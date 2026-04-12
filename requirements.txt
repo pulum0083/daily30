@@ -4,8 +4,8 @@
 # Market data
 yfinance>=0.2.40
 
-# Market calendar (holiday check)
-pandas_market_calendars>=4.3.0
+# Market calendar (holiday check) — optional, falls back to hardcoded list
+# pandas_market_calendars>=4.3.0
 
 # Timezone handling
 pytz>=2024.1

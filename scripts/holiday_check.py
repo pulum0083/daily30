@@ -30,8 +30,8 @@ def check_with_pandas_calendars(market: str, check_date: date) -> bool:
             end_date=check_date.strftime("%Y-%m-%d"),
         )
         return not schedule.empty
-    except ImportError:
-        return None  # Fallback needed
+    except Exception:
+        return None  # Fallback to hardcoded list
 
 
 def check_kospi_open(check_date: date) -> bool:
