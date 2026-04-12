@@ -23,6 +23,10 @@ on:
           - us
           - weekly
 
+# repo 쓰기 권한 (HTML 커밋 & 푸시에 필요)
+permissions:
+  contents: write
+
 # 모든 job에 공통 적용되는 환경 변수
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
