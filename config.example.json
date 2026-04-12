@@ -1,0 +1,27 @@
+{
+  "_comment": "config.example.json — 이 파일을 config.json으로 복사하고 값을 채우세요. config.json은 절대 git에 커밋하지 마세요.",
+
+  "telegram": {
+    "_comment": "BotFather에서 봇 생성 후 token 획득. chat_id는 @userinfobot으로 확인",
+    "bot_token": "YOUR_BOT_TOKEN_HERE",
+    "chat_id": "YOUR_CHAT_ID_HERE"
+  },
+
+  "google_sheets": {
+    "_comment": "GCP Console에서 서비스 계정 생성 → JSON 키 다운로드 → 스프레드시트에 서비스 계정 이메일 공유",
+    "credentials_file": "gcp_credentials.json",
+    "spreadsheet_id": "YOUR_SPREADSHEET_ID_HERE"
+  },
+
+  "web": {
+    "_comment": "HTML 파일이 호스팅되는 베이스 URL. GitHub Pages, Cloudflare Pages, 또는 로컬 서버",
+    "base_url": "https://your-username.github.io/dailyb"
+  },
+
+  "briefing": {
+    "timezone": "Asia/Seoul",
+    "kospi_time": "08:30",
+    "us_time": "22:30",
+    "weekly_time": "21:00"
+  }
+}

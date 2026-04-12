@@ -1,0 +1,24 @@
+# 민감 정보 — 절대 커밋 금지
+config.json
+gcp_credentials.json
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# 로그
+logs/
+
+# macOS
+.DS_Store
+
+# 데이터 캐시 (HTML 출력물은 커밋함)
+data/latest_*.json
+data/analysis_*.json
+data/sheets_row_*.json

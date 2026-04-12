@@ -1,0 +1,215 @@
+name: Daily 30 Report
+
+# ──────────────────────────────────────────────────────────────────
+# 스케줄 (UTC 기준)
+#   코스피  : KST 08:30 월~금  →  UTC 23:30 일~목  →  "30 23 * * 0-4"
+#   미국    : KST 22:30 월~금  →  UTC 13:30 월~금  →  "30 13 * * 1-5"
+#   주간    : KST 21:00 일요일  →  UTC 12:00 일요일  →  "0 12 * * 0"
+# ──────────────────────────────────────────────────────────────────
+on:
+  schedule:
+    - cron: "30 23 * * 0-4"   # 코스피 브리핑
+    - cron: "30 13 * * 1-5"   # 미국 시장 브리핑
+    - cron: "0 12 * * 0"      # 주간 리포트
+  workflow_dispatch:
+    inputs:
+      briefing_type:
+        description: "수동 실행할 브리핑 종류"
+        required: true
+        default: "kospi"
+        type: choice
+        options:
+          - kospi
+          - us
+          - weekly
+
+# 모든 job에 공통 적용되는 환경 변수
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  WEB_BASE_URL: "https://bejewelled-toffee-87de55.netlify.app"
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+# ══════════════════════════════════════════════════════════════════
+# 공통 설치 스텝 정의 (재사용)
+# ══════════════════════════════════════════════════════════════════
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  # JOB 1 — 코스피 시초가 브리핑
+  # 실행 조건: cron "30 23 * * 0-4"  또는  workflow_dispatch(kospi)
+  # ════════════════════════════════════════════════════════════════
+  kospi-briefing:
+    name: "📈 코스피 브리핑 (KST 08:30)"
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '30 23 * * 0-4') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi')
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 🤖 Claude CLI 설치 및 PATH 등록
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          # npm 전역 bin 경로를 GITHUB_PATH에 추가 (exit 127 방지)
+          echo "$(npm root -g)/../bin" >> "$GITHUB_PATH"
+
+      - name: 🗓️ 한국 시장 휴장일 확인
+        id: holiday
+        run: |
+          if python3 scripts/holiday_check.py --market kospi; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "오늘은 한국 시장 휴장일 — 건너뜀"
+          fi
+
+      - name: 📊 시장 데이터 수집
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          mkdir -p data web/briefings
+          python3 scripts/fetch_data.py --type kospi
+
+      - name: ✨ Claude 브리핑 생성
+        if: steps.holiday.outputs.open == 'true'
+        run: claude --dangerously-skip-permissions -p "$(cat agents/kospi_morning.md)"
+
+      - name: 📨 Telegram 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type kospi
+
+      - name: 🚀 HTML 커밋 & 푸시
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/ data/
+          git diff --staged --quiet || git commit -m "📊 코스피 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git push
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 2 — 미국 시장 브리핑
+  # 실행 조건: cron "30 13 * * 1-5"  또는  workflow_dispatch(us)
+  # ════════════════════════════════════════════════════════════════
+  us-briefing:
+    name: "🇺🇸 미국 브리핑 (KST 22:30)"
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '30 13 * * 1-5') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us')
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 🤖 Claude CLI 설치 및 PATH 등록
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          echo "$(npm root -g)/../bin" >> "$GITHUB_PATH"
+
+      - name: 🗓️ 미국 시장 휴장일 확인
+        id: holiday
+        run: |
+          if python3 scripts/holiday_check.py --market us; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "오늘은 미국 시장 휴장일 — 건너뜀"
+          fi
+
+      - name: 📊 시장 데이터 수집
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          mkdir -p data web/briefings
+          python3 scripts/fetch_data.py --type us
+
+      - name: ✨ Claude 브리핑 생성
+        if: steps.holiday.outputs.open == 'true'
+        run: claude --dangerously-skip-permissions -p "$(cat agents/us_evening.md)"
+
+      - name: 📨 Telegram 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type us
+
+      - name: 🚀 HTML 커밋 & 푸시
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/ data/
+          git diff --staged --quiet || git commit -m "🇺🇸 미국 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git push
+
+  # ════════════════════════════════════════════════════════════════
+  # JOB 3 — 주간 투자 리포트
+  # 실행 조건: cron "0 12 * * 0"  또는  workflow_dispatch(weekly)
+  # ════════════════════════════════════════════════════════════════
+  weekly-report:
+    name: "📋 주간 리포트 (KST 일요일 21:00)"
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 12 * * 0') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'weekly')
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 🤖 Claude CLI 설치 및 PATH 등록
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          echo "$(npm root -g)/../bin" >> "$GITHUB_PATH"
+
+      - name: 📊 주간 데이터 수집
+        run: |
+          mkdir -p data web/briefings
+          python3 scripts/fetch_data.py --type weekly
+
+      - name: ✨ Claude 주간 리포트 생성
+        run: claude --dangerously-skip-permissions -p "$(cat agents/weekly_report.md)"
+
+      - name: 📨 Telegram 전송
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type weekly
+
+      - name: 🚀 HTML 커밋 & 푸시
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/ data/
+          git diff --staged --quiet || git commit -m "📋 주간 리포트: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git push
