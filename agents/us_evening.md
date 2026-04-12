@@ -61,7 +61,12 @@
 
 ### HTML 레이아웃 필수 구조
 
-`agents/kospi_morning.md`의 "HTML 레이아웃 필수 구조" 섹션과 동일한 2컬럼 레이아웃을 사용한다:
+`agents/kospi_morning.md`의 "HTML 필수 규칙" 섹션과 동일한 규칙을 적용한다:
+- `<html class="light">` (라이트모드 기본값)
+- GNB에 테마 토글 버튼 포함
+- `market-summary-bar`는 포함하지 않는다
+
+`agents/kospi_morning.md`의 2컬럼 레이아웃을 사용한다:
 - 왼쪽 `layout-grid__main`: 브리핑 본문
 - 오른쪽 `layout-grid__right`: 시장 지표 사이드바 (right-panel)
 - `</body>` 직전에 `<script>window.MARKET_DATA = {...}</script>` 블록을 삽입하여 수집한 시장 데이터를 주입한다.

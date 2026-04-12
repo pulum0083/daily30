@@ -37,11 +37,17 @@
       localStorage.setItem('theme', 'dark');
     }
   }
+  /* Theme init — default: light. Respect saved preference. */
   (function() {
     const saved = localStorage.getItem('theme');
-    if (saved === 'light') {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
+    const html = document.documentElement;
+    if (saved === 'dark') {
+      html.classList.remove('light');
+      html.classList.add('dark');
+    } else {
+      /* light is default — remove dark class that HTML might have */
+      html.classList.remove('dark');
+      html.classList.add('light');
     }
   })();
 

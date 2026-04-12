@@ -200,8 +200,9 @@
     .gnb__theme-toggle:hover { background: rgba(255,255,255,.16); color: #fff; }
     .gnb__theme-toggle .icon-sun,
     .gnb__theme-toggle .icon-moon { display: none; }
-    html.dark  .gnb__theme-toggle .icon-moon { display: block; }
-    html:not(.dark) .gnb__theme-toggle .icon-sun { display: block; }
+    /* light mode → 달 아이콘(클릭하면 다크로) / dark mode → 해 아이콘(클릭하면 라이트로) */
+    html.dark  .gnb__theme-toggle .icon-sun  { display: block; }
+    html:not(.dark) .gnb__theme-toggle .icon-moon { display: block; }
 
     /* ============================================================
        Layout
@@ -1318,16 +1319,9 @@
    DailyB — Additional Components
    ============================================================ */
 
-/* Market summary bar */
+/* Market summary bar — hidden (data now shown in sidebar) */
 .market-summary-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  background: var(--surface);
-  border: 1px solid var(--line-secondary);
-  border-radius: var(--r-12);
-  padding: 12px 16px;
-  margin-bottom: 16px;
+  display: none;
 }
 .mkt-item { display: flex; flex-direction: column; gap: 2px; min-width: 56px; }
 .mkt-item__label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }

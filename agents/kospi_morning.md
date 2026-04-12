@@ -86,16 +86,46 @@
 }
 ```
 
-### HTML 레이아웃 필수 구조
+### HTML 필수 규칙
 
-생성할 HTML은 반드시 **2컬럼 레이아웃**을 사용한다:
+1. `<html>` 태그는 반드시 `class="light"` (라이트모드 기본값):
+   ```html
+   <html lang="ko" class="light">
+   ```
+
+2. GNB에 테마 토글 버튼 포함 (날 아이콘: 라이트→다크, 해 아이콘: 다크→라이트):
+   ```html
+   <nav class="gnb">
+     <div class="gnb__inner">
+       <div class="gnb__logo">
+         <div class="gnb__logo-mark">
+           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+             <polyline points="16 7 22 7 22 13"></polyline>
+           </svg>
+         </div>
+         <span class="gnb__title">Daily<span>30'</span></span>
+       </div>
+       <div class="gnb__meta">
+         <span class="gnb__date">YYYY-MM-DD KST HH:MM</span>
+         <span class="gnb__badge">코스피</span>
+         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+           <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+           <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+         </button>
+       </div>
+     </div>
+   </nav>
+   ```
+
+3. 생성할 HTML은 반드시 **2컬럼 레이아웃**을 사용한다:
 - 왼쪽: 브리핑 본문 (`layout-grid__main`)
 - 오른쪽: 시장 지표 사이드바 (`layout-grid__right`)
 
 ```html
 <div class="layout-grid">
   <div class="layout-grid__main">
-    <!-- 브리핑 본문 (market-summary-bar, 예측카드, 종목추천 등) -->
+    <!-- 브리핑 본문 (예측카드, 종목추천 등. market-summary-bar는 포함하지 않는다) -->
   </div>
   <aside class="layout-grid__right">
     <div class="right-panel">
