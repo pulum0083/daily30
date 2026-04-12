@@ -134,25 +134,33 @@
         <span class="live-dot">LIVE</span>
       </div>
       <div class="mkt-list">
+        <!-- 코스피 브리핑: 미국 시장 먼저 → 한국 시장 → 변동성 순서 -->
         <div class="mkt-group" id="mkt-g1">
           <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g1')">
-            <span class="mkt-group-title">국내 · 미국 · 환율</span>
+            <span class="mkt-group-title">미국 시장</span>
             <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
           </div>
           <div class="mkt-group-body"><div class="mkt-group-body-inner">
-            <!-- 각 지표 row -->
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스피</span><div class="mkt-vals"><div class="mkt-val" id="kospi-val">-</div><div class="mkt-chg" id="kospi-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kospi"></canvas></div></div>
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스닥</span><div class="mkt-vals"><div class="mkt-val" id="kosdaq-val">-</div><div class="mkt-chg" id="kosdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kosdaq"></canvas></div></div>
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥</span><div class="mkt-vals"><div class="mkt-val" id="nasdaq-val">-</div><div class="mkt-chg" id="nasdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div></div>
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥100 선물</span><div class="mkt-vals"><div class="mkt-val" id="nq-val">-</div><div class="mkt-chg" id="nq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nq"></canvas></div></div>
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">다우존스</span><div class="mkt-vals"><div class="mkt-val" id="dji-val">-</div><div class="mkt-chg" id="dji-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dji"></canvas></div></div>
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val" id="sox-val">-</div><div class="mkt-chg" id="sox-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-sox"></canvas></div></div>
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러환율 USD/KRW</span><div class="mkt-vals"><div class="mkt-val" id="usd-val">-</div><div class="mkt-chg" id="usd-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-usd"></canvas></div></div>
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러 인덱스 DXY</span><div class="mkt-vals"><div class="mkt-val" id="dxy-val">-</div><div class="mkt-chg" id="dxy-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dxy"></canvas></div></div>
           </div></div>
         </div>
         <div class="mkt-group" id="mkt-g2">
           <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g2')">
+            <span class="mkt-group-title">한국 시장 · 환율</span>
+            <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+          </div>
+          <div class="mkt-group-body"><div class="mkt-group-body-inner">
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스피</span><div class="mkt-vals"><div class="mkt-val" id="kospi-val">-</div><div class="mkt-chg" id="kospi-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kospi"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스닥</span><div class="mkt-vals"><div class="mkt-val" id="kosdaq-val">-</div><div class="mkt-chg" id="kosdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kosdaq"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러환율 USD/KRW</span><div class="mkt-vals"><div class="mkt-val" id="usd-val">-</div><div class="mkt-chg" id="usd-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-usd"></canvas></div></div>
+          </div></div>
+        </div>
+        <div class="mkt-group" id="mkt-g3">
+          <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g3')">
             <span class="mkt-group-title">변동성</span>
             <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
           </div>

@@ -69,9 +69,14 @@
 `agents/kospi_morning.md`의 2컬럼 레이아웃을 사용한다:
 - 왼쪽 `layout-grid__main`: 브리핑 본문
 - 오른쪽 `layout-grid__right`: 시장 지표 사이드바 (right-panel)
-- `</body>` 직전에 `<script>window.MARKET_DATA = {...}</script>` 블록을 삽입하여 수집한 시장 데이터를 주입한다.
+- `</body>` 직전에 `<script>window.MARKET_DATA = {...}</script>` 블록을 삽입
 
-사이드바 HTML 구조와 MARKET_DATA 형식은 `agents/kospi_morning.md`를 참조한다.
+**⚠️ 미국 브리핑 사이드바 그룹 순서** (코스피와 다름):
+1. **한국 시장 · 환율** (mkt-g1): 코스피, 코스닥, 달러환율 USD/KRW
+2. **미국 시장** (mkt-g2): 나스닥, 나스닥100 선물, 다우존스, 필라델피아 반도체, 달러 인덱스 DXY
+3. **변동성** (mkt-g3): WTI 국제유가, 공포탐욕지수
+
+나머지 HTML 구조(각 mkt-row, canvas id 등)와 MARKET_DATA 형식은 `agents/kospi_morning.md`를 참조한다.
 
 저장 경로:
 - `web/briefings/YYYY-MM-DD-us.html`
