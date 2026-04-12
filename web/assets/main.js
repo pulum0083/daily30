@@ -269,19 +269,36 @@
   }
 
   /* ============================================================
-     Market data + live simulation
+     Market data — loaded from window.MARKET_DATA (set by agent)
   ============================================================ */
-  const marketData = {
-    kospi:  { base: 2584.36, chg:  1.24, data:[2540,2548,2556,2560,2555,2562,2570,2575,2578,2584], color:UP_COLOR,   valId:'kospi-val',  badgeId:'kospi-badge',  canvasId:'c-kospi'  },
-    kosdaq: { base:  742.18, chg:  0.88, data:[728,730,733,736,734,737,739,741,741,742],            color:UP_COLOR,   valId:'kosdaq-val', badgeId:'kosdaq-badge', canvasId:'c-kosdaq' },
-    nasdaq: { base:17925.12, chg:  2.27, data:[17420,17510,17580,17630,17590,17680,17750,17820,17880,17925], color:UP_COLOR, valId:'nasdaq-val', badgeId:'nasdaq-badge', canvasId:'c-nasdaq'},
-    nq:     { base:19842.50, chg:  0.41, data:[19680,19710,19740,19760,19750,19780,19800,19820,19835,19843], color:UP_COLOR, valId:'nq-val',    badgeId:'nq-badge',    canvasId:'c-nq'    },
-    dji:    { base:40527.48, chg:  1.56, data:[39800,39900,40050,40120,40080,40200,40310,40420,40480,40527], color:UP_COLOR, valId:'dji-val',   badgeId:'dji-badge',   canvasId:'c-dji'   },
-    sox:    { base: 4821.36, chg:  2.41, data:[4680,4710,4740,4760,4745,4770,4790,4805,4815,4821],  color:UP_COLOR,   valId:'sox-val',   badgeId:'sox-badge',   canvasId:'c-sox'   },
-    oil:    { base:   61.24, chg: -4.21, data:[65.2,64.8,64.3,63.9,63.5,63.1,62.7,62.2,61.7,61.24],color:DOWN_COLOR, valId:'oil-val',   badgeId:'oil-badge',   canvasId:'c-oil'   },
-    usd:    { base: 1368.50, chg: -0.21, data:[1374,1373,1372,1371,1371,1370,1370,1369,1369,1368.5],color:DOWN_COLOR, valId:'usd-val',   badgeId:'usd-badge',   canvasId:'c-usd'   },
-    dxy:    { base:  102.84, chg: -0.38, data:[103.4,103.3,103.2,103.1,103.1,103.0,103.0,102.9,102.9,102.84],color:DOWN_COLOR,valId:'dxy-val',badgeId:'dxy-badge',canvasId:'c-dxy'},
+  const _defaults = {
+    kospi:  { base: 0, chg: 0, data:[0], valId:'kospi-val',  badgeId:'kospi-badge',  canvasId:'c-kospi'  },
+    kosdaq: { base: 0, chg: 0, data:[0], valId:'kosdaq-val', badgeId:'kosdaq-badge', canvasId:'c-kosdaq' },
+    nasdaq: { base: 0, chg: 0, data:[0], valId:'nasdaq-val', badgeId:'nasdaq-badge', canvasId:'c-nasdaq' },
+    nq:     { base: 0, chg: 0, data:[0], valId:'nq-val',    badgeId:'nq-badge',    canvasId:'c-nq'    },
+    dji:    { base: 0, chg: 0, data:[0], valId:'dji-val',   badgeId:'dji-badge',   canvasId:'c-dji'   },
+    sox:    { base: 0, chg: 0, data:[0], valId:'sox-val',   badgeId:'sox-badge',   canvasId:'c-sox'   },
+    oil:    { base: 0, chg: 0, data:[0], valId:'oil-val',   badgeId:'oil-badge',   canvasId:'c-oil'   },
+    usd:    { base: 0, chg: 0, data:[0], valId:'usd-val',   badgeId:'usd-badge',   canvasId:'c-usd'   },
+    dxy:    { base: 0, chg: 0, data:[0], valId:'dxy-val',   badgeId:'dxy-badge',   canvasId:'c-dxy'   },
   };
+
+  /* Merge agent-provided data into defaults */
+  const marketData = {};
+  const src = window.MARKET_DATA || {};
+  Object.entries(_defaults).forEach(([key, def]) => {
+    const s = src[key] || {};
+    const chg = s.chg ?? def.chg;
+    marketData[key] = {
+      base:     s.base ?? def.base,
+      chg:      chg,
+      data:     s.data && s.data.length > 1 ? s.data : def.data,
+      color:    chg >= 0 ? UP_COLOR : DOWN_COLOR,
+      valId:    def.valId,
+      badgeId:  def.badgeId,
+      canvasId: def.canvasId,
+    };
+  });
 
   function formatVal(key, v) {
     if (key === 'oil') return '$' + v.toFixed(2);
@@ -320,19 +337,8 @@
     updateOilReason();
   }
 
-  /* Live simulation — jitter every 5 s */
-  let fgVal = 28;
-  function simulateLive() {
-    Object.entries(marketData).forEach(([, d]) => {
-      d.base += (Math.random() - 0.5) * 0.002 * d.base;
-      d.chg  += (Math.random() - 0.5) * 0.04;
-      d.data.push(d.base);
-      d.data.shift();
-    });
-    fgVal = Math.min(100, Math.max(0, fgVal + (Math.random() - 0.5) * 1.5));
-    renderAll();
-    setFearGreed(Math.round(fgVal));
-  }
+  /* Fear & Greed value from agent data */
+  let fgVal = (window.MARKET_DATA && window.MARKET_DATA.fearGreed) ? window.MARKET_DATA.fearGreed.value : 50;
 
   /* ============================================================
      Sparkline hover tooltip (value + time)
@@ -527,8 +533,16 @@
 
   window.addEventListener('load', () => {
     renderAll();
-    setFearGreed(28);
-    setInterval(simulateLive, 5000);
+    setFearGreed(fgVal);
+    /* Update FG history from data */
+    const fgData = (window.MARKET_DATA && window.MARKET_DATA.fearGreed) || {};
+    ['prev','1w','1m','1y'].forEach((k, i) => {
+      const el = document.getElementById('fg-hist-' + k);
+      if (el && fgData[k] !== undefined) {
+        el.textContent = fgData[k];
+        el.style.color = fgData[k] >= 50 ? '#E03131' : '#2563EB';
+      }
+    });
     Object.entries(marketData).forEach(([key, d]) => attachSparkTooltip(d.canvasId, key));
     // rAF ensures layout is complete so canvas.offsetWidth is accurate on mobile
     requestAnimationFrame(() => {

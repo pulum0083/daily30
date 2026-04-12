@@ -59,9 +59,14 @@
 
 분석 결과를 `data/analysis_us.json`에 저장한다 (kospi와 동일 JSON 구조).
 
-```bash
-python3 scripts/generate_html.py --type us --data-file data/latest_us.json
-```
+### HTML 레이아웃 필수 구조
+
+`agents/kospi_morning.md`의 "HTML 레이아웃 필수 구조" 섹션과 동일한 2컬럼 레이아웃을 사용한다:
+- 왼쪽 `layout-grid__main`: 브리핑 본문
+- 오른쪽 `layout-grid__right`: 시장 지표 사이드바 (right-panel)
+- `</body>` 직전에 `<script>window.MARKET_DATA = {...}</script>` 블록을 삽입하여 수집한 시장 데이터를 주입한다.
+
+사이드바 HTML 구조와 MARKET_DATA 형식은 `agents/kospi_morning.md`를 참조한다.
 
 저장 경로:
 - `web/briefings/YYYY-MM-DD-us.html`

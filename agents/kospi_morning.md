@@ -86,9 +86,94 @@
 }
 ```
 
-```bash
-python3 scripts/generate_html.py --type kospi --data-file data/latest_kospi.json
+### HTML 레이아웃 필수 구조
+
+생성할 HTML은 반드시 **2컬럼 레이아웃**을 사용한다:
+- 왼쪽: 브리핑 본문 (`layout-grid__main`)
+- 오른쪽: 시장 지표 사이드바 (`layout-grid__right`)
+
+```html
+<div class="layout-grid">
+  <div class="layout-grid__main">
+    <!-- 브리핑 본문 (market-summary-bar, 예측카드, 종목추천 등) -->
+  </div>
+  <aside class="layout-grid__right">
+    <div class="right-panel">
+      <div class="panel-header">
+        <span class="section-title">시장 지표</span>
+        <span class="live-dot">LIVE</span>
+      </div>
+      <div class="mkt-list">
+        <div class="mkt-group" id="mkt-g1">
+          <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g1')">
+            <span class="mkt-group-title">국내 · 미국 · 환율</span>
+            <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+          </div>
+          <div class="mkt-group-body"><div class="mkt-group-body-inner">
+            <!-- 각 지표 row -->
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스피</span><div class="mkt-vals"><div class="mkt-val" id="kospi-val">-</div><div class="mkt-chg" id="kospi-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kospi"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스닥</span><div class="mkt-vals"><div class="mkt-val" id="kosdaq-val">-</div><div class="mkt-chg" id="kosdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-kosdaq"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥</span><div class="mkt-vals"><div class="mkt-val" id="nasdaq-val">-</div><div class="mkt-chg" id="nasdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥100 선물</span><div class="mkt-vals"><div class="mkt-val" id="nq-val">-</div><div class="mkt-chg" id="nq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nq"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">다우존스</span><div class="mkt-vals"><div class="mkt-val" id="dji-val">-</div><div class="mkt-chg" id="dji-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dji"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val" id="sox-val">-</div><div class="mkt-chg" id="sox-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-sox"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러환율 USD/KRW</span><div class="mkt-vals"><div class="mkt-val" id="usd-val">-</div><div class="mkt-chg" id="usd-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-usd"></canvas></div></div>
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러 인덱스 DXY</span><div class="mkt-vals"><div class="mkt-val" id="dxy-val">-</div><div class="mkt-chg" id="dxy-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dxy"></canvas></div></div>
+          </div></div>
+        </div>
+        <div class="mkt-group" id="mkt-g2">
+          <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g2')">
+            <span class="mkt-group-title">변동성</span>
+            <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+          </div>
+          <div class="mkt-group-body"><div class="mkt-group-body-inner">
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">WTI 국제유가</span><div class="mkt-vals"><div class="mkt-val" id="oil-val">-</div><div class="mkt-chg" id="oil-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-oil"></canvas></div></div>
+            <div class="fg-block">
+              <div class="fg-block-header"><span class="mkt-name">공포탐욕지수</span><span class="fg-badge" id="fg-badge">-</span></div>
+              <div class="fg-body">
+                <div class="fg-gauge-mini"><canvas id="fg-gauge-canvas" style="width:118px;height:64px;display:block;"></canvas></div>
+                <div class="fg-info">
+                  <div class="fg-now"><span class="fg-now-val" id="fg-value">-</span><span class="fg-now-lbl" id="fg-label">-</span></div>
+                  <div class="fg-hist-grid">
+                    <div class="fg-hist-item"><span class="lbl">전일</span><span class="val" id="fg-hist-prev">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1주</span><span class="val" id="fg-hist-1w">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1달</span><span class="val" id="fg-hist-1m">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1년</span><span class="val" id="fg-hist-1y">-</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
 ```
+
+### 시장 지표 데이터 주입 (필수)
+
+HTML `</body>` 직전에 아래 `<script>` 블록을 삽입하여 수집한 시장 데이터를 주입한다.
+`data` 배열은 최근 10개 데이터 포인트 (sparkline용). yfinance `history(period="5d", interval="1h")`로 수집하거나, 웹 검색으로 최근 종가 추이를 넣는다.
+
+```html
+<script>
+window.MARKET_DATA = {
+  kospi:  { base: 2584.93, chg: 1.00, data: [2556,2562,2570,2575,2578,2580,2582,2583,2584,2585] },
+  kosdaq: { base: 740.11,  chg: 0.79, data: [730,733,735,736,737,738,739,739,740,740] },
+  nasdaq: { base: 17728.39,chg: 2.39, data: [17300,17400,17480,17520,17560,17600,17650,17680,17710,17728] },
+  nq:     { base: 19897.19,chg: 0.18, data: [19800,19820,19840,19850,19860,19870,19880,19885,19890,19897] },
+  dji:    { base: 40887.75,chg: 1.49, data: [40200,40350,40450,40520,40580,40650,40720,40780,40840,40888] },
+  sox:    { base: 4825.53, chg: 2.36, data: [4700,4720,4740,4755,4770,4785,4800,4810,4820,4826] },
+  oil:    { base: 61.70,   chg:-4.04, data: [64.5,64.0,63.5,63.1,62.8,62.5,62.2,61.9,61.8,61.7] },
+  usd:    { base: 1376.77, chg:-0.29, data: [1382,1381,1380,1380,1379,1378,1378,1377,1377,1377] },
+  dxy:    { base: 102.57,  chg:-0.17, data: [103.0,102.9,102.9,102.8,102.8,102.7,102.7,102.6,102.6,102.6] },
+  fearGreed: { value: 27, prev: 6, "1w": 12, "1m": 64, "1y": 75 }
+};
+</script>
+```
+
+위 값들은 **반드시 Step 1에서 수집한 실제 데이터로 채운다**. 예시 숫자를 그대로 사용하지 않는다.
 
 저장 경로:
 - `web/briefings/YYYY-MM-DD-kospi.html`
