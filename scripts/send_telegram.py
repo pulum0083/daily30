@@ -72,6 +72,65 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
         return json.loads(resp.read().decode("utf-8"))
 
 
+def build_fallback_message(briefing_type: str) -> str:
+    """analysis_kospi/us/weekly.json 에서 텔레그램 메시지를 자동 생성한다."""
+    from datetime import datetime
+    import pytz
+
+    web_url = get_web_base_url()
+    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y.%m.%d")
+    date_slug = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+
+    analysis_file = DATA_DIR / f"analysis_{briefing_type}.json"
+    if not analysis_file.exists():
+        # 마지막 수단: 단순 알림만
+        labels = {"kospi": "🇰🇷 코스피", "us": "🇺🇸 미국 시장", "weekly": "📋 주간 리포트"}
+        label = labels.get(briefing_type, "📊 브리핑")
+        return (
+            f"{label} 브리핑 | {today}\n\n"
+            f"브리핑이 생성되었습니다.\n\n"
+            f"🔗 상세 분석 → {web_url}/briefings/{date_slug}-{briefing_type}.html"
+        )
+
+    with open(analysis_file, encoding="utf-8") as f:
+        data = json.load(f)
+
+    pred = data.get("prediction", {})
+    direction = pred.get("direction", "알 수 없음")
+    up_pct = pred.get("up_pct", "?")
+    confidence = pred.get("confidence", "?")
+    reasons = data.get("reasons", [])
+
+    # HTML 태그 제거 (텔레그램 plain text용)
+    import re
+    def strip_html(text):
+        return re.sub(r"<[^>]+>", "", str(text))
+
+    if briefing_type == "kospi":
+        header = f"🇰🇷 코스피 시초가 브리핑 | {today}"
+        pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
+        link = f"{web_url}/briefings/{date_slug}-kospi.html"
+    elif briefing_type == "us":
+        header = f"🇺🇸 미국 시장 브리핑 | {today}"
+        pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
+        link = f"{web_url}/briefings/{date_slug}-us.html"
+    else:
+        header = f"📋 주간 리포트 | {today}"
+        pred_line = ""
+        link = f"{web_url}/briefings/{date_slug}-weekly.html"
+
+    bullet_lines = "\n".join(
+        f"• {strip_html(r)}" for r in reasons[:3]
+    )
+
+    parts = [header, "", pred_line] if pred_line else [header]
+    if bullet_lines:
+        parts += ["", "핵심 시그널:", bullet_lines]
+    parts += ["", f"🔗 상세 분석 → {link}"]
+
+    return "\n".join(parts)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Send briefing to Telegram")
     parser.add_argument("--type", choices=["kospi", "us", "weekly"], required=True)
@@ -93,11 +152,13 @@ def main():
         message_text = args.message
     else:
         msg_file = DATA_DIR / f"telegram_message_{args.type}.txt"
-        if not msg_file.exists():
-            print(f"[send_telegram] Message file not found: {msg_file}", file=sys.stderr)
-            sys.exit(1)
-        with open(msg_file, encoding="utf-8") as f:
-            message_text = f.read()
+        if msg_file.exists():
+            with open(msg_file, encoding="utf-8") as f:
+                message_text = f.read()
+        else:
+            # txt 파일 없으면 analysis JSON에서 자동 생성 (fallback)
+            print(f"[send_telegram] Message file not found, trying fallback from JSON...", file=sys.stderr)
+            message_text = build_fallback_message(args.type)
 
     # Replace placeholder URL if present
     web_url = get_web_base_url()
