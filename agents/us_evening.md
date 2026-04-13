@@ -50,6 +50,7 @@
 - `<html class="light">` (라이트모드 기본값)
 - GNB에 테마 토글 버튼 포함
 - `market-summary-bar`는 포함하지 않는다
+- **accordion-body 내부 패딩**: `accordion-body` 안에 반드시 `accordion-body__inner` wrapper 사용 (규칙 0a 참조)
 
 `agents/kospi_morning.md`의 2컬럼 레이아웃을 사용한다:
 - 왼쪽 `layout-grid__main`: 브리핑 본문

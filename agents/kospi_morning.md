@@ -74,7 +74,20 @@
 
 ### HTML 필수 규칙
 
-0. 각 종목 카드(`.stock-pick-card__top`)에 반드시 미니 차트 canvas를 추가한다. ID는 `mc-1`, `mc-2`, ... 순서로 부여한다. 범례 포함:
+0a. **accordion-body 구조 필수**: `accordion-body` 안에 반드시 `accordion-body__inner` wrapper를 사용해야 내부 좌우 패딩(16px)이 적용된다.
+   ```html
+   <div class="accordion-item is-open is-today">
+     <div class="accordion-header">...</div>
+     <div class="accordion-body">
+       <div class="accordion-body__inner">
+         <div class="open-section">...</div>
+         <div class="open-section">...</div>
+       </div>
+     </div>
+   </div>
+   ```
+
+0b. 각 종목 카드(`.stock-pick-card__top`)에 반드시 미니 차트 canvas를 추가한다. ID는 `mc-1`, `mc-2`, ... 순서로 부여한다. 범례 포함:
    ```html
    <div class="stock-pick-mini-chart">
      <canvas id="mc-1" width="88" height="52"></canvas>
