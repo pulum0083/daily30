@@ -210,7 +210,7 @@
     .layout-wrapper {
       max-width: 1218px;
       margin: 0 auto;
-      padding: 24px 24px 80px;
+      padding: 24px 40px 80px;
     }
     .layout-grid {
       display: grid;
@@ -1583,4 +1583,13 @@
   .mkt-spark canvas { height: 40px !important; }
   .mkt-val { font-size: 14px; }
   .fg-now-val { font-size: 18px; }
+}
+
+/* ============================================================
+   Layout Wrapper — explicit override (ensures padding on all pages)
+   ============================================================ */
+.layout-wrapper {
+  max-width: 1218px;
+  margin: 0 auto;
+  padding: 24px 40px 80px;
 }

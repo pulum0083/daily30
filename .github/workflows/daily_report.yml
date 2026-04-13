@@ -2,13 +2,13 @@ name: Daily 30 Report
 
 # ──────────────────────────────────────────────────────────────────
 # 스케줄 (UTC 기준)
-#   코스피  : KST 08:30 월~금  →  UTC 23:30 일~목  →  "30 23 * * 0-4"
-#   미국    : KST 22:30 월~금  →  UTC 13:30 월~금  →  "30 13 * * 1-5"
+#   코스피  : KST 08:23 월~금  →  UTC 23:23 일~목  →  "23 23 * * 0-4"
+#   미국    : KST 22:00 월~금  →  UTC 13:00 월~금  →  "0 13 * * 1-5"
 # ──────────────────────────────────────────────────────────────────
 on:
   schedule:
-    - cron: "30 23 * * 0-4"   # 코스피 브리핑
-    - cron: "30 13 * * 1-5"   # 미국 시장 브리핑
+    - cron: "23 23 * * 0-4"   # 코스피 브리핑
+    - cron: "0 13 * * 1-5"    # 미국 시장 브리핑
   workflow_dispatch:
     inputs:
       briefing_type:
@@ -41,13 +41,13 @@ defaults:
 jobs:
   # ════════════════════════════════════════════════════════════════
   # JOB 1 — 코스피 시초가 브리핑
-  # 실행 조건: cron "30 23 * * 0-4"  또는  workflow_dispatch(kospi)
+  # 실행 조건: cron "23 23 * * 0-4"  또는  workflow_dispatch(kospi)
   # ════════════════════════════════════════════════════════════════
   kospi-briefing:
-    name: "📈 코스피 브리핑 (KST 08:30)"
+    name: "📈 코스피 브리핑 (KST 08:23)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '30 23 * * 0-4') ||
+      (github.event_name == 'schedule' && github.event.schedule == '23 23 * * 0-4') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi')
 
     steps:
@@ -105,13 +105,13 @@ jobs:
 
   # ════════════════════════════════════════════════════════════════
   # JOB 2 — 미국 시장 브리핑
-  # 실행 조건: cron "30 13 * * 1-5"  또는  workflow_dispatch(us)
+  # 실행 조건: cron "0 13 * * 1-5"  또는  workflow_dispatch(us)
   # ════════════════════════════════════════════════════════════════
   us-briefing:
-    name: "🇺🇸 미국 브리핑 (KST 22:30)"
+    name: "🇺🇸 미국 브리핑 (KST 22:00)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '30 13 * * 1-5') ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 13 * * 1-5') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us')
 
     steps:
