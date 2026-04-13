@@ -1087,7 +1087,7 @@
     @media (max-width: 600px) {
       /* Layout */
       .layout-wrapper {
-        padding: 12px 12px 60px;
+        padding: 12px 16px 60px;
       }
 
       /* GNB */
@@ -1161,6 +1161,9 @@
         /* CSS dimensions — JS reads offsetWidth/offsetHeight to draw at correct resolution */
         width: 100% !important;
         height: 80px !important;
+      }
+      .stock-pick-card__cta {
+        padding-left: 0;
       }
 
       /* Right panel: market indicators */

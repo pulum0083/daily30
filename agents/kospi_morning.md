@@ -5,27 +5,14 @@
 
 ## Step 1: 시장 데이터 수집
 
-`data/latest_kospi.json`이 이미 존재하면 이를 활용한다. 없거나 불충분하면 웹 검색으로 아래 데이터를 직접 수집한다:
+`data/latest_kospi.json` 파일을 읽어라. **이 파일 하나에 모든 시장 데이터가 사전 수집되어 있다.**
 
-### 수집 대상 데이터 (전일 종가 / 최신 기준)
-| 지표 | 설명 |
-|------|------|
-| S&P 500 | 전일 종가, 등락률 |
-| NASDAQ | 전일 종가, 등락률 |
-| 다우존스 | 전일 종가, 등락률 |
-| 필라델피아 반도체지수 (SOX) | 전일 종가, 등락률 |
-| EWY ETF | 전일 종가, 등락률 |
-| VIX | 현재 수준 |
-| 공포탐욕지수 | CNN Fear & Greed Index |
-| 달러 인덱스 (DXY) | 전일 종가, 등락률 |
-| 원/달러 환율 | 최신 |
-| WTI 유가 | 전일 종가, 등락률 |
-| 브렌트유 | 전일 종가, 등락률 |
-| 미국 10년물 국채 금리 | 현재 |
-| 코스피200 선물 프리장 수급 | 외국인 순매수/순매도 계약수 (가용 시) |
-| 미국 빅테크 전일 성과 | NVDA, AAPL, MSFT, AMZN, META, GOOGL |
-| 아시아 선물 | 코스피/닛케이 야간선물 (가용 시) |
-| 금 | 전일 종가, 등락률 |
+- `market_data_js` → `window.MARKET_DATA` 스크립트에 그대로 사용 (sidebar 지표 + sparkline 포함)
+- `fearGreed` → 공포탐욕지수 (이미 `market_data_js.fearGreed`에 포함)
+- `sp500`, `vix`, `bigtech`, `gold`, `rates`, `oil` → 예측 분석에 활용
+- `kospi_candidates` → 잭 켈로그 전략 종목 후보 (가격, MA20, MA200, signal 포함, signal 우선순위 순 정렬)
+
+**웹 검색 금지**: 모든 시장 데이터는 JSON 파일에 있다. 단, `kospi_candidates` 목록에 없는 특정 종목을 추천하려는 경우에만 1회 검색 허용.
 
 ## Step 2: 코스피 방향 예측
 
@@ -45,12 +32,11 @@
 - MA20 상향 돌파 또는 MA20 지지 반등 + 거래량 급증 조건
 - 각 종목마다: 종목명, 현재가, 등락률, MA20/MA200 대비 위치, 시나리오, 실행 가이드
 
-⚠️ **가격 데이터 필수 규칙:**
-- 모든 종목의 현재가/종가는 반드시 **웹 검색으로 당일 최신 가격을 확인**한다. 학습 데이터의 과거 가격을 절대 사용하지 않는다.
-- 네이버 금융(finance.naver.com), Google Finance, Yahoo Finance 등에서 실시간 시세를 검색한다.
-- 검색 예: "SK하이닉스 주가", "삼성전자 현재가"
-- MA20, MA200도 웹 검색 또는 yfinance 데이터 기반으로 산출한다.
-- 가격을 확인할 수 없는 종목은 추천 목록에서 제외한다.
+✅ **종목 가격 데이터 규칙:**
+- `kospi_candidates` 배열에서 `ma20_signal`이 `crossing_up` 또는 `above`인 종목을 우선 선택한다.
+- `price`, `change_pct`, `ma20`, `ma20_dist_pct`, `ma200`, `ma200_dist_pct`는 JSON에서 읽어 그대로 사용한다.
+- `sparkline`, `ma20_sparkline`, `ma200_sparkline` 배열을 `stockCharts` 항목의 `prices`, `ma20`, `ma200`에 매핑한다.
+- JSON에 없는 종목을 추천하려면 1회만 웹 검색하여 가격을 확인한 후 사용한다.
 
 ## Step 3: HTML 브리핑 생성
 
@@ -88,7 +74,43 @@
 
 ### HTML 필수 규칙
 
-1. `<html>` 태그는 반드시 `class="light"` (라이트모드 기본값):
+0. 각 종목 카드(`.stock-pick-card__top`)에 반드시 미니 차트 canvas를 추가한다. ID는 `mc-1`, `mc-2`, ... 순서로 부여한다. 범례 포함:
+   ```html
+   <div class="stock-pick-mini-chart">
+     <canvas id="mc-1" width="88" height="52"></canvas>
+     <div class="stock-pick-mini-chart__legend">
+       <span class="leg-price">주가</span>
+       <span class="leg-ma">MA20</span>
+       <span class="leg-ma200">MA200</span>
+     </div>
+   </div>
+   ```
+
+1. `</body>` 직전에 잭 켈로그 모달 HTML을 추가한다 (window.MARKET_DATA 스크립트 앞):
+   ```html
+   <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
+     <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="kellogg-modal-title">
+       <button class="info-modal__close" onclick="closeKelloggModal()" aria-label="닫기">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+       </button>
+       <div class="info-modal__title" id="kellogg-modal-title">잭 켈로그 20일선 전략이란?</div>
+       <div class="info-modal__body">
+         <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(MA20) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+         <br>
+         <p><strong>선별 기준</strong></p>
+         <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+           <li>MA20을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+           <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+           <li>최소 <strong>3거래일 이상</strong> MA20 위에서 유지 중인 종목</li>
+         </ul>
+         <br>
+         <p style="color:var(--text-tertiary); font-size:12px;">※ 매매 추천이 아닌 전략 추종 종목 탐색 목적으로 제공됩니다.</p>
+       </div>
+     </div>
+   </div>
+   ```
+
+2. `<html>` 태그는 반드시 `class="light"` (라이트모드 기본값):
    ```html
    <html lang="ko" class="light">
    ```
@@ -192,7 +214,7 @@
 ### 시장 지표 데이터 주입 (필수)
 
 HTML `</body>` 직전에 아래 `<script>` 블록을 삽입하여 수집한 시장 데이터를 주입한다.
-`data` 배열은 최근 10개 데이터 포인트 (sparkline용). yfinance `history(period="5d", interval="1h")`로 수집하거나, 웹 검색으로 최근 종가 추이를 넣는다.
+`data` 배열은 최근 10개 데이터 포인트 (sparkline용). `data/latest_kospi.json`의 `market_data_js`에 이미 포함되어 있다.
 
 ```html
 <script>
@@ -206,12 +228,19 @@ window.MARKET_DATA = {
   oil:    { base: 61.70,   chg:-4.04, data: [64.5,64.0,63.5,63.1,62.8,62.5,62.2,61.9,61.8,61.7] },
   usd:    { base: 1376.77, chg:-0.29, data: [1382,1381,1380,1380,1379,1378,1378,1377,1377,1377] },
   dxy:    { base: 102.57,  chg:-0.17, data: [103.0,102.9,102.9,102.8,102.8,102.7,102.7,102.6,102.6,102.6] },
-  fearGreed: { value: 27, prev: 6, "1w": 12, "1m": 64, "1y": 75 }
+  fearGreed: { value: 27, prev: 6, "1w": 12, "1m": 64, "1y": 75 },
+  stockCharts: [
+    { id: "mc-1", prices: [179000,180000,181000,182000,183000,184000,185000,185200,185200,185200], ma20: [183000,183050,183100,183100,183100,183100,183100,183100,183100,183100], ma200: [176000,177000,178000,179000,180000,180000,180000,180000,180000,180000] },
+    { id: "mc-2", prices: [113000,114000,115000,115500,115800,115900,116000,115800,115500,115000], ma20: [114000,114200,114400,114500,114600,114600,114600,114600,114600,114600], ma200: [94000,95000,96000,97000,98000,98000,98000,98000,98000,98000] }
+  ]
 };
 </script>
 ```
 
-위 값들은 **반드시 Step 1에서 수집한 실제 데이터로 채운다**. 예시 숫자를 그대로 사용하지 않는다.
+위 예시 숫자 대신 **`data/latest_kospi.json`에서 읽은 실제 데이터**로 채운다:
+- `kospi`, `kosdaq`, `nasdaq`, `nq`, `dji`, `sox`, `oil`, `usd`, `dxy`, `fearGreed` → JSON의 `market_data_js` 값 그대로 복사
+- `stockCharts` → 선택한 각 종목의 `sparkline`→`prices`, `ma20_sparkline`→`ma20`, `ma200_sparkline`→`ma200`으로 매핑
+- `stockCharts`의 `id`는 종목 카드 canvas ID와 일치해야 한다 (`mc-1`, `mc-2` ...). 종목 수만큼 배열에 추가한다.
 
 저장 경로:
 - `web/briefings/YYYY-MM-DD-kospi.html`
