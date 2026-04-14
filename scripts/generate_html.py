@@ -22,6 +22,19 @@ BRIEFINGS_DIR.mkdir(parents=True, exist_ok=True)
 KST = pytz.timezone("Asia/Seoul")
 
 
+def fmt_generated_time(generated_at: str) -> str:
+    """Extract HH:MM (KST) from an ISO-8601 generated_at string."""
+    try:
+        dt = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = KST.localize(dt)
+        else:
+            dt = dt.astimezone(KST)
+        return dt.strftime("%H:%M")
+    except Exception:
+        return "08:30"
+
+
 def get_web_base_url() -> str:
     """Return web base URL — env var first, then config.json, then hardcoded default."""
     url = os.environ.get("WEB_BASE_URL")
@@ -88,6 +101,14 @@ def build_kospi_html(data: dict, analysis: dict, date_str: str) -> str:
     reasons = analysis.get("reasons", [])
     stock_picks = analysis.get("stock_picks", [])
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
+
+    gen_time = fmt_generated_time(generated_at)
+
+    # Confidence interval bar widths
+    # up_light  = confidence% (upper bound for dominant direction)
+    # down_light = down_pct * confidence / up_pct  (proportional bound)
+    up_light = confidence
+    down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
 
     reasons_html = "\n".join(
         f"<li>{r}</li>" for r in reasons
@@ -210,22 +231,56 @@ def build_kospi_html(data: dict, analysis: dict, date_str: str) -> str:
       <div class="accordion-body">
         <!-- 1. 예측 -->
         <div class="open-section">
-          <div class="open-section__title">코스피 시초가 방향 예측</div>
+          <div class="open-section__title">
+            코스피 시초가 방향 예측
+            <span class="section-time">{gen_time} 생성</span>
+          </div>
           <div class="prediction-card">
             <div class="prediction-summary">
               <span class="prediction-label">{direction} 예측 (신뢰도 {confidence}%)</span>
-              <span class="prediction-confidence">08:30 생성</span>
             </div>
-            <div class="bar-chart">
-              <div class="bar-row">
-                <div class="bar-row__label"><span class="dot" style="background:var(--status-up)"></span>상승</div>
-                <div class="bar-row__track"><div class="bar-row__fill up" style="width:{up_pct}%"></div></div>
-                <span class="bar-row__pct up">{up_pct}%</span>
+            <!-- PC: Confidence interval bar -->
+            <div class="pred-confbar">
+              <div class="pred-confbar__row">
+                <div class="pred-confbar__header">
+                  <span style="color:var(--status-up)">상승</span>
+                  <span style="color:var(--text-secondary)">{up_pct}%</span>
+                </div>
+                <div class="pred-confbar__track">
+                  <div class="pred-confbar__light" style="width:{up_light}%;background:var(--status-up-bg)"></div>
+                  <div class="pred-confbar__solid up" style="width:{up_pct}%"></div>
+                </div>
+                <div class="pred-confbar__meta">신뢰구간 {confidence}% → 최대 {up_light}%</div>
               </div>
-              <div class="bar-row">
-                <div class="bar-row__label"><span class="dot" style="background:var(--status-down)"></span>하락</div>
-                <div class="bar-row__track"><div class="bar-row__fill down" style="width:{down_pct}%"></div></div>
-                <span class="bar-row__pct down">{down_pct}%</span>
+              <div class="pred-confbar__row">
+                <div class="pred-confbar__header">
+                  <span style="color:var(--status-down)">하락</span>
+                  <span style="color:var(--text-secondary)">{down_pct}%</span>
+                </div>
+                <div class="pred-confbar__track">
+                  <div class="pred-confbar__light" style="width:{down_light}%;background:var(--status-down-bg)"></div>
+                  <div class="pred-confbar__solid down" style="width:{down_pct}%"></div>
+                </div>
+                <div class="pred-confbar__meta">신뢰구간 {confidence}% → 최대 {down_light}%</div>
+              </div>
+            </div>
+            <!-- Mobile: Diverging bar -->
+            <div class="pred-divbar">
+              <div class="pred-divbar__header">
+                <span style="color:var(--status-down)">하락 {down_pct}%</span>
+                <span style="color:var(--status-up)">상승 {up_pct}%</span>
+              </div>
+              <div class="pred-divbar__track">
+                <div class="pred-divbar__down" style="flex:{down_pct}">
+                  <span class="pred-divbar__pct">{down_pct}%</span>
+                </div>
+                <div class="pred-divbar__up" style="flex:{up_pct}">
+                  <span class="pred-divbar__pct">{up_pct}%</span>
+                </div>
+              </div>
+              <div class="pred-divbar__neutral">
+                <div class="pred-divbar__tick"></div>
+                <div class="pred-divbar__label">중립(50%)</div>
               </div>
             </div>
           </div>

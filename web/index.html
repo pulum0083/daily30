@@ -49,22 +49,56 @@
 
               <!-- 1. 예측 카드 -->
               <div class="open-section">
-                <div class="open-section__title">코스피 시초가 방향 예측</div>
+                <div class="open-section__title">
+                  코스피 시초가 방향 예측
+                  <span class="section-time">08:30 생성</span>
+                </div>
                 <div class="prediction-card">
                   <div class="prediction-summary">
                     <span class="prediction-label">상승 우위 예측 (신뢰도 75%)</span>
-                    <span class="prediction-confidence">08:30 생성</span>
                   </div>
-                  <div class="bar-chart">
-                    <div class="bar-row">
-                      <div class="bar-row__label"><span class="dot" style="background:var(--status-up)"></span>상승</div>
-                      <div class="bar-row__track"><div class="bar-row__fill up" style="width:65%"></div></div>
-                      <span class="bar-row__pct up">65%</span>
+                  <!-- PC: Confidence interval bar -->
+                  <div class="pred-confbar">
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-up)">상승</span>
+                        <span style="color:var(--text-secondary)">65%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:75%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:65%"></div>
+                      </div>
+                      <div class="pred-confbar__meta">신뢰구간 75% → 최대 75%</div>
                     </div>
-                    <div class="bar-row">
-                      <div class="bar-row__label"><span class="dot" style="background:var(--status-down)"></span>하락</div>
-                      <div class="bar-row__track"><div class="bar-row__fill down" style="width:35%"></div></div>
-                      <span class="bar-row__pct down">35%</span>
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-down)">하락</span>
+                        <span style="color:var(--text-secondary)">35%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:40%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:35%"></div>
+                      </div>
+                      <div class="pred-confbar__meta">신뢰구간 75% → 최대 40%</div>
+                    </div>
+                  </div>
+                  <!-- Mobile: Diverging bar -->
+                  <div class="pred-divbar">
+                    <div class="pred-divbar__header">
+                      <span style="color:var(--status-down)">하락 35%</span>
+                      <span style="color:var(--status-up)">상승 65%</span>
+                    </div>
+                    <div class="pred-divbar__track">
+                      <div class="pred-divbar__down" style="flex:35">
+                        <span class="pred-divbar__pct">35%</span>
+                      </div>
+                      <div class="pred-divbar__up" style="flex:65">
+                        <span class="pred-divbar__pct">65%</span>
+                      </div>
+                    </div>
+                    <div class="pred-divbar__neutral">
+                      <div class="pred-divbar__tick"></div>
+                      <div class="pred-divbar__label">중립(50%)</div>
                     </div>
                   </div>
                 </div>

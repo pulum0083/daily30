@@ -560,6 +560,113 @@
     .bar-row__pct.up   { color: var(--status-up); }
     .bar-row__pct.down { color: var(--status-down); }
 
+    /* Section title time badge */
+    .section-time {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 100px;
+      background: var(--color-primary-light);
+      color: var(--color-primary);
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    /* Prediction semicircle gauge (unused, kept for reference) */
+    .pred-gauge { display: none; }
+
+    /* Prediction confidence interval bar (PC default) */
+    .pred-confbar { display: block; }
+    .pred-confbar__row { margin-bottom: 14px; }
+    .pred-confbar__row:last-child { margin-bottom: 0; }
+    .pred-confbar__header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pred-confbar__track {
+      position: relative;
+      height: 12px;
+      background: var(--grey-50);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .pred-confbar__light {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      border-radius: 6px;
+    }
+    .pred-confbar__solid {
+      position: absolute;
+      left: 0; top: 0;
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pred-confbar__solid.up   { background: var(--status-up); }
+    .pred-confbar__solid.down { background: var(--status-down); }
+    .pred-confbar__meta {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    /* Prediction diverging bar (mobile only, hidden by default) */
+    .pred-divbar { display: none; }
+    .pred-divbar__header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .pred-divbar__track {
+      display: flex;
+      height: 32px;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .pred-divbar__down {
+      background: var(--status-down);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 10px;
+    }
+    .pred-divbar__up {
+      background: var(--status-up);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+    }
+    .pred-divbar__pct {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .pred-divbar__neutral {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .pred-divbar__tick {
+      width: 1px;
+      height: 6px;
+      background: var(--line-primary);
+    }
+    .pred-divbar__label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
     /* Reason block */
     .reason-block {
       background: var(--surface-secondary);
@@ -1126,7 +1233,11 @@
         padding: 6px 10px;
       }
 
-      /* Prediction bars */
+      /* Prediction charts: confbar → divbar on mobile */
+      .pred-confbar { display: none; }
+      .pred-divbar { display: block; }
+
+      /* Prediction bars (legacy) */
       .bar-row__label {
         font-size: 12px;
         min-width: 36px;
@@ -1583,6 +1694,8 @@
   .mkt-spark canvas { height: 40px !important; }
   .mkt-val { font-size: 14px; }
   .fg-now-val { font-size: 18px; }
+  .pred-confbar { display: none; }
+  .pred-divbar { display: block; }
 }
 
 /* ============================================================
