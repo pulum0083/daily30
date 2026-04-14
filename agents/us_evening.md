@@ -40,33 +40,45 @@
 - `sparkline`, `ma20_sparkline`, `ma200_sparkline` 배열을 `stockCharts` 항목의 `prices`, `ma20`, `ma200`에 매핑한다.
 - JSON에 없는 종목을 추천하려면 1회만 웹 검색하여 가격을 확인한 후 사용한다.
 
-## Step 3: HTML 브리핑 생성
+## Step 3: 분석 결과 저장
 
 분석 결과를 `data/analysis_us.json`에 저장한다 (kospi와 동일 JSON 구조).
+**HTML은 별도 스크립트(`scripts/generate_html.py`)가 생성하므로 여기서 HTML을 출력하지 않는다.**
 
-### HTML 레이아웃 필수 구조
+```json
+{
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 60,
+    "down_pct": 40,
+    "confidence": 72
+  },
+  "reasons": [
+    "🌏 아시아 증시 … <b>수치</b> …",
+    "📈 S&P500 선물 … <b>수치</b> …",
+    "📉 VIX … <b>수치</b> …",
+    "🏦 국채금리 … <b>수치</b> …",
+    "💹 빅테크 프리마켓 … <b>수치</b> …"
+  ],
+  "stock_picks": [
+    {
+      "name": "NVDA (엔비디아)",
+      "price": "$XXX.XX",
+      "change": "+X.XX%",
+      "change_cls": "up",
+      "signal": "MA20 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 3.2,
+      "ma200_dist_pct": 22.1,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "시나리오 설명.",
+      "action_guide": "시가 $XXX 이내 진입. 목표: $YYY / 손절: $ZZZ 이탈 시."
+    }
+  ]
+}
+```
 
-`agents/kospi_morning.md`의 "HTML 필수 규칙" 섹션과 동일한 규칙을 적용한다:
-- `<html class="light">` (라이트모드 기본값)
-- GNB에 테마 토글 버튼 포함
-- `market-summary-bar`는 포함하지 않는다
-- **accordion-body 내부 패딩**: `accordion-body` 안에 반드시 `accordion-body__inner` wrapper 사용 (규칙 0a 참조)
-
-`agents/kospi_morning.md`의 2컬럼 레이아웃을 사용한다:
-- 왼쪽 `layout-grid__main`: 브리핑 본문
-- 오른쪽 `layout-grid__right`: 시장 지표 사이드바 (right-panel)
-- `</body>` 직전에 `<script>window.MARKET_DATA = {...}</script>` 블록을 삽입
-
-**⚠️ 미국 브리핑 사이드바 그룹 순서** (코스피와 다름):
-1. **한국 시장 · 환율** (mkt-g1): 코스피, 코스닥, 달러환율 USD/KRW
-2. **미국 시장** (mkt-g2): 나스닥, 나스닥100 선물, 다우존스, 필라델피아 반도체, 달러 인덱스 DXY
-3. **변동성** (mkt-g3): WTI 국제유가, 공포탐욕지수
-
-나머지 HTML 구조(각 mkt-row, canvas id 등)와 MARKET_DATA 형식은 `agents/kospi_morning.md`를 참조한다.
-
-저장 경로:
-- `web/briefings/YYYY-MM-DD-us.html`
-- `web/index.html` (덮어쓰기)
+저장 완료 후 별도 조치 없음 — HTML 생성은 workflow가 `generate_html.py`를 통해 처리한다.
 
 ## Step 4: 텔레그램 메시지 파일 저장
 

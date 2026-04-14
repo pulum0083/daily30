@@ -23,5 +23,15 @@
     "kospi_time": "08:30",
     "us_time": "22:30",
     "weekly_time": "21:00"
+  },
+
+  "gemini": {
+    "_comment": "Google AI Studio (aistudio.google.com)에서 무료 발급. 뉴스 요약 전처리에 사용.",
+    "api_key": "YOUR_GEMINI_API_KEY_HERE"
+  },
+
+  "anthropic": {
+    "_comment": "Anthropic Console에서 발급. call_claude.py가 직접 API 호출 시 사용. 환경변수 ANTHROPIC_API_KEY 우선.",
+    "api_key": "YOUR_ANTHROPIC_API_KEY_HERE"
   }
 }

@@ -13,3 +13,10 @@ pytz>=2024.1
 # Data processing
 pandas>=2.2.0
 numpy>=1.26.0
+
+# ── 하이브리드 AI 파이프라인 ──────────────────────────────────────────
+# 1순위: Claude Prompt Caching (call_claude.py)
+anthropic>=0.40.0
+
+# 3순위: Gemini Flash 뉴스 전처리 (fetch_news.py)
+google-genai>=1.0.0
