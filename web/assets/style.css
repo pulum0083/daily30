@@ -953,6 +953,18 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50%       { opacity: .5; transform: scale(0.8); }
     }
+    .pub-time {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0;
+    }
+    /* Flat sidebar rows — separator between direct mkt-row children */
+    .mkt-list > .mkt-row {
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .mkt-list > .mkt-row:last-of-type { border-bottom: none; }
 
     /* Market list */
     .mkt-list {
@@ -1408,6 +1420,25 @@
       flex-shrink: 0;
     }
     .info-icon-btn:hover { color: var(--text-secondary); background: var(--line-secondary); }
+    /* Prediction guide pill button — i + label text */
+    .pred-guide-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      border: none; background: var(--line-secondary);
+      cursor: pointer; padding: 2px 7px 2px 4px;
+      border-radius: 100px; flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .pred-guide-btn:hover { background: var(--line-primary); }
+    .pred-guide-btn__icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--text-tertiary); color: var(--surface);
+      font-size: 9px; font-weight: 800; flex-shrink: 0; line-height: 1;
+    }
+    .pred-guide-btn__label {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-tertiary); letter-spacing: 0; text-transform: none;
+    }
     .info-modal-backdrop {
       display: none; position: fixed; inset: 0; z-index: 9000;
       background: rgba(0,0,0,.55); align-items: center; justify-content: center;

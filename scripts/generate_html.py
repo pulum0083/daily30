@@ -146,52 +146,15 @@ def build_stock_picks_html(stock_picks: list) -> str:
     return html
 
 
-def build_sidebar_groups(briefing_type: str) -> str:
-    """Build sidebar market groups. Group order differs: KOSPI=미국→한국→변동성, US=한국→미국→변동성."""
-
-    chevron_svg = '<svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>'
-
-    def mkt_row(name, val_id, badge_id, canvas_id):
-        return f"""                <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">{name}</span><div class="mkt-vals"><div class="mkt-val" id="{val_id}">-</div><div class="mkt-chg" id="{badge_id}">-</div></div></div><div class="mkt-spark"><canvas id="{canvas_id}"></canvas></div></div>"""
-
-    g_us = f"""
-            <div class="mkt-group" id="mkt-g-us">
-              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g-us')">
-                <span class="mkt-group-title">미국 시장</span>
-                {chevron_svg}
-              </div>
-              <div class="mkt-group-body"><div class="mkt-group-body-inner">
-{mkt_row("나스닥", "nasdaq-val", "nasdaq-badge", "c-nasdaq")}
-{mkt_row("나스닥100 선물", "nq-val", "nq-badge", "c-nq")}
-{mkt_row("다우존스", "dji-val", "dji-badge", "c-dji")}
-{mkt_row("필라델피아 반도체", "sox-val", "sox-badge", "c-sox")}
-{mkt_row("달러 인덱스 DXY", "dxy-val", "dxy-badge", "c-dxy")}
-              </div></div>
-            </div>"""
-
-    g_kr = f"""
-            <div class="mkt-group" id="mkt-g-kr">
-              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g-kr')">
-                <span class="mkt-group-title">한국 시장 · 환율</span>
-                {chevron_svg}
-              </div>
-              <div class="mkt-group-body"><div class="mkt-group-body-inner">
-{mkt_row("코스피", "kospi-val", "kospi-badge", "c-kospi")}
-{mkt_row("코스닥", "kosdaq-val", "kosdaq-badge", "c-kosdaq")}
-{mkt_row("달러환율 USD/KRW", "usd-val", "usd-badge", "c-usd")}
-              </div></div>
-            </div>"""
-
-    g_vol = f"""
-            <div class="mkt-group" id="mkt-g-vol">
-              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g-vol')">
-                <span class="mkt-group-title">변동성</span>
-                {chevron_svg}
-              </div>
-              <div class="mkt-group-body"><div class="mkt-group-body-inner">
-{mkt_row("WTI 국제유가", "oil-val", "oil-badge", "c-oil")}
+_FG_BLOCK = """\
                 <div class="fg-block">
-                  <div class="fg-block-header"><span class="mkt-name">공포탐욕지수</span><span class="fg-badge" id="fg-badge">-</span></div>
+                  <div class="fg-block-header">
+                    <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
+                      공포탐욕지수
+                      <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명" style="font-size:11px;font-weight:700;line-height:1;">!</button>
+                    </span>
+                    <span class="fg-badge" id="fg-badge">-</span>
+                  </div>
                   <div class="fg-body">
                     <div class="fg-gauge-mini"><canvas id="fg-gauge-canvas" style="width:118px;height:64px;display:block;"></canvas></div>
                     <div class="fg-info">
@@ -202,16 +165,35 @@ def build_sidebar_groups(briefing_type: str) -> str:
                         <div class="fg-hist-item"><span class="lbl">1달</span><span class="val" id="fg-hist-1m">-</span></div>
                         <div class="fg-hist-item"><span class="lbl">1년</span><span class="val" id="fg-hist-1y">-</span></div>
                       </div>
+                      <div id="fg-date" style="font-size:10px;color:var(--text-tertiary);margin-top:4px;"></div>
                     </div>
                   </div>
-                </div>
-              </div></div>
-            </div>"""
+                </div>"""
+
+
+def build_sidebar_items(briefing_type: str) -> str:
+    """Build flat sidebar market items. Order differs per briefing type."""
+
+    def mkt_row(name, val_id, badge_id, canvas_id):
+        return f'                <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">{name}</span><div class="mkt-vals"><div class="mkt-val" id="{val_id}">-</div><div class="mkt-chg" id="{badge_id}">-</div></div></div><div class="mkt-spark"><canvas id="{canvas_id}"></canvas></div></div>'
 
     if briefing_type == "kospi":
-        return g_us + g_kr + g_vol
-    else:
-        return g_kr + g_us + g_vol
+        rows = [
+            mkt_row("나스닥",            "nasdaq-val", "nasdaq-badge", "c-nasdaq"),
+            mkt_row("다우존스",           "dji-val",    "dji-badge",    "c-dji"),
+            mkt_row("필라델피아 반도체",   "sox-val",    "sox-badge",    "c-sox"),
+            mkt_row("달러 인덱스 DXY",   "dxy-val",    "dxy-badge",    "c-dxy"),
+            mkt_row("WTI 국제유가",       "oil-val",    "oil-badge",    "c-oil"),
+            _FG_BLOCK,
+        ]
+    else:  # us
+        rows = [
+            mkt_row("나스닥100 선물",     "nq-val",     "nq-badge",     "c-nq"),
+            mkt_row("WTI 국제유가",       "oil-val",    "oil-badge",    "c-oil"),
+            _FG_BLOCK,
+        ]
+
+    return "\n".join(rows)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -257,8 +239,8 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
     # Stock picks HTML
     picks_html = build_stock_picks_html(stock_picks)
 
-    # Sidebar groups HTML
-    sidebar_groups = build_sidebar_groups(briefing_type)
+    # Sidebar items HTML (flat, no groups)
+    sidebar_groups = build_sidebar_items(briefing_type)
 
     # Type-specific strings
     if briefing_type == "kospi":
@@ -326,6 +308,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         '              <div class="open-section">\n'
         '                <div class="open-section__title">\n'
         f"                  {section_title}\n"
+        '                  <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명" style="font-size:11px;font-weight:700;line-height:1;">i</button>\n'
         f'                  <span class="section-time">{gen_time} 생성</span>\n'
         "                </div>\n"
         '                <div class="prediction-card">\n'
@@ -419,7 +402,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         '        <div class="right-panel">\n'
         '          <div class="panel-header">\n'
         '            <span class="section-title">시장 지표</span>\n'
-        '            <span class="live-dot">LIVE</span>\n'
+        f'            <span class="pub-time">{date_str} {gen_time}</span>\n'
         "          </div>\n"
         '          <div class="mkt-list">\n'
         + sidebar_groups + "\n"
@@ -448,6 +431,50 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         "        </ul>\n"
         "        <br>\n"
         '        <p style="color:var(--text-tertiary); font-size:12px;">※ 매매 추천이 아닌 전략 추종 종목 탐색 목적으로 제공됩니다.</p>\n'
+        "      </div>\n"
+        "    </div>\n"
+        "  </div>\n"
+        "\n"
+        "  <!-- 공포탐욕지수 모달 -->\n"
+        '  <div class="info-modal-backdrop" id="fg-modal" onclick="if(event.target===this)closeFGModal()">\n'
+        '    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="fg-modal-title">\n'
+        '      <button class="info-modal__close" onclick="closeFGModal()" aria-label="닫기">\n'
+        '        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>\n'
+        "      </button>\n"
+        '      <div class="info-modal__title" id="fg-modal-title">공포탐욕지수(Fear &amp; Greed Index)</div>\n'
+        '      <div class="info-modal__body">\n'
+        "        <p>시장의 7가지 요인을 분석하여 현재 투자자의 심리를 극단적인 공포(0)부터 극단적인 탐욕(100)까지 측정하는 심리지표입니다.</p>\n"
+        "        <br>\n"
+        '        <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">\n'
+        '          <li><strong style="color:#1D4ED8">0~24</strong> : 극단적 공포(Extreme Fear)</li>\n'
+        '          <li><strong style="color:#2563EB">25~44</strong> : 공포(Fear)</li>\n'
+        '          <li><strong style="color:#CA8A04">45~54</strong> : 중립(Neutral)</li>\n'
+        '          <li><strong style="color:#E03131">55~74</strong> : 탐욕(Greed)</li>\n'
+        '          <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕(Extreme Greed)</li>\n'
+        "        </ul>\n"
+        "      </div>\n"
+        "    </div>\n"
+        "  </div>\n"
+        "\n"
+        "  <!-- 시초가 예측 모달 -->\n"
+        '  <div class="info-modal-backdrop" id="pred-modal" onclick="if(event.target===this)closePredModal()">\n'
+        '    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">\n'
+        '      <button class="info-modal__close" onclick="closePredModal()" aria-label="닫기">\n'
+        '        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>\n'
+        "      </button>\n"
+        '      <div class="info-modal__title" id="pred-modal-title">시초가 방향 예측이란?</div>\n'
+        '      <div class="info-modal__body">\n'
+        "        <p>미국 선물·지수, 외국인 수급, 반도체 지표, 공포탐욕지수 등 다수의 시장 데이터를 종합하여 AI가 다음 거래일 시초가 방향을 분석한 결과입니다.</p>\n"
+        "        <br>\n"
+        "        <p><strong>읽는 법</strong></p>\n"
+        '        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">\n'
+        "          <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>\n"
+        "          <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>\n"
+        "          <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>\n"
+        "          <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>\n"
+        "        </ul>\n"
+        "        <br>\n"
+        '        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>\n'
         "      </div>\n"
         "    </div>\n"
         "  </div>\n"

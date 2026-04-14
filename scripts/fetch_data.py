@@ -87,11 +87,13 @@ def get_fear_greed() -> dict:
             return int(entries[idx]["value"]) if idx < len(entries) else None
 
         return {
-            "value": val_at(0),
-            "prev":  val_at(1),
-            "1w":    val_at(7),
-            "1m":    val_at(30),
-            "1y":    val_at(364),
+            "value":          val_at(0),
+            "prev":           val_at(1),
+            "1w":             val_at(7),
+            "1m":             val_at(30),
+            "1y":             val_at(364),
+            "timestamp":      entries[0].get("timestamp"),       # Unix timestamp (str)
+            "classification": entries[0].get("value_classification"),  # e.g. "Extreme Fear"
         }
     except Exception as e:
         print(f"[fetch_data] Fear & Greed API error: {e}", file=sys.stderr)

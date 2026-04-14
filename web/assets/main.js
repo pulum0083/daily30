@@ -152,11 +152,11 @@
      Fear & Greed mini gauge (canvas semicircle)
   ============================================================ */
   function fgMeta(v) {
-    if (v <= 25) return { color:'#1D4ED8', label:'극단적 공포', badge:'xfear' };
-    if (v <= 45) return { color:'#2563EB', label:'공포',       badge:'fear'  };
-    if (v <= 55) return { color:'#CA8A04', label:'중립',       badge:'neutral'};
-    if (v <= 75) return { color:'#E03131', label:'탐욕',       badge:'greed' };
-    return            { color:'#B91C1C', label:'극단적 탐욕',  badge:'greed' };
+    if (v <= 24) return { color:'#1D4ED8', label:'극단적 공포', badge:'xfear' };
+    if (v <= 44) return { color:'#2563EB', label:'공포',       badge:'fear'  };
+    if (v <= 54) return { color:'#CA8A04', label:'중립',       badge:'neutral'};
+    if (v <= 74) return { color:'#E03131', label:'탐욕',       badge:'greed' };
+    return            { color:'#B91C1C', label:'극단적 탐욕',  badge:'xgreed' };
   }
 
   function drawFGGauge(value) {
@@ -273,7 +273,7 @@
     if (lblEl) { lblEl.textContent = m.label; lblEl.style.color = m.color; }
     if (bdgEl) {
       bdgEl.className = `fg-badge ${m.badge}`;
-      const labels = { xfear:'EXTREME FEAR', fear:'FEAR', neutral:'NEUTRAL', greed:'GREED' };
+      const labels = { xfear:'EXTREME FEAR', fear:'FEAR', neutral:'NEUTRAL', greed:'GREED', xgreed:'EXTREME GREED' };
       bdgEl.textContent = labels[m.badge] || m.badge.toUpperCase();
     }
   }
@@ -509,6 +509,15 @@
         el.style.color = fgData[k] >= 50 ? '#E03131' : '#2563EB';
       }
     });
+    /* Show FG data date from API timestamp */
+    const fgDateEl = document.getElementById('fg-date');
+    if (fgDateEl && fgData.timestamp) {
+      const ts = parseInt(fgData.timestamp, 10) * 1000;
+      const d = new Date(ts);
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      fgDateEl.textContent = `기준: ${mm}/${dd}`;
+    }
     Object.entries(marketData).forEach(([key, d]) => attachSparkTooltip(d.canvasId, key));
     // rAF ensures layout is complete so canvas.offsetWidth is accurate on mobile
     requestAnimationFrame(() => {
@@ -526,4 +535,29 @@
   function closeKelloggModal() {
     document.getElementById('kellogg-modal').classList.remove('is-open');
   }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeKelloggModal(); });
+
+  function openFGModal() {
+    const el = document.getElementById('fg-modal');
+    if (el) el.classList.add('is-open');
+  }
+  function closeFGModal() {
+    const el = document.getElementById('fg-modal');
+    if (el) el.classList.remove('is-open');
+  }
+
+  function openPredModal() {
+    const el = document.getElementById('pred-modal');
+    if (el) el.classList.add('is-open');
+  }
+  function closePredModal() {
+    const el = document.getElementById('pred-modal');
+    if (el) el.classList.remove('is-open');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeKelloggModal();
+      closeFGModal();
+      closePredModal();
+    }
+  });
