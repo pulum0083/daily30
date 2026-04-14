@@ -30,6 +30,9 @@ env:
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   WEB_BASE_URL: "https://bejewelled-toffee-87de55.netlify.app"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+
+
 
 # ══════════════════════════════════════════════════════════════════
 # 공통 설치 스텝 정의 (재사용)
