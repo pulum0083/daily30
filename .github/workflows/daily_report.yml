@@ -66,11 +66,13 @@ jobs:
       - name: 📦 Python 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 🤖 Claude CLI 설치 및 PATH 등록
-        run: |
-          npm install -g @anthropic-ai/claude-code
-          # npm 전역 bin 경로를 GITHUB_PATH에 추가 (exit 127 방지)
-          echo "$(npm root -g)/../bin" >> "$GITHUB_PATH"
+     - name: 📰 뉴스 요약 (Gemini Flash)
+      if: steps.holiday.outputs.open == 'true'
+      continue-on-error: true
+      run: python3 scripts/fetch_news.py --type kospi
+- name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
+      if: steps.holiday.outputs.open == 'true'
+      run: python3 scripts/call_claude.py --type kospi
 
       - name: 🗓️ 한국 시장 휴장일 확인
         id: holiday
@@ -130,10 +132,13 @@ jobs:
       - name: 📦 Python 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 🤖 Claude CLI 설치 및 PATH 등록
-        run: |
-          npm install -g @anthropic-ai/claude-code
-          echo "$(npm root -g)/../bin" >> "$GITHUB_PATH"
+      - name: 📰 뉴스 요약 (Gemini Flash)
+      if: steps.holiday.outputs.open == 'true'
+      continue-on-error: true
+      run: python3 scripts/fetch_news.py --type kospi
+      - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
+      if: steps.holiday.outputs.open == 'true'
+      run: python3 scripts/call_claude.py --type kospi
 
       - name: 🗓️ 미국 시장 휴장일 확인
         id: holiday
