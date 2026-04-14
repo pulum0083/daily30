@@ -23,13 +23,16 @@ mkdir -p data web/briefings
 # 2. 시장 데이터 사전 수집
 python3 "$PROJECT_DIR/scripts/fetch_data.py" --type us
 
-# 3. Claude 브리핑 생성
-claude --dangerously-skip-permissions -p "$(cat agents/us_evening.md)"
+# 3. 뉴스 요약 (Gemini Flash)
+python3 "$PROJECT_DIR/scripts/fetch_news.py" --type us || echo "[WARN] 뉴스 수집 실패 (무시)"
 
-# 4. Telegram 전송
+# 4. Claude 분석 생성 + HTML 저장
+python3 "$PROJECT_DIR/scripts/call_claude.py" --type us
+
+# 5. Telegram 전송
 python3 "$PROJECT_DIR/scripts/send_telegram.py" --type us || echo "[WARN] Telegram 전송 실패 (무시)"
 
-# 5. Git 커밋 & 푸시
+# 6. Git 커밋 & 푸시
 git config user.email "dailyb-bot@users.noreply.github.com"
 git config user.name "DailyB Bot"
 git add web/ data/
