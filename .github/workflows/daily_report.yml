@@ -2,8 +2,8 @@ name: Daily 30 Report
 
 on:
   schedule:
-    - cron: "23 23 * * 0-4"   # 코스피 브리핑 KST 08:23
-    - cron: "45 12 * * 1-5"   # 미국 시장 브리핑 KST 21:45
+    - cron: "13 23 * * 0-4"   # 코스피 브리핑 KST 08:13
+    - cron: "30 12 * * 1-5"   # 미국 시장 브리핑 KST 21:30
   workflow_dispatch:
     inputs:
       briefing_type:
@@ -31,10 +31,10 @@ defaults:
 
 jobs:
   kospi-briefing:
-    name: "📈 코스피 브리핑 (KST 08:23)"
+    name: "📈 코스피 브리핑 (KST 08:13)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '23 23 * * 0-4') ||
+      (github.event_name == 'schedule' && github.event.schedule == '13 23 * * 0-4') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi')
 
     steps:
@@ -90,10 +90,10 @@ jobs:
           git push
 
   us-briefing:
-    name: "🇺🇸 미국 브리핑 (KST 21:45)"
+    name: "🇺🇸 미국 브리핑 (KST 21:30)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '45 12 * * 1-5') ||
+      (github.event_name == 'schedule' && github.event.schedule == '30 12 * * 1-5') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us')
 
     steps:
