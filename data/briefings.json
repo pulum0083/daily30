@@ -1,1 +1,56 @@
-{"briefings": []}
+{
+  "briefings": [
+    {
+      "date": "2026-04-07",
+      "type": "kospi",
+      "predicted_direction": "상승 우위",
+      "is_correct": true,
+      "actual_direction": "상승",
+      "actual_change_pct": 1.2,
+      "checked_at": "...",
+      "up_pct": 65,
+      "down_pct": 35,
+      "confidence": 78,
+      "generated_at": "..."
+    },
+    {
+      "date": "2026-04-08",
+      "type": "kospi",
+      "predicted_direction": "하락 우위",
+      "is_correct": false,
+      "actual_direction": "상승",
+      "actual_change_pct": 0.5,
+      "checked_at": "...",
+      "up_pct": 35,
+      "down_pct": 65,
+      "confidence": 72,
+      "generated_at": "..."
+    },
+    {
+      "date": "2026-04-09",
+      "type": "kospi",
+      "predicted_direction": "상승 우위",
+      "is_correct": true,
+      "actual_direction": "상승",
+      "actual_change_pct": 0.8,
+      "checked_at": "...",
+      "up_pct": 70,
+      "down_pct": 30,
+      "confidence": 80,
+      "generated_at": "..."
+    },
+    {
+      "date": "2026-04-10",
+      "type": "kospi",
+      "predicted_direction": "상승 우위",
+      "is_correct": true,
+      "actual_direction": "상승",
+      "actual_change_pct": 2.1,
+      "checked_at": "...",
+      "up_pct": 68,
+      "down_pct": 32,
+      "confidence": 75,
+      "generated_at": "..."
+    }
+  ]
+}

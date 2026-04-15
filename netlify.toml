@@ -1,3 +1,22 @@
+# ── Netlify 설정 (현재 미사용 — GitHub Pages로 이전됨) ──────────────
+# 호스팅은 GitHub Pages (gh-pages 브랜치) 로 이전되었습니다.
+# 이 파일은 Netlify로 롤백 시 참고용으로 보존합니다.
+
 [build]
   publish = "web/"
   command = "echo 'Static site — no build needed'"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=3600"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=300, must-revalidate"
+
+[[headers]]
+  for = "/briefings/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

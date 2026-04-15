@@ -4,10 +4,18 @@
 
 자동화된 일일/주간 투자 브리핑 생성 시스템. 코스피 및 미국 시장 방향 예측, 주간 이슈 점검, 텔레그램 알림, 구글 시트 데이터 적재를 담당한다.
 
+## 웹 서비스 URL
+
+**https://pulum0083.github.io/daily30**
+
+호스팅: GitHub Pages (`gh-pages` 브랜치 자동 배포)
+→ 브리핑 생성 후 `web/` 폴더를 `gh-pages` 브랜치에 푸시 → GitHub Pages 서빙
+
 ## 실행 흐름
 
 ```
-스케줄 트리거 → 시장 데이터 수집 → 휴장 확인 → 분석/예측 생성 → HTML 저장 → 텔레그램 전송 → 구글 시트 업데이트
+스케줄 트리거 → 시장 데이터 수집 → 휴장 확인 → 분석/예측 생성 → HTML 저장
+  → 텔레그램 전송 → main 커밋·푸시 → gh-pages 브랜치 배포 → GitHub Pages 서빙
 ```
 
 ## 디렉토리 구조
@@ -50,7 +58,7 @@ DailyB/
     "spreadsheet_id": "..."
   },
   "web": {
-    "base_url": "https://your-hosting-url.com"
+    "base_url": "https://pulum0083.github.io/daily30"
   }
 }
 ```
