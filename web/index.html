@@ -7,9 +7,30 @@
   <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
+
+  <!-- ============================================================
+       Sidebar — 날짜별 브리핑 목록
+  ============================================================ -->
+  <aside class="sidebar" id="sidebar" aria-label="브리핑 목록">
+    <div class="sidebar__header">
+      <span class="sidebar__title">브리핑 기록</span>
+    </div>
+    <nav class="sidebar__nav" id="sidebar-nav">
+      <!-- JS로 동적 렌더링 -->
+    </nav>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
   <nav class="gnb">
     <div class="gnb__inner">
       <div class="gnb__logo">
+        <button class="gnb__sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="브리핑 목록 열기/닫기">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <line x1="2" y1="4.5" x2="16" y2="4.5"/>
+            <line x1="2" y1="9"   x2="16" y2="9"/>
+            <line x1="2" y1="13.5" x2="16" y2="13.5"/>
+          </svg>
+        </button>
         <div class="gnb__logo-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
@@ -415,6 +436,7 @@
   ]
 };
   </script>
+  <script src="assets/briefing-list.js"></script>
   <script src="assets/main.js"></script>
 </body>
 </html>
