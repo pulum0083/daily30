@@ -171,6 +171,88 @@ _FG_BLOCK = """\
                 </div>"""
 
 
+def compute_accuracy_stats(briefing_type: str) -> dict:
+    """Read briefings.json and compute accuracy stats for the sidebar."""
+    path = DATA_DIR / "briefings.json"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    # Only entries with a resolved actual result (is_correct is not None)
+    entries = [
+        b for b in data.get("briefings", [])
+        if b.get("type") == briefing_type and b.get("is_correct") is not None
+    ]
+    if not entries:
+        return {}
+
+    entries = sorted(entries, key=lambda x: x["date"])
+
+    last7  = entries[-7:]
+    last30 = entries[-30:]
+
+    def pct(correct, total):
+        return round(correct / total * 100) if total else 0
+
+    correct7  = sum(1 for e in last7  if e["is_correct"])
+    correct30 = sum(1 for e in last30 if e["is_correct"])
+
+    return {
+        "last7_correct":  correct7,
+        "last7_total":    len(last7),
+        "last7_pct":      pct(correct7, len(last7)),
+        "last30_correct": correct30,
+        "last30_total":   len(last30),
+        "last30_pct":     pct(correct30, len(last30)),
+        "recent_dots":    [{"correct": e["is_correct"], "date": e["date"]} for e in last7],
+    }
+
+
+def build_accuracy_block(briefing_type: str) -> str:
+    """Build the accuracy stats HTML block for the sidebar."""
+    stats = compute_accuracy_stats(briefing_type)
+    if not stats:
+        return ""
+
+    pct7  = stats["last7_pct"]
+    pct30 = stats["last30_pct"]
+    n7    = stats["last7_total"]
+    n30   = stats["last30_total"]
+
+    # Colour the percentage by accuracy level
+    def pct_cls(p):
+        if p >= 70: return "acc-good"
+        if p >= 50: return "acc-mid"
+        return "acc-bad"
+
+    dots_html = ""
+    for d in stats["recent_dots"]:
+        cls   = "correct" if d["correct"] else "wrong"
+        label = "맞음" if d["correct"] else "틀림"
+        dots_html += f'<span class="acc-dot {cls}" title="{d["date"]} {label}"></span>'
+
+    return f"""\
+      <div class="accuracy-standalone">
+        <div class="accuracy-standalone__header">
+          <span class="accuracy-standalone__title">예측 정확도</span>
+          <span class="accuracy-standalone__sub">코스피 시초가</span>
+        </div>
+        <div class="accuracy-standalone__stats">
+          <div class="acc-stat">
+            <span class="acc-val {pct_cls(pct7)}">{pct7}%</span>
+            <span class="acc-lbl">최근 {n7}일</span>
+          </div>
+          <div class="acc-divider"></div>
+          <div class="acc-stat">
+            <span class="acc-val {pct_cls(pct30)}">{pct30}%</span>
+            <span class="acc-lbl">최근 {n30}일</span>
+          </div>
+        </div>
+        <div class="accuracy-standalone__dots">{dots_html}</div>
+      </div>"""
+
+
 def build_sidebar_items(briefing_type: str) -> str:
     """Build flat sidebar market items. Order differs per briefing type."""
 
@@ -215,6 +297,13 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
     confidence = pred.get("confidence", 70)
     reasons = analysis.get("reasons", [])[:4]
     stock_picks = analysis.get("stock_picks", [])
+
+    # Dynamic reason section title (Claude-generated or fallback by direction)
+    _fallback_title = {
+        "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
+        "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
+    }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
+    reason_title = analysis.get("reason_title") or _fallback_title
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
     gen_time = fmt_generated_time(generated_at)
 
@@ -364,7 +453,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         "\n"
         "              <!-- 2. 예측 근거 -->\n"
         '              <div class="open-section">\n'
-        '                <div class="open-section__title">예측 근거</div>\n'
+        f'                <div class="open-section__title reason-section-title">{reason_title}</div>\n'
         '                <div class="reason-block">\n'
         "                  <ul>\n"
         + reasons_html + "\n"
@@ -397,9 +486,10 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         "        </div>\n"
         "      </div><!-- /layout-grid__main -->\n"
         "\n"
-        "      <!-- 오른쪽: 시장 지표 사이드바 -->\n"
+        "      <!-- 오른쪽: 사이드바 -->\n"
         '      <aside class="layout-grid__right">\n'
-        '        <div class="right-panel">\n'
+        + (build_accuracy_block(briefing_type) + "\n" if build_accuracy_block(briefing_type) else "")
+        + '        <div class="right-panel">\n'
         '          <div class="panel-header">\n'
         '            <span class="section-title">시장 지표</span>\n'
         f'            <span class="pub-time">{date_str} {gen_time}</span>\n'

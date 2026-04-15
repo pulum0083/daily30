@@ -2,8 +2,9 @@ name: Daily 30 Report
 
 on:
   schedule:
-    - cron: "5 23 * * 0-4"    # 코스피 브리핑 KST 08:05
-    - cron: "15 12 * * 1-5"   # 미국 시장 브리핑 KST 21:15
+    - cron: "5 23 * * 0-4"    # 코스피 브리핑 KST 08:05 (UTC 23:05 전일)
+    - cron: "15 12 * * 1-5"   # 미국 시장 브리핑 KST 21:15 (UTC 12:15)
+    - cron: "10 0 * * 2-6"    # 코스피 정확도 체크 KST 09:10 (UTC 00:10, 화~토)
   workflow_dispatch:
     inputs:
       briefing_type:
@@ -14,14 +15,17 @@ on:
         options:
           - kospi
           - us
+          - accuracy
 
 permissions:
-  contents: write
+  contents: write   # main 브랜치 커밋·푸시
+  pages: write      # GitHub Pages 배포
+  id-token: write   # OIDC 토큰 (actions/deploy-pages 필수)
 
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  WEB_BASE_URL: "https://bejewelled-toffee-87de55.netlify.app"
+  WEB_BASE_URL: "https://pulum0083.github.io/daily30"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
@@ -29,6 +33,7 @@ defaults:
   run:
     shell: bash
 
+# ──────────────────────────────────────────────────────────────────
 jobs:
   kospi-briefing:
     name: "📈 코스피 브리핑 (KST 08:05)"
@@ -80,7 +85,7 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
 
-      - name: 🚀 HTML 커밋 & 푸시
+      - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
@@ -89,6 +94,20 @@ jobs:
           git diff --staged --quiet || git commit -m "📊 코스피 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           git push
 
+      - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
+        if: steps.holiday.outputs.open == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          publish_branch: gh-pages
+          force_orphan: false       # 히스토리 유지
+          keep_files: false         # 매번 전체 덮어씀 (stale 파일 방지)
+          user_name: "DailyB Bot"
+          user_email: "dailyb-bot@users.noreply.github.com"
+          commit_message: "📊 Pages 배포: 코스피 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+
+  # ──────────────────────────────────────────────────────────────────
   us-briefing:
     name: "🇺🇸 미국 브리핑 (KST 21:15)"
     runs-on: ubuntu-latest
@@ -139,11 +158,58 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
 
-      - name: 🚀 HTML 커밋 & 푸시
+      - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
           git add web/ data/
           git diff --staged --quiet || git commit -m "🇺🇸 미국 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git push
+
+      - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
+        if: steps.holiday.outputs.open == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          publish_branch: gh-pages
+          force_orphan: false
+          keep_files: false
+          user_name: "DailyB Bot"
+          user_email: "dailyb-bot@users.noreply.github.com"
+          commit_message: "🇺🇸 Pages 배포: 미국 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+
+  # ──────────────────────────────────────────────────────────────────
+  kospi-accuracy:
+    name: "📊 코스피 정확도 체크 (KST 09:10)"
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '10 0 * * 2-6') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'accuracy')
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 📊 전일 코스피 예측 정확도 체크
+        run: |
+          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
+          python3 scripts/check_accuracy.py --type kospi --date "$DATE"
+
+      - name: 💾 정확도 결과 커밋 & 푸시
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add data/briefings.json
+          git diff --staged --quiet || git commit -m "📊 정확도 업데이트: $(TZ=Asia/Seoul date +'%Y-%m-%d')"
           git push

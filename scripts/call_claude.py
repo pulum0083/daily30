@@ -86,6 +86,16 @@ KOSPI_SYSTEM_PROMPT = """\
 - 📉 하락 또는 약세 시그널
 - 🏦 금리·연준·매크로 관련 시그널
 
+### 예측 근거 섹션 타이틀(reason_title) 작성 규칙
+예측 근거 섹션 상단에 표시되는 훅 타이틀. 30자 이내.
+
+- **상승 우위**: 왜 오를지를 드라이빙하는 핵심 팩터 1~2개를 훅으로. 구체적 수치 하나 포함 권장.
+  예시: "왜 오를까? — 나스닥·반도체 동시 강세", "외인 2.7조 순매수, 오늘도 상승 이어간다"
+- **하락 우위**: 경보성 톤 또는 핵심 위험 요인 명시.
+  예시: "긴급 점검: 기술주 약세 속 하락 시그널", "왜 내릴까? — VIX 급등·달러 강세"
+- **중립**: 질문형으로 방향성 혼재 표현.
+  예시: "오를까 내릴까? 오늘의 핵심 변수", "방향 혼재 — 판단 기준 N가지"
+
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
@@ -97,6 +107,7 @@ KOSPI_SYSTEM_PROMPT = """\
     "down_pct": 35,
     "confidence": 78
   },
+  "reason_title": "왜 오를까? — 나스닥·반도체 동시 강세",
   "reasons": [
     "🚀 나스닥은 <b>+X.X%</b>로 마감하며 기술주가 전반적으로 강세를 보였어요. MSFT는 <b>+X.X%</b>로 MA20을 돌파했고, 코스피 IT·플랫폼 섹터의 갭 상승을 기대할 근거가 돼요.",
     "💡 필라델피아 반도체 지수 SOX는 <b>+X.X%</b>로 연속 강세예요. SK하이닉스·삼성전자 시초가에 상승 압력이 작용할 여지가 있어요.",
@@ -180,6 +191,16 @@ US_SYSTEM_PROMPT = """\
 - 💹 빅테크·섹터 수급
 - 🛢️ 유가·원자재
 
+### 예측 근거 섹션 타이틀(reason_title) 작성 규칙
+예측 근거 섹션 상단에 표시되는 훅 타이틀. 30자 이내.
+
+- **상승 우위**: 왜 오를지를 드라이빙하는 핵심 팩터 1~2개를 훅으로. 구체적 수치 하나 포함 권장.
+  예시: "왜 오를까? — 선물 강세·빅테크 반등", "S&P500 저점 반등, 오늘도 상승 이어간다"
+- **하락 우위**: 경보성 톤 또는 핵심 위험 요인 명시.
+  예시: "긴급 점검: 선물 약세·VIX 급등", "왜 내릴까? — 빅테크 매도세·금리 상승"
+- **중립**: 질문형으로 방향성 혼재 표현.
+  예시: "오를까 내릴까? 오늘의 핵심 변수", "방향 혼재 — 판단 기준 N가지"
+
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
@@ -191,6 +212,7 @@ US_SYSTEM_PROMPT = """\
     "down_pct": 40,
     "confidence": 72
   },
+  "reason_title": "왜 오를까? — 선물 강세·빅테크 반등",
   "reasons": [
     "🌏 아시아 증시는 일본 <b>+X.X%</b>, 한국 <b>+X.X%</b>로 동반 강세를 보이며 리스크온 분위기가 형성됐어요.",
     "📈 S&P500 선물은 <b>+X.X%</b>, NQ 선물은 <b>+X.X%</b>로 프리마켓이 강하게 출발하고 있어요.",
@@ -263,6 +285,53 @@ def save_analysis(briefing_type: str, analysis: dict) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(analysis, f, ensure_ascii=False, indent=2)
     print(f"[call_claude] Saved → {path}")
+
+
+def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: dict) -> None:
+    """Append or update the prediction record in data/briefings.json for accuracy tracking."""
+    path = DATA_DIR / "briefings.json"
+    if path.exists():
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        data = {"briefings": []}
+
+    pred = analysis.get("prediction", {})
+    briefings = data.setdefault("briefings", [])
+
+    existing_idx = next(
+        (i for i, b in enumerate(briefings) if b["date"] == date_str and b["type"] == briefing_type),
+        None,
+    )
+
+    entry = {
+        "date": date_str,
+        "type": briefing_type,
+        "predicted_direction": pred.get("direction", ""),
+        "up_pct": pred.get("up_pct", 0),
+        "down_pct": pred.get("down_pct", 0),
+        "confidence": pred.get("confidence", 0),
+        "actual_direction": None,
+        "actual_change_pct": None,
+        "is_correct": None,
+        "generated_at": datetime.now(KST).isoformat(),
+        "checked_at": None,
+    }
+
+    if existing_idx is not None:
+        # Preserve existing actual result (don't overwrite accuracy data on re-run)
+        prev = briefings[existing_idx]
+        entry["actual_direction"] = prev.get("actual_direction")
+        entry["actual_change_pct"] = prev.get("actual_change_pct")
+        entry["is_correct"] = prev.get("is_correct")
+        entry["checked_at"] = prev.get("checked_at")
+        briefings[existing_idx] = entry
+    else:
+        briefings.append(entry)
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"[call_claude] Saved prediction to briefings.json ({date_str}, {briefing_type})")
 
 
 def extract_json(text: str) -> dict:
@@ -359,6 +428,9 @@ def main():
 
     # 2. Save analysis JSON
     save_analysis(args.type, analysis)
+
+    # 2b. Record prediction in briefings.json for accuracy tracking
+    save_prediction_to_briefings(args.type, date_str, analysis)
 
     # 3. Generate HTML (unless --no-html)
     if not args.no_html:

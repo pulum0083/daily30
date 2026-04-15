@@ -1523,12 +1523,22 @@
 .layout-grid__right { grid-area: right; }
 
 /* ============================================================
-   Right Panel — Market Indicators Sidebar
+   Right Column — sticky wrapper stacking accuracy + market panels
    ============================================================ */
-.right-panel {
+.layout-grid__right {
   position: sticky;
   top: calc(var(--gnb-height, 52px) + 24px);
   max-height: calc(100vh - var(--gnb-height, 52px) - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* ============================================================
+   Right Panel — Market Indicators Sidebar
+   ============================================================ */
+.right-panel {
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -1536,6 +1546,8 @@
   border-radius: var(--r-12);
   box-shadow: var(--shadow-10);
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 .panel-header {
   display: flex;
@@ -1702,6 +1714,88 @@
 .fg-hist-item .val { font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ============================================================
+   Reason Section Title — dynamic hook title
+   ============================================================ */
+.reason-section-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.2px;
+}
+
+/* ============================================================
+   Accuracy Standalone — independent card above market panel
+   ============================================================ */
+.accuracy-standalone {
+  background: var(--surface);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-12);
+  box-shadow: var(--shadow-10);
+  padding: 14px 16px 12px;
+}
+.accuracy-standalone__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.accuracy-standalone__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.accuracy-standalone__sub {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.accuracy-standalone__stats {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.accuracy-standalone__dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.acc-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.acc-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--line-secondary);
+  flex-shrink: 0;
+}
+.acc-val {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.acc-val.acc-good { color: #16A34A; }
+.acc-val.acc-mid  { color: var(--status-caution); }
+.acc-val.acc-bad  { color: #E03131; }
+.acc-lbl {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+.acc-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: default;
+}
+.acc-dot.correct { background: #16A34A; }
+.acc-dot.wrong   { background: #E03131; }
+
+/* ============================================================
    Responsive — Tablet (≤900px): sidebar goes below briefing
    ============================================================ */
 @media (max-width: 900px) {
@@ -1712,9 +1806,12 @@
       "right";
     row-gap: 16px;
   }
-  .right-panel {
+  .layout-grid__right {
     position: static;
     max-height: none;
+  }
+  .right-panel {
+    flex: none;
   }
 }
 
