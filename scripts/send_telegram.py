@@ -54,7 +54,7 @@ def get_web_base_url() -> str:
             cfg = json.load(f)
         return cfg.get("web", {}).get("base_url", "").rstrip("/")
 
-    return "https://bejewelled-toffee-87de55.netlify.app"
+    return "https://pulum0083.github.io/daily30"
 
 
 def send_message(bot_token: str, chat_id: str, text: str) -> dict:
@@ -99,6 +99,7 @@ def build_fallback_message(briefing_type: str) -> str:
     direction = pred.get("direction", "알 수 없음")
     up_pct = pred.get("up_pct", "?")
     confidence = pred.get("confidence", "?")
+    reason_title = data.get("reason_title", "")
     reasons = data.get("reasons", [])
 
     # HTML 태그 제거 (텔레그램 plain text용)
@@ -124,8 +125,10 @@ def build_fallback_message(briefing_type: str) -> str:
     )
 
     parts = [header, "", pred_line] if pred_line else [header]
+    if reason_title:
+        parts += ["", f"〔{strip_html(reason_title)}〕"]
     if bullet_lines:
-        parts += ["", "핵심 시그널:", bullet_lines]
+        parts += ["", bullet_lines]
     parts += ["", f"🔗 상세 분석 → {link}"]
 
     return "\n".join(parts)
