@@ -100,7 +100,7 @@ python3 scripts/generate_html.py --type weekly --data-file data/latest_weekly.js
 
 🔍 주목 테마: [테마1] / [테마2] / [테마3]
 
-🔗 전체 리포트 → https://bejewelled-toffee-87de55.netlify.app/briefings/YYYY-MM-DD-weekly.html
+🔗 전체 리포트 → https://pulum0083.github.io/daily30/briefings/YYYY-MM-DD-weekly.html
 ```
 
 ## 오류 처리

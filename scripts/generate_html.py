@@ -65,7 +65,7 @@ def get_web_base_url() -> str:
         with open(config_file, encoding="utf-8") as f:
             cfg = json.load(f)
         return cfg.get("web", {}).get("base_url", "").rstrip("/")
-    return "https://bejewelled-toffee-87de55.netlify.app"
+    return "https://pulum0083.github.io/daily30"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

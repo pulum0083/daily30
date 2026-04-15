@@ -97,7 +97,7 @@
 
 ⚠️ 주요 리스크: [한 줄]
 
-🔗 상세 분석 → https://bejewelled-toffee-87de55.netlify.app/briefings/YYYY-MM-DD-kospi.html
+🔗 상세 분석 → https://pulum0083.github.io/daily30/briefings/YYYY-MM-DD-kospi.html
 ```
 
 ## 오류 처리

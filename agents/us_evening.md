@@ -98,7 +98,7 @@
 
 📅 오늘의 이벤트: [주요 경제지표 or 연준 발언]
 
-🔗 상세 분석 → https://bejewelled-toffee-87de55.netlify.app/briefings/YYYY-MM-DD-us.html
+🔗 상세 분석 → https://pulum0083.github.io/daily30/briefings/YYYY-MM-DD-us.html
 ```
 
 ## 오류 처리
