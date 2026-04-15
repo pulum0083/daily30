@@ -307,7 +307,7 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=2048,
+        max_tokens=4096,
         system=[
             {
                 "type": "text",
