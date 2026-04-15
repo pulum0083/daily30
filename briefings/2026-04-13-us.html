@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily30' — 미국 시장 브리핑 2026-04-13</title>
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <div class="gnb__logo">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <span class="gnb__title">Daily<span>30'</span></span>
+      </div>
+      <div class="gnb__meta">
+        <span class="gnb__date" id="gnb-date">2026-04-13 KST 22:30</span>
+        <span class="gnb__badge">미국</span>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout-wrapper">
+    <div class="layout-grid">
+
+      <!-- ── 왼쪽: 브리핑 본문 ── -->
+      <div class="layout-grid__main">
+
+        <!-- 예측 accordion -->
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header">
+            <div class="accordion-header__date-label">2026-04-13</div>
+            <div class="accordion-header__badges">
+              <span class="pred-badge up">상승 예측</span>
+            </div>
+          </div>
+
+          <div class="accordion-body">
+
+            <!-- 1. 예측 카드 -->
+            <div class="open-section">
+              <div class="open-section__title">미국 시장 방향 예측</div>
+              <div class="prediction-card">
+                <div class="prediction-summary">
+                  <span class="prediction-label">상승 예측 (신뢰도 65%) — S&P500 +0.1% ~ +0.5% 예상</span>
+                  <span class="prediction-confidence">22:30 생성</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-tertiary); margin-bottom:8px;">
+                  핵심 섹터: <strong style="color:var(--text-secondary);">에너지 · 빅테크(MSFT 주도) · 금융</strong>
+                </div>
+                <div class="bar-chart">
+                  <div class="bar-row">
+                    <div class="bar-row__label"><span class="dot" style="background:var(--status-up)"></span>상승</div>
+                    <div class="bar-row__track"><div class="bar-row__fill up" style="width:58%"></div></div>
+                    <span class="bar-row__pct up">58%</span>
+                  </div>
+                  <div class="bar-row">
+                    <div class="bar-row__label"><span class="dot" style="background:var(--status-down)"></span>하락</div>
+                    <div class="bar-row__track"><div class="bar-row__fill down" style="width:42%"></div></div>
+                    <span class="bar-row__pct down">42%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 예측 근거 -->
+            <div class="open-section">
+              <div class="open-section__title">예측 근거</div>
+              <div class="reason-block">
+                <ul>
+                  <li>🌏 아시아 증시 동반 강세 — 닛케이 <b>+1.84%</b>, 코스피 <b>+1.40%</b> 상승 마감으로 미국 개장 전 리스크온 분위기 형성. 항셍 <b>-0.90%</b>으로 중국발 불안요소는 상존</li>
+                  <li>📈 S&P500 선물 <b>+0.05%</b> / 나스닥100 선물 <b>+0.10%</b> — 프리마켓 소폭 양호. S&P500 현물이 MA20(6,611) 대비 <b>+3.22%</b>, MA200(6,666) 대비 <b>+2.38%</b> 상회하며 기술적 강세 구조 유지</li>
+                  <li>😰 VIX <b>19.84 (+3.17%)</b> / 공포탐욕지수 <b>12 (극단적 공포)</b> — VIX가 최근 고점 30.6 대비 35% 하락하며 불안심리 완화 진행 중. 공포탐욕지수 12는 역발상 관점의 반등 기대 신호</li>
+                  <li>💻 MSFT <b>+2.28% (MA20 상향 돌파)</b> — 빅테크 중 유일한 MA20 crossing up 신호 발생. GOOGL <b>+0.35%</b>, TSLA <b>+0.84%</b>, AVGO <b>+0.66%</b> 동반 상승으로 기술주 중심 매수세 유입</li>
+                  <li id="oil-reason-li">🛢️ WTI <b>$102.32 (+5.95%)</b> 급등 — 에너지 섹터 강세로 XOM·CVX 수혜 기대. 반면 인플레이션 우려 재점화로 Fed 긴축 기조 유지 압력 가능. 미 10년물 국채 <b>4.321% (+0.09%)</b> 소폭 상승</li>
+                  <li>💵 달러 인덱스 DXY <b>98.74 (+0.10%)</b> 보합 — 달러 강세 압력 제한적으로 신흥시장 자금 유출 우려 낮음. 유럽 증시 DAX <b>-0.30%</b>, FTSE <b>-0.10%</b>, CAC <b>-0.34%</b> 소폭 하락은 부담</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 3. 잭 켈로그 전략 종목 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                잭 켈로그 20일선 전략 추종 종목
+                <button class="info-icon-btn" onclick="openKelloggModal()" aria-label="전략 설명">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </button>
+              </div>
+              <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">
+                MA20을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 모멘텀 종목만을 선별합니다.
+              </div>
+              <div class="stock-picks">
+
+                <!-- 1. MSFT -->
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">1</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">
+                        MSFT
+                        <span class="ma20-badge">MA20 상향 돌파 — 빅테크 모멘텀 선도주</span>
+                        <span class="golden-badge">★ GOLDEN</span>
+                      </div>
+                      <div class="stock-pick-card__meta">
+                        <span class="stock-pick-card__price">$379.32</span>
+                        <span class="stock-pick-card__change up">+2.28%</span>
+                      </div>
+                      <div class="ma200-gauge">
+                        <span class="ma200-gauge__label">MA20 대비</span>
+                        <div class="ma200-gauge__track">
+                          <div class="ma200-gauge__fill up" style="width:15%"></div>
+                        </div>
+                        <span class="ma200-gauge__pct up">+0.8% 상회</span>
+                      </div>
+                      <div class="stock-pick-card__scenario">
+                        <span class="scenario-tag">MA20 돌파 모멘텀</span>
+                        MA20(376.3) 상향 돌파 신호 발생. 나스닥 기술주 반등 국면에서 빅테크 대장주로 재부각. AI 클라우드(Azure) 성장 지속 기대감과 함께 거래량(10.8M) 급증으로 신호 신뢰도 높음.
+                      </div>
+                    </div>
+                    <div class="stock-pick-mini-chart">
+                      <canvas id="mc-1" width="88" height="52"></canvas>
+                      <div class="stock-pick-mini-chart__legend">
+                        <span class="leg-price">주가</span>
+                        <span class="leg-ma">MA20</span>
+                        <span class="leg-ma200">MA200</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="stock-pick-card__cta">
+                    <span class="cta-label">실행 가이드</span>
+                    시가 +2% 이내 출발 시 진입 유리. 376달러(MA20) 지지 확인 후 홀딩. 손절: 372달러 이탈 시.
+                  </div>
+                </div>
+
+                <!-- 2. NVDA -->
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">2</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">
+                        NVDA
+                        <span class="ma20-badge">MA20 +6.28% 상회 — AI 반도체 대장</span>
+                        <span class="golden-badge">★ GOLDEN</span>
+                      </div>
+                      <div class="stock-pick-card__meta">
+                        <span class="stock-pick-card__price">$189.03</span>
+                        <span class="stock-pick-card__change up">+0.21%</span>
+                      </div>
+                      <div class="ma200-gauge">
+                        <span class="ma200-gauge__label">MA200 대비</span>
+                        <div class="ma200-gauge__track">
+                          <div class="ma200-gauge__fill up" style="width:30%"></div>
+                        </div>
+                        <span class="ma200-gauge__pct up">+4.49% 상회</span>
+                      </div>
+                      <div class="stock-pick-card__scenario">
+                        <span class="scenario-tag">AI 반도체 지속 강세</span>
+                        SOX +0.16% 보합권에서 NVDA 독자 강세 유지. MA20(177.9)·MA200(180.9) 모두 상회하며 탄탄한 기술적 구조. 거래량 46.5M으로 관심 지속. AI 데이터센터 수요 확대 구조적 상승 추세.
+                      </div>
+                    </div>
+                    <div class="stock-pick-mini-chart">
+                      <canvas id="mc-2" width="88" height="52"></canvas>
+                      <div class="stock-pick-mini-chart__legend">
+                        <span class="leg-price">주가</span>
+                        <span class="leg-ma">MA20</span>
+                        <span class="leg-ma200">MA200</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="stock-pick-card__cta">
+                    <span class="cta-label">실행 가이드</span>
+                    시가 186달러 이하 출발 시 분할 진입. 180달러(MA200) 이탈 시 손절. 목표: 195~200달러.
+                  </div>
+                </div>
+
+                <!-- 3. AVGO -->
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">3</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">
+                        AVGO
+                        <span class="ma20-badge">MA20 +15.26% — AI 네트워킹 광폭 상승</span>
+                      </div>
+                      <div class="stock-pick-card__meta">
+                        <span class="stock-pick-card__price">$373.99</span>
+                        <span class="stock-pick-card__change up">+0.66%</span>
+                      </div>
+                      <div class="ma200-gauge">
+                        <span class="ma200-gauge__label">MA200 대비</span>
+                        <div class="ma200-gauge__track">
+                          <div class="ma200-gauge__fill up" style="width:75%"></div>
+                        </div>
+                        <span class="ma200-gauge__pct up">+13.50% 상회</span>
+                      </div>
+                      <div class="stock-pick-card__scenario">
+                        <span class="scenario-tag">AI 네트워킹 광폭 상승</span>
+                        MA20(324.5)·MA200(329.5) 모두 강하게 상회하는 잭 켈로그 이상 조건. AI 네트워킹 반도체(ASIC·AI 스위치) 구조적 수요 급증으로 강한 추세 유지. 단기 조정 시 MA20 부근이 재진입 기회.
+                      </div>
+                    </div>
+                    <div class="stock-pick-mini-chart">
+                      <canvas id="mc-3" width="88" height="52"></canvas>
+                      <div class="stock-pick-mini-chart__legend">
+                        <span class="leg-price">주가</span>
+                        <span class="leg-ma">MA20</span>
+                        <span class="leg-ma200">MA200</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="stock-pick-card__cta">
+                    <span class="cta-label">실행 가이드</span>
+                    시가 370달러 전후 진입. 거래량 130% 이상 확인 시 추가 매수. 손절: 345달러(MA20 직하) 이탈 시.
+                  </div>
+                </div>
+
+                <!-- 4. JPM -->
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">4</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">
+                        JPM
+                        <span class="ma20-badge">MA20 +5.57% — 금리 상승 수혜 금융주</span>
+                      </div>
+                      <div class="stock-pick-card__meta">
+                        <span class="stock-pick-card__price">$309.62</span>
+                        <span class="stock-pick-card__change down">-0.08%</span>
+                      </div>
+                      <div class="ma200-gauge">
+                        <span class="ma200-gauge__label">MA200 대비</span>
+                        <div class="ma200-gauge__track">
+                          <div class="ma200-gauge__fill up" style="width:22%"></div>
+                        </div>
+                        <span class="ma200-gauge__pct up">+3.10% 상회</span>
+                      </div>
+                      <div class="stock-pick-card__scenario">
+                        <span class="scenario-tag">금융주 금리 수혜</span>
+                        MA20(293.3)·MA200(300.3) 모두 상회하며 기술적으로 우호적. WTI 급등에 따른 에너지 대출 수혜 및 금리 소폭 상승 환경에서 NIM(순이자마진) 개선 기대. 금융 섹터 안정적 수급.
+                      </div>
+                    </div>
+                    <div class="stock-pick-mini-chart">
+                      <canvas id="mc-4" width="88" height="52"></canvas>
+                      <div class="stock-pick-mini-chart__legend">
+                        <span class="leg-price">주가</span>
+                        <span class="leg-ma">MA20</span>
+                        <span class="leg-ma200">MA200</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="stock-pick-card__cta">
+                    <span class="cta-label">실행 가이드</span>
+                    시가 308달러 전후 진입. 거래량 150% 이상 확인 후 적극 진입. 손절: 300달러(MA200) 이탈 시.
+                  </div>
+                </div>
+
+              </div><!-- /stock-picks -->
+            </div><!-- /open-section -->
+
+          </div><!-- /accordion-body -->
+        </div><!-- /accordion-item -->
+
+        <div class="t-caption" style="margin-top:16px; text-align:right;">
+          생성: 2026-04-13T22:30:00+09:00 | DailyB v1
+        </div>
+      </div><!-- /layout-grid__main -->
+
+      <!-- ── 오른쪽: 시장 지표 사이드바 ── -->
+      <aside class="layout-grid__right">
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title">시장 지표</span>
+            <span class="live-dot">LIVE</span>
+          </div>
+          <div class="mkt-list">
+
+            <!-- 그룹 1: 한국 시장 · 환율 (미국 브리핑은 한국 먼저) -->
+            <div class="mkt-group" id="mkt-g1">
+              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g1')">
+                <span class="mkt-group-title">한국 시장 · 환율</span>
+                <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+              </div>
+              <div class="mkt-group-body"><div class="mkt-group-body-inner">
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">코스피</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="kospi-val">-</div>
+                      <div class="mkt-chg" id="kospi-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-kospi"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">코스닥</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="kosdaq-val">-</div>
+                      <div class="mkt-chg" id="kosdaq-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-kosdaq"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">달러환율 USD/KRW</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="usd-val">-</div>
+                      <div class="mkt-chg" id="usd-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-usd"></canvas></div>
+                </div>
+              </div></div>
+            </div><!-- /mkt-g1 -->
+
+            <!-- 그룹 2: 미국 시장 -->
+            <div class="mkt-group" id="mkt-g2">
+              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g2')">
+                <span class="mkt-group-title">미국 시장</span>
+                <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+              </div>
+              <div class="mkt-group-body"><div class="mkt-group-body-inner">
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">나스닥</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="nasdaq-val">-</div>
+                      <div class="mkt-chg" id="nasdaq-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">나스닥100 선물</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="nq-val">-</div>
+                      <div class="mkt-chg" id="nq-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-nq"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">다우존스</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="dji-val">-</div>
+                      <div class="mkt-chg" id="dji-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-dji"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">필라델피아 반도체</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="sox-val">-</div>
+                      <div class="mkt-chg" id="sox-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-sox"></canvas></div>
+                </div>
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">달러 인덱스 DXY</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="dxy-val">-</div>
+                      <div class="mkt-chg" id="dxy-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-dxy"></canvas></div>
+                </div>
+              </div></div>
+            </div><!-- /mkt-g2 -->
+
+            <!-- 그룹 3: 변동성 -->
+            <div class="mkt-group" id="mkt-g3">
+              <div class="mkt-group-header" onclick="toggleMktGroup('mkt-g3')">
+                <span class="mkt-group-title">변동성</span>
+                <svg class="mkt-group-chevron" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
+              </div>
+              <div class="mkt-group-body"><div class="mkt-group-body-inner">
+                <div class="mkt-row">
+                  <div class="mkt-row-info">
+                    <span class="mkt-name">WTI 국제유가</span>
+                    <div class="mkt-vals">
+                      <div class="mkt-val" id="oil-val">-</div>
+                      <div class="mkt-chg" id="oil-badge">-</div>
+                    </div>
+                  </div>
+                  <div class="mkt-spark"><canvas id="c-oil"></canvas></div>
+                </div>
+                <div class="fg-block">
+                  <div class="fg-block-header">
+                    <span class="mkt-name">공포탐욕지수</span>
+                    <span class="fg-badge" id="fg-badge">-</span>
+                  </div>
+                  <div class="fg-body">
+                    <div class="fg-gauge-mini"><canvas id="fg-gauge-canvas" style="width:118px;height:64px;display:block;"></canvas></div>
+                    <div class="fg-info">
+                      <div class="fg-now">
+                        <span class="fg-now-val" id="fg-value">-</span>
+                        <span class="fg-now-lbl" id="fg-label">-</span>
+                      </div>
+                      <div class="fg-hist-grid">
+                        <div class="fg-hist-item"><span class="lbl">전일</span><span class="val" id="fg-hist-prev">-</span></div>
+                        <div class="fg-hist-item"><span class="lbl">1주</span><span class="val" id="fg-hist-1w">-</span></div>
+                        <div class="fg-hist-item"><span class="lbl">1달</span><span class="val" id="fg-hist-1m">-</span></div>
+                        <div class="fg-hist-item"><span class="lbl">1년</span><span class="val" id="fg-hist-1y">-</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div></div>
+            </div><!-- /mkt-g3 -->
+
+          </div><!-- /mkt-list -->
+        </div><!-- /right-panel -->
+      </aside><!-- /layout-grid__right -->
+
+    </div><!-- /layout-grid -->
+  </div><!-- /layout-wrapper -->
+
+  <!-- 잭 켈로그 모달 -->
+  <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="kellogg-modal-title">
+      <button class="info-modal__close" onclick="closeKelloggModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="kellogg-modal-title">잭 켈로그 20일선 전략이란?</div>
+      <div class="info-modal__body">
+        <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(MA20) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+        <br>
+        <p><strong>선별 기준</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+          <li>MA20을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+          <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+          <li>최소 <strong>3거래일 이상</strong> MA20 위에서 유지 중인 종목</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ 매매 추천이 아닌 전략 추종 종목 탐색 목적으로 제공됩니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  window.MARKET_DATA = {
+    kospi:  { base: 5858.87, chg:  1.40, data: [5888.78, 5877.85, 5878.09, 5866.39, 5820.84, 5803.89, 5797.96, 5790.64, 5802.56, 5795.35] },
+    kosdaq: { base: 1093.63, chg:  1.64, data: [1092.07, 1092.16, 1094.41, 1095.22, 1098.85, 1098.45, 1098.64, 1097.69, 1100.48, 1099.34] },
+    nasdaq: { base: 22978.32,chg:  0.33, data: [22819.30, 22967.01, 22973.43, 22891.23, 22856.86, 22889.22, 22916.81, 22901.06, 22948.04, 22978.32] },
+    nq:     { base: 25307.75,chg:  0.10, data: [25079.75, 25115.50, 25101.50, 25097.75, 25116.00, 25156.75, 25089.25, 25168.75, 25307.00, 25307.75] },
+    dji:    { base: 47715.20,chg: -0.42, data: [48182.57, 48110.39, 48037.68, 47921.61, 47877.49, 47950.82, 47915.43, 47921.34, 47707.55, 47715.20] },
+    sox:    { base: 8903.67, chg:  0.16, data: [8688.99, 8901.16, 8943.19, 8885.16, 8893.36, 8931.06, 8937.98, 8890.28, 8891.97, 8903.67] },
+    oil:    { base: 102.32,  chg:  5.95, data: [104.32, 103.27, 103.69, 104.61, 104.51, 103.83, 104.25, 103.65, 101.72, 102.32] },
+    usd:    { base: 1485.28, chg:  0.81, data: [1488.09, 1487.56, 1486.47, 1486.68, 1487.12, 1489.38, 1487.67, 1483.91, 1484.78, 1485.28] },
+    dxy:    { base: 98.74,   chg:  0.10, data: [99.01, 99.01, 98.91, 98.98, 98.98, 98.93, 99.03, 98.91, 98.81, 98.74] },
+    fearGreed: { value: 12, prev: 16, "1w": 13, "1m": 16, "1y": 31 },
+    stockCharts: [
+      {
+        id: "mc-1",
+        prices:  [358.96, 370.17, 369.37, 373.46, 372.88, 372.29, 374.33, 373.07, 370.87, 379.315],
+        ma20:    [390.84, 389.15, 387.36, 385.50, 383.69, 381.84, 380.27, 378.68, 377.13, 376.31],
+        ma200:   [476.82, 476.29, 475.78, 475.26, 474.75, 474.22, 473.72, 473.17, 472.59, 472.04]
+      },
+      {
+        id: "mc-2",
+        prices:  [165.17, 174.40, 175.75, 177.39, 177.64, 178.10, 182.08, 183.91, 188.63, 189.03],
+        ma20:    [178.56, 178.28, 177.92, 177.62, 177.61, 177.39, 177.25, 177.15, 177.42, 177.86],
+        ma200:   [179.32, 179.47, 179.64, 179.80, 179.97, 180.13, 180.32, 180.52, 180.72, 180.90]
+      },
+      {
+        id: "mc-3",
+        prices:  [293.41, 309.51, 313.49, 314.55, 314.43, 333.97, 350.63, 354.91, 371.55, 373.99],
+        ma20:    [321.44, 321.25, 321.08, 320.21, 319.44, 318.89, 319.32, 320.03, 321.84, 324.47],
+        ma200:   [325.68, 325.96, 326.29, 326.61, 326.95, 327.37, 327.88, 328.39, 328.94, 329.49]
+      },
+      {
+        id: "mc-4",
+        prices:  [282.33, 292.66, 293.88, 293.10, 295.45, 297.40, 307.97, 310.33, 309.87, 309.62],
+        ma20:    [287.85, 287.55, 287.35, 287.40, 287.77, 288.22, 289.26, 290.47, 291.89, 293.27],
+        ma200:   [298.85, 299.00, 299.17, 299.31, 299.46, 299.61, 299.80, 299.98, 300.15, 300.31]
+      }
+    ]
+  };
+  </script>
+  <script src="../assets/main.js"></script>
+</body>
+</html>
