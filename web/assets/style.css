@@ -1414,12 +1414,13 @@
 
     .info-icon-btn {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 20px; height: 20px; border: none; background: none;
-      cursor: pointer; padding: 0; color: var(--text-tertiary);
-      border-radius: 50%; transition: color 0.15s, background 0.15s;
-      flex-shrink: 0;
+      width: 18px; height: 18px; border: none;
+      background: var(--text-tertiary); color: var(--surface);
+      cursor: pointer; padding: 0;
+      border-radius: 50%; transition: background 0.15s;
+      flex-shrink: 0; font-size: 11px; font-weight: 800; line-height: 1;
     }
-    .info-icon-btn:hover { color: var(--text-secondary); background: var(--line-secondary); }
+    .info-icon-btn:hover { background: var(--text-secondary); }
     /* Prediction guide pill button — i + label text */
     .pred-guide-btn {
       display: inline-flex; align-items: center; gap: 4px;

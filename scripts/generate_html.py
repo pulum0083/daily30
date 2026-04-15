@@ -151,7 +151,7 @@ _FG_BLOCK = """\
                   <div class="fg-block-header">
                     <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
                       공포탐욕지수
-                      <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명" style="font-size:11px;font-weight:700;line-height:1;">!</button>
+                      <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명">!</button>
                     </span>
                     <span class="fg-badge" id="fg-badge">-</span>
                   </div>
@@ -308,7 +308,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         '              <div class="open-section">\n'
         '                <div class="open-section__title">\n'
         f"                  {section_title}\n"
-        '                  <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명" style="font-size:11px;font-weight:700;line-height:1;">i</button>\n'
+        '                  <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">i</button>\n'
         f'                  <span class="section-time">{gen_time} 생성</span>\n'
         "                </div>\n"
         '                <div class="prediction-card">\n'
