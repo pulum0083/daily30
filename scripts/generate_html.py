@@ -378,7 +378,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         '              <div class="open-section">\n'
         '                <div class="open-section__title">\n'
         "                  잭 켈로그 20일선 전략 추종 종목\n"
-        '                  <button class="info-btn" onclick="openKelloggModal()" aria-label="전략 설명">?</button>\n'
+        '                  <button class="info-icon-btn" onclick="openKelloggModal()" aria-label="전략 설명">?</button>\n'
         "                </div>\n"
         '                <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">\n'
         "                  MA20을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 모멘텀 종목만을 선별합니다.\n"
