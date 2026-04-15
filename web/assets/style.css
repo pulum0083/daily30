@@ -1714,13 +1714,25 @@
 .fg-hist-item .val { font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ============================================================
-   Reason Section Title — dynamic hook title
+   Reason Section Title — dynamic hook title (말풍선 아이콘, 파란 바 제거)
    ============================================================ */
 .reason-section-title {
   font-size: 14px !important;
   font-weight: 700 !important;
   color: var(--text-primary) !important;
   letter-spacing: -0.2px;
+  text-transform: none !important;
+}
+.reason-section-title::before {
+  content: '💬';
+  display: inline !important;
+  width: auto !important;
+  height: auto !important;
+  background: none !important;
+  border-radius: 0 !important;
+  font-size: 13px;
+  line-height: 1;
+  margin-right: 2px;
 }
 
 /* ============================================================
