@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page_title }}</title>
+  <link rel="stylesheet" href="{{ asset_prefix }}assets/style.css" />
+</head>
+<body>
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <div class="gnb__logo">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <span class="gnb__title">Daily<span>30'</span></span>
+      </div>
+      <div class="gnb__meta">
+        <span class="gnb__date" id="gnb-date">{{ date_str }} KST {{ gnb_time }}</span>
+        <span class="gnb__badge">{{ badge_text }}</span>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout-wrapper">
+    <div class="layout-grid">
+
+      <!-- 왼쪽: 브리핑 본문 -->
+      <div class="layout-grid__main">
+
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header">
+            <div class="accordion-header__date-label">{{ date_str }}</div>
+            <div class="accordion-header__badges">
+              <span class="pred-badge {{ dir_cls }}">{{ direction }}</span>
+            </div>
+          </div>
+
+          <div class="accordion-body">
+            <div class="accordion-body__inner">
+
+              <!-- 1. 예측 카드 -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  {{ section_title }}
+                  <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">?</button>
+                  <span class="section-time">{{ gen_time }} 생성</span>
+                </div>
+                <div class="prediction-card">
+                  <div class="prediction-summary">
+                    <span class="prediction-label">{{ direction }} 예측 (신뢰도 {{ confidence }}%)</span>
+                  </div>
+                  <!-- PC: Confidence interval bar -->
+                  <div class="pred-confbar">
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-up)">상승</span>
+                        <span style="color:var(--text-secondary)">{{ up_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ up_light }}%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:{{ up_pct }}%"></div>
+                      </div>
+                      <div class="pred-confbar__meta">신뢰구간 {{ confidence }}% → 최대 {{ up_light }}%</div>
+                    </div>
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-down)">하락</span>
+                        <span style="color:var(--text-secondary)">{{ down_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ down_light }}%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:{{ down_pct }}%"></div>
+                      </div>
+                      <div class="pred-confbar__meta">신뢰구간 {{ confidence }}% → 최대 {{ down_light }}%</div>
+                    </div>
+                  </div>
+                  <!-- Mobile: Diverging bar -->
+                  <div class="pred-divbar">
+                    <div class="pred-divbar__header">
+                      <span style="color:var(--status-down)">하락 {{ down_pct }}%</span>
+                      <span style="color:var(--status-up)">상승 {{ up_pct }}%</span>
+                    </div>
+                    <div class="pred-divbar__track">
+                      <div class="pred-divbar__down" style="flex:{{ down_pct }}">
+                        <span class="pred-divbar__pct">{{ down_pct }}%</span>
+                      </div>
+                      <div class="pred-divbar__up" style="flex:{{ up_pct }}">
+                        <span class="pred-divbar__pct">{{ up_pct }}%</span>
+                      </div>
+                    </div>
+                    <div class="pred-divbar__neutral">
+                      <div class="pred-divbar__tick"></div>
+                      <div class="pred-divbar__label">중립(50%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. 예측 근거 -->
+              <div class="open-section">
+                <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+                <div class="reason-block">
+                  <ul>
+                    {% if reasons %}
+                    {% for r in reasons %}
+                    <li>{{ r }}</li>
+                    {% endfor %}
+                    {% else %}
+                    <li>데이터 수집 중...</li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <!-- 3. 잭 켈로그 전략 종목 -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  잭 켈로그 20일선 전략 추종 종목
+                  <button class="info-icon-btn" onclick="openKelloggModal()" aria-label="전략 설명">?</button>
+                </div>
+                <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">
+                  MA20을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 모멘텀 종목만을 선별합니다.
+                </div>
+                <div class="stock-picks">
+                  {% for pick in stock_picks %}
+                  <div class="stock-pick-card">
+                    <div class="stock-pick-card__top">
+                      <div class="stock-pick-card__rank">{{ pick.rank }}</div>
+                      <div class="stock-pick-card__info">
+                        <div class="stock-pick-card__name">
+                          {{ pick.name }}
+                          <span class="ma20-badge">{{ pick.signal }}</span>
+                          {% if pick.golden %}<span class="golden-badge">★ GOLDEN</span>{% endif %}
+                        </div>
+                        <div class="stock-pick-card__meta">
+                          <span class="stock-pick-card__price">{{ pick.price }}</span>
+                          <span class="stock-pick-card__change {{ pick.change_cls }}">{{ pick.change }}</span>
+                        </div>
+                        <div class="ma200-gauge">
+                          <span class="ma200-gauge__label">200일선 대비</span>
+                          <div class="ma200-gauge__track">
+                            <div class="ma200-gauge__fill {{ pick.ma200_cls }}" style="width:{{ pick.ma200_w }}%"></div>
+                          </div>
+                          <span class="ma200-gauge__pct {{ pick.ma200_cls }}">{{ pick.ma200_sign }}{{ pick.ma200_dist }}% {{ pick.ma200_above_below }}</span>
+                        </div>
+                        <div class="stock-pick-card__scenario">
+                          <span class="scenario-tag">{{ pick.scenario_tag }}</span>
+                          {{ pick.scenario }}
+                        </div>
+                      </div>
+                      <div class="stock-pick-mini-chart">
+                        <canvas id="{{ pick.canvas_id }}" width="88" height="52"></canvas>
+                        <div class="stock-pick-mini-chart__legend">
+                          <span class="leg-price">주가</span>
+                          <span class="leg-ma">MA20</span>
+                          <span class="leg-ma200">MA200</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stock-pick-card__cta">
+                      <span class="cta-label">실행 가이드</span>
+                      {{ pick.action_guide }}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+            </div><!-- /accordion-body__inner -->
+          </div><!-- /accordion-body -->
+        </div><!-- /accordion-item -->
+
+        <div class="t-caption" style="margin-top:16px; text-align:right;">
+          생성: {{ generated_at }} | DailyB v1
+        </div>
+      </div><!-- /layout-grid__main -->
+
+      <!-- 오른쪽: 사이드바 -->
+      <aside class="layout-grid__right">
+        {% if accuracy %}
+        <div class="accuracy-standalone">
+          <div class="accuracy-standalone__header">
+            <span class="accuracy-standalone__title">예측 정확도</span>
+            <span class="accuracy-standalone__sub">코스피 시초가</span>
+          </div>
+          <div class="accuracy-standalone__stats">
+            <div class="acc-stat">
+              <span class="acc-val {{ accuracy.last7_pct | acc_cls }}">{{ accuracy.last7_pct }}%</span>
+              <span class="acc-lbl">최근 {{ accuracy.last7_total }}일</span>
+            </div>
+            <div class="acc-divider"></div>
+            <div class="acc-stat">
+              <span class="acc-val {{ accuracy.last30_pct | acc_cls }}">{{ accuracy.last30_pct }}%</span>
+              <span class="acc-lbl">최근 {{ accuracy.last30_total }}일</span>
+            </div>
+          </div>
+          <div class="accuracy-standalone__dots">
+            {% for dot in accuracy.recent_dots %}
+            <span class="acc-dot {{ 'correct' if dot.correct else 'wrong' }}" title="{{ dot.date }} {{ '맞음' if dot.correct else '틀림' }}"></span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title">시장 지표</span>
+            <span class="pub-time">{{ date_str }} {{ gen_time }}</span>
+          </div>
+          <div class="mkt-list">
+            {% for item in sidebar_items %}
+            {% if item.type == 'market' %}
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">{{ item.name }}</span><div class="mkt-vals"><div class="mkt-val" id="{{ item.val_id }}">-</div><div class="mkt-chg" id="{{ item.badge_id }}">-</div></div></div><div class="mkt-spark"><canvas id="{{ item.canvas_id }}"></canvas></div></div>
+            {% elif item.type == 'fg' %}
+            <div class="fg-block">
+              <div class="fg-block-header">
+                <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
+                  공포탐욕지수
+                  <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명">?</button>
+                </span>
+                <span class="fg-badge" id="fg-badge">-</span>
+              </div>
+              <div class="fg-body">
+                <div class="fg-gauge-mini"><canvas id="fg-gauge-canvas" style="width:118px;height:64px;display:block;"></canvas></div>
+                <div class="fg-info">
+                  <div class="fg-now"><span class="fg-now-val" id="fg-value">-</span><span class="fg-now-lbl" id="fg-label">-</span></div>
+                  <div class="fg-hist-grid">
+                    <div class="fg-hist-item"><span class="lbl">전일</span><span class="val" id="fg-hist-prev">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1주</span><span class="val" id="fg-hist-1w">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1달</span><span class="val" id="fg-hist-1m">-</span></div>
+                    <div class="fg-hist-item"><span class="lbl">1년</span><span class="val" id="fg-hist-1y">-</span></div>
+                  </div>
+                  <div id="fg-date" style="font-size:10px;color:var(--text-tertiary);margin-top:4px;"></div>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+          </div><!-- /mkt-list -->
+        </div><!-- /right-panel -->
+      </aside><!-- /layout-grid__right -->
+
+    </div><!-- /layout-grid -->
+  </div><!-- /layout-wrapper -->
+
+  <!-- 잭 켈로그 모달 -->
+  <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="kellogg-modal-title">
+      <button class="info-modal__close" onclick="closeKelloggModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="kellogg-modal-title">잭 켈로그 20일선 전략이란?</div>
+      <div class="info-modal__body">
+        <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(MA20) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+        <br>
+        <p><strong>선별 기준</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+          <li>MA20을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+          <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+          <li>최소 <strong>3거래일 이상</strong> MA20 위에서 유지 중인 종목</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ 매매 추천이 아닌 전략 추종 종목 탐색 목적으로 제공됩니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공포탐욕지수 모달 -->
+  <div class="info-modal-backdrop" id="fg-modal" onclick="if(event.target===this)closeFGModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="fg-modal-title">
+      <button class="info-modal__close" onclick="closeFGModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="fg-modal-title">공포탐욕지수(Fear &amp; Greed Index)</div>
+      <div class="info-modal__body">
+        <p>시장의 7가지 요인을 분석하여 현재 투자자의 심리를 극단적인 공포(0)부터 극단적인 탐욕(100)까지 측정하는 심리지표입니다.</p>
+        <br>
+        <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+          <li><strong style="color:#1D4ED8">0~24</strong> : 극단적 공포(Extreme Fear)</li>
+          <li><strong style="color:#2563EB">25~44</strong> : 공포(Fear)</li>
+          <li><strong style="color:#CA8A04">45~54</strong> : 중립(Neutral)</li>
+          <li><strong style="color:#E03131">55~74</strong> : 탐욕(Greed)</li>
+          <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕(Extreme Greed)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시초가 예측 모달 -->
+  <div class="info-modal-backdrop" id="pred-modal" onclick="if(event.target===this)closePredModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">
+      <button class="info-modal__close" onclick="closePredModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="pred-modal-title">시초가 방향 예측이란?</div>
+      <div class="info-modal__body">
+        <p>미국 선물·지수, 외국인 수급, 반도체 지표, 공포탐욕지수 등 다수의 시장 데이터를 종합하여 AI가 다음 거래일 시초가 방향을 분석한 결과입니다.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+          <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>
+          <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>
+          <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
+          <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  window.MARKET_DATA = {{ market_data_json }};
+  </script>
+  <script src="{{ asset_prefix }}assets/main.js"></script>
+</body>
+</html>
