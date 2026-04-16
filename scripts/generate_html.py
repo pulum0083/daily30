@@ -73,11 +73,24 @@ def get_web_base_url() -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def build_stock_charts(stock_picks: list, candidates: list) -> list:
-    """Build stockCharts array for MARKET_DATA by matching picks to candidates."""
+    """Build stockCharts array for MARKET_DATA by matching picks to candidates.
+
+    picks.name 형식: "AAPL (애플)" 또는 "삼성전자" — 앞 토큰(공백 전)을 ticker로 추출해 매칭.
+    candidates.name/ticker 형식: "AAPL" 또는 "005930" 등 순수 티커.
+    """
     charts = []
     for i, pick in enumerate(stock_picks, 1):
         pick_name = pick.get("name", "")
-        candidate = next((c for c in candidates if c.get("name") == pick_name), None)
+        # "AAPL (애플)" → "AAPL" / "삼성전자" → "삼성전자"
+        pick_ticker = pick_name.split(" ")[0].strip() if pick_name else ""
+
+        candidate = next(
+            (c for c in candidates
+             if c.get("ticker") == pick_ticker
+             or c.get("name") == pick_ticker
+             or c.get("name") == pick_name),
+            None,
+        )
         if candidate:
             charts.append({
                 "id": f"mc-{i}",
