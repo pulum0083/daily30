@@ -390,7 +390,7 @@ def extract_briefing_summary(html_path: Path) -> Optional[dict]:
             "reasons": reasons,
             "reason_title": reason_title,
             "gen_time": gen_time,
-            "url": f"briefings/{name}",
+            "url": f"briefings/{date_str}/",
         }
     except Exception as e:
         print(f"[generate_html] extract_briefing_summary error ({html_path.name}): {e}",
@@ -517,15 +517,73 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Date page builder (clean URL: /briefings/YYYY-MM-DD/)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def save_date_page(data: dict, analysis: dict, date_str: str, briefing_type: str) -> None:
+    """Generate web/briefings/YYYY-MM-DD/index.html (served at /briefings/YYYY-MM-DD/)."""
+    html = build_full_html(data, analysis, date_str, briefing_type, asset_prefix="../../")
+    date_dir = BRIEFINGS_DIR / date_str
+    date_dir.mkdir(parents=True, exist_ok=True)
+    out = date_dir / "index.html"
+    out.write_text(html, encoding="utf-8")
+    print(f"[generate_html] Date page saved → {out}")
+
+
+def backfill_date_pages() -> None:
+    """
+    For each existing YYYY-MM-DD-{type}.html, create/overwrite the date page at
+    web/briefings/YYYY-MM-DD/index.html by reusing the briefing HTML with a
+    corrected asset prefix (../ → ../../).
+    On days with both kospi and us briefings, us (the later run) is used.
+    """
+    date_files: dict = {}
+    for path in sorted(BRIEFINGS_DIR.glob("*-*.html"), reverse=True):
+        name = path.stem
+        parts = name.split("-")
+        if len(parts) < 4:
+            continue
+        date_str = "-".join(parts[:3])
+        btype = parts[3]
+        date_files.setdefault(date_str, {})[btype] = path
+
+    for date_str, type_files in sorted(date_files.items()):
+        # Prefer us (runs later in the day); fall back to kospi
+        source = type_files.get("us") or type_files.get("kospi")
+        if not source:
+            continue
+
+        content = source.read_text(encoding="utf-8")
+        # Fix asset references: one level deeper (../assets → ../../assets)
+        content = content.replace('href="../assets/', 'href="../../assets/')
+        content = content.replace('src="../assets/', 'src="../../assets/')
+
+        date_dir = BRIEFINGS_DIR / date_str
+        date_dir.mkdir(parents=True, exist_ok=True)
+        out = date_dir / "index.html"
+        out.write_text(content, encoding="utf-8")
+        print(f"[generate_html] Backfilled date page → {out}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Generate HTML briefing from analysis JSON")
-    parser.add_argument("--type", choices=["kospi", "us", "weekly"], required=True)
-    parser.add_argument("--data-file", required=True, help="Path to latest_{type}.json")
+    parser.add_argument("--type", choices=["kospi", "us", "weekly"])
+    parser.add_argument("--data-file", help="Path to latest_{type}.json")
     parser.add_argument("--date", default=None, help="Date string (YYYY-MM-DD)")
+    parser.add_argument("--backfill-date-pages", action="store_true",
+                        help="Backfill /briefings/YYYY-MM-DD/ pages from existing HTMLs and exit")
     args = parser.parse_args()
+
+    if args.backfill_date_pages:
+        backfill_date_pages()
+        return
+
+    if not args.type or not args.data_file:
+        parser.error("--type and --data-file are required unless --backfill-date-pages is used")
 
     date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
 
@@ -551,6 +609,10 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html_briefing)
     print(f"[generate_html] Saved → {out_path}")
+
+    # Save date page (clean URL: /briefings/YYYY-MM-DD/)
+    if args.type != "weekly":
+        save_date_page(data, analysis, date_str, args.type)
 
     # Update index.html
     index_path = WEB_DIR / "index.html"
