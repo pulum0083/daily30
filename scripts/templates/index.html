@@ -31,12 +31,14 @@
   <div class="layout-wrapper">
     <div class="layout-grid">
 
-      <!-- 왼쪽: 브리핑 본문 -->
-      <div class="layout-grid__main">
-
-        <div class="accordion-item is-open is-today">
-          <div class="accordion-header">
-            <div class="accordion-header__date-label">{{ date_str }}</div>
+      <!-- ① 최신 브리핑 (펼쳐진 상태) -->
+      <div class="briefing-latest">
+        <div class="accordion-item is-open is-today" data-index="0">
+          <div class="accordion-header" onclick="toggleAccordion(0)">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date-label">{{ date_str }}</div>
+              <span class="acc-type-badge {{ briefing_type }}">{{ badge_text }}</span>
+            </div>
             <div class="accordion-header__badges">
               <span class="pred-badge {{ dir_cls }}">{{ direction }}</span>
             </div>
@@ -56,7 +58,6 @@
                   <div class="prediction-summary">
                     <span class="prediction-label">{{ direction }} 예측 (신뢰도 {{ confidence }}%)</span>
                   </div>
-                  <!-- PC: Confidence interval bar -->
                   <div class="pred-confbar">
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
@@ -81,7 +82,6 @@
                       <div class="pred-confbar__meta">신뢰구간 {{ confidence }}% → 최대 {{ down_light }}%</div>
                     </div>
                   </div>
-                  <!-- Mobile: Diverging bar -->
                   <div class="pred-divbar">
                     <div class="pred-divbar__header">
                       <span style="color:var(--status-down)">하락 {{ down_pct }}%</span>
@@ -179,12 +179,12 @@
           </div><!-- /accordion-body -->
         </div><!-- /accordion-item -->
 
-        <div class="t-caption" style="margin-top:16px; text-align:right;">
+        <div class="t-caption" style="margin-top:12px; text-align:right;">
           생성: {{ generated_at }} | DailyB v1
         </div>
-      </div><!-- /layout-grid__main -->
+      </div><!-- /briefing-latest -->
 
-      <!-- 오른쪽: 사이드바 -->
+      <!-- ② 오른쪽 패널: 예측 성공률 + 시장 지표 (최신 브리핑 기준) -->
       <aside class="layout-grid__right">
         {% if accuracy %}
         <div class="accuracy-standalone">
@@ -244,9 +244,104 @@
             </div>
             {% endif %}
             {% endfor %}
-          </div><!-- /mkt-list -->
-        </div><!-- /right-panel -->
+          </div>
+        </div>
       </aside><!-- /layout-grid__right -->
+
+      <!-- ③ 이전 브리핑 아카이브 (접힌 상태) -->
+      {% if archive_items %}
+      <div class="briefing-archive">
+        {% for item in archive_items %}
+        <div class="accordion-item" data-index="{{ loop.index }}">
+          <div class="accordion-header" onclick="toggleAccordion({{ loop.index }})">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date-label">{{ item.date }}</div>
+              <span class="acc-type-badge {{ item.type }}">{{ item.badge_text }}</span>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="pred-badge {{ item.dir_cls }}">{{ item.direction }}</span>
+            </div>
+          </div>
+
+          <div class="accordion-body">
+            <div class="accordion-body__inner">
+
+              <!-- 예측 카드 (static) -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  {{ item.section_title }}
+                  <span class="section-time">{{ item.gen_time }} 생성</span>
+                </div>
+                <div class="prediction-card">
+                  <div class="prediction-summary">
+                    <span class="prediction-label">{{ item.direction }} 예측 (신뢰도 {{ item.confidence }}%)</span>
+                  </div>
+                  <div class="pred-confbar">
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-up)">상승</span>
+                        <span style="color:var(--text-secondary)">{{ item.up_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ item.up_light }}%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:{{ item.up_pct }}%"></div>
+                      </div>
+                    </div>
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-down)">하락</span>
+                        <span style="color:var(--text-secondary)">{{ item.down_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ item.down_light }}%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:{{ item.down_pct }}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pred-divbar">
+                    <div class="pred-divbar__header">
+                      <span style="color:var(--status-down)">하락 {{ item.down_pct }}%</span>
+                      <span style="color:var(--status-up)">상승 {{ item.up_pct }}%</span>
+                    </div>
+                    <div class="pred-divbar__track">
+                      <div class="pred-divbar__down" style="flex:{{ item.down_pct }}">
+                        <span class="pred-divbar__pct">{{ item.down_pct }}%</span>
+                      </div>
+                      <div class="pred-divbar__up" style="flex:{{ item.up_pct }}">
+                        <span class="pred-divbar__pct">{{ item.up_pct }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 예측 근거 -->
+              {% if item.reasons %}
+              <div class="open-section">
+                <div class="open-section__title reason-section-title">{{ item.reason_title or "핵심 시그널" }}</div>
+                <div class="reason-block">
+                  <ul>
+                    {% for r in item.reasons %}
+                    <li>{{ r }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- 전체 브리핑 링크 -->
+              <div class="open-section" style="padding-bottom:4px;">
+                <a class="archive-detail-link" href="{{ item.url }}">
+                  전체 브리핑 보기 →
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div><!-- /briefing-archive -->
+      {% endif %}
 
     </div><!-- /layout-grid -->
   </div><!-- /layout-wrapper -->

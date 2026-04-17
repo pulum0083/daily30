@@ -1510,17 +1510,30 @@
 .impact-low    { color: #16A34A; font-weight: 600; }
 
 /* ============================================================
-   Layout Grid — 2 column with right sidebar
+   Layout Grid — 3-area: latest / right / archive
+   PC: 2열 (latest+archive 왼쪽, right 오른쪽)
+   모바일: latest → right → archive 순 1열
    ============================================================ */
 .layout-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
-  grid-template-areas: "main right";
+  grid-template-areas:
+    "latest  right"
+    "archive right";
   column-gap: 20px;
   align-items: start;
 }
-.layout-grid__main  { grid-area: main; }
+/* 기존 single-briefing 페이지용 (briefings/*.html) */
+.layout-grid__main  { grid-area: latest; }
 .layout-grid__right { grid-area: right; }
+/* index.html 멀티 아코디언용 */
+.briefing-latest  { grid-area: latest; }
+.briefing-archive {
+  grid-area: archive;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 /* ============================================================
    Right Column — sticky wrapper stacking accuracy + market panels
@@ -1808,14 +1821,16 @@
 .acc-dot.wrong   { background: #E03131; }
 
 /* ============================================================
-   Responsive — Tablet (≤900px): sidebar goes below briefing
+   Responsive — Tablet/Mobile (≤900px)
+   순서: latest → right(예측성공률+시장지표) → archive
    ============================================================ */
 @media (max-width: 900px) {
   .layout-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "main"
-      "right";
+      "latest"
+      "right"
+      "archive";
     row-gap: 16px;
   }
   .layout-grid__right {
@@ -1864,220 +1879,69 @@
 }
 
 /* ============================================================
-   Sidebar — 날짜별 브리핑 목록 (Google AI Studio 스타일)
+   Accordion header layout — date + type badge / pred badge
    ============================================================ */
-:root {
-  --sidebar-width: 256px;
-  --sidebar-bg:    #1C1D20;
-  --sidebar-hover: rgba(255,255,255,.06);
-  --sidebar-active: rgba(255,255,255,.10);
-}
-
-.sidebar {
-  position: fixed;
-  top: var(--gnb-height);
-  left: 0;
-  width: var(--sidebar-width);
-  height: calc(100vh - var(--gnb-height));
-  background: var(--sidebar-bg);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transform: translateX(-100%);
-  transition: transform 0.22s cubic-bezier(.4,0,.2,1);
-  z-index: 90;
-  border-right: 1px solid rgba(255,255,255,.07);
-}
-
-.sidebar.is-open {
-  transform: translateX(0);
-}
-
-.sidebar__header {
+.accordion-header {
   display: flex;
   align-items: center;
-  padding: 16px 16px 10px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  flex-shrink: 0;
-}
-
-.sidebar__title {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255,255,255,.45);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.sidebar__nav {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 0 24px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.15) transparent;
-}
-.sidebar__nav::-webkit-scrollbar { width: 4px; }
-.sidebar__nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
-
-/* Date group */
-.sidebar__group {
-  margin-bottom: 4px;
-}
-
-.sidebar__group-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255,255,255,.35);
-  padding: 10px 16px 4px;
-  letter-spacing: 0.04em;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
   user-select: none;
 }
 
-/* Individual item */
-.sidebar__item {
+.accordion-header__left {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px 8px 16px;
-  cursor: pointer;
-  border-radius: 0;
-  text-decoration: none;
-  color: rgba(255,255,255,.80);
-  transition: background 0.12s;
-  position: relative;
-  min-height: 40px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.sidebar__item:hover {
-  background: var(--sidebar-hover);
+.accordion-header__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.sidebar__item.is-active {
-  background: var(--sidebar-active);
-}
-
-.sidebar__item.is-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  background: var(--color-primary);
-  border-radius: 0 2px 2px 0;
-}
-
-/* Type badge (코스피/US) */
-.sidebar__type-badge {
+/* 아코디언 헤더 내 타입 뱃지 (코스피 / 미국) */
+.acc-type-badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   flex-shrink: 0;
   letter-spacing: 0.02em;
 }
-
-.sidebar__type-badge.kospi {
+.acc-type-badge.kospi {
+  background: rgba(124,58,237,.15);
+  color: #7C3AED;
+}
+.acc-type-badge.us {
+  background: rgba(37,99,235,.15);
+  color: #2563EB;
+}
+html.dark .acc-type-badge.kospi {
   background: rgba(124,58,237,.30);
   color: #C4B5FD;
 }
-
-.sidebar__type-badge.us {
+html.dark .acc-type-badge.us {
   background: rgba(37,99,235,.30);
   color: #93C5FD;
 }
 
-/* Item main text */
-.sidebar__item-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.sidebar__item-date {
-  font-size: 11px;
-  color: rgba(255,255,255,.40);
-  font-weight: 500;
-}
-
-.sidebar__item-label {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: rgba(255,255,255,.82);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Prediction indicator */
-.sidebar__pred {
-  font-size: 11px;
+/* 아카이브 "전체 브리핑 보기" 링크 */
+.archive-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
   font-weight: 600;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 2px;
+  color: var(--color-primary);
+  text-decoration: none;
+  padding: 8px 0 16px;
+  transition: opacity 0.12s;
 }
-
-.sidebar__pred.up   { color: #F87171; }
-.sidebar__pred.down { color: #60A5FA; }
-
-/* ============================================================
-   GNB sidebar toggle button
-   ============================================================ */
-.gnb__sidebar-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  color: rgba(255,255,255,.70);
-  margin-right: 6px;
-  flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
-}
-
-.gnb__sidebar-toggle:hover {
-  background: rgba(255,255,255,.10);
-  color: #fff;
-}
-
-.gnb__sidebar-toggle.is-active {
-  background: rgba(255,255,255,.12);
-  color: #fff;
-}
-
-/* ============================================================
-   Backdrop (mobile overlay)
-   ============================================================ */
-.sidebar-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 89;
-}
-
-.sidebar-backdrop.is-visible {
-  display: block;
-}
-
-/* ============================================================
-   Layout shift when sidebar open (desktop ≥ 900px)
-   ============================================================ */
-@media (min-width: 900px) {
-  body.sidebar-open .layout-wrapper {
-    padding-left: calc(var(--sidebar-width) + 40px);
-    transition: padding-left 0.22s cubic-bezier(.4,0,.2,1);
-  }
-}
-
-@media (max-width: 899px) {
-  /* mobile: sidebar overlays, no layout shift */
-  body.sidebar-open .sidebar-backdrop {
-    display: block;
-  }
-}
+.archive-detail-link:hover { opacity: 0.75; }

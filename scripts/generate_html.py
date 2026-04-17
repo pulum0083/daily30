@@ -10,9 +10,11 @@ Claude only outputs the analysis JSON; this script renders the full page.
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 import pytz
 from jinja2 import Environment, FileSystemLoader
 
@@ -308,6 +310,213 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Archive briefing summary extractor
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extract_briefing_summary(html_path: Path) -> Optional[dict]:
+    """
+    web/briefings/YYYY-MM-DD-{type}.html 파일에서 아코디언 아카이브에 필요한
+    핵심 데이터를 추출한다.
+    반환: {date, type, badge_text, section_title, direction, dir_cls,
+           up_pct, down_pct, confidence, up_light, down_light,
+           reasons, gen_time, url}
+    """
+    try:
+        name = html_path.name  # "2026-04-17-kospi.html"
+        parts = name.replace(".html", "").split("-")
+        date_str = "-".join(parts[:3])
+        btype = parts[3] if len(parts) > 3 else "kospi"
+
+        content = html_path.read_text(encoding="utf-8")
+
+        # --- 예측 방향 ---
+        dir_match = re.search(r'<span class="pred-badge[^"]*">\s*(.*?)\s*</span>', content)
+        direction = dir_match.group(1).strip() if dir_match else "중립"
+        dir_cls = "up" if direction == "상승 우위" else ("down" if direction == "하락 우위" else "")
+
+        # --- 확률 ---
+        up_match = re.search(r'pred-confbar__solid up[^"]*"\s*style="width:(\d+)%"', content)
+        down_match = re.search(r'pred-confbar__solid down[^"]*"\s*style="width:(\d+)%"', content)
+        up_pct = int(up_match.group(1)) if up_match else 50
+        down_pct = int(down_match.group(1)) if down_match else 50
+
+        # --- 신뢰도 ---
+        conf_match = re.search(r'신뢰도\s*(\d+)%\)', content)
+        confidence = int(conf_match.group(1)) if conf_match else 70
+
+        # confidence interval light bar widths
+        up_light = confidence
+        down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
+
+        # --- 예측 근거 ---
+        rb_match = re.search(
+            r'<div class="reason-block">\s*<ul>([\s\S]*?)</ul>', content
+        )
+        reasons: list[str] = []
+        if rb_match:
+            li_matches = re.findall(r"<li>([\s\S]*?)</li>", rb_match.group(1))
+            reasons = [li.strip() for li in li_matches]
+
+        # --- 생성 시각 ---
+        time_match = re.search(r'<span class="section-time">(\d+:\d+) 생성</span>', content)
+        gen_time = time_match.group(1) if time_match else ""
+
+        # --- reason_title ---
+        rt_match = re.search(
+            r'<div class="open-section__title reason-section-title">(.*?)</div>', content
+        )
+        reason_title = rt_match.group(1).strip() if rt_match else ""
+
+        # type-specific labels
+        if btype == "kospi":
+            badge_text = "코스피"
+            section_title = "코스피 시초가 방향 예측"
+        else:
+            badge_text = "미국"
+            section_title = "S&amp;P500 방향 예측"
+
+        return {
+            "date": date_str,
+            "type": btype,
+            "badge_text": badge_text,
+            "section_title": section_title,
+            "direction": direction,
+            "dir_cls": dir_cls,
+            "up_pct": up_pct,
+            "down_pct": down_pct,
+            "confidence": confidence,
+            "up_light": up_light,
+            "down_light": down_light,
+            "reasons": reasons,
+            "reason_title": reason_title,
+            "gen_time": gen_time,
+            "url": f"briefings/{name}",
+        }
+    except Exception as e:
+        print(f"[generate_html] extract_briefing_summary error ({html_path.name}): {e}",
+              file=sys.stderr)
+        return None
+
+
+def load_briefing_summaries(current_date: str, current_type: str, n: int = 10) -> list[dict]:
+    """
+    web/briefings/ 폴더의 HTML 파일을 스캔하여 최신 n개 브리핑 요약을 반환한다.
+    현재 브리핑(current_date-current_type)은 제외 (index에서 latest로 별도 렌더링).
+    반환: 최신순 정렬 리스트
+    """
+    html_files = sorted(
+        BRIEFINGS_DIR.glob("*-*.html"),
+        reverse=True,  # 파일명이 YYYY-MM-DD 형식이라 역순 정렬이 최신순
+    )
+
+    summaries = []
+    for path in html_files:
+        name = path.stem  # "2026-04-17-kospi"
+        parts = name.split("-")
+        if len(parts) < 4:
+            continue
+        date_str = "-".join(parts[:3])
+        btype = parts[3]
+
+        # 현재 브리핑은 건너뜀 (latest로 별도 처리)
+        if date_str == current_date and btype == current_type:
+            continue
+
+        summary = extract_briefing_summary(path)
+        if summary:
+            summaries.append(summary)
+
+        if len(summaries) >= n - 1:  # latest 1개 + archive (n-1)개
+            break
+
+    return summaries
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Multi-accordion index builder
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_index_html_multi(data: dict, analysis: dict, date_str: str,
+                           briefing_type: str) -> str:
+    """
+    최신 브리핑 + 최근 N개 아카이브를 아코디언으로 합쳐 index.html 렌더링.
+    최신 브리핑: 펼쳐진 상태, 완전한 시장 데이터 포함.
+    아카이브 항목: 접힌 상태, 예측 바 + 예측 근거만 표시.
+    """
+    market_data_js = dict(data.get("market_data_js", {}))
+    candidates_key = "kospi_candidates" if briefing_type == "kospi" else "us_candidates"
+    candidates = data.get(candidates_key, [])
+
+    pred = analysis.get("prediction", {})
+    up_pct = pred.get("up_pct", 50)
+    down_pct = pred.get("down_pct", 50)
+    direction = pred.get("direction", "중립")
+    confidence = pred.get("confidence", 70)
+    reasons = analysis.get("reasons", [])[:4]
+    stock_picks_raw = analysis.get("stock_picks", [])
+
+    _fallback_title = {
+        "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
+        "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
+    }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
+    reason_title = analysis.get("reason_title") or _fallback_title
+    generated_at = data.get("generated_at", datetime.now(KST).isoformat())
+    gen_time = fmt_generated_time(generated_at)
+
+    stock_charts = build_stock_charts(stock_picks_raw, candidates)
+    market_data_js["stockCharts"] = stock_charts
+    market_data_json = json.dumps(market_data_js, ensure_ascii=False, indent=2)
+
+    dir_cls = "up" if direction == "상승 우위" else ("down" if direction == "하락 우위" else "")
+    up_light = confidence
+    down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
+
+    if briefing_type == "kospi":
+        page_title = f"Daily30' — 코스피 시초가 브리핑 {date_str}"
+        badge_text = "코스피"
+        gnb_time = "08:30"
+        section_title = "코스피 시초가 방향 예측"
+    else:
+        page_title = f"Daily30' — 미국 시장 브리핑 {date_str}"
+        badge_text = "미국"
+        gnb_time = "22:30"
+        section_title = "S&P500 방향 예측"
+
+    accuracy_stats = compute_accuracy_stats(briefing_type) or None
+    archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+
+    ctx = {
+        "page_title": page_title,
+        "asset_prefix": "",
+        "date_str": date_str,
+        "gen_time": gen_time,
+        "generated_at": generated_at,
+        "badge_text": badge_text,
+        "gnb_time": gnb_time,
+        "section_title": section_title,
+        "briefing_type": briefing_type,
+        "direction": direction,
+        "dir_cls": dir_cls,
+        "confidence": confidence,
+        "up_pct": up_pct,
+        "down_pct": down_pct,
+        "up_light": up_light,
+        "down_light": down_light,
+        "reason_title": reason_title,
+        "reasons": reasons,
+        "stock_picks": build_stock_picks_data(stock_picks_raw),
+        "accuracy": accuracy_stats,
+        "sidebar_items": build_sidebar_data(briefing_type),
+        "market_data_json": market_data_json,
+        "archive_items": archive_items,
+    }
+
+    env = _make_env()
+    template = env.get_template("index.html")
+    return template.render(**ctx)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -331,10 +540,10 @@ def main():
         html_briefing = f"<html><body><h1>Weekly Report {date_str}</h1></body></html>"
         html_index = html_briefing
     else:
-        # briefings/*.html uses "../assets/" prefix
+        # briefings/*.html: 개별 페이지 (변경 없음)
         html_briefing = build_full_html(data, analysis, date_str, args.type, asset_prefix="../")
-        # index.html uses "assets/" prefix
-        html_index = build_full_html(data, analysis, date_str, args.type, asset_prefix="")
+        # index.html: 멀티 아코디언 (최신 + 아카이브)
+        html_index = build_index_html_multi(data, analysis, date_str, args.type)
 
     # Save to briefings archive
     filename = f"{date_str}-{args.type}.html"
