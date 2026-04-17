@@ -1528,7 +1528,12 @@
 .layout-grid__right { grid-area: right; }
 /* index.html 멀티 아코디언용 */
 .briefing-latest  { grid-area: latest; }
-.briefing-archive { grid-area: archive; }
+.briefing-archive {
+  grid-area: archive;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 /* ============================================================
    Right Column — sticky wrapper stacking accuracy + market panels
