@@ -2,8 +2,8 @@ name: Daily 30 Report
 
 on:
   schedule:
-    - cron: "5 23 * * 0-4"    # 코스피 브리핑 KST 08:05 (UTC 23:05 전일)
-    - cron: "15 12 * * 1-5"   # 미국 시장 브리핑 KST 21:15 (UTC 12:15)
+    - cron: "15 23 * * 0-4"   # 코스피 브리핑 KST 08:15 (UTC 23:15 전일) → 지연 감안 08:30 도착
+    - cron: "20 12 * * 1-5"   # 미국 시장 브리핑 KST 21:20 (UTC 12:20) → 지연 감안 21:30 도착
     - cron: "10 0 * * 2-6"    # 코스피 정확도 체크 KST 09:10 (UTC 00:10, 화~토)
   workflow_dispatch:
     inputs:
