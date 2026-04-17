@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily30' — 코스피 시초가 브리핑 2026-04-17</title>
-  <link rel="stylesheet" href="../assets/style.css" />
+  <title>{{ page_title }}</title>
+  <link rel="stylesheet" href="{{ asset_prefix }}assets/style.css" />
 </head>
 <body>
   <nav class="gnb">
@@ -19,8 +19,8 @@
         <span class="gnb__title">Daily<span>30'</span></span>
       </div>
       <div class="gnb__meta">
-        <span class="gnb__date" id="gnb-date">2026-04-17 KST 08:30</span>
-        <span class="gnb__badge">코스피</span>
+        <span class="gnb__date" id="gnb-date">{{ date_str }} KST {{ gnb_time }}</span>
+        <span class="gnb__badge">{{ badge_text }}</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
           <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -32,14 +32,16 @@
   <div class="layout-wrapper">
     <div class="layout-grid">
 
-      <!-- 왼쪽: 브리핑 본문 -->
-      <div class="layout-grid__main">
-
-        <div class="accordion-item is-open is-today">
-          <div class="accordion-header">
-            <div class="accordion-header__date-label">2026-04-17</div>
+      <!-- ① 최신 브리핑 (펼쳐진 상태) -->
+      <div class="briefing-latest">
+        <div class="accordion-item is-open is-today" data-index="0">
+          <div class="accordion-header" onclick="toggleAccordion(0)">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date-label">{{ date_str }}</div>
+              <span class="acc-type-badge {{ briefing_type }}">{{ badge_text }}</span>
+            </div>
             <div class="accordion-header__badges">
-              <span class="pred-badge ">중립</span>
+              <span class="pred-badge {{ dir_cls }}">{{ direction }}</span>
             </div>
           </div>
 
@@ -49,51 +51,49 @@
               <!-- 1. 예측 카드 -->
               <div class="open-section">
                 <div class="open-section__title">
-                  코스피 시초가 방향 예측
+                  {{ section_title }}
                   <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">?</button>
-                  <span class="section-time">22:40 생성</span>
+                  <span class="section-time">{{ gen_time }} 생성</span>
                 </div>
                 <div class="prediction-card">
                   <div class="prediction-summary">
-                    <span class="prediction-label">중립 예측 (신뢰도 70%)</span>
+                    <span class="prediction-label">{{ direction }} 예측 (신뢰도 {{ confidence }}%)</span>
                   </div>
-                  <!-- PC: Confidence interval bar -->
                   <div class="pred-confbar">
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
                         <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">50%</span>
+                        <span style="color:var(--text-secondary)">{{ up_pct }}%</span>
                       </div>
                       <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:50%"></div>
+                        <div class="pred-confbar__light" style="width:{{ up_light }}%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:{{ up_pct }}%"></div>
                       </div>
-                      <div class="pred-confbar__meta">신뢰구간 70% → 최대 70%</div>
+                      <div class="pred-confbar__meta">신뢰구간 {{ confidence }}% → 최대 {{ up_light }}%</div>
                     </div>
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
                         <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">50%</span>
+                        <span style="color:var(--text-secondary)">{{ down_pct }}%</span>
                       </div>
                       <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:50%"></div>
+                        <div class="pred-confbar__light" style="width:{{ down_light }}%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:{{ down_pct }}%"></div>
                       </div>
-                      <div class="pred-confbar__meta">신뢰구간 70% → 최대 70%</div>
+                      <div class="pred-confbar__meta">신뢰구간 {{ confidence }}% → 최대 {{ down_light }}%</div>
                     </div>
                   </div>
-                  <!-- Mobile: Diverging bar -->
                   <div class="pred-divbar">
                     <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 50%</span>
-                      <span style="color:var(--status-up)">상승 50%</span>
+                      <span style="color:var(--status-down)">하락 {{ down_pct }}%</span>
+                      <span style="color:var(--status-up)">상승 {{ up_pct }}%</span>
                     </div>
                     <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
+                      <div class="pred-divbar__down" style="flex:{{ down_pct }}">
+                        <span class="pred-divbar__pct">{{ down_pct }}%</span>
                       </div>
-                      <div class="pred-divbar__up" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
+                      <div class="pred-divbar__up" style="flex:{{ up_pct }}">
+                        <span class="pred-divbar__pct">{{ up_pct }}%</span>
                       </div>
                     </div>
                     <div class="pred-divbar__neutral">
@@ -106,12 +106,16 @@
 
               <!-- 2. 예측 근거 -->
               <div class="open-section">
-                <div class="open-section__title reason-section-title">오를까 내릴까? — 오늘의 핵심 변수</div>
+                <div class="open-section__title reason-section-title">{{ reason_title }}</div>
                 <div class="reason-block">
                   <ul>
-                    
+                    {% if reasons %}
+                    {% for r in reasons %}
+                    <li>{{ r }}</li>
+                    {% endfor %}
+                    {% else %}
                     <li>데이터 수집 중...</li>
-                    
+                    {% endif %}
                   </ul>
                 </div>
               </div>
@@ -128,7 +132,47 @@
                   MA20을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 모멘텀 종목만을 선별합니다.
                 </div>
                 <div class="stock-picks">
-                  
+                  {% for pick in stock_picks %}
+                  <div class="stock-pick-card">
+                    <div class="stock-pick-card__top">
+                      <div class="stock-pick-card__rank">{{ pick.rank }}</div>
+                      <div class="stock-pick-card__info">
+                        <div class="stock-pick-card__name">
+                          {{ pick.name }}
+                          <span class="ma20-badge">{{ pick.signal }}</span>
+                          {% if pick.golden %}<span class="golden-badge">★ GOLDEN</span>{% endif %}
+                        </div>
+                        <div class="stock-pick-card__meta">
+                          <span class="stock-pick-card__price">{{ pick.price }}</span>
+                          <span class="stock-pick-card__change {{ pick.change_cls }}">{{ pick.change }}</span>
+                        </div>
+                        <div class="ma200-gauge">
+                          <span class="ma200-gauge__label">200일선 대비</span>
+                          <div class="ma200-gauge__track">
+                            <div class="ma200-gauge__fill {{ pick.ma200_cls }}" style="width:{{ pick.ma200_w }}%"></div>
+                          </div>
+                          <span class="ma200-gauge__pct {{ pick.ma200_cls }}">{{ pick.ma200_sign }}{{ pick.ma200_dist }}% {{ pick.ma200_above_below }}</span>
+                        </div>
+                        <div class="stock-pick-card__scenario">
+                          <span class="scenario-tag">{{ pick.scenario_tag }}</span>
+                          {{ pick.scenario }}
+                        </div>
+                      </div>
+                      <div class="stock-pick-mini-chart">
+                        <canvas id="{{ pick.canvas_id }}" width="88" height="52"></canvas>
+                        <div class="stock-pick-mini-chart__legend">
+                          <span class="leg-price">주가</span>
+                          <span class="leg-ma">MA20</span>
+                          <span class="leg-ma200">MA200</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="stock-pick-card__cta">
+                      <span class="cta-label">실행 가이드</span>
+                      {{ pick.action_guide }}
+                    </div>
+                  </div>
+                  {% endfor %}
                 </div>
               </div>
 
@@ -136,14 +180,14 @@
           </div><!-- /accordion-body -->
         </div><!-- /accordion-item -->
 
-        <div class="t-caption" style="margin-top:16px; text-align:right;">
-          생성: 2026-04-16T22:40:26.527810+09:00 | DailyB v1
+        <div class="t-caption" style="margin-top:12px; text-align:right;">
+          생성: {{ generated_at }} | DailyB v1
         </div>
-      </div><!-- /layout-grid__main -->
+      </div><!-- /briefing-latest -->
 
-      <!-- 오른쪽: 사이드바 -->
+      <!-- ② 오른쪽 패널: 예측 성공률 + 시장 지표 (최신 브리핑 기준) -->
       <aside class="layout-grid__right">
-        
+        {% if accuracy %}
         <div class="accuracy-standalone">
           <div class="accuracy-standalone__header">
             <span class="accuracy-standalone__title">예측 정확도</span>
@@ -151,60 +195,32 @@
           </div>
           <div class="accuracy-standalone__stats">
             <div class="acc-stat">
-              <span class="acc-val acc-good">83%</span>
-              <span class="acc-lbl">최근 6일</span>
+              <span class="acc-val {{ accuracy.last7_pct | acc_cls }}">{{ accuracy.last7_pct }}%</span>
+              <span class="acc-lbl">최근 {{ accuracy.last7_total }}일</span>
             </div>
             <div class="acc-divider"></div>
             <div class="acc-stat">
-              <span class="acc-val acc-good">83%</span>
-              <span class="acc-lbl">최근 6일</span>
+              <span class="acc-val {{ accuracy.last30_pct | acc_cls }}">{{ accuracy.last30_pct }}%</span>
+              <span class="acc-lbl">최근 {{ accuracy.last30_total }}일</span>
             </div>
           </div>
           <div class="accuracy-standalone__dots">
-            
-            <span class="acc-dot correct" title="2026-04-07 맞음"></span>
-            
-            <span class="acc-dot wrong" title="2026-04-08 틀림"></span>
-            
-            <span class="acc-dot correct" title="2026-04-09 맞음"></span>
-            
-            <span class="acc-dot correct" title="2026-04-10 맞음"></span>
-            
-            <span class="acc-dot correct" title="2026-04-16 맞음"></span>
-            
-            <span class="acc-dot correct" title="2026-04-17 맞음"></span>
-            
+            {% for dot in accuracy.recent_dots %}
+            <span class="acc-dot {{ 'correct' if dot.correct else 'wrong' }}" title="{{ dot.date }} {{ '맞음' if dot.correct else '틀림' }}"></span>
+            {% endfor %}
           </div>
         </div>
-        
+        {% endif %}
         <div class="right-panel">
           <div class="panel-header">
             <span class="section-title">시장 지표</span>
-            <span class="pub-time">2026-04-17 22:40</span>
+            <span class="pub-time">{{ date_str }} {{ gen_time }}</span>
           </div>
           <div class="mkt-list">
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥</span><div class="mkt-vals"><div class="mkt-val" id="nasdaq-val">-</div><div class="mkt-chg" id="nasdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div></div>
-            
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">다우존스</span><div class="mkt-vals"><div class="mkt-val" id="dji-val">-</div><div class="mkt-chg" id="dji-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dji"></canvas></div></div>
-            
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val" id="sox-val">-</div><div class="mkt-chg" id="sox-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-sox"></canvas></div></div>
-            
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러 인덱스 DXY</span><div class="mkt-vals"><div class="mkt-val" id="dxy-val">-</div><div class="mkt-chg" id="dxy-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-dxy"></canvas></div></div>
-            
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">WTI 국제유가</span><div class="mkt-vals"><div class="mkt-val" id="oil-val">-</div><div class="mkt-chg" id="oil-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-oil"></canvas></div></div>
-            
-            
-            
+            {% for item in sidebar_items %}
+            {% if item.type == 'market' %}
+            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">{{ item.name }}</span><div class="mkt-vals"><div class="mkt-val" id="{{ item.val_id }}">-</div><div class="mkt-chg" id="{{ item.badge_id }}">-</div></div></div><div class="mkt-spark"><canvas id="{{ item.canvas_id }}"></canvas></div></div>
+            {% elif item.type == 'fg' %}
             <div class="fg-block">
               <div class="fg-block-header">
                 <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
@@ -227,11 +243,106 @@
                 </div>
               </div>
             </div>
-            
-            
-          </div><!-- /mkt-list -->
-        </div><!-- /right-panel -->
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
       </aside><!-- /layout-grid__right -->
+
+      <!-- ③ 이전 브리핑 아카이브 (접힌 상태) -->
+      {% if archive_items %}
+      <div class="briefing-archive">
+        {% for item in archive_items %}
+        <div class="accordion-item" data-index="{{ loop.index }}">
+          <div class="accordion-header" onclick="toggleAccordion({{ loop.index }})">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date-label">{{ item.date }}</div>
+              <span class="acc-type-badge {{ item.type }}">{{ item.badge_text }}</span>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="pred-badge {{ item.dir_cls }}">{{ item.direction }}</span>
+            </div>
+          </div>
+
+          <div class="accordion-body">
+            <div class="accordion-body__inner">
+
+              <!-- 예측 카드 (static) -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  {{ item.section_title }}
+                  <span class="section-time">{{ item.gen_time }} 생성</span>
+                </div>
+                <div class="prediction-card">
+                  <div class="prediction-summary">
+                    <span class="prediction-label">{{ item.direction }} 예측 (신뢰도 {{ item.confidence }}%)</span>
+                  </div>
+                  <div class="pred-confbar">
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-up)">상승</span>
+                        <span style="color:var(--text-secondary)">{{ item.up_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ item.up_light }}%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:{{ item.up_pct }}%"></div>
+                      </div>
+                    </div>
+                    <div class="pred-confbar__row">
+                      <div class="pred-confbar__header">
+                        <span style="color:var(--status-down)">하락</span>
+                        <span style="color:var(--text-secondary)">{{ item.down_pct }}%</span>
+                      </div>
+                      <div class="pred-confbar__track">
+                        <div class="pred-confbar__light" style="width:{{ item.down_light }}%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:{{ item.down_pct }}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pred-divbar">
+                    <div class="pred-divbar__header">
+                      <span style="color:var(--status-down)">하락 {{ item.down_pct }}%</span>
+                      <span style="color:var(--status-up)">상승 {{ item.up_pct }}%</span>
+                    </div>
+                    <div class="pred-divbar__track">
+                      <div class="pred-divbar__down" style="flex:{{ item.down_pct }}">
+                        <span class="pred-divbar__pct">{{ item.down_pct }}%</span>
+                      </div>
+                      <div class="pred-divbar__up" style="flex:{{ item.up_pct }}">
+                        <span class="pred-divbar__pct">{{ item.up_pct }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 예측 근거 -->
+              {% if item.reasons %}
+              <div class="open-section">
+                <div class="open-section__title reason-section-title">{{ item.reason_title or "핵심 시그널" }}</div>
+                <div class="reason-block">
+                  <ul>
+                    {% for r in item.reasons %}
+                    <li>{{ r }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- 전체 브리핑 링크 -->
+              <div class="open-section" style="padding-bottom:4px;">
+                <a class="archive-detail-link" href="{{ item.url }}">
+                  전체 브리핑 보기 →
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div><!-- /briefing-archive -->
+      {% endif %}
 
     </div><!-- /layout-grid -->
   </div><!-- /layout-wrapper -->
@@ -303,163 +414,8 @@
   </div>
 
   <script>
-  window.MARKET_DATA = {
-  "kospi": {
-    "base": 6226.05,
-    "chg": 2.21,
-    "data": [
-      6148.3398,
-      6147.2998,
-      6141.71,
-      6103.6899,
-      6194.48,
-      6212.9702,
-      6212.9502,
-      6204.6699,
-      6187.7598,
-      6207.21
-    ]
-  },
-  "kosdaq": {
-    "base": 1162.97,
-    "chg": 0.91,
-    "data": [
-      1148.6899,
-      1151.9301,
-      1155.97,
-      1148.0601,
-      1165.97,
-      1166.3,
-      1165.95,
-      1168.11,
-      1161.46,
-      1161.7
-    ]
-  },
-  "nasdaq": {
-    "base": 23988.91,
-    "chg": -0.11,
-    "data": [
-      23620.6074,
-      23634.1074,
-      23823.2617,
-      23874.9844,
-      23906.9492,
-      23868.4199,
-      23916.9512,
-      23985.0488,
-      24010.7812,
-      23988.9082
-    ]
-  },
-  "nq": {
-    "base": 26417.75,
-    "chg": 0.2,
-    "data": [
-      26434.5,
-      26455.0,
-      26480.75,
-      26460.0,
-      26440.5,
-      26453.25,
-      26406.0,
-      26418.25,
-      26402.0,
-      26411.75
-    ]
-  },
-  "dji": {
-    "base": 48644.63,
-    "chg": 0.37,
-    "data": [
-      48562.4414,
-      48535.3906,
-      48447.9297,
-      48373.4297,
-      48317.0703,
-      48376.1719,
-      48417.4492,
-      48499.8789,
-      48460.5508,
-      48646.1719
-    ]
-  },
-  "sox": {
-    "base": 9205.15,
-    "chg": -0.37,
-    "data": [
-      9224.8623,
-      9222.4932,
-      9206.3926,
-      9200.8027,
-      9156.4775,
-      9096.2051,
-      9130.2725,
-      9190.2266,
-      9237.6084,
-      9205.1475
-    ]
-  },
-  "oil": {
-    "base": 88.91,
-    "chg": -2.61,
-    "data": [
-      91.77,
-      91.56,
-      91.58,
-      89.34,
-      89.25,
-      89.47,
-      88.79,
-      88.6,
-      89.28,
-      88.91
-    ]
-  },
-  "usd": {
-    "base": 1476.38,
-    "chg": 0.47,
-    "data": [
-      1471.98,
-      1471.54,
-      1472.48,
-      1473.3199,
-      1474.86,
-      1476.6,
-      1476.92,
-      1476.39,
-      1475.3101,
-      1476.5699
-    ]
-  },
-  "dxy": {
-    "base": 98.2,
-    "chg": 0.14,
-    "data": [
-      97.965,
-      98.014,
-      98.005,
-      98.099,
-      98.156,
-      98.208,
-      98.209,
-      98.163,
-      98.19,
-      98.196
-    ]
-  },
-  "fearGreed": {
-    "value": 21,
-    "prev": 23,
-    "1w": 16,
-    "1m": 26,
-    "1y": 33,
-    "timestamp": "1776384000",
-    "classification": "Extreme Fear"
-  },
-  "stockCharts": []
-};
+  window.MARKET_DATA = {{ market_data_json }};
   </script>
-  <script src="../assets/main.js"></script>
+  <script src="{{ asset_prefix }}assets/main.js"></script>
 </body>
 </html>
