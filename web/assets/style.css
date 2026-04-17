@@ -1891,6 +1891,14 @@
   gap: 8px;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+}
+
+.accordion-header__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 /* 아코디언 헤더 내 타입 뱃지 (코스피 / 미국) */
