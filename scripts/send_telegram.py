@@ -89,7 +89,7 @@ def build_fallback_message(briefing_type: str) -> str:
         return (
             f"{label} 브리핑 | {today}\n\n"
             f"브리핑이 생성되었습니다.\n\n"
-            f"🔗 상세 분석 → {web_url}/briefings/{date_slug}-{briefing_type}.html"
+            f"🔗 상세 분석 → {web_url}/briefings/{'ko' if briefing_type == 'kospi' else briefing_type}/{date_slug}/"
         )
 
     with open(analysis_file, encoding="utf-8") as f:
@@ -110,15 +110,15 @@ def build_fallback_message(briefing_type: str) -> str:
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 시초가 브리핑 | {today}"
         pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
-        link = f"{web_url}/briefings/{date_slug}-kospi.html"
+        link = f"{web_url}/briefings/ko/{date_slug}/"
     elif briefing_type == "us":
         header = f"🇺🇸 미국 시장 브리핑 | {today}"
         pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
-        link = f"{web_url}/briefings/{date_slug}-us.html"
+        link = f"{web_url}/briefings/us/{date_slug}/"
     else:
         header = f"📋 주간 리포트 | {today}"
         pred_line = ""
-        link = f"{web_url}/briefings/{date_slug}-weekly.html"
+        link = f"{web_url}/briefings/weekly/{date_slug}/"
 
     bullet_lines = "\n".join(
         f"• {strip_html(r)}" for r in reasons[:3]

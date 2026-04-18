@@ -58,7 +58,7 @@ def main():
         "up_pct":     pred.get("up_pct", 0),
         "confidence": pred.get("confidence", 0),
         "reasons":    reasons,
-        "link":       f"{WEB_BASE}/briefings/{date_slug}-{args.type}.html",
+        "link":       f"{WEB_BASE}/briefings/{'ko' if args.type == 'kospi' else args.type}/{date_slug}/",
         "updated_at": datetime.now(kst).strftime("%Y-%m-%d %H:%M KST"),
     }
 
