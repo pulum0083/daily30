@@ -33,5 +33,10 @@
   "anthropic": {
     "_comment": "Anthropic Console에서 발급. call_claude.py가 직접 API 호출 시 사용. 환경변수 ANTHROPIC_API_KEY 우선.",
     "api_key": "YOUR_ANTHROPIC_API_KEY_HERE"
+  },
+
+  "subscribe": {
+    "_comment": "scripts/email_subscribe.gs를 Apps Script 웹앱으로 배포 후 URL 입력. google_sheets.spreadsheet_id와 동일한 시트 사용.",
+    "apps_script_url": "YOUR_APPS_SCRIPT_DEPLOY_URL_HERE"
   }
 }

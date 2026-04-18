@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily30' — 매일 아침, 시장이 먼저 보인다</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    /* ============================================================
+       Landing · scroll-stage layout
+    ============================================================ */
+
+    :root {
+      --stage-sidebar-width: clamp(340px, 28vw, 400px);
+      --stage-gap: 0px;
+      --chapter-accent: var(--color-primary);
+    }
+
+    html, body { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    /* GNB minor tune for landing */
+    .gnb { border-bottom: 1px solid rgba(255,255,255,.06); }
+    .gnb__title-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      margin-left: 6px;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    /* ── Page shell ── */
+    .stage-shell {
+      display: grid;
+      grid-template-columns: 1fr var(--stage-sidebar-width);
+      align-items: start;
+    }
+
+    /* ============================================================
+       LEFT · scroll stage
+       Pattern: a long scroll track, with an absolutely-positioned
+       sticky canvas that swaps chapter content by scroll progress.
+    ============================================================ */
+    .scroll-track {
+      position: relative;
+    }
+
+    /* Sticky canvas where chapters render */
+    .stage-canvas {
+      position: sticky;
+      top: var(--gnb-height);
+      height: calc(100vh - var(--gnb-height));
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .stage-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 clamp(32px, 6vw, 96px);
+    }
+
+    /* Chapter (one per section) */
+    .chapter {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.15fr);
+      gap: clamp(24px, 4vw, 56px);
+      align-items: center;
+      padding: clamp(24px, 5vh, 56px) clamp(24px, 5vw, 80px);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.6s cubic-bezier(.2,.8,.2,1);
+      pointer-events: none;
+    }
+    .chapter.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .chapter__text {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 440px;
+    }
+
+    .chapter__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--chapter-accent);
+    }
+    .chapter__eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1.5px;
+      background: currentColor;
+    }
+
+    .chapter__title {
+      font-size: clamp(32px, 4.2vw, 56px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+      text-wrap: balance;
+    }
+    .chapter__title em {
+      font-style: normal;
+      color: var(--chapter-accent);
+    }
+
+    .chapter__body {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      text-wrap: pretty;
+      max-width: 420px;
+    }
+
+    .chapter__meta {
+      display: flex;
+      gap: 28px;
+      margin-top: 8px;
+    }
+    .chapter__meta > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .chapter__meta-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .chapter__meta-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .chapter__visual {
+      position: relative;
+      width: 100%;
+      height: min(560px, 72vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0; /* allow grid child to shrink properly */
+    }
+    .chapter__visual > * {
+      flex-shrink: 0; /* prevent card content from being squeezed */
+    }
+
+    /* ── Scroll triggers (invisible full-height sections) ── */
+    .triggers {
+      position: relative;
+    }
+    .trigger {
+      height: 110vh;
+      pointer-events: none;
+    }
+    .trigger:first-child { height: 100vh; }
+
+    /* ============================================================
+       Chapter visuals
+    ============================================================ */
+
+    /* 0 · Hero — brand orb */
+    .hero-stack {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-orb {
+      position: relative;
+      width: min(460px, 60vh);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 70% 75%, rgba(124,58,237,.45), rgba(124,58,237,0) 60%),
+        linear-gradient(135deg, #006EFF 0%, #7C3AED 100%);
+      box-shadow:
+        0 40px 80px rgba(0,110,255,.25),
+        0 20px 40px rgba(124,58,237,.18),
+        inset 0 2px 0 rgba(255,255,255,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 8s ease-in-out infinite;
+    }
+    html.dark .hero-orb {
+      box-shadow:
+        0 40px 100px rgba(0,110,255,.35),
+        0 20px 40px rgba(124,58,237,.25),
+        inset 0 2px 0 rgba(255,255,255,.2);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+    .hero-orb__inner {
+      font-size: clamp(54px, 7vw, 96px);
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.04em;
+      text-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+    .hero-orb__inner sup {
+      font-size: 0.55em;
+      vertical-align: top;
+      opacity: 0.85;
+      font-weight: 700;
+    }
+
+    .hero-ring {
+      position: absolute;
+      border: 1.5px solid rgba(0,110,255,.18);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    html.dark .hero-ring { border-color: rgba(59,139,255,.2); }
+    .hero-ring.r1 { width: 120%; aspect-ratio: 1; animation: spin 40s linear infinite; }
+    .hero-ring.r2 { width: 145%; aspect-ratio: 1; border-style: dashed; animation: spin 80s linear infinite reverse; opacity: 0.5; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 1 · Prediction — confidence bars */
+    .pred-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow-20);
+    }
+    .pred-visual__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .pred-visual__title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .pred-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--status-up-bg);
+      color: var(--status-up);
+    }
+    .pred-value {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+      color: var(--status-up);
+    }
+    .pred-value span { font-size: 22px; color: var(--text-tertiary); margin-left: 2px; font-weight: 700; }
+    .pred-sub {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 22px;
+    }
+    .pred-bars { display: flex; flex-direction: column; gap: 14px; }
+    .pred-bar-row { }
+    .pred-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pred-bar-track {
+      height: 8px;
+      background: var(--grey-50);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .pred-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      width: 0;
+      transition: width 1.1s cubic-bezier(.2,.8,.2,1);
+    }
+    .pred-bar-fill.up   { background: linear-gradient(90deg, #E03131, #FF6A6A); }
+    .pred-bar-fill.down { background: linear-gradient(90deg, #2775ED, #60A3FF); }
+
+    .pred-confidence {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px dashed var(--line-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pred-confidence__label { font-size: 12px; color: var(--text-tertiary); }
+    .pred-confidence__ring {
+      position: relative;
+      width: 44px; height: 44px;
+    }
+    .pred-confidence__ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .pred-confidence__ring circle { fill: none; stroke-width: 4; }
+    .pred-confidence__ring .track { stroke: var(--grey-50); }
+    .pred-confidence__ring .fill  {
+      stroke: var(--chapter-accent);
+      stroke-dasharray: 126;
+      stroke-dashoffset: 126;
+      transition: stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1);
+      stroke-linecap: round;
+    }
+    .pred-confidence__pct {
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* 2 · Schedule — timeline */
+    .sched-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sched-row {
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 18px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-10);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .is-active .sched-row { opacity: 1; transform: translateX(0); }
+    .is-active .sched-row:nth-child(1) { transition-delay: 0.1s; }
+    .is-active .sched-row:nth-child(2) { transition-delay: 0.2s; }
+    .is-active .sched-row:nth-child(3) { transition-delay: 0.3s; }
+
+    .sched-row__time {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      min-width: 76px;
+    }
+    .sched-row__dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sched-row__dot.kospi  { background: #E03131; box-shadow: 0 0 0 4px rgba(224,49,49,.15); }
+    .sched-row__dot.us     { background: #2775ED; box-shadow: 0 0 0 4px rgba(39,117,237,.15); }
+    .sched-row__dot.weekly { background: #7C3AED; box-shadow: 0 0 0 4px rgba(124,58,237,.15); }
+
+    .sched-row__title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .sched-row__desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .sched-row__tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 100px;
+      background: var(--surface-secondary);
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+    }
+
+    /* 3 · Accuracy — dial */
+    .acc-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 28px;
+      padding: 40px 36px 32px;
+      box-shadow: var(--shadow-20);
+      text-align: center;
+    }
+    .acc-dial {
+      position: relative;
+      width: 260px; height: 140px;
+      margin: 0 auto 16px;
+    }
+    .acc-dial svg { width: 100%; height: 100%; }
+    .acc-dial__track { fill: none; stroke: var(--grey-50); stroke-width: 14; stroke-linecap: round; }
+    .acc-dial__fill {
+      fill: none;
+      stroke: url(#accGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1);
+    }
+    .acc-value {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .acc-value span {
+      font-size: 24px;
+      color: var(--text-tertiary);
+      font-weight: 700;
+    }
+    .acc-sub {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+    .acc-legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line-secondary);
+    }
+    .acc-legend__item { display: flex; flex-direction: column; gap: 2px; }
+    .acc-legend__value { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+    .acc-legend__label { font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* 3 · Kellogg strategy — stock picks */
+    .kel-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .kel-card {
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-10);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      transform: translateX(-16px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .is-active .kel-card { opacity: 1; transform: translateX(0); }
+    .is-active .kel-card:nth-child(2) { transition-delay: 0.08s; }
+    .is-active .kel-card:nth-child(3) { transition-delay: 0.16s; }
+    .is-active .kel-card:nth-child(4) { transition-delay: 0.24s; }
+    .is-active .kel-card:nth-child(5) { transition-delay: 0.32s; }
+
+    .kel-card__rank {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .kel-card__info { flex: 1; min-width: 0; }
+    .kel-card__name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .kel-card__ticker {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .kel-card__company {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .kel-card__tag {
+      display: inline-block;
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 100px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      letter-spacing: 0.04em;
+    }
+    .kel-card__tag.golden {
+      background: #FFF4D6;
+      color: #C28A00;
+    }
+    html.dark .kel-card__tag.golden { background: rgba(255,200,60,.15); color: #FFCE5F; }
+    .kel-card__meta {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .kel-card__change.up   { color: var(--status-up);   font-weight: 700; }
+    .kel-card__change.down { color: var(--status-down); font-weight: 700; }
+    .kel-card__spark {
+      flex-shrink: 0;
+      width: 64px;
+      height: 36px;
+    }
+
+    .kel-footnote {
+      margin-top: 6px;
+      padding: 14px 16px;
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+    .kel-footnote b { color: var(--text-secondary); }
+
+    /* 4 · Data sources — floating chips */
+    .src-visual {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+    }
+    .src-chip {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 14px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow-20);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.55s, transform 0.55s;
+    }
+    .is-active .src-chip { opacity: 1; transform: translateY(0); }
+    .src-chip__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--chapter-accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--chapter-accent) 25%, transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--chapter-accent) 25%, transparent); }
+      50%      { box-shadow: 0 0 0 7px color-mix(in oklab, var(--chapter-accent) 10%, transparent); }
+    }
+    .src-chip__meta {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+    }
+
+    .src-chip:nth-child(1)  { top: 8%;  left: 6%;  transition-delay: 0.05s; }
+    .src-chip:nth-child(2)  { top: 18%; right: 4%; transition-delay: 0.12s; }
+    .src-chip:nth-child(3)  { top: 36%; left: 20%; transition-delay: 0.19s; }
+    .src-chip:nth-child(4)  { top: 48%; right: 18%; transition-delay: 0.26s; }
+    .src-chip:nth-child(5)  { top: 68%; left: 8%;  transition-delay: 0.33s; }
+    .src-chip:nth-child(6)  { top: 80%; right: 10%; transition-delay: 0.40s; }
+    .src-chip:nth-child(7)  { top: 60%; left: 44%; transition-delay: 0.47s; }
+
+    .src-core {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--chapter-accent), #7C3AED);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 20px 60px rgba(0,110,255,.25);
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      z-index: 1;
+    }
+    .src-core::before,
+    .src-core::after {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      border: 1px dashed var(--line-primary);
+      border-radius: 50%;
+      animation: spin 30s linear infinite;
+      opacity: 0.4;
+    }
+    .src-core::after { inset: -80px; animation-duration: 50s; animation-direction: reverse; }
+
+    /* 5 · Channels — device mocks */
+    .ch-visual {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+      width: 100%;
+      min-width: 380px;
+      max-width: 560px;
+    }
+    .ch-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-20);
+      position: relative;
+    }
+    .ch-card__header {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .ch-card__icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .ch-card__icon.tg { background: #E8F4FF; color: #0088CC; }
+    .ch-card__icon.em { background: #FFF3E0; color: #E67700; }
+    html.dark .ch-card__icon.tg { background: rgba(0,136,204,.15); color: #5BAEFF; }
+    html.dark .ch-card__icon.em { background: rgba(230,119,0,.15); color: #FFB246; }
+    .ch-card__title { font-size: 13px; font-weight: 700; }
+    .ch-card__sub   { font-size: 11px; color: var(--text-tertiary); }
+
+    .ch-msg {
+      background: var(--surface-secondary);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      border: 1px solid var(--line-secondary);
+    }
+    .ch-msg b { color: var(--status-up); }
+    .ch-msg__time {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .ch-email-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .ch-email-row:last-child { border-bottom: none; }
+    .ch-email-row__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--chapter-accent);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .ch-email-row__title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .ch-email-row__preview { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; }
+
+    /* ============================================================
+       Scroll copy track
+       Each chapter has scroll copy on the LEFT of chapter area.
+       But since stage is sticky, we only need an overlay at top.
+    ============================================================ */
+    .scroll-progress {
+      position: fixed;
+      top: calc(var(--gnb-height) + 20px);
+      left: 20px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .scroll-progress__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--line-primary);
+      transition: background 0.3s, transform 0.3s;
+    }
+    .scroll-progress__dot.is-active {
+      background: var(--chapter-accent);
+      transform: scale(1.5);
+    }
+
+    /* ============================================================
+       RIGHT SIDEBAR — Subscribe
+    ============================================================ */
+    .subscribe-sidebar {
+      position: sticky;
+      top: var(--gnb-height);
+      height: calc(100vh - var(--gnb-height));
+      background: var(--surface);
+      border-left: 1px solid var(--line-secondary);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sub-head {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .sub-head__eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--chapter-accent);
+      margin-bottom: 8px;
+    }
+    .sub-head__title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      text-wrap: balance;
+    }
+    .sub-head__desc {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      line-height: 1.55;
+    }
+
+    /* Tabs */
+    .sub-tabs {
+      display: flex;
+      padding: 0 28px;
+      margin-top: 20px;
+      gap: 4px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .sub-tab {
+      flex: 1;
+      padding: 14px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-align: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .sub-tab:hover { color: var(--text-primary); }
+    .sub-tab.is-active {
+      color: var(--chapter-accent);
+      border-bottom-color: var(--chapter-accent);
+    }
+
+    .sub-tab svg { width: 15px; height: 15px; }
+
+    /* Panels */
+    .sub-panel {
+      padding: 24px 28px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sub-panel.is-active { display: flex; }
+
+    .sub-panel__benefit {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+    }
+    .sub-panel__benefit-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .sub-panel__benefit-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+    .sub-panel__benefit-text b { color: var(--text-primary); }
+
+    /* Form */
+    .sub-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .sub-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .sub-input {
+      width: 100%;
+      padding: 13px 15px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface-secondary);
+      border: 1.5px solid var(--line-secondary);
+      border-radius: 10px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .sub-input:focus {
+      border-color: var(--chapter-accent);
+      background: var(--surface);
+    }
+    .sub-input::placeholder { color: var(--text-tertiary); }
+
+    .sub-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--chapter-accent);
+      color: white;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: background 0.15s, transform 0.08s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .sub-btn:hover  { background: var(--color-primary-hover); }
+    .sub-btn:active { transform: scale(0.985); }
+    .sub-btn.is-done { background: #1AAA55; pointer-events: none; }
+
+    .sub-btn svg { width: 16px; height: 16px; }
+
+    .sub-note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    /* Schedule reminder */
+    .sub-schedule {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sub-schedule__title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .sub-schedule__row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .sub-schedule__time {
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      min-width: 42px;
+    }
+    .sub-schedule__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sub-schedule__dot.kospi  { background: #E03131; }
+    .sub-schedule__dot.us     { background: #2775ED; }
+    .sub-schedule__dot.weekly { background: #7C3AED; }
+
+    /* Footer inside sidebar */
+    .sub-foot {
+      margin-top: auto;
+      padding: 20px 28px;
+      border-top: 1px solid var(--line-secondary);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .sub-foot a {
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: var(--line-primary);
+    }
+
+    /* ============================================================
+       Responsive
+    ============================================================ */
+    /* Tighten chapter layout on narrow desktop widths */
+    @media (max-width: 1280px) {
+      .chapter {
+        grid-template-columns: minmax(260px, 0.9fr) minmax(380px, 1.2fr);
+        gap: clamp(20px, 2.5vw, 36px);
+        padding: clamp(24px, 4vh, 48px) clamp(20px, 3vw, 48px);
+      }
+      .chapter__title {
+        font-size: clamp(28px, 3.4vw, 44px);
+      }
+      .chapter__body {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .stage-shell { grid-template-columns: 1fr; }
+      .subscribe-sidebar {
+        position: static;
+        height: auto;
+        border-left: none;
+        border-top: 1px solid var(--line-secondary);
+      }
+      .chapter {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 24px;
+      }
+      .chapter__visual {
+        height: 340px;
+      }
+      .pred-visual, .sched-visual, .acc-visual, .ch-visual {
+        min-width: 0;
+      }
+      .scroll-progress { display: none; }
+    }
+
+    /* Spacer at end of scroll track so last chapter stays a bit */
+    .track-tail { height: 40vh; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━ GNB ━━━━━━━━━━━━━━━━━━━━ -->
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <div class="gnb__logo">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+            <polyline points="16 7 22 7 22 13"></polyline>
+          </svg>
+        </div>
+        <span class="gnb__title">Daily<span>30'</span></span>
+        <span class="gnb__title-sub">AI 투자 브리핑</span>
+      </div>
+      <div class="gnb__meta">
+        <a href="#" onclick="event.preventDefault(); document.getElementById('sub-sidebar').scrollIntoView({behavior:'smooth'});"
+           style="font-size:13px; color:rgba(255,255,255,.7); font-weight:500;">구독하기 →</a>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Scroll progress dots (desktop only) -->
+  <div class="scroll-progress" id="scroll-progress"></div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━ STAGE SHELL ━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="stage-shell">
+
+    <!-- ═══════════ LEFT · Scroll stage ═══════════ -->
+    <div class="scroll-track" id="scroll-track">
+
+      <!-- Sticky canvas with chapter visuals -->
+      <div class="stage-canvas">
+        <div class="stage-inner">
+
+          <!-- Chapter 0 · Hero -->
+          <div class="chapter is-active" data-chapter="0">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">Daily · Since 2026</span>
+              <h1 class="chapter__title">
+                매일 아침<br>
+                <em>시장이 먼저</em><br>
+                보입니다.
+              </h1>
+              <p class="chapter__body">
+                AI가 글로벌 시장 데이터를 분석해<br>
+                코스피·미국 방향을 예측합니다.<br>
+                장 시작 전 스팟 브리핑, 텔레그램 또는 이메일로.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">08:30</span>
+                  <span class="chapter__meta-label">코스피 브리핑</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">22:30</span>
+                  <span class="chapter__meta-label">미국 브리핑</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">무료</span>
+                  <span class="chapter__meta-label">구독료</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="hero-stack">
+                <div class="hero-ring r1"></div>
+                <div class="hero-ring r2"></div>
+                <div class="hero-orb">
+                  <div class="hero-orb__inner">30<sup>′</sup></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter 1 · Prediction -->
+          <div class="chapter" data-chapter="1">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">01 · Prediction</span>
+              <h2 class="chapter__title">
+                AI가 분석한<br>
+                <em>방향 예측</em>을<br>
+                먼저 받으세요.
+              </h2>
+              <p class="chapter__body">
+                S&P 500 선물, VIX, 외국인 수급, 환율, 금리까지 —
+                수십 개 지표를 종합해 <b>상승 / 하락 / 중립</b> 방향과
+                확률, 신뢰도를 제공합니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">수십 개</span>
+                  <span class="chapter__meta-label">분석 지표</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">Claude</span>
+                  <span class="chapter__meta-label">AI 엔진</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="pred-visual">
+                <div class="pred-visual__header">
+                  <span class="pred-visual__title">2026-04-17 · S&P500 방향 예측</span>
+                  <span class="pred-badge">상승 우위</span>
+                </div>
+                <div class="pred-value" id="pred-value">0<span>%</span></div>
+                <div class="pred-sub">상승 확률 · 최근 10일 신호 일관성 높음</div>
+                <div class="pred-bars">
+                  <div class="pred-bar-row">
+                    <div class="pred-bar-label">
+                      <span style="color:var(--status-up)">상승</span>
+                      <span id="pred-up-label">62%</span>
+                    </div>
+                    <div class="pred-bar-track">
+                      <div class="pred-bar-fill up" id="pred-up-fill"></div>
+                    </div>
+                  </div>
+                  <div class="pred-bar-row">
+                    <div class="pred-bar-label">
+                      <span style="color:var(--status-down)">하락</span>
+                      <span id="pred-down-label">38%</span>
+                    </div>
+                    <div class="pred-bar-track">
+                      <div class="pred-bar-fill down" id="pred-down-fill"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pred-confidence">
+                  <div>
+                    <div class="pred-confidence__label">신뢰도 (Confidence)</div>
+                    <div style="font-size:18px; font-weight:800; margin-top:2px;">68%</div>
+                  </div>
+                  <div class="pred-confidence__ring">
+                    <svg viewBox="0 0 44 44">
+                      <circle class="track" cx="22" cy="22" r="20"></circle>
+                      <circle class="fill"  cx="22" cy="22" r="20" id="pred-ring"></circle>
+                    </svg>
+                    <div class="pred-confidence__pct">68</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter 2 · Schedule -->
+          <div class="chapter" data-chapter="2">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">02 · Schedule</span>
+              <h2 class="chapter__title">
+                아침에 한 번,<br>
+                <em>저녁에 한 번.</em>
+              </h2>
+              <p class="chapter__body">
+                <b>하루 두 번</b>, 장 시작 전에 맞춰 도착합니다.
+                아침 8:30엔 코스피 시초가 브리핑,
+                밤 10:30엔 미국 시장 브리핑.
+                일요일 저녁엔 주간 리포트가 더해집니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">2회</span>
+                  <span class="chapter__meta-label">일간 브리핑</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">자동</span>
+                  <span class="chapter__meta-label">휴장일 스킵</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="sched-visual">
+                <div class="sched-row">
+                  <div class="sched-row__time">08:30</div>
+                  <div class="sched-row__dot kospi"></div>
+                  <div>
+                    <div class="sched-row__title">코스피 시초가 브리핑</div>
+                    <div class="sched-row__desc">월 ~ 금 · 전일 미국 마감 기반 방향 예측</div>
+                  </div>
+                  <span class="sched-row__tag">평일</span>
+                </div>
+                <div class="sched-row">
+                  <div class="sched-row__time">22:30</div>
+                  <div class="sched-row__dot us"></div>
+                  <div>
+                    <div class="sched-row__title">미국 시장 브리핑</div>
+                    <div class="sched-row__desc">월 ~ 금 · S&P500 방향 + 빅테크 동향</div>
+                  </div>
+                  <span class="sched-row__tag">평일</span>
+                </div>
+                <div class="sched-row">
+                  <div class="sched-row__time">21:00</div>
+                  <div class="sched-row__dot weekly"></div>
+                  <div>
+                    <div class="sched-row__title">주간 리포트</div>
+                    <div class="sched-row__desc">일요일 · 지난주 요약 + 다음주 전망</div>
+                  </div>
+                  <span class="sched-row__tag">주간</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter 3 · Kellogg 20MA strategy -->
+          <div class="chapter" data-chapter="3">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">03 · Stock Picks</span>
+              <h2 class="chapter__title">
+                잭 켄로그<br>
+                <em>20일선 전략</em>을<br>
+                매일 선별합니다.
+              </h2>
+              <p class="chapter__body">
+                예측에서 멈추지 않습니다.
+                <b>MA20을 상향 돌파하거나 지지 반등한 종목</b> 중
+                거래량 급증을 동반한 모멘텀 종목만을 골라,
+                진입·목표·손절 가이드까지 함께 드립니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">3–5종목</span>
+                  <span class="chapter__meta-label">매일 선별</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">실행 가이드</span>
+                  <span class="chapter__meta-label">진입·목표·손절</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="kel-visual">
+                <div class="kel-card">
+                  <div class="kel-card__rank">1</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">AMD</span>
+                      <span class="kel-card__company">어드밴스드 마이크로</span>
+                      <span class="kel-card__tag golden">★ GOLDEN</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$265.52</span>
+                      <span class="kel-card__change up">+2.87%</span>
+                      <span>MA20 +19.4%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,28 8,26 16,22 24,20 32,16 40,14 48,9 56,6 64,4"/>
+                    <polyline fill="none" stroke="var(--line-primary)" stroke-width="1" stroke-dasharray="2 2"
+                      points="0,24 64,14"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">2</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">MSFT</span>
+                      <span class="kel-card__company">마이크로소프트</span>
+                      <span class="kel-card__tag">MA20 강세</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$417.51</span>
+                      <span class="kel-card__change up">+1.53%</span>
+                      <span>MA20 +10.4%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,22 8,24 16,20 24,18 32,14 40,12 48,10 56,8 64,7"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">3</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">JPM</span>
+                      <span class="kel-card__company">JP모간 체이스</span>
+                      <span class="kel-card__tag golden">★ GOLDEN</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$309.50</span>
+                      <span class="kel-card__change up">+1.17%</span>
+                      <span>MA20 +4.2%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,24 8,22 16,23 24,20 32,18 40,17 48,15 56,13 64,12"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">4</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">AAPL</span>
+                      <span class="kel-card__company">애플</span>
+                      <span class="kel-card__tag">눌림목</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$262.71</span>
+                      <span class="kel-card__change down">−1.40%</span>
+                      <span>MA20 +2.9%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#2775ED" stroke-width="1.5"
+                      points="0,14 8,12 16,15 24,13 32,16 40,18 48,17 56,20 64,19"/>
+                  </svg>
+                </div>
+
+                <div class="kel-footnote">
+                  <b>★ GOLDEN</b> — MA20·MA200 동시 상회, 기관 수급 유입 구간.
+                  각 종목에는 시가 진입가·목표가·손절가가 함께 등록돼있습니다.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter 4 · Data sources -->
+          <div class="chapter" data-chapter="4">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">04 · Data</span>
+              <h2 class="chapter__title">
+                모든 지표를<br>
+                <em>하나의 브리핑</em>으로.
+              </h2>
+              <p class="chapter__body">
+                글로벌 증시 · 선물 · 금리 · 환율 · 원자재 · 변동성까지.
+                매일 아침 흩어진 지표를 읽을 필요 없이,
+                핵심만 요약해 받아보세요.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">yfinance</span>
+                  <span class="chapter__meta-label">실시간 데이터</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">웹 검색</span>
+                  <span class="chapter__meta-label">뉴스 보완</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="src-visual">
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    S&P 500 <span class="src-chip__meta">6,982 · +0.80%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    VIX <span class="src-chip__meta">18.33</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    US 10Y <span class="src-chip__meta">4.268%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    닛케이 <span class="src-chip__meta">+2.38%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    USD/KRW <span class="src-chip__meta">1,383.2</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    WTI <span class="src-chip__meta">$61.6</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    Fear &amp; Greed <span class="src-chip__meta">35</span>
+                  </div>
+                </div>
+                <div class="src-core">DAILY30'</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chapter 5 · Channels -->
+          <div class="chapter" data-chapter="5">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">05 · Channels</span>
+              <h2 class="chapter__title">
+                편한 곳으로<br>
+                <em>바로 도착</em>합니다.
+              </h2>
+              <p class="chapter__body">
+                앱 설치도, 새로운 알림 설정도 필요 없어요.
+                텔레그램 또는 이메일 중 편한 방식을 고르세요.
+                오른쪽에서 바로 구독할 수 있습니다. →
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">즉시</span>
+                  <span class="chapter__meta-label">구독 시작</span>
+                </div>
+                <div>
+                  <span class="chapter__meta-value">언제든</span>
+                  <span class="chapter__meta-label">구독 해지</span>
+                </div>
+              </div>
+            </div>
+            <div class="chapter__visual">
+              <div class="ch-visual">
+                <div class="ch-card">
+                  <div class="ch-card__header">
+                    <div class="ch-card__icon tg">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                        <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="ch-card__title">Daily30' Bot</div>
+                      <div class="ch-card__sub">텔레그램 · 매일 08:30 KST</div>
+                    </div>
+                  </div>
+                  <div class="ch-msg">
+                    📈 <b>코스피 상승 우위</b> (72%)<br>
+                    외국인 2.7조 순매수,<br>
+                    SK하이닉스 110만원 돌파
+                    <div class="ch-msg__time">08:32 ✓✓</div>
+                  </div>
+                  <div class="ch-msg" style="margin-bottom:0;">
+                    🔗 전체 브리핑 보기
+                    <div class="ch-msg__time">08:32 ✓✓</div>
+                  </div>
+                </div>
+                <div class="ch-card">
+                  <div class="ch-card__header">
+                    <div class="ch-card__icon em">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="ch-card__title">받은편지함</div>
+                      <div class="ch-card__sub">이메일 · 뉴스레터</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot"></span>
+                    <div>
+                      <div class="ch-email-row__title">📈 코스피 상승 우위 · 신뢰도 72%</div>
+                      <div class="ch-email-row__preview">외국인 2.7조 순매수, SK하이닉스 110만원 돌파…</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot" style="background:#7C3AED"></span>
+                    <div>
+                      <div class="ch-email-row__title">📊 주간 리포트 · 반도체 모멘텀</div>
+                      <div class="ch-email-row__preview">이번 주 하이라이트와 다음 주 전망…</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot" style="background:#2775ED"></span>
+                    <div>
+                      <div class="ch-email-row__title">🇺🇸 S&P500 최고치 경신</div>
+                      <div class="ch-email-row__preview">빅테크 동반 강세, VIX 18선 안착…</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /stage-inner -->
+      </div><!-- /stage-canvas -->
+
+      <!-- Invisible scroll triggers — one per chapter -->
+      <div class="triggers">
+        <div class="trigger" data-trigger="0"></div>
+        <div class="trigger" data-trigger="1"></div>
+        <div class="trigger" data-trigger="2"></div>
+        <div class="trigger" data-trigger="3"></div>
+        <div class="trigger" data-trigger="4"></div>
+        <div class="trigger" data-trigger="5"></div>
+        <div class="track-tail"></div>
+      </div>
+
+    </div><!-- /scroll-track -->
+
+    <!-- ═══════════ RIGHT · Subscribe sidebar ═══════════ -->
+    <aside class="subscribe-sidebar" id="sub-sidebar">
+
+      <div class="sub-head">
+        <div class="sub-head__eyebrow">Subscribe · 무료</div>
+        <h3 class="sub-head__title">브리핑을<br>받아볼 채널을 고르세요</h3>
+        <p class="sub-head__desc">텔레그램은 즉시, 이메일은 매일 아침. 언제든 구독 해지할 수 있어요.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="sub-tabs" role="tablist">
+        <button class="sub-tab is-active" id="tab-tg" role="tab" aria-selected="true" onclick="switchTab('tg')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+          텔레그램
+        </button>
+        <button class="sub-tab" id="tab-em" role="tab" aria-selected="false" onclick="switchTab('em')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          이메일
+        </button>
+      </div>
+
+      <!-- TG panel -->
+      <div class="sub-panel is-active" id="panel-tg" role="tabpanel">
+        <div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">⚡</div>
+            <div class="sub-panel__benefit-text">
+              <b>즉시 수신.</b> 채널에 들어오면 바로 다음 브리핑부터 받아볼 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">💬</div>
+            <div class="sub-panel__benefit-text">
+              <b>핵심 요약 300자.</b> 모바일에서 요약 내용을 먼저 확인할 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">🔗</div>
+            <div class="sub-panel__benefit-text">
+              <b>전체 브리핑 링크.</b> 더 궁금하면 웹에서 이어서 읽을 수 있어요.
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-form">
+          <button class="sub-btn" onclick="joinTelegram(this)">
+            텔레그램 채널 바로가기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="sub-note">링크가 열리지 않으면 <a href="https://t.me/daily30_briefing" target="_blank" style="color:var(--chapter-accent);">t.me/daily30_briefing</a>에서 직접 구독하실 수 있어요.</p>
+        </div>
+
+        <div class="sub-schedule">
+          <div class="sub-schedule__title">수신 스케줄</div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot kospi"></span>
+            <span class="sub-schedule__time">08:30</span>
+            <span>코스피 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot us"></span>
+            <span class="sub-schedule__time">22:30</span>
+            <span>미국 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot weekly"></span>
+            <span class="sub-schedule__time">21:00</span>
+            <span>주간 리포트 · 일요일</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email panel -->
+      <div class="sub-panel" id="panel-em" role="tabpanel">
+        <div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">📧</div>
+            <div class="sub-panel__benefit-text">
+              <b>전문 발송.</b> 브리핑 전체를 받은편지함으로 보내드려요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">📚</div>
+            <div class="sub-panel__benefit-text">
+              <b>이메일 아카이브.</b> 지난 브리핑을 받은편지함에서 검색하고 다시 볼 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">🔕</div>
+            <div class="sub-panel__benefit-text">
+              <b>방해 최소화.</b> 푸시 알림 없이, 조용히 도착합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-form" id="email-form">
+          <label class="sub-label" for="email-input">이메일 주소</label>
+          <input class="sub-input" id="email-input" type="email" placeholder="you@example.com" />
+          <button class="sub-btn" id="email-btn" onclick="submitEmail(this)">
+            뉴스레터 구독 신청
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="sub-note" id="sub-note-em">구독 확인 메일을 보내드립니다. 스팸함도 확인해주세요.</p>
+        </div>
+
+        <div class="sub-schedule">
+          <div class="sub-schedule__title">뉴스레터 스케줄</div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot kospi"></span>
+            <span class="sub-schedule__time">08:30</span>
+            <span>코스피 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot us"></span>
+            <span class="sub-schedule__time">22:30</span>
+            <span>미국 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot weekly"></span>
+            <span class="sub-schedule__time">21:00</span>
+            <span>주간 리포트 · 일요일</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-foot">
+        Daily30' · 개인 투자 비서<br>
+        <a href="index.html">최신 브리핑 보기</a> · 무료 · 언제든 해지
+      </div>
+
+    </aside>
+  </div><!-- /stage-shell -->
+
+  <!-- Theme toggle -->
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.classList.contains('dark') ? 'light' : 'dark';
+      html.classList.remove('light','dark');
+      html.classList.add(next);
+      try { localStorage.setItem('daily30-theme', next); } catch(e){}
+    }
+    (function initTheme(){
+      try {
+        const saved = localStorage.getItem('daily30-theme');
+        if (saved) {
+          document.documentElement.classList.remove('light','dark');
+          document.documentElement.classList.add(saved);
+        }
+      } catch(e){}
+    })();
+  </script>
+
+  <!-- Scroll stage controller -->
+  <script>
+    (function(){
+      const track    = document.getElementById('scroll-track');
+      const triggers = [...document.querySelectorAll('.trigger')];
+      const chapters = [...document.querySelectorAll('.chapter')];
+      const progress = document.getElementById('scroll-progress');
+
+      // Build progress dots
+      chapters.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'scroll-progress__dot';
+        if (i === 0) d.classList.add('is-active');
+        progress.appendChild(d);
+      });
+      const dots = [...progress.querySelectorAll('.scroll-progress__dot')];
+
+      let currentIdx = 0;
+      function setActive(idx) {
+        if (idx === currentIdx) return;
+        currentIdx = idx;
+        chapters.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+
+        // Trigger chapter-specific animations
+        if (idx === 1) animatePrediction();
+      }
+
+      // Use IntersectionObserver to track which trigger is currently in view
+      const io = new IntersectionObserver((entries) => {
+        // Pick the most-visible trigger
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a,b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible.length) {
+          const idx = parseInt(visible[0].target.dataset.trigger, 10);
+          setActive(idx);
+        }
+      }, {
+        rootMargin: '-35% 0px -35% 0px',
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+      });
+      triggers.forEach(t => io.observe(t));
+
+      let predAnimated = false;
+      function animatePrediction() {
+        if (predAnimated) return;
+        predAnimated = true;
+
+        // Count up pred value
+        const valEl = document.getElementById('pred-value');
+        const target = 62;
+        let start = performance.now();
+        const dur = 900;
+        function step(now){
+          const t = Math.min(1, (now - start) / dur);
+          const e = 1 - Math.pow(1-t, 3); // easeOutCubic
+          valEl.firstChild.nodeValue = Math.round(target * e);
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+
+        document.getElementById('pred-up-fill').style.width = '62%';
+        document.getElementById('pred-down-fill').style.width = '38%';
+
+        const ring = document.getElementById('pred-ring');
+        const circumference = 2 * Math.PI * 20;
+        ring.setAttribute('stroke-dasharray', circumference);
+        ring.style.strokeDashoffset = circumference * (1 - 0.68);
+      }
+
+      // Click dot to scroll to trigger
+      dots.forEach((d, i) => {
+        d.style.pointerEvents = 'auto';
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => {
+          triggers[i].scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
+    })();
+  </script>
+
+  <!-- Subscribe sidebar controller -->
+  <script>
+    function switchTab(which) {
+      document.getElementById('tab-tg').classList.toggle('is-active', which === 'tg');
+      document.getElementById('tab-em').classList.toggle('is-active', which === 'em');
+      document.getElementById('tab-tg').setAttribute('aria-selected', which === 'tg');
+      document.getElementById('tab-em').setAttribute('aria-selected', which === 'em');
+      document.getElementById('panel-tg').classList.toggle('is-active', which === 'tg');
+      document.getElementById('panel-em').classList.toggle('is-active', which === 'em');
+    }
+
+    function joinTelegram(btn) {
+      window.open('https://t.me/daily30_briefing', '_blank', 'noopener');
+      btn.innerHTML = '✓ 텔레그램으로 이동했습니다';
+      btn.classList.add('is-done');
+      setTimeout(() => {
+        btn.innerHTML = '텔레그램 채널 바로가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        btn.classList.remove('is-done');
+      }, 3500);
+    }
+
+    const SUBSCRIBE_ENDPOINT = 'https://formspree.io/f/xojydzja';
+
+    function submitEmail(btn) {
+      const input = document.getElementById('email-input');
+      const email = input.value.trim();
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        input.focus();
+        input.style.borderColor = 'var(--status-up)';
+        setTimeout(() => { input.style.borderColor = ''; }, 1400);
+        return;
+      }
+
+      // 전송 중 상태
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg style="animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> 전송 중…';
+
+      fetch(SUBSCRIBE_ENDPOINT, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body:    JSON.stringify({ email, source: 'landing' }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          btn.innerHTML = '✓ 구독 신청 완료!';
+          btn.classList.add('is-done');
+          input.disabled = true;
+          document.getElementById('sub-note-em').textContent =
+            '✓ ' + email + ' 으로 등록되었어요. 스팸함도 확인해 주세요.';
+        } else {
+          throw new Error(data.error || 'unknown');
+        }
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        const note = document.getElementById('sub-note-em');
+        note.textContent = '⚠ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+        note.style.color = 'var(--status-up)';
+      });
+    }
+
+    document.getElementById('email-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitEmail(document.getElementById('email-btn'));
+    });
+  </script>
+</body>
+</html>
