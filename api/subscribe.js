@@ -2,7 +2,7 @@ const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -18,9 +18,9 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: 'Daily30\' <onboarding@resend.dev>',
+      from: "Daily30' <onboarding@resend.dev>",
       to: email,
-      subject: '[Daily30\'] 구독 신청이 완료되었습니다',
+      subject: "[Daily30'] 구독 신청이 완료되었습니다",
       html: `
         <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px; color: #111;">
           <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 8px;">Daily30' 구독을 시작합니다 🎉</h2>
@@ -39,9 +39,8 @@ export default async function handler(req, res) {
       `,
     });
 
-    // 구독자를 관리자 이메일(본인)에게도 알림
     await resend.emails.send({
-      from: 'Daily30\' <onboarding@resend.dev>',
+      from: "Daily30' <onboarding@resend.dev>",
       to: 'luke00.ncsoft@gmail.com',
       subject: `[Daily30'] 새 구독자: ${email}`,
       html: `<p>새 구독자가 등록되었습니다: <b>${email}</b></p>`,
@@ -50,6 +49,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Failed to send email' });
+    return res.status(500).json({ error: err.message || 'Failed to send email' });
   }
-}
+};
