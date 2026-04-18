@@ -1776,6 +1776,7 @@
       document.getElementById('panel-tg').classList.toggle('is-active', which === 'tg');
       document.getElementById('panel-em').classList.toggle('is-active', which === 'em');
     }
+    if (window.innerWidth < 768) switchTab('tg');
 
     function joinTelegram(btn) {
       window.open('https://t.me/daily30_briefing', '_blank', 'noopener');
