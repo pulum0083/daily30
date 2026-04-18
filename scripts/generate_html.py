@@ -390,7 +390,7 @@ def extract_briefing_summary(html_path: Path) -> Optional[dict]:
             "reasons": reasons,
             "reason_title": reason_title,
             "gen_time": gen_time,
-            "url": f"briefings/{date_str}/",
+            "url": f"/briefings/{'ko' if btype == 'kospi' else btype}/{date_str}/",
         }
     except Exception as e:
         print(f"[generate_html] extract_briefing_summary error ({html_path.name}): {e}",
@@ -487,7 +487,7 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
 
     ctx = {
         "page_title": page_title,
-        "asset_prefix": "",
+        "asset_prefix": "/",
         "date_str": date_str,
         "gen_time": gen_time,
         "generated_at": generated_at,
