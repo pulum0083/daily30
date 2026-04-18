@@ -2,8 +2,8 @@ name: Daily 30 Report
 
 on:
   schedule:
-    - cron: "15 23 * * 0-4"   # 코스피 브리핑 KST 08:15 (UTC 23:15 전일) → 지연 감안 08:30 도착
-    - cron: "20 12 * * 1-5"   # 미국 시장 브리핑 KST 21:20 (UTC 12:20) → 지연 감안 21:30 도착
+    - cron: "35 22 * * 0-4"   # 코스피 브리핑 KST 07:35 (UTC 22:35 전일) → 지연 감안 08:30 도착
+    - cron: "50 11 * * 1-5"   # 미국 시장 브리핑 KST 20:50 (UTC 11:50) → 지연 감안 21:30 도착
     - cron: "5 0 * * 2-6"     # 공포탐욕 패치 KST 09:05 (UTC 00:05, 화~토)
     - cron: "10 0 * * 2-6"    # 코스피 정확도 체크 KST 09:10 (UTC 00:10, 화~토)
   workflow_dispatch:
@@ -41,7 +41,7 @@ jobs:
     name: "📈 코스피 브리핑 (KST 08:05)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '15 23 * * 0-4') ||
+      (github.event_name == 'schedule' && github.event.schedule == '35 22 * * 0-4') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi')
 
     steps:
@@ -114,7 +114,7 @@ jobs:
     name: "🇺🇸 미국 브리핑 (KST 21:15)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '20 12 * * 1-5') ||
+      (github.event_name == 'schedule' && github.event.schedule == '50 11 * * 1-5') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us')
 
     steps:
