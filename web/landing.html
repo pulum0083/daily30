@@ -1522,18 +1522,18 @@
 
       <!-- Tabs -->
       <div class="sub-tabs" role="tablist">
-        <button class="sub-tab is-active" id="tab-tg" role="tab" aria-selected="true" onclick="switchTab('tg')">
+        <button class="sub-tab" id="tab-tg" role="tab" aria-selected="false" onclick="switchTab('tg')">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
           텔레그램
         </button>
-        <button class="sub-tab" id="tab-em" role="tab" aria-selected="false" onclick="switchTab('em')">
+        <button class="sub-tab is-active" id="tab-em" role="tab" aria-selected="true" onclick="switchTab('em')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           이메일
         </button>
       </div>
 
       <!-- TG panel -->
-      <div class="sub-panel is-active" id="panel-tg" role="tabpanel">
+      <div class="sub-panel" id="panel-tg" role="tabpanel">
         <div>
           <div class="sub-panel__benefit">
             <div class="sub-panel__benefit-icon">⚡</div>
@@ -1584,7 +1584,7 @@
       </div>
 
       <!-- Email panel -->
-      <div class="sub-panel" id="panel-em" role="tabpanel">
+      <div class="sub-panel is-active" id="panel-em" role="tabpanel">
         <div>
           <div class="sub-panel__benefit">
             <div class="sub-panel__benefit-icon">📧</div>
