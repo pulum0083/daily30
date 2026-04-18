@@ -1640,6 +1640,26 @@
     </aside>
   </div><!-- /stage-shell -->
 
+  <!-- Subscribe success modal -->
+  <div id="sub-modal" style="display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;padding:24px">
+    <div id="sub-modal-bg" style="position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)" onclick="closeSubModal()"></div>
+    <div style="position:relative;background:var(--surface);border:1px solid var(--line-secondary);border-radius:24px;padding:40px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.25)">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1AAA55,#34C469);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px">✓</div>
+      <h3 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;color:var(--text-primary)">구독 신청 완료!</h3>
+      <p id="sub-modal-email" style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px"></p>
+      <p style="font-size:13px;color:var(--text-tertiary);line-height:1.6;margin-bottom:28px">최신 브리핑을 바로 보내드렸어요.<br>스팸함도 꼭 확인해 주세요.</p>
+      <div style="background:var(--surface-secondary);border:1px solid var(--line-secondary);border-radius:12px;padding:14px 16px;margin-bottom:24px;text-align:left">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px">수신 스케줄</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+          📈 <b>08:30</b> 코스피 브리핑 · 평일<br>
+          🌐 <b>22:30</b> 미국 브리핑 · 평일<br>
+          📊 <b>21:00</b> 주간 리포트 · 일요일
+        </div>
+      </div>
+      <button onclick="closeSubModal()" style="width:100%;padding:14px;font-size:14px;font-weight:700;background:var(--chapter-accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:inherit">확인</button>
+    </div>
+  </div>
+
   <!-- Theme toggle -->
   <script>
     function toggleTheme() {
@@ -1792,8 +1812,8 @@
           btn.innerHTML = '✓ 구독 신청 완료!';
           btn.classList.add('is-done');
           input.disabled = true;
-          document.getElementById('sub-note-em').textContent =
-            '✓ ' + email + ' 으로 등록되었어요. 최신 브리핑을 바로 보내드렸어요. 스팸함도 확인해 주세요.';
+          document.getElementById('sub-note-em').textContent = '';
+          showSubModal(email);
         } else {
           throw new Error(data.error || 'unknown');
         }
@@ -1809,6 +1829,21 @@
 
     document.getElementById('email-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') submitEmail(document.getElementById('email-btn'));
+    });
+
+    function showSubModal(email) {
+      document.getElementById('sub-modal-email').textContent = email + ' 으로 등록되었어요.';
+      const modal = document.getElementById('sub-modal');
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => modal.style.opacity = '1');
+    }
+
+    function closeSubModal() {
+      document.getElementById('sub-modal').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSubModal();
     });
   </script>
 </body>
