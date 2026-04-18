@@ -1763,8 +1763,7 @@
       }, 3500);
     }
 
-    // Apps Script 배포 후 이 URL을 교체하세요
-    const SUBSCRIBE_ENDPOINT = 'YOUR_APPS_SCRIPT_URL_HERE';
+    const SUBSCRIBE_ENDPOINT = 'https://formspree.io/f/xojydzja';
 
     function submitEmail(btn) {
       const input = document.getElementById('email-input');
@@ -1777,38 +1776,34 @@
         return;
       }
 
-      // URL 미설정 시 안내
-      if (!SUBSCRIBE_ENDPOINT || SUBSCRIBE_ENDPOINT === 'YOUR_APPS_SCRIPT_URL_HERE') {
-        alert('SUBSCRIBE_ENDPOINT가 설정되지 않았습니다.\nscripts/email_subscribe.gs 배포 후 URL을 교체하세요.');
-        return;
-      }
-
       // 전송 중 상태
       const originalHTML = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<svg style="animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> 전송 중…';
 
-      // no-cors 사용: Apps Script는 preflight 미지원
-      // opaque response지만 네트워크 에러는 catch됨
       fetch(SUBSCRIBE_ENDPOINT, {
         method:  'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body:    JSON.stringify({ email, source: 'landing' }),
-        mode:    'no-cors',
       })
-      .then(() => {
-        btn.innerHTML = '✓ 구독 신청 완료!';
-        btn.classList.add('is-done');
-        input.disabled = true;
-        document.getElementById('sub-note-em').textContent =
-          '✓ ' + email + ' 으로 등록되었어요. 스팸함도 확인해 주세요.';
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          btn.innerHTML = '✓ 구독 신청 완료!';
+          btn.classList.add('is-done');
+          input.disabled = true;
+          document.getElementById('sub-note-em').textContent =
+            '✓ ' + email + ' 으로 등록되었어요. 스팸함도 확인해 주세요.';
+        } else {
+          throw new Error(data.error || 'unknown');
+        }
       })
       .catch(() => {
         btn.disabled = false;
         btn.innerHTML = originalHTML;
-        document.getElementById('sub-note-em').textContent =
-          '⚠ 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
-        document.getElementById('sub-note-em').style.color = 'var(--status-up)';
+        const note = document.getElementById('sub-note-em');
+        note.textContent = '⚠ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+        note.style.color = 'var(--status-up)';
       });
     }
 
