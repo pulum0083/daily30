@@ -1,8 +1,5 @@
 {
   "outputDirectory": "web",
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "buildCommand": null,
+  "installCommand": "npm install"
 }
