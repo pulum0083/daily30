@@ -251,16 +251,6 @@
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    /* Axis labels */
-    ctx.font = `600 ${Math.round(cssW*0.072)}px system-ui,sans-serif`;
-    ctx.fillStyle = '#9CA3AF';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'right';
-    ctx.fillText('0',   cx - outerR - 3, cy);
-    ctx.textAlign = 'left';
-    ctx.fillText('100', cx + outerR + 3, cy);
-    ctx.textAlign = 'center';
-    ctx.fillText('50',  cx, cy - outerR - 3);
   }
 
   function setFearGreed(value) {
