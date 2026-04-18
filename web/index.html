@@ -3,10 +3,1011 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily30' — 미국 시장 브리핑 2026-04-18</title>
-  <link rel="stylesheet" href="/assets/style.css" />
+  <title>Daily30' — 매일 아침, 시장이 먼저 보인다</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    /* ============================================================
+       Landing · scroll-stage layout
+    ============================================================ */
+
+    :root {
+      --stage-sidebar-width: clamp(340px, 28vw, 400px);
+      --stage-gap: 0px;
+      --chapter-accent: var(--color-primary);
+    }
+
+    html, body { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+    }
+
+    /* GNB minor tune for landing */
+    .gnb { border-bottom: 1px solid rgba(255,255,255,.06); }
+    .gnb__title-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      margin-left: 6px;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    /* ── Page shell ── */
+    .stage-shell {
+      display: grid;
+      grid-template-columns: 1fr var(--stage-sidebar-width);
+      align-items: start;
+    }
+
+    /* ============================================================
+       LEFT · scroll stage
+       Pattern: a long scroll track, with an absolutely-positioned
+       sticky canvas that swaps chapter content by scroll progress.
+    ============================================================ */
+    .scroll-track {
+      position: relative;
+    }
+
+    /* Sticky canvas where chapters render */
+    .stage-canvas {
+      position: sticky;
+      top: var(--gnb-height);
+      height: calc(100vh - var(--gnb-height));
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .stage-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 clamp(32px, 6vw, 96px);
+    }
+
+    /* Chapter (one per section) */
+    .chapter {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.15fr);
+      gap: clamp(24px, 4vw, 56px);
+      align-items: center;
+      padding: clamp(24px, 5vh, 56px) clamp(24px, 5vw, 80px);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(.2,.8,.2,1), transform 0.6s cubic-bezier(.2,.8,.2,1);
+      pointer-events: none;
+    }
+    .chapter.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .chapter__text {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 440px;
+    }
+
+    .chapter__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--chapter-accent);
+    }
+    .chapter__eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1.5px;
+      background: currentColor;
+    }
+
+    .chapter__title {
+      font-size: clamp(32px, 4.2vw, 56px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      color: var(--text-primary);
+      text-wrap: balance;
+    }
+    .chapter__title em {
+      font-style: normal;
+      color: var(--chapter-accent);
+    }
+
+    .chapter__body {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      text-wrap: pretty;
+      max-width: 420px;
+    }
+
+    .chapter__meta {
+      display: flex;
+      gap: 28px;
+      margin-top: 8px;
+    }
+    .chapter__meta > div {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .chapter__meta-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .chapter__meta-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .chapter__visual {
+      position: relative;
+      width: 100%;
+      height: min(560px, 72vh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0; /* allow grid child to shrink properly */
+    }
+    .chapter__visual > * {
+      flex-shrink: 0; /* prevent card content from being squeezed */
+    }
+
+    /* ── Scroll triggers (invisible full-height sections) ── */
+    .triggers {
+      position: relative;
+    }
+    .trigger {
+      height: 110vh;
+      pointer-events: none;
+    }
+    .trigger:first-child { height: 100vh; }
+
+    /* ============================================================
+       Chapter visuals
+    ============================================================ */
+
+    /* 0 · Hero — brand orb */
+    .hero-stack {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-orb {
+      position: relative;
+      width: min(460px, 60vh);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,0) 55%),
+        radial-gradient(circle at 70% 75%, rgba(124,58,237,.45), rgba(124,58,237,0) 60%),
+        linear-gradient(135deg, #006EFF 0%, #7C3AED 100%);
+      box-shadow:
+        0 40px 80px rgba(0,110,255,.25),
+        0 20px 40px rgba(124,58,237,.18),
+        inset 0 2px 0 rgba(255,255,255,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 8s ease-in-out infinite;
+    }
+    html.dark .hero-orb {
+      box-shadow:
+        0 40px 100px rgba(0,110,255,.35),
+        0 20px 40px rgba(124,58,237,.25),
+        inset 0 2px 0 rgba(255,255,255,.2);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+    .hero-orb__inner {
+      font-size: clamp(54px, 7vw, 96px);
+      font-weight: 900;
+      color: white;
+      letter-spacing: -0.04em;
+      text-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+    .hero-orb__inner sup {
+      font-size: 0.55em;
+      vertical-align: top;
+      opacity: 0.85;
+      font-weight: 700;
+    }
+
+    .hero-ring {
+      position: absolute;
+      border: 1.5px solid rgba(0,110,255,.18);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    html.dark .hero-ring { border-color: rgba(59,139,255,.2); }
+    .hero-ring.r1 { width: 120%; aspect-ratio: 1; animation: spin 40s linear infinite; }
+    .hero-ring.r2 { width: 145%; aspect-ratio: 1; border-style: dashed; animation: spin 80s linear infinite reverse; opacity: 0.5; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 1 · Prediction — confidence bars */
+    .pred-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow-20);
+    }
+    .pred-visual__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .pred-visual__title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .pred-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--status-up-bg);
+      color: var(--status-up);
+    }
+    .pred-value {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+      color: var(--status-up);
+    }
+    .pred-value span { font-size: 22px; color: var(--text-tertiary); margin-left: 2px; font-weight: 700; }
+    .pred-sub {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 22px;
+    }
+    .pred-bars { display: flex; flex-direction: column; gap: 14px; }
+    .pred-bar-row { }
+    .pred-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .pred-bar-track {
+      height: 8px;
+      background: var(--grey-50);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .pred-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      width: 0;
+      transition: width 1.1s cubic-bezier(.2,.8,.2,1);
+    }
+    .pred-bar-fill.up   { background: linear-gradient(90deg, #E03131, #FF6A6A); }
+    .pred-bar-fill.down { background: linear-gradient(90deg, #2775ED, #60A3FF); }
+
+    .pred-confidence {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px dashed var(--line-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pred-confidence__label { font-size: 12px; color: var(--text-tertiary); }
+    .pred-confidence__ring {
+      position: relative;
+      width: 44px; height: 44px;
+    }
+    .pred-confidence__ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .pred-confidence__ring circle { fill: none; stroke-width: 4; }
+    .pred-confidence__ring .track { stroke: var(--grey-50); }
+    .pred-confidence__ring .fill  {
+      stroke: var(--chapter-accent);
+      stroke-dasharray: 126;
+      stroke-dashoffset: 126;
+      transition: stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1);
+      stroke-linecap: round;
+    }
+    .pred-confidence__pct {
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    /* 2 · Schedule — timeline */
+    .sched-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sched-row {
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 18px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-10);
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .is-active .sched-row { opacity: 1; transform: translateX(0); }
+    .is-active .sched-row:nth-child(1) { transition-delay: 0.1s; }
+    .is-active .sched-row:nth-child(2) { transition-delay: 0.2s; }
+    .is-active .sched-row:nth-child(3) { transition-delay: 0.3s; }
+
+    .sched-row__time {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      min-width: 76px;
+    }
+    .sched-row__dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sched-row__dot.kospi  { background: #E03131; box-shadow: 0 0 0 4px rgba(224,49,49,.15); }
+    .sched-row__dot.us     { background: #2775ED; box-shadow: 0 0 0 4px rgba(39,117,237,.15); }
+    .sched-row__dot.weekly { background: #7C3AED; box-shadow: 0 0 0 4px rgba(124,58,237,.15); }
+
+    .sched-row__title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .sched-row__desc {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .sched-row__tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 100px;
+      background: var(--surface-secondary);
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+    }
+
+    /* 3 · Accuracy — dial */
+    .acc-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 28px;
+      padding: 40px 36px 32px;
+      box-shadow: var(--shadow-20);
+      text-align: center;
+    }
+    .acc-dial {
+      position: relative;
+      width: 260px; height: 140px;
+      margin: 0 auto 16px;
+    }
+    .acc-dial svg { width: 100%; height: 100%; }
+    .acc-dial__track { fill: none; stroke: var(--grey-50); stroke-width: 14; stroke-linecap: round; }
+    .acc-dial__fill {
+      fill: none;
+      stroke: url(#accGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1);
+    }
+    .acc-value {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .acc-value span {
+      font-size: 24px;
+      color: var(--text-tertiary);
+      font-weight: 700;
+    }
+    .acc-sub {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+    .acc-legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 28px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line-secondary);
+    }
+    .acc-legend__item { display: flex; flex-direction: column; gap: 2px; }
+    .acc-legend__value { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+    .acc-legend__label { font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* 3 · Kellogg strategy — stock picks */
+    .kel-visual {
+      width: 100%;
+      min-width: 360px;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .kel-card {
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow-10);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      opacity: 0;
+      transform: translateX(-16px);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    .is-active .kel-card { opacity: 1; transform: translateX(0); }
+    .is-active .kel-card:nth-child(2) { transition-delay: 0.08s; }
+    .is-active .kel-card:nth-child(3) { transition-delay: 0.16s; }
+    .is-active .kel-card:nth-child(4) { transition-delay: 0.24s; }
+    .is-active .kel-card:nth-child(5) { transition-delay: 0.32s; }
+
+    .kel-card__rank {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .kel-card__info { flex: 1; min-width: 0; }
+    .kel-card__name-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .kel-card__ticker {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+    .kel-card__company {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .kel-card__tag {
+      display: inline-block;
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 100px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      letter-spacing: 0.04em;
+    }
+    .kel-card__tag.golden {
+      background: #FFF4D6;
+      color: #C28A00;
+    }
+    html.dark .kel-card__tag.golden { background: rgba(255,200,60,.15); color: #FFCE5F; }
+    .kel-card__meta {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .kel-card__change.up   { color: var(--status-up);   font-weight: 700; }
+    .kel-card__change.down { color: var(--status-down); font-weight: 700; }
+    .kel-card__spark {
+      flex-shrink: 0;
+      width: 64px;
+      height: 36px;
+    }
+
+    .kel-footnote {
+      margin-top: 6px;
+      padding: 14px 16px;
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: 12px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+    }
+    .kel-footnote b { color: var(--text-secondary); }
+
+    /* 4 · Data sources — floating chips */
+    .src-visual {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 420px;
+    }
+    .src-chip {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 14px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow-20);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.55s, transform 0.55s;
+    }
+    .is-active .src-chip { opacity: 1; transform: translateY(0); }
+    .src-chip__dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--chapter-accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--chapter-accent) 25%, transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--chapter-accent) 25%, transparent); }
+      50%      { box-shadow: 0 0 0 7px color-mix(in oklab, var(--chapter-accent) 10%, transparent); }
+    }
+    .src-chip__meta {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+    }
+
+    .src-chip:nth-child(1)  { top: 8%;  left: 6%;  transition-delay: 0.05s; }
+    .src-chip:nth-child(2)  { top: 18%; right: 4%; transition-delay: 0.12s; }
+    .src-chip:nth-child(3)  { top: 36%; left: 20%; transition-delay: 0.19s; }
+    .src-chip:nth-child(4)  { top: 48%; right: 18%; transition-delay: 0.26s; }
+    .src-chip:nth-child(5)  { top: 68%; left: 8%;  transition-delay: 0.33s; }
+    .src-chip:nth-child(6)  { top: 80%; right: 10%; transition-delay: 0.40s; }
+    .src-chip:nth-child(7)  { top: 60%; left: 44%; transition-delay: 0.47s; }
+
+    .src-core {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--chapter-accent), #7C3AED);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 20px 60px rgba(0,110,255,.25);
+      color: white;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      z-index: 1;
+    }
+    .src-core::before,
+    .src-core::after {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      border: 1px dashed var(--line-primary);
+      border-radius: 50%;
+      animation: spin 30s linear infinite;
+      opacity: 0.4;
+    }
+    .src-core::after { inset: -80px; animation-duration: 50s; animation-direction: reverse; }
+
+    /* 5 · Channels — device mocks */
+    .ch-visual {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+      width: 100%;
+      min-width: 380px;
+      max-width: 560px;
+    }
+    .ch-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--line-secondary);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-20);
+      position: relative;
+    }
+    .ch-card__header {
+      display: flex; align-items: center; gap: 10px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .ch-card__icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .ch-card__icon.tg { background: #E8F4FF; color: #0088CC; }
+    .ch-card__icon.em { background: #FFF3E0; color: #E67700; }
+    html.dark .ch-card__icon.tg { background: rgba(0,136,204,.15); color: #5BAEFF; }
+    html.dark .ch-card__icon.em { background: rgba(230,119,0,.15); color: #FFB246; }
+    .ch-card__title { font-size: 13px; font-weight: 700; }
+    .ch-card__sub   { font-size: 11px; color: var(--text-tertiary); }
+
+    .ch-msg {
+      background: var(--surface-secondary);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      border: 1px solid var(--line-secondary);
+    }
+    .ch-msg b { color: var(--status-up); }
+    .ch-msg__time {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .ch-email-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .ch-email-row:last-child { border-bottom: none; }
+    .ch-email-row__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--chapter-accent);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .ch-email-row__title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .ch-email-row__preview { font-size: 11px; color: var(--text-tertiary); line-height: 1.5; }
+
+    /* ============================================================
+       Scroll copy track
+       Each chapter has scroll copy on the LEFT of chapter area.
+       But since stage is sticky, we only need an overlay at top.
+    ============================================================ */
+    .scroll-progress {
+      position: fixed;
+      top: calc(var(--gnb-height) + 20px);
+      left: 20px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .scroll-progress__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--line-primary);
+      transition: background 0.3s, transform 0.3s;
+    }
+    .scroll-progress__dot.is-active {
+      background: var(--chapter-accent);
+      transform: scale(1.5);
+    }
+
+    /* ============================================================
+       RIGHT SIDEBAR — Subscribe
+    ============================================================ */
+    .subscribe-sidebar {
+      position: sticky;
+      top: var(--gnb-height);
+      height: calc(100vh - var(--gnb-height));
+      background: var(--surface);
+      border-left: 1px solid var(--line-secondary);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .sub-head {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .sub-head__eyebrow {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--chapter-accent);
+      margin-bottom: 8px;
+    }
+    .sub-head__title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      text-wrap: balance;
+    }
+    .sub-head__desc {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      line-height: 1.55;
+    }
+
+    /* Tabs */
+    .sub-tabs {
+      display: flex;
+      padding: 0 28px;
+      margin-top: 20px;
+      gap: 4px;
+      border-bottom: 1px solid var(--line-secondary);
+    }
+    .sub-tab {
+      flex: 1;
+      padding: 14px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-align: center;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .sub-tab:hover { color: var(--text-primary); }
+    .sub-tab.is-active {
+      color: var(--chapter-accent);
+      border-bottom-color: var(--chapter-accent);
+    }
+
+    .sub-tab svg { width: 15px; height: 15px; }
+
+    /* Panels */
+    .sub-panel {
+      padding: 24px 28px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sub-panel.is-active { display: flex; }
+
+    .sub-panel__benefit {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+    }
+    .sub-panel__benefit-icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      background: var(--color-primary-light);
+      color: var(--chapter-accent);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .sub-panel__benefit-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+    .sub-panel__benefit-text b { color: var(--text-primary); }
+
+    /* Form */
+    .sub-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .sub-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .sub-input {
+      width: 100%;
+      padding: 13px 15px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface-secondary);
+      border: 1.5px solid var(--line-secondary);
+      border-radius: 10px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .sub-input:focus {
+      border-color: var(--chapter-accent);
+      background: var(--surface);
+    }
+    .sub-input::placeholder { color: var(--text-tertiary); }
+
+    .sub-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      background: var(--chapter-accent);
+      color: white;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: background 0.15s, transform 0.08s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .sub-btn:hover  { background: var(--color-primary-hover); }
+    .sub-btn:active { transform: scale(0.985); }
+    .sub-btn.is-done { background: #1AAA55; pointer-events: none; }
+
+    .sub-btn svg { width: 16px; height: 16px; }
+
+    .sub-note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    /* Schedule reminder */
+    .sub-schedule {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sub-schedule__title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .sub-schedule__row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .sub-schedule__time {
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      min-width: 42px;
+    }
+    .sub-schedule__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sub-schedule__dot.kospi  { background: #E03131; }
+    .sub-schedule__dot.us     { background: #2775ED; }
+    .sub-schedule__dot.weekly { background: #7C3AED; }
+
+    /* Footer inside sidebar */
+    .sub-foot {
+      margin-top: auto;
+      padding: 20px 28px;
+      border-top: 1px solid var(--line-secondary);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+    .sub-foot a {
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: var(--line-primary);
+    }
+
+    /* ============================================================
+       Responsive
+    ============================================================ */
+    /* Tighten chapter layout on narrow desktop widths */
+    @media (max-width: 1280px) {
+      .chapter {
+        grid-template-columns: minmax(260px, 0.9fr) minmax(380px, 1.2fr);
+        gap: clamp(20px, 2.5vw, 36px);
+        padding: clamp(24px, 4vh, 48px) clamp(20px, 3vw, 48px);
+      }
+      .chapter__title {
+        font-size: clamp(28px, 3.4vw, 44px);
+      }
+      .chapter__body {
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .stage-shell { grid-template-columns: 1fr; }
+      .subscribe-sidebar {
+        position: static;
+        height: auto;
+        border-left: none;
+        border-top: 1px solid var(--line-secondary);
+      }
+      .chapter {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 24px;
+      }
+      .chapter__visual {
+        height: 340px;
+      }
+      .pred-visual, .sched-visual, .acc-visual, .ch-visual {
+        min-width: 0;
+      }
+      .scroll-progress { display: none; }
+    }
+
+    /* Spacer at end of scroll track so last chapter stays a bit */
+    .track-tail { height: 40vh; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━ GNB ━━━━━━━━━━━━━━━━━━━━ -->
   <nav class="gnb">
     <div class="gnb__inner">
       <div class="gnb__logo">
@@ -17,9 +1018,11 @@
           </svg>
         </div>
         <span class="gnb__title">Daily<span>30'</span></span>
+        <span class="gnb__title-sub">AI 투자 브리핑</span>
       </div>
       <div class="gnb__meta">
-        <span class="gnb__date" id="gnb-date">2026-04-18 KST 22:30</span>
+        <a href="index.html"
+           style="font-size:13px; color:rgba(255,255,255,.7); font-weight:500;">최신 브리핑 보기 →</a>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
           <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -28,1639 +1031,820 @@
     </div>
   </nav>
 
-  <div class="layout-wrapper">
-    <div class="layout-grid">
+  <!-- Scroll progress dots (desktop only) -->
+  <div class="scroll-progress" id="scroll-progress"></div>
 
-      <!-- ① 최신 브리핑 (펼쳐진 상태) -->
-      <div class="briefing-latest">
-        <div class="accordion-item is-open is-today" data-index="0">
-          <div class="accordion-header" onclick="toggleAccordion(0)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-18</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
-            </div>
-          </div>
+  <!-- ━━━━━━━━━━━━━━━━━━━━ STAGE SHELL ━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="stage-shell">
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
+    <!-- ═══════════ LEFT · Scroll stage ═══════════ -->
+    <div class="scroll-track" id="scroll-track">
 
-              <!-- 1. 예측 카드 -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&P500 방향 예측
-                  <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">?</button>
-                  <span class="section-time">22:40 생성</span>
+      <!-- Sticky canvas with chapter visuals -->
+      <div class="stage-canvas">
+        <div class="stage-inner">
+
+          <!-- Chapter 0 · Hero -->
+          <div class="chapter is-active" data-chapter="0">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">Daily · Since 2026</span>
+              <h1 class="chapter__title">
+                매일 아침<br>
+                <em>시장이 먼저</em><br>
+                보입니다.
+              </h1>
+              <p class="chapter__body">
+                AI가 글로벌 시장 데이터를 분석해<br>
+                코스피·미국 방향을 예측합니다.<br>
+                장 시작 전 스팟 브리핑, 텔레그램 또는 이메일로.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">08:30</span>
+                  <span class="chapter__meta-label">코스피 브리핑</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 68%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">62%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:68%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:62%"></div>
-                      </div>
-                      <div class="pred-confbar__meta">신뢰구간 68% → 최대 68%</div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">38%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:42%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:38%"></div>
-                      </div>
-                      <div class="pred-confbar__meta">신뢰구간 68% → 최대 42%</div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 38%</span>
-                      <span style="color:var(--status-up)">상승 62%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:38">
-                        <span class="pred-divbar__pct">38%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:62">
-                        <span class="pred-divbar__pct">62%</span>
-                      </div>
-                    </div>
-                    <div class="pred-divbar__neutral">
-                      <div class="pred-divbar__tick"></div>
-                      <div class="pred-divbar__label">중립(50%)</div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">22:30</span>
+                  <span class="chapter__meta-label">미국 브리핑</span>
                 </div>
-              </div>
-
-              <!-- 2. 예측 근거 -->
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">신고가 이후 숨 고르기, 상승 기조는 유효</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    
-                    <li>🌏 아시아·유럽 증시가 일제히 강세를 보였어요. 닛케이는 <b>+2.38%</b>, 항셍은 <b>+1.72%</b>로 뛰었고, 독일 DAX <b>+0.72%</b>, 영국 FTSE <b>+0.73%</b>도 동반 상승하며 글로벌 리스크온 분위기가 뚜렷하게 형성됐어요.</li>
-                    
-                    <li>📈 S&P500 선물은 <b>+0.14%</b>, 다우 선물은 <b>+0.18%</b>로 소폭 강세를 유지하고 있어요. 전일 S&P500·나스닥이 사상 최고치를 경신한 직후라 추가 매수보다는 관망 심리도 혼재하지만, 선물이 플러스권을 지키며 하방 압력은 제한적이에요.</li>
-                    
-                    <li>😰 VIX는 <b>18.33</b>으로 20선을 하회하며 안정적인 리스크온 구간에 머물고 있어요. 지난 10일 평균인 <b>23.79</b> 대비 큰 폭으로 낮아진 상태라 투자 심리 개선 흐름이 지속되고 있다는 신호예요.</li>
-                    
-                    <li>🏦 미국 10년 국채금리는 <b>4.268%</b>로 전일 대비 <b>-0.33%</b> 하락하며 안정세를 유지하고 있어요. 금리 부담이 낮아진 환경은 성장주·기술주에 우호적으로 작용하고, 달러 강세 압력도 완화될 여지가 있어요.</li>
-                    
-                    
-                  </ul>
-                </div>
-              </div>
-
-              <div class="divider"></div>
-
-              <!-- 3. 잭 켈로그 전략 종목 -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  잭 켈로그 20일선 전략 추종 종목
-                  <button class="info-icon-btn" onclick="openKelloggModal()" aria-label="전략 설명">?</button>
-                </div>
-                <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">
-                  MA20을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 모멘텀 종목만을 선별합니다.
-                </div>
-                <div class="stock-picks">
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">1</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          MSFT (마이크로소프트)
-                          <span class="ma20-badge">MA20 강세 유지</span>
-                          
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">$417.51</span>
-                          <span class="stock-pick-card__change up">+1.53%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill down" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct down">-11.3% 하회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">모멘텀 가속</span>
-                          전일 +1.53% 급등하며 MA20 대비 10.42% 상회 중이에요. 최근 10거래일 스파크라인이 뚜렷한 우상향 곡선을 그리고 있고, AI 인프라 투자 기대감이 지속되며 기관 수급이 유입되고 있어요. 신고가 부근에서의 눌림 없는 전진은 강세 모멘텀이 살아 있다는 증거예요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-1" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 $415~420 구간 진입. 목표: $435(+4.2%) / 손절: $408 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">2</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          AMD (어드밴스드 마이크로 디바이시스)
-                          <span class="ma20-badge">MA20 강세 유지</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">$265.52</span>
-                          <span class="stock-pick-card__change up">+2.87%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+31.7% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">골든 모멘텀</span>
-                          전일 +2.87%로 반도체 후발 모멘텀을 이끌었어요. MA20 대비 19.37%, MA200 대비 31.66% 상회하며 두 이동평균선 모두 강하게 돌파한 상태예요. AI 가속기 경쟁에서 NVDA의 보완재 역할로 기관 매수세가 지속 유입 중이에요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-2" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 $263~268 구간 진입. 목표: $280(+5.5%) / 손절: $255 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">3</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          JPM (JP모건 체이스)
-                          <span class="ma20-badge">MA20·MA200 동시 상회</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">$309.50</span>
-                          <span class="stock-pick-card__change up">+1.17%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:29%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+2.9% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">금융 섹터 주도</span>
-                          MA20 대비 4.21%, MA200 대비 2.92% 위에서 안정적으로 유지되고 있어요. 전일 +1.17% 상승하며 금융 섹터 강세를 주도했고, 금리 안정 환경에서 순이자마진 개선 기대감이 이어지고 있어요. 실적 시즌 초입에 은행주 수급이 집중될 가능성이 높아요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-3" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 $307~312 구간 진입. 목표: $322(+4.1%) / 손절: $301 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">4</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          GS (골드만삭스)
-                          <span class="ma20-badge">MA20·MA200 동시 상회</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">$907.46</span>
-                          <span class="stock-pick-card__change up">+0.89%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+11.6% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">금융 모멘텀 지속</span>
-                          MA20 대비 5.59%, MA200 대비 11.64% 위에 위치하며 금융 섹터 중 상대 강도가 높은 편이에요. 전일 +0.89% 상승했고, 투자은행 딜 파이프라인 회복 기대와 트레이딩 수익 호조 전망이 실적 시즌 촉매로 작용할 수 있어요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-4" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 $900~915 구간 진입. 목표: $945(+4.1%) / 손절: $885 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">5</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          AAPL (애플)
-                          <span class="ma20-badge">MA20 근접 유지</span>
-                          
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">$262.71</span>
-                          <span class="stock-pick-card__change down">-1.40%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:44%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+4.5% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">눌림목 매수 기회</span>
-                          전일 -1.40% 하락하며 MA20($255.29) 대비 거리가 2.91%로 좁혀졌어요. 이란 휴전 기대감과 글로벌 리스크온 분위기에서 애플 공급망 정상화 기대가 함께 작용할 수 있어요. MA20 지지선 근방의 눌림목 진입은 리스크 대비 수익 비율이 양호한 구간이에요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-5" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 $260~264 구간 진입. 목표: $275(+4.7%) / 손절: $253 이탈 시.
-                    </div>
-                  </div>
-                  
-                </div>
-              </div>
-
-            </div><!-- /accordion-body__inner -->
-          </div><!-- /accordion-body -->
-        </div><!-- /accordion-item -->
-
-        <div class="t-caption" style="margin-top:12px; text-align:right;">
-          생성: 2026-04-16T22:40:26.527810+09:00 | DailyB v1
-        </div>
-      </div><!-- /briefing-latest -->
-
-      <!-- ② 오른쪽 패널: 예측 성공률 + 시장 지표 (최신 브리핑 기준) -->
-      <aside class="layout-grid__right">
-        
-        <div class="right-panel">
-          <div class="panel-header">
-            <span class="section-title">시장 지표</span>
-            <span class="pub-time">2026-04-18 22:40</span>
-          </div>
-          <div class="mkt-list">
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥100 선물</span><div class="mkt-vals"><div class="mkt-val" id="nq-val">-</div><div class="mkt-chg" id="nq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nq"></canvas></div></div>
-            
-            
-            
-            <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">WTI 국제유가</span><div class="mkt-vals"><div class="mkt-val" id="oil-val">-</div><div class="mkt-chg" id="oil-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-oil"></canvas></div></div>
-            
-            
-            
-            <div class="fg-block">
-              <div class="fg-block-header">
-                <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
-                  공포탐욕지수
-                  <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명">?</button>
-                </span>
-                <span class="fg-badge" id="fg-badge">-</span>
-              </div>
-              <div class="fg-body">
-                <div class="fg-gauge-mini"><canvas id="fg-gauge-canvas" style="width:118px;height:64px;display:block;"></canvas></div>
-                <div class="fg-info">
-                  <div class="fg-now"><span class="fg-now-val" id="fg-value">-</span><span class="fg-now-lbl" id="fg-label">-</span></div>
-                  <div class="fg-hist-grid">
-                    <div class="fg-hist-item"><span class="lbl">전일</span><span class="val" id="fg-hist-prev">-</span></div>
-                    <div class="fg-hist-item"><span class="lbl">1주</span><span class="val" id="fg-hist-1w">-</span></div>
-                    <div class="fg-hist-item"><span class="lbl">1달</span><span class="val" id="fg-hist-1m">-</span></div>
-                    <div class="fg-hist-item"><span class="lbl">1년</span><span class="val" id="fg-hist-1y">-</span></div>
-                  </div>
-                  <div id="fg-date" style="font-size:10px;color:var(--text-tertiary);margin-top:4px;"></div>
+                <div>
+                  <span class="chapter__meta-value">무료</span>
+                  <span class="chapter__meta-label">구독료</span>
                 </div>
               </div>
             </div>
-            
-            
-          </div>
-        </div>
-      </aside><!-- /layout-grid__right -->
-
-      <!-- ③ 이전 브리핑 아카이브 (접힌 상태) -->
-      
-      <div class="briefing-archive">
-        
-        <div class="accordion-item" data-index="1">
-          <div class="accordion-header" onclick="toggleAccordion(1)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-17</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
+            <div class="chapter__visual">
+              <div class="hero-stack">
+                <div class="hero-ring r1"></div>
+                <div class="hero-ring r2"></div>
+                <div class="hero-orb">
+                  <div class="hero-orb__inner">30<sup>′</sup></div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&amp;P500 방향 예측
-                  <span class="section-time">22:40 생성</span>
+          <!-- Chapter 1 · Prediction -->
+          <div class="chapter" data-chapter="1">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">01 · Prediction</span>
+              <h2 class="chapter__title">
+                AI가 분석한<br>
+                <em>방향 예측</em>을<br>
+                먼저 받으세요.
+              </h2>
+              <p class="chapter__body">
+                S&P 500 선물, VIX, 외국인 수급, 환율, 금리까지 —
+                수십 개 지표를 종합해 <b>상승 / 하락 / 중립</b> 방향과
+                확률, 신뢰도를 제공합니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">수십 개</span>
+                  <span class="chapter__meta-label">분석 지표</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 68%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">62%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:68%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:62%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">38%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:42%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:38%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 38%</span>
-                      <span style="color:var(--status-up)">상승 62%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:38">
-                        <span class="pred-divbar__pct">38%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:62">
-                        <span class="pred-divbar__pct">62%</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">Claude</span>
+                  <span class="chapter__meta-label">AI 엔진</span>
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">신고가 이후 숨 고르기, 상승 기조는 유효</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🌏 아시아·유럽 증시가 일제히 강세를 보였어요. 닛케이는 <b>+2.38%</b>, 항셍은 <b>+1.72%</b>로 뛰었고, 독일 DAX <b>+0.72%</b>, 영국 FTSE <b>+0.73%</b>도 동반 상승하며 글로벌 리스크온 분위기가 뚜렷하게 형성됐어요.</li>
-                    
-                    <li>📈 S&P500 선물은 <b>+0.14%</b>, 다우 선물은 <b>+0.18%</b>로 소폭 강세를 유지하고 있어요. 전일 S&P500·나스닥이 사상 최고치를 경신한 직후라 추가 매수보다는 관망 심리도 혼재하지만, 선물이 플러스권을 지키며 하방 압력은 제한적이에요.</li>
-                    
-                    <li>😰 VIX는 <b>18.33</b>으로 20선을 하회하며 안정적인 리스크온 구간에 머물고 있어요. 지난 10일 평균인 <b>23.79</b> 대비 큰 폭으로 낮아진 상태라 투자 심리 개선 흐름이 지속되고 있다는 신호예요.</li>
-                    
-                    <li>🏦 미국 10년 국채금리는 <b>4.268%</b>로 전일 대비 <b>-0.33%</b> 하락하며 안정세를 유지하고 있어요. 금리 부담이 낮아진 환경은 성장주·기술주에 우호적으로 작용하고, 달러 강세 압력도 완화될 여지가 있어요.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/us/2026-04-17/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
             </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="2">
-          <div class="accordion-header" onclick="toggleAccordion(2)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-17</div>
-              <span class="acc-type-badge kospi">코스피</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge ">중립</span>
+            <div class="chapter__visual">
+              <div class="pred-visual">
+                <div class="pred-visual__header">
+                  <span class="pred-visual__title">2026-04-17 · S&P500 방향 예측</span>
+                  <span class="pred-badge">상승 우위</span>
+                </div>
+                <div class="pred-value" id="pred-value">0<span>%</span></div>
+                <div class="pred-sub">상승 확률 · 최근 10일 신호 일관성 높음</div>
+                <div class="pred-bars">
+                  <div class="pred-bar-row">
+                    <div class="pred-bar-label">
+                      <span style="color:var(--status-up)">상승</span>
+                      <span id="pred-up-label">62%</span>
+                    </div>
+                    <div class="pred-bar-track">
+                      <div class="pred-bar-fill up" id="pred-up-fill"></div>
+                    </div>
+                  </div>
+                  <div class="pred-bar-row">
+                    <div class="pred-bar-label">
+                      <span style="color:var(--status-down)">하락</span>
+                      <span id="pred-down-label">38%</span>
+                    </div>
+                    <div class="pred-bar-track">
+                      <div class="pred-bar-fill down" id="pred-down-fill"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="pred-confidence">
+                  <div>
+                    <div class="pred-confidence__label">신뢰도 (Confidence)</div>
+                    <div style="font-size:18px; font-weight:800; margin-top:2px;">68%</div>
+                  </div>
+                  <div class="pred-confidence__ring">
+                    <svg viewBox="0 0 44 44">
+                      <circle class="track" cx="22" cy="22" r="20"></circle>
+                      <circle class="fill"  cx="22" cy="22" r="20" id="pred-ring"></circle>
+                    </svg>
+                    <div class="pred-confidence__pct">68</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  코스피 시초가 방향 예측
-                  <span class="section-time">22:40 생성</span>
+          <!-- Chapter 2 · Schedule -->
+          <div class="chapter" data-chapter="2">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">02 · Schedule</span>
+              <h2 class="chapter__title">
+                아침에 한 번,<br>
+                <em>저녁에 한 번.</em>
+              </h2>
+              <p class="chapter__body">
+                <b>하루 두 번</b>, 장 시작 전에 맞춰 도착합니다.
+                아침 8:30엔 코스피 시초가 브리핑,
+                밤 10:30엔 미국 시장 브리핑.
+                일요일 저녁엔 주간 리포트가 더해집니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">2회</span>
+                  <span class="chapter__meta-label">일간 브리핑</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">중립 예측 (신뢰도 70%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:50%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:50%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 50%</span>
-                      <span style="color:var(--status-up)">상승 50%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">자동</span>
+                  <span class="chapter__meta-label">휴장일 스킵</span>
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">오를까 내릴까? — 오늘의 핵심 변수</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>데이터 수집 중...</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/ko/2026-04-17/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
             </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="3">
-          <div class="accordion-header" onclick="toggleAccordion(3)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-16</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
+            <div class="chapter__visual">
+              <div class="sched-visual">
+                <div class="sched-row">
+                  <div class="sched-row__time">08:30</div>
+                  <div class="sched-row__dot kospi"></div>
+                  <div>
+                    <div class="sched-row__title">코스피 시초가 브리핑</div>
+                    <div class="sched-row__desc">월 ~ 금 · 전일 미국 마감 기반 방향 예측</div>
+                  </div>
+                  <span class="sched-row__tag">평일</span>
+                </div>
+                <div class="sched-row">
+                  <div class="sched-row__time">22:30</div>
+                  <div class="sched-row__dot us"></div>
+                  <div>
+                    <div class="sched-row__title">미국 시장 브리핑</div>
+                    <div class="sched-row__desc">월 ~ 금 · S&P500 방향 + 빅테크 동향</div>
+                  </div>
+                  <span class="sched-row__tag">평일</span>
+                </div>
+                <div class="sched-row">
+                  <div class="sched-row__time">21:00</div>
+                  <div class="sched-row__dot weekly"></div>
+                  <div>
+                    <div class="sched-row__title">주간 리포트</div>
+                    <div class="sched-row__desc">일요일 · 지난주 요약 + 다음주 전망</div>
+                  </div>
+                  <span class="sched-row__tag">주간</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&amp;P500 방향 예측
-                  <span class="section-time">22:40 생성</span>
+          <!-- Chapter 3 · Kellogg 20MA strategy -->
+          <div class="chapter" data-chapter="3">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">03 · Stock Picks</span>
+              <h2 class="chapter__title">
+                잭 켄로그<br>
+                <em>20일선 전략</em>을<br>
+                매일 선별합니다.
+              </h2>
+              <p class="chapter__body">
+                예측에서 멈추지 않습니다.
+                <b>MA20을 상향 돌파하거나 지지 반등한 종목</b> 중
+                거래량 급증을 동반한 모멘텀 종목만을 골라,
+                진입·목표·손절 가이드까지 함께 드립니다.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">3–5종목</span>
+                  <span class="chapter__meta-label">매일 선별</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 68%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">62%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:68%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:62%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">38%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:42%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:38%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 38%</span>
-                      <span style="color:var(--status-up)">상승 62%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:38">
-                        <span class="pred-divbar__pct">38%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:62">
-                        <span class="pred-divbar__pct">62%</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">실행 가이드</span>
+                  <span class="chapter__meta-label">진입·목표·손절</span>
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">신고가 이후 숨 고르기, 상승 기조는 유효</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🌏 아시아·유럽 증시가 일제히 강세를 보였어요. 닛케이는 <b>+2.38%</b>, 항셍은 <b>+1.72%</b>로 뛰었고, 독일 DAX <b>+0.72%</b>, 영국 FTSE <b>+0.73%</b>도 동반 상승하며 글로벌 리스크온 분위기가 뚜렷하게 형성됐어요.</li>
-                    
-                    <li>📈 S&P500 선물은 <b>+0.14%</b>, 다우 선물은 <b>+0.18%</b>로 소폭 강세를 유지하고 있어요. 전일 S&P500·나스닥이 사상 최고치를 경신한 직후라 추가 매수보다는 관망 심리도 혼재하지만, 선물이 플러스권을 지키며 하방 압력은 제한적이에요.</li>
-                    
-                    <li>😰 VIX는 <b>18.33</b>으로 20선을 하회하며 안정적인 리스크온 구간에 머물고 있어요. 지난 10일 평균인 <b>23.79</b> 대비 큰 폭으로 낮아진 상태라 투자 심리 개선 흐름이 지속되고 있다는 신호예요.</li>
-                    
-                    <li>🏦 미국 10년 국채금리는 <b>4.268%</b>로 전일 대비 <b>-0.33%</b> 하락하며 안정세를 유지하고 있어요. 금리 부담이 낮아진 환경은 성장주·기술주에 우호적으로 작용하고, 달러 강세 압력도 완화될 여지가 있어요.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/us/2026-04-16/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
             </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="4">
-          <div class="accordion-header" onclick="toggleAccordion(4)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-16</div>
-              <span class="acc-type-badge kospi">코스피</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
-            </div>
-          </div>
-
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  코스피 시초가 방향 예측
-                  <span class="section-time">08:52 생성</span>
-                </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 81%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">72%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:81%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:72%"></div>
-                      </div>
+            <div class="chapter__visual">
+              <div class="kel-visual">
+                <div class="kel-card">
+                  <div class="kel-card__rank">1</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">AMD</span>
+                      <span class="kel-card__company">어드밴스드 마이크로</span>
+                      <span class="kel-card__tag golden">★ GOLDEN</span>
                     </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">28%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:32%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:28%"></div>
-                      </div>
+                    <div class="kel-card__meta">
+                      <span>$265.52</span>
+                      <span class="kel-card__change up">+2.87%</span>
+                      <span>MA20 +19.4%</span>
                     </div>
                   </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 28%</span>
-                      <span style="color:var(--status-up)">상승 72%</span>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,28 8,26 16,22 24,20 32,16 40,14 48,9 56,6 64,4"/>
+                    <polyline fill="none" stroke="var(--line-primary)" stroke-width="1" stroke-dasharray="2 2"
+                      points="0,24 64,14"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">2</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">MSFT</span>
+                      <span class="kel-card__company">마이크로소프트</span>
+                      <span class="kel-card__tag">MA20 강세</span>
                     </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:28">
-                        <span class="pred-divbar__pct">28%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:72">
-                        <span class="pred-divbar__pct">72%</span>
-                      </div>
+                    <div class="kel-card__meta">
+                      <span>$417.51</span>
+                      <span class="kel-card__change up">+1.53%</span>
+                      <span>MA20 +10.4%</span>
                     </div>
                   </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,22 8,24 16,20 24,18 32,14 40,12 48,10 56,8 64,7"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">3</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">JPM</span>
+                      <span class="kel-card__company">JP모간 체이스</span>
+                      <span class="kel-card__tag golden">★ GOLDEN</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$309.50</span>
+                      <span class="kel-card__change up">+1.17%</span>
+                      <span>MA20 +4.2%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#E03131" stroke-width="1.5"
+                      points="0,24 8,22 16,23 24,20 32,18 40,17 48,15 56,13 64,12"/>
+                  </svg>
+                </div>
+
+                <div class="kel-card">
+                  <div class="kel-card__rank">4</div>
+                  <div class="kel-card__info">
+                    <div class="kel-card__name-row">
+                      <span class="kel-card__ticker">AAPL</span>
+                      <span class="kel-card__company">애플</span>
+                      <span class="kel-card__tag">눌림목</span>
+                    </div>
+                    <div class="kel-card__meta">
+                      <span>$262.71</span>
+                      <span class="kel-card__change down">−1.40%</span>
+                      <span>MA20 +2.9%</span>
+                    </div>
+                  </div>
+                  <svg class="kel-card__spark" viewBox="0 0 64 36" preserveAspectRatio="none">
+                    <polyline fill="none" stroke="#2775ED" stroke-width="1.5"
+                      points="0,14 8,12 16,15 24,13 32,16 40,18 48,17 56,20 64,19"/>
+                  </svg>
+                </div>
+
+                <div class="kel-footnote">
+                  <b>★ GOLDEN</b> — MA20·MA200 동시 상회, 기관 수급 유입 구간.
+                  각 종목에는 시가 진입가·목표가·손절가가 함께 등록돼있습니다.
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">왜 오를까? — S&P500 최고치·빅테크 동반 강세</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🚀 S&P500은 <b>+0.80%</b>로 <b>7,022pt</b>를 기록하며 사상 최고치에 근접했어요. MSFT가 <b>+4.61%</b>, AAPL이 <b>+2.94%</b>로 빅테크 전반이 강세를 보여, 코스피 IT·플랫폼 섹터의 갭 상승 압력이 높아졌어요.</li>
-                    
-                    <li>💡 NVDA는 <b>+1.20%</b>로 <b>198.87달러</b>를 기록하며 MA20 대비 <b>+10.86%</b> 위에서 꾸준히 상승세를 이어가고 있어요. SK하이닉스·삼성전자·한미반도체 등 국내 반도체주에 우호적인 시초가 환경이 조성됐어요.</li>
-                    
-                    <li>😰 VIX는 <b>18.17</b>로 하락 마감하며 MA20인 <b>24.12</b>보다 크게 낮은 수준을 유지하고 있어요. 리스크온 심리가 확실히 자리 잡았고, 글로벌 투자자들이 위험자산 선호 모드로 전환된 상태예요.</li>
-                    
-                    <li>🇺🇸 EWY는 <b>-1.20%</b>로 소폭 하락했지만, MA20 대비 <b>+10.78%</b>·MA200 대비 <b>+48.93%</b>라는 강한 구조적 우위를 유지하고 있어요. 골드만삭스의 한국 증시 최고치 전망과 중동 긴장 완화 뉴스가 외국인 수급에 추가적인 우호 재료로 작용할 수 있어요.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/ko/2026-04-16/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="5">
-          <div class="accordion-header" onclick="toggleAccordion(5)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-15</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&amp;P500 방향 예측
-                  <span class="section-time">23:20 생성</span>
+          <!-- Chapter 4 · Data sources -->
+          <div class="chapter" data-chapter="4">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">04 · Data</span>
+              <h2 class="chapter__title">
+                모든 지표를<br>
+                <em>하나의 브리핑</em>으로.
+              </h2>
+              <p class="chapter__body">
+                글로벌 증시 · 선물 · 금리 · 환율 · 원자재 · 변동성까지.
+                매일 아침 흩어진 지표를 읽을 필요 없이,
+                핵심만 요약해 받아보세요.
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">yfinance</span>
+                  <span class="chapter__meta-label">실시간 데이터</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 68%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">62%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:68%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:62%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">38%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:42%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:38%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 38%</span>
-                      <span style="color:var(--status-up)">상승 62%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:38">
-                        <span class="pred-divbar__pct">38%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:62">
-                        <span class="pred-divbar__pct">62%</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">웹 검색</span>
+                  <span class="chapter__meta-label">뉴스 보완</span>
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">기록 근접·빅테크 강세, 상승 흐름 이어간다</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>📈 S&P500 선물은 <b>+0.14%</b>로 프리마켓에서 소폭 강세를 유지하고 있고, 현물 S&P500도 <b>6,982.74</b>로 MA20 대비 <b>+5.14%</b> 상회하며 상승 모멘텀이 살아 있어요.</li>
-                    
-                    <li>😰 VIX는 <b>17.64</b>로 전일 대비 <b>-3.92%</b> 하락하며 MA20(<b>24.10</b>)을 크게 하회하고 있어요. 변동성이 빠르게 진정되며 리스크온 분위기가 형성됐어요.</li>
-                    
-                    <li>🏦 미국 10년물 국채금리는 <b>4.274%</b>로 MA20(<b>4.327%</b>) 아래에서 안정세를 보이고 있어요. 금리 부담이 완화되며 성장주·기술주에 우호적인 매크로 환경이 이어지고 있어요.</li>
-                    
-                    <li>💹 MSFT가 <b>+3.41%</b>, TSLA가 <b>+3.45%</b>, AVGO가 <b>+3.64%</b>, MS가 <b>+5.00%</b>로 빅테크와 금융주가 동반 강세를 보이며 지수를 끌어올리고 있어요. Bank of America 실적 서프라이즈도 금융 섹터 전반에 긍정적인 신호를 줬어요.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/us/2026-04-15/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
             </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="6">
-          <div class="accordion-header" onclick="toggleAccordion(6)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-15</div>
-              <span class="acc-type-badge kospi">코스피</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
+            <div class="chapter__visual">
+              <div class="src-visual">
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    S&P 500 <span class="src-chip__meta">6,982 · +0.80%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    VIX <span class="src-chip__meta">18.33</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    US 10Y <span class="src-chip__meta">4.268%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    닛케이 <span class="src-chip__meta">+2.38%</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    USD/KRW <span class="src-chip__meta">1,383.2</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    WTI <span class="src-chip__meta">$61.6</span>
+                  </div>
+                </div>
+                <div class="src-chip">
+                  <span class="src-chip__dot"></span>
+                  <div>
+                    Fear &amp; Greed <span class="src-chip__meta">35</span>
+                  </div>
+                </div>
+                <div class="src-core">DAILY30'</div>
+              </div>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  코스피 시초가 방향 예측
-                  <span class="section-time">19:44 생성</span>
+          <!-- Chapter 5 · Channels -->
+          <div class="chapter" data-chapter="5">
+            <div class="chapter__text">
+              <span class="chapter__eyebrow">05 · Channels</span>
+              <h2 class="chapter__title">
+                편한 곳으로<br>
+                <em>바로 도착</em>합니다.
+              </h2>
+              <p class="chapter__body">
+                앱 설치도, 새로운 알림 설정도 필요 없어요.
+                텔레그램 또는 이메일 중 편한 방식을 고르세요.
+                오른쪽에서 바로 구독할 수 있습니다. →
+              </p>
+              <div class="chapter__meta">
+                <div>
+                  <span class="chapter__meta-value">즉시</span>
+                  <span class="chapter__meta-label">구독 시작</span>
                 </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 72%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">70%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:72%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:70%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">30%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:31%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:30%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 30%</span>
-                      <span style="color:var(--status-up)">상승 70%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:30">
-                        <span class="pred-divbar__pct">30%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:70">
-                        <span class="pred-divbar__pct">70%</span>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <span class="chapter__meta-value">언제든</span>
+                  <span class="chapter__meta-label">구독 해지</span>
                 </div>
               </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">왜 오를까? — 빅테크 랠리·EWY +3.9% 폭등</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🚀 코스피가 전일 <b>6,000포인트</b>를 돌파하며 급등세를 이어가고 있습니다. 미국 증시 하락에도 불구하고 코스피가 독자적 강세를 보인 것은 외국인 수급과 반도체 모멘텀이 그만큼 강력하다는 신호입니다.</li>
-                    
-                    <li>🇺🇸 외국인 투자자들이 <b>2.7조원 이상</b> 순매수하며 코스피 상승을 뒷받침하고 있습니다. 이 규모의 외국인 매수세가 지속될 경우 시초가에도 상승 갭이 유지될 가능성이 높습니다.</li>
-                    
-                    <li>💡 SK하이닉스가 <b>110만원</b>을 돌파하며 역대 최고가를 경신했습니다. 반도체 섹터의 강세는 코스피 전체 지수를 견인하는 핵심 동력으로, 삼성전자와 SK하이닉스 비중이 큰 코스피 특성상 시초가 강세 압력으로 이어질 수 있습니다.</li>
-                    
-                    <li>😰 국제 유가 상승세가 아시아 시장에 하락 압력으로 작용할 수 있으며, 미국 증시 약세 역시 코스피 시초가 상단을 제한하는 요인입니다. 단기 급등에 따른 차익 실현 매물 출회 가능성도 염두에 둬야 합니다.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/ko/2026-04-15/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
             </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="7">
-          <div class="accordion-header" onclick="toggleAccordion(7)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-14</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge ">중립</span>
+            <div class="chapter__visual">
+              <div class="ch-visual">
+                <div class="ch-card">
+                  <div class="ch-card__header">
+                    <div class="ch-card__icon tg">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                        <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="ch-card__title">Daily30' Bot</div>
+                      <div class="ch-card__sub">텔레그램 · 매일 08:30 KST</div>
+                    </div>
+                  </div>
+                  <div class="ch-msg">
+                    📈 <b>코스피 상승 우위</b> (72%)<br>
+                    외국인 2.7조 순매수,<br>
+                    SK하이닉스 110만원 돌파
+                    <div class="ch-msg__time">08:32 ✓✓</div>
+                  </div>
+                  <div class="ch-msg" style="margin-bottom:0;">
+                    🔗 전체 브리핑 보기
+                    <div class="ch-msg__time">08:32 ✓✓</div>
+                  </div>
+                </div>
+                <div class="ch-card">
+                  <div class="ch-card__header">
+                    <div class="ch-card__icon em">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="ch-card__title">받은편지함</div>
+                      <div class="ch-card__sub">이메일 · 뉴스레터</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot"></span>
+                    <div>
+                      <div class="ch-email-row__title">📈 코스피 상승 우위 · 신뢰도 72%</div>
+                      <div class="ch-email-row__preview">외국인 2.7조 순매수, SK하이닉스 110만원 돌파…</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot" style="background:#7C3AED"></span>
+                    <div>
+                      <div class="ch-email-row__title">📊 주간 리포트 · 반도체 모멘텀</div>
+                      <div class="ch-email-row__preview">이번 주 하이라이트와 다음 주 전망…</div>
+                    </div>
+                  </div>
+                  <div class="ch-email-row">
+                    <span class="ch-email-row__dot" style="background:#2775ED"></span>
+                    <div>
+                      <div class="ch-email-row__title">🇺🇸 S&P500 최고치 경신</div>
+                      <div class="ch-email-row__preview">빅테크 동반 강세, VIX 18선 안착…</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
+        </div><!-- /stage-inner -->
+      </div><!-- /stage-canvas -->
 
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&amp;P500 방향 예측
-                  <span class="section-time">22:30 생성</span>
-                </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">중립 예측 (신뢰도 70%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:50%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:70%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:50%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 50%</span>
-                      <span style="color:var(--status-up)">상승 50%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">핵심 시그널</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>데이터 수집 중...</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/us/2026-04-14/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="8">
-          <div class="accordion-header" onclick="toggleAccordion(8)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-14</div>
-              <span class="acc-type-badge kospi">코스피</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
-            </div>
-          </div>
-
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  코스피 시초가 방향 예측
-                  <span class="section-time">19:44 생성</span>
-                </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 72%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">70%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:72%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:70%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">30%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:31%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:30%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 30%</span>
-                      <span style="color:var(--status-up)">상승 70%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:30">
-                        <span class="pred-divbar__pct">30%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:70">
-                        <span class="pred-divbar__pct">70%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">왜 오를까? — 오늘의 상승 시그널</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🚀 코스피가 전일 <b>6,000포인트</b>를 돌파하며 급등세를 이어가고 있습니다. 미국 증시 하락에도 불구하고 코스피가 독자적 강세를 보인 것은 외국인 수급과 반도체 모멘텀이 그만큼 강력하다는 신호입니다.</li>
-                    
-                    <li>🇺🇸 외국인 투자자들이 <b>2.7조원 이상</b> 순매수하며 코스피 상승을 뒷받침하고 있습니다. 이 규모의 외국인 매수세가 지속될 경우 시초가에도 상승 갭이 유지될 가능성이 높습니다.</li>
-                    
-                    <li>💡 SK하이닉스가 <b>110만원</b>을 돌파하며 역대 최고가를 경신했습니다. 반도체 섹터의 강세는 코스피 전체 지수를 견인하는 핵심 동력으로, 삼성전자와 SK하이닉스 비중이 큰 코스피 특성상 시초가 강세 압력으로 이어질 수 있습니다.</li>
-                    
-                    <li>😰 국제 유가 상승세가 아시아 시장에 하락 압력으로 작용할 수 있으며, 미국 증시 약세 역시 코스피 시초가 상단을 제한하는 요인입니다. 단기 급등에 따른 차익 실현 매물 출회 가능성도 염두에 둬야 합니다.</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/ko/2026-04-14/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        
-        <div class="accordion-item" data-index="9">
-          <div class="accordion-header" onclick="toggleAccordion(9)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-04-13</div>
-              <span class="acc-type-badge us">미국</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge ">상승 예측</span>
-            </div>
-          </div>
-
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-
-              <!-- 예측 카드 (static) -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  S&amp;P500 방향 예측
-                  <span class="section-time"> 생성</span>
-                </div>
-                <div class="prediction-card">
-                  <div class="prediction-summary">
-                    <span class="prediction-label">상승 예측 예측 (신뢰도 65%)</span>
-                  </div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:65%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:50%"></div>
-                      </div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header">
-                        <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">50%</span>
-                      </div>
-                      <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:65%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:50%"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 50%</span>
-                      <span style="color:var(--status-up)">상승 50%</span>
-                    </div>
-                    <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                      <div class="pred-divbar__up" style="flex:50">
-                        <span class="pred-divbar__pct">50%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 예측 근거 -->
-              
-              <div class="open-section">
-                <div class="open-section__title reason-section-title">핵심 시그널</div>
-                <div class="reason-block">
-                  <ul>
-                    
-                    <li>🌏 아시아 증시 동반 강세 — 닛케이 <b>+1.84%</b>, 코스피 <b>+1.40%</b> 상승 마감으로 미국 개장 전 리스크온 분위기 형성. 항셍 <b>-0.90%</b>으로 중국발 불안요소는 상존</li>
-                    
-                    <li>📈 S&P500 선물 <b>+0.05%</b> / 나스닥100 선물 <b>+0.10%</b> — 프리마켓 소폭 양호. S&P500 현물이 MA20(6,611) 대비 <b>+3.22%</b>, MA200(6,666) 대비 <b>+2.38%</b> 상회하며 기술적 강세 구조 유지</li>
-                    
-                    <li>😰 VIX <b>19.84 (+3.17%)</b> / 공포탐욕지수 <b>12 (극단적 공포)</b> — VIX가 최근 고점 30.6 대비 35% 하락하며 불안심리 완화 진행 중. 공포탐욕지수 12는 역발상 관점의 반등 기대 신호</li>
-                    
-                    <li>💻 MSFT <b>+2.28% (MA20 상향 돌파)</b> — 빅테크 중 유일한 MA20 crossing up 신호 발생. GOOGL <b>+0.35%</b>, TSLA <b>+0.84%</b>, AVGO <b>+0.66%</b> 동반 상승으로 기술주 중심 매수세 유입</li>
-                    
-                    <li>💵 달러 인덱스 DXY <b>98.74 (+0.10%)</b> 보합 — 달러 강세 압력 제한적으로 신흥시장 자금 유출 우려 낮음. 유럽 증시 DAX <b>-0.30%</b>, FTSE <b>-0.10%</b>, CAC <b>-0.34%</b> 소폭 하락은 부담</li>
-                    
-                  </ul>
-                </div>
-              </div>
-              
-
-              <!-- 전체 브리핑 링크 -->
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/us/2026-04-13/">
-                  전체 브리핑 보기 →
-                </a>
-              </div>
-
-            </div>
-          </div>
-        </div>
-        
-      </div><!-- /briefing-archive -->
-      
-
-    </div><!-- /layout-grid -->
-  </div><!-- /layout-wrapper -->
-
-  <!-- 잭 켈로그 모달 -->
-  <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="kellogg-modal-title">
-      <button class="info-modal__close" onclick="closeKelloggModal()" aria-label="닫기">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="info-modal__title" id="kellogg-modal-title">잭 켈로그 20일선 전략이란?</div>
-      <div class="info-modal__body">
-        <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(MA20) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
-        <br>
-        <p><strong>선별 기준</strong></p>
-        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
-          <li>MA20을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
-          <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
-          <li>최소 <strong>3거래일 이상</strong> MA20 위에서 유지 중인 종목</li>
-        </ul>
-        <br>
-        <p style="color:var(--text-tertiary); font-size:12px;">※ 매매 추천이 아닌 전략 추종 종목 탐색 목적으로 제공됩니다.</p>
+      <!-- Invisible scroll triggers — one per chapter -->
+      <div class="triggers">
+        <div class="trigger" data-trigger="0"></div>
+        <div class="trigger" data-trigger="1"></div>
+        <div class="trigger" data-trigger="2"></div>
+        <div class="trigger" data-trigger="3"></div>
+        <div class="trigger" data-trigger="4"></div>
+        <div class="trigger" data-trigger="5"></div>
+        <div class="track-tail"></div>
       </div>
+
+    </div><!-- /scroll-track -->
+
+    <!-- ═══════════ RIGHT · Subscribe sidebar ═══════════ -->
+    <aside class="subscribe-sidebar" id="sub-sidebar">
+
+      <div class="sub-head">
+        <div class="sub-head__eyebrow">Subscribe · 무료</div>
+        <h3 class="sub-head__title">브리핑을<br>받아볼 채널을 고르세요</h3>
+        <p class="sub-head__desc">텔레그램은 즉시, 이메일은 매일 아침. 언제든 구독 해지할 수 있어요.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="sub-tabs" role="tablist">
+        <button class="sub-tab is-active" id="tab-tg" role="tab" aria-selected="true" onclick="switchTab('tg')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+          텔레그램
+        </button>
+        <button class="sub-tab" id="tab-em" role="tab" aria-selected="false" onclick="switchTab('em')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          이메일
+        </button>
+      </div>
+
+      <!-- TG panel -->
+      <div class="sub-panel is-active" id="panel-tg" role="tabpanel">
+        <div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">⚡</div>
+            <div class="sub-panel__benefit-text">
+              <b>즉시 수신.</b> 채널에 들어오면 바로 다음 브리핑부터 받아볼 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">💬</div>
+            <div class="sub-panel__benefit-text">
+              <b>핵심 요약 300자.</b> 모바일에서 요약 내용을 먼저 확인할 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">🔗</div>
+            <div class="sub-panel__benefit-text">
+              <b>전체 브리핑 링크.</b> 더 궁금하면 웹에서 이어서 읽을 수 있어요.
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-form">
+          <button class="sub-btn" onclick="joinTelegram(this)">
+            텔레그램 채널 바로가기
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="sub-note">링크가 열리지 않으면 <a href="https://t.me/daily30_briefing" target="_blank" style="color:var(--chapter-accent);">t.me/daily30_briefing</a>에서 직접 구독하실 수 있어요.</p>
+        </div>
+
+        <div class="sub-schedule">
+          <div class="sub-schedule__title">수신 스케줄</div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot kospi"></span>
+            <span class="sub-schedule__time">08:30</span>
+            <span>코스피 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot us"></span>
+            <span class="sub-schedule__time">22:30</span>
+            <span>미국 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot weekly"></span>
+            <span class="sub-schedule__time">21:00</span>
+            <span>주간 리포트 · 일요일</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email panel -->
+      <div class="sub-panel" id="panel-em" role="tabpanel">
+        <div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">📧</div>
+            <div class="sub-panel__benefit-text">
+              <b>전문 발송.</b> 브리핑 전체를 받은편지함으로 보내드려요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">📚</div>
+            <div class="sub-panel__benefit-text">
+              <b>이메일 아카이브.</b> 지난 브리핑을 받은편지함에서 검색하고 다시 볼 수 있어요.
+            </div>
+          </div>
+          <div class="sub-panel__benefit">
+            <div class="sub-panel__benefit-icon">🔕</div>
+            <div class="sub-panel__benefit-text">
+              <b>방해 최소화.</b> 푸시 알림 없이, 조용히 도착합니다.
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-form" id="email-form">
+          <label class="sub-label" for="email-input">이메일 주소</label>
+          <input class="sub-input" id="email-input" type="email" placeholder="you@example.com" />
+          <button class="sub-btn" id="email-btn" onclick="submitEmail(this)">
+            뉴스레터 구독 신청
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p class="sub-note" id="sub-note-em">구독 확인 메일을 보내드립니다. 스팸함도 확인해주세요.</p>
+        </div>
+
+        <div class="sub-schedule">
+          <div class="sub-schedule__title">뉴스레터 스케줄</div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot kospi"></span>
+            <span class="sub-schedule__time">08:30</span>
+            <span>코스피 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot us"></span>
+            <span class="sub-schedule__time">22:30</span>
+            <span>미국 · 평일</span>
+          </div>
+          <div class="sub-schedule__row">
+            <span class="sub-schedule__dot weekly"></span>
+            <span class="sub-schedule__time">21:00</span>
+            <span>주간 리포트 · 일요일</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-foot">
+        Daily30' · 개인 투자 비서<br>
+        <a href="index.html">최신 브리핑 보기</a> · 무료 · 언제든 해지
+      </div>
+
+    </aside>
+  </div><!-- /stage-shell -->
+
+  <!-- Subscribe success modal -->
+  <div id="sub-modal" style="display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;padding:24px">
+    <div id="sub-modal-bg" style="position:absolute;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px)" onclick="closeSubModal()"></div>
+    <div style="position:relative;background:var(--surface);border:1px solid var(--line-secondary);border-radius:24px;padding:40px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.25)">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1AAA55,#34C469);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px">✓</div>
+      <h3 style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;color:var(--text-primary)">구독 신청 완료!</h3>
+      <p id="sub-modal-email" style="font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px"></p>
+      <p style="font-size:13px;color:var(--text-tertiary);line-height:1.6;margin-bottom:28px">최신 브리핑을 바로 보내드렸어요.<br>스팸함도 꼭 확인해 주세요.</p>
+      <div style="background:var(--surface-secondary);border:1px solid var(--line-secondary);border-radius:12px;padding:14px 16px;margin-bottom:24px;text-align:left">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px">수신 스케줄</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+          📈 <b>08:30</b> 코스피 브리핑 · 평일<br>
+          🌐 <b>22:30</b> 미국 브리핑 · 평일<br>
+          📊 <b>21:00</b> 주간 리포트 · 일요일
+        </div>
+      </div>
+      <button onclick="closeSubModal()" style="width:100%;padding:14px;font-size:14px;font-weight:700;background:var(--chapter-accent);color:#fff;border:none;border-radius:10px;cursor:pointer;font-family:inherit">확인</button>
     </div>
   </div>
 
-  <!-- 공포탐욕지수 모달 -->
-  <div class="info-modal-backdrop" id="fg-modal" onclick="if(event.target===this)closeFGModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="fg-modal-title">
-      <button class="info-modal__close" onclick="closeFGModal()" aria-label="닫기">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="info-modal__title" id="fg-modal-title">공포탐욕지수(Fear &amp; Greed Index)</div>
-      <div class="info-modal__body">
-        <p>시장의 7가지 요인을 분석하여 현재 투자자의 심리를 극단적인 공포(0)부터 극단적인 탐욕(100)까지 측정하는 심리지표입니다.</p>
-        <br>
-        <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
-          <li><strong style="color:#1D4ED8">0~24</strong> : 극단적 공포(Extreme Fear)</li>
-          <li><strong style="color:#2563EB">25~44</strong> : 공포(Fear)</li>
-          <li><strong style="color:#CA8A04">45~54</strong> : 중립(Neutral)</li>
-          <li><strong style="color:#E03131">55~74</strong> : 탐욕(Greed)</li>
-          <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕(Extreme Greed)</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- 시초가 예측 모달 -->
-  <div class="info-modal-backdrop" id="pred-modal" onclick="if(event.target===this)closePredModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">
-      <button class="info-modal__close" onclick="closePredModal()" aria-label="닫기">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="info-modal__title" id="pred-modal-title">시초가 방향 예측이란?</div>
-      <div class="info-modal__body">
-        <p>미국 선물·지수, 외국인 수급, 반도체 지표, 공포탐욕지수 등 다수의 시장 데이터를 종합하여 AI가 다음 거래일 시초가 방향을 분석한 결과입니다.</p>
-        <br>
-        <p><strong>읽는 법</strong></p>
-        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
-          <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>
-          <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>
-          <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
-          <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
-        </ul>
-        <br>
-        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
-      </div>
-    </div>
-  </div>
-
+  <!-- Theme toggle -->
   <script>
-  window.MARKET_DATA = {
-  "kospi": {
-    "base": 6226.05,
-    "chg": 2.21,
-    "data": [
-      6148.3398,
-      6147.2998,
-      6141.71,
-      6103.6899,
-      6194.48,
-      6212.9702,
-      6212.9502,
-      6204.6699,
-      6187.7598,
-      6207.21
-    ]
-  },
-  "kosdaq": {
-    "base": 1162.97,
-    "chg": 0.91,
-    "data": [
-      1148.6899,
-      1151.9301,
-      1155.97,
-      1148.0601,
-      1165.97,
-      1166.3,
-      1165.95,
-      1168.11,
-      1161.46,
-      1161.7
-    ]
-  },
-  "nasdaq": {
-    "base": 23988.91,
-    "chg": -0.11,
-    "data": [
-      23620.6074,
-      23634.1074,
-      23823.2617,
-      23874.9844,
-      23906.9492,
-      23868.4199,
-      23916.9512,
-      23985.0488,
-      24010.7812,
-      23988.9082
-    ]
-  },
-  "nq": {
-    "base": 26417.75,
-    "chg": 0.2,
-    "data": [
-      26434.5,
-      26455.0,
-      26480.75,
-      26460.0,
-      26440.5,
-      26453.25,
-      26406.0,
-      26418.25,
-      26402.0,
-      26411.75
-    ]
-  },
-  "dji": {
-    "base": 48644.63,
-    "chg": 0.37,
-    "data": [
-      48562.4414,
-      48535.3906,
-      48447.9297,
-      48373.4297,
-      48317.0703,
-      48376.1719,
-      48417.4492,
-      48499.8789,
-      48460.5508,
-      48646.1719
-    ]
-  },
-  "sox": {
-    "base": 9205.15,
-    "chg": -0.37,
-    "data": [
-      9224.8623,
-      9222.4932,
-      9206.3926,
-      9200.8027,
-      9156.4775,
-      9096.2051,
-      9130.2725,
-      9190.2266,
-      9237.6084,
-      9205.1475
-    ]
-  },
-  "oil": {
-    "base": 88.91,
-    "chg": -2.61,
-    "data": [
-      91.77,
-      91.56,
-      91.58,
-      89.34,
-      89.25,
-      89.47,
-      88.79,
-      88.6,
-      89.28,
-      88.91
-    ]
-  },
-  "usd": {
-    "base": 1476.38,
-    "chg": 0.47,
-    "data": [
-      1471.98,
-      1471.54,
-      1472.48,
-      1473.3199,
-      1474.86,
-      1476.6,
-      1476.92,
-      1476.39,
-      1475.3101,
-      1476.5699
-    ]
-  },
-  "dxy": {
-    "base": 98.2,
-    "chg": 0.14,
-    "data": [
-      97.965,
-      98.014,
-      98.005,
-      98.099,
-      98.156,
-      98.208,
-      98.209,
-      98.163,
-      98.19,
-      98.196
-    ]
-  },
-  "fearGreed": {
-    "value": 23,
-    "prev": 23,
-    "1w": 14,
-    "1m": 28,
-    "1y": 30,
-    "timestamp": "1776297600",
-    "classification": "Extreme Fear"
-  },
-  "stockCharts": [
-    {
-      "id": "mc-1",
-      "prices": [
-        373.46,
-        372.88,
-        372.29,
-        374.33,
-        373.07,
-        370.87,
-        384.37,
-        393.11,
-        411.22,
-        417.51
-      ],
-      "ma20": [
-        385.497,
-        383.693,
-        381.837,
-        380.2655,
-        378.675,
-        377.1255,
-        376.5665,
-        376.2245,
-        376.815,
-        378.101
-      ],
-      "ma200": [
-        475.262,
-        474.75,
-        474.2241,
-        473.7226,
-        473.1719,
-        472.5899,
-        472.0646,
-        471.5573,
-        471.148,
-        470.7629
-      ]
-    },
-    {
-      "id": "mc-2",
-      "prices": [
-        217.5,
-        220.18,
-        221.53,
-        231.82,
-        236.64,
-        245.04,
-        246.83,
-        255.07,
-        258.12,
-        265.52
-      ],
-      "ma20": [
-        202.7255,
-        204.113,
-        205.0555,
-        206.485,
-        208.0755,
-        210.4405,
-        213.1125,
-        216.037,
-        219.1275,
-        222.4305
-      ],
-      "ma200": [
-        196.8881,
-        197.3535,
-        197.8272,
-        198.3451,
-        198.8804,
-        199.4135,
-        199.9306,
-        200.4876,
-        201.0591,
-        201.6772
-      ]
-    },
-    {
-      "id": "mc-3",
-      "prices": [
-        293.1,
-        295.45,
-        297.4,
-        307.97,
-        310.33,
-        309.87,
-        313.68,
-        311.12,
-        305.93,
-        309.5
-      ],
-      "ma20": [
-        287.4012,
-        287.7734,
-        288.2212,
-        289.2567,
-        290.4704,
-        291.8914,
-        293.4755,
-        294.7964,
-        295.8214,
-        296.9827
-      ],
-      "ma200": [
-        299.3063,
-        299.4616,
-        299.605,
-        299.796,
-        299.9829,
-        300.1528,
-        300.328,
-        300.4673,
-        300.5888,
-        300.7144
-      ]
-    },
-    {
-      "id": "mc-4",
-      "prices": [
-        863.04,
-        866.05,
-        864.15,
-        905.75,
-        903.72,
-        907.8,
-        890.79,
-        909.63,
-        899.49,
-        907.46
-      ],
-      "ma20": [
-        821.1135,
-        823.345,
-        824.951,
-        828.548,
-        832.546,
-        838.56,
-        843.989,
-        849.732,
-        854.3545,
-        859.4535
-      ],
-      "ma200": [
-        801.9564,
-        803.2116,
-        804.4051,
-        805.7792,
-        807.1133,
-        808.3928,
-        809.549,
-        810.7143,
-        811.8109,
-        812.864
-      ]
-    },
-    {
-      "id": "mc-5",
-      "prices": [
-        255.92,
-        258.86,
-        253.5,
-        258.9,
-        260.49,
-        260.48,
-        259.2,
-        258.83,
-        266.43,
-        262.71
-      ],
-      "ma20": [
-        253.4105,
-        253.4805,
-        253.1615,
-        253.065,
-        253.049,
-        253.285,
-        253.739,
-        254.0395,
-        254.6495,
-        255.288
-      ],
-      "ma200": [
-        248.804,
-        249.123,
-        249.4106,
-        249.7032,
-        250.0012,
-        250.3051,
-        250.5964,
-        250.8886,
-        251.2184,
-        251.5092
-      ]
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.classList.contains('dark') ? 'light' : 'dark';
+      html.classList.remove('light','dark');
+      html.classList.add(next);
+      try { localStorage.setItem('daily30-theme', next); } catch(e){}
     }
-  ]
-};
+    (function initTheme(){
+      try {
+        const saved = localStorage.getItem('daily30-theme');
+        if (saved) {
+          document.documentElement.classList.remove('light','dark');
+          document.documentElement.classList.add(saved);
+        }
+      } catch(e){}
+    })();
   </script>
-  <script src="/assets/main.js"></script>
+
+  <!-- Scroll stage controller -->
+  <script>
+    (function(){
+      const track    = document.getElementById('scroll-track');
+      const triggers = [...document.querySelectorAll('.trigger')];
+      const chapters = [...document.querySelectorAll('.chapter')];
+      const progress = document.getElementById('scroll-progress');
+
+      // Build progress dots
+      chapters.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'scroll-progress__dot';
+        if (i === 0) d.classList.add('is-active');
+        progress.appendChild(d);
+      });
+      const dots = [...progress.querySelectorAll('.scroll-progress__dot')];
+
+      let currentIdx = 0;
+      function setActive(idx) {
+        if (idx === currentIdx) return;
+        currentIdx = idx;
+        chapters.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+
+        // Trigger chapter-specific animations
+        if (idx === 1) animatePrediction();
+      }
+
+      // Use IntersectionObserver to track which trigger is currently in view
+      const io = new IntersectionObserver((entries) => {
+        // Pick the most-visible trigger
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a,b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible.length) {
+          const idx = parseInt(visible[0].target.dataset.trigger, 10);
+          setActive(idx);
+        }
+      }, {
+        rootMargin: '-35% 0px -35% 0px',
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+      });
+      triggers.forEach(t => io.observe(t));
+
+      let predAnimated = false;
+      function animatePrediction() {
+        if (predAnimated) return;
+        predAnimated = true;
+
+        // Count up pred value
+        const valEl = document.getElementById('pred-value');
+        const target = 62;
+        let start = performance.now();
+        const dur = 900;
+        function step(now){
+          const t = Math.min(1, (now - start) / dur);
+          const e = 1 - Math.pow(1-t, 3); // easeOutCubic
+          valEl.firstChild.nodeValue = Math.round(target * e);
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+
+        document.getElementById('pred-up-fill').style.width = '62%';
+        document.getElementById('pred-down-fill').style.width = '38%';
+
+        const ring = document.getElementById('pred-ring');
+        const circumference = 2 * Math.PI * 20;
+        ring.setAttribute('stroke-dasharray', circumference);
+        ring.style.strokeDashoffset = circumference * (1 - 0.68);
+      }
+
+      // Click dot to scroll to trigger
+      dots.forEach((d, i) => {
+        d.style.pointerEvents = 'auto';
+        d.style.cursor = 'pointer';
+        d.addEventListener('click', () => {
+          triggers[i].scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
+    })();
+  </script>
+
+  <!-- Subscribe sidebar controller -->
+  <script>
+    function switchTab(which) {
+      document.getElementById('tab-tg').classList.toggle('is-active', which === 'tg');
+      document.getElementById('tab-em').classList.toggle('is-active', which === 'em');
+      document.getElementById('tab-tg').setAttribute('aria-selected', which === 'tg');
+      document.getElementById('tab-em').setAttribute('aria-selected', which === 'em');
+      document.getElementById('panel-tg').classList.toggle('is-active', which === 'tg');
+      document.getElementById('panel-em').classList.toggle('is-active', which === 'em');
+    }
+
+    function joinTelegram(btn) {
+      window.open('https://t.me/daily30_briefing', '_blank', 'noopener');
+      btn.innerHTML = '✓ 텔레그램으로 이동했습니다';
+      btn.classList.add('is-done');
+      setTimeout(() => {
+        btn.innerHTML = '텔레그램 채널 바로가기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        btn.classList.remove('is-done');
+      }, 3500);
+    }
+
+    const SUBSCRIBE_ENDPOINT = '/api/subscribe';
+
+    function submitEmail(btn) {
+      const input = document.getElementById('email-input');
+      const email = input.value.trim();
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        input.focus();
+        input.style.borderColor = 'var(--status-up)';
+        setTimeout(() => { input.style.borderColor = ''; }, 1400);
+        return;
+      }
+
+      // 전송 중 상태
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg style="animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> 전송 중…';
+
+      fetch(SUBSCRIBE_ENDPOINT, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body:    JSON.stringify({ email, source: 'landing' }),
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          btn.innerHTML = '✓ 구독 신청 완료!';
+          btn.classList.add('is-done');
+          input.disabled = true;
+          document.getElementById('sub-note-em').textContent = '';
+          showSubModal(email);
+        } else {
+          throw new Error(data.error || 'unknown');
+        }
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        const note = document.getElementById('sub-note-em');
+        note.textContent = '⚠ 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+        note.style.color = 'var(--status-up)';
+      });
+    }
+
+    document.getElementById('email-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitEmail(document.getElementById('email-btn'));
+    });
+
+    function showSubModal(email) {
+      document.getElementById('sub-modal-email').textContent = email + ' 으로 등록되었어요.';
+      const modal = document.getElementById('sub-modal');
+      modal.style.display = 'flex';
+      requestAnimationFrame(() => modal.style.opacity = '1');
+    }
+
+    function closeSubModal() {
+      document.getElementById('sub-modal').style.display = 'none';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSubModal();
+    });
+  </script>
 </body>
 </html>

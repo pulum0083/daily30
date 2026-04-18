@@ -522,7 +522,7 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
 
 def save_date_page(data: dict, analysis: dict, date_str: str, briefing_type: str) -> None:
     """Generate web/briefings/YYYY-MM-DD/index.html (served at /briefings/YYYY-MM-DD/)."""
-    html = build_full_html(data, analysis, date_str, briefing_type, asset_prefix="../../")
+    html = build_full_html(data, analysis, date_str, briefing_type, asset_prefix="/")
     date_dir = BRIEFINGS_DIR / date_str
     date_dir.mkdir(parents=True, exist_ok=True)
     out = date_dir / "index.html"
@@ -599,7 +599,7 @@ def main():
         html_index = html_briefing
     else:
         # briefings/*.html: 개별 페이지 (변경 없음)
-        html_briefing = build_full_html(data, analysis, date_str, args.type, asset_prefix="../")
+        html_briefing = build_full_html(data, analysis, date_str, args.type, asset_prefix="/")
         # index.html: 멀티 아코디언 (최신 + 아카이브)
         html_index = build_index_html_multi(data, analysis, date_str, args.type)
 
@@ -614,11 +614,11 @@ def main():
     if args.type != "weekly":
         save_date_page(data, analysis, date_str, args.type)
 
-    # Update index.html
-    index_path = WEB_DIR / "index.html"
+    # Update briefings/index.html (serves at /briefings/)
+    index_path = BRIEFINGS_DIR / "index.html"
     with open(index_path, "w", encoding="utf-8") as f:
         f.write(html_index)
-    print(f"[generate_html] index.html updated")
+    print(f"[generate_html] briefings/index.html updated")
 
 
 if __name__ == "__main__":
