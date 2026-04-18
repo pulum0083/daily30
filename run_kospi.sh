@@ -29,8 +29,14 @@ python3 "$PROJECT_DIR/scripts/fetch_news.py" --type kospi || echo "[WARN] 뉴스
 # 4. Claude 분석 생성 + HTML 저장
 python3 "$PROJECT_DIR/scripts/call_claude.py" --type kospi
 
-# 5. Telegram 전송
+# 5. latest.json 업데이트 (구독자 즉시 발송용)
+python3 "$PROJECT_DIR/scripts/update_latest.py" --type kospi || echo "[WARN] latest.json 업데이트 실패 (무시)"
+
+# 6. Telegram 전송
 python3 "$PROJECT_DIR/scripts/send_telegram.py" --type kospi || echo "[WARN] Telegram 전송 실패 (무시)"
+
+# 7. 이메일 발송
+python3 "$PROJECT_DIR/scripts/send_email.py" --type kospi || echo "[WARN] 이메일 발송 실패 (무시)"
 
 # 6. Git 커밋 & 푸시
 git config user.email "dailyb-bot@users.noreply.github.com"

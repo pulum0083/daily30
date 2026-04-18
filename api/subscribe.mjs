@@ -1,3 +1,57 @@
+const WEB_BASE    = 'https://daily30-ecru.vercel.app';
+const ADMIN_EMAIL = 'pulum0083@gmail.com';
+
+async function sendViaResend(apiKey, { from, to, subject, html }) {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type':  'application/json',
+      'User-Agent':    'daily30-briefing/1.0',
+    },
+    body: JSON.stringify({ from, to: [to], subject, html }),
+  });
+  return res;
+}
+
+function buildBriefingEmail(latest, email) {
+  const { label, title, direction, up_pct, confidence, reasons, link } = latest;
+
+  const reasonRows = (reasons || []).map(r =>
+    `<tr><td style="font-size:13px;line-height:1.7;color:#444;padding:3px 0">• ${r}</td></tr>`
+  ).join('');
+
+  const predBlock = direction ? `
+    <tr><td style="padding:4px 0">
+      <span style="font-size:14px;font-weight:700;color:#333">📊 예측: ${direction} (${up_pct}%)</span><br/>
+      <span style="font-size:13px;color:#888">신뢰도: ${confidence}%</span>
+    </td></tr>
+    <tr><td style="padding:4px 0"></td></tr>
+  ` : '';
+
+  return `
+    <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#006EFF,#7C3AED);padding:24px 28px">
+        <div style="color:rgba(255,255,255,.7);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Daily30' · AI 투자 브리핑</div>
+        <div style="color:#fff;font-size:18px;font-weight:800;line-height:1.35">${title || label}</div>
+      </div>
+      <div style="padding:20px 28px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="font-size:13px;color:#888;padding-bottom:12px">${label}</td></tr>
+          ${predBlock}
+          ${reasonRows}
+        </table>
+      </div>
+      <div style="padding:16px 28px;border-top:1px solid #f0f0f0;background:#fafafa">
+        <a href="${link}" style="display:inline-block;background:#006EFF;color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 24px;border-radius:8px">전체 브리핑 보기 →</a>
+      </div>
+      <div style="padding:14px 28px;font-size:11px;color:#bbb">
+        Daily30' · 개인 투자 비서
+      </div>
+    </div>
+  `;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -12,31 +66,39 @@ export default async function handler(req, res) {
   }
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  if (!RESEND_API_KEY) {
-    return res.status(500).json({ error: 'Missing RESEND_API_KEY' });
-  }
+  if (!RESEND_API_KEY) return res.status(500).json({ error: 'Missing RESEND_API_KEY' });
 
   try {
-    // 관리자 알림만 발송 (도메인 인증 전까지 구독자 직접 발송 불가)
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: "Daily30' <onboarding@resend.dev>",
-        to: ['pulum0083@gmail.com'],
-        subject: `[Daily30'] 새 구독자: ${email}`,
-        html: `<p>새 구독자가 등록되었습니다: <b>${email}</b></p><p>총 구독자 목록을 업데이트하세요.</p>`,
-      }),
-    });
+    // 최신 브리핑 정보 가져오기
+    let latest = null;
+    try {
+      const r = await fetch(`${WEB_BASE}/data/latest.json`);
+      if (r.ok) latest = await r.json();
+    } catch (_) {}
 
-    const data = await r.json();
-    if (!r.ok) return res.status(500).json({ error: data });
+    // 구독자에게 최신 브리핑 발송 (도메인 인증 후 활성화)
+    if (latest) {
+      const html    = buildBriefingEmail(latest, email);
+      const subject = `📊 ${latest.title || latest.label} — Daily30' 최신 브리핑`;
+      await sendViaResend(RESEND_API_KEY, {
+        from:    "Daily30' <onboarding@resend.dev>",
+        to:      email,
+        subject,
+        html,
+      });
+    }
+
+    // 관리자 알림
+    await sendViaResend(RESEND_API_KEY, {
+      from:    "Daily30' <onboarding@resend.dev>",
+      to:      ADMIN_EMAIL,
+      subject: `[Daily30'] 새 구독자: ${email}`,
+      html:    `<p>새 구독자: <b>${email}</b></p>${latest ? `<p>최신 브리핑 발송: <a href="${latest.link}">${latest.title}</a></p>` : ''}`,
+    });
 
     return res.status(200).json({ ok: true });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ error: err.message });
   }
 }
