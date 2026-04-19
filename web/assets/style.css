@@ -1943,3 +1943,24 @@ html.dark .acc-type-badge.us {
   transition: opacity 0.12s;
 }
 .archive-detail-link:hover { opacity: 0.75; }
+
+/* ============================================================
+   Mobile responsive — 전역 오버라이드 (layout-wrapper, GNB)
+   반드시 파일 최하단에 위치해야 이전 전역 선언을 덮어씀
+   ============================================================ */
+@media (max-width: 900px) {
+  .layout-wrapper {
+    padding: 16px 20px 60px;
+  }
+  .gnb {
+    padding: 0 20px;
+  }
+}
+@media (max-width: 600px) {
+  .layout-wrapper {
+    padding: 12px 12px 60px;
+  }
+  .gnb {
+    padding: 0 12px;
+  }
+}
