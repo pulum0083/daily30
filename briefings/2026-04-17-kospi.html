@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily30' — 코스피 시초가 브리핑 2026-04-17</title>
-  <link rel="stylesheet" href="../assets/style.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
 </head>
 <body>
   <nav class="gnb">
     <div class="gnb__inner">
-      <div class="gnb__logo">
+      <a class="gnb__logo" href="/" style="text-decoration:none;">
         <div class="gnb__logo-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
             <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
@@ -20,7 +20,6 @@
       </div>
       <div class="gnb__meta">
         <span class="gnb__date" id="gnb-date">2026-04-17 KST 08:30</span>
-        <span class="gnb__badge">코스피</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
           <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -39,7 +38,7 @@
           <div class="accordion-header">
             <div class="accordion-header__date-label">2026-04-17</div>
             <div class="accordion-header__badges">
-              <span class="pred-badge up">상승 우위</span>
+              <span class="pred-badge ">중립</span>
             </div>
           </div>
 
@@ -51,49 +50,49 @@
                 <div class="open-section__title">
                   코스피 시초가 방향 예측
                   <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">?</button>
-                  <span class="section-time">08:51 생성</span>
+                  <span class="section-time">22:40 생성</span>
                 </div>
                 <div class="prediction-card">
                   <div class="prediction-summary">
-                    <span class="prediction-label">상승 우위 예측 (신뢰도 82%)</span>
+                    <span class="prediction-label">중립 예측 (신뢰도 70%)</span>
                   </div>
                   <!-- PC: Confidence interval bar -->
                   <div class="pred-confbar">
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
                         <span style="color:var(--status-up)">상승</span>
-                        <span style="color:var(--text-secondary)">72%</span>
+                        <span style="color:var(--text-secondary)">50%</span>
                       </div>
                       <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:82%;background:var(--status-up-bg)"></div>
-                        <div class="pred-confbar__solid up" style="width:72%"></div>
+                        <div class="pred-confbar__light" style="width:70%;background:var(--status-up-bg)"></div>
+                        <div class="pred-confbar__solid up" style="width:50%"></div>
                       </div>
-                      <div class="pred-confbar__meta">신뢰구간 82% → 최대 82%</div>
+                      <div class="pred-confbar__meta">신뢰구간 70% → 최대 70%</div>
                     </div>
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
                         <span style="color:var(--status-down)">하락</span>
-                        <span style="color:var(--text-secondary)">28%</span>
+                        <span style="color:var(--text-secondary)">50%</span>
                       </div>
                       <div class="pred-confbar__track">
-                        <div class="pred-confbar__light" style="width:32%;background:var(--status-down-bg)"></div>
-                        <div class="pred-confbar__solid down" style="width:28%"></div>
+                        <div class="pred-confbar__light" style="width:70%;background:var(--status-down-bg)"></div>
+                        <div class="pred-confbar__solid down" style="width:50%"></div>
                       </div>
-                      <div class="pred-confbar__meta">신뢰구간 82% → 최대 32%</div>
+                      <div class="pred-confbar__meta">신뢰구간 70% → 최대 70%</div>
                     </div>
                   </div>
                   <!-- Mobile: Diverging bar -->
                   <div class="pred-divbar">
                     <div class="pred-divbar__header">
-                      <span style="color:var(--status-down)">하락 28%</span>
-                      <span style="color:var(--status-up)">상승 72%</span>
+                      <span style="color:var(--status-down)">하락 50%</span>
+                      <span style="color:var(--status-up)">상승 50%</span>
                     </div>
                     <div class="pred-divbar__track">
-                      <div class="pred-divbar__down" style="flex:28">
-                        <span class="pred-divbar__pct">28%</span>
+                      <div class="pred-divbar__down" style="flex:50">
+                        <span class="pred-divbar__pct">50%</span>
                       </div>
-                      <div class="pred-divbar__up" style="flex:72">
-                        <span class="pred-divbar__pct">72%</span>
+                      <div class="pred-divbar__up" style="flex:50">
+                        <span class="pred-divbar__pct">50%</span>
                       </div>
                     </div>
                     <div class="pred-divbar__neutral">
@@ -106,19 +105,11 @@
 
               <!-- 2. 예측 근거 -->
               <div class="open-section">
-                <div class="open-section__title reason-section-title">왜 오를까? — EWY +1.76%·현대차 폭등 견인</div>
+                <div class="open-section__title reason-section-title">오를까 내릴까? — 오늘의 핵심 변수</div>
                 <div class="reason-block">
                   <ul>
                     
-                    
-                    <li>🚀 S&P500은 <b>+0.26%</b>로 <b>7,041p</b>까지 오르며 사상 최고치 경신을 이어갔어요. MSFT가 <b>+2.20%</b>로 강하게 반등했고, 글로벌 기술주 강세 흐름이 코스피 플랫폼·IT 섹터에 긍정적 신호로 작용해요.</li>
-                    
-                    <li>🇺🇸 한국 ETF EWY는 <b>+1.76%</b>로 상승하며 <b>147.47달러</b>를 기록했고, MA200 대비 <b>+50.95%</b>로 구조적 강세 구간에 있어요. 외국인 순매수 환경이 유지되고 있어 코스피 시초가 상승 압력이 높아요.</li>
-                    
-                    <li>😰 VIX는 <b>17.94</b>로 하락하며 리스크온 심리가 강화됐어요. MA20 대비 <b>-24.52%</b> 수준까지 떨어져 공포 심리가 크게 완화됐고, 투자자들이 위험 자산으로 이동하는 흐름이 뚜렷해요.</li>
-                    
-                    <li>💡 현대차·기아가 각각 <b>+5.12%</b>, <b>+4.22%</b>로 폭등하며 자동차 섹터가 코스피 상승을 견인하고 있어요. 골드만삭스의 한국 증시 사상 최고치 전망과 기업 실적 호조가 투자 심리를 강하게 자극하고 있어요.</li>
-                    
+                    <li>데이터 수집 중...</li>
                     
                   </ul>
                 </div>
@@ -137,206 +128,6 @@
                 </div>
                 <div class="stock-picks">
                   
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">1</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          기아
-                          <span class="ma20-badge">MA20 상향 돌파</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">157,900원</span>
-                          <span class="stock-pick-card__change up">+4.22%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+30.4% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">모멘텀 가속</span>
-                          MA20을 crossing_up으로 돌파하며 모멘텀 전환 신호가 확인됐어요. MA200 대비 +30.45%로 구조적 강세가 뚜렷하고, 현대차 그룹 전반의 실적 기대감과 휴전 기대감이 자동차 섹터 수혜를 키우고 있어요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-1" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 157,000~159,000원 구간 진입. 목표: 168,000원(+6.4%) / 손절: 152,000원 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">2</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          현대차
-                          <span class="ma20-badge">MA20 상회 지속</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">534,000원</span>
-                          <span class="stock-pick-card__change up">+5.12%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+64.7% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">섹터 주도주</span>
-                          MA200 대비 +64.7%로 압도적인 구조적 강세를 보이고 있어요. 기아와 함께 자동차 그룹 쌍끌이 상승이 이어지고 있으며, 글로벌 증시 강세와 기업 실적 호조가 외국인 매수를 자극하는 환경이에요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-2" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 530,000~537,000원 구간 진입. 목표: 560,000원(+4.9%) / 손절: 518,000원 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">3</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          삼성전자
-                          <span class="ma20-badge">MA20 상회 지속</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">217,500원</span>
-                          <span class="stock-pick-card__change up">+3.08%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+86.4% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">반도체 대장주</span>
-                          MA200 대비 +86.4%로 반도체 종목 중 구조적 강세가 가장 강한 종목이에요. SK하이닉스와 함께 반도체 섹터 동반 상승 흐름이 이어지고 있으며, EWY 강세가 외국인 수급 유입으로 연결될 가능성이 높아요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-3" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 215,000~219,000원 구간 진입. 목표: 230,000원(+5.3%) / 손절: 209,000원 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">4</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          현대모비스
-                          <span class="ma20-badge">MA20 상회 지속</span>
-                          <span class="golden-badge">★ GOLDEN</span>
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">427,000원</span>
-                          <span class="stock-pick-card__change up">+2.77%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+23.0% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">자동차 부품 수혜</span>
-                          현대차·기아 폭등에 연동한 자동차 부품 수혜주로 부각되고 있어요. MA200 대비 +22.98%로 구조적 강세 구간에 있고, MA20과의 거리(+7.25%)가 적당해 추가 상승 여력이 남아 있어요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-4" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 424,000~430,000원 구간 진입. 목표: 450,000원(+5.1%) / 손절: 415,000원 이탈 시.
-                    </div>
-                  </div>
-                  
-                  <div class="stock-pick-card">
-                    <div class="stock-pick-card__top">
-                      <div class="stock-pick-card__rank">5</div>
-                      <div class="stock-pick-card__info">
-                        <div class="stock-pick-card__name">
-                          셀트리온
-                          <span class="ma20-badge">MA20 상회 지속</span>
-                          
-                        </div>
-                        <div class="stock-pick-card__meta">
-                          <span class="stock-pick-card__price">209,000원</span>
-                          <span class="stock-pick-card__change up">+3.47%</span>
-                        </div>
-                        <div class="ma200-gauge">
-                          <span class="ma200-gauge__label">200일선 대비</span>
-                          <div class="ma200-gauge__track">
-                            <div class="ma200-gauge__fill up" style="width:100%"></div>
-                          </div>
-                          <span class="ma200-gauge__pct up">+10.7% 상회</span>
-                        </div>
-                        <div class="stock-pick-card__scenario">
-                          <span class="scenario-tag">바이오 모멘텀</span>
-                          MA20 대비 +4.58%로 이격이 크지 않아 진입 부담이 낮고, MA200 대비 +10.68%로 구조적으로 안정된 상승 궤도에 있어요. 글로벌 증시 리스크온 분위기 속에서 바이오 섹터 자금 유입이 기대돼요.
-                        </div>
-                      </div>
-                      <div class="stock-pick-mini-chart">
-                        <canvas id="mc-5" width="88" height="52"></canvas>
-                        <div class="stock-pick-mini-chart__legend">
-                          <span class="leg-price">주가</span>
-                          <span class="leg-ma">MA20</span>
-                          <span class="leg-ma200">MA200</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="stock-pick-card__cta">
-                      <span class="cta-label">실행 가이드</span>
-                      시가 207,000~210,500원 구간 진입. 목표: 220,000원(+4.8%) / 손절: 202,000원 이탈 시.
-                    </div>
-                  </div>
-                  
                 </div>
               </div>
 
@@ -345,7 +136,7 @@
         </div><!-- /accordion-item -->
 
         <div class="t-caption" style="margin-top:16px; text-align:right;">
-          생성: 2026-04-17T08:51:27.737895+09:00 | DailyB v1
+          생성: 2026-04-16T22:40:26.527810+09:00 | DailyB v1
         </div>
       </div><!-- /layout-grid__main -->
 
@@ -359,13 +150,13 @@
           </div>
           <div class="accuracy-standalone__stats">
             <div class="acc-stat">
-              <span class="acc-val acc-good">80%</span>
-              <span class="acc-lbl">최근 5일</span>
+              <span class="acc-val acc-good">83%</span>
+              <span class="acc-lbl">최근 6일</span>
             </div>
             <div class="acc-divider"></div>
             <div class="acc-stat">
-              <span class="acc-val acc-good">80%</span>
-              <span class="acc-lbl">최근 5일</span>
+              <span class="acc-val acc-good">83%</span>
+              <span class="acc-lbl">최근 6일</span>
             </div>
           </div>
           <div class="accuracy-standalone__dots">
@@ -380,13 +171,15 @@
             
             <span class="acc-dot correct" title="2026-04-16 맞음"></span>
             
+            <span class="acc-dot correct" title="2026-04-17 맞음"></span>
+            
           </div>
         </div>
         
         <div class="right-panel">
           <div class="panel-header">
             <span class="section-title">시장 지표</span>
-            <span class="pub-time">2026-04-17 08:51</span>
+            <span class="pub-time">2026-04-17 22:40</span>
           </div>
           <div class="mkt-list">
             
@@ -511,8 +304,8 @@
   <script>
   window.MARKET_DATA = {
   "kospi": {
-    "base": 6091.39,
-    "chg": 2.07,
+    "base": 6226.05,
+    "chg": 2.21,
     "data": [
       6148.3398,
       6147.2998,
@@ -527,8 +320,8 @@
     ]
   },
   "kosdaq": {
-    "base": 1152.43,
-    "chg": 2.72,
+    "base": 1162.97,
+    "chg": 0.91,
     "data": [
       1148.6899,
       1151.9301,
@@ -543,115 +336,115 @@
     ]
   },
   "nasdaq": {
-    "base": 24102.7,
-    "chg": 0.36,
+    "base": 23988.91,
+    "chg": -0.11,
     "data": [
+      23620.6074,
+      23634.1074,
+      23823.2617,
+      23874.9844,
+      23906.9492,
+      23868.4199,
       23916.9512,
       23985.0488,
       24010.7812,
-      23962.0586,
-      24064.416,
-      24114.8691,
-      24073.5059,
-      23995.998,
-      24057.168,
-      24097.0
+      23988.9082
     ]
   },
   "nq": {
-    "base": 26486.0,
-    "chg": 0.46,
+    "base": 26417.75,
+    "chg": 0.2,
     "data": [
-      26322.0,
-      26404.25,
-      26533.25,
-      26473.25,
-      26460.75,
-      26438.0,
-      26483.75,
-      26464.25,
-      26475.25,
-      26486.0
+      26434.5,
+      26455.0,
+      26480.75,
+      26460.0,
+      26440.5,
+      26453.25,
+      26406.0,
+      26418.25,
+      26402.0,
+      26411.75
     ]
   },
   "dji": {
-    "base": 48578.72,
-    "chg": 0.24,
+    "base": 48644.63,
+    "chg": 0.37,
     "data": [
+      48562.4414,
+      48535.3906,
+      48447.9297,
+      48373.4297,
+      48317.0703,
+      48376.1719,
       48417.4492,
       48499.8789,
       48460.5508,
-      48371.2109,
-      48453.4297,
-      48583.1289,
-      48489.1719,
-      48522.5898,
-      48568.0312,
-      48565.0898
+      48646.1719
     ]
   },
   "sox": {
-    "base": 9329.35,
-    "chg": 0.97,
+    "base": 9205.15,
+    "chg": -0.37,
     "data": [
+      9224.8623,
+      9222.4932,
+      9206.3926,
+      9200.8027,
+      9156.4775,
+      9096.2051,
       9130.2725,
       9190.2266,
       9237.6084,
-      9247.2275,
-      9323.3047,
-      9323.1113,
-      9309.6768,
-      9258.2568,
-      9315.5664,
-      9326.9688
+      9205.1475
     ]
   },
   "oil": {
-    "base": 90.01,
-    "chg": -1.4,
+    "base": 88.91,
+    "chg": -2.61,
     "data": [
-      90.15,
-      90.35,
-      90.3,
-      91.21,
-      91.57,
-      90.47,
-      90.1,
-      89.65,
-      89.59,
-      90.01
+      91.77,
+      91.56,
+      91.58,
+      89.34,
+      89.25,
+      89.47,
+      88.79,
+      88.6,
+      89.28,
+      88.91
     ]
   },
   "usd": {
-    "base": 1474.06,
-    "chg": 0.32,
+    "base": 1476.38,
+    "chg": 0.47,
     "data": [
-      1478.88,
-      1478.73,
-      1478.33,
-      1479.33,
-      1479.73,
-      1479.15,
-      1479.21,
-      1479.39,
-      1478.91,
-      1478.8101
+      1471.98,
+      1471.54,
+      1472.48,
+      1473.3199,
+      1474.86,
+      1476.6,
+      1476.92,
+      1476.39,
+      1475.3101,
+      1476.5699
     ]
   },
   "dxy": {
-    "base": 98.18,
-    "chg": 0.12,
+    "base": 98.2,
+    "chg": 0.14,
     "data": [
-      98.245,
-      98.269,
-      98.187,
-      98.244,
-      98.264,
-      98.215,
-      98.206,
-      98.203,
-      98.206,
-      98.18
+      97.965,
+      98.014,
+      98.005,
+      98.099,
+      98.156,
+      98.208,
+      98.209,
+      98.163,
+      98.19,
+      98.196
     ]
   },
   "fearGreed": {
@@ -663,203 +456,7 @@
     "timestamp": "1776297600",
     "classification": "Extreme Fear"
   },
-  "stockCharts": [
-    {
-      "id": "mc-1",
-      "prices": [
-        150200.0,
-        151600.0,
-        150800.0,
-        159200.0,
-        150500.0,
-        149000.0,
-        147400.0,
-        149200.0,
-        151500.0,
-        157900.0
-      ],
-      "ma20": [
-        155783.3016,
-        156015.8492,
-        155844.3773,
-        156045.0078,
-        155571.1516,
-        155151.618,
-        154762.2484,
-        154209.0234,
-        153397.1992,
-        153125.7023
-      ],
-      "ma200": [
-        118420.1497,
-        118725.5198,
-        119015.3946,
-        119340.0847,
-        119627.0226,
-        119905.0235,
-        120164.9659,
-        120437.2612,
-        120724.4093,
-        121041.1625
-      ]
-    },
-    {
-      "id": "mc-2",
-      "prices": [
-        471000.0,
-        469000.0,
-        473000.0,
-        508000.0,
-        489500.0,
-        489500.0,
-        478500.0,
-        491500.0,
-        508000.0,
-        534000.0
-      ],
-      "ma20": [
-        500700.0,
-        498800.0,
-        496200.0,
-        495100.0,
-        493525.0,
-        492150.0,
-        490775.0,
-        489250.0,
-        487400.0,
-        488000.0
-      ],
-      "ma200": [
-        310921.9355,
-        312306.654,
-        313691.8743,
-        315249.6574,
-        316727.1268,
-        318192.4099,
-        319585.6321,
-        321038.9798,
-        322569.953,
-        324216.3027
-      ]
-    },
-    {
-      "id": "mc-3",
-      "prices": [
-        186200.0,
-        193100.0,
-        196500.0,
-        210500.0,
-        204000.0,
-        206000.0,
-        201000.0,
-        206500.0,
-        211000.0,
-        217500.0
-      ],
-      "ma20": [
-        186837.5,
-        187817.5,
-        188247.5,
-        189272.5,
-        190077.5,
-        191202.5,
-        191817.5,
-        192447.5,
-        192572.5,
-        193422.5
-      ],
-      "ma200": [
-        110065.9571,
-        110739.9853,
-        111427.567,
-        112187.1182,
-        112920.0775,
-        113668.4527,
-        114387.3967,
-        115125.4708,
-        115888.9989,
-        116683.5501
-      ]
-    },
-    {
-      "id": "mc-4",
-      "prices": [
-        388500.0,
-        388500.0,
-        390000.0,
-        407000.0,
-        401500.0,
-        402500.0,
-        391500.0,
-        405000.0,
-        415500.0,
-        427000.0
-      ],
-      "ma20": [
-        401296.5125,
-        400509.3031,
-        399105.2328,
-        398551.1625,
-        398142.1516,
-        398302.0359,
-        398060.175,
-        397925.0,
-        397450.0,
-        398150.0
-      ],
-      "ma200": [
-        341770.9394,
-        342361.3381,
-        342892.8609,
-        343529.0506,
-        344150.032,
-        344758.805,
-        345310.1197,
-        345862.5584,
-        346499.4558,
-        347201.2283
-      ]
-    },
-    {
-      "id": "mc-5",
-      "prices": [
-        195300.0,
-        195800.0,
-        193700.0,
-        202000.0,
-        201500.0,
-        199700.0,
-        195200.0,
-        199100.0,
-        202000.0,
-        209000.0
-      ],
-      "ma20": [
-        202355.0,
-        201945.0,
-        201330.0,
-        200980.0,
-        200755.0,
-        200465.0,
-        200225.0,
-        199880.0,
-        199505.0,
-        199855.0
-      ],
-      "ma200": [
-        187101.8729,
-        187273.252,
-        187434.1312,
-        187628.0458,
-        187834.8958,
-        188027.7666,
-        188198.1375,
-        188385.5187,
-        188597.8563,
-        188835.2354
-      ]
-    }
-  ]
+  "stockCharts": []
 };
   </script>
   <script src="../assets/main.js"></script>

@@ -251,16 +251,6 @@
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    /* Axis labels */
-    ctx.font = `600 ${Math.round(cssW*0.072)}px system-ui,sans-serif`;
-    ctx.fillStyle = '#9CA3AF';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'right';
-    ctx.fillText('0',   cx - outerR - 3, cy);
-    ctx.textAlign = 'left';
-    ctx.fillText('100', cx + outerR + 3, cy);
-    ctx.textAlign = 'center';
-    ctx.fillText('50',  cx, cy - outerR - 3);
   }
 
   function setFearGreed(value) {
@@ -498,7 +488,6 @@
   }
 
   window.addEventListener('load', () => {
-    initSidebar();
     renderAll();
     setFearGreed(fgVal);
     /* Update FG history from data */
@@ -560,132 +549,6 @@
       closeKelloggModal();
       closeFGModal();
       closePredModal();
-      if (document.body.classList.contains('sidebar-open')) toggleSidebar();
     }
   });
 
-  /* ============================================================
-     Sidebar — 날짜별 브리핑 목록
-  ============================================================ */
-  function renderSidebar() {
-    const nav = document.getElementById('sidebar-nav');
-    if (!nav) return;
-    const list = window.BRIEFING_LIST;
-    if (!list || !list.length) {
-      nav.innerHTML = '<div style="padding:20px 16px;font-size:13px;color:rgba(255,255,255,.35);">브리핑 없음</div>';
-      return;
-    }
-
-    /* 날짜별로 그룹핑 (이미 최신순 정렬 가정) */
-    const groups = {};
-    const order  = [];
-    list.forEach(item => {
-      if (!groups[item.date]) { groups[item.date] = []; order.push(item.date); }
-      groups[item.date].push(item);
-    });
-
-    /* 경로 깊이 판단 — briefings/*.html 이면 '../' prefix 사용 */
-    const inBriefings = location.pathname.includes('/briefings/');
-    const urlBase     = inBriefings ? '../' : '';
-
-    /* 현재 페이지 파일명으로 활성 항목 판단 */
-    const currentFile = location.pathname.split('/').pop() || 'index.html';
-
-    let html = '';
-    order.forEach(date => {
-      const [, m, d] = date.split('-');
-      const labelDate = new Date(date + 'T00:00:00');
-      const today     = new Date(); today.setHours(0,0,0,0);
-      const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-
-      let dateLabel;
-      if (labelDate.getTime() === today.getTime())          dateLabel = '오늘';
-      else if (labelDate.getTime() === yesterday.getTime()) dateLabel = '어제';
-      else                                                   dateLabel = `${m}월 ${d}일`;
-
-      html += `<div class="sidebar__group"><div class="sidebar__group-label">${dateLabel}</div>`;
-
-      groups[date].forEach(item => {
-        const fileName = item.url.split('/').pop();
-        const isActive = fileName === currentFile ? ' is-active' : '';
-        const href     = item.url === '#' ? '#' : urlBase + item.url;
-        const predArrow = item.pred === 'up' ? '↑' : '↓';
-        const typeLabel = item.type === 'kospi' ? '코스피' : 'US';
-
-        html += `<a class="sidebar__item${isActive}" href="${href}">` +
-          `<span class="sidebar__type-badge ${item.type}">${typeLabel}</span>` +
-          `<div class="sidebar__item-body"><span class="sidebar__item-label">${item.label}</span></div>` +
-          `<span class="sidebar__pred ${item.pred}">${predArrow} ${item.confidence}%</span>` +
-          `</a>`;
-      });
-
-      html += `</div>`;
-    });
-
-    nav.innerHTML = html;
-  }
-
-  function toggleSidebar() {
-    const sidebar  = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
-    const toggleBtn = document.getElementById('sidebar-toggle-btn');
-    const isOpen   = document.body.classList.toggle('sidebar-open');
-
-    sidebar.classList.toggle('is-open', isOpen);
-    backdrop.classList.toggle('is-visible', isOpen);
-    toggleBtn.classList.toggle('is-active', isOpen);
-    toggleBtn.setAttribute('aria-label', isOpen ? '브리핑 목록 닫기' : '브리핑 목록 열기');
-    localStorage.setItem('sidebar-open', isOpen ? '1' : '0');
-  }
-
-  /* ============================================================
-     사이드바 DOM 자동 주입
-     — briefings/*.html 처럼 사이드바 HTML이 없는 페이지에도 동작
-  ============================================================ */
-  function ensureSidebarDOM() {
-    if (document.getElementById('sidebar')) return; /* 이미 있으면 skip */
-
-    /* aside 생성 */
-    const aside = document.createElement('aside');
-    aside.className = 'sidebar';
-    aside.id = 'sidebar';
-    aside.setAttribute('aria-label', '브리핑 목록');
-    aside.innerHTML =
-      '<div class="sidebar__header"><span class="sidebar__title">브리핑 기록</span></div>' +
-      '<nav class="sidebar__nav" id="sidebar-nav"></nav>';
-
-    /* backdrop 생성 */
-    const backdrop = document.createElement('div');
-    backdrop.className = 'sidebar-backdrop';
-    backdrop.id = 'sidebar-backdrop';
-    backdrop.addEventListener('click', toggleSidebar);
-
-    document.body.insertBefore(aside, document.body.firstChild);
-    document.body.insertBefore(backdrop, aside.nextSibling);
-
-    /* GNB에 햄버거 버튼 주입 */
-    const logoDiv = document.querySelector('.gnb__logo');
-    if (logoDiv && !document.getElementById('sidebar-toggle-btn')) {
-      const btn = document.createElement('button');
-      btn.className = 'gnb__sidebar-toggle';
-      btn.id = 'sidebar-toggle-btn';
-      btn.setAttribute('aria-label', '브리핑 목록 열기/닫기');
-      btn.innerHTML =
-        '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">' +
-        '<line x1="2" y1="4.5" x2="16" y2="4.5"/>' +
-        '<line x1="2" y1="9" x2="16" y2="9"/>' +
-        '<line x1="2" y1="13.5" x2="16" y2="13.5"/>' +
-        '</svg>';
-      btn.addEventListener('click', toggleSidebar);
-      logoDiv.insertBefore(btn, logoDiv.firstChild);
-    }
-  }
-
-  /* 사이드바 렌더 + 저장된 열림 상태 복원 — load 후 실행 */
-  function initSidebar() {
-    ensureSidebarDOM();
-    renderSidebar();
-    if (localStorage.getItem('sidebar-open') === '1') {
-      toggleSidebar();
-    }
-  }
