@@ -222,17 +222,14 @@
       50% { transform: translateY(-14px); }
     }
     .hero-orb__inner {
-      font-size: clamp(54px, 7vw, 96px);
-      font-weight: 900;
-      color: white;
-      letter-spacing: -0.04em;
-      text-shadow: 0 4px 16px rgba(0,0,0,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,.2));
     }
-    .hero-orb__inner sup {
-      font-size: 0.55em;
-      vertical-align: top;
-      opacity: 0.85;
-      font-weight: 700;
+    .hero-orb__inner svg {
+      width: clamp(100px, 14vw, 180px);
+      height: clamp(100px, 14vw, 180px);
     }
 
     .hero-ring {
@@ -1082,7 +1079,22 @@
                 <div class="hero-ring r1"></div>
                 <div class="hero-ring r2"></div>
                 <div class="hero-orb">
-                  <div class="hero-orb__inner">DS</div>
+                  <div class="hero-orb__inner">
+                    <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <!-- 캔들 1 (하락 · 왼쪽) -->
+                      <line x1="22" y1="10" x2="22" y2="25" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>
+                      <rect x="13" y="25" width="18" height="32" rx="3" fill="rgba(255,255,255,.35)" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+                      <line x1="22" y1="57" x2="22" y2="72" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>
+                      <!-- 캔들 2 (상승 · 중앙) -->
+                      <line x1="60" y1="8" x2="60" y2="20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                      <rect x="51" y="20" width="18" height="42" rx="3" fill="white" stroke="white" stroke-width="2"/>
+                      <line x1="60" y1="62" x2="60" y2="80" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                      <!-- 캔들 3 (상승 · 오른쪽) -->
+                      <line x1="98" y1="18" x2="98" y2="30" stroke="rgba(255,255,255,.8)" stroke-width="3" stroke-linecap="round"/>
+                      <rect x="89" y="30" width="18" height="36" rx="3" fill="rgba(255,255,255,.75)" stroke="rgba(255,255,255,.9)" stroke-width="2"/>
+                      <line x1="98" y1="66" x2="98" y2="78" stroke="rgba(255,255,255,.8)" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
