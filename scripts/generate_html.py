@@ -260,12 +260,12 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
 
     # Type-specific strings
     if briefing_type == "kospi":
-        page_title = f"Daily30' — 코스피 시초가 브리핑 {date_str}"
+        page_title = f"Double-Shot — 코스피 시초가 브리핑 {date_str}"
         badge_text = "코스피"
         gnb_time = "08:30"
         section_title = "코스피 시초가 방향 예측"
     else:
-        page_title = f"Daily30' — 미국 시장 브리핑 {date_str}"
+        page_title = f"Double-Shot — 미국 시장 브리핑 {date_str}"
         badge_text = "미국"
         gnb_time = "22:30"
         section_title = "S&P500 방향 예측"
@@ -472,12 +472,12 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
     down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
 
     if briefing_type == "kospi":
-        page_title = f"Daily30' — 코스피 시초가 브리핑 {date_str}"
+        page_title = f"Double-Shot — 코스피 시초가 브리핑 {date_str}"
         badge_text = "코스피"
         gnb_time = "08:30"
         section_title = "코스피 시초가 방향 예측"
     else:
-        page_title = f"Daily30' — 미국 시장 브리핑 {date_str}"
+        page_title = f"Double-Shot — 미국 시장 브리핑 {date_str}"
         badge_text = "미국"
         gnb_time = "22:30"
         section_title = "S&P500 방향 예측"
