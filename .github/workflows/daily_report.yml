@@ -82,6 +82,10 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type kospi
 
+      - name: 🔄 latest.json 갱신
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/update_latest.py --type kospi
+
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
@@ -154,6 +158,10 @@ jobs:
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type us
+
+      - name: 🔄 latest.json 갱신
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/update_latest.py --type us
 
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true'
