@@ -2,15 +2,12 @@
   "outputDirectory": "web",
   "buildCommand": null,
   "installCommand": "npm install",
-  "rewrites": [
-    { "source": "/",                           "destination": "/landing.html" },
-    { "source": "/briefings",                  "destination": "/index.html" },
-    { "source": "/briefings/",                 "destination": "/index.html" },
-    { "source": "/briefings/ko/:date",         "destination": "/briefings/:date-kospi.html" },
-    { "source": "/briefings/ko/:date/",        "destination": "/briefings/:date-kospi.html" },
-    { "source": "/briefings/us/:date",         "destination": "/briefings/:date-us.html" },
-    { "source": "/briefings/us/:date/",        "destination": "/briefings/:date-us.html" },
-    { "source": "/briefings/weekly/:date",     "destination": "/briefings/:date-weekly.html" },
-    { "source": "/briefings/weekly/:date/",    "destination": "/briefings/:date-weekly.html" }
+  "routes": [
+    { "src": "^/$",                                  "dest": "/landing.html" },
+    { "src": "^/briefings/?$",                       "dest": "/briefings/index.html" },
+    { "src": "^/briefings/ko/([^/]+)/?$",            "dest": "/briefings/$1-kospi.html" },
+    { "src": "^/briefings/us/([^/]+)/?$",            "dest": "/briefings/$1-us.html" },
+    { "src": "^/briefings/weekly/([^/]+)/?$",        "dest": "/briefings/$1-weekly.html" },
+    { "handle": "filesystem" }
   ]
 }
