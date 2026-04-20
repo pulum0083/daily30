@@ -34,10 +34,10 @@ function buildBriefingEmail(latest, email) {
   ` : '';
 
   return `
-    <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden">
-      <div style="background:linear-gradient(135deg,#006EFF,#7C3AED);padding:24px 28px">
-        <div style="color:rgba(255,255,255,.7);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Daily30' · AI 투자 브리핑</div>
-        <div style="color:#fff;font-size:18px;font-weight:800;line-height:1.35">${title || label}</div>
+    <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;">
+      <div style="background:#006EFF;padding:24px 28px">
+        <div style="color:rgba(255,255,255,.8);font-size:11px;font-weight:700;letter-spacing:.08em;margin-bottom:8px">Double-Shot · AI 투자 브리핑</div>
+        <div style="color:#fff;font-size:18px;font-weight:800;line-height:1.4">${title || label}</div>
       </div>
       <div style="padding:20px 28px">
         <table style="width:100%;border-collapse:collapse">
