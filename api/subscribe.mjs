@@ -1,4 +1,4 @@
-const WEB_BASE    = 'https://daily30-ecru.vercel.app';
+const WEB_BASE    = 'https://doubleshot.space';
 const ADMIN_EMAIL = 'pulum0083@gmail.com';
 
 async function sendViaResend(apiKey, { from, to, subject, html }) {
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       const subject = `📊 ${latest.title || latest.label} — Double-Shot 최신 브리핑`;
       try {
         await sendViaResend(RESEND_API_KEY, {
-          from:    "Double-Shot <onboarding@resend.dev>",
+          from:    "Double-Shot <noreply@doubleshot.space>",
           to:      email,
           subject,
           html,
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
 
     // 관리자 알림
     await sendViaResend(RESEND_API_KEY, {
-      from:    "Double-Shot <onboarding@resend.dev>",
+      from:    "Double-Shot <noreply@doubleshot.space>",
       to:      ADMIN_EMAIL,
       subject: `[Double-Shot] 새 구독자: ${email}`,
       html:    `<p>새 구독자: <b>${email}</b></p>${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료' : '발송 실패'}: <a href="${latest.link}">${latest.title}</a></p>` : ''}`,
