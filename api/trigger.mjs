@@ -3,12 +3,6 @@ const REPO = 'pulum0083/daily30';
 const WORKFLOW = 'daily_report.yml';
 
 export default async function handler(req, res) {
-  // Vercel cron secret 검증
-  const auth = req.headers['authorization'];
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   const { type } = req.query;
   if (!VALID_TYPES.includes(type)) {
     return res.status(400).json({ error: `Invalid type: ${type}` });
