@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: "15 23 * * 0-4"   # 코스피 브리핑 KST 08:15 (UTC 23:15 전일) → 지연 감안 08:30 도착
     - cron: "20 12 * * 1-5"   # 미국 시장 브리핑 KST 21:20 (UTC 12:20) → 지연 감안 21:30 도착
+    - cron: "5 0 * * 2-6"     # 공포탐욕 패치 KST 09:05 (UTC 00:05, 화~토)
     - cron: "10 0 * * 2-6"    # 코스피 정확도 체크 KST 09:10 (UTC 00:10, 화~토)
   workflow_dispatch:
     inputs:
@@ -16,6 +17,7 @@ on:
           - kospi
           - us
           - accuracy
+          - fg-patch
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
@@ -190,6 +192,52 @@ jobs:
           user_name: "DailyB Bot"
           user_email: "dailyb-bot@users.noreply.github.com"
           commit_message: "🇺🇸 Pages 배포: 미국 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+
+  # ──────────────────────────────────────────────────────────────────
+  fg-patch:
+    name: "😰 공포탐욕 패치 (KST 09:05)"
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '5 0 * * 2-6') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'fg-patch')
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 😰 Fear & Greed 패치
+        run: |
+          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
+          python3 scripts/patch_fg.py --date "$DATE"
+
+      - name: 💾 패치 결과 커밋 & 푸시
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/
+          git diff --staged --quiet || git commit -m "😰 공포탐욕 패치: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git push
+
+      - name: 🌐 GitHub Pages 배포
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          publish_branch: gh-pages
+          force_orphan: false
+          keep_files: false
+          user_name: "DailyB Bot"
+          user_email: "dailyb-bot@users.noreply.github.com"
+          commit_message: "😰 Pages 배포: 공포탐욕 패치 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
 
   # ──────────────────────────────────────────────────────────────────
   kospi-accuracy:
