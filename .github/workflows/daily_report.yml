@@ -37,8 +37,7 @@ jobs:
     name: "📈 코스피 브리핑 (KST 08:05)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '15 23 * * 0-4') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi'
 
     steps:
       - name: 📥 체크아웃
@@ -115,8 +114,7 @@ jobs:
     name: "🇺🇸 미국 브리핑 (KST 21:15)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '20 12 * * 1-5') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us'
 
     steps:
       - name: 📥 체크아웃
@@ -193,8 +191,7 @@ jobs:
     name: "😰 공포탐욕 패치 (KST 09:05)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '5 0 * * 2-6') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'fg-patch')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'fg-patch'
 
     steps:
       - name: 📥 체크아웃
@@ -239,8 +236,7 @@ jobs:
     name: "📊 코스피 정확도 체크 (KST 09:10)"
     runs-on: ubuntu-latest
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '10 0 * * 2-6') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'accuracy')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'accuracy'
 
     steps:
       - name: 📥 체크아웃
