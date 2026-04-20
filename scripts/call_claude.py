@@ -358,10 +358,10 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
 
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 시초가 브리핑 | {date_display}"
-        link = f"{web_base}/briefings/{date_str}-kospi.html"
+        link = f"{web_base}/briefings/ko/{date_str}/"
     else:
         header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
-        link = f"{web_base}/briefings/{date_str}-us.html"
+        link = f"{web_base}/briefings/us/{date_str}/"
 
     lines = [
         header,
