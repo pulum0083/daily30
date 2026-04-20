@@ -68,8 +68,12 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
     }
     data = urllib.parse.urlencode(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, method="POST")
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8")
+        raise RuntimeError(f"HTTP {e.code}: {body}") from e
 
 
 def build_fallback_message(briefing_type: str) -> str:
