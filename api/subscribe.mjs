@@ -11,7 +11,11 @@ async function sendViaResend(apiKey, { from, to, subject, html }) {
     },
     body: JSON.stringify({ from, to: [to], subject, html }),
   });
-  return res;
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Resend error ${res.status}: ${body}`);
+  }
+  return res.json();
 }
 
 function buildBriefingEmail(latest, email) {
@@ -76,27 +80,33 @@ export default async function handler(req, res) {
       if (r.ok) latest = await r.json();
     } catch (_) {}
 
-    // 구독자에게 최신 브리핑 발송 (도메인 인증 후 활성화)
+    // 구독자에게 최신 브리핑 발송
+    let briefingSent = false;
     if (latest) {
       const html    = buildBriefingEmail(latest, email);
-      const subject = `📊 ${latest.title || latest.label} — Daily30' 최신 브리핑`;
-      await sendViaResend(RESEND_API_KEY, {
-        from:    "Daily30' <onboarding@resend.dev>",
-        to:      email,
-        subject,
-        html,
-      });
+      const subject = `📊 ${latest.title || latest.label} — Double-Shot 최신 브리핑`;
+      try {
+        await sendViaResend(RESEND_API_KEY, {
+          from:    "Double-Shot <onboarding@resend.dev>",
+          to:      email,
+          subject,
+          html,
+        });
+        briefingSent = true;
+      } catch (e) {
+        console.error('[subscribe] 브리핑 발송 실패:', e.message);
+      }
     }
 
     // 관리자 알림
     await sendViaResend(RESEND_API_KEY, {
-      from:    "Daily30' <onboarding@resend.dev>",
+      from:    "Double-Shot <onboarding@resend.dev>",
       to:      ADMIN_EMAIL,
-      subject: `[Daily30'] 새 구독자: ${email}`,
-      html:    `<p>새 구독자: <b>${email}</b></p>${latest ? `<p>최신 브리핑 발송: <a href="${latest.link}">${latest.title}</a></p>` : ''}`,
+      subject: `[Double-Shot] 새 구독자: ${email}`,
+      html:    `<p>새 구독자: <b>${email}</b></p>${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료' : '발송 실패'}: <a href="${latest.link}">${latest.title}</a></p>` : ''}`,
     });
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, briefingSent });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: err.message });
