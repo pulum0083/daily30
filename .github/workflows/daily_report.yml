@@ -27,7 +27,7 @@ permissions:
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  WEB_BASE_URL: "https://daily30-ecru.vercel.app"
+  WEB_BASE_URL: "https://doubleshot.space"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
   RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}

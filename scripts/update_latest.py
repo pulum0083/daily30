@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 WEB_DATA = BASE_DIR / "web" / "data"
 
-WEB_BASE = "https://daily30-ecru.vercel.app"
+WEB_BASE = "https://doubleshot.space"
 
 TYPE_LABEL = {
     "kospi":  "🇰🇷 코스피 시초가 브리핑",

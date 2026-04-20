@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 
 RECIPIENT  = "pulum0083@gmail.com"
-WEB_BASE   = "https://daily30-ecru.vercel.app"
+WEB_BASE   = "https://doubleshot.space"
 
 TYPE_META = {
     "kospi":  {"label": "🇰🇷 코스피 시초가 브리핑", "emoji": "📈"},
@@ -130,7 +130,7 @@ def wrap_html(title: str, body_text: str, link: str) -> str:
 
 def send_email(api_key: str, subject: str, html: str) -> dict:
     payload = json.dumps({
-        "from":    "Daily30' <onboarding@resend.dev>",
+        "from":    "Double-Shot <noreply@doubleshot.space>",
         "to":      [RECIPIENT],
         "subject": subject,
         "html":    html,
