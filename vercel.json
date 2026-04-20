@@ -3,11 +3,14 @@
   "buildCommand": null,
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/briefings/ko/:date",      "destination": "/briefings/:date-kospi.html" },
-    { "source": "/briefings/ko/:date/",     "destination": "/briefings/:date-kospi.html" },
-    { "source": "/briefings/us/:date",      "destination": "/briefings/:date-us.html" },
-    { "source": "/briefings/us/:date/",     "destination": "/briefings/:date-us.html" },
-    { "source": "/briefings/weekly/:date",  "destination": "/briefings/:date-weekly.html" },
-    { "source": "/briefings/weekly/:date/", "destination": "/briefings/:date-weekly.html" }
+    { "source": "/",                           "destination": "/landing.html" },
+    { "source": "/briefings",                  "destination": "/index.html" },
+    { "source": "/briefings/",                 "destination": "/index.html" },
+    { "source": "/briefings/ko/:date",         "destination": "/briefings/:date-kospi.html" },
+    { "source": "/briefings/ko/:date/",        "destination": "/briefings/:date-kospi.html" },
+    { "source": "/briefings/us/:date",         "destination": "/briefings/:date-us.html" },
+    { "source": "/briefings/us/:date/",        "destination": "/briefings/:date-us.html" },
+    { "source": "/briefings/weekly/:date",     "destination": "/briefings/:date-weekly.html" },
+    { "source": "/briefings/weekly/:date/",    "destination": "/briefings/:date-weekly.html" }
   ]
 }
