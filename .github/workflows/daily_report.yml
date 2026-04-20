@@ -25,9 +25,10 @@ permissions:
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  WEB_BASE_URL: "https://pulum0083.github.io/daily30"
+  WEB_BASE_URL: "https://daily30-ecru.vercel.app"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
 defaults:
   run:
@@ -84,6 +85,11 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
+
+      - name: 📧 이메일 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_email.py --type kospi
 
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
@@ -157,6 +163,11 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
+
+      - name: 📧 이메일 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_email.py --type us
 
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
