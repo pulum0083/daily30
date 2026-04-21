@@ -97,6 +97,7 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/ data/
           git diff --staged --quiet || git commit -m "📊 코스피 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git pull --rebase
           git push
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
@@ -178,6 +179,7 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/ data/
           git diff --staged --quiet || git commit -m "🇺🇸 미국 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git pull --rebase
           git push
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
