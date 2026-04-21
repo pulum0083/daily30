@@ -12,7 +12,6 @@ on:
           - kospi
           - us
           - accuracy
-          - fg-patch
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
@@ -76,6 +75,10 @@ jobs:
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type kospi
+
+      - name: 🔄 latest.json 업데이트
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/update_latest.py --type kospi
 
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true'
@@ -154,6 +157,10 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type us
 
+      - name: 🔄 latest.json 업데이트
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/update_latest.py --type us
+
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
@@ -217,6 +224,7 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/
           git diff --staged --quiet || git commit -m "😰 공포탐욕 패치: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git pull --rebase
           git push
 
       - name: 🌐 GitHub Pages 배포

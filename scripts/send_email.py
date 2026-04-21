@@ -55,8 +55,7 @@ def build_email(briefing_type: str, date_slug: str) -> tuple[str, str]:
     kst       = pytz.timezone("Asia/Seoul")
     today_str = datetime.now(kst).strftime("%Y.%m.%d")
     meta      = TYPE_META[briefing_type]
-    slug      = 'ko' if briefing_type == 'kospi' else briefing_type
-    link      = f"{WEB_BASE}/briefings/{slug}/{date_slug}/"
+    link      = f"{WEB_BASE}/briefings/{date_slug}/"
 
     # ── 분석 JSON 읽기 ──
     analysis_file = DATA_DIR / f"analysis_{briefing_type}.json"
