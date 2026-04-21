@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0D0D0F"/>
+      <stop offset="100%" stop-color="#161618"/>
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E03131"/>
+      <stop offset="100%" stop-color="#FF6A6A"/>
+    </linearGradient>
+    <linearGradient id="accentLine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E03131" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FF6A6A" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <g stroke="rgba(255,255,255,0.03)" stroke-width="1">
+    <line x1="0" y1="157" x2="1200" y2="157"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="472" x2="1200" y2="472"/>
+    <line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="900" y1="0" x2="900" y2="630"/>
+  </g>
+
+  <!-- Decorative candlestick chart (right side) -->
+  <g opacity="0.07">
+    <!-- Candles -->
+    <rect x="780" y="260" width="28" height="120" rx="3" fill="#4CAF50"/>
+    <line x1="794" y1="230" x2="794" y2="260" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="794" y1="380" x2="794" y2="410" stroke="#4CAF50" stroke-width="3"/>
+
+    <rect x="830" y="300" width="28" height="80" rx="3" fill="#F44336"/>
+    <line x1="844" y1="270" x2="844" y2="300" stroke="#F44336" stroke-width="3"/>
+    <line x1="844" y1="380" x2="844" y2="405" stroke="#F44336" stroke-width="3"/>
+
+    <rect x="880" y="240" width="28" height="140" rx="3" fill="#4CAF50"/>
+    <line x1="894" y1="205" x2="894" y2="240" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="894" y1="380" x2="894" y2="415" stroke="#4CAF50" stroke-width="3"/>
+
+    <rect x="930" y="280" width="28" height="100" rx="3" fill="#F44336"/>
+    <line x1="944" y1="250" x2="944" y2="280" stroke="#F44336" stroke-width="3"/>
+    <line x1="944" y1="380" x2="944" y2="408" stroke="#F44336" stroke-width="3"/>
+
+    <rect x="980" y="220" width="28" height="160" rx="3" fill="#4CAF50"/>
+    <line x1="994" y1="190" x2="994" y2="220" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="994" y1="380" x2="994" y2="420" stroke="#4CAF50" stroke-width="3"/>
+
+    <rect x="1030" y="250" width="28" height="130" rx="3" fill="#4CAF50"/>
+    <line x1="1044" y1="220" x2="1044" y2="250" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="1044" y1="380" x2="1044" y2="415" stroke="#4CAF50" stroke-width="3"/>
+
+    <rect x="1080" y="200" width="28" height="180" rx="3" fill="#4CAF50"/>
+    <line x1="1094" y1="165" x2="1094" y2="200" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="1094" y1="380" x2="1094" y2="425" stroke="#4CAF50" stroke-width="3"/>
+
+    <rect x="1130" y="230" width="28" height="150" rx="3" fill="#4CAF50"/>
+    <line x1="1144" y1="195" x2="1144" y2="230" stroke="#4CAF50" stroke-width="3"/>
+    <line x1="1144" y1="380" x2="1144" y2="418" stroke="#4CAF50" stroke-width="3"/>
+  </g>
+
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="5" height="630" fill="url(#accentLine)" transform="rotate(90 315 315)"/>
+  <rect x="72" y="0" width="5" height="630" fill="url(#logoGrad)" opacity="0.6"/>
+
+  <!-- Logo mark -->
+  <rect x="88" y="210" width="72" height="72" rx="18" fill="url(#logoGrad)"/>
+  <!-- Candlestick SVG inside logo (scaled up) -->
+  <g transform="translate(88,210) scale(3)">
+    <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+    <line x1="7" y1="4" x2="7" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+    <line x1="17" y1="3" x2="17" y2="5" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Service name -->
+  <text x="180" y="261" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="52" font-weight="800" fill="white" letter-spacing="-1">Double-Shot</text>
+
+  <!-- Subtitle -->
+  <text x="180" y="302" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="500" fill="rgba(255,255,255,0.5)" letter-spacing="0.02em">AI 투자 브리핑</text>
+
+  <!-- Divider -->
+  <rect x="88" y="330" width="560" height="1" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Description -->
+  <text x="88" y="375" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" fill="rgba(255,255,255,0.65)">매일 아침 코스피 · 저녁 미국 시장</text>
+  <text x="88" y="410" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" fill="rgba(255,255,255,0.65)">AI가 예측하는 장 방향 브리핑</text>
+
+  <!-- Tags -->
+  <rect x="88" y="450" width="130" height="36" rx="18" fill="rgba(224,49,49,0.15)" stroke="rgba(224,49,49,0.3)" stroke-width="1"/>
+  <text x="153" y="473" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#FF6A6A">📈 코스피</text>
+
+  <rect x="234" y="450" width="130" height="36" rx="18" fill="rgba(224,49,49,0.15)" stroke="rgba(224,49,49,0.3)" stroke-width="1"/>
+  <text x="299" y="473" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#FF6A6A">🇺🇸 미국 시장</text>
+
+  <rect x="380" y="450" width="100" height="36" rx="18" fill="rgba(224,49,49,0.15)" stroke="rgba(224,49,49,0.3)" stroke-width="1"/>
+  <text x="430" y="473" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="600" fill="#FF6A6A">무료</text>
+
+  <!-- Domain -->
+  <text x="88" y="560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="16" fill="rgba(255,255,255,0.25)">doubleshot.space</text>
+</svg>
