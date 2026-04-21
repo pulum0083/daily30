@@ -12,7 +12,6 @@ on:
           - kospi
           - us
           - accuracy
-          - fg-patch
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
@@ -225,6 +224,7 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/
           git diff --staged --quiet || git commit -m "😰 공포탐욕 패치: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git pull --rebase
           git push
 
       - name: 🌐 GitHub Pages 배포
