@@ -149,122 +149,32 @@
   }
 
   /* ============================================================
-     Fear & Greed mini gauge (canvas semicircle)
+     VIX 공포지수 렌더링
   ============================================================ */
-  function fgMeta(v) {
-    if (v <= 24) return { color:'#1D4ED8', label:'극단적 공포', badge:'xfear' };
-    if (v <= 44) return { color:'#2563EB', label:'공포',       badge:'fear'  };
-    if (v <= 54) return { color:'#CA8A04', label:'중립',       badge:'neutral'};
-    if (v <= 74) return { color:'#E03131', label:'탐욕',       badge:'greed' };
-    return            { color:'#B91C1C', label:'극단적 탐욕',  badge:'xgreed' };
+  function vixLevel(v) {
+    if (v < 15) return { label: '안정',  cls: 'calm'     };
+    if (v < 20) return { label: '보통',  cls: 'normal'   };
+    if (v < 30) return { label: '경계',  cls: 'elevated' };
+    if (v < 40) return { label: '불안',  cls: 'high'     };
+    return             { label: '극단',  cls: 'extreme'  };
   }
 
-  function drawFGGauge(value) {
-    const canvas = document.getElementById('fg-gauge-canvas');
-    if (!canvas) return;
-    const dpr = window.devicePixelRatio || 1;
-    const cssW = canvas.offsetWidth  || 118;
-    const cssH = canvas.offsetHeight || 64;
-    canvas.width  = cssW * dpr;
-    canvas.height = cssH * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-
-    const cx     = cssW / 2;
-    const cy     = cssH * 0.82;
-    const outerR = cssW * 0.44;
-    const innerR = outerR * 0.60;
-    const midR   = (outerR + innerR) / 2;
-    const trkW   = outerR - innerR;
-
-    ctx.clearRect(0, 0, cssW, cssH);
-
-    const isDark = document.documentElement.classList.contains('dark');
-    const trackBg    = isDark ? '#3A3C3E' : '#E5E5E6';
-    const pivotFill  = isDark ? '#1C1D1F' : '#FFFFFF';
-    const pivotStroke= isDark ? '#3C3E40' : '#D0D1D2';
-
-    /* Background track */
-    ctx.beginPath();
-    ctx.arc(cx, cy, midR, Math.PI, 0, false);
-    ctx.strokeStyle = trackBg;
-    ctx.lineWidth = trkW + 2;
-    ctx.lineCap = 'butt';
-    ctx.stroke();
-
-    /* 5 color segments: angle = π*(1 + pct/100) */
-    const SEGS = [
-      [0, 20,  '#1D4ED8'],
-      [20,40,  '#3B82F6'],
-      [40,60,  '#CA8A04'],
-      [60,80,  '#EF4444'],
-      [80,100, '#B91C1C'],
-    ];
-    SEGS.forEach(([from, to, col]) => {
-      ctx.beginPath();
-      ctx.arc(cx, cy, midR, Math.PI*(1+from/100), Math.PI*(1+to/100), false);
-      ctx.strokeStyle = col;
-      ctx.lineWidth = trkW;
-      ctx.lineCap = 'butt';
-      ctx.stroke();
-    });
-
-    /* Separator ticks */
-    [20,40,60,80].forEach(pct => {
-      const a = Math.PI*(1+pct/100);
-      ctx.beginPath();
-      ctx.moveTo(cx+(innerR-1)*Math.cos(a), cy+(innerR-1)*Math.sin(a));
-      ctx.lineTo(cx+(outerR+1)*Math.cos(a), cy+(outerR+1)*Math.sin(a));
-      ctx.strokeStyle = pivotFill;
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-    });
-
-    /* Needle — thin tapered pointer reaching arc midpoint */
-    const needleA  = Math.PI * (1.5 + value/100);
-    const nTip     = midR + 2;   /* tip lands just past arc midpoint */
-    const nTail    = trkW * 0.3; /* short tail below pivot */
-    const nHalfW   = 2;          /* half-width at widest (near pivot) */
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(needleA);
-    ctx.beginPath();
-    ctx.moveTo(-nHalfW,  nTail);   /* base left */
-    ctx.lineTo( nHalfW,  nTail);   /* base right */
-    ctx.lineTo( 0.6,    -nTip);    /* tip right */
-    ctx.lineTo(-0.6,    -nTip);    /* tip left */
-    ctx.closePath();
-    ctx.fillStyle = isDark ? '#E8EAEB' : '#1A1B1D';
-    ctx.shadowColor = 'rgba(0,0,0,0.55)';
-    ctx.shadowBlur  = 4;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.restore();
-
-    /* Pivot — drawn after needle so it caps the base cleanly */
-    const pivR = trkW * 0.38;
-    ctx.beginPath();
-    ctx.arc(cx, cy, pivR, 0, Math.PI*2);
-    ctx.fillStyle = pivotFill;
-    ctx.fill();
-    ctx.strokeStyle = pivotStroke;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-  }
-
-  function setFearGreed(value) {
-    drawFGGauge(value);
-    const m = fgMeta(value);
-    const valEl = document.getElementById('fg-value');
-    const lblEl = document.getElementById('fg-label');
-    const bdgEl = document.getElementById('fg-badge');
-    if (valEl) { valEl.textContent = value; valEl.style.color = m.color; }
-    if (lblEl) { lblEl.textContent = m.label; lblEl.style.color = m.color; }
-    if (bdgEl) {
-      bdgEl.className = `fg-badge ${m.badge}`;
-      const labels = { xfear:'EXTREME FEAR', fear:'FEAR', neutral:'NEUTRAL', greed:'GREED', xgreed:'EXTREME GREED' };
-      bdgEl.textContent = labels[m.badge] || m.badge.toUpperCase();
+  function renderVix() {
+    const vix = (window.MARKET_DATA && window.MARKET_DATA.vix) || {};
+    const valEl = document.getElementById('vix-val');
+    const chgEl = document.getElementById('vix-chg');
+    const lvlEl = document.getElementById('vix-level');
+    if (!valEl || vix.price === undefined) return;
+    valEl.textContent = vix.price.toFixed(2);
+    if (chgEl && vix.change_pct !== undefined) {
+      const sign = vix.change_pct >= 0 ? '+' : '';
+      chgEl.textContent = `${sign}${vix.change_pct.toFixed(2)}%`;
+      chgEl.className = 'mkt-chg ' + (vix.change_pct >= 0 ? 'up' : 'down');
+    }
+    if (lvlEl) {
+      const m = vixLevel(vix.price);
+      lvlEl.textContent = m.label;
+      lvlEl.className = `vix-badge ${m.cls}`;
     }
   }
 
@@ -337,8 +247,6 @@
     updateOilReason();
   }
 
-  /* Fear & Greed value from agent data */
-  let fgVal = (window.MARKET_DATA && window.MARKET_DATA.fearGreed) ? window.MARKET_DATA.fearGreed.value : 50;
 
   /* ============================================================
      Sparkline hover tooltip (value + time)
@@ -489,25 +397,7 @@
 
   window.addEventListener('load', () => {
     renderAll();
-    setFearGreed(fgVal);
-    /* Update FG history from data */
-    const fgData = (window.MARKET_DATA && window.MARKET_DATA.fearGreed) || {};
-    ['prev','1w','1m','1y'].forEach((k, i) => {
-      const el = document.getElementById('fg-hist-' + k);
-      if (el && fgData[k] !== undefined) {
-        el.textContent = fgData[k];
-        el.style.color = fgData[k] >= 50 ? '#E03131' : '#2563EB';
-      }
-    });
-    /* Show FG data date from API timestamp */
-    const fgDateEl = document.getElementById('fg-date');
-    if (fgDateEl && fgData.timestamp) {
-      const ts = parseInt(fgData.timestamp, 10) * 1000;
-      const d = new Date(ts);
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      fgDateEl.textContent = `기준: ${mm}/${dd}`;
-    }
+    renderVix();
     Object.entries(marketData).forEach(([key, d]) => attachSparkTooltip(d.canvasId, key));
     // rAF ensures layout is complete so canvas.offsetWidth is accurate on mobile
     requestAnimationFrame(() => {
@@ -526,12 +416,21 @@
     document.getElementById('kellogg-modal').classList.remove('is-open');
   }
 
-  function openFGModal() {
-    const el = document.getElementById('fg-modal');
+  function openAccModal() {
+    const el = document.getElementById('acc-modal');
     if (el) el.classList.add('is-open');
   }
-  function closeFGModal() {
-    const el = document.getElementById('fg-modal');
+  function closeAccModal() {
+    const el = document.getElementById('acc-modal');
+    if (el) el.classList.remove('is-open');
+  }
+
+  function openVixModal() {
+    const el = document.getElementById('vix-modal');
+    if (el) el.classList.add('is-open');
+  }
+  function closeVixModal() {
+    const el = document.getElementById('vix-modal');
     if (el) el.classList.remove('is-open');
   }
 
@@ -547,7 +446,8 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       closeKelloggModal();
-      closeFGModal();
+      closeAccModal();
+      closeVixModal();
       closePredModal();
     }
   });
