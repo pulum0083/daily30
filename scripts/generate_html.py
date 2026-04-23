@@ -179,13 +179,13 @@ def build_sidebar_data(briefing_type: str) -> list:
             {"type": "market", "name": "필라델피아 반도체",   "val_id": "sox-val",    "badge_id": "sox-badge",    "canvas_id": "c-sox"},
             {"type": "market", "name": "달러 인덱스 DXY",   "val_id": "dxy-val",    "badge_id": "dxy-badge",    "canvas_id": "c-dxy"},
             {"type": "market", "name": "WTI 국제유가",       "val_id": "oil-val",    "badge_id": "oil-badge",    "canvas_id": "c-oil"},
-            {"type": "fg"},
+            {"type": "vix"},
         ]
     else:  # us
         return [
             {"type": "market", "name": "나스닥100 선물",     "val_id": "nq-val",  "badge_id": "nq-badge",  "canvas_id": "c-nq"},
             {"type": "market", "name": "WTI 국제유가",       "val_id": "oil-val", "badge_id": "oil-badge", "canvas_id": "c-oil"},
-            {"type": "fg"},
+            {"type": "vix"},
         ]
 
 
@@ -228,6 +228,11 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
     market_data_js = dict(data.get("market_data_js", {}))
     candidates_key = "kospi_candidates" if briefing_type == "kospi" else "us_candidates"
     candidates = data.get(candidates_key, [])
+
+    # VIX fallback: 구 데이터 파일은 market_data_js에 vix가 없고 최상위에만 있음
+    if "vix" not in market_data_js and data.get("vix"):
+        market_data_js["vix"] = data["vix"]
+    market_data_js.pop("fearGreed", None)
 
     pred = analysis.get("prediction", {})
     up_pct = pred.get("up_pct", 50)
@@ -446,6 +451,10 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
     market_data_js = dict(data.get("market_data_js", {}))
     candidates_key = "kospi_candidates" if briefing_type == "kospi" else "us_candidates"
     candidates = data.get(candidates_key, [])
+
+    if "vix" not in market_data_js and data.get("vix"):
+        market_data_js["vix"] = data["vix"]
+    market_data_js.pop("fearGreed", None)
 
     pred = analysis.get("prediction", {})
     up_pct = pred.get("up_pct", 50)
