@@ -252,11 +252,9 @@ def fetch_kospi_data() -> dict:
     print("[fetch_data]   → sidebar market data")
     market_data_js = build_sidebar_market_data(SIDEBAR_TICKERS_KOSPI)
 
-    # 2. Fear & Greed Index
+    # 2. Fear & Greed Index (Claude 분석용 — UI에서는 제거됨)
     print("[fetch_data]   → fear & greed index")
     fg = get_fear_greed()
-    if fg:
-        market_data_js["fearGreed"] = fg
 
     # 3. Additional macro tickers (not in sidebar)
     print("[fetch_data]   → macro tickers")
@@ -267,6 +265,10 @@ def fetch_kospi_data() -> dict:
         d = get_ticker_full(t)
         if "error" not in d:
             macro[t] = d
+
+    # VIX를 사이드바 market_data_js에 포함 (UI 표시용)
+    if macro.get("^VIX"):
+        market_data_js["vix"] = macro["^VIX"]
 
     # 4. Korean stock candidates (Kellogg strategy screening)
     print("[fetch_data]   → KOSPI candidates")
@@ -288,6 +290,7 @@ def fetch_kospi_data() -> dict:
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},
         "bigtech": {t: macro.get(t, {}) for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]},
+        "fearGreed": fg or {},
         # Kellogg screening — sorted by signal quality
         # Claude picks 3-5 from this list; use sparkline/ma20_sparkline/ma200_sparkline for stockCharts
         "kospi_candidates": kospi_candidates,
@@ -308,11 +311,9 @@ def fetch_us_data() -> dict:
     print("[fetch_data]   → sidebar market data")
     market_data_js = build_sidebar_market_data(SIDEBAR_TICKERS_US)
 
-    # 2. Fear & Greed
+    # 2. Fear & Greed (Claude 분석용 — UI에서는 제거됨)
     print("[fetch_data]   → fear & greed index")
     fg = get_fear_greed()
-    if fg:
-        market_data_js["fearGreed"] = fg
 
     # 3. Macro + futures
     print("[fetch_data]   → macro tickers")
@@ -327,6 +328,10 @@ def fetch_us_data() -> dict:
         d = get_ticker_full(t)
         if "error" not in d:
             macro[t] = d
+
+    # VIX를 사이드바 market_data_js에 포함 (UI 표시용)
+    if macro.get("^VIX"):
+        market_data_js["vix"] = macro["^VIX"]
 
     # 4. US stock candidates
     print("[fetch_data]   → US candidates")
@@ -367,6 +372,7 @@ def fetch_us_data() -> dict:
             t: next((c for c in us_candidates if c["ticker"] == t), {})
             for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "TSLA"]
         },
+        "fearGreed": fg or {},
         "us_candidates": us_candidates,
     }
 

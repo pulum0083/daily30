@@ -1724,6 +1724,21 @@
 .fg-hist-item .lbl { color: var(--text-tertiary); }
 .fg-hist-item .val { font-weight: 700; font-variant-numeric: tabular-nums; }
 
+/* VIX badge */
+.vix-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 100px;
+  background: var(--grey-25);
+  color: var(--text-secondary);
+}
+.vix-badge.calm     { background: #DCFCE7; color: #16A34A; }
+.vix-badge.normal   { background: #ECFCCB; color: #65A30D; }
+.vix-badge.elevated { background: #FEF9C3; color: #CA8A04; }
+.vix-badge.high     { background: var(--status-down-bg); color: var(--status-down); }
+.vix-badge.extreme  { background: #FFE4E6; color: #B91C1C; }
+
 /* ============================================================
    Reason Section Title — dynamic hook title (말풍선 아이콘, 파란 바 제거)
    ============================================================ */

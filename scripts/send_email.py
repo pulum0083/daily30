@@ -2,10 +2,12 @@
 """
 브리핑 요약을 이메일로 발송한다 (Resend API).
 
+- 관리자(RECIPIENT) 항상 포함
+- RESEND_AUDIENCE_ID 설정 시 Resend Contacts에서 구독자 목록 조회 후 함께 발송
+
 사용법:
   python3 scripts/send_email.py --type kospi
   python3 scripts/send_email.py --type us
-  python3 scripts/send_email.py --type weekly
 """
 
 import argparse
@@ -24,6 +26,32 @@ DATA_DIR = BASE_DIR / "data"
 
 RECIPIENT  = "pulum0083@gmail.com"
 WEB_BASE   = "https://doubleshot.space"
+
+
+def notify_telegram(message: str) -> None:
+    """긴급 알림을 텔레그램으로 발송. 실패해도 조용히 넘어감."""
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id   = os.environ.get("TELEGRAM_CHAT_ID")
+    if not bot_token or not chat_id:
+        config_file = BASE_DIR / "config.json"
+        if config_file.exists():
+            with open(config_file, encoding="utf-8") as f:
+                cfg = json.load(f)
+            bot_token = cfg.get("telegram", {}).get("bot_token", "")
+            chat_id   = cfg.get("telegram", {}).get("chat_id", "")
+    if not bot_token or not chat_id:
+        return
+    try:
+        payload = json.dumps({"chat_id": chat_id, "text": message, "parse_mode": "HTML"}).encode("utf-8")
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
 
 TYPE_META = {
     "kospi":  {"label": "🇰🇷 코스피 시초가 브리핑", "emoji": "📈"},
@@ -50,6 +78,27 @@ def strip_html(text: str) -> str:
     return re.sub(r"<[^>]+>", "", str(text))
 
 
+def get_subscribers(api_key: str, audience_id: str) -> list[str]:
+    """Resend Contacts API에서 구독 중인 이메일 목록 조회"""
+    req = urllib.request.Request(
+        f"https://api.resend.com/audiences/{audience_id}/contacts",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type":  "application/json",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            emails = [c["email"] for c in data.get("data", []) if c.get("subscribed")]
+            print(f"[send_email] 구독자 {len(emails)}명 조회 완료")
+            return emails
+    except Exception as e:
+        print(f"[send_email] Contacts 조회 실패: {e}", file=sys.stderr)
+        return []
+
+
 def build_email(briefing_type: str, date_slug: str) -> tuple[str, str]:
     """(subject, html_body) 반환"""
     kst       = pytz.timezone("Asia/Seoul")
@@ -57,7 +106,6 @@ def build_email(briefing_type: str, date_slug: str) -> tuple[str, str]:
     meta      = TYPE_META[briefing_type]
     link      = f"{WEB_BASE}/briefings/{date_slug}/"
 
-    # ── 분석 JSON 읽기 ──
     analysis_file = DATA_DIR / f"analysis_{briefing_type}.json"
     if not analysis_file.exists():
         subject = f"{meta['emoji']} {meta['label']} | {today_str}"
@@ -74,84 +122,122 @@ def build_email(briefing_type: str, date_slug: str) -> tuple[str, str]:
     confidence   = pred.get("confidence", "")
     reasons      = data.get("reasons", [])
 
-    # 제목: reason_title 사용
     subject = f"{meta['emoji']} {reason_title}" if reason_title else f"{meta['emoji']} {meta['label']} | {today_str}"
 
-    # 본문 블록
-    lines = []
-    lines.append(f"<b>{meta['label']}</b> | {today_str}")
-    lines.append("")
+    rows = ""
+    rows += f"<tr><td style='font-size:13px;color:#888888;padding-bottom:12px;font-family:Arial,sans-serif;'>{meta['label']} | {today_str}</td></tr>"
 
     if direction:
-        lines.append(f"📊 예측: <b>{direction}</b> ({up_pct}%)")
-        lines.append(f"신뢰도: {confidence}%")
-        lines.append("")
+        rows += f"<tr><td style='padding:4px 0;font-family:Arial,sans-serif;'><span style='font-size:14px;font-weight:700;color:#333333;'>&#128202; 예측: {direction} ({up_pct}%)</span><br/><span style='font-size:13px;color:#888888;'>신뢰도: {confidence}%</span></td></tr>"
+        rows += "<tr><td style='padding:4px 0;'></td></tr>"
 
     if reason_title:
-        lines.append(f"💬 <b>{reason_title}</b>")
-        lines.append("")
+        rows += f"<tr><td style='font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#333333;padding:4px 0;'>💬 {reason_title}</td></tr>"
+        rows += "<tr><td style='padding:4px 0;'></td></tr>"
 
     if reasons:
-        lines.append("핵심 시그널:")
+        rows += "<tr><td style='font-family:Arial,sans-serif;font-size:13px;color:#555555;padding:4px 0;font-weight:700;'>핵심 시그널:</td></tr>"
         for r in reasons[:3]:
-            lines.append(f"• {strip_html(r)}")
+            rows += f"<tr><td style='font-family:Arial,sans-serif;font-size:13px;line-height:1.8;color:#444444;padding:3px 0;'>&#8226; {strip_html(r)}</td></tr>"
 
-    body_text = "\n".join(lines)
-    return subject, wrap_html(subject, body_text, link)
-
-
-def wrap_html(title: str, body_text: str, link: str) -> str:
-    rows = ""
-    for line in body_text.split("\n"):
-        if line == "":
-            rows += "<tr><td style='padding:4px 0'></td></tr>"
-        else:
-            rows += f"<tr><td style='font-size:14px;line-height:1.7;color:#333'>{line}</td></tr>"
-
-    return f"""
-    <div style="font-family:'Apple SD Gothic Neo',sans-serif;max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;">
-      <div style="background:#006EFF;padding:24px 28px">
-        <div style="color:rgba(255,255,255,.8);font-size:12px;font-weight:700;letter-spacing:.08em;margin-bottom:8px">Double-Shot · AI 투자 브리핑</div>
-        <div style="color:#fff;font-size:20px;font-weight:800;line-height:1.4">{title}</div>
-      </div>
-      <div style="padding:24px 28px">
-        <table style="width:100%;border-collapse:collapse">{rows}</table>
-      </div>
-      <div style="padding:16px 28px;border-top:1px solid #f0f0f0;background:#fafafa">
-        <a href="{link}" style="display:inline-block;background:#006EFF;color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 24px;border-radius:8px">전체 브리핑 보기 →</a>
-      </div>
-      <div style="padding:16px 28px;font-size:11px;color:#aaa">
-        Daily30' · 개인 투자 비서 · 언제든 구독 해지 가능
-      </div>
-    </div>
-    """
+    return subject, wrap_html(subject, rows, link)
 
 
-def send_email(api_key: str, subject: str, html: str) -> dict:
-    payload = json.dumps({
-        "from":    "Double-Shot <noreply@doubleshot.space>",
-        "to":      [RECIPIENT],
-        "subject": subject,
-        "html":    html,
-    }).encode("utf-8")
+def wrap_html(title: str, rows_html: str, link: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Double-Shot 브리핑</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f5;">
+  <tr><td align="center" style="padding:24px 16px;">
+    <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #e5e5e5;">
+      <tr>
+        <td bgcolor="#006EFF" style="padding:24px 28px;background:#006EFF;">
+          <p style="margin:0 0 8px 0;font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:1px;">Double-Shot &#183; AI 투자 브리핑</p>
+          <p style="margin:0;font-family:Arial,sans-serif;font-size:18px;font-weight:800;color:#ffffff;line-height:1.4;">{title}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px 28px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            {rows_html}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 28px;border-top:1px solid #f0f0f0;background:#fafafa;">
+          <a href="{link}" style="display:inline-block;background:#006EFF;color:#ffffff;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;font-weight:700;padding:12px 24px;">전체 브리핑 보기 &#x2192;</a>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:14px 28px;font-family:Arial,sans-serif;font-size:11px;color:#bbbbbb;">
+          Double-Shot &#183; AI 투자 브리핑 서비스
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
 
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type":  "application/json",
-            "User-Agent":    "daily30-briefing/1.0",
-        },
-        method="POST",
-    )
 
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        raise RuntimeError(f"Resend API 오류 ({e.code}): {body}")
+def send_emails_batch(api_key: str, recipients: list[str], subject: str, html: str) -> int:
+    """Resend batch API로 여러 수신자에게 개별 발송. 성공 건수 반환."""
+    messages = [
+        {
+            "from":    "Double-Shot <noreply@doubleshot.space>",
+            "to":      [r],
+            "subject": subject,
+            "html":    html,
+            "headers": {
+                "List-Unsubscribe": "<mailto:unsubscribe@doubleshot.space?subject=unsubscribe>",
+                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+            },
+        }
+        for r in recipients
+    ]
+
+    success = 0
+    # Resend batch 최대 100개
+    for i in range(0, len(messages), 100):
+        batch = messages[i:i+100]
+        payload = json.dumps(batch).encode("utf-8")
+        req = urllib.request.Request(
+            "https://api.resend.com/emails/batch",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type":  "application/json",
+                "User-Agent":    "daily30-briefing/1.0",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+                success += len(result.get("data", []))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8")
+            if e.code == 429:
+                notify_telegram(
+                    "⚠️ <b>Double-Shot 이메일 발송 한도 초과</b>\n"
+                    "Resend 무료 플랜 일일/월간 한도에 도달했어요.\n"
+                    "→ Resend 대시보드에서 플랜 업그레이드를 확인해 주세요."
+                )
+            elif e.code in (401, 403):
+                notify_telegram(
+                    f"🔑 <b>Double-Shot 이메일 발송 실패 ({e.code})</b>\n"
+                    "RESEND_API_KEY가 유효하지 않거나 권한이 없어요.\n"
+                    "→ GitHub Secrets의 RESEND_API_KEY를 확인해 주세요."
+                )
+            raise RuntimeError(f"Resend batch API 오류 ({e.code}): {body}")
+
+    return success
 
 
 def main():
@@ -171,10 +257,24 @@ def main():
 
     subject, html = build_email(args.type, date_slug)
 
+    # 수신자 목록: 관리자 + Resend Contacts 구독자
+    audience_id = os.environ.get("RESEND_AUDIENCE_ID")
+    subscribers = get_subscribers(api_key, audience_id) if audience_id else []
+
+    # 관리자는 항상 포함, 중복 제거
+    recipients = list(dict.fromkeys([RECIPIENT] + subscribers))
+    print(f"[send_email] 총 수신자 {len(recipients)}명 (관리자 1 + 구독자 {len(subscribers)})")
+
     try:
-        result = send_email(api_key, subject, html)
-        print(f"[send_email] ✓ 발송 완료 → {RECIPIENT} (id={result.get('id', '?')})")
+        sent = send_emails_batch(api_key, recipients, subject, html)
+        print(f"[send_email] ✓ 발송 완료 → {sent}/{len(recipients)}명")
         print(f"[send_email]   제목: {subject}")
+        if sent < len(recipients):
+            notify_telegram(
+                f"⚠️ <b>Double-Shot 이메일 일부 발송 실패</b>\n"
+                f"{sent}/{len(recipients)}명에게만 전송됐어요.\n"
+                f"→ Resend 대시보드 로그를 확인해 주세요."
+            )
     except RuntimeError as e:
         print(f"[send_email] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
