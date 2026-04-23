@@ -3,11 +3,6 @@
   "outputDirectory": "web",
   "buildCommand": null,
   "installCommand": "npm install",
-  "crons": [
-    { "path": "/api/trigger?type=kospi",    "schedule": "15 23 * * 0-4" },
-    { "path": "/api/trigger?type=us",       "schedule": "20 12 * * 1-5" },
-    { "path": "/api/trigger?type=accuracy", "schedule": "10 0 * * 2-6" }
-  ],
   "routes": [
     { "src": "^/$",                                  "dest": "/landing.html" },
     { "src": "^/briefings/?$",                       "dest": "/briefings/index.html" },
