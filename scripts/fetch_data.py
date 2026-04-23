@@ -175,30 +175,36 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
     Build the window.MARKET_DATA object for sidebar injection.
     Returns dict ready to be JSON-serialised as window.MARKET_DATA.
     """
+    import math
     import yfinance as yf
 
     market_data = {}
     for key, ticker in sidebar_map.items():
         try:
-            # Price + change from daily history
-            hist = yf.Ticker(ticker).history(period="5d")
+            # Use 1mo period for reliability (5d can be too short after long weekends)
+            hist = yf.Ticker(ticker).history(period="1mo")
             closes = hist["Close"].dropna()
             if len(closes) < 2:
+                print(f"[fetch_data] sidebar {key}/{ticker}: insufficient data ({len(closes)} closes)", file=sys.stderr)
                 continue
             price = float(closes.iloc[-1])
             prev = float(closes.iloc[-2])
+            if math.isnan(price) or math.isnan(prev) or prev == 0:
+                print(f"[fetch_data] sidebar {key}/{ticker}: invalid price (price={price}, prev={prev})", file=sys.stderr)
+                continue
             chg = round((price - prev) / prev * 100, 2)
 
-            # Hourly sparkline (last 10 hourly points)
+            # Hourly sparkline (last 10 hourly points); fallback to daily closes
             sparkline = get_hourly_sparkline(ticker, n=10)
-            if not sparkline:
-                sparkline = [round(float(p), 2) for p in closes.iloc[-10:].tolist()]
+            if len(sparkline) < 2:
+                sparkline = [round(float(p), 4) for p in closes.iloc[-10:].tolist()]
 
             market_data[key] = {
                 "base": round(price, 2),
                 "chg":  chg,
                 "data": sparkline,
             }
+            print(f"[fetch_data] sidebar {key}: {price:.2f} ({chg:+.2f}%) [{len(sparkline)} pts]")
         except Exception as e:
             print(f"[fetch_data] sidebar {key}/{ticker}: {e}", file=sys.stderr)
 
