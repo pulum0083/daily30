@@ -24,7 +24,7 @@ import pytz
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 
-RECIPIENTS = ["pulum0083@gmail.com", "luke00@ncsoft.com"]
+RECIPIENTS = ["pulum0083@gmail.com"]
 WEB_BASE   = "https://doubleshot.space"
 
 
@@ -91,7 +91,7 @@ def get_subscribers(api_key: str, audience_id: str) -> list[str]:
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            emails = [c["email"] for c in data.get("data", []) if c.get("subscribed")]
+            emails = [c["email"] for c in data.get("data", []) if not c.get("unsubscribed")]
             print(f"[send_email] 구독자 {len(emails)}명 조회 완료")
             return emails
     except Exception as e:
@@ -268,7 +268,7 @@ def main():
 
     # 관리자는 항상 포함, 중복 제거
     recipients = list(dict.fromkeys(RECIPIENTS + subscribers))
-    print(f"[send_email] 총 수신자 {len(recipients)}명 (관리자 {len(RECIPIENTS)} + 구독자 {len(subscribers)})")
+    print(f"[send_email] 총 수신자 {len(recipients)}명 (관리자 1 + 구독자 {len(subscribers)})")
 
     try:
         sent = send_emails_batch(api_key, recipients, subject, html)
