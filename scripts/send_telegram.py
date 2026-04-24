@@ -138,6 +138,23 @@ def build_fallback_message(briefing_type: str) -> str:
     return "\n".join(parts)
 
 
+def already_sent_today(briefing_type: str) -> bool:
+    """Return True if a message was already sent today (KST) for this type."""
+    from datetime import datetime
+    import pytz
+    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+    flag_file = DATA_DIR / f"telegram_sent_{briefing_type}_{today}.flag"
+    return flag_file.exists()
+
+
+def mark_sent_today(briefing_type: str) -> None:
+    from datetime import datetime
+    import pytz
+    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+    flag_file = DATA_DIR / f"telegram_sent_{briefing_type}_{today}.flag"
+    flag_file.touch()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Send briefing to Telegram")
     parser.add_argument("--type", choices=["kospi", "us", "weekly"], required=True)
@@ -147,7 +164,16 @@ def main():
         default=None,
         help="Message text. If omitted, reads data/telegram_message_{type}.txt",
     )
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Send even if already sent today",
+    )
     args = parser.parse_args()
+
+    # 하루 1회 발송 제한 — 중복 실행 방지
+    if not args.force and already_sent_today(args.type):
+        print(f"[send_telegram] ⚠️  Already sent today (type={args.type}). Skipping. Use --force to override.")
+        return
 
     try:
         bot_token, chat_id = load_credentials()
@@ -174,6 +200,7 @@ def main():
     try:
         result = send_message(bot_token, chat_id, message_text)
         if result.get("ok"):
+            mark_sent_today(args.type)
             print(f"[send_telegram] ✓ Sent (type={args.type})")
         else:
             print(f"[send_telegram] Telegram API error: {result}", file=sys.stderr)
