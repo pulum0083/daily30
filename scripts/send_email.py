@@ -24,7 +24,7 @@ import pytz
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 
-RECIPIENT  = "pulum0083@gmail.com"
+RECIPIENTS = ["pulum0083@gmail.com", "luke00@ncsoft.com"]
 WEB_BASE   = "https://doubleshot.space"
 
 
@@ -96,6 +96,11 @@ def get_subscribers(api_key: str, audience_id: str) -> list[str]:
             return emails
     except Exception as e:
         print(f"[send_email] Contacts 조회 실패: {e}", file=sys.stderr)
+        notify_telegram(
+            f"⚠️ <b>Double-Shot 구독자 목록 조회 실패</b>\n"
+            f"Resend Contacts API 오류로 구독자에게 이메일이 발송되지 않았어요.\n"
+            f"오류: {e}"
+        )
         return []
 
 
@@ -262,8 +267,8 @@ def main():
     subscribers = get_subscribers(api_key, audience_id) if audience_id else []
 
     # 관리자는 항상 포함, 중복 제거
-    recipients = list(dict.fromkeys([RECIPIENT] + subscribers))
-    print(f"[send_email] 총 수신자 {len(recipients)}명 (관리자 1 + 구독자 {len(subscribers)})")
+    recipients = list(dict.fromkeys(RECIPIENTS + subscribers))
+    print(f"[send_email] 총 수신자 {len(recipients)}명 (관리자 {len(RECIPIENTS)} + 구독자 {len(subscribers)})")
 
     try:
         sent = send_emails_batch(api_key, recipients, subject, html)
