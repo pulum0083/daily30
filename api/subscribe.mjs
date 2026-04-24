@@ -156,14 +156,18 @@ export default async function handler(req, res) {
     }
 
     // 4. 관리자 알림
-    await sendViaResend(RESEND_API_KEY, {
-      from:    "Double-Shot <noreply@doubleshot.space>",
-      to:      ADMIN_EMAIL,
-      subject: `[Double-Shot] 새 구독자: ${email}`,
-      html:    `<p>새 구독자: <b>${email}</b></p>
-                <p>Contacts 저장: ${contactSaved ? '✅ 완료' : '❌ 실패 (RESEND_AUDIENCE_ID 미설정 또는 오류)'}</p>
-                ${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료 ✅' : '발송 실패 ❌'}: <a href="${latest.link}">${latest.title}</a></p>` : '<p>latest.json 없음</p>'}`,
-    });
+    try {
+      await sendViaResend(RESEND_API_KEY, {
+        from:    "Double-Shot <noreply@doubleshot.space>",
+        to:      ADMIN_EMAIL,
+        subject: `[Double-Shot] 새 구독자: ${email}`,
+        html:    `<p>새 구독자: <b>${email}</b></p>
+                  <p>Contacts 저장: ${contactSaved ? '✅ 완료' : '❌ 실패 (RESEND_AUDIENCE_ID 미설정 또는 오류)'}</p>
+                  ${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료 ✅' : '발송 실패 ❌'}: <a href="${latest.link}">${latest.title}</a></p>` : '<p>latest.json 없음</p>'}`,
+      });
+    } catch (e) {
+      console.error('[subscribe] 관리자 알림 발송 실패:', e.message);
+    }
 
     return res.status(200).json({ ok: true, briefingSent, contactSaved });
   } catch (err) {
