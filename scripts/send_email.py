@@ -28,25 +28,28 @@ RECIPIENTS = ["pulum0083@gmail.com"]
 WEB_BASE   = "https://doubleshot.space"
 
 
-def notify_telegram(message: str) -> None:
-    """긴급 알림을 텔레그램으로 발송. 실패해도 조용히 넘어감."""
-    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id   = os.environ.get("TELEGRAM_CHAT_ID")
-    if not bot_token or not chat_id:
+def notify_admin_email(subject: str, body: str) -> None:
+    """운영자(pulum0083@gmail.com)에게 오류 알림 이메일 발송. 실패해도 조용히 넘어감."""
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
         config_file = BASE_DIR / "config.json"
         if config_file.exists():
             with open(config_file, encoding="utf-8") as f:
                 cfg = json.load(f)
-            bot_token = cfg.get("telegram", {}).get("bot_token", "")
-            chat_id   = cfg.get("telegram", {}).get("chat_id", "")
-    if not bot_token or not chat_id:
+            api_key = cfg.get("resend", {}).get("api_key", "")
+    if not api_key:
         return
     try:
-        payload = json.dumps({"chat_id": chat_id, "text": message, "parse_mode": "HTML"}).encode("utf-8")
+        payload = json.dumps({
+            "from": "noreply@doubleshot.space",
+            "to": ["pulum0083@gmail.com"],
+            "subject": subject,
+            "html": f"<pre style='font-family:sans-serif'>{body}</pre>",
+        }).encode("utf-8")
         req = urllib.request.Request(
-            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            "https://api.resend.com/emails",
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             method="POST",
         )
         urllib.request.urlopen(req, timeout=10)
@@ -96,10 +99,9 @@ def get_subscribers(api_key: str, audience_id: str) -> list[str]:
             return emails
     except Exception as e:
         print(f"[send_email] Contacts 조회 실패: {e}", file=sys.stderr)
-        notify_telegram(
-            f"⚠️ <b>Double-Shot 구독자 목록 조회 실패</b>\n"
-            f"Resend Contacts API 오류로 구독자에게 이메일이 발송되지 않았어요.\n"
-            f"오류: {e}"
+        notify_admin_email(
+            "[Double-Shot] 구독자 목록 조회 실패",
+            f"Resend Contacts API 오류로 구독자에게 이메일이 발송되지 않았어요.\n오류: {e}",
         )
         return []
 
@@ -229,16 +231,14 @@ def send_emails_batch(api_key: str, recipients: list[str], subject: str, html: s
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8")
             if e.code == 429:
-                notify_telegram(
-                    "⚠️ <b>Double-Shot 이메일 발송 한도 초과</b>\n"
-                    "Resend 무료 플랜 일일/월간 한도에 도달했어요.\n"
-                    "→ Resend 대시보드에서 플랜 업그레이드를 확인해 주세요."
+                notify_admin_email(
+                    "[Double-Shot] 이메일 발송 한도 초과",
+                    "Resend 무료 플랜 일일/월간 한도에 도달했어요.\n→ Resend 대시보드에서 플랜 업그레이드를 확인해 주세요.",
                 )
             elif e.code in (401, 403):
-                notify_telegram(
-                    f"🔑 <b>Double-Shot 이메일 발송 실패 ({e.code})</b>\n"
-                    "RESEND_API_KEY가 유효하지 않거나 권한이 없어요.\n"
-                    "→ GitHub Secrets의 RESEND_API_KEY를 확인해 주세요."
+                notify_admin_email(
+                    f"[Double-Shot] 이메일 발송 실패 ({e.code})",
+                    "RESEND_API_KEY가 유효하지 않거나 권한이 없어요.\n→ GitHub Secrets의 RESEND_API_KEY를 확인해 주세요.",
                 )
             raise RuntimeError(f"Resend batch API 오류 ({e.code}): {body}")
 
@@ -275,10 +275,9 @@ def main():
         print(f"[send_email] ✓ 발송 완료 → {sent}/{len(recipients)}명")
         print(f"[send_email]   제목: {subject}")
         if sent < len(recipients):
-            notify_telegram(
-                f"⚠️ <b>Double-Shot 이메일 일부 발송 실패</b>\n"
-                f"{sent}/{len(recipients)}명에게만 전송됐어요.\n"
-                f"→ Resend 대시보드 로그를 확인해 주세요."
+            notify_admin_email(
+                "[Double-Shot] 이메일 일부 발송 실패",
+                f"{sent}/{len(recipients)}명에게만 전송됐어요.\n→ Resend 대시보드 로그를 확인해 주세요.",
             )
     except RuntimeError as e:
         print(f"[send_email] ERROR: {e}", file=sys.stderr)
