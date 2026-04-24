@@ -132,7 +132,7 @@ GitHub Actions Secrets에 모두 등록되어 있음. Vercel 환경변수에도 
 5. **텔레그램**: 핵심 시그널 150자 이내 해요 체, 브리핑 URL 포함
 6. **오류 처리**: 텔레그램·이메일 스텝은 `continue-on-error: true` (실패해도 HTML 커밋은 진행)
 7. **push 충돌 방지**: 커밋 후 `git pull --rebase && git push` 패턴 사용
-8. **main 직접 push 금지**: feature 브랜치 → PR → merge 워크플로 사용
+8. **브랜치 전략**: 소규모 수정(스크립트 1~2개, 버그 픽스)은 main 직접 push. 대규모 변경(템플릿 전면 교체, 파이프라인 구조 변경 등)은 feature 브랜치 → PR → merge
 
 ## Vercel 라우팅
 
