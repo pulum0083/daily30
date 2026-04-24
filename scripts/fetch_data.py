@@ -122,7 +122,7 @@ def get_ticker_full(ticker: str) -> dict:
             "price":      round(price, 4),
             "change_pct": round(change_pct, 4),
             "volume":     int(hist["Volume"].iloc[-1]),
-            "sparkline":  [round(float(p), 4) for p in closes.iloc[-10:].tolist()],
+            "sparkline":  [round(float(p), 4) for p in closes.iloc[-20:].tolist()],
         }
 
         if len(closes) >= 20:
@@ -130,7 +130,7 @@ def get_ticker_full(ticker: str) -> dict:
             ma20 = float(ma20_series.iloc[-1])
             result["ma20"] = round(ma20, 4)
             result["ma20_dist_pct"] = round((price - ma20) / ma20 * 100, 2)
-            result["ma20_sparkline"] = [round(float(v), 4) for v in ma20_series.iloc[-10:].tolist()]
+            result["ma20_sparkline"] = [round(float(v), 4) for v in ma20_series.iloc[-20:].tolist()]
 
             # MA20 signal: crossing_up = previously below, now above
             if len(ma20_series) >= 2:
@@ -150,7 +150,7 @@ def get_ticker_full(ticker: str) -> dict:
             ma200 = float(ma200_series.iloc[-1])
             result["ma200"] = round(ma200, 4)
             result["ma200_dist_pct"] = round((price - ma200) / ma200 * 100, 2)
-            result["ma200_sparkline"] = [round(float(v), 4) for v in ma200_series.iloc[-10:].tolist()]
+            result["ma200_sparkline"] = [round(float(v), 4) for v in ma200_series.iloc[-20:].tolist()]
 
         return result
     except Exception as e:
