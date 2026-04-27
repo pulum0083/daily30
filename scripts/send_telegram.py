@@ -197,6 +197,22 @@ def main():
     web_url = get_web_base_url()
     message_text = message_text.replace("{web.base_url}", web_url)
 
+    # ── 날짜 유효성 검사: 오늘 날짜가 아닌 stale 메시지 발송 차단 ──
+    if not args.force:
+        import re
+        import pytz
+        today_str = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y.%m.%d")
+        # 메시지 첫 줄에서 날짜 패턴 추출 (예: 2026.04.27)
+        first_line = message_text.split("\n")[0]
+        date_match = re.search(r"(\d{4}\.\d{2}\.\d{2})", first_line)
+        if date_match and date_match.group(1) != today_str:
+            print(
+                f"[send_telegram] ❌ Stale message detected: content date={date_match.group(1)}, today={today_str}. "
+                f"Aborting to prevent sending outdated briefing. Use --force to override.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
     try:
         result = send_message(bot_token, chat_id, message_text)
         if result.get("ok"):
