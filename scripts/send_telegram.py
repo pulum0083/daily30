@@ -104,6 +104,8 @@ def build_fallback_message(briefing_type: str) -> str:
     direction = pred.get("direction", "알 수 없음")
     up_pct = pred.get("up_pct", "?")
     confidence = pred.get("confidence", "?")
+    # 방향에 맞는 수치: 하락 우위면 하락%, 상승 우위면 상승%
+    dir_pct = (100 - up_pct) if ("하락" in str(direction) and isinstance(up_pct, (int, float))) else up_pct
     reason_title = data.get("reason_title", "")
     reasons = data.get("reasons", [])
 
@@ -114,11 +116,11 @@ def build_fallback_message(briefing_type: str) -> str:
 
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 시초가 브리핑 | {today}"
-        pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
+        pred_line = f"📊 예측: {direction} ({dir_pct}%)\n신뢰도: {confidence}%"
         link = f"{web_url}/briefings/ko/{date_slug}/"
     elif briefing_type == "us":
         header = f"🇺🇸 미국 시장 브리핑 | {today}"
-        pred_line = f"📊 예측: {direction} ({up_pct}%)\n신뢰도: {confidence}%"
+        pred_line = f"📊 예측: {direction} ({dir_pct}%)\n신뢰도: {confidence}%"
         link = f"{web_url}/briefings/us/{date_slug}/"
     else:
         header = f"📋 주간 리포트 | {today}"
