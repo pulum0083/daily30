@@ -203,7 +203,10 @@
         {% if accuracy %}
         <div class="accuracy-standalone">
           <div class="accuracy-standalone__header">
-            <span class="accuracy-standalone__title">예측 정확도</span>
+            <span class="accuracy-standalone__title" style="display:flex;align-items:center;gap:4px;">
+              예측 정확도
+              <button class="info-icon-btn" onclick="openAccModal()" aria-label="예측 정확도 설명">?</button>
+            </span>
             <span class="accuracy-standalone__sub">코스피 시초가</span>
           </div>
           <div class="accuracy-standalone__stats">
@@ -359,6 +362,28 @@
 
     </div><!-- /layout-grid -->
   </div><!-- /layout-wrapper -->
+
+  <!-- 예측 정확도 모달 -->
+  <div class="info-modal-backdrop" id="acc-modal" onclick="if(event.target===this)closeAccModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
+      <button class="info-modal__close" onclick="closeAccModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
+      <div class="info-modal__body">
+        <p>AI가 코스피 시초가 방향(상승 / 하락)을 예측한 결과를 실제 시장과 비교해 맞힌 비율이에요.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
+          <li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
+          <li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- 잭 켈로그 모달 -->
   <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
