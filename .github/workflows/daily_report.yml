@@ -98,9 +98,16 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/ data/
           git diff --staged --quiet || git commit -m "📊 코스피 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
-          git fetch origin main
-          git rebase -X ours origin/main
-          git push
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main; then
+              git push && break
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
         if: steps.holiday.outputs.open == 'true'
@@ -181,9 +188,16 @@ jobs:
           git config user.name "DailyB Bot"
           git add web/ data/
           git diff --staged --quiet || git commit -m "🇺🇸 미국 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
-          git fetch origin main
-          git rebase -X ours origin/main
-          git push
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main; then
+              git push && break
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치)
         if: steps.holiday.outputs.open == 'true'
@@ -229,4 +243,13 @@ jobs:
           git config user.name "DailyB Bot"
           git add data/briefings.json
           git diff --staged --quiet || git commit -m "📊 정확도 업데이트: $(TZ=Asia/Seoul date +'%Y-%m-%d')"
-          git push
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main; then
+              git push && break
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done

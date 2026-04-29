@@ -324,8 +324,14 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
     """Append or update the prediction record in data/briefings.json for accuracy tracking."""
     path = DATA_DIR / "briefings.json"
     if path.exists():
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"[call_claude] WARNING: briefings.json 파싱 실패 ({e}), 백업 후 복구합니다.")
+            backup = path.with_suffix(".json.bak")
+            path.rename(backup)
+            data = {"briefings": []}
     else:
         data = {"briefings": []}
 
