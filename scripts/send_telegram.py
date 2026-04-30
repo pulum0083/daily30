@@ -127,7 +127,7 @@ def build_fallback_message(briefing_type: str) -> str:
         pred_line = ""
         link = f"{web_url}/briefings/weekly/{date_slug}/"
 
-    bullet_lines = "\n".join(
+    bullet_lines = "\n\n".join(
         f"• {strip_html(r)}" for r in reasons[:3]
     )
 
