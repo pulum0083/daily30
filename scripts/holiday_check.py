@@ -68,6 +68,7 @@ def check_kospi_open(check_date: date) -> bool:
         date(2026, 2, 17),  # 설날
         date(2026, 2, 18),  # 설날 연휴
         date(2026, 3, 1),   # 삼일절
+        date(2026, 5, 1),   # 근로자의 날
         date(2026, 5, 5),   # 어린이날
         date(2026, 6, 6),   # 현충일
         date(2026, 8, 15),  # 광복절

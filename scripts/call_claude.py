@@ -395,6 +395,8 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     reason_title = strip_html(analysis.get("reason_title", ""))
     reasons = analysis.get("reasons", [])
 
+    dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
+
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 시초가 브리핑 | {date_display}"
         link = f"{web_base}/briefings/ko/{date_str}/"
@@ -402,22 +404,24 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
         link = f"{web_base}/briefings/us/{date_str}/"
 
+    divider = "─" * 20
+
     lines = [
         header,
-        "",
-        f"📊 예측: {direction} ({up_pct}%)",
-        f"신뢰도: {confidence}%",
+        divider,
+        f"{dir_emoji} 예측: <b>{direction} ({up_pct}%)</b>",
+        f"신뢰도: <b>{confidence}%</b>",
     ]
 
     if reason_title:
-        lines += ["", f"💬 {reason_title}"]
+        lines += [divider, f"💬 {reason_title}"]
 
     if reasons:
         lines += ["", "핵심 시그널:"]
         for r in reasons[:4]:
             lines.append(f"• {strip_html(r)}")
 
-    lines += ["", f"🔗 상세 분석 → {link}"]
+    lines += [divider, f"🔗 상세 분석 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
