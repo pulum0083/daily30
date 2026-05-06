@@ -81,6 +81,17 @@ def load_analysis(briefing_type: str) -> dict:
     return {}
 
 
+def normalize_ma_terms(text: str) -> str:
+    """MA200 → 200일 이동평균선, MA20 → 20일 이동평균선 (MA200 먼저 처리)"""
+    text = re.sub(r'\bMA200\b', '200일 이동평균선', text)
+    text = re.sub(r'\bMA20\b', '20일 이동평균선', text)
+    return text
+
+
+def normalize_ma_list(items: list) -> list:
+    return [normalize_ma_terms(s) if isinstance(s, str) else s for s in items]
+
+
 def get_web_base_url() -> str:
     url = os.environ.get("WEB_BASE_URL")
     if url:
@@ -202,7 +213,7 @@ def build_stock_picks_data(stock_picks: list) -> list:
             "price": pick.get("price", ""),
             "change": pick.get("change", ""),
             "change_cls": pick.get("change_cls", "up"),
-            "signal": pick.get("signal", "MA20 반등"),
+            "signal": normalize_ma_terms(pick.get("signal", "20일 이동평균선 반등")),
             "golden": bool(pick.get("golden")),
             "scenario_tag": pick.get("scenario_tag", "단기 반등"),
             "scenario": pick.get("scenario", ""),
@@ -239,7 +250,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
     down_pct = pred.get("down_pct", 50)
     direction = pred.get("direction", "중립")
     confidence = pred.get("confidence", 70)
-    reasons = analysis.get("reasons", [])[:4]
+    reasons = normalize_ma_list(analysis.get("reasons", [])[:4])
     stock_picks_raw = analysis.get("stock_picks", [])
 
     # Dynamic reason section title (Claude-generated or fallback by direction)
@@ -247,7 +258,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
         "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
     }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
-    reason_title = analysis.get("reason_title") or _fallback_title
+    reason_title = normalize_ma_terms(analysis.get("reason_title") or _fallback_title)
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
     gen_time = fmt_generated_time(generated_at)
 
@@ -461,14 +472,14 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
     down_pct = pred.get("down_pct", 50)
     direction = pred.get("direction", "중립")
     confidence = pred.get("confidence", 70)
-    reasons = analysis.get("reasons", [])[:4]
+    reasons = normalize_ma_list(analysis.get("reasons", [])[:4])
     stock_picks_raw = analysis.get("stock_picks", [])
 
     _fallback_title = {
         "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
         "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
     }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
-    reason_title = analysis.get("reason_title") or _fallback_title
+    reason_title = normalize_ma_terms(analysis.get("reason_title") or _fallback_title)
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
     gen_time = fmt_generated_time(generated_at)
 
