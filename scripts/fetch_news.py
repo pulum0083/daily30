@@ -37,8 +37,10 @@ KST = pytz.timezone("Asia/Seoul")
 # RSS 뉴스 소스 설정
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _rss(q: str, hl: str = "en", gl: str = "US", ceid: str = "US:en") -> str:
-    return f"https://news.google.com/rss/search?q={quote(q)}&hl={hl}&gl={gl}&ceid={ceid}"
+def _rss(q: str, hl: str = "en", gl: str = "US", ceid: str = "US:en", recent: bool = False) -> str:
+    # recent=True → tbs=qdr:d (24시간 이내 뉴스만)
+    tbs = "&tbs=qdr:d" if recent else ""
+    return f"https://news.google.com/rss/search?q={quote(q)}&hl={hl}&gl={gl}&ceid={ceid}{tbs}"
 
 KOSPI_RSS_FEEDS = [
     _rss("KOSPI stock market", "en", "US", "US:en"),
@@ -52,8 +54,10 @@ US_RSS_FEEDS = [
     _rss("Federal Reserve interest rate economy"),
     _rss("US stock market today earnings"),
     _rss("NVDA AAPL MSFT semiconductor"),
-    _rss("stock 52-week high premarket today"),
-    _rss("stock new all-time high premarket"),
+    # 프리장 신고가 피드: recent=True → 24시간 이내 뉴스만
+    _rss("stock 52-week high premarket", recent=True),
+    _rss("stock all-time high premarket today", recent=True),
+    _rss("stock hits record high premarket earnings", recent=True),
 ]
 
 KOSPI_GEMINI_PROMPT = """\
@@ -141,8 +145,22 @@ def get_gemini_api_key() -> str:
 # RSS 파싱 (표준 라이브러리만 사용)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_rss_headlines(feed_url: str, max_items: int = 8) -> list[str]:
-    """Google News RSS에서 헤드라인 목록을 반환한다."""
+def _parse_pub_date(pub_date_str: str) -> datetime | None:
+    """RSS pubDate 문자열을 UTC datetime으로 파싱한다."""
+    import email.utils
+    try:
+        ts = email.utils.parsedate_to_datetime(pub_date_str)
+        return ts.astimezone(pytz.utc)
+    except Exception:
+        return None
+
+
+def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 0) -> list[str]:
+    """Google News RSS에서 헤드라인 목록을 반환한다.
+
+    max_age_hours > 0 이면 해당 시간 이내에 발행된 기사만 포함.
+    """
+    import re as _re
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; DailyB/1.0)"
     }
@@ -155,15 +173,24 @@ def fetch_rss_headlines(feed_url: str, max_items: int = 8) -> list[str]:
         if channel is None:
             return []
         items = channel.findall("item")[:max_items]
+        now_utc = datetime.now(pytz.utc)
         headlines = []
         for item in items:
+            # pubDate 필터링
+            if max_age_hours > 0:
+                pub_date_str = item.findtext("pubDate", "")
+                pub_dt = _parse_pub_date(pub_date_str) if pub_date_str else None
+                if pub_dt is None:
+                    continue
+                age_hours = (now_utc - pub_dt).total_seconds() / 3600
+                if age_hours > max_age_hours:
+                    continue
+
             title = item.findtext("title", "").strip()
             desc = item.findtext("description", "").strip()
-            # desc may contain HTML; strip tags naively
             desc_clean = ""
             if desc:
-                import re
-                desc_clean = re.sub(r"<[^>]+>", "", desc)[:120]
+                desc_clean = _re.sub(r"<[^>]+>", "", desc)[:120]
             if title:
                 line = title
                 if desc_clean:
@@ -177,13 +204,20 @@ def fetch_rss_headlines(feed_url: str, max_items: int = 8) -> list[str]:
 
 def collect_news(briefing_type: str) -> str:
     """모든 RSS 피드에서 헤드라인을 수집하여 하나의 텍스트로 반환한다."""
-    feeds = KOSPI_RSS_FEEDS if briefing_type == "kospi" else US_RSS_FEEDS
+    if briefing_type == "kospi":
+        # (feed_url, max_age_hours) — 0 = 필터 없음
+        feed_configs = [(url, 0) for url in KOSPI_RSS_FEEDS]
+    else:
+        # 일반 피드: 필터 없음 / 프리장 신고가 피드(마지막 3개): 30시간 이내만
+        general = US_RSS_FEEDS[:-3]
+        premarket = US_RSS_FEEDS[-3:]
+        feed_configs = [(url, 0) for url in general] + [(url, 30) for url in premarket]
+
     all_headlines = []
     seen = set()
 
-    for feed_url in feeds:
-        for headline in fetch_rss_headlines(feed_url, max_items=6):
-            # 중복 제거 (제목 앞 30자 기준)
+    for feed_url, max_age_hours in feed_configs:
+        for headline in fetch_rss_headlines(feed_url, max_items=6, max_age_hours=max_age_hours):
             key = headline[:30]
             if key not in seen:
                 seen.add(key)
@@ -212,8 +246,9 @@ def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
 
     client = genai.Client(api_key=get_gemini_api_key())
 
+    today_kst = datetime.now(KST).strftime("%Y-%m-%d")
     prompt_prefix = KOSPI_GEMINI_PROMPT if briefing_type == "kospi" else US_GEMINI_PROMPT
-    full_prompt = prompt_prefix + "\n" + news_text
+    full_prompt = f"오늘 날짜 (KST): {today_kst}\n\n" + prompt_prefix + "\n" + news_text
 
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
