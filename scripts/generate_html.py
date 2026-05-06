@@ -315,7 +315,7 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         # premarket highs (US only; empty list if absent)
         "premarket_highs": [
             {**h, "reason": normalize_ma_terms(h.get("reason", ""))}
-            for h in analysis.get("premarket_highs", [])
+            for h in analysis.get("premarket_highs", [])[:3]
         ] if briefing_type == "us" else [],
         # accuracy
         "accuracy": accuracy_stats,
@@ -532,7 +532,7 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
         "stock_picks": build_stock_picks_data(stock_picks_raw),
         "premarket_highs": [
             {**h, "reason": normalize_ma_terms(h.get("reason", ""))}
-            for h in analysis.get("premarket_highs", [])
+            for h in analysis.get("premarket_highs", [])[:3]
         ] if briefing_type == "us" else [],
         "accuracy": accuracy_stats,
         "sidebar_items": build_sidebar_data(briefing_type),
