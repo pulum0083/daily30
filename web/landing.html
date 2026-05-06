@@ -78,6 +78,9 @@
       background: rgba(255,255,255,.15);
       color: #fff;
     }
+    @media (max-width: 768px) {
+      .gnb__title-sub { display: none; }
+    }
 
     /* ── Page shell ── */
     .stage-shell {
@@ -1069,7 +1072,7 @@
       </a>
       <div class="gnb__meta">
         <a href="/briefings" data-i18n="gnb-briefings"
-           style="font-size:13px; color:rgba(255,255,255,.7); font-weight:500;">최신 브리핑 보기 →</a>
+           style="font-size:13px; color:rgba(255,255,255,.7); font-weight:500;">최신 브리핑 →</a>
         <button class="gnb__lang-toggle" onclick="toggleLang()" aria-label="언어 전환">
           <span id="lang-ko" class="active">KO</span>
           <span id="lang-en">EN</span>
@@ -1737,7 +1740,7 @@
   <script>
     const I18N = {
       ko: {
-        'gnb-briefings': '최신 브리핑 보기 →',
+        'gnb-briefings': '최신 브리핑 →',
         'ch0-title': '매일 아침<br><em>시장이 먼저</em><br>보입니다.',
         'ch0-body': 'AI가 글로벌 시장 데이터를 분석해<br>코스피·미국 방향을 예측합니다.<br>장 시작 전 스팟 브리핑, 텔레그램 또는 이메일로.',
         'ch0-m1l': '코스피 브리핑', 'ch0-m2l': '미국 브리핑', 'ch0-m3v': '무료', 'ch0-m3l': '구독료',
@@ -1788,7 +1791,7 @@
         'sub-contact': '문의 메일 보내기',
       },
       en: {
-        'gnb-briefings': 'Latest Briefings →',
+        'gnb-briefings': 'Briefings →',
         'ch0-title': 'Every Morning,<br><em>See Markets</em><br>Before They Open.',
         'ch0-body': 'AI analyzes global market data<br>to predict KOSPI &amp; US market direction.<br>Pre-open spot briefings, via Telegram or email.',
         'ch0-m1l': 'KOSPI Brief', 'ch0-m2l': 'US Brief', 'ch0-m3v': 'Free', 'ch0-m3l': 'Subscription',
