@@ -133,9 +133,40 @@
                 </div>
               </div>
 
+              {% if premarket_highs %}
               <div class="divider"></div>
 
-              <!-- 3. 잭 켈로그 전략 종목 -->
+              <!-- 3. 프리장 신고가 종목 -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  🏆 프리장 신고가 종목
+                </div>
+                <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">
+                  오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.
+                </div>
+                <div class="premarket-highs">
+                  {% for item in premarket_highs %}
+                  <div class="premarket-high-card">
+                    <div class="premarket-high-card__top">
+                      <div class="premarket-high-card__identity">
+                        <span class="premarket-high-card__ticker">{{ item.ticker }}</span>
+                        <span class="premarket-high-card__name">{{ item.name }}</span>
+                      </div>
+                      <div class="premarket-high-card__right">
+                        <span class="premarket-high-card__badge {% if item.change_pct and item.change_pct[0] == '+' %}up{% else %}down{% endif %}">{{ item.change_pct }}</span>
+                        <span class="premarket-high-card__tag">신고가 🏆</span>
+                      </div>
+                    </div>
+                    <div class="premarket-high-card__reason">{{ item.reason }}</div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+
+              <div class="divider"></div>
+
+              <!-- 4. 잭 켈로그 전략 종목 -->
               <div class="open-section">
                 <div class="open-section__title">
                   잭 켈로그 20일선 전략 추종 종목
@@ -188,37 +219,6 @@
                   {% endfor %}
                 </div>
               </div>
-
-              {% if premarket_highs %}
-              <div class="divider"></div>
-
-              <!-- 4. 프리장 신고가 종목 -->
-              <div class="open-section">
-                <div class="open-section__title">
-                  🏆 프리장 신고가 종목
-                </div>
-                <div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; line-height:1.7;">
-                  오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.
-                </div>
-                <div class="premarket-highs">
-                  {% for item in premarket_highs %}
-                  <div class="premarket-high-card">
-                    <div class="premarket-high-card__top">
-                      <div class="premarket-high-card__identity">
-                        <span class="premarket-high-card__ticker">{{ item.ticker }}</span>
-                        <span class="premarket-high-card__name">{{ item.name }}</span>
-                      </div>
-                      <div class="premarket-high-card__right">
-                        <span class="premarket-high-card__badge {% if item.change_pct and item.change_pct[0] == '+' %}up{% else %}down{% endif %}">{{ item.change_pct }}</span>
-                        <span class="premarket-high-card__tag">신고가 🏆</span>
-                      </div>
-                    </div>
-                    <div class="premarket-high-card__reason">{{ item.reason }}</div>
-                  </div>
-                  {% endfor %}
-                </div>
-              </div>
-              {% endif %}
 
             </div><!-- /accordion-body__inner -->
           </div><!-- /accordion-body -->
