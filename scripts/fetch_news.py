@@ -52,6 +52,8 @@ US_RSS_FEEDS = [
     _rss("Federal Reserve interest rate economy"),
     _rss("US stock market today earnings"),
     _rss("NVDA AAPL MSFT semiconductor"),
+    _rss("stock 52-week high premarket today"),
+    _rss("stock new all-time high premarket"),
 ]
 
 KOSPI_GEMINI_PROMPT = """\
@@ -94,8 +96,22 @@ US_GEMINI_PROMPT = """\
     "헤드라인 2",
     "헤드라인 3"
   ],
-  "market_sentiment": "bullish" | "bearish" | "neutral"
+  "market_sentiment": "bullish" | "bearish" | "neutral",
+  "premarket_highs": [
+    {
+      "ticker": "종목 티커 (예: AAPL)",
+      "name": "종목명 (예: Apple)",
+      "change_pct": "프리장 등락률 (예: +3.2%)",
+      "reason": "신고가를 찍은 핵심 이유 한 문장 (영어 가능)"
+    }
+  ]
 }
+
+premarket_highs 작성 규칙:
+- 뉴스에서 프리장 52주 신고가 또는 역대 신고가(all-time high)를 달성한 종목만 포함
+- 최대 3개. 뉴스에서 명확히 확인되지 않으면 빈 배열 []로 출력
+- 중요도순 정렬: 시가총액 크거나 등락폭이 크거나 시장 영향력이 높은 종목을 앞에 배치
+- reason은 뉴스 기반 사실만 기재 (추측 금지)
 
 뉴스 데이터:
 """
