@@ -21,6 +21,7 @@ permissions:
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  TELEGRAM_CHAT_ID_EN: ${{ secrets.TELEGRAM_CHAT_ID_EN }}
   WEB_BASE_URL: "https://doubleshot.space"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -85,6 +86,16 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
+
+      - name: 🌐 영문 번역 (Claude Haiku)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/translate_to_en.py --type kospi
+
+      - name: 📨 Telegram EN 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type kospi --lang en
 
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true'
@@ -175,6 +186,16 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
+
+      - name: 🌐 영문 번역 (Claude Haiku)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/translate_to_en.py --type us
+
+      - name: 📨 Telegram EN 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type us --lang en
 
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true'
