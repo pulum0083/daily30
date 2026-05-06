@@ -438,7 +438,18 @@ def extract_json(text: str) -> dict:
         lines = text.split("\n")
         # Remove first line (```json or ```) and last line (```)
         text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-    return json.loads(text)
+    data = json.loads(text)
+
+    # Guarantee up_pct + down_pct == 100
+    pred = data.get("prediction", {})
+    up = pred.get("up_pct", 50)
+    dn = pred.get("down_pct", 50)
+    if up + dn != 100:
+        print(f"[call_claude] WARNING: up_pct({up}) + down_pct({dn}) = {up+dn}, normalizing down_pct to {100-up}")
+        pred["down_pct"] = 100 - up
+        data["prediction"] = pred
+
+    return data
 
 
 # ─────────────────────────────────────────────────────────────────────────────
