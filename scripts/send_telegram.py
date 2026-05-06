@@ -20,11 +20,40 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 
 
-def load_credentials() -> tuple[str, str]:
-    """Return (bot_token, chat_id) — env vars first, then config.json."""
-    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+def load_credentials(lang: str = "ko") -> tuple[str, str]:
+    """Return (bot_token, chat_id).
 
+    For lang='en', reads TELEGRAM_CHAT_ID_EN (env) or telegram.chat_id_en (config.json).
+    """
+    bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+
+    if lang == "en":
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID_EN", "")
+        if not chat_id:
+            config_file = BASE_DIR / "config.json"
+            if config_file.exists():
+                with open(config_file, encoding="utf-8") as f:
+                    cfg = json.load(f)
+                chat_id = cfg.get("telegram", {}).get("chat_id_en", "")
+        if not chat_id:
+            raise RuntimeError(
+                "English Telegram channel not configured.\n"
+                "Set env var TELEGRAM_CHAT_ID_EN, "
+                "or add telegram.chat_id_en to config.json."
+            )
+        if bot_token and chat_id:
+            return bot_token, chat_id
+        config_file = BASE_DIR / "config.json"
+        if config_file.exists():
+            with open(config_file, encoding="utf-8") as f:
+                cfg = json.load(f)
+            token = bot_token or cfg.get("telegram", {}).get("bot_token", "")
+            if token and chat_id:
+                return token, chat_id
+        raise RuntimeError("TELEGRAM_BOT_TOKEN not set.")
+
+    # Korean channel (default)
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
     if bot_token and chat_id:
         return bot_token, chat_id
 
@@ -138,20 +167,22 @@ def build_fallback_message(briefing_type: str) -> str:
     return "\n".join(parts)
 
 
-def already_sent_today(briefing_type: str) -> bool:
-    """Return True if a message was already sent today (KST) for this type."""
+def already_sent_today(briefing_type: str, lang: str = "ko") -> bool:
+    """Return True if a message was already sent today (KST) for this type/lang."""
     from datetime import datetime
     import pytz
     today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
-    flag_file = DATA_DIR / f"telegram_sent_{briefing_type}_{today}.flag"
+    suffix = f"_{lang}" if lang != "ko" else ""
+    flag_file = DATA_DIR / f"telegram_sent{suffix}_{briefing_type}_{today}.flag"
     return flag_file.exists()
 
 
-def mark_sent_today(briefing_type: str) -> None:
+def mark_sent_today(briefing_type: str, lang: str = "ko") -> None:
     from datetime import datetime
     import pytz
     today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
-    flag_file = DATA_DIR / f"telegram_sent_{briefing_type}_{today}.flag"
+    suffix = f"_{lang}" if lang != "ko" else ""
+    flag_file = DATA_DIR / f"telegram_sent{suffix}_{briefing_type}_{today}.flag"
     flag_file.touch()
 
 
@@ -159,10 +190,14 @@ def main():
     parser = argparse.ArgumentParser(description="Send briefing to Telegram")
     parser.add_argument("--type", choices=["kospi", "us", "weekly"], required=True)
     parser.add_argument(
+        "--lang", choices=["ko", "en"], default="ko",
+        help="Language channel: 'ko' (default) or 'en' (TELEGRAM_CHAT_ID_EN)",
+    )
+    parser.add_argument(
         "--message",
         type=str,
         default=None,
-        help="Message text. If omitted, reads data/telegram_message_{type}.txt",
+        help="Message text. If omitted, reads data/telegram_message_{lang}_{type}.txt",
     )
     parser.add_argument(
         "--force", action="store_true",
@@ -171,12 +206,12 @@ def main():
     args = parser.parse_args()
 
     # 하루 1회 발송 제한 — 중복 실행 방지
-    if not args.force and already_sent_today(args.type):
-        print(f"[send_telegram] ⚠️  Already sent today (type={args.type}). Skipping. Use --force to override.")
+    if not args.force and already_sent_today(args.type, args.lang):
+        print(f"[send_telegram] ⚠️  Already sent today (type={args.type}, lang={args.lang}). Skipping. Use --force to override.")
         return
 
     try:
-        bot_token, chat_id = load_credentials()
+        bot_token, chat_id = load_credentials(args.lang)
     except RuntimeError as e:
         print(f"[send_telegram] {e}", file=sys.stderr)
         sys.exit(1)
@@ -184,12 +219,17 @@ def main():
     if args.message:
         message_text = args.message
     else:
-        msg_file = DATA_DIR / f"telegram_message_{args.type}.txt"
+        # EN: telegram_message_en_{type}.txt / KO: telegram_message_{type}.txt
+        if args.lang == "en":
+            msg_file = DATA_DIR / f"telegram_message_en_{args.type}.txt"
+        else:
+            msg_file = DATA_DIR / f"telegram_message_{args.type}.txt"
+
         if msg_file.exists():
             with open(msg_file, encoding="utf-8") as f:
                 message_text = f.read()
         else:
-            # txt 파일 없으면 analysis JSON에서 자동 생성 (fallback)
+            # txt 파일 없으면 analysis JSON에서 자동 생성 (fallback, KO only)
             print(f"[send_telegram] Message file not found, trying fallback from JSON...", file=sys.stderr)
             message_text = build_fallback_message(args.type)
 
@@ -216,8 +256,8 @@ def main():
     try:
         result = send_message(bot_token, chat_id, message_text)
         if result.get("ok"):
-            mark_sent_today(args.type)
-            print(f"[send_telegram] ✓ Sent (type={args.type})")
+            mark_sent_today(args.type, args.lang)
+            print(f"[send_telegram] ✓ Sent (type={args.type}, lang={args.lang})")
         else:
             print(f"[send_telegram] Telegram API error: {result}", file=sys.stderr)
             sys.exit(1)
