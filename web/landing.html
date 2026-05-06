@@ -1827,7 +1827,7 @@
         'tg-b2': '<b>300-char summary.</b> Scan key insights on mobile before diving in.',
         'tg-b3': '<b>Full briefing link.</b> Tap to read the complete analysis on the web.',
         'tg-btn': 'Join Telegram Channel',
-        'tg-note': "If the link doesn't open, subscribe directly at <a href=\"https://t.me/doubleshot30\" target=\"_blank\" style=\"color:var(--chapter-accent);\">t.me/doubleshot30</a>.",
+        'tg-note': "If the link doesn't open, subscribe directly at <a href=\"https://t.me/doubleshot_en_Report\" target=\"_blank\" style=\"color:var(--chapter-accent);\">t.me/doubleshot_en_Report</a>.",
         'tg-sched-title': 'Delivery Schedule', 'tg-s1': 'KOSPI · Weekdays', 'tg-s2': 'US · Weekdays', 'tg-s3': 'Weekly Report · Sunday',
         'em-b1': '<b>Briefing summary.</b> Preview key points and click through to the full briefing.',
         'em-b2': '<b>Email archive.</b> Search past briefings in your inbox anytime.',
@@ -1986,7 +1986,8 @@
     if (window.innerWidth < 768) switchTab('tg');
 
     function joinTelegram(btn) {
-      window.open('https://t.me/doubleshot30', '_blank', 'noopener');
+      const tgUrl = currentLang === 'en' ? 'https://t.me/doubleshot_en_Report' : 'https://t.me/doubleshot30';
+      window.open(tgUrl, '_blank', 'noopener');
       const doneMsg = currentLang === 'en' ? '✓ Redirected to Telegram' : '✓ 텔레그램으로 이동했습니다';
       const origLabel = currentLang === 'en' ? 'Join Telegram Channel' : '텔레그램 채널 바로가기';
       btn.innerHTML = doneMsg;
