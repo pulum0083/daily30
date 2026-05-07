@@ -28,6 +28,8 @@ def load_credentials(lang: str = "ko") -> tuple[str, str]:
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
 
     if lang == "en":
+        # EN 전용 봇 토큰 우선 사용 (없으면 기본 봇 토큰 사용)
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN_EN") or bot_token
         chat_id = os.environ.get("TELEGRAM_CHAT_ID_EN", "")
         if not chat_id:
             config_file = BASE_DIR / "config.json"
@@ -47,7 +49,7 @@ def load_credentials(lang: str = "ko") -> tuple[str, str]:
         if config_file.exists():
             with open(config_file, encoding="utf-8") as f:
                 cfg = json.load(f)
-            token = bot_token or cfg.get("telegram", {}).get("bot_token", "")
+            token = bot_token or cfg.get("telegram", {}).get("bot_token_en", "") or cfg.get("telegram", {}).get("bot_token", "")
             if token and chat_id:
                 return token, chat_id
         raise RuntimeError("TELEGRAM_BOT_TOKEN not set.")

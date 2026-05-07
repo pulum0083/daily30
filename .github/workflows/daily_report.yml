@@ -20,6 +20,7 @@ permissions:
 
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_BOT_TOKEN_EN: ${{ secrets.TELEGRAM_BOT_TOKEN_EN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TELEGRAM_CHAT_ID_EN: ${{ secrets.TELEGRAM_CHAT_ID_EN }}
   WEB_BASE_URL: "https://doubleshot.space"
