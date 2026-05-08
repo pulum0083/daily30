@@ -72,6 +72,133 @@ SIDEBAR_TICKERS_US = {
 }
 
 
+def fetch_economic_calendar() -> dict:
+    """ForexFactory 주간 경제 캘린더에서 고영향 이벤트를 가져온다 (무료, API 키 불필요).
+
+    Returns:
+        {
+          "today": [...],    # 오늘 KST 기준 고영향 이벤트
+          "upcoming": [...], # 향후 5일 고영향 이벤트 (최대 10개)
+        }
+    """
+    try:
+        url = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 DailyB/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            events = json.loads(resp.read().decode("utf-8"))
+
+        KEY_COUNTRIES = {"USD", "CNY", "KRW", "JPY", "EUR"}
+        kst_now = datetime.now(KST)
+        today_kst = kst_now.strftime("%Y-%m-%d")
+
+        high_impact_events = []
+        for ev in events:
+            if ev.get("impact") not in ("High",):
+                continue
+            if ev.get("country") not in KEY_COUNTRIES:
+                continue
+
+            date_raw = ev.get("date", "")
+            date_kst_str = ""
+            date_kst_date = ""
+            try:
+                dt = datetime.fromisoformat(date_raw)
+                dt_kst = dt.astimezone(KST)
+                date_kst_str = dt_kst.strftime("%Y-%m-%d %H:%M KST")
+                date_kst_date = dt_kst.strftime("%Y-%m-%d")
+            except Exception:
+                pass
+
+            high_impact_events.append({
+                "title":    ev.get("title", ""),
+                "country":  ev.get("country", ""),
+                "impact":   ev.get("impact", ""),
+                "date_kst": date_kst_str,
+                "date_kst_date": date_kst_date,
+                "forecast": ev.get("forecast", ""),
+                "previous": ev.get("previous", ""),
+                "actual":   ev.get("actual", ""),
+            })
+
+        today_events    = [e for e in high_impact_events if e["date_kst_date"] == today_kst]
+        upcoming_events = [e for e in high_impact_events if e["date_kst_date"] > today_kst]
+
+        print(f"[fetch_data] Economic calendar: today={len(today_events)}, upcoming={len(upcoming_events[:10])}")
+        return {"today": today_events, "upcoming": upcoming_events[:10]}
+
+    except Exception as e:
+        print(f"[fetch_data] Economic calendar error: {e}", file=sys.stderr)
+        return {"today": [], "upcoming": []}
+
+
+def fetch_investor_trading_kospi(date_str: str = None) -> dict:
+    """KRX 투자자별 순매수 데이터 (pykrx).
+
+    코스피 조회 기준일: 당일 시장 개장 전이므로 전 거래일 데이터 사용.
+
+    Returns:
+        {
+          "date": "YYYYMMDD",
+          "foreign":     {"buy": int, "sell": int, "net": int},  # 외국인합계
+          "institution": {"buy": int, "sell": int, "net": int},  # 기관합계
+          "individual":  {"buy": int, "sell": int, "net": int},  # 개인
+        }
+    """
+    try:
+        from pykrx import stock as krx_stock
+    except ImportError:
+        print("[fetch_data] pykrx not installed — skipping investor trading", file=sys.stderr)
+        return {}
+
+    try:
+        kst_now = datetime.now(KST)
+
+        if date_str is None:
+            # 전 거래일 (주말 건너뜀)
+            target = kst_now - timedelta(days=1)
+            while target.weekday() >= 5:  # 5=Sat, 6=Sun
+                target -= timedelta(days=1)
+            date_str = target.strftime("%Y%m%d")
+
+        df = krx_stock.get_market_trading_volume_by_investor(date_str, date_str, "KOSPI")
+
+        if df is None or df.empty:
+            print(f"[fetch_data] Investor trading: no data for {date_str}", file=sys.stderr)
+            return {}
+
+        # 컬럼명 동적 탐색 (pykrx 버전별 차이 대응)
+        cols = df.columns.tolist()
+        buy_col  = next((c for c in cols if "매수" in str(c)), None)
+        sell_col = next((c for c in cols if "매도" in str(c) and "순" not in str(c)), None)
+        net_col  = next((c for c in cols if "순매수" in str(c) or ("순" in str(c) and "매수" in str(c))), None)
+
+        INVESTOR_MAP = {
+            "기관합계":  "institution",
+            "외국인합계": "foreign",
+            "개인":      "individual",
+        }
+
+        result: dict = {"date": date_str}
+        for kr, en in INVESTOR_MAP.items():
+            if kr not in df.index:
+                continue
+            row = df.loc[kr]
+            result[en] = {
+                "buy":  int(row[buy_col])  if buy_col  else 0,
+                "sell": int(row[sell_col]) if sell_col else 0,
+                "net":  int(row[net_col])  if net_col  else 0,
+            }
+
+        print(f"[fetch_data] Investor trading ({date_str}): "
+              f"foreign net={result.get('foreign', {}).get('net', 'N/A'):,}, "
+              f"institution net={result.get('institution', {}).get('net', 'N/A'):,}")
+        return result
+
+    except Exception as e:
+        print(f"[fetch_data] Investor trading error: {e}", file=sys.stderr)
+        return {}
+
+
 def get_fear_greed() -> dict:
     """Fetch CNN Fear & Greed Index from alternative.me (free, no auth)."""
     try:
@@ -280,6 +407,14 @@ def fetch_kospi_data() -> dict:
     print("[fetch_data]   → KOSPI candidates")
     kospi_candidates = build_stock_candidates(KOSPI_CANDIDATES)
 
+    # 5. 경제 지표 캘린더 (ForexFactory)
+    print("[fetch_data]   → economic calendar")
+    economic_calendar = fetch_economic_calendar()
+
+    # 6. 투자자별 순매수 (pykrx — 전 거래일)
+    print("[fetch_data]   → investor trading (pykrx)")
+    investor_trading = fetch_investor_trading_kospi()
+
     data = {
         "generated_at": datetime.now(KST).isoformat(),
         "type": "kospi",
@@ -297,6 +432,10 @@ def fetch_kospi_data() -> dict:
         "rates":  {"us10y": macro.get("^TNX", {})},
         "bigtech": {t: macro.get(t, {}) for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]},
         "fearGreed": fg or {},
+        # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
+        "economic_calendar": economic_calendar,
+        # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)
+        "investor_trading": investor_trading,
         # Kellogg screening — sorted by signal quality
         # Claude picks 3-5 from this list; use sparkline/ma20_sparkline/ma200_sparkline for stockCharts
         "kospi_candidates": kospi_candidates,
@@ -347,6 +486,10 @@ def fetch_us_data() -> dict:
     for c in us_candidates:
         c["name"] = c["ticker"]
 
+    # 5. 경제 지표 캘린더 (ForexFactory)
+    print("[fetch_data]   → economic calendar")
+    economic_calendar = fetch_economic_calendar()
+
     data = {
         "generated_at": datetime.now(KST).isoformat(),
         "type": "us",
@@ -379,6 +522,8 @@ def fetch_us_data() -> dict:
             for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "TSLA"]
         },
         "fearGreed": fg or {},
+        # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
+        "economic_calendar": economic_calendar,
         "us_candidates": us_candidates,
     }
 

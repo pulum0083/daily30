@@ -47,7 +47,16 @@ KOSPI_SYSTEM_PROMPT = """\
    - SOX +2% 이상이면 반도체 비중이 큰 코스피에 직접 수혜
 4. EWY (한국 ETF) — 외국인 수급 방향의 선행 지표
    - EWY 상승 + 원화 강세 = 외국인 순매수 환경
-5. VIX + 공포탐욕지수 — 글로벌 리스크 선호도
+5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
+   - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
+   - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
+   - EWY + investor_trading 둘 다 긍정이면 수급 신뢰도 최고
+6. economic_calendar — 오늘·이번주 고영향 경제 이벤트
+   - today 배열: 오늘 KST 기준 발표될 지표 (CPI·FOMC·NFP 등)
+   - actual이 빈 문자열이면 아직 미발표, 수치가 있으면 이미 발표됨
+   - forecast vs actual 비교: actual > forecast = 서프라이즈(호재), actual < forecast = 쇼크(악재)
+   - 오늘 고영향 지표가 있으면 반드시 reasons에 언급
+7. VIX + 공포탐욕지수 — 글로벌 리스크 선호도
    - VIX 20 이하 = 리스크온, 20~30 = 주의, 30 이상 = 리스크오프
    - 공포탐욕 25 이하 = 극단적 공포(역발상 매수 기회 가능)
 6. 달러(DXY/USD-KRW) — 외국인 자금 흐름
@@ -167,11 +176,13 @@ US_SYSTEM_PROMPT = """\
 4. 미국 10년 국채금리 + DXY — 거시 환경
    - 금리 급등 + 달러 강세 = 성장주·기술주 부담
    - 금리 안정 + 달러 약세 = 주식 우호 환경
-5. 주요 경제지표 발표 일정
-   - CPI·PPI·PCE — 인플레이션 지표, 연준 기대 변화
+5. economic_calendar — 오늘·이번주 고영향 경제 이벤트 (데이터에 포함됨)
+   - today 배열: 오늘 발표 예정 지표. actual이 있으면 이미 발표됨
+   - actual > forecast = 서프라이즈(호재), actual < forecast = 쇼크(악재)
+   - CPI·PPI·PCE 서프라이즈 = 연준 기대 변화 → 즉각 시장 반응
    - 실업률·비농업고용 — 경기 강도 판단
-   - GDP·소매판매 — 소비·성장 모멘텀
    - 연준 의원 발언·FOMC 회의 — 금리 기대 직접 영향
+   - 오늘 고영향 지표가 있으면 반드시 reasons에 언급
 6. 빅테크 프리마켓 수급 — 시가총액 상위 종목이 지수를 끌어당김
    - NVDA·AAPL·MSFT·META·GOOGL·AMZN·TSLA 동향 확인
 

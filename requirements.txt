@@ -4,6 +4,9 @@
 # Market data
 yfinance>=0.2.40
 
+# Korean market investor trading data (KRX 투자자별 순매수)
+pykrx>=1.0.45
+
 # Market calendar (holiday check) — optional, falls back to hardcoded list
 # pandas_market_calendars>=4.3.0
 
