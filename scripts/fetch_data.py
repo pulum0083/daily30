@@ -132,19 +132,19 @@ def fetch_economic_calendar() -> dict:
 
 
 def fetch_investor_trading_kospi(date_str: str = None) -> dict:
-    """KRX 공개 API에서 코스피 투자자별 순매수 데이터를 가져온다 (인증 불필요).
+    """NAVER Finance에서 코스피 투자자별 순매수 데이터를 가져온다 (인증 불필요).
 
     코스피 조회 기준일: 당일 시장 개장 전이므로 전 거래일 데이터 사용.
 
     Returns:
         {
           "date": "YYYYMMDD",
-          "foreign":     {"buy": int, "sell": int, "net": int},  # 외국인합계 (단위: 백만원)
-          "institution": {"buy": int, "sell": int, "net": int},  # 기관합계
-          "individual":  {"buy": int, "sell": int, "net": int},  # 개인
+          "foreign":     {"net": int},  # 외국인합계 순매수 (단위: 백만원)
+          "institution": {"net": int},  # 기관합계 순매수
+          "individual":  {"net": int},  # 개인 순매수
         }
     """
-    import urllib.parse
+    import re
 
     kst_now = datetime.now(KST)
 
@@ -155,62 +155,53 @@ def fetch_investor_trading_kospi(date_str: str = None) -> dict:
             target -= timedelta(days=1)
         date_str = target.strftime("%Y%m%d")
 
+    def parse_num(s: str) -> int:
+        """'+1,234,567' 또는 '-234,567' → int"""
+        s = str(s).strip().replace(",", "").replace("+", "")
+        try:
+            return int(s)
+        except ValueError:
+            return 0
+
     try:
-        # KRX data.krx.co.kr 공개 AJAX API (인증 불필요, Referer만 필요)
-        url = "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
-        params = urllib.parse.urlencode({
-            "bld":        "dbms/MDC/STAT/standard/MDCSTAT02202",
-            "trdDd":      date_str,
-            "money":      "1",       # 단위: 백만원
-            "inqTpCd":    "2",       # 조회 유형: 거래대금
-            "trdVolTpCd": "1",
-            "askBid":     "",
-            "isuCd":      "",
-            "locale":     "ko_KR",
-        }).encode("utf-8")
-
+        # NAVER Finance 투자자별 거래 동향 (EUC-KR HTML)
+        url = (
+            f"https://finance.naver.com/sise/investorDealTrendDay.naver"
+            f"?bizdate={date_str}&sosok=0"
+        )
         headers = {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            "Referer":      "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020202",
-            "User-Agent":   "Mozilla/5.0 (compatible; DailyB/1.0)",
-            "Origin":       "https://data.krx.co.kr",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer":    "https://finance.naver.com/sise/",
+            "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
         }
-        req = urllib.request.Request(url, data=params, headers=headers, method="POST")
+        req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=15) as resp:
-            raw = json.loads(resp.read().decode("utf-8"))
+            html = resp.read().decode("euc-kr", errors="replace")
 
-        rows = raw.get("OutBlock_1", [])
-        if not rows:
-            print(f"[fetch_data] Investor trading: empty response for {date_str}", file=sys.stderr)
+        # 테이블 첫 번째 데이터 행에서 순매수 값 추출
+        # 컬럼 순서: 날짜 | 개인 | 외국인 | 기관계 | 금융투자 | 보험 | 투신 | ...
+        # <td class="num">+1,234,567</td> 형태
+        nums = re.findall(r'<td[^>]*class="[^"]*num[^"]*"[^>]*>\s*([+\-]?[\d,]+)\s*</td>', html)
+
+        if len(nums) < 3:
+            print(f"[fetch_data] Investor trading: could not parse table (found {len(nums)} nums)", file=sys.stderr)
             return {}
 
-        # 투자자 이름 매핑
-        INVESTOR_MAP = {
-            "외국인합계": "foreign",
-            "기관합계":   "institution",
-            "개인":       "individual",
+        # nums[0]=개인, nums[1]=외국인, nums[2]=기관계
+        individual_net  = parse_num(nums[0])
+        foreign_net     = parse_num(nums[1])
+        institution_net = parse_num(nums[2])
+
+        result = {
+            "date":        date_str,
+            "foreign":     {"net": foreign_net},
+            "institution": {"net": institution_net},
+            "individual":  {"net": individual_net},
         }
 
-        result: dict = {"date": date_str}
-        for row in rows:
-            name = row.get("INVST_NM", "").strip()
-            if name not in INVESTOR_MAP:
-                continue
-            key = INVESTOR_MAP[name]
-            # 매수(BID), 매도(ASK), 순매수(NETBID) — 단위 백만원
-            def to_int(val: str) -> int:
-                return int(str(val).replace(",", "").replace("-", "0") or 0)
-
-            buy  = to_int(row.get("BID_TRDVAL", 0))
-            sell = to_int(row.get("ASK_TRDVAL", 0))
-            net_raw = str(row.get("NETBID_TRDVAL", "0")).replace(",", "")
-            net = int(net_raw) if net_raw.lstrip("-").isdigit() else 0
-
-            result[key] = {"buy": buy, "sell": sell, "net": net}
-
         print(f"[fetch_data] Investor trading ({date_str}): "
-              f"foreign net={result.get('foreign', {}).get('net', 'N/A'):,}, "
-              f"institution net={result.get('institution', {}).get('net', 'N/A'):,}")
+              f"foreign={foreign_net:+,} 외국인, "
+              f"institution={institution_net:+,} 기관 (단위: 백만원)")
         return result
 
     except Exception as e:
