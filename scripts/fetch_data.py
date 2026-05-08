@@ -448,7 +448,7 @@ def fetch_kospi_data() -> dict:
     economic_calendar = fetch_economic_calendar()
 
     # 6. 투자자별 순매수 (pykrx — 전 거래일)
-    print("[fetch_data]   → investor trading (pykrx)")
+    print("[fetch_data]   → investor trading (외국인/기관 순매수)")
     investor_trading = fetch_investor_trading_kospi()
 
     data = {
