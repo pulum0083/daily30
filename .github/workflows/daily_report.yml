@@ -12,6 +12,14 @@ on:
           - kospi
           - us
           - accuracy
+      dry_run:
+        description: "dry_run=true 시 텔레그램·이메일 전송 건너뜀 (테스트용)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
@@ -84,7 +92,7 @@ jobs:
         run: python3 scripts/update_latest.py --type kospi
 
       - name: 📨 Telegram 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
 
@@ -94,12 +102,12 @@ jobs:
         run: python3 scripts/translate_to_en.py --type kospi
 
       - name: 📨 Telegram EN 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi --lang en
 
       - name: 📧 이메일 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_email.py --type kospi
 
@@ -184,7 +192,7 @@ jobs:
         run: python3 scripts/update_latest.py --type us
 
       - name: 📨 Telegram 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
 
@@ -194,12 +202,12 @@ jobs:
         run: python3 scripts/translate_to_en.py --type us
 
       - name: 📨 Telegram EN 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us --lang en
 
       - name: 📧 이메일 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_email.py --type us
 
