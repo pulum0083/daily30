@@ -47,6 +47,9 @@ KOSPI_SYSTEM_PROMPT = """\
    - SOX +2% 이상이면 반도체 비중이 큰 코스피에 직접 수혜
 4. EWY (한국 ETF) — 외국인 수급 방향의 선행 지표
    - EWY 상승 + 원화 강세 = 외국인 순매수 환경
+4-1. dram_etf (Roundhill Memory ETF, 티커: DRAM) — HBM·DRAM 수요 선행 지표
+   - 삼성전자·SK하이닉스 시초가와 높은 상관관계
+   - dram_etf 상승 = HBM 수요 강세 기대 → 반도체 섹터 갭 상승 가능성
 5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
    - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
@@ -185,6 +188,9 @@ US_SYSTEM_PROMPT = """\
    - 오늘 고영향 지표가 있으면 반드시 reasons에 언급
 6. 빅테크 프리마켓 수급 — 시가총액 상위 종목이 지수를 끌어당김
    - NVDA·AAPL·MSFT·META·GOOGL·AMZN·TSLA 동향 확인
+7. dram_etf (Roundhill Memory ETF, 티커: DRAM) — HBM·메모리 반도체 섹터 선행
+   - NVDA 호실적 → DRAM ETF 상승 → MU·AVGO 동반 강세 패턴
+   - dram_etf 급등 시 반도체 섹터 종목 picks에 반영
 
 ### 종목 선택 규칙 (잭 켈로그 MA20 전략)
 잭 켈로그(Zack Kellogg)의 20일 이동평균선 전략은 단기 모멘텀 스윙 기법이다.

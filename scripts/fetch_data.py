@@ -428,7 +428,8 @@ def fetch_kospi_data() -> dict:
     # 3. Additional macro tickers (not in sidebar)
     print("[fetch_data]   → macro tickers")
     macro_tickers = ["^GSPC", "^VIX", "BZ=F", "GC=F", "^TNX",
-                     "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY"]
+                     "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
+                     "DRAM"]  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
     macro = {}
     for t in macro_tickers:
         d = get_ticker_full(t)
@@ -460,6 +461,7 @@ def fetch_kospi_data() -> dict:
         "sp500":  macro.get("^GSPC", {}),
         "vix":    macro.get("^VIX", {}),
         "ewy":    macro.get("EWY", {}),
+        "dram_etf": macro.get("DRAM", {}),  # Roundhill Memory ETF (HBM·DRAM 수요 선행)
         "oil": {
             "wti":   market_data_js.get("oil", {}),
             "brent": macro.get("BZ=F", {}),
@@ -503,6 +505,7 @@ def fetch_us_data() -> dict:
         "ES=F", "YM=F",
         "^N225", "^HSI",
         "^GDAXI", "^FTSE", "^FCHI",
+        "DRAM",   # Roundhill Memory & HBM ETF
     ]
     macro = {}
     for t in macro_tickers:
@@ -558,6 +561,7 @@ def fetch_us_data() -> dict:
             for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "TSLA"]
         },
         "fearGreed": fg or {},
+        "dram_etf":  macro.get("DRAM", {}),  # Roundhill Memory ETF (HBM·DRAM 수요 선행)
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         "us_candidates": us_candidates,
