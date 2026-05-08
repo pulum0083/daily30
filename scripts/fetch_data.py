@@ -163,50 +163,69 @@ def fetch_investor_trading_kospi(date_str: str = None) -> dict:
         except ValueError:
             return 0
 
-    try:
-        # NAVER Finance 투자자별 거래 동향 (EUC-KR HTML)
-        url = (
-            f"https://finance.naver.com/sise/investorDealTrendDay.naver"
-            f"?bizdate={date_str}&sosok=0"
-        )
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Referer":    "https://finance.naver.com/sise/",
-            "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-        }
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
+    # 시도할 URL 목록 (inner 프레임 → 메인 페이지 순)
+    candidate_urls = [
+        # 1순위: inner 프레임 페이지 (실제 테이블 데이터)
+        f"https://finance.naver.com/sise/investorDealTrendDayInner.naver?bizdate={date_str}&sosok=0",
+        # 2순위: 메인 페이지
+        f"https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={date_str}&sosok=0",
+    ]
+    headers = {
+        "User-Agent":    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer":       "https://finance.naver.com/sise/",
+        "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+        "Accept":        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
 
-        # 테이블 첫 번째 데이터 행에서 순매수 값 추출
-        # 컬럼 순서: 날짜 | 개인 | 외국인 | 기관계 | 금융투자 | 보험 | 투신 | ...
-        # <td class="num">+1,234,567</td> 형태
-        nums = re.findall(r'<td[^>]*class="[^"]*num[^"]*"[^>]*>\s*([+\-]?[\d,]+)\s*</td>', html)
+    # 여러 패턴으로 숫자 추출 시도
+    NUM_PATTERNS = [
+        r'<td[^>]*class="[^"]*num[^"]*"[^>]*>\s*([+\-]?[\d,]+)\s*</td>',
+        r'<td[^>]*class="[^"]*tah[^"]*"[^>]*>\s*([+\-]?[\d,]+)\s*</td>',
+        r'<td[^>]*>\s*([+\-][\d,]+)\s*</td>',   # 부호 있는 숫자만
+    ]
 
-        if len(nums) < 3:
-            print(f"[fetch_data] Investor trading: could not parse table (found {len(nums)} nums)", file=sys.stderr)
-            return {}
+    for url in candidate_urls:
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw_bytes = resp.read()
+                # EUC-KR 우선, 실패하면 UTF-8
+                try:
+                    html = raw_bytes.decode("euc-kr")
+                except UnicodeDecodeError:
+                    html = raw_bytes.decode("utf-8", errors="replace")
 
-        # nums[0]=개인, nums[1]=외국인, nums[2]=기관계
-        individual_net  = parse_num(nums[0])
-        foreign_net     = parse_num(nums[1])
-        institution_net = parse_num(nums[2])
+            nums = []
+            for pattern in NUM_PATTERNS:
+                nums = re.findall(pattern, html)
+                if len(nums) >= 3:
+                    break
 
-        result = {
-            "date":        date_str,
-            "foreign":     {"net": foreign_net},
-            "institution": {"net": institution_net},
-            "individual":  {"net": individual_net},
-        }
+            if len(nums) < 3:
+                print(f"[fetch_data] Investor trading: {url.split('?')[0].split('/')[-1]} → found {len(nums)} nums, trying next...", file=sys.stderr)
+                continue
 
-        print(f"[fetch_data] Investor trading ({date_str}): "
-              f"foreign={foreign_net:+,} 외국인, "
-              f"institution={institution_net:+,} 기관 (단위: 백만원)")
-        return result
+            # 컬럼 순서: 날짜 | 개인 | 외국인 | 기관계 | ...
+            individual_net  = parse_num(nums[0])
+            foreign_net     = parse_num(nums[1])
+            institution_net = parse_num(nums[2])
 
-    except Exception as e:
-        print(f"[fetch_data] Investor trading error: {e}", file=sys.stderr)
-        return {}
+            result = {
+                "date":        date_str,
+                "foreign":     {"net": foreign_net},
+                "institution": {"net": institution_net},
+                "individual":  {"net": individual_net},
+            }
+            print(f"[fetch_data] Investor trading ({date_str}): "
+                  f"foreign={foreign_net:+,}, institution={institution_net:+,} (단위: 백만원)")
+            return result
+
+        except Exception as e:
+            print(f"[fetch_data] Investor trading error ({url.split('/')[-1]}): {e}", file=sys.stderr)
+            continue
+
+    print(f"[fetch_data] Investor trading: all sources failed for {date_str}", file=sys.stderr)
+    return {}
 
 
 def get_fear_greed() -> dict:
