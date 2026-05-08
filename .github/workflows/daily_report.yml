@@ -96,16 +96,6 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
 
-      - name: 🌐 영문 번역 (Claude Haiku)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: python3 scripts/translate_to_en.py --type kospi
-
-      - name: 📨 Telegram EN 전송
-        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
-        continue-on-error: true
-        run: python3 scripts/send_telegram.py --type kospi --lang en
-
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
@@ -195,16 +185,6 @@ jobs:
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
-
-      - name: 🌐 영문 번역 (Claude Haiku)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: python3 scripts/translate_to_en.py --type us
-
-      - name: 📨 Telegram EN 전송
-        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
-        continue-on-error: true
-        run: python3 scripts/send_telegram.py --type us --lang en
 
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
