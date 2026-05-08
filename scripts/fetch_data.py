@@ -132,62 +132,81 @@ def fetch_economic_calendar() -> dict:
 
 
 def fetch_investor_trading_kospi(date_str: str = None) -> dict:
-    """KRX 투자자별 순매수 데이터 (pykrx).
+    """KRX 공개 API에서 코스피 투자자별 순매수 데이터를 가져온다 (인증 불필요).
 
     코스피 조회 기준일: 당일 시장 개장 전이므로 전 거래일 데이터 사용.
 
     Returns:
         {
           "date": "YYYYMMDD",
-          "foreign":     {"buy": int, "sell": int, "net": int},  # 외국인합계
+          "foreign":     {"buy": int, "sell": int, "net": int},  # 외국인합계 (단위: 백만원)
           "institution": {"buy": int, "sell": int, "net": int},  # 기관합계
           "individual":  {"buy": int, "sell": int, "net": int},  # 개인
         }
     """
-    try:
-        from pykrx import stock as krx_stock
-    except ImportError:
-        print("[fetch_data] pykrx not installed — skipping investor trading", file=sys.stderr)
-        return {}
+    import urllib.parse
+
+    kst_now = datetime.now(KST)
+
+    if date_str is None:
+        # 전 거래일 (주말 건너뜀)
+        target = kst_now - timedelta(days=1)
+        while target.weekday() >= 5:  # 5=Sat, 6=Sun
+            target -= timedelta(days=1)
+        date_str = target.strftime("%Y%m%d")
 
     try:
-        kst_now = datetime.now(KST)
+        # KRX data.krx.co.kr 공개 AJAX API (인증 불필요, Referer만 필요)
+        url = "https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd"
+        params = urllib.parse.urlencode({
+            "bld":        "dbms/MDC/STAT/standard/MDCSTAT02202",
+            "trdDd":      date_str,
+            "money":      "1",       # 단위: 백만원
+            "inqTpCd":    "2",       # 조회 유형: 거래대금
+            "trdVolTpCd": "1",
+            "askBid":     "",
+            "isuCd":      "",
+            "locale":     "ko_KR",
+        }).encode("utf-8")
 
-        if date_str is None:
-            # 전 거래일 (주말 건너뜀)
-            target = kst_now - timedelta(days=1)
-            while target.weekday() >= 5:  # 5=Sat, 6=Sun
-                target -= timedelta(days=1)
-            date_str = target.strftime("%Y%m%d")
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer":      "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020202",
+            "User-Agent":   "Mozilla/5.0 (compatible; DailyB/1.0)",
+            "Origin":       "https://data.krx.co.kr",
+        }
+        req = urllib.request.Request(url, data=params, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = json.loads(resp.read().decode("utf-8"))
 
-        df = krx_stock.get_market_trading_volume_by_investor(date_str, date_str, "KOSPI")
-
-        if df is None or df.empty:
-            print(f"[fetch_data] Investor trading: no data for {date_str}", file=sys.stderr)
+        rows = raw.get("OutBlock_1", [])
+        if not rows:
+            print(f"[fetch_data] Investor trading: empty response for {date_str}", file=sys.stderr)
             return {}
 
-        # 컬럼명 동적 탐색 (pykrx 버전별 차이 대응)
-        cols = df.columns.tolist()
-        buy_col  = next((c for c in cols if "매수" in str(c)), None)
-        sell_col = next((c for c in cols if "매도" in str(c) and "순" not in str(c)), None)
-        net_col  = next((c for c in cols if "순매수" in str(c) or ("순" in str(c) and "매수" in str(c))), None)
-
+        # 투자자 이름 매핑
         INVESTOR_MAP = {
-            "기관합계":  "institution",
             "외국인합계": "foreign",
-            "개인":      "individual",
+            "기관합계":   "institution",
+            "개인":       "individual",
         }
 
         result: dict = {"date": date_str}
-        for kr, en in INVESTOR_MAP.items():
-            if kr not in df.index:
+        for row in rows:
+            name = row.get("INVST_NM", "").strip()
+            if name not in INVESTOR_MAP:
                 continue
-            row = df.loc[kr]
-            result[en] = {
-                "buy":  int(row[buy_col])  if buy_col  else 0,
-                "sell": int(row[sell_col]) if sell_col else 0,
-                "net":  int(row[net_col])  if net_col  else 0,
-            }
+            key = INVESTOR_MAP[name]
+            # 매수(BID), 매도(ASK), 순매수(NETBID) — 단위 백만원
+            def to_int(val: str) -> int:
+                return int(str(val).replace(",", "").replace("-", "0") or 0)
+
+            buy  = to_int(row.get("BID_TRDVAL", 0))
+            sell = to_int(row.get("ASK_TRDVAL", 0))
+            net_raw = str(row.get("NETBID_TRDVAL", "0")).replace(",", "")
+            net = int(net_raw) if net_raw.lstrip("-").isdigit() else 0
+
+            result[key] = {"buy": buy, "sell": sell, "net": net}
 
         print(f"[fetch_data] Investor trading ({date_str}): "
               f"foreign net={result.get('foreign', {}).get('net', 'N/A'):,}, "
