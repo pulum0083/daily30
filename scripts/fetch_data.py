@@ -7,6 +7,7 @@ Pre-collects ALL data needed for briefings so Claude makes ≤3 web searches per
 import argparse
 import json
 import sys
+import time
 import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -235,6 +236,27 @@ def fetch_investor_trading_kospi(date_str: str = None) -> dict:
     return {}
 
 
+def _yf_history(ticker: str, retries: int = 3, **kwargs):
+    """yfinance history() 호출을 최대 retries회 exponential backoff으로 재시도한다."""
+    import yfinance as yf
+    import pandas as pd
+    last_exc = None
+    for attempt in range(retries):
+        try:
+            hist = yf.Ticker(ticker).history(**kwargs)
+            if not hist.empty:
+                return hist
+        except Exception as e:
+            last_exc = e
+        if attempt < retries - 1:
+            delay = 2 ** attempt
+            print(f"[fetch_data] {ticker} fetch failed (attempt {attempt + 1}/{retries}), retry in {delay}s", file=sys.stderr)
+            time.sleep(delay)
+    if last_exc:
+        print(f"[fetch_data] {ticker} all retries failed: {last_exc}", file=sys.stderr)
+    return pd.DataFrame()
+
+
 def get_fear_greed() -> dict:
     """Fetch CNN Fear & Greed Index from alternative.me (free, no auth)."""
     try:
@@ -271,8 +293,7 @@ def get_ticker_full(ticker: str) -> dict:
              ma200, ma200_dist_pct, ma200_sparkline (10 pts).
     """
     try:
-        import yfinance as yf
-        hist = yf.Ticker(ticker).history(period="1y")
+        hist = _yf_history(ticker, period="1y")
         if len(hist) < 2:
             return {"error": "insufficient data"}
 
@@ -323,8 +344,7 @@ def get_ticker_full(ticker: str) -> dict:
 def get_hourly_sparkline(ticker: str, n: int = 10) -> list:
     """Get last n hourly closing prices for sidebar sparklines."""
     try:
-        import yfinance as yf
-        hist = yf.Ticker(ticker).history(period="5d", interval="1h")
+        hist = _yf_history(ticker, period="5d", interval="1h")
         closes = hist["Close"].dropna()
         if len(closes) > 0:
             return [round(float(p), 4) for p in closes.iloc[-n:].tolist()]
@@ -339,13 +359,12 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
     Returns dict ready to be JSON-serialised as window.MARKET_DATA.
     """
     import math
-    import yfinance as yf
 
     market_data = {}
     for key, ticker in sidebar_map.items():
         try:
             # Use 1mo period for reliability (5d can be too short after long weekends)
-            hist = yf.Ticker(ticker).history(period="1mo")
+            hist = _yf_history(ticker, period="1mo")
             closes = hist["Close"].dropna()
             if len(closes) < 2:
                 print(f"[fetch_data] sidebar {key}/{ticker}: insufficient data ({len(closes)} closes)", file=sys.stderr)

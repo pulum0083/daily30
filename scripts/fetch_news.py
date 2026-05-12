@@ -307,12 +307,10 @@ def main():
             print(f"[fetch_news] Gemini summary: {len(summary.get('key_indicators', []))} indicators, "
                   f"{len(summary.get('headlines', []))} headlines")
         except Exception as e:
-            print(f"[fetch_news] ERROR: Gemini summarization failed: {e}", file=sys.stderr)
-            # 실패해도 원본 헤드라인 일부를 fallback으로 사용
-            raw_headlines = [line.lstrip("- ") for line in news_text.split("\n")[:5] if line.strip()]
+            print(f"[fetch_news] ERROR: Gemini summarization failed: {e}. Continuing with market data only.", file=sys.stderr)
             summary = {
-                "key_indicators": raw_headlines[:3],
-                "headlines": raw_headlines[:3],
+                "key_indicators": [],
+                "headlines": [],
                 "market_sentiment": "neutral",
                 "error": str(e),
             }

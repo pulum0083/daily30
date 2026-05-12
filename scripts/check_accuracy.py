@@ -59,6 +59,8 @@ def get_kospi_open_vs_prev_close(date_str: str) -> tuple | None:
         idx_str = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
         if idx_str == date_str and i > 0:
             prev_close = float(rows[i - 1][1]["Close"])
+            if prev_close == 0:
+                return None
             open_price = float(row["Open"])
             change_pct = (open_price - prev_close) / prev_close * 100
             return open_price, prev_close, change_pct
@@ -78,6 +80,8 @@ def get_sp500_open_vs_prev_close(date_str: str) -> tuple | None:
         idx_str = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
         if idx_str == date_str and i > 0:
             prev_close = float(rows[i - 1][1]["Close"])
+            if prev_close == 0:
+                return None
             open_price = float(row["Open"])
             change_pct = (open_price - prev_close) / prev_close * 100
             return open_price, prev_close, change_pct
