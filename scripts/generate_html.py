@@ -714,12 +714,118 @@ def backfill_date_pages() -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# KOSPI 마감 시황 HTML 빌더
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _fmt_idx(d: dict) -> dict:
+    """지수 데이터를 템플릿용 문자열로 변환한다."""
+    if not d or "error" in d:
+        return {"price": "-", "chg_pct": "-", "chg_abs": "-", "arrow": "", "cls": "neutral"}
+    price = d.get("price", 0)
+    chg   = d.get("change_pct", 0)
+    chg_abs = d.get("change_abs", 0)
+    cls   = "up" if chg >= 0 else "down"
+    arrow = "▲" if chg >= 0 else "▼"
+    return {
+        "price":   f"{price:,.2f}",
+        "chg_pct": f"{chg:+.2f}",
+        "chg_abs": f"{abs(chg_abs):,.2f}",
+        "arrow":   arrow,
+        "cls":     cls,
+    }
+
+
+def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
+    """KOSPI 마감 시황 브리핑 HTML을 생성한다."""
+    generated_at = data.get("generated_at", datetime.now(KST).isoformat())
+    gen_time = fmt_generated_time(generated_at)
+
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        days_ko = ["월", "화", "수", "목", "금", "토", "일"]
+        day_of_week = days_ko[dt.weekday()]
+    except Exception:
+        day_of_week = ""
+
+    indices  = data.get("indices", {})
+    futures  = data.get("futures", {})
+    sectors  = data.get("sectors", [])
+    top_gainers = data.get("top_gainers", [])
+
+    kospi  = _fmt_idx(indices.get("kospi", {}))
+    kosdaq = _fmt_idx(indices.get("kosdaq", {}))
+    usdkrw = _fmt_idx(indices.get("usdkrw", {}))
+    nq     = _fmt_idx(futures.get("nq", {}))
+    sp     = _fmt_idx(futures.get("sp", {}))
+    wti    = _fmt_idx(futures.get("wti", {}))
+
+    # 원/달러 부가 설명
+    usdkrw_note = "원화 강세 마감" if (indices.get("usdkrw") or {}).get("change_pct", 0) < 0 else "원화 약세 마감"
+
+    web_base = get_web_base_url()
+    page_title = f"Double-Shot — 코스피 마감 시황 {date_str}"
+    og_image_url = f"{web_base}/briefings/{date_str}-kospi-close-og.svg"
+    og_description = f"{date_str} 코스피 마감: {analysis.get('market_title', '')}"
+
+    reasons = [r for r in analysis.get("reasons", []) if r]
+
+    ctx = {
+        "page_title":    page_title,
+        "asset_prefix":  "/",
+        "date_str":      date_str,
+        "day_of_week":   day_of_week,
+        "gen_time":      gen_time,
+        "og_image_url":  og_image_url,
+        "og_description": og_description,
+        "market_title":  analysis.get("market_title", ""),
+        "market_summary": analysis.get("market_summary", ""),
+        "reasons":       reasons,
+        "sectors":       sectors,
+        "top_gainers":   top_gainers,
+        # 지수
+        "kospi_price":   kospi["price"],   "kospi_chg_pct":  kospi["chg_pct"],
+        "kospi_chg_abs": kospi["chg_abs"], "kospi_arrow":    kospi["arrow"],
+        "kospi_cls":     kospi["cls"],     "kospi_volume":   "",
+        "kosdaq_price":  kosdaq["price"],  "kosdaq_chg_pct": kosdaq["chg_pct"],
+        "kosdaq_chg_abs": kosdaq["chg_abs"], "kosdaq_arrow": kosdaq["arrow"],
+        "kosdaq_cls":    kosdaq["cls"],
+        "usdkrw_price":  usdkrw["price"],  "usdkrw_chg_pct": usdkrw["chg_pct"],
+        "usdkrw_cls":    usdkrw["cls"],    "usdkrw_arrow":   usdkrw["arrow"],
+        "usdkrw_note":   usdkrw_note,
+        # 사이드바
+        "nq_price":  nq["price"],  "nq_chg_pct":  nq["chg_pct"],  "nq_cls":  nq["cls"],
+        "sp_price":  sp["price"],  "sp_chg_pct":  sp["chg_pct"],  "sp_cls":  sp["cls"],
+        "wti_price": wti["price"], "wti_chg_pct": wti["chg_pct"], "wti_cls": wti["cls"],
+    }
+
+    env = _make_env()
+    template = env.get_template("briefing_closing.html")
+    return template.render(**ctx)
+
+
+def save_closing_pages(data: dict, analysis: dict, date_str: str) -> None:
+    """마감 시황 HTML을 flat 파일과 clean URL 경로 두 곳에 저장한다."""
+    html = build_closing_html(data, analysis, date_str)
+
+    # flat: briefings/YYYY-MM-DD-kospi-close.html
+    flat_path = BRIEFINGS_DIR / f"{date_str}-kospi-close.html"
+    flat_path.write_text(html, encoding="utf-8")
+    print(f"[generate_html] Closing briefing saved → {flat_path}")
+
+    # clean URL: briefings/ko-close/YYYY-MM-DD/index.html
+    close_dir = BRIEFINGS_DIR / "ko-close" / date_str
+    close_dir.mkdir(parents=True, exist_ok=True)
+    (close_dir / "index.html").write_text(html, encoding="utf-8")
+    print(f"[generate_html] Closing date page saved → {close_dir}/index.html")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(description="Generate HTML briefing from analysis JSON")
-    parser.add_argument("--type", choices=["kospi", "us", "weekly"])
+    parser.add_argument("--type", choices=["kospi", "us", "weekly", "kospi-close"])
     parser.add_argument("--data-file", help="Path to latest_{type}.json")
     parser.add_argument("--date", default=None, help="Date string (YYYY-MM-DD)")
     parser.add_argument("--backfill-date-pages", action="store_true",
@@ -741,6 +847,11 @@ def main():
     except FileNotFoundError as e:
         print(f"[generate_html] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
+
+    # ── KOSPI 마감 시황 ──
+    if args.type == "kospi-close":
+        save_closing_pages(data, analysis, date_str)
+        return
 
     if args.type == "weekly":
         html_briefing = f"<html><body><h1>Weekly Report {date_str}</h1></body></html>"

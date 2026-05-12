@@ -11,6 +11,7 @@ on:
         options:
           - kospi
           - us
+          - kospi-close
           - accuracy
       dry_run:
         description: "dry_run=true 시 텔레그램·이메일 전송 건너뜀 (테스트용)"
@@ -221,6 +222,92 @@ jobs:
           user_name: "DailyB Bot"
           user_email: "dailyb-bot@users.noreply.github.com"
           commit_message: "🇺🇸 Pages 배포: 미국 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+
+  # ──────────────────────────────────────────────────────────────────
+
+  kospi-close-briefing:
+    name: "🇰🇷 코스피 마감 시황 (KST 15:45)"
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi-close'
+
+    env:
+      ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
+      TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
+      RESEND_API_KEY:       ${{ secrets.RESEND_API_KEY }}
+      WEB_BASE_URL:         "https://doubleshot.space"
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 🗓️ 코스피 휴장일 확인
+        id: holiday
+        run: |
+          if python3 scripts/holiday_check.py --market kospi; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "오늘은 코스피 휴장일 — 건너뜀"
+          fi
+
+      - name: 📊 마감 데이터 수집 (지수 + 섹터 + 급등주)
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          mkdir -p data web/briefings/ko-close
+          python3 scripts/fetch_closing_kospi.py
+
+      - name: ✨ Claude 마감 시황 분석
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
+          python3 scripts/call_claude.py --type kospi-close --date "$DATE"
+
+      - name: 📨 Telegram 전송
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/send_telegram.py --type kospi-close
+
+      - name: 💾 HTML & 데이터 커밋 → main 푸시
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/ data/
+          git diff --staged --quiet || git commit -m "🇰🇷 코스피 마감: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main; then
+              git push && break
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+
+      - name: 🌐 GitHub Pages 배포
+        if: steps.holiday.outputs.open == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          publish_branch: gh-pages
+          force_orphan: false
+          keep_files: false
+          user_name: "DailyB Bot"
+          user_email: "dailyb-bot@users.noreply.github.com"
+          commit_message: "🇰🇷 Pages 배포: 코스피 마감 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
 
   # ──────────────────────────────────────────────────────────────────
   kospi-accuracy:

@@ -120,12 +120,14 @@ def build_fallback_message(briefing_type: str) -> str:
     analysis_file = DATA_DIR / f"analysis_{briefing_type}.json"
     if not analysis_file.exists():
         # 마지막 수단: 단순 알림만
-        labels = {"kospi": "🇰🇷 코스피", "us": "🇺🇸 미국 시장", "weekly": "📋 주간 리포트"}
+        labels = {"kospi": "🇰🇷 코스피", "us": "🇺🇸 미국 시장", "weekly": "📋 주간 리포트", "kospi-close": "🇰🇷 코스피 마감"}
         label = labels.get(briefing_type, "📊 브리핑")
+        url_map = {"kospi": f"ko/{date_slug}", "us": f"us/{date_slug}", "kospi-close": f"ko-close/{date_slug}"}
+        path = url_map.get(briefing_type, f"weekly/{date_slug}")
         return (
             f"{label} 브리핑 | {today}\n\n"
             f"브리핑이 생성되었습니다.\n\n"
-            f"🔗 상세 분석 → {web_url}/briefings/{'ko' if briefing_type == 'kospi' else briefing_type}/{date_slug}/"
+            f"🔗 상세 분석 → {web_url}/briefings/{path}/"
         )
 
     with open(analysis_file, encoding="utf-8") as f:
@@ -193,7 +195,7 @@ def mark_sent_today(briefing_type: str, lang: str = "ko") -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Send briefing to Telegram")
-    parser.add_argument("--type", choices=["kospi", "us", "weekly"], required=True)
+    parser.add_argument("--type", choices=["kospi", "us", "weekly", "kospi-close"], required=True)
     parser.add_argument(
         "--lang", choices=["ko", "en"], default="ko",
         help="Language channel: 'ko' (default) or 'en' (TELEGRAM_CHAT_ID_EN)",
@@ -224,8 +226,10 @@ def main():
     if args.message:
         message_text = args.message
     else:
-        # EN: telegram_message_en_{type}.txt / KO: telegram_message_{type}.txt
-        if args.lang == "en":
+        # kospi-close 전용 파일명 / EN / KO
+        if args.type == "kospi-close":
+            msg_file = DATA_DIR / "telegram_message_kospi_close.txt"
+        elif args.lang == "en":
             msg_file = DATA_DIR / f"telegram_message_en_{args.type}.txt"
         else:
             msg_file = DATA_DIR / f"telegram_message_{args.type}.txt"

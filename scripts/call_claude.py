@@ -617,7 +617,7 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Call Claude API with Prompt Caching")
-    parser.add_argument("--type", choices=["kospi", "us"], required=True)
+    parser.add_argument("--type", choices=["kospi", "us", "kospi-close"], required=True)
     parser.add_argument("--date", default=None, help="Date string (YYYY-MM-DD)")
     parser.add_argument(
         "--no-html", action="store_true",
@@ -627,23 +627,48 @@ def main():
 
     date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
 
-    # 1. Call Claude → get analysis JSON
+    # ── KOSPI 마감 시황 흐름 ──
+    if args.type == "kospi-close":
+        try:
+            analysis = call_claude_closing(date_str)
+        except Exception as e:
+            print(f"[call_claude] ERROR: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        save_analysis("kospi-close", analysis)
+
+        data_file = DATA_DIR / "latest_kospi_close.json"
+        with open(data_file, encoding="utf-8") as f:
+            market_data = json.load(f)
+        save_closing_telegram_message(date_str, analysis, market_data)
+
+        if not args.no_html:
+            html_script = BASE_DIR / "scripts" / "generate_html.py"
+            cmd = [
+                sys.executable, str(html_script),
+                "--type", "kospi-close",
+                "--data-file", str(data_file),
+                "--date", date_str,
+            ]
+            print(f"[call_claude] Generating closing HTML: {' '.join(cmd)}")
+            result = subprocess.run(cmd)
+            if result.returncode != 0:
+                print("[call_claude] WARNING: closing HTML generation failed", file=sys.stderr)
+
+        print(f"[call_claude] Done. market_title={analysis.get('market_title', '')}")
+        return
+
+    # ── 기존 kospi / us 흐름 ──
     try:
         analysis = call_claude(args.type, date_str)
     except Exception as e:
         print(f"[call_claude] ERROR calling Claude API: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # 2. Save analysis JSON
     save_analysis(args.type, analysis)
-
-    # 2b. Record prediction in briefings.json for accuracy tracking
     save_prediction_to_briefings(args.type, date_str, analysis)
-
-    # 2c. Generate telegram message (always fresh — overwrites stale txt)
     save_telegram_message(args.type, date_str, analysis)
 
-    # 3. Generate HTML (unless --no-html)
     if not args.no_html:
         data_file = DATA_DIR / f"latest_{args.type}.json"
         html_script = BASE_DIR / "scripts" / "generate_html.py"
@@ -659,6 +684,162 @@ def main():
             print("[call_claude] WARNING: HTML generation failed", file=sys.stderr)
 
     print(f"[call_claude] Done. direction={analysis.get('prediction', {}).get('direction')}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# KOSPI 마감 시황 — 시스템 프롬프트
+# ─────────────────────────────────────────────────────────────────────────────
+
+KOSPI_CLOSE_SYSTEM_PROMPT = """\
+너는 20년 경력의 한국 주식시장 시황 분석가다.
+오늘 코스피 마감 데이터를 바탕으로 오늘 장 움직임을 해설하고 섹터 요약을 제공한다.
+
+## 글쓰기 기본 규칙
+
+**[규칙 A] 결과 먼저, 데이터는 뒤에**
+코스피에 어떤 결과가 있었는지(사실)를 첫 문장에 쓰고, 왜 그런지(데이터·수치)를 뒤에 붙인다.
+❌ "나스닥 선물이 +0.2% 올랐어요. 코스피 강세에 영향을 줬어요."
+✅ "코스피가 강하게 마감했어요. 나스닥 선물이 <b>+0.2%</b> 오르며 투자심리를 받쳤거든요."
+
+**[규칙 B] 모든 문장은 해요체로 끝낸다**
+'~해요', '~예요', '~있어요', '~같아요', '~거든요' 중 하나로 끝나야 한다.
+❌ 절대 금지: "~마감.", "~압력.", "~강세.", "~판단." 처럼 명사·한자어로 끝나는 것
+
+## 분석 항목
+
+### 1. 마감 시황 요약 (market_summary)
+오늘 장 전반을 2~3문장으로 요약. 지수 등락폭·방향과 핵심 이유 1개 포함.
+
+### 2. 시황 분석 근거 (reasons)
+정확히 4개. 중요도 내림차순.
+- 각 항목 150자 이내, 이모지 1개로 시작
+- 수치는 반드시 <b>수치</b> 형식으로 강조
+- reasons[0]: 오늘 지수 방향 총평 (코스피 등락폭 + 핵심 동인)
+- reasons[1]~[3]: 오늘 장에 실제로 영향을 준 요인 (외국인 수급, 섹터 동향, 거시 변수 등)
+
+### 3. 시황 타이틀 (market_title)
+reasons 섹션 상단 훅 타이틀. 30자 이내.
+예: "반도체 주도 + 외국인 순매수로 강세 마감", "관망 속 보합 마감 — 방향성 부재"
+
+### 4. 텔레그램 핵심 시그널 (telegram_signals)
+정확히 2개. 텔레그램 발송용 압축 요약.
+각 항목 60자 이내, 이모지 1개, <b> 태그 허용.
+
+## 출력 형식
+
+순수 JSON만 출력한다. 마크다운 코드블록, 설명 텍스트 없이 오직 JSON.
+
+{
+  "market_title": "반도체 주도 + 외국인 순매수로 강세 마감",
+  "market_summary": "오늘 코스피가 <b>+0.82%</b> 상승 마감했어요. 반도체 섹터가 장 전체를 이끌었고, 외국인이 순매수로 전환하며 상승폭을 키웠어요.",
+  "reasons": [
+    "📈 코스피가 <b>+0.82%</b> 상승 마감했어요. 반도체 섹터가 오늘 장 전체를 견인했고, 외국인이 순매수로 돌아서며 상승폭을 키웠어요.",
+    "💡 반도체·HBM 수혜주 동반 강세였어요. SK하이닉스가 <b>+3.4%</b> 급등하며 코스피 전체 상승을 이끌었어요. 엔비디아 실적 기대감이 반도체 섹터 전반에 퍼졌거든요.",
+    "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환했어요. 이틀 연속 매도에서 돌아섰고, 원화 강세도 외국인 유입에 우호적이었어요.",
+    "🏦 금리 부담 완화 기대도 시장을 받쳤어요. 미국채 10년물이 전일 대비 <b>-5bp</b> 하락하며 성장주 밸류에이션 부담이 줄었거든요."
+  ],
+  "telegram_signals": [
+    "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도했어요.",
+    "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환. 원화 강세도 외국인 유입에 우호적이었어요."
+  ]
+}
+"""
+
+
+def call_claude_closing(date_str: str) -> dict:
+    """KOSPI 마감 시황 분석을 Claude에게 요청한다."""
+    client = anthropic.Anthropic(
+        api_key=get_anthropic_api_key(),
+        default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
+    )
+
+    data_file = DATA_DIR / "latest_kospi_close.json"
+    if not data_file.exists():
+        raise FileNotFoundError(f"마감 데이터 없음: {data_file}")
+    with open(data_file, encoding="utf-8") as f:
+        market_data = json.load(f)
+
+    user_content = f"오늘 날짜: {date_str}\n\n"
+    user_content += f"마감 데이터:\n{json.dumps(market_data, ensure_ascii=False, indent=2)}\n"
+
+    print(f"[call_claude] Calling Claude for kospi-close (date={date_str})")
+    print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=2048,
+        system=[
+            {
+                "type": "text",
+                "text": KOSPI_CLOSE_SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+        messages=[{"role": "user", "content": user_content}],
+    )
+
+    usage = response.usage
+    if hasattr(usage, "cache_creation_input_tokens"):
+        print(f"[call_claude] Cache created: {usage.cache_creation_input_tokens} tokens")
+    if hasattr(usage, "cache_read_input_tokens"):
+        print(f"[call_claude] Cache hit: {usage.cache_read_input_tokens} tokens (90% discount)")
+    print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
+
+    return extract_json(response.content[0].text)
+
+
+def save_closing_telegram_message(date_str: str, analysis: dict, market_data: dict) -> None:
+    """KOSPI 마감 시황 텔레그램 메시지를 파일로 저장한다."""
+    import re
+
+    def strip_html(text):
+        return re.sub(r"<[^>]+>", "", str(text))
+
+    web_base = get_web_base_url()
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        date_display = dt.strftime("%Y.%m.%d")
+    except Exception:
+        date_display = date_str
+
+    indices = market_data.get("indices", {})
+    kospi  = indices.get("kospi", {})
+    kosdaq = indices.get("kosdaq", {})
+
+    def fmt_index(d: dict, name: str) -> str:
+        if "error" in d or not d:
+            return f"📊 {name} - 데이터 없음"
+        price = d.get("price", "-")
+        chg   = d.get("change_pct", 0)
+        arrow = "▲" if chg >= 0 else "▼"
+        return f"📊 {name} <b>{price:,.2f}</b>  {arrow} {chg:+.2f}%"
+
+    market_title   = strip_html(analysis.get("market_title", ""))
+    signals        = analysis.get("telegram_signals", [])
+    divider = "─" * 20
+
+    lines = [
+        f"🇰🇷 코스피 마감 시황 | {date_display}",
+        divider,
+        fmt_index(kospi,  "KOSPI"),
+        fmt_index(kosdaq, "KOSDAQ"),
+        divider,
+        f"💬 {market_title}",
+        "",
+        "핵심 시그널:",
+    ]
+    for sig in signals[:2]:
+        lines.append(f"• {strip_html(sig)}")
+    lines += [
+        divider,
+        f"🔗 상세 분석 → {web_base}/briefings/ko-close/{date_str}/",
+    ]
+
+    msg = "\n".join(lines)
+    out = DATA_DIR / "telegram_message_kospi_close.txt"
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(msg)
+    print(f"[call_claude] Closing telegram message saved → {out}")
 
 
 if __name__ == "__main__":

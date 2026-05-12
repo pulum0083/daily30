@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-PW9RHHFPM4');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page_title }}</title>
+  <meta property="og:title" content="{{ page_title }}" />
+  <meta property="og:description" content="{{ og_description }}" />
+  <meta property="og:image" content="{{ og_image_url }}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="{{ og_image_url }}" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/favicon.svg"/>
+  <link rel="stylesheet" href="{{ asset_prefix }}assets/style.css" />
+  <style>
+    /* ── 마감 시황 전용 컴포넌트 ── */
+    .close-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .close-idx {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+    }
+    .close-idx__name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .close-idx__val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .close-idx__chg { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .close-idx__chg.up   { color: var(--status-up); }
+    .close-idx__chg.down { color: var(--status-down); }
+    .close-idx__vol { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+    .sector-grid { display: flex; flex-direction: column; gap: 6px; }
+    .sector-row { display: flex; align-items: center; gap: 10px; }
+    .sector-row__name { font-size: 13px; font-weight: 500; color: var(--text-secondary); min-width: 96px; flex-shrink: 0; }
+    .sector-row__bar-track { flex: 1; height: 6px; background: var(--grey-50); border-radius: 100px; overflow: hidden; }
+    .sector-row__bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+    .sector-row__bar-fill.up   { background: var(--status-up); }
+    .sector-row__bar-fill.down { background: var(--status-down); }
+    .sector-row__pct { font-size: 13px; font-weight: 700; min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+    .sector-row__pct.up   { color: var(--status-up); }
+    .sector-row__pct.down { color: var(--status-down); }
+
+    .top-stock-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-stock-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .top-stock-card__rank {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--status-up-bg); color: var(--status-up);
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .top-stock-card__body { flex: 1; min-width: 0; }
+    .top-stock-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .top-stock-card__name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .top-stock-card__change {
+      font-size: 13px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px;
+      background: var(--status-up-bg); color: var(--status-up);
+    }
+    .top-stock-card__price { font-size: 13px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+    .top-stock-card__reason { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 5px; }
+
+    .close-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 9px; border-radius: 100px;
+      background: rgba(100,100,200,.12); color: #6366F1;
+    }
+
+    @media (max-width: 600px) {
+      .close-summary { grid-template-columns: repeat(2, 1fr); }
+      .close-summary .close-idx:last-child { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <a class="gnb__logo" href="/" style="text-decoration:none;">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+            <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+            <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+      <div class="gnb__meta">
+        <span class="gnb__date" id="gnb-date">{{ date_str }} KST 15:45</span>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout-wrapper">
+    <div class="layout-grid">
+
+      <!-- ── 왼쪽 메인 ── -->
+      <main class="layout-grid__main">
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header" style="cursor:default;">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date">
+                <span class="accordion-header__date-label">{{ date_str }}</span>
+                <span class="accordion-header__date-sub">{{ day_of_week }} · 15:45 마감</span>
+              </div>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="close-badge">🔔 마감</span>
+            </div>
+          </div>
+          <div class="accordion-body" style="grid-template-rows:1fr;">
+          <div class="accordion-body__inner" style="overflow:visible;">
+
+            <!-- 마감 지수 -->
+            <div class="open-section">
+              <div class="open-section__title">마감 지수</div>
+              <div class="close-summary">
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSPI</div>
+                  <div class="close-idx__val">{{ kospi_price }}</div>
+                  <div class="close-idx__chg {{ kospi_cls }}">{{ kospi_arrow }} {{ kospi_chg_abs }} ({{ kospi_chg_pct }}%)</div>
+                  {% if kospi_volume %}<div class="close-idx__vol">거래대금 {{ kospi_volume }}</div>{% endif %}
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSDAQ</div>
+                  <div class="close-idx__val">{{ kosdaq_price }}</div>
+                  <div class="close-idx__chg {{ kosdaq_cls }}">{{ kosdaq_arrow }} {{ kosdaq_chg_abs }} ({{ kosdaq_chg_pct }}%)</div>
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">원/달러</div>
+                  <div class="close-idx__val">{{ usdkrw_price }}</div>
+                  <div class="close-idx__chg {{ usdkrw_cls }}">{{ usdkrw_arrow }} {{ usdkrw_chg_pct }}%</div>
+                  <div class="close-idx__vol">{{ usdkrw_note }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 시황 분석 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                <span class="reason-section-title">{{ market_title }}</span>
+              </div>
+              <div class="reason-block">
+                <p>{{ market_summary }}</p>
+                {% if reasons %}
+                <ul>
+                  {% for r in reasons %}
+                  <li>{{ r }}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- 섹터 성과 -->
+            {% if sectors %}
+            <div class="open-section">
+              <div class="open-section__title">섹터 성과</div>
+              <div class="reason-block">
+                <div class="sector-grid">
+                  {% for s in sectors %}
+                  {% set abs_pct = s.change_pct | abs %}
+                  {% set bar_width = [abs_pct * 40, 100] | min %}
+                  {% set cls = 'up' if s.change_pct >= 0 else 'down' %}
+                  <div class="sector-row">
+                    <span class="sector-row__name">{{ s.name }}</span>
+                    <div class="sector-row__bar-track">
+                      <div class="sector-row__bar-fill {{ cls }}" style="width:{{ bar_width }}%"></div>
+                    </div>
+                    <span class="sector-row__pct {{ cls }}">{{ '%+.2f' % s.change_pct }}%</span>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- 오늘의 급등주 TOP 3 -->
+            {% if top_gainers %}
+            <div class="open-section">
+              <div class="open-section__title">오늘의 급등주 TOP 3</div>
+              <div class="top-stock-list">
+                {% for stock in top_gainers %}
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">{{ loop.index }}</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">{{ stock.name }}</span>
+                      <span class="top-stock-card__change">{{ stock.change_pct }}</span>
+                      <span class="top-stock-card__price">{{ stock.price }}</span>
+                    </div>
+                    {% if stock.reason %}
+                    <div class="top-stock-card__reason">{{ stock.reason }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+          </div><!-- /accordion-body__inner -->
+          </div><!-- /accordion-body -->
+        </div><!-- /accordion-item -->
+      </main>
+
+      <!-- ── 오른쪽 사이드바 ── -->
+      <aside class="layout-grid__right">
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title">시장 지표</span>
+            <span class="pub-time">데이터 수집 {{ gen_time }}</span>
+          </div>
+          <div class="mkt-list">
+            <div class="mkt-section-label">국내</div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">코스피</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ kospi_price }}</div>
+                  <div class="mkt-chg {{ kospi_cls }}">{{ kospi_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">코스닥</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ kosdaq_price }}</div>
+                  <div class="mkt-chg {{ kosdaq_cls }}">{{ kosdaq_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mkt-section-label">해외 (프리마켓)</div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">나스닥 선물</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ nq_price }}</div>
+                  <div class="mkt-chg {{ nq_cls }}">{{ nq_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">S&amp;P500 선물</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ sp_price }}</div>
+                  <div class="mkt-chg {{ sp_cls }}">{{ sp_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mkt-section-label">환율·원자재</div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">원/달러</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ usdkrw_price }}</div>
+                  <div class="mkt-chg {{ usdkrw_cls }}">{{ usdkrw_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name">WTI 유가</span>
+                <div class="mkt-vals">
+                  <div class="mkt-val">{{ wti_price }}</div>
+                  <div class="mkt-chg {{ wti_cls }}">{{ wti_chg_pct }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  </script>
+</body>
+</html>
