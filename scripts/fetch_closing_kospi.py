@@ -298,6 +298,56 @@ def fetch_investor_trading() -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 장중 5분봉 (9:00~15:20 KST)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def fetch_intraday_kospi() -> dict:
+    """당일 KOSPI 5분봉 데이터를 반환한다.
+
+    Returns:
+        {
+          "prices":    [float, ...],   # 9:00~15:20 종가 리스트
+          "high":      float,
+          "high_idx":  int,
+          "low":       float,
+          "low_idx":   int,
+        }
+    """
+    hist = _yf_history("^KS11", period="1d", interval="5m")
+    if hist is None or hist.empty:
+        print("[fetch_closing] intraday: no data", file=sys.stderr)
+        return {}
+
+    closes = hist["Close"].dropna()
+    if len(closes) == 0:
+        return {}
+
+    # KST 기준 09:00~15:20 구간만 필터
+    try:
+        idx = closes.index.tz_convert(KST)
+        mask = (idx.hour > 9) | ((idx.hour == 9) & (idx.minute >= 0))
+        mask &= (idx.hour < 15) | ((idx.hour == 15) & (idx.minute <= 20))
+        closes = closes[mask]
+    except Exception:
+        pass  # 타임존 변환 실패 시 전체 사용
+
+    if len(closes) == 0:
+        return {}
+
+    prices = [round(float(p), 2) for p in closes.tolist()]
+    high_val = max(prices)
+    low_val  = min(prices)
+    print(f"[fetch_closing] intraday: {len(prices)}봉, 고점={high_val}, 저점={low_val}")
+    return {
+        "prices":   prices,
+        "high":     high_val,
+        "high_idx": prices.index(high_val),
+        "low":      low_val,
+        "low_idx":  prices.index(low_val),
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 전체 수집
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -323,6 +373,9 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → 급등주 TOP 3 (네이버)")
     top_gainers = fetch_top_gainers(limit=3)
 
+    print("[fetch_closing]   → 장중 5분봉 (스파크라인)")
+    intraday = fetch_intraday_kospi()
+
     print("[fetch_closing]   → 투자자별 순매수")
     investor = fetch_investor_trading()
 
@@ -343,6 +396,7 @@ def fetch_closing_data() -> dict:
         "sectors": sectors,
         "top_gainers": top_gainers,
         "investor_trading": investor,
+        "intraday": intraday,
     }
 
     out = DATA_DIR / "latest_kospi_close.json"

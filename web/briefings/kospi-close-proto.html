@@ -264,6 +264,19 @@
           </div>
         </div>
 
+        <!-- 코스피 장중 흐름 -->
+        <div class="open-section" id="intraday-section">
+          <div class="open-section__title">코스피 장중 흐름</div>
+          <div class="reason-block" style="padding:16px;">
+            <div style="position:relative;">
+              <canvas id="intraday-chart" style="width:100%;height:120px;display:block;"></canvas>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;">
+              <span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 섹터 성과 -->
         <div class="open-section">
           <div class="open-section__title">섹터 성과</div>
@@ -441,6 +454,179 @@
       localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     }
     if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+    // ── 코스피 장중 스파크라인 ──
+    (function drawIntradayChart() {
+      // 목업 데이터: 9:00~15:20 5분봉 (78개)
+      const prices = [
+        2598,2601,2605,2610,2608,2612,2615,2618,2614,2610,
+        2607,2604,2608,2611,2615,2619,2622,2620,2617,2613,
+        2610,2606,2604,2601,2599,2597,2594,2591,2589,2592,
+        2595,2599,2603,2607,2610,2613,2616,2619,2622,2625,
+        2623,2621,2618,2615,2618,2621,2624,2627,2630,2628,
+        2625,2622,2620,2617,2619,2622,2624,2626,2623,2620,
+        2618,2615,2617,2619,2621,2623,2625,2622,2620,2621,
+        2620,2621,2620,2619,2620,2620,2620,2620
+      ];
+
+      const highVal = Math.max(...prices);
+      const lowVal  = Math.min(...prices);
+      const highIdx = prices.indexOf(highVal);
+      const lowIdx  = prices.indexOf(lowVal);
+
+      const canvas = document.getElementById('intraday-chart');
+      if (!canvas) return;
+
+      function draw() {
+        const dpr    = window.devicePixelRatio || 1;
+        const rect   = canvas.getBoundingClientRect();
+        const W      = rect.width;
+        const H      = rect.height;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const isDark    = document.documentElement.classList.contains('dark');
+        const isUp      = prices[prices.length - 1] >= prices[0];
+        const lineColor = isUp ? '#E03131' : '#2775ED';
+        const fillRgb   = isUp ? '224,49,49' : '39,117,237';
+        const gridColor    = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+        const highColor    = '#E03131';
+        const lowColor     = '#2775ED';
+        const font         = "600 11px 'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+
+        const PAD  = { top: 28, right: 8, bottom: 26, left: 8 };
+        const cW   = W - PAD.left - PAD.right;
+        const cH   = H - PAD.top  - PAD.bottom;
+
+        const minP = lowVal  - 6;
+        const maxP = highVal + 6;
+        const range = maxP - minP;
+
+        function xOf(i) { return PAD.left + (i / (prices.length - 1)) * cW; }
+        function yOf(v) { return PAD.top  + (1 - (v - minP) / range) * cH; }
+
+        // 수평 그리드
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth   = 1;
+        [0.25, 0.5, 0.75].forEach(t => {
+          const y = PAD.top + t * cH;
+          ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+        });
+
+        // 면 채우기 (그라데이션)
+        const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+        grad.addColorStop(0, isDark ? `rgba(${fillRgb},.22)` : `rgba(${fillRgb},.13)`);
+        grad.addColorStop(1, `rgba(${fillRgb},0)`);
+        ctx.beginPath();
+        ctx.moveTo(xOf(0), yOf(prices[0]));
+        prices.forEach((p, i) => i > 0 && ctx.lineTo(xOf(i), yOf(p)));
+        ctx.lineTo(xOf(prices.length - 1), PAD.top + cH);
+        ctx.lineTo(xOf(0), PAD.top + cH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // 라인 — catmull-rom 스플라인으로 부드러운 곡선
+        function drawSmooth(pts, stroke, fill) {
+          const n = pts.length;
+          ctx.beginPath();
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const p0 = pts[Math.max(i - 1, 0)];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = pts[Math.min(i + 2, n - 1)];
+            const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+            const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+            const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+            const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2[0], p2[1]);
+          }
+          if (fill) {
+            ctx.lineTo(pts[n-1][0], PAD.top + cH);
+            ctx.lineTo(pts[0][0],   PAD.top + cH);
+            ctx.closePath();
+            ctx.fillStyle = fill;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], pts[0][1]);
+            for (let i = 0; i < n - 1; i++) {
+              const p0 = pts[Math.max(i - 1, 0)];
+              const p1 = pts[i];
+              const p2 = pts[i + 1];
+              const p3 = pts[Math.min(i + 2, n - 1)];
+              ctx.bezierCurveTo(
+                p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6,
+                p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6,
+                p2[0], p2[1]
+              );
+            }
+          }
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth   = 1.8;
+          ctx.lineJoin    = 'round';
+          ctx.stroke();
+        }
+
+        const pts = prices.map((p, i) => [xOf(i), yOf(p)]);
+        drawSmooth(pts, lineColor, grad);
+
+        // 고점·저점 마커 — 레이블이 원과 겹치지 않도록 보장
+        function drawMarker(idx, val, color, arrow, above) {
+          const x  = xOf(idx);
+          const y  = yOf(val);
+          const r  = 4.5;   // 원 반지름
+          const gap = 8;    // 원과 레이블 배경 사이 최소 간격
+
+          // 레이블 텍스트
+          const labelText = `${arrow} ${val.toLocaleString()}`;
+          ctx.font = font;
+          const tw = ctx.measureText(labelText).width;
+          const LH = 14;  // 레이블 배경 높이
+
+          // X 위치: 원 중심에 가운데 정렬, 차트 경계 벗어나지 않게 클램프
+          let lx = x - tw / 2;
+          lx = Math.max(PAD.left, Math.min(lx, PAD.left + cW - tw));
+
+          // Y 위치: 원 경계(r) + gap 만큼 이격, 캔버스 안에 클램프
+          let ly;
+          if (above) {
+            ly = y - r - gap - LH / 2;
+            ly = Math.max(LH / 2 + 2, ly);           // 캔버스 상단 기준
+          } else {
+            ly = y + r + gap + LH / 2;
+            ly = Math.min(H - LH / 2 - 2, ly);       // 캔버스 하단 기준
+          }
+
+          // 원 먼저
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle   = color;
+          ctx.fill();
+          ctx.strokeStyle = isDark ? '#1C1D1F' : '#fff';
+          ctx.lineWidth   = 1.5;
+          ctx.stroke();
+
+          // 레이블 배경 + 텍스트 (원 위에)
+          const bg = isDark ? 'rgba(28,29,31,.92)' : 'rgba(255,255,255,.92)';
+          ctx.fillStyle = bg;
+          ctx.fillRect(lx - 3, ly - LH / 2, tw + 6, LH);
+          ctx.fillStyle = color;
+          ctx.fillText(labelText, lx, ly + 4);
+        }
+
+        drawMarker(highIdx, highVal, highColor, '▲ 고점', true);
+        drawMarker(lowIdx,  lowVal,  lowColor,  '▼ 저점', false);
+      }
+
+      draw();
+      window.addEventListener('resize', draw);
+      // 다크모드 토글 시 재렌더
+      const orig = window.toggleTheme;
+      window.toggleTheme = function() { orig(); draw(); };
+    })();
   </script>
 </body>
 </html>

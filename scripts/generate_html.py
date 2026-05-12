@@ -769,6 +769,14 @@ def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
 
     reasons = [r for r in analysis.get("reasons", []) if r]
 
+    # 장중 스파크라인 데이터
+    intraday = data.get("intraday", {})
+    intraday_prices_json = json.dumps(intraday.get("prices", []))
+    intraday_high     = intraday.get("high", 0)
+    intraday_high_idx = intraday.get("high_idx", 0)
+    intraday_low      = intraday.get("low", 0)
+    intraday_low_idx  = intraday.get("low_idx", 0)
+
     ctx = {
         "page_title":    page_title,
         "asset_prefix":  "/",
@@ -782,6 +790,12 @@ def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
         "reasons":       reasons,
         "sectors":       sectors,
         "top_gainers":   top_gainers,
+        # 장중 스파크라인
+        "intraday_prices_json": intraday_prices_json,
+        "intraday_high":        intraday_high,
+        "intraday_high_idx":    intraday_high_idx,
+        "intraday_low":         intraday_low,
+        "intraday_low_idx":     intraday_low_idx,
         # 지수
         "kospi_price":   kospi["price"],   "kospi_chg_pct":  kospi["chg_pct"],
         "kospi_chg_abs": kospi["chg_abs"], "kospi_arrow":    kospi["arrow"],
