@@ -125,8 +125,8 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi") -> None:
     elif "하락" in predicted:
         is_correct = actual_direction == "하락"
     else:
-        # 중립 예측은 정오답 판단 보류 (None)
-        is_correct = None
+        # 중립 예측: 실제 변동폭 ±0.5% 이내면 정확으로 채점
+        is_correct = abs(change_pct) <= 0.5
 
     entry["actual_direction"] = actual_direction
     entry["actual_change_pct"] = round(change_pct, 2)

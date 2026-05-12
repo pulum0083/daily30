@@ -60,9 +60,9 @@ def fmt_generated_time(generated_at: str) -> str:
             dt = KST.localize(dt)
         else:
             dt = dt.astimezone(KST)
-        return dt.strftime("%H:%M")
+        return dt.strftime("%H:%M KST")
     except Exception:
-        return "08:30"
+        return "08:30 KST"
 
 
 def load_data(data_file: str) -> dict:
@@ -102,6 +102,111 @@ def get_web_base_url() -> str:
             cfg = json.load(f)
         return cfg.get("web", {}).get("base_url", "").rstrip("/")
     return "https://pulum0083.github.io/daily30"
+
+
+def generate_og_image(
+    date_str: str,
+    briefing_type: str,
+    direction: str,
+    up_pct,
+    down_pct,
+    confidence,
+    reason_title: str,
+    reasons: list,
+) -> str:
+    """날짜·예측 방향이 반영된 OG 이미지 SVG를 동적으로 생성한다."""
+    import html as _html
+    def esc(s): return _html.escape(str(s))
+
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        date_display = dt.strftime("%Y.%m.%d")
+        day_ko = ["월", "화", "수", "목", "금", "토", "일"][dt.weekday()]
+    except Exception:
+        date_display = date_str
+        day_ko = ""
+
+    if "상승" in direction:
+        badge_fill, badge_stroke, badge_color = "rgba(224,49,49,.18)", "rgba(224,49,49,.4)", "#FF6A6A"
+        dir_emoji = "📈"
+    elif "하락" in direction:
+        badge_fill, badge_stroke, badge_color = "rgba(39,117,237,.18)", "rgba(39,117,237,.4)", "#60A3FF"
+        dir_emoji = "📉"
+    else:
+        badge_fill, badge_stroke, badge_color = "rgba(100,100,100,.18)", "rgba(100,100,100,.4)", "#AAAAAA"
+        dir_emoji = "📊"
+
+    bar_total = 368
+    down_w = round(bar_total * int(down_pct) / 100)
+    up_w   = round(bar_total * int(up_pct) / 100)
+    up_x   = 56 + (bar_total - up_w)
+
+    type_label = "코스피 시초가 방향 예측" if briefing_type == "kospi" else "S&P500 방향 예측"
+    rt = re.sub(r"<[^>]+>", "", str(reason_title))[:52]
+    r_lines = [re.sub(r"<[^>]+>", "", str(r))[:76] for r in reasons[:3]]
+    while len(r_lines) < 3:
+        r_lines.append("")
+
+    font = "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E03131"/><stop offset="100%" stop-color="#FF6A6A"/></linearGradient>
+    <linearGradient id="bu" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E03131"/><stop offset="100%" stop-color="#FF6A6A"/></linearGradient>
+    <linearGradient id="bd" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2775ED"/><stop offset="100%" stop-color="#60A3FF"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#111213"/>
+  <rect width="1200" height="52" fill="#16181A"/>
+  <rect x="0" y="51" width="1200" height="1" fill="rgba(255,255,255,.06)"/>
+  <rect x="32" y="12" width="28" height="28" rx="7" fill="url(#lg)"/>
+  <g transform="translate(32,12) scale(1.167)">
+    <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+    <line x1="7" y1="4" x2="7" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+    <line x1="17" y1="3" x2="17" y2="5" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <text x="70" y="33" font-family="{font}" font-size="16" font-weight="700" fill="white">Double</text>
+  <text x="126" y="33" font-family="{font}" font-size="16" font-weight="700" fill="rgba(255,255,255,.5)">-Shot</text>
+  <text x="176" y="33" font-family="{font}" font-size="12" fill="rgba(255,255,255,.35)">  AI 투자 브리핑</text>
+  <text x="1050" y="33" font-family="{font}" font-size="12" fill="rgba(255,255,255,.4)">{esc(date_display)} ({esc(day_ko)})</text>
+  <text x="40" y="90" font-family="{font}" font-size="18" font-weight="700" fill="rgba(255,255,255,.9)">{esc(date_str)}</text>
+  <rect x="310" y="72" width="88" height="26" rx="13" fill="{badge_fill}" stroke="{badge_stroke}" stroke-width="1"/>
+  <text x="354" y="89" text-anchor="middle" font-family="{font}" font-size="12" font-weight="700" fill="{badge_color}">{esc(direction)}</text>
+  <rect x="40" y="106" width="400" height="152" rx="12" fill="#1C1D1F"/>
+  <text x="56" y="130" font-family="{font}" font-size="11" font-weight="600" fill="rgba(255,255,255,.4)" letter-spacing="0.05em">{esc(type_label)}</text>
+  <text x="56" y="160" font-family="{font}" font-size="18" font-weight="800" fill="white">{dir_emoji} {esc(direction)} 예측</text>
+  <text x="56" y="180" font-family="{font}" font-size="14" font-weight="500" fill="rgba(255,255,255,.5)">(신뢰도 {confidence}%)</text>
+  <text x="56" y="208" font-family="{font}" font-size="12" fill="#60A3FF">하락 {down_pct}%</text>
+  <text x="424" y="208" text-anchor="end" font-family="{font}" font-size="12" fill="#FF6A6A">상승 {up_pct}%</text>
+  <rect x="56" y="214" width="368" height="22" rx="11" fill="#242628"/>
+  <rect x="56" y="214" width="{down_w}" height="22" rx="11" fill="url(#bd)"/>
+  <rect x="{up_x}" y="214" width="{up_w}" height="22" rx="11" fill="url(#bu)"/>
+  <rect x="239" y="208" width="1" height="34" fill="rgba(255,255,255,.2)"/>
+  <text x="40" y="292" font-family="{font}" font-size="14" font-weight="700" fill="rgba(255,255,255,.85)">💬 {esc(rt)}</text>
+  <circle cx="50" cy="320" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="324" font-family="{font}" font-size="12" fill="rgba(255,255,255,.6)">{esc(r_lines[0])}</text>
+  <circle cx="50" cy="348" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="352" font-family="{font}" font-size="12" fill="rgba(255,255,255,.6)">{esc(r_lines[1])}</text>
+  <circle cx="50" cy="376" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="380" font-family="{font}" font-size="12" fill="rgba(255,255,255,.6)">{esc(r_lines[2])}</text>
+  <text x="40" y="598" font-family="{font}" font-size="12" fill="rgba(255,255,255,.2)">doubleshot.space</text>
+  <rect x="476" y="68" width="1" height="530" fill="rgba(255,255,255,.07)"/>
+  <text x="500" y="90" font-family="{font}" font-size="11" font-weight="700" fill="rgba(255,255,255,.35)" letter-spacing="0.1em">시장 지표</text>
+  <rect x="0" y="508" width="1200" height="122" fill="#0D0D0F"/>
+  <rect x="0" y="508" width="1200" height="1" fill="rgba(255,255,255,.06)"/>
+  <text x="40" y="542" font-family="{font}" font-size="11" font-weight="700" fill="rgba(255,255,255,.3)" letter-spacing="0.1em">수신 채널</text>
+  <rect x="40" y="554" width="140" height="36" rx="18" fill="rgba(0,136,204,.12)" stroke="rgba(0,136,204,.3)" stroke-width="1"/>
+  <text x="110" y="576" text-anchor="middle" font-family="{font}" font-size="14" font-weight="600" fill="#5BAEFF">📱 텔레그램</text>
+  <rect x="194" y="554" width="120" height="36" rx="18" fill="rgba(230,119,0,.12)" stroke="rgba(230,119,0,.3)" stroke-width="1"/>
+  <text x="254" y="576" text-anchor="middle" font-family="{font}" font-size="14" font-weight="600" fill="#FFB246">📧 이메일</text>
+  <text x="40" y="616" font-family="{font}" font-size="12" fill="rgba(255,255,255,.2)">무료 · 언제든 해지 가능 · doubleshot.space</text>
+  <text x="900" y="556" font-family="{font}" font-size="11" font-weight="700" fill="rgba(255,255,255,.3)" letter-spacing="0.1em">브리핑 스케줄</text>
+  <text x="900" y="582" font-family="{font}" font-size="15" font-weight="700" fill="rgba(255,255,255,.7)">08:30</text>
+  <text x="950" y="582" font-family="{font}" font-size="12" fill="rgba(255,255,255,.35)">코스피 · 평일</text>
+  <text x="900" y="604" font-family="{font}" font-size="15" font-weight="700" fill="rgba(255,255,255,.7)">21:30</text>
+  <text x="950" y="604" font-family="{font}" font-size="12" fill="rgba(255,255,255,.35)">미국 · 평일</text>
+</svg>"""
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -289,6 +394,11 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
     # Accuracy stats (None if unavailable)
     accuracy_stats = compute_accuracy_stats(briefing_type) or None
 
+    # OG image URL + description
+    web_base = get_web_base_url()
+    og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
+    og_description = f"{date_str} {section_title}: {direction} {up_pct if '상승' in direction else down_pct}% · 신뢰도 {confidence}%"
+
     ctx = {
         "page_title": page_title,
         "asset_prefix": asset_prefix,
@@ -323,6 +433,9 @@ def build_full_html(data: dict, analysis: dict, date_str: str,
         "sidebar_items": build_sidebar_data(briefing_type),
         # MARKET_DATA JSON (raw, no escaping)
         "market_data_json": market_data_json,
+        # OG
+        "og_image_url": og_image_url,
+        "og_description": og_description,
     }
 
     env = _make_env()
@@ -510,6 +623,10 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
     accuracy_stats = compute_accuracy_stats(briefing_type) or None
     archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
 
+    web_base = get_web_base_url()
+    og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
+    og_description = f"{date_str} {section_title}: {direction} {up_pct if '상승' in direction else down_pct}% · 신뢰도 {confidence}%"
+
     ctx = {
         "page_title": page_title,
         "asset_prefix": "/",
@@ -538,6 +655,8 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
         "sidebar_items": build_sidebar_data(briefing_type),
         "market_data_json": market_data_json,
         "archive_items": archive_items,
+        "og_image_url": og_image_url,
+        "og_description": og_description,
     }
 
     env = _make_env()
@@ -638,6 +757,23 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html_briefing)
     print(f"[generate_html] Saved → {out_path}")
+
+    # Save OG image SVG
+    if args.type != "weekly":
+        pred = analysis.get("prediction", {})
+        og_svg = generate_og_image(
+            date_str=date_str,
+            briefing_type=args.type,
+            direction=pred.get("direction", "중립"),
+            up_pct=pred.get("up_pct", 50),
+            down_pct=pred.get("down_pct", 50),
+            confidence=pred.get("confidence", 70),
+            reason_title=analysis.get("reason_title", ""),
+            reasons=analysis.get("reasons", []),
+        )
+        og_path = BRIEFINGS_DIR / f"{date_str}-{args.type}-og.svg"
+        og_path.write_text(og_svg, encoding="utf-8")
+        print(f"[generate_html] OG image saved → {og_path}")
 
     # Save date page (clean URL: /briefings/YYYY-MM-DD/)
     if args.type != "weekly":

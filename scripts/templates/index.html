@@ -12,6 +12,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ page_title }}</title>
+  <meta property="og:title" content="{{ page_title }}" />
+  <meta property="og:description" content="{{ og_description }}" />
+  <meta property="og:image" content="{{ og_image_url }}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="{{ og_image_url }}" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
   <link rel="apple-touch-icon" href="/favicon.svg"/>
   <link rel="stylesheet" href="{{ asset_prefix }}assets/style.css" />
@@ -230,7 +236,7 @@
         <div class="right-panel">
           <div class="panel-header">
             <span class="section-title">시장 지표</span>
-            <span class="pub-time">{{ date_str }} {{ gen_time }} 업데이트</span>
+            <span class="pub-time">데이터 수집 {{ gen_time }}</span>
           </div>
           <div class="mkt-list">
             {% for item in sidebar_items %}
