@@ -134,6 +134,7 @@ def build_fallback_message(briefing_type: str) -> str:
     pred = data.get("prediction", {})
     direction = pred.get("direction", "알 수 없음")
     up_pct = pred.get("up_pct", "?")
+    down_pct = pred.get("down_pct", "?")
     confidence = pred.get("confidence", "?")
     reason_title = data.get("reason_title", "")
     reasons = data.get("reasons", [])
@@ -142,16 +143,18 @@ def build_fallback_message(briefing_type: str) -> str:
     def strip_html(text):
         return re.sub(r"<[^>]+>", "", str(text))
 
+    # 방향에 맞는 확률 표기: 상승 우위 → up_pct, 하락 우위 → down_pct
+    dir_pct = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
     divider = "─" * 20
 
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 시초가 브리핑 | {today}"
-        pred_line = f"{dir_emoji} 예측: <b>{direction} ({up_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
+        pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
         link = f"{web_url}/briefings/ko/{date_slug}/"
     elif briefing_type == "us":
         header = f"🇺🇸 미국 시장 브리핑 | {today}"
-        pred_line = f"{dir_emoji} 예측: <b>{direction} ({up_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
+        pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
         link = f"{web_url}/briefings/us/{date_slug}/"
     else:
         header = f"📋 주간 리포트 | {today}"

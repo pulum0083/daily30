@@ -489,10 +489,13 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     pred = analysis.get("prediction", {})
     direction = pred.get("direction", "알 수 없음")
     up_pct = pred.get("up_pct", "?")
+    down_pct = pred.get("down_pct", "?")
     confidence = pred.get("confidence", "?")
     reason_title = strip_html(analysis.get("reason_title", ""))
     reasons = analysis.get("reasons", [])
 
+    # 방향에 맞는 확률 표기: 상승 우위 → up_pct, 하락 우위 → down_pct
+    dir_pct = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
     if briefing_type == "kospi":
@@ -507,7 +510,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     lines = [
         header,
         divider,
-        f"{dir_emoji} 예측: <b>{direction} ({up_pct}%)</b>",
+        f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
         f"신뢰도: <b>{confidence}%</b>",
     ]
 
