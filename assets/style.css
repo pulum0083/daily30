@@ -2062,3 +2062,24 @@ html.dark .acc-type-badge.us {
     padding: 0 16px;
   }
 }
+
+/* ============================================================
+   모바일 사이드바 차트 오버플로우 방지
+   ============================================================ */
+@media (max-width: 768px) {
+  .right-panel,
+  .layout-grid__right {
+    overflow-x: hidden;
+  }
+  .mkt-list {
+    overflow-x: hidden;
+  }
+  .mkt-spark {
+    flex-shrink: 0;
+    min-width: 0;
+    width: 64px;
+  }
+  .mkt-spark canvas {
+    width: 100% !important;
+  }
+}
