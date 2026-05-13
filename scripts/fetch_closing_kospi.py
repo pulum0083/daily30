@@ -152,26 +152,13 @@ def fetch_top_gainers(limit: int = 3) -> list[dict]:
         print(f"[fetch_closing] top gainers fetch failed: {e}", file=sys.stderr)
         return []
 
-    # 간단한 정규식 파싱 — 테이블 구조가 복잡해 태그 파서 대신 정규식 사용
     import re
     result = []
-    # 패턴: 종목 링크 → 이름, 바로 뒤에 등락률 셀
-    pattern = re.compile(
-        r'<a[^>]+href="/item/main[^"]+"\s*>([^<]+)</a>'   # 종목명
-        r'.*?'
-        r'<td[^>]*class="[^"]*rate[^"]*"[^>]*>\s*'        # 등락률 셀
-        r'<span[^>]*>\+?([\d.]+)%</span>',                 # 등락률 값
-        re.DOTALL,
-    )
-    price_pattern = re.compile(
-        r'<td[^>]*class="[^"]*number[^"]*"[^>]*>\s*([\d,]+)\s*</td>'
-    )
 
-    # 종목별 블록 분리 (tr 단위)
     tr_pattern = re.compile(r'<tr[^>]*>(.*?)</tr>', re.DOTALL)
-    name_pat   = re.compile(r'<a[^>]+href="/item/main[^"]+"\s*title="([^"]+)"')
-    rate_pat   = re.compile(r'class="[^"]*rate[^"]*"[^>]*>\s*<span[^>]*>\+?([\d.]+)%')
-    price_pat  = re.compile(r'class="[^"]*number[^"]*"[^>]*>\s*([\d,]+)\s*</td>')
+    name_pat   = re.compile(r'<a[^>]+href="/item/main[^"]+"\s*class="tltle">([^<]+)</a>')
+    rate_pat   = re.compile(r'\+(\d+\.\d+)%')
+    price_pat  = re.compile(r'<td\s+class="number">\s*([\d,]+)\s*</td>')
 
     for m in tr_pattern.finditer(html):
         row = m.group(1)
@@ -222,19 +209,20 @@ def fetch_sector_performance() -> list[dict]:
 
     import re
     result = []
-    # 각 그룹 행: 그룹명 + 등락률
-    row_pat = re.compile(
-        r'<a[^>]+href="/sise/sise_group_detail\.naver\?[^"]*"[^>]*>([^<]+)</a>'
-        r'.*?'
-        r'<td[^>]*>\s*<span[^>]*class="([^"]*)"[^>]*>([\d.]+)</span>',
-        re.DOTALL,
-    )
-    for m in row_pat.finditer(html):
-        name = m.group(1).strip()
-        cls  = m.group(2)
-        val  = float(m.group(3))
-        chg  = val if "up" in cls or "red" in cls else -val
-        result.append({"name": name, "change_pct": round(chg, 2)})
+    tr_pat = re.compile(r'<tr[^>]*>(.*?)</tr>', re.DOTALL)
+    link_pat = re.compile(r'<a[^>]+href="/sise/sise_group_detail\.naver\?[^"]*">([^<]+)</a>')
+    rate_pat = re.compile(r'<span[^>]*class="[^"]*\b(red|blu)\d*[^"]*"[^>]*>\s*\+?([\d.]+)%\s*</span>')
+
+    for m in tr_pat.finditer(html):
+        row = m.group(1)
+        link_m = link_pat.search(row)
+        rate_m = rate_pat.search(row)
+        if link_m and rate_m:
+            name = link_m.group(1).strip()
+            color = rate_m.group(1)
+            val = float(rate_m.group(2))
+            chg = val if color == "red" else -val
+            result.append({"name": name, "change_pct": round(chg, 2)})
 
     # SECTOR_IDS에 없는 섹터는 제외하고, 있는 섹터만 순서대로 반환
     sector_names = list(SECTOR_IDS.keys())
