@@ -888,12 +888,28 @@ def main():
         if index_path.exists():
             import re as _re
             idx_html = index_path.read_text(encoding="utf-8")
+
+            # 기존 마감 시황 항목 모두 제거 (중복 방지)
+            idx_html = _re.sub(
+                r'\s*<div class="briefing-archive" style="margin-bottom:0;">.*?</div>\s*</div>\s*</div>',
+                '',
+                idx_html,
+                flags=_re.DOTALL,
+            )
+            # briefing-archive 안에 이전 방식으로 삽입된 항목도 제거
+            idx_html = _re.sub(
+                r'<div class="accordion-item" data-index="closing-[^"]*">.*?</div>\s*</div>\s*</div>\s*</div>',
+                '',
+                idx_html,
+                flags=_re.DOTALL,
+            )
+
             market_title = analysis.get("market_title", "코스피 마감 시황")
             reasons_html = ""
             for r in analysis.get("reasons", [])[:4]:
                 reasons_html += f"<li>{r}</li>\n"
             closing_item = f'''
-      <div class="briefing-archive" style="margin-bottom:0;">
+      <div class="closing-archive-block">
         <div class="accordion-item" data-index="closing-{date_str}">
           <div class="accordion-header" onclick="toggleAccordion('closing-{date_str}')">
             <div class="accordion-header__left">
@@ -920,14 +936,14 @@ def main():
           </div>
         </div>
       </div>'''
-            # briefing-latest 블록 바로 뒤에 삽입 (아카이브 위)
+            # briefing-latest 블록 바로 뒤, 아카이브 위에 삽입
             marker = '<!-- ③ 이전 브리핑 아카이브'
             if marker in idx_html:
                 idx_html = idx_html.replace(marker, closing_item + "\n\n      " + marker, 1)
                 index_path.write_text(idx_html, encoding="utf-8")
                 print(f"[generate_html] briefings/index.html updated (closing archive inserted)")
             else:
-                print("[generate_html] WARNING: briefing-archive marker not found in index.html")
+                print("[generate_html] WARNING: archive marker not found in index.html")
         return
 
     if args.type == "weekly":
