@@ -456,10 +456,10 @@ def extract_briefing_summary(html_path: Path) -> Optional[dict]:
            reasons, gen_time, url}
     """
     try:
-        name = html_path.name  # "2026-04-17-kospi.html"
+        name = html_path.name  # "2026-04-17-kospi.html" or "2026-05-13-kospi-close.html"
         parts = name.replace(".html", "").split("-")
         date_str = "-".join(parts[:3])
-        btype = parts[3] if len(parts) > 3 else "kospi"
+        btype = "-".join(parts[3:]) if len(parts) > 3 else "kospi"
 
         content = html_path.read_text(encoding="utf-8")
 
@@ -502,7 +502,24 @@ def extract_briefing_summary(html_path: Path) -> Optional[dict]:
         reason_title = rt_match.group(1).strip() if rt_match else ""
 
         # type-specific labels
-        if btype == "kospi":
+        if btype == "kospi-close":
+            badge_text = "마감 시황"
+            section_title = "코스피 마감 시황"
+            # 마감 시황은 market_title을 direction 대신 사용
+            mt_match = re.search(r'<div class="open-section__title reason-section-title">(.*?)</div>', content)
+            market_title = mt_match.group(1).strip() if mt_match else reason_title
+            return {
+                "date": date_str,
+                "type": btype,
+                "badge_text": badge_text,
+                "section_title": section_title,
+                "is_closing": True,
+                "market_title": market_title,
+                "reasons": reasons,
+                "gen_time": gen_time,
+                "url": f"/briefings/ko-close/{date_str}/",
+            }
+        elif btype == "kospi":
             badge_text = "코스피"
             section_title = "코스피 시초가 방향 예측"
         else:
@@ -545,12 +562,12 @@ def load_briefing_summaries(current_date: str, current_type: str, n: int = 10) -
 
     summaries = []
     for path in html_files:
-        name = path.stem  # "2026-04-17-kospi"
+        name = path.stem  # "2026-04-17-kospi" or "2026-05-13-kospi-close"
         parts = name.split("-")
         if len(parts) < 4:
             continue
         date_str = "-".join(parts[:3])
-        btype = parts[3]
+        btype = "-".join(parts[3:])
 
         # 현재 브리핑은 건너뜀 (latest로 별도 처리)
         if date_str == current_date and btype == current_type:
@@ -865,6 +882,21 @@ def main():
     # ── KOSPI 마감 시황 ──
     if args.type == "kospi-close":
         save_closing_pages(data, analysis, date_str)
+
+        # briefings/index.html 재생성 (마감 시황이 아카이브 목록에 반영되도록)
+        latest_kospi = DATA_DIR / "latest_kospi.json"
+        analysis_kospi = DATA_DIR / "analysis_kospi.json"
+        if latest_kospi.exists() and analysis_kospi.exists():
+            with open(latest_kospi, encoding="utf-8") as f:
+                idx_data = json.load(f)
+            with open(analysis_kospi, encoding="utf-8") as f:
+                idx_analysis = json.load(f)
+            idx_date = idx_data.get("generated_at", "")[:10] or date_str
+            html_index = build_index_html_multi(idx_data, idx_analysis, idx_date, "kospi")
+            index_path = BRIEFINGS_DIR / "index.html"
+            with open(index_path, "w", encoding="utf-8") as f:
+                f.write(html_index)
+            print(f"[generate_html] briefings/index.html updated (with closing archive)")
         return
 
     if args.type == "weekly":
