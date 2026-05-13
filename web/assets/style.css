@@ -1524,12 +1524,18 @@
 .layout-grid__main  { grid-area: latest; }
 .layout-grid__right { grid-area: right; }
 /* index.html 멀티 아코디언용 */
-.briefing-latest  { grid-area: latest; }
+.briefing-latest {
+  grid-area: latest;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 .briefing-archive {
   grid-area: archive;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 12px;
 }
 
 /* ============================================================
@@ -1936,6 +1942,14 @@
   background: rgba(37,99,235,.15);
   color: #2563EB;
 }
+.acc-type-badge.kospi-close {
+  background: rgba(220,38,38,.12);
+  color: #DC2626;
+}
+html.dark .acc-type-badge.kospi-close {
+  background: rgba(220,38,38,.28);
+  color: #FCA5A5;
+}
 html.dark .acc-type-badge.kospi {
   background: rgba(124,58,237,.30);
   color: #C4B5FD;
@@ -2082,4 +2096,90 @@ html.dark .acc-type-badge.us {
   .mkt-spark canvas {
     width: 100% !important;
   }
+}
+
+/* ============================================================
+   마감 시황 전용 컴포넌트
+   ============================================================ */
+.close-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.close-idx {
+  background: var(--surface-secondary);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-8);
+  padding: 14px 16px;
+}
+.close-idx__name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.close-idx__val {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.close-idx__chg { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.close-idx__chg.up   { color: var(--status-up); }
+.close-idx__chg.down { color: var(--status-down); }
+.close-idx__vol { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+.sector-grid { display: flex; flex-direction: column; gap: 14px; }
+.sector-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line-secondary);
+}
+.sector-row:last-child { padding-bottom: 0; border-bottom: none; }
+.sector-row__name { font-size: 13px; font-weight: 600; color: var(--text-primary); min-width: 140px; flex-shrink: 0; }
+.sector-row__bar-track { flex: 1; height: 8px; background: var(--grey-50); border-radius: 100px; overflow: hidden; }
+.sector-row__bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+.sector-row__bar-fill.up   { background: var(--status-up); }
+.sector-row__bar-fill.down { background: var(--status-down); }
+.sector-row__pct { font-size: 14px; font-weight: 700; min-width: 60px; text-align: right; font-variant-numeric: tabular-nums; }
+.sector-row__pct.up   { color: var(--status-up); }
+.sector-row__pct.down { color: var(--status-down); }
+
+.top-stock-list { display: flex; flex-direction: column; gap: 10px; }
+.top-stock-card {
+  background: var(--surface-secondary);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-8);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.top-stock-card__rank {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--status-up-bg); color: var(--status-up);
+  font-size: 13px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.top-stock-card__body { flex: 1; min-width: 0; }
+.top-stock-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.top-stock-card__name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.top-stock-card__change {
+  font-size: 13px; font-weight: 700;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--status-up-bg); color: var(--status-up);
+}
+.top-stock-card__price { font-size: 13px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+.top-stock-card__reason { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 5px; }
+
+@media (max-width: 600px) {
+  .close-summary { grid-template-columns: repeat(2, 1fr); }
+  .close-summary .close-idx:last-child { grid-column: span 2; }
 }

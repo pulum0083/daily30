@@ -60,12 +60,119 @@
               <span class="acc-type-badge {{ briefing_type }}">{{ badge_text }}</span>
             </div>
             <div class="accordion-header__badges">
+              {% if is_closing_latest %}
+              <span class="pred-badge">마감 시황</span>
+              {% else %}
               <span class="pred-badge {{ dir_cls }}">{{ direction }}</span>
+              {% endif %}
             </div>
           </div>
 
           <div class="accordion-body">
             <div class="accordion-body__inner">
+
+              {% if is_closing_latest %}
+              <!-- 마감 지수 -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  마감 지수
+                  <span class="section-time">{{ gen_time }} 생성</span>
+                </div>
+                <div class="close-summary">
+                  <div class="close-idx">
+                    <div class="close-idx__name">KOSPI</div>
+                    <div class="close-idx__val">{{ kospi_price }}</div>
+                    <div class="close-idx__chg {{ kospi_cls }}">{{ kospi_arrow }} {{ kospi_chg_abs }} ({{ kospi_chg_pct }}%)</div>
+                    {% if kospi_volume %}<div class="close-idx__vol">거래대금 {{ kospi_volume }}</div>{% endif %}
+                  </div>
+                  <div class="close-idx">
+                    <div class="close-idx__name">KOSDAQ</div>
+                    <div class="close-idx__val">{{ kosdaq_price }}</div>
+                    <div class="close-idx__chg {{ kosdaq_cls }}">{{ kosdaq_arrow }} {{ kosdaq_chg_abs }} ({{ kosdaq_chg_pct }}%)</div>
+                  </div>
+                  <div class="close-idx">
+                    <div class="close-idx__name">원/달러</div>
+                    <div class="close-idx__val">{{ usdkrw_price }}</div>
+                    <div class="close-idx__chg {{ usdkrw_cls }}">{{ usdkrw_arrow }} {{ usdkrw_chg_pct }}%</div>
+                    <div class="close-idx__vol">{{ usdkrw_note }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 시황 분석 -->
+              <div class="open-section">
+                <div class="open-section__title">
+                  <span class="reason-section-title">{{ market_title }}</span>
+                </div>
+                <div class="reason-block">
+                  {% if market_summary %}<p>{{ market_summary }}</p>{% endif %}
+                  {% if reasons %}
+                  <ul>
+                    {% for r in reasons %}
+                    <li>{{ r }}</li>
+                    {% endfor %}
+                  </ul>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if intraday_prices_json and intraday_prices_json != '[]' %}
+              <div class="open-section" id="intraday-section">
+                <div class="open-section__title">코스피 장중 흐름</div>
+                <div class="reason-block" style="padding:16px;">
+                  <canvas id="intraday-chart" style="width:100%;height:120px;display:block;"></canvas>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;">
+                    <span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if sectors %}
+              <div class="open-section">
+                <div class="open-section__title">섹터 성과</div>
+                <div class="reason-block">
+                  <div class="sector-grid">
+                    {% for s in sectors %}
+                    {% set abs_pct = s.change_pct | abs %}
+                    {% set bar_width = [abs_pct * 40, 100] | min %}
+                    {% set cls = 'up' if s.change_pct >= 0 else 'down' %}
+                    <div class="sector-row">
+                      <span class="sector-row__name">{{ s.name }}</span>
+                      <div class="sector-row__bar-track">
+                        <div class="sector-row__bar-fill {{ cls }}" style="width:{{ bar_width }}%"></div>
+                      </div>
+                      <span class="sector-row__pct {{ cls }}">{{ '%+.2f' % s.change_pct }}%</span>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if top_gainers %}
+              <div class="open-section">
+                <div class="open-section__title">오늘의 급등주 TOP 3</div>
+                <div class="top-stock-list">
+                  {% for stock in top_gainers %}
+                  <div class="top-stock-card">
+                    <div class="top-stock-card__rank">{{ loop.index }}</div>
+                    <div class="top-stock-card__body">
+                      <div class="top-stock-card__header">
+                        <span class="top-stock-card__name">{{ stock.name }}</span>
+                        <span class="top-stock-card__change">{{ stock.change_pct }}</span>
+                        <span class="top-stock-card__price">{{ stock.price }}</span>
+                      </div>
+                      {% if stock.reason %}
+                      <div class="top-stock-card__reason">{{ stock.reason }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              {% else %}
 
               <!-- 1. 예측 카드 -->
               <div class="open-section">
@@ -194,6 +301,7 @@
                   {% endfor %}
                 </div>
               </div>
+              {% endif %}
 
             </div><!-- /accordion-body__inner -->
           </div><!-- /accordion-body -->
@@ -478,5 +586,87 @@
   window.MARKET_DATA = {{ market_data_json }};
   </script>
   <script src="{{ asset_prefix }}assets/main.js"></script>
+
+  {% if is_closing_latest and intraday_prices_json and intraday_prices_json != '[]' %}
+  <script>
+    (function drawIntradayChart() {
+      const canvas = document.getElementById('intraday-chart');
+      if (!canvas) return;
+      const prices  = {{ intraday_prices_json }};
+      const highVal = {{ intraday_high }}, highIdx = {{ intraday_high_idx }};
+      const lowVal  = {{ intraday_low }},  lowIdx  = {{ intraday_low_idx }};
+      if (!prices.length) return;
+
+      function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const W = rect.width, H = rect.height;
+        canvas.width  = W * dpr; canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        const isDark    = document.documentElement.classList.contains('dark');
+        const isUp      = prices[prices.length - 1] >= prices[0];
+        const lineColor = isUp ? '#E03131' : '#2775ED';
+        const fillRgb   = isUp ? '224,49,49' : '39,117,237';
+        const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+        const font      = "600 11px 'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+        const PAD = { top: 28, right: 8, bottom: 26, left: 8 };
+        const cW  = W - PAD.left - PAD.right;
+        const cH  = H - PAD.top  - PAD.bottom;
+        const minP = lowVal - 6, maxP = highVal + 6, range = maxP - minP;
+        const xOf = i => PAD.left + (i / (prices.length - 1)) * cW;
+        const yOf = v => PAD.top  + (1 - (v - minP) / range) * cH;
+        ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75].forEach(t => {
+          const y = PAD.top + t * cH;
+          ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+        });
+        const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+        grad.addColorStop(0, isDark ? `rgba(${fillRgb},.22)` : `rgba(${fillRgb},.13)`);
+        grad.addColorStop(1, `rgba(${fillRgb},0)`);
+        const pts = prices.map((p, i) => [xOf(i), yOf(p)]);
+        const n   = pts.length;
+        function spline(fill) {
+          ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,n-1)];
+            ctx.bezierCurveTo(
+              p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6,
+              p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6,
+              p2[0], p2[1]
+            );
+          }
+          if (fill) {
+            ctx.lineTo(pts[n-1][0], PAD.top+cH); ctx.lineTo(pts[0][0], PAD.top+cH);
+            ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+          }
+        }
+        spline(true); spline(false);
+        ctx.strokeStyle = lineColor; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
+        function drawMarker(idx, val, color, arrow, above) {
+          const x=xOf(idx), y=yOf(val), r=4.5, gap=8;
+          const labelText = `${arrow} ${val.toLocaleString()}`;
+          ctx.font = font;
+          const tw = ctx.measureText(labelText).width, LH = 14;
+          let lx = x - tw/2;
+          lx = Math.max(PAD.left, Math.min(lx, PAD.left+cW-tw));
+          let ly = above ? y-r-gap-LH/2 : y+r+gap+LH/2;
+          ly = above ? Math.max(LH/2+2, ly) : Math.min(H-LH/2-2, ly);
+          ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+          ctx.fillStyle=color; ctx.fill();
+          ctx.strokeStyle=isDark?'#1C1D1F':'#fff'; ctx.lineWidth=1.5; ctx.stroke();
+          const bg = isDark?'rgba(28,29,31,.92)':'rgba(255,255,255,.92)';
+          ctx.fillStyle=bg; ctx.fillRect(lx-3, ly-LH/2, tw+6, LH);
+          ctx.fillStyle=color; ctx.fillText(labelText, lx, ly+4);
+        }
+        drawMarker(highIdx, highVal, '#E03131', '▲ 고점', true);
+        drawMarker(lowIdx,  lowVal,  '#2775ED', '▼ 저점', false);
+      }
+      window._redrawIntraday = draw;
+      draw();
+      window.addEventListener('resize', draw);
+    })();
+  </script>
+  {% endif %}
 </body>
 </html>

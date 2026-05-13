@@ -594,55 +594,96 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
     최신 브리핑: 펼쳐진 상태, 완전한 시장 데이터 포함.
     아카이브 항목: 접힌 상태, 예측 바 + 예측 근거만 표시.
     """
+    is_closing_latest = (briefing_type == "kospi-close")
+
     market_data_js = dict(data.get("market_data_js", {}))
-    candidates_key = "kospi_candidates" if briefing_type == "kospi" else "us_candidates"
-    candidates = data.get(candidates_key, [])
+    if briefing_type == "kospi":
+        candidates_key = "kospi_candidates"
+    elif briefing_type == "us":
+        candidates_key = "us_candidates"
+    else:
+        candidates_key = None
+    candidates = data.get(candidates_key, []) if candidates_key else []
 
     if "vix" not in market_data_js and data.get("vix"):
         market_data_js["vix"] = data["vix"]
     market_data_js.pop("fearGreed", None)
 
-    pred = analysis.get("prediction", {})
-    up_pct = pred.get("up_pct", 50)
-    down_pct = pred.get("down_pct", 50)
-    direction = pred.get("direction", "중립")
-    confidence = pred.get("confidence", 70)
-    reasons = normalize_ma_list(analysis.get("reasons", [])[:4])
-    stock_picks_raw = analysis.get("stock_picks", [])
-
-    _fallback_title = {
-        "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
-        "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
-    }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
-    reason_title = normalize_ma_terms(analysis.get("reason_title") or _fallback_title)
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
     gen_time = fmt_generated_time(generated_at)
+    reasons = normalize_ma_list(analysis.get("reasons", [])[:4])
 
-    stock_charts = build_stock_charts(stock_picks_raw, candidates)
-    market_data_js["stockCharts"] = stock_charts
-    market_data_json = json.dumps(market_data_js, ensure_ascii=False, indent=2)
+    if is_closing_latest:
+        pred = {}
+        up_pct = down_pct = 50
+        direction = "마감 시황"
+        confidence = 0
+        dir_cls = ""
+        up_light = down_light = 0
+        reason_title = ""
+        stock_picks_raw = []
+        stock_charts = {}
+        market_data_js["stockCharts"] = stock_charts
+        market_title = analysis.get("market_title", "코스피 마감 시황")
 
-    dir_cls = "up" if direction == "상승 우위" else ("down" if direction == "하락 우위" else "")
-    up_light = confidence
-    down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
+        page_title = f"Double-Shot — 코스피 마감 시황 {date_str}"
+        badge_text = "마감 시황"
+        gnb_time = "17:30"
+        section_title = "코스피 마감 시황"
 
-    if briefing_type == "kospi":
-        page_title = f"Double-Shot — 코스피 시초가 브리핑 {date_str}"
-        badge_text = "코스피"
-        gnb_time = "08:30"
-        section_title = "코스피 시초가 방향 예측"
+        accuracy_stats = compute_accuracy_stats("kospi") or None
+        archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+
+        web_base = get_web_base_url()
+        og_image_url = f"{web_base}/briefings/{date_str}-kospi-close-og.svg"
+        og_description = f"{date_str} 코스피 마감: {market_title}"
     else:
-        page_title = f"Double-Shot — 미국 시장 브리핑 {date_str}"
-        badge_text = "미국"
-        gnb_time = "22:30"
-        section_title = "S&P500 방향 예측"
+        pred = analysis.get("prediction", {})
+        up_pct = pred.get("up_pct", 50)
+        down_pct = pred.get("down_pct", 50)
+        direction = pred.get("direction", "중립")
+        confidence = pred.get("confidence", 70)
+        stock_picks_raw = analysis.get("stock_picks", [])
 
-    accuracy_stats = compute_accuracy_stats(briefing_type) or None
-    archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+        _fallback_title = {
+            "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
+            "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
+        }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
+        reason_title = normalize_ma_terms(analysis.get("reason_title") or _fallback_title)
+        market_title = ""
 
-    web_base = get_web_base_url()
-    og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
-    og_description = f"{date_str} {section_title}: {direction} {up_pct if '상승' in direction else down_pct}% · 신뢰도 {confidence}%"
+        stock_charts = build_stock_charts(stock_picks_raw, candidates)
+        market_data_js["stockCharts"] = stock_charts
+
+        dir_cls = "up" if direction == "상승 우위" else ("down" if direction == "하락 우위" else "")
+        up_light = confidence
+        down_light = round(down_pct * confidence / up_pct) if up_pct > 0 else confidence
+
+        if briefing_type == "kospi":
+            page_title = f"Double-Shot — 코스피 시초가 브리핑 {date_str}"
+            badge_text = "코스피"
+            gnb_time = "08:30"
+            section_title = "코스피 시초가 방향 예측"
+        else:
+            page_title = f"Double-Shot — 미국 시장 브리핑 {date_str}"
+            badge_text = "미국"
+            gnb_time = "22:30"
+            section_title = "S&P500 방향 예측"
+
+        accuracy_stats = compute_accuracy_stats(briefing_type) or None
+        archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+
+        web_base = get_web_base_url()
+        og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
+        og_description = f"{date_str} {section_title}: {direction} {up_pct if '상승' in direction else down_pct}% · 신뢰도 {confidence}%"
+
+    sidebar_type = "kospi" if briefing_type == "kospi-close" else briefing_type
+    premarket_highs = []
+    if briefing_type == "us":
+        premarket_highs = [
+            {**h, "reason": normalize_ma_terms(h.get("reason", ""))}
+            for h in analysis.get("premarket_highs", [])[:3]
+        ]
 
     ctx = {
         "page_title": page_title,
@@ -654,6 +695,8 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
         "gnb_time": gnb_time,
         "section_title": section_title,
         "briefing_type": briefing_type,
+        "is_closing_latest": is_closing_latest,
+        "market_title": market_title,
         "direction": direction,
         "dir_cls": dir_cls,
         "confidence": confidence,
@@ -664,17 +707,24 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
         "reason_title": reason_title,
         "reasons": reasons,
         "stock_picks": build_stock_picks_data(stock_picks_raw),
-        "premarket_highs": [
-            {**h, "reason": normalize_ma_terms(h.get("reason", ""))}
-            for h in analysis.get("premarket_highs", [])[:3]
-        ] if briefing_type == "us" else [],
+        "premarket_highs": premarket_highs,
         "accuracy": accuracy_stats,
-        "sidebar_items": build_sidebar_data(briefing_type),
+        "sidebar_items": build_sidebar_data(sidebar_type),
         "market_data_json": market_data_json,
         "archive_items": archive_items,
         "og_image_url": og_image_url,
         "og_description": og_description,
     }
+
+    if is_closing_latest:
+        # 마감 시황 풀 컨텐츠를 ctx에 병합 (gen_time, reasons 등은 위에서 덮어쓰지 않도록 유지)
+        closing_ctx = _build_closing_ctx(data, analysis, date_str)
+        for k, v in closing_ctx.items():
+            ctx.setdefault(k, v)
+            ctx[k] = v
+        # 위에서 빈 값으로 세팅된 reasons를 closing의 것으로 덮어쓰기
+        ctx["reasons"] = closing_ctx["reasons"]
+        ctx["market_title"] = closing_ctx["market_title"]
 
     env = _make_env()
     template = env.get_template("index.html")
@@ -752,8 +802,8 @@ def _fmt_idx(d: dict) -> dict:
     }
 
 
-def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
-    """KOSPI 마감 시황 브리핑 HTML을 생성한다."""
+def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
+    """마감 시황 템플릿에서 공통으로 쓰는 변수 묶음을 반환한다."""
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
     gen_time = fmt_generated_time(generated_at)
 
@@ -776,17 +826,10 @@ def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
     sp     = _fmt_idx(futures.get("sp", {}))
     wti    = _fmt_idx(futures.get("wti", {}))
 
-    # 원/달러 부가 설명
     usdkrw_note = "원화 강세 마감" if (indices.get("usdkrw") or {}).get("change_pct", 0) < 0 else "원화 약세 마감"
-
-    web_base = get_web_base_url()
-    page_title = f"Double-Shot — 코스피 마감 시황 {date_str}"
-    og_image_url = f"{web_base}/briefings/{date_str}-kospi-close-og.svg"
-    og_description = f"{date_str} 코스피 마감: {analysis.get('market_title', '')}"
 
     reasons = [r for r in analysis.get("reasons", []) if r]
 
-    # 장중 스파크라인 데이터
     intraday = data.get("intraday", {})
     intraday_prices_json = json.dumps(intraday.get("prices", []))
     intraday_high     = intraday.get("high", 0)
@@ -794,26 +837,20 @@ def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
     intraday_low      = intraday.get("low", 0)
     intraday_low_idx  = intraday.get("low_idx", 0)
 
-    ctx = {
-        "page_title":    page_title,
-        "asset_prefix":  "/",
-        "date_str":      date_str,
-        "day_of_week":   day_of_week,
-        "gen_time":      gen_time,
-        "og_image_url":  og_image_url,
-        "og_description": og_description,
+    return {
+        "generated_at": generated_at,
+        "gen_time": gen_time,
+        "day_of_week": day_of_week,
         "market_title":  analysis.get("market_title", ""),
         "market_summary": analysis.get("market_summary", ""),
         "reasons":       reasons,
         "sectors":       sectors,
         "top_gainers":   top_gainers,
-        # 장중 스파크라인
         "intraday_prices_json": intraday_prices_json,
         "intraday_high":        intraday_high,
         "intraday_high_idx":    intraday_high_idx,
         "intraday_low":         intraday_low,
         "intraday_low_idx":     intraday_low_idx,
-        # 지수
         "kospi_price":   kospi["price"],   "kospi_chg_pct":  kospi["chg_pct"],
         "kospi_chg_abs": kospi["chg_abs"], "kospi_arrow":    kospi["arrow"],
         "kospi_cls":     kospi["cls"],     "kospi_volume":   "",
@@ -823,10 +860,26 @@ def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
         "usdkrw_price":  usdkrw["price"],  "usdkrw_chg_pct": usdkrw["chg_pct"],
         "usdkrw_cls":    usdkrw["cls"],    "usdkrw_arrow":   usdkrw["arrow"],
         "usdkrw_note":   usdkrw_note,
-        # 사이드바
         "nq_price":  nq["price"],  "nq_chg_pct":  nq["chg_pct"],  "nq_cls":  nq["cls"],
         "sp_price":  sp["price"],  "sp_chg_pct":  sp["chg_pct"],  "sp_cls":  sp["cls"],
         "wti_price": wti["price"], "wti_chg_pct": wti["chg_pct"], "wti_cls": wti["cls"],
+    }
+
+
+def build_closing_html(data: dict, analysis: dict, date_str: str) -> str:
+    """KOSPI 마감 시황 브리핑 HTML을 생성한다."""
+    web_base = get_web_base_url()
+    page_title = f"Double-Shot — 코스피 마감 시황 {date_str}"
+    og_image_url = f"{web_base}/briefings/{date_str}-kospi-close-og.svg"
+    og_description = f"{date_str} 코스피 마감: {analysis.get('market_title', '')}"
+
+    ctx = {
+        "page_title":    page_title,
+        "asset_prefix":  "/",
+        "date_str":      date_str,
+        "og_image_url":  og_image_url,
+        "og_description": og_description,
+        **_build_closing_ctx(data, analysis, date_str),
     }
 
     env = _make_env()
@@ -883,67 +936,11 @@ def main():
     if args.type == "kospi-close":
         save_closing_pages(data, analysis, date_str)
 
-        # briefings/index.html에 마감 시황 아카이브 항목 삽입
+        # briefings/index.html 전체 재생성 — 마감 시황을 최신(펼침)으로 배치
         index_path = BRIEFINGS_DIR / "index.html"
-        if index_path.exists():
-            import re as _re
-            idx_html = index_path.read_text(encoding="utf-8")
-
-            # 기존 마감 시황 항목 모두 제거 (중복 방지)
-            idx_html = _re.sub(
-                r'\s*<div class="briefing-archive" style="margin-bottom:0;">.*?</div>\s*</div>\s*</div>',
-                '',
-                idx_html,
-                flags=_re.DOTALL,
-            )
-            # briefing-archive 안에 이전 방식으로 삽입된 항목도 제거
-            idx_html = _re.sub(
-                r'<div class="accordion-item" data-index="closing-[^"]*">.*?</div>\s*</div>\s*</div>\s*</div>',
-                '',
-                idx_html,
-                flags=_re.DOTALL,
-            )
-
-            market_title = analysis.get("market_title", "코스피 마감 시황")
-            reasons_html = ""
-            for r in analysis.get("reasons", [])[:4]:
-                reasons_html += f"<li>{r}</li>\n"
-            closing_item = f'''
-      <div class="closing-archive-block">
-        <div class="accordion-item" data-index="closing-{date_str}">
-          <div class="accordion-header" onclick="toggleAccordion('closing-{date_str}')">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">{date_str}</div>
-              <span class="acc-type-badge kospi-close">마감 시황</span>
-            </div>
-            <div class="accordion-header__badges">
-              <span class="pred-badge">마감 시황</span>
-            </div>
-          </div>
-          <div class="accordion-body">
-            <div class="accordion-body__inner">
-              <div class="open-section">
-                <div class="open-section__title">코스피 마감 시황</div>
-                <div class="open-section__title reason-section-title">{market_title}</div>
-              </div>
-              <div class="open-section">
-                <div class="reason-block"><ul>{reasons_html}</ul></div>
-              </div>
-              <div class="open-section" style="padding-bottom:4px;">
-                <a class="archive-detail-link" href="/briefings/ko-close/{date_str}/">전체 브리핑 보기 →</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>'''
-            # briefing-latest 블록 바로 뒤, 아카이브 위에 삽입
-            marker = '<!-- ③ 이전 브리핑 아카이브'
-            if marker in idx_html:
-                idx_html = idx_html.replace(marker, closing_item + "\n\n      " + marker, 1)
-                index_path.write_text(idx_html, encoding="utf-8")
-                print(f"[generate_html] briefings/index.html updated (closing archive inserted)")
-            else:
-                print("[generate_html] WARNING: archive marker not found in index.html")
+        html_index = build_index_html_multi(data, analysis, date_str, "kospi-close")
+        index_path.write_text(html_index, encoding="utf-8")
+        print(f"[generate_html] briefings/index.html updated (closing as latest)")
         return
 
     if args.type == "weekly":
