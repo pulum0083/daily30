@@ -491,6 +491,14 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
     print(f"[call_claude] Saved prediction to briefings.json ({date_str}, {briefing_type})")
 
 
+def get_web_base_url() -> str:
+    web_base = os.environ.get("WEB_BASE_URL", "")
+    if not web_base:
+        cfg = load_config()
+        web_base = cfg.get("web", {}).get("base_url", "https://pulum0083.github.io/daily30")
+    return web_base.rstrip("/")
+
+
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
     import re
@@ -498,11 +506,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     def strip_html(text: str) -> str:
         return re.sub(r"<[^>]+>", "", str(text))
 
-    web_base = os.environ.get("WEB_BASE_URL", "")
-    if not web_base:
-        cfg = load_config()
-        web_base = cfg.get("web", {}).get("base_url", "https://pulum0083.github.io/daily30")
-    web_base = web_base.rstrip("/")
+    web_base = get_web_base_url()
 
     date_display = datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y.%m.%d")
 
