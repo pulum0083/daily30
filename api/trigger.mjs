@@ -24,7 +24,7 @@ async function alreadyRunToday(ghPat, type) {
     if (!resp.ok) return false;
     const data = await resp.json();
     return (data.workflow_runs || []).some(run =>
-      run.inputs?.briefing_type === type &&
+      run.display_title === `Daily 30 Report (${type})` &&
       ['queued', 'in_progress', 'completed'].includes(run.status)
     );
   } catch {

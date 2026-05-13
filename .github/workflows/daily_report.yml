@@ -1,4 +1,5 @@
 name: Daily 30 Report
+run-name: "Daily 30 Report (${{ inputs.briefing_type }})"
 
 on:
   workflow_dispatch:
