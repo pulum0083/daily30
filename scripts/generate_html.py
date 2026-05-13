@@ -892,8 +892,10 @@ def main():
             reasons_html = ""
             for r in analysis.get("reasons", [])[:4]:
                 reasons_html += f"<li>{r}</li>\n"
-            closing_item = f'''<div class="accordion-item" data-index="closing-{date_str}">
-          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            closing_item = f'''
+      <div class="briefing-archive" style="margin-bottom:0;">
+        <div class="accordion-item" data-index="closing-{date_str}">
+          <div class="accordion-header" onclick="toggleAccordion('closing-{date_str}')">
             <div class="accordion-header__left">
               <div class="accordion-header__date-label">{date_str}</div>
               <span class="acc-type-badge kospi-close">마감 시황</span>
@@ -916,11 +918,12 @@ def main():
               </div>
             </div>
           </div>
-        </div>'''
-            # briefing-archive 블록 시작 직후에 삽입
-            marker = '<div class="briefing-archive">'
+        </div>
+      </div>'''
+            # briefing-latest 블록 바로 뒤에 삽입 (아카이브 위)
+            marker = '<!-- ③ 이전 브리핑 아카이브'
             if marker in idx_html:
-                idx_html = idx_html.replace(marker, marker + "\n" + closing_item, 1)
+                idx_html = idx_html.replace(marker, closing_item + "\n\n      " + marker, 1)
                 index_path.write_text(idx_html, encoding="utf-8")
                 print(f"[generate_html] briefings/index.html updated (closing archive inserted)")
             else:
