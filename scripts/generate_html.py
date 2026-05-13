@@ -883,20 +883,48 @@ def main():
     if args.type == "kospi-close":
         save_closing_pages(data, analysis, date_str)
 
-        # briefings/index.html 재생성 (마감 시황이 아카이브 목록에 반영되도록)
-        latest_kospi = DATA_DIR / "latest_kospi.json"
-        analysis_kospi = DATA_DIR / "analysis_kospi.json"
-        if latest_kospi.exists() and analysis_kospi.exists():
-            with open(latest_kospi, encoding="utf-8") as f:
-                idx_data = json.load(f)
-            with open(analysis_kospi, encoding="utf-8") as f:
-                idx_analysis = json.load(f)
-            idx_date = idx_data.get("generated_at", "")[:10] or date_str
-            html_index = build_index_html_multi(idx_data, idx_analysis, idx_date, "kospi")
-            index_path = BRIEFINGS_DIR / "index.html"
-            with open(index_path, "w", encoding="utf-8") as f:
-                f.write(html_index)
-            print(f"[generate_html] briefings/index.html updated (with closing archive)")
+        # briefings/index.html에 마감 시황 아카이브 항목 삽입
+        index_path = BRIEFINGS_DIR / "index.html"
+        if index_path.exists():
+            import re as _re
+            idx_html = index_path.read_text(encoding="utf-8")
+            market_title = analysis.get("market_title", "코스피 마감 시황")
+            reasons_html = ""
+            for r in analysis.get("reasons", [])[:4]:
+                reasons_html += f"<li>{r}</li>\n"
+            closing_item = f'''<div class="accordion-item" data-index="closing-{date_str}">
+          <div class="accordion-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date-label">{date_str}</div>
+              <span class="acc-type-badge kospi-close">마감 시황</span>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="pred-badge">마감 시황</span>
+            </div>
+          </div>
+          <div class="accordion-body">
+            <div class="accordion-body__inner">
+              <div class="open-section">
+                <div class="open-section__title">코스피 마감 시황</div>
+                <div class="open-section__title reason-section-title">{market_title}</div>
+              </div>
+              <div class="open-section">
+                <div class="reason-block"><ul>{reasons_html}</ul></div>
+              </div>
+              <div class="open-section" style="padding-bottom:4px;">
+                <a class="archive-detail-link" href="/briefings/ko-close/{date_str}/">전체 브리핑 보기 →</a>
+              </div>
+            </div>
+          </div>
+        </div>'''
+            # briefing-archive 블록 시작 직후에 삽입
+            marker = '<div class="briefing-archive">'
+            if marker in idx_html:
+                idx_html = idx_html.replace(marker, marker + "\n" + closing_item, 1)
+                index_path.write_text(idx_html, encoding="utf-8")
+                print(f"[generate_html] briefings/index.html updated (closing archive inserted)")
+            else:
+                print("[generate_html] WARNING: briefing-archive marker not found in index.html")
         return
 
     if args.type == "weekly":
