@@ -274,7 +274,7 @@ jobs:
           python3 scripts/call_claude.py --type kospi-close --date "$DATE"
 
       - name: 📨 Telegram 전송
-        if: steps.holiday.outputs.open == 'true'
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi-close
 
