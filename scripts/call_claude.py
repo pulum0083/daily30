@@ -673,6 +673,14 @@ def main():
         data_file = DATA_DIR / "latest_kospi_close.json"
         with open(data_file, encoding="utf-8") as f:
             market_data = json.load(f)
+
+        # Claude가 생성한 급등 사유를 top_gainers에 병합
+        reasons_map = analysis.get("top_gainers_reasons", {})
+        for stock in market_data.get("top_gainers", []):
+            stock["reason"] = reasons_map.get(stock["name"], "")
+        with open(data_file, "w", encoding="utf-8") as f:
+            json.dump(market_data, f, ensure_ascii=False, indent=2)
+
         save_closing_telegram_message(date_str, analysis, market_data)
 
         if not args.no_html:
@@ -754,7 +762,13 @@ KOSPI_CLOSE_SYSTEM_PROMPT = """\
 reasons 섹션 상단 훅 타이틀. 30자 이내.
 예: "반도체 주도 + 외국인 순매수로 강세 마감", "관망 속 보합 마감 — 방향성 부재"
 
-### 4. 텔레그램 핵심 시그널 (telegram_signals)
+### 4. 오늘의 급등주 분석 (top_gainers_reasons)
+입력 데이터의 top_gainers 배열에 있는 종목 각각에 대해 급등 사유를 작성한다.
+- 종목명을 key로, 한 문장(60자 이내) 급등 사유를 value로 작성
+- 오늘 뉴스·섹터 맥락에서 왜 급등했는지 추론
+- 해요체 규칙 적용
+
+### 5. 텔레그램 핵심 시그널 (telegram_signals)
 정확히 2개. 텔레그램 발송용 압축 요약.
 각 항목 60자 이내, 이모지 1개, <b> 태그 허용.
 
@@ -771,6 +785,11 @@ reasons 섹션 상단 훅 타이틀. 30자 이내.
     "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환했어요. 이틀 연속 매도에서 돌아섰고, 원화 강세도 외국인 유입에 우호적이었어요.",
     "🏦 금리 부담 완화 기대도 시장을 받쳤어요. 미국채 10년물이 전일 대비 <b>-5bp</b> 하락하며 성장주 밸류에이션 부담이 줄었거든요."
   ],
+  "top_gainers_reasons": {
+    "에이프로젠": "한화그룹 인수 기대감에 상한가를 기록했어요.",
+    "SK하이닉스": "엔비디아 실적 서프라이즈 수혜로 HBM 기대감이 커졌어요.",
+    "삼성전자": "반도체 업황 반등 기대에 외국인 순매수가 집중됐어요."
+  },
   "telegram_signals": [
     "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도했어요.",
     "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환. 원화 강세도 외국인 유입에 우호적이었어요."

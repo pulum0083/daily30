@@ -224,19 +224,9 @@ def fetch_sector_performance() -> list[dict]:
             chg = val if color == "red" else -val
             result.append({"name": name, "change_pct": round(chg, 2)})
 
-    # SECTOR_IDS에 없는 섹터는 제외하고, 있는 섹터만 순서대로 반환
-    sector_names = list(SECTOR_IDS.keys())
-    mapped = {r["name"]: r["change_pct"] for r in result}
-
-    final = []
-    for sname in sector_names:
-        if sname in mapped:
-            final.append({"name": sname, "change_pct": mapped[sname]})
-        # 데이터 없으면 skip
-
-    # 데이터가 너무 적으면 raw 결과 상위 7개 반환
-    if len(final) < 3 and result:
-        final = sorted(result, key=lambda x: x["change_pct"], reverse=True)[:7]
+    # 등락률 절대값 기준으로 영향이 큰 섹터 상위 5개 반환
+    result.sort(key=lambda x: abs(x["change_pct"]), reverse=True)
+    final = result[:5]
 
     print(f"[fetch_closing] sectors: {len(final)}개")
     return final
