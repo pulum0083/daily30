@@ -677,6 +677,8 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
         og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
         og_description = f"{date_str} {section_title}: {direction} {up_pct if '상승' in direction else down_pct}% · 신뢰도 {confidence}%"
 
+    market_data_json = json.dumps(market_data_js, ensure_ascii=False, indent=2)
+
     sidebar_type = "kospi" if briefing_type == "kospi-close" else briefing_type
     premarket_highs = []
     if briefing_type == "us":
