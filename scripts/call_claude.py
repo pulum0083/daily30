@@ -491,6 +491,12 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
         k: v for k, v in market_data.items()
         if k not in ("market_data_js",)  # sidebar data not needed for analysis
     }
+    # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
+    if candidates_key in analysis_data:
+        analysis_data[candidates_key] = [
+            {k: v for k, v in c.items() if "sparkline" not in k}
+            for c in analysis_data[candidates_key]
+        ]
 
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
