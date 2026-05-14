@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-PW9RHHFPM4');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Double-Shot — 코스피 마감 시황 2026-05-14</title>
+  <meta property="og:title" content="Double-Shot — 코스피 마감 시황 2026-05-14" />
+  <meta property="og:description" content="2026-05-14 코스피 마감: 서울고속버스터미널 재개발 테마 폭등 + 코스피 1%대 강세" />
+  <meta property="og:image" content="https://doubleshot.space/briefings/2026-05-14-kospi-close-og.svg" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://doubleshot.space/briefings/2026-05-14-kospi-close-og.svg" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/favicon.svg"/>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    /* ── 마감 시황 전용 컴포넌트 ── */
+    .close-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .close-idx {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+    }
+    .close-idx__name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .close-idx__val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .close-idx__chg { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .close-idx__chg.up   { color: var(--status-up); }
+    .close-idx__chg.down { color: var(--status-down); }
+    .close-idx__vol { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+    /* ── 사이드바 섹터 패널 (우측 날개용) ── */
+    .sector-panel { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    .sector-item { display: flex; flex-direction: column; gap: 6px; }
+    .sector-item__top { display: flex; align-items: center; gap: 8px; }
+    .sector-item__rank {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: var(--grey-50); color: var(--text-tertiary);
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .sector-item__name {
+      flex: 1; min-width: 0;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      line-height: 1.35;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sector-item__pct {
+      font-size: 13px; font-weight: 800;
+      font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
+    .sector-item__pct.up   { color: var(--status-up); }
+    .sector-item__pct.down { color: var(--status-down); }
+    .sector-item__bar-track {
+      height: 5px; background: var(--grey-50);
+      border-radius: 100px; overflow: hidden;
+    }
+    .sector-item__bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+    .sector-item__bar-fill.up   { background: var(--status-up); }
+    .sector-item__bar-fill.down { background: var(--status-down); }
+    .sector-item__stocks {
+      display: flex; flex-direction: column; gap: 3px;
+      margin-top: 4px; padding-left: 26px;
+    }
+    .sector-stock {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+      font-size: 12px; line-height: 1.4;
+    }
+    .sector-stock__name {
+      color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      min-width: 0;
+    }
+    .sector-stock__pct {
+      font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0;
+      color: var(--text-tertiary);
+    }
+
+    .top-stock-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-stock-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .top-stock-card__rank {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--status-up-bg); color: var(--status-up);
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .top-stock-card__body { flex: 1; min-width: 0; }
+    .top-stock-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .top-stock-card__name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .top-stock-card__change {
+      font-size: 13px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px;
+      background: var(--status-up-bg); color: var(--status-up);
+    }
+    .top-stock-card__price { font-size: 13px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+    .top-stock-card__reason { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 5px; }
+
+    .close-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 9px; border-radius: 100px;
+      background: rgba(100,100,200,.12); color: #6366F1;
+    }
+
+    @media (max-width: 600px) {
+      .close-summary { grid-template-columns: repeat(2, 1fr); }
+      .close-summary .close-idx:last-child { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <a class="gnb__logo" href="/" style="text-decoration:none;">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+            <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+            <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+      <div class="gnb__meta">
+        <span class="gnb__date" id="gnb-date">2026-05-14 KST 15:40</span>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout-wrapper">
+    <div class="layout-grid">
+
+      <!-- ── 왼쪽 메인 ── -->
+      <main class="layout-grid__main">
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header" style="cursor:default;">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date">
+                <span class="accordion-header__date-label">2026-05-14</span>
+                <span class="accordion-header__date-sub">목 · 15:40 마감</span>
+              </div>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="close-badge">🔔 마감</span>
+            </div>
+          </div>
+          <div class="accordion-body" style="grid-template-rows:1fr;">
+          <div class="accordion-body__inner" style="overflow:visible;">
+
+            <!-- 마감 지수 -->
+            <div class="open-section">
+              <div class="open-section__title">마감 지수</div>
+              <div class="close-summary">
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSPI</div>
+                  <div class="close-idx__val">7,941.95</div>
+                  <div class="close-idx__chg up">▲ 97.94 (+1.25%)</div>
+                  
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSDAQ</div>
+                  <div class="close-idx__val">1,188.49</div>
+                  <div class="close-idx__chg up">▲ 11.56 (+0.98%)</div>
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">원/달러</div>
+                  <div class="close-idx__val">1,489.94</div>
+                  <div class="close-idx__chg down">▼ -0.20%</div>
+                  <div class="close-idx__vol">원화 강세 마감</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 시황 분석 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                <span class="reason-section-title">서울고속버스터미널 재개발 테마 폭등 + 코스피 1%대 강세</span>
+              </div>
+              <div class="reason-block">
+                <p>오늘 코스피가 <b>+1.25%</b> 상승하며 <b>7,941.95p</b>로 마감했어요. 서울고속버스터미널 재개발 수혜주가 테마 전반을 이끌며 장 분위기를 달궜고, 나스닥 선물이 <b>+0.5%</b> 오르며 대외 투자심리도 우호적이었거든요. 장 중반 한때 <b>7,985p</b>까지 고점을 높였다가 막판 소폭 되돌림이 있었지만 상승 흐름은 유지됐어요.</p>
+                
+                <ul>
+                  
+                  <li>📈 코스피가 <b>+1.25%</b>, 코스닥도 <b>+0.98%</b> 동반 강세로 마감했어요. 서울고속버스터미널 재개발 테마와 신규상장주 강세가 시장 전반의 투자심리를 끌어올렸고, 나스닥 선물 <b>+0.5%</b>가 외부 환경을 우호적으로 받쳤거든요.</li>
+                  
+                  <li>🏗️ 서울고속버스터미널 재개발 수혜 테마가 오늘 장의 최대 화두였어요. 천일고속·동양고속이 상한가에 근접하며 테마 평균 <b>+16.97%</b> 폭등했고, 신세계·이마트 등 부동산 보유 자산주까지 동반 강세를 보이며 유통·교통 섹터 전반으로 매기가 번졌어요.</li>
+                  
+                  <li>🆕 2026년 상반기 신규상장 종목들이 강한 수급을 끌어모았어요. 폴레드가 <b>+300%</b>라는 이례적 급등을 기록했고, 코스모로보틱스도 <b>+29.96%</b> 상한가를 치며 신규상장 테마 평균이 <b>+16.3%</b>에 달했어요.</li>
+                  
+                  <li>🌐 원·달러 환율이 <b>-0.2%</b> 하락하며 <b>1,489.94원</b>으로 마감했어요. 원화 소폭 강세가 외국인 투자 환경에 긍정적으로 작용했고, WTI 원유도 <b>101달러</b>대를 유지하며 에너지 비용 우려가 크게 부각되지 않았거든요.</li>
+                  
+                </ul>
+                
+              </div>
+            </div>
+
+            <!-- 코스피 장중 흐름 -->
+            
+            <div class="open-section" id="intraday-section">
+              <div class="open-section__title">코스피 장중 흐름</div>
+              <div class="reason-block" style="padding:16px;">
+                <canvas id="intraday-chart" style="width:100%;height:120px;display:block;"></canvas>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;">
+                  <span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span>
+                </div>
+              </div>
+            </div>
+            
+
+            <!-- 섹터 성과는 우측 패널로 이동 -->
+
+            <!-- 오늘의 급등주 TOP 3 -->
+            
+            <div class="open-section">
+              <div class="open-section__title">오늘의 급등주 TOP 3</div>
+              <div class="top-stock-list">
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">1</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">천일고속</span>
+                      <span class="top-stock-card__change">+29.96%</span>
+                      <span class="top-stock-card__price">295,000원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">서울고속버스터미널 재개발 사업 관련 구체적인 추진 소식이 직접적인 트리거가 됐어요. 터미널 부지 개발 수혜를 받는 핵심 지분 보유사로 부각되며 부동산 보유 자산주 테마와 겹치면서 매수세가 집중됐거든요. 동양고속 등 같은 테마 종목이 동반 상한가를 치며 테마 전체의 수급 모멘텀이 강화됐어요.</div>
+                    
+                  </div>
+                </div>
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">2</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">동양고속</span>
+                      <span class="top-stock-card__change">+29.94%</span>
+                      <span class="top-stock-card__price">56,200원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">서울고속버스터미널 재개발 수혜주로 천일고속과 함께 쌍으로 묶이며 동반 급등했어요. 터미널 지분 관계사로서 개발 이익 기대감이 극대화됐고, 테마 내 거래량이 평소 대비 수배 이상 폭증하며 단기 수급이 집중적으로 유입됐거든요. 신세계·이마트 등 유통 자산주까지 연쇄 강세로 번지며 테마 모멘텀이 더욱 강화됐어요.</div>
+                    
+                  </div>
+                </div>
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">3</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">SK네트웍스</span>
+                      <span class="top-stock-card__change">+29.93%</span>
+                      <span class="top-stock-card__price">7,900원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">SK그룹 지배구조 개편 및 자산 재편 기대감이 다시 부각되며 매수세를 끌어당겼어요. 부동산·자산 재평가 테마가 오늘 장 전반에 걸쳐 강세를 보이는 흐름과 맞물려 수급이 몰렸거든요. SK그룹 계열사 전반에 걸친 밸류업 기대감이 단기 모멘텀으로 작용하고 있어 향후 그룹 발표 일정이 관전 포인트예요.</div>
+                    
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+
+          </div><!-- /accordion-body__inner -->
+          </div><!-- /accordion-body -->
+        </div><!-- /accordion-item -->
+      </main>
+
+      <!-- ── 오른쪽 사이드바: 섹터 성과 ── -->
+      <aside class="layout-grid__right">
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title" style="display:inline-flex;align-items:center;gap:6px;">
+              섹터 성과
+              <button class="info-icon-btn" onclick="openSectorModal()" aria-label="섹터 성과 설명">?</button>
+            </span>
+            <span class="pub-time">상승률 TOP 5</span>
+          </div>
+          
+          <div class="sector-panel">
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">1</span>
+                <span class="sector-item__name" title="서울고속버스터미널 재개발 수혜">서울고속버스터미널 재개발 수혜</span>
+                <span class="sector-item__pct up">+16.97%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:84.85%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">천일고속</span>
+                  <span class="sector-stock__pct">+29.96%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">동양고속</span>
+                  <span class="sector-stock__pct">+29.94%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">신세계</span>
+                  <span class="sector-stock__pct">+10.88%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">2</span>
+                <span class="sector-item__name" title="2026 상반기 신규상장">2026 상반기 신규상장</span>
+                <span class="sector-item__pct up">+16.30%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:81.5%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">폴레드</span>
+                  <span class="sector-stock__pct">+300.00%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">코스모로보틱스</span>
+                  <span class="sector-stock__pct">+29.96%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">아이엠바이오로직스</span>
+                  <span class="sector-stock__pct">+20.90%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">3</span>
+                <span class="sector-item__name" title="출산장려정책">출산장려정책</span>
+                <span class="sector-item__pct up">+13.80%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:69.0%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">폴레드</span>
+                  <span class="sector-stock__pct">+300.00%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">삼익악기</span>
+                  <span class="sector-stock__pct">+5.71%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">SAMG엔터</span>
+                  <span class="sector-stock__pct">+3.13%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">4</span>
+                <span class="sector-item__name" title="엔젤산업">엔젤산업</span>
+                <span class="sector-item__pct up">+12.15%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:60.75%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">폴레드</span>
+                  <span class="sector-stock__pct">+300.00%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">삼익악기</span>
+                  <span class="sector-stock__pct">+5.71%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">SAMG엔터</span>
+                  <span class="sector-stock__pct">+3.13%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">5</span>
+                <span class="sector-item__name" title="부동산 보유 자산주">부동산 보유 자산주</span>
+                <span class="sector-item__pct up">+7.33%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:36.65%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">천일고속</span>
+                  <span class="sector-stock__pct">+29.96%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">동양고속</span>
+                  <span class="sector-stock__pct">+29.94%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">이마트</span>
+                  <span class="sector-stock__pct">+11.98%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+          </div>
+          
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- 섹터 성과 모달 -->
+  <div class="info-modal-backdrop" id="sector-modal" onclick="if(event.target===this)closeSectorModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
+      <button class="info-modal__close" onclick="closeSectorModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+      <div class="info-modal__body">
+        <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+          <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요. 가득 차면 +20% 이상이라는 뜻이에요.</li>
+          <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSectorModal() {
+      document.getElementById('sector-modal').classList.add('is-open');
+    }
+    function closeSectorModal() {
+      document.getElementById('sector-modal').classList.remove('is-open');
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSectorModal();
+    });
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      if (window._redrawIntraday) window._redrawIntraday();
+    }
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  </script>
+
+  
+  <script>
+    (function drawIntradayChart() {
+      const prices  = [7864.43, 7880.53, 7911.06, 7900.67, 7919.21, 7927.34, 7925.35, 7933.81, 7950.73, 7946.93, 7966.12, 7985.24, 7950.75, 7961.25, 7971.39, 7915.03, 7952.5, 7970.89, 7979.4, 7982.69, 7968.75, 7945.91, 7922.82, 7880.94, 7887.42, 7897.38, 7905.31, 7899.77, 7911.34, 7906.71, 7917.13, 7905.75, 7896.64, 7862.06, 7861.72, 7843.57, 7877.31, 7894.51, 7903.44, 7875.7, 7882.59, 7891.27, 7875.71, 7856.51, 7871.52, 7855.88, 7858.04, 7860.5, 7853.19, 7886.45, 7907.28, 7907.43, 7918.48, 7911.68, 7912.4, 7922.82, 7922.78, 7924.85, 7905.48, 7886.5, 7895.14, 7878.09, 7869.26, 7847.77, 7877.17, 7871.7, 7859.93, 7861.02, 7868.01, 7891.55, 7901.55, 7919.84];
+      const highVal = 7985.24;
+      const highIdx = 11;
+      const lowVal  = 7843.57;
+      const lowIdx  = 35;
+
+      if (!prices.length) return;
+      const canvas = document.getElementById('intraday-chart');
+      if (!canvas) return;
+
+      function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const W = rect.width, H = rect.height;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const isDark    = document.documentElement.classList.contains('dark');
+        const isUp      = prices[prices.length - 1] >= prices[0];
+        const lineColor = isUp ? '#E03131' : '#2775ED';
+        const fillRgb   = isUp ? '224,49,49' : '39,117,237';
+        const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+        const highColor = '#E03131';
+        const lowColor  = '#2775ED';
+        const font      = "600 11px 'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+
+        const PAD = { top: 28, right: 8, bottom: 26, left: 8 };
+        const cW  = W - PAD.left - PAD.right;
+        const cH  = H - PAD.top  - PAD.bottom;
+        const minP = lowVal  - 6, maxP = highVal + 6, range = maxP - minP;
+
+        function xOf(i) { return PAD.left + (i / (prices.length - 1)) * cW; }
+        function yOf(v) { return PAD.top  + (1 - (v - minP) / range) * cH; }
+
+        // 그리드
+        ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75].forEach(t => {
+          const y = PAD.top + t * cH;
+          ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+        });
+
+        // 그라데이션 면
+        const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+        grad.addColorStop(0, isDark ? `rgba(${fillRgb},.22)` : `rgba(${fillRgb},.13)`);
+        grad.addColorStop(1, `rgba(${fillRgb},0)`);
+
+        // catmull-rom 곡선
+        const pts = prices.map((p, i) => [xOf(i), yOf(p)]);
+        const n   = pts.length;
+        function spline(draw2fill) {
+          ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,n-1)];
+            ctx.bezierCurveTo(
+              p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6,
+              p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6,
+              p2[0], p2[1]
+            );
+          }
+          if (draw2fill) {
+            ctx.lineTo(pts[n-1][0], PAD.top+cH); ctx.lineTo(pts[0][0], PAD.top+cH);
+            ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+          }
+        }
+        spline(true);
+        spline(false);
+        ctx.strokeStyle = lineColor; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
+
+        // 마커
+        function drawMarker(idx, val, color, arrow, above) {
+          const x=xOf(idx), y=yOf(val), r=4.5, gap=8;
+          const labelText = `${arrow} ${val.toLocaleString()}`;
+          ctx.font = font;
+          const tw = ctx.measureText(labelText).width, LH = 14;
+          let lx = x - tw/2;
+          lx = Math.max(PAD.left, Math.min(lx, PAD.left+cW-tw));
+          let ly = above ? y-r-gap-LH/2 : y+r+gap+LH/2;
+          ly = above ? Math.max(LH/2+2, ly) : Math.min(H-LH/2-2, ly);
+          // 원
+          ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+          ctx.fillStyle=color; ctx.fill();
+          ctx.strokeStyle=isDark?'#1C1D1F':'#fff'; ctx.lineWidth=1.5; ctx.stroke();
+          // 레이블
+          const bg = isDark?'rgba(28,29,31,.92)':'rgba(255,255,255,.92)';
+          ctx.fillStyle=bg; ctx.fillRect(lx-3, ly-LH/2, tw+6, LH);
+          ctx.fillStyle=color; ctx.fillText(labelText, lx, ly+4);
+        }
+        drawMarker(highIdx, highVal, highColor, '▲ 고점', true);
+        drawMarker(lowIdx,  lowVal,  lowColor,  '▼ 저점', false);
+      }
+
+      window._redrawIntraday = draw;
+      draw();
+      window.addEventListener('resize', draw);
+    })();
+  </script>
+  
+</body>
+</html>
