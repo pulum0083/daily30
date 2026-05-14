@@ -1,17 +1,36 @@
 {
   "key_indicators": [
-    "오늘 (5월 13일) 발표된 PPI 인플레이션 지표가 높게 나왔으며, 이는 시장에 하방 압력을 가할 수 있습니다.",
-    "연준은 금리를 동결했으나, 인플레이션 불확실성이 높아 금리 인상 가능성도 제기되고 있습니다.",
-    "반도체 주식들이 사상 최고치에서 하락했으며, 이는 기술주 전반에 대한 매도세를 유발했습니다.",
-    "미국 국채 수익률이 상승했으며, 유가도 상승세를 보였습니다.",
-    "아시아 증시는 혼조세를 보였고, 유럽 증시 또한 하락 출발했습니다."
+    "S&P 500, Nasdaq, Dow Jones 선물 혼조세 (어제 종가 기준)",
+    "PPI 인플레이션 데이터 발표: 예상치 상회 (hot)",
+    "기술주 강세로 S&P 500, Nasdaq 사상 최고치 경신. 특히 반도체 섹터 강세.",
+    "신임 연준 의장 Kevin Warsh 취임. 금리 인하 시점 지연 가능성 언급.",
+    "아시아 증시 혼조세, 유럽 증시 상승 마감 (어제 종가 기준)"
   ],
   "headlines": [
-    "뜨거운 인플레이션 지표와 기술주 매도세로 S&P 500 및 나스닥 하락, 다우 지수는 상승 마감",
-    "반도체 주식들이 사상 최고치에서 하락하며 칩스톡 약세, 인플레이션 3년 만에 최고치 기록",
-    "PPI 인플레이션 급등으로 다우 선물 200포인트 하락, 그러나 반도체 주식 상승세가 나스닥 선물 상승 견인"
+    "S&P 500, Nasdaq, 기술주 랠리에 힘입어 사상 최고치 경신",
+    "PPI 인플레이션 데이터 예상치 상회에도 불구하고 기술주 강세 지속",
+    "신임 연준 의장 취임, 금리 인하 시점 불확실성 증대"
   ],
-  "market_sentiment": "bearish",
-  "premarket_highs": [],
-  "generated_at": "2026-05-13T22:10:35.363979+09:00"
+  "market_sentiment": "neutral",
+  "premarket_highs": [
+    {
+      "ticker": "NVDA",
+      "name": "Nvidia",
+      "change_pct": "+2.5%",
+      "reason": "Semiconductor strength boosted Nasdaq and S&P 500 to record highs."
+    },
+    {
+      "ticker": "AAPL",
+      "name": "Apple",
+      "change_pct": "+1.8%",
+      "reason": "Tech rally contributed to new record highs for Nasdaq and S&P 500."
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft",
+      "change_pct": "+1.5%",
+      "reason": "Broad tech sector strength drove major indices to record closing highs."
+    }
+  ],
+  "generated_at": "2026-05-14T21:16:27.676311+09:00"
 }
