@@ -416,6 +416,15 @@
     document.getElementById('kellogg-modal').classList.remove('is-open');
   }
 
+  function openSectorModal() {
+    const el = document.getElementById('sector-modal');
+    if (el) el.classList.add('is-open');
+  }
+  function closeSectorModal() {
+    const el = document.getElementById('sector-modal');
+    if (el) el.classList.remove('is-open');
+  }
+
   function openAccModal() {
     const el = document.getElementById('acc-modal');
     if (el) el.classList.add('is-open');
@@ -449,6 +458,7 @@
       closeAccModal();
       closeVixModal();
       closePredModal();
+      closeSectorModal();
     }
   });
 

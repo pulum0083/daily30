@@ -764,10 +764,10 @@
       line-height: 1.75;
     }
     .ma20-badge {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 1px 5px;
+      border-radius: 3px;
       background: rgba(0,110,255,.08);
       color: var(--color-primary);
     }
@@ -824,12 +824,12 @@
     }
     .scenario-tag {
       display: inline;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--color-primary);
       background: var(--color-primary-light);
-      padding: 1px 5px;
-      border-radius: 3px;
+      padding: 2px 6px;
+      border-radius: 4px;
       margin-right: 5px;
       letter-spacing: 0.02em;
     }
@@ -2151,6 +2151,54 @@ html.dark .acc-type-badge.us {
 .sector-row__pct { font-size: 14px; font-weight: 700; min-width: 60px; text-align: right; font-variant-numeric: tabular-nums; }
 .sector-row__pct.up   { color: var(--status-up); }
 .sector-row__pct.down { color: var(--status-down); }
+
+/* 컴팩트 섹터 카드 (마감 시황 사이드바 + 인덱스 페이지 공용) */
+.sector-panel { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+.sector-item { display: flex; flex-direction: column; gap: 6px; }
+.sector-item__top { display: flex; align-items: center; gap: 8px; }
+.sector-item__rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--grey-50); color: var(--text-tertiary);
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.sector-item__name {
+  flex: 1; min-width: 0;
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  line-height: 1.35;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sector-item__pct {
+  font-size: 13px; font-weight: 800;
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
+.sector-item__pct.up   { color: var(--status-up); }
+.sector-item__pct.down { color: var(--status-down); }
+.sector-item__bar-track {
+  height: 5px; background: var(--grey-50);
+  border-radius: 100px; overflow: hidden;
+}
+.sector-item__bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+.sector-item__bar-fill.up   { background: var(--status-up); }
+.sector-item__bar-fill.down { background: var(--status-down); }
+.sector-item__stocks {
+  display: flex; flex-direction: column; gap: 3px;
+  margin-top: 4px; padding-left: 26px;
+}
+.sector-stock {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  font-size: 12px; line-height: 1.4;
+}
+.sector-stock__name {
+  color: var(--text-secondary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+.sector-stock__pct {
+  font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0;
+  color: var(--text-tertiary);
+}
 
 .top-stock-list { display: flex; flex-direction: column; gap: 10px; }
 .top-stock-card {
