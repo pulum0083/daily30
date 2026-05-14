@@ -193,10 +193,55 @@ SECTOR_IDS = {
 }
 
 
-def fetch_sector_performance() -> list[dict]:
-    """네이버 그룹별 시세에서 섹터 등락률을 가져온다.
+def fetch_sector_top_stocks(detail_path: str, limit: int = 3) -> list[dict]:
+    """네이버 테마 상세 페이지에서 등락률 상위 종목을 반환한다.
 
-    Returns list of {"name": str, "change_pct": float}
+    Args:
+        detail_path: "/sise/sise_group_detail.naver?type=theme&no=591" 형태
+    Returns:
+        [{"name": str, "change_pct": float}, ...]
+    """
+    import re
+    url = f"https://finance.naver.com{detail_path}"
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("euc-kr", errors="replace")
+    except Exception as e:
+        print(f"[fetch_closing] sector detail fetch failed ({detail_path}): {e}", file=sys.stderr)
+        return []
+
+    name_pat = re.compile(r'<a href="/item/main\.naver\?code=\d+">([^<]+)</a>')
+    pct_pat  = re.compile(r'<span class="tah p11 (red\d+|blu\d+|nv01)">\s*([+\-]?[\d.]+)%\s*</span>')
+
+    # 종목명 단위로 row를 잘라낸 뒤 그 뒤 1500자 안에서 등락률을 잡아낸다.
+    stocks: list[dict] = []
+    seen: set[str] = set()
+    for m in name_pat.finditer(html):
+        name = m.group(1).strip()
+        if name in seen:
+            continue
+        seen.add(name)
+        chunk = html[m.end():m.end() + 1500]
+        pct_matches = pct_pat.findall(chunk)
+        if pct_matches:
+            color, val = pct_matches[0]
+            try:
+                pct = float(val)
+                if color.startswith("blu"):
+                    pct = -abs(pct)
+                stocks.append({"name": name, "change_pct": round(pct, 2)})
+            except ValueError:
+                continue
+
+    stocks.sort(key=lambda x: x["change_pct"], reverse=True)
+    return stocks[:limit]
+
+
+def fetch_sector_performance() -> list[dict]:
+    """네이버 그룹별 시세에서 섹터 등락률과 섹터별 상위 종목을 가져온다.
+
+    Returns list of {"name": str, "change_pct": float, "stocks": [{"name", "change_pct"}, ...]}
     """
     url = "https://finance.naver.com/sise/sise_group.naver"
     try:
@@ -210,7 +255,7 @@ def fetch_sector_performance() -> list[dict]:
     import re
     result = []
     tr_pat = re.compile(r'<tr[^>]*>(.*?)</tr>', re.DOTALL)
-    link_pat = re.compile(r'<a[^>]+href="/sise/sise_group_detail\.naver\?[^"]*">([^<]+)</a>')
+    link_pat = re.compile(r'<a[^>]+href="(/sise/sise_group_detail\.naver\?[^"]*)">([^<]+)</a>')
     rate_pat = re.compile(r'<span[^>]*class="[^"]*\b(red|blu)\d*[^"]*"[^>]*>\s*\+?([\d.]+)%\s*</span>')
 
     for m in tr_pat.finditer(html):
@@ -218,17 +263,27 @@ def fetch_sector_performance() -> list[dict]:
         link_m = link_pat.search(row)
         rate_m = rate_pat.search(row)
         if link_m and rate_m:
-            name = link_m.group(1).strip()
+            href = link_m.group(1).replace("&amp;", "&")
+            name = link_m.group(2).strip()
             color = rate_m.group(1)
             val = float(rate_m.group(2))
             chg = val if color == "red" else -val
-            result.append({"name": name, "change_pct": round(chg, 2)})
+            result.append({
+                "name": name,
+                "change_pct": round(chg, 2),
+                "_href": href,
+            })
 
     # 등락률 절대값 기준으로 영향이 큰 섹터 상위 5개 반환
     result.sort(key=lambda x: abs(x["change_pct"]), reverse=True)
     final = result[:5]
 
-    print(f"[fetch_closing] sectors: {len(final)}개")
+    # 각 섹터의 상위 종목 2~3개 추가
+    for sec in final:
+        sec["stocks"] = fetch_sector_top_stocks(sec.pop("_href"), limit=3)
+        time.sleep(0.3)  # 네이버 부담 줄이기
+
+    print(f"[fetch_closing] sectors: {len(final)}개 (종목 포함)")
     return final
 
 
