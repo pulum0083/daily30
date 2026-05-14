@@ -764,10 +764,10 @@
       line-height: 1.75;
     }
     .ma20-badge {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 1px 5px;
+      border-radius: 3px;
       background: rgba(0,110,255,.08);
       color: var(--color-primary);
     }
@@ -824,12 +824,12 @@
     }
     .scenario-tag {
       display: inline;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--color-primary);
       background: var(--color-primary-light);
-      padding: 1px 5px;
-      border-radius: 3px;
+      padding: 2px 6px;
+      border-radius: 4px;
       margin-right: 5px;
       letter-spacing: 0.02em;
     }
