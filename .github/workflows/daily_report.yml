@@ -227,7 +227,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────────
 
   kospi-close-briefing:
-    name: "🇰🇷 코스피 마감 시황 (KST 15:45)"
+    name: "🇰🇷 코스피 마감 시황 (KST 15:40)"
     runs-on: ubuntu-latest
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi-close'
