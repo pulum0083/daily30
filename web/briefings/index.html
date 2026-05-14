@@ -134,65 +134,132 @@
 
               
               <div class="open-section">
-                <div class="open-section__title">섹터 성과</div>
-                <div class="reason-block">
-                  <div class="sector-grid">
-                    
-                    
-                    
-                    
-                    <div class="sector-row">
-                      <span class="sector-row__name">서울고속버스터미널 재개발 수혜</span>
-                      <div class="sector-row__bar-track">
-                        <div class="sector-row__bar-fill up" style="width:100%"></div>
+                <div class="open-section__title">
+                  섹터 성과
+                  <button class="info-icon-btn" onclick="openSectorModal()" aria-label="섹터 성과 설명">?</button>
+                </div>
+                <div class="reason-block" style="padding:14px 16px 16px;">
+                  <div style="display:flex;flex-direction:column;gap:14px;">
+                    <div class="sector-item">
+                      <div class="sector-item__top">
+                        <span class="sector-item__rank">1</span>
+                        <span class="sector-item__name" title="서울고속버스터미널 재개발 수혜">서울고속버스터미널 재개발 수혜</span>
+                        <span class="sector-item__pct up">+16.97%</span>
                       </div>
-                      <span class="sector-row__pct up">+16.97%</span>
-                    </div>
-                    
-                    
-                    
-                    
-                    <div class="sector-row">
-                      <span class="sector-row__name">2026 상반기 신규상장</span>
-                      <div class="sector-row__bar-track">
-                        <div class="sector-row__bar-fill up" style="width:100%"></div>
+                      <div class="sector-item__bar-track">
+                        <div class="sector-item__bar-fill up" style="width:84.85%"></div>
                       </div>
-                      <span class="sector-row__pct up">+16.30%</span>
-                    </div>
-                    
-                    
-                    
-                    
-                    <div class="sector-row">
-                      <span class="sector-row__name">출산장려정책</span>
-                      <div class="sector-row__bar-track">
-                        <div class="sector-row__bar-fill up" style="width:100%"></div>
+                      <div class="sector-item__stocks">
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">천일고속</span>
+                          <span class="sector-stock__pct">+29.96%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">동양고속</span>
+                          <span class="sector-stock__pct">+29.94%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">신세계</span>
+                          <span class="sector-stock__pct">+10.88%</span>
+                        </div>
                       </div>
-                      <span class="sector-row__pct up">+13.80%</span>
                     </div>
-                    
-                    
-                    
-                    
-                    <div class="sector-row">
-                      <span class="sector-row__name">엔젤산업</span>
-                      <div class="sector-row__bar-track">
-                        <div class="sector-row__bar-fill up" style="width:100%"></div>
+                    <div class="sector-item">
+                      <div class="sector-item__top">
+                        <span class="sector-item__rank">2</span>
+                        <span class="sector-item__name" title="2026 상반기 신규상장">2026 상반기 신규상장</span>
+                        <span class="sector-item__pct up">+16.30%</span>
                       </div>
-                      <span class="sector-row__pct up">+12.15%</span>
-                    </div>
-                    
-                    
-                    
-                    
-                    <div class="sector-row">
-                      <span class="sector-row__name">부동산 보유 자산주</span>
-                      <div class="sector-row__bar-track">
-                        <div class="sector-row__bar-fill up" style="width:100%"></div>
+                      <div class="sector-item__bar-track">
+                        <div class="sector-item__bar-fill up" style="width:81.5%"></div>
                       </div>
-                      <span class="sector-row__pct up">+7.33%</span>
+                      <div class="sector-item__stocks">
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">폴레드</span>
+                          <span class="sector-stock__pct">+300.00%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">코스모로보틱스</span>
+                          <span class="sector-stock__pct">+29.96%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">아이엠바이오로직스</span>
+                          <span class="sector-stock__pct">+20.90%</span>
+                        </div>
+                      </div>
                     </div>
-                    
+                    <div class="sector-item">
+                      <div class="sector-item__top">
+                        <span class="sector-item__rank">3</span>
+                        <span class="sector-item__name" title="출산장려정책">출산장려정책</span>
+                        <span class="sector-item__pct up">+13.80%</span>
+                      </div>
+                      <div class="sector-item__bar-track">
+                        <div class="sector-item__bar-fill up" style="width:69.0%"></div>
+                      </div>
+                      <div class="sector-item__stocks">
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">폴레드</span>
+                          <span class="sector-stock__pct">+300.00%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">삼익악기</span>
+                          <span class="sector-stock__pct">+5.71%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">SAMG엔터</span>
+                          <span class="sector-stock__pct">+3.13%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sector-item">
+                      <div class="sector-item__top">
+                        <span class="sector-item__rank">4</span>
+                        <span class="sector-item__name" title="엔젤산업">엔젤산업</span>
+                        <span class="sector-item__pct up">+12.15%</span>
+                      </div>
+                      <div class="sector-item__bar-track">
+                        <div class="sector-item__bar-fill up" style="width:60.75%"></div>
+                      </div>
+                      <div class="sector-item__stocks">
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">폴레드</span>
+                          <span class="sector-stock__pct">+300.00%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">삼익악기</span>
+                          <span class="sector-stock__pct">+5.71%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">SAMG엔터</span>
+                          <span class="sector-stock__pct">+3.13%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="sector-item">
+                      <div class="sector-item__top">
+                        <span class="sector-item__rank">5</span>
+                        <span class="sector-item__name" title="부동산 보유 자산주">부동산 보유 자산주</span>
+                        <span class="sector-item__pct up">+7.33%</span>
+                      </div>
+                      <div class="sector-item__bar-track">
+                        <div class="sector-item__bar-fill up" style="width:36.65%"></div>
+                      </div>
+                      <div class="sector-item__stocks">
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">천일고속</span>
+                          <span class="sector-stock__pct">+29.96%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">동양고속</span>
+                          <span class="sector-stock__pct">+29.94%</span>
+                        </div>
+                        <div class="sector-stock">
+                          <span class="sector-stock__name">이마트</span>
+                          <span class="sector-stock__pct">+11.98%</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1202,6 +1269,28 @@
         </ul>
         <br>
         <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 섹터 성과 모달 -->
+  <div class="info-modal-backdrop" id="sector-modal" onclick="if(event.target===this)closeSectorModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
+      <button class="info-modal__close" onclick="closeSectorModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+      <div class="info-modal__body">
+        <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+          <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요. 가득 차면 +20% 이상이라는 뜻이에요.</li>
+          <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
       </div>
     </div>
   </div>
