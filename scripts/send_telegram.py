@@ -28,31 +28,29 @@ def load_credentials(lang: str = "ko") -> tuple[str, str]:
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN")
 
     if lang == "en":
-        # EN 전용 봇 토큰 우선 사용 (없으면 기본 봇 토큰 사용)
         bot_token = os.environ.get("TELEGRAM_BOT_TOKEN_EN") or bot_token
         chat_id = os.environ.get("TELEGRAM_CHAT_ID_EN", "")
-        if not chat_id:
+        if not bot_token or not chat_id:
             config_file = BASE_DIR / "config.json"
             if config_file.exists():
                 with open(config_file, encoding="utf-8") as f:
                     cfg = json.load(f)
-                chat_id = cfg.get("telegram", {}).get("chat_id_en", "")
+                if not chat_id:
+                    chat_id = cfg.get("telegram", {}).get("chat_id_en", "")
+                if not bot_token:
+                    bot_token = (
+                        cfg.get("telegram", {}).get("bot_token_en", "")
+                        or cfg.get("telegram", {}).get("bot_token", "")
+                    )
         if not chat_id:
             raise RuntimeError(
                 "English Telegram channel not configured.\n"
                 "Set env var TELEGRAM_CHAT_ID_EN, "
                 "or add telegram.chat_id_en to config.json."
             )
-        if bot_token and chat_id:
-            return bot_token, chat_id
-        config_file = BASE_DIR / "config.json"
-        if config_file.exists():
-            with open(config_file, encoding="utf-8") as f:
-                cfg = json.load(f)
-            token = bot_token or cfg.get("telegram", {}).get("bot_token_en", "") or cfg.get("telegram", {}).get("bot_token", "")
-            if token and chat_id:
-                return token, chat_id
-        raise RuntimeError("TELEGRAM_BOT_TOKEN not set.")
+        if not bot_token:
+            raise RuntimeError("TELEGRAM_BOT_TOKEN not set.")
+        return bot_token, chat_id
 
     # Korean channel (default)
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
@@ -275,9 +273,8 @@ def main():
         import re
         import pytz
         today_str = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y.%m.%d")
-        # 메시지 첫 줄에서 날짜 패턴 추출 (예: 2026.04.27)
-        first_line = message_text.split("\n")[0]
-        date_match = re.search(r"(\d{4}\.\d{2}\.\d{2})", first_line)
+        # 메시지 전체에서 날짜 패턴 추출 (예: 2026.04.27)
+        date_match = re.search(r"(\d{4}\.\d{2}\.\d{2})", message_text)
         if date_match and date_match.group(1) != today_str:
             print(
                 f"[send_telegram] ❌ Stale message detected: content date={date_match.group(1)}, today={today_str}. "
