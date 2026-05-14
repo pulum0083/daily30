@@ -174,23 +174,47 @@ def build_fallback_message(briefing_type: str) -> str:
     return "\n".join(parts)
 
 
+SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
+
+
+def _load_sent_log() -> dict:
+    if SENT_LOG_FILE.exists():
+        with open(SENT_LOG_FILE, encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+    return {}
+
+
+def _save_sent_log(log: dict) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SENT_LOG_FILE, "w", encoding="utf-8") as f:
+        json.dump(log, f, indent=2, ensure_ascii=False)
+
+
 def already_sent_today(briefing_type: str, lang: str = "ko") -> bool:
-    """Return True if a message was already sent today (KST) for this type/lang."""
+    """Return True if a message was already sent today (KST) for this type/lang.
+
+    telegram_sent_log.json에 날짜를 기록하여 git에 커밋 — GitHub Actions
+    ephemeral 환경에서도 체크아웃 시 이전 발송 기록을 읽을 수 있다.
+    """
     from datetime import datetime
     import pytz
     today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
-    suffix = f"_{lang}" if lang != "ko" else ""
-    flag_file = DATA_DIR / f"telegram_sent{suffix}_{briefing_type}_{today}.flag"
-    return flag_file.exists()
+    log = _load_sent_log()
+    return log.get(briefing_type, {}).get(lang) == today
 
 
 def mark_sent_today(briefing_type: str, lang: str = "ko") -> None:
     from datetime import datetime
     import pytz
     today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
-    suffix = f"_{lang}" if lang != "ko" else ""
-    flag_file = DATA_DIR / f"telegram_sent{suffix}_{briefing_type}_{today}.flag"
-    flag_file.touch()
+    log = _load_sent_log()
+    if briefing_type not in log:
+        log[briefing_type] = {}
+    log[briefing_type][lang] = today
+    _save_sent_log(log)
 
 
 def main():
