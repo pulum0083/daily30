@@ -62,8 +62,71 @@ def _yf_history(ticker: str, retries: int = 3, **kwargs):
     return pd.DataFrame()
 
 
+def _fetch_naver_index(code: str) -> dict:
+    """네이버 모바일 API에서 코스피/코스닥 실시간 종가를 반환한다.
+
+    Yahoo(yfinance)는 한국 지수에 15~30분 지연이 있어 15:40 시점에 종가가 반영되지 않음.
+    네이버는 동시호가 마감(15:30) 직후 closePrice가 확정되므로 우선 사용한다.
+    """
+    url = f"https://m.stock.naver.com/api/index/{code}/basic"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            payload = json.loads(resp.read())
+        price = float(payload["closePrice"].replace(",", ""))
+        abs_chg = float(payload["compareToPreviousClosePrice"].replace(",", ""))
+        ratio = float(payload["fluctuationsRatio"].replace(",", ""))
+        # compareToPreviousPrice.code: 2=상승, 5=하락, 3=보합, 1=상한, 4=하한
+        direction = (payload.get("compareToPreviousPrice") or {}).get("code", "3")
+        sign = 1 if direction in ("1", "2") else (-1 if direction in ("4", "5") else 0)
+        return {
+            "price": round(price, 2),
+            "change_pct": round(sign * abs(ratio), 2),
+            "change_abs": round(sign * abs(abs_chg), 2),
+        }
+    except Exception as e:
+        print(f"[fetch_closing] naver index {code} failed: {e}", file=sys.stderr)
+        return {}
+
+
+def _fetch_naver_usdkrw() -> dict:
+    """네이버 환율 API에서 원/달러 종가를 반환한다."""
+    url = "https://m.stock.naver.com/front-api/marketIndex/prices?reutersCode=FX_USDKRW&category=exchange&pageSize=10&page=1"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            payload = json.loads(resp.read())
+        rows = payload.get("result") or []
+        if len(rows) < 2:
+            return {}
+        today, yest = rows[0], rows[1]
+        price = float(today["closePrice"].replace(",", ""))
+        prev  = float(yest["closePrice"].replace(",", ""))
+        chg_abs = round(price - prev, 2)
+        chg_pct = round((price - prev) / prev * 100, 2) if prev else 0.0
+        return {"price": round(price, 2), "change_pct": chg_pct, "change_abs": chg_abs}
+    except Exception as e:
+        print(f"[fetch_closing] naver USDKRW failed: {e}", file=sys.stderr)
+        return {}
+
+
 def get_closing_price(ticker: str) -> dict:
-    """마감 종가·등락률을 반환한다."""
+    """마감 종가·등락률을 반환한다.
+
+    한국 지수·환율은 네이버 실시간 API를 우선 사용하고, 실패 시 yfinance(지연 있음)로 폴백한다.
+    그 외 (NQ=F / ES=F / CL=F 등) 해외 티커는 yfinance만 사용.
+    """
+    naver_first = {
+        "^KS11":   lambda: _fetch_naver_index("KOSPI"),
+        "^KQ11":   lambda: _fetch_naver_index("KOSDAQ"),
+        "USDKRW=X": _fetch_naver_usdkrw,
+    }
+    if ticker in naver_first:
+        result = naver_first[ticker]()
+        if result and "price" in result:
+            return result
+        print(f"[fetch_closing] {ticker} naver miss → yfinance fallback", file=sys.stderr)
+
     hist = _yf_history(ticker, period="5d", interval="1d")
     if len(hist) < 2:
         return {"error": "insufficient data"}
