@@ -9,7 +9,6 @@
     { "src": "^/briefings/ko/([^/]+)/?$",                 "dest": "/briefings/$1-kospi.html" },
     { "src": "^/briefings/us/([^/]+)/?$",                 "dest": "/briefings/$1-us.html" },
     { "src": "^/briefings/ko-close/([^/]+)/?$",           "dest": "/briefings/ko-close/$1/index.html" },
-    { "src": "^/briefings/weekly/([^/]+)/?$",             "dest": "/briefings/$1-weekly.html" },
     { "handle": "filesystem" }
   ]
 }
