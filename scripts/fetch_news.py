@@ -159,7 +159,7 @@ def get_gemini_api_key() -> str:
 # RSS 파싱 (표준 라이브러리만 사용)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _parse_pub_date(pub_date_str: str) -> datetime | None:
+def _parse_pub_date(pub_date_str: str) -> "datetime | None":
     """RSS pubDate 문자열을 UTC datetime으로 파싱한다."""
     import email.utils
     try:
