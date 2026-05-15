@@ -33,6 +33,16 @@ async function alreadyRunToday(ghPat, type) {
 }
 
 export default async function handler(req, res) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return res.status(500).json({ error: 'Missing CRON_SECRET env var' });
+  }
+
+  const auth = req.headers['authorization'];
+  if (auth !== `Bearer ${cronSecret}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { type } = req.query;
   if (!VALID_TYPES.includes(type)) {
     return res.status(400).json({ error: `Invalid type: ${type}` });
