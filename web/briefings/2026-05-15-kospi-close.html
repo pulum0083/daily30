@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-PW9RHHFPM4');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Double-Shot — 코스피 마감 시황 2026-05-15</title>
+  <meta property="og:title" content="Double-Shot — 코스피 마감 시황 2026-05-15" />
+  <meta property="og:description" content="2026-05-15 코스피 마감: 코스피 -6.12% 역대급 폭락 — 패닉셀 마감" />
+  <meta property="og:image" content="https://doubleshot.space/briefings/2026-05-15-kospi-close-og.svg" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://doubleshot.space/briefings/2026-05-15-kospi-close-og.svg" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="/favicon.svg"/>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    /* ── 마감 시황 전용 컴포넌트 ── */
+    .close-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .close-idx {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+    }
+    .close-idx__name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .close-idx__val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .close-idx__chg { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .close-idx__chg.up   { color: var(--status-up); }
+    .close-idx__chg.down { color: var(--status-down); }
+    .close-idx__vol { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+    /* ── 사이드바 섹터 패널 (우측 날개용) ── */
+    .sector-panel { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    .sector-item { display: flex; flex-direction: column; gap: 6px; }
+    .sector-item__top { display: flex; align-items: center; gap: 8px; }
+    .sector-item__rank {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: var(--grey-50); color: var(--text-tertiary);
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .sector-item__name {
+      flex: 1; min-width: 0;
+      font-size: 13px; font-weight: 600; color: var(--text-primary);
+      line-height: 1.35;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sector-item__pct {
+      font-size: 13px; font-weight: 800;
+      font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
+    .sector-item__pct.up   { color: var(--status-up); }
+    .sector-item__pct.down { color: var(--status-down); }
+    .sector-item__bar-track {
+      height: 5px; background: var(--grey-50);
+      border-radius: 100px; overflow: hidden;
+    }
+    .sector-item__bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+    .sector-item__bar-fill.up   { background: var(--status-up); }
+    .sector-item__bar-fill.down { background: var(--status-down); }
+    .sector-item__stocks {
+      display: flex; flex-direction: column; gap: 3px;
+      margin-top: 4px; padding-left: 26px;
+    }
+    .sector-stock {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+      font-size: 12px; line-height: 1.4;
+    }
+    .sector-stock__name {
+      color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      min-width: 0;
+    }
+    .sector-stock__pct {
+      font-weight: 600; font-variant-numeric: tabular-nums; flex-shrink: 0;
+      color: var(--text-tertiary);
+    }
+
+    .top-stock-list { display: flex; flex-direction: column; gap: 10px; }
+    .top-stock-card {
+      background: var(--surface-secondary);
+      border: 1px solid var(--line-secondary);
+      border-radius: var(--r-8);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .top-stock-card__rank {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--status-up-bg); color: var(--status-up);
+      font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .top-stock-card__body { flex: 1; min-width: 0; }
+    .top-stock-card__header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .top-stock-card__name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .top-stock-card__change {
+      font-size: 13px; font-weight: 700;
+      padding: 2px 7px; border-radius: 4px;
+      background: var(--status-up-bg); color: var(--status-up);
+    }
+    .top-stock-card__price { font-size: 13px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+    .top-stock-card__reason { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-top: 5px; }
+
+    .close-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700;
+      padding: 2px 9px; border-radius: 100px;
+      background: rgba(100,100,200,.12); color: #6366F1;
+    }
+
+    @media (max-width: 600px) {
+      .close-summary { grid-template-columns: repeat(2, 1fr); }
+      .close-summary .close-idx:last-child { grid-column: span 2; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="gnb">
+    <div class="gnb__inner">
+      <a class="gnb__logo" href="/" style="text-decoration:none;">
+        <div class="gnb__logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+            <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+            <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+      <div class="gnb__meta">
+        <span class="gnb__date" id="gnb-date">2026-05-15 KST 15:40</span>
+        <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
+          <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout-wrapper">
+    <div class="layout-grid">
+
+      <!-- ── 왼쪽 메인 ── -->
+      <main class="layout-grid__main">
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header" style="cursor:default;">
+            <div class="accordion-header__left">
+              <div class="accordion-header__date">
+                <span class="accordion-header__date-label">2026-05-15</span>
+                <span class="accordion-header__date-sub">금 · 15:40 마감</span>
+              </div>
+            </div>
+            <div class="accordion-header__badges">
+              <span class="close-badge">🔔 마감</span>
+            </div>
+          </div>
+          <div class="accordion-body" style="grid-template-rows:1fr;">
+          <div class="accordion-body__inner" style="overflow:visible;">
+
+            <!-- 마감 지수 -->
+            <div class="open-section">
+              <div class="open-section__title">마감 지수</div>
+              <div class="close-summary">
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSPI</div>
+                  <div class="close-idx__val">7,493.18</div>
+                  <div class="close-idx__chg down">▼ 488.23 (-6.12%)</div>
+                  
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">KOSDAQ</div>
+                  <div class="close-idx__val">1,129.82</div>
+                  <div class="close-idx__chg down">▼ 61.27 (-5.14%)</div>
+                </div>
+                <div class="close-idx">
+                  <div class="close-idx__name">원/달러</div>
+                  <div class="close-idx__val">1,500.10</div>
+                  <div class="close-idx__chg up">▲ +0.44%</div>
+                  <div class="close-idx__vol">원화 약세 마감</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 시황 분석 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                <span class="reason-section-title">코스피 -6.12% 역대급 폭락 — 패닉셀 마감</span>
+              </div>
+              <div class="reason-block">
+                <p>오늘 코스피가 <b>-6.12%(-488.23p)</b>라는 충격적인 낙폭으로 마감했어요. 장 초반 8,042까지 올랐다가 이후 일방적으로 밀리며 7,399까지 추락하는 사실상 패닉셀 장세였어요. 나스닥 선물이 <b>-1.11%</b> 약세를 보인 데다 원달러 환율이 <b>1,500원</b> 선을 재차 돌파하며 외국인 이탈을 가속시켰거든요.</p>
+                
+                <ul>
+                  
+                  <li>📉 코스피가 <b>-6.12%</b>, 무려 <b>488p</b>나 빠지며 사실상 붕괴에 가까운 하루를 보냈어요. 장 고점 <b>8,042</b>에서 저점 <b>7,399</b>까지 단 하루에 <b>643p</b>가 증발한 거예요. 투자심리가 완전히 무너진 패닉셀 장세였어요.</li>
+                  
+                  <li>💵 원달러 환율이 <b>1,500원</b> 선을 재돌파하며 외국인 매도를 자극했어요. 환율이 <b>+0.44%(+6.6원)</b> 올라서면서 원화 가치가 떨어지자 외국인 입장에서는 추가 손실을 피하려는 이탈 매물이 쏟아졌거든요.</li>
+                  
+                  <li>🇺🇸 나스닥 선물이 <b>-1.11%</b>, S&P500 선물도 <b>-0.63%</b> 하락하며 글로벌 위험회피 심리가 국내 시장을 강하게 짓눌렀어요. 특히 WTI 유가가 <b>+2.11%</b> 오르며 인플레이션 재점화 우려도 함께 부상했거든요.</li>
+                  
+                  <li>🛢️ WTI 원유가 <b>103.3달러(+2.11%)</b>까지 치솟으며 에너지 비용 부담과 글로벌 긴축 장기화 우려를 자극했어요. 윤활유 섹터가 예외적으로 <b>+3.24%</b> 강세를 보인 것도 이 유가 급등의 수혜였어요.</li>
+                  
+                </ul>
+                
+              </div>
+            </div>
+
+            <!-- 코스피 장중 흐름 -->
+            
+            <div class="open-section" id="intraday-section">
+              <div class="open-section__title">코스피 장중 흐름</div>
+              <div class="reason-block" style="padding:16px;">
+                <canvas id="intraday-chart" style="width:100%;height:120px;display:block;"></canvas>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-tertiary);font-variant-numeric:tabular-nums;">
+                  <span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span>
+                </div>
+              </div>
+            </div>
+            
+
+            <!-- 섹터 성과는 우측 패널로 이동 -->
+
+            <!-- 오늘의 급등주 TOP 3 -->
+            
+            <div class="open-section">
+              <div class="open-section__title">오늘의 급등주 TOP 3</div>
+              <div class="top-stock-list">
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">1</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">한세엠케이</span>
+                      <span class="top-stock-card__change">+29.98%</span>
+                      <span class="top-stock-card__price">1,613원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">패션·의류 업황 회복 기대감 속에 단기 저평가 매수세가 집중됐어요. 지수 급락 속 개별 종목 테마 수급이 쏠리는 역발상 매매가 유입됐거든요.</div>
+                    
+                  </div>
+                </div>
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">2</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">미래에셋 인버스 2X 은 선물 ETN B</span>
+                      <span class="top-stock-card__change">+21.97%</span>
+                      <span class="top-stock-card__price">1,760원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">코스피가 <b>-6%</b>대 폭락하는 공포 장세에서 안전자산인 은(銀) 가격이 급락하자 인버스 레버리지 상품이 반사 수익을 냈어요. 위험자산 회피 심리가 극에 달한 날 레버리지 인버스로 수급이 몰렸거든요.</div>
+                    
+                  </div>
+                </div>
+                
+                <div class="top-stock-card">
+                  <div class="top-stock-card__rank">3</div>
+                  <div class="top-stock-card__body">
+                    <div class="top-stock-card__header">
+                      <span class="top-stock-card__name">삼성 인버스 2X 은 선물 ETN</span>
+                      <span class="top-stock-card__change">+21.86%</span>
+                      <span class="top-stock-card__price">34,840원</span>
+                    </div>
+                    
+                    <div class="top-stock-card__reason">미래에셋 인버스 2X 은 선물 ETN B와 동일하게, 은 선물 가격 하락에 연동한 인버스 레버리지 구조가 오늘 급락장에서 큰 폭의 수익을 냈어요. 헤지 수요와 단기 차익 매매가 동시에 유입된 거예요.</div>
+                    
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+
+          </div><!-- /accordion-body__inner -->
+          </div><!-- /accordion-body -->
+        </div><!-- /accordion-item -->
+      </main>
+
+      <!-- ── 오른쪽 사이드바: 섹터 성과 ── -->
+      <aside class="layout-grid__right">
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title" style="display:inline-flex;align-items:center;gap:6px;">
+              섹터 성과
+              <button class="info-icon-btn" onclick="openSectorModal()" aria-label="섹터 성과 설명">?</button>
+            </span>
+            <span class="pub-time">상승률 TOP 5</span>
+          </div>
+          
+          <div class="sector-panel">
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">1</span>
+                <span class="sector-item__name" title="서울고속버스터미널 재개발 수혜">서울고속버스터미널 재개발 수혜</span>
+                <span class="sector-item__pct up">+3.56%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:17.8%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">동양고속</span>
+                  <span class="sector-stock__pct">+17.08%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">천일고속</span>
+                  <span class="sector-stock__pct">+12.03%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">신세계</span>
+                  <span class="sector-stock__pct">+1.12%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">2</span>
+                <span class="sector-item__name" title="윤활유">윤활유</span>
+                <span class="sector-item__pct up">+3.24%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:16.200000000000003%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">한국쉘석유</span>
+                  <span class="sector-stock__pct">+20.08%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">흥구석유</span>
+                  <span class="sector-stock__pct">+3.63%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">GS</span>
+                  <span class="sector-stock__pct">+3.48%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">3</span>
+                <span class="sector-item__name" title="CCTV＆DVR">CCTV＆DVR</span>
+                <span class="sector-item__pct up">+1.45%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:7.25%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">앤씨앤</span>
+                  <span class="sector-stock__pct">+29.89%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">아이디스</span>
+                  <span class="sector-stock__pct">+1.51%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">코콤</span>
+                  <span class="sector-stock__pct">-1.82%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">4</span>
+                <span class="sector-item__name" title="지역화폐">지역화폐</span>
+                <span class="sector-item__pct up">+1.44%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:7.199999999999999%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">코나아이</span>
+                  <span class="sector-stock__pct">+14.01%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">웹케시</span>
+                  <span class="sector-stock__pct">+0.49%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">유라클</span>
+                  <span class="sector-stock__pct">-0.09%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+          </div>
+          
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- 섹터 성과 모달 -->
+  <div class="info-modal-backdrop" id="sector-modal" onclick="if(event.target===this)closeSectorModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
+      <button class="info-modal__close" onclick="closeSectorModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+      <div class="info-modal__body">
+        <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+          <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요. 가득 차면 +20% 이상이라는 뜻이에요.</li>
+          <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openSectorModal() {
+      document.getElementById('sector-modal').classList.add('is-open');
+    }
+    function closeSectorModal() {
+      document.getElementById('sector-modal').classList.remove('is-open');
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSectorModal();
+    });
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      if (window._redrawIntraday) window._redrawIntraday();
+    }
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  </script>
+
+  
+  <script>
+    (function drawIntradayChart() {
+      const prices  = [7952.43, 7974.34, 8004.05, 8017.44, 8042.85, 8036.97, 8038.3, 7984.41, 7965.5, 7947.65, 7968.41, 7971.36, 7967.31, 7942.23, 7925.19, 7920.51, 7917.91, 7885.76, 7870.44, 7909.43, 7891.52, 7841.01, 7800.2, 7748.07, 7748.19, 7728.38, 7677.98, 7656.37, 7720.39, 7686.88, 7729.66, 7715.88, 7749.46, 7742.77, 7742.84, 7719.29, 7706.61, 7699.14, 7705.05, 7705.58, 7694.23, 7694.51, 7681.0, 7713.56, 7714.15, 7733.43, 7719.4, 7705.19, 7685.17, 7683.0, 7667.37, 7638.9, 7619.33, 7633.35, 7615.46, 7635.38, 7612.39, 7581.52, 7564.61, 7541.71, 7524.77, 7558.52, 7596.84, 7572.97, 7560.74, 7530.52, 7480.23, 7475.09, 7454.72, 7441.55, 7433.63, 7399.25];
+      const highVal = 8042.85;
+      const highIdx = 4;
+      const lowVal  = 7399.25;
+      const lowIdx  = 71;
+
+      if (!prices.length) return;
+      const canvas = document.getElementById('intraday-chart');
+      if (!canvas) return;
+
+      function draw() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const W = rect.width, H = rect.height;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const isDark    = document.documentElement.classList.contains('dark');
+        const isUp      = prices[prices.length - 1] >= prices[0];
+        const lineColor = isUp ? '#E03131' : '#2775ED';
+        const fillRgb   = isUp ? '224,49,49' : '39,117,237';
+        const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+        const highColor = '#E03131';
+        const lowColor  = '#2775ED';
+        const font      = "600 11px 'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+
+        const PAD = { top: 28, right: 8, bottom: 26, left: 8 };
+        const cW  = W - PAD.left - PAD.right;
+        const cH  = H - PAD.top  - PAD.bottom;
+        const minP = lowVal  - 6, maxP = highVal + 6, range = maxP - minP;
+
+        function xOf(i) { return PAD.left + (i / (prices.length - 1)) * cW; }
+        function yOf(v) { return PAD.top  + (1 - (v - minP) / range) * cH; }
+
+        // 그리드
+        ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75].forEach(t => {
+          const y = PAD.top + t * cH;
+          ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cW, y); ctx.stroke();
+        });
+
+        // 그라데이션 면
+        const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top + cH);
+        grad.addColorStop(0, isDark ? `rgba(${fillRgb},.22)` : `rgba(${fillRgb},.13)`);
+        grad.addColorStop(1, `rgba(${fillRgb},0)`);
+
+        // catmull-rom 곡선
+        const pts = prices.map((p, i) => [xOf(i), yOf(p)]);
+        const n   = pts.length;
+        function spline(draw2fill) {
+          ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 0; i < n - 1; i++) {
+            const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,n-1)];
+            ctx.bezierCurveTo(
+              p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6,
+              p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6,
+              p2[0], p2[1]
+            );
+          }
+          if (draw2fill) {
+            ctx.lineTo(pts[n-1][0], PAD.top+cH); ctx.lineTo(pts[0][0], PAD.top+cH);
+            ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+          }
+        }
+        spline(true);
+        spline(false);
+        ctx.strokeStyle = lineColor; ctx.lineWidth = 1.8; ctx.lineJoin = 'round'; ctx.stroke();
+
+        // 마커
+        function drawMarker(idx, val, color, arrow, above) {
+          const x=xOf(idx), y=yOf(val), r=4.5, gap=8;
+          const labelText = `${arrow} ${val.toLocaleString()}`;
+          ctx.font = font;
+          const tw = ctx.measureText(labelText).width, LH = 14;
+          let lx = x - tw/2;
+          lx = Math.max(PAD.left, Math.min(lx, PAD.left+cW-tw));
+          let ly = above ? y-r-gap-LH/2 : y+r+gap+LH/2;
+          ly = above ? Math.max(LH/2+2, ly) : Math.min(H-LH/2-2, ly);
+          // 원
+          ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+          ctx.fillStyle=color; ctx.fill();
+          ctx.strokeStyle=isDark?'#1C1D1F':'#fff'; ctx.lineWidth=1.5; ctx.stroke();
+          // 레이블
+          const bg = isDark?'rgba(28,29,31,.92)':'rgba(255,255,255,.92)';
+          ctx.fillStyle=bg; ctx.fillRect(lx-3, ly-LH/2, tw+6, LH);
+          ctx.fillStyle=color; ctx.fillText(labelText, lx, ly+4);
+        }
+        drawMarker(highIdx, highVal, highColor, '▲ 고점', true);
+        drawMarker(lowIdx,  lowVal,  lowColor,  '▼ 저점', false);
+      }
+
+      window._redrawIntraday = draw;
+      draw();
+      window.addEventListener('resize', draw);
+    })();
+  </script>
+  
+</body>
+</html>
