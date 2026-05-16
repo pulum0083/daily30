@@ -11,6 +11,7 @@
       --bg:                   #F3F5F7;
       --surface:              #FFFFFF;
       --surface-secondary:    #F9FAFB;
+      --surface-hover:        #F3F4F6;
       --panel:                #FFFFFF;
 
       /* Text */
@@ -70,6 +71,7 @@
       --bg:                   #111213;
       --surface:              #1C1D1F;
       --surface-secondary:    #242628;
+      --surface-hover:        #2A2B2D;
       --panel:                #1C1D1F;
 
       --text-primary:         #F3F5F7;
@@ -982,7 +984,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 11px 0;
+      padding: 15px 0;
     }
 
     .mkt-row-info {
@@ -1531,10 +1533,10 @@
   gap: 24px;
 }
 .briefing-archive {
-  grid-area: archive;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  grid-column: 1 / -1;
   margin-top: 12px;
 }
 
@@ -1612,7 +1614,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 11px 0;
+  padding: 15px 0;
 }
 .mkt-row-info { flex: 1; min-width: 0; }
 .mkt-name {
@@ -1620,7 +1622,7 @@
   font-size: 11px;
   font-weight: 500;
   color: var(--text-secondary);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1832,12 +1834,168 @@
 .acc-dot {
   width: 9px;
   height: 9px;
-  border-radius: 50%;
+  border-radius: 3px;
   flex-shrink: 0;
   cursor: default;
 }
 .acc-dot.correct { background: #16A34A; }
 .acc-dot.wrong   { background: #E03131; }
+
+/* ── 정확도 카드 Option C ── */
+.accuracy-standalone__stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.acc-stat-tile {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.acc-stat-tile.acc-good { background: #F0FDF4; }
+.acc-stat-tile.acc-mid  { background: #FEFCE8; }
+.acc-stat-tile.acc-bad  { background: #FEF2F2; }
+
+html.dark .acc-stat-tile.acc-good { background: rgba(20, 83, 45, 0.15); }
+html.dark .acc-stat-tile.acc-mid  { background: rgba(113, 63, 18, 0.15); }
+html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
+
+.acc-streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: var(--surface-secondary);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.acc-streak__icon { font-size: 14px; }
+.acc-streak__text strong { color: #16A34A; }
+
+/* ── 아카이브 카드 리스트 ── */
+.archive-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line-secondary);
+  text-decoration: none;
+  color: inherit;
+  transition: background .15s, border-color .15s;
+}
+.archive-card:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-primary);
+}
+.archive-card__date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+.archive-card__badges {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+.archive-card__result {
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 16px;
+  text-align: right;
+}
+.archive-card__result.hit  { color: #16A34A; }
+.archive-card__result.miss { color: #E03131; }
+.archive-card__arrow {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+/* ── 사이드바 CTA ── */
+.sidebar-cta {
+  padding: 14px 16px;
+  border-top: 1px solid var(--line-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.sidebar-cta__tg {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: #F5F8FA;
+  border: 1px solid #D1DCE5;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background .15s;
+}
+.sidebar-cta__tg:hover { background: #EBF1F6; }
+
+html.dark .sidebar-cta__tg {
+  background: var(--surface-secondary);
+  border-color: var(--line-primary);
+}
+html.dark .sidebar-cta__tg:hover { background: var(--surface-hover); }
+html.dark .sidebar-cta__tg-title { color: #7EC8E3; }
+html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
+
+.sidebar-cta__tg-icon {
+  width: 30px;
+  height: 30px;
+  background: #5BA4CF;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-cta__tg-text { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-cta__tg-title { font-size: 13px; font-weight: 700; color: #2C5F7A; }
+.sidebar-cta__tg-sub   { font-size: 10px; color: #5C8DA8; }
+.sidebar-cta__divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.sidebar-cta__divider::before,
+.sidebar-cta__divider::after { content: ''; flex: 1; height: 1px; background: var(--line-secondary); }
+.sidebar-cta__email-form { display: flex; gap: 6px; }
+.sidebar-cta__input {
+  flex: 1;
+  font-size: 12px;
+  padding: 7px 10px;
+  border: 1px solid var(--line-secondary);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+  outline: none;
+}
+.sidebar-cta__input:focus { border-color: var(--line-primary); }
+.sidebar-cta__btn {
+  font-size: 12px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: var(--text-primary);
+  color: var(--surface);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
 
 /* ============================================================
    Responsive — Tablet/Mobile (≤900px)

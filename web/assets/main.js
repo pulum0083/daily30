@@ -462,3 +462,23 @@
     }
   });
 
+  function ctaSubscribe(e) {
+    e.preventDefault();
+    const input = e.target.querySelector('input[type="email"]');
+    const btn   = e.target.querySelector('button');
+    const email = input.value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).then(r => {
+      btn.textContent = r.ok ? '완료!' : '오류';
+      if (r.ok) input.value = '';
+    }).catch(() => { btn.textContent = '오류'; })
+      .finally(() => {
+        setTimeout(() => { btn.disabled = false; btn.textContent = '구독'; }, 3000);
+      });
+  }
+
