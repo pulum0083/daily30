@@ -1546,11 +1546,9 @@
 .layout-grid__right {
   position: sticky;
   top: calc(var(--gnb-height, 52px) + 24px);
-  max-height: calc(100vh - var(--gnb-height, 52px) - 48px);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow: hidden;
 }
 
 /* ============================================================
