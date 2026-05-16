@@ -126,37 +126,82 @@ Step 1-1 추가 블록 아래에 이어서 추가:
 }
 ```
 
-- [ ] **Step 1-3: CTA 스타일 추가**
+- [ ] **Step 1-3: 시장 지표 행 간격 확대**
+
+`style.css`의 `.mkt-row {` 블록 (line 1611)에서 `padding: 11px 0` → `padding: 15px 0` 으로 수정:
+
+```css
+.mkt-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;   /* 11px → 15px */
+}
+```
+
+같은 파일 안 반응형 블록 (line ~985)의 `.mkt-row { padding: 11px 0; }` 도 동일하게 `15px`로 수정.
+
+`.mkt-name { margin-bottom: 5px; }` 도 `6px`로 변경:
+
+```css
+.mkt-name {
+  ...
+  margin-bottom: 6px;   /* 5px → 6px */
+}
+```
+
+- [ ] **Step 1-4: CTA 스타일 추가**
 
 Step 1-2 블록 아래에 이어서 추가:
 
 ```css
 /* ── 사이드바 CTA ── */
 .sidebar-cta {
+  padding: 14px 16px;
   border-top: 1px solid var(--line-secondary);
-  padding-top: 14px;
-  margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 .sidebar-cta__tg {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12px;
-  color: var(--text-secondary);
+  gap: 10px;
+  padding: 11px 14px;
+  background: #F5F8FA;
+  border: 1px solid #D1DCE5;
+  border-radius: 10px;
   text-decoration: none;
+  transition: background .15s;
 }
-.sidebar-cta__tg:hover { color: var(--text-primary); }
-.sidebar-cta__email-form {
+.sidebar-cta__tg:hover { background: #EBF1F6; }
+.sidebar-cta__tg-icon {
+  width: 30px;
+  height: 30px;
+  background: #5BA4CF;
+  border-radius: 8px;
   display: flex;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
+.sidebar-cta__tg-text { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-cta__tg-title { font-size: 13px; font-weight: 700; color: #2C5F7A; }
+.sidebar-cta__tg-sub   { font-size: 10px; color: #5C8DA8; }
+.sidebar-cta__divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.sidebar-cta__divider::before,
+.sidebar-cta__divider::after { content: ''; flex: 1; height: 1px; background: var(--line-secondary); }
+.sidebar-cta__email-form { display: flex; gap: 6px; }
 .sidebar-cta__input {
   flex: 1;
   font-size: 12px;
-  padding: 6px 10px;
+  padding: 7px 10px;
   border: 1px solid var(--line-secondary);
   border-radius: 8px;
   background: var(--surface);
@@ -166,7 +211,7 @@ Step 1-2 블록 아래에 이어서 추가:
 .sidebar-cta__input:focus { border-color: var(--line-primary); }
 .sidebar-cta__btn {
   font-size: 12px;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 8px;
   background: var(--text-primary);
   color: var(--surface);
@@ -176,7 +221,7 @@ Step 1-2 블록 아래에 이어서 추가:
 }
 ```
 
-- [ ] **Step 1-4: CSS 변수 확인 및 추가**
+- [ ] **Step 1-5: CSS 변수 확인 및 추가**
 
 `style.css` 상단 `:root` 블록을 확인. `--surface-secondary`, `--surface-hover`가 없으면 추가:
 
@@ -193,7 +238,7 @@ Step 1-2 블록 아래에 이어서 추가:
 --surface-hover: #2A2B2D;
 ```
 
-- [ ] **Step 1-5: 커밋**
+- [ ] **Step 1-6: 커밋**
 
 ```bash
 git add web/assets/style.css
@@ -441,9 +486,15 @@ git commit -m "feat(main.js): CTA 이메일 구독 핸들러 추가"
 ```html
         <div class="sidebar-cta">
           <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            텔레그램 채널 구독
+            <div class="sidebar-cta__tg-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div class="sidebar-cta__tg-text">
+              <span class="sidebar-cta__tg-title">텔레그램 채널 구독</span>
+              <span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑 수신</span>
+            </div>
           </a>
+          <div class="sidebar-cta__divider">또는 이메일로</div>
           <form class="sidebar-cta__email-form" onsubmit="ctaSubscribe(event)">
             <input class="sidebar-cta__input" type="email" placeholder="이메일 주소" required />
             <button class="sidebar-cta__btn" type="submit">구독</button>
