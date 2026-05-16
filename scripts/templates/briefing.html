@@ -247,16 +247,21 @@
             <span class="accuracy-standalone__sub">코스피 시초가</span>
           </div>
           <div class="accuracy-standalone__stats">
-            <div class="acc-stat">
+            <div class="acc-stat-tile {{ accuracy.last7_pct | acc_cls }}">
               <span class="acc-val {{ accuracy.last7_pct | acc_cls }}">{{ accuracy.last7_pct }}%</span>
               <span class="acc-lbl">최근 {{ accuracy.last7_total }}일</span>
             </div>
-            <div class="acc-divider"></div>
-            <div class="acc-stat">
+            <div class="acc-stat-tile {{ accuracy.last30_pct | acc_cls }}">
               <span class="acc-val {{ accuracy.last30_pct | acc_cls }}">{{ accuracy.last30_pct }}%</span>
               <span class="acc-lbl">최근 {{ accuracy.last30_total }}일</span>
             </div>
           </div>
+          {% if accuracy.streak is defined and accuracy.streak >= 2 %}
+          <div class="acc-streak">
+            <span class="acc-streak__icon">🔥</span>
+            <span class="acc-streak__text">최근 <strong>{{ accuracy.streak }}연속</strong> 적중</span>
+          </div>
+          {% endif %}
           <div class="accuracy-standalone__dots">
             {% for dot in accuracy.recent_dots %}
             <span class="acc-dot {{ 'correct' if dot.correct else 'wrong' }}" title="{{ dot.date }} {{ '맞음' if dot.correct else '틀림' }}"></span>
@@ -293,6 +298,22 @@
             {% endfor %}
           </div><!-- /mkt-list -->
         </div><!-- /right-panel -->
+        <div class="sidebar-cta">
+          <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
+            <div class="sidebar-cta__tg-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div class="sidebar-cta__tg-text">
+              <span class="sidebar-cta__tg-title">텔레그램 채널 구독</span>
+              <span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑 수신</span>
+            </div>
+          </a>
+          <div class="sidebar-cta__divider">또는 이메일로</div>
+          <form class="sidebar-cta__email-form" onsubmit="ctaSubscribe(event)">
+            <input class="sidebar-cta__input" type="email" placeholder="이메일 주소" required />
+            <button class="sidebar-cta__btn" type="submit">구독</button>
+          </form>
+        </div>
       </aside><!-- /layout-grid__right -->
 
     </div><!-- /layout-grid -->
