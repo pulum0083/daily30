@@ -40,15 +40,15 @@
 
 **현재:** 브리핑 유형 무관하게 9개 지수 전부 표시.
 
-**변경:** `briefing_type`에 따라 다른 지수 목록 전달.
+**변경:** 두 브리핑 모두 **장 시작 전**에 발송되므로, 당일 시장 데이터가 아닌 예측에 실제로 유용한 지표만 선별한다.
 
-| 브리핑 유형 | 표시 지수 |
-|------------|----------|
-| `kospi` (코스피 시초가/마감) | KOSPI, KOSDAQ, USD/KRW, 공포탐욕지수 |
-| `us` (미국 시장) | NASDAQ, NQ, SOX, 공포탐욕지수 |
+| 브리핑 유형 | 발송 시각 | 표시 지수 | 선택 이유 |
+|------------|----------|----------|----------|
+| `kospi` (08:30 KST) | 한국 장 시작 전 | NASDAQ, SOX, NQ선물, USD/KRW | 전날 미국 마감 + 선물이 코스피 시초가에 직접 영향 |
+| `us` (21:20 KST) | 미국 장 시작 전 | NQ선물, NASDAQ, SOX, VIX | 프리마켓 선물 + 전일 종가 + 변동성 지표 |
 
-- `generate_html.py`의 `sidebar_items` 생성 로직에서 `briefing_type`으로 분기
-- 공포탐욕지수(`type: 'fg'`)는 현재 `index.html`에만 있음 → `briefing.html`에도 추가
+- `generate_html.py`의 `build_sidebar_data()`에서 `briefing_type`으로 분기
+- 공포탐욕지수(FG) **미사용** — VIX(`type: 'vix'`)로 대체 (이미 구현 완료)
 
 ### 1-3. 조용한 CTA 블록
 
@@ -93,10 +93,10 @@
 | 파일 | 변경 내용 |
 |------|----------|
 | `scripts/templates/index.html` | 아카이브 섹션 마크업 교체 + 정확도 카드 마크업 변경 |
-| `scripts/templates/briefing.html` | 정확도 카드 마크업 변경 + 공포탐욕지수 블록 추가 |
+| `scripts/templates/briefing.html` | 정확도 카드 마크업 변경 |
 | `scripts/generate_html.py` | `streak` 계산 추가, `sidebar_items` 유형별 분기 |
-| `web/assets/style.css` | 카드 리스트 스타일 추가, 정확도 카드 Option C 스타일 |
-| `web/assets/main.js` | archive용 `toggleAccordion` 호출 제거 (최신 브리핑용은 유지) |
+| `web/assets/style.css` | 카드 리스트 스타일 추가, 정확도 카드 Option C 스타일, CTA 스타일 |
+| `web/assets/main.js` | `ctaSubscribe` 함수 추가 (archive용 toggleAccordion 호출 제거) |
 
 ---
 
