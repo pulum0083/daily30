@@ -1533,10 +1533,10 @@
   gap: 24px;
 }
 .briefing-archive {
-  grid-area: archive;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
+  grid-column: 1 / -1;
   margin-top: 12px;
 }
 
@@ -1834,7 +1834,7 @@
 .acc-dot {
   width: 9px;
   height: 9px;
-  border-radius: 50%;
+  border-radius: 3px;
   flex-shrink: 0;
   cursor: default;
 }
@@ -1860,6 +1860,10 @@
 .acc-stat-tile.acc-mid  { background: #FEFCE8; }
 .acc-stat-tile.acc-bad  { background: #FEF2F2; }
 
+html.dark .acc-stat-tile.acc-good { background: rgba(20, 83, 45, 0.15); }
+html.dark .acc-stat-tile.acc-mid  { background: rgba(113, 63, 18, 0.15); }
+html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
+
 .acc-streak {
   display: flex;
   align-items: center;
@@ -1874,16 +1878,7 @@
 .acc-streak__icon { font-size: 14px; }
 .acc-streak__text strong { color: #16A34A; }
 
-/* 점 모양: 원형 → 둥근 사각형 */
-.acc-dot { border-radius: 3px; }
-
 /* ── 아카이브 카드 리스트 ── */
-.briefing-archive {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  grid-column: 1 / -1;
-}
 .archive-card {
   display: flex;
   align-items: center;
@@ -1948,6 +1943,15 @@
   transition: background .15s;
 }
 .sidebar-cta__tg:hover { background: #EBF1F6; }
+
+html.dark .sidebar-cta__tg {
+  background: var(--surface-secondary);
+  border-color: var(--line-primary);
+}
+html.dark .sidebar-cta__tg:hover { background: var(--surface-hover); }
+html.dark .sidebar-cta__tg-title { color: #7EC8E3; }
+html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
+
 .sidebar-cta__tg-icon {
   width: 30px;
   height: 30px;
