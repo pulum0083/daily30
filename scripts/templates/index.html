@@ -371,6 +371,22 @@
             {% for item in sidebar_items %}
             {% if item.type == 'market' %}
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">{{ item.name }}</span><div class="mkt-vals"><div class="mkt-val" id="{{ item.val_id }}">-</div><div class="mkt-chg" id="{{ item.badge_id }}">-</div></div></div><div class="mkt-spark"><canvas id="{{ item.canvas_id }}"></canvas></div></div>
+            {% elif item.type == 'vix' %}
+            <div class="mkt-row">
+              <div class="mkt-row-info">
+                <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
+                  VIX 공포지수
+                  <button class="info-icon-btn" onclick="openVixModal()" aria-label="VIX 설명">?</button>
+                </span>
+                <div class="mkt-vals">
+                  <div class="mkt-val" id="vix-val">-</div>
+                  <div class="mkt-chg" id="vix-chg">-</div>
+                </div>
+              </div>
+              <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end;">
+                <span class="vix-badge" id="vix-level">-</span>
+              </div>
+            </div>
             {% elif item.type == 'fg' %}
             <div class="fg-block">
               <div class="fg-block-header">
