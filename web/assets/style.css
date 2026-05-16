@@ -1900,11 +1900,13 @@ html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
   min-width: 72px;
   flex-shrink: 0;
 }
-.archive-card__badges {
+.archive-card__spacer { flex: 1; }
+.archive-card__right {
   display: flex;
-  gap: 5px;
-  flex: 1;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .archive-card__result {
   font-size: 12px;
@@ -1919,6 +1921,11 @@ html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
   font-size: 12px;
   color: var(--text-tertiary);
   flex-shrink: 0;
+}
+/* 아카이브 카드 내 예측 방향 배지 */
+.archive-card .pred-badge {
+  min-width: 62px;
+  text-align: center;
 }
 
 /* ── 사이드바 CTA ── */
@@ -2085,10 +2092,14 @@ html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
 .acc-type-badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 4px;
   flex-shrink: 0;
   letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 .acc-type-badge.kospi {
   background: rgba(124,58,237,.15);

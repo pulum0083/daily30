@@ -433,16 +433,15 @@
         {% for item in archive_items %}
         <a class="archive-card" href="{{ item.url }}">
           <span class="archive-card__date">{{ item.date }}</span>
-          <span class="archive-card__badges">
-            <span class="acc-type-badge {{ item.type }}">{{ item.badge_text }}</span>
-            {% if item.is_closing %}
-            <span class="pred-badge">마감 시황</span>
-            {% else %}
+          <span class="acc-type-badge {{ item.type }}">{{ item.badge_text }}</span>
+          <span class="archive-card__spacer"></span>
+          <div class="archive-card__right">
+            {% if not item.is_closing %}
             <span class="pred-badge {{ item.dir_cls }}">{{ item.direction }}</span>
             {% endif %}
-          </span>
-          <span class="archive-card__result {{ item.result_cls }}">{{ item.result }}</span>
-          <span class="archive-card__arrow">→</span>
+            <span class="archive-card__result {{ item.result_cls }}">{{ item.result }}</span>
+            <span class="archive-card__arrow">→</span>
+          </div>
         </a>
         {% endfor %}
       </div>
