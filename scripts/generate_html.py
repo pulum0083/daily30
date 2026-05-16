@@ -248,6 +248,31 @@ def build_stock_charts(stock_picks: list, candidates: list) -> list:
 # Data preparers (context builders)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _load_accuracy_lookup() -> dict:
+    """briefings.json에서 {(date, btype): is_correct} 딕셔너리를 반환한다."""
+    path = DATA_DIR / "briefings.json"
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    return {
+        (b["date"], b["type"]): b["is_correct"]
+        for b in data.get("briefings", [])
+        if b.get("is_correct") is not None
+    }
+
+
+def _compute_streak(dots: list) -> int:
+    """recent_dots 끝에서부터 연속 correct=True 개수를 반환한다."""
+    streak = 0
+    for dot in reversed(dots):
+        if dot.get("correct"):
+            streak += 1
+        else:
+            break
+    return streak
+
+
 def compute_accuracy_stats(briefing_type: str) -> dict:
     """Read briefings.json and compute accuracy stats for the sidebar."""
     path = DATA_DIR / "briefings.json"
@@ -275,6 +300,7 @@ def compute_accuracy_stats(briefing_type: str) -> dict:
     correct7  = sum(1 for e in last7  if e["is_correct"])
     correct30 = sum(1 for e in last30 if e["is_correct"])
 
+    recent_dots = [{"correct": e["is_correct"], "date": e["date"]} for e in last7]
     return {
         "last7_correct":  correct7,
         "last7_total":    len(last7),
@@ -282,25 +308,28 @@ def compute_accuracy_stats(briefing_type: str) -> dict:
         "last30_correct": correct30,
         "last30_total":   len(last30),
         "last30_pct":     pct(correct30, len(last30)),
-        "recent_dots":    [{"correct": e["is_correct"], "date": e["date"]} for e in last7],
+        "recent_dots":    recent_dots,
+        "streak":         _compute_streak(recent_dots),
     }
 
 
 def build_sidebar_data(briefing_type: str) -> list:
-    """Return sidebar items list. Order differs per briefing type."""
+    """브리핑 발송 시각 기준으로 유용한 지표만 반환한다.
+    - kospi (08:30): 전날 미국 마감 + NQ선물 + USD/KRW → 코스피 시초가 예측에 직접 활용
+    - us (21:20): NQ선물(프리마켓) + 전일 미국 지수 + VIX
+    """
     if briefing_type == "kospi":
         return [
             {"type": "market", "name": "나스닥",            "val_id": "nasdaq-val", "badge_id": "nasdaq-badge", "canvas_id": "c-nasdaq"},
-            {"type": "market", "name": "다우존스",           "val_id": "dji-val",    "badge_id": "dji-badge",    "canvas_id": "c-dji"},
-            {"type": "market", "name": "필라델피아 반도체",   "val_id": "sox-val",    "badge_id": "sox-badge",    "canvas_id": "c-sox"},
-            {"type": "market", "name": "달러 인덱스 DXY",   "val_id": "dxy-val",    "badge_id": "dxy-badge",    "canvas_id": "c-dxy"},
-            {"type": "market", "name": "WTI 국제유가",       "val_id": "oil-val",    "badge_id": "oil-badge",    "canvas_id": "c-oil"},
-            {"type": "vix"},
+            {"type": "market", "name": "필라델피아 반도체", "val_id": "sox-val",    "badge_id": "sox-badge",    "canvas_id": "c-sox"},
+            {"type": "market", "name": "나스닥100 선물",    "val_id": "nq-val",     "badge_id": "nq-badge",     "canvas_id": "c-nq"},
+            {"type": "market", "name": "원/달러",           "val_id": "usd-val",    "badge_id": "usd-badge",    "canvas_id": "c-usd"},
         ]
     else:  # us
         return [
-            {"type": "market", "name": "나스닥100 선물",     "val_id": "nq-val",  "badge_id": "nq-badge",  "canvas_id": "c-nq"},
-            {"type": "market", "name": "WTI 국제유가",       "val_id": "oil-val", "badge_id": "oil-badge", "canvas_id": "c-oil"},
+            {"type": "market", "name": "나스닥100 선물",    "val_id": "nq-val",     "badge_id": "nq-badge",     "canvas_id": "c-nq"},
+            {"type": "market", "name": "나스닥",            "val_id": "nasdaq-val", "badge_id": "nasdaq-badge", "canvas_id": "c-nasdaq"},
+            {"type": "market", "name": "필라델피아 반도체", "val_id": "sox-val",    "badge_id": "sox-badge",    "canvas_id": "c-sox"},
             {"type": "vix"},
         ]
 
@@ -633,6 +662,11 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
 
         accuracy_stats = compute_accuracy_stats("kospi") or None
         archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+        _acc_lookup = _load_accuracy_lookup()
+        for _item in archive_items:
+            _ic = _acc_lookup.get((_item["date"], _item["type"]))
+            _item["result"]     = "✓" if _ic is True else ("✗" if _ic is False else "-")
+            _item["result_cls"] = "hit" if _ic is True else ("miss" if _ic is False else "")
 
         web_base = get_web_base_url()
         og_image_url = f"{web_base}/briefings/{date_str}-kospi-close-og.svg"
@@ -672,6 +706,11 @@ def build_index_html_multi(data: dict, analysis: dict, date_str: str,
 
         accuracy_stats = compute_accuracy_stats(briefing_type) or None
         archive_items = load_briefing_summaries(date_str, briefing_type, n=10)
+        _acc_lookup = _load_accuracy_lookup()
+        for _item in archive_items:
+            _ic = _acc_lookup.get((_item["date"], _item["type"]))
+            _item["result"]     = "✓" if _ic is True else ("✗" if _ic is False else "-")
+            _item["result_cls"] = "hit" if _ic is True else ("miss" if _ic is False else "")
 
         web_base = get_web_base_url()
         og_image_url = f"{web_base}/briefings/{date_str}-{briefing_type}-og.svg"
