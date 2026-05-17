@@ -9,10 +9,8 @@
     { "src": "^/briefings/ko/([^/]+)/?$",                 "dest": "/briefings/$1-kospi.html" },
     { "src": "^/briefings/us/([^/]+)/?$",                 "dest": "/briefings/$1-us.html" },
     { "src": "^/briefings/ko-close/([^/]+)/?$",           "dest": "/briefings/ko-close/$1/index.html" },
-    { "src": "^/chips$",              "dest": "https://chipboard.vercel.app/chips" },
-    { "src": "^/chips/api/(.*)",      "dest": "https://chipboard.vercel.app/api/$1" },
-    { "src": "^/chips/_next/(.*)",    "dest": "https://chipboard.vercel.app/chips/_next/$1" },
-    { "src": "^/chips/(.*)",          "dest": "https://chipboard.vercel.app/chips/$1" },
+    { "src": "^/chips$",     "dest": "https://chipboard.vercel.app/chips" },
+    { "src": "^/chips/(.*)", "dest": "https://chipboard.vercel.app/chips/$1" },
     { "handle": "filesystem" }
   ]
 }
