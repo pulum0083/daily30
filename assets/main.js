@@ -462,3 +462,74 @@
     }
   });
 
+  // ── 칩보드 위젯 — /chips/api/prices ──
+  var CHIP_FALLBACK = [
+    { flag: '🇰🇷', name: '삼성전자',  market: 'KOSPI' },
+    { flag: '🇰🇷', name: 'SK하이닉스', market: 'KOSPI' },
+    { flag: '🇺🇸', name: 'Micron',     market: 'NASDAQ' },
+    { flag: '🇺🇸', name: 'AMD',        market: 'NASDAQ' },
+    { flag: '🇺🇸', name: 'Intel',      market: 'NASDAQ' },
+  ];
+
+  function formatChipPrice(price, market) {
+    if (price == null) return '—';
+    if (market === 'KOSPI') return price.toLocaleString('ko-KR');
+    return '$' + price.toFixed(2);
+  }
+
+  function renderChipRow(flag, name, price, chg, dir) {
+    const row = document.createElement('div');
+    row.className = 'chip-row';
+    row.innerHTML =
+      '<span class="chip-row__flag">' + flag + '</span>' +
+      '<span class="chip-row__name">' + name + '</span>' +
+      '<span class="chip-row__price">' + price + '</span>' +
+      '<span class="chip-row__chg ' + dir + '">' + chg + '</span>';
+    return row;
+  }
+
+  function loadChipWidget() {
+    var container = document.getElementById('chip-stocks');
+    if (!container) return;
+    fetch('/chips/api/prices', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(stocks) {
+        if (!Array.isArray(stocks) || !stocks.length) throw new Error();
+        stocks.slice(0, 5).forEach(function(s) {
+          var rate  = typeof s.changeRate === 'number' ? s.changeRate : 0;
+          var dir   = rate > 0 ? 'up' : rate < 0 ? 'down' : 'flat';
+          var arrow = rate > 0 ? '▲' : rate < 0 ? '▼' : '';
+          var chg   = arrow + Math.abs(rate).toFixed(2) + '%';
+          var flag  = s.market === 'KOSPI' ? '🇰🇷' : '🇺🇸';
+          container.appendChild(renderChipRow(flag, s.name, formatChipPrice(s.price, s.market), chg, dir));
+        });
+      })
+      .catch(function() {
+        CHIP_FALLBACK.forEach(function(s) {
+          container.appendChild(renderChipRow(s.flag, s.name, '—', '—', 'flat'));
+        });
+      });
+  }
+
+  loadChipWidget();
+
+  function ctaSubscribe(e) {
+    e.preventDefault();
+    const input = e.target.querySelector('input[type="email"]');
+    const btn   = e.target.querySelector('button');
+    const email = input.value.trim();
+    if (!email) return;
+    btn.disabled = true;
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).then(r => {
+      btn.textContent = r.ok ? '완료!' : '오류';
+      if (r.ok) input.value = '';
+    }).catch(() => { btn.textContent = '오류'; })
+      .finally(() => {
+        setTimeout(() => { btn.disabled = false; btn.textContent = '구독'; }, 3000);
+      });
+  }
+

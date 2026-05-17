@@ -19,7 +19,8 @@
 <body>
   <nav class="gnb">
     <div class="gnb__inner">
-      <a class="gnb__logo" href="/" style="text-decoration:none;">
+            <div class="gnb__left">
+      <a class="gnb__logo" href="https://doubleshot.space/briefings" style="text-decoration:none;">
         <div class="gnb__logo-mark">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
@@ -32,6 +33,8 @@
         </div>
         <span class="gnb__title">Double<span>-Shot</span></span>
       </a>
+        <a class="gnb__chips-link" href="/chips">Chip-Board →</a>
+      </div>
       <div class="gnb__meta">
         <span class="gnb__date" id="gnb-date">2026-05-12 KST 08:30</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
@@ -376,12 +379,11 @@
             <span class="accuracy-standalone__sub">코스피 시초가</span>
           </div>
           <div class="accuracy-standalone__stats">
-            <div class="acc-stat">
+            <div class="acc-stat-tile acc-good">
               <span class="acc-val acc-good">86%</span>
               <span class="acc-lbl">최근 7일</span>
             </div>
-            <div class="acc-divider"></div>
-            <div class="acc-stat">
+            <div class="acc-stat-tile acc-good">
               <span class="acc-val acc-good">88%</span>
               <span class="acc-lbl">최근 8일</span>
             </div>
@@ -452,6 +454,19 @@
             
           </div><!-- /mkt-list -->
         </div><!-- /right-panel -->
+        <a class="chip-widget" href="/chips" target="_blank" rel="noopener">
+          <div class="chip-widget__header">
+            <div class="chip-widget__left">
+              <div class="chip-widget__badge">AI</div>
+              <span class="chip-widget__title">AI 반도체 종목</span>
+            </div>
+            <span class="chip-widget__more">→</span>
+          </div>
+          <div class="chip-widget__stocks" id="chip-stocks"></div>
+        </a>
+        <div class="sidebar-cta">
+          <a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 서비스 소개 →</a>
+        </div>
       </aside><!-- /layout-grid__right -->
 
     </div><!-- /layout-grid -->
