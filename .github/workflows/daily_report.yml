@@ -103,6 +103,10 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_email.py --type kospi
 
+      - name: 🧹 15일 초과 브리핑 정리
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/prune_briefings.py
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -193,6 +197,10 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_email.py --type us
 
+      - name: 🧹 15일 초과 브리핑 정리
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/prune_briefings.py
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -278,6 +286,10 @@ jobs:
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi-close
+
+      - name: 🧹 15일 초과 브리핑 정리
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/prune_briefings.py
 
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'

@@ -146,11 +146,31 @@
       align-items: center;
       justify-content: space-between;
     }
+    .gnb__left {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 0;
+      flex-shrink: 1;
+    }
     .gnb__logo {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-shrink: 0;
     }
+    .gnb__chips-link {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      padding-left: 12px;
+      margin-left: 10px;
+      border-left: 1px solid rgba(255,255,255,.18);
+      transition: color .15s;
+      white-space: nowrap;
+    }
+    .gnb__chips-link:hover { color: rgba(255,255,255,.9); }
     .gnb__logo-mark {
       width: 28px;
       height: 28px;
@@ -912,9 +932,6 @@
        Right Panel — Google Finance compact style
        ============================================================ */
     .right-panel {
-      position: sticky;
-      top: calc(var(--gnb-height) + 24px);
-      max-height: calc(100vh - var(--gnb-height) - 48px);
       display: flex;
       flex-direction: column;
       background: var(--surface);
@@ -1541,11 +1558,9 @@
 }
 
 /* ============================================================
-   Right Column — sticky wrapper stacking accuracy + market panels
+   Right Column — stacking accuracy + market panels
    ============================================================ */
 .layout-grid__right {
-  position: sticky;
-  top: calc(var(--gnb-height, 52px) + 24px);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1612,7 +1627,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 15px 0;
+  padding: 9px 0;
 }
 .mkt-row-info { flex: 1; min-width: 0; }
 .mkt-name {
@@ -1774,34 +1789,32 @@
   border: 1px solid var(--line-secondary);
   border-radius: var(--r-12);
   box-shadow: var(--shadow-10);
-  padding: 14px 16px 12px;
+  padding: 8px 14px;
 }
 .accuracy-standalone__header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
 }
 .accuracy-standalone__title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
 }
 .accuracy-standalone__sub {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-tertiary);
 }
 .accuracy-standalone__stats {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-}
-.accuracy-standalone__dots {
-  display: flex;
   gap: 6px;
-  align-items: center;
-  justify-content: center;
+  margin-bottom: 0;
 }
+/* 점 표기 & 연속 기록 숨김 */
+.accuracy-standalone__dots,
+.acc-streak { display: none !important; }
 .acc-stat {
   flex: 1;
   display: flex;
@@ -1816,7 +1829,7 @@
   flex-shrink: 0;
 }
 .acc-val {
-  font-size: 22px;
+  font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -1828,50 +1841,43 @@
   font-size: 10px;
   color: var(--text-tertiary);
   font-weight: 400;
+  white-space: nowrap;
 }
 .acc-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
   flex-shrink: 0;
   cursor: default;
 }
 .acc-dot.correct { background: #16A34A; }
 .acc-dot.wrong   { background: #E03131; }
 
-/* ── 정확도 카드 Option C ── */
-.accuracy-standalone__stats {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-}
+/* ── 정확도 카드 — 인라인 숫자형 ── */
 .acc-stat-tile {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
   gap: 3px;
-  border-radius: 8px;
-  padding: 8px 10px;
+  background: none !important;
+  padding: 0;
+  border-radius: 0;
 }
-.acc-stat-tile.acc-good { background: #F0FDF4; }
-.acc-stat-tile.acc-mid  { background: #FEFCE8; }
-.acc-stat-tile.acc-bad  { background: #FEF2F2; }
-
-html.dark .acc-stat-tile.acc-good { background: rgba(20, 83, 45, 0.15); }
-html.dark .acc-stat-tile.acc-mid  { background: rgba(113, 63, 18, 0.15); }
-html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
+/* 구분선 */
+.acc-stat-tile + .acc-stat-tile {
+  padding-left: 8px;
+  border-left: 1px solid var(--line-secondary);
+}
 
 .acc-streak {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 10px;
+  padding: 5px 10px;
   background: var(--surface-secondary);
   border-radius: 8px;
   font-size: 12px;
   color: var(--text-primary);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .acc-streak__icon { font-size: 14px; }
 .acc-streak__text strong { color: #16A34A; }
@@ -1927,6 +1933,97 @@ html.dark .acc-stat-tile.acc-bad  { background: rgba(127, 29, 29, 0.15); }
   min-width: 62px;
   text-align: center;
 }
+
+/* ── 칩보드 위젯 ── */
+.chip-widget {
+  display: block;
+  padding: 11px 14px 8px;
+  background: #EEF3FF;
+  border: 1.5px solid #4A7FF5;
+  border-radius: var(--r-12);
+  text-decoration: none;
+  transition: background .15s;
+}
+.chip-widget:hover { background: #E3EBFF; }
+html.dark .chip-widget {
+  background: rgba(59, 130, 246, 0.10);
+  border-color: rgba(96, 165, 250, 0.45);
+}
+html.dark .chip-widget:hover { background: rgba(59, 130, 246, 0.16); }
+.chip-widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+.chip-widget__left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.chip-widget__badge {
+  width: 22px;
+  height: 22px;
+  background: #2563EB;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+}
+.chip-widget__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1E3A8A;
+}
+html.dark .chip-widget__title { color: #93C5FD; }
+.chip-widget__more {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2563EB;
+}
+html.dark .chip-widget__more { color: #60A5FA; }
+
+/* 종목 행 */
+.chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(74, 127, 245, 0.13);
+}
+.chip-row__flag { font-size: 11px; flex-shrink: 0; line-height: 1; }
+.chip-row__name {
+  font-size: 12px;
+  color: var(--text-primary);
+  flex: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip-row__price {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chip-row__chg {
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 50px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.chip-row__chg.up   { color: var(--status-up); }
+.chip-row__chg.down { color: var(--status-down); }
+.chip-row__chg.flat { color: var(--text-tertiary); }
 
 /* ── 사이드바 CTA ── */
 .sidebar-cta {
@@ -2001,6 +2098,16 @@ html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
   cursor: pointer;
   white-space: nowrap;
 }
+.sidebar-intro {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  text-align: center;
+  padding-top: 2px;
+  transition: color .15s;
+}
+.sidebar-intro:hover { color: var(--text-secondary); }
 
 /* ============================================================
    Responsive — Tablet/Mobile (≤900px)
@@ -2019,9 +2126,13 @@ html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
     position: static;
     max-height: none;
   }
-  .right-panel {
-    flex: none;
-  }
+  .right-panel { flex: none; }
+
+  /* 모바일 사이드바 순서: 정확도 → 칩보드 → 시장지표 → CTA */
+  .accuracy-standalone { order: 1; }
+  .chip-widget         { order: 2; }
+  .right-panel         { order: 3; }
+  .sidebar-cta         { order: 4; }
 }
 
 /* ============================================================
@@ -2034,6 +2145,11 @@ html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
   .fg-now-val { font-size: 18px; }
   .pred-confbar { display: none; }
   .pred-divbar { display: block; }
+
+  /* GNB 모바일 — 날짜 숨기고 Chip-Board 링크 유지 */
+  .gnb { padding: 0 16px; }
+  .gnb__date { display: none; }
+  .gnb__meta { gap: 8px; }
 }
 
 /* ============================================================

@@ -25,19 +25,22 @@
 <body>
   <nav class="gnb">
     <div class="gnb__inner">
-      <a class="gnb__logo" href="/" style="text-decoration:none;">
-        <div class="gnb__logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
-            <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
-            <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <span class="gnb__title">Double<span>-Shot</span></span>
-      </a>
+      <div class="gnb__left">
+        <a class="gnb__logo" href="https://doubleshot.space/briefings" style="text-decoration:none;">
+          <div class="gnb__logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+              <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+              <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="gnb__title">Double<span>-Shot</span></span>
+        </a>
+        <a class="gnb__chips-link" href="/chips">Chip-Board →</a>
+      </div>
       <div class="gnb__meta">
         <span class="gnb__date" id="gnb-date">{{ date_str }} KST {{ gnb_time }}</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
@@ -298,6 +301,16 @@
             {% endfor %}
           </div><!-- /mkt-list -->
         </div><!-- /right-panel -->
+        <a class="chip-widget" href="/chips" target="_blank" rel="noopener">
+          <div class="chip-widget__header">
+            <div class="chip-widget__left">
+              <div class="chip-widget__badge">AI</div>
+              <span class="chip-widget__title">AI 반도체 종목</span>
+            </div>
+            <span class="chip-widget__more">→</span>
+          </div>
+          <div class="chip-widget__stocks" id="chip-stocks"></div>
+        </a>
         <div class="sidebar-cta">
           <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
             <div class="sidebar-cta__tg-icon">
@@ -308,6 +321,7 @@
               <span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑 수신</span>
             </div>
           </a>
+          <a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 서비스 소개 →</a>
         </div>
       </aside><!-- /layout-grid__right -->
 
