@@ -25,19 +25,22 @@
 <body>
   <nav class="gnb">
     <div class="gnb__inner">
-      <a class="gnb__logo" href="/" style="text-decoration:none;">
-        <div class="gnb__logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
-            <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
-            <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <span class="gnb__title">Double<span>-Shot</span></span>
-      </a>
+      <div class="gnb__left">
+        <a class="gnb__logo" href="https://doubleshot.space/briefings" style="text-decoration:none;">
+          <div class="gnb__logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+              <line x1="7" y1="4"  x2="7" y2="8"  stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+              <line x1="17" y1="3"  x2="17" y2="5"  stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="gnb__title">Double<span>-Shot</span></span>
+        </a>
+        <a class="gnb__chips-link" href="/chips">Chip-Board →</a>
+      </div>
       <div class="gnb__meta">
         <span class="gnb__date" id="gnb-date">2026-05-19 KST 08:30</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
@@ -51,25 +54,19 @@
   <div class="layout-wrapper">
     <div class="layout-grid">
 
-      <!-- ① 최신 브리핑 (펼쳐진 상태) -->
-      <div class="briefing-latest">
-        <div class="accordion-item is-open is-today" data-index="0">
-          <div class="accordion-header" onclick="toggleAccordion(0)">
-            <div class="accordion-header__left">
-              <div class="accordion-header__date-label">2026-05-19</div>
-              <span class="acc-type-badge kospi">코스피</span>
-            </div>
+      <!-- 왼쪽: 브리핑 본문 -->
+      <div class="layout-grid__main">
+
+        <div class="accordion-item is-open is-today">
+          <div class="accordion-header">
+            <div class="accordion-header__date-label">2026-05-19</div>
             <div class="accordion-header__badges">
-              
               <span class="pred-badge down">하락 우위</span>
-              
             </div>
           </div>
 
           <div class="accordion-body">
             <div class="accordion-body__inner">
-
-              
 
               <!-- 1. 예측 카드 -->
               <div class="open-section">
@@ -82,6 +79,7 @@
                   <div class="prediction-summary">
                     <span class="prediction-label">하락 우위 예측 (신뢰도 68%)</span>
                   </div>
+                  <!-- PC: Confidence interval bar -->
                   <div class="pred-confbar">
                     <div class="pred-confbar__row">
                       <div class="pred-confbar__header">
@@ -106,6 +104,7 @@
                       <div class="pred-confbar__meta">신뢰구간 68% → 최대 111%</div>
                     </div>
                   </div>
+                  <!-- Mobile: Diverging bar -->
                   <div class="pred-divbar">
                     <div class="pred-divbar__header">
                       <span style="color:var(--status-down)">하락 62%</span>
@@ -147,9 +146,11 @@
                 </div>
               </div>
 
+              
+
               <div class="divider"></div>
 
-              <!-- 3. 잭 켈로그 전략 종목 -->
+              <!-- 4. 잭 켈로그 전략 종목 -->
               <div class="open-section">
                 <div class="open-section__title">
                   잭 켈로그 20일선 전략 추종 종목
@@ -362,18 +363,17 @@
                   
                 </div>
               </div>
-              
 
             </div><!-- /accordion-body__inner -->
           </div><!-- /accordion-body -->
         </div><!-- /accordion-item -->
 
-        <div class="t-caption" style="margin-top:12px; text-align:right;">
+        <div class="t-caption" style="margin-top:16px; text-align:right;">
           생성: 2026-05-19T08:05:52.205483+09:00 | DailyB v1
         </div>
-      </div><!-- /briefing-latest -->
+      </div><!-- /layout-grid__main -->
 
-      <!-- ② 오른쪽 패널: 예측 성공률 + 시장 지표 (최신 브리핑 기준) -->
+      <!-- 오른쪽: 사이드바 -->
       <aside class="layout-grid__right">
         
         <div class="accuracy-standalone">
@@ -442,8 +442,18 @@
             <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">원/달러</span><div class="mkt-vals"><div class="mkt-val" id="usd-val">-</div><div class="mkt-chg" id="usd-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-usd"></canvas></div></div>
             
             
+          </div><!-- /mkt-list -->
+        </div><!-- /right-panel -->
+        <a class="chip-widget" href="/chips" target="_blank" rel="noopener">
+          <div class="chip-widget__header">
+            <div class="chip-widget__left">
+              <div class="chip-widget__badge">AI</div>
+              <span class="chip-widget__title">AI 반도체 종목</span>
+            </div>
+            <span class="chip-widget__more">→</span>
           </div>
-        </div>
+          <div class="chip-widget__stocks" id="chip-stocks"></div>
+        </a>
         <div class="sidebar-cta">
           <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
             <div class="sidebar-cta__tg-icon">
@@ -454,173 +464,12 @@
               <span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑 수신</span>
             </div>
           </a>
+          <a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 서비스 소개 →</a>
         </div>
       </aside><!-- /layout-grid__right -->
 
-      <!-- ③ 이전 브리핑 아카이브 (카드 리스트) -->
-      
-      <div class="briefing-archive">
-        
-        <a class="archive-card" href="/briefings/us/2026-05-18/">
-          <span class="archive-card__date">2026-05-18</span>
-          <span class="acc-type-badge us">미국</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge ">중립</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko/2026-05-18/">
-          <span class="archive-card__date">2026-05-18</span>
-          <span class="acc-type-badge kospi">코스피</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge down">하락 우위</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko-close/2026-05-18/">
-          <span class="archive-card__date">2026-05-18</span>
-          <span class="acc-type-badge kospi-close">마감 시황</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/us/2026-05-16/">
-          <span class="archive-card__date">2026-05-16</span>
-          <span class="acc-type-badge us">미국</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge down">하락 우위</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko/2026-05-15/">
-          <span class="archive-card__date">2026-05-15</span>
-          <span class="acc-type-badge kospi">코스피</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge up">상승 우위</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko-close/2026-05-15/">
-          <span class="archive-card__date">2026-05-15</span>
-          <span class="acc-type-badge kospi-close">마감 시황</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/us/2026-05-14/">
-          <span class="archive-card__date">2026-05-14</span>
-          <span class="acc-type-badge us">미국</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge up">상승 우위</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko/2026-05-14/">
-          <span class="archive-card__date">2026-05-14</span>
-          <span class="acc-type-badge kospi">코스피</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="pred-badge up">상승 우위</span>
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-        <a class="archive-card" href="/briefings/ko-close/2026-05-14/">
-          <span class="archive-card__date">2026-05-14</span>
-          <span class="acc-type-badge kospi-close">마감 시황</span>
-          <span class="archive-card__spacer"></span>
-          <div class="archive-card__right">
-            
-            <span class="archive-card__result ">-</span>
-            <span class="archive-card__arrow">→</span>
-          </div>
-        </a>
-        
-      </div>
-      
-
     </div><!-- /layout-grid -->
   </div><!-- /layout-wrapper -->
-
-  <!-- 예측 정확도 모달 -->
-  <div class="info-modal-backdrop" id="acc-modal" onclick="if(event.target===this)closeAccModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
-      <button class="info-modal__close" onclick="closeAccModal()" aria-label="닫기">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
-      <div class="info-modal__body">
-        <p>AI가 코스피 시초가 방향(상승 / 하락)을 예측한 결과를 실제 시장과 비교해 맞힌 비율이에요.</p>
-        <br>
-        <p><strong>읽는 법</strong></p>
-        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
-          <li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
-          <li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
-          <li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
-        </ul>
-        <br>
-        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 섹터 성과 모달 -->
-  <div class="info-modal-backdrop" id="sector-modal" onclick="if(event.target===this)closeSectorModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
-      <button class="info-modal__close" onclick="closeSectorModal()" aria-label="닫기">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
-      <div class="info-modal__body">
-        <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
-        <br>
-        <p><strong>읽는 법</strong></p>
-        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
-          <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
-          <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요. 가득 차면 +20% 이상이라는 뜻이에요.</li>
-          <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
-        </ul>
-        <br>
-        <p style="color:var(--text-tertiary); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
-      </div>
-    </div>
-  </div>
 
   <!-- 잭 켈로그 모달 -->
   <div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()">
@@ -644,22 +493,44 @@
     </div>
   </div>
 
-  <!-- 공포탐욕지수 모달 -->
-  <div class="info-modal-backdrop" id="fg-modal" onclick="if(event.target===this)closeFGModal()">
-    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="fg-modal-title">
-      <button class="info-modal__close" onclick="closeFGModal()" aria-label="닫기">
+  <!-- 예측 정확도 모달 -->
+  <div class="info-modal-backdrop" id="acc-modal" onclick="if(event.target===this)closeAccModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
+      <button class="info-modal__close" onclick="closeAccModal()" aria-label="닫기">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <div class="info-modal__title" id="fg-modal-title">공포탐욕지수(Fear &amp; Greed Index)</div>
+      <div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
       <div class="info-modal__body">
-        <p>시장의 7가지 요인을 분석하여 현재 투자자의 심리를 극단적인 공포(0)부터 극단적인 탐욕(100)까지 측정하는 심리지표입니다.</p>
+        <p>AI가 코스피 시초가 방향(상승 / 하락)을 예측한 결과를 실제 시장과 비교해 맞힌 비율이에요.</p>
+        <br>
+        <p><strong>읽는 법</strong></p>
+        <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+          <li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
+          <li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
+          <li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
+        </ul>
+        <br>
+        <p style="color:var(--text-tertiary); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIX 공포지수 모달 -->
+  <div class="info-modal-backdrop" id="vix-modal" onclick="if(event.target===this)closeVixModal()">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="vix-modal-title">
+      <button class="info-modal__close" onclick="closeVixModal()" aria-label="닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="info-modal__title" id="vix-modal-title">VIX 공포지수(Volatility Index)</div>
+      <div class="info-modal__body">
+        <p>S&amp;P500 옵션 시장에서 산출되는 30일 내재변동성 지표로, 시장 참여자들이 예상하는 변동성의 크기를 나타냅니다. '월스트리트 공포지수'라고도 불립니다.</p>
         <br>
         <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
-          <li><strong style="color:#1D4ED8">0~24</strong> : 극단적 공포(Extreme Fear)</li>
-          <li><strong style="color:#2563EB">25~44</strong> : 공포(Fear)</li>
-          <li><strong style="color:#CA8A04">45~54</strong> : 중립(Neutral)</li>
-          <li><strong style="color:#E03131">55~74</strong> : 탐욕(Greed)</li>
-          <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕(Extreme Greed)</li>
+          <li><strong style="color:#16A34A">15 미만</strong> : 안정 — 시장이 매우 안정적</li>
+          <li><strong style="color:#65A30D">15~20</strong> : 보통 — 정상 변동성 범위</li>
+          <li><strong style="color:#CA8A04">20~30</strong> : 경계 — 불확실성 확대</li>
+          <li><strong style="color:#E03131">30~40</strong> : 불안 — 투자자 심리 위축</li>
+          <li><strong style="color:#B91C1C">40 이상</strong> : 극단 — 시장 패닉 수준</li>
         </ul>
       </div>
     </div>
@@ -1260,7 +1131,5 @@
 };
   </script>
   <script src="/assets/main.js"></script>
-
-  
 </body>
 </html>
