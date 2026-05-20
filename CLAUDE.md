@@ -19,7 +19,8 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 
 | 브리핑 | 실행 시각 (KST) | 요일 |
 |--------|----------------|------|
-| 코스피 시초가 | 08:30 | 평일 (월~금) |
+| 코스피 시초가 | 07:30 | 평일 (월~금) |
+| 코스피 마감 | 16:00 | 평일 (월~금) |
 | 미국 시장 | 21:20 | 평일 (월~금) |
 | 공포탐욕 패치 | 09:05 | 평일 (화~토) |
 | 예측 정확도 체크 | 09:10 | 평일 (화~토) |
@@ -27,7 +28,7 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 ## 실행 흐름
 
 ```
-Vercel Cron → /api/trigger?type=kospi
+cron-job.org → /api/trigger?type=kospi
   → GitHub Actions workflow_dispatch
     → 휴장일 확인 (holiday_check.py)
     → 시장 데이터 수집 (fetch_data.py)
