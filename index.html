@@ -20,13 +20,17 @@
   <nav class="gnb">
     <div class="gnb__inner">
       <div class="gnb__logo">
-        <div class="gnb__logo-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-            <polyline points="16 7 22 7 22 13"></polyline>
-          </svg>
-        </div>
-        <span class="gnb__title">Double<span>-Shot</span></span>
+        <a class="gnb__logo-link" href="https://doubleshot.space/briefings">
+          <div class="gnb__logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+              <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+          </div>
+          <span class="gnb__title">Double<span>-Shot</span></span>
+        </a>
+        <div class="gnb__logo-sep"></div>
+        <a class="gnb__chip-link" href="https://doubleshot.space/chips">Chip-Board →</a>
       </div>
       <div class="gnb__meta">
         <span class="gnb__date" id="gnb-date">2026-04-17 KST 08:30</span>
@@ -321,7 +325,7 @@
 
       <!-- 오른쪽: 사이드바 -->
       <aside class="layout-grid__right">
-        
+
         <div class="accuracy-standalone">
           <div class="accuracy-standalone__header">
             <span class="accuracy-standalone__title">예측 정확도</span>
@@ -384,8 +388,8 @@
             <div class="fg-block">
               <div class="fg-block-header">
                 <span class="mkt-name" style="display:flex;align-items:center;gap:4px;">
-                  공포탐욕지수
-                  <button class="info-icon-btn" onclick="openFGModal()" aria-label="공포탐욕지수 설명">?</button>
+                  VIX 공포지수
+                  <button class="info-icon-btn" onclick="openFGModal()" aria-label="VIX 설명">?</button>
                 </span>
                 <span class="fg-badge" id="fg-badge">-</span>
               </div>
@@ -407,6 +411,70 @@
             
           </div><!-- /mkt-list -->
         </div><!-- /right-panel -->
+
+        <!-- Chip-Board 위젯 -->
+        <a class="chip-widget" href="https://doubleshot.space/chips">
+          <div class="chip-widget-header">
+            <div class="chip-widget-title">
+              <div class="chip-widget-icon">AI</div>
+              AI 반도체 종목
+            </div>
+            <span class="chip-widget-arrow">→</span>
+          </div>
+          <div class="chip-widget-body">
+            <div class="chip-mini-rows">
+              <div class="chip-mini-row">
+                <span class="chip-flag">🇰🇷</span>
+                <span class="chip-name">삼성전자</span>
+                <span class="chip-price">79,200</span>
+                <span class="chip-chg up">▲1.80%</span>
+              </div>
+              <div class="chip-mini-row">
+                <span class="chip-flag">🇰🇷</span>
+                <span class="chip-name">SK하이닉스</span>
+                <span class="chip-price">198,500</span>
+                <span class="chip-chg up">▲2.32%</span>
+              </div>
+              <div class="chip-mini-row">
+                <span class="chip-flag">🇺🇸</span>
+                <span class="chip-name">Micron</span>
+                <span class="chip-price">$118.40</span>
+                <span class="chip-chg down">▼0.80%</span>
+              </div>
+              <div class="chip-mini-row">
+                <span class="chip-flag">🇺🇸</span>
+                <span class="chip-name">AMD</span>
+                <span class="chip-price">$152.10</span>
+                <span class="chip-chg up">▲3.10%</span>
+              </div>
+              <div class="chip-mini-row">
+                <span class="chip-flag">🇺🇸</span>
+                <span class="chip-name">Intel</span>
+                <span class="chip-price">$22.80</span>
+                <span class="chip-chg down">▼1.51%</span>
+              </div>
+            </div>
+          </div>
+          <div class="chip-widget-footer">
+            <span class="chip-footer-text">10초마다 자동 갱신</span>
+            <span class="chip-footer-cta">상세 분석 보기 →</span>
+          </div>
+        </a>
+
+        <div class="sidebar-cta">
+          <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
+            <div class="sidebar-cta__tg-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div class="sidebar-cta__tg-text">
+              <span class="sidebar-cta__tg-title">텔레그램 채널 구독</span>
+              <span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑 수신</span>
+            </div>
+          </a>
+        </div>
+
+        <a class="sidebar-intro-link" href="https://doubleshot.space/landing">Double-Shot 서비스 소개 →</a>
+
       </aside><!-- /layout-grid__right -->
 
     </div><!-- /layout-grid -->
