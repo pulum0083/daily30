@@ -2098,13 +2098,17 @@ html.dark .sidebar-cta__tg-sub   { color: #5BA4CF; }
   cursor: pointer;
   white-space: nowrap;
 }
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 2px;
+}
 .sidebar-intro {
-  display: block;
   font-size: 11px;
   color: var(--text-tertiary);
   text-decoration: none;
-  text-align: center;
-  padding-top: 2px;
   transition: color .15s;
 }
 .sidebar-intro:hover { color: var(--text-secondary); }
