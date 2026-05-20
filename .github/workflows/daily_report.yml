@@ -28,6 +28,10 @@ permissions:
   pages: write      # GitHub Pages 배포
   id-token: write   # OIDC 토큰 (actions/deploy-pages 필수)
 
+concurrency:
+  group: daily30-${{ github.event.inputs.briefing_type }}
+  cancel-in-progress: false
+
 env:
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_BOT_TOKEN_EN: ${{ secrets.TELEGRAM_BOT_TOKEN_EN }}
