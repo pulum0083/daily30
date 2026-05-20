@@ -50,7 +50,7 @@ defaults:
 # ──────────────────────────────────────────────────────────────────
 jobs:
   kospi-briefing:
-    name: "📈 코스피 브리핑 (KST 07:20)"
+    name: "📈 코스피 브리핑 (KST 07:30)"
     runs-on: ubuntu-latest
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi'
