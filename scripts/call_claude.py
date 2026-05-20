@@ -733,7 +733,11 @@ def main():
 
 KOSPI_CLOSE_SYSTEM_PROMPT = """\
 너는 20년 경력의 한국 주식시장 시황 분석가다.
-오늘 코스피 마감 데이터를 바탕으로 오늘 장 움직임을 해설하고 섹터 요약을 제공한다.
+오늘 코스피 마감 데이터와 뉴스 요약을 바탕으로 오늘 장 움직임을 해설하고 섹터 요약을 제공한다.
+
+**[핵심] 분석은 마감 데이터(수치) 기준. 뉴스는 급등주 사유·섹터 맥락 설명에 활용한다.**
+- 뉴스가 제공되면 reasons와 top_gainers_reasons에서 구체적 촉매(실적·정책·테마)를 보강하는 데 사용한다
+- 뉴스가 없어도 마감 데이터만으로 분석을 완성한다
 
 ## 글쓰기 기본 규칙
 
@@ -816,6 +820,10 @@ def call_claude_closing(date_str: str) -> dict:
 
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += f"마감 데이터:\n{json.dumps(market_data, ensure_ascii=False, indent=2)}\n"
+
+    news_summary = load_news_summary("kospi-close")
+    if news_summary:
+        user_content += f"\n뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
     print(f"[call_claude] Calling Claude for kospi-close (date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")

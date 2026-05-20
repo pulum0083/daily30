@@ -49,6 +49,13 @@ KOSPI_RSS_FEEDS = [
     _rss("코스피 증시", "ko", "KR", "KR:ko"),
 ]
 
+KOSPI_CLOSE_RSS_FEEDS = [
+    _rss("코스피 마감 증시", "ko", "KR", "KR:ko", recent=True),
+    _rss("코스피 외국인 기관", "ko", "KR", "KR:ko", recent=True),
+    _rss("KOSPI close today", "en", "US", "US:en", recent=True),
+    _rss("Korea semiconductor stock", "en", "US", "US:en", recent=True),
+]
+
 US_RSS_FEEDS = [
     _rss("NASDAQ S&P500 stock market"),
     _rss("Federal Reserve interest rate economy"),
@@ -81,6 +88,34 @@ KOSPI_GEMINI_PROMPT = """\
   ],
   "headlines": [
     "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1 (원문 그대로)",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish" | "bearish" | "neutral"
+}
+
+뉴스 데이터:
+"""
+
+KOSPI_CLOSE_GEMINI_PROMPT = """\
+아래 뉴스 헤드라인들을 분석하여, 오늘 코스피 마감 시황 분석에 필요한 정보만 추출해줘.
+
+[key_indicators 작성 규칙]
+- 오늘 장중 실제 발생한 이슈만 포함: 섹터별 등락 원인, 외국인·기관 수급, 정책·규제 뉴스
+- 수치(%, 금액)가 있으면 반드시 포함
+- 절대 포함하지 말 것: 중장기 전망, 애널리스트 목표가, 연간 수익률
+- 포함해야 할 것: 장중 급등락 종목 원인, 수급 동향, 오늘 발표된 경제 지표·정책
+
+출력 형식 (JSON만, 다른 텍스트 없이):
+{
+  "key_indicators": [
+    "오늘 코스피 등락 관련 핵심 이슈 1 (수치 포함)",
+    "섹터별 이슈 (반도체·바이오·2차전지 등)",
+    "외국인·기관 수급 관련 뉴스 (있을 경우)",
+    "정책·규제·실적 이슈 (있을 경우)"
+  ],
+  "headlines": [
+    "오늘 코스피 장중 이슈 헤드라인 1 (원문 그대로)",
     "헤드라인 2",
     "헤드라인 3"
   ],
@@ -221,6 +256,8 @@ def collect_news(briefing_type: str) -> str:
     if briefing_type == "kospi":
         # (feed_url, max_age_hours) — 0 = 필터 없음
         feed_configs = [(url, 0) for url in KOSPI_RSS_FEEDS]
+    elif briefing_type == "kospi-close":
+        feed_configs = [(url, 0) for url in KOSPI_CLOSE_RSS_FEEDS]
     else:
         # 일반 피드: 필터 없음 / 프리장 신고가 피드(마지막 3개): 30시간 이내만
         general = US_RSS_FEEDS[:-3]
@@ -261,7 +298,8 @@ def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
     client = genai.Client(api_key=get_gemini_api_key())
 
     today_kst = datetime.now(KST).strftime("%Y-%m-%d")
-    prompt_prefix = KOSPI_GEMINI_PROMPT if briefing_type == "kospi" else US_GEMINI_PROMPT
+    prompt_map = {"kospi": KOSPI_GEMINI_PROMPT, "kospi-close": KOSPI_CLOSE_GEMINI_PROMPT, "us": US_GEMINI_PROMPT}
+    prompt_prefix = prompt_map[briefing_type]
     full_prompt = f"오늘 날짜 (KST): {today_kst}\n\n" + prompt_prefix + "\n" + news_text
 
     response = client.models.generate_content(
@@ -288,7 +326,7 @@ def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch & summarize market news via Gemini Flash")
-    parser.add_argument("--type", choices=["kospi", "us"], required=True)
+    parser.add_argument("--type", choices=["kospi", "kospi-close", "us"], required=True)
     args = parser.parse_args()
 
     print(f"[fetch_news] Collecting news for type={args.type}")
