@@ -39,49 +39,56 @@ def check_kospi_open(check_date: date) -> bool:
     if is_weekend(check_date):
         return False
 
-    result = check_with_pandas_calendars("kospi", check_date)
-    if result is not None:
-        return result
-
-    # Hardcoded Korean public holidays 2025-2026 (fallback)
+    # 하드코딩 목록을 먼저 확인 (manual override — pandas보다 우선)
     korean_holidays_2025 = {
         date(2025, 1, 1),   # 신정
+        date(2025, 1, 27),  # 설날 임시공휴일
         date(2025, 1, 28),  # 설날 연휴
         date(2025, 1, 29),  # 설날
         date(2025, 1, 30),  # 설날 연휴
-        date(2025, 3, 1),   # 삼일절
-        date(2025, 5, 5),   # 어린이날
-        date(2025, 5, 6),   # 대체공휴일
+        date(2025, 3, 3),   # 대체공휴일 (삼일절 3/1 토요일)
+        date(2025, 5, 5),   # 어린이날 + 부처님오신날 (겹침)
+        date(2025, 5, 6),   # 대체공휴일 (부처님오신날)
+        date(2025, 6, 3),   # 21대 대통령선거 임시공휴일
         date(2025, 6, 6),   # 현충일
         date(2025, 8, 15),  # 광복절
         date(2025, 10, 3),  # 개천절
-        date(2025, 10, 5),  # 추석 연휴
         date(2025, 10, 6),  # 추석
         date(2025, 10, 7),  # 추석 연휴
+        date(2025, 10, 8),  # 대체공휴일 (추석 연휴 10/5 일요일)
         date(2025, 10, 9),  # 한글날
         date(2025, 12, 25), # 성탄절
-        date(2025, 12, 31), # 연말 휴장
+        date(2025, 12, 31), # KRX 연말 휴장
     }
     korean_holidays_2026 = {
         date(2026, 1, 1),   # 신정
         date(2026, 2, 16),  # 설날 연휴
         date(2026, 2, 17),  # 설날
         date(2026, 2, 18),  # 설날 연휴
-        date(2026, 3, 1),   # 삼일절
+        date(2026, 3, 2),   # 대체공휴일 (삼일절 3/1 일요일)
         date(2026, 5, 1),   # 근로자의 날
         date(2026, 5, 5),   # 어린이날
-        date(2026, 6, 6),   # 현충일
-        date(2026, 8, 15),  # 광복절
+        date(2026, 5, 25),  # 대체공휴일 (부처님오신날 5/24 일요일)
+        date(2026, 6, 3),   # 지방선거일 임시공휴일
+        date(2026, 7, 17),  # 제헌절 (18년 만에 공휴일 부활)
+        date(2026, 8, 17),  # 대체공휴일 (광복절 8/15 토요일)
         date(2026, 9, 24),  # 추석 연휴
         date(2026, 9, 25),  # 추석
         date(2026, 9, 26),  # 추석 연휴
-        date(2026, 10, 3),  # 개천절
+        date(2026, 10, 5),  # 대체공휴일 (개천절 10/3 토요일)
         date(2026, 10, 9),  # 한글날
         date(2026, 12, 25), # 성탄절
-        date(2026, 12, 31), # 연말 휴장
+        date(2026, 12, 31), # KRX 연말 휴장
     }
     all_holidays = korean_holidays_2025 | korean_holidays_2026
-    return check_date not in all_holidays
+    if check_date in all_holidays:
+        return False
+
+    result = check_with_pandas_calendars("kospi", check_date)
+    if result is not None:
+        return result
+
+    return True
 
 
 def check_us_open(check_date: date) -> bool:
