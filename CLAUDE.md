@@ -20,9 +20,8 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 | 브리핑 | 실행 시각 (KST) | 요일 |
 |--------|----------------|------|
 | 코스피 시초가 | 07:30 | 평일 (월~금) |
-| 코스피 마감 | 16:00 | 평일 (월~금) |
+| 코스피 마감 | 15:40 | 평일 (월~금) |
 | 미국 시장 | 21:20 | 평일 (월~금) |
-| 공포탐욕 패치 | 09:05 | 평일 (화~토) |
 | 예측 정확도 체크 | 09:10 | 평일 (화~토) |
 
 ## 실행 흐름
@@ -89,7 +88,7 @@ daily30/
 │   ├── news_summary_kospi.json   # Gemini 뉴스 요약 (커밋됨)
 │   └── news_summary_us.json      # Gemini 뉴스 요약 (커밋됨)
 ├── .github/workflows/
-│   └── daily_report.yml          # kospi / us / fg-patch / accuracy 4개 job
+│   └── daily_report.yml          # kospi / us / kospi-close / accuracy 4개 job
 └── config.json                   # API 키 (gitignore — config.example.json 참조)
 ```
 
@@ -153,5 +152,5 @@ GitHub Actions Secrets에 모두 등록되어 있음. Vercel 환경변수에도 
 |-----|------------|-----------|
 | `kospi-briefing` | `kospi` | fetch_data → fetch_news → call_claude → **update_latest** → telegram → email → commit → pages |
 | `us-briefing` | `us` | 동일 구조 |
-| `fg-patch` | `fg-patch` | patch_fg → commit (pull --rebase) → pages |
+| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → commit → pages |
 | `kospi-accuracy` | `accuracy` | check_accuracy → commit |
