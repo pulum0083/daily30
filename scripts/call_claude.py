@@ -438,6 +438,80 @@ def save_analysis(briefing_type: str, analysis: dict) -> None:
     print(f"[call_claude] Saved → {path}")
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Signal rotation — reasons[1]~[3] 카테고리 다양화용 히스토리 관리
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extract_signal_emojis(reasons: list) -> list:
+    """reasons[1:4]의 첫 토큰(이모지) 추출. reasons[0]은 항상 시장 방향 요약이라 제외."""
+    if not isinstance(reasons, list) or len(reasons) < 2:
+        return []
+    signals = []
+    for r in reasons[1:4]:
+        if isinstance(r, str) and r.strip():
+            first = r.strip().split(" ", 1)[0]
+            signals.append(first)
+    return signals
+
+
+def load_signal_history(briefing_type: str) -> list:
+    path = DATA_DIR / f"signal_history_{briefing_type}.json"
+    if not path.exists():
+        return []
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("history", [])
+    except Exception:
+        return []
+
+
+def save_signal_to_history(briefing_type: str, date_str: str, signals: list, keep: int = 10) -> None:
+    """오늘 시그널을 date 기준 upsert. 최근 keep개만 보관."""
+    if not signals:
+        return
+    path = DATA_DIR / f"signal_history_{briefing_type}.json"
+    history = [h for h in load_signal_history(briefing_type) if h.get("date") != date_str]
+    history.append({"date": date_str, "signals": signals})
+    history.sort(key=lambda h: h.get("date", ""), reverse=True)
+    history = history[:keep]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"history": history}, f, ensure_ascii=False, indent=2)
+    print(f"[call_claude] Saved signal history → {path} ({len(history)} entries)")
+
+
+def build_avoidance_hint(history: list, days: int = 3) -> str:
+    """최근 N일 시그널을 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
+    recent = history[:days]
+    if not recent:
+        return ""
+    lines = [
+        "",
+        "## [다양성 가이드 — reasons 작성 시 매우 중요]",
+        "",
+        "최근 브리핑에서 reasons[1]~[3]에 사용한 시그널 카테고리(이모지):",
+    ]
+    for h in recent:
+        sigs = " ".join(h.get("signals", []))
+        lines.append(f"  - {h.get('date', '?')}: {sigs}")
+    lines += [
+        "",
+        "**오늘 reasons[1]~[3]에서는 위 카테고리를 가급적 피하고**, "
+        "시스템 프롬프트의 시그널 풀에서 **다른 카테고리**를 우선 선택해라. "
+        "매일 같은 이모지가 반복되면 독자가 단조롭게 느낀다.",
+        "",
+        "**예외 (임계치 초과 시 회피 규칙 무시)**: 아래 중 하나라도 충족하면 "
+        "그 카테고리를 reasons에 반드시 포함한다. 정확성이 다양성보다 우선이다.",
+        "  - SOX 또는 DRAM ETF 등락 ±2% 이상 → 💡 반도체",
+        "  - VIX 전일 대비 ±15% 이상 또는 절대값 25 이상 → 😐/😰 VIX",
+        "  - EWY 등락 ±2% 이상 또는 외국인 대규모 순매도/순매수 → 🇺🇸 외국인 수급",
+        "  - WTI 유가 ±3% 이상 → 🛢️ 유가",
+        "  - 10년물 금리 ±8bp 이상 → 🏦 금리",
+        "  - 오늘 고영향 경제지표(CPI/NFP/FOMC 등) 발표 → 📅 경제 캘린더",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: dict) -> None:
     """Append or update the prediction record in data/briefings.json for accuracy tracking."""
     path = DATA_DIR / "briefings.json"
@@ -614,6 +688,16 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
+    # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 시초가 + us 브리핑)
+    if briefing_type in ("kospi", "us"):
+        history = load_signal_history(briefing_type)
+        # 오늘 분 entry는 회피 대상에서 제외 (재실행 시 자기 자신을 회피하지 않도록)
+        history = [h for h in history if h.get("date") != date_str]
+        hint = build_avoidance_hint(history, days=3)
+        if hint:
+            user_content += hint
+            print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
+
     print(f"[call_claude] Calling Claude API (type={briefing_type}, date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
 
@@ -641,7 +725,14 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
 
     raw_text = response.content[0].text
-    return extract_json(raw_text)
+    analysis = extract_json(raw_text)
+
+    # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 시초가 + us 브리핑)
+    if briefing_type in ("kospi", "us"):
+        signals = extract_signal_emojis(analysis.get("reasons", []))
+        save_signal_to_history(briefing_type, date_str, signals)
+
+    return analysis
 
 
 # ─────────────────────────────────────────────────────────────────────────────
