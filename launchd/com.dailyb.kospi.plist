@@ -12,37 +12,37 @@
     <string>/Users/luke/Service App/DailyB/run_kospi.sh</string>
   </array>
 
-  <!-- 월~금 08:30 KST (시스템 시간대가 Asia/Seoul 기준) -->
+  <!-- 월~금 09:00 KST (시스템 시간대가 Asia/Seoul 기준) -->
   <key>StartCalendarInterval</key>
   <array>
     <!-- Monday -->
     <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>30</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
       <key>Weekday</key><integer>1</integer>
     </dict>
     <!-- Tuesday -->
     <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>30</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
       <key>Weekday</key><integer>2</integer>
     </dict>
     <!-- Wednesday -->
     <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>30</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
       <key>Weekday</key><integer>3</integer>
     </dict>
     <!-- Thursday -->
     <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>30</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
       <key>Weekday</key><integer>4</integer>
     </dict>
     <!-- Friday -->
     <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>30</integer>
+      <key>Hour</key><integer>9</integer>
+      <key>Minute</key><integer>0</integer>
       <key>Weekday</key><integer>5</integer>
     </dict>
   </array>
