@@ -11,16 +11,16 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ page_title }}</title>
-  <meta property="og:title" content="{{ page_title }}" />
-  <meta property="og:description" content="{{ og_description }}" />
-  <meta property="og:image" content="{{ og_image_url }}" />
+  <title>Double-Shot — 코스피 마감 시황 2026-05-25</title>
+  <meta property="og:title" content="Double-Shot — 코스피 마감 시황 2026-05-25" />
+  <meta property="og:description" content="2026-05-25 코스피 마감: 코스닥 +5% 테마 폭발, 코스피는 소폭 강보합" />
+  <meta property="og:image" content="https://doubleshot.space/briefings/2026-05-25-kospi-close-og.svg" />
   <meta property="og:type" content="article" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="{{ og_image_url }}" />
+  <meta name="twitter:image" content="https://doubleshot.space/briefings/2026-05-25-kospi-close-og.svg" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
   <link rel="apple-touch-icon" href="/favicon.svg"/>
-  <link rel="stylesheet" href="{{ asset_prefix }}assets/style.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
   <style>
     /* ── 마감 지수 카드 ── */
     .close-summary {
@@ -172,7 +172,7 @@
         <span class="gnb__title">Double<span>-Shot</span></span>
       </a>
       <div class="gnb__meta">
-        <span class="gnb__date" id="gnb-date">{{ date_str }} KST 15:40</span>
+        <span class="gnb__date" id="gnb-date">2026-05-25 KST 15:40</span>
         <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="테마 전환">
           <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -190,8 +190,8 @@
           <div class="accordion-header" style="cursor:default;">
             <div class="accordion-header__left">
               <div class="accordion-header__date">
-                <span class="accordion-header__date-label">{{ date_str }}</span>
-                <span class="accordion-header__date-sub">{{ day_of_week }} · 15:40 마감</span>
+                <span class="accordion-header__date-label">2026-05-25</span>
+                <span class="accordion-header__date-sub">월 · 15:40 마감</span>
               </div>
             </div>
             <div class="accordion-header__badges">
@@ -207,127 +207,58 @@
               <div class="close-summary">
                 <div class="close-idx">
                   <div class="close-idx__name">KOSPI</div>
-                  <div class="close-idx__val">{{ kospi_price }}</div>
-                  <div class="close-idx__chg {{ kospi_cls }}">{{ kospi_arrow }} {{ kospi_chg_abs }} ({{ kospi_chg_pct }}%)</div>
+                  <div class="close-idx__val">7,847.71</div>
+                  <div class="close-idx__chg up">▲ 32.12 (+0.41%)</div>
                 </div>
                 <div class="close-idx">
                   <div class="close-idx__name">KOSDAQ</div>
-                  <div class="close-idx__val">{{ kosdaq_price }}</div>
-                  <div class="close-idx__chg {{ kosdaq_cls }}">{{ kosdaq_arrow }} {{ kosdaq_chg_abs }} ({{ kosdaq_chg_pct }}%)</div>
+                  <div class="close-idx__val">1,161.13</div>
+                  <div class="close-idx__chg up">▲ 55.16 (+4.99%)</div>
                 </div>
                 <div class="close-idx">
                   <div class="close-idx__name">원/달러</div>
-                  <div class="close-idx__val">{{ usdkrw_price }}</div>
-                  <div class="close-idx__chg {{ usdkrw_cls }}">{{ usdkrw_arrow }} {{ usdkrw_chg_pct }}%</div>
-                  <div class="close-idx__vol">{{ usdkrw_note }}</div>
+                  <div class="close-idx__val">1,514.20</div>
+                  <div class="close-idx__chg up">▲ +0.58%</div>
+                  <div class="close-idx__vol">원화 약세 마감</div>
                 </div>
               </div>
-              {% if trade_amount_fmt %}
-              <div class="trade-vol">
-                <div class="trade-vol__label">코스피 거래대금</div>
-                <div class="trade-vol__val">{{ trade_amount_fmt }}</div>
-              </div>
-              {% endif %}
+              
             </div>
 
             <!-- ② 시장 폭 -->
-            {% if market_breadth %}
-            <div class="open-section">
-              <div class="open-section__title">시장 폭</div>
-              <div class="breadth-groups">
-                <div class="breadth-group">
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">상승</span>
-                    <span class="breadth-chip__val up">{{ market_breadth.up }}</span>
-                  </div>
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">하락</span>
-                    <span class="breadth-chip__val down">{{ market_breadth.down }}</span>
-                  </div>
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">보합</span>
-                    <span class="breadth-chip__val neutral">{{ market_breadth.unchanged }}</span>
-                  </div>
-                </div>
-                <div class="breadth-group">
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">상한가</span>
-                    <span class="breadth-chip__val up">{{ market_breadth.upper_limit }}</span>
-                  </div>
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">하한가</span>
-                    <span class="breadth-chip__val down">{{ market_breadth.lower_limit }}</span>
-                  </div>
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">신고가</span>
-                    <span class="breadth-chip__val up">{{ market_breadth.new_high }}</span>
-                  </div>
-                  <div class="breadth-chip">
-                    <span class="breadth-chip__label">신저가</span>
-                    <span class="breadth-chip__val down">{{ market_breadth.new_low }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {% endif %}
+            
 
             <!-- ③ 수급 현황 -->
-            {% if has_investor %}
-            <div class="open-section">
-              <div class="open-section__title">
-                수급 현황
-                <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;margin-left:4px;">코스피 · 순매수 기준</span>
-              </div>
-              <div class="supply-grid">
-                {% for key, label in [('foreign','외국인'), ('institution','기관'), ('individual','개인')] %}
-                {% set card = investor_cards[key] %}
-                <div class="supply-card">
-                  <div class="supply-card__label">{{ label }}</div>
-                  <div class="supply-card__amt {{ card.cls }}">{{ card.fmt }}</div>
-                  <div class="supply-card__sub">{{ card.label }}</div>
-                  <div class="supply-bar-track">
-                    <div class="supply-bar-fill {{ card.cls }}" style="width:{{ card.bar }}%"></div>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
-            {% endif %}
+            
 
             <!-- ④ 시황 분석 (B포맷 우선, 레거시 폴백) -->
             <div class="open-section">
               <div class="open-section__title">
-                <span class="reason-section-title">{{ market_title }}</span>
+                <span class="reason-section-title">코스닥 +5% 테마 폭발, 코스피는 소폭 강보합</span>
               </div>
               <div class="reason-block">
-                <p>{{ market_summary }}</p>
-                {% if why %}
+                <p>오늘 코스피는 <b>+0.41%</b> 소폭 강보합으로 마감했어요. 코스닥이 <b>+4.99%</b>라는 압도적인 상승률을 기록하며 MLCC·나트륨이온배터리·양자컴퓨팅 등 중소형 테마주 중심의 차별화 장세가 펼쳐졌어요.</p>
+                
                 <div class="b-format">
                   <div class="b-row">
                     <span class="b-label">WHY</span>
-                    <p class="b-text">{{ why }}</p>
+                    <p class="b-text">원달러 환율이 <b>1,514원</b>으로 <b>+0.58%</b> 상승하며 외국인 대형주 수급을 억제했어요. 반면 나스닥·S&P 선물이 보합권에 머무는 가운데 국내 개인 투자자 중심의 테마 수급이 코스닥으로 집중된 것이 오늘 장의 핵심 동력이었거든요.</p>
                   </div>
                   <div class="b-row">
                     <span class="b-label">WHAT</span>
-                    <p class="b-text">{{ what }}</p>
+                    <p class="b-text">코스닥에서 MLCC 섹터가 <b>+12.56%</b>로 폭등했고, 삼화콘덴서 <b>+29.94%</b>·미래산업 <b>+29.89%</b>가 상한가에 근접했어요. 나트륨이온배터리 <b>+9.05%</b>·양자컴퓨팅 <b>+7.63%</b>·반도체 기판 <b>+7.48%</b> 등 다수 테마가 동반 폭등했지만, 코스피는 장 중 <b>7,806</b>~<b>7,874</b> 좁은 박스권 횡보에 그쳤거든요.</p>
                   </div>
                   <div class="b-row so-what">
                     <span class="b-label">SO?</span>
-                    <p class="b-text">{{ so_what }}</p>
+                    <p class="b-text">환율 부담이 해소되지 않는 한 코스피 대형주 반등은 제한적이고, 오늘 테마 급등의 연속성 여부가 다음 세션 코스닥의 방향을 결정하는 핵심 변수가 될 거예요.</p>
                   </div>
                 </div>
-                {% elif reasons %}
-                <ul>
-                  {% for r in reasons %}
-                  <li>{{ r }}</li>
-                  {% endfor %}
-                </ul>
-                {% endif %}
+                
               </div>
             </div>
 
             <!-- ⑤ 코스피 장중 흐름 -->
-            {% if intraday_prices_json and intraday_prices_json != '[]' %}
+            
             <div class="open-section" id="intraday-section">
               <div class="open-section__title">코스피 장중 흐름</div>
               <div class="reason-block" style="padding:16px;">
@@ -337,36 +268,10 @@
                 </div>
               </div>
             </div>
-            {% endif %}
+            
 
             <!-- ⑥ 코스피 200 시총 상위 10종목 -->
-            {% if kospi200_top10 %}
-            <div class="open-section">
-              <div class="open-section__title">코스피 200 시총 상위 10종목</div>
-              <div class="top10-wrap">
-                <table class="top10-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>종목명</th>
-                      <th>현재가</th>
-                      <th>등락률</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for s in kospi200_top10 %}
-                    <tr>
-                      <td>{{ s.rank }}</td>
-                      <td>{{ s.name }}</td>
-                      <td class="price">{{ s.price }}</td>
-                      <td class="chg {{ s.cls }}">{{ s.change_pct }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {% endif %}
+            
 
           </div><!-- /accordion-body__inner -->
           </div><!-- /accordion-body -->
@@ -383,35 +288,181 @@
             </span>
             <span class="pub-time">상승률 TOP 5</span>
           </div>
-          {% if sectors %}
+          
           <div class="sector-panel">
-            {% for s in sectors %}
-            {% set abs_pct = s.change_pct | abs %}
-            {% set bar_width = [abs_pct * 5, 100] | min %}
-            {% set cls = 'up' if s.change_pct >= 0 else 'down' %}
+            
+            
+            
+            
             <div class="sector-item">
               <div class="sector-item__top">
-                <span class="sector-item__rank">{{ loop.index }}</span>
-                <span class="sector-item__name" title="{{ s.name }}">{{ s.name }}</span>
-                <span class="sector-item__pct {{ cls }}">{{ '%+.2f' % s.change_pct }}%</span>
+                <span class="sector-item__rank">1</span>
+                <span class="sector-item__name" title="MLCC(적층세라믹콘덴서)">MLCC(적층세라믹콘덴서)</span>
+                <span class="sector-item__pct up">+12.56%</span>
               </div>
               <div class="sector-item__bar-track">
-                <div class="sector-item__bar-fill {{ cls }}" style="width:{{ bar_width }}%"></div>
+                <div class="sector-item__bar-fill up" style="width:62.800000000000004%"></div>
               </div>
-              {% if s.stocks %}
+              
               <div class="sector-item__stocks">
-                {% for stock in s.stocks %}
+                
                 <div class="sector-stock">
-                  <span class="sector-stock__name">{{ stock.name }}</span>
-                  <span class="sector-stock__pct">{{ '%+.2f' % stock.change_pct }}%</span>
+                  <span class="sector-stock__name">삼화콘덴서</span>
+                  <span class="sector-stock__pct">+29.94%</span>
                 </div>
-                {% endfor %}
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">아바텍</span>
+                  <span class="sector-stock__pct">+22.85%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">대주전자재료</span>
+                  <span class="sector-stock__pct">+18.34%</span>
+                </div>
+                
               </div>
-              {% endif %}
+              
             </div>
-            {% endfor %}
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">2</span>
+                <span class="sector-item__name" title="2차전지(나트륨이온)">2차전지(나트륨이온)</span>
+                <span class="sector-item__pct up">+9.05%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:45.25%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">디아이씨</span>
+                  <span class="sector-stock__pct">+23.44%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">메가터치</span>
+                  <span class="sector-stock__pct">+16.75%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">에코프로</span>
+                  <span class="sector-stock__pct">+12.87%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">3</span>
+                <span class="sector-item__name" title="우주태양광(페로브스카이트 등)">우주태양광(페로브스카이트 등)</span>
+                <span class="sector-item__pct up">+7.75%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:38.75%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">대주전자재료</span>
+                  <span class="sector-stock__pct">+18.34%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">선익시스템</span>
+                  <span class="sector-stock__pct">+17.16%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">엘케이켐</span>
+                  <span class="sector-stock__pct">+11.97%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">4</span>
+                <span class="sector-item__name" title="양자암호/양자컴퓨팅">양자암호/양자컴퓨팅</span>
+                <span class="sector-item__pct up">+7.63%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:38.15%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">포톤</span>
+                  <span class="sector-stock__pct">+30.00%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">엑스게이트</span>
+                  <span class="sector-stock__pct">+24.19%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">한국첨단소재</span>
+                  <span class="sector-stock__pct">+21.54%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
+            
+            
+            
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">5</span>
+                <span class="sector-item__name" title="반도체 기판(FC-BGA/PCB/MLB 등)">반도체 기판(FC-BGA/PCB/MLB 등)</span>
+                <span class="sector-item__pct up">+7.48%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill up" style="width:37.400000000000006%"></div>
+              </div>
+              
+              <div class="sector-item__stocks">
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">인텍플러스</span>
+                  <span class="sector-stock__pct">+26.68%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">심텍홀딩스</span>
+                  <span class="sector-stock__pct">+20.39%</span>
+                </div>
+                
+                <div class="sector-stock">
+                  <span class="sector-stock__name">티엘비</span>
+                  <span class="sector-stock__pct">+12.08%</span>
+                </div>
+                
+              </div>
+              
+            </div>
+            
           </div>
-          {% endif %}
+          
         </div>
       </aside>
 
@@ -452,14 +503,14 @@
     if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
   </script>
 
-  {% if intraday_prices_json and intraday_prices_json != '[]' %}
+  
   <script>
     (function drawIntradayChart() {
-      const prices  = {{ intraday_prices_json }};
-      const highVal = {{ intraday_high }};
-      const highIdx = {{ intraday_high_idx }};
-      const lowVal  = {{ intraday_low }};
-      const lowIdx  = {{ intraday_low_idx }};
+      const prices  = [7848.45, 7849.71, 7827.67, 7829.56, 7867.23, 7844.26, 7838.5, 7874.51, 7864.52, 7846.08, 7813.8, 7811.83, 7806.06, 7810.95, 7839.57, 7845.27, 7830.54, 7819.91, 7844.57, 7853.97, 7857.96, 7866.03, 7858.05, 7848.52, 7851.24, 7848.55, 7839.2, 7847.09, 7827.1, 7828.35, 7834.49, 7838.45, 7848.95, 7846.88, 7837.39, 7837.12, 7837.58, 7824.03, 7829.42, 7826.67, 7821.53, 7821.16, 7829.48, 7831.34, 7834.13, 7833.79, 7839.02, 7846.98, 7848.39, 7862.46, 7861.51, 7855.59, 7856.7, 7861.28, 7857.98, 7853.16, 7848.32, 7848.08, 7848.75, 7859.92, 7866.46, 7863.21, 7858.31, 7858.35, 7863.48, 7869.91, 7868.32, 7861.18, 7869.84, 7866.81, 7868.79, 7835.14];
+      const highVal = 7874.51;
+      const highIdx = 7;
+      const lowVal  = 7806.06;
+      const lowIdx  = 12;
 
       if (!prices.length) return;
       const canvas = document.getElementById('intraday-chart');
@@ -547,6 +598,6 @@
       window.addEventListener('resize', draw);
     })();
   </script>
-  {% endif %}
+  
 </body>
 </html>

@@ -843,6 +843,16 @@ def _fmt_idx(d: dict) -> dict:
     }
 
 
+def _fmt_investor_card(net: int, max_abs: int) -> dict:
+    """순매수 금액(백만원 단위 추정)을 템플릿 카드용 dict로 변환한다."""
+    eok = abs(net) // 100  # 백만원 → 억원
+    sign = "+" if net >= 0 else "-"
+    cls = "up" if net >= 0 else "down"
+    bar = min(round(abs(net) / max_abs * 100), 100) if max_abs > 0 else 0
+    label = "순매수" if net >= 0 else "순매도"
+    return {"fmt": f"{sign}{eok:,}억", "cls": cls, "bar": bar, "label": label, "raw": net}
+
+
 def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
     """마감 시황 템플릿에서 공통으로 쓰는 변수 묶음을 반환한다."""
     generated_at = data.get("generated_at", datetime.now(KST).isoformat())
@@ -858,7 +868,6 @@ def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
     indices  = data.get("indices", {})
     futures  = data.get("futures", {})
     sectors  = data.get("sectors", [])
-    top_gainers = data.get("top_gainers", [])
 
     kospi  = _fmt_idx(indices.get("kospi", {}))
     kosdaq = _fmt_idx(indices.get("kosdaq", {}))
@@ -869,7 +878,11 @@ def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
 
     usdkrw_note = "원화 강세 마감" if (indices.get("usdkrw") or {}).get("change_pct", 0) < 0 else "원화 약세 마감"
 
-    reasons = [r for r in analysis.get("reasons", []) if r]
+    # B포맷 (why/what/so_what) 또는 레거시 reasons 모두 지원
+    why      = analysis.get("why", "")
+    what     = analysis.get("what", "")
+    so_what  = analysis.get("so_what", "")
+    reasons  = [r for r in analysis.get("reasons", []) if r]  # 레거시 폴백
 
     intraday = data.get("intraday", {})
     intraday_prices_json = json.dumps(intraday.get("prices", []))
@@ -878,23 +891,59 @@ def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
     intraday_low      = intraday.get("low", 0)
     intraday_low_idx  = intraday.get("low_idx", 0)
 
+    # 거래대금
+    trade_amount = data.get("trade_amount", {})
+    trade_amount_fmt = trade_amount.get("formatted", "")
+
+    # 시장 폭
+    market_breadth = data.get("market_breadth", {})
+
+    # 코스피 200 TOP10
+    kospi200_top10 = data.get("kospi200_top10", [])
+
+    # 수급 현황
+    investor = data.get("investor_trading", {})
+    inv_nets = {
+        k: (investor.get(k) or {}).get("net", 0)
+        for k in ("foreign", "institution", "individual")
+    }
+    max_abs_inv = max((abs(v) for v in inv_nets.values()), default=1) or 1
+    investor_cards = {k: _fmt_investor_card(v, max_abs_inv) for k, v in inv_nets.items()}
+    has_investor = any(v != 0 for v in inv_nets.values())
+
     return {
         "generated_at": generated_at,
         "gen_time": gen_time,
         "day_of_week": day_of_week,
-        "market_title":  analysis.get("market_title", ""),
+        "market_title":   analysis.get("market_title", ""),
         "market_summary": analysis.get("market_summary", ""),
-        "reasons":       reasons,
-        "sectors":       sectors,
-        "top_gainers":   top_gainers,
+        # B포맷
+        "why":     why,
+        "what":    what,
+        "so_what": so_what,
+        # 레거시 폴백
+        "reasons": reasons,
+        # 섹터
+        "sectors": sectors,
+        # 거래대금
+        "trade_amount_fmt": trade_amount_fmt,
+        # 시장 폭
+        "market_breadth": market_breadth,
+        # 코스피 200 TOP10
+        "kospi200_top10": kospi200_top10,
+        # 수급
+        "investor_cards": investor_cards,
+        "has_investor":   has_investor,
+        # 인트라데이
         "intraday_prices_json": intraday_prices_json,
         "intraday_high":        intraday_high,
         "intraday_high_idx":    intraday_high_idx,
         "intraday_low":         intraday_low,
         "intraday_low_idx":     intraday_low_idx,
+        # 지수
         "kospi_price":   kospi["price"],   "kospi_chg_pct":  kospi["chg_pct"],
         "kospi_chg_abs": kospi["chg_abs"], "kospi_arrow":    kospi["arrow"],
-        "kospi_cls":     kospi["cls"],     "kospi_volume":   "",
+        "kospi_cls":     kospi["cls"],
         "kosdaq_price":  kosdaq["price"],  "kosdaq_chg_pct": kosdaq["chg_pct"],
         "kosdaq_chg_abs": kosdaq["chg_abs"], "kosdaq_arrow": kosdaq["arrow"],
         "kosdaq_cls":    kosdaq["cls"],
