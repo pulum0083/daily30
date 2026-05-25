@@ -2,7 +2,7 @@
 # DailyB — 코스피 시초가 브리핑 실행 스크립트
 # launchd에서 매주 월~금 09:00 KST에 호출됨
 
-PROJECT_DIR="/Users/luke/Service App/DailyB"
+PROJECT_DIR="/Users/luke/Service App/double-shot"
 LOG_FILE="$PROJECT_DIR/logs/kospi_$(date +%Y%m%d).log"
 
 mkdir -p "$PROJECT_DIR/logs"

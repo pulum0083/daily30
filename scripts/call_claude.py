@@ -765,13 +765,6 @@ def main():
         with open(data_file, encoding="utf-8") as f:
             market_data = json.load(f)
 
-        # Claude가 생성한 급등 사유를 top_gainers에 병합
-        reasons_map = analysis.get("top_gainers_reasons", {})
-        for stock in market_data.get("top_gainers", []):
-            stock["reason"] = reasons_map.get(stock["name"], "")
-        with open(data_file, "w", encoding="utf-8") as f:
-            json.dump(market_data, f, ensure_ascii=False, indent=2)
-
         save_closing_telegram_message(date_str, analysis, market_data)
 
         if not args.no_html:

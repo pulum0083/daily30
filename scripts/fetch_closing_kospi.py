@@ -384,7 +384,12 @@ def fetch_investor_trading() -> dict:
                 key = INVESTOR_MAP.get(inv)
                 if not key:
                     continue
-                net = row.get("netBuyAmount") or row.get("net") or row.get("netBuy") or 0
+                for field in ("netBuyAmount", "net", "netBuy"):
+                    if row.get(field) is not None:
+                        net = row[field]
+                        break
+                else:
+                    net = 0
                 result[key] = {"net": int(str(net).replace(",", "") or 0)}
             if len(result) > 1:
                 return result
@@ -575,7 +580,13 @@ def fetch_kospi200_top10() -> list:
             except ValueError:
                 chg_pct = 0.0
 
-            dir_code = (s.get("compareToPreviousPrice") or {}).get("code", "3")
+            ctp = s.get("compareToPreviousPrice")
+            if isinstance(ctp, dict):
+                dir_code = ctp.get("code", "3")
+            elif isinstance(ctp, str):
+                dir_code = ctp
+            else:
+                dir_code = "3"
             if dir_code in ("4", "5"):
                 chg_pct = -abs(chg_pct)
 

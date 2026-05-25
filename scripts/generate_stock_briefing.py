@@ -155,6 +155,8 @@ def call_claude(client: anthropic.Anthropic, stock: dict, date_str: str) -> dict
         print(f"[briefing] Cache write: {usage.cache_creation_input_tokens} tokens")
     print(f"[briefing] Output: {usage.output_tokens} tokens")
 
+    if not response.content:
+        raise RuntimeError(f"Claude returned empty content for {stock['name']}")
     text = response.content[0].text.strip()
     if text.startswith("```"):
         lines = text.split("\n")

@@ -534,8 +534,8 @@ def extract_briefing_summary(html_path: Path) -> Optional[dict]:
         if btype == "kospi-close":
             badge_text = "마감 시황"
             section_title = "코스피 마감 시황"
-            # 마감 시황은 market_title을 direction 대신 사용
-            mt_match = re.search(r'<div class="open-section__title reason-section-title">(.*?)</div>', content)
+            # 마감 시황 템플릿은 <span class="reason-section-title"> 구조 사용
+            mt_match = re.search(r'<span class="reason-section-title">(.*?)</span>', content)
             market_title = mt_match.group(1).strip() if mt_match else reason_title
             return {
                 "date": date_str,
@@ -845,7 +845,7 @@ def _fmt_idx(d: dict) -> dict:
 
 def _fmt_investor_card(net: int, max_abs: int) -> dict:
     """순매수 금액(백만원 단위 추정)을 템플릿 카드용 dict로 변환한다."""
-    eok = abs(net) // 100  # 백만원 → 억원
+    eok = round(abs(net) / 100)  # 백만원 → 억원 (반올림)
     sign = "+" if net >= 0 else "-"
     cls = "up" if net >= 0 else "down"
     bar = min(round(abs(net) / max_abs * 100), 100) if max_abs > 0 else 0
