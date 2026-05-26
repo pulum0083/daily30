@@ -512,6 +512,27 @@
             {% endfor %}
           </div>
         </div>
+        {% if is_closing_latest and ai_semicon_stocks %}
+        <div class="semicon-panel">
+          <div class="semicon-panel__header">
+            <div class="semicon-panel__title-wrap">
+              <span class="semicon-panel__badge">AI</span>
+              <span class="semicon-panel__title">AI 반도체 종목</span>
+            </div>
+            <a class="semicon-panel__arrow" href="/chips">→</a>
+          </div>
+          <div class="semicon-panel__list">
+            {% for s in ai_semicon_stocks %}
+            <div class="semicon-stock">
+              <span class="semicon-stock__flag">{{ s.flag }}</span>
+              <span class="semicon-stock__name">{{ s.name }}</span>
+              <span class="semicon-stock__price">{{ s.price }}</span>
+              <span class="semicon-stock__chg {{ s.cls }}">{{ s.chg_pct }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
         <a class="chip-widget" href="/chips" target="_blank" rel="noopener">
           <div class="chip-widget__header">
             <div class="chip-widget__left">
@@ -522,6 +543,7 @@
           </div>
           <div class="chip-widget__stocks" id="chip-stocks"></div>
         </a>
+        {% endif %}
         <div class="sidebar-cta">
           <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
             <div class="sidebar-cta__tg-icon">

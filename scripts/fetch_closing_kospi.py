@@ -570,6 +570,60 @@ def fetch_kospi200_top10() -> list:
 # 전체 수집
 # ─────────────────────────────────────────────────────────────────────────────
 
+def fetch_ai_semicon_stocks() -> list:
+    """AI 반도체 대표 종목 (KRX 2개 + US 3개) 현재가·등락률을 반환한다."""
+    from pykrx import stock as krx
+    kst_now  = datetime.now(KST)
+    date_str = kst_now.strftime("%Y%m%d")
+
+    result = []
+
+    # 국내 종목: 삼성전자, SK하이닉스
+    krx_stocks = [("005930", "삼성전자", "🇰🇷"), ("000660", "SK하이닉스", "🇰🇷")]
+    for code, name, flag in krx_stocks:
+        try:
+            df = krx.get_market_ohlcv(date_str, date_str, code)
+            if df.empty:
+                continue
+            price = int(df["종가"].iloc[0])
+            chg   = float(df["등락률"].iloc[0])
+            cls   = "up" if chg > 0 else ("down" if chg < 0 else "neutral")
+            arrow = "▲" if chg > 0 else ("▼" if chg < 0 else "")
+            result.append({
+                "name": name, "flag": flag,
+                "price": f"{price:,}",
+                "chg_pct": f"{arrow} {abs(chg):.2f}%",
+                "cls": cls,
+            })
+        except Exception as e:
+            print(f"[fetch_closing] ai_semicon {name}: {e}", file=__import__("sys").stderr)
+
+    # 해외 종목: Micron, Intel, AMD (전날 종가 기준 — 한국 마감 시 미국 장 미개장)
+    us_stocks = [("MU", "Micron", "🇺🇸"), ("INTC", "Intel", "🇺🇸"), ("AMD", "AMD", "🇺🇸")]
+    for ticker, name, flag in us_stocks:
+        try:
+            hist = _yf_history(ticker, period="2d", interval="1d")
+            if hist is None or hist.empty:
+                continue
+            row   = hist.iloc[-1]
+            price = float(row["Close"])
+            prev  = float(hist["Close"].iloc[-2]) if len(hist) >= 2 else price
+            chg   = ((price - prev) / prev * 100) if prev else 0
+            cls   = "up" if chg > 0 else ("down" if chg < 0 else "neutral")
+            arrow = "▲" if chg > 0 else ("▼" if chg < 0 else "")
+            result.append({
+                "name": name, "flag": flag,
+                "price": f"${price:.2f}",
+                "chg_pct": f"{arrow} {abs(chg):.2f}%",
+                "cls": cls,
+            })
+        except Exception as e:
+            print(f"[fetch_closing] ai_semicon {name}: {e}", file=__import__("sys").stderr)
+
+    print(f"[fetch_closing] AI 반도체 종목: {len(result)}개")
+    return result
+
+
 def fetch_closing_data() -> dict:
     print("[fetch_closing] 코스피 마감 데이터 수집 시작...")
 
@@ -604,6 +658,9 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → 코스피 200 TOP10")
     kospi200_top10 = fetch_kospi200_top10()
 
+    print("[fetch_closing]   → AI 반도체 종목")
+    ai_semicon_stocks = fetch_ai_semicon_stocks()
+
     data = {
         "generated_at": datetime.now(KST).isoformat(),
         "type": "kospi-close",
@@ -624,6 +681,7 @@ def fetch_closing_data() -> dict:
         "trade_amount": trade_amount,
         "market_breadth": market_breadth,
         "kospi200_top10": kospi200_top10,
+        "ai_semicon_stocks": ai_semicon_stocks,
     }
 
     out = DATA_DIR / "latest_kospi_close.json"

@@ -911,6 +911,9 @@ def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
     investor_cards = {k: _fmt_investor_card(v, max_abs_inv) for k, v in inv_nets.items()}
     has_investor = any(v != 0 for v in inv_nets.values())
 
+    # AI 반도체 종목
+    ai_semicon_stocks = data.get("ai_semicon_stocks", [])
+
     return {
         "generated_at": generated_at,
         "gen_time": gen_time,
@@ -934,6 +937,8 @@ def _build_closing_ctx(data: dict, analysis: dict, date_str: str) -> dict:
         # 수급
         "investor_cards": investor_cards,
         "has_investor":   has_investor,
+        # AI 반도체 종목
+        "ai_semicon_stocks": ai_semicon_stocks,
         # 인트라데이
         "intraday_prices_json": intraday_prices_json,
         "intraday_high":        intraday_high,

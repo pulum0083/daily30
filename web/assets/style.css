@@ -2605,3 +2605,81 @@ html.dark .acc-type-badge.us {
   .b-row { flex-direction: column; gap: 4px; }
   .b-label { margin-top: 0; }
 }
+
+/* ── AI 반도체 종목 사이드 위젯 ── */
+.semicon-panel {
+  margin-top: 10px;
+  background: var(--surface-primary);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-8);
+  overflow: hidden;
+}
+.semicon-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+}
+.semicon-panel__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.semicon-panel__badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: rgba(255,255,255,.25);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.semicon-panel__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.semicon-panel__arrow {
+  font-size: 14px;
+  color: rgba(255,255,255,.8);
+  text-decoration: none;
+}
+.semicon-panel__list {
+  display: flex;
+  flex-direction: column;
+}
+.semicon-stock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line-secondary);
+}
+.semicon-stock:last-child { border-bottom: none; }
+.semicon-stock__flag { font-size: 13px; flex-shrink: 0; }
+.semicon-stock__name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.semicon-stock__price {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.semicon-stock__chg {
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  min-width: 52px;
+  text-align: right;
+}
+.semicon-stock__chg.up   { color: var(--status-up); }
+.semicon-stock__chg.down { color: var(--status-down); }
