@@ -2518,3 +2518,90 @@ html.dark .acc-type-badge.us {
   .close-summary { grid-template-columns: repeat(2, 1fr); }
   .close-summary .close-idx:last-child { grid-column: span 2; }
 }
+
+/* ── 거래대금 ── */
+.trade-vol {
+  background: var(--surface-secondary);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-8);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.trade-vol__label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); }
+.trade-vol__val { font-size: 18px; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+/* ── 시장 폭 ── */
+.breadth-groups { display: flex; flex-direction: column; gap: 8px; }
+.breadth-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.breadth-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--line-secondary);
+  border-radius: 6px; padding: 6px 12px; font-size: 12px;
+}
+.breadth-chip__label { color: var(--text-tertiary); font-weight: 500; }
+.breadth-chip__val { font-weight: 800; font-variant-numeric: tabular-nums; }
+.breadth-chip__val.up      { color: var(--status-up); }
+.breadth-chip__val.down    { color: var(--status-down); }
+.breadth-chip__val.neutral { color: var(--text-primary); }
+
+/* ── 수급 현황 ── */
+.supply-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.supply-card {
+  background: var(--surface-secondary);
+  border: 1px solid var(--line-secondary);
+  border-radius: var(--r-8); padding: 14px 16px;
+}
+.supply-card__label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 8px; }
+.supply-card__amt { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.supply-card__amt.up   { color: var(--status-up); }
+.supply-card__amt.down { color: var(--status-down); }
+.supply-card__sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
+.supply-bar-track { height: 4px; background: var(--line-secondary); border-radius: 100px; overflow: hidden; margin-top: 10px; }
+.supply-bar-fill { height: 100%; border-radius: 100px; }
+.supply-bar-fill.up   { background: var(--status-up); }
+.supply-bar-fill.down { background: var(--status-down); }
+
+/* ── B 포맷 (WHY / WHAT / SO?) ── */
+.b-format { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+.b-row { display: flex; gap: 12px; align-items: flex-start; }
+.b-label {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  background: var(--surface-secondary); border: 1px solid var(--line-secondary);
+  border-radius: 4px; padding: 3px 7px;
+  flex-shrink: 0; margin-top: 2px; white-space: nowrap;
+}
+.b-row.so-what .b-label {
+  background: rgba(99,102,241,.08);
+  border-color: rgba(99,102,241,.25);
+  color: #6366F1;
+}
+.b-text { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin: 0; }
+
+/* ── 코스피 200 TOP10 ── */
+.top10-wrap { border: 1px solid var(--line-secondary); border-radius: var(--r-8); overflow: hidden; }
+.top10-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.top10-table thead tr { background: var(--surface-secondary); border-bottom: 1px solid var(--line-secondary); }
+.top10-table th { font-size: 11px; font-weight: 600; color: var(--text-tertiary); padding: 8px 12px; text-align: right; }
+.top10-table th:first-child { text-align: center; width: 28px; }
+.top10-table th:nth-child(2) { text-align: left; }
+.top10-table td { padding: 9px 12px; text-align: right; border-bottom: 1px solid var(--line-secondary); font-variant-numeric: tabular-nums; }
+.top10-table tr:last-child td { border-bottom: none; }
+.top10-table td:first-child { text-align: center; color: var(--text-tertiary); font-size: 12px; }
+.top10-table td:nth-child(2) { text-align: left; font-weight: 600; color: var(--text-primary); }
+.top10-table td.price { color: var(--text-secondary); font-size: 12px; }
+.top10-table td.chg { font-weight: 700; }
+.top10-table td.chg.up   { color: var(--status-up); }
+.top10-table td.chg.down { color: var(--status-down); }
+.top10-table td.chg.flat { color: var(--text-tertiary); }
+.top10-table tbody tr:hover { background: var(--surface-secondary); }
+
+/* ── 모바일: b-row 세로 스택 ── */
+@media (max-width: 600px) {
+  .b-row { flex-direction: column; gap: 4px; }
+  .b-label { margin-top: 0; }
+}
