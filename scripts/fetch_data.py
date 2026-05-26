@@ -448,7 +448,8 @@ def fetch_kospi_data() -> dict:
     print("[fetch_data]   → macro tickers")
     macro_tickers = ["^GSPC", "^VIX", "BZ=F", "GC=F", "^TNX",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
-                     "DRAM"]  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
+                     "DRAM",  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
+                     "^N225", "^HSI", "^TWII", "000001.SS"]  # 아시아 지역 지수 (catch-up 시그널)
     macro = {}
     for t in macro_tickers:
         d = get_ticker_full(t)
@@ -470,6 +471,16 @@ def fetch_kospi_data() -> dict:
     # 6. 투자자별 순매수 (pykrx — 전 거래일)
     print("[fetch_data]   → investor trading (외국인/기관 순매수)")
     investor_trading = fetch_investor_trading_kospi()
+
+    # 7. 휴장 직후(post-holiday catch-up) 플래그 — 한국만 단독 휴장한 다음날 판정
+    print("[fetch_data]   → post-holiday catch-up flag")
+    try:
+        from holiday_check import was_kospi_only_closed_previous_session
+        post_holiday_catchup = was_kospi_only_closed_previous_session(datetime.now(KST).date())
+    except Exception as e:
+        print(f"[fetch_data] post-holiday check error: {e}", file=sys.stderr)
+        post_holiday_catchup = False
+    print(f"[fetch_data]   post_holiday_catchup={post_holiday_catchup}")
 
     data = {
         "generated_at": datetime.now(KST).isoformat(),
@@ -493,6 +504,15 @@ def fetch_kospi_data() -> dict:
         "economic_calendar": economic_calendar,
         # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)
         "investor_trading": investor_trading,
+        # 아시아 지역 지수 (직전 거래일 종가) — 한국 단독 휴장 다음날 catch-up 시그널
+        "asia_regional": {
+            "nikkei":   macro.get("^N225", {}),
+            "hangseng": macro.get("^HSI", {}),
+            "taiwan":   macro.get("^TWII", {}),
+            "shanghai": macro.get("000001.SS", {}),
+        },
+        # True면 어제 한국만 휴장 + 미국 개장 — EWY보다 asia_regional이 더 정확한 선행 지표
+        "post_holiday_catchup": post_holiday_catchup,
         # Kellogg screening — sorted by signal quality
         # Claude picks 3-5 from this list; use sparkline/ma20_sparkline/ma200_sparkline for stockCharts
         "kospi_candidates": kospi_candidates,

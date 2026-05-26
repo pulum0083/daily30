@@ -74,6 +74,10 @@ KOSPI_SYSTEM_PROMPT = """\
 4-1. dram_etf (Roundhill Memory ETF, 티커: DRAM) — HBM·DRAM 수요 선행 지표
    - 삼성전자·SK하이닉스 시초가와 높은 상관관계
    - dram_etf 상승 = HBM 수요 강세 기대 → 반도체 섹터 갭 상승 가능성
+4-2. asia_regional (닛케이·항셍·상해·대만) — 직전 거래일 아시아 동조 흐름
+   - **post_holiday_catchup=true (한국 단독 휴장 다음날)이면 EWY보다 우선순위 높음**
+   - 한국이 쉬는 동안 아시아 주요 시장이 강세였다면 코스피 갭 상승(catch-up) 가능성
+   - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 시초가에 직접 영향
 5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
    - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
@@ -687,6 +691,20 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
+
+    # 휴장 직후 컨텍스트 — 한국 단독 휴장 다음날엔 EWY보다 아시아 지역 지수가 우선 시그널
+    if briefing_type == "kospi" and analysis_data.get("post_holiday_catchup"):
+        user_content += (
+            "\n## ⚠️ 휴장 직후 컨텍스트 (post-holiday catch-up)\n"
+            "어제는 한국 증시만 단독 휴장이었고 미국·아시아 주요 시장은 거래되었어요. "
+            "이런 날은 EWY가 한국 갭 방향의 후행 지표가 될 수 있어요 "
+            "(EWY는 미국 거래시간 sentiment를 반영하므로 한국 휴장과 무관하게 움직임).\n"
+            "**우선순위 조정**:\n"
+            "1. asia_regional(닛케이·항셍·상해·대만)이 모두 강세였다면 코스피 갭 상승 catch-up 가능성 우선 고려\n"
+            "2. EWY 약세와 asia_regional 강세가 충돌하면 confidence를 보수적으로(50~60%대)로 설정\n"
+            "3. reasons에 🌏 아시아 동조 흐름을 반드시 포함 (catch-up 효과 설명)\n"
+        )
+        print("[call_claude] Post-holiday catch-up context injected")
 
     # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 시초가 + us 브리핑)
     if briefing_type in ("kospi", "us"):

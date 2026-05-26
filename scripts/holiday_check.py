@@ -7,7 +7,7 @@ Exit code 0 = market is open, Exit code 1 = market is closed/holiday.
 
 import argparse
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import pytz
 
 KST = pytz.timezone("Asia/Seoul")
@@ -127,6 +127,31 @@ def check_us_open(check_date: date) -> bool:
     }
     all_holidays = us_holidays_2025 | us_holidays_2026
     return check_date not in all_holidays
+
+
+def was_kospi_only_closed_previous_session(today: date) -> bool:
+    """직전 KOSPI 거래일과 오늘 사이에 다른 시장(미국·아시아)이 1번 이상 추가로 거래됐는지 판정.
+
+    True면 'post-holiday catch-up' 컨텍스트가 필요한 날.
+    매주 월요일(주말 갭만 있는 경우)은 False로 떨어지고,
+    한국이 평일에 단독 휴장한 다음 거래일에는 True가 된다.
+    """
+    # 직전 KOSPI 거래일을 찾는다
+    prev_kospi = today
+    while True:
+        prev_kospi -= timedelta(days=1)
+        if check_kospi_open(prev_kospi):
+            break
+
+    # 그 사이의 추가 거래일 카운트 — 평일(아시아 시장 대부분 거래) 또는 미국 거래일
+    extra_sessions = 0
+    d = prev_kospi + timedelta(days=1)
+    while d < today:
+        if (not is_weekend(d)) or check_us_open(d):
+            extra_sessions += 1
+        d += timedelta(days=1)
+
+    return extra_sessions >= 1
 
 
 def main():
