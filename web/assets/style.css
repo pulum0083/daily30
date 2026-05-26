@@ -1937,25 +1937,26 @@
 /* ── 칩보드 위젯 ── */
 .chip-widget {
   display: block;
-  padding: 11px 14px 8px;
   background: #EEF3FF;
   border: 1.5px solid #4A7FF5;
   border-radius: var(--r-12);
-  text-decoration: none;
-  transition: background .15s;
+  overflow: hidden;
 }
-.chip-widget:hover { background: #E3EBFF; }
 html.dark .chip-widget {
   background: rgba(59, 130, 246, 0.10);
   border-color: rgba(96, 165, 250, 0.45);
 }
-html.dark .chip-widget:hover { background: rgba(59, 130, 246, 0.16); }
 .chip-widget__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 7px;
+  padding: 11px 14px 9px;
+  text-decoration: none;
+  transition: background .15s;
+  cursor: pointer;
 }
+.chip-widget__header:hover { background: #dce8ff; }
+html.dark .chip-widget__header:hover { background: rgba(59, 130, 246, 0.16); }
 .chip-widget__left {
   display: flex;
   align-items: center;
@@ -1989,6 +1990,7 @@ html.dark .chip-widget__title { color: #93C5FD; }
 html.dark .chip-widget__more { color: #60A5FA; }
 
 /* 종목 행 */
+.chip-widget__stocks { padding: 0 14px 8px; }
 .chip-row {
   display: flex;
   align-items: center;
@@ -2620,7 +2622,11 @@ html.dark .acc-type-badge.us {
   justify-content: space-between;
   padding: 10px 14px;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity .15s;
 }
+.semicon-panel__header:hover { opacity: .88; }
 .semicon-panel__title-wrap {
   display: flex;
   align-items: center;
