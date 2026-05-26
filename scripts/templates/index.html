@@ -109,7 +109,22 @@
                 </div>
                 <div class="reason-block">
                   {% if market_summary %}<p>{{ market_summary }}</p>{% endif %}
-                  {% if reasons %}
+                  {% if why %}
+                  <div class="b-format">
+                    <div class="b-row">
+                      <span class="b-label">WHY</span>
+                      <p class="b-text">{{ why }}</p>
+                    </div>
+                    <div class="b-row">
+                      <span class="b-label">WHAT</span>
+                      <p class="b-text">{{ what }}</p>
+                    </div>
+                    <div class="b-row so-what">
+                      <span class="b-label">SO?</span>
+                      <p class="b-text">{{ so_what }}</p>
+                    </div>
+                  </div>
+                  {% elif reasons %}
                   <ul>
                     {% for r in reasons %}
                     <li>{{ r }}</li>
