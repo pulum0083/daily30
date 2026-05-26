@@ -285,6 +285,43 @@ def get_fear_greed() -> dict:
         return {}
 
 
+def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
+    """장 중/프리마켓 현재가와 전일 종가를 반환한다.
+
+    1순위: yfinance fast_info (단일 속성, 빠름)
+    2순위: intraday 5m + prepost=True
+    실패 시 None 반환 → 호출부에서 일봉 fallback 처리.
+    """
+    import yfinance as yf
+
+    # 1순위: fast_info
+    try:
+        fi = yf.Ticker(ticker).fast_info
+        last = fi.last_price
+        prev = fi.previous_close
+        if last and prev and float(last) > 0 and float(prev) > 0:
+            return float(last), float(prev)
+    except Exception:
+        pass
+
+    # 2순위: intraday 5m (프리마켓 포함)
+    try:
+        intraday = _yf_history(ticker, period="2d", interval="5m", prepost=True)
+        if not intraday.empty:
+            intraday_closes = intraday["Close"].dropna()
+            if len(intraday_closes) > 0:
+                # 전일 종가는 intraday에서 날짜 경계로 구분
+                import pandas as pd
+                today = intraday_closes.index[-1].date()
+                prev_closes = intraday_closes[intraday_closes.index.date < today]
+                if not prev_closes.empty:
+                    return float(intraday_closes.iloc[-1]), float(prev_closes.iloc[-1])
+    except Exception:
+        pass
+
+    return None
+
+
 def get_ticker_full(ticker: str) -> dict:
     """
     Fetch 1 year daily history for a ticker.
@@ -298,8 +335,14 @@ def get_ticker_full(ticker: str) -> dict:
             return {"error": "insufficient data"}
 
         closes = hist["Close"].dropna()
-        price = float(closes.iloc[-1])
-        prev_price = float(closes.iloc[-2])
+
+        # 장 중/프리마켓 실시간 가격 우선, 실패 시 일봉 fallback
+        rt = _get_realtime_price(ticker)
+        if rt is not None:
+            price, prev_price = rt
+        else:
+            price = float(closes.iloc[-1])
+            prev_price = float(closes.iloc[-2])
         change_pct = (price - prev_price) / prev_price * 100
 
         result = {
@@ -369,8 +412,15 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
             if len(closes) < 2:
                 print(f"[fetch_data] sidebar {key}/{ticker}: insufficient data ({len(closes)} closes)", file=sys.stderr)
                 continue
-            price = float(closes.iloc[-1])
-            prev = float(closes.iloc[-2])
+
+            # 장 중/프리마켓 실시간 가격 우선, 실패 시 일봉 fallback
+            rt = _get_realtime_price(ticker)
+            if rt is not None:
+                price, prev = rt
+            else:
+                price = float(closes.iloc[-1])
+                prev = float(closes.iloc[-2])
+
             if math.isnan(price) or math.isnan(prev) or prev == 0:
                 print(f"[fetch_data] sidebar {key}/{ticker}: invalid price (price={price}, prev={prev})", file=sys.stderr)
                 continue
