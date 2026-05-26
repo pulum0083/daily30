@@ -10,7 +10,7 @@
   <array>
     <string>/bin/bash</string>
     <string>-c</string>
-    <string>cd "/Users/luke/Service App/double-shot" &amp;&amp; python3 scripts/generate_stock_briefing.py</string>
+    <string>cd "/Users/luke/Service App/double-shot" &amp;&amp; python3 scripts/fetch_data.py --type kospi &amp;&amp; python3 scripts/fetch_news.py --type kospi &amp;&amp; python3 scripts/generate_stock_briefing.py</string>
   </array>
 
   <!-- 월~금 00:00 / 06:00 / 12:00 / 18:00 KST -->
