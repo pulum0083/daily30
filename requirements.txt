@@ -3,6 +3,7 @@
 
 # Market data
 yfinance>=0.2.40
+pykrx>=1.0.45  # KRX 공식 데이터 — 시장폭/투자자수급/KOSPI200
 
 # Market calendar (holiday check) — optional, falls back to hardcoded list
 # pandas_market_calendars>=4.3.0

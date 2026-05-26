@@ -355,46 +355,32 @@ def fetch_sector_performance() -> list[dict]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_investor_trading() -> dict:
-    """당일 외국인·기관·개인 순매수를 반환한다."""
+    """당일 외국인·기관·개인 순매수를 반환한다. pykrx(KRX 공식) 사용."""
     kst_now  = datetime.now(KST)
     date_str = kst_now.strftime("%Y%m%d")
-
-    apis = [
-        f"https://api.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-        f"https://m.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-    ]
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Mobile Safari/537.36",
-        "Referer": "https://m.stock.naver.com/",
-        "Accept": "application/json",
-    }
-    INVESTOR_MAP = {
-        "FO": "foreign", "OT": "institution", "PE": "individual",
-        "외국인": "foreign", "기관": "institution", "개인": "individual",
-    }
-    for url in apis:
-        try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read())
-            rows = data if isinstance(data, list) else data.get("investorList", data.get("list", []))
-            result: dict = {"date": date_str}
-            for row in rows:
-                inv = row.get("investorType") or row.get("tp") or row.get("type") or row.get("name") or ""
-                key = INVESTOR_MAP.get(inv)
-                if not key:
-                    continue
-                for field in ("netBuyAmount", "net", "netBuy"):
-                    if row.get(field) is not None:
-                        net = row[field]
-                        break
-                else:
-                    net = 0
-                result[key] = {"net": int(str(net).replace(",", "") or 0)}
-            if len(result) > 1:
-                return result
-        except Exception as e:
-            print(f"[fetch_closing] investor trading error: {e}", file=sys.stderr)
+    try:
+        from pykrx import stock as krx
+        df = krx.get_market_net_purchases_of_equities(date_str, date_str, "코스피")
+        if df.empty:
+            print("[fetch_closing] investor trading: empty DataFrame", file=sys.stderr)
+            return {}
+        # 컬럼 탐색: '순매수거래대금' 또는 '순매수금액' (버전에 따라 다름)
+        net_col = next((c for c in df.columns if "순매수" in c and "금" in c), None)
+        if net_col is None:
+            net_col = df.columns[0]
+        KEY_MAP = {"외국인": "foreign", "기관합계": "institution", "개인": "individual"}
+        result: dict = {"date": date_str}
+        for krx_key, out_key in KEY_MAP.items():
+            if krx_key in df.index:
+                val = int(df.loc[krx_key, net_col])
+                result[out_key] = {"net": val}
+        if len(result) > 1:
+            foreign_net = result.get("foreign", {}).get("net", 0)
+            print(f"[fetch_closing] investor trading ({date_str}): foreign={foreign_net:+,} (백만원)")
+            return result
+        print("[fetch_closing] investor trading: could not map investors", file=sys.stderr)
+    except Exception as e:
+        print(f"[fetch_closing] investor trading pykrx error: {e}", file=sys.stderr)
     return {}
 
 
@@ -494,48 +480,34 @@ def fetch_trade_amount() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_market_breadth() -> dict:
-    """코스피 시장 폭 데이터를 반환한다."""
+    """코스피 시장 폭 데이터를 반환한다. pykrx(KRX 공식) 사용."""
     kst_now  = datetime.now(KST)
     date_str = kst_now.strftime("%Y%m%d")
-    urls = [
-        f"https://m.stock.naver.com/api/index/KOSPI/upDownStockCount?bizDate={date_str}",
-        f"https://api.stock.naver.com/api/index/KOSPI/upDownStockCount?bizDate={date_str}",
-    ]
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Mobile Safari/537.36",
-        "Referer": "https://m.stock.naver.com/",
-        "Accept": "application/json",
-    }
-
-    def _get(d: dict, *keys) -> int:
-        for k in keys:
-            v = d.get(k)
-            if v is not None:
-                try:
-                    return int(str(v).replace(",", ""))
-                except ValueError:
-                    pass
-        return 0
-
-    for url in urls:
-        try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read())
-            result = {
-                "up":          _get(data, "upCount",         "riseCount",  "up"),
-                "down":        _get(data, "downCount",        "fallCount",  "down"),
-                "unchanged":   _get(data, "unchangedCount",   "steadyCount","unchanged"),
-                "upper_limit": _get(data, "upperLimitCount",  "ceilCount",  "limitUp"),
-                "lower_limit": _get(data, "lowerLimitCount",  "floorCount", "limitDown"),
-                "new_high":    _get(data, "highestCount",     "newHighCount","high"),
-                "new_low":     _get(data, "lowestCount",      "newLowCount", "low"),
-            }
-            if result["up"] > 0 or result["down"] > 0:
-                print(f"[fetch_closing] 시장 폭: 상승 {result['up']} / 하락 {result['down']}")
-                return result
-        except Exception as e:
-            print(f"[fetch_closing] market breadth failed ({url}): {e}", file=sys.stderr)
+    try:
+        from pykrx import stock as krx
+        df = krx.get_market_price_change_by_ticker(date_str, date_str, market="KOSPI")
+        if df.empty:
+            print("[fetch_closing] market breadth: empty DataFrame", file=sys.stderr)
+            return {}
+        chg_col = next((c for c in df.columns if "등락" in c and "률" in c), None)
+        if chg_col is None:
+            print("[fetch_closing] market breadth: 등락률 column not found", file=sys.stderr)
+            return {}
+        chg = df[chg_col]
+        up          = int((chg >  0).sum())
+        down        = int((chg <  0).sum())
+        unchanged   = int((chg == 0).sum())
+        upper_limit = int((chg >= 29.9).sum())
+        lower_limit = int((chg <= -29.9).sum())
+        result = {
+            "up": up, "down": down, "unchanged": unchanged,
+            "upper_limit": upper_limit, "lower_limit": lower_limit,
+            "new_high": 0, "new_low": 0,  # pykrx 미지원
+        }
+        print(f"[fetch_closing] 시장 폭: 상승 {up} / 하락 {down} / 상한가 {upper_limit}")
+        return result
+    except Exception as e:
+        print(f"[fetch_closing] market breadth pykrx error: {e}", file=sys.stderr)
     return {}
 
 
@@ -544,74 +516,53 @@ def fetch_market_breadth() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_kospi200_top10() -> list:
-    """코스피 200 시총 상위 10종목을 반환한다."""
-    url = "https://m.stock.naver.com/api/index/KOSPI200/indexStockList?pageSize=10&page=1"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Mobile Safari/537.36",
-        "Referer": "https://m.stock.naver.com/",
-        "Accept": "application/json",
-    }
+    """코스피 200 시총 상위 10종목을 반환한다. pykrx(KRX 공식) 사용."""
+    kst_now  = datetime.now(KST)
+    date_str = kst_now.strftime("%Y%m%d")
     try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read())
-
-        stocks_raw = data if isinstance(data, list) else (
-            data.get("stocks") or data.get("stockList") or
-            data.get("indexStockList") or data.get("list") or []
-        )
+        from pykrx import stock as krx
+        # KOSPI200 구성종목 목록 ('1028' = KOSPI200)
+        constituents = krx.get_index_portfolio_deposit_file("1028")
+        if isinstance(constituents, list):
+            tickers = constituents[:10]
+        elif hasattr(constituents, 'index'):
+            tickers = list(constituents.index[:10])
+        else:
+            tickers = []
+        if not tickers:
+            print("[fetch_closing] KOSPI200 top10: no tickers", file=sys.stderr)
+            return []
 
         result = []
-        for i, s in enumerate(stocks_raw[:10], 1):
-            name = s.get("name") or s.get("stockName") or s.get("itemName") or ""
-            if not name:
-                continue
-            price_raw = s.get("closePrice") or s.get("price") or s.get("last") or "0"
-            price_str = str(price_raw).replace(",", "")
+        for i, code in enumerate(tickers, 1):
             try:
-                price_int = int(float(price_str))
+                df = krx.get_market_ohlcv(date_str, date_str, code)
+                if df.empty:
+                    continue
+                name = krx.get_market_ticker_name(code)
+                price_int = int(df["종가"].iloc[0])
+                chg_pct   = float(df["등락률"].iloc[0])
                 price_fmt = f"{price_int:,}원"
-            except ValueError:
-                price_fmt = price_raw + "원"
-
-            chg_raw = s.get("fluctuationsRatio") or s.get("changeRate") or s.get("chgRate") or "0"
-            try:
-                chg_pct = float(str(chg_raw).replace(",", "").replace("%", ""))
-            except ValueError:
-                chg_pct = 0.0
-
-            ctp = s.get("compareToPreviousPrice")
-            if isinstance(ctp, dict):
-                dir_code = ctp.get("code", "3")
-            elif isinstance(ctp, str):
-                dir_code = ctp
-            else:
-                dir_code = "3"
-            if dir_code in ("4", "5"):
-                chg_pct = -abs(chg_pct)
-
-            if chg_pct > 0:
-                chg_disp = f"▲ +{chg_pct:.2f}%"
-                cls = "up"
-            elif chg_pct < 0:
-                chg_disp = f"▼ {chg_pct:.2f}%"
-                cls = "down"
-            else:
-                chg_disp = "0.00%"
-                cls = "flat"
-
-            result.append({
-                "rank": i,
-                "name": name,
-                "price": price_fmt,
-                "change_pct": chg_disp,
-                "cls": cls,
-            })
+                if chg_pct > 0:
+                    chg_disp = f"▲ +{chg_pct:.2f}%"
+                    cls = "up"
+                elif chg_pct < 0:
+                    chg_disp = f"▼ {chg_pct:.2f}%"
+                    cls = "down"
+                else:
+                    chg_disp = "0.00%"
+                    cls = "flat"
+                result.append({
+                    "rank": i, "name": name,
+                    "price": price_fmt, "change_pct": chg_disp, "cls": cls,
+                })
+            except Exception as e2:
+                print(f"[fetch_closing] KOSPI200 top10 {code}: {e2}", file=sys.stderr)
 
         print(f"[fetch_closing] KOSPI200 TOP10: {len(result)}종목")
         return result
     except Exception as e:
-        print(f"[fetch_closing] KOSPI200 top10 failed: {e}", file=sys.stderr)
+        print(f"[fetch_closing] KOSPI200 top10 pykrx error: {e}", file=sys.stderr)
     return []
 
 
