@@ -144,9 +144,24 @@ def call_claude(client: anthropic.Anthropic, stock: dict, datetime_str: str) -> 
 
 
 def insert_and_cleanup(sb, stock: dict, analysis: dict) -> None:
+    new_title = analysis["title"]
+
+    # 최신 타이틀과 동일하면 중복 저장 안 함
+    latest = (
+        sb.table("stock_briefings")
+        .select("title")
+        .eq("ticker", stock["ticker"])
+        .order("generated_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if latest.data and latest.data[0]["title"] == new_title:
+        print(f"[briefing] Skip: {stock['name']} — 이전 타이틀과 동일, 저장 건너뜀")
+        return
+
     sb.table("stock_briefings").insert({
         "ticker": stock["ticker"],
-        "title": analysis["title"],
+        "title": new_title,
         "generated_at": datetime.now(KST).isoformat(),
     }).execute()
 
