@@ -225,14 +225,82 @@
                   <div class="close-idx__vol">원화 강세 마감</div>
                 </div>
               </div>
-              
+
+              <div class="trade-vol">
+                <div class="trade-vol__label">코스피 거래대금</div>
+                <div class="trade-vol__val">39조 647억원</div>
+              </div>
+
             </div>
 
             <!-- ② 시장 폭 -->
-            
+
+            <div class="open-section">
+              <div class="open-section__title">시장 폭</div>
+              <div class="breadth-groups">
+                <div class="breadth-group">
+                  <div class="breadth-chip">
+                    <span class="breadth-chip__label">상승</span>
+                    <span class="breadth-chip__val up">234</span>
+                  </div>
+                  <div class="breadth-chip">
+                    <span class="breadth-chip__label">하락</span>
+                    <span class="breadth-chip__val down">656</span>
+                  </div>
+                  <div class="breadth-chip">
+                    <span class="breadth-chip__label">보합</span>
+                    <span class="breadth-chip__val neutral">28</span>
+                  </div>
+                </div>
+                <div class="breadth-group">
+                  <div class="breadth-chip">
+                    <span class="breadth-chip__label">상한가</span>
+                    <span class="breadth-chip__val up">4</span>
+                  </div>
+                  <div class="breadth-chip">
+                    <span class="breadth-chip__label">하한가</span>
+                    <span class="breadth-chip__val down">0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             <!-- ③ 수급 현황 -->
-            
+
+            <div class="open-section">
+              <div class="open-section__title">
+                수급 현황
+                <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;margin-left:4px;">코스피 · 순매수 기준</span>
+              </div>
+              <div class="supply-grid">
+                <div class="supply-card">
+                  <div class="supply-card__label">외국인</div>
+                  <div class="supply-card__amt down">-1,844억</div>
+                  <div class="supply-card__sub">순매도</div>
+                  <div class="supply-bar-track">
+                    <div class="supply-bar-fill down" style="width:20%"></div>
+                  </div>
+                </div>
+                <div class="supply-card">
+                  <div class="supply-card__label">기관</div>
+                  <div class="supply-card__amt up">+9,104억</div>
+                  <div class="supply-card__sub">순매수</div>
+                  <div class="supply-bar-track">
+                    <div class="supply-bar-fill up" style="width:100%"></div>
+                  </div>
+                </div>
+                <div class="supply-card">
+                  <div class="supply-card__label">개인</div>
+                  <div class="supply-card__amt down">-6,156억</div>
+                  <div class="supply-card__sub">순매도</div>
+                  <div class="supply-bar-track">
+                    <div class="supply-bar-fill down" style="width:68%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             <!-- ④ 시황 분석 (B포맷 우선, 레거시 폴백) -->
             <div class="open-section">
@@ -274,7 +342,85 @@
             
 
             <!-- ⑥ 코스피 200 시총 상위 10종목 -->
-            
+
+            <div class="open-section">
+              <div class="open-section__title">코스피 200 시총 상위 10종목</div>
+              <div class="top10-wrap">
+                <table class="top10-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>종목명</th>
+                      <th>현재가</th>
+                      <th>등락률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td>삼성전자</td>
+                      <td class="price">299,000원</td>
+                      <td class="chg up">▲ +2.22%</td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>SK하이닉스</td>
+                      <td class="price">2,052,000원</td>
+                      <td class="chg up">▲ +5.72%</td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td>삼성바이오로직스</td>
+                      <td class="price">1,425,000원</td>
+                      <td class="chg up">▲ +0.71%</td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td>LG에너지솔루션</td>
+                      <td class="price">399,500원</td>
+                      <td class="chg up">▲ +0.25%</td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <td>현대차</td>
+                      <td class="price">689,000원</td>
+                      <td class="chg up">▲ +5.19%</td>
+                    </tr>
+                    <tr>
+                      <td>6</td>
+                      <td>KB금융</td>
+                      <td class="price">157,300원</td>
+                      <td class="chg down">▼ -1.69%</td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td>셀트리온</td>
+                      <td class="price">195,000원</td>
+                      <td class="chg down">▼ -1.86%</td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td>NAVER</td>
+                      <td class="price">200,000원</td>
+                      <td class="chg down">▼ -1.48%</td>
+                    </tr>
+                    <tr>
+                      <td>9</td>
+                      <td>POSCO홀딩스</td>
+                      <td class="price">442,000원</td>
+                      <td class="chg down">▼ -1.23%</td>
+                    </tr>
+                    <tr>
+                      <td>10</td>
+                      <td>LG화학</td>
+                      <td class="price">351,000원</td>
+                      <td class="chg flat">0.00%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
 
           </div><!-- /accordion-body__inner -->
           </div><!-- /accordion-body -->
