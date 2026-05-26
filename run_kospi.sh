@@ -29,10 +29,7 @@ python3 "$PROJECT_DIR/scripts/fetch_news.py" --type kospi || echo "[WARN] 뉴스
 # 4. Claude 분석 생성 + HTML 저장
 python3 "$PROJECT_DIR/scripts/call_claude.py" --type kospi
 
-# 5. 종목별 이슈 브리핑 생성 (삼성전자·SK하이닉스 → Supabase)
-python3 "$PROJECT_DIR/scripts/generate_stock_briefing.py" || echo "[WARN] 종목 브리핑 생성 실패 (무시)"
-
-# 6. latest.json 업데이트 (구독자 즉시 발송용)
+# 5. latest.json 업데이트 (구독자 즉시 발송용)
 python3 "$PROJECT_DIR/scripts/update_latest.py" --type kospi || echo "[WARN] latest.json 업데이트 실패 (무시)"
 
 # 6. Telegram 전송
