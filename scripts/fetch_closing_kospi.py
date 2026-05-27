@@ -518,53 +518,34 @@ def fetch_market_breadth() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_kospi200_top10() -> list:
-    """코스피 200 시총 상위 10종목을 반환한다. pykrx(KRX 공식) 사용."""
-    kst_now  = datetime.now(KST)
-    date_str = kst_now.strftime("%Y%m%d")
+    """코스피 200 시총 상위 10종목을 반환한다. 네이버 marketValue API 사용."""
+    url = "https://m.stock.naver.com/api/stocks/marketValue?market=KS&size=10"
     try:
-        from pykrx import stock as krx
-        # KOSPI200 구성종목 목록 ('1028' = KOSPI200)
-        constituents = krx.get_index_portfolio_deposit_file("1028")
-        if isinstance(constituents, list):
-            tickers = constituents[:10]
-        elif hasattr(constituents, 'index'):
-            tickers = list(constituents.index[:10])
-        else:
-            tickers = []
-        if not tickers:
-            print("[fetch_closing] KOSPI200 top10: no tickers", file=sys.stderr)
-            return []
-
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            payload = json.loads(resp.read())
+        stocks = payload.get("stocks", [])
         result = []
-        for i, code in enumerate(tickers, 1):
-            try:
-                df = krx.get_market_ohlcv(date_str, date_str, code)
-                if df.empty:
-                    continue
-                name = krx.get_market_ticker_name(code)
-                price_int = int(df["종가"].iloc[0])
-                chg_pct   = float(df["등락률"].iloc[0])
-                price_fmt = f"{price_int:,}원"
-                if chg_pct > 0:
-                    chg_disp = f"▲ +{chg_pct:.2f}%"
-                    cls = "up"
-                elif chg_pct < 0:
-                    chg_disp = f"▼ {chg_pct:.2f}%"
-                    cls = "down"
-                else:
-                    chg_disp = "0.00%"
-                    cls = "flat"
-                result.append({
-                    "rank": i, "name": name,
-                    "price": price_fmt, "change_pct": chg_disp, "cls": cls,
-                })
-            except Exception as e2:
-                print(f"[fetch_closing] KOSPI200 top10 {code}: {e2}", file=sys.stderr)
-
+        for i, s in enumerate(stocks[:10], 1):
+            code = s.get("compareToPreviousPrice", {}).get("code", "3")
+            ratio = float(s.get("fluctuationsRatio", "0") or "0")
+            if code == "2":
+                chg_disp = f"▲ +{ratio:.2f}%"
+                cls = "up"
+            elif code == "5":
+                chg_disp = f"▼ {ratio:.2f}%"
+                cls = "down"
+            else:
+                chg_disp = "0.00%"
+                cls = "flat"
+            result.append({
+                "rank": i, "name": s.get("stockName", ""),
+                "price": s.get("closePrice", ""), "change_pct": chg_disp, "cls": cls,
+            })
         print(f"[fetch_closing] KOSPI200 TOP10: {len(result)}종목")
         return result
     except Exception as e:
-        print(f"[fetch_closing] KOSPI200 top10 pykrx error: {e}", file=sys.stderr)
+        print(f"[fetch_closing] KOSPI200 top10 naver error: {e}", file=sys.stderr)
     return []
 
 
