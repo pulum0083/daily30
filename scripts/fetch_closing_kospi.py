@@ -14,6 +14,7 @@ Usage:
 """
 
 import json
+import re
 import sys
 import time
 import urllib.request
@@ -355,32 +356,38 @@ def fetch_sector_performance() -> list[dict]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_investor_trading() -> dict:
-    """당일 외국인·기관·개인 순매수를 반환한다. pykrx(KRX 공식) 사용."""
+    """당일 외국인·기관·개인 순매수를 반환한다. 네이버 증권 PC 페이지 HTML 파싱."""
     kst_now  = datetime.now(KST)
     date_str = kst_now.strftime("%Y%m%d")
     try:
-        from pykrx import stock as krx
-        df = krx.get_market_net_purchases_of_equities(date_str, date_str, "코스피")
-        if df.empty:
-            print("[fetch_closing] investor trading: empty DataFrame", file=sys.stderr)
+        url = "https://finance.naver.com/sise/sise_index.naver?code=KOSPI"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            text = resp.read().decode("euc-kr", errors="ignore")
+        # "개인<br>..+N,NNN억...외국인<br>...-N,NNN억...기관<br>...+N,NNN억" 패턴
+        m = re.search(
+            r"개인<br>.*?([+-][0-9,]+).*?외국인<br>.*?([+-][0-9,]+).*?기관<br>.*?([+-][0-9,]+)",
+            text, re.DOTALL
+        )
+        if not m:
+            print("[fetch_closing] investor trading: pattern not found", file=sys.stderr)
             return {}
-        # 컬럼 탐색: '순매수거래대금' 또는 '순매수금액' (버전에 따라 다름)
-        net_col = next((c for c in df.columns if "순매수" in c and "금" in c), None)
-        if net_col is None:
-            net_col = df.columns[0]
-        KEY_MAP = {"외국인": "foreign", "기관합계": "institution", "개인": "individual"}
-        result: dict = {"date": date_str}
-        for krx_key, out_key in KEY_MAP.items():
-            if krx_key in df.index:
-                val = int(df.loc[krx_key, net_col])
-                result[out_key] = {"net": val}
-        if len(result) > 1:
-            foreign_net = result.get("foreign", {}).get("net", 0)
-            print(f"[fetch_closing] investor trading ({date_str}): foreign={foreign_net:+,} (백만원)")
-            return result
-        print("[fetch_closing] investor trading: could not map investors", file=sys.stderr)
+        def _parse_eok(s: str) -> int:
+            # 억원 단위 → 백만원 단위 (×100) 로 변환해 기존 구조와 통일
+            return int(s.replace(",", "").replace("+", "")) * 100
+        individual = _parse_eok(m.group(1))
+        foreign    = _parse_eok(m.group(2))
+        institution= _parse_eok(m.group(3))
+        result = {
+            "date": date_str,
+            "foreign":     {"net": foreign},
+            "institution": {"net": institution},
+            "individual":  {"net": individual},
+        }
+        print(f"[fetch_closing] investor trading ({date_str}): foreign={foreign:+,} individual={individual:+,} institution={institution:+,} (백만원)")
+        return result
     except Exception as e:
-        print(f"[fetch_closing] investor trading pykrx error: {e}", file=sys.stderr)
+        print(f"[fetch_closing] investor trading naver error: {e}", file=sys.stderr)
     return {}
 
 
@@ -441,28 +448,21 @@ def fetch_intraday_kospi() -> dict:
 def fetch_trade_amount() -> dict:
     """코스피 당일 거래대금을 반환한다. (억원 단위)
 
-    Naver 모바일 API의 tradeAmount 필드를 사용한다.
-    단위가 백만원이면 ÷100, 원이면 ÷1e8 으로 변환.
+    네이버 폴링 API의 accumulatedTradingValueRaw(원 단위)를 사용한다.
     """
-    url = "https://m.stock.naver.com/api/index/KOSPI/basic"
+    url = "https://polling.finance.naver.com/api/realtime/domestic/index/KOSPI"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             payload = json.loads(resp.read())
-        raw = ""
-        for key in ("tradeAmount", "accTradePrice", "totalTradeAmount"):
-            v = payload.get(key)
-            if v:
-                raw = str(v).replace(",", "")
-                break
+        datas = payload.get("datas", [])
+        if not datas:
+            return {}
+        raw = datas[0].get("accumulatedTradingValueRaw", "")
         if not raw:
             return {}
-        val = float(raw)
-        # 단위 추정: 1조원 이상이면 원 단위, 아니면 백만원 단위
-        if val >= 1e12:
-            eok = round(val / 1e8)
-        else:
-            eok = round(val / 100)
+        val = float(str(raw).replace(",", ""))
+        eok = round(val / 1e8)
         if eok <= 0:
             return {}
         jo = eok // 10000
@@ -480,34 +480,36 @@ def fetch_trade_amount() -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_market_breadth() -> dict:
-    """코스피 시장 폭 데이터를 반환한다. pykrx(KRX 공식) 사용."""
-    kst_now  = datetime.now(KST)
-    date_str = kst_now.strftime("%Y%m%d")
+    """코스피 시장 폭 데이터를 반환한다. 네이버 증권 메인 페이지 HTML 파싱."""
     try:
-        from pykrx import stock as krx
-        df = krx.get_market_price_change_by_ticker(date_str, date_str, market="KOSPI")
-        if df.empty:
-            print("[fetch_closing] market breadth: empty DataFrame", file=sys.stderr)
+        url = "https://finance.naver.com/sise/"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            text = resp.read().decode("euc-kr", errors="ignore")
+        # 등락종목 섹션: uup(상한가) / up(상승) / noc(보합) / dn(하락) / ddn(하한가)
+        def _extract(cls: str) -> int:
+            m = re.search(rf'class="{cls}"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
+            return int(m.group(1).replace(",", "")) if m else 0
+        upper_limit = _extract("uup")
+        up          = _extract("up")
+        unchanged   = _extract("noc")
+        # 하락/하한가는 하락 section에서 파싱
+        dn_m  = re.search(r'class="dn"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
+        ddn_m = re.search(r'class="ddn"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
+        down        = int(dn_m.group(1).replace(",", "")) if dn_m else 0
+        lower_limit = int(ddn_m.group(1).replace(",", "")) if ddn_m else 0
+        if up == 0 and down == 0:
+            print("[fetch_closing] market breadth: parsing failed", file=sys.stderr)
             return {}
-        chg_col = next((c for c in df.columns if "등락" in c and "률" in c), None)
-        if chg_col is None:
-            print("[fetch_closing] market breadth: 등락률 column not found", file=sys.stderr)
-            return {}
-        chg = df[chg_col]
-        up          = int((chg >  0).sum())
-        down        = int((chg <  0).sum())
-        unchanged   = int((chg == 0).sum())
-        upper_limit = int((chg >= 29.9).sum())
-        lower_limit = int((chg <= -29.9).sum())
         result = {
             "up": up, "down": down, "unchanged": unchanged,
             "upper_limit": upper_limit, "lower_limit": lower_limit,
-            "new_high": 0, "new_low": 0,  # pykrx 미지원
+            "new_high": 0, "new_low": 0,
         }
         print(f"[fetch_closing] 시장 폭: 상승 {up} / 하락 {down} / 상한가 {upper_limit}")
         return result
     except Exception as e:
-        print(f"[fetch_closing] market breadth pykrx error: {e}", file=sys.stderr)
+        print(f"[fetch_closing] market breadth naver error: {e}", file=sys.stderr)
     return {}
 
 
