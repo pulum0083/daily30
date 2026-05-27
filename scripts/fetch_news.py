@@ -47,6 +47,8 @@ KOSPI_RSS_FEEDS = [
     _rss("Korea stock NASDAQ semiconductor", "en", "US", "US:en"),
     _rss("Korean stock market today", "en", "US", "US:en"),
     _rss("코스피 증시", "ko", "KR", "KR:ko"),
+    # 원유 가격 동향: 유가 급등락이 코스피 인플레·에너지 섹터에 직결되므로 최신 뉴스 포함
+    _rss("crude oil WTI Brent price today", "en", "US", "US:en", recent=True),
 ]
 
 KOSPI_CLOSE_RSS_FEEDS = [

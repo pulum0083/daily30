@@ -345,6 +345,25 @@ def get_ticker_full(ticker: str) -> dict:
             prev_price = float(closes.iloc[-2])
         change_pct = (price - prev_price) / prev_price * 100
 
+        # Futures rollover guard: same as build_sidebar_market_data.
+        # Applies to commodity/rate futures (BZ=F, CL=F, GC=F, ^TNX, etc.).
+        try:
+            h = _yf_history(ticker, period="5d", interval="1h")
+            hc = h["Close"].dropna()
+            if len(hc) >= 25:
+                hp = float(hc.iloc[-1])
+                gap = abs(price - hp) / hp if hp != 0 else 0
+                if gap > 0.03:
+                    hp_prev = float(hc.iloc[max(0, len(hc) - 25)])
+                    price = hp
+                    change_pct = (hp - hp_prev) / hp_prev * 100 if hp_prev != 0 else 0
+                    print(
+                        f"[fetch_data] {ticker}: rollover detected (gap={gap:.1%}) → hourly override",
+                        file=sys.stderr,
+                    )
+        except Exception:
+            pass
+
         result = {
             "price":      round(price, 4),
             "change_pct": round(change_pct, 4),
@@ -426,9 +445,30 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
                 continue
             chg = round((price - prev) / prev * 100, 2)
 
-            # Hourly sparkline (last 10 hourly points); fallback to daily closes
-            sparkline = get_hourly_sparkline(ticker, n=10)
-            if len(sparkline) < 2:
+            # Fetch hourly data: used for sparkline and futures rollover sanity check.
+            # Futures contracts (CL=F, BZ=F, NQ=F, etc.) roll monthly — the "last daily close"
+            # from yfinance can jump to the new contract's price, creating a 4-8% artificial gap.
+            # If daily close deviates >3% from the latest hourly close, the daily data is stale
+            # due to rollover; override with hourly-based price and 24h-ago comparison.
+            hourly_hist = _yf_history(ticker, period="5d", interval="1h")
+            hourly_closes = hourly_hist["Close"].dropna()
+
+            if len(hourly_closes) >= 2:
+                hourly_price = float(hourly_closes.iloc[-1])
+                gap = abs(price - hourly_price) / hourly_price if hourly_price != 0 else 0
+                if gap > 0.03:
+                    # Rollover detected: switch to hourly-based price and 24h change
+                    hourly_prev = float(hourly_closes.iloc[max(0, len(hourly_closes) - 25)])
+                    price = round(hourly_price, 2)
+                    chg = round((hourly_price - hourly_prev) / hourly_prev * 100, 2) if hourly_prev != 0 else 0
+                    print(
+                        f"[fetch_data] sidebar {key}/{ticker}: rollover detected "
+                        f"(daily={closes.iloc[-1]:.2f}, hourly={hourly_price:.2f}, gap={gap:.1%}) "
+                        f"→ switched to hourly data",
+                        file=sys.stderr,
+                    )
+                sparkline = [round(float(p), 4) for p in hourly_closes.iloc[-10:].tolist()]
+            else:
                 sparkline = [round(float(p), 4) for p in closes.iloc[-10:].tolist()]
 
             market_data[key] = {
