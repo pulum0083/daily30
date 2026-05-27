@@ -431,13 +431,13 @@
         </div>
         {% if ai_semicon_stocks %}
         <div class="semicon-panel">
-          <div class="semicon-panel__header">
+          <a class="semicon-panel__header" href="/chips">
             <div class="semicon-panel__title-wrap">
               <span class="semicon-panel__badge">AI</span>
               <span class="semicon-panel__title">AI 반도체 종목</span>
             </div>
-            <a class="semicon-panel__arrow" href="/chips">→</a>
-          </div>
+            <span class="semicon-panel__arrow">→</span>
+          </a>
           <div class="semicon-panel__list">
             {% for s in ai_semicon_stocks %}
             <div class="semicon-stock">
