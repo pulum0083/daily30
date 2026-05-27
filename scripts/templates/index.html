@@ -426,8 +426,69 @@
         </div>
       </div><!-- /briefing-latest -->
 
-      <!-- ② 오른쪽 패널: 예측 성공률 + 시장 지표 (최신 브리핑 기준) -->
+      <!-- ② 오른쪽 패널: 마감 시황은 섹터 성과, 그 외는 예측 성공률 + 시장 지표 -->
       <aside class="layout-grid__right">
+        {% if is_closing_latest %}
+        <div class="right-panel">
+          <div class="panel-header">
+            <span class="section-title" style="display:inline-flex;align-items:center;gap:6px;">
+              섹터 성과
+              <button class="info-icon-btn" onclick="openSectorModal()" aria-label="섹터 성과 설명">?</button>
+            </span>
+            <span class="pub-time">상승률 TOP 5</span>
+          </div>
+          {% if sectors %}
+          <div class="sector-panel">
+            {% for s in sectors %}
+            {% set abs_pct = s.change_pct | abs %}
+            {% set bar_width = [abs_pct * 5, 100] | min %}
+            {% set cls = 'up' if s.change_pct >= 0 else 'down' %}
+            <div class="sector-item">
+              <div class="sector-item__top">
+                <span class="sector-item__rank">{{ loop.index }}</span>
+                <span class="sector-item__name" title="{{ s.name }}">{{ s.name }}</span>
+                <span class="sector-item__pct {{ cls }}">{{ '%+.2f' % s.change_pct }}%</span>
+              </div>
+              <div class="sector-item__bar-track">
+                <div class="sector-item__bar-fill {{ cls }}" style="width:{{ bar_width }}%"></div>
+              </div>
+              {% if s.stocks %}
+              <div class="sector-item__stocks">
+                {% for stock in s.stocks %}
+                <div class="sector-stock">
+                  <span class="sector-stock__name">{{ stock.name }}</span>
+                  <span class="sector-stock__pct">{{ '%+.2f' % stock.change_pct }}%</span>
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% if ai_semicon_stocks %}
+        <div class="semicon-panel">
+          <div class="semicon-panel__header">
+            <div class="semicon-panel__title-wrap">
+              <span class="semicon-panel__badge">AI</span>
+              <span class="semicon-panel__title">AI 반도체 종목</span>
+            </div>
+            <a class="semicon-panel__arrow" href="/chips">→</a>
+          </div>
+          <div class="semicon-panel__list">
+            {% for s in ai_semicon_stocks %}
+            <div class="semicon-stock">
+              <span class="semicon-stock__flag">{{ s.flag }}</span>
+              <span class="semicon-stock__name">{{ s.name }}</span>
+              <span class="semicon-stock__price">{{ s.price }}</span>
+              <span class="semicon-stock__chg {{ s.cls }}">{{ s.chg_pct }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% else %}
         {% if accuracy %}
         <div class="accuracy-standalone">
           <div class="accuracy-standalone__header">
@@ -512,27 +573,6 @@
             {% endfor %}
           </div>
         </div>
-        {% if is_closing_latest and ai_semicon_stocks %}
-        <div class="semicon-panel">
-          <div class="semicon-panel__header">
-            <div class="semicon-panel__title-wrap">
-              <span class="semicon-panel__badge">AI</span>
-              <span class="semicon-panel__title">AI 반도체 종목</span>
-            </div>
-            <a class="semicon-panel__arrow" href="/chips">→</a>
-          </div>
-          <div class="semicon-panel__list">
-            {% for s in ai_semicon_stocks %}
-            <div class="semicon-stock">
-              <span class="semicon-stock__flag">{{ s.flag }}</span>
-              <span class="semicon-stock__name">{{ s.name }}</span>
-              <span class="semicon-stock__price">{{ s.price }}</span>
-              <span class="semicon-stock__chg {{ s.cls }}">{{ s.chg_pct }}</span>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% else %}
         <div class="chip-widget">
           <a class="chip-widget__header" href="/chips" target="_blank" rel="noopener">
             <div class="chip-widget__left">
