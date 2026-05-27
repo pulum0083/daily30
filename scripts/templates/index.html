@@ -203,44 +203,6 @@
               </div>
               {% endif %}
 
-              {% if sectors %}
-              <div class="open-section">
-                <div class="open-section__title">
-                  섹터 성과
-                  <button class="info-icon-btn" onclick="openSectorModal()" aria-label="섹터 성과 설명">?</button>
-                </div>
-                <div class="reason-block" style="padding:14px 16px 16px;">
-                  <div style="display:flex;flex-direction:column;gap:14px;">
-                    {% for s in sectors %}
-                    {% set abs_pct = s.change_pct | abs %}
-                    {% set bar_width = [abs_pct * 5, 100] | min %}
-                    {% set cls = 'up' if s.change_pct >= 0 else 'down' %}
-                    <div class="sector-item">
-                      <div class="sector-item__top">
-                        <span class="sector-item__rank">{{ loop.index }}</span>
-                        <span class="sector-item__name" title="{{ s.name }}">{{ s.name }}</span>
-                        <span class="sector-item__pct {{ cls }}">{{ '%+.2f' % s.change_pct }}%</span>
-                      </div>
-                      <div class="sector-item__bar-track">
-                        <div class="sector-item__bar-fill {{ cls }}" style="width:{{ bar_width }}%"></div>
-                      </div>
-                      {% if s.stocks %}
-                      <div class="sector-item__stocks">
-                        {% for stock in s.stocks %}
-                        <div class="sector-stock">
-                          <span class="sector-stock__name">{{ stock.name }}</span>
-                          <span class="sector-stock__pct">{{ '%+.2f' % stock.change_pct }}%</span>
-                        </div>
-                        {% endfor %}
-                      </div>
-                      {% endif %}
-                    </div>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              {% endif %}
-
               {% if kospi200_top10 %}
               <div class="open-section">
                 <div class="open-section__title">코스피 200 시총 상위 10종목</div>
