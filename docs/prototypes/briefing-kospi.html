@@ -28,6 +28,10 @@ html{font-size:15px;-webkit-font-smoothing:antialiased;}
 body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;word-break:keep-all;}
 a{color:inherit;text-decoration:none;}button{cursor:pointer;border:none;background:none;font:inherit;}
 
+/* embed 모드에서 GNB 숨김 */
+body.is-embed .gnb{display:none;}
+body.is-embed{background:transparent;}
+
 /* GNB */
 .gnb{position:sticky;top:0;z-index:100;height:var(--gnb-h);background:var(--gnb-bg);border-bottom:1px solid rgba(255,255,255,.06);padding:0 32px;display:flex;align-items:center;}
 .gnb__inner{width:100%;display:flex;align-items:center;justify-content:space-between;}
@@ -56,12 +60,16 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .accordion-item{background:var(--canvas);border-radius:var(--r-lg);border:1px solid var(--hairline);box-shadow:var(--s1);overflow:hidden;}
 .accordion-item.is-open{box-shadow:var(--s2);}
 .accordion-item.is-today{border-color:rgba(0,110,255,.22);}
-.accordion-header{display:flex;align-items:center;gap:12px;padding:16px 18px;}
+.accordion-header{display:flex;align-items:center;gap:12px;padding:14px 18px;}
 .accordion-header__date-label{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
-.accordion-header__badges{margin-left:auto;}
 .pred-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;}
 .pred-badge.up{background:var(--up-bg);color:var(--up);}
 .pred-badge.down{background:var(--dn-bg);color:var(--dn);}
+/* 날짜 헤더 이전/다음 */
+.header-nav{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.hnav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:var(--r-sm);transition:all .15s;cursor:pointer;flex-shrink:0;}
+.hnav-btn:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-bg);}
+.hnav-btn.disabled{opacity:.25;pointer-events:none;cursor:default;}
 .accordion-body{display:grid;grid-template-rows:1fr;}
 .accordion-body__inner{overflow:visible;border-top:1px solid var(--hairline);padding:0 18px 22px;}
 
@@ -338,7 +346,14 @@ html.dark .chip-widget__more{color:#60A5FA;}
       <div class="accordion-item is-open is-today">
         <div class="accordion-header">
           <div class="accordion-header__date-label">2026-05-28</div>
-          <div class="accordion-header__badges"><span class="pred-badge up">상승 우위</span></div>
+          <div class="header-nav">
+            <a class="hnav-btn" id="btn-prev" href="#" title="이전 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <a class="hnav-btn" id="btn-next" href="#" title="다음 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
         </div>
         <div class="accordion-body">
           <div class="accordion-body__inner">
@@ -598,6 +613,14 @@ window.addEventListener('load',()=>{
 window.addEventListener('resize',()=>{
   Object.entries(SPARKLINES).forEach(([id,{data,color}])=>drawSparkline(id,data,color));
   MINI_CHARTS.forEach(d=>drawMiniChart(d.id,d.prices,d.ma20,d.ma200));
+  const params=new URLSearchParams(location.search);
+  // embed=1 이면 GNB 숨김
+  if(params.get('embed')==='1') document.body.classList.add('is-embed');
+  // mode=latest 이면 다음 버튼 비활성
+  if(params.get('mode')==='latest'){
+    const n=document.getElementById('btn-next');
+    if(n)n.classList.add('disabled');
+  }
 });
 </script>
 </body>
