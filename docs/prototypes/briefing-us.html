@@ -264,6 +264,29 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .info-modal__close:hover{background:var(--surface-inset);}
 .t-caption{font-size:12px;color:var(--muted);}
 
+/* ── 접힘 토글 ── */
+.pre-open-toggle{display:flex;align-items:center;gap:10px;padding:12px 16px;margin-top:18px;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);cursor:pointer;transition:background .15s;user-select:none;}
+.pre-open-toggle:hover{background:var(--surface-inset);}
+.pre-open-toggle__summary{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+.pre-open-toggle__label{font-size:13px;font-weight:600;color:var(--ink);}
+.pre-open-toggle__status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#FEF9C3;color:#A16207;white-space:nowrap;}
+.pre-open-toggle__chevron{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.pre-open-toggle__chevron.open{transform:rotate(180deg);}
+.pre-open-content{overflow:hidden;transition:max-height .3s ease,opacity .3s ease;max-height:2000px;opacity:1;}
+.pre-open-content.collapsed{max-height:0;opacity:0;}
+
+/* ── 오늘밤 관전 포인트 ── */
+.watchpoint-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;}
+.watchpoint-row{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hairline);align-items:flex-start;}
+.watchpoint-row:last-child{border-bottom:none;}
+.watchpoint-row__icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.watchpoint-row__body{flex:1;min-width:0;}
+.watchpoint-row__label{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--primary);margin-bottom:3px;}
+.watchpoint-row__text{font-size:13px;line-height:1.7;color:var(--ink);}
+.watchpoint-level{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;}
+.watchpoint-level.up{background:var(--up-bg);color:var(--up);}
+.watchpoint-level.dn{background:var(--dn-bg);color:var(--dn);}
+
 /* ── Responsive ── */
 @media(max-width:900px){
   .layout-wrapper{padding:16px 20px 60px;}
@@ -339,6 +362,19 @@ html.dark .chip-widget__more{color:#60A5FA;}
         <div class="accordion-body">
           <div class="accordion-body__inner">
 
+            <!-- ── 접힘 토글 헤더 (장 개시 후 표시) ── -->
+            <div class="pre-open-toggle" id="pre-open-toggle" onclick="togglePreOpen()">
+              <div class="pre-open-toggle__summary">
+                <span class="pred-badge up" style="font-size:11px;padding:2px 8px">상승 우위</span>
+                <span class="pre-open-toggle__label">S&P500 예측 65% · 21:16 생성</span>
+              </div>
+              <span class="pre-open-toggle__status">장 개시됨</span>
+              <span class="pre-open-toggle__chevron" id="pre-open-chevron">▼</span>
+            </div>
+
+            <!-- ── 접히는 영역 ── -->
+            <div class="pre-open-content" id="pre-open-content">
+
             <!-- 예측 카드 -->
             <div class="open-section">
               <div class="open-section__title">
@@ -394,6 +430,36 @@ html.dark .chip-widget__more{color:#60A5FA;}
                     <div class="premarket-high-card__right"><span class="premarket-high-card__badge up">+3.2%</span><span class="premarket-high-card__tag">신고가 🏆</span></div>
                   </div>
                   <div class="premarket-high-card__reason">🚀 HBM 주문 급증으로 AI 수요 확대가 기대돼요. 프리마켓 강세가 지속되고 있어요.</div>
+                </div>
+              </div>
+            </div>
+
+            </div><!-- /pre-open-content -->
+
+            <!-- ── 오늘밤 관전 포인트 (항상 표시) ── -->
+            <div class="open-section">
+              <div class="open-section__title">👁 오늘밤 관전 포인트</div>
+              <div class="watchpoint-card">
+                <div class="watchpoint-row">
+                  <div class="watchpoint-row__icon">📍</div>
+                  <div class="watchpoint-row__body">
+                    <div class="watchpoint-row__label">방향 확인 레벨</div>
+                    <div class="watchpoint-row__text">S&P500 <b>5,310</b> 이상 유지 시 상승 추세 확인<span class="watchpoint-level up">▲ 유지</span>. <b>5,280</b> 이하 이탈 시 하락 경계<span class="watchpoint-level dn">▼ 경계</span>예요.</div>
+                  </div>
+                </div>
+                <div class="watchpoint-row">
+                  <div class="watchpoint-row__icon">📡</div>
+                  <div class="watchpoint-row__body">
+                    <div class="watchpoint-row__label">프리마켓 체크</div>
+                    <div class="watchpoint-row__text">나스닥 선물 방향이 시초가를 결정해요. <b>NQ 선물 +0.5% 이상</b>이면 기술주 갭업 출발 유력해요.</div>
+                  </div>
+                </div>
+                <div class="watchpoint-row">
+                  <div class="watchpoint-row__icon">📅</div>
+                  <div class="watchpoint-row__body">
+                    <div class="watchpoint-row__label">오늘 일정</div>
+                    <div class="watchpoint-row__text"><b>22:30</b> 미국 증시 개장 · <b>23:00</b> 소비자신뢰지수 발표 · <b>익일 03:00</b> FOMC 의사록 공개</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -551,7 +617,24 @@ function renderMarket(){const m=window.MARKET_DATA;[['nq',m.nq],['nasdaq',m.nasd
 var CHIP_FB=[{flag:'🇰🇷',name:'삼성전자'},{flag:'🇰🇷',name:'SK하이닉스'},{flag:'🇺🇸',name:'Micron'},{flag:'🇺🇸',name:'AMD'},{flag:'🇺🇸',name:'Intel'}];
 function loadChipWidget(){var c=document.getElementById('chip-stocks');if(!c)return;fetch('/chips/api/prices',{signal:AbortSignal.timeout(4000)}).then(r=>r.ok?r.json():Promise.reject()).then(stocks=>{if(!Array.isArray(stocks)||!stocks.length)throw 0;stocks.slice(0,5).forEach(s=>{var rate=s.changeRate||0,dir=rate>0?'up':rate<0?'down':'flat',arrow=rate>0?'▲':rate<0?'▼':'',chg=arrow+Math.abs(rate).toFixed(2)+'%',flag=s.market==='KOSPI'?'🇰🇷':'🇺🇸';const r=document.createElement('div');r.className='chip-row';r.innerHTML='<span class="chip-row__flag">'+flag+'</span><span class="chip-row__name">'+s.name+'</span><span class="chip-row__price">'+(s.market==='KOSPI'?s.price.toLocaleString('ko-KR'):'$'+s.price.toFixed(2))+'</span><span class="chip-row__chg '+dir+'">'+chg+'</span>';c.appendChild(r);});}).catch(()=>{CHIP_FB.forEach(s=>{const r=document.createElement('div');r.className='chip-row';r.innerHTML='<span class="chip-row__flag">'+s.flag+'</span><span class="chip-row__name">'+s.name+'</span><span class="chip-row__price">—</span><span class="chip-row__chg flat">—</span>';c.appendChild(r);});});}
 
-window.addEventListener('load',()=>{renderAccBox();renderMarket();loadChipWidget();requestAnimationFrame(()=>{(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});});
+function togglePreOpen(){
+  const content=document.getElementById('pre-open-content');
+  const chevron=document.getElementById('pre-open-chevron');
+  const isCollapsed=content.classList.contains('collapsed');
+  if(isCollapsed){content.classList.remove('collapsed');chevron.classList.remove('open');}
+  else{content.classList.add('collapsed');chevron.classList.add('open');}
+}
+function applyTimeCollapse(){
+  const sim=new URLSearchParams(location.search).get('sim');
+  const kst=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));
+  const h=kst.getHours(),m=kst.getMinutes();
+  const isAfter2230=(h>22)||(h===22&&m>=30);
+  if(sim==='open'||isAfter2230){
+    document.getElementById('pre-open-content').classList.add('collapsed');
+    document.getElementById('pre-open-chevron').classList.add('open');
+  }
+}
+window.addEventListener('load',()=>{renderAccBox();applyTimeCollapse();renderMarket();loadChipWidget();requestAnimationFrame(()=>{(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});});
 window.addEventListener('resize',()=>{renderMarket();(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});
 </script>
 </body>
