@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Shot — 미국 시장 브리핑 v3</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root {
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+  --gnb-bg:#16181A;--gnb-h:52px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);
+  --up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);--s2:0 4px 12px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;word-break:keep-all;}
+a{color:inherit;text-decoration:none;}button{cursor:pointer;border:none;background:none;font:inherit;}
+
+/* GNB */
+.gnb{position:sticky;top:0;z-index:100;height:var(--gnb-h);background:var(--gnb-bg);border-bottom:1px solid rgba(255,255,255,.06);padding:0 32px;display:flex;align-items:center;}
+.gnb__inner{width:100%;display:flex;align-items:center;justify-content:space-between;}
+.gnb__left{display:flex;align-items:center;}
+.gnb__logo{display:flex;align-items:center;gap:8px;}
+.gnb__logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#E03131,#FF6A6A);display:flex;align-items:center;justify-content:center;}
+.gnb__logo-mark svg{width:18px;height:18px;}
+.gnb__title{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;}
+.gnb__title span{color:var(--primary);}
+.gnb__chips-link{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);padding-left:12px;margin-left:10px;border-left:1px solid rgba(255,255,255,.18);}
+.gnb__chips-link:hover{color:rgba(255,255,255,.9);}
+.gnb__meta{display:flex;align-items:center;gap:14px;}
+.gnb__date{font-size:12px;color:rgba(255,255,255,.42);}
+.gnb__theme-toggle{width:30px;height:30px;border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;}
+.gnb__theme-toggle:hover{background:rgba(255,255,255,.16);color:#fff;}
+.icon-sun,.icon-moon{display:none;}
+html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
+
+/* Layout */
+.layout-wrapper{max-width:1200px;margin:0 auto;padding:24px 32px 72px;}
+.layout-grid{display:grid;grid-template-columns:1fr 336px;column-gap:20px;align-items:start;}
+.layout-grid__main{min-width:0;}
+.layout-grid__right{display:flex;flex-direction:column;gap:12px;}
+
+/* Accordion */
+.accordion-item{background:var(--canvas);border-radius:var(--r-lg);border:1px solid var(--hairline);box-shadow:var(--s1);overflow:hidden;}
+.accordion-item.is-open{box-shadow:var(--s2);}
+.accordion-item.is-today{border-color:rgba(0,110,255,.22);}
+.accordion-header{display:flex;align-items:center;gap:12px;padding:16px 18px;}
+.accordion-header__date-label{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
+.accordion-header__badges{margin-left:auto;}
+.pred-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;}
+.pred-badge.up{background:var(--up-bg);color:var(--up);}
+.pred-badge.down{background:var(--dn-bg);color:var(--dn);}
+.accordion-body{display:grid;grid-template-rows:1fr;}
+.accordion-body__inner{overflow:visible;border-top:1px solid var(--hairline);padding:0 18px 22px;}
+
+/* Open section */
+.open-section{margin-top:22px;}
+.open-section+.open-section{margin-top:24px;}
+.open-section__title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.open-section__title::before{content:'';display:block;width:3px;height:12px;background:var(--primary);border-radius:2px;flex-shrink:0;}
+.section-time{margin-left:auto;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);text-transform:none;letter-spacing:0;white-space:nowrap;}
+.reason-section-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
+.reason-section-title::before{content:'💬';display:inline!important;width:auto!important;height:auto!important;background:none!important;border-radius:0!important;font-size:13px;margin-right:2px;}
+.divider{height:1px;background:var(--hairline);margin:18px 0;}
+
+/* ── AI 정확도 박스 ── */
+.acc-box{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;}
+.acc-box__header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 11px;border-bottom:1px solid var(--hairline);}
+.acc-box__title{font-size:13px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:6px;}
+.acc-box__period{font-size:11px;font-weight:600;color:var(--muted);}
+.acc-stats-row{display:flex;border-bottom:1px solid var(--hairline);}
+.acc-stat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 8px;gap:3px;border-right:1px solid var(--hairline);}
+.acc-stat:last-child{border-right:none;}
+.acc-stat__val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;}
+.acc-stat__val.good{color:#16A34A;}
+.acc-stat__val.mid{color:#D97706;}
+.acc-stat__val.bad{color:var(--up);}
+.acc-stat__lbl{font-size:10px;color:var(--muted);font-weight:500;white-space:nowrap;}
+.acc-bar-wrap{padding:10px 16px 13px;}
+.acc-bar{height:5px;border-radius:999px;display:flex;gap:2px;overflow:hidden;}
+.acc-bar__hit{background:#A2BFA5;border-radius:999px;}
+.acc-bar__miss{background:#C8AAAA;border-radius:999px;}
+.acc-bar__pending{background:var(--hairline);border-radius:999px;}
+.acc-bar-caption{margin-top:7px;font-size:11px;color:var(--muted);display:flex;gap:10px;}
+.acc-bar-caption span{display:flex;align-items:center;gap:4px;}
+.acc-bar-caption span::before{content:'';display:inline-block;width:8px;height:3px;border-radius:999px;flex-shrink:0;}
+.acc-bar-hit::before{background:#A2BFA5;}
+.acc-bar-miss::before{background:#C8AAAA;}
+.acc-bar-pending::before{background:var(--hairline);}
+
+/* PC에선 사이드바에만 표시 */
+.acc-box--sidebar{display:flex;flex-direction:column;}
+.acc-box--mobile{display:none;}
+
+/* Prediction card */
+.prediction-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:16px;}
+.prediction-summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.prediction-label{font-size:15px;font-weight:600;color:var(--ink);}
+.pred-confbar{display:block;}
+.pred-confbar__row{margin-bottom:14px;}
+.pred-confbar__row:last-child{margin-bottom:0;}
+.pred-confbar__header{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;}
+.pred-confbar__track{position:relative;height:10px;background:var(--surface-inset);border-radius:999px;overflow:hidden;}
+.pred-confbar__light{position:absolute;left:0;top:0;height:100%;border-radius:999px;}
+.pred-confbar__solid{position:absolute;left:0;top:0;height:100%;border-radius:999px;}
+.pred-confbar__solid.up{background:var(--up);}
+.pred-confbar__solid.down{background:var(--dn);}
+.pred-confbar__meta{font-size:11px;color:var(--muted);margin-top:4px;}
+.pred-divbar{display:none;}
+.pred-divbar__header{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:8px;}
+.pred-divbar__track{display:flex;height:32px;border-radius:999px;overflow:hidden;}
+.pred-divbar__down{background:var(--dn);display:flex;align-items:center;padding-left:10px;}
+.pred-divbar__up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.pred-divbar__pct{font-size:12px;font-weight:600;color:#fff;}
+.pred-divbar__neutral{display:flex;flex-direction:column;align-items:center;margin-top:4px;}
+.pred-divbar__tick{width:1px;height:6px;background:var(--hairline);}
+.pred-divbar__label{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* Reason block */
+.reason-block{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:14px 16px;}
+.reason-block ul{padding-left:16px;display:flex;flex-direction:column;gap:10px;}
+.reason-block ul li{font-size:14px;line-height:1.75;color:var(--ink);}
+
+/* Premarket */
+.premarket-highs{display:flex;flex-direction:column;gap:8px;}
+.premarket-high-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:12px 14px;}
+.premarket-high-card__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.premarket-high-card__identity{display:flex;align-items:center;gap:8px;}
+.premarket-high-card__ticker{font-size:15px;font-weight:700;color:var(--ink);}
+.premarket-high-card__name{font-size:12px;color:var(--muted);}
+.premarket-high-card__right{display:flex;align-items:center;gap:6px;}
+.premarket-high-card__badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;}
+.premarket-high-card__badge.up{background:var(--up-bg);color:var(--up);}
+.premarket-high-card__tag{font-size:11px;color:var(--muted);}
+.premarket-high-card__reason{font-size:13px;line-height:1.75;color:var(--muted);}
+
+/* Stock picks */
+.stock-picks{display:flex;flex-direction:column;gap:10px;}
+.stock-pick-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:14px 16px;}
+.stock-pick-card__top{display:flex;gap:12px;align-items:flex-start;}
+.stock-pick-card__rank{width:24px;height:24px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.stock-pick-card__info{flex:1;min-width:0;}
+.stock-pick-card__name{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:4px;}
+.ma20-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--primary-bg);color:var(--primary);}
+.stock-pick-card__meta{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.stock-pick-card__price{font-size:14px;font-weight:600;color:var(--ink);}
+.stock-pick-card__change{font-size:13px;font-weight:600;padding:1px 6px;border-radius:4px;}
+.stock-pick-card__change.up{background:var(--up-bg);color:var(--up);}
+.stock-pick-card__change.down{background:var(--dn-bg);color:var(--dn);}
+.ma200-gauge{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.ma200-gauge__label{font-size:10px;font-weight:600;color:var(--muted);flex-shrink:0;}
+.ma200-gauge__track{flex:0 0 56px;height:3px;background:var(--hairline);border-radius:999px;overflow:hidden;}
+.ma200-gauge__fill{height:100%;border-radius:999px;}
+.ma200-gauge__fill.up{background:var(--up);}
+.ma200-gauge__fill.down{background:var(--dn);}
+.ma200-gauge__pct{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+.ma200-gauge__pct.up{color:var(--up);}
+.ma200-gauge__pct.down{color:var(--dn);}
+.signal-stats{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;background:var(--surface-inset);border-radius:var(--r-sm);}
+.signal-stats__label{font-size:11px;color:var(--muted);font-weight:500;flex-shrink:0;}
+.signal-stats__divider{width:1px;height:14px;background:var(--hairline);flex-shrink:0;}
+.signal-stat{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.signal-stat__val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.signal-stat__val.good{color:#16A34A;}
+.signal-stat__val.mid{color:#D97706;}
+.signal-stat__sub{font-size:10px;color:var(--muted);white-space:nowrap;}
+.signal-mini-dots{display:flex;gap:2px;align-items:center;}
+.s-dot{width:6px;height:6px;border-radius:1px;flex-shrink:0;}
+.s-dot.h{background:#16A34A;}
+.s-dot.m{background:var(--up);}
+.s-dot.p{background:var(--hairline);}
+.stock-pick-card__scenario{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.85;}
+.scenario-tag{font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);padding:2px 6px;border-radius:4px;margin-right:5px;}
+.stock-pick-card__cta{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);line-height:1.75;}
+.cta-label{font-size:9px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);flex-shrink:0;padding:2px 5px;border:1px solid var(--hairline);border-radius:3px;}
+.stock-pick-mini-chart{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:1px;}
+.stock-pick-mini-chart canvas{display:block;width:88px;height:52px;}
+.stock-pick-mini-chart__legend{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);}
+.stock-pick-mini-chart__legend span{display:flex;align-items:center;gap:3px;}
+.stock-pick-mini-chart__legend span::before{content:'';display:inline-block;width:14px;height:2px;}
+.leg-price::before{background:var(--up)!important;}
+.leg-ma::before{background:repeating-linear-gradient(to right,#D97706 0,#D97706 3px,transparent 3px,transparent 5px)!important;}
+.leg-ma200::before{background:repeating-linear-gradient(to right,#7C3AED 0,#7C3AED 4px,transparent 4px,transparent 7px)!important;width:16px!important;height:2.5px!important;}
+
+/* Sidebar panels */
+.right-panel{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 11px;border-bottom:1px solid var(--hairline);}
+.section-title{font-size:13px;font-weight:700;color:var(--ink);}
+.pub-time{font-size:11px;font-weight:600;color:var(--muted);}
+.mkt-list{padding:0 14px;}
+.mkt-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hairline);}
+.mkt-row:last-child{border-bottom:none;}
+.mkt-row-info{flex:1;min-width:0;}
+.mkt-name{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mkt-vals{display:flex;align-items:baseline;gap:7px;}
+.mkt-val{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;}
+.mkt-chg{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mkt-chg.up{color:var(--up);}
+.mkt-chg.down{color:var(--dn);}
+.mkt-spark{flex-shrink:0;width:80px;height:44px;cursor:crosshair;}
+.mkt-spark canvas{display:block;width:100%!important;height:44px!important;}
+.vix-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-inset);color:var(--muted);}
+.vix-badge.calm{background:#DCFCE7;color:#16A34A;}
+.vix-badge.normal{background:#ECFCCB;color:#65A30D;}
+.vix-badge.elevated{background:#FEF9C3;color:#CA8A04;}
+.vix-badge.high{background:var(--dn-bg);color:var(--dn);}
+
+/* Chip widget */
+.chip-widget{background:#EEF3FF;border:1.5px solid #4A7FF5;border-radius:var(--r-lg);overflow:hidden;}
+html.dark .chip-widget{background:rgba(59,130,246,.10);border-color:rgba(96,165,250,.40);}
+.chip-widget__header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 9px;cursor:pointer;transition:background .15s;}
+.chip-widget__header:hover{background:#dce8ff;}
+html.dark .chip-widget__header:hover{background:rgba(59,130,246,.16);}
+.chip-widget__left{display:flex;align-items:center;gap:7px;}
+.chip-widget__badge{width:22px;height:22px;background:#2563EB;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
+.chip-widget__title{font-size:13px;font-weight:700;color:#1E3A8A;}
+html.dark .chip-widget__title{color:#93C5FD;}
+.chip-widget__more{font-size:14px;font-weight:700;color:#2563EB;}
+html.dark .chip-widget__more{color:#60A5FA;}
+.chip-widget__stocks{padding:0 14px 8px;}
+.chip-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(74,127,245,.12);font-size:13px;}
+.chip-row:last-child{border-bottom:none;}
+.chip-row__flag{flex-shrink:0;font-size:14px;}
+.chip-row__name{flex:1;color:var(--ink);font-weight:500;}
+.chip-row__price{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);}
+.chip-row__chg{font-size:12px;font-weight:600;min-width:52px;text-align:right;}
+.chip-row__chg.up{color:var(--up);}
+.chip-row__chg.down{color:var(--dn);}
+.chip-row__chg.flat{color:var(--muted);}
+
+/* Sidebar CTA */
+.sidebar-cta{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;}
+.sidebar-cta__tg{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--hairline);transition:background .15s;}
+.sidebar-cta__tg:hover{background:var(--surface-soft);}
+.sidebar-cta__tg-icon{width:34px;height:34px;border-radius:var(--r-md);background:#2CA5E0;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sidebar-cta__tg-text{display:flex;flex-direction:column;gap:2px;}
+.sidebar-cta__tg-title{font-size:13px;font-weight:700;color:var(--ink);}
+.sidebar-cta__tg-sub{font-size:11px;color:var(--muted);}
+.sidebar-footer{display:flex;align-items:center;gap:12px;padding:10px 16px;}
+.sidebar-intro{font-size:11px;color:var(--muted);}
+.sidebar-intro:hover{color:var(--primary);}
+
+/* Modal */
+.info-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--muted);color:var(--canvas);border-radius:50%;font-size:11px;font-weight:800;transition:background .15s;flex-shrink:0;}
+.info-icon-btn:hover{background:var(--ink);}
+.info-modal-backdrop{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;}
+.info-modal-backdrop.is-open{display:flex;}
+.info-modal{background:var(--canvas);border-radius:var(--r-lg);border:1px solid var(--hairline);padding:24px;max-width:420px;width:calc(100% - 40px);position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.info-modal__title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+.info-modal__body{font-size:13px;color:var(--muted);line-height:1.75;}
+.info-modal__close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.info-modal__close:hover{background:var(--surface-inset);}
+.t-caption{font-size:12px;color:var(--muted);}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .layout-wrapper{padding:16px 20px 60px;}
+  .layout-grid{grid-template-columns:1fr;row-gap:16px;}
+  /* PC 사이드바 acc-box 숨김, 모바일 acc-box 표시 */
+  .acc-box--sidebar{display:none;}
+  .acc-box--mobile{display:flex;flex-direction:column;}
+  /* 사이드바 전체는 남기되, acc-box가 mobile에선 main 안에 있으므로 sidebar의 시장지표 등은 아래 표시됨 */
+}
+@media(max-width:600px){
+  .layout-wrapper{padding:12px 14px 60px;}
+  .gnb{padding:0 16px;}
+  .pred-confbar{display:none;}
+  .pred-divbar{display:block;}
+  .stock-pick-card__top{flex-wrap:wrap;}
+  .stock-pick-card__info{flex:1 1 100%;}
+  .stock-pick-mini-chart{width:100%;align-items:stretch;margin-top:10px;}
+  .stock-pick-mini-chart canvas{width:100%!important;height:72px!important;}
+}
+</style>
+</head>
+<body>
+
+<nav class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__left">
+      <a class="gnb__logo" href="/briefings">
+        <div class="gnb__logo-mark"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="8" width="4" height="10" rx="1" fill="white"/><line x1="7" y1="4" x2="7" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/><rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/><line x1="17" y1="3" x2="17" y2="5" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/><line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+      <a class="gnb__chips-link" href="/chips">Chip-Board →</a>
+    </div>
+    <div class="gnb__meta">
+      <span class="gnb__date" id="gnb-date">2026-05-27 KST 21:17</span>
+      <button class="gnb__theme-toggle" onclick="toggleTheme()">
+        <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- 정확도 박스 공통 템플릿 (JS로 두 곳에 렌더링) -->
+<template id="acc-tpl">
+  <div class="acc-stats-row">
+    <div class="acc-stat"><span class="acc-stat__val good">73%</span><span class="acc-stat__lbl">최근 7일</span></div>
+    <div class="acc-stat"><span class="acc-stat__val good">68%</span><span class="acc-stat__lbl">최근 30일</span></div>
+  </div>
+  <div class="acc-bar-wrap">
+    <div class="acc-bar">
+      <div class="acc-bar__hit" style="width:70%"></div>
+      <div class="acc-bar__miss" style="width:27%"></div>
+      <div class="acc-bar__pending" style="width:3%"></div>
+    </div>
+    <div class="acc-bar-caption">
+      <span class="acc-bar-hit">적중 21</span>
+      <span class="acc-bar-miss">오류 8</span>
+      <span class="acc-bar-pending">미결 1</span>
+    </div>
+  </div>
+</template>
+
+<div class="layout-wrapper">
+  <div class="layout-grid">
+
+    <!-- ── MAIN ── -->
+    <div class="layout-grid__main">
+      <div class="accordion-item is-open is-today">
+        <div class="accordion-header">
+          <div class="accordion-header__date-label">2026-05-27</div>
+          <div class="accordion-header__badges"><span class="pred-badge up">상승 우위</span></div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+
+            <!-- 예측 카드 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                S&P500 방향 예측
+                <button class="info-icon-btn" onclick="openPredModal()">?</button>
+                <span class="section-time">21:16 KST 생성</span>
+              </div>
+              <div class="prediction-card">
+                <div class="prediction-summary"><span class="prediction-label">상승 우위 예측 (신뢰도 65%)</span></div>
+                <div class="pred-confbar">
+                  <div class="pred-confbar__row">
+                    <div class="pred-confbar__header"><span style="color:var(--up)">상승</span><span style="color:var(--muted)">62%</span></div>
+                    <div class="pred-confbar__track"><div class="pred-confbar__light" style="width:65%;background:var(--up-bg)"></div><div class="pred-confbar__solid up" style="width:62%"></div></div>
+                    <div class="pred-confbar__meta">신뢰구간 65% → 최대 65%</div>
+                  </div>
+                  <div class="pred-confbar__row">
+                    <div class="pred-confbar__header"><span style="color:var(--dn)">하락</span><span style="color:var(--muted)">38%</span></div>
+                    <div class="pred-confbar__track"><div class="pred-confbar__light" style="width:40%;background:var(--dn-bg)"></div><div class="pred-confbar__solid down" style="width:38%"></div></div>
+                    <div class="pred-confbar__meta">신뢰구간 65% → 최대 40%</div>
+                  </div>
+                </div>
+                <div class="pred-divbar">
+                  <div class="pred-divbar__header"><span style="color:var(--dn)">하락 38%</span><span style="color:var(--up)">상승 62%</span></div>
+                  <div class="pred-divbar__track"><div class="pred-divbar__down" style="flex:38"><span class="pred-divbar__pct">38%</span></div><div class="pred-divbar__up" style="flex:62"><span class="pred-divbar__pct">62%</span></div></div>
+                  <div class="pred-divbar__neutral"><div class="pred-divbar__tick"></div><div class="pred-divbar__label">중립(50%)</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 근거 -->
+            <div class="open-section">
+              <div class="open-section__title reason-section-title">왜 오를까? — 선물 강세·이란 평화 기대·칩주 반등</div>
+              <div class="reason-block">
+                <ul>
+                  <li>📈 S&P500 선물 <b>+0.14%</b>, NQ 선물 <b>+0.54%</b>. 기술주 비중 높은 나스닥 선물이 더 강한 모습이에요.</li>
+                  <li>💡 DRAM ETF <b>-2.70%</b>, MU <b>-2.06%</b>. 반도체 약세가 지수 상승을 제한하지만 AI 낙관론으로 하락폭은 제한적이에요.</li>
+                  <li>🕊️ 이란 평화 협상 기대로 중동 리스크가 완화됐어요. S&P500·나스닥 연속 신고가 흐름을 유지하고 있어요.</li>
+                  <li>😰 공포탐욕지수 <b>25</b> (지난주 34). 역발상 저가 매수 구간이나 단기 변동성에 주의가 필요해요.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 프리장 신고가 -->
+            <div class="open-section">
+              <div class="open-section__title">🏆 프리장 신고가 종목</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</div>
+              <div class="premarket-highs">
+                <div class="premarket-high-card">
+                  <div class="premarket-high-card__top">
+                    <div class="premarket-high-card__identity"><span class="premarket-high-card__ticker">MU</span><span class="premarket-high-card__name">Micron Technology</span></div>
+                    <div class="premarket-high-card__right"><span class="premarket-high-card__badge up">+3.2%</span><span class="premarket-high-card__tag">신고가 🏆</span></div>
+                  </div>
+                  <div class="premarket-high-card__reason">🚀 HBM 주문 급증으로 AI 수요 확대가 기대돼요. 프리마켓 강세가 지속되고 있어요.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 종목 픽 -->
+            <div class="open-section">
+              <div class="open-section__title">
+                상승 모멘텀 종목
+                <button class="info-icon-btn" onclick="openKelloggModal()">?</button>
+              </div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">20일선을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 종목만 선별했어요.</div>
+              <div class="stock-picks">
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">1</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">GOOGL (알파벳)<span class="ma20-badge">20일선 상향 돌파 시도</span></div>
+                      <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$388.88</span><span class="stock-pick-card__change up">+0.03%</span></div>
+                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill up" style="width:100%"></div></div><span class="ma200-gauge__pct up">+31.0%</span></div>
+                      <div class="stock-pick-card__scenario"><span class="scenario-tag">20일선 크로싱업 진입</span>20일선($387.41)을 돌파했어요. AI 광고·클라우드 모멘텀과 이란 리스크 완화가 있어요.</div>
+                    </div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-1" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                  </div>
+                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 $389 이내에 진입해요. 목표: $405(+4.1%) / 손절: $382예요.</div>
+                </div>
+
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">2</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">AVGO (브로드컴)<span class="ma20-badge">20일선 상향 돌파 시도</span></div>
+                      <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$422.01</span><span class="stock-pick-card__change down">-0.46%</span></div>
+                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill up" style="width:100%"></div></div><span class="ma200-gauge__pct up">+20.8%</span></div>
+                      <div class="stock-pick-card__scenario"><span class="scenario-tag">20일선 크로싱업</span>AI ASIC 선두예요. DRAM 약세에도 차별화가 가능해요.</div>
+                    </div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-2" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                  </div>
+                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 $422 이내에 진입해요. 목표: $440(+4.3%) / 손절: $415예요.</div>
+                </div>
+
+                <div class="stock-pick-card">
+                  <div class="stock-pick-card__top">
+                    <div class="stock-pick-card__rank">3</div>
+                    <div class="stock-pick-card__info">
+                      <div class="stock-pick-card__name">NVDA (엔비디아)<span class="ma20-badge">20일선 위 안착</span></div>
+                      <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$214.86</span><span class="stock-pick-card__change up">+0.43%</span></div>
+                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill up" style="width:100%"></div></div><span class="ma200-gauge__pct up">+14.8%</span></div>
+                      <div class="stock-pick-card__scenario"><span class="scenario-tag">AI 모멘텀 유지</span>20일선($214.66) 직상을 지지하고 있어요. 이란 긴장 완화 + AI 낙관론이에요.</div>
+                    </div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-3" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                  </div>
+                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 $215 이내에 진입해요. 목표: $225(+4.7%) / 손절: $210이에요.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 모바일 전용: AI 정확도 (종목 픽 바로 아래) -->
+            <div class="open-section">
+              <div class="acc-box acc-box--mobile" id="acc-mobile"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="t-caption" style="margin-top:14px;text-align:right">생성: 2026-05-27T21:16:40+09:00 | DailyB v3</div>
+    </div>
+
+    <!-- ── SIDEBAR ── -->
+    <div class="layout-grid__right">
+
+      <!-- PC 전용: AI 정확도 맨 위 -->
+      <div class="acc-box acc-box--sidebar" id="acc-sidebar"></div>
+
+      <div class="right-panel">
+        <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">21:16 KST</span></div>
+        <div class="mkt-list">
+          <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥100 선물</span><div class="mkt-vals"><div class="mkt-val" id="nq-val">-</div><div class="mkt-chg" id="nq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nq"></canvas></div></div>
+          <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥</span><div class="mkt-vals"><div class="mkt-val" id="nasdaq-val">-</div><div class="mkt-chg" id="nasdaq-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div></div>
+          <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val" id="sox-val">-</div><div class="mkt-chg" id="sox-badge">-</div></div></div><div class="mkt-spark"><canvas id="c-sox"></canvas></div></div>
+          <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name" style="display:flex;align-items:center;gap:4px">VIX 공포지수<button class="info-icon-btn" onclick="openVixModal()">?</button></span><div class="mkt-vals"><div class="mkt-val" id="vix-val">-</div><div class="mkt-chg" id="vix-chg">-</div></div></div><div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge" id="vix-level">-</span></div></div>
+        </div>
+      </div>
+
+      <div class="chip-widget">
+        <a class="chip-widget__header" href="/chips" target="_blank" rel="noopener"><div class="chip-widget__left"><div class="chip-widget__badge">AI</div><span class="chip-widget__title">AI 반도체 종목</span></div><span class="chip-widget__more">→</span></a>
+        <div class="chip-widget__stocks" id="chip-stocks"></div>
+      </div>
+
+      <div class="sidebar-cta">
+        <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener"><div class="sidebar-cta__tg-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="sidebar-cta__tg-text"><span class="sidebar-cta__tg-title">텔레그램 채널 구독</span><span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑을 받아보세요</span></div></a>
+        <div class="sidebar-footer"><a class="sidebar-intro" href="mailto:pulum0083@gmail.com">메일 문의</a><a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 소개 →</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 모달 -->
+<div class="info-modal-backdrop" id="kellogg-modal" onclick="if(event.target===this)closeKelloggModal()"><div class="info-modal"><button class="info-modal__close" onclick="closeKelloggModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="info-modal__title">잭 켈로그 20일선 전략</div><div class="info-modal__body"><ul style="padding-left:16px;display:flex;flex-direction:column;gap:6px"><li>20일선 <strong>상향 돌파</strong> 또는 <strong>지지 반등</strong></li><li>돌파 시 <strong>거래량 급증</strong> 동반</li></ul><br><p style="font-size:12px">※ 모멘텀 탐색 목적이에요. 매매 추천이 아니에요.</p></div></div></div>
+<div class="info-modal-backdrop" id="vix-modal" onclick="if(event.target===this)closeVixModal()"><div class="info-modal"><button class="info-modal__close" onclick="closeVixModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="info-modal__title">VIX 공포지수</div><div class="info-modal__body"><ul style="padding-left:16px;display:flex;flex-direction:column;gap:8px"><li><strong style="color:#16A34A">15 미만</strong> — 안정</li><li><strong style="color:#65A30D">15~20</strong> — 보통</li><li><strong style="color:#CA8A04">20~30</strong> — 경계</li><li><strong style="color:#2775ED">30~40</strong> — 불안</li><li><strong style="color:#B91C1C">40 이상</strong> — 극단</li></ul></div></div></div>
+<div class="info-modal-backdrop" id="pred-modal" onclick="if(event.target===this)closePredModal()"><div class="info-modal"><button class="info-modal__close" onclick="closePredModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div class="info-modal__title">시초가 방향 예측</div><div class="info-modal__body"><p>미국 선물·지수, 수급, 반도체 지표, 공포탐욕지수 등을 종합한 AI 분석 결과예요.</p></div></div></div>
+
+<script>
+// AI 정확도 박스를 PC(사이드바)와 모바일(메인) 두 곳에 렌더링
+function renderAccBox() {
+  const tpl = document.getElementById('acc-tpl');
+  if (!tpl) return;
+  function buildBox(targetId, extraHeader) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    el.innerHTML = `
+      <div class="acc-box__header">
+        <span class="acc-box__title">
+          AI 예측 정확도
+          <button class="info-icon-btn" onclick="openAccModal()">?</button>
+        </span>
+        <span class="acc-box__period">최근 30일</span>
+      </div>
+      ${tpl.innerHTML}`;
+  }
+  buildBox('acc-sidebar');
+  buildBox('acc-mobile');
+}
+
+window.MARKET_DATA={
+  nq:{base:30267.25,chg:0.54,data:[30103.25,30105.5,30103.5,30075.75,30140.25,30195.5,30213.25,30235.5,30264.75,30267.25]},
+  nasdaq:{base:26656.18,chg:1.19,data:[26417.12,26328.42,26346.27,26706.39,26614.70,26600.15,26561.91,26618.70,26616.42,26652.79]},
+  sox:{base:12876.91,chg:5.53,data:[12265.46,12178.94,12203.60,12828.11,12755.87,12767.31,12784.68,12854.76,12883.49,12876.49]},
+  vix:{price:16.95,change_pct:-0.35},
+  stockCharts:[
+    {id:"mc-1",prices:[349.78,349.94,384.8,385.69,383.25,388.43,398.04,397.99,400.8,388.64,387.35,402.62,401.07,396.78,396.94,387.66,388.91,387.66,382.97,388.88],ma20:[325.04,328.15,332.52,337.02,341.18,345.33,349.37,353.34,357.52,360.89,363.61,366.88,370.14,372.89,375.87,378.64,381.12,383.55,385.48,387.41],ma200:[277.99,278.83,279.85,280.87,281.87,282.89,283.93,284.96,286.02,287.00,287.98,289.03,290.06,291.06,292.09,293.08,294.05,295.02,295.96,296.92]},
+    {id:"mc-2",prices:[399.83,405.45,417.43,421.28,416.5,427.36,425.44,412.56,430.0,428.43,419.3,416.79,439.79,425.19,420.71,411.07,417.76,414.57,414.14,422.01],ma20:[375.52,380.32,385.52,390.85,395.96,400.63,404.37,407.25,410.17,412.61,414.53,415.54,417.60,418.54,419.59,420.03,419.79,419.52,419.09,419.28],ma200:[336.95,337.61,338.30,339.01,339.67,340.40,341.09,341.77,342.51,343.22,343.87,344.49,345.21,345.83,346.48,347.10,347.71,348.32,348.89,349.49]},
+    {id:"mc-3",prices:[213.17,209.25,199.57,198.45,198.48,196.5,207.83,211.5,215.2,219.44,220.78,225.83,235.74,225.32,222.32,220.61,223.47,219.51,215.33,214.86],ma20:[193.24,194.98,196.17,197.22,198.27,199.19,200.47,201.85,203.18,204.69,205.90,207.25,209.12,210.30,211.31,212.35,213.40,214.39,214.75,214.66],ma200:[183.34,183.56,183.71,183.84,183.97,184.09,184.27,184.49,184.72,184.95,185.18,185.43,185.73,185.96,186.18,186.42,186.63,186.84,187.02,187.19]}
+  ]
+};
+
+function toggleTheme(){const h=document.documentElement;if(h.classList.contains('dark')){h.classList.replace('dark','light');localStorage.setItem('theme','light');}else{h.classList.replace('light','dark');localStorage.setItem('theme','dark');}}
+(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.replace('light','dark');})();
+function openKelloggModal(){document.getElementById('kellogg-modal').classList.add('is-open');}
+function closeKelloggModal(){document.getElementById('kellogg-modal').classList.remove('is-open');}
+function openAccModal(){/* placeholder */}
+function openVixModal(){document.getElementById('vix-modal').classList.add('is-open');}
+function closeVixModal(){document.getElementById('vix-modal').classList.remove('is-open');}
+function openPredModal(){document.getElementById('pred-modal').classList.add('is-open');}
+function closePredModal(){document.getElementById('pred-modal').classList.remove('is-open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeKelloggModal();closeVixModal();closePredModal();}});
+function updateClock(){const n=new Date(),days=['일','월','화','수','목','금','토'],d=document.getElementById('gnb-date');if(!d)return;d.textContent=`${n.getFullYear()}.${String(n.getMonth()+1).padStart(2,'0')}.${String(n.getDate()).padStart(2,'0')} (${days[n.getDay()]}) ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;}
+updateClock();setInterval(updateClock,30000);
+const UP='#E03131',DN='#2775ED';
+function drawSparkline(id,data,color){const c=document.getElementById(id);if(!c)return;const dpr=window.devicePixelRatio||1,W=c.offsetWidth||80,H=c.offsetHeight||44;c.width=W*dpr;c.height=H*dpr;const ctx=c.getContext('2d');ctx.scale(dpr,dpr);const min=Math.min(...data),max=Math.max(...data),range=max-min||1,pad=2;const pts=data.map((v,i)=>({x:(i/(data.length-1))*W,y:H-pad-((v-min)/range)*(H-pad*2)}));const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,color+'38');grad.addColorStop(1,color+'00');ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}ctx.lineTo(pts.at(-1).x,H);ctx.lineTo(pts[0].x,H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(pts.at(-1).x,pts.at(-1).y,2.2,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+function drawMiniChart(id,prices,ma20,ma200){const c=document.getElementById(id);if(!c)return;const dpr=window.devicePixelRatio||1,W=c.offsetWidth||88,H=c.offsetHeight||52;c.width=W*dpr;c.height=H*dpr;const ctx=c.getContext('2d');ctx.scale(dpr,dpr);const all=[...prices,...ma20,...(ma200||[])],minV=Math.min(...all),maxV=Math.max(...all),rng=maxV-minV||1;const pad={t:5,b:5,l:3,r:3},pW=W-pad.l-pad.r,pH=H-pad.t-pad.b;const xf=(i,l)=>pad.l+(i/(l-1))*pW,yf=v=>pad.t+(1-(v-minV)/rng)*pH;if(ma200&&ma200.length){ctx.beginPath();ctx.setLineDash([4,3]);ctx.strokeStyle='#7C3AED';ctx.lineWidth=1.8;ma200.forEach((v,i)=>{i===0?ctx.moveTo(xf(i,ma200.length),yf(v)):ctx.lineTo(xf(i,ma200.length),yf(v));});ctx.stroke();ctx.setLineDash([]);}ctx.beginPath();ctx.setLineDash([3,2]);ctx.strokeStyle='#D97706';ctx.lineWidth=1.2;ma20.forEach((v,i)=>{i===0?ctx.moveTo(xf(i,ma20.length),yf(v)):ctx.lineTo(xf(i,ma20.length),yf(v));});ctx.stroke();ctx.setLineDash([]);ctx.beginPath();prices.forEach((v,i)=>{i===0?ctx.moveTo(xf(i,prices.length),yf(v)):ctx.lineTo(xf(i,prices.length),yf(v));});ctx.lineTo(xf(prices.length-1,prices.length),H-pad.b);ctx.lineTo(pad.l,H-pad.b);ctx.closePath();const g=ctx.createLinearGradient(0,pad.t,0,H-pad.b);g.addColorStop(0,'rgba(224,49,49,.22)');g.addColorStop(1,'rgba(224,49,49,.02)');ctx.fillStyle=g;ctx.fill();ctx.beginPath();ctx.strokeStyle='#E03131';ctx.lineWidth=1.6;prices.forEach((v,i)=>{i===0?ctx.moveTo(xf(i,prices.length),yf(v)):ctx.lineTo(xf(i,prices.length),yf(v));});ctx.stroke();const lx=xf(prices.length-1,prices.length),ly=yf(prices[prices.length-1]);ctx.beginPath();ctx.arc(lx,ly,2.5,0,Math.PI*2);ctx.fillStyle='#E03131';ctx.fill();}
+function renderMarket(){const m=window.MARKET_DATA;[['nq',m.nq],['nasdaq',m.nasdaq],['sox',m.sox]].forEach(([k,d])=>{if(!d)return;const ve=document.getElementById(k+'-val'),be=document.getElementById(k+'-badge');if(ve)ve.textContent=d.base.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});if(be){const s=d.chg>=0?'+':'';be.textContent=s+d.chg.toFixed(2)+'%';be.className='mkt-chg '+(d.chg>=0?'up':'down');}drawSparkline('c-'+k,d.data,d.chg>=0?UP:DN);});const vix=m.vix||{};if(vix.price!==undefined){const ve=document.getElementById('vix-val'),ce=document.getElementById('vix-chg'),le=document.getElementById('vix-level');if(ve)ve.textContent=vix.price.toFixed(2);if(ce){const s=vix.change_pct>=0?'+':'';ce.textContent=s+vix.change_pct.toFixed(2)+'%';ce.className='mkt-chg '+(vix.change_pct>=0?'up':'down');}if(le){const lvls=[[15,'안정','calm'],[20,'보통','normal'],[30,'경계','elevated'],[40,'불안','high'],[Infinity,'극단','extreme']];const[,lbl,cls]=lvls.find(([t])=>vix.price<t);le.textContent=lbl;le.className='vix-badge '+cls;}}}
+var CHIP_FB=[{flag:'🇰🇷',name:'삼성전자'},{flag:'🇰🇷',name:'SK하이닉스'},{flag:'🇺🇸',name:'Micron'},{flag:'🇺🇸',name:'AMD'},{flag:'🇺🇸',name:'Intel'}];
+function loadChipWidget(){var c=document.getElementById('chip-stocks');if(!c)return;fetch('/chips/api/prices',{signal:AbortSignal.timeout(4000)}).then(r=>r.ok?r.json():Promise.reject()).then(stocks=>{if(!Array.isArray(stocks)||!stocks.length)throw 0;stocks.slice(0,5).forEach(s=>{var rate=s.changeRate||0,dir=rate>0?'up':rate<0?'down':'flat',arrow=rate>0?'▲':rate<0?'▼':'',chg=arrow+Math.abs(rate).toFixed(2)+'%',flag=s.market==='KOSPI'?'🇰🇷':'🇺🇸';const r=document.createElement('div');r.className='chip-row';r.innerHTML='<span class="chip-row__flag">'+flag+'</span><span class="chip-row__name">'+s.name+'</span><span class="chip-row__price">'+(s.market==='KOSPI'?s.price.toLocaleString('ko-KR'):'$'+s.price.toFixed(2))+'</span><span class="chip-row__chg '+dir+'">'+chg+'</span>';c.appendChild(r);});}).catch(()=>{CHIP_FB.forEach(s=>{const r=document.createElement('div');r.className='chip-row';r.innerHTML='<span class="chip-row__flag">'+s.flag+'</span><span class="chip-row__name">'+s.name+'</span><span class="chip-row__price">—</span><span class="chip-row__chg flat">—</span>';c.appendChild(r);});});}
+
+window.addEventListener('load',()=>{renderAccBox();renderMarket();loadChipWidget();requestAnimationFrame(()=>{(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});});
+window.addEventListener('resize',()=>{renderMarket();(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});
+</script>
+</body>
+</html>
