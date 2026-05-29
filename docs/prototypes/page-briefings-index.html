@@ -66,7 +66,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 
 /* 목록 섹션 구분선 */
 .list-divider{max-width:1264px;margin:0 auto;padding:0 32px;}
-.list-divider__inner{display:flex;align-items:center;gap:12px;padding:28px 0 16px;border-top:2px solid var(--hairline);}
+.list-divider__inner{display:flex;align-items:center;gap:12px;padding:16px 0 16px;border-top:2px solid var(--hairline);}
 .list-divider__label{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
 .list-divider__line{flex:1;height:1px;background:var(--hairline);}
 
@@ -154,16 +154,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 
 <!-- 최신 브리핑 -->
 <div class="briefing-section">
-  <div class="briefing-topbar">
-    <div class="briefing-topbar__left">
-      <span class="latest-chip">LATEST</span>
-      <span class="briefing-topbar__title">2026-05-29 · 코스피 시초가 예측</span>
-    </div>
-    <button class="copy-url-btn" onclick="copyUrl()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      URL 복사
-    </button>
-  </div>
 
   <!-- 브리핑 본문 — iframe으로 기존 프로토타입 임베드 -->
   <div class="briefing-frame-wrap">
@@ -278,10 +268,18 @@ function toggleTheme(){
   const h=document.documentElement;h.classList.toggle('dark');h.classList.toggle('light');
 }
 function resizeFrame(f){
-  try{
-    const h=f.contentDocument.documentElement.scrollHeight;
-    f.style.height=h+'px';
-  }catch(e){f.style.height='1200px';}
+  const measure=()=>{
+    try{
+      const doc=f.contentDocument;
+      const wrapper=doc.querySelector('.layout-wrapper')||doc.body;
+      const style=doc.defaultView.getComputedStyle(wrapper);
+      const pb=parseFloat(style.paddingBottom)||0;
+      const h=wrapper.offsetHeight - pb;
+      if(h>0) f.style.height=h+'px';
+    }catch(e){f.style.height='1200px';}
+  };
+  setTimeout(measure, 50);
+  setTimeout(measure, 400);
 }
 function copyUrl(){
   navigator.clipboard.writeText('https://doubleshot.space/briefings/2026-05-29/kospi/').then(()=>{

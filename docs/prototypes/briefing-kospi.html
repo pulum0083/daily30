@@ -31,6 +31,7 @@ a{color:inherit;text-decoration:none;}button{cursor:pointer;border:none;backgrou
 /* embed 모드에서 GNB 숨김 */
 body.is-embed .gnb{display:none;}
 body.is-embed{background:transparent;}
+body.is-embed .layout-wrapper{padding-bottom:0;}
 
 /* GNB */
 .gnb{position:sticky;top:0;z-index:100;height:var(--gnb-h);background:var(--gnb-bg);border-bottom:1px solid rgba(255,255,255,.06);padding:0 32px;display:flex;align-items:center;}
@@ -364,8 +365,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
                 <span class="pred-badge up" style="font-size:11px;padding:2px 8px">상승 우위</span>
                 <span class="pre-open-toggle__label">KOSPI 예측 68% · 07:29 생성</span>
               </div>
-              <span class="pre-open-toggle__status">장 개시됨</span>
-              <span class="pre-open-toggle__chevron" id="pre-open-chevron">▼</span>
+              <span class="pre-open-toggle__chevron" id="pre-open-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
             </div>
 
             <!-- ── 접히는 영역 ── -->
@@ -605,6 +605,12 @@ function applyTimeCollapse(){
 }
 
 window.addEventListener('load',()=>{
+  const params=new URLSearchParams(location.search);
+  if(params.get('embed')==='1') document.body.classList.add('is-embed');
+  if(params.get('mode')==='latest'){
+    const _n=document.getElementById('btn-next');
+    if(_n)_n.classList.add('disabled');
+  }
   renderAccBox();
   applyTimeCollapse();
   Object.entries(SPARKLINES).forEach(([id,{data,color}])=>drawSparkline(id,data,color));
@@ -613,14 +619,6 @@ window.addEventListener('load',()=>{
 window.addEventListener('resize',()=>{
   Object.entries(SPARKLINES).forEach(([id,{data,color}])=>drawSparkline(id,data,color));
   MINI_CHARTS.forEach(d=>drawMiniChart(d.id,d.prices,d.ma20,d.ma200));
-  const params=new URLSearchParams(location.search);
-  // embed=1 이면 GNB 숨김
-  if(params.get('embed')==='1') document.body.classList.add('is-embed');
-  // mode=latest 이면 다음 버튼 비활성
-  if(params.get('mode')==='latest'){
-    const n=document.getElementById('btn-next');
-    if(n)n.classList.add('disabled');
-  }
 });
 </script>
 </body>

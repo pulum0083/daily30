@@ -59,6 +59,10 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .accordion-header{display:flex;align-items:center;gap:12px;padding:16px 18px;}
 .accordion-header__date-label{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
 .accordion-header__badges{margin-left:auto;}
+.header-nav{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.hnav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:var(--r-sm);transition:all .15s;cursor:pointer;flex-shrink:0;}
+.hnav-btn:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-bg);}
+.hnav-btn.disabled{opacity:.25;pointer-events:none;cursor:default;}
 .pred-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;}
 .pred-badge.up{background:var(--up-bg);color:var(--up);}
 .pred-badge.down{background:var(--dn-bg);color:var(--dn);}
@@ -357,7 +361,14 @@ html.dark .chip-widget__more{color:#60A5FA;}
       <div class="accordion-item is-open is-today">
         <div class="accordion-header">
           <div class="accordion-header__date-label">2026-05-27</div>
-          <div class="accordion-header__badges"><span class="pred-badge up">상승 우위</span></div>
+          <div class="header-nav">
+            <a class="hnav-btn" id="btn-prev" href="#" title="이전 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <a class="hnav-btn" id="btn-next" href="#" title="다음 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
         </div>
         <div class="accordion-body">
           <div class="accordion-body__inner">
@@ -368,8 +379,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
                 <span class="pred-badge up" style="font-size:11px;padding:2px 8px">상승 우위</span>
                 <span class="pre-open-toggle__label">S&P500 예측 65% · 21:16 생성</span>
               </div>
-              <span class="pre-open-toggle__status">장 개시됨</span>
-              <span class="pre-open-toggle__chevron" id="pre-open-chevron">▼</span>
+              <span class="pre-open-toggle__chevron" id="pre-open-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
             </div>
 
             <!-- ── 접히는 영역 ── -->
@@ -634,7 +644,14 @@ function applyTimeCollapse(){
     document.getElementById('pre-open-chevron').classList.add('open');
   }
 }
-window.addEventListener('load',()=>{renderAccBox();applyTimeCollapse();renderMarket();loadChipWidget();requestAnimationFrame(()=>{(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});});
+window.addEventListener('load',()=>{
+  const params=new URLSearchParams(location.search);
+  if(params.get('embed')==='1') document.body.classList.add('is-embed');
+  if(params.get('mode')==='latest'){const n=document.getElementById('btn-next');if(n)n.classList.add('disabled');}
+  applyTimeCollapse();
+  renderAccBox();renderMarket();loadChipWidget();
+  requestAnimationFrame(()=>{(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});
+});
 window.addEventListener('resize',()=>{renderMarket();(window.MARKET_DATA.stockCharts||[]).forEach(d=>{if(d.id)drawMiniChart(d.id,d.prices||[],d.ma20||[],d.ma200||[]);});});
 </script>
 </body>

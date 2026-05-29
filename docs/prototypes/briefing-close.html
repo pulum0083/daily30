@@ -60,6 +60,10 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .accordion-header__date-label{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-0.3px;}
 .accordion-header__date-sub{font-size:12px;color:var(--muted);}
 .accordion-header__badges{margin-left:auto;}
+.header-nav{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.hnav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:var(--r-sm);transition:all .15s;cursor:pointer;flex-shrink:0;}
+.hnav-btn:hover{color:var(--primary);border-color:var(--primary);background:var(--primary-bg);}
+.hnav-btn.disabled{opacity:.25;pointer-events:none;cursor:default;}
 .close-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.1);color:#6366F1;}
 .accordion-body{display:grid;grid-template-rows:1fr;}
 .accordion-body__inner{overflow:visible;border-top:1px solid var(--hairline);padding:20px 18px 24px;}
@@ -175,7 +179,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 }
 .flow-bar__rect{
   position:absolute;width:100%;
-  border-radius:2px 2px 0 0;
+  border-radius:3px;
 }
 .flow-bar__rect.up{
   background:var(--up);
@@ -184,7 +188,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .flow-bar__rect.down{
   background:var(--dn);
   top:50%;
-  border-radius:0 0 2px 2px;
 }
 .flow-bar__rect.zero{
   background:var(--hairline);
@@ -316,7 +319,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
   font-size:15px;font-weight:800;
   font-variant-numeric:tabular-nums;flex-shrink:0;
 }
-.sector-block__pct.up{color:var(--up);}
+.sector-block__pct.up{color:#B85555;}
 .sector-block__pct.down{color:var(--dn);}
 .sector-block__stocks{
   display:flex;flex-direction:column;gap:4px;
@@ -336,7 +339,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
   flex-shrink:0;padding-left:8px;
   color:var(--ink);
 }
-.sector-stock-row__pct.up{color:var(--up);}
+.sector-stock-row__pct.up{color:#B85555;}
 .sector-stock-row__pct.down{color:var(--dn);}
 
 /* Chip widget */
@@ -437,7 +440,14 @@ html.dark .chip-widget__more{color:#60A5FA;}
               <span class="accordion-header__date-sub">수 · 15:40 마감</span>
             </div>
           </div>
-          <div class="accordion-header__badges"><span class="close-badge">🔔 마감</span></div>
+          <div class="header-nav">
+            <a class="hnav-btn" id="btn-prev" href="#" title="이전 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </a>
+            <a class="hnav-btn" id="btn-next" href="#" title="다음 브리핑">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
         </div>
 
         <div class="accordion-body" style="grid-template-rows:1fr">
@@ -517,7 +527,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <div class="supply-summary__info">
                     <div class="supply-summary__lbl">기관</div>
                     <div class="supply-summary__amt up">+1,880억</div>
-                    <div class="supply-summary__sub">순매수 · 최근 7일</div>
+                    <div class="supply-summary__sub">순매수</div>
                   </div>
                   <div class="flow-chart" data-flow="institution"></div>
                 </div>
@@ -525,7 +535,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <div class="supply-summary__info">
                     <div class="supply-summary__lbl">개인</div>
                     <div class="supply-summary__amt up">+4,064억</div>
-                    <div class="supply-summary__sub">순매수 · 최근 7일</div>
+                    <div class="supply-summary__sub">순매수</div>
                   </div>
                   <div class="flow-chart" data-flow="individual"></div>
                 </div>
