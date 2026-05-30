@@ -115,15 +115,14 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 
 /* ── 시장 폭 ── */
 .breadth-row{
-  display:grid;grid-template-columns:1fr 1.4fr;
-  align-items:start;
-  padding:14px 16px;
+  display:flex;align-items:baseline;gap:14px;
+  padding:10px 16px;
 }
 .breadth-row + .breadth-row{border-top:1px solid var(--hairline);}
 .breadth-row__label{
   font-size:11px;font-weight:700;color:var(--muted);
   letter-spacing:0.04em;text-transform:uppercase;
-  align-self:center;
+  flex-shrink:0;width:52px;
 }
 .breadth-row__items{display:flex;gap:14px;flex-wrap:wrap;}
 .breadth-cell{display:flex;align-items:baseline;gap:5px;font-variant-numeric:tabular-nums;}
@@ -292,55 +291,38 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .section-title{font-size:13px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:6px;}
 .pub-time{font-size:11px;font-weight:600;color:var(--muted);}
 
-/* ── 섹터 성과 — 재디자인 ── */
-.sector-list{padding:6px 0;}
-.sector-block{padding:14px 18px;border-bottom:1px solid var(--hairline);}
-.sector-block:last-child{border-bottom:none;}
-.sector-block__top{
-  display:flex;align-items:baseline;gap:10px;
-  margin-bottom:8px;
-}
-.sector-block__rank{
-  flex-shrink:0;
-  width:22px;height:22px;border-radius:5px;
-  background:var(--surface-inset);
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:var(--muted);
-  font-variant-numeric:tabular-nums;
-  align-self:center;
-}
-.sector-block__name{
-  flex:1;min-width:0;
-  font-size:14px;font-weight:700;color:var(--ink);
-  letter-spacing:-0.2px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.sector-block__pct{
-  font-size:15px;font-weight:800;
-  font-variant-numeric:tabular-nums;flex-shrink:0;
-}
-.sector-block__pct.up{color:#B85555;}
-.sector-block__pct.down{color:var(--dn);}
-.sector-block__stocks{
-  display:flex;flex-direction:column;gap:4px;
-  padding-left:32px;
-}
-.sector-stock-row{
-  display:flex;align-items:baseline;justify-content:space-between;
-  font-size:12px;
-}
-.sector-stock-row__name{
-  color:var(--muted);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  min-width:0;
-}
-.sector-stock-row__pct{
-  font-weight:600;font-variant-numeric:tabular-nums;
-  flex-shrink:0;padding-left:8px;
-  color:var(--ink);
-}
-.sector-stock-row__pct.up{color:#B85555;}
-.sector-stock-row__pct.down{color:var(--dn);}
+/* ── E. 섹터 로테이션 / 자금 흐름 (사이드바) ── */
+.rota-list{padding:4px 0;}
+.rota-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--hairline);}
+.rota-row:last-child{border-bottom:none;}
+.rota-name{font-size:13px;font-weight:600;color:var(--ink);}
+.rota-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.rota-pct.up{color:var(--up);}
+.rota-pct.dn{color:var(--dn);}
+.rota-take{font-size:12px;line-height:1.7;color:var(--muted);padding:11px 16px 13px;border-bottom:1px solid var(--hairline);}
+.rota-take b{color:var(--ink);}
+
+/* ── D. 거래대금 급증 + 수급 동반 종목 (본문) ── */
+.dpick-list{display:flex;flex-direction:column;gap:10px;padding:14px 16px;}
+.dpick-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px 15px;}
+.dpick-card__head{display:flex;align-items:center;gap:10px;}
+.dpick-rank{width:22px;height:22px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dpick-name{font-size:15px;font-weight:700;color:var(--ink);}
+.dpick-code{font-size:12px;color:var(--muted);font-weight:500;margin-left:1px;}
+.dpick-chg{margin-left:auto;font-size:13px;font-weight:700;padding:1px 7px;border-radius:4px;}
+.dpick-chg.up{background:var(--up-bg);color:var(--up);}
+.dpick-chg.down{background:var(--dn-bg);color:var(--dn);}
+.dpick-metrics{display:flex;gap:8px;margin-top:11px;}
+.dpick-metric{flex:1;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:8px 10px;}
+.dpick-metric__lbl{font-size:10px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
+.dpick-metric__val{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px;}
+.dpick-metric__val.buy{color:var(--up);}
+.dpick-metric__sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.dpick-mult{font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-bg);padding:1px 5px;border-radius:3px;}
+.dpick-take{margin:0 16px 16px;font-size:13px;line-height:1.8;color:var(--ink);background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:11px 14px;}
+.dpick-take b{color:var(--ink);}
+.dpick-take::before{content:'💬 ';}
+@media(max-width:600px){.dpick-metrics{flex-wrap:wrap;}.dpick-metric{flex:1 1 30%;}}
 
 /* Chip widget */
 .chip-widget{background:#EEF3FF;border:1.5px solid #4A7FF5;border-radius:var(--r-lg);overflow:hidden;}
@@ -623,7 +605,58 @@ html.dark .chip-widget__more{color:#60A5FA;}
               </div>
             </div>
 
-            <!-- ⑥ 아침 픽 결과 -->
+            <!-- ⑥ 거래대금 급증 + 수급 동반 종목 (D) -->
+            <div class="section-card">
+              <div class="section-card__head">
+                <span class="section-card__title">거래대금 급증 + 수급 동반 종목</span>
+                <span class="section-card__sub">거래대금 급증 × 외국인·기관 동시 순매수</span>
+              </div>
+              <div class="dpick-list">
+
+                <div class="dpick-card">
+                  <div class="dpick-card__head">
+                    <span class="dpick-rank">1</span>
+                    <span class="dpick-name">SK하이닉스 <span class="dpick-code">000660</span></span>
+                    <span class="dpick-chg up">+9.31%</span>
+                  </div>
+                  <div class="dpick-metrics">
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×2.6</span></div><div class="dpick-metric__val">3.1조</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+1,820억</div><div class="dpick-metric__sub">순매수</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+640억</div><div class="dpick-metric__sub">순매수</div></div>
+                  </div>
+                </div>
+
+                <div class="dpick-card">
+                  <div class="dpick-card__head">
+                    <span class="dpick-rank">2</span>
+                    <span class="dpick-name">LG이노텍 <span class="dpick-code">011070</span></span>
+                    <span class="dpick-chg up">+23.61%</span>
+                  </div>
+                  <div class="dpick-metrics">
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×4.2</span></div><div class="dpick-metric__val">8,400억</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+540억</div><div class="dpick-metric__sub">순매수</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+380억</div><div class="dpick-metric__sub">순매수</div></div>
+                  </div>
+                </div>
+
+                <div class="dpick-card">
+                  <div class="dpick-card__head">
+                    <span class="dpick-rank">3</span>
+                    <span class="dpick-name">삼성전기 <span class="dpick-code">009150</span></span>
+                    <span class="dpick-chg up">+17.31%</span>
+                  </div>
+                  <div class="dpick-metrics">
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×3.4</span></div><div class="dpick-metric__val">6,100억</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+410억</div><div class="dpick-metric__sub">순매수</div></div>
+                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+290억</div><div class="dpick-metric__sub">순매수</div></div>
+                  </div>
+                </div>
+
+              </div>
+              <div class="dpick-take">외국인은 시장 전체로는 순매도(-4,498억)였지만, <b>반도체·부품 대형주</b>엔 거래대금과 양매수가 집중됐어요. 다음 세션 모멘텀이 이어질 가능성이 높아요.</div>
+            </div>
+
+            <!-- ⑦ 아침 픽 결과 -->
             <div class="section-card">
               <div class="section-card__head">
                 <span class="section-card__title">아침 픽 결과</span>
@@ -694,7 +727,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
               </div>
             </div>
 
-            <!-- ⑦ KOSPI 200 TOP 10 -->
+            <!-- ⑧ KOSPI 200 TOP 10 -->
             <div class="section-card">
               <div class="section-card__head">
                 <span class="section-card__title">코스피 200 시총 상위</span>
@@ -725,79 +758,20 @@ html.dark .chip-widget__more{color:#60A5FA;}
 
     <aside class="layout-grid__right">
 
-      <!-- 섹터 성과 — 재디자인 -->
+      <!-- E. 섹터 로테이션 / 자금 흐름 -->
       <div class="right-panel">
         <div class="panel-header">
-          <span class="section-title">섹터 성과<button class="info-icon-btn" onclick="openSectorModal()" style="margin-left:6px">?</button></span>
-          <span class="pub-time">상승률 TOP 5</span>
+          <span class="section-title">섹터 로테이션<button class="info-icon-btn" onclick="openSectorModal()" style="margin-left:6px">?</button></span>
+          <span class="pub-time">자금 흐름</span>
         </div>
-        <div class="sector-list">
-
-          <div class="sector-block">
-            <div class="sector-block__top">
-              <span class="sector-block__rank">1</span>
-              <span class="sector-block__name">IT 대표주</span>
-              <span class="sector-block__pct up">+4.74%</span>
-            </div>
-            <div class="sector-block__stocks">
-              <div class="sector-stock-row"><span class="sector-stock-row__name">삼성에스디에스</span><span class="sector-stock-row__pct up">+29.78%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">SK하이닉스</span><span class="sector-stock-row__pct up">+9.31%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">삼성전자</span><span class="sector-stock-row__pct up">+2.68%</span></div>
-            </div>
-          </div>
-
-          <div class="sector-block">
-            <div class="sector-block__top">
-              <span class="sector-block__rank">2</span>
-              <span class="sector-block__name">반도체 대표주(생산)</span>
-              <span class="sector-block__pct up">+1.20%</span>
-            </div>
-            <div class="sector-block__stocks">
-              <div class="sector-stock-row"><span class="sector-stock-row__name">SK하이닉스</span><span class="sector-stock-row__pct up">+9.31%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">삼성전자</span><span class="sector-stock-row__pct up">+2.68%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">DB하이텍</span><span class="sector-stock-row__pct down">-8.39%</span></div>
-            </div>
-          </div>
-
-          <div class="sector-block">
-            <div class="sector-block__top">
-              <span class="sector-block__rank">3</span>
-              <span class="sector-block__name">냉각시스템(액침냉각)</span>
-              <span class="sector-block__pct up">+0.60%</span>
-            </div>
-            <div class="sector-block__stocks">
-              <div class="sector-stock-row"><span class="sector-stock-row__name">3S</span><span class="sector-stock-row__pct up">+16.01%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">SK</span><span class="sector-stock-row__pct up">+3.66%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">케이엔솔</span><span class="sector-stock-row__pct up">+2.62%</span></div>
-            </div>
-          </div>
-
-          <div class="sector-block">
-            <div class="sector-block__top">
-              <span class="sector-block__rank">4</span>
-              <span class="sector-block__name">SI(시스템통합)</span>
-              <span class="sector-block__pct up">+0.08%</span>
-            </div>
-            <div class="sector-block__stocks">
-              <div class="sector-stock-row"><span class="sector-stock-row__name">삼성에스디에스</span><span class="sector-stock-row__pct up">+29.78%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">현대오토에버</span><span class="sector-stock-row__pct up">+19.91%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">LG씨엔에스</span><span class="sector-stock-row__pct up">+14.11%</span></div>
-            </div>
-          </div>
-
-          <div class="sector-block">
-            <div class="sector-block__top">
-              <span class="sector-block__rank">5</span>
-              <span class="sector-block__name">제대혈</span>
-              <span class="sector-block__pct up">+0.06%</span>
-            </div>
-            <div class="sector-block__stocks">
-              <div class="sector-stock-row"><span class="sector-stock-row__name">녹십자</span><span class="sector-stock-row__pct up">+4.89%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">메디포스트</span><span class="sector-stock-row__pct up">+2.97%</span></div>
-              <div class="sector-stock-row"><span class="sector-stock-row__name">지씨셀</span><span class="sector-stock-row__pct down">-1.70%</span></div>
-            </div>
-          </div>
-
+        <div class="rota-take"><b>반도체·부품</b>으로 자금이 쏠리고 <b>2차전지·코스닥</b>에서 빠진 하루였어요. 거래대금도 IT·부품에 집중됐어요.</div>
+        <div class="rota-list">
+          <div class="rota-row"><span class="rota-name">IT·부품</span><span class="rota-pct up">+4.7%</span></div>
+          <div class="rota-row"><span class="rota-name">반도체</span><span class="rota-pct up">+1.2%</span></div>
+          <div class="rota-row"><span class="rota-name">조선·기계</span><span class="rota-pct up">+0.6%</span></div>
+          <div class="rota-row"><span class="rota-name">인터넷</span><span class="rota-pct dn">-1.5%</span></div>
+          <div class="rota-row"><span class="rota-name">바이오</span><span class="rota-pct dn">-1.7%</span></div>
+          <div class="rota-row"><span class="rota-name">2차전지</span><span class="rota-pct dn">-2.1%</span></div>
         </div>
       </div>
 

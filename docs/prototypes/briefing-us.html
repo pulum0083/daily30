@@ -361,6 +361,30 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .bl-row{grid-template-columns:72px 1fr 1fr;}
   .bl-cell:last-child{display:none;}
 }
+
+/* ── C. 미국 → 한국 낙수효과 ── */
+.spill-list{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:2px 14px;}
+.spill-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--hairline);}
+.spill-row:last-child{border-bottom:none;}
+.spill-us{flex:0 0 196px;}
+.spill-us__sector{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:3px;}
+.spill-us__tickers{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.us-chg{font-size:11px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--up-bg);color:var(--up);}
+.spill-arrow{flex-shrink:0;color:var(--muted);display:flex;align-items:center;}
+.spill-ko{flex:1;min-width:0;}
+.spill-ko__stocks{display:flex;flex-wrap:wrap;gap:5px;}
+.ko-chip{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);border-radius:999px;padding:3px 10px;}
+.spill-strength{flex:0 0 50px;text-align:right;}
+.strength-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;}
+.strength-badge.high{background:var(--up-bg);color:var(--up);}
+.strength-badge.mid{background:#FEF3C7;color:#B45309;}
+.strength-badge.low{background:var(--surface-inset);color:var(--muted);}
+@media(max-width:600px){
+  .spill-row{flex-wrap:wrap;}
+  .spill-us{flex:1 1 100%;}
+  .spill-arrow{transform:rotate(90deg);}
+  .spill-strength{flex:0 0 auto;margin-left:auto;}
+}
 </style>
 </head>
 <body>
@@ -526,6 +550,56 @@ html.dark .chip-widget__more{color:#60A5FA;}
             </div>
 
             <div class="divider"></div>
+
+            <!-- C. 미국 → 한국 낙수효과 -->
+            <div class="open-section">
+              <div class="open-section__title">🇰🇷 내일 코스피 낙수 종목</div>
+              <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">오늘밤 미국이 예측대로 움직이면, <b style="color:var(--ink)">내일 아침 코스피</b>에서 어떤 종목이 영향을 받을지 매핑했어요. (별도 데이터 없이 AI 분석으로 생성)</div>
+              <div class="spill-list">
+
+                <div class="spill-row">
+                  <div class="spill-us">
+                    <div class="spill-us__sector">🔌 반도체 <span class="us-chg">SOX 강세 예상</span></div>
+                    <div class="spill-us__tickers">MU 신고가 · NVDA · AVGO 프리장 강세</div>
+                  </div>
+                  <div class="spill-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></div>
+                  <div class="spill-ko"><div class="spill-ko__stocks"><span class="ko-chip">SK하이닉스</span><span class="ko-chip">삼성전자</span><span class="ko-chip">한미반도체</span></div></div>
+                  <div class="spill-strength"><span class="strength-badge high">강함</span></div>
+                </div>
+
+                <div class="spill-row">
+                  <div class="spill-us">
+                    <div class="spill-us__sector">✈️ 항공·운송 <span class="us-chg">유가 하락</span></div>
+                    <div class="spill-us__tickers">이란 평화 기대 → WTI 약세</div>
+                  </div>
+                  <div class="spill-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></div>
+                  <div class="spill-ko"><div class="spill-ko__stocks"><span class="ko-chip">대한항공</span><span class="ko-chip">진에어</span></div></div>
+                  <div class="spill-strength"><span class="strength-badge mid">보통</span></div>
+                </div>
+
+                <div class="spill-row">
+                  <div class="spill-us">
+                    <div class="spill-us__sector">🤖 빅테크·AI <span class="us-chg">선물 강세</span></div>
+                    <div class="spill-us__tickers">나스닥 선물 +0.5% 리스크온</div>
+                  </div>
+                  <div class="spill-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></div>
+                  <div class="spill-ko"><div class="spill-ko__stocks"><span class="ko-chip">네이버</span><span class="ko-chip">카카오</span></div></div>
+                  <div class="spill-strength"><span class="strength-badge mid">보통</span></div>
+                </div>
+
+                <div class="spill-row">
+                  <div class="spill-us">
+                    <div class="spill-us__sector">🏦 금융 <span class="us-chg">금리 안정</span></div>
+                    <div class="spill-us__tickers">미 10년물 안정 → 은행주 우호</div>
+                  </div>
+                  <div class="spill-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></div>
+                  <div class="spill-ko"><div class="spill-ko__stocks"><span class="ko-chip">KB금융</span><span class="ko-chip">신한지주</span></div></div>
+                  <div class="spill-strength"><span class="strength-badge low">약함</span></div>
+                </div>
+
+              </div>
+              <div class="reason-block" style="margin-top:12px"><ul><li>💬 반도체 낙수가 <b>가장 강하게</b> 작동할 자리예요. 미국 칩주가 예측대로 오르면 SK하이닉스·삼성전자의 내일 시초가 갭업 가능성이 높아요.</li></ul></div>
+            </div>
 
             <!-- 종목 픽 -->
             <div class="open-section">
