@@ -192,6 +192,8 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
   background:var(--hairline);
   height:2px!important;top:calc(50% - 1px);
 }
+.flow-bar:not(.today) .flow-bar__rect.up,
+.flow-bar:not(.today) .flow-bar__rect.down{opacity:.45;}
 .flow-bar.today .flow-bar__rect.up   {background:var(--up);box-shadow:0 0 0 1px var(--canvas) inset;}
 .flow-bar.today .flow-bar__rect.down {background:var(--dn);box-shadow:0 0 0 1px var(--canvas) inset;}
 .flow-chart__axis{
