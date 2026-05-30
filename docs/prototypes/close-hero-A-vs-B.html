@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!-- 코스피 마감 브리핑 상단 히어로 재구성 — A(차트 히어로+종가 주석) vs B(차트+거래대금, 지수 요약 스트립) 비교 -->
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>마감 히어로 — A vs B 비교</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);
+  --up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);--s2:0 4px 12px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;word-break:keep-all;padding:32px 20px 80px;}
+button{cursor:pointer;border:none;background:none;font:inherit;}
+
+.page-head{max-width:1180px;margin:0 auto 28px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+.page-head h1{font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px;}
+.page-head p{font-size:13px;color:var(--muted);line-height:1.7;max-width:780px;}
+.page-head p b{color:var(--ink);font-weight:600;}
+.theme-btn{flex-shrink:0;width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-inset);color:var(--muted);display:flex;align-items:center;justify-content:center;}
+.icon-sun,.icon-moon{display:none;}
+html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
+
+.compare{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+@media(max-width:960px){.compare{grid-template-columns:1fr;}}
+.col__head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+.col__tag{font-size:11px;font-weight:800;letter-spacing:0.06em;color:#fff;background:var(--ink);border-radius:5px;padding:3px 9px;flex-shrink:0;}
+.col__tag.hl{background:var(--primary);}
+.col__name{font-size:15px;font-weight:700;letter-spacing:-0.2px;}
+.col__bet{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:14px;}
+.col__bet b{color:var(--ink);font-weight:600;}
+
+/* 섹션 카드 (close 브리핑과 동일) */
+.section-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;}
+.section-card__head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hairline);}
+.section-card__title{font-size:12px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:8px;}
+.section-card__title::before{content:'';display:block;width:3px;height:12px;background:var(--primary);border-radius:2px;}
+.section-card__sub{font-size:11px;color:var(--muted);font-weight:500;}
+
+.intraday-axis{display:flex;justify-content:space-between;padding:4px 0 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.intraday-canvas-wrap{position:relative;width:100%;}
+.intraday-canvas-wrap canvas{display:block;width:100%;height:100%;}
+
+/* ───────── A. 차트 히어로 + 종가 주석 ───────── */
+.a-hero{padding:16px;}
+.a-hero__lead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.a-hero__idx{}
+.a-hero__idx-name{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;}
+.a-hero__idx-val{font-size:30px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1;}
+.a-hero__idx-chg{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;}
+.a-hero__idx-chg.up{color:var(--up);}
+.a-hero__vol{text-align:right;}
+.a-hero__vol-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px;}
+.a-hero__vol-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.4px;}
+.a-chart-wrap{height:104px;}
+.a-sub-row{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:14px;border-top:1px solid var(--hairline);}
+.a-sub-cell{padding:12px 4px 2px;display:flex;align-items:baseline;gap:8px;}
+.a-sub-cell + .a-sub-cell{border-left:1px solid var(--hairline);padding-left:16px;}
+.a-sub-cell__name{font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;}
+.a-sub-cell__val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
+.a-sub-cell__chg{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;margin-left:auto;}
+.a-sub-cell__chg.down{color:var(--dn);}
+
+/* ───────── B. 지수 요약 스트립 + 차트 히어로 ───────── */
+.b-strip{display:flex;align-items:stretch;background:var(--canvas);border-bottom:1px solid var(--hairline);}
+.b-strip__cell{flex:1;padding:9px 14px;border-right:1px solid var(--hairline);display:flex;flex-direction:column;gap:2px;}
+.b-strip__cell:last-child{border-right:none;}
+.b-strip__name{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.03em;}
+.b-strip__line{display:flex;align-items:baseline;gap:6px;}
+.b-strip__val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.3px;}
+.b-strip__chg{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+.b-strip__chg.up{color:var(--up);}
+.b-strip__chg.down{color:var(--dn);}
+.b-hero{padding:16px;}
+.b-hero__head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px;}
+.b-hero__title{font-size:13px;font-weight:700;}
+.b-hero__time{font-size:11px;color:var(--muted);}
+.b-chart-wrap{height:128px;}
+.b-vol-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface-inset);border-top:1px solid var(--hairline);}
+.b-vol-row__label{font-size:12px;font-weight:600;color:var(--muted);}
+.b-vol-row__val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div>
+    <h1>코스피 마감 — 상단 히어로 재구성 비교</h1>
+    <p><b>A</b>는 장중 곡선을 등뼈로 두고 KOSPI 종가를 그 위에 주석처럼 얹어요. KOSDAQ·원/달러는 아래 보조 행으로 강등(<b>+2.25% vs −3.36% 디버전스</b>는 살림). <b>B</b>는 사용자 원안 — 지수 3종을 맨 위 얇은 스트립으로 압축하고, 차트+거래대금을 히어로로.</p>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">
+    <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  </button>
+</div>
+
+<div class="compare">
+
+  <!-- ════ A ════ -->
+  <div class="col">
+    <div class="col__head"><span class="col__tag hl">A</span><span class="col__name">차트 히어로 + 종가 주석 (추천)</span></div>
+    <p class="col__bet">곡선이 등뼈, 종가는 그 위 주석. KOSDAQ·FX는 <b>보조 행</b>으로 — 디버전스는 살리되 헤드라인은 양보.</p>
+    <div class="section-card">
+      <div class="section-card__head">
+        <span class="section-card__title">마감 스냅샷</span>
+        <span class="section-card__sub">09:00 ~ 15:30 정규장</span>
+      </div>
+      <div class="a-hero">
+        <div class="a-hero__lead">
+          <div class="a-hero__idx">
+            <div class="a-hero__idx-name">KOSPI 종가</div>
+            <div class="a-hero__idx-val">8,228.70</div>
+            <div class="a-hero__idx-chg up">▲ 181.19 (+2.25%)</div>
+          </div>
+          <div class="a-hero__vol">
+            <div class="a-hero__vol-label">코스피 거래대금</div>
+            <div class="a-hero__vol-val">55조 8,408억</div>
+          </div>
+        </div>
+        <div class="a-chart-wrap intraday-canvas-wrap"><canvas id="chart-a"></canvas></div>
+        <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+        <div class="a-sub-row">
+          <div class="a-sub-cell"><span class="a-sub-cell__name">KOSDAQ</span><span class="a-sub-cell__val">1,133.13</span><span class="a-sub-cell__chg down">▼ -3.36%</span></div>
+          <div class="a-sub-cell"><span class="a-sub-cell__name">원/달러</span><span class="a-sub-cell__val">1,501.70</span><span class="a-sub-cell__chg down">▼ -0.38%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ B ════ -->
+  <div class="col">
+    <div class="col__head"><span class="col__tag">B</span><span class="col__name">지수 요약 스트립 + 차트 (원안)</span></div>
+    <p class="col__bet">지수 3종을 맨 위 <b>얇은 스트립</b>으로 압축, 차트+거래대금을 히어로로. 가장 깔끔하지만 종가의 무게가 옅어져요.</p>
+    <div class="section-card">
+      <div class="b-strip">
+        <div class="b-strip__cell"><span class="b-strip__name">KOSPI</span><div class="b-strip__line"><span class="b-strip__val">8,228.70</span><span class="b-strip__chg up">+2.25%</span></div></div>
+        <div class="b-strip__cell"><span class="b-strip__name">KOSDAQ</span><div class="b-strip__line"><span class="b-strip__val">1,133.13</span><span class="b-strip__chg down">-3.36%</span></div></div>
+        <div class="b-strip__cell"><span class="b-strip__name">원/달러</span><div class="b-strip__line"><span class="b-strip__val">1,501.70</span><span class="b-strip__chg down">-0.38%</span></div></div>
+      </div>
+      <div class="b-hero">
+        <div class="b-hero__head">
+          <span class="b-hero__title">코스피 장중 흐름</span>
+          <span class="b-hero__time">고점 8,229.00 · 저점 7,806.06</span>
+        </div>
+        <div class="b-chart-wrap intraday-canvas-wrap"><canvas id="chart-b"></canvas></div>
+        <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+      </div>
+      <div class="b-vol-row">
+        <span class="b-vol-row__label">코스피 거래대금</span>
+        <span class="b-vol-row__val">55조 8,408억원</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const INTRADAY=[8050.2,8065.4,8074.5,7874.51,7862.3,7845.1,7806.06,7820.4,7835.7,7850.2,7862.8,7878.3,7892.1,7901.5,7915.2,7928.7,7940.1,7952.3,7965.8,7978.2,7989.5,8001.3,8012.7,8024.1,8035.6,8047.2,8058.9,8070.3,8081.7,8093.2,8104.6,8115.9,8127.3,8138.7,8150.1,8161.4,8172.8,8184.2,8195.5,8206.9,8218.3,8222.1,8225.8,8228.7,8226.3,8224.1,8221.8,8219.5,8220.3,8222.7,8221.0,8223.5,8226.8,8228.7,8224.5,8220.3,8228.7,8225.1,8221.8,8218.4,8222.7,8228.7,8225.3,8221.9,8218.5,8222.1,8225.6,8229.0,8225.8,8222.6,8219.3,8223.1,8228.7,8225.4,8222.0,8228.7];
+const HIGH_IDX=INTRADAY.indexOf(Math.max(...INTRADAY));
+const LOW_IDX=INTRADAY.indexOf(Math.min(...INTRADAY));
+function drawIntraday(canvasId, H){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  const dpr=window.devicePixelRatio||1,W=canvas.parentElement.offsetWidth||500;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.width=W*dpr;canvas.height=H*dpr;
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const min=Math.min(...INTRADAY)-10,max=Math.max(...INTRADAY)+10,range=max-min;
+  const pad={t:24,b:6,l:8,r:8},pW=W-pad.l-pad.r,pH=H-pad.t-pad.b;
+  const xf=i=>pad.l+(i/(INTRADAY.length-1))*pW,yf=v=>pad.t+(1-(v-min)/range)*pH;
+  ctx.beginPath();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(100,100,100,.2)';ctx.lineWidth=1;ctx.moveTo(pad.l,yf(INTRADAY[0]));ctx.lineTo(W-pad.r,yf(INTRADAY[0]));ctx.stroke();ctx.setLineDash([]);
+  const color='#2775ED';
+  const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);grad.addColorStop(0,'rgba(39,117,237,.18)');grad.addColorStop(1,'rgba(39,117,237,.02)');
+  ctx.beginPath();ctx.moveTo(xf(0),yf(INTRADAY[0]));for(let i=1;i<INTRADAY.length;i++){const cx=(xf(i-1)+xf(i))/2;ctx.bezierCurveTo(cx,yf(INTRADAY[i-1]),cx,yf(INTRADAY[i]),xf(i),yf(INTRADAY[i]));}ctx.lineTo(xf(INTRADAY.length-1),H-pad.b);ctx.lineTo(xf(0),H-pad.b);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.moveTo(xf(0),yf(INTRADAY[0]));for(let i=1;i<INTRADAY.length;i++){const cx=(xf(i-1)+xf(i))/2;ctx.bezierCurveTo(cx,yf(INTRADAY[i-1]),cx,yf(INTRADAY[i]),xf(i),yf(INTRADAY[i]));}ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.stroke();
+  function drawLabel(x,y,text,c,above){
+    ctx.font=`bold 11px 'Pretendard Variable',sans-serif`;
+    const tw=ctx.measureText(text).width,th=13,p=4;
+    let lx=Math.min(Math.max(x,tw/2+p+2),W-tw/2-p-2);
+    const ly=above?y-10:y+20;
+    const isDark=document.documentElement.classList.contains('dark');
+    ctx.fillStyle=isDark?'rgba(36,38,40,0.92)':'rgba(255,255,255,0.92)';
+    ctx.beginPath();ctx.roundRect(lx-tw/2-p,ly-th,tw+p*2,th+2,4);ctx.fill();
+    ctx.fillStyle=c;ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(text,lx,ly);
+  }
+  ctx.beginPath();ctx.arc(xf(HIGH_IDX),yf(INTRADAY[HIGH_IDX]),4,0,Math.PI*2);ctx.fillStyle='#E03131';ctx.fill();
+  drawLabel(xf(HIGH_IDX),yf(INTRADAY[HIGH_IDX]),`▲ 고점 ${INTRADAY[HIGH_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`,'#E03131',true);
+  ctx.beginPath();ctx.arc(xf(LOW_IDX),yf(INTRADAY[LOW_IDX]),4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+  drawLabel(xf(LOW_IDX),yf(INTRADAY[LOW_IDX]),`▼ 저점 ${INTRADAY[LOW_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`,color,true);
+}
+function drawAll(){drawIntraday('chart-a',104);drawIntraday('chart-b',128);}
+function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');h.classList.toggle('light');drawAll();}
+(function(){if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.remove('light');document.documentElement.classList.add('dark');}})();
+window.addEventListener('load',drawAll);
+window.addEventListener('resize',drawAll);
+</script>
+</body>
+</html>

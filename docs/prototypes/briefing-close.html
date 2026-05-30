@@ -95,23 +95,25 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .section-card__body{padding:14px 16px;}
 .section-card__divider{height:1px;background:var(--hairline);margin:0;}
 
-/* ── 마감 지수 ── */
-.close-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
-.close-idx{padding:14px 16px;border-right:1px solid var(--hairline);}
-.close-idx:last-child{border-right:none;}
-.close-idx__name{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;}
-.close-idx__val{font-size:22px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1;margin-bottom:4px;}
-.close-idx__chg{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
-.close-idx__chg.up{color:var(--up);}
-.close-idx__chg.down{color:var(--dn);}
-.close-idx__vol{font-size:10px;color:var(--muted);margin-top:3px;}
-.trade-vol-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;
-  background:var(--surface-inset);
-}
-.trade-vol-row__label{font-size:12px;font-weight:600;color:var(--muted);}
-.trade-vol-row__val{font-size:16px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+/* ── 마감 스냅샷 (차트 히어로 + 종가 주석) ── */
+.a-hero{padding:16px;}
+.a-hero__lead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.a-hero__idx-name{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;}
+.a-hero__idx-val{font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1;}
+.a-hero__idx-chg{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:6px;}
+.a-hero__idx-chg.up{color:var(--up);}
+.a-hero__idx-chg.down{color:var(--dn);}
+.a-hero__vol{text-align:right;}
+.a-hero__vol-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px;}
+.a-hero__vol-val{font-size:18px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.4px;}
+.a-sub-row{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:14px;border-top:1px solid var(--hairline);}
+.a-sub-cell{padding:12px 4px 2px;display:flex;align-items:baseline;gap:8px;}
+.a-sub-cell + .a-sub-cell{border-left:1px solid var(--hairline);padding-left:16px;}
+.a-sub-cell__name{font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;}
+.a-sub-cell__val{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.a-sub-cell__chg{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;margin-left:auto;}
+.a-sub-cell__chg.up{color:var(--up);}
+.a-sub-cell__chg.down{color:var(--dn);}
 
 /* ── 시장 폭 ── */
 .breadth-row{
@@ -264,9 +266,8 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .reason-title-bar{display:flex;align-items:center;gap:6px;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hairline);font-size:14px;font-weight:700;color:var(--ink);}
 .reason-title-bar::before{content:'💬';font-size:13px;}
 
-/* ── 장중 흐름 ── */
-.intraday-body{padding:14px 16px 12px;}
-.intraday-canvas-wrap{position:relative;width:100%;height:140px;}
+/* ── 장중 흐름 차트 (마감 스냅샷 내) ── */
+.intraday-canvas-wrap{position:relative;width:100%;height:104px;}
 .intraday-canvas-wrap canvas{display:block;width:100%;height:100%;}
 .intraday-axis{display:flex;justify-content:space-between;padding:4px 0 0;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;}
 
@@ -426,9 +427,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
 @media(max-width:600px){
   .layout-wrapper{padding:12px 14px 60px;}
   .gnb{padding:0 16px;}
-  .close-grid{grid-template-columns:repeat(2,1fr);}
-  .close-grid .close-idx{border-bottom:1px solid var(--hairline);}
-  .close-grid .close-idx:last-child{grid-column:span 2;border-right:none;border-bottom:none;}
   .supply-summary__cell{grid-template-columns:1fr 160px;gap:12px;}
   .supply-summary__amt{font-size:18px;}
   .breadth-row{grid-template-columns:1fr;}
@@ -487,37 +485,47 @@ html.dark .chip-widget__more{color:#60A5FA;}
         <div class="accordion-body" style="grid-template-rows:1fr">
           <div class="accordion-body__inner">
 
-            <!-- ① 마감 지수 + 거래대금 (통합) -->
+            <!-- ① 마감 스냅샷 (차트 히어로 + 종가 주석) -->
             <div class="section-card">
               <div class="section-card__head">
-                <span class="section-card__title">마감 지수</span>
-                <span class="section-card__sub">15:30 정규장 마감</span>
+                <span class="section-card__title">마감 스냅샷</span>
+                <span class="section-card__sub">09:00 ~ 15:30 정규장</span>
               </div>
-              <div class="close-grid">
-                <div class="close-idx">
-                  <div class="close-idx__name">KOSPI</div>
-                  <div class="close-idx__val">8,228.70</div>
-                  <div class="close-idx__chg up">▲ 181.19 (+2.25%)</div>
+              <div class="a-hero">
+                <div class="a-hero__lead">
+                  <div class="a-hero__idx">
+                    <div class="a-hero__idx-name">KOSPI 종가</div>
+                    <div class="a-hero__idx-val">8,228.70</div>
+                    <div class="a-hero__idx-chg up">▲ 181.19 (+2.25%)</div>
+                  </div>
+                  <div class="a-hero__vol">
+                    <div class="a-hero__vol-label">코스피 거래대금</div>
+                    <div class="a-hero__vol-val">55조 8,408억</div>
+                  </div>
                 </div>
-                <div class="close-idx">
-                  <div class="close-idx__name">KOSDAQ</div>
-                  <div class="close-idx__val">1,133.13</div>
-                  <div class="close-idx__chg down">▼ 39.39 (-3.36%)</div>
+                <div class="intraday-canvas-wrap"><canvas id="intraday-chart"></canvas></div>
+                <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+                <div class="a-sub-row">
+                  <div class="a-sub-cell"><span class="a-sub-cell__name">KOSDAQ</span><span class="a-sub-cell__val">1,133.13</span><span class="a-sub-cell__chg down">▼ -3.36%</span></div>
+                  <div class="a-sub-cell"><span class="a-sub-cell__name">원/달러</span><span class="a-sub-cell__val">1,501.70</span><span class="a-sub-cell__chg down">▼ -0.38%</span></div>
                 </div>
-                <div class="close-idx">
-                  <div class="close-idx__name">원/달러</div>
-                  <div class="close-idx__val">1,501.70</div>
-                  <div class="close-idx__chg down">▼ -0.38%</div>
-                  <div class="close-idx__vol">원화 강세 마감</div>
-                </div>
-              </div>
-              <div class="trade-vol-row">
-                <span class="trade-vol-row__label">코스피 거래대금</span>
-                <span class="trade-vol-row__val">55조 8,408억원</span>
               </div>
             </div>
 
-            <!-- ② 시장 폭 -->
+            <!-- ② 시황 분석 -->
+            <div class="section-card">
+              <div class="reason-title-bar">기관 대규모 매수 주도 — 코스피 8,000선 돌파 강세</div>
+              <div class="reason-body">
+                <p>코스피 <b>+2.25%</b>(<b>+181.19p</b>) 강세 마감이에요. 연기금 <b>+3,210억</b> 주도, 외국인 <b>-4,498억</b> 순매도예요.</p>
+                <div class="b-format">
+                  <div class="b-row"><span class="b-label">WHY</span><p class="b-text">WTI <b>-4.86%</b> 급락으로 인플레 우려가 해소됐어요. 나스닥 선물 <b>+0.9%</b>·S&P500 선물 <b>+0.65%</b> 리스크온이에요. 연기금 <b>+3,210억</b> 주도 매수예요.</p></div>
+                  <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">반도체 대표주 <b>+9.9%</b>·MLCC <b>+12.75%</b>·반도체 기판 <b>+8.67%</b>예요. LG이노텍 <b>+23.61%</b>·삼성전기 <b>+17.31%</b>·SK하이닉스 <b>+5.72%</b>예요.</p></div>
+                  <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">연기금 대규모 매수 + 유가 급락 = 강력한 리스크온 시그널이에요. 다음 세션 반도체·부품 모멘텀이 지속될 가능성이 높아요.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ③ 시장 폭 -->
             <div class="section-card">
               <div class="section-card__head">
                 <span class="section-card__title">시장 폭</span>
@@ -538,19 +546,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <div class="breadth-cell"><span class="breadth-cell__lbl">하한가</span><span class="breadth-cell__val down">0</span></div>
                   <div class="breadth-cell"><span class="breadth-cell__lbl">신고가</span><span class="breadth-cell__val up">0</span></div>
                   <div class="breadth-cell"><span class="breadth-cell__lbl">신저가</span><span class="breadth-cell__val down">0</span></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ③ 시황 분석 -->
-            <div class="section-card">
-              <div class="reason-title-bar">기관 대규모 매수 주도 — 코스피 8,000선 돌파 강세</div>
-              <div class="reason-body">
-                <p>코스피 <b>+2.25%</b>(<b>+181.19p</b>) 강세 마감이에요. 연기금 <b>+3,210억</b> 주도, 외국인 <b>-4,498억</b> 순매도예요.</p>
-                <div class="b-format">
-                  <div class="b-row"><span class="b-label">WHY</span><p class="b-text">WTI <b>-4.86%</b> 급락으로 인플레 우려가 해소됐어요. 나스닥 선물 <b>+0.9%</b>·S&P500 선물 <b>+0.65%</b> 리스크온이에요. 연기금 <b>+3,210억</b> 주도 매수예요.</p></div>
-                  <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">반도체 대표주 <b>+9.9%</b>·MLCC <b>+12.75%</b>·반도체 기판 <b>+8.67%</b>예요. LG이노텍 <b>+23.61%</b>·삼성전기 <b>+17.31%</b>·SK하이닉스 <b>+5.72%</b>예요.</p></div>
-                  <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">연기금 대규모 매수 + 유가 급락 = 강력한 리스크온 시그널이에요. 다음 세션 반도체·부품 모멘텀이 지속될 가능성이 높아요.</p></div>
                 </div>
               </div>
             </div>
@@ -596,19 +591,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
               </div>
             </div>
 
-            <!-- ⑤ 장중 흐름 -->
-            <div class="section-card">
-              <div class="section-card__head">
-                <span class="section-card__title">코스피 장중 흐름</span>
-                <span class="section-card__sub">09:00 ~ 15:20</span>
-              </div>
-              <div class="intraday-body">
-                <div class="intraday-canvas-wrap"><canvas id="intraday-chart"></canvas></div>
-                <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
-              </div>
-            </div>
-
-            <!-- ⑥ 거래대금 급증 + 수급 동반 종목 (D) -->
+            <!-- ⑤ 거래대금 급증 + 수급 동반 종목 (D) -->
             <div class="section-card">
               <div class="section-card__head">
                 <span class="section-card__title">거래대금 급증 + 수급 동반 종목</span>
@@ -717,29 +700,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
                 </div>
 
               </div>
-            </div>
-
-            <!-- ⑧ KOSPI 200 TOP 10 -->
-            <div class="section-card">
-              <div class="section-card__head">
-                <span class="section-card__title">코스피 200 시총 상위</span>
-                <span class="section-card__sub">상위 10종목</span>
-              </div>
-              <table class="top10-table">
-                <thead><tr><th>#</th><th>종목명</th><th>현재가</th><th>등락률</th></tr></thead>
-                <tbody>
-                  <tr><td>1</td><td>삼성전자</td><td class="price">307,000원</td><td class="chg up">▲ +2.68%</td></tr>
-                  <tr><td>2</td><td>SK하이닉스</td><td class="price">2,243,000원</td><td class="chg up">▲ +9.31%</td></tr>
-                  <tr><td>3</td><td>삼성바이오로직스</td><td class="price">1,095,000원</td><td class="chg up">▲ +1.20%</td></tr>
-                  <tr><td>4</td><td>LG에너지솔루션</td><td class="price">298,500원</td><td class="chg down">▼ -0.50%</td></tr>
-                  <tr><td>5</td><td>현대차</td><td class="price">221,000원</td><td class="chg up">▲ +0.91%</td></tr>
-                  <tr><td>6</td><td>KB금융</td><td class="price">92,300원</td><td class="chg up">▲ +1.43%</td></tr>
-                  <tr><td>7</td><td>셀트리온</td><td class="price">175,800원</td><td class="chg down">▼ -0.79%</td></tr>
-                  <tr><td>8</td><td>NAVER</td><td class="price">168,200원</td><td class="chg down">▼ -1.47%</td></tr>
-                  <tr><td>9</td><td>POSCO홀딩스</td><td class="price">267,500원</td><td class="chg up">▲ +2.10%</td></tr>
-                  <tr><td>10</td><td>LG화학</td><td class="price">198,000원</td><td class="chg flat">— 0.00%</td></tr>
-                </tbody>
-              </table>
             </div>
 
           </div>
@@ -985,7 +945,7 @@ const HIGH_IDX=INTRADAY.indexOf(Math.max(...INTRADAY));
 const LOW_IDX=INTRADAY.indexOf(Math.min(...INTRADAY));
 function drawIntraday(){
   const canvas=document.getElementById('intraday-chart');if(!canvas)return;
-  const dpr=window.devicePixelRatio||1,W=canvas.parentElement.offsetWidth||600,H=140;
+  const dpr=window.devicePixelRatio||1,W=canvas.parentElement.offsetWidth||600,H=104;
   canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.width=W*dpr;canvas.height=H*dpr;
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
   const min=Math.min(...INTRADAY)-10,max=Math.max(...INTRADAY)+10,range=max-min;
