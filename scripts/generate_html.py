@@ -34,6 +34,8 @@ KST = pytz.timezone("Asia/Seoul")
 TYPE_MAP = {"kospi": "kospi", "us": "us", "kospi-close": "close", "close": "close"}
 # 내부 type → analysis 파일명에 쓰는 source type
 SRC_TYPE = {"kospi": "kospi", "us": "us", "close": "kospi-close"}
+# 내부 type → 시장 데이터 파일명
+DATA_FILE = {"kospi": "latest_kospi.json", "us": "latest_us.json", "close": "latest_kospi_close.json"}
 BRIEFING_LABELS = {"kospi": "코스피 예측", "close": "코스피 마감", "us": "미국 시장"}
 SCHEDULED_TIMES = {"kospi": "07:30", "close": "15:40", "us": "21:20"}
 DAY_FULL = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
@@ -472,18 +474,45 @@ def write_output(html: str, internal_type: str, target_date: str):
     print(f"[generate_html] wrote {out_dir.relative_to(BASE_DIR)}/index.html")
 
 
+def find_latest_ready():
+    """generated_at 기준 가장 최근 생성된 ready 브리핑 (internal_type, date) 반환. 없으면 None."""
+    bpath = DATA_DIR / "briefings.json"
+    briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
+    best = None  # (generated_at, internal_type, date)
+    for b in briefings:
+        it = TYPE_MAP.get(b.get("type"), b.get("type"))
+        d = b.get("date")
+        if it not in DATA_FILE or not d:
+            continue
+        if not (BRIEFINGS_DIR / d / it / "index.html").exists():
+            continue
+        ga = b.get("generated_at", "") or ""
+        if best is None or ga > best[0]:
+            best = (ga, it, d)
+    return (best[1], best[2]) if best else None
+
+
 def regenerate_index():
-    """web/briefings/index.html 재생성 (pages 템플릿이 있으면)."""
+    """web/briefings/index.html = 가장 최근 브리핑(본문+목록). 브리핑이 없으면 목록 전용 폴백."""
+    latest = find_latest_ready()
+    if latest:
+        internal_type, target_date = latest
+        dpath = DATA_DIR / DATA_FILE[internal_type]
+        market_data = load_json(dpath) if dpath.exists() else {}
+        html = render_briefing(internal_type, target_date, market_data)
+        (BRIEFINGS_DIR / "index.html").write_text(html, encoding="utf-8")
+        print(f"[generate_html] wrote index = 최신 브리핑 {target_date}/{internal_type}")
+        return
     tpl = TEMPLATES_DIR / "pages" / "briefings_index.html"
     if not tpl.exists():
-        print("[generate_html] skip index (pages/briefings_index.html 미작성 — Phase 4)")
+        print("[generate_html] skip index (브리핑 0개 + 목록 템플릿 없음)")
         return
     env = make_env()
     ctx = {"css_path": "/assets/style.css", "js_path": "/assets/main.js",
            **build_list_context("", "")}
     html = env.get_template("pages/briefings_index.html").render(**ctx)
     (BRIEFINGS_DIR / "index.html").write_text(html, encoding="utf-8")
-    print("[generate_html] wrote web/briefings/index.html")
+    print("[generate_html] wrote web/briefings/index.html (목록 전용)")
 
 
 def main():
