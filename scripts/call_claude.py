@@ -124,6 +124,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 실행 가이드 작성 규칙:
 - 구체적 진입 구간 (시가 기준 ±X원 또는 ±X%)
 - 명확한 목표가와 손절가
+- action_guide에 쓴 진입가·목표가·손절가를 구조화 필드(entry, target, target_pct, stop, stop_pct)로도 동일하게 출력한다 (카드 하단 그리드 표시용)
 - 시장 전체 방향과 종목의 연관성 설명
 
 ### 예측 근거(reasons) 작성 규칙
@@ -228,7 +229,8 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       "ma200_dist_pct": 15.3,
       "scenario_tag": "모멘텀 가속",
       "scenario": "시나리오 설명 문장. 왜 이 종목인지, 어떤 촉매가 있는지 구체적으로 서술한다.",
-      "action_guide": "시가 X원 이내 진입. 목표: Y원(+X.X%) / 손절: Z원 이탈 시."
+      "action_guide": "시가 X원 이내 진입. 목표: Y원(+X.X%) / 손절: Z원 이탈 시.",
+      "entry": "X원", "target": "Y원", "target_pct": "+X.X%", "stop": "Z원", "stop_pct": "-X.X%"
     }
   ],
   "telegram_signals": [
@@ -321,6 +323,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 - 티커와 회사명 모두 표기 (예: "NVDA (엔비디아)")
 - 구체적 진입 구간 (시가 기준 ±$X 또는 ±X%)
 - 명확한 목표가와 손절가
+- action_guide에 쓴 진입가·목표가·손절가를 구조화 필드(entry, target, target_pct, stop, stop_pct)로도 동일하게 출력한다 (카드 하단 그리드 표시용)
 - 해당 종목이 오늘 시장 방향과 어떻게 연관되는지 설명
 
 ### 예측 근거(reasons) 작성 규칙
@@ -444,7 +447,8 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       "ma200_dist_pct": 22.1,
       "scenario_tag": "모멘텀 가속",
       "scenario": "시나리오 설명 문장. 왜 이 종목인지, 어떤 촉매가 있는지 구체적으로 서술한다.",
-      "action_guide": "시가 $XXX 이내 진입. 목표: $YYY(+X.X%) / 손절: $ZZZ 이탈 시."
+      "action_guide": "시가 $XXX 이내 진입. 목표: $YYY(+X.X%) / 손절: $ZZZ 이탈 시.",
+      "entry": "$XXX", "target": "$YYY", "target_pct": "+X.X%", "stop": "$ZZZ", "stop_pct": "-X.X%"
     }
   ],
   "premarket_highs": [
