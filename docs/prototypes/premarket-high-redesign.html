@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!-- 프리장 신고가 종목 영역 리디자인 — 현행 vs A(정보 보강 카드) vs B(컴팩트 리스트) -->
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프리장 신고가 — 리디자인 비교</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);
+  --up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;word-break:keep-all;padding:32px 20px 80px;}
+button{cursor:pointer;border:none;background:none;font:inherit;}
+
+.page-head{max-width:680px;margin:0 auto 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+.page-head h1{font-size:20px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px;}
+.page-head p{font-size:13px;color:var(--muted);line-height:1.7;max-width:520px;}
+.theme-btn{flex-shrink:0;width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-inset);color:var(--muted);display:flex;align-items:center;justify-content:center;}
+.icon-sun,.icon-moon{display:none;}
+html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
+
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:30px;}
+.block__head{display:flex;align-items:baseline;gap:10px;margin-bottom:4px;}
+.block__tag{font-size:11px;font-weight:800;letter-spacing:0.06em;color:#fff;border-radius:5px;padding:3px 9px;flex-shrink:0;}
+.block__tag.cur{background:var(--muted);}
+.block__tag.a{background:var(--primary);}
+.block__tag.b{background:var(--ink);}
+.block__name{font-size:15px;font-weight:700;}
+.block__note{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+
+.sec-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;margin-bottom:6px;}
+.sec-title::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.sec-desc{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7;}
+
+/* ── 현행 ── */
+.premarket-highs{display:flex;flex-direction:column;gap:8px;}
+.premarket-high-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:12px 14px;}
+.premarket-high-card__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.premarket-high-card__identity{display:flex;align-items:center;gap:8px;}
+.premarket-high-card__ticker{font-size:15px;font-weight:700;color:var(--ink);}
+.premarket-high-card__name{font-size:12px;color:var(--muted);}
+.premarket-high-card__right{display:flex;align-items:center;gap:6px;}
+.premarket-high-card__badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--up-bg);color:var(--up);}
+.premarket-high-card__tag{font-size:11px;color:var(--muted);}
+.premarket-high-card__reason{font-size:13px;line-height:1.75;color:var(--muted);}
+
+/* ── A: 정보 보강 카드 ── */
+.pmh-a{display:flex;flex-direction:column;gap:8px;}
+.pmh-a-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px 15px;box-shadow:var(--s1);}
+.pmh-a-card__top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.pmh-a-card__id{display:flex;align-items:center;gap:9px;min-width:0;}
+.pmh-a-card__ticker{font-size:16px;font-weight:800;letter-spacing:-0.3px;}
+.pmh-a-card__name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pmh-a-card__price{text-align:right;flex-shrink:0;}
+.pmh-a-card__now{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.3px;}
+.pmh-a-card__chg{font-size:12px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums;margin-top:1px;}
+.pmh-a-card__hi{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);}
+.hi-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--gold-bg);color:var(--gold);flex-shrink:0;}
+.pmh-a-card__hi-detail{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.pmh-a-card__hi-detail b{color:var(--ink);font-weight:700;}
+.pmh-a-card__reason{font-size:12px;line-height:1.7;color:var(--muted);margin-top:8px;}
+
+/* ── B: 컴팩트 리스트 ── */
+.pmh-b{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;background:var(--canvas);}
+.pmh-b-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--hairline);}
+.pmh-b-row:last-child{border-bottom:none;}
+.pmh-b-row__main{flex:1;min-width:0;}
+.pmh-b-row__line1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pmh-b-row__ticker{font-size:14px;font-weight:800;letter-spacing:-0.2px;}
+.pmh-b-row__name{font-size:11px;color:var(--muted);}
+.hi-pill-sm{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--gold-bg);color:var(--gold);}
+.hi-pill-sm.alltime{background:var(--up-bg);color:var(--up);}
+.pmh-b-row__reason{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.pmh-b-row__price{text-align:right;flex-shrink:0;}
+.pmh-b-row__now{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.3px;}
+.pmh-b-row__chg{font-size:12px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums;}
+
+/* ── C: 절충 (리스트 행 + 돌파 레벨) ── */
+.pmh-c{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;background:var(--canvas);}
+.pmh-c-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--hairline);}
+.pmh-c-row:last-child{border-bottom:none;}
+.pmh-c-row__main{flex:1;min-width:0;}
+.pmh-c-row__line1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pmh-c-row__ticker{font-size:14px;font-weight:800;letter-spacing:-0.2px;}
+.pmh-c-row__name{font-size:11px;color:var(--muted);}
+.pmh-c-row__break{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.pmh-c-row__break b{color:var(--ink);font-weight:700;}
+.pmh-c-row__break .arrow{color:var(--up);font-weight:800;}
+.pmh-c-row__break .dot{color:var(--hairline);}
+.pmh-c-row__reason{color:var(--muted);font-variant-numeric:normal;}
+.pmh-c-row__price{text-align:right;flex-shrink:0;}
+.pmh-c-row__now{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.3px;}
+.pmh-c-row__chg{font-size:12px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div>
+    <h1>프리장 신고가 종목 — 리디자인 비교</h1>
+    <p>현행은 정보가 빈약하고(가격 없음·트로피 중복) 종목픽 카드와 톤이 달라요. A는 <b>신고가 가격·돌파 레벨</b>을 보강한 카드, B는 종목 여러 개에 강한 <b>컴팩트 리스트</b>예요.</p>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">
+    <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  </button>
+</div>
+
+<div class="wrap">
+
+  <!-- 현행 -->
+  <div class="block">
+    <div class="block__head"><span class="block__tag cur">현행</span><span class="block__name">프리장 신고가 종목</span></div>
+    <p class="block__note">가격 없음 · 트로피 중복 · 신고가 종류 미표시</p>
+    <div class="sec-title">🏆 프리장 신고가 종목</div>
+    <p class="sec-desc">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</p>
+    <div class="premarket-highs">
+      <div class="premarket-high-card">
+        <div class="premarket-high-card__top">
+          <div class="premarket-high-card__identity"><span class="premarket-high-card__ticker">MU</span><span class="premarket-high-card__name">Micron Technology</span></div>
+          <div class="premarket-high-card__right"><span class="premarket-high-card__badge">+3.2%</span><span class="premarket-high-card__tag">신고가 🏆</span></div>
+        </div>
+        <div class="premarket-high-card__reason">🚀 HBM 주문 급증으로 AI 수요 확대가 기대돼요. 프리마켓 강세가 지속되고 있어요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div class="block">
+    <div class="block__head"><span class="block__tag a">A</span><span class="block__name">정보 보강 카드</span></div>
+    <p class="block__note">프리장 가격 + 돌파 레벨(직전 고점) + 신고가 종류 pill · 종목픽 카드와 톤 통일</p>
+    <div class="sec-title">프리장 신고가</div>
+    <p class="sec-desc">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</p>
+    <div class="pmh-a">
+      <div class="pmh-a-card">
+        <div class="pmh-a-card__top">
+          <div class="pmh-a-card__id"><span class="pmh-a-card__ticker">MU</span><span class="pmh-a-card__name">Micron Technology</span></div>
+          <div class="pmh-a-card__price"><div class="pmh-a-card__now">$124.80</div><div class="pmh-a-card__chg">▲ +3.2%</div></div>
+        </div>
+        <div class="pmh-a-card__hi">
+          <span class="hi-pill">🏆 52주 신고가</span>
+          <span class="pmh-a-card__hi-detail">직전 고점 <b>$120.90</b> 돌파</span>
+        </div>
+        <div class="pmh-a-card__reason">HBM 주문 급증으로 AI 수요 확대가 기대돼요. 프리마켓 강세가 지속되고 있어요.</div>
+      </div>
+      <div class="pmh-a-card">
+        <div class="pmh-a-card__top">
+          <div class="pmh-a-card__id"><span class="pmh-a-card__ticker">PLTR</span><span class="pmh-a-card__name">Palantir</span></div>
+          <div class="pmh-a-card__price"><div class="pmh-a-card__now">$89.30</div><div class="pmh-a-card__chg">▲ +4.1%</div></div>
+        </div>
+        <div class="pmh-a-card__hi">
+          <span class="hi-pill">🏆 역대 최고가</span>
+          <span class="pmh-a-card__hi-detail">직전 고점 <b>$85.80</b> 돌파</span>
+        </div>
+        <div class="pmh-a-card__reason">정부 AI 계약 모멘텀이 이어지고 있어요. 거래량도 동반 급증했어요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="block">
+    <div class="block__head"><span class="block__tag b">B</span><span class="block__name">컴팩트 리스트</span></div>
+    <p class="block__note">행 기반 · 종목 여러 개에 강함 · 신고가 종류 색 구분(금=52주 / 빨강=역대)</p>
+    <div class="sec-title">프리장 신고가</div>
+    <p class="sec-desc">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</p>
+    <div class="pmh-b">
+      <div class="pmh-b-row">
+        <div class="pmh-b-row__main">
+          <div class="pmh-b-row__line1"><span class="pmh-b-row__ticker">MU</span><span class="pmh-b-row__name">Micron Technology</span><span class="hi-pill-sm">52주 신고가</span></div>
+          <div class="pmh-b-row__reason">HBM 주문 급증 · AI 수요 확대 기대</div>
+        </div>
+        <div class="pmh-b-row__price"><div class="pmh-b-row__now">$124.80</div><div class="pmh-b-row__chg">▲ +3.2%</div></div>
+      </div>
+      <div class="pmh-b-row">
+        <div class="pmh-b-row__main">
+          <div class="pmh-b-row__line1"><span class="pmh-b-row__ticker">PLTR</span><span class="pmh-b-row__name">Palantir</span><span class="hi-pill-sm alltime">역대 최고가</span></div>
+          <div class="pmh-b-row__reason">정부 AI 계약 모멘텀 · 거래량 급증</div>
+        </div>
+        <div class="pmh-b-row__price"><div class="pmh-b-row__now">$89.30</div><div class="pmh-b-row__chg">▲ +4.1%</div></div>
+      </div>
+      <div class="pmh-b-row">
+        <div class="pmh-b-row__main">
+          <div class="pmh-b-row__line1"><span class="pmh-b-row__ticker">AVGO</span><span class="pmh-b-row__name">Broadcom</span><span class="hi-pill-sm">52주 신고가</span></div>
+          <div class="pmh-b-row__reason">AI ASIC 수주 기대 · 차별화 지속</div>
+        </div>
+        <div class="pmh-b-row__price"><div class="pmh-b-row__now">$428.50</div><div class="pmh-b-row__chg">▲ +1.9%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C 절충 -->
+  <div class="block">
+    <div class="block__head"><span class="block__tag a">C</span><span class="block__name">절충 — 리스트 + 돌파 레벨 (추천)</span></div>
+    <p class="block__note">B의 가벼운 리스트 행에 A의 핵심(직전 고점 돌파가)을 한 줄로 통합 · 여러 종목 수용 + 정보 밀도 둘 다</p>
+    <div class="sec-title">프리장 신고가</div>
+    <p class="sec-desc">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</p>
+    <div class="pmh-c">
+      <div class="pmh-c-row">
+        <div class="pmh-c-row__main">
+          <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">MU</span><span class="pmh-c-row__name">Micron Technology</span><span class="hi-pill-sm">52주 신고가</span></div>
+          <div class="pmh-c-row__break"><span class="arrow">▲</span>직전 고점 <b>$120.90</b> 돌파<span class="dot">·</span><span class="pmh-c-row__reason">HBM 주문 급증</span></div>
+        </div>
+        <div class="pmh-c-row__price"><div class="pmh-c-row__now">$124.80</div><div class="pmh-c-row__chg">+3.2%</div></div>
+      </div>
+      <div class="pmh-c-row">
+        <div class="pmh-c-row__main">
+          <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">PLTR</span><span class="pmh-c-row__name">Palantir</span><span class="hi-pill-sm alltime">역대 최고가</span></div>
+          <div class="pmh-c-row__break"><span class="arrow">▲</span>직전 고점 <b>$85.80</b> 돌파<span class="dot">·</span><span class="pmh-c-row__reason">정부 AI 계약 모멘텀</span></div>
+        </div>
+        <div class="pmh-c-row__price"><div class="pmh-c-row__now">$89.30</div><div class="pmh-c-row__chg">+4.1%</div></div>
+      </div>
+      <div class="pmh-c-row">
+        <div class="pmh-c-row__main">
+          <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">AVGO</span><span class="pmh-c-row__name">Broadcom</span><span class="hi-pill-sm">52주 신고가</span></div>
+          <div class="pmh-c-row__break"><span class="arrow">▲</span>직전 고점 <b>$421.00</b> 돌파<span class="dot">·</span><span class="pmh-c-row__reason">AI ASIC 수주 기대</span></div>
+        </div>
+        <div class="pmh-c-row__price"><div class="pmh-c-row__now">$428.50</div><div class="pmh-c-row__chg">+1.9%</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');h.classList.toggle('light');}
+(function(){if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.remove('light');document.documentElement.classList.add('dark');}})();
+</script>
+</body>
+</html>
