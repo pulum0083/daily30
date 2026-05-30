@@ -960,20 +960,20 @@ function drawIntraday(){
   function drawLabel(x, y, text, color, above) {
     ctx.font = `bold 11px 'Pretendard Variable',sans-serif`;
     const tw = ctx.measureText(text).width;
-    const th = 13, pad = 4;
+    const pad = 4;
     // x 경계 처리
     let lx = Math.min(Math.max(x, tw/2 + pad + 2), W - tw/2 - pad - 2);
     const ly = above ? y - 10 : y + 20;
-    // 배경 박스
-    const isDark = document.documentElement.classList.contains('dark');
-    ctx.fillStyle = isDark ? 'rgba(36,38,40,0.92)' : 'rgba(255,255,255,0.92)';
-    ctx.beginPath();
-    ctx.roundRect(lx - tw/2 - pad, ly - th, tw + pad*2, th + 2, 4);
-    ctx.fill();
-    // 텍스트
-    ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
+    // 흰 박스 대신 캔버스색 외곽선(헤일로)으로 가독성 확보
+    const isDark = document.documentElement.classList.contains('dark');
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = isDark ? 'rgba(28,29,31,0.92)' : 'rgba(255,255,255,0.95)';
+    ctx.strokeText(text, lx, ly);
+    // 텍스트
+    ctx.fillStyle = color;
     ctx.fillText(text, lx, ly);
   }
   // 고점
