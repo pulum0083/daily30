@@ -301,7 +301,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .rota-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
 .rota-pct.up{color:var(--up);}
 .rota-pct.dn{color:var(--dn);}
-.rota-take{font-size:12px;line-height:1.7;color:var(--muted);padding:11px 16px 13px;border-bottom:1px solid var(--hairline);}
+.rota-take{font-size:12px;line-height:1.7;color:var(--muted);padding:11px 16px 13px;border-top:1px solid var(--hairline);}
 .rota-take b{color:var(--ink);}
 
 /* ── D. 거래대금 급증 + 수급 동반 종목 (양매수 바) ── */
@@ -542,7 +542,20 @@ html.dark .chip-widget__more{color:#60A5FA;}
               </div>
             </div>
 
-            <!-- ③ 수급 현황 (요약 + 기관 세부 통합) -->
+            <!-- ③ 시황 분석 -->
+            <div class="section-card">
+              <div class="reason-title-bar">기관 대규모 매수 주도 — 코스피 8,000선 돌파 강세</div>
+              <div class="reason-body">
+                <p>코스피 <b>+2.25%</b>(<b>+181.19p</b>) 강세 마감이에요. 연기금 <b>+3,210억</b> 주도, 외국인 <b>-4,498억</b> 순매도예요.</p>
+                <div class="b-format">
+                  <div class="b-row"><span class="b-label">WHY</span><p class="b-text">WTI <b>-4.86%</b> 급락으로 인플레 우려가 해소됐어요. 나스닥 선물 <b>+0.9%</b>·S&P500 선물 <b>+0.65%</b> 리스크온이에요. 연기금 <b>+3,210억</b> 주도 매수예요.</p></div>
+                  <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">반도체 대표주 <b>+9.9%</b>·MLCC <b>+12.75%</b>·반도체 기판 <b>+8.67%</b>예요. LG이노텍 <b>+23.61%</b>·삼성전기 <b>+17.31%</b>·SK하이닉스 <b>+5.72%</b>예요.</p></div>
+                  <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">연기금 대규모 매수 + 유가 급락 = 강력한 리스크온 시그널이에요. 다음 세션 반도체·부품 모멘텀이 지속될 가능성이 높아요.</p></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ④ 수급 현황 (요약 + 기관 세부 통합) -->
             <div class="section-card">
               <div class="section-card__head">
                 <span class="section-card__title">수급 현황</span>
@@ -580,19 +593,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <span class="inst-breakdown__note">KRX 공식 · pykrx</span>
                 </div>
                 <div class="inst-list" id="inst-list"></div>
-              </div>
-            </div>
-
-            <!-- ④ 시황 분석 -->
-            <div class="section-card">
-              <div class="reason-title-bar">기관 대규모 매수 주도 — 코스피 8,000선 돌파 강세</div>
-              <div class="reason-body">
-                <p>코스피 <b>+2.25%</b>(<b>+181.19p</b>) 강세 마감이에요. 연기금 <b>+3,210억</b> 주도, 외국인 <b>-4,498억</b> 순매도예요.</p>
-                <div class="b-format">
-                  <div class="b-row"><span class="b-label">WHY</span><p class="b-text">WTI <b>-4.86%</b> 급락으로 인플레 우려가 해소됐어요. 나스닥 선물 <b>+0.9%</b>·S&P500 선물 <b>+0.65%</b> 리스크온이에요. 연기금 <b>+3,210억</b> 주도 매수예요.</p></div>
-                  <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">반도체 대표주 <b>+9.9%</b>·MLCC <b>+12.75%</b>·반도체 기판 <b>+8.67%</b>예요. LG이노텍 <b>+23.61%</b>·삼성전기 <b>+17.31%</b>·SK하이닉스 <b>+5.72%</b>예요.</p></div>
-                  <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">연기금 대규모 매수 + 유가 급락 = 강력한 리스크온 시그널이에요. 다음 세션 반도체·부품 모멘텀이 지속될 가능성이 높아요.</p></div>
-                </div>
               </div>
             </div>
 
@@ -756,7 +756,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
           <span class="section-title">섹터 로테이션<button class="info-icon-btn" onclick="openSectorModal()" style="margin-left:6px">?</button></span>
           <span class="pub-time">자금 흐름</span>
         </div>
-        <div class="rota-take"><b>반도체·부품</b>으로 자금이 쏠리고 <b>2차전지·코스닥</b>에서 빠진 하루였어요. 거래대금도 IT·부품에 집중됐어요.</div>
         <div class="rota-list">
           <div class="rota-row"><span class="rota-name">IT·부품</span><span class="rota-pct up">+4.7%</span></div>
           <div class="rota-row"><span class="rota-name">반도체</span><span class="rota-pct up">+1.2%</span></div>
@@ -765,6 +764,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
           <div class="rota-row"><span class="rota-name">바이오</span><span class="rota-pct dn">-1.7%</span></div>
           <div class="rota-row"><span class="rota-name">2차전지</span><span class="rota-pct dn">-2.1%</span></div>
         </div>
+        <div class="rota-take"><b>반도체·부품</b>으로 자금이 쏠리고 <b>2차전지·코스닥</b>에서 빠진 하루였어요. 거래대금도 IT·부품에 집중됐어요.</div>
       </div>
 
       <!-- AI 반도체 -->
