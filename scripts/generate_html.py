@@ -306,7 +306,27 @@ def build_close_sections(analysis: dict, market: dict, index_name: str) -> dict:
             "cls": "up" if s.get("change_pct", 0) >= 0 else "dn",
         } for s in sectors[:8]]
 
-    # close_supply / dpick / pick_result: 현재 데이터 미생산 → 생략(하이브리드)
+    # close_supply (수급) — fetch_investor_trading 구조: {player: {"net": 백만원}}
+    inv = market.get("investor_trading", {})
+    if isinstance(inv, dict) and inv:
+        cells = []
+        for label, key in [("외국인", "foreign"), ("기관", "institution"), ("개인", "individual")]:
+            d = inv.get(key)
+            if not isinstance(d, dict) or d.get("net") is None:
+                continue
+            eok = round(d["net"] / 100)  # 백만원 → 억원
+            up = eok >= 0
+            cells.append({
+                "label": label,
+                "amt": f"{eok:+,}억",
+                "amt_cls": "up" if up else "down",
+                "sub": "순매수" if up else "순매도",
+                "flow": d.get("flow", []),  # 7일 흐름(있으면)
+            })
+        if cells:
+            ctx["supply_cells"] = cells
+
+    # close_dpick / pick_result: 종목별 거래대금·수급·전일픽 데이터 미수집 → 생략(하이브리드)
     return ctx
 
 
