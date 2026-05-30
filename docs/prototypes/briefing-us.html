@@ -292,6 +292,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .pre-open-toggle:hover{background:var(--surface-inset);}
 .pre-open-toggle__summary{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
 .pre-open-toggle__label{font-size:13px;font-weight:600;color:var(--ink);}
+.pre-open-toggle__time{font-size:11px;font-weight:400;color:var(--muted);}
 .pre-open-toggle__status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#FEF9C3;color:#A16207;white-space:nowrap;}
 .pre-open-toggle__chevron{font-size:11px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
 .pre-open-toggle__chevron.open{transform:rotate(180deg);}
@@ -478,7 +479,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
             <div class="pre-open-toggle" id="pre-open-toggle" onclick="togglePreOpen()">
               <div class="pre-open-toggle__summary">
                 <span class="pred-badge up" style="font-size:11px;padding:2px 8px">상승 우위</span>
-                <span class="pre-open-toggle__label">S&P500 예측 65% · 21:16 생성</span>
+                <span class="pre-open-toggle__label">S&P500 예측 65%<span class="pre-open-toggle__time"> · 21:16 생성</span></span>
               </div>
               <span class="pre-open-toggle__chevron" id="pre-open-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
             </div>
