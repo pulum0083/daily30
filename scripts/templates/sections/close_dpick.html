@@ -1,0 +1,21 @@
+{# 거래대금 급증 + 수급 동반 종목 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">거래대금 급증 + 수급 동반 종목</span>
+    <span class="section-card__sub">거래대금 급증 × 외국인·기관 동시 순매수</span>
+  </div>
+  <div class="dpick-list">
+    {% for row in dpick_rows %}
+    <div class="dpick-row">
+      <div class="dpick-top">
+        <span class="dpick-name">{{ row.name }}</span><span class="dpick-code">{{ row.code }}</span>
+        <span class="dpick-mult">거래대금 ×{{ row.mult }}</span><span class="dpick-vol">{{ row.vol }}</span>
+        <span class="dpick-chg">{{ row.chg }}</span>
+      </div>
+      <div class="dpick-bar">{% for seg in row.segs %}<div class="dpick-seg {{ seg.cls }}" style="width:{{ seg.width }}%">{{ seg.label }}</div>{% endfor %}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="dpick-legend"><span class="frgn">외국인 순매수</span><span class="inst">기관 순매수</span></div>
+  {% if dpick_take %}<div class="dpick-take">{{ dpick_take | safe }}</div>{% endif %}
+</div>

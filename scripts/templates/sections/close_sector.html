@@ -1,0 +1,13 @@
+{# 섹터 로테이션 / 자금 흐름 — 마감 사이드바 #}
+<div class="right-panel">
+  <div class="panel-header">
+    <span class="section-title">섹터 로테이션<button class="info-icon-btn" data-modal-open="sector-modal" style="margin-left:6px">?</button></span>
+    <span class="pub-time">자금 흐름</span>
+  </div>
+  <div class="rota-list">
+    {% for s in sectors %}
+    <div class="rota-row"><span class="rota-name">{{ s.name }}</span><span class="rota-pct {{ s.cls }}">{{ s.pct }}</span></div>
+    {% endfor %}
+  </div>
+  {% if sector_take %}<div class="rota-take">{{ sector_take | safe }}</div>{% endif %}
+</div>
