@@ -206,9 +206,9 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
             "spark_data": d.get("data", []),
             "spark_color": "#E03131" if chg_cls == "up" else "#2775ED",
         })
-    # VIX (us)
+    # VIX (코스피·미국 공통 — 데이터 있을 때만)
     vix = mdj.get("vix")
-    if internal_type == "us" and isinstance(vix, dict) and vix.get("price") is not None:
+    if internal_type in ("kospi", "us") and isinstance(vix, dict) and vix.get("price") is not None:
         p = vix["price"]
         lvls = [(15, "안정", "calm"), (20, "보통", "normal"), (30, "경계", "elevated"),
                 (40, "불안", "high"), (10 ** 9, "극단", "high")]
