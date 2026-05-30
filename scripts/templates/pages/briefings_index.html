@@ -1,0 +1,10 @@
+{# /briefings 진입 페이지 — TODAY 카드 + 최근 30일 브리핑 목록 #}
+{% extends "base.html" %}
+{% block title %}브리핑 목록 — Double-Shot{% endblock %}
+{% block og_title %}Double-Shot — AI 투자 브리핑 목록{% endblock %}
+{% block og_desc %}매일 아침 코스피·저녁 미국 시장 AI 예측 브리핑{% endblock %}
+{% block body %}
+<div class="layout-wrapper">
+  {% include "sections/briefing_list.html" %}
+</div>
+{% endblock %}
