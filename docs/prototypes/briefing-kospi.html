@@ -111,29 +111,31 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .acc-box--sidebar{display:flex;flex-direction:column;}
 .acc-box--mobile{display:none;}
 
-/* Prediction card */
+/* Prediction card — A 게이지 */
 .prediction-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:16px;}
-.prediction-summary{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.prediction-label{font-size:15px;font-weight:600;color:var(--ink);}
-.pred-confbar{display:block;}
-.pred-confbar__row{margin-bottom:14px;}
-.pred-confbar__row:last-child{margin-bottom:0;}
-.pred-confbar__header{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px;}
-.pred-confbar__track{position:relative;height:10px;background:var(--surface-inset);border-radius:999px;overflow:hidden;}
-.pred-confbar__light{position:absolute;left:0;top:0;height:100%;border-radius:999px;}
-.pred-confbar__solid{position:absolute;left:0;top:0;height:100%;border-radius:999px;}
-.pred-confbar__solid.up{background:var(--up);}
-.pred-confbar__solid.down{background:var(--dn);}
-.pred-confbar__meta{font-size:11px;color:var(--muted);margin-top:4px;}
-.pred-divbar{display:none;}
-.pred-divbar__header{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:8px;}
-.pred-divbar__track{display:flex;height:32px;border-radius:999px;overflow:hidden;}
-.pred-divbar__down{background:var(--dn);display:flex;align-items:center;padding-left:10px;}
-.pred-divbar__up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
-.pred-divbar__pct{font-size:12px;font-weight:600;color:#fff;}
-.pred-divbar__neutral{display:flex;flex-direction:column;align-items:center;margin-top:4px;}
-.pred-divbar__tick{width:1px;height:6px;background:var(--hairline);}
-.pred-divbar__label{font-size:11px;color:var(--muted);margin-top:2px;}
+.pred-top{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.pred-top__lead{font-size:15px;font-weight:700;}
+.pred-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:4px 11px;border-radius:999px;}
+.pred-badge.up{background:var(--up-bg);color:var(--up);}
+.pred-badge.dn{background:var(--dn-bg);color:var(--dn);}
+.pred-gauge__track{position:relative;height:14px;border-radius:999px;background:linear-gradient(90deg,var(--dn-bg),var(--surface-inset) 50%,var(--up-bg));}
+.pred-gauge__mid{position:absolute;left:50%;top:-5px;bottom:-5px;width:1.5px;background:var(--hairline);transform:translateX(-50%);}
+.pred-gauge__band{position:absolute;top:0;bottom:0;border-radius:999px;}
+.pred-gauge__needle{position:absolute;top:-6px;width:4px;height:26px;border-radius:2px;box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
+.pred-gauge__needle.up{background:var(--up);}
+.pred-gauge__needle.dn{background:var(--dn);}
+.pred-gauge__scale{display:flex;justify-content:space-between;margin-top:9px;font-size:11px;color:var(--muted);font-weight:600;}
+.pred-readout{display:flex;align-items:baseline;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--hairline);}
+.pred-readout__big{font-size:30px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1;}
+.pred-readout__big.up{color:var(--up);}
+.pred-readout__big.dn{color:var(--dn);}
+.pred-readout__unit{font-size:14px;font-weight:700;}
+.pred-readout__unit.up{color:var(--up);}
+.pred-readout__unit.dn{color:var(--dn);}
+.pred-readout__strength{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);}
+.strength-dots{display:flex;gap:3px;}
+.strength-dots i{width:7px;height:7px;border-radius:50%;background:var(--hairline);}
+.strength-dots i.on{background:var(--up);}
 
 /* Reason block */
 .reason-block{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:14px 16px;}
@@ -437,23 +439,19 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <span class="section-time">07:29 KST 생성</span>
                 </div>
                 <div class="prediction-card">
-                  <div class="prediction-summary"><span class="prediction-label">상승 우위 예측 (신뢰도 68%)</span></div>
-                  <div class="pred-confbar">
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header"><span style="color:var(--up)">상승</span><span style="color:var(--muted)">65%</span></div>
-                      <div class="pred-confbar__track"><div class="pred-confbar__light" style="width:68%;background:var(--up-bg)"></div><div class="pred-confbar__solid up" style="width:65%"></div></div>
-                      <div class="pred-confbar__meta">신뢰구간 68% → 최대 68%</div>
-                    </div>
-                    <div class="pred-confbar__row">
-                      <div class="pred-confbar__header"><span style="color:var(--dn)">하락</span><span style="color:var(--muted)">35%</span></div>
-                      <div class="pred-confbar__track"><div class="pred-confbar__light" style="width:38%;background:var(--dn-bg)"></div><div class="pred-confbar__solid down" style="width:35%"></div></div>
-                      <div class="pred-confbar__meta">신뢰구간 68% → 최대 38%</div>
-                    </div>
+                  <div class="pred-top">
+                    <span class="pred-badge up">▲ 상승 우위</span>
                   </div>
-                  <div class="pred-divbar">
-                    <div class="pred-divbar__header"><span style="color:var(--dn)">하락 35%</span><span style="color:var(--up)">상승 65%</span></div>
-                    <div class="pred-divbar__track"><div class="pred-divbar__down" style="flex:35"><span class="pred-divbar__pct">35%</span></div><div class="pred-divbar__up" style="flex:65"><span class="pred-divbar__pct">65%</span></div></div>
-                    <div class="pred-divbar__neutral"><div class="pred-divbar__tick"></div><div class="pred-divbar__label">중립(50%)</div></div>
+                  <div class="pred-gauge__track">
+                    <div class="pred-gauge__mid"></div>
+                    <div class="pred-gauge__band" style="left:58%;width:14%;background:rgba(224,49,49,.16)"></div>
+                    <div class="pred-gauge__needle up" style="left:65%"></div>
+                  </div>
+                  <div class="pred-gauge__scale"><span>하락</span><span>중립 50</span><span>상승</span></div>
+                  <div class="pred-readout">
+                    <span class="pred-readout__big up">65</span>
+                    <span class="pred-readout__unit up">% 상승</span>
+                    <span class="pred-readout__strength">신호 강도 <span class="strength-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> 강함</span>
                   </div>
                 </div>
               </div>
