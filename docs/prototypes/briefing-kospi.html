@@ -581,6 +581,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
           <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">코스피 야간선물</span><div class="mkt-vals"><div class="mkt-val" id="kf-val">2,658.50</div><div class="mkt-chg up" id="kf-badge">+0.71%</div></div></div><div class="mkt-spark"><canvas id="c-kf"></canvas></div></div>
           <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">S&P500 (전일 마감)</span><div class="mkt-vals"><div class="mkt-val" id="sp-val">5,308.15</div><div class="mkt-chg up" id="sp-badge">+0.58%</div></div></div><div class="mkt-spark"><canvas id="c-sp"></canvas></div></div>
           <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val" id="sox-val">4,512.60</div><div class="mkt-chg up" id="sox-badge">+1.24%</div></div></div><div class="mkt-spark"><canvas id="c-sox"></canvas></div></div>
+          <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">달러/원 환율</span><div class="mkt-vals"><div class="mkt-val" id="fx-val">1,381.00</div><div class="mkt-chg down" id="fx-badge">-0.29%</div></div></div><div class="mkt-spark"><canvas id="c-fx"></canvas></div></div>
           <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name" style="display:flex;align-items:center;gap:4px">VIX 공포지수<button class="info-icon-btn" onclick="openVixModal()">?</button></span><div class="mkt-vals"><div class="mkt-val" id="vix-val">16.95</div><div class="mkt-chg down" id="vix-chg">-2.59%</div></div></div><div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal" id="vix-level">보통</span></div></div>
         </div>
       </div>
@@ -733,6 +734,7 @@ const SPARKLINES = {
   'c-kf': {data:[2611,2618,2624,2630,2625,2638,2641,2648,2652,2658], color: UP},
   'c-sp': {data:[5240,5252,5265,5258,5271,5280,5290,5285,5300,5308], color: UP},
   'c-sox': {data:[4398,4412,4425,4418,4430,4450,4462,4478,4498,4512], color: UP},
+  'c-fx': {data:[1392,1390,1387,1389,1386,1384,1385,1383,1382,1381], color: DN},
 };
 const MINI_CHARTS = [
   {id:'mc-1',prices:[178500,181000,185000,188000,183500,190000,194500,192000,196000,195000,197500,199000,198000,196500,194000,193500,196000,197500,196500,198500],ma20:[175000,176200,177500,178800,180000,181200,182500,183800,185000,186200,187300,188400,189400,190300,191200,192100,193000,193900,194800,196800],ma200:[158000,158500,159000,159500,160000,160500,161000,161500,162000,162500,163000,163500,164000,164500,165000,165500,166000,166500,167000,167500]},
