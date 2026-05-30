@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!-- Double-Shot 심볼·파비콘 리디자인 후보 비교 페이지 -->
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Shot 심볼 — 후보 비교</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --gnb-bg:#0E0F11;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);
+  --s1:0 1px 4px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;word-break:keep-all;padding:32px 20px 80px;}
+button{cursor:pointer;border:none;background:none;font:inherit;}
+
+.page-head{max-width:1100px;margin:0 auto 28px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;}
+.page-head h1{font-size:21px;font-weight:800;letter-spacing:-0.4px;margin-bottom:8px;}
+.page-head p{font-size:13px;color:var(--muted);line-height:1.7;max-width:640px;}
+.theme-btn{flex-shrink:0;width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-inset);color:var(--muted);display:flex;align-items:center;justify-content:center;}
+.icon-sun,.icon-moon{display:none;}
+html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
+
+.grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.grid{grid-template-columns:1fr;}}
+
+.cand{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);padding:18px 18px 16px;display:flex;flex-direction:column;gap:14px;}
+.cand__head{display:flex;align-items:baseline;gap:8px;}
+.cand__tag{font-size:11px;font-weight:800;color:#fff;background:var(--ink);border-radius:5px;padding:2px 8px;flex-shrink:0;}
+.cand__tag.cur{background:var(--muted);}
+.cand__name{font-size:14px;font-weight:700;}
+.cand__concept{font-size:12px;color:var(--muted);line-height:1.55;min-height:34px;}
+
+/* 아이콘 스케일 미리보기 */
+.cand__sizes{display:flex;align-items:center;gap:18px;padding:14px 4px;background:var(--surface-soft);border-radius:var(--r-md);justify-content:center;}
+.size-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.size-col span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.ic{display:block;border-radius:13px;}
+.ic-56{width:56px;height:56px;}
+.ic-32{width:32px;height:32px;border-radius:8px;}
+.ic-16{width:16px;height:16px;border-radius:4px;}
+
+/* 워드마크 락업 (GNB 미리보기) */
+.cand__lockup{display:flex;align-items:center;gap:9px;padding:11px 14px;background:var(--gnb-bg);border-radius:var(--r-md);}
+.lockup-mark{width:28px;height:28px;border-radius:7px;flex-shrink:0;}
+.lockup-title{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;}
+.lockup-title span{color:var(--primary);}
+
+/* 라이트/다크 칩 배경 비교 */
+.cand__bgs{display:flex;gap:8px;}
+.bg-chip{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;border-radius:var(--r-sm);border:1px solid var(--hairline);}
+.bg-chip.light{background:#FFFFFF;}
+.bg-chip.dark{background:#0E0F11;}
+.bg-chip .ic-24{width:24px;height:24px;border-radius:6px;}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div>
+    <h1>Double-Shot 심볼 · 파비콘 후보</h1>
+    <p>이름의 의미 축(캔들·커피 더블샷·아침/저녁 두 시장·타깃·레터마크·상승 시그널)을 가로질러 8개 후보를 만들었어요. 각 후보는 <b>56·32·16px</b> 스케일과 <b>GNB 락업</b>, <b>라이트/다크 배경</b>에서 함께 봅니다. 16px가 핵심 — 파비콘에서 뭉개지지 않아야 해요.</p>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">
+    <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  </button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+function toggleTheme(){const h=document.documentElement;h.classList.toggle('dark');h.classList.toggle('light');}
+
+// 공통: 빨강 그라데이션 배경 정의 (각 SVG에 고유 id로 삽입)
+function bg(id){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E03131"/><stop offset="100%" stop-color="#FF6A6A"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#${id})"/>`;}
+
+// 각 후보의 '마크'(배경 위 흰색 도형) — viewBox 0 0 32 32 기준
+const marks = {
+  cur:`
+    <rect x="7" y="11" width="5" height="13" rx="1.5" fill="white"/>
+    <line x1="9.5" y1="6" x2="9.5" y2="11" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="9.5" y1="24" x2="9.5" y2="28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <rect x="20" y="8" width="5" height="10" rx="1.5" fill="white" fill-opacity=".55"/>
+    <line x1="22.5" y1="5" x2="22.5" y2="8" stroke="white" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22.5" y1="18" x2="22.5" y2="22" stroke="white" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>`,
+
+  // B 상승 듀얼 캔들 — 둘 다 흰색, 우측이 더 높게 올라 '상승+둘'
+  candleUp:`
+    <rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/>
+    <line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/>
+    <line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/>`,
+
+  // C 커피 더블샷 — 컵 + 두 줄기 추출
+  coffee:`
+    <path d="M9 13 h14 v3 a7 7 0 0 1 -7 7 h0 a7 7 0 0 1 -7 -7 z" fill="white"/>
+    <path d="M23 14 h2.4 a2.6 2.6 0 0 1 0 5.2 H22.6" fill="none" stroke="white" stroke-width="2"/>
+    <line x1="13" y1="5.5" x2="13" y2="9.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+    <line x1="19" y1="5.5" x2="19" y2="9.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>`,
+
+  // D 타깃 — 과녁 + 두 발(두 점)
+  target:`
+    <circle cx="16" cy="16" r="9" fill="none" stroke="white" stroke-width="2.2"/>
+    <circle cx="16" cy="16" r="4" fill="none" stroke="white" stroke-width="2.2"/>
+    <circle cx="13.6" cy="16" r="1.7" fill="white"/>
+    <circle cx="18.4" cy="16" r="1.7" fill="white"/>`,
+
+  // E AM/PM — 해(아침 코스피) + 달(저녁 미국)
+  ampm:`
+    <circle cx="12" cy="16" r="4" fill="white"/>
+    <g stroke="white" stroke-width="1.8" stroke-linecap="round">
+      <line x1="12" y1="8.5" x2="12" y2="10"/><line x1="12" y1="22" x2="12" y2="23.5"/>
+      <line x1="5.5" y1="16" x2="7" y2="16"/><line x1="7.3" y1="11.3" x2="8.4" y2="12.4"/>
+      <line x1="7.3" y1="20.7" x2="8.4" y2="19.6"/>
+    </g>
+    <path d="M25 12 a5.4 5.4 0 1 0 0 8 a4.2 4.2 0 0 1 0 -8 z" fill="white"/>`,
+
+  // F DS 모노그램
+  ds:`<text x="16" y="22.4" font-family="'Pretendard Variable',sans-serif" font-size="15" font-weight="800" fill="white" text-anchor="middle" letter-spacing="-1">DS</text>`,
+
+  // G 더블 셰브론 업 — 상승 ×2
+  chevUp:`
+    <path d="M9 19 L16 13 L23 19" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M9 25 L16 19 L23 25" fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>`,
+
+  // H 캔들 + 스파크 — 단일 굵은 캔들에 시그널 점
+  spark:`
+    <rect x="11" y="13" width="7" height="12" rx="2" fill="white"/>
+    <line x1="14.5" y1="8.5" x2="14.5" y2="13" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="14.5" y1="25" x2="14.5" y2="28" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="22" cy="10" r="2.6" fill="white"/>`
+};
+
+const candidates = [
+  {tag:'현행', cls:'cur', name:'듀얼 캔들 (현행)', concept:'캔들 2개, 우측 55% 투명. 금융 정통이지만 16px에서 투명도 차이가 약해요.', mark:'cur'},
+  {tag:'B', name:'상승 듀얼 캔들', concept:'캔들 2개를 우상향으로 배치. ‘둘’ + ‘상승’을 동시에. 현행 정체성 유지하며 명료화.', mark:'candleUp'},
+  {tag:'C', name:'커피 더블샷', concept:'에스프레소 컵 + 추출 2줄기. 매일 아침·저녁 루틴과 직결, 가장 차별적인 브랜드 서사.', mark:'coffee'},
+  {tag:'D', name:'타깃 — 두 발', concept:'과녁에 두 발(예측 2회 적중). ‘Shot’의 직역. 16px에서도 또렷.', mark:'target'},
+  {tag:'E', name:'해 + 달 (AM/PM)', concept:'아침 코스피(해) + 저녁 미국(달). 하루 두 브리핑 구조를 그대로 상징.', mark:'ampm'},
+  {tag:'F', name:'DS 모노그램', concept:'레터마크. 추상 의미는 약하지만 확장성·범용성 최고. 워드마크와 강하게 묶임.', mark:'ds'},
+  {tag:'G', name:'더블 셰브론 업', concept:'상승 셰브론 ×2. 강세·예측을 미니멀하게. 16px 가독성 최상.', mark:'chevUp'},
+  {tag:'H', name:'캔들 + 시그널', concept:'굵은 캔들 1개 + 신호 점. 단순·대담. ‘예측 시그널’ 강조.', mark:'spark'}
+];
+
+function svgIcon(markKey, uid, cls){
+  return `<svg class="ic ${cls}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">${bg('g-'+uid)}${marks[markKey]}</svg>`;
+}
+function svgMarkOnly(markKey, uid, cls){
+  // 배경 칩 위에 올릴 때도 그라데이션 사각형 포함 (앱 아이콘 형태 유지)
+  return `<svg class="${cls}" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">${bg('gc-'+uid)}${marks[markKey]}</svg>`;
+}
+
+document.getElementById('grid').innerHTML = candidates.map((c,i)=>`
+  <div class="cand">
+    <div class="cand__head">
+      <span class="cand__tag ${c.cls||''}">${c.tag}</span>
+      <span class="cand__name">${c.name}</span>
+    </div>
+    <div class="cand__concept">${c.concept}</div>
+    <div class="cand__sizes">
+      <div class="size-col">${svgIcon(c.mark,i+'a','ic-56')}<span>56</span></div>
+      <div class="size-col">${svgIcon(c.mark,i+'b','ic-32')}<span>32</span></div>
+      <div class="size-col">${svgIcon(c.mark,i+'c','ic-16')}<span>16</span></div>
+    </div>
+    <div class="cand__lockup">
+      ${svgMarkOnly(c.mark,i+'d','lockup-mark')}
+      <span class="lockup-title">Double<span>-Shot</span></span>
+    </div>
+    <div class="cand__bgs">
+      <div class="bg-chip light">${svgMarkOnly(c.mark,i+'e','ic-24')}</div>
+      <div class="bg-chip dark">${svgMarkOnly(c.mark,i+'f','ic-24')}</div>
+    </div>
+  </div>
+`).join('');
+
+(function(){if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.remove('light');document.documentElement.classList.add('dark');}})();
+</script>
+</body>
+</html>
