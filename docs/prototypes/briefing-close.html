@@ -950,15 +950,15 @@ function drawIntraday(){
   canvas.style.width=W+'px';canvas.style.height=H+'px';canvas.width=W*dpr;canvas.height=H*dpr;
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
   const min=Math.min(...INTRADAY)-10,max=Math.max(...INTRADAY)+10,range=max-min;
-  const pad={t:30,b:6,l:8,r:8},pW=W-pad.l-pad.r,pH=H-pad.t-pad.b;
+  const pad={t:24,b:6,l:8,r:8},pW=W-pad.l-pad.r,pH=H-pad.t-pad.b;
   const xf=i=>pad.l+(i/(INTRADAY.length-1))*pW,yf=v=>pad.t+(1-(v-min)/range)*pH;
   ctx.beginPath();ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(100,100,100,.2)';ctx.lineWidth=1;ctx.moveTo(pad.l,yf(INTRADAY[0]));ctx.lineTo(W-pad.r,yf(INTRADAY[0]));ctx.stroke();ctx.setLineDash([]);
   const color='#2775ED';
   const grad=ctx.createLinearGradient(0,pad.t,0,H-pad.b);grad.addColorStop(0,'rgba(39,117,237,.18)');grad.addColorStop(1,'rgba(39,117,237,.02)');
   ctx.beginPath();ctx.moveTo(xf(0),yf(INTRADAY[0]));for(let i=1;i<INTRADAY.length;i++){const cx=(xf(i-1)+xf(i))/2;ctx.bezierCurveTo(cx,yf(INTRADAY[i-1]),cx,yf(INTRADAY[i]),xf(i),yf(INTRADAY[i]));}ctx.lineTo(xf(INTRADAY.length-1),H-pad.b);ctx.lineTo(xf(0),H-pad.b);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
   ctx.beginPath();ctx.moveTo(xf(0),yf(INTRADAY[0]));for(let i=1;i<INTRADAY.length;i++){const cx=(xf(i-1)+xf(i))/2;ctx.bezierCurveTo(cx,yf(INTRADAY[i-1]),cx,yf(INTRADAY[i]),xf(i),yf(INTRADAY[i]));}ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.stroke();
-  // 세로 스택 라벨: 숫자(위) → 화살표 → 블릿(데이터 지점). 흰 박스 없이 캔버스색 헤일로로 가독성 확보
-  function drawLabel(x, dotY, arrow, label, color){
+  // 라벨: 블릿(데이터 지점) 위에 숫자. 흰 박스 없이 캔버스색 헤일로로 가독성 확보
+  function drawLabel(x, dotY, label, color){
     ctx.textAlign='center';ctx.textBaseline='alphabetic';
     const isDark=document.documentElement.classList.contains('dark');
     const halo=isDark?'rgba(28,29,31,0.92)':'rgba(255,255,255,0.95)';
@@ -966,22 +966,16 @@ function drawIntraday(){
     ctx.font=`bold 11px 'Pretendard Variable',sans-serif`;
     const tw=ctx.measureText(label).width;
     const lx=Math.min(Math.max(x, tw/2+4), W-tw/2-4);
-    const arrowY=dotY-9, labelY=arrowY-11;
-    // 화살표 (블릿 바로 위)
-    ctx.font=`9px 'Pretendard Variable',sans-serif`;
-    ctx.strokeStyle=halo;ctx.strokeText(arrow,lx,arrowY);
-    ctx.fillStyle=color;ctx.fillText(arrow,lx,arrowY);
-    // 숫자 (화살표 위)
-    ctx.font=`bold 11px 'Pretendard Variable',sans-serif`;
+    const labelY=dotY-12;
     ctx.strokeStyle=halo;ctx.strokeText(label,lx,labelY);
     ctx.fillStyle=color;ctx.fillText(label,lx,labelY);
   }
   // 고점
   ctx.beginPath();ctx.arc(xf(HIGH_IDX),yf(INTRADAY[HIGH_IDX]),4,0,Math.PI*2);ctx.fillStyle='#E03131';ctx.fill();
-  drawLabel(xf(HIGH_IDX), yf(INTRADAY[HIGH_IDX]), '▲', `고점 ${INTRADAY[HIGH_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`, '#E03131');
+  drawLabel(xf(HIGH_IDX), yf(INTRADAY[HIGH_IDX]), `고점 ${INTRADAY[HIGH_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`, '#E03131');
   // 저점
   ctx.beginPath();ctx.arc(xf(LOW_IDX),yf(INTRADAY[LOW_IDX]),4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
-  drawLabel(xf(LOW_IDX), yf(INTRADAY[LOW_IDX]), '▼', `저점 ${INTRADAY[LOW_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`, color);
+  drawLabel(xf(LOW_IDX), yf(INTRADAY[LOW_IDX]), `저점 ${INTRADAY[LOW_IDX].toLocaleString('ko-KR',{minimumFractionDigits:2})}`, color);
 }
 
 function toggleTheme(){const h=document.documentElement;if(h.classList.contains('dark')){h.classList.replace('dark','light');localStorage.setItem('theme','light');}else{h.classList.replace('light','dark');localStorage.setItem('theme','dark');}drawIntraday();}
