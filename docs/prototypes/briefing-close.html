@@ -66,7 +66,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .hnav-btn.disabled{opacity:.25;pointer-events:none;cursor:default;}
 .close-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.1);color:#6366F1;}
 .accordion-body{display:grid;grid-template-rows:1fr;}
-.accordion-body__inner{overflow:visible;border-top:1px solid var(--hairline);padding:20px 18px 24px;}
+.accordion-body__inner{min-width:0;overflow:visible;border-top:1px solid var(--hairline);padding:20px 18px 24px;}
 
 /* ── 통일된 섹션 카드 ── */
 .section-card{
@@ -107,7 +107,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .a-hero__vol-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px;}
 .a-hero__vol-val{font-size:18px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.4px;}
 .a-sub-row{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:14px;border-top:1px solid var(--hairline);}
-.a-sub-cell{padding:12px 4px 2px;display:flex;align-items:baseline;gap:8px;}
+.a-sub-cell{min-width:0;padding:12px 4px 2px;display:flex;align-items:baseline;gap:8px;}
 .a-sub-cell + .a-sub-cell{border-left:1px solid var(--hairline);padding-left:16px;}
 .a-sub-cell__name{font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;}
 .a-sub-cell__val{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
@@ -432,6 +432,8 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .supply-summary__amt{font-size:18px;}
   .breadth-row{grid-template-columns:1fr;}
   .breadth-row__label{margin-bottom:6px;}
+  .a-sub-row{grid-template-columns:1fr;}
+  .a-sub-cell + .a-sub-cell{border-left:none;border-top:1px solid var(--hairline);padding-left:4px;}
   .bl-today__body{grid-template-columns:1fr;}
   .bl-slot{border-right:none;border-bottom:1px solid var(--hairline);}
   .bl-slot:last-child{border-bottom:none;}
