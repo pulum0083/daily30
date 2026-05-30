@@ -166,24 +166,34 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .stock-pick-card__change{font-size:13px;font-weight:600;padding:1px 6px;border-radius:4px;}
 .stock-pick-card__change.up{background:var(--up-bg);color:var(--up);}
 .stock-pick-card__change.down{background:var(--dn-bg);color:var(--dn);}
-.ma200-gauge{display:flex;align-items:center;gap:6px;margin-top:6px;}
-.ma200-gauge__label{font-size:10px;font-weight:600;color:var(--muted);flex-shrink:0;}
-.ma200-gauge__track{flex:0 0 56px;height:3px;background:var(--hairline);border-radius:999px;overflow:hidden;}
-.ma200-gauge__fill{height:100%;border-radius:999px;}
-.ma200-gauge__fill.up{background:var(--up);}
-.ma200-gauge__fill.down{background:var(--dn);}
-.ma200-gauge__pct{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;}
+.ma200-gauge{display:block;margin-top:8px;}
+.ma200-gauge__row{display:flex;align-items:center;gap:8px;}
+.ma200-gauge__label{font-size:10px;font-weight:600;color:var(--muted);flex-shrink:0;width:62px;}
+.ma200-gauge__track{position:relative;flex:1;height:6px;background:var(--surface-inset);border-radius:999px;}
+.ma200-gauge__zero{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hairline);}
+.ma200-gauge__fill{position:absolute;top:0;height:100%;border-radius:999px;}
+.ma200-gauge__fill.up{background:var(--up);left:50%;}
+.ma200-gauge__fill.down{background:var(--dn);right:50%;}
+.ma200-gauge__pct{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0;width:48px;text-align:right;}
 .ma200-gauge__pct.up{color:var(--up);}
 .ma200-gauge__pct.down{color:var(--dn);}
+.ma200-gauge__scale{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin:3px 0 0 70px;}
 .stock-pick-card__scenario{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.85;}
-.scenario-tag{font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);padding:2px 6px;border-radius:4px;margin-right:5px;}
-.stock-pick-card__cta{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);line-height:1.75;}
-.cta-label{font-size:9px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted);flex-shrink:0;padding:2px 5px;border:1px solid var(--hairline);border-radius:3px;}
+.pick-legend{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--muted);margin:-2px 0 12px 2px;}
+.pick-legend span{display:flex;align-items:center;gap:4px;}
+.pick-legend span::before{content:'';display:inline-block;width:14px;height:2px;}
+.pick-nums{margin-top:12px;padding-top:12px;border-top:1px solid var(--hairline);}
+.pick-nums__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;}
+.pick-num{background:var(--surface-soft);padding:9px 12px;display:flex;flex-direction:column;gap:3px;}
+.pick-num__label{font-size:10px;color:var(--muted);font-weight:600;}
+.pick-num__val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.pick-num__val.up{color:var(--up);}
+.pick-num__val.dn{color:var(--dn);}
+.pick-num__sub{font-size:10px;font-weight:600;font-variant-numeric:tabular-nums;}
+.pick-num__sub.up{color:var(--up);}
+.pick-num__sub.dn{color:var(--dn);}
 .stock-pick-mini-chart{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:1px;}
 .stock-pick-mini-chart canvas{display:block;width:88px;height:52px;}
-.stock-pick-mini-chart__legend{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);}
-.stock-pick-mini-chart__legend span{display:flex;align-items:center;gap:3px;}
-.stock-pick-mini-chart__legend span::before{content:'';display:inline-block;width:14px;height:2px;}
 .leg-price::before{background:var(--up)!important;}
 .leg-ma::before{background:repeating-linear-gradient(to right,#D97706 0,#D97706 3px,transparent 3px,transparent 5px)!important;}
 .leg-ma200::before{background:repeating-linear-gradient(to right,#7C3AED 0,#7C3AED 4px,transparent 4px,transparent 7px)!important;width:16px!important;height:2.5px!important;}
@@ -512,48 +522,76 @@ html.dark .chip-widget__more{color:#60A5FA;}
                 <button class="info-icon-btn" onclick="openKelloggModal()">?</button>
               </div>
               <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">20일선을 상향 돌파하거나 정확히 지지 반등한 종목 중 거래량 급증을 동반한 종목만 선별했어요.</div>
+              <div class="pick-legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div>
               <div class="stock-picks">
 
                 <div class="stock-pick-card">
                   <div class="stock-pick-card__top">
                     <div class="stock-pick-card__rank">1</div>
                     <div class="stock-pick-card__info">
-                      <div class="stock-pick-card__name">SK하이닉스 (000660)<span class="ma20-badge">20일선 상향 돌파 시도</span></div>
+                      <div class="stock-pick-card__name">SK하이닉스 (000660)<span class="ma20-badge">20일선 크로싱업</span></div>
                       <div class="stock-pick-card__meta"><span class="stock-pick-card__price">198,500원</span><span class="stock-pick-card__change up">+1.28%</span></div>
-                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill up" style="width:100%"></div></div><span class="ma200-gauge__pct up">+22.4%</span></div>
-                      <div class="stock-pick-card__scenario"><span class="scenario-tag">20일선 크로싱업 진입</span>20일선(196,800원) 돌파를 시도하고 있어요. SOX +1.24% + HBM 수요가 급증했어요. 외국인 3거래일 연속 순매수예요.</div>
+                      <div class="stock-pick-card__scenario">20일선(196,800원) 돌파를 시도하고 있어요. SOX +1.24% + HBM 수요가 급증했어요. 외국인 3거래일 연속 순매수예요.</div>
+                      <div class="ma200-gauge">
+                        <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:18.7%"></div></div><span class="ma200-gauge__pct up">+22.4%</span></div>
+                        <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                      </div>
                     </div>
-                    <div class="stock-pick-mini-chart"><canvas id="mc-1" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-1" width="88" height="52"></canvas></div>
                   </div>
-                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 199,000원 이내에 진입해요. 목표: 208,000원(+4.5%) / 손절: 193,000원이에요.</div>
+                  <div class="pick-nums">
+                    <div class="pick-nums__grid">
+                      <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">199,000원</span></div>
+                      <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">208,000원</span><span class="pick-num__sub up">+4.5%</span></div>
+                      <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">193,000원</span><span class="pick-num__sub dn">-3.0%</span></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="stock-pick-card">
                   <div class="stock-pick-card__top">
                     <div class="stock-pick-card__rank">2</div>
                     <div class="stock-pick-card__info">
-                      <div class="stock-pick-card__name">삼성전자 (005930)<span class="ma20-badge">20일선 위 안착</span></div>
+                      <div class="stock-pick-card__name">삼성전자 (005930)<span class="ma20-badge">20일선 지지반등</span></div>
                       <div class="stock-pick-card__meta"><span class="stock-pick-card__price">62,400원</span><span class="stock-pick-card__change up">+0.48%</span></div>
-                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill down" style="width:62%"></div></div><span class="ma200-gauge__pct down">-8.1%</span></div>
-                      <div class="stock-pick-card__scenario"><span class="scenario-tag">20일선 지지 반등</span>20일선(61,900원) 직상이에요. HBM3E 양산 가속화가 기대되고 뉴욕 반도체 강세 낙수효과도 있어요.</div>
+                      <div class="stock-pick-card__scenario">20일선(61,900원) 직상이에요. HBM3E 양산 가속화가 기대되고 뉴욕 반도체 강세 낙수효과도 있어요.</div>
+                      <div class="ma200-gauge">
+                        <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill down" style="width:6.75%"></div></div><span class="ma200-gauge__pct down">-8.1%</span></div>
+                        <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                      </div>
                     </div>
-                    <div class="stock-pick-mini-chart"><canvas id="mc-2" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-2" width="88" height="52"></canvas></div>
                   </div>
-                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 62,500원 이내에 진입해요. 목표: 65,000원(+4.0%) / 손절: 61,000원이에요.</div>
+                  <div class="pick-nums">
+                    <div class="pick-nums__grid">
+                      <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">62,500원</span></div>
+                      <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">65,000원</span><span class="pick-num__sub up">+4.0%</span></div>
+                      <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">61,000원</span><span class="pick-num__sub dn">-2.4%</span></div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="stock-pick-card">
                   <div class="stock-pick-card__top">
                     <div class="stock-pick-card__rank">3</div>
                     <div class="stock-pick-card__info">
-                      <div class="stock-pick-card__name">한화에어로스페이스 (012450)<span class="ma20-badge">20일선 상향 돌파 시도</span></div>
+                      <div class="stock-pick-card__name">한화에어로스페이스 (012450)<span class="ma20-badge">20일선 돌파</span></div>
                       <div class="stock-pick-card__meta"><span class="stock-pick-card__price">354,000원</span><span class="stock-pick-card__change up">+2.17%</span></div>
-                      <div class="ma200-gauge"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__fill up" style="width:100%"></div></div><span class="ma200-gauge__pct up">+51.3%</span></div>
-                      <div class="stock-pick-card__scenario"><span class="scenario-tag">방산 모멘텀</span>20일선(348,500원)을 돌파했어요. NATO 방산비 증액과 폴란드 추가 계약이 기대돼요. 거래량은 전일 대비 2.3배예요.</div>
+                      <div class="stock-pick-card__scenario">20일선(348,500원)을 돌파했어요. NATO 방산비 증액과 폴란드 추가 계약이 기대돼요. 거래량은 전일 대비 2.3배예요.</div>
+                      <div class="ma200-gauge">
+                        <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:42.75%"></div></div><span class="ma200-gauge__pct up">+51.3%</span></div>
+                        <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                      </div>
                     </div>
-                    <div class="stock-pick-mini-chart"><canvas id="mc-3" width="88" height="52"></canvas><div class="stock-pick-mini-chart__legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div></div>
+                    <div class="stock-pick-mini-chart"><canvas id="mc-3" width="88" height="52"></canvas></div>
                   </div>
-                  <div class="stock-pick-card__cta"><span class="cta-label">실행 가이드</span>시가 355,000원 이내에 진입해요. 목표: 370,000원(+4.2%) / 손절: 345,000원이에요.</div>
+                  <div class="pick-nums">
+                    <div class="pick-nums__grid">
+                      <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">355,000원</span></div>
+                      <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">370,000원</span><span class="pick-num__sub up">+4.2%</span></div>
+                      <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">345,000원</span><span class="pick-num__sub dn">-2.8%</span></div>
+                    </div>
+                  </div>
                 </div>
 
               </div>
