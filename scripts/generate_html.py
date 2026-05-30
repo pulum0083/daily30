@@ -171,7 +171,7 @@ def build_nh_stocks(analysis: dict) -> list:
             "break_note": h.get("break_note", ""),
             "reason": h.get("reason", ""),
             "price": h.get("price", ""),
-            "chg": h.get("chg", h.get("change", "")),
+            "chg": h.get("chg") or h.get("change") or h.get("change_pct", ""),
         })
     return out
 
