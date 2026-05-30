@@ -279,9 +279,9 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .watchpoint-level{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;}
 .watchpoint-level.up{background:var(--up-bg);color:var(--up);}
 .watchpoint-level.dn{background:var(--dn-bg);color:var(--dn);}
-.lvl-rows{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
-.lvl-row{display:flex;align-items:center;gap:10px;font-size:13px;}
-.lvl-pill{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;flex-shrink:0;min-width:96px;}
+.lvl-rows{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:2px;}
+.lvl-row{display:flex;align-items:center;gap:7px;font-size:13px;}
+.lvl-pill{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;flex-shrink:0;}
 .lvl-pill.up{background:var(--up-bg);color:var(--up);}
 .lvl-pill.dn{background:var(--dn-bg);color:var(--dn);}
 .lvl-pill__num{font-variant-numeric:tabular-nums;}
@@ -483,8 +483,8 @@ html.dark .chip-widget__more{color:#60A5FA;}
                   <div class="watchpoint-row__body">
                     <div class="watchpoint-row__label">방향 확인 레벨</div>
                     <div class="lvl-rows">
-                      <div class="lvl-row"><span class="lvl-pill up">저항 <span class="lvl-pill__num">2,660</span></span><span class="lvl-row__note">돌파·유지 시 상승 추세 확인</span></div>
-                      <div class="lvl-row"><span class="lvl-pill dn">지지 <span class="lvl-pill__num">2,630</span></span><span class="lvl-row__note">이탈 시 하락 전환 경계</span></div>
+                      <div class="lvl-row"><span class="lvl-pill up">저항 <span class="lvl-pill__num">2,660</span></span><span class="lvl-row__note">돌파 시 상승</span></div>
+                      <div class="lvl-row"><span class="lvl-pill dn">지지 <span class="lvl-pill__num">2,630</span></span><span class="lvl-row__note">이탈 시 경계</span></div>
                     </div>
                   </div>
                 </div>
