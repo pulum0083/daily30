@@ -302,27 +302,28 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .rota-take{font-size:12px;line-height:1.7;color:var(--muted);padding:11px 16px 13px;border-bottom:1px solid var(--hairline);}
 .rota-take b{color:var(--ink);}
 
-/* ── D. 거래대금 급증 + 수급 동반 종목 (본문) ── */
-.dpick-list{display:flex;flex-direction:column;gap:10px;padding:14px 16px;}
-.dpick-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px 15px;}
-.dpick-card__head{display:flex;align-items:center;gap:10px;}
-.dpick-rank{width:22px;height:22px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.dpick-name{font-size:15px;font-weight:700;color:var(--ink);}
-.dpick-code{font-size:12px;color:var(--muted);font-weight:500;margin-left:1px;}
-.dpick-chg{margin-left:auto;font-size:13px;font-weight:700;padding:1px 7px;border-radius:4px;}
-.dpick-chg.up{background:var(--up-bg);color:var(--up);}
-.dpick-chg.down{background:var(--dn-bg);color:var(--dn);}
-.dpick-metrics{display:flex;gap:8px;margin-top:11px;}
-.dpick-metric{flex:1;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-sm);padding:8px 10px;}
-.dpick-metric__lbl{font-size:10px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
-.dpick-metric__val{font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px;}
-.dpick-metric__val.buy{color:var(--up);}
-.dpick-metric__sub{font-size:10px;color:var(--muted);margin-top:1px;}
-.dpick-mult{font-size:10px;font-weight:700;color:var(--primary);background:var(--primary-bg);padding:1px 5px;border-radius:3px;}
-.dpick-take{margin:0 16px 16px;font-size:13px;line-height:1.8;color:var(--ink);background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:11px 14px;}
+/* ── D. 거래대금 급증 + 수급 동반 종목 (양매수 바) ── */
+.dpick-list{display:flex;flex-direction:column;}
+.dpick-row{padding:13px 16px;border-bottom:1px solid var(--hairline);}
+.dpick-row:last-child{border-bottom:none;}
+.dpick-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.dpick-name{font-size:14px;font-weight:700;color:var(--ink);}
+.dpick-code{font-size:11px;color:var(--muted);}
+.dpick-mult{font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);padding:1px 7px;border-radius:999px;}
+.dpick-vol{font-size:11px;color:var(--muted);margin-left:2px;}
+.dpick-chg{margin-left:auto;font-size:13px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums;}
+.dpick-bar{display:flex;height:22px;border-radius:5px;overflow:hidden;background:var(--surface-inset);}
+.dpick-seg{display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
+.dpick-seg.frgn{background:#7C3AED;}
+.dpick-seg.inst{background:#0D9488;}
+.dpick-legend{display:flex;gap:14px;padding:10px 16px 0;font-size:11px;color:var(--muted);}
+.dpick-legend span{display:flex;align-items:center;gap:5px;}
+.dpick-legend span::before{content:'';width:9px;height:9px;border-radius:2px;}
+.dpick-legend .frgn::before{background:#7C3AED;}
+.dpick-legend .inst::before{background:#0D9488;}
+.dpick-take{margin:10px 16px 16px;font-size:13px;line-height:1.8;color:var(--ink);background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:11px 14px;}
 .dpick-take b{color:var(--ink);}
 .dpick-take::before{content:'💬 ';}
-@media(max-width:600px){.dpick-metrics{flex-wrap:wrap;}.dpick-metric{flex:1 1 30%;}}
 
 /* Chip widget */
 .chip-widget{background:#EEF3FF;border:1.5px solid #4A7FF5;border-radius:var(--r-lg);overflow:hidden;}
@@ -613,46 +614,35 @@ html.dark .chip-widget__more{color:#60A5FA;}
               </div>
               <div class="dpick-list">
 
-                <div class="dpick-card">
-                  <div class="dpick-card__head">
-                    <span class="dpick-rank">1</span>
-                    <span class="dpick-name">SK하이닉스 <span class="dpick-code">000660</span></span>
-                    <span class="dpick-chg up">+9.31%</span>
+                <div class="dpick-row">
+                  <div class="dpick-top">
+                    <span class="dpick-name">SK하이닉스</span><span class="dpick-code">000660</span>
+                    <span class="dpick-mult">거래대금 ×2.6</span><span class="dpick-vol">3.1조</span>
+                    <span class="dpick-chg">+9.31%</span>
                   </div>
-                  <div class="dpick-metrics">
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×2.6</span></div><div class="dpick-metric__val">3.1조</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+1,820억</div><div class="dpick-metric__sub">순매수</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+640억</div><div class="dpick-metric__sub">순매수</div></div>
-                  </div>
+                  <div class="dpick-bar"><div class="dpick-seg frgn" style="width:60%">외국인 +1,820억</div><div class="dpick-seg inst" style="width:21%">기관 +640억</div></div>
                 </div>
 
-                <div class="dpick-card">
-                  <div class="dpick-card__head">
-                    <span class="dpick-rank">2</span>
-                    <span class="dpick-name">LG이노텍 <span class="dpick-code">011070</span></span>
-                    <span class="dpick-chg up">+23.61%</span>
+                <div class="dpick-row">
+                  <div class="dpick-top">
+                    <span class="dpick-name">LG이노텍</span><span class="dpick-code">011070</span>
+                    <span class="dpick-mult">거래대금 ×4.2</span><span class="dpick-vol">8,400억</span>
+                    <span class="dpick-chg">+23.61%</span>
                   </div>
-                  <div class="dpick-metrics">
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×4.2</span></div><div class="dpick-metric__val">8,400억</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+540억</div><div class="dpick-metric__sub">순매수</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+380억</div><div class="dpick-metric__sub">순매수</div></div>
-                  </div>
+                  <div class="dpick-bar"><div class="dpick-seg frgn" style="width:22%">외 +540</div><div class="dpick-seg inst" style="width:15%">기관 +380억</div></div>
                 </div>
 
-                <div class="dpick-card">
-                  <div class="dpick-card__head">
-                    <span class="dpick-rank">3</span>
-                    <span class="dpick-name">삼성전기 <span class="dpick-code">009150</span></span>
-                    <span class="dpick-chg up">+17.31%</span>
+                <div class="dpick-row">
+                  <div class="dpick-top">
+                    <span class="dpick-name">삼성전기</span><span class="dpick-code">009150</span>
+                    <span class="dpick-mult">거래대금 ×3.4</span><span class="dpick-vol">6,100억</span>
+                    <span class="dpick-chg">+17.31%</span>
                   </div>
-                  <div class="dpick-metrics">
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">거래대금 <span class="dpick-mult">×3.4</span></div><div class="dpick-metric__val">6,100억</div><div class="dpick-metric__sub">20일 평균 대비</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">외국인</div><div class="dpick-metric__val buy">+410억</div><div class="dpick-metric__sub">순매수</div></div>
-                    <div class="dpick-metric"><div class="dpick-metric__lbl">기관</div><div class="dpick-metric__val buy">+290억</div><div class="dpick-metric__sub">순매수</div></div>
-                  </div>
+                  <div class="dpick-bar"><div class="dpick-seg frgn" style="width:17%">외 +410</div><div class="dpick-seg inst" style="width:12%">기관 +290억</div></div>
                 </div>
 
               </div>
+              <div class="dpick-legend"><span class="frgn">외국인 순매수</span><span class="inst">기관 순매수</span></div>
               <div class="dpick-take">외국인은 시장 전체로는 순매도(-4,498억)였지만, <b>반도체·부품 대형주</b>엔 거래대금과 양매수가 집중됐어요. 다음 세션 모멘텀이 이어질 가능성이 높아요.</div>
             </div>
 
