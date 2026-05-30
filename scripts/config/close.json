@@ -1,0 +1,11 @@
+{
+  "type": "close",
+  "source_type": "kospi-close",
+  "index_name": "KOSPI",
+  "template": "briefings/close.html",
+  "url_prefix": "close",
+  "scheduled_time": "15:40",
+  "gnb_time": "15:40",
+  "sections_main": ["close_hero", "close_reason", "close_breadth", "close_supply", "close_dpick", "close_pick_result"],
+  "sections_sidebar": ["close_sector"]
+}

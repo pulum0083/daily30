@@ -1,0 +1,11 @@
+{
+  "type": "kospi",
+  "index_name": "KOSPI",
+  "template": "briefings/kospi.html",
+  "pred_title": "KOSPI 시초가 방향 예측",
+  "url_prefix": "kospi",
+  "scheduled_time": "07:30",
+  "gnb_time": "07:30",
+  "sections_main": ["prediction", "reasons", "watchpoints", "stock_picks"],
+  "sections_sidebar": ["accuracy", "market_data"]
+}

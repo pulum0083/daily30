@@ -1,0 +1,42 @@
+{# 코스피 마감 브리핑 조립 템플릿 #}
+{% extends "base.html" %}
+{% block title %}{{ date_str }} 코스피 마감 — Double-Shot{% endblock %}
+{% block og_title %}{{ date_str }} 코스피 마감 — Double-Shot{% endblock %}
+{% block og_desc %}{{ og_description }}{% endblock %}
+{% block body %}
+<div class="layout-wrapper">
+  <div class="layout-grid">
+    <main class="layout-grid__main">
+      <div class="accordion-item is-close">
+        <div class="accordion-header" style="cursor:default">
+          <div class="accordion-header__left">
+            <div class="accordion-header__date"><span class="accordion-header__date-label">{{ date_str }}</span></div>
+          </div>
+          <div class="header-nav">
+            <a class="hnav-btn {% if not prev_url %}disabled{% endif %}" id="btn-prev" href="{{ prev_url | default('#') }}" title="이전 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <a class="hnav-btn {% if not next_url %}disabled{% endif %}" id="btn-next" href="{{ next_url | default('#') }}" title="다음 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+            {% if intraday_prices %}{% include "sections/close_hero.html" %}{% endif %}
+            {% if reason_title %}{% include "sections/close_reason.html" %}{% endif %}
+            {% if breadth_rows %}{% include "sections/close_breadth.html" %}{% endif %}
+            {% if supply_cells %}{% include "sections/close_supply.html" %}{% endif %}
+            {% if dpick_rows %}{% include "sections/close_dpick.html" %}{% endif %}
+            {% if pick_results %}{% include "sections/close_pick_result.html" %}{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="t-caption" style="margin-top:14px;text-align:right">생성: {{ generated_at }} | DailyB</div>
+    </main>
+
+    <aside class="layout-grid__right">
+      {% if sectors %}{% include "sections/close_sector.html" %}{% endif %}
+      {% include "sections/_chip_cta.html" %}
+    </aside>
+  </div>
+
+  {% include "sections/briefing_list.html" %}
+</div>
+{% endblock %}
