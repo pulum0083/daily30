@@ -35,6 +35,8 @@
 
 - **2026-05-31: reasons 1문장 압축 문제 (기존 서비스는 블릿당 2문장).** 원인 = 프롬프트 규칙 A가 "2문장"을 강제하지 않고 few-shot 예시에도 1문장이 섞임. 수정(worktree cda8f30 → sync → main cf226cc): ① 규칙 A를 "각 reason 정확히 2문장(의견+데이터)"으로 명문화(코스피·미국), ② reasons 글자수 규칙에 "1문장 압축 금지" 추가, ③ few-shot 예시 JSON을 2문장 모범으로 교체, ④ 5/29 테스트 데이터(data/v2 analysis_kospi·us)의 reasons도 실수치 기반 2문장으로 교체. → 내일 라이브 브리핑부터 자동 적용.
 
+- **2026-05-31: 상승 모멘텀 scenario 형식 = 기존 서비스 2문장으로 정렬.** 기존 라이브 모멘텀 카드는 "전일 <b>+X%</b> 급등하며 MA20을 막 돌파한 종목이에요. {촉매}로 투자 심리 개선, {시장 맥락} 속 추가 상승 여력이 있어요." 2문장. v2는 ① scenario가 촉매 1문장만, ② 템플릿(stock_picks.html L17)이 scenario+action_guide를 합쳐 노트에 "진입/목표/손절"이 그리드와 중복 표시되는 문제. 수정(worktree a27f27c → sync → main b55c1b0): ① call_claude 코스피·미국에 "시나리오(scenario) 작성 규칙"(정확히 2문장, 1문장=전일등락+MA20 돌파/지지, 2문장=촉매+여력, **진입가 텍스트 금지**) 명문화 + few-shot scenario 교체, ② 템플릿에서 action_guide 노트 중복 제거(진입/목표/손절 그리드는 유지 — 프로토타입 의도). ③ 5/29 테스트데이터(data/v2 analysis_kospi·us) scenario도 실수치 2문장으로 교체해 로컬 검증. 라이브 자동 적용은 내일 브리핑부터. ⚠️ push 보류 상태(아래 네비 건과 함께).
+
 - **2026-05-31: 네비 href "None" 렌더 버그.** 인접 브리핑이 없을 때(첫·끝 날짜) 헤더 ‹›버튼이 `href="None"`으로 렌더됨. 원인 = 조립 템플릿 3종이 `{{ prev_url | default('#') }}`를 썼는데 Jinja `default`는 **undefined일 때만** 적용되고 명시적 `None`엔 안 먹음. 수정(worktree 66e224d → sync → main 7885445): `default('#', true)`로 boolean 인자 추가해 falsy(None)에도 적용. `disabled` 클래스 조건(`{% if not prev_url %}`)은 None이 falsy라 원래 정상. 로컬 4페이지 재렌더로 `href="#"`+disabled 검증 완료. ⚠️ **push 보류 상태(사용자 결정) — 월 07:30 전 push 안 하면 첫 라이브 브리핑엔 버그 잔존.**
 
 - **2026-05-31: PREP 커밋(aaef1db)의 base.html 패치 누락.** sync_v2.py 도입 시 발견 — base.html이 비-v2 경로(`/favicon.svg`·`/briefings`)인 채로 커밋돼 있었음. sync 결과로 `/v2/` 패치 적용해 후속 커밋에서 수정. (원인: PREP 당시 Edit 유령 출력으로 실제 미반영)
