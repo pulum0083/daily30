@@ -33,4 +33,6 @@
 
 ## 발견 이슈 (카나리 중)
 
+- **2026-05-31: reasons 1문장 압축 문제 (기존 서비스는 블릿당 2문장).** 원인 = 프롬프트 규칙 A가 "2문장"을 강제하지 않고 few-shot 예시에도 1문장이 섞임. 수정(worktree cda8f30 → sync → main cf226cc): ① 규칙 A를 "각 reason 정확히 2문장(의견+데이터)"으로 명문화(코스피·미국), ② reasons 글자수 규칙에 "1문장 압축 금지" 추가, ③ few-shot 예시 JSON을 2문장 모범으로 교체, ④ 5/29 테스트 데이터(data/v2 analysis_kospi·us)의 reasons도 실수치 기반 2문장으로 교체. → 내일 라이브 브리핑부터 자동 적용.
+
 - **2026-05-31: PREP 커밋(aaef1db)의 base.html 패치 누락.** sync_v2.py 도입 시 발견 — base.html이 비-v2 경로(`/favicon.svg`·`/briefings`)인 채로 커밋돼 있었음. sync 결과로 `/v2/` 패치 적용해 후속 커밋에서 수정. (원인: PREP 당시 Edit 유령 출력으로 실제 미반영)
