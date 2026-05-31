@@ -377,7 +377,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         for p in dpick:
             rows.append({
                 "name": p["name"], "code": p["code"],
-                "mult": f"거래대금 ×{p['trade_mult']}",
+                "mult": f"{p['trade_mult']}",
                 "vol": _fmt_eok(p["trade_value_eok"]),
                 "chg": f"{p['change_pct']:+.2f}%",
                 "segs": [_seg("외국인", p["frgn_eok"], "frgn"),
@@ -386,8 +386,8 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         ctx["dpick_rows"] = rows
         top = dpick[0]
         ctx["dpick_take"] = (
-            f"<b>{top['name']}</b>이 거래대금 {top['trade_mult']}배 급증 속에서 "
-            f"외국인·기관 양매수를 동시에 받았어요. 다음 세션 수급 모멘텀을 주목할 만해요."
+            f"<b>{top['name']}</b> — 거래대금 {top['trade_mult']}배 급증 속 "
+            f"외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요."
         )
 
     return ctx
