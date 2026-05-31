@@ -34,6 +34,15 @@
 - worktree에 미커밋 변경이 있으면 sync가 경고. **수요일 컷오버는 커밋된 브랜치만 머지**하므로 worktree 커밋 필수.
 - 이 방식이면 v2 수정이 자동으로 브랜치에 쌓이고, 컷오버(rebuild-config-driven 머지) 시 100% 반영된다.
 
+## 마감 미구현 섹션 실데이터화 (사용자: ①부터 하나씩)
+
+### ⚠️ 데이터 소스 조사 결론 (2026-05-31)
+투자자 수급 데이터 소스 상태: **pykrx 투자자 엔드포인트 = KRX "LOGOUT" 안티스크래핑으로 빈 결과**(OHLCV만 정상, 샌드박스·과거날짜 무관). 네이버 모바일 API(`api.stock.naver.com/.../investorTrend`) = 404(경로 변경, 기존 fetch_data도 깨졌을 가능성). **유일하게 작동: 단일일 시장합계 스크래핑(`sise_index.naver`)** — 현재 수급현황 당일 수치 출처. → ②(종목별 외인·기관) ③ 일부도 같은 투자자 데이터 의존이라 동일 제약.
+
+### ① 수급 7일 흐름 — ✅ 구현 완료 (단일일 누적 방식, 사용자 선택)
+벌크 7일 API가 막혀, 매일 작동하는 단일일 수급을 `data/supply_history.json`(v2는 data/v2)에 **날짜별 멱등 upsert** 후 각 투자자 최근 7거래일 시계열을 flow-chart로 렌더. generate_html에 `update_supply_history`·`supply_flow` 추가, `build_close_sections(…, target_date)`. **기관 세부(inst_list)는 보류**(KRX 유일 소스라 막힘 → inst_list 없으면 섹션 자동 생략). worktree 44065ea → sync → main. 로컬 검증: 합성 시드 6일+당일자동추가=7일, 3개 차트×7막대·콘솔에러0. ⚠️ 라이브는 첫 7거래일 동안 점진적으로 채워짐(처음엔 막대 1~6개). 합성 시드(data/v2/supply_history.json)는 로컬 테스트용 — 미커밋.
+- **남은 작업: ② 거래대금급증+수급동반 종목, ③ 아침 픽 결과.** ②는 종목별 투자자 데이터(현재 소스 없음) → 착수 전 소스 재확인 필요. ③은 아침 픽 영속화(briefings.json엔 stock_picks 없음)+OHLC 조회+결과분류, 파이프라인 2잡 연계.
+
 ## 발견 이슈 (카나리 중)
 
 - **2026-05-31: reasons 1문장 압축 문제 (기존 서비스는 블릿당 2문장).** 원인 = 프롬프트 규칙 A가 "2문장"을 강제하지 않고 few-shot 예시에도 1문장이 섞임. 수정(worktree cda8f30 → sync → main cf226cc): ① 규칙 A를 "각 reason 정확히 2문장(의견+데이터)"으로 명문화(코스피·미국), ② reasons 글자수 규칙에 "1문장 압축 금지" 추가, ③ few-shot 예시 JSON을 2문장 모범으로 교체, ④ 5/29 테스트 데이터(data/v2 analysis_kospi·us)의 reasons도 실수치 기반 2문장으로 교체. → 내일 라이브 브리핑부터 자동 적용.
