@@ -361,7 +361,35 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         if cells:
             ctx["supply_cells"] = cells
 
-    # close_dpick / pick_result: 종목별 거래대금·수급·전일픽 데이터 미수집 → 생략(하이브리드)
+    # close_dpick (거래대금 급증 + 외국인·기관 동시 순매수)
+    dpick = market.get("dpick", [])
+    if dpick:
+        max_eok = max((max(p["frgn_eok"], p["inst_eok"]) for p in dpick), default=1) or 1
+
+        def _fmt_eok(e):
+            return f"{e / 10000:.2f}조" if e >= 10000 else f"{e:,}억"
+
+        def _seg(label, eok, cls):
+            return {"cls": cls, "width": max(8, round(eok / max_eok * 65)),
+                    "label": f"{label} {eok:+,}억"}
+
+        rows = []
+        for p in dpick:
+            rows.append({
+                "name": p["name"], "code": p["code"],
+                "mult": f"거래대금 ×{p['trade_mult']}",
+                "vol": _fmt_eok(p["trade_value_eok"]),
+                "chg": f"{p['change_pct']:+.2f}%",
+                "segs": [_seg("외국인", p["frgn_eok"], "frgn"),
+                         _seg("기관", p["inst_eok"], "inst")],
+            })
+        ctx["dpick_rows"] = rows
+        top = dpick[0]
+        ctx["dpick_take"] = (
+            f"<b>{top['name']}</b>이 거래대금 {top['trade_mult']}배 급증 속에서 "
+            f"외국인·기관 양매수를 동시에 받았어요. 다음 세션 수급 모멘텀을 주목할 만해요."
+        )
+
     return ctx
 
 

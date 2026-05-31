@@ -514,6 +514,99 @@ def fetch_market_breadth() -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 거래대금 급증 + 수급 동반 종목 (외국인·기관 동시 순매수)
+# ─────────────────────────────────────────────────────────────────────────────
+# 데이터 제약: KRX 종목별 순매수 '금액' 소스가 막혀 있어(LOGOUT), 네이버 종목별
+# 일별 순매매 '수량'에 종가를 곱한 근사 금액(억원)을 사용한다.
+
+DPICK_ETF_KEYWORDS = ("KODEX", "TIGER", "KOSEF", "ARIRANG", "KBSTAR", "HANARO",
+                      "PLUS", "RISE", "ACE ", "SOL ", "TIMEFOLIO", "레버리지", "인버스", "선물")
+
+
+def _dpick_num(cell: str) -> float:
+    s = re.sub(r"<[^>]+>", "", cell).strip().replace(",", "").replace("%", "").replace("+", "")
+    try:
+        return float(s) if "." in s else int(s)
+    except ValueError:
+        return 0
+
+
+def _fetch_frgn_daily(code: str) -> list:
+    """종목별 외국인·기관 일별 순매매(수량) — 네이버 item/frgn. 최신순 행 리스트."""
+    url = f"https://finance.naver.com/item/frgn.naver?code={code}"
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            html = resp.read().decode("euc-kr", errors="replace")
+    except Exception:
+        return []
+    rows = []
+    for r in re.split(r"</tr>", html):
+        if "gray03" not in r or not re.search(r"\d{4}\.\d{2}\.\d{2}", r):
+            continue
+        cells = re.findall(r'<td[^>]*class="num"[^>]*>(.*?)</td>', r, re.DOTALL)
+        if len(cells) >= 6:
+            rows.append({
+                "close": _dpick_num(cells[0]),   # 종가
+                "chg":   _dpick_num(cells[2]),   # 등락률(%)
+                "vol":   _dpick_num(cells[3]),   # 거래량(주)
+                "inst":  _dpick_num(cells[4]),   # 기관 순매매량(주)
+                "frgn":  _dpick_num(cells[5]),   # 외국인 순매매량(주)
+            })
+    return rows
+
+
+def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> list:
+    """거래대금 급증 × 외국인·기관 동시 순매수 종목을 반환한다.
+
+    universe(코스피 거래량 상위)에서 ETF를 제외하고, 각 종목의 일별 외국인·기관
+    순매매로 (ⓐ거래대금이 20일 평균 대비 min_mult배 이상 급증, ⓑ외국인·기관 동시
+    순매수)를 만족하는 종목을 거래대금 순으로 선별한다.
+    """
+    url = "https://finance.naver.com/sise/sise_quant.naver?sosok=0"  # 코스피 거래량 상위
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("euc-kr", errors="replace")
+    except Exception as e:
+        print(f"[fetch_closing] dpick universe fetch failed: {e}", file=sys.stderr)
+        return []
+
+    pairs = re.findall(r'/item/main\.naver\?code=(\d{6})"[^>]*class="tltle">([^<]+)</a>', html)
+    cand = [(c, n.strip()) for c, n in pairs
+            if not any(k in n for k in DPICK_ETF_KEYWORDS)][:universe]
+
+    picks = []
+    for code, name in cand:
+        rows = _fetch_frgn_daily(code)
+        if not rows:
+            continue
+        today = rows[0]
+        close = today["close"]
+        if close <= 0:
+            continue
+        tv = today["vol"] * close / 1e8                          # 당일 거래대금(억)
+        recent = rows[:20]
+        avg = sum(x["vol"] * x["close"] for x in recent) / len(recent) / 1e8
+        mult = tv / avg if avg else 0
+        frgn_eok = today["frgn"] * close / 1e8
+        inst_eok = today["inst"] * close / 1e8
+        if frgn_eok > 0 and inst_eok > 0 and mult >= min_mult:
+            picks.append({
+                "name": name, "code": code,
+                "change_pct": round(today["chg"], 2),
+                "trade_value_eok": round(tv),
+                "trade_mult": round(mult, 1),
+                "frgn_eok": round(frgn_eok),
+                "inst_eok": round(inst_eok),
+            })
+    picks.sort(key=lambda p: -p["trade_value_eok"])
+    picks = picks[:limit]
+    print(f"[fetch_closing] dpick: {[p['name'] for p in picks]}")
+    return picks
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 코스피 200 시총 상위 10종목
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -638,6 +731,9 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → 시장 폭")
     market_breadth = fetch_market_breadth()
 
+    print("[fetch_closing]   → 거래대금 급증 + 수급 동반 종목")
+    dpick = fetch_dpick()
+
     print("[fetch_closing]   → 코스피 200 TOP10")
     kospi200_top10 = fetch_kospi200_top10()
 
@@ -663,6 +759,7 @@ def fetch_closing_data() -> dict:
         "intraday": intraday,
         "trade_amount": trade_amount,
         "market_breadth": market_breadth,
+        "dpick": dpick,
         "kospi200_top10": kospi200_top10,
         "ai_semicon_stocks": ai_semicon_stocks,
     }
