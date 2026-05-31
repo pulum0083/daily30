@@ -48,6 +48,40 @@ def load_json(path: Path) -> dict:
         return json.load(f)
 
 
+# 마감 수급 7일 흐름용 누적 저장 (벌크 7일 API가 막혀 있어 매일 단일일 수급을 쌓아 시계열 생성)
+SUPPLY_HISTORY_FILE = DATA_DIR / "supply_history.json"
+SUPPLY_KEYS = ("foreign", "institution", "individual")
+
+
+def _load_supply_history() -> dict:
+    try:
+        return load_json(SUPPLY_HISTORY_FILE)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def update_supply_history(date: str, inv: dict) -> dict:
+    """당일 시장 수급(외국인/기관/개인 순매수)을 날짜별로 멱등 upsert하고 전체를 반환한다(억원 단위)."""
+    rec = {}
+    for key in SUPPLY_KEYS:
+        d = inv.get(key)
+        if isinstance(d, dict) and d.get("net") is not None:
+            rec[key] = round(d["net"] / 100)  # 백만원 → 억원
+    hist = _load_supply_history()
+    if not rec:
+        return hist
+    hist[date] = rec
+    hist = {k: hist[k] for k in sorted(hist)[-30:]}  # 최근 30일만 보관
+    SUPPLY_HISTORY_FILE.write_text(json.dumps(hist, ensure_ascii=False, indent=2), encoding="utf-8")
+    return hist
+
+
+def supply_flow(hist: dict, key: str, upto: str) -> list:
+    """key 투자자의 최근 7거래일(upto 날짜 이하) 순매수 시계열(오래된→오늘, 억원)."""
+    dates = sorted(d for d in hist if d <= upto)[-7:]
+    return [hist[d].get(key, 0) for d in dates]
+
+
 def make_env() -> Environment:
     env = Environment(loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=False)
     env.filters["tojson"] = lambda v: json.dumps(v, ensure_ascii=False)
@@ -226,7 +260,7 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
     return items
 
 
-def build_close_sections(analysis: dict, market: dict, index_name: str) -> dict:
+def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:
     """마감 전용 섹션 컨텍스트 (있는 데이터만)."""
     ctx = {}
     indices = market.get("indices", {})
@@ -309,6 +343,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str) -> dict:
     # close_supply (수급) — fetch_investor_trading 구조: {player: {"net": 백만원}}
     inv = market.get("investor_trading", {})
     if isinstance(inv, dict) and inv:
+        hist = update_supply_history(target_date, inv)
         cells = []
         for label, key in [("외국인", "foreign"), ("기관", "institution"), ("개인", "individual")]:
             d = inv.get(key)
@@ -321,7 +356,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str) -> dict:
                 "amt": f"{eok:+,}억",
                 "amt_cls": "up" if up else "down",
                 "sub": "순매수" if up else "순매도",
-                "flow": d.get("flow", []),  # 7일 흐름(있으면)
+                "flow": supply_flow(hist, key, target_date),  # 최근 7일 흐름(누적)
             })
         if cells:
             ctx["supply_cells"] = cells
@@ -468,7 +503,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
 
     if internal_type == "close":
-        ctx.update(build_close_sections(analysis, market_data, index_name))
+        ctx.update(build_close_sections(analysis, market_data, index_name, target_date))
         ctx["og_description"] = analysis.get("market_title", f"{target_date} 코스피 마감")
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
