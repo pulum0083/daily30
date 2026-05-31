@@ -1,0 +1,29 @@
+{# 아침 픽 결과 — 시초가 픽의 종가 기준 성과 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">아침 픽 결과</span>
+    <span class="section-card__sub">{{ pick_result_sub }}</span>
+  </div>
+  <div class="pick-result-list">
+    {% for p in pick_results %}
+    <div class="pick-result-card">
+      <div class="pick-result-hd">
+        <div class="pick-result-hd__left">
+          <div class="pick-result-rank">{{ loop.index }}</div>
+          <div class="pick-result-hd__info">
+            <div class="pick-result-hd__name">{{ p.name }}<span class="pick-scenario-tag">{{ p.scenario_tag }}</span></div>
+            <div class="pick-entry-line"><span class="{{ 'entry-ok' if p.entered else 'entry-ng' }}">{{ '✓ 진입' if p.entered else '✗ 미진입' }}</span>{{ p.entry_line }}</div>
+          </div>
+        </div>
+        <span class="pick-result-badge {{ p.badge_cls }}">{{ p.badge_label }}</span>
+      </div>
+      <div class="pick-result-nums">
+        {% for num in p.nums %}
+        <div class="pick-result-num"><span class="pick-result-num__label">{{ num.label }}</span><span class="pick-result-num__val {{ num.cls }}">{{ num.val }}</span></div>
+        {% endfor %}
+      </div>
+      <div class="pick-result-note">{{ p.note | safe }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

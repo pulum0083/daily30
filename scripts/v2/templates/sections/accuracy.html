@@ -1,0 +1,23 @@
+{# AI 예측 정확도 박스 — 7일·30일 적중률 + 30일 적중/오류/미결 막대 #}
+<div class="acc-box">
+  <div class="acc-box__header">
+    <span class="acc-box__title">AI 예측 정확도 <button class="info-icon-btn" data-modal-open="acc-modal">?</button></span>
+    <span class="acc-box__period">최근 30일</span>
+  </div>
+  <div class="acc-stats-row">
+    <div class="acc-stat"><span class="acc-stat__val {{ acc_7d_pct | acc_cls }}">{{ acc_7d_pct }}%</span><span class="acc-stat__lbl">최근 7일</span></div>
+    <div class="acc-stat"><span class="acc-stat__val {{ acc_30d_pct | acc_cls }}">{{ acc_30d_pct }}%</span><span class="acc-stat__lbl">최근 30일</span></div>
+  </div>
+  <div class="acc-bar-wrap">
+    <div class="acc-bar">
+      <div class="acc-bar__hit" style="width:{{ hit_pct }}%"></div>
+      <div class="acc-bar__miss" style="width:{{ miss_pct }}%"></div>
+      <div class="acc-bar__pending" style="width:{{ pending_pct }}%"></div>
+    </div>
+    <div class="acc-bar-caption">
+      <span class="acc-bar-hit">적중 {{ hit }}</span>
+      <span class="acc-bar-miss">오류 {{ miss }}</span>
+      <span class="acc-bar-pending">미결 {{ pending }}</span>
+    </div>
+  </div>
+</div>

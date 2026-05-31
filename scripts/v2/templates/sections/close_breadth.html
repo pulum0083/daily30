@@ -1,0 +1,17 @@
+{# 시장 폭 — 등락/특이 종목 수 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">시장 폭</span>
+    <span class="section-card__sub">{{ breadth_sub | default('코스피 종목 기준') }}</span>
+  </div>
+  {% for row in breadth_rows %}
+  <div class="breadth-row">
+    <span class="breadth-row__label">{{ row.label }}</span>
+    <div class="breadth-row__items">
+      {% for cell in row.cells %}
+      <div class="breadth-cell"><span class="breadth-cell__lbl">{{ cell.lbl }}</span><span class="breadth-cell__val {{ cell.cls }}">{{ cell.val }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>

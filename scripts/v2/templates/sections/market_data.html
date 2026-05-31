@@ -1,0 +1,26 @@
+{# 시장 지표 사이드바 패널 — 지수/환율/금리 스파크라인 + VIX 뱃지 (코스피·미국 공유) #}
+<div class="right-panel">
+  <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">{{ generated_time }} KST</span></div>
+  <div class="mkt-list">
+    {% for item in market_items %}
+    <div class="mkt-row">
+      <div class="mkt-row-info">
+        <span class="mkt-name"{% if item.info_modal %} style="display:flex;align-items:center;gap:4px"{% endif %}>{{ item.name }}{% if item.info_modal %}<button class="info-icon-btn" data-modal-open="{{ item.info_modal }}">?</button>{% endif %}</span>
+        <div class="mkt-vals"><div class="mkt-val">{{ item.val }}</div><div class="mkt-chg {{ item.chg_cls }}">{{ item.chg }}</div></div>
+      </div>
+      {% if item.vix_level %}
+      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge {{ item.vix_level_cls }}">{{ item.vix_level }}</span></div>
+      {% else %}
+      <div class="mkt-spark"><canvas id="{{ item.spark_id }}"></canvas></div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  {% for item in market_items if item.spark_id %}
+  drawSparkline('{{ item.spark_id }}', {{ item.spark_data | tojson }}, '{{ item.spark_color }}');
+  {% endfor %}
+});
+</script>
