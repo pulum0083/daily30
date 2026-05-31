@@ -131,7 +131,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 
 시나리오(scenario) 작성 규칙:
 - 정확히 2문장, 해요체. **진입가·목표가·손절가는 scenario에 절대 쓰지 않는다** (그건 action_guide·구조화 필드로만 출력하며 카드에서 별도 그리드로 표시됨).
-- 1문장: 전일 등락률(change_pct)과 20일선(MA20) 상황을 묶어 쓴다. ma20_signal이 "crossing_up"이면 "전일 <b>+X.XX%</b> 급등하며 20일 이동평균선(MA20)을 막 돌파한 종목이에요." 식으로, "above"면 "20일선(MA20)을 지지선 삼아 반등한 종목이에요." 식으로 쓴다.
+- 1문장: 전일 등락률(change_pct)과 20일선(MA20) 상황을 묶어 쓴다. ma20_signal이 "crossing_up"이면 "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요." 식으로, "above"면 "20일선을 지지선 삼아 반등한 종목이에요." 식으로 쓴다.
 - 2문장: 오늘 섹터·매크로 촉매와 추가 상승 여력 전망을 쓴다.
 
 ### 예측 근거(reasons) 작성 규칙
@@ -230,12 +230,12 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       "price": "000,000원",
       "change": "+X.XX%",
       "change_cls": "up",
-      "signal": "MA20 상향 돌파",
+      "signal": "20일선 상향 돌파",
       "golden": false,
       "ma20_dist_pct": 2.1,
       "ma200_dist_pct": 15.3,
       "scenario_tag": "모멘텀 가속",
-      "scenario": "전일 <b>+X.XX%</b> 급등하며 20일 이동평균선(MA20)을 막 돌파한 종목이에요. 반도체 투자 심리가 개선되고 있고, 코스피 반도체 랠리 속에서 추가 상승 여력이 있어요.",
+      "scenario": "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요. 반도체 투자 심리가 개선되고 있고, 코스피 반도체 랠리 속에서 추가 상승 여력이 있어요.",
       "action_guide": "시가 X원 이내 진입. 목표: Y원(+X.X%) / 손절: Z원 이탈 시.",
       "entry": "X원", "target": "Y원", "target_pct": "+X.X%", "stop": "Z원", "stop_pct": "-X.X%"
     }
@@ -335,7 +335,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 
 시나리오(scenario) 작성 규칙:
 - 정확히 2문장, 해요체. **진입가·목표가·손절가는 scenario에 절대 쓰지 않는다** (그건 action_guide·구조화 필드로만 출력하며 카드에서 별도 그리드로 표시됨).
-- 1문장: 전일 등락률(change_pct)과 20일선(MA20) 상황을 묶어 쓴다. ma20_signal이 "crossing_up"이면 "전일 <b>+X.XX%</b> 급등하며 20일 이동평균선(MA20)을 막 돌파한 종목이에요." 식으로, "above"면 "20일선(MA20)을 지지선 삼아 반등한 종목이에요." 식으로 쓴다.
+- 1문장: 전일 등락률(change_pct)과 20일선(MA20) 상황을 묶어 쓴다. ma20_signal이 "crossing_up"이면 "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요." 식으로, "above"면 "20일선을 지지선 삼아 반등한 종목이에요." 식으로 쓴다.
 - 2문장: 오늘 섹터·매크로 촉매와 추가 상승 여력 전망을 쓴다.
 
 ### 예측 근거(reasons) 작성 규칙
@@ -453,12 +453,12 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       "price": "$XXX.XX",
       "change": "+X.XX%",
       "change_cls": "up",
-      "signal": "MA20 상향 돌파",
+      "signal": "20일선 상향 돌파",
       "golden": false,
       "ma20_dist_pct": 3.2,
       "ma200_dist_pct": 22.1,
       "scenario_tag": "모멘텀 가속",
-      "scenario": "전일 <b>+X.XX%</b> 급등하며 20일 이동평균선(MA20)을 막 돌파한 종목이에요. AI 반도체 수요 강세로 투자 심리가 개선되고 있고, 나스닥 랠리 속에서 추가 상승 여력이 있어요.",
+      "scenario": "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요. AI 반도체 수요 강세로 투자 심리가 개선되고 있고, 나스닥 랠리 속에서 추가 상승 여력이 있어요.",
       "action_guide": "시가 $XXX 이내 진입. 목표: $YYY(+X.X%) / 손절: $ZZZ 이탈 시.",
       "entry": "$XXX", "target": "$YYY", "target_pct": "+X.X%", "stop": "$ZZZ", "stop_pct": "-X.X%"
     }
