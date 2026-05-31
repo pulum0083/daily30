@@ -41,7 +41,9 @@
 
 ### ① 수급 7일 흐름 — ✅ 구현 완료 (단일일 누적 방식, 사용자 선택)
 벌크 7일 API가 막혀, 매일 작동하는 단일일 수급을 `data/supply_history.json`(v2는 data/v2)에 **날짜별 멱등 upsert** 후 각 투자자 최근 7거래일 시계열을 flow-chart로 렌더. generate_html에 `update_supply_history`·`supply_flow` 추가, `build_close_sections(…, target_date)`. **기관 세부(inst_list)는 보류**(KRX 유일 소스라 막힘 → inst_list 없으면 섹션 자동 생략). worktree 44065ea → sync → main. 로컬 검증: 합성 시드 6일+당일자동추가=7일, 3개 차트×7막대·콘솔에러0. ⚠️ 라이브는 첫 7거래일 동안 점진적으로 채워짐(처음엔 막대 1~6개). 합성 시드(data/v2/supply_history.json)는 로컬 테스트용 — 미커밋.
-- **남은 작업: ② 거래대금급증+수급동반 종목, ③ 아침 픽 결과.** ②는 종목별 투자자 데이터(현재 소스 없음) → 착수 전 소스 재확인 필요. ③은 아침 픽 영속화(briefings.json엔 stock_picks 없음)+OHLC 조회+결과분류, 파이프라인 2잡 연계.
+### ② 거래대금 급증 + 수급 동반 종목(dpick) — ✅ 구현 완료
+소스 재조사 결과: **pykrx 시장전체 OHLCV·투자자 전부 막힘(단일종목 OHLCV만 됨), 네이버 모바일 API 404.** 단 **네이버 종목별 `item/frgn`(외국인·기관 일별 순매매 수량)은 작동**하고 2026-05-29 실데이터 확인. → fetch_closing_kospi에 `fetch_dpick`(+`_fetch_frgn_daily`,`_dpick_num`) 추가: ⓐuniverse=네이버 거래량상위(`sise_quant`)에서 ETF 제외 상위 20, ⓑ종목별 frgn로 당일 거래대금(=거래량×종가)·20일평균 대비 배수·외인/기관 순매수액(**수량×종가 근사**, KRX 금액소스 막힘) 산출, ⓒ거래대금배수≥1.5 & 외인·기관 동시 순매수 필터 → 거래대금순 top3. generate_html `build_close_sections`에 dpick_rows 빌더(seg 막대 width=금액/최대×65%, vol 조/억 포맷, take 문구). worktree 11c535d·(mult중복·조사 fix) → sync → main. 실데이터 검증: NAVER(거래대금 1.76조 ×6.1, 외인+378·기관+2,053억)·삼성전자우·LG씨엔에스, 콘솔에러0. ⚠️ **순매수 금액은 근사치**(주식수×종가) — 전문투자자 대상이라 차후 정확 금액 소스(KRX OTP 정상화 등) 확보 시 교체 권장. fetch_dpick은 종목별 ~20 HTTP 팬아웃(마감잡 ~10s 추가).
+- **남은 작업: ③ 아침 픽 결과.** 아침 픽 영속화(briefings.json엔 stock_picks 없음)+OHLC 조회+결과분류, 파이프라인 2잡 연계. 가장 큼.
 
 ## 발견 이슈 (카나리 중)
 
