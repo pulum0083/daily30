@@ -424,7 +424,7 @@ def build_list_context(target_date: str, active_type: str) -> dict:
         "date": today, "day_label": day_label(today, full=True),
         "slots": [cell_for(today, t, True) for t in types],
     }
-    past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:30]
+    past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:10]
     past_rows, prev_month = [], None
     for d in past_dates:
         try:

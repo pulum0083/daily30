@@ -451,8 +451,8 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .reason-body{padding:14px 16px;}
 .reason-body p{font-size:14px;line-height:1.8;color:var(--ink);}
 .b-format{display:flex;flex-direction:column;gap:14px;margin-top:14px;}
-.b-row{display:flex;gap:12px;align-items:flex-start;}
-.b-label{font-size:10px;font-weight:800;letter-spacing:0.08em;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:4px;padding:3px 7px;flex-shrink:0;margin-top:2px;white-space:nowrap;}
+.b-row{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.b-label{font-size:10px;font-weight:800;letter-spacing:0.08em;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:4px;padding:3px 7px;flex-shrink:0;white-space:nowrap;}
 .b-row.so-what .b-label{background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.25);color:#6366F1;}
 .b-text{font-size:14px;color:var(--muted);line-height:1.75;margin:0;}
 .b-text b{color:var(--ink);}
