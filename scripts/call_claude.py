@@ -1087,7 +1087,7 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
         lines.append(f"• {strip_html(sig)}")
     lines += [
         divider,
-        f"🔗 상세 분석 → {web_base}/briefings/ko-close/{date_str}/",
+        f"🔗 상세 분석 → {web_base}/briefings/{date_str}/close/",
     ]
 
     msg = "\n".join(lines)

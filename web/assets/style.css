@@ -95,6 +95,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .accordion-body{display:grid;grid-template-rows:1fr;}
 .accordion-body__inner{min-width:0;overflow:visible;border-top:1px solid var(--hairline);padding:0 18px 22px;}
 .accordion-item.is-close .accordion-body__inner{padding:20px 18px 24px;}
+.accordion-item.is-close .accordion-body{display:block;}
 
 /* ──────────────────────────────────────────────
    오픈 섹션 (코스피·미국 본문 섹션 헤더)

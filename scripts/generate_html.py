@@ -315,10 +315,10 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
     mb = market.get("market_breadth", {})
     if mb:
         rows = []
-        if any(k in mb for k in ("advance", "decline", "unchanged")):
+        if any(k in mb for k in ("up", "down", "unchanged")):
             rows.append({"label": "등락", "cells": [
-                {"lbl": "상승", "val": mb.get("advance", 0), "cls": "up"},
-                {"lbl": "하락", "val": mb.get("decline", 0), "cls": "down"},
+                {"lbl": "상승", "val": mb.get("up", 0), "cls": "up"},
+                {"lbl": "하락", "val": mb.get("down", 0), "cls": "down"},
                 {"lbl": "보합", "val": mb.get("unchanged", 0), "cls": "neutral"},
             ]})
         if any(k in mb for k in ("upper_limit", "lower_limit", "new_high", "new_low")):
