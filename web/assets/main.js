@@ -208,6 +208,50 @@
     }).join('');
   }
 
+  /* ── 브리핑 목록 today 카드 동적 패치 — /data/briefings-list.json ── */
+  var BL_LABELS = { kospi: '코스피 예측', close: '코스피 마감', us: '미국 시장' };
+  var BL_TYPES  = ['kospi', 'close', 'us'];
+
+  function _blSlotHtml(s, lbl) {
+    if (s.state === 'ready') {
+      var pill = s.pill_text ? '<span class="bl-pill ' + s.pill_cls + '">' + s.pill_text + '</span>' : '';
+      return '<a class="bl-slot is-ready" href="' + s.url + '">' +
+        '<div class="bl-slot__label">' + lbl + '</div>' +
+        '<div class="bl-slot__title">' + s.title + '</div>' +
+        '<div class="bl-slot__meta">' + pill + '<span class="bl-slot__time">' + s.time + '</span></div>' +
+        '</a>';
+    }
+    if (s.state === 'pending') {
+      return '<div class="bl-slot is-pending">' +
+        '<div class="bl-slot__label">' + lbl + '</div>' +
+        '<div class="bl-slot__title">생성 예정</div>' +
+        '<div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> ' + s.scheduled_time + ' 예정</span></div>' +
+        '</div>';
+    }
+    return '<div class="bl-slot"><div class="bl-slot__label">' + lbl + '</div><div class="bl-slot__title">—</div></div>';
+  }
+
+  function patchBriefingList() {
+    var todayEl = document.querySelector('.bl-today');
+    if (!todayEl) return;
+    // today 날짜는 DOM에서 읽음 (정적 HTML이 생성된 날짜 기준)
+    var dateEl = todayEl.querySelector('.bl-today__date');
+    var todayDate = dateEl ? dateEl.textContent.trim() : '';
+    if (!todayDate) return;
+    var todayBody = todayEl.querySelector('.bl-today__body');
+    if (!todayBody) return;
+    fetch('/data/briefings-list.json', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        var daySlots = (data.slots || {})[todayDate];
+        if (!daySlots) return;
+        todayBody.innerHTML = BL_TYPES.map(function(t) {
+          return _blSlotHtml(daySlots[t] || { state: 'empty' }, BL_LABELS[t]);
+        }).join('');
+      })
+      .catch(function() {});
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -222,6 +266,7 @@
     initModals();
     renderSupplyFlows();
     loadChipWidget();
+    patchBriefingList();
   });
 
   /* ── 칩보드 위젯 — /chips/api/prices ── */

@@ -632,12 +632,84 @@ def regenerate_index():
     print("[generate_html] wrote web/briefings/index.html (목록 전용)")
 
 
+def write_briefings_list_json():
+    """web/data/briefings-list.json 을 생성한다.
+
+    브리핑 목록 today 카드를 JS가 동적으로 패치하는 데 사용한다.
+    각 날짜별 kospi/close/us 슬롯 상태를 담는다.
+    """
+    bpath = DATA_DIR / "briefings.json"
+    briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
+
+    types = ["kospi", "close", "us"]
+    _legacy_path = {"kospi": lambda d: BRIEFINGS_DIR / f"{d}-kospi.html",
+                    "us":    lambda d: BRIEFINGS_DIR / f"{d}-us.html",
+                    "close": lambda d: BRIEFINGS_DIR / "ko-close" / d / "index.html"}
+
+    # 최근 30일 분 날짜만 대상
+    all_dates = sorted({b["date"] for b in briefings if b.get("date")}, reverse=True)[:30]
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    if today not in all_dates:
+        all_dates = [today] + all_dates
+
+    slots = {}
+    for d in all_dates:
+        day_slots = {}
+        for btype in types:
+            new_path = BRIEFINGS_DIR / d / btype / "index.html"
+            legacy_path = _legacy_path[btype](d)
+            ready = new_path.exists() or legacy_path.exists()
+            match = next((b for b in briefings if b.get("date") == d and TYPE_MAP.get(b.get("type"), b.get("type")) == btype), None)
+
+            if ready:
+                url = f"/briefings/{d}/{btype}/" if new_path.exists() else (
+                    f"/briefings/ko/{d}/" if btype == "kospi" else
+                    f"/briefings/us/{d}/" if btype == "us" else
+                    f"/briefings/ko-close/{d}/"
+                )
+                entry = {"state": "ready", "url": url}
+                if match:
+                    if btype == "close":
+                        chg = match.get("actual_change_pct")
+                        entry["pill_cls"] = "neutral"
+                        entry["pill_text"] = f"{chg:+.2f}%" if isinstance(chg, (int, float)) else ""
+                        entry["title"] = f"KOSPI {chg:+.2f}%" if isinstance(chg, (int, float)) else "마감"
+                    else:
+                        direction = match.get("predicted_direction") or match.get("direction", "")
+                        up = "상승" in direction
+                        entry["pill_cls"] = "up" if up else "dn"
+                        entry["pill_text"] = ("▲ 상승" if up else "▼ 하락") if direction else ""
+                        entry["title"] = direction or "—"
+                    entry["time"] = fmt_time(match.get("generated_at", ""))
+                else:
+                    entry["title"] = "—"
+                    entry["time"] = ""
+            else:
+                entry = {"state": "pending", "scheduled_time": SCHEDULED_TIMES.get(btype, "")}
+            day_slots[btype] = entry
+        slots[d] = day_slots
+
+    out_path = WEB_DIR / "data" / "briefings-list.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps({"slots": slots}, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[generate_html] wrote web/data/briefings-list.json")
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--type", required=True, choices=list(TYPE_MAP.keys()))
-    parser.add_argument("--date", required=True, help="YYYY-MM-DD")
-    parser.add_argument("--data-file", dest="data_file", required=True, help="시장 데이터 JSON 경로")
+    parser.add_argument("--type", choices=list(TYPE_MAP.keys()))
+    parser.add_argument("--date", help="YYYY-MM-DD")
+    parser.add_argument("--data-file", dest="data_file", help="시장 데이터 JSON 경로")
+    parser.add_argument("--write-list-only", action="store_true",
+                        help="briefings-list.json 만 갱신하고 HTML 재생성 없이 종료")
     args = parser.parse_args()
+
+    if args.write_list_only:
+        write_briefings_list_json()
+        return
+
+    if not args.type or not args.date or not args.data_file:
+        parser.error("--type, --date, --data-file 은 필수입니다 (--write-list-only 사용 시 제외)")
 
     internal_type = TYPE_MAP[args.type]
     data_path = Path(args.data_file)
@@ -646,6 +718,7 @@ def main():
     html = render_briefing(internal_type, args.date, market_data)
     write_output(html, internal_type, args.date)
     regenerate_index()
+    write_briefings_list_json()
 
 
 if __name__ == "__main__":
