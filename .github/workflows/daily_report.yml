@@ -97,14 +97,6 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type kospi
 
-      - name: 🆕 v2 카나리 렌더 (무음, /v2/)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: |
-          mkdir -p data/v2
-          cp data/*.json data/v2/ 2>/dev/null || true
-          python3 scripts/v2/call_claude.py --type kospi
-
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
@@ -198,14 +190,6 @@ jobs:
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type us
-
-      - name: 🆕 v2 카나리 렌더 (무음, /v2/)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: |
-          mkdir -p data/v2
-          cp data/*.json data/v2/ 2>/dev/null || true
-          python3 scripts/v2/call_claude.py --type us
 
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
@@ -307,15 +291,6 @@ jobs:
         run: |
           DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
           python3 scripts/call_claude.py --type kospi-close --date "$DATE"
-
-      - name: 🆕 v2 카나리 렌더 (무음, /v2/)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: |
-          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
-          mkdir -p data/v2
-          cp data/*.json data/v2/ 2>/dev/null || true
-          python3 scripts/v2/call_claude.py --type kospi-close --date "$DATE"
 
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
