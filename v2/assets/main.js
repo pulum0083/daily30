@@ -43,14 +43,27 @@
     content.classList.toggle('collapsed', !collapsed);
     if (chevron) chevron.classList.toggle('open', !collapsed);
   }
-  // KST 9:00 이후면 자동 접힘 (?sim=9am 으로 강제 시뮬레이션 가능)
+  // 브리핑 타입별 자동 접힘 시각 (KST, 장 오픈 후 2시간)
+  // kospi/close: 11:00 KST, us: 00:30 KST
+  // ?sim=collapse 로 강제 접힘 시뮬레이션 가능
   function applyTimeCollapse() {
     const content = document.getElementById('pre-open-content');
     if (!content) return;
     const sim = new URLSearchParams(location.search).get('sim');
     const kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-    const after9 = kst.getHours() > 9 || (kst.getHours() === 9 && kst.getMinutes() >= 0);
-    if (sim === '9am' || after9) {
+    const h = kst.getHours(), m = kst.getMinutes();
+
+    const path = location.pathname;
+    let shouldCollapse = false;
+    if (path.includes('/us/')) {
+      // 미국 브리핑: 자정 00:30 KST 이후 접힘
+      shouldCollapse = h === 0 && m >= 30 || h >= 1;
+    } else {
+      // 코스피 시초가·마감: 오전 11:00 KST 이후 접힘
+      shouldCollapse = h > 11 || (h === 11 && m >= 0);
+    }
+
+    if (sim === 'collapse' || shouldCollapse) {
       content.classList.add('collapsed');
       const chevron = document.getElementById('pre-open-chevron');
       if (chevron) chevron.classList.add('open');
