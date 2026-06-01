@@ -610,16 +610,31 @@ def find_latest_ready():
 
 
 def regenerate_index():
-    """web/briefings/index.html = 가장 최근 브리핑(본문+목록). 브리핑이 없으면 목록 전용 폴백."""
+    """web/briefings/index.html = 가장 최근 브리핑 HTML을 그대로 복사.
+
+    재렌더링 금지: data/latest_*.json이 이후 변경되면 index.html 내용이
+    실제 브리핑과 달라지는 버그를 방지하기 위해, 이미 저장된 HTML 파일을 복사한다.
+    """
     latest = find_latest_ready()
     if latest:
         internal_type, target_date = latest
-        dpath = DATA_DIR / DATA_FILE[internal_type]
-        market_data = load_json(dpath) if dpath.exists() else {}
-        html = render_briefing(internal_type, target_date, market_data)
-        (BRIEFINGS_DIR / "index.html").write_text(html, encoding="utf-8")
-        print(f"[generate_html] wrote index = 최신 브리핑 {target_date}/{internal_type}")
-        return
+        src = BRIEFINGS_DIR / target_date / internal_type / "index.html"
+        if src.exists():
+            import shutil
+            shutil.copy2(src, BRIEFINGS_DIR / "index.html")
+            print(f"[generate_html] copied index ← {target_date}/{internal_type}/index.html")
+            return
+        # 신형 파일 없으면 레거시 플랫 파일 시도
+        legacy = {
+            "kospi": BRIEFINGS_DIR / f"{target_date}-kospi.html",
+            "us":    BRIEFINGS_DIR / f"{target_date}-us.html",
+            "close": BRIEFINGS_DIR / "ko-close" / target_date / "index.html",
+        }.get(internal_type)
+        if legacy and legacy.exists():
+            import shutil
+            shutil.copy2(legacy, BRIEFINGS_DIR / "index.html")
+            print(f"[generate_html] copied index ← {legacy.name}")
+            return
     tpl = TEMPLATES_DIR / "pages" / "briefings_index.html"
     if not tpl.exists():
         print("[generate_html] skip index (브리핑 0개 + 목록 템플릿 없음)")
