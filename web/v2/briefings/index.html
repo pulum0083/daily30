@@ -645,13 +645,20 @@ window.addEventListener('load', function () {
     <button class="info-modal__close" data-modal-close="picks-modal" aria-label="닫기">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <div class="info-modal__title" id="picks-modal-title">잭 켈로그 20일선 전략이란?</div>
+    <div class="info-modal__title" id="picks-modal-title">상승 모멘텀 종목</div>
     <div class="info-modal__body">
-      <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(20일선) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+      <p>20일 이동평균선(MA20) 전략으로 선별한 단기 상승 모멘텀 종목이에요. 20일선을 돌파하거나 지지받는 종목 중 매크로 흐름과 맞아떨어지는 것을 추천해요.</p>
       <br>
-      <p><strong>선별 기준</strong></p>
-      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
-        <li>20일선을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+      <p><strong>막대 그래프 읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>20일선 대비</strong> — 현재 주가가 20일 이동평균선보다 얼마나 위·아래에 있는지 나타내요. 0에 가까울수록 20일선 바로 위에서 막 돌파한 상태예요.</li>
+        <li><strong>200일선 대비</strong> — 현재 주가가 200일 이동평균선 대비 위치예요. 플러스(+)가 클수록 장기 추세 강세 구간에 있는 거예요. 예: <strong>+90.8%</strong>는 200일선보다 90.8% 위에 있다는 뜻이에요.</li>
+        <li><strong>막대 색상</strong> — 빨간색이 진할수록 이동평균선 위 거리가 커요. 막대가 오른쪽으로 길수록 상대 강도가 높아요.</li>
+      </ul>
+      <br>
+      <p><strong>선별 기준 (잭 켈로그 MA20 전략)</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px; color:var(--fg2);">
+        <li>20일선을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목 우선</li>
         <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
         <li>최소 <strong>3거래일 이상</strong> 20일선 위에서 유지 중인 종목</li>
       </ul>
