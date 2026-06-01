@@ -43,18 +43,8 @@
     content.classList.toggle('collapsed', !collapsed);
     if (chevron) chevron.classList.toggle('open', !collapsed);
   }
-  // KST 9:00 이후면 자동 접힘 (?sim=9am 으로 강제 시뮬레이션 가능)
   function applyTimeCollapse() {
-    const content = document.getElementById('pre-open-content');
-    if (!content) return;
-    const sim = new URLSearchParams(location.search).get('sim');
-    const kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-    const after9 = kst.getHours() > 9 || (kst.getHours() === 9 && kst.getMinutes() >= 0);
-    if (sim === '9am' || after9) {
-      content.classList.add('collapsed');
-      const chevron = document.getElementById('pre-open-chevron');
-      if (chevron) chevron.classList.add('open');
-    }
+    // 예측 섹션은 항상 열린 상태 유지
   }
 
   /* ── 모달 (info-icon) ── */
@@ -218,6 +208,109 @@
     }).join('');
   }
 
+  /* ── 브리핑 목록 전체 동적 재구성 — /data/briefings-list.json (단일 진실원) ──
+     정적 HTML에 박힌 "오늘" 날짜는 페이지 생성 시점마다 달라 불일치가 생긴다.
+     실제 현재 KST 날짜를 기준으로 목록 전체를 다시 그려 모든 페이지가 동일·최신 상태를 갖게 한다. */
+  var BL_LABELS   = { kospi: '코스피 예측', close: '코스피 마감', us: '미국 시장' };
+  var BL_TYPES    = ['kospi', 'close', 'us'];
+  var BL_SCHEDULE = { kospi: '07:30', close: '16:00', us: '21:20' };
+  var BL_DAYS     = ['일', '월', '화', '수', '목', '금', '토'];
+
+  function _blKstToday() {
+    var kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+    return kst.getFullYear() + '-' + String(kst.getMonth() + 1).padStart(2, '0') + '-' + String(kst.getDate()).padStart(2, '0');
+  }
+  function _blDay(dateStr, full) {
+    var p = dateStr.split('-');
+    var label = BL_DAYS[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
+    return full ? label + '요일' : label;
+  }
+  function _blCurrentPage() {
+    var p = location.pathname, m;
+    if ((m = p.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\/(kospi|close|us)\//))) return { date: m[1], type: m[2] };
+    if ((m = p.match(/\/briefings\/(ko|us|ko-close)\/(\d{4}-\d{2}-\d{2})\//)))
+      return { date: m[2], type: m[1] === 'ko' ? 'kospi' : (m[1] === 'us' ? 'us' : 'close') };
+    return null;
+  }
+
+  function _blSlot(s, lbl, isCurrent) {
+    s = s || { state: 'empty' };
+    if (s.state === 'pending') {
+      return '<div class="bl-slot is-pending"><div class="bl-slot__label">' + lbl + '</div>' +
+        '<div class="bl-slot__title">생성 예정</div>' +
+        '<div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> ' + s.scheduled_time + ' 예정</span></div></div>';
+    }
+    if (s.state === 'ready') {
+      var pill = s.pill_text ? '<span class="bl-pill ' + s.pill_cls + '">' + s.pill_text + '</span>' : '';
+      var inner = '<div class="bl-slot__label">' + lbl + '</div><div class="bl-slot__title">' + s.title + '</div>' +
+        '<div class="bl-slot__meta">' + pill + '<span class="bl-slot__time">' + s.time + '</span></div>';
+      return isCurrent
+        ? '<div class="bl-slot is-current">' + inner + '</div>'
+        : '<a class="bl-slot is-ready" href="' + s.url + '">' + inner + '</a>';
+    }
+    return '<div class="bl-slot"><div class="bl-slot__label">' + lbl + '</div><div class="bl-slot__title">—</div></div>';
+  }
+  function _blCell(s, lbl, isCurrent) {
+    s = s || { state: 'empty' };
+    if (s.state === 'ready') {
+      var pill = s.pill_text ? '<span class="bl-pill ' + s.pill_cls + '">' + s.pill_text + '</span>' : '';
+      var inner = '<div class="bl-cell__label">' + lbl + '</div><div class="bl-cell__bottom">' + pill + '<span class="bl-cell__time">' + s.time + '</span></div>';
+      return isCurrent
+        ? '<div class="bl-cell is-current">' + inner + '</div>'
+        : '<a class="bl-cell is-ready" href="' + s.url + '">' + inner + '</a>';
+    }
+    return '<div class="bl-cell is-empty"><div class="bl-cell__label">' + lbl + '</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>';
+  }
+
+  function patchBriefingList() {
+    var section = document.querySelector('.bottom-list');
+    if (!section) return;
+    fetch('/data/briefings-list.json', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        var slots = data.slots || {};
+        var today = _blKstToday();
+        var cur = _blCurrentPage();
+
+        // 오늘 카드 — 현재 KST 날짜 기준 (JSON에 없으면 스케줄 기반 pending)
+        var todaySlots = slots[today] || {};
+        var todayHtml =
+          '<div class="bl-today"><div class="bl-today__head">' +
+          '<span class="bl-today__date">' + today + '</span>' +
+          '<span class="bl-today__day">' + _blDay(today, true) + '</span></div>' +
+          '<div class="bl-today__body">' +
+          BL_TYPES.map(function(t) {
+            var s = todaySlots[t] || { state: 'pending', scheduled_time: BL_SCHEDULE[t] };
+            return _blSlot(s, BL_LABELS[t], cur && cur.date === today && cur.type === t);
+          }).join('') +
+          '</div></div>';
+
+        // 과거 행 — 오늘 이전 + ready 1개 이상, 최근 10일, 월별 그룹
+        var pastDates = Object.keys(slots).filter(function(d) {
+          return d < today && BL_TYPES.some(function(t) { return slots[d][t] && slots[d][t].state === 'ready'; });
+        }).sort().reverse().slice(0, 10);
+
+        var prevMonth = null, rowsHtml = '';
+        pastDates.forEach(function(d) {
+          var p = d.split('-');
+          var month = (+p[0]) + '년 ' + (+p[1]) + '월';
+          if (month !== prevMonth) { rowsHtml += '<div class="bl-month">' + month + '</div>'; prevMonth = month; }
+          rowsHtml +=
+            '<div class="bl-row"><div class="bl-row__date">' +
+            '<span class="bl-row__num">' + d.slice(5) + '</span>' +
+            '<span class="bl-row__day">' + _blDay(d, false) + '</span></div>' +
+            BL_TYPES.map(function(t) {
+              return _blCell(slots[d][t], BL_LABELS[t], cur && cur.date === d && cur.type === t);
+            }).join('') +
+            '</div>';
+        });
+
+        var divider = section.querySelector('.bl-divider');
+        section.innerHTML = (divider ? divider.outerHTML : '') + todayHtml + rowsHtml;
+      })
+      .catch(function() {});
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -231,7 +324,55 @@
     applyTimeCollapse();
     initModals();
     renderSupplyFlows();
+    loadChipWidget();
+    patchBriefingList();
   });
+
+  /* ── 칩보드 위젯 — /chips/api/prices ── */
+  var CHIP_FALLBACK = [
+    { flag: '🇰🇷', name: '삼성전자',  market: 'KOSPI' },
+    { flag: '🇰🇷', name: 'SK하이닉스', market: 'KOSPI' },
+    { flag: '🇺🇸', name: 'Micron',     market: 'NASDAQ' },
+    { flag: '🇺🇸', name: 'AMD',        market: 'NASDAQ' },
+    { flag: '🇺🇸', name: 'Intel',      market: 'NASDAQ' },
+  ];
+  function formatChipPrice(price, market) {
+    if (price == null) return '—';
+    if (market === 'KOSPI') return price.toLocaleString('ko-KR');
+    return '$' + price.toFixed(2);
+  }
+  function renderChipRow(flag, name, price, chg, dir) {
+    const row = document.createElement('div');
+    row.className = 'chip-row';
+    row.innerHTML =
+      '<span class="chip-row__flag">' + flag + '</span>' +
+      '<span class="chip-row__name">' + name + '</span>' +
+      '<span class="chip-row__price">' + price + '</span>' +
+      '<span class="chip-row__chg ' + dir + '">' + chg + '</span>';
+    return row;
+  }
+  function loadChipWidget() {
+    var container = document.getElementById('chip-stocks');
+    if (!container) return;
+    fetch('/chips/api/prices', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(stocks) {
+        if (!Array.isArray(stocks) || !stocks.length) throw new Error();
+        stocks.slice(0, 5).forEach(function(s) {
+          var rate  = typeof s.changeRate === 'number' ? s.changeRate : 0;
+          var dir   = rate > 0 ? 'up' : rate < 0 ? 'down' : 'flat';
+          var arrow = rate > 0 ? '▲' : rate < 0 ? '▼' : '';
+          var chg   = arrow + Math.abs(rate).toFixed(2) + '%';
+          var flag  = s.market === 'KOSPI' ? '🇰🇷' : '🇺🇸';
+          container.appendChild(renderChipRow(flag, s.name, formatChipPrice(s.price, s.market), chg, dir));
+        });
+      })
+      .catch(function() {
+        CHIP_FALLBACK.forEach(function(s) {
+          container.appendChild(renderChipRow(s.flag, s.name, '—', '—', 'flat'));
+        });
+      });
+  }
 
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
   window.toggleTheme = toggleTheme;
