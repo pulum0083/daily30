@@ -37,7 +37,7 @@ SRC_TYPE = {"kospi": "kospi", "us": "us", "close": "kospi-close"}
 # 내부 type → 시장 데이터 파일명
 DATA_FILE = {"kospi": "latest_kospi.json", "us": "latest_us.json", "close": "latest_kospi_close.json"}
 BRIEFING_LABELS = {"kospi": "코스피 예측", "close": "코스피 마감", "us": "미국 시장"}
-SCHEDULED_TIMES = {"kospi": "07:30", "close": "15:40", "us": "21:20"}
+SCHEDULED_TIMES = {"kospi": "07:30", "close": "16:00", "us": "21:20"}
 DAY_FULL = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
 DAY_SHORT = ["월", "화", "수", "목", "금", "토", "일"]
 

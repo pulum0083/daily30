@@ -213,7 +213,7 @@
      실제 현재 KST 날짜를 기준으로 목록 전체를 다시 그려 모든 페이지가 동일·최신 상태를 갖게 한다. */
   var BL_LABELS   = { kospi: '코스피 예측', close: '코스피 마감', us: '미국 시장' };
   var BL_TYPES    = ['kospi', 'close', 'us'];
-  var BL_SCHEDULE = { kospi: '07:30', close: '15:40', us: '21:20' };
+  var BL_SCHEDULE = { kospi: '07:30', close: '16:00', us: '21:20' };
   var BL_DAYS     = ['일', '월', '화', '수', '목', '금', '토'];
 
   function _blKstToday() {
