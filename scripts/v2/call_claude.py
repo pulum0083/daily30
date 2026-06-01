@@ -119,7 +119,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 선별 기준:
 - kospi_candidates 배열에서 ma20_signal이 "crossing_up"인 종목 최우선
 - ma20_signal이 "above"이고 ma20_dist_pct가 작은 종목 차선
-- price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 JSON 데이터값 그대로 사용 (변경 금지)
+- **[데이터 검증 — 절대 규칙]** price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 kospi_candidates JSON 데이터값 그대로 사용한다. 절대 임의로 변경하거나 다른 수치를 쓰면 안 된다. 데이터에 없는 종목을 임의로 추가해서도 안 된다.
 - 3~5개 선택. 모멘텀과 MA200 구조적 강세 종목 우선 배치
 - golden: true 조건 → MA200도 함께 돌파하거나 크게 상회한 종목
 
@@ -192,6 +192,12 @@ VIX 관련 항목의 이모지는 아래 기준을 엄격히 따른다. 절대 �
   "levels": [{"label":"지지","num":"1,508","cls":"dn"},{"label":"저항","num":"1,520","cls":"up"}]
   (지지=cls "dn", 저항=cls "up". num은 원/달러·코스피 등 실제 데이터 기반 수치)
 - 주목할 이벤트가 전혀 없으면 빈 배열 []로 출력한다.
+
+**[데이터 검증 — 절대 규칙: 수치는 반드시 제공된 데이터에서 가져와라]**
+- 원/달러 환율 levels: 반드시 `usd_krw.current` 값을 기준으로 ±0.5~1% 범위에서 지지·저항을 계산해라.
+  예: usd_krw.current=1507 → 지지 1,495 / 저항 1,520 (1507±1% 내외). 임의로 1,360이나 1,380 같은 수치를 쓰면 절대 안 된다.
+- 경제지표 수치(PMI·CPI·NFP 등): text에 포함하는 숫자는 반드시 `economic_calendar.today[].forecast` 또는 `previous` 필드의 정확한 값을 그대로 써라. 데이터에 없는 수치는 절대 추측해 쓰지 마라.
+- 이 두 규칙을 어기면 브리핑 신뢰도가 치명적으로 손상된다. 수치를 확신할 수 없으면 numbers 대신 추세/방향 표현으로 대체해라.
 
 ### 텔레그램 핵심 시그널(telegram_signals) 작성 규칙
 텔레그램 발송용 압축 요약. 정확히 2개.
@@ -322,7 +328,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 선별 기준:
 - us_candidates 배열에서 ma20_signal이 "crossing_up"인 종목 최우선
 - ma20_signal이 "above"이고 ma20_dist_pct가 작은 종목 차선
-- price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 JSON 데이터값 그대로 사용 (변경 금지)
+- **[데이터 검증 — 절대 규칙]** price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 us_candidates JSON 데이터값 그대로 사용한다. 절대 임의로 변경하거나 다른 수치를 쓰면 안 된다. 데이터에 없는 종목을 임의로 추가해서도 안 된다.
 - 3~5개 선택. 반도체·빅테크·금융·에너지 섹터 분산 고려
 - golden: true 조건 → MA200도 함께 돌파하거나 크게 상회
 
@@ -404,6 +410,13 @@ VIX 관련 항목의 이모지는 아래 기준을 엄격히 따른다. 절대 �
   "levels": [{"label":"지지","num":"4,760","cls":"dn"},{"label":"저항","num":"4,800","cls":"up"}]
   (지지=cls "dn", 저항=cls "up". num은 S&P500 등 실제 데이터 기반 수치)
 - 주목할 이벤트가 전혀 없으면 빈 배열 []로 출력한다.
+
+**[데이터 검증 — 절대 규칙: 수치는 반드시 제공된 데이터에서 가져와라]**
+- 원/달러 환율 levels: 반드시 `usd_krw.current` 값을 기준으로 ±0.5~1% 범위에서 지지·저항을 계산해라.
+  예: usd_krw.current=1507 → 지지 1,495 / 저항 1,520. 임의의 수치를 쓰면 절대 안 된다.
+- S&P500 levels: `sp500.price` 값을 기준으로 ±0.5~1% 범위에서 산출해라.
+- 경제지표 수치(PMI·CPI·NFP 등): text에 포함하는 숫자는 반드시 `economic_calendar.today[].forecast` 또는 `previous` 필드의 정확한 값을 그대로 써라. 데이터에 없는 수치는 절대 추측해 쓰지 마라.
+- 이 규칙을 어기면 브리핑 신뢰도가 치명적으로 손상된다. 수치를 확신할 수 없으면 numbers 대신 추세/방향 표현으로 대체해라.
 
 ### 낙수효과(spill) 작성 규칙
 오늘밤 미국이 예측대로 움직일 때, 내일 아침 코스피에서 영향받을 섹터·종목을 2~3개 매핑한다.
@@ -605,6 +618,53 @@ def build_avoidance_hint(history: list, days: int = 3) -> str:
     return "\n".join(lines)
 
 
+def validate_analysis_data(analysis: dict, market_data: dict) -> list[str]:
+    """Claude 출력값과 실제 시장 데이터를 비교해 이상 항목을 경고로 반환한다.
+
+    데이터 부재(할루시네이션) 방지용 후처리 검증.
+    """
+    warnings = []
+
+    # 1. 원/달러 환율 watch_items levels 검증
+    actual_usd = market_data.get("market_data_js", {}).get("usd", {}).get("base")
+    if actual_usd:
+        for item in analysis.get("watch_items", []):
+            if "levels" in item and ("환율" in item.get("label", "") or "달러" in item.get("label", "")):
+                for lv in item["levels"]:
+                    try:
+                        num = float(lv["num"].replace(",", ""))
+                        deviation = abs(num - actual_usd) / actual_usd
+                        if deviation > 0.05:  # 실제 환율 대비 5% 이상 차이
+                            warnings.append(
+                                f"[검증 실패] 환율 레벨 {lv['num']} vs 실제 {actual_usd:.0f} "
+                                f"(차이 {deviation:.1%}) — 할루시네이션 의심"
+                            )
+                    except (ValueError, TypeError):
+                        pass
+
+    # 2. 종목 가격 검증 — candidates 데이터와 대조
+    candidates_key = "kospi_candidates" if "kospi_candidates" in market_data else "us_candidates"
+    candidates = {c["name"]: c for c in market_data.get(candidates_key, []) if "name" in c}
+    for pick in analysis.get("stock_picks", []):
+        name = pick.get("name", "")
+        if name in candidates:
+            expected_change = candidates[name].get("change_pct")
+            if expected_change is not None:
+                # change 필드에서 숫자 추출 (예: "+14.15%" → 14.15)
+                change_str = pick.get("change", "").replace("%", "").replace("+", "")
+                try:
+                    actual_change = float(change_str)
+                    if abs(actual_change - expected_change) > 0.5:  # 0.5%p 이상 차이
+                        warnings.append(
+                            f"[검증 실패] {name} change {change_str}% vs 데이터 {expected_change:.2f}% "
+                            f"— 수치 불일치"
+                        )
+                except ValueError:
+                    pass
+
+    return warnings
+
+
 def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: dict) -> None:
     """Append or update the prediction record in data/briefings.json for accuracy tracking."""
     path = DATA_DIR / "briefings.json"
@@ -769,6 +829,15 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
         k: v for k, v in market_data.items()
         if k not in ("market_data_js",)  # sidebar data not needed for analysis
     }
+    # [필수] watch_items 환율 레벨 계산을 위해 USD/KRW 실제 데이터 주입
+    # market_data_js는 분석에서 제외되지만, 환율은 관전 포인트에서 반드시 실제 수치 기반으로 써야 함
+    mjs = market_data.get("market_data_js", {})
+    if "usd" in mjs and "base" in mjs["usd"]:
+        analysis_data["usd_krw"] = {
+            "current": mjs["usd"]["base"],
+            "change_pct": mjs["usd"].get("chg"),
+        }
+        print(f"[call_claude] usd_krw injected: {mjs['usd']['base']}")
     # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
     if candidates_key in analysis_data:
         analysis_data[candidates_key] = [
@@ -900,6 +969,14 @@ def main():
     save_analysis(args.type, analysis)
     save_prediction_to_briefings(args.type, date_str, analysis)
     save_telegram_message(args.type, date_str, analysis)
+
+    # 데이터 검증 — 환율/종목 가격 할루시네이션 감지
+    market_data = load_market_data(args.type)
+    validation_warnings = validate_analysis_data(analysis, market_data)
+    if validation_warnings:
+        print("[call_claude] ⚠️  데이터 검증 경고 발생:", file=sys.stderr)
+        for w in validation_warnings:
+            print(f"  {w}", file=sys.stderr)
 
     if not args.no_html:
         data_file = DATA_DIR / f"latest_{args.type}.json"

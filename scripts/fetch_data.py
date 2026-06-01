@@ -364,9 +364,30 @@ def get_ticker_full(ticker: str) -> dict:
         except Exception:
             pass
 
+        # 가격 데이터 날짜 기록 — 발행 시점 데이터 검증용
+        last_close_date = closes.index[-1]
+        if hasattr(last_close_date, "date"):
+            last_close_date = last_close_date.date()
+        price_date = str(last_close_date)
+
+        # 최신 거래일 대비 stale 여부 경고 (2 거래일 이상 차이 시)
+        kst_today = datetime.now(KST).date()
+        from datetime import date as date_type
+        if isinstance(last_close_date, str):
+            import datetime as _dt
+            last_close_date = _dt.date.fromisoformat(last_close_date)
+        days_old = (kst_today - last_close_date).days
+        if days_old > 5:  # 주말+휴일 감안해 5일 초과면 경고
+            print(
+                f"[fetch_data] WARNING: {ticker} price data may be stale "
+                f"(last close: {price_date}, today: {kst_today}, gap: {days_old}d)",
+                file=sys.stderr,
+            )
+
         result = {
             "price":      round(price, 4),
             "change_pct": round(change_pct, 4),
+            "price_date": price_date,   # 데이터 신선도 검증용
             "volume":     int(hist["Volume"].iloc[-1]),
             "sparkline":  [round(float(p), 4) for p in closes.iloc[-20:].tolist()],
         }
