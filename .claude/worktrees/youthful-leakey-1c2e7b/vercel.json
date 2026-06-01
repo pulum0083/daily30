@@ -1,0 +1,19 @@
+{
+  "framework": null,
+  "outputDirectory": "web",
+  "buildCommand": "",
+  "installCommand": "npm install",
+  "crons": [
+    { "path": "/api/trigger?type=kospi",    "schedule": "15 23 * * 0-4" },
+    { "path": "/api/trigger?type=us",       "schedule": "15 12 * * 1-5" },
+    { "path": "/api/trigger?type=accuracy", "schedule": "10 0 * * 2-6" }
+  ],
+  "routes": [
+    { "src": "^/$",                                  "dest": "/landing.html" },
+    { "src": "^/briefings/?$",                       "dest": "/briefings/index.html" },
+    { "src": "^/briefings/ko/([^/]+)/?$",            "dest": "/briefings/$1-kospi.html" },
+    { "src": "^/briefings/us/([^/]+)/?$",            "dest": "/briefings/$1-us.html" },
+    { "src": "^/briefings/weekly/([^/]+)/?$",        "dest": "/briefings/$1-weekly.html" },
+    { "handle": "filesystem" }
+  ]
+}

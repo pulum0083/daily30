@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E03131"/><stop offset="100%" stop-color="#FF6A6A"/></linearGradient>
+    <linearGradient id="bu" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E03131"/><stop offset="100%" stop-color="#FF6A6A"/></linearGradient>
+    <linearGradient id="bd" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#2775ED"/><stop offset="100%" stop-color="#60A3FF"/></linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#111213"/>
+  <rect width="1200" height="52" fill="#16181A"/>
+  <rect x="0" y="51" width="1200" height="1" fill="rgba(255,255,255,.06)"/>
+  <rect x="32" y="12" width="28" height="28" rx="7" fill="url(#lg)"/>
+  <g transform="translate(32,12) scale(1.167)">
+    <rect x="5" y="8" width="4" height="10" rx="1" fill="white"/>
+    <line x1="7" y1="4" x2="7" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="7" y1="18" x2="7" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    <rect x="15" y="5" width="4" height="8" rx="1" fill="white" fill-opacity=".55"/>
+    <line x1="17" y1="3" x2="17" y2="5" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="17" y1="13" x2="17" y2="16" stroke="white" stroke-opacity=".55" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <text x="70" y="33" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700" fill="white">Double</text>
+  <text x="126" y="33" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16" font-weight="700" fill="rgba(255,255,255,.5)">-Shot</text>
+  <text x="176" y="33" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.35)">  AI 투자 브리핑</text>
+  <text x="1050" y="33" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.4)">2026.05.13 (수)</text>
+  <text x="40" y="90" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="700" fill="rgba(255,255,255,.9)">2026-05-13</text>
+  <rect x="310" y="72" width="88" height="26" rx="13" fill="rgba(39,117,237,.18)" stroke="rgba(39,117,237,.4)" stroke-width="1"/>
+  <text x="354" y="89" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="700" fill="#60A3FF">하락 우위</text>
+  <rect x="40" y="106" width="400" height="152" rx="12" fill="#1C1D1F"/>
+  <text x="56" y="130" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="600" fill="rgba(255,255,255,.4)" letter-spacing="0.05em">코스피 시초가 방향 예측</text>
+  <text x="56" y="160" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="18" font-weight="800" fill="white">📉 하락 우위 예측</text>
+  <text x="56" y="180" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" font-weight="500" fill="rgba(255,255,255,.5)">(신뢰도 72%)</text>
+  <text x="56" y="208" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#60A3FF">하락 68%</text>
+  <text x="424" y="208" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="#FF6A6A">상승 32%</text>
+  <rect x="56" y="214" width="368" height="22" rx="11" fill="#242628"/>
+  <rect x="56" y="214" width="250" height="22" rx="11" fill="url(#bd)"/>
+  <rect x="306" y="214" width="118" height="22" rx="11" fill="url(#bu)"/>
+  <rect x="239" y="208" width="1" height="34" fill="rgba(255,255,255,.2)"/>
+  <text x="40" y="292" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" font-weight="700" fill="rgba(255,255,255,.85)">💬 긴급 점검: 외인 매도·DRAM ETF 급락 하락 신호</text>
+  <circle cx="50" cy="320" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="324" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.6)">📉 코스피 시초가가 오늘 하락 출발할 가능성이 높아요. EWY(한국 ETF)가 무려 -7.4% 급락했고, DRAM ETF도 -6.9% 내</text>
+  <circle cx="50" cy="348" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="352" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.6)">💡 반도체·HBM 종목에 매도 압력이 클 것 같아요. 미국 메모리 ETF(DRAM)가 하루 만에 -6.9% 폭락했고, SK하이닉스·한미반</text>
+  <circle cx="50" cy="376" r="3" fill="rgba(255,255,255,.3)"/>
+  <text x="62" y="380" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.6)">🛢️ 오늘 국제유가 급등이 성장주에 추가 부담을 줄 것 같아요. WTI 유가가 +4.05달러 오르며 인플레이션 우려가 되살아났고, 미국 </text>
+  <text x="40" y="598" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.2)">doubleshot.space</text>
+  <rect x="476" y="68" width="1" height="530" fill="rgba(255,255,255,.07)"/>
+  <text x="500" y="90" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="700" fill="rgba(255,255,255,.35)" letter-spacing="0.1em">시장 지표</text>
+  <rect x="0" y="508" width="1200" height="122" fill="#0D0D0F"/>
+  <rect x="0" y="508" width="1200" height="1" fill="rgba(255,255,255,.06)"/>
+  <text x="40" y="542" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="700" fill="rgba(255,255,255,.3)" letter-spacing="0.1em">수신 채널</text>
+  <rect x="40" y="554" width="140" height="36" rx="18" fill="rgba(0,136,204,.12)" stroke="rgba(0,136,204,.3)" stroke-width="1"/>
+  <text x="110" y="576" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" font-weight="600" fill="#5BAEFF">📱 텔레그램</text>
+  <rect x="194" y="554" width="120" height="36" rx="18" fill="rgba(230,119,0,.12)" stroke="rgba(230,119,0,.3)" stroke-width="1"/>
+  <text x="254" y="576" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" font-weight="600" fill="#FFB246">📧 이메일</text>
+  <text x="40" y="616" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.2)">무료 · 언제든 해지 가능 · doubleshot.space</text>
+  <text x="900" y="556" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" font-weight="700" fill="rgba(255,255,255,.3)" letter-spacing="0.1em">브리핑 스케줄</text>
+  <text x="900" y="582" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="700" fill="rgba(255,255,255,.7)">08:30</text>
+  <text x="950" y="582" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.35)">코스피 · 평일</text>
+  <text x="900" y="604" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="15" font-weight="700" fill="rgba(255,255,255,.7)">21:30</text>
+  <text x="950" y="604" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" fill="rgba(255,255,255,.35)">미국 · 평일</text>
+</svg>

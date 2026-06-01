@@ -1,0 +1,327 @@
+#!/usr/bin/env python3
+"""
+Gemini Flash 기반 뉴스 요약 스크립트 (3순위: Gemini Worker).
+
+흐름:
+  1. Google News RSS에서 시장 관련 뉴스 헤드라인 수집 (무료, API 키 불필요)
+  2. Gemini 1.5 Flash로 핵심 지표 5개 + 헤드라인 3개로 압축
+  3. data/news_summary_{type}.json 저장
+
+call_claude.py가 이 요약본만 Claude에 전달하므로, 원문 뉴스의 방대한 토큰을 Claude가 처리하지 않아도 됩니다.
+
+Usage:
+    python3 scripts/fetch_news.py --type kospi
+    python3 scripts/fetch_news.py --type us
+"""
+
+import argparse
+import json
+import os
+import sys
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from pathlib import Path
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+from urllib.error import URLError
+
+import pytz
+
+BASE_DIR = Path(__file__).parent.parent
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
+
+KST = pytz.timezone("Asia/Seoul")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RSS 뉴스 소스 설정
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _rss(q: str, hl: str = "en", gl: str = "US", ceid: str = "US:en", recent: bool = False) -> str:
+    # recent=True → tbs=qdr:d (24시간 이내 뉴스만)
+    tbs = "&tbs=qdr:d" if recent else ""
+    return f"https://news.google.com/rss/search?q={quote(q)}&hl={hl}&gl={gl}&ceid={ceid}{tbs}"
+
+KOSPI_RSS_FEEDS = [
+    _rss("KOSPI stock market", "en", "US", "US:en"),
+    _rss("Korea stock NASDAQ semiconductor", "en", "US", "US:en"),
+    _rss("Korean stock market today", "en", "US", "US:en"),
+    _rss("코스피 증시", "ko", "KR", "KR:ko"),
+]
+
+US_RSS_FEEDS = [
+    _rss("NASDAQ S&P500 stock market"),
+    _rss("Federal Reserve interest rate economy"),
+    _rss("US stock market today earnings"),
+    _rss("NVDA AAPL MSFT semiconductor"),
+    # 프리장 신고가 피드: recent=True → 24시간 이내 뉴스만
+    _rss("stock 52-week high premarket", recent=True),
+    _rss("stock all-time high premarket today", recent=True),
+    _rss("stock hits record high premarket earnings", recent=True),
+]
+
+KOSPI_GEMINI_PROMPT = """\
+아래 뉴스 헤드라인들을 분석하여, 오늘 코스피 시초가 예측에 필요한 정보만 추출해줘.
+
+[key_indicators 작성 규칙]
+- 반드시 어제 미국 증시 등락 원인, 오늘 코스피에 직접 영향을 줄 이슈만 포함
+- 수치(%, 금액)가 있으면 반드시 포함
+- 절대 포함하지 말 것: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망, 역사적 신고가 배경 설명
+  (예: "올해 75% 상승", "골드만삭스 한국 주식 상승 여력 크다" → 포함 금지)
+- 포함해야 할 것: 어제 나스닥·S&P500 등락 이유, 외국인 수급 이슈(ETF 자금 유출입), 오늘 예정된 경제 지표, 반도체·기술주 이슈
+
+출력 형식 (JSON만, 다른 텍스트 없이):
+{
+  "key_indicators": [
+    "어제 미국 증시 관련 구체적 이슈 1 (수치 포함)",
+    "어제 미국 증시 관련 구체적 이슈 2",
+    "외국인 수급·ETF 관련 이슈 (있을 경우)",
+    "오늘 예정된 경제 지표 또는 이벤트 (있을 경우)",
+    "반도체·기술주 관련 이슈 (있을 경우)"
+  ],
+  "headlines": [
+    "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1 (원문 그대로)",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish" | "bearish" | "neutral"
+}
+
+뉴스 데이터:
+"""
+
+US_GEMINI_PROMPT = """\
+아래 뉴스 헤드라인들을 분석하여, 오늘 밤 미국 증시(S&P500/NASDAQ) 개장 방향 예측에 필요한 정보만 추출해줘.
+
+[key_indicators 작성 규칙]
+- 오늘 또는 어제 실제 발생한 이슈, 현재 선물 방향, 오늘 발표된 경제 지표만 포함
+- 수치(%, 금액, bp)가 있으면 반드시 포함
+- 절대 포함하지 말 것: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망, 시장 역사적 배경 설명
+  (예: "S&P500이 올해 XX% 상승", "월스트리트는 하반기 강세를 전망" → 포함 금지)
+- 포함해야 할 것: 오늘 프리마켓 선물 방향, 발표된 경제 지표 결과(CPI·NFP·FOMC), 빅테크 실적·이슈, 금리·VIX 변동
+
+출력 형식 (JSON만, 다른 텍스트 없이):
+{
+  "key_indicators": [
+    "오늘 선물·프리마켓 관련 구체적 이슈 1 (수치 포함)",
+    "발표된 경제 지표 결과 또는 연준 이슈 (있을 경우)",
+    "빅테크·반도체 이슈 (있을 경우, 수치 포함)",
+    "금리·VIX·달러 관련 이슈 (있을 경우)",
+    "아시아·유럽 증시 흐름 (있을 경우)"
+  ],
+  "headlines": [
+    "미국 증시 방향에 영향을 줄 헤드라인 1",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish" | "bearish" | "neutral",
+  "premarket_highs": [
+    {
+      "ticker": "종목 티커 (예: AAPL)",
+      "name": "종목명 (예: Apple)",
+      "change_pct": "프리장 등락률 (예: +3.2%)",
+      "reason": "신고가를 찍은 핵심 이유 한 문장 (영어 가능)"
+    }
+  ]
+}
+
+premarket_highs 작성 규칙:
+- 뉴스에서 프리장 52주 신고가 또는 역대 신고가(all-time high)를 달성한 종목만 포함
+- 최대 3개. 뉴스에서 명확히 확인되지 않으면 빈 배열 []로 출력
+- 중요도순 정렬: 시가총액 크거나 등락폭이 크거나 시장 영향력이 높은 종목을 앞에 배치
+- reason은 뉴스 기반 사실만 기재 (추측 금지)
+
+뉴스 데이터:
+"""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Gemini API 설정
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_gemini_api_key() -> str:
+    key = os.environ.get("GEMINI_API_KEY", "")
+    if not key:
+        config_file = BASE_DIR / "config.json"
+        if config_file.exists():
+            with open(config_file, encoding="utf-8") as f:
+                cfg = json.load(f)
+            key = cfg.get("gemini", {}).get("api_key", "")
+    if not key:
+        raise RuntimeError(
+            "GEMINI_API_KEY not set. "
+            "Set the environment variable or add gemini.api_key to config.json"
+        )
+    return key
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RSS 파싱 (표준 라이브러리만 사용)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _parse_pub_date(pub_date_str: str) -> "datetime | None":
+    """RSS pubDate 문자열을 UTC datetime으로 파싱한다."""
+    import email.utils
+    try:
+        ts = email.utils.parsedate_to_datetime(pub_date_str)
+        return ts.astimezone(pytz.utc)
+    except Exception:
+        return None
+
+
+def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 0) -> list[str]:
+    """Google News RSS에서 헤드라인 목록을 반환한다.
+
+    max_age_hours > 0 이면 해당 시간 이내에 발행된 기사만 포함.
+    """
+    import re as _re
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; DailyB/1.0)"
+    }
+    try:
+        req = Request(feed_url, headers=headers)
+        with urlopen(req, timeout=10) as resp:
+            xml_data = resp.read()
+        root = ET.fromstring(xml_data)
+        channel = root.find("channel")
+        if channel is None:
+            return []
+        items = channel.findall("item")[:max_items]
+        now_utc = datetime.now(pytz.utc)
+        headlines = []
+        for item in items:
+            # pubDate 필터링
+            if max_age_hours > 0:
+                pub_date_str = item.findtext("pubDate", "")
+                pub_dt = _parse_pub_date(pub_date_str) if pub_date_str else None
+                if pub_dt is None:
+                    continue
+                age_hours = (now_utc - pub_dt).total_seconds() / 3600
+                if age_hours > max_age_hours:
+                    continue
+
+            title = item.findtext("title", "").strip()
+            desc = item.findtext("description", "").strip()
+            desc_clean = ""
+            if desc:
+                desc_clean = _re.sub(r"<[^>]+>", "", desc)[:120]
+            if title:
+                line = title
+                if desc_clean:
+                    line += f" — {desc_clean}"
+                headlines.append(line)
+        return headlines
+    except (URLError, ET.ParseError, Exception) as e:
+        print(f"[fetch_news] RSS fetch failed ({feed_url[:60]}...): {e}", file=sys.stderr)
+        return []
+
+
+def collect_news(briefing_type: str) -> str:
+    """모든 RSS 피드에서 헤드라인을 수집하여 하나의 텍스트로 반환한다."""
+    if briefing_type == "kospi":
+        # (feed_url, max_age_hours) — 0 = 필터 없음
+        feed_configs = [(url, 0) for url in KOSPI_RSS_FEEDS]
+    else:
+        # 일반 피드: 필터 없음 / 프리장 신고가 피드(마지막 3개): 30시간 이내만
+        general = US_RSS_FEEDS[:-3]
+        premarket = US_RSS_FEEDS[-3:]
+        feed_configs = [(url, 0) for url in general] + [(url, 30) for url in premarket]
+
+    all_headlines = []
+    seen = set()
+
+    for feed_url, max_age_hours in feed_configs:
+        for headline in fetch_rss_headlines(feed_url, max_items=6, max_age_hours=max_age_hours):
+            key = headline[:30]
+            if key not in seen:
+                seen.add(key)
+                all_headlines.append(headline)
+
+    if not all_headlines:
+        return ""
+
+    return "\n".join(f"- {h}" for h in all_headlines[:20])
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Gemini Flash 요약 (google-generativeai SDK)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
+    """Gemini 2.0 Flash로 뉴스 텍스트를 요약하여 JSON 딕셔너리를 반환한다."""
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        raise RuntimeError(
+            "google-genai not installed. "
+            "Run: pip install google-genai"
+        )
+
+    client = genai.Client(api_key=get_gemini_api_key())
+
+    today_kst = datetime.now(KST).strftime("%Y-%m-%d")
+    prompt_prefix = KOSPI_GEMINI_PROMPT if briefing_type == "kospi" else US_GEMINI_PROMPT
+    full_prompt = f"오늘 날짜 (KST): {today_kst}\n\n" + prompt_prefix + "\n" + news_text
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite",
+        contents=full_prompt,
+        config=types.GenerateContentConfig(
+            temperature=0.3,
+            max_output_tokens=512,
+        ),
+    )
+    raw = response.text.strip()
+
+    # Strip markdown fences if present
+    if raw.startswith("```"):
+        lines = raw.split("\n")
+        raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+
+    return json.loads(raw)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Entry point
+# ─────────────────────────────────────────────────────────────────────────────
+
+def main():
+    parser = argparse.ArgumentParser(description="Fetch & summarize market news via Gemini Flash")
+    parser.add_argument("--type", choices=["kospi", "us"], required=True)
+    args = parser.parse_args()
+
+    print(f"[fetch_news] Collecting news for type={args.type}")
+
+    # 1. RSS 수집
+    news_text = collect_news(args.type)
+    if not news_text:
+        print("[fetch_news] WARNING: No news collected. Saving empty summary.", file=sys.stderr)
+        summary = {"key_indicators": [], "headlines": [], "market_sentiment": "neutral"}
+    else:
+        print(f"[fetch_news] Collected {news_text.count(chr(10)) + 1} headlines")
+
+        # 2. Gemini 요약
+        try:
+            summary = summarize_with_gemini(news_text, args.type)
+            print(f"[fetch_news] Gemini summary: {len(summary.get('key_indicators', []))} indicators, "
+                  f"{len(summary.get('headlines', []))} headlines")
+        except Exception as e:
+            print(f"[fetch_news] ERROR: Gemini summarization failed: {e}. Continuing with market data only.", file=sys.stderr)
+            summary = {
+                "key_indicators": [],
+                "headlines": [],
+                "market_sentiment": "neutral",
+                "error": str(e),
+            }
+
+    # 3. 타임스탬프 추가 후 저장
+    summary["generated_at"] = datetime.now(KST).isoformat()
+    out_path = DATA_DIR / f"news_summary_{args.type}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+    print(f"[fetch_news] Saved → {out_path}")
+
+
+if __name__ == "__main__":
+    main()
