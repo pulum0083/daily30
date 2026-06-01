@@ -182,6 +182,9 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .reason-block{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:14px 16px;}
 .reason-block ul{padding-left:16px;display:flex;flex-direction:column;gap:10px;}
 .reason-block ul li{font-size:14px;line-height:1.75;color:var(--ink);}
+.counter-signal{margin-top:10px;padding:11px 14px;background:var(--surface-inset);border-radius:var(--r-md);border:1px dashed var(--hairline);}
+.counter-signal__tag{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;letter-spacing:-0.2px;}
+.counter-signal__text{font-size:13px;line-height:1.7;color:var(--ink);margin:0;}
 
 /* ──────────────────────────────────────────────
    뉴욕 마감 요약 (코스피)

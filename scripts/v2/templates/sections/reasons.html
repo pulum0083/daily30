@@ -8,4 +8,10 @@
       {% endfor %}
     </ul>
   </div>
+  {% if counter_signal %}
+  <div class="counter-signal">
+    <span class="counter-signal__tag">⚠️ 단, 이건 주의해요</span>
+    <p class="counter-signal__text">{{ counter_signal | safe }}</p>
+  </div>
+  {% endif %}
 </div>

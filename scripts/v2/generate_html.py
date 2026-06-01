@@ -147,6 +147,7 @@ def build_reasons(analysis: dict) -> dict:
     return {
         "reason_title": analysis.get("reason_title") or fallback,
         "reasons": analysis.get("reasons", [])[:4],
+        "counter_signal": analysis.get("counter_signal", ""),
     }
 
 
