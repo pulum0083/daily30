@@ -11,7 +11,9 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 |------|-----|
 | 랜딩페이지 | **https://doubleshot.space** |
 | 브리핑 목록 | **https://doubleshot.space/briefings** |
-| 최신 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/** |
+| 코스피 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/kospi/** |
+| 마감 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/close/** |
+| 미국 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/us/** |
 
 호스팅: Vercel (정적 서빙 + Cron 트리거) + GitHub Pages (`gh-pages` 브랜치, Vercel 배포 시 병행)
 
@@ -30,13 +32,14 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 cron-job.org → /api/trigger?type=kospi
   → GitHub Actions workflow_dispatch
     → 휴장일 확인 (holiday_check.py)
-    → 시장 데이터 수집 (fetch_data.py)
+    → 시장 데이터 수집 (fetch_data.py / fetch_closing_kospi.py)
     → 뉴스 요약 (fetch_news.py — Gemini 2.5 Flash Lite)
     → AI 분석·예측 (call_claude.py — Claude Sonnet 4.6, Prompt Caching)
     → latest.json 갱신 (update_latest.py)
     → 텔레그램 전송 (send_telegram.py)
     → 이메일 전송 (send_email.py → Resend API)
     → HTML 생성 & main 커밋·푸시 (generate_html.py)
+      → web/data/briefings-list.json 자동 갱신 (write_briefings_list_json)
     → GitHub Pages 배포 (gh-pages 브랜치)
 ```
 
@@ -45,51 +48,68 @@ cron-job.org → /api/trigger?type=kospi
 ```
 daily30/
 ├── CLAUDE.md
-├── vercel.json                   # Vercel 라우팅 + Cron 스케줄 설정
+├── vercel.json                      # Vercel 라우팅 + Cron 스케줄 설정
 ├── api/
-│   ├── trigger.mjs               # Vercel Cron → GitHub Actions dispatch
-│   └── subscribe.mjs             # 이메일 구독 신청 API (최신 브리핑 즉시 발송)
+│   ├── trigger.mjs                  # Vercel Cron → GitHub Actions dispatch
+│   └── subscribe.mjs                # 이메일 구독 신청 API (최신 브리핑 즉시 발송)
 ├── scripts/
-│   ├── call_claude.py            # Claude Sonnet 4.6 + Prompt Caching 분석 생성
-│   ├── fetch_data.py             # yfinance 기반 시장 데이터 수집
-│   ├── fetch_news.py             # Gemini 2.5 Flash Lite 뉴스 요약
-│   ├── generate_html.py          # templates/ 기반 HTML 브리핑 생성
-│   ├── send_telegram.py          # 텔레그램 전송
-│   ├── send_email.py             # Resend API 이메일 전송 (pulum0083@gmail.com)
-│   ├── update_latest.py          # web/data/latest.json 갱신 (구독 API용)
-│   ├── holiday_check.py          # 한국/미국 공휴일 확인
-│   ├── patch_fg.py               # Fear & Greed 지수 HTML 패치 (09:05 KST)
-│   ├── check_accuracy.py         # 전일 예측 정확도 체크
+│   ├── call_claude.py               # Claude Sonnet 4.6 + Prompt Caching 분석 생성
+│   ├── fetch_data.py                # yfinance 기반 코스피·미국 시장 데이터 수집
+│   ├── fetch_closing_kospi.py       # 코스피 마감 데이터 수집 (수급·장중·시장폭·dpick)
+│   ├── fetch_news.py                # Gemini 2.5 Flash Lite 뉴스 요약
+│   ├── generate_html.py             # config-driven HTML 브리핑 조립기
+│   │                                #   --type {kospi|us|kospi-close} --date YYYY-MM-DD --data-file <path>
+│   │                                #   --write-list-only  → HTML 재생성 없이 briefings-list.json만 갱신
+│   ├── send_telegram.py             # 텔레그램 전송
+│   ├── send_email.py                # Resend API 이메일 전송
+│   ├── update_latest.py             # web/data/latest.json 갱신 (구독 API용)
+│   ├── holiday_check.py             # 한국/미국 공휴일 확인
+│   ├── patch_fg.py                  # Fear & Greed 지수 HTML 패치 (09:05 KST)
+│   ├── check_accuracy.py            # 전일 예측 정확도 체크
+│   ├── config/
+│   │   ├── kospi.json               # 코스피 브리핑 섹션 선언
+│   │   ├── close.json               # 마감 브리핑 섹션 선언
+│   │   └── us.json                  # 미국 브리핑 섹션 선언
 │   └── templates/
-│       ├── briefing.html         # 브리핑 페이지 템플릿
-│       └── index.html            # 날짜별 index 템플릿
+│       ├── base.html                # 공통 레이아웃 (GNB, CSS/JS 경로)
+│       ├── briefings/
+│       │   ├── kospi.html           # 코스피 예측 브리핑 템플릿
+│       │   ├── close.html           # 코스피 마감 브리핑 템플릿
+│       │   └── us.html              # 미국 시장 브리핑 템플릿
+│       ├── pages/
+│       │   └── briefings_index.html # 브리핑 목록 페이지 템플릿
+│       └── sections/                # 공통 섹션 partial 템플릿
 ├── web/
-│   ├── landing.html              # 랜딩페이지 (/ 라우팅)
-│   ├── favicon.svg               # GNB 로고 마크 기반 SVG 파비콘
+│   ├── landing.html                 # 랜딩페이지 (/ 라우팅)
+│   ├── favicon.svg
 │   ├── briefings/
-│   │   ├── index.html            # 브리핑 목록 (/briefings)
-│   │   ├── YYYY-MM-DD-kospi.html # 코스피 브리핑 flat 파일
-│   │   ├── YYYY-MM-DD-us.html    # 미국 브리핑 flat 파일
-│   │   └── YYYY-MM-DD/           # URL용 디렉토리 (/briefings/YYYY-MM-DD/)
-│   │       └── index.html
+│   │   ├── index.html               # 브리핑 목록 (/briefings) — 항상 최신 브리핑 본문 포함
+│   │   └── YYYY-MM-DD/
+│   │       ├── kospi/index.html     # 코스피 예측 브리핑
+│   │       ├── close/index.html     # 코스피 마감 브리핑
+│   │       └── us/index.html        # 미국 시장 브리핑
 │   ├── data/
-│   │   └── latest.json           # 최신 브리핑 요약 (구독 API가 읽음)
+│   │   ├── latest.json              # 최신 브리핑 요약 (구독 API가 읽음)
+│   │   └── briefings-list.json      # 날짜별 슬롯 상태 (브리핑 목록 동적 패치용)
 │   └── assets/
 │       ├── style.css
 │       ├── main.js
 │       ├── briefing-list.js
-│       └── og-image.svg          # OG 썸네일 (브리핑 대시보드 스타일)
+│       └── og-image.svg
 ├── data/
-│   ├── briefings.json            # 예측·정확도 누적 데이터
-│   ├── latest_kospi.json         # 최신 코스피 시장 데이터 (gitignore)
-│   ├── latest_us.json            # 최신 미국 시장 데이터 (gitignore)
-│   ├── analysis_kospi.json       # Claude 분석 결과 (gitignore)
-│   ├── analysis_us.json          # Claude 분석 결과 (gitignore)
-│   ├── news_summary_kospi.json   # Gemini 뉴스 요약 (커밋됨)
-│   └── news_summary_us.json      # Gemini 뉴스 요약 (커밋됨)
+│   ├── briefings.json               # 예측·정확도 누적 데이터 (커밋됨)
+│   ├── supply_history.json          # 외국인·기관·개인 7일 수급 히스토리 (커밋됨)
+│   ├── latest_kospi.json            # 최신 코스피 시장 데이터 (gitignore)
+│   ├── latest_us.json               # 최신 미국 시장 데이터 (gitignore)
+│   ├── latest_kospi_close.json      # 최신 마감 데이터 (gitignore)
+│   ├── analysis_kospi.json          # Claude 분석 결과 (gitignore)
+│   ├── analysis_us.json             # Claude 분석 결과 (gitignore)
+│   ├── analysis_kospi-close.json    # Claude 마감 분석 결과 (gitignore)
+│   ├── news_summary_kospi.json      # Gemini 뉴스 요약 (커밋됨)
+│   └── news_summary_us.json         # Gemini 뉴스 요약 (커밋됨)
 ├── .github/workflows/
-│   └── daily_report.yml          # kospi / us / kospi-close / accuracy 4개 job
-└── config.json                   # API 키 (gitignore — config.example.json 참조)
+│   └── daily_report.yml             # kospi / us / kospi-close / accuracy 4개 job
+└── config.json                      # API 키 (gitignore — config.example.json 참조)
 ```
 
 ## AI 파이프라인
@@ -103,6 +123,12 @@ daily30/
 - 출력: JSON only (`analysis_{type}.json`) → HTML 생성은 `generate_html.py`가 담당
 - 생성 항목: `prediction` (direction / up_pct / confidence), `reasons`, `reason_title`, `stock_picks`
 
+### 마감 데이터 수집 — `fetch_closing_kospi.py`
+- 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
+- 거래대금 급증 × 수급 동반 종목 (dpick): 외국인·기관 동시 순매수 + 거래대금 1.5배↑
+- 코스피200 TOP10 (kospi200_top10), AI 반도체 종목 (ai_semicon_stocks)
+- 출력 필드: `market_breadth.up/down/unchanged/upper_limit/lower_limit`
+
 ## API 키 / 환경변수
 
 | 변수 | 용도 |
@@ -114,34 +140,25 @@ daily30/
 | `RESEND_API_KEY` | 이메일 발송 (Resend) |
 | `GH_PAT` | Vercel → GitHub Actions dispatch |
 
-GitHub Actions Secrets에 모두 등록되어 있음. Vercel 환경변수에도 `RESEND_API_KEY`, `GH_PAT` 등록 필요.
+GitHub Actions Secrets에 모두 등록되어 있음.
 
 ## 이메일 발송
 
 - **브리핑 자동 발송**: `send_email.py` → `pulum0083@gmail.com` (매 브리핑 후 자동)
 - **구독 웰컴 발송**: `api/subscribe.mjs` → 구독 신청 시 최신 브리핑 즉시 발송
 - 발신 주소: `noreply@doubleshot.space` (Resend 도메인 인증 완료)
-- 관리자 알림: 새 구독자 발생 시 `pulum0083@gmail.com`으로 알림
-
-## 주요 규칙
-
-1. **휴장일 스킵**: `holiday_check.py --market kospi|us` 확인 후 해당일엔 전체 파이프라인 중단
-2. **데이터 최신성**: 항상 당일 KST 기준. yfinance 실패 시 웹 검색으로 대체
-3. **URL 구조**: 브리핑 URL = `/briefings/{YYYY-MM-DD}/` (type prefix 없음)
-4. **latest.json**: 브리핑 생성 직후 `update_latest.py`로 반드시 갱신 (구독 API가 이 파일 기준으로 발송)
-5. **텔레그램**: 핵심 시그널 150자 이내 해요 체, 브리핑 URL 포함
-6. **오류 처리**: 텔레그램·이메일 스텝은 `continue-on-error: true` (실패해도 HTML 커밋은 진행)
-7. **push 충돌 방지**: 커밋 후 `git pull --rebase && git push` 패턴 사용
-8. **브랜치 전략**: 소규모 수정(스크립트 1~2개, 버그 픽스)은 main 직접 push. 대규모 변경(템플릿 전면 교체, 파이프라인 구조 변경 등)은 feature 브랜치 → PR → merge
 
 ## Vercel 라우팅
 
 ```
-/                        → landing.html
-/briefings/              → briefings/index.html
-/briefings/{date}/       → briefings/{date}/index.html  (filesystem)
-/briefings/ko/{date}/    → briefings/{date}-kospi.html  (레거시 호환)
-/briefings/us/{date}/    → briefings/{date}-us.html     (레거시 호환)
+/                              → landing.html
+/briefings/                    → briefings/index.html
+/briefings/{date}/kospi/       → briefings/{date}/kospi/index.html
+/briefings/{date}/close/       → briefings/{date}/close/index.html
+/briefings/{date}/us/          → briefings/{date}/us/index.html
+/briefings/ko/{date}/          → briefings/{date}-kospi.html  (레거시 호환)
+/briefings/us/{date}/          → briefings/{date}-us.html     (레거시 호환)
+/briefings/ko-close/{date}/    → briefings/ko-close/{date}/index.html (레거시 호환)
 ```
 
 ## GitHub Actions Workflow (`daily_report.yml`)
@@ -150,7 +167,110 @@ GitHub Actions Secrets에 모두 등록되어 있음. Vercel 환경변수에도 
 
 | job | 트리거 type | 주요 스텝 |
 |-----|------------|-----------|
-| `kospi-briefing` | `kospi` | fetch_data → fetch_news → call_claude → **update_latest** → telegram → email → commit → pages |
+| `kospi-briefing` | `kospi` | fetch_data → fetch_news → call_claude → **update_latest** → telegram → email → generate_html → commit → pages |
 | `us-briefing` | `us` | 동일 구조 |
-| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → commit → pages |
+| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → generate_html → commit → pages |
 | `kospi-accuracy` | `accuracy` | check_accuracy → commit |
+
+---
+
+## 운영 규칙
+
+### 1. 종목 가격 데이터는 반드시 실데이터로 검증
+
+Claude 분석 JSON(`analysis_*.json`)의 종목 가격·등락률은 LLM이 생성한 값으로 **틀릴 수 있다.**
+HTML에 반영하기 전 반드시 yfinance로 실제 시장 데이터를 확인하고 덮어써야 한다.
+
+```python
+# 국내 종목: 티커 = "005380.KS" 형식
+hist = yf.Ticker("005380.KS").history(period="5d").dropna(subset=["Close"])
+# 미국 종목: 티커 = "BAC" 형식
+hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
+```
+
+- **sparkline 데이터 누락 시**: `drawMiniChart('mc-N', [], [], [])` → 캔버스 빈칸. yfinance 20일 종가로 채워야 한다.
+- **MA200 계산**: 300일 히스토리 필요 (`period="300d"`). 20일치 slice해서 사용.
+
+### 2. generate_html.py 사용 시 기존 수정 덮어쓰기 주의
+
+`generate_html.py --type kospi ...` 를 실행하면 해당 날짜 브리핑 HTML이 **완전히 재생성**된다.
+수동으로 가격·sparkline을 수정한 HTML이 있다면 반드시 확인 후 실행할 것.
+
+**브리핑 목록 JSON만 갱신할 때**는 `--write-list-only` 플래그를 사용한다:
+```bash
+python3 scripts/generate_html.py --write-list-only
+```
+
+### 3. 에셋 경로 — /v2/ 경로는 완전 삭제됨
+
+모든 CSS·JS·favicon은 `/assets/` 경로를 사용한다. `/v2/assets/`는 삭제됨.
+
+| 올바른 경로 | 잘못된 경로 (사용 금지) |
+|------------|------------------------|
+| `/assets/style.css` | `/v2/assets/style.css` |
+| `/assets/main.js` | `/v2/assets/main.js` |
+| `/favicon.svg` | `/v2/favicon.svg` |
+| `/briefings/` | `/v2/briefings/` |
+
+생성된 HTML에서 `/v2/` 경로가 발견되면 즉시 수정한다.
+
+### 4. 브리핑 목록 동적 패치 메커니즘
+
+`web/assets/main.js`의 `patchBriefingList()` 함수가 페이지 로드 시 `/data/briefings-list.json`을 fetch해서 today 카드 슬롯을 최신 상태로 교체한다.
+
+- `generate_html.py` 실행 시 `write_briefings_list_json()`이 자동으로 JSON을 갱신한다.
+- 이 덕분에 코스피 예측 페이지를 보는 중에 미국 브리핑이 배포돼도 today 카드가 실시간으로 업데이트된다.
+- **수동으로 JSON만 갱신**할 때: `python3 scripts/generate_html.py --write-list-only`
+
+### 5. 마감 브리핑 시장 폭 데이터 필드
+
+`latest_kospi_close.json`의 `market_breadth` 필드에서 읽는다:
+
+```json
+{
+  "market_breadth": {
+    "up": 179,        → 상승 종목 수
+    "down": 732,      → 하락 종목 수
+    "unchanged": 12,  → 보합 종목 수
+    "upper_limit": 4, → 상한가
+    "lower_limit": 0, → 하한가
+    "new_high": 0,    → 52주 신고가
+    "new_low": 0      → 52주 신저가
+  }
+}
+```
+
+### 6. 랜딩 페이지 CSS 변수 의존성
+
+`landing.html`은 `--gnb-height` 변수를 사용한다.
+`assets/style.css`에서는 `--gnb-h`(52px)로 정의되어 있으므로 landing.html `:root`에 반드시 매핑이 있어야 한다:
+
+```css
+:root {
+  --gnb-height: var(--gnb-h, 52px);
+}
+```
+
+이 변수가 없으면 `.stage-canvas` 높이가 0이 되어 랜딩 페이지 전체가 빈 화면이 된다.
+
+### 7. 예측 섹션 — 항상 열린 상태 유지
+
+`applyTimeCollapse()` 함수에서 KST 9시 이후 자동으로 예측 섹션을 접는 로직을 제거했다.
+예측 섹션은 **항상 열린 상태**를 유지해야 한다. 다시 자동 접힘 로직을 추가하지 말 것.
+
+### 8. AI 반도체 위젯 (칩보드)
+
+`web/assets/main.js`의 `loadChipWidget()`이 `/chips/api/prices`를 fetch한다.
+API 응답이 없으면 폴백(삼성전자·SK하이닉스·Micron·AMD·Intel)을 표시한다.
+이 함수는 `window.addEventListener('load', ...)` 안에서 반드시 호출되어야 한다.
+
+### 9. 텔레그램 발송 금지 조건
+
+작업 완료 알림, 수동 테스트, 개발 중 임시 실행 시 텔레그램을 발송하지 않는다.
+구독자 채널이므로 스케줄된 브리핑 외 ad-hoc 발송은 노이즈가 된다.
+
+### 10. 커밋 단위
+
+- 한 논리적 변경 = 한 커밋. 여러 파일을 고쳤더라도 같은 목적이면 하나로 묶는다.
+- HTML 수동 패치(가격 보정, sparkline 추가 등)는 커밋 메시지에 종목명·수정 내용을 명시한다.
+- 브리핑 자동 생성 커밋(`📊 코스피 브리핑: ...`)과 수동 수정 커밋은 구분한다.
