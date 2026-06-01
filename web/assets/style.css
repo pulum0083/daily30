@@ -110,6 +110,20 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .divider{height:1px;background:var(--hairline);margin:18px 0;}
 
 /* ──────────────────────────────────────────────
+   반도체 섹터 브리핑 (코스피 아침 브리핑 하단)
+────────────────────────────────────────────── */
+.semicon-brief{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px 22px 22px;margin-top:14px;}
+.semicon-brief__header{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.semicon-brief__icon{font-size:14px;line-height:1;}
+.semicon-brief__title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;}
+.semicon-brief__date{margin-left:auto;font-size:11px;color:var(--muted);}
+.semicon-brief__signal{font-size:15px;font-weight:700;color:var(--ink);line-height:1.55;padding:11px 14px;background:var(--surface-soft);border-left:3px solid var(--primary);border-radius:0 var(--r-sm) var(--r-sm) 0;}
+.semicon-brief__divider{height:1px;background:var(--hairline);margin:16px 0;}
+.semicon-brief__body{display:flex;flex-direction:column;gap:10px;}
+.semicon-brief__body p{margin:0;font-size:14px;color:var(--text-secondary,var(--muted));line-height:1.85;}
+html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
+
+/* ──────────────────────────────────────────────
    통일 섹션 카드 (마감 브리핑)
 ────────────────────────────────────────────── */
 .section-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;margin-bottom:14px;}

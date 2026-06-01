@@ -545,6 +545,11 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
+        if internal_type == "kospi":
+            ss = analysis.get("sector_semicon") or {}
+            if ss.get("signal"):
+                ctx["semicon_signal"] = ss["signal"]
+                ctx["semicon_paragraphs"] = ss.get("paragraphs", [])
         if internal_type == "us":
             ctx["nh_stocks"] = build_nh_stocks(analysis)
             ctx["spill_rows"] = analysis.get("spill") or analysis.get("spill_rows") or []
