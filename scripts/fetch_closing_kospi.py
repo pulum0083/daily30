@@ -607,6 +607,132 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> li
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 아침 픽 결과 (모멘텀 종목 당일 종가 성과)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _naver_stock_code(name: str):
+    """종목명 → 네이버 종목코드 조회 (자동완성 API)."""
+    import urllib.parse
+    url = (f"https://ac.finance.naver.com/ac"
+           f"?q={urllib.parse.quote(name)}&q_enc=utf8&st=111&sug=&lng=ko&target=stock")
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+        for item in data.get("items", [[]])[0]:
+            if item[0] == name:
+                return item[1]
+        # 정확히 일치하지 않으면 첫 번째 결과 반환
+        items = data.get("items", [[]])[0]
+        return items[0][1] if items else None
+    except Exception:
+        return None
+
+
+def _parse_price_str(s: str):
+    """'245,000원' → 245000. 파싱 실패 시 None."""
+    if not s:
+        return None
+    digits = re.sub(r"[^0-9]", "", s)
+    return int(digits) if digits else None
+
+
+def fetch_morning_pick_results(top10_by_name: dict) -> list:
+    """아침 픽의 당일 종가 성과를 반환한다.
+
+    analysis_kospi.json 을 읽어 픽 종목의 종가를 top10 또는 네이버에서 조회한 뒤
+    진입·목표·손절 기준으로 성과를 판정한다.
+    """
+    analysis_path = DATA_DIR / "analysis_kospi.json"
+    if not analysis_path.exists():
+        return []
+
+    try:
+        analysis = json.loads(analysis_path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+    picks = analysis.get("stock_picks", [])[:5]
+    results = []
+
+    for pick in picks:
+        name = pick.get("name", "")
+        if not name:
+            continue
+
+        # 종가 조회: top10 우선, 없으면 네이버 frgn 페이지
+        close_price = None
+        change_pct = None
+
+        top_entry = top10_by_name.get(name)
+        if top_entry:
+            p = re.sub(r"[^0-9]", "", top_entry.get("price", ""))
+            close_price = int(p) if p else None
+            m = re.search(r"([+-]?\d+\.?\d*)", top_entry.get("change_pct", "").replace("▲", "").replace("▼", ""))
+            if m:
+                change_pct = float(m.group(1))
+                if "▼" in top_entry.get("change_pct", "") or "하락" in top_entry.get("change_pct", ""):
+                    change_pct = -abs(change_pct)
+
+        if close_price is None:
+            code = _naver_stock_code(name)
+            if code:
+                rows = _fetch_frgn_daily(code)
+                if rows:
+                    close_price = int(rows[0]["close"])
+                    change_pct = rows[0]["chg"]
+
+        if close_price is None:
+            continue
+
+        # 진입·목표·손절 파싱
+        entry  = _parse_price_str(pick.get("entry"))
+        target = _parse_price_str(pick.get("target"))
+        stop   = _parse_price_str(pick.get("stop"))
+
+        # 성과 판정
+        if target and close_price >= target:
+            badge_label, badge_cls = "목표 도달 ✓", "pick-badge--target"
+        elif stop and close_price <= stop:
+            badge_label, badge_cls = "손절선 터치", "pick-badge--stop"
+        elif entry and close_price >= entry:
+            badge_label, badge_cls = "진입권 내 ↑", "pick-badge--ok"
+        elif entry and close_price >= entry * 0.98:
+            badge_label, badge_cls = "진입권 근접", "pick-badge--near"
+        else:
+            badge_label, badge_cls = "진입 미달", "pick-badge--ng"
+
+        entered = bool(entry and close_price >= entry * 0.98)
+
+        # 수익률
+        morning_price = _parse_price_str(pick.get("price", ""))
+        pnl_pct = None
+        if morning_price and morning_price > 0:
+            pnl_pct = round((close_price - morning_price) / morning_price * 100, 2)
+
+        results.append({
+            "name": name,
+            "scenario_tag": pick.get("scenario_tag", ""),
+            "entered": entered,
+            "entry_line": f"진입 {pick.get('entry','—')} → 목표 {pick.get('target','—')} / 손절 {pick.get('stop','—')}",
+            "badge_label": badge_label,
+            "badge_cls": badge_cls,
+            "nums": [
+                {"label": "종가", "val": f"{close_price:,}원",
+                 "cls": "up" if change_pct and change_pct >= 0 else "down"},
+                {"label": "등락", "val": f"{change_pct:+.2f}%" if change_pct is not None else "—",
+                 "cls": "up" if change_pct and change_pct >= 0 else "down"},
+                {"label": "수익률", "val": f"{pnl_pct:+.2f}%" if pnl_pct is not None else "—",
+                 "cls": "up" if pnl_pct and pnl_pct >= 0 else "down"},
+            ],
+            "note": pick.get("scenario", ""),
+        })
+
+    print(f"[fetch_closing] morning pick results: {[r['name'] for r in results]}")
+    return results
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 코스피 200 시총 상위 10종목
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -740,6 +866,10 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → AI 반도체 종목")
     ai_semicon_stocks = fetch_ai_semicon_stocks()
 
+    print("[fetch_closing]   → 아침 픽 결과")
+    top10_by_name = {s["name"]: s for s in kospi200_top10}
+    morning_pick_results = fetch_morning_pick_results(top10_by_name)
+
     data = {
         "generated_at": datetime.now(KST).isoformat(),
         "type": "kospi-close",
@@ -762,6 +892,7 @@ def fetch_closing_data() -> dict:
         "dpick": dpick,
         "kospi200_top10": kospi200_top10,
         "ai_semicon_stocks": ai_semicon_stocks,
+        "morning_pick_results": morning_pick_results,
     }
 
     out = DATA_DIR / "latest_kospi_close.json"

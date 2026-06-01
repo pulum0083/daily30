@@ -390,6 +390,12 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             f"외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요."
         )
 
+    # close_pick_result (아침 픽 당일 종가 성과)
+    raw_picks = market.get("morning_pick_results", [])
+    if raw_picks:
+        ctx["pick_results"] = raw_picks
+        ctx["pick_result_sub"] = "아침 시초가 픽 · 당일 종가 기준"
+
     return ctx
 
 
