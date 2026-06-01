@@ -29,12 +29,12 @@
               {% include "sections/reasons.html" %}
               <div class="divider"></div>
             </div>
+            {% if semicon_signal %}{% include "sections/sector_semicon.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
           </div>
         </div>
       </div>
-      {% if semicon_signal %}{% include "sections/sector_semicon.html" %}{% endif %}
       <div class="t-caption" style="margin-top:14px;text-align:right">생성: {{ generated_at }} | DailyB</div>
     </main>
 

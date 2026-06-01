@@ -107,6 +107,8 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 .section-time{margin-left:auto;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);text-transform:none;letter-spacing:0;white-space:nowrap;}
 .reason-section-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
 .reason-section-title::before{content:'💬';display:inline!important;width:auto!important;height:auto!important;background:none!important;border-radius:0!important;font-size:13px;margin-right:2px;}
+.semicon-section-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
+.semicon-section-title::before{display:none!important;}
 .divider{height:1px;background:var(--hairline);margin:18px 0;}
 
 /* ──────────────────────────────────────────────

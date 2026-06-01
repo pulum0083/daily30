@@ -1,15 +1,11 @@
-{# 반도체 섹터 브리핑 — 코스피 아침 브리핑 하단 추가 섹션 #}
-<div class="semicon-brief">
-  <div class="semicon-brief__header">
-    <span class="semicon-brief__icon">💾</span>
-    <span class="semicon-brief__title">반도체 섹터 브리핑</span>
-    <span class="semicon-brief__date">{{ date_str }}</span>
-  </div>
-  <div class="semicon-brief__signal">{{ semicon_signal }}</div>
-  <div class="semicon-brief__divider"></div>
-  <div class="semicon-brief__body">
-    {% for para in semicon_paragraphs %}
-    <p>{{ para | safe }}</p>
-    {% endfor %}
+{# 반도체 섹터 브리핑 — 관전 포인트 위, 블릿 형태 #}
+<div class="open-section">
+  <div class="open-section__title semicon-section-title">💾 반도체 섹터 — {{ semicon_signal }}</div>
+  <div class="reason-block">
+    <ul>
+      {% for para in semicon_paragraphs %}
+      <li>{{ para | safe }}</li>
+      {% endfor %}
+    </ul>
   </div>
 </div>
