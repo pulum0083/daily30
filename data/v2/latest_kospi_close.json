@@ -1,0 +1,357 @@
+{
+  "generated_at": "2026-06-01T16:01:38.725512+09:00",
+  "type": "kospi-close",
+  "indices": {
+    "kospi": {
+      "price": 8788.38,
+      "change_pct": 3.68,
+      "change_abs": 312.23
+    },
+    "kosdaq": {
+      "price": 1050.03,
+      "change_pct": -2.3,
+      "change_abs": -24.77
+    },
+    "usdkrw": {
+      "price": 1505.4,
+      "change_pct": -0.14,
+      "change_abs": -2.1
+    }
+  },
+  "futures": {
+    "nq": {
+      "price": 30582.25,
+      "change_pct": 0.58,
+      "change_abs": 177.0
+    },
+    "sp": {
+      "price": 7618.0,
+      "change_pct": 0.29,
+      "change_abs": 22.25
+    },
+    "wti": {
+      "price": 90.37,
+      "change_pct": 3.45,
+      "change_abs": 3.01
+    }
+  },
+  "sectors": [
+    {
+      "name": "IT 대표주",
+      "change_pct": 9.21,
+      "stocks": [
+        {
+          "name": "LG전자",
+          "change_pct": 29.86
+        },
+        {
+          "name": "삼성에스디에스",
+          "change_pct": 21.07
+        },
+        {
+          "name": "삼성전자",
+          "change_pct": 10.09
+        }
+      ]
+    },
+    {
+      "name": "인터넷 대표주",
+      "change_pct": 8.91,
+      "stocks": [
+        {
+          "name": "NAVER",
+          "change_pct": 16.03
+        },
+        {
+          "name": "카카오",
+          "change_pct": 1.79
+        }
+      ]
+    },
+    {
+      "name": "제습기",
+      "change_pct": 5.43,
+      "stocks": [
+        {
+          "name": "LG전자",
+          "change_pct": 29.86
+        },
+        {
+          "name": "삼성전자",
+          "change_pct": 10.09
+        },
+        {
+          "name": "에스피지",
+          "change_pct": 9.69
+        }
+      ]
+    },
+    {
+      "name": "통신",
+      "change_pct": 4.7,
+      "stocks": [
+        {
+          "name": "SK텔레콤",
+          "change_pct": 11.53
+        },
+        {
+          "name": "LG유플러스",
+          "change_pct": 1.8
+        },
+        {
+          "name": "KT",
+          "change_pct": 0.76
+        }
+      ]
+    },
+    {
+      "name": "공기청정기",
+      "change_pct": 3.39,
+      "stocks": [
+        {
+          "name": "LG전자",
+          "change_pct": 29.86
+        },
+        {
+          "name": "성호전자",
+          "change_pct": 18.11
+        },
+        {
+          "name": "삼성전자",
+          "change_pct": 10.09
+        }
+      ]
+    }
+  ],
+  "top_gainers": [
+    {
+      "name": "LG헬로비전",
+      "change_pct": "+30.00%",
+      "price": "2,860원"
+    },
+    {
+      "name": "LG전자우",
+      "change_pct": "+29.99%",
+      "price": "124,400원"
+    },
+    {
+      "name": "두산로보틱스",
+      "change_pct": "+29.95%",
+      "price": "138,400원"
+    }
+  ],
+  "investor_trading": {
+    "date": "20260601",
+    "foreign": {
+      "net": -2914300
+    },
+    "institution": {
+      "net": 2535000
+    },
+    "individual": {
+      "net": 377400
+    }
+  },
+  "intraday": {
+    "prices": [
+      8585.73,
+      8583.5,
+      8587.08,
+      8552.8,
+      8613.46,
+      8628.81,
+      8640.21,
+      8691.83,
+      8689.42,
+      8672.57,
+      8647.74,
+      8672.17,
+      8708.07,
+      8712.08,
+      8715.63,
+      8726.86,
+      8741.42,
+      8747.11,
+      8765.97,
+      8785.58,
+      8795.2,
+      8821.87,
+      8826.61,
+      8837.29,
+      8835.25,
+      8846.65,
+      8850.39,
+      8845.29,
+      8844.21,
+      8866.64,
+      8842.09,
+      8869.23,
+      8847.79,
+      8828.92,
+      8825.06,
+      8849.19,
+      8863.76,
+      8865.47,
+      8864.36,
+      8864.27,
+      8860.65,
+      8860.53,
+      8860.4,
+      8859.74,
+      8835.84,
+      8841.46,
+      8822.89,
+      8820.22,
+      8840.31,
+      8838.32,
+      8850.08,
+      8848.86,
+      8844.05,
+      8848.94,
+      8852.05,
+      8851.85,
+      8855.08,
+      8852.67,
+      8856.7,
+      8863.73,
+      8853.99,
+      8842.48,
+      8834.37,
+      8823.01,
+      8801.27,
+      8739.77,
+      8748.86,
+      8776.93,
+      8810.05,
+      8826.45,
+      8811.76,
+      8820.06
+    ],
+    "high": 8869.23,
+    "high_idx": 31,
+    "low": 8552.8,
+    "low_idx": 3
+  },
+  "trade_amount": {
+    "amount_eok": 693645,
+    "formatted": "69조 3,645억원"
+  },
+  "market_breadth": {
+    "up": 179,
+    "down": 732,
+    "unchanged": 12,
+    "upper_limit": 4,
+    "lower_limit": 0,
+    "new_high": 0,
+    "new_low": 0
+  },
+  "kospi200_top10": [
+    {
+      "rank": 1,
+      "name": "삼성전자",
+      "price": "349,000",
+      "change_pct": "▲ +10.09%",
+      "cls": "up"
+    },
+    {
+      "rank": 2,
+      "name": "SK하이닉스",
+      "price": "2,363,000",
+      "change_pct": "▲ +1.29%",
+      "cls": "up"
+    },
+    {
+      "rank": 3,
+      "name": "삼성전자우",
+      "price": "229,000",
+      "change_pct": "▲ +13.09%",
+      "cls": "up"
+    },
+    {
+      "rank": 4,
+      "name": "SK스퀘어",
+      "price": "1,256,000",
+      "change_pct": "▲ +1.87%",
+      "cls": "up"
+    },
+    {
+      "rank": 5,
+      "name": "현대차",
+      "price": "750,000",
+      "change_pct": "▲ +3.73%",
+      "cls": "up"
+    },
+    {
+      "rank": 6,
+      "name": "삼성전기",
+      "price": "2,005,000",
+      "change_pct": "▼ -5.74%",
+      "cls": "down"
+    },
+    {
+      "rank": 7,
+      "name": "LG에너지솔루션",
+      "price": "455,000",
+      "change_pct": "▼ -0.66%",
+      "cls": "down"
+    },
+    {
+      "rank": 8,
+      "name": "삼성생명",
+      "price": "410,000",
+      "change_pct": "▲ +5.53%",
+      "cls": "up"
+    },
+    {
+      "rank": 9,
+      "name": "삼성물산",
+      "price": "455,000",
+      "change_pct": "▲ +5.20%",
+      "cls": "up"
+    },
+    {
+      "rank": 10,
+      "name": "HD현대중공업",
+      "price": "684,000",
+      "change_pct": "▼ -1.72%",
+      "cls": "down"
+    }
+  ],
+  "ai_semicon_stocks": [
+    {
+      "name": "삼성전자",
+      "flag": "🇰🇷",
+      "price": "349,000",
+      "chg_pct": "▲ 10.09%",
+      "cls": "up"
+    },
+    {
+      "name": "SK하이닉스",
+      "flag": "🇰🇷",
+      "price": "2,363,000",
+      "chg_pct": "▲ 1.29%",
+      "cls": "up"
+    },
+    {
+      "name": "Micron",
+      "flag": "🇺🇸",
+      "price": "$971.00",
+      "chg_pct": "▲ 5.14%",
+      "cls": "up"
+    },
+    {
+      "name": "Intel",
+      "flag": "🇺🇸",
+      "price": "$114.68",
+      "chg_pct": "▼ 5.14%",
+      "cls": "down"
+    },
+    {
+      "name": "AMD",
+      "flag": "🇺🇸",
+      "price": "$516.10",
+      "chg_pct": "▼ 0.38%",
+      "cls": "down"
+    }
+  ]
+}
