@@ -43,18 +43,8 @@
     content.classList.toggle('collapsed', !collapsed);
     if (chevron) chevron.classList.toggle('open', !collapsed);
   }
-  // KST 9:00 이후면 자동 접힘 (?sim=9am 으로 강제 시뮬레이션 가능)
   function applyTimeCollapse() {
-    const content = document.getElementById('pre-open-content');
-    if (!content) return;
-    const sim = new URLSearchParams(location.search).get('sim');
-    const kst = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
-    const after9 = kst.getHours() > 9 || (kst.getHours() === 9 && kst.getMinutes() >= 0);
-    if (sim === '9am' || after9) {
-      content.classList.add('collapsed');
-      const chevron = document.getElementById('pre-open-chevron');
-      if (chevron) chevron.classList.add('open');
-    }
+    // 예측 섹션은 항상 열린 상태 유지
   }
 
   /* ── 모달 (info-icon) ── */
