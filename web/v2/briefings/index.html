@@ -652,9 +652,57 @@ window.addEventListener('load', function () {
       <p><strong>막대 그래프 읽는 법</strong></p>
       <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
         <li><strong>20일선 대비</strong> — 현재 주가가 20일 이동평균선보다 얼마나 위·아래에 있는지 나타내요. 0에 가까울수록 20일선 바로 위에서 막 돌파한 상태예요.</li>
-        <li><strong>200일선 대비</strong> — 현재 주가가 200일 이동평균선 대비 위치예요. 플러스(+)가 클수록 장기 추세 강세 구간에 있는 거예요. 예: <strong>+90.8%</strong>는 200일선보다 90.8% 위에 있다는 뜻이에요.</li>
+        <li><strong>200일선 대비</strong> — 현재 주가가 200일 이동평균선 대비 위치예요. 플러스(+)가 클수록 장기 추세 강세 구간에 있는 거예요.</li>
         <li><strong>막대 색상</strong> — 빨간색이 진할수록 이동평균선 위 거리가 커요. 막대가 오른쪽으로 길수록 상대 강도가 높아요.</li>
       </ul>
+      <div style="margin-top:12px; padding:12px 14px; background:var(--surface-inset); border-radius:10px; display:flex; flex-direction:column; gap:10px;">
+        <p style="font-size:11px; font-weight:600; color:var(--muted); margin:0 0 2px;">예시</p>
+        
+        <div>
+          <div style="font-size:11px; font-weight:600; margin-bottom:4px;">A종목 — 20일선 바로 위 (+2%)</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row">
+              <span class="ma200-gauge__label">200일선 대비</span>
+              <div class="ma200-gauge__track">
+                <div class="ma200-gauge__zero"></div>
+                <div class="ma200-gauge__fill up" style="width:1.7%;"></div>
+              </div>
+              <span class="ma200-gauge__pct up">+2%</span>
+            </div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size:11px; font-weight:600; margin-bottom:4px;">B종목 — 장기 강세 구간 (+90%)</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row">
+              <span class="ma200-gauge__label">200일선 대비</span>
+              <div class="ma200-gauge__track">
+                <div class="ma200-gauge__zero"></div>
+                <div class="ma200-gauge__fill up" style="width:75%;"></div>
+              </div>
+              <span class="ma200-gauge__pct up">+90%</span>
+            </div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        
+        <div>
+          <div style="font-size:11px; font-weight:600; margin-bottom:4px;">C종목 — 200일선 아래 (-20%)</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row">
+              <span class="ma200-gauge__label">200일선 대비</span>
+              <div class="ma200-gauge__track">
+                <div class="ma200-gauge__zero"></div>
+                <div class="ma200-gauge__fill down" style="width:16.7%;"></div>
+              </div>
+              <span class="ma200-gauge__pct down">-20%</span>
+            </div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+      </div>
       <br>
       <p><strong>선별 기준 (잭 켈로그 MA20 전략)</strong></p>
       <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px; color:var(--fg2);">
