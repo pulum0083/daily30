@@ -453,15 +453,30 @@ def build_list_context(target_date: str, active_type: str) -> dict:
     def norm_type(t):
         return TYPE_MAP.get(t, t)
 
+    # 구형 v1 경로 매핑 (레거시 HTML 파일 존재 여부 확인용)
+    _legacy_path = {"kospi": lambda d: BRIEFINGS_DIR / f"{d}-kospi.html",
+                    "us":    lambda d: BRIEFINGS_DIR / f"{d}-us.html",
+                    "close": lambda d: BRIEFINGS_DIR / "ko-close" / d / "index.html"}
+
     def cell_for(d: str, btype: str, today_card: bool) -> dict:
-        ready = (BRIEFINGS_DIR / d / btype / "index.html").exists()
+        new_path = BRIEFINGS_DIR / d / btype / "index.html"
+        legacy_path = _legacy_path[btype](d)
+        ready = new_path.exists() or legacy_path.exists()
         match = next((b for b in briefings if b.get("date") == d and norm_type(b.get("type")) == btype), None)
         base = {"type": btype, "label": BRIEFING_LABELS[btype]}
         if d == target_date and btype == active_type:
             base["state"] = "current"
         elif ready:
             base["state"] = "ready"
-            base["url"] = f"/briefings/{d}/{btype}/"
+            # 새 형식 URL 우선, 없으면 레거시 URL
+            if new_path.exists():
+                base["url"] = f"/briefings/{d}/{btype}/"
+            elif btype == "kospi":
+                base["url"] = f"/briefings/ko/{d}/"
+            elif btype == "us":
+                base["url"] = f"/briefings/us/{d}/"
+            else:
+                base["url"] = f"/briefings/ko-close/{d}/"
         elif today_card:
             base["state"] = "pending"
             base["scheduled_time"] = SCHEDULED_TIMES[btype]
@@ -493,9 +508,17 @@ def build_list_context(target_date: str, active_type: str) -> dict:
         "date": today, "day_label": day_label(today, full=True),
         "slots": [cell_for(today, t, True) for t in types],
     }
-    past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:10]
+    past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:20]
     past_rows, prev_month = [], None
     for d in past_dates:
+        # 하나라도 HTML이 존재하는 날짜만 표시 (신형·구형 경로 모두 확인)
+        if not any(
+            (BRIEFINGS_DIR / d / t / "index.html").exists() or _legacy_path[t](d).exists()
+            for t in types
+        ):
+            continue
+        if len(past_rows) >= 10:
+            break
         try:
             dt = date.fromisoformat(d)
         except ValueError:
