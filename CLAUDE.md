@@ -176,20 +176,90 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 
 ## 운영 규칙
 
-### 1. 종목 가격 데이터는 반드시 실데이터로 검증
+### 1. 브리핑 데이터 검증 — 의심 없이 확인, 틀리면 수정 후 커밋
 
-Claude 분석 JSON(`analysis_*.json`)의 종목 가격·등락률은 LLM이 생성한 값으로 **틀릴 수 있다.**
-HTML에 반영하기 전 반드시 yfinance로 실제 시장 데이터를 확인하고 덮어써야 한다.
+> **LLM이 생성한 가격·수치는 틀릴 수 있다. 브리핑에 나오는 모든 수치는 실제 시장 데이터로 검증하고 반영한다.**
+
+#### 종목 가격·등락률 (코스피·미국 예측 브리핑)
+
+`analysis_*.json`의 종목 가격·등락률은 **LLM 할루시네이션** 가능성이 있다.
+HTML 반영 전 반드시 yfinance 또는 네이버 금융으로 실제 값을 확인하고 덮어쓴다.
 
 ```python
-# 국내 종목: 티커 = "005380.KS" 형식
+import yfinance as yf
+
+# 국내 종목: "{종목코드}.KS" 형식, 5d로 최근 종가 확인
 hist = yf.Ticker("005380.KS").history(period="5d").dropna(subset=["Close"])
-# 미국 종목: 티커 = "BAC" 형식
+last_close = int(hist["Close"].iloc[-1])
+
+# 미국 종목: 티커 직접 사용
 hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 ```
 
-- **sparkline 데이터 누락 시**: `drawMiniChart('mc-N', [], [], [])` → 캔버스 빈칸. yfinance 20일 종가로 채워야 한다.
-- **MA200 계산**: 300일 히스토리 필요 (`period="300d"`). 20일치 slice해서 사용.
+- 가격이 실제와 차이나면 → 가격·등락률·MA200·진입/목표/손절·sparkline 모두 일괄 수정.
+- **sparkline 빈 배열** `drawMiniChart('mc-N', [], [], [])` → 캔버스 빈칸. yfinance 20일 종가로 채운다.
+- **MA200 계산**: `period="300d"` 필요. 최근 20개 slice 사용.
+
+#### 코스피 마감 브리핑 3대 필수 확인 항목
+
+마감 브리핑 생성·수정 시 아래 세 항목을 `data/latest_kospi_close.json`(또는 `data/v2/latest_kospi_close.json`)에서 반드시 확인한다. 값이 0이거나 비어 있으면 수정한다.
+
+**① 시장 폭 (`market_breadth`)**
+
+```json
+{
+  "market_breadth": {
+    "up": 179,        ← 0이면 오류
+    "down": 732,      ← 0이면 오류
+    "unchanged": 12,
+    "upper_limit": 4,
+    "lower_limit": 0,
+    "new_high": 0,
+    "new_low": 0
+  }
+}
+```
+
+상승·하락이 모두 0이면 데이터 미수집. 네이버 금융 → KRX 시장 정보로 당일 값을 확인하고 HTML 수정.
+
+**② 수급 현황 (`investor_trading`)**
+
+```json
+{
+  "investor_trading": {
+    "foreign": { "net": -2914300 },    ← 단위: 백만원 (억원 = net / 100)
+    "institution": { "net": 2535000 },
+    "individual": { "net": 377400 }
+  }
+}
+```
+
+`net`이 null이거나 3개 모두 0이면 오류. `supply_cells`에 반영된 억원 단위 값과 교차 검증.
+
+**③ 거래대금 급증 + 수급 동반 종목 (`dpick`)**
+
+```json
+[{
+  "name": "포스코DX", "code": "022100",
+  "change_pct": 19.26,
+  "trade_value_eok": 3191,   ← 억원
+  "trade_mult": 8.6,          ← 20일 평균 대비 배수
+  "frgn_eok": 204,
+  "inst_eok": 93
+}]
+```
+
+`dpick` 키 자체가 없거나 빈 배열이면 `fetch_closing_kospi.py`의 `fetch_dpick()`로 재수집하거나, 네이버 금융 거래량 상위에서 수동 확인 후 HTML에 직접 추가.
+
+#### 데이터 확인 순서 (마감 브리핑 수동 패치 시)
+
+```
+1. data/latest_kospi_close.json 열어서 위 3개 필드 확인
+2. 0 또는 누락 → python3 scripts/fetch_closing_kospi.py 재실행 (장 종료 후)
+3. 여전히 누락 → 네이버 금융 / KRX 웹에서 수동 확인
+4. HTML 직접 수정 → 커밋
+5. python3 scripts/generate_html.py --write-list-only 실행
+```
 
 ### 2. generate_html.py 사용 시 기존 수정 덮어쓰기 주의
 
