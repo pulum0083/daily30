@@ -1,0 +1,34 @@
+{# 마감 스냅샷 — 종가/거래대금 + 장중 흐름 차트 + 보조 지수 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">마감 스냅샷</span>
+    <span class="section-card__sub">09:00 ~ 15:30 정규장</span>
+  </div>
+  <div class="a-hero">
+    <div class="a-hero__lead">
+      <div class="a-hero__idx">
+        <div class="a-hero__idx-name">{{ index_name }} 종가</div>
+        <div class="a-hero__idx-val">{{ close_val }}</div>
+        <div class="a-hero__idx-chg {{ close_chg_cls }}">{{ close_chg }}</div>
+      </div>
+      <div class="a-hero__vol">
+        <div class="a-hero__vol-label">{{ vol_label | default('거래대금') }}</div>
+        <div class="a-hero__vol-val">{{ vol_val }}</div>
+      </div>
+    </div>
+    <div class="intraday-canvas-wrap"><canvas id="intraday-chart"></canvas></div>
+    <div class="intraday-axis">{% for t in intraday_axis %}<span>{{ t }}</span>{% endfor %}</div>
+    <div class="a-sub-row">
+      {% for sub in sub_indices %}
+      <div class="a-sub-cell"><span class="a-sub-cell__name">{{ sub.name }}</span><span class="a-sub-cell__val">{{ sub.val }}</span><span class="a-sub-cell__chg {{ sub.chg_cls }}">{{ sub.chg }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  drawCloseChart('intraday-chart', {{ intraday_prices | tojson }}, {{ prev_close | default('null') }});
+  window.redrawCharts = function () { drawCloseChart('intraday-chart', {{ intraday_prices | tojson }}, {{ prev_close | default('null') }}); };
+});
+window.addEventListener('resize', function () { drawCloseChart('intraday-chart', {{ intraday_prices | tojson }}, {{ prev_close | default('null') }}); });
+</script>

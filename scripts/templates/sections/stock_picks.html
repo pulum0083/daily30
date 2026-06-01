@@ -1,0 +1,44 @@
+{# 종목 픽 섹션 — 상승 모멘텀 종목 카드 (랭크·200일선 게이지·미니차트·진입/목표/손절) #}
+<div class="open-section">
+  <div class="open-section__title">
+    {{ picks_title | default('상승 모멘텀 종목') }}
+    <button class="info-icon-btn" data-modal-open="picks-modal">?</button>
+  </div>
+  {% if picks_intro %}<div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">{{ picks_intro }}</div>{% endif %}
+  <div class="pick-legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div>
+  <div class="stock-picks">
+    {% for pick in stock_picks %}
+    <div class="stock-pick-card">
+      <div class="stock-pick-card__top">
+        <div class="stock-pick-card__rank">{{ loop.index }}</div>
+        <div class="stock-pick-card__info">
+          <div class="stock-pick-card__name">{{ pick.name }}{% if pick.ma20_badge %}<span class="ma20-badge">{{ pick.ma20_badge }}</span>{% endif %}</div>
+          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">{{ pick.price }}</span><span class="stock-pick-card__change {{ pick.change_cls }}">{{ pick.change }}</span></div>
+          <div class="stock-pick-card__scenario">{{ pick.scenario | safe }}</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill {{ pick.ma200_cls }}" style="width:{{ pick.ma200_fill_width }}%"></div></div><span class="ma200-gauge__pct {{ pick.ma200_cls }}">{{ pick.ma200_pct }}</span></div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        <div class="stock-pick-mini-chart"><canvas id="{{ pick.chart_id }}" width="88" height="52"></canvas></div>
+      </div>
+      {% if pick.entry %}
+      <div class="pick-nums">
+        <div class="pick-nums__grid">
+          <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">{{ pick.entry }}</span></div>
+          <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">{{ pick.target }}</span><span class="pick-num__sub up">{{ pick.target_pct }}</span></div>
+          <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">{{ pick.stop }}</span><span class="pick-num__sub dn">{{ pick.stop_pct }}</span></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  {% for pick in stock_picks %}
+  drawMiniChart('{{ pick.chart_id }}', {{ pick.prices | tojson }}, {{ pick.ma20 | tojson }}, {{ pick.ma200 | tojson }});
+  {% endfor %}
+});
+</script>

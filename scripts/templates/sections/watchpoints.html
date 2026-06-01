@@ -1,0 +1,23 @@
+{# 관전 포인트 섹션 — 방향 확인 레벨(저항/지지) + 체크 항목들 (코스피·미국 공유) #}
+<div class="open-section">
+  <div class="open-section__title">{{ watch_title | default('👁 관전 포인트') }}</div>
+  <div class="watchpoint-card">
+    {% for item in watch_items %}
+    <div class="watchpoint-row">
+      <div class="watchpoint-row__icon">{{ item.icon }}</div>
+      <div class="watchpoint-row__body">
+        <div class="watchpoint-row__label">{{ item.label }}</div>
+        {% if item.levels %}
+        <div class="lvl-rows">
+          {% for lvl in item.levels %}
+          <div class="lvl-row"><span class="lvl-pill {{ lvl.cls }}">{{ lvl.label }} <span class="lvl-pill__num">{{ lvl.num }}</span></span><span class="lvl-row__note">{{ lvl.note }}</span></div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="watchpoint-row__text">{{ item.text | safe }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

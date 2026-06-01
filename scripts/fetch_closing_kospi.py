@@ -514,6 +514,225 @@ def fetch_market_breadth() -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 거래대금 급증 + 수급 동반 종목 (외국인·기관 동시 순매수)
+# ─────────────────────────────────────────────────────────────────────────────
+# 데이터 제약: KRX 종목별 순매수 '금액' 소스가 막혀 있어(LOGOUT), 네이버 종목별
+# 일별 순매매 '수량'에 종가를 곱한 근사 금액(억원)을 사용한다.
+
+DPICK_ETF_KEYWORDS = ("KODEX", "TIGER", "KOSEF", "ARIRANG", "KBSTAR", "HANARO",
+                      "PLUS", "RISE", "ACE ", "SOL ", "TIMEFOLIO", "레버리지", "인버스", "선물")
+
+
+def _dpick_num(cell: str) -> float:
+    s = re.sub(r"<[^>]+>", "", cell).strip().replace(",", "").replace("%", "").replace("+", "")
+    try:
+        return float(s) if "." in s else int(s)
+    except ValueError:
+        return 0
+
+
+def _fetch_frgn_daily(code: str) -> list:
+    """종목별 외국인·기관 일별 순매매(수량) — 네이버 item/frgn. 최신순 행 리스트."""
+    url = f"https://finance.naver.com/item/frgn.naver?code={code}"
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            html = resp.read().decode("euc-kr", errors="replace")
+    except Exception:
+        return []
+    rows = []
+    for r in re.split(r"</tr>", html):
+        if "gray03" not in r or not re.search(r"\d{4}\.\d{2}\.\d{2}", r):
+            continue
+        cells = re.findall(r'<td[^>]*class="num"[^>]*>(.*?)</td>', r, re.DOTALL)
+        if len(cells) >= 6:
+            rows.append({
+                "close": _dpick_num(cells[0]),   # 종가
+                "chg":   _dpick_num(cells[2]),   # 등락률(%)
+                "vol":   _dpick_num(cells[3]),   # 거래량(주)
+                "inst":  _dpick_num(cells[4]),   # 기관 순매매량(주)
+                "frgn":  _dpick_num(cells[5]),   # 외국인 순매매량(주)
+            })
+    return rows
+
+
+def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> list:
+    """거래대금 급증 × 외국인·기관 동시 순매수 종목을 반환한다.
+
+    universe(코스피 거래량 상위)에서 ETF를 제외하고, 각 종목의 일별 외국인·기관
+    순매매로 (ⓐ거래대금이 20일 평균 대비 min_mult배 이상 급증, ⓑ외국인·기관 동시
+    순매수)를 만족하는 종목을 거래대금 순으로 선별한다.
+    """
+    url = "https://finance.naver.com/sise/sise_quant.naver?sosok=0"  # 코스피 거래량 상위
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("euc-kr", errors="replace")
+    except Exception as e:
+        print(f"[fetch_closing] dpick universe fetch failed: {e}", file=sys.stderr)
+        return []
+
+    pairs = re.findall(r'/item/main\.naver\?code=(\d{6})"[^>]*class="tltle">([^<]+)</a>', html)
+    cand = [(c, n.strip()) for c, n in pairs
+            if not any(k in n for k in DPICK_ETF_KEYWORDS)][:universe]
+
+    picks = []
+    for code, name in cand:
+        rows = _fetch_frgn_daily(code)
+        if not rows:
+            continue
+        today = rows[0]
+        close = today["close"]
+        if close <= 0:
+            continue
+        tv = today["vol"] * close / 1e8                          # 당일 거래대금(억)
+        recent = rows[:20]
+        avg = sum(x["vol"] * x["close"] for x in recent) / len(recent) / 1e8
+        mult = tv / avg if avg else 0
+        frgn_eok = today["frgn"] * close / 1e8
+        inst_eok = today["inst"] * close / 1e8
+        if frgn_eok > 0 and inst_eok > 0 and mult >= min_mult:
+            picks.append({
+                "name": name, "code": code,
+                "change_pct": round(today["chg"], 2),
+                "trade_value_eok": round(tv),
+                "trade_mult": round(mult, 1),
+                "frgn_eok": round(frgn_eok),
+                "inst_eok": round(inst_eok),
+            })
+    picks.sort(key=lambda p: -p["trade_value_eok"])
+    picks = picks[:limit]
+    print(f"[fetch_closing] dpick: {[p['name'] for p in picks]}")
+    return picks
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 아침 픽 결과 (모멘텀 종목 당일 종가 성과)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _naver_stock_code(name: str):
+    """종목명 → 네이버 종목코드 조회 (자동완성 API)."""
+    import urllib.parse
+    url = (f"https://ac.finance.naver.com/ac"
+           f"?q={urllib.parse.quote(name)}&q_enc=utf8&st=111&sug=&lng=ko&target=stock")
+    try:
+        req = urllib.request.Request(url, headers=NAVER_HEADERS)
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+        for item in data.get("items", [[]])[0]:
+            if item[0] == name:
+                return item[1]
+        # 정확히 일치하지 않으면 첫 번째 결과 반환
+        items = data.get("items", [[]])[0]
+        return items[0][1] if items else None
+    except Exception:
+        return None
+
+
+def _parse_price_str(s: str):
+    """'245,000원' → 245000. 파싱 실패 시 None."""
+    if not s:
+        return None
+    digits = re.sub(r"[^0-9]", "", s)
+    return int(digits) if digits else None
+
+
+def fetch_morning_pick_results(top10_by_name: dict) -> list:
+    """아침 픽의 당일 종가 성과를 반환한다.
+
+    analysis_kospi.json 을 읽어 픽 종목의 종가를 top10 또는 네이버에서 조회한 뒤
+    진입·목표·손절 기준으로 성과를 판정한다.
+    """
+    analysis_path = DATA_DIR / "analysis_kospi.json"
+    if not analysis_path.exists():
+        return []
+
+    try:
+        analysis = json.loads(analysis_path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+    picks = analysis.get("stock_picks", [])[:5]
+    results = []
+
+    for pick in picks:
+        name = pick.get("name", "")
+        if not name:
+            continue
+
+        # 종가 조회: top10 우선, 없으면 네이버 frgn 페이지
+        close_price = None
+        change_pct = None
+
+        top_entry = top10_by_name.get(name)
+        if top_entry:
+            p = re.sub(r"[^0-9]", "", top_entry.get("price", ""))
+            close_price = int(p) if p else None
+            m = re.search(r"([+-]?\d+\.?\d*)", top_entry.get("change_pct", "").replace("▲", "").replace("▼", ""))
+            if m:
+                change_pct = float(m.group(1))
+                if "▼" in top_entry.get("change_pct", "") or "하락" in top_entry.get("change_pct", ""):
+                    change_pct = -abs(change_pct)
+
+        if close_price is None:
+            code = _naver_stock_code(name)
+            if code:
+                rows = _fetch_frgn_daily(code)
+                if rows:
+                    close_price = int(rows[0]["close"])
+                    change_pct = rows[0]["chg"]
+
+        if close_price is None:
+            continue
+
+        # 진입·목표·손절 파싱
+        entry  = _parse_price_str(pick.get("entry"))
+        target = _parse_price_str(pick.get("target"))
+        stop   = _parse_price_str(pick.get("stop"))
+
+        # 성과 판정
+        if target and close_price >= target:
+            badge_label, badge_cls = "목표 도달 ✓", "pick-badge--target"
+        elif stop and close_price <= stop:
+            badge_label, badge_cls = "손절선 터치", "pick-badge--stop"
+        elif entry and close_price >= entry:
+            badge_label, badge_cls = "진입권 내 ↑", "pick-badge--ok"
+        elif entry and close_price >= entry * 0.98:
+            badge_label, badge_cls = "진입권 근접", "pick-badge--near"
+        else:
+            badge_label, badge_cls = "진입 미달", "pick-badge--ng"
+
+        entered = bool(entry and close_price >= entry * 0.98)
+
+        # 수익률
+        morning_price = _parse_price_str(pick.get("price", ""))
+        pnl_pct = None
+        if morning_price and morning_price > 0:
+            pnl_pct = round((close_price - morning_price) / morning_price * 100, 2)
+
+        results.append({
+            "name": name,
+            "scenario_tag": pick.get("scenario_tag", ""),
+            "entered": entered,
+            "entry_line": f"진입 {pick.get('entry','—')} → 목표 {pick.get('target','—')} / 손절 {pick.get('stop','—')}",
+            "badge_label": badge_label,
+            "badge_cls": badge_cls,
+            "nums": [
+                {"label": "종가", "val": f"{close_price:,}원",
+                 "cls": "up" if change_pct and change_pct >= 0 else "down"},
+                {"label": "등락", "val": f"{change_pct:+.2f}%" if change_pct is not None else "—",
+                 "cls": "up" if change_pct and change_pct >= 0 else "down"},
+                {"label": "수익률", "val": f"{pnl_pct:+.2f}%" if pnl_pct is not None else "—",
+                 "cls": "up" if pnl_pct and pnl_pct >= 0 else "down"},
+            ],
+            "note": pick.get("scenario", ""),
+        })
+
+    print(f"[fetch_closing] morning pick results: {[r['name'] for r in results]}")
+    return results
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 코스피 200 시총 상위 10종목
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -638,11 +857,18 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → 시장 폭")
     market_breadth = fetch_market_breadth()
 
+    print("[fetch_closing]   → 거래대금 급증 + 수급 동반 종목")
+    dpick = fetch_dpick()
+
     print("[fetch_closing]   → 코스피 200 TOP10")
     kospi200_top10 = fetch_kospi200_top10()
 
     print("[fetch_closing]   → AI 반도체 종목")
     ai_semicon_stocks = fetch_ai_semicon_stocks()
+
+    print("[fetch_closing]   → 아침 픽 결과")
+    top10_by_name = {s["name"]: s for s in kospi200_top10}
+    morning_pick_results = fetch_morning_pick_results(top10_by_name)
 
     data = {
         "generated_at": datetime.now(KST).isoformat(),
@@ -663,8 +889,10 @@ def fetch_closing_data() -> dict:
         "intraday": intraday,
         "trade_amount": trade_amount,
         "market_breadth": market_breadth,
+        "dpick": dpick,
         "kospi200_top10": kospi200_top10,
         "ai_semicon_stocks": ai_semicon_stocks,
+        "morning_pick_results": morning_pick_results,
     }
 
     out = DATA_DIR / "latest_kospi_close.json"

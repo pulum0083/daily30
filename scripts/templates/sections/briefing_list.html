@@ -1,0 +1,55 @@
+{# 하단 브리핑 목록 — TODAY 카드 + 최근 30일 날짜 1행 목록 (모든 페이지 공유) #}
+<section class="bottom-list">
+  <div class="bl-divider">
+    <span class="bl-divider__label">브리핑 목록</span>
+    <div class="bl-divider__line"></div>
+  </div>
+
+  {% if today_card %}
+  <div class="bl-today">
+    <div class="bl-today__head">
+      <span class="bl-today__date">{{ today_card.date }}</span>
+      <span class="bl-today__day">{{ today_card.day_label }}</span>
+    </div>
+    <div class="bl-today__body">
+      {% for slot in today_card.slots %}
+      {% if slot.state == 'pending' %}
+      <div class="bl-slot is-pending">
+        <div class="bl-slot__label">{{ slot.label }}</div>
+        <div class="bl-slot__title">생성 예정</div>
+        <div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> {{ slot.scheduled_time }} 예정</span></div>
+      </div>
+      {% elif slot.state == 'current' %}
+      <div class="bl-slot is-current">
+        <div class="bl-slot__label">{{ slot.label }}</div>
+        <div class="bl-slot__title">{{ slot.title }}</div>
+        <div class="bl-slot__meta">{% if slot.pill_text %}<span class="bl-pill {{ slot.pill_cls }}">{{ slot.pill_text }}</span>{% endif %}<span class="bl-slot__time">{{ slot.time }}</span></div>
+      </div>
+      {% else %}
+      <a class="bl-slot is-ready" href="{{ slot.url }}">
+        <div class="bl-slot__label">{{ slot.label }}</div>
+        <div class="bl-slot__title">{{ slot.title }}</div>
+        <div class="bl-slot__meta">{% if slot.pill_text %}<span class="bl-pill {{ slot.pill_cls }}">{{ slot.pill_text }}</span>{% endif %}<span class="bl-slot__time">{{ slot.time }}</span></div>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% for row in past_rows %}
+  {% if row.show_month %}<div class="bl-month">{{ row.month_label }}</div>{% endif %}
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">{{ row.date_short }}</span><span class="bl-row__day">{{ row.day_label }}</span></div>
+    {% for cell in row.cells %}
+    {% if cell.state == 'current' %}
+    <div class="bl-cell is-current"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom">{% if cell.pill_text %}<span class="bl-pill {{ cell.pill_cls }}">{{ cell.pill_text }}</span>{% endif %}<span class="bl-cell__time">{{ cell.time }}</span></div></div>
+    {% elif cell.state == 'ready' %}
+    <a class="bl-cell is-ready" href="{{ cell.url }}"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom">{% if cell.pill_text %}<span class="bl-pill {{ cell.pill_cls }}">{{ cell.pill_text }}</span>{% endif %}<span class="bl-cell__time">{{ cell.time }}</span></div></a>
+    {% else %}
+    <div class="bl-cell is-empty"><div class="bl-cell__label">{{ cell.label }}</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+</section>

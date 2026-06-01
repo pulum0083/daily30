@@ -1,0 +1,33 @@
+{# 수급 현황 — 외국인/기관/개인 7일 흐름 + 기관 세부 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">수급 현황</span>
+    <span class="section-card__sub">{{ supply_sub | default('코스피 · 순매수 (억원)') }}</span>
+  </div>
+  <div class="supply-summary">
+    {% for cell in supply_cells %}
+    <div class="supply-summary__cell">
+      <div class="supply-summary__info">
+        <div class="supply-summary__lbl">{{ cell.label }}</div>
+        <div class="supply-summary__amt {{ cell.amt_cls }}">{{ cell.amt }}</div>
+        <div class="supply-summary__sub">{{ cell.sub }}</div>
+      </div>
+      <div class="flow-chart" data-values="{{ cell.flow | tojson | forceescape }}"></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if inst_list %}
+  <div class="inst-breakdown">
+    <div class="inst-breakdown__title">
+      <span>기관 세부 분류</span>
+      <span class="inst-breakdown__note">KRX 공식 · pykrx</span>
+    </div>
+    <div class="inst-list" id="inst-list"></div>
+  </div>
+  {% endif %}
+</div>
+{% if inst_list %}
+<script>
+window.addEventListener('load', function () { renderInstList('inst-list', {{ inst_list | tojson }}); });
+</script>
+{% endif %}

@@ -1,0 +1,12 @@
+{# 시황 분석 — 리드 문장 + WHY/WHAT/SO 포맷 (마감) #}
+<div class="section-card">
+  <div class="reason-title-bar">{{ reason_title }}</div>
+  <div class="reason-body">
+    <p>{{ reason_lead | safe }}</p>
+    <div class="b-format">
+      {% for row in b_rows %}
+      <div class="b-row{% if row.so_what %} so-what{% endif %}"><span class="b-label">{{ row.label }}</span><p class="b-text">{{ row.text | safe }}</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+{# 예측 게이지 섹션 — 방향 예측 + 게이지 + 신호 강도 #}
+<div class="open-section">
+  <div class="open-section__title">
+    {{ pred_title }}
+    <button class="info-icon-btn" data-modal-open="pred-modal">?</button>
+    <span class="section-time">{{ generated_time }} KST 생성</span>
+  </div>
+  <div class="prediction-card">
+    <div class="pred-top">
+      <span class="pred-badge {{ dir_cls }}">{{ dir_arrow }} {{ direction }}</span>
+    </div>
+    <div class="pred-gauge__track">
+      <div class="pred-gauge__mid"></div>
+      <div class="pred-gauge__band" style="left:{{ band_left }}%;width:{{ band_width }}%;background:{{ band_color }}"></div>
+      <div class="pred-gauge__needle {{ dir_cls }}" style="left:{{ up_pct }}%"></div>
+    </div>
+    <div class="pred-gauge__scale"><span>하락</span><span>중립 50</span><span>상승</span></div>
+    <div class="pred-readout">
+      <span class="pred-readout__big {{ dir_cls }}">{{ readout_pct }}</span>
+      <span class="pred-readout__unit {{ dir_cls }}">% {{ dir_word }}</span>
+      <span class="pred-readout__strength">신호 강도
+        <span class="strength-dots">{% for i in range(5) %}<i class="{{ 'on' if i < confidence_dots else '' }}"></i>{% endfor %}</span>
+        {{ confidence_label }}</span>
+    </div>
+  </div>
+</div>
