@@ -214,13 +214,21 @@ python3 scripts/generate_html.py --write-list-only
 
 생성된 HTML에서 `/v2/` 경로가 발견되면 즉시 수정한다.
 
-### 4. 브리핑 목록 동적 패치 메커니즘
+### 4. 브리핑 목록 동적 재구성 메커니즘
 
-`web/assets/main.js`의 `patchBriefingList()` 함수가 페이지 로드 시 `/data/briefings-list.json`을 fetch해서 today 카드 슬롯을 최신 상태로 교체한다.
+브리핑 목록(`.bottom-list`)은 HTML 생성 시점에 "오늘" 날짜가 정적으로 박힌다.
+페이지마다 생성 시점이 다르면 목록이 불일치하므로, **JS가 목록 전체를 다시 그린다.**
 
-- `generate_html.py` 실행 시 `write_briefings_list_json()`이 자동으로 JSON을 갱신한다.
-- 이 덕분에 코스피 예측 페이지를 보는 중에 미국 브리핑이 배포돼도 today 카드가 실시간으로 업데이트된다.
+`web/assets/main.js`의 `patchBriefingList()`가 페이지 로드 시 동작한다:
+- `/data/briefings-list.json`(단일 진실원)을 fetch.
+- **현재 KST 날짜**를 오늘 카드로 잡는다 (DOM에 박힌 날짜를 쓰지 않는다 — 이게 불일치의 원인이었다).
+- 오늘 카드 + 과거 행(최근 10일, ready 1개 이상) 전체를 JSON에서 재구성한다.
+- 현재 보고 있는 브리핑(`location.pathname` 파싱)만 `is-current`로 강조하고, 나머지는 링크.
+- 결과: **어느 브리핑을 선택하든 목록은 동일·최신 상태**를 유지한다.
+
+`generate_html.py` 실행 시 `write_briefings_list_json()`이 자동으로 JSON을 갱신한다.
 - **수동으로 JSON만 갱신**할 때: `python3 scripts/generate_html.py --write-list-only`
+- 정적 템플릿(`briefing_list.html`)은 JS 비활성 시 폴백으로만 쓰인다.
 
 ### 5. 마감 브리핑 시장 폭 데이터 필드
 
