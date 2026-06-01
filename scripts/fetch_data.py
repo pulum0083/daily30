@@ -133,106 +133,59 @@ def fetch_economic_calendar() -> dict:
 
 
 def fetch_investor_trading_kospi(date_str: str = None) -> dict:
-    """NAVER Finance에서 코스피 투자자별 순매수 데이터를 가져온다 (인증 불필요).
+    """pykrx(KRX 공식 데이터)에서 코스피 투자자별 순매수를 가져온다.
 
     코스피 조회 기준일: 당일 시장 개장 전이므로 전 거래일 데이터 사용.
+    휴장일·주말이면 직전 거래일까지 최대 7일 역행한다.
 
     Returns:
         {
           "date": "YYYYMMDD",
-          "foreign":     {"net": int},  # 외국인합계 순매수 (단위: 백만원)
+          "foreign":     {"net": int},  # 외국인 순매수 (단위: 백만원)
           "institution": {"net": int},  # 기관합계 순매수
           "individual":  {"net": int},  # 개인 순매수
         }
+        실패 시 빈 dict.
     """
-    import re
+    try:
+        from pykrx import stock
+    except ImportError as e:
+        print(f"[fetch_data] Investor trading: pykrx import 실패 ({e})", file=sys.stderr)
+        return {}
 
-    kst_now = datetime.now(KST)
+    # 조회 시작점: 명시 date 또는 전일
+    if date_str:
+        cursor = datetime.strptime(date_str, "%Y%m%d")
+    else:
+        cursor = datetime.now(KST) - timedelta(days=1)
 
-    if date_str is None:
-        # 전 거래일 (주말 건너뜀)
-        target = kst_now - timedelta(days=1)
-        while target.weekday() >= 5:  # 5=Sat, 6=Sun
-            target -= timedelta(days=1)
-        date_str = target.strftime("%Y%m%d")
-
-    def parse_num(s: str) -> int:
-        """'+1,234,567' 또는 '-234,567' → int"""
-        s = str(s).strip().replace(",", "").replace("+", "")
+    for _ in range(7):  # 휴장일 감안해 직전 거래일까지 역행
+        d = cursor.strftime("%Y%m%d")
         try:
-            return int(s)
-        except ValueError:
-            return 0
-
-    # NAVER Stock 모바일 REST API (JSON 반환, 인증 불필요)
-    # 투자자별 순매수 — 코스피 기준
-    candidate_apis = [
-        # 1순위: NAVER 증권 모바일 API (인덱스 투자자 동향)
-        f"https://api.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-        # 2순위: m.stock.naver.com 버전
-        f"https://m.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-    ]
-    headers = {
-        "User-Agent":    "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Mobile Safari/537.36",
-        "Referer":       "https://m.stock.naver.com/",
-        "Accept":        "application/json, text/plain, */*",
-        "Accept-Language": "ko-KR,ko;q=0.9",
-    }
-
-    # 투자자 코드 → 영문 키 매핑
-    INVESTOR_MAP = {
-        "FO":   "foreign",      # 외국인
-        "OT":   "institution",  # 기관
-        "PE":   "individual",   # 개인
-        # 이름 기반 fallback
-        "외국인": "foreign",
-        "기관":   "institution",
-        "개인":   "individual",
-    }
-
-    for url in candidate_apis:
-        try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-
-            # 응답 구조 탐색: list or dict
-            rows = data if isinstance(data, list) else data.get("investorList", data.get("list", []))
-            if not rows:
-                print(f"[fetch_data] Investor trading: empty JSON from {url.split('?')[0].split('/')[-1]}", file=sys.stderr)
-                continue
-
-            result: dict = {"date": date_str}
-            for row in rows:
-                # 투자자 구분: investorType, tp, type 등 키 이름 다양
-                inv_type = (
-                    row.get("investorType") or row.get("tp") or
-                    row.get("type") or row.get("name") or ""
-                )
-                key = INVESTOR_MAP.get(inv_type)
-                if not key:
-                    continue
-                # 순매수: netBuyAmount, net, netBuy 등
-                net_val = (
-                    row.get("netBuyAmount") or row.get("net") or
-                    row.get("netBuy") or row.get("netAmount") or 0
-                )
-                result[key] = {"net": int(str(net_val).replace(",", "") or 0)}
-
-            if len(result) > 1:  # date 외 최소 1개 이상
-                foreign_net     = result.get("foreign",     {}).get("net", 0)
-                institution_net = result.get("institution", {}).get("net", 0)
-                print(f"[fetch_data] Investor trading ({date_str}): "
-                      f"foreign={foreign_net:+,}, institution={institution_net:+,} (단위: 백만원)")
-                return result
-
-            print(f"[fetch_data] Investor trading: could not map investors from {url}", file=sys.stderr)
-
+            df = stock.get_market_trading_value_by_investor(d, d, "KOSPI")
         except Exception as e:
-            print(f"[fetch_data] Investor trading error ({url.split('/')[-1].split('?')[0]}): {e}", file=sys.stderr)
-            continue
+            print(f"[fetch_data] Investor trading pykrx error ({d}): {e}", file=sys.stderr)
+            df = None
 
-    print(f"[fetch_data] Investor trading: all sources failed for {date_str}", file=sys.stderr)
+        if df is not None and not df.empty and "순매수" in df.columns:
+            def net_of(label: str) -> int:
+                # pykrx는 원 단위 반환 → 백만원으로 변환
+                return int(df.loc[label, "순매수"]) // 1_000_000 if label in df.index else 0
+
+            result = {
+                "date":        d,
+                "foreign":     {"net": net_of("외국인")},
+                "institution": {"net": net_of("기관합계")},
+                "individual":  {"net": net_of("개인")},
+            }
+            print(f"[fetch_data] Investor trading ({d}): "
+                  f"foreign={result['foreign']['net']:+,}, "
+                  f"institution={result['institution']['net']:+,} (단위: 백만원)")
+            return result
+
+        cursor -= timedelta(days=1)
+
+    print("[fetch_data] Investor trading: 최근 7일 내 데이터 없음", file=sys.stderr)
     return {}
 
 
