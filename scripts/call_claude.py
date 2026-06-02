@@ -288,6 +288,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   ],
   "stock_picks": [
     {
+      "ticker": "005930",
       "name": "종목명",
       "price": "000,000원",
       "change": "+X.XX%",
@@ -544,6 +545,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   ],
   "stock_picks": [
     {
+      "ticker": "NVDA",
       "name": "NVDA (엔비디아)",
       "price": "$XXX.XX",
       "change": "+X.XX%",

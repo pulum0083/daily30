@@ -151,17 +151,25 @@ def build_reasons(analysis: dict) -> dict:
 
 
 def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> list:
-    """analysis.stock_picks → 카드 컨텍스트 (스파크라인은 candidates에서 매칭)."""
+    """analysis.stock_picks → 카드 컨텍스트.
+    price/change는 candidates 실데이터로 덮어쓴다 (Claude 할루시네이션 방지).
+    """
     picks = analysis.get("stock_picks", [])
     if not picks:
         return []
     cand_key = "kospi_candidates" if internal_type == "kospi" else "us_candidates"
     candidates = market_data.get(cand_key, []) or []
 
-    def find_chart(pick):
-        tk, nm = pick.get("ticker", ""), pick.get("name", "")
+    def find_candidate(pick):
+        tk = pick.get("ticker", "")
+        nm = pick.get("name", "")
+        # "NVDA (엔비디아)" → "NVDA" 형태에서 티커 추출
+        nm_prefix = nm.split("(")[0].strip() if nm else ""
         for c in candidates:
-            if c.get("ticker") in (tk, nm) or c.get("name") in (tk, nm):
+            ct = c.get("ticker", "")
+            if ct and ct in (tk, nm, nm_prefix):
+                return c
+            if c.get("name") in (tk, nm):
                 return c
         return {}
 
@@ -170,13 +178,29 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
         dist = p.get("ma200_dist_pct", 0) or 0
         ma200_cls = "up" if dist >= 0 else "down"
         fill_w = min(abs(dist), 60) / 60 * 50
-        chart = find_chart(p)
+        cand = find_candidate(p)
+
+        # price/change: 실데이터 우선, 없으면 Claude 값 폴백
+        actual_chg = cand.get("change_pct")
+        actual_price = cand.get("price")
+        if actual_chg is not None:
+            change_str = f"{actual_chg:+.2f}%"
+            change_cls = "up" if actual_chg >= 0 else "dn"
+        else:
+            change_str = p.get("change", "")
+            change_cls = p.get("change_cls", "up")
+        if actual_price is not None:
+            is_us = internal_type == "us"
+            price_str = f"${actual_price:,.2f}" if is_us else f"{actual_price:,.0f}원"
+        else:
+            price_str = p.get("price", "")
+
         result.append({
             "name": p.get("name", ""),
             "ma20_badge": p.get("signal", ""),
-            "price": p.get("price", ""),
-            "change": p.get("change", ""),
-            "change_cls": p.get("change_cls", "up"),
+            "price": price_str,
+            "change": change_str,
+            "change_cls": change_cls,
             "scenario": p.get("scenario", ""),
             "action_guide": p.get("action_guide", ""),
             "ma200_cls": ma200_cls,
@@ -188,9 +212,9 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
             "target_pct": p.get("target_pct"),
             "stop": p.get("stop"),
             "stop_pct": p.get("stop_pct"),
-            "prices": chart.get("sparkline", []),
-            "ma20": chart.get("ma20_sparkline", []),
-            "ma200": chart.get("ma200_sparkline", []),
+            "prices": cand.get("sparkline", []),
+            "ma20": cand.get("ma20_sparkline", []),
+            "ma200": cand.get("ma200_sparkline", []),
         })
     return result
 
