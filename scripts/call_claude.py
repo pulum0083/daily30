@@ -637,6 +637,27 @@ def save_signal_to_history(briefing_type: str, date_str: str, signals: list, kee
     print(f"[call_claude] Saved signal history → {path} ({len(history)} entries)")
 
 
+def load_sector_history(briefing_type: str) -> list:
+    """data/sector_history_{type}.json의 history 배열을 반환. 없으면 빈 리스트."""
+    path = DATA_DIR / f"sector_history_{briefing_type}.json"
+    if not path.exists():
+        return []
+    with open(path, encoding="utf-8") as f:
+        return json.load(f).get("history", [])
+
+
+def save_sector_to_history(briefing_type: str, date_str: str, sector_key: str, keep: int = 10) -> None:
+    """오늘 선정 섹터를 date 기준 upsert. 최근 keep개만 보관 (최신순)."""
+    path = DATA_DIR / f"sector_history_{briefing_type}.json"
+    history = [h for h in load_sector_history(briefing_type) if h.get("date") != date_str]
+    history.append({"date": date_str, "sector_key": sector_key})
+    history.sort(key=lambda h: h.get("date", ""), reverse=True)
+    history = history[:keep]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"history": history}, f, ensure_ascii=False, indent=2)
+    print(f"[call_claude] Saved sector history → {path} ({len(history)} entries)")
+
+
 def build_sector_avoidance_hint(history: list, days: int = 5) -> str:
     """최근 N회 선정된 섹터를 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
     names = []
