@@ -132,6 +132,120 @@ def _fmt_chg(v):
     return f"{'+' if v >= 0 else ''}{v:.2f}%"
 
 
+# ── 픽 종목 실측 주입 (yfinance 직접 fetch) ───────────────────────────────────
+# Claude는 후보 풀과 무관하게 종목을 자유 선택하므로, 사전 수집된 candidate가
+# 대부분 비어 있다. 픽된 종목의 ticker를 직접 fetch해 price·change·MA·sparkline을
+# 실측으로 덮어쓰고, generate_html이 읽는 candidate 리스트에도 주입한다.
+
+def _resolve_ticker(pick, btype):
+    """pick → yfinance 조회용 티커. 해석 불가 시 빈 문자열."""
+    tk = (pick.get("ticker") or "").strip()
+    name = pick.get("name") or ""
+    if btype == "us":
+        sym = tk or (name.split("(")[0].strip().split()[0] if name else "")
+        # 미국 티커: 영문 대문자 1~5자
+        return sym if re.fullmatch(r"[A-Z]{1,5}", sym or "") else ""
+    # kospi / kospi-close: 6자리 종목코드 → .KS
+    code = (tk.split(".")[0] if tk else "").strip()
+    return f"{code}.KS" if code.isdigit() and len(code) == 6 else ""
+
+
+def _inject_candidate(cands, clean_ticker, name, data):
+    """generate_html sparkline 매칭용 candidate 항목을 주입/갱신한다."""
+    entry = {
+        "ticker": clean_ticker,
+        "name": name,
+        "price": data["price"],
+        "change_pct": data["change_pct"],
+        "ma20_dist_pct": data.get("ma20_dist_pct"),
+        "ma200_dist_pct": data.get("ma200_dist_pct"),
+        "sparkline": data.get("sparkline", []),
+        "ma20_sparkline": data.get("ma20_sparkline", []),
+        "ma200_sparkline": data.get("ma200_sparkline", []),
+    }
+    for i, c in enumerate(cands):
+        if c.get("ticker") == clean_ticker or c.get("name") == name:
+            cands[i] = entry
+            return
+    cands.append(entry)
+
+
+def _fetch_pick_realdata(ticker):
+    """yfinance 일봉으로 직전 완료 세션 기준 실측을 계산한다.
+    브리핑의 '전일 등락률' = close[-1] vs close[-2] (실시간 장중가 아님).
+    Returns dict(price, change_pct, ma20_dist_pct, ma200_dist_pct, sparklines) 또는 {"error":...}.
+    """
+    try:
+        import yfinance as yf
+        hist = yf.Ticker(ticker).history(period="300d").dropna(subset=["Close"])
+        closes = hist["Close"]
+        if len(closes) < 2:
+            return {"error": "insufficient data"}
+        price = float(closes.iloc[-1])
+        prev = float(closes.iloc[-2])
+        out = {
+            "price": round(price, 4),
+            "change_pct": round((price - prev) / prev * 100, 4),
+            "sparkline": [round(float(x), 4) for x in closes.iloc[-20:].tolist()],
+        }
+        if len(closes) >= 20:
+            ma20 = closes.rolling(20).mean().dropna()
+            out["ma20_dist_pct"] = round((price - float(ma20.iloc[-1])) / float(ma20.iloc[-1]) * 100, 2)
+            out["ma20_sparkline"] = [round(float(v), 4) for v in ma20.iloc[-20:].tolist()]
+        if len(closes) >= 200:
+            ma200 = closes.rolling(200).mean().dropna()
+            out["ma200_dist_pct"] = round((price - float(ma200.iloc[-1])) / float(ma200.iloc[-1]) * 100, 2)
+            out["ma200_sparkline"] = [round(float(v), 4) for v in ma200.iloc[-20:].tolist()]
+        return out
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
+    """픽된 종목의 실측 데이터를 fetch해 analysis·latest(candidate)에 주입한다.
+    Returns: latest가 변경됐는지(bool).
+    """
+    picks = analysis.get("stock_picks")
+    if not isinstance(picks, list) or not picks:
+        return False
+    if btype not in ("kospi", "us"):
+        return False
+
+    is_us = btype == "us"
+    cand_key = "us_candidates" if is_us else "kospi_candidates"
+    cands = latest.setdefault(cand_key, [])
+    changed = False
+
+    for p in picks:
+        tk = _resolve_ticker(p, btype)
+        if not tk:
+            warnings.append(f"종목 '{p.get('name')}' 티커 해석 실패 — 실측 주입 생략")
+            continue
+        data = _fetch_pick_realdata(tk)
+        if "error" in data or data.get("price") is None:
+            warnings.append(f"종목 '{p.get('name')}'({tk}) 실측 fetch 실패: {data.get('error', 'no price')}")
+            continue
+
+        price, chg = data["price"], data["change_pct"]
+        old_chg = p.get("change")
+        p["price"] = f"${price:,.2f}" if is_us else f"{int(round(price)):,}원"
+        p["change"] = _fmt_chg(chg)
+        p["change_cls"] = "up" if chg >= 0 else "down"
+        if data.get("ma200_dist_pct") is not None:
+            p["ma200_dist_pct"] = data["ma200_dist_pct"]
+        if data.get("ma20_dist_pct") is not None:
+            p["ma20_dist_pct"] = data["ma20_dist_pct"]
+
+        clean_tk = tk if is_us else tk.split(".")[0]
+        _inject_candidate(cands, clean_tk, p.get("name", ""), data)
+        changed = True
+        corrections.append(
+            f"종목 '{p.get('name')}'({tk}) 실측 주입: change {old_chg} → {p['change']}, price {p['price']}"
+        )
+
+    return changed
+
+
 def correct_pick_price(pick, gt, corrections):
     """pick 가격이 실측과 ±5% 초과 이탈하면 price·change·entry/target/stop를 교정."""
     cur = parse_price(pick.get("price"))
@@ -365,7 +479,19 @@ def main():
     analysis = load_json(analysis_path)
     latest = load_json(latest_path) if latest_path.exists() else {}
 
+    # 0) 픽 종목 실측 주입 (yfinance 직접 fetch — 깨진/빈약한 candidate 풀 우회)
+    pre_corrections, pre_warnings = [], []
+    latest_changed = enrich_picks_with_realdata(
+        analysis, latest, btype, pre_corrections, pre_warnings
+    )
+    if latest_changed and latest_path.exists():
+        with open(latest_path, "w", encoding="utf-8") as f:
+            json.dump(latest, f, ensure_ascii=False, indent=2)
+        print(f"[validate] ✓ candidate 실측 주입 후 저장 → {latest_path}")
+
     result = validate(analysis, latest, btype)
+    result["corrections"] = pre_corrections + result["corrections"]
+    result["warnings"] = pre_warnings + result["warnings"]
 
     for w in result["warnings"]:
         print(f"[validate] ⚠️  {w}")

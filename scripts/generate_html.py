@@ -175,17 +175,22 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
 
     result = []
     for i, p in enumerate(picks, 1):
-        dist = p.get("ma200_dist_pct", 0) or 0
+        cand = find_candidate(p)
+
+        # MA200 게이지: 실데이터 우선, 없으면 Claude 값 폴백
+        dist = cand.get("ma200_dist_pct")
+        if dist is None:
+            dist = p.get("ma200_dist_pct", 0) or 0
         ma200_cls = "up" if dist >= 0 else "down"
         fill_w = min(abs(dist), 60) / 60 * 50
-        cand = find_candidate(p)
 
         # price/change: 실데이터 우선, 없으면 Claude 값 폴백
         actual_chg = cand.get("change_pct")
         actual_price = cand.get("price")
         if actual_chg is not None:
             change_str = f"{actual_chg:+.2f}%"
-            change_cls = "up" if actual_chg >= 0 else "dn"
+            # CSS: stock-pick-card__change.up / .down (음수는 'down' — 'dn' 미정의)
+            change_cls = "up" if actual_chg >= 0 else "down"
         else:
             change_str = p.get("change", "")
             change_cls = p.get("change_cls", "up")
@@ -220,7 +225,9 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
 
 
 def build_nh_stocks(analysis: dict) -> list:
-    """US 프리장 52주 신고가."""
+    """US 프리장 52주 신고가.
+    price·change는 실측 소스가 없어(프리장 데이터 미수집) 표시하지 않는다 — 정성 정보만.
+    """
     out = []
     for h in analysis.get("premarket_highs", [])[:5]:
         out.append({
@@ -230,8 +237,6 @@ def build_nh_stocks(analysis: dict) -> list:
             "alltime": bool(h.get("all_time") or h.get("alltime")),
             "break_note": h.get("break_note", ""),
             "reason": h.get("reason", ""),
-            "price": h.get("price", ""),
-            "chg": h.get("chg") or h.get("change") or h.get("change_pct", ""),
         })
     return out
 
@@ -670,7 +675,9 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
                 ctx["sector_paragraphs"] = sf.get("paragraphs", [])
         if internal_type == "us":
             ctx["nh_stocks"] = build_nh_stocks(analysis)
-            ctx["spill_rows"] = analysis.get("spill") or analysis.get("spill_rows") or []
+            # 섹터 등락률 tag는 실측 소스가 없어(AI 추정) 제거 — 종목 매핑만 표시
+            spill_rows = analysis.get("spill") or analysis.get("spill_rows") or []
+            ctx["spill_rows"] = [{k: v for k, v in r.items() if k != "tag"} for r in spill_rows]
         d = ctx.get("direction", "")
         rp = ctx.get("readout_pct", "")
         ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"

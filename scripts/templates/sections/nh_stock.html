@@ -9,7 +9,6 @@
         <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">{{ s.ticker }}</span><span class="pmh-c-row__name">{{ s.name }}</span><span class="hi-pill-sm{% if s.alltime %} alltime{% endif %}">{{ s.tag }}</span></div>
         <div class="pmh-c-row__break"><span class="arrow">▲</span>{{ s.break_note | safe }}{% if s.reason %}<span class="dot">·</span><span>{{ s.reason }}</span>{% endif %}</div>
       </div>
-      <div class="pmh-c-row__price"><div class="pmh-c-row__now">{{ s.price }}</div><div class="pmh-c-row__chg">{{ s.chg }}</div></div>
     </div>
     {% endfor %}
   </div>

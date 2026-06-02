@@ -204,6 +204,80 @@ def test_supply_scale_skipped_for_kospi():
     assert not any("스케일" in w for w in r["warnings"]), r["warnings"]
 
 
+# ── 픽 종목 티커 해석 ─────────────────────────────────────────────────────────
+def test_resolve_ticker_us():
+    assert v._resolve_ticker({"name": "NVDA (엔비디아)", "ticker": None}, "us") == "NVDA"
+    assert v._resolve_ticker({"name": "BAC (뱅크오브아메리카)"}, "us") == "BAC"
+    assert v._resolve_ticker({"ticker": "MSFT", "name": "마이크로소프트"}, "us") == "MSFT"
+    # 영문 티커로 해석 불가(한글명만)면 빈 문자열
+    assert v._resolve_ticker({"name": "마이크로소프트"}, "us") == ""
+
+
+def test_resolve_ticker_kospi():
+    assert v._resolve_ticker({"ticker": "005930", "name": "삼성전자"}, "kospi") == "005930.KS"
+    assert v._resolve_ticker({"ticker": "005930.KS", "name": "삼성전자"}, "kospi") == "005930.KS"
+    # 종목코드 없으면 빈 문자열(이름만으로 추측 금지)
+    assert v._resolve_ticker({"name": "삼성전자"}, "kospi") == ""
+
+
+# ── 픽 실측 주입 (fetch 스텁) ─────────────────────────────────────────────────
+def test_enrich_picks_overwrites_and_injects():
+    real = {"price": 224.36, "change_pct": 6.26, "ma20_dist_pct": 3.5,
+            "ma200_dist_pct": 19.4, "sparkline": [1, 2, 3],
+            "ma20_sparkline": [1, 2, 3], "ma200_sparkline": [1, 2, 3]}
+    orig = v._fetch_pick_realdata
+    v._fetch_pick_realdata = lambda tk: real
+    try:
+        analysis = {"stock_picks": [
+            {"name": "NVDA (엔비디아)", "ticker": None, "change": "+2.14%",
+             "price": "$1.00", "ma200_dist_pct": 99}
+        ]}
+        latest = {"us_candidates": [
+            {"ticker": "NVDA (엔비디아)", "name": "NVDA (엔비디아)", "sparkline": [999]}
+        ]}
+        cor, warn = [], []
+        changed = v.enrich_picks_with_realdata(analysis, latest, "us", cor, warn)
+        p = analysis["stock_picks"][0]
+        assert changed is True
+        assert p["change"] == "+6.26%"
+        assert p["change_cls"] == "up"
+        assert p["price"] == "$224.36"
+        assert p["ma200_dist_pct"] == 19.4
+        # candidate는 중복 추가가 아니라 교체, sparkline은 실측
+        cands = latest["us_candidates"]
+        assert len(cands) == 1
+        assert cands[0]["ticker"] == "NVDA"
+        assert cands[0]["sparkline"] == [1, 2, 3]
+    finally:
+        v._fetch_pick_realdata = orig
+
+
+def test_enrich_picks_down_class():
+    orig = v._fetch_pick_realdata
+    v._fetch_pick_realdata = lambda tk: {"price": 51.51, "change_pct": -0.17,
+                                         "sparkline": [1], "ma20_sparkline": [1],
+                                         "ma200_sparkline": [1]}
+    try:
+        analysis = {"stock_picks": [{"name": "BAC (뱅크오브아메리카)", "change": "+0.12%"}]}
+        latest = {}
+        cor, warn = [], []
+        v.enrich_picks_with_realdata(analysis, latest, "us", cor, warn)
+        p = analysis["stock_picks"][0]
+        assert p["change"] == "-0.17%"
+        assert p["change_cls"] == "down"
+    finally:
+        v._fetch_pick_realdata = orig
+
+
+def test_enrich_picks_unresolvable_ticker_warns():
+    analysis = {"stock_picks": [{"name": "삼성전자"}]}  # kospi 코드 없음
+    latest = {}
+    cor, warn = [], []
+    changed = v.enrich_picks_with_realdata(analysis, latest, "kospi", cor, warn)
+    assert changed is False
+    assert any("티커 해석 실패" in w for w in warn)
+
+
 if __name__ == "__main__":
     import traceback
     fns = [g for n, g in sorted(globals().items()) if n.startswith("test_") and callable(g)]
