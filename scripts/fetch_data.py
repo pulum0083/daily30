@@ -461,6 +461,24 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
     market_data = {}
     for key, ticker in sidebar_map.items():
         try:
+            # USD/KRW: 네이버 실시간 API 1순위, yfinance는 sparkline 전용 폴백
+            # yfinance USDKRW=X는 주말 데이터 혼입·지연 문제로 가격이 틀릴 수 있다.
+            if key == "usd":
+                naver = fetch_naver_usdkrw()
+                hourly_hist = _yf_history(ticker, period="5d", interval="1h")
+                hourly_closes = hourly_hist["Close"].dropna()
+                sparkline = [round(float(p), 4) for p in hourly_closes.iloc[-10:].tolist()] if len(hourly_closes) >= 1 else []
+                if naver and "price" in naver:
+                    market_data[key] = {
+                        "base": naver["price"],
+                        "chg":  naver["change_pct"],
+                        "data": sparkline,
+                    }
+                    print(f"[fetch_data] sidebar {key}: {naver['price']:.2f} ({naver['change_pct']:+.2f}%) [naver] [{len(sparkline)} pts]")
+                    continue
+                # 네이버 실패 → yfinance 폴백 (아래 공통 로직으로 진행)
+                print(f"[fetch_data] sidebar {key}: naver failed → yfinance fallback", file=sys.stderr)
+
             # Use 1mo period for reliability (5d can be too short after long weekends)
             hist = _yf_history(ticker, period="1mo")
             closes = hist["Close"].dropna()
