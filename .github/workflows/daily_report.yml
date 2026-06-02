@@ -366,7 +366,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 📊 코스피 예측 정확도 백필 (미검증 과거분 일괄 정산)
-        run: python3 scripts/check_accuracy.py --type kospi --backfill --force
+        run: python3 scripts/check_accuracy.py --type kospi --backfill
 
       - name: 💾 정확도 결과 커밋 & 푸시
         run: |
