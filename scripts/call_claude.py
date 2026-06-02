@@ -948,6 +948,14 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
             user_content += hint
             print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
 
+    # 섹터 로테이션 가이드: 최근 선정 섹터 회피 (kospi 아침만)
+    if briefing_type == "kospi":
+        sector_history = [h for h in load_sector_history("kospi") if h.get("date") != date_str]
+        sector_hint = build_sector_avoidance_hint(sector_history, days=5)
+        if sector_hint:
+            user_content += sector_hint
+            print(f"[call_claude] Sector rotation hint injected ({len(sector_history[:5])} recent)")
+
     print(f"[call_claude] Calling Claude API (type={briefing_type}, date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
 
@@ -981,6 +989,17 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     if briefing_type in ("kospi", "us"):
         signals = extract_signal_emojis(analysis.get("reasons", []))
         save_signal_to_history(briefing_type, date_str, signals)
+
+    # sector_focus 검증·보정 후 이력 저장 (kospi 아침만)
+    if briefing_type == "kospi":
+        recent_keys = [
+            h.get("sector_key")
+            for h in load_sector_history("kospi")
+            if h.get("date") != date_str
+        ][:5]
+        analysis["sector_focus"] = pick_sector(analysis.get("sector_focus"), recent_keys)
+        save_sector_to_history("kospi", date_str, analysis["sector_focus"]["sector_key"])
+        print(f"[call_claude] Sector focus → {analysis['sector_focus']['sector_key']}")
 
     return analysis
 
