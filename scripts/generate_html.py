@@ -123,7 +123,7 @@ def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time:
         "pred_title": pred_title,
         "direction": direction,
         "dir_cls": dir_cls,
-        "dir_arrow": "▲" if is_up else "▼",
+        "dir_arrow": "▲" if is_up else ("▼" if "하락" in direction else "—"),
         "dir_word": "상승" if is_up else "하락",
         "up_pct": up_pct,
         "down_pct": down_pct,
