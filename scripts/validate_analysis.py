@@ -138,16 +138,22 @@ def _fmt_chg(v):
 # 실측으로 덮어쓰고, generate_html이 읽는 candidate 리스트에도 주입한다.
 
 def _resolve_ticker(pick, btype):
-    """pick → yfinance 조회용 티커. 해석 불가 시 빈 문자열."""
+    """pick → 조회용 식별자. 해석 불가 시 빈 문자열.
+
+    - us: 영문 티커(예: NVDA) — yfinance용.
+    - kospi: 6자리 종목코드(예: 005930) — 네이버 일봉용. .KS/.KQ 접미사는 붙이지
+      않는다. yfinance에 .KS를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·오价)를
+      반환해 잘못된 가격이 주입되기 때문. 네이버는 코드만으로 시장을 정확히 식별한다.
+    """
     tk = (pick.get("ticker") or "").strip()
     name = pick.get("name") or ""
     if btype == "us":
         sym = tk or (name.split("(")[0].strip().split()[0] if name else "")
         # 미국 티커: 영문 대문자 1~5자
         return sym if re.fullmatch(r"[A-Z]{1,5}", sym or "") else ""
-    # kospi / kospi-close: 6자리 종목코드 → .KS
+    # kospi / kospi-close: 6자리 종목코드 (접미사 없음)
     code = (tk.split(".")[0] if tk else "").strip()
-    return f"{code}.KS" if code.isdigit() and len(code) == 6 else ""
+    return code if code.isdigit() and len(code) == 6 else ""
 
 
 def _inject_candidate(cands, clean_ticker, name, data):
@@ -170,35 +176,70 @@ def _inject_candidate(cands, clean_ticker, name, data):
     cands.append(entry)
 
 
-def _fetch_pick_realdata(ticker):
-    """yfinance 일봉으로 직전 완료 세션 기준 실측을 계산한다.
-    브리핑의 '전일 등락률' = close[-1] vs close[-2] (실시간 장중가 아님).
-    Returns dict(price, change_pct, ma20_dist_pct, ma200_dist_pct, sparklines) 또는 {"error":...}.
+def _closes_to_realdata(closes, ndigits):
+    """일봉 종가 리스트(오래된→최신)로 실측 dict를 만든다.
+    '전일 등락률' = close[-1] vs close[-2] (실시간 장중가 아님).
     """
+    if len(closes) < 2:
+        return {"error": "insufficient data"}
+    price, prev = closes[-1], closes[-2]
+    r = (lambda v: round(v, ndigits))
+    out = {
+        "price": r(price),
+        "change_pct": round((price - prev) / prev * 100, 4),
+        "sparkline": [r(x) for x in closes[-20:]],
+    }
+
+    def _ma_series(window):
+        # 마지막 20개 지점의 이동평균(데이터 부족 시 윈도우 clamp)
+        return [sum(closes[max(0, i - window + 1):i + 1]) / len(closes[max(0, i - window + 1):i + 1])
+                for i in range(len(closes) - 20, len(closes))]
+
+    if len(closes) >= 20:
+        ma20 = _ma_series(20)
+        out["ma20_dist_pct"] = round((price - ma20[-1]) / ma20[-1] * 100, 2)
+        out["ma20_sparkline"] = [r(v) for v in ma20]
+    if len(closes) >= 200:
+        ma200 = _ma_series(200)
+        out["ma200_dist_pct"] = round((price - ma200[-1]) / ma200[-1] * 100, 2)
+        out["ma200_sparkline"] = [r(v) for v in ma200]
+    return out
+
+
+def _fetch_us_realdata(ticker):
+    """yfinance 일봉으로 미국 종목 실측을 계산한다."""
     try:
         import yfinance as yf
         hist = yf.Ticker(ticker).history(period="300d").dropna(subset=["Close"])
-        closes = hist["Close"]
-        if len(closes) < 2:
-            return {"error": "insufficient data"}
-        price = float(closes.iloc[-1])
-        prev = float(closes.iloc[-2])
-        out = {
-            "price": round(price, 4),
-            "change_pct": round((price - prev) / prev * 100, 4),
-            "sparkline": [round(float(x), 4) for x in closes.iloc[-20:].tolist()],
-        }
-        if len(closes) >= 20:
-            ma20 = closes.rolling(20).mean().dropna()
-            out["ma20_dist_pct"] = round((price - float(ma20.iloc[-1])) / float(ma20.iloc[-1]) * 100, 2)
-            out["ma20_sparkline"] = [round(float(v), 4) for v in ma20.iloc[-20:].tolist()]
-        if len(closes) >= 200:
-            ma200 = closes.rolling(200).mean().dropna()
-            out["ma200_dist_pct"] = round((price - float(ma200.iloc[-1])) / float(ma200.iloc[-1]) * 100, 2)
-            out["ma200_sparkline"] = [round(float(v), 4) for v in ma200.iloc[-20:].tolist()]
-        return out
+        closes = [float(x) for x in hist["Close"].tolist()]
+        return _closes_to_realdata(closes, ndigits=4)
     except Exception as e:
         return {"error": str(e)}
+
+
+def _fetch_kospi_realdata(code):
+    """네이버 일봉으로 한국 종목 실측을 계산한다 (6자리 코드만으로 시장 자동 식별).
+    yfinance .KS/.KQ 추측의 오价·stale 문제를 피하기 위해 네이버를 단일 소스로 쓴다.
+    """
+    import urllib.request
+    from datetime import datetime, timedelta
+    try:
+        end = datetime.now().strftime("%Y%m%d") + "0000"
+        start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
+        url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
+               f"?startDateTime={start}&endDateTime={end}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read())
+        closes = [float(rw["closePrice"]) for rw in rows if rw.get("closePrice")]
+        return _closes_to_realdata(closes, ndigits=2)
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def _fetch_pick_realdata(ticker, is_us):
+    """픽 종목 실측 fetch. 미국=yfinance, 한국=네이버 일봉."""
+    return _fetch_us_realdata(ticker) if is_us else _fetch_kospi_realdata(ticker)
 
 
 def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
@@ -221,7 +262,7 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
         if not tk:
             warnings.append(f"종목 '{p.get('name')}' 티커 해석 실패 — 실측 주입 생략")
             continue
-        data = _fetch_pick_realdata(tk)
+        data = _fetch_pick_realdata(tk, is_us)
         if "error" in data or data.get("price") is None:
             warnings.append(f"종목 '{p.get('name')}'({tk}) 실측 fetch 실패: {data.get('error', 'no price')}")
             continue
@@ -236,8 +277,7 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
         if data.get("ma20_dist_pct") is not None:
             p["ma20_dist_pct"] = data["ma20_dist_pct"]
 
-        clean_tk = tk if is_us else tk.split(".")[0]
-        _inject_candidate(cands, clean_tk, p.get("name", ""), data)
+        _inject_candidate(cands, tk, p.get("name", ""), data)
         changed = True
         corrections.append(
             f"종목 '{p.get('name')}'({tk}) 실측 주입: change {old_chg} → {p['change']}, price {p['price']}"

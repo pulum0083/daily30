@@ -214,8 +214,10 @@ def test_resolve_ticker_us():
 
 
 def test_resolve_ticker_kospi():
-    assert v._resolve_ticker({"ticker": "005930", "name": "삼성전자"}, "kospi") == "005930.KS"
-    assert v._resolve_ticker({"ticker": "005930.KS", "name": "삼성전자"}, "kospi") == "005930.KS"
+    # KOSPI·KOSDAQ 모두 6자리 코드만 반환 (.KS/.KQ 접미사 금지 — 네이버 일봉용)
+    assert v._resolve_ticker({"ticker": "005930", "name": "삼성전자"}, "kospi") == "005930"
+    assert v._resolve_ticker({"ticker": "005930.KS", "name": "삼성전자"}, "kospi") == "005930"
+    assert v._resolve_ticker({"ticker": "247540", "name": "에코프로비엠"}, "kospi") == "247540"
     # 종목코드 없으면 빈 문자열(이름만으로 추측 금지)
     assert v._resolve_ticker({"name": "삼성전자"}, "kospi") == ""
 
@@ -226,7 +228,7 @@ def test_enrich_picks_overwrites_and_injects():
             "ma200_dist_pct": 19.4, "sparkline": [1, 2, 3],
             "ma20_sparkline": [1, 2, 3], "ma200_sparkline": [1, 2, 3]}
     orig = v._fetch_pick_realdata
-    v._fetch_pick_realdata = lambda tk: real
+    v._fetch_pick_realdata = lambda tk, is_us: real
     try:
         analysis = {"stock_picks": [
             {"name": "NVDA (엔비디아)", "ticker": None, "change": "+2.14%",
@@ -254,9 +256,9 @@ def test_enrich_picks_overwrites_and_injects():
 
 def test_enrich_picks_down_class():
     orig = v._fetch_pick_realdata
-    v._fetch_pick_realdata = lambda tk: {"price": 51.51, "change_pct": -0.17,
-                                         "sparkline": [1], "ma20_sparkline": [1],
-                                         "ma200_sparkline": [1]}
+    v._fetch_pick_realdata = lambda tk, is_us: {"price": 51.51, "change_pct": -0.17,
+                                                "sparkline": [1], "ma20_sparkline": [1],
+                                                "ma200_sparkline": [1]}
     try:
         analysis = {"stock_picks": [{"name": "BAC (뱅크오브아메리카)", "change": "+0.12%"}]}
         latest = {}
@@ -265,6 +267,32 @@ def test_enrich_picks_down_class():
         p = analysis["stock_picks"][0]
         assert p["change"] == "-0.17%"
         assert p["change_cls"] == "down"
+    finally:
+        v._fetch_pick_realdata = orig
+
+
+def test_enrich_picks_kospi_uses_bare_code_and_won():
+    """코스피 픽: 6자리 코드로 fetch, price는 원화 포맷, candidate ticker는 코드."""
+    captured = {}
+
+    def fake(tk, is_us):
+        captured["tk"], captured["is_us"] = tk, is_us
+        return {"price": 360500.0, "change_pct": 3.30, "ma200_dist_pct": 5.1,
+                "sparkline": [1], "ma20_sparkline": [1], "ma200_sparkline": [1]}
+
+    orig = v._fetch_pick_realdata
+    v._fetch_pick_realdata = fake
+    try:
+        analysis = {"stock_picks": [{"name": "삼성전자", "ticker": "005930", "change": "+9.9%"}]}
+        latest = {}
+        cor, warn = [], []
+        v.enrich_picks_with_realdata(analysis, latest, "kospi", cor, warn)
+        p = analysis["stock_picks"][0]
+        assert captured["tk"] == "005930"   # .KS 없이 6자리 코드
+        assert captured["is_us"] is False
+        assert p["change"] == "+3.30%"
+        assert p["price"] == "360,500원"
+        assert latest["kospi_candidates"][0]["ticker"] == "005930"
     finally:
         v._fetch_pick_realdata = orig
 
