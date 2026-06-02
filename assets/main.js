@@ -311,6 +311,49 @@
       .catch(function() {});
   }
 
+  /* ── 브리핑 페이지 이전/다음 네비게이션 동적 패치 ──
+     HTML 생성 시점에 박힌 prev/next URL은 이후 생성된 브리핑을 가리키지 못한다.
+     briefings-list.json에서 같은 타입의 ready 날짜 목록을 읽어 버튼을 갱신한다. */
+  function patchBriefingNav() {
+    var btnPrev = document.getElementById('btn-prev');
+    var btnNext = document.getElementById('btn-next');
+    if (!btnPrev && !btnNext) return;
+    var cur = _blCurrentPage();
+    if (!cur) return;
+
+    fetch('/data/briefings-list.json', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        var slots = data.slots || {};
+        // 현재 타입의 ready 날짜들을 최신순 정렬
+        var dates = Object.keys(slots).filter(function(d) {
+          return slots[d][cur.type] && slots[d][cur.type].state === 'ready';
+        }).sort().reverse();
+
+        var idx = dates.indexOf(cur.date);
+        if (idx === -1) return;
+
+        // 최신순 기준: idx-1 = 더 최신(newer) → btn-next(>), idx+1 = 더 오래됨(older) → btn-prev(<)
+        var newerDate = idx > 0 ? dates[idx - 1] : null;
+        var olderDate = idx < dates.length - 1 ? dates[idx + 1] : null;
+
+        function applyNav(btn, targetDate) {
+          if (!btn) return;
+          if (targetDate) {
+            btn.href = slots[targetDate][cur.type].url;
+            btn.classList.remove('disabled');
+          } else {
+            btn.setAttribute('href', '#');
+            btn.classList.add('disabled');
+          }
+        }
+
+        applyNav(btnPrev, olderDate);
+        applyNav(btnNext, newerDate);
+      })
+      .catch(function() {});
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -326,6 +369,7 @@
     renderSupplyFlows();
     loadChipWidget();
     patchBriefingList();
+    patchBriefingNav();
   });
 
   /* ── 칩보드 위젯 — /chips/api/prices ── */
