@@ -936,14 +936,17 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
         k: v for k, v in market_data.items()
         if k not in ("market_data_js",)  # sidebar data not needed for analysis
     }
-    # 환율은 market_data_js 안에 묻혀 있어 Claude에 전달되지 않으므로 명시적으로 주입한다.
-    # 이 값이 없으면 Claude가 임의 수치를 쓰는 할루시네이션이 발생한다.
-    usd_data = (market_data.get("market_data_js") or {}).get("usd") or {}
-    if usd_data.get("price"):
-        analysis_data["usdkrw"] = {
-            "price": usd_data["price"],
-            "change_pct": usd_data.get("change_pct"),
-        }
+    # 환율: 네이버 실시간 API 1순위, 실패 시 market_data_js 폴백.
+    # yfinance USDKRW=X는 주말·공휴일 공백 문제가 있어 네이버를 우선 사용한다.
+    from fetch_data import fetch_naver_usdkrw
+    usdkrw = fetch_naver_usdkrw()
+    if not usdkrw.get("price"):
+        usd_data = (market_data.get("market_data_js") or {}).get("usd") or {}
+        if usd_data.get("price"):
+            usdkrw = {"price": usd_data["price"], "change_pct": usd_data.get("change_pct")}
+    if usdkrw.get("price"):
+        analysis_data["usdkrw"] = usdkrw
+        print(f"[call_claude] usdkrw = {usdkrw['price']}원 ({usdkrw.get('change_pct'):+.2f}%)")
     # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
     if candidates_key in analysis_data:
         analysis_data[candidates_key] = [

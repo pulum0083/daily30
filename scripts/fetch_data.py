@@ -558,6 +558,32 @@ def build_stock_candidates(candidates: list[tuple]) -> list[dict]:
     return result
 
 
+def fetch_naver_usdkrw() -> dict:
+    """네이버 환율 API에서 원/달러 현재가·전일 대비 등락률을 반환한다.
+    yfinance USDKRW=X는 주말 데이터·공휴일 공백 문제가 있어 네이버를 1순위로 쓴다.
+    실패 시 빈 dict 반환 → 호출부에서 yfinance 폴백 처리.
+    """
+    url = (
+        "https://m.stock.naver.com/front-api/marketIndex/prices"
+        "?reutersCode=FX_USDKRW&category=exchange&pageSize=10&page=1"
+    )
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            payload = json.loads(resp.read())
+        rows = payload.get("result") or []
+        if len(rows) < 2:
+            return {}
+        today, yest = rows[0], rows[1]
+        price = float(today["closePrice"].replace(",", ""))
+        prev  = float(yest["closePrice"].replace(",", ""))
+        chg_pct = round((price - prev) / prev * 100, 2) if prev else 0.0
+        return {"price": round(price, 2), "change_pct": chg_pct}
+    except Exception as e:
+        print(f"[fetch_data] naver USDKRW failed: {e}", file=sys.stderr)
+        return {}
+
+
 def _get_price_change(ticker: str) -> dict | None:
     """ticker의 최신 종가와 전일 대비 등락률을 수집한다 (5d 히스토리, 경량).
 
