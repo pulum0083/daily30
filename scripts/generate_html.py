@@ -551,30 +551,16 @@ def build_list_context(target_date: str, active_type: str) -> dict:
     def norm_type(t):
         return TYPE_MAP.get(t, t)
 
-    # 구형 v1 경로 매핑 (레거시 HTML 파일 존재 여부 확인용)
-    _legacy_path = {"kospi": lambda d: BRIEFINGS_DIR / f"{d}-kospi.html",
-                    "us":    lambda d: BRIEFINGS_DIR / f"{d}-us.html",
-                    "close": lambda d: BRIEFINGS_DIR / "ko-close" / d / "index.html"}
-
     def cell_for(d: str, btype: str, today_card: bool) -> dict:
         new_path = BRIEFINGS_DIR / d / btype / "index.html"
-        legacy_path = _legacy_path[btype](d)
-        ready = new_path.exists() or legacy_path.exists()
+        ready = new_path.exists()
         match = next((b for b in briefings if b.get("date") == d and norm_type(b.get("type")) == btype), None)
         base = {"type": btype, "label": BRIEFING_LABELS[btype]}
         if d == target_date and btype == active_type:
             base["state"] = "current"
         elif ready:
             base["state"] = "ready"
-            # 새 형식 URL 우선, 없으면 레거시 URL
-            if new_path.exists():
-                base["url"] = f"/briefings/{d}/{btype}/"
-            elif btype == "kospi":
-                base["url"] = f"/briefings/ko/{d}/"
-            elif btype == "us":
-                base["url"] = f"/briefings/us/{d}/"
-            else:
-                base["url"] = f"/briefings/ko-close/{d}/"
+            base["url"] = f"/briefings/{d}/{btype}/"
         elif today_card:
             base["state"] = "pending"
             base["scheduled_time"] = SCHEDULED_TIMES[btype]
@@ -609,11 +595,7 @@ def build_list_context(target_date: str, active_type: str) -> dict:
     past_dates = sorted({b["date"] for b in briefings if b.get("date") and b["date"] != today}, reverse=True)[:20]
     past_rows, prev_month = [], None
     for d in past_dates:
-        # 하나라도 HTML이 존재하는 날짜만 표시 (신형·구형 경로 모두 확인)
-        if not any(
-            (BRIEFINGS_DIR / d / t / "index.html").exists() or _legacy_path[t](d).exists()
-            for t in types
-        ):
+        if not any((BRIEFINGS_DIR / d / t / "index.html").exists() for t in types):
             continue
         if len(past_rows) >= 10:
             break
@@ -726,17 +708,6 @@ def regenerate_index():
             shutil.copy2(src, BRIEFINGS_DIR / "index.html")
             print(f"[generate_html] copied index ← {target_date}/{internal_type}/index.html")
             return
-        # 신형 파일 없으면 레거시 플랫 파일 시도
-        legacy = {
-            "kospi": BRIEFINGS_DIR / f"{target_date}-kospi.html",
-            "us":    BRIEFINGS_DIR / f"{target_date}-us.html",
-            "close": BRIEFINGS_DIR / "ko-close" / target_date / "index.html",
-        }.get(internal_type)
-        if legacy and legacy.exists():
-            import shutil
-            shutil.copy2(legacy, BRIEFINGS_DIR / "index.html")
-            print(f"[generate_html] copied index ← {legacy.name}")
-            return
     tpl = TEMPLATES_DIR / "pages" / "briefings_index.html"
     if not tpl.exists():
         print("[generate_html] skip index (브리핑 0개 + 목록 템플릿 없음)")
@@ -771,9 +742,6 @@ def write_briefings_list_json():
     briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
 
     types = ["kospi", "close", "us"]
-    _legacy_path = {"kospi": lambda d: BRIEFINGS_DIR / f"{d}-kospi.html",
-                    "us":    lambda d: BRIEFINGS_DIR / f"{d}-us.html",
-                    "close": lambda d: BRIEFINGS_DIR / "ko-close" / d / "index.html"}
 
     # 최근 30일 분 날짜만 대상
     all_dates = sorted({b["date"] for b in briefings if b.get("date")}, reverse=True)[:30]
@@ -786,20 +754,13 @@ def write_briefings_list_json():
         day_slots = {}
         for btype in types:
             new_path = BRIEFINGS_DIR / d / btype / "index.html"
-            legacy_path = _legacy_path[btype](d)
-            ready = new_path.exists() or legacy_path.exists()
+            ready = new_path.exists()
             match = next((b for b in briefings if b.get("date") == d and TYPE_MAP.get(b.get("type"), b.get("type")) == btype), None)
 
             if ready:
-                url = f"/briefings/{d}/{btype}/" if new_path.exists() else (
-                    f"/briefings/ko/{d}/" if btype == "kospi" else
-                    f"/briefings/us/{d}/" if btype == "us" else
-                    f"/briefings/ko-close/{d}/"
-                )
-                entry = {"state": "ready", "url": url}
+                entry = {"state": "ready", "url": f"/briefings/{d}/{btype}/"}
                 if btype == "close":
-                    html_path = new_path if new_path.exists() else legacy_path
-                    price = _parse_close_price(html_path)
+                    price = _parse_close_price(new_path)
                     entry["title"] = price or "마감"
                     entry["price"] = price or ""
                     entry["time"] = fmt_time(match.get("generated_at", "")) if match else ""

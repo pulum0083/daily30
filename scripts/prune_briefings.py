@@ -30,24 +30,6 @@ def prune():
                 os.remove(entry.path)
             removed.append(entry.name)
 
-    # ko-close 하위 디렉토리도 동일 규칙 적용
-    ko_close = os.path.join(briefings, 'ko-close')
-    if os.path.isdir(ko_close):
-        for entry in os.scandir(ko_close):
-            m = DATE_RE.match(entry.name)
-            if not m:
-                continue
-            try:
-                entry_date = date.fromisoformat(m.group(1))
-            except ValueError:
-                continue
-            if entry_date < cutoff:
-                if entry.is_dir():
-                    shutil.rmtree(entry.path)
-                else:
-                    os.remove(entry.path)
-                removed.append(f'ko-close/{entry.name}')
-
     if removed:
         print(f"[prune] {cutoff} 이전 {len(removed)}개 삭제:")
         for r in sorted(removed):

@@ -131,21 +131,20 @@ def main():
     patched_any = False
 
     # 1. 오늘 코스피 브리핑 HTML 패치
-    briefing_path = WEB_DIR / "briefings" / f"{date_str}-kospi.html"
+    briefing_path = WEB_DIR / "briefings" / date_str / "kospi" / "index.html"
     if briefing_path.exists():
         patched_any |= patch_html(briefing_path, fg)
     else:
         print(f"[patch_fg] 브리핑 파일 없음: {briefing_path}", file=sys.stderr)
 
-    # 2. index.html 패치 (오늘 코스피 내용이 들어있는 경우만)
-    index_path = WEB_DIR / "index.html"
+    # 2. briefings/index.html 패치 (오늘 코스피 내용이 들어있는 경우만)
+    index_path = WEB_DIR / "briefings" / "index.html"
     if index_path.exists():
-        # index.html이 오늘 코스피 브리핑을 담고 있는지 확인
         index_content = index_path.read_text(encoding="utf-8")
-        if f"{date_str}-kospi" in index_content or f"{date_str} KST 08" in index_content:
+        if date_str in index_content:
             patched_any |= patch_html(index_path, fg)
         else:
-            print(f"[patch_fg] index.html에 오늘 코스피 데이터 없음 — 건너뜀")
+            print(f"[patch_fg] briefings/index.html에 오늘 데이터 없음 — 건너뜀")
 
     if patched_any:
         print("[patch_fg] 패치 완료")

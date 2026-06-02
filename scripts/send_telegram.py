@@ -120,7 +120,7 @@ def build_fallback_message(briefing_type: str) -> str:
         # 마지막 수단: 단순 알림만
         labels = {"kospi": "🇰🇷 코스피", "us": "🇺🇸 미국 시장", "weekly": "📋 주간 리포트", "kospi-close": "🇰🇷 코스피 마감"}
         label = labels.get(briefing_type, "📊 브리핑")
-        url_map = {"kospi": f"ko/{date_slug}", "us": f"us/{date_slug}", "kospi-close": f"ko-close/{date_slug}"}
+        url_map = {"kospi": f"{date_slug}/kospi", "us": f"{date_slug}/us", "kospi-close": f"{date_slug}/close"}
         path = url_map.get(briefing_type, f"weekly/{date_slug}")
         return (
             f"{label} 브리핑 | {today}\n\n"
@@ -151,11 +151,15 @@ def build_fallback_message(briefing_type: str) -> str:
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 예측 브리핑 | {today}"
         pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
-        link = f"{web_url}/briefings/ko/{date_slug}/"
+        link = f"{web_url}/briefings/{date_slug}/kospi/"
     elif briefing_type == "us":
         header = f"🇺🇸 미국 시장 브리핑 | {today}"
         pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
-        link = f"{web_url}/briefings/us/{date_slug}/"
+        link = f"{web_url}/briefings/{date_slug}/us/"
+    elif briefing_type == "kospi-close":
+        header = f"🇰🇷 코스피 마감 브리핑 | {today}"
+        pred_line = f"{dir_emoji} {direction}" if direction else ""
+        link = f"{web_url}/briefings/{date_slug}/close/"
     else:
         header = f"📋 주간 리포트 | {today}"
         pred_line = ""
