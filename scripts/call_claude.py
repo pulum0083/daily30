@@ -29,6 +29,21 @@ DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 섹터 로테이션 풀 (코스피 아침 브리핑 — sector_focus)
+# ─────────────────────────────────────────────────────────────────────────────
+SECTOR_POOL = [
+    {"key": "semicon", "name": "반도체",     "emoji": "🏭"},
+    {"key": "power",   "name": "AI전력기기", "emoji": "⚡"},
+    {"key": "defense", "name": "방산",       "emoji": "🛡️"},
+    {"key": "ship",    "name": "조선",       "emoji": "🚢"},
+    {"key": "battery", "name": "2차전지",    "emoji": "🔋"},
+    {"key": "auto",    "name": "자동차",     "emoji": "🚗"},
+    {"key": "bio",     "name": "바이오",     "emoji": "💊"},
+    {"key": "finance", "name": "금융",       "emoji": "🏦"},
+]
+SECTOR_BY_KEY = {s["key"]: s for s in SECTOR_POOL}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # System prompts (CACHED — these are billed at 10% on cache hits)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -620,6 +635,46 @@ def save_signal_to_history(briefing_type: str, date_str: str, signals: list, kee
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"history": history}, f, ensure_ascii=False, indent=2)
     print(f"[call_claude] Saved signal history → {path} ({len(history)} entries)")
+
+
+def build_sector_avoidance_hint(history: list, days: int = 5) -> str:
+    """최근 N회 선정된 섹터를 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
+    names = []
+    for h in history[:days]:
+        s = SECTOR_BY_KEY.get(h.get("sector_key"))
+        if s:
+            names.append(f"{s['emoji']} {s['name']}")
+    if not names:
+        return ""
+    return (
+        "\n## 🔄 섹터 로테이션 가이드\n"
+        f"최근 다룬 섹터: {', '.join(names)}\n"
+        "위 섹터는 가급적 피하고, 오늘 뉴스·시장 흐름상 가장 임팩트 큰 다른 섹터를 골라 "
+        "sector_focus를 작성하세요. 단, 특정 섹터에 압도적 빅뉴스가 있으면 중복이어도 괜찮아요.\n"
+    )
+
+
+def pick_sector(focus: dict, recent_keys: list) -> dict:
+    """Claude가 고른 sector_focus를 검증·보정한다.
+    - sector_key가 풀에 없으면 최근(recent_keys) 제외하고 pool 순서상 첫 섹터로 폴백.
+    - name·emoji는 항상 풀의 정본 값으로 덮어써 불일치를 막는다.
+    - signal·paragraphs는 Claude 출력 유지.
+    """
+    focus = focus or {}
+    key = focus.get("sector_key")
+    if key not in SECTOR_BY_KEY:
+        key = next(
+            (s["key"] for s in SECTOR_POOL if s["key"] not in recent_keys),
+            SECTOR_POOL[0]["key"],
+        )
+    meta = SECTOR_BY_KEY[key]
+    result = dict(focus)
+    result["sector_key"] = meta["key"]
+    result["sector_name"] = meta["name"]
+    result["emoji"] = meta["emoji"]
+    result.setdefault("signal", "")
+    result.setdefault("paragraphs", [])
+    return result
 
 
 def build_avoidance_hint(history: list, days: int = 3) -> str:
