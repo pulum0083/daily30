@@ -1211,8 +1211,18 @@ def call_claude_closing(date_str: str) -> dict:
     with open(data_file, encoding="utf-8") as f:
         market_data = json.load(f)
 
+    # investor_trading.net은 백만원 단위로 저장됨 → Claude 프롬프트용으로만 억원 변환
+    import copy
+    claude_data = copy.deepcopy(market_data)
+    it = claude_data.get("investor_trading", {})
+    for actor in ["foreign", "institution", "individual"]:
+        if actor in it and "net" in it[actor]:
+            it[actor]["net"] = round(it[actor]["net"] / 100)
+    if it:
+        it["_unit"] = "억원"
+
     user_content = f"오늘 날짜: {date_str}\n\n"
-    user_content += f"마감 데이터:\n{json.dumps(market_data, ensure_ascii=False, indent=2)}\n"
+    user_content += f"마감 데이터:\n{json.dumps(claude_data, ensure_ascii=False, indent=2)}\n"
 
     news_summary = load_news_summary("kospi-close")
     if news_summary:
