@@ -395,6 +395,37 @@ def fetch_investor_trading() -> dict:
 # 장중 5분봉 (9:00~15:20 KST)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _despike_intraday(prices: list, threshold: float = 0.015) -> list:
+    """장중 5분봉의 반전 스파이크(yfinance 장 시작 오틱)를 이웃값으로 보정한다.
+
+    이웃 봉 대비 threshold(기본 1.5%) 이상 같은 방향으로 튀었다가 곧바로
+    되돌아오는 단일 봉을 이웃 평균(내부)·이웃값(양 끝)으로 대체한다.
+    좌→우 순차 적용이라 장 시작부의 연속 오틱도 직전 보정값을 기준으로 흡수된다.
+    """
+    n = len(prices)
+    if n < 3:
+        return list(prices)
+    out = list(prices)
+    for i in range(n):
+        if i == 0:
+            nb = out[1]
+            if nb and abs(out[0] - nb) / nb > threshold:
+                out[0] = nb
+        elif i == n - 1:
+            nb = out[i - 1]
+            if nb and abs(out[i] - nb) / nb > threshold:
+                out[i] = nb
+        else:
+            prev_, next_ = out[i - 1], out[i + 1]
+            if not prev_ or not next_:
+                continue
+            dprev = (out[i] - prev_) / prev_
+            dnext = (out[i] - next_) / next_
+            if abs(dprev) > threshold and abs(dnext) > threshold and (dprev > 0) == (dnext > 0):
+                out[i] = round((prev_ + next_) / 2, 2)
+    return out
+
+
 def fetch_intraday_kospi() -> dict:
     """당일 KOSPI 5분봉 데이터를 반환한다.
 
@@ -429,6 +460,7 @@ def fetch_intraday_kospi() -> dict:
         return {}
 
     prices = [round(float(p), 2) for p in closes.tolist()]
+    prices = _despike_intraday(prices)   # 장 시작 오틱 등 반전 스파이크 보정
     high_val = max(prices)
     low_val  = min(prices)
     print(f"[fetch_closing] intraday: {len(prices)}봉, 고점={high_val}, 저점={low_val}")

@@ -292,7 +292,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             "close_chg": f"{'▲' if up else '▼'} {abs(ca):.2f} ({cp:+.2f}%)",
             "close_chg_cls": "up" if up else "down",
             "vol_label": "코스피 거래대금",
-            "vol_val": ta.get("kospi_formatted") or ta.get("kospi") or "—",
+            "vol_val": ta.get("formatted") or "—",
             "intraday_prices": prices,
             "prev_close": round(price - ca, 2),
             "intraday_axis": ["09:00", "10:30", "12:00", "13:30", "15:20"],
