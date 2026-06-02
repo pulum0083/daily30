@@ -717,14 +717,21 @@ def main():
     parser.add_argument("--data-file", dest="data_file", help="시장 데이터 JSON 경로")
     parser.add_argument("--write-list-only", action="store_true",
                         help="briefings-list.json 만 갱신하고 HTML 재생성 없이 종료")
+    parser.add_argument("--sync-index", action="store_true",
+                        help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
     args = parser.parse_args()
 
     if args.write_list_only:
         write_briefings_list_json()
         return
 
+    if args.sync_index:
+        regenerate_index()
+        write_briefings_list_json()
+        return
+
     if not args.type or not args.date or not args.data_file:
-        parser.error("--type, --date, --data-file 은 필수입니다 (--write-list-only 사용 시 제외)")
+        parser.error("--type, --date, --data-file 은 필수입니다 (--write-list-only / --sync-index 사용 시 제외)")
 
     internal_type = TYPE_MAP[args.type]
     data_path = Path(args.data_file)
