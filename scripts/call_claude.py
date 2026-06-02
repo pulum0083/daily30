@@ -705,6 +705,9 @@ def pick_sector(focus: dict, recent_keys: list) -> dict:
             (s["key"] for s in SECTOR_POOL if s["key"] not in recent_keys),
             SECTOR_POOL[0]["key"],
         )
+    elif key in recent_keys:
+        # 최근 N회 중복 — 강제 교체하지 않고 경고만 남긴다 (빅뉴스 예외 허용)
+        print(f"[call_claude] WARN: sector '{key}'가 최근 선정 이력과 중복 (빅뉴스 예외로 통과)")
     meta = SECTOR_BY_KEY[key]
     result = dict(focus)
     result["sector_key"] = meta["key"]

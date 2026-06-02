@@ -45,6 +45,13 @@ def test_pick_sector_falls_back_when_key_invalid():
     assert result["sector_name"] == "AI전력기기"
 
 
+def test_pick_sector_keeps_valid_recent_duplicate():
+    # 스펙: 유효 키가 최근 이력과 중복이어도 강제 교체하지 않고 유지한다 (경고만).
+    result = cc.pick_sector({"sector_key": "semicon", "signal": "s"}, recent_keys=["semicon", "defense"])
+    assert result["sector_key"] == "semicon"
+    assert result["sector_name"] == "반도체"
+
+
 def test_pick_sector_handles_none_focus():
     result = cc.pick_sector(None, recent_keys=[])
     assert result["sector_key"] == "semicon"
