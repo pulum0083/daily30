@@ -1,0 +1,82 @@
+# 수급 데이터 일간/누적 검증용 일회용 워크플로 — 커밋·배포·발송 없음 (검증 후 삭제)
+name: "🔎 수급 데이터 검증 (일회용)"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify-investor:
+    name: "수급 일간/누적 비교"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 🔎 네이버 스크레이프 vs pykrx 공식 일간 비교
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "scripts")
+          from datetime import datetime, timedelta, timezone
+          KST = timezone(timedelta(hours=9))
+
+          def eok(d, k):
+              v = (d.get(k) or {}).get("net")
+              return f"{v/100:+,.0f}억 ({v:+,} 백만원)" if v is not None else "— (없음)"
+
+          print("실행 시각:", datetime.now(KST).isoformat())
+          print("\n=== ① 네이버 sise_index.naver 스크레이프 (현재 '투자자별 매매동향') ===")
+          try:
+              from fetch_closing_kospi import fetch_investor_trading as close_inv
+              c = close_inv()
+              print(f"  [마감 함수]  외국인 {eok(c,'foreign')} | 기관 {eok(c,'institution')} | 개인 {eok(c,'individual')}")
+          except Exception as e:
+              print("  [마감 함수] 실패:", e)
+          try:
+              from fetch_data import fetch_investor_trading_kospi as morning_inv
+              m = morning_inv()
+              print(f"  [아침 함수]  외국인 {eok(m,'foreign')} | 기관 {eok(m,'institution')} | 개인 {eok(m,'individual')}")
+          except Exception as e:
+              print("  [아침 함수] 실패:", e)
+
+          print("\n=== ② pykrx 공식 KOSPI 투자자별 순매수 — 최근 거래일들 (단위: 억원) ===")
+          print("    (일간이면 날마다 들쭉날쭉, 월누적이면 같은 달 안에서 단조 증가)")
+          try:
+              from pykrx import stock as krx
+              shown = 0
+              for off in range(0, 14):
+                  d = (datetime.now(KST) - timedelta(days=off)).strftime("%Y%m%d")
+                  try:
+                      df = krx.get_market_trading_value_by_investor(d, d, "KOSPI")
+                  except Exception:
+                      continue
+                  if df is None or df.empty or "순매수" not in df.columns:
+                      continue
+                  s = df["순매수"]
+                  def pick(*names):
+                      for n in names:
+                          if n in s.index:
+                              return int(s.loc[n])
+                      return None
+                  fo  = pick("외국인", "외국인합계")
+                  ins = pick("기관합계", "기관계")
+                  ind = pick("개인")
+                  fmt = lambda v: f"{v/1e8:+,.0f}억" if v is not None else "?"
+                  print(f"  {d}: 외국인 {fmt(fo)} | 기관 {fmt(ins)} | 개인 {fmt(ind)}")
+                  shown += 1
+                  if shown >= 6:
+                      break
+              if shown == 0:
+                  print("  pykrx에서 최근 거래일 데이터를 가져오지 못함")
+          except Exception as e:
+              print("  pykrx 실패:", e)
+          PY
