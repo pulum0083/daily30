@@ -1,9 +1,9 @@
-{# 반도체 섹터 브리핑 — 관전 포인트 위, 블릿 형태 #}
+{# 오늘의 섹터 심층 브리핑 — 관전 포인트 위, 블릿 형태 #}
 <div class="open-section">
-  <div class="open-section__title semicon-section-title">💾 반도체 섹터 — {{ semicon_signal }}</div>
+  <div class="open-section__title semicon-section-title">{{ sector_emoji }} {{ sector_name }} 섹터 — {{ sector_signal }}</div>
   <div class="reason-block">
     <ul>
-      {% for para in semicon_paragraphs %}
+      {% for para in sector_paragraphs %}
       <li>{{ para | safe }}</li>
       {% endfor %}
     </ul>
