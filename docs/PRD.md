@@ -1,5 +1,5 @@
 **최초 작성:** 2026년 4월 13일
-**최종 업데이트:** 2026년 5월 20일
+**최종 업데이트:** 2026년 6월 3일
 
 **프로젝트명:** Double-Shot — AI 기반 투자 브리핑 자동화 서비스
 
@@ -35,8 +35,9 @@
     + ForexFactory (경제 지표 캘린더)
          │
          ▼
-[뉴스 요약]
-    Gemini 2.5 Flash Lite (구글 검색 기반 크롤링 → 요약)
+[뉴스 수집·요약]
+    Gemini 2.5 Flash (Google Search grounding)
+    → 그 시점 Google 검색 기반 최신 뉴스 직접 검색·요약 (1회 호출)
          │
          ▼
 [AI 분석 엔진]
@@ -46,11 +47,17 @@
     → 잭 켈로그 20일선 전략 종목 (3~5개)
     → JSON 출력 only
          │
+         ▼
+[데이터 검증 게이트] validate_analysis.py
+    → 픽 종목 실측 주입 (미국=yfinance / 한국=네이버 일봉)
+    → 본문 금지패턴·환율·지수%·수급 스케일 교정
+    → 치명적 오류 시 발행 중단 + 관리자 텔레그램 알림
+         │
     ┌────┴────────────────┐
     ▼                     ▼
 [HTML 생성]          [알림 전송]
  generate_html.py     ├ 텔레그램 (send_telegram.py)
-    │                 └ 이메일 (send_email.py → Resend API)
+ (검증 후 재렌더)     └ 이메일 (send_email.py → Resend API)
     ▼
 [배포]
  GitHub Push → GitHub Pages (gh-pages 브랜치)
@@ -89,8 +96,10 @@
 
 | **단계** | **모델** | **역할** |
 |---|---|---|
-| 뉴스 수집·요약 | Gemini 2.5 Flash Lite | 구글 검색 기반 크롤링 → 요약 (코스피·미국·마감 3종) |
+| 뉴스 수집·요약 | Gemini 2.5 Flash | **Google Search grounding**으로 그 시점 최신 뉴스 직접 검색·요약 (코스피·미국·마감 3종) |
 | 분석·예측 | Claude Sonnet 4.6 | 시장 데이터 + 뉴스 종합 분석, JSON 출력 |
+
+> **뉴스 수집 방식 (2026-06-03 변경):** 기존 구글 뉴스 RSS 파싱 → Gemini 요약(2단계)에서, Gemini가 `google_search` tool로 직접 검색·요약(1단계)으로 교체. RSS 인덱싱 지연·정렬 문제 없이 항상 그 시점 최신 검색 결과를 사용한다.
 
 - **Prompt Caching** 적용 (시스템 프롬프트 캐시, ~5분 TTL, 재실행 시 90% 비용 절감)
 - Claude는 JSON only 출력 → HTML 생성은 `generate_html.py`(Jinja2 템플릿)가 담당
@@ -134,6 +143,49 @@
 | **글쓰기 규칙** | 의견 먼저·해요체, reason_title은 해요체 제외 |
 | **push 충돌 방지** | `git pull --rebase && git push` 패턴 |
 | **API 보안** | `/api/trigger`에 CRON_SECRET 인증 필수 |
+
+---
+
+## 5-1. 데이터 정합성 — 할루시네이션 방지 설계 (2026-06-03)
+
+> **핵심 원칙: 화면에 표시되는 모든 수치는 실측이어야 한다. LLM이 생성한 숫자는 신뢰하지 않고, 발행 전 실제 시장 데이터로 덮어쓴다.**
+
+### 파이프라인 순서 (검증 게이트 → 출력)
+
+```
+call_claude(--no-html)  분석 JSON만 생성 (HTML·텔레그램 X)
+        ↓
+validate_analysis       픽 실측 주입 + 본문 교정 (analysis·candidate 갱신)
+        ↓
+call_claude(--render)   교정된 데이터로 웹 페이지 + 텔레그램 메시지 생성
+        ↓
+send_telegram           웹 페이지 생성 후 발송
+```
+
+LLM이 생성한 HTML·텔레그램이 검증 *이전*에 만들어지던 구조를 바로잡아, **검증 게이트의 교정이 모든 출력물에 반영**되도록 했다.
+
+### 영역별 데이터 출처·검증 상태
+
+| 영역 | 출처 | 상태 |
+|---|---|---|
+| 코스피·미국 **종목 픽** (가격·등락률·MA200/20·sparkline) | 검증 게이트 실측 주입 — **미국=yfinance / 한국=네이버 일봉** | ✅ 실측 |
+| 사이드바 **시장 지표** (지수·VIX·환율) | yfinance / 네이버 | ✅ 실측 |
+| 마감 브리핑 **카드** (지수·시장폭·수급·dpick·섹터·방향검증) | `latest_kospi_close.json` | ✅ 실측 |
+| 미국 **프리장 신고가·낙수 섹터%** | 실측 소스 없음 | ✅ 날조 수치 표시 제거(정성 정보만) |
+| **본문 산문** (reasons·scenario·마감 WHY/WHAT/SO·섹터 단락) | Claude 생성 | ⚠️ 부분 검증 (금지단위·환율범위·지수%·수급 100배 스케일) |
+
+### 종목 픽 실측 주입 메커니즘 (`validate_analysis.enrich_picks_with_realdata`)
+
+Claude는 후보 풀과 무관하게 종목을 자유 선택하므로, 사전 수집된 candidate 풀이 비거나 깨져도(yfinance 실패 시 종목 누락) 픽 종목을 **그 시점 직접 fetch**해 실측을 주입한다.
+
+- **미국 종목:** yfinance 일봉 — 티커 직접 조회.
+- **한국 종목:** 네이버 일봉 API(`api.stock.naver.com/chart/domestic/item/{code}/day`) — **6자리 종목코드만으로 KOSPI·KOSDAQ 시장을 정확히 식별**. yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환하므로 사용 금지.
+- 기준값: **직전 완료 세션 종가 대비 등락률**(`close[-1] vs close[-2]`) — 실시간 장중가 아님.
+- 주입 후 `candidate` 리스트에도 반영 → `generate_html`이 sparkline을 매칭.
+
+### 뉴스 최신성
+
+Gemini Google Search grounding이 그 시점 검색 결과를 직접 사용하므로 항상 최신. 주말 갭(월요일 브리핑의 직전 세션 = 금요일)도 검색 모델이 자연 처리한다.
 
 ---
 
@@ -203,27 +255,29 @@ GitHub Actions
     │         → data/latest_kospi.json
     │
     ├─ python3 scripts/fetch_news.py --type kospi
-    │      └─ Gemini 2.5 Flash Lite 뉴스 요약
+    │      └─ Gemini 2.5 Flash (Google Search grounding) 뉴스 검색·요약
     │         → data/news_summary_kospi.json
     │
-    ├─ python3 scripts/call_claude.py --type kospi
-    │      └─ Claude Sonnet 4.6 (Prompt Caching)
+    ├─ python3 scripts/call_claude.py --type kospi --no-html
+    │      └─ Claude Sonnet 4.6 (Prompt Caching) — 분석 JSON만
     │         → data/analysis_kospi.json (JSON only)
+    │
+    ├─ python3 scripts/validate_analysis.py --type kospi
+    │      └─ 픽 실측 주입(미국 yfinance/한국 네이버) + 본문 교정
+    │         → analysis_kospi.json·latest_kospi.json 갱신
+    │
+    ├─ python3 scripts/call_claude.py --type kospi --render
+    │      └─ 교정된 데이터로 웹 페이지 + 텔레그램 메시지 생성
+    │         → web/briefings/YYYY-MM-DD/kospi/index.html
     │
     ├─ python3 scripts/update_latest.py --type kospi
     │      └─ web/data/latest.json 갱신
     │
-    ├─ python3 scripts/send_telegram.py --type kospi
+    ├─ python3 scripts/send_telegram.py --type kospi   (웹 페이지 생성 후)
     │      └─ Telegram Bot API 호출
     │
     ├─ python3 scripts/send_email.py --type kospi
     │      └─ Resend API 호출
-    │
-    ├─ python3 scripts/generate_html.py --type kospi
-    │      └─ Jinja2 템플릿 렌더링
-    │         → web/briefings/YYYY-MM-DD-kospi.html
-    │         → web/briefings/YYYY-MM-DD/index.html
-    │         → web/briefings/index.html (목록 갱신)
     │
     └─ git add → commit → pull --rebase → push
            └─ GitHub Pages 자동 배포 (gh-pages 브랜치)
@@ -394,6 +448,7 @@ daily30/
 | 2026-05-15 | PRD 전면 업데이트 (현행 시스템 상태 반영) |
 | 2026-05-20 | 코스피 시초가 07:30 변경, 마감 뉴스 수집 추가, 10년물 금리 필수규칙 제거, trigger.mjs 인증 강화, 템플릿 UI 통일 |
 | 2026-06-02 | 코스피 아침 섹터 심층 로테이션 도입 — 반도체 고정(sector_semicon) → 8개 풀 하이브리드 자동 선정(sector_focus), 최근 5회 회피 이력(sector_history_kospi.json) |
+| 2026-06-03 | **데이터 정합성 전면 강화:** ① 종목 픽 실측 주입(검증 게이트, 미국 yfinance·한국 네이버 일봉) ② 한국 KOSDAQ `.KS` 유령데이터 버그 수정 ③ 파이프라인 재배치(검증→웹페이지→텔레그램) ④ 프리장 신고가·낙수 섹터% 날조 수치 제거 ⑤ 뉴스 수집 RSS→Gemini Google Search grounding 교체 |
 
 ---
 
