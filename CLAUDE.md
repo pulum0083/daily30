@@ -118,10 +118,19 @@ daily30/
 - 구글 검색 기반 뉴스 크롤링 후 요약
 - `data/news_summary_{type}.json` 저장
 
+### 뉴스 수집 — Gemini 2.5 Flash + Google Search grounding (`fetch_news.py`)
+- `google_search` tool로 그 시점 최신 뉴스를 **직접 검색·요약**(1회 호출). RSS 파싱 제거됨.
+- 브리핑 타입별 검색 프롬프트(KOSPI/KOSPI_CLOSE/US)로 검색 키워드 지시.
+
 ### 분석·예측 — Claude Sonnet 4.6 (`call_claude.py`)
 - **Prompt Caching** 적용 (시스템 프롬프트 캐시, ~5분 TTL, 재실행 시 90% 비용 절감)
 - 출력: JSON only (`analysis_{type}.json`) → HTML 생성은 `generate_html.py`가 담당
 - 생성 항목: `prediction` (direction / up_pct / confidence), `reasons`, `reason_title`, `stock_picks`
+
+### 데이터 검증 게이트 — `validate_analysis.py`
+- call_claude(`--no-html`) → **validate_analysis** → call_claude(`--render`) → telegram 순으로 동작.
+- 픽 종목 실측 주입(미국 yfinance·한국 네이버 일봉) + 본문 금지패턴·환율·지수%·수급 스케일 교정.
+- 치명적 오류 시 발행 중단 + 관리자 텔레그램 알림.
 
 ### 마감 데이터 수집 — `fetch_closing_kospi.py`
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
@@ -176,9 +185,35 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 
 ## 운영 규칙
 
-### 1. 브리핑 데이터 검증 — 의심 없이 확인, 틀리면 수정 후 커밋
+### 0. 데이터 정합성 — 자동 검증 파이프라인 (핵심)
 
-> **LLM이 생성한 가격·수치는 틀릴 수 있다. 브리핑에 나오는 모든 수치는 실제 시장 데이터로 검증하고 반영한다.**
+> **화면에 표시되는 모든 수치는 실측이어야 한다. LLM이 생성한 숫자는 신뢰하지 않고, 발행 전 실제 시장 데이터로 덮어쓴다.**
+
+**파이프라인 순서 (절대 바꾸지 말 것):**
+
+```
+call_claude --no-html   분석 JSON만 (HTML·텔레그램 생성 안 함)
+      → validate_analysis   픽 실측 주입 + 본문 교정
+      → call_claude --render   교정된 데이터로 웹 페이지·텔레그램 메시지 생성
+      → send_telegram   웹 페이지 생성 후 발송
+```
+
+LLM 출력(HTML·텔레그램)이 검증 *이전*에 만들어지면 교정이 반영되지 않는다. 새 출력물을 추가할 때도 반드시 `--render`(검증 이후) 단계에서 생성한다.
+
+**종목 픽 실측 주입 (`enrich_picks_with_realdata`):**
+- 미국 종목 → **yfinance** (티커 직접).
+- 한국 종목 → **네이버 일봉** (`api.stock.naver.com/chart/domestic/item/{code}/day`). **6자리 코드만 사용, `.KS`/`.KQ` 접미사 금지.**
+  - ⚠️ yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 네이버는 코드만으로 시장을 정확히 식별한다.
+- 기준: 직전 완료 세션 종가 대비 등락률(`close[-1] vs close[-2]`), 실시간 장중가 아님.
+
+**실측 소스가 없는 영역은 수치를 표시하지 않는다:**
+- 미국 프리장 신고가(`premarket_highs`), 낙수 섹터 등락률(`spill` tag) → 정성 정보만, 숫자 제거.
+
+**검증 범위 (현재):** 픽·사이드바·마감 카드는 실측. 본문 산문(reasons·scenario·마감 WHY/WHAT/SO)은 금지단위·환율·지수%·수급 100배 스케일만 검증 — 산문 내 개별 종목 수치는 구조적 미검증이므로 수동 점검 시 주의.
+
+### 1. 브리핑 데이터 수동 검증 — 의심 없이 확인, 틀리면 수정 후 커밋
+
+> **자동 게이트가 있어도, 수동 패치·재생성 시에는 LLM이 생성한 가격·수치를 실제 시장 데이터로 검증하고 반영한다.**
 
 #### 종목 가격·등락률 (코스피·미국 예측 브리핑)
 
@@ -186,15 +221,22 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 HTML 반영 전 반드시 yfinance 또는 네이버 금융으로 실제 값을 확인하고 덮어쓴다.
 
 ```python
+# 국내 종목: 네이버 일봉 (6자리 코드만, 시장 자동 식별 — .KS 금지)
+import urllib.request, json
+from datetime import datetime, timedelta
+code = "005930"
+end = datetime.now().strftime("%Y%m%d") + "0000"
+start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
+url = f"https://api.stock.naver.com/chart/domestic/item/{code}/day?startDateTime={start}&endDateTime={end}"
+rows = json.loads(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})).read())
+closes = [r["closePrice"] for r in rows if r.get("closePrice")]  # 오래된→최신
+
+# 미국 종목: yfinance 티커 직접 사용
 import yfinance as yf
-
-# 국내 종목: "{종목코드}.KS" 형식, 5d로 최근 종가 확인
-hist = yf.Ticker("005380.KS").history(period="5d").dropna(subset=["Close"])
-last_close = int(hist["Close"].iloc[-1])
-
-# 미국 종목: 티커 직접 사용
 hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 ```
+
+> ⚠️ 국내 종목에 `yf.Ticker("{code}.KS")`를 쓰지 말 것. KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 가장 안전한 건 `validate_analysis._fetch_kospi_realdata(code)` 재사용.
 
 - 가격이 실제와 차이나면 → 가격·등락률·MA200·진입/목표/손절·sparkline 모두 일괄 수정.
 - **sparkline 빈 배열** `drawMiniChart('mc-N', [], [], [])` → 캔버스 빈칸. yfinance 20일 종가로 채운다.
