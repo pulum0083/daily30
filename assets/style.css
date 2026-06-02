@@ -687,7 +687,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .bl-today__body{grid-template-columns:1fr;}
   .bl-slot{border-right:none;border-bottom:1px solid var(--hairline);}
   .bl-slot:last-child{border-bottom:none;}
-  .bl-row{grid-template-columns:auto 1fr 1fr;}
-  .bl-row__date{padding:0 12px;}
-  .bl-cell:last-child{display:none;}
+  .bl-row{grid-template-columns:auto 1fr 1fr 1fr;}
+  .bl-row__date{padding:0 10px;}
+  .bl-cell{padding:10px 8px;}
 }
