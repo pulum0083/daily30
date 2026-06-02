@@ -277,7 +277,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   },
   "reason_title": "왜 오를까? — 나스닥·유가 하락 동시 호재",
   "reasons": [
-    "🚀 코스피 시초가가 오늘 강하게 출발할 것 같아요. 나스닥이 <b>+X.X%</b> 올랐고 NQ선물도 <b>+X.X%</b> 상승하며 미국 증시가 사상 최고 수준에 근접했거든요.",
+    "🚀 코스피가 오늘 강하게 상승할 것 같아요. 나스닥이 <b>+X.X%</b> 올랐고 NQ선물도 <b>+X.X%</b> 상승하며 미국 증시가 사상 최고 수준에 근접했거든요.",
     "🛢️ 국제 유가 급락이 오늘 성장주에 긍정적으로 작용할 것 같아요. WTI 유가가 <b>-X.X%</b> 떨어지며 인플레이션 부담이 줄었고 금리 부담도 다소 완화됐거든요.",
     "💡 반도체·메모리 섹터가 오늘 강세 출발할 것 같아요. 미국 반도체 지수(SOX)가 <b>+X.X%</b> 올랐고 삼성전자·SK하이닉스 같은 대형 반도체주에 우호적인 흐름이거든요.",
     "🌏 외국인 수급이 오늘 코스피에 우호적으로 작용할 것 같아요. 닛케이 <b>+X.X%</b>·상해 <b>+X.X%</b>로 아시아 증시가 동반 강세를 보이며 리스크온 분위기가 형성됐거든요."
@@ -973,7 +973,7 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
         )
         print("[call_claude] Post-holiday catch-up context injected")
 
-    # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 시초가 + us 브리핑)
+    # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 예측 + us 브리핑)
     if briefing_type in ("kospi", "us"):
         history = load_signal_history(briefing_type)
         # 오늘 분 entry는 회피 대상에서 제외 (재실행 시 자기 자신을 회피하지 않도록)
@@ -1020,7 +1020,7 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     raw_text = response.content[0].text
     analysis = extract_json(raw_text)
 
-    # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 시초가 + us 브리핑)
+    # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 + us 브리핑)
     if briefing_type in ("kospi", "us"):
         signals = extract_signal_emojis(analysis.get("reasons", []))
         save_signal_to_history(briefing_type, date_str, signals)

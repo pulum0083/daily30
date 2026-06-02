@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily30' — 코스피 시초가 브리핑 2026-04-17</title>
+  <title>Daily30' — 코스피 예측 브리핑 2026-04-17</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
   <link rel="apple-touch-icon" href="/favicon.svg"/>
   <link rel="stylesheet" href="assets/style.css" />
@@ -63,7 +63,7 @@
               <!-- 1. 예측 카드 -->
               <div class="open-section">
                 <div class="open-section__title">
-                  코스피 시초가 방향 예측
+                  코스피 당일 방향 예측
                   <button class="info-icon-btn" onclick="openPredModal()" aria-label="예측 방법 설명">?</button>
                   <span class="section-time">10:11 생성</span>
                 </div>
@@ -125,7 +125,7 @@
                   <ul>
                     
                     
-                    <li>🚀 나스닥 <b>+1.96%</b>, S&P500 <b>+1.18%</b>, 반도체지수(SOX) <b>+2.04%</b> 동반 상승하며 미국 시장의 강한 위험선호 기조가 확인됨. 코스피 시초가 강세 출발을 강하게 지지.</li>
+                    <li>🚀 나스닥 <b>+1.96%</b>, S&P500 <b>+1.18%</b>, 반도체지수(SOX) <b>+2.04%</b> 동반 상승하며 미국 시장의 강한 위험선호 기조가 확인됨. 코스피 당일 강세를 강하게 지지.</li>
                     
                     <li>💡 NVDA <b>+3.8%</b>, META <b>+4.41%</b>, AMZN <b>+3.81%</b> 등 빅테크 전반의 강세로 반도체·IT 섹터 연동 코스피 대형주에 상승 압력.</li>
                     
@@ -329,7 +329,7 @@
         <div class="accuracy-standalone">
           <div class="accuracy-standalone__header">
             <span class="accuracy-standalone__title">예측 정확도</span>
-            <span class="accuracy-standalone__sub">코스피 시초가</span>
+            <span class="accuracy-standalone__sub">코스피 예측</span>
           </div>
           <div class="accuracy-standalone__stats">
             <div class="acc-stat">
@@ -523,15 +523,15 @@
     </div>
   </div>
 
-  <!-- 시초가 예측 모달 -->
+  <!-- 당일 방향 예측 모달 -->
   <div class="info-modal-backdrop" id="pred-modal" onclick="if(event.target===this)closePredModal()">
     <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">
       <button class="info-modal__close" onclick="closePredModal()" aria-label="닫기">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
-      <div class="info-modal__title" id="pred-modal-title">시초가 방향 예측이란?</div>
+      <div class="info-modal__title" id="pred-modal-title">당일 방향 예측이란?</div>
       <div class="info-modal__body">
-        <p>미국 선물·지수, 외국인 수급, 반도체 지표, 공포탐욕지수 등 다수의 시장 데이터를 종합하여 AI가 다음 거래일 시초가 방향을 분석한 결과입니다.</p>
+        <p>미국 선물·지수, 외국인 수급, 반도체 지표, 공포탐욕지수 등 다수의 시장 데이터를 종합하여 AI가 당일 코스피 종가 방향을 분석한 결과입니다.</p>
         <br>
         <p><strong>읽는 법</strong></p>
         <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
