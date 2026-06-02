@@ -192,84 +192,44 @@ def fetch_investor_trading_kospi(date_str: str = None) -> dict:
             target -= timedelta(days=1)
         date_str = target.strftime("%Y%m%d")
 
-    def parse_num(s: str) -> int:
-        """'+1,234,567' 또는 '-234,567' → int"""
-        s = str(s).strip().replace(",", "").replace("+", "")
-        try:
-            return int(s)
-        except ValueError:
-            return 0
+    # 네이버 증권 KOSPI 지수 페이지의 "투자자별 매매동향" 파싱.
+    # 구 investorTrend JSON API(api.stock.naver.com/.../investorTrend)는 폐기되어 404.
+    # 마감 브리핑(fetch_closing_kospi.fetch_investor_trading)과 동일한 HTML 소스를 사용한다.
+    # 07:30 실행 시점엔 시장이 마감 상태이므로 이 페이지는 직전 완료 세션(전 거래일) 수급을 보여준다.
+    try:
+        url = "https://finance.naver.com/sise/sise_index.naver?code=KOSPI"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            text = resp.read().decode("euc-kr", errors="ignore")
 
-    # NAVER Stock 모바일 REST API (JSON 반환, 인증 불필요)
-    # 투자자별 순매수 — 코스피 기준
-    candidate_apis = [
-        # 1순위: NAVER 증권 모바일 API (인덱스 투자자 동향)
-        f"https://api.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-        # 2순위: m.stock.naver.com 버전
-        f"https://m.stock.naver.com/api/index/KOSPI/investorTrend?bizDate={date_str}",
-    ]
-    headers = {
-        "User-Agent":    "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Mobile Safari/537.36",
-        "Referer":       "https://m.stock.naver.com/",
-        "Accept":        "application/json, text/plain, */*",
-        "Accept-Language": "ko-KR,ko;q=0.9",
-    }
+        # "개인<br>..+N,NNN억...외국인<br>...-N,NNN억...기관<br>...+N,NNN억" 패턴
+        m = re.search(
+            r"개인<br>.*?([+-][0-9,]+).*?외국인<br>.*?([+-][0-9,]+).*?기관<br>.*?([+-][0-9,]+)",
+            text, re.DOTALL,
+        )
+        if not m:
+            print("[fetch_data] Investor trading: pattern not found", file=sys.stderr)
+            return {}
 
-    # 투자자 코드 → 영문 키 매핑
-    INVESTOR_MAP = {
-        "FO":   "foreign",      # 외국인
-        "OT":   "institution",  # 기관
-        "PE":   "individual",   # 개인
-        # 이름 기반 fallback
-        "외국인": "foreign",
-        "기관":   "institution",
-        "개인":   "individual",
-    }
+        def _eok_to_mwon(s: str) -> int:
+            # 억원 → 백만원 (×100). 다운스트림(supply_history·generate_html)이 기대하는 단위.
+            return int(s.replace(",", "").replace("+", "")) * 100
 
-    for url in candidate_apis:
-        try:
-            req = urllib.request.Request(url, headers=headers)
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-
-            # 응답 구조 탐색: list or dict
-            rows = data if isinstance(data, list) else data.get("investorList", data.get("list", []))
-            if not rows:
-                print(f"[fetch_data] Investor trading: empty JSON from {url.split('?')[0].split('/')[-1]}", file=sys.stderr)
-                continue
-
-            result: dict = {"date": date_str}
-            for row in rows:
-                # 투자자 구분: investorType, tp, type 등 키 이름 다양
-                inv_type = (
-                    row.get("investorType") or row.get("tp") or
-                    row.get("type") or row.get("name") or ""
-                )
-                key = INVESTOR_MAP.get(inv_type)
-                if not key:
-                    continue
-                # 순매수: netBuyAmount, net, netBuy 등
-                net_val = (
-                    row.get("netBuyAmount") or row.get("net") or
-                    row.get("netBuy") or row.get("netAmount") or 0
-                )
-                result[key] = {"net": int(str(net_val).replace(",", "") or 0)}
-
-            if len(result) > 1:  # date 외 최소 1개 이상
-                foreign_net     = result.get("foreign",     {}).get("net", 0)
-                institution_net = result.get("institution", {}).get("net", 0)
-                print(f"[fetch_data] Investor trading ({date_str}): "
-                      f"foreign={foreign_net:+,}, institution={institution_net:+,} (단위: 백만원)")
-                return result
-
-            print(f"[fetch_data] Investor trading: could not map investors from {url}", file=sys.stderr)
-
-        except Exception as e:
-            print(f"[fetch_data] Investor trading error ({url.split('/')[-1].split('?')[0]}): {e}", file=sys.stderr)
-            continue
-
-    print(f"[fetch_data] Investor trading: all sources failed for {date_str}", file=sys.stderr)
-    return {}
+        individual  = _eok_to_mwon(m.group(1))
+        foreign     = _eok_to_mwon(m.group(2))
+        institution = _eok_to_mwon(m.group(3))
+        result = {
+            "date":        date_str,
+            "foreign":     {"net": foreign},
+            "institution": {"net": institution},
+            "individual":  {"net": individual},
+        }
+        print(f"[fetch_data] Investor trading ({date_str}): "
+              f"foreign={foreign:+,}, institution={institution:+,}, individual={individual:+,} (백만원)")
+        return result
+    except Exception as e:
+        print(f"[fetch_data] Investor trading error: {e}", file=sys.stderr)
+        return {}
 
 
 def _yf_history(ticker: str, retries: int = 3, **kwargs):
