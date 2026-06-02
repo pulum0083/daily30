@@ -92,17 +92,21 @@ jobs:
 
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/call_claude.py --type kospi
+        run: python3 scripts/call_claude.py --type kospi --no-html
 
       - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/validate_analysis.py --type kospi
 
+      - name: 🖥️ 웹 페이지·텔레그램 메시지 생성 (교정된 데이터로 재렌더)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/call_claude.py --type kospi --render
+
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type kospi
 
-      - name: 📨 Telegram 전송
+      - name: 📨 Telegram 전송 (웹 페이지 생성 후)
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
@@ -190,17 +194,21 @@ jobs:
 
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/call_claude.py --type us
+        run: python3 scripts/call_claude.py --type us --no-html
 
       - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/validate_analysis.py --type us
 
+      - name: 🖥️ 웹 페이지·텔레그램 메시지 생성 (교정된 데이터로 재렌더)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/call_claude.py --type us --render
+
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type us
 
-      - name: 📨 Telegram 전송
+      - name: 📨 Telegram 전송 (웹 페이지 생성 후)
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
@@ -299,13 +307,19 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: |
           DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
-          python3 scripts/call_claude.py --type kospi-close --date "$DATE"
+          python3 scripts/call_claude.py --type kospi-close --date "$DATE" --no-html
 
       - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/validate_analysis.py --type kospi-close
 
-      - name: 📨 Telegram 전송
+      - name: 🖥️ 웹 페이지·텔레그램 메시지 생성 (교정된 데이터로 재렌더)
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
+          python3 scripts/call_claude.py --type kospi-close --date "$DATE" --render
+
+      - name: 📨 Telegram 전송 (웹 페이지 생성 후)
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi-close

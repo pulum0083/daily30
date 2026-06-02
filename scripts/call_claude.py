@@ -1069,6 +1069,37 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
+def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: bool = False) -> None:
+    """교정된 analysis로 텔레그램 메시지(txt)와 HTML을 생성한다 (API 호출 없음).
+
+    검증 게이트(validate_analysis) 이후에 호출돼야 교정값이 출력물에 반영된다.
+    """
+    if briefing_type == "kospi-close":
+        data_file = DATA_DIR / "latest_kospi_close.json"
+        with open(data_file, encoding="utf-8") as f:
+            market_data = json.load(f)
+        save_closing_telegram_message(date_str, analysis, market_data)
+        gen_type = "kospi-close"
+    else:
+        save_telegram_message(briefing_type, date_str, analysis)
+        gen_type = briefing_type
+        data_file = DATA_DIR / f"latest_{briefing_type}.json"
+
+    if no_html:
+        return
+    html_script = BASE_DIR / "scripts" / "generate_html.py"
+    cmd = [
+        sys.executable, str(html_script),
+        "--type", gen_type,
+        "--data-file", str(data_file),
+        "--date", date_str,
+    ]
+    print(f"[call_claude] Generating HTML: {' '.join(cmd)}")
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        print("[call_claude] WARNING: HTML generation failed", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Call Claude API with Prompt Caching")
     parser.add_argument("--type", choices=["kospi", "us", "kospi-close"], required=True)
@@ -1077,9 +1108,25 @@ def main():
         "--no-html", action="store_true",
         help="Skip HTML generation (useful for testing)"
     )
+    parser.add_argument(
+        "--render", action="store_true",
+        help="API 호출 없이 기존(교정된) analysis_*.json으로 텔레그램 txt·HTML만 재생성"
+    )
     args = parser.parse_args()
 
     date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
+
+    # ── 재렌더 모드: 검증 게이트 이후 교정된 analysis로 출력물만 재생성 ──
+    if args.render:
+        analysis_path = DATA_DIR / f"analysis_{args.type}.json"
+        if not analysis_path.exists():
+            print(f"[call_claude] ERROR: {analysis_path} 없음 — --render 불가", file=sys.stderr)
+            sys.exit(1)
+        with open(analysis_path, encoding="utf-8") as f:
+            analysis = json.load(f)
+        render_outputs(args.type, date_str, analysis, no_html=args.no_html)
+        print(f"[call_claude] Render-only done (type={args.type})")
+        return
 
     # ── KOSPI 마감 시황 흐름 ──
     if args.type == "kospi-close":
@@ -1090,26 +1137,7 @@ def main():
             sys.exit(1)
 
         save_analysis("kospi-close", analysis)
-
-        data_file = DATA_DIR / "latest_kospi_close.json"
-        with open(data_file, encoding="utf-8") as f:
-            market_data = json.load(f)
-
-        save_closing_telegram_message(date_str, analysis, market_data)
-
-        if not args.no_html:
-            html_script = BASE_DIR / "scripts" / "generate_html.py"
-            cmd = [
-                sys.executable, str(html_script),
-                "--type", "kospi-close",
-                "--data-file", str(data_file),
-                "--date", date_str,
-            ]
-            print(f"[call_claude] Generating closing HTML: {' '.join(cmd)}")
-            result = subprocess.run(cmd)
-            if result.returncode != 0:
-                print("[call_claude] WARNING: closing HTML generation failed", file=sys.stderr)
-
+        render_outputs("kospi-close", date_str, analysis, no_html=args.no_html)
         print(f"[call_claude] Done. market_title={analysis.get('market_title', '')}")
         return
 
@@ -1122,21 +1150,7 @@ def main():
 
     save_analysis(args.type, analysis)
     save_prediction_to_briefings(args.type, date_str, analysis)
-    save_telegram_message(args.type, date_str, analysis)
-
-    if not args.no_html:
-        data_file = DATA_DIR / f"latest_{args.type}.json"
-        html_script = BASE_DIR / "scripts" / "generate_html.py"
-        cmd = [
-            sys.executable, str(html_script),
-            "--type", args.type,
-            "--data-file", str(data_file),
-            "--date", date_str,
-        ]
-        print(f"[call_claude] Generating HTML: {' '.join(cmd)}")
-        result = subprocess.run(cmd)
-        if result.returncode != 0:
-            print("[call_claude] WARNING: HTML generation failed", file=sys.stderr)
+    render_outputs(args.type, date_str, analysis, no_html=args.no_html)
 
     print(f"[call_claude] Done. direction={analysis.get('prediction', {}).get('direction')}")
 
