@@ -37,6 +37,7 @@ env:
   TELEGRAM_BOT_TOKEN_EN: ${{ secrets.TELEGRAM_BOT_TOKEN_EN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   TELEGRAM_CHAT_ID_EN: ${{ secrets.TELEGRAM_CHAT_ID_EN }}
+  TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
   WEB_BASE_URL: "https://doubleshot.space"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -92,6 +93,10 @@ jobs:
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type kospi
+
+      - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/validate_analysis.py --type kospi
 
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
@@ -186,6 +191,10 @@ jobs:
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type us
+
+      - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/validate_analysis.py --type us
 
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
@@ -291,6 +300,10 @@ jobs:
         run: |
           DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
           python3 scripts/call_claude.py --type kospi-close --date "$DATE"
+
+      - name: 🛡️ 분석 검증 게이트 (수치·본문 — 치명적 오류 시 발행 중단)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/validate_analysis.py --type kospi-close
 
       - name: 📨 Telegram 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
