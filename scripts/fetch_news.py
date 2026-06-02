@@ -38,7 +38,9 @@ KST = pytz.timezone("Asia/Seoul")
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _rss(q: str, hl: str = "en", gl: str = "US", ceid: str = "US:en", recent: bool = False) -> str:
-    # recent=True → tbs=qdr:d (24시간 이내 뉴스만)
+    # recent=True → tbs=qdr:d (Google측 24시간 프리필터). 같은 날 뉴스만 의미있는
+    # 피드(마감·프리장)에만 사용. 일반 시장 피드는 주말 갭(월요일=금요일장) 때문에
+    # Google측 강제 필터를 걸지 않고, 기사 pubDate 최신순 정렬 + staleness 상한으로 거른다.
     tbs = "&tbs=qdr:d" if recent else ""
     return f"https://news.google.com/rss/search?q={quote(q)}&hl={hl}&gl={gl}&ceid={ceid}{tbs}"
 
@@ -47,7 +49,7 @@ KOSPI_RSS_FEEDS = [
     _rss("Korea stock NASDAQ semiconductor", "en", "US", "US:en"),
     _rss("Korean stock market today", "en", "US", "US:en"),
     _rss("코스피 증시", "ko", "KR", "KR:ko"),
-    # 원유 가격 동향: 유가 급등락이 코스피 인플레·에너지 섹터에 직결되므로 최신 뉴스 포함
+    # 원유 가격 동향: 유가 급등락이 코스피 인플레·에너지 섹터에 직결
     _rss("crude oil WTI Brent price today", "en", "US", "US:en", recent=True),
 ]
 
@@ -63,7 +65,7 @@ US_RSS_FEEDS = [
     _rss("Federal Reserve interest rate economy"),
     _rss("US stock market today earnings"),
     _rss("NVDA AAPL MSFT semiconductor"),
-    # 프리장 신고가 피드: recent=True → 24시간 이내 뉴스만
+    # 프리장 신고가 피드(마지막 3개): 같은 날 프리장 뉴스만
     _rss("stock 52-week high premarket", recent=True),
     _rss("stock all-time high premarket today", recent=True),
     _rss("stock hits record high premarket earnings", recent=True),
@@ -207,14 +209,17 @@ def _parse_pub_date(pub_date_str: str) -> "datetime | None":
 
 
 def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 0) -> list[str]:
-    """Google News RSS에서 헤드라인 목록을 반환한다.
+    """Google News RSS에서 헤드라인을 발행 최신순으로 반환한다.
 
-    max_age_hours > 0 이면 해당 시간 이내에 발행된 기사만 포함.
+    - 전체 item을 파싱해 pubDate 기준 내림차순(최신 우선) 정렬한다.
+      (Google RSS 기본 정렬은 관련도순이라, 정렬 없이 앞에서 자르면 오래된 기사가
+       섞이고 최신 기사가 유실될 수 있다.)
+    - max_age_hours > 0 이면 그 시간보다 오래된 기사는 제외(staleness 상한).
+      pubDate 없는 기사는 보수적으로 제외한다.
+    - 정렬·필터 후 상위 max_items개를 반환한다.
     """
     import re as _re
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; DailyB/1.0)"
-    }
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; DailyB/1.0)"}
     try:
         req = Request(feed_url, headers=headers)
         with urlopen(req, timeout=10) as resp:
@@ -223,31 +228,25 @@ def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 
         channel = root.find("channel")
         if channel is None:
             return []
-        items = channel.findall("item")[:max_items]
         now_utc = datetime.now(pytz.utc)
-        headlines = []
-        for item in items:
-            # pubDate 필터링
+        parsed = []  # (pub_dt, line)
+        for item in channel.findall("item"):
+            pub_dt = _parse_pub_date(item.findtext("pubDate", "") or "")
             if max_age_hours > 0:
-                pub_date_str = item.findtext("pubDate", "")
-                pub_dt = _parse_pub_date(pub_date_str) if pub_date_str else None
                 if pub_dt is None:
+                    continue  # 날짜 미상은 staleness 보장 불가 → 제외
+                if (now_utc - pub_dt).total_seconds() / 3600 > max_age_hours:
                     continue
-                age_hours = (now_utc - pub_dt).total_seconds() / 3600
-                if age_hours > max_age_hours:
-                    continue
-
             title = item.findtext("title", "").strip()
+            if not title:
+                continue
             desc = item.findtext("description", "").strip()
-            desc_clean = ""
-            if desc:
-                desc_clean = _re.sub(r"<[^>]+>", "", desc)[:120]
-            if title:
-                line = title
-                if desc_clean:
-                    line += f" — {desc_clean}"
-                headlines.append(line)
-        return headlines
+            desc_clean = _re.sub(r"<[^>]+>", "", desc)[:120] if desc else ""
+            line = f"{title} — {desc_clean}" if desc_clean else title
+            parsed.append((pub_dt, line))
+        # 최신순 정렬 (pubDate 없는 항목은 가장 뒤로)
+        parsed.sort(key=lambda x: x[0] or datetime.min.replace(tzinfo=pytz.utc), reverse=True)
+        return [line for _, line in parsed[:max_items]]
     except (URLError, ET.ParseError, Exception) as e:
         print(f"[fetch_news] RSS fetch failed ({feed_url[:60]}...): {e}", file=sys.stderr)
         return []
@@ -255,16 +254,21 @@ def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 
 
 def collect_news(briefing_type: str) -> str:
     """모든 RSS 피드에서 헤드라인을 수집하여 하나의 텍스트로 반환한다."""
+    # max_age_hours: 기사 staleness 상한. 헤드라인은 최신순 정렬돼 항상 최신을 우선
+    # 선택하므로, 이 값은 '오래된 뉴스 유입 차단' backstop이다. 일반 시장 피드는
+    # 주말 갭(월요일 브리핑의 직전 세션 = 금요일, 최대 ~72h 전)을 커버하도록 72h.
+    # 같은 날 뉴스만 의미있는 마감·프리장 피드는 더 짧게.
+    GENERAL_MAX_AGE = 72
     if briefing_type == "kospi":
-        # (feed_url, max_age_hours) — 0 = 필터 없음
-        feed_configs = [(url, 0) for url in KOSPI_RSS_FEEDS]
+        feed_configs = [(url, GENERAL_MAX_AGE) for url in KOSPI_RSS_FEEDS]
     elif briefing_type == "kospi-close":
-        feed_configs = [(url, 0) for url in KOSPI_CLOSE_RSS_FEEDS]
+        # 당일 마감 시황: 오늘 장중 뉴스만 — 36h
+        feed_configs = [(url, 36) for url in KOSPI_CLOSE_RSS_FEEDS]
     else:
-        # 일반 피드: 필터 없음 / 프리장 신고가 피드(마지막 3개): 30시간 이내만
+        # 일반 피드: 72h(주말 갭) / 프리장 신고가 피드(마지막 3개): 같은 날 30h
         general = US_RSS_FEEDS[:-3]
         premarket = US_RSS_FEEDS[-3:]
-        feed_configs = [(url, 0) for url in general] + [(url, 30) for url in premarket]
+        feed_configs = [(url, GENERAL_MAX_AGE) for url in general] + [(url, 30) for url in premarket]
 
     all_headlines = []
     seen = set()
