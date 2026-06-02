@@ -195,6 +195,12 @@ reasons, watch_items, sector_focus 등 모든 출력에서, 시장 데이터 JSO
 ❌ 금지 예: "코스피 시가총액이 <b>7경 원</b>을 돌파하며" (데이터에 시가총액 수치 없음)
 ✅ 허용 예: "EWY가 <b>+5.20%</b> 폭등해 외국인 자금 유입이 강하게 나타나고 있어요." (EWY change_pct는 데이터에 존재)
 
+**[필수 규칙 6] 원/달러 환율 수치는 반드시 `usdkrw.price`를 사용한다**
+환율을 언급해야 하는 모든 섹션(reasons, sector_focus, watch_items 등)에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.
+`usdkrw` 데이터가 없으면 환율 수치를 직접 기재하지 않고 "원화 흐름" 등 정성적 표현으로만 쓴다.
+❌ 금지: 데이터 없이 "환율이 1,370원 아래로" 등 임의 수치 기재
+✅ 허용: "원달러 환율이 <b>{usdkrw.price}원</b>으로" (데이터에 실제 값 있을 때만)
+
 ### 예측 근거 섹션 타이틀(reason_title) 작성 규칙
 예측 근거 섹션 상단에 표시되는 훅 타이틀. 30자 이내.
 
@@ -441,6 +447,12 @@ VIX 관련 항목의 이모지는 아래 기준을 엄격히 따른다. 절대 �
 **[필수 규칙 5] 제공된 데이터에 없는 수치는 절대 직접 기재 금지**
 reasons, watch_items 등 모든 출력에서, 시장 데이터 JSON 또는 뉴스 요약에 명시적으로 존재하는 수치만 <b> 태그로 강조할 수 있다.
 데이터에 없는 통계를 추정하거나 만들어 쓰는 것은 금지한다.
+
+**[필수 규칙 6] 원/달러 환율 수치는 반드시 `usdkrw.price`를 사용한다**
+환율을 언급해야 하는 모든 섹션에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.
+`usdkrw` 데이터가 없으면 환율 수치를 직접 기재하지 않고 "원화 흐름" 등 정성적 표현으로만 쓴다.
+❌ 금지: 임의 환율 수치 기재 (예: "환율이 1,370원 아래로")
+✅ 허용: "원달러 환율이 <b>{usdkrw.price}원</b>으로" (데이터에 실제 값 있을 때만)
 
 ### 예측 근거 섹션 타이틀(reason_title) 작성 규칙
 예측 근거 섹션 상단에 표시되는 훅 타이틀. 30자 이내.
@@ -918,6 +930,14 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
         k: v for k, v in market_data.items()
         if k not in ("market_data_js",)  # sidebar data not needed for analysis
     }
+    # 환율은 market_data_js 안에 묻혀 있어 Claude에 전달되지 않으므로 명시적으로 주입한다.
+    # 이 값이 없으면 Claude가 임의 수치를 쓰는 할루시네이션이 발생한다.
+    usd_data = (market_data.get("market_data_js") or {}).get("usd") or {}
+    if usd_data.get("price"):
+        analysis_data["usdkrw"] = {
+            "price": usd_data["price"],
+            "change_pct": usd_data.get("change_pct"),
+        }
     # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
     if candidates_key in analysis_data:
         analysis_data[candidates_key] = [
