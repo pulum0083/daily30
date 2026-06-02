@@ -893,13 +893,37 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
 
 
 def extract_json(text: str) -> dict:
-    """Parse JSON from Claude's response, stripping any accidental markdown fences."""
+    """Parse JSON from Claude's response, stripping any accidental markdown fences or trailing text."""
     text = text.strip()
     # Strip markdown code fences if present
     if text.startswith("```"):
         lines = text.split("\n")
-        # Remove first line (```json or ```) and last line (```)
         text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+        text = text.strip()
+    # Extract only the JSON object (first { ... matching }) to handle trailing text
+    start = text.find("{")
+    if start != -1:
+        depth = 0
+        in_str = False
+        escape = False
+        for i, ch in enumerate(text[start:], start):
+            if escape:
+                escape = False
+                continue
+            if ch == "\\" and in_str:
+                escape = True
+                continue
+            if ch == '"':
+                in_str = not in_str
+                continue
+            if not in_str:
+                if ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        text = text[start:i + 1]
+                        break
     data = json.loads(text)
 
     # Guarantee up_pct + down_pct == 100
