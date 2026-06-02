@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
+# Gemini Google Search grounding으로 최신 시장 뉴스를 수집·요약하는 스크립트
+
 """
-Gemini Flash 기반 뉴스 요약 스크립트 (3순위: Gemini Worker).
-
 흐름:
-  1. Google News RSS에서 시장 관련 뉴스 헤드라인 수집 (무료, API 키 불필요)
-  2. Gemini 1.5 Flash로 핵심 지표 5개 + 헤드라인 3개로 압축
-  3. data/news_summary_{type}.json 저장
-
-call_claude.py가 이 요약본만 Claude에 전달하므로, 원문 뉴스의 방대한 토큰을 Claude가 처리하지 않아도 됩니다.
+  Gemini 2.5 Flash (google_search grounding) → 그 시점 Google 검색 기반 최신 뉴스 수집·요약
+  → data/news_summary_{type}.json 저장
 
 Usage:
     python3 scripts/fetch_news.py --type kospi
     python3 scripts/fetch_news.py --type us
+    python3 scripts/fetch_news.py --type kospi-close
 """
 
 import argparse
 import json
 import os
+import re
 import sys
-import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import quote
-from urllib.request import Request, urlopen
-from urllib.error import URLError
 
 import pytz
 
@@ -33,149 +28,9 @@ DATA_DIR.mkdir(exist_ok=True)
 
 KST = pytz.timezone("Asia/Seoul")
 
-# ─────────────────────────────────────────────────────────────────────────────
-# RSS 뉴스 소스 설정
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _rss(q: str, hl: str = "en", gl: str = "US", ceid: str = "US:en", recent: bool = False) -> str:
-    # recent=True → tbs=qdr:d (Google측 24시간 프리필터). 같은 날 뉴스만 의미있는
-    # 피드(마감·프리장)에만 사용. 일반 시장 피드는 주말 갭(월요일=금요일장) 때문에
-    # Google측 강제 필터를 걸지 않고, 기사 pubDate 최신순 정렬 + staleness 상한으로 거른다.
-    tbs = "&tbs=qdr:d" if recent else ""
-    return f"https://news.google.com/rss/search?q={quote(q)}&hl={hl}&gl={gl}&ceid={ceid}{tbs}"
-
-KOSPI_RSS_FEEDS = [
-    _rss("KOSPI stock market", "en", "US", "US:en"),
-    _rss("Korea stock NASDAQ semiconductor", "en", "US", "US:en"),
-    _rss("Korean stock market today", "en", "US", "US:en"),
-    _rss("코스피 증시", "ko", "KR", "KR:ko"),
-    # 원유 가격 동향: 유가 급등락이 코스피 인플레·에너지 섹터에 직결
-    _rss("crude oil WTI Brent price today", "en", "US", "US:en", recent=True),
-]
-
-KOSPI_CLOSE_RSS_FEEDS = [
-    _rss("코스피 마감 증시", "ko", "KR", "KR:ko", recent=True),
-    _rss("코스피 외국인 기관", "ko", "KR", "KR:ko", recent=True),
-    _rss("KOSPI close today", "en", "US", "US:en", recent=True),
-    _rss("Korea semiconductor stock", "en", "US", "US:en", recent=True),
-]
-
-US_RSS_FEEDS = [
-    _rss("NASDAQ S&P500 stock market"),
-    _rss("Federal Reserve interest rate economy"),
-    _rss("US stock market today earnings"),
-    _rss("NVDA AAPL MSFT semiconductor"),
-    # 프리장 신고가 피드(마지막 3개): 같은 날 프리장 뉴스만
-    _rss("stock 52-week high premarket", recent=True),
-    _rss("stock all-time high premarket today", recent=True),
-    _rss("stock hits record high premarket earnings", recent=True),
-]
-
-KOSPI_GEMINI_PROMPT = """\
-아래 뉴스 헤드라인들을 분석하여, 오늘 코스피 당일 방향 예측에 필요한 정보만 추출해줘.
-
-[key_indicators 작성 규칙]
-- 반드시 어제 미국 증시 등락 원인, 오늘 코스피에 직접 영향을 줄 이슈만 포함
-- 수치(%, 금액)가 있으면 반드시 포함
-- 절대 포함하지 말 것: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망, 역사적 신고가 배경 설명
-  (예: "올해 75% 상승", "골드만삭스 한국 주식 상승 여력 크다" → 포함 금지)
-- 포함해야 할 것: 어제 나스닥·S&P500 등락 이유, 외국인 수급 이슈(ETF 자금 유출입), 오늘 예정된 경제 지표, 반도체·기술주 이슈
-
-출력 형식 (JSON만, 다른 텍스트 없이):
-{
-  "key_indicators": [
-    "어제 미국 증시 관련 구체적 이슈 1 (수치 포함)",
-    "어제 미국 증시 관련 구체적 이슈 2",
-    "외국인 수급·ETF 관련 이슈 (있을 경우)",
-    "오늘 예정된 경제 지표 또는 이벤트 (있을 경우)",
-    "반도체·기술주 관련 이슈 (있을 경우)"
-  ],
-  "headlines": [
-    "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1 (원문 그대로)",
-    "헤드라인 2",
-    "헤드라인 3"
-  ],
-  "market_sentiment": "bullish" | "bearish" | "neutral"
-}
-
-뉴스 데이터:
-"""
-
-KOSPI_CLOSE_GEMINI_PROMPT = """\
-아래 뉴스 헤드라인들을 분석하여, 오늘 코스피 마감 시황 분석에 필요한 정보만 추출해줘.
-
-[key_indicators 작성 규칙]
-- 오늘 장중 실제 발생한 이슈만 포함: 섹터별 등락 원인, 외국인·기관 수급, 정책·규제 뉴스
-- 수치(%, 금액)가 있으면 반드시 포함
-- 절대 포함하지 말 것: 중장기 전망, 애널리스트 목표가, 연간 수익률
-- 포함해야 할 것: 장중 급등락 종목 원인, 수급 동향, 오늘 발표된 경제 지표·정책
-
-출력 형식 (JSON만, 다른 텍스트 없이):
-{
-  "key_indicators": [
-    "오늘 코스피 등락 관련 핵심 이슈 1 (수치 포함)",
-    "섹터별 이슈 (반도체·바이오·2차전지 등)",
-    "외국인·기관 수급 관련 뉴스 (있을 경우)",
-    "정책·규제·실적 이슈 (있을 경우)"
-  ],
-  "headlines": [
-    "오늘 코스피 장중 이슈 헤드라인 1 (원문 그대로)",
-    "헤드라인 2",
-    "헤드라인 3"
-  ],
-  "market_sentiment": "bullish" | "bearish" | "neutral"
-}
-
-뉴스 데이터:
-"""
-
-US_GEMINI_PROMPT = """\
-아래 뉴스 헤드라인들을 분석하여, 오늘 밤 미국 증시(S&P500/NASDAQ) 개장 방향 예측에 필요한 정보만 추출해줘.
-
-[key_indicators 작성 규칙]
-- 오늘 또는 어제 실제 발생한 이슈, 현재 선물 방향, 오늘 발표된 경제 지표만 포함
-- 수치(%, 금액, bp)가 있으면 반드시 포함
-- 절대 포함하지 말 것: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망, 시장 역사적 배경 설명
-  (예: "S&P500이 올해 XX% 상승", "월스트리트는 하반기 강세를 전망" → 포함 금지)
-- 포함해야 할 것: 오늘 프리마켓 선물 방향, 발표된 경제 지표 결과(CPI·NFP·FOMC), 빅테크 실적·이슈, 금리·VIX 변동
-
-출력 형식 (JSON만, 다른 텍스트 없이):
-{
-  "key_indicators": [
-    "오늘 선물·프리마켓 관련 구체적 이슈 1 (수치 포함)",
-    "발표된 경제 지표 결과 또는 연준 이슈 (있을 경우)",
-    "빅테크·반도체 이슈 (있을 경우, 수치 포함)",
-    "금리·VIX·달러 관련 이슈 (있을 경우)",
-    "아시아·유럽 증시 흐름 (있을 경우)"
-  ],
-  "headlines": [
-    "미국 증시 방향에 영향을 줄 헤드라인 1",
-    "헤드라인 2",
-    "헤드라인 3"
-  ],
-  "market_sentiment": "bullish" | "bearish" | "neutral",
-  "premarket_highs": [
-    {
-      "ticker": "종목 티커 (예: AAPL)",
-      "name": "종목명 (예: Apple)",
-      "change_pct": "프리장 등락률 (예: +3.2%)",
-      "reason": "신고가를 찍은 핵심 이유 한 문장 (영어 가능)"
-    }
-  ]
-}
-
-premarket_highs 작성 규칙:
-- 뉴스에서 프리장 52주 신고가 또는 역대 신고가(all-time high)를 달성한 종목만 포함
-- 최대 3개. 뉴스에서 명확히 확인되지 않으면 빈 배열 []로 출력
-- 중요도순 정렬: 시가총액 크거나 등락폭이 크거나 시장 영향력이 높은 종목을 앞에 배치
-- reason은 뉴스 기반 사실만 기재 (추측 금지)
-
-뉴스 데이터:
-"""
-
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Gemini API 설정
+# Gemini API
 # ─────────────────────────────────────────────────────────────────────────────
 
 def get_gemini_api_key() -> str:
@@ -195,133 +50,160 @@ def get_gemini_api_key() -> str:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# RSS 파싱 (표준 라이브러리만 사용)
+# 브리핑 타입별 검색·요약 프롬프트
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _parse_pub_date(pub_date_str: str) -> "datetime | None":
-    """RSS pubDate 문자열을 UTC datetime으로 파싱한다."""
-    import email.utils
-    try:
-        ts = email.utils.parsedate_to_datetime(pub_date_str)
-        return ts.astimezone(pytz.utc)
-    except Exception:
-        return None
+KOSPI_PROMPT = """\
+오늘({today}) 한국 코스피 시장 예측에 필요한 최신 뉴스를 Google Search로 검색해 분석해줘.
 
+검색할 내용:
+- 어제(현지 시각) 미국 나스닥·S&P500 등락 원인과 수치
+- 오늘 코스피 개장에 영향을 줄 외국인 수급·ETF 자금 흐름
+- 오늘 예정된 주요 경제 지표 또는 이벤트 (FOMC, CPI 등)
+- 반도체·기술주 관련 최신 이슈 (NVDA, TSMC 등)
+- 원유·환율 최신 동향
 
-def fetch_rss_headlines(feed_url: str, max_items: int = 8, max_age_hours: int = 0) -> list[str]:
-    """Google News RSS에서 헤드라인을 발행 최신순으로 반환한다.
+[key_indicators 작성 규칙]
+- 반드시 실제 수치(%, 금액)를 포함한다
+- 오늘 코스피에 직접 영향을 줄 이슈만 포함한다
+- 포함 금지: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망
 
-    - 전체 item을 파싱해 pubDate 기준 내림차순(최신 우선) 정렬한다.
-      (Google RSS 기본 정렬은 관련도순이라, 정렬 없이 앞에서 자르면 오래된 기사가
-       섞이고 최신 기사가 유실될 수 있다.)
-    - max_age_hours > 0 이면 그 시간보다 오래된 기사는 제외(staleness 상한).
-      pubDate 없는 기사는 보수적으로 제외한다.
-    - 정렬·필터 후 상위 max_items개를 반환한다.
-    """
-    import re as _re
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; DailyB/1.0)"}
-    try:
-        req = Request(feed_url, headers=headers)
-        with urlopen(req, timeout=10) as resp:
-            xml_data = resp.read()
-        root = ET.fromstring(xml_data)
-        channel = root.find("channel")
-        if channel is None:
-            return []
-        now_utc = datetime.now(pytz.utc)
-        parsed = []  # (pub_dt, line)
-        for item in channel.findall("item"):
-            pub_dt = _parse_pub_date(item.findtext("pubDate", "") or "")
-            if max_age_hours > 0:
-                if pub_dt is None:
-                    continue  # 날짜 미상은 staleness 보장 불가 → 제외
-                if (now_utc - pub_dt).total_seconds() / 3600 > max_age_hours:
-                    continue
-            title = item.findtext("title", "").strip()
-            if not title:
-                continue
-            desc = item.findtext("description", "").strip()
-            desc_clean = _re.sub(r"<[^>]+>", "", desc)[:120] if desc else ""
-            line = f"{title} — {desc_clean}" if desc_clean else title
-            parsed.append((pub_dt, line))
-        # 최신순 정렬 (pubDate 없는 항목은 가장 뒤로)
-        parsed.sort(key=lambda x: x[0] or datetime.min.replace(tzinfo=pytz.utc), reverse=True)
-        return [line for _, line in parsed[:max_items]]
-    except (URLError, ET.ParseError, Exception) as e:
-        print(f"[fetch_news] RSS fetch failed ({feed_url[:60]}...): {e}", file=sys.stderr)
-        return []
+출력 형식 (JSON만, 다른 텍스트 없이):
+{{
+  "key_indicators": [
+    "어제 미국 증시 관련 구체적 이슈 (수치 포함)",
+    "외국인 수급·ETF 관련 이슈",
+    "오늘 예정된 경제 지표 또는 이벤트",
+    "반도체·기술주 이슈",
+    "원유·환율 동향"
+  ],
+  "headlines": [
+    "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish or bearish or neutral"
+}}
+"""
 
+KOSPI_CLOSE_PROMPT = """\
+오늘({today}) 한국 코스피 마감 시황 분석에 필요한 최신 뉴스를 Google Search로 검색해 분석해줘.
 
-def collect_news(briefing_type: str) -> str:
-    """모든 RSS 피드에서 헤드라인을 수집하여 하나의 텍스트로 반환한다."""
-    # max_age_hours: 기사 staleness 상한. 헤드라인은 최신순 정렬돼 항상 최신을 우선
-    # 선택하므로, 이 값은 '오래된 뉴스 유입 차단' backstop이다. 일반 시장 피드는
-    # 주말 갭(월요일 브리핑의 직전 세션 = 금요일, 최대 ~72h 전)을 커버하도록 72h.
-    # 같은 날 뉴스만 의미있는 마감·프리장 피드는 더 짧게.
-    GENERAL_MAX_AGE = 72
-    if briefing_type == "kospi":
-        feed_configs = [(url, GENERAL_MAX_AGE) for url in KOSPI_RSS_FEEDS]
-    elif briefing_type == "kospi-close":
-        # 당일 마감 시황: 오늘 장중 뉴스만 — 36h
-        feed_configs = [(url, 36) for url in KOSPI_CLOSE_RSS_FEEDS]
-    else:
-        # 일반 피드: 72h(주말 갭) / 프리장 신고가 피드(마지막 3개): 같은 날 30h
-        general = US_RSS_FEEDS[:-3]
-        premarket = US_RSS_FEEDS[-3:]
-        feed_configs = [(url, GENERAL_MAX_AGE) for url in general] + [(url, 30) for url in premarket]
+검색할 내용:
+- 오늘 코스피 마감 지수와 주요 등락 원인
+- 오늘 외국인·기관 수급 동향
+- 오늘 장중 급등락 섹터 및 종목 원인
+- 오늘 발표된 경제 지표·정책·규제 이슈
 
-    all_headlines = []
-    seen = set()
+[key_indicators 작성 규칙]
+- 오늘 장중 실제 발생한 이슈만 포함한다
+- 반드시 수치(%, 금액)를 포함한다
+- 포함 금지: 중장기 전망, 애널리스트 목표가, 연간 수익률
 
-    for feed_url, max_age_hours in feed_configs:
-        for headline in fetch_rss_headlines(feed_url, max_items=6, max_age_hours=max_age_hours):
-            key = headline[:30]
-            if key not in seen:
-                seen.add(key)
-                all_headlines.append(headline)
+출력 형식 (JSON만, 다른 텍스트 없이):
+{{
+  "key_indicators": [
+    "오늘 코스피 등락 관련 핵심 이슈 (수치 포함)",
+    "섹터별 이슈 (반도체·바이오·2차전지 등)",
+    "외국인·기관 수급 관련 뉴스",
+    "정책·규제·실적 이슈"
+  ],
+  "headlines": [
+    "오늘 코스피 마감 관련 헤드라인 1",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish or bearish or neutral"
+}}
+"""
 
-    if not all_headlines:
-        return ""
+US_PROMPT = """\
+오늘({today}) 미국 증시(S&P500/NASDAQ) 예측에 필요한 최신 뉴스를 Google Search로 검색해 분석해줘.
 
-    return "\n".join(f"- {h}" for h in all_headlines[:20])
+검색할 내용:
+- 현재 S&P500·나스닥 선물 방향과 수치
+- 오늘 발표된 경제 지표 결과 (CPI, NFP, FOMC 등)
+- 빅테크·반도체 주요 이슈 (NVDA, AAPL, MSFT, AMD 등)
+- 연준 발언·금리 동향
+- 아시아·유럽 증시 흐름
+- 오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목
+
+[key_indicators 작성 규칙]
+- 오늘 또는 어제 실제 발생한 이슈, 현재 선물 방향만 포함한다
+- 반드시 수치(%, 금액, bp)를 포함한다
+- 포함 금지: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망
+
+출력 형식 (JSON만, 다른 텍스트 없이):
+{{
+  "key_indicators": [
+    "오늘 선물·프리마켓 관련 구체적 이슈 (수치 포함)",
+    "발표된 경제 지표 결과 또는 연준 이슈",
+    "빅테크·반도체 이슈 (수치 포함)",
+    "금리·VIX·달러 관련 이슈",
+    "아시아·유럽 증시 흐름"
+  ],
+  "headlines": [
+    "미국 증시 방향에 영향을 줄 헤드라인 1",
+    "헤드라인 2",
+    "헤드라인 3"
+  ],
+  "market_sentiment": "bullish or bearish or neutral",
+  "premarket_highs": [
+    {{
+      "ticker": "종목 티커 (예: AAPL)",
+      "name": "종목명 (예: Apple)",
+      "reason": "신고가를 찍은 핵심 이유 한 문장"
+    }}
+  ]
+}}
+
+premarket_highs:
+- 오늘 프리장 52주 신고가 또는 역대 최고가 달성 종목만, 최대 3개
+- Google Search에서 명확히 확인되지 않으면 빈 배열 []로 출력
+"""
+
+PROMPT_MAP = {
+    "kospi": KOSPI_PROMPT,
+    "kospi-close": KOSPI_CLOSE_PROMPT,
+    "us": US_PROMPT,
+}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Gemini Flash 요약 (google-generativeai SDK)
+# Gemini Google Search grounding으로 뉴스 수집·요약
 # ─────────────────────────────────────────────────────────────────────────────
 
-def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
-    """Gemini 2.0 Flash로 뉴스 텍스트를 요약하여 JSON 딕셔너리를 반환한다."""
+def fetch_and_summarize(briefing_type: str) -> dict:
+    """Gemini Google Search grounding으로 최신 뉴스를 검색·요약해 dict로 반환한다."""
     try:
         from google import genai
         from google.genai import types
     except ImportError:
-        raise RuntimeError(
-            "google-genai not installed. "
-            "Run: pip install google-genai"
-        )
+        raise RuntimeError("google-genai not installed. Run: pip install google-genai")
 
     client = genai.Client(api_key=get_gemini_api_key())
-
-    today_kst = datetime.now(KST).strftime("%Y-%m-%d")
-    prompt_map = {"kospi": KOSPI_GEMINI_PROMPT, "kospi-close": KOSPI_CLOSE_GEMINI_PROMPT, "us": US_GEMINI_PROMPT}
-    prompt_prefix = prompt_map[briefing_type]
-    full_prompt = f"오늘 날짜 (KST): {today_kst}\n\n" + prompt_prefix + "\n" + news_text
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    prompt = PROMPT_MAP[briefing_type].format(today=today)
 
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
-        contents=full_prompt,
+        contents=prompt,
         config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.3,
-            max_output_tokens=512,
+            max_output_tokens=1024,
         ),
     )
     raw = response.text.strip()
 
-    # Strip markdown fences if present
+    # JSON 블록 추출 (마크다운 펜스·전후 텍스트 제거)
     if raw.startswith("```"):
         lines = raw.split("\n")
         raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+    # { ... } 블록만 추출
+    m = re.search(r"\{[\s\S]*\}", raw)
+    if m:
+        raw = m.group(0)
 
     return json.loads(raw)
 
@@ -331,35 +213,27 @@ def summarize_with_gemini(news_text: str, briefing_type: str) -> dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Fetch & summarize market news via Gemini Flash")
+    parser = argparse.ArgumentParser(description="Gemini Google Search grounding으로 시장 뉴스 수집·요약")
     parser.add_argument("--type", choices=["kospi", "kospi-close", "us"], required=True)
     args = parser.parse_args()
 
-    print(f"[fetch_news] Collecting news for type={args.type}")
+    print(f"[fetch_news] Fetching news via Gemini Google Search grounding (type={args.type})")
 
-    # 1. RSS 수집
-    news_text = collect_news(args.type)
-    if not news_text:
-        print("[fetch_news] WARNING: No news collected. Saving empty summary.", file=sys.stderr)
-        summary = {"key_indicators": [], "headlines": [], "market_sentiment": "neutral"}
-    else:
-        print(f"[fetch_news] Collected {news_text.count(chr(10)) + 1} headlines")
+    try:
+        summary = fetch_and_summarize(args.type)
+        print(
+            f"[fetch_news] OK: {len(summary.get('key_indicators', []))} indicators, "
+            f"{len(summary.get('headlines', []))} headlines"
+        )
+    except Exception as e:
+        print(f"[fetch_news] ERROR: {e}", file=sys.stderr)
+        summary = {
+            "key_indicators": [],
+            "headlines": [],
+            "market_sentiment": "neutral",
+            "error": str(e),
+        }
 
-        # 2. Gemini 요약
-        try:
-            summary = summarize_with_gemini(news_text, args.type)
-            print(f"[fetch_news] Gemini summary: {len(summary.get('key_indicators', []))} indicators, "
-                  f"{len(summary.get('headlines', []))} headlines")
-        except Exception as e:
-            print(f"[fetch_news] ERROR: Gemini summarization failed: {e}. Continuing with market data only.", file=sys.stderr)
-            summary = {
-                "key_indicators": [],
-                "headlines": [],
-                "market_sentiment": "neutral",
-                "error": str(e),
-            }
-
-    # 3. 타임스탬프 추가 후 저장
     summary["generated_at"] = datetime.now(KST).isoformat()
     out_path = DATA_DIR / f"news_summary_{args.type}.json"
     with open(out_path, "w", encoding="utf-8") as f:
