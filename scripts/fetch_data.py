@@ -20,6 +20,42 @@ DATA_DIR.mkdir(exist_ok=True)
 KST = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
 
+# 섹터 로테이션 대표 종목·ETF (sector_focus 브리핑용 실시간 데이터 수집)
+SECTOR_FOCUS_STOCKS = {
+    "semicon": {
+        "etfs": [("SOX", "^SOX"), ("DRAM", "DRAM")],
+        "ko":   [("005930.KS", "삼성전자"), ("000660.KS", "SK하이닉스"), ("042700.KS", "한미반도체")],
+    },
+    "power": {
+        "etfs": [],
+        "ko":   [("267260.KS", "HD현대일렉트릭"), ("010120.KS", "LS일렉트릭"), ("298040.KS", "효성중공업")],
+    },
+    "defense": {
+        "etfs": [("ITA", "ITA")],
+        "ko":   [("012450.KS", "한화에어로스페이스"), ("079550.KS", "LIG넥스원"), ("064350.KS", "현대로템")],
+    },
+    "ship": {
+        "etfs": [],
+        "ko":   [("329180.KS", "HD현대중공업"), ("042660.KS", "한화오션"), ("010140.KS", "삼성중공업")],
+    },
+    "battery": {
+        "etfs": [("LIT", "LIT")],
+        "ko":   [("373220.KS", "LG에너지솔루션"), ("247540.KS", "에코프로비엠"), ("006400.KS", "삼성SDI")],
+    },
+    "auto": {
+        "etfs": [],
+        "ko":   [("005380.KS", "현대차"), ("000270.KS", "기아"), ("012330.KS", "현대모비스")],
+    },
+    "bio": {
+        "etfs": [("XBI", "XBI")],
+        "ko":   [("207940.KS", "삼성바이오로직스"), ("068270.KS", "셀트리온"), ("000100.KS", "유한양행")],
+    },
+    "finance": {
+        "etfs": [],
+        "ko":   [("105560.KS", "KB금융"), ("055550.KS", "신한지주"), ("138040.KS", "메리츠금융지주")],
+    },
+}
+
 # Korean stock candidates for Kellogg strategy screening
 KOSPI_CANDIDATES = [
     ("005930.KS", "삼성전자"),
@@ -522,6 +558,45 @@ def build_stock_candidates(candidates: list[tuple]) -> list[dict]:
     return result
 
 
+def _get_price_change(ticker: str) -> dict | None:
+    """ticker의 전일 종가와 등락률만 빠르게 수집한다 (5d 히스토리, 경량)."""
+    try:
+        hist = _yf_history(ticker, period="5d")
+        closes = hist["Close"].dropna()
+        if len(closes) < 2:
+            return None
+        price = float(closes.iloc[-1])
+        prev = float(closes.iloc[-2])
+        change_pct = round((price - prev) / prev * 100, 2)
+        return {"price": round(price, 2), "change_pct": change_pct}
+    except Exception:
+        return None
+
+
+def fetch_sector_stocks() -> dict:
+    """섹터별 대표 종목·ETF의 전일 종가·등락률을 수집한다.
+    sector_focus 브리핑에서 Claude가 실제 수치를 인용할 수 있도록 한다.
+    """
+    result = {}
+    for sector_key, cfg in SECTOR_FOCUS_STOCKS.items():
+        stocks = []
+        for ticker, name in cfg["ko"]:
+            d = _get_price_change(ticker)
+            if d:
+                stocks.append({"name": name, "ticker": ticker, **d})
+            else:
+                print(f"[fetch_data] sector stock {ticker}({name}) 수집 실패", file=sys.stderr)
+        etfs = {}
+        for etf_name, etf_ticker in cfg["etfs"]:
+            d = _get_price_change(etf_ticker)
+            if d:
+                etfs[etf_name] = {"ticker": etf_ticker, **d}
+            else:
+                print(f"[fetch_data] sector ETF {etf_ticker} 수집 실패", file=sys.stderr)
+        result[sector_key] = {"stocks": stocks, "etfs": etfs}
+    return result
+
+
 def fetch_kospi_data() -> dict:
     """Fetch ALL data needed for KOSPI morning briefing."""
     print("[fetch_data] Fetching KOSPI data...")
@@ -562,7 +637,11 @@ def fetch_kospi_data() -> dict:
     print("[fetch_data]   → investor trading (외국인/기관 순매수)")
     investor_trading = fetch_investor_trading_kospi()
 
-    # 7. 휴장 직후(post-holiday catch-up) 플래그 — 한국만 단독 휴장한 다음날 판정
+    # 7. 섹터 대표 종목 데이터 (sector_focus 할루시네이션 방지)
+    print("[fetch_data]   → sector focus stocks")
+    sector_stocks = fetch_sector_stocks()
+
+    # 8. 휴장 직후(post-holiday catch-up) 플래그 — 한국만 단독 휴장한 다음날 판정
     print("[fetch_data]   → post-holiday catch-up flag")
     try:
         from holiday_check import was_kospi_only_closed_previous_session
@@ -606,6 +685,8 @@ def fetch_kospi_data() -> dict:
         # Kellogg screening — sorted by signal quality
         # Claude picks 3-5 from this list; use sparkline/ma20_sparkline/ma200_sparkline for stockCharts
         "kospi_candidates": kospi_candidates,
+        # 섹터 로테이션 — 대표 종목·ETF 전일 종가·등락률 (할루시네이션 방지용 실제 데이터)
+        "sector_stocks": sector_stocks,
     }
 
     out_path = DATA_DIR / "latest_kospi.json"
