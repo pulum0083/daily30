@@ -163,6 +163,47 @@ def test_close_headline_excluded():
     assert not r["blocks"]
 
 
+# ── 수급 스케일 크로스체크 ────────────────────────────────────────────────────
+_SUPPLY_LATEST = {
+    "investor_trading": {
+        "foreign":     {"net": -6_594_100},   # 백만원 → 억원 -65,941
+        "institution": {"net":    240_900},    # 억원 +2,409
+        "individual":  {"net":  6_348_900},    # 억원 +63,489
+    }
+}
+
+
+def test_supply_scale_warns_on_100x_undercount():
+    # 분석 본문에 659억 언급(실제 65,941억) → 경고 발생
+    a = {
+        "market_summary": "", "why": "외국인이 <b>659억원</b> 순매도했어요.",
+        "what": "", "so_what": "",
+    }
+    r = v.validate(a, _SUPPLY_LATEST, "kospi-close")
+    assert any("외국인" in w and "스케일" in w for w in r["warnings"]), r["warnings"]
+
+
+def test_supply_scale_clean_on_correct_value():
+    # 올바른 수치(6조 5,941억) 언급 → 스케일 경고 없어야 함
+    a = {
+        "market_summary": "", "why": "외국인이 <b>6조 5,941억원</b> 순매도했어요.",
+        "what": "", "so_what": "",
+    }
+    r = v.validate(a, _SUPPLY_LATEST, "kospi-close")
+    assert not any("스케일" in w for w in r["warnings"]), r["warnings"]
+
+
+def test_supply_scale_skipped_for_kospi():
+    # kospi 브리핑은 수급 스케일 체크 비대상
+    a = {
+        "prediction": {"direction": "상승 우위", "up_pct": 60},
+        "reasons": ["이유1", "이유2"],
+        "why": "외국인이 659억 순매도.", "what": "", "so_what": "",
+    }
+    r = v.validate(a, _SUPPLY_LATEST, "kospi")
+    assert not any("스케일" in w for w in r["warnings"]), r["warnings"]
+
+
 if __name__ == "__main__":
     import traceback
     fns = [g for n, g in sorted(globals().items()) if n.startswith("test_") and callable(g)]

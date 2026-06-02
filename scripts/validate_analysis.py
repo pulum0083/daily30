@@ -187,6 +187,75 @@ def _filter_list_prose(items, label, corrections):
     return kept, removed
 
 
+# ── 수급 수치 스케일 크로스체크 (kospi-close) ────────────────────────────────
+def _extract_eok_values(text):
+    """본문에서 억원 수치를 추출한다. '6조 5,941억' → 65941, '659억' → 659."""
+    t = strip_tags(text or "")
+    values = set()
+    # N조 M억
+    for m in re.finditer(r"([\d,]+)\s*조\s*([\d,]+)\s*억", t):
+        jo  = int(m.group(1).replace(",", ""))
+        eok = int(m.group(2).replace(",", ""))
+        values.add(jo * 10000 + eok)
+    # N억 (앞 6자 안에 '조'가 없을 때만)
+    for m in re.finditer(r"([\d,]+)\s*억", t):
+        ctx = t[max(0, m.start() - 6):m.start()]
+        if "조" not in ctx:
+            values.add(int(m.group(1).replace(",", "")))
+    return values
+
+
+def _check_supply_scale(analysis, latest, warnings):
+    """마감 브리핑 분석 본문의 수급 수치 스케일을 크로스체크한다.
+
+    investor_trading.net(백만원 → 억원 변환값)과 본문 언급 수치를 비교.
+    실제 값의 1/100 수준이 언급되고 실제 값은 언급되지 않으면 WARN.
+    """
+    it = latest.get("investor_trading", {})
+    if not it:
+        return
+
+    actuals = {}  # actor → 실제 억원(절대값)
+    for actor in ("foreign", "institution", "individual"):
+        net = (it.get(actor) or {}).get("net")
+        if net is not None:
+            eok = abs(round(net / 100))
+            if eok >= 100:   # 100억 미만은 검사 실익 없음
+                actuals[actor] = eok
+
+    if not actuals:
+        return
+
+    # 분석 본문 전체에서 억원 숫자 추출
+    prose = " ".join(
+        analysis.get(f, "") or ""
+        for f in ("market_summary", "why", "what", "so_what")
+    )
+    mentioned = _extract_eok_values(prose)
+    if not mentioned:
+        return
+
+    LABEL = {"foreign": "외국인", "institution": "기관", "individual": "개인"}
+
+    for actor, actual in actuals.items():
+        wrong_scale = actual // 100  # 100배 축소된 잘못된 값
+
+        # 잘못된 스케일(±40%) 언급 & 올바른 스케일(±40%) 미언급
+        near_wrong   = any(abs(v - wrong_scale) / wrong_scale <= 0.4 for v in mentioned)
+        near_correct = any(abs(v - actual)      / actual       <= 0.4 for v in mentioned)
+
+        if near_wrong and not near_correct:
+            fmt_actual = (
+                f"{actual // 10000}조 {actual % 10000:,}억"
+                if actual >= 10000 else f"{actual:,}억"
+            )
+            fmt_wrong = f"{wrong_scale:,}억"
+            warnings.append(
+                f"수급 스케일 불일치 ({LABEL[actor]}): 본문에 {fmt_wrong} 언급, "
+                f"실제 {fmt_actual} — 단위 100배 오류 의심"
+            )
+
+
 # ── 검증 본체 ─────────────────────────────────────────────────────────────────
 def validate(analysis, latest, btype):
     """analysis를 검증·교정한다.
@@ -248,6 +317,10 @@ def validate(analysis, latest, btype):
         bad = find_forbidden(a.get(fld))
         if bad:
             blocks.append(f"본문 '{fld}' 금지 패턴: {bad} (스칼라 — 안전 교정 불가)")
+
+    # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
+    if btype == "kospi-close":
+        _check_supply_scale(a, latest, warnings)
 
     return {"analysis": a, "corrections": corrections, "warnings": warnings, "blocks": blocks}
 
