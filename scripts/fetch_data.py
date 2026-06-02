@@ -559,10 +559,18 @@ def build_stock_candidates(candidates: list[tuple]) -> list[dict]:
 
 
 def _get_price_change(ticker: str) -> dict | None:
-    """ticker의 전일 종가와 등락률만 빠르게 수집한다 (5d 히스토리, 경량)."""
+    """ticker의 최신 종가와 전일 대비 등락률을 수집한다 (5d 히스토리, 경량).
+
+    USDKRW=X 같은 외환 티커는 일요일 데이터가 포함되어 '전일'이 주말로
+    잡히는 문제가 있다. 평일(월~금) 행만 남겨서 비교한다.
+    """
     try:
         hist = _yf_history(ticker, period="5d")
         closes = hist["Close"].dropna()
+        # 외환 등 주말 포함 티커: 평일만 필터링
+        weekday_closes = closes[closes.index.dayofweek < 5]
+        if len(weekday_closes) >= 2:
+            closes = weekday_closes
         if len(closes) < 2:
             return None
         price = float(closes.iloc[-1])
