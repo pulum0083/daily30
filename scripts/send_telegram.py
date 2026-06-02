@@ -149,7 +149,7 @@ def build_fallback_message(briefing_type: str) -> str:
     divider = "─" * 20
 
     if briefing_type == "kospi":
-        header = f"🇰🇷 코스피 시초가 브리핑 | {today}"
+        header = f"🇰🇷 코스피 예측 브리핑 | {today}"
         pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
         link = f"{web_url}/briefings/ko/{date_slug}/"
     elif briefing_type == "us":

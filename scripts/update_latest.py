@@ -19,7 +19,7 @@ WEB_DATA = BASE_DIR / "web" / "data"
 WEB_BASE = "https://doubleshot.space"
 
 TYPE_LABEL = {
-    "kospi":  "🇰🇷 코스피 시초가 브리핑",
+    "kospi":  "🇰🇷 코스피 예측 브리핑",
     "us":     "🇺🇸 미국 시장 브리핑",
     "weekly": "📋 주간 리포트",
 }

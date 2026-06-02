@@ -57,7 +57,7 @@ def notify_admin_email(subject: str, body: str) -> None:
         pass
 
 TYPE_META = {
-    "kospi":  {"label": "🇰🇷 코스피 시초가 브리핑", "emoji": "📈"},
+    "kospi":  {"label": "🇰🇷 코스피 예측 브리핑", "emoji": "📈"},
     "us":     {"label": "🇺🇸 미국 시장 브리핑",     "emoji": "🌐"},
     "weekly": {"label": "📋 주간 리포트",            "emoji": "📊"},
 }

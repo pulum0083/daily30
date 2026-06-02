@@ -49,7 +49,7 @@ SECTOR_BY_KEY = {s["key"]: s for s in SECTOR_POOL}
 
 KOSPI_SYSTEM_PROMPT = """\
 너는 20년 경력의 한국·미국 주식시장 투자 전략가다.
-제공된 시장 데이터와 뉴스 요약을 분석하여 오늘 코스피 시초가 방향을 예측한다.
+제공된 시장 데이터와 뉴스 요약을 분석하여 오늘 코스피 당일 방향(종가 기준)을 예측한다.
 
 ## 글쓰기 기본 규칙 (모든 텍스트에 적용)
 
@@ -99,18 +99,18 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
    - 나스닥 +1% 이상이면 코스피 IT·반도체 섹터 갭 상승 가능성 높음
    - 다우 단독 강세(나스닥 약세)는 코스피에 제한적 영향
 2. NQ선물·YM선물 현재 방향 — 실시간 미국 시장 심리 반영
-3. 필라델피아 반도체(SOX) — 삼성전자·SK하이닉스 시초가 직결
+3. 필라델피아 반도체(SOX) — 삼성전자·SK하이닉스 당일 흐름 직결
    - SOX +2% 이상이면 반도체 비중이 큰 코스피에 직접 수혜
 4. EWY (한국 ETF) change_pct — 외국인 수급 방향의 선행 지표
    - EWY -2% 이하: 강한 하락 우위 신호 (외국인 이탈 직결)
    - EWY +1% 이상 + 원화 강세: 외국인 순매수 환경
 4-1. dram_etf (Roundhill Memory ETF, 티커: DRAM) — HBM·DRAM 수요 선행 지표
-   - 삼성전자·SK하이닉스 시초가와 높은 상관관계
+   - 삼성전자·SK하이닉스 당일 흐름과 높은 상관관계
    - dram_etf 상승 = HBM 수요 강세 기대 → 반도체 섹터 갭 상승 가능성
 4-2. asia_regional (닛케이·항셍·상해·대만) — 직전 거래일 아시아 동조 흐름
    - **post_holiday_catchup=true (한국 단독 휴장 다음날)이면 EWY보다 우선순위 높음**
    - 한국이 쉬는 동안 아시아 주요 시장이 강세였다면 코스피 갭 상승(catch-up) 가능성
-   - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 시초가에 직접 영향
+   - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 당일 방향에 직접 영향
 5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
    - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
@@ -212,7 +212,7 @@ reasons, watch_items, sector_focus 등 모든 출력에서, 시장 데이터 JSO
   예시: "오를까 내릴까? 오늘의 핵심 변수", "방향 혼재 — 판단 기준 N가지"
 
 ### 관전 포인트(watch_items) 작성 규칙
-오늘 시초가 이후 장중에 주목해야 할 이벤트·지표·레벨을 2~3개 선별한다.
+오늘 장중 주목해야 할 이벤트·지표·레벨을 2~3개 선별한다.
 - economic_calendar.today에 고영향 지표(CPI·FOMC·NFP 등)가 있으면 우선 포함한다.
 - 각 항목은 {icon, label, text} 형태. text는 왜 중요한지 해요체 1~2문장.
 - 가격 레벨(지지·저항)이 핵심인 항목은 text 대신 levels 배열을 쓴다:
@@ -858,7 +858,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
     if briefing_type == "kospi":
-        header = f"🇰🇷 코스피 시초가 브리핑 | {date_display}"
+        header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
         link   = f"{web_base}/briefings/ko/{date_str}/"
     else:
         header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
