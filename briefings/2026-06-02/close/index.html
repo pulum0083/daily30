@@ -56,7 +56,6 @@
         <div class="accordion-body">
           <div class="accordion-body__inner">
             
-            
 <div class="section-card">
   <div class="section-card__head">
     <span class="section-card__title">마감 스냅샷</span>
@@ -205,80 +204,36 @@ window.addEventListener('resize', function () { drawCloseChart('intraday-chart',
   <div class="dpick-take"><b>두산로보틱스</b> — 거래대금 1.9배 급증 속 외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요.</div>
 </div>
             
-<div class="section-card" style="display:none">
+<div class="section-card">
   <div class="section-card__head">
-    <span class="section-card__title">아침 픽 결과</span>
-    <span class="section-card__sub">아침 시초가 픽 · 당일 종가 기준</span>
+    <span class="section-card__title">방향 예측 검증</span>
+    <span class="section-card__sub">아침 예측 · 당일 종가 기준</span>
   </div>
-  <div class="pick-result-list">
-    
-    <div class="pick-result-card">
-      <div class="pick-result-hd">
-        <div class="pick-result-hd__left">
-          <div class="pick-result-rank">1</div>
-          <div class="pick-result-hd__info">
-            <div class="pick-result-hd__name">현대차<span class="pick-scenario-tag">모멘텀 가속</span></div>
-            <div class="pick-entry-line"><span class="entry-ng">✗ 미진입</span>진입 245,000~248,000원 → 목표 260,000원 / 손절 238,000원</div>
-          </div>
+  <div class="dv-body">
+    <div class="dv-flow">
+      <div class="dv-box">
+        <span class="dv-box__lbl">예측</span>
+        <span class="dv-box__dir up">▲ 상승 우위</span>
+        <div class="dv-gauge">
+          <div class="dv-gauge__track"><div class="dv-gauge__fill up" style="width:82%"></div></div>
+          <span class="dv-gauge__cap">상승 확률 <b>82%</b> · 신뢰 <b>88</b></span>
         </div>
-        <span class="pick-result-badge pick-badge--target">목표 도달 ✓</span>
       </div>
-      <div class="pick-result-nums">
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">종가</span><span class="pick-result-num__val down">729,000원</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">등락</span><span class="pick-result-num__val down">-2.80%</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">수익률</span><span class="pick-result-num__val up">+197.55%</span></div>
-        
+      <div class="dv-verdict">
+        <span class="dv-chip dv-chip--hit">✓</span>
+        <span class="dv-verdict__text dv-verdict__text--hit">적중</span>
+        <span class="dv-verdict__arrow"></span>
       </div>
-      <div class="pick-result-note">전일 <b>+3.88%</b> 급등하며 20일선을 막 돌파한 종목이에요. 빅테크 강세와 위험자산 선호 분위기 속에서 외국인 수급 유입이 집중될 가능성이 있어요.</div>
+      <div class="dv-box">
+        <span class="dv-box__lbl">실제</span>
+        <span class="dv-box__val up">▲ +0.15%</span>
+        <span class="dv-box__meta">KOSPI 종가 8,801.49</span>
+      </div>
     </div>
     
-    <div class="pick-result-card">
-      <div class="pick-result-hd">
-        <div class="pick-result-hd__left">
-          <div class="pick-result-rank">2</div>
-          <div class="pick-result-hd__info">
-            <div class="pick-result-hd__name">SK하이닉스<span class="pick-scenario-tag">구조적 강세</span></div>
-            <div class="pick-entry-line"><span class="entry-ng">✗ 미진입</span>진입 1,100,000~1,115,000원 → 목표 1,180,000원 / 손절 1,065,000원</div>
-          </div>
-        </div>
-        <span class="pick-result-badge pick-badge--target">목표 도달 ✓</span>
-      </div>
-      <div class="pick-result-nums">
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">종가</span><span class="pick-result-num__val down">2,360,000원</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">등락</span><span class="pick-result-num__val down">-0.13%</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">수익률</span><span class="pick-result-num__val up">+114.55%</span></div>
-        
-      </div>
-      <div class="pick-result-note">20일선을 지지선 삼아 전일 <b>+3.75%</b> 급등한 종목이에요. 엔비디아가 <b>+3.8%</b> 오르며 HBM 수요 기대가 다시 살아났고, AI 랠리 국면에서 핵심 수혜주 지위를 유지하고 있어요.</div>
-    </div>
-    
-    <div class="pick-result-card">
-      <div class="pick-result-hd">
-        <div class="pick-result-hd__left">
-          <div class="pick-result-rank">3</div>
-          <div class="pick-result-hd__info">
-            <div class="pick-result-hd__name">삼성전자<span class="pick-scenario-tag">눌림 후 재돌파</span></div>
-            <div class="pick-entry-line"><span class="entry-ng">✗ 미진입</span>진입 82,000~83,000원 → 목표 87,500원 / 손절 79,500원</div>
-          </div>
-        </div>
-        <span class="pick-result-badge pick-badge--target">목표 도달 ✓</span>
-      </div>
-      <div class="pick-result-nums">
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">종가</span><span class="pick-result-num__val up">360,500원</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">등락</span><span class="pick-result-num__val up">+3.30%</span></div>
-        
-        <div class="pick-result-num"><span class="pick-result-num__label">수익률</span><span class="pick-result-num__val up">+339.63%</span></div>
-        
-      </div>
-      <div class="pick-result-note">전일 <b>+1.80%</b> 오르며 20일선을 막 돌파한 종목이에요. 삼성 노조 파업 철회 소식과 AI 랠리 수혜로 코스피 7,000 돌파 국면에서 추가 상승 여력이 있어요.</div>
+    <div class="dv-foot">
+      <span class="dv-foot__lbl">최근 9회</span>
+      <span class="dv-foot__val">8/9 적중</span>
     </div>
     
   </div>
