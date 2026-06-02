@@ -365,10 +365,8 @@ jobs:
       - name: 📦 Python 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 📊 전일 코스피 예측 정확도 체크
-        run: |
-          DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
-          python3 scripts/check_accuracy.py --type kospi --date "$DATE"
+      - name: 📊 코스피 예측 정확도 백필 (미검증 과거분 일괄 정산)
+        run: python3 scripts/check_accuracy.py --type kospi --backfill
 
       - name: 💾 정확도 결과 커밋 & 푸시
         run: |

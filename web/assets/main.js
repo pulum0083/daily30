@@ -254,7 +254,8 @@
     s = s || { state: 'empty' };
     if (s.state === 'ready') {
       var pill = s.pill_text ? '<span class="bl-pill ' + s.pill_cls + '">' + s.pill_text + '</span>' : '';
-      var inner = '<div class="bl-cell__label">' + lbl + '</div><div class="bl-cell__bottom">' + pill + '<span class="bl-cell__time">' + s.time + '</span></div>';
+      var priceHtml = s.price ? '<div class="bl-cell__title">' + s.price + '</div>' : '';
+      var inner = '<div class="bl-cell__label">' + lbl + '</div>' + priceHtml + '<div class="bl-cell__bottom">' + pill + '<span class="bl-cell__time">' + s.time + '</span></div>';
       return isCurrent
         ? '<div class="bl-cell is-current">' + inner + '</div>'
         : '<a class="bl-cell is-ready" href="' + s.url + '">' + inner + '</a>';

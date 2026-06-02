@@ -6,11 +6,12 @@ to the actual KOSPI opening move.
 Run at ~09:10 KST (00:10 UTC) — after KOSPI opens at 09:00 KST.
 Updates data/briefings.json with the actual result.
 """
+from __future__ import annotations
 
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytz
@@ -49,8 +50,12 @@ def get_kospi_open_vs_prev_close(date_str: str) -> tuple | None:
     Uses yfinance ^KS11 daily data.
     Returns None if data is unavailable.
     """
+    # 대상 날짜를 포함하는 윈도우로 조회 (period 고정 시 과거 백필이 윈도우 밖으로 누락됨)
+    target = datetime.strptime(date_str, "%Y-%m-%d")
+    start = (target - timedelta(days=7)).strftime("%Y-%m-%d")
+    end = (target + timedelta(days=2)).strftime("%Y-%m-%d")
     ticker = yf.Ticker("^KS11")
-    hist = ticker.history(period="10d", interval="1d")
+    hist = ticker.history(start=start, end=end, interval="1d")
     if hist.empty or len(hist) < 2:
         return None
 
@@ -70,8 +75,11 @@ def get_kospi_open_vs_prev_close(date_str: str) -> tuple | None:
 
 def get_sp500_open_vs_prev_close(date_str: str) -> tuple | None:
     """Same logic for S&P500 ^GSPC."""
+    target = datetime.strptime(date_str, "%Y-%m-%d")
+    start = (target - timedelta(days=7)).strftime("%Y-%m-%d")
+    end = (target + timedelta(days=2)).strftime("%Y-%m-%d")
     ticker = yf.Ticker("^GSPC")
-    hist = ticker.history(period="10d", interval="1d")
+    hist = ticker.history(start=start, end=end, interval="1d")
     if hist.empty or len(hist) < 2:
         return None
 
@@ -142,6 +150,28 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi") -> None:
     )
 
 
+def backfill(briefing_type: str = "kospi") -> None:
+    """미검증 과거 예측(오늘 이전, is_correct 미정)을 모두 정산한다.
+
+    09:10 실행 시점엔 당일 일봉이 아직 없어 당일 검사는 실패한다. 따라서 정산은
+    '오늘 이전' 날짜만 대상으로 하고, 매 실행이 누락분을 따라잡는다(self-healing).
+    """
+    data = load_briefings()
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    pending = sorted({
+        b["date"] for b in data.get("briefings", [])
+        if b.get("type") == briefing_type
+        and b.get("is_correct") is None
+        and b.get("date", "") < today
+    })
+    if not pending:
+        print(f"[check_accuracy] 백필 대상 없음 ({briefing_type})")
+        return
+    print(f"[check_accuracy] 백필 대상 {len(pending)}건: {pending}")
+    for d in pending:
+        check_accuracy(d, briefing_type)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
@@ -150,10 +180,15 @@ def main():
     parser = argparse.ArgumentParser(description="Check prediction accuracy vs actual market open")
     parser.add_argument("--type", default="kospi", choices=["kospi", "us"])
     parser.add_argument("--date", default=None, help="YYYY-MM-DD (default: today KST)")
+    parser.add_argument("--backfill", action="store_true",
+                        help="미검증 과거 예측을 모두 정산 (--date 무시)")
     args = parser.parse_args()
 
-    date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
-    check_accuracy(date_str, args.type)
+    if args.backfill:
+        backfill(args.type)
+    else:
+        date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
+        check_accuracy(date_str, args.type)
 
 
 if __name__ == "__main__":

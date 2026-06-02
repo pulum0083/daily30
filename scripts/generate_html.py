@@ -718,6 +718,29 @@ def regenerate_index():
     print("[generate_html] wrote web/briefings/index.html (목록 전용)")
 
 
+def _parse_close_price(html_path):
+    """close 브리핑 HTML에서 KOSPI 종가와 등락률 추출 (신규/레거시 포맷 모두 지원)."""
+    try:
+        html = html_path.read_text(encoding="utf-8")
+        # 신규 포맷: a-hero__idx-val / a-hero__idx-chg
+        price_m = re.search(r'class="a-hero__idx-val">([0-9,]+(?:\.\d+)?)<', html)
+        chg_m = re.search(r'class="a-hero__idx-chg (up|dn)">[^(]*\(([+\-]?\d+(?:\.\d+)?%)\)', html)
+        if not price_m:
+            # 레거시 포맷: close-idx__name">KOSPI 다음 close-idx__val
+            price_m = re.search(r'close-idx__name">KOSPI.*?close-idx__val">([0-9,]+(?:\.\d+)?)<', html, re.DOTALL)
+            chg_m = re.search(r'close-idx__name">KOSPI.*?close-idx__chg (up|down)">[^(]*\(([+\-]?\d+(?:\.\d+)?%)\)', html, re.DOTALL)
+        if not price_m:
+            return None, None, "neutral"
+        price = price_m.group(1)
+        chg = chg_m.group(2) if chg_m else None
+        cls = chg_m.group(1) if chg_m else "neutral"
+        if cls == "down":
+            cls = "dn"
+        return price, chg, cls
+    except Exception:
+        return None, None, "neutral"
+
+
 def write_briefings_list_json():
     """web/data/briefings-list.json 을 생성한다.
 
@@ -754,18 +777,20 @@ def write_briefings_list_json():
                     f"/briefings/ko-close/{d}/"
                 )
                 entry = {"state": "ready", "url": url}
-                if match:
-                    if btype == "close":
-                        chg = match.get("actual_change_pct")
-                        entry["pill_cls"] = "neutral"
-                        entry["pill_text"] = f"{chg:+.2f}%" if isinstance(chg, (int, float)) else ""
-                        entry["title"] = f"KOSPI {chg:+.2f}%" if isinstance(chg, (int, float)) else "마감"
-                    else:
-                        direction = match.get("predicted_direction") or match.get("direction", "")
-                        up = "상승" in direction
-                        entry["pill_cls"] = "up" if up else "dn"
-                        entry["pill_text"] = ("▲ 상승" if up else "▼ 하락") if direction else ""
-                        entry["title"] = direction or "—"
+                if btype == "close":
+                    html_path = new_path if new_path.exists() else legacy_path
+                    price, chg, cls = _parse_close_price(html_path)
+                    entry["title"] = price or "마감"
+                    entry["price"] = price or ""
+                    entry["pill_cls"] = ""
+                    entry["pill_text"] = ""
+                    entry["time"] = fmt_time(match.get("generated_at", "")) if match else ""
+                elif match:
+                    direction = match.get("predicted_direction") or match.get("direction", "")
+                    up = "상승" in direction
+                    entry["pill_cls"] = "up" if up else "dn"
+                    entry["pill_text"] = ("▲ 상승" if up else "▼ 하락") if direction else ""
+                    entry["title"] = direction or "—"
                     entry["time"] = fmt_time(match.get("generated_at", ""))
                 else:
                     entry["title"] = "—"
