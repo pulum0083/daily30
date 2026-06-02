@@ -245,14 +245,20 @@ reasons, watch_items, sector_focus 등 모든 출력에서, 시장 데이터 JSO
 - **sector_key / sector_name**: 위 표의 값 그대로 사용한다.
 - **signal**: 오늘 그 섹터의 핵심을 한 문장으로. 마침표 종결. 30자 이내.
   예시: "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중."
-- **paragraphs**: 3개 문단. 각 문단은 해요체 2~3문장.
-  - 1문단: 오늘 그 섹터의 핵심 모멘텀 또는 이슈
-  - 2문단: 종목별 차별화 시각 — 같은 섹터 안 승자 vs 패자를 구체 종목명으로 대비
+- **paragraphs 작성 절차 (반드시 순서대로 따를 것)**
+  1. 선택한 sector_key로 `sector_stocks[sector_key].stocks` 목록을 먼저 조회한다.
+  2. 각 종목의 `change_pct`와 `price`를 그대로 읽어 문장에 삽입한다.
+  3. 목록에 있는 종목만 등락률 수치를 언급한다. 목록에 없는 종목은 수치 없이 이름만 쓴다.
+  4. `sector_stocks[sector_key].etfs`에 ETF 데이터가 있으면 같은 방식으로 인용한다.
+- **paragraphs 구성**: 3개 문단, 각 문단 해요체 2~3문장.
+  - 1문단: 오늘 그 섹터의 핵심 모멘텀 또는 이슈 (sector_stocks 수치 활용)
+  - 2문단: 종목별 차별화 — sector_stocks에서 상승·하락 종목을 대비 (실제 change_pct 사용)
   - 3문단: 리스크 요인 또는 변곡점 시그널
-- **[데이터 규칙] 수치는 반드시 시장 데이터 `sector_stocks` 또는 뉴스 요약에 명시된 값만 인용한다.**
-  - `sector_stocks[선택한 sector_key].stocks`의 price·change_pct와 `sector_stocks[선택한 sector_key].etfs`의 change_pct를 적극 활용한다.
-  - 데이터에 없는 수치(시가총액, 거래대금, ETF 수익률 등)를 추정하거나 만들어 쓰는 것은 금지한다.
+- **[데이터 금지 규칙]**
+  - sector_stocks에 없는 종목의 등락률·가격을 추정하거나 만들어 쓰는 것은 절대 금지한다.
   - 수치 근거가 없는 항목은 정성적 문장으로만 작성한다.
+  - ❌ 금지: "삼성바이오로직스가 +1.8% 올랐다" (sector_stocks에 실제 값 없이 임의 기재)
+  - ✅ 허용: "삼성바이오로직스가 <b>+1.8%</b> 올랐다" (sector_stocks.bio.stocks에서 change_pct=1.8 확인 후)
 - 수치는 <b> 태그로 강조한다.
 
 ## 출력 형식
