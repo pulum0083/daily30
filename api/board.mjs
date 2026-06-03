@@ -9,8 +9,11 @@ export default async function handler(req, res) {
   const { content, author } = req.body || {};
   if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
   if (!author  || !author.trim())  return res.status(400).json({ error: 'author required' });
+  if (content.trim().length > 1000) return res.status(400).json({ error: 'content too long' });
+  if (author.trim().length > 50)    return res.status(400).json({ error: 'author too long' });
 
   const GH_PAT = process.env.GH_PAT;
+  if (!GH_PAT) return res.status(500).json({ error: 'Missing GH_PAT env var' });
   const REPO   = 'pulum0083/daily30';
   const PATH   = 'web/data/board.json';
   const ghHeaders = {
@@ -27,6 +30,7 @@ export default async function handler(req, res) {
   const current = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
 
   // 새 글 추가
+  if (!Array.isArray(current.posts)) current.posts = [];
   const newPost = {
     id:         crypto.randomUUID(),
     content:    content.trim(),
@@ -49,7 +53,7 @@ export default async function handler(req, res) {
       sha,
     }),
   });
-  if (!putRes.ok) return res.status(502).json({ error: 'github write failed' });
+  if (!putRes.ok) return res.status(503).json({ error: '잠시 후 다시 시도해주세요' });
 
   // 텔레그램 알림 (실패해도 201 반환)
   const token  = process.env.TELEGRAM_BOT_TOKEN;
