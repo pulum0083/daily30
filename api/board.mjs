@@ -53,11 +53,7 @@ export default async function handler(req, res) {
       sha,
     }),
   });
-  if (!putRes.ok) {
-    const errBody = await putRes.json().catch(() => ({}));
-    console.error('[board] GitHub PUT failed', putRes.status, JSON.stringify(errBody));
-    return res.status(503).json({ error: '잠시 후 다시 시도해주세요', _debug: { status: putRes.status, gh: errBody } });
-  }
+  if (!putRes.ok) return res.status(503).json({ error: '잠시 후 다시 시도해주세요' });
 
   // 텔레그램 알림 (실패해도 201 반환)
   const token  = process.env.TELEGRAM_BOT_TOKEN;
