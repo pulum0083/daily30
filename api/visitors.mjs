@@ -37,15 +37,16 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         dateRanges: [{ startDate: '2025-01-01', endDate: 'today' }],
-        metrics:    [{ name: 'totalUsers' }],
+        metrics:    [{ name: 'totalUsers' }, { name: 'screenPageViews' }],
       }),
     }
   );
 
   if (!gaRes.ok) return res.status(502).json({ error: 'GA API failed' });
-  const data  = await gaRes.json();
-  const count = parseInt(data.rows?.[0]?.metricValues?.[0]?.value || '0', 10);
+  const data      = await gaRes.json();
+  const totalUsers     = parseInt(data.rows?.[0]?.metricValues?.[0]?.value || '0', 10);
+  const screenPageViews = parseInt(data.rows?.[0]?.metricValues?.[1]?.value || '0', 10);
 
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-  return res.status(200).json({ totalUsers: count });
+  return res.status(200).json({ totalUsers, screenPageViews });
 }
