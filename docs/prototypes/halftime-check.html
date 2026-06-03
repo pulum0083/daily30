@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>정오 점검 목업</title>
+<style>
+  :root{
+    --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+    --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+    --primary:#006EFF;--primary-bg:#E8F4FF;
+    --up:#E03131;--up-bg:#FFE8E8;
+    --dn:#2775ED;--dn-bg:#DBE8FE;
+    --gold:#B7791F;--gold-bg:#FEF3C7;
+    --green:#1a7f37;--green-bg:#dafbe1;
+    --r-sm:6px;--r-md:10px;--r-lg:16px;
+    --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--surface-inset);color:var(--ink);
+    font-family:-apple-system,'Pretendard',sans-serif;font-size:14px;line-height:1.5;
+    padding:24px 0 60px;
+  }
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px}
+
+  .section-label{
+    font-size:12px;font-weight:700;color:var(--primary);
+    margin:28px 0 6px;padding-left:2px;letter-spacing:.3px;
+  }
+  .section-desc{font-size:12px;color:var(--muted);margin-bottom:12px;padding-left:2px;line-height:1.45}
+
+  /* ── 공통 카드 ── */
+  .card{
+    background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--r-lg);box-shadow:var(--s1);
+    overflow:hidden;
+  }
+
+  /* ── 케이스 1: 스코어보드 아래 붙는 정오 카드 ── */
+  .halftime-card{padding:16px 18px}
+  .ht-stamp{
+    display:flex;align-items:center;gap:8px;
+    font-size:11px;color:var(--muted);margin-bottom:12px;
+  }
+  .ht-stamp .time-chip{
+    background:var(--gold-bg);color:var(--gold);
+    font-weight:700;font-size:11px;padding:2px 8px;border-radius:12px;
+  }
+
+  /* 신뢰도 변화 */
+  .conf-change{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .conf-box{text-align:center;flex:1}
+  .conf-box .lbl{font-size:10px;color:var(--muted);margin-bottom:4px}
+  .conf-box .num{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .conf-box .sub{font-size:10px;color:var(--muted)}
+  .conf-arrow{font-size:18px;color:var(--muted);flex-shrink:0}
+  .conf-box.after .num.up{color:var(--green)}
+  .conf-box.after .num.hold{color:var(--gold)}
+  .conf-box.after .num.dn{color:var(--dn)}
+  .delta-chip{
+    font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:3px;display:inline-block;
+  }
+  .delta-chip.up{background:var(--green-bg);color:var(--green)}
+  .delta-chip.hold{background:var(--gold-bg);color:var(--gold)}
+  .delta-chip.dn{background:var(--dn-bg);color:var(--dn)}
+
+  /* 오전 미니 스파크 */
+  .spark-mini{height:44px;margin:2px 0 10px;position:relative}
+  .spark-mini svg{width:100%;height:100%;display:block;overflow:visible}
+  .spark-mini .baseline{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+
+  /* 평가 텍스트 */
+  .ht-assess{
+    font-size:13px;color:var(--ink);line-height:1.6;
+    border-left:3px solid var(--gold);padding-left:10px;margin-bottom:12px;
+  }
+  .ht-assess .kw{font-weight:700}
+
+  /* 오후 전망 */
+  .ht-outlook{
+    background:var(--surface-soft);border-radius:var(--r-md);
+    padding:11px 13px;font-size:12.5px;line-height:1.55;
+  }
+  .ht-outlook .outlook-lbl{
+    font-size:10px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;
+  }
+  .ht-outlook .stance{
+    display:inline-block;font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:10px;margin-bottom:6px;
+  }
+  .ht-outlook .stance.hold{background:var(--gold-bg);color:var(--gold)}
+  .ht-outlook .stance.up-rev{background:var(--green-bg);color:var(--green)}
+  .ht-outlook .stance.dn-rev{background:var(--up-bg);color:var(--up)}
+
+  /* ── 케이스 2: 브리핑 페이지 인라인 배너 ── */
+  .inline-banner{
+    border-left:4px solid var(--gold);padding:14px 16px;
+    background:var(--canvas);
+  }
+  .ib-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .ib-head .chip{font-size:11px;font-weight:700;background:var(--gold-bg);
+    color:var(--gold);padding:2px 9px;border-radius:12px}
+  .ib-head .ttl{font-size:13px;font-weight:700}
+  .ib-body{font-size:13px;color:var(--ink);line-height:1.6}
+  .ib-body .hl{font-weight:700}
+  .ib-more{font-size:12px;color:var(--primary);margin-top:8px;display:block;text-decoration:none}
+
+  /* ── 케이스 3: 텔레그램 메시지 스타일 ── */
+  .tg-wrap{background:#efeff4;border-radius:var(--r-lg);padding:16px}
+  .tg-label{font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.3px}
+  .tg-bubble{
+    background:#fff;border-radius:12px 12px 12px 3px;
+    padding:12px 14px;font-size:13px;line-height:1.65;
+    box-shadow:0 1px 2px rgba(0,0,0,.12);max-width:320px;
+  }
+  .tg-bubble .tg-title{font-weight:700;font-size:14px;margin-bottom:6px}
+  .tg-bubble .tg-body{color:#222}
+  .tg-bubble .tg-body b{color:#000}
+  .tg-bubble .tg-body .tag{color:#006EFF}
+  .tg-time{font-size:10px;color:var(--muted);margin-top:6px;text-align:right}
+
+  /* 상태 토글 */
+  .toggle-row{display:flex;gap:6px;margin-bottom:14px}
+  .toggle{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--hairline);
+    background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s}
+  .toggle.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══════ 케이스 1: 스코어보드 아래 정오 카드 ══════ -->
+  <div class="section-label">케이스 1 — 스코어보드 아래 붙는 카드</div>
+  <div class="section-desc">12:30 정각에 스코어보드 아래로 슬라이드 인. AI 신뢰도 변화가 핵심.</div>
+
+  <div class="toggle-row">
+    <button class="toggle on" onclick="setCase1('up',this)">신뢰도 상향</button>
+    <button class="toggle" onclick="setCase1('hold',this)">유지</button>
+    <button class="toggle" onclick="setCase1('dn',this)">하향</button>
+  </div>
+
+  <div class="card">
+    <!-- 기존 스코어보드는 위에 있다고 가정, 구분선 -->
+    <div style="background:var(--surface-soft);padding:10px 18px;font-size:12px;color:var(--muted);
+      border-bottom:1px solid var(--hairline);display:flex;align-items:center;gap:6px">
+      <span>▲ 위: 라이브 스코어보드</span>
+    </div>
+
+    <div class="halftime-card">
+      <div class="ht-stamp">
+        <span class="time-chip">12:30 하프타임</span>
+        <span>AI 정오 점검</span>
+      </div>
+
+      <!-- 신뢰도 변화 -->
+      <div class="conf-change" id="conf-change">
+        <div class="conf-box before">
+          <div class="lbl">아침 신뢰도</div>
+          <div class="num" style="color:var(--muted)">76%</div>
+          <div class="sub">07:30 발행</div>
+        </div>
+        <div class="conf-arrow">→</div>
+        <div class="conf-box after">
+          <div class="lbl">정오 업데이트</div>
+          <div class="num up" id="conf-num">82%</div>
+          <div><span class="delta-chip up" id="conf-delta">▲ +6%p 상향</span></div>
+        </div>
+      </div>
+
+      <!-- 오전 미니 스파크 -->
+      <div class="spark-mini">
+        <svg viewBox="0 0 300 44" preserveAspectRatio="none">
+          <line class="baseline" x1="0" y1="28" x2="300" y2="28"></line>
+          <polyline id="spark1" fill="none" stroke="#E03131" stroke-width="2"
+            points="0,30 40,27 80,32 120,24 160,20 200,17 240,13 300,10"></polyline>
+          <circle id="dot1" cx="300" cy="10" r="3" fill="#E03131"></circle>
+        </svg>
+      </div>
+
+      <!-- 오전 평가 -->
+      <div class="ht-assess" id="ht-assess">
+        <span class="kw">외국인이 예상보다 강하게 순매수</span>하며 오전 내내 지수를 지지했어요.
+        반도체 섹터가 오전 상승분의 절반 이상을 이끌었고요.
+      </div>
+
+      <!-- 오후 전망 -->
+      <div class="ht-outlook">
+        <div class="outlook-lbl">오후 전망</div>
+        <div><span class="stance hold" id="stance">상승 우위 유지</span></div>
+        <div id="outlook-body">오후에도 외국인 매수 기조가 이어질 가능성이 높아요.
+          다만 장 후반 차익 실현이 나올 수 있으니 주의.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ 케이스 2: 브리핑 내 인라인 배너 ══════ -->
+  <div class="section-label" style="margin-top:36px">케이스 2 — 브리핑 본문 내 인라인 배너</div>
+  <div class="section-desc">브리핑 HTML에 12:30 이후 삽입. 별도 페이지 없이 기존 브리핑 안에서 갱신.</div>
+  <div class="card">
+    <div class="inline-banner">
+      <div class="ib-head">
+        <span class="chip">12:30 정오 점검</span>
+        <span class="ttl">상승 우위 유지 · 신뢰도 상향</span>
+      </div>
+      <div class="ib-body">
+        오전 흐름이 <span class="hl">아침 예측대로</span> 진행됐어요.
+        외국인 순매수가 예상보다 강해 신뢰도를 76% → <span class="hl">82%</span>로 올려요.
+        오후에도 상승 기조를 유지하되 장 후반 차익 실현에 유의.
+      </div>
+      <a class="ib-more" href="#">정오 점검 전문 보기 →</a>
+    </div>
+  </div>
+
+  <!-- ══════ 케이스 3: 텔레그램 메시지 ══════ -->
+  <div class="section-label" style="margin-top:36px">케이스 3 — 텔레그램 푸시 메시지</div>
+  <div class="section-desc">12:30 cron이 생성. 구독자가 열지 않아도 받는 유일한 장중 터치.</div>
+  <div class="tg-wrap">
+    <div class="tg-label">TELEGRAM · double-shot 채널</div>
+    <div class="tg-bubble">
+      <div class="tg-title">⏱ 12:30 코스피 정오 점검</div>
+      <div class="tg-body">
+        <b>아침 예측:</b> ↑ 상승 우위 (신뢰도 76%)<br>
+        <b>오전 결과:</b> +0.52% · 예측 순항 중<br>
+        <b>정오 판단:</b> 상승 우위 유지, 신뢰도 <b>82%</b>로 상향<br><br>
+        외국인이 예상보다 강하게 매수. 오후도 기조 유지 전망, 단 장 후반 차익 실현 주의.<br><br>
+        <span class="tag">→ 오늘 브리핑 보기</span>
+      </div>
+      <div class="tg-time">12:30 · double-shot</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const c1states = {
+  up: {
+    num:'82%', numCls:'up', delta:'▲ +6%p 상향', deltaCls:'up',
+    sparkPts:'0,30 40,27 80,32 120,24 160,20 200,17 240,13 300,10',
+    sparkC:'#E03131', dotY:10,
+    assess:'<span class="kw">외국인이 예상보다 강하게 순매수</span>하며 오전 내내 지수를 지지했어요. 반도체 섹터가 오전 상승분의 절반 이상을 이끌었고요.',
+    stance:'상승 우위 유지', stanceCls:'hold',
+    outlook:'오후에도 외국인 매수 기조가 이어질 가능성이 높아요. 다만 장 후반 차익 실현이 나올 수 있으니 주의.'
+  },
+  hold: {
+    num:'76%', numCls:'hold', delta:'→ 유지', deltaCls:'hold',
+    sparkPts:'0,28 40,26 80,30 120,27 160,28 200,26 240,29 300,27',
+    sparkC:'#B7791F', dotY:27,
+    assess:'오전 흐름이 <span class="kw">예측 범위 안</span>에서 움직이고 있어요. 특별한 변수는 없고 오전 거래량도 평균 수준.',
+    stance:'상승 우위 유지', stanceCls:'hold',
+    outlook:'오전과 비슷한 혼조세가 이어질 수 있어요. 방향성 없는 박스권 장세를 염두에 두세요.'
+  },
+  dn: {
+    num:'58%', numCls:'dn', delta:'▼ −18%p 하향', deltaCls:'dn',
+    sparkPts:'0,28 40,30 80,27 120,34 160,38 200,40 240,44 300,48',
+    sparkC:'#2775ED', dotY:48,
+    assess:'<span class="kw">예상 밖의 외국인 매도세</span>가 오전 내내 이어졌어요. 원·달러 환율 급등이 겹치며 상승 모멘텀이 약화됐고요.',
+    stance:'⚠ 전망 하향 조정', stanceCls:'dn-rev',
+    outlook:'상승보다 하락 가능성이 커졌어요. 하락 우위로 전망을 수정하며, 오후 추가 하락에 대비하는 게 좋아요.'
+  }
+};
+
+function setCase1(k, btn) {
+  const s = c1states[k];
+  document.querySelectorAll('.toggle').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  const numEl = document.getElementById('conf-num');
+  numEl.textContent = s.num;
+  numEl.className = 'num ' + s.numCls;
+  const deltaEl = document.getElementById('conf-delta');
+  deltaEl.textContent = s.delta;
+  deltaEl.className = 'delta-chip ' + s.deltaCls;
+  document.getElementById('spark1').setAttribute('points', s.sparkPts);
+  document.getElementById('spark1').setAttribute('stroke', s.sparkC);
+  document.getElementById('dot1').setAttribute('cy', s.dotY);
+  document.getElementById('dot1').setAttribute('fill', s.sparkC);
+  document.getElementById('ht-assess').innerHTML = s.assess;
+  const stEl = document.getElementById('stance');
+  stEl.textContent = s.stance;
+  stEl.className = 'stance ' + s.stanceCls;
+  document.getElementById('outlook-body').textContent = s.outlook;
+}
+</script>
+</body>
+</html>

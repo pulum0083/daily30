@@ -12,6 +12,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8789", "--directory", "docs/prototypes"],
       "port": 8789
+    },
+    {
+      "name": "vercel-dev",
+      "runtimeExecutable": "vercel",
+      "runtimeArgs": ["dev", "--listen", "3000", "--yes"],
+      "port": 3000
     }
   ]
 }

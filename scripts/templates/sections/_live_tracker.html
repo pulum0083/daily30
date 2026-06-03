@@ -1,0 +1,27 @@
+{# 예측 vs 실제 라이브 섹션 — 코스피 장중에만 활성화 #}
+<div id="live-tracker"
+     data-dir="{{ dir_cls }}"
+     data-pred-pct="{{ readout_pct }}"
+     data-pred-label="{{ dir_arrow }} {{ direction }}">
+  <div class="live-tracker">
+    <div class="live-tracker__header">
+      <span class="live-tracker__title">예측 vs 실제</span>
+      <span class="live-tracker__badge" id="live-badge">
+        <span class="live-dot"></span>LIVE
+      </span>
+    </div>
+    <div class="live-tracker__rows">
+      <div class="live-tracker__row">
+        <span class="live-tracker__label">예측</span>
+        <span class="pred-badge {{ dir_cls }}" style="font-size:12px;padding:2px 8px">{{ dir_arrow }} {{ direction }}</span>
+        <span class="live-tracker__pred-pct">{{ readout_pct }}%</span>
+      </div>
+      <div class="live-tracker__row">
+        <span class="live-tracker__label">현재</span>
+        <span class="live-tracker__current" id="live-current">로딩 중…</span>
+        <span class="live-tracker__verdict" id="live-verdict"></span>
+      </div>
+    </div>
+    <div class="live-tracker__footer" id="live-updated"></div>
+  </div>
+</div>

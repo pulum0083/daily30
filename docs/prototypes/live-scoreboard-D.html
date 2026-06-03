@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>라이브 예측 스코어보드 D</title>
+<style>
+  :root{
+    --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+    --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+    --primary:#006EFF;--primary-bg:#E8F4FF;
+    --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+    --gold:#B7791F;--gold-bg:#FEF3C7;
+    --r-sm:6px;--r-md:10px;--r-lg:16px;
+    --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--surface-inset);color:var(--ink);
+    font-family:-apple-system,'Pretendard',sans-serif;font-size:14px;line-height:1.5;
+    padding:24px 0 60px;
+  }
+  .wrap{max-width:430px;margin:0 auto;padding:0 16px}
+  .page-title{font-size:13px;color:var(--muted);text-align:center;margin-bottom:8px}
+  .toggle-row{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+  .toggle{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--hairline);
+    background:var(--canvas);color:var(--muted);cursor:pointer}
+  .toggle.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .card{
+    background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--r-lg);box-shadow:var(--s2);padding:18px;
+  }
+
+  /* 헤더 */
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .card-head .ttl{font-size:13px;font-weight:700;color:var(--muted)}
+  .live-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    color:var(--up);background:var(--up-bg);padding:3px 9px;border-radius:20px}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--up);animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* 헤드라인 (A) */
+  .verdict-head{font-size:19px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px}
+  .verdict-sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.45}
+
+  /* 게이지 (A) */
+  .gauge{position:relative;height:40px;margin:0 2px}
+  .gauge-track{position:absolute;top:14px;left:0;right:0;height:8px;border-radius:4px;
+    background:linear-gradient(90deg,
+      var(--dn-bg) 0%, var(--dn-bg) 33%,
+      var(--surface-inset) 33%, var(--surface-inset) 67%,
+      var(--up-bg) 67%, var(--up-bg) 100%);}
+  .gauge-needle{position:absolute;top:4px;width:3px;height:28px;border-radius:2px;
+    background:var(--ink);transform:translateX(-50%);transition:left .5s ease}
+  .gauge-needle::after{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid var(--ink)}
+  .gauge-zones{display:flex;margin:0 2px 16px;font-size:10px;color:var(--muted)}
+  .gauge-zones span{flex:1}
+  .gauge-zones span:nth-child(2){text-align:center}
+  .gauge-zones span:last-child{text-align:right}
+
+  /* 현재값 라인 */
+  .now-row{display:flex;align-items:baseline;gap:10px;
+    padding:12px 14px;background:var(--surface-soft);border-radius:var(--r-md);margin-bottom:16px}
+  .now-row .idx{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .now-row .chg{font-size:14px;font-weight:700;color:var(--up)}
+  .now-row .pred-tag{margin-left:auto;font-size:11px;font-weight:700;
+    background:var(--up-bg);color:var(--up);padding:3px 9px;border-radius:12px}
+
+  /* 스파크라인 (C) */
+  .spark-canvas{position:relative;height:76px;margin:2px 0 6px}
+  svg{display:block;width:100%;height:100%;overflow:visible}
+  .predline{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+  .predline-lbl{font-size:9px;fill:var(--muted)}
+  .spark-foot{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px}
+
+  /* 푸터: 카운트다운 (B) */
+  .card-foot{display:flex;align-items:center;justify-content:space-between;
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--hairline);
+    font-size:11px;color:var(--muted)}
+  .card-foot .cd{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .state-note{font-size:11px;color:var(--muted);text-align:center;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-title">변형 D — 게이지 + 스파크라인 합본 (상태 전환 미리보기)</div>
+  <div class="toggle-row">
+    <button class="toggle on" onclick="setState('hit',this)">적중 중</button>
+    <button class="toggle" onclick="setState('tie',this)">박빙</button>
+    <button class="toggle" onclick="setState('miss',this)">이탈 중</button>
+  </div>
+
+  <div class="card" id="card">
+    <div class="card-head">
+      <span class="ttl">예측 vs 실제 · 코스피</span>
+      <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+    </div>
+
+    <!-- A: 헤드라인 -->
+    <div class="verdict-head" id="head">예측대로 <span id="head-em">순항 중</span></div>
+    <div class="verdict-sub" id="sub">아침 "상승 우위(신뢰도 76%)" 예측이 지금 들어맞고 있어요.</div>
+
+    <!-- A: 게이지 -->
+    <div class="gauge">
+      <div class="gauge-track"></div>
+      <div class="gauge-needle" id="needle" style="left:76%"></div>
+    </div>
+    <div class="gauge-zones"><span>이탈</span><span>박빙</span><span>적중</span></div>
+
+    <!-- 현재값 -->
+    <div class="now-row">
+      <span class="idx" id="idx">2,718.40</span>
+      <span class="chg" id="chg">+0.42%</span>
+      <span class="pred-tag" id="ptag">↑ 상승 우위</span>
+    </div>
+
+    <!-- C: 스파크라인 -->
+    <div class="spark-canvas">
+      <svg viewBox="0 0 300 76" preserveAspectRatio="none">
+        <line class="predline" x1="0" y1="52" x2="300" y2="52"></line>
+        <text class="predline-lbl" x="2" y="48">전일 종가</text>
+        <polyline id="spark" fill="none" stroke="#E03131" stroke-width="2"
+          points="0,54 25,50 50,56 75,48 100,44 125,47 150,40 175,42 200,34 225,37 250,30 275,26 300,20"></polyline>
+        <circle id="dot" cx="300" cy="20" r="3.5" fill="#E03131"></circle>
+      </svg>
+    </div>
+    <div class="spark-foot"><span>09:00</span><span id="nowt">11:13 현재</span><span>15:30</span></div>
+
+    <!-- B: 카운트다운 -->
+    <div class="card-foot">
+      <span>매 30초 자동 갱신</span>
+      <span>마감까지 <span class="cd" id="cd">1:47:30</span></span>
+    </div>
+  </div>
+
+  <div class="state-note">위 토글로 적중 / 박빙 / 이탈 상태를 미리 볼 수 있어요.</div>
+</div>
+
+<script>
+const UP='#E03131', DN='#2775ED', MUTED='#6B7280';
+const states={
+  hit:{
+    head:['예측대로 ','순항 중',UP],
+    sub:'아침 "상승 우위(신뢰도 76%)" 예측이 지금 들어맞고 있어요.',
+    needle:'76%', idx:'2,718.40', chg:'+0.42%', chgc:UP,
+    ptag:'↑ 상승 우위', ptagc:UP,
+    spark:'0,54 25,50 50,56 75,48 100,44 125,47 150,40 175,42 200,34 225,37 250,30 275,26 300,20',
+    doty:20, sparkc:UP
+  },
+  tie:{
+    head:['예측과 ','팽팽한 접전',MUTED],
+    sub:'상승 예측했지만 현재 거의 보합. 마감까지 방향이 갈릴 수 있어요.',
+    needle:'50%', idx:'2,706.10', chg:'+0.04%', chgc:UP,
+    ptag:'↑ 상승 우위', ptagc:UP,
+    spark:'0,54 25,52 50,55 75,51 100,53 125,50 150,52 175,49 200,51 225,50 250,52 275,51 300,52',
+    doty:52, sparkc:MUTED
+  },
+  miss:{
+    head:['예측이 ','빗나가는 중',DN],
+    sub:'상승 예측과 반대로 하락 전환. 외국인 매도세가 원인으로 보여요.',
+    needle:'20%', idx:'2,689.30', chg:'-0.58%', chgc:DN,
+    ptag:'↑ 상승 우위', ptagc:UP,
+    spark:'0,52 25,55 50,53 75,58 100,60 125,57 150,62 175,64 200,61 225,66 250,68 275,70 300,72',
+    doty:72, sparkc:DN
+  }
+};
+function setState(k,btn){
+  const s=states[k];
+  document.querySelectorAll('.toggle').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('head').childNodes[0].nodeValue=s.head[0];
+  const em=document.getElementById('head-em'); em.textContent=s.head[1]; em.style.color=s.head[2];
+  document.getElementById('sub').textContent=s.sub;
+  document.getElementById('needle').style.left=s.needle;
+  document.getElementById('idx').textContent=s.idx;
+  const chg=document.getElementById('chg'); chg.textContent=s.chg; chg.style.color=s.chgc;
+  const pt=document.getElementById('ptag'); pt.textContent=s.ptag;
+  document.getElementById('spark').setAttribute('points',s.spark);
+  document.getElementById('spark').setAttribute('stroke',s.sparkc);
+  const dot=document.getElementById('dot'); dot.setAttribute('cy',s.doty); dot.setAttribute('fill',s.sparkc);
+}
+</script>
+</body>
+</html>
