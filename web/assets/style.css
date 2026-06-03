@@ -671,6 +671,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .sidebar-footer{display:flex;align-items:center;gap:12px;padding:10px 16px;}
 .sidebar-intro{font-size:11px;color:var(--muted);transition:color .15s;}
 .sidebar-intro:hover{color:var(--primary);}
+.sidebar-opinion-btn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;}
 
 /* ──────────────────────────────────────────────
    모달 + 인포 아이콘 + 캡션 (공통)
