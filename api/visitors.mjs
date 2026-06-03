@@ -51,7 +51,11 @@ export default async function handler(req, res) {
     }
   );
 
-  if (!gaRes.ok) return res.status(502).json({ error: 'GA API failed' });
+  if (!gaRes.ok) {
+    const errBody = await gaRes.json().catch(() => ({}));
+    console.error('[visitors] GA API failed', gaRes.status, JSON.stringify(errBody));
+    return res.status(502).json({ error: 'GA API failed', _debug: { status: gaRes.status, ga: errBody } });
+  }
   const data  = await gaRes.json();
   const count = parseInt(data.rows?.[0]?.metricValues?.[0]?.value || '0', 10);
 
