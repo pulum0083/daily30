@@ -34,10 +34,6 @@
       `(${days[kst.getDay()]}) ${pad(kst.getHours())}:${pad(kst.getMinutes())}`;
   }
 
-  function applyTimeCollapse() {
-    // 예측 섹션은 항상 열린 상태 유지
-  }
-
   /* ── 모달 (info-icon) ── */
   function openModal(id) {
     const el = document.getElementById(id);
@@ -636,7 +632,6 @@
     }
     updateGnbDate();
     setInterval(updateGnbDate, 30000);
-    applyTimeCollapse();
     initModals();
     initNotices();
     renderSupplyFlows();
@@ -857,10 +852,6 @@
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
         .catch(function() {});
-    }
-
-    function escHtml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
     function renderNews(d) {
