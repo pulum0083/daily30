@@ -7,7 +7,6 @@
 <div class="layout-wrapper">
   <div class="layout-grid">
     <main class="layout-grid__main">
-      {% include "sections/_live_scoreboard.html" %}
       <div class="accordion-item is-open is-today">
         <div class="accordion-header">
           <div class="accordion-header__date-label">{{ date_str }}</div>
@@ -18,6 +17,7 @@
         </div>
         <div class="accordion-body">
           <div class="accordion-body__inner">
+            {% include "sections/_live_scoreboard.html" %}
             <div class="pre-open-toggle" id="pre-open-toggle" onclick="togglePreOpen()">
               <div class="pre-open-toggle__summary">
                 <span class="pred-badge {{ dir_cls }}" style="font-size:13px;padding:2px 8px">{{ dir_arrow }}</span>
