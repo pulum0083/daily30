@@ -712,6 +712,22 @@
     var isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     btn.classList.toggle('open', !isOpen);
+    var left = btn.querySelector('.lsb-ac-left');
+    if (!left) return;
+    if (!isOpen) {
+      // 열기 — 현재 표시 중인 time/title을 dataset에 저장 후 레이블 교체
+      var t = left.querySelector('.lsb-ac-prev-time, #lsb-ac-prev-time');
+      var ti = left.querySelector('.lsb-ac-prev-title, #lsb-ac-prev-title');
+      btn.dataset.savedTime  = t  ? t.textContent  : (btn.dataset.savedTime  || '');
+      btn.dataset.savedTitle = ti ? ti.textContent : (btn.dataset.savedTitle || '');
+      left.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+    } else {
+      // 닫기 — 저장해둔 time/title 복원
+      left.innerHTML = '<span class="lsb-ac-prev-time" id="lsb-ac-prev-time">'
+        + (btn.dataset.savedTime  || '') + '</span>'
+        + '<span class="lsb-ac-prev-title" id="lsb-ac-prev-title">'
+        + (btn.dataset.savedTitle || '') + '</span>';
+    }
   }
   window.lsbToggleAccordion = lsbToggleAccordion;
 
@@ -791,9 +807,9 @@
     }
 
     var VERDICT = {
-      hit:   { headline: '예측대로 순항 중',  color: 'var(--up)', bg: 'var(--up-bg)' },
-      tight: { headline: '팽팽한 접전',        color: 'var(--gold)', bg: 'var(--gold-bg)' },
-      miss:  { headline: '빗나가는 중',        color: 'var(--dn)', bg: 'var(--dn-bg)' },
+      hit:   { prefix: '예측대로 ', em: '순항 중',   color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '팽팽한 ',   em: '접전',       color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          em: '빗나가는 중', color: 'var(--dn)',   bg: 'var(--dn-bg)' },
     };
 
     function updateDisplay(price, changePct) {
@@ -814,7 +830,11 @@
         chgEl.style.color = changePct >= 0 ? 'var(--up)' : 'var(--dn)';
       }
 
-      if (headEl) { headEl.textContent = v.headline; headEl.style.color = v.color; }
+      var prefixEl = document.getElementById('lsb-head-prefix');
+      var emEl     = document.getElementById('lsb-head-em');
+      if (prefixEl) prefixEl.textContent = v.prefix;
+      if (emEl)     { emEl.textContent = v.em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+      if (headEl)   headEl.style.color = '';
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
       var rawPos;
@@ -871,7 +891,10 @@
           bodyEl.innerHTML = hist.map(function(item) {
             return '<div class="lsb-news-item">'
               + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
+              + '<div class="lsb-ni-content">'
               + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
+              + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
+              + '</div>'
               + '</div>';
           }).join('');
         }
