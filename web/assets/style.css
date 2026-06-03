@@ -668,10 +668,12 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .sidebar-cta__tg-text{display:flex;flex-direction:column;gap:2px;}
 .sidebar-cta__tg-title{font-size:13px;font-weight:700;color:var(--ink);}
 .sidebar-cta__tg-sub{font-size:11px;color:var(--muted);}
-.sidebar-footer{display:flex;align-items:center;gap:12px;padding:10px 16px;}
+.sidebar-footer{display:flex;align-items:center;gap:10px;padding:10px 16px;}
 .sidebar-intro{font-size:11px;color:var(--muted);transition:color .15s;}
 .sidebar-intro:hover{color:var(--primary);}
-.sidebar-opinion-btn{background:none;border:none;padding:0;cursor:pointer;font-family:inherit;}
+.sidebar-opinion-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--primary);background:transparent;border:1.5px solid var(--primary);border-radius:6px;cursor:pointer;font-family:inherit;transition:background .15s,color .15s;margin-left:auto;}
+.sidebar-opinion-btn:hover{background:var(--primary);color:#fff;}
+.sidebar-opinion-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 
 /* ──────────────────────────────────────────────
    모달 + 인포 아이콘 + 캡션 (공통)
