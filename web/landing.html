@@ -944,6 +944,22 @@
 
     .sub-btn svg { width: 16px; height: 16px; }
 
+    .opinion-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 20px;
+      padding: 8px 14px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .opinion-btn:hover { border-color: var(--chapter-accent); color: var(--chapter-accent); }
+    .opinion-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
     .sub-note {
       font-size: 11px;
       color: var(--text-tertiary);
@@ -1131,6 +1147,10 @@
                   <span class="chapter__meta-label" data-i18n="ch0-m3l">구독료</span>
                 </div>
               </div>
+              <button class="opinion-btn" onclick="openNoticePanel(); switchPanelTab('board');">
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                의견 남기기
+              </button>
             </div>
             <div class="chapter__visual">
               <div class="hero-stack">
