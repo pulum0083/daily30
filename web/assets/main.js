@@ -595,7 +595,20 @@
           })
           .catch(function() {});
       })
-      .catch(function() {});
+      .catch(function() {
+        // 공지 fetch 실패해도 게시판 새글 배지는 확인
+        fetch(BOARD_JSON_URL, { signal: AbortSignal.timeout(5000) })
+          .then(function(r) { return r.json(); })
+          .then(function(boardData) {
+            var posts = (boardData && boardData.posts) || [];
+            var seen  = localStorage.getItem(BOARD_SEEN_KEY);
+            var hasNew = posts.some(function(p) {
+              return !p.parent_id && (!seen || p.created_at > seen);
+            });
+            if (hasNew) dot.classList.add('is-visible');
+          })
+          .catch(function() {});
+      });
   }
 
   function initNotices() {
