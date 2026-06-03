@@ -23,11 +23,13 @@ PROMPT = """
 
 
 def get_gemini_api_key() -> str:
-    key = os.environ.get("GEMINI_API_KEY")
+    key = os.environ.get("GEMINI_API_KEY", "")
     if not key:
         cfg = REPO_ROOT / "config.json"
         if cfg.exists():
-            key = json.loads(cfg.read_text()).get("GEMINI_API_KEY")
+            with open(cfg, encoding="utf-8") as f:
+                config = json.load(f)
+            key = config.get("gemini", {}).get("api_key", "")
     if not key:
         raise RuntimeError("GEMINI_API_KEY not found in env or config.json")
     return key
@@ -51,7 +53,7 @@ def fetch_latest_issue(today: str, time_str: str) -> dict:
     if raw.startswith("```"):
         lines = raw.split("\n")
         raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
-    m = re.search(r"\{[\s\S]*?\}", raw)
+    m = re.search(r"\{[\s\S]*\}", raw)
     if m:
         raw = m.group(0)
     return json.loads(raw)
