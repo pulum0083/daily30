@@ -176,7 +176,21 @@ def build_fallback_message(briefing_type: str) -> str:
     return "\n".join(parts)
 
 
+GURU_QUOTES_FILE = DATA_DIR / "guru_quotes.json"
 SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
+
+
+def pick_quote() -> str:
+    """guru_quotes.json에서 랜덤으로 명언 한 줄을 반환한다."""
+    import random
+    if not GURU_QUOTES_FILE.exists():
+        return ""
+    with open(GURU_QUOTES_FILE, encoding="utf-8") as f:
+        quotes = json.load(f)
+    if not quotes:
+        return ""
+    item = random.choice(quotes)
+    return f"\n\n━━━━━━━━━━━━━━━━━━━━\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
 
 
 def _load_sent_log() -> dict:
@@ -271,6 +285,9 @@ def main():
     # Replace placeholder URL if present
     web_url = get_web_base_url()
     message_text = message_text.replace("{web.base_url}", web_url)
+
+    # 명언 추가
+    message_text = message_text.rstrip() + pick_quote()
 
     # ── 날짜 유효성 검사: 오늘 날짜가 아닌 stale 메시지 발송 차단 ──
     if not args.force:
