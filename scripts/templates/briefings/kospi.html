@@ -18,18 +18,9 @@
         <div class="accordion-body">
           <div class="accordion-body__inner">
             {% include "sections/_live_scoreboard.html" %}
-            <div class="pre-open-toggle" id="pre-open-toggle" onclick="togglePreOpen()">
-              <div class="pre-open-toggle__summary">
-                <span class="pred-badge {{ dir_cls }}" style="font-size:13px;padding:2px 8px">{{ dir_arrow }}</span>
-                <span class="pre-open-toggle__label">{{ index_name }} 예측 {{ up_pct }}%<span class="pre-open-toggle__time"> · {{ generated_time }} 생성</span></span>
-              </div>
-              <span class="pre-open-toggle__chevron" id="pre-open-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </div>
-            <div class="pre-open-content" id="pre-open-content">
-              {% include "sections/prediction.html" %}
-              {% include "sections/reasons.html" %}
-              <div class="divider"></div>
-            </div>
+            {% include "sections/prediction.html" %}
+            {% include "sections/reasons.html" %}
+            <div class="divider"></div>
             {% if sector_signal %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}

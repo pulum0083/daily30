@@ -34,15 +34,6 @@
       `(${days[kst.getDay()]}) ${pad(kst.getHours())}:${pad(kst.getMinutes())}`;
   }
 
-  /* ── 접힘 토글 (장 시작 전 섹션) ── */
-  function togglePreOpen() {
-    const content = document.getElementById('pre-open-content');
-    const chevron = document.getElementById('pre-open-chevron');
-    if (!content) return;
-    const collapsed = content.classList.contains('collapsed');
-    content.classList.toggle('collapsed', !collapsed);
-    if (chevron) chevron.classList.toggle('open', !collapsed);
-  }
   function applyTimeCollapse() {
     // 예측 섹션은 항상 열린 상태 유지
   }
@@ -960,7 +951,6 @@
 
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
   window.toggleTheme = toggleTheme;
-  window.togglePreOpen = togglePreOpen;
   window.openModal = openModal;
   window.closeModal = closeModal;
   window.drawSparkline = drawSparkline;
