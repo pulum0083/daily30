@@ -460,7 +460,7 @@
     if (panel) panel.classList.remove('is-open');
   }
 
-  var BOARD_JSON_URL   = '/data/board.json';
+  var BOARD_JSON_URL   = '/api/board';
   var BOARD_POST_URL   = '/api/board';
   var BOARD_AUTHOR_KEY = 'ds_board_author';
   var BOARD_SEEN_KEY   = 'ds_board_last_seen';

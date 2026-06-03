@@ -1,16 +1,9 @@
-// 게시판 글 등록: GitHub board.json 업데이트 + 텔레그램 관리자 알림
+// 게시판 글 조회(GET) / 등록(POST): GitHub board.json 실시간 읽기·쓰기 + 텔레그램 관리자 알림
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { content, author } = req.body || {};
-  if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
-  if (!author  || !author.trim())  return res.status(400).json({ error: 'author required' });
-  if (content.trim().length > 1000) return res.status(400).json({ error: 'content too long' });
-  if (author.trim().length > 50)    return res.status(400).json({ error: 'author too long' });
 
   const GH_PAT = process.env.GH_PAT;
   if (!GH_PAT) return res.status(500).json({ error: 'Missing GH_PAT env var' });
@@ -22,6 +15,24 @@ export default async function handler(req, res) {
     'Content-Type': 'application/json',
     'X-GitHub-Api-Version': '2022-11-28',
   };
+
+  // GET — GitHub에서 실시간으로 최신 글 목록 반환
+  if (req.method === 'GET') {
+    const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, { headers: ghHeaders });
+    if (!getRes.ok) return res.status(502).json({ error: 'github read failed' });
+    const { content: b64 } = await getRes.json();
+    const data = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json(data);
+  }
+
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { content, author } = req.body || {};
+  if (!content || !content.trim()) return res.status(400).json({ error: 'content required' });
+  if (!author  || !author.trim())  return res.status(400).json({ error: 'author required' });
+  if (content.trim().length > 1000) return res.status(400).json({ error: 'content too long' });
+  if (author.trim().length > 50)    return res.status(400).json({ error: 'author too long' });
 
   // 현재 파일 읽기 (SHA 필요)
   const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, { headers: ghHeaders });
