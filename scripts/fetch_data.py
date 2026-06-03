@@ -253,33 +253,6 @@ def _yf_history(ticker: str, retries: int = 3, **kwargs):
     return pd.DataFrame()
 
 
-def get_fear_greed() -> dict:
-    """Fetch CNN Fear & Greed Index from alternative.me (free, no auth)."""
-    try:
-        url = "https://api.alternative.me/fng/?limit=365"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            raw = json.loads(resp.read().decode())
-        entries = raw.get("data", [])
-        if not entries:
-            return {}
-
-        def val_at(idx):
-            return int(entries[idx]["value"]) if idx < len(entries) else None
-
-        return {
-            "value":          val_at(0),
-            "prev":           val_at(1),
-            "1w":             val_at(7),
-            "1m":             val_at(30),
-            "1y":             val_at(364),
-            "timestamp":      entries[0].get("timestamp"),       # Unix timestamp (str)
-            "classification": entries[0].get("value_classification"),  # e.g. "Extreme Fear"
-        }
-    except Exception as e:
-        print(f"[fetch_data] Fear & Greed API error: {e}", file=sys.stderr)
-        return {}
-
 
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
@@ -617,11 +590,7 @@ def fetch_kospi_data() -> dict:
     print("[fetch_data]   → sidebar market data")
     market_data_js = build_sidebar_market_data(SIDEBAR_TICKERS_KOSPI)
 
-    # 2. Fear & Greed Index (Claude 분석용 — UI에서는 제거됨)
-    print("[fetch_data]   → fear & greed index")
-    fg = get_fear_greed()
-
-    # 3. Additional macro tickers (not in sidebar)
+    # 2. Additional macro tickers (not in sidebar)
     print("[fetch_data]   → macro tickers")
     macro_tickers = ["^GSPC", "^VIX", "BZ=F", "GC=F", "^TNX",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
@@ -680,7 +649,6 @@ def fetch_kospi_data() -> dict:
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},
         "bigtech": {t: macro.get(t, {}) for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]},
-        "fearGreed": fg or {},
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         # 투자자별 순매수 (외국인/기관/개인 — 전 거래일 KRX 기준)
@@ -716,11 +684,7 @@ def fetch_us_data() -> dict:
     print("[fetch_data]   → sidebar market data")
     market_data_js = build_sidebar_market_data(SIDEBAR_TICKERS_US)
 
-    # 2. Fear & Greed (Claude 분석용 — UI에서는 제거됨)
-    print("[fetch_data]   → fear & greed index")
-    fg = get_fear_greed()
-
-    # 3. Macro + futures
+    # 2. Macro + futures
     print("[fetch_data]   → macro tickers")
     macro_tickers = [
         "^GSPC", "^VIX", "^TNX", "BZ=F", "GC=F",
@@ -782,7 +746,6 @@ def fetch_us_data() -> dict:
             t: next((c for c in us_candidates if c["ticker"] == t), {})
             for t in ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "TSLA"]
         },
-        "fearGreed": fg or {},
         "dram_etf":  macro.get("DRAM", {}),  # Roundhill Memory ETF (HBM·DRAM 수요 선행)
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
