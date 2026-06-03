@@ -555,16 +555,36 @@
     if (!content) { if (ta) ta.focus(); return; }
     if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
 
+    var author = getBoardAuthor();
     fetch(BOARD_POST_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: content, author: getBoardAuthor() }),
+      body: JSON.stringify({ content: content, author: author }),
     })
       .then(function(r) {
         if (!r.ok) throw new Error('fail');
+        return r.json();
+      })
+      .then(function(data) {
         if (ta) ta.value = '';
         if (btn) { btn.disabled = false; btn.textContent = '등록'; }
-        setTimeout(fetchBoard, 3000);
+        // 낙관적 업데이트 — Vercel 재배포 대기 없이 즉시 DOM에 표시
+        var body = document.getElementById('board-panel-body');
+        if (body && data && data.post) {
+          var p = data.post;
+          var postHtml =
+            '<div class="board-post">' +
+              '<div class="board-post__header">' +
+                '<span class="board-post__author">' + escHtml(p.author) + '</span>' +
+                '<span class="board-post__time">' + fmtBoardDate(p.created_at) + '</span>' +
+              '</div>' +
+              '<div class="board-post__content">' + escHtml(p.content) + '</div>' +
+            '</div>';
+          // 빈 목록 메시지를 지우고 새 글 prepend
+          var empty = body.querySelector('.notice-panel__empty');
+          if (empty) body.innerHTML = '';
+          body.insertAdjacentHTML('afterbegin', postHtml);
+        }
       })
       .catch(function() {
         if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
