@@ -725,11 +725,17 @@
     function kstNow() {
       return new Date(Date.now() + 9 * 3600 * 1000);
     }
+    function isPreOpen() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 530 && mins < 540;   // 08:50~08:59
+    }
     function isMarketHours() {
       var k = kstNow(), day = k.getUTCDay();
       if (day === 0 || day === 6) return false;
       var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
-      return mins >= 540 && mins < 930;   // 09:00~15:29
+      return mins >= 530 && mins < 930;   // 08:50~15:29 (준비 중 포함)
     }
     function isAfterMarket() {
       var k = kstNow(), day = k.getUTCDay();
@@ -741,12 +747,40 @@
     if (!isMarketHours() && !isAfterMarket()) return;
     el.style.display = '';
 
+    // ── 마감 후 상태 ──
     if (isAfterMarket()) {
       var badge = document.getElementById('lsb-badge');
-      if (badge) {
-        badge.className = 'lsb-closed-badge';
-        badge.textContent = '마감';
+      if (badge) { badge.className = 'lsb-closed-badge'; badge.textContent = '마감'; }
+      var footElC = document.getElementById('lsb-foot');
+      if (footElC) footElC.innerHTML = '<strong>마감</strong>';
+      fetchKospi();
+      fetchNews();
+      return;
+    }
+
+    // ── 준비 중 상태 (08:50~08:59) ──
+    if (isPreOpen()) {
+      var badge2 = document.getElementById('lsb-badge');
+      if (badge2) { badge2.className = 'lsb-pre-badge'; badge2.textContent = '준비 중'; }
+      var headEl0 = document.getElementById('lsb-headline');
+      if (headEl0) { headEl0.textContent = '장 시작 준비 중'; headEl0.style.color = 'var(--muted)'; }
+      var subEl0 = document.getElementById('lsb-sub');
+      if (subEl0) subEl0.textContent = '09:00 장 시작과 함께 실시간 추적을 시작합니다.';
+      function updatePreOpenTimer() {
+        var kp = kstNow();
+        var open = new Date(kp);
+        open.setUTCHours(9, 0, 0, 0);
+        if (open <= kp) { window.location.reload(); return; }
+        var diff2 = open - kp;
+        var mm = Math.floor(diff2 / 60000);
+        var ss = Math.floor((diff2 % 60000) / 1000);
+        var footElP = document.getElementById('lsb-foot');
+        if (footElP) footElP.innerHTML = '장 시작까지 <strong>' + mm + ':' + String(ss).padStart(2, '0') + '</strong>';
       }
+      updatePreOpenTimer();
+      setInterval(updatePreOpenTimer, 1000);
+      fetchNews();
+      return;
     }
 
     function calcVerdict(changePct) {
