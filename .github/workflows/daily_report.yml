@@ -14,6 +14,7 @@ on:
           - us
           - kospi-close
           - accuracy
+          - kospi-news-live
       dry_run:
         description: "dry_run=true 시 텔레그램·이메일 전송 건너뜀 (테스트용)"
         required: false
@@ -398,3 +399,47 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
+
+  # ──────────────────────────────────────────────────────────────────
+  kospi-news-live:
+    name: "📰 코스피 장중 뉴스 갱신"
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.briefing_type == 'kospi-news-live'
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 🐍 Python 세팅
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 📦 의존성 설치
+        run: pip install google-genai
+
+      - name: 📰 뉴스 이슈 수집
+        run: python3 scripts/fetch_news_live.py
+
+      - name: 💾 JSON 커밋 & 푸시
+        run: |
+          git config user.name  "DailyB Bot"
+          git config user.email "bot@doubleshot.space"
+          git add web/data/kospi-news-live.json
+          if git diff --cached --quiet; then
+            echo "변경 없음, 커밋 스킵"
+          else
+            git commit -m "data: 코스피 장중 뉴스 갱신 $(TZ=Asia/Seoul date +'%H:%M') KST"
+            git push
+          fi
+
+      - name: 🚀 GitHub Pages 배포
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web
+          keep_files: true

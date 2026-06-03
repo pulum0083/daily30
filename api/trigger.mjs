@@ -1,4 +1,4 @@
-const VALID_TYPES = ['kospi', 'kospi-close', 'us', 'accuracy'];
+const VALID_TYPES = ['kospi', 'kospi-close', 'us', 'accuracy', 'kospi-news-live'];
 const REPO = 'pulum0083/daily30';
 const WORKFLOW = 'daily_report.yml';
 
