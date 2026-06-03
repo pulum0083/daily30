@@ -69,6 +69,10 @@
     });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        var np = document.getElementById('notice-panel');
+        if (np && np.classList.contains('is-open')) { closeNoticePanel(); return; }
+        var fm = document.getElementById('feedback-modal-overlay');
+        if (fm && fm.classList.contains('is-open')) { closeFeedbackModal(); return; }
         document.querySelectorAll('.info-modal-backdrop.is-open')
           .forEach(bd => bd.classList.remove('is-open'));
       }
@@ -356,6 +360,14 @@
   }
 
   /* ── 공지사항 패널 ── */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   var NOTICES_URL = '/data/notices.json';
   var NOTICES_LS_KEY = 'ds_read_notices';
 
@@ -382,9 +394,9 @@
       return '<div class="notice-card' + (unread ? ' is-unread' : '') + '">' +
         (unread ? '<div class="notice-card__dot"></div>' : '') +
         '<div class="notice-card__meta">' + noticeBadgeHtml(n.type) +
-        '<span class="notice-card__date">' + n.date + '</span></div>' +
-        '<div class="notice-card__title">' + n.title + '</div>' +
-        '<div class="notice-card__body">' + n.body + '</div>' +
+        '<span class="notice-card__date">' + escHtml(n.date) + '</span></div>' +
+        '<div class="notice-card__title">' + escHtml(n.title) + '</div>' +
+        '<div class="notice-card__body">' + escHtml(n.body) + '</div>' +
         '</div>';
     }).join('');
   }
@@ -478,10 +490,18 @@
           '<button class="feedback-modal__submit" id="feedback-submit" onclick="submitFeedback()">보내기</button>' +
         '</div>' +
       '</div>';
+    el.addEventListener('click', function(e) {
+      if (e.target === el) closeFeedbackModal();
+    });
     document.body.appendChild(el);
   }
 
   function openFeedbackModal() {
+    // 성공 메시지로 교체된 뒤 재오픈 시 기존 overlay 제거 후 재주입
+    var existing = document.getElementById('feedback-modal-overlay');
+    if (existing && !document.getElementById('feedback-textarea')) {
+      existing.parentNode.removeChild(existing);
+    }
     injectFeedbackModal();
     var overlay = document.getElementById('feedback-modal-overlay');
     if (overlay) overlay.classList.add('is-open');
