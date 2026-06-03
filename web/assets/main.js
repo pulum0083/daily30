@@ -650,6 +650,7 @@
     initNotices();
     renderSupplyFlows();
     loadChipWidget();
+    loadVisitorCount();
     initLiveTracker();
     patchBriefingList();
     patchBriefingNav();
@@ -733,6 +734,20 @@
       '<span class="chip-row__chg ' + dir + '">' + chg + '</span>';
     return row;
   }
+  function loadVisitorCount() {
+    var wrap  = document.getElementById('sidebar-visitors');
+    var count = document.getElementById('sidebar-visitors-count');
+    if (!wrap || !count) return;
+    fetch('/api/visitors', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        if (!data.totalUsers) return;
+        count.textContent = data.totalUsers.toLocaleString('ko-KR') + '명';
+        wrap.style.display = '';
+      })
+      .catch(function() {});
+  }
+
   function loadChipWidget() {
     var container = document.getElementById('chip-stocks');
     if (!container) return;
