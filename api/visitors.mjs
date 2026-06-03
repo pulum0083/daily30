@@ -44,9 +44,8 @@ export default async function handler(req, res) {
 
   if (!gaRes.ok) return res.status(502).json({ error: 'GA API failed' });
   const data      = await gaRes.json();
-  const totalUsers     = parseInt(data.rows?.[0]?.metricValues?.[0]?.value || '0', 10);
-  const screenPageViews = parseInt(data.rows?.[0]?.metricValues?.[1]?.value || '0', 10);
+  const pageViews = parseInt(data.rows?.[0]?.metricValues?.[1]?.value || '0', 10);
 
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
-  return res.status(200).json({ totalUsers, screenPageViews });
+  return res.status(200).json({ pageViews });
 }

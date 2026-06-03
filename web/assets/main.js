@@ -740,20 +740,20 @@
     fetch('/api/visitors', { signal: AbortSignal.timeout(5000) })
       .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
       .then(function(data) {
-        if (!data.totalUsers) return;
+        if (!data.pageViews) return;
         var existing = document.getElementById('sidebar-visitors');
         if (!existing) {
           var wrap = document.createElement('div');
           wrap.id = 'sidebar-visitors';
           wrap.className = 'sidebar-visitors';
           wrap.innerHTML =
-            '<span class="sidebar-visitors__label">누적 방문자</span>' +
+            '<span class="sidebar-visitors__label">누적 페이지뷰</span>' +
             '<span class="sidebar-visitors__count" id="sidebar-visitors-count"></span>';
           opinionBtn.closest('.sidebar-footer').insertAdjacentElement('afterend', wrap);
           existing = wrap;
         }
         var countEl = existing.querySelector('.sidebar-visitors__count') || document.getElementById('sidebar-visitors-count');
-        if (countEl) countEl.textContent = data.totalUsers.toLocaleString('ko-KR') + '명';
+        if (countEl) countEl.textContent = data.pageViews.toLocaleString('ko-KR') + '회';
         existing.style.display = '';
       })
       .catch(function() {});
