@@ -651,65 +651,9 @@
     renderSupplyFlows();
     loadChipWidget();
     loadVisitorCount();
-    initLiveTracker();
     patchBriefingList();
     patchBriefingNav();
   });
-
-  /* ── 예측 vs 실제 라이브 트래커 ── */
-  function isKospiOpen() {
-    var now = new Date();
-    var kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    var day  = kst.getUTCDay();
-    var mins = kst.getUTCHours() * 60 + kst.getUTCMinutes();
-    return day >= 1 && day <= 5 && mins >= 540 && mins < 930;
-  }
-
-  function initLiveTracker() {
-    var el = document.getElementById('live-tracker');
-    if (!el) return;
-
-    var dir      = el.dataset.dir;      // 'up' | 'down'
-    var elCur    = document.getElementById('live-current');
-    var elVerdict = document.getElementById('live-verdict');
-    var elUpdated = document.getElementById('live-updated');
-
-    if (!isKospiOpen()) {
-      el.querySelector('.live-tracker__badge').textContent = '장 마감';
-      el.querySelector('.live-tracker__badge').style.color = 'var(--muted)';
-      if (elCur) elCur.textContent = '—';
-      return;
-    }
-
-    function fetchAndRender() {
-      fetch('/api/kospi-live', { signal: AbortSignal.timeout(8000) })
-        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function(d) {
-          var pct = d.changePct;
-          var sign = pct >= 0 ? '+' : '';
-          var cls  = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
-
-          elCur.textContent = sign + pct.toFixed(2) + '%';
-          elCur.className   = 'live-tracker__current ' + cls;
-
-          var hit = (dir === 'up' && pct > 0) || (dir === 'down' && pct < 0);
-          var neutral = pct === 0;
-          elVerdict.textContent = neutral ? '' : hit ? '✓ 적중 중' : '✗ 빗나가는 중';
-          elVerdict.className   = 'live-tracker__verdict ' + (neutral ? '' : hit ? 'up' : 'down');
-
-          var kst = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-          var hh  = String(kst.getUTCHours()).padStart(2, '0');
-          var mm  = String(kst.getUTCMinutes()).padStart(2, '0');
-          if (elUpdated) elUpdated.textContent = hh + ':' + mm + ' KST 기준';
-        })
-        .catch(function() {
-          if (elCur) elCur.textContent = '—';
-        });
-    }
-
-    fetchAndRender();
-    setInterval(fetchAndRender, 30000);
-  }
 
   /* ── 칩보드 위젯 — /chips/api/prices ── */
   var CHIP_FALLBACK = [
