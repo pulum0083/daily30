@@ -649,6 +649,7 @@
     initModals();
     initNotices();
     renderSupplyFlows();
+    initLiveScoreboard();
     loadChipWidget();
     loadVisitorCount();
     patchBriefingList();
@@ -701,6 +702,181 @@
         existing.style.display = '';
       })
       .catch(function() {});
+  }
+
+  /* ── 라이브 스코어보드 아코디언 ── */
+  function lsbToggleAccordion() {
+    var btn  = document.getElementById('lsb-accordion-btn');
+    var body = document.getElementById('lsb-accordion-body');
+    if (!btn || !body) return;
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+  window.lsbToggleAccordion = lsbToggleAccordion;
+
+  /* ── 라이브 스코어보드 초기화 ── */
+  function initLiveScoreboard() {
+    var el = document.getElementById('live-scoreboard');
+    if (!el) return;
+
+    var dir     = el.dataset.dir || 'up';   // 'up' | 'dn'
+
+    function kstNow() {
+      return new Date(Date.now() + 9 * 3600 * 1000);
+    }
+    function isMarketHours() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 540 && mins < 930;   // 09:00~15:29
+    }
+    function isAfterMarket() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 930;
+    }
+
+    if (!isMarketHours() && !isAfterMarket()) return;
+    el.style.display = '';
+
+    if (isAfterMarket()) {
+      var badge = document.getElementById('lsb-badge');
+      if (badge) {
+        badge.className = 'lsb-closed-badge';
+        badge.textContent = '마감';
+      }
+    }
+
+    function calcVerdict(changePct) {
+      if (Math.abs(changePct) <= 0.1) return 'tight';
+      if (dir === 'up'  && changePct >  0.1) return 'hit';
+      if (dir === 'dn'  && changePct < -0.1) return 'hit';
+      return 'miss';
+    }
+
+    var VERDICT = {
+      hit:   { headline: '예측대로 순항 중',  color: 'var(--up)', bg: 'var(--up-bg)' },
+      tight: { headline: '팽팽한 접전',        color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { headline: '빗나가는 중',        color: 'var(--dn)', bg: 'var(--dn-bg)' },
+    };
+
+    function updateDisplay(price, changePct) {
+      var verdict = calcVerdict(changePct);
+      var v = VERDICT[verdict];
+
+      var idxEl     = document.getElementById('lsb-idx');
+      var chgEl     = document.getElementById('lsb-chg');
+      var headEl    = document.getElementById('lsb-headline');
+      var needleEl  = document.getElementById('lsb-needle');
+      var predTagEl = document.getElementById('lsb-pred-tag');
+
+      if (idxEl) idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+      var sign = changePct >= 0 ? '+' : '';
+      if (chgEl) {
+        chgEl.textContent = sign + changePct.toFixed(2) + '%';
+        chgEl.style.color = changePct >= 0 ? 'var(--up)' : 'var(--dn)';
+      }
+
+      if (headEl) { headEl.textContent = v.headline; headEl.style.color = v.color; }
+
+      // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
+      var rawPos;
+      if (dir === 'up') {
+        rawPos = Math.max(0, Math.min(100, (changePct + 2) / 4 * 100));
+      } else {
+        rawPos = Math.max(0, Math.min(100, (-changePct + 2) / 4 * 100));
+      }
+      if (needleEl) needleEl.style.left = rawPos + '%';
+
+      if (predTagEl) {
+        predTagEl.style.background = v.bg;
+        predTagEl.style.color = v.color;
+      }
+    }
+
+    function fetchKospi() {
+      fetch('/api/kospi-live')
+        .then(function(r) { return r.json(); })
+        .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
+        .catch(function() {});
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderNews(d) {
+      if (!d || !d.latest) return;
+      var stampEl    = document.getElementById('lsb-news-stamp');
+      var latestEl   = document.getElementById('lsb-news-latest');
+      var accordionEl = document.getElementById('lsb-accordion');
+      var bodyEl     = document.getElementById('lsb-accordion-body');
+      var prevTimeEl = document.getElementById('lsb-ac-prev-time');
+      var prevTitleEl= document.getElementById('lsb-ac-prev-title');
+
+      if (stampEl) {
+        stampEl.innerHTML = '<span style="color:var(--primary);font-weight:700">방금 업데이트</span>'
+          + ' · ' + escHtml(d.updated_at) + ' 기준 · 매 1시간 갱신';
+      }
+      if (latestEl) {
+        latestEl.innerHTML = '<div class="lsb-news-card">'
+          + '<div class="lsb-news-title">' + escHtml(d.latest.title) + '</div>'
+          + '<div class="lsb-news-body">'  + escHtml(d.latest.summary) + '</div>'
+          + '</div>';
+      }
+
+      var hist = d.history || [];
+      if (hist.length > 0 && accordionEl) {
+        accordionEl.style.display = '';
+        if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
+        if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+        if (bodyEl) {
+          bodyEl.innerHTML = hist.map(function(item) {
+            return '<div class="lsb-news-item">'
+              + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
+              + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
+              + '</div>';
+          }).join('');
+        }
+      }
+    }
+
+    function fetchNews() {
+      fetch('/data/kospi-news-live.json?t=' + Date.now())
+        .then(function(r) { return r.json(); })
+        .then(renderNews)
+        .catch(function() {});
+    }
+
+    function updateCountdown() {
+      var k = kstNow();
+      var close = new Date(k);
+      close.setUTCHours(6, 30, 0, 0);   // 15:30 KST = 06:30 UTC
+      if (close <= k) {
+        var cdEl = document.getElementById('lsb-countdown');
+        if (cdEl) cdEl.textContent = '마감';
+        return;
+      }
+      var diff = close - k;
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      var el2 = document.getElementById('lsb-countdown');
+      if (el2) el2.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    fetchKospi();
+    fetchNews();
+    updateCountdown();
+
+    if (isMarketHours()) {
+      setInterval(fetchKospi, 30000);
+      setInterval(fetchNews, 5 * 60000);
+      setInterval(updateCountdown, 1000);
+    }
   }
 
   function loadChipWidget() {
