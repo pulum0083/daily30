@@ -355,6 +355,174 @@
       .catch(function() {});
   }
 
+  /* ── 공지사항 패널 ── */
+  var NOTICES_URL = '/data/notices.json';
+  var NOTICES_LS_KEY = 'ds_read_notices';
+
+  function getReadIds() {
+    try { return JSON.parse(localStorage.getItem(NOTICES_LS_KEY) || '[]'); } catch(_) { return []; }
+  }
+  function saveReadIds(ids) {
+    try { localStorage.setItem(NOTICES_LS_KEY, JSON.stringify(ids)); } catch(_) {}
+  }
+
+  function noticeBadgeHtml(type) {
+    var map = { update: ['업데이트', 'update'], ops: ['운영공지', 'ops'], urgent: ['긴급', 'urgent'] };
+    var pair = map[type] || map['update'];
+    return '<span class="notice-badge notice-badge--' + pair[1] + '">' + pair[0] + '</span>';
+  }
+
+  function renderNotices(notices) {
+    var readIds = getReadIds();
+    if (!notices.length) {
+      return '<p class="notice-panel__empty">공지사항이 없습니다.</p>';
+    }
+    return notices.slice(0, 10).map(function(n) {
+      var unread = readIds.indexOf(n.id) === -1;
+      return '<div class="notice-card' + (unread ? ' is-unread' : '') + '">' +
+        (unread ? '<div class="notice-card__dot"></div>' : '') +
+        '<div class="notice-card__meta">' + noticeBadgeHtml(n.type) +
+        '<span class="notice-card__date">' + n.date + '</span></div>' +
+        '<div class="notice-card__title">' + n.title + '</div>' +
+        '<div class="notice-card__body">' + n.body + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function injectNoticePanel() {
+    if (document.getElementById('notice-panel')) return;
+    var overlay = document.createElement('div');
+    overlay.className = 'notice-overlay';
+    overlay.id = 'notice-overlay';
+    overlay.addEventListener('click', closeNoticePanel);
+
+    var panel = document.createElement('div');
+    panel.className = 'notice-panel';
+    panel.id = 'notice-panel';
+    panel.innerHTML =
+      '<div class="notice-panel__header">' +
+        '<span class="notice-panel__title">공지사항</span>' +
+        '<button class="notice-panel__close" onclick="closeNoticePanel()">✕</button>' +
+      '</div>' +
+      '<div class="notice-panel__body" id="notice-panel-body"><p class="notice-panel__empty">불러오는 중...</p></div>' +
+      '<div class="notice-panel__footer">' +
+        '<button class="suggest-btn" onclick="openFeedbackModal()">' +
+          '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+          '건의하기' +
+        '</button>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+  }
+
+  function openNoticePanel() {
+    injectNoticePanel();
+    var overlay = document.getElementById('notice-overlay');
+    var panel = document.getElementById('notice-panel');
+    if (overlay) overlay.classList.add('is-open');
+    if (panel) panel.classList.add('is-open');
+    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var notices = (data && data.notices) || [];
+        var body = document.getElementById('notice-panel-body');
+        if (body) body.innerHTML = renderNotices(notices);
+        var ids = notices.map(function(n) { return n.id; });
+        saveReadIds(ids);
+        var dot = document.getElementById('gnb-notif-dot');
+        if (dot) dot.classList.remove('is-visible');
+      })
+      .catch(function() {
+        var body = document.getElementById('notice-panel-body');
+        if (body) body.innerHTML = '<p class="notice-panel__empty">공지를 불러오지 못했습니다.</p>';
+      });
+  }
+
+  function closeNoticePanel() {
+    var overlay = document.getElementById('notice-overlay');
+    var panel = document.getElementById('notice-panel');
+    if (overlay) overlay.classList.remove('is-open');
+    if (panel) panel.classList.remove('is-open');
+  }
+
+  function initNotices() {
+    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var notices = (data && data.notices) || [];
+        var readIds = getReadIds();
+        var hasUnread = notices.some(function(n) { return readIds.indexOf(n.id) === -1; });
+        var dot = document.getElementById('gnb-notif-dot');
+        if (dot && hasUnread) dot.classList.add('is-visible');
+      })
+      .catch(function() {});
+  }
+
+  /* ── 건의하기 모달 ── */
+  function injectFeedbackModal() {
+    if (document.getElementById('feedback-modal-overlay')) return;
+    var el = document.createElement('div');
+    el.className = 'feedback-modal-overlay';
+    el.id = 'feedback-modal-overlay';
+    el.innerHTML =
+      '<div class="feedback-modal">' +
+        '<div class="feedback-modal__header">' +
+          '<span class="feedback-modal__title">건의하기</span>' +
+          '<button class="feedback-modal__close" onclick="closeFeedbackModal()">✕</button>' +
+        '</div>' +
+        '<p class="feedback-modal__sub">불편한 점, 원하는 기능, 오류 제보를 자유롭게 남겨주세요.</p>' +
+        '<textarea class="feedback-modal__textarea" id="feedback-textarea" placeholder="자유롭게 작성해주세요..."></textarea>' +
+        '<div class="feedback-modal__footer">' +
+          '<button class="feedback-modal__cancel" onclick="closeFeedbackModal()">취소</button>' +
+          '<button class="feedback-modal__submit" id="feedback-submit" onclick="submitFeedback()">보내기</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(el);
+  }
+
+  function openFeedbackModal() {
+    injectFeedbackModal();
+    var overlay = document.getElementById('feedback-modal-overlay');
+    if (overlay) overlay.classList.add('is-open');
+    var ta = document.getElementById('feedback-textarea');
+    if (ta) { ta.value = ''; setTimeout(function() { ta.focus(); }, 50); }
+    var btn = document.getElementById('feedback-submit');
+    if (btn) { btn.disabled = false; btn.textContent = '보내기'; }
+  }
+
+  function closeFeedbackModal() {
+    var overlay = document.getElementById('feedback-modal-overlay');
+    if (overlay) overlay.classList.remove('is-open');
+  }
+
+  function submitFeedback() {
+    var ta = document.getElementById('feedback-textarea');
+    var btn = document.getElementById('feedback-submit');
+    var message = ta ? ta.value.trim() : '';
+    if (!message) { if (ta) ta.focus(); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
+
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, page: location.pathname }),
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('server error');
+        var modal = document.querySelector('.feedback-modal');
+        if (modal) {
+          modal.innerHTML =
+            '<p class="feedback-modal__success">✅ 의견이 전달됐습니다.</p>' +
+            '<p class="feedback-modal__success-sub">소중한 의견 감사합니다.</p>';
+        }
+        setTimeout(closeFeedbackModal, 1800);
+      })
+      .catch(function() {
+        if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
+      });
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -367,6 +535,7 @@
     setInterval(updateGnbDate, 30000);
     applyTimeCollapse();
     initModals();
+    initNotices();
     renderSupplyFlows();
     loadChipWidget();
     patchBriefingList();
@@ -428,4 +597,9 @@
   window.drawMiniChart = drawMiniChart;
   window.drawCloseChart = drawCloseChart;
   window.renderInstList = renderInstList;
+  window.openNoticePanel = openNoticePanel;
+  window.closeNoticePanel = closeNoticePanel;
+  window.openFeedbackModal = openFeedbackModal;
+  window.closeFeedbackModal = closeFeedbackModal;
+  window.submitFeedback = submitFeedback;
 })();
