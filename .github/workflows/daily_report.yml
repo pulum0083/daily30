@@ -428,13 +428,22 @@ jobs:
       - name: 💾 JSON 커밋 & 푸시
         run: |
           git config user.name  "DailyB Bot"
-          git config user.email "bot@doubleshot.space"
+          git config user.email "dailyb-bot@users.noreply.github.com"
           git add web/data/kospi-news-live.json
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
           else
             git commit -m "data: 코스피 장중 뉴스 갱신 $(TZ=Asia/Seoul date +'%H:%M') KST"
-            git push
+            for i in 1 2 3 4 5; do
+              git fetch origin main
+              if git rebase origin/main; then
+                git push && break
+              else
+                git rebase --abort 2>/dev/null || true
+              fi
+              echo "Push attempt $i failed, retrying in 15s..."
+              sleep 15
+            done
           fi
 
       - name: 🚀 GitHub Pages 배포
@@ -443,3 +452,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./web
           keep_files: true
+          user_name: "DailyB Bot"
+          user_email: "dailyb-bot@users.noreply.github.com"
