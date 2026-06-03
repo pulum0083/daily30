@@ -799,7 +799,7 @@
 
     function fetchKospi() {
       fetch('/api/kospi-live')
-        .then(function(r) { return r.json(); })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
         .catch(function() {});
     }
@@ -846,7 +846,7 @@
 
     function fetchNews() {
       fetch('/data/kospi-news-live.json?t=' + Date.now())
-        .then(function(r) { return r.json(); })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(renderNews)
         .catch(function() {});
     }
@@ -854,9 +854,9 @@
     function updateCountdown() {
       var k = kstNow();
       var close = new Date(k);
-      close.setUTCHours(6, 30, 0, 0);   // 15:30 KST = 06:30 UTC
+      close.setUTCHours(15, 30, 0, 0);   // 15:30 KST = shifted space 15:30
+      var cdEl = document.getElementById('lsb-countdown');
       if (close <= k) {
-        var cdEl = document.getElementById('lsb-countdown');
         if (cdEl) cdEl.textContent = '마감';
         return;
       }
@@ -864,8 +864,7 @@
       var h = Math.floor(diff / 3600000);
       var m = Math.floor((diff % 3600000) / 60000);
       var s = Math.floor((diff % 60000) / 1000);
-      var el2 = document.getElementById('lsb-countdown');
-      if (el2) el2.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      if (cdEl) cdEl.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
     }
 
     fetchKospi();
