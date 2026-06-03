@@ -224,22 +224,6 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
     return result
 
 
-def build_nh_stocks(analysis: dict) -> list:
-    """US 프리장 52주 신고가.
-    price·change는 실측 소스가 없어(프리장 데이터 미수집) 표시하지 않는다 — 정성 정보만.
-    """
-    out = []
-    for h in analysis.get("premarket_highs", [])[:5]:
-        out.append({
-            "ticker": h.get("ticker", ""),
-            "name": h.get("name", ""),
-            "tag": h.get("tag", "52주 신고가"),
-            "alltime": bool(h.get("all_time") or h.get("alltime")),
-            "break_note": h.get("break_note", ""),
-            "reason": h.get("reason", ""),
-        })
-    return out
-
 
 def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> list:
     """시장 지표 사이드바. market_data_js 키를 표시 항목으로 매핑(있는 것만)."""
@@ -656,7 +640,6 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
                 ctx["sector_signal"] = sf["signal"]
                 ctx["sector_paragraphs"] = sf.get("paragraphs", [])
         if internal_type == "us":
-            ctx["nh_stocks"] = build_nh_stocks(analysis)
             # 섹터 등락률 tag는 실측 소스가 없어(AI 추정) 제거 — 종목 매핑만 표시
             spill_rows = analysis.get("spill") or analysis.get("spill_rows") or []
             ctx["spill_rows"] = [{k: v for k, v in r.items() if k != "tag"} for r in spill_rows]

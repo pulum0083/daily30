@@ -126,7 +126,6 @@ US_PROMPT = """\
 - 빅테크·반도체 주요 이슈 (NVDA, AAPL, MSFT, AMD 등)
 - 연준 발언·금리 동향
 - 아시아·유럽 증시 흐름
-- 오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목
 
 [key_indicators 작성 규칙]
 - 오늘 또는 어제 실제 발생한 이슈, 현재 선물 방향만 포함한다
@@ -147,19 +146,8 @@ US_PROMPT = """\
     "헤드라인 2",
     "헤드라인 3"
   ],
-  "market_sentiment": "bullish or bearish or neutral",
-  "premarket_highs": [
-    {{
-      "ticker": "종목 티커 (예: AAPL)",
-      "name": "종목명 (예: Apple)",
-      "reason": "신고가를 찍은 핵심 이유 한 문장"
-    }}
-  ]
+  "market_sentiment": "bullish or bearish or neutral"
 }}
-
-premarket_highs:
-- 오늘 프리장 52주 신고가 또는 역대 최고가 달성 종목만, 최대 3개
-- Google Search에서 명확히 확인되지 않으면 빈 배열 []로 출력
 """
 
 PROMPT_MAP = {
