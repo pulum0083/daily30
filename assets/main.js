@@ -34,19 +34,6 @@
       `(${days[kst.getDay()]}) ${pad(kst.getHours())}:${pad(kst.getMinutes())}`;
   }
 
-  /* ── 접힘 토글 (장 시작 전 섹션) ── */
-  function togglePreOpen() {
-    const content = document.getElementById('pre-open-content');
-    const chevron = document.getElementById('pre-open-chevron');
-    if (!content) return;
-    const collapsed = content.classList.contains('collapsed');
-    content.classList.toggle('collapsed', !collapsed);
-    if (chevron) chevron.classList.toggle('open', !collapsed);
-  }
-  function applyTimeCollapse() {
-    // 예측 섹션은 항상 열린 상태 유지
-  }
-
   /* ── 모달 (info-icon) ── */
   function openModal(id) {
     const el = document.getElementById(id);
@@ -645,10 +632,10 @@
     }
     updateGnbDate();
     setInterval(updateGnbDate, 30000);
-    applyTimeCollapse();
     initModals();
     initNotices();
     renderSupplyFlows();
+    initLiveScoreboard();
     loadChipWidget();
     loadVisitorCount();
     patchBriefingList();
@@ -703,6 +690,243 @@
       .catch(function() {});
   }
 
+  /* ── 라이브 스코어보드 아코디언 ── */
+  function lsbToggleAccordion() {
+    var btn  = document.getElementById('lsb-accordion-btn');
+    var body = document.getElementById('lsb-accordion-body');
+    if (!btn || !body) return;
+    var isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+    var left = btn.querySelector('.lsb-ac-left');
+    if (!left) return;
+    if (!isOpen) {
+      // 열기 — 현재 표시 중인 time/title을 dataset에 저장 후 레이블 교체
+      var t = left.querySelector('.lsb-ac-prev-time, #lsb-ac-prev-time');
+      var ti = left.querySelector('.lsb-ac-prev-title, #lsb-ac-prev-title');
+      btn.dataset.savedTime  = t  ? t.textContent  : (btn.dataset.savedTime  || '');
+      btn.dataset.savedTitle = ti ? ti.textContent : (btn.dataset.savedTitle || '');
+      left.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+    } else {
+      // 닫기 — 저장해둔 time/title 복원
+      left.innerHTML = '<span class="lsb-ac-prev-time" id="lsb-ac-prev-time">'
+        + (btn.dataset.savedTime  || '') + '</span>'
+        + '<span class="lsb-ac-prev-title" id="lsb-ac-prev-title">'
+        + (btn.dataset.savedTitle || '') + '</span>';
+    }
+  }
+  window.lsbToggleAccordion = lsbToggleAccordion;
+
+  /* ── 라이브 스코어보드 초기화 ── */
+  function initLiveScoreboard() {
+    var el = document.getElementById('live-scoreboard');
+    if (!el) return;
+
+    var dir     = el.dataset.dir || 'up';   // 'up' | 'dn'
+
+    function kstNow() {
+      return new Date(Date.now() + 9 * 3600 * 1000);
+    }
+    function isPreOpen() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 530 && mins < 540;   // 08:50~08:59
+    }
+    function isMarketHours() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 530 && mins < 930;   // 08:50~15:29 (준비 중 포함)
+    }
+    function isAfterMarket() {
+      var k = kstNow(), day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 930;
+    }
+
+    // 당일 브리핑에서만 표시 — URL의 날짜와 오늘 KST 날짜 비교
+    var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
+    if (m) {
+      var k = kstNow();
+      var todayKst = k.getUTCFullYear() + '-' +
+        String(k.getUTCMonth() + 1).padStart(2, '0') + '-' +
+        String(k.getUTCDate()).padStart(2, '0');
+      if (m[1] !== todayKst) return;
+    }
+
+    if (!isMarketHours() && !isAfterMarket()) return;
+    el.style.display = '';
+
+    // ── 마감 후 상태 ──
+    if (isAfterMarket()) {
+      var badge = document.getElementById('lsb-badge');
+      if (badge) { badge.className = 'lsb-closed-badge'; badge.textContent = '마감'; }
+      var footElC = document.getElementById('lsb-foot');
+      if (footElC) footElC.innerHTML = '<strong>마감</strong>';
+      fetchKospi();
+      fetchNews();
+      return;
+    }
+
+    // ── 준비 중 상태 (08:50~08:59) ──
+    if (isPreOpen()) {
+      var badge2 = document.getElementById('lsb-badge');
+      if (badge2) { badge2.className = 'lsb-pre-badge'; badge2.textContent = '준비 중'; }
+      var headEl0 = document.getElementById('lsb-headline');
+      if (headEl0) { headEl0.textContent = '장 시작 준비 중'; headEl0.style.color = 'var(--muted)'; }
+      var subEl0 = document.getElementById('lsb-sub');
+      if (subEl0) subEl0.textContent = '09:00 장 시작과 함께 실시간 추적을 시작합니다.';
+      function updatePreOpenTimer() {
+        var kp = kstNow();
+        var open = new Date(kp);
+        open.setUTCHours(9, 0, 0, 0);
+        if (open <= kp) { window.location.reload(); return; }
+        var diff2 = open - kp;
+        var mm = Math.floor(diff2 / 60000);
+        var ss = Math.floor((diff2 % 60000) / 1000);
+        var footElP = document.getElementById('lsb-foot');
+        if (footElP) footElP.innerHTML = '장 시작까지 <strong>' + mm + ':' + String(ss).padStart(2, '0') + '</strong>';
+      }
+      updatePreOpenTimer();
+      setInterval(updatePreOpenTimer, 1000);
+      fetchNews();
+      return;
+    }
+
+    function calcVerdict(changePct) {
+      if (Math.abs(changePct) <= 0.1) return 'tight';
+      if (dir === 'up'  && changePct >  0.1) return 'hit';
+      if (dir === 'dn'  && changePct < -0.1) return 'hit';
+      return 'miss';
+    }
+
+    var VERDICT = {
+      hit:   { prefix: '예측대로 ', em: '순항 중',   color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '팽팽한 ',   em: '접전',       color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          em: '빗나가는 중', color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    };
+
+    function updateDisplay(price, changePct) {
+      var verdict = calcVerdict(changePct);
+      var v = VERDICT[verdict];
+
+      var idxEl     = document.getElementById('lsb-idx');
+      var chgEl     = document.getElementById('lsb-chg');
+      var headEl    = document.getElementById('lsb-headline');
+      var needleEl  = document.getElementById('lsb-needle');
+      var predTagEl = document.getElementById('lsb-pred-tag');
+
+      if (idxEl) idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+      var sign = changePct >= 0 ? '+' : '';
+      if (chgEl) {
+        chgEl.textContent = sign + changePct.toFixed(2) + '%';
+        chgEl.style.color = changePct >= 0 ? 'var(--up)' : 'var(--dn)';
+      }
+
+      var prefixEl = document.getElementById('lsb-head-prefix');
+      var emEl     = document.getElementById('lsb-head-em');
+      if (prefixEl) prefixEl.textContent = v.prefix;
+      if (emEl)     { emEl.textContent = v.em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+      if (headEl)   headEl.style.color = '';
+
+      // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
+      var rawPos;
+      if (dir === 'up') {
+        rawPos = Math.max(0, Math.min(100, (changePct + 2) / 4 * 100));
+      } else {
+        rawPos = Math.max(0, Math.min(100, (-changePct + 2) / 4 * 100));
+      }
+      if (needleEl) needleEl.style.left = rawPos + '%';
+
+      if (predTagEl) {
+        predTagEl.style.background = v.bg;
+        predTagEl.style.color = v.color;
+      }
+    }
+
+    function fetchKospi() {
+      fetch('/api/kospi-live')
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
+        .catch(function() {});
+    }
+
+    function renderNews(d) {
+      if (!d || !d.latest) return;
+      var stampEl    = document.getElementById('lsb-news-stamp');
+      var latestEl   = document.getElementById('lsb-news-latest');
+      var accordionEl = document.getElementById('lsb-accordion');
+      var bodyEl     = document.getElementById('lsb-accordion-body');
+      var prevTimeEl = document.getElementById('lsb-ac-prev-time');
+      var prevTitleEl= document.getElementById('lsb-ac-prev-title');
+
+      if (stampEl) {
+        stampEl.innerHTML = '<span style="color:var(--primary);font-weight:700">방금 업데이트</span>'
+          + ' · ' + escHtml(d.updated_at) + ' 기준 · 매 1시간 갱신';
+      }
+      if (latestEl) {
+        latestEl.innerHTML = '<div class="lsb-news-card">'
+          + '<div class="lsb-news-title">' + escHtml(d.latest.title) + '</div>'
+          + '<div class="lsb-news-body">'  + escHtml(d.latest.summary) + '</div>'
+          + '</div>';
+      }
+
+      var hist = d.history || [];
+      if (hist.length > 0 && accordionEl) {
+        accordionEl.style.display = '';
+        if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
+        if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+        if (bodyEl) {
+          bodyEl.innerHTML = hist.map(function(item) {
+            return '<div class="lsb-news-item">'
+              + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
+              + '<div class="lsb-ni-content">'
+              + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
+              + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
+              + '</div>'
+              + '</div>';
+          }).join('');
+        }
+      }
+    }
+
+    function fetchNews() {
+      fetch('/data/kospi-news-live.json?t=' + Date.now())
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(renderNews)
+        .catch(function() {});
+    }
+
+    function updateCountdown() {
+      var k = kstNow();
+      var close = new Date(k);
+      close.setUTCHours(15, 30, 0, 0);   // 15:30 KST = shifted space 15:30
+      var cdEl = document.getElementById('lsb-countdown');
+      if (close <= k) {
+        if (cdEl) cdEl.textContent = '마감';
+        return;
+      }
+      var diff = close - k;
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      if (cdEl) cdEl.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+
+    fetchKospi();
+    fetchNews();
+    updateCountdown();
+
+    if (isMarketHours()) {
+      setInterval(fetchKospi, 30000);
+      setInterval(fetchNews, 5 * 60000);
+      setInterval(updateCountdown, 1000);
+    }
+  }
+
   function loadChipWidget() {
     var container = document.getElementById('chip-stocks');
     if (!container) return;
@@ -728,7 +952,6 @@
 
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
   window.toggleTheme = toggleTheme;
-  window.togglePreOpen = togglePreOpen;
   window.openModal = openModal;
   window.closeModal = closeModal;
   window.drawSparkline = drawSparkline;
