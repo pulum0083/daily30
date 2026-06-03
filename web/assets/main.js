@@ -751,6 +751,16 @@
       return mins >= 930;
     }
 
+    // 당일 브리핑에서만 표시 — URL의 날짜와 오늘 KST 날짜 비교
+    var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
+    if (m) {
+      var k = kstNow();
+      var todayKst = k.getUTCFullYear() + '-' +
+        String(k.getUTCMonth() + 1).padStart(2, '0') + '-' +
+        String(k.getUTCDate()).padStart(2, '0');
+      if (m[1] !== todayKst) return;
+    }
+
     if (!isMarketHours() && !isAfterMarket()) return;
     el.style.display = '';
 
