@@ -69,6 +69,8 @@
     });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        var np = document.getElementById('notice-panel');
+        if (np && np.classList.contains('is-open')) { closeNoticePanel(); return; }
         document.querySelectorAll('.info-modal-backdrop.is-open')
           .forEach(bd => bd.classList.remove('is-open'));
       }
@@ -355,6 +357,284 @@
       .catch(function() {});
   }
 
+  /* ── 공지사항 패널 ── */
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  var NOTICES_URL = '/data/notices.json';
+  var NOTICES_LS_KEY = 'ds_read_notices';
+
+  function getReadIds() {
+    try { return JSON.parse(localStorage.getItem(NOTICES_LS_KEY) || '[]'); } catch(_) { return []; }
+  }
+  function saveReadIds(ids) {
+    try { localStorage.setItem(NOTICES_LS_KEY, JSON.stringify(ids)); } catch(_) {}
+  }
+
+  function noticeBadgeHtml(type) {
+    var map = { update: ['업데이트', 'update'], ops: ['운영공지', 'ops'], urgent: ['긴급', 'urgent'] };
+    var pair = map[type] || map['update'];
+    return '<span class="notice-badge notice-badge--' + pair[1] + '">' + pair[0] + '</span>';
+  }
+
+  function renderNotices(notices) {
+    var readIds = getReadIds();
+    if (!notices.length) {
+      return '<p class="notice-panel__empty">공지사항이 없습니다.</p>';
+    }
+    return notices.slice(0, 10).map(function(n) {
+      var unread = readIds.indexOf(n.id) === -1;
+      return '<div class="notice-card' + (unread ? ' is-unread' : '') + '">' +
+        (unread ? '<div class="notice-card__dot"></div>' : '') +
+        '<div class="notice-card__meta">' + noticeBadgeHtml(n.type) +
+        '<span class="notice-card__date">' + escHtml(n.date) + '</span></div>' +
+        '<div class="notice-card__title">' + escHtml(n.title) + '</div>' +
+        '<div class="notice-card__body">' + escHtml(n.body) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function injectNoticePanel() {
+    if (document.getElementById('notice-panel')) return;
+    var overlay = document.createElement('div');
+    overlay.className = 'notice-overlay';
+    overlay.id = 'notice-overlay';
+    overlay.addEventListener('click', closeNoticePanel);
+
+    var panel = document.createElement('div');
+    panel.className = 'notice-panel';
+    panel.id = 'notice-panel';
+    panel.innerHTML =
+      '<div class="notice-panel__header">' +
+        '<span class="notice-panel__title">공지 · 게시판</span>' +
+        '<button class="notice-panel__close" onclick="closeNoticePanel()">✕</button>' +
+      '</div>' +
+      '<div class="notice-panel__tabs">' +
+        '<button class="notice-tab is-active" id="tab-btn-notice" onclick="switchPanelTab(\'notice\')">공지사항</button>' +
+        '<button class="notice-tab" id="tab-btn-board" onclick="switchPanelTab(\'board\')">게시판</button>' +
+      '</div>' +
+      '<div class="notice-panel__body" id="notice-panel-body"><p class="notice-panel__empty">불러오는 중...</p></div>' +
+      '<div class="board-panel" id="board-panel-body" style="display:none"></div>' +
+      '<div class="board-input" id="board-input-area" style="display:none">' +
+        '<textarea class="board-input__textarea" id="board-textarea" placeholder="자유롭게 의견을 남겨주세요..."></textarea>' +
+        '<button class="board-input__submit" id="board-submit" onclick="submitBoardPost()">등록</button>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(panel);
+  }
+
+  function openNoticePanel() {
+    injectNoticePanel();
+    switchPanelTab('notice');
+    var overlay = document.getElementById('notice-overlay');
+    var panel = document.getElementById('notice-panel');
+    if (overlay) overlay.classList.add('is-open');
+    if (panel) panel.classList.add('is-open');
+    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var notices = (data && data.notices) || [];
+        var body = document.getElementById('notice-panel-body');
+        if (body) body.innerHTML = renderNotices(notices);
+        var ids = notices.map(function(n) { return n.id; });
+        saveReadIds(ids);
+        var dot = document.getElementById('gnb-notif-dot');
+        if (dot) dot.classList.remove('is-visible');
+      })
+      .catch(function() {
+        var body = document.getElementById('notice-panel-body');
+        if (body) body.innerHTML = '<p class="notice-panel__empty">공지를 불러오지 못했습니다.</p>';
+      });
+  }
+
+  function closeNoticePanel() {
+    var overlay = document.getElementById('notice-overlay');
+    var panel = document.getElementById('notice-panel');
+    if (overlay) overlay.classList.remove('is-open');
+    if (panel) panel.classList.remove('is-open');
+  }
+
+  var BOARD_JSON_URL   = '/api/board';
+  var BOARD_POST_URL   = '/api/board';
+  var BOARD_AUTHOR_KEY = 'ds_board_author';
+  var BOARD_SEEN_KEY   = 'ds_board_last_seen';
+
+  function getBoardAuthor() {
+    var stored = localStorage.getItem(BOARD_AUTHOR_KEY);
+    if (stored) return stored;
+    var rnd    = Math.random().toString(16).slice(2, 5);
+    var author = '익명_' + rnd;
+    localStorage.setItem(BOARD_AUTHOR_KEY, author);
+    return author;
+  }
+
+  function fmtBoardDate(iso) {
+    var d   = new Date(iso);
+    var kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    return (kst.getUTCMonth() + 1) + '/' + kst.getUTCDate() + ' ' +
+      String(kst.getUTCHours()).padStart(2, '0') + ':' +
+      String(kst.getUTCMinutes()).padStart(2, '0');
+  }
+
+  function renderBoardPosts(posts) {
+    var originals = posts.filter(function(p) { return !p.parent_id; });
+    var replies   = posts.filter(function(p) { return  p.parent_id; });
+    if (!originals.length) {
+      return '<p class="notice-panel__empty">아직 등록된 글이 없어요.<br>첫 번째 의견을 남겨보세요!</p>';
+    }
+    return originals.slice().reverse().map(function(p) {
+      var myReplies = replies.filter(function(r) { return r.parent_id === p.id; });
+      var replyHtml = myReplies.map(function(r) {
+        return '<div class="board-reply">' +
+          '<div class="board-reply__author">운영AI봇</div>' +
+          '<div class="board-reply__content">' + escHtml(r.content) + '</div>' +
+          '<div class="board-reply__time">' + fmtBoardDate(r.created_at) + '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="board-post">' +
+        '<div class="board-post__header">' +
+          '<span class="board-post__author">' + escHtml(p.author) + '</span>' +
+          '<span class="board-post__time">' + fmtBoardDate(p.created_at) + '</span>' +
+        '</div>' +
+        '<div class="board-post__content">' + escHtml(p.content) + '</div>' +
+      '</div>' + replyHtml;
+    }).join('');
+  }
+
+  function fetchBoard() {
+    var body = document.getElementById('board-panel-body');
+    if (!body) return;
+    body.innerHTML = '<p class="notice-panel__empty">불러오는 중...</p>';
+    fetch(BOARD_JSON_URL + '?t=' + Date.now(), { signal: AbortSignal.timeout(8000) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var posts = (data && data.posts) || [];
+        if (body) body.innerHTML = renderBoardPosts(posts);
+        localStorage.setItem(BOARD_SEEN_KEY, new Date().toISOString());
+        checkAndShowDot();
+      })
+      .catch(function() {
+        if (body) body.innerHTML = '<p class="notice-panel__empty">불러오지 못했습니다.</p>';
+      });
+  }
+
+  function switchPanelTab(tab) {
+    var noticeBody = document.getElementById('notice-panel-body');
+    var boardBody  = document.getElementById('board-panel-body');
+    var boardInput = document.getElementById('board-input-area');
+    var btnNotice  = document.getElementById('tab-btn-notice');
+    var btnBoard   = document.getElementById('tab-btn-board');
+    if (!noticeBody || !boardBody) return;
+
+    if (tab === 'board') {
+      noticeBody.style.display = 'none';
+      boardBody.style.display  = '';
+      boardInput.style.display = '';
+      if (btnNotice) btnNotice.classList.remove('is-active');
+      if (btnBoard)  btnBoard.classList.add('is-active');
+      fetchBoard();
+    } else {
+      noticeBody.style.display = '';
+      boardBody.style.display  = 'none';
+      boardInput.style.display = 'none';
+      if (btnBoard)  btnBoard.classList.remove('is-active');
+      if (btnNotice) btnNotice.classList.add('is-active');
+    }
+  }
+
+  function submitBoardPost() {
+    var ta      = document.getElementById('board-textarea');
+    var btn     = document.getElementById('board-submit');
+    var content = ta ? ta.value.trim() : '';
+    if (!content) { if (ta) ta.focus(); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
+
+    var author = getBoardAuthor();
+    fetch(BOARD_POST_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content, author: author }),
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('fail');
+        return r.json();
+      })
+      .then(function(data) {
+        if (ta) ta.value = '';
+        if (btn) { btn.disabled = false; btn.textContent = '등록'; }
+        // 낙관적 업데이트 — Vercel 재배포 대기 없이 즉시 DOM에 표시
+        var body = document.getElementById('board-panel-body');
+        if (body && data && data.post) {
+          var p = data.post;
+          var postHtml =
+            '<div class="board-post">' +
+              '<div class="board-post__header">' +
+                '<span class="board-post__author">' + escHtml(p.author) + '</span>' +
+                '<span class="board-post__time">' + fmtBoardDate(p.created_at) + '</span>' +
+              '</div>' +
+              '<div class="board-post__content">' + escHtml(p.content) + '</div>' +
+            '</div>';
+          // 빈 목록 메시지를 지우고 새 글 prepend
+          var empty = body.querySelector('.notice-panel__empty');
+          if (empty) body.innerHTML = '';
+          body.insertAdjacentHTML('afterbegin', postHtml);
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
+      });
+  }
+
+  function checkAndShowDot() {
+    var dot = document.getElementById('gnb-notif-dot');
+    if (!dot) return;
+
+    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var notices   = (data && data.notices) || [];
+        var readIds   = getReadIds();
+        var hasUnread = notices.some(function(n) { return readIds.indexOf(n.id) === -1; });
+        if (hasUnread) { dot.classList.add('is-visible'); return; }
+
+        fetch(BOARD_JSON_URL, { signal: AbortSignal.timeout(5000) })
+          .then(function(r) { return r.json(); })
+          .then(function(boardData) {
+            var posts  = (boardData && boardData.posts) || [];
+            var seen   = localStorage.getItem(BOARD_SEEN_KEY);
+            var hasNew = posts.some(function(p) {
+              return !p.parent_id && (!seen || p.created_at > seen);
+            });
+            if (hasNew) dot.classList.add('is-visible');
+          })
+          .catch(function() {});
+      })
+      .catch(function() {
+        // 공지 fetch 실패해도 게시판 새글 배지는 확인
+        fetch(BOARD_JSON_URL, { signal: AbortSignal.timeout(5000) })
+          .then(function(r) { return r.json(); })
+          .then(function(boardData) {
+            var posts = (boardData && boardData.posts) || [];
+            var seen  = localStorage.getItem(BOARD_SEEN_KEY);
+            var hasNew = posts.some(function(p) {
+              return !p.parent_id && (!seen || p.created_at > seen);
+            });
+            if (hasNew) dot.classList.add('is-visible');
+          })
+          .catch(function() {});
+      });
+  }
+
+  function initNotices() {
+    checkAndShowDot();
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -367,8 +647,10 @@
     setInterval(updateGnbDate, 30000);
     applyTimeCollapse();
     initModals();
+    initNotices();
     renderSupplyFlows();
     loadChipWidget();
+    loadVisitorCount();
     patchBriefingList();
     patchBriefingNav();
   });
@@ -396,6 +678,31 @@
       '<span class="chip-row__chg ' + dir + '">' + chg + '</span>';
     return row;
   }
+  function loadVisitorCount() {
+    var opinionBtn = document.querySelector('.sidebar-opinion-btn');
+    if (!opinionBtn) return;
+    fetch('/api/visitors', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        if (!data.pageViews) return;
+        var existing = document.getElementById('sidebar-visitors');
+        if (!existing) {
+          var wrap = document.createElement('div');
+          wrap.id = 'sidebar-visitors';
+          wrap.className = 'sidebar-visitors';
+          wrap.innerHTML =
+            '<span class="sidebar-visitors__label">누적 페이지뷰</span>' +
+            '<span class="sidebar-visitors__count" id="sidebar-visitors-count"></span>';
+          opinionBtn.closest('.sidebar-footer').insertAdjacentElement('afterend', wrap);
+          existing = wrap;
+        }
+        var countEl = existing.querySelector('.sidebar-visitors__count') || document.getElementById('sidebar-visitors-count');
+        if (countEl) countEl.textContent = data.pageViews.toLocaleString('ko-KR') + '회';
+        existing.style.display = '';
+      })
+      .catch(function() {});
+  }
+
   function loadChipWidget() {
     var container = document.getElementById('chip-stocks');
     if (!container) return;
@@ -428,4 +735,8 @@
   window.drawMiniChart = drawMiniChart;
   window.drawCloseChart = drawCloseChart;
   window.renderInstList = renderInstList;
+  window.openNoticePanel = openNoticePanel;
+  window.closeNoticePanel = closeNoticePanel;
+  window.switchPanelTab  = switchPanelTab;
+  window.submitBoardPost = submitBoardPost;
 })();
