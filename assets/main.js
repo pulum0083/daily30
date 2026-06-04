@@ -706,13 +706,10 @@
       var ti = left.querySelector('.lsb-ac-prev-title, #lsb-ac-prev-title');
       btn.dataset.savedTime  = t  ? t.textContent  : (btn.dataset.savedTime  || '');
       btn.dataset.savedTitle = ti ? ti.textContent : (btn.dataset.savedTitle || '');
-      left.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+      left.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
     } else {
-      // 닫기 — 저장해둔 time/title 복원
-      left.innerHTML = '<span class="lsb-ac-prev-time" id="lsb-ac-prev-time">'
-        + (btn.dataset.savedTime  || '') + '</span>'
-        + '<span class="lsb-ac-prev-title" id="lsb-ac-prev-title">'
-        + (btn.dataset.savedTitle || '') + '</span>';
+      // 닫기 — 고정 레이블
+      left.innerHTML = '<span class="lsb-ac-collapse-label">이슈 히스토리 보기</span>';
     }
   }
   window.lsbToggleAccordion = lsbToggleAccordion;
@@ -759,12 +756,47 @@
     if (!isMarketHours() && !isAfterMarket()) return;
     el.style.display = '';
 
+    // isAfterMarket() 조기 return 이전에 선언 — updateDisplay() 콜백에서 참조하므로 반드시 앞에 있어야 함
+    function calcVerdict(changePct) {
+      if (Math.abs(changePct) <= 0.1) return 'tight';
+      if (dir === 'up'  && changePct >  0.1) return 'hit';
+      if (dir === 'dn'  && changePct < -0.1) return 'hit';
+      return 'miss';
+    }
+    var VERDICT_MSGS = {
+      up: {
+        hit:  ['예측대로 흘러가는 중', '시나리오대로 전개 중', '방향 정확히 맞아가는 중', '분석대로네요',
+               '예측이 맞아떨어지는 중', '오늘 전망 적중', '오늘 AI 컨디션 좋네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중',
+               '오늘은 시장이 다른 말을 하고 있어요', '변수가 생긴 것 같아요', '시장이 예측을 무시하고 있어요'],
+      },
+      dn: {
+        hit:  ['예측대로 흘러가는 중', '분석대로네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중, 다행이예요', '예상 밖 흐름', '예측과 반대로 오르는 중',
+               '변수가 생긴 것 같아요, 좋은 징조', '예측은 틀렸지만 반가운 흐름',
+               '오늘은 틀려서 기분 좋은 날', '시장이 좋은 의미로 예측을 깨고 있어요',
+               '하락 예측이지만 시장은 반가운 반란 중', '틀렸는데 기쁜 날',
+               '이런 날은 틀려도 괜찮아요', '예측보다 시장이 더 건강하네요', '나쁜 예측이 틀려서 다행이에요'],
+      },
+      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
+    };
+    var VERDICT_META = {
+      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    };
+
     // ── 마감 후 상태 ──
     if (isAfterMarket()) {
       var badge = document.getElementById('lsb-badge');
       if (badge) { badge.className = 'lsb-closed-badge'; badge.textContent = '마감'; }
       var footElC = document.getElementById('lsb-foot');
       if (footElC) footElC.innerHTML = '<strong>마감</strong>';
+      // fetchKospi 실패 시 폴백 — 먼저 세팅 후 데이터 오면 덮어씀
+      var emElA = document.getElementById('lsb-head-em');
+      if (emElA) { emElA.textContent = '오늘 장이 종료됐어요.'; emElA.style.color = ''; emElA.style.fontWeight = '700'; }
+      var subElA = document.getElementById('lsb-sub');
+      if (subElA) subElA.textContent = '최종 종가 확인 중…';
       fetchKospi();
       fetchNews();
       return;
@@ -794,36 +826,6 @@
       fetchNews();
       return;
     }
-
-    function calcVerdict(changePct) {
-      if (Math.abs(changePct) <= 0.1) return 'tight';
-      if (dir === 'up'  && changePct >  0.1) return 'hit';
-      if (dir === 'dn'  && changePct < -0.1) return 'hit';
-      return 'miss';
-    }
-
-    var VERDICT_MSGS = {
-      up: {
-        hit:  ['예측대로 흘러가는 중', '시나리오대로 전개 중', '방향 정확히 맞아가는 중', '분석대로네요',
-               '예측이 맞아떨어지는 중', '오늘 전망 적중', '오늘 AI 컨디션 좋네요', '예측대로 움직이고 있어요'],
-        miss: ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중',
-               '오늘은 시장이 다른 말을 하고 있어요', '변수가 생긴 것 같아요', '시장이 예측을 무시하고 있어요'],
-      },
-      dn: {
-        hit:  ['예측대로 흘러가는 중', '분석대로네요', '예측대로 움직이고 있어요'],
-        miss: ['빗나가는 중, 다행이예요', '예상 밖 흐름', '예측과 반대로 오르는 중',
-               '변수가 생긴 것 같아요, 좋은 징조', '예측은 틀렸지만 반가운 흐름',
-               '오늘은 틀려서 기분 좋은 날', '시장이 좋은 의미로 예측을 깨고 있어요',
-               '하락 예측이지만 시장은 반가운 반란 중', '틀렸는데 기쁜 날',
-               '이런 날은 틀려도 괜찮아요', '예측보다 시장이 더 건강하네요', '나쁜 예측이 틀려서 다행이에요'],
-      },
-      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
-    };
-    var VERDICT_META = {
-      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
-      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
-      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
-    };
 
     function pickMsg(verdict) {
       if (verdict === 'tight') {
@@ -904,9 +906,46 @@
 
       var prefixEl = document.getElementById('lsb-head-prefix');
       var emEl     = document.getElementById('lsb-head-em');
-      if (prefixEl) prefixEl.textContent = v.prefix;
-      if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
-      if (headEl)   headEl.style.color = '';
+      if (isAfterMarket()) {
+        // 장 마감: 메인=종료 안내, 보조=결과 요약문
+        if (prefixEl) prefixEl.textContent = '';
+        if (emEl)     { emEl.textContent = '오늘 장이 종료됐어요.'; emEl.style.color = ''; emEl.style.fontWeight = '700'; }
+        if (headEl)   headEl.style.color = '';
+        var sign = changePct >= 0 ? '+' : '';
+        var pct  = sign + changePct.toFixed(2) + '%';
+        var CLOSE_MSGS = {
+          hit: {
+            up:   ['상승 예측이 맞았어요. ' + pct + ' 상승 마감이에요.',
+                   '예측대로 올랐어요. ' + pct + ' 상승으로 마감했어요.'],
+            dn:   ['하락 예측이 맞았어요. ' + pct + ' 하락 마감이에요.',
+                   '예측대로 내렸어요. ' + pct + ' 하락으로 마감했어요.'],
+          },
+          miss: {
+            up:   ['아쉽게도 예측이 빗나갔어요. ' + pct + ' 하락 마감이에요.',
+                   '상승을 기대했는데 ' + pct + ' 하락했어요. 오늘은 시장이 더 강했어요.',
+                   '예측이 틀렸어요. ' + pct + ' 하락으로 마감했어요. 다음엔 더 잘 볼게요.',
+                   '시장이 예측을 무시했어요. ' + pct + ' 하락 마감이에요.',
+                   '오늘은 AI도 시장을 못 이겼어요. ' + pct + ' 하락이에요.'],
+            dn:   ['이번엔 AI가 틀렸어요. ' + pct + ' 올랐으니 좋은 의미의 오답이에요.',
+                   '예측은 빗나갔지만 ' + pct + ' 상승 마감이에요. 이런 오답은 환영해요.',
+                   '하락 경고했는데 시장이 반란을 일으켰어요. ' + pct + ' 상승이에요.',
+                   '틀려서 다행인 날이에요. ' + pct + ' 상승 마감이에요.',
+                   'AI가 틀렸고 시장이 올랐어요. ' + pct + ' 기분 좋은 오답이에요.'],
+          },
+          tight: ['오차 범위 안에서 마감했어요. ' + pct + '로 중립에 가까웠어요.',
+                  '박빙이었어요. ' + pct + ' 변동으로 중립 마감했어요.'],
+        };
+        var pool = verdict === 'tight'
+          ? CLOSE_MSGS.tight
+          : CLOSE_MSGS[verdict][dir];
+        var closeSummary = pool[Math.floor(Math.random() * pool.length)];
+        var subElU = document.getElementById('lsb-sub');
+        if (subElU) { subElU.textContent = closeSummary; subElU.style.color = ''; subElU.style.fontWeight = ''; }
+      } else {
+        if (prefixEl) prefixEl.textContent = v.prefix;
+        if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+        if (headEl)   headEl.style.color = '';
+      }
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
       var rawPos;
@@ -972,6 +1011,14 @@
         if (hist.length > 0) {
           if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
           if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+          // 이전 이슈 기본 펼침
+          var btnEl = document.getElementById('lsb-accordion-btn');
+          if (bodyEl && btnEl && !bodyEl.classList.contains('open')) {
+            bodyEl.classList.add('open');
+            btnEl.classList.add('open');
+            var leftEl = btnEl.querySelector('.lsb-ac-left');
+            if (leftEl) leftEl.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
+          }
           if (bodyEl) {
             bodyEl.innerHTML = hist.map(function(item) {
               return '<div class="lsb-news-item">'
