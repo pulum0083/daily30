@@ -756,6 +756,36 @@
     if (!isMarketHours() && !isAfterMarket()) return;
     el.style.display = '';
 
+    // isAfterMarket() 조기 return 이전에 선언 — updateDisplay() 콜백에서 참조하므로 반드시 앞에 있어야 함
+    function calcVerdict(changePct) {
+      if (Math.abs(changePct) <= 0.1) return 'tight';
+      if (dir === 'up'  && changePct >  0.1) return 'hit';
+      if (dir === 'dn'  && changePct < -0.1) return 'hit';
+      return 'miss';
+    }
+    var VERDICT_MSGS = {
+      up: {
+        hit:  ['예측대로 흘러가는 중', '시나리오대로 전개 중', '방향 정확히 맞아가는 중', '분석대로네요',
+               '예측이 맞아떨어지는 중', '오늘 전망 적중', '오늘 AI 컨디션 좋네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중',
+               '오늘은 시장이 다른 말을 하고 있어요', '변수가 생긴 것 같아요', '시장이 예측을 무시하고 있어요'],
+      },
+      dn: {
+        hit:  ['예측대로 흘러가는 중', '분석대로네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중, 다행이예요', '예상 밖 흐름', '예측과 반대로 오르는 중',
+               '변수가 생긴 것 같아요, 좋은 징조', '예측은 틀렸지만 반가운 흐름',
+               '오늘은 틀려서 기분 좋은 날', '시장이 좋은 의미로 예측을 깨고 있어요',
+               '하락 예측이지만 시장은 반가운 반란 중', '틀렸는데 기쁜 날',
+               '이런 날은 틀려도 괜찮아요', '예측보다 시장이 더 건강하네요', '나쁜 예측이 틀려서 다행이에요'],
+      },
+      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
+    };
+    var VERDICT_META = {
+      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    };
+
     // ── 마감 후 상태 ──
     if (isAfterMarket()) {
       var badge = document.getElementById('lsb-badge');
@@ -796,36 +826,6 @@
       fetchNews();
       return;
     }
-
-    function calcVerdict(changePct) {
-      if (Math.abs(changePct) <= 0.1) return 'tight';
-      if (dir === 'up'  && changePct >  0.1) return 'hit';
-      if (dir === 'dn'  && changePct < -0.1) return 'hit';
-      return 'miss';
-    }
-
-    var VERDICT_MSGS = {
-      up: {
-        hit:  ['예측대로 흘러가는 중', '시나리오대로 전개 중', '방향 정확히 맞아가는 중', '분석대로네요',
-               '예측이 맞아떨어지는 중', '오늘 전망 적중', '오늘 AI 컨디션 좋네요', '예측대로 움직이고 있어요'],
-        miss: ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중',
-               '오늘은 시장이 다른 말을 하고 있어요', '변수가 생긴 것 같아요', '시장이 예측을 무시하고 있어요'],
-      },
-      dn: {
-        hit:  ['예측대로 흘러가는 중', '분석대로네요', '예측대로 움직이고 있어요'],
-        miss: ['빗나가는 중, 다행이예요', '예상 밖 흐름', '예측과 반대로 오르는 중',
-               '변수가 생긴 것 같아요, 좋은 징조', '예측은 틀렸지만 반가운 흐름',
-               '오늘은 틀려서 기분 좋은 날', '시장이 좋은 의미로 예측을 깨고 있어요',
-               '하락 예측이지만 시장은 반가운 반란 중', '틀렸는데 기쁜 날',
-               '이런 날은 틀려도 괜찮아요', '예측보다 시장이 더 건강하네요', '나쁜 예측이 틀려서 다행이에요'],
-      },
-      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
-    };
-    var VERDICT_META = {
-      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
-      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
-      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
-    };
 
     function pickMsg(verdict) {
       if (verdict === 'tight') {
