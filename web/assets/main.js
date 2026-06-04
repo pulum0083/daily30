@@ -975,7 +975,7 @@
     updateCountdown();
 
     if (isMarketHours()) {
-      setInterval(fetchKospi, 30000);
+      setInterval(fetchKospi, 10000);
       setInterval(fetchNews, 5 * 60000);
       setInterval(updateCountdown, 1000);
       setInterval(tickRefreshCount, 1000);

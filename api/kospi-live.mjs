@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const code    = (d.compareToPreviousPrice || {}).code || '3';
     const sign    = ['1','2'].includes(code) ? 1 : ['4','5'].includes(code) ? -1 : 0;
 
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
+    res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=20');
     res.json({
       price,
       changePct:    Math.round(sign * Math.abs(ratio)   * 100) / 100,
