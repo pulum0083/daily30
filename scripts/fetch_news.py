@@ -182,6 +182,9 @@ def fetch_and_summarize(briefing_type: str) -> dict:
             max_output_tokens=1024,
         ),
     )
+    if not response.text:
+        finish = getattr(response.candidates[0], 'finish_reason', 'UNKNOWN') if response.candidates else 'NO_CANDIDATES'
+        raise RuntimeError(f"Gemini returned empty response (finish_reason={finish})")
     raw = response.text.strip()
 
     # JSON 블록 추출 (마크다운 펜스·전후 텍스트 제거)
