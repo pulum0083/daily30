@@ -636,6 +636,7 @@
     initNotices();
     renderSupplyFlows();
     initLiveScoreboard();
+    initLiveMarketPanel();
     loadChipWidget();
     loadVisitorCount();
     patchBriefingList();
@@ -1133,6 +1134,183 @@
           container.appendChild(renderChipRow(s.flag, s.name, '—', '—', 'flat'));
         });
       });
+  }
+
+  /* ── 장 중 실시간 시장 지표 패널 ── */
+  function initLiveMarketPanel() {
+    var panel = document.getElementById('market-data-panel');
+    if (!panel) return;
+
+    // KST 기준 오늘 평일 09:00 이후인지 확인
+    function isLiveMode() {
+      var k = new Date(Date.now() + 9 * 3600 * 1000);
+      var day = k.getUTCDay();
+      if (day === 0 || day === 6) return false;
+      return k.getUTCHours() * 60 + k.getUTCMinutes() >= 540; // 09:00 KST
+    }
+    function isDuringMarket() {
+      var k = new Date(Date.now() + 9 * 3600 * 1000);
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      return mins >= 540 && mins < 930; // 09:00~15:29
+    }
+
+    if (!isLiveMode()) return;
+
+    var sparkData = { kosdaq: [], kospi200: [], forex: [] };
+    var polling = null;
+
+    function fmt(n, dp) {
+      return n.toLocaleString('ko-KR', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    }
+    function chgClass(pct) { return pct > 0 ? 'up' : pct < 0 ? 'down' : ''; }
+    function chgText(pct)  { return (pct > 0 ? '+' : '') + pct.toFixed(2) + '%'; }
+    function supplyBarPct(val, maxAbs) { return Math.min(48, Math.abs(val) / maxAbs * 48); }
+
+    function buildPanel() {
+      var header = panel.querySelector('.panel-header');
+      if (header) {
+        header.querySelector('.pub-time').outerHTML =
+          '<span class="pub-time mkt-live-time">' +
+          '<span class="mkt-live-dot"></span>' +
+          '<span class="mkt-live-label">실시간</span>' +
+          '</span>';
+      }
+
+      var list = panel.querySelector('.mkt-list');
+      list.innerHTML =
+        // 국내 지수
+        '<div class="mkt-section-label">국내 지수</div>' +
+        '<div id="mkt-live-rows">' +
+        mkIndexRow('kosdaq',  '코스닥',         '') +
+        mkIndexRow('kospi200','코스피200', '<span class="mkt-name-badge futures">IDX</span>') +
+        '</div>' +
+        // 환율
+        '<div class="mkt-section-label">환율</div>' +
+        '<div id="mkt-live-fx">' +
+        '<div class="mkt-row">' +
+        '<div class="mkt-row-info">' +
+        '<span class="mkt-name" style="display:flex;align-items:center;gap:4px">' +
+        '원/달러<span class="mkt-name-badge fx">FX</span></span>' +
+        '<div class="mkt-vals">' +
+        '<div class="mkt-val" id="ml-fx-val">—</div>' +
+        '<div class="mkt-chg" id="ml-fx-chg">—</div>' +
+        '</div></div>' +
+        '<div class="mkt-spark"><canvas id="ml-fx-spark"></canvas></div>' +
+        '</div></div>' +
+        // 수급
+        '<div class="mkt-section-label">오늘 수급 · 코스피</div>' +
+        '<div class="mkt-list" id="mkt-live-supply" style="padding:0 14px">' +
+        mkSupplyRow('frgn', '외국인') +
+        mkSupplyRow('inst', '기관') +
+        mkSupplyRow('indv', '개인') +
+        '</div>';
+    }
+
+    function mkIndexRow(key, label, badge) {
+      return '<div class="mkt-row">' +
+        '<div class="mkt-row-info">' +
+        '<span class="mkt-name" style="display:flex;align-items:center;gap:4px">' + label + badge + '</span>' +
+        '<div class="mkt-vals">' +
+        '<div class="mkt-val" id="ml-' + key + '-val">—</div>' +
+        '<div class="mkt-chg" id="ml-' + key + '-chg">—</div>' +
+        '</div></div>' +
+        '<div class="mkt-spark"><canvas id="ml-' + key + '-spark"></canvas></div>' +
+        '</div>';
+    }
+
+    function mkSupplyRow(key, label) {
+      return '<div class="supply-row">' +
+        '<div class="supply-info">' +
+        '<div class="supply-name">' + label + '</div>' +
+        '<div class="supply-vals">' +
+        '<span class="supply-val" id="ml-' + key + '-val">—</span>' +
+        '<span class="supply-unit">억</span>' +
+        '</div></div>' +
+        '<div class="supply-bar-outer">' +
+        '<div class="supply-bar-center">' +
+        '<div class="supply-bar-fill2" id="ml-' + key + '-bar" style="width:0%"></div>' +
+        '</div>' +
+        '<div class="supply-bar-labels">' +
+        '<span style="color:var(--dn)">매도</span>' +
+        '<span style="color:var(--up)">매수</span>' +
+        '</div></div></div>';
+    }
+
+    function applyData(d) {
+      // 지수
+      ['kosdaq', 'kospi200'].forEach(function(key) {
+        var src = d[key];
+        if (!src) return;
+        var valEl = document.getElementById('ml-' + key + '-val');
+        var chgEl = document.getElementById('ml-' + key + '-chg');
+        if (!valEl) return;
+        var prev = parseFloat(valEl.textContent.replace(/[,—]/g, '')) || 0;
+        var newVal = src.price;
+        valEl.textContent = fmt(newVal, 2);
+        chgEl.textContent = chgText(src.changePct);
+        chgEl.className   = 'mkt-chg ' + chgClass(src.changePct);
+        if (prev) {
+          valEl.classList.remove('mkt-flash-up', 'mkt-flash-dn');
+          void valEl.offsetWidth;
+          valEl.classList.add(newVal > prev ? 'mkt-flash-up' : 'mkt-flash-dn');
+        }
+        sparkData[key].push(newVal);
+        if (sparkData[key].length > 30) sparkData[key].shift();
+        if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key], '#2775ED');
+      });
+
+      // 환율
+      if (d.forex) {
+        var fxVal = document.getElementById('ml-fx-val');
+        var fxChg = document.getElementById('ml-fx-chg');
+        if (fxVal) {
+          var prevFx = parseFloat(fxVal.textContent.replace(/[,—]/g, '')) || 0;
+          fxVal.textContent = fmt(d.forex.price, 2);
+          fxChg.textContent = chgText(d.forex.changePct);
+          fxChg.className   = 'mkt-chg ' + chgClass(d.forex.changePct);
+          if (prevFx) {
+            fxVal.classList.remove('mkt-flash-up', 'mkt-flash-dn');
+            void fxVal.offsetWidth;
+            fxVal.classList.add(d.forex.price > prevFx ? 'mkt-flash-up' : 'mkt-flash-dn');
+          }
+        }
+        sparkData.forex.push(d.forex.price);
+        if (sparkData.forex.length > 30) sparkData.forex.shift();
+        if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex, '#B7791F');
+      }
+
+      // 수급
+      if (d.investor) {
+        var map = { frgn: d.investor.foreign, inst: d.investor.institution, indv: d.investor.individual };
+        var maxAbs = Math.max(500, Math.abs(map.frgn || 0), Math.abs(map.inst || 0), Math.abs(map.indv || 0));
+        Object.keys(map).forEach(function(key) {
+          var val = map[key];
+          if (val == null) return;
+          var valEl = document.getElementById('ml-' + key + '-val');
+          var barEl = document.getElementById('ml-' + key + '-bar');
+          if (!valEl) return;
+          valEl.textContent = (val >= 0 ? '+' : '') + Math.round(val).toLocaleString();
+          valEl.className   = 'supply-val ' + (val >= 0 ? 'buying' : 'selling');
+          if (barEl) {
+            barEl.style.width = supplyBarPct(val, maxAbs) + '%';
+            barEl.className   = 'supply-bar-fill2 ' + (val >= 0 ? 'buy' : 'sell');
+          }
+        });
+      }
+    }
+
+    function poll() {
+      fetch('/api/market', { signal: AbortSignal.timeout(8000) })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(applyData)
+        .catch(function() {});
+    }
+
+    buildPanel();
+    poll();
+    if (isDuringMarket()) {
+      polling = setInterval(poll, 60000);
+    }
   }
 
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */

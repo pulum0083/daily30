@@ -536,6 +536,35 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .vix-badge.elevated{background:#FEF9C3;color:#CA8A04;}
 .vix-badge.high{background:var(--dn-bg);color:var(--dn);}
 
+/* ── 실시간 시장 지표 패널 (장 중 전환) ── */
+.mkt-section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:7px 14px 3px;background:var(--surface-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
+.mkt-live-time{display:flex;align-items:center;gap:5px;}
+.mkt-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22C55E;position:relative;flex-shrink:0;}
+.mkt-live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:rgba(34,197,94,.28);animation:mkt-pulse 1.8s ease-out infinite;}
+@keyframes mkt-pulse{0%{transform:scale(1);opacity:.8;}100%{transform:scale(2.2);opacity:0;}}
+.mkt-live-label{font-size:11px;font-weight:700;color:#22C55E;}
+.mkt-name-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;}
+.mkt-name-badge.futures{background:var(--primary-bg);color:var(--primary);}
+.mkt-name-badge.fx{background:var(--gold-bg);color:var(--gold);}
+.supply-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--hairline);}
+.supply-row:last-child{border-bottom:none;}
+.supply-info{flex:1;min-width:0;}
+.supply-name{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;}
+.supply-vals{display:flex;align-items:baseline;gap:5px;}
+.supply-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.supply-val.buying{color:var(--up);}.supply-val.selling{color:var(--dn);}
+.supply-unit{font-size:11px;color:var(--muted);}
+.supply-bar-outer{flex-shrink:0;width:78px;display:flex;flex-direction:column;gap:4px;}
+.supply-bar-center{position:relative;width:100%;height:5px;background:var(--surface-inset);border-radius:999px;overflow:hidden;}
+.supply-bar-fill2{position:absolute;top:0;height:100%;border-radius:999px;transition:width .5s ease;}
+.supply-bar-fill2.buy{background:var(--up);left:50%;}
+.supply-bar-fill2.sell{background:var(--dn);right:50%;}
+.supply-bar-labels{display:flex;justify-content:space-between;font-size:9px;font-weight:600;color:var(--muted);}
+@keyframes mkt-flash-up{0%{color:var(--up);}100%{color:var(--ink);}}
+@keyframes mkt-flash-dn{0%{color:var(--dn);}100%{color:var(--ink);}}
+.mkt-flash-up{animation:mkt-flash-up .7s ease-out;}
+.mkt-flash-dn{animation:mkt-flash-dn .7s ease-out;}
+
 /* 섹터 로테이션 / 자금 흐름 (마감 사이드바) */
 .rota-list{padding:4px 0;}
 .rota-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--hairline);}
