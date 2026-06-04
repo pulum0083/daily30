@@ -1163,6 +1163,7 @@
       var sb = document.getElementById('live-scoreboard');
       if (sb) sb.insertAdjacentElement('afterend', panel);
       panel.classList.add('mkt-panel-inline');
+      panel.style.marginTop = '16px';
     }
 
     var sparkData = { kosdaq: [], kospi200: [], forex: [] };
