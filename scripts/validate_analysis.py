@@ -627,6 +627,10 @@ def validate(analysis, latest, btype):
             blocks.append("stock_picks 전부 제거됨 (브리핑 빈약)")
         a["stock_picks"] = kept
 
+    # 2-b) 산문 교차검증 — 픽 실측 vs reasons·scenario·watchpoints
+    if btype in ("kospi", "us"):
+        validate_prose_against_picks(a, btype, corrections, warnings, blocks)
+
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):
         kept, _ = _filter_list_prose(a["reasons"], "reasons", corrections)
