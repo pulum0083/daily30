@@ -78,7 +78,7 @@ def main() -> None:
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             prev = existing.get("latest")
-            if prev and prev.get("title"):
+            if prev and prev.get("title") and prev.get("title") != "오늘의 이슈 준비 중":
                 history = [{"time": existing.get("updated_at", ""), **prev}]
             history += existing.get("history", [])
             history = history[:MAX_HISTORY]

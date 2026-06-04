@@ -888,21 +888,29 @@
           + '</div>';
       }
 
-      var hist = d.history || [];
-      if (hist.length > 0 && accordionEl) {
+      var hist = (d.history || []).filter(function(item) {
+        return item.title && item.title !== '오늘의 이슈 준비 중';
+      });
+      if (accordionEl) {
         accordionEl.style.display = '';
-        if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
-        if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
-        if (bodyEl) {
-          bodyEl.innerHTML = hist.map(function(item) {
-            return '<div class="lsb-news-item">'
-              + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
-              + '<div class="lsb-ni-content">'
-              + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
-              + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
-              + '</div>'
-              + '</div>';
-          }).join('');
+        if (hist.length > 0) {
+          if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
+          if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+          if (bodyEl) {
+            bodyEl.innerHTML = hist.map(function(item) {
+              return '<div class="lsb-news-item">'
+                + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
+                + '<div class="lsb-ni-content">'
+                + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
+                + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
+                + '</div>'
+                + '</div>';
+            }).join('');
+          }
+        } else {
+          if (prevTimeEl)  prevTimeEl.textContent  = '';
+          if (prevTitleEl) prevTitleEl.textContent = '이전 이슈 없음';
+          if (bodyEl) bodyEl.innerHTML = '<div style="padding:12px 0;font-size:13px;color:var(--muted);text-align:center">—</div>';
         }
       }
     }
