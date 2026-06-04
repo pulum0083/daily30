@@ -464,13 +464,27 @@ def validate(analysis, latest, btype):
         if not kept:
             blocks.append("sector_focus.paragraphs 전부 제거됨")
 
-    # 4) 계층 2 — 스칼라 본문 (위반 시 차단)
+    # 4) 계층 2 — 스칼라 본문 (금지 문장 제거 후 계속 발행)
     for fld in SCALAR_PROSE.get(btype, []):
         if fld in EXCLUDED_FIELDS:
             continue
-        bad = find_forbidden(a.get(fld))
-        if bad:
-            blocks.append(f"본문 '{fld}' 금지 패턴: {bad} (스칼라 — 안전 교정 불가)")
+        text = a.get(fld)
+        if not isinstance(text, str) or not text:
+            continue
+        bad = find_forbidden(text)
+        if not bad:
+            continue
+        # 금지 패턴을 포함한 문장만 제거
+        import re as _re
+        sentences = _re.split(r'(?<=[.!?요])\s+', text)
+        kept = [s for s in sentences if not find_forbidden(s)]
+        if kept:
+            a[fld] = " ".join(kept)
+            corrections.append(f"본문 '{fld}' 금지 문장 제거: {bad}")
+        else:
+            # 전체가 금지 패턴인 경우 필드 삭제
+            a[fld] = ""
+            warnings.append(f"본문 '{fld}' 전체 제거 (금지 패턴 {bad})")
 
     # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
     if btype == "kospi-close":
