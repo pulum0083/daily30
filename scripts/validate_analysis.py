@@ -103,6 +103,19 @@ def find_forbidden(text):
     return reasons
 
 
+def is_contradicted(stated_pct: float, real_pct: float) -> bool:
+    """산문에 기재된 % 수치가 실측 change_pct와 충돌하는지 판정.
+
+    조건: diff > 5%p AND (실측 < 0.5% OR 배수 >= 5배)
+    """
+    diff = abs(stated_pct - real_pct)
+    if diff <= 5.0:
+        return False
+    if abs(real_pct) < 0.5:
+        return True
+    return abs(stated_pct / real_pct) >= 5.0
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""

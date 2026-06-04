@@ -1,0 +1,28 @@
+# 산문 % 수치 불일치 판정 함수(is_contradicted) 단위 테스트
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
+from validate_analysis import is_contradicted
+
+def test_large_discrepancy_flagged():
+    # AVGO 케이스: 실측 -0.49% vs 텍스트 +15.8%
+    assert is_contradicted(15.8, -0.49) is True
+
+def test_small_diff_passes():
+    # +4.2% 텍스트 vs +4.0% 실측 → 허용 (5%p 이내)
+    assert is_contradicted(4.2, 4.0) is False
+
+def test_near_zero_real_uses_diff_only():
+    # 실측 0.1% vs 텍스트 +10% → diff=9.9 > 5 → 차단
+    assert is_contradicted(10.0, 0.1) is True
+
+def test_near_zero_real_small_diff_passes():
+    # 실측 0.1% vs 텍스트 +2% → diff=1.9 < 5 → 허용
+    assert is_contradicted(2.0, 0.1) is False
+
+def test_ratio_exactly_5x_flagged():
+    # 실측 2% vs 텍스트 10% → ratio=5 → 차단
+    assert is_contradicted(10.0, 2.0) is True
+
+def test_ratio_below_5x_passes():
+    # 실측 2% vs 텍스트 8% → diff=6>5 but ratio=4<5 → 허용
+    assert is_contradicted(8.0, 2.0) is False
