@@ -802,15 +802,89 @@
       return 'miss';
     }
 
-    var VERDICT = {
-      hit:   { prefix: '예측대로 ', em: '순항 중',   color: 'var(--up)',   bg: 'var(--up-bg)' },
-      tight: { prefix: '팽팽한 ',   em: '접전',       color: 'var(--gold)', bg: 'var(--gold-bg)' },
-      miss:  { prefix: '',          em: '빗나가는 중', color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    var VERDICT_MSGS = {
+      up: {
+        hit:  ['예측대로 흘러가는 중', '시나리오대로 전개 중', '방향 정확히 맞아가는 중', '분석대로네요',
+               '예측이 맞아떨어지는 중', '오늘 전망 적중', '오늘 AI 컨디션 좋네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중',
+               '오늘은 시장이 다른 말을 하고 있어요', '변수가 생긴 것 같아요', '시장이 예측을 무시하고 있어요'],
+      },
+      dn: {
+        hit:  ['예측대로 흘러가는 중', '분석대로네요', '예측대로 움직이고 있어요'],
+        miss: ['빗나가는 중, 다행이예요', '예상 밖 흐름', '예측과 반대로 오르는 중',
+               '변수가 생긴 것 같아요, 좋은 징조', '예측은 틀렸지만 반가운 흐름',
+               '오늘은 틀려서 기분 좋은 날', '시장이 좋은 의미로 예측을 깨고 있어요',
+               '하락 예측이지만 시장은 반가운 반란 중', '틀렸는데 기쁜 날',
+               '이런 날은 틀려도 괜찮아요', '예측보다 시장이 더 건강하네요', '나쁜 예측이 틀려서 다행이에요'],
+      },
+      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
     };
+    var VERDICT_META = {
+      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    };
+
+    function pickMsg(verdict) {
+      if (verdict === 'tight') {
+        var t = VERDICT_MSGS.tight;
+        return t[Math.floor(Math.random() * t.length)];
+      }
+      var list = VERDICT_MSGS[dir][verdict];
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    var odoState = null;
+    var odoReady = false;
+
+    function odometerUpdate(container, numStr) {
+      var chars = numStr.split('');
+      var fmt   = numStr.replace(/[0-9]/g, 'D');
+
+      if (!odoState || odoState.fmt !== fmt) {
+        container.innerHTML = '';
+        odoState = { fmt: fmt, inners: [] };
+        odoReady = false;
+        for (var i = 0; i < chars.length; i++) {
+          var ch = chars[i];
+          if (ch >= '0' && ch <= '9') {
+            var col   = document.createElement('span');
+            col.className = 'lsb-odo-digit';
+            var inner = document.createElement('span');
+            inner.className = 'lsb-odo-inner';
+            for (var d = 0; d <= 9; d++) {
+              var s = document.createElement('span');
+              s.textContent = d;
+              inner.appendChild(s);
+            }
+            col.appendChild(inner);
+            container.appendChild(col);
+            odoState.inners.push(inner);
+          } else {
+            var sep = document.createElement('span');
+            sep.className = 'lsb-odo-sep';
+            sep.textContent = ch;
+            container.appendChild(sep);
+          }
+        }
+      }
+
+      var innerIdx = 0;
+      for (var j = 0; j < chars.length; j++) {
+        if (chars[j] >= '0' && chars[j] <= '9') {
+          var digit = parseInt(chars[j]);
+          var inn   = odoState.inners[innerIdx++];
+          inn.style.transition = odoReady ? 'transform 0.55s cubic-bezier(0.22,0.68,0,1.2)' : 'none';
+          inn.style.transform  = 'translateY(-' + (digit * 10) + '%)';
+        }
+      }
+      if (!odoReady) { requestAnimationFrame(function() { odoReady = true; }); }
+    }
 
     function updateDisplay(price, changePct) {
       var verdict = calcVerdict(changePct);
-      var v = VERDICT[verdict];
+      var v = VERDICT_META[verdict];
+      var em = pickMsg(verdict);
 
       var idxEl     = document.getElementById('lsb-idx');
       var chgEl     = document.getElementById('lsb-chg');
@@ -818,7 +892,9 @@
       var needleEl  = document.getElementById('lsb-needle');
       var predTagEl = document.getElementById('lsb-pred-tag');
 
-      if (idxEl) idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
+      if (idxEl) {
+        odometerUpdate(idxEl, price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2}));
+      }
 
       var sign = changePct >= 0 ? '+' : '';
       if (chgEl) {
@@ -829,7 +905,7 @@
       var prefixEl = document.getElementById('lsb-head-prefix');
       var emEl     = document.getElementById('lsb-head-em');
       if (prefixEl) prefixEl.textContent = v.prefix;
-      if (emEl)     { emEl.textContent = v.em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+      if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
       if (headEl)   headEl.style.color = '';
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
@@ -842,12 +918,26 @@
       if (needleEl) needleEl.style.left = rawPos + '%';
 
       if (predTagEl) {
-        predTagEl.style.background = v.bg;
-        predTagEl.style.color = v.color;
+        var predBg  = dir === 'dn' ? 'var(--dn-bg)' : 'var(--up-bg)';
+        var predClr = dir === 'dn' ? 'var(--dn)'    : 'var(--up)';
+        predTagEl.style.background = predBg;
+        predTagEl.style.color = predClr;
       }
     }
 
+    var refreshSecs = 10;
+
+    function tickRefreshCount() {
+      var el = document.getElementById('lsb-refresh-count');
+      if (!el) return;
+      refreshSecs = Math.max(0, refreshSecs - 1);
+      el.textContent = refreshSecs + '초';
+    }
+
     function fetchKospi() {
+      refreshSecs = 10;
+      var el = document.getElementById('lsb-refresh-count');
+      if (el) el.textContent = '10초';
       fetch('/api/kospi-live')
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
@@ -874,21 +964,29 @@
           + '</div>';
       }
 
-      var hist = d.history || [];
-      if (hist.length > 0 && accordionEl) {
+      var hist = (d.history || []).filter(function(item) {
+        return item.title && item.title !== '오늘의 이슈 준비 중';
+      });
+      if (accordionEl) {
         accordionEl.style.display = '';
-        if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
-        if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
-        if (bodyEl) {
-          bodyEl.innerHTML = hist.map(function(item) {
-            return '<div class="lsb-news-item">'
-              + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
-              + '<div class="lsb-ni-content">'
-              + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
-              + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
-              + '</div>'
-              + '</div>';
-          }).join('');
+        if (hist.length > 0) {
+          if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
+          if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+          if (bodyEl) {
+            bodyEl.innerHTML = hist.map(function(item) {
+              return '<div class="lsb-news-item">'
+                + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
+                + '<div class="lsb-ni-content">'
+                + '<div class="lsb-ni-title">' + escHtml(item.title) + '</div>'
+                + (item.summary ? '<div class="lsb-ni-body">' + escHtml(item.summary) + '</div>' : '')
+                + '</div>'
+                + '</div>';
+            }).join('');
+          }
+        } else {
+          if (prevTimeEl)  prevTimeEl.textContent  = '';
+          if (prevTitleEl) prevTitleEl.textContent = '이슈 히스토리';
+          if (bodyEl) bodyEl.innerHTML = '<div style="padding:12px 0;font-size:13px;color:var(--muted)">이전 이슈 내용이 쌓이게 되어요.</div>';
         }
       }
     }
@@ -921,9 +1019,10 @@
     updateCountdown();
 
     if (isMarketHours()) {
-      setInterval(fetchKospi, 30000);
+      setInterval(fetchKospi, 10000);
       setInterval(fetchNews, 5 * 60000);
       setInterval(updateCountdown, 1000);
+      setInterval(tickRefreshCount, 1000);
     }
   }
 
