@@ -235,7 +235,7 @@ def validate_prose_against_picks(analysis: dict, btype: str,
         if not isinstance(chg, (int, float)):
             continue
         real = float(chg)
-        sentences = re.split(r'(?<=[.。!?])\s*', scenario)
+        sentences = _sentence_split(scenario)
         kept_sentences = []
         for sent in sentences:
             claims = _extract_change_claims(sent)
@@ -247,7 +247,7 @@ def validate_prose_against_picks(analysis: dict, btype: str,
                 )
             else:
                 kept_sentences.append(sent)
-        new_scenario = " ".join(s for s in kept_sentences if s.strip())
+        new_scenario = _join_sentences(kept_sentences)
         if not new_scenario.strip():
             warnings.append(f"픽 '{pick.get('name')}' scenario 전체 제거됨 — 수동 확인 필요")
         pick["scenario"] = new_scenario
@@ -301,6 +301,11 @@ def _sentence_split(text: str) -> list:
     return [s.strip() for s in re.split(r"(?<=[.。!?])\s*", text) if s.strip()]
 
 
+def _join_sentences(sentences: list) -> str:
+    """분리된 문장 리스트를 하나의 문자열로 합친다."""
+    return " ".join(s for s in sentences if s.strip())
+
+
 def _direction_contradicts(sentence: str, real_chg: float) -> bool:
     """문장의 방향 표현(정성·정량)이 실측 change_pct와 모순인지 확인."""
     plain = strip_tags(sentence)
@@ -335,24 +340,17 @@ def validate_prose_nonpick_stocks(analysis: dict, btype: str,
         if tk:
             pick_tickers.add(tk)
 
-    # 산문 텍스트 수집: reasons 항목, 픽 scenario
-    prose_fields: list = []
-    if isinstance(analysis.get("reasons"), list):
-        prose_fields.append(("reasons_list", analysis["reasons"]))
-    for pick in (analysis.get("stock_picks") or []):
-        sc = pick.get("scenario") or ""
-        if sc:
-            prose_fields.append(("pick_scenario", pick))
-
-    # 검사할 모든 텍스트에서 티커 후보 수집 (중복 제거)
+    # 모든 산문에서 티커 후보 수집 (중복 제거)
     candidate_tickers: set = set()
-    for kind, obj in prose_fields:
-        texts = obj if kind == "reasons_list" else [obj.get("scenario", "")]
-        for text in texts:
-            for m in _US_TICKER_RE.finditer(strip_tags(text)):
-                tk = m.group(1)
-                if tk not in _NON_TICKER and tk not in pick_tickers:
-                    candidate_tickers.add(tk)
+    all_prose = list(analysis.get("reasons") or []) + [
+        p.get("scenario", "") for p in (analysis.get("stock_picks") or [])
+        if p.get("scenario")
+    ]
+    for text in all_prose:
+        for m in _US_TICKER_RE.finditer(strip_tags(text)):
+            tk = m.group(1)
+            if tk not in _NON_TICKER and tk not in pick_tickers:
+                candidate_tickers.add(tk)
 
     if not candidate_tickers:
         return
@@ -411,7 +409,7 @@ def validate_prose_nonpick_stocks(analysis: dict, btype: str,
                 )
             else:
                 kept_sents.append(sent)
-        pick["scenario"] = " ".join(s for s in kept_sents if s.strip())
+        pick["scenario"] = _join_sentences(kept_sents)
 
 
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
