@@ -286,8 +286,12 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
     return changed
 
 
-def correct_pick_price(pick, gt, corrections):
-    """pick 가격이 실측과 ±5% 초과 이탈하면 price·change·entry/target/stop를 교정."""
+def correct_pick_price(pick, gt, corrections, is_us=False):
+    """pick 가격이 실측과 ±5% 초과 이탈하면 price·change·entry/target/stop를 교정.
+
+    is_us는 btype에서 직접 전달받는다. Claude 원본 가격 문자열('$' 유무)로
+    판정하면 '$' 없는 미국 가격 형식("130달러" 등)에서 오판할 수 있다.
+    """
     cur = parse_price(pick.get("price"))
     gt_price = gt.get("price")
     if cur is None or not gt_price or cur <= 0:
@@ -295,7 +299,6 @@ def correct_pick_price(pick, gt, corrections):
     if abs(cur - gt_price) / gt_price <= PRICE_TOLERANCE:
         return
 
-    is_us = "$" in (pick.get("price") or "")
     new_price = f"${gt_price:,.2f}" if is_us else f"{int(round(gt_price)):,}원"
     ratio = gt_price / cur
 
@@ -431,6 +434,7 @@ def validate(analysis, latest, btype):
 
     # 2) 계층 1 + stock_picks 본문
     picks = a.get("stock_picks")
+    is_us = btype == "us"
     if isinstance(picks, list) and picks:
         cands = collect_candidates(latest, btype)
         kept = []
@@ -441,7 +445,7 @@ def validate(analysis, latest, btype):
                 continue
             gt = match_candidate(p, cands)
             if gt:
-                correct_pick_price(p, gt, corrections)
+                correct_pick_price(p, gt, corrections, is_us=is_us)
             else:
                 warnings.append(f"종목 '{p.get('name')}' 실측 매칭 실패 — 가격 교차검증 생략")
             kept.append(p)
@@ -458,14 +462,31 @@ def validate(analysis, latest, btype):
     if isinstance(a.get("watch_items"), list):
         a["watch_items"], _ = _filter_list_prose(a["watch_items"], "watch_items", corrections)
     sf = a.get("sector_focus")
-    if isinstance(sf, dict) and isinstance(sf.get("paragraphs"), list):
-        kept, _ = _filter_list_prose(sf["paragraphs"], "sector_focus.paragraphs", corrections)
-        sf["paragraphs"] = kept
-        if not kept:
-            blocks.append("sector_focus.paragraphs 전부 제거됨")
+    if isinstance(sf, dict):
+        if isinstance(sf.get("paragraphs"), list):
+            kept, _ = _filter_list_prose(sf["paragraphs"], "sector_focus.paragraphs", corrections)
+            sf["paragraphs"] = kept
+            if not kept:
+                blocks.append("sector_focus.paragraphs 전부 제거됨")
+        # signal 필드: 30자 이내 한 문장 — 금지 패턴 감지 시 경고만(필수 필드라 제거 불가)
+        if isinstance(sf.get("signal"), str):
+            bad = find_forbidden(sf["signal"])
+            if bad:
+                warnings.append(f"sector_focus.signal 금지 패턴 감지 (수동 확인 필요): {bad}")
 
-    # 3-b) telegram_signals (kospi-close) — 텔레그램 직송 문자열이므로 반드시 검증
-    if btype == "kospi-close" and isinstance(a.get("telegram_signals"), list):
+    # sector_semicon (us 전용) — paragraphs·signal 검증
+    ss = a.get("sector_semicon")
+    if isinstance(ss, dict):
+        if isinstance(ss.get("paragraphs"), list):
+            kept, _ = _filter_list_prose(ss["paragraphs"], "sector_semicon.paragraphs", corrections)
+            ss["paragraphs"] = kept
+        if isinstance(ss.get("signal"), str):
+            bad = find_forbidden(ss["signal"])
+            if bad:
+                warnings.append(f"sector_semicon.signal 금지 패턴 감지 (수동 확인 필요): {bad}")
+
+    # 3-b) telegram_signals — 텔레그램 직송 문자열이므로 모든 타입에서 검증
+    if isinstance(a.get("telegram_signals"), list):
         a["telegram_signals"], _ = _filter_list_prose(
             a["telegram_signals"], "telegram_signals", corrections
         )

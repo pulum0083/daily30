@@ -1152,6 +1152,9 @@ def main():
             sys.exit(1)
         with open(analysis_path, encoding="utf-8") as f:
             analysis = json.load(f)
+        # validate 통과 후 교정된 analysis로 briefings.json 기록 (kospi-close는 prediction 필드 없음)
+        if args.type != "kospi-close":
+            save_prediction_to_briefings(args.type, date_str, analysis)
         render_outputs(args.type, date_str, analysis, no_html=args.no_html)
         print(f"[call_claude] Render-only done (type={args.type})")
         return
@@ -1177,7 +1180,6 @@ def main():
         sys.exit(1)
 
     save_analysis(args.type, analysis)
-    save_prediction_to_briefings(args.type, date_str, analysis)
     render_outputs(args.type, date_str, analysis, no_html=args.no_html)
 
     print(f"[call_claude] Done. direction={analysis.get('prediction', {}).get('direction')}")
@@ -1288,6 +1290,11 @@ def call_claude_closing(date_str: str) -> dict:
             it[actor]["net"] = round(it[actor]["net"] / 100)
     if it:
         it["_unit"] = "억원"
+    else:
+        # 수급 데이터 미수집 시 Claude가 추정 수치를 생성하지 않도록 명시
+        claude_data["_investor_trading_note"] = (
+            "수급 데이터 미수집 — why/what/so_what에서 외국인·기관·개인 수급 수치를 언급하거나 추정하지 말 것"
+        )
 
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += f"마감 데이터:\n{json.dumps(claude_data, ensure_ascii=False, indent=2)}\n"
