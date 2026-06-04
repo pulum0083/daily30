@@ -464,6 +464,12 @@ def validate(analysis, latest, btype):
         if not kept:
             blocks.append("sector_focus.paragraphs 전부 제거됨")
 
+    # 3-b) telegram_signals (kospi-close) — 텔레그램 직송 문자열이므로 반드시 검증
+    if btype == "kospi-close" and isinstance(a.get("telegram_signals"), list):
+        a["telegram_signals"], _ = _filter_list_prose(
+            a["telegram_signals"], "telegram_signals", corrections
+        )
+
     # 4) 계층 2 — 스칼라 본문 (금지 문장 제거 후 계속 발행)
     for fld in SCALAR_PROSE.get(btype, []):
         if fld in EXCLUDED_FIELDS:
