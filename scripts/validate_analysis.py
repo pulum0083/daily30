@@ -253,6 +253,8 @@ def validate_prose_against_picks(analysis: dict, btype: str,
         pick["scenario"] = new_scenario
 
     # ── watchpoints 검증 ─────────────────────────────────────────
+    if "watch_items" in analysis and "watchpoints" in analysis:
+        warnings.append("watch_items와 watchpoints 키 동시 존재 — watchpoints는 미검증")
     watch_key = "watch_items" if "watch_items" in analysis else "watchpoints"
     watch = analysis.get(watch_key)
     if isinstance(watch, list):
