@@ -834,6 +834,53 @@
       return list[Math.floor(Math.random() * list.length)];
     }
 
+    var odoState = null;
+    var odoReady = false;
+
+    function odometerUpdate(container, numStr) {
+      var chars = numStr.split('');
+      var fmt   = numStr.replace(/[0-9]/g, 'D');
+
+      if (!odoState || odoState.fmt !== fmt) {
+        container.innerHTML = '';
+        odoState = { fmt: fmt, inners: [] };
+        odoReady = false;
+        for (var i = 0; i < chars.length; i++) {
+          var ch = chars[i];
+          if (ch >= '0' && ch <= '9') {
+            var col   = document.createElement('span');
+            col.className = 'lsb-odo-digit';
+            var inner = document.createElement('span');
+            inner.className = 'lsb-odo-inner';
+            for (var d = 0; d <= 9; d++) {
+              var s = document.createElement('span');
+              s.textContent = d;
+              inner.appendChild(s);
+            }
+            col.appendChild(inner);
+            container.appendChild(col);
+            odoState.inners.push(inner);
+          } else {
+            var sep = document.createElement('span');
+            sep.className = 'lsb-odo-sep';
+            sep.textContent = ch;
+            container.appendChild(sep);
+          }
+        }
+      }
+
+      var innerIdx = 0;
+      for (var j = 0; j < chars.length; j++) {
+        if (chars[j] >= '0' && chars[j] <= '9') {
+          var digit = parseInt(chars[j]);
+          var inn   = odoState.inners[innerIdx++];
+          inn.style.transition = odoReady ? 'transform 0.55s cubic-bezier(0.22,0.68,0,1.2)' : 'none';
+          inn.style.transform  = 'translateY(-' + (digit * 10) + '%)';
+        }
+      }
+      if (!odoReady) { requestAnimationFrame(function() { odoReady = true; }); }
+    }
+
     function updateDisplay(price, changePct) {
       var verdict = calcVerdict(changePct);
       var v = VERDICT_META[verdict];
@@ -846,10 +893,7 @@
       var predTagEl = document.getElementById('lsb-pred-tag');
 
       if (idxEl) {
-        idxEl.classList.remove('slot');
-        void idxEl.offsetWidth;
-        idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
-        idxEl.classList.add('slot');
+        odometerUpdate(idxEl, price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2}));
       }
 
       var sign = changePct >= 0 ? '+' : '';
