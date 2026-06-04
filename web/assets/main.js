@@ -820,7 +820,7 @@
       tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
     };
     var VERDICT_META = {
-      hit:   { prefix: '예측대로 ', color: 'var(--up)',   bg: 'var(--up-bg)' },
+      hit:   { prefix: '',          color: 'var(--up)',   bg: 'var(--up-bg)' },
       tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
       miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
     };
