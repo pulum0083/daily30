@@ -35,3 +35,36 @@ def test_real_zero_exact():
     # 실측 정확히 0.0 → ZeroDivisionError 없이 diff만으로 판정
     assert is_contradicted(10.0, 0.0) is True
     assert is_contradicted(3.0, 0.0) is False
+
+
+from validate_analysis import _extract_change_claims
+
+def test_change_claim_detects_jeonil():
+    # "전일 +X%" 패턴
+    text = "전일 <b>+15.80%</b> 폭등하며 20일선 위로 강하게 치솟은 종목이에요."
+    claims = _extract_change_claims(text)
+    assert claims == [15.80]
+
+def test_change_claim_detects_poldeung():
+    # "+X% 폭등" 패턴
+    text = "단 하루에 +15.8% 폭등했거든요."
+    claims = _extract_change_claims(text)
+    assert claims == [15.8]
+
+def test_change_claim_ignores_ma():
+    # "MA 대비 +X%" 는 change claim이 아님
+    text = "20일선 대비 +11% 이상 상회 중인 종목이에요."
+    claims = _extract_change_claims(text)
+    assert claims == []
+
+def test_change_claim_ignores_target():
+    # "목표 +X%" 는 change claim이 아님
+    text = "목표 +8.5% / 손절 -5.2%"
+    claims = _extract_change_claims(text)
+    assert claims == []
+
+def test_change_claim_detects_geupnak():
+    # "-X% 급락" 패턴
+    text = "엔비디아(NVDA)는 -3.62% 급락했어요."
+    claims = _extract_change_claims(text)
+    assert claims == [-3.62]

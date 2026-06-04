@@ -119,6 +119,44 @@ def is_contradicted(stated_pct: float, real_pct: float) -> bool:
     return abs(stated_pct / real_pct) >= 5.0
 
 
+# change claim 컨텍스트 키워드 — 일간 변동률을 서술하는 문장에서만 % 추출
+_CHANGE_CTX_RE = re.compile(
+    r'(?:'
+    r'전일\s*[+-]?\d'           # "전일 +X%"
+    r'|단\s*하루에'              # "단 하루에 +X%"
+    r'|하루\s*만에'              # "하루 만에 +X%"
+    r'|[+-]?\d[\d.]*\s*%\s*(?:폭등|급등|폭락|급락|상승|하락|올랐|떨어|빠졌)'  # "+X% 폭등"
+    r'|(?:폭등|급등|폭락|급락|상승|하락)\s*[+-]?\d'  # "폭등 +X%"
+    r')'
+)
+_PCT_RE = re.compile(r'([+-]?\d+\.?\d*)\s*%')
+
+
+def _extract_change_claims(text: str) -> list:
+    """산문 텍스트에서 '일간 변동률'을 서술하는 % 수치만 추출한다.
+    MA 대비, 목표 수익률, 손절 % 등은 제외.
+    """
+    if not isinstance(text, str):
+        return []
+    t = strip_tags(text)
+    # 수집된 (% 수치 위치, 값) 쌍을 모은 뒤 위치 중복 제거
+    seen_positions = set()
+    results = []
+    for m in _CHANGE_CTX_RE.finditer(t):
+        window_start = max(0, m.start() - 5)
+        window = t[window_start: m.end() + 30]
+        for pm in _PCT_RE.finditer(window):
+            abs_pos = window_start + pm.start()
+            if abs_pos in seen_positions:
+                continue
+            seen_positions.add(abs_pos)
+            try:
+                results.append(float(pm.group(1)))
+            except ValueError:
+                pass
+    return results
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
