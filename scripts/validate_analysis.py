@@ -277,6 +277,143 @@ def validate_prose_against_picks(analysis: dict, btype: str,
         analysis[watch_key] = kept
 
 
+# ── 픽 외 종목 산문 검증 ────────────────────────────────────────────────────────
+
+# ETF·지수·약어 등 티커처럼 보이지만 개별 종목이 아닌 단어 제외 목록
+_NON_TICKER = frozenset({
+    "USD", "ETF", "GDP", "CPI", "NFP", "VIX", "DXY", "SOX", "PCE",
+    "ISM", "PMI", "FED", "ECB", "BOJ", "AI", "US", "NQ", "SP",
+    "FOMC", "DRAM", "EWY", "GLD", "WTI", "DAX", "JPY", "KRW", "EUR",
+    "SOXL", "TQQQ", "QQQ", "SPY", "IWM", "XLK", "XLF", "SOXX",
+    "NYSE", "KRX", "KST", "MA", "MA20", "MA200",
+    "LLM", "API", "IPO", "CEO", "CFO", "REIT", "FY", "EPS", "PE",
+})
+
+_US_TICKER_RE = re.compile(r"\b([A-Z]{2,5})\b")
+
+# 방향 단어: 상승/하락 문맥 감지
+_UP_WORDS_RE = re.compile(r"(올랐|상승|급등|폭등|강세|반등|오르며|오른|올라|강하게)")
+_DOWN_WORDS_RE = re.compile(r"(내렸|하락|급락|폭락|약세|빠졌|떨어|내리며|내린|하락세|폭락|폭등)")
+
+
+def _sentence_split(text: str) -> list:
+    """텍스트를 문장 단위로 분리. HTML 태그 경계 고려."""
+    return [s.strip() for s in re.split(r"(?<=[.。!?])\s*", text) if s.strip()]
+
+
+def _direction_contradicts(sentence: str, real_chg: float) -> bool:
+    """문장의 방향 표현(정성·정량)이 실측 change_pct와 모순인지 확인."""
+    plain = strip_tags(sentence)
+    # 정량 % 수치 모순
+    claims = _extract_change_claims(plain)
+    if any(is_contradicted(c, real_chg) for c in claims):
+        return True
+    # 정성 방향 모순: 텍스트 상승인데 실측 하락(-1% 미만), 또는 반대
+    has_up = bool(_UP_WORDS_RE.search(plain))
+    has_dn = bool(_DOWN_WORDS_RE.search(plain))
+    if has_up and not has_dn and real_chg <= -1.0:
+        return True
+    if has_dn and not has_up and real_chg >= 1.0:
+        return True
+    return False
+
+
+def validate_prose_nonpick_stocks(analysis: dict, btype: str,
+                                   corrections: list, warnings: list) -> None:
+    """픽에 없는 개별 종목이 산문(reasons·scenario)에 언급될 때,
+    방향 표현이 실측과 모순이면 해당 문장을 제거한다.
+
+    현재 미국(us) 브리핑만 지원 — 한국 종목명 추출은 사전 필요.
+    """
+    if btype != "us":
+        return
+
+    # 이미 검증된 픽 티커 집합 (재조회 방지)
+    pick_tickers: set = set()
+    for p in (analysis.get("stock_picks") or []):
+        tk = (p.get("ticker") or "").strip().upper()
+        if tk:
+            pick_tickers.add(tk)
+
+    # 산문 텍스트 수집: reasons 항목, 픽 scenario
+    prose_fields: list = []
+    if isinstance(analysis.get("reasons"), list):
+        prose_fields.append(("reasons_list", analysis["reasons"]))
+    for pick in (analysis.get("stock_picks") or []):
+        sc = pick.get("scenario") or ""
+        if sc:
+            prose_fields.append(("pick_scenario", pick))
+
+    # 검사할 모든 텍스트에서 티커 후보 수집 (중복 제거)
+    candidate_tickers: set = set()
+    for kind, obj in prose_fields:
+        texts = obj if kind == "reasons_list" else [obj.get("scenario", "")]
+        for text in texts:
+            for m in _US_TICKER_RE.finditer(strip_tags(text)):
+                tk = m.group(1)
+                if tk not in _NON_TICKER and tk not in pick_tickers:
+                    candidate_tickers.add(tk)
+
+    if not candidate_tickers:
+        return
+
+    # 각 티커 실측 fetch (캐시)
+    realdata_cache: dict = {}
+    for tk in candidate_tickers:
+        data = _fetch_us_realdata(tk)
+        if "error" not in data and data.get("change_pct") is not None:
+            realdata_cache[tk] = data["change_pct"]
+
+    if not realdata_cache:
+        return
+
+    def _tickers_in_text(text: str) -> list:
+        plain = strip_tags(text)
+        return [m.group(1) for m in _US_TICKER_RE.finditer(plain)
+                if m.group(1) in realdata_cache]
+
+    # ── reasons 문장 단위 교정 ────────────────────────────────────────────────
+    if isinstance(analysis.get("reasons"), list):
+        kept = []
+        for item in analysis["reasons"]:
+            tickers_in_item = _tickers_in_text(item)
+            if not tickers_in_item:
+                kept.append(item)
+                continue
+            # 항목 내 모순 티커 존재 여부 확인
+            bad_tickers = [tk for tk in tickers_in_item
+                           if _direction_contradicts(item, realdata_cache[tk])]
+            if bad_tickers:
+                corrections.append(
+                    f"reasons 항목 제거 (비픽 종목 방향 모순 {bad_tickers}): {item[:60]}"
+                )
+            else:
+                kept.append(item)
+        analysis["reasons"] = kept
+
+    # ── 픽 scenario 문장 단위 교정 ───────────────────────────────────────────
+    for pick in (analysis.get("stock_picks") or []):
+        sc = pick.get("scenario") or ""
+        if not sc:
+            continue
+        tickers_in_sc = _tickers_in_text(sc)
+        if not tickers_in_sc:
+            continue
+        sentences = _sentence_split(sc)
+        kept_sents = []
+        for sent in sentences:
+            bad = [tk for tk in _tickers_in_text(sent)
+                   if _direction_contradicts(sent, realdata_cache[tk])]
+            if bad:
+                corrections.append(
+                    f"픽 '{pick.get('name')}' scenario 문장 제거 "
+                    f"(비픽 종목 방향 모순 {bad}): {sent[:60]}"
+                )
+            else:
+                kept_sents.append(sent)
+        pick["scenario"] = " ".join(s for s in kept_sents if s.strip())
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
@@ -630,6 +767,10 @@ def validate(analysis, latest, btype):
     # 2-b) 산문 교차검증 — 픽 실측 vs reasons·scenario·watchpoints
     if btype in ("kospi", "us"):
         validate_prose_against_picks(a, btype, corrections, warnings, blocks)
+
+    # 2-c) 산문 교차검증 — 픽 외 개별 종목 방향 모순 (us 전용)
+    if btype == "us":
+        validate_prose_nonpick_stocks(a, btype, corrections, warnings)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):
