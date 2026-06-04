@@ -907,40 +907,56 @@
       var prefixEl = document.getElementById('lsb-head-prefix');
       var emEl     = document.getElementById('lsb-head-em');
       if (isAfterMarket()) {
-        // 장 마감: 메인=종료 안내, 보조=결과 요약문
+        // 장 마감: 메인=예측 결과 요약, 보조=등락률 한 줄
         if (prefixEl) prefixEl.textContent = '';
-        if (emEl)     { emEl.textContent = '오늘 장이 종료됐어요.'; emEl.style.color = ''; emEl.style.fontWeight = '700'; }
         if (headEl)   headEl.style.color = '';
         var sign = changePct >= 0 ? '+' : '';
         var pct  = sign + changePct.toFixed(2) + '%';
+        // 대표 타이틀(emEl)과 서브 타이틀(subElU)을 각각 분리 관리
+        // hit.dn(하락 예측 적중)은 아쉬움 표현을 대표 타이틀 뒤에 붙인다
         var CLOSE_MSGS = {
           hit: {
-            up:   ['상승 예측이 맞았어요. ' + pct + ' 상승 마감이에요.',
-                   '예측대로 올랐어요. ' + pct + ' 상승으로 마감했어요.'],
-            dn:   ['하락 예측이 맞았어요. ' + pct + ' 하락 마감이에요.',
-                   '예측대로 내렸어요. ' + pct + ' 하락으로 마감했어요.'],
+            up: {
+              title: ['상승 예측이 맞았어요.', '예측대로 올랐어요.'],
+              sub:   [pct + ' 상승 마감이에요.', pct + ' 상승으로 마감했어요.'],
+            },
+            dn: {
+              title: ['하락 예측이 맞았어요. 아쉬운 하루였어요.',
+                      '하락 예측이 맞았어요. 내일은 반등을 기대해요.',
+                      '하락 예측이 맞았어요. 오늘은 아쉬운 날이에요.'],
+              sub:   [pct + ' 하락 마감이에요.', pct + ' 하락으로 마감했어요.'],
+            },
           },
           miss: {
-            up:   ['아쉽게도 예측이 빗나갔어요. ' + pct + ' 하락 마감이에요.',
-                   '상승을 기대했는데 ' + pct + ' 하락했어요. 오늘은 시장이 더 강했어요.',
-                   '예측이 틀렸어요. ' + pct + ' 하락으로 마감했어요. 다음엔 더 잘 볼게요.',
-                   '시장이 예측을 무시했어요. ' + pct + ' 하락 마감이에요.',
-                   '오늘은 AI도 시장을 못 이겼어요. ' + pct + ' 하락이에요.'],
-            dn:   ['이번엔 AI가 틀렸어요. ' + pct + ' 올랐으니 좋은 의미의 오답이에요.',
-                   '예측은 빗나갔지만 ' + pct + ' 상승 마감이에요. 이런 오답은 환영해요.',
-                   '하락 경고했는데 시장이 반란을 일으켰어요. ' + pct + ' 상승이에요.',
-                   '틀려서 다행인 날이에요. ' + pct + ' 상승 마감이에요.',
-                   'AI가 틀렸고 시장이 올랐어요. ' + pct + ' 기분 좋은 오답이에요.'],
+            up: {
+              title: ['아쉽게도 예측이 빗나갔어요.',
+                      '상승을 기대했는데 빗나갔어요.',
+                      '오늘은 AI도 시장을 못 이겼어요.'],
+              sub:   [pct + ' 하락 마감이에요.',
+                      pct + ' 하락으로 마감했어요. 다음엔 더 잘 볼게요.',
+                      pct + ' 하락이에요. 시장이 더 강했어요.'],
+            },
+            dn: {
+              title: ['이번엔 AI가 틀렸어요.',
+                      '예측은 빗나갔지만 좋은 결과예요.',
+                      '틀려서 다행인 날이에요.'],
+              sub:   [pct + ' 올랐어요. 기분 좋은 오답이에요.',
+                      pct + ' 상승 마감이에요. 이런 오답은 환영해요.',
+                      pct + ' 상승 마감이에요.'],
+            },
           },
-          tight: ['오차 범위 안에서 마감했어요. ' + pct + '로 중립에 가까웠어요.',
-                  '박빙이었어요. ' + pct + ' 변동으로 중립 마감했어요.'],
+          tight: {
+            title: ['박빙으로 마감했어요.', '오차 범위 안에서 마감했어요.'],
+            sub:   [pct + '로 중립에 가까웠어요.', pct + ' 변동으로 중립 마감했어요.'],
+          },
         };
-        var pool = verdict === 'tight'
-          ? CLOSE_MSGS.tight
-          : CLOSE_MSGS[verdict][dir];
-        var closeSummary = pool[Math.floor(Math.random() * pool.length)];
+        var pool = verdict === 'tight' ? CLOSE_MSGS.tight : CLOSE_MSGS[verdict][dir];
+        var idx = Math.floor(Math.random() * pool.title.length);
+        var closeTitle = pool.title[idx];
+        var closeSub   = pool.sub[idx % pool.sub.length];
+        if (emEl) { emEl.textContent = closeTitle; emEl.style.color = ''; emEl.style.fontWeight = '700'; }
         var subElU = document.getElementById('lsb-sub');
-        if (subElU) { subElU.textContent = closeSummary; subElU.style.color = ''; subElU.style.fontWeight = ''; }
+        if (subElU) { subElU.textContent = closeSub; subElU.style.color = ''; subElU.style.fontWeight = ''; }
       } else {
         if (prefixEl) prefixEl.textContent = v.prefix;
         if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
