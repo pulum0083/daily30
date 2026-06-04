@@ -706,7 +706,7 @@
       var ti = left.querySelector('.lsb-ac-prev-title, #lsb-ac-prev-title');
       btn.dataset.savedTime  = t  ? t.textContent  : (btn.dataset.savedTime  || '');
       btn.dataset.savedTitle = ti ? ti.textContent : (btn.dataset.savedTitle || '');
-      left.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+      left.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
     } else {
       // 닫기 — 저장해둔 time/title 복원
       left.innerHTML = '<span class="lsb-ac-prev-time" id="lsb-ac-prev-time">'
@@ -978,7 +978,7 @@
             bodyEl.classList.add('open');
             btnEl.classList.add('open');
             var leftEl = btnEl.querySelector('.lsb-ac-left');
-            if (leftEl) leftEl.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+            if (leftEl) leftEl.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
           }
           if (bodyEl) {
             bodyEl.innerHTML = hist.map(function(item) {
