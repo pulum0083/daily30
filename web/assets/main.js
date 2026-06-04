@@ -794,9 +794,9 @@
       if (footElC) footElC.innerHTML = '<strong>마감</strong>';
       // fetchKospi 실패 시 폴백 — 먼저 세팅 후 데이터 오면 덮어씀
       var emElA = document.getElementById('lsb-head-em');
-      if (emElA && emElA.textContent === '로딩 중…') emElA.textContent = '장 마감';
+      if (emElA) { emElA.textContent = '오늘 장이 종료됐어요.'; emElA.style.color = ''; emElA.style.fontWeight = '700'; }
       var subElA = document.getElementById('lsb-sub');
-      if (subElA) subElA.textContent = '오늘 장이 종료됐어요. 최종 종가를 확인하고 있어요.';
+      if (subElA) subElA.textContent = '최종 종가 확인 중…';
       fetchKospi();
       fetchNews();
       return;
@@ -906,13 +906,17 @@
 
       var prefixEl = document.getElementById('lsb-head-prefix');
       var emEl     = document.getElementById('lsb-head-em');
-      if (prefixEl) prefixEl.textContent = v.prefix;
-      if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
-      if (headEl)   headEl.style.color = '';
-      // 마감 후 sub 텍스트 업데이트
       if (isAfterMarket()) {
+        // 장 마감: 메인=종료 안내, 보조=판정 메시지
+        if (prefixEl) prefixEl.textContent = '';
+        if (emEl)     { emEl.textContent = '오늘 장이 종료됐어요.'; emEl.style.color = ''; emEl.style.fontWeight = '700'; }
+        if (headEl)   headEl.style.color = '';
         var subElU = document.getElementById('lsb-sub');
-        if (subElU) subElU.textContent = '오늘 장이 종료됐어요. 종가 ' + price.toLocaleString('ko-KR', {minimumFractionDigits:2}) + ' (' + (changePct >= 0 ? '+' : '') + changePct.toFixed(2) + '%)';
+        if (subElU)   { subElU.textContent = em; subElU.style.color = v.color; subElU.style.fontWeight = '600'; }
+      } else {
+        if (prefixEl) prefixEl.textContent = v.prefix;
+        if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+        if (headEl)   headEl.style.color = '';
       }
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
