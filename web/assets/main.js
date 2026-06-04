@@ -931,13 +931,13 @@
       var el = document.getElementById('lsb-refresh-count');
       if (!el) return;
       refreshSecs = Math.max(0, refreshSecs - 1);
-      el.textContent = '↻ ' + refreshSecs + '초';
+      el.textContent = refreshSecs + '초';
     }
 
     function fetchKospi() {
       refreshSecs = 10;
       var el = document.getElementById('lsb-refresh-count');
-      if (el) el.textContent = '↻ 10초';
+      if (el) el.textContent = '10초';
       fetch('/api/kospi-live')
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
