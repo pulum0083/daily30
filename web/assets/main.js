@@ -855,6 +855,9 @@
       var el = document.getElementById('lsb-refresh-count');
       if (!el) return;
       refreshSecs = Math.max(0, refreshSecs - 1);
+      el.classList.remove('flip');
+      void el.offsetWidth; // reflow로 애니메이션 재시작
+      el.classList.add('flip');
       el.textContent = '↻ ' + refreshSecs + '초';
     }
 
