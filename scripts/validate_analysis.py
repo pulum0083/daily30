@@ -158,6 +158,123 @@ def _extract_change_claims(text: str) -> list:
     return results
 
 
+def validate_prose_against_picks(analysis: dict, btype: str,
+                                  corrections: list, warnings: list, blocks: list) -> None:
+    """픽 실측 데이터와 reasons·scenario·watchpoints 산문을 교차검증한다.
+
+    불일치 문장/항목을 제거하고 corrections에 기록.
+    kospi-close는 stock_picks가 없으므로 skip.
+    """
+    if btype == "kospi-close":
+        return
+
+    picks = analysis.get("stock_picks")
+    if not isinstance(picks, list) or not picks:
+        return
+
+    # 픽 실측 테이블 구성 (enrich 완료 후 change_pct가 float로 채워져 있음)
+    ticker_real: dict = {}
+    name_real: dict = {}
+    for p in picks:
+        chg = p.get("change_pct")
+        if not isinstance(chg, (int, float)):
+            continue
+        tk = (p.get("ticker") or "").strip().upper()
+        nm = (p.get("name") or "").strip()
+        if tk:
+            ticker_real[tk] = float(chg)
+        if nm:
+            name_real[nm] = float(chg)
+        # 이름에서 짧은 식별자 추출: "AVGO (브로드컴)" → "AVGO", "브로드컴"
+        parts = re.split(r'[\s()/·]', nm)
+        for part in parts:
+            part = part.strip()
+            if len(part) >= 2:
+                name_real.setdefault(part, float(chg))
+
+    def real_chg_for_text(text: str):
+        """텍스트에 언급된 픽 티커/이름을 찾아 실측 change_pct 반환. 없으면 None."""
+        t = strip_tags(text)
+        for tk, chg in ticker_real.items():
+            if tk in t:
+                return chg
+        for nm, chg in sorted(name_real.items(), key=lambda x: -len(x[0])):
+            if nm in t:
+                return chg
+        return None
+
+    # ── reasons 검증 ──────────────────────────────────────────────
+    reasons = analysis.get("reasons")
+    if isinstance(reasons, list):
+        kept = []
+        for item in reasons:
+            real = real_chg_for_text(item)
+            if real is None:
+                kept.append(item)
+                continue
+            claims = _extract_change_claims(item)
+            bad = [c for c in claims if is_contradicted(c, real)]
+            if bad:
+                corrections.append(
+                    f"reasons 항목 제거 (실측 {real:+.2f}% vs 텍스트 {bad}): {item[:60]}"
+                )
+            else:
+                kept.append(item)
+        if len(kept) < REASONS_MIN:
+            blocks.append(
+                f"reasons가 {len(kept)}개로 과소 — prose 교정 후 부족 (최소 {REASONS_MIN})"
+            )
+        analysis["reasons"] = kept
+
+    # ── 픽 scenario 검증 ──────────────────────────────────────────
+    for pick in picks:
+        scenario = pick.get("scenario") or ""
+        if not scenario:
+            continue
+        chg = pick.get("change_pct")
+        if not isinstance(chg, (int, float)):
+            continue
+        real = float(chg)
+        sentences = re.split(r'(?<=[.。!?])\s*', scenario)
+        kept_sentences = []
+        for sent in sentences:
+            claims = _extract_change_claims(sent)
+            bad = [c for c in claims if is_contradicted(c, real)]
+            if bad:
+                corrections.append(
+                    f"픽 '{pick.get('name')}' scenario 문장 제거 "
+                    f"(실측 {real:+.2f}% vs 텍스트 {bad}): {sent[:60]}"
+                )
+            else:
+                kept_sentences.append(sent)
+        new_scenario = " ".join(s for s in kept_sentences if s.strip())
+        if not new_scenario.strip():
+            warnings.append(f"픽 '{pick.get('name')}' scenario 전체 제거됨 — 수동 확인 필요")
+        pick["scenario"] = new_scenario
+
+    # ── watchpoints 검증 ─────────────────────────────────────────
+    watch_key = "watch_items" if "watch_items" in analysis else "watchpoints"
+    watch = analysis.get(watch_key)
+    if isinstance(watch, list):
+        kept = []
+        for item in watch:
+            text = item.get("text") or item.get("label") or ""
+            real = real_chg_for_text(text)
+            if real is None:
+                kept.append(item)
+                continue
+            claims = _extract_change_claims(text)
+            bad = [c for c in claims if is_contradicted(c, real)]
+            if bad:
+                corrections.append(
+                    f"watchpoint 항목 제거 (실측 {real:+.2f}% vs 텍스트 {bad}): "
+                    f"{item.get('label', '')}"
+                )
+            else:
+                kept.append(item)
+        analysis[watch_key] = kept
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""

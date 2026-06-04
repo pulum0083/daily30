@@ -1,7 +1,7 @@
 # 산문 % 수치 불일치 판정 함수(is_contradicted) 단위 테스트
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
-from validate_analysis import is_contradicted, _extract_change_claims
+from validate_analysis import is_contradicted, _extract_change_claims, validate_prose_against_picks
 
 def test_large_discrepancy_flagged():
     # AVGO 케이스: 실측 -0.49% vs 텍스트 +15.8%
@@ -66,3 +66,81 @@ def test_change_claim_detects_geupnak():
     text = "엔비디아(NVDA)는 -3.62% 급락했어요."
     claims = _extract_change_claims(text)
     assert claims == [-3.62]
+
+
+# ── validate_prose_against_picks 테스트 ──────────────────────────────────────
+
+def _make_pick(ticker, name, change_pct):
+    return {"ticker": ticker, "name": name, "change_pct": change_pct,
+            "price": "$100", "change": f"{change_pct:+.2f}%",
+            "scenario": "", "action_guide": ""}
+
+def test_removes_contradicted_reason():
+    analysis = {
+        "stock_picks": [_make_pick("AVGO", "AVGO (브로드컴)", -0.49)],
+        "reasons": [
+            "📈 선물이 약세예요.",
+            "💡 브로드컴(AVGO)이 단 하루에 +15.8% 폭등했거든요.",
+            "🌏 아시아 증시가 하락했어요.",
+        ],
+        "watch_items": [],
+    }
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "us", corrections, warnings, blocks)
+    assert len(analysis["reasons"]) == 2
+    assert any("AVGO" in c for c in corrections)
+
+def test_keeps_valid_reason():
+    analysis = {
+        "stock_picks": [_make_pick("META", "META (메타)", 4.24)],
+        "reasons": ["META가 +4.2% 상승했어요."],
+        "watch_items": [],
+    }
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "us", corrections, warnings, blocks)
+    assert len(analysis["reasons"]) == 1
+
+def test_removes_contradicted_scenario_sentence():
+    pick = _make_pick("AVGO", "AVGO (브로드컴)", -0.49)
+    pick["scenario"] = "전일 +15.80% 폭등하며 20일선 위로 강하게 치솟은 종목이에요. 반도체 온기가 유입되고 있어요."
+    analysis = {"stock_picks": [pick], "reasons": ["a", "b"], "watch_items": []}
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "us", corrections, warnings, blocks)
+    scenario = analysis["stock_picks"][0]["scenario"]
+    assert "+15.80%" not in scenario
+    assert "반도체 온기" in scenario
+
+def test_removes_contradicted_watchpoint():
+    analysis = {
+        "stock_picks": [_make_pick("AVGO", "AVGO (브로드컴)", -0.49)],
+        "reasons": ["a", "b"],
+        "watch_items": [
+            {"icon": "💡", "label": "AVGO 모멘텀",
+             "text": "브로드컴이 단 하루에 +15.8% 폭등했어요."},
+            {"icon": "📅", "label": "NFP",
+             "text": "내일 발표 예정이에요."},
+        ],
+    }
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "us", corrections, warnings, blocks)
+    assert len(analysis["watch_items"]) == 1
+    assert analysis["watch_items"][0]["label"] == "NFP"
+
+def test_blocks_when_reasons_below_min():
+    analysis = {
+        "stock_picks": [_make_pick("AVGO", "AVGO (브로드컴)", -0.49)],
+        "reasons": [
+            "💡 AVGO 단 하루에 +15.8% 폭등했어요.",
+            "🌏 AVGO 하루 만에 +15.8% 급등했어요.",
+        ],
+        "watch_items": [],
+    }
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "us", corrections, warnings, blocks)
+    assert len(blocks) > 0
+
+def test_skips_kospi_close():
+    analysis = {"reasons": ["테스트"], "watch_items": []}
+    corrections, warnings, blocks = [], [], []
+    validate_prose_against_picks(analysis, "kospi-close", corrections, warnings, blocks)
+    assert corrections == [] and blocks == []
