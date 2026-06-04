@@ -762,6 +762,11 @@
       if (badge) { badge.className = 'lsb-closed-badge'; badge.textContent = '마감'; }
       var footElC = document.getElementById('lsb-foot');
       if (footElC) footElC.innerHTML = '<strong>마감</strong>';
+      // fetchKospi 실패 시 폴백 — 먼저 세팅 후 데이터 오면 덮어씀
+      var emElA = document.getElementById('lsb-head-em');
+      if (emElA && emElA.textContent === '로딩 중…') emElA.textContent = '장 마감';
+      var subElA = document.getElementById('lsb-sub');
+      if (subElA) subElA.textContent = '오늘 장이 종료됐어요. 최종 지수를 불러오는 중이에요.';
       fetchKospi();
       fetchNews();
       return;
