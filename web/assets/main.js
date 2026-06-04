@@ -818,7 +818,12 @@
       var needleEl  = document.getElementById('lsb-needle');
       var predTagEl = document.getElementById('lsb-pred-tag');
 
-      if (idxEl) idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
+      if (idxEl) {
+        idxEl.classList.remove('slot');
+        void idxEl.offsetWidth;
+        idxEl.textContent = price.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2});
+        idxEl.classList.add('slot');
+      }
 
       var sign = changePct >= 0 ? '+' : '';
       if (chgEl) {
@@ -855,9 +860,6 @@
       var el = document.getElementById('lsb-refresh-count');
       if (!el) return;
       refreshSecs = Math.max(0, refreshSecs - 1);
-      el.classList.remove('flip');
-      void el.offsetWidth; // reflow로 애니메이션 재시작
-      el.classList.add('flip');
       el.textContent = '↻ ' + refreshSecs + '초';
     }
 
