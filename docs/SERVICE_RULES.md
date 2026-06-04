@@ -106,3 +106,75 @@
 
 - 작업 완료 알림, 수동 테스트, 개발 중 임시 실행 시 발송 금지.
 - 스케줄된 브리핑 파이프라인 외 ad-hoc 발송은 구독자 채널 노이즈가 된다.
+
+---
+
+## 6. 라이브 스코어보드 UI 규칙
+
+### 색상 — 예측 방향 기준 (시장 관행과 동일)
+
+| 상태 | 색상 | CSS 변수 |
+|------|------|---------|
+| 상승 (up) | 빨간 | `--up` (#E03131) |
+| 하락 (dn) | 파란 | `--dn` (#2775ED) |
+
+`lsb-pred-tag`(예측 방향 뱃지)는 **verdict(순항/빗나감)가 아닌 예측 방향 고정 컬러**를 사용한다.  
+verdict 컬러는 헤드라인 em 텍스트에만 적용한다.
+
+### 스코어보드 코멘트 — 방향별 분리
+
+- 상승 우위 `hit` / 상승 우위 `miss` / 하락 우위 `hit` / 하락 우위 `miss` 4가지 풀로 분리.
+- 30초(현재 10초) 갱신마다 각 풀에서 **랜덤 선택**.
+- **하락 우위 miss**(하락 예측인데 상승) 코멘트는 기분 좋은 표현으로 구성한다.
+- "순항 중"처럼 방향이 함축된 표현은 방향 무관 풀에 넣지 않는다.
+
+### 실시간 갱신 주기
+
+| 항목 | 설정 |
+|------|------|
+| 코스피 지수 폴링 | 10초 (`setInterval(fetchKospi, 10000)`) |
+| API 캐시 | `s-maxage=10` (네이버 API 10초마다 실호출) |
+| 뉴스 이슈 갱신 | 1시간 (Vercel cron, GitHub Actions) |
+
+### 코스피 지수 — 오도미터 효과
+
+- 지수 업데이트 시 자릿수별 독립 롤링 애니메이션 적용 (`lsb-odo-digit` + `lsb-odo-inner`).
+- `<span>`은 기본 `display:inline`이라 CSS `transform` 미작동 → `.lsb-idx`에 `display:inline-block` 필수.
+- 첫 렌더는 `transition:none`으로 즉시 세팅, 이후 갱신부터 `0.55s cubic-bezier` 롤링.
+
+### 카운트다운 타이머
+
+- `lsb-cd-num`(숫자 span)만 `overflow:hidden` 래퍼 안에서 슬라이드업 애니메이션.
+- `fetchKospi` 호출 시 카운터 10 리셋 → 9 → 8 … 0 순으로 표시.
+
+---
+
+## 7. 뉴스 수집 스케줄 (kospi-news-live)
+
+| 시각 (KST) | UTC cron | 비고 |
+|-----------|----------|------|
+| 09:10 | `10 0 * * 1-5` | 장 시작 직후 첫 이슈 |
+| 10:00 | `0 1 * * 1-5` | |
+| 11:00 | `0 2 * * 1-5` | |
+| 12:00 | `0 3 * * 1-5` | |
+| 13:00 | `0 4 * * 1-5` | |
+| 14:00 | `0 5 * * 1-5` | |
+| 15:00 | `0 6 * * 1-5` | 마감 전 마지막 |
+
+Vercel cron → `/api/trigger?type=kospi-news-live` → GitHub Actions `kospi-news-live` job → `fetch_news_live.py` 순으로 실행.
+
+**주의:** `kospi-news-live` job은 `actions/checkout@v6` + `GITHUB_TOKEN`을 사용한다. `GH_PAT` secret은 이 job에 불필요하며, 사용하면 secret 미설정 시 checkout 실패한다.
+
+플레이스홀더("오늘의 이슈 준비 중") 항목은 히스토리에 누적되지 않도록 `fetch_news_live.py`에서 필터링한다.
+
+---
+
+## 8. 배포 워크플로우
+
+**Vercel은 `main` 브랜치 push 시 자동 배포된다.** 따라서 push = 배포.
+
+- 코드 수정 → `git commit` (push 없음)
+- 여러 커밋을 쌓은 뒤 **"배포해줘"** 요청 시 `git push` 1회
+- Vercel 배포 큐 누적 방지 및 불필요한 배포 최소화
+
+Claude는 명시적 배포 요청 없이 `git push`하지 않는다.
