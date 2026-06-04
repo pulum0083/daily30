@@ -659,20 +659,19 @@ def write_output(html: str, internal_type: str, target_date: str):
 
 
 def find_latest_ready():
-    """generated_at 기준 가장 최근 생성된 ready 브리핑 (internal_type, date) 반환. 없으면 None."""
-    bpath = DATA_DIR / "briefings.json"
-    briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
-    best = None  # (generated_at, internal_type, date)
-    for b in briefings:
-        it = TYPE_MAP.get(b.get("type"), b.get("type"))
-        d = b.get("date")
-        if it not in DATA_FILE or not d:
+    """파일 수정 시간 기준 가장 최근 생성된 ready 브리핑 (internal_type, date) 반환. 없으면 None."""
+    best = None  # (mtime, internal_type, date)
+    for d_dir in BRIEFINGS_DIR.iterdir():
+        d = d_dir.name
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', d):
             continue
-        if not (BRIEFINGS_DIR / d / it / "index.html").exists():
-            continue
-        ga = b.get("generated_at", "") or ""
-        if best is None or ga > best[0]:
-            best = (ga, it, d)
+        for it in DATA_FILE:
+            html = d_dir / it / "index.html"
+            if not html.exists():
+                continue
+            mtime = html.stat().st_mtime
+            if best is None or mtime > best[0]:
+                best = (mtime, it, d)
     return (best[1], best[2]) if best else None
 
 
