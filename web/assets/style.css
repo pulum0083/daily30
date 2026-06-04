@@ -715,7 +715,7 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .bottom-list{max-width:100%;}
 }
 /* 모바일 라이브 모드 — 시장 지표 패널을 스코어보드 바로 아래 인라인 배치 */
-.mkt-panel-inline{margin-top:0;margin-bottom:4px;}
+.mkt-panel-inline{margin-top:12px;margin-bottom:4px;}
 @media(max-width:600px){
   .layout-wrapper{padding:12px 14px 60px;}
   .gnb{padding:0 16px;}
