@@ -708,11 +708,8 @@
       btn.dataset.savedTitle = ti ? ti.textContent : (btn.dataset.savedTitle || '');
       left.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
     } else {
-      // 닫기 — 저장해둔 time/title 복원
-      left.innerHTML = '<span class="lsb-ac-prev-time" id="lsb-ac-prev-time">'
-        + (btn.dataset.savedTime  || '') + '</span>'
-        + '<span class="lsb-ac-prev-title" id="lsb-ac-prev-title">'
-        + (btn.dataset.savedTitle || '') + '</span>';
+      // 닫기 — 고정 레이블
+      left.innerHTML = '<span class="lsb-ac-collapse-label">이슈 히스토리 보기</span>';
     }
   }
   window.lsbToggleAccordion = lsbToggleAccordion;
