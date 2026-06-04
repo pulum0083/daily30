@@ -1184,6 +1184,13 @@
         mkIndexRow('kosdaq',  '코스닥',         '') +
         mkIndexRow('kospi200','코스피200', '<span class="mkt-name-badge futures">IDX</span>') +
         '</div>' +
+        // 수급
+        '<div class="mkt-section-label">오늘 수급 · 코스피</div>' +
+        '<div class="mkt-list" id="mkt-live-supply" style="padding:0 14px">' +
+        mkSupplyRow('frgn', '외국인') +
+        mkSupplyRow('inst', '기관') +
+        mkSupplyRow('indv', '개인') +
+        '</div>' +
         // 환율
         '<div class="mkt-section-label">환율</div>' +
         '<div id="mkt-live-fx">' +
@@ -1196,14 +1203,7 @@
         '<div class="mkt-chg" id="ml-fx-chg">—</div>' +
         '</div></div>' +
         '<div class="mkt-spark"><canvas id="ml-fx-spark"></canvas></div>' +
-        '</div></div>' +
-        // 수급
-        '<div class="mkt-section-label">오늘 수급 · 코스피</div>' +
-        '<div class="mkt-list" id="mkt-live-supply" style="padding:0 14px">' +
-        mkSupplyRow('frgn', '외국인') +
-        mkSupplyRow('inst', '기관') +
-        mkSupplyRow('indv', '개인') +
-        '</div>';
+        '</div></div>';
     }
 
     function mkIndexRow(key, label, badge) {
