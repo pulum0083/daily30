@@ -564,10 +564,6 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
                 ctx["sector_name"] = sf.get("sector_name", "반도체")
                 ctx["sector_signal"] = sf["signal"]
                 ctx["sector_paragraphs"] = sf.get("paragraphs", [])
-        if internal_type == "us":
-            # 섹터 등락률 tag는 실측 소스가 없어(AI 추정) 제거 — 종목 매핑만 표시
-            spill_rows = analysis.get("spill") or analysis.get("spill_rows") or []
-            ctx["spill_rows"] = [{k: v for k, v in r.items() if k != "tag"} for r in spill_rows]
         d = ctx.get("direction", "")
         rp = ctx.get("readout_pct", "")
         ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
