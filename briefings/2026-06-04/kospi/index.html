@@ -347,31 +347,8 @@ window.addEventListener('load', function () {
     </main>
 
     <aside class="layout-grid__right">
-      
-<div class="acc-box">
-  <div class="acc-box__header">
-    <span class="acc-box__title">AI 예측 정확도 <button class="info-icon-btn" data-modal-open="acc-modal">?</button></span>
-    <span class="acc-box__period">최근 30일</span>
-  </div>
-  <div class="acc-stats-row">
-    <div class="acc-stat"><span class="acc-stat__val good">71%</span><span class="acc-stat__lbl">최근 7일</span></div>
-    <div class="acc-stat"><span class="acc-stat__val mid">67%</span><span class="acc-stat__lbl">최근 30일</span></div>
-  </div>
-  <div class="acc-bar-wrap">
-    <div class="acc-bar">
-      <div class="acc-bar__hit" style="width:62%"></div>
-      <div class="acc-bar__miss" style="width:31%"></div>
-      <div class="acc-bar__pending" style="width:6%"></div>
-    </div>
-    <div class="acc-bar-caption">
-      <span class="acc-bar-hit">적중 20</span>
-      <span class="acc-bar-miss">오류 10</span>
-      <span class="acc-bar-pending">미결 2</span>
-    </div>
-  </div>
-</div>
-      
-<div class="right-panel">
+
+<div class="right-panel" id="market-data-panel">
   <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:31 KST</span></div>
   <div class="mkt-list">
     
@@ -428,7 +405,30 @@ window.addEventListener('load', function () {
   
 });
 </script>
-      
+
+<div class="acc-box">
+  <div class="acc-box__header">
+    <span class="acc-box__title">AI 예측 정확도 <button class="info-icon-btn" data-modal-open="acc-modal">?</button></span>
+    <span class="acc-box__period">최근 30일</span>
+  </div>
+  <div class="acc-stats-row">
+    <div class="acc-stat"><span class="acc-stat__val good">71%</span><span class="acc-stat__lbl">최근 7일</span></div>
+    <div class="acc-stat"><span class="acc-stat__val mid">67%</span><span class="acc-stat__lbl">최근 30일</span></div>
+  </div>
+  <div class="acc-bar-wrap">
+    <div class="acc-bar">
+      <div class="acc-bar__hit" style="width:62%"></div>
+      <div class="acc-bar__miss" style="width:31%"></div>
+      <div class="acc-bar__pending" style="width:6%"></div>
+    </div>
+    <div class="acc-bar-caption">
+      <span class="acc-bar-hit">적중 20</span>
+      <span class="acc-bar-miss">오류 10</span>
+      <span class="acc-bar-pending">미결 2</span>
+    </div>
+  </div>
+</div>
+
 <div class="chip-widget">
   <a class="chip-widget__header" href="/chips" target="_blank" rel="noopener">
     <div class="chip-widget__left"><div class="chip-widget__badge">AI</div><span class="chip-widget__title">AI 반도체 종목</span></div>
