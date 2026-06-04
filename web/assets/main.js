@@ -1168,13 +1168,30 @@
     function chgText(pct)  { return (pct > 0 ? '+' : '') + pct.toFixed(2) + '%'; }
     function supplyBarPct(val, maxAbs) { return Math.min(48, Math.abs(val) / maxAbs * 48); }
 
+    function updateStatusLabel() {
+      var labelEl = panel.querySelector('.mkt-live-label');
+      var dotEl   = panel.querySelector('.mkt-live-dot');
+      if (!labelEl) return;
+      var during = isDuringMarket();
+      labelEl.textContent = during ? '실시간' : '장 마감';
+      if (dotEl) dotEl.style.display = during ? '' : 'none';
+    }
+
+    function scheduleCloseLabel() {
+      var k    = new Date(Date.now() + 9 * 3600 * 1000);
+      var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
+      var msLeft = (930 - mins) * 60 * 1000 - (k.getUTCSeconds() * 1000);
+      if (msLeft > 0) setTimeout(updateStatusLabel, msLeft);
+    }
+
     function buildPanel() {
       var header = panel.querySelector('.panel-header');
       if (header) {
+        var during = isDuringMarket();
         header.querySelector('.pub-time').outerHTML =
           '<span class="pub-time mkt-live-time">' +
-          '<span class="mkt-live-dot"></span>' +
-          '<span class="mkt-live-label">실시간</span>' +
+          '<span class="mkt-live-dot"' + (during ? '' : ' style="display:none"') + '></span>' +
+          '<span class="mkt-live-label">' + (during ? '실시간' : '장 마감') + '</span>' +
           '</span>';
       }
 
@@ -1312,6 +1329,7 @@
     poll();
     if (isDuringMarket()) {
       polling = setInterval(poll, 60000);
+      scheduleCloseLabel();
     }
   }
 
