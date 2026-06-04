@@ -1140,6 +1140,8 @@
   function initLiveMarketPanel() {
     var panel = document.getElementById('market-data-panel');
     if (!panel) return;
+    // 코스피 아침 브리핑(live-scoreboard 포함)에서만 활성화
+    if (!document.getElementById('live-scoreboard')) return;
 
     // KST 기준 오늘 평일 09:00 이후인지 확인
     function isLiveMode() {
