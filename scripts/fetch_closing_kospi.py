@@ -91,24 +91,59 @@ def _fetch_naver_index(code: str) -> dict:
 
 
 def _fetch_naver_usdkrw() -> dict:
-    """네이버 환율 API에서 원/달러 종가를 반환한다."""
-    url = "https://m.stock.naver.com/front-api/marketIndex/prices?reutersCode=FX_USDKRW&category=exchange&pageSize=10&page=1"
+    """USD/KRW 종가·등락률.
+    1차: manana.kr (chipboard 동일 소스)
+    2차: fawazahmed0 CDN (chipboard 동일 소스)
+    3차: 네이버 모바일 API
+    """
+    # 1차: manana.kr
     try:
+        req = urllib.request.Request(
+            "https://api.manana.kr/exchange/rate/KRW/USD.json",
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            rows = json.loads(resp.read())
+        if rows and isinstance(rows, list) and rows[0].get("rate"):
+            price = float(rows[0]["rate"])
+            prev = float(rows[1]["rate"]) if len(rows) >= 2 and rows[1].get("rate") else None
+            chg_abs = round(price - prev, 2) if prev else 0.0
+            chg_pct = round((price - prev) / prev * 100, 2) if prev else 0.0
+            return {"price": round(price, 2), "change_pct": chg_pct, "change_abs": chg_abs}
+    except Exception as e:
+        print(f"[fetch_closing] manana.kr USDKRW failed: {e}", file=sys.stderr)
+
+    # 2차: fawazahmed0 CDN
+    try:
+        req = urllib.request.Request(
+            "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read())
+        rate = data.get("usd", {}).get("krw")
+        if rate:
+            return {"price": round(float(rate), 2), "change_pct": 0.0, "change_abs": 0.0}
+    except Exception as e:
+        print(f"[fetch_closing] fawazahmed0 USDKRW failed: {e}", file=sys.stderr)
+
+    # 3차: 네이버 모바일 API
+    try:
+        url = "https://m.stock.naver.com/front-api/marketIndex/prices?reutersCode=FX_USDKRW&category=exchange&pageSize=10&page=1"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             payload = json.loads(resp.read())
         rows = payload.get("result") or []
-        if len(rows) < 2:
-            return {}
-        today, yest = rows[0], rows[1]
-        price = float(today["closePrice"].replace(",", ""))
-        prev  = float(yest["closePrice"].replace(",", ""))
-        chg_abs = round(price - prev, 2)
-        chg_pct = round((price - prev) / prev * 100, 2) if prev else 0.0
-        return {"price": round(price, 2), "change_pct": chg_pct, "change_abs": chg_abs}
+        if len(rows) >= 2:
+            price = float(rows[0]["closePrice"].replace(",", ""))
+            prev  = float(rows[1]["closePrice"].replace(",", ""))
+            chg_abs = round(price - prev, 2)
+            chg_pct = round((price - prev) / prev * 100, 2) if prev else 0.0
+            return {"price": round(price, 2), "change_pct": chg_pct, "change_abs": chg_abs}
     except Exception as e:
         print(f"[fetch_closing] naver USDKRW failed: {e}", file=sys.stderr)
-        return {}
+
+    return {}
 
 
 def get_closing_price(ticker: str) -> dict:
