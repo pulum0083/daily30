@@ -140,16 +140,17 @@ def _extract_change_claims(text: str) -> list:
         return []
     t = strip_tags(text)
     # 수집된 (% 수치 위치, 값) 쌍을 모은 뒤 위치 중복 제거
-    seen_positions = set()
+    # % 기호의 위치로 중복을 감지 (같은 % 기호를 여러 패턴이 지칭하는 경우 제거)
+    seen_pct_positions = set()
     results = []
     for m in _CHANGE_CTX_RE.finditer(t):
-        window_start = max(0, m.start() - 5)
-        window = t[window_start: m.end() + 30]
+        window = t[m.start(): m.end() + 30]
         for pm in _PCT_RE.finditer(window):
-            abs_pos = window_start + pm.start()
-            if abs_pos in seen_positions:
+            # % 기호의 절대 위치 (pm.group()의 끝 위치 = % 기호)
+            pct_char_pos = m.start() + pm.end() - 1
+            if pct_char_pos in seen_pct_positions:
                 continue
-            seen_positions.add(abs_pos)
+            seen_pct_positions.add(pct_char_pos)
             try:
                 results.append(float(pm.group(1)))
             except ValueError:

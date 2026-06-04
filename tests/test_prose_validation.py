@@ -1,7 +1,7 @@
 # 산문 % 수치 불일치 판정 함수(is_contradicted) 단위 테스트
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
-from validate_analysis import is_contradicted
+from validate_analysis import is_contradicted, _extract_change_claims
 
 def test_large_discrepancy_flagged():
     # AVGO 케이스: 실측 -0.49% vs 텍스트 +15.8%
@@ -36,8 +36,6 @@ def test_real_zero_exact():
     assert is_contradicted(10.0, 0.0) is True
     assert is_contradicted(3.0, 0.0) is False
 
-
-from validate_analysis import _extract_change_claims
 
 def test_change_claim_detects_jeonil():
     # "전일 +X%" 패턴
