@@ -1158,6 +1158,13 @@
 
     if (!isLiveMode()) return;
 
+    // 모바일(≤900px)에서 스코어보드 바로 아래로 패널 이동 — 이후 위치 유지
+    if (window.innerWidth <= 900) {
+      var sb = document.getElementById('live-scoreboard');
+      if (sb) sb.insertAdjacentElement('afterend', panel);
+      panel.classList.add('mkt-panel-inline');
+    }
+
     var sparkData = { kosdaq: [], kospi200: [], forex: [] };
     var polling = null;
 
