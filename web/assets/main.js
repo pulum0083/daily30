@@ -909,8 +909,8 @@
           }
         } else {
           if (prevTimeEl)  prevTimeEl.textContent  = '';
-          if (prevTitleEl) prevTitleEl.textContent = '이전 이슈 없음';
-          if (bodyEl) bodyEl.innerHTML = '<div style="padding:12px 0;font-size:13px;color:var(--muted);text-align:center">—</div>';
+          if (prevTitleEl) prevTitleEl.textContent = '이슈 히스토리';
+          if (bodyEl) bodyEl.innerHTML = '<div style="padding:12px 0;font-size:13px;color:var(--muted)">이전 이슈 내용이 쌓이게 되어요.</div>';
         }
       }
     }
