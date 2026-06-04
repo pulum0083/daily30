@@ -106,12 +106,15 @@ def find_forbidden(text):
 def is_contradicted(stated_pct: float, real_pct: float) -> bool:
     """산문에 기재된 % 수치가 실측 change_pct와 충돌하는지 판정.
 
-    조건: diff > 5%p AND (실측 < 0.5% OR 배수 >= 5배)
+    조건: diff > 5%p AND (실측 < 0.5% OR 배수 >= 5배 OR 부호 반전)
     """
     diff = abs(stated_pct - real_pct)
     if diff <= 5.0:
         return False
     if abs(real_pct) < 0.5:
+        return True
+    # 방향 반전 (부호가 다르고 diff > 5%p) → 차단
+    if stated_pct * real_pct < 0:
         return True
     return abs(stated_pct / real_pct) >= 5.0
 

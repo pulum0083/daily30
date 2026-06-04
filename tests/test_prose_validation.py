@@ -26,3 +26,12 @@ def test_ratio_exactly_5x_flagged():
 def test_ratio_below_5x_passes():
     # 실측 2% vs 텍스트 8% → diff=6>5 but ratio=4<5 → 허용
     assert is_contradicted(8.0, 2.0) is False
+
+def test_sign_flip_flagged():
+    # +5% 텍스트 vs -2% 실측 → 방향 반전 → 차단
+    assert is_contradicted(5.0, -2.0) is True
+
+def test_real_zero_exact():
+    # 실측 정확히 0.0 → ZeroDivisionError 없이 diff만으로 판정
+    assert is_contradicted(10.0, 0.0) is True
+    assert is_contradicted(3.0, 0.0) is False
