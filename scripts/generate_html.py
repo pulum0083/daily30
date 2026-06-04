@@ -273,78 +273,6 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
     return items
 
 
-def build_close_direction_verify(market: dict, index_name: str, target_date: str) -> dict:
-    """마감 방향 예측 검증 — 아침 kospi 방향 예측 vs 당일 종가 방향.
-
-    예측: briefings.json 당일 kospi 항목 (아침 생성 시 고정된 정본)
-    실제: latest_kospi_close.json indices.kospi
-    판정: 종가 방향 부호 비교 (is_correct는 익일 check_accuracy가 채우므로 직접 산출)
-    누적: 이번 달 kospi 중 is_correct 채워진 항목 집계
-    """
-    kospi = (market.get("indices") or {}).get("kospi") or {}
-    cp = kospi.get("change_pct")
-    if cp is None:
-        return {}
-
-    bpath = DATA_DIR / "briefings.json"
-    if not bpath.exists():
-        return {}
-    briefings = load_json(bpath).get("briefings", [])
-
-    todays = [b for b in briefings if b.get("date") == target_date and b.get("type") == "kospi"]
-    if not todays:
-        return {}
-    pred = todays[-1]
-    pdir = pred.get("predicted_direction") or ""
-    up_pct, down_pct, confidence = pred.get("up_pct"), pred.get("down_pct"), pred.get("confidence")
-
-    down_pred = "하락" in pdir
-    actual_up = cp >= 0
-
-    # 판정: 예측 방향 부호 vs 실제 종가 부호 (보합 예측은 ±0.3% 이내면 적중)
-    if "상승" in pdir:
-        hit = actual_up
-    elif down_pred:
-        hit = not actual_up
-    else:
-        hit = abs(cp) < 0.3
-
-    if down_pred:
-        prob_pct, prob_label, pred_cls, pred_arrow = down_pct or 0, "하락 확률", "down", "▼"
-    else:
-        prob_pct, prob_label, pred_cls, pred_arrow = up_pct or 0, "상승 확률", "up", "▲"
-
-    # 누적: 최근 검증 완료분(롤링) — check_accuracy가 드물게 돌아 달력 월 집계는 대부분 비어 있음
-    checked = [b for b in briefings
-               if b.get("type") == "kospi" and b.get("is_correct") is not None]
-    recent = checked[-10:]
-    streak_label = streak_text = None
-    if recent:
-        correct = sum(1 for b in recent if b["is_correct"])
-        streak_label = f"최근 {len(recent)}회"
-        streak_text = f"{correct}/{len(recent)} 적중"
-
-    return {
-        "dv_show": True,
-        "dv_pred_dir": pdir,
-        "dv_pred_arrow": pred_arrow,
-        "dv_pred_cls": pred_cls,
-        "dv_prob_pct": prob_pct,
-        "dv_prob_label": prob_label,
-        "dv_confidence": confidence,
-        "dv_actual_arrow": "▲" if actual_up else "▼",
-        "dv_actual_chg": f"{cp:+.2f}%",
-        "dv_actual_cls": "up" if actual_up else "down",
-        "dv_actual_price": f"{kospi.get('price', 0):,.2f}",
-        "dv_index_name": index_name,
-        "dv_verdict_cls": "hit" if hit else "miss",
-        "dv_verdict_icon": "✓" if hit else "✗",
-        "dv_verdict_text": "적중" if hit else "미스",
-        "dv_streak_label": streak_label,
-        "dv_streak_text": streak_text,
-    }
-
-
 def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:
     """마감 전용 섹션 컨텍스트 (있는 데이터만)."""
     ctx = {}
@@ -474,9 +402,6 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             f"<b>{top['name']}</b> — 거래대금 {top['trade_mult']}배 급증 속 "
             f"외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요."
         )
-
-    # close_direction_verify (아침 방향 예측 vs 당일 종가) — 기존 close_pick_result 대체
-    ctx.update(build_close_direction_verify(market, index_name, target_date))
 
     return ctx
 
