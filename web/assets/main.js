@@ -955,7 +955,7 @@
 
       if (stampEl) {
         stampEl.innerHTML = '<span style="color:var(--primary);font-weight:700">방금 업데이트</span>'
-          + ' · ' + escHtml(d.updated_at) + ' 기준 · 매 1시간 갱신';
+          + ' · ' + escHtml(d.updated_at) + ' 기준 · 매 30분 갱신';
       }
       if (latestEl) {
         latestEl.innerHTML = '<div class="lsb-news-card">'

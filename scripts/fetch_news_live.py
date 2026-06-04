@@ -14,7 +14,6 @@ MAX_HISTORY = 6
 PROMPT = """
 지금 {today} {time} KST 기준, 코스피 장중에 가장 큰 영향을 주는 핵심 이슈 1개를 알려주세요.
 
-{exclude_clause}
 요약문은 반드시 해요체(~있어요, ~이에요, ~해요 등)로 작성하세요.
 
 아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
@@ -38,19 +37,14 @@ def get_gemini_api_key() -> str:
     return key
 
 
-def fetch_latest_issue(today: str, time_str: str, exclude_title: str = "") -> dict:
+def fetch_latest_issue(today: str, time_str: str) -> dict:
     from google import genai
     from google.genai import types
-
-    exclude_clause = (
-        f'직전 이슈 "{exclude_title}"와 같은 주제는 피하고 다른 이슈를 선택해주세요.'
-        if exclude_title else ""
-    )
 
     client = genai.Client(api_key=get_gemini_api_key())
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
-        contents=PROMPT.format(today=today, time=time_str, exclude_clause=exclude_clause),
+        contents=PROMPT.format(today=today, time=time_str),
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.3,
@@ -74,29 +68,24 @@ def main() -> None:
 
     print(f"[fetch_news_live] {today} {time_str} KST — Gemini 이슈 수집 시작")
 
-    # 직전 이슈 제목 읽기 (중복 주제 회피용)
-    prev_title = ""
+    try:
+        latest = fetch_latest_issue(today, time_str)
+    except Exception as e:
+        print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # 기존 latest를 history 맨 앞에 추가
     history: list = []
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             prev = existing.get("latest")
             if prev and prev.get("title") and prev.get("title") != "오늘의 이슈 준비 중":
-                prev_title = prev["title"]
                 history = [{"time": existing.get("updated_at", ""), **prev}]
             history += existing.get("history", [])
             history = history[:MAX_HISTORY]
         except Exception:
             pass
-
-    if prev_title:
-        print(f"[fetch_news_live] 직전 이슈: '{prev_title}' → 다른 주제 요청")
-
-    try:
-        latest = fetch_latest_issue(today, time_str, exclude_title=prev_title)
-    except Exception as e:
-        print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
-        sys.exit(1)
 
     data = {"updated_at": time_str, "latest": latest, "history": history}
     OUT_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
