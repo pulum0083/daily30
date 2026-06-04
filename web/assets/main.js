@@ -842,12 +842,26 @@
       if (needleEl) needleEl.style.left = rawPos + '%';
 
       if (predTagEl) {
-        predTagEl.style.background = v.bg;
-        predTagEl.style.color = v.color;
+        var predBg  = dir === 'dn' ? 'var(--dn-bg)' : 'var(--up-bg)';
+        var predClr = dir === 'dn' ? 'var(--dn)'    : 'var(--up)';
+        predTagEl.style.background = predBg;
+        predTagEl.style.color = predClr;
       }
     }
 
+    var refreshSecs = 30;
+
+    function tickRefreshCount() {
+      var el = document.getElementById('lsb-refresh-count');
+      if (!el) return;
+      refreshSecs = Math.max(0, refreshSecs - 1);
+      el.textContent = '↻ ' + refreshSecs + '초';
+    }
+
     function fetchKospi() {
+      refreshSecs = 30;
+      var el = document.getElementById('lsb-refresh-count');
+      if (el) el.textContent = '↻ 30초';
       fetch('/api/kospi-live')
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function(d) { if (d && d.price) updateDisplay(d.price, d.changePct || 0); })
@@ -924,6 +938,7 @@
       setInterval(fetchKospi, 30000);
       setInterval(fetchNews, 5 * 60000);
       setInterval(updateCountdown, 1000);
+      setInterval(tickRefreshCount, 1000);
     }
   }
 
