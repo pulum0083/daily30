@@ -12,14 +12,23 @@ OUT_PATH = REPO_ROOT / "web" / "data" / "kospi-news-live.json"
 MAX_HISTORY = 6
 
 PROMPT = """
-지금 {today} {time} KST 기준, 코스피 장중에 가장 큰 영향을 주는 핵심 이슈 1개를 알려주세요.
+지금 {today} {time} KST 기준, 코스피 장중에 가장 큰 영향을 주는 핵심 이슈 1개를 골라주세요.
 
-요약문은 반드시 해요체(~있어요, ~이에요, ~해요 등)로 작성하세요.
+[타이틀 규칙]
+- 15자 이내, 현재 일어나고 있는 일을 짧고 강하게
+- "지속", "흐름", "동향" 같은 밋밋한 단어 금지
+- 가능하면 구체적 숫자·행위자 포함 (예: "외국인 19일째 매도", "원화 1530 돌파", "반도체 3% 급등")
+- 시장 감정이 느껴지는 표현 허용 (질주, 급락, 흔들, 버팀, 폭발 등)
+
+[요약 규칙]
+- 40자 이내, 해요체(~있어요, ~이에요, ~해요)
+- 투자자 시각 — 단순 사실이 아닌 "왜 지금 이게 중요한지"를 한 줄로
+- 원인 → 결과 구조로 (예: "OO 때문에 XX가 흔들리고 있어요")
 
 아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
 {{
-  "title": "이슈 제목 (15자 이내)",
-  "summary": "한 줄 요약 (40자 이내, 해요체)"
+  "title": "이슈 제목",
+  "summary": "한 줄 요약"
 }}
 """
 
@@ -47,7 +56,7 @@ def fetch_latest_issue(today: str, time_str: str) -> dict:
         contents=PROMPT.format(today=today, time=time_str),
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
-            temperature=0.3,
+            temperature=0.7,
             max_output_tokens=256,
         ),
     )
