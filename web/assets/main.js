@@ -766,7 +766,7 @@
       var emElA = document.getElementById('lsb-head-em');
       if (emElA && emElA.textContent === '로딩 중…') emElA.textContent = '장 마감';
       var subElA = document.getElementById('lsb-sub');
-      if (subElA) subElA.textContent = '오늘 장이 종료됐어요. 최종 지수를 불러오는 중이에요.';
+      if (subElA) subElA.textContent = '오늘 장이 종료됐어요. 최종 종가를 확인하고 있어요.';
       fetchKospi();
       fetchNews();
       return;
@@ -909,6 +909,11 @@
       if (prefixEl) prefixEl.textContent = v.prefix;
       if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
       if (headEl)   headEl.style.color = '';
+      // 마감 후 sub 텍스트 업데이트
+      if (isAfterMarket()) {
+        var subElU = document.getElementById('lsb-sub');
+        if (subElU) subElU.textContent = '오늘 장이 종료됐어요. 종가 ' + price.toLocaleString('ko-KR', {minimumFractionDigits:2}) + ' (' + (changePct >= 0 ? '+' : '') + changePct.toFixed(2) + '%)';
+      }
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
       var rawPos;
