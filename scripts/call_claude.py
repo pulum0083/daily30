@@ -1118,7 +1118,8 @@ def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: b
     print(f"[call_claude] Generating HTML: {' '.join(cmd)}")
     result = subprocess.run(cmd)
     if result.returncode != 0:
-        print("[call_claude] WARNING: HTML generation failed", file=sys.stderr)
+        print("[call_claude] ERROR: HTML generation failed — aborting", file=sys.stderr)
+        sys.exit(1)
 
 
 def main():

@@ -215,12 +215,7 @@ def main():
         )
     except Exception as e:
         print(f"[fetch_news] ERROR: {e}", file=sys.stderr)
-        summary = {
-            "key_indicators": [],
-            "headlines": [],
-            "market_sentiment": "neutral",
-            "error": str(e),
-        }
+        sys.exit(1)
 
     summary["generated_at"] = datetime.now(KST).isoformat()
     out_path = DATA_DIR / f"news_summary_{args.type}.json"

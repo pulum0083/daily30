@@ -40,6 +40,15 @@ export default async function handler(req, res) {
   const { content: b64, sha } = await getRes.json();
   const current = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
 
+  // 속도 제한: 최근 1분 내 전체 게시물 5개 초과 시 거부
+  if (Array.isArray(current.posts)) {
+    const cutoff = Date.now() - 60_000;
+    const recentCount = current.posts.filter(p => new Date(p.created_at).getTime() > cutoff).length;
+    if (recentCount >= 5) {
+      return res.status(429).json({ error: '잠시 후 다시 시도해주세요 (분당 최대 5건)' });
+    }
+  }
+
   // 새 글 추가
   if (!Array.isArray(current.posts)) current.posts = [];
   const newPost = {

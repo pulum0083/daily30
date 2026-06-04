@@ -105,7 +105,9 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email } = req.body;
+  // 허니팟 필드: 봇은 보통 모든 필드를 채움
+  const { email, website } = req.body;
+  if (website) return res.status(400).json({ error: 'Invalid request' });
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'Invalid email' });
   }
@@ -155,18 +157,20 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4. 관리자 알림
-    try {
-      await sendViaResend(RESEND_API_KEY, {
-        from:    "Double-Shot <noreply@doubleshot.space>",
-        to:      ADMIN_EMAIL,
-        subject: `[Double-Shot] 새 구독자: ${email}`,
-        html:    `<p>새 구독자: <b>${email}</b></p>
-                  <p>Contacts 저장: ${contactSaved ? '✅ 완료' : '❌ 실패 (RESEND_AUDIENCE_ID 미설정 또는 오류)'}</p>
-                  ${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료 ✅' : '발송 실패 ❌'}: <a href="${latest.link}">${latest.title}</a></p>` : '<p>latest.json 없음</p>'}`,
-      });
-    } catch (e) {
-      console.error('[subscribe] 관리자 알림 발송 실패:', e.message);
+    // 4. 관리자 알림 (contactSaved 성공 시에만 — 중복 요청에 의한 알림 폭탄 방지)
+    if (contactSaved) {
+      try {
+        await sendViaResend(RESEND_API_KEY, {
+          from:    "Double-Shot <noreply@doubleshot.space>",
+          to:      ADMIN_EMAIL,
+          subject: `[Double-Shot] 새 구독자: ${email}`,
+          html:    `<p>새 구독자: <b>${email}</b></p>
+                    <p>Contacts 저장: ✅ 완료</p>
+                    ${latest ? `<p>최신 브리핑 ${briefingSent ? '발송 완료 ✅' : '발송 실패 ❌'}: <a href="${latest.link}">${latest.title}</a></p>` : '<p>latest.json 없음</p>'}`,
+        });
+      } catch (e) {
+        console.error('[subscribe] 관리자 알림 발송 실패:', e.message);
+      }
     }
 
     return res.status(200).json({ ok: true, briefingSent, contactSaved });

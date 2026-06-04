@@ -701,6 +701,12 @@ def fetch_kospi_data() -> dict:
         "sector_stocks": sector_stocks,
     }
 
+    # 품질 게이트: 핵심 지수 데이터 누락 시 발행 중단
+    missing = [k for k in ("sp500", "vix") if not data.get(k, {}).get("price")]
+    if missing or not data.get("market_data_js"):
+        print(f"[fetch_data] ERROR: 핵심 시장 데이터 누락 {missing or ['market_data_js']} — 발행 중단", file=sys.stderr)
+        sys.exit(1)
+
     out_path = DATA_DIR / "latest_kospi.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -783,6 +789,12 @@ def fetch_us_data() -> dict:
         "economic_calendar": economic_calendar,
         "us_candidates": us_candidates,
     }
+
+    # 품질 게이트: S&P500·VIX 누락 시 발행 중단
+    missing = [k for k in ("sp500", "vix") if not data.get(k, {}).get("price")]
+    if missing or not data.get("market_data_js"):
+        print(f"[fetch_data] ERROR: 핵심 시장 데이터 누락 {missing or ['market_data_js']} — 발행 중단", file=sys.stderr)
+        sys.exit(1)
 
     out_path = DATA_DIR / "latest_us.json"
     with open(out_path, "w", encoding="utf-8") as f:
