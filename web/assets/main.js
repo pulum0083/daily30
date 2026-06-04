@@ -802,15 +802,26 @@
       return 'miss';
     }
 
-    var VERDICT = {
-      hit:   { prefix: '예측대로 ', em: '순항 중',   color: 'var(--up)',   bg: 'var(--up-bg)' },
-      tight: { prefix: '팽팽한 ',   em: '접전',       color: 'var(--gold)', bg: 'var(--gold-bg)' },
-      miss:  { prefix: '',          em: '빗나가는 중', color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    var VERDICT_MSGS = {
+      hit:   ['예측대로 흘러가는 중', '분석대로네요', '오늘 전망 적중', '예측대로 움직이고 있어요'],
+      tight: ['팽팽한 접전', '박빙 승부', '아슬아슬한 줄타기', '오차 범위 안에서 흘러가는 중', '중립 부근 공방 중'],
+      miss:  ['빗나가는 중', '예상 밖 흐름', '예측과 반대로 흘러가는 중'],
     };
+    var VERDICT_META = {
+      hit:   { prefix: '예측대로 ', color: 'var(--up)',   bg: 'var(--up-bg)' },
+      tight: { prefix: '',          color: 'var(--gold)', bg: 'var(--gold-bg)' },
+      miss:  { prefix: '',          color: 'var(--dn)',   bg: 'var(--dn-bg)' },
+    };
+
+    function pickMsg(verdict) {
+      var list = VERDICT_MSGS[verdict];
+      return list[Math.floor(Math.random() * list.length)];
+    }
 
     function updateDisplay(price, changePct) {
       var verdict = calcVerdict(changePct);
-      var v = VERDICT[verdict];
+      var v = VERDICT_META[verdict];
+      var em = pickMsg(verdict);
 
       var idxEl     = document.getElementById('lsb-idx');
       var chgEl     = document.getElementById('lsb-chg');
@@ -834,7 +845,7 @@
       var prefixEl = document.getElementById('lsb-head-prefix');
       var emEl     = document.getElementById('lsb-head-em');
       if (prefixEl) prefixEl.textContent = v.prefix;
-      if (emEl)     { emEl.textContent = v.em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
+      if (emEl)     { emEl.textContent = em; emEl.style.color = v.color; emEl.style.fontWeight = '600'; }
       if (headEl)   headEl.style.color = '';
 
       // 바늘 위치: 예측 방향 기준으로 0(이탈)~100(적중) 매핑, ±2% 포화
