@@ -68,18 +68,23 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing GH_PAT env var' });
   }
 
+  // 하루 여러 번 실행되는 타입은 중복 체크 제외
+  const MULTI_RUN_TYPES = ['kospi-news-live'];
+
   // 오늘 이미 실행된 워크플로우가 있으면 중복 dispatch 방지
   let isDuplicate = false;
-  try {
-    isDuplicate = await alreadyRunToday(GH_PAT, type);
-  } catch (err) {
-    console.error(`[trigger] duplicate check failed: ${err.message}`);
-    return res.status(503).json({ error: 'Could not verify duplicate run state' });
-  }
+  if (!MULTI_RUN_TYPES.includes(type)) {
+    try {
+      isDuplicate = await alreadyRunToday(GH_PAT, type);
+    } catch (err) {
+      console.error(`[trigger] duplicate check failed: ${err.message}`);
+      return res.status(503).json({ error: 'Could not verify duplicate run state' });
+    }
 
-  if (isDuplicate) {
-    console.log(`[trigger] ⚠️ Already ran today for type=${type}. Skipping dispatch.`);
-    return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today', type });
+    if (isDuplicate) {
+      console.log(`[trigger] ⚠️ Already ran today for type=${type}. Skipping dispatch.`);
+      return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today', type });
+    }
   }
 
   const resp = await fetch(
