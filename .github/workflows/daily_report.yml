@@ -410,9 +410,9 @@ jobs:
 
     steps:
       - name: 📥 체크아웃
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Python 세팅
         uses: actions/setup-python@v5

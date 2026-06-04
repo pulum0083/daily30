@@ -751,6 +751,8 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .lsb-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s2);overflow:hidden;}
 .lsb-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0;margin-bottom:12px;}
 .lsb-title{font-size:13px;font-weight:700;color:var(--muted);}
+.lsb-beta-tag{display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:1px 5px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:4px;}
+html.dark .lsb-beta-tag{color:#A78BFA;background:rgba(167,139,250,.15);}
 .lsb-live-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#1a7f37;background:#dafbe1;padding:3px 9px;border-radius:999px;}
 html.dark .lsb-live-badge{background:rgba(45,164,78,.18);color:#4ac26b;}
 .lsb-live-dot{width:6px;height:6px;border-radius:50%;background:#2da44e;animation:lsb-pulse 1.4s infinite;}
