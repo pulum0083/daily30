@@ -972,6 +972,14 @@
         if (hist.length > 0) {
           if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
           if (prevTitleEl) prevTitleEl.textContent = hist[0].title;
+          // 이전 이슈 기본 펼침
+          var btnEl = document.getElementById('lsb-accordion-btn');
+          if (bodyEl && btnEl && !bodyEl.classList.contains('open')) {
+            bodyEl.classList.add('open');
+            btnEl.classList.add('open');
+            var leftEl = btnEl.querySelector('.lsb-ac-left');
+            if (leftEl) leftEl.innerHTML = '<span class="lsb-ac-collapse-label">이전 이슈 접기</span>';
+          }
           if (bodyEl) {
             bodyEl.innerHTML = hist.map(function(item) {
               return '<div class="lsb-news-item">'
