@@ -1146,12 +1146,12 @@
       var k = new Date(Date.now() + 9 * 3600 * 1000);
       var day = k.getUTCDay();
       if (day === 0 || day === 6) return false;
-      return k.getUTCHours() * 60 + k.getUTCMinutes() >= 540; // 09:00 KST
+      return k.getUTCHours() * 60 + k.getUTCMinutes() >= 530; // 08:50 KST
     }
     function isDuringMarket() {
       var k = new Date(Date.now() + 9 * 3600 * 1000);
       var mins = k.getUTCHours() * 60 + k.getUTCMinutes();
-      return mins >= 540 && mins < 930; // 09:00~15:29
+      return mins >= 530 && mins < 930; // 08:50~15:29
     }
 
     if (!isLiveMode()) return;
