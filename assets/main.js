@@ -74,9 +74,11 @@
     c.width = W * dpr; c.height = H * dpr;
     const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
 
-    const isUp  = data[data.length - 1] >= data[0];
+    const cur   = data[data.length - 1];
+    const isUp  = cur >= data[0];
     const color = isUp ? '#E03131' : '#2775ED';
-    const pad   = { t: 5, b: 5, l: 2, r: 5 };
+    // 우측 포지션 바 공간 확보 (바 4px + 양쪽 여백 3+2px)
+    const pad   = { t: 5, b: 5, l: 2, r: 11 };
     const pW    = W - pad.l - pad.r, pH = H - pad.t - pad.b;
     const min   = Math.min(...data), max = Math.max(...data);
     const range = max - min || data[0] * 0.001 || 1;
@@ -108,6 +110,21 @@
     const lx = pts.at(-1).x, ly = pts.at(-1).y;
     ctx.beginPath(); ctx.arc(lx, ly, 4,   0, Math.PI * 2); ctx.fillStyle = '#fff';   ctx.fill();
     ctx.beginPath(); ctx.arc(lx, ly, 2.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+
+    // 포지션 바 — 현재가가 세션 범위에서 어느 위치인지
+    const bx = W - 5, bTop = pad.t, bH = pH;
+    const curPct = (cur - min) / range;
+    const curY   = bTop + (1 - curPct) * bH;
+    // 트랙 (전체 범위)
+    ctx.fillStyle = 'rgba(150,150,150,0.18)';
+    ctx.fillRect(bx - 2, bTop, 4, bH);
+    // 현재 위치 이하 채움
+    const fillH = bTop + bH - curY;
+    if (fillH > 0) { ctx.fillStyle = color + '55'; ctx.fillRect(bx - 2, curY, 4, fillH); }
+    // 현재 위치 마커 (가로 선)
+    ctx.beginPath();
+    ctx.moveTo(bx - 4, curY); ctx.lineTo(bx + 2, curY);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
   }
   // 종목 미니차트 (주가 + 20일선 + 200일선)
   function drawMiniChart(id, prices, ma20, ma200) {
@@ -1230,6 +1247,82 @@
       if (msLeft > 0) setTimeout(updateStatusLabel, msLeft);
     }
 
+    function injectMktHelpModal() {
+      if (document.getElementById('mkt-help-modal')) return;
+      var m = document.createElement('div');
+      m.id = 'mkt-help-modal';
+      m.innerHTML =
+        '<div class="mkt-help-backdrop"></div>' +
+        '<div class="mkt-help-sheet">' +
+        '<div class="mkt-help-hd">' +
+        '<span class="mkt-help-title">시장 지표 읽는 법</span>' +
+        '<button class="mkt-help-close" aria-label="닫기">✕</button>' +
+        '</div>' +
+        '<div class="mkt-help-body">' +
+
+        '<div class="mkt-help-item">' +
+        '<div class="mkt-help-icon-wrap supply-icon">' +
+        '<div class="mkt-help-supply-demo">' +
+        '<div class="mkt-help-supply-track"><div class="mkt-help-supply-fill sell" style="width:60%"></div></div>' +
+        '<div class="mkt-help-supply-track"><div class="mkt-help-supply-fill buy" style="width:30%"></div></div>' +
+        '<div class="mkt-help-supply-track"><div class="mkt-help-supply-fill buy" style="width:75%"></div></div>' +
+        '</div>' +
+        '</div>' +
+        '<div class="mkt-help-desc">' +
+        '<strong>수급 바</strong>' +
+        '<p>중앙에서 좌우로 뻗는 바입니다.<br>길수록 순매도·순매수 강도가 강해요.</p>' +
+        '</div>' +
+        '</div>' +
+
+        '<div class="mkt-help-item">' +
+        '<div class="mkt-help-icon-wrap">' +
+        '<canvas class="mkt-help-spark-demo" id="mkt-help-spark-demo-1" width="78" height="44"></canvas>' +
+        '</div>' +
+        '<div class="mkt-help-desc">' +
+        '<strong>스파크라인</strong>' +
+        '<p>장 시작부터 지금까지의 흐름입니다.<br>점선은 시작가 기준선이에요.</p>' +
+        '</div>' +
+        '</div>' +
+
+        '<div class="mkt-help-item">' +
+        '<div class="mkt-help-icon-wrap">' +
+        '<canvas class="mkt-help-spark-demo" id="mkt-help-spark-demo-2" width="78" height="44"></canvas>' +
+        '</div>' +
+        '<div class="mkt-help-desc">' +
+        '<strong>포지션 바 <span style="font-size:10px;color:var(--muted)">(우측 세로 바)</span></strong>' +
+        '<p>오늘 전체 범위에서<br>현재가가 어느 위치인지 보여줘요.</p>' +
+        '</div>' +
+        '</div>' +
+
+        '<div class="mkt-help-color-row">' +
+        '<span class="mkt-help-chip up">빨강 = 상승</span>' +
+        '<span class="mkt-help-chip dn">파랑 = 하락</span>' +
+        '</div>' +
+
+        '</div>' +  // body
+        '</div>';   // sheet
+      document.body.appendChild(m);
+
+      m.querySelector('.mkt-help-backdrop').addEventListener('click', closeMktHelpModal);
+      m.querySelector('.mkt-help-close').addEventListener('click', closeMktHelpModal);
+    }
+
+    function openMktHelpModal() {
+      var m = document.getElementById('mkt-help-modal');
+      if (!m) return;
+      m.classList.add('open');
+      // 데모 스파크라인 그리기
+      var upData   = [100, 101, 103, 102, 104, 106, 107, 106, 108];
+      var downData = [108, 107, 106, 105, 104, 103, 101, 100, 100];
+      drawSparkline('mkt-help-spark-demo-1', downData);
+      drawSparkline('mkt-help-spark-demo-2', upData);
+    }
+
+    function closeMktHelpModal() {
+      var m = document.getElementById('mkt-help-modal');
+      if (m) m.classList.remove('open');
+    }
+
     function buildPanel() {
       var header = panel.querySelector('.panel-header');
       if (header) {
@@ -1247,7 +1340,18 @@
           '</svg>' +
           '</button>' +
           '</div>';
+        // ? 도움말 버튼 — section-title 옆에 삽입
+        var titleEl = header.querySelector('.section-title');
+        if (titleEl && !header.querySelector('.mkt-help-btn')) {
+          var helpBtn = document.createElement('button');
+          helpBtn.className = 'mkt-help-btn';
+          helpBtn.title = '그래프 읽는 법';
+          helpBtn.textContent = '?';
+          helpBtn.addEventListener('click', openMktHelpModal);
+          titleEl.insertAdjacentElement('afterend', helpBtn);
+        }
       }
+      injectMktHelpModal();
 
       var list = panel.querySelector('.mkt-list');
       list.innerHTML =
