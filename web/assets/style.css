@@ -538,7 +538,7 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 #mkt-help-modal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-end;}
 #mkt-help-modal.open{display:flex;}
 .mkt-help-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);}
-.mkt-help-sheet{position:relative;width:100%;max-width:480px;margin:0 auto;background:var(--surface);border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,0);}
+.mkt-help-sheet{position:relative;width:100%;max-width:480px;margin:0 auto;background:var(--surface,#fff);border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,0);box-shadow:0 -4px 32px rgba(0,0,0,.18);}
 .mkt-help-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;}
 .mkt-help-title{font-size:15px;font-weight:700;color:var(--ink);}
 .mkt-help-close{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 6px;line-height:1;}

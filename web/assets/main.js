@@ -1340,15 +1340,15 @@
           '</svg>' +
           '</button>' +
           '</div>';
-        // ? 도움말 버튼 — section-title 옆에 삽입
+        // ? 도움말 버튼 — section-title 안에 append (inline-flex gap으로 바로 옆에 붙음)
         var titleEl = header.querySelector('.section-title');
-        if (titleEl && !header.querySelector('.mkt-help-btn')) {
+        if (titleEl && !titleEl.querySelector('.mkt-help-btn')) {
           var helpBtn = document.createElement('button');
           helpBtn.className = 'mkt-help-btn';
           helpBtn.title = '그래프 읽는 법';
           helpBtn.textContent = '?';
           helpBtn.addEventListener('click', openMktHelpModal);
-          titleEl.insertAdjacentElement('afterend', helpBtn);
+          titleEl.appendChild(helpBtn);
         }
       }
       injectMktHelpModal();
