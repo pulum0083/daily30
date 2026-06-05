@@ -1413,7 +1413,7 @@
           valEl.classList.add(newVal > prev ? 'mkt-flash-up' : 'mkt-flash-dn');
         }
         sparkData[key].push(newVal);
-        if (sparkData[key].length > 30) sparkData[key].shift();
+        if (sparkData[key].length > 500) sparkData[key].shift();
         if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key]);
       });
 
@@ -1433,7 +1433,7 @@
           }
         }
         sparkData.forex.push(d.forex.price);
-        if (sparkData.forex.length > 30) sparkData.forex.shift();
+        if (sparkData.forex.length > 500) sparkData.forex.shift();
         if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex);
       }
 
@@ -1470,11 +1470,30 @@
 
     buildPanel();
 
-    // 복원된 데이터로 즉시 스파크라인 표시
+    // 복원된 sessionStorage 데이터로 즉시 표시 (인트라데이 로드 전 임시)
     ['kosdaq', 'kospi200'].forEach(function(key) {
       if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key]);
     });
     if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex);
+
+    // 일중 전체 흐름 초기화 — 오늘 09:00부터 현재까지 데이터로 교체
+    function fetchIntraday() {
+      fetch('/api/intraday', { signal: AbortSignal.timeout(12000) })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(d) {
+          ['kosdaq', 'kospi200', 'forex'].forEach(function(key) {
+            var arr = d[key];
+            if (arr && arr.length >= 2) {
+              sparkData[key] = arr;
+              var canvasId = key === 'forex' ? 'ml-fx-spark' : 'ml-' + key + '-spark';
+              drawSparkline(canvasId, arr);
+            }
+          });
+          saveSparkData();
+        })
+        .catch(function() {});
+    }
+    fetchIntraday();
 
     poll();
     if (isDuringMarket()) {
