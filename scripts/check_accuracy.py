@@ -128,6 +128,19 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
 
     save_briefings(data)
 
+    # KOSPI 브리핑 HTML에 실제 등락률 주입 — 과거 브리핑 스코어보드 표시용
+    if briefing_type == "kospi" and not (change_pct != change_pct):  # NaN 체크
+        import re
+        html_path = BASE_DIR / "web" / "briefings" / date_str / "kospi" / "index.html"
+        if html_path.exists():
+            html = html_path.read_text(encoding="utf-8")
+            if 'data-actual-pct=' in html:
+                html = re.sub(r'data-actual-pct="[^"]*"', f'data-actual-pct="{change_pct:.2f}"', html)
+            else:
+                html = html.replace('id="live-scoreboard"', f'id="live-scoreboard" data-actual-pct="{change_pct:.2f}"', 1)
+            html_path.write_text(html, encoding="utf-8")
+            print(f"[check_accuracy] HTML 패치: kospi/{date_str} (actual_pct={change_pct:+.2f}%)")
+
     result_mark = "✓" if is_correct is True else ("?" if is_correct is None else "✗")
     print(
         f"[check_accuracy] {date_str} ({briefing_type}): "
