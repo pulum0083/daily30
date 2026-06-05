@@ -8,7 +8,7 @@
 <title>2026-06-05 코스피 마감 — Double-Shot</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="2026-06-05 코스피 마감 — Double-Shot">
-<meta property="og:description" content="생명보험·유통 급등, 외국인 매도에 상승폭 제한">
+<meta property="og:description" content="브로드컴 쇼크發 반도체 급락 — 코스피 5.54% 폭락">
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
@@ -30,7 +30,7 @@
       <a class="gnb__chips-link" href="/chips">Chip-Board →</a>
     </div>
     <div class="gnb__meta">
-      <span class="gnb__date" id="gnb-date">2026-06-05 KST 16:12</span>
+      <span class="gnb__date" id="gnb-date">2026-06-05 KST 16:02</span>
       <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환">
         <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -60,18 +60,53 @@
         <div class="accordion-body">
           <div class="accordion-body__inner">
             
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">마감 스냅샷</span>
+    <span class="section-card__sub">09:00 ~ 15:30 정규장</span>
+  </div>
+  <div class="a-hero">
+    <div class="a-hero__lead">
+      <div class="a-hero__idx">
+        <div class="a-hero__idx-name">KOSPI 종가</div>
+        <div class="a-hero__idx-val">8,160.59</div>
+        <div class="a-hero__idx-chg down">▼ 478.82 (-5.54%)</div>
+      </div>
+      <div class="a-hero__vol">
+        <div class="a-hero__vol-label">코스피 거래대금</div>
+        <div class="a-hero__vol-val">45조 7,384억원</div>
+      </div>
+    </div>
+    <div class="intraday-canvas-wrap"><canvas id="intraday-chart"></canvas></div>
+    <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+    <div class="a-sub-row">
+      
+      <div class="a-sub-cell"><span class="a-sub-cell__name">KOSDAQ</span><span class="a-sub-cell__val">1,002.44</span><span class="a-sub-cell__chg down">▼ -4.50%</span></div>
+      
+      <div class="a-sub-cell"><span class="a-sub-cell__name">원/달러</span><span class="a-sub-cell__val">1,539.92</span><span class="a-sub-cell__chg up">▲ +0.00%</span></div>
+      
+    </div>
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  drawCloseChart('intraday-chart', [8284.83, 8245.95, 8174.28, 8137.68, 8107.53, 8143.01, 8185.25, 8152.04, 8162.93, 8104.67, 8101.9, 8079.62, 8058.63, 8060.02, 8051.63, 8074.56, 8053.71, 8096.93, 8168.4, 8209.01, 8245.63, 8207.31, 8244.12, 8279.0, 8281.17, 8307.55, 8318.71, 8303.92, 8348.57, 8366.32, 8360.92, 8350.01, 8318.08, 8315.28, 8294.18, 8279.66, 8305.12, 8282.17, 8290.66, 8285.37, 8284.57, 8277.19, 8281.63, 8260.86, 8254.12, 8220.0, 8190.41, 8220.61, 8206.79, 8209.81, 8192.83, 8180.35, 8189.86, 8163.58, 8153.93, 8198.93, 8183.0, 8217.21, 8227.43, 8231.06, 8241.82, 8234.74, 8227.77, 8249.46, 8267.61, 8234.43, 8263.46, 8271.54, 8256.8, 8217.72, 8192.94, 8181.86], 8639.41);
+  window.redrawCharts = function () { drawCloseChart('intraday-chart', [8284.83, 8245.95, 8174.28, 8137.68, 8107.53, 8143.01, 8185.25, 8152.04, 8162.93, 8104.67, 8101.9, 8079.62, 8058.63, 8060.02, 8051.63, 8074.56, 8053.71, 8096.93, 8168.4, 8209.01, 8245.63, 8207.31, 8244.12, 8279.0, 8281.17, 8307.55, 8318.71, 8303.92, 8348.57, 8366.32, 8360.92, 8350.01, 8318.08, 8315.28, 8294.18, 8279.66, 8305.12, 8282.17, 8290.66, 8285.37, 8284.57, 8277.19, 8281.63, 8260.86, 8254.12, 8220.0, 8190.41, 8220.61, 8206.79, 8209.81, 8192.83, 8180.35, 8189.86, 8163.58, 8153.93, 8198.93, 8183.0, 8217.21, 8227.43, 8231.06, 8241.82, 8234.74, 8227.77, 8249.46, 8267.61, 8234.43, 8263.46, 8271.54, 8256.8, 8217.72, 8192.94, 8181.86], 8639.41); };
+});
+window.addEventListener('resize', function () { drawCloseChart('intraday-chart', [8284.83, 8245.95, 8174.28, 8137.68, 8107.53, 8143.01, 8185.25, 8152.04, 8162.93, 8104.67, 8101.9, 8079.62, 8058.63, 8060.02, 8051.63, 8074.56, 8053.71, 8096.93, 8168.4, 8209.01, 8245.63, 8207.31, 8244.12, 8279.0, 8281.17, 8307.55, 8318.71, 8303.92, 8348.57, 8366.32, 8360.92, 8350.01, 8318.08, 8315.28, 8294.18, 8279.66, 8305.12, 8282.17, 8290.66, 8285.37, 8284.57, 8277.19, 8281.63, 8260.86, 8254.12, 8220.0, 8190.41, 8220.61, 8206.79, 8209.81, 8192.83, 8180.35, 8189.86, 8163.58, 8153.93, 8198.93, 8183.0, 8217.21, 8227.43, 8231.06, 8241.82, 8234.74, 8227.77, 8249.46, 8267.61, 8234.43, 8263.46, 8271.54, 8256.8, 8217.72, 8192.94, 8181.86], 8639.41); });
+</script>
             
 <div class="section-card">
-  <div class="reason-title-bar">생명보험·유통 급등, 외국인 매도에 상승폭 제한</div>
+  <div class="reason-title-bar">브로드컴 쇼크發 반도체 급락 — 코스피 5.54% 폭락</div>
   <div class="reason-body">
-    <p>코스피가 <b>+0.15%</b> 소폭 상승하며 <b>8,801.49</b>포인트로 마감했어요. 외국인이 <b>6조 5,941억원</b> 순매도하며 상승폭을 억제한 반면, 개인이 <b>6조 3,489억원</b> 순매수로 지수를 받쳐줬어요.</p>
+    <p>오늘 코스피가 <b>-5.54%(-478.82pt)</b> 폭락하며 <b>8,160.59</b>에 마감했어요. 미국 브로드컴 실적 전망 하향이 촉발한 반도체 쇼크에 외국인이 대규모 매도로 응답하며 장중 사이드카까지 발동됐거든요.</p>
     <div class="b-format">
       
-      <div class="b-row"><span class="b-label">WHY</span><p class="b-text">외국인이 <b>6조 5,941억원</b>이라는 대규모 순매도를 쏟아내며 장 내내 상승 동력을 갉아먹었어요. 원달러 환율도 <b>1,517.3원</b>으로 <b>+0.18%</b> 상승하며 외국인 이탈의 배경이 됐거든요.</p></div>
+      <div class="b-row"><span class="b-label">WHY</span><p class="b-text">브로드컴 실적 전망 하향이 글로벌 AI 반도체 수요 우려로 확산되며 국내 반도체 대형주에 직격탄을 날린 게 근본 원인이에요. 나스닥 선물이 <b>-1.16%</b> 하락한 가운데 외국인이 <b>3조 5,210억원 순매도</b>, 기관도 <b>9,434억원 순매도</b>로 동반 이탈하며 낙폭을 키웠거든요.</p></div>
       
-      <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">생명보험 섹터가 <b>+7.95%</b>로 가장 강했고, 삼성생명이 <b>+17.07%</b>·SK텔레콤이 <b>+11.59%</b>·삼성전자가 <b>+3.30%</b>로 특정 대형주에 매수세가 집중됐어요. 반면 코스닥은 <b>-2.29%</b>로 급락했고, 삼성전기 <b>-9.58%</b>·현대차 <b>-2.80%</b>·LG에너지솔루션 <b>-2.75%</b> 등 낙폭이 두드러졌거든요.</p></div>
+      <div class="b-row"><span class="b-label">WHAT</span><p class="b-text">SK하이닉스 <b>-9.92%</b>·삼성물산 <b>-13.93%</b>·삼성전자 <b>-6.40%</b>·SK스퀘어 <b>-7.57%</b> 등 반도체·대형주가 지수 하락을 주도했어요. 반면 ELS 과징금 축소 소식을 등에 업은 은행 섹터는 <b>+2.39%</b> 올랐고, 신한지주 <b>+7.39%</b>·KB금융 <b>+4.51%</b>로 낙장 속 방어주 역할을 해줬어요.</p></div>
       
-      <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">외국인이 <b>6조 5,941억원</b>을 매도하는 환경에서도 코스피가 사상 최고 권역을 유지하고 있는 만큼, 외국인 매도세가 진정되는 세션에서는 추가 상승 여력이 열릴 수 있어요.</p></div>
+      <div class="b-row so-what"><span class="b-label">SO?</span><p class="b-text">브로드컴발 AI 반도체 수요 의구심이 해소되지 않는 한 외국인 수급 회복은 제한적일 수밖에 없어서, 다음 세션도 반도체 대형주 중심의 변동성 장세가 이어질 가능성이 높아요.</p></div>
       
     </div>
   </div>
@@ -132,10 +167,10 @@
     <div class="supply-summary__cell">
       <div class="supply-summary__info">
         <div class="supply-summary__lbl">기관</div>
-        <div class="supply-summary__amt down">-9,435억</div>
+        <div class="supply-summary__amt down">-9,434억</div>
         <div class="supply-summary__sub">순매도</div>
       </div>
-      <div class="flow-chart" data-values="[25351, 2409, 18091, -9435]"></div>
+      <div class="flow-chart" data-values="[25351, 2409, 18091, -9434]"></div>
     </div>
     
     <div class="supply-summary__cell">
@@ -158,127 +193,39 @@
     <span class="section-card__sub">코스피 · 순매수 (억원)</span>
   </div>
   <div class="dpick-list">
-    
     <div class="dpick-row">
       <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
         <span class="dpick-name">외국인</span>
         <span class="sflow-summary">3일 연속 순매도, 오늘 규모 축소</span>
       </div>
       <div class="sflow-trend">
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg frgn seg-dn" style="width:45%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-05</span>
-            <span class="sflow-trend-amt down">−35,210억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg frgn seg-dn" style="width:88%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-04</span>
-            <span class="sflow-trend-amt down">−69,529억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg frgn seg-dn" style="width:83%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-02</span>
-            <span class="sflow-trend-amt down">−65,941억</span>
-          </div>
-        </div>
-        
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg frgn seg-dn" style="width:45%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-05</span><span class="sflow-trend-amt down">−35,210억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg frgn seg-dn" style="width:88%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-04</span><span class="sflow-trend-amt down">−69,529억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg frgn seg-dn" style="width:83%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-02</span><span class="sflow-trend-amt down">−65,941억</span></div></div>
       </div>
     </div>
-    
     <div class="dpick-row">
       <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
         <span class="dpick-name">기관</span>
         <span class="sflow-summary">어제 순매수, 오늘 순매도 전환</span>
       </div>
       <div class="sflow-trend">
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg inst seg-dn" style="width:46%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-05</span>
-            <span class="sflow-trend-amt down">−9,435억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg inst" style="width:88%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-04</span>
-            <span class="sflow-trend-amt up">+18,091억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg inst" style="width:12%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-02</span>
-            <span class="sflow-trend-amt up">+2,409억</span>
-          </div>
-        </div>
-        
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg inst seg-dn" style="width:46%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-05</span><span class="sflow-trend-amt down">−9,435억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg inst" style="width:88%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-04</span><span class="sflow-trend-amt up">+18,091억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg inst" style="width:12%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-02</span><span class="sflow-trend-amt up">+2,409억</span></div></div>
       </div>
     </div>
-    
     <div class="dpick-row">
       <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
         <span class="dpick-name">개인</span>
         <span class="sflow-summary">3일 연속 순매수, 규모 감소 중</span>
       </div>
       <div class="sflow-trend">
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg indiv" style="width:59%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-05</span>
-            <span class="sflow-trend-amt up">+42,242억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg indiv" style="width:70%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-04</span>
-            <span class="sflow-trend-amt up">+50,159억</span>
-          </div>
-        </div>
-        
-        <div class="sflow-trend-day">
-          <div class="sflow-trend-bar">
-            <div class="dpick-seg indiv" style="width:88%">&nbsp;</div>
-          </div>
-          <div class="sflow-trend-meta">
-            <span class="sflow-trend-date">06-02</span>
-            <span class="sflow-trend-amt up">+63,489억</span>
-          </div>
-        </div>
-        
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg indiv" style="width:59%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-05</span><span class="sflow-trend-amt up">+42,242억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg indiv" style="width:70%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-04</span><span class="sflow-trend-amt up">+50,159억</span></div></div>
+        <div class="sflow-trend-day"><div class="sflow-trend-bar"><div class="dpick-seg indiv" style="width:88%">&nbsp;</div></div><div class="sflow-trend-meta"><span class="sflow-trend-date">06-02</span><span class="sflow-trend-amt up">+63,489억</span></div></div>
       </div>
     </div>
-    
   </div>
 </div>
           </div>
@@ -332,7 +279,7 @@
     <span class="sidebar-visitors__count" id="sidebar-visitors-count">—</span>
   </div>
 </div>
-<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-06-05T16:12:48.397423+09:00</div>
+<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-06-05T16:02:09.711291+09:00</div>
     </aside>
   </div>
 
