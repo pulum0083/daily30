@@ -629,10 +629,6 @@ def load_config() -> dict:
 
 
 def get_anthropic_api_key() -> str:
-    # Claude Desktop이 빈 env var를 주입하면 SDK가 Bearer 헤더 오류를 낸다 — 비어있으면 제거
-    for _var in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_CUSTOM_HEADERS"):
-        if not os.environ.get(_var):
-            os.environ.pop(_var, None)
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not key:
         cfg = load_config()

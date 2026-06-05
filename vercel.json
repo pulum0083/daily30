@@ -6,7 +6,7 @@
   "installCommand": "npm install",
   "routes": [
     { "src": "^/$",                                       "dest": "/landing.html" },
-    { "src": "^/briefings/?$",                            "dest": "/briefings/2026-06-05/us/index.html" },
+    { "src": "^/briefings/?$",                            "dest": "/briefings/2026-06-05/close/index.html" },
     { "src": "^/briefings/([0-9]{4}-[0-9]{2}-[0-9]{2})/(kospi|close|us)/?$", "dest": "/briefings/$1/$2/index.html" },
     { "src": "^/briefings/ko/([^/]+)/?$",                 "dest": "/briefings/$1/kospi/index.html" },
     { "src": "^/briefings/us/([^/]+)/?$",                 "dest": "/briefings/$1/us/index.html" },
