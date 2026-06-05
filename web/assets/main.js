@@ -335,6 +335,11 @@
     var label = BL_DAYS[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()];
     return full ? label + '요일' : label;
   }
+  function _blIsWeekend(dateStr) {
+    var p = dateStr.split('-');
+    var dow = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
+    return dow === 0 || dow === 6;
+  }
   function _blCurrentPage() {
     var p = location.pathname, m;
     if ((m = p.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\/(kospi|close|us)\//))) return { date: m[1], type: m[2] };
@@ -391,7 +396,7 @@
           '<span class="bl-today__day">' + _blDay(today, true) + '</span></div>' +
           '<div class="bl-today__body">' +
           BL_TYPES.map(function(t) {
-            var s = todaySlots[t] || { state: 'pending', scheduled_time: BL_SCHEDULE[t] };
+            var s = todaySlots[t] || (_blIsWeekend(today) ? { state: 'empty' } : { state: 'pending', scheduled_time: BL_SCHEDULE[t] });
             return _blSlot(s, BL_LABELS[t], cur && cur.date === today && cur.type === t);
           }).join('') +
           '</div></div>';
