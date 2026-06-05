@@ -613,31 +613,22 @@ def find_latest_ready():
     return (best[1], best[2]) if best else None
 
 
-def regenerate_index():
-    """web/briefings/index.html = 가장 최근 브리핑 HTML을 그대로 복사.
-
-    재렌더링 금지: data/latest_*.json이 이후 변경되면 index.html 내용이
-    실제 브리핑과 달라지는 버그를 방지하기 위해, 이미 저장된 HTML 파일을 복사한다.
-    """
-    latest = find_latest_ready()
-    if latest:
-        internal_type, target_date = latest
-        src = BRIEFINGS_DIR / target_date / internal_type / "index.html"
-        if src.exists():
-            import shutil
-            shutil.copy2(src, BRIEFINGS_DIR / "index.html")
-            print(f"[generate_html] copied index ← {target_date}/{internal_type}/index.html")
-            return
-    tpl = TEMPLATES_DIR / "pages" / "briefings_index.html"
-    if not tpl.exists():
-        print("[generate_html] skip index (브리핑 0개 + 목록 템플릿 없음)")
+def update_vercel_briefings_route(internal_type: str, target_date: str):
+    """vercel.json의 /briefings/ 라우팅을 최신 브리핑으로 업데이트."""
+    import re
+    vercel_path = BASE_DIR / "vercel.json"
+    content = vercel_path.read_text(encoding="utf-8")
+    dest = f"/briefings/{target_date}/{internal_type}/index.html"
+    pattern = r'("src": "\^/briefings/\?\$",\s*"dest": ")[^"]*(")'
+    if not re.search(pattern, content):
+        print(f"[generate_html] vercel.json /briefings/ 패턴 미일치, 건너뜀")
         return
-    env = make_env()
-    ctx = {"css_path": "/assets/style.css", "js_path": "/assets/main.js",
-           **build_list_context("", "")}
-    html = env.get_template("pages/briefings_index.html").render(**ctx)
-    (BRIEFINGS_DIR / "index.html").write_text(html, encoding="utf-8")
-    print("[generate_html] wrote web/briefings/index.html (목록 전용)")
+    updated = re.sub(pattern, lambda m: m.group(1) + dest + m.group(2), content)
+    if updated == content:
+        print(f"[generate_html] vercel.json /briefings/ 이미 최신 ({dest})")
+        return
+    vercel_path.write_text(updated, encoding="utf-8")
+    print(f"[generate_html] vercel.json /briefings/ → {dest}")
 
 
 def _parse_close_price(html_path):
@@ -721,7 +712,9 @@ def main():
         return
 
     if args.sync_index:
-        regenerate_index()
+        latest = find_latest_ready()
+        if latest:
+            update_vercel_briefings_route(latest[0], latest[1])
         write_briefings_list_json()
         return
 
@@ -734,7 +727,7 @@ def main():
 
     html = render_briefing(internal_type, args.date, market_data)
     write_output(html, internal_type, args.date)
-    regenerate_index()
+    update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
 
 
