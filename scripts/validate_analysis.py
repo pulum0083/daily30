@@ -515,8 +515,31 @@ def _closes_to_realdata(closes, ndigits):
     return out
 
 
+def _closes_from_toss_candles(candles: list, ndigits: int) -> dict:
+    """Toss 캔들 리스트(오래된→최신)에서 실측 dict를 만든다."""
+    closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
+    return _closes_to_realdata(closes, ndigits)
+
+
 def _fetch_us_realdata(ticker):
-    """yfinance 일봉으로 미국 종목 실측을 계산한다."""
+    """미국 종목 실측. Toss 캔들 우선, 실패 시 yfinance 폴백."""
+    # 1) 토스 API
+    try:
+        import scripts.toss_client as tc
+    except ImportError:
+        try:
+            import toss_client as tc
+        except ImportError:
+            tc = None
+    if tc:
+        try:
+            candles = tc.get_candles(ticker, interval="1d", count=300)
+            if candles:
+                return _closes_from_toss_candles(candles, ndigits=4)
+        except Exception:
+            pass
+
+    # 2) yfinance 폴백
     try:
         import yfinance as yf
         hist = yf.Ticker(ticker).history(period="300d").dropna(subset=["Close"])
@@ -527,9 +550,24 @@ def _fetch_us_realdata(ticker):
 
 
 def _fetch_kospi_realdata(code):
-    """네이버 일봉으로 한국 종목 실측을 계산한다 (6자리 코드만으로 시장 자동 식별).
-    yfinance .KS/.KQ 추측의 오价·stale 문제를 피하기 위해 네이버를 단일 소스로 쓴다.
-    """
+    """한국 종목 실측 (6자리 코드). Toss 캔들 우선, 실패 시 네이버 폴백."""
+    # 1) 토스 API
+    try:
+        import scripts.toss_client as tc
+    except ImportError:
+        try:
+            import toss_client as tc
+        except ImportError:
+            tc = None
+    if tc:
+        try:
+            candles = tc.get_candles(code, interval="1d", count=300)
+            if candles:
+                return _closes_from_toss_candles(candles, ndigits=2)
+        except Exception:
+            pass
+
+    # 2) 네이버 일봉 폴백
     import urllib.request
     from datetime import datetime, timedelta
     try:
@@ -547,7 +585,7 @@ def _fetch_kospi_realdata(code):
 
 
 def _fetch_pick_realdata(ticker, is_us):
-    """픽 종목 실측 fetch. 미국=yfinance, 한국=네이버 일봉."""
+    """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함."""
     return _fetch_us_realdata(ticker) if is_us else _fetch_kospi_realdata(ticker)
 
 

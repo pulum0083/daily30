@@ -35,6 +35,12 @@
     "api_key": "YOUR_ANTHROPIC_API_KEY_HERE"
   },
 
+  "toss": {
+    "_comment": "토스증권 Open API (developers.tossinvest.com). 종목 가격·캔들 실측 조회. 환경변수 TOSS_CLIENT_ID / TOSS_CLIENT_SECRET 우선.",
+    "client_id": "YOUR_TOSS_CLIENT_ID_HERE",
+    "client_secret": "YOUR_TOSS_CLIENT_SECRET_HERE"
+  },
+
   "subscribe": {
     "_comment": "scripts/email_subscribe.gs를 Apps Script 웹앱으로 배포 후 URL 입력. google_sheets.spreadsheet_id와 동일한 시트 사용.",
     "apps_script_url": "YOUR_APPS_SCRIPT_DEPLOY_URL_HERE"
