@@ -399,7 +399,60 @@ API 응답이 없으면 폴백(삼성전자·SK하이닉스·Micron·AMD·Intel)
 - **hit.up (상승 예측 적중)**: 아쉬움 표현 없이 "상승 예측이 맞았어요."로만.
 - CLOSE_MSGS 구조는 각 케이스마다 `title` 배열과 `sub` 배열을 분리 관리한다.
 
-### 11. 커밋 단위
+### 11. 라이브 스코어보드 — 구조와 운영 규칙
+
+라이브 스코어보드는 `web/assets/main.js`의 `initLiveScoreboard()` 함수가 담당한다.
+장 전·장 중·장 후 세 가지 상태를 구분해 각각 다른 UI를 렌더링한다.
+
+#### 구성 요소
+
+| 영역 | 데이터 소스 | 갱신 주기 |
+|------|------------|----------|
+| 코스피 지수 · 등락률 | `/api/kospi-live` | 10초 (장 중만) |
+| 코스피200 · 코스닥 · 원/달러 | `/api/market` | 60초 (장 중만) |
+| 수급 (외국인·기관·개인) | `/api/market` | 60초 (장 중만) |
+| 장중 뉴스 이슈 | `/data/kospi-news-live.json` | 5분 (JS 폴링) |
+| 스파크라인 그래프 | 인메모리 누적 + sessionStorage 복원 | 폴링 시 자동 |
+
+#### 장 상태 판단 기준 (KST)
+
+- **장 전** (준비 중): 08:50~09:00 — 카운트다운 표시
+- **장 중**: 09:00~15:30 — 실시간 폴링 활성
+- **장 후**: 15:30 이후 — `장 마감` 라벨, 폴링 중단
+
+#### 뉴스 갱신 파이프라인
+
+```
+GitHub Actions schedule (kospi-news-live.yml)
+  → scripts/fetch_news_live.py  (Gemini 2.5 Flash Lite + Google Search)
+  → web/data/kospi-news-live.json 커밋 & 푸시
+  → GitHub Pages 배포
+```
+
+- **스케줄**: 평일 09:10~15:00 KST, 30분 간격 (총 13회)
+- **워크플로우**: `.github/workflows/kospi-news-live.yml` (독립 파일, GHA native schedule)
+- **Vercel cron 사용 금지**: Hobby 플랜은 cron 2개 제한이므로 vercel.json `crons` 배열은 비워 둔다.
+- JSON 구조: `{ date, updated_at, latest: { title, summary }, history: [...] }`
+- `history`는 최대 6개 보관 (같은 날짜인 경우에만 이어받음)
+
+#### 스파크라인 규칙
+
+- 색상: 상승=빨강(`#E03131`), 하락=파랑(`#2775ED`) — 첫 값 대비 현재값으로 자동 결정
+- 시작가 기준 점선을 그려 흐름 맥락을 제공한다
+- 데이터는 `sessionStorage('mkt-spark-v1')`에 저장 — 새로고침 후에도 즉시 복원
+- 폴링 데이터를 슬라이딩 윈도우(최대 30개)로 누적
+
+#### 수급 표시 순서
+
+개인 → 기관 → 외국인 (변경 금지. 한국 투자자 관점 기준)
+
+#### 수정 시 주의사항
+
+- `isDuringMarket()` / `isPreOpen()` / `isAfterMarket()` 판단 함수가 겹쳐 있다. 상태 로직 변경 시 세 함수 모두 확인.
+- 스코어보드 HTML은 `buildPanel()`이 동적으로 생성한다. 인라인 HTML에서 ID를 찾으려 하면 찾을 수 없다.
+- `applyTimeCollapse()` 자동 접힘 로직은 제거됨 — 다시 추가하지 말 것.
+
+### 12. 커밋 단위
 
 - 한 논리적 변경 = 한 커밋. 여러 파일을 고쳤더라도 같은 목적이면 하나로 묶는다.
 - HTML 수동 패치(가격 보정, sparkline 추가 등)는 커밋 메시지에 종목명·수정 내용을 명시한다.

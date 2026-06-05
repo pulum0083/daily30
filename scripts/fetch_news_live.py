@@ -60,7 +60,10 @@ def fetch_latest_issue(today: str, time_str: str) -> dict:
             max_output_tokens=256,
         ),
     )
-    raw = response.text.strip()
+    raw = response.text
+    if not raw:
+        raise RuntimeError("Gemini가 빈 응답을 반환했습니다 (response.text is None or empty)")
+    raw = raw.strip()
     if raw.startswith("```"):
         lines = raw.split("\n")
         raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
