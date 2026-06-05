@@ -1235,10 +1235,18 @@
       if (header) {
         var during = isDuringMarket();
         header.querySelector('.pub-time').outerHTML =
+          '<div style="display:flex;align-items:center;gap:4px;">' +
           '<span class="pub-time mkt-live-time">' +
           '<span class="mkt-live-dot"' + (during ? '' : ' style="display:none"') + '></span>' +
           '<span class="mkt-live-label">' + (during ? '실시간' : '장 마감') + '</span>' +
-          '</span>';
+          '</span>' +
+          '<button class="mkt-refresh-btn" title="페이지 새로고침" onclick="window.location.reload()">' +
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M13.5 8A5.5 5.5 0 1 1 10 3.07"/>' +
+          '<polyline points="10 1 10 4 13 4"/>' +
+          '</svg>' +
+          '</button>' +
+          '</div>';
       }
 
       var list = panel.querySelector('.mkt-list');
