@@ -1025,6 +1025,14 @@
 
     function renderNews(d) {
       if (!d || !d.latest) return;
+      // 날짜가 오늘 KST와 다르면 어제 데이터 — 렌더링 스킵
+      if (d.date) {
+        var k2 = kstNow();
+        var todayKst2 = k2.getUTCFullYear() + '-' +
+          String(k2.getUTCMonth() + 1).padStart(2, '0') + '-' +
+          String(k2.getUTCDate()).padStart(2, '0');
+        if (d.date !== todayKst2) return;
+      }
       var stampEl    = document.getElementById('lsb-news-stamp');
       var latestEl   = document.getElementById('lsb-news-latest');
       var accordionEl = document.getElementById('lsb-accordion');

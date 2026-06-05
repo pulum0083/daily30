@@ -83,20 +83,22 @@ def main() -> None:
         print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # 기존 latest를 history 맨 앞에 추가
+    # 기존 latest를 history 맨 앞에 추가 (날짜가 같은 경우에만 history 이어받음)
     history: list = []
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
-            prev = existing.get("latest")
-            if prev and prev.get("title") and prev.get("title") != "오늘의 이슈 준비 중":
-                history = [{"time": existing.get("updated_at", ""), **prev}]
-            history += existing.get("history", [])
-            history = history[:MAX_HISTORY]
+            if existing.get("date") == today:
+                prev = existing.get("latest")
+                if prev and prev.get("title") and prev.get("title") != "오늘의 이슈 준비 중":
+                    history = [{"time": existing.get("updated_at", ""), **prev}]
+                history += existing.get("history", [])
+                history = history[:MAX_HISTORY]
+            # 날짜가 다르면 history를 비워서 새 날 시작
         except Exception:
             pass
 
-    data = {"updated_at": time_str, "latest": latest, "history": history}
+    data = {"date": today, "updated_at": time_str, "latest": latest, "history": history}
     OUT_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[fetch_news_live] Saved → {OUT_PATH}")
 
