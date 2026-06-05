@@ -67,7 +67,7 @@
   /* ── 차트 프리미티브 ──
      섹션 템플릿이 실데이터를 주입해 호출한다. */
   // 미니 스파크라인 (시장 지표)
-  function drawSparkline(id, data) {
+  function drawSparkline(id, data, hoverIdx) {
     const c = document.getElementById(id);
     if (!c || !data || data.length < 2) return;
     const dpr = window.devicePixelRatio || 1, W = c.offsetWidth || 80, H = c.offsetHeight || 44;
@@ -111,6 +111,17 @@
     ctx.beginPath(); ctx.arc(lx, ly, 4,   0, Math.PI * 2); ctx.fillStyle = '#fff';   ctx.fill();
     ctx.beginPath(); ctx.arc(lx, ly, 2.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
 
+    // 호버 크로스헤어
+    if (hoverIdx !== undefined) {
+      const hx = xf(hoverIdx), hy = yf(data[hoverIdx]);
+      ctx.beginPath(); ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(120,120,120,0.4)'; ctx.lineWidth = 1;
+      ctx.moveTo(hx, pad.t); ctx.lineTo(hx, H - pad.b);
+      ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+      ctx.beginPath(); ctx.arc(hx, hy, 2.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+    }
+
     // 포지션 바 — 현재가가 세션 범위에서 어느 위치인지
     const bx = W - 5, bTop = pad.t, bH = pH;
     const curPct = (cur - min) / range;
@@ -125,6 +136,65 @@
     ctx.beginPath();
     ctx.moveTo(bx - 4, curY); ctx.lineTo(bx + 2, curY);
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // 호버 인터랙션 연결 (최초 1회)
+    c._sparkData = data.slice();
+    if (!c._hoverAttached) { c._hoverAttached = true; attachSparkHover(c); }
+  }
+
+  function attachSparkHover(c) {
+    // 툴팁 div 생성
+    var tip = document.createElement('div');
+    tip.className = 'spark-tip';
+    var wrap = c.parentElement;
+    wrap.style.position = 'relative';
+    wrap.appendChild(tip);
+
+    function fmtNum(v) {
+      return v >= 100
+        ? v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    c.addEventListener('mousemove', function(e) {
+      var data = c._sparkData;
+      if (!data || data.length < 2) return;
+      var rect = c.getBoundingClientRect();
+      var mx   = e.clientX - rect.left;
+      var W    = c.offsetWidth || 80;
+      var pad  = { l: 2, r: 11 };
+      var pW   = W - pad.l - pad.r;
+      var idx  = Math.round((mx - pad.l) / pW * (data.length - 1));
+      idx = Math.max(0, Math.min(data.length - 1, idx));
+
+      var val   = data[idx];
+      var start = data[0];
+      var delta = (val - start) / start * 100;
+      var sign  = delta >= 0 ? '+' : '';
+      var color = delta >= 0 ? '#E03131' : '#2775ED';
+
+      // 크로스헤어 재드로우
+      drawSparkline(c.id, data, idx);
+
+      // 툴팁 내용
+      tip.innerHTML =
+        '<span class="spark-tip-val" style="color:' + color + '">' + fmtNum(val) + '</span>' +
+        '<span class="spark-tip-delta" style="color:' + color + '">' + sign + delta.toFixed(2) + '%</span>';
+
+      // 툴팁 위치 — 캔버스 위, x는 크로스헤어 따라감
+      var xf  = pad.l + (idx / (data.length - 1)) * pW;
+      tip.style.display = 'flex';
+      // 렌더 후 실제 너비 기준으로 좌우 클램프
+      var tipW = tip.offsetWidth || 88;
+      var left = xf - tipW / 2;
+      left = Math.max(0, Math.min(W - pad.r - tipW, left));
+      tip.style.left = left + 'px';
+    });
+
+    c.addEventListener('mouseleave', function() {
+      tip.style.display = 'none';
+      if (c._sparkData) drawSparkline(c.id, c._sparkData);
+    });
   }
   // 종목 미니차트 (주가 + 20일선 + 200일선)
   function drawMiniChart(id, prices, ma20, ma200) {
