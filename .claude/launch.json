@@ -14,6 +14,12 @@
       "port": 8789
     },
     {
+      "name": "context-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8790", "--directory", ".context"],
+      "port": 8790
+    },
+    {
       "name": "vercel-dev",
       "runtimeExecutable": "vercel",
       "runtimeArgs": ["dev", "--listen", "3000", "--yes"],
