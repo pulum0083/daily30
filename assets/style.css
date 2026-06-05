@@ -531,31 +531,6 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .mkt-spark{flex-shrink:0;width:78px;height:44px;cursor:crosshair;}
 .mkt-spark canvas{display:block;width:100%!important;height:44px!important;}
 #mkt-live-rows,#mkt-live-fx{padding:0 14px;}
-/* 시장 지표 도움말 버튼 */
-.mkt-help-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--muted);background:none;color:var(--muted);font-size:10px;font-weight:700;cursor:pointer;margin-left:4px;flex-shrink:0;transition:border-color .15s,color .15s;}
-.mkt-help-btn:hover{border-color:var(--ink);color:var(--ink);}
-/* 도움말 모달 */
-#mkt-help-modal{display:none;position:fixed;inset:0;z-index:9000;align-items:flex-end;}
-#mkt-help-modal.open{display:flex;}
-.mkt-help-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);}
-.mkt-help-sheet{position:relative;width:100%;max-width:480px;margin:0 auto;background:var(--surface,#fff);border-radius:20px 20px 0 0;padding:0 0 env(safe-area-inset-bottom,0);box-shadow:0 -4px 32px rgba(0,0,0,.18);}
-.mkt-help-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px;}
-.mkt-help-title{font-size:15px;font-weight:700;color:var(--ink);}
-.mkt-help-close{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 6px;line-height:1;}
-.mkt-help-body{padding:0 20px 24px;display:flex;flex-direction:column;gap:20px;}
-.mkt-help-item{display:flex;align-items:center;gap:16px;}
-.mkt-help-icon-wrap{flex-shrink:0;width:78px;height:44px;border-radius:8px;background:var(--surface-inset);overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.mkt-help-supply-demo{display:flex;flex-direction:column;gap:5px;width:60px;}
-.mkt-help-supply-track{position:relative;height:5px;background:var(--surface);border-radius:999px;overflow:hidden;}
-.mkt-help-supply-fill{position:absolute;top:0;height:100%;border-radius:999px;}
-.mkt-help-supply-fill.sell{background:#2775ED;right:50%;}
-.mkt-help-supply-fill.buy{background:#E03131;left:50%;}
-.mkt-help-desc strong{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
-.mkt-help-desc p{font-size:12px;color:var(--muted);line-height:1.55;margin:0;}
-.mkt-help-color-row{display:flex;gap:8px;padding-top:4px;}
-.mkt-help-chip{font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;}
-.mkt-help-chip.up{background:rgba(224,49,49,.1);color:#E03131;}
-.mkt-help-chip.dn{background:rgba(39,117,237,.1);color:#2775ED;}
 .vix-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-inset);color:var(--muted);}
 .vix-badge.calm{background:#DCFCE7;color:#16A34A;}
 .vix-badge.normal{background:#ECFCCB;color:#65A30D;}
