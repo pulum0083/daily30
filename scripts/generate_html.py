@@ -374,36 +374,51 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         if cells:
             ctx["supply_cells"] = cells
 
-    # close_dpick (거래대금 급증 + 외국인·기관 동시 순매수)
-    dpick = market.get("dpick", [])
-    if dpick:
-        max_eok = max((max(p["frgn_eok"], p["inst_eok"]) for p in dpick), default=1) or 1
+    # 3일 수급 흐름 (supply_history.json → 투자자별 3일 트렌드)
+    supply_hist_path = DATA_DIR / "supply_history.json"
+    supply_hist = load_json(supply_hist_path) if supply_hist_path.exists() else {}
+    if supply_hist:
+        sorted_dates = sorted(supply_hist.keys(), reverse=True)[:3]  # 최신순
+        sorted_dates_asc = list(reversed(sorted_dates))              # 오래된→최신
 
-        def _fmt_eok(e):
-            return f"{e / 10000:.2f}조" if e >= 10000 else f"{e:,}억"
+        investor_defs = [
+            ("foreign",     "frgn",  "외국인"),
+            ("institution", "inst",  "기관"),
+            ("individual",  "indiv", "개인"),
+        ]
 
-        def _seg(label, eok, cls):
-            return {"cls": cls, "width": max(8, round(eok / max_eok * 65)),
-                    "label": f"{label} {eok:+,}억"}
+        def _sflow_summary(vals):
+            signs = [v >= 0 for v in vals]
+            d = lambda pos: "순매수" if pos else "순매도"
+            if all(signs):
+                trend = ", 규모 감소 중" if vals[-1] < vals[-2] else (", 규모 확대 중" if vals[-1] > vals[-2] else "")
+                return f"{len(vals)}일 연속 순매수{trend}"
+            elif not any(signs):
+                trend = ", 오늘 규모 축소" if abs(vals[-1]) < abs(vals[-2]) else (", 규모 확대 중" if abs(vals[-1]) > abs(vals[-2]) else "")
+                return f"{len(vals)}일 연속 순매도{trend}"
+            elif signs[-1] != signs[-2]:
+                return f"어제 {d(signs[-2])}, 오늘 {d(signs[-1])} 전환"
+            else:
+                return f"혼조세"
 
-        rows = []
-        for p in dpick:
-            rows.append({
-                "name": p["name"], "code": p["code"],
-                "mult": f"{p['trade_mult']}",
-                "vol": _fmt_eok(p["trade_value_eok"]),
-                "chg": f"{p['change_pct']:+.2f}%",
-                "segs": [_seg("외국인", p["frgn_eok"], "frgn"),
-                         _seg("기관", p["inst_eok"], "inst")],
-            })
-        ctx["dpick_rows"] = rows
-        top = dpick[0]
-        ctx["dpick_take"] = (
-            f"<b>{top['name']}</b> — 거래대금 {top['trade_mult']}배 급증 속 "
-            f"외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요."
-        )
-    else:
-        ctx["dpick_pending"] = True
+        # 투자자별 최대 절대값으로 각자 스케일 정규화
+        flow_rows = []
+        for key, cls, label in investor_defs:
+            vals = [supply_hist[d].get(key, 0) for d in sorted_dates_asc]
+            max_abs = max(abs(v) for v in vals) or 1
+            days = []
+            for d, val in zip(sorted_dates_asc, vals):
+                mm_dd = d[5:]
+                sign = "+" if val >= 0 else "−"
+                days.append({
+                    "date": mm_dd,
+                    "width": max(4, round(abs(val) / max_abs * 88)),
+                    "dn": val < 0,
+                    "amt": f"{sign}{abs(val):,}억",
+                })
+            flow_rows.append({"investor": label, "cls": cls, "days": days,
+                               "summary": _sflow_summary(vals)})
+        ctx["supply_flow_rows"] = flow_rows
 
     return ctx
 

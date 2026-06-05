@@ -1,0 +1,30 @@
+{# 3일 수급 흐름 — 투자자별 3일 트렌드 바 (마감) #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">3일 수급 흐름</span>
+    <span class="section-card__sub">코스피 · 순매수 (억원)</span>
+  </div>
+  <div class="dpick-list">
+    {% for row in supply_flow_rows %}
+    <div class="dpick-row">
+      <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
+        <span class="dpick-name">{{ row.investor }}</span>
+        <span class="sflow-summary">{{ row.summary }}</span>
+      </div>
+      <div class="sflow-trend">
+        {% for day in row.days %}
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg {{ row.cls }}{% if day.dn %} seg-dn{% endif %}" style="width:{{ day.width }}%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">{{ day.date }}</span>
+            <span class="sflow-trend-amt {{ 'down' if day.dn else 'up' }}">{{ day.amt }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
