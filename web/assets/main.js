@@ -1174,7 +1174,14 @@
       panel.style.marginTop = '16px';
     }
 
-    var sparkData = { kosdaq: [], kospi200: [], forex: [] };
+    var SPARK_KEY = 'mkt-spark-v1';
+    var sparkData = (function() {
+      try {
+        var saved = JSON.parse(sessionStorage.getItem(SPARK_KEY) || 'null');
+        if (saved && Array.isArray(saved.kosdaq)) return saved;
+      } catch (e) {}
+      return { kosdaq: [], kospi200: [], forex: [] };
+    })();
     var polling = null;
 
     function fmt(n, dp) {
@@ -1216,9 +1223,9 @@
         // 수급
         '<div class="mkt-section-label">오늘 수급 · 코스피</div>' +
         '<div class="mkt-list" id="mkt-live-supply" style="padding:0 14px">' +
-        mkSupplyRow('frgn', '외국인') +
-        mkSupplyRow('inst', '기관') +
         mkSupplyRow('indv', '개인') +
+        mkSupplyRow('inst', '기관') +
+        mkSupplyRow('frgn', '외국인') +
         '</div>' +
         // 국내 지수
         '<div class="mkt-section-label">국내 지수</div>' +
@@ -1334,14 +1341,25 @@
       }
     }
 
+    function saveSparkData() {
+      try { sessionStorage.setItem(SPARK_KEY, JSON.stringify(sparkData)); } catch (e) {}
+    }
+
     function poll() {
       fetch('/api/market', { signal: AbortSignal.timeout(8000) })
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(applyData)
+        .then(function(d) { applyData(d); saveSparkData(); })
         .catch(function() {});
     }
 
     buildPanel();
+
+    // 복원된 데이터로 즉시 스파크라인 표시
+    ['kosdaq', 'kospi200'].forEach(function(key) {
+      if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key], '#2775ED');
+    });
+    if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex, '#B7791F');
+
     poll();
     if (isDuringMarket()) {
       polling = setInterval(poll, 60000);
