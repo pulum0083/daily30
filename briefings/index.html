@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>브리핑으로 이동 중…</title>
+  <style>
+    body { margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #888; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <span>최신 브리핑으로 이동 중…</span>
+  <script>
+    // briefings-list.json에서 가장 최신 ready 브리핑 URL로 리다이렉트
+    // 날짜 내 우선순위: us(21:20) > close(16:00) > kospi(07:30)
+    var TYPE_ORDER = ['us', 'close', 'kospi'];
+
+    fetch('/data/briefings-list.json')
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) {
+        var slots = data.slots || {};
+        var dates = Object.keys(slots).sort().reverse();
+        for (var i = 0; i < dates.length; i++) {
+          var day = slots[dates[i]];
+          for (var j = 0; j < TYPE_ORDER.length; j++) {
+            var slot = day[TYPE_ORDER[j]];
+            if (slot && slot.state === 'ready' && slot.url) {
+              location.replace(slot.url);
+              return;
+            }
+          }
+        }
+        // ready 슬롯이 하나도 없으면 랜딩으로
+        location.replace('/');
+      })
+      .catch(function() { location.replace('/'); });
+  </script>
+</body>
+</html>
