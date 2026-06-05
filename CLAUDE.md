@@ -342,6 +342,14 @@ python3 scripts/generate_html.py --write-list-only
 - **수동으로 JSON만 갱신**할 때: `python3 scripts/generate_html.py --write-list-only`
 - 정적 템플릿(`briefing_list.html`)은 JS 비활성 시 폴백으로만 쓰인다.
 
+#### 주말(토·일) 슬롯 처리
+
+`_blIsWeekend(dateStr)` 헬퍼로 요일을 판단한다. 토·일은 코스피·미국 휴장이므로 오늘 카드의 모든 슬롯을 `state: 'empty'`(`—`)로 표시한다. "생성 예정" 문구를 절대 표시하지 않는다.
+
+#### `/briefings` 진입 시 최신 브리핑 자동 이동
+
+`web/briefings/index.html`이 `briefings-list.json`을 fetch해 가장 최근 `ready` 슬롯 URL로 `location.replace()` 한다. 날짜 내 우선순위: `us > close > kospi`. **`vercel.json`에 날짜를 하드코딩하지 않는다** — 브리핑이 생성될 때마다 자동으로 최신을 가리킨다.
+
 ### 5. 마감 브리핑 시장 폭 데이터 필드
 
 `latest_kospi_close.json`의 `market_breadth` 필드에서 읽는다:
@@ -402,37 +410,56 @@ API 응답이 없으면 폴백(삼성전자·SK하이닉스·Micron·AMD·Intel)
 ### 11. 라이브 스코어보드 — 구조와 운영 규칙
 
 라이브 스코어보드는 `web/assets/main.js`의 `initLiveScoreboard()` 함수가 담당한다.
-장 전·장 중·장 후 세 가지 상태를 구분해 각각 다른 UI를 렌더링한다.
+**당일 브리핑과 과거 브리핑 모두** 스코어보드를 표시한다. 상태에 따라 렌더링이 달라진다.
 
-#### 구성 요소
+#### 상태별 동작
+
+| 상태 | 조건 | 동작 |
+|------|------|------|
+| 장 전 (준비 중) | 당일 08:50~08:59 | 카운트다운 표시 |
+| 장 중 (LIVE) | 당일 09:00~15:30 | `/api/kospi-live` 10초 폴링 |
+| 장 후 (당일) | 당일 15:30 이후 | 최종 종가 fetch 후 예측 결과 표시 |
+| **과거 브리핑** | URL 날짜 < 오늘 | **정적 결과 표시 (폴링 없음)** |
+| 숨김 | 장 시작 전(~08:49) | `display:none` |
+
+#### 과거 브리핑 스코어보드 규칙
+
+과거 코스피 브리핑 페이지에서 스코어보드가 **항상 표시**된다. 예측 적중 여부, 그날 이슈, 시장 지표를 확인하는 용도다.
+
+- **결과 표시**: `data-actual-pct` 속성이 있으면 예측 적중/빗나감 메시지 + 등락률 + 게이지 바늘 렌더링.
+- **결과 미집계**: `data-actual-pct`가 비어 있으면 "결과 집계 중…" 표시. 다음 날 09:10 `check_accuracy.py` 실행 후 자동 주입.
+- **뉴스 이슈**: `fetchNews()`가 `/data/kospi-news-{date}.json` (날짜별 아카이브)를 fetch. 아카이브가 없으면 빈 상태.
+- **시장 지표 패널**: `initLiveMarketPanel()`이 `/data/market-{date}.json`을 fetch해 정적 표시. 스파크라인 없이 종가·수급만 표시.
+
+#### 데이터 아카이브 파이프라인
+
+```
+fetch_news_live.py (30분마다 실행)
+  → web/data/kospi-news-live.json  (당일 갱신)
+  → web/data/kospi-news-{date}.json  (날짜별 아카이브 ← 과거 브리핑용)
+
+check_accuracy.py (다음 날 09:10 실행)
+  → data/briefings.json 에 actual_change_pct 기록
+  → web/briefings/{date}/kospi/index.html 의 data-actual-pct 속성 주입
+  → web/data/market-{date}.json 생성 (코스피·코스닥·코스피200·수급)
+```
+
+#### 구성 요소 (당일 장 중)
 
 | 영역 | 데이터 소스 | 갱신 주기 |
 |------|------------|----------|
-| 코스피 지수 · 등락률 | `/api/kospi-live` | 10초 (장 중만) |
-| 코스피200 · 코스닥 · 원/달러 | `/api/market` | 60초 (장 중만) |
-| 수급 (외국인·기관·개인) | `/api/market` | 60초 (장 중만) |
-| 장중 뉴스 이슈 | `/data/kospi-news-live.json` | 5분 (JS 폴링) |
+| 코스피 지수 · 등락률 | `/api/kospi-live` | 10초 |
+| 코스피200 · 코스닥 · 원/달러 | `/api/market` | 60초 |
+| 수급 (외국인·기관·개인) | `/api/market` | 60초 |
+| 장중 뉴스 이슈 | `/data/kospi-news-live.json` | 5분 |
 | 스파크라인 그래프 | 인메모리 누적 + sessionStorage 복원 | 폴링 시 자동 |
 
-#### 장 상태 판단 기준 (KST)
-
-- **장 전** (준비 중): 08:50~09:00 — 카운트다운 표시
-- **장 중**: 09:00~15:30 — 실시간 폴링 활성
-- **장 후**: 15:30 이후 — `장 마감` 라벨, 폴링 중단
-
-#### 뉴스 갱신 파이프라인
-
-```
-GitHub Actions schedule (kospi-news-live.yml)
-  → scripts/fetch_news_live.py  (Gemini 2.5 Flash Lite + Google Search)
-  → web/data/kospi-news-live.json 커밋 & 푸시
-  → GitHub Pages 배포
-```
+#### 뉴스 워크플로우
 
 - **스케줄**: 평일 09:10~15:00 KST, 30분 간격 (총 13회)
-- **워크플로우**: `.github/workflows/kospi-news-live.yml` (독립 파일, GHA native schedule)
-- **Vercel cron 사용 금지**: Hobby 플랜은 cron 2개 제한이므로 vercel.json `crons` 배열은 비워 둔다.
-- JSON 구조: `{ date, updated_at, latest: { title, summary }, history: [...] }`
+- **워크플로우**: `.github/workflows/kospi-news-live.yml` (GHA native schedule)
+- **Vercel cron 사용 금지**: Hobby 플랜은 cron 2개 제한이므로 `vercel.json` `crons` 배열은 비워 둔다.
+- JSON 구조: `{ date, updated_at, latest: { market, stock }, history: [...] }`
 - `history`는 최대 6개 보관 (같은 날짜인 경우에만 이어받음)
 
 #### 스파크라인 규칙
@@ -449,6 +476,7 @@ GitHub Actions schedule (kospi-news-live.yml)
 #### 수정 시 주의사항
 
 - `isDuringMarket()` / `isPreOpen()` / `isAfterMarket()` 판단 함수가 겹쳐 있다. 상태 로직 변경 시 세 함수 모두 확인.
+- `isPast` 플래그는 `initLiveScoreboard()` 내부 클로저 변수다. `initLiveMarketPanel()`은 별도로 `mktIsPast`를 계산한다.
 - 스코어보드 HTML은 `buildPanel()`이 동적으로 생성한다. 인라인 HTML에서 ID를 찾으려 하면 찾을 수 없다.
 - `applyTimeCollapse()` 자동 접힘 로직은 제거됨 — 다시 추가하지 말 것.
 
