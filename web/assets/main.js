@@ -74,9 +74,11 @@
     c.width = W * dpr; c.height = H * dpr;
     const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
 
-    const isUp  = data[data.length - 1] >= data[0];
+    const cur   = data[data.length - 1];
+    const isUp  = cur >= data[0];
     const color = isUp ? '#E03131' : '#2775ED';
-    const pad   = { t: 5, b: 5, l: 2, r: 5 };
+    // 우측 포지션 바 공간 확보 (바 4px + 양쪽 여백 3+2px)
+    const pad   = { t: 5, b: 5, l: 2, r: 11 };
     const pW    = W - pad.l - pad.r, pH = H - pad.t - pad.b;
     const min   = Math.min(...data), max = Math.max(...data);
     const range = max - min || data[0] * 0.001 || 1;
@@ -108,6 +110,21 @@
     const lx = pts.at(-1).x, ly = pts.at(-1).y;
     ctx.beginPath(); ctx.arc(lx, ly, 4,   0, Math.PI * 2); ctx.fillStyle = '#fff';   ctx.fill();
     ctx.beginPath(); ctx.arc(lx, ly, 2.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+
+    // 포지션 바 — 현재가가 세션 범위에서 어느 위치인지
+    const bx = W - 5, bTop = pad.t, bH = pH;
+    const curPct = (cur - min) / range;
+    const curY   = bTop + (1 - curPct) * bH;
+    // 트랙 (전체 범위)
+    ctx.fillStyle = 'rgba(150,150,150,0.18)';
+    ctx.fillRect(bx - 2, bTop, 4, bH);
+    // 현재 위치 이하 채움
+    const fillH = bTop + bH - curY;
+    if (fillH > 0) { ctx.fillStyle = color + '55'; ctx.fillRect(bx - 2, curY, 4, fillH); }
+    // 현재 위치 마커 (가로 선)
+    ctx.beginPath();
+    ctx.moveTo(bx - 4, curY); ctx.lineTo(bx + 2, curY);
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
   }
   // 종목 미니차트 (주가 + 20일선 + 200일선)
   function drawMiniChart(id, prices, ma20, ma200) {
