@@ -174,15 +174,23 @@ verdict 컬러는 헤드라인 em 텍스트에만 적용한다.
 
 ## 7. 뉴스 수집 스케줄 (kospi-news-live)
 
-| 시각 (KST) | UTC cron | 비고 |
-|-----------|----------|------|
-| 09:10 | `10 0 * * 1-5` | 장 시작 직후 첫 이슈 |
-| 10:00 | `0 1 * * 1-5` | |
-| 11:00 | `0 2 * * 1-5` | |
-| 12:00 | `0 3 * * 1-5` | |
-| 13:00 | `0 4 * * 1-5` | |
-| 14:00 | `0 5 * * 1-5` | |
-| 15:00 | `0 6 * * 1-5` | 마감 전 마지막 |
+**30분 단위** 수집. 09:10·09:30은 장 초반 2슬롯, 이후 정각·30분 반복, 15:00 마감.
+
+| 시각 (KST) | UTC cron |
+|-----------|----------|
+| 09:10 | `10 0 * * 1-5` |
+| 09:30 | `30 0 * * 1-5` |
+| 10:00 | `0 1 * * 1-5` |
+| 10:30 | `30 1 * * 1-5` |
+| 11:00 | `0 2 * * 1-5` |
+| 11:30 | `30 2 * * 1-5` |
+| 12:00 | `0 3 * * 1-5` |
+| 12:30 | `30 3 * * 1-5` |
+| 13:00 | `0 4 * * 1-5` |
+| 13:30 | `30 4 * * 1-5` |
+| 14:00 | `0 5 * * 1-5` |
+| 14:30 | `30 5 * * 1-5` |
+| 15:00 | `0 6 * * 1-5` |
 
 Vercel cron → `/api/trigger?type=kospi-news-live` → GitHub Actions `kospi-news-live` job → `fetch_news_live.py` 순으로 실행.
 
@@ -206,16 +214,80 @@ Claude는 명시적 배포 요청 없이 `git push`하지 않는다.
 
 | 항목 | 값 |
 |------|-----|
-| 프로젝트 | `double-shot` (단일) |
-| 연결 레포 | `pulum0083/daily30` (main 브랜치) |
+| 프로젝트명 | `double-shot` (단일, 팀: `pulum0083s-projects`) |
+| 연결 레포 | `pulum0083/daily30` (`main` 브랜치) |
 | 도메인 | `doubleshot.space` |
-| 프로젝트 설정 | `.vercel/project.json` (projectId: `prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo`) |
+| `.vercel/project.json` | `projectId: prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo` |
 
-`daily30` Vercel 프로젝트는 삭제됨. 동명의 프로젝트를 새로 만들지 말 것.
+`daily30` Vercel 프로젝트는 삭제됨. 동명의 프로젝트를 새로 만들지 말 것.  
+`main` push → Vercel 자동 production 배포 → `doubleshot.space` 자동 반영.
 
 ---
 
-## 9. 데이터 정합성 — 배포 전 필수 체크
+## 9. 데이터 신선도 — 브리핑 생성 시각 기준
+
+> **브리핑에 쓰이는 모든 시장 데이터는 브리핑 생성 시각 기준 최신 데이터여야 한다.**
+
+### 원칙
+
+- **전날 데이터·몇 시간 전 데이터 사용 금지.** `latest_{type}.json`에 저장된 데이터가 오래됐으면 `fetch_data.py`를 재실행한 뒤 브리핑을 생성한다.
+- 수동 재실행 시 가장 먼저 데이터 수집부터 시작한다:
+  ```
+  python3 scripts/fetch_data.py --type us       # 또는 kospi / kospi-close
+  python3 scripts/fetch_news.py --type us
+  python3 scripts/call_claude.py --type us --no-html
+  python3 scripts/validate_analysis.py --type us
+  python3 scripts/call_claude.py --type us --render
+  ```
+- `latest_{type}.json`의 `generated_at` 필드가 오늘 날짜가 맞는지 확인한다.  
+  틀리면 수집부터 다시 시작한다.
+
+### 데이터 수집 시각 기준
+
+| 브리핑 | 수집 기준 시각 |
+|--------|--------------|
+| 코스피 예측 (07:30) | 당일 07:30 전후 수집 데이터 |
+| 코스피 마감 (16:00) | 당일 장 마감(15:30) 후 수집 데이터 |
+| 미국 (21:20) | 당일 21:20 전후 수집 데이터 (프리마켓 반영) |
+
+---
+
+## 10. 시장 데이터 수집 우선순위 (Toss API 1순위)
+
+> **Toss 증권 Open API를 1순위로 사용한다. 네이버·Yahoo Finance는 폴백이다.**
+
+### 우선순위 표
+
+| 데이터 | 1순위 | 폴백 |
+|--------|-------|------|
+| 국내 종목 캔들 (일봉·분봉) | Toss `get_candles(symbol)` | 네이버 일봉 API |
+| 국내 종목 현재가 | Toss `get_prices([symbols])` | 네이버 금융 |
+| 미국 종목 캔들·현재가 | yfinance (티커 직접) | — |
+| 환율 (USD/KRW) | Toss `get_exchange_rate()` | 네이버 환율 API |
+| 지수 (코스피·나스닥 등) | yfinance | — |
+
+### Toss API 함수 (`scripts/toss_client.py`)
+
+| 함수 | 설명 |
+|------|------|
+| `get_candles(symbol, interval, count)` | 캔들 조회. `interval="1d"` 일봉, `"1m"` 1분봉. 최대 300개(내부 페이지네이션). |
+| `get_prices(symbols)` | 현재가 일괄 조회. 심볼 리스트 최대 200개. |
+| `get_exchange_rate(base, quote)` | 환율. 기본 USD→KRW `midRate` 반환. |
+
+### 국내 종목 심볼 형식
+
+- Toss API 심볼: `KR7005930003` (ISIN 형식) — `.KS`/`.KQ` 접미사 사용 금지.
+- 네이버 폴백: 6자리 코드 (`005930`) — `.KS`/`.KQ` 접미사 사용 금지.
+- yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale)를 반환하므로 국내 종목에는 yfinance 사용 금지.
+
+### Toss API 인증
+
+`config.json`의 `toss.client_id` / `toss.client_secret` 또는 환경변수 `TOSS_CLIENT_ID` / `TOSS_CLIENT_SECRET`.  
+토큰은 내부적으로 캐시되며 만료 60초 전 자동 갱신된다.
+
+---
+
+## 11. 데이터 정합성 — 배포 전 필수 체크
 
 > **LLM이 생성한 수치는 신뢰하지 않는다. 배포 전에 반드시 실측으로 검증한다.**
 
