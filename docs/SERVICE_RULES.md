@@ -201,3 +201,71 @@ Vercel cron → `/api/trigger?type=kospi-news-live` → GitHub Actions `kospi-ne
 - Vercel 배포 큐 누적 방지 및 불필요한 배포 최소화
 
 Claude는 명시적 배포 요청 없이 `git push`하지 않는다.
+
+### Vercel 프로젝트 구조 (2026-06-05 통합 후)
+
+| 항목 | 값 |
+|------|-----|
+| 프로젝트 | `double-shot` (단일) |
+| 연결 레포 | `pulum0083/daily30` (main 브랜치) |
+| 도메인 | `doubleshot.space` |
+| 프로젝트 설정 | `.vercel/project.json` (projectId: `prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo`) |
+
+`daily30` Vercel 프로젝트는 삭제됨. 동명의 프로젝트를 새로 만들지 말 것.
+
+---
+
+## 9. 데이터 정합성 — 배포 전 필수 체크
+
+> **LLM이 생성한 수치는 신뢰하지 않는다. 배포 전에 반드시 실측으로 검증한다.**
+
+### 9-1. 자동 파이프라인 순서 (절대 바꾸지 말 것)
+
+```
+call_claude --no-html        분석 JSON 생성
+  → validate_analysis        실측 주입 + 금지패턴 교정
+  → call_claude --render     교정된 데이터로 HTML 생성
+  → send_telegram            HTML 생성 후 발송
+```
+
+`--render` 전 단계(HTML·텔레그램)가 검증 전에 생성되면 교정이 반영되지 않는다.
+
+### 9-2. 수동 배포 전 체크리스트
+
+브리핑 HTML을 직접 생성하거나 수정할 때 아래 항목을 반드시 확인한다.
+
+**종목 가격·등락률**
+- [ ] `analysis_{type}.json`의 종목 가격·등락률이 실제 시장 데이터와 일치하는가
+- [ ] 미국 종목: yfinance 직접 조회 / 국내 종목: 네이버 일봉 API (`.KS` 접미사 금지)
+- [ ] sparkline 데이터가 빈 배열(`[]`)이 아닌가
+
+**코스피 마감 브리핑 추가 확인**
+- [ ] `market_breadth.up`, `market_breadth.down` 모두 0이 아닌가
+- [ ] `investor_trading.foreign.net`, `.institution.net`, `.individual.net` 정상인가
+- [ ] `dpick` 배열이 존재하고 비어있지 않은가
+
+**공통**
+- [ ] `vercel.json`의 `/briefings` 루트 라우트가 오늘 최신 브리핑을 가리키는가
+- [ ] `web/data/briefings-list.json`이 오늘 슬롯을 포함하는가
+
+### 9-3. 로컬 수동 실행 시 Claude Desktop 환경변수 충돌 주의
+
+Claude Desktop 앱이 빈 `ANTHROPIC_AUTH_TOKEN` 환경변수를 주입해 Anthropic SDK가 오동작한다.
+`call_claude.py`의 `get_anthropic_api_key()`에서 자동으로 정리하므로 별도 조치 불필요.
+단, SDK를 직접 호출하는 다른 스크립트에서는 아래를 확인한다.
+
+```python
+for var in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_CUSTOM_HEADERS"):
+    if not os.environ.get(var):
+        os.environ.pop(var, None)
+```
+
+### 9-4. generate_html.py 실행 시 덮어쓰기 주의
+
+`generate_html.py --type {kospi|us|kospi-close}` 실행 시 해당 날짜 브리핑 HTML이 **완전 재생성**된다.
+수동 수정 내역이 있으면 실행 전 반드시 확인.
+
+브리핑 목록 JSON만 갱신할 때는 `--write-list-only` 사용:
+```bash
+python3 scripts/generate_html.py --write-list-only
+```
