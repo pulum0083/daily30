@@ -530,7 +530,7 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .mkt-chg.down{color:var(--dn);}
 .mkt-spark{flex-shrink:0;width:78px;height:44px;cursor:crosshair;position:relative;}
 .mkt-spark canvas{display:block;width:100%!important;height:44px!important;}
-.spark-tip{display:none;position:absolute;top:-26px;left:0;flex-direction:column;align-items:center;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:3px 7px;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.10);z-index:10;}
+.spark-tip{display:none;position:fixed;flex-direction:column;align-items:center;background:var(--canvas);border:1px solid var(--hairline);border-radius:6px;padding:3px 7px;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:9999;}
 html.dark .spark-tip{background:#1e2130;border-color:rgba(255,255,255,.12);}
 .spark-tip-val{font-size:11px;font-weight:700;line-height:1.3;}
 .spark-tip-delta{font-size:10px;font-weight:600;line-height:1.2;}
