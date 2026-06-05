@@ -972,9 +972,8 @@
         if (subElPast) { subElPast.textContent = '다음 날 오전 정확도 체크 후 결과가 표시됩니다.'; }
       }
 
-      // 뉴스 섹션은 당일 데이터라 과거 브리핑에 적합하지 않음
-      var lsbNews = document.querySelector('#live-scoreboard .lsb-news');
-      if (lsbNews) lsbNews.style.display = 'none';
+      // 그날 뉴스 아카이브 fetch
+      fetchNews();
       return;
     }
 
@@ -1200,8 +1199,8 @@
 
     function renderNews(d) {
       if (!d || !d.latest) return;
-      // 날짜가 오늘 KST와 다르면 어제 데이터 — 렌더링 스킵
-      if (d.date) {
+      // 과거 브리핑은 날짜 체크 생략, 당일 브리핑만 오늘 날짜 확인
+      if (!isPast && d.date) {
         var k2 = kstNow();
         var todayKst2 = k2.getUTCFullYear() + '-' +
           String(k2.getUTCMonth() + 1).padStart(2, '0') + '-' +
@@ -1280,7 +1279,10 @@
     }
 
     function fetchNews() {
-      fetch('/data/kospi-news-live.json?t=' + Date.now())
+      var url = isPast && m && m[1]
+        ? '/data/kospi-news-' + m[1] + '.json'
+        : '/data/kospi-news-live.json?t=' + Date.now();
+      fetch(url)
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
         .then(renderNews)
         .catch(function() {});
@@ -1357,7 +1359,18 @@
       return mins >= 530 && mins < 930; // 08:50~15:29
     }
 
-    if (!isLiveMode()) return;
+    // 과거 브리핑 판단 — URL 날짜가 오늘보다 이전이면 과거 모드
+    var mktUrlMatch = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
+    var mktIsPast = false;
+    if (mktUrlMatch) {
+      var mktNow = new Date(Date.now() + 9 * 3600 * 1000);
+      var mktToday = mktNow.getUTCFullYear() + '-' +
+        String(mktNow.getUTCMonth() + 1).padStart(2, '0') + '-' +
+        String(mktNow.getUTCDate()).padStart(2, '0');
+      if (mktUrlMatch[1] < mktToday) mktIsPast = true;
+    }
+
+    if (!mktIsPast && !isLiveMode()) return;
 
     // 모바일(≤900px)에서 스코어보드 바로 아래로 패널 이동 — 이후 위치 유지
     if (window.innerWidth <= 900) {
@@ -1604,6 +1617,19 @@
     }
 
     buildPanel();
+
+    // 과거 브리핑: market-{date}.json 으로 정적 표시, 폴링 없음
+    if (mktIsPast) {
+      var mktLabelEl = panel.querySelector('.mkt-live-label');
+      var mktDotEl   = panel.querySelector('.mkt-live-dot');
+      if (mktLabelEl) mktLabelEl.textContent = '마감';
+      if (mktDotEl)   mktDotEl.style.display = 'none';
+      fetch('/data/market-' + mktUrlMatch[1] + '.json', { signal: AbortSignal.timeout(5000) })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function(d) { applyData(d); })
+        .catch(function() {});
+      return;
+    }
 
     // 복원된 sessionStorage 데이터로 즉시 표시 (인트라데이 로드 전 임시)
     ['kosdaq', 'kospi200'].forEach(function(key) {

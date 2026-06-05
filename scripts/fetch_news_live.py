@@ -153,6 +153,11 @@ def main() -> None:
     OUT_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[fetch_news_live] Saved → {OUT_PATH}")
 
+    # 날짜별 아카이브 저장 — 과거 브리핑 스코어보드에서 그날 이슈 표시용
+    archive_path = OUT_PATH.parent / f"kospi-news-{today}.json"
+    archive_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[fetch_news_live] Archive → {archive_path.name}")
+
 
 if __name__ == "__main__":
     main()

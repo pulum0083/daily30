@@ -86,6 +86,51 @@ def get_sp500_close_vs_prev_close(date_str: str) -> tuple | None:
 # Core
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _save_market_archive(date_str: str, kospi_close: float, kospi_chg_pct: float) -> None:
+    """마감 시장 데이터를 web/data/market-{date}.json 으로 저장한다."""
+    archive_path = BASE_DIR / "web" / "data" / f"market-{date_str}.json"
+    if archive_path.exists():
+        return  # 이미 존재하면 덮어쓰지 않음
+
+    market: dict = {"kospi": {"price": round(kospi_close, 2), "changePct": round(kospi_chg_pct, 2)}}
+
+    # 코스닥 / 코스피200 종가
+    try:
+        target = datetime.strptime(date_str, "%Y-%m-%d")
+        start = (target - timedelta(days=7)).strftime("%Y-%m-%d")
+        end = (target + timedelta(days=2)).strftime("%Y-%m-%d")
+        for key, ticker in [("kosdaq", "^KQ11"), ("kospi200", "^KS200")]:
+            hist = yf.Ticker(ticker).history(start=start, end=end, interval="1d")
+            rows = list(hist.iterrows())
+            for i, (idx, row) in enumerate(rows):
+                d = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
+                if d == date_str and i > 0:
+                    prev = float(rows[i - 1][1]["Close"])
+                    cur  = float(row["Close"])
+                    if prev and cur and cur == cur:  # NaN 체크
+                        market[key] = {"price": round(cur, 2), "changePct": round((cur - prev) / prev * 100, 2)}
+                    break
+    except Exception as e:
+        print(f"[check_accuracy] market archive 지수 fetch 실패: {e}", file=sys.stderr)
+
+    # 외국인·기관·개인 수급 (latest_kospi_close.json 에서 읽기)
+    try:
+        close_json = BASE_DIR / "data" / "latest_kospi_close.json"
+        if close_json.exists():
+            cdata = json.loads(close_json.read_text(encoding="utf-8"))
+            it = cdata.get("investor_trading", {})
+            market["investor"] = {
+                "foreign":     round((it.get("foreign",     {}).get("net", 0) or 0) / 100),
+                "institution": round((it.get("institution", {}).get("net", 0) or 0) / 100),
+                "individual":  round((it.get("individual",  {}).get("net", 0) or 0) / 100),
+            }
+    except Exception as e:
+        print(f"[check_accuracy] market archive 수급 읽기 실패: {e}", file=sys.stderr)
+
+    archive_path.write_text(json.dumps(market, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[check_accuracy] 마켓 아카이브 저장: {archive_path.name}")
+
+
 def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = False) -> None:
     data = load_briefings()
     briefings = data.get("briefings", [])
@@ -140,6 +185,10 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
                 html = html.replace('id="live-scoreboard"', f'id="live-scoreboard" data-actual-pct="{change_pct:.2f}"', 1)
             html_path.write_text(html, encoding="utf-8")
             print(f"[check_accuracy] HTML 패치: kospi/{date_str} (actual_pct={change_pct:+.2f}%)")
+
+    # 마감 시장 데이터 아카이브 — 과거 브리핑 시장 지표 패널 표시용
+    if briefing_type == "kospi":
+        _save_market_archive(date_str, close_price, change_pct)
 
     result_mark = "✓" if is_correct is True else ("?" if is_correct is None else "✗")
     print(
