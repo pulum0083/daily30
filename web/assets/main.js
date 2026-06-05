@@ -1128,9 +1128,9 @@
               return '<div class="lsb-news-item">'
                 + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
                 + '<div class="lsb-ni-content">'
-                + (mIssue ? '<div class="lsb-ni-title"><span class="lsb-news-badge sm">시장</span>' + escHtml(mIssue.title) + '</div>'
+                + (mIssue ? '<div class="lsb-ni-title"><span class="lsb-news-badge sm market">시장</span>' + escHtml(mIssue.title) + '</div>'
                   + (mIssue.summary ? '<div class="lsb-ni-body">' + escHtml(mIssue.summary) + '</div>' : '') : '')
-                + (sIssue ? '<div class="lsb-ni-title" style="margin-top:6px"><span class="lsb-news-badge sm">종목</span>' + escHtml(sIssue.title) + '</div>'
+                + (sIssue ? '<div class="lsb-ni-title" style="margin-top:6px"><span class="lsb-news-badge sm stock">종목</span>' + escHtml(sIssue.title) + '</div>'
                   + (sIssue.summary ? '<div class="lsb-ni-body">' + escHtml(sIssue.summary) + '</div>' : '') : '')
                 + '</div>'
                 + '</div>';
