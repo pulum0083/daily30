@@ -401,13 +401,13 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             else:
                 return f"혼조세"
 
-        # 투자자별 최대 절대값으로 각자 스케일 정규화
+        # 투자자별 최대 절대값으로 각자 스케일 정규화 (표시는 최신순)
         flow_rows = []
         for key, cls, label in investor_defs:
-            vals = [supply_hist[d].get(key, 0) for d in sorted_dates_asc]
-            max_abs = max(abs(v) for v in vals) or 1
+            vals_asc = [supply_hist[d].get(key, 0) for d in sorted_dates_asc]
+            max_abs = max(abs(v) for v in vals_asc) or 1
             days = []
-            for d, val in zip(sorted_dates_asc, vals):
+            for d, val in zip(sorted_dates, [supply_hist[d].get(key, 0) for d in sorted_dates]):
                 mm_dd = d[5:]
                 sign = "+" if val >= 0 else "−"
                 days.append({
@@ -417,7 +417,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
                     "amt": f"{sign}{abs(val):,}억",
                 })
             flow_rows.append({"investor": label, "cls": cls, "days": days,
-                               "summary": _sflow_summary(vals)})
+                               "summary": _sflow_summary(vals_asc)})
         ctx["supply_flow_rows"] = flow_rows
 
     return ctx
