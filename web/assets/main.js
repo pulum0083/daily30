@@ -1278,7 +1278,7 @@
         '<div class="info-modal__title">시장 지표 읽는 법</div>' +
         '<div class="info-modal__body">' +
         '<p><b style="color:var(--ink)">수급 바</b><br>' +
-        '개인·기관·외국인의 순매수/매도 강도를 막대로 표시해요. 오른쪽으로 길수록 매수 우세, 왼쪽으로 길수록 매도 우세예요.</p>' +
+        '개인·기관·외국인의 순사기/팔기 강도를 막대로 표시해요. 오른쪽으로 길수록 사기 우세, 왼쪽으로 길수록 팔기 우세예요.</p>' +
         '<p><b style="color:var(--ink)">흐르는 선 (스파크라인)</b><br>' +
         '장 시작(09:00)부터 지금까지 1분마다 쌓이는 가격 흐름이에요. ' +
         '점선은 시초가 기준선으로, 선이 점선 위에 있으면 시초가 대비 상승 중이에요. ' +
@@ -1389,8 +1389,8 @@
         '<div class="supply-bar-fill2" id="ml-' + key + '-bar" style="width:0%"></div>' +
         '</div>' +
         '<div class="supply-bar-labels">' +
-        '<span style="color:var(--dn)">매도</span>' +
-        '<span style="color:var(--up)">매수</span>' +
+        '<span style="color:var(--dn)">팔기</span>' +
+        '<span style="color:var(--up)">사기</span>' +
         '</div></div></div>';
     }
 
