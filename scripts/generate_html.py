@@ -402,6 +402,8 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             f"<b>{top['name']}</b> — 거래대금 {top['trade_mult']}배 급증 속 "
             f"외국인·기관 양매수가 동시에 유입됐어요. 다음 세션 수급 모멘텀을 주목할 만해요."
         )
+    else:
+        ctx["dpick_pending"] = True
 
     return ctx
 
