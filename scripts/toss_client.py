@@ -11,7 +11,7 @@ from pathlib import Path
 BASE_URL = "https://openapi.tossinvest.com"
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-_token_cache: dict = {"token": None, "expires_at": 0.0}
+_token_cache = {"token": None, "expires_at": 0.0}
 
 
 def _load_config() -> dict:
@@ -54,7 +54,7 @@ def _get_token() -> str:
     return _token_cache["token"]
 
 
-def _api_get(path: str, params: dict | None = None) -> dict:
+def _api_get(path: str, params=None) -> dict:
     token = _get_token()
     url = f"{BASE_URL}{path}"
     if params:
@@ -64,27 +64,28 @@ def _api_get(path: str, params: dict | None = None) -> dict:
         return json.loads(resp.read())
 
 
-def get_candles(symbol: str, interval: str = "1d", count: int = 300) -> list[dict]:
+def get_candles(symbol: str, interval: str = "1d", count: int = 300) -> list:
     """일봉(1d) 또는 1분봉(1m) 캔들 반환. 오래된→최신 순서.
 
     Toss API는 1회 최대 200개. count > 200이면 nextBefore로 페이지네이션.
     """
-    all_candles: list[dict] = []
-    before: str | None = None
+    all_candles = []
+    before = None
     remaining = count
 
     while remaining > 0:
         batch = min(remaining, 200)
-        params: dict = {"symbol": symbol, "interval": interval, "count": batch}
+        params = {"symbol": symbol, "interval": interval, "count": batch}
         if before:
             params["before"] = before
         result = _api_get("/api/v1/candles", params)
-        candles = result.get("candles", [])
+        body = result.get("result", result)
+        candles = body.get("candles", [])
         if not candles:
             break
         # 응답은 최신→오래된 순이므로 prepend해서 오래된→최신 유지
         all_candles = candles[::-1] + all_candles
-        before = result.get("nextBefore")
+        before = body.get("nextBefore")
         remaining -= len(candles)
         if not before:
             break
@@ -92,16 +93,18 @@ def get_candles(symbol: str, interval: str = "1d", count: int = 300) -> list[dic
     return all_candles
 
 
-def get_prices(symbols: list[str]) -> list[dict]:
+def get_prices(symbols: list) -> list:
     """현재가 일괄 조회. 최대 200개."""
     result = _api_get("/api/v1/prices", {"symbols": ",".join(symbols)})
-    return result if isinstance(result, list) else result.get("prices", [])
+    body = result.get("result", result)
+    return body if isinstance(body, list) else body.get("prices", [])
 
 
-def get_exchange_rate(base: str = "USD", quote: str = "KRW") -> float | None:
+def get_exchange_rate(base: str = "USD", quote: str = "KRW"):
     """환율 조회. USD→KRW midRate 반환."""
     try:
         result = _api_get("/api/v1/exchange-rate", {"baseCurrency": base, "quoteCurrency": quote})
-        return float(result["midRate"])
+        body = result.get("result", result)
+        return float(body["midRate"])
     except Exception:
         return None
