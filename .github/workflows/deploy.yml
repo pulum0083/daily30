@@ -1,9 +1,16 @@
-# main 브랜치 push 시 web/ 디렉토리를 gh-pages에 자동 배포
+# main 브랜치 코드 변경 시 web/ 를 gh-pages에 배포
+# web/data/ 변경(뉴스·브리핑 JSON)은 제외 — kospi-news-live.yml이 직접 배포
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'web/assets/**'
+      - 'web/*.html'
+      - 'web/briefings/**'
+      - 'api/**'
+      - 'vercel.json'
 
 permissions:
   contents: write
