@@ -1224,7 +1224,7 @@
         '<div class="mkt-section-label">국내 지수</div>' +
         '<div id="mkt-live-rows">' +
         mkIndexRow('kosdaq',  '코스닥',         '') +
-        mkIndexRow('kospi200','코스피200', '<span class="mkt-name-badge futures">IDX</span>') +
+        mkIndexRow('kospi200','코스피200', '') +
         '</div>' +
         // 환율
         '<div class="mkt-section-label">환율</div>' +
