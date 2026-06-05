@@ -142,18 +142,21 @@
     if (!c._hoverAttached) { c._hoverAttached = true; attachSparkHover(c); }
   }
 
-  function attachSparkHover(c) {
-    // 툴팁 div 생성
-    var tip = document.createElement('div');
-    tip.className = 'spark-tip';
-    var wrap = c.parentElement;
-    wrap.style.position = 'relative';
-    wrap.appendChild(tip);
+  // 전역 툴팁 — body에 단 하나, position:fixed로 뷰포트 기준 위치 잡아 잘림 방지
+  function getGlobalSparkTip() {
+    var tip = document.getElementById('spark-tip-global');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'spark-tip-global';
+      tip.className = 'spark-tip';
+      document.body.appendChild(tip);
+    }
+    return tip;
+  }
 
+  function attachSparkHover(c) {
     function fmtNum(v) {
-      return v >= 100
-        ? v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return v.toLocaleString('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     c.addEventListener('mousemove', function(e) {
@@ -176,23 +179,31 @@
       // 크로스헤어 재드로우
       drawSparkline(c.id, data, idx);
 
-      // 툴팁 내용
+      // 전역 툴팁 내용 업데이트
+      var tip = getGlobalSparkTip();
       tip.innerHTML =
         '<span class="spark-tip-val" style="color:' + color + '">' + fmtNum(val) + '</span>' +
         '<span class="spark-tip-delta" style="color:' + color + '">' + sign + delta.toFixed(2) + '%</span>';
-
-      // 툴팁 위치 — 캔버스 위, x는 크로스헤어 따라감
-      var xf  = pad.l + (idx / (data.length - 1)) * pW;
       tip.style.display = 'flex';
-      // 렌더 후 실제 너비 기준으로 좌우 클램프
+
+      // 크로스헤어 x 기준으로 fixed 위치 계산
+      var xRatio = (data.length > 1) ? idx / (data.length - 1) : 0;
+      var canvasX = rect.left + pad.l + xRatio * pW;
       var tipW = tip.offsetWidth || 88;
-      var left = xf - tipW / 2;
-      left = Math.max(0, Math.min(W - pad.r - tipW, left));
+      var tipH = tip.offsetHeight || 36;
+      var left = canvasX - tipW / 2;
+      // 뷰포트 좌우 클램프
+      left = Math.max(4, Math.min(window.innerWidth - tipW - 4, left));
+      var top = rect.top - tipH - 6;
+      // 위쪽 공간 없으면 아래로
+      if (top < 4) top = rect.bottom + 6;
       tip.style.left = left + 'px';
+      tip.style.top  = top + 'px';
     });
 
     c.addEventListener('mouseleave', function() {
-      tip.style.display = 'none';
+      var tip = document.getElementById('spark-tip-global');
+      if (tip) tip.style.display = 'none';
       if (c._sparkData) drawSparkline(c.id, c._sparkData);
     });
   }

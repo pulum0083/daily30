@@ -29,11 +29,19 @@ PROMPT = """
 - 투자자 시각 — "왜 지금 이게 중요한지"를 한 줄로
 - 원인 → 결과 구조 (예: "OO 때문에 XX가 흔들리고 있어요")
 
-아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
+{avoid_block}아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
 {{
   "market": {{"title": "시장 이슈 제목", "summary": "한 줄 요약"}},
   "stock":  {{"title": "종목 이슈 제목", "summary": "한 줄 요약"}}
 }}
+"""
+
+AVOID_BLOCK_TMPL = """[직전 이슈 — 종목 카테고리에서 반드시 다른 주제를 선택할 것]
+직전에 이미 다룬 종목 이슈(중복 금지):
+{items}
+위 종목·이슈와 동일하거나 매우 유사한 내용은 선택하지 마세요.
+다른 종목 또는 다른 이슈각도를 선택하세요.
+
 """
 
 
@@ -50,14 +58,20 @@ def get_gemini_api_key() -> str:
     return key
 
 
-def fetch_latest_issue(today: str, time_str: str) -> dict:
+def fetch_latest_issue(today: str, time_str: str, recent_stock_titles: list[str] | None = None) -> dict:
     from google import genai
     from google.genai import types
+
+    if recent_stock_titles:
+        items = "\n".join(f"- {t}" for t in recent_stock_titles)
+        avoid_block = AVOID_BLOCK_TMPL.format(items=items)
+    else:
+        avoid_block = ""
 
     client = genai.Client(api_key=get_gemini_api_key())
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
-        contents=PROMPT.format(today=today, time=time_str),
+        contents=PROMPT.format(today=today, time=time_str, avoid_block=avoid_block),
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.7,
@@ -88,8 +102,28 @@ def main() -> None:
 
     print(f"[fetch_news_live] {today} {time_str} KST — Gemini 이슈 수집 시작")
 
+    # 직전 종목 이슈 타이틀 수집 (최대 2개) — 중복 방지용
+    recent_stock_titles: list[str] = []
+    if OUT_PATH.exists():
+        try:
+            existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+            if existing.get("date") == today:
+                # latest의 stock
+                lt = existing.get("latest", {})
+                if isinstance(lt, dict) and lt.get("stock", {}).get("title"):
+                    recent_stock_titles.append(lt["stock"]["title"])
+                # history 첫 번째 stock
+                for h in existing.get("history", [])[:1]:
+                    t = (h.get("stock") or {}).get("title", "")
+                    if t and t not in recent_stock_titles:
+                        recent_stock_titles.append(t)
+        except Exception:
+            pass
+    if recent_stock_titles:
+        print(f"[fetch_news_live] 중복 방지 종목 이슈: {recent_stock_titles}")
+
     try:
-        latest = fetch_latest_issue(today, time_str)
+        latest = fetch_latest_issue(today, time_str, recent_stock_titles or None)
     except Exception as e:
         print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
