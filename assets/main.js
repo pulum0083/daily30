@@ -870,17 +870,19 @@
       return mins >= 930;
     }
 
-    // 당일 브리핑에서만 표시 — URL의 날짜와 오늘 KST 날짜 비교
+    // 당일이면 장 시간 기반, 과거 브리핑이면 정적 결과 표시
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
+    var isPast = false;
     if (m) {
-      var k = kstNow();
-      var todayKst = k.getUTCFullYear() + '-' +
-        String(k.getUTCMonth() + 1).padStart(2, '0') + '-' +
-        String(k.getUTCDate()).padStart(2, '0');
-      if (m[1] !== todayKst) return;
+      var k0 = kstNow();
+      var todayKst = k0.getUTCFullYear() + '-' +
+        String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
+        String(k0.getUTCDate()).padStart(2, '0');
+      if (m[1] > todayKst) return;        // 미래 날짜는 표시 안 함
+      if (m[1] < todayKst) isPast = true; // 과거 브리핑
     }
 
-    if (!isMarketHours() && !isAfterMarket()) return;
+    if (!isPast && !isMarketHours() && !isAfterMarket()) return;
     el.style.display = '';
 
     // isAfterMarket() 조기 return 이전에 선언 — updateDisplay() 콜백에서 참조하므로 반드시 앞에 있어야 함
@@ -926,6 +928,53 @@
       if (subElA) subElA.textContent = '최종 종가 확인 중…';
       fetchKospi();
       fetchNews();
+      return;
+    }
+
+    // ── 과거 브리핑 — 정적 결과 표시 (폴링 없음) ──
+    if (isPast) {
+      var badge3 = document.getElementById('lsb-badge');
+      if (badge3) { badge3.className = 'lsb-closed-badge'; badge3.textContent = '마감'; }
+      var footElPast = document.getElementById('lsb-foot');
+      if (footElPast) footElPast.innerHTML = '<strong>마감</strong>';
+
+      var actualPct = parseFloat(el.dataset.actualPct);
+      var emElPast  = document.getElementById('lsb-head-em');
+      var subElPast = document.getElementById('lsb-sub');
+
+      if (!isNaN(actualPct)) {
+        var verdictPast = calcVerdict(actualPct);
+        var signPast = actualPct >= 0 ? '+' : '';
+        var pctPast  = signPast + actualPct.toFixed(2) + '%';
+        var closedMsg =
+          verdictPast === 'tight' ? '박빙으로 마감했어요.' :
+          verdictPast === 'hit'   ? (dir === 'dn' ? '하락 예측이 맞았어요. 아쉬운 하루였어요.' : '상승 예측이 맞았어요.') :
+                                    (dir === 'dn' ? '틀려서 다행인 날이에요.' : '아쉽게도 예측이 빗나갔어요.');
+        if (emElPast)  { emElPast.textContent = closedMsg; emElPast.style.color = ''; emElPast.style.fontWeight = '700'; }
+        if (subElPast) { subElPast.textContent = pctPast + (actualPct >= 0 ? ' 상승 마감이에요.' : ' 하락 마감이에요.'); }
+
+        var chgElPast = document.getElementById('lsb-chg');
+        if (chgElPast) { chgElPast.textContent = signPast + actualPct.toFixed(2) + '%'; chgElPast.style.color = actualPct >= 0 ? 'var(--up)' : 'var(--dn)'; }
+
+        var needleElPast = document.getElementById('lsb-needle');
+        var rawPosPast = dir === 'up'
+          ? Math.max(0, Math.min(100, (actualPct + 2) / 4 * 100))
+          : Math.max(0, Math.min(100, (-actualPct + 2) / 4 * 100));
+        if (needleElPast) needleElPast.style.left = rawPosPast + '%';
+
+        var predTagElPast = document.getElementById('lsb-pred-tag');
+        if (predTagElPast) {
+          predTagElPast.style.background = dir === 'dn' ? 'var(--dn-bg)' : 'var(--up-bg)';
+          predTagElPast.style.color      = dir === 'dn' ? 'var(--dn)'    : 'var(--up)';
+        }
+      } else {
+        if (emElPast)  { emElPast.textContent = '결과 집계 중…'; emElPast.style.color = 'var(--muted)'; emElPast.style.fontWeight = ''; }
+        if (subElPast) { subElPast.textContent = '다음 날 오전 정확도 체크 후 결과가 표시됩니다.'; }
+      }
+
+      // 뉴스 섹션은 당일 데이터라 과거 브리핑에 적합하지 않음
+      var lsbNews = document.querySelector('#live-scoreboard .lsb-news');
+      if (lsbNews) lsbNews.style.display = 'none';
       return;
     }
 
