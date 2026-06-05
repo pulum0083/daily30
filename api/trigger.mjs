@@ -1,6 +1,8 @@
 const VALID_TYPES = ['kospi', 'kospi-close', 'us', 'accuracy', 'kospi-news-live'];
 const REPO = 'pulum0083/daily30';
 const WORKFLOW = 'daily_report.yml';
+// 뉴스 갱신은 전용 워크플로우로 직접 dispatch — daily_report.yml과 concurrency 분리
+const WORKFLOW_MAP = { 'kospi-news-live': 'kospi-news-live.yml' };
 
 function isAuthorized(req) {
   const secret = process.env.CRON_SECRET;
@@ -87,8 +89,9 @@ export default async function handler(req, res) {
     }
   }
 
+  const workflow = WORKFLOW_MAP[type] ?? WORKFLOW;
   const resp = await fetch(
-    `https://api.github.com/repos/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
+    `https://api.github.com/repos/${REPO}/actions/workflows/${workflow}/dispatches`,
     {
       method: 'POST',
       headers: {
@@ -97,7 +100,10 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
         'X-GitHub-Api-Version': '2022-11-28',
       },
-      body: JSON.stringify({ ref: 'main', inputs: { briefing_type: type, dry_run: dryRun } }),
+      // 전용 워크플로우는 inputs 없음 (workflow_dispatch만 선언)
+      body: JSON.stringify(WORKFLOW_MAP[type]
+        ? { ref: 'main' }
+        : { ref: 'main', inputs: { briefing_type: type, dry_run: dryRun } }),
     }
   );
 

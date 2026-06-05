@@ -2,6 +2,7 @@
 name: 코스피 장중 뉴스 갱신
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '10 0 * * 1-5'  # 09:10 KST
     - cron: '30 0 * * 1-5'  # 09:30 KST
