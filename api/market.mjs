@@ -17,7 +17,7 @@ async function fetchIndex(code) {
 
 async function fetchForex() {
   const r = await fetch(
-    'https://m.stock.naver.com/front-api/marketIndex/prices?reutersCode=FX_USDKRW&category=exchange&pageSize=5&page=1',
+    'https://m.stock.naver.com/front-api/marketIndex/prices?reutersCode=FX_USDKRW&category=exchange&pageSize=10&page=1',
     { headers: HDR, signal: AbortSignal.timeout(6000) },
   );
   if (!r.ok) throw new Error(`forex ${r.status}`);
@@ -41,9 +41,9 @@ async function fetchInvestor() {
   const buf  = await r.arrayBuffer();
   const text = new TextDecoder('euc-kr').decode(buf);
 
-  // "개인<br>...+N,NNN억 외국인<br>...-N,NNN억 기관<br>...+N,NNN억"
+  // "개인<br><span class="up">+N,NNN<span>억</span>..."
   const m = text.match(
-    /개인<br>.*?([+-][\d,]+)억.*?외국인<br>.*?([+-][\d,]+)억.*?기관<br>.*?([+-][\d,]+)억/s
+    /개인<br>.*?([+-][\d,]+)<span>억.*?외국인<br>.*?([+-][\d,]+)<span>억.*?기관<br>.*?([+-][\d,]+)<span>억/s
   );
   if (!m) throw new Error('investor pattern not found');
 
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
 
   const [kosdaq, kospi200, forex, investor] = await Promise.allSettled([
     fetchIndex('KOSDAQ'),
-    fetchIndex('KOSPI200'),
+    fetchIndex('KPI200'),
     fetchForex(),
     fetchInvestor(),
   ]);
