@@ -254,7 +254,7 @@ def _yf_history(ticker: str, retries: int = 3, **kwargs):
 
 
 
-def _get_realtime_price(ticker: str) -> "tuple[float, float] | None":
+def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
     1순위: yfinance fast_info (단일 속성, 빠름)
@@ -567,7 +567,7 @@ def fetch_naver_usdkrw() -> dict:
     return {}
 
 
-def _get_price_change(ticker: str) -> "dict | None":
+def _get_price_change(ticker: str) -> dict | None:
     """ticker의 최신 종가와 전일 대비 등락률을 수집한다 (5d 히스토리, 경량).
 
     USDKRW=X 같은 외환 티커는 일요일 데이터가 포함되어 '전일'이 주말로
