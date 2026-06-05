@@ -543,6 +543,10 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .mkt-live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:rgba(34,197,94,.28);animation:mkt-pulse 1.8s ease-out infinite;}
 @keyframes mkt-pulse{0%{transform:scale(1);opacity:.8;}100%{transform:scale(2.2);opacity:0;}}
 .mkt-live-label{font-size:11px;font-weight:700;color:#22C55E;}
+.mkt-refresh-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:22px;border:1px solid var(--hairline);background:var(--surface-soft);cursor:pointer;border-radius:6px;color:var(--muted);padding:0;transition:background .15s,border-color .15s,color .15s;flex-shrink:0;}
+.mkt-refresh-btn:hover{background:var(--surface-inset);border-color:var(--muted);color:var(--ink);}
+.mkt-refresh-btn:active{transform:scale(.93);}
+.mkt-refresh-btn svg{width:13px;height:13px;}
 .mkt-name-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;}
 .mkt-name-badge.futures{background:var(--primary-bg);color:var(--primary);}
 .mkt-name-badge.fx{background:var(--gold-bg);color:var(--gold);}

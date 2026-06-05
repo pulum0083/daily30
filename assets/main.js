@@ -67,24 +67,47 @@
   /* ── 차트 프리미티브 ──
      섹션 템플릿이 실데이터를 주입해 호출한다. */
   // 미니 스파크라인 (시장 지표)
-  function drawSparkline(id, data, color) {
+  function drawSparkline(id, data) {
     const c = document.getElementById(id);
-    if (!c || !data || !data.length) return;
+    if (!c || !data || data.length < 2) return;
     const dpr = window.devicePixelRatio || 1, W = c.offsetWidth || 80, H = c.offsetHeight || 44;
     c.width = W * dpr; c.height = H * dpr;
     const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
-    const min = Math.min(...data), max = Math.max(...data), range = max - min || 1, pad = 2;
-    const pts = data.map((v, i) => ({ x: (i / (data.length - 1)) * W, y: H - pad - ((v - min) / range) * (H - pad * 2) }));
+
+    const isUp  = data[data.length - 1] >= data[0];
+    const color = isUp ? '#E03131' : '#2775ED';
+    const pad   = { t: 5, b: 5, l: 2, r: 5 };
+    const pW    = W - pad.l - pad.r, pH = H - pad.t - pad.b;
+    const min   = Math.min(...data), max = Math.max(...data);
+    const range = max - min || data[0] * 0.001 || 1;
+    const xf    = i => pad.l + (i / (data.length - 1)) * pW;
+    const yf    = v => pad.t + (1 - (v - min) / range) * pH;
+    const pts   = data.map((v, i) => ({ x: xf(i), y: yf(v) }));
+
+    // 시작가 기준선
+    const refY = yf(data[0]);
+    ctx.beginPath(); ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = color + '55'; ctx.lineWidth = 0.8;
+    ctx.moveTo(pad.l, refY); ctx.lineTo(W - pad.r, refY);
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // 그라디언트 면
     const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, color + '38'); grad.addColorStop(1, color + '00');
+    grad.addColorStop(0, color + '40'); grad.addColorStop(1, color + '00');
     ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) { const cx = (pts[i - 1].x + pts[i].x) / 2; ctx.bezierCurveTo(cx, pts[i - 1].y, cx, pts[i].y, pts[i].x, pts[i].y); }
-    ctx.lineTo(pts.at(-1).x, H); ctx.lineTo(pts[0].x, H); ctx.closePath();
+    for (let i = 1; i < pts.length; i++) { const cx = (pts[i-1].x + pts[i].x) / 2; ctx.bezierCurveTo(cx, pts[i-1].y, cx, pts[i].y, pts[i].x, pts[i].y); }
+    ctx.lineTo(pts.at(-1).x, H - pad.b); ctx.lineTo(pts[0].x, H - pad.b); ctx.closePath();
     ctx.fillStyle = grad; ctx.fill();
+
+    // 라인
     ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) { const cx = (pts[i - 1].x + pts[i].x) / 2; ctx.bezierCurveTo(cx, pts[i - 1].y, cx, pts[i].y, pts[i].x, pts[i].y); }
+    for (let i = 1; i < pts.length; i++) { const cx = (pts[i-1].x + pts[i].x) / 2; ctx.bezierCurveTo(cx, pts[i-1].y, cx, pts[i].y, pts[i].x, pts[i].y); }
     ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(pts.at(-1).x, pts.at(-1).y, 2.2, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+
+    // 현재값 도트 — 흰 테두리 + 컬러 채움
+    const lx = pts.at(-1).x, ly = pts.at(-1).y;
+    ctx.beginPath(); ctx.arc(lx, ly, 4,   0, Math.PI * 2); ctx.fillStyle = '#fff';   ctx.fill();
+    ctx.beginPath(); ctx.arc(lx, ly, 2.5, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
   }
   // 종목 미니차트 (주가 + 20일선 + 200일선)
   function drawMiniChart(id, prices, ma20, ma200) {
@@ -1174,7 +1197,14 @@
       panel.style.marginTop = '16px';
     }
 
-    var sparkData = { kosdaq: [], kospi200: [], forex: [] };
+    var SPARK_KEY = 'mkt-spark-v1';
+    var sparkData = (function() {
+      try {
+        var saved = JSON.parse(sessionStorage.getItem(SPARK_KEY) || 'null');
+        if (saved && Array.isArray(saved.kosdaq)) return saved;
+      } catch (e) {}
+      return { kosdaq: [], kospi200: [], forex: [] };
+    })();
     var polling = null;
 
     function fmt(n, dp) {
@@ -1205,10 +1235,18 @@
       if (header) {
         var during = isDuringMarket();
         header.querySelector('.pub-time').outerHTML =
+          '<div style="display:flex;align-items:center;gap:4px;">' +
           '<span class="pub-time mkt-live-time">' +
           '<span class="mkt-live-dot"' + (during ? '' : ' style="display:none"') + '></span>' +
           '<span class="mkt-live-label">' + (during ? '실시간' : '장 마감') + '</span>' +
-          '</span>';
+          '</span>' +
+          '<button class="mkt-refresh-btn" title="페이지 새로고침" onclick="window.location.reload()">' +
+          '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M13.5 8A5.5 5.5 0 1 1 10 3.07"/>' +
+          '<polyline points="10 1 10 4 13 4"/>' +
+          '</svg>' +
+          '</button>' +
+          '</div>';
       }
 
       var list = panel.querySelector('.mkt-list');
@@ -1216,9 +1254,9 @@
         // 수급
         '<div class="mkt-section-label">오늘 수급 · 코스피</div>' +
         '<div class="mkt-list" id="mkt-live-supply" style="padding:0 14px">' +
-        mkSupplyRow('frgn', '외국인') +
-        mkSupplyRow('inst', '기관') +
         mkSupplyRow('indv', '개인') +
+        mkSupplyRow('inst', '기관') +
+        mkSupplyRow('frgn', '외국인') +
         '</div>' +
         // 국내 지수
         '<div class="mkt-section-label">국내 지수</div>' +
@@ -1291,7 +1329,7 @@
         }
         sparkData[key].push(newVal);
         if (sparkData[key].length > 30) sparkData[key].shift();
-        if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key], '#2775ED');
+        if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key]);
       });
 
       // 환율
@@ -1311,7 +1349,7 @@
         }
         sparkData.forex.push(d.forex.price);
         if (sparkData.forex.length > 30) sparkData.forex.shift();
-        if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex, '#B7791F');
+        if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex);
       }
 
       // 수급
@@ -1334,14 +1372,25 @@
       }
     }
 
+    function saveSparkData() {
+      try { sessionStorage.setItem(SPARK_KEY, JSON.stringify(sparkData)); } catch (e) {}
+    }
+
     function poll() {
       fetch('/api/market', { signal: AbortSignal.timeout(8000) })
         .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(applyData)
+        .then(function(d) { applyData(d); saveSparkData(); })
         .catch(function() {});
     }
 
     buildPanel();
+
+    // 복원된 데이터로 즉시 스파크라인 표시
+    ['kosdaq', 'kospi200'].forEach(function(key) {
+      if (sparkData[key].length >= 2) drawSparkline('ml-' + key + '-spark', sparkData[key]);
+    });
+    if (sparkData.forex.length >= 2) drawSparkline('ml-fx-spark', sparkData.forex);
+
     poll();
     if (isDuringMarket()) {
       polling = setInterval(poll, 60000);
