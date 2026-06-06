@@ -327,14 +327,17 @@ hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 
 `dpick` 키 자체가 없거나 빈 배열이면 `fetch_closing_kospi.py`의 `fetch_dpick()`로 재수집하거나, 네이버 금융 거래량 상위에서 수동 확인 후 HTML에 직접 추가.
 
+**dpick 빈 배열 = 정상 동작일 수 있다.** `fetch_dpick()`는 네이버 `item/frgn` 페이지의 최신 행 날짜가 오늘 KST가 아니면 해당 종목을 자동 스킵한다. 16:30 실행 기준에도 네이버 업데이트가 늦으면 `dpick`이 비어 있고, HTML에서 섹션이 사라진다. 이는 어제 데이터를 표시하지 않기 위한 의도적 동작이다.
+
 #### 데이터 확인 순서 (마감 브리핑 수동 패치 시)
 
 ```
 1. data/latest_kospi_close.json 열어서 위 3개 필드 확인
-2. 0 또는 누락 → python3 scripts/fetch_closing_kospi.py 재실행 (장 종료 후)
-3. 여전히 누락 → 네이버 금융 / KRX 웹에서 수동 확인
-4. HTML 직접 수정 → 커밋
-5. python3 scripts/generate_html.py --write-list-only 실행
+2. 0 또는 누락 → python3 scripts/fetch_closing_kospi.py 재실행 (16:30 이후)
+3. dpick 빈 배열 → 네이버 업데이트 전(16:20 이전)일 수 있음. 16:30 이후 재실행.
+4. 여전히 누락 → 네이버 금융 / KRX 웹에서 수동 확인
+5. HTML 직접 수정 → 커밋
+6. python3 scripts/generate_html.py --write-list-only 실행
 ```
 
 ### 2. generate_html.py 사용 시 기존 수정 덮어쓰기 주의
