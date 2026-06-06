@@ -1199,7 +1199,6 @@
 
     function renderNews(d) {
       if (!d || !d.latest) return;
-      // 과거 브리핑은 날짜 체크 생략, 당일 브리핑만 오늘 날짜 확인
       if (!isPast && d.date) {
         var k2 = kstNow();
         var todayKst2 = k2.getUTCFullYear() + '-' +
@@ -1207,75 +1206,48 @@
           String(k2.getUTCDate()).padStart(2, '0');
         if (d.date !== todayKst2) return;
       }
-      var stampEl    = document.getElementById('lsb-news-stamp');
-      var latestEl   = document.getElementById('lsb-news-latest');
-      var accordionEl = document.getElementById('lsb-accordion');
-      var bodyEl     = document.getElementById('lsb-accordion-body');
-      var prevTimeEl = document.getElementById('lsb-ac-prev-time');
-      var prevTitleEl= document.getElementById('lsb-ac-prev-title');
+      var timelineEl = document.getElementById('lsb-timeline');
+      if (!timelineEl) return;
 
-      if (stampEl) {
-        stampEl.innerHTML = '<span style="color:var(--primary);font-weight:700">방금 업데이트</span>'
-          + ' · ' + escHtml(d.updated_at) + ' 기준 · 매 30분 갱신';
-      }
-      // latest: 새 포맷 { market, stock } 또는 구 포맷 { title, summary }
-      function newsCard(issue, badge) {
-        if (!issue || !issue.title) return '';
-        return '<div class="lsb-news-card">'
-          + (badge ? '<span class="lsb-news-badge">' + badge + '</span>' : '')
-          + '<div class="lsb-news-title">' + escHtml(issue.title) + '</div>'
-          + '<div class="lsb-news-body">'  + escHtml(issue.summary || '') + '</div>'
-          + '</div>';
-      }
-      if (latestEl) {
-        var lat = d.latest || {};
-        if (lat.market || lat.stock) {
-          // 새 포맷
-          latestEl.innerHTML = newsCard(lat.market, '시장') + newsCard(lat.stock, '종목');
-        } else {
-          // 구 포맷 호환
-          latestEl.innerHTML = newsCard(lat, '');
-        }
-      }
-
+      // history는 최신→과거 순. 그대로 사용 (최신이 맨 위)
       var hist = (d.history || []).filter(function(item) {
-        var mTitle = (item.market && item.market.title) || item.title;
-        return mTitle && mTitle !== '오늘의 이슈 준비 중';
+        var t = (item.market && item.market.title) || item.title;
+        return t && t !== '오늘의 이슈 준비 중';
       });
-      if (accordionEl) {
-        accordionEl.style.display = '';
-        if (hist.length > 0) {
-          var h0mTitle = (hist[0].market && hist[0].market.title) || hist[0].title || '';
-          if (prevTimeEl)  prevTimeEl.textContent  = hist[0].time;
-          if (prevTitleEl) prevTitleEl.textContent = h0mTitle;
-          var btnEl = document.getElementById('lsb-accordion-btn');
-          if (bodyEl && btnEl && !bodyEl.classList.contains('open')) {
-            bodyEl.classList.add('open');
-            btnEl.classList.add('open');
-            var leftEl = btnEl.querySelector('.lsb-ac-left');
-            if (leftEl) leftEl.innerHTML = '<span class="lsb-ac-collapse-label">목록 닫기</span>';
-          }
-          if (bodyEl) {
-            bodyEl.innerHTML = hist.map(function(item) {
-              var mIssue = item.market || (item.title ? item : null);
-              var sIssue = item.stock || null;
-              return '<div class="lsb-news-item">'
-                + '<span class="lsb-ni-time">' + escHtml(item.time) + '</span>'
-                + '<div class="lsb-ni-content">'
-                + (mIssue ? '<div class="lsb-ni-title"><span class="lsb-news-badge sm market">시장</span>' + escHtml(mIssue.title) + '</div>'
-                  + (mIssue.summary ? '<div class="lsb-ni-body">' + escHtml(mIssue.summary) + '</div>' : '') : '')
-                + (sIssue ? '<div class="lsb-ni-title" style="margin-top:6px"><span class="lsb-news-badge sm stock">종목</span>' + escHtml(sIssue.title) + '</div>'
-                  + (sIssue.summary ? '<div class="lsb-ni-body">' + escHtml(sIssue.summary) + '</div>' : '') : '')
-                + '</div>'
-                + '</div>';
-            }).join('');
-          }
-        } else {
-          if (prevTimeEl)  prevTimeEl.textContent  = '';
-          if (prevTitleEl) prevTitleEl.textContent = '이슈 히스토리';
-          if (bodyEl) bodyEl.innerHTML = '<div style="padding:12px 0;font-size:13px;color:var(--muted)">이전 이슈 내용이 쌓이게 되어요.</div>';
-        }
+
+      // history가 없으면 latest 단독 표시
+      if (hist.length === 0) {
+        var lat = d.latest || {};
+        var latTitle = (lat.market && lat.market.title) || lat.title || '';
+        if (latTitle) hist = [{ time: d.updated_at || '', market: lat.market, title: latTitle }];
       }
+
+      if (hist.length === 0) {
+        timelineEl.innerHTML = '<div class="lsb-tl-empty">장중 이슈가 쌓이게 됩니다.</div>';
+        return;
+      }
+
+      function tlIssue(issue, type) {
+        if (!issue || !issue.title) return '';
+        var label = type === 'market' ? '시장' : '종목';
+        return '<div class="lsb-tl-issue">'
+          + '<span class="lsb-tl-badge ' + type + '">' + label + '</span>'
+          + '<span class="lsb-tl-headline">' + escHtml(issue.title) + '</span>'
+          + '</div>'
+          + (issue.summary ? '<div class="lsb-tl-desc">' + escHtml(issue.summary) + '</div>' : '');
+      }
+      timelineEl.innerHTML = hist.map(function(item, i) {
+        var isLatest = i === 0;
+        var mIssue = item.market || (item.title ? item : null);
+        var sIssue = item.stock || null;
+        return '<div class="lsb-tl-item' + (isLatest ? ' active' : '') + '">'
+          + '<span class="lsb-tl-time">' + escHtml(item.time || '') + '</span>'
+          + '<div class="lsb-tl-body">'
+          + tlIssue(mIssue, 'market')
+          + (sIssue ? '<div class="lsb-tl-stock">' + tlIssue(sIssue, 'stock') + '</div>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
     }
 
     function fetchNews() {
