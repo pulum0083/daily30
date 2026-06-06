@@ -1,0 +1,29 @@
+{# 이슈 브리핑 섹션 — kospi / close / us 브리핑 공용 partial (B안: JS 동적 fetch)
+   - 발행 시점과 무관하게 페이지 로드 시 최신 이슈를 fetch해 표시한다.
+   - kospi-news-{date}.json 을 fetch → data-slot 필터링 → history 1개 이상일 때 섹션 표시
+   - 데이터 속성:
+       data-date   : 브리핑 날짜 (YYYY-MM-DD)
+       data-slot   : MARKET | POST_MARKET | US_MARKET
+       data-type   : kospi | close | us
+#}
+<div id="issue-briefing-wrap"
+     data-date="{{ date_str }}"
+     data-slot="{{ issue_slot | default('MARKET') }}"
+     data-type="{{ briefing_type | default('kospi') }}"
+     style="display:none;margin-top:16px;">
+  <div class="issue-briefing-card">
+    <div class="issue-briefing-header">
+      <div class="issue-briefing-title">
+        <span class="issue-briefing-dot"></span>
+        이슈 브리핑
+        <span class="issue-briefing-badge">AI 중계</span>
+      </div>
+      <span class="issue-briefing-meta" id="issue-briefing-meta">—</span>
+    </div>
+    <div class="issue-briefing-body">
+      <div id="issue-briefing-tl">
+        <div class="ib-item"><span class="ib-time">—</span><div class="ib-body"><div class="ib-desc" style="-webkit-line-clamp:unset">이슈를 불러오는 중이에요.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>

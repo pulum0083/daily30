@@ -47,6 +47,17 @@
 {% block body %}{% endblock %}
 
 <script src="{{ js_path | default('/assets/main.js') }}"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initLiveScoreboard === 'function') initLiveScoreboard();
+  if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
+  if (typeof initIssueBriefing === 'function') initIssueBriefing();
+  if (typeof patchBriefingList === 'function') patchBriefingList();
+  if (typeof initNotices === 'function') initNotices();
+  if (typeof loadChipWidget === 'function') loadChipWidget();
+  if (typeof loadVisitorCount === 'function') loadVisitorCount();
+});
+</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

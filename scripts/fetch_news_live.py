@@ -1,4 +1,12 @@
-# 장중 코스피 핵심 이슈를 Gemini Google Search로 수집해 kospi-news-live.json을 갱신하는 스크립트
+# 이슈 브리핑 수집 스크립트
+# 평일 06:00~익일 01:00 KST 운영. 실행 시각에 따라 프롬프트를 자동 분기한다.
+#
+# 구간별 프롬프트:
+#   PRE_MARKET  (06:00~08:59) : 장 전 준비 — 전날 미국 마감 + 오늘 코스피 전망
+#   MARKET      (09:00~15:29) : 장중 실시간 — 코스피·수급·급등락 이슈
+#   POST_MARKET (15:30~19:59) : 마감 후 + 미국 프리마켓 — 한국 마감 정리·미국 개장 전
+#   US_MARKET   (20:00~01:00) : 미국 시장 — 미국 장중 이슈 중심
+
 import json
 import os
 import re
@@ -11,17 +19,37 @@ REPO_ROOT = Path(__file__).parent.parent
 OUT_PATH = REPO_ROOT / "web" / "data" / "kospi-news-live.json"
 MAX_HISTORY = 6
 
-PROMPT = """
-지금 {today} {time} KST 기준, 코스피 장중 투자자가 가장 주목해야 할 이슈 2개를 골라주세요.
 
-[선택 범위 — 아래 두 카테고리에서 각 1개씩]
-1. 시장 전체: 코스피·코스닥 지수 흐름, 외국인·기관 수급, 환율, 글로벌 이슈
-2. 주요 종목: 삼성전자·SK하이닉스·현대차·셀트리온·카카오·NAVER·KB금융·포스코 등 대형주, 또는 오늘 5% 이상 급등락 중인 종목
+# ── 시간대 판별 ──────────────────────────────────────────────────────────────
 
+def get_slot(hour: int, minute: int) -> str:
+    """KST 시·분을 받아 구간 문자열을 반환한다.
+
+    운영 구간:
+      MARKET      09:00~15:29  장중 실시간
+      POST_MARKET 16:35~21:29  마감 후 + 미국 프리마켓
+      US_MARKET   21:30~01:00  미국 시장
+    운영 외 시간은 MARKET 폴백 (워크플로우가 해당 시간에 실행하지 않음)
+    """
+    total = hour * 60 + minute
+    if 540 <= total < 930:    # 09:00~15:29
+        return "MARKET"
+    if 995 <= total < 1290:   # 16:35~21:29
+        return "POST_MARKET"
+    # 21:30~23:59 또는 00:00~01:00(익일)
+    if total >= 1290 or total <= 60:
+        return "US_MARKET"
+    return "MARKET"           # 운영 외 시간 폴백
+
+
+# ── 프롬프트 템플릿 ─────────────────────────────────────────────────────────
+
+# 공통 출력 규칙 (모든 프롬프트에 삽입)
+_OUTPUT_RULES = """
 [타이틀 규칙]
-- 각 15자 이내, 현재 일어나고 있는 일을 짧고 강하게
+- 각 15자 이내, 지금 일어나고 있는 일을 짧고 강하게
 - "지속", "흐름", "동향" 같은 밋밋한 단어 금지
-- 구체적 숫자·행위자 포함 (예: "삼전 5% 급락", "외국인 20일째 매도", "원화 1545 돌파")
+- 구체적 숫자·행위자 포함 (예: "나스닥 2% 급락", "외국인 20일째 매도", "원화 1545 돌파")
 - 시장 감정 표현 허용 (질주, 급락, 흔들, 버팀, 폭발 등)
 
 [요약 규칙]
@@ -32,18 +60,65 @@ PROMPT = """
 {avoid_block}아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
 {{
   "market": {{"title": "시장 이슈 제목", "summary": "한 줄 요약"}},
-  "stock":  {{"title": "종목 이슈 제목", "summary": "한 줄 요약"}}
+  "stock":  {{"title": "종목/자산 이슈 제목", "summary": "한 줄 요약"}}
 }}
 """
 
-AVOID_BLOCK_TMPL = """[직전 이슈 — 종목 카테고리에서 반드시 다른 주제를 선택할 것]
-직전에 이미 다룬 종목 이슈(중복 금지):
+# 장 전 준비 (06:00~08:59)
+PROMPT_PRE_MARKET = """
+지금 {today} {time} KST — 한국 장 시작 전입니다.
+오늘 코스피 개장에 영향을 줄 핵심 이슈 2개를 Google Search로 찾아 정리해 주세요.
+
+[선택 범위]
+1. 시장 전체: 어젯밤 미국 나스닥·S&P500·SOX 등락, 오늘 코스피 방향에 영향을 줄 글로벌 변수 (환율·선물·VIX 등)
+2. 주요 종목/자산: 어젯밤 미국 반도체·빅테크 중 오늘 국내 연관주에 영향을 줄 종목, 또는 오늘 코스피 예상 강세/약세 섹터
+""" + _OUTPUT_RULES
+
+# 장중 실시간 (09:00~15:29)
+PROMPT_MARKET = """
+지금 {today} {time} KST — 코스피 장중입니다.
+지금 이 순간 투자자가 가장 주목해야 할 이슈 2개를 Google Search로 찾아 정리해 주세요.
+
+[선택 범위]
+1. 시장 전체: 코스피·코스닥 지수 흐름, 외국인·기관 수급, 환율, 글로벌 돌발 이슈
+2. 주요 종목: 삼성전자·SK하이닉스·현대차·셀트리온·카카오·NAVER·KB금융·포스코 등 대형주, 또는 오늘 5% 이상 급등락 중인 종목
+""" + _OUTPUT_RULES
+
+# 마감 후 + 미국 프리마켓 (15:30~19:59)
+PROMPT_POST_MARKET = """
+지금 {today} {time} KST — 한국 장 마감 후, 미국 프리마켓 시간대입니다.
+오늘 코스피 마감 정리와 오늘 밤 미국 시장 전망에 필요한 핵심 이슈 2개를 Google Search로 찾아 정리해 주세요.
+
+[선택 범위]
+1. 시장 전체: 오늘 코스피·코스닥 마감 등락 원인 요약, 또는 현재 미국 선물·프리마켓 방향과 원인
+2. 주요 종목/자산: 오늘 국내 급등락 종목 사유, 또는 오늘 밤 미국 주목 종목 (실적·이벤트 등)
+""" + _OUTPUT_RULES
+
+# 미국 시장 (20:00~01:00)
+PROMPT_US_MARKET = """
+지금 {today} {time} KST — 미국 주식시장이 열려 있습니다 (또는 막 열렸습니다).
+지금 미국 시장에서 가장 중요한 이슈 2개를 Google Search로 찾아 정리해 주세요.
+
+[선택 범위]
+1. 시장 전체: S&P500·나스닥·다우 장중 등락 원인, 연준 발언·경제지표 발표, VIX·달러·국채금리 움직임
+2. 주요 종목/자산: 지금 미국 시장에서 급등락 중인 빅테크·반도체 종목 (NVDA·AAPL·MSFT·AMD·TSMC 등), 또는 실적 발표 종목
+""" + _OUTPUT_RULES
+
+PROMPT_MAP = {
+    "MARKET":      PROMPT_MARKET,
+    "POST_MARKET": PROMPT_POST_MARKET,
+    "US_MARKET":   PROMPT_US_MARKET,
+}
+
+AVOID_BLOCK_TMPL = """[직전 2회 이슈 — 아래 시장·종목 주제와 동일하거나 매우 유사한 내용은 선택하지 마세요]
 {items}
-위 종목·이슈와 동일하거나 매우 유사한 내용은 선택하지 마세요.
-다른 종목 또는 다른 이슈각도를 선택하세요.
+
+시장 이슈와 종목 이슈 모두 위 목록과 겹치지 않는 새로운 주제를 선택하세요.
 
 """
 
+
+# ── API 키 ────────────────────────────────────────────────────────────────────
 
 def get_gemini_api_key() -> str:
     key = os.environ.get("GEMINI_API_KEY", "")
@@ -58,20 +133,29 @@ def get_gemini_api_key() -> str:
     return key
 
 
-def fetch_latest_issue(today: str, time_str: str, recent_stock_titles: list[str] | None = None) -> dict:
+# ── Gemini 호출 ───────────────────────────────────────────────────────────────
+
+def fetch_latest_issue(
+    slot: str,
+    today: str,
+    time_str: str,
+    recent_stock_titles=None,  # list[str] | None
+) -> dict:
     from google import genai
     from google.genai import types
 
+    avoid_block = ""
     if recent_stock_titles:
         items = "\n".join(f"- {t}" for t in recent_stock_titles)
         avoid_block = AVOID_BLOCK_TMPL.format(items=items)
-    else:
-        avoid_block = ""
+
+    prompt_tmpl = PROMPT_MAP[slot]
+    prompt = prompt_tmpl.format(today=today, time=time_str, avoid_block=avoid_block)
 
     client = genai.Client(api_key=get_gemini_api_key())
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
-        contents=PROMPT.format(today=today, time=time_str, avoid_block=avoid_block),
+        contents=prompt,
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.7,
@@ -95,40 +179,48 @@ def fetch_latest_issue(today: str, time_str: str, recent_stock_titles: list[str]
     return parsed
 
 
+# ── 메인 ─────────────────────────────────────────────────────────────────────
+
 def main() -> None:
     now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
     time_str = now.strftime("%H:%M")
+    slot = get_slot(now.hour, now.minute)
 
-    print(f"[fetch_news_live] {today} {time_str} KST — Gemini 이슈 수집 시작")
+    print(f"[fetch_news_live] {today} {time_str} KST — 슬롯={slot} — Gemini 이슈 수집 시작")
 
-    # 직전 종목 이슈 타이틀 수집 (최대 2개) — 중복 방지용
-    recent_stock_titles: list[str] = []
+    # 직전 2회 market·stock 이슈 타이틀 수집 — 중복 방지용
+    # 가장 최신 이슈(latest)와 그 이전 이슈(history[0])의 market·stock 타이틀을 모두 수집한다.
+    recent_stock_titles: list = []
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             if existing.get("date") == today:
-                # latest의 stock
+                # 직전 이슈 (latest)
                 lt = existing.get("latest", {})
-                if isinstance(lt, dict) and lt.get("stock", {}).get("title"):
-                    recent_stock_titles.append(lt["stock"]["title"])
-                # history 첫 번째 stock
+                if isinstance(lt, dict):
+                    for key in ("market", "stock"):
+                        t = (lt.get(key) or {}).get("title", "")
+                        if t and t not in recent_stock_titles:
+                            recent_stock_titles.append(t)
+                # 그 이전 이슈 (history[0])
                 for h in existing.get("history", [])[:1]:
-                    t = (h.get("stock") or {}).get("title", "")
-                    if t and t not in recent_stock_titles:
-                        recent_stock_titles.append(t)
+                    for key in ("market", "stock"):
+                        t = (h.get(key) or {}).get("title", "")
+                        if t and t not in recent_stock_titles:
+                            recent_stock_titles.append(t)
         except Exception:
             pass
     if recent_stock_titles:
-        print(f"[fetch_news_live] 중복 방지 종목 이슈: {recent_stock_titles}")
+        print(f"[fetch_news_live] 중복 방지 이슈 목록: {recent_stock_titles}")
 
     try:
-        latest = fetch_latest_issue(today, time_str, recent_stock_titles or None)
+        latest = fetch_latest_issue(slot, today, time_str, recent_stock_titles or None)
     except Exception as e:
         print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # 기존 latest를 history 맨 앞에 추가 (날짜가 같은 경우에만 history 이어받음)
+    # 기존 latest를 history 맨 앞에 추가 (같은 날짜인 경우에만 이어받음)
     history: list = []
     if OUT_PATH.exists():
         try:
@@ -136,7 +228,6 @@ def main() -> None:
             if existing.get("date") == today:
                 prev = existing.get("latest")
                 if prev:
-                    # market 키가 있는 새 포맷 또는 구 포맷 모두 history에 보존
                     entry = {"time": existing.get("updated_at", "")}
                     if "market" in prev:
                         entry.update(prev)
@@ -149,7 +240,13 @@ def main() -> None:
         except Exception:
             pass
 
-    data = {"date": today, "updated_at": time_str, "latest": latest, "history": history}
+    data = {
+        "date": today,
+        "updated_at": time_str,
+        "slot": slot,           # 디버깅·프론트 활용용
+        "latest": latest,
+        "history": history,
+    }
     OUT_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[fetch_news_live] Saved → {OUT_PATH}")
 

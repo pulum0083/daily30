@@ -1635,6 +1635,124 @@
     }
   }
 
+  /* ── 이슈 브리핑 동적 fetch (B안) ──────────────────────────────────────
+     kospi-news-{date}.json 을 fetch → data-slot 필터링 → 렌더링
+     발행 시점과 무관하게 페이지 로드 시 최신 이슈를 표시한다.
+     history 1개 이상일 때만 섹션을 표시하고, 0개면 wrap 을 숨긴다.
+
+     슬롯별 수록 시각:
+       MARKET      → 09:00~15:29 수집분 (코스피 예측 브리핑)
+       POST_MARKET → 16:35~21:29 수집분 (코스피 마감 브리핑)
+       US_MARKET   → 21:30~01:00 수집분 (미국 시장 브리핑)
+  ── */
+  function initIssueBriefing() {
+    var wrap = document.getElementById('issue-briefing-wrap');
+    if (!wrap) return;
+
+    var date = wrap.dataset.date;   // YYYY-MM-DD
+    var slot = wrap.dataset.slot;   // MARKET | POST_MARKET | US_MARKET
+    if (!date || !slot) return;
+
+    // 슬롯별 허용 시각 범위 (KST, 분 단위)
+    var SLOT_RANGE = {
+      MARKET:      { from: 540,  to: 930  },   // 09:00~15:29
+      POST_MARKET: { from: 995,  to: 1290 },   // 16:35~21:29
+      US_MARKET:   { from: 1290, to: 1500 },   // 21:30~24:59  (+익일 00:00~01:00)
+    };
+
+    function timeToMins(timeStr) {
+      // "HH:MM" → 분
+      var parts = (timeStr || '').split(':');
+      if (parts.length < 2) return -1;
+      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    }
+
+    function inSlot(timeStr) {
+      var m = timeToMins(timeStr);
+      if (m < 0) return false;
+      var r = SLOT_RANGE[slot];
+      if (!r) return true;  // 알 수 없는 슬롯은 전부 허용
+      if (slot === 'US_MARKET') {
+        // 21:30~23:59 또는 00:00~01:00(익일 = 0~60분)
+        return m >= r.from || m <= 60;
+      }
+      return m >= r.from && m < r.to;
+    }
+
+    function tlIssue(issue, type) {
+      if (!issue || !issue.title) return '';
+      var label = type === 'market' ? '시장' : '종목';
+      return '<div class="ib-line">'
+        + '<span class="ib-badge ' + type + '">' + label + '</span>'
+        + '<span class="ib-hl">' + escHtml(issue.title) + '</span>'
+        + '</div>'
+        + (issue.summary ? '<div class="ib-desc">' + escHtml(issue.summary) + '</div>' : '');
+    }
+
+    function render(data) {
+      if (!data) return;
+
+      // history에서 슬롯에 해당하는 항목만 필터링
+      var hist = (data.history || []).filter(function(item) {
+        return inSlot(item.time);
+      });
+
+      if (hist.length === 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      // 메타(업데이트 시각) 갱신
+      var metaEl = document.getElementById('issue-briefing-meta');
+      if (metaEl && data.updated_at) metaEl.textContent = data.updated_at + ' 업데이트';
+
+      // 타임라인 렌더링 (B안 — 컴팩트 피드)
+      var tlEl = document.getElementById('issue-briefing-tl');
+      if (!tlEl) return;
+
+      tlEl.innerHTML = hist.map(function(item, i) {
+        var isLatest = (i === 0);
+        var mIssue = item.market || null;
+        var sIssue = item.stock  || null;
+        var hasBoth = mIssue && sIssue;
+
+        return '<div class="ib-item' + (isLatest ? ' is-latest' : '') + '">'
+          + '<span class="ib-time">' + escHtml(item.time || '') + '</span>'
+          + '<div class="ib-body">'
+          + tlIssue(mIssue, 'market')
+          + (hasBoth ? '<div class="ib-sep"></div>' : '')
+          + tlIssue(sIssue, 'stock')
+          + '</div>'
+          + '</div>';
+      }).join('');
+
+      wrap.style.display = '';
+    }
+
+    // 아카이브 JSON fetch (당일이면 live.json도 시도)
+    var kstNow = new Date(Date.now() + 9 * 3600 * 1000);
+    var todayKst = kstNow.getUTCFullYear() + '-'
+      + String(kstNow.getUTCMonth() + 1).padStart(2, '0') + '-'
+      + String(kstNow.getUTCDate()).padStart(2, '0');
+    var isToday = (date === todayKst);
+
+    // 아카이브 우선, 없으면 live.json fallback
+    var url = '/data/kospi-news-' + date + '.json';
+    fetch(url, { signal: AbortSignal.timeout(6000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject('archive-404'); })
+      .then(render)
+      .catch(function() {
+        if (isToday) {
+          fetch('/data/kospi-news-live.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) })
+            .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(render)
+            .catch(function() { wrap.style.display = 'none'; });
+        } else {
+          wrap.style.display = 'none';
+        }
+      });
+  }
+
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
   window.toggleTheme = toggleTheme;
   window.openModal = openModal;
@@ -1647,4 +1765,5 @@
   window.closeNoticePanel = closeNoticePanel;
   window.switchPanelTab  = switchPanelTab;
   window.submitBoardPost = submitBoardPost;
+  window.initIssueBriefing = initIssueBriefing;
 })();

@@ -7,24 +7,28 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 
 ## 서비스 URL
 
-| 구분 | URL |
-|------|-----|
-| 랜딩페이지 | **https://doubleshot.space** |
-| 브리핑 목록 | **https://doubleshot.space/briefings** |
-| 코스피 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/kospi/** |
-| 마감 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/close/** |
-| 미국 브리핑 | **https://doubleshot.space/briefings/{YYYY-MM-DD}/us/** |
+
+| 구분      | URL                                                                                                                  |
+| ------- | -------------------------------------------------------------------------------------------------------------------- |
+| 랜딩페이지   | **[https://doubleshot.space](https://doubleshot.space)**                                                             |
+| 브리핑 목록  | **[https://doubleshot.space/briefings](https://doubleshot.space/briefings)**                                         |
+| 코스피 브리핑 | **[https://doubleshot.space/briefings/{YYYY-MM-DD}/kospi/](https://doubleshot.space/briefings/{YYYY-MM-DD}/kospi/)** |
+| 마감 브리핑  | **[https://doubleshot.space/briefings/{YYYY-MM-DD}/close/](https://doubleshot.space/briefings/{YYYY-MM-DD}/close/)** |
+| 미국 브리핑  | **[https://doubleshot.space/briefings/{YYYY-MM-DD}/us/](https://doubleshot.space/briefings/{YYYY-MM-DD}/us/)**       |
+
 
 호스팅: Vercel (정적 서빙 + Cron 트리거) + GitHub Pages (`gh-pages` 브랜치, Vercel 배포 시 병행)
 
 ## 브리핑 스케줄
 
-| 브리핑 | 실행 시각 (KST) | 요일 |
-|--------|----------------|------|
-| 코스피 시초가 | 07:30 | 평일 (월~금) |
-| 코스피 마감 | 16:30 | 평일 (월~금) |
-| 미국 시장 | 21:20 | 평일 (월~금) |
-| 예측 정확도 체크 | 09:10 | 평일 (화~토) |
+
+| 브리핑       | 실행 시각 (KST) | 요일       |
+| --------- | ----------- | -------- |
+| 코스피 시초가   | 07:30       | 평일 (월~금) |
+| 코스피 마감    | 16:30       | 평일 (월~금) |
+| 미국 시장     | 21:20       | 평일 (월~금) |
+| 예측 정확도 체크 | 09:10       | 평일 (화~토) |
+
 
 ## 실행 흐름
 
@@ -57,6 +61,7 @@ daily30/
 │   ├── fetch_data.py                # yfinance 기반 코스피·미국 시장 데이터 수집
 │   ├── fetch_closing_kospi.py       # 코스피 마감 데이터 수집 (수급·장중·시장폭·dpick)
 │   ├── fetch_news.py                # Gemini 2.5 Flash Lite 뉴스 요약
+│   ├── fetch_news_live.py           # 이슈 브리핑 수집 (시간대별 슬롯 분기, 22회/일)
 │   ├── generate_html.py             # config-driven HTML 브리핑 조립기
 │   │                                #   --type {kospi|us|kospi-close} --date YYYY-MM-DD --data-file <path>
 │   │                                #   --write-list-only  → HTML 재생성 없이 briefings-list.json만 갱신
@@ -79,6 +84,7 @@ daily30/
 │       ├── pages/
 │       │   └── briefings_index.html # 브리핑 목록 페이지 템플릿
 │       └── sections/                # 공통 섹션 partial 템플릿
+│           ├── _issue_briefing.html  # 이슈 브리핑 공용 partial (history 1개↑ 시 표시)
 ├── web/
 │   ├── landing.html                 # 랜딩페이지 (/ 라우팅)
 │   ├── favicon.svg
@@ -115,24 +121,29 @@ daily30/
 ## AI 파이프라인
 
 ### 뉴스 수집 — Gemini 2.5 Flash Lite (`fetch_news.py`)
+
 - 구글 검색 기반 뉴스 크롤링 후 요약
 - `data/news_summary_{type}.json` 저장
 
 ### 뉴스 수집 — Gemini 2.5 Flash + Google Search grounding (`fetch_news.py`)
+
 - `google_search` tool로 그 시점 최신 뉴스를 **직접 검색·요약**(1회 호출). RSS 파싱 제거됨.
 - 브리핑 타입별 검색 프롬프트(KOSPI/KOSPI_CLOSE/US)로 검색 키워드 지시.
 
 ### 분석·예측 — Claude Sonnet 4.6 (`call_claude.py`)
+
 - **Prompt Caching** 적용 (시스템 프롬프트 캐시, ~5분 TTL, 재실행 시 90% 비용 절감)
 - 출력: JSON only (`analysis_{type}.json`) → HTML 생성은 `generate_html.py`가 담당
 - 생성 항목: `prediction` (direction / up_pct / confidence), `reasons`, `reason_title`, `stock_picks`
 
 ### 데이터 검증 게이트 — `validate_analysis.py`
+
 - call_claude(`--no-html`) → **validate_analysis** → call_claude(`--render`) → telegram 순으로 동작.
 - 픽 종목 실측 주입(미국 yfinance·한국 네이버 일봉) + 본문 금지패턴·환율·지수%·수급 스케일 교정.
 - 치명적 오류 시 발행 중단 + 관리자 텔레그램 알림.
 
 ### 마감 데이터 수집 — `fetch_closing_kospi.py`
+
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
 - 거래대금 급증 × 수급 동반 종목 (dpick): 외국인·기관 동시 순매수 + 거래대금 1.5배↑
 - 코스피200 TOP10 (kospi200_top10), AI 반도체 종목 (ai_semicon_stocks)
@@ -140,16 +151,18 @@ daily30/
 
 ## API 키 / 환경변수
 
-| 변수 | 용도 |
-|------|------|
-| `ANTHROPIC_API_KEY` | Claude Sonnet 4.6 |
-| `GEMINI_API_KEY` | Gemini 2.5 Flash Lite |
-| `TELEGRAM_BOT_TOKEN` | 텔레그램 봇 |
-| `TELEGRAM_CHAT_ID` | 텔레그램 채널 |
-| `RESEND_API_KEY` | 이메일 발송 (Resend) |
-| `GH_PAT` | Vercel → GitHub Actions dispatch |
-| `TOSS_CLIENT_ID` | 토스증권 Open API — 종목 캔들·현재가·환율 조회 |
-| `TOSS_CLIENT_SECRET` | 토스증권 Open API 시크릿 |
+
+| 변수                   | 용도                               |
+| -------------------- | -------------------------------- |
+| `ANTHROPIC_API_KEY`  | Claude Sonnet 4.6                |
+| `GEMINI_API_KEY`     | Gemini 2.5 Flash Lite            |
+| `TELEGRAM_BOT_TOKEN` | 텔레그램 봇                           |
+| `TELEGRAM_CHAT_ID`   | 텔레그램 채널                          |
+| `RESEND_API_KEY`     | 이메일 발송 (Resend)                  |
+| `GH_PAT`             | Vercel → GitHub Actions dispatch |
+| `TOSS_CLIENT_ID`     | 토스증권 Open API — 종목 캔들·현재가·환율 조회  |
+| `TOSS_CLIENT_SECRET` | 토스증권 Open API 시크릿                |
+
 
 GitHub Actions Secrets에 모두 등록되어 있음.
 
@@ -166,11 +179,13 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 
 #### 실측 조회 우선순위 (`validate_analysis.py`)
 
-| 종목 | 1순위 | 2순위 (폴백) |
-|------|-------|-------------|
+
+| 종목    | 1순위           | 2순위 (폴백)                       |
+| ----- | ------------- | ------------------------------ |
 | 한국 종목 | 토스증권 Open API | 네이버 일봉 (`api.stock.naver.com`) |
-| 미국 종목 | 토스증권 Open API | yfinance |
-| 환율 | 토스증권 Open API | (없음 — 실패 시 `None` 반환) |
+| 미국 종목 | 토스증권 Open API | yfinance                       |
+| 환율    | 토스증권 Open API | (없음 — 실패 시 `None` 반환)          |
+
 
 토스 API가 미설정이거나 응답 실패 시 자동으로 폴백 소스를 사용한다.
 
@@ -197,12 +212,14 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 
 4개 job, 모두 `workflow_dispatch` 트리거 (Vercel Cron이 `/api/trigger`로 dispatch):
 
-| job | 트리거 type | 주요 스텝 |
-|-----|------------|-----------|
-| `kospi-briefing` | `kospi` | fetch_data → fetch_news → call_claude → **update_latest** → telegram → email → generate_html → commit → pages |
-| `us-briefing` | `us` | 동일 구조 |
-| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → generate_html → commit → pages |
-| `kospi-accuracy` | `accuracy` | check_accuracy → commit |
+
+| job                    | 트리거 type      | 주요 스텝                                                                                                         |
+| ---------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `kospi-briefing`       | `kospi`       | fetch_data → fetch_news → call_claude → **update_latest** → telegram → email → generate_html → commit → pages |
+| `us-briefing`          | `us`          | 동일 구조                                                                                                         |
+| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → generate_html → commit → pages                    |
+| `kospi-accuracy`       | `accuracy`    | check_accuracy → commit                                                                                       |
+
 
 ---
 
@@ -224,12 +241,14 @@ call_claude --no-html   분석 JSON만 (HTML·텔레그램 생성 안 함)
 LLM 출력(HTML·텔레그램)이 검증 *이전*에 만들어지면 교정이 반영되지 않는다. 새 출력물을 추가할 때도 반드시 `--render`(검증 이후) 단계에서 생성한다.
 
 **종목 픽 실측 주입 (`enrich_picks_with_realdata`):**
+
 - 미국 종목 → **토스증권 Open API** 우선, 실패 시 **yfinance** 폴백.
 - 한국 종목 → **토스증권 Open API** 우선 (6자리 코드 그대로), 실패 시 **네이버 일봉** 폴백 (`api.stock.naver.com/chart/domestic/item/{code}/day`). **6자리 코드만 사용, `.KS`/`.KQ` 접미사 금지.**
   - ⚠️ yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 토스·네이버는 코드만으로 시장을 정확히 식별한다.
 - 기준: 직전 완료 세션 종가 대비 등락률(`close[-1] vs close[-2]`), 실시간 장중가 아님.
 
 **실측 소스가 없는 영역은 수치를 표시하지 않는다:**
+
 - 미국 프리장 신고가(`premarket_highs`), 낙수 섹터 등락률(`spill` tag) → 정성 정보만, 숫자 제거.
 
 **검증 범위 (현재):** 픽·사이드바·마감 카드는 실측. 본문 산문(reasons·scenario·마감 WHY/WHAT/SO)은 금지단위·환율·지수%·수급 100배 스케일만 검증 — 산문 내 개별 종목 수치는 구조적 미검증이므로 수동 점검 시 주의.
@@ -346,6 +365,7 @@ hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 수동으로 가격·sparkline을 수정한 HTML이 있다면 반드시 확인 후 실행할 것.
 
 **브리핑 목록 JSON만 갱신할 때**는 `--write-list-only` 플래그를 사용한다:
+
 ```bash
 python3 scripts/generate_html.py --write-list-only
 ```
@@ -354,12 +374,14 @@ python3 scripts/generate_html.py --write-list-only
 
 모든 CSS·JS·favicon은 `/assets/` 경로를 사용한다. `/v2/assets/`는 삭제됨.
 
-| 올바른 경로 | 잘못된 경로 (사용 금지) |
-|------------|------------------------|
+
+| 올바른 경로              | 잘못된 경로 (사용 금지)         |
+| ------------------- | ---------------------- |
 | `/assets/style.css` | `/v2/assets/style.css` |
-| `/assets/main.js` | `/v2/assets/main.js` |
-| `/favicon.svg` | `/v2/favicon.svg` |
-| `/briefings/` | `/v2/briefings/` |
+| `/assets/main.js`   | `/v2/assets/main.js`   |
+| `/favicon.svg`      | `/v2/favicon.svg`      |
+| `/briefings/`       | `/v2/briefings/`       |
+
 
 생성된 HTML에서 `/v2/` 경로가 발견되면 즉시 수정한다.
 
@@ -369,6 +391,7 @@ python3 scripts/generate_html.py --write-list-only
 페이지마다 생성 시점이 다르면 목록이 불일치하므로, **JS가 목록 전체를 다시 그린다.**
 
 `web/assets/main.js`의 `patchBriefingList()`가 페이지 로드 시 동작한다:
+
 - `/data/briefings-list.json`(단일 진실원)을 fetch.
 - **현재 KST 날짜**를 오늘 카드로 잡는다 (DOM에 박힌 날짜를 쓰지 않는다 — 이게 불일치의 원인이었다).
 - 오늘 카드 + 과거 행(최근 10일, ready 1개 이상) 전체를 JSON에서 재구성한다.
@@ -376,6 +399,7 @@ python3 scripts/generate_html.py --write-list-only
 - 결과: **어느 브리핑을 선택하든 목록은 동일·최신 상태**를 유지한다.
 
 `generate_html.py` 실행 시 `write_briefings_list_json()`이 자동으로 JSON을 갱신한다.
+
 - **수동으로 JSON만 갱신**할 때: `python3 scripts/generate_html.py --write-list-only`
 - 정적 템플릿(`briefing_list.html`)은 JS 비활성 시 폴백으로만 쓰인다.
 
@@ -385,7 +409,7 @@ python3 scripts/generate_html.py --write-list-only
 
 #### `/briefings` 진입 시 최신 브리핑 자동 이동
 
-`web/briefings/index.html`이 `briefings-list.json`을 fetch해 가장 최근 `ready` 슬롯 URL로 `location.replace()` 한다. 날짜 내 우선순위: `us > close > kospi`. **`vercel.json`에 날짜를 하드코딩하지 않는다** — 브리핑이 생성될 때마다 자동으로 최신을 가리킨다.
+`web/briefings/index.html`이 `briefings-list.json`을 fetch해 가장 최근 `ready` 슬롯 URL로 `location.replace()` 한다. 날짜 내 우선순위: `us > close > kospi`. `**vercel.json`에 날짜를 하드코딩하지 않는다** — 브리핑이 생성될 때마다 자동으로 최신을 가리킨다.
 
 ### 5. 마감 브리핑 시장 폭 데이터 필드
 
@@ -451,13 +475,15 @@ API 응답이 없으면 폴백(삼성전자·SK하이닉스·Micron·AMD·Intel)
 
 #### 상태별 동작
 
-| 상태 | 조건 | 동작 |
-|------|------|------|
-| 장 전 (준비 중) | 당일 08:50~08:59 | 카운트다운 표시 |
+
+| 상태         | 조건             | 동작                       |
+| ---------- | -------------- | ------------------------ |
+| 장 전 (준비 중) | 당일 08:50~08:59 | 카운트다운 표시                 |
 | 장 중 (LIVE) | 당일 09:00~15:30 | `/api/kospi-live` 10초 폴링 |
-| 장 후 (당일) | 당일 15:30 이후 | 최종 종가 fetch 후 예측 결과 표시 |
-| **과거 브리핑** | URL 날짜 < 오늘 | **정적 결과 표시 (폴링 없음)** |
-| 숨김 | 장 시작 전(~08:49) | `display:none` |
+| 장 후 (당일)   | 당일 15:30 이후    | 최종 종가 fetch 후 예측 결과 표시   |
+| **과거 브리핑** | URL 날짜 < 오늘    | **정적 결과 표시 (폴링 없음)**     |
+| 숨김         | 장 시작 전(~08:49) | `display:none`           |
+
 
 #### 과거 브리핑 스코어보드 규칙
 
@@ -485,23 +511,133 @@ check_accuracy.py (다음 날 09:10 실행)
 
 시장 지표 패널은 `initLiveMarketPanel()`이 담당하며, 스코어보드와 독립적으로 동작한다.
 
-| 영역 | 데이터 소스 | 갱신 주기 |
-|------|------------|----------|
-| 코스피 지수 · 등락률 | `/api/kospi-live` | 10초 |
-| 코스피200 · 코스닥 · 원/달러 | `/api/market` | 60초 |
-| 수급 (외국인·기관·개인) | `/api/market` | 60초 |
-| 장중 뉴스 이슈 | `/data/kospi-news-live.json` | 5분 |
-| 스파크라인 그래프 | 인메모리 누적 + sessionStorage 복원 | 폴링 시 자동 |
+
+| 영역                  | 데이터 소스                       | 갱신 주기   |
+| ------------------- | ---------------------------- | ------- |
+| 코스피 지수 · 등락률        | `/api/kospi-live`            | 10초     |
+| 코스피200 · 코스닥 · 원/달러 | `/api/market`                | 60초     |
+| 수급 (외국인·기관·개인)      | `/api/market`                | 60초     |
+| 장중 뉴스 이슈            | `/data/kospi-news-live.json` | 5분      |
+| 스파크라인 그래프           | 인메모리 누적 + sessionStorage 복원  | 폴링 시 자동 |
+
 
 `/api/market`은 코스피200·코스닥·원달러·수급을 한 번에 반환하는 Vercel API 엔드포인트다. 60초마다 자동 갱신되며, 장 중 실시간 데이터를 표시한다.
 
 #### 뉴스 워크플로우
 
-- **스케줄**: 평일 09:10~15:00 KST, 30분 간격 (총 13회)
 - **워크플로우**: `.github/workflows/kospi-news-live.yml` (GHA native schedule)
 - **Vercel cron 사용 금지**: Hobby 플랜은 cron 2개 제한이므로 `vercel.json` `crons` 배열은 비워 둔다.
-- JSON 구조: `{ date, updated_at, latest: { market, stock }, history: [...] }`
+- JSON 구조: `{ date, updated_at, slot, latest: { market, stock }, history: [...] }`
+  - `slot` 필드: 수집 시점 구간 (`MARKET` / `POST_MARKET` / `US_MARKET`) — 디버깅·프론트 활용용
 - `history`는 최대 6개 보관 (같은 날짜인 경우에만 이어받음)
+
+#### 이슈 브리핑 수집 스케줄 (평일 기준, KST)
+
+| 구간 | 주기 | 회수 | 슬롯 | 프롬프트 성격 |
+| --- | --- | --- | --- | --- |
+| 09:10 ~ 15:00 | 30분 | 13회 | `MARKET` | 장중 실시간 — 코스피·수급·급등락 이슈 |
+| 16:35 ~ 21:00 | 1시간 | 5회 | `POST_MARKET` | 마감 후 + 미국 프리마켓 — 한국 마감 정리·미국 개장 전 이슈 |
+| 21:30 ~ 01:00 | 1시간 | 4회 | `US_MARKET` | 미국 시장 브리핑 — 미국 장중 이슈 중심 |
+
+총 **22회/일**. Google Search grounding 무료 한도(1,500회/일) 대비 여유 충분 → 추가 비용 없음.
+
+**`get_slot()` 시간대 경계값 (`fetch_news_live.py`)**
+
+```
+09:00~15:29 KST → MARKET
+16:35~21:29 KST → POST_MARKET
+21:30~01:00 KST → US_MARKET
+운영 외 시간     → MARKET 폴백 (워크플로우 미실행)
+```
+
+#### 이슈 브리핑 섹션 — 브리핑별 위치·표시 규칙
+
+이슈 브리핑은 `scripts/templates/sections/_issue_briefing.html` partial로 구현된다.
+`generate_html.py`가 `issue_news` 컨텍스트 변수를 주입하면 자동 렌더링된다.
+
+**표시 조건: `issue_news.history` 1개 이상일 때만 섹션 표시. 0개 또는 `None`이면 비표시.**
+
+**브리핑별 삽입 위치**
+
+| 브리핑 | 위치 | 표시 슬롯 |
+| --- | --- | --- |
+| 코스피 예측 브리핑 | 스코어보드(`_live_scoreboard`) 바로 아래, 예측 카드 위 | `MARKET` (09:00~15:29) |
+| 코스피 마감 브리핑 | 마감 시황(`close_reason`) 아래, 수급(`close_supply`) 위 | `POST_MARKET` (16:35~21:29) |
+| 미국 시장 브리핑 | 본문 최상단 (예측 카드보다 위) | `US_MARKET` (21:30~01:00) |
+
+**브리핑별 타임테이블 (어느 시각 이슈가 어느 브리핑에 수록되는가)**
+
+| 브리핑 | 수록 시각 (KST) |
+| --- | --- |
+| 코스피 예측 브리핑 | 09:00~15:29 장중 수집분 |
+| 코스피 마감 브리핑 | 16:35~21:29 마감 후·프리마켓 수집분 |
+| 미국 시장 브리핑 | 21:30~01:00 미국 장중 수집분 |
+
+**`issue_news` 컨텍스트 구조 (generate_html.py 주입 시 참고)**
+
+```python
+issue_news = {
+    "date": "YYYY-MM-DD",
+    "updated_at": "HH:MM",        # 마지막 갱신 시각
+    "slot": "MARKET",             # MARKET | POST_MARKET | US_MARKET
+    "latest": { "market": {...}, "stock": {...} },
+    "history": [                  # 1개 이상이어야 섹션 표시
+        { "time": "HH:MM", "market": {"title": "...", "summary": "..."}, "stock": {...} },
+        ...
+    ]
+}
+```
+
+브리핑 생성 시각 기준으로 해당 날짜의 `kospi-news-{date}.json`(아카이브)을 읽어 슬롯(`slot`)에 맞는 수집분만 필터링해 주입한다.
+
+#### 이슈 브리핑 동적 렌더링 — B안 (JS fetch)
+
+> **발행 시점과 무관하게 페이지 로드 시 최신 이슈를 fetch해 표시한다.**
+> 브리핑 HTML에는 빈 컨테이너만 있고, JS가 `kospi-news-{date}.json`을 fetch해 슬롯 필터링 후 렌더링한다.
+
+**`initIssueBriefing()` 동작 (`web/assets/main.js`)**
+
+```
+페이지 로드 → initIssueBriefing()
+  → #issue-briefing-wrap 의 data-date, data-slot 읽기
+  → /data/kospi-news-{date}.json fetch (없으면 kospi-news-live.json fallback)
+  → history 항목을 data-slot 범위로 필터링
+      MARKET:      09:00~15:29
+      POST_MARKET: 16:35~21:29
+      US_MARKET:   21:30~01:00 (또는 00:00~01:00)
+  → 1개 이상이면 섹션 표시, 0개면 display:none
+```
+
+- `base.html`의 `window.addEventListener('load')` 블록에서 자동 호출된다.
+- 아카이브 JSON 우선 fetch → 없으면 `kospi-news-live.json` fallback → 둘 다 실패하면 섹션 숨김.
+- 발행 후에도 이슈가 추가되면 다음 페이지 로드 시 자동 반영된다.
+
+**UI 스타일: B안 — 컴팩트 피드형**
+
+- 항목당 `시각 + 시장타이틀 + 종목타이틀` 구조, 요약은 1줄 클리핑
+- 시장/종목 사이 점선 구분선(`ib-sep`)
+- 최신 항목: 왼쪽 주황 보더 + 연한 주황 배경 강조, 시각 주황색
+- CSS 클래스: `.ib-item`, `.ib-time`, `.ib-body`, `.ib-line`, `.ib-badge`, `.ib-hl`, `.ib-desc`, `.ib-sep`
+- 다크모드 대응 포함
+
+#### 이슈 중복 방지 규칙
+
+> **가장 최신 이슈는 바로 직전 이슈와 그 이전 이슈까지, 시장·종목 타이틀이 모두 겹치지 않아야 한다.**
+
+`fetch_news_live.py`의 중복 방지 동작:
+
+- 수집 전 기존 `kospi-news-live.json`에서 **직전 이슈(`latest`)와 그 이전(`history[0]`)의 `market`·`stock` 타이틀**을 최대 4개까지 수집한다.
+- 수집한 타이틀을 `{avoid_block}` 형태로 프롬프트에 주입 → Gemini가 해당 주제를 피해 새 이슈를 선택한다.
+- 적용 범위: `market` 이슈와 `stock` 이슈 모두 (기존에는 `stock`만 적용했으나 확장됨).
+- 같은 날짜 데이터가 없으면 중복 방지 블록 없이 자유 선택.
+
+```
+수집 대상 (최대 4개 타이틀):
+  latest.market.title
+  latest.stock.title
+  history[0].market.title
+  history[0].stock.title
+```
 
 #### 스파크라인 규칙
 
@@ -526,3 +662,4 @@ check_accuracy.py (다음 날 09:10 실행)
 - 한 논리적 변경 = 한 커밋. 여러 파일을 고쳤더라도 같은 목적이면 하나로 묶는다.
 - HTML 수동 패치(가격 보정, sparkline 추가 등)는 커밋 메시지에 종목명·수정 내용을 명시한다.
 - 브리핑 자동 생성 커밋(`📊 코스피 브리핑: ...`)과 수동 수정 커밋은 구분한다.
+

@@ -21,9 +21,10 @@
           <div class="accordion-body__inner">
             {% if intraday_prices %}{% include "sections/close_hero.html" %}{% endif %}
             {% if reason_title %}{% include "sections/close_reason.html" %}{% endif %}
-            {% if breadth_rows %}{% include "sections/close_breadth.html" %}{% endif %}
+            {% include "sections/_issue_briefing.html" %}
             {% if supply_cells %}{% include "sections/close_supply.html" %}{% endif %}
             {% if supply_flow_rows %}{% include "sections/close_supply_flow.html" %}{% endif %}
+            {% if breadth_rows %}{% include "sections/close_breadth.html" %}{% endif %}
           </div>
         </div>
       </div>

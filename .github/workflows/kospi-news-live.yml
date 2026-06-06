@@ -1,21 +1,47 @@
-# 코스피 장중 뉴스를 30분마다 수집해 kospi-news-live.json을 갱신하는 워크플로우
-name: 코스피 장중 뉴스 갱신
+# 이슈 브리핑 수집 워크플로우
+# 평일(월~금) 운영 구간 (KST):
+#
+# ┌──────────────────────┬──────┬──────┬───────────────────────────────┐
+# │ 구간 (KST)           │ 주기 │ 회수 │ 성격                          │
+# ├──────────────────────┼──────┼──────┼───────────────────────────────┤
+# │ 09:10 ~ 15:00        │ 30분 │ 13회 │ 장중 실시간 이슈              │
+# │ 16:35 ~ 21:00        │ 1시간 │  5회 │ 마감 후 + 미국 프리마켓      │
+# │ 21:30 ~ 01:00        │ 1시간 │  4회 │ 미국 시장 브리핑              │
+# └──────────────────────┴──────┴──────┴───────────────────────────────┘
+# 총 22회/일 — Google Search grounding 무료 한도(1,500회/일) 대비 여유 충분
+
+name: 이슈 브리핑 수집
 
 on:
   schedule:
-    - cron: '10 0 * * 1-5'  # 09:10 KST
-    - cron: '30 0 * * 1-5'  # 09:30 KST
-    - cron: '0 1 * * 1-5'   # 10:00 KST
-    - cron: '30 1 * * 1-5'  # 10:30 KST
-    - cron: '0 2 * * 1-5'   # 11:00 KST
-    - cron: '30 2 * * 1-5'  # 11:30 KST
-    - cron: '0 3 * * 1-5'   # 12:00 KST
-    - cron: '30 3 * * 1-5'  # 12:30 KST
-    - cron: '0 4 * * 1-5'   # 13:00 KST
-    - cron: '30 4 * * 1-5'  # 13:30 KST
-    - cron: '0 5 * * 1-5'   # 14:00 KST
-    - cron: '30 5 * * 1-5'  # 14:30 KST
-    - cron: '0 6 * * 1-5'   # 15:00 KST
+    # ── 장중 실시간 (09:10~15:00 KST = 00:10~06:00 UTC) ──
+    - cron: '10 0 * * 1-5'   # 09:10 KST
+    - cron: '30 0 * * 1-5'   # 09:30 KST
+    - cron: '0 1 * * 1-5'    # 10:00 KST
+    - cron: '30 1 * * 1-5'   # 10:30 KST
+    - cron: '0 2 * * 1-5'    # 11:00 KST
+    - cron: '30 2 * * 1-5'   # 11:30 KST
+    - cron: '0 3 * * 1-5'    # 12:00 KST
+    - cron: '30 3 * * 1-5'   # 12:30 KST
+    - cron: '0 4 * * 1-5'    # 13:00 KST
+    - cron: '30 4 * * 1-5'   # 13:30 KST
+    - cron: '0 5 * * 1-5'    # 14:00 KST
+    - cron: '30 5 * * 1-5'   # 14:30 KST
+    - cron: '0 6 * * 1-5'    # 15:00 KST
+
+    # ── 마감 후 + 미국 프리마켓 (16:35~21:00 KST = 07:35~12:00 UTC) ──
+    - cron: '35 7 * * 1-5'   # 16:35 KST
+    - cron: '35 8 * * 1-5'   # 17:35 KST
+    - cron: '35 9 * * 1-5'   # 18:35 KST
+    - cron: '35 10 * * 1-5'  # 19:35 KST
+    - cron: '35 11 * * 1-5'  # 20:35 KST
+
+    # ── 미국 시장 브리핑 (21:30~01:00 KST = 12:30~16:00 UTC) ──
+    - cron: '30 12 * * 1-5'  # 21:30 KST
+    - cron: '30 13 * * 1-5'  # 22:30 KST
+    - cron: '30 14 * * 1-5'  # 23:30 KST
+    - cron: '30 15 * * 1-5'  # 00:30 KST (익일)
+
   workflow_dispatch:
 
 permissions:
@@ -32,7 +58,7 @@ concurrency:
 
 jobs:
   run:
-    name: "📰 코스피 장중 뉴스 갱신"
+    name: "📰 이슈 브리핑 수집"
     runs-on: ubuntu-latest
 
     steps:
@@ -49,7 +75,7 @@ jobs:
       - name: 📦 의존성 설치
         run: pip install google-genai
 
-      - name: 📰 뉴스 이슈 수집
+      - name: 📰 이슈 수집
         run: python3 scripts/fetch_news_live.py
 
       - name: 💾 JSON 커밋 & 푸시
@@ -60,7 +86,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
           else
-            git commit -m "data: 코스피 장중 뉴스 갱신 $(TZ=Asia/Seoul date +'%H:%M') KST"
+            git commit -m "data: 이슈 브리핑 갱신 $(TZ=Asia/Seoul date +'%H:%M') KST"
             for i in 1 2 3 4 5; do
               git fetch origin main
               if git rebase origin/main; then
