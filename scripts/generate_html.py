@@ -552,6 +552,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
     index_name = config["index_name"]
     prev_url, next_url = find_adjacent(internal_type, target_date)
 
+    canonical_url = f"https://doubleshot.space/briefings/{target_date}/{internal_type}/"
     ctx = {
         "date_str": target_date,
         "generated_at": generated_at,
@@ -560,6 +561,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         "index_name": index_name,
         "prev_url": prev_url, "next_url": next_url,
         "css_path": "/assets/style.css", "js_path": "/assets/main.js",
+        "canonical_url": canonical_url,
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
     }
@@ -696,6 +698,51 @@ def write_briefings_list_json():
     print(f"[generate_html] wrote web/data/briefings-list.json")
 
 
+def write_sitemap_xml():
+    """web/sitemap.xml 을 생성한다. generate_html 실행마다 자동 갱신."""
+    BASE = "https://doubleshot.space"
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+
+    urls = [
+        {"loc": f"{BASE}/",          "changefreq": "daily",  "priority": "1.0"},
+        {"loc": f"{BASE}/briefings/", "changefreq": "daily",  "priority": "0.9"},
+    ]
+
+    # ready 상태인 브리핑 페이지만 포함
+    bpath = DATA_DIR / "briefings.json"
+    briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
+    ready_dates = sorted({b["date"] for b in briefings if b.get("date")}, reverse=True)
+
+    type_order = ["kospi", "close", "us"]
+    for d in ready_dates:
+        for btype in type_order:
+            page = BRIEFINGS_DIR / d / btype / "index.html"
+            if page.exists():
+                lastmod = d if d <= today else today
+                urls.append({
+                    "loc": f"{BASE}/briefings/{d}/{btype}/",
+                    "lastmod": lastmod,
+                    "changefreq": "monthly",
+                    "priority": "0.7",
+                })
+
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>',
+             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u in urls:
+        lines.append("  <url>")
+        lines.append(f"    <loc>{u['loc']}</loc>")
+        if "lastmod" in u:
+            lines.append(f"    <lastmod>{u['lastmod']}</lastmod>")
+        lines.append(f"    <changefreq>{u['changefreq']}</changefreq>")
+        lines.append(f"    <priority>{u['priority']}</priority>")
+        lines.append("  </url>")
+    lines.append("</urlset>")
+
+    out_path = WEB_DIR / "sitemap.xml"
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"[generate_html] wrote web/sitemap.xml ({len(urls)} urls)")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=list(TYPE_MAP.keys()))
@@ -709,6 +756,7 @@ def main():
 
     if args.write_list_only:
         write_briefings_list_json()
+        write_sitemap_xml()
         return
 
     if args.sync_index:
@@ -716,6 +764,7 @@ def main():
         if latest:
             update_vercel_briefings_route(latest[0], latest[1])
         write_briefings_list_json()
+        write_sitemap_xml()
         return
 
     if not args.type or not args.date or not args.data_file:
@@ -729,6 +778,7 @@ def main():
     write_output(html, internal_type, args.date)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
+    write_sitemap_xml()
 
 
 if __name__ == "__main__":
