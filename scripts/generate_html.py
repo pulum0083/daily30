@@ -420,6 +420,30 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
                                "summary": _sflow_summary(vals_asc)})
         ctx["supply_flow_rows"] = flow_rows
 
+    # close_dpick — 당일 데이터가 있을 때만 (없으면 섹션 자체 미표시)
+    dpick_raw = market.get("dpick", [])
+    if dpick_raw:
+        dpick_rows = []
+        for p in dpick_raw:
+            frgn = p.get("frgn_eok", 0)
+            inst = p.get("inst_eok", 0)
+            total = frgn + inst or 1
+            fw = max(4, round(frgn / total * 80))
+            iw = max(4, round(inst / total * 80))
+            chg = p.get("change_pct", 0)
+            dpick_rows.append({
+                "name": p.get("name", ""),
+                "code": p.get("code", ""),
+                "mult": p.get("trade_mult", 0),
+                "vol":  f"{p.get('trade_value_eok', 0):,}억",
+                "chg":  f"{'▲' if chg >= 0 else '▼'} {abs(chg):.2f}%",
+                "segs": [
+                    {"cls": "frgn", "width": fw, "label": f"외국인 {frgn:,}억"},
+                    {"cls": "inst", "width": iw, "label": f"기관 {inst:,}억"},
+                ],
+            })
+        ctx["dpick_rows"] = dpick_rows
+
     return ctx
 
 

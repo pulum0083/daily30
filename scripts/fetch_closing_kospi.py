@@ -609,11 +609,15 @@ def _fetch_frgn_daily(code: str) -> list:
         return []
     rows = []
     for r in re.split(r"</tr>", html):
-        if "gray03" not in r or not re.search(r"\d{4}\.\d{2}\.\d{2}", r):
+        if "gray03" not in r:
+            continue
+        date_m = re.search(r"(\d{4})\.(\d{2})\.(\d{2})", r)
+        if not date_m:
             continue
         cells = re.findall(r'<td[^>]*class="num"[^>]*>(.*?)</td>', r, re.DOTALL)
         if len(cells) >= 6:
             rows.append({
+                "date": f"{date_m.group(1)}-{date_m.group(2)}-{date_m.group(3)}",
                 "close": _dpick_num(cells[0]),   # 종가
                 "chg":   _dpick_num(cells[2]),   # 등락률(%)
                 "vol":   _dpick_num(cells[3]),   # 거래량(주)
@@ -643,12 +647,17 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> li
     cand = [(c, n.strip()) for c, n in pairs
             if not any(k in n for k in DPICK_ETF_KEYWORDS)][:universe]
 
+    today_str = datetime.now(KST).strftime("%Y-%m-%d")
     picks = []
     for code, name in cand:
         rows = _fetch_frgn_daily(code)
         if not rows:
             continue
         today = rows[0]
+        # 당일 데이터가 아직 올라오지 않은 경우(어제 데이터) → 스킵
+        if today.get("date") != today_str:
+            print(f"[fetch_closing] dpick {name}({code}): 최신 행={today.get('date')} ≠ 오늘={today_str} → 스킵")
+            continue
         close = today["close"]
         if close <= 0:
             continue

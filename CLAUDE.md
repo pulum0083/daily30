@@ -22,7 +22,7 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 | 브리핑 | 실행 시각 (KST) | 요일 |
 |--------|----------------|------|
 | 코스피 시초가 | 07:30 | 평일 (월~금) |
-| 코스피 마감 | 16:00 | 평일 (월~금) |
+| 코스피 마감 | 16:30 | 평일 (월~금) |
 | 미국 시장 | 21:20 | 평일 (월~금) |
 | 예측 정확도 체크 | 09:10 | 평일 (화~토) |
 
@@ -148,8 +148,31 @@ daily30/
 | `TELEGRAM_CHAT_ID` | 텔레그램 채널 |
 | `RESEND_API_KEY` | 이메일 발송 (Resend) |
 | `GH_PAT` | Vercel → GitHub Actions dispatch |
+| `TOSS_CLIENT_ID` | 토스증권 Open API — 종목 캔들·현재가·환율 조회 |
+| `TOSS_CLIENT_SECRET` | 토스증권 Open API 시크릿 |
 
 GitHub Actions Secrets에 모두 등록되어 있음.
+
+### 토스증권 Open API (`scripts/toss_client.py`)
+
+- **용도**: 종목 캔들(일봉), 현재가 일괄 조회, USD/KRW 환율 조회.
+- **인증**: OAuth2 `client_credentials` 방식. `_get_token()`이 토큰을 캐싱(메모리, ~24h TTL).
+- **키 우선순위**: 환경변수 `TOSS_CLIENT_ID` / `TOSS_CLIENT_SECRET` → `config.json` `toss.client_id` / `toss.client_secret`.
+- **엔드포인트**: `https://openapi.tossinvest.com`
+  - `GET /api/v1/candles` — 일봉/1분봉 (1회 최대 200개, `nextBefore`로 페이지네이션)
+  - `GET /api/v1/prices` — 현재가 일괄 (최대 200개)
+  - `GET /api/v1/exchange-rate` — 환율 (`midRate`)
+- **심볼 형식**: 한국 종목 6자리 코드 그대로, 미국 종목 티커 그대로 사용 (`.KS`/`.KQ` 접미사 불필요).
+
+#### 실측 조회 우선순위 (`validate_analysis.py`)
+
+| 종목 | 1순위 | 2순위 (폴백) |
+|------|-------|-------------|
+| 한국 종목 | 토스증권 Open API | 네이버 일봉 (`api.stock.naver.com`) |
+| 미국 종목 | 토스증권 Open API | yfinance |
+| 환율 | 토스증권 Open API | (없음 — 실패 시 `None` 반환) |
+
+토스 API가 미설정이거나 응답 실패 시 자동으로 폴백 소스를 사용한다.
 
 ## 이메일 발송
 
@@ -201,9 +224,9 @@ call_claude --no-html   분석 JSON만 (HTML·텔레그램 생성 안 함)
 LLM 출력(HTML·텔레그램)이 검증 *이전*에 만들어지면 교정이 반영되지 않는다. 새 출력물을 추가할 때도 반드시 `--render`(검증 이후) 단계에서 생성한다.
 
 **종목 픽 실측 주입 (`enrich_picks_with_realdata`):**
-- 미국 종목 → **yfinance** (티커 직접).
-- 한국 종목 → **네이버 일봉** (`api.stock.naver.com/chart/domestic/item/{code}/day`). **6자리 코드만 사용, `.KS`/`.KQ` 접미사 금지.**
-  - ⚠️ yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 네이버는 코드만으로 시장을 정확히 식별한다.
+- 미국 종목 → **토스증권 Open API** 우선, 실패 시 **yfinance** 폴백.
+- 한국 종목 → **토스증권 Open API** 우선 (6자리 코드 그대로), 실패 시 **네이버 일봉** 폴백 (`api.stock.naver.com/chart/domestic/item/{code}/day`). **6자리 코드만 사용, `.KS`/`.KQ` 접미사 금지.**
+  - ⚠️ yfinance에 `.KS`를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 토스·네이버는 코드만으로 시장을 정확히 식별한다.
 - 기준: 직전 완료 세션 종가 대비 등락률(`close[-1] vs close[-2]`), 실시간 장중가 아님.
 
 **실측 소스가 없는 영역은 수치를 표시하지 않는다:**
@@ -221,7 +244,18 @@ LLM 출력(HTML·텔레그램)이 검증 *이전*에 만들어지면 교정이 �
 HTML 반영 전 반드시 yfinance 또는 네이버 금융으로 실제 값을 확인하고 덮어쓴다.
 
 ```python
-# 국내 종목: 네이버 일봉 (6자리 코드만, 시장 자동 식별 — .KS 금지)
+# 가장 안전한 방법: validate_analysis의 함수 직접 재사용 (토스→폴백 자동 처리)
+from scripts.validate_analysis import _fetch_kospi_realdata, _fetch_us_realdata
+result = _fetch_kospi_realdata("005930")  # 한국: 6자리 코드
+result = _fetch_us_realdata("BAC")        # 미국: 티커
+
+# 토스 API 직접 사용 (toss_client.py)
+import scripts.toss_client as tc
+candles = tc.get_candles("005930", interval="1d", count=300)  # 한국
+candles = tc.get_candles("BAC",    interval="1d", count=300)  # 미국
+closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
+
+# 네이버 일봉 폴백 (토스 실패 시)
 import urllib.request, json
 from datetime import datetime, timedelta
 code = "005930"
@@ -231,12 +265,12 @@ url = f"https://api.stock.naver.com/chart/domestic/item/{code}/day?startDateTime
 rows = json.loads(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})).read())
 closes = [r["closePrice"] for r in rows if r.get("closePrice")]  # 오래된→최신
 
-# 미국 종목: yfinance 티커 직접 사용
+# yfinance 폴백 (미국, 토스 실패 시)
 import yfinance as yf
 hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 ```
 
-> ⚠️ 국내 종목에 `yf.Ticker("{code}.KS")`를 쓰지 말 것. KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다. 가장 안전한 건 `validate_analysis._fetch_kospi_realdata(code)` 재사용.
+> ⚠️ 국내 종목에 `yf.Ticker("{code}.KS")`를 쓰지 말 것. KOSDAQ 종목이 유령 데이터(하루 stale·틀린 가격)를 반환한다.
 
 - 가격이 실제와 차이나면 → 가격·등락률·MA200·진입/목표/손절·sparkline 모두 일괄 수정.
 - **sparkline 빈 배열** `drawMiniChart('mc-N', [], [], [])` → 캔버스 빈칸. yfinance 20일 종가로 채운다.
