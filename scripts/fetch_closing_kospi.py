@@ -92,11 +92,24 @@ def _fetch_naver_index(code: str) -> dict:
 
 def _fetch_naver_usdkrw() -> dict:
     """USD/KRW 종가·등락률.
-    1차: manana.kr (chipboard 동일 소스)
-    2차: fawazahmed0 CDN (chipboard 동일 소스)
-    3차: 네이버 모바일 API
+    1차: Toss Open API (공식, 안정적)
+    2차: manana.kr
+    3차: fawazahmed0 CDN
+    4차: 네이버 모바일 API
     """
-    # 1차: manana.kr
+    # 1차: Toss Open API
+    try:
+        try:
+            import scripts.toss_client as tc
+        except ImportError:
+            import toss_client as tc
+        price = tc.get_exchange_rate("USD", "KRW")
+        if price:
+            return {"price": round(price, 2), "change_pct": 0.0, "change_abs": 0.0}
+    except Exception as e:
+        print(f"[fetch_closing] Toss USDKRW failed: {e}", file=sys.stderr)
+
+    # 2차: manana.kr
     try:
         req = urllib.request.Request(
             "https://api.manana.kr/exchange/rate/KRW/USD.json",
