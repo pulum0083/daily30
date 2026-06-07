@@ -100,4 +100,4 @@ double-shot/
 └── config.json                  # API 키 (gitignore)
 ```
 
-@SERVICE_RULES.md
+@docs/SERVICE_RULES.md
