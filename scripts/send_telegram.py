@@ -286,6 +286,14 @@ def main():
     web_url = get_web_base_url()
     message_text = message_text.replace("{web.base_url}", web_url)
 
+    # 일회성 공지 추가 (파일이 있으면 붙이고 삭제)
+    notice_file = DATA_DIR / "telegram_notice_once.txt"
+    if notice_file.exists():
+        notice_text = notice_file.read_text(encoding="utf-8").strip()
+        if notice_text:
+            message_text = message_text.rstrip() + "\n\n" + notice_text
+        notice_file.unlink()
+
     # 명언 추가
     message_text = message_text.rstrip() + pick_quote()
 
