@@ -346,25 +346,6 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .leg-ma::before{background:repeating-linear-gradient(to right,#D97706 0,#D97706 3px,transparent 3px,transparent 5px)!important;}
 .leg-ma200::before{background:repeating-linear-gradient(to right,#7C3AED 0,#7C3AED 4px,transparent 4px,transparent 7px)!important;width:16px!important;height:2.5px!important;}
 
-/* ──────────────────────────────────────────────
-   미국 → 한국 낙수효과 (미국)
-────────────────────────────────────────────── */
-.spill-list{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:2px 14px;}
-.spill-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--hairline);}
-.spill-row:last-child{border-bottom:none;}
-.spill-us{flex:0 0 196px;}
-.spill-us__sector{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:3px;}
-.spill-us__tickers{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
-.us-chg{font-size:11px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--up-bg);color:var(--up);}
-.spill-arrow{flex-shrink:0;color:var(--muted);display:flex;align-items:center;}
-.spill-ko{flex:1;min-width:0;}
-.spill-ko__stocks{display:flex;flex-wrap:wrap;gap:5px;}
-.ko-chip{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);border-radius:999px;padding:3px 10px;}
-.spill-strength{flex:0 0 50px;text-align:right;}
-.strength-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;}
-.strength-badge.high{background:var(--up-bg);color:var(--up);}
-.strength-badge.mid{background:#FEF3C7;color:#B45309;}
-.strength-badge.low{background:var(--surface-inset);color:var(--muted);}
 
 /* ──────────────────────────────────────────────
    접힘 토글 헤더 (코스피·미국)
@@ -754,11 +735,6 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .breadth-row__label{margin-bottom:6px;}
   .a-sub-row{grid-template-columns:1fr;}
   .a-sub-cell + .a-sub-cell{border-left:none;border-top:1px solid var(--hairline);padding-left:4px;}
-  /* 낙수효과 */
-  .spill-row{flex-wrap:wrap;}
-  .spill-us{flex:1 1 100%;}
-  .spill-arrow{transform:rotate(90deg);}
-  .spill-strength{flex:0 0 auto;margin-left:auto;}
   /* 하단 목록 */
   .bl-today__body{grid-template-columns:1fr;}
   .bl-slot{border-right:none;border-bottom:1px solid var(--hairline);}

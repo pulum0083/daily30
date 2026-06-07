@@ -596,10 +596,6 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       "entry": "$XXX", "target": "$YYY", "target_pct": "+X.X%", "stop": "$ZZZ", "stop_pct": "-X.X%"
     }
   ],
-  "spill": [
-    {"sector": "반도체", "tag": "+1.8%", "tickers": "NVDA·AVGO·AMD", "ko_stocks": ["삼성전자", "SK하이닉스", "한미반도체"], "strength": "강", "strength_cls": "high"},
-    {"sector": "빅테크", "tag": "+0.9%", "tickers": "AAPL·MSFT", "ko_stocks": ["네이버", "카카오"], "strength": "중", "strength_cls": "mid"}
-  ],
   "telegram_signals": [
     "📈 오늘 미국 증시가 소폭 상승 출발할 것 같아요. S&P500 선물이 <b>+0.3%</b> 올라있거든요.",
     "💡 빅테크 강세가 지수를 받쳐주고 있어요. NVDA <b>+1.97%</b>, TSLA <b>+3.89%</b> 상승 중이에요."
