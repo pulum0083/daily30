@@ -193,6 +193,12 @@ jobs:
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type us
 
+      - name: Fetch analyst quotes
+        run: python3 scripts/fetch_analyst_quotes.py
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type us --no-html
