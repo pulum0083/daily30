@@ -20,6 +20,15 @@
 - 픽 종목 실측 주입 + 본문 금지패턴·환율·지수%·수급 스케일 교정.
 - 치명적 오류 시 발행 중단 + 관리자 텔레그램 알림.
 
+### 월가 애널리스트 발언 수집 — `fetch_analyst_quotes.py`
+
+- Gemini 2.5 Flash Lite + `google_search` tool로 12명 애널리스트의 48시간 이내 실발언 수집.
+- 발언이 없으면 `[]` 저장 후 exit 0 — 파이프라인 보호. 섹션만 생략됨.
+- 출력: `data/analyst_quotes.json` (최대 4건, 최신순 정렬)
+- 감성 분류: `bull` / `bear` / `neu` (Gemini가 검색·추출 동시에 자동 분류)
+- us-briefing job에서 `fetch_news.py` 직후, `call_claude.py` 직전에 실행. `continue-on-error: true`.
+- 대상 애널리스트 (12명): Tom Lee, Ed Yardeni, Dan Ives, Mike Wilson, Savita Subramanian, Bill Ackman, Stan Druckenmiller, Mohamed El-Erian, Jeff Gundlach, Ray Dalio, Cathie Wood, Michael Burry
+
 ### 마감 데이터 수집 — `fetch_closing_kospi.py`
 
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
@@ -78,7 +87,7 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 | job                    | 트리거 type      | 주요 스텝 |
 | ---------------------- | ------------- | --------- |
 | `kospi-briefing`       | `kospi`       | fetch_data → fetch_news → call_claude → update_latest → telegram → email → generate_html → commit → pages |
-| `us-briefing`          | `us`          | 동일 구조 |
+| `us-briefing`          | `us`          | fetch_data → fetch_news → **fetch_analyst_quotes** → call_claude → update_latest → telegram → email → generate_html → commit → pages |
 | `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → generate_html → commit → pages |
 | `kospi-accuracy`       | `accuracy`    | check_accuracy → commit |
 
@@ -109,7 +118,7 @@ LLM 출력(HTML·텔레그램)이 검증 이전에 만들어지면 교정이 반
 - 기준: 직전 완료 세션 종가 대비 등락률(`close[-1] vs close[-2]`), 실시간 장중가 아님.
 
 **실측 소스가 없는 영역은 수치를 표시하지 않는다:**
-- 미국 프리장 신고가(`premarket_highs`), 낙수 섹터 등락률(`spill` tag) → 정성 정보만, 숫자 제거.
+- 미국 프리장 신고가(`premarket_highs`) → 정성 정보만, 숫자 제거.
 
 **검증 범위 (현재):** 픽·사이드바·마감 카드는 실측. 본문 산문은 금지단위·환율·지수%·수급 100배 스케일만 검증 — 산문 내 개별 종목 수치는 구조적 미검증이므로 수동 점검 시 주의.
 
@@ -313,7 +322,17 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
                   → web/data/market-{date}.json (코스피·코스닥·코스피200·수급)
 ```
 
-### 11. 커밋 단위
+### 11. 월가 코멘트 섹션 (`analyst_quotes`) — 운영 규칙
+
+미국 시장 브리핑 전용 섹션. 발언이 없으면 섹션 전체 생략 (빈 상태 표시 금지).
+
+- **발언 생성·추론 금지.** `fetch_analyst_quotes.py`가 google_search에서 실제로 찾은 발언만 표시한다.
+- **수동 재수집**: `python3 scripts/fetch_analyst_quotes.py` 실행 후 `generate_html.py`로 재생성.
+- **발언이 없는 날**: `data/analyst_quotes.json`이 `[]`이면 섹션이 자동으로 생략된다. 정상 동작.
+- **감성 뱃지**: `bull`(강세) / `bear`(약세) / `neu`(중립) 세 가지만 허용. 다른 값은 스크립트가 자동으로 `neu`로 정규화한다.
+- **섹션 순서**: 미국 브리핑 기준 reasons → 구분선 → `analyst_quotes` → `watchpoints` → `stock_picks`.
+
+### 12. 커밋 단위
 
 - 한 논리적 변경 = 한 커밋. 여러 파일을 고쳤더라도 같은 목적이면 하나로 묶는다.
 - HTML 수동 패치(가격 보정, sparkline 추가 등)는 커밋 메시지에 종목명·수정 내용을 명시한다.
