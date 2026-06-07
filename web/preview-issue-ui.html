@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이슈 브리핑 UI 비교</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+
+/* ── 공통 래퍼 ── */
+.preview-section {
+  max-width: 560px;
+  margin: 32px auto;
+  padding: 0 20px;
+}
+.preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+.ib-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px 12px;
+  border-bottom: 1px solid var(--hairline);
+}
+.ib-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.ib-dot { width: 7px; height: 7px; border-radius: 50%; background: #e03131; flex-shrink: 0; }
+.ib-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 20px; background: rgba(220,53,69,.1); color: #c0392b;
+}
+.ib-meta { font-size: 11px; color: var(--muted); }
+.ib-card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--s2);
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════
+   A안 — 아코디언형
+   타이틀 클릭 → 요약 토글
+════════════════════════════════════════ */
+.acc-feed {}
+.acc-item {
+  border-bottom: 1px solid var(--hairline);
+}
+.acc-item:last-child { border-bottom: none; }
+
+.acc-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.acc-row:hover { background: var(--surface-soft); }
+
+.acc-time {
+  flex-shrink: 0;
+  width: 48px;
+  padding: 11px 0 11px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.acc-item.is-latest .acc-time { color: #e8590c; }
+
+.acc-badges {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 8px;
+}
+.acc-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 4px; white-space: nowrap;
+}
+.acc-badge.market { background: rgba(220,53,69,.1); color: #c0392b; }
+.acc-badge.stock  { background: rgba(39,117,237,.1); color: #1a5fb4; }
+
+.acc-titles {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 10px 11px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.acc-title-line {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.acc-title-line.stock-line {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.acc-chevron {
+  flex-shrink: 0;
+  padding: 11px 14px 11px 4px;
+  color: var(--muted);
+  transition: transform .2s;
+  font-size: 11px;
+}
+.acc-item.is-open .acc-chevron { transform: rotate(180deg); }
+
+.acc-detail {
+  display: none;
+  padding: 0 16px 12px 48px;
+  background: var(--surface-soft);
+}
+.acc-item.is-open .acc-detail { display: block; }
+.acc-item.is-latest .acc-detail { background: rgba(253,126,20,.04); }
+
+.acc-detail-row {
+  padding: 8px 0;
+  border-top: 1px solid var(--hairline);
+}
+.acc-detail-row:first-child { border-top: none; }
+.acc-detail-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; margin-right: 6px;
+}
+.acc-detail-badge.market { background: rgba(220,53,69,.1); color: #c0392b; }
+.acc-detail-badge.stock  { background: rgba(39,117,237,.1); color: #1a5fb4; }
+.acc-detail-hl { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+.acc-detail-desc { font-size: 12px; color: var(--muted); line-height: 1.55; margin-top: 3px; padding-left: 2px; }
+
+
+/* ════════════════════════════════════════
+   B안 — 컴팩트 피드형
+   한 줄로 압축, 요약 상시 표시하되 작게
+════════════════════════════════════════ */
+.compact-feed {}
+.compact-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--hairline);
+  align-items: flex-start;
+}
+.compact-item:last-child { border-bottom: none; }
+.compact-item.is-latest {
+  background: rgba(253,126,20,.04);
+  border-left: 3px solid rgba(253,126,20,.5);
+  padding-left: 13px;
+}
+
+.compact-time {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  width: 36px;
+  padding-top: 1px;
+}
+.compact-item.is-latest .compact-time { color: #e8590c; }
+
+.compact-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+
+.compact-line {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.compact-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 4px; flex-shrink: 0;
+}
+.compact-badge.market { background: rgba(220,53,69,.1); color: #c0392b; }
+.compact-badge.stock  { background: rgba(39,117,237,.1); color: #1a5fb4; }
+
+.compact-hl { font-size: 12.5px; font-weight: 700; color: var(--ink); line-height: 1.35; }
+.compact-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-left: 28px;
+}
+
+.compact-divider {
+  height: 1px;
+  background: var(--hairline);
+  margin: 2px 0;
+  opacity: .5;
+}
+
+
+/* ════════════════════════════════════════
+   C안 — 타임라인 + 우측 칩형
+   시각·타이틀만 좌측, 뱃지칩을 우측에
+════════════════════════════════════════ */
+.chip-feed {}
+.chip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.chip-item:last-child { border-bottom: none; }
+.chip-item.is-latest {
+  background: rgba(253,126,20,.045);
+}
+
+.chip-left {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  width: 36px;
+}
+.chip-time {
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.chip-item.is-latest .chip-time { color: #e8590c; }
+.chip-line-v {
+  width: 1px;
+  flex: 1;
+  min-height: 16px;
+  background: var(--hairline);
+  margin-top: 4px;
+}
+
+.chip-content { flex: 1; min-width: 0; }
+.chip-row { display: flex; align-items: flex-start; gap: 8px; padding: 2px 0; }
+.chip-row + .chip-row { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--hairline); }
+
+.chip-tag {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+}
+.chip-tag.market { background: rgba(220,53,69,.1); color: #c0392b; }
+.chip-tag.stock  { background: rgba(39,117,237,.1); color: #1a5fb4; }
+
+.chip-text {}
+.chip-hl { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.35; }
+.chip-desc { font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+
+</style>
+</head>
+<body style="background:var(--surface-soft);padding-bottom:60px;">
+
+<div style="background:var(--gnb-bg);color:#fff;text-align:center;padding:10px;font-size:12px;font-weight:700;">
+  이슈 브리핑 UI 비교 — A·B·C 3안
+  <button onclick="document.documentElement.classList.toggle('dark');document.documentElement.classList.toggle('light')"
+    style="margin-left:16px;padding:3px 10px;border-radius:6px;background:rgba(255,255,255,.15);color:#fff;border:none;cursor:pointer;font-size:11px;">
+    다크모드 전환
+  </button>
+</div>
+
+<!-- ══════ A안 ══════ -->
+<div class="preview-section">
+  <div class="preview-label">A안 — 아코디언형 (클릭해서 요약 펼침)</div>
+  <div class="ib-card">
+    <div class="ib-header">
+      <div class="ib-title"><span class="ib-dot"></span>이슈 브리핑<span class="ib-badge">AI 중계</span></div>
+      <span class="ib-meta">15:00 업데이트</span>
+    </div>
+    <div class="acc-feed">
+
+      <div class="acc-item is-latest is-open">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">15:00</span>
+          <div class="acc-badges">
+            <span class="acc-badge market">시장</span>
+            <span class="acc-badge stock">종목</span>
+          </div>
+          <div class="acc-titles">
+            <div class="acc-title-line">코스피 2,590선 붕괴</div>
+            <div class="acc-title-line stock-line">삼전 -2.1% 장중 62,400원</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">코스피 2,590선 붕괴</span>
+            <div class="acc-detail-desc">외국인 순매도 1.2조 돌파하며 2,590선이 무너졌어요. 반도체·금융 동반 약세예요.</div>
+          </div>
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge stock">종목</span>
+            <span class="acc-detail-hl">삼전 -2.1% 장중 62,400원</span>
+            <div class="acc-detail-desc">외국인 집중 매도에 52주 신저가 위협 중이에요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">13:30</span>
+          <div class="acc-badges">
+            <span class="acc-badge market">시장</span>
+            <span class="acc-badge stock">종목</span>
+          </div>
+          <div class="acc-titles">
+            <div class="acc-title-line">점심 후 반등 시도 실패</div>
+            <div class="acc-title-line stock-line">SK하이닉스 -3.5% 급락</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">점심 후 반등 시도 실패</span>
+            <div class="acc-detail-desc">2,610선 회복 시도했지만 매도 물량에 막혀 재차 밀렸어요. 기관도 순매도 전환했어요.</div>
+          </div>
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge stock">종목</span>
+            <span class="acc-detail-hl">SK하이닉스 -3.5% 급락</span>
+            <div class="acc-detail-desc">HBM 공급 과잉 우려 재점화. 외국인 순매도 집중되고 있어요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">11:30</span>
+          <div class="acc-badges">
+            <span class="acc-badge market">시장</span>
+            <span class="acc-badge stock">종목</span>
+          </div>
+          <div class="acc-titles">
+            <div class="acc-title-line">원화 1,385원 돌파</div>
+            <div class="acc-title-line stock-line">KB금융 +2.3% 홀로 강세</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">원화 1,385원 돌파</span>
+            <div class="acc-detail-desc">달러 강세로 원화가 1,385원을 넘었어요. 외국인 이탈 가속화 우려가 높아졌어요.</div>
+          </div>
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge stock">종목</span>
+            <span class="acc-detail-hl">KB금융 +2.3% 홀로 강세</span>
+            <div class="acc-detail-desc">밸류업 정책 기대로 금융주만 방어적 매수세 유입 중이에요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">10:30</span>
+          <div class="acc-badges">
+            <span class="acc-badge market">시장</span>
+            <span class="acc-badge stock">종목</span>
+          </div>
+          <div class="acc-titles">
+            <div class="acc-title-line">코스닥 -2.1% 동반 급락</div>
+            <div class="acc-title-line stock-line">셀트리온 -4.2% 낙폭 확대</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">코스닥 -2.1% 동반 급락</span>
+            <div class="acc-detail-desc">바이오·2차전지 동반 약세로 코스닥도 700선 위협받고 있어요.</div>
+          </div>
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge stock">종목</span>
+            <span class="acc-detail-hl">셀트리온 -4.2% 낙폭 확대</span>
+            <div class="acc-detail-desc">임상 결과 실망감에 외국인·기관 동반 매도세예요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">09:30</span>
+          <div class="acc-badges"><span class="acc-badge market">시장</span></div>
+          <div class="acc-titles">
+            <div class="acc-title-line">시초가 -1.2% 약세 출발</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">시초가 -1.2% 약세 출발</span>
+            <div class="acc-detail-desc">SOX -2.15% 영향으로 개장부터 매도세 우세예요. 예측 시나리오 그대로예요.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <div class="acc-row" onclick="toggleAcc(this)">
+          <span class="acc-time">09:10</span>
+          <div class="acc-badges">
+            <span class="acc-badge market">시장</span>
+            <span class="acc-badge stock">종목</span>
+          </div>
+          <div class="acc-titles">
+            <div class="acc-title-line">NFP 쇼크·아시아 전반 약세</div>
+            <div class="acc-title-line stock-line">한미반도체 +5.2% 역행 강세</div>
+          </div>
+          <span class="acc-chevron">▾</span>
+        </div>
+        <div class="acc-detail">
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge market">시장</span>
+            <span class="acc-detail-hl">NFP 쇼크·아시아 전반 약세</span>
+            <div class="acc-detail-desc">닛케이 -1.8%, 항셍 -1.5%. 미국 고용지표 쇼크 여파가 아시아 전반을 흔들고 있어요.</div>
+          </div>
+          <div class="acc-detail-row">
+            <span class="acc-detail-badge stock">종목</span>
+            <span class="acc-detail-hl">한미반도체 +5.2% 역행 강세</span>
+            <div class="acc-detail-desc">독자적 수급 유입. 반도체 약세 속 이례적 강세예요.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════ B안 ══════ -->
+<div class="preview-section">
+  <div class="preview-label">B안 — 컴팩트 피드형 (요약 1줄 클리핑)</div>
+  <div class="ib-card">
+    <div class="ib-header">
+      <div class="ib-title"><span class="ib-dot"></span>이슈 브리핑<span class="ib-badge">AI 중계</span></div>
+      <span class="ib-meta">15:00 업데이트</span>
+    </div>
+    <div class="compact-feed">
+
+      <div class="compact-item is-latest">
+        <span class="compact-time">15:00</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">코스피 2,590선 붕괴</span>
+          </div>
+          <div class="compact-desc">외국인 순매도 1.2조 돌파하며 2,590선이 무너졌어요. 반도체·금융 동반 약세예요.</div>
+          <div class="compact-divider"></div>
+          <div class="compact-line">
+            <span class="compact-badge stock">종목</span>
+            <span class="compact-hl">삼전 -2.1% 장중 62,400원</span>
+          </div>
+          <div class="compact-desc">외국인 집중 매도에 52주 신저가 위협 중이에요.</div>
+        </div>
+      </div>
+
+      <div class="compact-item">
+        <span class="compact-time">13:30</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">점심 후 반등 시도 실패</span>
+          </div>
+          <div class="compact-desc">2,610선 회복 시도했지만 매도 물량에 막혀 재차 밀렸어요. 기관도 순매도 전환했어요.</div>
+          <div class="compact-divider"></div>
+          <div class="compact-line">
+            <span class="compact-badge stock">종목</span>
+            <span class="compact-hl">SK하이닉스 -3.5% 급락</span>
+          </div>
+          <div class="compact-desc">HBM 공급 과잉 우려 재점화. 외국인 순매도 집중되고 있어요.</div>
+        </div>
+      </div>
+
+      <div class="compact-item">
+        <span class="compact-time">11:30</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">원화 1,385원 돌파</span>
+          </div>
+          <div class="compact-desc">달러 강세로 원화가 1,385원을 넘었어요. 외국인 이탈 가속화 우려가 높아졌어요.</div>
+          <div class="compact-divider"></div>
+          <div class="compact-line">
+            <span class="compact-badge stock">종목</span>
+            <span class="compact-hl">KB금융 +2.3% 홀로 강세</span>
+          </div>
+          <div class="compact-desc">밸류업 정책 기대로 금융주만 방어적 매수세 유입 중이에요.</div>
+        </div>
+      </div>
+
+      <div class="compact-item">
+        <span class="compact-time">10:30</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">코스닥 -2.1% 동반 급락</span>
+          </div>
+          <div class="compact-desc">바이오·2차전지 동반 약세로 코스닥도 700선 위협받고 있어요.</div>
+          <div class="compact-divider"></div>
+          <div class="compact-line">
+            <span class="compact-badge stock">종목</span>
+            <span class="compact-hl">셀트리온 -4.2% 낙폭 확대</span>
+          </div>
+          <div class="compact-desc">임상 결과 실망감에 외국인·기관 동반 매도세예요.</div>
+        </div>
+      </div>
+
+      <div class="compact-item">
+        <span class="compact-time">09:30</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">시초가 -1.2% 약세 출발</span>
+          </div>
+          <div class="compact-desc">SOX -2.15% 영향으로 개장부터 매도세 우세예요. 예측 시나리오 그대로예요.</div>
+        </div>
+      </div>
+
+      <div class="compact-item">
+        <span class="compact-time">09:10</span>
+        <div class="compact-body">
+          <div class="compact-line">
+            <span class="compact-badge market">시장</span>
+            <span class="compact-hl">NFP 쇼크·아시아 전반 약세</span>
+          </div>
+          <div class="compact-desc">닛케이 -1.8%, 항셍 -1.5%. 미국 고용지표 쇼크 여파가 아시아 전반을 흔들고 있어요.</div>
+          <div class="compact-divider"></div>
+          <div class="compact-line">
+            <span class="compact-badge stock">종목</span>
+            <span class="compact-hl">한미반도체 +5.2% 역행 강세</span>
+          </div>
+          <div class="compact-desc">독자적 수급 유입. 반도체 약세 속 이례적 강세예요.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════ C안 ══════ -->
+<div class="preview-section">
+  <div class="preview-label">C안 — 세로 타임라인 + 태그칩형</div>
+  <div class="ib-card">
+    <div class="ib-header">
+      <div class="ib-title"><span class="ib-dot"></span>이슈 브리핑<span class="ib-badge">AI 중계</span></div>
+      <span class="ib-meta">15:00 업데이트</span>
+    </div>
+    <div class="chip-feed" style="padding: 8px 0;">
+
+      <div class="chip-item is-latest">
+        <div class="chip-left">
+          <span class="chip-time">15:00</span>
+          <div class="chip-line-v"></div>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">코스피 2,590선 붕괴</div>
+              <div class="chip-desc">외국인 순매도 1.2조 돌파하며 2,590선이 무너졌어요. 반도체·금융 동반 약세예요.</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip-tag stock">종목</span>
+            <div>
+              <div class="chip-hl">삼전 -2.1% 장중 62,400원</div>
+              <div class="chip-desc">외국인 집중 매도에 52주 신저가 위협 중이에요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-item">
+        <div class="chip-left">
+          <span class="chip-time">13:30</span>
+          <div class="chip-line-v"></div>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">점심 후 반등 시도 실패</div>
+              <div class="chip-desc">2,610선 회복 시도했지만 매도 물량에 막혀 재차 밀렸어요.</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip-tag stock">종목</span>
+            <div>
+              <div class="chip-hl">SK하이닉스 -3.5% 급락</div>
+              <div class="chip-desc">HBM 공급 과잉 우려 재점화. 외국인 순매도 집중되고 있어요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-item">
+        <div class="chip-left">
+          <span class="chip-time">11:30</span>
+          <div class="chip-line-v"></div>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">원화 1,385원 돌파</div>
+              <div class="chip-desc">달러 강세로 원화가 1,385원을 넘었어요.</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip-tag stock">종목</span>
+            <div>
+              <div class="chip-hl">KB금융 +2.3% 홀로 강세</div>
+              <div class="chip-desc">밸류업 정책 기대로 금융주만 방어적 매수세 유입 중이에요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-item">
+        <div class="chip-left">
+          <span class="chip-time">10:30</span>
+          <div class="chip-line-v"></div>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">코스닥 -2.1% 동반 급락</div>
+              <div class="chip-desc">바이오·2차전지 동반 약세로 코스닥도 700선 위협받고 있어요.</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip-tag stock">종목</span>
+            <div>
+              <div class="chip-hl">셀트리온 -4.2% 낙폭 확대</div>
+              <div class="chip-desc">임상 결과 실망감에 외국인·기관 동반 매도세예요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-item">
+        <div class="chip-left">
+          <span class="chip-time">09:30</span>
+          <div class="chip-line-v"></div>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">시초가 -1.2% 약세 출발</div>
+              <div class="chip-desc">SOX -2.15% 영향으로 개장부터 매도세 우세예요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip-item">
+        <div class="chip-left">
+          <span class="chip-time">09:10</span>
+        </div>
+        <div class="chip-content">
+          <div class="chip-row">
+            <span class="chip-tag market">시장</span>
+            <div>
+              <div class="chip-hl">NFP 쇼크·아시아 전반 약세</div>
+              <div class="chip-desc">닛케이 -1.8%, 항셍 -1.5%. 미국 고용지표 쇼크 여파가 아시아 전반을 흔들고 있어요.</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip-tag stock">종목</span>
+            <div>
+              <div class="chip-hl">한미반도체 +5.2% 역행 강세</div>
+              <div class="chip-desc">독자적 수급 유입. 반도체 약세 속 이례적 강세예요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/assets/main.js"></script>
+<script>
+function toggleAcc(rowEl) {
+  var item = rowEl.closest('.acc-item');
+  item.classList.toggle('is-open');
+}
+// A안 최신 항목은 기본 열림
+document.querySelectorAll('.acc-item.is-latest').forEach(function(el) {
+  el.classList.add('is-open');
+});
+</script>
+</body>
+</html>
