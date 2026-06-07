@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[프리뷰] 코스피 마감 브리핑 — 이슈 브리핑</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+.preview-banner{background:#7c3aed;color:#fff;text-align:center;padding:7px 16px;font-size:12px;font-weight:700;letter-spacing:.03em;}
+.preview-banner span{opacity:.7;font-weight:400;margin-left:8px;}
+</style>
+</head>
+<body>
+<div class="preview-banner">📉 코스피 마감 브리핑 프리뷰 <span>이슈 브리핑 위치: 수급 흐름 아래 · POST_MARKET 슬롯 (16:35~21:00)</span></div>
+
+<nav class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__left">
+      <a class="gnb__logo" href="/briefings">
+        <div class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+    </div>
+    <div class="gnb__meta">
+      <span class="gnb__date">2026-06-06 KST 16:02</span>
+      <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환">
+        <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="layout-wrapper">
+  <div class="layout-grid">
+    <main class="layout-grid__main">
+      <div class="accordion-item is-close">
+        <div class="accordion-header" style="cursor:default">
+          <div class="accordion-header__left">
+            <div class="accordion-header__date"><span class="accordion-header__date-label">2026-06-06</span></div>
+          </div>
+          <div class="header-nav">
+            <a class="hnav-btn" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <a class="hnav-btn disabled" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+
+            <!-- 마감 시황 카드 (간소화) -->
+            <div class="section-card" style="margin-top:4px;">
+              <div class="section-card__head">
+                <span class="section-card__title">마감 시황</span>
+                <span class="section-card__sub">2026-06-06 종가 기준</span>
+              </div>
+              <div class="section-card__body">
+                <div style="font-size:28px;font-weight:800;color:var(--dn);font-variant-numeric:tabular-nums;">2,587.32</div>
+                <div style="font-size:14px;font-weight:700;color:var(--dn);margin-top:4px;">▼ -32.10 (-1.23%)</div>
+                <div style="font-size:13px;color:var(--muted);margin-top:10px;line-height:1.7;">반도체 섹터 약세와 외국인 순매도가 맞물리며 코스피가 2,590선을 하향 이탈했어요. 기관도 장 후반 순매도로 전환하며 낙폭이 확대됐어요.</div>
+              </div>
+            </div>
+
+            <!-- ★ 이슈 브리핑 — JS 동적 fetch (B안) -->
+            <div id="issue-briefing-wrap"
+                 data-date="2026-06-05"
+                 data-slot="POST_MARKET"
+                 data-type="close"
+                 style="display:none;margin-top:16px;">
+              <div class="issue-briefing-card">
+                <div class="issue-briefing-header">
+                  <div class="issue-briefing-title">
+                    <span class="issue-briefing-dot"></span>
+                    이슈 브리핑
+                  </div>
+                  <span class="issue-briefing-meta" id="issue-briefing-meta">—</span>
+                </div>
+                <div class="issue-briefing-body">
+                  <div id="issue-briefing-tl">
+                    <div class="ib-item"><span class="ib-time">—</span><div class="ib-body"><div class="ib-desc" style="-webkit-line-clamp:unset">이슈를 불러오는 중이에요.</div></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 수급 (간소화) -->
+            <div class="section-card">
+              <div class="section-card__head"><span class="section-card__title">수급 현황</span></div>
+              <div class="section-card__body" style="display:flex;gap:16px;font-size:13px;">
+                <div><div style="color:var(--muted);font-size:11px;margin-bottom:3px;">외국인</div><div style="font-weight:700;color:var(--dn);">-1.2조</div></div>
+                <div><div style="color:var(--muted);font-size:11px;margin-bottom:3px;">기관</div><div style="font-weight:700;color:var(--dn);">-3,420억</div></div>
+                <div><div style="color:var(--muted);font-size:11px;margin-bottom:3px;">개인</div><div style="font-weight:700;color:var(--up);">+1.5조</div></div>
+              </div>
+            </div>
+
+            <!-- 시장 폭 (간소화) -->
+            <div class="section-card">
+              <div class="section-card__head"><span class="section-card__title">시장 폭</span><span class="section-card__sub">코스피 종목 기준</span></div>
+              <div class="section-card__body" style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--up);">179</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">상승</div></div>
+                <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--dn);">732</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">하락</div></div>
+                <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--muted);">12</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">보합</div></div>
+                <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--up);">4</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">상한가</div></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="layout-grid__right">
+      <div class="section-card">
+        <div class="section-card__head"><span class="section-card__title">섹터 성과</span></div>
+        <div class="section-card__body" style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="display:flex;justify-content:space-between;"><span>반도체</span><span style="color:var(--dn);font-weight:700;">-2.8%</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>배터리</span><span style="color:var(--dn);font-weight:700;">-2.1%</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>바이오</span><span style="color:var(--dn);font-weight:700;">-1.9%</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>금융</span><span style="color:var(--up);font-weight:700;">+1.2%</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>유틸리티</span><span style="color:var(--up);font-weight:700;">+0.4%</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="/assets/main.js"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initIssueBriefing === 'function') initIssueBriefing();
+});
+</script>
+</html>

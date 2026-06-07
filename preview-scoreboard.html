@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-06-06 코스피 스코어보드 프리뷰 — Double-Shot</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+/* 프리뷰 배너 */
+.preview-banner{background:#7c3aed;color:#fff;text-align:center;padding:8px 16px;font-size:13px;font-weight:600;letter-spacing:.02em;}
+.preview-banner span{opacity:.7;font-weight:400;margin-left:8px;}
+
+/* ── 이슈 브리핑 독립 섹션 ── */
+.issue-briefing-section{
+  margin-top:16px;
+}
+.issue-briefing-card{
+  background:var(--canvas);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-lg);
+  box-shadow:var(--s2);
+  overflow:hidden;
+}
+.issue-briefing-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--hairline);
+}
+.issue-briefing-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink);
+}
+.issue-briefing-dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#e03131;
+  flex-shrink:0;
+}
+.issue-briefing-badge{
+  font-size:10px;font-weight:700;
+  padding:2px 7px;
+  border-radius:20px;
+  background:rgba(220,53,69,.1);
+  color:#c0392b;
+  letter-spacing:.2px;
+}
+.issue-briefing-meta{
+  font-size:11px;
+  color:var(--muted);
+}
+.issue-briefing-body{
+  padding:14px 18px 16px;
+}
+
+/* 기존 lsb-news 헤더 숨기기 (스코어보드 내부에서만 사용) */
+.lsb-news-inner-hidden .lsb-news-header{display:none;}
+</style>
+</head>
+<body>
+
+<div class="preview-banner">
+  🔍 스코어보드 + 이슈 브리핑 구조 프리뷰
+  <span>더미 데이터 · 실제 컴포넌트</span>
+</div>
+
+<nav class="gnb">
+  <div class="gnb__inner">
+    <div class="gnb__left">
+      <a class="gnb__logo" href="/briefings">
+        <div class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
+        <span class="gnb__title">Double<span>-Shot</span></span>
+      </a>
+    </div>
+    <div class="gnb__meta">
+      <span class="gnb__date" id="gnb-date">2026-06-06 KST 07:31</span>
+      <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환">
+        <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="layout-wrapper">
+  <div class="layout-grid">
+    <main class="layout-grid__main">
+      <div class="accordion-item is-open is-today">
+        <div class="accordion-header">
+          <div class="accordion-header__date-label">2026-06-06</div>
+          <div class="header-nav">
+            <a class="hnav-btn" href="/briefings/2026-06-05/kospi/" title="이전"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <a class="hnav-btn disabled" href="#" title="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+
+<!-- ═══════════════════════════════════════
+     섹션 1 — 예측 vs 실제 · 코스피
+     (스코어보드, 이슈 영역 제거)
+════════════════════════════════════════ -->
+<div id="live-scoreboard"
+     data-actual-pct="-1.23"
+     data-dir="dn"
+     data-pred-pct="32"
+     data-pred-label="↓ 하락 우위"
+     style="display:none;margin-top:16px;margin-bottom:0;">
+  <div class="lsb-card">
+
+    <div class="lsb-head">
+      <span class="lsb-title">예측 vs 실제 · 코스피 <span class="lsb-beta-tag">BETA</span></span>
+      <span class="lsb-live-badge" id="lsb-badge">
+        <span class="lsb-live-dot"></span>LIVE
+      </span>
+    </div>
+
+    <div class="lsb-verdict" id="lsb-headline"><span id="lsb-head-prefix"></span><span id="lsb-head-em">로딩 중…</span></div>
+    <div class="lsb-sub" id="lsb-sub">아침 "↓ 하락 우위(신뢰도 보통)" 예측을 추적 중입니다.</div>
+
+    <div class="lsb-gauge" aria-hidden="true">
+      <div class="lsb-gauge-track">
+        <div class="lsb-gauge-needle" id="lsb-needle" style="left:50%"></div>
+      </div>
+    </div>
+    <div class="lsb-gauge-zones">
+      <span>이탈</span><span>박빙</span><span>적중</span>
+    </div>
+
+    <div class="lsb-now-row">
+      <span class="lsb-idx-wrap"><span class="lsb-idx" id="lsb-idx">—</span></span>
+      <span class="lsb-chg" id="lsb-chg">—</span>
+      <span class="lsb-pred-tag" id="lsb-pred-tag">↓ 하락 우위</span>
+      <span class="lsb-refresh">↻ <span id="lsb-refresh-count">10초</span></span>
+    </div>
+
+    <div class="lsb-foot" id="lsb-foot">
+      마감까지 <strong id="lsb-countdown">—</strong>
+    </div>
+
+  </div>
+</div>
+<!-- /섹션 1 -->
+
+
+<!-- ═══════════════════════════════════════
+     섹션 2 — 이슈 브리핑 (독립 카드)
+     renderNews() 결과를 lsb-timeline에 주입
+════════════════════════════════════════ -->
+<div class="issue-briefing-section">
+  <div class="issue-briefing-card">
+
+    <div class="issue-briefing-header">
+      <div class="issue-briefing-title">
+        <span class="issue-briefing-dot"></span>
+        이슈 브리핑
+        <span class="issue-briefing-badge">AI 중계</span>
+      </div>
+      <span class="issue-briefing-meta" id="issue-updated-at">업데이트 중…</span>
+    </div>
+
+    <div class="issue-briefing-body">
+      <!-- lsb-timeline을 그대로 재사용 — renderNews()가 이 ID를 타겟으로 씀 -->
+      <div id="lsb-timeline">
+        <div class="lsb-tl-empty">이슈 데이터를 불러오는 중이에요.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- /섹션 2 -->
+
+
+<!-- 예측 카드 (기존 유지) -->
+<div class="open-section" style="margin-top:16px;">
+  <div class="open-section__title">
+    KOSPI 당일 방향 예측
+    <span class="section-time">07:31 KST 생성</span>
+  </div>
+  <div class="prediction-card">
+    <div class="pred-top">
+      <span class="pred-badge dn">↓ 하락 우위</span>
+    </div>
+    <div class="pred-gauge__track">
+      <div class="pred-gauge__mid"></div>
+      <div class="pred-gauge__band" style="left:25%;width:14%;background:rgba(39,117,237,.42)"></div>
+      <div class="pred-gauge__needle dn" style="left:32%"></div>
+    </div>
+    <div class="pred-gauge__scale"><span>하락</span><span>중립 50</span><span>상승</span></div>
+    <div class="pred-readout">
+      <span class="pred-readout__big dn">68</span>
+      <span class="pred-readout__unit dn">% 하락</span>
+      <span class="pred-readout__strength">신호 강도
+        <span class="strength-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span>
+        보통</span>
+    </div>
+  </div>
+</div>
+
+<div class="open-section">
+  <div class="open-section__title reason-section-title">긴급 점검: NFP 발표 앞두고 아시아 전반 약세</div>
+  <div class="reason-block">
+    <ul>
+      <li>🌏 닛케이 <b>-1.45%</b>, 항셍 <b>-1.48%</b>, 대만 <b>-1.75%</b>로 아시아 주요 3개 시장이 일제히 내렸어요. 코스피만 이 흐름을 피하긴 어려워요.</li>
+      <li>💡 미국 반도체 지수(SOX)가 <b>-2.15%</b>, DRAM ETF도 <b>-5.75%</b> 급락. 반도체 비중이 큰 코스피 특성상 직격탄이에요.</li>
+      <li>📅 오늘 밤 비농업 고용(NFP) 발표 앞두고 관망 심리가 강해질 거예요. 예상치 <b>85K</b>, 실업률 <b>4.3%</b> 유지 전망.</li>
+    </ul>
+  </div>
+</div>
+
+          </div><!-- /accordion-body__inner -->
+        </div>
+      </div>
+    </main>
+
+    <aside class="layout-grid__right">
+      <div class="right-panel">
+        <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:31 KST</span></div>
+        <div class="mkt-list">
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">나스닥</span>
+              <div class="mkt-vals"><div class="mkt-val">26,830.96</div><div class="mkt-chg down">-0.09%</div></div>
+            </div>
+            <div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">필라델피아 반도체</span>
+              <div class="mkt-vals"><div class="mkt-val">13,617.50</div><div class="mkt-chg down">-2.15%</div></div>
+            </div>
+            <div class="mkt-spark"><canvas id="c-sox"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">VIX 공포지수</span>
+              <div class="mkt-vals"><div class="mkt-val">18.40</div><div class="mkt-chg up">+6.35%</div></div>
+            </div>
+            <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal">보통</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acc-box">
+        <div class="acc-box__header">
+          <span class="acc-box__title">AI 예측 정확도</span>
+          <span class="acc-box__period">최근 30일</span>
+        </div>
+        <div class="acc-stats-row">
+          <div class="acc-stat"><span class="acc-stat__val good">71%</span><span class="acc-stat__lbl">최근 7일</span></div>
+          <div class="acc-stat"><span class="acc-stat__val mid">67%</span><span class="acc-stat__lbl">최근 30일</span></div>
+        </div>
+        <div class="acc-bar-wrap">
+          <div class="acc-bar">
+            <div class="acc-bar__hit" style="width:61%"></div>
+            <div class="acc-bar__miss" style="width:30%"></div>
+            <div class="acc-bar__pending" style="width:9%"></div>
+          </div>
+          <div class="acc-bar-caption">
+            <span class="acc-bar-hit">적중 20</span>
+            <span class="acc-bar-miss">오류 10</span>
+            <span class="acc-bar-pending">미결 3</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- main.js 로드 전 URL 패치 (isPast=true 유도) -->
+<script>
+  history.replaceState(null, '', '/briefings/2026-06-05/kospi/?preview=1');
+</script>
+<script src="/assets/main.js"></script>
+<script>
+window.addEventListener('load', function () {
+
+  /* 스파크라인 */
+  drawSparkline('c-nasdaq', [26913.19,26870.00,26862.92,26690.62,26800.27,26804.32,26863.32,26917.73,26911.01,26835.20], '#2775ED');
+  drawSparkline('c-sox',    [13994.52,13913.86,13915.82,13354.99,13504.05,13594.93,13654.68,13763.30,13761.56,13616.01], '#2775ED');
+
+  /* ── 스코어보드 초기화 (isPast → 정적 결과 표시) ── */
+  if (typeof initLiveScoreboard === 'function') initLiveScoreboard();
+  var sb = document.getElementById('live-scoreboard');
+  if (sb) sb.style.display = '';
+
+  /* ── 이슈 브리핑 — 더미 JSON fetch + renderNews 직접 호출 ── */
+  fetch('/data/kospi-news-2026-06-05.json?t=' + Date.now())
+    .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(function(d){
+      renderIssueBriefing(d);
+    })
+    .catch(function(e){
+      console.warn('이슈 브리핑 fetch 실패:', e);
+      document.getElementById('lsb-timeline').innerHTML =
+        '<div class="lsb-tl-empty">이슈 데이터를 불러오지 못했어요.</div>';
+    });
+});
+
+/* renderNews() 로직을 독립 함수로 복제 (lsb-timeline 타겟, updated-at 반영) */
+function escHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function renderIssueBriefing(d) {
+  if (!d) return;
+
+  /* updated_at 표시 */
+  var metaEl = document.getElementById('issue-updated-at');
+  if (metaEl && d.updated_at) metaEl.textContent = d.updated_at + ' 업데이트';
+
+  var timelineEl = document.getElementById('lsb-timeline');
+  if (!timelineEl) return;
+
+  var hist = (d.history || []).filter(function(item){
+    var t = (item.market && item.market.title) || item.title;
+    return t && t !== '오늘의 이슈 준비 중';
+  });
+
+  if (hist.length === 0) {
+    timelineEl.innerHTML = '<div class="lsb-tl-empty">장중 이슈가 쌓이게 됩니다.</div>';
+    return;
+  }
+
+  function tlIssue(issue, type) {
+    if (!issue || !issue.title) return '';
+    var label = type === 'market' ? '시장' : '종목';
+    return '<div class="lsb-tl-issue">'
+      + '<span class="lsb-tl-badge ' + type + '">' + label + '</span>'
+      + '<span class="lsb-tl-headline">' + escHtml(issue.title) + '</span>'
+      + '</div>'
+      + (issue.summary ? '<div class="lsb-tl-desc">' + escHtml(issue.summary) + '</div>' : '');
+  }
+
+  timelineEl.innerHTML = hist.map(function(item, i){
+    var isLatest = i === 0;
+    var mIssue = item.market || (item.title ? item : null);
+    var sIssue = item.stock || null;
+    return '<div class="lsb-tl-item' + (isLatest ? ' active' : '') + '">'
+      + '<span class="lsb-tl-time">' + escHtml(item.time || '') + '</span>'
+      + '<div class="lsb-tl-body">'
+      + tlIssue(mIssue, 'market')
+      + (sIssue ? '<div class="lsb-tl-stock">' + tlIssue(sIssue, 'stock') + '</div>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
