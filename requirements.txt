@@ -24,3 +24,6 @@ anthropic>=0.40.0
 
 # 3순위: Gemini Flash 뉴스 전처리 (fetch_news.py)
 google-genai>=1.0.0
+
+# Date parsing (fetch_analyst_quotes.py)
+python-dateutil>=2.9.0
