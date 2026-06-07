@@ -17,6 +17,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import dateutil.parser
 import pytz
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,15 @@ ANALYSTS = [
 ]
 
 MAX_QUOTES = 4
+
+VALID_SENTIMENTS = {"bull", "bear", "neu"}
+REQUIRED_FIELDS = {"name", "quote", "source", "published_at", "time_label", "sentiment"}
+
+
+def _is_valid_quote(q) -> bool:
+    if not isinstance(q, dict):
+        return False
+    return all(q.get(f) for f in REQUIRED_FIELDS)
 
 
 def get_gemini_api_key() -> str:
@@ -123,7 +133,7 @@ def fetch_analyst_quotes() -> list:
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.1,
-            max_output_tokens=2048,
+            max_output_tokens=4096,
         ),
     )
 
@@ -150,10 +160,30 @@ def fetch_analyst_quotes() -> list:
     for q in quotes:
         q["initials"] = initials_map.get(q.get("name", ""), q.get("initials", "??"))
 
+    # sentiment 정규화: e.g. "bullish"→"bull", "bearish"→"bear", "neutral"→"neu"
+    _sent_map = {"bullish": "bull", "bearish": "bear", "neutral": "neu"}
+    for q in quotes:
+        s = str(q.get("sentiment", "")).lower()
+        q["sentiment"] = _sent_map.get(s, s) if s in _sent_map else (s if s in VALID_SENTIMENTS else "neu")
+
+    # 중복 제거: 동일 애널리스트의 가장 최근 발언만 유지
+    seen = {}
+    for q in quotes:
+        name = q.get("name", "")
+        try:
+            dt = dateutil.parser.parse(q.get("published_at", "2000-01-01T00:00:00+09:00"))
+        except Exception:
+            dt = datetime(2000, 1, 1, tzinfo=KST)
+        if name not in seen or dt > seen[name][0]:
+            seen[name] = (dt, q)
+    quotes = [v for _, v in seen.values()]
+
+    # 필수 필드 검증 필터
+    quotes = [q for q in quotes if _is_valid_quote(q)]
+
     # published_at 기준 최신순 정렬 후 MAX_QUOTES 보존
     def sort_key(q):
         try:
-            import dateutil.parser
             return dateutil.parser.parse(q.get("published_at", "2000-01-01T00:00:00+09:00"))
         except Exception:
             return datetime(2000, 1, 1, tzinfo=KST)
