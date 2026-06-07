@@ -2,7 +2,6 @@
   "framework": null,
   "outputDirectory": "web",
   "buildCommand": "",
-  "ignoreCommand": "git diff HEAD~1 --name-only | grep -qv '^web/data/kospi-news-live\\.json$'",
   "installCommand": "npm install",
   "routes": [
     { "src": "^/$",                                       "dest": "/landing.html" },
