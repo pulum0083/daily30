@@ -21,6 +21,7 @@
             {% include "sections/prediction.html" %}
             {% include "sections/reasons.html" %}
             <div class="divider"></div>
+            {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
           </div>

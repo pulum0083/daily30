@@ -447,6 +447,17 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
     return ctx
 
 
+def build_analyst_quotes(data: dict) -> dict:
+    """월가 애널리스트 발언 섹션 컨텍스트 빌더."""
+    quotes_path = BASE_DIR / "data" / "analyst_quotes.json"
+    if quotes_path.exists():
+        with open(quotes_path, encoding="utf-8") as f:
+            analyst_quotes = json.load(f)
+    else:
+        analyst_quotes = []
+    return {"analyst_quotes": analyst_quotes}
+
+
 def build_accuracy(internal_type: str) -> dict:
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
@@ -597,6 +608,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx.update(build_reasons(analysis))
+        ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
