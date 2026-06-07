@@ -913,7 +913,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         for s in signals:
             lines.append(f"• {strip_html(s)}")
 
-    lines += [divider, f"🔗 상세 분석 → {link}"]
+    lines += [f"🔗 상세 분석 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1373,7 +1373,6 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     for sig in signals[:2]:
         lines.append(f"• {strip_html(sig)}")
     lines += [
-        divider,
         f"🔗 상세 분석 → {web_base}/briefings/{date_str}/close/",
     ]
 
