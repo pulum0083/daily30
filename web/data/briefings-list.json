@@ -1,9 +1,13 @@
 {
   "slots": {
-    "2026-06-07": {
+    "2026-06-08": {
       "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
+        "state": "ready",
+        "url": "/briefings/2026-06-08/kospi/",
+        "pill_cls": "dn",
+        "pill_text": "▼ 하락",
+        "title": "하락 우위",
+        "time": "07:39"
       },
       "close": {
         "state": "pending",
@@ -453,20 +457,6 @@
       }
     },
     "2026-04-28": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-04-27": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
