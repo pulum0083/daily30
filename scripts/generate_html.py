@@ -606,6 +606,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
     prev_url, next_url = find_adjacent(internal_type, target_date)
 
     canonical_url = f"https://doubleshot.space/briefings/{target_date}/{internal_type}/"
+    _issue_slot_map = {"kospi": "MARKET", "close": "POST_MARKET", "us": "US_MARKET"}
     ctx = {
         "date_str": target_date,
         "generated_at": generated_at,
@@ -615,6 +616,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         "prev_url": prev_url, "next_url": next_url,
         "css_path": "/assets/style.css", "js_path": "/assets/main.js",
         "canonical_url": canonical_url,
+        "briefing_type": internal_type,
+        "issue_slot": _issue_slot_map.get(internal_type, "MARKET"),
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
     }
