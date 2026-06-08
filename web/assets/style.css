@@ -767,7 +767,7 @@ html.dark .lsb-live-dot{background:#4ac26b;}
 .lsb-gauge-zones span{flex:1;}
 .lsb-gauge-zones span:nth-child(2){text-align:center;}
 .lsb-gauge-zones span:last-child{text-align:right;}
-.lsb-now-row{display:flex;align-items:center;gap:10px;margin:14px 18px 0;padding:11px 14px;background:var(--surface-soft);border-radius:var(--r-md);}
+.lsb-now-row{display:flex;align-items:center;gap:10px;margin:14px 18px 14px;padding:11px 14px;background:var(--surface-soft);border-radius:var(--r-md);}
 .lsb-idx{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;display:inline-flex;align-items:center;height:1.3em;line-height:1.3em;}
 .lsb-chg{font-size:14px;font-weight:700;}
 .lsb-pred-tag{margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:var(--r-sm);white-space:nowrap;}
