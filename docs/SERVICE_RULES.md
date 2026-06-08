@@ -322,6 +322,10 @@ python3 scripts/generate_html.py --write-list-only
 - Gemini 검색은 날짜 지시 없이도 최근 날짜 기사를 가져오지만, 직전 주요 이벤트(급락·급등)가 있을 경우 그 기사를 오늘 것으로 착각해 반환하는 편향이 있다.
 - 날짜 제한 없이 실행하면 어제~수일 전 기사가 오늘 이슈로 표시될 수 있다 (2026-06-08 검증됨).
 
+**잘못된 이슈 수동 삭제**: `kospi-news-live.json`의 `history` 배열에서 오래된 날짜·잘못된 수치를 담은 항목은 즉시 삭제 후 커밋한다.
+- 삭제 기준: 날짜가 틀렸거나, 지수·가격이 당일 실제 수준과 현저히 다른 항목.
+- `history` 항목 삭제 후 JSON 문법(trailing comma) 반드시 확인.
+
 **데이터 아카이브 파이프라인:**
 ```
 fetch_news_live.py → web/data/kospi-news-live.json (당일 갱신)
