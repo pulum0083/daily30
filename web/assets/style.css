@@ -776,27 +776,6 @@ html.dark .lsb-live-dot{background:#4ac26b;}
 .lsb-odo-inner{display:flex;flex-direction:column;}
 .lsb-odo-inner span{height:1.3em;line-height:1.3em;display:block;text-align:center;}
 .lsb-odo-sep{display:inline-block;height:1.3em;line-height:1.3em;vertical-align:top;}
-.lsb-divider{height:1px;background:var(--hairline);margin:14px 0 0;}
-.lsb-news{padding:14px 18px 12px;}
-.lsb-news-header{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-.lsb-news-dot{width:7px;height:7px;border-radius:50%;background:#e03131;flex-shrink:0;}
-.lsb-news-title-label{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.2px;}
-.lsb-tl-item{display:flex;gap:10px;padding:10px 0 10px 14px;border-left:2px solid var(--hairline);}
-.lsb-tl-item+.lsb-tl-item{margin-top:6px;}
-.lsb-tl-item.active{border:1px solid rgba(253,126,20,.22);border-radius:8px;padding:12px 14px;background:rgba(253,126,20,.055);margin-bottom:6px;}
-.lsb-tl-time{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);flex-shrink:0;white-space:nowrap;padding-top:2px;width:34px;}
-.lsb-tl-item.active .lsb-tl-time{color:#e8590c;}
-.lsb-tl-body{flex:1;min-width:0;}
-.lsb-tl-issue{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;}
-.lsb-tl-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0;}
-.lsb-tl-badge.market{background:rgba(220,53,69,.1);color:#c0392b;}
-.lsb-tl-badge.stock{background:rgba(39,117,237,.1);color:#1a5fb4;}
-.lsb-tl-headline{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.4;}
-.lsb-tl-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:0;padding-left:30px;}
-.lsb-tl-stock{margin-top:8px;}
-html.dark .lsb-tl-item.active{background:rgba(253,126,20,.08);border-color:rgba(253,126,20,.28);}
-html.dark .lsb-tl-item.active .lsb-tl-time{color:#fd7e14;}
-.lsb-tl-empty{font-size:13px;color:var(--muted);padding:4px 0 4px 14px;border-left:2px solid var(--hairline);}
 .lsb-foot{display:flex;align-items:center;padding:11px 18px;border-top:1px solid var(--hairline);font-size:11px;color:var(--muted);background:var(--surface-soft);}
 .lsb-foot strong{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:4px;}
 /* ── 이슈 브리핑 섹션 (B안 — 컴팩트 피드형) ── */

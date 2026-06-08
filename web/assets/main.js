@@ -927,7 +927,6 @@
       var subElA = document.getElementById('lsb-sub');
       if (subElA) subElA.textContent = '최종 종가 확인 중…';
       fetchKospi();
-      fetchNews();
       return;
     }
 
@@ -972,8 +971,6 @@
         if (subElPast) { subElPast.textContent = '다음 날 오전 정확도 체크 후 결과가 표시됩니다.'; }
       }
 
-      // 그날 뉴스 아카이브 fetch
-      fetchNews();
       return;
     }
 
@@ -1197,69 +1194,6 @@
         .catch(function() {});
     }
 
-    function renderNews(d) {
-      if (!d || !d.latest) return;
-      if (!isPast && d.date) {
-        var k2 = kstNow();
-        var todayKst2 = k2.getUTCFullYear() + '-' +
-          String(k2.getUTCMonth() + 1).padStart(2, '0') + '-' +
-          String(k2.getUTCDate()).padStart(2, '0');
-        if (d.date !== todayKst2) return;
-      }
-      var timelineEl = document.getElementById('lsb-timeline');
-      if (!timelineEl) return;
-
-      // history는 최신→과거 순. 그대로 사용 (최신이 맨 위)
-      var hist = (d.history || []).filter(function(item) {
-        var t = (item.market && item.market.title) || item.title;
-        return t && t !== '오늘의 이슈 준비 중';
-      });
-
-      // history가 없으면 latest 단독 표시
-      if (hist.length === 0) {
-        var lat = d.latest || {};
-        var latTitle = (lat.market && lat.market.title) || lat.title || '';
-        if (latTitle) hist = [{ time: d.updated_at || '', market: lat.market, title: latTitle }];
-      }
-
-      if (hist.length === 0) {
-        timelineEl.innerHTML = '<div class="lsb-tl-empty">장중 이슈가 쌓이게 됩니다.</div>';
-        return;
-      }
-
-      function tlIssue(issue, type) {
-        if (!issue || !issue.title) return '';
-        var label = type === 'market' ? '시장' : '종목';
-        return '<div class="lsb-tl-issue">'
-          + '<span class="lsb-tl-badge ' + type + '">' + label + '</span>'
-          + '<span class="lsb-tl-headline">' + escHtml(issue.title) + '</span>'
-          + '</div>'
-          + (issue.summary ? '<div class="lsb-tl-desc">' + escHtml(issue.summary) + '</div>' : '');
-      }
-      timelineEl.innerHTML = hist.map(function(item, i) {
-        var isLatest = i === 0;
-        var mIssue = item.market || (item.title ? item : null);
-        var sIssue = item.stock || null;
-        return '<div class="lsb-tl-item' + (isLatest ? ' active' : '') + '">'
-          + '<span class="lsb-tl-time">' + escHtml(item.time || '') + '</span>'
-          + '<div class="lsb-tl-body">'
-          + tlIssue(mIssue, 'market')
-          + (sIssue ? '<div class="lsb-tl-stock">' + tlIssue(sIssue, 'stock') + '</div>' : '')
-          + '</div>'
-          + '</div>';
-      }).join('');
-    }
-
-    function fetchNews() {
-      var url = isPast && m && m[1]
-        ? '/data/kospi-news-' + m[1] + '.json'
-        : '/data/kospi-news-live.json?t=' + Date.now();
-      fetch(url)
-        .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(renderNews)
-        .catch(function() {});
-    }
-
     function updateCountdown() {
       var k = kstNow();
       var close = new Date(k);
@@ -1277,12 +1211,10 @@
     }
 
     fetchKospi();
-    fetchNews();
     updateCountdown();
 
     if (isMarketHours()) {
       setInterval(fetchKospi, 10000);
-      setInterval(fetchNews, 5 * 60000);
       setInterval(updateCountdown, 1000);
       setInterval(tickRefreshCount, 1000);
     }
