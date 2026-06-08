@@ -185,7 +185,40 @@ hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 6. python3 scripts/generate_html.py --write-list-only 실행
 ```
 
-### 2. generate_html.py 사용 시 기존 수정 덮어쓰기 주의
+### 2. generate_html.py — 분석 데이터 오염 방지 메커니즘
+
+#### analysis_snapshot.json (핵심 보호 장치)
+
+`generate_html.py`는 HTML 생성 시 `web/briefings/{date}/{type}/analysis_snapshot.json`을 함께 커밋한다.
+이 스냅샷이 존재하면 이후 재생성 시 `data/analysis_{type}.json` 대신 스냅샷을 우선 사용한다.
+
+```
+1순위: web/briefings/{date}/{type}/analysis_snapshot.json  (git-committed, 날짜 고정)
+2순위: data/analysis_{type}.json                           (gitignored, 다음 워크플로우가 덮어씀)
+```
+
+**날짜 검증 게이트**: 스냅샷 없이 `data/analysis_{type}.json`을 사용할 때,
+`generated_at` 날짜가 `--date`와 다르면 즉시 RuntimeError로 발행 중단.
+다른 워크플로우 실행으로 오염된 파일이 예측을 덮어쓰는 것을 차단한다.
+
+**재생성 시 안전 순서:**
+```bash
+# 스냅샷이 있으면 자동으로 올바른 분석 데이터 사용
+python3 scripts/generate_html.py --type kospi --date 2026-06-08 --data-file data/latest_kospi.json
+```
+
+**스냅샷 수동 생성 (원복 후 등 스냅샷 없을 때):**
+```python
+import json
+from pathlib import Path
+analysis = json.load(open("data/analysis_kospi.json"))
+analysis["prediction"] = {"direction": "하락 우위", "up_pct": 20, "confidence": 80}
+analysis["generated_at"] = "2026-06-08T07:39:00+09:00"
+snap = Path("web/briefings/2026-06-08/kospi/analysis_snapshot.json")
+snap.write_text(json.dumps(analysis, ensure_ascii=False, indent=2))
+```
+
+#### HTML 재생성 시 덮어쓰기 주의
 
 `generate_html.py --type kospi ...`를 실행하면 해당 날짜 브리핑 HTML이 완전히 재생성된다.
 수동으로 가격·sparkline을 수정한 HTML이 있다면 반드시 확인 후 실행할 것.

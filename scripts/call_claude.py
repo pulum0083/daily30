@@ -655,6 +655,7 @@ def load_news_summary(briefing_type: str) -> dict:
 
 def save_analysis(briefing_type: str, analysis: dict) -> None:
     path = DATA_DIR / f"analysis_{briefing_type}.json"
+    analysis["generated_at"] = datetime.now(KST).isoformat()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(analysis, f, ensure_ascii=False, indent=2)
     print(f"[call_claude] Saved → {path}")

@@ -579,8 +579,26 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
     env = make_env()
     config = load_json(CONFIG_DIR / f"{internal_type}.json")
     src_type = SRC_TYPE[internal_type]
+    # ── analysis 로드 우선순위 ──────────────────────────────────────────────────
+    # 1순위: git에 커밋된 날짜별 snapshot (재생성 시 오염 방지)
+    # 2순위: 임시 live 파일 — 반드시 날짜 검증 후 사용
+    snapshot_path = BRIEFINGS_DIR / target_date / internal_type / "analysis_snapshot.json"
     analysis_path = DATA_DIR / f"analysis_{src_type}.json"
-    analysis = load_json(analysis_path) if analysis_path.exists() else {}
+
+    if snapshot_path.exists():
+        analysis = load_json(snapshot_path)
+    elif analysis_path.exists():
+        analysis = load_json(analysis_path)
+        analysis_date = (analysis.get("generated_at") or "")[:10]
+        if analysis_date and analysis_date != target_date:
+            raise RuntimeError(
+                f"[generate_html] ⛔ 분석 날짜 불일치 — "
+                f"analysis_{src_type}.json 생성일({analysis_date}) ≠ 대상 날짜({target_date}).\n"
+                f"다른 워크플로우 실행으로 덮어써진 파일입니다. 오염된 예측 발행을 차단합니다.\n"
+                f"해결: web/briefings/{target_date}/{internal_type}/analysis_snapshot.json 이 있으면 자동 사용됩니다."
+            )
+    else:
+        analysis = {}
 
     generated_at = market_data.get("generated_at") or analysis.get("generated_at") or datetime.now(KST).isoformat()
     gen_time = fmt_time(generated_at)
@@ -624,14 +642,20 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
 
     template = env.get_template(config["template"])
-    return template.render(**ctx)
+    return template.render(**ctx), analysis
 
 
-def write_output(html: str, internal_type: str, target_date: str):
+def write_output(html: str, internal_type: str, target_date: str, analysis=None):
     out_dir = BRIEFINGS_DIR / target_date / internal_type
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
     print(f"[generate_html] wrote {out_dir.relative_to(BASE_DIR)}/index.html")
+    # analysis snapshot 저장 — git에 커밋되어 재생성 시 날짜 오염을 방지함
+    if analysis:
+        import json as _json
+        snap_path = out_dir / "analysis_snapshot.json"
+        snap_path.write_text(_json.dumps(analysis, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[generate_html] snapshot → {snap_path.relative_to(BASE_DIR)}")
 
 
 def find_latest_ready():
@@ -810,8 +834,8 @@ def main():
     data_path = Path(args.data_file)
     market_data = load_json(data_path) if data_path.exists() else {}
 
-    html = render_briefing(internal_type, args.date, market_data)
-    write_output(html, internal_type, args.date)
+    html, analysis = render_briefing(internal_type, args.date, market_data)
+    write_output(html, internal_type, args.date, analysis)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
     write_sitemap_xml()
