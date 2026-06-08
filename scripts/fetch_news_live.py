@@ -114,6 +114,52 @@ PROMPT_MAP = {
     "US_MARKET":   PROMPT_US_MARKET,
 }
 
+# 방향 모순 키워드 (하락장에서 상승 표현, 상승장에서 하락 표현)
+_UP_WORDS   = re.compile(r"반등|상승|급등|오름|강세|올라|뛰어|돌파|신고가")
+_DOWN_WORDS = re.compile(r"하락|급락|폭락|무너|붕괴|추락|약세|내려|곤두박")
+
+
+def _get_market_reality():
+    """삼성전자 현재가로 오늘 장중 방향을 추정한다. 실패 시 None 반환."""
+    try:
+        sys.path.insert(0, str(REPO_ROOT))
+        import scripts.toss_client as tc
+        # 현재가
+        prices = tc.get_prices(["005930"])
+        if not prices:
+            return None
+        current = float(prices[0].get("lastPrice") or 0)
+        if not current:
+            return None
+        # 전일 종가 (오늘 캔들 제외)
+        today_str = datetime.now(KST).strftime("%Y-%m-%d")
+        candles = tc.get_candles("005930", interval="1d", count=5)
+        prev_closes = [
+            float(c["closePrice"]) for c in candles
+            if c.get("closePrice") and c.get("timestamp", "")[:10] != today_str
+        ]
+        if not prev_closes:
+            return None
+        prev_close = prev_closes[-1]  # 가장 최근 전일 종가
+        change_pct = (current - prev_close) / prev_close * 100
+        return {"change_pct": round(change_pct, 2), "current": current, "prev_close": prev_close}
+    except Exception as e:
+        print(f"[fetch_news_live] market reality 조회 실패 (무시): {e}")
+        return None
+
+
+def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
+    """시장 등락률과 이슈 타이틀 방향이 모순인지 확인한다."""
+    titles = " ".join([
+        (latest.get("market") or {}).get("title", ""),
+        (latest.get("stock") or {}).get("title", ""),
+    ])
+    if change_pct <= -3.0 and _UP_WORDS.search(titles):
+        return True
+    if change_pct >= 3.0 and _DOWN_WORDS.search(titles):
+        return True
+    return False
+
 AVOID_BLOCK_TMPL = """[직전 2회 이슈 — 아래 시장·종목 주제와 동일하거나 매우 유사한 내용은 선택하지 마세요]
 {items}
 
@@ -139,22 +185,9 @@ def get_gemini_api_key() -> str:
 
 # ── Gemini 호출 ───────────────────────────────────────────────────────────────
 
-def fetch_latest_issue(
-    slot: str,
-    today: str,
-    time_str: str,
-    recent_stock_titles=None,  # list[str] | None
-) -> dict:
+def _call_gemini(prompt: str) -> dict:
     from google import genai
     from google.genai import types
-
-    avoid_block = ""
-    if recent_stock_titles:
-        items = "\n".join(f"- {t}" for t in recent_stock_titles)
-        avoid_block = AVOID_BLOCK_TMPL.format(items=items)
-
-    prompt_tmpl = PROMPT_MAP[slot]
-    prompt = prompt_tmpl.format(today=today, time=time_str, avoid_block=avoid_block)
 
     client = genai.Client(api_key=get_gemini_api_key())
     response = client.models.generate_content(
@@ -168,7 +201,7 @@ def fetch_latest_issue(
     )
     raw = response.text
     if not raw:
-        raise RuntimeError("Gemini가 빈 응답을 반환했습니다 (response.text is None or empty)")
+        raise RuntimeError("Gemini가 빈 응답을 반환했습니다")
     raw = raw.strip()
     if raw.startswith("```"):
         lines = raw.split("\n")
@@ -177,10 +210,42 @@ def fetch_latest_issue(
     if m:
         raw = m.group(0)
     parsed = json.loads(raw)
-    # 구버전 단일 포맷 호환 — market/stock 키가 없으면 market으로 래핑
     if "market" not in parsed and "title" in parsed:
         parsed = {"market": parsed, "stock": None}
     return parsed
+
+
+def fetch_latest_issue(
+    slot: str,
+    today: str,
+    time_str: str,
+    recent_stock_titles=None,
+    market_reality=None,   # _get_market_reality() 결과
+) -> dict:
+    avoid_block = ""
+    if recent_stock_titles:
+        items = "\n".join(f"- {t}" for t in recent_stock_titles)
+        avoid_block = AVOID_BLOCK_TMPL.format(items=items)
+
+    prompt_tmpl = PROMPT_MAP[slot]
+    prompt = prompt_tmpl.format(today=today, time=time_str, avoid_block=avoid_block)
+
+    # MARKET 슬롯: 실측 방향을 프롬프트에 주입 (재시도 시 모순 방지)
+    if slot == "MARKET" and market_reality:
+        chg = market_reality["change_pct"]
+        direction = "하락" if chg < 0 else "상승"
+        prompt += (
+            f"\n\n[실측 데이터 — 반드시 반영]\n"
+            f"삼성전자 현재 등락률: {chg:+.1f}% ({direction})\n"
+            f"이 방향과 모순되는 '반등', '급등', '상승' 등의 표현은 사용하지 마세요."
+            if chg <= -3 else
+            f"\n\n[실측 데이터 — 반드시 반영]\n"
+            f"삼성전자 현재 등락률: {chg:+.1f}% ({direction})\n"
+            f"이 방향과 모순되는 '급락', '폭락', '하락' 등의 표현은 사용하지 마세요."
+            if chg >= 3 else ""
+        )
+
+    return _call_gemini(prompt)
 
 
 # ── 메인 ─────────────────────────────────────────────────────────────────────
@@ -218,11 +283,31 @@ def main() -> None:
     if recent_stock_titles:
         print(f"[fetch_news_live] 중복 방지 이슈 목록: {recent_stock_titles}")
 
-    try:
-        latest = fetch_latest_issue(slot, today, time_str, recent_stock_titles or None)
-    except Exception as e:
-        print(f"[fetch_news_live] ERROR: {e}", file=sys.stderr)
-        sys.exit(1)
+    # MARKET 슬롯: 실측 방향 조회 (검증용)
+    market_reality = _get_market_reality() if slot == "MARKET" else None
+    if market_reality:
+        print(f"[fetch_news_live] 실측 삼성전자 {market_reality['change_pct']:+.1f}%")
+
+    latest = None
+    for attempt in range(3):
+        try:
+            latest = fetch_latest_issue(
+                slot, today, time_str,
+                recent_stock_titles or None,
+                market_reality=market_reality if attempt > 0 else None,
+            )
+        except Exception as e:
+            print(f"[fetch_news_live] ERROR (시도 {attempt+1}): {e}", file=sys.stderr)
+            if attempt == 2:
+                sys.exit(1)
+            continue
+
+        # 방향 모순 검증 (MARKET 슬롯 + 실측 데이터 있을 때만)
+        if market_reality and _is_direction_conflict(latest, market_reality["change_pct"]):
+            titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
+            print(f"[fetch_news_live] ⚠️ 방향 모순 감지 (시도 {attempt+1}): {titles} — 재시도")
+            continue
+        break
 
     # 기존 latest를 history 맨 앞에 추가 (같은 날짜인 경우에만 이어받음)
     history: list = []
