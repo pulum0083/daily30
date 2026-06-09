@@ -214,7 +214,29 @@ def _call_gemini(prompt: str) -> dict:
     parsed = json.loads(raw)
     if "market" not in parsed and "title" in parsed:
         parsed = {"market": parsed, "stock": None}
-    return parsed
+    return _clean_issue(parsed)
+
+
+def _clean_issue(issue: dict) -> dict:
+    """title·summary 에서 [ ] ( ) 괄호 태그 제거."""
+    def clean(text: str) -> str:
+        if not text:
+            return text
+        text = re.sub(r"\[.*?\]", "", text)   # [ET특징주], [서울=연합뉴스] 등
+        text = re.sub(r"\(.*?\)", "", text)   # (특징주), (005930) 등
+        return re.sub(r"\s{2,}", " ", text).strip()
+
+    result = {}
+    for key in ("market", "stock"):
+        val = issue.get(key)
+        if isinstance(val, dict):
+            result[key] = {
+                "title":   clean(val.get("title", "")),
+                "summary": clean(val.get("summary", "")),
+            }
+        else:
+            result[key] = val
+    return result
 
 
 def fetch_latest_issue(
