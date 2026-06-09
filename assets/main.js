@@ -1661,28 +1661,38 @@
       wrap.style.display = '';
     }
 
-    // 아카이브 JSON fetch (당일이면 live.json도 시도)
+    // 오늘 날짜 판별
     var kstNow = new Date(Date.now() + 9 * 3600 * 1000);
     var todayKst = kstNow.getUTCFullYear() + '-'
       + String(kstNow.getUTCMonth() + 1).padStart(2, '0') + '-'
       + String(kstNow.getUTCDate()).padStart(2, '0');
     var isToday = (date === todayKst);
 
-    // 아카이브 우선, 없으면 live.json fallback
-    var url = '/data/kospi-news-' + date + '.json';
-    fetch(url, { signal: AbortSignal.timeout(6000) })
-      .then(function(r) { return r.ok ? r.json() : Promise.reject('archive-404'); })
-      .then(render)
-      .catch(function() {
-        if (isToday) {
-          fetch('/data/kospi-news-live.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) })
-            .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-            .then(render)
-            .catch(function() { wrap.style.display = 'none'; });
-        } else {
-          wrap.style.display = 'none';
-        }
-      });
+    function fetchAndRender() {
+      if (isToday) {
+        // 오늘은 live.json 직접 fetch (캐시 버스팅)
+        fetch('/data/kospi-news-live.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) })
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+          .then(render)
+          .catch(function() { wrap.style.display = 'none'; });
+      } else {
+        // 과거 날짜는 아카이브 JSON
+        fetch('/data/kospi-news-' + date + '.json', { signal: AbortSignal.timeout(6000) })
+          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+          .then(render)
+          .catch(function() { wrap.style.display = 'none'; });
+      }
+    }
+
+    fetchAndRender();
+
+    // 장중(09:00~15:30 KST) 5분마다 자동 갱신
+    if (isToday) {
+      var kstMins = kstNow.getUTCHours() * 60 + kstNow.getUTCMinutes();
+      if (kstMins >= 540 && kstMins < 930) {
+        setInterval(fetchAndRender, 5 * 60 * 1000);
+      }
+    }
   }
 
   /* ── 전역 노출 (인라인 핸들러·섹션 템플릿용) ── */
