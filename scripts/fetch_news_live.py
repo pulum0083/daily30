@@ -115,8 +115,10 @@ PROMPT_MAP = {
 }
 
 # 방향 모순 키워드 (하락장에서 상승 표현, 상승장에서 하락 표현)
-_UP_WORDS   = re.compile(r"반등|상승|급등|오름|강세|올라|뛰어|돌파|신고가")
-_DOWN_WORDS = re.compile(r"하락|급락|폭락|무너|붕괴|추락|약세|내려|곤두박")
+_UP_WORDS      = re.compile(r"반등|상승|급등|오름|강세|올라|뛰어|돌파|신고가")
+_DOWN_WORDS    = re.compile(r"하락|급락|폭락|무너|붕괴|추락|약세|내려|곤두박")
+# 극단적 폭락/급등 표현 — 시장 방향과 조금만 반대여도 모순으로 처리
+_EXTREME_CRASH = re.compile(r"서킷브레이커|서킷 브레이커|붕괴")
 
 
 def _get_market_reality():
@@ -154,9 +156,13 @@ def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
         (latest.get("market") or {}).get("title", ""),
         (latest.get("stock") or {}).get("title", ""),
     ])
-    if change_pct <= -3.0 and _UP_WORDS.search(titles):
+    # 극단적 폭락 표현(붕괴·서킷브레이커)은 시장이 조금이라도 양전이면 모순
+    if change_pct > 0.5 and _EXTREME_CRASH.search(titles):
         return True
-    if change_pct >= 3.0 and _DOWN_WORDS.search(titles):
+    # 일반 방향 키워드: 임계값 ±1.5%로 낮춤 (기존 ±3%)
+    if change_pct <= -1.5 and _UP_WORDS.search(titles):
+        return True
+    if change_pct >= 1.5 and _DOWN_WORDS.search(titles):
         return True
     return False
 
@@ -230,20 +236,21 @@ def fetch_latest_issue(
     prompt_tmpl = PROMPT_MAP[slot]
     prompt = prompt_tmpl.format(today=today, time=time_str, avoid_block=avoid_block)
 
-    # MARKET 슬롯: 실측 방향을 프롬프트에 주입 (재시도 시 모순 방지)
+    # MARKET 슬롯: 실측 방향을 프롬프트에 주입 (모든 시도에 적용)
     if slot == "MARKET" and market_reality:
         chg = market_reality["change_pct"]
         direction = "하락" if chg < 0 else "상승"
-        prompt += (
+        header = (
             f"\n\n[실측 데이터 — 반드시 반영]\n"
             f"삼성전자 현재 등락률: {chg:+.1f}% ({direction})\n"
-            f"이 방향과 모순되는 '반등', '급등', '상승' 등의 표현은 사용하지 마세요."
-            if chg <= -3 else
-            f"\n\n[실측 데이터 — 반드시 반영]\n"
-            f"삼성전자 현재 등락률: {chg:+.1f}% ({direction})\n"
-            f"이 방향과 모순되는 '급락', '폭락', '하락' 등의 표현은 사용하지 마세요."
-            if chg >= 3 else ""
         )
+        if chg <= -1.5:
+            prompt += header + "이 방향과 모순되는 '반등', '급등', '상승' 등의 표현은 사용하지 마세요."
+        elif chg >= 1.5:
+            prompt += header + "이 방향과 모순되는 '급락', '폭락', '하락', '붕괴' 등의 표현은 사용하지 마세요."
+        else:
+            # 소폭 등락 구간: 방향 안내 + 극단적 표현 모두 금지
+            prompt += header + "시장이 소폭 움직이는 중이에요. '붕괴', '폭락', '서킷브레이커', '급등', '급락' 등 극단적 표현은 사용하지 마세요."
 
     return _call_gemini(prompt)
 
@@ -294,7 +301,7 @@ def main() -> None:
             latest = fetch_latest_issue(
                 slot, today, time_str,
                 recent_stock_titles or None,
-                market_reality=market_reality if attempt > 0 else None,
+                market_reality=market_reality,  # 첫 시도부터 항상 주입
             )
         except Exception as e:
             print(f"[fetch_news_live] ERROR (시도 {attempt+1}): {e}", file=sys.stderr)
