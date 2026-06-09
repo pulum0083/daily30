@@ -106,6 +106,7 @@ time_label 형식: 발언이 오늘(KST 기준)이면 "오늘 HH:MM", 어제면 
     "initials": "이니셜 2자",
     "quote": "한국어 번역 발언 (원문 기반, 2-4문장)",
     "source": "출처 매체명",
+    "url": "기사 원문 URL (없으면 빈 문자열 \"\")",
     "published_at": "ISO 8601 datetime (KST, 예: 2026-06-06T23:14:00+09:00)",
     "time_label": "어제 23:14",
     "sentiment": "bull"
