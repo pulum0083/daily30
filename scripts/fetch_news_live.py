@@ -166,10 +166,13 @@ def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
         return True
     return False
 
-AVOID_BLOCK_TMPL = """[직전 2회 이슈 — 아래 시장·종목 주제와 동일하거나 매우 유사한 내용은 선택하지 마세요]
+AVOID_BLOCK_TMPL = """[직전 이슈 중복 금지]
+직전에 다룬 이슈:
 {items}
 
-시장 이슈와 종목 이슈 모두 위 목록과 겹치지 않는 새로운 주제를 선택하세요.
+중요: 제목이 달라도 위 목록에 등장하는 종목명·지수명·키워드가 같으면 중복입니다.
+예) 직전에 '삼성전자·SK하이닉스 4%↑'를 다뤘다면, '삼성전자·SK하이닉스 4~7%↑'도 중복입니다.
+시장 이슈와 종목 이슈 모두 완전히 다른 종목·주제를 선택하세요.
 
 """
 
@@ -279,8 +282,8 @@ def main() -> None:
                         t = (lt.get(key) or {}).get("title", "")
                         if t and t not in recent_stock_titles:
                             recent_stock_titles.append(t)
-                # 그 이전 이슈 (history[0])
-                for h in existing.get("history", [])[:1]:
+                # 그 이전 이슈 (history[0:2])
+                for h in existing.get("history", [])[:2]:
                     for key in ("market", "stock"):
                         t = (h.get(key) or {}).get("title", "")
                         if t and t not in recent_stock_titles:
