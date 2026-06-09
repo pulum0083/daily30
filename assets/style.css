@@ -803,3 +803,22 @@ html.dark .lsb-live-dot{background:#4ac26b;}
 .ib-sep{height:1px;background:var(--hairline);margin:2px 0;opacity:.5;}
 html.dark .issue-briefing-card{border-color:rgba(253,126,20,.2);}
 html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
+
+/* ──────────────────────────────────────────────
+   월가 애널리스트 코멘트 카드 (미국 브리핑)
+────────────────────────────────────────────── */
+.analyst-quotes-section{display:flex;flex-direction:column;gap:10px;}
+.analyst-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 16px;}
+.analyst-card__top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.analyst-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:-.5px;}
+.analyst-meta{flex:1;min-width:0;}
+.analyst-name{font-size:13px;font-weight:700;color:var(--ink);}
+.analyst-affil{font-size:11px;color:var(--muted);margin-top:1px;}
+.analyst-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;flex-shrink:0;}
+.analyst-badge.bull{background:var(--up-bg);color:var(--up);}
+.analyst-badge.bear{background:var(--dn-bg);color:var(--dn);}
+.analyst-badge.neu{background:var(--surface-inset);color:var(--muted);}
+.analyst-quote{font-size:13px;line-height:1.75;color:var(--ink);}
+.analyst-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);}
+.analyst-source{font-size:11px;font-weight:600;color:var(--primary);}
+.analyst-time{font-size:11px;color:var(--muted);margin-left:auto;}
