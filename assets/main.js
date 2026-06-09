@@ -1611,14 +1611,19 @@
       return m >= r.from && m < r.to;
     }
 
+    function cleanBrackets(text) {
+      if (!text) return text;
+      return text.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s{2,}/g, ' ').trim();
+    }
+
     function tlIssue(issue, type) {
       if (!issue || !issue.title) return '';
       var label = type === 'market' ? '시장' : '종목';
       return '<div class="ib-line">'
         + '<span class="ib-badge ' + type + '">' + label + '</span>'
-        + '<span class="ib-hl">' + escHtml(issue.title) + '</span>'
+        + '<span class="ib-hl">' + escHtml(cleanBrackets(issue.title)) + '</span>'
         + '</div>'
-        + (issue.summary ? '<div class="ib-desc">' + escHtml(issue.summary) + '</div>' : '');
+        + (issue.summary ? '<div class="ib-desc">' + escHtml(cleanBrackets(issue.summary)) + '</div>' : '');
     }
 
     function render(data) {
