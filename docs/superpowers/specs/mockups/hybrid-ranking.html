@@ -1,0 +1,98 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+.ds{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;color:var(--ink);background:var(--soft);
+  max-width:620px;margin:0 auto;text-align:left;word-break:keep-all;padding:4px;}
+.ds .num{font-variant-numeric:tabular-nums;}.ds .up{color:var(--up);}.ds .dn{color:var(--dn);}
+
+.ds .legend{display:flex;gap:14px;align-items:center;font-size:11px;color:var(--muted);margin:0 4px 12px;flex-wrap:wrap;}
+.ds .lg{display:inline-flex;align-items:center;gap:5px;}
+.ds .ai-pick{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--primary);color:#fff;}
+.ds .ai-sig{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+
+.ds .card{background:var(--soft);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.ds .ch{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.ds .ct{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+.ds .ct::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.ds .cs{font-size:11px;color:var(--muted);}
+
+.ds .row{display:flex;align-items:center;gap:10px;padding:10px 15px;border-bottom:1px solid var(--hair);background:var(--canvas);}
+.ds .row:last-child{border-bottom:none;}
+.ds .rk{width:16px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.ds .rk.t{color:var(--primary);}
+.ds .nm{width:104px;flex-shrink:0;}
+.ds .nm b{font-size:13px;font-weight:700;display:block;}
+.ds .nm small{font-size:10px;color:var(--muted);}
+/* bar chart */
+.ds .barwrap{flex:1;height:22px;background:var(--inset);border-radius:6px;overflow:hidden;position:relative;}
+.ds .bar{height:100%;border-radius:6px;display:flex;align-items:center;}
+.ds .bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}
+.ds .bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}
+.ds .bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
+.ds .barval{position:absolute;right:8px;top:0;height:22px;display:flex;align-items:center;font-size:11px;font-weight:800;color:var(--ink);}
+/* AI column */
+.ds .aicol{width:70px;flex-shrink:0;text-align:right;}
+.ds .aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;display:inline-block;}
+.ds .ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);display:inline-block;}
+.ds .aid{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);display:inline-block;}
+.ds .ax{font-size:11px;color:#C0C4CA;}
+
+.ds .conflict{font-size:11px;color:var(--up);background:var(--up-bg);border-radius:8px;padding:8px 12px;margin:10px 4px;line-height:1.5;}
+</style>
+
+<div class="ds">
+  <h2 style="font-size:18px;margin:6px 4px 4px;">하이브리드 랭킹 — 첫 화면</h2>
+  <p style="font-size:12px;color:var(--muted);margin:0 4px 12px;">ETFNow식 거래량·상승·하락 차트 + 더블샷 AI 상승확률 컬럼</p>
+
+  <div class="legend">
+    <span class="lg"><span class="ai-pick">AI 78%</span> Claude 예측(픽)</span>
+    <span class="lg"><span class="ai-sig">신호 64%</span> 기술신호(전 종목)</span>
+    <span class="lg" style="color:#C0C4CA;">— 신호 없음</span>
+  </div>
+
+  <!-- 거래량 톱 -->
+  <div class="card">
+    <div class="ch"><span class="ct">거래량 톱</span><span class="cs">추적 142종목 중 · 06-11</span></div>
+    <div class="row"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930</small></div>
+      <div class="barwrap"><div class="bar vol" style="width:100%;"></div><span class="barval num">3,210만주</span></div>
+      <div class="aicol"><span class="ais">신호 58%</span></div></div>
+    <div class="row"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660</small></div>
+      <div class="barwrap"><div class="bar vol" style="width:71%;"></div><span class="barval num">2,280만주</span></div>
+      <div class="aicol"><span class="aip">AI 78%</span></div></div>
+    <div class="row"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700</small></div>
+      <div class="barwrap"><div class="bar vol" style="width:48%;"></div><span class="barval num">1,540만주</span></div>
+      <div class="aicol"><span class="ais">신호 71%</span></div></div>
+    <div class="row"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490</small></div>
+      <div class="barwrap"><div class="bar vol" style="width:33%;"></div><span class="barval num">1,050만주</span></div>
+      <div class="aicol"><span class="aid">신호 42%</span></div></div>
+  </div>
+
+  <div class="conflict">🔥 충돌 신호 · 삼성전자는 거래량 1위지만 AI 기술신호는 58%(중립). SK하이닉스는 Claude가 78% 상승 우위 — 수급과 AI가 일치.</div>
+
+  <!-- 상승 / 하락 2열 느낌 -->
+  <div class="card">
+    <div class="ch"><span class="ct">상승 톱</span><span class="cs">등락률 기준</span></div>
+    <div class="row"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930</small></div>
+      <div class="barwrap"><div class="bar up" style="width:100%;"></div><span class="barval num up">+9.4%</span></div>
+      <div class="aicol"><span class="ais">신호 69%</span></div></div>
+    <div class="row"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660</small></div>
+      <div class="barwrap"><div class="bar up" style="width:36%;"></div><span class="barval num up">+3.4%</span></div>
+      <div class="aicol"><span class="aip">AI 78%</span></div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ct">하락 톱</span><span class="cs">등락률 기준</span></div>
+    <div class="row"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930</small></div>
+      <div class="barwrap"><div class="bar dn" style="width:100%;"></div><span class="barval num dn">−6.4%</span></div>
+      <div class="aicol"><span class="ais">신호 58%</span></div></div>
+    <div class="row"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058470</small></div>
+      <div class="barwrap"><div class="bar dn" style="width:9%;"></div><span class="barval num dn">−0.6%</span></div>
+      <div class="aicol"><span class="ax">—</span></div></div>
+  </div>
+
+  <p style="font-size:11px;color:var(--muted);text-align:center;padding:4px 8px 8px;line-height:1.6;">
+    2티어: <b style="color:var(--primary);">파란 채움 = Claude 예측(픽)</b>, <b style="color:var(--primary);">파란 외곽선 = 기술신호(전 종목)</b>, 빨간 외곽선 = 약세 신호. 표기로 둘을 명확히 구분(YMYL 대응).
+  </p>
+</div>
