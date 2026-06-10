@@ -203,6 +203,11 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _is_quota_error(e: Exception) -> bool:
+    msg = str(e).upper()
+    return "429" in msg or "RESOURCE_EXHAUSTED" in msg or "QUOTA" in msg
+
+
 def main():
     parser = argparse.ArgumentParser(description="Gemini Google Search grounding으로 시장 뉴스 수집·요약")
     parser.add_argument("--type", choices=["kospi", "kospi-close", "us"], required=True)
@@ -210,14 +215,34 @@ def main():
 
     print(f"[fetch_news] Fetching news via Gemini Google Search grounding (type={args.type})")
 
-    try:
-        summary = fetch_and_summarize(args.type)
-        print(
-            f"[fetch_news] OK: {len(summary.get('key_indicators', []))} indicators, "
-            f"{len(summary.get('headlines', []))} headlines"
-        )
-    except Exception as e:
-        print(f"[fetch_news] ERROR: {e}", file=sys.stderr)
+    summary = None
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            summary = fetch_and_summarize(args.type)
+            print(
+                f"[fetch_news] OK (attempt {attempt}): "
+                f"{len(summary.get('key_indicators', []))} indicators, "
+                f"{len(summary.get('headlines', []))} headlines"
+            )
+            break
+        except Exception as e:
+            last_err = e
+            if _is_quota_error(e) and attempt < 3:
+                wait = 30 * attempt
+                print(f"[fetch_news] 429/quota — {wait}s 후 재시도 ({attempt}/3)", file=sys.stderr)
+                import time
+                time.sleep(wait)
+            else:
+                break
+
+    if summary is None:
+        print(f"[fetch_news] ERROR: {last_err}", file=sys.stderr)
+        # stale 파일이 남아 있으면 downstream이 구 데이터를 쓰지 않도록 삭제
+        stale = DATA_DIR / f"news_summary_{args.type}.json"
+        if stale.exists():
+            stale.unlink()
+            print(f"[fetch_news] stale 뉴스 파일 삭제: {stale}", file=sys.stderr)
         sys.exit(1)
 
     summary["generated_at"] = datetime.now(KST).isoformat()

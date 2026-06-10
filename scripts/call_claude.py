@@ -647,10 +647,16 @@ def load_market_data(briefing_type: str) -> dict:
 
 def load_news_summary(briefing_type: str) -> dict:
     path = DATA_DIR / f"news_summary_{briefing_type}.json"
-    if path.exists():
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    generated = data.get("generated_at", "")[:10]
+    if generated != today:
+        print(f"[call_claude] 뉴스 파일 날짜 불일치 ({generated} ≠ {today}) — 무시", file=sys.stderr)
+        return {}
+    return data
 
 
 def save_analysis(briefing_type: str, analysis: dict) -> None:
