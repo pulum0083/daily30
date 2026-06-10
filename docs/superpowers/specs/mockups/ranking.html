@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}a{cursor:pointer;}
+
+.gnb{background:var(--gnb);height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;}.gnb__logo b{color:#5AA2FF;}
+.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
+.gnb .right{margin-left:auto;}.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;}.gnb .sbtn svg{width:13px;height:13px;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 14px;}.crumb a{color:var(--muted);text-decoration:none;}
+
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px;flex-wrap:wrap;}
+.phead h1{font-size:26px;font-weight:800;letter-spacing:-.6px;margin:0;display:flex;align-items:center;gap:9px;}
+.phead h1 .ic{font-size:24px;}
+.phead .sub{font-size:12px;color:var(--muted);margin-top:6px;}
+.tabs{display:inline-flex;background:var(--inset);border-radius:11px;padding:3px;gap:2px;}
+.tabs a{font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;padding:8px 16px;border-radius:8px;}
+.tabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
+
+/* filter bar */
+.fbar{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap;}
+.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}
+.chips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
+
+/* table */
+.tbl{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;box-shadow:var(--s1);}
+.thead{display:flex;align-items:center;gap:14px;padding:11px 20px;background:var(--soft);border-bottom:1px solid var(--hair);font-size:11px;font-weight:700;color:var(--muted);}
+.row{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}
+.row:last-child{border-bottom:none;}.row:hover{background:var(--primary-bg);}
+.c-rk{width:30px;text-align:center;flex-shrink:0;}
+.c-nm{width:190px;flex-shrink:0;}
+.c-bar{flex:1;min-width:120px;}
+.c-chg{width:84px;text-align:right;flex-shrink:0;}
+.c-ai{width:92px;text-align:right;flex-shrink:0;}
+
+.row .c-rk{font-size:14px;font-weight:800;color:var(--muted);}.row .c-rk.t{color:var(--primary);}
+.row .c-nm b{font-size:14px;font-weight:700;display:block;}.row .c-nm small{font-size:10px;color:var(--muted);}
+.barwrap{height:24px;background:var(--inset);border-radius:6px;overflow:hidden;position:relative;}
+.bar{height:100%;border-radius:6px;}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}
+.barval{position:absolute;right:10px;top:0;height:24px;display:flex;align-items:center;font-size:11px;font-weight:800;}
+.chg{font-size:13px;font-weight:800;}
+.aip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--primary);color:#fff;cursor:help;}
+.ais{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);cursor:help;}
+.aid{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);cursor:help;}
+.ax{font-size:12px;color:#C0C4CA;cursor:help;}
+
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;}
+.pager a{min-width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;border:1px solid var(--hair);background:var(--canvas);font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}
+.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--muted);margin:16px 2px 0;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+
+#tip{position:fixed;z-index:100;display:none;max-width:268px;background:#fff;border:1px solid var(--hair);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:12px 14px;pointer-events:none;}
+#tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;}#tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}#tip .bd b{color:var(--ink);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo">Double<b>-Shot</b></span><a>브리핑</a><a class="on">종목</a><span class="right"><span class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+
+<div class="wrap">
+  <div class="crumb"><a>홈</a> › <a>종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
+
+  <div class="phead">
+    <div>
+      <h1><span class="ic">🔥</span> 거래량 순위</h1>
+      <div class="sub">추적 142종목 · 코스피·코스닥 · 06-11 종가 기준</div>
+    </div>
+    <div class="tabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
+  </div>
+
+  <div class="fbar">
+    <span class="lbl">섹터</span>
+    <div class="chips"><a class="on">전체</a><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a><a>엔터</a></div>
+  </div>
+
+  <div class="tbl">
+    <div class="thead"><span class="c-rk">#</span><span class="c-nm">종목</span><span class="c-bar">거래량</span><span class="c-chg">등락률</span><span class="c-ai">AI 상승확률</span></div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="legend">
+    <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span>
+    <span class="lg"><span class="ais">신호 64</span> 기술신호(전 종목)</span>
+    <span class="lg"><span class="aid">신호 42</span> 약세 신호</span>
+    <span class="lg"><span class="ax">—</span> 신호 없음</span>
+  </div>
+
+  <div class="pager"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>5</a><a>›</a></div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+const data=[
+ [1,'삼성전자','005930','반도체',100,'3,210만주','−6.4%','dn',['ais',58]],
+ [2,'SK하이닉스','000660','반도체',71,'2,280만주','+3.4%','up',['aip',78]],
+ [3,'한미반도체','042700','반도체',48,'1,540만주','+1.8%','up',['ais',71]],
+ [4,'POSCO홀딩스','005490','2차전지',33,'1,050만주','−1.2%','dn',['aid',42]],
+ [5,'LG에너지솔루션','373220','2차전지',26,'820만주','+0.4%','up',['ais',55]],
+ [6,'현대차','005380','자동차',22,'690만주','+1.1%','up',['ax',0]],
+ [7,'에코프로비엠','247540','2차전지',19,'610만주','+6.1%','up',['ais',63]],
+ [8,'카카오','035720','인터넷',17,'540만주','−3.9%','dn',['aid',38]],
+ [9,'NAVER','035420','인터넷',15,'470만주','−0.9%','dn',['ax',0]],
+ [10,'기아','000270','자동차',13,'420만주','+0.8%','up',['ais',52]],
+ [11,'삼성바이오로직스','207940','바이오',12,'380만주','+0.3%','up',['ax',0]],
+ [12,'주성엔지니어링','036930','반도체',11,'350만주','+9.4%','up',['ais',69]],
+ [13,'셀트리온','068270','바이오',10,'320만주','−0.4%','dn',['ais',51]],
+ [14,'하나금융지주','086790','금융',9,'290만주','+2.5%','up',['ais',66]],
+ [15,'DB하이텍','000990','반도체',8,'260만주','+1.8%','up',['ais',64]],
+];
+document.getElementById('rows').innerHTML=data.map(r=>{
+  const [t,n]=r[8];const badge=n?`<span class="${t}">${t==='aip'?'AI':'신호'} ${n}</span>`:`<span class="ax">—</span>`;
+  return `<a class="row"><span class="c-rk ${r[0]<=3?'t':''} num">${r[0]}</span>
+   <span class="c-nm"><b>${r[1]}</b><small class="num">${r[2]} · ${r[3]}</small></span>
+   <span class="c-bar"><span class="barwrap"><span class="bar ${r[7]==='up'?'up':r[7]==='dn'?'dn':'vol'}" style="display:block;width:${r[4]}%"></span><span class="barval num">${r[5]}</span></span></span>
+   <span class="c-chg chg ${r[7]} num">${r[6]}</span>
+   <span class="c-ai">${badge}</span></a>`;
+}).join('');
+
+/* 툴팁 */
+const tip=document.getElementById('tip');
+function tipHTML(el){const m=(el.textContent.match(/\d+/)||['?']);const n=m[0];
+ if(el.classList.contains('aip'))return `<div class="tt" style="color:#006EFF">🔵 AI 상승확률 ${n}%</div><div class="bd">오늘 AI가 <b>픽한 종목</b>. Claude가 <b>뉴스·수급·차트</b>를 종합 분석한 상승 확률, 신뢰도 ${n}%.</div>`;
+ if(el.classList.contains('ais'))return `<div class="tt" style="color:#006EFF">⚪ 기술신호 ${n}점</div><div class="bd"><b>전 종목</b> 규칙 기반 점수(0~100). <b>20·200일선 + 골든크로스 + 5일 모멘텀</b> 합산. 예측 아닌 기술 참고 신호.</div>`;
+ if(el.classList.contains('aid'))return `<div class="tt" style="color:#E03131">🔴 기술신호 ${n}점 · 약세</div><div class="bd">이동평균선 아래 등 <b>약세 신호 우세</b> 구간(42↓).</div>`;
+ return `<div class="tt" style="color:#6B7280">— 신호 없음</div><div class="bd">거래일 <b>200일 미만</b> 등 데이터 부족으로 미산출.</div>`;}
+function mv(e){const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+16,y=e.clientY+16;if(x+w+14>innerWidth)x=e.clientX-w-16;if(y+h+14>innerHeight)y=e.clientY-h-16;tip.style.left=Math.max(14,x)+'px';tip.style.top=Math.max(14,y)+'px';}
+document.querySelectorAll('.aip,.ais,.aid,.ax').forEach(el=>{el.addEventListener('mouseenter',e=>{tip.innerHTML=tipHTML(e.currentTarget);tip.style.display='block';mv(e);});el.addEventListener('mousemove',mv);el.addEventListener('mouseleave',()=>tip.style.display='none');});
+</script>
+</body>
+</html>

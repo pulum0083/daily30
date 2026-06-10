@@ -155,9 +155,11 @@ ETFNow 출처(KRX·네이버·Yahoo·NASDAQ Trader·업비트) 중 업비트(코
 | 홈 허브 | `/stocks` (= `/`) | `home.html` |
 | 종목 상세 | `/stocks/{code}` | `stock-detail.html` |
 | 섹터 페이지 | `/stocks/sectors/{sector}` | `sector.html` |
-| 랭킹 전체 | `/stocks/{volume,gainers,losers}` | (예정) |
+| 랭킹 전체 | `/stocks/{volume,gainers,losers}` | `ranking.html` |
 | 검색 오버레이 | (모달) | `search-overlay.html` |
-| **연결 클릭 플로우** | — | `flow-clickable.html` |
+| **연결 클릭 플로우** | — | `flow-clickable.html` (홈⇄랭킹⇄상세⇄섹터 + 검색 + AI뱃지 툴팁) |
+
+랭킹 전체 진입: 홈 각 블록 "전체 →" 및 섹터 "N종목 전체 →" 클릭. 랭킹에서 종목 행 → 상세.
 
 ## 하이브리드 랭킹 — 2티어 AI 상승확률 (확정)
 
