@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}
+.phase{font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;background:var(--gold-bg);color:var(--gold);}
+
+.gnb{background:var(--gnb);height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1200px;margin:0 auto;width:100%;padding:0 32px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;}.gnb__logo b{color:#5AA2FF;}
+.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
+.gnb .right{margin-left:auto;color:#7A7E85;font-size:12px;}
+
+.wrap{max-width:1200px;margin:0 auto;padding:24px 32px 72px;}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}
+.grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
+
+/* sector header */
+.shead{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);padding:20px 22px;margin-bottom:16px;}
+.shead__top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.stitle{font-size:26px;font-weight:800;letter-spacing:-.6px;display:flex;align-items:center;gap:10px;}
+.stitle .em{font-size:24px;}
+.ssub{font-size:12px;color:var(--muted);margin-top:6px;}
+.skpi{display:flex;gap:22px;}
+.skpi .k{text-align:right;}
+.skpi .k .l{font-size:11px;color:var(--muted);}
+.skpi .k .v{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.senti{margin-top:16px;padding-top:16px;border-top:1px solid var(--hair);}
+.senti__l{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;}
+.senti__l b{color:var(--up);}
+.gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}
+.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
+.gg__s{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;margin-top:8px;}
+
+/* ranking card */
+.sc{background:var(--soft);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.sc__h{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.seg{display:inline-flex;background:var(--inset);border-radius:9px;padding:3px;gap:2px;}
+.seg a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 11px;border-radius:7px;}
+.seg a.on{background:var(--canvas);color:var(--ink);box-shadow:var(--s1);}
+
+.row{display:flex;align-items:center;gap:11px;padding:11px 18px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.row:last-child{border-bottom:none;}.row:hover{background:var(--soft);}
+.rk{width:16px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
+.nm{width:118px;flex-shrink:0;}.nm b{font-size:13px;font-weight:700;display:block;}.nm small{font-size:10px;color:var(--muted);}
+.barwrap{flex:1;height:22px;background:var(--inset);border-radius:6px;overflow:hidden;position:relative;}
+.bar{height:100%;border-radius:6px;}
+.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}
+.barval{position:absolute;right:8px;top:0;height:22px;display:flex;align-items:center;font-size:11px;font-weight:800;}
+.aicol{width:70px;flex-shrink:0;text-align:right;}
+.aip{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;}
+.ais{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+.aid{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
+.more{display:block;text-align:center;padding:12px;font-size:12.5px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+
+/* sidebar */
+.panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
+.panel__h{padding:12px 16px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.panel__h .tt{display:inline-flex;align-items:center;gap:8px;}.panel__h .tt::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.lead{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}
+.lead:last-child{border-bottom:none;}.lead:hover{background:var(--soft);}
+.lead .medal{width:24px;height:24px;border-radius:50%;background:var(--gold-bg);color:var(--gold);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.lead .nm2{flex:1;font-size:13px;font-weight:700;}.lead .nm2 small{display:block;font-size:10px;color:var(--muted);font-weight:500;margin-top:1px;}
+.lead .c{font-size:13px;font-weight:700;}
+.note{font-size:11px;color:var(--gold);background:var(--gold-bg);padding:9px 16px;line-height:1.5;}
+.srow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}
+.srow:last-child{border-bottom:none;}.srow .nm{width:auto;flex:1;font-size:13px;font-weight:600;}.srow .nm small{font-size:10px;}.srow .c{font-size:13px;font-weight:700;}
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:14px 16px;}
+.chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 12px;text-decoration:none;}
+.disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
+.lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}
+.lede b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo">Double<b>-Shot</b></span><a href="#">브리핑</a><a href="#" class="on">종목</a><span class="right">06-11 · ☾ · 🔔</span></div></div>
+
+<div class="wrap">
+  <div class="crumb">홈 › 종목 › 섹터 › <span style="color:var(--ink);">반도체</span></div>
+  <div class="grid">
+
+    <!-- MAIN -->
+    <div>
+      <div class="shead">
+        <div class="shead__top">
+          <div>
+            <div class="stitle"><span class="em">🔧</span> 반도체</div>
+            <div class="ssub">추적 28종목 · 코스피·코스닥 · 06-11 종가 기준</div>
+          </div>
+          <div class="skpi">
+            <div class="k"><div class="l">섹터 평균</div><div class="v up num">+1.2%</div></div>
+            <div class="k"><div class="l">상승/하락</div><div class="v num">19 / 9</div></div>
+          </div>
+        </div>
+        <div class="senti">
+          <div class="senti__l"><span>섹터 AI 심리</span><span>상승 우위 <b class="num">68%</b></span></div>
+          <div class="gg"><div class="n" style="left:68%;"></div></div>
+          <div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div>
+        </div>
+      </div>
+
+      <p class="lede">반도체 섹터는 <b>HBM·메모리 업황 회복</b> 기대로 외국인 수급이 유입되고 있어요. AI가 주목한 픽은 <b>SK하이닉스(78%)</b>, 기술신호 강세는 <b>한미반도체·DB하이텍</b>이에요. 섹터 대장주는 시가총액 기준 삼성전자·SK하이닉스예요.</p>
+
+      <div class="sc">
+        <div class="sc__h">
+          <span class="sc__t">반도체 종목 랭킹</span>
+          <span class="seg"><a href="#" class="on">시총</a><a href="#">상승</a><a href="#">거래량</a></span>
+        </div>
+        <a class="row"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930</small></div><div class="barwrap"><div class="bar dn" style="width:100%;"></div><span class="barval dn num">−6.4%</span></div><div class="aicol"><span class="ais">신호 58%</span></div></a>
+        <a class="row"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660</small></div><div class="barwrap"><div class="bar up" style="width:62%;"></div><span class="barval up num">+3.4%</span></div><div class="aicol"><span class="aip">AI 78%</span></div></a>
+        <a class="row"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700</small></div><div class="barwrap"><div class="bar up" style="width:40%;"></div><span class="barval up num">+1.8%</span></div><div class="aicol"><span class="ais">신호 71%</span></div></a>
+        <a class="row"><span class="rk num">4</span><div class="nm"><b>DB하이텍</b><small class="num">000990</small></div><div class="barwrap"><div class="bar up" style="width:40%;"></div><span class="barval up num">+1.8%</span></div><div class="aicol"><span class="ais">신호 64%</span></div></a>
+        <a class="row"><span class="rk num">5</span><div class="nm"><b>리노공업</b><small class="num">058470</small></div><div class="barwrap"><div class="bar dn" style="width:12%;"></div><span class="barval dn num">−0.6%</span></div><div class="aicol"><span class="aid">신호 41%</span></div></a>
+        <a class="more" href="#">반도체 28종목 전체 보기 →</a>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">반도체 대장주</span><span style="font-size:11px;color:var(--muted);">시총순</span></div>
+        <a class="lead"><span class="medal">1</span><span class="nm2">삼성전자 <small class="num">005930</small></span><span class="c dn num">−6.40%</span></a>
+        <a class="lead"><span class="medal">2</span><span class="nm2">SK하이닉스 <small class="num">000660</small></span><span class="c up num">+3.42%</span></a>
+        <a class="lead"><span class="medal">3</span><span class="nm2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">반도체 대표 ETF <span class="phase">PHASE 2</span></span></div>
+        <div class="note">⚠ ETF 구성종목 신규 수집 필요</div>
+        <a class="srow"><span class="nm">KODEX 반도체 <small class="num">091160</small></span><span class="c up num">+2.8%</span></a>
+        <a class="srow"><span class="nm">TIGER Fn반도체TOP10 <small class="num">396500</small></span><span class="c up num">+2.5%</span></a>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">다른 섹터</span></div>
+        <div class="chips"><a href="#">2차전지</a><a href="#">바이오</a><a href="#">자동차</a><a href="#">금융</a><a href="#">인터넷</a><a href="#">엔터</a></div>
+      </div>
+    </div>
+  </div>
+  <p class="disc">※ 섹터 평균·AI 심리는 추적 종목의 실측값을 종합한 참고치입니다. 투자 판단의 참고용이며 종목 추천이나 수익을 보장하지 않습니다.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+.ds{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;color:var(--ink);
+  max-width:620px;margin:0 auto;text-align:left;word-break:keep-all;padding:4px;}
+.ds .num{font-variant-numeric:tabular-nums;}.ds .up{color:var(--up);}.ds .dn{color:var(--dn);}
+
+/* dimmed backdrop with hub hint */
+.ds .scene{background:var(--soft);border-radius:14px;padding:14px;position:relative;overflow:hidden;border:1px solid var(--hair);}
+.ds .dim{position:absolute;inset:0;background:rgba(19,21,26,.38);backdrop-filter:blur(1px);z-index:1;}
+.ds .behind{filter:saturate(.7);}
+.ds .behind h1{font-size:20px;font-weight:800;margin:4px 2px;}
+.ds .behind .barrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--hair);}
+.ds .behind .bn{width:90px;font-size:12px;font-weight:600;}
+.ds .behind .bb{flex:1;height:16px;background:var(--inset);border-radius:5px;}
+.ds .behind .bb>i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#CFE0FF,#006EFF);}
+
+/* command palette */
+.ds .pal{position:relative;z-index:2;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.28);margin:18px auto 8px;max-width:460px;overflow:hidden;}
+.ds .pal__in{display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--hair);}
+.ds .pal__in svg{width:19px;height:19px;color:var(--muted);}
+.ds .pal__in .q{font-size:16px;font-weight:600;}
+.ds .pal__in .cur{display:inline-block;width:1.5px;height:18px;background:var(--primary);vertical-align:middle;animation:bl 1s steps(1) infinite;}
+@keyframes bl{50%{opacity:0;}}
+.ds .pal__in kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 6px;}
+
+.ds .grp{padding:8px 0;}
+.ds .grp__t{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.3px;padding:6px 18px 4px;}
+.ds .res{display:flex;align-items:center;gap:11px;padding:9px 18px;cursor:pointer;}
+.ds .res.sel{background:var(--primary-bg);}
+.ds .res .ico{width:26px;height:26px;border-radius:7px;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.ds .res.sel .ico{background:var(--primary);color:#fff;}
+.ds .res .nm{flex:1;}
+.ds .res .nm b{font-size:14px;font-weight:700;}
+.ds .res .nm b mark{background:#FFF1A8;color:inherit;border-radius:2px;}
+.ds .res .nm small{font-size:11px;color:var(--muted);margin-left:6px;}
+.ds .res .c{font-size:12px;font-weight:700;}
+.ds .aip{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--primary);color:#fff;}
+.ds .ais{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+.ds .foot{display:flex;gap:16px;padding:10px 18px;border-top:1px solid var(--hair);font-size:11px;color:var(--muted);}
+.ds .foot b{font-weight:700;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:4px;padding:1px 5px;}
+</style>
+
+<div class="ds">
+  <h2 style="font-size:17px;margin:6px 4px;">검색 — 인스턴트 오버레이 (⌘K)</h2>
+  <p style="font-size:12px;color:var(--muted);margin:0 4px 12px;">독립 페이지 없이 즉시 매칭 · 클릭→상세. SEO는 상세·섹터가 담당.</p>
+
+  <div class="scene">
+    <!-- behind (dimmed hub) -->
+    <div class="behind">
+      <h1>오늘의 종목</h1>
+      <div class="barrow"><span class="bn">삼성전자</span><div class="bb"><i style="width:100%"></i></div></div>
+      <div class="barrow"><span class="bn">SK하이닉스</span><div class="bb"><i style="width:71%"></i></div></div>
+      <div class="barrow"><span class="bn">한미반도체</span><div class="bb"><i style="width:48%"></i></div></div>
+    </div>
+    <div class="dim"></div>
+
+    <!-- palette -->
+    <div class="pal">
+      <div class="pal__in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>
+        <span class="q">하이<span class="cur"></span></span>
+        <kbd>ESC</kbd>
+      </div>
+
+      <div class="grp">
+        <div class="grp__t">종목 3건</div>
+        <div class="res sel"><span class="ico num">반</span><span class="nm"><b>SK<mark>하이</mark>닉스</b><small class="num">000660 · 반도체</small></span><span class="aip">AI 78%</span><span class="c up num">+3.42%</span></div>
+        <div class="res"><span class="ico num">반</span><span class="nm"><b>DB<mark>하이</mark>텍</b><small class="num">000990 · 반도체</small></span><span class="ais">신호 61%</span><span class="c up num">+1.80%</span></div>
+        <div class="res"><span class="ico num">에</span><span class="nm"><b><mark>하이</mark>브</b><small class="num">352820 · 엔터</small></span><span class="ais">신호 47%</span><span class="c dn num">−0.90%</span></div>
+      </div>
+
+      <div class="grp" style="border-top:1px solid var(--hair);">
+        <div class="grp__t">최근 검색</div>
+        <div class="res"><span class="ico">🕘</span><span class="nm"><b>삼성전자</b><small class="num">005930</small></span><span class="c dn num">−6.40%</span></div>
+      </div>
+
+      <div class="foot"><span><b>↑</b> <b>↓</b> 이동</span><span><b>↵</b> 종목 상세로</span><span><b>esc</b> 닫기</span></div>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:var(--muted);text-align:center;padding:10px 8px;line-height:1.6;">이름·코드 동시 매칭, 매칭 글자 하이라이트, AI 상승확률 뱃지 동반. ↵ 또는 클릭 → <b>/stocks/000660</b> 상세로 이동.</p>
+</div>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}
+
+.gnb{background:var(--gnb);height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;}.gnb__logo b{color:#5AA2FF;}
+.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
+.gnb .right{margin-left:auto;}
+.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;}.gnb .sbtn svg{width:13px;height:13px;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:26px 28px 64px;}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:20px;flex-wrap:wrap;}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:-.8px;margin:0;}.hero h1 .a{color:var(--primary);}
+.hero p{font-size:13px;color:var(--muted);margin:7px 0 0;}
+.search{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:13px;padding:13px 17px;box-shadow:var(--s1);min-width:360px;}
+.search svg{width:18px;height:18px;color:var(--muted);}.search span{color:var(--muted);font-size:14px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
+
+.strip{display:flex;background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:4px 0;margin-bottom:22px;}
+.strip .m{flex:1;text-align:center;padding:10px 8px;border-right:1px solid var(--hair);}.strip .m:last-child{border-right:none;}
+.strip .m .l{font-size:11px;color:var(--muted);}.strip .m .v{font-size:16px;font-weight:800;margin-top:3px;}
+
+/* stacked ranking block */
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:16px;overflow:hidden;margin-bottom:18px;box-shadow:var(--s1);}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:16px;font-weight:800;display:inline-flex;align-items:center;gap:9px;}
+.block__t .ic{font-size:17px;}
+.block__t::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px;}
+.block__s{font-size:12px;color:var(--muted);}
+
+.row{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.row:last-of-type{border-bottom:none;}.row:hover{background:var(--primary-bg);}
+.rk{width:18px;text-align:center;font-size:14px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
+.nm{width:160px;flex-shrink:0;}.nm b{font-size:14px;font-weight:700;display:block;}.nm small{font-size:10px;color:var(--muted);}
+.barwrap{flex:1;height:26px;background:var(--inset);border-radius:7px;overflow:hidden;position:relative;}
+.bar{height:100%;border-radius:7px;}
+.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}
+.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}
+.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
+.barval{position:absolute;right:11px;top:0;height:26px;display:flex;align-items:center;font-size:12px;font-weight:800;color:var(--ink);}
+.ai{width:78px;text-align:right;flex-shrink:0;}
+.aip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--primary);color:#fff;}
+.ais{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+.aid{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
+.ax{font-size:12px;color:#C0C4CA;}
+.more{display:block;text-align:center;padding:13px;font-size:13px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+
+.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--muted);margin:6px 2px 20px;flex-wrap:wrap;}
+.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+.secwrap .t{font-size:13px;font-weight:800;color:var(--muted);margin:0 2px 11px;}
+.chips{display:flex;flex-wrap:wrap;gap:9px;}
+.chips a{font-size:13px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:8px 15px;text-decoration:none;box-shadow:var(--s1);}
+.chips a:hover{border-color:var(--primary);color:var(--primary);}
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo">Double<b>-Shot</b></span><a>브리핑</a><a class="on">종목</a><span class="right"><span class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+
+<div class="wrap">
+  <div class="hero">
+    <div><h1>오늘의 <span class="a">종목</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · 06-11</p></div>
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
+  </div>
+
+  <div class="strip">
+    <div class="m"><div class="l">코스피</div><div class="v num">2,712.34 <span class="up">+0.82%</span></div></div>
+    <div class="m"><div class="l">코스닥</div><div class="v num">781.20 <span class="up">+0.45%</span></div></div>
+    <div class="m"><div class="l">코스피200</div><div class="v num">366.1 <span class="up">+0.71%</span></div></div>
+    <div class="m"><div class="l">원/달러</div><div class="v num">1,366.5 <span class="dn">−3.2</span></div></div>
+  </div>
+
+  <!-- 섹터로 보기 (숫자와 랭킹 사이 — 중요 내비) -->
+  <div class="secwrap" style="margin-bottom:18px;">
+    <div class="t">섹터로 보기</div>
+    <div class="chips"><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a><a>엔터</a><a>조선</a><a>방산</a></div>
+  </div>
+
+  <!-- 2티어 가이드 (상단) -->
+  <div class="legend" style="margin:0 2px 16px;">
+    <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span>
+    <span class="lg"><span class="ais">신호 64</span> 기술신호(전 종목)</span>
+    <span class="lg"><span class="aid">신호 42</span> 약세 신호</span>
+    <span class="lg"><span class="ax">—</span> 신호 없음</span>
+  </div>
+
+  <!-- 거래량 -->
+  <div class="block">
+    <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11</span></div>
+    <a class="row"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+    <a class="row"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
+    <a class="row"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
+    <a class="row"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:33%"></div><span class="barval num">1,050만주</span></div><div class="ai"><span class="aid">신호 42</span></div></a>
+    <a class="row"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:26%"></div><span class="barval num">820만주</span></div><div class="ai"><span class="ais">신호 55</span></div></a>
+    <a class="more">거래량 전체 →</a>
+  </div>
+
+  <!-- 상승 -->
+  <div class="block">
+    <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s">등락률 기준</span></div>
+    <a class="row"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
+    <a class="row"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+    <a class="row"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
+    <a class="row"><span class="rk num">4</span><div class="nm"><b>하나금융지주</b><small class="num">086790 · 금융</small></div><div class="barwrap"><div class="bar up" style="width:27%"></div><span class="barval up num">+2.5%</span></div><div class="ai"><span class="ais">신호 66</span></div></a>
+    <a class="row"><span class="rk num">5</span><div class="nm"><b>DB하이텍</b><small class="num">000990 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:19%"></div><span class="barval up num">+1.8%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
+    <a class="more">상승 전체 →</a>
+  </div>
+
+  <!-- 하락 -->
+  <div class="block">
+    <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s">등락률 기준</span></div>
+    <a class="row"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+    <a class="row"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+    <a class="row"><span class="rk t num">3</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar dn" style="width:19%"></div><span class="barval dn num">−1.2%</span></div><div class="ai"><span class="aid">신호 42</span></div></a>
+    <a class="row"><span class="rk num">4</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
+    <a class="row"><span class="rk num">5</span><div class="nm"><b>셀트리온</b><small class="num">068270 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:7%"></div><span class="barval dn num">−0.4%</span></div><div class="ai"><span class="ais">신호 51</span></div></a>
+    <a class="more">하락 전체 →</a>
+  </div>
+</div>
+</body>
+</html>
