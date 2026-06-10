@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;
+  --ink:#13151A;--muted:#6B7280;--primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;
+}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}
+.phase{font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:middle;}
+.p2{background:var(--gold-bg);color:var(--gold);}.p3{background:#ECFDF3;color:#16A34A;}
+
+.gnb{background:var(--gnb);height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1200px;margin:0 auto;width:100%;padding:0 32px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;}.gnb__logo b{color:#5AA2FF;}
+.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
+.gnb .right{margin-left:auto;color:#7A7E85;font-size:12px;}
+
+.wrap{max-width:1200px;margin:0 auto;padding:24px 32px 72px;}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}
+.grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.two .sc{margin-bottom:0;}
+
+.hero{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);padding:20px 22px;margin-bottom:16px;}
+.hero__top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+.hname{font-size:24px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;}
+.chip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);}
+.hmeta{font-size:12px;color:var(--muted);margin-top:6px;}
+.hprice{font-size:26px;font-weight:800;letter-spacing:-.6px;text-align:right;}
+.hchg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:6px;display:inline-block;background:var(--up-bg);color:var(--up);}
+.spark{width:100%;height:60px;margin-top:16px;}
+
+.sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:16px;display:flex;flex-direction:column;}
+.sc__h{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.sc__s{font-size:11px;color:var(--muted);font-weight:500;}
+.sc__b{padding:18px;flex:1;}
+
+.pbadge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--up-bg);color:var(--up);}
+.pg{position:relative;height:14px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:18px;}
+.pg .mid{position:absolute;left:50%;top:-5px;bottom:-5px;width:1.5px;background:var(--hair);transform:translateX(-50%);}
+.pg .ndl{position:absolute;top:-6px;width:4px;height:26px;border-radius:2px;box-shadow:0 0 0 2px var(--canvas);background:var(--up);transform:translateX(-50%);}
+.pgs{display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--muted);font-weight:600;}
+.ro{display:flex;align-items:baseline;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--hair);}
+.ro__b{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--up);}
+.ro__u{font-size:14px;font-weight:700;color:var(--up);}
+.ro__c{margin-left:auto;font-size:12px;color:var(--muted);}.ro__c b{color:var(--primary);font-size:14px;}
+.scen{font-size:14px;color:var(--muted);line-height:1.85;margin:14px 0 0;}
+
+.tiles{display:flex;gap:10px;}
+.tile{flex:1;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:14px 8px;text-align:center;}
+.tile .l{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.tile .v{font-size:17px;font-weight:800;}
+.tile.tu .l{color:var(--up);}.tile.td .l{color:var(--dn);}
+
+.ma{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.ma .l{font-size:12px;font-weight:600;color:var(--muted);width:84px;}
+.ma .tr{position:relative;flex:1;height:6px;background:var(--inset);border-radius:999px;}
+.ma .z{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hair);}
+.ma .f{position:absolute;top:0;height:100%;border-radius:999px;background:var(--up);left:50%;}
+.ma .p{font-size:12px;font-weight:700;width:48px;text-align:right;color:var(--up);}
+.sg{display:flex;justify-content:space-around;border-top:1px solid var(--hair);margin-top:14px;padding-top:14px;}
+.sg .c{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sg .v{font-size:14px;font-weight:800;}.sg .v.good{color:#16A34A;}.sg .s{font-size:10px;color:var(--muted);}
+
+.hist{display:flex;flex-direction:column;}
+.hist .it{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--hair);font-size:13px;}
+.hist .it:last-child{border-bottom:none;}
+.hist .d{color:var(--muted);width:58px;flex-shrink:0;font-weight:600;}
+.hist .r{font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;flex-shrink:0;}
+.hist .r.o{background:var(--up-bg);color:var(--up);}.hist .r.x{background:var(--dn-bg);color:var(--dn);}
+
+.panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
+.panel__h{padding:12px 16px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between;}
+.panel__h .tt{display:inline-flex;align-items:center;gap:8px;}
+.panel__h .tt::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.srow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}
+.srow:last-child{border-bottom:none;}.srow:hover{background:var(--soft);}
+.srow .nm{flex:1;font-size:13px;font-weight:600;}
+.srow .nm small{display:block;color:var(--muted);font-weight:500;font-size:10px;margin-top:1px;}
+.srow .c{font-size:13px;font-weight:700;}
+.wt{width:96px;text-align:right;}.wt b{font-size:13px;font-weight:800;}
+.wt .bar{height:4px;border-radius:999px;background:var(--inset);margin-top:4px;overflow:hidden;}.wt .bar>i{display:block;height:100%;background:var(--primary);}
+.note{font-size:11px;color:var(--gold);background:var(--gold-bg);padding:9px 16px;line-height:1.5;}
+.combo{display:flex;flex-wrap:wrap;gap:7px;padding:14px 16px;}
+.combo a{font-size:12px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 11px;text-decoration:none;}
+.accb{padding:16px;}
+.accb .big{font-size:18px;font-weight:800;margin:4px 0;}.accb .big b{color:#16A34A;}
+.disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
+</style>
+</head>
+<body>
+
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo">Double<b>-Shot</b></span><a href="#">브리핑</a><a href="#" class="on">종목</a><span class="right">06-11 · ☾ · 🔔</span></div></div>
+
+<div class="wrap">
+  <div class="crumb">홈 › 종목 › <span style="color:var(--ink);">SK하이닉스</span></div>
+  <div class="grid">
+
+    <!-- MAIN -->
+    <div>
+      <div class="hero">
+        <div class="hero__top">
+          <div><div class="hname">SK하이닉스 <span class="chip">반도체</span></div><div class="hmeta"><span class="num">000660</span> · KOSPI · 06-11 종가 기준</div></div>
+          <div><div class="hprice num">248,500</div><div class="hchg num">▲ 8,200 +3.42%</div></div>
+        </div>
+        <svg class="spark" viewBox="0 0 740 60" preserveAspectRatio="none"><line x1="0" y1="46" x2="740" y2="46" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3 4"/><polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/></svg>
+      </div>
+
+      <!-- AI 전망 (full width) -->
+      <div class="sc">
+        <div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">06-11 07:30</span></div>
+        <div class="sc__b">
+          <span class="pbadge">▲ 상승 우위 · MA20 상향 돌파</span>
+          <div class="pg"><div class="mid"></div><div class="ndl" style="left:78%;"></div></div>
+          <div class="pgs"><span>하락 우위</span><span>중립</span><span>상승 우위</span></div>
+          <div class="ro"><span class="ro__b num">78</span><span class="ro__u">% 상승 확률</span><span class="ro__c">신뢰도 <b class="num">78%</b></span></div>
+          <p class="scen">HBM3E 12단 양산 본격화로 실적 기대가 커지고 있어요. 20일선을 막 상향 돌파해 개별 모멘텀이 살아있는 신호예요. 반도체 업황 회복 기대가 외국인 수급으로 확인되는 흐름이에요.</p>
+        </div>
+      </div>
+
+      <!-- 매매 가이드 + 기술 지표 (2-up) -->
+      <div class="two" style="margin-bottom:16px;">
+        <div class="sc">
+          <div class="sc__h"><span class="sc__t">매매 가이드</span><span class="sc__s">참고용</span></div>
+          <div class="sc__b"><div class="tiles">
+            <div class="tile"><div class="l">진입</div><div class="v num">248,000</div></div>
+            <div class="tile tu"><div class="l">목표</div><div class="v num up">262,000</div></div>
+            <div class="tile td"><div class="l">손절</div><div class="v num dn">240,000</div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:10px;"><span>목표 <b class="up">+5.4%</b></span><span>손절 <b class="dn">−3.4%</b></span></div>
+          </div>
+        </div>
+        <div class="sc">
+          <div class="sc__h"><span class="sc__t">기술적 지표</span></div>
+          <div class="sc__b">
+            <div class="ma"><span class="l">20일선</span><div class="tr"><div class="z"></div><div class="f" style="width:8%;"></div></div><span class="p">+2.9%</span></div>
+            <div class="ma"><span class="l">200일선</span><div class="tr"><div class="z"></div><div class="f" style="width:30%;"></div></div><span class="p">+22.1%</span></div>
+            <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">111만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2.07조</span><span class="s">시총</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 픽 이력 -->
+      <div class="sc">
+        <div class="sc__h"><span class="sc__t">과거 AI 픽 이력</span><span class="sc__s">하이브리드 맥락</span></div>
+        <div class="sc__b"><div class="hist">
+          <div class="it"><span class="d num">06-11</span><span class="r o">적중</span><span>상승 우위 예측 → +3.4% 마감</span></div>
+          <div class="it"><span class="d num">06-05</span><span class="r o">적중</span><span>상승 우위 예측 → +1.8% 마감</span></div>
+          <div class="it"><span class="d num">05-28</span><span class="r x">빗나감</span><span>상승 우위 예측 → −0.9% 마감</span></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR 360 -->
+    <div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">같은 섹터 · 반도체</span></div>
+        <a class="srow"><span class="nm">삼성전자 <small class="num">005930</small></span><span class="c dn num">−6.40%</span></a>
+        <a class="srow"><span class="nm">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
+        <a class="srow"><span class="nm">DB하이텍 <small class="num">000990</small></span><span class="c up num">+1.80%</span></a>
+        <a class="srow"><span class="nm">리노공업 <small class="num">058470</small></span><span class="c dn num">−0.60%</span></a>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">이 종목을 담은 ETF <span class="phase p2">PHASE 2</span></span><span style="font-size:11px;color:var(--muted);">38개</span></div>
+        <div class="note">⚠ ETF 구성종목 신규 수집 필요</div>
+        <a class="srow"><span class="nm">KODEX 반도체 <small class="num">091160</small></span><span class="wt"><b class="num">24.1%</b><div class="bar"><i style="width:80%"></i></div></span></a>
+        <a class="srow"><span class="nm">TIGER Fn반도체TOP10 <small class="num">396500</small></span><span class="wt"><b class="num">22.6%</b><div class="bar"><i style="width:75%"></i></div></span></a>
+        <a class="srow"><span class="nm">ACE 반도체 <small class="num">469150</small></span><span class="wt"><b class="num">19.3%</b><div class="bar"><i style="width:64%"></i></div></span></a>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">함께 담기는 종목 · 조합 <span class="phase p2">PHASE 2</span></span></div>
+        <div class="combo"><a href="#">삼성전자 31개</a><a href="#">한미반도체 12개</a><a href="#">DB하이텍 9개</a><a href="#">리노공업 8개</a><a href="#">이오테크닉스 7개</a></div>
+      </div>
+      <div class="panel">
+        <div class="panel__h"><span class="tt">AI 예측 적중률 <span class="phase p3">PHASE 3</span></span></div>
+        <div class="accb"><div class="big num">최근 20회 중 <b>13회 · 65%</b></div><div style="font-size:11px;color:var(--muted);line-height:1.6;">픽 선정 시 예측 방향 적중률. day-1부터 기록 시작.</div></div>
+      </div>
+    </div>
+  </div>
+  <p class="disc">※ 모든 수치는 직전 거래일 종가 기준 실측값입니다. 투자 판단의 참고용이며 종목 추천이나 수익을 보장하지 않습니다. 투자 책임은 투자자 본인에게 있습니다.</p>
+</div>
+</body>
+</html>

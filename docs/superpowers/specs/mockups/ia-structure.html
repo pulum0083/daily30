@@ -1,0 +1,65 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+.ia{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;color:#13151A;max-width:680px;margin:0 auto;text-align:left;}
+.ia .gnb{background:#16181A;border-radius:10px;padding:11px 16px;display:flex;align-items:center;gap:18px;color:#fff;margin-bottom:8px;}
+.ia .gnb .logo{font-weight:800;font-size:15px;}
+.ia .gnb .logo span{color:#5AA2FF;}
+.ia .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}
+.ia .gnb a.new{color:#fff;position:relative;}
+.ia .gnb a.new::after{content:'NEW';font-size:8px;font-weight:800;color:#16181A;background:#5AA2FF;border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:top;}
+.ia .gnb .sp{margin-left:auto;color:#6B7280;font-size:12px;}
+.ia .cap{font-size:12px;color:#6B7280;margin:2px 4px 18px;}
+
+.ia h3{font-size:13px;font-weight:700;color:#6B7280;margin:22px 0 10px;display:flex;align-items:center;gap:7px;}
+.ia h3::before{content:'';width:3px;height:13px;background:#006EFF;border-radius:2px;}
+
+.ia .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+.ia .node{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06);min-width:140px;}
+.ia .node b{font-size:13px;font-weight:800;display:block;}
+.ia .node code{font-size:11px;color:#006EFF;font-family:'Geist Mono',monospace;}
+.ia .node p{font-size:11px;color:#6B7280;margin:5px 0 0;line-height:1.5;}
+.ia .arrow{display:flex;align-items:center;color:#9CA3AF;font-size:20px;padding:0 10px;}
+.ia .node.hl{border-color:#BFDBFE;background:#F0F7FF;}
+
+.ia .entries{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.ia .entry{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;}
+.ia .entry b{font-size:12px;font-weight:800;display:block;margin-bottom:3px;}
+.ia .entry span{font-size:11px;color:#6B7280;line-height:1.5;}
+.ia .badge{font-size:9px;font-weight:800;color:#fff;background:#006EFF;border-radius:4px;padding:1px 5px;margin-left:5px;}
+</style>
+
+<div class="ia">
+  <h2>메뉴 구성 · 정보구조 제안</h2>
+  <p class="subtitle" style="font-size:13px;color:#6B7280;">종목 페이지가 어떻게 발견되고 연결되는지. 검색 유입 구조의 절반입니다.</p>
+
+  <!-- GNB -->
+  <h3>1 · GNB (상단 메뉴)</h3>
+  <div class="gnb">
+    <span class="logo">Double<span>-Shot</span></span>
+    <a href="#">브리핑</a>
+    <a href="#" class="new">종목</a>
+    <span class="sp">06-11 · ☾ · 🔔</span>
+  </div>
+  <p class="cap">현재 GNB엔 탭이 없습니다. "브리핑" · "종목" 두 탭을 신설. "종목" 탭이 종목 디렉토리 진입점.</p>
+
+  <!-- ROUTES -->
+  <h3>2 · 라우트 구조</h3>
+  <div class="flow">
+    <div class="node"><b>종목 목록</b><code>/stocks</code><p>섹터·랭킹·검색으로 종목 탐색</p></div>
+    <div class="arrow">→</div>
+    <div class="node hl"><b>종목 상세</b><code>/stocks/{code}</code><p>AI 전망·기술·하이브리드 맥락</p></div>
+    <div class="arrow">↻</div>
+    <div class="node"><b>섹터·조합</b><code>내부 링크</code><p>같은 섹터·함께 담기는 종목으로 회유</p></div>
+  </div>
+  <p class="cap">상세 페이지끼리 섹터·조합으로 서로 링크 → 내부 링크 그래프가 촘촘해져 색인·체류에 유리.</p>
+
+  <!-- ENTRY POINTS -->
+  <h3>3 · 진입 경로 (어디서 종목 페이지로 들어오나)</h3>
+  <div class="entries">
+    <div class="entry"><b>① 구글 검색 <span class="badge">핵심</span></b><span>"삼성전자 주가 전망" 롱테일 → 상세 페이지 직착</span></div>
+    <div class="entry"><b>② GNB 종목 탭</b><span>상단 메뉴 → /stocks 디렉토리</span></div>
+    <div class="entry"><b>③ 브리핑 속 종목</b><span>픽·섹터·후보 종목명을 클릭 가능하게 → 상세로</span></div>
+    <div class="entry"><b>④ 종목↔종목 회유</b><span>상세의 섹터·조합 섹션에서 다른 종목으로</span></div>
+  </div>
+  <p class="cap">①이 신규 유입 엔진, ②③④가 체류·페이지뷰를 늘리는 내부 순환.</p>
+</div>
