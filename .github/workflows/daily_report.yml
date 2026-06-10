@@ -154,7 +154,7 @@ jobs:
 
   # ──────────────────────────────────────────────────────────────────
   us-briefing:
-    name: "🇺🇸 미국 브리핑 (KST 21:15)"
+    name: "🇺🇸 미국 브리핑 (KST 21:45)"
     runs-on: ubuntu-latest
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us'
