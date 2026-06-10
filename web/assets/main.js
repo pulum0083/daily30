@@ -1628,6 +1628,11 @@
 
     function render(data) {
       if (!data) return;
+      // JSON 날짜가 브리핑 날짜와 다르면 표시하지 않음 (당일 첫 수집 전 어제 데이터 노출 방지)
+      if (data.date && data.date !== date) {
+        wrap.style.display = 'none';
+        return;
+      }
 
       // history에서 슬롯에 해당하는 항목만 필터링
       var hist = (data.history || []).filter(function(item) {
