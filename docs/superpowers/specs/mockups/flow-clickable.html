@@ -39,6 +39,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .chips a{font-size:13px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:8px 15px;text-decoration:none;box-shadow:var(--s1);}
 .chips a:hover{border-color:var(--primary);color:var(--primary);}
 .legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--muted);margin:16px 2px;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+.badge-info-btn{font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
 
 .block{background:var(--soft);border:1px solid var(--hair);border-radius:16px;overflow:hidden;margin-bottom:18px;box-shadow:var(--s1);}
 .block__h{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--canvas);border-bottom:1px solid var(--hair);}
@@ -156,12 +157,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="secwrap" style="margin-bottom:18px;"><div class="t">섹터로 보기</div>
       <div class="chips"><a onclick="go('sector')">반도체</a><a onclick="go('sector')">2차전지</a><a onclick="go('sector')">바이오</a><a onclick="go('sector')">자동차</a><a onclick="go('sector')">금융</a><a onclick="go('sector')">인터넷</a><a onclick="go('sector')">엔터</a><a onclick="go('sector')">조선</a><a onclick="go('sector')">방산</a></div>
     </div>
-    <div class="legend" style="margin:0 2px 16px;">
-      <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span><span class="lg"><span class="ais">신호 64</span> 기술신호</span><span class="lg"><span class="aid">신호 42</span> 약세</span><span class="lg"><span class="ax">—</span> 없음</span>
-    </div>
-
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11</span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11 <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
       <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
@@ -314,6 +311,13 @@ function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remo
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
 function tipHTML(el){
+  if(el.classList.contains('badge-info-btn'))
+    return `<div class="tt">AI 뱃지 안내</div><div class="bd" style="line-height:1.9">
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="aip" style="font-size:10px;padding:2px 7px">AI 78</span> <b>Claude 픽</b> — AI 브리핑이 오늘 선택한 종목</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="ais" style="font-size:10px;padding:2px 7px">신호 64</span> <b>기술신호 상승</b> — 이평선·모멘텀 종합 58↑</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="aid" style="font-size:10px;padding:2px 7px">신호 42</span> <b>기술신호 약세</b> — 이평선 아래 42↓</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span class="ax" style="font-size:11px">—</span> <b>신호 없음</b> — 데이터 부족(상장 200일↓)</span>
+    </div>`;
   const n=(el.textContent.match(/\d+/)||['?'])[0];
   if(el.classList.contains('aip'))
     return `<div class="tt" style="color:#006EFF">🔵 AI 상승확률 ${n}%</div><div class="bd">오늘 AI 브리핑이 <b>픽한 종목</b>이에요. Claude가 <b>뉴스·수급·차트를 종합 분석</b>해 상승 방향에 둔 확률이에요. 신뢰도 ${n}%. 더블샷의 프리미엄 신호예요.</div>`;
@@ -334,7 +338,7 @@ function moveTip(e){
   tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
 function hideTip(){tip.style.display='none';}
-document.querySelectorAll('.aip,.ais,.aid,.ax').forEach(el=>{
+document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn').forEach(el=>{
   el.addEventListener('mouseenter',showTip);
   el.addEventListener('mousemove',moveTip);
   el.addEventListener('mouseleave',hideTip);
