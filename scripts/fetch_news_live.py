@@ -284,7 +284,7 @@ def main() -> None:
     print(f"[fetch_news_live] {today} {time_str} KST — 슬롯={slot} — Gemini 이슈 수집 시작")
 
     # 직전 2회 market·stock 이슈 타이틀 수집 — 중복 방지용
-    # 가장 최신 이슈(latest)와 그 이전 이슈(history[0])의 market·stock 타이틀을 모두 수집한다.
+    # 가장 최신 이슈(latest)와 그 이전 이슈(history[0:5])의 market·stock 타이틀을 모두 수집한다.
     recent_stock_titles: list = []
     if OUT_PATH.exists():
         try:
@@ -297,8 +297,8 @@ def main() -> None:
                         t = (lt.get(key) or {}).get("title", "")
                         if t and t not in recent_stock_titles:
                             recent_stock_titles.append(t)
-                # 그 이전 이슈 (history[0:2])
-                for h in existing.get("history", [])[:2]:
+                # 그 이전 이슈 (history[0:5])
+                for h in existing.get("history", [])[:5]:
                     for key in ("market", "stock"):
                         t = (h.get(key) or {}).get("title", "")
                         if t and t not in recent_stock_titles:
