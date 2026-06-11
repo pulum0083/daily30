@@ -1621,9 +1621,9 @@
 
     function cleanTitle(text) {
       if (!text) return text;
-      // 대괄호·소괄호 제거 후 끝의 "- 출처명" 패턴 제거
+      // 대괄호·소괄호 제거 후 끝의 "- 언론사명" 패턴 제거 (2~15자 단어)
       return text.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '')
-        .replace(/\s*[-–—]\s*(?:뉴스\d*|[가-힣A-Za-z0-9]+(?:뉴스|미디어|통신|일보|방송|신문|시스|경제))\s*$/i, '')
+        .replace(/\s*[-–—]\s*[가-힣A-Za-z0-9·]{2,15}\s*$/u, '')
         .replace(/\s{2,}/g, ' ').trim();
     }
 
