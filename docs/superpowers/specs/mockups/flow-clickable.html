@@ -58,6 +58,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .aid{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
 .ax{font-size:12px;color:#C0C4CA;}
 .more{display:block;text-align:center;padding:13px;font-size:13px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.cols2 .block{margin-bottom:0;}
+.cols2 .nm{width:118px;}.cols2 .ai{width:62px;}.cols2 .nm small{font-size:9px;}
+.block__t.etf::before{background:#6B7280;}.block__t.etf{color:#374151;}
 
 /* detail 2-col */
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
@@ -164,19 +168,38 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
-    <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s">등락률 기준</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="more" onclick="go('ranking')">상승 전체 →</a>
+    <div class="cols2" style="margin-bottom:18px;">
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s">등락률 기준</span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
+        <a class="more" onclick="go('ranking')">상승 전체 →</a>
+      </div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s">등락률 기준</span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="more" onclick="go('ranking')">하락 전체 →</a>
+      </div>
     </div>
-    <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s">등락률 기준</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
-      <a class="more" onclick="go('ranking')">하락 전체 →</a>
+
+    <div class="cols2">
+      <div class="block">
+        <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s">AI 픽 미적용 · 신호만</span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
+        <a class="more" onclick="go('ranking')">ETF 전체 →</a>
+      </div>
+      <div class="block">
+        <div class="block__h"><span class="block__t etf"><span class="ic">🚀</span>ETF 상승 톱</span><span class="block__s">등락률 기준</span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 반도체</b><small class="num">091160 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+3.8%</span></div><div class="ai"><span class="ais">신호 65</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 2차전지테마</b><small class="num">305540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:79%"></div><span class="barval up num">+3.0%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국필반도체</b><small class="num">381180 · 미국반도체</small></div><div class="barwrap"><div class="bar up" style="width:55%"></div><span class="barval up num">+2.1%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
+        <a class="more" onclick="go('ranking')">ETF 전체 →</a>
+      </div>
     </div>
   </div>
 
