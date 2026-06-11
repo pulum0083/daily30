@@ -334,7 +334,7 @@ def main() -> None:
             continue
         break
 
-    # 기존 latest를 history 맨 앞에 추가 (같은 날짜인 경우에만 이어받음)
+    # 기존 history 이어받기 (같은 날짜인 경우만) + 기존 latest → history로 이동
     history: list = []
     if OUT_PATH.exists():
         try:
@@ -353,6 +353,12 @@ def main() -> None:
                 history = history[:MAX_HISTORY]
         except Exception:
             pass
+
+    # 새로 수집한 latest도 history 맨 앞에 추가 — 첫 실행부터 섹션 표시되도록
+    new_entry = {"time": time_str}
+    new_entry.update(latest)
+    history = [new_entry] + history
+    history = history[:MAX_HISTORY]
 
     data = {
         "date": today,
