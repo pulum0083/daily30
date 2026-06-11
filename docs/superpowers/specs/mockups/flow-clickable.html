@@ -34,7 +34,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .strip .m{flex:1;text-align:center;padding:10px 8px;border-right:1px solid var(--hair);}.strip .m:last-child{border-right:none;}
 .strip .m .l{font-size:11px;color:var(--muted);}.strip .m .v{font-size:16px;font-weight:800;margin-top:3px;}
 
-.secwrap .t{font-size:13px;font-weight:800;color:var(--muted);margin:0 2px 11px;}
+.secwrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.secwrap .t{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.etf-divider{border:none;border-top:2px dashed var(--hair);margin:22px 0 22px;}
 .chips{display:flex;flex-wrap:wrap;gap:9px;}
 .chips a{font-size:13px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:8px 15px;text-decoration:none;box-shadow:var(--s1);}
 .chips a:hover{border-color:var(--primary);color:var(--primary);}
@@ -166,6 +168,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:34%"></div><span class="barval num">1,080만주</span></div><div class="ai"><span class="aid">신호 42</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:27%"></div><span class="barval num">860만주</span></div><div class="ai"><span class="ais">신호 55</span></div></a>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
     <div class="cols2" style="margin-bottom:18px;">
@@ -174,6 +178,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>현대차</b><small class="num">005380 · 자동차</small></div><div class="barwrap"><div class="bar up" style="width:23%"></div><span class="barval up num">+2.2%</span></div><div class="ai"><span class="ais">신호 60</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한화에어로</b><small class="num">012450 · 방산</small></div><div class="barwrap"><div class="bar up" style="width:16%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="ais">신호 66</span></div></a>
         <a class="more" onclick="go('ranking')">상승 전체 →</a>
       </div>
       <div class="block">
@@ -181,15 +187,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>LG화학</b><small class="num">051910 · 2차전지</small></div><div class="barwrap"><div class="bar dn" style="width:10%"></div><span class="barval dn num">−0.6%</span></div><div class="ai"><span class="aid">신호 41</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>셀트리온</b><small class="num">068270 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:7%"></div><span class="barval dn num">−0.4%</span></div><div class="ai"><span class="ais">신호 51</span></div></a>
         <a class="more" onclick="go('ranking')">하락 전체 →</a>
       </div>
     </div>
 
+    <hr class="etf-divider">
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s">AI 픽 미적용 · 신호만 · 06-11</span></div>
       <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar vol" style="width:31%"></div><span class="barval num">570만주</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 차이나CSI300</b><small class="num">192090 · 중국</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div><span class="barval num">400만주</span></div><div class="ai"><span class="ax">—</span></div></a>
       <a class="more" onclick="go('ranking')">ETF 전체 →</a>
     </div>
     <div class="cols2">
@@ -198,6 +209,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 반도체</b><small class="num">091160 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+3.8%</span></div><div class="ai"><span class="ais">신호 65</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 2차전지테마</b><small class="num">305540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:79%"></div><span class="barval up num">+3.0%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국필반도체</b><small class="num">381180 · 미국반도체</small></div><div class="barwrap"><div class="bar up" style="width:55%"></div><span class="barval up num">+2.1%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 200선물인버스2X</b><small class="num">252670 · 인버스</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="aid">신호 40</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 미국S&P500</b><small class="num">360750 · 미국</small></div><div class="barwrap"><div class="bar up" style="width:26%"></div><span class="barval up num">+1.0%</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
         <a class="more" onclick="go('ranking')">ETF 상승 전체 →</a>
       </div>
       <div class="block">
@@ -205,6 +218,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−3.2%</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 200IT레버리지</b><small class="num">243890 · IT레버리지</small></div><div class="barwrap"><div class="bar dn" style="width:74%"></div><span class="barval dn num">−2.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>KODEX 바이오</b><small class="num">143460 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:44%"></div><span class="barval dn num">−1.4%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>TIGER 200선물인버스</b><small class="num">215580 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:28%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>KODEX 헬스케어</b><small class="num">266410 · 헬스케어</small></div><div class="barwrap"><div class="bar dn" style="width:16%"></div><span class="barval dn num">−0.5%</span></div><div class="ai"><span class="ais">신호 53</span></div></a>
         <a class="more" onclick="go('ranking')">ETF 하락 전체 →</a>
       </div>
     </div>
