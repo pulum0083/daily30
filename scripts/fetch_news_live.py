@@ -160,14 +160,57 @@ def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
     return False
 
 AVOID_BLOCK_TMPL = """[직전 이슈 중복 금지]
-직전에 다룬 이슈:
+오늘 이미 다룬 이슈 전체:
 {items}
 
 중요: 제목이 달라도 위 목록에 등장하는 종목명·지수명·키워드가 같으면 중복입니다.
 예) 직전에 '삼성전자·SK하이닉스 4%↑'를 다뤘다면, '삼성전자·SK하이닉스 4~7%↑'도 중복입니다.
 시장 이슈와 종목 이슈 모두 완전히 다른 종목·주제를 선택하세요.
+오전에 다룬 주제가 반복되면 독자가 장중 흐름을 파악할 수 없습니다. 시간대별로 다른 이슈를 발굴하세요.
 
 """
+
+AVOID_KEYWORDS_TMPL = """[중복 키워드 금지 — 재시도]
+아래 키워드가 포함된 뉴스는 이미 오늘 보도했습니다. 절대 선택하지 마세요:
+{keywords}
+
+완전히 다른 종목·섹터·이슈를 찾아서 선택하세요.
+
+"""
+
+
+def _title_keywords(title: str) -> set:
+    """타이틀에서 2자 이상 한글·영문 단어 추출 (조사·불용어 제외)"""
+    _stopwords = {'이슈', '뉴스', '기자', '오늘', '어제', '지난', '이번', '관련', '대한', '따른',
+                  '코스피', '코스닥', '주가', '주식', '시장', '장중', '장세', '상승', '하락',
+                  '전환', '반등', '급등', '급락', '강세', '약세', '회복', '마감'}
+    words = set(re.findall(r'[가-힣A-Za-z]{2,}', title))
+    return words - _stopwords
+
+
+def _overlap_ratio(new_title: str, existing_title: str) -> float:
+    """두 타이틀의 핵심 키워드 겹침 비율 (교집합 / 작은쪽 집합)"""
+    wa = _title_keywords(new_title)
+    wb = _title_keywords(existing_title)
+    if not wa or not wb:
+        return 0.0
+    return len(wa & wb) / min(len(wa), len(wb))
+
+
+def _find_duplicate(new_result: dict, existing_titles: list, threshold: float = 0.55) -> list:
+    """새 결과의 market/stock 타이틀이 기존 타이틀과 중복이면 겹친 키워드 목록 반환, 없으면 []"""
+    new_titles = [
+        (new_result.get("market") or {}).get("title", ""),
+        (new_result.get("stock") or {}).get("title", ""),
+    ]
+    blocked = set()
+    for nt in new_titles:
+        if not nt:
+            continue
+        for et in existing_titles:
+            if _overlap_ratio(nt, et) >= threshold:
+                blocked |= _title_keywords(nt) & _title_keywords(et)
+    return sorted(blocked)
 
 
 # ── API 키 ────────────────────────────────────────────────────────────────────
@@ -244,10 +287,15 @@ def fetch_latest_issue(
     today: str,
     time_str: str,
     recent_stock_titles=None,
-    market_reality=None,   # _get_market_reality() 결과
+    market_reality=None,
+    extra_avoid_keywords=None,  # Python 사후 검증에서 발견한 중복 키워드
 ) -> dict:
     avoid_block = ""
-    if recent_stock_titles:
+    if extra_avoid_keywords:
+        # 중복 키워드 명시 블록 (재시도 시 사용)
+        keywords_str = ", ".join(extra_avoid_keywords)
+        avoid_block = AVOID_KEYWORDS_TMPL.format(keywords=keywords_str)
+    elif recent_stock_titles:
         items = "\n".join(f"- {t}" for t in recent_stock_titles)
         avoid_block = AVOID_BLOCK_TMPL.format(items=items)
 
@@ -283,30 +331,27 @@ def main() -> None:
 
     print(f"[fetch_news_live] {today} {time_str} KST — 슬롯={slot} — Gemini 이슈 수집 시작")
 
-    # 직전 2회 market·stock 이슈 타이틀 수집 — 중복 방지용
-    # 가장 최신 이슈(latest)와 그 이전 이슈(history[0:5])의 market·stock 타이틀을 모두 수집한다.
-    recent_stock_titles: list = []
+    # 오늘 전체 market·stock 이슈 타이틀 수집 — 중복 방지 프롬프트용
+    all_today_titles: list = []
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             if existing.get("date") == today:
-                # 직전 이슈 (latest)
                 lt = existing.get("latest", {})
                 if isinstance(lt, dict):
                     for key in ("market", "stock"):
                         t = (lt.get(key) or {}).get("title", "")
-                        if t and t not in recent_stock_titles:
-                            recent_stock_titles.append(t)
-                # 그 이전 이슈 (history[0:5])
-                for h in existing.get("history", [])[:5]:
+                        if t and t not in all_today_titles:
+                            all_today_titles.append(t)
+                for h in existing.get("history", []):  # 제한 없이 오늘 전체
                     for key in ("market", "stock"):
                         t = (h.get(key) or {}).get("title", "")
-                        if t and t not in recent_stock_titles:
-                            recent_stock_titles.append(t)
+                        if t and t not in all_today_titles:
+                            all_today_titles.append(t)
         except Exception:
             pass
-    if recent_stock_titles:
-        print(f"[fetch_news_live] 중복 방지 이슈 목록: {recent_stock_titles}")
+    if all_today_titles:
+        print(f"[fetch_news_live] 오늘 이슈 전체({len(all_today_titles)}개): {all_today_titles}")
 
     # MARKET 슬롯: 실측 방향 조회 (검증용)
     market_reality = _get_market_reality() if slot == "MARKET" else None
@@ -314,16 +359,21 @@ def main() -> None:
         print(f"[fetch_news_live] 실측 삼성전자 {market_reality['change_pct']:+.1f}%")
 
     latest = None
-    for attempt in range(3):
+    blocked_keywords: list = []  # Python 사후 검증에서 발견한 중복 키워드
+    for attempt in range(4):
+        # 재시도 시 중복 키워드를 명시한 강화 프롬프트 사용
+        avoid_titles = all_today_titles if not blocked_keywords else None
+        extra_avoid_keywords = blocked_keywords if blocked_keywords else None
         try:
             latest = fetch_latest_issue(
                 slot, today, time_str,
-                recent_stock_titles or None,
-                market_reality=market_reality,  # 첫 시도부터 항상 주입
+                avoid_titles or None,
+                market_reality=market_reality,
+                extra_avoid_keywords=extra_avoid_keywords,
             )
         except Exception as e:
             print(f"[fetch_news_live] ERROR (시도 {attempt+1}): {e}", file=sys.stderr)
-            if attempt == 2:
+            if attempt == 3:
                 sys.exit(1)
             continue
 
@@ -332,6 +382,17 @@ def main() -> None:
             titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
             print(f"[fetch_news_live] ⚠️ 방향 모순 감지 (시도 {attempt+1}): {titles} — 재시도")
             continue
+
+        # Python 사후 중복 검증: 오늘 기존 타이틀과 키워드 겹침 확인
+        if all_today_titles:
+            blocked_keywords = _find_duplicate(latest, all_today_titles)
+            if blocked_keywords:
+                titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
+                print(f"[fetch_news_live] ⚠️ 중복 감지 (시도 {attempt+1}): {titles}")
+                print(f"[fetch_news_live]   겹친 키워드: {blocked_keywords} — 재시도")
+                if attempt < 3:
+                    continue
+
         break
 
     # 기존 history 이어받기 (같은 날짜인 경우만)
