@@ -87,7 +87,11 @@ PROMPT_POST_MARKET = """
 
 [선택 범위]
 1. 시장 전체: 오늘 코스피·코스닥 마감 등락 원인, 또는 현재 미국 선물·프리마켓 방향과 원인
-2. 주요 종목/자산: 오늘 국내 급등락 종목 사유, 또는 오늘 밤 미국 주목 종목 (실적·이벤트 등)
+2. 주요 종목/자산: 오늘 국내 급등락 종목 사유, 또는 오늘 밤 미국 실적 발표·이벤트가 있는 특정 종목
+
+[금지 기사 유형 — 반드시 제외]
+- "오늘의 추천 주식", "주목받은 주식", "이번 주 주목할 종목", "요일별 추천" 등 정기 큐레이션 기사
+- 기사 발행일이 오늘({today})이 아닌 것 (제목·본문에 오늘 날짜 또는 오늘의 실제 수치가 없으면 제외)
 """ + _OUTPUT_RULES
 
 # 미국 시장 (20:00~01:00)
@@ -98,7 +102,11 @@ PROMPT_US_MARKET = """
 
 [선택 범위]
 1. 시장 전체: S&P500·나스닥·다우 장중 등락 원인, 연준 발언·경제지표 발표, VIX·달러·국채금리 움직임
-2. 주요 종목/자산: 지금 미국 시장에서 급등락 중인 빅테크·반도체 종목 (NVDA·AAPL·MSFT·AMD·TSMC 등), 또는 실적 발표 종목
+2. 주요 종목/자산: 지금 미국 시장에서 급등락 중인 빅테크·반도체 종목 (NVDA·AAPL·MSFT·AMD·TSMC 등), 또는 오늘 실적 발표 종목
+
+[금지 기사 유형 — 반드시 제외]
+- "오늘의 추천 주식", "주목받은 주식", "이번 주 주목할 종목", "요일별 추천" 등 정기 큐레이션 기사
+- 기사 발행일이 오늘({today})이 아닌 것 (제목·본문에 오늘 날짜 또는 실시간 수치가 없으면 제외)
 """ + _OUTPUT_RULES
 
 PROMPT_MAP = {
@@ -141,6 +149,22 @@ def _get_market_reality():
     except Exception as e:
         print(f"[fetch_news_live] market reality 조회 실패 (무시): {e}")
         return None
+
+
+# 정기 큐레이션 기사 패턴 (날짜 무관한 일반 주식 추천 목록)
+_CURATION_PATTERNS = re.compile(
+    r"주목받은\s*주식|오늘의\s*추천|이번\s*주\s*주목|요일별\s*추천|"
+    r"stocks?\s*to\s*watch|top\s*stocks?|best\s*stocks?|"
+    r"월요일|화요일|수요일|목요일|금요일|토요일|일요일"
+    r"[^\n]{0,5}주목|"
+    r"주목할\s*주식|추천\s*종목\s*[0-9]",
+    re.IGNORECASE
+)
+
+
+def _is_curation_article(title: str) -> bool:
+    """정기 큐레이션 기사(요일별 추천 주식 등) 여부 — True면 재시도 대상"""
+    return bool(_CURATION_PATTERNS.search(title or ""))
 
 
 def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
@@ -382,6 +406,13 @@ def main() -> None:
             titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
             print(f"[fetch_news_live] ⚠️ 방향 모순 감지 (시도 {attempt+1}): {titles} — 재시도")
             continue
+
+        # 큐레이션 기사 검증: "요일별 추천 주식" 류 제외
+        stock_title = (latest.get("stock") or {}).get("title", "")
+        if _is_curation_article(stock_title):
+            print(f"[fetch_news_live] ⚠️ 큐레이션 기사 감지 (시도 {attempt+1}): {stock_title} — 재시도")
+            if attempt < 3:
+                continue
 
         # Python 사후 중복 검증: 오늘 기존 타이틀과 키워드 겹침 확인
         if all_today_titles:
