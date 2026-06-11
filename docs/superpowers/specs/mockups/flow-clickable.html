@@ -311,19 +311,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="fbar"><span class="lbl">섹터</span><div class="fchips"><a class="on">전체</a><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a></div></div>
     <div class="tbl">
       <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">종목</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:68px;text-align:right;">등락률</span><span class="block__s" style="width:78px;text-align:right;">AI 신호</span></div>
-      <a class="trow" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><span class="tchg dn num">−6.4%</span><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><span class="tchg up num">+3.4%</span><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><span class="tchg up num">+1.8%</span><div class="ai"><span class="ais">신호 71</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:33%"></div><span class="barval num">1,050만주</span></div><span class="tchg dn num">−1.2%</span><div class="ai"><span class="aid">신호 42</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:26%"></div><span class="barval num">820만주</span></div><span class="tchg up num">+0.4%</span><div class="ai"><span class="ais">신호 55</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk num">6</span><div class="nm"><b>현대차</b><small class="num">005380 · 자동차</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div><span class="barval num">690만주</span></div><span class="tchg up num">+1.1%</span><div class="ai"><span class="ax">—</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk num">7</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:19%"></div><span class="barval num">610만주</span></div><span class="tchg up num">+6.1%</span><div class="ai"><span class="ais">신호 63</span></div></a>
-      <a class="trow" onclick="go('detail')"><span class="rk num">8</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar vol" style="width:17%"></div><span class="barval num">540만주</span></div><span class="tchg dn num">−3.9%</span><div class="ai"><span class="aid">신호 38</span></div></a>
+      <div id="rank-rows"></div>
     </div>
-    <div class="legend" style="margin:16px 2px 0;">
-      <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span><span class="lg"><span class="ais">신호 64</span> 기술신호</span><span class="lg"><span class="aid">신호 42</span> 약세</span><span class="lg"><span class="ax">—</span> 없음</span>
-    </div>
-    <div class="pager"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>5</a><a>›</a></div>
+    <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
   </div>
 
 </div>
@@ -344,6 +334,44 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 <script>
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
+
+/* 랭킹 더보기 */
+const RANK_DATA=[
+  [1,'삼성전자','005930','반도체',100,'3,210만주','dn','−6.4%','ais','신호 58'],
+  [2,'SK하이닉스','000660','반도체',71,'2,280만주','up','+3.4%','aip','AI 78'],
+  [3,'한미반도체','042700','반도체',48,'1,540만주','up','+1.8%','ais','신호 71'],
+  [4,'POSCO홀딩스','005490','2차전지',33,'1,050만주','dn','−1.2%','aid','신호 42'],
+  [5,'LG에너지솔루션','373220','2차전지',26,'820만주','up','+0.4%','ais','신호 55'],
+  [6,'현대차','005380','자동차',22,'690만주','up','+1.1%','ax','—'],
+  [7,'에코프로비엠','247540','2차전지',19,'610만주','up','+6.1%','ais','신호 63'],
+  [8,'카카오','035720','인터넷',17,'540만주','dn','−3.9%','aid','신호 38'],
+  [9,'NAVER','035420','인터넷',15,'470만주','dn','−0.9%','ax','—'],
+  [10,'기아','000270','자동차',13,'420만주','up','+0.8%','ais','신호 52'],
+  [11,'삼성바이오로직스','207940','바이오',12,'380만주','up','+0.3%','ax','—'],
+  [12,'주성엔지니어링','036930','반도체',11,'350만주','up','+9.4%','ais','신호 69'],
+  [13,'셀트리온','068270','바이오',10,'320만주','dn','−0.4%','ais','신호 51'],
+  [14,'하나금융지주','086790','금융',9,'290만주','up','+2.5%','ais','신호 66'],
+  [15,'DB하이텍','000990','반도체',8,'260만주','up','+1.8%','ais','신호 64'],
+  [16,'LG화학','051910','2차전지',8,'240만주','dn','−0.6%','aid','신호 41'],
+  [17,'두산에너빌리티','034020','방산',7,'220만주','up','+1.2%','ais','신호 59'],
+  [18,'한화에어로스페이스','012450','방산',7,'200만주','up','+1.5%','ais','신호 66'],
+  [19,'크래프톤','259960','엔터',6,'190만주','up','+0.7%','ais','신호 57'],
+  [20,'카카오뱅크','323410','금융',6,'180만주','dn','−1.1%','aid','신호 43'],
+];
+let rankShown=10;
+function rankRow(r){
+  const top3=r[0]<=3;
+  const badge=r[8]==='ax'?`<span class="ax">—</span>`:`<span class="${r[8]}">${r[9]}</span>`;
+  return `<a class="trow" onclick="go('detail')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]} · ${r[3]}</small></div><div class="barwrap"><div class="bar vol" style="width:${r[4]}%"></div><span class="barval num">${r[5]}</span></div><span class="tchg ${r[6]} num">${r[7]}</span><div class="ai">${badge}</div></a>`;
+}
+function rankRender(){
+  document.getElementById('rank-rows').innerHTML=RANK_DATA.slice(0,rankShown).map(rankRow).join('');
+  const btn=document.getElementById('rank-more');
+  if(rankShown>=RANK_DATA.length){btn.style.display='none';}
+  else{btn.textContent=`더보기 · ${Math.min(rankShown+10,RANK_DATA.length)-rankShown}개 더 (${RANK_DATA.length-rankShown}개 남음)`;}
+}
+function rankLoadMore(){rankShown=Math.min(rankShown+10,RANK_DATA.length);rankRender();}
+rankRender();
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
