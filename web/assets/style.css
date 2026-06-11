@@ -788,19 +788,18 @@ html.dark .lsb-live-dot{background:#4ac26b;}
 .issue-briefing-meta{font-size:11px;color:var(--muted);}
 .issue-briefing-body{padding:0;}
 /* 컴팩트 아이템 */
-.ib-item{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--hairline);align-items:flex-start;}
+.ib-item{display:flex;gap:10px;padding:9px 16px;border-bottom:1px solid var(--hairline);align-items:center;}
 .ib-item:last-child{border-bottom:none;}
 .ib-item.is-latest{background:rgba(253,126,20,.04);border-left:3px solid rgba(253,126,20,.5);padding-left:13px;}
-.ib-time{flex-shrink:0;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);width:36px;padding-top:1px;}
+.ib-time{flex-shrink:0;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);width:36px;}
 .ib-item.is-latest .ib-time{color:#e8590c;}
-.ib-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
-.ib-line{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap;}
-.ib-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0;}
+.ib-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.ib-line{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
+.ib-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;flex-shrink:0;letter-spacing:.3px;}
 .ib-badge.market{background:rgba(220,53,69,.1);color:#c0392b;}
 .ib-badge.stock{background:rgba(39,117,237,.1);color:#1a5fb4;}
-.ib-hl{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;}
-.ib-desc{font-size:11.5px;color:var(--muted);line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;padding-left:28px;}
-.ib-sep{height:1px;background:var(--hairline);margin:2px 0;opacity:.5;}
+.ib-hl{font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.ib-sep{height:1px;background:var(--hairline);margin:1px 0;opacity:.5;}
 html.dark .issue-briefing-card{border-color:rgba(253,126,20,.2);}
 html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 
