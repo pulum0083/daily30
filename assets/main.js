@@ -1619,14 +1619,21 @@
       return text.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/\s{2,}/g, ' ').trim();
     }
 
+    function cleanTitle(text) {
+      if (!text) return text;
+      // 대괄호·소괄호 제거 후 끝의 "- 출처명" 패턴 제거
+      return text.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '')
+        .replace(/\s*[-–—]\s*(?:뉴스\d*|[가-힣A-Za-z0-9]+(?:뉴스|미디어|통신|일보|방송|신문|시스|경제))\s*$/i, '')
+        .replace(/\s{2,}/g, ' ').trim();
+    }
+
     function tlIssue(issue, type) {
       if (!issue || !issue.title) return '';
       var label = type === 'market' ? '시장' : '종목';
       return '<div class="ib-line">'
         + '<span class="ib-badge ' + type + '">' + label + '</span>'
-        + '<span class="ib-hl">' + escHtml(cleanBrackets(issue.title)) + '</span>'
-        + '</div>'
-        + (issue.summary ? '<div class="ib-desc">' + escHtml(cleanBrackets(issue.summary)) + '</div>' : '');
+        + '<span class="ib-hl">' + escHtml(cleanTitle(issue.title)) + '</span>'
+        + '</div>';
     }
 
     function render(data) {
