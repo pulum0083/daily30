@@ -26,13 +26,13 @@ def get_slot(hour: int, minute: int) -> str:
     """KST 시·분을 받아 구간 문자열을 반환한다.
 
     운영 구간:
-      MARKET      09:00~15:29  장중 실시간
+      MARKET      09:00~15:30  장중 실시간 (15:30 = 마감 직후 포함)
       POST_MARKET 16:35~21:29  마감 후 + 미국 프리마켓
       US_MARKET   21:30~01:00  미국 시장
     운영 외 시간은 MARKET 폴백 (워크플로우가 해당 시간에 실행하지 않음)
     """
     total = hour * 60 + minute
-    if 540 <= total < 930:    # 09:00~15:29
+    if 540 <= total <= 930:    # 09:00~15:30
         return "MARKET"
     if 995 <= total < 1290:   # 16:35~21:29
         return "POST_MARKET"
