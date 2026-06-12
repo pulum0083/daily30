@@ -54,6 +54,9 @@ body.is-embed .layout-wrapper{padding-bottom:0;}
 .gnb__link:hover{color:rgba(255,255,255,.9);}
 .gnb__chips-link{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);padding-left:12px;margin-left:10px;border-left:1px solid rgba(255,255,255,.18);}
 .gnb__chips-link:hover{color:rgba(255,255,255,.9);}
+.gnb__chipboard{display:flex;align-items:center;gap:5px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.18);font-size:12px;font-weight:600;color:rgba(255,255,255,.55);white-space:nowrap;}
+.gnb__chipboard:hover{color:rgba(255,255,255,.9);}
+.gnb__chipboard-badge{font-size:10px;font-weight:700;color:var(--primary);background:rgba(224,49,49,.15);border:1px solid rgba(224,49,49,.3);border-radius:4px;padding:1px 5px;line-height:1.4;}
 .gnb__meta{display:flex;align-items:center;gap:14px;}
 .gnb__date{font-size:12px;color:rgba(255,255,255,.42);}
 .gnb__theme-toggle{width:30px;height:30px;border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;}
