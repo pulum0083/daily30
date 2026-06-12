@@ -32,11 +32,7 @@
 
     </div>
     <div class="gnb__meta">
-<<<<<<< HEAD
-      <span class="gnb__date" id="gnb-date">2026-06-11 KST 07:40</span>
-=======
       <span class="gnb__date" id="gnb-date">2026-06-11 KST 23:07</span>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환">
         <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -132,11 +128,7 @@
   <div class="open-section__title">
     KOSPI 당일 방향 예측
     <button class="info-icon-btn" data-modal-open="pred-modal">?</button>
-<<<<<<< HEAD
-    <span class="section-time">07:40 KST 생성</span>
-=======
     <span class="section-time">23:07 KST 생성</span>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
   </div>
   <div class="prediction-card">
     <div class="pred-top">
@@ -158,21 +150,24 @@
   </div>
 </div>
             
-<div class="open-section">
-  <div class="open-section__title reason-section-title">긴급 점검: S&P -1.6%·VIX 급등·외인 대탈출</div>
-  <div class="reason-block">
-    <ul>
-      
-      <li>🚨 오늘 코스피는 강한 하락 압력을 받을 것 같아요. S&P500이 <b>-1.62%</b> 급락했고 나스닥도 전반적으로 미국 빅테크가 줄줄이 빠지며 위험자산 회피 심리가 다시 켜졌거든요.</li>
-      
-      <li>😰 VIX(공포 지수)가 오늘의 경보예요. 전일 대비 <b>+11.83%</b> 폭등하며 <b>22.22</b>까지 치솟았고, 20일 평균 대비 <b>+27.26%</b>나 높아요. 시장이 이 정도 공포를 반영하면 코스피도 피하기 어려워요.</li>
-      
-      <li>💡 반도체 섹터가 오늘 코스피 하락을 주도할 것 같아요. SOX 지수가 <b>-3.57%</b>, DRAM ETF도 <b>-4.16%</b> 급락했거든요. EWY도 <b>-2.97%</b> 내리며 외국인 이탈 신호가 선명해요.</li>
-      
-      <li>🛢️ 유가 급등이 하락 악재에 기름을 부었어요. WTI 유가가 <b>+4.18달러</b> 뛰며 브렌트도 <b>+3.60%</b> 급등했는데, 인플레이션 재점화 우려로 성장주 발목을 잡을 수 있어요. 게다가 오늘 밤 美 PPI 발표까지 예정돼 있어서 장 전반에 경계감이 맴돌 거예요.</li>
-      
-    </ul>
+<div class="sc-card">
+  <div class="sc-head">긴급 점검: S&P -1.6%·VIX 급등·외인 대탈출</div>
+  <div class="sc-summary">미국 빅테크 전반 급락·VIX 폭등으로 오늘 코스피는 <b>강한 하락 압력</b>을 받을 것 같아요.</div>
+  <div class="sc-cols">
+    <div class="sc-col">
+      <div class="sc-tag up">하락 근거</div>
+      <div class="sc-row"><div class="sc-dot up"></div><span>S&P500 <b>-1.62%</b>·나스닥 빅테크 전반 이탈</span></div>
+      <div class="sc-row"><div class="sc-dot up"></div><span>VIX <b>+11.83%</b> 폭등, <b>22.22</b>로 경보 수준</span></div>
+      <div class="sc-row"><div class="sc-dot up"></div><span>SOX <b>-3.57%</b>·DRAM ETF <b>-4.16%</b> 반도체 급락</span></div>
+    </div>
+    <div class="sc-col">
+      <div class="sc-tag dn">반등 가능성</div>
+      <div class="sc-row"><div class="sc-dot dn"></div><span>조선 섹터 역주행 — 한화오션 <b>+7.83%</b></span></div>
+      <div class="sc-row"><div class="sc-dot dn"></div><span>삼성바이오로직스 보합 방어, 방어주 부각</span></div>
+      <div class="sc-row"><div class="sc-dot dn"></div><span>갭 하락 후 기술적 반등 가능성 열려 있어요</span></div>
+    </div>
   </div>
+  <div class="sc-footer">다음 세션 핵심 변수: <b>오늘 밤 美 PPI + 외국인 수급 연속성</b>이에요.</div>
 </div>
             <div class="divider"></div>
             
@@ -206,27 +201,6 @@
     </div>
     
     <div class="watchpoint-row">
-<<<<<<< HEAD
-      <div class="watchpoint-row__icon">📊</div>
-      <div class="watchpoint-row__body">
-        <div class="watchpoint-row__label">코스피 지지·저항 레벨</div>
-        
-        <div class="lvl-rows">
-          
-          <div class="lvl-row"><span class="lvl-pill dn">1차 지지 <span class="lvl-pill__num">2,620</span></span><span class="lvl-row__note"></span></div>
-          
-          <div class="lvl-row"><span class="lvl-pill dn">2차 지지 <span class="lvl-pill__num">2,580</span></span><span class="lvl-row__note"></span></div>
-          
-          <div class="lvl-row"><span class="lvl-pill up">저항 <span class="lvl-pill__num">2,680</span></span><span class="lvl-row__note"></span></div>
-          
-        </div>
-        
-      </div>
-    </div>
-    
-    <div class="watchpoint-row">
-=======
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       <div class="watchpoint-row__icon">🌏</div>
       <div class="watchpoint-row__body">
         <div class="watchpoint-row__label">아시아 동반 하락 흐름</div>
@@ -253,17 +227,10 @@
         <div class="stock-pick-card__rank">1</div>
         <div class="stock-pick-card__info">
           <div class="stock-pick-card__name">삼성바이오로직스<span class="ma20-badge">20일선 하단 방어 중</span></div>
-<<<<<<< HEAD
-          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">1,298,000원</span><span class="stock-pick-card__change up">+0.15%</span></div>
-          <div class="stock-pick-card__scenario">전일 <b>+0.15%</b>로 하락장에서 홀로 보합을 지킨 종목이에요. 글로벌 증시 급락 속에서도 바이오 CDMO 특성상 매크로 충격을 상대적으로 덜 받는 방어주 성격이 부각될 수 있어요.</div>
-          <div class="ma200-gauge">
-            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill down" style="width:16.5%"></div></div><span class="ma200-gauge__pct down">-19.8%</span></div>
-=======
           <div class="stock-pick-card__meta"><span class="stock-pick-card__price">1,340,000원</span><span class="stock-pick-card__change down">-0.74%</span></div>
           <div class="stock-pick-card__scenario">전일 <b>+0.15%</b>로 하락장에서 홀로 보합을 지킨 종목이에요. 글로벌 증시 급락 속에서도 바이오 CDMO 특성상 매크로 충격을 상대적으로 덜 받는 방어주 성격이 부각될 수 있어요.</div>
           <div class="ma200-gauge">
             <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill down" style="width:15.6%"></div></div><span class="ma200-gauge__pct down">-18.7%</span></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
             <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
           </div>
         </div>
@@ -310,17 +277,10 @@
         <div class="stock-pick-card__rank">3</div>
         <div class="stock-pick-card__info">
           <div class="stock-pick-card__name">하나금융지주<span class="ma20-badge">20일선 근접 방어</span></div>
-<<<<<<< HEAD
-          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">117,900원</span><span class="stock-pick-card__change down">-0.92%</span></div>
-          <div class="stock-pick-card__scenario">전일 <b>-0.92%</b>로 낙폭이 상대적으로 제한적이었고, 20일선(<b>118,535원</b>)에 바짝 붙어 있어요. 시장 급락 속에서도 금리 고공행진이 이어지면 금융주 수익성 기대로 낙폭이 제한될 수 있어요.</div>
-          <div class="ma200-gauge">
-            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:12.9%"></div></div><span class="ma200-gauge__pct up">+15.4%</span></div>
-=======
           <div class="stock-pick-card__meta"><span class="stock-pick-card__price">123,600원</span><span class="stock-pick-card__change up">+2.49%</span></div>
           <div class="stock-pick-card__scenario">전일 <b>-0.92%</b>로 낙폭이 상대적으로 제한적이었고, 20일선(<b>118,535원</b>)에 바짝 붙어 있어요. 시장 급락 속에서도 금리 고공행진이 이어지면 금융주 수익성 기대로 낙폭이 제한될 수 있어요.</div>
           <div class="ma200-gauge">
             <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:19.8%"></div></div><span class="ma200-gauge__pct up">+23.7%</span></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
             <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
           </div>
         </div>
@@ -342,19 +302,11 @@
 <script>
 window.addEventListener('load', function () {
   
-<<<<<<< HEAD
-  drawMiniChart('mc-1', [1443000.0, 1410000.0, 1449000.0, 1419000.0, 1386000.0, 1346000.0, 1337000.0, 1395000.0, 1415000.0, 1425000.0, 1384000.0, 1373000.0, 1363000.0, 1377000.0, 1367000.0, 1350000.0, 1340000.0, 1243000.0, 1296000.0, 1298000.0], [1523150.0, 1516150.0, 1511800.0, 1502650.0, 1491150.0, 1478400.0, 1465000.0, 1455350.0, 1448050.0, 1443600.0, 1436400.0, 1429600.0, 1422550.0, 1417750.0, 1412600.0, 1405850.0, 1398850.0, 1387600.0, 1378800.0, 1370800.0], [1635923.44, 1635371.88, 1634743.05, 1634104.03, 1633388.32, 1632450.54, 1631305.86, 1630274.57, 1629505.18, 1628778.43, 1627692.14, 1626477.26, 1625440.51, 1624716.59, 1623839.66, 1622855.64, 1621968.8, 1620611.68, 1619571.06, 1618466.86]);
-  
-  drawMiniChart('mc-2', [84900.0, 84700.0, 89400.0, 86000.0, 83400.0, 81300.0, 81500.0, 84100.0, 88300.0, 85800.0, 85200.0, 83600.0, 85000.0, 83400.0, 81500.0, 80100.0, 77500.0, 72400.0, 76700.0, 76900.0], [92565.0, 92195.0, 91985.0, 91425.0, 90710.0, 89900.0, 89120.0, 88500.0, 88160.0, 87715.0, 87235.0, 86710.0, 86275.0, 85785.0, 85280.0, 84760.0, 84245.0, 83465.0, 82970.0, 82585.0], [110633.0, 110493.0, 110261.0, 110031.0, 109818.5, 109600.0, 109381.5, 109185.5, 109015.0, 108842.5, 108666.5, 108485.5, 108320.0, 108173.5, 108018.0, 107844.0, 107659.0, 107460.0, 107283.5, 107108.0]);
-  
-  drawMiniChart('mc-3', [123100.0, 122300.0, 126500.0, 119000.0, 114200.0, 115300.0, 115600.0, 119400.0, 122100.0, 120000.0, 118400.0, 115300.0, 115100.0, 113900.0, 117000.0, 120600.0, 123600.0, 112400.0, 119000.0, 117900.0], [124020.0, 124135.0, 124420.0, 124315.0, 123900.0, 123490.0, 123135.0, 122955.0, 123085.0, 123040.0, 122795.0, 122360.0, 121765.0, 121105.0, 120560.0, 120260.0, 120165.0, 119345.0, 118970.0, 118535.0], [99225.0, 99378.0, 99551.0, 99688.5, 99800.0, 99920.5, 100044.5, 100186.5, 100334.5, 100513.0, 100675.0, 100821.5, 100970.0, 101128.0, 101301.0, 101481.5, 101672.0, 101805.0, 101975.5, 102143.0]);
-=======
   drawMiniChart('mc-1', [1468000.0, 1472000.0, 1458000.0, 1443000.0, 1410000.0, 1449000.0, 1419000.0, 1386000.0, 1346000.0, 1337000.0, 1395000.0, 1415000.0, 1425000.0, 1384000.0, 1373000.0, 1363000.0, 1377000.0, 1367000.0, 1350000.0, 1340000.0], [1541950.0, 1535650.0, 1529550.0, 1523150.0, 1516150.0, 1511800.0, 1502650.0, 1491150.0, 1478400.0, 1465000.0, 1455350.0, 1448050.0, 1443600.0, 1436400.0, 1429600.0, 1422550.0, 1417750.0, 1412600.0, 1405850.0, 1398850.0], [1669610.6763, 1668667.9819, 1667832.1044, 1667036.5419, 1666160.5444, 1665464.1712, 1664333.3538, 1663183.6025, 1661926.1031, 1660600.5406, 1659395.8494, 1658106.6538, 1657036.5869, 1655753.8325, 1654254.6369, 1652628.5644, 1651310.81, 1650196.7494, 1648890.0613, 1647510.31]);
   
   drawMiniChart('mc-2', [], [], []);
   
   drawMiniChart('mc-3', [127655.0, 126500.0, 126600.0, 123100.0, 122300.0, 126500.0, 119000.0, 114200.0, 115300.0, 115600.0, 119400.0, 122100.0, 120000.0, 118400.0, 115300.0, 115100.0, 113900.0, 117000.0, 120600.0, 123600.0], [121802.4965, 122324.5457, 122851.5949, 123084.7109, 123253.0492, 123591.7434, 123540.5707, 123180.0203, 122824.9145, 122524.4531, 122399.125, 122582.241, 122590.9793, 122400.7844, 122020.9008, 121482.3508, 120878.8449, 120390.6949, 120146.9668, 120107.75], [96709.3397, 96898.9766, 97084.3103, 97240.6161, 97388.5988, 97580.6374, 97734.2153, 97865.7145, 98000.7923, 98140.7325, 98301.5941, 98474.995, 98630.6909, 98817.7738, 98981.1911, 99143.6084, 99302.9077, 99492.5972, 99699.8063, 99911.9286]);
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
   
 });
 </script>
@@ -366,21 +318,13 @@ window.addEventListener('load', function () {
     <aside class="layout-grid__right">
       
 <div class="right-panel" id="market-data-panel">
-<<<<<<< HEAD
-  <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:40 KST</span></div>
-=======
   <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">23:07 KST</span></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
   <div class="mkt-list">
     
     <div class="mkt-row">
       <div class="mkt-row-info">
         <span class="mkt-name">나스닥</span>
-<<<<<<< HEAD
-        <div class="mkt-vals"><div class="mkt-val">25,169.50</div><div class="mkt-chg down">-1.98%</div></div>
-=======
         <div class="mkt-vals"><div class="mkt-val">26,322.97</div><div class="mkt-chg down">-1.89%</div></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       </div>
       
       <div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div>
@@ -390,11 +334,7 @@ window.addEventListener('load', function () {
     <div class="mkt-row">
       <div class="mkt-row-info">
         <span class="mkt-name">필라델피아 반도체</span>
-<<<<<<< HEAD
-        <div class="mkt-vals"><div class="mkt-val">12,206.46</div><div class="mkt-chg down">-3.57%</div></div>
-=======
         <div class="mkt-vals"><div class="mkt-val">12,866.37</div><div class="mkt-chg down">-5.52%</div></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       </div>
       
       <div class="mkt-spark"><canvas id="c-sox"></canvas></div>
@@ -404,11 +344,7 @@ window.addEventListener('load', function () {
     <div class="mkt-row">
       <div class="mkt-row-info">
         <span class="mkt-name">나스닥100 선물</span>
-<<<<<<< HEAD
-        <div class="mkt-vals"><div class="mkt-val">28,423.75</div><div class="mkt-chg down">-1.98%</div></div>
-=======
         <div class="mkt-vals"><div class="mkt-val">29,846.75</div><div class="mkt-chg down">-1.06%</div></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       </div>
       
       <div class="mkt-spark"><canvas id="c-nq"></canvas></div>
@@ -418,17 +354,10 @@ window.addEventListener('load', function () {
     <div class="mkt-row">
       <div class="mkt-row-info">
         <span class="mkt-name" style="display:flex;align-items:center;gap:4px">VIX 공포지수<button class="info-icon-btn" data-modal-open="vix-modal">?</button></span>
-<<<<<<< HEAD
-        <div class="mkt-vals"><div class="mkt-val">22.22</div><div class="mkt-chg up">+11.83%</div></div>
-      </div>
-      
-      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge elevated">경계</span></div>
-=======
         <div class="mkt-vals"><div class="mkt-val">16.40</div><div class="mkt-chg up">+6.56%</div></div>
       </div>
       
       <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal">보통</span></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       
     </div>
     
@@ -437,19 +366,11 @@ window.addEventListener('load', function () {
 <script>
 window.addEventListener('load', function () {
   
-<<<<<<< HEAD
-  drawSparkline('c-nasdaq', [25588.1875, 25568.4531, 25675.1914, 25680.3574, 25388.959, 25353.3594, 25313.0098, 25337.582, 25180.7109, 25167.123], '#2775ED');
-  
-  drawSparkline('c-sox', [12459.1846, 12457.3584, 12656.8555, 12776.748, 12350.4521, 12312.7871, 12265.0508, 12322.9971, 12225.1367, 12204.6377], '#2775ED');
-  
-  drawSparkline('c-nq', [28832.0, 29020.75, 28900.25, 28855.25, 28717.5, 28780.0, 28607.5, 28527.25, 28472.0, 28423.75], '#2775ED');
-=======
   drawSparkline('c-nasdaq', [26870.0078, 26862.9297, 26690.6211, 26800.2715, 26804.3203, 26863.3203, 26917.7324, 26911.0137, 26835.207, 26322.9707], '#2775ED');
   
   drawSparkline('c-sox', [13913.8623, 13915.8203, 13354.9922, 13504.0576, 13594.9316, 13654.6855, 13763.3018, 13761.5615, 13616.0117, 12866.3711], '#2775ED');
   
   drawSparkline('c-nq', [30229.75, 30170.25, 30123.5, 30150.25, 30158.75, 30198.25, 30195.5, 30147.75, 30054.5, 29846.75], '#2775ED');
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
   
 });
 </script>
@@ -465,24 +386,14 @@ window.addEventListener('load', function () {
   </div>
   <div class="acc-bar-wrap">
     <div class="acc-bar">
-<<<<<<< HEAD
-      <div class="acc-bar__hit" style="width:58%"></div>
-      <div class="acc-bar__miss" style="width:25%"></div>
-      <div class="acc-bar__pending" style="width:17%"></div>
-=======
       <div class="acc-bar__hit" style="width:60%"></div>
       <div class="acc-bar__miss" style="width:26%"></div>
       <div class="acc-bar__pending" style="width:14%"></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
     </div>
     <div class="acc-bar-caption">
       <span class="acc-bar-hit">적중 21</span>
       <span class="acc-bar-miss">오류 9</span>
-<<<<<<< HEAD
-      <span class="acc-bar-pending">미결 6</span>
-=======
       <span class="acc-bar-pending">미결 5</span>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
     </div>
   </div>
 </div>
@@ -510,11 +421,7 @@ window.addEventListener('load', function () {
     <span class="sidebar-visitors__count" id="sidebar-visitors-count">—</span>
   </div>
 </div>
-<<<<<<< HEAD
-<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-06-11T07:40:37.326261+09:00</div>
-=======
 <div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-06-05T23:07:47.493941+09:00</div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
     </aside>
   </div>
 
@@ -536,13 +443,8 @@ window.addEventListener('load', function () {
       
       <div class="bl-slot is-current">
         <div class="bl-slot__label">코스피 예측</div>
-<<<<<<< HEAD
-        <div class="bl-slot__title">하락 우위</div>
-        <div class="bl-slot__meta"><span class="bl-pill dn">▼ 하락</span><span class="bl-slot__time">07:41</span></div>
-=======
         <div class="bl-slot__title">—</div>
         <div class="bl-slot__meta"><span class="bl-slot__time"></span></div>
->>>>>>> 3fa97dc (fix: 06-11 코스피 브리핑 관전 포인트 — 코스피 지지·저항 레벨 항목 제거)
       </div>
       
       
