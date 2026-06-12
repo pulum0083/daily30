@@ -1051,31 +1051,43 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     print(f"[call_claude] Calling Claude API (type={briefing_type}, date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        system=[
-            {
-                "type": "text",
-                "text": system_prompt,
-                "cache_control": {"type": "ephemeral"},  # Cache the system prompt
-            }
-        ],
-        messages=[
-            {"role": "user", "content": user_content}
-        ],
-    )
+    last_error: Exception | None = None
+    for attempt in range(3):
+        if attempt > 0:
+            print(f"[call_claude] JSON 파싱 실패, 재시도 {attempt}/2 ...")
 
-    # Log cache usage if available
-    usage = response.usage
-    if hasattr(usage, "cache_creation_input_tokens"):
-        print(f"[call_claude] Cache created: {usage.cache_creation_input_tokens} tokens")
-    if hasattr(usage, "cache_read_input_tokens"):
-        print(f"[call_claude] Cache hit: {usage.cache_read_input_tokens} tokens (90% discount)")
-    print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=4096,
+            system=[
+                {
+                    "type": "text",
+                    "text": system_prompt,
+                    "cache_control": {"type": "ephemeral"},  # Cache the system prompt
+                }
+            ],
+            messages=[
+                {"role": "user", "content": user_content}
+            ],
+        )
 
-    raw_text = response.content[0].text
-    analysis = extract_json(raw_text)
+        # Log cache usage if available
+        usage = response.usage
+        if hasattr(usage, "cache_creation_input_tokens"):
+            print(f"[call_claude] Cache created: {usage.cache_creation_input_tokens} tokens")
+        if hasattr(usage, "cache_read_input_tokens"):
+            print(f"[call_claude] Cache hit: {usage.cache_read_input_tokens} tokens (90% discount)")
+        print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
+
+        raw_text = response.content[0].text
+        try:
+            analysis = extract_json(raw_text)
+            break
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"[call_claude] ERROR calling Claude API: {e}")
+            last_error = e
+    else:
+        raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
 
     # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 + us 브리핑)
     if briefing_type in ("kospi", "us"):
@@ -1310,27 +1322,38 @@ def call_claude_closing(date_str: str) -> dict:
     print(f"[call_claude] Calling Claude for kospi-close (date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=2048,
-        system=[
-            {
-                "type": "text",
-                "text": KOSPI_CLOSE_SYSTEM_PROMPT,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=[{"role": "user", "content": user_content}],
-    )
+    last_error: Exception | None = None
+    for attempt in range(3):
+        if attempt > 0:
+            print(f"[call_claude] JSON 파싱 실패, 재시도 {attempt}/2 ...")
 
-    usage = response.usage
-    if hasattr(usage, "cache_creation_input_tokens"):
-        print(f"[call_claude] Cache created: {usage.cache_creation_input_tokens} tokens")
-    if hasattr(usage, "cache_read_input_tokens"):
-        print(f"[call_claude] Cache hit: {usage.cache_read_input_tokens} tokens (90% discount)")
-    print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
+        response = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2048,
+            system=[
+                {
+                    "type": "text",
+                    "text": KOSPI_CLOSE_SYSTEM_PROMPT,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=[{"role": "user", "content": user_content}],
+        )
 
-    return extract_json(response.content[0].text)
+        usage = response.usage
+        if hasattr(usage, "cache_creation_input_tokens"):
+            print(f"[call_claude] Cache created: {usage.cache_creation_input_tokens} tokens")
+        if hasattr(usage, "cache_read_input_tokens"):
+            print(f"[call_claude] Cache hit: {usage.cache_read_input_tokens} tokens (90% discount)")
+        print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
+
+        try:
+            return extract_json(response.content[0].text)
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"[call_claude] ERROR calling Claude API: {e}")
+            last_error = e
+
+    raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
 
 
 def save_closing_telegram_message(date_str: str, analysis: dict, market_data: dict) -> None:
