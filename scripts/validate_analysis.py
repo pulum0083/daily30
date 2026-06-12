@@ -589,6 +589,74 @@ def _fetch_pick_realdata(ticker, is_us):
     return _fetch_us_realdata(ticker) if is_us else _fetch_kospi_realdata(ticker)
 
 
+def _fetch_kospi_index_levels():
+    """코스피 지수 실측 + 핵심 레벨(지지/저항) 산출.
+
+    네이버 일봉 차트(`/api/kospi-live`와 동일 출처)에서 최근 5거래일 고가/저가를
+    뽑아 저항=최근 5일 고가, 지지=최근 5일 저가로 계산한다. 두 값 모두 당일 종가를
+    항상 사이에 두므로 현재가가 밴드를 벗어나지 않는다.
+
+    Returns {"price","support","resistance"} or {"error":...}.
+    """
+    import urllib.request
+    from datetime import datetime, timedelta
+    try:
+        end = datetime.now().strftime("%Y%m%d") + "0000"
+        start = (datetime.now() - timedelta(days=30)).strftime("%Y%m%d") + "0000"
+        url = (f"https://api.stock.naver.com/chart/domestic/index/KOSPI/day"
+               f"?startDateTime={start}&endDateTime={end}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read())
+        recent = rows[-5:]
+        highs = [float(r["highPrice"]) for r in recent if r.get("highPrice")]
+        lows = [float(r["lowPrice"]) for r in recent if r.get("lowPrice")]
+        closes = [float(r["closePrice"]) for r in recent if r.get("closePrice")]
+        if not highs or not lows or not closes:
+            return {"error": "코스피 일봉 행 없음"}
+        return {
+            "price": closes[-1],
+            "support": round(min(lows) / 10) * 10,
+            "resistance": round(max(highs) / 10) * 10,
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def inject_kospi_index_levels(analysis, corrections, warnings):
+    """코스피 '핵심 레벨' watch_item의 지지/저항 num을 실측 지수 기반으로 덮어쓴다.
+
+    LLM은 실제 코스피 지수를 입력받지 못해 학습 기억(현실 지수)으로 levels를
+    채우므로, 발행 전 실측값으로 교정한다. (SERVICE_RULES 0번 원칙)
+    """
+    watch_key = "watch_items" if "watch_items" in analysis else "watchpoints"
+    watch = analysis.get(watch_key)
+    if not isinstance(watch, list):
+        return
+    target = next(
+        (it for it in watch
+         if isinstance(it, dict) and isinstance(it.get("levels"), list) and it["levels"]),
+        None,
+    )
+    if target is None:
+        return
+    idx = _fetch_kospi_index_levels()
+    if "error" in idx:
+        warnings.append(f"코스피 핵심 레벨 실측 실패 — LLM 값 유지: {idx['error']}")
+        return
+    fmt = lambda n: f"{int(round(n)):,}"
+    old = {lv.get("label"): lv.get("num") for lv in target["levels"]}
+    for lv in target["levels"]:
+        if lv.get("cls") == "dn" or lv.get("label") == "지지":
+            lv.update(label="지지", num=fmt(idx["support"]), cls="dn")
+        elif lv.get("cls") == "up" or lv.get("label") == "저항":
+            lv.update(label="저항", num=fmt(idx["resistance"]), cls="up")
+    corrections.append(
+        f"코스피 핵심 레벨 실측 주입 (지지 {old.get('지지')}→{fmt(idx['support'])}, "
+        f"저항 {old.get('저항')}→{fmt(idx['resistance'])}; 현재 지수 {fmt(idx['price'])})"
+    )
+
+
 def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
     """픽된 종목의 실측 데이터를 fetch해 analysis·latest(candidate)에 주입한다.
     Returns: latest가 변경됐는지(bool).
@@ -816,6 +884,8 @@ def validate(analysis, latest, btype):
             blocks.append(f"reasons가 {len(kept)}개로 과소 (최소 {REASONS_MIN})")
     if isinstance(a.get("watch_items"), list):
         a["watch_items"], _ = _filter_list_prose(a["watch_items"], "watch_items", corrections)
+    if btype == "kospi":
+        inject_kospi_index_levels(a, corrections, warnings)
     sf = a.get("sector_focus")
     if isinstance(sf, dict):
         if isinstance(sf.get("paragraphs"), list):
