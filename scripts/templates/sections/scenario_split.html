@@ -1,0 +1,20 @@
+{# 시나리오 분기 형식 — 상승/하락 대비 2컬럼 (모든 브리핑 타입 공용) #}
+<div class="sc-card">
+  <div class="sc-head">{{ reason_title }}</div>
+  <div class="sc-summary">{{ sc_summary | safe }}</div>
+  <div class="sc-cols">
+    <div class="sc-col">
+      <div class="sc-tag up">{{ sc_left_label }}</div>
+      {% for item in sc_left_items %}
+      <div class="sc-row"><div class="sc-dot up"></div><span>{{ item | safe }}</span></div>
+      {% endfor %}
+    </div>
+    <div class="sc-col">
+      <div class="sc-tag dn">{{ sc_right_label }}</div>
+      {% for item in sc_right_items %}
+      <div class="sc-row"><div class="sc-dot dn"></div><span>{{ item | safe }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="sc-footer">{{ sc_footer | safe }}</div>
+</div>
