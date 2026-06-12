@@ -14,6 +14,8 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import urllib.request
+
 import pytz
 import yfinance as yf
 
@@ -45,21 +47,54 @@ def save_briefings(data: dict) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def get_kospi_close_vs_prev_close(date_str: str) -> tuple | None:
-    """Returns (close_price, prev_close, change_pct) for the given date using ^KS11."""
-    target = datetime.strptime(date_str, "%Y-%m-%d")
-    start = (target - timedelta(days=7)).strftime("%Y-%m-%d")
-    end = (target + timedelta(days=2)).strftime("%Y-%m-%d")
-    hist = yf.Ticker("^KS11").history(start=start, end=end, interval="1d")
-    if hist.empty or len(hist) < 2:
-        return None
-    rows = list(hist.iterrows())
-    for i, (idx, row) in enumerate(rows):
-        if (idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]) == date_str and i > 0:
-            prev_close = float(rows[i - 1][1]["Close"])
-            if prev_close == 0:
-                return None
-            close_price = float(row["Close"])
-            return close_price, prev_close, (close_price - prev_close) / prev_close * 100
+    """Returns (close_price, prev_close, change_pct) for the given date.
+    1순위: 네이버 지수 일봉 API, 2순위: yfinance ^KS11.
+    """
+    result = _kospi_from_naver(date_str)
+    if result is not None:
+        return result
+    # yfinance 폴백
+    try:
+        target = datetime.strptime(date_str, "%Y-%m-%d")
+        start = (target - timedelta(days=7)).strftime("%Y-%m-%d")
+        end = (target + timedelta(days=2)).strftime("%Y-%m-%d")
+        hist = yf.Ticker("^KS11").history(start=start, end=end, interval="1d")
+        if not hist.empty and len(hist) >= 2:
+            rows = list(hist.iterrows())
+            for i, (idx, row) in enumerate(rows):
+                if (idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]) == date_str and i > 0:
+                    prev_close = float(rows[i - 1][1]["Close"])
+                    if prev_close == 0:
+                        return None
+                    close_price = float(row["Close"])
+                    return close_price, prev_close, (close_price - prev_close) / prev_close * 100
+    except Exception:
+        pass
+    return None
+
+
+def _kospi_from_naver(date_str: str) -> tuple | None:
+    """네이버 코스피 지수 일봉 API로 (close, prev_close, change_pct) 반환."""
+    try:
+        target = datetime.strptime(date_str, "%Y-%m-%d")
+        start_dt = (target - timedelta(days=10)).strftime("%Y%m%d") + "000000"
+        end_dt = (target + timedelta(days=2)).strftime("%Y%m%d") + "235959"
+        url = (
+            f"https://api.stock.naver.com/chart/domestic/index/KOSPI/day"
+            f"?startDateTime={start_dt}&endDateTime={end_dt}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        rows = sorted(rows, key=lambda r: r["localDate"])
+        for i, row in enumerate(rows):
+            if row["localDate"] == date_str.replace("-", "") and i > 0:
+                prev_close = float(rows[i - 1]["closePrice"])
+                close_price = float(row["closePrice"])
+                if prev_close == 0:
+                    return None
+                return close_price, prev_close, (close_price - prev_close) / prev_close * 100
+    except Exception:
+        pass
     return None
 
 
