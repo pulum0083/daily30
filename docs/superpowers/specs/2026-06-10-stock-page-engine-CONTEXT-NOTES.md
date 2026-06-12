@@ -35,9 +35,10 @@ git pull
 ## 완료된 것
 
 - [x] 설계 스펙 작성·커밋 (Phase 1 + 프로토타입 확정 + 하이브리드 랭킹 산식)
-- [x] 목업 6종: home, stock-detail, sector, search-overlay, hybrid-ranking, flow-clickable
+- [x] 목업 7종: home, stock-detail, etf-detail, sector, search-overlay, hybrid-ranking, flow-clickable
 - [x] IA·GNB 탭·라우트·진입경로 정의
 - [x] AI 뱃지 hover 툴팁(2티어 의미 설명)
+- [x] ETF 상세 페이지 목업 (`etf-detail.html`) — 구성종목·섹터비중 도넛을 메인에, 유사ETF 보수 비교를 사이드바에. ETF는 AI 픽 미적용·신호만. `flow-clickable.html`의 ETF 섹션 행에서 `go('etf-detail')`로 연결.
 
 ## 다음 단계 (남은 일)
 

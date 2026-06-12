@@ -80,12 +80,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 /* detail 2-col */
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
-.hero2{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:16px 18px;margin-bottom:12px;}
-.hero2 .top{display:flex;justify-content:space-between;align-items:flex-start;}
+.hero2{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);margin-bottom:12px;overflow:hidden;}
+.hero2 .top{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px 0;}
 .hero2 .hn{font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px;}
 .chip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);cursor:pointer;}
 .hero2 .meta{font-size:12px;color:var(--muted);margin-top:5px;}
 .hero2 .px{font-size:21px;font-weight:800;text-align:right;}.hero2 .cg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--up-bg);color:var(--up);margin-top:5px;display:inline-block;}
+/* chart tabs */
+.ctabs{display:flex;gap:2px;padding:12px 16px 0;}
+.ctabs a{font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;color:var(--muted);cursor:pointer;user-select:none;}
+.ctabs a.on{background:var(--inset);color:var(--ink);}
+.cpane{padding:0;}
+.cpane.hidden{display:none;}
+.chart-wrap{padding:8px 14px 12px;}
+.chart-svg{width:100%;height:80px;display:block;overflow:visible;}
+.taxis{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:10px;color:var(--muted);font-weight:600;}
 .sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;}
 .sc__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
 .sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
@@ -131,6 +140,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
 .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
 .pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+/* etf-detail donut + holdings */
+.donutwrap{display:flex;gap:20px;align-items:center;padding:14px 16px;}
+.donut{width:120px;height:120px;border-radius:50%;flex-shrink:0;position:relative;
+  background:conic-gradient(#006EFF 0 111.6deg,#16A34A 0 151.2deg,#B7791F 0 183.6deg,#2775ED 0 212.4deg,#9333EA 0 234deg,#9CA3AF 0 360deg);}
+.donut::after{content:'';position:absolute;inset:20px;background:var(--soft);border-radius:50%;}
+.donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;}
+.donut .ctr b{font-size:16px;font-weight:800;}.donut .ctr span{font-size:10px;color:var(--muted);}
+.sec-legend{display:flex;flex-direction:column;gap:8px;flex:1;}
+.sec-legend .lg{display:flex;align-items:center;gap:8px;font-size:12px;}
+.sec-legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.sec-legend .pc{margin-left:auto;font-weight:800;}
+.hold{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}
+.hold:last-child{border-bottom:none;}.hold:hover{background:var(--primary-bg);}
+.hold .rk{font-size:11px;font-weight:700;color:var(--muted);width:16px;text-align:center;flex-shrink:0;}
+.hold .nm{flex:1;font-size:13px;font-weight:600;}.hold .nm small{display:block;color:var(--muted);font-weight:500;font-size:10px;margin-top:1px;}
+.hold .chg{font-size:12px;font-weight:700;width:50px;text-align:right;}
+.wt{width:88px;text-align:right;}.wt b{font-size:13px;font-weight:800;}
+.wt .bar2{height:4px;border-radius:999px;background:var(--inset);margin-top:4px;overflow:hidden;}.wt .bar2>i{display:block;height:100%;background:var(--primary);}
+.spec-tbl{display:flex;flex-direction:column;}
+.spec-tbl .it{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:13px;}
+.spec-tbl .it:last-child{border-bottom:none;}
+.spec-tbl .k{color:var(--muted);}.spec-tbl .v{font-weight:700;}
+.etf-pbadge{display:inline-flex;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--inset);color:var(--muted);}
 
 /* overlay */
 .ov{display:none;position:fixed;inset:0;z-index:50;background:rgba(19,21,26,.42);align-items:flex-start;justify-content:center;padding-top:80px;}.ov.on{display:flex;}
@@ -203,33 +236,180 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <hr class="etf-divider">
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s">AI 픽 미적용 · 신호만 · 06-11</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar vol" style="width:31%"></div><span class="barval num">570만주</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 차이나CSI300</b><small class="num">192090 · 중국</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div><span class="barval num">400만주</span></div><div class="ai"><span class="ax">—</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar vol" style="width:31%"></div><span class="barval num">570만주</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 차이나CSI300</b><small class="num">192090 · 중국</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div><span class="barval num">400만주</span></div><div class="ai"><span class="ax">—</span></div></a>
       <a class="more" onclick="go('ranking')">ETF 전체 →</a>
     </div>
     <div class="cols2">
       <div class="block">
         <div class="block__h"><span class="block__t etf"><span class="ic">🚀</span>ETF 상승 톱</span><span class="block__s">등락률 기준</span></div>
-        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 반도체</b><small class="num">091160 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+3.8%</span></div><div class="ai"><span class="ais">신호 65</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 2차전지테마</b><small class="num">305540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:79%"></div><span class="barval up num">+3.0%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국필반도체</b><small class="num">381180 · 미국반도체</small></div><div class="barwrap"><div class="bar up" style="width:55%"></div><span class="barval up num">+2.1%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 200선물인버스2X</b><small class="num">252670 · 인버스</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="aid">신호 40</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 미국S&P500</b><small class="num">360750 · 미국</small></div><div class="barwrap"><div class="bar up" style="width:26%"></div><span class="barval up num">+1.0%</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 반도체</b><small class="num">091160 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+3.8%</span></div><div class="ai"><span class="ais">신호 65</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 2차전지테마</b><small class="num">305540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:79%"></div><span class="barval up num">+3.0%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국필반도체</b><small class="num">381180 · 미국반도체</small></div><div class="barwrap"><div class="bar up" style="width:55%"></div><span class="barval up num">+2.1%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 200선물인버스2X</b><small class="num">252670 · 인버스</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="aid">신호 40</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 미국S&P500</b><small class="num">360750 · 미국</small></div><div class="barwrap"><div class="bar up" style="width:26%"></div><span class="barval up num">+1.0%</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
         <a class="more" onclick="go('ranking')">ETF 상승 전체 →</a>
       </div>
       <div class="block">
         <div class="block__h"><span class="block__t etf"><span class="ic">📉</span>ETF 하락 톱</span><span class="block__s">등락률 기준</span></div>
-        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−3.2%</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 200IT레버리지</b><small class="num">243890 · IT레버리지</small></div><div class="barwrap"><div class="bar dn" style="width:74%"></div><span class="barval dn num">−2.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>KODEX 바이오</b><small class="num">143460 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:44%"></div><span class="barval dn num">−1.4%</span></div><div class="ai"><span class="ax">—</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>TIGER 200선물인버스</b><small class="num">215580 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:28%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
-        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>KODEX 헬스케어</b><small class="num">266410 · 헬스케어</small></div><div class="barwrap"><div class="bar dn" style="width:16%"></div><span class="barval dn num">−0.5%</span></div><div class="ai"><span class="ais">신호 53</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−3.2%</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 200IT레버리지</b><small class="num">243890 · IT레버리지</small></div><div class="barwrap"><div class="bar dn" style="width:74%"></div><span class="barval dn num">−2.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>KODEX 바이오</b><small class="num">143460 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:44%"></div><span class="barval dn num">−1.4%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>TIGER 200선물인버스</b><small class="num">215580 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:28%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>KODEX 헬스케어</b><small class="num">266410 · 헬스케어</small></div><div class="barwrap"><div class="bar dn" style="width:16%"></div><span class="barval dn num">−0.5%</span></div><div class="ai"><span class="ais">신호 53</span></div></a>
         <a class="more" onclick="go('ranking')">ETF 하락 전체 →</a>
       </div>
     </div>
+  </div>
+
+  <!-- ===== ETF DETAIL (KODEX 200) ===== -->
+  <div class="screen" id="etf-detail">
+    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
+    <div class="grid">
+      <div>
+        <div class="hero2" id="hero-etf">
+          <div class="top">
+            <div><div class="hn">KODEX 200 <span class="chip">코스피200 추종</span></div><div class="meta"><span class="num">069500</span> · 삼성자산운용 · ETF · 06-12 종가</div></div>
+            <div style="text-align:right"><div class="px num">36,610</div><div class="cg num">▲ +0.71%</div></div>
+          </div>
+          <div class="ctabs">
+            <a class="on" onclick="switchTab('etf','intra',this)">당일 장중</a>
+            <a onclick="switchTab('etf','20d',this)">20일</a>
+            <a onclick="switchTab('etf','3m',this)">3개월</a>
+          </div>
+          <!-- 당일 장중 — 코스피200 패턴 (올라갔다 후반 조정, 소폭 양봉) -->
+          <div class="cpane chart-wrap" id="etf-intra">
+            <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-up" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2775ED" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#2775ED" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- 시가 기준선 -->
+              <line x1="0" y1="46" x2="740" y2="46" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+              <!-- area fill -->
+              <path d="M0,46 L57,44 L114,40 L171,52 L228,44 L285,36 L342,30 L399,22 L456,18 L513,12 L570,24 L627,32 L684,26 L740,24 L740,76 L0,76 Z" fill="url(#grad-etf-up)"/>
+              <!-- 라인 -->
+              <polyline fill="none" stroke="#2775ED" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,46 57,44 114,40 171,52 228,44 285,36 342,30 399,22 456,18 513,12 570,24 627,32 684,26 740,24"/>
+              <!-- 저점 -->
+              <circle cx="171" cy="52" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <text x="180" y="62" font-size="9.5" fill="#2775ED" font-family="Pretendard,sans-serif" font-weight="700">저점 36,280</text>
+              <!-- 고점 -->
+              <circle cx="513" cy="12" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+              <text x="470" y="10" font-size="9.5" fill="#E03131" font-family="Pretendard,sans-serif" font-weight="700">고점 36,720</text>
+            </svg>
+            <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+          </div>
+          <!-- 20일 -->
+          <div class="cpane chart-wrap hidden" id="etf-20d">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-20" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,44 L62,46 L123,40 L185,42 L246,37 L308,38 L370,33 L431,35 L493,28 L555,31 L616,24 L678,22 L740,17 L740,56 L0,56 Z" fill="url(#grad-etf-20)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,44 62,46 123,40 185,42 246,37 308,38 370,33 431,35 493,28 555,31 616,24 678,22 740,17"/>
+            </svg>
+            <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
+          </div>
+          <!-- 3개월 -->
+          <div class="cpane chart-wrap hidden" id="etf-3m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-3m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,48 L90,52 L160,46 L220,50 L280,42 L340,36 L400,28 L460,32 L520,24 L580,18 L640,14 L700,10 L740,8 L740,56 L0,56 Z" fill="url(#grad-etf-3m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 160,46 220,50 280,42 340,36 400,28 460,32 520,24 580,18 640,14 700,10 740,8"/>
+            </svg>
+            <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+        </div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">지수 추세 · 참고용</span><span class="sc__s">06-12 종가</span></div><div class="scb">
+          <span class="etf-pbadge">● 중립~강세 · 코스피200 추종</span>
+          <div class="pg" style="background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;"><div class="n" style="left:62%;background:var(--muted);"></div></div>
+          <div class="pgs"><span>약세</span><span>중립</span><span>강세</span></div>
+          <p class="scen">코스피200 지수를 그대로 추종하는 패시브 ETF예요. 개별 종목 예측이 아닌 <b>지수 방향 참고용</b>이에요. 현재 코스피200은 20일선 위에서 완만한 상승 흐름이에요.</p>
+          <div class="tiles" style="margin-top:14px;">
+            <div class="tile"><div class="l">추적지수</div><div class="v num up">+0.71%</div></div>
+            <div class="tile"><div class="l">거래량</div><div class="v num">1,840만</div></div>
+            <div class="tile"><div class="l">거래대금</div><div class="v num">6,740억</div></div>
+            <div class="tile"><div class="l">52주 위치</div><div class="v num">81%</div></div>
+          </div>
+        </div></div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">섹터 비중 <span class="phase">PHASE 2</span></span><span class="sc__s">구성종목 기준</span></div>
+          <div class="note">⚠ ETF 구성종목·비중 데이터 신규 수집 필요 (KRX·운용사 일별 공시)</div>
+          <div class="donutwrap">
+            <div class="donut"><div class="ctr"><b class="num">200</b><span>종목</span></div></div>
+            <div class="sec-legend">
+              <div class="lg"><span class="dot" style="background:#006EFF"></span><span>반도체</span><span class="pc num">31%</span></div>
+              <div class="lg"><span class="dot" style="background:#16A34A"></span><span>2차전지</span><span class="pc num">11%</span></div>
+              <div class="lg"><span class="dot" style="background:#B7791F"></span><span>자동차</span><span class="pc num">9%</span></div>
+              <div class="lg"><span class="dot" style="background:#2775ED"></span><span>금융</span><span class="pc num">8%</span></div>
+              <div class="lg"><span class="dot" style="background:#9333EA"></span><span>인터넷</span><span class="pc num">6%</span></div>
+              <div class="lg"><span class="dot" style="background:#9CA3AF"></span><span>기타</span><span class="pc num">35%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel"><div class="panel__h" style="justify-content:space-between;">구성종목 TOP10 <span class="phase">PHASE 2</span><span style="font-size:11px;color:var(--muted);font-weight:500;">전체 200종목</span></div>
+          <div class="note">⚠ 구성종목 신규 수집 필요 · 클릭 시 해당 종목 페이지로 이동</div>
+          <a class="hold" onclick="go('detail')"><span class="rk num">1</span><span class="nm">삼성전자<small class="num">005930</small></span><span class="chg up num">+1.2%</span><span class="wt"><b class="num">28.1%</b><div class="bar2"><i style="width:100%"></i></div></span></a>
+          <a class="hold" onclick="go('detail')"><span class="rk num">2</span><span class="nm">SK하이닉스<small class="num">000660</small></span><span class="chg up num">+3.4%</span><span class="wt"><b class="num">6.2%</b><div class="bar2"><i style="width:22%"></i></div></span></a>
+          <a class="hold"><span class="rk num">3</span><span class="nm">LG에너지솔루션<small class="num">373220</small></span><span class="chg dn num">−0.8%</span><span class="wt"><b class="num">3.1%</b><div class="bar2"><i style="width:11%"></i></div></span></a>
+          <a class="hold"><span class="rk num">4</span><span class="nm">삼성바이오로직스<small class="num">207940</small></span><span class="chg up num">+0.4%</span><span class="wt"><b class="num">2.9%</b><div class="bar2"><i style="width:10%"></i></div></span></a>
+          <a class="hold"><span class="rk num">5</span><span class="nm">현대차<small class="num">005380</small></span><span class="chg up num">+2.2%</span><span class="wt"><b class="num">2.4%</b><div class="bar2"><i style="width:9%"></i></div></span></a>
+          <a class="hold"><span class="rk num">6</span><span class="nm">기아<small class="num">000270</small></span><span class="chg up num">+1.1%</span><span class="wt"><b class="num">1.9%</b><div class="bar2"><i style="width:7%"></i></div></span></a>
+          <a class="hold"><span class="rk num">7</span><span class="nm">셀트리온<small class="num">068270</small></span><span class="chg dn num">−0.4%</span><span class="wt"><b class="num">1.8%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">8</span><span class="nm">KB금융<small class="num">105560</small></span><span class="chg up num">+0.6%</span><span class="wt"><b class="num">1.7%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">9</span><span class="nm">NAVER<small class="num">035420</small></span><span class="chg dn num">−0.9%</span><span class="wt"><b class="num">1.6%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">10</span><span class="nm">신한지주<small class="num">055550</small></span><span class="chg up num">+0.5%</span><span class="wt"><b class="num">1.5%</b><div class="bar2"><i style="width:5%"></i></div></span></a>
+          <a class="more">구성종목 전체 →</a>
+        </div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">직전 종가 기준</span></div><div class="scb">
+          <div class="ma"><span class="l">20일선</span><div class="tr"><div class="z"></div><div class="f" style="width:6%;"></div></div><span class="p">+1.8%</span></div>
+          <div class="ma"><span class="l">200일선</span><div class="tr"><div class="z"></div><div class="f" style="width:17%;"></div></div><span class="p">+12.3%</span></div>
+          <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">1,840만</span><span class="s">거래량</span></div><div class="c"><span class="v num">6,740억</span><span class="s">거래대금</span></div></div>
+        </div></div>
+      </div>
+
+      <div>
+        <div class="panel"><div class="panel__h">ETF 기본정보 <span class="phase">PHASE 2</span></div>
+          <div class="note">⚠ 운용사 메타데이터 신규 수집 필요</div>
+          <div class="spec-tbl">
+            <div class="it"><span class="k">추적지수</span><span class="v">코스피200</span></div>
+            <div class="it"><span class="k">운용사</span><span class="v">삼성자산운용</span></div>
+            <div class="it"><span class="k">총보수 (연)</span><span class="v num">0.0099%</span></div>
+            <div class="it"><span class="k">순자산 (AUM)</span><span class="v num">6.8조</span></div>
+            <div class="it"><span class="k">상장일</span><span class="v num">2002-10-14</span></div>
+            <div class="it"><span class="k">분배주기</span><span class="v">분기</span></div>
+            <div class="it"><span class="k">iNAV 괴리율</span><span class="v num">+0.02%</span></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel__h" style="justify-content:space-between;">유사 ETF · 코스피200<span style="font-size:11px;color:var(--muted);font-weight:500;">보수 비교</span></div>
+          <a class="srow"><span class="n2">TIGER 200 <small class="num">102110</small></span><span class="c num" style="color:var(--muted);">0.05%</span></a>
+          <a class="srow"><span class="n2">KBSTAR 200 <small class="num">148020</small></span><span class="c num" style="color:#16A34A;font-weight:800;">0.017%</span></a>
+          <a class="srow"><span class="n2">ACE 200 <small class="num">105190</small></span><span class="c num" style="color:var(--muted);">0.09%</span></a>
+          <a class="srow"><span class="n2">HANARO 200 <small class="num">293180</small></span><span class="c num" style="color:var(--muted);">0.036%</span></a>
+          <div class="note" style="color:var(--muted);background:var(--soft);">총보수는 낮을수록 유리해요. 같은 지수를 추종하면 수익률 차이는 크지 않아요.</div>
+        </div>
+        <div class="panel"><div class="panel__h">신호 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></div>
+          <div style="padding:16px;"><div style="font-size:16px;font-weight:800;margin:4px 0;">최근 20회 중 <b style="color:#16A34A;">12회 · 60%</b></div><div style="font-size:11px;color:var(--muted);line-height:1.6;">지수 추세 신호 방향 적중률. day-1부터 기록 시작.</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="disc">※ 시세·거래량·기술지표는 직전 거래일 종가 기준 실측값이에요. PHASE 2 항목은 데이터 파이프라인 구축 후 실측으로 채워져요. ETF는 개별 종목 AI 픽 대상이 아니며 지수 추세는 참고용이에요.</p>
   </div>
 
   <!-- ===== DETAIL (SK하이닉스) ===== -->
@@ -237,10 +417,69 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
     <div class="grid">
       <div>
-        <div class="hero2"><div class="top">
-          <div><div class="hn">SK하이닉스 <span class="chip" onclick="go('sector')">반도체</span></div><div class="meta"><span class="num">000660</span> · KOSPI · 06-11 종가</div></div>
-          <div><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
-        </div></div>
+        <div class="hero2" id="hero-stock">
+          <div class="top">
+            <div><div class="hn">SK하이닉스 <span class="chip" onclick="go('sector')">반도체</span></div><div class="meta"><span class="num">000660</span> · KOSPI · 06-12 종가</div></div>
+            <div style="text-align:right"><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
+          </div>
+          <div class="ctabs">
+            <a class="on" onclick="switchTab('stock','intra',this)">당일 장중</a>
+            <a onclick="switchTab('stock','20d',this)">20일</a>
+            <a onclick="switchTab('stock','3m',this)">3개월</a>
+          </div>
+          <!-- 당일 장중 area 차트 -->
+          <div class="cpane chart-wrap" id="stock-intra">
+            <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- 시가 기준선 (dashed) -->
+              <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+              <!-- area fill -->
+              <path d="M0,62 L40,66 L100,60 L160,55 L220,57 L285,46 L342,40 L399,35 L456,27 L513,13 L570,20 L627,26 L684,23 L740,22 L740,76 L0,76 Z" fill="url(#grad-up)"/>
+              <!-- 라인 -->
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,62 40,66 100,60 160,55 220,57 285,46 342,40 399,35 456,27 513,13 570,20 627,26 684,23 740,22"/>
+              <!-- 저점 마커 -->
+              <circle cx="40" cy="66" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <text x="50" y="70" font-size="9.5" fill="#2775ED" font-family="Pretendard,sans-serif" font-weight="700">저점 239,500</text>
+              <!-- 고점 마커 -->
+              <circle cx="513" cy="13" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+              <text x="470" y="11" font-size="9.5" fill="#E03131" font-family="Pretendard,sans-serif" font-weight="700">고점 250,500</text>
+            </svg>
+            <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+          </div>
+          <!-- 20일 스파크라인 -->
+          <div class="cpane chart-wrap hidden" id="stock-20d">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-20" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-20)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
+            </svg>
+            <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
+          </div>
+          <!-- 3개월 -->
+          <div class="cpane chart-wrap hidden" id="stock-3m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-3m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,52 L90,56 L160,50 L220,44 L280,48 L340,38 L400,30 L460,34 L520,22 L580,16 L640,12 L700,8 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-3m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
+            </svg>
+            <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+        </div>
         <div class="sc"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30</span></div><div class="scb">
           <span class="pbadge">▲ 상승 우위 · MA20 상향 돌파</span>
           <div class="pg"><div class="n" style="left:78%"></div></div><div class="pgs"><span>하락 우위</span><span>중립</span><span>상승 우위</span></div>
@@ -349,6 +588,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 <script>
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
+function switchTab(hero,tab,el){
+  const prefix=hero+'-';
+  document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+  ['intra','20d','3m'].forEach(t=>{
+    const p=document.getElementById(prefix+t);
+    if(p) p.classList.toggle('hidden',t!==tab);
+  });
+}
 
 /* 랭킹 더보기 */
 const RANK_DATA=[
