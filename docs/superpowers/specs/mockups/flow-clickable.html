@@ -225,51 +225,68 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
 .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
 
-/* ── 배당 인컴 설계기 ── */
+/* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
+/* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
-.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
-.sim__h{padding:14px 18px;border-bottom:1px solid var(--hair);background:#FFFBEB;}
-.sim__h .q{font-size:15px;font-weight:800;color:#92400E;}
-.sim__h .q small{font-size:11px;font-weight:500;color:var(--muted);margin-left:6px;}
-.simrow{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--hair);}
-.simrow .snm{flex:1;font-size:13px;font-weight:600;min-width:0;}
-.simrow .snm .mk{font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:6px;background:var(--inset);color:var(--muted);}
-.simrow .samt{width:112px;flex-shrink:0;}
-.simrow .samt input{width:100%;border:1px solid var(--hair);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;text-align:right;}
-.simrow .sinc{width:100px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:13px;font-weight:800;color:#B7791F;}.simrow .sinc small{display:block;font-size:9px;color:var(--muted);}
+.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
+.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:#FFFBEB;}
+.sim__h .q{font-size:15px;font-weight:600;color:#92400E;}
+.sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
+.simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
+.simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
+.simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
+.simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
+.simrow .qty span{font-size:12px;color:var(--muted);}
+.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:#B7791F;}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
 .simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
-.sim__add{display:flex;gap:8px;padding:12px 18px;background:var(--soft);border-bottom:1px solid var(--hair);flex-wrap:wrap;}
-.sim__add select,.sim__add input{border:1px solid var(--hair);border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;}
-.sim__add select{flex:1;min-width:200px;}.sim__add input{width:130px;text-align:right;}
-.sim__add a{font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;background:#B7791F;color:#fff;cursor:pointer;}
-.sim__target{display:flex;align-items:center;gap:8px;padding:13px 18px;font-size:13px;font-weight:700;color:#78350F;border-bottom:1px solid var(--hair);background:#FFFBEB;}
-.sim__target input{width:84px;border:1px solid #FDE68A;border-radius:7px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;font-weight:700;}
-.sim__out{padding:16px 18px;}
+.sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
+.combo{position:relative;flex:1;min-width:0;}
+.combo input{width:100%;border:1px solid var(--hair);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;}
+.combo input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,110,255,.12);}
+.combo__list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.12);max-height:264px;overflow-y:auto;}
+.combo__list.on{display:block;}
+.combo__hd{font-size:11px;font-weight:600;color:var(--muted);padding:8px 12px 4px;letter-spacing:.4px;}
+.combo__item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;}
+.combo__item:hover,.combo__item.sel{background:var(--primary-bg);}
+.combo__item .ci-nm{flex:1;font-weight:500;min-width:0;}
+.combo__item .ci-nm small{color:var(--muted);font-weight:400;margin-left:5px;font-size:11px;}
+.combo__item .ci-mk{font-size:9px;font-weight:600;padding:1px 5px;border-radius:5px;background:var(--inset);color:var(--muted);}
+.combo__item .ci-y{font-size:12px;font-weight:600;color:#B7791F;}
+.combo__none{padding:12px;font-size:12px;color:var(--muted);text-align:center;}
+.qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
+.qty span{font-size:13px;color:var(--muted);font-weight:500;}
+.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#B7791F;color:#fff;cursor:pointer;white-space:nowrap;}
+.sim__target{display:flex;align-items:center;gap:8px;padding:14px 20px;font-size:14px;font-weight:500;color:#78350F;border-bottom:1px solid var(--hair);background:#FFFBEB;}
+.sim__target input{width:84px;border:1px solid #FDE68A;border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
+.sim__out{padding:18px 20px;}
 .sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
-.sim-kpi .k{flex:1;min-width:110px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
-.sim-kpi .k .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
-.sim-kpi .k .v{font-size:19px;font-weight:800;}
-.sim-warn{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:11px 14px;font-size:12px;color:#7F1D1D;line-height:1.7;margin-bottom:10px;}
-.sim-warn b{font-weight:800;}
-.sim-tax{border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;line-height:1.6;margin-bottom:10px;}
-.sim-tax.safe{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.sim-tax.warn{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
-.sim-fill{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 14px;font-size:12px;color:#0C4A6E;line-height:1.7;}
-.sim-fill b{font-weight:800;}
-.hbdg{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
-.hbdg.ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.hbdg.warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
-.hbdg.bad{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
-.irow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
+.sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.sim-kpi .k .v{font-size:20px;font-weight:600;}
+.sim-warn{background:#fff5f7;border:1px solid #f33942;border-radius:10px;padding:12px 14px;font-size:13px;color:#b3262d;line-height:1.7;margin-bottom:10px;}
+.sim-warn b{font-weight:600;color:#f33942;}
+.sim-tax{border-radius:10px;padding:12px 14px;font-size:13px;font-weight:500;line-height:1.6;margin-bottom:10px;}
+.sim-tax.safe{background:#ecfeea;color:#00ae1a;border:1px solid #00d954;}
+.sim-tax.warn{background:#fff5f7;color:#f33942;border:1px solid #f33942;}
+.sim-fill{background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:13px;color:#0b4ea8;line-height:1.7;}
+.sim-fill b{font-weight:600;}
+.hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
+.hbdg.ok{background:#ecfeea;color:#00ae1a;}
+.hbdg.warn{background:#fff9e3;color:#eb8e02;}
+.hbdg.bad{background:#fff5f7;color:#f33942;}
+/* 사이드바 인컴 ETF 랭킹 행 */
+.irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
 .irow:last-child{border-bottom:none;}.irow:hover{background:#FFFBEB;}
-.irow .inm{flex:1;min-width:0;}.irow .inm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.irow .inm small{font-size:10px;color:var(--muted);}
-.irow .iyield{width:64px;text-align:right;flex-shrink:0;}.irow .iyield b{font-size:16px;font-weight:800;color:#B7791F;}.irow .iyield small{display:block;font-size:9px;color:var(--muted);}
-.irow .iret{width:104px;text-align:right;flex-shrink:0;font-size:10px;color:var(--muted);line-height:1.5;}
-.irow .iret b{font-size:12px;font-weight:800;color:var(--ink);}
-.irow .ihealth{width:58px;text-align:right;flex-shrink:0;}
-.honest{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+.irow .it{display:flex;align-items:center;gap:8px;}
+.irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
+.irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
+.irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
+.irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
+.honest{background:#fff5f7;border:1px solid #f33942;border-radius:12px;padding:14px 18px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:20px;flex-shrink:0;line-height:1.4;}
-.honest .tx3{font-size:12px;color:#7F1D1D;line-height:1.7;}.honest .tx3 b{font-weight:800;}
+.honest .tx3{font-size:13px;color:#b3262d;line-height:1.7;}.honest .tx3 b{font-weight:600;color:#f33942;}
 </style>
 </head>
 <body>
@@ -679,47 +696,49 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <div class="screen" id="income">
     <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
     <div class="phead">
-      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1조+ 배당·커버드콜 ETF · 목표 인컴 → 조합 + 분배 품질 + 세금 · 2026-06-13</div></div>
+      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1조+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
 
-    <!-- 인컴 시뮬레이터 (보유 입력 → 계산) -->
-    <div class="sim">
-      <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
-      <div id="sim-rows"></div>
-      <div class="sim__add">
-        <select id="sim-pick"></select>
-        <input id="sim-amt" type="number" value="1000" placeholder="만원">
-        <a onclick="simAdd()">+ 추가</a>
-      </div>
-      <div class="sim__target">목표 월 수령액 <input id="sim-target" type="number" value="100" oninput="simOut()"> 만원</div>
-      <div class="sim__out" id="sim-out"></div>
-    </div>
+    <div class="grid">
+      <!-- 메인: 인컴 시뮬레이터 -->
+      <div>
+        <div class="sim">
+          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
+          <div id="sim-rows"></div>
+          <div class="sim__add">
+            <div class="combo">
+              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱10 기본" autocomplete="off"
+                     onfocus="comboOpen()" oninput="comboFilter()" onblur="comboClose()">
+              <div class="combo__list" id="combo-list"></div>
+            </div>
+            <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
+            <a onclick="simAdd()">+ 추가</a>
+          </div>
+          <div class="sim__target">목표 월 수령액 <input id="sim-target" type="number" value="100" oninput="simOut()"> 만원</div>
+          <div class="sim__out" id="sim-out"></div>
+        </div>
 
-    <!-- 정직 배너 -->
-    <div class="honest">
-      <span class="ic3">⚠️</span>
-      <div class="tx3"><b>분배율은 수익률이 아니에요.</b> 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어요. 분배율이 높아도 가격이 녹으면 실제로 번 게 아니에요. 아래 <b>건전성 뱃지</b>가 "분배율 대비 실제 총수익"을 비교해줘요.</div>
-    </div>
+        <!-- 정직 배너 -->
+        <div class="honest">
+          <span class="ic3">⚠️</span>
+          <div class="tx3"><b>분배율은 수익률이 아니에요.</b> 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어요. 분배율이 높아도 가격이 녹으면 실제로 번 게 아니에요. 오른쪽 <b>건전성 뱃지</b>가 "분배율 대비 실제 총수익"을 비교해줘요.</div>
+        </div>
+        <p class="disc">※ 분배율·총수익·순자산은 직전 기준 실측값이에요. 건전성은 "총수익 − 분배율"로 추정한 가격 변화예요(원금분배 명시 데이터 대체). 세금은 예상치이며 개별 상황에 따라 달라져요. 투자 권유가 아니에요.</p>
+      </div>
 
-    <!-- 전체 인컴 ETF -->
-    <div class="phead" style="margin-top:6px;">
-      <div><h1 style="font-size:16px;">인컴 ETF 전체 · 순자산 1조+</h1><div class="psub">월배당·커버드콜 ETF · 분배율 vs 실제 총수익 비교</div></div>
-      <div class="stabs" id="isort-tabs">
-        <a class="on" onclick="incomeSort('yield',this)">분배율</a>
-        <a onclick="incomeSort('health',this)">건전성</a>
-        <a onclick="incomeSort('ret1y',this)">총수익</a>
+      <!-- 사이드바: 인컴 ETF 전체 -->
+      <div>
+        <div class="panel">
+          <div class="panel__h" style="justify-content:space-between;">인컴 ETF 전체 · 1조+
+            <div class="stabs" id="isort-tabs">
+              <a class="on" onclick="incomeSort('y',this)">분배율</a>
+              <a onclick="incomeSort('health',this)">건전성</a>
+            </div>
+          </div>
+          <div id="income-rows"></div>
+        </div>
       </div>
     </div>
-    <div class="tbl">
-      <div class="block__h" style="background:var(--soft);">
-        <span class="block__s" style="font-weight:700;flex:1;">ETF</span>
-        <span style="width:64px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">분배율</span>
-        <span style="width:104px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">실제 총수익·침식</span>
-        <span style="width:58px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">건전성</span>
-      </div>
-      <div id="income-rows"></div>
-    </div>
-    <p class="disc">※ 분배율·총수익·순자산은 직전 기준 실측값이에요. 건전성은 "총수익 − 분배율"로 추정한 가격 변화예요(원금분배 명시 데이터 대체). 세금은 예상치이며 개별 상황에 따라 달라져요. 투자 권유가 아니에요.</p>
   </div>
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
@@ -915,80 +934,99 @@ function passiveSort(key,el){
 }
 passiveRender();
 
-/* ── 배당 인컴 설계기 ── */
-const INCOME_DATA=[
-  {code:'458760',name:'ACE 미국배당다우존스',aum:'2.1조',y:3.6,r:19.1,fee:0.01},
-  {code:'458730',name:'TIGER 미국배당+7%프리미엄',aum:'3.9조',y:9.8,r:14.2,fee:0.39},
-  {code:'483280',name:'KODEX 미국배당프리미엄액티브',aum:'1.5조',y:8.5,r:8.0,fee:0.50},
-  {code:'441680',name:'TIGER 미국나스닥100커버드콜',aum:'1.2조',y:11.5,r:6.4,fee:0.37},
-  {code:'472830',name:'SOL 미국30년국채커버드콜',aum:'1.1조',y:12.5,r:2.1,fee:0.25},
-  {code:'476550',name:'TIGER 미국30년국채커버드콜',aum:'1.0조',y:13.0,r:1.9,fee:0.30},
-  {code:'498400',name:'RISE 200위클리커버드콜',aum:'1.3조',y:14.0,r:-2.8,fee:0.30},
+/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+const INCOME_UNIVERSE=[
+  {code:'458730',name:'TIGER 미국배당+7%프리미엄다우존스',aum:3.9,price:13500,y:9.8,r:14.2,mk:'KR'},
+  {code:'458760',name:'ACE 미국배당다우존스',aum:2.1,price:11200,y:3.6,r:19.1,mk:'KR'},
+  {code:'446720',name:'SOL 미국배당다우존스',aum:1.9,price:11800,y:3.5,r:18.0,mk:'KR'},
+  {code:'489250',name:'KODEX 미국배당커버드콜액티브',aum:1.7,price:10800,y:10.2,r:9.5,mk:'KR'},
+  {code:'483280',name:'KODEX 미국배당프리미엄액티브',aum:1.5,price:10500,y:8.5,r:8.0,mk:'KR'},
+  {code:'498400',name:'RISE 200위클리커버드콜',aum:1.3,price:10200,y:14.0,r:-2.8,mk:'KR'},
+  {code:'441680',name:'TIGER 미국나스닥100커버드콜',aum:1.2,price:9800,y:11.5,r:6.4,mk:'KR'},
+  {code:'472160',name:'KODEX 200타겟위클리커버드콜',aum:1.15,price:10000,y:12.0,r:-1.0,mk:'KR'},
+  {code:'476550',name:'TIGER 미국30년국채커버드콜',aum:1.0,price:9300,y:13.0,r:1.9,mk:'KR'},
+  {code:'481280',name:'SOL 미국30년국채커버드콜',aum:1.0,price:9100,y:12.5,r:2.1,mk:'KR'},
+  {code:'466920',name:'SOL 미국배당미국채혼합',aum:0.7,price:10600,y:6.0,r:7.2,mk:'KR'},
+  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
+  {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
+  {code:'QYLD',name:'Global X 나스닥커버드콜 (QYLD)',aum:0,price:24000,y:11.8,r:2.5,mk:'US'},
 ];
+const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
 function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+
+/* 사이드바: 인컴 ETF 전체 (국내 1조+) */
 function incomeRow(d){
-  const [hc,hl,e]=incomeHealth(d);
-  const eTxt=e>=0?`<span style="color:#16A34A">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#E03131">가격 ${e.toFixed(0)}%</span>`;
+  const[hc,hl,e]=incomeHealth(d);
   const rTxt=`${d.r>=0?'+':''}${d.r}%`;
+  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
   return `<a class="irow" onclick="go('etf-detail')">
-    <div class="inm"><b>${d.name}</b><small class="num">${d.code} · 순자산 ${d.aum} · 보수 ${d.fee}%</small></div>
-    <div class="iyield"><b class="num">${d.y}%</b><small>분배율</small></div>
-    <div class="iret"><b class="num">${rTxt}</b> 총수익<br>${eTxt}</div>
-    <div class="ihealth"><span class="hbdg ${hc}">${hl}</span></div>
+    <div class="it"><b>${d.name}</b><span class="hbdg ${hc}">${hl}</span></div>
+    <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
+    <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
   </a>`;
 }
-let iSortKey='yield';
+let iSortKey='y';
 function incomeRender(){
-  let arr=[...INCOME_DATA];
-  if(iSortKey==='yield')arr.sort((a,b)=>b.y-a.y);
-  else if(iSortKey==='ret1y')arr.sort((a,b)=>b.r-a.r);
+  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR'&&d.aum>=1.0);
+  if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
   document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
 }
 function incomeSort(k,el){iSortKey=k;document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');incomeRender();}
 incomeRender();
 
-/* 인컴 시뮬레이터 — 보유(만원) 입력 → 인컴·원금성 경고·종합과세·갭 메우기 */
-const SIM_ETFS={
-  '476550':{name:'TIGER 미국30년국채커버드콜',y:13.0,r:1.9,mk:'KR'},
-  '458760':{name:'ACE 미국배당다우존스',y:3.6,r:19.1,mk:'KR'},
-  '458730':{name:'TIGER 미국배당+7%프리미엄',y:9.8,r:14.2,mk:'KR'},
-  '441680':{name:'TIGER 미국나스닥100커버드콜',y:11.5,r:6.4,mk:'KR'},
-  'JEPI':{name:'JPMorgan 에쿼티프리미엄 (JEPI)',y:7.8,r:9.5,mk:'US'},
-  'SCHD':{name:'Schwab 미국배당 (SCHD)',y:3.5,r:12.0,mk:'US'},
-  'QYLD':{name:'Global X 나스닥커버드콜 (QYLD)',y:11.8,r:2.5,mk:'US'},
-};
-let simHoldings=[{code:'476550',amt:2000},{code:'458760',amt:3000},{code:'JEPI',amt:1500}];
-function simHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
+let simHoldings=[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+function simIncome(h){const d=UNIV[h.code];return h.qty*d.price*d.y/100/10000;}  // 만원/년
 function simRowsRender(){
   document.getElementById('sim-rows').innerHTML=simHoldings.map((h,i)=>{
-    const d=SIM_ETFS[h.code],inc=h.amt*d.y/100;
+    const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
     return `<div class="simrow">
       <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
-      <div class="samt"><input type="number" value="${h.amt}" oninput="simSet(${i},this.value)"></div>
-      <div class="sinc"><b class="num">${inc.toFixed(0)}만원</b><small>연 분배 ${d.y}%</small></div>
+      <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
+      <div class="sinc"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
       <div class="sx" onclick="simDel(${i})">×</div>
     </div>`;
   }).join('');
-  const pick=document.getElementById('sim-pick');
-  if(!pick.options.length)pick.innerHTML=Object.entries(SIM_ETFS).map(([c,d])=>`<option value="${c}">${d.name} · ${d.mk}</option>`).join('');
 }
-function simSet(i,v){simHoldings[i].amt=Math.max(0,parseInt(v)||0);simOut();}
+function simSet(i,v){simHoldings[i].qty=Math.max(0,parseInt(v)||0);simOut();}
 function simDel(i){simHoldings.splice(i,1);simRowsRender();simOut();}
-function simAdd(){const c=document.getElementById('sim-pick').value,a=parseInt(document.getElementById('sim-amt').value)||0;if(a>0){simHoldings.push({code:c,amt:a});simRowsRender();simOut();}}
+
+/* 콤보박스: 순자산 톱10 기본 + 이름·코드 검색 */
+let comboSel=null;
+function comboItems(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,10);
+  return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
+}
+function comboRender(q){
+  const arr=comboItems(q),list=document.getElementById('combo-list');
+  if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
+  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱10</div>';
+  list.innerHTML=hd+arr.map(d=>`<div class="combo__item" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
+}
+function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
+function comboFilter(){comboSel=null;comboOpen();}
+function comboClose(){setTimeout(()=>document.getElementById('combo-list').classList.remove('on'),150);}
+function comboPick(code){comboSel=code;document.getElementById('sim-search').value=UNIV[code].name;document.getElementById('combo-list').classList.remove('on');}
+function simAdd(){
+  if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
+  const qty=parseInt(document.getElementById('sim-amt').value)||0;
+  if(comboSel&&qty>0){simHoldings.push({code:comboSel,qty});comboSel=null;document.getElementById('sim-search').value='';simRowsRender();simOut();}
+}
 function simOut(){
   let totalDiv=0;const bad=[];
-  simHoldings.forEach(h=>{const d=SIM_ETFS[h.code];totalDiv+=h.amt*d.y/100;const[hc,,e]=simHealth(d);if(hc==='bad')bad.push({name:d.name,y:d.y,e});});
+  simHoldings.forEach(h=>{const d=UNIV[h.code];totalDiv+=simIncome(h);const[hc,,e]=incomeHealth(d);if(hc==='bad')bad.push({name:d.name,y:d.y,e});});
   const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
   let html=`<div class="sim-kpi">
     <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
     <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-    <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#E03131':'#16A34A'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+    <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
   </div>`;
   if(bad.length)html+=`<div class="sim-warn">⚠️ <b>보유 중 원금성 분배 ${bad.length}종목.</b> `+bad.map(b=>`${b.name}(분배 ${b.y}% · 가격 ${b.e.toFixed(0)}%)`).join(', ')+` — 분배금에 원금이 섞여 있어 표면 분배율만큼 번 게 아니에요.</div>`;
   if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ 금융소득종합과세 대상 — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
   else html+=`<div class="sim-tax safe">✓ 금융소득종합과세 안전 — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
-  if(gap>0){const f=SIM_ETFS['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 추가하면 채워져요.</div>`;}
+  if(gap>0){const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 더 담으면 채워져요.</div>`;}
   document.getElementById('sim-out').innerHTML=html;
 }
 simRowsRender();simOut();
