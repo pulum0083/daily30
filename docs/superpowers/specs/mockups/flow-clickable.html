@@ -229,8 +229,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
 .sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
-.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:#FFFBEB;}
-.sim__h .q{font-size:15px;font-weight:600;color:#92400E;}
+.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);}
+.sim__h .q{font-size:15px;font-weight:600;color:var(--ink);}
 .sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
 .simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
 .simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
@@ -258,23 +258,27 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
 .qty span{font-size:13px;color:var(--muted);font-weight:500;}
 .sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#B7791F;color:#fff;cursor:pointer;white-space:nowrap;}
-.sim__target{display:flex;align-items:center;gap:8px;padding:14px 20px;font-size:14px;font-weight:500;color:#78350F;border-bottom:1px solid var(--hair);background:#FFFBEB;}
-.sim__target input{width:84px;border:1px solid #FDE68A;border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
+.sim__target{display:flex;align-items:center;gap:8px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
+.sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
 .sim__out{padding:18px 20px;}
 .sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
 .sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
-.sim-warn{background:#fff5f7;border:1px solid #f33942;border-radius:10px;padding:12px 14px;font-size:13px;color:#b3262d;line-height:1.7;margin-bottom:10px;}
+/* 출력 노트 — 중성 배경 + 좌측 accent 바로 통일 (색은 선·강조에만) */
+.sim-warn,.sim-swap,.sim-tax,.sim-fill{background:var(--canvas);border:1px solid var(--hair);border-left-width:3px;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.65;color:var(--ink);margin-bottom:8px;}
+.sim-warn{border-left-color:#f33942;}
 .sim-warn b{font-weight:600;color:#f33942;}
-.sim-swap{background:#ecfeea;border:1px solid #00d954;border-radius:10px;padding:12px 14px;font-size:13px;color:#0a7d2c;line-height:1.7;margin-bottom:10px;}
+.sim-swap{border-left-color:#00ae1a;}
 .sim-swap b{font-weight:600;color:#00ae1a;}
 .sim-swap .arr{color:#00ae1a;font-weight:700;margin:0 4px;}
-.sim-tax{border-radius:10px;padding:12px 14px;font-size:13px;font-weight:500;line-height:1.6;margin-bottom:10px;}
-.sim-tax.safe{background:#ecfeea;color:#00ae1a;border:1px solid #00d954;}
-.sim-tax.warn{background:#fff5f7;color:#f33942;border:1px solid #f33942;}
-.sim-fill{background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;font-size:13px;color:#0b4ea8;line-height:1.7;}
-.sim-fill b{font-weight:600;}
+.sim-tax{font-weight:400;color:var(--muted);}
+.sim-tax.safe{border-left-color:#00ae1a;}
+.sim-tax.safe b{color:#00ae1a;}
+.sim-tax.warn{border-left-color:#f33942;color:var(--ink);}
+.sim-tax.warn b{color:#f33942;font-weight:600;}
+.sim-fill{border-left-color:var(--primary);}
+.sim-fill b{font-weight:600;color:var(--primary);}
 .hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
 .hbdg.ok{background:#ecfeea;color:#00ae1a;}
 .hbdg.warn{background:#fff9e3;color:#eb8e02;}
@@ -289,9 +293,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
 .irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
-.honest{background:#fff5f7;border:1px solid #f33942;border-radius:12px;padding:14px 18px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
-.honest .ic3{font-size:20px;flex-shrink:0;line-height:1.4;}
-.honest .tx3{font-size:13px;color:#b3262d;line-height:1.7;}.honest .tx3 b{font-weight:600;color:#f33942;}
+/* 인컴 ETF 패널 설명 캡션 + 건전성 범례 */
+.ipanel-cap{padding:10px 16px 12px;border-bottom:1px solid var(--hair);font-size:12px;color:var(--muted);line-height:1.6;}
+.ipanel-cap b{color:var(--ink);font-weight:600;}
+.ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
+.ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}
+.honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
+.honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
 </style>
 </head>
 <body>
@@ -740,6 +751,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <a onclick="incomeSort('health',this)">건전성</a>
             </div>
           </div>
+          <div class="ipanel-cap">순자산 <b>1조원 이상</b> 배당·커버드콜 ETF예요. 위 토글로 <b>분배율순·건전성순</b> 정렬을 바꿔요. 건전성은 <b>분배율 대비 실제 총수익</b>으로 따져요.
+            <div class="ipanel-legend">
+              <span><i class="dot ok"></i>건전 · 가격 유지</span>
+              <span><i class="dot warn"></i>주의 · 소폭 침식</span>
+              <span><i class="dot bad"></i>원금성 · 원금 잠식</span>
+            </div>
+          </div>
           <div id="income-rows"></div>
         </div>
       </div>
@@ -1065,8 +1083,8 @@ function simOut(){
     if(alt){const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
       html+=`<div class="sim-swap">🔄 <b>갈아타기 제안.</b> ${worst.name} <span class="num">(분배 ${worst.y}%·가격 ${worst.e.toFixed(0)}%)</span><span class="arr">→</span><b>${alt.name}</b> <span class="num">(분배 ${alt.y}%·가격 +${ae.toFixed(0)}%)</span>. 같은 평가금액 ${worst.val.toFixed(0)}만원 기준 월 인컴 ${curM.toFixed(1)}→${altM.toFixed(1)}만원으로 ${altM<curM?'줄지만':'늘고'}, 가격이 녹지 않아 실질 수익은 더 안정적이에요.</div>`;}
   }
-  if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ 금융소득종합과세 대상 — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
-  else html+=`<div class="sim-tax safe">✓ 금융소득종합과세 안전 — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
+  if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ <b>금융소득종합과세 대상</b> — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
+  else html+=`<div class="sim-tax safe">✓ <b>금융소득종합과세 안전</b> — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
   if(gap>0){const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 더 담으면 채워져요.</div>`;}
   document.getElementById('sim-out').innerHTML=html;
 }
