@@ -226,17 +226,36 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
 
 /* ── 배당 인컴 설계기 ── */
-.income-target{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:14px;padding:18px 20px;margin-bottom:16px;}
-.income-target .q{font-size:15px;font-weight:800;color:#92400E;margin-bottom:12px;}
-.tbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.tbtns a{font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;background:#fff;border:1.5px solid #FDE68A;color:#92400E;cursor:pointer;}
-.tbtns a.on{background:#B7791F;border-color:#B7791F;color:#fff;}
-.income-out{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
-.income-out .big{font-size:12px;color:#78350F;}
-.income-out .big b{display:block;font-size:22px;font-weight:800;color:#92400E;margin-top:2px;}
-.tax-badge{font-size:12px;font-weight:800;padding:7px 14px;border-radius:999px;margin-left:auto;}
-.tax-badge.safe{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.tax-badge.warn{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+/* 인컴 시뮬레이터 (보유 입력 → 계산) */
+.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
+.sim__h{padding:14px 18px;border-bottom:1px solid var(--hair);background:#FFFBEB;}
+.sim__h .q{font-size:15px;font-weight:800;color:#92400E;}
+.sim__h .q small{font-size:11px;font-weight:500;color:var(--muted);margin-left:6px;}
+.simrow{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--hair);}
+.simrow .snm{flex:1;font-size:13px;font-weight:600;min-width:0;}
+.simrow .snm .mk{font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:6px;background:var(--inset);color:var(--muted);}
+.simrow .samt{width:112px;flex-shrink:0;}
+.simrow .samt input{width:100%;border:1px solid var(--hair);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;text-align:right;}
+.simrow .sinc{width:100px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:13px;font-weight:800;color:#B7791F;}.simrow .sinc small{display:block;font-size:9px;color:var(--muted);}
+.simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
+.sim__add{display:flex;gap:8px;padding:12px 18px;background:var(--soft);border-bottom:1px solid var(--hair);flex-wrap:wrap;}
+.sim__add select,.sim__add input{border:1px solid var(--hair);border-radius:7px;padding:7px 9px;font-size:12px;font-family:inherit;}
+.sim__add select{flex:1;min-width:200px;}.sim__add input{width:130px;text-align:right;}
+.sim__add a{font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;background:#B7791F;color:#fff;cursor:pointer;}
+.sim__target{display:flex;align-items:center;gap:8px;padding:13px 18px;font-size:13px;font-weight:700;color:#78350F;border-bottom:1px solid var(--hair);background:#FFFBEB;}
+.sim__target input{width:84px;border:1px solid #FDE68A;border-radius:7px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;font-weight:700;}
+.sim__out{padding:16px 18px;}
+.sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.sim-kpi .k{flex:1;min-width:110px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
+.sim-kpi .k .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.sim-kpi .k .v{font-size:19px;font-weight:800;}
+.sim-warn{background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:11px 14px;font-size:12px;color:#7F1D1D;line-height:1.7;margin-bottom:10px;}
+.sim-warn b{font-weight:800;}
+.sim-tax{border-radius:10px;padding:11px 14px;font-size:12px;font-weight:700;line-height:1.6;margin-bottom:10px;}
+.sim-tax.safe{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.sim-tax.warn{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+.sim-fill{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 14px;font-size:12px;color:#0C4A6E;line-height:1.7;}
+.sim-fill b{font-weight:800;}
 .hbdg{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
 .hbdg.ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
 .hbdg.warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
@@ -251,14 +270,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .honest{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:20px;flex-shrink:0;line-height:1.4;}
 .honest .tx3{font-size:12px;color:#7F1D1D;line-height:1.7;}.honest .tx3 b{font-weight:800;}
-.alloc-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
-.alloc-row:last-child{border-bottom:none;}
-.alloc-row .an{flex:1;font-weight:600;min-width:0;}.alloc-row .an small{color:var(--muted);font-weight:400;margin-left:4px;}
-.alloc-row .apct{width:40px;text-align:right;font-weight:800;color:#B7791F;flex-shrink:0;}
-.alloc-bar{width:120px;height:6px;border-radius:999px;background:var(--inset);overflow:hidden;flex-shrink:0;}.alloc-bar i{display:block;height:100%;background:#B7791F;}
-.imonths{display:flex;gap:4px;align-items:flex-end;height:46px;padding:10px 16px 4px;}
-.imonths .mb{flex:1;background:#FCD34D;border-radius:3px 3px 0 0;}
-.imonths-x{display:flex;gap:4px;padding:0 16px 12px;}.imonths-x span{flex:1;text-align:center;font-size:8px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -671,44 +682,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1조+ 배당·커버드콜 ETF · 목표 인컴 → 조합 + 분배 품질 + 세금 · 2026-06-13</div></div>
     </div>
 
-    <!-- 인컴 목표 설계기 -->
-    <div class="income-target">
-      <div class="q">매달 얼마를 받고 싶으세요?</div>
-      <div class="tbtns" id="tbtns">
-        <a onclick="setTarget(50,this)">50만원</a>
-        <a class="on" onclick="setTarget(100,this)">100만원</a>
-        <a onclick="setTarget(200,this)">200만원</a>
-        <a onclick="setTarget(300,this)">300만원</a>
+    <!-- 인컴 시뮬레이터 (보유 입력 → 계산) -->
+    <div class="sim">
+      <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
+      <div id="sim-rows"></div>
+      <div class="sim__add">
+        <select id="sim-pick"></select>
+        <input id="sim-amt" type="number" value="1000" placeholder="만원">
+        <a onclick="simAdd()">+ 추가</a>
       </div>
-      <div class="income-out">
-        <div class="big">필요 투자금<b id="need-amt">약 1.70억원</b></div>
-        <div class="big">연 분배금<b id="year-div">1,200만원</b></div>
-        <div class="big">예상 블렌드 분배율<b id="blend-y">7.1%</b></div>
-        <span class="tax-badge safe" id="tax-badge">✓ 금융소득종합과세 안전</span>
-      </div>
+      <div class="sim__target">목표 월 수령액 <input id="sim-target" type="number" value="100" oninput="simOut()"> 만원</div>
+      <div class="sim__out" id="sim-out"></div>
     </div>
 
     <!-- 정직 배너 -->
     <div class="honest">
       <span class="ic3">⚠️</span>
       <div class="tx3"><b>분배율은 수익률이 아니에요.</b> 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어요. 분배율이 높아도 가격이 녹으면 실제로 번 게 아니에요. 아래 <b>건전성 뱃지</b>가 "분배율 대비 실제 총수익"을 비교해줘요.</div>
-    </div>
-
-    <!-- 추천 조합 -->
-    <div class="panel">
-      <div class="panel__h" style="justify-content:space-between;">추천 조합 · 월 100만원 <span style="font-size:11px;color:var(--muted);font-weight:500;">건전·주의 등급만 · 원금성 제외</span></div>
-      <div class="alloc-row"><div class="an">ACE 미국배당다우존스 <small class="num">458760 · 분배 3.6%</small></div><div class="alloc-bar"><i style="width:40%"></i></div><div class="apct">40%</div></div>
-      <div class="alloc-row"><div class="an">TIGER 미국배당+7%프리미엄 <small class="num">458730 · 분배 9.8%</small></div><div class="alloc-bar"><i style="width:40%"></i></div><div class="apct">40%</div></div>
-      <div class="alloc-row"><div class="an">KODEX 미국배당프리미엄액티브 <small class="num">483280 · 분배 8.5%</small></div><div class="alloc-bar"><i style="width:20%"></i></div><div class="apct">20%</div></div>
-      <div style="padding:12px 16px 2px;font-size:11px;font-weight:700;color:var(--muted);">월별 수령액 (분배월 섞어 평탄화)</div>
-      <div class="imonths">
-        <div class="mb" style="height:90%"></div><div class="mb" style="height:96%"></div><div class="mb" style="height:88%"></div>
-        <div class="mb" style="height:94%"></div><div class="mb" style="height:100%"></div><div class="mb" style="height:91%"></div>
-        <div class="mb" style="height:95%"></div><div class="mb" style="height:89%"></div><div class="mb" style="height:97%"></div>
-        <div class="mb" style="height:92%"></div><div class="mb" style="height:98%"></div><div class="mb" style="height:93%"></div>
-      </div>
-      <div class="imonths-x"><span>1월</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span></div>
-      <div class="pdisc" style="background:var(--soft);">매월 균등 수령되도록 분배 월이 다른 ETF를 섞었어요. 실제 분배금은 매월 달라질 수 있어요.</div>
     </div>
 
     <!-- 전체 인컴 ETF -->
@@ -957,16 +947,51 @@ function incomeRender(){
 }
 function incomeSort(k,el){iSortKey=k;document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');incomeRender();}
 incomeRender();
-function setTarget(won,el){
-  document.querySelectorAll('#tbtns a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
-  const blend=7.06, yearly=won*12, need=yearly/(blend/100);
-  document.getElementById('need-amt').textContent='약 '+(need/10000).toFixed(2)+'억원';
-  document.getElementById('year-div').textContent=yearly.toLocaleString()+'만원';
-  document.getElementById('blend-y').textContent=blend.toFixed(1)+'%';
-  const tb=document.getElementById('tax-badge');
-  if(yearly>=2000){tb.className='tax-badge warn';tb.textContent='⚠ 종합과세 대상 (연 '+yearly.toLocaleString()+'만원 > 2,000만원)';}
-  else{tb.className='tax-badge safe';tb.textContent='✓ 종합과세 안전 (연 '+yearly.toLocaleString()+'만원 ≤ 2,000만원)';}
+
+/* 인컴 시뮬레이터 — 보유(만원) 입력 → 인컴·원금성 경고·종합과세·갭 메우기 */
+const SIM_ETFS={
+  '476550':{name:'TIGER 미국30년국채커버드콜',y:13.0,r:1.9,mk:'KR'},
+  '458760':{name:'ACE 미국배당다우존스',y:3.6,r:19.1,mk:'KR'},
+  '458730':{name:'TIGER 미국배당+7%프리미엄',y:9.8,r:14.2,mk:'KR'},
+  '441680':{name:'TIGER 미국나스닥100커버드콜',y:11.5,r:6.4,mk:'KR'},
+  'JEPI':{name:'JPMorgan 에쿼티프리미엄 (JEPI)',y:7.8,r:9.5,mk:'US'},
+  'SCHD':{name:'Schwab 미국배당 (SCHD)',y:3.5,r:12.0,mk:'US'},
+  'QYLD':{name:'Global X 나스닥커버드콜 (QYLD)',y:11.8,r:2.5,mk:'US'},
+};
+let simHoldings=[{code:'476550',amt:2000},{code:'458760',amt:3000},{code:'JEPI',amt:1500}];
+function simHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+function simRowsRender(){
+  document.getElementById('sim-rows').innerHTML=simHoldings.map((h,i)=>{
+    const d=SIM_ETFS[h.code],inc=h.amt*d.y/100;
+    return `<div class="simrow">
+      <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
+      <div class="samt"><input type="number" value="${h.amt}" oninput="simSet(${i},this.value)"></div>
+      <div class="sinc"><b class="num">${inc.toFixed(0)}만원</b><small>연 분배 ${d.y}%</small></div>
+      <div class="sx" onclick="simDel(${i})">×</div>
+    </div>`;
+  }).join('');
+  const pick=document.getElementById('sim-pick');
+  if(!pick.options.length)pick.innerHTML=Object.entries(SIM_ETFS).map(([c,d])=>`<option value="${c}">${d.name} · ${d.mk}</option>`).join('');
 }
+function simSet(i,v){simHoldings[i].amt=Math.max(0,parseInt(v)||0);simOut();}
+function simDel(i){simHoldings.splice(i,1);simRowsRender();simOut();}
+function simAdd(){const c=document.getElementById('sim-pick').value,a=parseInt(document.getElementById('sim-amt').value)||0;if(a>0){simHoldings.push({code:c,amt:a});simRowsRender();simOut();}}
+function simOut(){
+  let totalDiv=0;const bad=[];
+  simHoldings.forEach(h=>{const d=SIM_ETFS[h.code];totalDiv+=h.amt*d.y/100;const[hc,,e]=simHealth(d);if(hc==='bad')bad.push({name:d.name,y:d.y,e});});
+  const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
+  let html=`<div class="sim-kpi">
+    <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
+    <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
+    <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#E03131':'#16A34A'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+  </div>`;
+  if(bad.length)html+=`<div class="sim-warn">⚠️ <b>보유 중 원금성 분배 ${bad.length}종목.</b> `+bad.map(b=>`${b.name}(분배 ${b.y}% · 가격 ${b.e.toFixed(0)}%)`).join(', ')+` — 분배금에 원금이 섞여 있어 표면 분배율만큼 번 게 아니에요.</div>`;
+  if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ 금융소득종합과세 대상 — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
+  else html+=`<div class="sim-tax safe">✓ 금융소득종합과세 안전 — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
+  if(gap>0){const f=SIM_ETFS['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 추가하면 채워져요.</div>`;}
+  document.getElementById('sim-out').innerHTML=html;
+}
+simRowsRender();simOut();
 
 /* 패시브 뱃지 툴팁 */
 const passBtn=document.getElementById('badge-pass-btn');
