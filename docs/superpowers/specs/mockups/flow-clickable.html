@@ -483,10 +483,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
 
         <div class="sc"><div class="sc__h"><span class="sc__t">지수 추세 · 참고용</span><span class="sc__s">06-12 종가</span></div><div class="scb">
-          <span class="etf-pbadge">● 중립~강세 · 코스피200 추종</span>
-          <div class="pg" style="background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;"><div class="n" style="left:62%;background:var(--muted);"></div></div>
+          <span class="etf-pbadge">● 상승 우위 · 브리핑 지수 전망 연동</span>
+          <div class="pg" style="background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;"><div class="n" style="left:64%;background:var(--muted);"></div></div>
           <div class="pgs"><span>약세</span><span>중립</span><span>강세</span></div>
-          <p class="scen">코스피200 지수를 그대로 추종하는 패시브 ETF예요. 개별 종목 예측이 아닌 <b>지수 방향 참고용</b>이에요. 현재 코스피200은 20일선 위에서 완만한 상승 흐름이에요.</p>
+          <p class="scen">코스피200을 추종하는 패시브 ETF라, 바늘은 <b>그날 코스피 브리핑의 지수 전망</b>을 따라요. 개별 종목 AI 픽이 아닌 <b>지수 방향 참고용</b>이에요. 오늘 브리핑은 상승 우위로 봤어요. <a style="color:var(--primary);font-weight:700;">브리핑 보기 →</a></p>
           <div class="tiles" style="margin-top:14px;">
             <div class="tile"><div class="l">추적지수</div><div class="v num up">+0.71%</div></div>
             <div class="tile"><div class="l">거래량</div><div class="v num">1,840만</div></div>
@@ -504,7 +504,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">배당 인컴 설계기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
         </div></div>
         <div class="sc"><div class="sc__h"><span class="sc__t">섹터 비중 <span class="phase">PHASE 2</span></span><span class="sc__s">구성종목 기준</span></div>
-          <div class="note">⚠ ETF 구성종목·비중 데이터 신규 수집 필요 (KRX·운용사 일별 공시)</div>
+          <div class="note">⚠ TOP10 비중은 네이버 etfAnalysis로 실측 가능 · 전체 섹터 분포는 근사치 ("기타"가 미커버분)</div>
           <div class="donutwrap">
             <div class="donut"><div class="ctr"><b class="num">200</b><span>종목</span></div></div>
             <div class="sec-legend">
@@ -519,7 +519,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
 
         <div class="panel"><div class="panel__h" style="justify-content:space-between;">구성종목 TOP10 <span class="phase">PHASE 2</span><span style="font-size:11px;color:var(--muted);font-weight:500;">전체 200종목</span></div>
-          <div class="note">⚠ 구성종목 신규 수집 필요 · 클릭 시 해당 종목 페이지로 이동</div>
+          <div class="note">TOP10은 etfAnalysis로 실측 가능 · 전체 200종목 리스트는 v2 · 클릭 시 해당 종목 페이지로 이동</div>
           <a class="hold" onclick="go('detail')"><span class="rk num">1</span><span class="nm">삼성전자<small class="num">005930</small></span><span class="chg up num">+1.2%</span><span class="wt"><b class="num">28.1%</b><div class="bar2"><i style="width:100%"></i></div></span></a>
           <a class="hold" onclick="go('detail')"><span class="rk num">2</span><span class="nm">SK하이닉스<small class="num">000660</small></span><span class="chg up num">+3.4%</span><span class="wt"><b class="num">6.2%</b><div class="bar2"><i style="width:22%"></i></div></span></a>
           <a class="hold"><span class="rk num">3</span><span class="nm">LG에너지솔루션<small class="num">373220</small></span><span class="chg dn num">−0.8%</span><span class="wt"><b class="num">3.1%</b><div class="bar2"><i style="width:11%"></i></div></span></a>
@@ -542,7 +542,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
       <div>
         <div class="panel"><div class="panel__h">ETF 기본정보 <span class="phase">PHASE 2</span></div>
-          <div class="note">⚠ 운용사 메타데이터 신규 수집 필요</div>
+          <div class="note">네이버 etfAnalysis로 실측 가능 (iNAV 괴리율은 장중 실시간이라 제외)</div>
           <div class="spec-tbl">
             <div class="it"><span class="k">추적지수</span><span class="v">코스피200</span></div>
             <div class="it"><span class="k">운용사</span><span class="v">삼성자산운용</span></div>
@@ -550,7 +550,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="it"><span class="k">순자산 (AUM)</span><span class="v num">6.8조</span></div>
             <div class="it"><span class="k">상장일</span><span class="v num">2002-10-14</span></div>
             <div class="it"><span class="k">분배주기</span><span class="v">분기</span></div>
-            <div class="it"><span class="k">iNAV 괴리율</span><span class="v num">+0.02%</span></div>
           </div>
         </div>
         <div class="panel"><div class="panel__h" style="justify-content:space-between;">유사 ETF · 코스피200<span style="font-size:11px;color:var(--muted);font-weight:500;">보수 비교</span></div>
