@@ -10,15 +10,17 @@
 - [x] AUM(marketValue) 1조+ 필터용 확인
 - [x] **한계 확인**: ROC 명시 분해 ✗(프록시 대체), 분배금 시계열 ✗(네이버 404, v2)
 
-## v1 파이프라인 (다음)
-- [ ] 유니버스 수집 — 이름 패턴 + dividendYieldTtm>0 + AUM 1조+ 필터
-- [ ] 유니버스 false positive 점검 (실행 분포 확인)
-- [ ] 건전성 뱃지 분류 함수 (건전/주의/원금성) + 단위 테스트
-- [ ] 가격침식 프록시 임계 day-1 분포로 확정
-- [ ] 상장 1년 미만 → 분배율 TTM 신뢰 낮음 플래그
-- [ ] 산출 스키마대로 data/income_etfs.json 출력
-- [ ] 인컴 목표 → 필요 원금 역산 + 분배 월 평탄화 로직
-- [ ] 종합과세 2천만원 임계 경고 + 과세유형별 분기
+## v1 파이프라인 (완료 — 2026-06-13, build_income_etfs.py)
+- [x] 유니버스 수집 — 이름 패턴 + dividendYieldTtm>0 + AUM 임계 필터
+- [x] 유니버스 분포 확인 — 1조+ 8개뿐 → **7천억+ 20개로 확정**(사용자 결정)
+- [x] 건전성 뱃지 분류 함수 (건전/주의/원금성) + 단위 테스트 (test_build_income_etfs.py, 5 passed)
+- [x] 가격침식 프록시 = Y1총수익 − 분배율. **필드 검증**: returnPerformanceList.Y1 ≈ navPerformanceList.Y1 일치 → NAV 기준 총수익 확정 (themeReturns.returnRate1y는 별개라 미사용)
+- [x] 상장 1년 미만 → low_confidence 플래그 (is_new_fund)
+- [x] 산출 data/income_etfs.json 출력 (20종, health: ok 14·warn 2·bad 2·None 2)
+- [~] 인컴 목표 → 필요 원금 역산: 프로토 시뮬레이터에 구현. 분배 월 평탄화는 v1 데이터(dividend_months) 보유, UI 미반영
+- [x] 종합과세 2천만원 임계 경고 (프로토 simOut)
+- [ ] **한계 — 강세장 침식 프록시 둔감**: 최근 1년 강세로 주식형 커버드콜 총수익이 +89~177%로 찍혀 대부분 ok 판정. 진짜 원금성은 국채 커버드콜 2종만 bad. 임계 보정 또는 분배율-vs-가격만 별도 지표 검토 (CONTEXT-NOTES 발견 4)
+- [ ] **데이터 의심값**: 주식형 커버드콜 Y1 +177%/+174% 등 비현실적. navPerf와 일치하나 신생·저가상장 왜곡 가능. v2에서 가격 시계열 교차검증
 
 ## UI 프로토타입 (완료 — 2026-06-13, flow-clickable.html)
 - [x] **피벗 결정**: 보유-입력 트래커 접고 랭킹(히어로)+단발 시뮬레이터(서포트). CONTEXT-NOTES 결정 4.

@@ -712,7 +712,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <div class="screen" id="income">
     <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
     <div class="phead">
-      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1조+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
+      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
 
     <div class="grid">
@@ -745,13 +745,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
         <div class="panel">
-          <div class="panel__h">인컴 ETF 전체 · 1조+
+          <div class="panel__h">인컴 ETF 전체 · 7천억+
             <div class="stabs" id="isort-tabs" style="margin-left:auto;">
               <a class="on" onclick="incomeSort('y',this)">분배율</a>
               <a onclick="incomeSort('health',this)">건전성</a>
             </div>
           </div>
-          <div class="ipanel-cap">순자산 <b>1조원 이상</b> 배당·커버드콜 ETF예요. 위 토글로 <b>분배율순·건전성순</b> 정렬을 바꿔요. 건전성은 <b>분배율 대비 실제 총수익</b>으로 따져요.
+          <div class="ipanel-cap">순자산 <b>7천억원 이상</b> 배당·커버드콜 ETF예요. 위 토글로 <b>분배율순·건전성순</b> 정렬을 바꿔요. 건전성은 <b>분배율 대비 실제 1년 총수익</b>으로 따져요.
             <div class="ipanel-legend">
               <span><i class="dot ok"></i>건전 · 가격 유지</span>
               <span><i class="dot warn"></i>주의 · 소폭 침식</span>
@@ -958,24 +958,26 @@ function passiveSort(key,el){
 passiveRender();
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+// 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
 const INCOME_UNIVERSE=[
-  {code:'458730',name:'TIGER 미국배당+7%프리미엄다우존스',aum:3.9,price:13500,y:9.8,r:14.2,mk:'KR'},
-  {code:'458760',name:'ACE 미국배당다우존스',aum:2.1,price:11200,y:3.6,r:19.1,mk:'KR'},
-  {code:'446720',name:'SOL 미국배당다우존스',aum:1.9,price:11800,y:3.5,r:18.0,mk:'KR'},
-  {code:'489250',name:'KODEX 미국배당커버드콜액티브',aum:1.7,price:10800,y:10.2,r:9.5,mk:'KR'},
-  {code:'483280',name:'KODEX 미국배당프리미엄액티브',aum:1.5,price:10500,y:8.5,r:8.0,mk:'KR'},
-  {code:'498400',name:'RISE 200위클리커버드콜',aum:1.3,price:10200,y:14.0,r:-2.8,mk:'KR'},
-  {code:'441680',name:'TIGER 미국나스닥100커버드콜',aum:1.2,price:9800,y:11.5,r:6.4,mk:'KR'},
-  {code:'472160',name:'KODEX 200타겟위클리커버드콜',aum:1.15,price:10000,y:12.0,r:-1.0,mk:'KR'},
-  {code:'476550',name:'TIGER 미국30년국채커버드콜',aum:1.0,price:9300,y:13.0,r:1.9,mk:'KR'},
-  {code:'481280',name:'SOL 미국30년국채커버드콜',aum:1.0,price:9100,y:12.5,r:2.1,mk:'KR'},
-  {code:'491620',name:'RISE 미국30년국채커버드콜',aum:1.05,price:9200,y:13.2,r:0.8,mk:'KR'},
-  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.3,price:9600,y:11.0,r:6.0,mk:'KR'},
-  {code:'487340',name:'KODEX 미국배당다우존스타겟커버드콜',aum:1.1,price:9700,y:10.5,r:7.5,mk:'KR'},
-  {code:'161510',name:'PLUS 고배당주',aum:1.6,price:14200,y:6.2,r:11.5,mk:'KR'},
-  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.2,price:4800,y:6.8,r:3.5,mk:'KR'},
-  {code:'279530',name:'KODEX 고배당',aum:1.0,price:11500,y:5.0,r:9.0,mk:'KR'},
-  {code:'466920',name:'SOL 미국배당미국채혼합',aum:0.7,price:10600,y:6.0,r:7.2,mk:'KR'},
+  {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
+  {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.4,r:16.35,mk:'KR'},
+  {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR'},
+  {code:'472150',name:'TIGER 배당커버드콜액티브',aum:1.93,price:25580,y:14.68,r:177.47,mk:'KR'},
+  {code:'475720',name:'RISE 200위클리커버드콜',aum:0.92,price:15065,y:14.61,r:100.36,mk:'KR'},
+  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.89,price:11970,y:13.48,r:44.7,mk:'KR'},
+  {code:'476550',name:'TIGER 미국30년국채커버드콜액티브(H)',aum:0.9,price:7240,y:13.02,r:1.85,mk:'KR'},
+  {code:'481060',name:'KODEX 미국30년국채타겟커버드콜(합성 H)',aum:0.84,price:7750,y:12.94,r:1.67,mk:'KR'},
+  {code:'498400',name:'KODEX 200타겟위클리커버드콜',aum:6.74,price:25050,y:11.23,r:174.81,mk:'KR'},
+  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.47,price:4075,y:9.54,r:6.03,mk:'KR'},
+  {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR'},
+  {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.7,r:29.7,mk:'KR'},
+  {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR'},
+  {code:'161510',name:'PLUS 고배당주',aum:2.49,price:26330,y:3.77,r:47.47,mk:'KR'},
+  {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.8,price:25865,y:3.66,r:50.98,mk:'KR'},
+  {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR'},
+  {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR'},
+  {code:'458730',name:'TIGER 미국배당다우존스',aum:3.9,price:15670,y:2.69,r:37.49,mk:'KR'},
   {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
   {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
   {code:'QYLD',name:'Global X 나스닥커버드콜 (QYLD)',aum:0,price:24000,y:11.8,r:2.5,mk:'US'},
@@ -997,7 +999,7 @@ function incomeRow(d,i){
 }
 let iSortKey='y';
 function incomeRender(){
-  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR'&&d.aum>=1.0);
+  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR');
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
   arr=arr.slice(0,15);
