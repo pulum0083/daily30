@@ -267,6 +267,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
 .sim-warn{background:#fff5f7;border:1px solid #f33942;border-radius:10px;padding:12px 14px;font-size:13px;color:#b3262d;line-height:1.7;margin-bottom:10px;}
 .sim-warn b{font-weight:600;color:#f33942;}
+.sim-swap{background:#ecfeea;border:1px solid #00d954;border-radius:10px;padding:12px 14px;font-size:13px;color:#0a7d2c;line-height:1.7;margin-bottom:10px;}
+.sim-swap b{font-weight:600;color:#00ae1a;}
+.sim-swap .arr{color:#00ae1a;font-weight:700;margin:0 4px;}
 .sim-tax{border-radius:10px;padding:12px 14px;font-size:13px;font-weight:500;line-height:1.6;margin-bottom:10px;}
 .sim-tax.safe{background:#ecfeea;color:#00ae1a;border:1px solid #00d954;}
 .sim-tax.warn{background:#fff5f7;color:#f33942;border:1px solid #f33942;}
@@ -280,6 +283,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
 .irow:last-child{border-bottom:none;}.irow:hover{background:#FFFBEB;}
 .irow .it{display:flex;align-items:center;gap:8px;}
+.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#B7791F;text-align:center;}
+.irow .it .rk.top{color:#fff;background:#B7791F;border-radius:5px;line-height:18px;}
 .irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
 .irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
@@ -708,7 +713,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="sim__add">
             <div class="combo">
               <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱10 기본" autocomplete="off"
-                     onfocus="comboOpen()" oninput="comboFilter()" onblur="comboClose()">
+                     onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
               <div class="combo__list" id="combo-list"></div>
             </div>
             <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
@@ -729,8 +734,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
         <div class="panel">
-          <div class="panel__h" style="justify-content:space-between;">인컴 ETF 전체 · 1조+
-            <div class="stabs" id="isort-tabs">
+          <div class="panel__h">인컴 ETF 전체 · 1조+
+            <div class="stabs" id="isort-tabs" style="margin-left:auto;">
               <a class="on" onclick="incomeSort('y',this)">분배율</a>
               <a onclick="incomeSort('health',this)">건전성</a>
             </div>
@@ -946,6 +951,12 @@ const INCOME_UNIVERSE=[
   {code:'472160',name:'KODEX 200타겟위클리커버드콜',aum:1.15,price:10000,y:12.0,r:-1.0,mk:'KR'},
   {code:'476550',name:'TIGER 미국30년국채커버드콜',aum:1.0,price:9300,y:13.0,r:1.9,mk:'KR'},
   {code:'481280',name:'SOL 미국30년국채커버드콜',aum:1.0,price:9100,y:12.5,r:2.1,mk:'KR'},
+  {code:'491620',name:'RISE 미국30년국채커버드콜',aum:1.05,price:9200,y:13.2,r:0.8,mk:'KR'},
+  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.3,price:9600,y:11.0,r:6.0,mk:'KR'},
+  {code:'487340',name:'KODEX 미국배당다우존스타겟커버드콜',aum:1.1,price:9700,y:10.5,r:7.5,mk:'KR'},
+  {code:'161510',name:'PLUS 고배당주',aum:1.6,price:14200,y:6.2,r:11.5,mk:'KR'},
+  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.2,price:4800,y:6.8,r:3.5,mk:'KR'},
+  {code:'279530',name:'KODEX 고배당',aum:1.0,price:11500,y:5.0,r:9.0,mk:'KR'},
   {code:'466920',name:'SOL 미국배당미국채혼합',aum:0.7,price:10600,y:6.0,r:7.2,mk:'KR'},
   {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
   {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
@@ -955,12 +966,13 @@ const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
 function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
 /* 사이드바: 인컴 ETF 전체 (국내 1조+) */
-function incomeRow(d){
+function incomeRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
+  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
   const rTxt=`${d.r>=0?'+':''}${d.r}%`;
   const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
-  return `<a class="irow" onclick="go('etf-detail')">
-    <div class="it"><b>${d.name}</b><span class="hbdg ${hc}">${hl}</span></div>
+  return `<a class="irow" onclick="addFromRanking('${d.code}')" title="클릭하면 시뮬레이터에 담겨요">
+    <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b><span class="hbdg ${hc}">${hl}</span></div>
     <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
     <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
   </a>`;
@@ -970,6 +982,7 @@ function incomeRender(){
   let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR'&&d.aum>=1.0);
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  arr=arr.slice(0,15);
   document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
 }
 function incomeSort(k,el){iSortKey=k;document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');incomeRender();}
@@ -991,24 +1004,46 @@ function simRowsRender(){
 }
 function simSet(i,v){simHoldings[i].qty=Math.max(0,parseInt(v)||0);simOut();}
 function simDel(i){simHoldings.splice(i,1);simRowsRender();simOut();}
+/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 (기능 C) */
+function addFromRanking(code){
+  const ex=simHoldings.findIndex(h=>h.code===code);
+  if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
+  simRowsRender();simOut();
+  const rows=document.querySelectorAll('#sim-rows .simrow');
+  const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
+  if(el){el.style.transition='background .4s';el.style.background='#FFFBEB';setTimeout(()=>el.style.background='',700);el.scrollIntoView({block:'nearest'});}
+}
 
 /* 콤보박스: 순자산 톱10 기본 + 이름·코드 검색 */
-let comboSel=null;
+let comboSel=null,comboCur=[],comboIdx=-1;
 function comboItems(q){
   q=(q||'').trim().toLowerCase();
   if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,10);
   return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
 }
 function comboRender(q){
-  const arr=comboItems(q),list=document.getElementById('combo-list');
+  const arr=comboItems(q),list=document.getElementById('combo-list');comboCur=arr;
   if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
   const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱10</div>';
-  list.innerHTML=hd+arr.map(d=>`<div class="combo__item" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
+  list.innerHTML=hd+arr.map((d,i)=>`<div class="combo__item${i===comboIdx?' sel':''}" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
 }
 function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
-function comboFilter(){comboSel=null;comboOpen();}
+function comboFilter(){comboSel=null;comboIdx=-1;comboOpen();}
 function comboClose(){setTimeout(()=>document.getElementById('combo-list').classList.remove('on'),150);}
 function comboPick(code){comboSel=code;document.getElementById('sim-search').value=UNIV[code].name;document.getElementById('combo-list').classList.remove('on');}
+function comboHighlight(){
+  const items=document.querySelectorAll('#combo-list .combo__item');
+  items.forEach((el,i)=>el.classList.toggle('sel',i===comboIdx));
+  if(comboIdx>=0&&items[comboIdx])items[comboIdx].scrollIntoView({block:'nearest'});
+}
+function comboKey(e){
+  const list=document.getElementById('combo-list');
+  if(!list.classList.contains('on')){if(e.key==='ArrowDown')comboOpen();return;}
+  if(e.key==='ArrowDown'){e.preventDefault();comboIdx=Math.min(comboCur.length-1,comboIdx+1);comboHighlight();}
+  else if(e.key==='ArrowUp'){e.preventDefault();comboIdx=Math.max(0,comboIdx-1);comboHighlight();}
+  else if(e.key==='Enter'){if(comboIdx>=0&&comboCur[comboIdx]){e.preventDefault();comboPick(comboCur[comboIdx].code);}}
+  else if(e.key==='Escape'){list.classList.remove('on');}
+}
 function simAdd(){
   if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
   const qty=parseInt(document.getElementById('sim-amt').value)||0;
@@ -1016,7 +1051,7 @@ function simAdd(){
 }
 function simOut(){
   let totalDiv=0;const bad=[];
-  simHoldings.forEach(h=>{const d=UNIV[h.code];totalDiv+=simIncome(h);const[hc,,e]=incomeHealth(d);if(hc==='bad')bad.push({name:d.name,y:d.y,e});});
+  simHoldings.forEach(h=>{const d=UNIV[h.code];totalDiv+=simIncome(h);const[hc,,e]=incomeHealth(d);if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});});
   const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
   let html=`<div class="sim-kpi">
     <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
@@ -1024,6 +1059,12 @@ function simOut(){
     <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
   </div>`;
   if(bad.length)html+=`<div class="sim-warn">⚠️ <b>보유 중 원금성 분배 ${bad.length}종목.</b> `+bad.map(b=>`${b.name}(분배 ${b.y}% · 가격 ${b.e.toFixed(0)}%)`).join(', ')+` — 분배금에 원금이 섞여 있어 표면 분배율만큼 번 게 아니에요.</div>`;
+  if(bad.length){
+    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
+    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
+    if(alt){const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      html+=`<div class="sim-swap">🔄 <b>갈아타기 제안.</b> ${worst.name} <span class="num">(분배 ${worst.y}%·가격 ${worst.e.toFixed(0)}%)</span><span class="arr">→</span><b>${alt.name}</b> <span class="num">(분배 ${alt.y}%·가격 +${ae.toFixed(0)}%)</span>. 같은 평가금액 ${worst.val.toFixed(0)}만원 기준 월 인컴 ${curM.toFixed(1)}→${altM.toFixed(1)}만원으로 ${altM<curM?'줄지만':'늘고'}, 가격이 녹지 않아 실질 수익은 더 안정적이에요.</div>`;}
+  }
   if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ 금융소득종합과세 대상 — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
   else html+=`<div class="sim-tax safe">✓ 금융소득종합과세 안전 — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
   if(gap>0){const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 더 담으면 채워져요.</div>`;}
