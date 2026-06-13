@@ -179,6 +179,86 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 #tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}
 #tip .bd b{color:var(--ink);font-weight:700;}
+
+/* ── 패시브 민감주 ── */
+.block__t.pass::before{background:#0284C7;}
+.block__t.pass{color:#0C4A6E;}
+.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+.pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+/* 위젯 메트릭 타일 */
+.pmet{display:flex;gap:8px;padding:12px 16px 0;}
+.pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
+.pmet .mc .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.pmet .mc .v{font-size:15px;font-weight:800;}
+.pmet .mc .sub{font-size:9px;color:var(--muted);margin-top:2px;}
+/* 패시브 한줄 번역 */
+.p1line{font-size:12px;color:var(--ink);padding:11px 16px 0;line-height:1.6;}
+.p1line b{color:#0284C7;}
+/* ETF 기여 행 */
+.petf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
+.petf-row:last-child{border-bottom:none;}
+.petf-row .en{flex:1;font-weight:600;}.petf-row .en small{display:block;font-size:10px;color:var(--muted);font-weight:400;}
+.petf-row .wt{font-size:12px;font-weight:800;color:var(--primary);}
+.petf-bar{height:3px;border-radius:999px;background:var(--inset);margin-top:3px;overflow:hidden;}
+.petf-bar i{display:block;height:100%;background:#0284C7;border-radius:999px;}
+/* 면책 띠 */
+.pdisc{font-size:10px;color:var(--muted);padding:7px 16px;background:var(--soft);line-height:1.5;border-top:1px solid var(--hair);}
+/* 패시브 랭킹 페이지 */
+.prank-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.prank-row:last-child{border-bottom:none;}
+.prank-row:hover{background:#F0F9FF;}
+.prank-row .rk2{width:20px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.dov-bar{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:#0C4A6E;}
+.conc-col{width:56px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.score-col{width:44px;text-align:right;font-size:13px;font-weight:800;color:#0284C7;flex-shrink:0;}
+/* 섹터 쏠림 배너 */
+.sector-bias{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:#0C4A6E;display:flex;align-items:center;gap:10px;}
+.sector-bias .ic2{font-size:18px;flex-shrink:0;}
+.sector-bias b{font-weight:800;}
+/* 정렬 토글 */
+.stabs{display:inline-flex;background:var(--inset);border-radius:8px;padding:3px;gap:2px;margin-bottom:12px;}
+.stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
+.stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
+
+/* ── 배당 인컴 설계기 ── */
+.income-target{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1px solid #FDE68A;border-radius:14px;padding:18px 20px;margin-bottom:16px;}
+.income-target .q{font-size:15px;font-weight:800;color:#92400E;margin-bottom:12px;}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.tbtns a{font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;background:#fff;border:1.5px solid #FDE68A;color:#92400E;cursor:pointer;}
+.tbtns a.on{background:#B7791F;border-color:#B7791F;color:#fff;}
+.income-out{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.income-out .big{font-size:12px;color:#78350F;}
+.income-out .big b{display:block;font-size:22px;font-weight:800;color:#92400E;margin-top:2px;}
+.tax-badge{font-size:12px;font-weight:800;padding:7px 14px;border-radius:999px;margin-left:auto;}
+.tax-badge.safe{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.tax-badge.warn{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+.hbdg{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+.hbdg.ok{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.hbdg.warn{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+.hbdg.bad{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA;}
+.irow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.irow:last-child{border-bottom:none;}.irow:hover{background:#FFFBEB;}
+.irow .inm{flex:1;min-width:0;}.irow .inm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.irow .inm small{font-size:10px;color:var(--muted);}
+.irow .iyield{width:64px;text-align:right;flex-shrink:0;}.irow .iyield b{font-size:16px;font-weight:800;color:#B7791F;}.irow .iyield small{display:block;font-size:9px;color:var(--muted);}
+.irow .iret{width:104px;text-align:right;flex-shrink:0;font-size:10px;color:var(--muted);line-height:1.5;}
+.irow .iret b{font-size:12px;font-weight:800;color:var(--ink);}
+.irow .ihealth{width:58px;text-align:right;flex-shrink:0;}
+.honest{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+.honest .ic3{font-size:20px;flex-shrink:0;line-height:1.4;}
+.honest .tx3{font-size:12px;color:#7F1D1D;line-height:1.7;}.honest .tx3 b{font-weight:800;}
+.alloc-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
+.alloc-row:last-child{border-bottom:none;}
+.alloc-row .an{flex:1;font-weight:600;min-width:0;}.alloc-row .an small{color:var(--muted);font-weight:400;margin-left:4px;}
+.alloc-row .apct{width:40px;text-align:right;font-weight:800;color:#B7791F;flex-shrink:0;}
+.alloc-bar{width:120px;height:6px;border-radius:999px;background:var(--inset);overflow:hidden;flex-shrink:0;}.alloc-bar i{display:block;height:100%;background:#B7791F;}
+.imonths{display:flex;gap:4px;align-items:flex-end;height:46px;padding:10px 16px 4px;}
+.imonths .mb{flex:1;background:#FCD34D;border-radius:3px 3px 0 0;}
+.imonths-x{display:flex;gap:4px;padding:0 16px 12px;}.imonths-x span{flex:1;text-align:center;font-size:8px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -200,8 +280,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="hotcards">
       <a class="hot hot--ai" onclick="go('ranking')"><span class="hot__ic">🔥</span><span class="hot__tx"><b>오늘의 AI 톱픽</b><small>Claude가 픽한 상승 후보</small></span><span class="hot__arr">→</span></a>
-      <a class="hot" onclick="go('ranking')"><span class="hot__ic">📊</span><span class="hot__tx"><b>거래량 급증</b><small>추적 142종목 거래대금 TOP</small></span><span class="hot__arr">→</span></a>
-      <a class="hot hot--etf" onclick="go('ranking')"><span class="hot__ic">📈</span><span class="hot__tx"><b>ETF 등락 TOP</b><small>iNAV 추정 기준 상승·하락</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('income')" style="background:#FFFBEB;border-color:#FDE68A;"><span class="hot__ic" style="background:#FEF3C7;">🪙</span><span class="hot__tx"><b style="color:#B7791F;">배당 인컴 설계기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11 <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
@@ -231,6 +311,17 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>셀트리온</b><small class="num">068270 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:7%"></div><span class="barval dn num">−0.4%</span></div><div class="ai"><span class="ais">신호 51</span></div></a>
         <a class="more" onclick="go('ranking')">하락 전체 →</a>
       </div>
+    </div>
+
+    <!-- ── 패시브 민감주 프리뷰 ── -->
+    <div class="block" style="margin-bottom:18px;">
+      <div class="block__h"><span class="block__t pass"><span class="ic">🧲</span>패시브 민감주 톱5</span><span class="block__s">ETF 기계매매 노출 · 거래일수순 <span class="badge-pass-btn" id="badge-pass-btn">뱃지 기준 ⓘ</span></span></div>
+      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>DB하이텍</b><small class="num">000990 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:61%"></div><span class="barval num" style="color:#0C4A6E;">9.2일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:58%"></div><span class="barval num" style="color:#0C4A6E;">8.7일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="more" onclick="go('passive')">패시브 민감주 전체 9종목 →</a>
     </div>
 
     <hr class="etf-divider">
@@ -506,10 +597,28 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <a class="srow" onclick="go('detail')"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
           <a class="srow" onclick="go('sector')"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
         </div>
-        <div class="panel"><div class="panel__h">이 종목을 담은 ETF <span class="phase">PHASE 2</span></div>
-          <div class="note">⚠ ETF 구성종목 신규 수집 필요</div>
-          <a class="srow"><span class="n2">KODEX 반도체 <small class="num">091160</small></span><span class="c num" style="color:var(--muted)">24.1%</span></a>
-          <a class="srow"><span class="n2">TIGER Fn반도체TOP10 <small class="num">396500</small></span><span class="c num" style="color:var(--muted)">22.6%</span></a>
+        <div class="panel" style="border-color:#BAE6FD;">
+          <div class="panel__h" style="background:#F0F9FF;border-color:#BAE6FD;">
+            <span style="color:#0C4A6E;">🧲 패시브 자금 노출도</span>
+          </div>
+          <p class="p1line">주요 반도체 ETF들이 <b>구조적으로 보유</b>하는 종목이에요. 패시브 기계매매 노출 수준이에요.</p>
+          <div class="pmet">
+            <div class="mc">
+              <div class="l">시총 대비 노출</div>
+              <div class="v num">1.6%</div>
+              <div class="sub">패시브 자금 약 2.8조</div>
+            </div>
+            <div class="mc">
+              <div class="l">거래일수 소화</div>
+              <div class="v num" style="color:#0284C7;">3.2일</div>
+              <div class="sub">임계 미달 · 뱃지 없음</div>
+            </div>
+          </div>
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);">끌고 가는 ETF TOP 3</div>
+          <div class="petf-row"><div class="en">KODEX 반도체<small>091160 · 비중 24.1%</small></div><div class="wt">24.1%</div></div>
+          <div class="petf-row"><div class="en">TIGER Fn반도체TOP10<small>396500 · 비중 22.6%</small></div><div class="wt">22.6%</div></div>
+          <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 6.2%</small></div><div class="wt">6.2%</div></div>
+          <div class="pdisc">주요 ETF TOP10 구성 기준 추정 · 소수 비중 누락 가능 · 인과 아님, 구조적 노출도</div>
         </div>
         <div class="panel"><div class="panel__h">AI 예측 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></div>
           <div style="padding:16px;"><div style="font-size:18px;font-weight:800;" class="num">최근 20회 중 <b style="color:#16A34A;">13회 · 65%</b></div></div>
@@ -552,6 +661,105 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="chips" style="padding:14px 16px;"><a onclick="go('sector')">2차전지</a><a onclick="go('sector')">바이오</a><a onclick="go('sector')">자동차</a><a onclick="go('sector')">금융</a></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
+  <div class="screen" id="income">
+    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
+    <div class="phead">
+      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1조+ 배당·커버드콜 ETF · 목표 인컴 → 조합 + 분배 품질 + 세금 · 2026-06-13</div></div>
+    </div>
+
+    <!-- 인컴 목표 설계기 -->
+    <div class="income-target">
+      <div class="q">매달 얼마를 받고 싶으세요?</div>
+      <div class="tbtns" id="tbtns">
+        <a onclick="setTarget(50,this)">50만원</a>
+        <a class="on" onclick="setTarget(100,this)">100만원</a>
+        <a onclick="setTarget(200,this)">200만원</a>
+        <a onclick="setTarget(300,this)">300만원</a>
+      </div>
+      <div class="income-out">
+        <div class="big">필요 투자금<b id="need-amt">약 1.70억원</b></div>
+        <div class="big">연 분배금<b id="year-div">1,200만원</b></div>
+        <div class="big">예상 블렌드 분배율<b id="blend-y">7.1%</b></div>
+        <span class="tax-badge safe" id="tax-badge">✓ 금융소득종합과세 안전</span>
+      </div>
+    </div>
+
+    <!-- 정직 배너 -->
+    <div class="honest">
+      <span class="ic3">⚠️</span>
+      <div class="tx3"><b>분배율은 수익률이 아니에요.</b> 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어요. 분배율이 높아도 가격이 녹으면 실제로 번 게 아니에요. 아래 <b>건전성 뱃지</b>가 "분배율 대비 실제 총수익"을 비교해줘요.</div>
+    </div>
+
+    <!-- 추천 조합 -->
+    <div class="panel">
+      <div class="panel__h" style="justify-content:space-between;">추천 조합 · 월 100만원 <span style="font-size:11px;color:var(--muted);font-weight:500;">건전·주의 등급만 · 원금성 제외</span></div>
+      <div class="alloc-row"><div class="an">ACE 미국배당다우존스 <small class="num">458760 · 분배 3.6%</small></div><div class="alloc-bar"><i style="width:40%"></i></div><div class="apct">40%</div></div>
+      <div class="alloc-row"><div class="an">TIGER 미국배당+7%프리미엄 <small class="num">458730 · 분배 9.8%</small></div><div class="alloc-bar"><i style="width:40%"></i></div><div class="apct">40%</div></div>
+      <div class="alloc-row"><div class="an">KODEX 미국배당프리미엄액티브 <small class="num">483280 · 분배 8.5%</small></div><div class="alloc-bar"><i style="width:20%"></i></div><div class="apct">20%</div></div>
+      <div style="padding:12px 16px 2px;font-size:11px;font-weight:700;color:var(--muted);">월별 수령액 (분배월 섞어 평탄화)</div>
+      <div class="imonths">
+        <div class="mb" style="height:90%"></div><div class="mb" style="height:96%"></div><div class="mb" style="height:88%"></div>
+        <div class="mb" style="height:94%"></div><div class="mb" style="height:100%"></div><div class="mb" style="height:91%"></div>
+        <div class="mb" style="height:95%"></div><div class="mb" style="height:89%"></div><div class="mb" style="height:97%"></div>
+        <div class="mb" style="height:92%"></div><div class="mb" style="height:98%"></div><div class="mb" style="height:93%"></div>
+      </div>
+      <div class="imonths-x"><span>1월</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span></div>
+      <div class="pdisc" style="background:var(--soft);">매월 균등 수령되도록 분배 월이 다른 ETF를 섞었어요. 실제 분배금은 매월 달라질 수 있어요.</div>
+    </div>
+
+    <!-- 전체 인컴 ETF -->
+    <div class="phead" style="margin-top:6px;">
+      <div><h1 style="font-size:16px;">인컴 ETF 전체 · 순자산 1조+</h1><div class="psub">월배당·커버드콜 ETF · 분배율 vs 실제 총수익 비교</div></div>
+      <div class="stabs" id="isort-tabs">
+        <a class="on" onclick="incomeSort('yield',this)">분배율</a>
+        <a onclick="incomeSort('health',this)">건전성</a>
+        <a onclick="incomeSort('ret1y',this)">총수익</a>
+      </div>
+    </div>
+    <div class="tbl">
+      <div class="block__h" style="background:var(--soft);">
+        <span class="block__s" style="font-weight:700;flex:1;">ETF</span>
+        <span style="width:64px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">분배율</span>
+        <span style="width:104px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">실제 총수익·침식</span>
+        <span style="width:58px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">건전성</span>
+      </div>
+      <div id="income-rows"></div>
+    </div>
+    <p class="disc">※ 분배율·총수익·순자산은 직전 기준 실측값이에요. 건전성은 "총수익 − 분배율"로 추정한 가격 변화예요(원금분배 명시 데이터 대체). 세금은 예상치이며 개별 상황에 따라 달라져요. 투자 권유가 아니에요.</p>
+  </div>
+
+  <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
+  <div class="screen" id="passive">
+    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="phead">
+      <div>
+        <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
+        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · 2026-06-13</div>
+      </div>
+      <div class="stabs" id="psort-tabs">
+        <a class="on" onclick="passiveSort('dov',this)">거래일수</a>
+        <a onclick="passiveSort('conc',this)">집중도</a>
+        <a onclick="passiveSort('score',this)">민감도</a>
+      </div>
+    </div>
+    <div class="sector-bias"><span class="ic2">📡</span><span>지금 패시브 자금은 <b>반도체 소부장</b>에 집중돼 있어요. 상위 9종목 중 7종목이 반도체 테마 ETF에 고비중으로 담겨 있어요.</span></div>
+    <div class="tbl" id="passive-tbl">
+      <div class="block__h" style="background:var(--soft);">
+        <span class="block__s" style="font-weight:700;width:160px;">종목</span>
+        <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);" id="pbar-label">거래일수 (ETF 물량 소화일)</span>
+        <span class="block__s" style="width:56px;text-align:right;" id="pconc-label">집중도</span>
+        <span class="block__s" style="width:44px;text-align:right;">민감도</span>
+        <span class="block__s" style="width:36px;text-align:right;">뱃지</span>
+      </div>
+      <div id="passive-rows"></div>
+    </div>
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:0 0 10px 10px;border-top:none;padding:10px 16px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:-1px;">
+      주요 ETF TOP10 구성종목 기준 추정 · 소수 비중 누락 가능 · 인과 주장 아님 · 구조적 노출도 지표예요.<br>
+      高: 거래일수 ≥ 8일 AND 시총 집중도 ≥ 10% · 中: 거래일수 ≥ 4일 AND 집중도 ≥ 5%
     </div>
   </div>
 
@@ -674,6 +882,106 @@ document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn').forEach(el=>{
 function openSearch(){document.getElementById('ov').classList.add('on');setTimeout(()=>document.getElementById('sq').focus(),50);}
 function closeSearch(){document.getElementById('ov').classList.remove('on');document.getElementById('sq').value='';}
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
+
+/* ── 패시브 민감주 랭킹 ── */
+const PASSIVE_DATA=[
+  {code:'039030',name:'이오테크닉스',sector:'반도체',conc:20.2,dov:15.0,score:98,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'058140',name:'리노공업',sector:'반도체',conc:21.0,dov:13.9,score:96,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'240810',name:'원익IPS',sector:'반도체',conc:18.9,dov:10.5,score:80,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'000990',name:'DB하이텍',sector:'반도체',conc:18.0,dov:9.2,score:74,badge:'high',etf:'KODEX 반도체'},
+  {code:'042700',name:'한미반도체',sector:'반도체',conc:12.3,dov:8.7,score:58,badge:'high',etf:'KODEX 반도체'},
+  {code:'095340',name:'ISC',sector:'반도체',conc:10.4,dov:7.6,score:50,badge:'mid',etf:'TIGER 반도체TOP10'},
+  {code:'247540',name:'에코프로비엠',sector:'2차전지',conc:6.0,dov:6.8,score:37,badge:'mid',etf:'TIGER 2차전지테마'},
+  {code:'357780',name:'솔브레인',sector:'반도체',conc:6.8,dov:6.3,score:37,badge:'mid',etf:'TIGER 반도체TOP10'},
+  {code:'086520',name:'에코프로',sector:'2차전지',conc:6.4,dov:4.8,score:31,badge:'mid',etf:'TIGER 2차전지테마'},
+];
+let pSortKey='dov';
+const maxDov=15.0;
+function passiveRow(r,i){
+  const pct=Math.round(r.dov/maxDov*100);
+  const badgeHtml=r.badge==='high'?'<span class="pbdg high">高</span>':'<span class="pbdg mid">中</span>';
+  const barVal=pSortKey==='conc'?r.conc+'%':pSortKey==='score'?r.score:r.dov+'일';
+  const barPct=pSortKey==='conc'?Math.round(r.conc/21*100):pSortKey==='score'?r.score:pct;
+  return `<a class="prank-row" onclick="go('detail')">
+    <span class="rk2 num">${i+1}</span>
+    <div class="nm" style="width:136px;flex-shrink:0;"><b style="font-size:13px;">${r.name}</b><small class="num" style="font-size:10px;color:var(--muted);">${r.code} · ${r.sector}</small></div>
+    <div class="dov-bar"><div class="fill" style="width:${barPct}%"></div><span class="val">${barVal}</span></div>
+    <span class="conc-col num">${r.conc}%</span>
+    <span class="score-col num">${r.score}</span>
+    <div style="width:36px;text-align:right;flex-shrink:0;">${badgeHtml}</div>
+  </a>`;
+}
+function passiveRender(){
+  const sorted=[...PASSIVE_DATA].sort((a,b)=>b[pSortKey]-a[pSortKey]);
+  document.getElementById('passive-rows').innerHTML=sorted.map((r,i)=>passiveRow(r,i)).join('');
+  const labels={dov:'거래일수 (ETF 물량 소화일)',conc:'집중도 (시총 대비 패시브 자금)',score:'민감도 점수 (0~100)'};
+  document.getElementById('pbar-label').textContent=labels[pSortKey];
+}
+function passiveSort(key,el){
+  pSortKey=key;
+  document.querySelectorAll('#psort-tabs a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+  passiveRender();
+}
+passiveRender();
+
+/* ── 배당 인컴 설계기 ── */
+const INCOME_DATA=[
+  {code:'458760',name:'ACE 미국배당다우존스',aum:'2.1조',y:3.6,r:19.1,fee:0.01},
+  {code:'458730',name:'TIGER 미국배당+7%프리미엄',aum:'3.9조',y:9.8,r:14.2,fee:0.39},
+  {code:'483280',name:'KODEX 미국배당프리미엄액티브',aum:'1.5조',y:8.5,r:8.0,fee:0.50},
+  {code:'441680',name:'TIGER 미국나스닥100커버드콜',aum:'1.2조',y:11.5,r:6.4,fee:0.37},
+  {code:'472830',name:'SOL 미국30년국채커버드콜',aum:'1.1조',y:12.5,r:2.1,fee:0.25},
+  {code:'476550',name:'TIGER 미국30년국채커버드콜',aum:'1.0조',y:13.0,r:1.9,fee:0.30},
+  {code:'498400',name:'RISE 200위클리커버드콜',aum:'1.3조',y:14.0,r:-2.8,fee:0.30},
+];
+function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+function incomeRow(d){
+  const [hc,hl,e]=incomeHealth(d);
+  const eTxt=e>=0?`<span style="color:#16A34A">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#E03131">가격 ${e.toFixed(0)}%</span>`;
+  const rTxt=`${d.r>=0?'+':''}${d.r}%`;
+  return `<a class="irow" onclick="go('etf-detail')">
+    <div class="inm"><b>${d.name}</b><small class="num">${d.code} · 순자산 ${d.aum} · 보수 ${d.fee}%</small></div>
+    <div class="iyield"><b class="num">${d.y}%</b><small>분배율</small></div>
+    <div class="iret"><b class="num">${rTxt}</b> 총수익<br>${eTxt}</div>
+    <div class="ihealth"><span class="hbdg ${hc}">${hl}</span></div>
+  </a>`;
+}
+let iSortKey='yield';
+function incomeRender(){
+  let arr=[...INCOME_DATA];
+  if(iSortKey==='yield')arr.sort((a,b)=>b.y-a.y);
+  else if(iSortKey==='ret1y')arr.sort((a,b)=>b.r-a.r);
+  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
+}
+function incomeSort(k,el){iSortKey=k;document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');incomeRender();}
+incomeRender();
+function setTarget(won,el){
+  document.querySelectorAll('#tbtns a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  const blend=7.06, yearly=won*12, need=yearly/(blend/100);
+  document.getElementById('need-amt').textContent='약 '+(need/10000).toFixed(2)+'억원';
+  document.getElementById('year-div').textContent=yearly.toLocaleString()+'만원';
+  document.getElementById('blend-y').textContent=blend.toFixed(1)+'%';
+  const tb=document.getElementById('tax-badge');
+  if(yearly>=2000){tb.className='tax-badge warn';tb.textContent='⚠ 종합과세 대상 (연 '+yearly.toLocaleString()+'만원 > 2,000만원)';}
+  else{tb.className='tax-badge safe';tb.textContent='✓ 종합과세 안전 (연 '+yearly.toLocaleString()+'만원 ≤ 2,000만원)';}
+}
+
+/* 패시브 뱃지 툴팁 */
+const passBtn=document.getElementById('badge-pass-btn');
+if(passBtn){
+  passBtn.addEventListener('mouseenter',e=>{
+    tip.innerHTML=`<div class="tt" style="color:#0284C7;">🧲 패시브 민감주 뱃지</div><div class="bd" style="line-height:1.9;">
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg high" style="font-size:10px;">高</span> <b>거래일수 ≥ 8일 AND 집중도 ≥ 10%</b></span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg mid" style="font-size:10px;">中</span> <b>거래일수 ≥ 4일 AND 집중도 ≥ 5%</b></span><br>
+      거래일수 = 패시브 자금 ÷ 20일 평균 거래대금<br>집중도 = 패시브 자금 ÷ 시가총액<br><b>인과 아님 — 구조적 노출도 지표예요.</b>
+    </div>`;
+    tip.style.display='block';moveTip(e);
+  });
+  passBtn.addEventListener('mousemove',moveTip);
+  passBtn.addEventListener('mouseleave',hideTip);
+}
 </script>
 </body>
 </html>
