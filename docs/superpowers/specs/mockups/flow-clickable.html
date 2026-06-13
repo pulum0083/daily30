@@ -22,7 +22,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}.crumb a{color:var(--muted);text-decoration:none;}.crumb a:hover{color:var(--primary);}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:0;}.crumb a{color:var(--muted);text-decoration:none;}.crumb a:hover{color:var(--primary);}
+.back-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hair);color:var(--muted);font-size:15px;cursor:pointer;margin-right:8px;flex-shrink:0;transition:background .12s,color .12s;padding:0;line-height:1;}
+.back-btn:hover{background:var(--inset);color:var(--ink);}
 
 .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;}
 .hero h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;}.hero h1 .a{color:var(--primary);}
@@ -413,7 +415,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== ETF DETAIL (KODEX 200) ===== -->
   <div class="screen" id="etf-detail">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-etf">
@@ -560,7 +562,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== DETAIL (SK하이닉스) ===== -->
   <div class="screen" id="detail">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-stock">
@@ -685,7 +687,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
     <div class="grid">
       <div>
         <div class="shead"><div class="top">
@@ -721,7 +723,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
   <div class="screen" id="income">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
     <div class="phead">
       <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
@@ -777,7 +779,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
     <div class="phead">
       <div>
         <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
@@ -808,7 +810,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== RANKING (거래량 전체) ===== -->
   <div class="screen" id="ranking">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()">‹</button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
     <div class="phead">
       <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-11 종가</div></div>
       <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
@@ -838,7 +840,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <div id="tip"></div>
 
 <script>
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
+const navHistory=[];
+function go(id,noHistory){
+  if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 function switchTab(hero,tab,el){
   const prefix=hero+'-';
   document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
