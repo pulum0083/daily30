@@ -336,7 +336,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><div class="l">원/달러</div><div class="v num">1,366.5 <span class="dn">−3.2</span></div></div>
     </div>
     <div class="hotcards">
-      <a class="hot hot--ai" onclick="go('ranking')"><span class="hot__ic">🔥</span><span class="hot__tx"><b>오늘의 AI 톱픽</b><small>Claude가 픽한 상승 후보</small></span><span class="hot__arr">→</span></a>
+      <a class="hot hot--ai" onclick="go('ranking')"><span class="hot__ic">🔥</span><span class="hot__tx"><b>오늘의 AI 브리핑</b><small>코스피 · 마감 · 미국 장 예측</small></span><span class="hot__arr">→</span></a>
       <a class="hot" onclick="go('income')" style="background:#FFFBEB;border-color:#FDE68A;"><span class="hot__ic" style="background:#FEF3C7;">🪙</span><span class="hot__tx"><b style="color:#B7791F;">배당 인컴 설계기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
       <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
@@ -415,7 +415,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== ETF DETAIL (KODEX 200) ===== -->
   <div class="screen" id="etf-detail">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-etf">
@@ -495,6 +495,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
         </div></div>
 
+        <div class="sc"><div class="sc__h"><span class="sc__t">분배 · 건전성</span><span class="sc__s">최근 1년 기준</span></div><div class="scb">
+          <div class="tiles">
+            <div class="tile"><div class="l">연 분배율</div><div class="v num">1.62%</div></div>
+            <div class="tile"><div class="l">분배주기</div><div class="v">분기</div></div>
+            <div class="tile"><div class="l">건전성</div><div class="v" style="color:#00ae1a;display:flex;align-items:center;justify-content:center;gap:5px;"><i style="width:8px;height:8px;border-radius:50%;background:#00ae1a;display:inline-block;"></i>건전</div></div>
+          </div>
+          <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">배당 인컴 설계기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
+        </div></div>
         <div class="sc"><div class="sc__h"><span class="sc__t">섹터 비중 <span class="phase">PHASE 2</span></span><span class="sc__s">구성종목 기준</span></div>
           <div class="note">⚠ ETF 구성종목·비중 데이터 신규 수집 필요 (KRX·운용사 일별 공시)</div>
           <div class="donutwrap">
@@ -562,7 +570,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== DETAIL (SK하이닉스) ===== -->
   <div class="screen" id="detail">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-stock">
@@ -628,12 +636,43 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
           </div>
         </div>
-        <div class="sc"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30</span></div><div class="scb">
+        <div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;">
+          <span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span>
+          <div style="font-size:13px;line-height:1.65;color:#92400E;">
+            <b>오늘 왜 움직였나</b> · HBM3E 12단 양산 공급계약 보도에 외국인·기관 동반 매수세 유입. 장중 고점 250,500 터치 후 +3.4% 마감했어요.
+            <span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-12 18:20 · 더블샷 이슈 수집</span>
+          </div>
+        </div></div>
+        <!-- 장 전/장 중: AI 오늘의 전망 (07:30 예측) -->
+        <div class="sc" id="pred-before"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30 예측</span></div><div class="scb">
           <span class="pbadge">▲ 상승 우위 · MA20 상향 돌파</span>
           <div class="pg"><div class="n" style="left:78%"></div></div><div class="pgs"><span>하락 우위</span><span>중립</span><span>상승 우위</span></div>
           <div class="ro"><b class="num">78</b><u>% 상승 확률</u><span class="cf">신뢰도 <b class="num">78%</b></span></div>
           <p class="scen">HBM3E 12단 양산 본격화로 실적 기대가 커지고 있어요. 20일선을 막 상향 돌파해 개별 모멘텀이 살아있는 신호예요.</p>
         </div></div>
+        <!-- 장 마감 후: 예측 결과 확정 (15:30 이후) -->
+        <div class="sc" id="pred-after" style="display:none"><div class="sc__h" style="background:#F0FDF4;border-color:#BBF7D0;"><span class="sc__t" style="color:#15803D;">오늘 예측 결과</span><span class="sc__s">15:32 확정</span></div><div class="scb">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <span style="font-size:28px;font-weight:900;color:#16A34A;line-height:1;">✓</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:#15803D;">적중 · 상승 예측이 맞았어요.</div>
+              <div style="font-size:12px;color:#16A34A;margin-top:2px;">상승 우위 78% 예측 → 실제 <b>+3.42%</b> 마감</div>
+            </div>
+          </div>
+          <div class="tiles">
+            <div class="tile"><div class="l">예측 방향</div><div class="v up">▲ 상승</div></div>
+            <div class="tile"><div class="l">실제 등락</div><div class="v num up">+3.42%</div></div>
+            <div class="tile"><div class="l">예측 확률</div><div class="v num">78%</div></div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--muted);">오늘 시장 전체 흐름</span>
+            <a onclick="alert('마감 브리핑 페이지로 이동')" style="font-size:12px;font-weight:700;color:var(--primary);">코스피 마감 브리핑 →</a>
+          </div>
+        </div></div>
+        <!-- 장 전/마감 토글 버튼 (목업 전용) -->
+        <div style="text-align:center;margin:-4px 0 12px;">
+          <button onclick="(function(){var b=document.getElementById('pred-before'),a=document.getElementById('pred-after');if(b.style.display==='none'){b.style.display='';a.style.display='none';this.textContent='→ 장 마감 후 상태 보기';}else{b.style.display='none';a.style.display='';this.textContent='← 장 전 상태 보기';}}).call(this)" style="font-size:11px;color:var(--muted);background:var(--inset);border:1px solid var(--hair);border-radius:6px;padding:5px 12px;cursor:pointer;">→ 장 마감 후 상태 보기</button>
+        </div>
         <div class="two">
           <div class="sc"><div class="sc__h"><span class="sc__t">매매 가이드</span></div><div class="scb"><div class="tiles">
             <div class="tile"><div class="l">진입</div><div class="v num">248,000</div></div><div class="tile"><div class="l">목표</div><div class="v num up">262,000</div></div><div class="tile"><div class="l">손절</div><div class="v num dn">240,000</div></div>
@@ -644,6 +683,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">111만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2.07조</span><span class="s">시총</span></div></div>
           </div></div>
         </div>
+        <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-12 · 순매수 억원</span></div><div class="scb">
+          <div class="tiles">
+            <div class="tile"><div class="l">개인</div><div class="v num dn">−820</div></div>
+            <div class="tile"><div class="l">기관</div><div class="v num up">+310</div></div>
+            <div class="tile"><div class="l">외국인</div><div class="v num up">+540</div></div>
+          </div>
+          <p class="scen" style="margin-top:12px;">외국인·기관이 동반 순매수, 개인은 차익 실현이에요. <b style="color:var(--up)">외국인 3일 연속 순매수</b> 흐름이 이어지고 있어요.</p>
+        </div></div>
         <div class="sc"><div class="sc__h"><span class="sc__t">과거 AI 픽 이력</span></div><div class="scb">
           <div style="font-size:13px;color:var(--muted);line-height:2;"><b style="color:var(--up)">06-11 적중</b> 상승 예측 → +3.4% · <b style="color:var(--up)">06-05 적중</b> → +1.8% · <b style="color:var(--dn)">05-28 빗나감</b> → −0.9%</div>
         </div></div>
@@ -687,7 +734,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
     <div class="grid">
       <div>
         <div class="shead"><div class="top">
@@ -723,7 +770,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
   <div class="screen" id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
     <div class="phead">
       <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
@@ -779,7 +826,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
     <div class="phead">
       <div>
         <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
@@ -810,7 +857,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== RANKING (거래량 전체) ===== -->
   <div class="screen" id="ranking">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
     <div class="phead">
       <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-11 종가</div></div>
       <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
