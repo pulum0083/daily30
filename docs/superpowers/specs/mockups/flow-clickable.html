@@ -293,6 +293,17 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
 .irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
+/* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
+.irow{position:relative;}
+.irow-arr{position:absolute;right:12px;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .2s;font-size:17px;line-height:1;user-select:none;pointer-events:auto;}
+.irow:hover .irow-arr{opacity:0.22;color:var(--muted);}
+.irow:hover .irow-arr:hover{opacity:1;color:var(--primary);}
+.irow-arr .arr-tip{position:absolute;bottom:calc(100%+7px);right:0;white-space:nowrap;background:rgba(25,25,25,.82);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:500;letter-spacing:-.01em;opacity:0;pointer-events:none;transition:opacity .15s;z-index:300;}
+.irow:hover .irow-arr:hover .arr-tip{opacity:1;}
+/* task3: 건전성 뱃지 호버 툴팁 */
+.hbdg-w{position:relative;display:inline-flex;}
+.hbdg-w .hbdg-tip{position:absolute;bottom:calc(100%+8px);right:0;width:210px;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);box-shadow:0 4px 20px rgba(0,0,0,.12);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:250;white-space:normal;text-align:left;}
+.hbdg-w:hover .hbdg-tip{opacity:1;transform:translateY(0);}
 /* 인컴 ETF 패널 설명 캡션 + 건전성 범례 */
 .ipanel-cap{padding:10px 16px 12px;border-bottom:1px solid var(--hair);font-size:12px;color:var(--muted);line-height:1.6;}
 .ipanel-cap b{color:var(--ink);font-weight:600;}
@@ -986,15 +997,18 @@ const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
 function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
 /* 사이드바: 인컴 ETF 전체 (국내 1조+) */
+const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.'};
 function incomeRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
   const rk=i+1,rkCls=rk<=3?'rk top':'rk';
   const rTxt=`${d.r>=0?'+':''}${d.r}%`;
   const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
-  return `<a class="irow" onclick="addFromRanking('${d.code}')" title="클릭하면 시뮬레이터에 담겨요">
-    <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b><span class="hbdg ${hc}">${hl}</span></div>
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  return `<a class="irow" onclick="addFromRanking('${d.code}')">
+    <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
     <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
+    <span class="irow-arr"><span class="arr-tip">클릭하면 내 보유에 담겨요</span>←</span>
   </a>`;
 }
 let iSortKey='y';
