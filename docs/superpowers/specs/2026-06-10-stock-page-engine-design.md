@@ -25,9 +25,12 @@ ETFNow가 작동하는 방식(프로그래매틱 SEO + 매일 쓰는 도구 + �
 
 ### 1. 종목 레지스트리 (`data/stock_universe.json`)
 
-파이프라인에 한 번이라도 등장한 종목 코드를 누적 저장한다.
+기준 유니버스를 일괄 시드하고, 그 위에 픽 등장 종목을 누적한다.
 
-- 소스: `kospi_candidates`, `sector_stocks`, `stock_picks`(픽). 각 실행 시 등장 코드를 레지스트리에 머지(append-only).
+> **갱신(2026-06-14)**: 초기 "픽 자연누적 단독" 방식은 닫힌 루프 회귀라 폐기. **영구 일괄 생성**으로 전환 — 레지스트리를 KOSPI200(Phase 1a)·KOSDAQ150(Phase 1b)으로 일괄 시드하고 픽은 그 위에 누적한다. 단계적 롤아웃·온디맨드 금지·최소 콘텐츠 기준은 `STOCKS_SERVICE_RULES.md §8` 참조.
+
+- 시드: KOSPI200(1a) → KOSDAQ150(1b) 기준 유니버스 일괄 등록.
+- 누적 소스: `kospi_candidates`, `sector_stocks`, `stock_picks`(픽). 각 실행 시 등장 코드를 레지스트리에 머지(append-only).
 - 레코드: `{ code, name, market(KOSPI/KOSDAQ), sector, first_seen, last_seen }`
 - 6자리 코드를 키로 한다. `.KS`/`.KQ` 접미사는 저장하지 않는다(SERVICE_RULES 준수).
 - **알려진 처리 필요점**: `stock_picks`는 `name`만 갖고 코드가 없을 수 있다 → `kospi_candidates`/`sector_stocks`의 name↔ticker 매핑으로 코드를 역추적. 매핑 실패 종목은 레지스트리에 넣지 않는다(이름만으로 페이지를 만들지 않는다).
@@ -114,7 +117,7 @@ ETFNow 출처(KRX·네이버·Yahoo·NASDAQ Trader·업비트) 중 업비트(코
 - 적중률 **표시** (Phase 3, 기록만 Phase 1)
 - 교육 콘텐츠 롱테일 글
 - 애드센스 신청 (트래픽 확보 후)
-- KOSPI200/KOSDAQ150 전체 유니버스 확장 (초기엔 자연 누적)
+- KOSDAQ150·롱테일 확장은 Phase 1b 이후 (Phase 1a는 KOSPI200 + ETF 1조+ ≈ 300페이지로 시작 — `STOCKS_SERVICE_RULES.md §8`)
 
 ## 설계 갱신 — 프로토타입 확정 (2026-06-11)
 
@@ -135,8 +138,9 @@ ETFNow 출처(KRX·네이버·Yahoo·NASDAQ Trader·업비트) 중 업비트(코
 - **종목 페이지 한정**: 사이드바 `336 → 360px`(ETF 행 여유), 메인 내부 **2분할**(매매 가이드 ↔ 기술 지표). 브리핑 페이지는 기존 `1fr/336` 유지.
 
 ### 상세 페이지 섹션 배치 (확정)
-- **메인**: 헤더+스파크라인 → AI 전망(`pred-gauge`, 풀폭) → [매매 가이드 | 기술 지표] 2분할 → 과거 AI 픽 이력.
+- **메인**: 헤더+스파크라인 → AI 전망(`pred-gauge`, 풀폭) → [매매 가이드 | 기술 지표] 2분할 → **참고 데이터 레이어** → 과거 AI 픽 이력.
 - **사이드바**: 같은 섹터 종목 · 이 종목을 담은 ETF(P2) · 함께 담기는 종목 조합(P2) · AI 예측 적중률(P3).
+- **참고 데이터 레이어 (2026-06-14 추가)**: 시총·52주 범위·외국인/기관/개인 수급·증권사 목표주가·실적 분기추세(매출·영업이익). 전부 네이버 무인증 실측(`integration` + `finance/quarter`), KOSPI200 show-when-present. **차별점이 아닌 신뢰·완성 레이어**(thin-content 방어). 목표주가는 AI 전망과 대조로 제시·출처 명시. 칩보드(`/chips`, 외부 프록시) 의존 금지. 상세는 `STOCKS_SERVICE_RULES.md §2`.
 
 ### 허브(홈) 화면 — 하이브리드 랭킹 (확정)
 - 풀폭(`max-width:1120px`) 단일 컬럼. 순서: 히어로+검색 → 시장 지표 스트립 → **섹터 칩(중요 내비)** → 2티어 가이드(상단) → **거래량 톱 → 상승 톱 → 하락 톱 세로 스택**(풀폭 수평 막대) → 각 블록 "전체 →".
