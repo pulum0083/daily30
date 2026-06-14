@@ -94,7 +94,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ctabs a.on{background:var(--inset);color:var(--ink);}
 .cpane{padding:0;}
 .cpane.hidden{display:none;}
-.chart-wrap{padding:8px 14px 12px;}
+.chart-wrap{padding:8px 14px 12px;position:relative;}
+.cmk-layer{position:absolute;left:14px;right:14px;top:8px;height:80px;pointer-events:none;}
+.cmk{position:absolute;font-size:10px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.72);padding:0 2px;border-radius:3px;}
+.cmk.hi{color:var(--up);}
+.cmk.lo{color:var(--dn);}
 .chart-svg{width:100%;height:80px;display:block;overflow:visible;}
 .taxis{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:10px;color:var(--muted);font-weight:600;}
 .sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;}
@@ -466,11 +470,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div style="text-align:right"><div class="px num">36,610</div><div class="cg num">▲ +0.71%</div></div>
           </div>
           <div class="ctabs">
-            <a class="on" onclick="switchTab('etf','intra',this)">당일 장중</a>
+            <a class="on" onclick="switchTab('etf','intra',this)">직전 장중</a>
             <a onclick="switchTab('etf','20d',this)">20일</a>
             <a onclick="switchTab('etf','3m',this)">3개월</a>
           </div>
-          <!-- 당일 장중 — 코스피200 패턴 (올라갔다 후반 조정, 소폭 양봉) -->
+          <!-- 직전 장중 — 코스피200 패턴 (06-12 완료 세션 · 실시간 아님) -->
           <div class="cpane chart-wrap" id="etf-intra">
             <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
               <defs>
@@ -485,13 +489,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <path d="M0,46 L57,44 L114,40 L171,52 L228,44 L285,36 L342,30 L399,22 L456,18 L513,12 L570,24 L627,32 L684,26 L740,24 L740,76 L0,76 Z" fill="url(#grad-etf-up)"/>
               <!-- 라인 -->
               <polyline fill="none" stroke="#2775ED" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,46 57,44 114,40 171,52 228,44 285,36 342,30 399,22 456,18 513,12 570,24 627,32 684,26 740,24"/>
-              <!-- 저점 -->
+              <!-- 저점·고점 마커 (라벨은 HTML 오버레이) -->
               <circle cx="171" cy="52" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-              <text x="180" y="62" font-size="9.5" fill="#2775ED" font-family="Pretendard,sans-serif" font-weight="700">저점 36,280</text>
-              <!-- 고점 -->
               <circle cx="513" cy="12" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
-              <text x="470" y="10" font-size="9.5" fill="#E03131" font-family="Pretendard,sans-serif" font-weight="700">고점 36,720</text>
             </svg>
+            <div class="cmk-layer">
+              <span class="cmk hi" style="left:69.3%;top:12px;transform:translate(-50%,-125%);">고점 36,720</span>
+              <span class="cmk lo" style="left:23.1%;top:52px;transform:translate(-50%,45%);">저점 36,280</span>
+            </div>
             <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
           </div>
           <!-- 20일 -->
@@ -620,11 +625,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div style="text-align:right"><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
           </div>
           <div class="ctabs">
-            <a class="on" onclick="switchTab('stock','intra',this)">당일 장중</a>
+            <a class="on" onclick="switchTab('stock','intra',this)">직전 장중</a>
             <a onclick="switchTab('stock','20d',this)">20일</a>
             <a onclick="switchTab('stock','3m',this)">3개월</a>
           </div>
-          <!-- 당일 장중 area 차트 -->
+          <!-- 직전 장중 area 차트 (06-12 완료 세션 · 실시간 아님) -->
           <div class="cpane chart-wrap" id="stock-intra">
             <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
               <defs>
@@ -639,13 +644,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <path d="M0,62 L40,66 L100,60 L160,55 L220,57 L285,46 L342,40 L399,35 L456,27 L513,13 L570,20 L627,26 L684,23 L740,22 L740,76 L0,76 Z" fill="url(#grad-up)"/>
               <!-- 라인 -->
               <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,62 40,66 100,60 160,55 220,57 285,46 342,40 399,35 456,27 513,13 570,20 627,26 684,23 740,22"/>
-              <!-- 저점 마커 -->
+              <!-- 저점·고점 마커 (라벨은 왜곡 방지 위해 HTML 오버레이로) -->
               <circle cx="40" cy="66" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-              <text x="50" y="70" font-size="9.5" fill="#2775ED" font-family="Pretendard,sans-serif" font-weight="700">저점 239,500</text>
-              <!-- 고점 마커 -->
               <circle cx="513" cy="13" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
-              <text x="470" y="11" font-size="9.5" fill="#E03131" font-family="Pretendard,sans-serif" font-weight="700">고점 250,500</text>
             </svg>
+            <div class="cmk-layer">
+              <span class="cmk hi" style="left:69.3%;top:13px;transform:translate(-50%,-125%);">고점 250,500</span>
+              <span class="cmk lo" style="left:5.4%;top:66px;transform:translate(8px,-50%);">저점 239,500</span>
+            </div>
             <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
           </div>
           <!-- 20일 스파크라인 -->
