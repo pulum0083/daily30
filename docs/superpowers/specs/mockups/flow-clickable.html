@@ -211,7 +211,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .block__t.pass::before{background:#0284C7;}
 .block__t.pass{color:#0C4A6E;}
 .bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
-.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
 .pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
 .pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
 .badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
@@ -1081,6 +1081,10 @@ function tipHTML(el){
     const m=el.textContent.match(/×([\d.]+)/);const mult=m?m[1]:'N';
     return `<div class="tt" style="color:#E8590C">🔶 거래량 ×${mult} 급증</div><div class="bd">오늘 거래량이 <b>최근 20일 평균 대비 ${mult}배</b>예요. 수치가 높을수록 <b>이례적인 거래 폭증</b>이에요. 외국인·기관 수급이 함께 들어왔다면 의미 있는 수급 유입 신호로 볼 수 있어요.</div>`;
   }
+  if(el.classList.contains('pbdg')&&el.classList.contains('high'))
+    return `<div class="tt" style="color:#92400E">🟡 패시브 노출 高</div><div class="bd">코스피200·반도체 등 주요 ETF가 <b>구조적으로 대량 보유</b>하는 종목이에요. 분기 말·지수 변경일마다 ETF 기계매매가 자동으로 대규모 수급을 만들어요. <b>리밸런싱 시즌에 변동성이 커질 수 있어요.</b></div>`;
+  if(el.classList.contains('pbdg')&&el.classList.contains('mid'))
+    return `<div class="tt" style="color:#065F46">🟢 패시브 노출 中</div><div class="bd">ETF 기계매매 노출이 <b>중간 수준</b>인 종목이에요. 패시브 수급 영향을 받지만 高보다는 낮아요. 리밸런싱 영향이 있을 때 단기 수급 변화를 참고하세요.</div>`;
   if(el.classList.contains('aip'))
     return `<div class="tt" style="color:#006EFF">🔵 AI 상승확률 ${n}%</div><div class="bd">오늘 AI 브리핑이 <b>픽한 종목</b>이에요. Claude가 <b>뉴스·수급·차트를 종합 분석</b>해 상승 방향에 둔 확률이에요. 신뢰도 ${n}%. 더블샷의 프리미엄 신호예요.</div>`;
   if(el.classList.contains('ais'))
@@ -1100,7 +1104,7 @@ function moveTip(e){
   tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
 function hideTip(){tip.style.display='none';}
-document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge').forEach(el=>{
+document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge,.pbdg').forEach(el=>{
   el.addEventListener('mouseenter',showTip);
   el.addEventListener('mousemove',moveTip);
   el.addEventListener('mouseleave',hideTip);
