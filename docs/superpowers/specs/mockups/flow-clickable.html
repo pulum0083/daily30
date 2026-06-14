@@ -51,6 +51,31 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bs-arr{font-size:16px;color:#C0C4CA;flex-shrink:0;transition:color .14s;}.brief-strip:hover .bs-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+/* 갱신 배지 */
+.upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
+.upd-badge .dot{width:4px;height:4px;border-radius:50%;background:#EF4444;animation:blink 1.2s ease-in-out infinite;}
+/* 실시간 포커스 카드 (칩보드 상단) */
+.focus-card{background:var(--canvas);border:1.5px solid #FECACA;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.focus-card__h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;font-weight:700;color:#991B1B;}
+.focus-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.focus-stock{padding:12px 14px;border-right:1px solid var(--hair);}
+.focus-stock:last-child{border-right:none;}
+.focus-stock .fn{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.focus-stock .fp{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.5px;}
+.focus-stock .fc{font-size:13px;font-weight:700;margin-top:1px;}
+.focus-stock .fs{font-size:10px;color:var(--muted);margin-top:5px;}
+/* Hyperliquid 장후 카드 */
+.hl-card{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.hl-card__h{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#EDE9FE;border-bottom:1px solid #DDD6FE;font-size:12px;font-weight:700;color:#5B21B6;}
+.hl-badge{background:#7C3AED;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:.02em;}
+.hl-note{font-size:10px;color:#7C3AED;font-weight:400;margin-left:auto;}
+.hl-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.hl-stock{padding:12px 14px;border-right:1px solid #DDD6FE;}
+.hl-stock:last-child{border-right:none;}
+.hl-stock .hn{font-size:11px;color:#6D28D9;font-weight:600;margin-bottom:4px;}
+.hl-stock .hp{font-size:20px;font-weight:800;color:#1E1B4B;line-height:1.1;letter-spacing:-.5px;}
+.hl-stock .hc{font-size:13px;font-weight:700;}
+.hl-stock .hf{font-size:10px;color:#7C3AED;margin-top:5px;}
 /* 프로토타입 시간대 토글 */
 .proto-toggle{display:flex;gap:4px;flex-shrink:0;align-items:center;}
 .proto-toggle button{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;}
@@ -449,11 +474,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div><h1>오늘의 <span class="a">종목</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · 06-11</p></div>
       <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span class="upd-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
+      <span style="font-size:10px;color:var(--muted);">09:00 – 15:30 장중</span>
+    </div>
     <div class="strip">
-      <div class="m"><span class="l">코스피</span><span class="v num">2,712</span><span class="vc up num">+0.82%</span></div>
-      <div class="m"><span class="l">코스닥</span><span class="v num">781.2</span><span class="vc up num">+0.45%</span></div>
-      <div class="m"><span class="l">KP200</span><span class="v num">366.1</span><span class="vc up num">+0.71%</span></div>
-      <div class="m"><span class="l">원/달러</span><span class="v num">1,366</span><span class="vc dn num">−3.2</span></div>
+      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">2,712</span><span class="vc up num" id="h-kospi-c">+0.82%</span></div>
+      <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">781.2</span><span class="vc up num" id="h-kosdaq-c">+0.45%</span></div>
+      <div class="m"><span class="l">KP200</span><span class="v num" id="h-kp200">366.1</span><span class="vc up num" id="h-kp200-c">+0.71%</span></div>
+      <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,366</span><span class="vc dn num" id="h-usd-c">−3.2</span></div>
     </div>
     <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
     <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-11/kospi/" style="cursor:pointer;">
@@ -478,7 +507,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11 <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
       <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><span class="vol-surge-badge">×2.1 급증</span><div class="ai"><span class="ais">신호 58</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><span class="vol-surge-badge">×3.4 급증</span><div class="ai"><span class="aip">AI 78</span></div></a>
       <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><span class="vol-surge-badge">×5.8 급증</span><div class="ai"><span class="ais">신호 71</span></div></a>
@@ -488,7 +517,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="cols2" style="margin-bottom:18px;">
       <div class="block">
-        <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s">등락률 기준</span></div>
+        <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
@@ -497,7 +526,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <a class="more" onclick="go('ranking')">상승 전체 →</a>
       </div>
       <div class="block">
-        <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s">등락률 기준</span></div>
+        <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
         <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
         <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
@@ -520,7 +549,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
     <hr class="etf-divider">
     <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s">AI 픽 미적용 · 신호만 · 06-11</span></div>
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> AI 픽 미적용</span></div>
       <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
       <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
       <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
@@ -1097,6 +1126,58 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         엔비디아 신고가·마이크론 어닝 서프라이즈로 HBM 수요 확인. SK하이닉스는 외국인 연속 순매수 흐름에서 시초가 갭업 가능성. 파운드리·장비는 모멘텀 제한적.
       </div>
       <a onclick="go('ranking')" style="display:block;padding:8px 16px;font-size:11px;font-weight:700;color:var(--primary);border-top:1px solid var(--hair);text-decoration:none;cursor:pointer;">더블샷 US 브리핑 원문 →</a>
+    </div>
+
+    <!-- 실시간 포커스: 삼성전자 · SK하이닉스 -->
+    <!-- 프로토타입 토글 -->
+    <div class="proto-toggle" style="margin-bottom:10px;">
+      <button class="on" onclick="chipFocus('live',this)">● 장중</button>
+      <button onclick="chipFocus('hl',this)">HL 장후</button>
+    </div>
+
+    <!-- 장중 실시간 카드 -->
+    <div class="focus-card" id="focus-live">
+      <div class="focus-card__h">
+        <span><span class="live-dot"></span>실시간 포커스</span>
+        <span class="upd-badge"><span class="dot"></span>10초 갱신</span>
+      </div>
+      <div class="focus-stocks">
+        <div class="focus-stock">
+          <div class="fn">삼성전자 <span class="num" style="font-weight:400;">005930</span></div>
+          <div class="fp num" id="sec-price">57,400</div>
+          <div class="fc up num" id="sec-chg">+1.2%</div>
+          <div class="fs">외국인 +2,204억 · 기관 +891억</div>
+        </div>
+        <div class="focus-stock">
+          <div class="fn">SK하이닉스 <span class="num" style="font-weight:400;">000660</span></div>
+          <div class="fp num" id="skh-price">248,000</div>
+          <div class="fc up num" id="skh-chg">+3.1%</div>
+          <div class="fs">외국인 +3일째 순매수 · 기관 중립</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 장 마감 후 Hyperliquid 24h 카드 -->
+    <div class="hl-card" id="focus-hl" style="display:none;">
+      <div class="hl-card__h">
+        <span class="hl-badge">HL 24h</span>
+        <span>장 마감 이후 연동</span>
+        <span class="hl-note">실제 체결가 아님 · 참고용</span>
+      </div>
+      <div class="hl-stocks">
+        <div class="hl-stock">
+          <div class="hn">삼성전자 <span style="font-weight:400;font-size:10px;">#SEC</span></div>
+          <div class="hp num">$38.20</div>
+          <div class="hc up num">+2.1%</div>
+          <div class="hf">펀딩 −0.008% · 장 마감 이후</div>
+        </div>
+        <div class="hl-stock">
+          <div class="hn">SK하이닉스 <span style="font-weight:400;font-size:10px;">#SKH</span></div>
+          <div class="hp num">$163.5</div>
+          <div class="hc up num">+5.97%</div>
+          <div class="hf">펀딩 −0.012% · 장 마감 이후</div>
+        </div>
+      </div>
     </div>
 
     <!-- 2-col: 좌=밤사이(과거) 우=한국종목(현재) -->
@@ -1705,6 +1786,12 @@ function renderChips(mode){
       '<div style="background:#F8FAFF;border-bottom:1px solid var(--hair);padding:9px 16px;display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#1E40AF;line-height:1.45;"><span>✨</span><span>'+nd.ai+'</span></div>'+
       rows+'</div>';
   }).join('');
+}
+function chipFocus(state,el){
+  el.parentNode.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('focus-live').style.display = state==='live' ? '' : 'none';
+  document.getElementById('focus-hl').style.display  = state==='hl'   ? '' : 'none';
 }
 function chipMode(mode,el){
   document.querySelectorAll('#chip-mode a').forEach(function(a){a.classList.remove('on');});
