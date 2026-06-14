@@ -155,6 +155,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .senti{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}.senti .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}.senti .l b{color:var(--up);}
 .gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}.gg__s{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;margin-top:8px;}
 .lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}.lede b{color:var(--ink);}
+/* 섹터 시장폭 */
+.breadth{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}
+.breadth .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}
+.breadth .l b{color:var(--ink);}
+.breadth .bbar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--inset);}
+.breadth .bbar i{display:block;height:100%;}.breadth .bbar .bu{background:var(--up);}.breadth .bbar .bd{background:var(--dn);}.breadth .bbar .bn{background:var(--hair);}
+.breadth .bk{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted);font-weight:600;}
+.breadth .bk i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+.breadth .bk .iu{background:var(--up);}.breadth .bk .id{background:var(--dn);}.breadth .bk .in{background:var(--hair);}
 .disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
 
 /* ranking page */
@@ -403,7 +412,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .gnb a{font-size:12px;}
   .gnb .sbtn{padding:6px 9px;}
   .hero h1,.phead h1{font-size:18px;}
-  .refrow{grid-template-columns:1fr;}
+  .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
+  .strip .m{flex:1 1 40%;}
+  .strip .m:nth-child(even){border-right:none;margin-right:0;padding-right:0;}
+  .refrow{grid-template-columns:1fr;gap:0;}
+  .refrow .rp{flex-direction:row;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);}
+  .refrow .rp:last-child{border-bottom:none;padding-bottom:0;}
+  .refrow .rk{font-size:12px;white-space:nowrap;}
+  .refrow b{font-size:15px;}
   .nm{width:104px;}
   .cols2 .nm{width:96px;}
   #chip-board .nm{width:100px;}
@@ -892,6 +908,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 6.2%</small></div><div class="wt">6.2%</div></div>
           <div class="pdisc">주요 ETF TOP10 구성 기준 추정 · 소수 비중 누락 가능 · 인과 아님, 구조적 노출도</div>
         </div>
+        <!-- 다른 섹터 — 현재 종목 섹터(반도체) 제외, 실제 8개 섹터 기준 -->
+        <div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div>
+          <div class="chips" style="padding:14px 16px;"><a onclick="go('sector')">⚡ 전력기기</a><a onclick="go('sector')">🛡️ 방산</a><a onclick="go('sector')">🚢 조선</a><a onclick="go('sector')">🔋 2차전지</a><a onclick="go('sector')">🚗 자동차</a><a onclick="go('sector')">🧬 바이오</a><a onclick="go('sector')">🏦 금융</a></div>
+        </div>
       </div>
     </div>
     <p class="disc">※ 모든 수치는 직전 거래일 종가 기준 실측값입니다. 투자 판단의 참고용입니다.</p>
@@ -907,14 +927,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="kpi"><div class="l">섹터 평균</div><div class="v up num">+1.2%</div></div>
         </div>
         <div class="senti"><div class="l"><span>섹터 AI 심리</span><span>상승 우위 <b class="num">68%</b></span></div><div class="gg"><div class="n" style="left:68%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
+        <div class="breadth">
+          <div class="l"><span>시장폭</span><span>28종목 중 <b class="up num">19 상승</b></span></div>
+          <div class="bbar"><i class="bu" style="width:67.9%"></i><i class="bd" style="width:28.6%"></i><i class="bn" style="width:3.5%"></i></div>
+          <div class="bk"><span><i class="iu"></i>상승 <span class="num">19</span></span><span><i class="id"></i>하락 <span class="num">8</span></span><span><i class="in"></i>보합 <span class="num">1</span></span></div>
+        </div>
         </div>
         <p class="lede">반도체 섹터는 <b>HBM·메모리 업황 회복</b> 기대로 외국인 수급이 유입되고 있어요. AI 픽은 <b>SK하이닉스(78%)</b>, 기술신호 강세는 <b>한미반도체·DB하이텍</b>이에요.</p>
         <div class="block">
           <div class="block__h"><span class="block__t">반도체 종목 랭킹</span><span class="block__s">시총순</span></div>
-          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660</small></div><div class="barwrap"><div class="bar up" style="width:62%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.8%</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
-          <a class="more" onclick="go('ranking')">반도체 28종목 전체 →</a>
+          <div id="sec-rows"></div>
+          <a class="more" id="sec-more"></a>
+        </div>
+        <!-- 패시브 쏠림 (섹터 고도 차별 블록 — 종목별 노출도 섹터 합산) -->
+        <div class="block" style="border-color:#BAE6FD;">
+          <div class="block__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
+          <p class="p1line" style="padding:12px 16px 4px;">반도체 섹터는 <b>주요 ETF 자금에 가장 많이 묶인 섹터</b>예요. 추적 28종목 중 <b>7종목</b>이 반도체 테마 ETF에 고비중으로 담겨 있어요.</p>
+          <div class="pmet">
+            <div class="mc"><div class="l">섹터 합산 노출</div><div class="v num">약 2.8조</div><div class="sub">반도체 테마 ETF 보유액</div></div>
+            <div class="mc"><div class="l">고노출 종목</div><div class="v num">7<span style="font-size:11px;color:var(--muted)">/28</span></div><div class="sub">노출도 高 등급</div></div>
+          </div>
+          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="more" onclick="go('passive')">패시브 민감주 전체 →</a>
         </div>
       </div>
       <div>
@@ -1248,6 +1284,54 @@ function rankRender(){
 }
 function rankLoadMore(){rankShown=Math.min(rankShown+10,RANK_DATA.length);rankRender();}
 rankRender();
+
+/* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
+const SECTOR_RANK=[
+  [1,'삼성전자','005930','dn','−6.4%',100,'ais','신호 58'],
+  [2,'SK하이닉스','000660','up','+3.4%',62,'aip','AI 78'],
+  [3,'한미반도체','042700','up','+1.8%',40,'ais','신호 71'],
+  [4,'DB하이텍','000990','up','+1.8%',38,'ais','신호 64'],
+  [5,'리노공업','058470','up','+0.9%',26,'ais','신호 60'],
+  [6,'이오테크닉스','039030','up','+2.1%',44,'ais','신호 62'],
+  [7,'주성엔지니어링','036930','up','+9.4%',96,'ais','신호 69'],
+  [8,'원익IPS','240810','up','+1.4%',32,'ais','신호 55'],
+  [9,'ISC','095340','up','+0.6%',20,'ax','—'],
+  [10,'솔브레인','357780','dn','−1.2%',28,'aid','신호 47'],
+  [11,'HPSP','403870','up','+3.1%',56,'ais','신호 67'],
+  [12,'테스','095610','up','+2.7%',50,'ais','신호 58'],
+  [13,'하나마이크론','067310','dn','−2.4%',46,'aid','신호 44'],
+  [14,'동진쎄미켐','005290','up','+0.4%',16,'ax','—'],
+  [15,'티씨케이','064760','dn','−0.8%',22,'ais','신호 52'],
+  [16,'고영','098460','up','+1.1%',28,'ais','신호 56'],
+  [17,'피에스케이','319660','up','+4.2%',70,'ais','신호 65'],
+  [18,'유진테크','084370','up','+1.6%',34,'ais','신호 59'],
+  [19,'네패스','033640','dn','−3.1%',54,'aid','신호 39'],
+  [20,'심텍','222800','up','+5.5%',82,'ais','신호 68'],
+  [21,'가온칩스','399720','up','+2.0%',42,'ais','신호 61'],
+  [22,'에스앤에스텍','101490','up','+1.3%',30,'ais','신호 54'],
+  [23,'케이씨텍','281820','up','+0.7%',20,'ax','—'],
+  [24,'코미코','183300','dn','−1.5%',32,'aid','신호 46'],
+  [25,'대주전자재료','078600','up','+6.8%',88,'ais','신호 66'],
+  [26,'월덱스','101160','up','+0.5%',18,'ax','—'],
+  [27,'엘오티베큠','083310','dn','−0.6%',18,'ais','신호 50'],
+  [28,'어보브반도체','102120','up','+1.9%',40,'ais','신호 57'],
+];
+let secShown=15;
+function secRow(r){
+  const top3=r[0]<=3;
+  const badge=r[6]==='ax'?`<span class="ax">—</span>`:`<span class="${r[6]}">${r[7]}</span>`;
+  return `<a class="row" onclick="go('detail')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]}</small></div><div class="barwrap"><div class="bar ${r[3]}" style="width:${r[5]}%"></div><span class="barval ${r[3]} num">${r[4]}</span></div><div class="ai">${badge}</div></a>`;
+}
+function secRender(){
+  const wrap=document.getElementById('sec-rows');
+  if(!wrap)return;
+  wrap.innerHTML=SECTOR_RANK.slice(0,secShown).map(secRow).join('');
+  const btn=document.getElementById('sec-more');
+  if(secShown>=SECTOR_RANK.length){btn.textContent=`반도체 ${SECTOR_RANK.length}종목 전체 →`;btn.setAttribute('onclick',"go('ranking')");}
+  else{btn.textContent=`더보기 · ${Math.min(secShown+10,SECTOR_RANK.length)-secShown}개 더 (${SECTOR_RANK.length-secShown}개 남음)`;btn.setAttribute('onclick','secLoadMore()');}
+}
+function secLoadMore(){secShown=Math.min(secShown+10,SECTOR_RANK.length);secRender();}
+secRender();
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
