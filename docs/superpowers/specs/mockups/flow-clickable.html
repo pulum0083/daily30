@@ -386,6 +386,34 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .acc-big{font-weight:900;color:#16A34A;line-height:1;white-space:nowrap;}.acc-big b{font-size:34px;}.acc-big u{font-size:16px;text-decoration:none;margin-left:1px;}
 .acc-meta{font-size:13px;}.acc-meta b{font-weight:800;}.acc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
 .acc-hist{font-size:12.5px;color:var(--muted);line-height:1.95;padding-top:12px;border-top:1px solid var(--hair);}
+
+/* ── 모바일 대응 (더블샷 900/600 브레이크포인트) ── */
+@media(max-width:900px){
+  .wrap{padding:16px 20px 56px;}
+  .gnb__in{padding:0 20px;gap:16px;}
+  .grid{grid-template-columns:minmax(0,1fr);row-gap:16px;}
+  .cols2{grid-template-columns:minmax(0,1fr);}
+  .two{grid-template-columns:minmax(0,1fr);}
+  .hero{gap:14px;}
+  .hero .search{min-width:0;width:100%;}
+}
+@media(max-width:600px){
+  .wrap{padding:12px 14px 52px;}
+  .gnb__in{padding:0 14px;gap:12px;}
+  .gnb a{font-size:12px;}
+  .gnb .sbtn{padding:6px 9px;}
+  .hero h1,.phead h1{font-size:18px;}
+  .refrow{grid-template-columns:1fr;}
+  .nm{width:104px;}
+  .cols2 .nm{width:96px;}
+  #chip-board .nm{width:100px;}
+  .prank-row .nm{width:104px!important;}
+  .ai{width:auto;}
+  /* 프로토타입 시간대 토글 — 좁은 화면에서 줄바꿈 */
+  .brief-strip{flex-wrap:wrap;}
+  .bs-arr{order:1;}
+  .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
+}
 </style>
 </head>
 <body>
