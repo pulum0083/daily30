@@ -32,9 +32,29 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .search{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:9px 13px;box-shadow:var(--s1);min-width:320px;cursor:text;}
 .search svg{width:15px;height:15px;color:var(--muted);}.search span{color:var(--muted);font-size:13px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
 
-.strip{display:flex;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:3px 0;margin-bottom:16px;}
-.strip .m{flex:1;text-align:center;padding:8px 6px;border-right:1px solid var(--hair);}.strip .m:last-child{border-right:none;}
-.strip .m .l{font-size:11px;color:var(--muted);}.strip .m .v{font-size:14px;font-weight:800;margin-top:2px;}
+.strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
+.strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
+/* ── AI 브리핑 스트립 ── */
+.brief-strip{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:10px 14px;margin:10px 0;cursor:pointer;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,padding .14s,border-color .14s;}
+.brief-strip.is-hidden{padding:0;border-color:transparent;box-shadow:none;background:transparent;pointer-events:none;overflow:hidden;height:0;margin:0;}
+.brief-strip:hover{border-color:var(--primary);background:#F8FAFF;}
+.brief-strip.bs-kospi{background:var(--primary-bg);border-color:#BFDBFE;}.brief-strip.bs-kospi:hover{background:#DCEFFE;}
+.brief-strip.bs-close{background:#F0FDF4;border-color:#BBF7D0;}.brief-strip.bs-close:hover{background:#DCFCE7;}
+.brief-strip.bs-us{background:#FEFCE8;border-color:#FDE68A;}.brief-strip.bs-us:hover{background:#FEF9C3;}
+.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:#FEE2E2;}
+.bs-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.bs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.bs-type{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
+.bs-kospi .bs-type{color:var(--primary);}.bs-close .bs-type{color:#16A34A;}.bs-us .bs-type{color:#CA8A04;}.bs-live .bs-type{color:#EF4444;}
+.bs-text{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;word-break:keep-all;}
+.bs-arr{font-size:16px;color:#C0C4CA;flex-shrink:0;transition:color .14s;}.brief-strip:hover .bs-arr{color:var(--primary);}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+/* 프로토타입 시간대 토글 */
+.proto-toggle{display:flex;gap:4px;flex-shrink:0;align-items:center;}
+.proto-toggle button{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;}
+.proto-toggle button.on{background:var(--primary);border-color:var(--primary);color:#fff;}
 
 .secwrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .secwrap .t{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;flex-shrink:0;}
@@ -376,10 +396,27 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
     </div>
     <div class="strip">
-      <div class="m"><div class="l">코스피</div><div class="v num">2,712.34 <span class="up">+0.82%</span></div></div>
-      <div class="m"><div class="l">코스닥</div><div class="v num">781.20 <span class="up">+0.45%</span></div></div>
-      <div class="m"><div class="l">코스피200</div><div class="v num">366.1 <span class="up">+0.71%</span></div></div>
-      <div class="m"><div class="l">원/달러</div><div class="v num">1,366.5 <span class="dn">−3.2</span></div></div>
+      <div class="m"><span class="l">코스피</span><span class="v num">2,712</span><span class="vc up num">+0.82%</span></div>
+      <div class="m"><span class="l">코스닥</span><span class="v num">781.2</span><span class="vc up num">+0.45%</span></div>
+      <div class="m"><span class="l">KP200</span><span class="v num">366.1</span><span class="vc up num">+0.71%</span></div>
+      <div class="m"><span class="l">원/달러</span><span class="v num">1,366</span><span class="vc dn num">−3.2</span></div>
+    </div>
+    <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
+    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-11/kospi/" style="cursor:pointer;">
+      <span class="bs-icon" id="bs-icon">📊</span>
+      <span class="bs-body">
+        <span class="bs-type" id="bs-type">코스피 예측 브리핑</span>
+        <span class="bs-text" id="bs-text">하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등</span>
+      </span>
+      <!-- 프로토타입 전용: 시간대 미리보기 버튼 -->
+      <div class="proto-toggle" id="proto-toggle" onclick="event.stopPropagation();">
+        <button class="on" onclick="previewSlot('kospi',this)">07:30</button>
+        <button onclick="previewSlot('live',this)">장중</button>
+        <button onclick="previewSlot('close',this)">마감</button>
+        <button onclick="previewSlot('us',this)">미국</button>
+        <button onclick="previewSlot('none',this)">숨김</button>
+      </div>
+      <span class="bs-arr">›</span>
     </div>
     <div class="hotcards">
       <a class="hot hot--ai" onclick="go('ranking')"><span class="hot__ic">🔥</span><span class="hot__tx"><b>오늘의 AI 브리핑</b><small>코스피 · 마감 · 미국 장 예측</small></span><span class="hot__arr">→</span></a>
@@ -1261,6 +1298,56 @@ if(passBtn){
   passBtn.addEventListener('mousemove',moveTip);
   passBtn.addEventListener('mouseleave',hideTip);
 }
+
+/* ── AI 브리핑 스트립 ── */
+var BS_SLOTS = {
+  kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑', text:'하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등', url:'/briefings/2026-06-11/kospi/' },
+  live:  { cls:'bs-live',  icon:'🔴', type:'<span class="live-dot"></span>장중 LIVE', text:'반도체 약세 지속 · 외국인 순매도 확대 · 09:30 이슈 업데이트', url:'/briefings/2026-06-11/kospi/' },
+  close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑', text:'코스피 -0.45% 마감 · 반도체 주도 하락 · 마감 브리핑 보기', url:'/briefings/2026-06-11/close/' },
+  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 브리핑', text:'S&P 상승 우위 · 신뢰도 68% · 연준 발언 주목', url:'/briefings/2026-06-11/us/' }
+};
+
+function applyBriefingStrip(slot) {
+  var el = document.getElementById('brief-strip');
+  if (!el) return;
+  if (slot === 'none') { el.className = 'brief-strip is-hidden'; return; }
+  var d = BS_SLOTS[slot];
+  if (!d) return;
+  el.className = 'brief-strip ' + d.cls;
+  el.href = d.url;
+  document.getElementById('bs-icon').textContent = d.icon;
+  document.getElementById('bs-type').innerHTML = d.type;
+  document.getElementById('bs-text').textContent = d.text.replace(/<[^>]+>/g,'');
+}
+
+function getKSTSlot() {
+  var now = new Date();
+  var kst = new Date(now.getTime() + 9 * 3600000);
+  var day = kst.getUTCDay();
+  if (day === 0 || day === 6) return 'none';
+  var hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
+  if (hm >= 730  && hm < 900)  return 'kospi';
+  if (hm >= 900  && hm < 1630) return 'live';
+  if (hm >= 1630 && hm < 2140) return 'close';
+  if (hm >= 2140 && hm < 2355) return 'us';
+  return 'none';
+}
+
+function previewSlot(slot, btn) {
+  document.querySelectorAll('#proto-toggle button').forEach(function(b){ b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  applyBriefingStrip(slot);
+}
+
+/* 초기화: 프로토타입은 항상 kospi로 시작, 실제 KST 슬롯은 버튼 참고용 */
+(function(){
+  var slot = getKSTSlot();
+  var initSlot = slot === 'none' ? 'kospi' : slot; // 프로토: 숨김이면 kospi 기본
+  applyBriefingStrip(initSlot);
+  var btns = document.querySelectorAll('#proto-toggle button');
+  var map = ['kospi','live','close','us','none'];
+  btns.forEach(function(b,i){ b.classList.toggle('on', map[i] === initSlot); });
+})();
 </script>
 </body>
 </html>
