@@ -316,6 +316,50 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
 .honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
+/* 참고 데이터 레이어 — 출처 라벨 */
+.src{display:block;margin-top:7px;font-size:11px;color:var(--muted);font-weight:500;}
+/* 52주 범위 바 */
+.w52-bar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--dn-bg),var(--inset) 50%,var(--up-bg));margin:6px 0 9px;}
+.w52-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,rgba(224,49,49,.18),rgba(224,49,49,.42));}
+.w52-now{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink);transform:translateX(-50%);}
+.w52-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;}
+.w52-lbl .num{color:var(--ink);}
+/* 실적 분기추세 그룹 막대 */
+.qf{display:flex;gap:10px;align-items:flex-end;height:84px;padding:0 4px;}
+.qf .q{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.qf .qbars{display:flex;gap:3px;align-items:flex-end;height:64px;}
+.qf .qbars i{width:11px;border-radius:3px 3px 0 0;display:block;}
+.qf .qbars .rev{background:var(--inset);}
+.qf .qbars .op{background:var(--primary);}
+.qf .qx{font-size:10px;color:var(--muted);font-weight:600;}
+.qf-lg{display:flex;gap:14px;justify-content:center;font-size:11px;color:var(--muted);margin-top:10px;}
+.qf-lg span{display:inline-flex;align-items:center;gap:5px;}
+.qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+/* 안내 푸터 */
+.ds-footer{margin:32px 0 8px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;}
+.ds-foot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+.ds-foot-grid .ff{padding:18px 20px;border-right:1px solid var(--hair);}
+.ds-foot-grid .ff:last-child{border-right:none;}
+.ds-foot-grid .ff-h{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:8px;}
+.ds-foot-grid .ff-b{font-size:12px;color:var(--muted);line-height:1.75;}
+.ds-foot-grid .ff-b b{color:var(--ink);font-weight:700;}
+.ds-foot-base{padding:12px 20px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
+/* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
+.refsub{padding:15px 0;border-top:1px solid var(--hair);}
+.refsub:first-child{padding-top:2px;border-top:none;}
+.refsub__h{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.refsub__s{font-size:11px;font-weight:500;color:var(--muted);}
+.refrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.refrow .rp{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.refrow .rk{font-size:11px;color:var(--muted);}
+.refrow b{font-size:16px;font-weight:800;}
+.refnote{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 0 0;}
+/* AI 픽 이력 · 적중률 통합 */
+.acc-top{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+.acc-big{font-weight:900;color:#16A34A;line-height:1;white-space:nowrap;}.acc-big b{font-size:34px;}.acc-big u{font-size:16px;text-decoration:none;margin-left:1px;}
+.acc-meta{font-size:13px;}.acc-meta b{font-weight:800;}.acc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.acc-hist{font-size:12.5px;color:var(--muted);line-height:1.95;padding-top:12px;border-top:1px solid var(--hair);}
+@media(max-width:720px){.ds-foot-grid{grid-template-columns:repeat(2,1fr);}.ds-foot-grid .ff:nth-child(2){border-right:none;}.ds-foot-grid .ff:nth-child(1),.ds-foot-grid .ff:nth-child(2){border-bottom:1px solid var(--hair);}}
 </style>
 </head>
 <body>
@@ -690,8 +734,38 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
           <p class="scen" style="margin-top:12px;">외국인·기관이 동반 순매수, 개인은 차익 실현이에요. <b style="color:var(--up)">외국인 3일 연속 순매수</b> 흐름이 이어지고 있어요.</p>
         </div></div>
-        <div class="sc"><div class="sc__h"><span class="sc__t">과거 AI 픽 이력</span></div><div class="scb">
-          <div style="font-size:13px;color:var(--muted);line-height:2;"><b style="color:var(--up)">06-11 적중</b> 상승 예측 → +3.4% · <b style="color:var(--up)">06-05 적중</b> → +1.8% · <b style="color:var(--dn)">05-28 빗나감</b> → −0.9%</div>
+        <!-- 참고 지표 (커머디티 데이터 한 카드로 묶음 — 보조 톤) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">실측 · 보조 자료</span></div><div class="scb">
+          <div class="refsub">
+            <div class="refsub__h">증권사 목표주가 <span class="refsub__s">컨센서스 06-11</span></div>
+            <div class="refrow"><span class="rp"><span class="rk">목표가 평균</span><b class="num">282,000</b></span><span class="rp"><span class="rk">현재가 대비</span><b class="num up">+13.5%</b></span><span class="rp"><span class="rk">투자의견</span><b>매수 <span style="font-size:12px;color:var(--muted)" class="num">4.1</span></b></span></div>
+            <p class="refnote"><b style="color:var(--up)">AI 신호 상승 78%</b> · 컨센서스 <b style="color:var(--ink)">+13.5% 여력</b> — 두 관점이 같은 방향. 네이버 금융 추정치라 시차 가능.</p>
+          </div>
+          <div class="refsub">
+            <div class="refsub__h">52주 범위 <span class="refsub__s">현재가 96% 지점</span></div>
+            <div class="w52-bar"><div class="w52-fill" style="width:96.5%"></div><div class="w52-now" style="left:96.5%"></div></div>
+            <div class="w52-lbl"><span>최저 <span class="num">152,000</span></span><span>최고 <span class="num">252,000</span></span></div>
+            <p class="refnote">52주 최고가 부근이라 신고가 갱신이 가까운 강세 흐름이에요.</p>
+          </div>
+          <div class="refsub">
+            <div class="refsub__h">실적 분기추세 <span class="refsub__s">매출·영업이익 (조원)</span></div>
+            <div class="qf">
+              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:20px"></i></div><div class="qx">24Q3</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:57px"></i><i class="op" style="height:23px"></i></div><div class="qx">24Q4</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:21px"></i></div><div class="qx">25Q1</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:64px"></i><i class="op" style="height:26px"></i></div><div class="qx">25Q2</div></div>
+            </div>
+            <div class="qf-lg"><span><i style="background:var(--inset)"></i>매출</span><span><i style="background:var(--primary)"></i>영업이익</span></div>
+            <p class="refnote">매출·영업이익이 우상향, HBM 수요가 실적으로 확인되는 흐름이에요. 네이버 금융 분기 재무.</p>
+          </div>
+        </div></div>
+        <!-- AI 픽 이력 · 적중률 (사이드바 적중률과 통합 — 같은 데이터) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">AI 픽 이력 · 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></span><span class="sc__s">최근 20회</span></div><div class="scb">
+          <div class="acc-top">
+            <div class="acc-big"><b class="num">65</b><u>%</u></div>
+            <div class="acc-meta"><div>최근 20회 중 <b class="num">13회 적중</b></div><div class="acc-sub">day-1부터 픽→결과 누적 기록</div></div>
+          </div>
+          <div class="acc-hist"><b style="color:var(--up)">06-11 적중</b> 상승 → +3.4% · <b style="color:var(--up)">06-05 적중</b> → +1.8% · <b style="color:var(--dn)">05-28 빗나감</b> → −0.9%</div>
         </div></div>
       </div>
       <div>
@@ -722,9 +796,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="petf-row"><div class="en">TIGER Fn반도체TOP10<small>396500 · 비중 22.6%</small></div><div class="wt">22.6%</div></div>
           <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 6.2%</small></div><div class="wt">6.2%</div></div>
           <div class="pdisc">주요 ETF TOP10 구성 기준 추정 · 소수 비중 누락 가능 · 인과 아님, 구조적 노출도</div>
-        </div>
-        <div class="panel"><div class="panel__h">AI 예측 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></div>
-          <div style="padding:16px;"><div style="font-size:18px;font-weight:800;" class="num">최근 20회 중 <b style="color:#16A34A;">13회 · 65%</b></div></div>
         </div>
       </div>
     </div>
@@ -868,6 +939,29 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
   </div>
+
+  <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
+  <footer class="ds-footer">
+    <div class="ds-foot-grid">
+      <div class="ff">
+        <div class="ff-h">📊 다루는 범위</div>
+        <div class="ff-b">코스피 종목은 <b>코스피200</b>만 다뤄요. 코스닥150·전체 종목은 단계적으로 넓혀가요.<br>ETF는 <b>순자산 1천억원 이상</b>만 다뤄요.</div>
+      </div>
+      <div class="ff">
+        <div class="ff-h">🕐 데이터 갱신</div>
+        <div class="ff-b">시세·수급·기술지표는 <b>매 거래일 장 마감 후</b> 갱신돼요. 목표주가·실적은 증권사·공시 반영 시점에 따라 며칠 시차가 있어요.</div>
+      </div>
+      <div class="ff">
+        <div class="ff-h">🔍 데이터 출처</div>
+        <div class="ff-b">모든 수치는 <b>실측값</b>이에요(토스증권·네이버 금융). AI가 만든 숫자는 쓰지 않고, 수집 안 된 항목은 표시하지 않아요.</div>
+      </div>
+      <div class="ff">
+        <div class="ff-h">⚠️ 투자 유의</div>
+        <div class="ff-b">AI 신호·기술신호는 <b>예측이 아닌 참고용</b>이에요. ETF 지수 추세는 개별 종목 픽이 아니에요. 투자 책임은 투자자 본인에게 있어요.</div>
+      </div>
+    </div>
+    <div class="ds-foot-base">Double-Shot · 종목 서비스 (베타) · 표시되는 수치는 직전 거래일 종가 기준이에요</div>
+  </footer>
 
 </div>
 
