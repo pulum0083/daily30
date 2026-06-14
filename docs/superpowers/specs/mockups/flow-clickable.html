@@ -122,6 +122,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .cmk.lo{color:var(--dn);}
 .chart-svg{width:100%;height:80px;display:block;overflow:visible;}
 .taxis{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:10px;color:var(--muted);font-weight:600;}
+.chart-tt{position:absolute;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;box-shadow:var(--s1);pointer-events:none;white-space:nowrap;z-index:10;display:none;transform:translateX(-50%);top:6px;}
+.chart-tt .ttd{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+.chart-cross{position:absolute;width:1px;top:8px;bottom:24px;background:#9CA3AF;opacity:.5;pointer-events:none;display:none;}
 .sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;}
 .sc__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
 .sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
@@ -508,45 +511,42 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div style="text-align:right"><div class="px num">36,610</div><div class="cg num">▲ +0.71%</div></div>
           </div>
           <div class="ctabs">
-            <a class="on" onclick="switchTab('etf','intra',this)">직전 장중</a>
-            <a onclick="switchTab('etf','20d',this)">20일</a>
+            <a class="on" onclick="switchTab('etf','5d',this)">5일</a>
+            <a onclick="switchTab('etf','1m',this)">1개월</a>
             <a onclick="switchTab('etf','3m',this)">3개월</a>
+            <a onclick="switchTab('etf','1y',this)">1년</a>
           </div>
-          <!-- 직전 장중 — 코스피200 패턴 (06-12 완료 세션 · 실시간 아님) -->
-          <div class="cpane chart-wrap" id="etf-intra">
+          <!-- 5일 일봉 -->
+          <div class="cpane chart-wrap" id="etf-5d">
             <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="grad-etf-up" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="grad-etf-5d" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#2775ED" stop-opacity="0.18"/>
                   <stop offset="100%" stop-color="#2775ED" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <!-- 시가 기준선 -->
-              <line x1="0" y1="46" x2="740" y2="46" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
-              <!-- area fill -->
-              <path d="M0,46 L57,44 L114,40 L171,52 L228,44 L285,36 L342,30 L399,22 L456,18 L513,12 L570,24 L627,32 L684,26 L740,24 L740,76 L0,76 Z" fill="url(#grad-etf-up)"/>
-              <!-- 라인 -->
-              <polyline fill="none" stroke="#2775ED" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,46 57,44 114,40 171,52 228,44 285,36 342,30 399,22 456,18 513,12 570,24 627,32 684,26 740,24"/>
-              <!-- 저점·고점 마커 (라벨은 HTML 오버레이) -->
-              <circle cx="171" cy="52" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-              <circle cx="513" cy="12" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+              <line x1="0" y1="60" x2="740" y2="60" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+              <path d="M0,60 L185,54 L370,44 L555,34 L740,22 L740,76 L0,76 Z" fill="url(#grad-etf-5d)"/>
+              <polyline fill="none" stroke="#2775ED" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,60 185,54 370,44 555,34 740,22"/>
+              <circle cx="0" cy="60" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <circle cx="740" cy="22" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
             </svg>
             <div class="cmk-layer">
-              <span class="cmk hi" style="left:69.3%;top:12px;transform:translate(-50%,-125%);">고점 36,720</span>
-              <span class="cmk lo" style="left:23.1%;top:52px;transform:translate(-50%,45%);">저점 36,280</span>
+              <span class="cmk hi" style="left:100%;top:22px;transform:translate(-100%,-125%);">고점 36,720</span>
+              <span class="cmk lo" style="left:0%;top:60px;transform:translate(8px,45%);">저점 36,150</span>
             </div>
-            <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+            <div class="taxis"><span>06-06</span><span>06-09</span><span>06-10</span><span>06-11</span><span>06-12</span></div>
           </div>
-          <!-- 20일 -->
-          <div class="cpane chart-wrap hidden" id="etf-20d">
+          <!-- 1개월 -->
+          <div class="cpane chart-wrap hidden" id="etf-1m">
             <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="grad-etf-20" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="grad-etf-1m" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
                   <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <path d="M0,44 L62,46 L123,40 L185,42 L246,37 L308,38 L370,33 L431,35 L493,28 L555,31 L616,24 L678,22 L740,17 L740,56 L0,56 Z" fill="url(#grad-etf-20)"/>
+              <path d="M0,44 L62,46 L123,40 L185,42 L246,37 L308,38 L370,33 L431,35 L493,28 L555,31 L616,24 L678,22 L740,17 L740,56 L0,56 Z" fill="url(#grad-etf-1m)"/>
               <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,44 62,46 123,40 185,42 246,37 308,38 370,33 431,35 493,28 555,31 616,24 678,22 740,17"/>
             </svg>
             <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
@@ -564,6 +564,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 160,46 220,50 280,42 340,36 400,28 460,32 520,24 580,18 640,14 700,10 740,8"/>
             </svg>
             <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+          <!-- 1년 -->
+          <div class="cpane chart-wrap hidden" id="etf-1y">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-1y" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,50 L90,54 L185,48 L280,44 L370,42 L460,34 L555,22 L640,13 L700,9 L740,6 L740,56 L0,56 Z" fill="url(#grad-etf-1y)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,50 90,54 185,48 280,44 370,42 460,34 555,22 640,13 700,9 740,6"/>
+            </svg>
+            <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
           </div>
         </div>
 
@@ -663,12 +677,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div style="text-align:right"><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
           </div>
           <div class="ctabs">
-            <a class="on" onclick="switchTab('stock','intra',this)">직전 장중</a>
-            <a onclick="switchTab('stock','20d',this)">20일</a>
+            <a class="on" onclick="switchTab('stock','5d',this)">5일</a>
+            <a onclick="switchTab('stock','1m',this)">1개월</a>
             <a onclick="switchTab('stock','3m',this)">3개월</a>
+            <a onclick="switchTab('stock','1y',this)">1년</a>
           </div>
-          <!-- 직전 장중 area 차트 (06-12 완료 세션 · 실시간 아님) -->
-          <div class="cpane chart-wrap" id="stock-intra">
+          <!-- 5일 일봉 -->
+          <div class="cpane chart-wrap" id="stock-5d">
             <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1">
@@ -676,32 +691,28 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
                   <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <!-- 시가 기준선 (dashed) -->
               <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
-              <!-- area fill -->
-              <path d="M0,62 L40,66 L100,60 L160,55 L220,57 L285,46 L342,40 L399,35 L456,27 L513,13 L570,20 L627,26 L684,23 L740,22 L740,76 L0,76 Z" fill="url(#grad-up)"/>
-              <!-- 라인 -->
-              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,62 40,66 100,60 160,55 220,57 285,46 342,40 399,35 456,27 513,13 570,20 627,26 684,23 740,22"/>
-              <!-- 저점·고점 마커 (라벨은 왜곡 방지 위해 HTML 오버레이로) -->
-              <circle cx="40" cy="66" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-              <circle cx="513" cy="13" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+              <path d="M0,64 L185,56 L370,44 L555,30 L740,16 L740,76 L0,76 Z" fill="url(#grad-up)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,64 185,56 370,44 555,30 740,16"/>
+              <circle cx="0" cy="64" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <circle cx="740" cy="16" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
             </svg>
             <div class="cmk-layer">
-              <span class="cmk hi" style="left:69.3%;top:13px;transform:translate(-50%,-125%);">고점 250,500</span>
-              <span class="cmk lo" style="left:5.4%;top:66px;transform:translate(8px,-50%);">저점 239,500</span>
+              <span class="cmk hi" style="left:100%;top:16px;transform:translate(-100%,-125%);">고점 248,500</span>
+              <span class="cmk lo" style="left:0%;top:64px;transform:translate(8px,45%);">저점 231,000</span>
             </div>
-            <div class="taxis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+            <div class="taxis"><span>06-06</span><span>06-09</span><span>06-10</span><span>06-11</span><span>06-12</span></div>
           </div>
-          <!-- 20일 스파크라인 -->
-          <div class="cpane chart-wrap hidden" id="stock-20d">
+          <!-- 1개월 -->
+          <div class="cpane chart-wrap hidden" id="stock-1m">
             <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="grad-up-20" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="grad-up-1m" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
                   <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-20)"/>
+              <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1m)"/>
               <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
             </svg>
             <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
@@ -719,6 +730,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
             </svg>
             <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+          <!-- 1년 -->
+          <div class="cpane chart-wrap hidden" id="stock-1y">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-1y" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,48 L90,52 L185,46 L280,40 L370,42 L460,32 L555,20 L640,11 L700,7 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1y)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 185,46 280,40 370,42 460,32 555,20 640,11 700,7 740,5"/>
+            </svg>
+            <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
           </div>
         </div>
         <div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;">
@@ -1022,11 +1047,45 @@ function switchTab(hero,tab,el){
   const prefix=hero+'-';
   document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
   el.classList.add('on');
-  ['intra','20d','3m'].forEach(t=>{
+  ['5d','1m','3m','1y'].forEach(t=>{
     const p=document.getElementById(prefix+t);
     if(p) p.classList.toggle('hidden',t!==tab);
   });
 }
+
+/* 차트 툴팁 */
+const CHART_DATA={
+  'stock-5d':{dates:['06-06','06-09','06-10','06-11','06-12'],prices:[231000,235500,240000,244000,248500],fmt:v=>v.toLocaleString()+'원'},
+  'stock-1m':{dates:['05-14','05-21','05-28','06-04','06-12'],prices:[200000,215000,228000,238000,248500],fmt:v=>v.toLocaleString()+'원'},
+  'stock-3m':{dates:['03-14','04-04','04-25','05-16','06-12'],prices:[185000,196000,210000,230000,248500],fmt:v=>v.toLocaleString()+'원'},
+  'stock-1y':{dates:['25.06','25.09','25.12','26.03','26.06'],prices:[155000,148000,175000,205000,248500],fmt:v=>v.toLocaleString()+'원'},
+  'etf-5d':{dates:['06-06','06-09','06-10','06-11','06-12'],prices:[36150,36250,36380,36500,36610],fmt:v=>v.toLocaleString()},
+  'etf-1m':{dates:['05-14','05-21','05-28','06-04','06-12'],prices:[34800,35200,35600,36100,36610],fmt:v=>v.toLocaleString()},
+  'etf-3m':{dates:['03-14','04-04','04-25','05-16','06-12'],prices:[33200,34000,34800,35600,36610],fmt:v=>v.toLocaleString()},
+  'etf-1y':{dates:['25.06','25.09','25.12','26.03','26.06'],prices:[29800,31000,33500,34200,36610],fmt:v=>v.toLocaleString()},
+};
+document.querySelectorAll('.chart-wrap').forEach(wrap=>{
+  const tt=document.createElement('div');tt.className='chart-tt';
+  const cross=document.createElement('div');cross.className='chart-cross';
+  wrap.appendChild(tt);wrap.appendChild(cross);
+  wrap.addEventListener('mousemove',e=>{
+    const svg=wrap.querySelector('.chart-svg');if(!svg)return;
+    const svgRect=svg.getBoundingClientRect();
+    const wrapRect=wrap.getBoundingClientRect();
+    const frac=Math.max(0,Math.min(1,(e.clientX-svgRect.left)/svgRect.width));
+    const pane=wrap.closest('.cpane');if(!pane||pane.classList.contains('hidden'))return;
+    const d=CHART_DATA[pane.id];if(!d)return;
+    const n=d.dates.length;
+    const idx=Math.min(n-1,Math.max(0,Math.round(frac*(n-1))));
+    tt.innerHTML=`<div class="ttd">${d.dates[idx]}</div>${d.fmt(d.prices[idx])}`;
+    const xInWrap=e.clientX-wrapRect.left;
+    tt.style.left=xInWrap+'px';
+    tt.style.display='block';
+    cross.style.left=xInWrap+'px';
+    cross.style.display='block';
+  });
+  wrap.addEventListener('mouseleave',()=>{tt.style.display='none';cross.style.display='none';});
+});
 
 /* 랭킹 더보기 */
 const RANK_DATA=[
