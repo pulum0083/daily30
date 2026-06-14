@@ -1020,14 +1020,86 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
       <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
     </div>
-    <div class="legend" style="margin:0 2px 12px;">
-      <span class="lg"><b>시초가 갭</b> 오늘 시가 vs 전일 종가</span>
-      <span class="lg"><b>×N</b> 거래대금 20일 평균 대비</span>
-      <span class="lg" id="chip-right-legend"><b>우측</b> 전일까지 수급 추세</span>
-    </div>
-    <div id="chip-board"></div>
-    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:4px;">
-      샘플 목업 · 벨웨더(미국)는 yahoo 실시간, 한국 갭·거래대금은 장중 실시간, <b>종목별 수급은 마감 후 확정</b>이라 아침엔 전일 추세만 보여줘요. 마감 모드에서 "갭+수급 동반=진짜 / 갭만=반짝"을 판별해요.
+    <div class="grid">
+      <!-- 좌측: 노드 카드 -->
+      <div>
+        <div class="legend" style="margin:0 2px 10px;">
+          <span class="lg"><b>시초가 갭</b> 오늘 시가 vs 전일 종가</span>
+          <span class="lg"><b>×N</b> 거래대금 20일 평균 대비</span>
+          <span class="lg" id="chip-right-legend"><b>우측</b> 전일까지 수급 추세</span>
+        </div>
+        <div id="chip-board"></div>
+        <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:4px;">
+          샘플 목업 · 벨웨더(미국)는 yahoo 실시간, 한국 갭·거래대금은 장중 실시간, <b>종목별 수급은 마감 후 확정</b>이라 아침엔 전일 추세만 보여줘요.
+        </div>
+      </div>
+      <!-- 우측: 사이드바 -->
+      <div>
+        <!-- ① 밤사이 미국 요약 -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div class="panel__h">🌏 밤사이 미국</div>
+          <div style="padding:4px 0 2px;">
+            <a class="srow"><span class="n2" style="font-weight:700;">NVDA <small style="font-weight:400;color:var(--muted);">엔비디아</small></span><span class="c up num">+4.2%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;">MU <small style="font-weight:400;color:var(--muted);">마이크론</small></span><span class="c up num">+6.9%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;">TSM <small style="font-weight:400;color:var(--muted);">TSMC ADR</small></span><span class="c up num">+1.1%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;">INTC <small style="font-weight:400;color:var(--muted);">인텔</small></span><span class="c dn num">−2.3%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;">ASML <small style="font-weight:400;color:var(--muted);">ASML</small></span><span class="c dn num">−0.8%</span></a>
+          </div>
+          <div style="padding:8px 16px 10px;font-size:11px;color:var(--muted);">나스닥 +1.4% · 필라델피아 반도체(SOX) +2.8%</div>
+        </div>
+        <!-- ② 오늘 주목 TOP 3 -->
+        <div class="panel" style="margin-bottom:12px;border-color:#FECACA;">
+          <div class="panel__h" style="background:#FEF2F2;border-color:#FECACA;"><span style="color:#991B1B;">⚡ 오늘 주목 TOP 3</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">갭 × 거래대금</span></div>
+          <a class="srow" style="gap:8px;">
+            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">1</span>
+            <span class="n2" style="flex:1;"><b>한미반도체</b><small class="num">042700 · HBM</small></span>
+            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+5.8%</span><span class="vol-surge-badge">×3.7</span></span>
+          </a>
+          <a class="srow" style="gap:8px;">
+            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">2</span>
+            <span class="n2" style="flex:1;"><b>SK하이닉스</b><small class="num">000660 · HBM</small></span>
+            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+3.1%</span><span class="vol-surge-badge">×2.4</span></span>
+          </a>
+          <a class="srow" style="gap:8px;">
+            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">3</span>
+            <span class="n2" style="flex:1;"><b>삼성전자</b><small class="num">005930 · DRAM</small></span>
+            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+1.9%</span><span class="vol-surge-badge">×1.6</span></span>
+          </a>
+        </div>
+        <!-- ③ SOX 미니차트 -->
+        <div class="panel" style="margin-bottom:12px;">
+          <div class="panel__h">📈 SOX 1개월</div>
+          <div style="padding:10px 16px 4px;">
+            <svg viewBox="0 0 320 60" style="width:100%;display:block;" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sox-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,52 L32,50 L64,48 L96,42 L128,44 L160,36 L192,28 L224,32 L256,18 L288,12 L320,8 L320,56 L0,56 Z" fill="url(#sox-grad)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2" stroke-linejoin="round" points="0,52 32,50 64,48 96,42 128,44 160,36 192,28 224,32 256,18 288,12 320,8"/>
+              <circle cx="0" cy="52" r="3" fill="#fff" stroke="#2775ED" stroke-width="1.8"/>
+              <circle cx="320" cy="8" r="3" fill="#fff" stroke="#E03131" stroke-width="1.8"/>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);padding:2px 0 6px;" class="num">
+              <span>05-14</span><span>05-28</span><span>06-11</span>
+            </div>
+          </div>
+          <div style="padding:0 16px 12px;display:flex;justify-content:space-between;font-size:12px;">
+            <span style="color:var(--muted);">1개월 수익률</span>
+            <span class="up num" style="font-weight:800;">+18.4%</span>
+          </div>
+        </div>
+        <!-- ④ 오늘의 AI 코멘트 -->
+        <div class="panel" style="border-color:#BFDBFE;background:#F8FAFF;">
+          <div class="panel__h" style="background:#EFF6FF;border-color:#BFDBFE;"><span style="color:#1E40AF;">💬 오늘의 AI 코멘트</span></div>
+          <div style="padding:12px 16px;font-size:12.5px;color:#1E3A5F;line-height:1.6;word-break:keep-all;">
+            엔비디아 신고가·마이크론 어닝 서프라이즈로 HBM 수요 확인. SK하이닉스는 외국인 연속 순매수 흐름에서 시초가 갭업 가능성. 파운드리·장비는 모멘텀 제한적.
+          </div>
+          <a onclick="go('ranking')" style="display:block;padding:8px 16px;font-size:11px;font-weight:700;color:var(--primary);border-top:1px solid var(--hair);text-decoration:none;cursor:pointer;">더블샷 US 브리핑 원문 →</a>
+        </div>
+      </div>
     </div>
   </div>
 
