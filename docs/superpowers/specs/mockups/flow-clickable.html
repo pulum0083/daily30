@@ -423,7 +423,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span class="bs-arr">›</span>
     </div>
     <div class="hotcards">
-      <a class="hot hot--ai" onclick="go('ranking')"><span class="hot__ic">🔥</span><span class="hot__tx"><b>오늘의 AI 브리핑</b><small>코스피 · 마감 · 미국 장 예측</small></span><span class="hot__arr">→</span></a>
+      <a class="hot hot--ai" onclick="go('chips')"><span class="hot__ic">🔬</span><span class="hot__tx"><b>AI 반도체 칩보드</b><small>밤사이 미국 → 오늘 한국 반도체</small></span><span class="hot__arr">→</span></a>
       <a class="hot" onclick="go('income')" style="background:#FFFBEB;border-color:#FDE68A;"><span class="hot__ic" style="background:#FEF3C7;">🪙</span><span class="hot__tx"><b style="color:#B7791F;">배당 인컴 설계기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
       <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
@@ -1007,6 +1007,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
   </div>
 
+  <!-- ===== CHIPS (AI 반도체 칩보드) ===== -->
+  <div class="screen" id="chips">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#5B21B6;">반도체 칩보드</span></div>
+    <div class="phead">
+      <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-11</div></div>
+      <div class="rtabs" id="chip-mode"><a class="on" onclick="chipMode('morning',this)">🌅 아침</a><a onclick="chipMode('close',this)">🌆 마감</a></div>
+    </div>
+    <div class="strip" style="margin-bottom:12px;">
+      <div class="m"><span class="l">섹터 온도계</span></div>
+      <div class="m"><span class="l">SOX</span><span class="vc up num">+2.8%</span></div>
+      <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
+      <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
+    </div>
+    <div class="legend" style="margin:0 2px 12px;">
+      <span class="lg"><b>시초가 갭</b> 오늘 시가 vs 전일 종가</span>
+      <span class="lg"><b>×N</b> 거래대금 20일 평균 대비</span>
+      <span class="lg" id="chip-right-legend"><b>우측</b> 전일까지 수급 추세</span>
+    </div>
+    <div id="chip-board"></div>
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:4px;">
+      샘플 목업 · 벨웨더(미국)는 yahoo 실시간, 한국 갭·거래대금은 장중 실시간, <b>종목별 수급은 마감 후 확정</b>이라 아침엔 전일 추세만 보여줘요. 마감 모드에서 "갭+수급 동반=진짜 / 갭만=반짝"을 판별해요.
+    </div>
+  </div>
+
   <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
   <footer class="ds-footer">
     <div class="ds-foot-list">
@@ -1416,6 +1440,61 @@ function previewSlot(slot, btn) {
   var map = ['kospi','live','close','us','none'];
   btns.forEach(function(b,i){ b.classList.toggle('on', map[i] === initSlot); });
 })();
+
+/* ── AI 반도체 칩보드 (밤사이 벨웨더 → 한국 밸류체인) ── */
+var CHIP_NODES=[
+  {node:'HBM', bell:[{t:'NVDA',c:4.2}], ai:'엔비디아 신고가 → HBM 수요 기대. SK하이닉스·한미반도체 갭업에 거래대금 급증 동반, 본더 라인까지 온기.',
+    rows:[{n:'SK하이닉스',code:'000660',gap:3.1,vol:2.4,sup:'외국인 3일째 순매수',v:'real',vt:'진짜 · 외국인·기관 합류'},
+          {n:'한미반도체',code:'042700',gap:5.8,vol:3.7,sup:'외국인 순매수 전환',v:'real',vt:'진짜 · 외국인 대량'}]},
+  {node:'DRAM / NAND', bell:[{t:'MU',c:6.9}], ai:'마이크론 어닝 서프라이즈 → 메모리 업사이클 신호. 다만 삼성전자 갭업은 약함, 수급 확인 필요.',
+    rows:[{n:'삼성전자',code:'005930',gap:1.9,vol:1.6,sup:'기관 2일째 순매수',v:'pop',vt:'반짝 · 당일 수급 이탈'},
+          {n:'SK하이닉스',code:'000660',gap:3.1,vol:2.4,sup:'외국인 3일째 순매수',v:'real',vt:'진짜 · 외국인·기관 합류'}]},
+  {node:'파운드리 · CPU', bell:[{t:'TSM',c:1.1},{t:'INTC',c:-2.3}], ai:'TSM 보합·INTC 약세 → 파운드리 모멘텀 제한적. DB하이텍 개인 주도 갭업, 추격 주의.',
+    rows:[{n:'삼성전자(파운드리)',code:'005930',gap:0.4,vol:1.1,sup:'외국인 중립',v:'pop',vt:'반짝 · 수급 동반 없음'},
+          {n:'DB하이텍',code:'000990',gap:1.2,vol:1.4,sup:'개인 매수 우위',v:'pop',vt:'반짝 · 개인 주도'}]},
+  {node:'장비', bell:[{t:'ASML',c:-0.8}], ai:'ASML 약세 → 장비 섹터 동반 조정. 거래대금 평소 이하, 관망 구간.',
+    rows:[{n:'주성엔지니어링',code:'036930',gap:-1.1,vol:0.9,sup:'외국인 순매도',v:'none',vt:'해당 없음'},
+          {n:'원익IPS',code:'240810',gap:-0.6,vol:0.8,sup:'기관 순매도 지속',v:'none',vt:'해당 없음'}]}
+];
+function chipBell(b,first){
+  var bg=b.c>0?'var(--up-bg)':b.c<0?'var(--dn-bg)':'var(--inset)';
+  var col=b.c>0?'var(--up)':b.c<0?'var(--dn)':'var(--muted)';
+  var s=(b.c>0?'+':'')+b.c.toFixed(1)+'%';
+  return '<span style="display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:'+bg+';color:'+col+';margin-left:6px;">'+b.t+' '+s+(first?' 밤사이':'')+'</span>';
+}
+function chipRight(r,mode){
+  if(mode==='morning') return '<span style="font-size:11px;color:var(--muted);font-weight:600;">🕐 '+r.sup+'</span>';
+  var m={real:['#ECFDF5','#16A34A','#A7F3D0','✓'],pop:['var(--gold-bg)','var(--gold)','#FDE68A','⚡'],none:['var(--inset)','var(--muted)','var(--hair)','–']}[r.v];
+  return '<span style="font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;background:'+m[0]+';color:'+m[1]+';border:1.5px solid '+m[2]+';white-space:nowrap;">'+m[3]+' '+r.vt+'</span>';
+}
+function renderChips(mode){
+  var board=document.getElementById('chip-board'); if(!board) return;
+  board.innerHTML=CHIP_NODES.map(function(nd){
+    var bells=nd.bell.map(function(b,i){return chipBell(b,i===0);}).join('');
+    var rows=nd.rows.map(function(r){
+      var gc=r.gap>0?'var(--up)':r.gap<0?'var(--dn)':'var(--muted)';
+      var gt=(r.gap>0?'+':'')+r.gap.toFixed(1)+'%';
+      var vs=r.vol>=1.5?'':'background:var(--inset);color:var(--muted);';
+      return '<a class="row" onclick="go(\'detail\')">'+
+        '<div class="nm" style="width:150px;"><b>'+r.n+'</b><small class="num">'+r.code+' · 반도체</small></div>'+
+        '<span class="num" style="width:62px;text-align:right;font-weight:800;color:'+gc+';">'+gt+'</span>'+
+        '<span class="vol-surge-badge" style="'+vs+'">×'+r.vol.toFixed(1)+'</span>'+
+        '<span style="margin-left:auto;text-align:right;">'+chipRight(r,mode)+'</span>'+
+        '</a>';
+    }).join('');
+    return '<div class="block">'+
+      '<div class="block__h"><span class="block__t">'+nd.node+'</span><span class="block__s" style="display:flex;align-items:center;">'+bells+'</span></div>'+
+      '<div style="background:#F8FAFF;border-bottom:1px solid var(--hair);padding:9px 16px;display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#1E40AF;line-height:1.45;"><span>✨</span><span>'+nd.ai+'</span></div>'+
+      rows+'</div>';
+  }).join('');
+}
+function chipMode(mode,el){
+  document.querySelectorAll('#chip-mode a').forEach(function(a){a.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('chip-right-legend').innerHTML = mode==='morning'?'<b>우측</b> 전일까지 수급 추세':'<b>우측</b> 마감 판별 (진짜·반짝)';
+  renderChips(mode);
+}
+renderChips('morning');
 </script>
 </body>
 </html>
