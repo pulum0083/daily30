@@ -433,7 +433,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">Double<b>-Shot</b></span><a onclick="alert('브리핑(보조) — 기존 페이지')">브리핑</a><a class="on" onclick="go('home')">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">Double<b>-Shot</b></span><a href="/briefings/">브리핑</a><a class="on" href="/stocks/" onclick="event.preventDefault();go('home')">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -546,7 +546,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== ETF DETAIL (KODEX 200) ===== -->
   <div class="screen" id="etf-detail">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">KODEX 200</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › ETF › <span style="color:var(--ink)">KODEX 200 <small style="font-weight:400;color:var(--muted)">/stocks/etf/069500/</small></span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-etf">
@@ -712,7 +712,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== DETAIL (SK하이닉스) ===== -->
   <div class="screen" id="detail">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <a href="/stocks/sectors/semicon/" onclick="event.preventDefault();go('sector')">반도체</a> › <span style="color:var(--ink)">SK하이닉스 <small style="font-weight:400;color:var(--muted)">/stocks/000660/</small></span></div>
     <div class="grid">
       <div>
         <div class="hero2" id="hero-stock">
@@ -919,7 +919,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체 <small style="font-weight:400;color:var(--muted)">/stocks/sectors/semicon/</small></span></div>
     <div class="grid">
       <div>
         <div class="shead"><div class="top">
@@ -971,7 +971,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
   <div class="screen" id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기 <small style="font-weight:400;color:var(--muted)">/stocks/income/</small></span></div>
     <div class="phead">
       <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
@@ -1027,7 +1027,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주 <small style="font-weight:400;color:var(--muted)">/stocks/passive/</small></span></div>
     <div class="phead">
       <div>
         <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
@@ -1058,7 +1058,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== RANKING (거래량 전체) ===== -->
   <div class="screen" id="ranking">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위 <small style="font-weight:400;color:var(--muted)">/stocks/volume/</small></span></div>
     <div class="phead">
       <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-11 종가</div></div>
       <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
@@ -1073,7 +1073,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== CHIPS (AI 반도체 칩보드) ===== -->
   <div class="screen" id="chips">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:#5B21B6;">반도체 칩보드</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/" onclick="event.preventDefault();go('home')">홈</a> › <span style="color:#5B21B6;">반도체 칩보드 <small style="font-weight:400;color:var(--muted)">/chips/</small></span></div>
     <div class="phead">
       <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-11</div></div>
       <div class="rtabs" id="chip-mode"><a class="on" onclick="chipMode('morning',this)">🌅 아침</a><a onclick="chipMode('close',this)">🌆 마감</a></div>
@@ -1196,13 +1196,39 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 <script>
 const navHistory=[];
+/* ── URL 체계 (실서비스 라우팅 기준) ──────────────────────────────
+   /stocks/                        홈 허브 (랭킹 + 섹터 + 검색)
+   /stocks/{code}/                 종목 상세   예) /stocks/000660/
+   /stocks/etf/{code}/             ETF 상세    예) /stocks/etf/069500/
+   /stocks/sectors/{key}/          섹터 페이지 예) /stocks/sectors/semicon/
+     keys: semicon | power | defense | ship | battery | auto | bio | finance
+   /stocks/volume/                 거래량 랭킹 전체
+   /stocks/gainers/                상승 랭킹 전체
+   /stocks/losers/                 하락 랭킹 전체
+   /stocks/passive/                패시브 민감주 랭킹
+   /stocks/income/                 배당 인컴 설계기
+   /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
+   /briefings/                     브리핑 허브 (기존 서비스)
+─────────────────────────────────────────────────────────────── */
+const SCREEN_URLS={
+  'home':       '/stocks/',
+  'detail':     '/stocks/000660/',        // SK하이닉스 (프로토타입 고정)
+  'etf-detail': '/stocks/etf/069500/',    // KODEX 200 (프로토타입 고정)
+  'sector':     '/stocks/sectors/semicon/',
+  'ranking':    '/stocks/volume/',
+  'passive':    '/stocks/passive/',
+  'income':     '/stocks/income/',
+  'chips':      '/chips/',
+};
 function go(id,noHistory){
   if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
+  history.pushState({screen:id},'',SCREEN_URLS[id]||'/stocks/');
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
+window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||'home';go(id,true);});
 function switchTab(hero,tab,el){
   const prefix=hero+'-';
   document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
