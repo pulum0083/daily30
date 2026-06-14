@@ -251,6 +251,7 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
             "prices": cand.get("sparkline", []),
             "ma20": cand.get("ma20_sparkline", []),
             "ma200": cand.get("ma200_sparkline", []),
+            "vol_mult": p.get("vol_mult"),
         })
     return result
 

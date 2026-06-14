@@ -64,6 +64,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .chips a:hover{border-color:var(--primary);color:var(--primary);}
 .legend{display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted);margin:12px 2px;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
 .badge-info-btn{font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+.vol-surge-badge{display:inline-flex;align-items:center;background:#E8590C;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
 
 /* HOT 카드 줄 (랭킹 바로가기) */
 .hotcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
@@ -425,11 +426,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11 <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:34%"></div><span class="barval num">1,080만주</span></div><div class="ai"><span class="aid">신호 42</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:27%"></div><span class="barval num">860만주</span></div><div class="ai"><span class="ais">신호 55</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><span class="vol-surge-badge">×2.1 급증</span><div class="ai"><span class="ais">신호 58</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><span class="vol-surge-badge">×3.4 급증</span><div class="ai"><span class="aip">AI 78</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><span class="vol-surge-badge">×5.8 급증</span><div class="ai"><span class="ais">신호 71</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:34%"></div><span class="barval num">1,080만주</span></div><span class="vol-surge-badge">×1.9 급증</span><div class="ai"><span class="aid">신호 42</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:27%"></div><span class="barval num">860만주</span></div><span class="vol-surge-badge">×2.3 급증</span><div class="ai"><span class="ais">신호 55</span></div></a>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
     <div class="cols2" style="margin-bottom:18px;">

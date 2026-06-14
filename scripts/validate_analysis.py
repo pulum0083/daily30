@@ -518,7 +518,14 @@ def _closes_to_realdata(closes, ndigits):
 def _closes_from_toss_candles(candles: list, ndigits: int) -> dict:
     """Toss 캔들 리스트(오래된→최신)에서 실측 dict를 만든다."""
     closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
-    return _closes_to_realdata(closes, ndigits)
+    result = _closes_to_realdata(closes, ndigits)
+    # vol_mult: 최신 거래량 / 직전 20일 평균 (tradingVolume 필드가 있을 때만)
+    volumes = [float(c["tradingVolume"]) for c in candles if c.get("tradingVolume")]
+    if len(volumes) >= 2:
+        avg20 = sum(volumes[max(0, len(volumes) - 21):-1]) / min(20, len(volumes) - 1)
+        if avg20 > 0:
+            result["vol_mult"] = round(volumes[-1] / avg20, 1)
+    return result
 
 
 def _fetch_us_realdata(ticker):
@@ -623,6 +630,8 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
             p["ma200_dist_pct"] = data["ma200_dist_pct"]
         if data.get("ma20_dist_pct") is not None:
             p["ma20_dist_pct"] = data["ma20_dist_pct"]
+        if data.get("vol_mult") is not None:
+            p["vol_mult"] = data["vol_mult"]
 
         _inject_candidate(cands, tk, p.get("name", ""), data)
         changed = True
