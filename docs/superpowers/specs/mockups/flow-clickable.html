@@ -129,7 +129,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* detail 2-col */
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
 /* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
-.chip-layout{display:grid;grid-template-columns:330px 1fr;column-gap:16px;align-items:start;}
+.chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
 .chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
 .chip-sb-label::after{content:'';flex:1;height:1px;background:var(--hair);}
 .chip-arrow{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--hair);padding:8px 0;}
@@ -1113,76 +1113,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-11</div></div>
       <div class="rtabs" id="chip-mode"><a class="on" onclick="chipMode('morning',this)">🌅 아침</a><a onclick="chipMode('close',this)">🌆 마감</a></div>
     </div>
-    <div class="strip" style="margin-bottom:12px;">
-      <div class="m"><span class="l">섹터 온도계</span></div>
-      <div class="m"><span class="l">SOX</span><span class="vc up num">+2.8%</span></div>
-      <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
-      <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
-    </div>
-    <!-- AI 코멘트: 본문 상단 (전체폭) -->
-    <div class="panel" style="border-color:#BFDBFE;background:#F8FAFF;margin-bottom:16px;">
-      <div class="panel__h" style="background:#EFF6FF;border-color:#BFDBFE;"><span style="color:#1E40AF;">💬 오늘의 AI 코멘트</span></div>
-      <div style="padding:12px 16px;font-size:13px;color:#1E3A5F;line-height:1.65;word-break:keep-all;">
-        엔비디아 신고가·마이크론 어닝 서프라이즈로 HBM 수요 확인. SK하이닉스는 외국인 연속 순매수 흐름에서 시초가 갭업 가능성. 파운드리·장비는 모멘텀 제한적.
-      </div>
-      <a onclick="go('ranking')" style="display:block;padding:8px 16px;font-size:11px;font-weight:700;color:var(--primary);border-top:1px solid var(--hair);text-decoration:none;cursor:pointer;">더블샷 US 브리핑 원문 →</a>
-    </div>
-
-    <!-- 실시간 포커스: 삼성전자 · SK하이닉스 -->
-    <!-- 프로토타입 토글 -->
-    <div class="proto-toggle" style="margin-bottom:10px;">
-      <button class="on" onclick="chipFocus('live',this)">● 장중</button>
-      <button onclick="chipFocus('hl',this)">HL 장후</button>
-    </div>
-
-    <!-- 장중 실시간 카드 -->
-    <div class="focus-card" id="focus-live">
-      <div class="focus-card__h">
-        <span><span class="live-dot"></span>실시간 포커스</span>
-        <span class="upd-badge"><span class="dot"></span>10초 갱신</span>
-      </div>
-      <div class="focus-stocks">
-        <div class="focus-stock">
-          <div class="fn">삼성전자 <span class="num" style="font-weight:400;">005930</span></div>
-          <div class="fp num" id="sec-price">57,400</div>
-          <div class="fc up num" id="sec-chg">+1.2%</div>
-          <div class="fs">외국인 +2,204억 · 기관 +891억</div>
-        </div>
-        <div class="focus-stock">
-          <div class="fn">SK하이닉스 <span class="num" style="font-weight:400;">000660</span></div>
-          <div class="fp num" id="skh-price">248,000</div>
-          <div class="fc up num" id="skh-chg">+3.1%</div>
-          <div class="fs">외국인 +3일째 순매수 · 기관 중립</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 장 마감 후 Hyperliquid 24h 카드 -->
-    <div class="hl-card" id="focus-hl" style="display:none;">
-      <div class="hl-card__h">
-        <span class="hl-badge">HL 24h</span>
-        <span>장 마감 이후 연동</span>
-        <span class="hl-note">실제 체결가 아님 · 참고용</span>
-      </div>
-      <div class="hl-stocks">
-        <div class="hl-stock">
-          <div class="hn">삼성전자 <span style="font-weight:400;font-size:10px;">#SEC</span></div>
-          <div class="hp num">$38.20</div>
-          <div class="hc up num">+2.1%</div>
-          <div class="hf">펀딩 −0.008% · 장 마감 이후</div>
-        </div>
-        <div class="hl-stock">
-          <div class="hn">SK하이닉스 <span style="font-weight:400;font-size:10px;">#SKH</span></div>
-          <div class="hp num">$163.5</div>
-          <div class="hc up num">+5.97%</div>
-          <div class="hf">펀딩 −0.012% · 장 마감 이후</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2-col: 좌=밤사이(과거) 우=한국종목(현재) -->
+    <!-- 2-col: 좌=어젯밤 미국(과거) 우=오늘 본문(현재) -->
     <div class="chip-layout">
-      <!-- 좌: 밤사이 미국 컨텍스트 -->
+      <!-- 좌: 어젯밤 미국 + SOX -->
       <div>
         <div class="chip-sb-label">어젯밤 미국</div>
         <div class="panel" style="margin-bottom:12px;">
@@ -1221,8 +1154,72 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
       </div>
 
-      <!-- 우: 오늘 한국 종목 반응 -->
+      <!-- 우: 섹터 온도계 + AI 코멘트 + 실시간 포커스 + 칩보드 -->
       <div>
+        <!-- 섹터 온도계 -->
+        <div class="strip" style="margin-bottom:12px;">
+          <div class="m"><span class="l">섹터 온도계</span></div>
+          <div class="m"><span class="l">SOX</span><span class="vc up num">+2.8%</span></div>
+          <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
+          <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
+        </div>
+        <!-- AI 코멘트 -->
+        <div class="panel" style="border-color:#BFDBFE;background:#F8FAFF;margin-bottom:12px;">
+          <div class="panel__h" style="background:#EFF6FF;border-color:#BFDBFE;"><span style="color:#1E40AF;">💬 오늘의 AI 코멘트</span></div>
+          <div style="padding:12px 16px;font-size:13px;color:#1E3A5F;line-height:1.65;word-break:keep-all;">
+            엔비디아 신고가·마이크론 어닝 서프라이즈로 HBM 수요 확인. SK하이닉스는 외국인 연속 순매수 흐름에서 시초가 갭업 가능성. 파운드리·장비는 모멘텀 제한적.
+          </div>
+          <a onclick="go('ranking')" style="display:block;padding:8px 16px;font-size:11px;font-weight:700;color:var(--primary);border-top:1px solid var(--hair);text-decoration:none;cursor:pointer;">더블샷 US 브리핑 원문 →</a>
+        </div>
+        <!-- 실시간 포커스 토글 -->
+        <div class="proto-toggle" style="margin-bottom:10px;">
+          <button class="on" onclick="chipFocus('live',this)">● 장중</button>
+          <button onclick="chipFocus('hl',this)">HL 장후</button>
+        </div>
+        <!-- 장중 실시간 카드 -->
+        <div class="focus-card" id="focus-live" style="margin-bottom:12px;">
+          <div class="focus-card__h">
+            <span><span class="live-dot"></span>실시간 포커스</span>
+            <span class="upd-badge"><span class="dot"></span>10초 갱신</span>
+          </div>
+          <div class="focus-stocks">
+            <div class="focus-stock">
+              <div class="fn">삼성전자 <span class="num" style="font-weight:400;">005930</span></div>
+              <div class="fp num" id="sec-price">57,400</div>
+              <div class="fc up num" id="sec-chg">+1.2%</div>
+              <div class="fs">외국인 +2,204억 · 기관 +891억</div>
+            </div>
+            <div class="focus-stock">
+              <div class="fn">SK하이닉스 <span class="num" style="font-weight:400;">000660</span></div>
+              <div class="fp num" id="skh-price">248,000</div>
+              <div class="fc up num" id="skh-chg">+3.1%</div>
+              <div class="fs">외국인 +3일째 순매수 · 기관 중립</div>
+            </div>
+          </div>
+        </div>
+        <!-- 장 마감 후 HL 카드 -->
+        <div class="hl-card" id="focus-hl" style="display:none;margin-bottom:12px;">
+          <div class="hl-card__h">
+            <span class="hl-badge">HL 24h</span>
+            <span>장 마감 이후 연동</span>
+            <span class="hl-note">실제 체결가 아님 · 참고용</span>
+          </div>
+          <div class="hl-stocks">
+            <div class="hl-stock">
+              <div class="hn">삼성전자 <span style="font-weight:400;font-size:10px;">#SEC</span></div>
+              <div class="hp num">$38.20</div>
+              <div class="hc up num">+2.1%</div>
+              <div class="hf">펀딩 −0.008% · 장 마감 이후</div>
+            </div>
+            <div class="hl-stock">
+              <div class="hn">SK하이닉스 <span style="font-weight:400;font-size:10px;">#SKH</span></div>
+              <div class="hp num">$163.5</div>
+              <div class="hc up num">+5.97%</div>
+              <div class="hf">펀딩 −0.012% · 장 마감 이후</div>
+            </div>
+          </div>
+        </div>
+        <!-- 칩보드 카드 -->
         <div class="chip-sb-label">오늘 한국 반도체</div>
         <div class="legend" style="margin:0 2px 10px;">
           <span class="lg"><b>시초가 갭</b> 오늘 시가 vs 전일 종가</span>
@@ -1233,21 +1230,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <!-- 오늘 주목 TOP 3 -->
         <div class="panel" style="margin-top:12px;border-color:#FECACA;">
           <div class="panel__h" style="background:#FEF2F2;border-color:#FECACA;"><span style="color:#991B1B;">⚡ 오늘 주목 TOP 3</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">갭 × 거래대금</span></div>
-          <a class="srow" style="gap:8px;">
-            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">1</span>
-            <span class="n2" style="flex:1;"><b>한미반도체</b><small class="num">042700 · HBM</small></span>
-            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+5.8%</span><span class="vol-surge-badge">×3.7</span></span>
-          </a>
-          <a class="srow" style="gap:8px;">
-            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">2</span>
-            <span class="n2" style="flex:1;"><b>SK하이닉스</b><small class="num">000660 · HBM</small></span>
-            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+3.1%</span><span class="vol-surge-badge">×2.4</span></span>
-          </a>
-          <a class="srow" style="gap:8px;">
-            <span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">3</span>
-            <span class="n2" style="flex:1;"><b>삼성전자</b><small class="num">005930 · DRAM</small></span>
-            <span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+1.9%</span><span class="vol-surge-badge">×1.6</span></span>
-          </a>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">1</span><span class="n2" style="flex:1;"><b>한미반도체</b><small class="num">042700 · HBM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+5.8%</span><span class="vol-surge-badge">×3.7</span></span></a>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">2</span><span class="n2" style="flex:1;"><b>SK하이닉스</b><small class="num">000660 · HBM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+3.1%</span><span class="vol-surge-badge">×2.4</span></span></a>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">3</span><span class="n2" style="flex:1;"><b>삼성전자</b><small class="num">005930 · DRAM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+1.9%</span><span class="vol-surge-badge">×1.6</span></span></a>
         </div>
         <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 14px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:8px;">
           샘플 목업 · 벨웨더(미국)는 yahoo 실시간, 한국 갭·거래대금은 장중 실시간, <b>종목별 수급은 마감 후 확정</b>이라 아침엔 전일 추세만 보여줘요.
