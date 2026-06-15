@@ -435,8 +435,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .anno-item b{color:var(--ink);}
 .iall-top-btn{margin-left:auto;border:1px solid #C7D2FE;background:#EEF2FF;color:#4F46E5;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
 .iall-top-btn:hover{background:#E0E7FF;}
-/* 사이드바: 모달과 동일 2열 행, 패딩만 좁게 */
-#income-rows .iall-row{padding:12px 16px;}
 .iall-more{display:block;width:100%;border:none;border-top:1px solid var(--hair);background:none;padding:13px 16px;font-size:13px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
 .iall-more:hover{background:var(--inset);}
 .income-modal.wide{max-width:600px;}
@@ -751,6 +749,19 @@ const INCOME_UNIVERSE=[
 const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
 function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
+const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.'};
+function incomeRow(d,i){
+  const[hc,hl,e]=incomeHealth(d);
+  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
+  const rTxt=`${d.r>=0?'+':''}${d.r}%`;
+  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  return `<a class="irow" onclick="addFromRanking('${d.code}')">
+    <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
+    <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
+  </a>`;
+}
 let iSortKey='y';
 function incomeFiltered(){
   const excludeCC=document.getElementById('cc-exclude')?.checked;
@@ -762,8 +773,7 @@ function incomeFiltered(){
 }
 function incomeRender(){
   const arr=incomeFiltered();
-  // incomeAllRow를 사이드바에도 재사용 — CSS에서 패딩만 오버라이드
-  document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeAllRow).join('');
+  document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
   const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
 }
 
