@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 <style>
 :root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
-  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;--s-ok:var(--s-ok);--s-ok-bg:var(--s-ok-bg);--s-warn:var(--s-warn);--s-warn-bg:var(--s-warn-bg);--s-bad:var(--s-bad);--s-bad-bg:var(--s-bad-bg);--ic-primary:var(--ic-primary);--ic-primary-bg:var(--ic-primary-bg);--ic-primary-dark:var(--ic-primary-dark);--passive-primary:var(--passive-primary);--passive-primary-bg:var(--passive-primary-bg);--passive-primary-border:var(--passive-primary-border);
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
   --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
 *{box-sizing:border-box;}html,body{margin:0;}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
@@ -42,7 +42,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .brief-strip.bs-kospi{background:var(--primary-bg);border-color:#BFDBFE;}.brief-strip.bs-kospi:hover{background:#DCEFFE;}
 .brief-strip.bs-close{background:#F0FDF4;border-color:#BBF7D0;}.brief-strip.bs-close:hover{background:#DCFCE7;}
 .brief-strip.bs-us{background:#FEFCE8;border-color:#FDE68A;}.brief-strip.bs-us:hover{background:#FEF9C3;}
-.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:var(--s-bad-bg);}
+.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:#FEE2E2;}
 .bs-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .bs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
 .bs-type{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
@@ -251,12 +251,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 /* ── 패시브 민감주 ── */
 .block__t.pass::before{background:#0284C7;}
-.block__t.pass{color:var(--passive-primary);}
-.bar.pbar{background:linear-gradient(90deg,var(--passive-primary-border),#0284C7);}
+.block__t.pass{color:#0C4A6E;}
+.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
 .pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
 .pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
 .pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid var(--passive-primary-border);border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
 /* 위젯 메트릭 타일 */
 .pmet{display:flex;gap:8px;padding:12px 16px 0;}
 .pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
@@ -278,15 +278,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 패시브 랭킹 페이지 */
 .prank-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
 .prank-row:last-child{border-bottom:none;}
-.prank-row:hover{background:var(--passive-primary-bg);}
+.prank-row:hover{background:#F0F9FF;}
 .prank-row .rk2{width:20px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
 .dov-bar{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
-.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--passive-primary-border),#0284C7);}
-.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:var(--passive-primary);}
+.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:#0C4A6E;}
 .conc-col{width:56px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
 .score-col{width:44px;text-align:right;font-size:13px;font-weight:800;color:#0284C7;flex-shrink:0;}
 /* 섹터 쏠림 배너 */
-.sector-bias{background:var(--passive-primary-bg);border:1px solid var(--passive-primary-border);border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:var(--passive-primary);display:flex;align-items:center;gap:10px;}
+.sector-bias{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:#0C4A6E;display:flex;align-items:center;gap:10px;}
 .sector-bias .ic2{font-size:18px;flex-shrink:0;}
 .sector-bias b{font-weight:800;}
 /* 정렬 토글 */
@@ -295,7 +295,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
 
 /* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
-/* 시맨틱: success var(--s-ok)/var(--s-ok-bg) · warning var(--s-warn)/var(--s-warn-bg) · error var(--s-bad)/var(--s-bad-bg) */
+/* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
 .sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
 .sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);}
@@ -307,7 +307,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
 .simrow .qty span{font-size:12px;color:var(--muted);}
-.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:var(--ic-primary);}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
+.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:#4F46E5;}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
 .simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
 .sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
 .combo{position:relative;flex:1;min-width:0;}
@@ -321,19 +321,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .combo__item .ci-nm{flex:1;font-weight:500;min-width:0;}
 .combo__item .ci-nm small{color:var(--muted);font-weight:400;margin-left:5px;font-size:11px;}
 .combo__item .ci-mk{font-size:9px;font-weight:600;padding:1px 5px;border-radius:5px;background:var(--inset);color:var(--muted);}
-.combo__item .ci-y{font-size:12px;font-weight:600;color:var(--ic-primary);}
+.combo__item .ci-y{font-size:12px;font-weight:600;color:#4F46E5;}
 .combo__none{padding:12px;font-size:12px;color:var(--muted);text-align:center;}
 .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
 .qty span{font-size:13px;color:var(--muted);font-weight:500;}
-.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:var(--ic-primary);color:#fff;cursor:pointer;white-space:nowrap;}
+.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#4F46E5;color:#fff;cursor:pointer;white-space:nowrap;}
 .sim__target{display:flex;flex-direction:column;gap:10px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
 .sim__target-row{display:flex;align-items:center;gap:8px;}
 .sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
 .sim__presets{display:flex;gap:6px;flex-wrap:wrap;}
 .sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
-.sim__presets a:hover{border-color:var(--ic-primary);color:var(--ic-primary);}
-.sim__presets a.on{background:var(--ic-primary);border-color:var(--ic-primary);color:#fff;}
+.sim__presets a:hover{border-color:#4F46E5;color:#4F46E5;}
+.sim__presets a.on{background:#4F46E5;border-color:#4F46E5;color:#fff;}
 .sim__out{padding:18px 20px;}
 .sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
@@ -351,9 +351,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-head .rci{font-size:15px;line-height:1;}
 .rc-head .rct{font-size:13px;font-weight:700;color:var(--ink);}
 .rc-head .rcb{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
-.rcb.red{background:var(--s-bad-bg);color:var(--s-bad);}
-.rcb.green{background:var(--s-ok-bg);color:var(--s-ok);}
-.rcb.amber{background:var(--gold-bg);color:var(--gold);}
+.rcb.red{background:#FEE2E2;color:#f33942;}
+.rcb.green{background:#D1FAE5;color:#059669;}
+.rcb.amber{background:#FEF3C7;color:#B7791F;}
 .rcb.blue{background:#DBEAFE;color:#2563EB;}
 .rc-chev{margin-left:8px;font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
 .rc.open .rc-chev{transform:rotate(180deg);}
@@ -362,14 +362,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-body b{font-weight:600;}
 .rc-body .rc-flow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2px;margin-bottom:2px;}
 .rc-body .rc-from{color:var(--muted);}
-.rc-body .rc-arr{color:var(--s-ok);font-weight:700;margin:0 4px;font-size:15px;}
-.rc-body .rc-to{color:var(--ic-primary);font-weight:700;}
+.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 4px;font-size:15px;}
+.rc-body .rc-to{color:#4F46E5;font-weight:700;}
 .rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
 .rc-body .rc-num{font-variant-numeric:tabular-nums;}
 .rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
 .rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
 .rc-act:hover{opacity:.8;}
-.rc-act.pri{background:var(--ic-primary);color:#fff;}
+.rc-act.pri{background:#4F46E5;color:#fff;}
 .rc-act.sec{background:var(--soft);border:1px solid var(--hair);color:var(--ink);}
 .sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
 .donut-wrap{position:relative;flex-shrink:0;}
@@ -382,19 +382,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
 .hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
-.hbdg.ok{background:var(--s-ok-bg);color:var(--s-ok);}
-.hbdg.warn{background:var(--s-warn-bg);color:var(--s-warn);}
-.hbdg.bad{background:var(--s-bad-bg);color:var(--s-bad);}
+.hbdg.ok{background:#ecfeea;color:#00ae1a;}
+.hbdg.warn{background:#fff9e3;color:#eb8e02;}
+.hbdg.bad{background:#fff5f7;color:#f33942;}
 /* 사이드바 인컴 ETF 랭킹 행 */
 .irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
-.irow:last-child{border-bottom:none;}.irow:hover{background:var(--ic-primary-bg);}
+.irow:last-child{border-bottom:none;}.irow:hover{background:#EEF2FF;}
 .irow .it{display:flex;align-items:center;gap:8px;}
-.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:var(--ic-primary);text-align:center;}
-.irow .it .rk.top{color:#fff;background:var(--ic-primary);border-radius:5px;line-height:18px;}
+.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#4F46E5;text-align:center;}
+.irow .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
 .irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
 .irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
-.irow .imx .yv{font-size:15px;font-weight:600;color:var(--ic-primary);}
+.irow .imx .yv{font-size:15px;font-weight:600;color:#4F46E5;}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
 .irow .it .rk{position:relative;display:flex;align-items:center;justify-content:center;}
 .irow .rk-n,.irow .rk-p{transition:opacity .15s;}
@@ -410,7 +410,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ipanel-cap b{color:var(--ink);font-weight:600;}
 .ipanel-cap-row{display:flex;align-items:flex-start;gap:8px;}
 .ipanel-qbtn{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#E5E7EB;border:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;margin-top:1px;}
-.ipanel-qbtn:hover{background:var(--ic-primary);color:#fff;}
+.ipanel-qbtn:hover{background:#4F46E5;color:#fff;}
 /* 인컴 도움말 모달 */
 .income-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;}
 .income-modal-bg.open{display:flex;}
@@ -423,12 +423,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .income-modal .prompt-text{font-size:12px;line-height:1.7;color:#333;font-family:inherit;}
 .income-modal .copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
 .income-modal .copy-btn:hover{opacity:.8;}
-.income-modal .copy-ok{color:var(--s-ok);font-size:12px;margin-left:8px;display:none;}
+.income-modal .copy-ok{color:#00ae1a;font-size:12px;margin-left:8px;display:none;}
 .ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
 .ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.ipanel-legend .dot.ok{background:var(--s-ok);}.ipanel-legend .dot.warn{background:var(--s-warn);}.ipanel-legend .dot.bad{background:var(--s-bad);}
-.honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid var(--s-warn);border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}
+.honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
 .honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
 /* 참고 데이터 레이어 — 출처 라벨 */
@@ -551,8 +551,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="hotcards">
       <a class="hot hot--ai" onclick="go('chips')"><span class="hot__ic">🔬</span><span class="hot__tx"><b>AI 반도체 칩보드</b><small>밤사이 미국 → 오늘 한국 반도체</small></span><span class="hot__arr">→</span></a>
-      <a class="hot" onclick="go('income')" style="background:var(--ic-primary-bg);border-color:#C7D2FE;"><span class="hot__ic" style="background:#E0E7FF;">🪙</span><span class="hot__tx"><b style="color:var(--ic-primary);">배당 인컴 설계기</b><small>순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</small></span><span class="hot__arr">→</span></a>
-      <a class="hot" onclick="go('passive')" style="background:var(--passive-primary-bg);border-color:var(--passive-primary-border);"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('income')" style="background:#EEF2FF;border-color:#C7D2FE;"><span class="hot__ic" style="background:#E0E7FF;">🪙</span><span class="hot__tx"><b style="color:#4F46E5;">배당 인컴 설계기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
@@ -587,11 +587,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <!-- ── 패시브 민감주 프리뷰 ── -->
     <div class="block" style="margin-bottom:18px;">
       <div class="block__h"><span class="block__t pass"><span class="ic">🧲</span>패시브 민감주 톱5</span><span class="block__s">ETF 기계매매 노출 · 거래일수순 <span class="badge-pass-btn" id="badge-pass-btn">뱃지 기준 ⓘ</span></span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:var(--passive-primary);">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:var(--passive-primary);">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:var(--passive-primary);">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>DB하이텍</b><small class="num">000990 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:61%"></div><span class="barval num" style="color:var(--passive-primary);">9.2일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:58%"></div><span class="barval num" style="color:var(--passive-primary);">8.7일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>DB하이텍</b><small class="num">000990 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:61%"></div><span class="barval num" style="color:#0C4A6E;">9.2일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:58%"></div><span class="barval num" style="color:#0C4A6E;">8.7일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
       <a class="more" onclick="go('passive')">패시브 민감주 전체 9종목 →</a>
     </div>
 
@@ -725,7 +725,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="tiles">
             <div class="tile"><div class="l">연 분배율</div><div class="v num">1.62%</div></div>
             <div class="tile"><div class="l">분배주기</div><div class="v">분기</div></div>
-            <div class="tile"><div class="l">건전성</div><div class="v" style="color:var(--s-ok);display:flex;align-items:center;justify-content:center;gap:5px;"><i style="width:8px;height:8px;border-radius:50%;background:var(--s-ok);display:inline-block;"></i>건전</div></div>
+            <div class="tile"><div class="l">건전성</div><div class="v" style="color:#00ae1a;display:flex;align-items:center;justify-content:center;gap:5px;"><i style="width:8px;height:8px;border-radius:50%;background:#00ae1a;display:inline-block;"></i>건전</div></div>
           </div>
           <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">배당 인컴 설계기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
         </div></div>
@@ -968,9 +968,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <a class="srow" onclick="go('detail')"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
           <a class="srow" onclick="go('sector')"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
         </div>
-        <div class="panel" style="border-color:var(--passive-primary-border);">
-          <div class="panel__h" style="background:var(--passive-primary-bg);border-color:var(--passive-primary-border);">
-            <span style="color:var(--passive-primary);">🧲 패시브 자금 노출도</span>
+        <div class="panel" style="border-color:#BAE6FD;">
+          <div class="panel__h" style="background:#F0F9FF;border-color:#BAE6FD;">
+            <span style="color:#0C4A6E;">🧲 패시브 자금 노출도</span>
           </div>
           <p class="p1line">주요 반도체 ETF들이 <b>구조적으로 보유</b>하는 종목이에요. 패시브 기계매매 노출 수준이에요.</p>
           <div class="pmet">
@@ -1023,16 +1023,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <a class="more" id="sec-more"></a>
         </div>
         <!-- 패시브 쏠림 (섹터 고도 차별 블록 — 종목별 노출도 섹터 합산) -->
-        <div class="block" style="border-color:var(--passive-primary-border);">
-          <div class="block__h" style="background:var(--passive-primary-bg);border-color:var(--passive-primary-border);"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
+        <div class="block" style="border-color:#BAE6FD;">
+          <div class="block__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
           <p class="p1line" style="padding:12px 16px 4px;">반도체 섹터는 <b>주요 ETF 자금에 가장 많이 묶인 섹터</b>예요. 추적 28종목 중 <b>7종목</b>이 반도체 테마 ETF에 고비중으로 담겨 있어요.</p>
           <div class="pmet">
             <div class="mc"><div class="l">섹터 합산 노출</div><div class="v num">약 2.8조</div><div class="sub">반도체 테마 ETF 보유액</div></div>
             <div class="mc"><div class="l">고노출 종목</div><div class="v num">7<span style="font-size:11px;color:var(--muted)">/28</span></div><div class="sub">노출도 高 등급</div></div>
           </div>
-          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:var(--passive-primary);">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:var(--passive-primary);">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:var(--passive-primary);">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
           <a class="more" onclick="go('passive')">패시브 민감주 전체 →</a>
         </div>
       </div>
@@ -1054,9 +1054,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
   <div class="screen" id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ic-primary);">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
     <div class="phead">
-      <div><h1 style="color:var(--ic-primary-dark);"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
+      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
 
     <div class="grid">
@@ -1146,7 +1146,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             </div>
           </div>
           <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
-            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:var(--ic-primary);width:14px;height:14px;cursor:pointer;">
+            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
             커버드콜 제외
           </label>
           <div id="income-rows"></div>
@@ -1160,7 +1160,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
     <div class="phead">
       <div>
-        <h1 style="color:var(--passive-primary);"><span class="ic">🧲</span> 패시브 민감주</h1>
+        <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
         <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · 2026-06-13</div>
       </div>
       <div class="stabs" id="psort-tabs">
@@ -1651,7 +1651,7 @@ function incomeRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
   const rk=i+1,rkCls=rk<=3?'rk top':'rk';
   const rTxt=`${d.r>=0?'+':''}${d.r}%`;
-  const eTxt=e>=0?`<span style="color:var(--s-ok)">가격 +${e.toFixed(0)}%</span>`:`<span style="color:var(--s-bad)">가격 ${e.toFixed(0)}%</span>`;
+  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   return `<a class="irow" onclick="addFromRanking('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
@@ -1711,7 +1711,7 @@ function addFromRanking(code){
   const rows=document.querySelectorAll('#sim-rows .simrow');
   const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
   if(el){
-    el.style.transition='background .4s';el.style.background='var(--ic-primary-bg)';
+    el.style.transition='background .4s';el.style.background='#EEF2FF';
     setTimeout(()=>el.style.background='',700);
     el.scrollIntoView({block:'nearest'});
     const inp=el.querySelector('.qty input');
@@ -1837,7 +1837,7 @@ function simOut(){
       <div class="sim-kpi">
         <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
         <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'var(--s-bad)':'var(--s-ok)'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
       </div>
       <div class="donut-legend">${legend}</div>
     </div>
@@ -1848,7 +1848,7 @@ function simOut(){
   if(bad.length){
     cards.push(`<div class="rc open">
       <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:var(--s-bad)">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
+      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
     </div>`);
     const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
     const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
@@ -1859,7 +1859,7 @@ function simOut(){
         <div class="rc-body">
           <div class="rc-flow">
             <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:var(--ic-primary)">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
           </div>
           같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
           <div class="rc-actions">
@@ -1874,7 +1874,7 @@ function simOut(){
   cards.push(`<div class="rc">
     <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'red':'green'}">${taxWarn?'과세 대상':'안전'}</span><span class="rc-chev">▾</span></div>
     <div class="rc-body">${taxWarn
-      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:var(--s-bad)">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
+      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:#f33942">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
       :`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 현재 보유 조합에서는 금융소득종합과세 대상이 아니에요.`}
     </div>
   </div>`);
