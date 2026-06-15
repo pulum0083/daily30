@@ -428,6 +428,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .income-modal .copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
 .income-modal .copy-btn:hover{opacity:.8;}
 .income-modal .copy-ok{color:#00ae1a;font-size:12px;margin-left:8px;display:none;}
+.anno-card{margin:10px 0 4px;display:flex;flex-direction:column;gap:10px;}
+.anno-labels{display:flex;flex-direction:column;gap:8px;padding:2px 0;}
+.anno-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.55;color:#444;}
+.anno-dot{flex-shrink:0;width:8px;height:8px;border-radius:2px;margin-top:4px;}
+.anno-item b{color:var(--ink);}
 .iall-more{display:block;width:100%;border:none;border-top:1px solid var(--hair);background:none;padding:13px 16px;font-size:13px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
 .iall-more:hover{background:var(--inset);}
 .income-modal.wide{max-width:560px;}
@@ -604,7 +609,42 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
 
               <h4>건전성이 뭔가요?</h4>
-              <p><b>건전성 = 총수익 − 분배율</b>이에요. 총수익이 분배율보다 높으면 분배하면서 자산도 불어나는 구조예요 (건전). 총수익이 분배율보다 낮으면 분배금 일부가 원금에서 나온 거예요 (원금성).</p>
+              <p><b>건전성 = 총수익 − 분배율</b>이에요. 아래 카드를 보면 바로 이해돼요.</p>
+
+              <!-- 어노테이션 카드 -->
+              <div class="anno-card">
+                <div class="anno-row">
+                  <div class="irow" style="padding:12px 14px;border-radius:10px;border:1px solid var(--hair);background:var(--canvas);pointer-events:none;">
+                    <div class="it" style="display:flex;align-items:center;gap:8px;">
+                      <span class="rk top" style="flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;text-align:center;">1</span>
+                      <b style="flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;">KODEX 200타겟위클리커버드콜</b>
+                      <span class="hbdg ok" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;background:#ecfeea;color:#00ae1a;white-space:nowrap;">건전</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 6.7조</div>
+                    <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);">
+                      <span style="font-size:15px;font-weight:600;color:#4F46E5;">11.23%</span> 분배 · 총수익 <b style="color:var(--ink)">+174.81%</b> · <span style="color:#00ae1a">가격 +164%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="anno-labels">
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#4F46E5;"></span>
+                    <div><b>분배율 11.23%</b><br>올해 분배금 합계 ÷ 현재가. 내가 받는 배당 비율이에요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#111;"></span>
+                    <div><b>총수익 +174.81%</b><br>분배금 재투자 기준 1년 수익률. 자산이 실제로 얼마나 불었는지예요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#00ae1a;"></span>
+                    <div><b>가격 +164%</b><br>총수익 − 분배율 ≈ 가격 변화 추정치. 분배받으면서 ETF 가격도 올랐어요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#00ae1a;border-radius:9999px;"></span>
+                    <div><b>건전 뱃지</b><br>가격이 유지·상승하며 분배해요. 주의는 소폭 침식, 원금성은 분배금에 원금이 섞인 구조예요.</div>
+                  </div>
+                </div>
+              </div>
 
               <h4>어떤 ETF를 골라야 할까요?</h4>
               <p>분배율이 낮아도 건전한 ETF가 장기적으로 더 유리할 수 있어요. 건전성 탭으로 정렬해 비교해보세요.</p>
