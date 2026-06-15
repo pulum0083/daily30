@@ -433,14 +433,34 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .anno-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.55;color:#444;}
 .anno-dot{flex-shrink:0;width:8px;height:8px;border-radius:2px;margin-top:4px;}
 .anno-item b{color:var(--ink);}
+.iall-top-btn{margin-left:auto;border:1px solid #C7D2FE;background:#EEF2FF;color:#4F46E5;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.iall-top-btn:hover{background:#E0E7FF;}
 .iall-more{display:block;width:100%;border:none;border-top:1px solid var(--hair);background:none;padding:13px 16px;font-size:13px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
 .iall-more:hover{background:var(--inset);}
-.income-modal.wide{max-width:560px;}
-.income-modal .iall-sub{font-size:12px;color:var(--muted);margin:0 0 12px;}
+.income-modal.wide{max-width:600px;}
 .income-modal .iall-h-count{font-size:13px;font-weight:600;color:#4F46E5;margin-left:4px;}
-.income-modal .iall-list{display:flex;flex-direction:column;margin:0 -28px;border-top:1px solid var(--hair);}
-.income-modal .iall-list .irow{border-top:1px solid var(--hair);padding:12px 28px;}
-.income-modal .iall-list .irow:first-child{border-top:none;}
+.income-modal .iall-controls{display:flex;align-items:center;gap:12px;padding:10px 0 8px;border-bottom:1px solid var(--hair);margin-bottom:0;}
+.income-modal .iall-cc-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;margin-left:auto;}
+.income-modal .iall-list{display:flex;flex-direction:column;margin:0 -28px;}
+/* 모달 전용 2-column 행 */
+.iall-row{display:flex;align-items:stretch;padding:14px 28px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);cursor:pointer;}
+.iall-row:last-child{border-bottom:none;}
+.iall-row:hover{background:#EEF2FF;}
+.iall-lft{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.iall-lft .it{display:flex;align-items:center;gap:8px;}
+.iall-lft .it .rk{flex-shrink:0;width:18px;font-size:12px;font-weight:700;color:#4F46E5;text-align:center;}
+.iall-lft .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.iall-lft .it b{flex:1;font-size:13px;font-weight:600;min-width:0;line-height:1.3;}
+.iall-lft .imeta{font-size:11px;color:var(--muted);}
+.iall-lft .iall-nums{font-size:11px;color:var(--muted);display:flex;align-items:baseline;gap:5px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;}
+.iall-lft .iall-nums .yv{font-size:13px;font-weight:700;color:#4F46E5;flex-shrink:0;}
+.iall-rgt{width:90px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;padding-left:10px;border-left:1px solid var(--hair);margin-left:10px;}
+.iall-price{font-size:15px;font-weight:700;line-height:1;}
+.iall-price.up{color:#00ae1a;}
+.iall-price.dn{color:#f33942;}
+.iall-price.neu{color:var(--muted);}
+.iall-desc{font-size:10px;line-height:1.45;color:var(--muted);text-align:right;}
+.iall-ret{font-size:10px;color:var(--muted);text-align:right;}
 .ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
 .ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -579,7 +599,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div>
         <div class="panel">
           <div class="panel__h">월배당 ETF (국내·미국)
-            <div class="stabs" id="isort-tabs" style="margin-left:auto;margin-bottom:0;">
+            <button class="iall-top-btn" onclick="openIncomeAllModal()">전체 보기</button>
+            <div class="stabs" id="isort-tabs" style="margin-left:8px;margin-bottom:0;">
               <a class="on" onclick="incomeSort('y',this)">분배율순</a>
               <a onclick="incomeSort('health',this)">건전성순</a>
             </div>
@@ -664,7 +685,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="income-modal wide">
               <button class="close-btn" onclick="closeIncomeAllModal()">×</button>
               <h3>월배당 ETF 전체 <span id="iall-h-count" class="iall-h-count"></span></h3>
-              <p class="iall-sub">순자산 <b>7천억 이상</b> 월배당 ETF예요 (국내·미국). 행을 누르면 내 보유에 담겨요.</p>
+              <div class="iall-controls">
+                <div class="stabs" id="iall-sort-tabs">
+                  <a class="on" onclick="iallSort('y',this)">분배율순</a>
+                  <a onclick="iallSort('health',this)">건전성순</a>
+                </div>
+                <label class="iall-cc-label">
+                  <input type="checkbox" id="iall-cc-exclude" onchange="incomeAllRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
+                  커버드콜 제외
+                </label>
+              </div>
               <div class="iall-list" id="income-all-rows"></div>
             </div>
           </div>
@@ -746,12 +776,55 @@ function incomeRender(){
   const arr=incomeFiltered();
   document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
   const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
-  if(document.getElementById('income-all-modal-bg')?.classList.contains('open'))incomeAllRender();
+}
+
+/* 모달 전용: 독립 sort + cc 상태 */
+let iAllSortKey='y';
+const HEALTH_DESC={
+  ok:'분배하면서 가격도 올랐어요.',
+  warn:'분배금 일부에 원금이 섞여 있어요.',
+  bad:'분배금 상당 부분이 원금에서 나왔어요.',
+};
+function incomeAllRow(d,i){
+  const[hc,hl,e]=incomeHealth(d);
+  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
+  const ePct=e!=null?Math.round(e):null;
+  const priceCls=ePct==null?'neu':ePct>=0?'up':'dn';
+  const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
+  const desc=HEALTH_DESC[hc]||'';
+  const rTxt=`총수익 ${d.r>=0?'+':''}${d.r}%`;
+  const metaTxt=d.mk==='US'
+    ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
+    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+  return `<a class="iall-row" onclick="addFromRanking('${d.code}')">
+    <div class="iall-lft">
+      <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b></div>
+      <div class="imeta num" style="display:flex;align-items:center;gap:6px;">${metaTxt}<span class="hbdg ${hc}" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;white-space:nowrap;">${hl}</span></div>
+      <div class="iall-nums"><span class="yv num">${d.y}%</span><span>분배</span><span style="color:var(--ink);font-weight:600;flex-shrink:0;">${rTxt}</span></div>
+    </div>
+    <div class="iall-rgt">
+      <div class="iall-price ${priceCls}">${priceTxt}</div>
+      <div class="iall-desc">${desc}</div>
+    </div>
+  </a>`;
+}
+function incomeAllFiltered(){
+  const excludeCC=document.getElementById('iall-cc-exclude')?.checked;
+  let arr=[...INCOME_UNIVERSE];
+  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(iAllSortKey==='y')arr.sort((a,b)=>b.y-a.y);
+  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  return arr;
 }
 function incomeAllRender(){
-  const arr=incomeFiltered();
-  document.getElementById('income-all-rows').innerHTML=arr.map(incomeRow).join('');
+  const arr=incomeAllFiltered();
+  document.getElementById('income-all-rows').innerHTML=arr.map(incomeAllRow).join('');
   document.getElementById('iall-h-count').textContent=`${arr.length}개`;
+}
+function iallSort(k,el){
+  iAllSortKey=k;
+  document.querySelectorAll('#iall-sort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  incomeAllRender();
 }
 function openIncomeAllModal(){incomeAllRender();document.getElementById('income-all-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
 function closeIncomeAllModal(){document.getElementById('income-all-modal-bg').classList.remove('open');document.body.style.overflow='';}
