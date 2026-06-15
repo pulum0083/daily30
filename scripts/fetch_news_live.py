@@ -50,11 +50,12 @@ _OUTPUT_RULES = """
 - title: 검색된 기사의 원문 제목을 그대로 사용하세요. 절대 새로 만들지 마세요.
   단, 제목 끝에 "- 언론사명" 형식으로 출처가 붙어 있으면 반드시 제거하세요. (예: "코스피 급등 - 데일리머니" → "코스피 급등")
 - summary: 해당 기사의 리드 문장(첫 줄 또는 핵심 문장)을 그대로 가져오세요. 절대 새로 쓰지 마세요.
+- pub_date: 기사의 실제 발행일을 YYYY-MM-DD 형식으로 기입하세요. 오늘({today})이어야 합니다. 다른 날짜 기사는 절대 선택하지 마세요.
 
 {avoid_block}아래 JSON 형식만 출력하세요 (마크다운·추가 텍스트 없이):
 {{
-  "market": {{"title": "기사 원문 제목", "summary": "기사 리드 문장"}},
-  "stock":  {{"title": "기사 원문 제목", "summary": "기사 리드 문장"}}
+  "market": {{"title": "기사 원문 제목", "summary": "기사 리드 문장", "pub_date": "YYYY-MM-DD"}},
+  "stock":  {{"title": "기사 원문 제목", "summary": "기사 리드 문장", "pub_date": "YYYY-MM-DD"}}
 }}
 """
 
@@ -286,7 +287,7 @@ def _call_gemini(prompt: str) -> dict:
 
 
 def _clean_issue(issue: dict) -> dict:
-    """title·summary 에서 [ ] ( ) 괄호 태그 제거."""
+    """title·summary 에서 [ ] ( ) 괄호 태그 제거. pub_date는 그대로 보존."""
     def clean(text: str) -> str:
         if not text:
             return text
@@ -298,13 +299,27 @@ def _clean_issue(issue: dict) -> dict:
     for key in ("market", "stock"):
         val = issue.get(key)
         if isinstance(val, dict):
-            result[key] = {
+            entry = {
                 "title":   clean(val.get("title", "")),
                 "summary": clean(val.get("summary", "")),
             }
+            if val.get("pub_date"):
+                entry["pub_date"] = val["pub_date"]
+            result[key] = entry
         else:
             result[key] = val
     return result
+
+
+def _has_stale_article(result: dict, today: str) -> list:
+    """pub_date가 오늘({today})이 아닌 기사 목록을 반환한다. 빈 리스트면 정상."""
+    stale = []
+    for key in ("market", "stock"):
+        val = result.get(key) or {}
+        pub_date = val.get("pub_date", "")
+        if pub_date and re.match(r"\d{4}-\d{2}-\d{2}", pub_date) and pub_date != today:
+            stale.append(f"{key}(pub_date={pub_date}): {val.get('title', '')}")
+    return stale
 
 
 def fetch_latest_issue(
@@ -401,6 +416,13 @@ def main() -> None:
             if attempt == 3:
                 sys.exit(1)
             continue
+
+        # 날짜 검증: pub_date가 오늘이 아닌 기사는 재시도
+        stale = _has_stale_article(latest, today)
+        if stale:
+            print(f"[fetch_news_live] ⚠️ 과거 날짜 기사 감지 (시도 {attempt+1}): {stale} — 재시도")
+            if attempt < 3:
+                continue
 
         # 방향 모순 검증 (MARKET 슬롯 + 실측 데이터 있을 때만)
         if market_reality and _is_direction_conflict(latest, market_reality["change_pct"]):
