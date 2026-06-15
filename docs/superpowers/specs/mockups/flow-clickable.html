@@ -360,9 +360,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-body{display:none;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--ink);}
 .rc.open .rc-body{display:block;}
 .rc-body b{font-weight:600;}
+.rc-body .rc-flow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2px;margin-bottom:2px;}
 .rc-body .rc-from{color:var(--muted);}
-.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 6px;font-size:15px;}
+.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 4px;font-size:15px;}
 .rc-body .rc-to{color:#4F46E5;font-weight:700;}
+.rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
 .rc-body .rc-num{font-variant-numeric:tabular-nums;}
 .rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
 .rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
@@ -1849,9 +1851,10 @@ function simOut(){
       cards.push(`<div class="rc open">
         <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
         <div class="rc-body">
-          <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-          <span class="rc-arr">→</span>
-          <span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span><br>
+          <div class="rc-flow">
+            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
+            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+          </div>
           같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
           <div class="rc-actions">
             <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
