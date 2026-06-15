@@ -3,8 +3,9 @@
 """
 배당 인컴 설계기 유니버스 파이프라인 (v1).
 
-순자산 일정 규모 이상의 배당·커버드콜 ETF를 모아, 분배율 대비 실제
-총수익으로 "분배 품질(건전성)"을 판정한다.
+순자산 일정 규모 이상의 '월배당' 배당·커버드콜 ETF를 모아, 분배율 대비 실제
+총수익으로 "분배 품질(건전성)"을 판정한다. 분기·반기 배당 ETF는 dividendMonthThisYear
+기준으로 걸러낸다(is_monthly).
 
 핵심 지표 — 가격침식 프록시:
   erosion = 총수익(Y1) − 분배율(TTM)
@@ -30,7 +31,7 @@ import json
 import re
 import time
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 KST = timezone(timedelta(hours=9))
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -85,6 +86,27 @@ def is_new_fund(listed_date, today):
     return (today - d).days < 365
 
 
+def is_monthly(months, listed_date, today):
+    """올해 지급 월(months)로 월배당 여부 판정. 분기·반기 배당 ETF를 걸러낸다.
+
+    신생 펀드는 올해 분배 횟수가 적으므로 상장 후 경과한 '완료 월' 수를 기준으로 본다.
+    이번 달은 아직 지급 전일 수 있어 1개월 여유를 둔다.
+    """
+    if not months:
+        return False
+    start = date(today.year, 1, 1)
+    if listed_date and len(str(listed_date)) == 8:
+        try:
+            ld = datetime.strptime(str(listed_date), "%Y%m%d").date()
+            if ld > start:
+                start = ld
+        except ValueError:
+            pass
+    elapsed = (today.year - start.year) * 12 + (today.month - start.month)
+    need = max(1, elapsed - 1)  # 직전 달 미지급 1개월 허용
+    return len(months) >= need
+
+
 # ---------- 네트워크 ----------
 
 def _getj(url, referer, encoding="utf-8"):
@@ -130,6 +152,9 @@ def build(aum_floor_eok, sleep=0.25):
         y = div.get("dividendYieldTtm")
         if not y or y <= 0:
             continue
+        months = parse_months(div.get("dividendMonthThisYear"))
+        if not is_monthly(months, a.get("listedDate"), today):
+            continue  # 월배당 ETF만 — 분기·반기 배당 제외
         r1y = return_y1(a.get("returnPerformanceList"))
         health, erosion = classify_health(y, r1y)
         etfs.append({
@@ -141,7 +166,7 @@ def build(aum_floor_eok, sleep=0.25):
             "return_1y": r1y,
             "erosion": erosion,
             "health": health,
-            "dividend_months": parse_months(div.get("dividendMonthThisYear")),
+            "dividend_months": months,
             "fee": a.get("totalFee"),
             "tax_type": a.get("taxationTypeCode"),
             "listed_date": a.get("listedDate"),
