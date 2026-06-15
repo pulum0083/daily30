@@ -305,6 +305,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
 .simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
 .simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
+.mk-kr,.mk-us{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;vertical-align:middle;}
+.mk-kr{background:#EEF2FF;color:#4F46E5;}
+.mk-us{background:#FEF3C7;color:#92400E;}
 .simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
 .simrow .qty span{font-size:12px;color:var(--muted);}
@@ -562,7 +565,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
         <div class="panel">
-          <div class="panel__h">배당·커버드콜 ETF
+          <div class="panel__h">월배당 ETF (국내·미국)
             <div class="stabs" id="isort-tabs" style="margin-left:auto;margin-bottom:0;">
               <a class="on" onclick="incomeSort('y',this)">분배율순</a>
               <a onclick="incomeSort('health',this)">건전성순</a>
@@ -570,7 +573,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
           <div class="ipanel-cap">
             <div class="ipanel-cap-row">
-              <div style="flex:1;">순자산 <b>7천억원 이상</b> 배당·커버드콜 ETF예요.<br>
+              <div style="flex:1;">순자산 <b>7천억 이상</b> 월배당 ETF예요 (국내·미국).<br>
                 <span id="icap-y">연 <b>분배율이 높은 순</b>으로 정렬돼요.</span>
                 <span id="icap-h" style="display:none"><b>분배율 대비 실제 1년 총수익</b>이 높은 순으로 정렬돼요.</span>
               </div>
@@ -628,7 +631,9 @@ function goBack(){ if(history.length>1) history.back(); else location.href='flow
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
+// 월배당 ETF만 포함 (국내: 순자산 7천억+, 미국: $500M+). 분기배당(PLUS고배당주·SCHD) 제외.
 const INCOME_UNIVERSE=[
+  // ── 국내 월배당 ETF (순자산 7천억+ 기준, 2026-06-11) ──────────────────────
   {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
   {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.4,r:16.35,mk:'KR'},
   {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR'},
@@ -642,14 +647,16 @@ const INCOME_UNIVERSE=[
   {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR'},
   {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.7,r:29.7,mk:'KR'},
   {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR'},
-  {code:'161510',name:'PLUS 고배당주',aum:2.49,price:26330,y:3.77,r:47.47,mk:'KR'},
   {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.8,price:25865,y:3.66,r:50.98,mk:'KR'},
   {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR'},
   {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR'},
   {code:'458730',name:'TIGER 미국배당다우존스',aum:3.9,price:15670,y:2.69,r:37.49,mk:'KR'},
-  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
-  {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
-  {code:'QYLD',name:'Global X 나스닥커버드콜 (QYLD)',aum:0,price:24000,y:11.8,r:2.5,mk:'US'},
+  // ── 미국 월배당 ETF ($500M+ 기준, 가격 단위: 원화 환산, 수익률 1년 기준) ──
+  {code:'JEPI', name:'JPMorgan 에쿼티프리미엄 (JEPI)', aum:47.0,price:78000, y:7.8, r:9.5, mk:'US',aumLabel:'$35B'},
+  {code:'JEPQ', name:'JPMorgan 나스닥 에쿼티프리미엄 (JEPQ)',aum:24.0,price:88000, y:11.5,r:38.0,mk:'US',aumLabel:'$18B'},
+  {code:'QYLD', name:'Global X 나스닥100 커버드콜 (QYLD)',  aum:11.0,price:24000, y:11.8,r:2.5, mk:'US',aumLabel:'$8B'},
+  {code:'XYLD', name:'Global X S&P500 커버드콜 (XYLD)',     aum:3.8, price:40000, y:9.8, r:4.2, mk:'US',aumLabel:'$2.8B'},
+  {code:'DIVO', name:'Amplify CWP 강화배당 (DIVO)',          aum:6.0, price:77000, y:4.5, r:16.2,mk:'US',aumLabel:'$4.5B'},
 ];
 const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
 function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
@@ -664,18 +671,18 @@ function incomeRow(d,i){
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   return `<a class="irow" onclick="addFromRanking('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
-    <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
+    <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
     <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
   </a>`;
 }
 let iSortKey='y';
 function incomeRender(){
   const excludeCC=document.getElementById('cc-exclude')?.checked;
-  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR');
+  let arr=[...INCOME_UNIVERSE];
   if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
-  arr=arr.slice(0,15);
+  arr=arr.slice(0,20);
   document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
 }
 function incomeSort(k,el){
