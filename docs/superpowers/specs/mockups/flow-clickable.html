@@ -394,8 +394,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
 .irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
-.irow-tip{position:absolute;top:10px;right:12px;background:rgba(25,25,25,.82);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .15s;z-index:300;white-space:nowrap;}
-.irow:hover .irow-tip{opacity:1;}
+.irow .it .rk{position:relative;}
+.irow .rk-n,.irow .rk-p{transition:opacity .15s;}
+.irow .rk-p{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;opacity:0;}
+.irow:hover .rk-n{opacity:0;}
+.irow:hover .rk-p{opacity:1;}
 /* task3: 건전성 뱃지 호버 툴팁 */
 .hbdg-w{position:relative;display:inline-flex;}
 .hbdg-w .hbdg-tip{position:absolute;bottom:calc(100%+8px);right:0;width:210px;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);box-shadow:0 4px 20px rgba(0,0,0,.12);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:250;white-space:normal;text-align:left;}
@@ -1600,10 +1603,9 @@ function incomeRow(d,i){
   const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   return `<a class="irow" onclick="addFromRanking('${d.code}')">
-    <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
     <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
-    <span class="irow-tip">클릭하면 내 보유에 담겨요</span>
   </a>`;
 }
 let iSortKey='y';
