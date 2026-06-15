@@ -327,27 +327,65 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
 .qty span{font-size:13px;color:var(--muted);font-weight:500;}
 .sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#B7791F;color:#fff;cursor:pointer;white-space:nowrap;}
-.sim__target{display:flex;align-items:center;gap:8px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
+.sim__target{display:flex;flex-direction:column;gap:10px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
+.sim__target-row{display:flex;align-items:center;gap:8px;}
 .sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
+.sim__presets{display:flex;gap:6px;flex-wrap:wrap;}
+.sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
+.sim__presets a:hover{border-color:#B7791F;color:#B7791F;}
+.sim__presets a.on{background:#B7791F;border-color:#B7791F;color:#fff;}
 .sim__out{padding:18px 20px;}
 .sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
 .sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
 .sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
-/* 출력 노트 — 중성 배경 + 좌측 accent 바로 통일 (색은 선·강조에만) */
-.sim-warn,.sim-swap,.sim-tax,.sim-fill{background:var(--canvas);border:1px solid var(--hair);border-left-width:3px;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.65;color:var(--ink);margin-bottom:8px;}
-.sim-warn{border-left-color:#f33942;}
-.sim-warn b{font-weight:600;color:#f33942;}
-.sim-swap{border-left-color:#00ae1a;}
-.sim-swap b{font-weight:600;color:#00ae1a;}
-.sim-swap .arr{color:#00ae1a;font-weight:700;margin:0 4px;}
-.sim-tax{font-weight:400;color:var(--muted);}
-.sim-tax.safe{border-left-color:#00ae1a;}
-.sim-tax.safe b{color:#00ae1a;}
-.sim-tax.warn{border-left-color:#f33942;color:var(--ink);}
-.sim-tax.warn b{color:#f33942;font-weight:600;}
-.sim-fill{border-left-color:var(--primary);}
-.sim-fill b{font-weight:600;color:var(--primary);}
+/* 진단 리포트 토글 버튼 */
+.report-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 16px;border:1px solid var(--hair);border-radius:10px;background:var(--soft);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;margin-bottom:2px;text-align:left;}
+.report-btn:hover{background:#F3F4F6;}
+.report-btn .rbc{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#E5E7EB;color:var(--muted);}
+.report-btn .rbc.has-warn{background:#FEE2E2;color:#f33942;}
+.report-btn .rbchev{margin-left:4px;font-size:11px;color:var(--muted);transition:transform .2s;}
+.report-btn.open .rbchev{transform:rotate(180deg);}
+/* 리포트 카드 */
+.sim-report{display:none;flex-direction:column;gap:8px;padding-top:10px;}
+.sim-report.open{display:flex;}
+.rc{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;transition:box-shadow .15s;}
+.rc:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.rc.open{border-color:#CBD5E1;}
+.rc-head{display:flex;align-items:center;gap:8px;padding:13px 16px;background:var(--soft);cursor:pointer;user-select:none;transition:background .12s;}
+.rc-head:hover{background:#ECEDEF;}
+.rc.open .rc-head{border-bottom:1px solid var(--hair);}
+.rc-head .rci{font-size:15px;line-height:1;}
+.rc-head .rct{font-size:13px;font-weight:700;color:var(--ink);}
+.rc-head .rcb{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+.rcb.red{background:#FEE2E2;color:#f33942;}
+.rcb.green{background:#D1FAE5;color:#059669;}
+.rcb.amber{background:#FEF3C7;color:#B7791F;}
+.rcb.blue{background:#DBEAFE;color:#2563EB;}
+.rc-chev{margin-left:8px;font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.rc.open .rc-chev{transform:rotate(180deg);}
+.rc-body{display:none;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--ink);}
+.rc.open .rc-body{display:block;}
+.rc-body b{font-weight:600;}
+.rc-body .rc-from{color:var(--muted);}
+.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 6px;font-size:15px;}
+.rc-body .rc-to{color:#059669;font-weight:700;}
+.rc-body .rc-num{font-variant-numeric:tabular-nums;}
+.rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
+.rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
+.rc-act:hover{opacity:.8;}
+.rc-act.pri{background:#B7791F;color:#fff;}
+.rc-act.sec{background:var(--soft);border:1px solid var(--hair);color:var(--ink);}
+.sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
+.donut-wrap{position:relative;flex-shrink:0;}
+.donut-arc{cursor:pointer;transition:opacity .15s;}
+.donut-arc:hover{opacity:.8;}
+.donut-tip{position:fixed;display:none;background:#1a1a1a;color:#fff;font-size:12px;line-height:1.5;padding:8px 12px;border-radius:8px;pointer-events:none;z-index:999;max-width:220px;white-space:nowrap;}
+.donut-tip b{font-weight:600;}
+.donut-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
 .hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
 .hbdg.ok{background:#ecfeea;color:#00ae1a;}
 .hbdg.warn{background:#fff9e3;color:#eb8e02;}
@@ -364,7 +402,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
 .irow{position:relative;}
-.irow-arr{position:absolute;right:12px;bottom:13px;opacity:0;transition:opacity .2s;font-size:15px;line-height:1;user-select:none;pointer-events:auto;}
+.irow-arr{position:absolute;right:12px;top:13px;opacity:0;transition:opacity .2s;font-size:15px;line-height:1;user-select:none;pointer-events:auto;}
 .irow:hover .irow-arr{opacity:0.22;color:var(--muted);}
 .irow:hover .irow-arr:hover{opacity:1;color:var(--primary);}
 .irow-arr .arr-tip{position:absolute;bottom:calc(100%+7px);right:0;white-space:nowrap;background:rgba(25,25,25,.82);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:500;letter-spacing:-.01em;opacity:0;pointer-events:none;transition:opacity .15s;z-index:300;}
@@ -1026,7 +1064,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
             <a onclick="simAdd()">+ 추가</a>
           </div>
-          <div class="sim__target">목표 월 수령액 <input id="sim-target" type="number" value="100" oninput="simOut()"> 만원</div>
+          <div class="sim__target">
+            <div class="sim__target-row">
+              <span>목표 월 수령액</span>
+              <input id="sim-target" type="number" value="100" oninput="targetInput()">
+              <span>만원</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;">종목 추가·주 수 변경 시 자동 계산돼요</span>
+            </div>
+            <div class="sim__presets" id="target-presets">
+              <a onclick="targetPreset(50)">50만</a>
+              <a onclick="targetPreset(100)" class="on">100만</a>
+              <a onclick="targetPreset(200)">200만</a>
+              <a onclick="targetPreset(300)">300만</a>
+              <a onclick="targetPreset(500)">500만</a>
+            </div>
+          </div>
           <div class="sim__out" id="sim-out"></div>
         </div>
 
@@ -1585,21 +1637,33 @@ function simRowsRender(){
     return `<div class="simrow">
       <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
       <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
-      <div class="sinc"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
+      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
       <div class="sx" onclick="simDel(${i})">×</div>
     </div>`;
   }).join('');
 }
-function simSet(i,v){simHoldings[i].qty=Math.max(0,parseInt(v)||0);simOut();}
+function simSet(i,v){
+  simHoldings[i].qty=Math.max(0,parseInt(v)||0);
+  const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
+  const el=document.getElementById('sinc-'+i);
+  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  simOut();
+}
 function simDel(i){simHoldings.splice(i,1);simRowsRender();simOut();}
-/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 (기능 C) */
+/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
 function addFromRanking(code){
   const ex=simHoldings.findIndex(h=>h.code===code);
   if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
   simRowsRender();simOut();
   const rows=document.querySelectorAll('#sim-rows .simrow');
   const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
-  if(el){el.style.transition='background .4s';el.style.background='#FFFBEB';setTimeout(()=>el.style.background='',700);el.scrollIntoView({block:'nearest'});}
+  if(el){
+    el.style.transition='background .4s';el.style.background='#FFFBEB';
+    setTimeout(()=>el.style.background='',700);
+    el.scrollIntoView({block:'nearest'});
+    const inp=el.querySelector('.qty input');
+    if(inp){inp.focus();inp.select();}
+  }
 }
 
 /* 콤보박스: 순자산 톱10 기본 + 이름·코드 검색 */
@@ -1635,28 +1699,160 @@ function comboKey(e){
 function simAdd(){
   if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
   const qty=parseInt(document.getElementById('sim-amt').value)||0;
-  if(comboSel&&qty>0){simHoldings.push({code:comboSel,qty});comboSel=null;document.getElementById('sim-search').value='';simRowsRender();simOut();}
+  if(comboSel&&qty>0){
+    simHoldings.push({code:comboSel,qty});
+    comboSel=null;document.getElementById('sim-search').value='';
+    simRowsRender();simOut();
+    const rows=document.querySelectorAll('#sim-rows .simrow');
+    const el=rows[simHoldings.length-1];
+    if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
+  }
+}
+const DONUT_COLORS=['#B7791F','#2775ED','#10B981','#8B5CF6','#D97706','#EF4444','#EC4899','#6366F1','#F59E0B'];
+const GAP_COLOR='#E5E7EB';
+
+function buildDonut(segs, monthly){
+  const CX=70,CY=70,R=50,W=18,circ=2*Math.PI*R;
+  const gap=segs.length>1?1.5:0;
+  let offset=0;
+  const arcs=segs.map((s,i)=>{
+    const len=Math.max(0,s.pct*circ-gap);
+    const el=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${W}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" class="donut-arc" data-i="${i}" transform="rotate(-90 ${CX} ${CY})"/>`;
+    offset+=s.pct*circ;
+    return el;
+  }).join('');
+  return `<svg class="donut-svg" viewBox="0 0 140 140" width="140" height="140">
+    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
+    ${arcs}
+    <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
+    <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">만원/월</text>
+  </svg>`;
+}
+
+function setupDonutTip(segs){
+  const tip=document.getElementById('donut-tip');
+  if(!tip)return;
+  document.querySelectorAll('.donut-arc').forEach(el=>{
+    el.addEventListener('mousemove',e=>{
+      const i=parseInt(el.dataset.i),s=segs[i];
+      if(!s)return;
+      const pct=(s.pct*100).toFixed(1);
+      tip.innerHTML=s.code
+        ?`<b>${s.name}</b><br>월 인컴 <b>${s.inc.toFixed(1)}만원</b> · ${pct}%`
+        :`<b>${s.name}</b><br>${s.inc.toFixed(1)}만원 더 필요해요`;
+      tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px';
+      tip.style.top=(e.clientY-10)+'px';
+    });
+    el.addEventListener('mouseleave',()=>{tip.style.display='none';});
+  });
+}
+
+const PRESETS=[50,100,200,300,500];
+function targetPreset(v){
+  document.getElementById('sim-target').value=v;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
+}
+function targetInput(){
+  const v=parseInt(document.getElementById('sim-target').value)||0;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
 }
 function simOut(){
-  let totalDiv=0;const bad=[];
-  simHoldings.forEach(h=>{const d=UNIV[h.code];totalDiv+=simIncome(h);const[hc,,e]=incomeHealth(d);if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});});
+  let totalDiv=0;const bad=[],slices=[];
+  simHoldings.forEach(h=>{
+    const d=UNIV[h.code],inc=simIncome(h);
+    totalDiv+=inc;
+    slices.push({name:d.name,code:h.code,inc});
+    const[hc,,e]=incomeHealth(d);
+    if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
+  });
   const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
-  let html=`<div class="sim-kpi">
-    <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
-    <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-    <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+
+  // 도넛 세그먼트 구성
+  const total=Math.max(monthly,target,0.01);
+  const segs=slices.map((s,i)=>({name:s.name,code:s.code,inc:s.inc/12,pct:s.inc/12/total,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
+  if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
+
+  const donut=simHoldings.length?buildDonut(segs,monthly):'';
+  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i>${s.name}<b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
+
+  let html=`<div class="sim-out-row">
+    ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
+    <div style="flex:1;min-width:0;">
+      <div class="sim-kpi">
+        <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+      </div>
+      <div class="donut-legend">${legend}</div>
+    </div>
   </div>`;
-  if(bad.length)html+=`<div class="sim-warn">⚠️ <b>보유 중 원금성 분배 ${bad.length}종목.</b> `+bad.map(b=>`${b.name}(분배 ${b.y}% · 가격 ${b.e.toFixed(0)}%)`).join(', ')+` — 분배금에 원금이 섞여 있어 표면 분배율만큼 번 게 아니에요.</div>`;
+
+  // 리포트 카드 조립
+  const cards=[];
   if(bad.length){
+    cards.push(`<div class="rc open">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
+    </div>`);
     const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
     const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
-    if(alt){const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
-      html+=`<div class="sim-swap">🔄 <b>갈아타기 제안.</b> ${worst.name} <span class="num">(분배 ${worst.y}%·가격 ${worst.e.toFixed(0)}%)</span><span class="arr">→</span><b>${alt.name}</b> <span class="num">(분배 ${alt.y}%·가격 +${ae.toFixed(0)}%)</span>. 같은 평가금액 ${worst.val.toFixed(0)}만원 기준 월 인컴 ${curM.toFixed(1)}→${altM.toFixed(1)}만원으로 ${altM<curM?'줄지만':'늘고'}, 가격이 녹지 않아 실질 수익은 더 안정적이에요.</div>`;}
+    if(alt){
+      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      cards.push(`<div class="rc open">
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
+        <div class="rc-body">
+          <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
+          <span class="rc-arr">→</span>
+          <span class="rc-to">${alt.name} <span class="rc-num" style="color:#059669">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span><br>
+          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
+          <div class="rc-actions">
+            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
+            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
+          </div>
+        </div>
+      </div>`);
+    }
   }
-  if(totalDiv>=2000)html+=`<div class="sim-tax warn">⚠ <b>금융소득종합과세 대상</b> — 연 분배금 ${totalDiv.toFixed(0)}만원 &gt; 2,000만원. 초과분 ${(totalDiv-2000).toFixed(0)}만원이 종합과세에 합산돼요.</div>`;
-  else html+=`<div class="sim-tax safe">✓ <b>금융소득종합과세 안전</b> — 연 분배금 ${totalDiv.toFixed(0)}만원 ≤ 2,000만원.</div>`;
-  if(gap>0){const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';html+=`<div class="sim-fill">📈 <b>목표까지 월 ${gap.toFixed(0)}만원 부족.</b> 건전 등급 <b>${f.name}</b>(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)을 약 <b>${needTxt}</b> 더 담으면 채워져요.</div>`;}
+  const taxWarn=totalDiv>=2000;
+  cards.push(`<div class="rc">
+    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'red':'green'}">${taxWarn?'과세 대상':'안전'}</span><span class="rc-chev">▾</span></div>
+    <div class="rc-body">${taxWarn
+      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:#f33942">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
+      :`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 현재 보유 조합에서는 금융소득종합과세 대상이 아니에요.`}
+    </div>
+  </div>`);
+  if(gap>0){
+    const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
+    cards.push(`<div class="rc">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
+        <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
+      </div>
+    </div>`);
+  }
+
+  const hasWarn=bad.length>0||taxWarn;
+  html+=`<button class="report-btn" id="report-btn" onclick="toggleReport()">
+    📋 진단 리포트
+    <span class="rbc ${hasWarn?'has-warn':''}">${cards.length}건</span>
+    <span class="rbchev">▾</span>
+  </button>
+  <div class="sim-report" id="sim-report">${cards.join('')}</div>`;
+
   document.getElementById('sim-out').innerHTML=html;
+  if(simHoldings.length)setupDonutTip(segs);
+}
+function toggleRc(head){head.closest('.rc').classList.toggle('open');}
+function toggleReport(){
+  const btn=document.getElementById('report-btn');
+  const rep=document.getElementById('sim-report');
+  if(!btn||!rep)return;
+  const open=rep.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  btn.querySelector('.rbchev').textContent=open?'▴':'▾';
 }
 simRowsRender();simOut();
 
