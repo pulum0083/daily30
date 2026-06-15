@@ -389,6 +389,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hbdg.ok{background:#ecfeea;color:#00ae1a;}
 .hbdg.warn{background:#fff9e3;color:#eb8e02;}
 .hbdg.bad{background:#fff5f7;color:#f33942;}
+.hbdg.na{background:#F1F3F5;color:#868E96;}
 /* 사이드바 인컴 ETF 랭킹 행 */
 .irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
 .irow:last-child{border-bottom:none;}.irow:hover{background:#EEF2FF;}
@@ -464,7 +465,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
 .ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}
+.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}.ipanel-legend .dot.na{background:#ADB5BD;}
 .honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
 .honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
@@ -592,7 +593,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
 
         <!-- 정직 배너 -->
-        <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값이며, 세금은 예상치예요. 투자 권유가 아니에요.</p>
+        <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값(국내 2026-06-13, 미국 2026-06-16)이고, 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요. 미국 ETF 가격은 원화 환산(@1,513.3원)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
       </div>
 
       <!-- 사이드바: 인컴 ETF 전체 -->
@@ -617,6 +618,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               <span><i class="dot ok"></i>건전 · 가격 유지</span>
               <span><i class="dot warn"></i>주의 · 소폭 침식</span>
               <span><i class="dot bad"></i>원금성 · 원금 잠식</span>
+              <span><i class="dot na"></i>데이터 부족 · 신생</span>
             </div>
           </div>
 
@@ -719,48 +721,53 @@ function go(id){ location.href='flow-clickable.html'; }
 function goBack(){ if(history.length>1) history.back(); else location.href='flow-clickable.html'; }
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
-// 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
-// 월배당 ETF만 포함 (국내: 순자산 7천억+, 미국: $500M+). 분기배당(PLUS고배당주·SCHD) 제외.
+// 국내 20종 = data/income_etfs.json 실측(2026-06-13, build_income_etfs.py, 순자산 7천억+).
+// 미국 5종 = yfinance 실측(2026-06-16, 가격 원화 환산 @1,513.3원, TTM 분배율·1년 총수익).
+// 전 종목 월배당(분배 12회/연). lc=true는 상장 1년 미만이라 총수익(r) 미집계 — 건전성 판정 불가.
 const INCOME_UNIVERSE=[
-  // ── 국내 월배당 ETF (순자산 7천억+ 기준, 2026-06-11) ──────────────────────
-  {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
-  {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.4,r:16.35,mk:'KR'},
-  {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR'},
-  {code:'472150',name:'TIGER 배당커버드콜액티브',aum:1.93,price:25580,y:14.68,r:177.47,mk:'KR'},
-  {code:'475720',name:'RISE 200위클리커버드콜',aum:0.92,price:15065,y:14.61,r:100.36,mk:'KR'},
-  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.89,price:11970,y:13.48,r:44.7,mk:'KR'},
-  {code:'476550',name:'TIGER 미국30년국채커버드콜액티브(H)',aum:0.9,price:7240,y:13.02,r:1.85,mk:'KR'},
-  {code:'481060',name:'KODEX 미국30년국채타겟커버드콜(합성 H)',aum:0.84,price:7750,y:12.94,r:1.67,mk:'KR'},
-  {code:'498400',name:'KODEX 200타겟위클리커버드콜',aum:6.74,price:25050,y:11.23,r:174.81,mk:'KR'},
-  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.47,price:4075,y:9.54,r:6.03,mk:'KR'},
-  {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR'},
-  {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.7,r:29.7,mk:'KR'},
-  {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR'},
-  {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.8,price:25865,y:3.66,r:50.98,mk:'KR'},
-  {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR'},
-  {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR'},
-  {code:'458730',name:'TIGER 미국배당다우존스',aum:3.9,price:15670,y:2.69,r:37.49,mk:'KR'},
-  // ── 미국 월배당 ETF ($500M+ 기준, 가격 단위: 원화 환산, 수익률 1년 기준) ──
-  {code:'JEPI', name:'JPMorgan 에쿼티프리미엄 (JEPI)', aum:47.0,price:78000, y:7.8, r:9.5, mk:'US',aumLabel:'$35B'},
-  {code:'JEPQ', name:'JPMorgan 나스닥 에쿼티프리미엄 (JEPQ)',aum:24.0,price:88000, y:11.5,r:38.0,mk:'US',aumLabel:'$18B'},
-  {code:'QYLD', name:'Global X 나스닥100 커버드콜 (QYLD)',  aum:11.0,price:24000, y:11.8,r:2.5, mk:'US',aumLabel:'$8B'},
-  {code:'XYLD', name:'Global X S&P500 커버드콜 (XYLD)',     aum:3.8, price:40000, y:9.8, r:4.2, mk:'US',aumLabel:'$2.8B'},
-  {code:'DIVO', name:'Amplify CWP 강화배당 (DIVO)',          aum:6.0, price:77000, y:4.5, r:16.2,mk:'US',aumLabel:'$4.5B'},
+  // ── 국내 월배당 ETF (순자산 7천억+, 2026-06-13 실측) ──────────────────────
+  {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR',lc:false},
+  {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.40,r:16.35,mk:'KR',lc:false},
+  {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR',lc:false},
+  {code:'472150',name:'TIGER 배당커버드콜액티브',aum:1.93,price:25580,y:14.68,r:177.47,mk:'KR',lc:false},
+  {code:'475720',name:'RISE 200위클리커버드콜',aum:0.92,price:15065,y:14.61,r:100.36,mk:'KR',lc:false},
+  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.89,price:11970,y:13.48,r:44.70,mk:'KR',lc:false},
+  {code:'476550',name:'TIGER 미국30년국채커버드콜액티브(H)',aum:0.90,price:7240,y:13.02,r:1.85,mk:'KR',lc:false},
+  {code:'481060',name:'KODEX 미국30년국채타겟커버드콜(합성 H)',aum:0.84,price:7750,y:12.94,r:1.67,mk:'KR',lc:false},
+  {code:'498400',name:'KODEX 200타겟위클리커버드콜',aum:6.74,price:25050,y:11.23,r:174.81,mk:'KR',lc:false},
+  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.47,price:4075,y:9.54,r:6.03,mk:'KR',lc:false},
+  {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR',lc:false},
+  {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.70,r:29.70,mk:'KR',lc:false},
+  {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR',lc:false},
+  {code:'161510',name:'PLUS 고배당주',aum:2.49,price:26330,y:3.77,r:47.47,mk:'KR',lc:false},
+  {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.80,price:25865,y:3.66,r:50.98,mk:'KR',lc:false},
+  {code:'0167B0',name:'SOL 200타겟위클리커버드콜',aum:0.75,price:14655,y:3.34,r:null,mk:'KR',lc:true},
+  {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR',lc:false},
+  {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR',lc:false},
+  {code:'458730',name:'TIGER 미국배당다우존스',aum:3.90,price:15670,y:2.69,r:37.49,mk:'KR',lc:false},
+  {code:'0177R0',name:'TIGER 반도체TOP10커버드콜액티브',aum:0.84,price:15450,y:2.66,r:null,mk:'KR',lc:true},
+  // ── 미국 월배당 ETF (yfinance 실측 2026-06-16, 가격 원화 환산) ──
+  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:44.6,price:85400,y:8.12,r:9.11,mk:'US',lc:false,aumLabel:'$44.6B'},
+  {code:'JEPQ',name:'JPMorgan 나스닥 에쿼티프리미엄 (JEPQ)',aum:39.6,price:92390,y:10.02,r:29.12,mk:'US',lc:false,aumLabel:'$39.6B'},
+  {code:'QYLD',name:'Global X 나스닥100 커버드콜 (QYLD)',aum:8.4,price:27560,y:11.42,r:23.81,mk:'US',lc:false,aumLabel:'$8.4B'},
+  {code:'XYLD',name:'Global X S&P500 커버드콜 (XYLD)',aum:3.2,price:61930,y:10.47,r:17.71,mk:'US',lc:false,aumLabel:'$3.2B'},
+  {code:'DIVO',name:'Amplify CWP 강화배당 (DIVO)',aum:7.1,price:70530,y:6.34,r:20.31,mk:'US',lc:false,aumLabel:'$7.1B'},
 ];
 const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
-function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+function incomeHealth(d){if(d.r==null)return['na','데이터 부족',null];const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
-const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.'};
+const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.',na:'상장 1년 미만이라 1년 총수익이 아직 없어요. 건전성을 판정할 수 없어요.'};
 function incomeRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
   const rk=i+1,rkCls=rk<=3?'rk top':'rk';
-  const rTxt=`${d.r>=0?'+':''}${d.r}%`;
-  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  const lastCol=hc==='na'
+    ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (신생)</span>`
+    :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`}`;
   return `<a class="irow" onclick="addFromRanking('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
-    <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
+    <div class="imx">${lastCol}</div>
   </a>`;
 }
 let iSortKey='y';
@@ -769,9 +776,11 @@ function incomeFiltered(){
   let arr=[...INCOME_UNIVERSE];
   if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
-  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  else arr.sort((a,b)=>healthScore(b)-healthScore(a));
   return arr;
 }
+// 건전성 정렬 스코어: 신생(r:null)은 항상 최하단
+function healthScore(d){return d.r==null?-Infinity:d.r-d.y;}
 function incomeRender(){
   const arr=incomeFiltered();
   document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
@@ -784,6 +793,7 @@ const HEALTH_DESC={
   ok:'분배하면서 가격도 올랐어요.',
   warn:'분배금 일부에 원금이 섞여 있어요.',
   bad:'분배금 상당 부분이 원금에서 나왔어요.',
+  na:'상장 1년 미만이라 총수익이 아직 없어요.',
 };
 function incomeAllRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
@@ -792,7 +802,7 @@ function incomeAllRow(d,i){
   const priceCls=ePct==null?'neu':ePct>=0?'up':'dn';
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
   const desc=HEALTH_DESC[hc]||'';
-  const rTxt=`총수익 ${d.r>=0?'+':''}${d.r}%`;
+  const rTxt=hc==='na'?'총수익 미집계':`총수익 ${d.r>=0?'+':''}${d.r}%`;
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
@@ -813,7 +823,7 @@ function incomeAllFiltered(){
   let arr=[...INCOME_UNIVERSE];
   if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
   if(iAllSortKey==='y')arr.sort((a,b)=>b.y-a.y);
-  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  else arr.sort((a,b)=>healthScore(b)-healthScore(a));
   return arr;
 }
 function incomeAllRender(){
@@ -1031,10 +1041,11 @@ function simOut(){
   }
   const taxWarn=totalDiv>=2000;
   cards.push(`<div class="rc">
-    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'red':'green'}">${taxWarn?'과세 대상':'안전'}</span><span class="rc-chev">▾</span></div>
+    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'amber':'green'}">${taxWarn?'검토 필요':'여유'}</span><span class="rc-chev">▾</span></div>
     <div class="rc-body">${taxWarn
-      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:#f33942">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
-      :`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 현재 보유 조합에서는 금융소득종합과세 대상이 아니에요.`}
+      ?`이 조합의 연 분배금만 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 종합과세 기준 <b>2,000만원</b>을 넘어요. 예금이자·다른 배당까지 합치면 실제 합산액은 더 커질 수 있어요.`
+      :`이 조합의 연 분배금은 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 다만 예금이자·다른 배당과 합산되면 달라질 수 있어요.`}
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">분배금 전액을 과세 대상으로 가정한 추정이에요. 국내주식형 ETF의 매매차익 비과세분은 실제 금융소득에 안 들어가, 실제 과세액은 더 낮을 수 있어요. 정확한 판정은 보유 전체·연소득 기준으로 확인하세요.</div>
     </div>
   </div>`);
   if(gap>0){
