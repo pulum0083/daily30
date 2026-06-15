@@ -339,16 +339,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
 .sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
-/* 진단 리포트 토글 버튼 */
-.report-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 16px;border:1px solid var(--hair);border-radius:10px;background:var(--soft);font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;margin-bottom:2px;text-align:left;}
-.report-btn:hover{background:#F3F4F6;}
-.report-btn .rbc{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#E5E7EB;color:var(--muted);}
-.report-btn .rbc.has-warn{background:#FEE2E2;color:#f33942;}
-.report-btn .rbchev{margin-left:4px;font-size:11px;color:var(--muted);transition:transform .2s;}
-.report-btn.open .rbchev{transform:rotate(180deg);}
 /* 리포트 카드 */
-.sim-report{display:none;flex-direction:column;gap:8px;padding-top:10px;}
-.sim-report.open{display:flex;}
+.sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
+.sim-report{display:flex;flex-direction:column;gap:8px;}
 .rc{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;transition:box-shadow .15s;}
 .rc:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .rc.open{border-color:#CBD5E1;}
@@ -401,12 +394,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
 .irow .imx .yv{font-size:15px;font-weight:600;color:#B7791F;}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
-.irow{position:relative;}
-.irow-arr{position:absolute;right:12px;top:13px;opacity:0;transition:opacity .2s;font-size:15px;line-height:1;user-select:none;pointer-events:auto;}
-.irow:hover .irow-arr{opacity:0.22;color:var(--muted);}
-.irow:hover .irow-arr:hover{opacity:1;color:var(--primary);}
-.irow-arr .arr-tip{position:absolute;bottom:calc(100%+7px);right:0;white-space:nowrap;background:rgba(25,25,25,.82);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:500;letter-spacing:-.01em;opacity:0;pointer-events:none;transition:opacity .15s;z-index:300;}
-.irow:hover .irow-arr:hover .arr-tip{opacity:1;}
+.irow-tip{position:absolute;top:10px;right:12px;background:rgba(25,25,25,.82);color:#fff;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .15s;z-index:300;white-space:nowrap;}
+.irow:hover .irow-tip{opacity:1;}
 /* task3: 건전성 뱃지 호버 툴팁 */
 .hbdg-w{position:relative;display:inline-flex;}
 .hbdg-w .hbdg-tip{position:absolute;bottom:calc(100%+8px);right:0;width:210px;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);box-shadow:0 4px 20px rgba(0,0,0,.12);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:250;white-space:normal;text-align:left;}
@@ -1614,7 +1603,7 @@ function incomeRow(d,i){
     <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
     <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
-    <span class="irow-arr"><span class="arr-tip">클릭하면 내 보유에 담겨요</span>←</span>
+    <span class="irow-tip">클릭하면 내 보유에 담겨요</span>
   </a>`;
 }
 let iSortKey='y';
@@ -1834,26 +1823,12 @@ function simOut(){
     </div>`);
   }
 
-  const hasWarn=bad.length>0||taxWarn;
-  html+=`<button class="report-btn" id="report-btn" onclick="toggleReport()">
-    📋 진단 리포트
-    <span class="rbc ${hasWarn?'has-warn':''}">${cards.length}건</span>
-    <span class="rbchev">▾</span>
-  </button>
-  <div class="sim-report" id="sim-report">${cards.join('')}</div>`;
+  html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
 
   document.getElementById('sim-out').innerHTML=html;
   if(simHoldings.length)setupDonutTip(segs);
 }
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
-function toggleReport(){
-  const btn=document.getElementById('report-btn');
-  const rep=document.getElementById('sim-report');
-  if(!btn||!rep)return;
-  const open=rep.classList.toggle('open');
-  btn.classList.toggle('open',open);
-  btn.querySelector('.rbchev').textContent=open?'▴':'▾';
-}
 simRowsRender();simOut();
 
 /* 패시브 뱃지 툴팁 */
