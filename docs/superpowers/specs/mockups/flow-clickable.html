@@ -1618,7 +1618,10 @@ function incomeSort(k,el){iSortKey=k;document.querySelectorAll('#isort-tabs a').
 incomeRender();
 
 /* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
-let simHoldings=[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+const SIM_KEY='ds-income-holdings-v1';
+function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
+function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
+let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
 function simIncome(h){const d=UNIV[h.code];return h.qty*d.price*d.y/100/10000;}  // 만원/년
 function simRowsRender(){
   document.getElementById('sim-rows').innerHTML=simHoldings.map((h,i)=>{
@@ -1632,18 +1635,18 @@ function simRowsRender(){
   }).join('');
 }
 function simSet(i,v){
-  simHoldings[i].qty=Math.max(0,parseInt(v)||0);
+  simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
   const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
   const el=document.getElementById('sinc-'+i);
   if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
   simOut();
 }
-function simDel(i){simHoldings.splice(i,1);simRowsRender();simOut();}
+function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
 /* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
 function addFromRanking(code){
   const ex=simHoldings.findIndex(h=>h.code===code);
   if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
-  simRowsRender();simOut();
+  saveHoldings();simRowsRender();simOut();
   const rows=document.querySelectorAll('#sim-rows .simrow');
   const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
   if(el){
@@ -1691,7 +1694,7 @@ function simAdd(){
   if(comboSel&&qty>0){
     simHoldings.push({code:comboSel,qty});
     comboSel=null;document.getElementById('sim-search').value='';
-    simRowsRender();simOut();
+    saveHoldings();simRowsRender();simOut();
     const rows=document.querySelectorAll('#sim-rows .simrow');
     const el=rows[simHoldings.length-1];
     if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
