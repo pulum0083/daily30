@@ -396,7 +396,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
 .irow .imx .yv{font-size:15px;font-weight:600;color:#4F46E5;}
 /* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
-.irow .it .rk{position:relative;}
+.irow .it .rk{position:relative;display:flex;align-items:center;justify-content:center;}
 .irow .rk-n,.irow .rk-p{transition:opacity .15s;}
 .irow .rk-p{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;opacity:0;}
 .irow:hover .rk-n{opacity:0;}
@@ -1067,7 +1067,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div id="sim-rows"></div>
           <div class="sim__add">
             <div class="combo">
-              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱10 기본" autocomplete="off"
+              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
                      onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
               <div class="combo__list" id="combo-list"></div>
             </div>
@@ -1099,7 +1099,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
         <div class="panel">
-          <div class="panel__h">인컴 ETF 전체 · 7천억+
+          <div class="panel__h">배당·커버드콜 ETF
             <div class="stabs" id="isort-tabs" style="margin-left:auto;margin-bottom:0;">
               <a class="on" onclick="incomeSort('y',this)">분배율순</a>
               <a onclick="incomeSort('health',this)">건전성순</a>
@@ -1145,6 +1145,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               </div>
             </div>
           </div>
+          <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
+            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
+            커버드콜 제외
+          </label>
           <div id="income-rows"></div>
         </div>
       </div>
@@ -1657,7 +1661,9 @@ function incomeRow(d,i){
 }
 let iSortKey='y';
 function incomeRender(){
+  const excludeCC=document.getElementById('cc-exclude')?.checked;
   let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR');
+  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
   arr=arr.slice(0,15);
@@ -1713,17 +1719,17 @@ function addFromRanking(code){
   }
 }
 
-/* 콤보박스: 순자산 톱10 기본 + 이름·코드 검색 */
+/* 콤보박스: 순자산 톱20 기본 + 이름·코드 검색 */
 let comboSel=null,comboCur=[],comboIdx=-1;
 function comboItems(q){
   q=(q||'').trim().toLowerCase();
-  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,10);
+  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,20);
   return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
 }
 function comboRender(q){
   const arr=comboItems(q),list=document.getElementById('combo-list');comboCur=arr;
   if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
-  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱10</div>';
+  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱20</div>';
   list.innerHTML=hd+arr.map((d,i)=>`<div class="combo__item${i===comboIdx?' sel':''}" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
 }
 function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
