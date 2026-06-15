@@ -421,8 +421,7 @@ def main() -> None:
         stale = _has_stale_article(latest, today)
         if stale:
             print(f"[fetch_news_live] ⚠️ 과거 날짜 기사 감지 (시도 {attempt+1}): {stale} — 재시도")
-            if attempt < 3:
-                continue
+            continue
 
         # 방향 모순 검증 (MARKET 슬롯 + 실측 데이터 있을 때만)
         if market_reality and _is_direction_conflict(latest, market_reality["change_pct"]):
@@ -434,8 +433,7 @@ def main() -> None:
         stock_title = (latest.get("stock") or {}).get("title", "")
         if _is_curation_article(stock_title):
             print(f"[fetch_news_live] ⚠️ 큐레이션 기사 감지 (시도 {attempt+1}): {stock_title} — 재시도")
-            if attempt < 3:
-                continue
+            continue
 
         # Python 사후 중복 검증: 오늘 기존 타이틀과 키워드 겹침 확인
         if all_today_titles:
@@ -448,6 +446,10 @@ def main() -> None:
                     continue
 
         break
+    else:
+        # 4번 모두 검증 실패 — 발행하지 않고 종료
+        print("[fetch_news_live] ❌ 4회 재시도 후에도 유효한 기사를 찾지 못했습니다. 발행 생략.", file=sys.stderr)
+        sys.exit(0)
 
     # 기존 history 이어받기 (같은 날짜인 경우만)
     history: list = []
