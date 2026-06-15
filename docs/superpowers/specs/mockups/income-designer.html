@@ -428,6 +428,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .income-modal .copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
 .income-modal .copy-btn:hover{opacity:.8;}
 .income-modal .copy-ok{color:#00ae1a;font-size:12px;margin-left:8px;display:none;}
+.iall-more{display:block;width:100%;border:none;border-top:1px solid var(--hair);background:none;padding:13px 16px;font-size:13px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
+.iall-more:hover{background:var(--inset);}
+.income-modal.wide{max-width:560px;}
+.income-modal .iall-sub{font-size:12px;color:var(--muted);margin:0 0 12px;}
+.income-modal .iall-h-count{font-size:13px;font-weight:600;color:#4F46E5;margin-left:4px;}
+.income-modal .iall-list{display:flex;flex-direction:column;margin:0 -28px;border-top:1px solid var(--hair);}
+.income-modal .iall-list .irow{border-top:1px solid var(--hair);padding:12px 28px;}
+.income-modal .iall-list .irow:first-child{border-top:none;}
 .ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
 .ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
 .ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
@@ -611,11 +619,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               </div>
             </div>
           </div>
+          <!-- 전체 ETF 모달 -->
+          <div class="income-modal-bg" id="income-all-modal-bg" onclick="if(event.target===this)closeIncomeAllModal()">
+            <div class="income-modal wide">
+              <button class="close-btn" onclick="closeIncomeAllModal()">×</button>
+              <h3>월배당 ETF 전체 <span id="iall-h-count" class="iall-h-count"></span></h3>
+              <p class="iall-sub">순자산 <b>7천억 이상</b> 월배당 ETF예요 (국내·미국). 행을 누르면 내 보유에 담겨요.</p>
+              <div class="iall-list" id="income-all-rows"></div>
+            </div>
+          </div>
           <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
             <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
             커버드콜 제외
           </label>
           <div id="income-rows"></div>
+          <button class="iall-more" onclick="openIncomeAllModal()">전체 ETF 보기 <span id="iall-count"></span></button>
         </div>
       </div>
     </div>
@@ -676,15 +694,27 @@ function incomeRow(d,i){
   </a>`;
 }
 let iSortKey='y';
-function incomeRender(){
+function incomeFiltered(){
   const excludeCC=document.getElementById('cc-exclude')?.checked;
   let arr=[...INCOME_UNIVERSE];
   if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
-  arr=arr.slice(0,20);
-  document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
+  return arr;
 }
+function incomeRender(){
+  const arr=incomeFiltered();
+  document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
+  const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
+  if(document.getElementById('income-all-modal-bg')?.classList.contains('open'))incomeAllRender();
+}
+function incomeAllRender(){
+  const arr=incomeFiltered();
+  document.getElementById('income-all-rows').innerHTML=arr.map(incomeRow).join('');
+  document.getElementById('iall-h-count').textContent=`${arr.length}개`;
+}
+function openIncomeAllModal(){incomeAllRender();document.getElementById('income-all-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
+function closeIncomeAllModal(){document.getElementById('income-all-modal-bg').classList.remove('open');document.body.style.overflow='';}
 function incomeSort(k,el){
   iSortKey=k;
   document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
