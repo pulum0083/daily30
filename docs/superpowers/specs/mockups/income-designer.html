@@ -603,6 +603,54 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   #add-sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;}
   #add-sheet-handle{display:none;}
 }
+
+/* ── 의견 모달 ── */
+#cm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:flex-end;justify-content:center;}
+#cm-overlay.open{display:flex;}
+#cm-dialog{background:var(--canvas);width:100%;max-width:520px;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);}
+#cm-overlay.open #cm-dialog{transform:translateY(0);}
+@media(min-width:600px){
+  #cm-overlay{align-items:center;}
+  #cm-dialog{border-radius:20px;max-height:80vh;transform:scale(.96);opacity:0;transition:transform .22s ease-out,opacity .22s ease-out;}
+  #cm-overlay.open #cm-dialog{transform:scale(1);opacity:1;}
+}
+.cm-handle{width:36px;height:4px;background:var(--hair);border-radius:2px;margin:10px auto 0;flex-shrink:0;}
+@media(min-width:600px){.cm-handle{display:none;}}
+.cm-head{display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--hair);flex-shrink:0;}
+.cm-title{font-size:15px;font-weight:700;color:var(--ink);}
+.cm-count{font-size:12px;font-weight:700;color:#4F46E5;background:#EEF2FF;border-radius:99px;padding:2px 9px;}
+.cm-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:4px;}
+.cm-close svg{width:16px;height:16px;}
+.cm-list{overflow-y:auto;flex:1;padding:0 16px;}
+.ci{padding:14px 0;border-bottom:1px solid var(--hair);}
+.ci:last-child{border-bottom:none;}
+.ci-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ci-av{width:28px;height:28px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4F46E5;flex-shrink:0;}
+.ci-author{font-size:13px;font-weight:600;color:var(--ink);}
+.ci-time{font-size:11px;color:var(--muted);margin-left:auto;}
+.ci-body{font-size:13px;color:var(--ink);line-height:1.65;padding-left:36px;margin-bottom:5px;}
+.ci-reply-btn{background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding-left:36px;font-family:inherit;display:flex;align-items:center;gap:3px;}
+.ci-reply-btn:hover{color:var(--ink);}
+.cs-replies{margin:8px 0 0 36px;border-left:2px solid #EEF2FF;padding-left:12px;}
+.cr{padding:8px 0;}
+.cr-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.cr-av{width:22px;height:22px;border-radius:50%;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.cr-author{font-size:12px;font-weight:600;color:var(--ink);}
+.cr-time{font-size:10px;color:var(--muted);margin-left:auto;}
+.cr-body{font-size:12px;color:var(--ink);line-height:1.55;padding-left:29px;}
+.cs-reply-form{margin:8px 0 0 36px;display:flex;gap:6px;}
+.cs-reply-input{flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);}
+.cs-reply-submit{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.cm-form{padding:12px 16px 16px;border-top:1px solid var(--hair);flex-shrink:0;}
+.cm-nick{width:150px;border:1.5px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
+.cm-nick:focus{border-color:#4F46E5;}
+.cm-textarea{width:100%;border:1.5px solid var(--hair);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:68px;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
+.cm-textarea:focus{border-color:#4F46E5;}
+.cm-foot-row{display:flex;align-items:center;justify-content:space-between;}
+.cm-hint{font-size:11px;color:var(--muted);}
+.cm-submit{background:#4F46E5;color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.cm-submit:hover{background:#4338CA;}
+.cm-empty{padding:32px 16px;text-align:center;font-size:13px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -613,7 +661,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();location.href='flow-clickable.html'">홈</a> › <a href="/stocks/" onclick="event.preventDefault();location.href='flow-clickable.html'">종목</a> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
-      <button onclick="document.getElementById('income-comment-section').scrollIntoView({behavior:'smooth'})" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:2px;">
+      <button onclick="openCommentModal()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:2px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         의견 남기기
       </button>
@@ -750,6 +798,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <!-- 정직 배너 -->
     <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값(국내 2026-06-13, 미국 2026-06-16)이고, 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요. 미국 ETF 가격은 원화 환산(@1,513.3원)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+
   </div>
 
   <!-- ===== 월배당 ETF 전체 랭킹 페이지 ===== -->
@@ -1254,9 +1303,107 @@ function copyPrompt(){
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
 simRowsRender();simOut();
 
+/* ── 의견 모달 ── */
+const NICK_ADJ=['배당하는','월배당','인컴','복리','장기','건전한','분배하는','커버드'];
+const NICK_ANIMAL=['판다','코알라','펭귄','고양이','토끼','다람쥐','수달','라마'];
+const AV_COLORS=[
+  {bg:'#EEF2FF',fg:'#4F46E5'},{bg:'#FEF3C7',fg:'#92400E'},
+  {bg:'#DCFCE7',fg:'#15803D'},{bg:'#FEE2E2',fg:'#B91C1C'},
+  {bg:'#F3E8FF',fg:'#7E22CE'},{bg:'#E0F2FE',fg:'#0369A1'}
+];
+let cmComments=[
+  {id:1,author:'배당하는 판다',av:0,body:'JEPI 넣어봤는데 분배율이 생각보다 낮게 나오네요. 원래 이 정도인가요?',ts:Date.now()-7200000,replies:[
+    {id:11,author:'월배당 코알라',av:1,body:'환율 영향도 있고 최근 분배율이 조금 낮아졌어요. 연평균으로 보시면 비슷해요.',ts:Date.now()-3600000}
+  ]},
+  {id:2,author:'인컴 수달',av:4,body:'목표 달성 전략 기능이 좋아요. KODEX OTM 추천 나왔는데 실제로 담아볼까 고민 중이에요.',ts:Date.now()-18000000,replies:[]},
+  {id:3,author:'복리 펭귄',av:2,body:'건전성 필터가 생각보다 유용하네요. 분배율만 보다가 가격 침식 종목을 걸러줘서 좋아요.',ts:Date.now()-86400000,replies:[]}
+];
+let openReplyId=null;
+function getNick(){
+  let n=localStorage.getItem('ds-comment-nick-v1');
+  if(!n){n=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];localStorage.setItem('ds-comment-nick-v1',n);}
+  return n;
+}
+function timeAgo(ts){
+  const d=Date.now()-ts,m=Math.floor(d/60000),h=Math.floor(d/3600000);
+  if(d<60000)return '방금';if(m<60)return m+'분 전';if(h<24)return h+'시간 전';
+  return Math.floor(d/86400000)+'일 전';
+}
+function avColor(idx){return AV_COLORS[idx%AV_COLORS.length];}
+function renderCmList(){
+  const el=document.getElementById('cm-list');
+  document.getElementById('cm-count').textContent=cmComments.reduce((a,c)=>a+1+c.replies.length,0);
+  if(!cmComments.length){el.innerHTML='<div class="cm-empty">아직 의견이 없어요. 첫 번째 의견을 남겨보세요.</div>';return;}
+  el.innerHTML=cmComments.map(c=>{
+    const av=avColor(c.av);
+    const replies=c.replies.map(r=>{
+      const ra=avColor(r.av);
+      return `<div class="cr"><div class="cr-head"><div class="cr-av" style="background:${ra.bg};color:${ra.fg};">${r.author[0]}</div><span class="cr-author">${r.author}</span><span class="cr-time">${timeAgo(r.ts)}</span></div><div class="cr-body">${r.body}</div></div>`;
+    }).join('');
+    const replyForm=openReplyId===c.id?`<div class="cs-reply-form"><input class="cs-reply-input" id="rf-${c.id}" placeholder="답글 입력…"><button class="cs-reply-submit" onclick="submitReply(${c.id})">등록</button></div>`:'';
+    const replyCount=c.replies.length?` ${c.replies.length}`:'';
+    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.ts)}</span></div><div class="ci-body">${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
+  }).join('');
+}
+function toggleReply(id){openReplyId=openReplyId===id?null:id;renderCmList();if(openReplyId){setTimeout(()=>document.getElementById('rf-'+id)?.focus(),50);}}
+function submitReply(parentId){
+  const inp=document.getElementById('rf-'+parentId);
+  const body=inp?.value.trim();
+  if(!body||body.length<2)return;
+  const nick=document.getElementById('cm-nick').value.trim()||getNick();
+  const parent=cmComments.find(c=>c.id===parentId);
+  if(parent){parent.replies.push({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now()});}
+  openReplyId=null;renderCmList();
+}
+function submitComment(){
+  const nick=document.getElementById('cm-nick').value.trim()||getNick();
+  const body=document.getElementById('cm-textarea').value.trim();
+  if(!body||body.length<2)return;
+  cmComments.unshift({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now(),replies:[]});
+  document.getElementById('cm-textarea').value='';
+  renderCmList();
+}
+function openCommentModal(){
+  document.getElementById('cm-nick').value=getNick();
+  renderCmList();
+  const ov=document.getElementById('cm-overlay');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
+}
+function closeCommentModal(){
+  const ov=document.getElementById('cm-overlay');
+  ov.classList.remove('open');
+  setTimeout(()=>{ov.style.display='none';},300);
+}
+function handleCmOverlayClick(e){if(e.target===document.getElementById('cm-overlay'))closeCommentModal();}
+
 
 </script>
 <!-- ===== ETF 추가 모달/바텀시트 ===== -->
+<!-- ===== 의견 모달 ===== -->
+<div id="cm-overlay" onclick="handleCmOverlayClick(event)">
+  <div id="cm-dialog">
+    <div class="cm-handle"></div>
+    <div class="cm-head">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="cm-title">의견</span>
+      <span class="cm-count" id="cm-count">0</span>
+      <button class="cm-close" onclick="closeCommentModal()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="cm-list" id="cm-list"></div>
+    <div class="cm-form">
+      <input class="cm-nick" id="cm-nick" placeholder="닉네임">
+      <textarea class="cm-textarea" id="cm-textarea" placeholder="의견을 남겨보세요. 투자 경험, 질문, ETF 추천 등 무엇이든 괜찮아요." rows="3"></textarea>
+      <div class="cm-foot-row">
+        <span class="cm-hint">익명으로 저장됩니다.</span>
+        <button class="cm-submit" onclick="submitComment()">등록</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="add-sheet-overlay" onclick="closeAddSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;"></div>
 <div id="add-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:300;transform:translateY(100%);transition:transform .25s ease-out;padding:0 0 env(safe-area-inset-bottom);">
   <div id="add-sheet-handle" style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:10px auto 0;"></div>
