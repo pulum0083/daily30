@@ -698,6 +698,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
                   커버드콜 제외
                 </label>
               </div>
+              <div style="display:flex;align-items:center;padding:7px 28px;border-top:1px solid var(--hair);background:var(--soft);">
+                <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
+                <div style="width:90px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">가격 변화 (1년)</div>
+              </div>
               <div class="iall-list" id="income-all-rows"></div>
             </div>
           </div>
@@ -813,7 +817,6 @@ function incomeAllRow(d,i){
       <div class="iall-nums"><span class="yv num">${d.y}%</span><span>분배</span><span style="color:var(--ink);font-weight:600;flex-shrink:0;">${rTxt}</span></div>
     </div>
     <div class="iall-rgt">
-      <div class="iall-ret">가격 변화 (1년)</div>
       <div class="iall-price ${priceCls}">${priceTxt}</div>
       <div class="iall-desc">${desc}</div>
     </div>
