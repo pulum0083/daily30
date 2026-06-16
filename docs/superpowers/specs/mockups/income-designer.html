@@ -546,6 +546,48 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .brief-strip{flex-wrap:wrap;}
   .bs-arr{order:1;}
   .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
+
+  /* ── 배당 인컴 설계기 모바일 최적화 ── */
+
+  /* 보유 종목 행: 이름을 첫 줄 전체에, 수량·인컴을 두 번째 줄에 */
+  .simrow{flex-wrap:wrap;padding:8px 14px;gap:4px 8px;}
+  .simrow .snm{width:100%;flex:none;font-size:13px;margin-bottom:2px;}
+  .simrow .sinc{margin-left:auto;width:auto;}
+  .simrow .sinc b{font-size:13px;}
+
+  /* 종목 추가 행: 검색 첫 줄 / 수량+버튼 둘째 줄 */
+  .sim__add{flex-wrap:wrap;padding:10px 14px;}
+  .sim__add .combo{width:100%;flex:none;}
+  .sim__add .qty{flex:1;}
+  .sim__add .qty input{width:100%;}
+
+  /* 콤보 드롭다운 아이템: 긴 이름 말줄임 */
+  .combo__item .ci-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .combo__item .ci-nm small{display:none;}
+
+  /* 시뮬레이터 아웃풋: 도넛 위 → KPI 아래로 세로 배치 */
+  .sim-out-row{flex-direction:column;align-items:stretch;gap:10px;}
+  .donut-wrap{align-self:center;}
+  .sim-kpi{flex-wrap:nowrap;}
+  .sim-kpi .k{min-width:0;flex:1;padding:8px 10px;}
+  .sim-kpi .k .v{font-size:16px;}
+
+  /* 도넛 범례: ETF 이름 말줄임 */
+  .dl-item{min-width:0;max-width:100%;}
+  .dl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+
+  /* 갈아타기 제안: 긴 ETF 이름 줄바꿈 허용 */
+  .rc-body .rc-dest{flex-shrink:1;min-width:0;flex-wrap:wrap;display:flex;}
+  .rc-body .rc-to{word-break:keep-all;overflow-wrap:break-word;min-width:0;}
+
+  /* 전체보기 테이블: 가격변화 bar 칼럼 숨김 */
+  .iall-bar-col{display:none!important;}
+  /* 대신 모바일에서는 가격변화 텍스트를 메타 줄에 표시 */
+  .iall-mobile-price{display:inline!important;}
+
+  /* 전체보기 헤더·정렬 */
+  .phead{flex-direction:column;align-items:flex-start;gap:10px;}
+  .rtabs{font-size:11px;}
 }
 </style>
 </head>
@@ -563,7 +605,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 메인: 인컴 시뮬레이터 -->
       <div>
         <div class="sim">
-          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
+          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요<small style="display:block;margin-top:3px;">커버드콜·배당주·해외 직상장까지</small></div></div>
           <div id="sim-rows"></div>
           <div class="sim__add">
             <div class="combo">
@@ -591,10 +633,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
           <div class="sim__out" id="sim-out"></div>
         </div>
-
-        <!-- 정직 배너 -->
-        <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값(국내 2026-06-13, 미국 2026-06-16)이고, 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요. 미국 ETF 가격은 원화 환산(@1,513.3원)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
-      </div>
 
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
@@ -691,6 +729,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
       </div>
     </div>
+    <!-- 정직 배너 -->
+    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값(국내 2026-06-13, 미국 2026-06-16)이고, 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요. 미국 ETF 가격은 원화 환산(@1,513.3원)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
   </div>
 
   <!-- ===== 월배당 ETF 전체 랭킹 페이지 ===== -->
@@ -709,19 +749,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <a class="on" onclick="iallPageSort('y',this)">분배율순</a>
           <a onclick="iallPageSort('health',this)">건전성순</a>
         </div>
-        <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;margin-left:auto;">
           <input type="checkbox" id="iallp-cc-exclude" onchange="incomeAllPageRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
           커버드콜 제외
         </label>
       </div>
     </div>
-    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);">
-      <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;background:var(--soft);border-bottom:1px solid var(--hair);">
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;overflow:visible;box-shadow:var(--s1);">
+      <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;background:var(--soft);border-bottom:1px solid var(--hair);border-radius:9px 9px 0 0;">
         <div style="width:26px;"></div>
         <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
         <div style="width:68px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">분배율</div>
         <div style="width:68px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">건전성</div>
-        <div style="width:200px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-right:8px;flex-shrink:0;">가격 변화 (1년)</div>
+        <div class="iall-bar-col" style="width:200px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-right:8px;flex-shrink:0;">가격 변화 (1년)</div>
       </div>
       <div id="income-all-page-rows"></div>
     </div>
@@ -805,6 +845,7 @@ function incomeRender(){
 let iAllPageSortKey='y';
 function incomeAllPageRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   const rk=i+1;
   const ePct=e!=null?Math.round(e):null;
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
@@ -813,6 +854,7 @@ function incomeAllPageRow(d,i){
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+  const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#00ae1a':'#f33942'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
   const rkEl=rk<=3
     ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
     :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
@@ -820,11 +862,11 @@ function incomeAllPageRow(d,i){
     ${rkEl}
     <div style="flex:1;min-width:0;">
       <div style="font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}<span class="iall-mobile-price" style="display:none;">${mobilePriceTxt}</span></div>
     </div>
     <div style="width:68px;text-align:right;font-size:15px;font-weight:700;color:#4F46E5;flex-shrink:0;" class="num">${d.y}%</div>
-    <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg ${hc}">${hl}</span></div>
-    <div style="width:200px;flex-shrink:0;">
+    <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="iall-bar-col" style="width:200px;flex-shrink:0;">
       <div class="barwrap" style="height:19px;">
         ${ePct!=null?`<div style="height:100%;border-radius:5px;width:${barPct.toFixed(1)}%;background:${ePct>=0?'#FFBBBB':'#BACFFF'};"></div>`:''}
         <span class="barval num ${barCls}">${priceTxt}</span>
@@ -1024,7 +1066,7 @@ function simOut(){
   if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
 
   const donut=simHoldings.length?buildDonut(segs,monthly):'';
-  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i>${s.name}<b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
+  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i><span class="dl-name">${s.name}</span><b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
 
   let html=`<div class="sim-out-row">
     ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
