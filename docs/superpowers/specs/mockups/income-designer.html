@@ -115,7 +115,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .nm{width:148px;flex-shrink:0;}.nm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.nm small{font-size:10px;color:var(--muted);}
 .barwrap{flex:1;height:19px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
 .bar{height:100%;border-radius:5px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
-.barval{position:absolute;right:6px;top:0;height:19px;display:flex;align-items:center;font-size:11px;font-weight:800;background:rgba(255,255,255,.82);padding:0 4px;border-radius:3px;}
+.barval{position:absolute;right:8px;top:0;height:19px;display:flex;align-items:center;font-size:11px;font-weight:800;}
 .ai{width:72px;text-align:right;flex-shrink:0;}
 .aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;}
 .ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
@@ -826,7 +826,7 @@ function incomeAllPageRow(d,i){
     <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg ${hc}">${hl}</span></div>
     <div style="width:200px;flex-shrink:0;">
       <div class="barwrap" style="height:19px;">
-        ${ePct!=null?`<div class="bar ${barCls}" style="width:${barPct.toFixed(1)}%;"></div>`:''}
+        ${ePct!=null?`<div style="height:100%;border-radius:5px;width:${barPct.toFixed(1)}%;background:${ePct>=0?'#FDDCDC':'#D6E4FF'};"></div>`:''}
         <span class="barval num ${barCls}">${priceTxt}</span>
       </div>
     </div>
