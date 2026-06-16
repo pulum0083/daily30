@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배당 인컴 설계기 — 월배당 ETF 건전성·인컴 계산기 | Double-Shot</title>
+<link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}a{cursor:pointer;}
+
+.gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;cursor:pointer;}.gnb__logo b{color:#5AA2FF;}
+.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
+.gnb .right{margin-left:auto;}
+.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;}.gnb .sbtn svg{width:13px;height:13px;}
+
+.wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
+.screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}.crumb a{color:var(--muted);text-decoration:none;padding:0 2px;}.crumb a:hover{color:var(--primary);}
+.back-btn{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hair);color:var(--muted);font-size:14px;cursor:pointer;margin-right:10px;transition:background .12s,color .12s;padding:0;line-height:1;}
+.back-btn:hover{background:var(--inset);color:var(--ink);}
+
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;}
+.hero h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;}.hero h1 .a{color:var(--primary);}
+.hero p{font-size:12px;color:var(--muted);margin:5px 0 0;}
+.search{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:9px 13px;box-shadow:var(--s1);min-width:320px;cursor:text;}
+.search svg{width:15px;height:15px;color:var(--muted);}.search span{color:var(--muted);font-size:13px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
+
+.strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
+.strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
+/* ── AI 브리핑 스트립 ── */
+.brief-strip{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:10px 14px;margin:10px 0;cursor:pointer;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,padding .14s,border-color .14s;}
+.brief-strip.is-hidden{padding:0;border-color:transparent;box-shadow:none;background:transparent;pointer-events:none;overflow:hidden;height:0;margin:0;}
+.brief-strip:hover{border-color:var(--primary);background:#F8FAFF;}
+.brief-strip.bs-kospi{background:var(--primary-bg);border-color:#BFDBFE;}.brief-strip.bs-kospi:hover{background:#DCEFFE;}
+.brief-strip.bs-close{background:#F0FDF4;border-color:#BBF7D0;}.brief-strip.bs-close:hover{background:#DCFCE7;}
+.brief-strip.bs-us{background:#FEFCE8;border-color:#FDE68A;}.brief-strip.bs-us:hover{background:#FEF9C3;}
+.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:#FEE2E2;}
+.bs-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.bs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.bs-type{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
+.bs-kospi .bs-type{color:var(--primary);}.bs-close .bs-type{color:#16A34A;}.bs-us .bs-type{color:#CA8A04;}.bs-live .bs-type{color:#EF4444;}
+.bs-text{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;word-break:keep-all;}
+.bs-arr{font-size:16px;color:#C0C4CA;flex-shrink:0;transition:color .14s;}.brief-strip:hover .bs-arr{color:var(--primary);}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+/* 갱신 배지 */
+.upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
+.upd-badge .dot{width:4px;height:4px;border-radius:50%;background:#EF4444;animation:blink 1.2s ease-in-out infinite;}
+/* 실시간 포커스 카드 (칩보드 상단) */
+.focus-card{background:var(--canvas);border:1.5px solid #FECACA;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.focus-card__h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;font-weight:700;color:#991B1B;}
+.focus-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.focus-stock{padding:12px 14px;border-right:1px solid var(--hair);}
+.focus-stock:last-child{border-right:none;}
+.focus-stock .fn{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.focus-stock .fp{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.5px;}
+.focus-stock .fc{font-size:13px;font-weight:700;margin-top:1px;}
+.focus-stock .fs{font-size:10px;color:var(--muted);margin-top:5px;}
+/* Hyperliquid 장후 카드 */
+.hl-card{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.hl-card__h{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#EDE9FE;border-bottom:1px solid #DDD6FE;font-size:12px;font-weight:700;color:#5B21B6;}
+.hl-badge{background:#7C3AED;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:.02em;}
+.hl-note{font-size:10px;color:#7C3AED;font-weight:400;margin-left:auto;}
+.hl-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.hl-stock{padding:12px 14px;border-right:1px solid #DDD6FE;}
+.hl-stock:last-child{border-right:none;}
+.hl-stock .hn{font-size:11px;color:#6D28D9;font-weight:600;margin-bottom:4px;}
+.hl-stock .hp{font-size:20px;font-weight:800;color:#1E1B4B;line-height:1.1;letter-spacing:-.5px;}
+.hl-stock .hc{font-size:13px;font-weight:700;}
+.hl-stock .hf{font-size:10px;color:#7C3AED;margin-top:5px;}
+/* 프로토타입 시간대 토글 */
+.proto-toggle{display:flex;gap:4px;flex-shrink:0;align-items:center;}
+.proto-toggle button{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;}
+.proto-toggle button.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+.secwrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.secwrap .t{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.etf-divider{border:none;border-top:2px dashed var(--hair);margin:18px 0 18px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;box-shadow:var(--s1);}
+.chips a:hover{border-color:var(--primary);color:var(--primary);}
+.legend{display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted);margin:12px 2px;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+.badge-info-btn{font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+.vol-surge-badge{display:inline-flex;align-items:center;background:#E8590C;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+
+/* HOT 카드 줄 (랭킹 바로가기) */
+.hotcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.hot{display:flex;align-items:center;gap:13px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:13px 16px;text-decoration:none;color:var(--ink);transition:transform .12s,border-color .12s,box-shadow .12s;}
+.hot:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.08);}
+.hot__ic{width:42px;height:42px;border-radius:11px;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hot__tx{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.hot__tx b{font-size:14px;font-weight:800;letter-spacing:-.3px;line-height:1.2;}
+.hot__tx small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hot__arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex-shrink:0;}.hot:hover .hot__arr{color:var(--primary);}
+.hot--ai{background:var(--primary-bg);border-color:#BFDBFE;}.hot--ai .hot__ic{background:#fff;}.hot--ai .hot__tx b{color:var(--primary);}
+.hot--etf .hot__tx b{color:#374151;}
+@media(max-width:720px){.hotcards{grid-template-columns:1fr;}}
+
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;box-shadow:var(--s1);}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}.block__t::before{content:'';width:3px;height:12px;background:var(--primary);border-radius:2px;}
+.block__s{font-size:11px;color:var(--muted);}
+.row{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.row:last-of-type{border-bottom:none;}.row:hover{background:var(--primary-bg);}
+.rk{width:16px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
+.nm{width:148px;flex-shrink:0;}.nm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.nm small{font-size:10px;color:var(--muted);}
+.barwrap{flex:1;height:19px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.bar{height:100%;border-radius:5px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
+.barval{position:absolute;right:8px;top:0;height:19px;display:flex;align-items:center;font-size:11px;font-weight:800;}
+.ai{width:72px;text-align:right;flex-shrink:0;}
+.aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;}
+.ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+.aid{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
+.ax{font-size:12px;color:#C0C4CA;}
+.more{display:block;text-align:center;padding:10px;font-size:12px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cols2 .block{margin-bottom:0;}
+.cols2 .nm{width:112px;}.cols2 .ai{width:62px;}.cols2 .nm small{font-size:9px;}
+.block__t.etf::before{background:#6B7280;}.block__t.etf{color:#374151;}
+
+/* detail 2-col */
+.grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
+/* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
+.chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
+.chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
+.chip-sb-label::after{content:'';flex:1;height:1px;background:var(--hair);}
+.chip-arrow{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--hair);padding:8px 0;}
+.hero2{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);margin-bottom:12px;overflow:hidden;}
+.hero2 .top{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px 0;}
+.hero2 .hn{font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px;}
+.chip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);cursor:pointer;}
+.hero2 .meta{font-size:12px;color:var(--muted);margin-top:5px;}
+.hero2 .px{font-size:21px;font-weight:800;text-align:right;}.hero2 .cg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--up-bg);color:var(--up);margin-top:5px;display:inline-block;}
+/* chart tabs */
+.ctabs{display:flex;gap:2px;padding:12px 16px 0;}
+.ctabs a{font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;color:var(--muted);cursor:pointer;user-select:none;}
+.ctabs a.on{background:var(--inset);color:var(--ink);}
+.cpane{padding:0;}
+.cpane.hidden{display:none;}
+.chart-wrap{padding:8px 14px 12px;position:relative;}
+.cmk-layer{position:absolute;left:14px;right:14px;top:8px;height:80px;pointer-events:none;}
+.cmk{position:absolute;font-size:10px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.72);padding:0 2px;border-radius:3px;}
+.cmk.hi{color:var(--up);}
+.cmk.lo{color:var(--dn);}
+.chart-svg{width:100%;height:80px;display:block;overflow:visible;}
+.taxis{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:10px;color:var(--muted);font-weight:600;}
+.chart-tt{position:absolute;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;box-shadow:var(--s1);pointer-events:none;white-space:nowrap;z-index:10;display:none;transform:translateX(-50%);top:6px;}
+.chart-tt .ttd{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+.chart-cross{position:absolute;width:1px;top:8px;bottom:24px;background:#9CA3AF;opacity:.5;pointer-events:none;display:none;}
+.sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.sc__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.sc__s{font-size:11px;color:var(--muted);}.scb{padding:14px 16px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}.two .sc{margin-bottom:0;}
+.pbadge{display:inline-flex;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--up-bg);color:var(--up);}
+.pg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;}
+.pg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
+.pgs{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-top:9px;}
+.ro{display:flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--hair);}
+.ro b{font-size:26px;font-weight:800;color:var(--up);line-height:1;}.ro u{font-size:13px;font-weight:700;color:var(--up);text-decoration:none;}.ro .cf{margin-left:auto;font-size:12px;color:var(--muted);}.ro .cf b{color:var(--primary);font-size:14px;}
+.scen{font-size:14px;color:var(--muted);line-height:1.85;margin:12px 0 0;}
+.tiles{display:flex;gap:10px;}.tile{flex:1;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:12px 8px;text-align:center;}.tile .l{font-size:11px;color:var(--muted);margin-bottom:4px;}.tile .v{font-size:15px;font-weight:800;}
+.ma{display:flex;align-items:center;gap:10px;margin-bottom:9px;}.ma .l{font-size:12px;font-weight:600;color:var(--muted);width:84px;}.ma .tr{position:relative;flex:1;height:6px;background:var(--inset);border-radius:999px;}.ma .z{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hair);}.ma .f{position:absolute;top:0;height:100%;border-radius:999px;background:var(--up);left:50%;}.ma .p{font-size:12px;font-weight:700;width:48px;text-align:right;color:var(--up);}
+.sg{display:flex;justify-content:space-around;border-top:1px solid var(--hair);margin-top:14px;padding-top:14px;}.sg .c{display:flex;flex-direction:column;align-items:center;gap:3px;}.sg .v{font-size:14px;font-weight:800;}.sg .v.good{color:#16A34A;}.sg .s{font-size:10px;color:var(--muted);}
+.panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
+.panel__h{padding:12px 16px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}.panel__h::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.srow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}.srow:last-child{border-bottom:none;}.srow:hover{background:var(--primary-bg);}
+.srow .n2{flex:1;font-size:13px;font-weight:600;}.srow .n2 small{color:var(--muted);font-weight:500;font-size:10px;margin-left:4px;}.srow .c{font-size:13px;font-weight:700;}
+.phase{font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;background:var(--gold-bg);color:var(--gold);}
+.note{font-size:11px;color:var(--gold);background:var(--gold-bg);padding:9px 16px;line-height:1.5;}
+
+/* sector header */
+.shead{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:16px 18px;margin-bottom:12px;}
+.shead .top{display:flex;justify-content:space-between;align-items:flex-start;}
+.shead .st{font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px;}.shead .ss{font-size:12px;color:var(--muted);margin-top:5px;}
+.shead .kpi{text-align:right;}.shead .kpi .l{font-size:11px;color:var(--muted);}.shead .kpi .v{font-size:17px;font-weight:800;}
+.senti{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}.senti .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}.senti .l b{color:var(--up);}
+.gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}.gg__s{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;margin-top:8px;}
+.lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}.lede b{color:var(--ink);}
+/* 섹터 시장폭 */
+.breadth{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}
+.breadth .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}
+.breadth .l b{color:var(--ink);}
+.breadth .bbar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--inset);}
+.breadth .bbar i{display:block;height:100%;}.breadth .bbar .bu{background:var(--up);}.breadth .bbar .bd{background:var(--dn);}.breadth .bbar .bn{background:var(--hair);}
+.breadth .bk{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted);font-weight:600;}
+.breadth .bk i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+.breadth .bk .iu{background:var(--up);}.breadth .bk .id{background:var(--dn);}.breadth .bk .in{background:var(--hair);}
+.disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
+
+/* ranking page */
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
+.phead h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;display:flex;align-items:center;gap:9px;}.phead h1 .ic{font-size:18px;}
+.phead .psub{font-size:12px;color:var(--muted);margin-top:5px;}
+.rtabs{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px;gap:2px;}
+.rtabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:8px;}.rtabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
+.fbar{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap;}.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
+.fchips{display:flex;flex-wrap:wrap;gap:7px;}.fchips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}.fchips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
+.tbl{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
+.trow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
+.tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
+.pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+/* etf-detail donut + holdings */
+.donutwrap{display:flex;gap:20px;align-items:center;padding:14px 16px;}
+.donut{width:120px;height:120px;border-radius:50%;flex-shrink:0;position:relative;
+  background:conic-gradient(#006EFF 0 111.6deg,#16A34A 0 151.2deg,#B7791F 0 183.6deg,#2775ED 0 212.4deg,#9333EA 0 234deg,#9CA3AF 0 360deg);}
+.donut::after{content:'';position:absolute;inset:20px;background:var(--soft);border-radius:50%;}
+.donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;}
+.donut .ctr b{font-size:16px;font-weight:800;}.donut .ctr span{font-size:10px;color:var(--muted);}
+.sec-legend{display:flex;flex-direction:column;gap:8px;flex:1;}
+.sec-legend .lg{display:flex;align-items:center;gap:8px;font-size:12px;}
+.sec-legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.sec-legend .pc{margin-left:auto;font-weight:800;}
+.hold{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}
+.hold:last-child{border-bottom:none;}.hold:hover{background:var(--primary-bg);}
+.hold .rk{font-size:11px;font-weight:700;color:var(--muted);width:16px;text-align:center;flex-shrink:0;}
+.hold .nm{flex:1;font-size:13px;font-weight:600;}.hold .nm small{display:block;color:var(--muted);font-weight:500;font-size:10px;margin-top:1px;}
+.hold .chg{font-size:12px;font-weight:700;width:50px;text-align:right;}
+.wt{width:88px;text-align:right;}.wt b{font-size:13px;font-weight:800;}
+.wt .bar2{height:4px;border-radius:999px;background:var(--inset);margin-top:4px;overflow:hidden;}.wt .bar2>i{display:block;height:100%;background:var(--primary);}
+.spec-tbl{display:flex;flex-direction:column;}
+.spec-tbl .it{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:13px;}
+.spec-tbl .it:last-child{border-bottom:none;}
+.spec-tbl .k{color:var(--muted);}.spec-tbl .v{font-weight:700;}
+.etf-pbadge{display:inline-flex;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--inset);color:var(--muted);}
+
+/* overlay */
+.ov{display:none;position:fixed;inset:0;z-index:50;background:rgba(19,21,26,.42);align-items:flex-start;justify-content:center;padding-top:80px;}.ov.on{display:flex;}
+.pal{width:460px;max-width:92vw;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;}
+.pal__in{display:flex;align-items:center;gap:10px;padding:14px 17px;border-bottom:1px solid var(--hair);}.pal__in svg{width:18px;height:18px;color:var(--muted);}.pal__in input{border:none;outline:none;font-size:16px;font-weight:600;font-family:inherit;flex:1;color:var(--ink);background:transparent;}
+.grp__t{font-size:11px;font-weight:700;color:var(--muted);padding:8px 17px 4px;}
+.res{display:flex;align-items:center;gap:10px;padding:9px 17px;cursor:pointer;text-decoration:none;color:var(--ink);}.res:hover,.res.sel{background:var(--primary-bg);}
+.res .ico{width:24px;height:24px;border-radius:6px;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);}.res.sel .ico{background:var(--primary);color:#fff;}
+.res .n3{flex:1;font-size:13px;font-weight:700;}.res .n3 small{font-size:10px;color:var(--muted);margin-left:5px;font-weight:500;}
+.foot{display:flex;gap:14px;padding:9px 17px;border-top:1px solid var(--hair);font-size:11px;color:var(--muted);}.foot b{background:var(--soft);border:1px solid var(--hair);border-radius:4px;padding:1px 5px;color:var(--ink);}
+.aip,.ais,.aid,.ax,.vol-surge-badge{cursor:help;}
+#tip{position:fixed;z-index:100;display:none;max-width:268px;background:#fff;border:1px solid var(--hair);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:12px 14px;pointer-events:none;}
+#tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+#tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}
+#tip .bd b{color:var(--ink);font-weight:700;}
+
+/* ── 패시브 민감주 ── */
+.block__t.pass::before{background:#0284C7;}
+.block__t.pass{color:#0C4A6E;}
+.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
+.pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+.pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+/* 위젯 메트릭 타일 */
+.pmet{display:flex;gap:8px;padding:12px 16px 0;}
+.pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
+.pmet .mc .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.pmet .mc .v{font-size:15px;font-weight:800;}
+.pmet .mc .sub{font-size:9px;color:var(--muted);margin-top:2px;}
+/* 패시브 한줄 번역 */
+.p1line{font-size:12px;color:var(--ink);padding:11px 16px 0;line-height:1.6;}
+.p1line b{color:#0284C7;}
+/* ETF 기여 행 */
+.petf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
+.petf-row:last-child{border-bottom:none;}
+.petf-row .en{flex:1;font-weight:600;}.petf-row .en small{display:block;font-size:10px;color:var(--muted);font-weight:400;}
+.petf-row .wt{font-size:12px;font-weight:800;color:var(--primary);}
+.petf-bar{height:3px;border-radius:999px;background:var(--inset);margin-top:3px;overflow:hidden;}
+.petf-bar i{display:block;height:100%;background:#0284C7;border-radius:999px;}
+/* 면책 띠 */
+.pdisc{font-size:10px;color:var(--muted);padding:7px 16px;background:var(--soft);line-height:1.5;border-top:1px solid var(--hair);}
+/* 패시브 랭킹 페이지 */
+.prank-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.prank-row:last-child{border-bottom:none;}
+.prank-row:hover{background:#F0F9FF;}
+.prank-row .rk2{width:20px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.dov-bar{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:#0C4A6E;}
+.conc-col{width:56px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.score-col{width:44px;text-align:right;font-size:13px;font-weight:800;color:#0284C7;flex-shrink:0;}
+/* 섹터 쏠림 배너 */
+.sector-bias{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:#0C4A6E;display:flex;align-items:center;gap:10px;}
+.sector-bias .ic2{font-size:18px;flex-shrink:0;}
+.sector-bias b{font-weight:800;}
+/* 정렬 토글 */
+.stabs{display:inline-flex;background:var(--inset);border-radius:8px;padding:3px;gap:2px;margin-bottom:12px;}
+.stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
+.stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
+
+/* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
+/* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
+/* 인컴 시뮬레이터 (보유 입력 → 계산) */
+.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
+.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);}
+.sim__h .q{font-size:15px;font-weight:600;color:var(--ink);}
+.sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
+.simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
+.simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
+.simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
+.mk-kr,.mk-us{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;vertical-align:middle;}
+.mk-kr{background:#EEF2FF;color:#4F46E5;}
+.mk-us{background:#FEF3C7;color:#92400E;}
+.simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
+.simrow .qty span{font-size:12px;color:var(--muted);}
+.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:#4F46E5;}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
+.simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
+.sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
+.combo{position:relative;flex:1;min-width:0;}
+.combo input{width:100%;border:1px solid var(--hair);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;}
+.combo input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,110,255,.12);}
+.combo__list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.12);max-height:264px;overflow-y:auto;}
+.combo__list.on{display:block;}
+.combo__hd{font-size:11px;font-weight:600;color:var(--muted);padding:8px 12px 4px;letter-spacing:.4px;}
+.combo__item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;}
+.combo__item:hover,.combo__item.sel{background:var(--primary-bg);}
+.combo__item .ci-nm{flex:1;font-weight:500;min-width:0;}
+.combo__item .ci-nm small{color:var(--muted);font-weight:400;margin-left:5px;font-size:11px;}
+.combo__item .ci-mk{font-size:9px;font-weight:600;padding:1px 5px;border-radius:5px;background:var(--inset);color:var(--muted);}
+.combo__item .ci-y{font-size:12px;font-weight:600;color:#4F46E5;}
+.combo__none{padding:12px;font-size:12px;color:var(--muted);text-align:center;}
+.qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
+.qty span{font-size:13px;color:var(--muted);font-weight:500;}
+.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#4F46E5;color:#fff;cursor:pointer;white-space:nowrap;}
+.sim__target{display:flex;flex-direction:column;gap:10px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
+.sim__target-row{display:flex;align-items:center;gap:8px;}
+.sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
+.sim__presets{display:flex;gap:6px;flex-wrap:wrap;}
+.sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
+.sim__presets a:hover{border-color:#4F46E5;color:#4F46E5;}
+.sim__presets a.on{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+.sim__out{padding:18px 20px;}
+.sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
+.sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.sim-kpi .k .v{font-size:20px;font-weight:600;}
+/* 리포트 카드 */
+.sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
+.sim-report{display:flex;flex-direction:column;gap:8px;}
+.rc{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;transition:box-shadow .15s;}
+.rc:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.rc.open{border-color:#CBD5E1;}
+.rc-head{display:flex;align-items:center;gap:8px;padding:13px 16px;background:var(--soft);cursor:pointer;user-select:none;transition:background .12s;}
+.rc-head:hover{background:#ECEDEF;}
+.rc.open .rc-head{border-bottom:1px solid var(--hair);}
+.rc-head .rci{font-size:15px;line-height:1;}
+.rc-head .rct{font-size:13px;font-weight:700;color:var(--ink);}
+.rc-head .rcb{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+.rcb.red{background:#FEE2E2;color:#f33942;}
+.rcb.green{background:#D1FAE5;color:#059669;}
+.rcb.amber{background:#FEF3C7;color:#B7791F;}
+.rcb.blue{background:#DBEAFE;color:#2563EB;}
+.rc-chev{margin-left:8px;font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.rc.open .rc-chev{transform:rotate(180deg);}
+.rc-body{display:none;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--ink);}
+.rc.open .rc-body{display:block;}
+.rc-body b{font-weight:600;}
+.rc-body .rc-flow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2px;margin-bottom:2px;}
+.rc-body .rc-from{color:var(--muted);}
+.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 4px;font-size:15px;}
+.rc-body .rc-to{color:#4F46E5;font-weight:700;}
+.rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
+.rc-body .rc-num{font-variant-numeric:tabular-nums;}
+.rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
+.rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
+.rc-act:hover{opacity:.8;}
+.rc-act.pri{background:#4F46E5;color:#fff;}
+.rc-act.sec{background:var(--soft);border:1px solid var(--hair);color:var(--ink);}
+.sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
+.donut-wrap{position:relative;flex-shrink:0;}
+.donut-arc{cursor:pointer;transition:opacity .15s;}
+.donut-arc:hover{opacity:.8;}
+.donut-tip{position:fixed;display:none;background:#1a1a1a;color:#fff;font-size:12px;line-height:1.5;padding:8px 12px;border-radius:8px;pointer-events:none;z-index:999;max-width:220px;white-space:nowrap;}
+.donut-tip b{font-weight:600;}
+.donut-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
+.hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
+.hbdg.ok{background:#ecfeea;color:#00ae1a;}
+.hbdg.warn{background:#fff9e3;color:#eb8e02;}
+.hbdg.bad{background:#fff5f7;color:#f33942;}
+.hbdg.na{background:#F1F3F5;color:#868E96;}
+/* 사이드바 인컴 ETF 랭킹 행 */
+.irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.irow:last-child{border-bottom:none;}.irow:hover{background:#EEF2FF;}
+.irow .it{display:flex;align-items:center;gap:8px;}
+.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#4F46E5;text-align:center;}
+.irow .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
+.irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
+.irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
+.irow .imx .yv{font-size:15px;font-weight:600;color:#4F46E5;}
+/* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
+.irow .it .rk{position:relative;display:flex;align-items:center;justify-content:center;height:18px;}
+.irow .rk-n,.irow .rk-p{transition:opacity .15s;}
+.irow .rk-p{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;opacity:0;}
+.irow:hover .rk-n{opacity:0;}
+.irow:hover .rk-p{opacity:1;}
+/* task3: 건전성 뱃지 호버 툴팁 */
+.hbdg-w{position:relative;display:inline-flex;}
+.hbdg-w .hbdg-tip{position:absolute;bottom:calc(100%+8px);right:0;width:210px;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);box-shadow:0 4px 20px rgba(0,0,0,.12);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:250;white-space:normal;text-align:left;}
+.hbdg-w:hover .hbdg-tip{opacity:1;transform:translateY(0);}
+/* 인컴 ETF 패널 설명 캡션 + 건전성 범례 */
+.ipanel-cap{padding:10px 16px 12px;border-bottom:1px solid var(--hair);font-size:12px;color:var(--muted);line-height:1.6;}
+.ipanel-cap b{color:var(--ink);font-weight:600;}
+.ipanel-cap-row{display:flex;align-items:flex-start;gap:8px;}
+.ipanel-qbtn{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#E5E7EB;border:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;margin-top:1px;}
+.ipanel-qbtn:hover{background:#4F46E5;color:#fff;}
+/* 인컴 도움말 모달 */
+.income-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;}
+.income-modal-bg.open{display:flex;}
+.income-modal{background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);position:relative;max-height:90vh;overflow-y:auto;}
+.income-modal h3{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 16px;}
+.income-modal h4{font-size:13px;font-weight:700;color:var(--ink);margin:16px 0 6px;}
+.income-modal p{font-size:13px;line-height:1.75;color:#444;margin:0 0 6px;}
+.income-modal .close-btn{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;}
+.income-modal .prompt-box{background:#F8F9FA;border:1px solid var(--hair);border-radius:10px;padding:14px 16px;margin-top:8px;}
+.income-modal .prompt-text{font-size:12px;line-height:1.7;color:#333;font-family:inherit;}
+.income-modal .copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.income-modal .copy-btn:hover{opacity:.8;}
+.income-modal .copy-ok{color:#00ae1a;font-size:12px;margin-left:8px;display:none;}
+.anno-card{margin:10px 0 4px;display:flex;flex-direction:column;gap:10px;}
+.anno-labels{display:flex;flex-direction:column;gap:8px;padding:2px 0;}
+.anno-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.55;color:#444;}
+.anno-dot{flex-shrink:0;width:8px;height:8px;border-radius:2px;margin-top:4px;}
+.anno-item b{color:var(--ink);}
+.iall-top-btn{margin-left:auto;border:1px solid #C7D2FE;background:#EEF2FF;color:#4F46E5;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.iall-top-btn:hover{background:#E0E7FF;}
+.iall-more{display:block;width:100%;border:none;border-top:1px solid var(--hair);background:none;padding:13px 16px;font-size:13px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;}
+.iall-more:hover{background:var(--inset);}
+.income-modal.wide{max-width:min(640px,calc(100vw - 40px));}
+.income-modal .iall-h-count{font-size:13px;font-weight:600;color:#4F46E5;margin-left:4px;}
+.income-modal .iall-controls{display:flex;align-items:center;gap:12px;padding:10px 0 8px;border-bottom:1px solid var(--hair);margin-bottom:0;}
+.income-modal .iall-cc-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;margin-left:auto;}
+.income-modal .iall-list{display:flex;flex-direction:column;margin:0 -28px;}
+/* 모달 전용 2-column 행 */
+.iall-row{display:flex;align-items:stretch;padding:14px 28px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);cursor:pointer;}
+.iall-row:last-child{border-bottom:none;}
+.iall-row:hover{background:#EEF2FF;}
+.iall-lft{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.iall-lft .it{display:flex;align-items:center;gap:8px;}
+.iall-lft .it .rk{flex-shrink:0;width:18px;font-size:12px;font-weight:700;color:#4F46E5;text-align:center;}
+.iall-lft .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.iall-lft .it b{flex:1;font-size:13px;font-weight:600;min-width:0;line-height:1.3;}
+.iall-lft .imeta{font-size:11px;color:var(--muted);}
+.iall-lft .iall-nums{font-size:11px;color:var(--muted);display:flex;align-items:baseline;gap:5px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;}
+.iall-lft .iall-nums .yv{font-size:13px;font-weight:700;color:#4F46E5;flex-shrink:0;}
+.iall-rgt{width:90px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;padding-left:10px;border-left:1px solid var(--hair);margin-left:10px;}
+.iall-price{font-size:15px;font-weight:700;line-height:1;}
+.iall-price.up{color:#00ae1a;}
+.iall-price.dn{color:#f33942;}
+.iall-price.neu{color:var(--muted);}
+.iall-desc{font-size:10px;line-height:1.45;color:var(--muted);text-align:right;}
+.iall-ret{font-size:10px;color:var(--muted);text-align:right;}
+.ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
+.ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}.ipanel-legend .dot.na{background:#ADB5BD;}
+.honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
+.honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
+/* 참고 데이터 레이어 — 출처 라벨 */
+.src{display:block;margin-top:7px;font-size:11px;color:var(--muted);font-weight:500;}
+/* 52주 범위 바 */
+.w52-bar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--dn-bg),var(--inset) 50%,var(--up-bg));margin:6px 0 9px;}
+.w52-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,rgba(224,49,49,.18),rgba(224,49,49,.42));}
+.w52-now{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink);transform:translateX(-50%);}
+.w52-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;}
+.w52-lbl .num{color:var(--ink);}
+/* 실적 분기추세 그룹 막대 */
+.qf{display:flex;gap:10px;align-items:flex-end;height:84px;padding:0 4px;}
+.qf .q{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.qf .qbars{display:flex;gap:3px;align-items:flex-end;height:64px;}
+.qf .qbars i{width:11px;border-radius:3px 3px 0 0;display:block;}
+.qf .qbars .rev{background:var(--inset);}
+.qf .qbars .op{background:var(--primary);}
+.qf .qx{font-size:10px;color:var(--muted);font-weight:600;}
+.qf-lg{display:flex;gap:14px;justify-content:center;font-size:11px;color:var(--muted);margin-top:10px;}
+.qf-lg span{display:inline-flex;align-items:center;gap:5px;}
+.qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+/* 안내 푸터 */
+.ds-footer{margin:32px 0 8px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;}
+.ds-foot-list{padding:20px 24px;}
+.ds-foot-list .fl{font-size:12.5px;color:var(--muted);line-height:1.8;padding:7px 0;}
+.ds-foot-list .fl + .fl{border-top:1px solid var(--hair);}
+.ds-foot-list .fl b{color:var(--ink);font-weight:700;}
+.ds-foot-list .fk{color:var(--ink);font-weight:700;margin-right:6px;}
+.ds-foot-base{padding:12px 24px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
+/* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
+.refsub{padding:15px 0;border-top:1px solid var(--hair);}
+.refsub:first-child{padding-top:2px;border-top:none;}
+.refsub__h{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.refsub__s{font-size:11px;font-weight:500;color:var(--muted);}
+.refrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.refrow .rp{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.refrow .rk{font-size:11px;color:var(--muted);}
+.refrow b{font-size:16px;font-weight:800;}
+.refnote{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 0 0;}
+/* AI 픽 이력 · 적중률 통합 */
+.acc-top{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+.acc-big{font-weight:900;color:#16A34A;line-height:1;white-space:nowrap;}.acc-big b{font-size:34px;}.acc-big u{font-size:16px;text-decoration:none;margin-left:1px;}
+.acc-meta{font-size:13px;}.acc-meta b{font-weight:800;}.acc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.acc-hist{font-size:12.5px;color:var(--muted);line-height:1.95;padding-top:12px;border-top:1px solid var(--hair);}
+
+/* ── 모바일 대응 (더블샷 900/600 브레이크포인트) ── */
+@media(max-width:900px){
+  .wrap{padding:16px 20px 56px;}
+  .gnb__in{padding:0 20px;gap:16px;}
+  .grid{grid-template-columns:minmax(0,1fr);row-gap:16px;}
+  .chip-layout{grid-template-columns:minmax(0,1fr);row-gap:12px;}
+  .cols2{grid-template-columns:minmax(0,1fr);}
+  .two{grid-template-columns:minmax(0,1fr);}
+  .hero{gap:14px;}
+  .hero .search{min-width:0;width:100%;}
+}
+@media(max-width:600px){
+  .wrap{padding:12px 14px 52px;}
+  .gnb__in{padding:0 14px;gap:12px;}
+  .gnb a{font-size:12px;}
+  .gnb .sbtn{padding:6px 9px;}
+  .hero h1,.phead h1{font-size:18px;}
+  .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
+  .strip .m{flex:1 1 40%;}
+  .strip .m:nth-child(even){border-right:none;margin-right:0;padding-right:0;}
+  .refrow{grid-template-columns:1fr;gap:0;}
+  .refrow .rp{flex-direction:row;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);}
+  .refrow .rp:last-child{border-bottom:none;padding-bottom:0;}
+  .refrow .rk{font-size:12px;white-space:nowrap;}
+  .refrow b{font-size:15px;}
+  .nm{width:104px;}
+  .cols2 .nm{width:96px;}
+  #chip-board .nm{width:100px;}
+  .prank-row .nm{width:104px!important;}
+  .ai{width:auto;}
+  /* 프로토타입 시간대 토글 — 좁은 화면에서 줄바꿈 */
+  .brief-strip{flex-wrap:wrap;}
+  .bs-arr{order:1;}
+  .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
+
+  /* ── 배당 인컴 설계기 모바일 최적화 ── */
+
+  /* 보유 종목 행: 이름을 첫 줄 전체에, 수량·인컴을 두 번째 줄에 */
+  .simrow{flex-wrap:wrap;padding:8px 14px;gap:4px 8px;}
+  .simrow .snm{width:100%;flex:none;font-size:13px;margin-bottom:2px;}
+  .simrow .sinc{margin-left:auto;width:auto;}
+  .simrow .sinc b{font-size:13px;}
+
+  /* 종목 추가 행: 검색 첫 줄 / 수량+버튼 둘째 줄 */
+  .sim__add{flex-wrap:wrap;padding:10px 14px;}
+  .sim__add .combo{width:100%;flex:none;}
+  .sim__add .qty{flex:1;}
+  .sim__add .qty input{width:100%;}
+
+  /* 콤보 드롭다운 아이템: 긴 이름 말줄임 */
+  .combo__item .ci-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .combo__item .ci-nm small{display:none;}
+
+  /* 시뮬레이터 아웃풋: 도넛 위 → KPI 아래로 세로 배치 */
+  .sim-out-row{flex-direction:column;align-items:stretch;gap:10px;}
+  .donut-wrap{align-self:center;}
+  .sim-kpi{flex-wrap:nowrap;}
+  .sim-kpi .k{min-width:0;flex:1;padding:8px 10px;}
+  .sim-kpi .k .v{font-size:16px;}
+
+  /* 도넛 범례: ETF 이름 말줄임 */
+  .dl-item{min-width:0;max-width:100%;}
+  .dl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+
+  /* 갈아타기 제안: 긴 ETF 이름 줄바꿈 허용 */
+  .rc-body .rc-dest{flex-shrink:1;min-width:0;flex-wrap:wrap;display:flex;}
+  .rc-body .rc-to{word-break:keep-all;overflow-wrap:break-word;min-width:0;}
+
+  /* 전체보기 테이블: 가격변화 bar 칼럼 숨김 */
+  .iall-bar-col{display:none!important;}
+  /* 대신 모바일에서는 가격변화 텍스트를 메타 줄에 표시 */
+  .iall-mobile-price{display:inline!important;}
+
+  /* 전체보기 헤더·정렬 */
+  .phead{flex-direction:column;align-items:flex-start;gap:10px;}
+  .rtabs{font-size:11px;}
+}
+/* ETF 추가 모달 — PC에서는 중앙 다이얼로그 */
+@media(min-width:600px){
+  #add-sheet{
+    bottom:auto;top:50%;left:50%;right:auto;
+    width:400px;
+    border-radius:16px;
+    transform:translate(-50%,-50%) scale(.96);
+    transition:transform .2s ease-out,opacity .2s ease-out;
+    opacity:0;
+    padding:0;
+  }
+  #add-sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  #add-sheet-handle{display:none;}
+}
+
+/* ── 의견 모달 ── */
+#cm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:flex-end;justify-content:center;}
+#cm-overlay.open{display:flex;}
+#cm-dialog{background:var(--canvas);width:100%;max-width:520px;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);}
+#cm-overlay.open #cm-dialog{transform:translateY(0);}
+@media(min-width:600px){
+  #cm-overlay{align-items:center;}
+  #cm-dialog{border-radius:20px;max-height:80vh;transform:scale(.96);opacity:0;transition:transform .22s ease-out,opacity .22s ease-out;}
+  #cm-overlay.open #cm-dialog{transform:scale(1);opacity:1;}
+}
+.cm-handle{width:36px;height:4px;background:var(--hair);border-radius:2px;margin:10px auto 0;flex-shrink:0;}
+@media(min-width:600px){.cm-handle{display:none;}}
+.cm-head{display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--hair);flex-shrink:0;}
+.cm-title{font-size:15px;font-weight:700;color:var(--ink);}
+.cm-count{font-size:12px;font-weight:700;color:#4F46E5;background:#EEF2FF;border-radius:99px;padding:2px 9px;}
+.cm-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:4px;}
+.cm-close svg{width:16px;height:16px;}
+.cm-list{overflow-y:auto;flex:1;padding:0 16px;}
+.ci{padding:14px 0;border-bottom:1px solid var(--hair);}
+.ci:last-child{border-bottom:none;}
+.ci-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ci-av{width:28px;height:28px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4F46E5;flex-shrink:0;}
+.ci-author{font-size:13px;font-weight:600;color:var(--ink);}
+.ci-time{font-size:11px;color:var(--muted);margin-left:auto;}
+.ci-body{font-size:13px;color:var(--ink);line-height:1.65;padding-left:36px;margin-bottom:5px;}
+.ci-reply-btn{background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding-left:36px;font-family:inherit;display:flex;align-items:center;gap:3px;}
+.ci-reply-btn:hover{color:var(--ink);}
+.cs-replies{margin:8px 0 0 36px;border-left:2px solid #EEF2FF;padding-left:12px;}
+.cr{padding:8px 0;}
+.cr-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.cr-av{width:22px;height:22px;border-radius:50%;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.cr-author{font-size:12px;font-weight:600;color:var(--ink);}
+.cr-time{font-size:10px;color:var(--muted);margin-left:auto;}
+.cr-body{font-size:12px;color:var(--ink);line-height:1.55;padding-left:29px;}
+.cs-reply-form{margin:8px 0 0 36px;display:flex;gap:6px;}
+.cs-reply-input{flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);}
+.cs-reply-submit{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.cm-form{padding:12px 16px 16px;border-top:1px solid var(--hair);flex-shrink:0;}
+.cm-nick{width:150px;border:1.5px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
+.cm-nick:focus{border-color:#4F46E5;}
+.cm-textarea{width:100%;border:1.5px solid var(--hair);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:68px;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
+.cm-textarea:focus{border-color:#4F46E5;}
+.cm-foot-row{display:flex;align-items:center;justify-content:space-between;}
+.cm-hint{font-size:11px;color:var(--muted);}
+.cm-submit{background:#4F46E5;color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.cm-submit:hover{background:#4338CA;}
+.cm-empty{padding:32px 16px;text-align:center;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/">Double<b>-Shot</b></a><a href="/briefings/">브리핑</a><a class="on" href="/stocks/income-designer/">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="wrap">
+  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
+  <div id="income">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span>홈</span> › <span>종목</span> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
+    <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
+      <button onclick="openCommentModal()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:2px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        의견 남기기
+      </button>
+    </div>
+
+    <div class="grid">
+      <!-- 메인: 인컴 시뮬레이터 -->
+      <div>
+        <div class="sim">
+          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요<small style="display:block;margin-top:3px;">커버드콜·배당주·해외 직상장까지</small></div></div>
+          <div id="sim-rows"></div>
+          <div class="sim__add">
+            <div class="combo">
+              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
+                     onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
+              <div class="combo__list" id="combo-list"></div>
+            </div>
+            <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
+            <a onclick="simAdd()">+ 추가</a>
+          </div>
+          <div class="sim__target">
+            <div class="sim__target-row">
+              <span>목표 월 수령액</span>
+              <input id="sim-target" type="number" value="100" oninput="targetInput()">
+              <span>만원</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;">종목 추가·주 수 변경 시 자동 계산돼요</span>
+            </div>
+            <div class="sim__presets" id="target-presets">
+              <a onclick="targetPreset(50)">50만</a>
+              <a onclick="targetPreset(100)" class="on">100만</a>
+              <a onclick="targetPreset(200)">200만</a>
+              <a onclick="targetPreset(300)">300만</a>
+              <a onclick="targetPreset(500)">500만</a>
+            </div>
+          </div>
+          <div class="sim__out" id="sim-out"></div>
+        </div>
+
+        <!-- 의견 남기기 진입 -->
+        <button onclick="openCommentModal()" style="width:100%;display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit;text-align:left;color:var(--muted);font-size:13px;transition:border-color .15s,background .15s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span style="flex:1;">사용해보셨나요? 의견을 남겨주세요.</span>
+          <span style="font-size:12px;font-weight:700;color:#4F46E5;">의견 남기기 →</span>
+        </button>
+      </div>
+
+      <!-- 사이드바: 인컴 ETF 전체 -->
+      <div>
+        <div class="panel">
+          <div class="panel__h">월배당 ETF
+            <button class="iall-top-btn" onclick="openIncomeAllPage()">전체 보기</button>
+            <div class="stabs" id="isort-tabs" style="margin-left:8px;margin-bottom:0;">
+              <a class="on" onclick="incomeSort('y',this)">분배율순</a>
+              <a onclick="incomeSort('health',this)">건전성순</a>
+            </div>
+          </div>
+          <div class="ipanel-cap">
+            <div class="ipanel-cap-row">
+              <div style="flex:1;">
+                <span id="icap-y">연 분배율이 높은 순 (국내·미국)</span>
+                <span id="icap-h" style="display:none">분배율 대비 1년 총수익이 높은 순 (국내·미국)</span>
+              </div>
+              <button class="ipanel-qbtn" onclick="openIncomeModal()">?</button>
+            </div>
+            <div class="ipanel-legend">
+              <span><i class="dot ok"></i>건전 · 가격 유지</span>
+              <span><i class="dot warn"></i>주의 · 소폭 침식</span>
+              <span><i class="dot bad"></i>원금성 · 원금 잠식</span>
+              <span><i class="dot na"></i>데이터 부족 · 신생</span>
+            </div>
+          </div>
+
+          <!-- 인컴 도움말 모달 -->
+          <div class="income-modal-bg" id="income-modal-bg" onclick="if(event.target===this)closeIncomeModal()">
+            <div class="income-modal">
+              <button class="close-btn" onclick="closeIncomeModal()">×</button>
+              <h3>🪙 인컴 ETF, 이것만 알면 돼요</h3>
+
+              <h4>분배율과 수익률은 달라요</h4>
+              <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
+
+              <h4>Q. 건전성이 뭔가요?</h4>
+              <p><b>건전성 = 총수익 − 분배율</b>이에요. 아래 카드를 보면 바로 이해돼요.</p>
+
+              <!-- 어노테이션 카드 -->
+              <div class="anno-card">
+                <div class="anno-row">
+                  <div class="irow" style="padding:12px 14px;border-radius:10px;border:1px solid var(--hair);background:var(--canvas);pointer-events:none;">
+                    <div class="it" style="display:flex;align-items:center;gap:8px;">
+                      <span class="rk top" style="flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;text-align:center;">1</span>
+                      <b style="flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;">KODEX 200타겟위클리커버드콜</b>
+                      <span class="hbdg ok" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;background:#ecfeea;color:#00ae1a;white-space:nowrap;">건전</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 6.7조</div>
+                    <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);">
+                      <span style="font-size:15px;font-weight:600;color:#4F46E5;">11.23%</span> 분배 · 총수익 <b style="color:var(--ink)">+174.81%</b> · <span style="color:#00ae1a">가격 +164%</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="anno-labels">
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#4F46E5;"></span>
+                    <div><b>분배율 11.23%</b><br>올해 분배금 합계 ÷ 현재가. 내가 받는 배당 비율이에요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#111;"></span>
+                    <div><b>총수익 +174.81%</b><br>분배금 재투자 기준 1년 수익률. 자산이 실제로 얼마나 불었는지예요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#00ae1a;"></span>
+                    <div><b>가격 +164%</b><br>총수익 − 분배율 ≈ 가격 변화 추정치. 분배받으면서 ETF 가격도 올랐어요.</div>
+                  </div>
+                  <div class="anno-item">
+                    <span class="anno-dot" style="background:#00ae1a;border-radius:9999px;"></span>
+                    <div><b>건전 뱃지</b><br>가격이 유지·상승하며 분배해요. 주의는 소폭 침식, 원금성은 분배금에 원금이 섞인 구조예요.</div>
+                  </div>
+                </div>
+              </div>
+
+              <h4>Q. 어떤 ETF를 골라야 할까요?</h4>
+              <p>분배율이 낮아도 건전한 ETF가 장기적으로 더 유리할 수 있어요. 건전성 탭으로 정렬해 비교해보세요.</p>
+
+              <h4>💬 AI에게 더 물어보세요</h4>
+              <div class="prompt-box">
+                <div class="prompt-text" id="income-prompt">커버드콜 ETF를 고려 중인데, 분배율 15%짜리 ETF와 분배율 9%지만 건전성이 좋은 ETF 중 어떤 게 장기적으로 유리할까요? 세금 효과까지 포함해서 비교해줘.</div>
+                <div style="display:flex;align-items:center;">
+                  <button class="copy-btn" onclick="copyPrompt()">📋 프롬프트 복사</button>
+                  <span class="copy-ok" id="copy-ok">✓ 복사됐어요</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
+            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
+            커버드콜 제외
+          </label>
+          <div id="income-rows"></div>
+          <button class="iall-more" onclick="openIncomeAllPage()">전체 ETF 보기 <span id="iall-count"></span></button>
+        </div>
+      </div>
+    </div>
+    <!-- 정직 배너 -->
+    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값(국내 2026-06-13, 미국 2026-06-16)이고, 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요. 미국 ETF 가격은 원화 환산(@1,513.3원)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+
+  </div>
+
+  <!-- ===== 월배당 ETF 전체 랭킹 페이지 ===== -->
+  <div id="income-all-page" style="display:none;">
+    <div class="crumb">
+      <button class="back-btn" onclick="closeIncomeAllPage()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <a href="#" onclick="event.preventDefault();closeIncomeAllPage()">배당 인컴 설계기</a> › <span style="color:#4F46E5;">월배당 ETF 전체</span>
+    </div>
+    <div class="phead">
+      <div>
+        <h1 style="color:#312E81;"><span class="ic">📊</span> 월배당 ETF 랭킹 <span id="iallp-count" style="font-size:16px;font-weight:600;color:#4F46E5;margin-left:2px;"></span></h1>
+        <div class="psub">순자산 7천억 이상 월배당 ETF (국내·미국). 종목 클릭 시 시뮬레이터에 추가돼요. <span style="color:var(--muted);">데이터 기준: 매주 월요일 갱신</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="rtabs" id="iallp-sort-tabs">
+          <a class="on" onclick="iallPageSort('y',this)">분배율순</a>
+          <a onclick="iallPageSort('health',this)">건전성순</a>
+        </div>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;margin-left:auto;">
+          <input type="checkbox" id="iallp-cc-exclude" onchange="incomeAllPageRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
+          커버드콜 제외
+        </label>
+      </div>
+    </div>
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;overflow:visible;box-shadow:var(--s1);">
+      <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;background:var(--soft);border-bottom:1px solid var(--hair);border-radius:9px 9px 0 0;">
+        <div style="width:26px;"></div>
+        <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
+        <div style="width:68px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">분배율</div>
+        <div style="width:68px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">건전성</div>
+        <div class="iall-bar-col" style="width:200px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-right:8px;flex-shrink:0;">가격 변화 (1년)</div>
+      </div>
+      <div id="income-all-page-rows"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+
+function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
+function goBack(){ if(history.length>1) history.back(); else location.href='/'; }
+
+/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+// 미국 5종 — yfinance 실측 하드코딩 (build_income_etfs.py 범위 밖)
+const US_UNIVERSE=[
+  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:44.6,price:85400,y:8.12,r:9.11,mk:'US',lc:false,aumLabel:'$44.6B'},
+  {code:'JEPQ',name:'JPMorgan 나스닥 에쿼티프리미엄 (JEPQ)',aum:39.6,price:92390,y:10.02,r:29.12,mk:'US',lc:false,aumLabel:'$39.6B'},
+  {code:'QYLD',name:'Global X 나스닥100 커버드콜 (QYLD)',aum:8.4,price:27560,y:11.42,r:23.81,mk:'US',lc:false,aumLabel:'$8.4B'},
+  {code:'XYLD',name:'Global X S&P500 커버드콜 (XYLD)',aum:3.2,price:61930,y:10.47,r:17.71,mk:'US',lc:false,aumLabel:'$3.2B'},
+  {code:'DIVO',name:'Amplify CWP 강화배당 (DIVO)',aum:7.1,price:70530,y:6.34,r:20.31,mk:'US',lc:false,aumLabel:'$7.1B'},
+];
+
+// income_etfs.json 필드 → INCOME_UNIVERSE 형식 변환
+function normKrEtf(e) {
+  return {
+    code: e.code,
+    name: e.name,
+    aum: e.aum_jo,
+    price: e.price,
+    y: e.yield_ttm,
+    r: e.return_1y,
+    mk: 'KR',
+    lc: e.low_confidence,
+  };
+}
+
+let INCOME_UNIVERSE = [...US_UNIVERSE]; // fetch 완료 전 fallback
+const UNIV={};US_UNIVERSE.forEach(d=>UNIV[d.code]=d); // 초기 상태, fetch 후 갱신
+function incomeHealth(d){if(d.r==null)return['na','데이터 부족',null];const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+
+const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.',na:'상장 1년 미만이라 1년 총수익이 아직 없어요. 건전성을 판정할 수 없어요.'};
+function incomeRow(d,i){
+  const[hc,hl,e]=incomeHealth(d);
+  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  const lastCol=hc==='na'
+    ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (신생)</span>`
+    :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`}`;
+  return `<a class="irow" onclick="openAddSheet('${d.code}')">
+    <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
+    <div class="imx">${lastCol}</div>
+  </a>`;
+}
+let iSortKey='y';
+function incomeFiltered(){
+  const excludeCC=document.getElementById('cc-exclude')?.checked;
+  let arr=[...INCOME_UNIVERSE];
+  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
+  else arr.sort((a,b)=>healthScore(b)-healthScore(a));
+  return arr;
+}
+// 건전성 정렬 스코어: 신생(r:null)은 항상 최하단
+function healthScore(d){return d.r==null?-Infinity:d.r-d.y;}
+function incomeRender(){
+  const arr=incomeFiltered();
+  document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
+  const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
+}
+
+/* 전체 랭킹 페이지: 독립 sort + cc 상태 */
+let iAllPageSortKey='y';
+function incomeAllPageRow(d,i){
+  const[hc,hl,e]=incomeHealth(d);
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  const rk=i+1;
+  const ePct=e!=null?Math.round(e):null;
+  const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
+  const barPct=ePct==null?0:Math.min(Math.abs(ePct)/180*100,100);
+  const barCls=ePct==null?'':ePct>=0?'up':'dn';
+  const metaTxt=d.mk==='US'
+    ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
+    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+  const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#00ae1a':'#f33942'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
+  const rkEl=rk<=3
+    ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
+    :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
+  return `<a class="trow" onclick="openAddSheet('${d.code}')" style="gap:12px;padding:11px 16px;align-items:flex-start;">
+    ${rkEl}
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:600;line-height:1.35;word-break:keep-all;">${d.name}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}<span class="iall-mobile-price" style="display:none;">${mobilePriceTxt}</span></div>
+    </div>
+    <div style="width:68px;text-align:right;font-size:15px;font-weight:700;color:#4F46E5;flex-shrink:0;" class="num">${d.y}%</div>
+    <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="iall-bar-col" style="width:200px;flex-shrink:0;">
+      <div class="barwrap" style="height:19px;">
+        ${ePct!=null?`<div style="height:100%;border-radius:5px;width:${barPct.toFixed(1)}%;background:${ePct>=0?'#FFBBBB':'#BACFFF'};"></div>`:''}
+        <span class="barval num ${barCls}">${priceTxt}</span>
+      </div>
+    </div>
+  </a>`;
+}
+function incomeAllPageFiltered(){
+  const excludeCC=document.getElementById('iallp-cc-exclude')?.checked;
+  let arr=[...INCOME_UNIVERSE];
+  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(iAllPageSortKey==='y')arr.sort((a,b)=>b.y-a.y);
+  else arr.sort((a,b)=>healthScore(b)-healthScore(a));
+  return arr;
+}
+function incomeAllPageRender(){
+  const arr=incomeAllPageFiltered();
+  document.getElementById('income-all-page-rows').innerHTML=arr.map(incomeAllPageRow).join('');
+  document.getElementById('iallp-count').textContent=`${arr.length}개`;
+}
+function iallPageSort(k,el){
+  iAllPageSortKey=k;
+  document.querySelectorAll('#iallp-sort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  incomeAllPageRender();
+}
+function openIncomeAllPage(){
+  incomeAllPageRender();
+  document.getElementById('income').style.display='none';
+  document.getElementById('income-all-page').style.display='block';
+  window.scrollTo(0,0);
+}
+function closeIncomeAllPage(){
+  document.getElementById('income-all-page').style.display='none';
+  document.getElementById('income').style.display='block';
+}
+function addFromRankingPage(code){
+  addFromRanking(code);
+  closeIncomeAllPage();
+}
+function incomeSort(k,el){
+  iSortKey=k;
+  document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  document.getElementById('icap-y').style.display=k==='y'?'':'none';
+  document.getElementById('icap-h').style.display=k==='health'?'':'none';
+  incomeRender();
+}
+incomeRender();
+
+/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
+const SIM_KEY='ds-income-holdings-v1';
+function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
+function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
+let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+function simIncome(h){const d=UNIV[h.code];if(!d)return 0;return h.qty*d.price*d.y/100/10000;}  // 만원/년
+function simRowsRender(){
+  document.getElementById('sim-rows').innerHTML=simHoldings.filter(h=>UNIV[h.code]).map((h,i)=>{
+    const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
+    return `<div class="simrow">
+      <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
+      <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
+      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
+      <div class="sx" onclick="simDel(${i})">×</div>
+    </div>`;
+  }).join('');
+}
+function simSet(i,v){
+  simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
+  const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
+  const el=document.getElementById('sinc-'+i);
+  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  simOut();
+}
+function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
+/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
+function openAddSheet(code){
+  const d=UNIV[code];
+  if(!d)return;
+  const[hc,hl]=incomeHealth(d);
+  const ex=simHoldings.findIndex(h=>h.code===code);
+  const alreadyQty=ex>=0?simHoldings[ex].qty:null;
+  const ePct=d.r!=null?Math.round(d.r-d.y):null;
+  const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
+  const priceColor=ePct==null?'var(--muted)':ePct>=0?'#00ae1a':'#f33942';
+  const metaTxt=d.mk==='US'
+    ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
+    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+  const hcBg={ok:'background:#DCFCE7;color:#15803D',warn:'background:#FEF3C7;color:#92400E',bad:'background:#FEE2E2;color:#B91C1C',na:'background:#F3F4F6;color:#6B7280'};
+  const alreadyNote=alreadyQty!=null
+    ?`<div style="font-size:11px;color:#4F46E5;background:#EEF2FF;border-radius:6px;padding:7px 10px;margin-bottom:10px;">이미 ${alreadyQty}주 담겨 있어요. 수량을 변경할까요?</div>`
+    :'';
+  document.getElementById('add-sheet-body').innerHTML=`
+    <div style="font-size:15px;font-weight:700;line-height:1.35;margin-bottom:4px;word-break:keep-all;">${d.name}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">${metaTxt}</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;background:#EEF2FF;border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:#4F46E5;">${d.y}%</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">연 분배율</div>
+      </div>
+      <div style="flex:1;background:#F8F9FA;border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:${priceColor};">${priceTxt}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">1년 가격변화</div>
+      </div>
+      <div style="flex:1;border-radius:8px;padding:8px;text-align:center;${hcBg[hc]}">
+        <div style="font-size:15px;font-weight:700;">${hl}</div>
+        <div style="font-size:10px;margin-top:2px;opacity:.75;">건전성</div>
+      </div>
+    </div>
+    ${alreadyNote}
+    <div style="font-size:12px;font-weight:600;margin-bottom:6px;">몇 주 담을까요?</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <input id="add-sheet-qty" type="number" min="1" step="1" value="100"
+        style="flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;text-align:right;outline:none;font-family:inherit;"
+        oninput="document.getElementById('add-sheet-confirm').disabled=!(+this.value>=1)">
+      <span style="font-size:13px;color:var(--muted);">주</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeAddSheet()" style="flex:1;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">취소</button>
+      <button id="add-sheet-confirm" onclick="confirmAddSheet('${code}')"
+        style="flex:2;background:#4F46E5;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">시뮬레이터에 추가</button>
+    </div>
+  `;
+  const overlay=document.getElementById('add-sheet-overlay');
+  const sheet=document.getElementById('add-sheet');
+  overlay.style.display='block';
+  sheet.style.display='block';
+  const isPC=window.innerWidth>=600;
+  if(isPC){
+    Object.assign(sheet.style,{bottom:'auto',top:'50%',left:'50%',right:'auto',
+      width:'420px',borderRadius:'16px',padding:'0',
+      transform:'translate(-50%,-50%) scale(.96)',
+      transition:'transform .2s ease-out, opacity .2s ease-out',
+      opacity:'0'});
+    document.getElementById('add-sheet-handle').style.display='none';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      sheet.style.transform='translate(-50%,-50%) scale(1)';
+      sheet.style.opacity='1';
+    }));
+  } else {
+    Object.assign(sheet.style,{bottom:'0',top:'',left:'0',right:'0',
+      width:'',borderRadius:'16px 16px 0 0',padding:'0 0 env(safe-area-inset-bottom)',
+      transform:'translateY(100%)',transition:'transform .25s ease-out',opacity:'1'});
+    document.getElementById('add-sheet-handle').style.display='';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{sheet.style.transform='translateY(0)';}));
+  }
+  setTimeout(()=>document.getElementById('add-sheet-qty')?.select(),300);
+}
+function closeAddSheet(){
+  const sheet=document.getElementById('add-sheet');
+  const isPC=window.innerWidth>=600;
+  if(isPC){
+    sheet.style.transform='translate(-50%,-50%) scale(.96)';
+    sheet.style.opacity='0';
+  } else {
+    sheet.style.transform='translateY(100%)';
+  }
+  setTimeout(()=>{
+    sheet.style.display='none';
+    document.getElementById('add-sheet-overlay').style.display='none';
+  },260);
+}
+function confirmAddSheet(code){
+  const qty=+document.getElementById('add-sheet-qty').value;
+  if(qty<1)return;
+  addFromRanking(code,qty);
+  closeAddSheet();
+}
+function addFromRanking(code,qty=100){
+  const ex=simHoldings.findIndex(h=>h.code===code);
+  if(ex>=0)simHoldings[ex].qty=qty; else simHoldings.push({code,qty});
+  saveHoldings();simRowsRender();simOut();
+  const rows=document.querySelectorAll('#sim-rows .simrow');
+  const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
+  if(el){
+    el.style.transition='background .4s';el.style.background='#EEF2FF';
+    setTimeout(()=>el.style.background='',700);
+    el.scrollIntoView({block:'nearest'});
+    const inp=el.querySelector('.qty input');
+    if(inp){inp.focus();inp.select();}
+  }
+}
+
+/* 콤보박스: 순자산 톱20 기본 + 이름·코드 검색 */
+let comboSel=null,comboCur=[],comboIdx=-1;
+function comboItems(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,20);
+  return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
+}
+function comboRender(q){
+  const arr=comboItems(q),list=document.getElementById('combo-list');comboCur=arr;
+  if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
+  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱20</div>';
+  list.innerHTML=hd+arr.map((d,i)=>`<div class="combo__item${i===comboIdx?' sel':''}" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
+}
+function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
+function comboFilter(){comboSel=null;comboIdx=-1;comboOpen();}
+function comboClose(){setTimeout(()=>document.getElementById('combo-list').classList.remove('on'),150);}
+function comboPick(code){comboSel=code;document.getElementById('sim-search').value=UNIV[code].name;document.getElementById('combo-list').classList.remove('on');}
+function comboHighlight(){
+  const items=document.querySelectorAll('#combo-list .combo__item');
+  items.forEach((el,i)=>el.classList.toggle('sel',i===comboIdx));
+  if(comboIdx>=0&&items[comboIdx])items[comboIdx].scrollIntoView({block:'nearest'});
+}
+function comboKey(e){
+  const list=document.getElementById('combo-list');
+  if(!list.classList.contains('on')){if(e.key==='ArrowDown')comboOpen();return;}
+  if(e.key==='ArrowDown'){e.preventDefault();comboIdx=Math.min(comboCur.length-1,comboIdx+1);comboHighlight();}
+  else if(e.key==='ArrowUp'){e.preventDefault();comboIdx=Math.max(0,comboIdx-1);comboHighlight();}
+  else if(e.key==='Enter'){if(comboIdx>=0&&comboCur[comboIdx]){e.preventDefault();comboPick(comboCur[comboIdx].code);}}
+  else if(e.key==='Escape'){list.classList.remove('on');}
+}
+function simAdd(){
+  if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
+  const qty=parseInt(document.getElementById('sim-amt').value)||0;
+  if(comboSel&&qty>0){
+    simHoldings.push({code:comboSel,qty});
+    comboSel=null;document.getElementById('sim-search').value='';
+    saveHoldings();simRowsRender();simOut();
+    const rows=document.querySelectorAll('#sim-rows .simrow');
+    const el=rows[simHoldings.length-1];
+    if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
+  }
+}
+const DONUT_COLORS=['#4F46E5','#2775ED','#10B981','#8B5CF6','#D97706','#EF4444','#EC4899','#6366F1','#F59E0B'];
+const GAP_COLOR='#E5E7EB';
+
+function buildDonut(segs, monthly){
+  const CX=70,CY=70,R=50,W=18,circ=2*Math.PI*R;
+  const gap=segs.length>1?1.5:0;
+  let offset=0;
+  const arcs=segs.map((s,i)=>{
+    const len=Math.max(0,s.pct*circ-gap);
+    const el=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${W}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" class="donut-arc" data-i="${i}" transform="rotate(-90 ${CX} ${CY})"/>`;
+    offset+=s.pct*circ;
+    return el;
+  }).join('');
+  return `<svg class="donut-svg" viewBox="0 0 140 140" width="140" height="140">
+    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
+    ${arcs}
+    <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
+    <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">만원/월</text>
+  </svg>`;
+}
+
+function setupDonutTip(segs){
+  const tip=document.getElementById('donut-tip');
+  if(!tip)return;
+  document.querySelectorAll('.donut-arc').forEach(el=>{
+    el.addEventListener('mousemove',e=>{
+      const i=parseInt(el.dataset.i),s=segs[i];
+      if(!s)return;
+      const pct=(s.pct*100).toFixed(1);
+      tip.innerHTML=s.code
+        ?`<b>${s.name}</b><br>월 인컴 <b>${s.inc.toFixed(1)}만원</b> · ${pct}%`
+        :`<b>${s.name}</b><br>${s.inc.toFixed(1)}만원 더 필요해요`;
+      tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px';
+      tip.style.top=(e.clientY-10)+'px';
+    });
+    el.addEventListener('mouseleave',()=>{tip.style.display='none';});
+  });
+}
+
+const PRESETS=[50,100,200,300,500];
+function targetPreset(v){
+  document.getElementById('sim-target').value=v;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
+}
+function targetInput(){
+  const v=parseInt(document.getElementById('sim-target').value)||0;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
+}
+function simOut(){
+  let totalDiv=0;const bad=[],slices=[];
+  simHoldings.forEach(h=>{
+    const d=UNIV[h.code];if(!d)return;
+    const inc=simIncome(h);
+    totalDiv+=inc;
+    slices.push({name:d.name,code:h.code,inc});
+    const[hc,,e]=incomeHealth(d);
+    if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
+  });
+  const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
+
+  // 도넛 세그먼트 구성
+  const total=Math.max(monthly,target,0.01);
+  const segs=slices.map((s,i)=>({name:s.name,code:s.code,inc:s.inc/12,pct:s.inc/12/total,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
+  if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
+
+  const donut=simHoldings.length?buildDonut(segs,monthly):'';
+  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i><span class="dl-name">${s.name}</span><b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
+
+  let html=`<div class="sim-out-row">
+    ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
+    <div style="flex:1;min-width:0;">
+      <div class="sim-kpi">
+        <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+      </div>
+      <div class="donut-legend">${legend}</div>
+    </div>
+  </div>`;
+
+  // 리포트 카드 조립
+  const cards=[];
+  if(bad.length){
+    cards.push(`<div class="rc open">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
+    </div>`);
+    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
+    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
+    if(alt){
+      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      cards.push(`<div class="rc open">
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
+        <div class="rc-body">
+          <div class="rc-flow">
+            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
+            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+          </div>
+          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
+          <div class="rc-actions">
+            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
+            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
+          </div>
+        </div>
+      </div>`);
+    }
+  }
+  const taxWarn=totalDiv>=2000;
+  cards.push(`<div class="rc">
+    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'amber':'green'}">${taxWarn?'검토 필요':'여유'}</span><span class="rc-chev">▾</span></div>
+    <div class="rc-body">${taxWarn
+      ?`이 조합의 연 분배금만 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 종합과세 기준 <b>2,000만원</b>을 넘어요. 예금이자·다른 배당까지 합치면 실제 합산액은 더 커질 수 있어요.`
+      :`이 조합의 연 분배금은 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 다만 예금이자·다른 배당과 합산되면 달라질 수 있어요.`}
+      <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">분배금 전액을 과세 대상으로 가정한 추정이에요. 국내주식형 ETF의 매매차익 비과세분은 실제 금융소득에 안 들어가, 실제 과세액은 더 낮을 수 있어요. 정확한 판정은 보유 전체·연소득 기준으로 확인하세요.</div>
+    </div>
+  </div>`);
+  if(gap>0){
+    const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
+    cards.push(`<div class="rc">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
+        <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
+      </div>
+    </div>`);
+  }
+
+  html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
+
+  document.getElementById('sim-out').innerHTML=html;
+  if(simHoldings.length)setupDonutTip(segs);
+}
+function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
+function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
+function copyPrompt(){
+  const txt=document.getElementById('income-prompt').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const ok=document.getElementById('copy-ok');ok.style.display='inline';
+    setTimeout(()=>ok.style.display='none',2000);
+  });
+}
+function toggleRc(head){head.closest('.rc').classList.toggle('open');}
+fetch('/data/income_etfs.json')
+  .then(r => r.json())
+  .then(data => {
+    const krEtfs = (data.etfs || []).map(normKrEtf);
+    INCOME_UNIVERSE = [...krEtfs, ...US_UNIVERSE];
+    INCOME_UNIVERSE.forEach(d => UNIV[d.code] = d);
+    incomeRender();
+    incomeAllPageRender();
+    simRowsRender();simOut();
+  })
+  .catch(() => {
+    INCOME_UNIVERSE = [...US_UNIVERSE];
+    INCOME_UNIVERSE.forEach(d => UNIV[d.code] = d);
+    simRowsRender();simOut();
+  });
+simRowsRender();simOut();
+
+/* ── 의견 모달 ── */
+const NICK_ADJ=['배당하는','월배당','인컴','복리','장기','건전한','분배하는','커버드'];
+const NICK_ANIMAL=['판다','코알라','펭귄','고양이','토끼','다람쥐','수달','라마'];
+const AV_COLORS=[
+  {bg:'#EEF2FF',fg:'#4F46E5'},{bg:'#FEF3C7',fg:'#92400E'},
+  {bg:'#DCFCE7',fg:'#15803D'},{bg:'#FEE2E2',fg:'#B91C1C'},
+  {bg:'#F3E8FF',fg:'#7E22CE'},{bg:'#E0F2FE',fg:'#0369A1'}
+];
+let cmComments=[
+  {id:1,author:'배당하는 판다',av:0,body:'JEPI 넣어봤는데 분배율이 생각보다 낮게 나오네요. 원래 이 정도인가요?',ts:Date.now()-7200000,replies:[
+    {id:11,author:'월배당 코알라',av:1,body:'환율 영향도 있고 최근 분배율이 조금 낮아졌어요. 연평균으로 보시면 비슷해요.',ts:Date.now()-3600000}
+  ]},
+  {id:2,author:'인컴 수달',av:4,body:'목표 달성 전략 기능이 좋아요. KODEX OTM 추천 나왔는데 실제로 담아볼까 고민 중이에요.',ts:Date.now()-18000000,replies:[]},
+  {id:3,author:'복리 펭귄',av:2,body:'건전성 필터가 생각보다 유용하네요. 분배율만 보다가 가격 침식 종목을 걸러줘서 좋아요.',ts:Date.now()-86400000,replies:[]}
+];
+let openReplyId=null;
+function getNick(){
+  let n=localStorage.getItem('ds-comment-nick-v1');
+  if(!n){n=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];localStorage.setItem('ds-comment-nick-v1',n);}
+  return n;
+}
+function timeAgo(ts){
+  const d=Date.now()-ts,m=Math.floor(d/60000),h=Math.floor(d/3600000);
+  if(d<60000)return '방금';if(m<60)return m+'분 전';if(h<24)return h+'시간 전';
+  return Math.floor(d/86400000)+'일 전';
+}
+function avColor(idx){return AV_COLORS[idx%AV_COLORS.length];}
+function renderCmList(){
+  const el=document.getElementById('cm-list');
+  document.getElementById('cm-count').textContent=cmComments.reduce((a,c)=>a+1+c.replies.length,0);
+  if(!cmComments.length){el.innerHTML='<div class="cm-empty">아직 의견이 없어요. 첫 번째 의견을 남겨보세요.</div>';return;}
+  el.innerHTML=cmComments.map(c=>{
+    const av=avColor(c.av);
+    const replies=c.replies.map(r=>{
+      const ra=avColor(r.av);
+      return `<div class="cr"><div class="cr-head"><div class="cr-av" style="background:${ra.bg};color:${ra.fg};">${r.author[0]}</div><span class="cr-author">${r.author}</span><span class="cr-time">${timeAgo(r.ts)}</span></div><div class="cr-body">${r.body}</div></div>`;
+    }).join('');
+    const replyForm=openReplyId===c.id?`<div class="cs-reply-form"><input class="cs-reply-input" id="rf-${c.id}" placeholder="답글 입력…"><button class="cs-reply-submit" onclick="submitReply(${c.id})">등록</button></div>`:'';
+    const replyCount=c.replies.length?` ${c.replies.length}`:'';
+    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.ts)}</span></div><div class="ci-body">${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
+  }).join('');
+}
+function toggleReply(id){openReplyId=openReplyId===id?null:id;renderCmList();if(openReplyId){setTimeout(()=>document.getElementById('rf-'+id)?.focus(),50);}}
+function submitReply(parentId){
+  const inp=document.getElementById('rf-'+parentId);
+  const body=inp?.value.trim();
+  if(!body||body.length<2)return;
+  const nick=document.getElementById('cm-nick').value.trim()||getNick();
+  const parent=cmComments.find(c=>c.id===parentId);
+  if(parent){parent.replies.push({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now()});}
+  openReplyId=null;renderCmList();
+}
+function submitComment(){
+  const nick=document.getElementById('cm-nick').value.trim()||getNick();
+  const body=document.getElementById('cm-textarea').value.trim();
+  if(!body||body.length<2)return;
+  cmComments.unshift({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now(),replies:[]});
+  document.getElementById('cm-textarea').value='';
+  renderCmList();
+}
+function openCommentModal(){
+  document.getElementById('cm-nick').value=getNick();
+  renderCmList();
+  const ov=document.getElementById('cm-overlay');
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
+}
+function closeCommentModal(){
+  const ov=document.getElementById('cm-overlay');
+  ov.classList.remove('open');
+  setTimeout(()=>{ov.style.display='none';},300);
+}
+function handleCmOverlayClick(e){if(e.target===document.getElementById('cm-overlay'))closeCommentModal();}
+
+
+</script>
+<!-- ===== ETF 추가 모달/바텀시트 ===== -->
+<!-- ===== 의견 모달 ===== -->
+<div id="cm-overlay" onclick="handleCmOverlayClick(event)">
+  <div id="cm-dialog">
+    <div class="cm-handle"></div>
+    <div class="cm-head">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="cm-title">의견</span>
+      <span class="cm-count" id="cm-count">0</span>
+      <button class="cm-close" onclick="closeCommentModal()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="cm-list" id="cm-list"></div>
+    <div class="cm-form">
+      <input class="cm-nick" id="cm-nick" placeholder="닉네임">
+      <textarea class="cm-textarea" id="cm-textarea" placeholder="의견을 남겨보세요. 투자 경험, 질문, ETF 추천 등 무엇이든 괜찮아요." rows="3"></textarea>
+      <div class="cm-foot-row">
+        <span class="cm-hint">익명으로 저장됩니다.</span>
+        <button class="cm-submit" onclick="submitComment()">등록</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="add-sheet-overlay" onclick="closeAddSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;"></div>
+<div id="add-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:300;transform:translateY(100%);transition:transform .25s ease-out;padding:0 0 env(safe-area-inset-bottom);">
+  <div id="add-sheet-handle" style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:10px auto 0;"></div>
+  <div id="add-sheet-body" style="padding:16px 20px 20px;"></div>
+</div>
+</body>
+</html>
