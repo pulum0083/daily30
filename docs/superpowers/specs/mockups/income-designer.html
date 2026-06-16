@@ -609,8 +609,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="ipanel-cap">
             <div class="ipanel-cap-row">
               <div style="flex:1;">
-                <span id="icap-y">연 분배율이 높은 순 <b>(국내·미국)</b></span>
-                <span id="icap-h" style="display:none">분배율 대비 1년 총수익이 높은 순 <b>(국내·미국)</b></span>
+                <span id="icap-y">연 분배율이 높은 순 (국내·미국)</span>
+                <span id="icap-h" style="display:none">분배율 대비 1년 총수익이 높은 순 (국내·미국)</span>
               </div>
               <button class="ipanel-qbtn" onclick="openIncomeModal()">?</button>
             </div>
@@ -813,6 +813,7 @@ function incomeAllRow(d,i){
       <div class="iall-nums"><span class="yv num">${d.y}%</span><span>분배</span><span style="color:var(--ink);font-weight:600;flex-shrink:0;">${rTxt}</span></div>
     </div>
     <div class="iall-rgt">
+      <div class="iall-ret">가격 변화 (1년)</div>
       <div class="iall-price ${priceCls}">${priceTxt}</div>
       <div class="iall-desc">${desc}</div>
     </div>
