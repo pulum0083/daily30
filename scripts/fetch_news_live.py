@@ -123,6 +123,35 @@ _DOWN_WORDS    = re.compile(r"하락|급락|폭락|무너|붕괴|추락|약세|�
 # 극단적 폭락/급등 표현 — 시장 방향과 조금만 반대여도 모순으로 처리
 _EXTREME_CRASH = re.compile(r"서킷브레이커|서킷 브레이커|붕괴")
 
+# 코스피 지수 레벨 언급 패턴: "2600선", "8,700선", "8700포인트" 등
+_KOSPI_LEVEL_PAT = re.compile(r"(?:\d{1,2},)?(\d{3,4})[선포]")
+
+
+def _get_kospi_reference_level() -> float | None:
+    """yfinance ^KS11으로 코스피 직전 종가를 반환한다. 실패 시 None."""
+    try:
+        import yfinance as yf
+        hist = yf.Ticker("^KS11").history(period="3d")
+        if hist.empty:
+            return None
+        return float(hist["Close"].iloc[-1])
+    except Exception as e:
+        print(f"[fetch_news_live] 코스피 기준 레벨 조회 실패 (무시): {e}")
+        return None
+
+
+def _is_wrong_index_level(result: dict, ref_level: float) -> list:
+    """기사 제목의 코스피 지수 레벨이 실제 수준과 ±30% 이상 차이나면 해당 항목 반환."""
+    bad = []
+    for key in ("market", "stock"):
+        title = (result.get(key) or {}).get("title", "")
+        for m in _KOSPI_LEVEL_PAT.finditer(title):
+            level = float(m.group(1).replace(",", ""))
+            if level < ref_level * 0.7 or level > ref_level * 1.3:
+                bad.append(f"{key}: {title} (언급={level:.0f}, 실제≈{ref_level:.0f})")
+                break
+    return bad
+
 
 def _get_market_reality():
     """삼성전자 현재가로 오늘 장중 방향을 추정한다. 실패 시 None 반환."""
@@ -393,10 +422,13 @@ def main() -> None:
     if all_today_titles:
         print(f"[fetch_news_live] 오늘 이슈 전체({len(all_today_titles)}개): {all_today_titles}")
 
-    # MARKET 슬롯: 실측 방향 조회 (검증용)
+    # MARKET 슬롯: 실측 방향 조회 + 코스피 기준 레벨 조회 (검증용)
     market_reality = _get_market_reality() if slot == "MARKET" else None
+    kospi_ref = _get_kospi_reference_level() if slot == "MARKET" else None
     if market_reality:
         print(f"[fetch_news_live] 실측 삼성전자 {market_reality['change_pct']:+.1f}%")
+    if kospi_ref:
+        print(f"[fetch_news_live] 코스피 기준 레벨 {kospi_ref:.0f}")
 
     latest = None
     blocked_keywords: list = []  # Python 사후 검증에서 발견한 중복 키워드
@@ -428,6 +460,13 @@ def main() -> None:
             titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
             print(f"[fetch_news_live] ⚠️ 방향 모순 감지 (시도 {attempt+1}): {titles} — 재시도")
             continue
+
+        # 코스피 지수 레벨 검증 (MARKET 슬롯): 실제 수준 ±30% 이탈 기사 차단
+        if kospi_ref:
+            wrong_level = _is_wrong_index_level(latest, kospi_ref)
+            if wrong_level:
+                print(f"[fetch_news_live] ⚠️ 코스피 지수 수준 불일치 (시도 {attempt+1}): {wrong_level} — 재시도")
+                continue
 
         # 큐레이션 기사 검증: "요일별 추천 주식" 류 제외
         stock_title = (latest.get("stock") or {}).get("title", "")
