@@ -600,7 +600,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div>
         <div class="panel">
           <div class="panel__h">월배당 ETF
-            <button class="iall-top-btn" onclick="openIncomeAllModal()">전체 보기</button>
+            <button class="iall-top-btn" onclick="openIncomeAllPage()">전체 보기</button>
             <div class="stabs" id="isort-tabs" style="margin-left:8px;margin-bottom:0;">
               <a class="on" onclick="incomeSort('y',this)">분배율순</a>
               <a onclick="incomeSort('health',this)">건전성순</a>
@@ -682,40 +682,50 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
               </div>
             </div>
           </div>
-          <!-- 전체 ETF 모달 -->
-          <div class="income-modal-bg" id="income-all-modal-bg" onclick="if(event.target===this)closeIncomeAllModal()">
-            <div class="income-modal wide">
-              <button class="close-btn" onclick="closeIncomeAllModal()">×</button>
-              <h3>월배당 ETF 전체 <span id="iall-h-count" class="iall-h-count"></span></h3>
-              <p style="font-size:12px;color:var(--muted);margin:4px 0 0;">순자산 <b style="color:var(--ink)">7천억 이상</b> 월배당 ETF예요 (국내·미국).</p>
-              <div class="iall-controls">
-                <div class="stabs" id="iall-sort-tabs">
-                  <a class="on" onclick="iallSort('y',this)">분배율순</a>
-                  <a onclick="iallSort('health',this)">건전성순</a>
-                </div>
-                <label class="iall-cc-label">
-                  <input type="checkbox" id="iall-cc-exclude" onchange="incomeAllRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
-                  커버드콜 제외
-                </label>
-              </div>
-              <div style="display:flex;align-items:center;margin:0 -28px;padding:7px 28px;border-top:1px solid var(--hair);background:var(--soft);">
-                <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
-                <div style="width:90px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">가격 변화 (1년)</div>
-              </div>
-              <div class="iall-list" id="income-all-rows"></div>
-            </div>
-          </div>
           <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
             <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
             커버드콜 제외
           </label>
           <div id="income-rows"></div>
-          <button class="iall-more" onclick="openIncomeAllModal()">전체 ETF 보기 <span id="iall-count"></span></button>
+          <button class="iall-more" onclick="openIncomeAllPage()">전체 ETF 보기 <span id="iall-count"></span></button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ===== 월배당 ETF 전체 랭킹 페이지 ===== -->
+  <div id="income-all-page" style="display:none;">
+    <div class="crumb">
+      <button class="back-btn" onclick="closeIncomeAllPage()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <a href="#" onclick="event.preventDefault();closeIncomeAllPage()">배당 인컴 설계기</a> › <span style="color:#4F46E5;">월배당 ETF 전체</span>
+    </div>
+    <div class="phead">
+      <div>
+        <h1 style="color:#312E81;"><span class="ic">📊</span> 월배당 ETF 랭킹 <span id="iallp-count" style="font-size:16px;font-weight:600;color:#4F46E5;margin-left:2px;"></span></h1>
+        <div class="psub">순자산 7천억 이상 월배당 ETF (국내·미국). 종목 클릭 시 시뮬레이터에 추가 후 이전 화면으로 돌아가요.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="rtabs" id="iallp-sort-tabs">
+          <a class="on" onclick="iallPageSort('y',this)">분배율순</a>
+          <a onclick="iallPageSort('health',this)">건전성순</a>
+        </div>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;">
+          <input type="checkbox" id="iallp-cc-exclude" onchange="incomeAllPageRender()" style="accent-color:#4F46E5;width:13px;height:13px;">
+          커버드콜 제외
+        </label>
+      </div>
+    </div>
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);">
+      <div style="display:flex;align-items:center;gap:12px;padding:7px 16px;background:var(--soft);border-bottom:1px solid var(--hair);">
+        <div style="width:26px;"></div>
+        <div style="flex:1;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;">종목</div>
+        <div style="width:68px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">분배율</div>
+        <div style="width:68px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;flex-shrink:0;">건전성</div>
+        <div style="width:200px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;padding-right:8px;flex-shrink:0;">가격 변화 (1년)</div>
+      </div>
+      <div id="income-all-page-rows"></div>
+    </div>
+  </div>
 
 </div>
 <script>
@@ -791,57 +801,69 @@ function incomeRender(){
   const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
 }
 
-/* 모달 전용: 독립 sort + cc 상태 */
-let iAllSortKey='y';
-const HEALTH_DESC={
-  ok:'분배하면서 가격도 올랐어요.',
-  warn:'분배금 일부에 원금이 섞여 있어요.',
-  bad:'분배금 상당 부분이 원금에서 나왔어요.',
-  na:'상장 1년 미만이라 총수익이 아직 없어요.',
-};
-function incomeAllRow(d,i){
+/* 전체 랭킹 페이지: 독립 sort + cc 상태 */
+let iAllPageSortKey='y';
+function incomeAllPageRow(d,i){
   const[hc,hl,e]=incomeHealth(d);
-  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
+  const rk=i+1;
   const ePct=e!=null?Math.round(e):null;
-  const priceCls=ePct==null?'neu':ePct>=0?'up':'dn';
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
-  const desc=HEALTH_DESC[hc]||'';
-  const rTxt=hc==='na'?'총수익 미집계':`총수익 ${d.r>=0?'+':''}${d.r}%`;
+  const barPct=ePct==null?0:Math.min(Math.abs(ePct)/180*100,100);
+  const barCls=ePct==null?'':ePct>=0?'up':'dn';
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
-  return `<a class="iall-row" onclick="addFromRanking('${d.code}')">
-    <div class="iall-lft">
-      <div class="it"><span class="${rkCls}">${rk}</span><b>${d.name}</b></div>
-      <div class="imeta num" style="display:flex;align-items:center;gap:6px;">${metaTxt}<span class="hbdg ${hc}" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;white-space:nowrap;">${hl}</span></div>
-      <div class="iall-nums"><span class="yv num">${d.y}%</span><span>분배</span><span style="color:var(--ink);font-weight:600;flex-shrink:0;">${rTxt}</span></div>
+  const rkEl=rk<=3
+    ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
+    :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
+  return `<a class="trow" onclick="addFromRankingPage('${d.code}')" style="gap:12px;padding:11px 16px;align-items:center;">
+    ${rkEl}
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}</div>
     </div>
-    <div class="iall-rgt">
-      <div class="iall-price ${priceCls}">${priceTxt}</div>
-      <div class="iall-desc">${desc}</div>
+    <div style="width:68px;text-align:right;font-size:15px;font-weight:700;color:#4F46E5;flex-shrink:0;" class="num">${d.y}%</div>
+    <div style="width:68px;text-align:center;flex-shrink:0;"><span class="hbdg ${hc}">${hl}</span></div>
+    <div style="width:200px;flex-shrink:0;">
+      <div class="barwrap" style="height:19px;">
+        ${ePct!=null?`<div class="bar ${barCls}" style="width:${barPct.toFixed(1)}%;"></div>`:''}
+        <span class="barval num ${barCls}">${priceTxt}</span>
+      </div>
     </div>
   </a>`;
 }
-function incomeAllFiltered(){
-  const excludeCC=document.getElementById('iall-cc-exclude')?.checked;
+function incomeAllPageFiltered(){
+  const excludeCC=document.getElementById('iallp-cc-exclude')?.checked;
   let arr=[...INCOME_UNIVERSE];
   if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
-  if(iAllSortKey==='y')arr.sort((a,b)=>b.y-a.y);
+  if(iAllPageSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>healthScore(b)-healthScore(a));
   return arr;
 }
-function incomeAllRender(){
-  const arr=incomeAllFiltered();
-  document.getElementById('income-all-rows').innerHTML=arr.map(incomeAllRow).join('');
-  document.getElementById('iall-h-count').textContent=`${arr.length}개`;
+function incomeAllPageRender(){
+  const arr=incomeAllPageFiltered();
+  document.getElementById('income-all-page-rows').innerHTML=arr.map(incomeAllPageRow).join('');
+  document.getElementById('iallp-count').textContent=`${arr.length}개`;
 }
-function iallSort(k,el){
-  iAllSortKey=k;
-  document.querySelectorAll('#iall-sort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
-  incomeAllRender();
+function iallPageSort(k,el){
+  iAllPageSortKey=k;
+  document.querySelectorAll('#iallp-sort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  incomeAllPageRender();
 }
-function openIncomeAllModal(){incomeAllRender();document.getElementById('income-all-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
-function closeIncomeAllModal(){document.getElementById('income-all-modal-bg').classList.remove('open');document.body.style.overflow='';}
+function openIncomeAllPage(){
+  incomeAllPageRender();
+  document.getElementById('income').style.display='none';
+  document.getElementById('income-all-page').style.display='block';
+  window.scrollTo(0,0);
+}
+function closeIncomeAllPage(){
+  document.getElementById('income-all-page').style.display='none';
+  document.getElementById('income').style.display='block';
+}
+function addFromRankingPage(code){
+  addFromRanking(code);
+  closeIncomeAllPage();
+}
 function incomeSort(k,el){
   iSortKey=k;
   document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
