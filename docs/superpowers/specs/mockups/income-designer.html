@@ -589,6 +589,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .phead{flex-direction:column;align-items:flex-start;gap:10px;}
   .rtabs{font-size:11px;}
 }
+/* ETF 추가 모달 — PC에서는 중앙 다이얼로그 */
+@media(min-width:600px){
+  #add-sheet{
+    bottom:auto;top:50%;left:50%;right:auto;
+    width:400px;
+    border-radius:16px;
+    transform:translate(-50%,-50%) scale(.96);
+    transition:transform .2s ease-out,opacity .2s ease-out;
+    opacity:0;
+    padding:0;
+  }
+  #add-sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;}
+  #add-sheet-handle{display:none;}
+}
 </style>
 </head>
 <body>
@@ -633,6 +647,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
           <div class="sim__out" id="sim-out"></div>
         </div>
+      </div>
 
       <!-- 사이드바: 인컴 ETF 전체 -->
       <div>
@@ -818,7 +833,7 @@ function incomeRow(d,i){
   const lastCol=hc==='na'
     ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (신생)</span>`
     :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`}`;
-  return `<a class="irow" onclick="addFromRanking('${d.code}')">
+  return `<a class="irow" onclick="openAddSheet('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
     <div class="imx">${lastCol}</div>
@@ -858,10 +873,10 @@ function incomeAllPageRow(d,i){
   const rkEl=rk<=3
     ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
     :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
-  return `<a class="trow" onclick="addFromRankingPage('${d.code}')" style="gap:12px;padding:11px 16px;align-items:center;">
+  return `<a class="trow" onclick="openAddSheet('${d.code}')" style="gap:12px;padding:11px 16px;align-items:flex-start;">
     ${rkEl}
     <div style="flex:1;min-width:0;">
-      <div style="font-size:13px;font-weight:600;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.name}</div>
+      <div style="font-size:13px;font-weight:600;line-height:1.35;word-break:keep-all;">${d.name}</div>
       <div style="font-size:11px;color:var(--muted);margin-top:2px;">${metaTxt}<span class="iall-mobile-price" style="display:none;">${mobilePriceTxt}</span></div>
     </div>
     <div style="width:68px;text-align:right;font-size:15px;font-weight:700;color:#4F46E5;flex-shrink:0;" class="num">${d.y}%</div>
@@ -941,9 +956,101 @@ function simSet(i,v){
 }
 function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
 /* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
-function addFromRanking(code){
+function openAddSheet(code){
+  const d=UNIV[code];
+  if(!d)return;
+  const[hc,hl]=incomeHealth(d);
   const ex=simHoldings.findIndex(h=>h.code===code);
-  if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
+  const alreadyQty=ex>=0?simHoldings[ex].qty:null;
+  const ePct=d.r!=null?Math.round(d.r-d.y):null;
+  const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
+  const priceColor=ePct==null?'var(--muted)':ePct>=0?'#00ae1a':'#f33942';
+  const metaTxt=d.mk==='US'
+    ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
+    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+  const hcBg={ok:'background:#DCFCE7;color:#15803D',warn:'background:#FEF3C7;color:#92400E',bad:'background:#FEE2E2;color:#B91C1C',na:'background:#F3F4F6;color:#6B7280'};
+  const alreadyNote=alreadyQty!=null
+    ?`<div style="font-size:11px;color:#4F46E5;background:#EEF2FF;border-radius:6px;padding:7px 10px;margin-bottom:10px;">이미 ${alreadyQty}주 담겨 있어요. 수량을 변경할까요?</div>`
+    :'';
+  document.getElementById('add-sheet-body').innerHTML=`
+    <div style="font-size:15px;font-weight:700;line-height:1.35;margin-bottom:4px;word-break:keep-all;">${d.name}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">${metaTxt}</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div style="flex:1;background:#EEF2FF;border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:#4F46E5;">${d.y}%</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">연 분배율</div>
+      </div>
+      <div style="flex:1;background:#F8F9FA;border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:15px;font-weight:700;color:${priceColor};">${priceTxt}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">1년 가격변화</div>
+      </div>
+      <div style="flex:1;border-radius:8px;padding:8px;text-align:center;${hcBg[hc]}">
+        <div style="font-size:15px;font-weight:700;">${hl}</div>
+        <div style="font-size:10px;margin-top:2px;opacity:.75;">건전성</div>
+      </div>
+    </div>
+    ${alreadyNote}
+    <div style="font-size:12px;font-weight:600;margin-bottom:6px;">몇 주 담을까요?</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <input id="add-sheet-qty" type="number" min="1" step="1" value="100"
+        style="flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:10px 12px;font-size:18px;font-weight:700;text-align:right;outline:none;font-family:inherit;"
+        oninput="document.getElementById('add-sheet-confirm').disabled=!(+this.value>=1)">
+      <span style="font-size:13px;color:var(--muted);">주</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeAddSheet()" style="flex:1;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">취소</button>
+      <button id="add-sheet-confirm" onclick="confirmAddSheet('${code}')"
+        style="flex:2;background:#4F46E5;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">시뮬레이터에 추가</button>
+    </div>
+  `;
+  const overlay=document.getElementById('add-sheet-overlay');
+  const sheet=document.getElementById('add-sheet');
+  overlay.style.display='block';
+  sheet.style.display='block';
+  const isPC=window.innerWidth>=600;
+  if(isPC){
+    Object.assign(sheet.style,{bottom:'auto',top:'50%',left:'50%',right:'auto',
+      width:'420px',borderRadius:'16px',padding:'0',
+      transform:'translate(-50%,-50%) scale(.96)',
+      transition:'transform .2s ease-out, opacity .2s ease-out',
+      opacity:'0'});
+    document.getElementById('add-sheet-handle').style.display='none';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      sheet.style.transform='translate(-50%,-50%) scale(1)';
+      sheet.style.opacity='1';
+    }));
+  } else {
+    Object.assign(sheet.style,{bottom:'0',top:'',left:'0',right:'0',
+      width:'',borderRadius:'16px 16px 0 0',padding:'0 0 env(safe-area-inset-bottom)',
+      transform:'translateY(100%)',transition:'transform .25s ease-out',opacity:'1'});
+    document.getElementById('add-sheet-handle').style.display='';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{sheet.style.transform='translateY(0)';}));
+  }
+  setTimeout(()=>document.getElementById('add-sheet-qty')?.select(),300);
+}
+function closeAddSheet(){
+  const sheet=document.getElementById('add-sheet');
+  const isPC=window.innerWidth>=600;
+  if(isPC){
+    sheet.style.transform='translate(-50%,-50%) scale(.96)';
+    sheet.style.opacity='0';
+  } else {
+    sheet.style.transform='translateY(100%)';
+  }
+  setTimeout(()=>{
+    sheet.style.display='none';
+    document.getElementById('add-sheet-overlay').style.display='none';
+  },260);
+}
+function confirmAddSheet(code){
+  const qty=+document.getElementById('add-sheet-qty').value;
+  if(qty<1)return;
+  addFromRanking(code,qty);
+  closeAddSheet();
+}
+function addFromRanking(code,qty=100){
+  const ex=simHoldings.findIndex(h=>h.code===code);
+  if(ex>=0)simHoldings[ex].qty=qty; else simHoldings.push({code,qty});
   saveHoldings();simRowsRender();simOut();
   const rows=document.querySelectorAll('#sim-rows .simrow');
   const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
@@ -1145,5 +1252,11 @@ simRowsRender();simOut();
 
 
 </script>
+<!-- ===== ETF 추가 모달/바텀시트 ===== -->
+<div id="add-sheet-overlay" onclick="closeAddSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;"></div>
+<div id="add-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:300;transform:translateY(100%);transition:transform .25s ease-out;padding:0 0 env(safe-area-inset-bottom);">
+  <div id="add-sheet-handle" style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:10px auto 0;"></div>
+  <div id="add-sheet-body" style="padding:16px 20px 20px;"></div>
+</div>
 </body>
 </html>
