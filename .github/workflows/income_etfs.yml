@@ -1,0 +1,36 @@
+# 배당 인컴 ETF 유니버스를 주1회 갱신하는 워크플로우
+name: Income ETFs Update
+
+on:
+  schedule:
+    - cron: '0 21 * * 0'   # 일요일 21:00 UTC = 월요일 06:00 KST
+  workflow_dispatch:         # 수동 실행 허용
+
+permissions:
+  contents: write
+
+jobs:
+  update-income-etfs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Build income_etfs.json
+        run: python3 scripts/build_income_etfs.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "DailyB Bot"
+          git config user.email "bot@doubleshot.space"
+          git add data/income_etfs.json
+          git diff --staged --quiet || git commit -m "data: income_etfs.json 주간 갱신 $(date +'%Y-%m-%d')"
+          git push
