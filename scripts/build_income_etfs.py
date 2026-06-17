@@ -162,7 +162,7 @@ def fetch_analysis(code):
 # ---------- 네트워크 (미국 — yfinance) ----------
 
 def fetch_usd_krw():
-    """현재 USD/KRW 환율. 실패 시 None."""
+    """현재 USD/KRW 환율. yfinance 실패 시 open.er-api 폴백. 모두 실패 시 None."""
     try:
         import yfinance as yf
         t = yf.Ticker("USDKRW=X")
@@ -170,7 +170,16 @@ def fetch_usd_krw():
         if price and price > 1000:
             return round(float(price), 1)
     except Exception as e:
-        print(f"  환율 조회 실패: {e}")
+        print(f"  yfinance 환율 실패: {e}")
+    try:
+        import urllib.request as ur, json as _j
+        r = _j.loads(ur.urlopen("https://open.er-api.com/v6/latest/USD", timeout=8).read())
+        rate = r.get("rates", {}).get("KRW")
+        if rate and rate > 1000:
+            print(f"  open.er-api 폴백: {rate}")
+            return round(float(rate), 1)
+    except Exception as e:
+        print(f"  open.er-api 환율 실패: {e}")
     return None
 
 
@@ -239,6 +248,7 @@ def build_us(usd_krw, sleep=0.5):
                 "return_1y": return_1y,
                 "erosion": erosion,
                 "health": health,
+                "is_cc": "커버드콜" in name,
                 "low_confidence": False,
             })
             r_str = f"{return_1y}%" if return_1y is not None else "—"
@@ -280,6 +290,7 @@ def build(aum_floor_eok, include_us=True, sleep=0.25):
             "return_1y": r1y,
             "erosion": erosion,
             "health": health,
+            "is_cc": "커버드콜" in name,
             "dividend_months": months,
             "fee": a.get("totalFee"),
             "tax_type": a.get("taxationTypeCode"),

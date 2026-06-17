@@ -669,7 +669,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           의견 남기기
         </button>
-        <span style="font-size:11px;color:#9CA3AF;">데이터 매주 월요일 갱신</span>
+        <span id="data-updated-at" style="font-size:11px;color:#9CA3AF;">데이터 매주 월요일 갱신</span>
       </div>
     </div>
 
@@ -853,6 +853,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
 function goBack(){ if(history.length>1) history.back(); else location.href='/'; }
+function openSearch(){ const el=document.getElementById('sim-search'); if(el){el.focus();el.select();window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});} }
 
 /* ── 월배당 ETF 계산기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // income_etfs.json 필드 → INCOME_UNIVERSE 형식 변환
@@ -866,6 +867,7 @@ function normKrEtf(e) {
     r: e.return_1y,
     mk: 'KR',
     lc: e.low_confidence,
+    is_cc: e.is_cc || false,
   };
 }
 function normUsEtf(e, usdKrw) {
@@ -879,6 +881,7 @@ function normUsEtf(e, usdKrw) {
     r: e.return_1y,
     mk: 'US',
     lc: e.low_confidence || false,
+    is_cc: e.is_cc || false,
     aumLabel: '$' + e.aum_b + 'B',
   };
 }
@@ -905,7 +908,7 @@ let iSortKey='y';
 function incomeFiltered(){
   const excludeCC=document.getElementById('cc-exclude')?.checked;
   let arr=[...INCOME_UNIVERSE];
-  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(excludeCC)arr=arr.filter(d=>!d.is_cc);
   if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>healthScore(b)-healthScore(a));
   return arr;
@@ -954,7 +957,7 @@ function incomeAllPageRow(d,i){
 function incomeAllPageFiltered(){
   const excludeCC=document.getElementById('iallp-cc-exclude')?.checked;
   let arr=[...INCOME_UNIVERSE];
-  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(excludeCC)arr=arr.filter(d=>!d.is_cc);
   if(iAllPageSortKey==='y')arr.sort((a,b)=>b.y-a.y);
   else arr.sort((a,b)=>healthScore(b)-healthScore(a));
   return arr;
@@ -974,11 +977,18 @@ function openIncomeAllPage(){
   document.getElementById('income').style.display='none';
   document.getElementById('income-all-page').style.display='block';
   window.scrollTo(0,0);
+  history.pushState({p:'all'},'',location.pathname+'#all');
 }
 function closeIncomeAllPage(){
   document.getElementById('income-all-page').style.display='none';
   document.getElementById('income').style.display='block';
+  history.pushState({p:'main'},'',location.pathname);
 }
+window.addEventListener('popstate',()=>{
+  if(location.hash==='#all'){incomeAllPageRender();document.getElementById('income').style.display='none';document.getElementById('income-all-page').style.display='block';}
+  else{document.getElementById('income-all-page').style.display='none';document.getElementById('income').style.display='block';}
+});
+if(location.hash==='#all'){incomeAllPageRender();document.getElementById('income').style.display='none';document.getElementById('income-all-page').style.display='block';}
 function addFromRankingPage(code){
   addFromRanking(code);
   closeIncomeAllPage();
@@ -1004,7 +1014,7 @@ function simRowsRender(){
     return `<div class="simrow">
       <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
       <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
-      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
+      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
       <div class="sx" onclick="simDel(${i})">×</div>
     </div>`;
   }).join('');
@@ -1013,7 +1023,7 @@ function simSet(i,v){
   simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
   const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
   const el=document.getElementById('sinc-'+i);
-  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
   simOut();
 }
 function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
@@ -1159,11 +1169,12 @@ function simAdd(){
   if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
   const qty=parseInt(document.getElementById('sim-amt').value)||0;
   if(comboSel&&qty>0){
-    simHoldings.push({code:comboSel,qty});
+    const ex=simHoldings.findIndex(h=>h.code===comboSel);
+    if(ex>=0)simHoldings[ex].qty=qty; else simHoldings.push({code:comboSel,qty});
     comboSel=null;document.getElementById('sim-search').value='';
     saveHoldings();simRowsRender();simOut();
     const rows=document.querySelectorAll('#sim-rows .simrow');
-    const el=rows[simHoldings.length-1];
+    const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
     if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
   }
 }
@@ -1286,14 +1297,19 @@ function simOut(){
       <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">분배금 전액을 과세 대상으로 가정한 추정이에요. 국내주식형 ETF의 매매차익 비과세분은 실제 금융소득에 안 들어가, 실제 과세액은 더 낮을 수 있어요. 정확한 판정은 보유 전체·연소득 기준으로 확인하세요.</div>
     </div>
   </div>`);
-  if(gap>0 && UNIV['458760']){
-    const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
-    cards.push(`<div class="rc">
-      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
-        <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
-      </div>
-    </div>`);
+  if(gap>0){
+    const held=new Set(simHoldings.map(h=>h.code));
+    const f=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&!held.has(d.code)).sort((a,b)=>b.y-a.y)[0];
+    if(f){
+      const need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
+      const priceTxt=f.r!=null?` · 가격 +${(f.r-f.y).toFixed(0)}%`:'';
+      cards.push(`<div class="rc">
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
+        <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}%${priceTxt})</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
+          <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
+        </div>
+      </div>`);
+    }
   }
 
   html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
@@ -1319,6 +1335,11 @@ fetch('/data/income_etfs.json')
     const usEtfs = (data.us_etfs || []).map(e => normUsEtf(e, usdKrw));
     INCOME_UNIVERSE = [...krEtfs, ...usEtfs];
     INCOME_UNIVERSE.forEach(d => UNIV[d.code] = d);
+    if(data.generated_at){
+      const dt=new Date(data.generated_at);
+      const s=`${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')} 기준`;
+      const el=document.getElementById('data-updated-at');if(el)el.textContent='데이터 '+s;
+    }
     incomeRender();
     incomeAllPageRender();
     simRowsRender();simOut();
