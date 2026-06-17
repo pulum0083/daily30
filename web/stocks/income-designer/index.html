@@ -301,9 +301,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
 .sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
-.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);}
+.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
 .sim__h .q{font-size:15px;font-weight:600;color:var(--ink);}
 .sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
+.sim__h .save-note{font-size:11px;color:#9CA3AF;white-space:nowrap;margin-top:2px;flex-shrink:0;}
 .simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
 .simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
 .simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
@@ -676,7 +677,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <!-- 메인: 인컴 시뮬레이터 -->
       <div>
         <div class="sim">
-          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요<small style="display:block;margin-top:3px;">커버드콜·배당주·해외 직상장까지</small></div></div>
+          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요<small style="display:block;margin-top:3px;">커버드콜·배당주·해외 직상장까지</small></div><span class="save-note">브라우저에 자동 저장돼요</span></div>
           <div id="sim-rows"></div>
           <div class="sim__add">
             <div class="combo">
