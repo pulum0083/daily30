@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>배당 인컴 설계기 — 월배당 ETF 건전성·인컴 계산기 | Double-Shot</title>
+<title>월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 <style>
@@ -296,7 +296,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
 .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
 
-/* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
+/* ── 월배당 ETF 계산기 (ncai-design-system 토큰 정렬) ── */
 /* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
 .sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
@@ -548,7 +548,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .bs-arr{order:1;}
   .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
 
-  /* ── 배당 인컴 설계기 모바일 최적화 ── */
+  /* ── 월배당 ETF 계산기 모바일 최적화 ── */
 
   /* 보유 종목 행: 이름을 첫 줄 전체에, 수량·인컴을 두 번째 줄에 */
   .simrow{flex-wrap:wrap;padding:8px 14px;gap:4px 8px;}
@@ -657,11 +657,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/">Double<b>-Shot</b></a><a href="/briefings/">브리핑</a><a class="on" href="/stocks/income-designer/">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 <div class="wrap">
-  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
+  <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span>홈</span> › <span>종목</span> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span>홈</span> › <span>종목</span> › <span style="color:#4F46E5;">월배당 ETF 계산기</span></div>
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
+      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
       <button onclick="openCommentModal()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:2px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         의견 남기기
@@ -813,7 +813,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <div id="income-all-page" style="display:none;">
     <div class="crumb">
       <button class="back-btn" onclick="closeIncomeAllPage()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <a href="#" onclick="event.preventDefault();closeIncomeAllPage()">배당 인컴 설계기</a> › <span style="color:#4F46E5;">월배당 ETF 전체</span>
+      <a href="#" onclick="event.preventDefault();closeIncomeAllPage()">월배당 ETF 계산기</a> › <span style="color:#4F46E5;">월배당 ETF 전체</span>
     </div>
     <div class="phead">
       <div>
@@ -849,7 +849,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
 function goBack(){ if(history.length>1) history.back(); else location.href='/'; }
 
-/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+/* ── 월배당 ETF 계산기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 미국 5종 — yfinance 실측 하드코딩 (build_income_etfs.py 범위 밖)
 const US_UNIVERSE=[
   {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:44.6,price:85400,y:8.12,r:9.11,mk:'US',lc:false,aumLabel:'$44.6B'},

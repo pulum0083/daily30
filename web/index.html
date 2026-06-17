@@ -294,7 +294,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
 .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
 
-/* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
+/* ── 월배당 ETF 계산기 (ncai-design-system 토큰 정렬) ── */
 /* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
 /* 인컴 시뮬레이터 (보유 입력 → 계산) */
 .sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
@@ -503,7 +503,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="hotcards">
       <a class="hot hot--ai" onclick="go('chips')"><span class="hot__ic">🔬</span><span class="hot__tx"><b>AI 반도체 칩보드</b><small>밤사이 미국 → 오늘 한국 반도체</small></span><span class="hot__arr">→</span></a>
-      <a class="hot" onclick="go('income')" style="background:#FFFBEB;border-color:#FDE68A;"><span class="hot__ic" style="background:#FEF3C7;">🪙</span><span class="hot__tx"><b style="color:#B7791F;">배당 인컴 설계기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('income')" style="background:#FFFBEB;border-color:#FDE68A;"><span class="hot__ic" style="background:#FEF3C7;">🪙</span><span class="hot__tx"><b style="color:#B7791F;">월배당 ETF 계산기</b><small>월배당·커버드콜 1조+ ETF 조합</small></span><span class="hot__arr">→</span></a>
       <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
     <div class="block">
@@ -679,7 +679,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="tile"><div class="l">분배주기</div><div class="v">분기</div></div>
             <div class="tile"><div class="l">건전성</div><div class="v" style="color:#00ae1a;display:flex;align-items:center;justify-content:center;gap:5px;"><i style="width:8px;height:8px;border-radius:50%;background:#00ae1a;display:inline-block;"></i>건전</div></div>
           </div>
-          <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">배당 인컴 설계기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
+          <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">월배당 ETF 계산기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
         </div></div>
         <div class="sc"><div class="sc__h"><span class="sc__t">섹터 비중 <span class="phase">PHASE 2</span></span><span class="sc__s">구성종목 기준</span></div>
           <div class="note">⚠ TOP10 비중은 네이버 etfAnalysis로 실측 가능 · 전체 섹터 분포는 근사치 ("기타"가 미커버분)</div>
@@ -1004,11 +1004,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
   </div>
 
-  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
+  <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div class="screen" id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#B7791F;">배당 인컴 설계기</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#B7791F;">월배당 ETF 계산기</span></div>
     <div class="phead">
-      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
+      <div><h1 style="color:#92400E;"><span class="ic">🪙</span> 월배당 ETF 계산기</h1><div class="psub">순자산 7천억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · 2026-06-13</div></div>
     </div>
 
     <div class="grid">
@@ -1280,7 +1280,7 @@ const navHistory=[];
    /stocks/gainers/                상승 랭킹 전체
    /stocks/losers/                 하락 랭킹 전체
    /stocks/passive/                패시브 민감주 랭킹
-   /stocks/income/                 배당 인컴 설계기
+   /stocks/income/                 월배당 ETF 계산기
    /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
    /briefings/                     브리핑 허브 (기존 서비스)
 ─────────────────────────────────────────────────────────────── */
@@ -1522,7 +1522,7 @@ function passiveSort(key,el){
 }
 passiveRender();
 
-/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+/* ── 월배당 ETF 계산기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
 const INCOME_UNIVERSE=[
   {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
