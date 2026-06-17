@@ -798,7 +798,8 @@ html.dark .lsb-live-dot{background:#4ac26b;}
 .ib-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0;}
 .ib-badge.market{background:rgba(220,53,69,.1);color:#c0392b;}
 .ib-badge.stock{background:rgba(39,117,237,.1);color:#1a5fb4;}
-.ib-hl{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.35;}
+.ib-hl{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.35;}
+.ib-badge.stock+.ib-hl{font-weight:400;color:var(--muted);}
 .ib-desc{font-size:11.5px;color:var(--muted);line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;padding-left:28px;}
 .ib-sep{height:1px;background:var(--hairline);margin:2px 0;opacity:.5;}
 html.dark .issue-briefing-card{border-color:rgba(253,126,20,.2);}
