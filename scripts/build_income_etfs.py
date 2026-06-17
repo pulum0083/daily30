@@ -187,7 +187,7 @@ def build(aum_floor_eok, sleep=0.25):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--aum-floor", type=int, default=7000, help="순자산 하한 (억원)")
-    ap.add_argument("--out", default="data/income_etfs.json")
+    ap.add_argument("--out", default="web/data/income_etfs.json")
     args = ap.parse_args()
     result = build(args.aum_floor)
     with open(args.out, "w", encoding="utf-8") as f:
