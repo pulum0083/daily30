@@ -1346,11 +1346,8 @@ const AV_COLORS=[
   {bg:'#F3E8FF',fg:'#7E22CE'},{bg:'#E0F2FE',fg:'#0369A1'}
 ];
 let openReplyId=null;
-function getNick(){
-  let n=localStorage.getItem('ds-comment-nick-v1');
-  if(!n){n=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];localStorage.setItem('ds-comment-nick-v1',n);}
-  return n;
-}
+const _sessionNick=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];
+function getNick(){return _sessionNick;}
 function timeAgo(iso){
   const d=Date.now()-new Date(iso).getTime(),m=Math.floor(d/60000),h=Math.floor(d/3600000);
   if(d<60000)return '방금';if(m<60)return m+'분 전';if(h<24)return h+'시간 전';
