@@ -360,11 +360,17 @@ def main() -> None:
         sys.exit(0)
 
     # 오늘 이미 발행된 타이틀 목록 (중복 방지용)
+    # seen_titles: history 수동 정리와 무관하게 오늘 발행된 모든 타이틀을 누적
     all_today_titles: list = []
+    prev_seen_titles: list = []
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             if existing.get("date") == today:
+                # 1순위: seen_titles 필드 (수동 정리에도 유지됨)
+                prev_seen_titles = existing.get("seen_titles", [])
+                all_today_titles = list(prev_seen_titles)
+                # 2순위: history 기반 보완 (seen_titles 미도입 구버전 대응)
                 for h in [existing.get("latest", {})] + existing.get("history", []):
                     for key in ("market", "stock"):
                         t = (h.get(key) or {}).get("title", "")
@@ -438,10 +444,18 @@ def main() -> None:
     history = [new_entry] + history
     history = history[:MAX_HISTORY]
 
+    # seen_titles 갱신: 오늘 발행된 타이틀 누적 (history 정리에도 유지)
+    seen_titles = list(prev_seen_titles)
+    for key in ("market", "stock"):
+        t = (result.get(key) or {}).get("title", "")
+        if t and t not in seen_titles:
+            seen_titles.append(t)
+
     data = {
         "date": today,
         "updated_at": time_str,
         "slot": slot,
+        "seen_titles": seen_titles,
         "latest": result,
         "history": history,
     }
