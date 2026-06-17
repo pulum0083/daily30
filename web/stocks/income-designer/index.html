@@ -6,6 +6,7 @@
 <title>월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
   --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
@@ -1328,7 +1329,14 @@ fetch('/data/income_etfs.json')
   });
 simRowsRender();simOut();
 
-/* ── 의견 모달 ── */
+/* ── 의견 모달 (Supabase) ── */
+const SB_URL='https://ofrxlvjsirkbuejijiaz.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mcnhsdmpzaXJrYnVlamlqaWF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE2ODUsImV4cCI6MjA5NzI3NzY4NX0.Ih5EeYydwSvQmIxPbu2wKNsJTfUfbfRsiZVSv2YOC1Y';
+let _sb=null;
+function getSb(){
+  if(!_sb&&window.supabase){_sb=window.supabase.createClient(SB_URL,SB_KEY);}
+  return _sb;
+}
 const NICK_ADJ=['배당하는','월배당','인컴','복리','장기','건전한','분배하는','커버드'];
 const NICK_ANIMAL=['판다','코알라','펭귄','고양이','토끼','다람쥐','수달','라마'];
 const AV_COLORS=[
@@ -1336,64 +1344,79 @@ const AV_COLORS=[
   {bg:'#DCFCE7',fg:'#15803D'},{bg:'#FEE2E2',fg:'#B91C1C'},
   {bg:'#F3E8FF',fg:'#7E22CE'},{bg:'#E0F2FE',fg:'#0369A1'}
 ];
-let cmComments=[
-  {id:1,author:'배당하는 판다',av:0,body:'JEPI 넣어봤는데 분배율이 생각보다 낮게 나오네요. 원래 이 정도인가요?',ts:Date.now()-7200000,replies:[
-    {id:11,author:'월배당 코알라',av:1,body:'환율 영향도 있고 최근 분배율이 조금 낮아졌어요. 연평균으로 보시면 비슷해요.',ts:Date.now()-3600000}
-  ]},
-  {id:2,author:'인컴 수달',av:4,body:'목표 달성 전략 기능이 좋아요. KODEX OTM 추천 나왔는데 실제로 담아볼까 고민 중이에요.',ts:Date.now()-18000000,replies:[]},
-  {id:3,author:'복리 펭귄',av:2,body:'건전성 필터가 생각보다 유용하네요. 분배율만 보다가 가격 침식 종목을 걸러줘서 좋아요.',ts:Date.now()-86400000,replies:[]}
-];
 let openReplyId=null;
 function getNick(){
   let n=localStorage.getItem('ds-comment-nick-v1');
   if(!n){n=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];localStorage.setItem('ds-comment-nick-v1',n);}
   return n;
 }
-function timeAgo(ts){
-  const d=Date.now()-ts,m=Math.floor(d/60000),h=Math.floor(d/3600000);
+function timeAgo(iso){
+  const d=Date.now()-new Date(iso).getTime(),m=Math.floor(d/60000),h=Math.floor(d/3600000);
   if(d<60000)return '방금';if(m<60)return m+'분 전';if(h<24)return h+'시간 전';
   return Math.floor(d/86400000)+'일 전';
 }
 function avColor(idx){return AV_COLORS[idx%AV_COLORS.length];}
-function renderCmList(){
+function renderCmList(tree){
   const el=document.getElementById('cm-list');
-  document.getElementById('cm-count').textContent=cmComments.reduce((a,c)=>a+1+c.replies.length,0);
-  if(!cmComments.length){el.innerHTML='<div class="cm-empty">아직 의견이 없어요. 첫 번째 의견을 남겨보세요.</div>';return;}
-  el.innerHTML=cmComments.map(c=>{
+  const total=tree.reduce((a,c)=>a+1+c.replies.length,0);
+  document.getElementById('cm-count').textContent=total;
+  if(!tree.length){el.innerHTML='<div class="cm-empty">아직 의견이 없어요. 첫 번째 의견을 남겨보세요.</div>';return;}
+  el.innerHTML=tree.map(c=>{
     const av=avColor(c.av);
-    const replies=c.replies.map(r=>{
+    const replies=(c.replies||[]).map(r=>{
       const ra=avColor(r.av);
-      return `<div class="cr"><div class="cr-head"><div class="cr-av" style="background:${ra.bg};color:${ra.fg};">${r.author[0]}</div><span class="cr-author">${r.author}</span><span class="cr-time">${timeAgo(r.ts)}</span></div><div class="cr-body">${r.body}</div></div>`;
+      return `<div class="cr"><div class="cr-head"><div class="cr-av" style="background:${ra.bg};color:${ra.fg};">${r.author[0]}</div><span class="cr-author">${r.author}</span><span class="cr-time">${timeAgo(r.created_at)}</span></div><div class="cr-body">${r.body}</div></div>`;
     }).join('');
     const replyForm=openReplyId===c.id?`<div class="cs-reply-form"><input class="cs-reply-input" id="rf-${c.id}" placeholder="답글 입력…"><button class="cs-reply-submit" onclick="submitReply(${c.id})">등록</button></div>`:'';
     const replyCount=c.replies.length?` ${c.replies.length}`:'';
-    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.ts)}</span></div><div class="ci-body">${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
+    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.created_at)}</span></div><div class="ci-body">${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
   }).join('');
 }
-function toggleReply(id){openReplyId=openReplyId===id?null:id;renderCmList();if(openReplyId){setTimeout(()=>document.getElementById('rf-'+id)?.focus(),50);}}
-function submitReply(parentId){
+async function loadAndRenderComments(){
+  const el=document.getElementById('cm-list');
+  el.innerHTML='<div class="cm-empty">불러오는 중…</div>';
+  const sb=getSb();
+  if(!sb){el.innerHTML='<div class="cm-empty">댓글을 불러올 수 없어요.</div>';return;}
+  const {data,error}=await sb.from('comments').select('*').order('created_at',{ascending:false});
+  if(error||!data){el.innerHTML='<div class="cm-empty">불러오기 실패. 잠시 후 다시 시도해주세요.</div>';return;}
+  const tops=data.filter(c=>!c.parent_id);
+  const reps=data.filter(c=>c.parent_id);
+  const tree=tops.map(c=>({...c,replies:reps.filter(r=>r.parent_id===c.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}));
+  renderCmList(tree);
+}
+function toggleReply(id){openReplyId=openReplyId===id?null:id;loadAndRenderComments();if(openReplyId){setTimeout(()=>document.getElementById('rf-'+id)?.focus(),50);}}
+async function submitReply(parentId){
   const inp=document.getElementById('rf-'+parentId);
   const body=inp?.value.trim();
   if(!body||body.length<2)return;
   const nick=document.getElementById('cm-nick').value.trim()||getNick();
-  const parent=cmComments.find(c=>c.id===parentId);
-  if(parent){parent.replies.push({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now()});}
-  openReplyId=null;renderCmList();
+  const btn=inp.nextElementSibling;
+  if(btn)btn.disabled=true;
+  const sb=getSb();
+  if(sb){await sb.from('comments').insert({author:nick,body,av:Math.floor(Math.random()*AV_COLORS.length),parent_id:parentId});}
+  openReplyId=null;
+  await loadAndRenderComments();
 }
-function submitComment(){
+async function submitComment(){
   const nick=document.getElementById('cm-nick').value.trim()||getNick();
   const body=document.getElementById('cm-textarea').value.trim();
   if(!body||body.length<2)return;
-  cmComments.unshift({id:Date.now(),author:nick,av:Math.floor(Math.random()*AV_COLORS.length),body,ts:Date.now(),replies:[]});
-  document.getElementById('cm-textarea').value='';
-  renderCmList();
+  const btn=document.querySelector('.cm-submit');
+  if(btn){btn.disabled=true;btn.textContent='등록 중…';}
+  const sb=getSb();
+  if(sb){
+    const {error}=await sb.from('comments').insert({author:nick,body,av:Math.floor(Math.random()*AV_COLORS.length)});
+    if(!error){document.getElementById('cm-textarea').value='';}
+  }
+  if(btn){btn.disabled=false;btn.textContent='등록';}
+  await loadAndRenderComments();
 }
-function openCommentModal(){
+async function openCommentModal(){
   document.getElementById('cm-nick').value=getNick();
-  renderCmList();
   const ov=document.getElementById('cm-overlay');
   ov.style.display='flex';
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
+  await loadAndRenderComments();
 }
 function closeCommentModal(){
   const ov=document.getElementById('cm-overlay');
