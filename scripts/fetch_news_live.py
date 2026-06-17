@@ -42,15 +42,15 @@ def get_slot(hour: int, minute: int) -> str:
 
 # ── RSS 수집 ─────────────────────────────────────────────────────────────────
 
-def _parse_rss_date(date_str: str) -> str | None:
-    """RSS pubDate → YYYY-MM-DD (KST). 실패 시 None."""
+def _parse_rss_datetime(date_str: str) -> tuple[str | None, str | None]:
+    """RSS pubDate → (YYYY-MM-DD, HH:MM) KST. 실패 시 (None, None)."""
     if not date_str:
-        return None
+        return None, None
     try:
-        dt = parsedate_to_datetime(date_str.strip())
-        return dt.astimezone(KST).strftime("%Y-%m-%d")
+        dt = parsedate_to_datetime(date_str.strip()).astimezone(KST)
+        return dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")
     except Exception:
-        return None
+        return None, None
 
 
 def _clean_title(title: str) -> str:
@@ -62,7 +62,7 @@ def _clean_title(title: str) -> str:
 
 
 def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
-    """RSS URL에서 오늘 날짜(KST) 기사만 수집한다."""
+    """RSS URL에서 오늘 날짜(KST) 기사만 수집한다. pub_time(HH:MM) 포함."""
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=12) as r:
@@ -72,7 +72,7 @@ def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
         for item in root.iter("item"):
             title = (item.findtext("title") or "").strip()
             desc = (item.findtext("description") or "").strip()
-            pub_date = _parse_rss_date(item.findtext("pubDate") or "")
+            pub_date, pub_time = _parse_rss_datetime(item.findtext("pubDate") or "")
             source_el = item.find("source")
             source = (source_el.text or "").strip() if source_el is not None else ""
 
@@ -83,6 +83,7 @@ def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
             items.append({
                 "title": _clean_title(title),
                 "date": pub_date,
+                "pub_time": pub_time or "00:00",
                 "source": source,
                 "desc": desc,
             })
@@ -367,11 +368,22 @@ def main() -> None:
 
     print(f"[fetch_news_live] {today} {time_str} KST — 슬롯={slot} — RSS 수집 시작")
 
-    # 1단계: RSS로 오늘 날짜 기사 수집
+    # 1단계: RSS로 오늘 날짜 기사 수집 (pub_time 포함, 최신순 정렬)
     articles = fetch_articles(slot, today)
+    articles.sort(key=lambda a: a.get("pub_time", "00:00"), reverse=True)
+
+    # 최근 3시간 내 기사 우선 — 장 초반 기사가 오후에 선택되는 것을 방지
+    cutoff = f"{(now.hour - 3):02d}:{now.minute:02d}" if now.hour >= 3 else "00:00"
+    recent = [a for a in articles if a.get("pub_time", "00:00") >= cutoff]
+    if len(recent) >= 2:
+        articles = recent
+        print(f"[fetch_news_live] 최근 3시간 기사 우선: {len(articles)}건 ({cutoff} 이후)")
+    else:
+        print(f"[fetch_news_live] 최근 3시간 기사 부족({len(recent)}건) — 전체 {len(articles)}건 사용")
+
     print(f"[fetch_news_live] 수집된 기사: {len(articles)}건")
     for a in articles:
-        print(f"  [{a['source']}] {a['title']}")
+        print(f"  {a.get('pub_time','??')} [{a['source']}] {a['title']}")
 
     if len(articles) < 2:
         print("[fetch_news_live] 오늘 날짜 기사 부족 (2건 미만) — 발행 생략.", file=sys.stderr)
