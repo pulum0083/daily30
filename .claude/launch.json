@@ -14,6 +14,12 @@
       "port": 8789
     },
     {
+      "name": "mockups",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "docs/superpowers/specs/mockups"],
+      "port": 8791
+    },
+    {
       "name": "context-preview",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8790", "--directory", ".context"],

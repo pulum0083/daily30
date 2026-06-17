@@ -20,7 +20,13 @@
             {% include "sections/_live_scoreboard.html" %}
             {% include "sections/_issue_briefing.html" %}
             {% include "sections/prediction.html" %}
-            {% include "sections/reasons.html" %}
+            {% if analysis_format == 'scenario' %}
+              {% include "sections/scenario_split.html" %}
+            {% elif analysis_format == 'why_what_so' %}
+              {% include "sections/why_what_so.html" %}
+            {% else %}
+              {% include "sections/reasons.html" %}
+            {% endif %}
             <div class="divider"></div>
             {% if sector_signal %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}

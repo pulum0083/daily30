@@ -138,16 +138,47 @@ def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time:
     }
 
 
+def build_scenario_context(analysis: dict) -> dict:
+    """시나리오 분기 형식용 컨텍스트. analysis_format == 'scenario' 일 때 사용."""
+    return {
+        "sc_summary": analysis.get("sc_summary", ""),
+        "sc_left_label": analysis.get("sc_left_label", "하락 근거"),
+        "sc_right_label": analysis.get("sc_right_label", "반등 가능성"),
+        "sc_left_items": analysis.get("sc_left_items", [])[:3],
+        "sc_right_items": analysis.get("sc_right_items", [])[:3],
+        "sc_footer": analysis.get("sc_footer", ""),
+    }
+
+
+def build_why_what_so_context(analysis: dict) -> dict:
+    """WHY/WHAT/SO WHAT 형식용 컨텍스트. analysis_format == 'why_what_so' 일 때 사용."""
+    b_rows = []
+    for label, key, sw in [("WHY", "why", False), ("WHAT", "what", False), ("SO?", "so_what", True)]:
+        if analysis.get(key):
+            b_rows.append({"label": label, "text": analysis[key], "so_what": sw})
+    return {
+        "reason_lead": analysis.get("reason_lead", ""),
+        "b_rows": b_rows,
+    }
+
+
 def build_reasons(analysis: dict) -> dict:
     direction = analysis.get("prediction", {}).get("direction", "")
     fallback = {
         "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
         "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
     }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
-    return {
+    fmt = analysis.get("analysis_format", "bullet")
+    ctx = {
+        "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
         "reasons": analysis.get("reasons", [])[:4],
     }
+    if fmt == "scenario":
+        ctx.update(build_scenario_context(analysis))
+    elif fmt == "why_what_so":
+        ctx.update(build_why_what_so_context(analysis))
+    return ctx
 
 
 def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> list:
@@ -220,6 +251,7 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
             "prices": cand.get("sparkline", []),
             "ma20": cand.get("ma20_sparkline", []),
             "ma200": cand.get("ma200_sparkline", []),
+            "vol_mult": p.get("vol_mult"),
         })
     return result
 
@@ -312,17 +344,22 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             "sub_indices": subs,
         })
 
-    # close_reason (항상 분석에 존재)
-    if analysis.get("market_title"):
-        b_rows = []
-        for label, key, sw in [("WHY", "why", False), ("WHAT", "what", False), ("SO?", "so_what", True)]:
-            if analysis.get(key):
-                b_rows.append({"label": label, "text": analysis[key], "so_what": sw})
-        ctx.update({
-            "reason_title": analysis["market_title"],
-            "reason_lead": analysis.get("market_summary", ""),
-            "b_rows": b_rows,
-        })
+    # close_reason 섹션
+    if analysis.get("market_title") or analysis.get("reason_title"):
+        fmt = analysis.get("analysis_format", "why_what_so")
+        ctx["analysis_format"] = fmt
+        ctx["reason_title"] = analysis.get("market_title") or analysis.get("reason_title", "")
+        if fmt == "scenario":
+            ctx.update(build_scenario_context(analysis))
+        elif fmt == "bullet":
+            ctx["reasons"] = analysis.get("reasons", [])[:4]
+        else:  # why_what_so (default for close)
+            ctx["reason_lead"] = analysis.get("market_summary", "")
+            b_rows = []
+            for label, key, sw in [("WHY", "why", False), ("WHAT", "what", False), ("SO?", "so_what", True)]:
+                if analysis.get(key):
+                    b_rows.append({"label": label, "text": analysis[key], "so_what": sw})
+            ctx["b_rows"] = b_rows
 
     # close_breadth (market_breadth 있을 때만)
     mb = market.get("market_breadth", {})

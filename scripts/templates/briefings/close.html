@@ -20,7 +20,15 @@
         <div class="accordion-body">
           <div class="accordion-body__inner">
             {% if intraday_prices %}{% include "sections/close_hero.html" %}{% endif %}
-            {% if reason_title %}{% include "sections/close_reason.html" %}{% endif %}
+            {% if reason_title %}
+              {% if analysis_format == 'scenario' %}
+                {% include "sections/scenario_split.html" %}
+              {% elif analysis_format == 'bullet' %}
+                {% include "sections/reasons.html" %}
+              {% else %}
+                {% include "sections/close_reason.html" %}
+              {% endif %}
+            {% endif %}
             {% include "sections/_issue_briefing.html" %}
             {% if supply_cells %}{% include "sections/close_supply.html" %}{% endif %}
             {% if supply_flow_rows %}{% include "sections/close_supply_flow.html" %}{% endif %}

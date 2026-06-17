@@ -1,0 +1,2633 @@
+{
+  "generated_at": "2026-06-13T14:03:30+09:00",
+  "coverage": {
+    "etf_count": 100,
+    "stock_count": 80,
+    "note": "주요 ETF TOP10 구성 기준 추정, 소수 비중 누락 가능"
+  },
+  "thresholds": {
+    "high": {
+      "dov": 8.0,
+      "conc": 10.0
+    },
+    "mid": {
+      "dov": 4.0,
+      "conc": 5.0
+    }
+  },
+  "ranking": [
+    {
+      "code": "039030",
+      "name": "이오테크닉스",
+      "concentration_pct": 20.2,
+      "days_of_volume": 15.0,
+      "score": 98,
+      "badge": "high",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "058470",
+      "name": "리노공업",
+      "concentration_pct": 21.0,
+      "days_of_volume": 13.9,
+      "score": 96,
+      "badge": "high",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "240810",
+      "name": "원익IPS",
+      "concentration_pct": 18.9,
+      "days_of_volume": 10.5,
+      "score": 80,
+      "badge": "high",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "000990",
+      "name": "DB하이텍",
+      "concentration_pct": 18.0,
+      "days_of_volume": 9.2,
+      "score": 74,
+      "badge": "high",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "042700",
+      "name": "한미반도체",
+      "concentration_pct": 12.3,
+      "days_of_volume": 8.7,
+      "score": 58,
+      "badge": "high",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "095340",
+      "name": "ISC",
+      "concentration_pct": 10.4,
+      "days_of_volume": 7.6,
+      "score": 50,
+      "badge": "mid",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "247540",
+      "name": "에코프로비엠",
+      "concentration_pct": 6.0,
+      "days_of_volume": 6.8,
+      "score": 37,
+      "badge": "mid",
+      "top_etf": "KODEX 코스닥150"
+    },
+    {
+      "code": "357780",
+      "name": "솔브레인",
+      "concentration_pct": 6.8,
+      "days_of_volume": 6.3,
+      "score": 37,
+      "badge": "mid",
+      "top_etf": "TIGER 반도체TOP10"
+    },
+    {
+      "code": "086520",
+      "name": "에코프로",
+      "concentration_pct": 6.4,
+      "days_of_volume": 4.8,
+      "score": 31,
+      "badge": "mid",
+      "top_etf": "KODEX 코스닥150"
+    }
+  ],
+  "stocks": {
+    "005930": {
+      "name": "삼성전자",
+      "passive_value_krw": 40948694410000,
+      "mcap_krw": 1885424900000000,
+      "concentration_pct": 2.2,
+      "days_of_volume": 3.9,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 34.65,
+          "contrib_krw": 9775873800000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 34.66,
+          "contrib_krw": 3909474700000
+        },
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 25.56,
+          "contrib_krw": 3498473880000
+        },
+        {
+          "name": "KODEX 200TR",
+          "weight_pct": 34.65,
+          "contrib_krw": 3078721800000
+        },
+        {
+          "name": "KODEX 레버리지",
+          "weight_pct": 24.04,
+          "contrib_krw": 2286348240000
+        }
+      ],
+      "score": 18
+    },
+    "000660": {
+      "name": "SK하이닉스",
+      "passive_value_krw": 40202149470000,
+      "mcap_krw": 1532310100000000,
+      "concentration_pct": 2.6,
+      "days_of_volume": 3.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 27.44,
+          "contrib_krw": 7741702080000
+        },
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 34.85,
+          "contrib_krw": 4770024050000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 27.45,
+          "contrib_krw": 3096222750000
+        },
+        {
+          "name": "KODEX SK하이닉스단일종목레버리지",
+          "weight_pct": 96.35,
+          "contrib_krw": 2872193500000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 34.7,
+          "contrib_krw": 2456274200000
+        }
+      ],
+      "score": 17
+    },
+    "009150": {
+      "name": "삼성전기",
+      "passive_value_krw": 7629276120000,
+      "mcap_krw": 128025000000000,
+      "concentration_pct": 6.0,
+      "days_of_volume": 3.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체TOP2플러스",
+          "weight_pct": 24.1,
+          "contrib_krw": 1454169900000
+        },
+        {
+          "name": "HANARO Fn K-반도체",
+          "weight_pct": 31.79,
+          "contrib_krw": 1419709610000
+        },
+        {
+          "name": "KODEX AI반도체TOP2플러스",
+          "weight_pct": 35.1,
+          "contrib_krw": 1309651200000
+        },
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 21.65,
+          "contrib_krw": 878318850000
+        },
+        {
+          "name": "KODEX 200",
+          "weight_pct": 2.22,
+          "contrib_krw": 626333040000
+        }
+      ],
+      "score": 24
+    },
+    "042700": {
+      "name": "한미반도체",
+      "passive_value_krw": 4237850870000,
+      "mcap_krw": 34407700000000,
+      "concentration_pct": 12.3,
+      "days_of_volume": 8.7,
+      "badge": "high",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 13.54,
+          "contrib_krw": 1853260420000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 7.45,
+          "contrib_krw": 527355700000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 20.28,
+          "contrib_krw": 270494640000
+        },
+        {
+          "name": "TIGER 반도체TOP10레버리지",
+          "weight_pct": 15.35,
+          "contrib_krw": 254027150000
+        },
+        {
+          "name": "ACE AI반도체TOP3+",
+          "weight_pct": 17.4,
+          "contrib_krw": 242817000000
+        }
+      ],
+      "score": 58
+    },
+    "402340": {
+      "name": "SK스퀘어",
+      "passive_value_krw": 3861142040000,
+      "mcap_krw": 179199500000000,
+      "concentration_pct": 2.2,
+      "days_of_volume": 3.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체TOP2플러스",
+          "weight_pct": 16.96,
+          "contrib_krw": 1023349440000
+        },
+        {
+          "name": "KODEX 200",
+          "weight_pct": 2.89,
+          "contrib_krw": 815361480000
+        },
+        {
+          "name": "TIGER 200 IT",
+          "weight_pct": 21.56,
+          "contrib_krw": 639642080000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 2.88,
+          "contrib_krw": 324849600000
+        },
+        {
+          "name": "KODEX 200TR",
+          "weight_pct": 2.87,
+          "contrib_krw": 255005240000
+        }
+      ],
+      "score": 16
+    },
+    "005380": {
+      "name": "현대차",
+      "passive_value_krw": 2549941640000,
+      "mcap_krw": 124288000000000,
+      "concentration_pct": 2.1,
+      "days_of_volume": 1.9,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 1.91,
+          "contrib_krw": 538872120000
+        },
+        {
+          "name": "TIGER 현대차그룹플러스",
+          "weight_pct": 32.84,
+          "contrib_krw": 306035960000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 1.9,
+          "contrib_krw": 214310500000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 8.3,
+          "contrib_krw": 206454200000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 7.84,
+          "contrib_krw": 197983520000
+        }
+      ],
+      "score": 11
+    },
+    "240810": {
+      "name": "원익IPS",
+      "passive_value_krw": 1703695470000,
+      "mcap_krw": 8997100000000,
+      "concentration_pct": 18.9,
+      "days_of_volume": 10.5,
+      "badge": "high",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 5.23,
+          "contrib_krw": 715845790000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 2.96,
+          "contrib_krw": 209526560000
+        },
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.75,
+          "contrib_krw": 148104000000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 7.84,
+          "contrib_krw": 104569920000
+        },
+        {
+          "name": "HANARO Fn K-반도체",
+          "weight_pct": 1.99,
+          "contrib_krw": 88871410000
+        }
+      ],
+      "score": 80
+    },
+    "058470": {
+      "name": "리노공업",
+      "passive_value_krw": 1675287850000,
+      "mcap_krw": 7964100000000,
+      "concentration_pct": 21.0,
+      "days_of_volume": 13.9,
+      "badge": "high",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 4.63,
+          "contrib_krw": 633721990000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 2.54,
+          "contrib_krw": 179796440000
+        },
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.37,
+          "contrib_krw": 127638720000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 6.94,
+          "contrib_krw": 92565720000
+        },
+        {
+          "name": "KODEX 반도체레버리지",
+          "weight_pct": 3.91,
+          "contrib_krw": 85574260000
+        }
+      ],
+      "score": 96
+    },
+    "006400": {
+      "name": "삼성SDI",
+      "passive_value_krw": 1554712230000,
+      "mcap_krw": 43435600000000,
+      "concentration_pct": 3.6,
+      "days_of_volume": 3.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 18.13,
+          "contrib_krw": 352682890000
+        },
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 8.49,
+          "contrib_krw": 344430810000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 29.95,
+          "contrib_krw": 216149150000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 27.75,
+          "contrib_krw": 208208250000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 17.63,
+          "contrib_krw": 192537230000
+        }
+      ],
+      "score": 20
+    },
+    "039030": {
+      "name": "이오테크닉스",
+      "passive_value_krw": 1526578320000,
+      "mcap_krw": 7539600000000,
+      "concentration_pct": 20.2,
+      "days_of_volume": 15.0,
+      "badge": "high",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 4.58,
+          "contrib_krw": 626878340000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 2.52,
+          "contrib_krw": 178380720000
+        },
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.34,
+          "contrib_krw": 126023040000
+        },
+        {
+          "name": "KODEX 반도체레버리지",
+          "weight_pct": 4.49,
+          "contrib_krw": 98268140000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 6.88,
+          "contrib_krw": 91765440000
+        }
+      ],
+      "score": 98
+    },
+    "000990": {
+      "name": "DB하이텍",
+      "passive_value_krw": 1363768060000,
+      "mcap_krw": 7582800000000,
+      "concentration_pct": 18.0,
+      "days_of_volume": 9.2,
+      "badge": "high",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 4.75,
+          "contrib_krw": 650146750000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 2.61,
+          "contrib_krw": 184751460000
+        },
+        {
+          "name": "TIGER 반도체TOP10레버리지",
+          "weight_pct": 9.89,
+          "contrib_krw": 163669610000
+        },
+        {
+          "name": "KODEX 반도체레버리지",
+          "weight_pct": 4.65,
+          "contrib_krw": 101769900000
+        },
+        {
+          "name": "HANARO Fn K-반도체",
+          "weight_pct": 1.81,
+          "contrib_krw": 80832790000
+        }
+      ],
+      "score": 74
+    },
+    "105560": {
+      "name": "KB금융",
+      "passive_value_krw": 1323611500000,
+      "mcap_krw": 57175700000000,
+      "concentration_pct": 2.3,
+      "days_of_volume": 5.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 1.13,
+          "contrib_krw": 318809160000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 18.57,
+          "contrib_krw": 143490390000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 1.13,
+          "contrib_krw": 127458350000
+        },
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 15.7,
+          "contrib_krw": 125678500000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 4.55,
+          "contrib_krw": 114901150000
+        }
+      ],
+      "score": 24
+    },
+    "000270": {
+      "name": "기아",
+      "passive_value_krw": 1264701640000,
+      "mcap_krw": 65120900000000,
+      "concentration_pct": 1.9,
+      "days_of_volume": 4.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 0.94,
+          "contrib_krw": 265204080000
+        },
+        {
+          "name": "TIGER 현대차그룹플러스",
+          "weight_pct": 21.71,
+          "contrib_krw": 202315490000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 5.84,
+          "contrib_krw": 145264160000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 0.94,
+          "contrib_krw": 106027300000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 3.92,
+          "contrib_krw": 98991760000
+        }
+      ],
+      "score": 20
+    },
+    "010120": {
+      "name": "LS ELECTRIC",
+      "passive_value_krw": 1199231980000,
+      "mcap_krw": 33375000000000,
+      "concentration_pct": 3.6,
+      "days_of_volume": 3.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 24.83,
+          "contrib_krw": 887970460000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 25.09,
+          "contrib_krw": 278273190000
+        },
+        {
+          "name": "TIGER 배당커버드콜액티브",
+          "weight_pct": 1.49,
+          "contrib_krw": 28818090000
+        },
+        {
+          "name": "TIGER LG그룹플러스",
+          "weight_pct": 2.88,
+          "contrib_krw": 4170240000
+        }
+      ],
+      "score": 21
+    },
+    "036930": {
+      "name": "주성엔지니어링",
+      "passive_value_krw": 1132363940000,
+      "mcap_krw": 10737100000000,
+      "concentration_pct": 10.5,
+      "days_of_volume": 1.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 3.54,
+          "contrib_krw": 250582440000
+        },
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 3.29,
+          "contrib_krw": 177186240000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 10.38,
+          "contrib_krw": 138448440000
+        },
+        {
+          "name": "KODEX 반도체레버리지",
+          "weight_pct": 6.12,
+          "contrib_krw": 133942320000
+        },
+        {
+          "name": "HANARO Fn K-반도체",
+          "weight_pct": 2.63,
+          "contrib_krw": 117453170000
+        }
+      ],
+      "score": 30
+    },
+    "028260": {
+      "name": "삼성물산",
+      "passive_value_krw": 1131372060000,
+      "mcap_krw": 70056400000000,
+      "concentration_pct": 1.6,
+      "days_of_volume": 3.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 11.07,
+          "contrib_krw": 449098830000
+        },
+        {
+          "name": "KODEX 200",
+          "weight_pct": 0.96,
+          "contrib_krw": 270846720000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 0.96,
+          "contrib_krw": 108283200000
+        },
+        {
+          "name": "KODEX 200TR",
+          "weight_pct": 0.96,
+          "contrib_krw": 85297920000
+        },
+        {
+          "name": "KODEX 레버리지",
+          "weight_pct": 0.67,
+          "contrib_krw": 63721020000
+        }
+      ],
+      "score": 16
+    },
+    "055550": {
+      "name": "신한지주",
+      "passive_value_krw": 1052133640000,
+      "mcap_krw": 47275600000000,
+      "concentration_pct": 2.2,
+      "days_of_volume": 6.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 0.95,
+          "contrib_krw": 268025400000
+        },
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 15.71,
+          "contrib_krw": 125758550000
+        },
+        {
+          "name": "KODEX 은행",
+          "weight_pct": 22.55,
+          "contrib_krw": 119515000000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 0.95,
+          "contrib_krw": 107155250000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 3.54,
+          "contrib_krw": 89395620000
+        }
+      ],
+      "score": 27
+    },
+    "403870": {
+      "name": "HPSP",
+      "passive_value_krw": 1007470460000,
+      "mcap_krw": 5884500000000,
+      "concentration_pct": 17.1,
+      "days_of_volume": 3.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 3.05,
+          "contrib_krw": 417462650000
+        },
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 2.29,
+          "contrib_krw": 162099940000
+        },
+        {
+          "name": "KODEX 반도체레버리지",
+          "weight_pct": 3.75,
+          "contrib_krw": 82072500000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 4.64,
+          "contrib_krw": 61888320000
+        },
+        {
+          "name": "HANARO Fn K-반도체",
+          "weight_pct": 1.18,
+          "contrib_krw": 52697620000
+        }
+      ],
+      "score": 53
+    },
+    "247540": {
+      "name": "에코프로비엠",
+      "passive_value_krw": 1002798900000,
+      "mcap_krw": 16631200000000,
+      "concentration_pct": 6.0,
+      "days_of_volume": 6.8,
+      "badge": "mid",
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 4.17,
+          "contrib_krw": 224579520000
+        },
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 9.86,
+          "contrib_krw": 191806580000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 18.42,
+          "contrib_krw": 121682520000
+        },
+        {
+          "name": "KODEX 코스닥150레버리지",
+          "weight_pct": 3.03,
+          "contrib_krw": 119903160000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 12.21,
+          "contrib_krw": 91611630000
+        }
+      ],
+      "score": 37
+    },
+    "086520": {
+      "name": "에코프로",
+      "passive_value_krw": 1002534900000,
+      "mcap_krw": 15709300000000,
+      "concentration_pct": 6.4,
+      "days_of_volume": 4.8,
+      "badge": "mid",
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 5.17,
+          "contrib_krw": 278435520000
+        },
+        {
+          "name": "KODEX 코스닥150레버리지",
+          "weight_pct": 3.76,
+          "contrib_krw": 148790720000
+        },
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 6.98,
+          "contrib_krw": 135781940000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 17.34,
+          "contrib_krw": 114548040000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 11.6,
+          "contrib_krw": 87034800000
+        }
+      ],
+      "score": 31
+    },
+    "373220": {
+      "name": "LG에너지솔루션",
+      "passive_value_krw": 996266400000,
+      "mcap_krw": 93600000000000,
+      "concentration_pct": 1.1,
+      "days_of_volume": 3.8,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 19.98,
+          "contrib_krw": 388670940000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 32.79,
+          "contrib_krw": 246023370000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 24.13,
+          "contrib_krw": 174146210000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 15.2,
+          "contrib_krw": 165999200000
+        },
+        {
+          "name": "TIGER 2차전지TOP10레버리지",
+          "weight_pct": 10.3,
+          "contrib_krw": 19796600000
+        }
+      ],
+      "score": 15
+    },
+    "005490": {
+      "name": "POSCO홀딩스",
+      "passive_value_krw": 954420440000,
+      "mcap_krw": 29874100000000,
+      "concentration_pct": 3.2,
+      "days_of_volume": 4.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 12.75,
+          "contrib_krw": 248025750000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 23.8,
+          "contrib_krw": 171764600000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 15.24,
+          "contrib_krw": 166436040000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 19.15,
+          "contrib_krw": 126504900000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 15.07,
+          "contrib_krw": 113070210000
+        }
+      ],
+      "score": 22
+    },
+    "298040": {
+      "name": "효성중공업",
+      "passive_value_krw": 948987110000,
+      "mcap_krw": 31479700000000,
+      "concentration_pct": 3.0,
+      "days_of_volume": 4.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 18.91,
+          "contrib_krw": 676259420000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 24.59,
+          "contrib_krw": 272727690000
+        }
+      ],
+      "score": 22
+    },
+    "011070": {
+      "name": "LG이노텍",
+      "passive_value_krw": 859934650000,
+      "mcap_krw": 24519100000000,
+      "concentration_pct": 3.5,
+      "days_of_volume": 1.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체TOP2플러스",
+          "weight_pct": 8.41,
+          "contrib_krw": 507450990000
+        },
+        {
+          "name": "RISE 네트워크인프라",
+          "weight_pct": 13.01,
+          "contrib_krw": 133833870000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 13.65,
+          "contrib_krw": 103398750000
+        },
+        {
+          "name": "TIGER 200 IT",
+          "weight_pct": 2.57,
+          "contrib_krw": 76246760000
+        },
+        {
+          "name": "TIGER LG그룹플러스",
+          "weight_pct": 14.95,
+          "contrib_krw": 21647600000
+        }
+      ],
+      "score": 12
+    },
+    "010140": {
+      "name": "삼성중공업",
+      "passive_value_krw": 833142730000,
+      "mcap_krw": 23672000000000,
+      "concentration_pct": 3.5,
+      "days_of_volume": 4.8,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL 조선TOP3플러스",
+          "weight_pct": 24.46,
+          "contrib_krw": 438885780000
+        },
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 4.69,
+          "contrib_krw": 190268610000
+        },
+        {
+          "name": "TIGER 조선TOP10",
+          "weight_pct": 16.24,
+          "contrib_krw": 113517600000
+        },
+        {
+          "name": "SOL 조선TOP3플러스레버리지",
+          "weight_pct": 27.29,
+          "contrib_krw": 46966090000
+        },
+        {
+          "name": "KODEX 조선TOP10",
+          "weight_pct": 19.73,
+          "contrib_krw": 43504650000
+        }
+      ],
+      "score": 24
+    },
+    "042660": {
+      "name": "한화오션",
+      "passive_value_krw": 795136630000,
+      "mcap_krw": 34532800000000,
+      "concentration_pct": 2.3,
+      "days_of_volume": 3.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL 조선TOP3플러스",
+          "weight_pct": 26.21,
+          "contrib_krw": 470286030000
+        },
+        {
+          "name": "TIGER 조선TOP10",
+          "weight_pct": 23.69,
+          "contrib_krw": 165593100000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 14.71,
+          "contrib_krw": 62811700000
+        },
+        {
+          "name": "SOL 조선TOP3플러스레버리지",
+          "weight_pct": 29.25,
+          "contrib_krw": 50339250000
+        },
+        {
+          "name": "KODEX 조선TOP10",
+          "weight_pct": 20.91,
+          "contrib_krw": 46106550000
+        }
+      ],
+      "score": 18
+    },
+    "034020": {
+      "name": "두산에너빌리티",
+      "passive_value_krw": 780868670000,
+      "mcap_krw": 59636200000000,
+      "concentration_pct": 1.3,
+      "days_of_volume": 2.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 200",
+          "weight_pct": 0.93,
+          "contrib_krw": 262382760000
+        },
+        {
+          "name": "TIGER 코리아원자력",
+          "weight_pct": 26.45,
+          "contrib_krw": 181076700000
+        },
+        {
+          "name": "TIGER 200",
+          "weight_pct": 0.93,
+          "contrib_krw": 104899350000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 3.88,
+          "contrib_krw": 97981640000
+        },
+        {
+          "name": "KODEX 200TR",
+          "weight_pct": 0.93,
+          "contrib_krw": 82632360000
+        }
+      ],
+      "score": 10
+    },
+    "267260": {
+      "name": "HD현대일렉트릭",
+      "passive_value_krw": 766452960000,
+      "mcap_krw": 40733300000000,
+      "concentration_pct": 1.9,
+      "days_of_volume": 3.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 14.82,
+          "contrib_krw": 529992840000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 21.32,
+          "contrib_krw": 236460120000
+        }
+      ],
+      "score": 16
+    },
+    "196170": {
+      "name": "알테오젠",
+      "passive_value_krw": 757490370000,
+      "mcap_krw": 18058600000000,
+      "concentration_pct": 4.2,
+      "days_of_volume": 3.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 6.27,
+          "contrib_krw": 337677120000
+        },
+        {
+          "name": "KODEX 코스닥150레버리지",
+          "weight_pct": 4.56,
+          "contrib_krw": 180448320000
+        },
+        {
+          "name": "TIGER 코스닥150",
+          "weight_pct": 6.25,
+          "contrib_krw": 101587500000
+        },
+        {
+          "name": "TIGER 바이오TOP10",
+          "weight_pct": 27.08,
+          "contrib_krw": 75878160000
+        },
+        {
+          "name": "KoAct 바이오헬스케어액티브",
+          "weight_pct": 9.65,
+          "contrib_krw": 42836350000
+        }
+      ],
+      "score": 22
+    },
+    "329180": {
+      "name": "HD현대중공업",
+      "passive_value_krw": 716483540000,
+      "mcap_krw": 68224800000000,
+      "concentration_pct": 1.1,
+      "days_of_volume": 2.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL 조선TOP3플러스",
+          "weight_pct": 25.05,
+          "contrib_krw": 449472150000
+        },
+        {
+          "name": "TIGER 조선TOP10",
+          "weight_pct": 24.44,
+          "contrib_krw": 170835600000
+        },
+        {
+          "name": "KODEX 조선TOP10",
+          "weight_pct": 21.81,
+          "contrib_krw": 48091050000
+        },
+        {
+          "name": "SOL 조선TOP3플러스레버리지",
+          "weight_pct": 27.94,
+          "contrib_krw": 48084740000
+        }
+      ],
+      "score": 10
+    },
+    "051910": {
+      "name": "LG화학",
+      "passive_value_krw": 644473510000,
+      "mcap_krw": 24354400000000,
+      "concentration_pct": 2.6,
+      "days_of_volume": 4.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 10.35,
+          "contrib_krw": 201338550000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 14.65,
+          "contrib_krw": 159992650000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 12.43,
+          "contrib_krw": 82112580000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 9.58,
+          "contrib_krw": 71878740000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 6.07,
+          "contrib_krw": 43807190000
+        }
+      ],
+      "score": 21
+    },
+    "007660": {
+      "name": "이수페타시스",
+      "passive_value_krw": 580425610000,
+      "mcap_krw": 8985300000000,
+      "concentration_pct": 6.5,
+      "days_of_volume": 3.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체TOP2플러스",
+          "weight_pct": 3.87,
+          "contrib_krw": 233511930000
+        },
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 8.17,
+          "contrib_krw": 108971460000
+        },
+        {
+          "name": "KODEX AI반도체TOP2플러스",
+          "weight_pct": 2.68,
+          "contrib_krw": 99996160000
+        },
+        {
+          "name": "KODEX AI반도체핵심장비",
+          "weight_pct": 7.85,
+          "contrib_krw": 42209450000
+        },
+        {
+          "name": "RISE 네트워크인프라",
+          "weight_pct": 4.09,
+          "contrib_krw": 42073830000
+        }
+      ],
+      "score": 26
+    },
+    "006260": {
+      "name": "LS",
+      "passive_value_krw": 553461560000,
+      "mcap_krw": 12058800000000,
+      "concentration_pct": 4.6,
+      "days_of_volume": 4.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 13.51,
+          "contrib_krw": 483144620000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 6.34,
+          "contrib_krw": 70316940000
+        }
+      ],
+      "score": 25
+    },
+    "086790": {
+      "name": "하나금융지주",
+      "passive_value_krw": 530729850000,
+      "mcap_krw": 33198500000000,
+      "concentration_pct": 1.6,
+      "days_of_volume": 4.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 16.06,
+          "contrib_krw": 128560300000
+        },
+        {
+          "name": "KODEX 은행",
+          "weight_pct": 21.02,
+          "contrib_krw": 111406000000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 13.19,
+          "contrib_krw": 101919130000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 3.93,
+          "contrib_krw": 97754820000
+        },
+        {
+          "name": "SOL 코리아고배당",
+          "weight_pct": 4.71,
+          "contrib_krw": 27996240000
+        }
+      ],
+      "score": 18
+    },
+    "012330": {
+      "name": "현대모비스",
+      "passive_value_krw": 519197960000,
+      "mcap_krw": 55074700000000,
+      "concentration_pct": 0.9,
+      "days_of_volume": 0.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 현대차그룹플러스",
+          "weight_pct": 16.42,
+          "contrib_krw": 153017980000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 16.3,
+          "contrib_krw": 123472500000
+        },
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 7.56,
+          "contrib_krw": 114813720000
+        },
+        {
+          "name": "SOL 자동차TOP3플러스",
+          "weight_pct": 19.49,
+          "contrib_krw": 85424670000
+        },
+        {
+          "name": "RISE 코리아밸류업",
+          "weight_pct": 2.69,
+          "contrib_krw": 32753440000
+        }
+      ],
+      "score": 4
+    },
+    "095340": {
+      "name": "ISC",
+      "passive_value_krw": 507349670000,
+      "mcap_krw": 4875300000000,
+      "concentration_pct": 10.4,
+      "days_of_volume": 7.6,
+      "badge": "mid",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 2.09,
+          "contrib_krw": 286064570000
+        },
+        {
+          "name": "SOL AI반도체TOP2플러스",
+          "weight_pct": 1.37,
+          "contrib_krw": 82664430000
+        },
+        {
+          "name": "KODEX AI반도체핵심장비",
+          "weight_pct": 7.89,
+          "contrib_krw": 42424530000
+        },
+        {
+          "name": "KODEX AI반도체TOP2플러스",
+          "weight_pct": 0.94,
+          "contrib_krw": 35073280000
+        },
+        {
+          "name": "TIGER 반도체TOP10레버리지",
+          "weight_pct": 1.23,
+          "contrib_krw": 20355270000
+        }
+      ],
+      "score": 50
+    },
+    "009540": {
+      "name": "HD한국조선해양",
+      "passive_value_krw": 487656090000,
+      "mcap_krw": 28167700000000,
+      "concentration_pct": 1.7,
+      "days_of_volume": 4.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL 조선TOP3플러스",
+          "weight_pct": 14.58,
+          "contrib_krw": 261608940000
+        },
+        {
+          "name": "TIGER 조선TOP10",
+          "weight_pct": 19.32,
+          "contrib_krw": 135046800000
+        },
+        {
+          "name": "KODEX 조선TOP10",
+          "weight_pct": 22.62,
+          "contrib_krw": 49877100000
+        },
+        {
+          "name": "SOL 조선TOP3플러스레버리지",
+          "weight_pct": 16.26,
+          "contrib_krw": 27983460000
+        },
+        {
+          "name": "TIGER 현대차그룹플러스",
+          "weight_pct": 1.41,
+          "contrib_krw": 13139790000
+        }
+      ],
+      "score": 18
+    },
+    "000810": {
+      "name": "삼성화재",
+      "passive_value_krw": 483721070000,
+      "mcap_krw": 29199400000000,
+      "concentration_pct": 1.7,
+      "days_of_volume": 3.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 5.15,
+          "contrib_krw": 208930350000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 4.59,
+          "contrib_krw": 114171660000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 9.09,
+          "contrib_krw": 70238430000
+        },
+        {
+          "name": "SOL 코리아고배당",
+          "weight_pct": 6.2,
+          "contrib_krw": 36852800000
+        },
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 4.19,
+          "contrib_krw": 33540950000
+        }
+      ],
+      "score": 16
+    },
+    "016360": {
+      "name": "삼성증권",
+      "passive_value_krw": 469742160000,
+      "mcap_krw": 10608800000000,
+      "concentration_pct": 4.4,
+      "days_of_volume": 6.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 증권",
+          "weight_pct": 17.71,
+          "contrib_krw": 159478550000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 4.86,
+          "contrib_krw": 120887640000
+        },
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 1.93,
+          "contrib_krw": 78298170000
+        },
+        {
+          "name": "TIGER 증권",
+          "weight_pct": 16.61,
+          "contrib_krw": 60742770000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 4.0,
+          "contrib_krw": 30908000000
+        }
+      ],
+      "score": 30
+    },
+    "316140": {
+      "name": "우리금융지주",
+      "passive_value_krw": 433282850000,
+      "mcap_krw": 22866500000000,
+      "concentration_pct": 1.9,
+      "days_of_volume": 5.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 13.77,
+          "contrib_krw": 110228850000
+        },
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 4.41,
+          "contrib_krw": 109694340000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 11.4,
+          "contrib_krw": 88087800000
+        },
+        {
+          "name": "KODEX 은행",
+          "weight_pct": 15.93,
+          "contrib_krw": 84429000000
+        },
+        {
+          "name": "SOL 코리아고배당",
+          "weight_pct": 4.76,
+          "contrib_krw": 28293440000
+        }
+      ],
+      "score": 23
+    },
+    "003670": {
+      "name": "포스코퓨처엠",
+      "passive_value_krw": 426549660000,
+      "mcap_krw": 17735900000000,
+      "concentration_pct": 2.4,
+      "days_of_volume": 5.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 20.39,
+          "contrib_krw": 134696340000
+        },
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 4.98,
+          "contrib_krw": 96875940000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 6.47,
+          "contrib_krw": 70658870000
+        },
+        {
+          "name": "KODEX 2차전지핵심소재10",
+          "weight_pct": 15.35,
+          "contrib_krw": 31743800000
+        },
+        {
+          "name": "ACE 포스코그룹포커스",
+          "weight_pct": 25.51,
+          "contrib_krw": 28877320000
+        }
+      ],
+      "score": 24
+    },
+    "277810": {
+      "name": "레인보우로보틱스",
+      "passive_value_krw": 420064740000,
+      "mcap_krw": 12105500000000,
+      "concentration_pct": 3.5,
+      "days_of_volume": 2.9,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.19,
+          "contrib_krw": 117944640000
+        },
+        {
+          "name": "TIGER 코리아휴머노이드로봇산업",
+          "weight_pct": 13.42,
+          "contrib_krw": 100220560000
+        },
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 5.05,
+          "contrib_krw": 76694350000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 6.76,
+          "contrib_krw": 51207000000
+        },
+        {
+          "name": "TIGER 코스닥150",
+          "weight_pct": 2.18,
+          "contrib_krw": 35433720000
+        }
+      ],
+      "score": 18
+    },
+    "006800": {
+      "name": "미래에셋증권",
+      "passive_value_krw": 363334800000,
+      "mcap_krw": 29265300000000,
+      "concentration_pct": 1.2,
+      "days_of_volume": 1.8,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 증권",
+          "weight_pct": 27.84,
+          "contrib_krw": 250699200000
+        },
+        {
+          "name": "TIGER 증권",
+          "weight_pct": 30.8,
+          "contrib_krw": 112635600000
+        }
+      ],
+      "score": 9
+    },
+    "032830": {
+      "name": "삼성생명",
+      "passive_value_krw": 351733230000,
+      "mcap_krw": 77100000000000,
+      "concentration_pct": 0.5,
+      "days_of_volume": 1.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 8.67,
+          "contrib_krw": 351733230000
+        }
+      ],
+      "score": 7
+    },
+    "001440": {
+      "name": "대한전선",
+      "passive_value_krw": 351249550000,
+      "mcap_krw": 7418300000000,
+      "concentration_pct": 4.7,
+      "days_of_volume": 1.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 8.51,
+          "contrib_krw": 304334620000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 4.23,
+          "contrib_krw": 46914930000
+        }
+      ],
+      "score": 16
+    },
+    "005940": {
+      "name": "NH투자증권",
+      "passive_value_krw": 342302370000,
+      "mcap_krw": 11313900000000,
+      "concentration_pct": 3.0,
+      "days_of_volume": 9.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 5.55,
+          "contrib_krw": 138050700000
+        },
+        {
+          "name": "KODEX 증권",
+          "weight_pct": 11.39,
+          "contrib_krw": 102566950000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 5.5,
+          "contrib_krw": 42498500000
+        },
+        {
+          "name": "TIGER 증권",
+          "weight_pct": 10.67,
+          "contrib_krw": 39020190000
+        },
+        {
+          "name": "PLUS 고배당주위클리커버드콜",
+          "weight_pct": 5.07,
+          "contrib_krw": 15787980000
+        }
+      ],
+      "score": 38
+    },
+    "012450": {
+      "name": "한화에어로스페이스",
+      "passive_value_krw": 333729810000,
+      "mcap_krw": 55585300000000,
+      "concentration_pct": 0.6,
+      "days_of_volume": 1.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER K방산&우주",
+          "weight_pct": 18.27,
+          "contrib_krw": 134704710000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 3.54,
+          "contrib_krw": 89395620000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 18.46,
+          "contrib_krw": 78824200000
+        },
+        {
+          "name": "RISE 코리아밸류업",
+          "weight_pct": 2.53,
+          "contrib_krw": 30805280000
+        }
+      ],
+      "score": 5
+    },
+    "108490": {
+      "name": "로보티즈",
+      "passive_value_krw": 324512890000,
+      "mcap_krw": 4836800000000,
+      "concentration_pct": 6.7,
+      "days_of_volume": 2.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 8.44,
+          "contrib_krw": 128178280000
+        },
+        {
+          "name": "TIGER 코리아휴머노이드로봇산업",
+          "weight_pct": 14.45,
+          "contrib_krw": 107912600000
+        },
+        {
+          "name": "RISE AI&로봇",
+          "weight_pct": 7.75,
+          "contrib_krw": 36324250000
+        },
+        {
+          "name": "ACE K휴머노이드로봇산업TOP2+",
+          "weight_pct": 21.66,
+          "contrib_krw": 31645260000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 2.7,
+          "contrib_krw": 20452500000
+        }
+      ],
+      "score": 24
+    },
+    "024110": {
+      "name": "기업은행",
+      "passive_value_krw": 318278340000,
+      "mcap_krw": 17383900000000,
+      "concentration_pct": 1.8,
+      "days_of_volume": 8.9,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 4.27,
+          "contrib_krw": 106211980000
+        },
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 12.84,
+          "contrib_krw": 102784200000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 9.46,
+          "contrib_krw": 73097420000
+        },
+        {
+          "name": "KODEX 은행",
+          "weight_pct": 4.53,
+          "contrib_krw": 24009000000
+        },
+        {
+          "name": "PLUS 고배당주위클리커버드콜",
+          "weight_pct": 3.91,
+          "contrib_krw": 12175740000
+        }
+      ],
+      "score": 34
+    },
+    "071050": {
+      "name": "한국금융지주",
+      "passive_value_krw": 301807780000,
+      "mcap_krw": 13402100000000,
+      "concentration_pct": 2.3,
+      "days_of_volume": 3.8,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 증권",
+          "weight_pct": 18.74,
+          "contrib_krw": 168753700000
+        },
+        {
+          "name": "TIGER 증권",
+          "weight_pct": 22.79,
+          "contrib_krw": 83343030000
+        },
+        {
+          "name": "TIGER 은행고배당플러스TOP10",
+          "weight_pct": 6.21,
+          "contrib_krw": 49711050000
+        }
+      ],
+      "score": 18
+    },
+    "000720": {
+      "name": "현대건설",
+      "passive_value_krw": 296845580000,
+      "mcap_krw": 17538500000000,
+      "concentration_pct": 1.7,
+      "days_of_volume": 2.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 코리아원자력",
+          "weight_pct": 24.39,
+          "contrib_krw": 166973940000
+        },
+        {
+          "name": "KODEX 건설",
+          "weight_pct": 23.54,
+          "contrib_krw": 51740920000
+        },
+        {
+          "name": "TIGER 현대차그룹플러스",
+          "weight_pct": 5.44,
+          "contrib_krw": 50695360000
+        },
+        {
+          "name": "TIGER 200 건설",
+          "weight_pct": 18.74,
+          "contrib_krw": 27435360000
+        }
+      ],
+      "score": 11
+    },
+    "307950": {
+      "name": "현대오토에버",
+      "passive_value_krw": 292916630000,
+      "mcap_krw": 18758000000000,
+      "concentration_pct": 1.6,
+      "days_of_volume": 1.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 7.22,
+          "contrib_krw": 109650140000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 8.44,
+          "contrib_krw": 63933000000
+        },
+        {
+          "name": "TIGER 코리아휴머노이드로봇산업",
+          "weight_pct": 8.53,
+          "contrib_krw": 63702040000
+        },
+        {
+          "name": "RISE AI&로봇",
+          "weight_pct": 7.14,
+          "contrib_krw": 33465180000
+        },
+        {
+          "name": "ACE K휴머노이드로봇산업TOP2+",
+          "weight_pct": 7.5,
+          "contrib_krw": 10957500000
+        }
+      ],
+      "score": 8
+    },
+    "066570": {
+      "name": "LG전자",
+      "passive_value_krw": 291228130000,
+      "mcap_krw": 36730500000000,
+      "concentration_pct": 0.8,
+      "days_of_volume": 0.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 200 IT",
+          "weight_pct": 4.23,
+          "contrib_krw": 125495640000
+        },
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 6.71,
+          "contrib_krw": 101904770000
+        },
+        {
+          "name": "TIGER LG그룹플러스",
+          "weight_pct": 23.86,
+          "contrib_krw": 34549280000
+        },
+        {
+          "name": "SOL 자동차TOP3플러스",
+          "weight_pct": 6.68,
+          "contrib_krw": 29278440000
+        }
+      ],
+      "score": 3
+    },
+    "028300": {
+      "name": "HLB",
+      "passive_value_krw": 265906320000,
+      "mcap_krw": 6140400000000,
+      "concentration_pct": 4.3,
+      "days_of_volume": 6.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.47,
+          "contrib_krw": 133024320000
+        },
+        {
+          "name": "KODEX 코스닥150레버리지",
+          "weight_pct": 1.79,
+          "contrib_krw": 70833880000
+        },
+        {
+          "name": "TIGER 코스닥150",
+          "weight_pct": 2.45,
+          "contrib_krw": 39822300000
+        },
+        {
+          "name": "TIGER 바이오TOP10",
+          "weight_pct": 4.51,
+          "contrib_krw": 12637020000
+        },
+        {
+          "name": "KODEX 바이오",
+          "weight_pct": 2.2,
+          "contrib_krw": 5156800000
+        }
+      ],
+      "score": 31
+    },
+    "064350": {
+      "name": "현대로템",
+      "passive_value_krw": 263237770000,
+      "mcap_krw": 22756200000000,
+      "concentration_pct": 1.2,
+      "days_of_volume": 2.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER K방산&우주",
+          "weight_pct": 25.29,
+          "contrib_krw": 186463170000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 17.98,
+          "contrib_krw": 76774600000
+        }
+      ],
+      "score": 10
+    },
+    "454910": {
+      "name": "두산로보틱스",
+      "passive_value_krw": 254217020000,
+      "mcap_krw": 7156100000000,
+      "concentration_pct": 3.6,
+      "days_of_volume": 0.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 코리아휴머노이드로봇산업",
+          "weight_pct": 14.6,
+          "contrib_krw": 109032800000
+        },
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 5.38,
+          "contrib_krw": 81706060000
+        },
+        {
+          "name": "RISE AI&로봇",
+          "weight_pct": 6.35,
+          "contrib_krw": 29762450000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 3.61,
+          "contrib_krw": 27345750000
+        },
+        {
+          "name": "ACE K휴머노이드로봇산업TOP2+",
+          "weight_pct": 4.36,
+          "contrib_krw": 6369960000
+        }
+      ],
+      "score": 11
+    },
+    "000500": {
+      "name": "가온전선",
+      "passive_value_krw": 254174240000,
+      "mcap_krw": 4168900000000,
+      "concentration_pct": 6.1,
+      "days_of_volume": 3.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 5.29,
+          "contrib_krw": 189180980000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 5.86,
+          "contrib_krw": 64993260000
+        }
+      ],
+      "score": 26
+    },
+    "062040": {
+      "name": "산일전기",
+      "passive_value_krw": 249809920000,
+      "mcap_krw": 7087600000000,
+      "concentration_pct": 3.5,
+      "days_of_volume": 2.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 5.72,
+          "contrib_krw": 204558640000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 4.08,
+          "contrib_krw": 45251280000
+        }
+      ],
+      "score": 17
+    },
+    "087010": {
+      "name": "펩트론",
+      "passive_value_krw": 236979880000,
+      "mcap_krw": 5363000000000,
+      "concentration_pct": 4.4,
+      "days_of_volume": 4.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 코스닥150",
+          "weight_pct": 2.24,
+          "contrib_krw": 120637440000
+        },
+        {
+          "name": "KODEX 코스닥150레버리지",
+          "weight_pct": 1.63,
+          "contrib_krw": 64502360000
+        },
+        {
+          "name": "TIGER 코스닥150",
+          "weight_pct": 2.23,
+          "contrib_krw": 36246420000
+        },
+        {
+          "name": "TIGER 바이오TOP10",
+          "weight_pct": 4.11,
+          "contrib_krw": 11516220000
+        },
+        {
+          "name": "TIGER 코스닥150 레버리지",
+          "weight_pct": 1.84,
+          "contrib_krw": 4077440000
+        }
+      ],
+      "score": 25
+    },
+    "357780": {
+      "name": "솔브레인",
+      "passive_value_krw": 233853810000,
+      "mcap_krw": 3434200000000,
+      "concentration_pct": 6.8,
+      "days_of_volume": 6.3,
+      "badge": "mid",
+      "top_etfs": [
+        {
+          "name": "TIGER 반도체TOP10",
+          "weight_pct": 1.65,
+          "contrib_krw": 225840450000
+        },
+        {
+          "name": "SOL 반도체전공정",
+          "weight_pct": 5.79,
+          "contrib_krw": 8013360000
+        }
+      ],
+      "score": 37
+    },
+    "207940": {
+      "name": "삼성바이오로직스",
+      "passive_value_krw": 228754050000,
+      "mcap_krw": 59946800000000,
+      "concentration_pct": 0.4,
+      "days_of_volume": 2.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 3.99,
+          "contrib_krw": 161870310000
+        },
+        {
+          "name": "TIGER 바이오TOP10",
+          "weight_pct": 23.87,
+          "contrib_krw": 66883740000
+        }
+      ],
+      "score": 10
+    },
+    "079550": {
+      "name": "LIG디펜스앤에어로스페이스",
+      "passive_value_krw": 211441870000,
+      "mcap_krw": 16984000000000,
+      "concentration_pct": 1.2,
+      "days_of_volume": 1.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER K방산&우주",
+          "weight_pct": 19.29,
+          "contrib_krw": 142225170000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 16.21,
+          "contrib_krw": 69216700000
+        }
+      ],
+      "score": 7
+    },
+    "047810": {
+      "name": "한국항공우주",
+      "passive_value_krw": 207032980000,
+      "mcap_krw": 13734200000000,
+      "concentration_pct": 1.5,
+      "days_of_volume": 2.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER K방산&우주",
+          "weight_pct": 17.36,
+          "contrib_krw": 127995280000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 18.51,
+          "contrib_krw": 79037700000
+        }
+      ],
+      "score": 10
+    },
+    "096770": {
+      "name": "SK이노베이션",
+      "passive_value_krw": 201954310000,
+      "mcap_krw": 17936500000000,
+      "concentration_pct": 1.1,
+      "days_of_volume": 2.9,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 4.13,
+          "contrib_krw": 80340890000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 6.55,
+          "contrib_krw": 71532550000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 3.38,
+          "contrib_krw": 25360140000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 2.93,
+          "contrib_krw": 21145810000
+        },
+        {
+          "name": "TIGER 2차전지TOP10레버리지",
+          "weight_pct": 1.86,
+          "contrib_krw": 3574920000
+        }
+      ],
+      "score": 12
+    },
+    "035420": {
+      "name": "NAVER",
+      "passive_value_krw": 186877140000,
+      "mcap_krw": 38747800000000,
+      "concentration_pct": 0.5,
+      "days_of_volume": 0.2,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 3.08,
+          "contrib_krw": 77779240000
+        },
+        {
+          "name": "KODEX 로봇액티브",
+          "weight_pct": 3.5,
+          "contrib_krw": 53154500000
+        },
+        {
+          "name": "RISE AI&로봇",
+          "weight_pct": 6.68,
+          "contrib_krw": 31309160000
+        },
+        {
+          "name": "TIGER 소프트웨어",
+          "weight_pct": 25.24,
+          "contrib_krw": 24634240000
+        }
+      ],
+      "score": 2
+    },
+    "068270": {
+      "name": "셀트리온",
+      "passive_value_krw": 184437830000,
+      "mcap_krw": 38342600000000,
+      "concentration_pct": 0.5,
+      "days_of_volume": 1.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 바이오TOP10",
+          "weight_pct": 26.35,
+          "contrib_krw": 73832700000
+        },
+        {
+          "name": "TIGER 코리아TOP10",
+          "weight_pct": 2.7,
+          "contrib_krw": 68183100000
+        },
+        {
+          "name": "KoAct 바이오헬스케어액티브",
+          "weight_pct": 7.99,
+          "contrib_krw": 35467610000
+        },
+        {
+          "name": "TIGER 기술이전바이오액티브",
+          "weight_pct": 5.14,
+          "contrib_krw": 6954420000
+        }
+      ],
+      "score": 6
+    },
+    "103590": {
+      "name": "일진전기",
+      "passive_value_krw": 175071720000,
+      "mcap_krw": 3900700000000,
+      "concentration_pct": 4.5,
+      "days_of_volume": 3.4,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI전력핵심설비",
+          "weight_pct": 3.81,
+          "contrib_krw": 136253220000
+        },
+        {
+          "name": "TIGER 코리아AI전력기기TOP3플러스",
+          "weight_pct": 3.5,
+          "contrib_krw": 38818500000
+        }
+      ],
+      "score": 22
+    },
+    "005830": {
+      "name": "DB손해보험",
+      "passive_value_krw": 166187940000,
+      "mcap_krw": 9707200000000,
+      "concentration_pct": 1.7,
+      "days_of_volume": 3.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "PLUS 고배당주",
+          "weight_pct": 4.55,
+          "contrib_krw": 113176700000
+        },
+        {
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "weight_pct": 5.18,
+          "contrib_krw": 40025860000
+        },
+        {
+          "name": "PLUS 고배당주위클리커버드콜",
+          "weight_pct": 4.17,
+          "contrib_krw": 12985380000
+        }
+      ],
+      "score": 16
+    },
+    "039490": {
+      "name": "키움증권",
+      "passive_value_krw": 165829430000,
+      "mcap_krw": 9534000000000,
+      "concentration_pct": 1.7,
+      "days_of_volume": 3.0,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 증권",
+          "weight_pct": 13.81,
+          "contrib_krw": 124359050000
+        },
+        {
+          "name": "TIGER 증권",
+          "weight_pct": 11.34,
+          "contrib_krw": 41470380000
+        }
+      ],
+      "score": 14
+    },
+    "440110": {
+      "name": "파두",
+      "passive_value_krw": 161928320000,
+      "mcap_krw": 5059800000000,
+      "concentration_pct": 3.2,
+      "days_of_volume": 0.8,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 반도체",
+          "weight_pct": 1.79,
+          "contrib_krw": 126706940000
+        },
+        {
+          "name": "TIGER 반도체",
+          "weight_pct": 1.8,
+          "contrib_krw": 30805200000
+        },
+        {
+          "name": "KODEX 반도체타겟위클리커버드콜",
+          "weight_pct": 1.78,
+          "contrib_krw": 4416180000
+        }
+      ],
+      "score": 10
+    },
+    "066970": {
+      "name": "엘앤에프",
+      "passive_value_krw": 160836870000,
+      "mcap_krw": 5436100000000,
+      "concentration_pct": 3.0,
+      "days_of_volume": 1.7,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 2.8,
+          "contrib_krw": 54468400000
+        },
+        {
+          "name": "KODEX 2차전지핵심소재10",
+          "weight_pct": 12.39,
+          "contrib_krw": 25622520000
+        },
+        {
+          "name": "KODEX 2차전지산업레버리지",
+          "weight_pct": 3.09,
+          "contrib_krw": 23184270000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 1.97,
+          "contrib_krw": 21514370000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 2.84,
+          "contrib_krw": 18761040000
+        }
+      ],
+      "score": 13
+    },
+    "018260": {
+      "name": "삼성에스디에스",
+      "passive_value_krw": 157130120000,
+      "mcap_krw": 18338500000000,
+      "concentration_pct": 0.9,
+      "days_of_volume": 0.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX 삼성그룹",
+          "weight_pct": 2.4,
+          "contrib_krw": 97365600000
+        },
+        {
+          "name": "TIGER 200 IT",
+          "weight_pct": 1.57,
+          "contrib_krw": 46578760000
+        },
+        {
+          "name": "TIGER 소프트웨어",
+          "weight_pct": 13.51,
+          "contrib_krw": 13185760000
+        }
+      ],
+      "score": 4
+    },
+    "011790": {
+      "name": "SKC",
+      "passive_value_krw": 149037250000,
+      "mcap_krw": 6958600000000,
+      "concentration_pct": 2.1,
+      "days_of_volume": 1.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 4.57,
+          "contrib_krw": 60954660000
+        },
+        {
+          "name": "KODEX 2차전지산업",
+          "weight_pct": 1.6,
+          "contrib_krw": 31124800000
+        },
+        {
+          "name": "TIGER 2차전지테마",
+          "weight_pct": 2.54,
+          "contrib_krw": 27739340000
+        },
+        {
+          "name": "TIGER 2차전지소재Fn",
+          "weight_pct": 2.66,
+          "contrib_krw": 17571960000
+        },
+        {
+          "name": "TIGER 2차전지TOP10",
+          "weight_pct": 1.43,
+          "contrib_krw": 10320310000
+        }
+      ],
+      "score": 9
+    },
+    "222800": {
+      "name": "심텍",
+      "passive_value_krw": 145004330000,
+      "mcap_krw": 4874100000000,
+      "concentration_pct": 3.0,
+      "days_of_volume": 1.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "SOL AI반도체소부장",
+          "weight_pct": 4.22,
+          "contrib_krw": 56286360000
+        },
+        {
+          "name": "ACE AI반도체TOP3+",
+          "weight_pct": 2.09,
+          "contrib_krw": 29165950000
+        },
+        {
+          "name": "KoAct 코스닥액티브",
+          "weight_pct": 3.37,
+          "contrib_krw": 22464420000
+        },
+        {
+          "name": "KODEX AI반도체핵심장비",
+          "weight_pct": 4.08,
+          "contrib_krw": 21938160000
+        },
+        {
+          "name": "TIME 코스닥액티브",
+          "weight_pct": 2.46,
+          "contrib_krw": 9840000000
+        }
+      ],
+      "score": 11
+    },
+    "064400": {
+      "name": "LG씨엔에스",
+      "passive_value_krw": 143661260000,
+      "mcap_krw": 8991000000000,
+      "concentration_pct": 1.6,
+      "days_of_volume": 0.3,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 코리아휴머노이드로봇산업",
+          "weight_pct": 7.56,
+          "contrib_krw": 56458080000
+        },
+        {
+          "name": "RISE AI&로봇",
+          "weight_pct": 8.18,
+          "contrib_krw": 38339660000
+        },
+        {
+          "name": "RISE 현대차고정피지컬AI",
+          "weight_pct": 5.04,
+          "contrib_krw": 38178000000
+        },
+        {
+          "name": "TIGER 소프트웨어",
+          "weight_pct": 6.72,
+          "contrib_krw": 6558720000
+        },
+        {
+          "name": "TIGER LG그룹플러스",
+          "weight_pct": 2.85,
+          "contrib_krw": 4126800000
+        }
+      ],
+      "score": 5
+    },
+    "272210": {
+      "name": "한화시스템",
+      "passive_value_krw": 141296910000,
+      "mcap_krw": 18136300000000,
+      "concentration_pct": 0.8,
+      "days_of_volume": 1.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER K방산&우주",
+          "weight_pct": 13.17,
+          "contrib_krw": 97102410000
+        },
+        {
+          "name": "KODEX 방산TOP10",
+          "weight_pct": 10.35,
+          "contrib_krw": 44194500000
+        }
+      ],
+      "score": 7
+    },
+    "047040": {
+      "name": "대우건설",
+      "passive_value_krw": 133856920000,
+      "mcap_krw": 8978300000000,
+      "concentration_pct": 1.5,
+      "days_of_volume": 0.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 코리아원자력",
+          "weight_pct": 12.79,
+          "contrib_krw": 87560340000
+        },
+        {
+          "name": "KODEX 건설",
+          "weight_pct": 13.43,
+          "contrib_krw": 29519140000
+        },
+        {
+          "name": "TIGER 200 건설",
+          "weight_pct": 11.46,
+          "contrib_krw": 16777440000
+        }
+      ],
+      "score": 5
+    },
+    "353200": {
+      "name": "대덕전자",
+      "passive_value_krw": 120183750000,
+      "mcap_krw": 8163700000000,
+      "concentration_pct": 1.5,
+      "days_of_volume": 0.6,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "KODEX AI반도체핵심장비",
+          "weight_pct": 6.31,
+          "contrib_krw": 33928870000
+        },
+        {
+          "name": "ACE AI반도체TOP3+",
+          "weight_pct": 2.17,
+          "contrib_krw": 30282350000
+        },
+        {
+          "name": "WON 반도체밸류체인액티브",
+          "weight_pct": 4.39,
+          "contrib_krw": 17617070000
+        },
+        {
+          "name": "1Q K반도체TOP2+",
+          "weight_pct": 5.76,
+          "contrib_krw": 16018560000
+        },
+        {
+          "name": "SOL 반도체후공정",
+          "weight_pct": 14.62,
+          "contrib_krw": 13435780000
+        }
+      ],
+      "score": 6
+    },
+    "443060": {
+      "name": "HD현대마린솔루션",
+      "passive_value_krw": 115750090000,
+      "mcap_krw": 11096300000000,
+      "concentration_pct": 1.0,
+      "days_of_volume": 1.5,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 조선TOP10",
+          "weight_pct": 7.67,
+          "contrib_krw": 53613300000
+        },
+        {
+          "name": "SOL 조선TOP3플러스",
+          "weight_pct": 2.96,
+          "contrib_krw": 53111280000
+        },
+        {
+          "name": "SOL 조선TOP3플러스레버리지",
+          "weight_pct": 3.31,
+          "contrib_krw": 5696510000
+        },
+        {
+          "name": "ACE 포스코그룹포커스",
+          "weight_pct": 1.85,
+          "contrib_krw": 2094200000
+        },
+        {
+          "name": "KODEX 조선TOP10",
+          "weight_pct": 0.56,
+          "contrib_krw": 1234800000
+        }
+      ],
+      "score": 7
+    },
+    "005935": {
+      "name": "삼성전자우",
+      "passive_value_krw": 115272360000,
+      "mcap_krw": 166090800000000,
+      "concentration_pct": 0.1,
+      "days_of_volume": 0.1,
+      "badge": null,
+      "top_etfs": [
+        {
+          "name": "TIGER 배당커버드콜액티브",
+          "weight_pct": 5.96,
+          "contrib_krw": 115272360000
+        }
+      ],
+      "score": 1
+    }
+  }
+}

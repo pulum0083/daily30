@@ -22,63 +22,152 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}.crumb a{color:var(--muted);text-decoration:none;}.crumb a:hover{color:var(--primary);}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 16px;}.crumb a{color:var(--muted);text-decoration:none;padding:0 2px;}.crumb a:hover{color:var(--primary);}
+.back-btn{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hair);color:var(--muted);font-size:14px;cursor:pointer;margin-right:10px;transition:background .12s,color .12s;padding:0;line-height:1;}
+.back-btn:hover{background:var(--inset);color:var(--ink);}
 
-.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:20px;flex-wrap:wrap;}
-.hero h1{font-size:28px;font-weight:800;letter-spacing:-.8px;margin:0;}.hero h1 .a{color:var(--primary);}
-.hero p{font-size:13px;color:var(--muted);margin:7px 0 0;}
-.search{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:13px;padding:13px 17px;box-shadow:var(--s1);min-width:360px;cursor:text;}
-.search svg{width:18px;height:18px;color:var(--muted);}.search span{color:var(--muted);font-size:14px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;}
+.hero h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;}.hero h1 .a{color:var(--primary);}
+.hero p{font-size:12px;color:var(--muted);margin:5px 0 0;}
+.search{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:9px 13px;box-shadow:var(--s1);min-width:320px;cursor:text;}
+.search svg{width:15px;height:15px;color:var(--muted);}.search span{color:var(--muted);font-size:13px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
 
-.strip{display:flex;background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:4px 0;margin-bottom:18px;}
-.strip .m{flex:1;text-align:center;padding:10px 8px;border-right:1px solid var(--hair);}.strip .m:last-child{border-right:none;}
-.strip .m .l{font-size:11px;color:var(--muted);}.strip .m .v{font-size:16px;font-weight:800;margin-top:3px;}
+.strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
+.strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
+/* ── AI 브리핑 스트립 ── */
+.brief-strip{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:10px 14px;margin:10px 0;cursor:pointer;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,padding .14s,border-color .14s;}
+.brief-strip.is-hidden{padding:0;border-color:transparent;box-shadow:none;background:transparent;pointer-events:none;overflow:hidden;height:0;margin:0;}
+.brief-strip:hover{border-color:var(--primary);background:#F8FAFF;}
+.brief-strip.bs-kospi{background:var(--primary-bg);border-color:#BFDBFE;}.brief-strip.bs-kospi:hover{background:#DCEFFE;}
+.brief-strip.bs-close{background:#F0FDF4;border-color:#BBF7D0;}.brief-strip.bs-close:hover{background:#DCFCE7;}
+.brief-strip.bs-us{background:#FEFCE8;border-color:#FDE68A;}.brief-strip.bs-us:hover{background:#FEF9C3;}
+.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:#FEE2E2;}
+.bs-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.bs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.bs-type{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
+.bs-kospi .bs-type{color:var(--primary);}.bs-close .bs-type{color:#16A34A;}.bs-us .bs-type{color:#CA8A04;}.bs-live .bs-type{color:#EF4444;}
+.bs-text{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;word-break:keep-all;}
+.bs-arr{font-size:16px;color:#C0C4CA;flex-shrink:0;transition:color .14s;}.brief-strip:hover .bs-arr{color:var(--primary);}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+/* 갱신 배지 */
+.upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
+.upd-badge .dot{width:4px;height:4px;border-radius:50%;background:#EF4444;animation:blink 1.2s ease-in-out infinite;}
+/* 실시간 포커스 카드 (칩보드 상단) */
+.focus-card{background:var(--canvas);border:1.5px solid #FECACA;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.focus-card__h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;font-weight:700;color:#991B1B;}
+.focus-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.focus-stock{padding:12px 14px;border-right:1px solid var(--hair);}
+.focus-stock:last-child{border-right:none;}
+.focus-stock .fn{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.focus-stock .fp{font-size:22px;font-weight:800;line-height:1.1;letter-spacing:-.5px;}
+.focus-stock .fc{font-size:13px;font-weight:700;margin-top:1px;}
+.focus-stock .fs{font-size:10px;color:var(--muted);margin-top:5px;}
+/* Hyperliquid 장후 카드 */
+.hl-card{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:14px;margin-bottom:14px;overflow:hidden;}
+.hl-card__h{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#EDE9FE;border-bottom:1px solid #DDD6FE;font-size:12px;font-weight:700;color:#5B21B6;}
+.hl-badge{background:#7C3AED;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:.02em;}
+.hl-note{font-size:10px;color:#7C3AED;font-weight:400;margin-left:auto;}
+.hl-stocks{display:grid;grid-template-columns:1fr 1fr;}
+.hl-stock{padding:12px 14px;border-right:1px solid #DDD6FE;}
+.hl-stock:last-child{border-right:none;}
+.hl-stock .hn{font-size:11px;color:#6D28D9;font-weight:600;margin-bottom:4px;}
+.hl-stock .hp{font-size:20px;font-weight:800;color:#1E1B4B;line-height:1.1;letter-spacing:-.5px;}
+.hl-stock .hc{font-size:13px;font-weight:700;}
+.hl-stock .hf{font-size:10px;color:#7C3AED;margin-top:5px;}
+/* 프로토타입 시간대 토글 */
+.proto-toggle{display:flex;gap:4px;flex-shrink:0;align-items:center;}
+.proto-toggle button{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;}
+.proto-toggle button.on{background:var(--primary);border-color:var(--primary);color:#fff;}
 
-.secwrap .t{font-size:13px;font-weight:800;color:var(--muted);margin:0 2px 11px;}
-.chips{display:flex;flex-wrap:wrap;gap:9px;}
-.chips a{font-size:13px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:8px 15px;text-decoration:none;box-shadow:var(--s1);}
+.secwrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.secwrap .t{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+.etf-divider{border:none;border-top:2px dashed var(--hair);margin:18px 0 18px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;box-shadow:var(--s1);}
 .chips a:hover{border-color:var(--primary);color:var(--primary);}
-.legend{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--muted);margin:16px 2px;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+.legend{display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted);margin:12px 2px;flex-wrap:wrap;}.legend .lg{display:inline-flex;align-items:center;gap:6px;}
+.badge-info-btn{font-size:11px;font-weight:600;color:var(--primary);background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+.vol-surge-badge{display:inline-flex;align-items:center;background:#E8590C;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
 
-.block{background:var(--soft);border:1px solid var(--hair);border-radius:16px;overflow:hidden;margin-bottom:18px;box-shadow:var(--s1);}
-.block__h{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--canvas);border-bottom:1px solid var(--hair);}
-.block__t{font-size:16px;font-weight:800;display:inline-flex;align-items:center;gap:9px;}.block__t .ic{font-size:17px;}.block__t::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px;}
-.block__s{font-size:12px;color:var(--muted);}
-.row{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+/* HOT 카드 줄 (랭킹 바로가기) */
+.hotcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.hot{display:flex;align-items:center;gap:13px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:13px 16px;text-decoration:none;color:var(--ink);transition:transform .12s,border-color .12s,box-shadow .12s;}
+.hot:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 5px 14px rgba(0,0,0,.08);}
+.hot__ic{width:42px;height:42px;border-radius:11px;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hot__tx{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.hot__tx b{font-size:14px;font-weight:800;letter-spacing:-.3px;line-height:1.2;}
+.hot__tx small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hot__arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex-shrink:0;}.hot:hover .hot__arr{color:var(--primary);}
+.hot--ai{background:var(--primary-bg);border-color:#BFDBFE;}.hot--ai .hot__ic{background:#fff;}.hot--ai .hot__tx b{color:var(--primary);}
+.hot--etf .hot__tx b{color:#374151;}
+@media(max-width:720px){.hotcards{grid-template-columns:1fr;}}
+
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;box-shadow:var(--s1);}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}.block__t::before{content:'';width:3px;height:12px;background:var(--primary);border-radius:2px;}
+.block__s{font-size:11px;color:var(--muted);}
+.row{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
 .row:last-of-type{border-bottom:none;}.row:hover{background:var(--primary-bg);}
-.rk{width:18px;text-align:center;font-size:14px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
-.nm{width:160px;flex-shrink:0;}.nm b{font-size:14px;font-weight:700;display:block;}.nm small{font-size:10px;color:var(--muted);}
-.barwrap{flex:1;height:26px;background:var(--inset);border-radius:7px;overflow:hidden;position:relative;}
-.bar{height:100%;border-radius:7px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
-.barval{position:absolute;right:11px;top:0;height:26px;display:flex;align-items:center;font-size:12px;font-weight:800;}
-.ai{width:78px;text-align:right;flex-shrink:0;}
-.aip{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--primary);color:#fff;}
-.ais{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
-.aid{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
+.rk{width:16px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}.rk.t{color:var(--primary);}
+.nm{width:148px;flex-shrink:0;}.nm b{font-size:13px;font-weight:700;display:block;line-height:1.3;}.nm small{font-size:10px;color:var(--muted);}
+.barwrap{flex:1;height:19px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.bar{height:100%;border-radius:5px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
+.barval{position:absolute;right:10px;top:0;height:19px;display:flex;align-items:center;font-size:11px;font-weight:800;}
+.ai{width:72px;text-align:right;flex-shrink:0;}
+.aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;}
+.ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
+.aid{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #FBD0D0;color:var(--up);}
 .ax{font-size:12px;color:#C0C4CA;}
-.more{display:block;text-align:center;padding:13px;font-size:13px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+.more{display:block;text-align:center;padding:10px;font-size:12px;font-weight:700;color:var(--primary);background:var(--canvas);border-top:1px solid var(--hair);text-decoration:none;}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.cols2 .block{margin-bottom:0;}
+.cols2 .nm{width:112px;}.cols2 .ai{width:62px;}.cols2 .nm small{font-size:9px;}
+.block__t.etf::before{background:#6B7280;}.block__t.etf{color:#374151;}
 
 /* detail 2-col */
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
-.hero2{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);padding:18px 20px;margin-bottom:16px;}
-.hero2 .top{display:flex;justify-content:space-between;align-items:flex-start;}
-.hero2 .hn{font-size:22px;font-weight:800;display:flex;align-items:center;gap:9px;}
+/* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
+.chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
+.chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
+.chip-sb-label::after{content:'';flex:1;height:1px;background:var(--hair);}
+.chip-arrow{display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--hair);padding:8px 0;}
+.hero2{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);margin-bottom:12px;overflow:hidden;}
+.hero2 .top{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px 0;}
+.hero2 .hn{font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px;}
 .chip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--primary-bg);color:var(--primary);cursor:pointer;}
 .hero2 .meta{font-size:12px;color:var(--muted);margin-top:5px;}
-.hero2 .px{font-size:24px;font-weight:800;text-align:right;}.hero2 .cg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--up-bg);color:var(--up);margin-top:5px;display:inline-block;}
-.sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:16px;}
-.sc__h{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.hero2 .px{font-size:21px;font-weight:800;text-align:right;}.hero2 .cg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px;background:var(--up-bg);color:var(--up);margin-top:5px;display:inline-block;}
+/* chart tabs */
+.ctabs{display:flex;gap:2px;padding:12px 16px 0;}
+.ctabs a{font-size:11px;font-weight:700;padding:5px 11px;border-radius:6px;color:var(--muted);cursor:pointer;user-select:none;}
+.ctabs a.on{background:var(--inset);color:var(--ink);}
+.cpane{padding:0;}
+.cpane.hidden{display:none;}
+.chart-wrap{padding:8px 14px 12px;position:relative;}
+.cmk-layer{position:absolute;left:14px;right:14px;top:8px;height:80px;pointer-events:none;}
+.cmk{position:absolute;font-size:10px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.72);padding:0 2px;border-radius:3px;}
+.cmk.hi{color:var(--up);}
+.cmk.lo{color:var(--dn);}
+.chart-svg{width:100%;height:80px;display:block;overflow:visible;}
+.taxis{display:flex;justify-content:space-between;padding:4px 2px 0;font-size:10px;color:var(--muted);font-weight:600;}
+.chart-tt{position:absolute;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;box-shadow:var(--s1);pointer-events:none;white-space:nowrap;z-index:10;display:none;transform:translateX(-50%);top:6px;}
+.chart-tt .ttd{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:2px;}
+.chart-cross{position:absolute;width:1px;top:8px;bottom:24px;background:#9CA3AF;opacity:.5;pointer-events:none;display:none;}
+.sc{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.sc__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
 .sc__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.sc__t::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
-.sc__s{font-size:11px;color:var(--muted);}.scb{padding:18px;}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}.two .sc{margin-bottom:0;}
+.sc__s{font-size:11px;color:var(--muted);}.scb{padding:14px 16px;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}.two .sc{margin-bottom:0;}
 .pbadge{display:inline-flex;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--up-bg);color:var(--up);}
-.pg{position:relative;height:14px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:18px;}
-.pg .n{position:absolute;top:-6px;width:4px;height:26px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
-.pgs{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-top:10px;}
-.ro{display:flex;align-items:baseline;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--hair);}
-.ro b{font-size:30px;font-weight:800;color:var(--up);line-height:1;}.ro u{font-size:14px;font-weight:700;color:var(--up);text-decoration:none;}.ro .cf{margin-left:auto;font-size:12px;color:var(--muted);}.ro .cf b{color:var(--primary);font-size:14px;}
-.scen{font-size:14px;color:var(--muted);line-height:1.85;margin:14px 0 0;}
-.tiles{display:flex;gap:10px;}.tile{flex:1;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:14px 8px;text-align:center;}.tile .l{font-size:11px;color:var(--muted);margin-bottom:5px;}.tile .v{font-size:17px;font-weight:800;}
+.pg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;}
+.pg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
+.pgs{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-top:9px;}
+.ro{display:flex;align-items:baseline;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--hair);}
+.ro b{font-size:26px;font-weight:800;color:var(--up);line-height:1;}.ro u{font-size:13px;font-weight:700;color:var(--up);text-decoration:none;}.ro .cf{margin-left:auto;font-size:12px;color:var(--muted);}.ro .cf b{color:var(--primary);font-size:14px;}
+.scen{font-size:14px;color:var(--muted);line-height:1.85;margin:12px 0 0;}
+.tiles{display:flex;gap:10px;}.tile{flex:1;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:12px 8px;text-align:center;}.tile .l{font-size:11px;color:var(--muted);margin-bottom:4px;}.tile .v{font-size:15px;font-weight:800;}
 .ma{display:flex;align-items:center;gap:10px;margin-bottom:9px;}.ma .l{font-size:12px;font-weight:600;color:var(--muted);width:84px;}.ma .tr{position:relative;flex:1;height:6px;background:var(--inset);border-radius:999px;}.ma .z{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hair);}.ma .f{position:absolute;top:0;height:100%;border-radius:999px;background:var(--up);left:50%;}.ma .p{font-size:12px;font-weight:700;width:48px;text-align:right;color:var(--up);}
 .sg{display:flex;justify-content:space-around;border-top:1px solid var(--hair);margin-top:14px;padding-top:14px;}.sg .c{display:flex;flex-direction:column;align-items:center;gap:3px;}.sg .v{font-size:14px;font-weight:800;}.sg .v.good{color:#16A34A;}.sg .s{font-size:10px;color:var(--muted);}
 .panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
@@ -89,36 +178,61 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .note{font-size:11px;color:var(--gold);background:var(--gold-bg);padding:9px 16px;line-height:1.5;}
 
 /* sector header */
-.shead{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);padding:18px 20px;margin-bottom:16px;}
+.shead{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:16px 18px;margin-bottom:12px;}
 .shead .top{display:flex;justify-content:space-between;align-items:flex-start;}
-.shead .st{font-size:24px;font-weight:800;display:flex;align-items:center;gap:9px;}.shead .ss{font-size:12px;color:var(--muted);margin-top:5px;}
-.shead .kpi{text-align:right;}.shead .kpi .l{font-size:11px;color:var(--muted);}.shead .kpi .v{font-size:20px;font-weight:800;}
+.shead .st{font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px;}.shead .ss{font-size:12px;color:var(--muted);margin-top:5px;}
+.shead .kpi{text-align:right;}.shead .kpi .l{font-size:11px;color:var(--muted);}.shead .kpi .v{font-size:17px;font-weight:800;}
 .senti{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}.senti .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}.senti .l b{color:var(--up);}
 .gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}.gg__s{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;margin-top:8px;}
 .lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}.lede b{color:var(--ink);}
+/* 섹터 시장폭 */
+.breadth{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}
+.breadth .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}
+.breadth .l b{color:var(--ink);}
+.breadth .bbar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--inset);}
+.breadth .bbar i{display:block;height:100%;}.breadth .bbar .bu{background:var(--up);}.breadth .bbar .bd{background:var(--dn);}.breadth .bbar .bn{background:var(--hair);}
+.breadth .bk{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--muted);font-weight:600;}
+.breadth .bk i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+.breadth .bk .iu{background:var(--up);}.breadth .bk .id{background:var(--dn);}.breadth .bk .in{background:var(--hair);}
 .disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
 
 /* ranking page */
-.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px;flex-wrap:wrap;}
-.phead h1{font-size:26px;font-weight:800;letter-spacing:-.6px;margin:0;display:flex;align-items:center;gap:9px;}.phead h1 .ic{font-size:24px;}
-.phead .psub{font-size:12px;color:var(--muted);margin-top:6px;}
-.rtabs{display:inline-flex;background:var(--inset);border-radius:11px;padding:3px;gap:2px;}
-.rtabs a{font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;padding:8px 16px;border-radius:8px;}.rtabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
-.fbar{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap;}.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
+.phead h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;display:flex;align-items:center;gap:9px;}.phead h1 .ic{font-size:18px;}
+.phead .psub{font-size:12px;color:var(--muted);margin-top:5px;}
+.rtabs{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px;gap:2px;}
+.rtabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:8px;}.rtabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
+.fbar{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap;}.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
 .fchips{display:flex;flex-wrap:wrap;gap:7px;}.fchips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}.fchips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
-.tbl{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;box-shadow:var(--s1);}
-.thead{display:flex;align-items:center;gap:14px;padding:11px 20px;background:var(--soft);border-bottom:1px solid var(--hair);font-size:11px;font-weight:700;color:var(--muted);}
-.trow{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
-.c-rk{width:30px;text-align:center;flex-shrink:0;font-size:14px;font-weight:800;color:var(--muted);}.c-rk.t{color:var(--primary);}
-.c-nm{width:188px;flex-shrink:0;}.c-nm b{font-size:14px;font-weight:700;display:block;}.c-nm small{font-size:10px;color:var(--muted);}
-.c-bar{flex:1;min-width:110px;}
-.c-bar .barwrap2{height:24px;background:var(--inset);border-radius:6px;overflow:hidden;position:relative;}
-.c-bar .bar{height:100%;border-radius:6px;display:block;}
-.c-bar .barval{position:absolute;right:10px;top:0;height:24px;display:flex;align-items:center;font-size:11px;font-weight:800;}
-.c-chg{width:80px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
-.c-ai{width:90px;text-align:right;flex-shrink:0;}
-.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;}
-.pager a{min-width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;border:1px solid var(--hair);background:var(--canvas);font-size:13px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.tbl{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
+.trow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
+.tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
+.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
+.pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+/* etf-detail donut + holdings */
+.donutwrap{display:flex;gap:20px;align-items:center;padding:14px 16px;}
+.donut{width:120px;height:120px;border-radius:50%;flex-shrink:0;position:relative;
+  background:conic-gradient(#006EFF 0 111.6deg,#16A34A 0 151.2deg,#B7791F 0 183.6deg,#2775ED 0 212.4deg,#9333EA 0 234deg,#9CA3AF 0 360deg);}
+.donut::after{content:'';position:absolute;inset:20px;background:var(--soft);border-radius:50%;}
+.donut .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;}
+.donut .ctr b{font-size:16px;font-weight:800;}.donut .ctr span{font-size:10px;color:var(--muted);}
+.sec-legend{display:flex;flex-direction:column;gap:8px;flex:1;}
+.sec-legend .lg{display:flex;align-items:center;gap:8px;font-size:12px;}
+.sec-legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.sec-legend .pc{margin-left:auto;font-weight:800;}
+.hold{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}
+.hold:last-child{border-bottom:none;}.hold:hover{background:var(--primary-bg);}
+.hold .rk{font-size:11px;font-weight:700;color:var(--muted);width:16px;text-align:center;flex-shrink:0;}
+.hold .nm{flex:1;font-size:13px;font-weight:600;}.hold .nm small{display:block;color:var(--muted);font-weight:500;font-size:10px;margin-top:1px;}
+.hold .chg{font-size:12px;font-weight:700;width:50px;text-align:right;}
+.wt{width:88px;text-align:right;}.wt b{font-size:13px;font-weight:800;}
+.wt .bar2{height:4px;border-radius:999px;background:var(--inset);margin-top:4px;overflow:hidden;}.wt .bar2>i{display:block;height:100%;background:var(--primary);}
+.spec-tbl{display:flex;flex-direction:column;}
+.spec-tbl .it{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:13px;}
+.spec-tbl .it:last-child{border-bottom:none;}
+.spec-tbl .k{color:var(--muted);}.spec-tbl .v{font-weight:700;}
+.etf-pbadge{display:inline-flex;font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--inset);color:var(--muted);}
 
 /* overlay */
 .ov{display:none;position:fixed;inset:0;z-index:50;background:rgba(19,21,26,.42);align-items:flex-start;justify-content:center;padding-top:80px;}.ov.on{display:flex;}
@@ -129,15 +243,276 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .res .ico{width:24px;height:24px;border-radius:6px;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);}.res.sel .ico{background:var(--primary);color:#fff;}
 .res .n3{flex:1;font-size:13px;font-weight:700;}.res .n3 small{font-size:10px;color:var(--muted);margin-left:5px;font-weight:500;}
 .foot{display:flex;gap:14px;padding:9px 17px;border-top:1px solid var(--hair);font-size:11px;color:var(--muted);}.foot b{background:var(--soft);border:1px solid var(--hair);border-radius:4px;padding:1px 5px;color:var(--ink);}
-.aip,.ais,.aid,.ax{cursor:help;}
+.aip,.ais,.aid,.ax,.vol-surge-badge{cursor:help;}
 #tip{position:fixed;z-index:100;display:none;max-width:268px;background:#fff;border:1px solid var(--hair);border-radius:11px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:12px 14px;pointer-events:none;}
 #tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 #tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}
 #tip .bd b{color:var(--ink);font-weight:700;}
+
+/* ── 패시브 민감주 ── */
+.block__t.pass::before{background:#0284C7;}
+.block__t.pass{color:#0C4A6E;}
+.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
+.pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+.pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
+/* 위젯 메트릭 타일 */
+.pmet{display:flex;gap:8px;padding:12px 16px 0;}
+.pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
+.pmet .mc .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.pmet .mc .v{font-size:15px;font-weight:800;}
+.pmet .mc .sub{font-size:9px;color:var(--muted);margin-top:2px;}
+/* 패시브 한줄 번역 */
+.p1line{font-size:12px;color:var(--ink);padding:11px 16px 0;line-height:1.6;}
+.p1line b{color:#0284C7;}
+/* ETF 기여 행 */
+.petf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
+.petf-row:last-child{border-bottom:none;}
+.petf-row .en{flex:1;font-weight:600;}.petf-row .en small{display:block;font-size:10px;color:var(--muted);font-weight:400;}
+.petf-row .wt{font-size:12px;font-weight:800;color:var(--primary);}
+.petf-bar{height:3px;border-radius:999px;background:var(--inset);margin-top:3px;overflow:hidden;}
+.petf-bar i{display:block;height:100%;background:#0284C7;border-radius:999px;}
+/* 면책 띠 */
+.pdisc{font-size:10px;color:var(--muted);padding:7px 16px;background:var(--soft);line-height:1.5;border-top:1px solid var(--hair);}
+/* 패시브 랭킹 페이지 */
+.prank-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.prank-row:last-child{border-bottom:none;}
+.prank-row:hover{background:#F0F9FF;}
+.prank-row .rk2{width:20px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.dov-bar{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#BAE6FD,#0284C7);}
+.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:#0C4A6E;}
+.conc-col{width:56px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.score-col{width:44px;text-align:right;font-size:13px;font-weight:800;color:#0284C7;flex-shrink:0;}
+/* 섹터 쏠림 배너 */
+.sector-bias{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:#0C4A6E;display:flex;align-items:center;gap:10px;}
+.sector-bias .ic2{font-size:18px;flex-shrink:0;}
+.sector-bias b{font-weight:800;}
+/* 정렬 토글 */
+.stabs{display:inline-flex;background:var(--inset);border-radius:8px;padding:3px;gap:2px;margin-bottom:12px;}
+.stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
+.stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:var(--s1);}
+
+/* ── 배당 인컴 설계기 (ncai-design-system 토큰 정렬) ── */
+/* 시맨틱: success #00ae1a/#ecfeea · warning #eb8e02/#fff9e3 · error #f33942/#fff5f7 */
+/* 인컴 시뮬레이터 (보유 입력 → 계산) */
+.sim{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:0 4px 12px rgba(15,23,42,.08);overflow:hidden;margin-bottom:16px;}
+.sim__h{padding:16px 20px;border-bottom:1px solid var(--hair);background:var(--soft);}
+.sim__h .q{font-size:15px;font-weight:600;color:var(--ink);}
+.sim__h .q small{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px;}
+.simrow{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--hair);}
+.simrow .snm{flex:1;font-size:14px;font-weight:500;min-width:0;}
+.simrow .snm .mk{font-size:10px;font-weight:600;padding:1px 6px;border-radius:6px;margin-left:6px;background:var(--inset);color:var(--muted);}
+.simrow .qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.simrow .qty input{width:88px;border:1px solid var(--hair);border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;text-align:right;}
+.simrow .qty span{font-size:12px;color:var(--muted);}
+.simrow .sinc{width:104px;text-align:right;flex-shrink:0;}.simrow .sinc b{font-size:14px;font-weight:600;color:#4F46E5;}.simrow .sinc small{display:block;font-size:10px;color:var(--muted);}
+.simrow .sx{width:18px;text-align:center;color:#C0C4CA;cursor:pointer;font-size:16px;flex-shrink:0;}.simrow .sx:hover{color:var(--up);}
+.sim__add{display:flex;gap:8px;padding:14px 20px;background:var(--soft);border-bottom:1px solid var(--hair);align-items:flex-start;}
+.combo{position:relative;flex:1;min-width:0;}
+.combo input{width:100%;border:1px solid var(--hair);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;}
+.combo input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,110,255,.12);}
+.combo__list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:20;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.12);max-height:264px;overflow-y:auto;}
+.combo__list.on{display:block;}
+.combo__hd{font-size:11px;font-weight:600;color:var(--muted);padding:8px 12px 4px;letter-spacing:.4px;}
+.combo__item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;}
+.combo__item:hover,.combo__item.sel{background:var(--primary-bg);}
+.combo__item .ci-nm{flex:1;font-weight:500;min-width:0;}
+.combo__item .ci-nm small{color:var(--muted);font-weight:400;margin-left:5px;font-size:11px;}
+.combo__item .ci-mk{font-size:9px;font-weight:600;padding:1px 5px;border-radius:5px;background:var(--inset);color:var(--muted);}
+.combo__item .ci-y{font-size:12px;font-weight:600;color:#4F46E5;}
+.combo__none{padding:12px;font-size:12px;color:var(--muted);text-align:center;}
+.qty{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.qty input{width:78px;border:1px solid var(--hair);border-radius:6px;padding:8px 9px;font-size:13px;font-family:inherit;text-align:right;}
+.qty span{font-size:13px;color:var(--muted);font-weight:500;}
+.sim__add a{font-size:13px;font-weight:600;padding:8px 16px;border-radius:6px;background:#4F46E5;color:#fff;cursor:pointer;white-space:nowrap;}
+.sim__target{display:flex;flex-direction:column;gap:10px;padding:14px 20px;font-size:14px;font-weight:500;color:var(--ink);border-bottom:1px solid var(--hair);background:var(--canvas);}
+.sim__target-row{display:flex;align-items:center;gap:8px;}
+.sim__target input{width:84px;border:1px solid var(--hair);border-radius:6px;padding:7px 8px;font-size:14px;font-family:inherit;text-align:right;font-weight:600;}
+.sim__presets{display:flex;gap:6px;flex-wrap:wrap;}
+.sim__presets a{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;transition:all .15s;}
+.sim__presets a:hover{border-color:#4F46E5;color:#4F46E5;}
+.sim__presets a.on{background:#4F46E5;border-color:#4F46E5;color:#fff;}
+.sim__out{padding:18px 20px;}
+.sim-kpi{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.sim-kpi .k{flex:1;min-width:104px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:12px 14px;}
+.sim-kpi .k .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.sim-kpi .k .v{font-size:20px;font-weight:600;}
+/* 리포트 카드 */
+.sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
+.sim-report{display:flex;flex-direction:column;gap:8px;}
+.rc{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;transition:box-shadow .15s;}
+.rc:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
+.rc.open{border-color:#CBD5E1;}
+.rc-head{display:flex;align-items:center;gap:8px;padding:13px 16px;background:var(--soft);cursor:pointer;user-select:none;transition:background .12s;}
+.rc-head:hover{background:#ECEDEF;}
+.rc.open .rc-head{border-bottom:1px solid var(--hair);}
+.rc-head .rci{font-size:15px;line-height:1;}
+.rc-head .rct{font-size:13px;font-weight:700;color:var(--ink);}
+.rc-head .rcb{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;}
+.rcb.red{background:#FEE2E2;color:#f33942;}
+.rcb.green{background:#D1FAE5;color:#059669;}
+.rcb.amber{background:#FEF3C7;color:#B7791F;}
+.rcb.blue{background:#DBEAFE;color:#2563EB;}
+.rc-chev{margin-left:8px;font-size:10px;color:var(--muted);transition:transform .2s;flex-shrink:0;}
+.rc.open .rc-chev{transform:rotate(180deg);}
+.rc-body{display:none;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--ink);}
+.rc.open .rc-body{display:block;}
+.rc-body b{font-weight:600;}
+.rc-body .rc-flow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 2px;margin-bottom:2px;}
+.rc-body .rc-from{color:var(--muted);}
+.rc-body .rc-arr{color:#00ae1a;font-weight:700;margin:0 4px;font-size:15px;}
+.rc-body .rc-to{color:#4F46E5;font-weight:700;}
+.rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
+.rc-body .rc-num{font-variant-numeric:tabular-nums;}
+.rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
+.rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
+.rc-act:hover{opacity:.8;}
+.rc-act.pri{background:#4F46E5;color:#fff;}
+.rc-act.sec{background:var(--soft);border:1px solid var(--hair);color:var(--ink);}
+.sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
+.donut-wrap{position:relative;flex-shrink:0;}
+.donut-arc{cursor:pointer;transition:opacity .15s;}
+.donut-arc:hover{opacity:.8;}
+.donut-tip{position:fixed;display:none;background:#1a1a1a;color:#fff;font-size:12px;line-height:1.5;padding:8px 12px;border-radius:8px;pointer-events:none;z-index:999;max-width:220px;white-space:nowrap;}
+.donut-tip b{font-weight:600;}
+.donut-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.dl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.dl-item i{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.dl-item b{margin-left:auto;color:var(--ink);font-weight:600;}
+.hbdg{font-size:10px;font-weight:600;padding:3px 9px;border-radius:9999px;white-space:nowrap;}
+.hbdg.ok{background:#ecfeea;color:#00ae1a;}
+.hbdg.warn{background:#fff9e3;color:#eb8e02;}
+.hbdg.bad{background:#fff5f7;color:#f33942;}
+/* 사이드바 인컴 ETF 랭킹 행 */
+.irow{display:block;padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
+.irow:last-child{border-bottom:none;}.irow:hover{background:#EEF2FF;}
+.irow .it{display:flex;align-items:center;gap:8px;}
+.irow .it .rk{flex-shrink:0;width:18px;font-size:13px;font-weight:700;color:#4F46E5;text-align:center;}
+.irow .it .rk.top{color:#fff;background:#4F46E5;border-radius:5px;line-height:18px;}
+.irow .it b{flex:1;font-size:14px;font-weight:600;min-width:0;line-height:1.3;}
+.irow .imeta{font-size:11px;color:var(--muted);margin-top:2px;}
+.irow .imx{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);}
+.irow .imx .yv{font-size:15px;font-weight:600;color:#4F46E5;}
+/* task2: 행 호버 시 좌측 화살표 (보일 듯 말 듯) */
+.irow .it .rk{position:relative;display:flex;align-items:center;justify-content:center;}
+.irow .rk-n,.irow .rk-p{transition:opacity .15s;}
+.irow .rk-p{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;opacity:0;}
+.irow:hover .rk-n{opacity:0;}
+.irow:hover .rk-p{opacity:1;}
+/* task3: 건전성 뱃지 호버 툴팁 */
+.hbdg-w{position:relative;display:inline-flex;}
+.hbdg-w .hbdg-tip{position:absolute;bottom:calc(100%+8px);right:0;width:210px;background:#fff;border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink);box-shadow:0 4px 20px rgba(0,0,0,.12);opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:250;white-space:normal;text-align:left;}
+.hbdg-w:hover .hbdg-tip{opacity:1;transform:translateY(0);}
+/* 인컴 ETF 패널 설명 캡션 + 건전성 범례 */
+.ipanel-cap{padding:10px 16px 12px;border-bottom:1px solid var(--hair);font-size:12px;color:var(--muted);line-height:1.6;}
+.ipanel-cap b{color:var(--ink);font-weight:600;}
+.ipanel-cap-row{display:flex;align-items:flex-start;gap:8px;}
+.ipanel-qbtn{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:#E5E7EB;border:none;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;margin-top:1px;}
+.ipanel-qbtn:hover{background:#4F46E5;color:#fff;}
+/* 인컴 도움말 모달 */
+.income-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;}
+.income-modal-bg.open{display:flex;}
+.income-modal{background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);position:relative;max-height:90vh;overflow-y:auto;}
+.income-modal h3{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 16px;}
+.income-modal h4{font-size:13px;font-weight:700;color:var(--ink);margin:16px 0 6px;}
+.income-modal p{font-size:13px;line-height:1.75;color:#444;margin:0 0 6px;}
+.income-modal .close-btn{position:absolute;top:16px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;}
+.income-modal .prompt-box{background:#F8F9FA;border:1px solid var(--hair);border-radius:10px;padding:14px 16px;margin-top:8px;}
+.income-modal .prompt-text{font-size:12px;line-height:1.7;color:#333;font-family:inherit;}
+.income-modal .copy-btn{display:flex;align-items:center;gap:6px;margin-top:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.income-modal .copy-btn:hover{opacity:.8;}
+.income-modal .copy-ok{color:#00ae1a;font-size:12px;margin-left:8px;display:none;}
+.ipanel-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;}
+.ipanel-legend span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ipanel-legend .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ipanel-legend .dot.ok{background:#00ae1a;}.ipanel-legend .dot.warn{background:#eb8e02;}.ipanel-legend .dot.bad{background:#f33942;}
+.honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
+.honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}
+.honest .tx3{font-size:13px;color:var(--ink);line-height:1.7;}.honest .tx3 b{font-weight:600;color:#c2410c;}
+/* 참고 데이터 레이어 — 출처 라벨 */
+.src{display:block;margin-top:7px;font-size:11px;color:var(--muted);font-weight:500;}
+/* 52주 범위 바 */
+.w52-bar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,var(--dn-bg),var(--inset) 50%,var(--up-bg));margin:6px 0 9px;}
+.w52-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px 0 0 5px;background:linear-gradient(90deg,rgba(224,49,49,.18),rgba(224,49,49,.42));}
+.w52-now{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink);transform:translateX(-50%);}
+.w52-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;}
+.w52-lbl .num{color:var(--ink);}
+/* 실적 분기추세 그룹 막대 */
+.qf{display:flex;gap:10px;align-items:flex-end;height:84px;padding:0 4px;}
+.qf .q{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.qf .qbars{display:flex;gap:3px;align-items:flex-end;height:64px;}
+.qf .qbars i{width:11px;border-radius:3px 3px 0 0;display:block;}
+.qf .qbars .rev{background:var(--inset);}
+.qf .qbars .op{background:var(--primary);}
+.qf .qx{font-size:10px;color:var(--muted);font-weight:600;}
+.qf-lg{display:flex;gap:14px;justify-content:center;font-size:11px;color:var(--muted);margin-top:10px;}
+.qf-lg span{display:inline-flex;align-items:center;gap:5px;}
+.qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+/* 안내 푸터 */
+.ds-footer{margin:32px 0 8px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;}
+.ds-foot-list{padding:20px 24px;}
+.ds-foot-list .fl{font-size:12.5px;color:var(--muted);line-height:1.8;padding:7px 0;}
+.ds-foot-list .fl + .fl{border-top:1px solid var(--hair);}
+.ds-foot-list .fl b{color:var(--ink);font-weight:700;}
+.ds-foot-list .fk{color:var(--ink);font-weight:700;margin-right:6px;}
+.ds-foot-base{padding:12px 24px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
+/* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
+.refsub{padding:15px 0;border-top:1px solid var(--hair);}
+.refsub:first-child{padding-top:2px;border-top:none;}
+.refsub__h{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.refsub__s{font-size:11px;font-weight:500;color:var(--muted);}
+.refrow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.refrow .rp{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.refrow .rk{font-size:11px;color:var(--muted);}
+.refrow b{font-size:16px;font-weight:800;}
+.refnote{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 0 0;}
+/* AI 픽 이력 · 적중률 통합 */
+.acc-top{display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+.acc-big{font-weight:900;color:#16A34A;line-height:1;white-space:nowrap;}.acc-big b{font-size:34px;}.acc-big u{font-size:16px;text-decoration:none;margin-left:1px;}
+.acc-meta{font-size:13px;}.acc-meta b{font-weight:800;}.acc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.acc-hist{font-size:12.5px;color:var(--muted);line-height:1.95;padding-top:12px;border-top:1px solid var(--hair);}
+
+/* ── 모바일 대응 (더블샷 900/600 브레이크포인트) ── */
+@media(max-width:900px){
+  .wrap{padding:16px 20px 56px;}
+  .gnb__in{padding:0 20px;gap:16px;}
+  .grid{grid-template-columns:minmax(0,1fr);row-gap:16px;}
+  .chip-layout{grid-template-columns:minmax(0,1fr);row-gap:12px;}
+  .cols2{grid-template-columns:minmax(0,1fr);}
+  .two{grid-template-columns:minmax(0,1fr);}
+  .hero{gap:14px;}
+  .hero .search{min-width:0;width:100%;}
+}
+@media(max-width:600px){
+  .wrap{padding:12px 14px 52px;}
+  .gnb__in{padding:0 14px;gap:12px;}
+  .gnb a{font-size:12px;}
+  .gnb .sbtn{padding:6px 9px;}
+  .hero h1,.phead h1{font-size:18px;}
+  .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
+  .strip .m{flex:1 1 40%;}
+  .strip .m:nth-child(even){border-right:none;margin-right:0;padding-right:0;}
+  .refrow{grid-template-columns:1fr;gap:0;}
+  .refrow .rp{flex-direction:row;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);}
+  .refrow .rp:last-child{border-bottom:none;padding-bottom:0;}
+  .refrow .rk{font-size:12px;white-space:nowrap;}
+  .refrow b{font-size:15px;}
+  .nm{width:104px;}
+  .cols2 .nm{width:96px;}
+  #chip-board .nm{width:100px;}
+  .prank-row .nm{width:104px!important;}
+  .ai{width:auto;}
+  /* 프로토타입 시간대 토글 — 좁은 화면에서 줄바꿈 */
+  .brief-strip{flex-wrap:wrap;}
+  .bs-arr{order:1;}
+  .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
+}
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">Double<b>-Shot</b></span><a onclick="alert('브리핑(보조) — 기존 페이지')">브리핑</a><a class="on" onclick="go('home')">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">Double<b>-Shot</b></span><a href="/briefings/">브리핑</a><a class="on" href="/stocks/" onclick="event.preventDefault();go('home')">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -147,57 +522,394 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div><h1>오늘의 <span class="a">종목</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · 06-11</p></div>
       <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span class="upd-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
+      <span style="font-size:10px;color:var(--muted);">09:00 – 15:30 장중</span>
+    </div>
     <div class="strip">
-      <div class="m"><div class="l">코스피</div><div class="v num">2,712.34 <span class="up">+0.82%</span></div></div>
-      <div class="m"><div class="l">코스닥</div><div class="v num">781.20 <span class="up">+0.45%</span></div></div>
-      <div class="m"><div class="l">코스피200</div><div class="v num">366.1 <span class="up">+0.71%</span></div></div>
-      <div class="m"><div class="l">원/달러</div><div class="v num">1,366.5 <span class="dn">−3.2</span></div></div>
+      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">2,712</span><span class="vc up num" id="h-kospi-c">+0.82%</span></div>
+      <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">781.2</span><span class="vc up num" id="h-kosdaq-c">+0.45%</span></div>
+      <div class="m"><span class="l">KP200</span><span class="v num" id="h-kp200">366.1</span><span class="vc up num" id="h-kp200-c">+0.71%</span></div>
+      <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,366</span><span class="vc dn num" id="h-usd-c">−3.2</span></div>
     </div>
-    <div class="secwrap" style="margin-bottom:18px;"><div class="t">섹터로 보기</div>
-      <div class="chips"><a onclick="go('sector')">반도체</a><a onclick="go('sector')">2차전지</a><a onclick="go('sector')">바이오</a><a onclick="go('sector')">자동차</a><a onclick="go('sector')">금융</a><a onclick="go('sector')">인터넷</a><a onclick="go('sector')">엔터</a><a onclick="go('sector')">조선</a><a onclick="go('sector')">방산</a></div>
+    <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
+    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-11/kospi/" style="cursor:pointer;">
+      <span class="bs-icon" id="bs-icon">📊</span>
+      <span class="bs-body">
+        <span class="bs-type" id="bs-type">코스피 예측 브리핑</span>
+        <span class="bs-text" id="bs-text">하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등</span>
+      </span>
+      <!-- 프로토타입 전용: 시간대 미리보기 버튼 -->
+      <div class="proto-toggle" id="proto-toggle" onclick="event.stopPropagation();">
+        <button class="on" onclick="previewSlot('kospi',this)">07:30</button>
+        <button onclick="previewSlot('live',this)">장중</button>
+        <button onclick="previewSlot('close',this)">마감</button>
+        <button onclick="previewSlot('us',this)">미국</button>
+        <button onclick="previewSlot('none',this)">숨김</button>
+      </div>
+      <span class="bs-arr">›</span>
     </div>
-    <div class="legend" style="margin:0 2px 16px;">
-      <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span><span class="lg"><span class="ais">신호 64</span> 기술신호</span><span class="lg"><span class="aid">신호 42</span> 약세</span><span class="lg"><span class="ax">—</span> 없음</span>
+    <div class="hotcards">
+      <a class="hot hot--ai" onclick="go('chips')"><span class="hot__ic">🔬</span><span class="hot__tx"><b>AI 반도체 칩보드</b><small>밤사이 미국 → 오늘 한국 반도체</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" href="income-designer.html" style="background:#EEF2FF;border-color:#C7D2FE;"><span class="hot__ic" style="background:#E0E7FF;">🪙</span><span class="hot__tx"><b style="color:#4F46E5;">배당 인컴 설계기</b><small>월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</small></span><span class="hot__arr">→</span></a>
+      <a class="hot" onclick="go('passive')" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="hot__ic" style="background:#E0F2FE;">🧲</span><span class="hot__tx"><b style="color:#0284C7;">패시브 민감주</b><small>ETF 기계매매 노출 상위 9종목</small></span><span class="hot__arr">→</span></a>
     </div>
-
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s">추적 142종목 중 · 06-11</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
+      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
+      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">3,210만주</span></div><span class="vol-surge-badge">×2.1 급증</span><div class="ai"><span class="ais">신호 58</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div><span class="barval num">2,280만주</span></div><span class="vol-surge-badge">×3.4 급증</span><div class="ai"><span class="aip">AI 78</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div><span class="barval num">1,540만주</span></div><span class="vol-surge-badge">×5.8 급증</span><div class="ai"><span class="ais">신호 71</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:34%"></div><span class="barval num">1,080만주</span></div><span class="vol-surge-badge">×1.9 급증</span><div class="ai"><span class="aid">신호 42</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:27%"></div><span class="barval num">860만주</span></div><span class="vol-surge-badge">×2.3 급증</span><div class="ai"><span class="ais">신호 55</span></div></a>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
-    <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s">등락률 기준</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="more" onclick="go('ranking')">상승 전체 →</a>
+    <div class="cols2" style="margin-bottom:18px;">
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링</b><small class="num">036930 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+9.4%</span></div><div class="ai"><span class="ais">신호 69</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:65%"></div><span class="barval up num">+6.1%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:36%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>현대차</b><small class="num">005380 · 자동차</small></div><div class="barwrap"><div class="bar up" style="width:23%"></div><span class="barval up num">+2.2%</span></div><div class="ai"><span class="ais">신호 60</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한화에어로</b><small class="num">012450 · 방산</small></div><div class="barwrap"><div class="bar up" style="width:16%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="ais">신호 66</span></div></a>
+        <a class="more" onclick="go('ranking')">상승 전체 →</a>
+      </div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
+        <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>LG화학</b><small class="num">051910 · 2차전지</small></div><div class="barwrap"><div class="bar dn" style="width:10%"></div><span class="barval dn num">−0.6%</span></div><div class="ai"><span class="aid">신호 41</span></div></a>
+        <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>셀트리온</b><small class="num">068270 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:7%"></div><span class="barval dn num">−0.4%</span></div><div class="ai"><span class="ais">신호 51</span></div></a>
+        <a class="more" onclick="go('ranking')">하락 전체 →</a>
+      </div>
     </div>
-    <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s">등락률 기준</span></div>
-      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>카카오</b><small class="num">035720 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:61%"></div><span class="barval dn num">−3.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
-      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>네이버</b><small class="num">035420 · 인터넷</small></div><div class="barwrap"><div class="bar dn" style="width:14%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="ax">—</span></div></a>
-      <a class="more" onclick="go('ranking')">하락 전체 →</a>
+
+    <!-- ── 패시브 민감주 프리뷰 ── -->
+    <div class="block" style="margin-bottom:18px;">
+      <div class="block__h"><span class="block__t pass"><span class="ic">🧲</span>패시브 민감주 톱5</span><span class="block__s">ETF 기계매매 노출 · 거래일수순 <span class="badge-pass-btn" id="badge-pass-btn">뱃지 기준 ⓘ</span></span></div>
+      <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">4</span><div class="nm"><b>DB하이텍</b><small class="num">000990 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:61%"></div><span class="barval num" style="color:#0C4A6E;">9.2일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="row" onclick="go('detail')"><span class="rk num">5</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar pbar" style="width:58%"></div><span class="barval num" style="color:#0C4A6E;">8.7일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+      <a class="more" onclick="go('passive')">패시브 민감주 전체 9종목 →</a>
     </div>
+
+    <hr class="etf-divider">
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> AI 픽 미적용</span></div>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div><span class="barval num">1,840만주</span></div><div class="ai"><span class="ais">신호 56</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div><span class="barval num">1,320만주</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div><span class="barval num">810만주</span></div><div class="ai"><span class="ais">신호 67</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar vol" style="width:31%"></div><span class="barval num">570만주</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
+      <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 차이나CSI300</b><small class="num">192090 · 중국</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div><span class="barval num">400만주</span></div><div class="ai"><span class="ax">—</span></div></a>
+      <a class="more" onclick="go('ranking')">ETF 전체 →</a>
+    </div>
+    <div class="cols2">
+      <div class="block">
+        <div class="block__h"><span class="block__t etf"><span class="ic">🚀</span>ETF 상승 톱</span><span class="block__s">등락률 기준</span></div>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 반도체</b><small class="num">091160 · 반도체</small></div><div class="barwrap"><div class="bar up" style="width:100%"></div><span class="barval up num">+3.8%</span></div><div class="ai"><span class="ais">신호 65</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 2차전지테마</b><small class="num">305540 · 2차전지</small></div><div class="barwrap"><div class="bar up" style="width:79%"></div><span class="barval up num">+3.0%</span></div><div class="ai"><span class="ais">신호 63</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국필반도체</b><small class="num">381180 · 미국반도체</small></div><div class="barwrap"><div class="bar up" style="width:55%"></div><span class="barval up num">+2.1%</span></div><div class="ai"><span class="ais">신호 64</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 200선물인버스2X</b><small class="num">252670 · 인버스</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.5%</span></div><div class="ai"><span class="aid">신호 40</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 미국S&P500</b><small class="num">360750 · 미국</small></div><div class="barwrap"><div class="bar up" style="width:26%"></div><span class="barval up num">+1.0%</span></div><div class="ai"><span class="ais">신호 61</span></div></a>
+        <a class="more" onclick="go('ranking')">ETF 상승 전체 →</a>
+      </div>
+      <div class="block">
+        <div class="block__h"><span class="block__t etf"><span class="ic">📉</span>ETF 하락 톱</span><span class="block__s">등락률 기준</span></div>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−3.2%</span></div><div class="ai"><span class="aid">신호 39</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>TIGER 200IT레버리지</b><small class="num">243890 · IT레버리지</small></div><div class="barwrap"><div class="bar dn" style="width:74%"></div><span class="barval dn num">−2.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>KODEX 바이오</b><small class="num">143460 · 바이오</small></div><div class="barwrap"><div class="bar dn" style="width:44%"></div><span class="barval dn num">−1.4%</span></div><div class="ai"><span class="ax">—</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>TIGER 200선물인버스</b><small class="num">215580 · 인버스</small></div><div class="barwrap"><div class="bar dn" style="width:28%"></div><span class="barval dn num">−0.9%</span></div><div class="ai"><span class="aid">신호 38</span></div></a>
+        <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>KODEX 헬스케어</b><small class="num">266410 · 헬스케어</small></div><div class="barwrap"><div class="bar dn" style="width:16%"></div><span class="barval dn num">−0.5%</span></div><div class="ai"><span class="ais">신호 53</span></div></a>
+        <a class="more" onclick="go('ranking')">ETF 하락 전체 →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ETF DETAIL (KODEX 200) ===== -->
+  <div class="screen" id="etf-detail">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › ETF › <span style="color:var(--ink)">KODEX 200</span></div>
+    <div class="grid">
+      <div>
+        <div class="hero2" id="hero-etf">
+          <div class="top">
+            <div><div class="hn">KODEX 200 <span class="chip">코스피200 추종</span></div><div class="meta"><span class="num">069500</span> · 삼성자산운용 · ETF · 06-12 종가</div></div>
+            <div style="text-align:right"><div class="px num">36,610</div><div class="cg num">▲ +0.71%</div></div>
+          </div>
+          <div class="ctabs">
+            <a class="on" onclick="switchTab('etf','5d',this)">5일</a>
+            <a onclick="switchTab('etf','1m',this)">1개월</a>
+            <a onclick="switchTab('etf','3m',this)">3개월</a>
+            <a onclick="switchTab('etf','1y',this)">1년</a>
+          </div>
+          <!-- 5일 일봉 -->
+          <div class="cpane chart-wrap" id="etf-5d">
+            <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-5d" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2775ED" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#2775ED" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="60" x2="740" y2="60" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+              <path d="M0,60 L185,54 L370,44 L555,34 L740,22 L740,76 L0,76 Z" fill="url(#grad-etf-5d)"/>
+              <polyline fill="none" stroke="#2775ED" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,60 185,54 370,44 555,34 740,22"/>
+              <circle cx="0" cy="60" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <circle cx="740" cy="22" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+            </svg>
+            <div class="cmk-layer">
+              <span class="cmk hi" style="left:100%;top:22px;transform:translate(-100%,-125%);">고점 36,720</span>
+              <span class="cmk lo" style="left:0%;top:60px;transform:translate(8px,45%);">저점 36,150</span>
+            </div>
+            <div class="taxis"><span>06-06</span><span>06-09</span><span>06-10</span><span>06-11</span><span>06-12</span></div>
+          </div>
+          <!-- 1개월 -->
+          <div class="cpane chart-wrap hidden" id="etf-1m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-1m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,44 L62,46 L123,40 L185,42 L246,37 L308,38 L370,33 L431,35 L493,28 L555,31 L616,24 L678,22 L740,17 L740,56 L0,56 Z" fill="url(#grad-etf-1m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,44 62,46 123,40 185,42 246,37 308,38 370,33 431,35 493,28 555,31 616,24 678,22 740,17"/>
+            </svg>
+            <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
+          </div>
+          <!-- 3개월 -->
+          <div class="cpane chart-wrap hidden" id="etf-3m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-3m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,48 L90,52 L160,46 L220,50 L280,42 L340,36 L400,28 L460,32 L520,24 L580,18 L640,14 L700,10 L740,8 L740,56 L0,56 Z" fill="url(#grad-etf-3m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 160,46 220,50 280,42 340,36 400,28 460,32 520,24 580,18 640,14 700,10 740,8"/>
+            </svg>
+            <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+          <!-- 1년 -->
+          <div class="cpane chart-wrap hidden" id="etf-1y">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-etf-1y" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,50 L90,54 L185,48 L280,44 L370,42 L460,34 L555,22 L640,13 L700,9 L740,6 L740,56 L0,56 Z" fill="url(#grad-etf-1y)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,50 90,54 185,48 280,44 370,42 460,34 555,22 640,13 700,9 740,6"/>
+            </svg>
+            <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
+          </div>
+        </div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">지수 추세 · 참고용</span><span class="sc__s">06-12 종가</span></div><div class="scb">
+          <span class="etf-pbadge">● 상승 우위 · 브리핑 지수 전망 연동</span>
+          <div class="pg" style="background:linear-gradient(90deg,rgba(39,117,237,.38),var(--inset) 50%,rgba(224,49,49,.38));margin-top:14px;"><div class="n" style="left:64%;background:var(--muted);"></div></div>
+          <div class="pgs"><span>약세</span><span>중립</span><span>강세</span></div>
+          <p class="scen">코스피200을 추종하는 패시브 ETF라, 바늘은 <b>그날 코스피 브리핑의 지수 전망</b>을 따라요. 개별 종목 AI 픽이 아닌 <b>지수 방향 참고용</b>이에요. 오늘 브리핑은 상승 우위로 봤어요. <a style="color:var(--primary);font-weight:700;">브리핑 보기 →</a></p>
+          <div class="tiles" style="margin-top:14px;">
+            <div class="tile"><div class="l">추적지수</div><div class="v num up">+0.71%</div></div>
+            <div class="tile"><div class="l">거래량</div><div class="v num">1,840만</div></div>
+            <div class="tile"><div class="l">거래대금</div><div class="v num">6,740억</div></div>
+            <div class="tile"><div class="l">52주 위치</div><div class="v num">81%</div></div>
+          </div>
+        </div></div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">분배 · 건전성</span><span class="sc__s">최근 1년 기준</span></div><div class="scb">
+          <div class="tiles">
+            <div class="tile"><div class="l">연 분배율</div><div class="v num">1.62%</div></div>
+            <div class="tile"><div class="l">분배주기</div><div class="v">분기</div></div>
+            <div class="tile"><div class="l">건전성</div><div class="v" style="color:#00ae1a;display:flex;align-items:center;justify-content:center;gap:5px;"><i style="width:8px;height:8px;border-radius:50%;background:#00ae1a;display:inline-block;"></i>건전</div></div>
+          </div>
+          <p class="scen" style="margin-top:12px;">지수를 그대로 추종해 <b>원금 잠식이 없어요.</b> 분배보다 가격 상승이 주된 수익원이에요. 커버드콜·고배당 ETF라면 <a onclick="go('income')" style="color:var(--primary);font-weight:700;">배당 인컴 설계기</a>에서 분배율 대비 실제 총수익(건전성)을 꼭 확인하세요.</p>
+        </div></div>
+        <div class="sc"><div class="sc__h"><span class="sc__t">섹터 비중 <span class="phase">PHASE 2</span></span><span class="sc__s">구성종목 기준</span></div>
+          <div class="note">⚠ TOP10 비중은 네이버 etfAnalysis로 실측 가능 · 전체 섹터 분포는 근사치 ("기타"가 미커버분)</div>
+          <div class="donutwrap">
+            <div class="donut"><div class="ctr"><b class="num">200</b><span>종목</span></div></div>
+            <div class="sec-legend">
+              <div class="lg"><span class="dot" style="background:#006EFF"></span><span>반도체</span><span class="pc num">31%</span></div>
+              <div class="lg"><span class="dot" style="background:#16A34A"></span><span>2차전지</span><span class="pc num">11%</span></div>
+              <div class="lg"><span class="dot" style="background:#B7791F"></span><span>자동차</span><span class="pc num">9%</span></div>
+              <div class="lg"><span class="dot" style="background:#2775ED"></span><span>금융</span><span class="pc num">8%</span></div>
+              <div class="lg"><span class="dot" style="background:#9333EA"></span><span>인터넷</span><span class="pc num">6%</span></div>
+              <div class="lg"><span class="dot" style="background:#9CA3AF"></span><span>기타</span><span class="pc num">35%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel"><div class="panel__h" style="justify-content:space-between;">구성종목 TOP10 <span class="phase">PHASE 2</span><span style="font-size:11px;color:var(--muted);font-weight:500;">전체 200종목</span></div>
+          <div class="note">TOP10은 etfAnalysis로 실측 가능 · 전체 200종목 리스트는 v2 · 클릭 시 해당 종목 페이지로 이동</div>
+          <a class="hold" onclick="go('detail')"><span class="rk num">1</span><span class="nm">삼성전자<small class="num">005930</small></span><span class="chg up num">+1.2%</span><span class="wt"><b class="num">28.1%</b><div class="bar2"><i style="width:100%"></i></div></span></a>
+          <a class="hold" onclick="go('detail')"><span class="rk num">2</span><span class="nm">SK하이닉스<small class="num">000660</small></span><span class="chg up num">+3.4%</span><span class="wt"><b class="num">6.2%</b><div class="bar2"><i style="width:22%"></i></div></span></a>
+          <a class="hold"><span class="rk num">3</span><span class="nm">LG에너지솔루션<small class="num">373220</small></span><span class="chg dn num">−0.8%</span><span class="wt"><b class="num">3.1%</b><div class="bar2"><i style="width:11%"></i></div></span></a>
+          <a class="hold"><span class="rk num">4</span><span class="nm">삼성바이오로직스<small class="num">207940</small></span><span class="chg up num">+0.4%</span><span class="wt"><b class="num">2.9%</b><div class="bar2"><i style="width:10%"></i></div></span></a>
+          <a class="hold"><span class="rk num">5</span><span class="nm">현대차<small class="num">005380</small></span><span class="chg up num">+2.2%</span><span class="wt"><b class="num">2.4%</b><div class="bar2"><i style="width:9%"></i></div></span></a>
+          <a class="hold"><span class="rk num">6</span><span class="nm">기아<small class="num">000270</small></span><span class="chg up num">+1.1%</span><span class="wt"><b class="num">1.9%</b><div class="bar2"><i style="width:7%"></i></div></span></a>
+          <a class="hold"><span class="rk num">7</span><span class="nm">셀트리온<small class="num">068270</small></span><span class="chg dn num">−0.4%</span><span class="wt"><b class="num">1.8%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">8</span><span class="nm">KB금융<small class="num">105560</small></span><span class="chg up num">+0.6%</span><span class="wt"><b class="num">1.7%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">9</span><span class="nm">NAVER<small class="num">035420</small></span><span class="chg dn num">−0.9%</span><span class="wt"><b class="num">1.6%</b><div class="bar2"><i style="width:6%"></i></div></span></a>
+          <a class="hold"><span class="rk num">10</span><span class="nm">신한지주<small class="num">055550</small></span><span class="chg up num">+0.5%</span><span class="wt"><b class="num">1.5%</b><div class="bar2"><i style="width:5%"></i></div></span></a>
+          <a class="more">구성종목 전체 →</a>
+        </div>
+
+        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">직전 종가 기준</span></div><div class="scb">
+          <div class="ma"><span class="l">20일선</span><div class="tr"><div class="z"></div><div class="f" style="width:6%;"></div></div><span class="p">+1.8%</span></div>
+          <div class="ma"><span class="l">200일선</span><div class="tr"><div class="z"></div><div class="f" style="width:17%;"></div></div><span class="p">+12.3%</span></div>
+          <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">1,840만</span><span class="s">거래량</span></div><div class="c"><span class="v num">6,740억</span><span class="s">거래대금</span></div></div>
+        </div></div>
+      </div>
+
+      <div>
+        <div class="panel"><div class="panel__h">ETF 기본정보 <span class="phase">PHASE 2</span></div>
+          <div class="note">네이버 etfAnalysis로 실측 가능 (iNAV 괴리율은 장중 실시간이라 제외)</div>
+          <div class="spec-tbl">
+            <div class="it"><span class="k">추적지수</span><span class="v">코스피200</span></div>
+            <div class="it"><span class="k">운용사</span><span class="v">삼성자산운용</span></div>
+            <div class="it"><span class="k">총보수 (연)</span><span class="v num">0.0099%</span></div>
+            <div class="it"><span class="k">순자산 (AUM)</span><span class="v num">6.8조</span></div>
+            <div class="it"><span class="k">상장일</span><span class="v num">2002-10-14</span></div>
+            <div class="it"><span class="k">분배주기</span><span class="v">분기</span></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel__h" style="justify-content:space-between;">유사 ETF · 코스피200<span style="font-size:11px;color:var(--muted);font-weight:500;">보수 비교</span></div>
+          <a class="srow"><span class="n2">TIGER 200 <small class="num">102110</small></span><span class="c num" style="color:var(--muted);">0.05%</span></a>
+          <a class="srow"><span class="n2">KBSTAR 200 <small class="num">148020</small></span><span class="c num" style="color:#16A34A;font-weight:800;">0.017%</span></a>
+          <a class="srow"><span class="n2">ACE 200 <small class="num">105190</small></span><span class="c num" style="color:var(--muted);">0.09%</span></a>
+          <a class="srow"><span class="n2">HANARO 200 <small class="num">293180</small></span><span class="c num" style="color:var(--muted);">0.036%</span></a>
+          <div class="note" style="color:var(--muted);background:var(--soft);">총보수는 낮을수록 유리해요. 같은 지수를 추종하면 수익률 차이는 크지 않아요.</div>
+        </div>
+        <div class="panel"><div class="panel__h">신호 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></div>
+          <div style="padding:16px;"><div style="font-size:16px;font-weight:800;margin:4px 0;">최근 20회 중 <b style="color:#16A34A;">12회 · 60%</b></div><div style="font-size:11px;color:var(--muted);line-height:1.6;">지수 추세 신호 방향 적중률. day-1부터 기록 시작.</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="disc">※ 시세·거래량·기술지표는 직전 거래일 종가 기준 실측값이에요. PHASE 2 항목은 데이터 파이프라인 구축 후 실측으로 채워져요. ETF는 개별 종목 AI 픽 대상이 아니며 지수 추세는 참고용이에요.</p>
   </div>
 
   <!-- ===== DETAIL (SK하이닉스) ===== -->
   <div class="screen" id="detail">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <a href="/stocks/sectors/semicon/" onclick="event.preventDefault();go('sector')">반도체</a> › <span style="color:var(--ink)">SK하이닉스</span></div>
     <div class="grid">
       <div>
-        <div class="hero2"><div class="top">
-          <div><div class="hn">SK하이닉스 <span class="chip" onclick="go('sector')">반도체</span></div><div class="meta"><span class="num">000660</span> · KOSPI · 06-11 종가</div></div>
-          <div><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
+        <div class="hero2" id="hero-stock">
+          <div class="top">
+            <div><div class="hn">SK하이닉스 <span class="chip" onclick="go('sector')">반도체</span></div><div class="meta"><span class="num">000660</span> · KOSPI · 06-12 종가</div></div>
+            <div style="text-align:right"><div class="px num">248,500</div><div class="cg num">▲ +3.42%</div></div>
+          </div>
+          <div class="ctabs">
+            <a class="on" onclick="switchTab('stock','5d',this)">5일</a>
+            <a onclick="switchTab('stock','1m',this)">1개월</a>
+            <a onclick="switchTab('stock','3m',this)">3개월</a>
+            <a onclick="switchTab('stock','1y',this)">1년</a>
+          </div>
+          <!-- 5일 일봉 -->
+          <div class="cpane chart-wrap" id="stock-5d">
+            <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+              <path d="M0,64 L185,56 L370,44 L555,30 L740,16 L740,76 L0,76 Z" fill="url(#grad-up)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,64 185,56 370,44 555,30 740,16"/>
+              <circle cx="0" cy="64" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+              <circle cx="740" cy="16" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+            </svg>
+            <div class="cmk-layer">
+              <span class="cmk hi" style="left:100%;top:16px;transform:translate(-100%,-125%);">고점 248,500</span>
+              <span class="cmk lo" style="left:0%;top:64px;transform:translate(8px,45%);">저점 231,000</span>
+            </div>
+            <div class="taxis"><span>06-06</span><span>06-09</span><span>06-10</span><span>06-11</span><span>06-12</span></div>
+          </div>
+          <!-- 1개월 -->
+          <div class="cpane chart-wrap hidden" id="stock-1m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-1m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
+            </svg>
+            <div class="taxis"><span>05-14</span><span>05-21</span><span>05-28</span><span>06-04</span><span>06-12</span></div>
+          </div>
+          <!-- 3개월 -->
+          <div class="cpane chart-wrap hidden" id="stock-3m">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-3m" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,52 L90,56 L160,50 L220,44 L280,48 L340,38 L400,30 L460,34 L520,22 L580,16 L640,12 L700,8 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-3m)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
+            </svg>
+            <div class="taxis"><span>03-14</span><span>04-04</span><span>04-25</span><span>05-16</span><span>06-12</span></div>
+          </div>
+          <!-- 1년 -->
+          <div class="cpane chart-wrap hidden" id="stock-1y">
+            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="grad-up-1y" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,48 L90,52 L185,46 L280,40 L370,42 L460,32 L555,20 L640,11 L700,7 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1y)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 185,46 280,40 370,42 460,32 555,20 640,11 700,7 740,5"/>
+            </svg>
+            <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
+          </div>
+        </div>
+        <div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;">
+          <span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span>
+          <div style="font-size:13px;line-height:1.65;color:#92400E;">
+            <b>오늘 왜 움직였나</b> · HBM3E 12단 양산 공급계약 보도에 외국인·기관 동반 매수세 유입. 장중 고점 250,500 터치 후 +3.4% 마감했어요.
+            <span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-12 18:20 · 더블샷 이슈 수집</span>
+          </div>
         </div></div>
-        <div class="sc"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30</span></div><div class="scb">
+        <!-- 장 전/장 중: AI 오늘의 전망 (07:30 예측) -->
+        <div class="sc" id="pred-before"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30 예측</span></div><div class="scb">
           <span class="pbadge">▲ 상승 우위 · MA20 상향 돌파</span>
           <div class="pg"><div class="n" style="left:78%"></div></div><div class="pgs"><span>하락 우위</span><span>중립</span><span>상승 우위</span></div>
           <div class="ro"><b class="num">78</b><u>% 상승 확률</u><span class="cf">신뢰도 <b class="num">78%</b></span></div>
           <p class="scen">HBM3E 12단 양산 본격화로 실적 기대가 커지고 있어요. 20일선을 막 상향 돌파해 개별 모멘텀이 살아있는 신호예요.</p>
         </div></div>
+        <!-- 장 마감 후: 예측 결과 확정 (15:30 이후) -->
+        <div class="sc" id="pred-after" style="display:none"><div class="sc__h" style="background:#F0FDF4;border-color:#BBF7D0;"><span class="sc__t" style="color:#15803D;">오늘 예측 결과</span><span class="sc__s">15:32 확정</span></div><div class="scb">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <span style="font-size:28px;font-weight:900;color:#16A34A;line-height:1;">✓</span>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:#15803D;">적중 · 상승 예측이 맞았어요.</div>
+              <div style="font-size:12px;color:#16A34A;margin-top:2px;">상승 우위 78% 예측 → 실제 <b>+3.42%</b> 마감</div>
+            </div>
+          </div>
+          <div class="tiles">
+            <div class="tile"><div class="l">예측 방향</div><div class="v up">▲ 상승</div></div>
+            <div class="tile"><div class="l">실제 등락</div><div class="v num up">+3.42%</div></div>
+            <div class="tile"><div class="l">예측 확률</div><div class="v num">78%</div></div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--muted);">오늘 시장 전체 흐름</span>
+            <a onclick="alert('마감 브리핑 페이지로 이동')" style="font-size:12px;font-weight:700;color:var(--primary);">코스피 마감 브리핑 →</a>
+          </div>
+        </div></div>
+        <!-- 장 전/마감 토글 버튼 (목업 전용) -->
+        <div style="text-align:center;margin:-4px 0 12px;">
+          <button onclick="(function(){var b=document.getElementById('pred-before'),a=document.getElementById('pred-after');if(b.style.display==='none'){b.style.display='';a.style.display='none';this.textContent='→ 장 마감 후 상태 보기';}else{b.style.display='none';a.style.display='';this.textContent='← 장 전 상태 보기';}}).call(this)" style="font-size:11px;color:var(--muted);background:var(--inset);border:1px solid var(--hair);border-radius:6px;padding:5px 12px;cursor:pointer;">→ 장 마감 후 상태 보기</button>
+        </div>
         <div class="two">
           <div class="sc"><div class="sc__h"><span class="sc__t">매매 가이드</span></div><div class="scb"><div class="tiles">
             <div class="tile"><div class="l">진입</div><div class="v num">248,000</div></div><div class="tile"><div class="l">목표</div><div class="v num up">262,000</div></div><div class="tile"><div class="l">손절</div><div class="v num dn">240,000</div></div>
@@ -208,8 +920,46 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">111만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2.07조</span><span class="s">시총</span></div></div>
           </div></div>
         </div>
-        <div class="sc"><div class="sc__h"><span class="sc__t">과거 AI 픽 이력</span></div><div class="scb">
-          <div style="font-size:13px;color:var(--muted);line-height:2;"><b style="color:var(--up)">06-11 적중</b> 상승 예측 → +3.4% · <b style="color:var(--up)">06-05 적중</b> → +1.8% · <b style="color:var(--dn)">05-28 빗나감</b> → −0.9%</div>
+        <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-12 · 순매수 억원</span></div><div class="scb">
+          <div class="tiles">
+            <div class="tile"><div class="l">개인</div><div class="v num dn">−820</div></div>
+            <div class="tile"><div class="l">기관</div><div class="v num up">+310</div></div>
+            <div class="tile"><div class="l">외국인</div><div class="v num up">+540</div></div>
+          </div>
+          <p class="scen" style="margin-top:12px;">외국인·기관이 동반 순매수, 개인은 차익 실현이에요. <b style="color:var(--up)">외국인 3일 연속 순매수</b> 흐름이 이어지고 있어요.</p>
+        </div></div>
+        <!-- 참고 지표 (커머디티 데이터 한 카드로 묶음 — 보조 톤) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">실측 · 보조 자료</span></div><div class="scb">
+          <div class="refsub">
+            <div class="refsub__h">증권사 목표주가 <span class="refsub__s">컨센서스 06-11</span></div>
+            <div class="refrow"><span class="rp"><span class="rk">목표가 평균</span><b class="num">282,000</b></span><span class="rp"><span class="rk">현재가 대비</span><b class="num up">+13.5%</b></span><span class="rp"><span class="rk">투자의견</span><b>매수 <span style="font-size:12px;color:var(--muted)" class="num">4.1</span></b></span></div>
+            <p class="refnote"><b style="color:var(--up)">AI 신호 상승 78%</b> · 컨센서스 <b style="color:var(--ink)">+13.5% 여력</b> — 두 관점이 같은 방향. 네이버 금융 추정치라 시차 가능.</p>
+          </div>
+          <div class="refsub">
+            <div class="refsub__h">52주 범위 <span class="refsub__s">현재가 96% 지점</span></div>
+            <div class="w52-bar"><div class="w52-fill" style="width:96.5%"></div><div class="w52-now" style="left:96.5%"></div></div>
+            <div class="w52-lbl"><span>최저 <span class="num">152,000</span></span><span>최고 <span class="num">252,000</span></span></div>
+            <p class="refnote">52주 최고가 부근이라 신고가 갱신이 가까운 강세 흐름이에요.</p>
+          </div>
+          <div class="refsub">
+            <div class="refsub__h">실적 분기추세 <span class="refsub__s">매출·영업이익 (조원)</span></div>
+            <div class="qf">
+              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:20px"></i></div><div class="qx">24Q3</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:57px"></i><i class="op" style="height:23px"></i></div><div class="qx">24Q4</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:21px"></i></div><div class="qx">25Q1</div></div>
+              <div class="q"><div class="qbars"><i class="rev" style="height:64px"></i><i class="op" style="height:26px"></i></div><div class="qx">25Q2</div></div>
+            </div>
+            <div class="qf-lg"><span><i style="background:var(--inset)"></i>매출</span><span><i style="background:var(--primary)"></i>영업이익</span></div>
+            <p class="refnote">매출·영업이익이 우상향, HBM 수요가 실적으로 확인되는 흐름이에요. 네이버 금융 분기 재무.</p>
+          </div>
+        </div></div>
+        <!-- AI 픽 이력 · 적중률 (사이드바 적중률과 통합 — 같은 데이터) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">AI 픽 이력 · 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></span><span class="sc__s">최근 20회</span></div><div class="scb">
+          <div class="acc-top">
+            <div class="acc-big"><b class="num">65</b><u>%</u></div>
+            <div class="acc-meta"><div>최근 20회 중 <b class="num">13회 적중</b></div><div class="acc-sub">day-1부터 픽→결과 누적 기록</div></div>
+          </div>
+          <div class="acc-hist"><b style="color:var(--up)">06-11 적중</b> 상승 → +3.4% · <b style="color:var(--up)">06-05 적중</b> → +1.8% · <b style="color:var(--dn)">05-28 빗나감</b> → −0.9%</div>
         </div></div>
       </div>
       <div>
@@ -218,13 +968,32 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <a class="srow" onclick="go('detail')"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
           <a class="srow" onclick="go('sector')"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
         </div>
-        <div class="panel"><div class="panel__h">이 종목을 담은 ETF <span class="phase">PHASE 2</span></div>
-          <div class="note">⚠ ETF 구성종목 신규 수집 필요</div>
-          <a class="srow"><span class="n2">KODEX 반도체 <small class="num">091160</small></span><span class="c num" style="color:var(--muted)">24.1%</span></a>
-          <a class="srow"><span class="n2">TIGER Fn반도체TOP10 <small class="num">396500</small></span><span class="c num" style="color:var(--muted)">22.6%</span></a>
+        <div class="panel" style="border-color:#BAE6FD;">
+          <div class="panel__h" style="background:#F0F9FF;border-color:#BAE6FD;">
+            <span style="color:#0C4A6E;">🧲 패시브 자금 노출도</span>
+          </div>
+          <p class="p1line">주요 반도체 ETF들이 <b>구조적으로 보유</b>하는 종목이에요. 패시브 기계매매 노출 수준이에요.</p>
+          <div class="pmet">
+            <div class="mc">
+              <div class="l">시총 대비 노출</div>
+              <div class="v num">1.6%</div>
+              <div class="sub">패시브 자금 약 2.8조</div>
+            </div>
+            <div class="mc">
+              <div class="l">거래일수 소화</div>
+              <div class="v num" style="color:#0284C7;">3.2일</div>
+              <div class="sub">임계 미달 · 뱃지 없음</div>
+            </div>
+          </div>
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);">끌고 가는 ETF TOP 3</div>
+          <div class="petf-row"><div class="en">KODEX 반도체<small>091160 · 비중 24.1%</small></div><div class="wt">24.1%</div></div>
+          <div class="petf-row"><div class="en">TIGER Fn반도체TOP10<small>396500 · 비중 22.6%</small></div><div class="wt">22.6%</div></div>
+          <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 6.2%</small></div><div class="wt">6.2%</div></div>
+          <div class="pdisc">주요 ETF TOP10 구성 기준 추정 · 소수 비중 누락 가능 · 인과 아님, 구조적 노출도</div>
         </div>
-        <div class="panel"><div class="panel__h">AI 예측 적중률 <span class="phase" style="background:#ECFDF3;color:#16A34A;">PHASE 3</span></div>
-          <div style="padding:16px;"><div style="font-size:18px;font-weight:800;" class="num">최근 20회 중 <b style="color:#16A34A;">13회 · 65%</b></div></div>
+        <!-- 다른 섹터 — 현재 종목 섹터(반도체) 제외, 실제 8개 섹터 기준 -->
+        <div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div>
+          <div class="chips" style="padding:14px 16px;"><a onclick="go('sector')">⚡ 전력기기</a><a onclick="go('sector')">🛡️ 방산</a><a onclick="go('sector')">🚢 조선</a><a onclick="go('sector')">🔋 2차전지</a><a onclick="go('sector')">🚗 자동차</a><a onclick="go('sector')">🧬 바이오</a><a onclick="go('sector')">🏦 금융</a></div>
         </div>
       </div>
     </div>
@@ -233,7 +1002,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
     <div class="grid">
       <div>
         <div class="shead"><div class="top">
@@ -241,14 +1010,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="kpi"><div class="l">섹터 평균</div><div class="v up num">+1.2%</div></div>
         </div>
         <div class="senti"><div class="l"><span>섹터 AI 심리</span><span>상승 우위 <b class="num">68%</b></span></div><div class="gg"><div class="n" style="left:68%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
+        <div class="breadth">
+          <div class="l"><span>시장폭</span><span>28종목 중 <b class="up num">19 상승</b></span></div>
+          <div class="bbar"><i class="bu" style="width:67.9%"></i><i class="bd" style="width:28.6%"></i><i class="bn" style="width:3.5%"></i></div>
+          <div class="bk"><span><i class="iu"></i>상승 <span class="num">19</span></span><span><i class="id"></i>하락 <span class="num">8</span></span><span><i class="in"></i>보합 <span class="num">1</span></span></div>
+        </div>
         </div>
         <p class="lede">반도체 섹터는 <b>HBM·메모리 업황 회복</b> 기대로 외국인 수급이 유입되고 있어요. AI 픽은 <b>SK하이닉스(78%)</b>, 기술신호 강세는 <b>한미반도체·DB하이텍</b>이에요.</p>
         <div class="block">
           <div class="block__h"><span class="block__t">반도체 종목 랭킹</span><span class="block__s">시총순</span></div>
-          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div><span class="barval dn num">−6.4%</span></div><div class="ai"><span class="ais">신호 58</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660</small></div><div class="barwrap"><div class="bar up" style="width:62%"></div><span class="barval up num">+3.4%</span></div><div class="ai"><span class="aip">AI 78</span></div></a>
-          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700</small></div><div class="barwrap"><div class="bar up" style="width:40%"></div><span class="barval up num">+1.8%</span></div><div class="ai"><span class="ais">신호 71</span></div></a>
-          <a class="more" onclick="go('ranking')">반도체 28종목 전체 →</a>
+          <div id="sec-rows"></div>
+          <a class="more" id="sec-more"></a>
+        </div>
+        <!-- 패시브 쏠림 (섹터 고도 차별 블록 — 종목별 노출도 섹터 합산) -->
+        <div class="block" style="border-color:#BAE6FD;">
+          <div class="block__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
+          <p class="p1line" style="padding:12px 16px 4px;">반도체 섹터는 <b>주요 ETF 자금에 가장 많이 묶인 섹터</b>예요. 추적 28종목 중 <b>7종목</b>이 반도체 테마 ETF에 고비중으로 담겨 있어요.</p>
+          <div class="pmet">
+            <div class="mc"><div class="l">섹터 합산 노출</div><div class="v num">약 2.8조</div><div class="sub">반도체 테마 ETF 보유액</div></div>
+            <div class="mc"><div class="l">고노출 종목</div><div class="v num">7<span style="font-size:11px;color:var(--muted)">/28</span></div><div class="sub">노출도 高 등급</div></div>
+          </div>
+          <a class="row" onclick="go('detail')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div><span class="barval num" style="color:#0C4A6E;">15.0일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div><span class="barval num" style="color:#0C4A6E;">13.9일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="row" onclick="go('detail')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div><span class="barval num" style="color:#0C4A6E;">10.5일</span></div><div class="ai"><span class="pbdg high">高</span></div></a>
+          <a class="more" onclick="go('passive')">패시브 민감주 전체 →</a>
         </div>
       </div>
       <div>
@@ -267,30 +1052,300 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
   </div>
 
+  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
+  <div class="screen" id="income">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
+    <div class="phead">
+      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
+    </div>
+
+    <div class="grid">
+      <!-- 메인: 인컴 시뮬레이터 -->
+      <div>
+        <div class="sim">
+          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
+          <div id="sim-rows"></div>
+          <div class="sim__add">
+            <div class="combo">
+              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
+                     onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
+              <div class="combo__list" id="combo-list"></div>
+            </div>
+            <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
+            <a onclick="simAdd()">+ 추가</a>
+          </div>
+          <div class="sim__target">
+            <div class="sim__target-row">
+              <span>목표 월 수령액</span>
+              <input id="sim-target" type="number" value="100" oninput="targetInput()">
+              <span>만원</span>
+              <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;">종목 추가·주 수 변경 시 자동 계산돼요</span>
+            </div>
+            <div class="sim__presets" id="target-presets">
+              <a onclick="targetPreset(50)">50만</a>
+              <a onclick="targetPreset(100)" class="on">100만</a>
+              <a onclick="targetPreset(200)">200만</a>
+              <a onclick="targetPreset(300)">300만</a>
+              <a onclick="targetPreset(500)">500만</a>
+            </div>
+          </div>
+          <div class="sim__out" id="sim-out"></div>
+        </div>
+
+        <!-- 정직 배너 -->
+        <p class="disc">분배율·총수익·순자산은 직전 기준 실측값이며, 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+      </div>
+
+      <!-- 사이드바: 인컴 ETF 전체 -->
+      <div>
+        <div class="panel">
+          <div class="panel__h">배당·커버드콜 ETF
+            <div class="stabs" id="isort-tabs" style="margin-left:auto;margin-bottom:0;">
+              <a class="on" onclick="incomeSort('y',this)">분배율순</a>
+              <a onclick="incomeSort('health',this)">건전성순</a>
+            </div>
+          </div>
+          <div class="ipanel-cap">
+            <div class="ipanel-cap-row">
+              <div style="flex:1;">순자산 <b>7천억원 이상</b> 배당·커버드콜 ETF예요.<br>
+                <span id="icap-y">연 <b>분배율이 높은 순</b>으로 정렬돼요.</span>
+                <span id="icap-h" style="display:none"><b>분배율 대비 실제 1년 총수익</b>이 높은 순으로 정렬돼요.</span>
+              </div>
+              <button class="ipanel-qbtn" onclick="openIncomeModal()">?</button>
+            </div>
+            <div class="ipanel-legend">
+              <span><i class="dot ok"></i>건전 · 가격 유지</span>
+              <span><i class="dot warn"></i>주의 · 소폭 침식</span>
+              <span><i class="dot bad"></i>원금성 · 원금 잠식</span>
+            </div>
+          </div>
+
+          <!-- 인컴 도움말 모달 -->
+          <div class="income-modal-bg" id="income-modal-bg" onclick="if(event.target===this)closeIncomeModal()">
+            <div class="income-modal">
+              <button class="close-btn" onclick="closeIncomeModal()">×</button>
+              <h3>🪙 인컴 ETF, 이것만 알면 돼요</h3>
+
+              <h4>분배율과 수익률은 달라요</h4>
+              <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
+
+              <h4>건전성이 뭔가요?</h4>
+              <p><b>건전성 = 총수익 − 분배율</b>이에요. 총수익이 분배율보다 높으면 분배하면서 자산도 불어나는 구조예요 (건전). 총수익이 분배율보다 낮으면 분배금 일부가 원금에서 나온 거예요 (원금성).</p>
+
+              <h4>어떤 ETF를 골라야 할까요?</h4>
+              <p>분배율이 낮아도 건전한 ETF가 장기적으로 더 유리할 수 있어요. 건전성 탭으로 정렬해 비교해보세요.</p>
+
+              <h4>💬 AI에게 더 물어보세요</h4>
+              <div class="prompt-box">
+                <div class="prompt-text" id="income-prompt">커버드콜 ETF를 고려 중인데, 분배율 15%짜리 ETF와 분배율 9%지만 건전성이 좋은 ETF 중 어떤 게 장기적으로 유리할까요? 세금 효과까지 포함해서 비교해줘.</div>
+                <div style="display:flex;align-items:center;">
+                  <button class="copy-btn" onclick="copyPrompt()">📋 프롬프트 복사</button>
+                  <span class="copy-ok" id="copy-ok">✓ 복사됐어요</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
+            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
+            커버드콜 제외
+          </label>
+          <div id="income-rows"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
+  <div class="screen" id="passive">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="phead">
+      <div>
+        <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
+        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · 2026-06-13</div>
+      </div>
+      <div class="stabs" id="psort-tabs">
+        <a class="on" onclick="passiveSort('dov',this)">거래일수</a>
+        <a onclick="passiveSort('conc',this)">집중도</a>
+        <a onclick="passiveSort('score',this)">민감도</a>
+      </div>
+    </div>
+    <div class="sector-bias"><span class="ic2">📡</span><span>지금 패시브 자금은 <b>반도체 소부장</b>에 집중돼 있어요. 상위 9종목 중 7종목이 반도체 테마 ETF에 고비중으로 담겨 있어요.</span></div>
+    <div class="tbl" id="passive-tbl">
+      <div class="block__h" style="background:var(--soft);">
+        <span class="block__s" style="font-weight:700;width:160px;">종목</span>
+        <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);" id="pbar-label">거래일수 (ETF 물량 소화일)</span>
+        <span class="block__s" style="width:56px;text-align:right;" id="pconc-label">집중도</span>
+        <span class="block__s" style="width:44px;text-align:right;">민감도</span>
+        <span class="block__s" style="width:36px;text-align:right;">뱃지</span>
+      </div>
+      <div id="passive-rows"></div>
+    </div>
+    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:0 0 10px 10px;border-top:none;padding:10px 16px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:-1px;">
+      주요 ETF TOP10 구성종목 기준 추정 · 소수 비중 누락 가능 · 인과 주장 아님 · 구조적 노출도 지표예요.<br>
+      高: 거래일수 ≥ 8일 AND 시총 집중도 ≥ 10% · 中: 거래일수 ≥ 4일 AND 집중도 ≥ 5%
+    </div>
+  </div>
+
   <!-- ===== RANKING (거래량 전체) ===== -->
   <div class="screen" id="ranking">
-    <div class="crumb"><a onclick="go('home')">홈</a> › <a onclick="go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
     <div class="phead">
       <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-11 종가</div></div>
       <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
     </div>
     <div class="fbar"><span class="lbl">섹터</span><div class="fchips"><a class="on">전체</a><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a></div></div>
     <div class="tbl">
-      <div class="thead"><span class="c-rk">#</span><span class="c-nm">종목</span><span class="c-bar">거래량</span><span class="c-chg">등락률</span><span class="c-ai" style="text-align:right;">AI 상승확률</span></div>
-      <a class="trow" onclick="go('detail')"><span class="c-rk t num">1</span><span class="c-nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:100%"></span><span class="barval num">3,210만주</span></span></span><span class="c-chg dn num">−6.4%</span><span class="c-ai"><span class="ais">신호 58</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk t num">2</span><span class="c-nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:71%"></span><span class="barval num">2,280만주</span></span></span><span class="c-chg up num">+3.4%</span><span class="c-ai"><span class="aip">AI 78</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk t num">3</span><span class="c-nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:48%"></span><span class="barval num">1,540만주</span></span></span><span class="c-chg up num">+1.8%</span><span class="c-ai"><span class="ais">신호 71</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk num">4</span><span class="c-nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:33%"></span><span class="barval num">1,050만주</span></span></span><span class="c-chg dn num">−1.2%</span><span class="c-ai"><span class="aid">신호 42</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk num">5</span><span class="c-nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:26%"></span><span class="barval num">820만주</span></span></span><span class="c-chg up num">+0.4%</span><span class="c-ai"><span class="ais">신호 55</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk num">6</span><span class="c-nm"><b>현대차</b><small class="num">005380 · 자동차</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:22%"></span><span class="barval num">690만주</span></span></span><span class="c-chg up num">+1.1%</span><span class="c-ai"><span class="ax">—</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk num">7</span><span class="c-nm"><b>에코프로비엠</b><small class="num">247540 · 2차전지</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:19%"></span><span class="barval num">610만주</span></span></span><span class="c-chg up num">+6.1%</span><span class="c-ai"><span class="ais">신호 63</span></span></a>
-      <a class="trow" onclick="go('detail')"><span class="c-rk num">8</span><span class="c-nm"><b>카카오</b><small class="num">035720 · 인터넷</small></span><span class="c-bar"><span class="barwrap2"><span class="bar vol" style="width:17%"></span><span class="barval num">540만주</span></span></span><span class="c-chg dn num">−3.9%</span><span class="c-ai"><span class="aid">신호 38</span></span></a>
+      <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">종목</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:68px;text-align:right;">등락률</span><span class="block__s" style="width:78px;text-align:right;">AI 신호</span></div>
+      <div id="rank-rows"></div>
     </div>
-    <div class="legend" style="margin:16px 2px 0;">
-      <span class="lg"><span class="aip">AI 78</span> Claude 예측(픽)</span><span class="lg"><span class="ais">신호 64</span> 기술신호</span><span class="lg"><span class="aid">신호 42</span> 약세</span><span class="lg"><span class="ax">—</span> 없음</span>
-    </div>
-    <div class="pager"><a>‹</a><a class="on">1</a><a>2</a><a>3</a><a>4</a><a>5</a><a>›</a></div>
+    <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
   </div>
+
+  <!-- ===== CHIPS (AI 반도체 칩보드) ===== -->
+  <div class="screen" id="chips">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/" onclick="event.preventDefault();go('home')">홈</a> › <span style="color:#5B21B6;">반도체 칩보드</span></div>
+    <div class="phead">
+      <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-11</div></div>
+      <div class="rtabs" id="chip-mode"><a class="on" onclick="chipMode('morning',this)">🌅 아침</a><a onclick="chipMode('close',this)">🌆 마감</a></div>
+    </div>
+    <!-- 2-col: 좌=어젯밤 미국(과거) 우=오늘 본문(현재) -->
+    <div class="chip-layout">
+      <!-- 좌: 어젯밤 미국 + SOX -->
+      <div>
+        <div class="chip-sb-label">어젯밤 미국</div>
+        <div class="panel" style="margin-bottom:12px;">
+          <div style="padding:4px 0 2px;">
+            <a class="srow"><span class="n2" style="font-weight:700;font-size:12px;">NVDA <small style="font-weight:400;color:var(--muted);">엔비디아</small></span><span class="c up num">+4.2%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;font-size:12px;">MU <small style="font-weight:400;color:var(--muted);">마이크론</small></span><span class="c up num">+6.9%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;font-size:12px;">TSM <small style="font-weight:400;color:var(--muted);">TSMC ADR</small></span><span class="c up num">+1.1%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;font-size:12px;">INTC <small style="font-weight:400;color:var(--muted);">인텔</small></span><span class="c dn num">−2.3%</span></a>
+            <a class="srow"><span class="n2" style="font-weight:700;font-size:12px;">ASML <small style="font-weight:400;color:var(--muted);">ASML</small></span><span class="c dn num">−0.8%</span></a>
+          </div>
+          <div style="padding:6px 14px 10px;font-size:10px;color:var(--muted);line-height:1.5;">나스닥 +1.4%<br>SOX +2.8%</div>
+        </div>
+        <div class="chip-sb-label">SOX 추세</div>
+        <div class="panel">
+          <div style="padding:10px 12px 4px;">
+            <svg viewBox="0 0 200 60" style="width:100%;display:block;" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sox-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,52 L20,50 L40,48 L60,42 L80,44 L100,36 L120,28 L140,32 L160,18 L180,12 L200,8 L200,56 L0,56 Z" fill="url(#sox-grad)"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="1.8" stroke-linejoin="round" points="0,52 20,50 40,48 60,42 80,44 100,36 120,28 140,32 160,18 180,12 200,8"/>
+              <circle cx="0" cy="52" r="2.5" fill="#fff" stroke="#2775ED" stroke-width="1.5"/>
+              <circle cx="200" cy="8" r="2.5" fill="#fff" stroke="#E03131" stroke-width="1.5"/>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);padding:2px 0 4px;" class="num">
+              <span>05-14</span><span>06-11</span>
+            </div>
+          </div>
+          <div style="padding:0 12px 10px;display:flex;justify-content:space-between;font-size:11px;">
+            <span style="color:var(--muted);">1개월</span>
+            <span class="up num" style="font-weight:800;">+18.4%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우: 섹터 온도계 + AI 코멘트 + 실시간 포커스 + 칩보드 -->
+      <div>
+        <!-- 섹터 온도계 -->
+        <div class="strip" style="margin-bottom:12px;">
+          <div class="m"><span class="l">섹터 온도계</span></div>
+          <div class="m"><span class="l">SOX</span><span class="vc up num">+2.8%</span></div>
+          <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
+          <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
+        </div>
+        <!-- AI 코멘트 -->
+        <div class="panel" style="border-color:#BFDBFE;background:#F8FAFF;margin-bottom:12px;">
+          <div class="panel__h" style="background:#EFF6FF;border-color:#BFDBFE;"><span style="color:#1E40AF;">💬 오늘의 AI 코멘트</span></div>
+          <div style="padding:12px 16px;font-size:13px;color:#1E3A5F;line-height:1.65;word-break:keep-all;">
+            엔비디아 신고가·마이크론 어닝 서프라이즈로 HBM 수요 확인. SK하이닉스는 외국인 연속 순매수 흐름에서 시초가 갭업 가능성. 파운드리·장비는 모멘텀 제한적.
+          </div>
+          <a onclick="go('ranking')" style="display:block;padding:8px 16px;font-size:11px;font-weight:700;color:var(--primary);border-top:1px solid var(--hair);text-decoration:none;cursor:pointer;">더블샷 US 브리핑 원문 →</a>
+        </div>
+        <!-- 실시간 포커스 토글 -->
+        <div class="proto-toggle" style="margin-bottom:10px;">
+          <button class="on" onclick="chipFocus('live',this)">● 장중</button>
+          <button onclick="chipFocus('hl',this)">HL 장후</button>
+        </div>
+        <!-- 장중 실시간 카드 -->
+        <div class="focus-card" id="focus-live" style="margin-bottom:12px;">
+          <div class="focus-card__h">
+            <span><span class="live-dot"></span>실시간 포커스</span>
+            <span class="upd-badge"><span class="dot"></span>10초 갱신</span>
+          </div>
+          <div class="focus-stocks">
+            <div class="focus-stock">
+              <div class="fn">삼성전자 <span class="num" style="font-weight:400;">005930</span></div>
+              <div class="fp num" id="sec-price">57,400</div>
+              <div class="fc up num" id="sec-chg">+1.2%</div>
+              <div class="fs">외국인 +2,204억 · 기관 +891억</div>
+            </div>
+            <div class="focus-stock">
+              <div class="fn">SK하이닉스 <span class="num" style="font-weight:400;">000660</span></div>
+              <div class="fp num" id="skh-price">248,000</div>
+              <div class="fc up num" id="skh-chg">+3.1%</div>
+              <div class="fs">외국인 +3일째 순매수 · 기관 중립</div>
+            </div>
+          </div>
+        </div>
+        <!-- 장 마감 후 HL 카드 -->
+        <div class="hl-card" id="focus-hl" style="display:none;margin-bottom:12px;">
+          <div class="hl-card__h">
+            <span class="hl-badge">HL 24h</span>
+            <span>장 마감 이후 연동</span>
+            <span class="hl-note">실제 체결가 아님 · 참고용</span>
+          </div>
+          <div class="hl-stocks">
+            <div class="hl-stock">
+              <div class="hn">삼성전자 <span style="font-weight:400;font-size:10px;">#SEC</span></div>
+              <div class="hp num">$38.20</div>
+              <div class="hc up num">+2.1%</div>
+              <div class="hf">펀딩 −0.008% · 장 마감 이후</div>
+            </div>
+            <div class="hl-stock">
+              <div class="hn">SK하이닉스 <span style="font-weight:400;font-size:10px;">#SKH</span></div>
+              <div class="hp num">$163.5</div>
+              <div class="hc up num">+5.97%</div>
+              <div class="hf">펀딩 −0.012% · 장 마감 이후</div>
+            </div>
+          </div>
+        </div>
+        <!-- 칩보드 카드 -->
+        <div class="chip-sb-label">오늘 한국 반도체</div>
+        <div class="legend" style="margin:0 2px 10px;">
+          <span class="lg"><b>시초가 갭</b> 오늘 시가 vs 전일 종가</span>
+          <span class="lg"><b>×N</b> 거래대금 20일 평균 대비</span>
+          <span class="lg" id="chip-right-legend"><b>우측</b> 전일까지 수급 추세</span>
+        </div>
+        <div id="chip-board"></div>
+        <!-- 오늘 주목 TOP 3 -->
+        <div class="panel" style="margin-top:12px;border-color:#FECACA;">
+          <div class="panel__h" style="background:#FEF2F2;border-color:#FECACA;"><span style="color:#991B1B;">⚡ 오늘 주목 TOP 3</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">갭 × 거래대금</span></div>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">1</span><span class="n2" style="flex:1;"><b>한미반도체</b><small class="num">042700 · HBM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+5.8%</span><span class="vol-surge-badge">×3.7</span></span></a>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">2</span><span class="n2" style="flex:1;"><b>SK하이닉스</b><small class="num">000660 · HBM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+3.1%</span><span class="vol-surge-badge">×2.4</span></span></a>
+          <a class="srow" style="gap:8px;"><span style="font-size:11px;font-weight:800;color:var(--up);width:16px;flex-shrink:0;">3</span><span class="n2" style="flex:1;"><b>삼성전자</b><small class="num">005930 · DRAM</small></span><span style="text-align:right;line-height:1.3;"><span class="up num" style="font-weight:800;display:block;">+1.9%</span><span class="vol-surge-badge">×1.6</span></span></a>
+        </div>
+        <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 14px;font-size:10px;color:var(--muted);line-height:1.6;margin-top:8px;">
+          샘플 목업 · 벨웨더(미국)는 yahoo 실시간, 한국 갭·거래대금은 장중 실시간, <b>종목별 수급은 마감 후 확정</b>이라 아침엔 전일 추세만 보여줘요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
+  <footer class="ds-footer">
+    <div class="ds-foot-list">
+      <div class="fl"><span class="fk">📊 다루는 범위</span>코스피 종목은 <b>코스피200</b>만, ETF는 <b>순자산 1천억원 이상</b>만 다뤄요. 코스닥150·전체 종목은 단계적으로 넓혀가요.</div>
+      <div class="fl"><span class="fk">🕐 데이터 갱신</span>시세·수급·기술지표는 <b>매 거래일 장 마감 후</b> 갱신돼요. 목표주가·실적은 증권사·공시 반영 시점에 따라 며칠 시차가 있을 수 있어요.</div>
+      <div class="fl"><span class="fk">🔍 데이터 출처</span>모든 수치는 <b>실측값</b>이에요(토스증권·네이버 금융). AI가 만든 숫자는 쓰지 않고, 수집 안 된 항목은 표시하지 않아요.</div>
+      <div class="fl"><span class="fk">⚠️ 투자 유의</span>AI 신호·기술신호는 <b>예측이 아닌 참고용</b>이고, ETF 지수 추세는 개별 종목 픽이 아니에요. 투자 책임은 투자자 본인에게 있어요.</div>
+    </div>
+    <div class="ds-foot-base">Double-Shot · 종목 서비스 (베타) · 표시되는 수치는 직전 거래일 종가 기준이에요</div>
+  </footer>
 
 </div>
 
@@ -309,12 +1364,189 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <div id="tip"></div>
 
 <script>
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo({top:0,behavior:'smooth'});}
+const navHistory=[];
+/* ── URL 체계 (실서비스 라우팅 기준) ──────────────────────────────
+   /stocks/                        홈 허브 (랭킹 + 섹터 + 검색)
+   /stocks/{code}/                 종목 상세   예) /stocks/000660/
+   /stocks/etf/{code}/             ETF 상세    예) /stocks/etf/069500/
+   /stocks/sectors/{key}/          섹터 페이지 예) /stocks/sectors/semicon/
+     keys: semicon | power | defense | ship | battery | auto | bio | finance
+   /stocks/volume/                 거래량 랭킹 전체
+   /stocks/gainers/                상승 랭킹 전체
+   /stocks/losers/                 하락 랭킹 전체
+   /stocks/passive/                패시브 민감주 랭킹
+   /stocks/income/                 배당 인컴 설계기
+   /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
+   /briefings/                     브리핑 허브 (기존 서비스)
+─────────────────────────────────────────────────────────────── */
+const SCREEN_URLS={
+  'home':       '/stocks/',
+  'detail':     '/stocks/000660/',        // SK하이닉스 (프로토타입 고정)
+  'etf-detail': '/stocks/etf/069500/',    // KODEX 200 (프로토타입 고정)
+  'sector':     '/stocks/sectors/semicon/',
+  'ranking':    '/stocks/volume/',
+  'passive':    '/stocks/passive/',
+  'income':     '/stocks/income/',
+  'chips':      '/chips/',
+};
+function go(id,noHistory){
+  if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+  history.pushState({screen:id},'',SCREEN_URLS[id]||'/stocks/');
+}
+function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
+window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||'home';go(id,true);});
+function switchTab(hero,tab,el){
+  const prefix=hero+'-';
+  document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+  ['5d','1m','3m','1y'].forEach(t=>{
+    const p=document.getElementById(prefix+t);
+    if(p) p.classList.toggle('hidden',t!==tab);
+  });
+}
+
+/* 차트 툴팁 */
+const CHART_DATA={
+  'stock-5d':{dates:['06-06','06-09','06-10','06-11','06-12'],prices:[231000,235500,240000,244000,248500],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'stock-1m':{dates:['05-14','05-21','05-28','06-04','06-12'],prices:[200000,215000,228000,238000,248500],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'stock-3m':{dates:['03-14','04-04','04-25','05-16','06-12'],prices:[185000,196000,210000,230000,248500],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'stock-1y':{dates:['25.06','25.09','25.12','26.03','26.06'],prices:[155000,148000,175000,205000,248500],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'etf-5d':{dates:['06-06','06-09','06-10','06-11','06-12'],prices:[36150,36250,36380,36500,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'etf-1m':{dates:['05-14','05-21','05-28','06-04','06-12'],prices:[34800,35200,35600,36100,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'etf-3m':{dates:['03-14','04-04','04-25','05-16','06-12'],prices:[33200,34000,34800,35600,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+  'etf-1y':{dates:['25.06','25.09','25.12','26.03','26.06'],prices:[29800,31000,33500,34200,36610],fmt:v=>'종가 : ₩'+v.toLocaleString()},
+};
+document.querySelectorAll('.chart-wrap').forEach(wrap=>{
+  const tt=document.createElement('div');tt.className='chart-tt';
+  const cross=document.createElement('div');cross.className='chart-cross';
+  wrap.appendChild(tt);wrap.appendChild(cross);
+  wrap.addEventListener('mousemove',e=>{
+    const svg=wrap.querySelector('.chart-svg');if(!svg)return;
+    const svgRect=svg.getBoundingClientRect();
+    const wrapRect=wrap.getBoundingClientRect();
+    const frac=Math.max(0,Math.min(1,(e.clientX-svgRect.left)/svgRect.width));
+    const pane=wrap.closest('.cpane');if(!pane||pane.classList.contains('hidden'))return;
+    const d=CHART_DATA[pane.id];if(!d)return;
+    const n=d.dates.length;
+    const idx=Math.min(n-1,Math.max(0,Math.round(frac*(n-1))));
+    tt.innerHTML=`<div class="ttd">${d.dates[idx]}</div>${d.fmt(d.prices[idx])}`;
+    const xInWrap=e.clientX-wrapRect.left;
+    tt.style.left=xInWrap+'px';
+    tt.style.display='block';
+    cross.style.left=xInWrap+'px';
+    cross.style.display='block';
+  });
+  wrap.addEventListener('mouseleave',()=>{tt.style.display='none';cross.style.display='none';});
+});
+
+/* 랭킹 더보기 */
+const RANK_DATA=[
+  [1,'삼성전자','005930','반도체',100,'3,210만주','dn','−6.4%','ais','신호 58'],
+  [2,'SK하이닉스','000660','반도체',71,'2,280만주','up','+3.4%','aip','AI 78'],
+  [3,'한미반도체','042700','반도체',48,'1,540만주','up','+1.8%','ais','신호 71'],
+  [4,'POSCO홀딩스','005490','2차전지',33,'1,050만주','dn','−1.2%','aid','신호 42'],
+  [5,'LG에너지솔루션','373220','2차전지',26,'820만주','up','+0.4%','ais','신호 55'],
+  [6,'현대차','005380','자동차',22,'690만주','up','+1.1%','ax','—'],
+  [7,'에코프로비엠','247540','2차전지',19,'610만주','up','+6.1%','ais','신호 63'],
+  [8,'카카오','035720','인터넷',17,'540만주','dn','−3.9%','aid','신호 38'],
+  [9,'NAVER','035420','인터넷',15,'470만주','dn','−0.9%','ax','—'],
+  [10,'기아','000270','자동차',13,'420만주','up','+0.8%','ais','신호 52'],
+  [11,'삼성바이오로직스','207940','바이오',12,'380만주','up','+0.3%','ax','—'],
+  [12,'주성엔지니어링','036930','반도체',11,'350만주','up','+9.4%','ais','신호 69'],
+  [13,'셀트리온','068270','바이오',10,'320만주','dn','−0.4%','ais','신호 51'],
+  [14,'하나금융지주','086790','금융',9,'290만주','up','+2.5%','ais','신호 66'],
+  [15,'DB하이텍','000990','반도체',8,'260만주','up','+1.8%','ais','신호 64'],
+  [16,'LG화학','051910','2차전지',8,'240만주','dn','−0.6%','aid','신호 41'],
+  [17,'두산에너빌리티','034020','방산',7,'220만주','up','+1.2%','ais','신호 59'],
+  [18,'한화에어로스페이스','012450','방산',7,'200만주','up','+1.5%','ais','신호 66'],
+  [19,'크래프톤','259960','엔터',6,'190만주','up','+0.7%','ais','신호 57'],
+  [20,'카카오뱅크','323410','금융',6,'180만주','dn','−1.1%','aid','신호 43'],
+];
+let rankShown=10;
+function rankRow(r){
+  const top3=r[0]<=3;
+  const badge=r[8]==='ax'?`<span class="ax">—</span>`:`<span class="${r[8]}">${r[9]}</span>`;
+  return `<a class="trow" onclick="go('detail')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]} · ${r[3]}</small></div><div class="barwrap"><div class="bar vol" style="width:${r[4]}%"></div><span class="barval num">${r[5]}</span></div><span class="tchg ${r[6]} num">${r[7]}</span><div class="ai">${badge}</div></a>`;
+}
+function rankRender(){
+  document.getElementById('rank-rows').innerHTML=RANK_DATA.slice(0,rankShown).map(rankRow).join('');
+  const btn=document.getElementById('rank-more');
+  if(rankShown>=RANK_DATA.length){btn.style.display='none';}
+  else{btn.textContent=`더보기 · ${Math.min(rankShown+10,RANK_DATA.length)-rankShown}개 더 (${RANK_DATA.length-rankShown}개 남음)`;}
+}
+function rankLoadMore(){rankShown=Math.min(rankShown+10,RANK_DATA.length);rankRender();}
+rankRender();
+
+/* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
+const SECTOR_RANK=[
+  [1,'삼성전자','005930','dn','−6.4%',100,'ais','신호 58'],
+  [2,'SK하이닉스','000660','up','+3.4%',62,'aip','AI 78'],
+  [3,'한미반도체','042700','up','+1.8%',40,'ais','신호 71'],
+  [4,'DB하이텍','000990','up','+1.8%',38,'ais','신호 64'],
+  [5,'리노공업','058470','up','+0.9%',26,'ais','신호 60'],
+  [6,'이오테크닉스','039030','up','+2.1%',44,'ais','신호 62'],
+  [7,'주성엔지니어링','036930','up','+9.4%',96,'ais','신호 69'],
+  [8,'원익IPS','240810','up','+1.4%',32,'ais','신호 55'],
+  [9,'ISC','095340','up','+0.6%',20,'ax','—'],
+  [10,'솔브레인','357780','dn','−1.2%',28,'aid','신호 47'],
+  [11,'HPSP','403870','up','+3.1%',56,'ais','신호 67'],
+  [12,'테스','095610','up','+2.7%',50,'ais','신호 58'],
+  [13,'하나마이크론','067310','dn','−2.4%',46,'aid','신호 44'],
+  [14,'동진쎄미켐','005290','up','+0.4%',16,'ax','—'],
+  [15,'티씨케이','064760','dn','−0.8%',22,'ais','신호 52'],
+  [16,'고영','098460','up','+1.1%',28,'ais','신호 56'],
+  [17,'피에스케이','319660','up','+4.2%',70,'ais','신호 65'],
+  [18,'유진테크','084370','up','+1.6%',34,'ais','신호 59'],
+  [19,'네패스','033640','dn','−3.1%',54,'aid','신호 39'],
+  [20,'심텍','222800','up','+5.5%',82,'ais','신호 68'],
+  [21,'가온칩스','399720','up','+2.0%',42,'ais','신호 61'],
+  [22,'에스앤에스텍','101490','up','+1.3%',30,'ais','신호 54'],
+  [23,'케이씨텍','281820','up','+0.7%',20,'ax','—'],
+  [24,'코미코','183300','dn','−1.5%',32,'aid','신호 46'],
+  [25,'대주전자재료','078600','up','+6.8%',88,'ais','신호 66'],
+  [26,'월덱스','101160','up','+0.5%',18,'ax','—'],
+  [27,'엘오티베큠','083310','dn','−0.6%',18,'ais','신호 50'],
+  [28,'어보브반도체','102120','up','+1.9%',40,'ais','신호 57'],
+];
+let secShown=15;
+function secRow(r){
+  const top3=r[0]<=3;
+  const badge=r[6]==='ax'?`<span class="ax">—</span>`:`<span class="${r[6]}">${r[7]}</span>`;
+  return `<a class="row" onclick="go('detail')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]}</small></div><div class="barwrap"><div class="bar ${r[3]}" style="width:${r[5]}%"></div><span class="barval ${r[3]} num">${r[4]}</span></div><div class="ai">${badge}</div></a>`;
+}
+function secRender(){
+  const wrap=document.getElementById('sec-rows');
+  if(!wrap)return;
+  wrap.innerHTML=SECTOR_RANK.slice(0,secShown).map(secRow).join('');
+  const btn=document.getElementById('sec-more');
+  if(secShown>=SECTOR_RANK.length){btn.textContent=`반도체 ${SECTOR_RANK.length}종목 전체 →`;btn.setAttribute('onclick',"go('ranking')");}
+  else{btn.textContent=`더보기 · ${Math.min(secShown+10,SECTOR_RANK.length)-secShown}개 더 (${SECTOR_RANK.length-secShown}개 남음)`;btn.setAttribute('onclick','secLoadMore()');}
+}
+function secLoadMore(){secShown=Math.min(secShown+10,SECTOR_RANK.length);secRender();}
+secRender();
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
 function tipHTML(el){
+  if(el.classList.contains('badge-info-btn'))
+    return `<div class="tt">AI 뱃지 안내</div><div class="bd" style="line-height:1.9">
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="aip" style="font-size:10px;padding:2px 7px">AI 78</span> <b>Claude 픽</b> — AI 브리핑이 오늘 선택한 종목</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="ais" style="font-size:10px;padding:2px 7px">신호 64</span> <b>기술신호 상승</b> — 이평선·모멘텀 종합 58↑</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:3px"><span class="aid" style="font-size:10px;padding:2px 7px">신호 42</span> <b>기술신호 약세</b> — 이평선 아래 42↓</span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span class="ax" style="font-size:11px">—</span> <b>신호 없음</b> — 데이터 부족(상장 200일↓)</span>
+    </div>`;
   const n=(el.textContent.match(/\d+/)||['?'])[0];
+  if(el.classList.contains('vol-surge-badge')){
+    const m=el.textContent.match(/×([\d.]+)/);const mult=m?m[1]:'N';
+    return `<div class="tt" style="color:#E8590C">🔶 거래량 ×${mult} 급증</div><div class="bd">오늘 거래량이 <b>최근 20일 평균 대비 ${mult}배</b>예요. 수치가 높을수록 <b>이례적인 거래 폭증</b>이에요. 외국인·기관 수급이 함께 들어왔다면 의미 있는 수급 유입 신호로 볼 수 있어요.</div>`;
+  }
+  if(el.classList.contains('pbdg')&&el.classList.contains('high'))
+    return `<div class="tt" style="color:#92400E">🟡 패시브 노출 高</div><div class="bd">코스피200·반도체 등 주요 ETF가 <b>구조적으로 대량 보유</b>하는 종목이에요. 분기 말·지수 변경일마다 ETF 기계매매가 자동으로 대규모 수급을 만들어요. <b>리밸런싱 시즌에 변동성이 커질 수 있어요.</b></div>`;
+  if(el.classList.contains('pbdg')&&el.classList.contains('mid'))
+    return `<div class="tt" style="color:#065F46">🟢 패시브 노출 中</div><div class="bd">ETF 기계매매 노출이 <b>중간 수준</b>인 종목이에요. 패시브 수급 영향을 받지만 高보다는 낮아요. 리밸런싱 영향이 있을 때 단기 수급 변화를 참고하세요.</div>`;
   if(el.classList.contains('aip'))
     return `<div class="tt" style="color:#006EFF">🔵 AI 상승확률 ${n}%</div><div class="bd">오늘 AI 브리핑이 <b>픽한 종목</b>이에요. Claude가 <b>뉴스·수급·차트를 종합 분석</b>해 상승 방향에 둔 확률이에요. 신뢰도 ${n}%. 더블샷의 프리미엄 신호예요.</div>`;
   if(el.classList.contains('ais'))
@@ -334,7 +1566,7 @@ function moveTip(e){
   tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
 function hideTip(){tip.style.display='none';}
-document.querySelectorAll('.aip,.ais,.aid,.ax').forEach(el=>{
+document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge,.pbdg').forEach(el=>{
   el.addEventListener('mouseenter',showTip);
   el.addEventListener('mousemove',moveTip);
   el.addEventListener('mouseleave',hideTip);
@@ -342,6 +1574,462 @@ document.querySelectorAll('.aip,.ais,.aid,.ax').forEach(el=>{
 function openSearch(){document.getElementById('ov').classList.add('on');setTimeout(()=>document.getElementById('sq').focus(),50);}
 function closeSearch(){document.getElementById('ov').classList.remove('on');document.getElementById('sq').value='';}
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
+
+/* ── 패시브 민감주 랭킹 ── */
+const PASSIVE_DATA=[
+  {code:'039030',name:'이오테크닉스',sector:'반도체',conc:20.2,dov:15.0,score:98,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'058140',name:'리노공업',sector:'반도체',conc:21.0,dov:13.9,score:96,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'240810',name:'원익IPS',sector:'반도체',conc:18.9,dov:10.5,score:80,badge:'high',etf:'TIGER 반도체TOP10'},
+  {code:'000990',name:'DB하이텍',sector:'반도체',conc:18.0,dov:9.2,score:74,badge:'high',etf:'KODEX 반도체'},
+  {code:'042700',name:'한미반도체',sector:'반도체',conc:12.3,dov:8.7,score:58,badge:'high',etf:'KODEX 반도체'},
+  {code:'095340',name:'ISC',sector:'반도체',conc:10.4,dov:7.6,score:50,badge:'mid',etf:'TIGER 반도체TOP10'},
+  {code:'247540',name:'에코프로비엠',sector:'2차전지',conc:6.0,dov:6.8,score:37,badge:'mid',etf:'TIGER 2차전지테마'},
+  {code:'357780',name:'솔브레인',sector:'반도체',conc:6.8,dov:6.3,score:37,badge:'mid',etf:'TIGER 반도체TOP10'},
+  {code:'086520',name:'에코프로',sector:'2차전지',conc:6.4,dov:4.8,score:31,badge:'mid',etf:'TIGER 2차전지테마'},
+];
+let pSortKey='dov';
+const maxDov=15.0;
+function passiveRow(r,i){
+  const pct=Math.round(r.dov/maxDov*100);
+  const badgeHtml=r.badge==='high'?'<span class="pbdg high">高</span>':'<span class="pbdg mid">中</span>';
+  const barVal=pSortKey==='conc'?r.conc+'%':pSortKey==='score'?r.score:r.dov+'일';
+  const barPct=pSortKey==='conc'?Math.round(r.conc/21*100):pSortKey==='score'?r.score:pct;
+  return `<a class="prank-row" onclick="go('detail')">
+    <span class="rk2 num">${i+1}</span>
+    <div class="nm" style="width:136px;flex-shrink:0;"><b style="font-size:13px;">${r.name}</b><small class="num" style="font-size:10px;color:var(--muted);">${r.code} · ${r.sector}</small></div>
+    <div class="dov-bar"><div class="fill" style="width:${barPct}%"></div><span class="val">${barVal}</span></div>
+    <span class="conc-col num">${r.conc}%</span>
+    <span class="score-col num">${r.score}</span>
+    <div style="width:36px;text-align:right;flex-shrink:0;">${badgeHtml}</div>
+  </a>`;
+}
+function passiveRender(){
+  const sorted=[...PASSIVE_DATA].sort((a,b)=>b[pSortKey]-a[pSortKey]);
+  document.getElementById('passive-rows').innerHTML=sorted.map((r,i)=>passiveRow(r,i)).join('');
+  const labels={dov:'거래일수 (ETF 물량 소화일)',conc:'집중도 (시총 대비 패시브 자금)',score:'민감도 점수 (0~100)'};
+  document.getElementById('pbar-label').textContent=labels[pSortKey];
+}
+function passiveSort(key,el){
+  pSortKey=key;
+  document.querySelectorAll('#psort-tabs a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+  passiveRender();
+}
+passiveRender();
+
+/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
+// 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
+const INCOME_UNIVERSE=[
+  {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
+  {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.4,r:16.35,mk:'KR'},
+  {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR'},
+  {code:'472150',name:'TIGER 배당커버드콜액티브',aum:1.93,price:25580,y:14.68,r:177.47,mk:'KR'},
+  {code:'475720',name:'RISE 200위클리커버드콜',aum:0.92,price:15065,y:14.61,r:100.36,mk:'KR'},
+  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.89,price:11970,y:13.48,r:44.7,mk:'KR'},
+  {code:'476550',name:'TIGER 미국30년국채커버드콜액티브(H)',aum:0.9,price:7240,y:13.02,r:1.85,mk:'KR'},
+  {code:'481060',name:'KODEX 미국30년국채타겟커버드콜(합성 H)',aum:0.84,price:7750,y:12.94,r:1.67,mk:'KR'},
+  {code:'498400',name:'KODEX 200타겟위클리커버드콜',aum:6.74,price:25050,y:11.23,r:174.81,mk:'KR'},
+  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.47,price:4075,y:9.54,r:6.03,mk:'KR'},
+  {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR'},
+  {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.7,r:29.7,mk:'KR'},
+  {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR'},
+  {code:'161510',name:'PLUS 고배당주',aum:2.49,price:26330,y:3.77,r:47.47,mk:'KR'},
+  {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.8,price:25865,y:3.66,r:50.98,mk:'KR'},
+  {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR'},
+  {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR'},
+  {code:'458730',name:'TIGER 미국배당다우존스',aum:3.9,price:15670,y:2.69,r:37.49,mk:'KR'},
+  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
+  {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
+  {code:'QYLD',name:'Global X 나스닥커버드콜 (QYLD)',aum:0,price:24000,y:11.8,r:2.5,mk:'US'},
+];
+const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
+function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
+
+/* 사이드바: 인컴 ETF 전체 (국내 1조+) */
+const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.'};
+function incomeRow(d,i){
+  const[hc,hl,e]=incomeHealth(d);
+  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
+  const rTxt=`${d.r>=0?'+':''}${d.r}%`;
+  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
+  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
+  return `<a class="irow" onclick="addFromRanking('${d.code}')">
+    <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
+    <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
+    <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
+  </a>`;
+}
+let iSortKey='y';
+function incomeRender(){
+  const excludeCC=document.getElementById('cc-exclude')?.checked;
+  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR');
+  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
+  if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
+  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
+  arr=arr.slice(0,15);
+  document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
+}
+function incomeSort(k,el){
+  iSortKey=k;
+  document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
+  document.getElementById('icap-y').style.display=k==='y'?'':'none';
+  document.getElementById('icap-h').style.display=k==='health'?'':'none';
+  incomeRender();
+}
+incomeRender();
+
+/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
+const SIM_KEY='ds-income-holdings-v1';
+function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
+function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
+let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
+function simIncome(h){const d=UNIV[h.code];return h.qty*d.price*d.y/100/10000;}  // 만원/년
+function simRowsRender(){
+  document.getElementById('sim-rows').innerHTML=simHoldings.map((h,i)=>{
+    const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
+    return `<div class="simrow">
+      <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
+      <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
+      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
+      <div class="sx" onclick="simDel(${i})">×</div>
+    </div>`;
+  }).join('');
+}
+function simSet(i,v){
+  simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
+  const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
+  const el=document.getElementById('sinc-'+i);
+  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  simOut();
+}
+function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
+/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
+function addFromRanking(code){
+  const ex=simHoldings.findIndex(h=>h.code===code);
+  if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
+  saveHoldings();simRowsRender();simOut();
+  const rows=document.querySelectorAll('#sim-rows .simrow');
+  const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
+  if(el){
+    el.style.transition='background .4s';el.style.background='#EEF2FF';
+    setTimeout(()=>el.style.background='',700);
+    el.scrollIntoView({block:'nearest'});
+    const inp=el.querySelector('.qty input');
+    if(inp){inp.focus();inp.select();}
+  }
+}
+
+/* 콤보박스: 순자산 톱20 기본 + 이름·코드 검색 */
+let comboSel=null,comboCur=[],comboIdx=-1;
+function comboItems(q){
+  q=(q||'').trim().toLowerCase();
+  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,20);
+  return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
+}
+function comboRender(q){
+  const arr=comboItems(q),list=document.getElementById('combo-list');comboCur=arr;
+  if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
+  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱20</div>';
+  list.innerHTML=hd+arr.map((d,i)=>`<div class="combo__item${i===comboIdx?' sel':''}" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
+}
+function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
+function comboFilter(){comboSel=null;comboIdx=-1;comboOpen();}
+function comboClose(){setTimeout(()=>document.getElementById('combo-list').classList.remove('on'),150);}
+function comboPick(code){comboSel=code;document.getElementById('sim-search').value=UNIV[code].name;document.getElementById('combo-list').classList.remove('on');}
+function comboHighlight(){
+  const items=document.querySelectorAll('#combo-list .combo__item');
+  items.forEach((el,i)=>el.classList.toggle('sel',i===comboIdx));
+  if(comboIdx>=0&&items[comboIdx])items[comboIdx].scrollIntoView({block:'nearest'});
+}
+function comboKey(e){
+  const list=document.getElementById('combo-list');
+  if(!list.classList.contains('on')){if(e.key==='ArrowDown')comboOpen();return;}
+  if(e.key==='ArrowDown'){e.preventDefault();comboIdx=Math.min(comboCur.length-1,comboIdx+1);comboHighlight();}
+  else if(e.key==='ArrowUp'){e.preventDefault();comboIdx=Math.max(0,comboIdx-1);comboHighlight();}
+  else if(e.key==='Enter'){if(comboIdx>=0&&comboCur[comboIdx]){e.preventDefault();comboPick(comboCur[comboIdx].code);}}
+  else if(e.key==='Escape'){list.classList.remove('on');}
+}
+function simAdd(){
+  if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
+  const qty=parseInt(document.getElementById('sim-amt').value)||0;
+  if(comboSel&&qty>0){
+    simHoldings.push({code:comboSel,qty});
+    comboSel=null;document.getElementById('sim-search').value='';
+    saveHoldings();simRowsRender();simOut();
+    const rows=document.querySelectorAll('#sim-rows .simrow');
+    const el=rows[simHoldings.length-1];
+    if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
+  }
+}
+const DONUT_COLORS=['#4F46E5','#2775ED','#10B981','#8B5CF6','#D97706','#EF4444','#EC4899','#6366F1','#F59E0B'];
+const GAP_COLOR='#E5E7EB';
+
+function buildDonut(segs, monthly){
+  const CX=70,CY=70,R=50,W=18,circ=2*Math.PI*R;
+  const gap=segs.length>1?1.5:0;
+  let offset=0;
+  const arcs=segs.map((s,i)=>{
+    const len=Math.max(0,s.pct*circ-gap);
+    const el=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${W}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" class="donut-arc" data-i="${i}" transform="rotate(-90 ${CX} ${CY})"/>`;
+    offset+=s.pct*circ;
+    return el;
+  }).join('');
+  return `<svg class="donut-svg" viewBox="0 0 140 140" width="140" height="140">
+    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
+    ${arcs}
+    <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
+    <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">만원/월</text>
+  </svg>`;
+}
+
+function setupDonutTip(segs){
+  const tip=document.getElementById('donut-tip');
+  if(!tip)return;
+  document.querySelectorAll('.donut-arc').forEach(el=>{
+    el.addEventListener('mousemove',e=>{
+      const i=parseInt(el.dataset.i),s=segs[i];
+      if(!s)return;
+      const pct=(s.pct*100).toFixed(1);
+      tip.innerHTML=s.code
+        ?`<b>${s.name}</b><br>월 인컴 <b>${s.inc.toFixed(1)}만원</b> · ${pct}%`
+        :`<b>${s.name}</b><br>${s.inc.toFixed(1)}만원 더 필요해요`;
+      tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px';
+      tip.style.top=(e.clientY-10)+'px';
+    });
+    el.addEventListener('mouseleave',()=>{tip.style.display='none';});
+  });
+}
+
+const PRESETS=[50,100,200,300,500];
+function targetPreset(v){
+  document.getElementById('sim-target').value=v;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
+}
+function targetInput(){
+  const v=parseInt(document.getElementById('sim-target').value)||0;
+  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
+  simOut();
+}
+function simOut(){
+  let totalDiv=0;const bad=[],slices=[];
+  simHoldings.forEach(h=>{
+    const d=UNIV[h.code],inc=simIncome(h);
+    totalDiv+=inc;
+    slices.push({name:d.name,code:h.code,inc});
+    const[hc,,e]=incomeHealth(d);
+    if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
+  });
+  const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
+
+  // 도넛 세그먼트 구성
+  const total=Math.max(monthly,target,0.01);
+  const segs=slices.map((s,i)=>({name:s.name,code:s.code,inc:s.inc/12,pct:s.inc/12/total,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
+  if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
+
+  const donut=simHoldings.length?buildDonut(segs,monthly):'';
+  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i>${s.name}<b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
+
+  let html=`<div class="sim-out-row">
+    ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
+    <div style="flex:1;min-width:0;">
+      <div class="sim-kpi">
+        <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+      </div>
+      <div class="donut-legend">${legend}</div>
+    </div>
+  </div>`;
+
+  // 리포트 카드 조립
+  const cards=[];
+  if(bad.length){
+    cards.push(`<div class="rc open">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
+    </div>`);
+    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
+    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
+    if(alt){
+      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      cards.push(`<div class="rc open">
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
+        <div class="rc-body">
+          <div class="rc-flow">
+            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
+            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+          </div>
+          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
+          <div class="rc-actions">
+            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
+            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
+          </div>
+        </div>
+      </div>`);
+    }
+  }
+  const taxWarn=totalDiv>=2000;
+  cards.push(`<div class="rc">
+    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'red':'green'}">${taxWarn?'과세 대상':'안전'}</span><span class="rc-chev">▾</span></div>
+    <div class="rc-body">${taxWarn
+      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:#f33942">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
+      :`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 현재 보유 조합에서는 금융소득종합과세 대상이 아니에요.`}
+    </div>
+  </div>`);
+  if(gap>0){
+    const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
+    cards.push(`<div class="rc">
+      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
+      <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
+        <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
+      </div>
+    </div>`);
+  }
+
+  html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
+
+  document.getElementById('sim-out').innerHTML=html;
+  if(simHoldings.length)setupDonutTip(segs);
+}
+function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
+function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
+function copyPrompt(){
+  const txt=document.getElementById('income-prompt').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const ok=document.getElementById('copy-ok');ok.style.display='inline';
+    setTimeout(()=>ok.style.display='none',2000);
+  });
+}
+function toggleRc(head){head.closest('.rc').classList.toggle('open');}
+simRowsRender();simOut();
+
+/* 패시브 뱃지 툴팁 */
+const passBtn=document.getElementById('badge-pass-btn');
+if(passBtn){
+  passBtn.addEventListener('mouseenter',e=>{
+    tip.innerHTML=`<div class="tt" style="color:#0284C7;">🧲 패시브 민감주 뱃지</div><div class="bd" style="line-height:1.9;">
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg high" style="font-size:10px;">高</span> <b>거래일수 ≥ 8일 AND 집중도 ≥ 10%</b></span><br>
+      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg mid" style="font-size:10px;">中</span> <b>거래일수 ≥ 4일 AND 집중도 ≥ 5%</b></span><br>
+      거래일수 = 패시브 자금 ÷ 20일 평균 거래대금<br>집중도 = 패시브 자금 ÷ 시가총액<br><b>인과 아님 — 구조적 노출도 지표예요.</b>
+    </div>`;
+    tip.style.display='block';moveTip(e);
+  });
+  passBtn.addEventListener('mousemove',moveTip);
+  passBtn.addEventListener('mouseleave',hideTip);
+}
+
+/* ── AI 브리핑 스트립 ── */
+var BS_SLOTS = {
+  kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑', text:'하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등', url:'/briefings/2026-06-11/kospi/' },
+  live:  { cls:'bs-live',  icon:'🔴', type:'<span class="live-dot"></span>장중 LIVE', text:'반도체 약세 지속 · 외국인 순매도 확대 · 09:30 이슈 업데이트', url:'/briefings/2026-06-11/kospi/' },
+  close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑', text:'코스피 -0.45% 마감 · 반도체 주도 하락 · 마감 브리핑 보기', url:'/briefings/2026-06-11/close/' },
+  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 브리핑', text:'S&P 상승 우위 · 신뢰도 68% · 연준 발언 주목', url:'/briefings/2026-06-11/us/' }
+};
+
+function applyBriefingStrip(slot) {
+  var el = document.getElementById('brief-strip');
+  if (!el) return;
+  if (slot === 'none') { el.className = 'brief-strip is-hidden'; return; }
+  var d = BS_SLOTS[slot];
+  if (!d) return;
+  el.className = 'brief-strip ' + d.cls;
+  el.href = d.url;
+  document.getElementById('bs-icon').textContent = d.icon;
+  document.getElementById('bs-type').innerHTML = d.type;
+  document.getElementById('bs-text').textContent = d.text.replace(/<[^>]+>/g,'');
+}
+
+function getKSTSlot() {
+  var now = new Date();
+  var kst = new Date(now.getTime() + 9 * 3600000);
+  var day = kst.getUTCDay();
+  if (day === 0 || day === 6) return 'none';
+  var hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
+  if (hm >= 730  && hm < 900)  return 'kospi';
+  if (hm >= 900  && hm < 1630) return 'live';
+  if (hm >= 1630 && hm < 2140) return 'close';
+  if (hm >= 2140 && hm < 2355) return 'us';
+  return 'none';
+}
+
+function previewSlot(slot, btn) {
+  document.querySelectorAll('#proto-toggle button').forEach(function(b){ b.classList.remove('on'); });
+  if (btn) btn.classList.add('on');
+  applyBriefingStrip(slot);
+}
+
+/* 초기화: 프로토타입은 항상 kospi로 시작, 실제 KST 슬롯은 버튼 참고용 */
+(function(){
+  var slot = getKSTSlot();
+  var initSlot = slot === 'none' ? 'kospi' : slot; // 프로토: 숨김이면 kospi 기본
+  applyBriefingStrip(initSlot);
+  var btns = document.querySelectorAll('#proto-toggle button');
+  var map = ['kospi','live','close','us','none'];
+  btns.forEach(function(b,i){ b.classList.toggle('on', map[i] === initSlot); });
+})();
+
+/* ── AI 반도체 칩보드 (밤사이 벨웨더 → 한국 밸류체인) ── */
+var CHIP_NODES=[
+  {node:'HBM', bell:[{t:'NVDA',c:4.2}], ai:'엔비디아 신고가 → HBM 수요 기대. SK하이닉스·한미반도체 갭업에 거래대금 급증 동반, 본더 라인까지 온기.',
+    rows:[{n:'SK하이닉스',code:'000660',gap:3.1,vol:2.4,sup:'외국인 3일째 순매수',v:'real',vt:'진짜 · 외국인·기관 합류'},
+          {n:'한미반도체',code:'042700',gap:5.8,vol:3.7,sup:'외국인 순매수 전환',v:'real',vt:'진짜 · 외국인 대량'}]},
+  {node:'DRAM / NAND', bell:[{t:'MU',c:6.9}], ai:'마이크론 어닝 서프라이즈 → 메모리 업사이클 신호. 다만 삼성전자 갭업은 약함, 수급 확인 필요.',
+    rows:[{n:'삼성전자',code:'005930',gap:1.9,vol:1.6,sup:'기관 2일째 순매수',v:'pop',vt:'반짝 · 당일 수급 이탈'},
+          {n:'SK하이닉스',code:'000660',gap:3.1,vol:2.4,sup:'외국인 3일째 순매수',v:'real',vt:'진짜 · 외국인·기관 합류'}]},
+  {node:'파운드리 · CPU', bell:[{t:'TSM',c:1.1},{t:'INTC',c:-2.3}], ai:'TSM 보합·INTC 약세 → 파운드리 모멘텀 제한적. DB하이텍 개인 주도 갭업, 추격 주의.',
+    rows:[{n:'삼성전자(파운드리)',code:'005930',gap:0.4,vol:1.1,sup:'외국인 중립',v:'pop',vt:'반짝 · 수급 동반 없음'},
+          {n:'DB하이텍',code:'000990',gap:1.2,vol:1.4,sup:'개인 매수 우위',v:'pop',vt:'반짝 · 개인 주도'}]},
+  {node:'장비', bell:[{t:'ASML',c:-0.8}], ai:'ASML 약세 → 장비 섹터 동반 조정. 거래대금 평소 이하, 관망 구간.',
+    rows:[{n:'주성엔지니어링',code:'036930',gap:-1.1,vol:0.9,sup:'외국인 순매도',v:'none',vt:'해당 없음'},
+          {n:'원익IPS',code:'240810',gap:-0.6,vol:0.8,sup:'기관 순매도 지속',v:'none',vt:'해당 없음'}]}
+];
+function chipBell(b,first){
+  var bg=b.c>0?'var(--up-bg)':b.c<0?'var(--dn-bg)':'var(--inset)';
+  var col=b.c>0?'var(--up)':b.c<0?'var(--dn)':'var(--muted)';
+  var s=(b.c>0?'+':'')+b.c.toFixed(1)+'%';
+  return '<span style="display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:'+bg+';color:'+col+';margin-left:6px;">'+b.t+' '+s+(first?' 밤사이':'')+'</span>';
+}
+function chipRight(r,mode){
+  if(mode==='morning') return '<span style="font-size:11px;color:var(--muted);font-weight:600;">🕐 '+r.sup+'</span>';
+  var m={real:['#ECFDF5','#16A34A','#A7F3D0','✓'],pop:['var(--gold-bg)','var(--gold)','#FDE68A','⚡'],none:['var(--inset)','var(--muted)','var(--hair)','–']}[r.v];
+  return '<span style="font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px;background:'+m[0]+';color:'+m[1]+';border:1.5px solid '+m[2]+';white-space:nowrap;">'+m[3]+' '+r.vt+'</span>';
+}
+function renderChips(mode){
+  var board=document.getElementById('chip-board'); if(!board) return;
+  board.innerHTML=CHIP_NODES.map(function(nd){
+    var bells=nd.bell.map(function(b,i){return chipBell(b,i===0);}).join('');
+    var rows=nd.rows.map(function(r){
+      var gc=r.gap>0?'var(--up)':r.gap<0?'var(--dn)':'var(--muted)';
+      var gt=(r.gap>0?'+':'')+r.gap.toFixed(1)+'%';
+      var vs=r.vol>=1.5?'':'background:var(--inset);color:var(--muted);';
+      return '<a class="row" onclick="go(\'detail\')">'+
+        '<div class="nm" style="width:150px;"><b>'+r.n+'</b><small class="num">'+r.code+' · 반도체</small></div>'+
+        '<span class="num" style="width:62px;text-align:right;font-weight:800;color:'+gc+';">'+gt+'</span>'+
+        '<span class="vol-surge-badge" style="'+vs+'">×'+r.vol.toFixed(1)+'</span>'+
+        '<span style="margin-left:auto;text-align:right;">'+chipRight(r,mode)+'</span>'+
+        '</a>';
+    }).join('');
+    return '<div class="block">'+
+      '<div class="block__h"><span class="block__t">'+nd.node+'</span><span class="block__s" style="display:flex;align-items:center;">'+bells+'</span></div>'+
+      '<div style="background:#F8FAFF;border-bottom:1px solid var(--hair);padding:9px 16px;display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#1E40AF;line-height:1.45;"><span>✨</span><span>'+nd.ai+'</span></div>'+
+      rows+'</div>';
+  }).join('');
+}
+function chipFocus(state,el){
+  el.parentNode.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('focus-live').style.display = state==='live' ? '' : 'none';
+  document.getElementById('focus-hl').style.display  = state==='hl'   ? '' : 'none';
+}
+function chipMode(mode,el){
+  document.querySelectorAll('#chip-mode a').forEach(function(a){a.classList.remove('on');});
+  el.classList.add('on');
+  document.getElementById('chip-right-legend').innerHTML = mode==='morning'?'<b>우측</b> 전일까지 수급 추세':'<b>우측</b> 마감 판별 (진짜·반짝)';
+  renderChips(mode);
+}
+renderChips('morning');
 </script>
 </body>
 </html>

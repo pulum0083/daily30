@@ -12,7 +12,7 @@
       <div class="stock-pick-card__top">
         <div class="stock-pick-card__rank">{{ loop.index }}</div>
         <div class="stock-pick-card__info">
-          <div class="stock-pick-card__name">{{ pick.name }}{% if pick.ma20_badge %}<span class="ma20-badge">{{ pick.ma20_badge }}</span>{% endif %}</div>
+          <div class="stock-pick-card__name">{{ pick.name }}{% if pick.ma20_badge %}<span class="ma20-badge">{{ pick.ma20_badge }}</span>{% endif %}{% if pick.vol_mult %}<span class="vol-surge-badge">×{{ pick.vol_mult }} 급증</span>{% endif %}</div>
           <div class="stock-pick-card__meta"><span class="stock-pick-card__price">{{ pick.price }}</span><span class="stock-pick-card__change {{ pick.change_cls }}">{{ pick.change }}</span></div>
           <div class="stock-pick-card__scenario">{{ pick.scenario | safe }}</div>
           <div class="ma200-gauge">

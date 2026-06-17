@@ -28,15 +28,17 @@ git pull
 - **범위**: Phase 1 = 종목 페이지(기존 데이터). Phase 2 = ETF 역인덱스·조합. Phase 3 = 종목별 적중률 표시(Phase 1부터 기록만).
 - **유니버스**: `data/stock_universe.json` 레지스트리 누적 + 일별 토스 candles 갱신.
 - **2티어 AI 상승확률**: 티어1 Claude 예측(픽) `AI 78` / 티어2 기술신호 점수(전 종목) `신호 64`. 산식은 스펙 참조. 극단값 안 만듦(YMYL).
-- **레이아웃**: 더블샷 2단 재사용. 종목 페이지만 사이드바 360 + 메인 2분할. 홈은 풀폭 세로 스택(거래량→상승→하락).
+- **레이아웃**: 더블샷 2단 재사용. 종목 페이지만 사이드바 360 + 메인 2분할. **홈은 C 하이브리드** — 거래량 톱 풀폭(대표) → 상승·하락 2단 → ETF 2단. (세로 풀폭 스택에서 변경, 2026-06-11.)
+- **ETF 블록**: 홈에 ETF 거래량 톱 + ETF 상승 톱 추가. ETF도 6자리 코드라 토스 candles로 시세·기술신호 산출 가능. 단 Claude 픽(`AI 78`)은 개별 종목 전용 → **ETF는 `신호`만**(헤더에 "AI 픽 미적용·신호만"). "거래량 상위 ETF" 검색어 흡수 + ETFNow 영역 잠식. Phase 1.5(역인덱스보다 단순).
 - **화면**: 홈 허브 / 종목 상세 / 섹터 페이지 / 검색 오버레이 / 랭킹 전체(`/stocks/volume·gainers·losers`).
 
 ## 완료된 것
 
 - [x] 설계 스펙 작성·커밋 (Phase 1 + 프로토타입 확정 + 하이브리드 랭킹 산식)
-- [x] 목업 6종: home, stock-detail, sector, search-overlay, hybrid-ranking, flow-clickable
+- [x] 목업 7종: home, stock-detail, etf-detail, sector, search-overlay, hybrid-ranking, flow-clickable
 - [x] IA·GNB 탭·라우트·진입경로 정의
 - [x] AI 뱃지 hover 툴팁(2티어 의미 설명)
+- [x] ETF 상세 페이지 목업 (`etf-detail.html`) — 구성종목·섹터비중 도넛을 메인에, 유사ETF 보수 비교를 사이드바에. ETF는 AI 픽 미적용·신호만. `flow-clickable.html`의 ETF 섹션 행에서 `go('etf-detail')`로 연결.
 
 ## 다음 단계 (남은 일)
 

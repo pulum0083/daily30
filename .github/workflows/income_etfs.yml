@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests yfinance pandas
 
       - name: Build income_etfs.json
         run: python3 scripts/build_income_etfs.py

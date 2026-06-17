@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verdict 레이어 프로토타입 — 패시브·칩보드·메인</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --pass:#0284C7;--pass-bg:#F0F9FF;--pass-border:#BAE6FD;
+  --chip:#5B21B6;--chip-bg:#F5F3FF;--chip-border:#DDD6FE;
+}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E8ECF1;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums;}
+.up{color:var(--up);}.dn{color:var(--dn);}
+
+/* 내비 */
+.nav{background:#16181A;height:52px;display:flex;align-items:center;padding:0 28px;gap:20px;position:sticky;top:0;z-index:10;}
+.nav__logo{font-size:15px;font-weight:800;color:#fff;}.nav__logo b{color:#5AA2FF;}
+.nav a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;}
+.nav a.on{color:#fff;}
+.nav__tabs{display:flex;gap:2px;margin-left:auto;background:#26282B;border-radius:8px;padding:3px;}
+.nav__tabs a{font-size:12px;font-weight:700;color:#9CA0A6;padding:5px 13px;border-radius:6px;cursor:pointer;}
+.nav__tabs a.on{background:var(--canvas);color:var(--ink);}
+
+/* 레이아웃 */
+.wrap{max-width:1100px;margin:0 auto;padding:28px 24px 64px;}
+.screen{display:none;}.screen.on{display:block;animation:fade .16s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.crumb{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.crumb a{color:var(--muted);text-decoration:none;cursor:pointer;}.crumb a:hover{color:var(--primary);}
+
+/* 공통 카드 */
+.card{background:var(--canvas);border:1px solid var(--hair);border-radius:13px;overflow:hidden;margin-bottom:12px;}
+.card--hero{border-width:1.5px;}
+.card__h{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--hair);font-size:12px;font-weight:800;}
+
+/* 섹션 제목 */
+.phead{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0 0 4px;}
+.psub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+
+/* 국면 배지 카드 (패시브·칩보드 공통 히어로) */
+.verdict-hero{border-radius:13px;overflow:hidden;margin-bottom:12px;}
+.verdict-hero__body{display:flex;align-items:center;gap:13px;padding:14px 17px;}
+.verdict-hero__ic{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.verdict-hero__label{font-size:11px;font-weight:800;letter-spacing:.04em;margin-bottom:4px;}
+.verdict-hero__title{font-size:15px;font-weight:800;line-height:1.5;}
+.verdict-hero__kpi{text-align:right;flex-shrink:0;}
+.verdict-hero__kpi-l{font-size:10px;color:var(--muted);}
+.verdict-hero__kpi-v{font-size:18px;font-weight:800;}
+.verdict-footer{display:flex;border-top:1px solid var(--hair);font-size:11px;}
+.verdict-footer__cell{flex:1;padding:8px 16px;color:var(--muted);}
+.verdict-footer__cell+.verdict-footer__cell{border-left:1px solid var(--hair);}
+
+/* 스포트라이트 카드 */
+.spotlight{border-radius:13px;padding:13px 16px;margin-bottom:12px;}
+.spotlight__label{font-size:11px;font-weight:800;margin-bottom:7px;}
+.spotlight__name{display:flex;align-items:baseline;gap:8px;margin-bottom:7px;}
+.spotlight__name b{font-size:15px;font-weight:800;}
+.spotlight__name small{font-size:11px;color:var(--muted);}
+.spotlight__body{font-size:13px;line-height:1.65;}
+
+/* 랭킹 테이블 */
+.rtbl{background:var(--canvas);border:1px solid var(--hair);border-radius:11px;overflow:hidden;margin-bottom:12px;}
+.rtbl__head{display:flex;align-items:center;padding:9px 16px;background:var(--soft);border-bottom:1px solid var(--hair);font-size:11px;font-weight:700;color:var(--muted);}
+.rtbl__row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #F5F5F5;cursor:pointer;transition:background .1s;}
+.rtbl__row:last-child{border-bottom:none;}
+.rtbl__row:hover{background:var(--primary-bg);}
+.rtbl__nm{width:144px;flex-shrink:0;}
+.rtbl__nm b{font-size:13px;font-weight:700;display:block;}
+.rtbl__nm small{font-size:10px;color:var(--muted);}
+.bar-wrap{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
+.bar-fill{height:100%;border-radius:5px;}
+.bar-val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;}
+.verdict-col{width:50px;text-align:right;flex-shrink:0;}
+.conc-col{width:48px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
+
+/* 뱃지 */
+.bdg{display:inline-flex;align-items:center;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+.bdg--up{background:var(--up-bg);color:var(--up);}
+.bdg--dn{background:var(--dn-bg);color:var(--dn);}
+.bdg--warn{background:#FEF3C7;color:#92400E;}
+.bdg--mute{background:var(--inset);color:var(--muted);}
+.bdg--pass{background:#E0F2FE;color:#0C4A6E;}
+.bdg--chip{background:#EDE9FE;color:#5B21B6;}
+
+/* 칩보드 — 종목 대응 행 */
+.chip-row{display:flex;align-items:center;gap:11px;padding:11px 16px;border-bottom:1px solid #F5F5F5;}
+.chip-row:last-child{border-bottom:none;}
+.chip-row__left{flex:1;min-width:0;}
+.chip-row__left b{font-size:13px;font-weight:700;}
+.chip-row__left small{font-size:10px;color:var(--muted);}
+.chip-row__desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.chip-row__verdict{text-align:right;flex-shrink:0;}
+.chip-row__verdict .v{font-size:11px;font-weight:800;display:block;margin-bottom:3px;}
+.chip-row__verdict small{font-size:10px;color:var(--muted);}
+
+/* 칩보드 근거 섹션 */
+.evidence{background:var(--canvas);border:1px solid var(--hair);border-radius:11px;padding:12px 16px;margin-bottom:12px;}
+.evidence__label{font-size:10px;font-weight:700;letter-spacing:.05em;color:#9CA3AF;text-transform:uppercase;margin-bottom:9px;}
+.evidence__items{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;}
+.evidence__disc{font-size:10px;color:#9CA3AF;line-height:1.6;margin-top:10px;padding-top:9px;border-top:1px solid var(--hair);}
+
+/* 메인 — 적중률 띠 */
+.acc-bar{display:flex;align-items:center;gap:14px;border-radius:13px;padding:14px 17px;margin-bottom:12px;}
+.acc-bar__num{display:flex;align-items:baseline;gap:1px;flex-shrink:0;}
+.acc-bar__num b{font-size:36px;font-weight:900;line-height:1;}
+.acc-bar__num u{font-size:17px;font-weight:900;text-decoration:none;}
+.acc-bar__text{flex:1;min-width:0;}
+.acc-bar__title{font-size:14px;font-weight:800;}
+.acc-bar__sub{font-size:12px;margin-top:2px;}
+
+/* 메인 — 오늘의 판단 */
+.pick-card{background:var(--canvas);border:1.5px solid #BFDBFE;border-radius:13px;overflow:hidden;margin-bottom:12px;}
+.pick-card__h{display:flex;align-items:center;gap:8px;padding:9px 16px;background:#EFF6FF;border-bottom:1px solid #BFDBFE;font-size:12px;font-weight:800;color:#1E40AF;}
+.pick-card__note{font-size:10px;font-weight:600;color:var(--muted);margin-left:auto;}
+.pick-card__body{padding:14px 16px;}
+.pick-card__head{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;}
+.pick-card__head b{font-size:17px;font-weight:800;}
+.pick-card__head small{font-size:11px;color:var(--muted);}
+.gauge{position:relative;height:11px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.34),#EEF1F5 50%,rgba(224,49,49,.40));margin-bottom:9px;}
+.gauge__needle{position:absolute;top:-4px;width:4px;height:19px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}
+.pick-card__desc{font-size:13px;color:#374151;line-height:1.65;}
+
+/* 메인 — 엣지 2칸 */
+.edge2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px;}
+.edge-cell{border-radius:12px;padding:13px 15px;}
+.edge-cell__label{font-size:11px;font-weight:800;margin-bottom:6px;}
+.edge-cell__title{font-size:14px;font-weight:800;}
+.edge-cell__body{font-size:12px;line-height:1.6;margin-top:5px;}
+
+/* 메인 — 거래량 (강등) */
+.demoted-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.demoted-label span{font-size:12px;font-weight:800;color:var(--muted);}
+.demoted-label a{font-size:11px;color:#9CA3AF;cursor:pointer;}
+.demoted-tbl{background:var(--canvas);border:1px solid var(--hair);border-radius:11px;overflow:hidden;opacity:.9;}
+.demoted-row{display:flex;align-items:center;gap:11px;padding:8px 16px;border-bottom:1px solid #F5F5F5;font-size:12.5px;}
+.demoted-row:last-child{border-bottom:none;}
+
+/* 지수 스트립 */
+.strip{display:flex;gap:16px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:12px;overflow-x:auto;white-space:nowrap;}
+.strip__sep{color:var(--hair);}
+.strip__item{display:flex;align-items:baseline;gap:5px;}
+.strip__l{color:var(--muted);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav__logo">Double<b>-Shot</b></span>
+  <a href="#" onclick="go('main')">브리핑</a>
+  <a href="#" class="on" onclick="go('main')">종목</a>
+  <div class="nav__tabs">
+    <a class="on" onclick="go('main')">메인</a>
+    <a onclick="go('passive')">패시브 민감주</a>
+    <a onclick="go('chips')">AI 칩보드</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ==============================
+     메인 — 엣지-퍼스트
+=============================== -->
+<div class="screen on" id="main">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:10px;flex-wrap:wrap;">
+    <div>
+      <div class="phead">오늘의 <span style="color:var(--primary);">종목</span></div>
+      <div class="psub" style="margin-bottom:0;">코스피·코스닥 AI 전망과 매일 갱신되는 실측 · 06-11</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted);cursor:text;">
+      🔍 종목명 또는 코드 검색<span style="margin-left:6px;font-size:11px;background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:1px 6px;">⌘K</span>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="strip__item"><span class="strip__l">코스피</span><b>2,712</b><span class="up num">+0.82%</span></div>
+    <span class="strip__sep">|</span>
+    <div class="strip__item"><span class="strip__l">코스닥</span><b>781.2</b><span class="up num">+0.45%</span></div>
+    <span class="strip__sep">|</span>
+    <div class="strip__item"><span class="strip__l">KP200</span><b>366.1</b><span class="up num">+0.71%</span></div>
+    <span class="strip__sep">|</span>
+    <div class="strip__item"><span class="strip__l">원/달러</span><b>1,366</b><span class="dn num">−3.2</span></div>
+  </div>
+
+  <!-- ① 적중률 신뢰 띠 -->
+  <div class="acc-bar" style="background:#F0FDF4;border:1.5px solid #BBF7D0;">
+    <div class="acc-bar__num" style="color:#16A34A;"><b>65</b><u>%</u></div>
+    <div class="acc-bar__text">
+      <div class="acc-bar__title" style="color:#15803D;">AI 종목 전망, 최근 60회 중 39회 적중</div>
+      <div class="acc-bar__sub" style="color:#16A34A;">매일 다음 날 실제 종가로 채점해요. 빗나간 것도 그대로 공개해요.</div>
+    </div>
+  </div>
+
+  <!-- ② 오늘의 판단 -->
+  <div class="pick-card">
+    <div class="pick-card__h">
+      ⚡ 오늘의 판단
+      <span class="pick-card__note">07:30 예측 · 가장 확신 높은 한 종목</span>
+    </div>
+    <div class="pick-card__body">
+      <div class="pick-card__head">
+        <b>SK하이닉스</b>
+        <small class="num">000660 · 반도체</small>
+        <span class="bdg bdg--up" style="margin-left:auto;font-size:11px;padding:3px 11px;">▲ 상승 우위 78%</span>
+      </div>
+      <div class="gauge"><div class="gauge__needle" style="left:78%;"></div></div>
+      <div class="pick-card__desc">HBM3E 12단 양산 본격화로 실적 기대가 커지고 있어요. 20일선을 막 상향 돌파해 <b>개별 모멘텀이 살아있는</b> 신호예요.</div>
+    </div>
+  </div>
+
+  <!-- ③ 엣지 2칸: 패시브 국면 + 인컴 정직 -->
+  <div class="edge2">
+    <div class="edge-cell" style="background:var(--pass-bg);border:1px solid var(--pass-border);">
+      <div class="edge-cell__label" style="color:#0C4A6E;">🧲 패시브 자금 국면</div>
+      <div class="edge-cell__title" style="color:var(--pass);">▲ 유입 중 <span style="font-size:12px;color:var(--muted);font-weight:700;">1주 +42.8억</span></div>
+      <div class="edge-cell__body" style="color:#374151;">반도체 소부장 인질주가 떠받쳐지는 흐름. <b style="color:var(--pass);">이오테크닉스 외 6종</b> 주목.
+        <a onclick="go('passive')" style="display:block;margin-top:6px;font-size:11px;font-weight:700;color:var(--pass);cursor:pointer;">패시브 민감주 전체 →</a>
+      </div>
+    </div>
+    <div class="edge-cell" style="background:#FFFBEB;border:1px solid #FDE68A;">
+      <div class="edge-cell__label" style="color:#92400E;">🪙 배당 인컴 — 정직 점검</div>
+      <div class="edge-cell__title" style="color:#f33942;">원금성 분배 2종 적발</div>
+      <div class="edge-cell__body" style="color:#374151;">국채커버드콜 분배율 13%인데 총수익 1.8% — <b style="color:#f33942;">원금을 헐고 있어요.</b>
+        <a style="display:block;margin-top:6px;font-size:11px;font-weight:700;color:var(--gold);cursor:pointer;">인컴 설계기 →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 거래량 랭킹 (강등) -->
+  <div class="demoted-label">
+    <span>📊 더 둘러보기 · 거래량 톱</span>
+    <a>전체 →</a>
+  </div>
+  <div class="demoted-tbl">
+    <div class="demoted-row"><span style="width:14px;color:#9CA3AF;font-weight:800;flex-shrink:0;">1</span><b style="flex:1;font-weight:700;">삼성전자</b><span style="color:var(--muted);" class="num">3,210만주</span><span class="up num" style="font-weight:700;width:54px;text-align:right;">+1.9%</span></div>
+    <div class="demoted-row"><span style="width:14px;color:#9CA3AF;font-weight:800;flex-shrink:0;">2</span><b style="flex:1;font-weight:700;">한미반도체</b><span style="color:var(--muted);" class="num">1,840만주</span><span class="up num" style="font-weight:700;width:54px;text-align:right;">+5.8%</span></div>
+    <div class="demoted-row"><span style="width:14px;color:#9CA3AF;font-weight:800;flex-shrink:0;">3</span><b style="flex:1;font-weight:700;">SK하이닉스</b><span style="color:var(--muted);" class="num">1,110만주</span><span class="up num" style="font-weight:700;width:54px;text-align:right;">+3.1%</span></div>
+  </div>
+</div>
+
+
+<!-- ==============================
+     패시브 민감주 — verdict 레이어
+=============================== -->
+<div class="screen" id="passive">
+  <div class="crumb"><a onclick="go('main')">홈</a> › <span style="color:var(--pass);">패시브 민감주</span></div>
+  <div class="phead" style="color:#0C4A6E;">🧲 패시브 민감주</div>
+  <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · 06-13</div>
+
+  <!-- ① 국면 배지 (Hero verdict) -->
+  <div class="verdict-hero card--hero" style="background:var(--canvas);border:1.5px solid #FBD0D0;">
+    <div class="verdict-hero__body">
+      <div class="verdict-hero__ic" style="background:var(--up-bg);">▲</div>
+      <div style="flex:1;min-width:0;">
+        <div class="verdict-hero__label" style="color:var(--up);">지금 패시브 자금은 유입 국면</div>
+        <div class="verdict-hero__title">노출 높은 종목이 펀더멘털과 무관하게 <span style="color:var(--up);">떠받쳐지는</span> 흐름이에요.</div>
+      </div>
+      <div class="verdict-hero__kpi">
+        <div class="verdict-hero__kpi-l">KODEX 반도체 1주 순자금유입</div>
+        <div class="verdict-hero__kpi-v up">+42.8억</div>
+      </div>
+    </div>
+    <div class="verdict-footer">
+      <div class="verdict-footer__cell">유입 + 高노출 → <b style="color:var(--up);">주목</b> (자금 탄력)</div>
+      <div class="verdict-footer__cell">유출 + 高노출 → <b style="color:#92400E;">주의</b> (인질 위험)</div>
+    </div>
+  </div>
+
+  <!-- ② 오늘의 인질주 스포트라이트 -->
+  <div class="spotlight" style="background:#FFFBEB;border:1.5px solid #FDE68A;">
+    <div class="spotlight__label" style="color:#92400E;">⚠️ 오늘의 인질주 — 자금에 가장 휘둘리는 중소형주</div>
+    <div class="spotlight__name">
+      <b>이오테크닉스</b>
+      <small class="num">039030 · 반도체 장비</small>
+      <span class="bdg bdg--up" style="margin-left:auto;">주목</span>
+    </div>
+    <div class="spotlight__body" style="color:#374151;">
+      ETF가 <b style="color:var(--gold);">거래량 15일치</b>를 쥐고 있어요. 지금은 유입 국면이라 떠받쳐지지만, 자금이 돌면 <b>펀더멘털과 무관하게 가장 먼저 밀리는</b> 종목이에요.
+    </div>
+  </div>
+
+  <!-- ③ 랭킹 표 (판정 컬럼 추가) -->
+  <div class="rtbl">
+    <div class="rtbl__head">
+      <span class="rtbl__nm" style="font-weight:700;">종목</span>
+      <span style="flex:1;">거래일수 (ETF 물량 소화일)</span>
+      <span class="conc-col">집중도</span>
+      <span class="verdict-col">판정</span>
+    </div>
+    <div class="rtbl__row">
+      <div class="rtbl__nm"><b>이오테크닉스</b><small>반도체 장비</small></div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:94%;background:linear-gradient(90deg,#BAE6FD,var(--pass));"></div><span class="bar-val num" style="color:#0C4A6E;">15.2일</span></div>
+      <div class="conc-col">18%</div>
+      <div class="verdict-col"><span class="bdg bdg--up">주목</span></div>
+    </div>
+    <div class="rtbl__row">
+      <div class="rtbl__nm"><b>리노공업</b><small>반도체 부품</small></div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:71%;background:linear-gradient(90deg,#BAE6FD,var(--pass));"></div><span class="bar-val num" style="color:#0C4A6E;">11.4일</span></div>
+      <div class="conc-col">14%</div>
+      <div class="verdict-col"><span class="bdg bdg--up">주목</span></div>
+    </div>
+    <div class="rtbl__row">
+      <div class="rtbl__nm"><b>원익IPS</b><small>반도체 장비</small></div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:56%;background:linear-gradient(90deg,#BAE6FD,var(--pass));"></div><span class="bar-val num" style="color:#0C4A6E;">8.9일</span></div>
+      <div class="conc-col">11%</div>
+      <div class="verdict-col"><span class="bdg bdg--up">주목</span></div>
+    </div>
+    <div class="rtbl__row">
+      <div class="rtbl__nm"><b>삼성전자</b><small>반도체</small></div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:20%;background:linear-gradient(90deg,#BAE6FD,var(--pass));"></div><span class="bar-val num" style="color:#0C4A6E;">3.2일</span></div>
+      <div class="conc-col">1.6%</div>
+      <div class="verdict-col"><span class="bdg bdg--mute">둔감</span></div>
+    </div>
+  </div>
+  <div style="font-size:10px;color:#9CA3AF;line-height:1.6;margin-bottom:8px;">주요 ETF TOP10 구성 기준 추정 · 인과 주장 아님, 구조적 노출도 지표 · 국면 = 네이버 cumulativeNetInflow1w (순자금유입, 가격 상승분 제거됨)</div>
+</div>
+
+
+<!-- ==============================
+     AI 반도체 칩보드 — verdict 레이어 (관찰형 톤)
+=============================== -->
+<div class="screen" id="chips">
+  <div class="crumb"><a onclick="go('main')">홈</a> › <span style="color:var(--chip);">AI 반도체 칩보드</span></div>
+  <div class="phead" style="color:var(--chip);">🔬 AI 반도체 칩보드</div>
+  <div class="psub">밤사이 미국 → 오늘 한국 반도체 대응 · 06-11 08:42 장전</div>
+
+  <!-- ① 밤사이 결론 (Hero verdict) -->
+  <div class="verdict-hero card--hero" style="background:var(--chip-bg);border:1.5px solid var(--chip-border);">
+    <div class="verdict-hero__body" style="flex-direction:column;gap:0;padding:15px 17px;">
+      <div class="verdict-hero__label" style="color:#7C3AED;margin-bottom:7px;">💬 밤사이 결론</div>
+      <div style="font-size:15.5px;font-weight:800;color:#2E1065;line-height:1.55;">
+        엔비디아 신고가·마이크론 어닝 서프라이즈로 <span style="color:#7C3AED;">HBM 수요 재확인</span>.<br>
+        오늘 <span style="color:var(--up);">HBM 라인에서 갭 관찰</span>, 파운드리·장비는 <span style="color:var(--muted);">모멘텀 제한</span> 흐름이에요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 오늘 한국 반도체 — 관찰형 대응 -->
+  <div class="card">
+    <div class="card__h" style="color:var(--ink);">오늘 한국 반도체 · 어떻게 보이나 <span style="font-size:10px;font-weight:600;color:var(--muted);margin-left:auto;">갭 × 거래대금 × 밤사이 연동</span></div>
+    <div class="chip-row">
+      <div class="chip-row__left">
+        <b>SK하이닉스</b> <small class="num">000660 · HBM</small>
+        <div class="chip-row__desc">외국인 3일 연속 순매수 + MU 어닝 수혜 직격 · HBM 노출 최대</div>
+      </div>
+      <div class="chip-row__verdict">
+        <span class="v"><span class="bdg bdg--up">갭 주목</span></span>
+        <small>예상 갭 +2~3%</small>
+      </div>
+    </div>
+    <div class="chip-row">
+      <div class="chip-row__left">
+        <b>한미반도체</b> <small class="num">042700 · HBM 장비</small>
+        <div class="chip-row__desc">HBM 본딩 장비 수혜, 전일 거래대금 ×3.7</div>
+      </div>
+      <div class="chip-row__verdict">
+        <span class="v"><span class="bdg bdg--up">갭 주목</span></span>
+        <small>거래 급증 동반</small>
+      </div>
+    </div>
+    <div class="chip-row">
+      <div class="chip-row__left">
+        <b>DB하이텍</b> <small class="num">000990 · 파운드리</small>
+        <div class="chip-row__desc">파운드리는 밤사이 모멘텀 약함</div>
+      </div>
+      <div class="chip-row__verdict">
+        <span class="v"><span class="bdg bdg--warn">모멘텀 제한</span></span>
+        <small>갭 메우기 가능</small>
+      </div>
+    </div>
+    <div class="chip-row">
+      <div class="chip-row__left">
+        <b>삼성전자</b> <small class="num">005930 · DRAM/파운드리</small>
+        <div class="chip-row__desc">DRAM 수혜 일부, 파운드리 비중이 발목</div>
+      </div>
+      <div class="chip-row__verdict">
+        <span class="v"><span class="bdg bdg--mute">혼조 관찰</span></span>
+        <small>방향 불확실</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 근거 (EVIDENCE — 강등) -->
+  <div class="evidence">
+    <div class="evidence__label">근거 · 밤사이 미국</div>
+    <div class="evidence__items">
+      <span>NVDA <b class="up">+4.2%</b></span>
+      <span>MU <b class="up">+6.9%</b></span>
+      <span>TSM <b class="up">+1.1%</b></span>
+      <span>INTC <b class="dn">−2.3%</b></span>
+      <span>ASML <b class="dn">−0.8%</b></span>
+      <span style="color:var(--hair);">|</span>
+      <span style="color:var(--muted);">나스닥 <b class="up">+1.4%</b></span>
+      <span style="color:var(--muted);">SOX <b class="up">+2.8%</b> (1개월 +18.4%)</span>
+      <span style="color:var(--muted);">VIX 14.2</span>
+    </div>
+    <div class="evidence__disc">벨웨더는 yahoo 실시간 · 한국 갭·거래대금은 장중 실시간 · 종목별 수급은 마감 후 확정이라 아침엔 전일 추세만 반영 · 투자 판단의 참고용</div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+var history_stack = ['main'];
+function go(id) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
+  var t = document.getElementById(id);
+  if(t) t.classList.add('on');
+  history_stack.push(id);
+  // nav tab 동기화
+  document.querySelectorAll('.nav__tabs a').forEach(function(a){
+    a.classList.toggle('on', a.getAttribute('onclick') && a.getAttribute('onclick').includes("'"+id+"'"));
+  });
+  window.scrollTo(0,0);
+}
+// 초기 탭 상태
+document.querySelectorAll('.nav__tabs a')[0].classList.add('on');
+</script>
+</body>
+</html>

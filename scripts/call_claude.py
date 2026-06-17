@@ -16,6 +16,7 @@ Usage:
 import argparse
 import json
 import os
+import random
 import subprocess
 import sys
 from datetime import datetime
@@ -348,6 +349,30 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
     ]
   }
 }
+
+**[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
+
+### 형식 A: bullet
+`reason_title`(훅 타이틀) + `reasons`(4개 불릿 배열) 출력.
+기존 방식 그대로.
+
+### 형식 B: scenario
+`reason_title` + 아래 6개 필드 출력:
+- `sc_summary`: 오늘 시장 한 줄 요약 (예측 방향 + 핵심 팩터)
+- `sc_left_label`: 왼쪽 컬럼 레이블 (상승우위="상승 근거", 하락우위="하락 근거")
+- `sc_right_label`: 오른쪽 컬럼 레이블 (상승우위="리스크", 하락우위="반등 가능성")
+- `sc_left_items`: 왼쪽 항목 정확히 3개 (각 60자 이내, <b> 수치 강조 포함)
+- `sc_right_items`: 오른쪽 항목 정확히 3개 (각 60자 이내)
+- `sc_footer`: 다음 세션 핵심 변수 1문장 (해요체)
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 C: why_what_so
+`reason_title` + 아래 4개 필드 출력:
+- `reason_lead`: 오늘 시장 전반 2문장 요약 (지수 등락폭·방향과 핵심 이유)
+- `why`: 시장을 움직인 근본 원인 1~2문장
+- `what`: 강한/약한 섹터·종목 구체 수치 1~2문장
+- `so_what`: 다음 세션 시사점 정확히 1문장 (해요체)
+`reasons` 필드는 출력하지 않는다.
 """
 
 US_SYSTEM_PROMPT = """\
@@ -609,6 +634,30 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
     ]
   }
 }
+
+**[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
+
+### 형식 A: bullet
+`reason_title`(훅 타이틀) + `reasons`(4개 불릿 배열) 출력.
+기존 방식 그대로.
+
+### 형식 B: scenario
+`reason_title` + 아래 6개 필드 출력:
+- `sc_summary`: 오늘 미국 시장 한 줄 요약 (예측 방향 + 핵심 팩터)
+- `sc_left_label`: 왼쪽 컬럼 레이블 (상승우위="강세 근거", 하락우위="약세 근거")
+- `sc_right_label`: 오른쪽 컬럼 레이블 (상승우위="리스크", 하락우위="반등 가능성")
+- `sc_left_items`: 왼쪽 항목 정확히 3개 (각 60자 이내, <b> 수치 강조 포함)
+- `sc_right_items`: 오른쪽 항목 정확히 3개 (각 60자 이내)
+- `sc_footer`: 다음 세션 핵심 변수 1문장 (해요체)
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 C: why_what_so
+`reason_title` + 아래 4개 필드 출력:
+- `reason_lead`: 오늘 미국 시장 전반 2문장 요약 (지수 등락폭·방향과 핵심 이유)
+- `why`: 시장을 움직인 근본 원인 1~2문장
+- `what`: 강한/약한 섹터·종목 구체 수치 1~2문장
+- `so_what`: 다음 세션 시사점 정확히 1문장 (해요체)
+`reasons` 필드는 출력하지 않는다.
 """
 
 
@@ -1048,6 +1097,12 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
             user_content += sector_hint
             print(f"[call_claude] Sector rotation hint injected ({len(sector_history[:5])} recent)")
 
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
+    _formats = ["bullet", "scenario", "why_what_so"]
+    chosen_format = random.choice(_formats)
+    user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
+    print(f"[call_claude] Selected format: {chosen_format}")
+
     print(f"[call_claude] Calling Claude API (type={briefing_type}, date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
 
@@ -1281,6 +1336,19 @@ sentiment shift는 마감 흐름의 근본 원인이 되기도 하고 다음 세
     "💰 외국인 <b>2,450억 순매도</b> — 글로벌 매크로 불확실성에 대형주 상단 제한됐어요."
   ]
 }
+
+**[형식 지시] 유저 메시지 하단에 오늘 사용할 형식이 지정된다.**
+
+### 형식 A: bullet
+`reason_title` + `reasons` 4개 불릿 배열 출력.
+`market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
+
+### 형식 B: scenario
+`reason_title` + `sc_summary`, `sc_left_label`("버틴 요인"), `sc_right_label`("내린 요인"), `sc_left_items`(3개), `sc_right_items`(3개), `sc_footer` 출력.
+`market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
+
+### 형식 C: why_what_so (기본값)
+기존 방식 그대로 `market_title`, `market_summary`, `why`, `what`, `so_what` 출력.
 """
 
 
@@ -1318,6 +1386,12 @@ def call_claude_closing(date_str: str) -> dict:
     news_summary = load_news_summary("kospi-close")
     if news_summary:
         user_content += f"\n뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
+
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
+    _formats = ["bullet", "scenario", "why_what_so"]
+    chosen_format = random.choice(_formats)
+    user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
+    print(f"[call_claude] Selected format: {chosen_format}")
 
     print(f"[call_claude] Calling Claude for kospi-close (date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")

@@ -9,7 +9,7 @@
     <div class="dpick-row">
       <div class="dpick-top">
         <span class="dpick-name">{{ row.name }}</span><span class="dpick-code">{{ row.code }}</span>
-        <span class="dpick-mult">거래대금 ×{{ row.mult }}</span><span class="dpick-vol">{{ row.vol }}</span>
+        <span class="vol-surge-badge">×{{ row.mult }} 급증</span><span class="dpick-vol">{{ row.vol }}</span>
         <span class="dpick-chg">{{ row.chg }}</span>
       </div>
       <div class="dpick-bar">{% for seg in row.segs %}<div class="dpick-seg {{ seg.cls }}" style="width:{{ seg.width }}%">{{ seg.label }}</div>{% endfor %}</div>
