@@ -143,6 +143,31 @@ def _get_market_reality():
         return None
 
 
+def _is_duplicate_title(latest: dict, recent_titles: list) -> bool:
+    """새 이슈 제목이 직전 이슈와 실질적으로 동일한지 확인한다.
+
+    한국어 2음절+ 키워드 기준으로 이전 제목의 60% 이상 겹치면 중복으로 판정.
+    """
+    if not recent_titles:
+        return False
+    new_market = (latest.get("market") or {}).get("title", "")
+    new_stock  = (latest.get("stock")  or {}).get("title", "")
+    for prev in recent_titles:
+        if not prev:
+            continue
+        prev_kw = set(re.findall(r"[가-힣]{2,}", prev))
+        if not prev_kw:
+            continue
+        for new_title in [new_market, new_stock]:
+            new_kw = set(re.findall(r"[가-힣]{2,}", new_title))
+            if not new_kw:
+                continue
+            overlap = prev_kw & new_kw
+            if len(overlap) / len(prev_kw) >= 0.6:
+                return True
+    return False
+
+
 def _is_direction_conflict(latest: dict, change_pct: float) -> bool:
     """시장 등락률과 이슈 타이틀 방향이 모순인지 확인한다."""
     titles = " ".join([
@@ -325,6 +350,12 @@ def main() -> None:
             print(f"[fetch_news_live] ERROR (시도 {attempt+1}): {e}", file=sys.stderr)
             if attempt == 2:
                 sys.exit(1)
+            continue
+
+        # 중복 제목 검증 — 소프트 방지(프롬프트)에도 Gemini가 같은 헤드라인을 반환하는 경우 차단
+        if recent_stock_titles and _is_duplicate_title(latest, recent_stock_titles):
+            titles = f"{(latest.get('market') or {}).get('title','')} / {(latest.get('stock') or {}).get('title','')}"
+            print(f"[fetch_news_live] ⚠️ 중복 제목 감지 (시도 {attempt+1}): {titles} — 재시도")
             continue
 
         # 방향 모순 검증 (MARKET 슬롯 + 실측 데이터 있을 때만)
