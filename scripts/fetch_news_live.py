@@ -416,8 +416,7 @@ def main() -> None:
             dup = _find_duplicate(result, all_today_titles)
             if dup:
                 print(f"[fetch_news_live] ⚠️ 중복 (시도 {attempt+1}): {dup} — 재시도")
-                if attempt < 3:
-                    continue
+                continue  # 항상 재시도 — 마지막 시도도 중복이면 for-else에서 발행 생략
 
         break
     else:
