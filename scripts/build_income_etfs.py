@@ -37,8 +37,8 @@ KST = timezone(timedelta(hours=9))
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
-# 인컴 ETF 이름 패턴 — 배당·분배 목적 상품. (실행 분포로 확정, 2026-06-13)
-NAME_PAT = re.compile(r"커버드콜|배당|프리미엄|인컴|고배당|위클리|데일리|리츠")
+# 인컴 ETF 이름 패턴 — 배당·분배 목적 상품. (실행 분포로 확정, 2026-06-17)
+NAME_PAT = re.compile(r"커버드콜|배당|프리미엄|인컴|고배당|위클리|데일리|리츠|CD금리|CD1년금리|KOFR금리|단기채권|미국채혼합")
 
 
 # ---------- 순수 함수 (네트워크 없음, 테스트 대상) ----------
