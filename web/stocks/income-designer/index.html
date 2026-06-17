@@ -805,7 +805,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       </div>
     </div>
     <!-- 정직 배너 -->
-    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요.<br><br>분배율·총수익·순자산은 매주 월요일 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요.<br><br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
+    <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요.<br>분배율·총수익·순자산은 매주 월요일 자동 갱신되는 실측값이에요. 분배율은 과거 12개월 실적이라 미래 분배를 보장하지 않아요. 상장 1년 미만 ETF는 총수익이 없어 건전성 판정에서 제외돼요.<br>미국 ETF 가격은 원화 환산(갱신 시점 환율 기준)이라 환율 변동은 별도예요. 세금은 예상치이고, 투자 권유가 아니에요.</p>
 
   </div>
 
@@ -1250,7 +1250,7 @@ function simOut(){
   if(bad.length){
     cards.push(`<div class="rc open">
       <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
+      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br>')}</div>
     </div>`);
     const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
     const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
