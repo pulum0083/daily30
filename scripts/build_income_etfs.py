@@ -1,11 +1,10 @@
 # 배당·커버드콜 ETF의 분배 품질(건전성)을 실측 집계하는 인컴 설계기 파이프라인
 #!/usr/bin/env python3
 """
-배당 인컴 설계기 유니버스 파이프라인 (v1).
+배당 인컴 설계기 유니버스 파이프라인 (v2 — 미국 ETF 추가).
 
-순자산 일정 규모 이상의 '월배당' 배당·커버드콜 ETF를 모아, 분배율 대비 실제
-총수익으로 "분배 품질(건전성)"을 판정한다. 분기·반기 배당 ETF는 dividendMonthThisYear
-기준으로 걸러낸다(is_monthly).
+국내: 순자산 일정 규모 이상의 '월배당' 배당·커버드콜 ETF (네이버 API)
+미국: 큐레이션 목록 기반 월배당 ETF (yfinance)
 
 핵심 지표 — 가격침식 프록시:
   erosion = 총수익(Y1) − 분배율(TTM)
@@ -13,18 +12,18 @@
     ≥ −분배율/2   : 소폭 침식 → 주의(warn)
     <  −분배율/2  : 분배금에 원금이 섞임(원금성) → 경고(bad)
 
-  명시적 원금분배(ROC) 분해는 네이버에 없다. 위 프록시가 대체한다.
-  총수익·NAV는 분배금 재투자 기준이라 가격만의 변화는 총수익−분배율로 추정.
+데이터 소스:
+  국내 - 유니버스/가격/시총 : finance.naver.com/api/sise/etfItemList.nhn (cp949)
+  국내 - 분배율·총수익·과세 : m.stock.naver.com/api/stock/{code}/etfAnalysis
+  미국 - 가격·배당·AUM     : yfinance
+  환율 - USD/KRW          : yfinance (USDKRW=X)
 
-데이터 소스 (전부 네이버, 무인증):
-  - 유니버스/가격/시총 : finance.naver.com/api/sise/etfItemList.nhn (cp949)
-  - 분배율·총수익·과세 : m.stock.naver.com/api/stock/{code}/etfAnalysis
-
-산출: data/income_etfs.json  (사이드바 랭킹 + 시뮬레이터 공용)
+산출: web/data/income_etfs.json  (사이드바 랭킹 + 시뮬레이터 공용)
 
 Usage:
   python3 scripts/build_income_etfs.py                 # 운영(순자산 7천억+)
   python3 scripts/build_income_etfs.py --aum-floor 10000   # 1조+
+  python3 scripts/build_income_etfs.py --no-us        # 미국 ETF 제외
 """
 import argparse
 import json
@@ -37,8 +36,31 @@ KST = timezone(timedelta(hours=9))
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
-# 인컴 ETF 이름 패턴 — 배당·분배 목적 상품. (실행 분포로 확정, 2026-06-17)
+# 국내 인컴 ETF 이름 패턴 (2026-06-17)
 NAME_PAT = re.compile(r"커버드콜|배당|프리미엄|인컴|고배당|위클리|데일리|리츠|CD금리|CD1년금리|KOFR금리|단기채권|미국채혼합")
+
+# 미국 인컴 ETF 큐레이션 목록 (ticker → 한국어 표시명)
+US_ETF_NAMES = {
+    "JEPI":  "JPMorgan 에쿼티프리미엄 (JEPI)",
+    "JEPQ":  "JPMorgan 나스닥 에쿼티프리미엄 (JEPQ)",
+    "QYLD":  "Global X 나스닥100 커버드콜 (QYLD)",
+    "RYLD":  "Global X Russell2000 커버드콜 (RYLD)",
+    "XYLD":  "Global X S&P500 커버드콜 (XYLD)",
+    "TLTW":  "iShares 20년+ 국채 커버드콜 (TLTW)",
+    "HYGW":  "iShares HY회사채 커버드콜 (HYGW)",
+    "SPYI":  "NEOS S&P500 고인컴 (SPYI)",
+    "QQQI":  "NEOS 나스닥100 고인컴 (QQQI)",
+    "DIVO":  "Amplify CWP 강화배당 (DIVO)",
+    "SCHD":  "Schwab 미국배당 (SCHD)",
+    "DVY":   "iShares 셀렉트배당 (DVY)",
+    "PFF":   "iShares 우선주·인컴 (PFF)",
+    "QYLG":  "Global X 나스닥100 50%커버드콜 (QYLG)",
+    "XYLG":  "Global X S&P500 50%커버드콜 (XYLG)",
+    "BST":   "BlackRock 사이언스·테크 인컴 (BST)",
+    "UTF":   "Cohen&Steers 인프라 인컴 (UTF)",
+    "PGX":   "Invesco 우선주 (PGX)",
+    "NUSI":  "Nationwide 리스크관리 인컴 (NUSI)",
+}
 
 
 # ---------- 순수 함수 (네트워크 없음, 테스트 대상) ----------
@@ -107,7 +129,7 @@ def is_monthly(months, listed_date, today):
     return len(months) >= need
 
 
-# ---------- 네트워크 ----------
+# ---------- 네트워크 (국내) ----------
 
 def _getj(url, referer, encoding="utf-8"):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Referer": referer})
@@ -137,9 +159,101 @@ def fetch_analysis(code):
         return None
 
 
+# ---------- 네트워크 (미국 — yfinance) ----------
+
+def fetch_usd_krw():
+    """현재 USD/KRW 환율. 실패 시 None."""
+    try:
+        import yfinance as yf
+        t = yf.Ticker("USDKRW=X")
+        price = t.fast_info.get("last_price")
+        if price and price > 1000:
+            return round(float(price), 1)
+    except Exception as e:
+        print(f"  환율 조회 실패: {e}")
+    return None
+
+
+def build_us(usd_krw, sleep=0.5):
+    """yfinance로 미국 인컴 ETF 수집. 월배당(연 6회+) ETF만 포함."""
+    try:
+        import yfinance as yf
+        import pandas as pd
+    except ImportError:
+        print("  yfinance 미설치 — pip install yfinance pandas")
+        return []
+
+    one_year_ago = pd.Timestamp.now(tz="UTC") - pd.DateOffset(years=1)
+    etfs = []
+
+    for ticker, name in US_ETF_NAMES.items():
+        try:
+            t = yf.Ticker(ticker)
+            info = t.info
+
+            price_usd = info.get("regularMarketPrice") or info.get("previousClose")
+            if not price_usd:
+                print(f"  skip {ticker} — 가격 없음")
+                continue
+
+            aum_usd = info.get("totalAssets") or 0
+            aum_b = round(aum_usd / 1e9, 1)
+
+            divs = t.dividends
+            if divs.empty:
+                print(f"  skip {ticker} — 배당 이력 없음")
+                continue
+
+            # 최근 12개월 배당만 집계
+            recent = divs[divs.index >= one_year_ago]
+            if len(recent) < 6:
+                print(f"  skip {ticker} — 연 {len(recent)}회 배당 (월배당 아님)")
+                continue
+
+            yield_ttm = round(float(recent.sum()) / float(price_usd) * 100, 2)
+            if yield_ttm <= 0:
+                continue
+
+            # 1년 총수익 = (현재가 - 1년전가 + 배당합) / 1년전가
+            hist = t.history(period="400d")
+            return_1y = None
+            if len(hist) >= 200:
+                tz = hist.index.tz
+                cutoff = pd.Timestamp.now(tz=tz) - pd.DateOffset(years=1)
+                past = hist[hist.index <= cutoff]
+                if not past.empty:
+                    p0 = float(past["Close"].iloc[-1])
+                    p1 = float(hist["Close"].iloc[-1])
+                    return_1y = round((p1 - p0 + float(recent.sum())) / p0 * 100, 2)
+
+            health, erosion = classify_health(yield_ttm, return_1y)
+            price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
+
+            etfs.append({
+                "code": ticker,
+                "name": name,
+                "aum_b": aum_b,
+                "price_usd": round(float(price_usd), 2),
+                "price_krw": price_krw,
+                "yield_ttm": yield_ttm,
+                "return_1y": return_1y,
+                "erosion": erosion,
+                "health": health,
+                "low_confidence": False,
+            })
+            r_str = f"{return_1y}%" if return_1y is not None else "—"
+            print(f"  ok   {ticker:6s} {name[:32]:34s} 분배 {yield_ttm}% · 총수익 {r_str} · ${aum_b}B")
+            time.sleep(sleep)
+        except Exception as e:
+            print(f"  err  {ticker} — {e}")
+
+    etfs.sort(key=lambda e: -(e["yield_ttm"] or 0))
+    return etfs
+
+
 # ---------- 조립 ----------
 
-def build(aum_floor_eok, sleep=0.25):
+def build(aum_floor_eok, include_us=True, sleep=0.25):
     today = datetime.now(KST).date()
     cands = [c for c in fetch_universe() if (c[3] or 0) >= aum_floor_eok]
     cands.sort(key=lambda c: -(c[3] or 0))
@@ -154,7 +268,7 @@ def build(aum_floor_eok, sleep=0.25):
             continue
         months = parse_months(div.get("dividendMonthThisYear"))
         if not is_monthly(months, a.get("listedDate"), today):
-            continue  # 월배당 ETF만 — 분기·반기 배당 제외
+            continue
         r1y = return_y1(a.get("returnPerformanceList"))
         health, erosion = classify_health(y, r1y)
         etfs.append({
@@ -174,25 +288,45 @@ def build(aum_floor_eok, sleep=0.25):
         })
         time.sleep(sleep)
     etfs.sort(key=lambda e: -(e["yield_ttm"] or 0))
+
+    us_etfs = []
+    usd_krw = None
+    if include_us:
+        print("\n─── 미국 ETF 수집 ───")
+        usd_krw = fetch_usd_krw()
+        if usd_krw:
+            print(f"  USD/KRW = {usd_krw}")
+        else:
+            print("  환율 조회 실패 — price_krw=null")
+        us_etfs = build_us(usd_krw)
+
     return {
         "generated_at": datetime.now(KST).isoformat(timespec="seconds"),
+        "usd_krw": usd_krw,
         "aum_floor_eok": aum_floor_eok,
-        "coverage": {"etf_count": len(etfs),
-                     "note": f"순자산 {aum_floor_eok//10000}조+ 배당·커버드콜 ETF" if aum_floor_eok >= 10000
-                             else f"순자산 {aum_floor_eok}억+ 배당·커버드콜 ETF"},
+        "coverage": {
+            "kr_count": len(etfs),
+            "us_count": len(us_etfs),
+            "note": f"국내 {aum_floor_eok}억+ 월배당 ETF + 미국 큐레이션 ETF",
+        },
         "etfs": etfs,
+        "us_etfs": us_etfs,
     }
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--aum-floor", type=int, default=7000, help="순자산 하한 (억원)")
-    ap.add_argument("--out", default="data/income_etfs.json")
+    ap.add_argument("--aum-floor", type=int, default=7000, help="국내 순자산 하한 (억원)")
+    ap.add_argument("--out", default="web/data/income_etfs.json")
+    ap.add_argument("--no-us", action="store_true", help="미국 ETF 수집 건너뜀")
     args = ap.parse_args()
-    result = build(args.aum_floor)
+    result = build(args.aum_floor, include_us=not args.no_us)
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-    print(f"✓ {result['coverage']['etf_count']}개 ETF → {args.out}")
+    kr = result["coverage"]["kr_count"]
+    us = result["coverage"]["us_count"]
+    print(f"\n✓ 국내 {kr}개 + 미국 {us}개 = {kr+us}개 ETF → {args.out}")
+    print("\n─── 국내 ETF ───")
     for e in result["etfs"]:
         flag = " ⚠신생" if e["low_confidence"] else ""
         print(f"  {e['health'] or '?':4s} {e['name'][:28]:30s} 분배 {e['yield_ttm']}% · 총수익 {e['return_1y']}% · 침식 {e['erosion']}%{flag}")

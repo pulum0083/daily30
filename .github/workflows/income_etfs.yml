@@ -22,7 +22,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests yfinance pandas
 
       - name: Build income_etfs.json
         run: python3 scripts/build_income_etfs.py
@@ -31,6 +31,6 @@ jobs:
         run: |
           git config user.name "DailyB Bot"
           git config user.email "bot@doubleshot.space"
-          git add data/income_etfs.json
+          git add web/data/income_etfs.json
           git diff --staged --quiet || git commit -m "data: income_etfs.json 주간 갱신 $(date +'%Y-%m-%d')"
           git push
