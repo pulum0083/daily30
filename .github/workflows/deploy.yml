@@ -9,8 +9,11 @@ on:
       - 'web/assets/**'
       - 'web/*.html'
       - 'web/briefings/**'
+      - 'web/stocks/**'
+      - 'web/data/**'
       - 'api/**'
       - 'vercel.json'
+  workflow_dispatch:
 
 permissions:
   contents: write
