@@ -322,6 +322,24 @@ def _title_kw(title: str) -> set:
     return set(re.findall(r"[가-힣A-Za-z]{2,}", title)) - _STOPWORDS
 
 
+def _filter_seen_articles(articles: list, seen_titles: list, threshold: float = 0.55) -> list:
+    """이미 발행된 타이틀과 키워드가 겹치는 기사를 목록에서 사전 제거한다."""
+    if not seen_titles:
+        return articles
+    filtered = []
+    for a in articles:
+        wa = _title_kw(a["title"])
+        dup = False
+        for st in seen_titles:
+            wb = _title_kw(st)
+            if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= threshold:
+                dup = True
+                break
+        if not dup:
+            filtered.append(a)
+    return filtered
+
+
 def _find_duplicate(result: dict, existing_titles: list, threshold: float = 0.55) -> list:
     new_titles = [
         (result.get("market") or {}).get("title", ""),
@@ -387,12 +405,19 @@ def main() -> None:
     if kospi_ref:
         print(f"[fetch_news_live] 코스피 기준 {kospi_ref:.0f}")
 
+    # 이미 발행된 기사를 RSS 목록에서 사전 제거 — Gemini가 선택 자체를 못 하게
+    fresh_articles = _filter_seen_articles(articles, all_today_titles)
+    print(f"[fetch_news_live] 중복 제거 후 기사: {len(fresh_articles)}/{len(articles)}건")
+    if len(fresh_articles) < 2:
+        print("[fetch_news_live] 신규 기사 부족 (2건 미만) — 발행 생략.", file=sys.stderr)
+        sys.exit(0)
+
     # 2단계: Gemini 선별 + 검증 루프
     result = None
     for attempt in range(4):
         avoid_titles = all_today_titles or None
         try:
-            result = _call_gemini_select(articles, slot, today, time_str, avoid_titles)
+            result = _call_gemini_select(fresh_articles, slot, today, time_str, avoid_titles)
         except Exception as e:
             print(f"[fetch_news_live] ERROR (시도 {attempt+1}): {e}", file=sys.stderr)
             if attempt == 3:
