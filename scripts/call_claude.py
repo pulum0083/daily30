@@ -1144,6 +1144,9 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     else:
         raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
 
+    # 브리핑 형식 강제 주입 — Claude가 빠뜨려도 항상 올바른 형식 보장
+    analysis["analysis_format"] = chosen_format
+
     # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 + us 브리핑)
     if briefing_type in ("kospi", "us"):
         signals = extract_signal_emojis(analysis.get("reasons", []))
@@ -1422,7 +1425,9 @@ def call_claude_closing(date_str: str) -> dict:
         print(f"[call_claude] Input: {usage.input_tokens}, Output: {usage.output_tokens} tokens")
 
         try:
-            return extract_json(response.content[0].text)
+            analysis = extract_json(response.content[0].text)
+            analysis["analysis_format"] = chosen_format
+            return analysis
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             print(f"[call_claude] ERROR calling Claude API: {e}")
             last_error = e
