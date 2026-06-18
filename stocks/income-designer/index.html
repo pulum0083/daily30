@@ -667,6 +667,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .cm-submit{background:#4F46E5;color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 .cm-submit:hover{background:#4338CA;}
 .cm-empty{padding:32px 16px;text-align:center;font-size:13px;color:var(--muted);}
+.cm-tags{display:flex;gap:6px;margin-bottom:8px;}
+.cm-tag{font-size:12px;font-weight:600;padding:5px 13px;border-radius:999px;border:1.5px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .12s;}
+.cm-tag.on{background:#EEF2FF;border-color:#A5B4FC;color:#4F46E5;}
+.ci-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;margin-right:4px;vertical-align:middle;}
+.ci-tag.프리톡{background:#EEF2FF;color:#4F46E5;}
+.ci-tag.개선의견{background:#FEF3C7;color:#92400E;}
 </style>
 </head>
 <body>
@@ -1420,7 +1426,8 @@ function renderCmList(tree){
     }).join('');
     const replyForm=openReplyId===c.id?`<div class="cs-reply-form"><input class="cs-reply-input" id="rf-${c.id}" placeholder="답글 입력…"><button class="cs-reply-submit" onclick="submitReply(${c.id})">등록</button></div>`:'';
     const replyCount=c.replies.length?` ${c.replies.length}`:'';
-    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.created_at)}</span></div><div class="ci-body">${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
+    const tagBadge=c.tag?`<span class="ci-tag ${c.tag}">${c.tag}</span>`:'';
+    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.created_at)}</span></div><div class="ci-body">${tagBadge}${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
   }).join('');
 }
 let cmTree=[];
@@ -1453,6 +1460,14 @@ async function submitReply(parentId){
   openReplyId=null;
   await loadAndRenderComments();
 }
+let _selectedTag='프리톡';
+function selectTag(tag){
+  _selectedTag=tag;
+  ['프리톡','개선의견'].forEach(t=>{
+    const el=document.getElementById('cm-tag-'+t);
+    if(el)el.classList.toggle('on',t===tag);
+  });
+}
 async function submitComment(){
   const nick=document.getElementById('cm-nick').value.trim()||getNick();
   const body=document.getElementById('cm-textarea').value.trim();
@@ -1461,7 +1476,7 @@ async function submitComment(){
   if(btn){btn.disabled=true;btn.textContent='등록 중…';}
   const sb=getSb();
   if(sb){
-    const {error}=await sb.from('comments').insert({author:nick,body,av:Math.floor(Math.random()*AV_COLORS.length)});
+    const {error}=await sb.from('comments').insert({author:nick,body,tag:_selectedTag,av:Math.floor(Math.random()*AV_COLORS.length)});
     if(!error){document.getElementById('cm-textarea').value='';}
   }
   if(btn){btn.disabled=false;btn.textContent='등록';}
@@ -1498,6 +1513,10 @@ function handleCmOverlayClick(e){if(e.target===document.getElementById('cm-overl
     </div>
     <div class="cm-list" id="cm-list"></div>
     <div class="cm-form">
+      <div class="cm-tags">
+        <button class="cm-tag on" id="cm-tag-프리톡" onclick="selectTag('프리톡')">프리톡</button>
+        <button class="cm-tag" id="cm-tag-개선의견" onclick="selectTag('개선의견')">개선의견</button>
+      </div>
       <input class="cm-nick" id="cm-nick" placeholder="닉네임">
       <textarea class="cm-textarea" id="cm-textarea" placeholder="의견을 남겨보세요. 투자 경험, 질문, ETF 추천 등 무엇이든 괜찮아요." rows="3"></textarea>
       <div class="cm-foot-row">
