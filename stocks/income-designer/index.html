@@ -887,6 +887,7 @@ function normKrEtf(e) {
     mk: 'KR',
     lc: e.low_confidence,
     is_cc: e.is_cc || false,
+    divMonths: Array.isArray(e.dividend_months) ? e.dividend_months.length : null,
   };
 }
 function normUsEtf(e, usdKrw) {
@@ -916,7 +917,7 @@ function incomeRow(d,i){
   const rk=i+1,rkCls=rk<=3?'rk top':'rk';
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   const lastCol=hc==='na'
-    ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (신생)</span>`
+    ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (이력 ${d.divMonths!=null?d.divMonths+'개월':'신생'})</span>`
     :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`}`;
   return `<a class="irow" onclick="openAddSheet('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
@@ -953,7 +954,7 @@ function incomeAllPageRow(d,i){
   const barCls=ePct==null?'':ePct>=0?'up':'dn';
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
-    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
+    :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조${hc==='na'&&d.divMonths!=null?` · 이력 ${d.divMonths}개월`:''}`;
   const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#00ae1a':'#f33942'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
   const rkEl=rk<=3
     ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
@@ -1027,7 +1028,7 @@ const SIM_KEY='ds-income-holdings-v1';
 function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
 function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
 let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
-function simIncome(h){const d=UNIV[h.code];if(!d)return 0;return h.qty*d.price*d.y/100/10000;}  // 만원/년
+function simIncome(h){const d=UNIV[h.code];if(!d)return 0;const g=h.qty*d.price*d.y/100/10000;return d.mk==='US'?g*0.85:g;}  // 만원/년, US는 15% 원천징수 차감
 function simRowsRender(){
   document.getElementById('sim-rows').innerHTML=simHoldings.filter(h=>UNIV[h.code]).map((h,i)=>{
     const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
@@ -1278,7 +1279,7 @@ function simOut(){
         <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
       </div>
       <div class="donut-legend">${legend}</div>
-      ${slices.some(s=>s.d.mk==='US')&&USDKRW?`<div style="margin-top:8px;font-size:11px;color:var(--muted);">기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b> 적용 · 미국 ETF 수령액에 반영</div>`:''}
+      ${slices.some(s=>s.d.mk==='US')&&USDKRW?`<div style="margin-top:8px;font-size:11px;color:var(--muted);">기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b> 적용 · 미국 ETF 15% 원천징수 차감 후 수령액</div>`:''}
     </div>
   </div>`;
 
@@ -1387,7 +1388,6 @@ fetch('/data/income_etfs.json')
     incomeAllPageRender();
     simRowsRender();simOut();
   });
-simRowsRender();simOut();
 
 /* ── 의견 모달 (Supabase) ── */
 const SB_URL='https://ofrxlvjsirkbuejijiaz.supabase.co';
