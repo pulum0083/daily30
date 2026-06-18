@@ -17,7 +17,7 @@
     </div>
     <div class="analyst-quote">{{ q.quote }}</div>
     <div class="analyst-footer">
-      {% if q.url %}<a class="analyst-source" href="{{ q.url }}" target="_blank" rel="noopener noreferrer">{{ q.source }}</a>{% else %}<span class="analyst-source">{{ q.source }}</span>{% endif %}
+      <a class="analyst-source" href="{{ q.search_url }}" target="_blank" rel="noopener noreferrer">{{ q.source }} <span class="analyst-source-arrow">→</span></a>
       <span class="analyst-time">{{ q.time_label }}</span>
     </div>
   </div>

@@ -522,12 +522,16 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
 
 def build_analyst_quotes(data: dict) -> dict:
     """월가 애널리스트 발언 섹션 컨텍스트 빌더."""
+    from urllib.parse import quote_plus
     quotes_path = BASE_DIR / "data" / "analyst_quotes.json"
     if quotes_path.exists():
         with open(quotes_path, encoding="utf-8") as f:
             analyst_quotes = json.load(f)
     else:
         analyst_quotes = []
+    for q in analyst_quotes:
+        query = f"{q.get('name', '')} {q.get('affiliation', '')}"
+        q["search_url"] = f"https://www.google.com/search?q={quote_plus(query)}"
     return {"analyst_quotes": analyst_quotes}
 
 
