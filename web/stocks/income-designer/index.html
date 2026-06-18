@@ -1335,10 +1335,11 @@ function simOut(){
   if(simHoldings.length)setupDonutTip(segs);
 }
 function genReport(){
+  // simOut()을 먼저 실행해 현재 UNIV 데이터로 _simReportHtml 재빌드
+  simOut();
   const slot=document.getElementById('sim-report-slot');
   if(!slot) return;
   slot.innerHTML=window._simReportHtml||'';
-  slot.querySelector('.gen-report-btn')&&slot.querySelector('.gen-report-btn').remove();
 }
 function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
 function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
