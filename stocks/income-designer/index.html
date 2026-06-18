@@ -19,7 +19,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 .gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
 .gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;}
-.gnb__title{font-size:18px !important;font-weight:800 !important;color:#fff !important;letter-spacing:-0.02em;}
+.gnb__title{display:inline-flex;align-items:center;gap:9px;font-size:18px !important;font-weight:800 !important;color:#fff !important;letter-spacing:-0.02em;}
+.gnb__mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#006EFF,#5AA9FF);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 7px rgba(0,110,255,.38);}
+.gnb__mark svg{width:18px;height:18px;display:block;}
 .gnb a{color:rgba(255,255,255,.5);font-size:12px;font-weight:600;text-decoration:none;transition:color .12s;}.gnb a:hover{color:rgba(255,255,255,.9);}
 .gnb__divider{width:1px;height:14px;background:rgba(255,255,255,.18);flex-shrink:0;margin:0 10px;}
 .gnb .right{margin-left:auto;display:flex;align-items:center;gap:12px;}
@@ -676,7 +678,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__title" href="/stocks/income-designer/">월배당 ETF 계산기</a><a href="/briefings/" style="margin-left:16px;">Double-Shot</a><div class="gnb__divider"></div><a href="/chips/">Chip-Board</a></div></div>
+<div class="gnb"><div class="gnb__in"><a class="gnb__title" href="/stocks/income-designer/"><span class="gnb__mark"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="17.2" rx="6.6" ry="2.4" fill="#fff" opacity=".5"/><ellipse cx="12" cy="13.2" rx="6.6" ry="2.4" fill="#fff" opacity=".75"/><ellipse cx="12" cy="9.2" rx="6.6" ry="2.4" fill="#fff"/></svg></span>월배당 ETF 계산기</a><a href="/briefings/" style="margin-left:16px;">Double-Shot</a><div class="gnb__divider"></div><a href="/chips/">Chip-Board</a></div></div>
 <div class="wrap">
   <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
