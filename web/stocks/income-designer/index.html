@@ -1319,20 +1319,6 @@ function simOut(){
       <div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">분배금 전액을 과세 대상으로 가정한 추정이에요. 국내주식형 ETF의 매매차익 비과세분은 실제 금융소득에 안 들어가, 실제 과세액은 더 낮을 수 있어요. 정확한 판정은 보유 전체·연소득 기준으로 확인하세요.</div>
     </div>
   </div>`);
-  if(gap>0){
-    const held=new Set(simHoldings.map(h=>h.code));
-    const f=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&!held.has(d.code)).sort((a,b)=>b.y-a.y)[0];
-    if(f){
-      const need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
-      const priceTxt=f.r!=null?` · 가격 +${(f.r-f.y).toFixed(0)}%`:'';
-      cards.push(`<div class="rc">
-        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
-        <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}%${priceTxt})</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
-          <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
-        </div>
-      </div>`);
-    }
-  }
 
   // 리포트 HTML은 만들어 두되, 버튼 클릭 시 genReport()가 노출 (기본은 생성 버튼만)
   window._simReportHtml=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
@@ -1343,7 +1329,9 @@ function simOut(){
 }
 function genReport(){
   const slot=document.getElementById('sim-report-slot');
-  if(slot)slot.innerHTML=window._simReportHtml||'';
+  if(!slot) return;
+  slot.innerHTML=window._simReportHtml||'';
+  slot.querySelector('.gen-report-btn')&&slot.querySelector('.gen-report-btn').remove();
 }
 function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
 function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
