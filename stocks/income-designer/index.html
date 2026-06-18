@@ -901,6 +901,7 @@ function normUsEtf(e, usdKrw) {
 
 let INCOME_UNIVERSE = [];
 const UNIV = {};
+let USDKRW = 0;
 function incomeHealth(d){if(d.r==null)return['na','데이터 부족',null];const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
 
 const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.',na:'상장 1년 미만이라 1년 총수익이 아직 없어요. 건전성을 판정할 수 없어요.'};
@@ -1271,6 +1272,7 @@ function simOut(){
         <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
       </div>
       <div class="donut-legend">${legend}</div>
+      ${slices.some(s=>s.d.mk==='US')&&USDKRW?`<div style="margin-top:8px;font-size:11px;color:var(--muted);">기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b> 적용 · 미국 ETF 수령액에 반영</div>`:''}
     </div>
   </div>`;
 
@@ -1360,6 +1362,7 @@ fetch('/data/income_etfs.json')
   .then(r => r.json())
   .then(data => {
     const usdKrw = data.usd_krw || 1360;
+    USDKRW = usdKrw;
     const krEtfs = (data.etfs || []).map(normKrEtf);
     const usEtfs = (data.us_etfs || []).map(e => normUsEtf(e, usdKrw));
     INCOME_UNIVERSE = [...krEtfs, ...usEtfs];
