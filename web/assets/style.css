@@ -630,6 +630,30 @@ html.dark .chip-widget__more{color:#60A5FA;}
 .chip-row__chg.down{color:var(--dn);}
 .chip-row__chg.flat{color:var(--muted);}
 
+/* 월배당 ETF 계산기 위젯 (칩보드 위 사이드바) */
+.income-widget{background:var(--canvas);border:1.5px solid #93B4FF;border-radius:var(--r-lg);overflow:hidden;}
+html.dark .income-widget{background:rgba(0,110,255,.07);border-color:rgba(96,165,250,.34);}
+.income-widget__header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 9px;transition:background .15s;}
+.income-widget__header:hover{background:#F0F5FF;}
+html.dark .income-widget__header:hover{background:rgba(0,110,255,.12);}
+.income-widget__left{display:flex;align-items:center;gap:7px;}
+.income-widget__badge{width:22px;height:22px;background:linear-gradient(135deg,#006EFF,#5AA9FF);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.income-widget__badge svg{width:15px;height:15px;display:block;}
+.income-widget__title{font-size:13px;font-weight:700;color:var(--ink);}
+.income-widget__more{font-size:14px;font-weight:700;color:#006EFF;}
+html.dark .income-widget__more{color:#5AA9FF;}
+.income-widget__list{padding:0 14px 4px;}
+.income-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,110,255,.10);font-size:13px;}
+.income-row:last-child{border-bottom:none;}
+.income-row__dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.income-row__dot.ok{background:#00ae1a;}.income-row__dot.warn{background:#eb8e02;}.income-row__dot.bad{background:#f33942;}.income-row__dot.na{background:#ADB5BD;}
+.income-row__name{flex:1;min-width:0;color:var(--ink);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.income-row__y{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);flex-shrink:0;}
+.income-widget__foot{display:block;padding:8px 14px 10px;font-size:11px;font-weight:600;color:#006EFF;border-top:1px solid rgba(0,110,255,.10);transition:background .15s;}
+html.dark .income-widget__foot{color:#5AA9FF;}
+.income-widget__foot:hover{background:#F0F5FF;}
+html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
+
 /* ──────────────────────────────────────────────
    사이드바 CTA (공통)
 ────────────────────────────────────────────── */

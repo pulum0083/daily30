@@ -766,11 +766,55 @@
     renderSupplyFlows();
     initLiveScoreboard();
     initLiveMarketPanel();
+    loadIncomeWidget();
     loadChipWidget();
     loadVisitorCount();
     patchBriefingList();
     patchBriefingNav();
   });
+
+  /* ── 월배당 ETF 계산기 위젯 — /data/income_etfs.json (칩보드 위 사이드바) ── */
+  function loadIncomeWidget() {
+    var chip = document.querySelector('.chip-widget');
+    if (!chip || document.querySelector('.income-widget')) return;
+    var COIN = '<svg viewBox="0 0 24 24" fill="none">' +
+      '<ellipse cx="12" cy="16.5" rx="6.4" ry="2.3" fill="#fff" opacity=".5"/>' +
+      '<ellipse cx="12" cy="12.5" rx="6.4" ry="2.3" fill="#fff" opacity=".75"/>' +
+      '<ellipse cx="12" cy="8.5" rx="6.4" ry="2.3" fill="#fff"/></svg>';
+    var w = document.createElement('div');
+    w.className = 'income-widget';
+    w.innerHTML =
+      '<a class="income-widget__header" href="/stocks/income-designer/" target="_blank" rel="noopener">' +
+        '<div class="income-widget__left"><div class="income-widget__badge">' + COIN + '</div>' +
+        '<span class="income-widget__title">월배당 ETF 계산기</span></div>' +
+        '<span class="income-widget__more">→</span>' +
+      '</a>' +
+      '<div class="income-widget__list" id="income-rows"></div>' +
+      '<a class="income-widget__foot" href="/stocks/income-designer/" target="_blank" rel="noopener">분배율·건전성 한눈에 · 내 배당 계산하기 →</a>';
+    chip.insertAdjacentElement('beforebegin', w);
+
+    var rows = w.querySelector('#income-rows');
+    fetch('/data/income_etfs.json', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(d) {
+        var list = (d && d.etfs) || [];
+        if (!list.length) throw new Error();
+        list.slice()
+          .sort(function(a, b) { return (b.yield_ttm || 0) - (a.yield_ttm || 0); })
+          .slice(0, 3)
+          .forEach(function(e) {
+            var health = ['ok', 'warn', 'bad', 'na'].indexOf(e.health) >= 0 ? e.health : 'na';
+            var row = document.createElement('div');
+            row.className = 'income-row';
+            row.innerHTML =
+              '<span class="income-row__dot ' + health + '"></span>' +
+              '<span class="income-row__name">' + e.name + '</span>' +
+              '<span class="income-row__y">연 ' + (e.yield_ttm || 0).toFixed(1) + '%</span>';
+            rows.appendChild(row);
+          });
+      })
+      .catch(function() { w.remove(); });
+  }
 
   /* ── 칩보드 위젯 — /chips/api/prices ── */
   var CHIP_FALLBACK = [
