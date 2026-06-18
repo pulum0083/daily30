@@ -106,7 +106,7 @@ time_label 형식: 발언이 오늘(KST 기준)이면 "오늘 HH:MM", 어제면 
     "initials": "이니셜 2자",
     "quote": "한국어 번역 발언 (원문 기반, 2-4문장)",
     "source": "출처 매체명",
-    "url": "기사 원문 URL (없으면 빈 문자열 \"\")",
+    "url": "반드시 빈 문자열 \"\" — URL은 검색 메타데이터에서 자동 주입됩니다",
     "published_at": "ISO 8601 datetime (KST, 예: 2026-06-06T23:14:00+09:00)",
     "time_label": "어제 23:14",
     "sentiment": "bull"
@@ -155,6 +155,34 @@ def fetch_analyst_quotes() -> list:
     quotes = json.loads(raw)
     if not isinstance(quotes, list):
         return []
+
+    # grounding_metadata에서 실제 URL 추출 (Gemini가 실제로 참조한 검색 결과)
+    grounding_urls: list[dict] = []
+    try:
+        gm = response.candidates[0].grounding_metadata
+        for chunk in (gm.grounding_chunks or []):
+            web = getattr(chunk, "web", None)
+            if web and getattr(web, "uri", None):
+                grounding_urls.append({"uri": web.uri, "title": getattr(web, "title", "")})
+    except Exception:
+        pass
+
+    # 각 발언에 grounding URL 매핑: 애널리스트 이름이 title에 포함된 URL 우선
+    def _find_url(q: dict) -> str:
+        name_lower = q.get("name", "").lower()
+        source_lower = q.get("source", "").lower()
+        # 1순위: title에 이름 포함
+        for g in grounding_urls:
+            if name_lower.split()[-1] in g["title"].lower():
+                return g["uri"]
+        # 2순위: title에 source 포함
+        for g in grounding_urls:
+            if any(w in g["title"].lower() for w in source_lower.split() if len(w) > 3):
+                return g["uri"]
+        return ""
+
+    for q in quotes:
+        q["url"] = _find_url(q)
 
     # initials 보정: ANALYSTS 정의 기준으로 덮어쓰기
     initials_map = {a["name"]: a["initials"] for a in ANALYSTS}

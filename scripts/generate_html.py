@@ -533,8 +533,8 @@ def build_analyst_quotes(data: dict) -> dict:
         if q.get("url"):
             q["search_url"] = q["url"]
         else:
-            query = f"{q.get('name', '')} {q.get('affiliation', '')}"
-            q["search_url"] = f"https://www.google.com/search?q={quote_plus(query)}"
+            query = f"{q.get('name', '')} {q.get('source', '')} {q.get('time_label', '')}"
+            q["search_url"] = f"https://www.google.com/search?q={quote_plus(query.strip())}"
     return {"analyst_quotes": analyst_quotes}
 
 
