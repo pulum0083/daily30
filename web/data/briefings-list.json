@@ -17,8 +17,12 @@
         "time": ""
       },
       "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
+        "state": "ready",
+        "url": "/briefings/2026-06-18/us/",
+        "pill_cls": "dn",
+        "pill_text": "▼ 하락",
+        "title": "하락 우위",
+        "time": "21:22"
       }
     },
     "2026-06-17": {
@@ -289,27 +293,16 @@
     },
     "2026-06-02": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-06-02/kospi/",
-        "pill_cls": "up",
-        "pill_text": "▲ 상승",
-        "title": "상승 우위",
-        "time": "07:32"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-06-02/close/",
-        "title": "8,801.49",
-        "price": "8,801.49",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-06-02/us/",
-        "pill_cls": "up",
-        "pill_text": "▲ 상승",
-        "title": "상승 우위",
-        "time": "22:02"
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-06-01": {
