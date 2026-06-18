@@ -19,10 +19,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 .gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
 .gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
-.gnb__logo{font-size:15px;font-weight:800;color:#fff;cursor:pointer;}.gnb__logo b{color:#5AA2FF;}
-.gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
-.gnb .right{margin-left:auto;}
-.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;}.gnb .sbtn svg{width:13px;height:13px;}
+.gnb__title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.01em;}
+.gnb a{color:rgba(255,255,255,.5);font-size:12px;font-weight:600;text-decoration:none;transition:color .12s;}.gnb a:hover{color:rgba(255,255,255,.9);}
+.gnb__divider{width:1px;height:14px;background:rgba(255,255,255,.18);flex-shrink:0;}
+.gnb .right{margin-left:auto;display:flex;align-items:center;gap:12px;}
 
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
@@ -676,7 +676,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/">Double<b>-Shot</b></a><a href="/briefings/">브리핑</a><a class="on" href="/stocks/income-designer/">종목</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><span class="gnb__title">월배당 ETF 계산기</span><a href="/briefings/" style="margin-left:16px;">Double-Shot</a><div class="gnb__divider"></div><a href="/chips/">Chip-Board</a></div></div>
 <div class="wrap">
   <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
