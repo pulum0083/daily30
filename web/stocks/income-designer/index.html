@@ -1202,7 +1202,7 @@ function buildDonut(segs, monthly){
     offset+=s.pct*circ;
     return el;
   }).join('');
-  return `<svg class="donut-svg" viewBox="0 0 140 140" width="140" height="140">
+  return `<svg class="donut-svg" viewBox="0 0 140 140" width="160" height="160">
     <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
     ${arcs}
     <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
