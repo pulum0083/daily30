@@ -743,6 +743,9 @@ html.dark .chip-widget__more{color:#60A5FA;}
   .bl-row{grid-template-columns:auto 1fr 1fr 1fr;}
   .bl-row__date{padding:0 10px;}
   .bl-cell{padding:10px 8px;}
+  /* 시나리오 분할(sc-cols) 모바일 1단 */
+  .sc-cols{grid-template-columns:1fr;}
+  .sc-col+.sc-col{border-left:none;border-top:1px solid var(--hairline);}
 }
 
 /* ── 라이브 스코어보드 ── */
