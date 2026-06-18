@@ -383,6 +383,8 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 미국 시장 브리핑 전용 섹션. 발언이 없으면 섹션 전체 생략 (빈 상태 표시 금지).
 
 - **발언 생성·추론 금지.** `fetch_analyst_quotes.py`가 google_search에서 실제로 찾은 발언만 표시한다.
+- **URL hallucination 금지.** Gemini에게 URL을 직접 생성하도록 시키지 않는다. URL은 반드시 Gemini `grounding_metadata.grounding_chunks`에서 추출한다. 프롬프트에 URL 필드를 요청하면 존재하지 않는 URL이 생성된다.
+- **출처 링크 우선순위**: `url` 필드(grounding 메타데이터)가 있으면 원본 링크, 없으면 `이름 + source + time_label` 구글 검색 폴백. `generate_html.py`의 `build_analyst_quotes()`가 처리.
 - **수동 재수집**: `python3 scripts/fetch_analyst_quotes.py` 실행 후 `generate_html.py`로 재생성.
 - **발언이 없는 날**: `data/analyst_quotes.json`이 `[]`이면 섹션이 자동으로 생략된다. 정상 동작.
 - **감성 뱃지**: `bull`(강세) / `bear`(약세) / `neu`(중립) 세 가지만 허용. 다른 값은 스크립트가 자동으로 `neu`로 정규화한다.
