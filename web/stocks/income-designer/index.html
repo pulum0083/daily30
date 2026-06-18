@@ -348,6 +348,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sim-kpi .k .v{font-size:20px;font-weight:600;}
 /* 리포트 카드 */
 .sim-report-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding:0 2px 8px;}
+.gen-report-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:13px;font-size:13px;font-weight:700;color:#4F46E5;cursor:pointer;font-family:inherit;transition:background .12s;}
+.gen-report-btn:hover{background:#E0E7FF;}
 .sim-report{display:flex;flex-direction:column;gap:8px;}
 .rc{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;transition:box-shadow .15s;}
 .rc:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
@@ -1235,7 +1237,7 @@ function simOut(){
     const d=UNIV[h.code];if(!d)return;
     const inc=simIncome(h);
     totalDiv+=inc;
-    slices.push({name:d.name,code:h.code,inc});
+    slices.push({name:d.name,code:h.code,inc,val:h.qty*d.price/10000,d});
     const[hc,,e]=incomeHealth(d);
     if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
   });
@@ -1288,6 +1290,26 @@ function simOut(){
       </div>`);
     }
   }
+  // ── 추가 진단 카드 (보유 조합만으로 항상 계산) ──
+  if(slices.length && totalDiv>0){
+    const top=[...slices].sort((a,b)=>b.inc-a.inc)[0];
+    const ts=top.inc/totalDiv*100, conc=ts>=40;
+    cards.push(`<div class="rc${conc?' open':''}"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${conc?'⚠️':'✅'}</span><span class="rct">집중 위험</span><span class="rcb ${conc?'amber':'green'}">상위 ${ts.toFixed(0)}%</span><span class="rc-chev">▾</span></div><div class="rc-body">${conc?`<b>${top.name}</b> 한 종목이 월 인컴의 <b class="rc-num">${ts.toFixed(0)}%</b>를 차지해요. 이 ETF 분배 정책이 바뀌면 전체 인컴이 크게 흔들릴 수 있어, 비중을 더 나누는 걸 권해요.`:`상위 종목(<b>${top.name}</b>)이 월 인컴의 <b class="rc-num">${ts.toFixed(0)}%</b>로 ${slices.length}개 종목에 비교적 고르게 분산돼 있어요.`}</div></div>`);
+  }
+  if(slices.length){
+    let totVal=0,ccVal=0,usVal=0,wY=0;const cnt={ok:0,warn:0,bad:0,na:0};
+    slices.forEach(s=>{totVal+=s.val;if(s.d.is_cc)ccVal+=s.val;if(s.d.mk==='US')usVal+=s.val;wY+=s.d.y*s.val;cnt[incomeHealth(s.d)[0]]++;});
+    if(totVal>0){
+      const ccPct=ccVal/totVal*100, ccHigh=ccPct>=60;
+      cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${ccHigh?'⚠️':'🪂'}</span><span class="rct">커버드콜 비중</span><span class="rcb ${ccHigh?'amber':'blue'}">${ccPct.toFixed(0)}%</span><span class="rc-chev">▾</span></div><div class="rc-body">평가금액 기준 커버드콜형 ETF 비중이 <b class="rc-num">${ccPct.toFixed(0)}%</b>예요. ${ccPct>0?'커버드콜은 옵션 매도로 분배 재원을 만드는 대신, 강한 상승장에서 주가 상단이 제한돼요.':'보유 종목 중 커버드콜형이 없어, 분배 재원이 주로 채권 이자·배당에서 나오는 구조예요.'}${ccHigh?' 비중이 높아 지수가 크게 오를 때 상승을 놓칠 수 있어요.':''}</div></div>`);
+      const usPct=usVal/totVal*100, krPct=100-usPct;
+      cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">🌐</span><span class="rct">국내·해외 비중</span><span class="rcb blue">KR ${krPct.toFixed(0)} · US ${usPct.toFixed(0)}</span><span class="rc-chev">▾</span></div><div class="rc-body">평가금액 기준 국내 <b class="rc-num">${krPct.toFixed(0)}%</b> · 해외 <b class="rc-num">${usPct.toFixed(0)}%</b> 구성이에요.${usPct>0?` 미국 ETF 분배금은 현지에서 <b class="rc-num">15%</b> 원천징수되고 환율 변동에 노출돼요.`:''}${usPct>=70?' 해외 비중이 높아 환율이 인컴의 큰 변수가 돼요.':(krPct>=70&&usPct>0?' 국내 비중이 높아 환율 영향은 제한적이에요.':'')}</div></div>`);
+      const avgY=wY/totVal, parts=[];
+      if(cnt.ok)parts.push(`건전 ${cnt.ok}`);if(cnt.warn)parts.push(`주의 ${cnt.warn}`);if(cnt.bad)parts.push(`원금성 ${cnt.bad}`);if(cnt.na)parts.push(`판정불가 ${cnt.na}`);
+      const healthy=cnt.ok>=Math.ceil(slices.length/2);
+      cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${healthy?'✅':'📊'}</span><span class="rct">포트 건전성 요약</span><span class="rcb ${healthy?'green':'blue'}">평균 분배 ${avgY.toFixed(1)}%</span><span class="rc-chev">▾</span></div><div class="rc-body">평가금액 가중 평균 분배율은 <b class="rc-num">${avgY.toFixed(1)}%</b>이고, 보유 ${slices.length}종목의 건전성은 <b>${parts.join(' · ')}</b>으로 나뉘어요.${cnt.bad?' 원금성 종목이 섞여 있어 표면 분배율만큼 실수익이 나지 않을 수 있어요.':(cnt.ok===slices.length?' 모든 종목이 분배하면서도 자산이 불어나는 건전 등급이에요.':'')}</div></div>`);
+    }
+  }
   const taxWarn=totalDiv>=2000;
   cards.push(`<div class="rc">
     <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'amber':'green'}">${taxWarn?'검토 필요':'여유'}</span><span class="rc-chev">▾</span></div>
@@ -1312,10 +1334,16 @@ function simOut(){
     }
   }
 
-  html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
+  // 리포트 HTML은 만들어 두되, 버튼 클릭 시 genReport()가 노출 (기본은 생성 버튼만)
+  window._simReportHtml=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
+  html+=`<div id="sim-report-slot">${simHoldings.length?`<button class="gen-report-btn" onclick="genReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>진단 리포트 생성하기</button>`:''}</div>`;
 
   document.getElementById('sim-out').innerHTML=html;
   if(simHoldings.length)setupDonutTip(segs);
+}
+function genReport(){
+  const slot=document.getElementById('sim-report-slot');
+  if(slot)slot.innerHTML=window._simReportHtml||'';
 }
 function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
 function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
