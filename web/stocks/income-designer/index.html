@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,6 +14,9 @@
 :root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
   --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--gold:#B7791F;--gold-bg:#FEF3C7;
   --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+html.dark{--canvas:#1C1D1F;--soft:#242628;--inset:#2A2B2D;--hair:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);--up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);--s1:0 1px 4px rgba(0,0,0,.35);}
 *{box-sizing:border-box;}html,body{margin:0;}
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
 .num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}a{cursor:pointer;}
@@ -25,7 +28,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gnb__mark svg{width:18px;height:18px;display:block;}
 .gnb a{color:rgba(255,255,255,.5);font-size:12px;font-weight:600;text-decoration:none;transition:color .12s;}.gnb a:hover{color:rgba(255,255,255,.9);}
 .gnb__divider{width:1px;height:14px;background:rgba(255,255,255,.18);flex-shrink:0;margin:0 10px;}
-.gnb .right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.gnb__left{display:flex;align-items:center;}
+.gnb__meta{margin-left:auto;display:flex;align-items:center;}
+.gnb__theme-toggle{width:30px;height:30px;border-radius:6px;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s,color .12s;}
+.gnb__theme-toggle:hover{background:rgba(255,255,255,.16);color:#fff;}
+.icon-sun,.icon-moon{display:none;}
+html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
@@ -679,7 +687,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__title" href="/stocks/income-designer/"><span class="gnb__mark"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="17.2" rx="6.6" ry="2.4" fill="#fff" opacity=".5"/><ellipse cx="12" cy="13.2" rx="6.6" ry="2.4" fill="#fff" opacity=".75"/><ellipse cx="12" cy="9.2" rx="6.6" ry="2.4" fill="#fff"/></svg></span>월배당 ETF 계산기</a><a href="/briefings/" style="margin-left:16px;">Double-Shot</a><div class="gnb__divider"></div><a href="/chips">Chip-Board</a></div></div>
+<div class="gnb"><div class="gnb__in"><div class="gnb__left"><a class="gnb__title" href="/stocks/income-designer/"><span class="gnb__mark"><svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="17.2" rx="6.6" ry="2.4" fill="#fff" opacity=".5"/><ellipse cx="12" cy="13.2" rx="6.6" ry="2.4" fill="#fff" opacity=".75"/><ellipse cx="12" cy="9.2" rx="6.6" ry="2.4" fill="#fff"/></svg></span>월배당 ETF 계산기</a><a href="/briefings/" style="margin-left:16px;">Double-Shot</a><div class="gnb__divider"></div><a href="/chips">Chip-Board</a></div><div class="gnb__meta"><button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환"><svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg><svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></button></div></div></div>
 <div class="wrap">
   <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
@@ -872,6 +880,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 </div>
 <script>
+(function(){
+  const root=document.documentElement;
+  if(!root.classList.contains('dark')&&!root.classList.contains('light')) root.classList.add('light');
+  if(localStorage.getItem('theme')==='dark') root.classList.replace('light','dark');
+})();
+function toggleTheme(){
+  const root=document.documentElement;
+  if(root.classList.contains('dark')){root.classList.replace('dark','light');localStorage.setItem('theme','light');}
+  else{root.classList.replace('light','dark');localStorage.setItem('theme','dark');}
+}
 
 function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
 function goBack(){ if(history.length>1) history.back(); else location.href='/'; }
