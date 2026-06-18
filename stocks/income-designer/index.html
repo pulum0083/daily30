@@ -1276,25 +1276,6 @@ function simOut(){
       <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
       <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br>')}</div>
     </div>`);
-    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
-    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
-    if(alt){
-      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
-      cards.push(`<div class="rc open">
-        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
-        <div class="rc-body">
-          <div class="rc-flow">
-            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
-          </div>
-          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
-          <div class="rc-actions">
-            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
-            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
-          </div>
-        </div>
-      </div>`);
-    }
   }
   // ── 포트 구성 분석 (집중위험·커버드콜·국내해외·건전성 통합 1카드) ──
   if(slices.length){
@@ -1314,6 +1295,27 @@ function simOut(){
       `<div class="pa-row"><span class="pa-label">건전성</span><span class="pa-val">${parts.join(' · ')} · 평균 분배 <b class="rc-num">${avgY.toFixed(1)}%</b></span></div>`,
     ].join('');
     cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${warn?'⚠️':'📊'}</span><span class="rct">포트 구성 분석</span><span class="rcb ${warn?'amber':'blue'}">${slices.length}종목</span><span class="rc-chev">▾</span></div><div class="rc-body"><div class="pa-grid">${rows}</div></div></div>`);
+  }
+  if(bad.length){
+    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
+    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
+    if(alt){
+      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      cards.push(`<div class="rc open">
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
+        <div class="rc-body">
+          <div class="rc-flow">
+            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
+            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+          </div>
+          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
+          <div class="rc-actions">
+            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
+            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
+          </div>
+        </div>
+      </div>`);
+    }
   }
   const taxWarn=totalDiv>=2000;
   cards.push(`<div class="rc">
