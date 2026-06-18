@@ -823,7 +823,9 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .analyst-badge.neu{background:var(--surface-inset);color:var(--muted);}
 .analyst-quote{font-size:13px;line-height:1.75;color:var(--ink);}
 .analyst-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);}
-.analyst-source{font-size:11px;font-weight:600;color:var(--primary);}
+.analyst-source{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;}
+.analyst-source:hover{text-decoration:underline;}
+.analyst-source-arrow{font-size:10px;opacity:0.7;}
 .analyst-time{font-size:11px;color:var(--muted);margin-left:auto;}
 
 /* ──────────────────────────────────────────────
