@@ -637,7 +637,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .cm-count{font-size:12px;font-weight:700;color:#4F46E5;background:#EEF2FF;border-radius:99px;padding:2px 9px;}
 .cm-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:4px;}
 .cm-close svg{width:16px;height:16px;}
-.cm-list{overflow-y:auto;flex:1;padding:0 16px;}
+.cm-list{overflow-y:auto;flex:1;padding:0 16px;overscroll-behavior:contain;}
 .ci{padding:14px 0;border-bottom:1px solid var(--hair);}
 .ci:last-child{border-bottom:none;}
 .ci-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
@@ -1486,12 +1486,14 @@ async function openCommentModal(){
   document.getElementById('cm-nick').value=getNick();
   const ov=document.getElementById('cm-overlay');
   ov.style.display='flex';
+  document.body.style.overflow='hidden';
   requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
   await loadAndRenderComments();
 }
 function closeCommentModal(){
   const ov=document.getElementById('cm-overlay');
   ov.classList.remove('open');
+  document.body.style.overflow='';
   setTimeout(()=>{ov.style.display='none';},300);
 }
 function handleCmOverlayClick(e){if(e.target===document.getElementById('cm-overlay'))closeCommentModal();}
