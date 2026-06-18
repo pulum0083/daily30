@@ -1,0 +1,12 @@
+{# Q&A 문답 형식 — 개인투자자 질문에 AI가 답변 (모든 브리핑 타입 공용) #}
+<div class="open-section">
+  <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+  <div class="qa-card">
+    {% for item in qa_items %}
+    <div class="qa-item">
+      <div class="qa-q"><span class="qa-mark qa-mark--q">Q.</span><span class="qa-q-text">{{ item.q | safe }}</span></div>
+      <div class="qa-a"><span class="qa-mark qa-mark--a">A.</span><span class="qa-a-text">{{ item.a | safe }}</span></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

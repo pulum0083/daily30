@@ -25,6 +25,10 @@
                 {% include "sections/scenario_split.html" %}
               {% elif analysis_format == 'bullet' %}
                 {% include "sections/reasons.html" %}
+              {% elif analysis_format == 'qa' %}
+                {% include "sections/qa.html" %}
+              {% elif analysis_format == 'signal' %}
+                {% include "sections/signal_board.html" %}
               {% else %}
                 {% include "sections/close_reason.html" %}
               {% endif %}

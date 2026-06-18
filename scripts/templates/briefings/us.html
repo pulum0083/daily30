@@ -22,6 +22,10 @@
               {% include "sections/scenario_split.html" %}
             {% elif analysis_format == 'why_what_so' %}
               {% include "sections/why_what_so.html" %}
+            {% elif analysis_format == 'qa' %}
+              {% include "sections/qa.html" %}
+            {% elif analysis_format == 'signal' %}
+              {% include "sections/signal_board.html" %}
             {% else %}
               {% include "sections/reasons.html" %}
             {% endif %}

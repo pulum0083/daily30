@@ -162,6 +162,34 @@ def build_why_what_so_context(analysis: dict) -> dict:
     }
 
 
+def build_qa_context(analysis: dict) -> dict:
+    """Q&A 문답 형식용 컨텍스트. analysis_format == 'qa' 일 때 사용."""
+    items = []
+    for it in analysis.get("qa_items", [])[:3]:
+        if it.get("q") and it.get("a"):
+            items.append({"q": it["q"], "a": it["a"]})
+    return {"qa_items": items}
+
+
+def build_signal_context(analysis: dict) -> dict:
+    """신호등 스코어보드 형식용 컨텍스트. analysis_format == 'signal' 일 때 사용."""
+    items = []
+    for it in analysis.get("sig_items", [])[:5]:
+        lvl = it.get("level", "neu")
+        if lvl not in ("up", "neu", "down"):
+            lvl = "neu"
+        if it.get("label") and it.get("desc"):
+            items.append({"level": lvl, "label": it["label"], "desc": it["desc"]})
+    tone = analysis.get("sig_tone", "neu")
+    if tone not in ("up", "neu", "down"):
+        tone = "neu"
+    return {
+        "sig_verdict": analysis.get("sig_verdict", ""),
+        "sig_tone": tone,
+        "sig_items": items,
+    }
+
+
 def build_reasons(analysis: dict) -> dict:
     direction = analysis.get("prediction", {}).get("direction", "")
     fallback = {
@@ -178,6 +206,10 @@ def build_reasons(analysis: dict) -> dict:
         ctx.update(build_scenario_context(analysis))
     elif fmt == "why_what_so":
         ctx.update(build_why_what_so_context(analysis))
+    elif fmt == "qa":
+        ctx.update(build_qa_context(analysis))
+    elif fmt == "signal":
+        ctx.update(build_signal_context(analysis))
     return ctx
 
 
@@ -353,6 +385,10 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             ctx.update(build_scenario_context(analysis))
         elif fmt == "bullet":
             ctx["reasons"] = analysis.get("reasons", [])[:4]
+        elif fmt == "qa":
+            ctx.update(build_qa_context(analysis))
+        elif fmt == "signal":
+            ctx.update(build_signal_context(analysis))
         else:  # why_what_so (default for close)
             ctx["reason_lead"] = analysis.get("market_summary", "")
             b_rows = []

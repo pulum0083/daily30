@@ -852,3 +852,30 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 @media(prefers-color-scheme:dark){.sc-dot.dn{background:#60a5fa;}.sc-dot.up{background:#f87171;}}
 .sc-footer{padding:10px 16px;border-top:1px solid var(--hairline);font-size:13px;color:var(--muted);line-height:1.6;}
 .sc-footer b{color:var(--primary);font-weight:600;}
+
+/* ── Q&A 문답 형식 (analysis_format == qa) ── */
+.qa-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s2);padding:2px 18px;margin-top:10px;}
+.qa-item{padding:14px 0;border-bottom:1px solid var(--hairline);}
+.qa-item:last-child{border-bottom:none;}
+.qa-q{display:flex;gap:8px;margin-bottom:6px;}
+.qa-a{display:flex;gap:8px;}
+.qa-mark{flex-shrink:0;font-weight:800;font-size:14px;line-height:1.65;}
+.qa-mark--q{color:#4F46E5;}
+.qa-mark--a{color:var(--up);}
+.qa-q-text{font-weight:700;font-size:14px;line-height:1.65;color:var(--ink);}
+.qa-a-text{font-size:14px;line-height:1.7;color:var(--muted);}
+.qa-a-text b{color:var(--ink);font-weight:600;}
+
+/* ── 신호등 스코어보드 형식 (analysis_format == signal) ── */
+.sig-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s2);padding:14px 18px;margin-top:10px;}
+.sig-verdict{font-size:13px;font-weight:700;padding:9px 13px;border-radius:10px;margin-bottom:12px;background:var(--surface-inset);color:var(--ink);}
+.sig-verdict.up{background:rgba(224,49,49,.1);color:var(--up);}
+.sig-verdict.down{background:rgba(39,117,237,.1);color:var(--dn);}
+.sig-row{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--hairline);font-size:14px;line-height:1.65;color:var(--muted);}
+.sig-row:last-child{border-bottom:none;}
+.sig-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;position:relative;top:5px;}
+.sig-dot.up{background:var(--up);}
+.sig-dot.neu{background:#D97706;}
+.sig-dot.down{background:var(--dn);}
+.sig-txt{flex:1;}
+.sig-txt b{color:var(--ink);font-weight:700;}

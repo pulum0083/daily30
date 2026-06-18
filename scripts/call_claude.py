@@ -373,6 +373,23 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 - `what`: 강한/약한 섹터·종목 구체 수치 1~2문장
 - `so_what`: 다음 세션 시사점 정확히 1문장 (해요체)
 `reasons` 필드는 출력하지 않는다.
+
+### 형식 D: qa
+`reason_title`(질문을 부르는 훅 타이틀, 예: "오늘, 코스피 사야 할까요?") + 아래 필드 출력:
+- `qa_items`: 정확히 2~3개. 각 항목은 `{"q": ..., "a": ...}` 객체.
+  - `q`: 개인투자자가 실제로 던질 법한 질문. 해요체 의문문, 40자 이내.
+  - `a`: 그 질문에 대한 답변. 완결된 해요체 2~3문장, <b> 수치 강조 포함. 데이터 근거로 답한다.
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 E: signal
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `sig_verdict`: 종합 판정 한 줄 (예: "강세 우위 · 신호 5개 중 3개가 상승"). 해요체 아님, 압축 라벨.
+- `sig_tone`: `sig_verdict`의 전반 톤. "up"(강세 우위) / "neu"(중립) / "down"(약세 우위) 중 하나.
+- `sig_items`: 정확히 4~5개. 각 항목은 `{"level": ..., "label": ..., "desc": ...}` 객체.
+  - `level`: "up"(상승/강세 신호) / "neu"(중립·경계 신호) / "down"(하락/약세 신호) 중 하나.
+  - `label`: 팩터명. 12자 이내 (예: "외국인 수급", "반도체", "FOMC").
+  - `desc`: 그 팩터 설명. **완결된 해요체 1문장**, <b> 수치 강조 포함.
+`reasons` 필드는 출력하지 않는다.
 """
 
 US_SYSTEM_PROMPT = """\
@@ -657,6 +674,23 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 - `why`: 시장을 움직인 근본 원인 1~2문장
 - `what`: 강한/약한 섹터·종목 구체 수치 1~2문장
 - `so_what`: 다음 세션 시사점 정확히 1문장 (해요체)
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 D: qa
+`reason_title`(질문을 부르는 훅 타이틀, 예: "오늘, 미국 주식 사야 할까요?") + 아래 필드 출력:
+- `qa_items`: 정확히 2~3개. 각 항목은 `{"q": ..., "a": ...}` 객체.
+  - `q`: 개인투자자가 실제로 던질 법한 질문. 해요체 의문문, 40자 이내.
+  - `a`: 그 질문에 대한 답변. 완결된 해요체 2~3문장, <b> 수치 강조 포함. 데이터 근거로 답한다.
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 E: signal
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `sig_verdict`: 종합 판정 한 줄 (예: "강세 우위 · 신호 5개 중 3개가 강세"). 해요체 아님, 압축 라벨.
+- `sig_tone`: `sig_verdict`의 전반 톤. "up"(강세 우위) / "neu"(중립) / "down"(약세 우위) 중 하나.
+- `sig_items`: 정확히 4~5개. 각 항목은 `{"level": ..., "label": ..., "desc": ...}` 객체.
+  - `level`: "up"(강세 신호) / "neu"(중립·경계 신호) / "down"(약세 신호) 중 하나.
+  - `label`: 팩터명. 12자 이내 (예: "기술주", "국채금리", "연준").
+  - `desc`: 그 팩터 설명. **완결된 해요체 1문장**, <b> 수치 강조 포함.
 `reasons` 필드는 출력하지 않는다.
 """
 
@@ -1098,7 +1132,7 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
             print(f"[call_claude] Sector rotation hint injected ({len(sector_history[:5])} recent)")
 
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
-    _formats = ["bullet", "scenario", "why_what_so"]
+    _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
     chosen_format = random.choice(_formats)
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
@@ -1352,6 +1386,17 @@ sentiment shift는 마감 흐름의 근본 원인이 되기도 하고 다음 세
 
 ### 형식 C: why_what_so (기본값)
 기존 방식 그대로 `market_title`, `market_summary`, `why`, `what`, `so_what` 출력.
+
+### 형식 D: qa
+`reason_title`(질문을 부르는 훅 타이틀, 예: "오늘 코스피, 어떻게 봐야 할까요?") + `qa_items` 출력.
+- `qa_items`: 정확히 2~3개. 각 `{"q": ..., "a": ...}`. q는 해요체 의문문 40자 이내, a는 완결된 해요체 2~3문장(<b> 수치 강조).
+`market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
+
+### 형식 E: signal
+`reason_title`(훅 타이틀) + `sig_verdict`, `sig_tone`, `sig_items` 출력.
+- `sig_verdict`: 종합 판정 한 줄 (압축 라벨). `sig_tone`: "up"/"neu"/"down".
+- `sig_items`: 정확히 4~5개. 각 `{"level": "up"|"neu"|"down", "label": 팩터명 12자 이내, "desc": 완결된 해요체 1문장(<b> 수치 강조)}`.
+`market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
 """
 
 
@@ -1391,7 +1436,7 @@ def call_claude_closing(date_str: str) -> dict:
         user_content += f"\n뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
-    _formats = ["bullet", "scenario", "why_what_so"]
+    _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
     chosen_format = random.choice(_formats)
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")

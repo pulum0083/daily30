@@ -1,0 +1,13 @@
+{# 신호등 스코어보드 형식 — 팩터별 강세/중립/약세 신호 (모든 브리핑 타입 공용) #}
+<div class="open-section">
+  <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+  <div class="sig-card">
+    {% if sig_verdict %}<div class="sig-verdict {{ sig_tone }}">{{ sig_verdict | safe }}</div>{% endif %}
+    {% for item in sig_items %}
+    <div class="sig-row">
+      <span class="sig-dot {{ item.level }}"></span>
+      <span class="sig-txt"><b>{{ item.label }}</b> — {{ item.desc | safe }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
