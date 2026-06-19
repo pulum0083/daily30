@@ -194,6 +194,7 @@ jobs:
         run: python3 scripts/fetch_news.py --type us
 
       - name: Fetch analyst quotes
+        if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/fetch_analyst_quotes.py
         continue-on-error: true
         env:
