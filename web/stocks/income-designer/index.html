@@ -955,7 +955,7 @@ function incomeFiltered(){
 function healthScore(d){return d.r==null?-Infinity:d.r-d.y;}
 function incomeRender(){
   const arr=incomeFiltered();
-  document.getElementById('income-rows').innerHTML=arr.slice(0,20).map(incomeRow).join('');
+  document.getElementById('income-rows').innerHTML=arr.slice(0,12).map(incomeRow).join('');
   const c=document.getElementById('iall-count');if(c)c.textContent=`(${arr.length})`;
 }
 
