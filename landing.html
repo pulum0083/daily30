@@ -72,6 +72,10 @@
     .tg-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 22px;font-size:15px;font-weight:700;background:#229ED9;color:#fff;border:none;border-radius:10px;cursor:pointer;text-decoration:none;white-space:nowrap}
     .tg-btn svg{width:18px;height:18px;fill:currentColor}
     .tg-btn:hover{filter:brightness(1.05)}
+    .hero-cta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .brief-btn{display:inline-flex;align-items:center;gap:7px;padding:14px 22px;font-size:15px;font-weight:700;background:var(--surface);color:var(--t1);border:2px solid var(--line);border-radius:10px;text-decoration:none;white-space:nowrap;transition:border-color .15s,color .15s;}
+    .brief-btn:hover{border-color:var(--blue);color:var(--blue);}
+    .brief-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
     .sub-alt{margin-top:12px;font-size:13px;color:var(--t3)}
     .hero-meta{display:flex;gap:28px;margin-top:28px}
     .hero-meta b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
@@ -209,10 +213,16 @@
         <span class="eyebrow">AI 투자 브리핑 · 코스피 · 미국</span>
         <h1 class="hero-t">오늘 오르는 이유,<br><span class="grad-text">내리는 이유</span>까지.</h1>
         <p class="hero-sub">매일 아침, AI가 시장 방향을 예측하고 그 근거를 조목조목 풀어드려요. 숫자만 던지는 알림이 아니라 "왜 움직이는지"를 읽는 브리핑이에요.</p>
-        <a class="tg-btn" id="subscribe" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
-          텔레그램으로 무료 구독
-        </a>
+        <div class="hero-cta">
+          <a class="tg-btn" id="subscribe" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
+            텔레그램으로 무료 구독
+          </a>
+          <a class="brief-btn" href="/briefings/">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            브리핑 보기
+          </a>
+        </div>
         <div class="sub-alt">광고 없음 · 휴장일 자동 스킵 · 언제든 해지</div>
         <div class="hero-meta">
           <div><b>하루 3회</b><span>코스피·미국 브리핑</span></div>
