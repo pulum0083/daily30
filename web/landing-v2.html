@@ -35,7 +35,7 @@
     }
 
     /* HERO */
-    .hero{padding:64px 0 48px}
+    .hero{padding:64px 0 48px;background:radial-gradient(1100px 420px at 78% -8%, rgba(0,110,255,.07), transparent 62%),radial-gradient(900px 380px at 12% 0%, rgba(124,58,237,.05), transparent 60%)}
     .hero .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:start}
     .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--blue);text-transform:uppercase}
     .eyebrow::before{content:"";width:22px;height:1.5px;background:currentColor}
@@ -128,7 +128,16 @@
     .cta-final input{border-color:transparent}
     .cta-final button{background:#0e1116}
 
-    footer{padding:32px 0;text-align:center;color:var(--t3);font-size:12px}
+    footer{padding:44px 0 96px;border-top:1px solid var(--line);background:var(--surface);color:var(--t3);font-size:12px}
+    .foot-grid{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;flex-wrap:wrap;margin-bottom:24px}
+    .foot-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;letter-spacing:-.02em;color:var(--t1);margin-bottom:8px}
+    .foot-logo .mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center}
+    .foot-logo .mark svg{width:13px;height:13px;fill:#fff}
+    .foot-brand p{font-size:12.5px;color:var(--t3);max-width:340px;line-height:1.55}
+    .foot-links{display:flex;flex-wrap:wrap;gap:10px 20px}
+    .foot-links a{font-size:13px;color:var(--t2);font-weight:500}
+    .foot-links a:hover{color:var(--blue)}
+    .foot-base{border-top:1px solid var(--line);padding-top:18px;font-size:11.5px;color:var(--t3)}
 
     /* sticky slim subscribe bar */
     .slim{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(20,22,26,.96);backdrop-filter:blur(10px);color:#fff;transform:translateY(120%);transition:transform .3s}
@@ -252,7 +261,7 @@
   </section>
 
   <!-- 4 · what you get -->
-  <section class="blk" style="background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <section class="blk" style="background:linear-gradient(180deg,#eef1ff,#f5f6fb);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow" style="justify-content:center">구독하면 받는 것</span>
@@ -297,12 +306,31 @@
     </div>
   </section>
 
-  <footer>© 2026 Double-Shot · doubleshot.space · AI 투자 브리핑</footer>
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <div class="foot-logo">
+            <span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="4" height="10" rx="1"/><rect x="15" y="5" width="4" height="8" rx="1" fill-opacity=".55"/></svg></span>
+            Double-Shot
+          </div>
+          <p>매일 아침 코스피·저녁 미국 시장, AI가 방향과 그 이유를 풀어주는 투자 브리핑.</p>
+        </div>
+        <nav class="foot-links">
+          <a href="/briefings">최신 브리핑</a>
+          <a href="/stocks/income-designer/">월배당 ETF 계산기</a>
+          <a href="https://t.me/doubleshot30" target="_blank" rel="noopener">텔레그램 구독</a>
+          <a href="mailto:pulum0083@gmail.com">문의</a>
+        </nav>
+      </div>
+      <div class="foot-base">© 2026 Double-Shot · doubleshot.space</div>
+    </div>
+  </footer>
 
   <!-- sticky slim subscribe bar -->
   <div class="slim" id="slim">
     <div class="wrap">
-      <div><b>매일 아침 시장 예측, 무료로.</b> <span>누적 적중률 69%</span></div>
+      <div><b>오늘 오르는 이유, 내리는 이유까지.</b> <span>매일 아침 브리핑 · 무료</span></div>
       <a class="tg-btn" href="https://t.me/doubleshot30" target="_blank" rel="noopener" style="padding:9px 16px;font-size:13px">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></svg>
         텔레그램 구독
