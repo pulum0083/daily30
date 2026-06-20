@@ -172,6 +172,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sg{display:flex;justify-content:space-around;border-top:1px solid var(--hair);margin-top:14px;padding-top:14px;}.sg .c{display:flex;flex-direction:column;align-items:center;gap:3px;}.sg .v{font-size:14px;font-weight:800;}.sg .v.good{color:#16A34A;}.sg .s{font-size:10px;color:var(--muted);}
 .panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
 .panel__h{padding:12px 16px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}.panel__h::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
+.suprow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--hair);}
+.supk{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.supv{font-size:19px;font-weight:800;line-height:1.1;}.supv.up{color:var(--up);}.supv.dn{color:var(--dn);}
+.supt{font-size:11px;font-weight:600;color:var(--muted);margin-left:5px;}
+.suphr{font-size:11px;color:var(--muted);margin-top:5px;}
+.supR{flex-shrink:0;}
+.spark{display:flex;align-items:flex-end;gap:5px;height:38px;}
+.spark .sb{position:relative;width:14px;height:38px;}
+.spark .sb::before{content:'';position:absolute;left:0;right:0;top:19px;height:1px;background:var(--hair);}
+.spark .sb i{position:absolute;left:2px;right:2px;display:block;}
+.spark .sb i.up{bottom:19px;background:var(--up);border-radius:2px 2px 0 0;}
+.spark .sb i.dn{top:19px;background:var(--dn);border-radius:0 0 2px 2px;}
+.spx{display:flex;gap:5px;margin-top:4px;}.spx span{width:14px;text-align:center;font-size:9px;color:var(--muted);white-space:nowrap;}
 .srow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}.srow:last-child{border-bottom:none;}.srow:hover{background:var(--primary-bg);}
 .srow .n2{flex:1;font-size:13px;font-weight:600;}.srow .n2 small{color:var(--muted);font-weight:500;font-size:10px;margin-left:4px;}.srow .c{font-size:13px;font-weight:700;}
 .phase{font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;background:var(--gold-bg);color:var(--gold);}
@@ -881,7 +894,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           </div>
         </div></div>
         <!-- 장 전/장 중: AI 오늘의 전망 (07:30 예측) -->
-        <div class="sc" id="pred-before"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s">07:30 예측</span></div><div class="scb">
+        <div class="sc" id="pred-before"><div class="sc__h"><span class="sc__t">AI 오늘의 전망</span><span class="sc__s"><b style="color:var(--up)">통산 적중률 65%</b> · 07:30 예측</span></div><div class="scb">
           <span class="pbadge">▲ 상승 우위 · MA20 상향 돌파</span>
           <div class="pg"><div class="n" style="left:78%"></div></div><div class="pgs"><span>하락 우위</span><span>중립</span><span>상승 우위</span></div>
           <div class="ro"><b class="num">78</b><u>% 상승 확률</u><span class="cf">신뢰도 <b class="num">78%</b></span></div>
@@ -910,24 +923,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <div style="text-align:center;margin:-4px 0 12px;">
           <button onclick="(function(){var b=document.getElementById('pred-before'),a=document.getElementById('pred-after');if(b.style.display==='none'){b.style.display='';a.style.display='none';this.textContent='→ 장 마감 후 상태 보기';}else{b.style.display='none';a.style.display='';this.textContent='← 장 전 상태 보기';}}).call(this)" style="font-size:11px;color:var(--muted);background:var(--inset);border:1px solid var(--hair);border-radius:6px;padding:5px 12px;cursor:pointer;">→ 장 마감 후 상태 보기</button>
         </div>
-        <div class="two">
-          <div class="sc"><div class="sc__h"><span class="sc__t">매매 가이드</span></div><div class="scb"><div class="tiles">
-            <div class="tile"><div class="l">진입</div><div class="v num">248,000</div></div><div class="tile"><div class="l">목표</div><div class="v num up">262,000</div></div><div class="tile"><div class="l">손절</div><div class="v num dn">240,000</div></div>
-          </div></div></div>
-          <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span></div><div class="scb">
-            <div class="ma"><span class="l">20일선</span><div class="tr"><div class="z"></div><div class="f" style="width:8%"></div></div><span class="p">+2.9%</span></div>
-            <div class="ma"><span class="l">200일선</span><div class="tr"><div class="z"></div><div class="f" style="width:30%"></div></div><span class="p">+22.1%</span></div>
-            <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">111만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2.07조</span><span class="s">시총</span></div></div>
-          </div></div>
-        </div>
-        <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-12 · 순매수 억원</span></div><div class="scb">
-          <div class="tiles">
-            <div class="tile"><div class="l">개인</div><div class="v num dn">−820</div></div>
-            <div class="tile"><div class="l">기관</div><div class="v num up">+310</div></div>
-            <div class="tile"><div class="l">외국인</div><div class="v num up">+540</div></div>
+        <!-- 수급 동향 (더블샷 '수급 현황' 스타일 — 큰 순매수 + 5일 미니막대 + 외인보유율 / 단위 주 / 개인→기관→외국인) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-19 종가 · 순매수 주</span></div><div class="scb">
+          <div class="suprow"><div class="supL"><div class="supk">개인</div><div class="num supv up">+74,603<span class="supt">순매수</span></div></div>
+            <div class="supR"><div class="spark"><div class="sb"><i class="dn" style="height:10px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:12px"></i></div><div class="sb"><i class="dn" style="height:3px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
           </div>
-          <p class="scen" style="margin-top:12px;">외국인·기관이 동반 순매수, 개인은 차익 실현이에요. <b style="color:var(--up)">외국인 3일 연속 순매수</b> 흐름이 이어지고 있어요.</p>
+          <div class="suprow"><div class="supL"><div class="supk">기관</div><div class="num supv up">+259,188<span class="supt">순매수</span></div></div>
+            <div class="supR"><div class="spark"><div class="sb"><i class="up" style="height:9px"></i></div><div class="sb"><i class="up" style="height:13px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div><div class="sb"><i class="up" style="height:14px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
+          </div>
+          <div class="suprow" style="border-bottom:none">
+            <div class="supL"><div class="supk">외국인</div><div class="num supv dn">−317,848<span class="supt">순매도</span></div><div class="suphr">외국인 보유율 <b class="num">51.26%</b></div></div>
+            <div class="supR"><div class="spark"><div class="sb"><i class="up" style="height:9px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="up" style="height:4px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div><div class="sb"><i class="dn" style="height:16px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
+          </div>
+          <p class="scen" style="margin-top:12px;">오늘 외국인이 순매도로 전환, 기관·개인이 받았어요. <b style="color:var(--up)">기관은 5일 연속 순매수</b> 흐름이에요. <span style="color:var(--muted)">네이버 금융 5일 · 수량 기준</span></p>
         </div></div>
+        <!-- 기술적 지표 (매일·풀폭) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span></div><div class="scb">
+          <div class="ma"><span class="l">20일선</span><div class="tr"><div class="z"></div><div class="f" style="width:8%"></div></div><span class="p">+2.9%</span></div>
+          <div class="ma"><span class="l">200일선</span><div class="tr"><div class="z"></div><div class="f" style="width:30%"></div></div><span class="p">+22.1%</span></div>
+          <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">111만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2.07조</span><span class="s">시총</span></div></div>
+        </div></div>
+        <!-- 매매 가이드 (픽된 날만·풀폭) -->
+        <div class="sc"><div class="sc__h"><span class="sc__t">매매 가이드</span><span class="sc__s">AI 픽 선정일</span></div><div class="scb"><div class="tiles">
+          <div class="tile"><div class="l">진입</div><div class="v num">248,000</div></div><div class="tile"><div class="l">목표</div><div class="v num up">262,000</div></div><div class="tile"><div class="l">손절</div><div class="v num dn">240,000</div></div>
+        </div></div></div>
         <!-- 참고 지표 (커머디티 데이터 한 카드로 묶음 — 보조 톤) -->
         <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">실측 · 보조 자료</span></div><div class="scb">
           <div class="refsub">
@@ -970,22 +989,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         </div>
         <div class="panel" style="border-color:#BAE6FD;">
           <div class="panel__h" style="background:#F0F9FF;border-color:#BAE6FD;">
-            <span style="color:#0C4A6E;">🧲 패시브 자금 노출도</span>
+            <span style="color:#0C4A6E;">📦 이 종목 담은 ETF</span>
           </div>
-          <p class="p1line">주요 반도체 ETF들이 <b>구조적으로 보유</b>하는 종목이에요. 패시브 기계매매 노출 수준이에요.</p>
-          <div class="pmet">
-            <div class="mc">
-              <div class="l">시총 대비 노출</div>
-              <div class="v num">1.6%</div>
-              <div class="sub">패시브 자금 약 2.8조</div>
-            </div>
-            <div class="mc">
-              <div class="l">거래일수 소화</div>
-              <div class="v num" style="color:#0284C7;">3.2일</div>
-              <div class="sub">임계 미달 · 뱃지 없음</div>
-            </div>
-          </div>
-          <div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);">끌고 가는 ETF TOP 3</div>
+          <p class="p1line">주요 반도체·코스피 ETF들이 이 종목을 담고 있어요. <b>패시브 ETF가 이 종목의 약 1.6%(약 2.8조)</b>를 구조적으로 보유해요.</p>
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);">많이 담은 ETF TOP 3</div>
           <div class="petf-row"><div class="en">KODEX 반도체<small>091160 · 비중 24.1%</small></div><div class="wt">24.1%</div></div>
           <div class="petf-row"><div class="en">TIGER Fn반도체TOP10<small>396500 · 비중 22.6%</small></div><div class="wt">22.6%</div></div>
           <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 6.2%</small></div><div class="wt">6.2%</div></div>
