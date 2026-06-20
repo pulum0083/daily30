@@ -1185,7 +1185,7 @@ const SCREEN_URLS={
 };
 // 종목 상세 — standalone 페이지로 실제 이동
 const STOCK_PAGES={'000660':1,'005930':1};
-function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else alert(code+' 상세 페이지는 준비 중이에요.');}
+function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else location.href='/stocks/stock.html?code='+code;}
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
 function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
 function go(id,noHistory){

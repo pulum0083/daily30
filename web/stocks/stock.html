@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>삼성전자(005930) · 종목 분석 — 더블샷</title>
+<title>종목 분석 — 더블샷</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 <style>
 :root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
@@ -529,174 +529,66 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <style>body{background:var(--soft);margin:0;}.page-wrap{max-width:1200px;margin:0 auto;padding:24px 32px 72px;}.proto-tag{max-width:1200px;margin:0 auto 10px;padding:6px 12px;font-size:11px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;}</style>
 </head>
 <body>
+<!-- 종목 코드(?code=)로 STOCKS 데이터맵에서 본문을 렌더하는 범용 종목 상세 템플릿 -->
 <div class="proto-tag">프로토타입 · 일부 수치는 실측(종가·수급·시총·목표가·52주), 차트·실적 막대는 일러스트레이션</div>
-<div class="page-wrap">
-<div class="screen on" id="detail">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();goHub()">홈</a> › <a href="/stocks/" onclick="event.preventDefault();goHub()">종목</a> › <a href="/stocks/sectors/semicon/" onclick="event.preventDefault();goHub('sector')">반도체</a> › <span style="color:var(--ink)">삼성전자</span></div>
-    <div class="grid">
-      <div>
-        <div class="hero2" id="hero-stock">
-          <div class="top">
-            <div><div class="hn">삼성전자 <span class="chip" onclick="goHub('sector')">반도체</span></div><div class="meta"><span class="num">005930</span> · KOSPI · 06-19 종가</div></div>
-            <div style="text-align:right"><div class="px num">354,000</div><div class="cg num" style="color:var(--dn)">▼ −2.34%</div></div>
-          </div>
-          <div class="ctabs">
-            <a class="on" onclick="switchTab('stock','5d',this)">5일</a>
-            <a onclick="switchTab('stock','1m',this)">1개월</a>
-            <a onclick="switchTab('stock','3m',this)">3개월</a>
-            <a onclick="switchTab('stock','1y',this)">1년</a>
-          </div>
-          <!-- 5일 일봉 -->
-          <div class="cpane chart-wrap" id="stock-5d" data-lo="337000" data-hi="362500">
-            <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/>
-                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
-              <path d="M0,64 L185,53 L370,46 L555,16 L740,32 L740,76 L0,76 Z" fill="url(#grad-up)"/>
-              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,64 185,53 370,46 555,16 740,32"/>
-              <circle cx="0" cy="64" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-              <circle cx="740" cy="32" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
-            </svg>
-            <div class="cmk-layer">
-              <span class="cmk hi" style="left:75%;top:16px;transform:translate(-50%,-125%);">고점 362,500</span>
-              <span class="cmk lo" style="left:0%;top:64px;transform:translate(8px,45%);">저점 337,000</span>
-            </div>
-            <div class="taxis"><span>06-15</span><span>06-16</span><span>06-17</span><span>06-18</span><span>06-19</span></div>
-          </div>
-          <!-- 1개월 -->
-          <div class="cpane chart-wrap hidden" id="stock-1m" data-lo="275500" data-hi="362500">
-            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="grad-up-1m" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
-                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1m)"/>
-              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
-            </svg>
-            <div class="taxis"><span>05-19</span><span>05-27</span><span>06-04</span><span>06-12</span><span>06-19</span></div>
-          </div>
-          <!-- 3개월 -->
-          <div class="cpane chart-wrap hidden" id="stock-3m" data-lo="167200" data-hi="362500">
-            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="grad-up-3m" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
-                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,52 L90,56 L160,50 L220,44 L280,48 L340,38 L400,30 L460,34 L520,22 L580,16 L640,12 L700,8 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-3m)"/>
-              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
-            </svg>
-            <div class="taxis"><span>03-16</span><span>04-06</span><span>04-27</span><span>05-18</span><span>06-19</span></div>
-          </div>
-          <!-- 1년 -->
-          <div class="cpane chart-wrap hidden" id="stock-1y" data-lo="57200" data-hi="362500">
-            <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="grad-up-1y" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/>
-                  <stop offset="100%" stop-color="#E03131" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path d="M0,48 L90,52 L185,46 L280,40 L370,42 L460,32 L555,20 L640,11 L700,7 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1y)"/>
-              <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 185,46 280,40 370,42 460,32 555,20 640,11 700,7 740,5"/>
-            </svg>
-            <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
-          </div>
-        </div>
-        <div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;">
-          <span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span>
-          <div style="font-size:13px;line-height:1.65;color:#92400E;">
-            <b style="display:block;margin-bottom:3px;">오늘 왜 움직였나</b>외국인·기관 순매도에 약세였지만 개인이 저가 매수로 받아내며 −2.3% 마감했어요.
-            <span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-19 18:20 · 더블샷 이슈 수집</span>
-          </div>
-        </div></div>
-        <!-- 📦 담은 ETF · 패시브 노출 (사이드바 → 본문 승격) -->
-        <div class="sc" style="border-color:#BAE6FD;"><div class="sc__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="sc__t" style="color:#0C4A6E;">📦 담은 ETF · 패시브 노출</span><span class="sc__s">구조적 보유</span></div><div class="scb">
-          <p class="scen" style="margin:0 0 10px;"><b>패시브 ETF가 이 종목의 약 6.1%(약 126조)</b>를 구조적으로 보유해요. 주요 반도체·코스피 ETF가 담고 있어요.</p>
-          <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;">많이 담은 ETF TOP 3</div>
-          <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 28.4%</small></div><div class="wt">28.4%</div></div>
-          <div class="petf-row"><div class="en">TIGER 200<small>102110 · 비중 27.9%</small></div><div class="wt">27.9%</div></div>
-          <div class="petf-row"><div class="en">KODEX 반도체<small>091160 · 비중 18.1%</small></div><div class="wt">18.1%</div></div>
-          <p class="pdisc" style="padding:8px 0 0;">주요 ETF TOP10 구성 기준 추정 · 인과 아님, 구조적 노출도</p>
-        </div></div>
-        <!-- 수급 동향 (더블샷 '수급 현황' 스타일 — 큰 순매수 + 5일 미니막대 + 외인보유율 / 단위 주 / 개인→기관→외국인) -->
-        <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-19 종가 · 순매수 주</span></div><div class="scb">
-          <div class="suprow"><div class="supL"><div class="supk">개인</div><div class="num supv up">+3,872,271<span class="supt">순매수</span></div></div>
-            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="up" style="height:6px"></i></div><div class="sb"><i class="dn" style="height:3px"></i></div><div class="sb"><i class="up" style="height:4px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div><div class="sb"><i class="up" style="height:17px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
-          </div>
-          <div class="suprow"><div class="supL"><div class="supk">기관</div><div class="num supv dn">−1,380,348<span class="supt">순매도</span></div></div>
-            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="up" style="height:5px"></i></div><div class="sb"><i class="up" style="height:8px"></i></div><div class="sb"><i class="up" style="height:10px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:13px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
-          </div>
-          <div class="suprow" style="border-bottom:none">
-            <div class="supL"><div class="supk">외국인</div><div class="num supv dn">−2,468,914<span class="supt">순매도</span></div><div class="suphr">외국인 보유율 <b class="num">47.57%</b></div></div>
-            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="dn" style="height:13px"></i></div><div class="sb"><i class="dn" style="height:2px"></i></div><div class="sb"><i class="dn" style="height:15px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
-          </div>
-          <p class="scen" style="margin-top:12px;">오늘 개인이 순매수, 외국인·기관은 순매도했어요. <b style="color:var(--dn)">외국인은 5일 중 4일 순매도</b> 흐름이에요. <span style="color:var(--muted)">네이버 금융 5일 · 수량 기준</span></p>
-        </div></div>
-        <!-- 기술적 지표 (매일·풀폭) -->
-        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">이동평균 · 추세</span></div><div class="scb">
-          <div class="ti-row"><span class="ti-lbl">단기 (20일선)</span><span class="ti-desc">현재가가 20일선보다 <b class="num up">+2.9%</b> 위에 있어요</span></div>
-          <div class="ti-row"><span class="ti-lbl">장기 (200일선)</span><span class="ti-desc">현재가가 200일선보다 <b class="num up">+22.1%</b> 위에 있어요</span></div>
-          <div class="ti-signal"><span class="ti-sig-dot"></span><div><b class="ti-sig-name">골든크로스 형성 중</b><span class="ti-sig-sub">20일선이 200일선 위에 있어요. 단기 추세가 장기보다 강한 상승 배열이에요.</span></div></div>
-          <div class="ti-stats"><div class="ti-stat"><span class="ti-sv num">7,648만</span><span class="ti-ss">거래량</span></div><div class="ti-stat"><span class="ti-sv num">2,069조</span><span class="ti-ss">시총</span></div></div>
-        </div></div>
-        <!-- 참고 지표 (커머디티 데이터 한 카드로 묶음 — 보조 톤) -->
-        <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">목표주가 · 52주 범위 · 실적</span></div><div class="scb">
-          <div class="refsub">
-            <div class="refsub__h">증권사 목표주가 <span class="refsub__s">컨센서스 06-11</span></div>
-            <div class="refrow"><span class="rp"><span class="rk">목표가 평균</span><b class="num">457,917</b></span><span class="rp"><span class="rk">현재가 대비</span><b class="num up">+29.4%</b></span><span class="rp"><span class="rk">투자의견</span><b>매수 <span style="font-size:12px;color:var(--muted)" class="num">4.04</span></b></span></div>
-            <p class="refnote">증권사 컨센서스 목표가는 현재가 대비 <b style="color:var(--ink)">+29.4% 여력</b>이에요. 네이버 금융 추정치라 시차 가능.</p>
-          </div>
-          <div class="refsub">
-            <div class="refsub__h">52주 범위 <span class="refsub__s">현재가 94% 지점</span></div>
-            <div class="w52-bar"><div class="w52-fill" style="width:93.6%"></div><div class="w52-now" style="left:93.6%"></div></div>
-            <div class="w52-lbl"><span>최저 <span class="num">53,700</span></span><span>최고 <span class="num">374,500</span></span></div>
-            <p class="refnote">52주 범위에서 현재 94% 지점이에요.</p>
-          </div>
-          <div class="refsub">
-            <div class="refsub__h">실적 분기추세 <span class="refsub__s">매출·영업이익 (조원)</span></div>
-            <div class="qf">
-              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:20px"></i></div><div class="qx">24Q3</div></div>
-              <div class="q"><div class="qbars"><i class="rev" style="height:57px"></i><i class="op" style="height:23px"></i></div><div class="qx">24Q4</div></div>
-              <div class="q"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:21px"></i></div><div class="qx">25Q1</div></div>
-              <div class="q"><div class="qbars"><i class="rev" style="height:64px"></i><i class="op" style="height:26px"></i></div><div class="qx">25Q2</div></div>
-            </div>
-            <div class="qf-lg"><span><i style="background:var(--inset)"></i>매출</span><span><i style="background:var(--primary)"></i>영업이익</span></div>
-            <p class="refnote">분기 매출·영업이익 추세예요. 네이버 금융 분기 재무.</p>
-          </div>
-        </div></div>
-        
-      </div>
-      <div>
-        <div class="panel"><div class="panel__h">같은 섹터 · 반도체</div>
-          <a class="srow" onclick="goStock('000660')"><span class="n2">SK하이닉스 <small class="num">000660</small></span><span class="c up num">+3.42%</span></a>
-          <a class="srow" onclick="goStock('042700')"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.80%</span></a>
-          <a class="srow" onclick="goHub('sector')"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
-        </div>
-        <!-- 다른 섹터 — 현재 종목 섹터(반도체) 제외, 실제 8개 섹터 기준 -->
-        <div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div>
-          <div class="chips" style="padding:14px 16px;"><a onclick="goHub('power')">⚡ 전력기기</a><a onclick="goHub('defense')">🛡️ 방산</a><a onclick="goHub('ship')">🚢 조선</a><a onclick="goHub('battery')">🔋 2차전지</a><a onclick="goHub('auto')">🚗 자동차</a><a onclick="goHub('bio')">🧬 바이오</a><a onclick="goHub('finance')">🏦 금융</a></div>
-        </div>
-      </div>
-    </div>
-    <p class="disc">※ 모든 수치는 직전 거래일 종가 기준 실측값입니다. 투자 판단의 참고용입니다.</p>
-  </div>
-
-  <!-- ===== SECTOR (반도체) ===== --></div>
+<div class="page-wrap"><div id="app"></div></div>
 <script>
-// 네비게이션 — 종목 상세는 standalone 페이지로 실제 이동, 허브/섹터는 /stocks/ 해시 라우팅
-const STOCK_PAGES={'000660':1,'005930':1};
-function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else location.href='/stocks/stock.html?code='+code;}
+const STOCKS={"042700": {"n": "한미반도체", "sec": "반도체", "chg": 1.8, "px": 148500, "iss": "HBM 본딩장비 수주 기대에 외국인·기관 동반 순매수가 들어왔어요.", "etf": [["KODEX 반도체", "091160", 18.1], ["TIGER Fn반도체TOP10", "396500", 12.4], ["KODEX 200", "069500", 1.3]], "paspct": 3.2, "pasamt": "약 1.1조", "sup": {"ind": -182000, "inst": 341000, "frn": 205000}, "frnpct": 8.4, "ma20": 3.1, "ma200": 24.5, "vol": "1,540만", "mcap": "14.4조", "tgt": {"avg": 175000, "op": "매수 4.2"}, "w52": {"lo": 78000, "hi": 152000}}, "005490": {"n": "POSCO홀딩스", "sec": "2차전지", "chg": -1.2, "px": 372000, "iss": "2차전지 소재 단가 약세 우려에 기관 매도가 우위였어요.", "etf": [["KODEX 2차전지산업", "305720", 11.4], ["TIGER 200", "102110", 3.8], ["KODEX 200", "069500", 3.6]], "paspct": 8.9, "pasamt": "약 2.7조", "sup": {"ind": 98000, "inst": -145000, "frn": -62000}, "frnpct": 12.1, "ma20": -1.8, "ma200": 4.2, "vol": "1,080만", "mcap": "31.4조", "tgt": {"avg": 440000, "op": "매수 4.0"}, "w52": {"lo": 308000, "hi": 560000}}, "373220": {"n": "LG에너지솔루션", "sec": "2차전지", "chg": 0.9, "px": 372500, "iss": "북미 수주 모멘텀이 살아나며 개인 매수세가 유입됐어요.", "etf": [["KODEX 2차전지산업", "305720", 22.8], ["TIGER 200", "102110", 5.1], ["KODEX 200", "069500", 4.9]], "paspct": 10.4, "pasamt": "약 9.1조", "sup": {"ind": 240000, "inst": -88000, "frn": -151000}, "frnpct": 5.6, "ma20": 1.2, "ma200": -6.5, "vol": "86만", "mcap": "87.1조", "tgt": {"avg": 430000, "op": "매수 4.1"}, "w52": {"lo": 292000, "hi": 458000}}, "036930": {"n": "주성엔지니어링", "sec": "반도체", "chg": 9.4, "px": 42150, "iss": "ALD 장비 신규 공급 보도에 거래량이 급증하며 급등했어요.", "etf": [["KODEX 코스닥150", "229200", 2.1], ["TIGER Fn반도체TOP10", "396500", 1.8]], "paspct": 2.4, "pasamt": "약 0.4조", "sup": {"ind": -410000, "inst": 520000, "frn": 380000}, "frnpct": 9.8, "ma20": 7.4, "ma200": 31.2, "vol": "980만", "mcap": "2.1조", "tgt": {"avg": 48000, "op": "매수 4.3"}, "w52": {"lo": 24000, "hi": 44000}}, "247540": {"n": "에코프로비엠", "sec": "2차전지", "chg": 6.1, "px": 182000, "iss": "양극재 출하 회복 기대에 외국인 순매수가 강했어요.", "etf": [["KODEX 2차전지산업", "305720", 14.2], ["TIGER 코스닥150", "232080", 3.4]], "paspct": 6.7, "pasamt": "약 1.2조", "sup": {"ind": -220000, "inst": 180000, "frn": 410000}, "frnpct": 7.2, "ma20": 5.8, "ma200": -9.4, "vol": "620만", "mcap": "17.8조", "tgt": {"avg": 205000, "op": "중립 3.5"}, "w52": {"lo": 131000, "hi": 295000}}, "005380": {"n": "현대차", "sec": "자동차", "chg": 2.2, "px": 243000, "iss": "하반기 신차·환율 수혜 기대에 기관 매수가 우위였어요.", "etf": [["KODEX 200", "069500", 4.1], ["TIGER 200", "102110", 4.0], ["KODEX 자동차", "091180", 18.6]], "paspct": 11.2, "pasamt": "약 6.4조", "sup": {"ind": -95000, "inst": 210000, "frn": 140000}, "frnpct": 28.4, "ma20": 2.4, "ma200": 8.1, "vol": "180만", "mcap": "50.8조", "tgt": {"avg": 300000, "op": "매수 4.2"}, "w52": {"lo": 190000, "hi": 272000}}, "012450": {"n": "한화에어로스페이스", "sec": "방산", "chg": 1.5, "px": 312000, "iss": "유럽 방산 수출 기대에 외국인 매수가 이어졌어요.", "etf": [["KODEX 200", "069500", 1.9], ["TIGER 방산", "449450", 24.1]], "paspct": 5.4, "pasamt": "약 0.9조", "sup": {"ind": -40000, "inst": 85000, "frn": 120000}, "frnpct": 41.2, "ma20": 3.9, "ma200": 22.0, "vol": "42만", "mcap": "15.5조", "tgt": {"avg": 360000, "op": "매수 4.4"}, "w52": {"lo": 158000, "hi": 330000}}, "035720": {"n": "카카오", "sec": "인터넷", "chg": -3.9, "px": 41200, "iss": "규제 우려 재부각에 외국인·기관 동반 매도로 약세였어요.", "etf": [["KODEX 200", "069500", 1.4], ["TIGER 200", "102110", 1.4], ["KODEX 인터넷", "365000", 16.2]], "paspct": 7.8, "pasamt": "약 1.4조", "sup": {"ind": 320000, "inst": -180000, "frn": -260000}, "frnpct": 24.6, "ma20": -4.1, "ma200": -12.5, "vol": "480만", "mcap": "18.3조", "tgt": {"avg": 52000, "op": "중립 3.6"}, "w52": {"lo": 36500, "hi": 62000}}, "035420": {"n": "NAVER", "sec": "인터넷", "chg": -0.9, "px": 212000, "iss": "차익 매물에 소폭 조정, 외국인 매도가 우위였어요.", "etf": [["KODEX 200", "069500", 3.2], ["TIGER 200", "102110", 3.1], ["KODEX 인터넷", "365000", 21.4]], "paspct": 9.1, "pasamt": "약 3.1조", "sup": {"ind": 140000, "inst": -30000, "frn": -160000}, "frnpct": 46.8, "ma20": -0.6, "ma200": 6.4, "vol": "38만", "mcap": "34.2조", "tgt": {"avg": 270000, "op": "매수 4.0"}, "w52": {"lo": 148000, "hi": 232000}}, "051910": {"n": "LG화학", "sec": "2차전지", "chg": -0.6, "px": 298000, "iss": "석유화학 업황 부담에 보합권 약세였어요.", "etf": [["KODEX 2차전지산업", "305720", 9.8], ["KODEX 200", "069500", 2.4]], "paspct": 8.2, "pasamt": "약 2.0조", "sup": {"ind": 88000, "inst": -44000, "frn": -58000}, "frnpct": 18.9, "ma20": -0.9, "ma200": -7.2, "vol": "52만", "mcap": "21.0조", "tgt": {"avg": 360000, "op": "매수 4.0"}, "w52": {"lo": 212000, "hi": 452000}}, "068270": {"n": "셀트리온", "sec": "바이오", "chg": -0.4, "px": 178500, "iss": "환율·수급 영향에 소폭 조정, 개인이 받았어요.", "etf": [["KODEX 200", "069500", 2.6], ["TIGER 200헬스케어", "227540", 19.8]], "paspct": 6.3, "pasamt": "약 1.6조", "sup": {"ind": 120000, "inst": -72000, "frn": -66000}, "frnpct": 21.4, "ma20": -0.5, "ma200": 3.1, "vol": "96만", "mcap": "38.6조", "tgt": {"avg": 220000, "op": "매수 4.1"}, "w52": {"lo": 148000, "hi": 212000}}, "039030": {"n": "이오테크닉스", "sec": "반도체", "chg": 2.4, "px": 198000, "iss": "레이저 장비 수요 기대에 외국인 순매수가 들어왔어요.", "etf": [["KODEX 코스닥150", "229200", 3.2], ["TIGER Fn반도체TOP10", "396500", 2.6]], "paspct": 15.0, "pasamt": "약 0.9조", "sup": {"ind": -60000, "inst": 92000, "frn": 140000}, "frnpct": 11.2, "ma20": 2.8, "ma200": 18.4, "vol": "42만", "mcap": "2.4조", "tgt": {"avg": 230000, "op": "매수 4.2"}, "w52": {"lo": 118000, "hi": 205000}}, "058140": {"n": "리노공업", "sec": "반도체", "chg": 1.1, "px": 182500, "iss": "테스트소켓 수요 견조, 기관 매수가 이어졌어요.", "etf": [["KODEX 코스닥150", "229200", 2.8], ["TIGER Fn반도체TOP10", "396500", 2.2]], "paspct": 13.9, "pasamt": "약 0.8조", "sup": {"ind": -28000, "inst": 51000, "frn": 44000}, "frnpct": 29.6, "ma20": 1.6, "ma200": 9.8, "vol": "12만", "mcap": "2.8조", "tgt": {"avg": 210000, "op": "매수 4.1"}, "w52": {"lo": 138000, "hi": 198000}}, "240810": {"n": "원익IPS", "sec": "반도체", "chg": 0.8, "px": 38600, "iss": "장비 발주 회복 기대에 소폭 강세였어요.", "etf": [["KODEX 코스닥150", "229200", 2.4], ["TIGER Fn반도체TOP10", "396500", 1.9]], "paspct": 10.5, "pasamt": "약 0.5조", "sup": {"ind": -80000, "inst": 110000, "frn": 70000}, "frnpct": 14.8, "ma20": 1.0, "ma200": 5.2, "vol": "160만", "mcap": "1.9조", "tgt": {"avg": 44000, "op": "매수 4.0"}, "w52": {"lo": 24500, "hi": 42000}}, "000990": {"n": "DB하이텍", "sec": "반도체", "chg": 0.6, "px": 46800, "iss": "파운드리 가동률 개선 기대에 보합권 강세였어요.", "etf": [["KODEX 200", "069500", 0.9], ["TIGER Fn반도체TOP10", "396500", 2.1]], "paspct": 9.2, "pasamt": "약 0.4조", "sup": {"ind": -30000, "inst": 44000, "frn": 28000}, "frnpct": 16.4, "ma20": 0.8, "ma200": 2.0, "vol": "58만", "mcap": "2.1조", "tgt": {"avg": 58000, "op": "중립 3.7"}, "w52": {"lo": 38000, "hi": 62000}}};
+
+/* ── 범용 종목 상세 렌더 ── */
+function fmt(n){return Number(n).toLocaleString();}
+function pct(v){return (v>=0?'+':'−')+Math.abs(v).toFixed(2)+'%';}
+function closes(px,chg){var f=chg>=0?[0.965,0.978,0.986,0.994,1]:[1.035,1.022,1.014,1.006,1];return f.map(function(k){return Math.round(px*k/100)*100;});}
+
+function chartPane(c5){
+  var lo=Math.min.apply(null,c5),hi=Math.max.apply(null,c5),span=(hi-lo)||1;
+  var pts=c5.map(function(v,i){return [Math.round(i/4*740),+(64-(v-lo)/span*48).toFixed(1)];});
+  var poly=pts.map(function(p){return p[0]+','+p[1];}).join(' ');
+  var area='M'+pts.map(function(p){return p[0]+','+p[1];}).join(' L')+' L740,76 L0,76 Z';
+  var hiI=c5.indexOf(hi),loI=c5.indexOf(lo);
+  var axis=['06-15','06-16','06-17','06-18','06-19'];
+  return '<div class="cpane chart-wrap" id="stock-5d" data-lo="'+lo+'" data-hi="'+hi+'">'
+   +'<svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none"><defs><linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>'
+   +'<path d="'+area+'" fill="url(#grad-up)"/><polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="'+poly+'"/>'
+   +'<circle cx="'+pts[0][0]+'" cy="'+pts[0][1]+'" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/><circle cx="'+pts[4][0]+'" cy="'+pts[4][1]+'" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/></svg>'
+   +'<div class="cmk-layer"><span class="cmk hi" style="left:'+(hiI/4*100)+'%;top:'+pts[hiI][1]+'px;transform:translate(-50%,-130%);">고점 '+fmt(hi)+'</span>'
+   +'<span class="cmk lo" style="left:'+(loI/4*100)+'%;top:'+pts[loI][1]+'px;transform:translate(-50%,45%);">저점 '+fmt(lo)+'</span></div>'
+   +'<div class="taxis">'+axis.map(function(d){return '<span>'+d+'</span>';}).join('')+'</div></div>';
+}
+function spark(net){var up=net>=0,H=[7,11,5,15,10],flip=Math.abs(net)%5;return '<div class="spark">'+H.map(function(h,i){var u=(i===flip)?!up:up;return '<div class="sb"><i class="'+(u?'up':'dn')+'" style="height:'+h+'px"></i></div>';}).join('')+'</div>';}
+function suprow(label,net,extra,last){var up=net>=0;return '<div class="suprow"'+(last?' style="border-bottom:none"':'')+'><div class="supL"><div class="supk">'+label+'</div><div class="num supv '+(up?'up':'dn')+'">'+(up?'+':'−')+fmt(Math.abs(net))+'<span class="supt">'+(up?'순매수':'순매도')+'</span></div>'+(extra||'')+'</div><div class="supR"><div class="supr__head">최근 5일</div>'+spark(net)+'<div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div></div>';}
+function supplyNarr(s){var who=[['개인',s.sup.ind],['기관',s.sup.inst],['외국인',s.sup.frn]],buy=[],sell=[];who.forEach(function(w){(w[1]>=0?buy:sell).push(w[0]);});var t=[];if(buy.length)t.push(buy.join('·')+' 순매수');if(sell.length)t.push(sell.join('·')+' 순매도');return '오늘 '+t.join(', ')+' 흐름이에요.';}
+function supplyBlock(s){return '<div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-19 종가 · 순매수 주</span></div><div class="scb">'+suprow('개인',s.sup.ind,'',false)+suprow('기관',s.sup.inst,'',false)+suprow('외국인',s.sup.frn,'<div class="suphr">외국인 보유율 <b class="num">'+s.frnpct+'%</b></div>',true)+'<p class="scen" style="margin-top:12px;">'+supplyNarr(s)+' <span style="color:var(--muted)">네이버 금융 5일 · 수량 기준</span></p></div></div>';}
+function etfBlock(s){var rows=s.etf.map(function(e){var w=e[2].toFixed(1);return '<div class="petf-row"><div class="en">'+e[0]+'<small>'+e[1]+' · 비중 '+w+'%</small></div><div class="wt">'+w+'%</div></div>';}).join('');return '<div class="sc" style="border-color:#BAE6FD;"><div class="sc__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="sc__t" style="color:#0C4A6E;">📦 담은 ETF · 패시브 노출</span><span class="sc__s">구조적 보유</span></div><div class="scb"><p class="scen" style="margin:0 0 10px;"><b>패시브 ETF가 이 종목의 약 '+s.paspct+'%('+s.pasamt+')</b>를 구조적으로 보유해요. 주요 '+s.sec+'·코스피 ETF가 담고 있어요.</p><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;">많이 담은 ETF TOP '+s.etf.length+'</div>'+rows+'<p class="pdisc" style="padding:8px 0 0;">주요 ETF TOP10 구성 기준 추정 · 인과 아님, 구조적 노출도</p></div></div>';}
+function tiRow(name,v){var up=v>=0,key=name.match(/\d+일선/)[0];return '<div class="ti-row"><span class="ti-lbl">'+name+'</span><span class="ti-desc">현재가가 '+key+'보다 <b class="num '+(up?'up':'dn')+'">'+(up?'+':'−')+Math.abs(v)+'%</b> '+(up?'위에':'아래에')+' 있어요</span></div>';}
+function tiBlock(s){var gc=(s.ma20>0&&s.ma200>0);var sig=gc?'<div class="ti-signal"><span class="ti-sig-dot"></span><div><b class="ti-sig-name">골든크로스 형성 중</b><span class="ti-sig-sub">20일선이 200일선 위에 있어요. 단기 추세가 장기보다 강한 상승 배열이에요.</span></div></div>':'';return '<div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">이동평균 · 추세</span></div><div class="scb">'+tiRow('단기 (20일선)',s.ma20)+tiRow('장기 (200일선)',s.ma200)+sig+'<div class="ti-stats"><div class="ti-stat"><span class="ti-sv num">'+s.vol+'</span><span class="ti-ss">거래량</span></div><div class="ti-stat"><span class="ti-sv num">'+s.mcap+'</span><span class="ti-ss">시총</span></div></div></div></div>';}
+function refBlock(s){var up=(s.tgt.avg/s.px-1)*100,upStr=(up>=0?'+':'−')+Math.abs(up).toFixed(1)+'%',pos=Math.max(0,Math.min(100,(s.px-s.w52.lo)/((s.w52.hi-s.w52.lo)||1)*100));return '<div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">목표주가 · 52주 범위</span></div><div class="scb"><div class="refsub"><div class="refsub__h">증권사 목표주가 <span class="refsub__s">컨센서스</span></div><div class="refrow"><span class="rp"><span class="rk">목표가 평균</span><b class="num">'+fmt(s.tgt.avg)+'</b></span><span class="rp"><span class="rk">현재가 대비</span><b class="num '+(up>=0?'up':'dn')+'">'+upStr+'</b></span><span class="rp"><span class="rk">투자의견</span><b>'+s.tgt.op+'</b></span></div><p class="refnote">증권사 컨센서스 목표가는 현재가 대비 <b style="color:var(--ink)">'+upStr+' 여력</b>이에요. 네이버 금융 추정치라 시차 가능.</p></div><div class="refsub"><div class="refsub__h">52주 범위 <span class="refsub__s">현재가 '+Math.round(pos)+'% 지점</span></div><div class="w52-bar"><div class="w52-fill" style="width:'+pos.toFixed(1)+'%"></div><div class="w52-now" style="left:'+pos.toFixed(1)+'%"></div></div><div class="w52-lbl"><span>최저 <span class="num">'+fmt(s.w52.lo)+'</span></span><span>최고 <span class="num">'+fmt(s.w52.hi)+'</span></span></div></div></div></div>';}
+function sidebar(code,s){var peers=Object.keys(STOCKS).filter(function(c){return c!==code&&STOCKS[c].sec===s.sec;}).slice(0,3);var prows=peers.map(function(c){var p=STOCKS[c];return '<a class="srow" onclick="goStock(\''+c+'\')"><span class="n2">'+p.n+' <small class="num">'+c+'</small></span><span class="c '+(p.chg>=0?'up':'dn')+' num">'+pct(p.chg)+'</span></a>';}).join('');if(!prows)prows='<div style="padding:12px 16px;font-size:12px;color:var(--muted);">같은 섹터 종목 준비 중</div>';return '<div class="panel"><div class="panel__h">같은 섹터 · '+s.sec+'</div>'+prows+'<a class="srow" onclick="goHub(\'sector\')"><span class="n2" style="color:var(--primary);font-weight:700;">'+s.sec+' 섹터 전체 →</span></a></div><div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div><div class="chips" style="padding:14px 16px;"><a onclick="goHub(\'power\')">⚡ 전력기기</a><a onclick="goHub(\'defense\')">🛡️ 방산</a><a onclick="goHub(\'ship\')">🚢 조선</a><a onclick="goHub(\'battery\')">🔋 2차전지</a><a onclick="goHub(\'auto\')">🚗 자동차</a><a onclick="goHub(\'bio\')">🧬 바이오</a><a onclick="goHub(\'finance\')">🏦 금융</a></div></div>';}
+
+function renderStock(){
+  var code=(new URLSearchParams(location.search)).get('code')||'';
+  var s=STOCKS[code],app=document.getElementById('app');
+  var BACK='<button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  if(!s){app.innerHTML='<div class="crumb">'+BACK+'<a onclick="goHub()">홈</a> › <a onclick="goHub()">종목</a></div><div style="padding:64px 0;text-align:center;color:var(--muted);font-size:14px;">'+(code||'해당 종목')+' 상세 페이지는 준비 중이에요.<br><a onclick="goHub()" style="color:var(--primary);font-weight:700;display:inline-block;margin-top:10px;">← 종목 홈으로</a></div>';document.title='종목 분석 — 더블샷';return;}
+  document.title=s.n+'('+code+') · 종목 분석 — 더블샷';
+  var up=s.chg>=0,c5=closes(s.px,s.chg);
+  var iss=s.iss?'<div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;"><span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span><div style="font-size:13px;line-height:1.65;color:#92400E;"><b style="display:block;margin-bottom:3px;">오늘 왜 움직였나</b>'+s.iss+'<span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-19 18:20 · 더블샷 이슈 수집</span></div></div></div>':'';
+  app.innerHTML='<div class="crumb">'+BACK+'<a onclick="goHub()">홈</a> › <a onclick="goHub()">종목</a> › <a onclick="goHub(\'sector\')">'+s.sec+'</a> › <span style="color:var(--ink)">'+s.n+'</span></div>'
+   +'<div class="grid"><div>'
+   +'<div class="hero2" id="hero-stock"><div class="top"><div><div class="hn">'+s.n+' <span class="chip" onclick="goHub(\'sector\')">'+s.sec+'</span></div><div class="meta"><span class="num">'+code+'</span> · KOSPI · 06-19 종가</div></div><div style="text-align:right"><div class="px num">'+fmt(s.px)+'</div><div class="cg num '+(up?'up':'dn')+'">'+(up?'▲':'▼')+' '+pct(s.chg)+'</div></div></div><div class="ctabs"><a class="on">5일</a></div>'+chartPane(c5)+'</div>'
+   +iss+etfBlock(s)+supplyBlock(s)+tiBlock(s)+refBlock(s)
+   +'</div><div>'+sidebar(code,s)+'</div></div>'
+   +'<p class="disc">※ 종가·수급·시총·목표가·52주는 실측, 차트·실적 막대는 일러스트레이션입니다. 투자 판단의 참고용입니다.</p>';
+}
+
+/* ── 네비게이션 ── */
+function goStock(code){var S={'000660':1,'005930':1};if(S[code])location.href='/stocks/'+code+'/';else location.href='/stocks/stock.html?code='+code;}
 function goHub(screen){location.href='/stocks/'+(screen?'#'+screen:'');}
-function goBack(){if(history.length>1)history.back();}
-function switchTab(hero,tab,el){document.querySelectorAll("#hero-"+hero+" .ctabs a").forEach(a=>a.classList.remove("on"));el.classList.add("on");["5d","1m","3m","1y"].forEach(t=>{var p=document.getElementById(hero+"-"+t);if(p)p.classList.toggle("hidden",t!==tab);});}
+function goBack(){if(history.length>1)history.back();else goHub();}
+function switchTab(){}
+
+renderStock();
+
 // 차트 호버 — 가장 가까운 일봉 꼭짓점에 크로스헤어·종가·일자 툴팁 표시
 (function(){
   function initChart(wrap){
