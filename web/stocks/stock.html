@@ -129,6 +129,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 /* detail 2-col */
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
+.dbox{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.05);padding:14px;margin-bottom:16px;}
+.dbox>.hero2{box-shadow:none;}
+.dbox>:last-child{margin-bottom:0;}
 /* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
 .chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
 .chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
@@ -574,7 +577,7 @@ function renderStock(){
   var up=s.chg>=0,c5=closes(s.px,s.chg);
   var iss=s.iss?'<div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;"><span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span><div style="font-size:13px;line-height:1.65;color:#92400E;"><b style="display:block;margin-bottom:3px;">오늘 왜 움직였나</b>'+s.iss+'<span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-19 18:20 · 더블샷 이슈 수집</span></div></div></div>':'';
   app.innerHTML='<div class="crumb">'+BACK+'<a onclick="goHub()">홈</a> › <a onclick="goHub()">종목</a> › <a onclick="goHub(\'sector\')">'+s.sec+'</a> › <span style="color:var(--ink)">'+s.n+'</span></div>'
-   +'<div class="grid"><div>'
+   +'<div class="grid"><div class="dbox">'
    +'<div class="hero2" id="hero-stock"><div class="top"><div><div class="hn">'+s.n+' <span class="chip" onclick="goHub(\'sector\')">'+s.sec+'</span></div><div class="meta"><span class="num">'+code+'</span> · KOSPI · 06-19 종가</div></div><div style="text-align:right"><div class="px num">'+fmt(s.px)+'</div><div class="cg num '+(up?'up':'dn')+'">'+(up?'▲':'▼')+' '+pct(s.chg)+'</div></div></div><div class="ctabs"><a class="on">5일</a></div>'+chartPane(c5)+'</div>'
    +iss+etfBlock(s)+supplyBlock(s)+tiBlock(s)+refBlock(s)
    +'</div><div>'+sidebar(code,s)+'</div></div>'
