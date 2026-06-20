@@ -887,6 +887,67 @@ def write_sitemap_xml():
     print(f"[generate_html] wrote web/sitemap.xml ({len(urls)} urls)")
 
 
+def patch_landing_hero(analysis: dict, target_date: str):
+    """랜딩 페이지 Hero 위젯을 최신 코스피 분석으로 갱신한다 (코스피 브리핑 생성 시에만 호출)."""
+    landing = WEB_DIR / "landing.html"
+    if not landing.exists():
+        return
+
+    prediction = analysis.get("prediction", {})
+    direction = prediction.get("direction", "상승 우위")
+    up_pct = prediction.get("up_pct", 50)
+    sig_items = (analysis.get("sig_items") or [])[:5]
+    reason_title = analysis.get("reason_title", "")
+
+    arrow = "↑" if "상승" in direction else "↓"
+    up_count = sum(1 for s in sig_items if s.get("level") == "up")
+    total = len(sig_items)
+    tone = "강세" if "상승" in direction else "약세"
+    conf_text = f"{tone} 우위 · 신호 {total}개 중 {up_count}개가 상승"
+
+    reason_lines = []
+    for item in sig_items:
+        label = item.get("label", "")
+        desc = re.sub(r"<[^>]+>", "", item.get("desc", ""))
+        level = item.get("level", "neu")
+        tag_cls = "brief-tag risk" if level == "dn" else "brief-tag"
+        reason_lines.append(
+            f'          <div class="brief-reason">'
+            f'<span class="{tag_cls}">{label}</span>'
+            f"<span>{desc}</span></div>"
+        )
+
+    widget = (
+        "<!-- HERO-WIDGET:START -->\n"
+        '      <div class="live">\n'
+        '        <div class="live-top">\n'
+        f'          <div class="lab"><span class="live-dot"></span>{target_date} · 코스피 당일 예측</div>\n'
+        f'          <div class="live-dir">{arrow} {direction} <span class="prob mono">{up_pct}% 상승</span></div>\n'
+        f'          <div class="brief-head">{reason_title}</div>\n'
+        f'          <div class="brief-sub">{conf_text}</div>\n'
+        "        </div>\n"
+        '        <div class="brief-reasons">\n'
+        + "\n".join(reason_lines) + "\n"
+        "        </div>\n"
+        f'        <a class="brief-more" href="/briefings/{target_date}/kospi/">이 브리핑 전체 읽기 →</a>\n'
+        "      </div>\n"
+        "      <!-- HERO-WIDGET:END -->"
+    )
+
+    html = landing.read_text(encoding="utf-8")
+    updated = re.sub(
+        r"<!-- HERO-WIDGET:START -->.*?<!-- HERO-WIDGET:END -->",
+        widget,
+        html,
+        flags=re.DOTALL,
+    )
+    if updated == html:
+        print("[generate_html] landing.html hero 마커 없음, 패치 생략")
+        return
+    landing.write_text(updated, encoding="utf-8")
+    print(f"[generate_html] landing.html hero → {target_date} 패치 완료")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=list(TYPE_MAP.keys()))
@@ -920,6 +981,8 @@ def main():
 
     html, analysis = render_briefing(internal_type, args.date, market_data)
     write_output(html, internal_type, args.date, analysis)
+    if internal_type == "kospi":
+        patch_landing_hero(analysis, args.date)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
     write_sitemap_xml()
