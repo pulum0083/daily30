@@ -791,7 +791,7 @@
       '</a>' +
       '<div class="income-widget__list" id="income-rows"></div>' +
       '<a class="income-widget__foot" href="/stocks/income-designer/" target="_blank" rel="noopener">분배율·건전성 한눈에 · 내 배당 계산하기 →</a>';
-    chip.insertAdjacentElement('beforebegin', w);
+    chip.insertAdjacentElement('afterend', w);
 
     var rows = w.querySelector('#income-rows');
     fetch('/data/income_etfs.json', { signal: AbortSignal.timeout(5000) })
