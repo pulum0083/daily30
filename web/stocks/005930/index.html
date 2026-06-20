@@ -169,8 +169,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ro b{font-size:26px;font-weight:800;color:var(--up);line-height:1;}.ro u{font-size:13px;font-weight:700;color:var(--up);text-decoration:none;}.ro .cf{margin-left:auto;font-size:12px;color:var(--muted);}.ro .cf b{color:var(--primary);font-size:14px;}
 .scen{font-size:14px;color:var(--muted);line-height:1.85;margin:12px 0 0;}
 .tiles{display:flex;gap:10px;}.tile{flex:1;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:12px 8px;text-align:center;}.tile .l{font-size:11px;color:var(--muted);margin-bottom:4px;}.tile .v{font-size:15px;font-weight:800;}
-.ma{display:flex;align-items:center;gap:10px;margin-bottom:9px;}.ma .l{font-size:12px;font-weight:600;color:var(--muted);width:84px;}.ma .tr{position:relative;flex:1;height:6px;background:var(--inset);border-radius:999px;}.ma .z{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hair);}.ma .f{position:absolute;top:0;height:100%;border-radius:999px;background:var(--up);left:50%;}.ma .p{font-size:12px;font-weight:700;width:48px;text-align:right;color:var(--up);}
-.sg{display:flex;justify-content:space-around;border-top:1px solid var(--hair);margin-top:14px;padding-top:14px;}.sg .c{display:flex;flex-direction:column;align-items:center;gap:3px;}.sg .v{font-size:14px;font-weight:800;}.sg .v.good{color:#16A34A;}.sg .s{font-size:10px;color:var(--muted);}
+.ti-row{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-bottom:1px solid var(--hair);}.ti-lbl{font-size:11px;font-weight:600;color:var(--muted);}.ti-desc{font-size:13px;color:var(--ink);line-height:1.5;}
+.ti-signal{display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:12px;background:var(--surface, #F0FDF4);border:1px solid #BBF7D0;border-radius:8px;}.ti-sig-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#16A34A;margin-top:4px;}.ti-sig-name{font-size:13px;font-weight:700;color:#15803D;display:block;margin-bottom:3px;}.ti-sig-sub{font-size:12px;color:#166534;line-height:1.55;}
+.ti-stats{display:flex;gap:0;border-top:1px solid var(--hair);margin-top:4px;padding-top:12px;}.ti-stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}.ti-sv{font-size:15px;font-weight:800;}.ti-ss{font-size:10px;color:var(--muted);}
 .panel{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;box-shadow:var(--s1);overflow:hidden;margin-bottom:16px;}
 .panel__h{padding:12px 16px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}.panel__h::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px;}
 .suprow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--hair);}
@@ -178,14 +179,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .supv{font-size:19px;font-weight:800;line-height:1.1;}.supv.up{color:var(--up);}.supv.dn{color:var(--dn);}
 .supt{font-size:11px;font-weight:600;color:var(--muted);margin-left:5px;}
 .suphr{font-size:11px;color:var(--muted);margin-top:5px;}
-.supR{flex:1;min-width:0;max-width:420px;}
-.spark{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;height:38px;}
-.spark .sb{position:relative;flex:1;max-width:56px;height:38px;}
+.supR{flex-shrink:0;width:160px;}
+.supr__head{display:flex;justify-content:flex-end;font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.spark{display:flex;align-items:flex-end;justify-content:space-between;gap:5px;height:38px;}
+.spark .sb{position:relative;flex:1;height:38px;}
 .spark .sb::before{content:'';position:absolute;left:0;right:0;top:19px;height:1px;background:var(--hair);}
-.spark .sb i{position:absolute;left:3px;right:3px;display:block;}
-.spark .sb i.up{bottom:19px;background:var(--up);border-radius:3px 3px 0 0;}
-.spark .sb i.dn{top:19px;background:var(--dn);border-radius:0 0 3px 3px;}
-.spx{display:flex;justify-content:space-between;gap:12px;margin-top:5px;}.spx span{flex:1;max-width:56px;text-align:center;font-size:10px;color:var(--muted);white-space:nowrap;}
+.spark .sb i{position:absolute;left:2px;right:2px;display:block;}
+.spark .sb i.up{bottom:19px;background:var(--up);border-radius:2px 2px 0 0;}
+.spark .sb i.dn{top:19px;background:var(--dn);border-radius:0 0 2px 2px;}
+.spx{display:flex;justify-content:space-between;gap:5px;margin-top:5px;}.spx span{flex:1;text-align:center;font-size:9px;color:var(--muted);white-space:nowrap;}
 .srow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);}.srow:last-child{border-bottom:none;}.srow:hover{background:var(--primary-bg);}
 .srow .n2{flex:1;font-size:13px;font-weight:600;}.srow .n2 small{color:var(--muted);font-weight:500;font-size:10px;margin-left:4px;}.srow .c{font-size:13px;font-weight:700;}
 .phase{font-size:9px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;background:var(--gold-bg);color:var(--gold);}
@@ -615,16 +617,26 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
             <span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">06-19 18:20 · 더블샷 이슈 수집</span>
           </div>
         </div></div>
-        <!-- 수급 동향 (실측 5일·수량 기준) -->
+        <!-- 수급 동향 (더블샷 '수급 현황' 스타일 — 큰 순매수 + 5일 미니막대 + 외인보유율 / 단위 주 / 개인→기관→외국인) -->
         <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">06-19 종가 · 순매수 주</span></div><div class="scb">
-          <div class="suprow"><div class="supL"><div class="supk">개인</div><div class="num supv up">+3,872,271<span class="supt">순매수</span></div></div><div class="supR"><div class="spark"><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:6px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:3px;background:var(--dn);border-radius:0 0 2px 2px"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:4px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:18px;background:var(--dn);border-radius:0 0 2px 2px"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:17px;background:var(--up);border-radius:2px 2px 0 0"></div></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div></div><div class="suprow"><div class="supL"><div class="supk">기관</div><div class="num supv dn">−1,380,348<span class="supt">순매도</span></div></div><div class="supR"><div class="spark"><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:5px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:8px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:10px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:18px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:13px;background:var(--dn);border-radius:0 0 2px 2px"></div></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div></div><div class="suprow" style="border-bottom:none"><div class="supL"><div class="supk">외국인</div><div class="num supv dn">−2,468,914<span class="supt">순매도</span></div><div class="suphr">외국인 보유율 <b class="num">47.57%</b></div></div><div class="supR"><div class="spark"><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:13px;background:var(--dn);border-radius:0 0 2px 2px"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:2px;background:var(--dn);border-radius:0 0 2px 2px"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:15px;background:var(--dn);border-radius:0 0 2px 2px"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;bottom:19px;height:18px;background:var(--up);border-radius:2px 2px 0 0"></div></div><div class="sb"><div style="position:absolute;left:2px;right:2px;top:19px;height:18px;background:var(--dn);border-radius:0 0 2px 2px"></div></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div></div>
+          <div class="suprow"><div class="supL"><div class="supk">개인</div><div class="num supv up">+3,872,271<span class="supt">순매수</span></div></div>
+            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="up" style="height:6px"></i></div><div class="sb"><i class="dn" style="height:3px"></i></div><div class="sb"><i class="up" style="height:4px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div><div class="sb"><i class="up" style="height:17px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
+          </div>
+          <div class="suprow"><div class="supL"><div class="supk">기관</div><div class="num supv dn">−1,380,348<span class="supt">순매도</span></div></div>
+            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="up" style="height:5px"></i></div><div class="sb"><i class="up" style="height:8px"></i></div><div class="sb"><i class="up" style="height:10px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:13px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
+          </div>
+          <div class="suprow" style="border-bottom:none">
+            <div class="supL"><div class="supk">외국인</div><div class="num supv dn">−2,468,914<span class="supt">순매도</span></div><div class="suphr">외국인 보유율 <b class="num">47.57%</b></div></div>
+            <div class="supR"><div class="supr__head">최근 5일</div><div class="spark"><div class="sb"><i class="dn" style="height:13px"></i></div><div class="sb"><i class="dn" style="height:2px"></i></div><div class="sb"><i class="dn" style="height:15px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div></div><div class="spx"><span>15</span><span>16</span><span>17</span><span>18</span><span>오늘</span></div></div>
+          </div>
           <p class="scen" style="margin-top:12px;">오늘 개인이 순매수, 외국인·기관은 순매도했어요. <b style="color:var(--dn)">외국인은 5일 중 4일 순매도</b> 흐름이에요. <span style="color:var(--muted)">네이버 금융 5일 · 수량 기준</span></p>
         </div></div>
         <!-- 기술적 지표 (매일·풀폭) -->
-        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">현재가가 이동평균선보다 높음</span></div><div class="scb">
-          <div class="ma"><span class="l">20일선 대비</span><div class="tr"><div class="z"></div><div class="f" style="width:8%"></div></div><span class="p">+2.9%</span></div>
-          <div class="ma"><span class="l">200일선 대비</span><div class="tr"><div class="z"></div><div class="f" style="width:30%"></div></div><span class="p">+22.1%</span></div>
-          <div class="sg"><div class="c"><span class="v good">○</span><span class="s">골든크로스</span></div><div class="c"><span class="v num">7,648만</span><span class="s">거래량</span></div><div class="c"><span class="v num">2,069조</span><span class="s">시총</span></div></div>
+        <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">이동평균 · 추세</span></div><div class="scb">
+          <div class="ti-row"><span class="ti-lbl">단기 (20일선)</span><span class="ti-desc">현재가가 20일선보다 <b class="num up">+2.9%</b> 위에 있어요</span></div>
+          <div class="ti-row"><span class="ti-lbl">장기 (200일선)</span><span class="ti-desc">현재가가 200일선보다 <b class="num up">+22.1%</b> 위에 있어요</span></div>
+          <div class="ti-signal"><span class="ti-sig-dot"></span><div><b class="ti-sig-name">골든크로스 형성 중</b><span class="ti-sig-sub">20일선이 200일선 위에 있어요. 단기 추세가 장기보다 강한 상승 배열이에요.</span></div></div>
+          <div class="ti-stats"><div class="ti-stat"><span class="ti-sv num">7,648만</span><span class="ti-ss">거래량</span></div><div class="ti-stat"><span class="ti-sv num">2,069조</span><span class="ti-ss">시총</span></div></div>
         </div></div>
         <!-- 참고 지표 (커머디티 데이터 한 카드로 묶음 — 보조 톤) -->
         <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">목표주가 · 52주 범위 · 실적</span></div><div class="scb">
