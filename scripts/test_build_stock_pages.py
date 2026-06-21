@@ -28,6 +28,26 @@ def test_stock_section_config():
 import scripts.generate_html as gh
 
 
+def test_build_stock_page_writes_real_price(tmp_path, monkeypatch):
+    fake = {"price": 354000.0, "change_pct": -2.34,
+            "sparkline": [350000.0, 354000.0], "error": None,
+            "week52_low": 53700.0, "week52_high": 374500.0, "week52_pos_pct": 94.0}
+    monkeypatch.setattr(gh, "stock_realdata", lambda code: fake)
+    monkeypatch.setattr(gh, "WEB_DIR", tmp_path)  # 출력 루트 격리
+
+    stock = {"code": "005930", "name": "삼성전자", "sector": "반도체",
+             "market": "KOSPI", "peers": [{"code": "000660", "name": "SK하이닉스"}]}
+    out = gh.build_stock_page(stock, [{"code": "000660", "name": "SK하이닉스", "change_pct": 3.42}])
+
+    html = (tmp_path / "stocks" / "005930" / "index.html").read_text(encoding="utf-8")
+    assert "354,000" in html
+    assert "53,700" in html and "374,500" in html
+    assert "SK하이닉스" in html       # peer 링크
+    assert "/assets/stocks.css" in html
+    assert "{{" not in html  # 미치환 변수 없음
+    assert out.endswith("stocks/005930/index.html")
+
+
 def test_stock_realdata_adds_52w(monkeypatch):
     fake_closes = [100.0 + i for i in range(300)]  # 오래된→최신
 

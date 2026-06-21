@@ -878,6 +878,44 @@ def write_sitemap_xml():
     print(f"[generate_html] wrote web/sitemap.xml ({len(urls)} urls)")
 
 
+def build_stock_page(stock, peers):
+    """종목 1개의 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
+    rd = stock_realdata(stock["code"])
+    if rd.get("error") or rd.get("price") is None:
+        raise RuntimeError(f"{stock['code']} 실측 실패: {rd.get('error')}")
+    env = make_env()
+    tmpl = env.get_template("stocks/detail.html")
+    ctx = {
+        "stock": stock,
+        "rd": rd,
+        "peers": peers,
+        "generated_label": datetime.now().strftime("%m-%d") + " 종가",
+    }
+    html = tmpl.render(**ctx)
+    out_dir = WEB_DIR / "stocks" / stock["code"]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(html, encoding="utf-8")
+    return f"stocks/{stock['code']}/index.html"
+
+
+def build_all_stocks():
+    """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다."""
+    stocks = load_json(CONFIG_DIR / "stocks.json")
+    results = []
+    for s in stocks:
+        peers = []
+        for p in s.get("peers", []):
+            prd = stock_realdata(p["code"])
+            peers.append({
+                "code": p["code"],
+                "name": p["name"],
+                "change_pct": None if prd.get("error") else prd.get("change_pct"),
+            })
+        results.append(build_stock_page(s, peers))
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=list(TYPE_MAP.keys()))
@@ -887,6 +925,8 @@ def main():
                         help="briefings-list.json 만 갱신하고 HTML 재생성 없이 종료")
     parser.add_argument("--sync-index", action="store_true",
                         help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
+    parser.add_argument("--stocks", action="store_true",
+                        help="stocks.json 종목 상세 페이지 일괄 생성")
     args = parser.parse_args()
 
     if args.write_list_only:
@@ -900,6 +940,11 @@ def main():
             update_vercel_briefings_route(latest[0], latest[1])
         write_briefings_list_json()
         write_sitemap_xml()
+        return
+
+    if args.stocks:
+        for path in build_all_stocks():
+            print(f"생성: {path}")
         return
 
     if not args.type or not args.date or not args.data_file:
