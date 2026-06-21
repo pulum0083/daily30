@@ -881,6 +881,14 @@ def write_sitemap_xml():
                     "priority": "0.7",
                 })
 
+    # 종목 상세 페이지
+    for s in load_json(CONFIG_DIR / "stocks.json"):
+        urls.append({
+            "loc": f"{BASE}/stocks/{s['code']}/",
+            "changefreq": "daily",
+            "priority": "0.8",
+        })
+
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in urls:
@@ -972,6 +980,7 @@ def main():
     if args.stocks:
         for path in build_all_stocks():
             print(f"생성: {path}")
+        write_sitemap_xml()
         return
 
     if not args.type or not args.date or not args.data_file:

@@ -85,3 +85,9 @@ def test_template_hides_52w_when_absent():
         peers=[], generated_label="06-22 종가")
     assert "준비 중" in html
     assert "최저 0" not in html and "최고 0" not in html
+
+
+def test_sitemap_includes_stock_urls():
+    import inspect
+    src = inspect.getsource(gh.write_sitemap_xml)
+    assert "stocks" in src, "사이트맵 생성에 종목 URL 추가 필요"
