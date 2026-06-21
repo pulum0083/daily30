@@ -1,0 +1,234 @@
+<!-- 종목 상세 페이지 Jinja2 템플릿 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ stock.name }}({{ stock.code }}) · 종목 분석 — 더블샷</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/stocks.css">
+<script defer src="/assets/stocks.js"></script>
+</head>
+<body>
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb__in">
+    <a class="gnb__logo" href="/"><b>더블</b>샷</a>
+    <a href="/briefings/">브리핑</a>
+    <a href="/stocks/" class="on">종목</a>
+    <div class="right">
+      <div class="sbtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        종목 검색
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="proto-tag">프로토타입 · 시세·sparkline·52주는 실측, 수급·목표가·분기실적은 일러스트레이션</div>
+<div class="page-wrap">
+<div class="screen on" id="detail">
+  <div class="crumb">
+    <button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <a href="/stocks/" onclick="event.preventDefault();goHub()">홈</a> › <a href="/stocks/" onclick="event.preventDefault();goHub()">종목</a> › <a href="/stocks/sectors/{{ stock.sector }}/" onclick="event.preventDefault();goHub('sector')">{{ stock.sector }}</a> › <span style="color:var(--ink)">{{ stock.name }}</span>
+  </div>
+  <div class="grid">
+    <div class="dbox">
+      <!-- 헤더 카드: 종목명 + 시세 + 차트 -->
+      <div class="hero2" id="hero-stock">
+        <div class="top">
+          <div>
+            <div class="hn">{{ stock.name }} <span class="chip" onclick="goHub('sector')">{{ stock.sector }}</span></div>
+            <div class="meta"><span class="num">{{ stock.code }}</span> · {{ stock.market }} · {{ generated_label }}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="px num">{{ "{:,}".format(rd.price | int) }}</div>
+            {% if rd.change_pct > 0 %}
+            <div class="cg num" style="color:var(--up)">▲ +{{ "%.2f"|format(rd.change_pct) }}%</div>
+            {% elif rd.change_pct < 0 %}
+            <div class="cg num" style="color:var(--dn)">▼ {{ "%.2f"|format(rd.change_pct) }}%</div>
+            {% else %}
+            <div class="cg num" style="color:var(--muted)">— 0.00%</div>
+            {% endif %}
+          </div>
+        </div>
+        <!-- 주목 이유 신호 칩 (일러스트레이션) -->
+        <div class="sigrow">
+          <span class="sigchip hot">🔥 거래량 급증</span>
+          <span class="sigchip dn">🔵 외국인 수급 동향</span>
+          <span class="sigchip tech">📈 기술적 신호</span>
+        </div>
+        <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더) -->
+        <div class="spark-header" data-spark="{{ rd.sparkline | join(',') }}"></div>
+        <!-- 기간탭 차트 (일러스트레이션 — 탭 UI는 실제 동작) -->
+        <div class="ctabs">
+          <a class="on" onclick="switchTab('stock','5d',this)">5일</a>
+          <a onclick="switchTab('stock','1m',this)">1개월</a>
+          <a onclick="switchTab('stock','3m',this)">3개월</a>
+          <a onclick="switchTab('stock','1y',this)">1년</a>
+        </div>
+        <!-- 5일 -->
+        <div class="cpane chart-wrap" id="stock-5d" data-lo="337000" data-hi="362500">
+          <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
+            <defs><linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
+            <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
+            <path d="M0,64 L185,53 L370,46 L555,16 L740,32 L740,76 L0,76 Z" fill="url(#grad-up)"/>
+            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,64 185,53 370,46 555,16 740,32"/>
+            <circle cx="0" cy="64" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
+            <circle cx="740" cy="32" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
+          </svg>
+          <div class="cmk-layer">
+            <span class="cmk hi" style="left:75%;top:16px;transform:translate(-50%,-125%);">고점 362,500</span>
+            <span class="cmk lo" style="left:0%;top:64px;transform:translate(8px,45%);">저점 337,000</span>
+          </div>
+          <div class="taxis"><span>06-15</span><span>06-16</span><span>06-17</span><span>06-18</span><span>06-19</span></div>
+        </div>
+        <!-- 1개월 -->
+        <div class="cpane chart-wrap hidden" id="stock-1m" data-lo="275500" data-hi="362500">
+          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+            <defs><linearGradient id="grad-up-1m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1m)"/>
+            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
+          </svg>
+          <div class="taxis"><span>05-19</span><span>05-27</span><span>06-04</span><span>06-12</span><span>06-19</span></div>
+        </div>
+        <!-- 3개월 -->
+        <div class="cpane chart-wrap hidden" id="stock-3m" data-lo="167200" data-hi="362500">
+          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+            <defs><linearGradient id="grad-up-3m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,52 L90,56 L160,50 L220,44 L280,48 L340,38 L400,30 L460,34 L520,22 L580,16 L640,12 L700,8 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-3m)"/>
+            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
+          </svg>
+          <div class="taxis"><span>03-16</span><span>04-06</span><span>04-27</span><span>05-18</span><span>06-19</span></div>
+        </div>
+        <!-- 1년 -->
+        <div class="cpane chart-wrap hidden" id="stock-1y" data-lo="57200" data-hi="362500">
+          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
+            <defs><linearGradient id="grad-up-1y" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,48 L90,52 L185,46 L280,40 L370,42 L460,32 L555,20 L640,11 L700,7 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1y)"/>
+            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 185,46 280,40 370,42 460,32 555,20 640,11 700,7 740,5"/>
+          </svg>
+          <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
+        </div>
+      </div>
+
+      <!-- 오늘 왜 움직였나 (일러스트레이션) -->
+      <div class="sc" style="border-color:#FDE68A;background:#FFFBEB;"><div class="scb" style="display:flex;gap:11px;align-items:flex-start;padding:13px 16px;">
+        <span style="font-size:15px;flex-shrink:0;line-height:1.5;">📰</span>
+        <div style="font-size:13px;line-height:1.65;color:#92400E;">
+          <b style="display:block;margin-bottom:3px;">오늘 왜 움직였나</b>외국인·기관 순매도에 약세였지만 개인이 저가 매수로 받아내며 마감했어요.
+          <span style="display:block;margin-top:5px;font-size:11px;color:#B7791F;font-weight:600;">{{ generated_label }} · 더블샷 이슈 수집</span>
+        </div>
+      </div></div>
+
+      <!-- 수급 동향 (일러스트레이션) -->
+      <div class="sc"><div class="sc__h"><span class="sc__t">수급 동향</span><span class="sc__s">{{ generated_label }} · 순매수 주</span></div><div class="scb">
+        <div class="suprow"><div class="supL"><div class="supk">개인</div><div class="num supv up">+3,872,271<span class="supt">순매수</span></div></div>
+          <div class="supR"><div class="supr__head">최근 7일</div><div class="spark"><div class="sb"><i class="dn" style="height:6px"></i></div><div class="sb"><i class="dn" style="height:10px"></i></div><div class="sb"><i class="dn" style="height:18px"></i></div><div class="sb"><i class="dn" style="height:12px"></i></div><div class="sb"><i class="dn" style="height:3px"></i></div><div class="sb"><i class="dn" style="height:2px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div></div><div class="spx"><span>6d</span><span>5d</span><span>4d</span><span>3d</span><span>2d</span><span>어제</span><span>오늘</span></div></div>
+        </div>
+        <div class="suprow"><div class="supL"><div class="supk">기관</div><div class="num supv dn">−1,380,348<span class="supt">순매도</span></div></div>
+          <div class="supR"><div class="supr__head">최근 7일</div><div class="spark"><div class="sb"><i class="dn" style="height:4px"></i></div><div class="sb"><i class="up" style="height:9px"></i></div><div class="sb"><i class="up" style="height:13px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div><div class="sb"><i class="dn" style="height:2px"></i></div><div class="sb"><i class="up" style="height:14px"></i></div></div><div class="spx"><span>6d</span><span>5d</span><span>4d</span><span>3d</span><span>2d</span><span>어제</span><span>오늘</span></div></div>
+        </div>
+        <div class="suprow" style="border-bottom:none">
+          <div class="supL"><div class="supk">외국인</div><div class="num supv dn">−2,468,914<span class="supt">순매도</span></div><div class="suphr">외국인 보유율 <b class="num">47.57%</b></div></div>
+          <div class="supR"><div class="supr__head">최근 7일</div><div class="spark"><div class="sb"><i class="dn" style="height:5px"></i></div><div class="sb"><i class="up" style="height:9px"></i></div><div class="sb"><i class="up" style="height:18px"></i></div><div class="sb"><i class="up" style="height:4px"></i></div><div class="sb"><i class="up" style="height:3px"></i></div><div class="sb"><i class="up" style="height:6px"></i></div><div class="sb"><i class="dn" style="height:16px"></i></div></div><div class="spx"><span>6d</span><span>5d</span><span>4d</span><span>3d</span><span>2d</span><span>어제</span><span>오늘</span></div></div>
+        </div>
+        <p class="scen" style="margin-top:12px;">수급 동향은 일러스트레이션입니다. <span style="color:var(--muted)">실측 데이터 준비 중</span></p>
+      </div></div>
+
+      <!-- 기술적 지표 (일러스트레이션) -->
+      <div class="sc"><div class="sc__h"><span class="sc__t">기술적 지표</span><span class="sc__s">이동평균 · 추세</span></div><div class="scb">
+        <div class="ti-row"><span class="ti-lbl">단기 (20일선)</span><span class="ti-desc">현재가가 20일선보다 <b class="num up">+2.9%</b> 위에 있어요</span></div>
+        <div class="ti-row"><span class="ti-lbl">장기 (200일선)</span><span class="ti-desc">현재가가 200일선보다 <b class="num up">+22.1%</b> 위에 있어요</span></div>
+        <div class="ti-signal"><span class="ti-sig-dot"></span><div><b class="ti-sig-name">골든크로스 형성 중</b><span class="ti-sig-sub">20일선이 200일선 위에 있어요. 단기 추세가 장기보다 강한 상승 배열이에요.</span></div></div>
+        <div class="ti-stats"><div class="ti-stat"><span class="ti-sv num">7,648만</span><span class="ti-ss">거래량</span></div><div class="ti-stat"><span class="ti-sv num">2,069조</span><span class="ti-ss">시총</span></div></div>
+      </div></div>
+
+      <!-- 참고 지표: 52주(실측) + 목표가·실적(일러스트레이션) -->
+      <div class="sc"><div class="sc__h"><span class="sc__t">참고 지표</span><span class="sc__s">목표주가 · 52주 범위 · 실적</span></div><div class="scb">
+        <!-- 증권사 목표주가 — 일러스트레이션 -->
+        <div class="refsub">
+          <div class="refsub__h">증권사 목표주가 <span class="refsub__s">컨센서스 (일러스트레이션)</span></div>
+          <div class="refrow"><span class="rp"><span class="rk">목표가 평균</span><b class="num">457,917</b></span><span class="rp"><span class="rk">현재가 대비</span><b class="num up">+29.4%</b></span><span class="rp"><span class="rk">투자의견</span><b>매수 <span style="font-size:12px;color:var(--muted)" class="num">4.04</span></b></span></div>
+          <p class="refnote">증권사 목표가 수치는 일러스트레이션입니다. 실측 데이터 준비 중.</p>
+        </div>
+        <!-- 52주 범위 — 실측 -->
+        <div class="refsub">
+          <div class="refsub__h">52주 범위 <span class="refsub__s">현재가 {{ rd.week52_pos_pct }}% 지점</span></div>
+          <div class="w52-bar">
+            <div class="w52-fill" style="width:{{ rd.week52_pos_pct }}%"></div>
+            <div class="w52-now" style="left:{{ rd.week52_pos_pct }}%"></div>
+          </div>
+          <div class="w52-lbl"><span>최저 <span class="num">{{ "{:,}".format(rd.week52_low | int) }}</span></span><span>최고 <span class="num">{{ "{:,}".format(rd.week52_high | int) }}</span></span></div>
+          <p class="refnote">52주 범위에서 현재 {{ rd.week52_pos_pct }}% 지점이에요.</p>
+        </div>
+        <!-- 실적 분기추세 — 일러스트레이션 -->
+        <div class="refsub">
+          <div class="refsub__h">실적 분기추세 <span class="refsub__s">매출·영업이익 (조원) — 일러스트레이션</span></div>
+          <div class="qf" id="qf-earnings">
+            <div class="q" data-qx="24Q3" data-rev="17.6" data-op="7.0"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:20px"></i></div><div class="qx">24Q3</div></div>
+            <div class="q" data-qx="24Q4" data-rev="19.8" data-op="8.1"><div class="qbars"><i class="rev" style="height:57px"></i><i class="op" style="height:23px"></i></div><div class="qx">24Q4</div></div>
+            <div class="q" data-qx="25Q1" data-rev="17.6" data-op="6.9"><div class="qbars"><i class="rev" style="height:51px"></i><i class="op" style="height:21px"></i></div><div class="qx">25Q1</div></div>
+            <div class="q" data-qx="25Q2" data-rev="22.3" data-op="9.2"><div class="qbars"><i class="rev" style="height:64px"></i><i class="op" style="height:26px"></i></div><div class="qx">25Q2</div></div>
+          </div>
+          <div class="qf-lg"><span><i style="background:var(--inset)"></i>매출</span><span><i style="background:var(--primary)"></i>영업이익</span></div>
+          <p class="refnote">분기 실적 수치는 일러스트레이션입니다. 실측 데이터 준비 중.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- 우측 사이드바 -->
+    <div>
+      <!-- 같은 섹터 — 실측 (peers) -->
+      <div class="panel"><div class="panel__h">같은 섹터 · {{ stock.sector }}</div>
+        {% for p in peers %}
+        <a class="srow" href="/stocks/{{ p.code }}/">
+          <span class="n2">{{ p.name }} <small class="num">{{ p.code }}</small></span>
+          {% if p.change_pct is not none %}
+            {% if p.change_pct > 0 %}
+            <span class="c up num">+{{ "%.2f"|format(p.change_pct) }}%</span>
+            {% elif p.change_pct < 0 %}
+            <span class="c dn num">{{ "%.2f"|format(p.change_pct) }}%</span>
+            {% else %}
+            <span class="c num" style="color:var(--muted)">0.00%</span>
+            {% endif %}
+          {% else %}
+          <span class="c num" style="color:var(--muted)">—</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+        <a class="srow" href="/stocks/sectors/{{ stock.sector }}/"><span class="n2" style="color:var(--primary);font-weight:700;">{{ stock.sector }} 섹터 전체 →</span></a>
+      </div>
+
+      <!-- 담은 ETF (일러스트레이션) -->
+      <div class="panel" style="border-color:#BAE6FD;">
+        <div class="panel__h" style="background:#F0F9FF;border-color:#BAE6FD;">
+          <span style="color:#0C4A6E;">📦 {{ stock.name }} 담은 ETF</span>
+        </div>
+        <p class="p1line">주요 ETF들이 이 종목을 담고 있어요. <b>패시브 ETF가 이 종목을 구조적으로 보유해요.</b></p>
+        <div style="padding:10px 16px 4px;font-size:11px;font-weight:700;color:var(--muted);">많이 담은 ETF (일러스트레이션)</div>
+        <div class="petf-row"><div class="en">KODEX 200<small>069500 · 비중 28.4%</small></div><div class="wt">28.4%</div></div>
+        <div class="petf-row"><div class="en">TIGER 200<small>102110 · 비중 27.9%</small></div><div class="wt">27.9%</div></div>
+        <div class="petf-row"><div class="en">KODEX 반도체<small>091160 · 비중 18.1%</small></div><div class="wt">18.1%</div></div>
+        <div class="pdisc">ETF 편입 데이터는 일러스트레이션입니다 · 실측 준비 중</div>
+      </div>
+
+      <!-- 다른 섹터 -->
+      <div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div>
+        <div class="chips" style="padding:14px 16px;">
+          <a href="/stocks/#power">⚡ 전력기기</a>
+          <a href="/stocks/#defense">🛡️ 방산</a>
+          <a href="/stocks/#ship">🚢 조선</a>
+          <a href="/stocks/#battery">🔋 2차전지</a>
+          <a href="/stocks/#auto">🚗 자동차</a>
+          <a href="/stocks/#bio">🧬 바이오</a>
+          <a href="/stocks/#finance">🏦 금융</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="disc">※ 모든 수치는 직전 거래일 종가 기준 실측값입니다 (수급·목표가·실적 제외 — 일러스트레이션). 투자 판단의 참고용입니다.</p>
+</div>
+</div>
+</body>
+</html>
