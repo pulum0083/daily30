@@ -1,0 +1,13 @@
+{
+  "type": "stock",
+  "template": "stocks/detail.html",
+  "url_prefix": "stocks",
+  "sections": [
+    "price_chart",
+    "why_moved",
+    "supply_flow",
+    "reference_metrics",
+    "peers"
+  ],
+  "illustration_sections": ["target_price", "quarterly_earnings"]
+}
