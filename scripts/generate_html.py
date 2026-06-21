@@ -22,6 +22,37 @@ from pathlib import Path
 import pytz
 from jinja2 import Environment, FileSystemLoader
 
+try:
+    from scripts.validate_analysis import _fetch_kospi_realdata
+    import scripts.toss_client as tc
+except ImportError:
+    from validate_analysis import _fetch_kospi_realdata
+    import toss_client as tc
+
+
+def _fetch_stock_closes(code):
+    """토스 일봉 종가 리스트(오래된→최신). 52주 범위 산출용."""
+    candles = tc.get_candles(code, interval="1d", count=300)
+    return [float(c["closePrice"]) for c in candles if c.get("closePrice")]
+
+
+def stock_realdata(code):
+    """종목 상세용 실측 dict. 시세·sparkline·MA + 52주 범위."""
+    rd = _fetch_kospi_realdata(code)
+    if rd.get("error"):
+        return {"error": rd["error"], "price": None}
+    rd["error"] = None
+    try:
+        closes = _fetch_stock_closes(code)
+        if closes:
+            lo, hi = min(closes), max(closes)
+            rd["week52_low"] = round(lo, 2)
+            rd["week52_high"] = round(hi, 2)
+            rd["week52_pos_pct"] = round((rd["price"] - lo) / (hi - lo) * 100, 1) if hi > lo else 0
+    except Exception:
+        rd["week52_low"] = rd["week52_high"] = rd["week52_pos_pct"] = None
+    return rd
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 WEB_DIR = BASE_DIR / "web"
