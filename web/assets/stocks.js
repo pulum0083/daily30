@@ -1,11 +1,10 @@
-// 종목 상세 페이지의 sparkline 렌더와 기간탭 토글을 담당하는 스크립트
+// 종목 상세 페이지의 sparkline 렌더를 담당하는 스크립트
 
 // 네비게이션 — 종목 상세는 standalone 페이지로 실제 이동, 허브/섹터는 /stocks/ 해시 라우팅
 // 제너레이터가 모든 종목에 /stocks/{code}/ 페이지를 생성하므로 무조건 클린 URL 사용
 function goStock(code){location.href='/stocks/'+code+'/';}
 function goHub(screen){location.href='/stocks/'+(screen?'#'+screen:'');}
 function goBack(){if(history.length>1)history.back();else goHub();}
-function switchTab(hero,tab,el){document.querySelectorAll("#hero-"+hero+" .ctabs a").forEach(a=>a.classList.remove("on"));el.classList.add("on");["5d","1m","3m","1y"].forEach(t=>{var p=document.getElementById(hero+"-"+t);if(p)p.classList.toggle("hidden",t!==tab);});}
 
 // 헤더 sparkline 렌더 — [data-spark] 속성의 쉼표 구분 종가 배열로 SVG 폴리라인 생성
 document.addEventListener('DOMContentLoaded', function() {
@@ -42,6 +41,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var areaPoints = pts.join(' ') + ' ' + lx.toFixed(1) + ',' + (H - PAD) + ' ' + fx.toFixed(1) + ',' + (H - PAD);
 
+    // 실측 고점·저점 라벨 위치 계산
+    var hiIdx = closes.indexOf(hi);
+    var loIdx = closes.indexOf(lo);
+    var hiPt = pts[hiIdx].split(',');
+    var loPt = pts[loIdx].split(',');
+    var hix = parseFloat(hiPt[0]);
+    var hiy = parseFloat(hiPt[1]);
+    var loxPt = parseFloat(loPt[0]);
+    var loyPt = parseFloat(loPt[1]);
+    var upColor = '#E03131';
+    var dnColor = '#2775ED';
+    var hiColor = isUp ? upColor : dnColor;
+    var loColor = isUp ? dnColor : upColor;
+    var hiLabel = '고점 ' + hi.toLocaleString();
+    var loLabel = '저점 ' + lo.toLocaleString();
+    // 라벨이 SVG 경계를 벗어나지 않도록 앵커 결정 (좌측 30% → start, 나머지 → end)
+    var hiAnchor = hix < W * 0.3 ? 'start' : 'end';
+    var loAnchor = loxPt < W * 0.3 ? 'start' : 'end';
+    var hiDy = hiy < 18 ? 14 : -6;
+    var loDy = loyPt > H - 18 ? -6 : 14;
+
     var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;height:80px;display:block;overflow:visible;">'
       + '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
       + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.18"/>'
@@ -51,42 +71,13 @@ document.addEventListener('DOMContentLoaded', function() {
       + '<polyline fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + pts.join(' ') + '"/>'
       + '<circle cx="' + fx.toFixed(1) + '" cy="' + firstPt[1] + '" r="3.5" fill="#fff" stroke="#9CA3AF" stroke-width="2"/>'
       + '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.5" fill="#fff" stroke="' + color + '" stroke-width="2"/>'
+      + '<text x="' + hix.toFixed(1) + '" y="' + (hiy + hiDy).toFixed(1) + '" text-anchor="' + hiAnchor + '" fill="' + hiColor + '" font-size="11" font-weight="700" font-family="inherit">' + hiLabel + '</text>'
+      + '<text x="' + loxPt.toFixed(1) + '" y="' + (loyPt + loDy).toFixed(1) + '" text-anchor="' + loAnchor + '" fill="' + loColor + '" font-size="11" font-weight="700" font-family="inherit">' + loLabel + '</text>'
       + '</svg>';
 
     container.innerHTML = svg;
   });
 });
-
-// 차트 호버 — 가장 가까운 일봉 꼭짓점에 크로스헤어·종가·일자 툴팁 표시
-(function(){
-  function initChart(wrap){
-    var poly=wrap.querySelector('polyline'),svg=wrap.querySelector('svg');
-    if(!poly||!svg)return;
-    var vbH=svg.viewBox.baseVal.height,svgH=80,PAD=14;
-    var pts=poly.getAttribute('points').trim().split(/\s+/).map(function(p){var a=p.split(',');return{x:+a[0],y:+a[1]};});
-    var ys=pts.map(function(p){return p.y;}),yMin=Math.min.apply(null,ys),yMax=Math.max.apply(null,ys);
-    var lo=+wrap.dataset.lo,hi=+wrap.dataset.hi;
-    var labels=[].map.call(wrap.querySelectorAll('.taxis span'),function(s){return s.textContent;});
-    var cross=document.createElement('div');cross.className='chart-cross';
-    var dot=document.createElement('div');dot.style.cssText='position:absolute;width:7px;height:7px;border-radius:50%;background:#fff;border:2px solid var(--up);transform:translate(-50%,-50%);pointer-events:none;display:none;z-index:11;';
-    var tt=document.createElement('div');tt.className='chart-tt';
-    wrap.appendChild(cross);wrap.appendChild(dot);wrap.appendChild(tt);
-    wrap.addEventListener('mousemove',function(e){
-      var r=wrap.getBoundingClientRect(),plotW=r.width-PAD*2;if(plotW<=0)return;
-      var cx=Math.max(0,Math.min(plotW,e.clientX-r.left-PAD)),vx=cx/plotW*740;
-      var best=pts[0],bd=1e9;pts.forEach(function(p){var d=Math.abs(p.x-vx);if(d<bd){bd=d;best=p;}});
-      var sx=PAD+best.x/740*plotW,sy=8+best.y/vbH*svgH;
-      var price=Math.round((hi-(best.y-yMin)/((yMax-yMin)||1)*(hi-lo))/100)*100;
-      var li=Math.round(best.x/740*(labels.length-1)),dl=labels[Math.max(0,Math.min(labels.length-1,li))]||'';
-      cross.style.left=sx+'px';cross.style.display='block';
-      dot.style.left=sx+'px';dot.style.top=sy+'px';dot.style.display='block';
-      tt.innerHTML=price.toLocaleString()+'<span style="font-size:11px;font-weight:600;color:var(--muted);margin-left:2px;">원</span>';
-      tt.style.left=Math.max(44,Math.min(r.width-44,sx))+'px';tt.style.display='block';
-    });
-    wrap.addEventListener('mouseleave',function(){cross.style.display='none';dot.style.display='none';tt.style.display='none';});
-  }
-  document.querySelectorAll('.chart-wrap[data-lo]').forEach(initChart);
-})();
 
 // 실적 차트 툴팁 (body-fixed — .sc overflow:hidden 우회)
 (function(){
@@ -108,18 +99,3 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 })();
 
-// 차트 색상 — 당일 등락(.cg ▲/▼) 기준: 상승 빨강, 하락 파랑
-(function applyChartColors() {
-  const cg = document.querySelector('.cg');
-  const color = (cg && cg.textContent.includes('▲')) ? '#E03131' : '#2775ED';
-  document.querySelectorAll('.chart-wrap').forEach(function(pane) {
-    const polyline = pane.querySelector('polyline');
-    if (!polyline) return;
-    polyline.setAttribute('stroke', color);
-    pane.querySelectorAll('linearGradient stop').forEach(function(s) {
-      s.setAttribute('stop-color', color);
-    });
-    const circles = pane.querySelectorAll('circle');
-    if (circles.length) circles[circles.length - 1].setAttribute('stroke', color);
-  });
-})();

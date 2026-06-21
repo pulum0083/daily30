@@ -54,58 +54,8 @@
           <span class="sigchip dn">🔵 외국인 수급 동향</span>
           <span class="sigchip tech">📈 기술적 신호</span>
         </div>
-        <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더) -->
+        <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더, 고점·저점 실측 라벨 포함) -->
         <div class="spark-header" data-spark="666000.0,655000.0,689000.0,681000.0,677000.0,723000.0,750000.0,729000.0,700000.0,700000.0,639000.0,639000.0,602000.0,597000.0,607000.0,647000.0,640000.0,618000.0,601000.0,613000.0"></div>
-        <!-- 기간탭 차트 (일러스트레이션 — 탭 UI는 실제 동작) -->
-        <div class="ctabs">
-          <a class="on" onclick="switchTab('stock','5d',this)">5일</a>
-          <a onclick="switchTab('stock','1m',this)">1개월</a>
-          <a onclick="switchTab('stock','3m',this)">3개월</a>
-          <a onclick="switchTab('stock','1y',this)">1년</a>
-        </div>
-        <!-- 5일 -->
-        <div class="cpane chart-wrap" id="stock-5d" data-lo="337000" data-hi="362500">
-          <svg class="chart-svg" viewBox="0 0 740 80" preserveAspectRatio="none">
-            <defs><linearGradient id="grad-up" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.18"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
-            <line x1="0" y1="62" x2="740" y2="62" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4 4"/>
-            <path d="M0,64 L185,53 L370,46 L555,16 L740,32 L740,76 L0,76 Z" fill="url(#grad-up)"/>
-            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="0,64 185,53 370,46 555,16 740,32"/>
-            <circle cx="0" cy="64" r="3.5" fill="#fff" stroke="#2775ED" stroke-width="2"/>
-            <circle cx="740" cy="32" r="3.5" fill="#fff" stroke="#E03131" stroke-width="2"/>
-          </svg>
-          <div class="cmk-layer">
-            <span class="cmk hi" style="left:75%;top:16px;transform:translate(-50%,-125%);">고점 362,500</span>
-            <span class="cmk lo" style="left:0%;top:64px;transform:translate(8px,45%);">저점 337,000</span>
-          </div>
-          <div class="taxis"><span>06-15</span><span>06-16</span><span>06-17</span><span>06-18</span><span>06-19</span></div>
-        </div>
-        <!-- 1개월 -->
-        <div class="cpane chart-wrap hidden" id="stock-1m" data-lo="275500" data-hi="362500">
-          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-            <defs><linearGradient id="grad-up-1m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,46 L62,48 L123,41 L185,43 L246,34 L308,29 L370,33 L431,22 L493,25 L555,15 L616,18 L678,9 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1m)"/>
-            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,46 62,48 123,41 185,43 246,34 308,29 370,33 431,22 493,25 555,15 616,18 678,9 740,5"/>
-          </svg>
-          <div class="taxis"><span>05-19</span><span>05-27</span><span>06-04</span><span>06-12</span><span>06-19</span></div>
-        </div>
-        <!-- 3개월 -->
-        <div class="cpane chart-wrap hidden" id="stock-3m" data-lo="167200" data-hi="362500">
-          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-            <defs><linearGradient id="grad-up-3m" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,52 L90,56 L160,50 L220,44 L280,48 L340,38 L400,30 L460,34 L520,22 L580,16 L640,12 L700,8 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-3m)"/>
-            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,52 90,56 160,50 220,44 280,48 340,38 400,30 460,34 520,22 580,16 640,12 700,8 740,5"/>
-          </svg>
-          <div class="taxis"><span>03-16</span><span>04-06</span><span>04-27</span><span>05-18</span><span>06-19</span></div>
-        </div>
-        <!-- 1년 -->
-        <div class="cpane chart-wrap hidden" id="stock-1y" data-lo="57200" data-hi="362500">
-          <svg class="chart-svg" viewBox="0 0 740 60" preserveAspectRatio="none">
-            <defs><linearGradient id="grad-up-1y" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E03131" stop-opacity="0.15"/><stop offset="100%" stop-color="#E03131" stop-opacity="0"/></linearGradient></defs>
-            <path d="M0,48 L90,52 L185,46 L280,40 L370,42 L460,32 L555,20 L640,11 L700,7 L740,5 L740,56 L0,56 Z" fill="url(#grad-up-1y)"/>
-            <polyline fill="none" stroke="#E03131" stroke-width="2.5" stroke-linejoin="round" points="0,48 90,52 185,46 280,40 370,42 460,32 555,20 640,11 700,7 740,5"/>
-          </svg>
-          <div class="taxis"><span>25.06</span><span>25.09</span><span>25.12</span><span>26.03</span><span>26.06</span></div>
-        </div>
       </div>
 
       <!-- 오늘 왜 움직였나 (일러스트레이션) -->
