@@ -900,18 +900,25 @@ def build_stock_page(stock, peers):
 
 
 def build_all_stocks():
-    """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다."""
+    """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
+
+    실측 호출 1회라도 실패하면 build_stock_page가 RuntimeError로 배치를 중단한다(fail-fast).
+    """
     stocks = load_json(CONFIG_DIR / "stocks.json")
+    peer_rd_cache = {}  # peer 실측 중복 호출 방지 (여러 종목이 같은 peer를 공유)
+
+    def _peer_change(code):
+        if code not in peer_rd_cache:
+            peer_rd_cache[code] = stock_realdata(code)
+        prd = peer_rd_cache[code]
+        return None if prd.get("error") else prd.get("change_pct")
+
     results = []
     for s in stocks:
-        peers = []
-        for p in s.get("peers", []):
-            prd = stock_realdata(p["code"])
-            peers.append({
-                "code": p["code"],
-                "name": p["name"],
-                "change_pct": None if prd.get("error") else prd.get("change_pct"),
-            })
+        peers = [
+            {"code": p["code"], "name": p["name"], "change_pct": _peer_change(p["code"])}
+            for p in s.get("peers", [])
+        ]
         results.append(build_stock_page(s, peers))
     return results
 
