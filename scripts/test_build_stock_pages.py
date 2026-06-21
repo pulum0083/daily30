@@ -15,6 +15,8 @@ def test_stocks_config_schema():
         for key in ("name", "sector", "market", "peers"):
             assert key in s, f"{s['code']} missing {key}"
         assert isinstance(s["peers"], list)
+        for p in s["peers"]:
+            assert len(p["code"]) == 6 and p["name"], f"{s['code']} bad peer {p}"
 
 
 def test_stock_section_config():
