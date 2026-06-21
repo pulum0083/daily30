@@ -1,8 +1,8 @@
 // 종목 상세 페이지의 sparkline 렌더와 기간탭 토글을 담당하는 스크립트
 
 // 네비게이션 — 종목 상세는 standalone 페이지로 실제 이동, 허브/섹터는 /stocks/ 해시 라우팅
-const STOCK_PAGES={'000660':1,'005930':1};
-function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else location.href='/stocks/stock.html?code='+code;}
+// 제너레이터가 모든 종목에 /stocks/{code}/ 페이지를 생성하므로 무조건 클린 URL 사용
+function goStock(code){location.href='/stocks/'+code+'/';}
 function goHub(screen){location.href='/stocks/'+(screen?'#'+screen:'');}
 function goBack(){if(history.length>1)history.back();else goHub();}
 function switchTab(hero,tab,el){document.querySelectorAll("#hero-"+hero+" .ctabs a").forEach(a=>a.classList.remove("on"));el.classList.add("on");["5d","1m","3m","1y"].forEach(t=>{var p=document.getElementById(hero+"-"+t);if(p)p.classList.toggle("hidden",t!==tab);});}
@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-spark]').forEach(function(container) {
     var raw = (container.getAttribute('data-spark') || '').trim();
     if (!raw) return;
-    var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && v > 0; });
+    // NaN/Infinity만 제거 — 도메인상 가격은 양수지만 0을 무시하면 안 됨
+    var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
     if (closes.length < 2) return;
 
     var W = 740, H = 80, PAD = 2;
