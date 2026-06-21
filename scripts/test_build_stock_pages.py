@@ -65,3 +65,23 @@ def test_stock_realdata_adds_52w(monkeypatch):
     assert rd["week52_high"] == 399.0
     assert 0 <= rd["week52_pos_pct"] <= 100
     assert rd["error"] is None
+
+
+def test_fetch_stock_closes_falls_back_to_naver(monkeypatch):
+    def boom(*a, **k):
+        raise RuntimeError("no toss creds")
+    monkeypatch.setattr(gh.tc, "get_candles", boom)
+    monkeypatch.setattr(gh, "_naver_daily_closes", lambda code: [100.0, 110.0, 120.0])
+    assert gh._fetch_stock_closes("005930") == [100.0, 110.0, 120.0]
+
+
+def test_template_hides_52w_when_absent():
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader("scripts/templates"))
+    t = env.get_template("stocks/detail.html")
+    html = t.render(
+        stock={"code": "005930", "name": "삼성전자", "sector": "반도체", "market": "KOSPI"},
+        rd={"price": 354000.0, "change_pct": -2.34, "sparkline": [1.0, 2.0], "error": None},
+        peers=[], generated_label="06-22 종가")
+    assert "준비 중" in html
+    assert "최저 0" not in html and "최고 0" not in html

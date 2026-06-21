@@ -156,13 +156,17 @@
         </div>
         <!-- 52주 범위 — 실측 -->
         <div class="refsub">
-          <div class="refsub__h">52주 범위 <span class="refsub__s">현재가 {{ rd.week52_pos_pct }}% 지점</span></div>
+          <div class="refsub__h">52주 범위{% if rd.week52_low %} <span class="refsub__s">현재가 {{ rd.week52_pos_pct }}% 지점</span>{% endif %}</div>
+          {% if rd.week52_low %}
           <div class="w52-bar">
             <div class="w52-fill" style="width:{{ rd.week52_pos_pct }}%"></div>
             <div class="w52-now" style="left:{{ rd.week52_pos_pct }}%"></div>
           </div>
           <div class="w52-lbl"><span>최저 <span class="num">{{ "{:,}".format(rd.week52_low | int) }}</span></span><span>최고 <span class="num">{{ "{:,}".format(rd.week52_high | int) }}</span></span></div>
           <p class="refnote">52주 범위에서 현재 {{ rd.week52_pos_pct }}% 지점이에요.</p>
+          {% else %}
+          <p class="refnote">52주 범위 데이터 준비 중.</p>
+          {% endif %}
         </div>
         <!-- 실적 분기추세 — 일러스트레이션 -->
         <div class="refsub">
