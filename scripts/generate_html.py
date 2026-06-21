@@ -31,7 +31,11 @@ except ImportError:
 
 
 def _fetch_stock_closes(code):
-    """토스 일봉 종가 리스트(오래된→최신). 52주 범위 산출용."""
+    """토스 일봉 종가 리스트(오래된→최신). 52주 범위 산출용.
+
+    _fetch_kospi_realdata가 캔들 원본을 반환하지 않아 부득이 토스를 재호출한다.
+    sparkline은 20개뿐이라 52주 범위 산출에 부족하다. (의도된 재호출)
+    """
     candles = tc.get_candles(code, interval="1d", count=300)
     return [float(c["closePrice"]) for c in candles if c.get("closePrice")]
 
