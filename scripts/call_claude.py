@@ -12,6 +12,7 @@ Usage:
     python3 scripts/call_claude.py --type kospi [--date 2026-04-14]
     python3 scripts/call_claude.py --type us
 """
+from __future__ import annotations
 
 import argparse
 import json
@@ -1058,7 +1059,7 @@ def extract_json(text: str) -> dict:
 # Core: Call Claude API with Prompt Caching
 # ─────────────────────────────────────────────────────────────────────────────
 
-def call_claude(briefing_type: str, date_str: str) -> dict:
+def call_claude(briefing_type: str, date_str: str, force_direction: str | None = None) -> dict:
     client = anthropic.Anthropic(
         api_key=get_anthropic_api_key(),
         default_headers={"anthropic-beta": "prompt-caching-2024-07-31"},
@@ -1098,6 +1099,29 @@ def call_claude(briefing_type: str, date_str: str) -> dict:
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
+
+    # 선행신호 방향 prior 주입 — SOX·선물 등 market_data_js 누락 신호도 함께 전달
+    if briefing_type == "kospi":
+        from leading_signal import compute_prior, format_prior_for_prompt
+        prior = compute_prior(market_data)
+        user_content += format_prior_for_prompt(prior)
+        print(f"[call_claude] Leading-signal prior: {prior['direction']} ({prior['strength']}, score {prior['score']})")
+    elif briefing_type == "us":
+        # 미국은 프리마켓 선물·SOX·VIX 기반 advisory prior (방향 강제 없음)
+        from leading_signal import compute_prior_us, format_prior_for_prompt_us
+        prior = compute_prior_us(market_data)
+        user_content += format_prior_for_prompt_us(prior)
+        print(f"[call_claude] Leading-signal prior (US): {prior['direction']} ({prior['strength']}, score {prior['score']})")
+
+    # 검증게이트 오버라이드 재생성용 — 방향 강제 (validate_analysis가 --force-direction으로 재호출). 코스피 전용.
+    if force_direction and briefing_type == "kospi":
+        user_content += (
+            f"\n## ⛔ 방향 강제 지시 (필수)\n"
+            f"이번 브리핑의 `prediction.direction`은 반드시 **{force_direction}**로 한다. "
+            f"reasons·reason_title·telegram_signals 등 모든 본문을 이 방향과 일관되게 작성한다. "
+            f"선행신호 prior가 전일 국내 등락보다 우선한다는 판단에 따른 강제다.\n"
+        )
+        print(f"[call_claude] ⛔ force_direction = {force_direction}")
 
     # 휴장 직후 컨텍스트 — 한국 단독 휴장 다음날엔 EWY보다 아시아 지역 지수가 우선 시그널
     if briefing_type == "kospi" and analysis_data.get("post_holiday_catchup"):
@@ -1248,6 +1272,10 @@ def main():
         "--render", action="store_true",
         help="API 호출 없이 기존(교정된) analysis_*.json으로 텔레그램 txt·HTML만 재생성"
     )
+    parser.add_argument(
+        "--force-direction", default=None,
+        help="prediction.direction 강제 (검증게이트 오버라이드 재생성용)",
+    )
     args = parser.parse_args()
 
     date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
@@ -1282,7 +1310,7 @@ def main():
 
     # ── 기존 kospi / us 흐름 ──
     try:
-        analysis = call_claude(args.type, date_str)
+        analysis = call_claude(args.type, date_str, force_direction=args.force_direction)
     except Exception as e:
         print(f"[call_claude] ERROR calling Claude API: {e}", file=sys.stderr)
         sys.exit(1)
