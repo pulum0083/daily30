@@ -29,7 +29,7 @@ def test_backfill_selects_only_past_unchecked(tmp_path, monkeypatch):
     _setup(tmp_path, entries)
 
     called = []
-    monkeypatch.setattr(ca, "check_accuracy", lambda d, t: called.append((d, t)))
+    monkeypatch.setattr(ca, "check_accuracy", lambda d, t, force=False: called.append((d, t)))
 
     ca.backfill("kospi")
 
@@ -40,6 +40,24 @@ def test_backfill_no_targets(tmp_path, monkeypatch, capsys):
     _setup(tmp_path, [
         {"date": "2026-05-13", "type": "kospi", "predicted_direction": "상승 우위", "is_correct": True},
     ])
-    monkeypatch.setattr(ca, "check_accuracy", lambda d, t: (_ for _ in ()).throw(AssertionError("호출되면 안 됨")))
+    monkeypatch.setattr(ca, "check_accuracy", lambda d, t, force=False: (_ for _ in ()).throw(AssertionError("호출되면 안 됨")))
     ca.backfill("kospi")
     assert "백필 대상 없음" in capsys.readouterr().out
+
+
+# ── NaN 가드: fetch가 NaN change_pct를 반환하면 가짜 '하락'을 기록하지 않는다 ──
+def test_nan_change_pct_not_recorded(tmp_path, monkeypatch):
+    _setup(tmp_path, [
+        {"date": "2026-06-02", "type": "kospi",
+         "predicted_direction": "상승 우위", "is_correct": None},
+    ])
+    # fetch가 NaN change_pct 반환 (yfinance 미수집 행 시뮬레이션)
+    monkeypatch.setattr(ca, "get_kospi_close_vs_prev_close",
+                        lambda d: (3000.0, 3000.0, float("nan")))
+    ca.check_accuracy("2026-06-02", "kospi")
+
+    saved = json.loads((tmp_path / "briefings.json").read_text(encoding="utf-8"))
+    entry = saved["briefings"][0]
+    # 채점 보류 — actual_direction이 주입되지 않아야 한다 (가짜 '하락' 금지)
+    assert entry.get("actual_direction") is None
+    assert entry.get("is_correct") is None

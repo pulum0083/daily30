@@ -390,11 +390,14 @@ jobs:
       - name: 📊 코스피 예측 정확도 백필 (미검증 과거분 일괄 정산)
         run: python3 scripts/check_accuracy.py --type kospi --backfill
 
+      - name: 🇺🇸 미국 예측 정확도 백필 (미검증 과거분 일괄 정산)
+        run: python3 scripts/check_accuracy.py --type us --backfill
+
       - name: 💾 정확도 결과 커밋 & 푸시
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
-          git add data/briefings.json
+          git add data/briefings.json web/briefings web/data
           git diff --staged --quiet || git commit -m "📊 정확도 업데이트: $(TZ=Asia/Seoul date +'%Y-%m-%d')"
           for i in 1 2 3 4 5; do
             git fetch origin main
