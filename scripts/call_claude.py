@@ -1100,12 +1100,18 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
-    # 선행신호 방향 prior 주입 (kospi 전용) — SOX·선물 등 market_data_js 누락 신호도 함께 전달
+    # 선행신호 방향 prior 주입 — SOX·선물 등 market_data_js 누락 신호도 함께 전달
     if briefing_type == "kospi":
         from leading_signal import compute_prior, format_prior_for_prompt
         prior = compute_prior(market_data)
         user_content += format_prior_for_prompt(prior)
         print(f"[call_claude] Leading-signal prior: {prior['direction']} ({prior['strength']}, score {prior['score']})")
+    elif briefing_type == "us":
+        # 미국은 프리마켓 선물·SOX·VIX 기반 advisory prior (방향 강제 없음)
+        from leading_signal import compute_prior_us, format_prior_for_prompt_us
+        prior = compute_prior_us(market_data)
+        user_content += format_prior_for_prompt_us(prior)
+        print(f"[call_claude] Leading-signal prior (US): {prior['direction']} ({prior['strength']}, score {prior['score']})")
 
     # 검증게이트 오버라이드 재생성용 — 방향 강제 (validate_analysis가 --force-direction으로 재호출). 코스피 전용.
     if force_direction and briefing_type == "kospi":

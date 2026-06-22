@@ -78,3 +78,50 @@ def test_direction_contradicts_strong():
     assert ls.prior_contradicts_direction({"direction": "상승", "strength": "mid"}, "하락 우위") is False
     # 중립 prior는 비대상
     assert ls.prior_contradicts_direction({"direction": "중립", "strength": "strong"}, "하락 우위") is False
+
+
+# ── 미국 브리핑 prior (advisory) ───────────────────────────────────────────────
+def _latest_us(sp=None, nq=None, dow=None, sox=None, vix=None):
+    """latest_us.json 구조 일부를 흉내낸 fixture (선물은 futures.*.change_pct, SOX는 market_data_js)."""
+    return {
+        "futures": {
+            "sp500_fut":  {"change_pct": sp} if sp is not None else {},
+            "nasdaq_fut": {"change_pct": nq} if nq is not None else {},
+            "dow_fut":    {"change_pct": dow} if dow is not None else {},
+        },
+        "market_data_js": {"sox": {"chg": sox} if sox is not None else {}},
+        "vix": {"change_pct": vix} if vix is not None else {},
+    }
+
+
+def test_extract_signals_us_paths():
+    sig = ls.extract_signals_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
+    assert sig["sp500_fut"] == 0.39
+    assert sig["nasdaq_fut"] == 1.11
+    assert sig["dow_fut"] == 0.27
+    assert sig["sox"] == 1.05
+    assert sig["vix"] == 7.32
+
+
+def test_compute_prior_us_up_from_futures():
+    # 선물 상승 + SOX 상승 → 상승 prior (전일 현물 약세와 무관하게)
+    p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
+    assert p["direction"] == "상승"
+
+
+def test_compute_prior_us_handles_missing_futures():
+    # nasdaq_fut 누락(None)이어도 안전하게 계산
+    p = ls.compute_prior_us(_latest_us(sp=-0.5, dow=-0.3, sox=-2.0, vix=5.0))
+    assert p["direction"] == "하락"
+    assert p["signals"]["nasdaq_fut"] is None
+
+
+def test_compute_prior_us_neutral_when_empty():
+    p = ls.compute_prior_us({"futures": {}, "market_data_js": {}})
+    assert p["direction"] == "중립" and p["strength"] == "weak"
+
+
+def test_format_prior_us_contains_futures():
+    p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
+    text = ls.format_prior_for_prompt_us(p)
+    assert "선물" in text and "SOX" in text and "1.11" in text

@@ -107,3 +107,92 @@ def prior_contradicts_direction(prior: dict, llm_direction: str) -> bool:
     if pd == "하락" and "상승" in (llm_direction or ""):
         return True
     return False
+
+
+# ── 미국 브리핑용 prior (advisory 주입 전용 — 하드 오버라이드 없음) ──────────────
+# 미국 브리핑은 개장 전 프리마켓 선물(ES/NQ/YM)이 가장 신선한 선행신호다.
+# EWY는 한국 외국인 프록시라 무관하므로 쓰지 않는다.
+US_SIGNAL_WEIGHTS = {"sp500_fut": 1.0, "nasdaq_fut": 1.0, "dow_fut": 0.3, "sox": 0.5, "vix": -0.2}
+NEUTRAL_BAND_US = 0.3   # 선물은 변동폭이 작아 코스피보다 좁은 데드밴드
+T_FUT_US = 0.5          # strength 표기용 선물 임계 (%) — advisory라 게이트 아님
+
+
+def extract_signals_us(latest: dict) -> dict:
+    """latest_us.json에서 미국 선행신호 등락률을 추출. 누락 필드는 None."""
+    futures = latest.get("futures") or {}
+    mdj = latest.get("market_data_js") or {}
+
+    def from_fut(key):   # futures.{key}.change_pct
+        v = futures.get(key)
+        return v.get("change_pct") if isinstance(v, dict) else None
+
+    sox = mdj.get("sox")
+    vix = latest.get("vix")
+    return {
+        "sp500_fut":  from_fut("sp500_fut"),
+        "nasdaq_fut": from_fut("nasdaq_fut"),
+        "dow_fut":    from_fut("dow_fut"),
+        "sox":        sox.get("chg") if isinstance(sox, dict) else None,
+        "vix":        vix.get("change_pct") if isinstance(vix, dict) else None,
+    }
+
+
+def _strength_us(sig: dict, direction: str) -> str:
+    """미국 prior 강도 (표기용 — 오버라이드 게이트 아님)."""
+    prim = [x for x in (sig.get("sp500_fut"), sig.get("nasdaq_fut")) if x is not None and x != 0]
+    if direction == "중립" or not prim:
+        return "weak"
+    agree = all((x > 0) == (prim[0] > 0) for x in prim)
+    if not agree:
+        return "weak"
+    vix = sig.get("vix")
+    vix_contra = vix is not None and (
+        (direction == "상승" and vix > VIX_CONTRA) or
+        (direction == "하락" and vix < -VIX_CONTRA)
+    )
+    if any(abs(x) >= T_FUT_US for x in prim) and not vix_contra:
+        return "strong"
+    return "mid"
+
+
+def compute_prior_us(latest: dict) -> dict:
+    """미국 브리핑 선행신호 prior 계산 (반환 형태는 compute_prior와 동일)."""
+    sig = extract_signals_us(latest)
+    score = 0.0
+    used = False
+    for key, w in US_SIGNAL_WEIGHTS.items():
+        v = sig.get(key)
+        if v is not None:
+            score += w * v
+            used = True
+    if not used:
+        return {"direction": "중립", "score": 0.0, "strength": "weak", "signals": sig}
+    if score > NEUTRAL_BAND_US:
+        direction = "상승"
+    elif score < -NEUTRAL_BAND_US:
+        direction = "하락"
+    else:
+        direction = "중립"
+    return {
+        "direction": direction,
+        "score": round(score, 3),
+        "strength": _strength_us(sig, direction),
+        "signals": sig,
+    }
+
+
+def format_prior_for_prompt_us(prior: dict) -> str:
+    """미국 prior를 LLM 프롬프트에 주입할 한국어 텍스트 블록으로 포맷 (advisory)."""
+    sig = prior["signals"]
+    def fmt(v):
+        return f"{v:+.2f}%" if isinstance(v, (int, float)) else "—"
+    lines = [
+        "\n## 🧭 선행신호 방향 prior (Python 결정론 계산 — 우선 참고)",
+        f"- 계산 방향: **{prior['direction']}** (강도 {prior['strength']}, score {prior['score']})",
+        f"- S&P선물 {fmt(sig.get('sp500_fut'))} · 나스닥선물 {fmt(sig.get('nasdaq_fut'))} "
+        f"· 다우선물 {fmt(sig.get('dow_fut'))} · SOX {fmt(sig.get('sox'))} · VIX {fmt(sig.get('vix'))}",
+        "- 이 값들은 미국장 개장 전 프리마켓 선물·반도체로, 전일 미국 현물 마감 **이후** 정보를 반영한다.",
+        "- **충돌 해소 규칙**: 전일 미국 현물이 크게 움직였더라도 프리마켓 선물(S&P·나스닥)·SOX가 그와 "
+        "모순되면 — 더 신선한 정보이므로 — 선물 방향을 우선 참고한다. 전일 마감에 앵커링하지 않는다.",
+    ]
+    return "\n".join(lines) + "\n"
