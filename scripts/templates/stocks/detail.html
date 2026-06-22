@@ -58,6 +58,7 @@
           <span class="sigchip dn">🔵 외국인 수급 동향</span>
           <span class="sigchip tech">📈 기술적 신호</span>
         </div>
+        <p class="refnote" style="margin:4px 0 0;">신호 칩은 일러스트레이션입니다.</p>
         <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더, 고점·저점 실측 라벨 포함) -->
         <div class="spark-header" data-spark="{{ rd.sparkline | join(',') }}"></div>
       </div>
@@ -138,7 +139,7 @@
       <!-- 같은 섹터 — 실측 (peers) -->
       <div class="panel"><div class="panel__h">같은 섹터 · {{ stock.sector }}</div>
         {% for p in peers %}
-        <a class="srow" href="/stocks/{{ p.code }}/">
+        {% if p.linked %}<a class="srow" href="/stocks/{{ p.code }}/">{% else %}<div class="srow">{% endif %}
           <span class="n2">{{ p.name }} <small class="num">{{ p.code }}</small></span>
           {% if p.change_pct is not none %}
             {% if p.change_pct > 0 %}
@@ -151,7 +152,7 @@
           {% else %}
           <span class="c num" style="color:var(--muted)">—</span>
           {% endif %}
-        </a>
+        {% if p.linked %}</a>{% else %}</div>{% endif %}
         {% endfor %}
         <a class="srow" href="/stocks/sectors/{{ stock.sector }}/"><span class="n2" style="color:var(--primary);font-weight:700;">{{ stock.sector }} 섹터 전체 →</span></a>
       </div>

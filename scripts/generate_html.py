@@ -933,6 +933,7 @@ def build_all_stocks():
     실측 호출 1회라도 실패하면 build_stock_page가 RuntimeError로 배치를 중단한다(fail-fast).
     """
     stocks = load_json(CONFIG_DIR / "stocks.json")
+    reg_codes = {s["code"] for s in stocks}
     peer_rd_cache = {}  # peer 실측 중복 호출 방지 (여러 종목이 같은 peer를 공유)
 
     def _peer_change(code):
@@ -944,7 +945,8 @@ def build_all_stocks():
     results = []
     for s in stocks:
         peers = [
-            {"code": p["code"], "name": p["name"], "change_pct": _peer_change(p["code"])}
+            {"code": p["code"], "name": p["name"], "change_pct": _peer_change(p["code"]),
+             "linked": p["code"] in reg_codes}
             for p in s.get("peers", [])
         ]
         results.append(build_stock_page(s, peers))

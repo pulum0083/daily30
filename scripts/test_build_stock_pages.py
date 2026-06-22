@@ -37,7 +37,7 @@ def test_build_stock_page_writes_real_price(tmp_path, monkeypatch):
 
     stock = {"code": "005930", "name": "삼성전자", "sector": "반도체",
              "market": "KOSPI", "peers": [{"code": "000660", "name": "SK하이닉스"}]}
-    out = gh.build_stock_page(stock, [{"code": "000660", "name": "SK하이닉스", "change_pct": 3.42}])
+    out = gh.build_stock_page(stock, [{"code": "000660", "name": "SK하이닉스", "change_pct": 3.42, "linked": True}])
 
     html = (tmp_path / "stocks" / "005930" / "index.html").read_text(encoding="utf-8")
     assert "354,000" in html
@@ -85,6 +85,21 @@ def test_template_hides_52w_when_absent():
         peers=[], generated_label="06-22 종가")
     assert "준비 중" in html
     assert "최저 0" not in html and "최고 0" not in html
+
+
+def test_build_all_stocks_caches_peer_fetches(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_rd(code):
+        calls.append(code)
+        return {"price": 100.0, "change_pct": 1.0, "sparkline": [99.0, 100.0],
+                "error": None, "week52_low": 50.0, "week52_high": 150.0, "week52_pos_pct": 50.0}
+
+    monkeypatch.setattr(gh, "stock_realdata", fake_rd)
+    monkeypatch.setattr(gh, "WEB_DIR", tmp_path)
+    gh.build_all_stocks()
+    # 042700은 005930과 000660 양쪽의 peer → 캐시가 동작하면 1회만 호출
+    assert calls.count("042700") == 1
 
 
 def test_sitemap_includes_stock_urls():
