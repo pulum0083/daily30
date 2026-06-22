@@ -190,6 +190,9 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
         return
 
     close_price, prev_close, change_pct = result
+    if change_pct != change_pct:  # NaN(미수집 행) → 가짜 '하락' 기록 방지, 채점 보류
+        print(f"[check_accuracy] {date_str} ({briefing_type}): change_pct NaN — 채점 보류", file=sys.stderr)
+        return
     actual_direction = "상승" if change_pct >= 0 else "하락"
 
     predicted = entry.get("predicted_direction", "")
