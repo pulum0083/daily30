@@ -1023,19 +1023,31 @@ def main():
         if prior_contradicts_direction(prior, llm_dir):
             print(f"[validate] 🧭 선행신호 오버라이드: LLM '{llm_dir}' ↔ strong prior '{prior['direction']}' "
                   f"(score {prior['score']}) — {prior['direction']}로 재생성", file=sys.stderr)
-            regen = subprocess.run(
-                [sys.executable, str(Path(__file__).resolve().parent / "call_claude.py"),
-                 "--type", "kospi", "--no-html", "--force-direction", prior["direction"]],
-            )
-            if regen.returncode == 0:
+            try:
+                regen = subprocess.run(
+                    [sys.executable, str(Path(__file__).resolve().parent / "call_claude.py"),
+                     "--type", "kospi", "--no-html", "--force-direction", prior["direction"]],
+                    timeout=300,
+                )
+            except subprocess.TimeoutExpired:
+                send_admin_alert("⚠️ kospi 방향 오버라이드 재생성 타임아웃(5분) — LLM 방향 유지 발행")
+                regen = None
+            if regen and regen.returncode == 0:
                 analysis = load_json(analysis_path)
+                pre_corrections, pre_warnings = [], []
+                latest_changed = enrich_picks_with_realdata(
+                    analysis, latest, btype, pre_corrections, pre_warnings
+                )
+                if latest_changed and latest_path.exists():
+                    with open(latest_path, "w", encoding="utf-8") as f:
+                        json.dump(latest, f, ensure_ascii=False, indent=2)
                 result = validate(analysis, latest, btype)
                 send_admin_alert(
                     f"🧭 <b>kospi</b> 방향 오버라이드\n"
                     f"LLM: {llm_dir} → prior: {prior['direction']} (강도 strong, score {prior['score']})\n"
                     f"SOX {prior['signals'].get('sox')} / EWY {prior['signals'].get('ewy')} / VIX {prior['signals'].get('vix')}"
                 )
-            else:
+            elif regen is not None:
                 send_admin_alert(f"⚠️ kospi 방향 오버라이드 재생성 실패(rc={regen.returncode}) — LLM 방향 {llm_dir} 유지 발행")
 
     result["corrections"] = pre_corrections + result["corrections"]
