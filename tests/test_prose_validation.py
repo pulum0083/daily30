@@ -222,3 +222,32 @@ def test_prose_nonpick_removes_hallucinated_sox(monkeypatch):
     validate_prose_nonpick_stocks(analysis, "us", [], [])
     assert len(analysis["reasons"]) == 1
     assert "SOX" not in analysis["reasons"][0]
+
+
+# ── 후속 확장: 거래 가능한 지수/섹터 ETF도 산문 방향 검증 ──────────────────────
+def test_index_etfs_not_in_non_ticker_exclusion():
+    for sym in ("SPY", "QQQ", "IWM", "XLK", "XLF", "SOXX", "SOXL", "TQQQ"):
+        assert sym not in _NON_TICKER
+
+
+def test_prose_nonpick_removes_hallucinated_qqq(monkeypatch):
+    # 실측 QQQ +1.5% 인데 "급락" 서술 → 제거
+    monkeypatch.setattr(
+        va, "_fetch_us_realdata",
+        lambda tk: {"change_pct": 1.5} if tk == "QQQ" else {"error": "x"})
+    analysis = {"stock_picks": [],
+                "reasons": ["📈 좋아요.", "💡 QQQ가 -3.2% 급락했어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert len(analysis["reasons"]) == 1
+    assert "QQQ" not in analysis["reasons"][0]
+
+
+def test_prose_nonpick_keeps_correct_spy(monkeypatch):
+    # 실측 SPY +0.8% 상승, 산문도 상승 → 유지 (오탐 방지)
+    monkeypatch.setattr(
+        va, "_fetch_us_realdata",
+        lambda tk: {"change_pct": 0.8} if tk == "SPY" else {"error": "x"})
+    analysis = {"stock_picks": [],
+                "reasons": ["💡 SPY가 +0.8% 상승하며 견조했어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert len(analysis["reasons"]) == 1

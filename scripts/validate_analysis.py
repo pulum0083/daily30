@@ -280,13 +280,13 @@ def validate_prose_against_picks(analysis: dict, btype: str,
 # ── 픽 외 종목 산문 검증 ────────────────────────────────────────────────────────
 
 # ETF·지수·약어 등 티커처럼 보이지만 개별 종목이 아닌 단어 제외 목록
-# 단, DRAM·SOX·EWY·GLD는 실측 조회 가능한 지수/ETF라 산문 방향 검증 대상으로 둔다
+# 단, 실측 조회 가능한 지수/ETF(DRAM·SOX·EWY·GLD·SPY·QQQ·IWM·XLK·XLF·
+# SOXX·SOXL·TQQQ)는 제외하지 않고 산문 방향 검증 대상으로 둔다.
 # (SOX는 _PROSE_FETCH_ALIAS로 ^SOX 매핑). 환각 방향 표현을 잡기 위함.
 _NON_TICKER = frozenset({
     "USD", "ETF", "GDP", "CPI", "NFP", "VIX", "DXY", "PCE",
     "ISM", "PMI", "FED", "ECB", "BOJ", "AI", "US", "NQ", "SP",
     "FOMC", "WTI", "DAX", "JPY", "KRW", "EUR",
-    "SOXL", "TQQQ", "QQQ", "SPY", "IWM", "XLK", "XLF", "SOXX",
     "NYSE", "KRX", "KST", "MA", "MA20", "MA200",
     "LLM", "API", "IPO", "CEO", "CFO", "REIT", "FY", "EPS", "PE",
 })
