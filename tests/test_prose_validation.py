@@ -251,3 +251,30 @@ def test_prose_nonpick_keeps_correct_spy(monkeypatch):
                 "reasons": ["💡 SPY가 +0.8% 상승하며 견조했어요."]}
     validate_prose_nonpick_stocks(analysis, "us", [], [])
     assert len(analysis["reasons"]) == 1
+
+
+# ── 후속 확장: VIX(^VIX 매핑)도 산문 방향 검증 ────────────────────────────────
+def test_vix_not_in_non_ticker_exclusion():
+    assert "VIX" not in _NON_TICKER
+
+
+def test_vix_fetch_uses_caret_alias(monkeypatch):
+    # 산문 "VIX"는 ^VIX 심볼로 실측 조회되어야 한다
+    called = []
+    monkeypatch.setattr(va, "_fetch_us_realdata",
+                        lambda tk: called.append(tk) or {"change_pct": 12.0})
+    analysis = {"stock_picks": [], "reasons": ["VIX가 급등했어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert "^VIX" in called
+
+
+def test_prose_nonpick_removes_hallucinated_vix(monkeypatch):
+    # 실측 VIX +12% 급등(공포 확대)인데 "급락" 서술 → 제거
+    monkeypatch.setattr(
+        va, "_fetch_us_realdata",
+        lambda tk: {"change_pct": 12.0} if tk == "^VIX" else {"error": "x"})
+    analysis = {"stock_picks": [],
+                "reasons": ["📈 좋아요.", "💡 VIX가 -8% 급락하며 안정됐어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert len(analysis["reasons"]) == 1
+    assert "VIX" not in analysis["reasons"][0]

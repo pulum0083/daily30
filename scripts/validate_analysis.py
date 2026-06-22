@@ -280,11 +280,11 @@ def validate_prose_against_picks(analysis: dict, btype: str,
 # ── 픽 외 종목 산문 검증 ────────────────────────────────────────────────────────
 
 # ETF·지수·약어 등 티커처럼 보이지만 개별 종목이 아닌 단어 제외 목록
-# 단, 실측 조회 가능한 지수/ETF(DRAM·SOX·EWY·GLD·SPY·QQQ·IWM·XLK·XLF·
+# 단, 실측 조회 가능한 지수/ETF(DRAM·SOX·VIX·EWY·GLD·SPY·QQQ·IWM·XLK·XLF·
 # SOXX·SOXL·TQQQ)는 제외하지 않고 산문 방향 검증 대상으로 둔다.
-# (SOX는 _PROSE_FETCH_ALIAS로 ^SOX 매핑). 환각 방향 표현을 잡기 위함.
+# (SOX→^SOX, VIX→^VIX는 _PROSE_FETCH_ALIAS로 매핑). 환각 방향 표현을 잡기 위함.
 _NON_TICKER = frozenset({
-    "USD", "ETF", "GDP", "CPI", "NFP", "VIX", "DXY", "PCE",
+    "USD", "ETF", "GDP", "CPI", "NFP", "DXY", "PCE",
     "ISM", "PMI", "FED", "ECB", "BOJ", "AI", "US", "NQ", "SP",
     "FOMC", "WTI", "DAX", "JPY", "KRW", "EUR",
     "NYSE", "KRX", "KST", "MA", "MA20", "MA200",
@@ -292,7 +292,7 @@ _NON_TICKER = frozenset({
 })
 
 # 산문 약칭 → 실측 조회용 심볼 (지수는 yfinance용 ^ 접두 필요)
-_PROSE_FETCH_ALIAS = {"SOX": "^SOX"}
+_PROSE_FETCH_ALIAS = {"SOX": "^SOX", "VIX": "^VIX"}
 
 # ASCII 문자 경계로 추출 — "SOX가"·"NVDA는"처럼 한국어 조사가 붙어도 인식
 # (\b만으로는 X↔가 사이에 워드 경계가 없어 누락됨)
