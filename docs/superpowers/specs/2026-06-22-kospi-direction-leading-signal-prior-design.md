@@ -91,6 +91,15 @@ call_claude --no-html    ← (B) 결정론 prior를 프롬프트에 주입 — 1
 - 비교군: prior vs 모멘텀 vs (가능 시) `briefings.json` 모델 실측.
 - **출시 기준(제안)**: 결합 prior 방향 적중률이 모멘텀 베이스라인을 유의하게 상회 ∧ strong 개입 케이스의 오답이 허용 범위 이내. 가중치·임계값(T_ewy, T_sox) 손튜닝도 이 하니스로 수행.
 
+## 3-b. 미국 브리핑 확장 (2026-06-23 추가, advisory 주입만)
+
+미국 브리핑에도 같은 *논리*를 확장하되 **주입(advisory)만** 적용한다 — 하드 오버라이드는 넣지 않는다.
+
+- **신호**: 프리마켓 선물(`futures.sp500_fut/nasdaq_fut/dow_fut.change_pct`) + SOX(`market_data_js.sox.chg`) + VIX. EWY는 한국 외국인 프록시라 제외. 모멘텀(배제 대상)은 전일 미국 현물 마감.
+- **구현**: `leading_signal.compute_prior_us` / `format_prior_for_prompt_us`. `call_claude` US 경로에서 매 실행 주입(컴포넌트 B의 US판). validate 오버라이드·force_direction은 US 미적용.
+- **오버라이드를 뺀 이유**: ① 미국은 선물(개장 전)과 예측 대상(같은 날 미국장)이 동일일이라 일봉 yfinance 백테스트로 임계값 검증 불가. ② 미국 브리핑은 정확도 77%로 모멘텀 부진이 진단된 적 없고, 프롬프트가 이미 선물을 1순위로 쓴다. 검증 안 된 임계값으로 라이브 방향을 강제 전환하는 리스크를 피한다.
+- SOX가 US LLM 입력에서도 누락(market_data_js 제외)되던 갭을 prior 주입이 함께 보완한다.
+
 ## 4. 범위 밖 (YAGNI)
 
 - 미국·마감 브리핑 미변경. 코스피 시초가 전용.
