@@ -69,3 +69,12 @@ def test_format_prior_for_prompt_contains_values():
     p = ls.compute_prior(_latest(sox=5.61, nasdaq=0.86, nq=0.5, ewy=5.96, vix=-12.04))
     text = ls.format_prior_for_prompt(p)
     assert "상승" in text and "SOX" in text and "5.61" in text
+
+
+def test_direction_contradicts_strong():
+    assert ls.prior_contradicts_direction({"direction": "상승", "strength": "strong"}, "하락 우위") is True
+    assert ls.prior_contradicts_direction({"direction": "상승", "strength": "strong"}, "상승 우위") is False
+    # mid 강도는 오버라이드 비대상
+    assert ls.prior_contradicts_direction({"direction": "상승", "strength": "mid"}, "하락 우위") is False
+    # 중립 prior는 비대상
+    assert ls.prior_contradicts_direction({"direction": "중립", "strength": "strong"}, "하락 우위") is False

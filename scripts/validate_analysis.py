@@ -13,6 +13,7 @@ import copy
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.parse
 import urllib.request
@@ -1012,6 +1013,31 @@ def main():
         print(f"[validate] ✓ candidate 실측 주입 후 저장 → {latest_path}")
 
     result = validate(analysis, latest, btype)
+
+    # 4-b) 선행신호 prior 오버라이드 (kospi 전용) — strong prior가 LLM 방향과 정반대면 재생성
+    if btype == "kospi":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from leading_signal import compute_prior, prior_contradicts_direction
+        prior = compute_prior(latest)
+        llm_dir = (result["analysis"].get("prediction") or {}).get("direction", "")
+        if prior_contradicts_direction(prior, llm_dir):
+            print(f"[validate] 🧭 선행신호 오버라이드: LLM '{llm_dir}' ↔ strong prior '{prior['direction']}' "
+                  f"(score {prior['score']}) — {prior['direction']}로 재생성", file=sys.stderr)
+            regen = subprocess.run(
+                [sys.executable, str(Path(__file__).resolve().parent / "call_claude.py"),
+                 "--type", "kospi", "--no-html", "--force-direction", prior["direction"]],
+            )
+            if regen.returncode == 0:
+                analysis = load_json(analysis_path)
+                result = validate(analysis, latest, btype)
+                send_admin_alert(
+                    f"🧭 <b>kospi</b> 방향 오버라이드\n"
+                    f"LLM: {llm_dir} → prior: {prior['direction']} (강도 strong, score {prior['score']})\n"
+                    f"SOX {prior['signals'].get('sox')} / EWY {prior['signals'].get('ewy')} / VIX {prior['signals'].get('vix')}"
+                )
+            else:
+                send_admin_alert(f"⚠️ kospi 방향 오버라이드 재생성 실패(rc={regen.returncode}) — LLM 방향 {llm_dir} 유지 발행")
+
     result["corrections"] = pre_corrections + result["corrections"]
     result["warnings"] = pre_warnings + result["warnings"]
 

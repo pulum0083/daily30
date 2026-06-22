@@ -95,3 +95,15 @@ def format_prior_for_prompt(prior: dict) -> str:
         "모순되면 — 더 신선한 정보이므로 — **선행신호(prior) 방향을 따른다.** 전일 국내 등락에 앵커링하지 않는다.",
     ]
     return "\n".join(lines) + "\n"
+
+
+def prior_contradicts_direction(prior: dict, llm_direction: str) -> bool:
+    """strong prior가 LLM 방향과 정반대인지. (오버라이드 발동 조건)"""
+    if prior.get("strength") != "strong":
+        return False
+    pd = prior.get("direction")
+    if pd == "상승" and "하락" in (llm_direction or ""):
+        return True
+    if pd == "하락" and "상승" in (llm_direction or ""):
+        return True
+    return False
