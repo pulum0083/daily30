@@ -751,6 +751,60 @@
     checkAndShowDot();
   }
 
+  /* ── 예측 로직 개선 안내 토스트 (브리핑 상세 진입 시 1회, 닫으면 영구 비표시) ── */
+  function initPredictionToast() {
+    // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
+    if (!/\/briefings\/\d{4}-\d{2}-\d{2}\//.test(location.pathname)) return;
+    var KEY = 'ds-toast-pred-v1';
+    try { if (localStorage.getItem(KEY)) return; } catch (e) {}
+
+    if (!document.getElementById('ds-toast-style')) {
+      var st = document.createElement('style');
+      st.id = 'ds-toast-style';
+      st.textContent =
+        '.ds-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,140%);z-index:9999;' +
+        'display:flex;align-items:flex-start;gap:10px;max-width:380px;width:calc(100% - 32px);' +
+        'background:#16181d;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:14px;' +
+        'padding:14px 14px 14px 16px;box-shadow:0 12px 32px rgba(0,0,0,.30);opacity:0;' +
+        'transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s;}' +
+        '.ds-toast.show{transform:translate(-50%,0);opacity:1;}' +
+        '.ds-toast-body{display:flex;gap:10px;align-items:flex-start;flex:1;}' +
+        '.ds-toast-emoji{font-size:20px;line-height:1.3;}' +
+        '.ds-toast-text{display:flex;flex-direction:column;gap:3px;}' +
+        '.ds-toast-text b{font-size:14px;font-weight:700;}' +
+        '.ds-toast-text span{font-size:12.5px;color:#b8bdc7;line-height:1.45;}' +
+        '.ds-toast-close{flex:none;background:none;border:none;color:#9aa0aa;font-size:20px;' +
+        'line-height:1;cursor:pointer;padding:0 2px;margin-left:4px;}' +
+        '.ds-toast-close:hover{color:#fff;}';
+      document.head.appendChild(st);
+    }
+
+    var toast = document.createElement('div');
+    toast.className = 'ds-toast';
+    toast.setAttribute('role', 'status');
+    toast.innerHTML =
+      '<div class="ds-toast-body">' +
+        '<span class="ds-toast-emoji">🧭</span>' +
+        '<div class="ds-toast-text">' +
+          '<b>예측 로직을 개선했어요.</b>' +
+          '<span>최근 시장 신호(선물·반도체·수급)를 우선 반영하도록 방향 판단을 바꿨어요.</span>' +
+        '</div>' +
+      '</div>' +
+      '<button class="ds-toast-close" type="button" aria-label="닫기">×</button>';
+
+    function dismiss() {
+      toast.classList.remove('show');
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      setTimeout(function () { toast.remove(); }, 350);
+    }
+    toast.querySelector('.ds-toast-close').addEventListener('click', dismiss);
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { toast.classList.add('show'); });
+    });
+  }
+
   /* ── 초기화 ── */
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
@@ -763,6 +817,7 @@
     setInterval(updateGnbDate, 30000);
     initModals();
     initNotices();
+    initPredictionToast();
     renderSupplyFlows();
     initLiveScoreboard();
     initLiveMarketPanel();
