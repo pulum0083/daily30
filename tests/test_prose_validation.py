@@ -144,3 +144,81 @@ def test_skips_kospi_close():
     corrections, warnings, blocks = [], [], []
     validate_prose_against_picks(analysis, "kospi-close", corrections, warnings, blocks)
     assert corrections == [] and blocks == []
+
+
+# ── 회귀: 2026-06-22 us — "DRAM ETF가 -1.84% 내려앉아" 환각 산문 ──────────────
+# 실제 DRAM ETF 직전 세션(2026-06-18, 6/19 준틴스 휴장)은 +9.66% 상승이었으나
+# LLM이 reasons 산문에 -1.84% 하락을 생성. 세 겹의 검증 구멍을 모두 막는다:
+#   ① "내려앉" 하락 동사 미등록 → 정량 추출 실패
+#   ② "내려앉" 정성 방향 단어 미등록
+#   ③ "DRAM"이 _NON_TICKER 제외 목록 → 산문 후보에서 누락
+from validate_analysis import (_direction_contradicts, _NON_TICKER,
+                               validate_prose_nonpick_stocks)
+import validate_analysis as va
+
+
+def test_naeryeoanja_quantitative_claim_extracted():
+    # ① "-1.84% 내려앉아"에서 정량 -1.84 추출되어야 한다
+    claims = _extract_change_claims("DRAM ETF가 -1.84% 내려앉아 차별화된 흐름이에요.")
+    assert -1.84 in claims
+
+
+def test_naeryeoanja_direction_contradicts_real_up():
+    # ②/① 실측 +9.66% 상승인데 "내려앉아" 하락 서술 → 모순으로 판정
+    sent = "다만 DRAM ETF가 <b>-1.84%</b> 내려앉아 메모리 반도체 섹터는 차별화된 흐름이에요."
+    assert _direction_contradicts(sent, 9.66) is True
+
+
+def test_dram_not_in_non_ticker_exclusion():
+    # ③ DRAM ETF는 dram_etf 실측값이 있으므로 산문 검증 대상이어야 한다
+    assert "DRAM" not in _NON_TICKER
+
+
+def test_prose_nonpick_removes_hallucinated_dram(monkeypatch):
+    # 통합: 실측 +9.66%를 주입하면 -1.84% 내려앉음 문장이 제거되어야 한다
+    monkeypatch.setattr(
+        va, "_fetch_us_realdata",
+        lambda tk: {"change_pct": 9.66} if tk == "DRAM" else {"error": "x"})
+    analysis = {
+        "stock_picks": [],
+        "reasons": [
+            "📈 빅테크가 전반적으로 소폭 플러스예요.",
+            "💡 다만 DRAM ETF가 <b>-1.84%</b> 내려앉아 메모리 반도체 섹터는 차별화된 흐름이에요.",
+        ],
+    }
+    corrections, warnings = [], []
+    validate_prose_nonpick_stocks(analysis, "us", corrections, warnings)
+    assert len(analysis["reasons"]) == 1
+    assert "DRAM" not in analysis["reasons"][0]
+
+
+# ── 동일 클래스 확장: SOX·EWY·GLD 산문 방향 검증 ──────────────────────────────
+from validate_analysis import _PROSE_FETCH_ALIAS
+
+
+def test_sox_ewy_gld_not_in_non_ticker_exclusion():
+    for sym in ("SOX", "EWY", "GLD"):
+        assert sym not in _NON_TICKER
+
+
+def test_sox_fetch_uses_caret_alias(monkeypatch):
+    # 산문 "SOX"는 ^SOX 심볼로 실측 조회되어야 한다
+    called = []
+    monkeypatch.setattr(va, "_fetch_us_realdata",
+                        lambda tk: called.append(tk) or {"change_pct": 6.42})
+    analysis = {"stock_picks": [],
+                "reasons": ["SOX가 강세를 보였어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert "^SOX" in called
+
+
+def test_prose_nonpick_removes_hallucinated_sox(monkeypatch):
+    # 실측 SOX +6.42% 인데 "빠졌다" 하락 서술 → 제거
+    monkeypatch.setattr(
+        va, "_fetch_us_realdata",
+        lambda tk: {"change_pct": 6.42} if tk == "^SOX" else {"error": "x"})
+    analysis = {"stock_picks": [],
+                "reasons": ["📈 좋아요.", "💡 다만 SOX가 -2.1% 빠졌어요."]}
+    validate_prose_nonpick_stocks(analysis, "us", [], [])
+    assert len(analysis["reasons"]) == 1
+    assert "SOX" not in analysis["reasons"][0]
