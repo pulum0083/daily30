@@ -1107,8 +1107,8 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         user_content += format_prior_for_prompt(prior)
         print(f"[call_claude] Leading-signal prior: {prior['direction']} ({prior['strength']}, score {prior['score']})")
 
-    # 검증게이트 오버라이드 재생성용 — 방향 강제 (validate_analysis가 --force-direction으로 재호출)
-    if force_direction:
+    # 검증게이트 오버라이드 재생성용 — 방향 강제 (validate_analysis가 --force-direction으로 재호출). 코스피 전용.
+    if force_direction and briefing_type == "kospi":
         user_content += (
             f"\n## ⛔ 방향 강제 지시 (필수)\n"
             f"이번 브리핑의 `prediction.direction`은 반드시 **{force_direction}**로 한다. "
