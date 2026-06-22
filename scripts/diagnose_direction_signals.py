@@ -125,7 +125,7 @@ def main():
     # 출시 게이트: 결합prior가 모멘텀을 5%p 이상 상회하면 PASS
     prior_hit, _, _ = hit(rules["결합prior"])
     mom_hit, _, _ = hit(rules["모멘텀(전일)"])
-    verdict = "PASS" if prior_hit > mom_hit + 5 else "FAIL"
+    verdict = "PASS" if prior_hit >= mom_hit + 5 else "FAIL"
     print(f"\n[출시 게이트] 결합prior {prior_hit:.1f}% vs 모멘텀 {mom_hit:.1f}% → {verdict}")
 
 
