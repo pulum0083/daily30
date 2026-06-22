@@ -54,13 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var dnColor = '#2775ED';
     var hiColor = isUp ? upColor : dnColor;
     var loColor = isUp ? dnColor : upColor;
-    var hiLabel = '고점 ' + hi.toLocaleString();
-    var loLabel = '저점 ' + lo.toLocaleString();
+    var hiLabel = '최근 고점 ' + hi.toLocaleString();
+    var loLabel = '최근 저점 ' + lo.toLocaleString();
     // 라벨이 SVG 경계를 벗어나지 않도록 앵커 결정 (좌측 30% → start, 나머지 → end)
     var hiAnchor = hix < W * 0.3 ? 'start' : 'end';
     var loAnchor = loxPt < W * 0.3 ? 'start' : 'end';
     var hiDy = hiy < 18 ? 14 : -6;
     var loDy = loyPt > H - 18 ? -6 : 14;
+    // 평탄(전 구간 동일가)하면 고점·저점이 한 점에 겹치므로 라벨 생략
+    var labelSvg = hi === lo ? '' :
+        '<text x="' + hix.toFixed(1) + '" y="' + (hiy + hiDy).toFixed(1) + '" text-anchor="' + hiAnchor + '" fill="' + hiColor + '" font-size="11" font-weight="700" font-family="inherit">' + hiLabel + '</text>'
+      + '<text x="' + loxPt.toFixed(1) + '" y="' + (loyPt + loDy).toFixed(1) + '" text-anchor="' + loAnchor + '" fill="' + loColor + '" font-size="11" font-weight="700" font-family="inherit">' + loLabel + '</text>';
 
     var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;height:80px;display:block;overflow:visible;">'
       + '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
@@ -71,8 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
       + '<polyline fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + pts.join(' ') + '"/>'
       + '<circle cx="' + fx.toFixed(1) + '" cy="' + firstPt[1] + '" r="3.5" fill="#fff" stroke="#9CA3AF" stroke-width="2"/>'
       + '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.5" fill="#fff" stroke="' + color + '" stroke-width="2"/>'
-      + '<text x="' + hix.toFixed(1) + '" y="' + (hiy + hiDy).toFixed(1) + '" text-anchor="' + hiAnchor + '" fill="' + hiColor + '" font-size="11" font-weight="700" font-family="inherit">' + hiLabel + '</text>'
-      + '<text x="' + loxPt.toFixed(1) + '" y="' + (loyPt + loDy).toFixed(1) + '" text-anchor="' + loAnchor + '" fill="' + loColor + '" font-size="11" font-weight="700" font-family="inherit">' + loLabel + '</text>'
+      + labelSvg
       + '</svg>';
 
     container.innerHTML = svg;
