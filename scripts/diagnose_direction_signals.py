@@ -13,9 +13,13 @@
   (미국장 종가 날짜 D는 코스피 D 마감 이후에 나오므로 사용 불가)
 """
 import sys
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import yfinance as yf
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from leading_signal import SIGNAL_WEIGHTS
 
 START = sys.argv[1] if len(sys.argv) > 1 else "2026-03-01"
 END = sys.argv[2] if len(sys.argv) > 2 else None  # None = 오늘까지
@@ -67,12 +71,14 @@ def main():
     )
     merged = merged.dropna(subset=["kospi", "momentum_src", "ewy", "sox", "vix", "nasdaq"])
 
-    # 결합 prior: EWY 지배 + SOX 보조 + NASDAQ 보조 + VIX 역부호 확인
+    # 결합 prior: leading_signal.SIGNAL_WEIGHTS 기준 (모듈과 동일 가중치)
+    # 주의: 라이브 prior는 NQ선물(nq)을 포함하지만,
+    # 백테스트는 yfinance로 과거 선물 정확 복원이 불가하므로 NQ 항은 제외한다.
     merged["prior_score"] = (
-        1.0 * merged["ewy"]
-        + 0.5 * merged["sox"]
-        + 0.3 * merged["nasdaq"]
-        - 0.2 * merged["vix"]
+        SIGNAL_WEIGHTS["sox"] * merged["sox"]
+        + SIGNAL_WEIGHTS["ewy"] * merged["ewy"]
+        + SIGNAL_WEIGHTS["nasdaq"] * merged["nasdaq"]
+        + SIGNAL_WEIGHTS["vix"] * merged["vix"]
     )
 
     truth = np.sign(merged["kospi"])
@@ -115,6 +121,12 @@ def main():
             mark = "↑" if r["kospi"] > 0 else "↓"
             ewy_ok = "EWY맞음" if np.sign(r["ewy"]) == np.sign(r["kospi"]) else "EWY틀림"
             print(f"   {r['kdate'].date()} 코스피{r['kospi']:+6.2f}{mark} | 전일{r['momentum_src']:+6.2f} EWY{r['ewy']:+6.2f} SOX{r['sox']:+6.2f} VIX{r['vix']:+6.2f} → {ewy_ok}")
+
+    # 출시 게이트: 결합prior가 모멘텀을 5%p 이상 상회하면 PASS
+    prior_hit, _, _ = hit(rules["결합prior"])
+    mom_hit, _, _ = hit(rules["모멘텀(전일)"])
+    verdict = "PASS" if prior_hit > mom_hit + 5 else "FAIL"
+    print(f"\n[출시 게이트] 결합prior {prior_hit:.1f}% vs 모멘텀 {mom_hit:.1f}% → {verdict}")
 
 
 if __name__ == "__main__":
