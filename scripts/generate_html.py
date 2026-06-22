@@ -888,7 +888,13 @@ def write_sitemap_xml():
 
 
 def patch_landing_hero(analysis: dict, target_date: str):
-    """랜딩 페이지 Hero 위젯을 최신 코스피 분석으로 갱신한다 (코스피 브리핑 생성 시에만 호출)."""
+    """랜딩 페이지 Hero 위젯을 최신 코스피 분석으로 갱신한다 (코스피 브리핑 생성 시에만 호출).
+
+    NOTE: 랜딩 hero는 고정 예시(2026-06-22 실측 브리핑)로 운영한다 — 자동 갱신 비활성화.
+    sig_items 필드가 스키마에 없어 reasons가 항상 비던 문제도 있었음. 되살리려면 아래 return을 제거하고
+    sig_items 대신 telegram_signals를 쓰도록 reason_lines를 수정해야 한다.
+    """
+    return
     landing = WEB_DIR / "landing.html"
     if not landing.exists():
         return
