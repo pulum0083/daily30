@@ -125,8 +125,8 @@ _CHANGE_CTX_RE = re.compile(
     r'전일\s*[+-]?\d'           # "전일 +X%"
     r'|단\s*하루에'              # "단 하루에 +X%"
     r'|하루\s*만에'              # "하루 만에 +X%"
-    r'|[+-]?\d[\d.]*\s*%\s*(?:폭등|급등|폭락|급락|상승|하락|올랐|떨어|빠졌)'  # "+X% 폭등"
-    r'|(?:폭등|급등|폭락|급락|상승|하락)\s*[+-]?\d'  # "폭등 +X%"
+    r'|[+-]?\d[\d.]*\s*%\s*(?:폭등|급등|폭락|급락|상승|하락|올랐|떨어|빠졌|내려앉|주저앉)'  # "+X% 폭등"
+    r'|(?:폭등|급등|폭락|급락|상승|하락|내려앉|주저앉)\s*[+-]?\d'  # "폭등 +X%"
     r')'
 )
 _PCT_RE = re.compile(r'([+-]?\d+\.?\d*)\s*%')
@@ -280,20 +280,27 @@ def validate_prose_against_picks(analysis: dict, btype: str,
 # ── 픽 외 종목 산문 검증 ────────────────────────────────────────────────────────
 
 # ETF·지수·약어 등 티커처럼 보이지만 개별 종목이 아닌 단어 제외 목록
+# 단, 실측 조회 가능한 지수/ETF(DRAM·SOX·EWY·GLD·SPY·QQQ·IWM·XLK·XLF·
+# SOXX·SOXL·TQQQ)는 제외하지 않고 산문 방향 검증 대상으로 둔다.
+# (SOX는 _PROSE_FETCH_ALIAS로 ^SOX 매핑). 환각 방향 표현을 잡기 위함.
 _NON_TICKER = frozenset({
-    "USD", "ETF", "GDP", "CPI", "NFP", "VIX", "DXY", "SOX", "PCE",
+    "USD", "ETF", "GDP", "CPI", "NFP", "VIX", "DXY", "PCE",
     "ISM", "PMI", "FED", "ECB", "BOJ", "AI", "US", "NQ", "SP",
-    "FOMC", "DRAM", "EWY", "GLD", "WTI", "DAX", "JPY", "KRW", "EUR",
-    "SOXL", "TQQQ", "QQQ", "SPY", "IWM", "XLK", "XLF", "SOXX",
+    "FOMC", "WTI", "DAX", "JPY", "KRW", "EUR",
     "NYSE", "KRX", "KST", "MA", "MA20", "MA200",
     "LLM", "API", "IPO", "CEO", "CFO", "REIT", "FY", "EPS", "PE",
 })
 
-_US_TICKER_RE = re.compile(r"\b([A-Z]{2,5})\b")
+# 산문 약칭 → 실측 조회용 심볼 (지수는 yfinance용 ^ 접두 필요)
+_PROSE_FETCH_ALIAS = {"SOX": "^SOX"}
+
+# ASCII 문자 경계로 추출 — "SOX가"·"NVDA는"처럼 한국어 조사가 붙어도 인식
+# (\b만으로는 X↔가 사이에 워드 경계가 없어 누락됨)
+_US_TICKER_RE = re.compile(r"(?<![A-Za-z])([A-Z]{2,5})(?![A-Za-z])")
 
 # 방향 단어: 상승/하락 문맥 감지
 _UP_WORDS_RE = re.compile(r"(올랐|상승|급등|폭등|강세|반등|오르며|오른|올라|강하게)")
-_DOWN_WORDS_RE = re.compile(r"(내렸|하락|급락|폭락|약세|빠졌|떨어|내리며|내린|하락세|폭락|폭등)")
+_DOWN_WORDS_RE = re.compile(r"(내렸|하락|급락|폭락|약세|빠졌|떨어|내리며|내린|내려앉|주저앉|하락세|폭락|폭등)")
 
 
 def _sentence_split(text: str) -> list:
@@ -358,7 +365,7 @@ def validate_prose_nonpick_stocks(analysis: dict, btype: str,
     # 각 티커 실측 fetch (캐시)
     realdata_cache: dict = {}
     for tk in candidate_tickers:
-        data = _fetch_us_realdata(tk)
+        data = _fetch_us_realdata(_PROSE_FETCH_ALIAS.get(tk, tk))
         if "error" not in data and data.get("change_pct") is not None:
             realdata_cache[tk] = data["change_pct"]
 
