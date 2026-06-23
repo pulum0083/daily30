@@ -5,8 +5,12 @@
    web/data/stocks-snapshot.json 으로 저장한다. SERVICE_RULES 0번 준수."""
 import json
 import sys
+import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+import toss_client as tc
 
 KST = timezone(timedelta(hours=9))
 
@@ -37,3 +41,47 @@ def ma200(closes):
         return None
     window = closes[-200:]
     return round(sum(window) / len(window), 2)
+
+
+def _toss_closes(symbol):
+    """토스 일봉 종가 시계열(오래된→최신). 실패 시 []."""
+    try:
+        candles = tc.get_candles(symbol, interval="1d", count=300)
+        return [float(c["closePrice"]) for c in candles if c.get("closePrice")]
+    except Exception as e:
+        print(f"[snapshot] toss {symbol} 실패: {e}", file=sys.stderr)
+        return []
+
+
+def _naver_closes(code):
+    """네이버 일봉 폴백(한국). 실패 시 []."""
+    try:
+        end = datetime.now().strftime("%Y%m%d") + "0000"
+        start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
+        url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
+               f"?startDateTime={start}&endDateTime={end}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        return [float(r["closePrice"]) for r in rows if r.get("closePrice")]
+    except Exception as e:
+        print(f"[snapshot] naver {code} 실패: {e}", file=sys.stderr)
+        return []
+
+
+def _yf_closes(ticker):
+    """yfinance 폴백(미국). 실패 시 []."""
+    try:
+        import yfinance as yf
+        hist = yf.Ticker(ticker).history(period="400d").dropna(subset=["Close"])
+        return [float(x) for x in hist["Close"].tolist()]
+    except Exception as e:
+        print(f"[snapshot] yfinance {ticker} 실패: {e}", file=sys.stderr)
+        return []
+
+
+def fetch_closes(symbol, market):
+    """market='kr'|'us'. 토스 우선, 폴백 분기. 한국은 6자리 코드만."""
+    closes = _toss_closes(symbol)
+    if closes:
+        return closes
+    return _naver_closes(symbol) if market == "kr" else _yf_closes(symbol)
