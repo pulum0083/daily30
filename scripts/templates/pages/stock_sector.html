@@ -1,0 +1,25 @@
+{# 섹터별 종목 리스트 정적 페이지 (검색 유입 영구 자산) #}
+{% extends "base.html" %}
+{% block title %}{{ sector_label }} 대표 종목 — Double-Shot{% endblock %}
+{% block og_title %}{{ sector_label }} 대표 종목 — Double-Shot{% endblock %}
+{% block og_desc %}{{ sector_label }} 섹터 대표 종목의 최신 시세와 52주 레인지를 한눈에{% endblock %}
+{% block body %}
+<div class="layout-wrapper">
+  <h1 class="sector-page-title">{{ sector_label }}</h1>
+  <div class="sector-stock-list">
+    {% for s in stocks %}
+    <div class="sector-card" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">{{ s.name }}</span>
+        <span class="sector-card__code">{{ s.code }}</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">{{ s.close_fmt }}</span>
+        <span class="sector-card__pct {{ s.pct_cls }}">{{ s.pct_fmt }}</span>
+      </div>
+      <div class="sector-card__range">52주 {{ s.wk52_low_fmt }} – {{ s.wk52_high_fmt }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

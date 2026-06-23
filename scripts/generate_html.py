@@ -956,6 +956,72 @@ def patch_landing_hero(analysis: dict, target_date: str):
     print(f"[generate_html] landing.html hero → {target_date} 패치 완료")
 
 
+def _fmt_krw(v: float) -> str:
+    """정수 원화 천 단위 콤마 포맷."""
+    return f"{int(v):,}"
+
+
+def _fmt_pct(v: float) -> str:
+    """부호 포함 등락률 포맷."""
+    sign = "+" if v > 0 else ""
+    return f"{sign}{v:.2f}%"
+
+
+def _pct_cls(v: float) -> str:
+    if v > 0:
+        return "up"
+    elif v < 0:
+        return "down"
+    return "flat"
+
+
+def build_sector_pages():
+    """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성."""
+    universe_path = CONFIG_DIR / "stock_universe.json"
+    snapshot_path = WEB_DIR / "data" / "stocks-snapshot.json"
+    universe = json.loads(universe_path.read_text(encoding="utf-8"))
+    snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    snap_stocks = snapshot.get("stocks", {})
+
+    env = make_env()
+    tpl = env.get_template("pages/stock_sector.html")
+
+    for key, sector in universe["sectors"].items():
+        stocks = []
+        for s in sector["stocks"]:
+            code = s["code"]
+            measured = snap_stocks.get(code)
+            if not measured:
+                continue
+            stocks.append({
+                "code": code,
+                "name": s["name"],
+                "close": measured["close"],
+                "close_fmt": _fmt_krw(measured["close"]),
+                "change_pct": measured["change_pct"],
+                "pct_fmt": _fmt_pct(measured["change_pct"]),
+                "pct_cls": _pct_cls(measured["change_pct"]),
+                "wk52_high": measured["wk52_high"],
+                "wk52_low": measured["wk52_low"],
+                "wk52_high_fmt": _fmt_krw(measured["wk52_high"]),
+                "wk52_low_fmt": _fmt_krw(measured["wk52_low"]),
+                "spark20": measured.get("spark20", []),
+            })
+
+        html = tpl.render(
+            sector_label=sector["label"],
+            sector_key=key,
+            stocks=stocks,
+            css_path="/assets/style.css",
+            js_path="/assets/main.js",
+        )
+        out_dir = WEB_DIR / "stocks" / "sector" / key
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_file = out_dir / "index.html"
+        out_file.write_text(html, encoding="utf-8")
+        print(f"섹터 페이지 {key} → {out_file}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=list(TYPE_MAP.keys()))
@@ -965,7 +1031,13 @@ def main():
                         help="briefings-list.json 만 갱신하고 HTML 재생성 없이 종료")
     parser.add_argument("--sync-index", action="store_true",
                         help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
+    parser.add_argument("--sectors", action="store_true",
+                        help="섹터별 종목 페이지 8개 생성하고 종료")
     args = parser.parse_args()
+
+    if args.sectors:
+        build_sector_pages()
+        return
 
     if args.write_list_only:
         write_briefings_list_json()
