@@ -569,14 +569,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
         <span class="bs-type" id="bs-type">코스피 예측 브리핑</span>
         <span class="bs-text" id="bs-text">하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등</span>
       </span>
-      <!-- 프로토타입 전용: 시간대 미리보기 버튼 -->
-      <div class="proto-toggle" id="proto-toggle" onclick="event.stopPropagation();">
-        <button class="on" onclick="previewSlot('kospi',this)">07:30</button>
-        <button onclick="previewSlot('live',this)">장중</button>
-        <button onclick="previewSlot('close',this)">마감</button>
-        <button onclick="previewSlot('us',this)">미국</button>
-        <button onclick="previewSlot('none',this)">숨김</button>
-      </div>
       <span class="bs-arr">›</span>
     </div>
     <style>#us-linked-widget{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;}#us-linked-widget .usw-tiles{display:flex;gap:9px;overflow-x:auto;}.us-tile{flex:1 0 auto;min-width:0;cursor:pointer;background:#F7F9FC;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 15px;transition:border-color .12s,box-shadow .12s,background .12s;}.us-tile.on{background:#fff;border-color:#2775ED;box-shadow:0 3px 10px rgba(37,117,237,.12);}</style><div id="us-linked-widget"><div style="display:flex;align-items:center;margin-bottom:11px;"><span style="font-size:15px;font-weight:800;color:#0F172A;">🌐 미국 연동 대표주</span><span style="font-size:11px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;margin-left:8px;">●실시간</span><span style="margin-left:auto;font-size:11px;color:#94A3B8;">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div><div class="usw-tiles"><div class="us-tile on" data-code="005930" onclick="usSel('005930')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI</div><div style="font-size:13px;font-weight:800;color:#0F172A;">삼성전자</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">354,000</div><div style="font-size:12px;font-weight:700;color:#2775ED;margin-top:3px;">▼ 8,300 (2.34%)</div></div><div class="us-tile" data-code="000660" onclick="usSel('000660')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI</div><div style="font-size:13px;font-weight:800;color:#0F172A;">SK하이닉스</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">248,500</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 8,500 (3.42%)</div></div><div class="us-tile" data-code="005380" onclick="usSel('005380')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI</div><div style="font-size:13px;font-weight:800;color:#0F172A;">현대차</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">245,000</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 2,000 (0.82%)</div></div></div><div class="us-detail" data-code="005930" style="background:#FBFCFE;border:1px solid #EEF2F7;border-radius:11px;padding:12px 14px 11px;margin-top:11px;"><div style="display:flex;align-items:center;gap:0;"><div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:800;color:#16A34A;">🇺🇸 짝 벨웨더 ●LIVE</span><span style="font-size:11px;font-weight:700;color:#475569;">MU <b style="color:#E03131;">+3.2%</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">SOX <b style="color:#E03131;">+2.8%</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">NVDA <b style="color:#E03131;">+1.9%</b></span></div><div style="font-size:12px;color:#334155;line-height:1.5;margin-top:7px;">💡 밤사이 미 반도체 강세 → 갭업 우호</div></div><div style="width:1px;height:36px;background:#D1D5DB;flex:none;margin:0 14px;"></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:800;color:#64748B;">🌍 외국인 보유율</span><span style="flex:none;"><svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="0.0,3.0 4.1,4.4 8.2,3.4 12.3,3.0 16.4,5.0 20.5,5.0 24.6,4.8 28.7,9.2 32.8,14.3 36.9,15.9 41.1,16.5 45.2,16.9 49.3,18.2 53.4,18.8 57.5,17.8 61.6,18.4 65.7,18.4 69.8,19.0 73.9,18.0 78.0,19.0" fill="none" stroke="#2775ED" stroke-width="1.5"/><circle cx="78" cy="19.0" r="2.2" fill="#fff" stroke="#2775ED" stroke-width="1.5"/></svg></span><span style="font-size:15px;font-weight:900;color:#0F172A;">47.57<span style="font-size:10px;font-weight:700;color:#64748B;">%</span></span><span style="font-size:11px;font-weight:800;color:#2775ED;">▼ 0.82<span style="font-size:9px;">%p</span></span></div><a href="/stocks/005930/" style="margin-left:auto;padding-left:14px;font-size:12px;font-weight:700;color:#2563EB;text-decoration:none;flex:none;">상세 →</a></div></div><div class="us-detail" data-code="000660" style="display:none;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:11px;padding:12px 14px 11px;margin-top:11px;"><div style="display:flex;align-items:center;gap:0;"><div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:800;color:#16A34A;">🇺🇸 짝 벨웨더 ●LIVE</span><span style="font-size:11px;font-weight:700;color:#475569;">MU <b style="color:#E03131;">+3.2%</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">SOX <b style="color:#E03131;">+2.8%</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">NVDA <b style="color:#E03131;">+1.9%</b></span></div><div style="font-size:12px;color:#334155;line-height:1.5;margin-top:7px;">💡 HBM 직접 수혜 → 갭업 우호</div></div><div style="width:1px;height:36px;background:#D1D5DB;flex:none;margin:0 14px;"></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:800;color:#64748B;">🌍 외국인 보유율</span><span style="flex:none;"><svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="0.0,3.0 4.1,4.3 8.2,4.0 12.3,3.3 16.4,7.2 20.5,8.8 24.6,11.4 28.7,12.4 32.8,13.2 36.9,16.1 41.1,16.4 45.2,18.0 49.3,19.0 53.4,17.7 57.5,15.3 61.6,14.3 65.7,12.7 69.8,12.4 73.9,12.2 78.0,13.5" fill="none" stroke="#2775ED" stroke-width="1.5"/><circle cx="78" cy="13.5" r="2.2" fill="#fff" stroke="#2775ED" stroke-width="1.5"/></svg></span><span style="font-size:15px;font-weight:900;color:#0F172A;">51.26<span style="font-size:10px;font-weight:700;color:#64748B;">%</span></span><span style="font-size:11px;font-weight:800;color:#2775ED;">▼ 0.40<span style="font-size:9px;">%p</span></span></div><a href="/stocks/000660/" style="margin-left:auto;padding-left:14px;font-size:12px;font-weight:700;color:#2563EB;text-decoration:none;flex:none;">상세 →</a></div></div><div class="us-detail" data-code="005380" style="display:none;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:11px;padding:12px 14px 11px;margin-top:11px;"><div style="display:flex;align-items:center;gap:0;"><div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:11px;font-weight:800;color:#16A34A;">🇺🇸 짝 벨웨더 ●LIVE</span><span style="font-size:11px;font-weight:700;color:#475569;">USD/KRW <b style="color:#2775ED;">1,366</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">TSLA <b style="color:#2775ED;">−2.1%</b></span><span style="color:#CBD5E1;">·</span><span style="font-size:11px;font-weight:700;color:#475569;">SPX <b style="color:#E03131;">+0.4%</b></span></div><div style="font-size:12px;color:#334155;line-height:1.5;margin-top:7px;">💡 원화 약세 수출 우호 · 미 EV 약세 부담</div></div><div style="width:1px;height:36px;background:#D1D5DB;flex:none;margin:0 14px;"></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;font-weight:800;color:#64748B;">🌍 외국인 보유율</span><span style="flex:none;"><svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="0.0,3.0 4.1,4.7 8.2,3.0 12.3,5.4 16.4,9.0 20.5,8.2 24.6,9.8 28.7,11.8 32.8,12.9 36.9,14.5 41.1,15.7 45.2,15.7 49.3,17.3 53.4,19.0 57.5,18.3 61.6,16.6 65.7,15.4 69.8,17.3 73.9,17.7 78.0,16.3" fill="none" stroke="#2775ED" stroke-width="1.5"/><circle cx="78" cy="16.3" r="2.2" fill="#fff" stroke="#2775ED" stroke-width="1.5"/></svg></span><span style="font-size:15px;font-weight:900;color:#0F172A;">25.38<span style="font-size:10px;font-weight:700;color:#64748B;">%</span></span><span style="font-size:11px;font-weight:800;color:#2775ED;">▼ 1.00<span style="font-size:9px;">%p</span></span></div><a href="/stocks/005380/" style="margin-left:auto;padding-left:14px;font-size:12px;font-weight:700;color:#2563EB;text-decoration:none;flex:none;">상세 →</a></div></div></div><script>function usSel(code){document.querySelectorAll('#us-linked-widget .us-tile').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-code')===code);});document.querySelectorAll('#us-linked-widget .us-detail').forEach(function(d){d.style.display=(d.getAttribute('data-code')===code)?'':'none';});}</script>
@@ -1738,53 +1730,77 @@ if(passBtn){
 }
 
 /* ── AI 브리핑 스트립 ── */
-var BS_SLOTS = {
-  kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑', text:'하락 우위 · 신뢰도 82% · 긴급 점검: S&P -1.6%·VIX 급등', url:'/briefings/2026-06-11/kospi/' },
-  live:  { cls:'bs-live',  icon:'🔴', type:'<span class="live-dot"></span>장중 LIVE', text:'반도체 약세 지속 · 외국인 순매도 확대 · 09:30 이슈 업데이트', url:'/briefings/2026-06-11/kospi/' },
-  close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑', text:'코스피 -0.45% 마감 · 반도체 주도 하락 · 마감 브리핑 보기', url:'/briefings/2026-06-11/close/' },
-  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 브리핑', text:'S&P 상승 우위 · 신뢰도 68% · 연준 발언 주목', url:'/briefings/2026-06-11/us/' }
+/* 예측 브리핑 스트립 — 현재 KST 시간대에 맞는 실제 브리핑을 briefings-list.json에서 연결.
+   시간대→타입: 07:30~장중=kospi(당일 예측), 마감 후=close, 저녁=us. 주말/없음=최근 ready 폴백. */
+var BS_META = {
+  kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑' },
+  close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑' },
+  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 브리핑' }
 };
 
-function applyBriefingStrip(slot) {
-  var el = document.getElementById('brief-strip');
-  if (!el) return;
-  if (slot === 'none') { el.className = 'brief-strip is-hidden'; return; }
-  var d = BS_SLOTS[slot];
-  if (!d) return;
-  el.className = 'brief-strip ' + d.cls;
-  el.href = d.url;
-  document.getElementById('bs-icon').textContent = d.icon;
-  document.getElementById('bs-type').innerHTML = d.type;
-  document.getElementById('bs-text').textContent = d.text.replace(/<[^>]+>/g,'');
-}
-
 function getKSTSlot() {
-  var now = new Date();
-  var kst = new Date(now.getTime() + 9 * 3600000);
+  var kst = new Date(Date.now() + 9 * 3600000);
   var day = kst.getUTCDay();
   if (day === 0 || day === 6) return 'none';
   var hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
-  if (hm >= 730  && hm < 900)  return 'kospi';
-  if (hm >= 900  && hm < 1630) return 'live';
+  if (hm >= 730  && hm < 1630) return 'kospi'; // 시초가 예측 ~ 마감 전(장중 포함)
   if (hm >= 1630 && hm < 2140) return 'close';
   if (hm >= 2140 && hm < 2355) return 'us';
   return 'none';
 }
 
-function previewSlot(slot, btn) {
-  document.querySelectorAll('#proto-toggle button').forEach(function(b){ b.classList.remove('on'); });
-  if (btn) btn.classList.add('on');
-  applyBriefingStrip(slot);
+function kstDateStr() {
+  return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
-/* 초기화: 프로토타입은 항상 kospi로 시작, 실제 KST 슬롯은 버튼 참고용 */
-(function(){
+function bsItem(s, type) {
+  var m = BS_META[type];
+  // 등락 화살표만 prefix(있으면). title이 방향 텍스트라 pill 전체를 붙이면 "하락·하락" 중복 → 화살표만.
+  var arrow = (s.pill_text || '').trim().charAt(0);
+  var pre = (arrow === '▲' || arrow === '▼') ? arrow + ' ' : '';
+  return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.title || '브리핑 보기') };
+}
+
+/* 우선순위: ① 오늘 해당 타입 ready → ② 최근 날짜의 해당 타입 ready → ③ 최근 ready 아무거나(us>close>kospi) */
+function resolveBriefing(list, type) {
+  var slots = list && list.slots;
+  if (!slots) return null;
+  var dates = Object.keys(slots).sort().reverse();
+  if (type && BS_META[type]) {
+    var today = slots[kstDateStr()];
+    if (today && today[type] && today[type].state === 'ready') return bsItem(today[type], type);
+    for (var i = 0; i < dates.length; i++) {
+      var s = slots[dates[i]][type];
+      if (s && s.state === 'ready') return bsItem(s, type);
+    }
+  }
+  for (var j = 0; j < dates.length; j++) {
+    var day = slots[dates[j]];
+    var order = ['us', 'close', 'kospi'];
+    for (var k = 0; k < order.length; k++) {
+      if (day[order[k]] && day[order[k]].state === 'ready') return bsItem(day[order[k]], order[k]);
+    }
+  }
+  return null;
+}
+
+(function renderBriefStrip(){
+  var el = document.getElementById('brief-strip');
+  if (!el) return;
   var slot = getKSTSlot();
-  var initSlot = slot === 'none' ? 'kospi' : slot; // 프로토: 숨김이면 kospi 기본
-  applyBriefingStrip(initSlot);
-  var btns = document.querySelectorAll('#proto-toggle button');
-  var map = ['kospi','live','close','us','none'];
-  btns.forEach(function(b,i){ b.classList.toggle('on', map[i] === initSlot); });
+  var type = slot === 'none' ? null : slot; // none(주말 등)이면 폴백으로 최근 브리핑
+  fetch('/data/briefings-list.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(list){
+      var d = resolveBriefing(list, type);
+      if (!d) { el.className = 'brief-strip is-hidden'; return; }
+      el.className = 'brief-strip ' + d.cls;
+      el.dataset.href = d.url;
+      document.getElementById('bs-icon').textContent = d.icon;
+      document.getElementById('bs-type').textContent = d.type;
+      document.getElementById('bs-text').textContent = d.text;
+    })
+    .catch(function(){});
 })();
 
 /* ── AI 반도체 칩보드 (밤사이 벨웨더 → 한국 밸류체인) ── */
@@ -1855,11 +1871,36 @@ renderChips('morning');
 (function(){
   var KR_UP='#E03131', KR_DN='#2775ED', KR_FLAT='#64748B';
   function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
-  function paintTile(tile, close, pct){
+  /* 가격이 바뀔 때 이전값→새값으로 카운트업(odometer) + 방향색 플래시 */
+  (function injectFlash(){
+    var st=document.createElement('style');
+    st.textContent='@keyframes usFlashUp{0%{background:rgba(224,49,49,.16)}100%{background:transparent}}'
+      +'@keyframes usFlashDn{0%{background:rgba(39,117,237,.16)}100%{background:transparent}}'
+      +'.us-flash-up{animation:usFlashUp .6s ease-out;border-radius:6px;}'
+      +'.us-flash-dn{animation:usFlashDn .6s ease-out;border-radius:6px;}';
+    document.head.appendChild(st);
+  })();
+  function countUp(el, to, dir){
+    var from = parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
+    if(!isFinite(from) || from===to){ el.textContent = fmt(to); return; }
+    if(dir){ el.classList.remove('us-flash-up','us-flash-dn'); void el.offsetWidth;
+      el.classList.add(dir>0?'us-flash-up':'us-flash-dn'); }
+    var start = performance.now(), dur = 550;
+    function step(now){
+      var t = Math.min(1,(now-start)/dur), e = 1-Math.pow(1-t,3); // easeOutCubic
+      el.textContent = fmt(from + (to-from)*e);
+      if(t<1) requestAnimationFrame(step); else el.textContent = fmt(to);
+    }
+    requestAnimationFrame(step);
+  }
+  function paintTile(tile, close, pct, animate){
     if(close==null) return;
     var els = tile.children; // [KOSPI 라벨, 종목명, 가격, 등락]
     if(els.length < 4) return;
-    els[2].textContent = fmt(close);
+    var prevShown = parseFloat((els[2].textContent||'').replace(/[^0-9.\-]/g,''));
+    var dir = isFinite(prevShown) ? (close>prevShown?1:close<prevShown?-1:0) : 0;
+    if(animate) countUp(els[2], close, dir);
+    else els[2].textContent = fmt(close);
     if(pct==null) return; // 가격만 갱신, 등락 표시는 유지
     var prev = close/(1+pct/100);
     var delta = Math.abs(close-prev);
@@ -1870,7 +1911,7 @@ renderChips('morning');
   function applySnapshot(snap){
     document.querySelectorAll('#us-linked-widget .us-tile[data-code]').forEach(function(tile){
       var s = snap.stocks && snap.stocks[tile.getAttribute('data-code')];
-      if(s) paintTile(tile, s.close, s.change_pct);
+      if(s) paintTile(tile, s.close, s.change_pct, false); // 최초 baseline은 즉시
     });
   }
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
@@ -1892,7 +1933,7 @@ renderChips('morning');
         if(!d || !Array.isArray(d.prices)) return;
         d.prices.forEach(function(p){
           var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+p.code+'"]');
-          if(tile && p.price!=null) paintTile(tile, p.price, p.changePct);
+          if(tile && p.price!=null) paintTile(tile, p.price, p.changePct, true); // 라이브는 카운트업
         });
       })
       .catch(function(){});
