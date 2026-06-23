@@ -336,6 +336,17 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/prune_briefings.py
 
+      - name: 📈 종목 스냅샷 빌드 (시세·52주)
+        if: steps.holiday.outputs.open == 'true'
+        env:
+          TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
+          TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
+        run: python3 scripts/build_stocks_snapshot.py
+
+      - name: 🗂️ 섹터 페이지 생성 (섹터 리스트)
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/generate_html.py --sectors
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |

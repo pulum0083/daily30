@@ -1,9 +1,24 @@
 {
   "slots": {
+    "2026-06-24": {
+      "kospi": {
+        "state": "pending",
+        "scheduled_time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-06-23": {
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-23/kospi/",
+        "headline": "엇갈린 신호 속 반도체가 방향을 쥔다",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -12,6 +27,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-23/close/",
+        "headline": "서킷브레이커 발동 — 코스피 역대급 -9.99% 폭락",
         "title": "8,203.84",
         "price": "8,203.84",
         "time": ""
@@ -19,6 +35,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-23/us/",
+        "headline": "긴급 점검: 선물 급락·VIX 폭등 — 시장이 흔들려요",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -29,6 +46,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-22/kospi/",
+        "headline": "9000선 돌파 후 숨 고르기 — 유가·환율이 발목",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -37,6 +55,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-22/close/",
+        "headline": "코스피 사상 최고치, 오늘 장 어떻게 읽어야 할까요?",
         "title": "9,114.55",
         "price": "9,114.55",
         "time": ""
@@ -44,6 +63,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-22/us/",
+        "headline": "S&P500 20일선 재돌파 — 선물·아시아 강세가 맞물렸어요",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -54,6 +74,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-19/kospi/",
+        "headline": "오를 이유 넘친다 — 반도체·이란 종전·VIX 급락 삼각 편대",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -62,6 +83,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-19/close/",
+        "headline": "장중 최고치 후 급반전 — 외국인·기관 동반 매도가 핵심이에요",
         "title": "9,052.42",
         "price": "9,052.42",
         "time": ""
@@ -75,6 +97,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-18/kospi/",
+        "headline": "긴급 점검: FOMC 매파 충격 + 빅테크 급락 삼중 압박",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -83,6 +106,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-18/close/",
+        "headline": "코스피 사상 첫 9,000선 돌파, 왜 오늘이었을까요?",
         "title": "9,063.84",
         "price": "9,063.84",
         "time": ""
@@ -90,6 +114,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-18/us/",
+        "headline": "긴급 점검: 연준 매파 충격 — 선물은 버티는 중",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -100,6 +125,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-17/kospi/",
+        "headline": "긴급 점검: SOX -5.7%·EWY -1.9% 동시 경고",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -108,6 +134,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-17/close/",
+        "headline": "코스피 사상 최고치 — 반도체 주도 + 유가 하락 리스크온",
         "title": "8,864.24",
         "price": "8,864.24",
         "time": ""
@@ -115,6 +142,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-17/us/",
+        "headline": "오늘 밤 키워드는 딱 하나 — 내일 새벽 FOMC 결정",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -125,6 +153,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-16/kospi/",
+        "headline": "왜 오를까? — 이란 평화협정·빅테크 랠리 동시 호재",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -133,6 +162,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-16/close/",
+        "headline": "미-이란 종전 기대·외국인 폭매수로 코스피 +2.11%",
         "title": "8,726.60",
         "price": "8,726.60",
         "time": ""
@@ -140,6 +170,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-16/us/",
+        "headline": "미·이란 종전 합의 훈풍 — 선물 강세·유가 급락 리스크온",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -150,6 +181,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-15/kospi/",
+        "headline": "아시아 동반 랠리 + 유가 급락 — 코스피 상승 동력 충분",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -158,6 +190,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-15/close/",
+        "headline": "미·이란 종전 합의 — 코스피 5.2% 역대급 급등",
         "title": "8,545.98",
         "price": "8,545.98",
         "time": ""
@@ -165,6 +198,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-15/us/",
+        "headline": "오늘 키워드는 딱 하나, 미·이란 종전 — 선물 급등·아시아 랠리",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -175,6 +209,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-12/kospi/",
+        "headline": "오늘 키워드는 단 하나 — DRAM·반도체 폭발",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -183,6 +218,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-12/close/",
+        "headline": "외국인·기관 쌍끌이에 코스피 4.63% 폭등",
         "title": "8,123.62",
         "price": "8,123.62",
         "time": ""
@@ -190,6 +226,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-12/us/",
+        "headline": "선물 소폭 강세 + 글로벌 증시 동반 상승",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -200,6 +237,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-11/kospi/",
+        "headline": "긴급 점검: S&P -1.6%·VIX 급등·외인 대탈출",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -208,6 +246,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-11/close/",
+        "headline": "개인 2조 순매수로 낙폭 만회 — 코스닥 사이드카 발동",
         "title": "7,763.95",
         "price": "7,763.95",
         "time": ""
@@ -215,6 +254,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-11/us/",
+        "headline": "오늘 밤 핵심은 딱 하나 — PPI·ECB 결과가 방향을 가른다",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -225,6 +265,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-10/kospi/",
+        "headline": "오늘밤 CPI가 최대 변수 — 장중 관망세 우세",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -233,6 +274,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-10/close/",
+        "headline": "반도체 패닉셀·외국인 연속 매도에 코스피 4.5% 급락",
         "title": "7,730.82",
         "price": "7,730.82",
         "time": ""
@@ -240,6 +282,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-10/us/",
+        "headline": "긴급 점검: CPI 발표 후 선물 급락·VIX 경계 수준",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -250,6 +293,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-09/kospi/",
+        "headline": "긴급 점검: 아시아 전면 급락 속 코스피 하방 압력",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -258,6 +302,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-09/close/",
+        "headline": "반도체 폭등·기관 2.5조 순매수로 코스피 8% 급반등",
         "title": "8,096.93",
         "price": "8,096.93",
         "time": ""
@@ -265,6 +310,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-09/us/",
+        "headline": "소폭 상승 출발 예상 — 선물 강세·CPI 대기 모드",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
@@ -275,6 +321,7 @@
       "kospi": {
         "state": "ready",
         "url": "/briefings/2026-06-08/kospi/",
+        "headline": "왜 오를까? — EWY 폭등·빅테크 전방위 강세",
         "pill_cls": "dn",
         "pill_text": "▼ 하락",
         "title": "하락 우위",
@@ -283,6 +330,7 @@
       "close": {
         "state": "ready",
         "url": "/briefings/2026-06-08/close/",
+        "headline": "블랙 먼데이 — 코스피 8.29% 폭락, 서킷브레이커 발동",
         "title": "7,484.41",
         "price": "7,484.41",
         "time": ""
@@ -290,6 +338,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-06-08/us/",
+        "headline": "반등 시도 — 선물 플러스지만 닛케이 급락이 변수",
         "pill_cls": "up",
         "pill_text": "▲ 상승",
         "title": "상승 우위",
