@@ -864,6 +864,13 @@ def validate(analysis, latest, btype):
         if not pred.get("direction"):
             blocks.append("prediction.direction 누락")
 
+    # 1-b) 위로 한 줄 — 순수 정서적 문구만 허용. 숫자·%·종목 티커가 섞이면 통째로 제거.
+    cl = a.get("comfort_line")
+    if isinstance(cl, str) and cl.strip():
+        if re.search(r"\d|%|[A-Z]{2,5}\b", strip_tags(cl)):
+            warnings.append(f"comfort_line 제거 (숫자·티커 포함): {cl!r}")
+            a["comfort_line"] = ""
+
     # 2) 계층 1 + stock_picks 본문
     picks = a.get("stock_picks")
     is_us = btype == "us"

@@ -201,6 +201,7 @@ def build_reasons(analysis: dict) -> dict:
         "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
         "reasons": analysis.get("reasons", [])[:4],
+        "comfort_line": analysis.get("comfort_line", ""),
     }
     if fmt == "scenario":
         ctx.update(build_scenario_context(analysis))
@@ -381,6 +382,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         fmt = analysis.get("analysis_format", "why_what_so")
         ctx["analysis_format"] = fmt
         ctx["reason_title"] = analysis.get("market_title") or analysis.get("reason_title", "")
+        ctx["comfort_line"] = analysis.get("comfort_line", "")
         if fmt == "scenario":
             ctx.update(build_scenario_context(analysis))
         elif fmt == "bullet":

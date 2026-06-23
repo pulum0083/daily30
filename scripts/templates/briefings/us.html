@@ -29,6 +29,7 @@
             {% else %}
               {% include "sections/reasons.html" %}
             {% endif %}
+            {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>
             {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}

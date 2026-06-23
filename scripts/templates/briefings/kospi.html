@@ -31,6 +31,7 @@
             {% else %}
               {% include "sections/reasons.html" %}
             {% endif %}
+            {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>
             {% if sector_signal %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}

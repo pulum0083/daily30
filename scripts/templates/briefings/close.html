@@ -32,6 +32,7 @@
               {% else %}
                 {% include "sections/close_reason.html" %}
               {% endif %}
+              {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             {% endif %}
             {% include "sections/_issue_briefing.html" %}
             {% if supply_cells %}{% include "sections/close_supply.html" %}{% endif %}
