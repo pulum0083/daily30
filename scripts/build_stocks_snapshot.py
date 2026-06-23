@@ -1,8 +1,13 @@
 # 종목 유니버스 일봉 → 시세·52주·스파크라인·MA200 스냅샷 빌드
 #!/usr/bin/env python3
 """실행: python3 scripts/build_stocks_snapshot.py
-   stock_universe.json의 ~48 한국 종목 + 섹터 벨웨더를 토스 캔들로 수집해
-   web/data/stocks-snapshot.json 으로 저장한다. SERVICE_RULES 0번 준수."""
+   stock_universe.json의 한국 종목(~41) + 섹터 벨웨더를 토스 캔들로 수집해
+   web/data/stocks-snapshot.json 으로 저장한다. SERVICE_RULES 0번 준수.
+
+   ⚠️ 장 마감 후 실행 전제. change_pct는 closes[-1] vs closes[-2]로 계산하므로,
+   장중에 돌리면 마지막 캔들이 미완료 세션(움직이는 종가)이 되어 등락률이
+   '직전 완료 세션 종가 대비'(validate_analysis 기준)와 어긋난다.
+   CI에서는 kospi-close 잡(16:30 KST 이후)에서만 실행한다."""
 import json
 import sys
 import urllib.request
