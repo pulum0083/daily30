@@ -1735,7 +1735,7 @@ if(passBtn){
 var BS_META = {
   kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑' },
   close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑' },
-  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 브리핑' }
+  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 예측 브리핑' }
 };
 
 function getKSTSlot() {
@@ -1758,7 +1758,8 @@ function bsItem(s, type) {
   // 등락 화살표만 prefix(있으면). title이 방향 텍스트라 pill 전체를 붙이면 "하락·하락" 중복 → 화살표만.
   var arrow = (s.pill_text || '').trim().charAt(0);
   var pre = (arrow === '▲' || arrow === '▼') ? arrow + ' ' : '';
-  return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.title || '브리핑 보기') };
+  // 실제 브리핑 타이틀(headline) 우선, 없으면 방향(title)
+  return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.headline || s.title || '브리핑 보기') };
 }
 
 /* 우선순위: ① 오늘 해당 타입 ready → ② 최근 날짜의 해당 타입 ready → ③ 최근 ready 아무거나(us>close>kospi) */

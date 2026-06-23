@@ -817,6 +817,13 @@ def write_briefings_list_json():
 
             if ready:
                 entry = {"state": "ready", "url": f"/briefings/{d}/{btype}/"}
+                # 브리핑 헤드라인(reason_title/market_title) — 스트립에서 실제 타이틀 표시용
+                snap_path = BRIEFINGS_DIR / d / btype / "analysis_snapshot.json"
+                if snap_path.exists():
+                    snap = load_json(snap_path)
+                    headline = snap.get("reason_title") or snap.get("market_title")
+                    if headline:
+                        entry["headline"] = headline
                 if btype == "close":
                     price = _parse_close_price(new_path)
                     entry["title"] = price or "마감"
