@@ -1,79 +1,47 @@
-// 종목 유니버스 실시간 현재가 — KST 시간대 분기 (KR 장중 / 마감 후 US 벨웨더)
-import { readFileSync } from 'node:fs';
-
-const universe = JSON.parse(
-  readFileSync(new URL('../scripts/config/stock_universe.json', import.meta.url), 'utf-8')
-);
-
-let _tossToken = null;
-let _tossExpires = 0;
-
-async function getTossToken() {
-  const clientId = process.env.TOSS_CLIENT_ID;
-  const clientSecret = process.env.TOSS_CLIENT_SECRET;
-  if (!clientId || !clientSecret) throw new Error('Toss credentials not set');
-  if (_tossToken && Date.now() < _tossExpires - 60000) return _tossToken;
-  const r = await fetch('https://openapi.tossinvest.com/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
-    }),
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!r.ok) throw new Error(`Toss token ${r.status}`);
-  const d = await r.json();
-  _tossToken = d.access_token;
-  _tossExpires = Date.now() + (d.expires_in || 86400) * 1000;
-  return _tossToken;
-}
+// 종목 실시간 현재가 — 네이버 종목 시세(m.stock.naver.com). 라이브 데이터는 git 커밋 안 함.
+// 토스 Open API는 IP 화이트리스트라 서버리스 유동 IP에서 막혀(access_denied: IP not allowed),
+// kospi-live.mjs와 동일하게 IP 제한 없는 네이버로 조회한다. 6자리 한국 코드만 허용.
+const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
 
 function krNowMinutes() {
   const now = new Date();
-  const utcMin = now.getUTCHours() * 60 + now.getUTCMinutes();
-  return (utcMin + 9 * 60) % (24 * 60);
+  return ((now.getUTCHours() * 60 + now.getUTCMinutes()) + 9 * 60) % (24 * 60);
 }
 
-function phase() {
+function krMarketOpen() {
   const m = krNowMinutes();
-  if (m >= 9 * 60 && m <= 15 * 60 + 30) return 'kr';
-  if (m > 15 * 60 + 30 || m < 6 * 60) return 'us';
-  return 'none';
+  return m >= 9 * 60 && m <= 15 * 60 + 30; // 09:00–15:30 KST
 }
 
-function krCodes() {
-  return Object.values(universe.sectors).flatMap(s => s.stocks.map(x => x.code));
-}
-
-function usTickers() {
-  const set = new Set();
-  Object.values(universe.sectors).forEach(s =>
-    (s.bellwethers || []).forEach(b => set.add(b.t))
-  );
-  return [...set];
-}
-
-async function tossPrices(symbols) {
-  const token = await getTossToken();
-  const r = await fetch(
-    'https://openapi.tossinvest.com/api/v1/prices?symbols=' + encodeURIComponent(symbols.join(',')),
-    { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(8000) }
-  );
-  if (!r.ok) throw new Error(`Toss prices ${r.status}`);
-  const d = await r.json();
-  return Array.isArray(d.result) ? d.result : (d.result?.prices || d.prices || []);
+async function fetchOne(code) {
+  try {
+    const r = await fetch(`https://m.stock.naver.com/api/stock/${code}/basic`, {
+      headers: HDR,
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
+    const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
+    if (!isFinite(price)) return null;
+    return { code, price, changePct: isFinite(pct) ? pct : null };
+  } catch (e) {
+    return null;
+  }
 }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const ph = phase();
-    if (ph === 'none') return res.status(200).json({ phase: 'none', prices: [] });
-    const symbols = ph === 'kr' ? krCodes() : usTickers();
-    const prices = await tossPrices(symbols);
-    return res.status(200).json({ phase: ph, prices });
+    const raw = (req.query?.codes || '').toString();
+    const codes = raw
+      .split(',')
+      .map(s => s.trim())
+      .filter(c => /^\d{6}$/.test(c))
+      .slice(0, 50);
+    if (!codes.length) return res.status(200).json({ open: krMarketOpen(), prices: [] });
+    const results = await Promise.all(codes.map(fetchOne));
+    return res.status(200).json({ open: krMarketOpen(), prices: results.filter(Boolean) });
   } catch (e) {
     return res.status(502).json({ error: String(e), prices: [] });
   }

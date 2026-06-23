@@ -1878,22 +1878,21 @@ renderChips('morning');
     .then(function(snap){ if(snap) applySnapshot(snap); })
     .catch(function(){});
 
-  /* 라이브 폴링(KR 10초). 토스 prices 응답 필드명 확정 전이라 방어적으로 동작 —
-     인식 가능한 가격 필드가 있을 때만 패치, 없으면(또는 크레덴셜 없으면) 무시. */
-  function pick(item, keys){ for(var i=0;i<keys.length;i++){ if(item[keys[i]]!=null) return parseFloat(String(item[keys[i]]).replace(/,/g,'')); } return null; }
+  /* 라이브 폴링(KR 10초) — /api/stocks-live(네이버 종목 시세, 서버리스, 커밋 안 함).
+     타일 data-code를 codes로 넘기고, {code, price, changePct} 실측을 받아 패치한다. */
+  var liveCodes = [].map.call(
+    document.querySelectorAll('#us-linked-widget .us-tile[data-code]'),
+    function(t){ return t.getAttribute('data-code'); }
+  );
   function poll(){
-    fetch('/api/stocks-live',{cache:'no-store'})
+    if(!liveCodes.length) return;
+    fetch('/api/stocks-live?codes='+liveCodes.join(','),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
-        if(!d || d.phase==='none' || !Array.isArray(d.prices) || !d.prices.length) return;
+        if(!d || !Array.isArray(d.prices)) return;
         d.prices.forEach(function(p){
-          var code = p.symbol||p.code||p.ticker||p.isin;
-          if(!code) return;
-          var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+code+'"]');
-          if(!tile) return;
-          var close = pick(p, ['close','closePrice','price','last','tradePrice']);
-          var pct = pick(p, ['changePct','fluctuationsRatio','changeRate','rate']);
-          if(close!=null) paintTile(tile, close, pct);
+          var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+p.code+'"]');
+          if(tile && p.price!=null) paintTile(tile, p.price, p.changePct);
         });
       })
       .catch(function(){});
