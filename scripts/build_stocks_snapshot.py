@@ -85,3 +85,61 @@ def fetch_closes(symbol, market):
     if closes:
         return closes
     return _naver_closes(symbol) if market == "kr" else _yf_closes(symbol)
+
+
+UNIVERSE_PATH = Path(__file__).parent / "config" / "stock_universe.json"
+OUT_PATH = Path(__file__).parent.parent / "web" / "data" / "stocks-snapshot.json"
+
+
+def load_universe():
+    return json.loads(UNIVERSE_PATH.read_text(encoding="utf-8"))
+
+
+def _build_one(symbol, name, sector, market):
+    closes = fetch_closes(symbol, market)
+    if len(closes) < 2:
+        print(f"[snapshot] {symbol}({name}) 데이터 부족 → 생략", file=sys.stderr)
+        return None
+    hi, lo = wk52_high_low(closes)
+    return {
+        "name": name, "sector": sector,
+        "close": closes[-1],
+        "change_pct": change_pct(closes),
+        "wk52_high": hi, "wk52_low": lo,
+        "spark5": sparkline(closes, 5),
+        "spark20": sparkline(closes, 20),
+        "ma200": ma200(closes),
+    }
+
+
+def build_snapshot():
+    uni = load_universe()
+    stocks, bellwethers = {}, {}
+    for key, sec in uni["sectors"].items():
+        for s in sec["stocks"]:
+            rec = _build_one(s["code"], s["name"], key, "kr")
+            if rec:
+                stocks[s["code"]] = rec
+        for b in sec.get("bellwethers", []):
+            if b["t"] in bellwethers:
+                continue
+            rec = _build_one(b["t"], b["name"], key, "us")
+            if rec:
+                bellwethers[b["t"]] = {"name": b["name"], "close": rec["close"],
+                                       "change_pct": rec["change_pct"]}
+    return {
+        "generated_at": datetime.now(KST).isoformat(),
+        "stocks": stocks,
+        "bellwethers": bellwethers,
+    }
+
+
+def main():
+    snap = build_snapshot()
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUT_PATH.write_text(json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[snapshot] {len(snap['stocks'])}종목 + {len(snap['bellwethers'])}벨웨더 → {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()
