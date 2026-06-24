@@ -106,16 +106,19 @@ def load_universe():
 
 
 def _build_one(symbol, name, sector, market):
-    vol = foreign = None
+    vol = vol_avg20 = foreign = foreign_spark = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
         rows = _naver_day_rows(symbol)
         closes = [float(r["closePrice"]) for r in rows if r.get("closePrice")]
-        if rows:
-            v = rows[-1].get("accumulatedTradingVolume")
-            f = rows[-1].get("foreignRetentionRate")
-            vol = int(v) if v is not None else None
-            foreign = round(float(f), 2) if f is not None else None
+        vols = [r["accumulatedTradingVolume"] for r in rows if r.get("accumulatedTradingVolume") is not None]
+        frates = [r["foreignRetentionRate"] for r in rows if r.get("foreignRetentionRate") is not None]
+        if vols:
+            vol = int(vols[-1])
+            vol_avg20 = int(sum(vols[-20:]) / len(vols[-20:]))
+        if frates:
+            foreign = round(float(frates[-1]), 2)
+            foreign_spark = [round(float(x), 2) for x in frates[-20:]]
     else:
         closes = fetch_closes(symbol, market)
     if len(closes) < 2:
@@ -133,8 +136,10 @@ def _build_one(symbol, name, sector, market):
     }
     if vol is not None:
         rec["vol"] = vol
+        rec["vol_avg20"] = vol_avg20
     if foreign is not None:
         rec["foreign_rate"] = foreign
+        rec["foreign_spark"] = foreign_spark
     return rec
 
 
