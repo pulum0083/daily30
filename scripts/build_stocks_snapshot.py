@@ -1,8 +1,9 @@
 # 종목 유니버스 일봉 → 시세·52주·스파크라인·MA200 스냅샷 빌드
 #!/usr/bin/env python3
 """실행: python3 scripts/build_stocks_snapshot.py
-   stock_universe.json의 한국 종목(~41) + 섹터 벨웨더를 토스 캔들로 수집해
+   stock_universe.json의 한국 종목(~41) + 섹터 벨웨더를 수집해
    web/data/stocks-snapshot.json 으로 저장한다. SERVICE_RULES 0번 준수.
+   한국 종목은 네이버 일봉(종가+거래량+외국인보유율), 미국 벨웨더는 토스→yfinance.
 
    ⚠️ 장 마감 후 실행 전제. change_pct는 closes[-1] vs closes[-2]로 계산하므로,
    장중에 돌리면 마지막 캔들이 미완료 세션(움직이는 종가)이 되어 등락률이
@@ -58,19 +59,23 @@ def _toss_closes(symbol):
         return []
 
 
-def _naver_closes(code):
-    """네이버 일봉 폴백(한국). 실패 시 []."""
+def _naver_day_rows(code):
+    """네이버 일봉 전체 행(오래된→최신). closePrice·accumulatedTradingVolume·foreignRetentionRate 포함. 실패 시 []."""
     try:
         end = datetime.now().strftime("%Y%m%d") + "0000"
         start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
         url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
                f"?startDateTime={start}&endDateTime={end}")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
-        return [float(r["closePrice"]) for r in rows if r.get("closePrice")]
+        return json.loads(urllib.request.urlopen(req, timeout=10).read())
     except Exception as e:
-        print(f"[snapshot] naver {code} 실패: {e}", file=sys.stderr)
+        print(f"[snapshot] naver day {code} 실패: {e}", file=sys.stderr)
         return []
+
+
+def _naver_closes(code):
+    """네이버 일봉 종가만. 실패 시 []."""
+    return [float(r["closePrice"]) for r in _naver_day_rows(code) if r.get("closePrice")]
 
 
 def _yf_closes(ticker):
@@ -101,12 +106,23 @@ def load_universe():
 
 
 def _build_one(symbol, name, sector, market):
-    closes = fetch_closes(symbol, market)
+    vol = foreign = None
+    if market == "kr":
+        # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
+        rows = _naver_day_rows(symbol)
+        closes = [float(r["closePrice"]) for r in rows if r.get("closePrice")]
+        if rows:
+            v = rows[-1].get("accumulatedTradingVolume")
+            f = rows[-1].get("foreignRetentionRate")
+            vol = int(v) if v is not None else None
+            foreign = round(float(f), 2) if f is not None else None
+    else:
+        closes = fetch_closes(symbol, market)
     if len(closes) < 2:
         print(f"[snapshot] {symbol}({name}) 데이터 부족 → 생략", file=sys.stderr)
         return None
     hi, lo = wk52_high_low(closes)
-    return {
+    rec = {
         "name": name, "sector": sector,
         "close": closes[-1],
         "change_pct": change_pct(closes),
@@ -115,6 +131,11 @@ def _build_one(symbol, name, sector, market):
         "spark20": sparkline(closes, 20),
         "ma200": ma200(closes),
     }
+    if vol is not None:
+        rec["vol"] = vol
+    if foreign is not None:
+        rec["foreign_rate"] = foreign
+    return rec
 
 
 def build_snapshot():
