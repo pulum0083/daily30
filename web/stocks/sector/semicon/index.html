@@ -5,11 +5,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>반도체 대표 종목 — Double-Shot</title>
+<title>🔬 반도체 종목 — Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
 <meta property="og:type" content="website">
-<meta property="og:title" content="반도체 대표 종목 — Double-Shot">
-<meta property="og:description" content="반도체 섹터 대표 종목의 최신 시세와 52주 레인지를 한눈에">
+<meta property="og:title" content="🔬 반도체 종목 — Double-Shot">
+<meta property="og:description" content="반도체 섹터 6종목 · 섹터 평균 +3.74% · 종가·52주 레인지 실측">
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
@@ -20,25 +20,57 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
 <style>
-  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
-  .sector-page-title{font-size:22px;font-weight:900;color:#0F172A;margin:6px 0 4px;letter-spacing:-0.3px;}
-  .sector-page-sub{font-size:12.5px;color:#94A3B8;margin:0 0 18px;}
-  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
-  .sector-card{display:block;text-decoration:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 48px;}
+  .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  .sector-crumb a{color:var(--muted);text-decoration:none;}
+  .sector-crumb a:hover{color:var(--ink);}
+  .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
+  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+
+  .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .sector-stat__box{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
+  .sector-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+  .sector-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
+  .sector-stat__val.up{color:#E03131;}
+  .sector-stat__val.down{color:#2775ED;}
+  .sector-stat__val.flat{color:var(--muted);}
+
+  .sector-breadth{margin-bottom:18px;}
+  .sector-breadth__label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;}
+  .sector-breadth__bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;}
+  .sector-breadth__up{background:#E03131;}
+  .sector-breadth__dn{background:#2775ED;}
+  .sector-breadth__fl{background:var(--hair);}
+  .sector-breadth__legend{display:flex;gap:14px;margin-top:5px;}
+  .sector-breadth__legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+  .sector-breadth__legend i{width:8px;height:8px;border-radius:2px;display:inline-block;}
+  .iu{background:#E03131;} .id{background:#2775ED;} .in{background:var(--hair);}
+
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:28px;}
+  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hair);border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-  .sector-card:hover{border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
+  .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
-  .sector-card__name{font-size:15px;font-weight:800;color:#0F172A;}
-  .sector-card__code{font-size:11px;font-weight:600;color:#94A3B8;font-variant-numeric:tabular-nums;}
+  .sector-card__name{font-size:15px;font-weight:800;color:var(--ink);}
+  .sector-card__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
   .sector-card__price{display:flex;align-items:baseline;gap:8px;}
-  .sector-card__close{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .sector-card__close{font-size:21px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
   .sector-card__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
   .sector-card__pct.up{color:#E03131;}
   .sector-card__pct.down{color:#2775ED;}
-  .sector-card__pct.flat{color:#64748B;}
+  .sector-card__pct.flat{color:var(--muted);}
   .sector-card__spark{margin:9px 0 7px;height:34px;}
   .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
-  .sector-card__range{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+  .sector-card__range{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .sector-card__fr{font-size:11px;color:var(--muted);margin-top:4px;}
+
+  .sector-nav{border-top:1px solid var(--hair);padding-top:16px;}
+  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:8px;}
+  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);
+    border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+  .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
+  .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
 </style>
 
 </head>
@@ -67,8 +99,40 @@
 
 
 <div class="sector-wrap">
-  <h1 class="sector-page-title">반도체 대표 종목</h1>
-  <p class="sector-page-sub">최근 거래일 종가 · 등락 · 52주 레인지 (매일 1회 실측 갱신)</p>
+  <p class="sector-crumb"><a href="/stocks/">종목 홈</a> › 🔬 반도체</p>
+  <h1 class="sector-page-title">🔬 반도체</h1>
+  <p class="sector-page-sub">6종목 · 2026-06-24 종가 기준 (매일 실측 갱신)</p>
+
+  <div class="sector-stat">
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">섹터 평균</div>
+      <div class="sector-stat__val up">+3.74%</div>
+    </div>
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">상승</div>
+      <div class="sector-stat__val up">6</div>
+    </div>
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">하락</div>
+      <div class="sector-stat__val down">0</div>
+    </div>
+    
+  </div>
+
+  <div class="sector-breadth">
+    <div class="sector-breadth__label">시장폭 — 6종목 중 상승 6</div>
+    <div class="sector-breadth__bar">
+      <div class="sector-breadth__up" style="flex:6"></div>
+      <div class="sector-breadth__dn" style="flex:0"></div>
+      
+    </div>
+    <div class="sector-breadth__legend">
+      <span><i class="iu"></i>상승 6</span>
+      <span><i class="id"></i>하락 0</span>
+      
+    </div>
+  </div>
+
   <div class="sector-stock-list">
     
     <a class="sector-card" href="/stocks/005930/" data-code="005930" data-spark20='[307000.0, 299500.0, 317000.0, 349000.0, 360500.0, 351500.0, 329000.0, 295500.0, 322000.0, 302500.0, 299000.0, 322500.0, 337000.0, 343000.0, 346500.0, 362500.0, 354000.0, 353500.0, 310000.0, 340500.0]'>
@@ -82,6 +146,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 57,200 – 362,500</div>
+      
+      <div class="sector-card__fr">외국인 보유 47.4%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/000660/" data-code="000660" data-spark20='[2243000.0, 2289000.0, 2333000.0, 2363000.0, 2360000.0, 2298000.0, 2070000.0, 1911000.0, 2215000.0, 2048000.0, 2101000.0, 2150000.0, 2288000.0, 2382000.0, 2521000.0, 2685000.0, 2764000.0, 2919000.0, 2555000.0, 2580000.0]'>
@@ -95,6 +162,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 235,500 – 2,919,000</div>
+      
+      <div class="sector-card__fr">외국인 보유 51.0%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/042700/" data-code="042700" data-spark20='[319000.0, 292500.0, 282000.0, 293000.0, 275500.0, 304000.0, 283000.0, 253500.0, 276500.0, 270000.0, 291000.0, 361000.0, 347000.0, 328500.0, 319500.0, 315500.0, 295000.0, 301500.0, 258000.0, 270000.0]'>
@@ -108,6 +178,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 81,500 – 409,500</div>
+      
+      <div class="sector-card__fr">외국인 보유 7.0%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/058470/" data-code="058470" data-spark20='[102500.0, 99100.0, 97400.0, 97300.0, 92800.0, 99600.0, 94100.0, 85100.0, 99000.0, 93000.0, 99800.0, 104500.0, 96800.0, 94700.0, 94700.0, 92300.0, 92600.0, 92400.0, 84900.0, 85200.0]'>
@@ -121,6 +194,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 44,400 – 127,000</div>
+      
+      <div class="sector-card__fr">외국인 보유 27.7%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/000990/" data-code="000990" data-spark20='[202000.0, 194300.0, 185500.0, 181400.0, 170100.0, 176400.0, 173800.0, 158800.0, 170300.0, 153700.0, 155200.0, 174300.0, 161200.0, 158000.0, 158500.0, 154500.0, 156100.0, 174000.0, 151100.0, 152400.0]'>
@@ -134,6 +210,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 43,000 – 220,500</div>
+      
+      <div class="sector-card__fr">외국인 보유 23.5%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/039030/" data-code="039030" data-spark20='[515000.0, 484500.0, 458000.0, 450000.0, 432000.0, 496000.0, 478000.0, 396500.0, 432500.0, 438000.0, 504000.0, 612000.0, 531000.0, 495000.0, 508000.0, 508000.0, 498500.0, 518000.0, 460000.0, 486500.0]'>
@@ -147,8 +226,34 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 145,400 – 612,000</div>
+      
+      <div class="sector-card__fr">외국인 보유 25.3%</div>
+      
     </a>
     
+  </div>
+
+  <div class="sector-nav">
+    <div class="sector-nav__label">다른 섹터 보기</div>
+    <div class="sector-nav__chips">
+      
+      <a href="/stocks/sector/semicon/" class="current">🔬 반도체</a>
+      
+      <a href="/stocks/sector/power/">⚡ 전력기기</a>
+      
+      <a href="/stocks/sector/defense/">🛡️ 방산</a>
+      
+      <a href="/stocks/sector/ship/">🚢 조선</a>
+      
+      <a href="/stocks/sector/battery/">🔋 2차전지</a>
+      
+      <a href="/stocks/sector/auto/">🚗 자동차</a>
+      
+      <a href="/stocks/sector/bio/">🧬 바이오</a>
+      
+      <a href="/stocks/sector/finance/">🏦 금융</a>
+      
+    </div>
   </div>
 </div>
 
@@ -167,7 +272,6 @@ window.addEventListener('load', function() {
 </script>
 
 <script>
-/* 카드별 20일 종가 스파크라인(data-spark20) 렌더 — 첫값 대비 상승=빨강·하락=파랑 */
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
     var raw=card.getAttribute('data-spark20'); if(!raw) return;

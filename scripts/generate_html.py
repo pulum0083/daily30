@@ -1092,6 +1092,12 @@ def _pct_cls(v: float) -> str:
     return "flat"
 
 
+_SECTOR_EMOJI = {
+    "semicon": "🔬", "battery": "🔋", "auto": "🚗", "defense": "🛡️",
+    "ship": "🚢", "bio": "🧬", "finance": "🏦", "power": "⚡",
+}
+
+
 def build_sector_pages():
     """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성."""
     universe_path = CONFIG_DIR / "stock_universe.json"
@@ -1099,9 +1105,15 @@ def build_sector_pages():
     universe = json.loads(universe_path.read_text(encoding="utf-8"))
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     snap_stocks = snapshot.get("stocks", {})
+    snapshot_date = snapshot.get("generated_at", "")[:10]
 
     env = make_env()
     tpl = env.get_template("pages/stock_sector.html")
+
+    all_sectors = [
+        {"key": k, "label": v["label"], "emoji": _SECTOR_EMOJI.get(k, "")}
+        for k, v in universe["sectors"].items()
+    ]
 
     for key, sector in universe["sectors"].items():
         stocks = []
@@ -1123,12 +1135,29 @@ def build_sector_pages():
                 "wk52_high_fmt": _fmt_krw(measured["wk52_high"]),
                 "wk52_low_fmt": _fmt_krw(measured["wk52_low"]),
                 "spark20": measured.get("spark20", []),
+                "foreign_rate": measured.get("foreign_rate"),
             })
+
+        pcts = [s["change_pct"] for s in stocks if s["change_pct"] is not None]
+        avg_pct = sum(pcts) / len(pcts) if pcts else 0
+        breadth = {
+            "up": sum(1 for p in pcts if p > 0),
+            "down": sum(1 for p in pcts if p < 0),
+            "flat": sum(1 for p in pcts if p == 0),
+            "total": len(pcts),
+        }
 
         html = tpl.render(
             sector_label=sector["label"],
             sector_key=key,
+            sector_emoji=_SECTOR_EMOJI.get(key, ""),
             stocks=stocks,
+            avg_pct=avg_pct,
+            avg_pct_fmt=_fmt_pct(avg_pct),
+            avg_cls=_pct_cls(avg_pct),
+            breadth=breadth,
+            snapshot_date=snapshot_date,
+            all_sectors=all_sectors,
             css_path="/assets/style.css",
             js_path="/assets/main.js",
         )

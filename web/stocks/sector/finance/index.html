@@ -5,11 +5,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>금융 대표 종목 — Double-Shot</title>
+<title>🏦 금융 종목 — Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
 <meta property="og:type" content="website">
-<meta property="og:title" content="금융 대표 종목 — Double-Shot">
-<meta property="og:description" content="금융 섹터 대표 종목의 최신 시세와 52주 레인지를 한눈에">
+<meta property="og:title" content="🏦 금융 종목 — Double-Shot">
+<meta property="og:description" content="금융 섹터 5종목 · 섹터 평균 -1.23% · 종가·52주 레인지 실측">
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
@@ -20,25 +20,57 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
 <style>
-  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
-  .sector-page-title{font-size:22px;font-weight:900;color:#0F172A;margin:6px 0 4px;letter-spacing:-0.3px;}
-  .sector-page-sub{font-size:12.5px;color:#94A3B8;margin:0 0 18px;}
-  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
-  .sector-card{display:block;text-decoration:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 48px;}
+  .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  .sector-crumb a{color:var(--muted);text-decoration:none;}
+  .sector-crumb a:hover{color:var(--ink);}
+  .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
+  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 16px;}
+
+  .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .sector-stat__box{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
+  .sector-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+  .sector-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
+  .sector-stat__val.up{color:#E03131;}
+  .sector-stat__val.down{color:#2775ED;}
+  .sector-stat__val.flat{color:var(--muted);}
+
+  .sector-breadth{margin-bottom:18px;}
+  .sector-breadth__label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;}
+  .sector-breadth__bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;}
+  .sector-breadth__up{background:#E03131;}
+  .sector-breadth__dn{background:#2775ED;}
+  .sector-breadth__fl{background:var(--hair);}
+  .sector-breadth__legend{display:flex;gap:14px;margin-top:5px;}
+  .sector-breadth__legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
+  .sector-breadth__legend i{width:8px;height:8px;border-radius:2px;display:inline-block;}
+  .iu{background:#E03131;} .id{background:#2775ED;} .in{background:var(--hair);}
+
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:28px;}
+  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hair);border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-  .sector-card:hover{border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
+  .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
-  .sector-card__name{font-size:15px;font-weight:800;color:#0F172A;}
-  .sector-card__code{font-size:11px;font-weight:600;color:#94A3B8;font-variant-numeric:tabular-nums;}
+  .sector-card__name{font-size:15px;font-weight:800;color:var(--ink);}
+  .sector-card__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
   .sector-card__price{display:flex;align-items:baseline;gap:8px;}
-  .sector-card__close{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .sector-card__close{font-size:21px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
   .sector-card__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
   .sector-card__pct.up{color:#E03131;}
   .sector-card__pct.down{color:#2775ED;}
-  .sector-card__pct.flat{color:#64748B;}
+  .sector-card__pct.flat{color:var(--muted);}
   .sector-card__spark{margin:9px 0 7px;height:34px;}
   .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
-  .sector-card__range{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+  .sector-card__range{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .sector-card__fr{font-size:11px;color:var(--muted);margin-top:4px;}
+
+  .sector-nav{border-top:1px solid var(--hair);padding-top:16px;}
+  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:8px;}
+  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);
+    border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
+  .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
+  .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
 </style>
 
 </head>
@@ -67,8 +99,40 @@
 
 
 <div class="sector-wrap">
-  <h1 class="sector-page-title">금융 대표 종목</h1>
-  <p class="sector-page-sub">최근 거래일 종가 · 등락 · 52주 레인지 (매일 1회 실측 갱신)</p>
+  <p class="sector-crumb"><a href="/stocks/">종목 홈</a> › 🏦 금융</p>
+  <h1 class="sector-page-title">🏦 금융</h1>
+  <p class="sector-page-sub">5종목 · 2026-06-24 종가 기준 (매일 실측 갱신)</p>
+
+  <div class="sector-stat">
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">섹터 평균</div>
+      <div class="sector-stat__val down">-1.23%</div>
+    </div>
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">상승</div>
+      <div class="sector-stat__val up">0</div>
+    </div>
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">하락</div>
+      <div class="sector-stat__val down">5</div>
+    </div>
+    
+  </div>
+
+  <div class="sector-breadth">
+    <div class="sector-breadth__label">시장폭 — 5종목 중 상승 0</div>
+    <div class="sector-breadth__bar">
+      <div class="sector-breadth__up" style="flex:0"></div>
+      <div class="sector-breadth__dn" style="flex:5"></div>
+      
+    </div>
+    <div class="sector-breadth__legend">
+      <span><i class="iu"></i>상승 0</span>
+      <span><i class="id"></i>하락 5</span>
+      
+    </div>
+  </div>
+
   <div class="sector-stock-list">
     
     <a class="sector-card" href="/stocks/105560/" data-code="105560" data-spark20='[153800.0, 149700.0, 150600.0, 152100.0, 156600.0, 164200.0, 171600.0, 151500.0, 154800.0, 154000.0, 151500.0, 161200.0, 169600.0, 172000.0, 164000.0, 163100.0, 158300.0, 157000.0, 153700.0, 151800.0]'>
@@ -82,6 +146,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 106,000 – 172,000</div>
+      
+      <div class="sector-card__fr">외국인 보유 80.1%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/055550/" data-code="055550" data-spark20='[95000.0, 92800.0, 93600.0, 92600.0, 96400.0, 100100.0, 107500.0, 97100.0, 101200.0, 98200.0, 96900.0, 99600.0, 105600.0, 106700.0, 103100.0, 100800.0, 100900.0, 97500.0, 97700.0, 95700.0]'>
@@ -95,6 +162,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 59,000 – 107,500</div>
+      
+      <div class="sector-card__fr">외국인 보유 61.8%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/138040/" data-code="138040" data-spark20='[104700.0, 103000.0, 102900.0, 106100.0, 106100.0, 106500.0, 107300.0, 102800.0, 109100.0, 108200.0, 106000.0, 108900.0, 111300.0, 114400.0, 114300.0, 112200.0, 108100.0, 105700.0, 104600.0, 103500.0]'>
@@ -108,6 +178,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 101,500 – 146,200</div>
+      
+      <div class="sector-card__fr">외국인 보유 14.2%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/086790/" data-code="086790" data-spark20='[118400.0, 115300.0, 115100.0, 113900.0, 117000.0, 120600.0, 123600.0, 112400.0, 119000.0, 117900.0, 114800.0, 121000.0, 129300.0, 132000.0, 126800.0, 126100.0, 123500.0, 119700.0, 115500.0, 114200.0]'>
@@ -121,6 +194,9 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 78,500 – 132,000</div>
+      
+      <div class="sector-card__fr">외국인 보유 68.5%</div>
+      
     </a>
     
     <a class="sector-card" href="/stocks/316140/" data-code="316140" data-spark20='[30650.0, 30050.0, 29700.0, 29400.0, 29900.0, 30400.0, 31200.0, 28850.0, 30000.0, 29800.0, 30150.0, 31150.0, 32550.0, 33050.0, 32150.0, 31550.0, 31050.0, 29850.0, 29450.0, 29250.0]'>
@@ -134,8 +210,34 @@
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 20,550 – 40,800</div>
+      
+      <div class="sector-card__fr">외국인 보유 45.5%</div>
+      
     </a>
     
+  </div>
+
+  <div class="sector-nav">
+    <div class="sector-nav__label">다른 섹터 보기</div>
+    <div class="sector-nav__chips">
+      
+      <a href="/stocks/sector/semicon/">🔬 반도체</a>
+      
+      <a href="/stocks/sector/power/">⚡ 전력기기</a>
+      
+      <a href="/stocks/sector/defense/">🛡️ 방산</a>
+      
+      <a href="/stocks/sector/ship/">🚢 조선</a>
+      
+      <a href="/stocks/sector/battery/">🔋 2차전지</a>
+      
+      <a href="/stocks/sector/auto/">🚗 자동차</a>
+      
+      <a href="/stocks/sector/bio/">🧬 바이오</a>
+      
+      <a href="/stocks/sector/finance/" class="current">🏦 금융</a>
+      
+    </div>
   </div>
 </div>
 
@@ -154,7 +256,6 @@ window.addEventListener('load', function() {
 </script>
 
 <script>
-/* 카드별 20일 종가 스파크라인(data-spark20) 렌더 — 첫값 대비 상승=빨강·하락=파랑 */
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
     var raw=card.getAttribute('data-spark20'); if(!raw) return;
