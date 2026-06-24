@@ -1,8 +1,1003 @@
 [
-  { "code": "005930", "name": "삼성전자",   "sector": "반도체", "sector_key": "semicon", "market": "KOSPI",
-    "peers": [{ "code": "000660", "name": "SK하이닉스" }, { "code": "042700", "name": "한미반도체" }] },
-  { "code": "000660", "name": "SK하이닉스", "sector": "반도체", "sector_key": "semicon", "market": "KOSPI",
-    "peers": [{ "code": "005930", "name": "삼성전자" }, { "code": "042700", "name": "한미반도체" }] },
-  { "code": "005380", "name": "현대차",     "sector": "자동차", "sector_key": "auto", "market": "KOSPI",
-    "peers": [{ "code": "000270", "name": "기아" }, { "code": "012330", "name": "현대모비스" }] }
+  {
+    "code": "005930",
+    "name": "삼성전자",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "000660",
+        "name": "SK하이닉스"
+      },
+      {
+        "code": "042700",
+        "name": "한미반도체"
+      }
+    ]
+  },
+  {
+    "code": "000660",
+    "name": "SK하이닉스",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005930",
+        "name": "삼성전자"
+      },
+      {
+        "code": "042700",
+        "name": "한미반도체"
+      }
+    ]
+  },
+  {
+    "code": "005380",
+    "name": "현대차",
+    "sector": "자동차",
+    "sector_key": "auto",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "000270",
+        "name": "기아"
+      },
+      {
+        "code": "012330",
+        "name": "현대모비스"
+      }
+    ]
+  },
+  {
+    "code": "042700",
+    "name": "한미반도체",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005930",
+        "name": "삼성전자"
+      },
+      {
+        "code": "000660",
+        "name": "SK하이닉스"
+      },
+      {
+        "code": "058470",
+        "name": "리노공업"
+      },
+      {
+        "code": "000990",
+        "name": "DB하이텍"
+      }
+    ]
+  },
+  {
+    "code": "058470",
+    "name": "리노공업",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005930",
+        "name": "삼성전자"
+      },
+      {
+        "code": "000660",
+        "name": "SK하이닉스"
+      },
+      {
+        "code": "042700",
+        "name": "한미반도체"
+      },
+      {
+        "code": "000990",
+        "name": "DB하이텍"
+      }
+    ]
+  },
+  {
+    "code": "000990",
+    "name": "DB하이텍",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005930",
+        "name": "삼성전자"
+      },
+      {
+        "code": "000660",
+        "name": "SK하이닉스"
+      },
+      {
+        "code": "042700",
+        "name": "한미반도체"
+      },
+      {
+        "code": "058470",
+        "name": "리노공업"
+      }
+    ]
+  },
+  {
+    "code": "039030",
+    "name": "이오테크닉스",
+    "sector": "반도체",
+    "sector_key": "semicon",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005930",
+        "name": "삼성전자"
+      },
+      {
+        "code": "000660",
+        "name": "SK하이닉스"
+      },
+      {
+        "code": "042700",
+        "name": "한미반도체"
+      },
+      {
+        "code": "058470",
+        "name": "리노공업"
+      }
+    ]
+  },
+  {
+    "code": "267260",
+    "name": "HD현대일렉트릭",
+    "sector": "전력기기",
+    "sector_key": "power",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "010120",
+        "name": "LS일렉트릭"
+      },
+      {
+        "code": "298040",
+        "name": "효성중공업"
+      },
+      {
+        "code": "034020",
+        "name": "두산에너빌리티"
+      },
+      {
+        "code": "033100",
+        "name": "제룡전기"
+      }
+    ]
+  },
+  {
+    "code": "010120",
+    "name": "LS일렉트릭",
+    "sector": "전력기기",
+    "sector_key": "power",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "267260",
+        "name": "HD현대일렉트릭"
+      },
+      {
+        "code": "298040",
+        "name": "효성중공업"
+      },
+      {
+        "code": "034020",
+        "name": "두산에너빌리티"
+      },
+      {
+        "code": "033100",
+        "name": "제룡전기"
+      }
+    ]
+  },
+  {
+    "code": "298040",
+    "name": "효성중공업",
+    "sector": "전력기기",
+    "sector_key": "power",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "267260",
+        "name": "HD현대일렉트릭"
+      },
+      {
+        "code": "010120",
+        "name": "LS일렉트릭"
+      },
+      {
+        "code": "034020",
+        "name": "두산에너빌리티"
+      },
+      {
+        "code": "033100",
+        "name": "제룡전기"
+      }
+    ]
+  },
+  {
+    "code": "034020",
+    "name": "두산에너빌리티",
+    "sector": "전력기기",
+    "sector_key": "power",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "267260",
+        "name": "HD현대일렉트릭"
+      },
+      {
+        "code": "010120",
+        "name": "LS일렉트릭"
+      },
+      {
+        "code": "298040",
+        "name": "효성중공업"
+      },
+      {
+        "code": "033100",
+        "name": "제룡전기"
+      }
+    ]
+  },
+  {
+    "code": "033100",
+    "name": "제룡전기",
+    "sector": "전력기기",
+    "sector_key": "power",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "267260",
+        "name": "HD현대일렉트릭"
+      },
+      {
+        "code": "010120",
+        "name": "LS일렉트릭"
+      },
+      {
+        "code": "298040",
+        "name": "효성중공업"
+      },
+      {
+        "code": "034020",
+        "name": "두산에너빌리티"
+      }
+    ]
+  },
+  {
+    "code": "012450",
+    "name": "한화에어로스페이스",
+    "sector": "방산",
+    "sector_key": "defense",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "079550",
+        "name": "LIG넥스원"
+      },
+      {
+        "code": "064350",
+        "name": "현대로템"
+      },
+      {
+        "code": "047810",
+        "name": "한국항공우주"
+      },
+      {
+        "code": "272210",
+        "name": "한화시스템"
+      }
+    ]
+  },
+  {
+    "code": "079550",
+    "name": "LIG넥스원",
+    "sector": "방산",
+    "sector_key": "defense",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "012450",
+        "name": "한화에어로스페이스"
+      },
+      {
+        "code": "064350",
+        "name": "현대로템"
+      },
+      {
+        "code": "047810",
+        "name": "한국항공우주"
+      },
+      {
+        "code": "272210",
+        "name": "한화시스템"
+      }
+    ]
+  },
+  {
+    "code": "064350",
+    "name": "현대로템",
+    "sector": "방산",
+    "sector_key": "defense",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "012450",
+        "name": "한화에어로스페이스"
+      },
+      {
+        "code": "079550",
+        "name": "LIG넥스원"
+      },
+      {
+        "code": "047810",
+        "name": "한국항공우주"
+      },
+      {
+        "code": "272210",
+        "name": "한화시스템"
+      }
+    ]
+  },
+  {
+    "code": "047810",
+    "name": "한국항공우주",
+    "sector": "방산",
+    "sector_key": "defense",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "012450",
+        "name": "한화에어로스페이스"
+      },
+      {
+        "code": "079550",
+        "name": "LIG넥스원"
+      },
+      {
+        "code": "064350",
+        "name": "현대로템"
+      },
+      {
+        "code": "272210",
+        "name": "한화시스템"
+      }
+    ]
+  },
+  {
+    "code": "272210",
+    "name": "한화시스템",
+    "sector": "방산",
+    "sector_key": "defense",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "012450",
+        "name": "한화에어로스페이스"
+      },
+      {
+        "code": "079550",
+        "name": "LIG넥스원"
+      },
+      {
+        "code": "064350",
+        "name": "현대로템"
+      },
+      {
+        "code": "047810",
+        "name": "한국항공우주"
+      }
+    ]
+  },
+  {
+    "code": "329180",
+    "name": "HD현대중공업",
+    "sector": "조선",
+    "sector_key": "ship",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "042660",
+        "name": "한화오션"
+      },
+      {
+        "code": "010140",
+        "name": "삼성중공업"
+      },
+      {
+        "code": "009540",
+        "name": "HD한국조선해양"
+      },
+      {
+        "code": "010620",
+        "name": "HD현대미포"
+      }
+    ]
+  },
+  {
+    "code": "042660",
+    "name": "한화오션",
+    "sector": "조선",
+    "sector_key": "ship",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "329180",
+        "name": "HD현대중공업"
+      },
+      {
+        "code": "010140",
+        "name": "삼성중공업"
+      },
+      {
+        "code": "009540",
+        "name": "HD한국조선해양"
+      },
+      {
+        "code": "010620",
+        "name": "HD현대미포"
+      }
+    ]
+  },
+  {
+    "code": "010140",
+    "name": "삼성중공업",
+    "sector": "조선",
+    "sector_key": "ship",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "329180",
+        "name": "HD현대중공업"
+      },
+      {
+        "code": "042660",
+        "name": "한화오션"
+      },
+      {
+        "code": "009540",
+        "name": "HD한국조선해양"
+      },
+      {
+        "code": "010620",
+        "name": "HD현대미포"
+      }
+    ]
+  },
+  {
+    "code": "009540",
+    "name": "HD한국조선해양",
+    "sector": "조선",
+    "sector_key": "ship",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "329180",
+        "name": "HD현대중공업"
+      },
+      {
+        "code": "042660",
+        "name": "한화오션"
+      },
+      {
+        "code": "010140",
+        "name": "삼성중공업"
+      },
+      {
+        "code": "010620",
+        "name": "HD현대미포"
+      }
+    ]
+  },
+  {
+    "code": "010620",
+    "name": "HD현대미포",
+    "sector": "조선",
+    "sector_key": "ship",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "329180",
+        "name": "HD현대중공업"
+      },
+      {
+        "code": "042660",
+        "name": "한화오션"
+      },
+      {
+        "code": "010140",
+        "name": "삼성중공업"
+      },
+      {
+        "code": "009540",
+        "name": "HD한국조선해양"
+      }
+    ]
+  },
+  {
+    "code": "373220",
+    "name": "LG에너지솔루션",
+    "sector": "2차전지",
+    "sector_key": "battery",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "247540",
+        "name": "에코프로비엠"
+      },
+      {
+        "code": "006400",
+        "name": "삼성SDI"
+      },
+      {
+        "code": "003670",
+        "name": "포스코퓨처엠"
+      },
+      {
+        "code": "066970",
+        "name": "엘앤에프"
+      }
+    ]
+  },
+  {
+    "code": "247540",
+    "name": "에코프로비엠",
+    "sector": "2차전지",
+    "sector_key": "battery",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "373220",
+        "name": "LG에너지솔루션"
+      },
+      {
+        "code": "006400",
+        "name": "삼성SDI"
+      },
+      {
+        "code": "003670",
+        "name": "포스코퓨처엠"
+      },
+      {
+        "code": "066970",
+        "name": "엘앤에프"
+      }
+    ]
+  },
+  {
+    "code": "006400",
+    "name": "삼성SDI",
+    "sector": "2차전지",
+    "sector_key": "battery",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "373220",
+        "name": "LG에너지솔루션"
+      },
+      {
+        "code": "247540",
+        "name": "에코프로비엠"
+      },
+      {
+        "code": "003670",
+        "name": "포스코퓨처엠"
+      },
+      {
+        "code": "066970",
+        "name": "엘앤에프"
+      }
+    ]
+  },
+  {
+    "code": "003670",
+    "name": "포스코퓨처엠",
+    "sector": "2차전지",
+    "sector_key": "battery",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "373220",
+        "name": "LG에너지솔루션"
+      },
+      {
+        "code": "247540",
+        "name": "에코프로비엠"
+      },
+      {
+        "code": "006400",
+        "name": "삼성SDI"
+      },
+      {
+        "code": "066970",
+        "name": "엘앤에프"
+      }
+    ]
+  },
+  {
+    "code": "066970",
+    "name": "엘앤에프",
+    "sector": "2차전지",
+    "sector_key": "battery",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "373220",
+        "name": "LG에너지솔루션"
+      },
+      {
+        "code": "247540",
+        "name": "에코프로비엠"
+      },
+      {
+        "code": "006400",
+        "name": "삼성SDI"
+      },
+      {
+        "code": "003670",
+        "name": "포스코퓨처엠"
+      }
+    ]
+  },
+  {
+    "code": "000270",
+    "name": "기아",
+    "sector": "자동차",
+    "sector_key": "auto",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005380",
+        "name": "현대차"
+      },
+      {
+        "code": "012330",
+        "name": "현대모비스"
+      },
+      {
+        "code": "204320",
+        "name": "HL만도"
+      },
+      {
+        "code": "011210",
+        "name": "현대위아"
+      }
+    ]
+  },
+  {
+    "code": "012330",
+    "name": "현대모비스",
+    "sector": "자동차",
+    "sector_key": "auto",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005380",
+        "name": "현대차"
+      },
+      {
+        "code": "000270",
+        "name": "기아"
+      },
+      {
+        "code": "204320",
+        "name": "HL만도"
+      },
+      {
+        "code": "011210",
+        "name": "현대위아"
+      }
+    ]
+  },
+  {
+    "code": "204320",
+    "name": "HL만도",
+    "sector": "자동차",
+    "sector_key": "auto",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005380",
+        "name": "현대차"
+      },
+      {
+        "code": "000270",
+        "name": "기아"
+      },
+      {
+        "code": "012330",
+        "name": "현대모비스"
+      },
+      {
+        "code": "011210",
+        "name": "현대위아"
+      }
+    ]
+  },
+  {
+    "code": "011210",
+    "name": "현대위아",
+    "sector": "자동차",
+    "sector_key": "auto",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "005380",
+        "name": "현대차"
+      },
+      {
+        "code": "000270",
+        "name": "기아"
+      },
+      {
+        "code": "012330",
+        "name": "현대모비스"
+      },
+      {
+        "code": "204320",
+        "name": "HL만도"
+      }
+    ]
+  },
+  {
+    "code": "207940",
+    "name": "삼성바이오로직스",
+    "sector": "바이오",
+    "sector_key": "bio",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "068270",
+        "name": "셀트리온"
+      },
+      {
+        "code": "000100",
+        "name": "유한양행"
+      },
+      {
+        "code": "326030",
+        "name": "SK바이오팜"
+      },
+      {
+        "code": "196170",
+        "name": "알테오젠"
+      }
+    ]
+  },
+  {
+    "code": "068270",
+    "name": "셀트리온",
+    "sector": "바이오",
+    "sector_key": "bio",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "207940",
+        "name": "삼성바이오로직스"
+      },
+      {
+        "code": "000100",
+        "name": "유한양행"
+      },
+      {
+        "code": "326030",
+        "name": "SK바이오팜"
+      },
+      {
+        "code": "196170",
+        "name": "알테오젠"
+      }
+    ]
+  },
+  {
+    "code": "000100",
+    "name": "유한양행",
+    "sector": "바이오",
+    "sector_key": "bio",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "207940",
+        "name": "삼성바이오로직스"
+      },
+      {
+        "code": "068270",
+        "name": "셀트리온"
+      },
+      {
+        "code": "326030",
+        "name": "SK바이오팜"
+      },
+      {
+        "code": "196170",
+        "name": "알테오젠"
+      }
+    ]
+  },
+  {
+    "code": "326030",
+    "name": "SK바이오팜",
+    "sector": "바이오",
+    "sector_key": "bio",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "207940",
+        "name": "삼성바이오로직스"
+      },
+      {
+        "code": "068270",
+        "name": "셀트리온"
+      },
+      {
+        "code": "000100",
+        "name": "유한양행"
+      },
+      {
+        "code": "196170",
+        "name": "알테오젠"
+      }
+    ]
+  },
+  {
+    "code": "196170",
+    "name": "알테오젠",
+    "sector": "바이오",
+    "sector_key": "bio",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "207940",
+        "name": "삼성바이오로직스"
+      },
+      {
+        "code": "068270",
+        "name": "셀트리온"
+      },
+      {
+        "code": "000100",
+        "name": "유한양행"
+      },
+      {
+        "code": "326030",
+        "name": "SK바이오팜"
+      }
+    ]
+  },
+  {
+    "code": "105560",
+    "name": "KB금융",
+    "sector": "금융",
+    "sector_key": "finance",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "055550",
+        "name": "신한지주"
+      },
+      {
+        "code": "138040",
+        "name": "메리츠금융지주"
+      },
+      {
+        "code": "086790",
+        "name": "하나금융지주"
+      },
+      {
+        "code": "316140",
+        "name": "우리금융지주"
+      }
+    ]
+  },
+  {
+    "code": "055550",
+    "name": "신한지주",
+    "sector": "금융",
+    "sector_key": "finance",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "105560",
+        "name": "KB금융"
+      },
+      {
+        "code": "138040",
+        "name": "메리츠금융지주"
+      },
+      {
+        "code": "086790",
+        "name": "하나금융지주"
+      },
+      {
+        "code": "316140",
+        "name": "우리금융지주"
+      }
+    ]
+  },
+  {
+    "code": "138040",
+    "name": "메리츠금융지주",
+    "sector": "금융",
+    "sector_key": "finance",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "105560",
+        "name": "KB금융"
+      },
+      {
+        "code": "055550",
+        "name": "신한지주"
+      },
+      {
+        "code": "086790",
+        "name": "하나금융지주"
+      },
+      {
+        "code": "316140",
+        "name": "우리금융지주"
+      }
+    ]
+  },
+  {
+    "code": "086790",
+    "name": "하나금융지주",
+    "sector": "금융",
+    "sector_key": "finance",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "105560",
+        "name": "KB금융"
+      },
+      {
+        "code": "055550",
+        "name": "신한지주"
+      },
+      {
+        "code": "138040",
+        "name": "메리츠금융지주"
+      },
+      {
+        "code": "316140",
+        "name": "우리금융지주"
+      }
+    ]
+  },
+  {
+    "code": "316140",
+    "name": "우리금융지주",
+    "sector": "금융",
+    "sector_key": "finance",
+    "market": "KOSPI",
+    "peers": [
+      {
+        "code": "105560",
+        "name": "KB금융"
+      },
+      {
+        "code": "055550",
+        "name": "신한지주"
+      },
+      {
+        "code": "138040",
+        "name": "메리츠금융지주"
+      },
+      {
+        "code": "086790",
+        "name": "하나금융지주"
+      }
+    ]
+  }
 ]

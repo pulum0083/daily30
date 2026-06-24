@@ -892,6 +892,8 @@ def stock_realdata(code):
     if rd.get("error"):
         return {"error": rd["error"], "price": None}
     rd["error"] = None
+    rd.setdefault("ma20_dist_pct", None)
+    rd.setdefault("ma200_dist_pct", None)
     try:
         closes = _fetch_stock_closes(code)
         if closes:
