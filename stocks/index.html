@@ -549,7 +549,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <!-- ===== HOME ===== -->
   <div class="screen on" id="home">
     <div class="hero">
-      <div><h1>오늘의 <span class="a">종목</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · 06-11</p></div>
+      <div><h1>오늘의 <span class="a">종목</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · 06-24</p></div>
       <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -563,7 +563,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,366</span><span class="vc dn num" id="h-usd-c">−3.2</span></div>
     </div>
     <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
-    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-11/kospi/" style="cursor:pointer;">
+    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-24/kospi/" style="cursor:pointer;">
       <span class="bs-icon" id="bs-icon">📊</span>
       <span class="bs-body">
         <span class="bs-type" id="bs-type">코스피 예측 브리핑</span>
@@ -803,7 +803,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div>
         <div class="dbox">
         <div class="shead"><div class="top">
-          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · 06-11 종가</div></div>
+          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · 06-24 종가</div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v up num">+1.2%</div></div>
         </div>
         <div class="senti"><div class="l"><span>섹터 AI 심리</span><span>상승 우위 <b class="num">68%</b></span></div><div class="gg"><div class="n" style="left:68%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
@@ -988,7 +988,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <div class="screen" id="ranking">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
     <div class="phead">
-      <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-11 종가</div></div>
+      <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · 06-24 종가</div></div>
       <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
     </div>
     <div class="fbar"><span class="lbl">섹터</span><div class="fchips"><a class="on">전체</a><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a></div></div>
@@ -1003,7 +1003,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <div class="screen" id="chips">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/" onclick="event.preventDefault();go('home')">홈</a> › <span style="color:#5B21B6;">반도체 칩보드</span></div>
     <div class="phead">
-      <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-11</div></div>
+      <div><h1 style="color:#5B21B6;"><span class="ic">🔬</span> AI 반도체 칩보드</h1><div class="psub">밤사이 미국 벨웨더 → 오늘 한국 반도체 대응 · 06-24</div></div>
       <div class="rtabs" id="chip-mode"><a class="on" onclick="chipMode('morning',this)">🌅 아침</a><a onclick="chipMode('close',this)">🌆 마감</a></div>
     </div>
     <!-- 2-col: 좌=어젯밤 미국(과거) 우=오늘 본문(현재) -->
@@ -1054,7 +1054,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
           <div class="m"><span class="l">섹터 온도계</span></div>
           <div class="m"><span class="l">SOX</span><span class="vc up num">+2.8%</span></div>
           <div class="m"><span class="l">VIX</span><span class="v num">14.2</span><span class="vc dn num">−0.6</span></div>
-          <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-11 08:42 · 장전</span></div>
+          <div class="m"><span class="l">상태</span><span class="vc num" style="color:var(--muted);font-weight:700;">06-24 15:30 · 장중</span></div>
         </div>
         <!-- AI 코멘트 -->
         <div class="panel" style="border-color:#BFDBFE;background:#F8FAFF;margin-bottom:12px;">
