@@ -1047,6 +1047,18 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             user_content += hint
             print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
 
+    # us_linked_story 주제 오버라이드 (data/us_linked_hint.json)
+    if briefing_type == "kospi":
+        hint_path = DATA_DIR / "us_linked_hint.json"
+        if hint_path.exists():
+            try:
+                hint_data = json.load(open(hint_path, encoding="utf-8"))
+                if hint_data.get("date") == date_str and hint_data.get("topic"):
+                    user_content += f"\n\n## 🇺🇸 us_linked_story 주제 지정\n오늘 us_linked_story는 반드시 다음 주제로 작성한다: {hint_data['topic']}\n"
+                    print(f"[call_claude] US linked story hint: {hint_data['topic']}")
+            except (json.JSONDecodeError, KeyError):
+                pass
+
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
     _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
     chosen_format = random.choice(_formats)
