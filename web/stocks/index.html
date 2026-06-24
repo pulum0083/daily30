@@ -605,11 +605,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> AI 픽 미적용</span></div>
-      <a class="row" onclick="go('etf-detail')"><span class="rk t num">1</span><div class="nm"><b>KODEX 200</b><small class="num">069500 · 코스피200</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div></div><span class="barval num">1,840만주</span><div class="ai"><span class="ais">신호 56</span></div></a>
-      <a class="row" onclick="go('etf-detail')"><span class="rk t num">2</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630 · 레버리지</small></div><div class="barwrap"><div class="bar vol" style="width:72%"></div></div><span class="barval num">1,320만주</span><div class="ai"><span class="ais">신호 61</span></div></a>
-      <a class="row" onclick="go('etf-detail')"><span class="rk t num">3</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690 · 미국</small></div><div class="barwrap"><div class="bar vol" style="width:44%"></div></div><span class="barval num">810만주</span><div class="ai"><span class="ais">신호 67</span></div></a>
-      <a class="row" onclick="go('etf-detail')"><span class="rk num">4</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800 · 인버스</small></div><div class="barwrap"><div class="bar vol" style="width:31%"></div></div><span class="barval num">570만주</span><div class="ai"><span class="aid">신호 39</span></div></a>
-      <a class="row" onclick="go('etf-detail')"><span class="rk num">5</span><div class="nm"><b>TIGER 차이나CSI300</b><small class="num">192090 · 중국</small></div><div class="barwrap"><div class="bar vol" style="width:22%"></div></div><span class="barval num">400만주</span><div class="ai"><span class="ax">—</span></div></a>
+      <div id="etf-top-rows"></div>
       <a class="more" onclick="go('ranking')">ETF 전체 →</a>
     </div>
       <div class="block">
@@ -2005,9 +2001,19 @@ renderChips('morning');
       kids[3].innerHTML=(up?'▲':dn?'▼':'–')+' '+Math.abs(delta).toFixed(2)+'<span style="font-size:9px;">%p</span>';
     });
   }
+  function renderEtfTop(snap){
+    var wrap=document.getElementById('etf-top-rows'); if(!wrap||!snap.etfs) return;
+    var list=Object.keys(snap.etfs).map(function(c){var e=snap.etfs[c];return {code:c,name:e.name,vol:e.vol||0};}).filter(function(x){return x.vol>0;});
+    list.sort(function(a,b){return b.vol-a.vol;});
+    var top=list.slice(0,5), maxv=top[0]?top[0].vol:1;
+    wrap.innerHTML=top.map(function(x,i){
+      var w=Math.round(x.vol/maxv*100);
+      return '<a class="row" onclick="go(\'etf-detail\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · ETF</small></div><div class="barwrap"><div class="bar vol" style="width:'+w+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span></a>';
+    }).join('');
+  }
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
-    .then(function(snap){ if(snap&&snap.stocks){ renderVolTop(snap); renderForeign(snap); } })
+    .then(function(snap){ if(snap&&snap.stocks){ renderVolTop(snap); renderForeign(snap); renderEtfTop(snap); } })
     .catch(function(){});
 })();
 </script>
