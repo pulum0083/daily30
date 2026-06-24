@@ -203,9 +203,19 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _is_quota_error(e: Exception) -> bool:
+def _is_retryable_error(e: Exception) -> bool:
     msg = str(e).upper()
-    return "429" in msg or "RESOURCE_EXHAUSTED" in msg or "QUOTA" in msg
+    return (
+        "429" in msg or "RESOURCE_EXHAUSTED" in msg or "QUOTA" in msg
+        or "503" in msg or "UNAVAILABLE" in msg or "SERVICE_UNAVAILABLE" in msg
+    )
+
+
+EMPTY_NEWS = {
+    "key_indicators": [],
+    "headlines": [],
+    "market_sentiment": "neutral",
+}
 
 
 def main():
@@ -228,10 +238,10 @@ def main():
             break
         except Exception as e:
             last_err = e
-            if _is_quota_error(e) and attempt < 3:
-                wait = 30 * attempt
-                print(f"[fetch_news] 429/quota — {wait}s 후 재시도 ({attempt}/3)", file=sys.stderr)
+            if _is_retryable_error(e) and attempt < 3:
                 import time
+                wait = 45 * attempt
+                print(f"[fetch_news] 일시 오류({attempt}/3) — {wait}s 후 재시도: {e}", file=sys.stderr)
                 time.sleep(wait)
             else:
                 break
@@ -243,7 +253,9 @@ def main():
         if stale.exists():
             stale.unlink()
             print(f"[fetch_news] stale 뉴스 파일 삭제: {stale}", file=sys.stderr)
-        sys.exit(1)
+        # Gemini 일시 장애 시 빈 뉴스로 파이프라인 계속 진행
+        print("[fetch_news] WARN: 빈 뉴스로 계속 진행 (Gemini 일시 장애)", file=sys.stderr)
+        summary = EMPTY_NEWS
 
     summary["generated_at"] = datetime.now(KST).isoformat()
     out_path = DATA_DIR / f"news_summary_{args.type}.json"
