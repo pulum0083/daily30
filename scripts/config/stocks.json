@@ -1,0 +1,8 @@
+[
+  { "code": "005930", "name": "삼성전자",   "sector": "반도체", "sector_key": "semicon", "market": "KOSPI",
+    "peers": [{ "code": "000660", "name": "SK하이닉스" }, { "code": "042700", "name": "한미반도체" }] },
+  { "code": "000660", "name": "SK하이닉스", "sector": "반도체", "sector_key": "semicon", "market": "KOSPI",
+    "peers": [{ "code": "005930", "name": "삼성전자" }, { "code": "042700", "name": "한미반도체" }] },
+  { "code": "005380", "name": "현대차",     "sector": "자동차", "sector_key": "auto", "market": "KOSPI",
+    "peers": [{ "code": "000270", "name": "기아" }, { "code": "012330", "name": "현대모비스" }] }
+]

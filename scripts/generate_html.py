@@ -22,6 +22,13 @@ from pathlib import Path
 import pytz
 from jinja2 import Environment, FileSystemLoader
 
+try:
+    from scripts.validate_analysis import _fetch_kospi_realdata
+    import scripts.toss_client as tc
+except ImportError:
+    from validate_analysis import _fetch_kospi_realdata
+    import toss_client as tc
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 WEB_DIR = BASE_DIR / "web"
@@ -849,6 +856,101 @@ def write_briefings_list_json():
     print(f"[generate_html] wrote web/data/briefings-list.json")
 
 
+def _naver_daily_closes(code):
+    """네이버 일봉 종가 리스트(오래된→최신). 토스 폴백용."""
+    import urllib.request
+    from datetime import timedelta
+    end = datetime.now().strftime("%Y%m%d") + "0000"
+    start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
+    url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
+           f"?startDateTime={start}&endDateTime={end}")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        rows = json.loads(resp.read())
+    return [float(r["closePrice"]) for r in rows if r.get("closePrice")]
+
+
+def _fetch_stock_closes(code):
+    """일봉 종가 리스트(오래된→최신). 52주 범위 산출용. 토스 우선, 실패 시 네이버 폴백.
+
+    _fetch_kospi_realdata가 캔들 원본을 반환하지 않아 부득이 재호출한다.
+    sparkline은 20개뿐이라 52주 범위 산출에 부족하다.
+    """
+    try:
+        candles = tc.get_candles(code, interval="1d", count=300)
+        closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
+        if closes:
+            return closes
+    except Exception:
+        pass
+    return _naver_daily_closes(code)
+
+
+def stock_realdata(code):
+    """종목 상세용 실측 dict. 시세·sparkline·MA + 52주 범위."""
+    rd = _fetch_kospi_realdata(code)
+    if rd.get("error"):
+        return {"error": rd["error"], "price": None}
+    rd["error"] = None
+    try:
+        closes = _fetch_stock_closes(code)
+        if closes:
+            lo, hi = min(closes), max(closes)
+            rd["week52_low"] = round(lo, 2)
+            rd["week52_high"] = round(hi, 2)
+            rd["week52_pos_pct"] = round((rd["price"] - lo) / (hi - lo) * 100, 1) if hi > lo else 0
+    except Exception:
+        rd["week52_low"] = rd["week52_high"] = rd["week52_pos_pct"] = None
+    return rd
+
+
+def build_stock_page(stock, peers):
+    """종목 1개의 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
+    rd = stock_realdata(stock["code"])
+    if rd.get("error") or rd.get("price") is None:
+        raise RuntimeError(f"{stock['code']} 실측 실패: {rd.get('error')}")
+    env = make_env()
+    tmpl = env.get_template("stocks/detail.html")
+    ctx = {
+        "stock": stock,
+        "rd": rd,
+        "peers": peers,
+        "generated_label": datetime.now().strftime("%m-%d") + " 종가",
+    }
+    html = tmpl.render(**ctx)
+    out_dir = WEB_DIR / "stocks" / stock["code"]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "index.html"
+    out_path.write_text(html, encoding="utf-8")
+    return f"stocks/{stock['code']}/index.html"
+
+
+def build_all_stocks():
+    """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
+
+    실측 호출 1회라도 실패하면 build_stock_page가 RuntimeError로 배치를 중단한다(fail-fast).
+    """
+    stocks = load_json(CONFIG_DIR / "stocks.json")
+    reg_codes = {s["code"] for s in stocks}
+    peer_rd_cache = {}  # peer 실측 중복 호출 방지 (여러 종목이 같은 peer를 공유)
+
+    def _peer_change(code):
+        if code not in peer_rd_cache:
+            peer_rd_cache[code] = stock_realdata(code)
+        prd = peer_rd_cache[code]
+        return None if prd.get("error") else prd.get("change_pct")
+
+    results = []
+    for s in stocks:
+        peers = [
+            {"code": p["code"], "name": p["name"], "change_pct": _peer_change(p["code"]),
+             "linked": p["code"] in reg_codes}
+            for p in s.get("peers", [])
+        ]
+        results.append(build_stock_page(s, peers))
+    return results
+
+
 def write_sitemap_xml():
     """web/sitemap.xml 을 생성한다. generate_html 실행마다 자동 갱신."""
     BASE = "https://doubleshot.space"
@@ -877,6 +979,15 @@ def write_sitemap_xml():
                     "changefreq": "monthly",
                     "priority": "0.7",
                 })
+
+    # 생성된 종목 상세 페이지만 포함
+    for s in load_json(CONFIG_DIR / "stocks.json"):
+        if (WEB_DIR / "stocks" / s["code"] / "index.html").exists():
+            urls.append({
+                "loc": f"{BASE}/stocks/{s['code']}/",
+                "changefreq": "daily",
+                "priority": "0.8",
+            })
 
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -1039,10 +1150,18 @@ def main():
                         help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
     parser.add_argument("--sectors", action="store_true",
                         help="섹터별 종목 페이지 8개 생성하고 종료")
+    parser.add_argument("--stocks", action="store_true",
+                        help="stocks.json 종목 상세 페이지 일괄 생성하고 종료")
     args = parser.parse_args()
 
     if args.sectors:
         build_sector_pages()
+        return
+
+    if args.stocks:
+        for path in build_all_stocks():
+            print(f"생성: {path}")
+        write_sitemap_xml()
         return
 
     if args.write_list_only:
