@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-06-25": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-06-25/kospi/",
+        "headline": "오늘 코스피, 반도체가 끌고 바이오가 미는 날",
+        "pill_cls": "up",
+        "pill_text": "▲ 상승",
+        "title": "상승 우위",
+        "time": "07:32"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-06-24": {
       "kospi": {
         "state": "ready",
@@ -556,20 +575,6 @@
       }
     },
     "2026-05-15": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-05-14": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
