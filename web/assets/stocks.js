@@ -277,23 +277,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function () {});
 })();
 
-// 실적 차트 툴팁 (body-fixed — .sc overflow:hidden 우회)
-(function(){
-  const tt = document.createElement('div');
-  tt.className = 'qf-tt';
-  tt.style.display = 'none';
-  document.body.appendChild(tt);
-  document.querySelectorAll('#qf-earnings .q').forEach(function(q) {
-    q.addEventListener('mouseenter', function() {
-      const r = q.getBoundingClientRect();
-      tt.innerHTML = '<b>' + q.dataset.qx + '</b>'
-        + '<span class="tt-rev">매출&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + q.dataset.rev + '조원</span><br>'
-        + '<span class="tt-op">영업이익&nbsp;' + q.dataset.op + '조원</span>';
-      tt.style.display = 'block';
-      tt.style.left = (r.left + r.width / 2) + 'px';
-      tt.style.top  = (r.top - 6) + 'px';
-    });
-    q.addEventListener('mouseleave', function() { tt.style.display = 'none'; });
-  });
-})();
-
