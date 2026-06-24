@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return Math.round(v).toLocaleString() + '억';
   }
 
-  // 1. 수급 동향
+  // 1. 수급 동향 — 5일 외국인·기관 순매수 (중앙 기준 다이버징 바)
   fetch('/chips/api/supply-demand?ticker=' + ticker)
     .then(function (r) { return r.json(); })
     .then(function (d) {
@@ -165,49 +165,45 @@ document.addEventListener('DOMContentLoaded', function() {
         var dt = new Date(d.updatedAt);
         upd.textContent = (dt.getMonth() + 1) + '/' + dt.getDate() + ' 기준 5일';
       }
-      // 최대값 (바 스케일용)
-      var maxVal = 0;
+      // 최대 절대 순매수 (다이버징 스케일용)
+      var maxAbs = 0;
       d.days.forEach(function (day) {
-        ['foreignBuy', 'foreignSell', 'institutionBuy', 'institutionSell'].forEach(function (k) {
-          if (day[k] > maxVal) maxVal = day[k];
-        });
+        maxAbs = Math.max(maxAbs,
+          Math.abs(day.foreignBuy - day.foreignSell),
+          Math.abs(day.institutionBuy - day.institutionSell));
       });
-      maxVal = maxVal || 1;
-      var rows = d.days.map(function (day) {
-        function bar(buy, sell, label) {
-          var net = buy - sell;
-          var isUp = net >= 0;
-          var fillVal = Math.abs(net);
-          var pct = Math.min(fillVal / maxVal * 100, 100).toFixed(1);
-          var cls = isUp ? 'buy' : 'sell';
-          var valCls = isUp ? 'up' : 'dn';
-          var sign = isUp ? '+' : '';
-          return '<div class="sup5-bar">'
-            + '<span class="sup5-label">' + label + '</span>'
-            + '<div class="sup5-track"><div class="sup5-fill ' + cls + '" style="width:' + pct + '%"></div></div>'
-            + '<span class="sup5-val ' + valCls + '">' + sign + fmt만(net) + '</span>'
-            + '</div>';
-        }
-        return '<div class="sup5-row">'
-          + '<span class="sup5-date">' + day.date + '</span>'
-          + '<div class="sup5-bars">'
-          + bar(day.foreignBuy, day.foreignSell, '외국인')
-          + bar(day.institutionBuy, day.institutionSell, '기관')
-          + '</div></div>';
+      maxAbs = maxAbs || 1;
+      function divRow(label, net) {
+        var buy = net >= 0;
+        var w = Math.min(Math.abs(net) / maxAbs * 50, 50).toFixed(1);
+        var cls = buy ? 'buy' : 'sell';
+        var valCls = buy ? 'up' : 'dn';
+        var sign = buy ? '+' : '';
+        return '<div class="sd-row"><span class="sd-lbl">' + label + '</span>'
+          + '<div class="sd-track"><div class="sd-zero"></div>'
+          + '<div class="sd-fill ' + cls + '" style="width:' + w + '%"></div></div>'
+          + '<span class="sd-val ' + valCls + '">' + sign + fmt만(net) + '</span></div>';
+      }
+      var days = d.days.map(function (day) {
+        return '<div class="sd-day"><div class="sd-day-date">' + day.date + '</div>'
+          + divRow('외', day.foreignBuy - day.foreignSell)
+          + divRow('기', day.institutionBuy - day.institutionSell)
+          + '</div>';
       }).join('');
 
-      var fNet = d.summary.foreignNetBuy;
-      var iNet = d.summary.institutionNetBuy;
-      function sumBox(label, net) {
-        var cls = net >= 0 ? 'up' : 'dn';
-        var sign = net >= 0 ? '+' : '';
-        return '<div class="sup5-sum-box">'
-          + '<div class="sup5-sum-label">' + label + ' 5일 순매수</div>'
-          + '<div class="sup5-sum-val ' + cls + '">' + sign + fmt만(net) + '</div>'
-          + '</div>';
+      function sumBox(name, net) {
+        var up = net >= 0;
+        var cls = up ? 'up' : 'dn';
+        var sign = up ? '+' : '';
+        var tag = up ? '순매수' : '순매도';
+        return '<div class="sd-sum-box"><div class="sd-sum-top">'
+          + '<span class="sd-sum-name">' + name + ' · 5일</span>'
+          + '<span class="sd-sum-tag ' + cls + '">' + tag + '</span></div>'
+          + '<div class="sd-sum-val ' + cls + '">' + sign + fmt만(net) + '</div></div>';
       }
-      body.innerHTML = rows
-        + '<div class="sup5-summary">' + sumBox('외국인', fNet) + sumBox('기관', iNet) + '</div>';
+      body.innerHTML = '<div class="sd-sum">'
+        + sumBox('외국인', d.summary.foreignNetBuy) + sumBox('기관', d.summary.institutionNetBuy)
+        + '</div><div class="sd-axis"><span>◀ 순매도</span><span>순매수 ▶</span></div>' + days;
       sec.style.display = '';
     }).catch(function () {});
 
@@ -247,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
       sec.style.display = '';
     }).catch(function () {});
 
-  // 3. 영업이익 추이
+  // 3. 영업이익 분기 추이 (컬럼 차트 — 값 라벨·베이스라인·추정 해치)
   fetch('/chips/api/financials?ticker=' + ticker)
     .then(function (r) { return r.json(); })
     .then(function (d) {
@@ -257,28 +253,26 @@ document.addEventListener('DOMContentLoaded', function() {
       if (qs.length === 0) return;
       var sec = document.getElementById('sec-financials');
       var body = document.getElementById('financials-body');
-      var vals = qs.map(function (q) { return q.operatingIncome; });
-      var absMax = Math.max.apply(null, vals.map(Math.abs)) || 1;
-      var BARH = 120; // px
+      var absMax = Math.max.apply(null, qs.map(function (q) { return Math.abs(q.operatingIncome); })) || 1;
+      var BARH = 140; // px
       var bars = qs.map(function (q) {
         var v = q.operatingIncome;
-        var isEst = q.isEstimate;
-        var isPos = v >= 0;
-        var ratio = Math.abs(v) / absMax;
-        // 최소 12% 보장 — 작은 분기도 막대가 보이도록
-        var h = Math.max(Math.round(ratio * BARH), 12);
-        var cls = isEst ? (isPos ? 'estimate' : 'neg-est') : (isPos ? 'positive' : 'negative');
-        return '<div class="fin-bar-wrap">'
-          + '<div class="fin-val ' + (isPos ? 'up' : 'dn') + '">' + fmtAmt(v) + '</div>'
-          + '<div class="fin-bar ' + cls + '" style="height:' + h + 'px"></div>'
-          + '<div class="fin-qx">' + q.quarter.replace('Q', '<br>Q') + '</div>'
-          + '</div>';
+        var est = q.isEstimate;
+        // 최소 14px 보장 — 작은 분기도 라벨과 함께 읽히도록
+        var h = Math.max(Math.round(Math.abs(v) / absMax * BARH), 14);
+        return '<div class="fin-col"><span class="fin-cap' + (est ? ' est' : '') + '">'
+          + fmtAmt(v) + (est ? '(E)' : '') + '</span>'
+          + '<div class="fin-bar ' + (est ? 'est' : 'actual') + '" style="height:' + h + 'px"></div></div>';
       }).join('');
-      body.innerHTML = '<div class="fin-bars">' + bars + '</div>'
-        + '<div class="fin-legend">'
-        + '<span><i style="background:var(--up)"></i>실적</span>'
-        + '<span><i style="background:var(--up);opacity:.45;border:1px dashed var(--up)"></i>추정</span>'
-        + '</div>';
+      var xs = qs.map(function (q) {
+        return '<span class="fin-x' + (q.isEstimate ? ' est' : '') + '">'
+          + q.quarter.replace('Q', '<br>Q') + '</span>';
+      }).join('');
+      body.innerHTML = '<div class="fin-chart">' + bars + '</div>'
+        + '<div class="fin-xrow">' + xs + '</div>'
+        + '<div class="fin-foot"><div class="fin-legend">'
+        + '<span><i style="background:var(--up)"></i>확정 실적</span>'
+        + '<span><i class="est"></i>컨센서스 추정</span></div></div>';
       sec.style.display = '';
     }).catch(function () {});
 })();
