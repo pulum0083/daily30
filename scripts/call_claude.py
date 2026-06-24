@@ -31,21 +31,6 @@ DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 섹터 로테이션 풀 (코스피 아침 브리핑 — sector_focus)
-# ─────────────────────────────────────────────────────────────────────────────
-SECTOR_POOL = [
-    {"key": "semicon", "name": "반도체",     "emoji": "🏭"},
-    {"key": "power",   "name": "AI전력기기", "emoji": "⚡"},
-    {"key": "defense", "name": "방산",       "emoji": "🛡️"},
-    {"key": "ship",    "name": "조선",       "emoji": "🚢"},
-    {"key": "battery", "name": "2차전지",    "emoji": "🔋"},
-    {"key": "auto",    "name": "자동차",     "emoji": "🚗"},
-    {"key": "bio",     "name": "바이오",     "emoji": "💊"},
-    {"key": "finance", "name": "금융",       "emoji": "🏦"},
-]
-SECTOR_BY_KEY = {s["key"]: s for s in SECTOR_POOL}
-
-# ─────────────────────────────────────────────────────────────────────────────
 # System prompts (CACHED — these are billed at 10% on cache hits)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -208,16 +193,16 @@ VIX 관련 항목의 이모지는 아래 기준을 엄격히 따른다. 절대 �
 - VIX 30 이상 (리스크오프, 위험) → 😰
 
 **[필수 규칙 5] 제공된 데이터에 없는 수치는 절대 직접 기재 금지**
-reasons, watch_items, sector_focus 등 모든 출력에서, 시장 데이터 JSON 또는 뉴스 요약에 명시적으로 존재하는 수치만 <b> 태그로 강조할 수 있다.
+reasons, watch_items, us_linked_story 등 모든 출력에서, 시장 데이터 JSON 또는 뉴스 요약에 명시적으로 존재하는 수치만 <b> 태그로 강조할 수 있다.
 데이터에 없는 통계(예: 시가총액, 거래대금, 외국인 보유 비율 등)를 추정하거나 만들어 쓰는 것은 금지한다.
 ❌ 금지 예: "코스피 시가총액이 <b>7경 원</b>을 돌파하며" (데이터에 시가총액 수치 없음)
 ✅ 허용 예: "EWY가 <b>+5.20%</b> 폭등해 외국인 자금 유입이 강하게 나타나고 있어요." (EWY change_pct는 데이터에 존재)
 
 **[필수 규칙 5-1] 공포탐욕지수(Fear & Greed Index) 언급 전면 금지**
-CNN Fear & Greed Index(공포탐욕지수)는 수집 데이터에 포함되지 않는다. 어떤 섹션(reasons, watch_items, sector_focus, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
+CNN Fear & Greed Index(공포탐욕지수)는 수집 데이터에 포함되지 않는다. 어떤 섹션(reasons, watch_items, us_linked_story, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
 
 **[필수 규칙 6] 원/달러 환율 수치는 반드시 `usdkrw.price`를 사용한다**
-환율을 언급해야 하는 모든 섹션(reasons, sector_focus, watch_items 등)에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.
+환율을 언급해야 하는 모든 섹션(reasons, us_linked_story, watch_items 등)에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.
 `usdkrw` 데이터가 없으면 환율 수치를 직접 기재하지 않고 "원화 흐름" 등 정성적 표현으로만 쓴다.
 ❌ 금지: 데이터 없이 "환율이 1,370원 아래로" 등 임의 수치 기재
 ✅ 허용: "원달러 환율이 <b>{usdkrw.price}원</b>으로" (데이터에 실제 값 있을 때만)
@@ -254,49 +239,32 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - reasons에서 가장 임팩트 큰 2개를 선택해 더 짧게 압축
 - 자세한 내용은 웹에서 확인 유도 목적 — 궁금증을 유발하되 결론만 전달
 
-### 오늘의 섹터 브리핑(sector_focus) 작성 규칙
-코스피 아침 브리핑 하단에 붙는 "오늘의 섹터" 심층 분석. 매일 아래 8개 섹터 풀에서 1개를 골라 작성한다.
+### 미국 연계 종목 소식(us_linked_story) 작성 규칙
+코스피 아침 브리핑 하단에 붙는, 오늘 한국 시장에 가장 임팩트가 큰 미국 이벤트 1건 심층 분석.
 
-| sector_key | 섹터명 | 대표 종목 |
-|---|---|---|
-| semicon | 반도체 | 삼성전자, SK하이닉스, 한미반도체 |
-| power | AI전력기기 | HD현대일렉트릭, LS일렉트릭, 효성중공업 |
-| defense | 방산 | 한화에어로스페이스, LIG넥스원, 현대로템 |
-| ship | 조선 | HD현대중공업, 한화오션, 삼성중공업 |
-| battery | 2차전지 | LG에너지솔루션, 에코프로비엠, 삼성SDI |
-| auto | 자동차 | 현대차, 기아, 현대모비스 |
-| bio | 바이오 | 삼성바이오로직스, 셀트리온, 유한양행 |
-| finance | 금융 | KB금융, 신한지주, 메리츠금융 |
-
-- **섹터 선택**: 오늘 뉴스·시장 흐름상 가장 임팩트 큰 섹터 1개를 고른다. user 메시지에 "섹터 로테이션 가이드"가 있으면 최근 다룬 섹터는 피한다.
-- **sector_key / sector_name**: 위 표의 값 그대로 사용한다.
-- **signal**: 오늘 그 섹터의 핵심을 한 문장으로. 마침표 종결. 30자 이내.
-  예시: "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중."
-- **paragraphs 작성 절차 (반드시 순서대로 따를 것)**
-  1. 선택한 sector_key로 `sector_stocks[sector_key].stocks` 목록을 먼저 조회한다.
-  2. 각 종목의 `change_pct`와 `price`를 그대로 읽어 문장에 삽입한다.
-  3. 목록에 있는 종목만 등락률 수치를 언급한다. 목록에 없는 종목은 수치 없이 이름만 쓴다.
-  4. `sector_stocks[sector_key].etfs`에 ETF 데이터가 있으면 같은 방식으로 인용한다.
-- **paragraphs 구성**: 3개 문단, 각 문단 해요체. 문장 수는 자유 (1~2문장 권장).
+- **주제 선택**: 뉴스 요약·시장 데이터에서 한국 종목에 직접 영향을 주는 미국 이벤트를 1건 고른다.
+  - 실적 발표 (마이크론→SK하이닉스, 애플→LG이노텍 등)
+  - 정책·규제 (미국 반도체 수출규제→반도체주, FOMC→금융주 등)
+  - 미국 종목 급등락 (테슬라→2차전지, 엔비디아→반도체 등)
+  - 해당 이벤트가 한국 시장에 왜 중요한지가 핵심.
+- **title**: 이벤트 핵심을 한 줄로. 30~50자. 마침표 종결 아닌 헤드라인 스타일.
+  예시: "마이크론 실적 발표 — 내일 새벽, HBM 가이던스가 핵심"
+- **paragraphs**: 3개 문단, 각 문단 해요체 1~2문장.
   - **각 문단 작성 원칙**: 판단·주장 문장을 먼저 쓴다. 데이터는 그 뒤에 붙이거나, 판단만 이어가도 된다.
-    - ✅ "SK하이닉스가 오늘도 강세를 이어갈 것 같아요. HBM3E 독점 공급 구조가 흔들리지 않았거든요."
-    - ✅ "반도체 섹터는 오늘 시장을 주도할 거예요. 엔비디아 **+5.6%**·DRAM ETF **+7.5%** 급등이 수급까지 끌어올렸어요."
-    - ❌ 데이터 먼저: "엔비디아가 +5.6% 올랐어요. 반도체 섹터에 긍정적이에요."
-  - 1문단: 오늘 그 섹터의 핵심 모멘텀 또는 이슈 (sector_stocks 수치 활용)
-  - 2문단: 종목별 차별화 — sector_stocks에서 상승·하락 종목을 대비 (실제 change_pct 사용)
-  - 3문단: 리스크 요인 또는 변곡점 시그널
-- **[데이터 금지 규칙]**
-  - sector_stocks에 없는 종목의 등락률·가격을 추정하거나 만들어 쓰는 것은 절대 금지한다.
-  - 수치 근거가 없는 항목은 정성적 문장으로만 작성한다.
-  - ❌ 금지: "삼성바이오로직스가 +1.8% 올랐다" (sector_stocks에 실제 값 없이 임의 기재)
-  - ✅ 허용: "삼성바이오로직스가 <b>+1.8%</b> 올랐다" (sector_stocks.bio.stocks에서 change_pct=1.8 확인 후)
+  - 1문단: 이벤트 핵심 — 무엇이, 언제 일어나는지
+  - 2문단: 한국 연관 종목에 미치는 영향 — 수치 근거(<b> 강조)
+  - 3문단: 리스크 시나리오 또는 반대 방향 가능성
+- **related_stocks**: 이 이벤트와 직접 연관된 종목 2~4개. 한국 종목과 미국 티커 모두 가능.
+  - name: 종목명 (한국은 한글, 미국은 티커)
+  - code: 종목 코드 (한국 6자리, 미국 티커)
 - 수치는 <b> 태그로 강조한다.
+- 뉴스 요약에 마땅한 미국 이벤트가 없으면 `us_linked_story`를 null로 출력한다. 억지로 만들지 않는다.
 
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, sector_focus, comfort_line**
+**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, us_linked_story, comfort_line**
 reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타이틀이 공백이 된다.
 
 {
@@ -339,15 +307,17 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
     "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도할 것 같아요.",
     "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환. 원화 강세도 외국인 유입에 우호적이에요."
   ],
-  "sector_focus": {
-    "sector_key": "semicon",
-    "sector_name": "반도체",
-    "emoji": "🏭",
-    "signal": "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중.",
+  "us_linked_story": {
+    "title": "마이크론 실적 발표 — 내일 새벽, HBM 가이던스가 핵심",
     "paragraphs": [
-      "엔비디아 Blackwell 출하가 본격화되면서 HBM3E 수요가 예상보다 오래 이어지고 있어요. SK하이닉스는 이 사이클의 직접 수혜 위치를 유지하고 있어요.",
-      "삼성전자는 HBM4 수율 이슈가 아직 해소됐다는 공식 신호가 없어요. 수율 인증 공시를 확인한 뒤 진입하는 게 안전해요.",
-      "지금 가장 중요한 리스크는 경쟁이 아니라 빅테크의 자본지출 피로예요. 엔비디아 가이던스가 꺾이는 순간이 이 사이클의 변곡점이 될 거예요."
+      "마이크론이 한국시간 내일 새벽 실적을 발표해요. 시장이 주목하는 건 HBM 매출 가이던스예요.",
+      "월가 컨센서스는 매출 <b>$8.8B</b>(YoY +50%)이에요. HBM 매출이 <b>$2.5B+</b> 가이던스가 나오면 SK하이닉스에 직접 호재예요.",
+      "반대로 DRAM 재고 증가 시그널이 나오면 반도체 섹터 전체가 눌릴 수 있어요."
+    ],
+    "related_stocks": [
+      {"name": "SK하이닉스", "code": "000660"},
+      {"name": "삼성전자", "code": "005930"},
+      {"name": "MU", "code": "MU"}
     ]
   }
 }
@@ -592,18 +562,6 @@ stock_picks에 포함되지 않은 종목(NVDA·AAPL·AVGO 등 맥락 종목 포
 - reasons에서 가장 임팩트 큰 2개를 선택해 더 짧게 압축
 - 자세한 내용은 웹에서 확인 유도 목적 — 궁금증을 유발하되 결론만 전달
 
-### 반도체 섹터 브리핑(sector_semicon) 작성 규칙
-코스피 아침 브리핑 하단에 붙는 반도체 섹터 심층 분석. 주식 투자 관점의 의견을 담는다.
-
-- **signal**: 오늘의 반도체 섹터 핵심을 한 문장으로. 마침표 종결. 30자 이내.
-  예시: "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중."
-- **paragraphs**: 3개 문단. 각 문단은 해요체 2~3문장. 총 200자 내외.
-  - 1문단: 오늘 반도체 섹터의 핵심 모멘텀 또는 이슈
-  - 2문단: 종목별 차별화 시각 (SK하이닉스 vs 삼성전자 등 구체 종목 언급)
-  - 3문단: 리스크 요인 또는 변곡점 시그널
-- 해당 날짜 데이터(SOX, DRAM ETF, 뉴스 요약)를 근거로 작성. 수치는 <b> 태그로 강조.
-- 오늘 반도체 관련 뉴스가 전혀 없어도 구조적 관점으로 작성한다.
-
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
@@ -650,15 +608,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   "telegram_signals": [
     "📈 오늘 미국 증시가 소폭 상승 출발할 것 같아요. S&P500 선물이 <b>+0.3%</b> 올라있거든요.",
     "💡 빅테크 강세가 지수를 받쳐주고 있어요. NVDA <b>+1.97%</b>, TSLA <b>+3.89%</b> 상승 중이에요."
-  ],
-  "sector_semicon": {
-    "signal": "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중.",
-    "paragraphs": [
-      "엔비디아 Blackwell 출하가 본격화되면서 HBM3E 수요가 예상보다 오래 이어지고 있어요. SK하이닉스는 이 사이클의 직접 수혜 위치를 유지하고 있고, 단기 조정이 와도 추세가 꺾인 게 아니라 숨 고르기로 보는 게 맞아요.",
-      "삼성전자는 HBM4 수율 이슈가 아직 해소됐다는 공식 신호가 없어요. 반등을 기대하고 먼저 들어가기보다는 수율 인증 공시를 확인한 뒤 진입하는 게 훨씬 안전해요.",
-      "지금 반도체 섹터에서 가장 중요한 리스크는 경쟁이 아니라 빅테크의 자본지출 피로예요. 엔비디아 가이던스가 꺾이는 순간이 이 사이클의 변곡점이 될 거예요. 그 신호가 나오기 전까지는 HBM 공급망 중심 포지션이 유효해요."
-    ]
-  }
+  ]
 }
 
 **[위로 한 줄(comfort_line) 규칙 — 형식과 무관하게 항상 출력]**
@@ -804,70 +754,6 @@ def save_signal_to_history(briefing_type: str, date_str: str, signals: list, kee
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"history": history}, f, ensure_ascii=False, indent=2)
     print(f"[call_claude] Saved signal history → {path} ({len(history)} entries)")
-
-
-def load_sector_history(briefing_type: str) -> list:
-    """data/sector_history_{type}.json의 history 배열을 반환. 없으면 빈 리스트."""
-    path = DATA_DIR / f"sector_history_{briefing_type}.json"
-    if not path.exists():
-        return []
-    with open(path, encoding="utf-8") as f:
-        return json.load(f).get("history", [])
-
-
-def save_sector_to_history(briefing_type: str, date_str: str, sector_key: str, keep: int = 10) -> None:
-    """오늘 선정 섹터를 date 기준 upsert. 최근 keep개만 보관 (최신순)."""
-    path = DATA_DIR / f"sector_history_{briefing_type}.json"
-    history = [h for h in load_sector_history(briefing_type) if h.get("date") != date_str]
-    history.append({"date": date_str, "sector_key": sector_key})
-    history.sort(key=lambda h: h.get("date", ""), reverse=True)
-    history = history[:keep]
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump({"history": history}, f, ensure_ascii=False, indent=2)
-    print(f"[call_claude] Saved sector history → {path} ({len(history)} entries)")
-
-
-def build_sector_avoidance_hint(history: list, days: int = 5) -> str:
-    """최근 N회 선정된 섹터를 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
-    names = []
-    for h in history[:days]:
-        s = SECTOR_BY_KEY.get(h.get("sector_key"))
-        if s:
-            names.append(f"{s['emoji']} {s['name']}")
-    if not names:
-        return ""
-    return (
-        "\n## 🔄 섹터 로테이션 가이드\n"
-        f"최근 다룬 섹터: {', '.join(names)}\n"
-        "위 섹터는 가급적 피하고, 오늘 뉴스·시장 흐름상 가장 임팩트 큰 다른 섹터를 골라 "
-        "sector_focus를 작성하세요. 단, 특정 섹터에 압도적 빅뉴스가 있으면 중복이어도 괜찮아요.\n"
-    )
-
-
-def pick_sector(focus: dict, recent_keys: list) -> dict:
-    """Claude가 고른 sector_focus를 검증·보정한다.
-    - sector_key가 풀에 없으면 최근(recent_keys) 제외하고 pool 순서상 첫 섹터로 폴백.
-    - name·emoji는 항상 풀의 정본 값으로 덮어써 불일치를 막는다.
-    - signal·paragraphs는 Claude 출력 유지.
-    """
-    focus = focus or {}
-    key = focus.get("sector_key")
-    if key not in SECTOR_BY_KEY:
-        key = next(
-            (s["key"] for s in SECTOR_POOL if s["key"] not in recent_keys),
-            SECTOR_POOL[0]["key"],
-        )
-    elif key in recent_keys:
-        # 최근 N회 중복 — 강제 교체하지 않고 경고만 남긴다 (빅뉴스 예외 허용)
-        print(f"[call_claude] WARN: sector '{key}'가 최근 선정 이력과 중복 (빅뉴스 예외로 통과)")
-    meta = SECTOR_BY_KEY[key]
-    result = dict(focus)
-    result["sector_key"] = meta["key"]
-    result["sector_name"] = meta["name"]
-    result["emoji"] = meta["emoji"]
-    result.setdefault("signal", "")
-    result.setdefault("paragraphs", [])
-    return result
 
 
 def build_avoidance_hint(history: list, days: int = 3) -> str:
@@ -1161,14 +1047,6 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             user_content += hint
             print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
 
-    # 섹터 로테이션 가이드: 최근 선정 섹터 회피 (kospi 아침만)
-    if briefing_type == "kospi":
-        sector_history = [h for h in load_sector_history("kospi") if h.get("date") != date_str]
-        sector_hint = build_sector_avoidance_hint(sector_history, days=5)
-        if sector_hint:
-            user_content += sector_hint
-            print(f"[call_claude] Sector rotation hint injected ({len(sector_history[:5])} recent)")
-
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
     _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
     chosen_format = random.choice(_formats)
@@ -1223,17 +1101,6 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     if briefing_type in ("kospi", "us"):
         signals = extract_signal_emojis(analysis.get("reasons", []))
         save_signal_to_history(briefing_type, date_str, signals)
-
-    # sector_focus 검증·보정 후 이력 저장 (kospi 아침만)
-    if briefing_type == "kospi":
-        recent_keys = [
-            h.get("sector_key")
-            for h in load_sector_history("kospi")
-            if h.get("date") != date_str
-        ][:5]
-        analysis["sector_focus"] = pick_sector(analysis.get("sector_focus"), recent_keys)
-        save_sector_to_history("kospi", date_str, analysis["sector_focus"]["sector_key"])
-        print(f"[call_claude] Sector focus → {analysis['sector_focus']['sector_key']}")
 
     return analysis
 
