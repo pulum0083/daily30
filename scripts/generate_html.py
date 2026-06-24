@@ -716,12 +716,11 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         if internal_type == "kospi":
-            sf = analysis.get("sector_focus") or analysis.get("sector_semicon") or {}
-            if sf.get("signal"):
-                ctx["sector_emoji"] = sf.get("emoji", "🏭")
-                ctx["sector_name"] = sf.get("sector_name", "반도체")
-                ctx["sector_signal"] = sf["signal"]
-                ctx["sector_paragraphs"] = sf.get("paragraphs", [])
+            uls = analysis.get("us_linked_story") or {}
+            if uls.get("title"):
+                ctx["us_linked_title"] = uls["title"]
+                ctx["us_linked_paragraphs"] = uls.get("paragraphs", [])
+                ctx["us_linked_stocks"] = uls.get("related_stocks", [])
         d = ctx.get("direction", "")
         rp = ctx.get("readout_pct", "")
         ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
