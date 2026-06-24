@@ -1917,21 +1917,46 @@ renderChips('morning');
     .catch(function(){});
 
   /* 라이브 폴링(KR 10초) — /api/stocks-live(네이버 종목 시세, 서버리스, 커밋 안 함).
-     타일 data-code를 codes로 넘기고, {code, price, changePct} 실측을 받아 패치한다. */
+     타일 data-code를 codes로, 벨웨더를 us(네이버 해외 심볼)로 넘겨 실측을 받아 패치한다. */
   var liveCodes = [].map.call(
     document.querySelectorAll('#us-linked-widget .us-tile[data-code]'),
     function(t){ return t.getAttribute('data-code'); }
   );
+  // 타일별 짝 벨웨더: [표시라벨, 네이버 해외심볼]. 유니버스 구성과 정합(SOX→SOXX ETF).
+  var TILE_BELL = {
+    '005930':[['MU','MU.O'],['SOX','SOXX.O'],['NVDA','NVDA.O']],
+    '000660':[['MU','MU.O'],['SOX','SOXX.O'],['NVDA','NVDA.O']],
+    '005380':[['TSLA','TSLA.O'],['F','F']]
+  };
+  var US_SYMS = (function(){ var set={}; Object.keys(TILE_BELL).forEach(function(c){TILE_BELL[c].forEach(function(b){set[b[1]]=1;});}); return Object.keys(set); })();
+  function renderBells(usList){
+    var q={}; usList.forEach(function(u){ q[u.sym]=u; });
+    Object.keys(TILE_BELL).forEach(function(code){
+      var panel=document.querySelector('#us-linked-widget .us-detail[data-code="'+code+'"]');
+      if(!panel) return;
+      var label=[].filter.call(panel.querySelectorAll('span'),function(s){return s.textContent.indexOf('짝 벨웨더')>=0;})[0];
+      if(!label) return;
+      var html=label.outerHTML;
+      TILE_BELL[code].forEach(function(b,i){
+        var u=q[b[1]]; if(!u||u.changePct==null) return;
+        var pct=u.changePct, col=pct>0?'#E03131':pct<0?'#2775ED':'#475569', sign=pct>0?'+':'';
+        if(i>0) html+='<span style="color:#CBD5E1;">·</span>';
+        html+='<span style="font-size:11px;font-weight:700;color:#475569;">'+b[0]+' <b style="color:'+col+';">'+sign+pct.toFixed(1)+'%</b></span>';
+      });
+      label.parentElement.innerHTML=html;
+    });
+  }
   function poll(){
     if(!liveCodes.length) return;
-    fetch('/api/stocks-live?codes='+liveCodes.join(','),{cache:'no-store'})
+    fetch('/api/stocks-live?codes='+liveCodes.join(',')+'&us='+US_SYMS.join(','),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
-        if(!d || !Array.isArray(d.prices)) return;
-        d.prices.forEach(function(p){
+        if(!d) return;
+        if(Array.isArray(d.prices)) d.prices.forEach(function(p){
           var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+p.code+'"]');
           if(tile && p.price!=null) paintTile(tile, p.price, p.changePct, true); // 라이브는 카운트업
         });
+        if(Array.isArray(d.us) && d.us.length) renderBells(d.us);
       })
       .catch(function(){});
   }
