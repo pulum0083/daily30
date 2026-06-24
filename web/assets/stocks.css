@@ -254,23 +254,28 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .spark-header svg{width:100%;height:140px;display:block;overflow:visible;}
 
 /* ── chipboard 실시간 섹션 ── */
-/* 수급 동향 */
-.sup5-row{display:flex;gap:0;border-bottom:1px solid var(--hair);padding:8px 0;}
-.sup5-row:first-child{padding-top:0;}
-.sup5-row:last-child{border-bottom:none;padding-bottom:0;}
-.sup5-date{width:46px;font-size:11px;font-weight:600;color:var(--muted);flex-shrink:0;padding-top:1px;}
-.sup5-bars{flex:1;display:flex;flex-direction:column;gap:4px;}
-.sup5-bar{display:flex;align-items:center;gap:6px;font-size:11.5px;}
-.sup5-label{width:32px;font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0;}
-.sup5-track{flex:1;height:6px;border-radius:3px;background:var(--inset);overflow:hidden;}
-.sup5-fill{height:100%;border-radius:3px;}
-.sup5-fill.buy{background:var(--up);}
-.sup5-fill.sell{background:var(--dn);}
-.sup5-val{font-size:10.5px;font-weight:700;min-width:52px;text-align:right;font-variant-numeric:tabular-nums;}
-.sup5-summary{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hair);}
-.sup5-sum-box{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:8px 10px;}
-.sup5-sum-label{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px;}
-.sup5-sum-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+/* 수급 동향 — 5일 외국인·기관 순매수 (다이버징) */
+.sd-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.sd-sum-box{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 13px;}
+.sd-sum-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.sd-sum-name{font-size:11.5px;font-weight:700;color:var(--muted);}
+.sd-sum-tag{font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:9999px;}
+.sd-sum-tag.up{background:var(--up-bg);color:var(--up);}
+.sd-sum-tag.dn{background:var(--dn-bg);color:var(--dn);}
+.sd-sum-val{font-size:19px;font-weight:800;letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
+.sd-axis{display:flex;justify-content:space-between;font-size:9.5px;font-weight:700;color:var(--muted);margin:0 56px 8px 26px;}
+.sd-day{padding:8px 0;border-top:1px solid var(--hair);}
+.sd-day:first-of-type{border-top:none;padding-top:2px;}
+.sd-day:last-of-type{padding-bottom:0;}
+.sd-day-date{font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.sd-row{display:flex;align-items:center;gap:8px;margin:4px 0;}
+.sd-lbl{width:18px;font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.sd-track{position:relative;flex:1;height:10px;background:var(--inset);border-radius:5px;}
+.sd-zero{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#cbd2dc;}
+.sd-fill{position:absolute;top:0;bottom:0;border-radius:5px;}
+.sd-fill.buy{left:50%;background:var(--up);}
+.sd-fill.sell{right:50%;background:var(--dn);}
+.sd-val{width:60px;text-align:right;font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums;}
 /* 증권사 목표주가 */
 .tgt-avg{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--hair);}
 .tgt-avg-price{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;}
@@ -283,19 +288,22 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .tgt-op{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--up-bg);color:var(--up);}
 .tgt-op.hold{background:var(--inset);color:var(--muted);}
 .tgt-date{font-size:10px;color:var(--muted);}
-/* 영업이익 바 차트 */
-.fin-bars{display:flex;align-items:flex-end;gap:6px;height:140px;margin-bottom:8px;}
-.fin-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.fin-bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:height .2s;}
-.fin-bar.positive{background:var(--up);}
-.fin-bar.negative{background:var(--dn);}
-.fin-bar.estimate{background:var(--up);opacity:0.45;border:1px dashed var(--up);}
-.fin-bar.neg-est{background:var(--dn);opacity:0.45;border:1px dashed var(--dn);}
-.fin-qx{font-size:9.5px;color:var(--muted);font-weight:600;text-align:center;white-space:nowrap;}
-.fin-val{font-size:9.5px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;}
-.fin-legend{display:flex;gap:14px;margin-top:6px;}
-.fin-legend span{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
-.fin-legend i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+/* 영업이익 분기 추이 (컬럼) */
+.fin-chart{position:relative;display:flex;align-items:flex-end;gap:8px;height:178px;border-bottom:1.5px solid var(--hair);}
+.fin-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.fin-cap{font-size:10px;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:6px;white-space:nowrap;color:var(--ink);}
+.fin-cap.est{color:var(--muted);}
+.fin-bar{width:74%;max-width:36px;border-radius:5px 5px 0 0;min-height:5px;}
+.fin-bar.actual{background:linear-gradient(180deg,var(--up),#f25c5c);}
+.fin-bar.est{background:repeating-linear-gradient(45deg,var(--up-bg),var(--up-bg) 4px,#fff 4px,#fff 8px);border:1px solid var(--up);border-bottom:none;}
+.fin-xrow{display:flex;gap:8px;margin-top:8px;}
+.fin-x{flex:1;font-size:9.5px;font-weight:600;color:var(--muted);text-align:center;line-height:1.25;}
+.fin-x.est{color:var(--primary);}
+.fin-foot{display:flex;justify-content:flex-end;margin-top:10px;}
+.fin-legend{display:flex;gap:13px;}
+.fin-legend span{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);}
+.fin-legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+.fin-legend i.est{background:repeating-linear-gradient(45deg,var(--up-bg),var(--up-bg) 3px,#fff 3px,#fff 6px);border:1px solid var(--up);}
 
 /* ── 모바일 대응 ── */
 @media(max-width:900px){
