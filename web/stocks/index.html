@@ -576,11 +576,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="home-main">
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
-      <a class="row" onclick="goStock('005930')"><span class="rk t num">1</span><div class="nm"><b>삼성전자</b><small class="num">005930 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:100%"></div></div><span class="barval num">3,210만주</span><span class="vol-surge-badge">×2.1 급증</span><div class="ai"><span class="ais">신호 58</span></div></a>
-      <a class="row" onclick="goStock('000660')"><span class="rk t num">2</span><div class="nm"><b>SK하이닉스</b><small class="num">000660 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:71%"></div></div><span class="barval num">2,280만주</span><span class="vol-surge-badge">×3.4 급증</span><div class="ai"><span class="aip">AI 78</span></div></a>
-      <a class="row" onclick="goStock('042700')"><span class="rk t num">3</span><div class="nm"><b>한미반도체</b><small class="num">042700 · 반도체</small></div><div class="barwrap"><div class="bar vol" style="width:48%"></div></div><span class="barval num">1,540만주</span><span class="vol-surge-badge">×5.8 급증</span><div class="ai"><span class="ais">신호 71</span></div></a>
-      <a class="row" onclick="goStock('005490')"><span class="rk num">4</span><div class="nm"><b>POSCO홀딩스</b><small class="num">005490 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:34%"></div></div><span class="barval num">1,080만주</span><span class="vol-surge-badge">×1.9 급증</span><div class="ai"><span class="aid">신호 42</span></div></a>
-      <a class="row" onclick="goStock('373220')"><span class="rk num">5</span><div class="nm"><b>LG에너지솔루션</b><small class="num">373220 · 2차전지</small></div><div class="barwrap"><div class="bar vol" style="width:27%"></div></div><span class="barval num">860만주</span><span class="vol-surge-badge">×2.3 급증</span><div class="ai"><span class="ais">신호 55</span></div></a>
+      <div id="vol-top-rows"></div>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
       <div class="block">
@@ -1941,6 +1937,53 @@ renderChips('morning');
   }
   poll();
   setInterval(poll, 10000);
+})();
+</script>
+<script>
+/* 거래량 톱 + 외국인 보유율 — stocks-snapshot.json 실측 배선.
+   거래량 톱: 유니버스를 거래량(vol)으로 랭킹. 급증배수=vol/vol_avg20. AI신호는 실측 아니라 제거.
+   외국인 보유율: foreign_rate + foreign_spark(20일)로 수치·델타·스파크라인 실측. */
+(function(){
+  var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
+  function manju(v){ return Math.round(v/10000).toLocaleString('en-US')+'만주'; }
+  function sparkSvg(vals,color){
+    if(!vals||vals.length<2) return '';
+    var n=vals.length,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+    var pts=vals.map(function(v,i){var x=(i/(n-1))*78;var y=19-((v-min)/rng)*16;return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var last=pts.split(' ').pop().split(',');
+    return '<svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.2" fill="#fff" stroke="'+color+'" stroke-width="1.5"/></svg>';
+  }
+  function renderVolTop(snap){
+    var wrap=document.getElementById('vol-top-rows'); if(!wrap) return;
+    var list=Object.keys(snap.stocks).map(function(c){var s=snap.stocks[c];return {code:c,name:s.name,sector:s.sector,vol:s.vol||0,avg:s.vol_avg20||0};}).filter(function(x){return x.vol>0;});
+    list.sort(function(a,b){return b.vol-a.vol;});
+    var top=list.slice(0,5), maxv=top[0]?top[0].vol:1;
+    wrap.innerHTML=top.map(function(x,i){
+      var w=Math.round(x.vol/maxv*100), surge=x.avg?x.vol/x.avg:0;
+      var badge=surge>=1.5?'<span class="vol-surge-badge">×'+surge.toFixed(1)+' 급증</span>':'';
+      return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+(SECTOR_LABELS[x.sector]||'')+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+w+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span>'+badge+'</a>';
+    }).join('');
+  }
+  function renderForeign(snap){
+    document.querySelectorAll('#us-linked-widget .us-detail[data-code]').forEach(function(panel){
+      var s=snap.stocks[panel.getAttribute('data-code')];
+      if(!s||!s.foreign_spark||!s.foreign_spark.length) return;
+      var label=[].filter.call(panel.querySelectorAll('span'),function(sp){return sp.textContent.trim()==='🌍 외국인 보유율';})[0];
+      if(!label) return;
+      var kids=label.parentElement.children; // [라벨, svg, 수치, 델타]
+      if(kids.length<4) return;
+      var spark=s.foreign_spark, cur=s.foreign_rate, prev=spark.length>1?spark[spark.length-2]:cur, delta=Math.round((cur-prev)*100)/100;
+      var up=delta>0,dn=delta<0,col=up?'#E03131':dn?'#2775ED':'#64748B';
+      kids[1].innerHTML=sparkSvg(spark,col);
+      kids[2].innerHTML=cur.toFixed(2)+'<span style="font-size:10px;font-weight:700;color:#64748B;">%</span>';
+      kids[3].style.color=col;
+      kids[3].innerHTML=(up?'▲':dn?'▼':'–')+' '+Math.abs(delta).toFixed(2)+'<span style="font-size:9px;">%p</span>';
+    });
+  }
+  fetch('/data/stocks-snapshot.json',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(snap){ if(snap&&snap.stocks){ renderVolTop(snap); renderForeign(snap); } })
+    .catch(function(){});
 })();
 </script>
 </body>
