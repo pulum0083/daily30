@@ -164,6 +164,11 @@ html.dark .notice-card.is-unread{border-color:rgba(59,139,255,.3);background:rgb
 .reason-section-title::before{content:'💬';display:inline!important;width:auto!important;height:auto!important;background:none!important;border-radius:0!important;font-size:13px;margin-right:2px;}
 .semicon-section-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
 .semicon-section-title::before{display:none!important;}
+.us-linked-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
+.us-linked-title::before{display:none!important;}
+.us-badge{display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;margin-right:6px;}
+.us-linked-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.us-linked-chip{font-size:11px;color:var(--muted);background:var(--surface-soft);border:1px solid var(--hairline);padding:3px 8px;border-radius:12px;}
 .divider{height:1px;background:var(--hairline);margin:18px 0;}
 
 /* ──────────────────────────────────────────────
