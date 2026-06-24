@@ -19,6 +19,28 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
+<style>
+  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
+  .sector-page-title{font-size:22px;font-weight:900;color:#0F172A;margin:6px 0 4px;letter-spacing:-0.3px;}
+  .sector-page-sub{font-size:12.5px;color:#94A3B8;margin:0 0 18px;}
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+  .sector-card{display:block;text-decoration:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+    padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
+  .sector-card:hover{border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
+  .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
+  .sector-card__name{font-size:15px;font-weight:800;color:#0F172A;}
+  .sector-card__code{font-size:11px;font-weight:600;color:#94A3B8;font-variant-numeric:tabular-nums;}
+  .sector-card__price{display:flex;align-items:baseline;gap:8px;}
+  .sector-card__close{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .sector-card__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .sector-card__pct.up{color:#E03131;}
+  .sector-card__pct.down{color:#2775ED;}
+  .sector-card__pct.flat{color:#64748B;}
+  .sector-card__spark{margin:9px 0 7px;height:34px;}
+  .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
+  .sector-card__range{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+</style>
+
 </head>
 <body>
 
@@ -44,11 +66,12 @@
 </nav>
 
 
-<div class="layout-wrapper">
-  <h1 class="sector-page-title">2차전지</h1>
+<div class="sector-wrap">
+  <h1 class="sector-page-title">2차전지 대표 종목</h1>
+  <p class="sector-page-sub">최근 거래일 종가 · 등락 · 52주 레인지 (매일 1회 실측 갱신)</p>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="373220" data-spark20='[383500.0, 442000.0, 458000.0, 455000.0, 442500.0, 422000.0, 414000.0, 388500.0, 396500.0, 385500.0, 384500.0, 400000.0, 420500.0, 410500.0, 416000.0, 400000.0, 404500.0, 385500.0, 362000.0, 365500.0]'>
+    <a class="sector-card" href="/stocks/373220/" data-code="373220" data-spark20='[383500.0, 442000.0, 458000.0, 455000.0, 442500.0, 422000.0, 414000.0, 388500.0, 396500.0, 385500.0, 384500.0, 400000.0, 420500.0, 410500.0, 416000.0, 400000.0, 404500.0, 385500.0, 362000.0, 365500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">LG에너지솔루션</span>
         <span class="sector-card__code">373220</span>
@@ -57,10 +80,11 @@
         <span class="sector-card__close">365,500</span>
         <span class="sector-card__pct up">+0.97%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 288,000 – 514,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="247540" data-spark20='[213500.0, 218500.0, 217000.0, 207000.0, 198000.0, 197400.0, 180100.0, 159700.0, 167600.0, 164500.0, 164300.0, 170000.0, 186500.0, 179500.0, 180000.0, 172300.0, 169400.0, 166700.0, 150900.0, 152500.0]'>
+    <a class="sector-card" href="/stocks/247540/" data-code="247540" data-spark20='[213500.0, 218500.0, 217000.0, 207000.0, 198000.0, 197400.0, 180100.0, 159700.0, 167600.0, 164500.0, 164300.0, 170000.0, 186500.0, 179500.0, 180000.0, 172300.0, 169400.0, 166700.0, 150900.0, 152500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">에코프로비엠</span>
         <span class="sector-card__code">247540</span>
@@ -69,10 +93,11 @@
         <span class="sector-card__close">152,500</span>
         <span class="sector-card__pct up">+1.06%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 89,500 – 246,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="006400" data-spark20='[630000.0, 676000.0, 688000.0, 652000.0, 602000.0, 607000.0, 568000.0, 503000.0, 515000.0, 496500.0, 498500.0, 539000.0, 553000.0, 549000.0, 550000.0, 522000.0, 555000.0, 533000.0, 469000.0, 489000.0]'>
+    <a class="sector-card" href="/stocks/006400/" data-code="006400" data-spark20='[630000.0, 676000.0, 688000.0, 652000.0, 602000.0, 607000.0, 568000.0, 503000.0, 515000.0, 496500.0, 498500.0, 539000.0, 553000.0, 549000.0, 550000.0, 522000.0, 555000.0, 533000.0, 469000.0, 489000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">삼성SDI</span>
         <span class="sector-card__code">006400</span>
@@ -81,10 +106,11 @@
         <span class="sector-card__close">489,000</span>
         <span class="sector-card__pct up">+4.26%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 168,200 – 712,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="003670" data-spark20='[229000.0, 238000.0, 245500.0, 231000.0, 222500.0, 221500.0, 209000.0, 187700.0, 193000.0, 187600.0, 184700.0, 199400.0, 210500.0, 209000.0, 209500.0, 202000.0, 199500.0, 192000.0, 172900.0, 178100.0]'>
+    <a class="sector-card" href="/stocks/003670/" data-code="003670" data-spark20='[229000.0, 238000.0, 245500.0, 231000.0, 222500.0, 221500.0, 209000.0, 187700.0, 193000.0, 187600.0, 184700.0, 199400.0, 210500.0, 209000.0, 209500.0, 202000.0, 199500.0, 192000.0, 172900.0, 178100.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">포스코퓨처엠</span>
         <span class="sector-card__code">003670</span>
@@ -93,10 +119,11 @@
         <span class="sector-card__close">178,100</span>
         <span class="sector-card__pct up">+3.01%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 118,500 – 296,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="066970" data-spark20='[149700.0, 169200.0, 168300.0, 155000.0, 150000.0, 150100.0, 139900.0, 124600.0, 129600.0, 126400.0, 125800.0, 134000.0, 141700.0, 141700.0, 140600.0, 127900.0, 128600.0, 125700.0, 112700.0, 113700.0]'>
+    <a class="sector-card" href="/stocks/066970/" data-code="066970" data-spark20='[149700.0, 169200.0, 168300.0, 155000.0, 150000.0, 150100.0, 139900.0, 124600.0, 129600.0, 126400.0, 125800.0, 134000.0, 141700.0, 141700.0, 140600.0, 127900.0, 128600.0, 125700.0, 112700.0, 113700.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">엘앤에프</span>
         <span class="sector-card__code">066970</span>
@@ -105,8 +132,9 @@
         <span class="sector-card__close">113,700</span>
         <span class="sector-card__pct up">+0.89%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 48,200 – 213,000</div>
-    </div>
+    </a>
     
   </div>
 </div>
@@ -123,6 +151,22 @@ window.addEventListener('load', function() {
   if (typeof loadChipWidget === 'function') loadChipWidget();
   if (typeof loadVisitorCount === 'function') loadVisitorCount();
 });
+</script>
+
+<script>
+/* 카드별 20일 종가 스파크라인(data-spark20) 렌더 — 첫값 대비 상승=빨강·하락=파랑 */
+(function(){
+  document.querySelectorAll('.sector-card').forEach(function(card){
+    var raw=card.getAttribute('data-spark20'); if(!raw) return;
+    var vals; try{ vals=JSON.parse(raw); }catch(e){ return; }
+    if(!vals||vals.length<2) return;
+    var W=240,H=34,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+    var up=vals[vals.length-1]>=vals[0], col=up?'#E03131':'#2775ED';
+    var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*W;var y=H-2-((v-min)/rng)*(H-4);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var spark=card.querySelector('.sector-card__spark');
+    spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.6"/></svg>';
+  });
+})();
 </script>
 
 </body>

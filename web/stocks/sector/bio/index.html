@@ -19,6 +19,28 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
+<style>
+  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
+  .sector-page-title{font-size:22px;font-weight:900;color:#0F172A;margin:6px 0 4px;letter-spacing:-0.3px;}
+  .sector-page-sub{font-size:12.5px;color:#94A3B8;margin:0 0 18px;}
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+  .sector-card{display:block;text-decoration:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+    padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
+  .sector-card:hover{border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
+  .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
+  .sector-card__name{font-size:15px;font-weight:800;color:#0F172A;}
+  .sector-card__code{font-size:11px;font-weight:600;color:#94A3B8;font-variant-numeric:tabular-nums;}
+  .sector-card__price{display:flex;align-items:baseline;gap:8px;}
+  .sector-card__close{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .sector-card__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .sector-card__pct.up{color:#E03131;}
+  .sector-card__pct.down{color:#2775ED;}
+  .sector-card__pct.flat{color:#64748B;}
+  .sector-card__spark{margin:9px 0 7px;height:34px;}
+  .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
+  .sector-card__range{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+</style>
+
 </head>
 <body>
 
@@ -44,11 +66,12 @@
 </nav>
 
 
-<div class="layout-wrapper">
-  <h1 class="sector-page-title">바이오</h1>
+<div class="sector-wrap">
+  <h1 class="sector-page-title">바이오 대표 종목</h1>
+  <p class="sector-page-sub">최근 거래일 종가 · 등락 · 52주 레인지 (매일 1회 실측 갱신)</p>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="207940" data-spark20='[1384000.0, 1373000.0, 1363000.0, 1377000.0, 1367000.0, 1350000.0, 1340000.0, 1243000.0, 1296000.0, 1298000.0, 1286000.0, 1295000.0, 1332000.0, 1333000.0, 1370000.0, 1430000.0, 1374000.0, 1295000.0, 1273000.0, 1385000.0]'>
+    <a class="sector-card" href="/stocks/207940/" data-code="207940" data-spark20='[1384000.0, 1373000.0, 1363000.0, 1377000.0, 1367000.0, 1350000.0, 1340000.0, 1243000.0, 1296000.0, 1298000.0, 1286000.0, 1295000.0, 1332000.0, 1333000.0, 1370000.0, 1430000.0, 1374000.0, 1295000.0, 1273000.0, 1385000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">삼성바이오로직스</span>
         <span class="sector-card__code">207940</span>
@@ -57,10 +80,11 @@
         <span class="sector-card__close">1,385,000</span>
         <span class="sector-card__pct up">+8.80%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 1,243,000 – 1,965,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="068270" data-spark20='[185390.0, 181101.0, 183865.0, 182722.0, 179100.0, 176500.0, 171400.0, 159400.0, 170000.0, 167300.0, 166200.0, 173000.0, 175000.0, 174500.0, 174600.0, 173600.0, 170300.0, 168500.0, 160500.0, 172700.0]'>
+    <a class="sector-card" href="/stocks/068270/" data-code="068270" data-spark20='[185390.0, 181101.0, 183865.0, 182722.0, 179100.0, 176500.0, 171400.0, 159400.0, 170000.0, 167300.0, 166200.0, 173000.0, 175000.0, 174500.0, 174600.0, 173600.0, 170300.0, 168500.0, 160500.0, 172700.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">셀트리온</span>
         <span class="sector-card__code">068270</span>
@@ -69,10 +93,11 @@
         <span class="sector-card__close">172,700</span>
         <span class="sector-card__pct up">+7.60%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 151,553 – 236,861</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="000100" data-spark20='[85200.0, 83600.0, 85000.0, 83400.0, 81500.0, 80100.0, 77500.0, 72400.0, 76700.0, 76900.0, 76400.0, 77200.0, 78900.0, 78300.0, 79100.0, 78200.0, 76100.0, 73400.0, 69800.0, 72300.0]'>
+    <a class="sector-card" href="/stocks/000100/" data-code="000100" data-spark20='[85200.0, 83600.0, 85000.0, 83400.0, 81500.0, 80100.0, 77500.0, 72400.0, 76700.0, 76900.0, 76400.0, 77200.0, 78900.0, 78300.0, 79100.0, 78200.0, 76100.0, 73400.0, 69800.0, 72300.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">유한양행</span>
         <span class="sector-card__code">000100</span>
@@ -81,10 +106,11 @@
         <span class="sector-card__close">72,300</span>
         <span class="sector-card__pct up">+3.58%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 69,800 – 135,800</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="326030" data-spark20='[94700.0, 93500.0, 89700.0, 89100.0, 88400.0, 90500.0, 88100.0, 82400.0, 91900.0, 86400.0, 88500.0, 87900.0, 90200.0, 88700.0, 90400.0, 88700.0, 87000.0, 85500.0, 82200.0, 86600.0]'>
+    <a class="sector-card" href="/stocks/326030/" data-code="326030" data-spark20='[94700.0, 93500.0, 89700.0, 89100.0, 88400.0, 90500.0, 88100.0, 82400.0, 91900.0, 86400.0, 88500.0, 87900.0, 90200.0, 88700.0, 90400.0, 88700.0, 87000.0, 85500.0, 82200.0, 86600.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">SK바이오팜</span>
         <span class="sector-card__code">326030</span>
@@ -93,10 +119,11 @@
         <span class="sector-card__close">86,600</span>
         <span class="sector-card__pct up">+5.35%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 82,200 – 140,700</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="196170" data-spark20='[386500.0, 369500.0, 369000.0, 366000.0, 357000.0, 346500.0, 332500.0, 289500.0, 326500.0, 315000.0, 347000.0, 337000.0, 349000.0, 352500.0, 373000.0, 369500.0, 353500.0, 350500.0, 333000.0, 371500.0]'>
+    <a class="sector-card" href="/stocks/196170/" data-code="196170" data-spark20='[386500.0, 369500.0, 369000.0, 366000.0, 357000.0, 346500.0, 332500.0, 289500.0, 326500.0, 315000.0, 347000.0, 337000.0, 349000.0, 352500.0, 373000.0, 369500.0, 353500.0, 350500.0, 333000.0, 371500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">알테오젠</span>
         <span class="sector-card__code">196170</span>
@@ -105,8 +132,9 @@
         <span class="sector-card__close">371,500</span>
         <span class="sector-card__pct up">+11.56%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 289,500 – 559,000</div>
-    </div>
+    </a>
     
   </div>
 </div>
@@ -123,6 +151,22 @@ window.addEventListener('load', function() {
   if (typeof loadChipWidget === 'function') loadChipWidget();
   if (typeof loadVisitorCount === 'function') loadVisitorCount();
 });
+</script>
+
+<script>
+/* 카드별 20일 종가 스파크라인(data-spark20) 렌더 — 첫값 대비 상승=빨강·하락=파랑 */
+(function(){
+  document.querySelectorAll('.sector-card').forEach(function(card){
+    var raw=card.getAttribute('data-spark20'); if(!raw) return;
+    var vals; try{ vals=JSON.parse(raw); }catch(e){ return; }
+    if(!vals||vals.length<2) return;
+    var W=240,H=34,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+    var up=vals[vals.length-1]>=vals[0], col=up?'#E03131':'#2775ED';
+    var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*W;var y=H-2-((v-min)/rng)*(H-4);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var spark=card.querySelector('.sector-card__spark');
+    spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.6"/></svg>';
+  });
+})();
 </script>
 
 </body>

@@ -19,6 +19,28 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
+<style>
+  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 40px;}
+  .sector-page-title{font-size:22px;font-weight:900;color:#0F172A;margin:6px 0 4px;letter-spacing:-0.3px;}
+  .sector-page-sub{font-size:12.5px;color:#94A3B8;margin:0 0 18px;}
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+  .sector-card{display:block;text-decoration:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+    padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
+  .sector-card:hover{border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
+  .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
+  .sector-card__name{font-size:15px;font-weight:800;color:#0F172A;}
+  .sector-card__code{font-size:11px;font-weight:600;color:#94A3B8;font-variant-numeric:tabular-nums;}
+  .sector-card__price{display:flex;align-items:baseline;gap:8px;}
+  .sector-card__close{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+  .sector-card__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .sector-card__pct.up{color:#E03131;}
+  .sector-card__pct.down{color:#2775ED;}
+  .sector-card__pct.flat{color:#64748B;}
+  .sector-card__spark{margin:9px 0 7px;height:34px;}
+  .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
+  .sector-card__range{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+</style>
+
 </head>
 <body>
 
@@ -44,11 +66,12 @@
 </nav>
 
 
-<div class="layout-wrapper">
-  <h1 class="sector-page-title">방산</h1>
+<div class="sector-wrap">
+  <h1 class="sector-page-title">방산 대표 종목</h1>
+  <p class="sector-page-sub">최근 거래일 종가 · 등락 · 52주 레인지 (매일 1회 실측 갱신)</p>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="012450" data-spark20='[1244000.0, 1200000.0, 1173000.0, 1138000.0, 1070000.0, 1068000.0, 1049000.0, 1006000.0, 1016000.0, 1031000.0, 1014000.0, 1078000.0, 1084000.0, 1183000.0, 1224000.0, 1189000.0, 1122000.0, 1125000.0, 1073000.0, 1094000.0]'>
+    <a class="sector-card" href="/stocks/012450/" data-code="012450" data-spark20='[1244000.0, 1200000.0, 1173000.0, 1138000.0, 1070000.0, 1068000.0, 1049000.0, 1006000.0, 1016000.0, 1031000.0, 1014000.0, 1078000.0, 1084000.0, 1183000.0, 1224000.0, 1189000.0, 1122000.0, 1125000.0, 1073000.0, 1094000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한화에어로스페이스</span>
         <span class="sector-card__code">012450</span>
@@ -57,10 +80,11 @@
         <span class="sector-card__close">1,094,000</span>
         <span class="sector-card__pct up">+1.96%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 779,000 – 1,537,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="079550" data-spark20='[875000.0, 856000.0, 801000.0, 776000.0, 726000.0, 733000.0, 726000.0, 696000.0, 725000.0, 790000.0, 764000.0, 772000.0, 845000.0, 1002000.0, 950000.0, 884000.0, 852000.0, 848000.0, 809000.0, 824000.0]'>
+    <a class="sector-card" href="/stocks/079550/" data-code="079550" data-spark20='[875000.0, 856000.0, 801000.0, 776000.0, 726000.0, 733000.0, 726000.0, 696000.0, 725000.0, 790000.0, 764000.0, 772000.0, 845000.0, 1002000.0, 950000.0, 884000.0, 852000.0, 848000.0, 809000.0, 824000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">LIG넥스원</span>
         <span class="sector-card__code">079550</span>
@@ -69,10 +93,11 @@
         <span class="sector-card__close">824,000</span>
         <span class="sector-card__pct up">+1.85%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 364,500 – 1,020,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="064350" data-spark20='[207000.0, 206000.0, 200500.0, 213000.0, 203000.0, 192700.0, 191400.0, 175000.0, 180900.0, 189400.0, 188400.0, 208500.0, 213000.0, 226500.0, 219000.0, 211500.0, 207000.0, 203500.0, 193600.0, 195500.0]'>
+    <a class="sector-card" href="/stocks/064350/" data-code="064350" data-spark20='[207000.0, 206000.0, 200500.0, 213000.0, 203000.0, 192700.0, 191400.0, 175000.0, 180900.0, 189400.0, 188400.0, 208500.0, 213000.0, 226500.0, 219000.0, 211500.0, 207000.0, 203500.0, 193600.0, 195500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">현대로템</span>
         <span class="sector-card__code">064350</span>
@@ -81,10 +106,11 @@
         <span class="sector-card__close">195,500</span>
         <span class="sector-card__pct up">+0.98%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 168,900 – 269,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="047810" data-spark20='[165700.0, 167900.0, 168300.0, 163000.0, 147000.0, 141500.0, 139000.0, 125000.0, 127700.0, 137600.0, 141900.0, 140900.0, 147600.0, 154900.0, 155600.0, 152000.0, 146500.0, 148600.0, 140400.0, 143100.0]'>
+    <a class="sector-card" href="/stocks/047810/" data-code="047810" data-spark20='[165700.0, 167900.0, 168300.0, 163000.0, 147000.0, 141500.0, 139000.0, 125000.0, 127700.0, 137600.0, 141900.0, 140900.0, 147600.0, 154900.0, 155600.0, 152000.0, 146500.0, 148600.0, 140400.0, 143100.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한국항공우주</span>
         <span class="sector-card__code">047810</span>
@@ -93,10 +119,11 @@
         <span class="sector-card__close">143,100</span>
         <span class="sector-card__pct up">+1.92%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 84,700 – 202,000</div>
-    </div>
+    </a>
     
-    <div class="sector-card" data-code="272210" data-spark20='[109600.0, 105900.0, 105000.0, 102000.0, 97400.0, 96100.0, 94600.0, 86500.0, 86600.0, 91600.0, 88600.0, 96000.0, 99500.0, 106400.0, 105300.0, 96100.0, 91100.0, 89500.0, 81900.0, 82600.0]'>
+    <a class="sector-card" href="/stocks/272210/" data-code="272210" data-spark20='[109600.0, 105900.0, 105000.0, 102000.0, 97400.0, 96100.0, 94600.0, 86500.0, 86600.0, 91600.0, 88600.0, 96000.0, 99500.0, 106400.0, 105300.0, 96100.0, 91100.0, 89500.0, 81900.0, 82600.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한화시스템</span>
         <span class="sector-card__code">272210</span>
@@ -105,8 +132,9 @@
         <span class="sector-card__close">82,600</span>
         <span class="sector-card__pct up">+0.85%</span>
       </div>
+      <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 45,350 – 162,700</div>
-    </div>
+    </a>
     
   </div>
 </div>
@@ -123,6 +151,22 @@ window.addEventListener('load', function() {
   if (typeof loadChipWidget === 'function') loadChipWidget();
   if (typeof loadVisitorCount === 'function') loadVisitorCount();
 });
+</script>
+
+<script>
+/* 카드별 20일 종가 스파크라인(data-spark20) 렌더 — 첫값 대비 상승=빨강·하락=파랑 */
+(function(){
+  document.querySelectorAll('.sector-card').forEach(function(card){
+    var raw=card.getAttribute('data-spark20'); if(!raw) return;
+    var vals; try{ vals=JSON.parse(raw); }catch(e){ return; }
+    if(!vals||vals.length<2) return;
+    var W=240,H=34,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+    var up=vals[vals.length-1]>=vals[0], col=up?'#E03131':'#2775ED';
+    var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*W;var y=H-2-((v-min)/rng)*(H-4);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var spark=card.querySelector('.sector-card__spark');
+    spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.6"/></svg>';
+  });
+})();
 </script>
 
 </body>
