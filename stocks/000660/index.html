@@ -38,7 +38,7 @@
         <div class="top">
           <div>
             <div class="hn">SK하이닉스 <a class="chip" href="/stocks/sector/semicon/">반도체</a></div>
-            <div class="meta"><span class="num">000660</span> · KOSPI · 06-24 종가</div>
+            <div class="meta"><span class="num">000660</span> · KOSPI · 06-25 종가</div>
           </div>
           <div style="text-align:right">
             <div class="px num">2,580,000</div>
@@ -51,9 +51,26 @@
         <div class="spark-header" data-spark="2243000.0,2289000.0,2333000.0,2363000.0,2360000.0,2298000.0,2070000.0,1911000.0,2215000.0,2048000.0,2101000.0,2150000.0,2288000.0,2382000.0,2521000.0,2685000.0,2764000.0,2919000.0,2555000.0,2580000.0"></div>
       </div>
 
+      <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
+      
+      <div id="sec-supply" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">외국인·기관 수급</span><span class="sc__s" id="supply-updated"></span></div>
+        <div class="scb" id="supply-body"></div>
+      </div>
+      <div id="sec-targets" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">증권사 목표주가</span><span class="sc__s" id="targets-avg"></span></div>
+        <div class="scb" id="targets-body"></div>
+      </div>
+      <div id="sec-financials" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">분기 영업이익 추이</span><span class="sc__s">단위: 억원</span></div>
+        <div class="scb" id="financials-body"></div>
+      </div>
+      <div id="chips-meta" data-chips-ticker="000660" style="display:none"></div>
+      
+
       <!-- 이동평균 대비 (실측) -->
       
-      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-24 종가</span></div><div class="scb">
+      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-25 종가</span></div><div class="scb">
         
         <div class="ti-row">
           <span class="ti-lbl">20일선 대비</span>
@@ -76,7 +93,7 @@
           <div class="w52-fill" style="width:87.6%"></div>
           <div class="w52-now" style="left:87.6%"></div>
         </div>
-        <div class="w52-lbl"><span>최저 <span class="num">177,500</span></span><span>최고 <span class="num">2,919,000</span></span></div>
+        <div class="w52-lbl"><span>최저 <span class="num">186,000</span></span><span>최고 <span class="num">2,919,000</span></span></div>
       </div></div>
       
     </div>
