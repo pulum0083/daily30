@@ -195,9 +195,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .qf-lg span{display:inline-flex;align-items:center;gap:5px;}
 .qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
 .qf .q{cursor:pointer;}.qf .q:hover .qbars i{opacity:.7;}
-.qf-tt{position:fixed;background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:8px 12px;box-shadow:0 4px 12px rgba(0,0,0,.12);pointer-events:none;font-size:12px;line-height:1.7;white-space:nowrap;z-index:9999;transform:translate(-50%,-100%);margin-top:-6px;}
-.qf-tt b{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px;}
-.qf-tt .tt-rev{color:var(--ink);}.qf-tt .tt-op{color:var(--primary);font-weight:700;}
 /* 안내 푸터 */
 .ds-footer{margin:32px 0 8px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;}
 .ds-foot-list{padding:20px 24px;}
