@@ -6,79 +6,131 @@ function goStock(code){location.href='/stocks/'+code+'/';}
 function goHub(screen){location.href='/stocks/'+(screen?'#'+screen:'');}
 function goBack(){if(history.length>1)history.back();else goHub();}
 
-// 헤더 sparkline 렌더 — [data-spark] 속성의 쉼표 구분 종가 배열로 SVG 폴리라인 생성
+// 헤더 sparkline 렌더 — Canvas 베지어 방식 (마감 브리핑 drawCloseChart와 동일 스타일)
+function drawSparkCanvas(container, closes) {
+  if (!closes || closes.length < 2) return;
+  var H = 140;
+  var W = container.offsetWidth || 600;
+  var dpr = window.devicePixelRatio || 1;
+  var canvas = document.createElement('canvas');
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  canvas.style.display = 'block';
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  container.innerHTML = '';
+  container.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  var isUp = closes[closes.length - 1] >= closes[0];
+  var color = isUp ? '#E03131' : '#2775ED';
+  var pad = { t: 28, b: 8, l: 10, r: 10 };
+  var pW = W - pad.l - pad.r, pH = H - pad.t - pad.b;
+
+  var lo = Math.min.apply(null, closes);
+  var hi = Math.max.apply(null, closes);
+  var margin = (hi - lo) * 0.08 || hi * 0.01;
+  var vMin = lo - margin, vMax = hi + margin;
+  var range = vMax - vMin || 1;
+
+  var n = closes.length;
+  function xf(i) { return pad.l + (i / (n - 1)) * pW; }
+  function yf(v) { return pad.t + (1 - (v - vMin) / range) * pH; }
+
+  // 그라디언트 채우기
+  var grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  grad.addColorStop(0, isUp ? 'rgba(224,49,49,.15)' : 'rgba(39,117,237,.15)');
+  grad.addColorStop(1, isUp ? 'rgba(224,49,49,.01)' : 'rgba(39,117,237,.01)');
+
+  ctx.beginPath();
+  ctx.moveTo(xf(0), yf(closes[0]));
+  for (var i = 1; i < n; i++) {
+    var cx = (xf(i - 1) + xf(i)) / 2;
+    ctx.bezierCurveTo(cx, yf(closes[i - 1]), cx, yf(closes[i]), xf(i), yf(closes[i]));
+  }
+  ctx.lineTo(xf(n - 1), H - pad.b);
+  ctx.lineTo(xf(0), H - pad.b);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // 선
+  ctx.beginPath();
+  ctx.moveTo(xf(0), yf(closes[0]));
+  for (var j = 1; j < n; j++) {
+    var cxj = (xf(j - 1) + xf(j)) / 2;
+    ctx.bezierCurveTo(cxj, yf(closes[j - 1]), cxj, yf(closes[j]), xf(j), yf(closes[j]));
+  }
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // 고점·저점 라벨 (halo 테두리로 가독성 확보)
+  function drawLabel(x, y, label, lblColor) {
+    var isDark = document.documentElement.classList.contains('dark');
+    var halo = isDark ? 'rgba(28,29,31,.92)' : 'rgba(255,255,255,.95)';
+    ctx.font = "bold 11px 'Pretendard Variable',Pretendard,sans-serif";
+    ctx.textBaseline = 'alphabetic';
+    var tw = ctx.measureText(label).width;
+    var lx = Math.min(Math.max(x, tw / 2 + pad.l), W - tw / 2 - pad.r);
+    var labelY = y < pad.t + 16 ? y + 18 : y - 8;
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 3;
+    ctx.textAlign = 'center';
+    ctx.strokeStyle = halo;
+    ctx.strokeText(label, lx, labelY);
+    ctx.fillStyle = lblColor;
+    ctx.fillText(label, lx, labelY);
+  }
+
+  if (hi !== lo) {
+    var hiIdx = closes.indexOf(hi), loIdx = closes.indexOf(lo);
+    var upColor = '#E03131', dnColor = '#2775ED';
+    // 고점 마커
+    ctx.beginPath();
+    ctx.arc(xf(hiIdx), yf(hi), 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = isUp ? upColor : dnColor;
+    ctx.fill();
+    drawLabel(xf(hiIdx), yf(hi), '최근 고점 ' + hi.toLocaleString(), isUp ? upColor : dnColor);
+    // 저점 마커
+    ctx.beginPath();
+    ctx.arc(xf(loIdx), yf(lo), 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = isUp ? dnColor : upColor;
+    ctx.fill();
+    drawLabel(xf(loIdx), yf(lo), '최근 저점 ' + lo.toLocaleString(), isUp ? dnColor : upColor);
+  }
+
+  // 현재가 끝점 도트
+  ctx.beginPath();
+  ctx.arc(xf(n - 1), yf(closes[n - 1]), 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.fill();
+  ctx.stroke();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('[data-spark]').forEach(function(container) {
     var raw = (container.getAttribute('data-spark') || '').trim();
     if (!raw) return;
-    // NaN/Infinity만 제거 — 도메인상 가격은 양수지만 0을 무시하면 안 됨
     var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
-    if (closes.length < 2) return;
-
-    var W = 740, H = 140, PAD = 4;
-    var lo = Math.min.apply(null, closes);
-    var hi = Math.max.apply(null, closes);
-    var range = hi - lo || 1;
-    var isUp = closes[closes.length - 1] >= closes[0];
-    var color = isUp ? '#E03131' : '#2775ED';
-    var gradId = 'spark-grad-' + Math.random().toString(36).slice(2);
-
-    var n = closes.length;
-    var pts = closes.map(function(v, i) {
-      var x = (n === 1) ? W / 2 : (i / (n - 1)) * (W - PAD * 2) + PAD;
-      var y = PAD + (1 - (v - lo) / range) * (H - PAD * 2);
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    });
-
-    var lastPt = pts[pts.length - 1].split(',');
-    var firstPt = pts[0].split(',');
-
-    // 마지막점 좌표
-    var lx = parseFloat(lastPt[0]);
-    var ly = parseFloat(lastPt[1]);
-    // 첫번째점 좌표
-    var fx = parseFloat(firstPt[0]);
-
-    var areaPoints = pts.join(' ') + ' ' + lx.toFixed(1) + ',' + (H - PAD) + ' ' + fx.toFixed(1) + ',' + (H - PAD);
-
-    // 실측 고점·저점 라벨 위치 계산
-    var hiIdx = closes.indexOf(hi);
-    var loIdx = closes.indexOf(lo);
-    var hiPt = pts[hiIdx].split(',');
-    var loPt = pts[loIdx].split(',');
-    var hix = parseFloat(hiPt[0]);
-    var hiy = parseFloat(hiPt[1]);
-    var loxPt = parseFloat(loPt[0]);
-    var loyPt = parseFloat(loPt[1]);
-    var upColor = '#E03131';
-    var dnColor = '#2775ED';
-    var hiColor = isUp ? upColor : dnColor;
-    var loColor = isUp ? dnColor : upColor;
-    var hiLabel = '최근 고점 ' + hi.toLocaleString();
-    var loLabel = '최근 저점 ' + lo.toLocaleString();
-    // 라벨이 SVG 경계를 벗어나지 않도록 앵커 결정 (좌측 30% → start, 나머지 → end)
-    var hiAnchor = hix < W * 0.3 ? 'start' : 'end';
-    var loAnchor = loxPt < W * 0.3 ? 'start' : 'end';
-    var hiDy = hiy < 18 ? 14 : -6;
-    var loDy = loyPt > H - 18 ? -6 : 14;
-    // 평탄(전 구간 동일가)하면 고점·저점이 한 점에 겹치므로 라벨 생략
-    var labelSvg = hi === lo ? '' :
-        '<text x="' + hix.toFixed(1) + '" y="' + (hiy + hiDy).toFixed(1) + '" text-anchor="' + hiAnchor + '" fill="' + hiColor + '" font-size="11" font-weight="700" font-family="inherit">' + hiLabel + '</text>'
-      + '<text x="' + loxPt.toFixed(1) + '" y="' + (loyPt + loDy).toFixed(1) + '" text-anchor="' + loAnchor + '" fill="' + loColor + '" font-size="11" font-weight="700" font-family="inherit">' + loLabel + '</text>';
-
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;height:140px;display:block;overflow:visible;">'
-      + '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
-      + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.18"/>'
-      + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
-      + '</linearGradient></defs>'
-      + '<polygon points="' + areaPoints + '" fill="url(#' + gradId + ')"/>'
-      + '<polyline fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + pts.join(' ') + '"/>'
-      + '<circle cx="' + fx.toFixed(1) + '" cy="' + firstPt[1] + '" r="3.5" fill="#fff" stroke="#9CA3AF" stroke-width="2"/>'
-      + '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="3.5" fill="#fff" stroke="' + color + '" stroke-width="2"/>'
-      + labelSvg
-      + '</svg>';
-
-    container.innerHTML = svg;
+    drawSparkCanvas(container, closes);
+  });
+  // 리사이즈 대응
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      document.querySelectorAll('[data-spark]').forEach(function(container) {
+        var raw = (container.getAttribute('data-spark') || '').trim();
+        if (!raw) return;
+        var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
+        drawSparkCanvas(container, closes);
+      });
+    }, 100);
   });
 });
 
@@ -207,13 +259,14 @@ document.addEventListener('DOMContentLoaded', function() {
       var body = document.getElementById('financials-body');
       var vals = qs.map(function (q) { return q.operatingIncome; });
       var absMax = Math.max.apply(null, vals.map(Math.abs)) || 1;
-      var BARH = 80; // px
+      var BARH = 120; // px
       var bars = qs.map(function (q) {
         var v = q.operatingIncome;
         var isEst = q.isEstimate;
         var isPos = v >= 0;
-        var pct = Math.min(Math.abs(v) / absMax * 100, 100).toFixed(1);
-        var h = Math.max(Math.round(Math.abs(v) / absMax * BARH), 2);
+        var ratio = Math.abs(v) / absMax;
+        // 최소 12% 보장 — 작은 분기도 막대가 보이도록
+        var h = Math.max(Math.round(ratio * BARH), 12);
         var cls = isEst ? (isPos ? 'estimate' : 'neg-est') : (isPos ? 'positive' : 'negative');
         return '<div class="fin-bar-wrap">'
           + '<div class="fin-val ' + (isPos ? 'up' : 'dn') + '">' + fmtAmt(v) + '</div>'
