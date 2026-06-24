@@ -38,7 +38,7 @@
         <div class="top">
           <div>
             <div class="hn">삼성전자 <a class="chip" href="/stocks/sector/semicon/">반도체</a></div>
-            <div class="meta"><span class="num">005930</span> · KOSPI · 06-24 종가</div>
+            <div class="meta"><span class="num">005930</span> · KOSPI · 06-25 종가</div>
           </div>
           <div style="text-align:right">
             <div class="px num">340,500</div>
@@ -51,9 +51,26 @@
         <div class="spark-header" data-spark="307000.0,299500.0,317000.0,349000.0,360500.0,351500.0,329000.0,295500.0,322000.0,302500.0,299000.0,322500.0,337000.0,343000.0,346500.0,362500.0,354000.0,353500.0,310000.0,340500.0"></div>
       </div>
 
+      <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
+      
+      <div id="sec-supply" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">외국인·기관 수급</span><span class="sc__s" id="supply-updated"></span></div>
+        <div class="scb" id="supply-body"></div>
+      </div>
+      <div id="sec-targets" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">증권사 목표주가</span><span class="sc__s" id="targets-avg"></span></div>
+        <div class="scb" id="targets-body"></div>
+      </div>
+      <div id="sec-financials" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">분기 영업이익 추이</span><span class="sc__s">단위: 억원</span></div>
+        <div class="scb" id="financials-body"></div>
+      </div>
+      <div id="chips-meta" data-chips-ticker="005930" style="display:none"></div>
+      
+
       <!-- 이동평균 대비 (실측) -->
       
-      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-24 종가</span></div><div class="scb">
+      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-25 종가</span></div><div class="scb">
         
         <div class="ti-row">
           <span class="ti-lbl">20일선 대비</span>

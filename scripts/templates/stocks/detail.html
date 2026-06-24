@@ -55,6 +55,23 @@
         <div class="spark-header" data-spark="{{ rd.sparkline | join(',') }}"></div>
       </div>
 
+      <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
+      {% if chips_ticker %}
+      <div id="sec-supply" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">외국인·기관 수급</span><span class="sc__s" id="supply-updated"></span></div>
+        <div class="scb" id="supply-body"></div>
+      </div>
+      <div id="sec-targets" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">증권사 목표주가</span><span class="sc__s" id="targets-avg"></span></div>
+        <div class="scb" id="targets-body"></div>
+      </div>
+      <div id="sec-financials" class="sc" style="display:none">
+        <div class="sc__h"><span class="sc__t">분기 영업이익 추이</span><span class="sc__s">단위: 억원</span></div>
+        <div class="scb" id="financials-body"></div>
+      </div>
+      <div id="chips-meta" data-chips-ticker="{{ chips_ticker }}" style="display:none"></div>
+      {% endif %}
+
       <!-- 이동평균 대비 (실측) -->
       {% if rd.ma20_dist_pct is not none or rd.ma200_dist_pct is not none %}
       <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">{{ generated_label }}</span></div><div class="scb">

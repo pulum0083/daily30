@@ -918,6 +918,7 @@ def build_stock_page(stock, peers):
         "rd": rd,
         "peers": peers,
         "generated_label": datetime.now().strftime("%m-%d") + " 종가",
+        "chips_ticker": stock.get("chips_ticker", ""),
     }
     html = tmpl.render(**ctx)
     out_dir = WEB_DIR / "stocks" / stock["code"]
