@@ -30,19 +30,37 @@ async function fetchOne(code) {
   }
 }
 
+// 해외 종목(미국 벨웨더) — 네이버 해외 시세. 심볼 예: NVDA.O, MU.O, SOXX.O, TSLA.O, F
+async function fetchOverseas(sym) {
+  try {
+    const r = await fetch(`https://api.stock.naver.com/stock/${encodeURIComponent(sym)}/basic`, {
+      headers: HDR,
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
+    const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
+    if (!isFinite(price)) return null;
+    return { sym, price, changePct: isFinite(pct) ? pct : null };
+  } catch (e) {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
-    const raw = (req.query?.codes || '').toString();
-    const codes = raw
-      .split(',')
-      .map(s => s.trim())
-      .filter(c => /^\d{6}$/.test(c))
-      .slice(0, 50);
-    if (!codes.length) return res.status(200).json({ open: krMarketOpen(), prices: [] });
-    const results = await Promise.all(codes.map(fetchOne));
-    return res.status(200).json({ open: krMarketOpen(), prices: results.filter(Boolean) });
+    const codes = (req.query?.codes || '').toString()
+      .split(',').map(s => s.trim()).filter(c => /^\d{6}$/.test(c)).slice(0, 50);
+    const usSyms = (req.query?.us || '').toString()
+      .split(',').map(s => s.trim()).filter(s => /^[A-Za-z]{1,6}(\.[A-Za-z])?$/.test(s)).slice(0, 20);
+    const [prices, us] = await Promise.all([
+      Promise.all(codes.map(fetchOne)).then(a => a.filter(Boolean)),
+      Promise.all(usSyms.map(fetchOverseas)).then(a => a.filter(Boolean)),
+    ]);
+    return res.status(200).json({ open: krMarketOpen(), prices, us });
   } catch (e) {
-    return res.status(502).json({ error: String(e), prices: [] });
+    return res.status(502).json({ error: String(e), prices: [], us: [] });
   }
 }

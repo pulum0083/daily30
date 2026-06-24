@@ -3,113 +3,346 @@
     "semicon": {
       "label": "반도체",
       "stocks": [
-        { "code": "005930", "name": "삼성전자" },
-        { "code": "000660", "name": "SK하이닉스" },
-        { "code": "042700", "name": "한미반도체" },
-        { "code": "058470", "name": "리노공업" },
-        { "code": "000990", "name": "DB하이텍" },
-        { "code": "039030", "name": "이오테크닉스" }
+        {
+          "code": "005930",
+          "name": "삼성전자"
+        },
+        {
+          "code": "000660",
+          "name": "SK하이닉스"
+        },
+        {
+          "code": "042700",
+          "name": "한미반도체"
+        },
+        {
+          "code": "058470",
+          "name": "리노공업"
+        },
+        {
+          "code": "000990",
+          "name": "DB하이텍"
+        },
+        {
+          "code": "039030",
+          "name": "이오테크닉스"
+        }
       ],
       "bellwethers": [
-        { "t": "NVDA", "name": "엔비디아", "kind": "US" },
-        { "t": "MU", "name": "마이크론", "kind": "US" },
-        { "t": "SOXX", "name": "반도체 ETF", "kind": "US" }
+        {
+          "t": "NVDA",
+          "name": "엔비디아",
+          "kind": "US"
+        },
+        {
+          "t": "MU",
+          "name": "마이크론",
+          "kind": "US"
+        },
+        {
+          "t": "SOXX",
+          "name": "반도체 ETF",
+          "kind": "US"
+        }
       ]
     },
     "power": {
       "label": "전력기기",
       "stocks": [
-        { "code": "267260", "name": "HD현대일렉트릭" },
-        { "code": "010120", "name": "LS일렉트릭" },
-        { "code": "298040", "name": "효성중공업" },
-        { "code": "034020", "name": "두산에너빌리티" },
-        { "code": "033100", "name": "제룡전기" }
+        {
+          "code": "267260",
+          "name": "HD현대일렉트릭"
+        },
+        {
+          "code": "010120",
+          "name": "LS일렉트릭"
+        },
+        {
+          "code": "298040",
+          "name": "효성중공업"
+        },
+        {
+          "code": "034020",
+          "name": "두산에너빌리티"
+        },
+        {
+          "code": "033100",
+          "name": "제룡전기"
+        }
       ],
       "bellwethers": [
-        { "t": "GEV", "name": "GE Vernova", "kind": "US" },
-        { "t": "VRT", "name": "Vertiv", "kind": "US" }
+        {
+          "t": "GEV",
+          "name": "GE Vernova",
+          "kind": "US"
+        },
+        {
+          "t": "VRT",
+          "name": "Vertiv",
+          "kind": "US"
+        }
       ]
     },
     "defense": {
       "label": "방산",
       "stocks": [
-        { "code": "012450", "name": "한화에어로스페이스" },
-        { "code": "079550", "name": "LIG넥스원" },
-        { "code": "064350", "name": "현대로템" },
-        { "code": "047810", "name": "한국항공우주" },
-        { "code": "272210", "name": "한화시스템" }
+        {
+          "code": "012450",
+          "name": "한화에어로스페이스"
+        },
+        {
+          "code": "079550",
+          "name": "LIG넥스원"
+        },
+        {
+          "code": "064350",
+          "name": "현대로템"
+        },
+        {
+          "code": "047810",
+          "name": "한국항공우주"
+        },
+        {
+          "code": "272210",
+          "name": "한화시스템"
+        }
       ],
       "bellwethers": [
-        { "t": "ITA", "name": "방산 ETF", "kind": "US" },
-        { "t": "LMT", "name": "록히드마틴", "kind": "US" }
+        {
+          "t": "ITA",
+          "name": "방산 ETF",
+          "kind": "US"
+        },
+        {
+          "t": "LMT",
+          "name": "록히드마틴",
+          "kind": "US"
+        }
       ]
     },
     "ship": {
       "label": "조선",
       "stocks": [
-        { "code": "329180", "name": "HD현대중공업" },
-        { "code": "042660", "name": "한화오션" },
-        { "code": "010140", "name": "삼성중공업" },
-        { "code": "009540", "name": "HD한국조선해양" },
-        { "code": "010620", "name": "HD현대미포" }
+        {
+          "code": "329180",
+          "name": "HD현대중공업"
+        },
+        {
+          "code": "042660",
+          "name": "한화오션"
+        },
+        {
+          "code": "010140",
+          "name": "삼성중공업"
+        },
+        {
+          "code": "009540",
+          "name": "HD한국조선해양"
+        },
+        {
+          "code": "010620",
+          "name": "HD현대미포"
+        }
       ],
       "bellwethers": []
     },
     "battery": {
       "label": "2차전지",
       "stocks": [
-        { "code": "373220", "name": "LG에너지솔루션" },
-        { "code": "247540", "name": "에코프로비엠" },
-        { "code": "006400", "name": "삼성SDI" },
-        { "code": "003670", "name": "포스코퓨처엠" },
-        { "code": "066970", "name": "엘앤에프" }
+        {
+          "code": "373220",
+          "name": "LG에너지솔루션"
+        },
+        {
+          "code": "247540",
+          "name": "에코프로비엠"
+        },
+        {
+          "code": "006400",
+          "name": "삼성SDI"
+        },
+        {
+          "code": "003670",
+          "name": "포스코퓨처엠"
+        },
+        {
+          "code": "066970",
+          "name": "엘앤에프"
+        }
       ],
       "bellwethers": [
-        { "t": "ALB", "name": "Albemarle", "kind": "US" },
-        { "t": "LIT", "name": "리튬 ETF", "kind": "US" }
+        {
+          "t": "ALB",
+          "name": "Albemarle",
+          "kind": "US"
+        },
+        {
+          "t": "LIT",
+          "name": "리튬 ETF",
+          "kind": "US"
+        }
       ]
     },
     "auto": {
       "label": "자동차",
       "stocks": [
-        { "code": "005380", "name": "현대차" },
-        { "code": "000270", "name": "기아" },
-        { "code": "012330", "name": "현대모비스" },
-        { "code": "204320", "name": "HL만도" },
-        { "code": "011210", "name": "현대위아" }
+        {
+          "code": "005380",
+          "name": "현대차"
+        },
+        {
+          "code": "000270",
+          "name": "기아"
+        },
+        {
+          "code": "012330",
+          "name": "현대모비스"
+        },
+        {
+          "code": "204320",
+          "name": "HL만도"
+        },
+        {
+          "code": "011210",
+          "name": "현대위아"
+        }
       ],
       "bellwethers": [
-        { "t": "TSLA", "name": "테슬라", "kind": "US" },
-        { "t": "F", "name": "포드", "kind": "US" }
+        {
+          "t": "TSLA",
+          "name": "테슬라",
+          "kind": "US"
+        },
+        {
+          "t": "F",
+          "name": "포드",
+          "kind": "US"
+        }
       ]
     },
     "bio": {
       "label": "바이오",
       "stocks": [
-        { "code": "207940", "name": "삼성바이오로직스" },
-        { "code": "068270", "name": "셀트리온" },
-        { "code": "000100", "name": "유한양행" },
-        { "code": "326030", "name": "SK바이오팜" },
-        { "code": "196170", "name": "알테오젠" }
+        {
+          "code": "207940",
+          "name": "삼성바이오로직스"
+        },
+        {
+          "code": "068270",
+          "name": "셀트리온"
+        },
+        {
+          "code": "000100",
+          "name": "유한양행"
+        },
+        {
+          "code": "326030",
+          "name": "SK바이오팜"
+        },
+        {
+          "code": "196170",
+          "name": "알테오젠"
+        }
       ],
       "bellwethers": [
-        { "t": "XBI", "name": "바이오 ETF", "kind": "US" },
-        { "t": "LLY", "name": "일라이릴리", "kind": "US" }
+        {
+          "t": "XBI",
+          "name": "바이오 ETF",
+          "kind": "US"
+        },
+        {
+          "t": "LLY",
+          "name": "일라이릴리",
+          "kind": "US"
+        }
       ]
     },
     "finance": {
       "label": "금융",
       "stocks": [
-        { "code": "105560", "name": "KB금융" },
-        { "code": "055550", "name": "신한지주" },
-        { "code": "138040", "name": "메리츠금융지주" },
-        { "code": "086790", "name": "하나금융지주" },
-        { "code": "316140", "name": "우리금융지주" }
+        {
+          "code": "105560",
+          "name": "KB금융"
+        },
+        {
+          "code": "055550",
+          "name": "신한지주"
+        },
+        {
+          "code": "138040",
+          "name": "메리츠금융지주"
+        },
+        {
+          "code": "086790",
+          "name": "하나금융지주"
+        },
+        {
+          "code": "316140",
+          "name": "우리금융지주"
+        }
       ],
       "bellwethers": [
-        { "t": "JPM", "name": "JP모건", "kind": "US" },
-        { "t": "KBE", "name": "은행 ETF", "kind": "US" }
+        {
+          "t": "JPM",
+          "name": "JP모건",
+          "kind": "US"
+        },
+        {
+          "t": "KBE",
+          "name": "은행 ETF",
+          "kind": "US"
+        }
       ]
     }
-  }
+  },
+  "etfs": [
+    {
+      "code": "069500",
+      "name": "KODEX 200"
+    },
+    {
+      "code": "122630",
+      "name": "KODEX 레버리지"
+    },
+    {
+      "code": "133690",
+      "name": "TIGER 미국나스닥100"
+    },
+    {
+      "code": "360750",
+      "name": "TIGER 미국S&P500"
+    },
+    {
+      "code": "102110",
+      "name": "TIGER 200"
+    },
+    {
+      "code": "229200",
+      "name": "KODEX 코스닥150"
+    },
+    {
+      "code": "091230",
+      "name": "TIGER 반도체"
+    },
+    {
+      "code": "305720",
+      "name": "KODEX 2차전지산업"
+    },
+    {
+      "code": "132030",
+      "name": "KODEX 골드선물"
+    },
+    {
+      "code": "114800",
+      "name": "KODEX 인버스"
+    },
+    {
+      "code": "252670",
+      "name": "KODEX 200선물인버스2X"
+    },
+    {
+      "code": "233740",
+      "name": "KODEX 코스닥150레버리지"
+    }
+  ]
 }
