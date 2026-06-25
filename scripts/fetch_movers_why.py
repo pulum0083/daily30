@@ -185,3 +185,51 @@ def pick_event(name: str, today: str) -> dict | None:
         "source": a["source"], "summary": (parsed.get("summary") or "").strip(),
         "sentiment": sent,
     }
+
+
+def _why_line(event: dict, tier: str) -> str:
+    summ = event.get("summary") or event.get("headline")
+    if tier == "why":
+        return summ
+    return f"{summ} (개별 인과 단정 안 함)"
+
+
+def build_payload(today: str) -> dict:
+    """무버 선별 → 종목별 뉴스·게이트 → 산출물 dict."""
+    movers = select_movers(fetch_mover_rows())
+    stocks = []
+    for r in movers:
+        event = pick_event(r["name"], today)
+        tier = classify_tier(event, r["change_pct"])
+        events = []
+        if event and tier != "none":
+            events = [{
+                "time": event["time"], "headline": event["headline"],
+                "url": event["url"], "source": event["source"],
+                "why": _why_line(event, tier), "tier": tier,
+                "sentiment": event["sentiment"],
+            }]
+        stocks.append({
+            "code": r["code"], "name": r["name"],
+            "changePct": round(r["change_pct"], 2),
+            "surge": round(r.get("surge") or 0, 2),
+            "events": events,
+        })
+    return {"generated_at": datetime.now(KST).isoformat(), "date": today, "stocks": stocks}
+
+
+def main():
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    payload = build_payload(today)
+    WEB_DATA.mkdir(parents=True, exist_ok=True)
+    dated = WEB_DATA / f"movers-why-{today}.json"
+    live = WEB_DATA / "movers-why-live.json"
+    text = json.dumps(payload, ensure_ascii=False, indent=2)
+    dated.write_text(text, encoding="utf-8")
+    live.write_text(text, encoding="utf-8")
+    n_pinned = sum(1 for s in payload["stocks"] if s["events"])
+    print(f"[movers_why] {len(payload['stocks'])} movers, {n_pinned} with news → {dated.name}")
+
+
+if __name__ == "__main__":
+    main()
