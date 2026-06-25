@@ -2038,8 +2038,29 @@ renderChips('morning');
       label.parentElement.innerHTML=html;
     });
   }
-  function poll(){
-    if(!liveCodes.length) return;
+  /* KR 정규장 개장 여부(09:00~15:30 평일). 마감 후엔 HL 24h 무기한선물로 전환. */
+  function krOpen(){
+    var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);
+    var kd=new Date(Date.now()+9*3600*1000).getUTCDay(); // KST 요일
+    if(kd===0||kd===6) return false; // 주말
+    return m>=540 && m<=930;
+  }
+  var uswWidget=document.getElementById('us-linked-widget');
+  var uswHdr=uswWidget?uswWidget.firstElementChild:null;
+  function setNight(on){
+    if(!uswHdr||uswHdr.children.length<3) return;
+    var pill=uswHdr.children[1], sub=uswHdr.children[2];
+    if(on===uswHdr._night) return; uswHdr._night=on;
+    if(on){
+      pill.textContent='🌙 HL 24h'; pill.style.color='#6D28D9'; pill.style.background='#EDE9FE';
+      sub.textContent='하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님';
+    }else{
+      pill.textContent='●실시간'; pill.style.color='#16A34A'; pill.style.background='#ECFDF3';
+      sub.textContent='코스피 시총 상위 3 · 마감 후 미국 LIVE';
+    }
+  }
+  /* 장중: 네이버 실측 KRW(stocks-live)로 타일·벨웨더 갱신 */
+  function pollDay(){
     fetch('/api/stocks-live?codes='+liveCodes.join(',')+'&us='+US_SYMS.join(','),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
@@ -2051,6 +2072,29 @@ renderChips('morning');
         if(Array.isArray(d.us) && d.us.length) renderBells(d.us);
       })
       .catch(function(){});
+  }
+  /* 마감 후: HL 24h perp의 USD가격×환율 KRW 환산으로 타일 갱신. 벨웨더는 stocks-live 유지(미장 라이브). */
+  function pollNight(){
+    fetch('/api/hl-night',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d||!Array.isArray(d.items)) return;
+        d.items.forEach(function(it){
+          var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+it.code+'"]');
+          if(tile && it.krw!=null) paintTile(tile, it.krw, it.changePct, true);
+        });
+      })
+      .catch(function(){});
+    fetch('/api/stocks-live?us='+US_SYMS.join(','),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d&&Array.isArray(d.us)&&d.us.length) renderBells(d.us); })
+      .catch(function(){});
+  }
+  function poll(){
+    if(!liveCodes.length) return;
+    var night=!krOpen();
+    setNight(night);
+    if(night) pollNight(); else pollDay();
   }
   poll();
   setInterval(poll, 10000);
