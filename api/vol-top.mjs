@@ -38,6 +38,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       open: krMarketOpen(),
       top: top.map(x => ({ ...x, barPct: Math.round(x.vol / maxVol * 100) })),
+      all: items, // 41종목 전체 {code,name,sector,vol,changePct} — 상승/하락 정렬용
       updatedAt: new Date().toISOString(),
     });
   } catch (e) {
