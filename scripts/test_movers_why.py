@@ -1,0 +1,24 @@
+# 왜움직였나 엔진 순수함수 단위 테스트 (네트워크 없음)
+#!/usr/bin/env python3
+import fetch_movers_why as m
+
+
+def test_select_movers_threshold_and_dedup():
+    rows = [
+        {"code": "A", "name": "에이", "change_pct": 5.0, "surge": 1.1},
+        {"code": "B", "name": "비",  "change_pct": -3.0, "surge": 1.0},
+        {"code": "C", "name": "씨",  "change_pct": 0.5, "surge": 2.0},
+        {"code": "D", "name": "디",  "change_pct": 0.3, "surge": 1.1},
+    ]
+    out = m.select_movers(rows, max_n=10)
+    codes = [r["code"] for r in out]
+    assert "D" not in codes
+    assert set(codes) == {"A", "B", "C"}
+
+
+def test_select_movers_caps_at_max_n():
+    rows = [{"code": str(i), "name": str(i), "change_pct": 9.0 - i*0.1, "surge": 1.0}
+            for i in range(20)]
+    out = m.select_movers(rows, max_n=10)
+    assert len(out) == 10
+    assert out[0]["code"] == "0"
