@@ -1,0 +1,152 @@
+<!-- [프리뷰] 종목 상세 — "오늘 장중·왜 움직였나" 곡선 섹션 배치 검토용 (목업 데이터) -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[프리뷰] 오늘 장중 섹션 배치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/stocks.css">
+<style>
+  /* 프리뷰 전용 — 장중 곡선 섹션 */
+  .intra .scb{padding:0;}
+  .intra-chart{position:relative;padding:10px 8px 4px;}
+  .intra-chart svg{width:100%;height:150px;display:block;overflow:visible;}
+  .intra-evts{border-top:1px solid var(--hair);}
+  .intra-evt{display:flex;gap:10px;padding:11px 16px;border-top:1px solid var(--hair);}
+  .intra-evt:first-child{border-top:none;}
+  .ie-num{width:18px;height:18px;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .ie-num.why{background:var(--up);color:#fff;}
+  .ie-num.rel{background:var(--soft);border:1px solid var(--hair);color:var(--muted);}
+  .ie-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .ie-time{font-size:12px;color:var(--muted);}
+  .ie-badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;white-space:nowrap;}
+  .ie-badge.why{background:#EAF7EC;color:#1B7A2E;}
+  .ie-badge.rel{background:var(--inset);color:var(--muted);}
+  .ie-headline{font-size:13.5px;margin:5px 0 0;line-height:1.5;}
+  .ie-src{font-size:12px;color:var(--primary);text-decoration:none;}
+  .ie-legend{display:flex;gap:14px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--hair);}
+  .ie-legend span{font-size:11px;color:var(--muted);}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:1px;margin-right:3px;}
+</style>
+</head>
+<body>
+<nav class="gnb">
+  <div class="gnb__in">
+    <a class="gnb__logo" href="/stocks/">종목</a>
+    <div class="gnb__subs">
+      <a class="gnb__sub" href="https://doubleshot.space/">Double-Shot</a>
+      <div class="gnb__divider"></div>
+      <a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="screen on" id="detail">
+  <div class="crumb">
+    <a href="/stocks/">홈</a> › <a href="/stocks/">종목</a> › <a href="#">반도체</a> › <span style="color:var(--ink)">삼성전자</span>
+    <span style="margin-left:8px;font-size:11px;color:var(--gold);background:var(--gold-bg);padding:1px 7px;border-radius:5px;">프리뷰 · 목업 데이터</span>
+  </div>
+  <div class="grid">
+    <div class="dbox">
+      <!-- 헤더 카드 (기존 그대로) -->
+      <div class="hero2" id="hero-stock">
+        <div class="top">
+          <div>
+            <div class="hn">삼성전자 <a class="chip" href="#">반도체</a></div>
+            <div class="meta"><span class="num">005930</span> · KOSPI · 장중</div>
+          </div>
+          <div style="text-align:right">
+            <div class="px num">75,200</div>
+            <div class="cg num" style="color:var(--up);background:var(--up-bg)">▲ +5.9%</div>
+          </div>
+        </div>
+        <div class="spark-header" data-spark="68200,68500,69100,69800,70200,69900,70500,71200,71000,71800,72400,72100,73000,73600,73200,74100,74600,74200,75000,75200"></div>
+      </div>
+
+      <!-- ▼▼▼ 신규: 오늘 장중 · 왜 움직였나 (헤더 아래 / 이동평균 위) ▼▼▼ -->
+      <div class="sc intra">
+        <div class="sc__h">
+          <span class="sc__t">오늘 장중 · 왜 움직였나</span>
+          <span class="sc__s">14:30 갱신 · 09:00~현재</span>
+        </div>
+        <div class="scb">
+          <div class="intra-chart">
+            <svg viewBox="0 0 340 156" role="img" aria-label="장중 가격 곡선과 뉴스 발생 시점 핀">
+              <line x1="20" y1="128" x2="330" y2="128" stroke="#E5E7EB" stroke-width="1"/>
+              <polyline fill="none" stroke="#E03131" stroke-width="2" stroke-linejoin="round"
+                points="20,112 44,74 90,76 135,62 180,66 210,48 265,40 330,30"/>
+              <circle cx="330" cy="30" r="3.5" fill="#E03131"/>
+              <line x1="44" y1="74" x2="44" y2="20" stroke="#E03131" stroke-width="1" stroke-dasharray="3 3"/>
+              <circle cx="44" cy="16" r="9" fill="#E03131"/>
+              <text x="44" y="20" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">1</text>
+              <line x1="210" y1="48" x2="210" y2="20" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="3 3"/>
+              <circle cx="210" cy="16" r="9" fill="#fff" stroke="#9CA3AF" stroke-width="1"/>
+              <text x="210" y="20" text-anchor="middle" font-size="11" fill="#6B7280" font-weight="700">2</text>
+              <text x="20" y="146" font-size="10" fill="#9CA3AF">09:00</text>
+              <text x="305" y="146" font-size="10" fill="#9CA3AF">15:30</text>
+            </svg>
+          </div>
+          <div class="intra-evts">
+            <div class="intra-evt">
+              <div class="ie-num why">1</div>
+              <div>
+                <div class="ie-top"><span class="ie-time">09:32</span><span class="ie-badge why">▲ 왜 · 방향 일치</span></div>
+                <p class="ie-headline">HBM4 공급 확대 보도에 외국인 매수세 유입</p>
+                <a class="ie-src" href="#">삼성전자, 엔비디아에 HBM4 공급 본격화 — 한국경제 ↗</a>
+              </div>
+            </div>
+            <div class="intra-evt">
+              <div class="ie-num rel">2</div>
+              <div>
+                <div class="ie-top"><span class="ie-time">13:10</span><span class="ie-badge rel">관련 뉴스</span></div>
+                <p class="ie-headline" style="color:var(--muted)">시장 전반 외국인 순매수 전환 <span style="font-size:11px;color:#9CA3AF">(인과 단정 안 함)</span></p>
+                <a class="ie-src" href="#">코스피, 외국인 순매수에 2,800선 회복 — 연합뉴스 ↗</a>
+              </div>
+            </div>
+          </div>
+          <div class="ie-legend">
+            <span><span class="dot" style="background:#1B7A2E"></span>왜 = 헤드라인이 방향 지지 (게이트 통과)</span>
+            <span><span class="dot" style="background:#9CA3AF"></span>관련 = 병치만, 인과 X</span>
+          </div>
+        </div>
+      </div>
+      <!-- ▲▲▲ 신규 섹션 끝 ▲▲▲ -->
+
+      <!-- 이동평균 대비 (기존) -->
+      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-25 종가</span></div><div class="scb">
+        <div class="ti-row">
+          <span class="ti-lbl">20일선 대비</span>
+          <span class="ti-desc">현재가가 20일선보다 <b class="num up">+4.1%</b> 위에 있어요</span>
+        </div>
+        <div class="ti-row" style="border-bottom:none">
+          <span class="ti-lbl">200일선 대비</span>
+          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+18.2%</b> 위에 있어요</span>
+        </div>
+      </div></div>
+
+      <!-- 52주 범위 (기존) -->
+      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 88.0% 지점</span></div><div class="scb">
+        <div class="w52-bar">
+          <div class="w52-fill" style="width:88%"></div>
+          <div class="w52-now" style="left:88%"></div>
+        </div>
+        <div class="w52-lbl"><span>최저 <span class="num">49,900</span></span><span>최고 <span class="num">88,800</span></span></div>
+      </div></div>
+    </div>
+
+    <!-- 우측 사이드바 (기존) -->
+    <div>
+      <div class="panel"><div class="panel__h">같은 섹터 · 반도체</div>
+        <a class="srow" href="#"><span class="n2">SK하이닉스 <small class="num">000660</small></span><span class="c dn num">-3.10%</span></a>
+        <a class="srow" href="#"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+2.40%</span></a>
+        <a class="srow" href="#"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
+      </div>
+    </div>
+  </div>
+  <p class="disc">※ [프리뷰] 장중 곡선·뉴스는 목업입니다. 배치 검토용.</p>
+</div>
+</div>
+</body>
+</html>
