@@ -96,5 +96,40 @@
 
 ## 부록 — 프로토타입
 
-- `web/preview-stock-intraday.html` — 종목 상세 "오늘 장중" 카드 배치.
-- `web/preview-hub-mover-live.html` — 홈 주도주 탭 확장 + 실시간 누적 시뮬레이션.
+- `web/preview-stock-intraday.html` — 종목 상세 "오늘 장중" 카드 배치. (Phase A에서 정리됨)
+- `web/preview-hub-mover-live.html` — 홈 주도주 탭 확장 + 실시간 누적 시뮬레이션. (Phase A에서 정리됨)
+- `web/preview-movers-why.html`, `web/preview-hub-pins.html` — Phase B 뉴스 핀 시안(곡선+핀+타임라인, 홈 카드 적용). 임시.
+
+---
+
+## Phase B 구현 범위 확정 (2026-06-25)
+
+Phase A(실측 곡선 인프라)는 완료. 아래는 **뉴스 핀 레이어(Phase B) 1차** 구현 범위.
+
+### 무버 선별 규칙 (`fetch_movers_why.py`)
+
+- 소스: `api/vol-top.mjs`와 동일한 41종목 유니버스의 장중 등락·거래량(스냅샷 `vol_avg20` 병합으로 급증배수 계산).
+- 선별: 상승 상위 + 하락 상위 + 거래량급증 상위를 합쳐 dedup → **최대 10종목**.
+- 임계값(둘 중 하나 충족해야 핀 대상): **`|등락률| ≥ 2%`** 또는 **`surge(거래량/vol_avg20) ≥ 1.5×`**. 미달 종목은 제외(밋밋한 종목 핀 낭비 방지).
+
+### 뉴스 수집·게이트 (기존 패턴 재사용)
+
+- RSS: `fetch_news_live.py`의 `_GN_KR`(한국어 Google News RSS) + `_parse_rss_datetime` + 오늘 `pub_date` 가드 재사용. 종목명으로 검색.
+- Gemini: 선별·요약·감성분류만(`fetch_news_live.py` 패턴). URL은 grounding 메타데이터에서만. 날짜·헤드라인 생성 불가.
+- 방향 게이트: `fetch_news_live._is_direction_conflict(result, change_pct)` 재사용 — 감성↔등락 일치 `why`, 불일치 `related` 강등, 기사 0건 `none`.
+
+### 산출물 / 스케줄
+
+- 산출물: `web/data/movers-why-{date}.json` (+ `movers-why-live.json`). 종목별 `events[]{time,headline,url,source,why,tier,sentiment}` (스펙 6절 형태).
+- 스케줄: GHA-native, **MARKET 슬롯 30분 cadence** 재사용(규칙 10번, Vercel cron 금지). 마감 후 그날 보존, 다음 거래일 09:00 리셋.
+
+### 프론트 (핀 레이어)
+
+- 홈 주도주 카드(`web/stocks/index.html`)와 상세 "오늘 장중" 카드(`web/assets/stocks.js`)의 기존 곡선 위에 핀+번호 타임라인 추가.
+- 핀 색: `why`=빨강(채움), `related`=회색(테두리), `none`=핀 없음 + "오늘 관련 뉴스 없음 · 수급/테마 추정" 한 줄.
+- pub_time → 09:00~15:30 x축 매핑, 곡선 좌표에서 y 보간. 번호로 타임라인과 1:1 연결.
+- 데이터 없음/휴장일/픽 없음 시 깨짐 없이 숨김, 콘솔 에러 0.
+
+### 범위 밖 (2차)
+
+- 클릭 시 실시간 RSS 보강, ETF·비주도주 확대.
