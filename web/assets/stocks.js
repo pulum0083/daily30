@@ -277,3 +277,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function () {});
 })();
 
+// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터로 헤더 아래 카드 렌더(데이터 있을 때만 표시)
+(function(){
+  var card=document.getElementById('intra-card');
+  if(!card) return;
+  var code=card.getAttribute('data-code');
+  fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
+    var vals=(d&&d.minutes)||[];
+    if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
+    var X0=14,X1=626,YT=22,YB=150;
+    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
+    var pts=vals.map(function(v,i){var x=X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED', last=pts.split(' ').pop().split(',');
+    document.getElementById('intra-svg').innerHTML=
+      '<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'+
+      '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>'+
+      '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+col+'"/>'+
+      '<text x="14" y="170" font-size="10" fill="#9CA3AF">09:00</text><text x="595" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
+    card.style.display='';
+  }).catch(function(){});
+})();
+

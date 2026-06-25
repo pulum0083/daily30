@@ -58,6 +58,29 @@
         <div class="spark-header" data-spark="{{ rd.sparkline | join(',') }}"></div>
       </div>
 
+      <!-- 오늘 장중 (실측 1분봉) — 장중/장후 거래일에만 JS가 채움 -->
+      <div class="sc" id="intra-card" data-code="{{ stock.code }}" style="display:none">
+        <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
+        <div class="scb" style="padding:8px 12px;">
+          <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
+        </div>
+      </div>
+
+      {% if bellwether or foreign_rate is not none %}
+      <div class="sc"><div class="sc__h"><span class="sc__t">해외 연동 · 외국인 보유율</span><span class="sc__s">참고용</span></div><div class="scb">
+        {% if bellwether %}
+        <div class="ti-row"><span class="ti-lbl">미 벨웨더 {{ bellwether.name }}</span>
+          <span class="ti-desc"><b class="num {{ 'up' if (bellwether.change_pct or 0) >= 0 else 'dn' }}">{{ '+' if (bellwether.change_pct or 0) >= 0 else '' }}{{ "%.1f"|format(bellwether.change_pct or 0) }}%</b> 밤사이</span>
+        </div>
+        {% endif %}
+        {% if foreign_rate is not none %}
+        <div class="ti-row" style="border-bottom:none"><span class="ti-lbl">외국인 보유율</span>
+          <span class="ti-desc"><b class="num">{{ "%.2f"|format(foreign_rate) }}%</b></span>
+        </div>
+        {% endif %}
+      </div></div>
+      {% endif %}
+
       <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
       {% if chips_ticker %}
       <div id="sec-supply" class="sc" style="display:none">
