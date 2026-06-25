@@ -22,3 +22,21 @@ def test_select_movers_caps_at_max_n():
     out = m.select_movers(rows, max_n=10)
     assert len(out) == 10
     assert out[0]["code"] == "0"
+
+
+def test_parse_naver_realtime():
+    data = {"datas": [{
+        "itemCode": "005930", "stockName": "삼성전자",
+        "closePrice": "358,500", "fluctuationsRatio": "5.29",
+        "accumulatedTradingVolume": "12,345,678",
+    }]}
+    r = m.parse_naver_realtime(data, vol_avg20=6000000)
+    assert r["code"] == "005930"
+    assert r["name"] == "삼성전자"
+    assert r["change_pct"] == 5.29
+    assert r["volume"] == 12345678
+    assert round(r["surge"], 2) == 2.06
+
+
+def test_parse_naver_realtime_missing():
+    assert m.parse_naver_realtime({"datas": []}, vol_avg20=1) is None
