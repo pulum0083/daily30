@@ -906,11 +906,46 @@ def stock_realdata(code):
     return rd
 
 
+def sector_bellwether(snapshot: dict, sectors: dict, sector_key: str):
+    """종목 섹터의 첫 미국 벨웨더 dict(t·name·change_pct) 반환. 없으면 None."""
+    sec = (sectors or {}).get(sector_key) or {}
+    bells = sec.get("bellwethers") or []
+    if not bells:
+        return None
+    t = bells[0].get("t")
+    info = (snapshot.get("bellwethers") or {}).get(t)
+    if not info:
+        return None
+    return {"t": t, "name": info.get("name"), "change_pct": info.get("change_pct")}
+
+
+_STOCK_SNAPSHOT_CACHE = None
+_SECTORS_CACHE = None
+
+
+def _load_stock_snapshot():
+    global _STOCK_SNAPSHOT_CACHE
+    if _STOCK_SNAPSHOT_CACHE is None:
+        p = WEB_DIR / "data" / "stocks-snapshot.json"
+        _STOCK_SNAPSHOT_CACHE = load_json(p) if p.exists() else {}
+    return _STOCK_SNAPSHOT_CACHE
+
+
+def _load_sectors():
+    global _SECTORS_CACHE
+    if _SECTORS_CACHE is None:
+        p = CONFIG_DIR / "stock_universe.json"
+        _SECTORS_CACHE = (load_json(p).get("sectors") or {}) if p.exists() else {}
+    return _SECTORS_CACHE
+
+
 def build_stock_page(stock, peers):
     """종목 1개의 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
     rd = stock_realdata(stock["code"])
     if rd.get("error") or rd.get("price") is None:
         raise RuntimeError(f"{stock['code']} 실측 실패: {rd.get('error')}")
+    snap = _load_stock_snapshot()
+    snap_stock = (snap.get("stocks") or {}).get(stock["code"], {})
     env = make_env()
     tmpl = env.get_template("stocks/detail.html")
     ctx = {
@@ -919,6 +954,9 @@ def build_stock_page(stock, peers):
         "peers": peers,
         "generated_label": datetime.now().strftime("%m-%d") + " 종가",
         "chips_ticker": stock.get("chips_ticker", ""),
+        "bellwether": sector_bellwether(snap, _load_sectors(), stock.get("sector_key")),
+        "foreign_rate": snap_stock.get("foreign_rate"),
+        "foreign_spark": snap_stock.get("foreign_spark"),
     }
     html = tmpl.render(**ctx)
     out_dir = WEB_DIR / "stocks" / stock["code"]

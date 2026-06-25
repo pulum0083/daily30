@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 """실행: python3 scripts/test_build_stocks_snapshot.py"""
 import build_stocks_snapshot as m
+import generate_html as g
 
 
 def test_change_pct():
@@ -30,6 +31,16 @@ def test_ma200():
     # 최근 200개 = 101..300, 평균 = (101+300)/2 = 200.5
     assert m.ma200(closes) == 200.5
     assert m.ma200([1.0, 2.0]) is None           # 200개 미만
+
+
+def test_sector_bellwether_for_stock():
+    snapshot = {"bellwethers": {"NVDA": {"name": "엔비디아", "change_pct": 1.9}}}
+    sectors = {"semicon": {"bellwethers": [{"t": "NVDA"}]}}
+    bw = g.sector_bellwether(snapshot, sectors, "semicon")
+    assert bw["t"] == "NVDA"
+    assert bw["change_pct"] == 1.9
+    # 없는 섹터 → None
+    assert g.sector_bellwether(snapshot, sectors, "nonexist") is None
 
 
 def run():
