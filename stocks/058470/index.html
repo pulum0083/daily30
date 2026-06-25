@@ -44,15 +44,39 @@
             <div class="meta"><span class="num">058470</span> · KOSPI · 06-25 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">85,200</div>
+            <div class="px num">88,700</div>
             
-            <div class="cg num" style="color:var(--up)">▲ +0.35%</div>
+            <div class="cg num" style="color:var(--up)">▲ +4.11%</div>
             
           </div>
         </div>
         <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더, 고점·저점 실측 라벨 포함) -->
-        <div class="spark-header" data-spark="102500.0,99100.0,97400.0,97300.0,92800.0,99600.0,94100.0,85100.0,99000.0,93000.0,99800.0,104500.0,96800.0,94700.0,94700.0,92300.0,92600.0,92400.0,84900.0,85200.0"></div>
+        <div class="spark-header" data-spark="99100.0,97400.0,97300.0,92800.0,99600.0,94100.0,85100.0,99000.0,93000.0,99800.0,104500.0,96800.0,94700.0,94700.0,92300.0,92600.0,92400.0,84900.0,85200.0,88700.0"></div>
       </div>
+
+      <!-- 오늘 장중 (실측 1분봉) — 장중/장후 거래일에만 JS가 채움 -->
+      <div class="sc" id="intra-card" data-code="058470" style="display:none">
+        <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
+        <div class="scb" style="padding:8px 12px;">
+          <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
+        </div>
+        <div id="intra-tl" style="margin-top:6px;"></div>
+      </div>
+
+      
+      <div class="sc"><div class="sc__h"><span class="sc__t">해외 연동 · 외국인 보유율</span><span class="sc__s">참고용</span></div><div class="scb">
+        
+        <div class="ti-row"><span class="ti-lbl">미 벨웨더 엔비디아</span>
+          <span class="ti-desc"><b class="num dn">-0.5%</b> 밤사이</span>
+        </div>
+        
+        
+        <div class="ti-row" style="border-bottom:none"><span class="ti-lbl">외국인 보유율</span>
+          <span class="ti-desc"><b class="num">27.52%</b></span>
+        </div>
+        
+      </div></div>
+      
 
       <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
       
@@ -63,13 +87,13 @@
         
         <div class="ti-row">
           <span class="ti-lbl">20일선 대비</span>
-          <span class="ti-desc">현재가가 20일선보다 <b class="num dn">-10.2%</b> 아래에 있어요</span>
+          <span class="ti-desc">현재가가 20일선보다 <b class="num dn">-5.8%</b> 아래에 있어요</span>
         </div>
         
         
         <div class="ti-row" style="border-bottom:none">
           <span class="ti-lbl">200일선 대비</span>
-          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+4.9%</b> 위에 있어요</span>
+          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+8.9%</b> 위에 있어요</span>
         </div>
         
       </div></div>
@@ -77,10 +101,10 @@
 
       <!-- 52주 범위 (실측) -->
       
-      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 53.8% 지점</span></div><div class="scb">
+      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 57.7% 지점</span></div><div class="scb">
         <div class="w52-bar">
-          <div class="w52-fill" style="width:53.8%"></div>
-          <div class="w52-now" style="left:53.8%"></div>
+          <div class="w52-fill" style="width:57.7%"></div>
+          <div class="w52-now" style="left:57.7%"></div>
         </div>
         <div class="w52-lbl"><span>최저 <span class="num">36,450</span></span><span>최고 <span class="num">127,000</span></span></div>
       </div></div>
@@ -96,7 +120,7 @@
           <span class="n2">삼성전자 <small class="num">005930</small></span>
           
             
-            <span class="c up num">+9.84%</span>
+            <span class="c up num">+5.29%</span>
             
           
         </a>
@@ -105,7 +129,7 @@
           <span class="n2">SK하이닉스 <small class="num">000660</small></span>
           
             
-            <span class="c up num">+0.98%</span>
+            <span class="c up num">+13.06%</span>
             
           
         </a>
@@ -114,7 +138,7 @@
           <span class="n2">한미반도체 <small class="num">042700</small></span>
           
             
-            <span class="c up num">+4.65%</span>
+            <span class="c up num">+1.11%</span>
             
           
         </a>
@@ -123,7 +147,7 @@
           <span class="n2">DB하이텍 <small class="num">000990</small></span>
           
             
-            <span class="c up num">+0.86%</span>
+            <span class="c up num">+3.67%</span>
             
           
         </a>

@@ -277,3 +277,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function () {});
 })();
 
+// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터로 헤더 아래 카드 렌더(데이터 있을 때만 표시)
+(function(){
+  var card=document.getElementById('intra-card');
+  if(!card) return;
+  var code=card.getAttribute('data-code');
+  fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
+    var vals=(d&&d.minutes)||[];
+    if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
+    var X0=14,X1=626,YT=22,YB=150;
+    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
+    var pts=vals.map(function(v,i){var x=X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED', last=pts.split(' ').pop().split(',');
+    document.getElementById('intra-svg').innerHTML=
+      '<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'+
+      '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>'+
+      '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+col+'"/>'+
+      '<text x="14" y="170" font-size="10" fill="#9CA3AF">09:00</text><text x="595" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
+    card.style.display='';
+    var coords2=vals.map(function(v,i){return {x:X0+(X1-X0)*(i/(n-1)),y:YB-(YB-YT)*((v-lo)/span)};});
+    function yAtX2(x){var b=coords2[0];for(var i=0;i<coords2.length;i++){if(Math.abs(coords2[i].x-x)<Math.abs(b.x-x))b=coords2[i];}return b.y;}
+    function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
+    var dnow=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+    fetch('/data/movers-why-'+dnow+'.json').then(function(r){return r.ok?r.json():fetch('/data/movers-why-live.json').then(function(x){return x.ok?x.json():null;});}).then(function(j){
+      if(!j||!j.stocks)return;
+      var me=j.stocks.filter(function(s){return s.code===code;})[0];
+      var evs=(me&&me.events)||[];
+      var svgEl=document.getElementById('intra-svg'),add='';
+      evs.forEach(function(e,i){var ax=t2x(e.time),ay=yAtX2(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
+        var px=Math.min(X1-12,Math.max(X0+12,ax)),up=(ay-41)>=YT,cy=up?ay-31:ay+31,sy=up?ay-24:ay+24,ty=up?ay-27:ay+35;
+        add+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="'+st+'" stroke-width="1.3"/><circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"/><text x="'+px.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="11" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';});
+      svgEl.innerHTML+=add;
+      var tl=document.getElementById('intra-tl');
+      if(tl&&evs.length){ tl.innerHTML=evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
+        return '<div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="flex:none;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;margin:1px 0 2px;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;">출처 · '+e.source+'</div></div></div>';}).join(''); }
+    }).catch(function(){});
+  }).catch(function(){});
+})();
+
