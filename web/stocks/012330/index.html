@@ -44,15 +44,38 @@
             <div class="meta"><span class="num">012330</span> · KOSPI · 06-25 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">509,000</div>
+            <div class="px num">513,000</div>
             
-            <div class="cg num" style="color:var(--dn)">▼ -0.20%</div>
+            <div class="cg num" style="color:var(--up)">▲ +0.79%</div>
             
           </div>
         </div>
         <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더, 고점·저점 실측 라벨 포함) -->
-        <div class="spark-header" data-spark="688000.0,686000.0,768000.0,761000.0,759000.0,748000.0,697000.0,612000.0,595000.0,570000.0,576000.0,607000.0,640000.0,660000.0,631000.0,603000.0,612000.0,569000.0,510000.0,509000.0"></div>
+        <div class="spark-header" data-spark="686000.0,768000.0,761000.0,759000.0,748000.0,697000.0,612000.0,595000.0,570000.0,576000.0,607000.0,640000.0,660000.0,631000.0,603000.0,612000.0,569000.0,510000.0,509000.0,513000.0"></div>
       </div>
+
+      <!-- 오늘 장중 (실측 1분봉) — 장중/장후 거래일에만 JS가 채움 -->
+      <div class="sc" id="intra-card" data-code="012330" style="display:none">
+        <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
+        <div class="scb" style="padding:8px 12px;">
+          <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
+        </div>
+      </div>
+
+      
+      <div class="sc"><div class="sc__h"><span class="sc__t">해외 연동 · 외국인 보유율</span><span class="sc__s">참고용</span></div><div class="scb">
+        
+        <div class="ti-row"><span class="ti-lbl">미 벨웨더 테슬라</span>
+          <span class="ti-desc"><b class="num dn">-1.6%</b> 밤사이</span>
+        </div>
+        
+        
+        <div class="ti-row" style="border-bottom:none"><span class="ti-lbl">외국인 보유율</span>
+          <span class="ti-desc"><b class="num">36.84%</b></span>
+        </div>
+        
+      </div></div>
+      
 
       <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
       
@@ -63,13 +86,13 @@
         
         <div class="ti-row">
           <span class="ti-lbl">20일선 대비</span>
-          <span class="ti-desc">현재가가 20일선보다 <b class="num dn">-20.5%</b> 아래에 있어요</span>
+          <span class="ti-desc">현재가가 20일선보다 <b class="num dn">-18.7%</b> 아래에 있어요</span>
         </div>
         
         
         <div class="ti-row" style="border-bottom:none">
           <span class="ti-lbl">200일선 대비</span>
-          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+23.4%</b> 위에 있어요</span>
+          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+24.1%</b> 위에 있어요</span>
         </div>
         
       </div></div>
@@ -77,10 +100,10 @@
 
       <!-- 52주 범위 (실측) -->
       
-      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 50.8% 지점</span></div><div class="scb">
+      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 51.5% 지점</span></div><div class="scb">
         <div class="w52-bar">
-          <div class="w52-fill" style="width:50.8%"></div>
-          <div class="w52-now" style="left:50.8%"></div>
+          <div class="w52-fill" style="width:51.5%"></div>
+          <div class="w52-now" style="left:51.5%"></div>
         </div>
         <div class="w52-lbl"><span>최저 <span class="num">242,000</span></span><span>최고 <span class="num">768,000</span></span></div>
       </div></div>
@@ -96,7 +119,7 @@
           <span class="n2">현대차 <small class="num">005380</small></span>
           
             
-            <span class="c dn num">-0.39%</span>
+            <span class="c dn num">-1.18%</span>
             
           
         </a>
@@ -105,7 +128,7 @@
           <span class="n2">기아 <small class="num">000270</small></span>
           
             
-            <span class="c up num">+1.09%</span>
+            <span class="c up num">+0.43%</span>
             
           
         </a>
@@ -114,7 +137,7 @@
           <span class="n2">HL만도 <small class="num">204320</small></span>
           
             
-            <span class="c up num">+3.14%</span>
+            <span class="c dn num">-3.83%</span>
             
           
         </a>
@@ -123,7 +146,7 @@
           <span class="n2">현대위아 <small class="num">011210</small></span>
           
             
-            <span class="c up num">+2.37%</span>
+            <span class="c dn num">-3.08%</span>
             
           
         </a>
