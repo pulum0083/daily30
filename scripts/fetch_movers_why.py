@@ -88,7 +88,11 @@ def fetch_mover_rows() -> list[dict]:
     return rows
 
 
+import re  # noqa: E402
+import urllib.parse  # noqa: E402
+import xml.etree.ElementTree as ET  # noqa: E402
 from fetch_news_live import _UP_WORDS, _DOWN_WORDS  # noqa: E402
+from fetch_news_live import _GN_KR, _clean_title, _parse_rss_datetime, get_gemini_api_key  # noqa: E402
 
 
 def classify_tier(event: dict | None, change_pct: float) -> str:
@@ -106,3 +110,78 @@ def classify_tier(event: dict | None, change_pct: float) -> str:
     if (sent == "pos" and up) or (sent == "neg" and down):
         return "why"
     return "related"
+
+
+_SENT_PROMPT = """종목 "{name}"의 오늘 기사 목록입니다. 주가에 가장 영향이 큰 기사 1건을 골라,
+요약 1문장과 감성을 분류하세요. 사실만, 추측·생성 금지.
+
+[기사 목록]
+{lst}
+
+[출력 — JSON만, 마크다운 없이]
+{{"idx": 0, "summary": "한 문장 요약", "sentiment": "pos|neg|neu"}}
+"""
+
+
+def _fetch_stock_articles(name: str, today: str, max_items: int = 8) -> list[dict]:
+    """종목명 Google News RSS에서 오늘 기사 + link(url)까지 수집한다."""
+    url = _GN_KR + urllib.parse.quote(f"{name} 주가")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            root = ET.fromstring(r.read())
+    except Exception as e:
+        print(f"[movers_why] {name} RSS 실패: {e}")
+        return []
+    out = []
+    for item in root.iter("item"):
+        title = (item.findtext("title") or "").strip()
+        pub_date, pub_time = _parse_rss_datetime(item.findtext("pubDate") or "")
+        if not title or pub_date != today:
+            continue
+        src_el = item.find("source")
+        out.append({
+            "headline": _clean_title(title),
+            "time": pub_time or "09:00",
+            "url": (item.findtext("link") or "").strip(),
+            "source": (src_el.text or "").strip() if src_el is not None else "",
+        })
+        if len(out) >= max_items:
+            break
+    return out
+
+
+def pick_event(name: str, today: str) -> dict | None:
+    """종목 기사 중 Gemini가 1건 선별·요약·감성. 기사 0건이면 None."""
+    articles = _fetch_stock_articles(name, today)
+    if not articles:
+        return None
+    from google import genai
+    from google.genai import types
+    lst = "\n".join(f'{i}. "{a["headline"]}" ({a["source"]})' for i, a in enumerate(articles))
+    prompt = _SENT_PROMPT.format(name=name, lst=lst)
+    try:
+        client = genai.Client(api_key=get_gemini_api_key())
+        resp = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=prompt,
+            config=types.GenerateContentConfig(temperature=0.2, max_output_tokens=200),
+        )
+        raw = (resp.text or "").strip()
+        mt = re.search(r"\{[\s\S]*\}", raw)
+        parsed = json.loads(mt.group(0)) if mt else {}
+    except Exception as e:
+        print(f"[movers_why] {name} Gemini 실패: {e}")
+        return None
+    idx = parsed.get("idx")
+    if not isinstance(idx, int) or not (0 <= idx < len(articles)):
+        return None
+    a = articles[idx]
+    sent = parsed.get("sentiment", "neu")
+    if sent not in ("pos", "neg", "neu"):
+        sent = "neu"
+    return {
+        "time": a["time"], "headline": a["headline"], "url": a["url"],
+        "source": a["source"], "summary": (parsed.get("summary") or "").strip(),
+        "sentiment": sent,
+    }
