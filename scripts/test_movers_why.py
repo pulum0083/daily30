@@ -40,3 +40,12 @@ def test_parse_naver_realtime():
 
 def test_parse_naver_realtime_missing():
     assert m.parse_naver_realtime({"datas": []}, vol_avg20=1) is None
+
+
+def test_classify_tier():
+    assert m.classify_tier(None, 5.0) == "none"
+    assert m.classify_tier({"sentiment": "pos", "headline": "엔비디아 공급 확대"}, 5.0) == "why"
+    assert m.classify_tier({"sentiment": "neg", "headline": "실적 쇼크 급락"}, -4.0) == "why"
+    assert m.classify_tier({"sentiment": "pos", "headline": "수주 호재"}, -4.0) == "related"
+    assert m.classify_tier({"sentiment": "neu", "headline": "급등 기대감"}, -4.0) == "related"
+    assert m.classify_tier({"sentiment": "neu", "headline": "거래량 증가"}, 0.5) == "related"

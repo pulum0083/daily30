@@ -86,3 +86,23 @@ def fetch_mover_rows() -> list[dict]:
         except Exception as e:
             print(f"[movers_why] {code} 실시간 실패: {e}")
     return rows
+
+
+from fetch_news_live import _UP_WORDS, _DOWN_WORDS  # noqa: E402
+
+
+def classify_tier(event: dict | None, change_pct: float) -> str:
+    """방향 일치 게이트. event 없으면 none, 감성·헤드라인↔등락 일치면 why, 불일치면 related."""
+    if not event:
+        return "none"
+    head = event.get("headline", "") or ""
+    sent = event.get("sentiment", "neu")
+    up = change_pct >= CHANGE_THRESHOLD
+    down = change_pct <= -CHANGE_THRESHOLD
+    if down and _UP_WORDS.search(head):
+        return "related"
+    if up and _DOWN_WORDS.search(head):
+        return "related"
+    if (sent == "pos" and up) or (sent == "neg" and down):
+        return "why"
+    return "related"
