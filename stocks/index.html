@@ -14,10 +14,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 .gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
 .gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
-.gnb__logo{font-size:15px;font-weight:800;color:#fff;cursor:pointer;}.gnb__logo b{color:#5AA2FF;}
+.gnb__logo{font-size:15px;font-weight:800;color:#fff;cursor:pointer;text-decoration:none;}
 .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
-.gnb .right{margin-left:auto;}
-.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;}.gnb .sbtn svg{width:13px;height:13px;}
+.gnb .right{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.gnb__sub{font-size:12px;font-weight:500;color:#6B7280;padding:5px 9px;border-radius:7px;transition:color .12s,background .12s;}.gnb__sub:hover{color:#C9CCD1;background:#26282B;}
+.gnb__divider{width:1px;height:16px;background:#2E3035;margin:0 4px;flex-shrink:0;}
+.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;margin-left:8px;}.gnb .sbtn svg{width:13px;height:13px;}
 
 .wrap{max-width:1120px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
@@ -542,7 +544,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">Double<b>-Shot</b></span><a href="/briefings/">브리핑</a><a class="on" href="/stocks/" onclick="event.preventDefault();go('home')">종목</a><a href="/stocks/" onclick="event.preventDefault();go('income')" style="white-space:nowrap">배당 설계기</a><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">종목</span><span class="gnb__subs"><a class="gnb__sub" href="https://doubleshot.space/">Double-Shot</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/" onclick="event.preventDefault();go('income')">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -575,7 +577,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge" id="vol-upd-badge"><span class="dot"></span>장중 2분</span> <span class="badge-info-btn" id="badge-info-btn">AI 뱃지 ⓘ</span></span></div>
       <div id="vol-top-rows"></div>
       <a class="more" onclick="go('ranking')">거래량 전체 →</a>
     </div>
@@ -1970,11 +1972,9 @@ renderChips('morning');
 })();
 </script>
 <script>
-/* 거래량 톱 + 외국인 보유율 — stocks-snapshot.json 실측 배선.
-   거래량 톱: 유니버스를 거래량(vol)으로 랭킹. 급증배수=vol/vol_avg20. AI신호는 실측 아니라 제거.
-   외국인 보유율: foreign_rate + foreign_spark(20일)로 수치·델타·스파크라인 실측. */
+/* 거래량 톱 — /api/vol-top 장중 2분 폴링 (장후엔 snapshot 폴백)
+   외국인 보유율 — stocks-snapshot.json 실측 배선 */
 (function(){
-  var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
   function manju(v){ return Math.round(v/10000).toLocaleString('en-US')+'만주'; }
   function sparkSvg(vals,color){
     if(!vals||vals.length<2) return '';
@@ -1983,16 +1983,33 @@ renderChips('morning');
     var last=pts.split(' ').pop().split(',');
     return '<svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.2" fill="#fff" stroke="'+color+'" stroke-width="1.5"/></svg>';
   }
-  function renderVolTop(snap){
+  function renderVolTopRows(items){
     var wrap=document.getElementById('vol-top-rows'); if(!wrap) return;
-    var list=Object.keys(snap.stocks).map(function(c){var s=snap.stocks[c];return {code:c,name:s.name,sector:s.sector,vol:s.vol||0,avg:s.vol_avg20||0};}).filter(function(x){return x.vol>0;});
-    list.sort(function(a,b){return b.vol-a.vol;});
-    var top=list.slice(0,5), maxv=top[0]?top[0].vol:1;
-    wrap.innerHTML=top.map(function(x,i){
-      var w=Math.round(x.vol/maxv*100), surge=x.avg?x.vol/x.avg:0;
-      var badge=surge>=1.5?'<span class="vol-surge-badge">×'+surge.toFixed(1)+' 급증</span>':'';
-      return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+(SECTOR_LABELS[x.sector]||'')+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+w+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span>'+badge+'</a>';
+    wrap.innerHTML=items.map(function(x,i){
+      return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+x.sector+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+(x.barPct||0)+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span></a>';
     }).join('');
+  }
+  function pollVolTop(){
+    fetch('/api/vol-top',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(d&&d.top&&d.top.length) renderVolTopRows(d.top);
+        var badge=document.getElementById('vol-upd-badge');
+        if(badge) badge.title='최근 갱신: '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+      })
+      .catch(function(){});
+  }
+  function krMarketOpen(){
+    var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);
+    return m>=540&&m<=930;
+  }
+  pollVolTop();
+  if(krMarketOpen()) setInterval(pollVolTop, 120000);
+  function renderVolTopFromSnap(snap){
+    var list=Object.keys(snap.stocks).map(function(c){var s=snap.stocks[c];return {code:c,name:s.name,sector:s.sector,vol:s.vol||0};}).filter(function(x){return x.vol>0;});
+    list.sort(function(a,b){return b.vol-a.vol;});
+    var top=list.slice(0,5),maxv=top[0]?top[0].vol:1;
+    renderVolTopRows(top.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}));
   }
   function renderForeign(snap){
     document.querySelectorAll('#us-linked-widget .us-detail[data-code]').forEach(function(panel){
@@ -2022,7 +2039,7 @@ renderChips('morning');
   }
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
-    .then(function(snap){ if(snap&&snap.stocks){ renderVolTop(snap); renderForeign(snap); renderEtfTop(snap); } })
+    .then(function(snap){ if(snap&&snap.stocks){ renderVolTopFromSnap(snap); renderForeign(snap); renderEtfTop(snap); } })
     .catch(function(){});
 })();
 </script>
