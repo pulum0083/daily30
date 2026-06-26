@@ -37,6 +37,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
 .strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
+.strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
 /* ── AI 브리핑 스트립 ── */
 .brief-strip{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:10px 14px;margin:10px 0;cursor:pointer;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,padding .14s,border-color .14s;}
 .brief-strip.is-hidden{padding:0;border-color:transparent;box-shadow:none;background:transparent;pointer-events:none;overflow:hidden;height:0;margin:0;}
@@ -569,7 +570,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span style="font-size:10px;color:var(--muted);">09:00 – 15:30 장중</span>
     </div>
     <div class="strip">
-      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
+      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
       <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
@@ -2450,6 +2451,32 @@ renderChips('morning');
 (function(){
   function fmtPct(pct){return (pct>=0?'+':'')+pct.toFixed(2)+'%';}
   function dirClass(pct){return pct>0?'up':pct<0?'dn':'';}
+  // 최근 종가 배열 → 미니 스파크라인 (상승=빨강·하락=파랑, 첫 값 대비 마지막 값)
+  function miniSpark(vals){
+    if(!Array.isArray(vals)||vals.length<2) return '';
+    var n=vals.length,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+    var color=vals[n-1]>=vals[0]?'#E03131':'#2775ED';
+    var pts=vals.map(function(v,i){return ((i/(n-1))*36).toFixed(1)+','+(12-((v-min)/rng)*10).toFixed(1);}).join(' ');
+    var last=pts.split(' ').pop().split(',');
+    return '<svg viewBox="0 0 40 14"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="1.8" fill="'+color+'"/></svg>';
+  }
+  // 종가 배열 → 툴팁 본문 (날짜 · 종가 · 전일대비 %) — 3열 그리드로 세로 정렬
+  function buildSparkTip(rows){
+    var cells=rows.map(function(r,i){
+      var md=r.d.slice(4,6)+'/'+r.d.slice(6,8);
+      var bold=i===rows.length-1;
+      var cv=r.c.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      var chg='';
+      if(i>0&&rows[i-1].c){
+        var p=(r.c-rows[i-1].c)/rows[i-1].c*100;
+        chg='<span style="color:'+(p>=0?'#E03131':'#2775ED')+';'+(bold?'font-weight:800':'')+'">'+(p>=0?'+':'')+p.toFixed(2)+'%</span>';
+      }
+      return '<span style="color:#94A3B8;'+(bold?'font-weight:800':'')+'">'+md+'</span>'
+           + '<span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:'+(bold?'800':'700')+'">'+cv+'</span>'
+           + '<span style="text-align:right;font-variant-numeric:tabular-nums">'+chg+'</span>';
+    }).join('');
+    return '<div style="display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;row-gap:3px;align-items:baseline">'+cells+'</div>';
+  }
   fetch('/api/kospi-live',{cache:'no-store',signal:AbortSignal.timeout(6000)})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
@@ -2462,6 +2489,20 @@ renderChips('morning');
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d) return;
+      if(Array.isArray(d.kospiSpark)&&d.kospiSpark.length>1){
+        var sp=document.getElementById('h-kospi-spark');
+        if(sp){
+          sp.innerHTML=miniSpark(d.kospiSpark.map(function(x){return x.c;}));
+          sp.dataset.tipTitle='코스피 최근 종가 · 8영업일';
+          sp.dataset.tip=buildSparkTip(d.kospiSpark);
+          if(!sp._tipBound&&typeof showTip==='function'){
+            sp.addEventListener('mouseenter',showTip);
+            sp.addEventListener('mousemove',moveTip);
+            sp.addEventListener('mouseleave',hideTip);
+            sp._tipBound=true;
+          }
+        }
+      }
       if(d.kosdaq&&d.kosdaq.price){
         var el=document.getElementById('h-kosdaq'),ec=document.getElementById('h-kosdaq-c');
         if(el) el.textContent=d.kosdaq.price.toFixed(1);
