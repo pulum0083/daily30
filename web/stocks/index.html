@@ -839,20 +839,35 @@ function usSel(code){
           .then(function(r){return r.ok?r.json():null;})
           .then(function(d){ if(d&&d.prices) applyLive(d.prices); }).catch(function(){});
       }
-      fetch('/briefings/'+briefDate()+'/kospi/analysis_snapshot.json',{cache:'no-store'})
+      function loadPicks(date){
+        fetch('/briefings/'+date+'/kospi/analysis_snapshot.json',{cache:'no-store'})
+          .then(function(r){return r.ok?r.json():null;})
+          .then(function(snap){
+            var picks=(snap&&snap.stock_picks)||[];
+            PICKS=picks.map(function(p){return {code:p.ticker,name:p.name,tag:p.scenario_tag||p.signal||'',entry:won(p.entry),target:won(p.target),stop:won(p.stop),target_pct:p.target_pct||''};})
+              .filter(function(p){return p.code&&p.entry&&p.target&&p.stop;});
+            if(!PICKS.length){ box.style.display='none'; return; }
+            grid.innerHTML=PICKS.map(cardHTML).join('');
+            box.style.display='';
+            document.getElementById('mt-sub').textContent=date+' 코스피 픽 '+PICKS.length+'종목 · 진입/목표/손절 추적';
+            poll();
+            if(krOpen()){ setInterval(poll,45000); }
+            else { var lv=document.getElementById('mt-live'); lv.textContent='●장 마감'; lv.style.color='#94A3B8'; lv.style.background='#F1F5F9'; }
+          }).catch(function(){ box.style.display='none'; });
+      }
+      // 최신 kospi 브리핑 날짜를 briefings-list.json에서 권위있게 해석 — DOM에 박힌 stale data-href(생성 시점 고정) 의존 제거
+      function latestKospiDate(list){
+        var slots=list&&list.slots; if(!slots) return null;
+        var today=kstDate();
+        if(slots[today]&&slots[today].kospi&&slots[today].kospi.state==='ready') return today;
+        var dates=Object.keys(slots).sort().reverse();
+        for(var i=0;i<dates.length;i++){ var k=slots[dates[i]].kospi; if(k&&k.state==='ready') return dates[i]; }
+        return null;
+      }
+      fetch('/data/briefings-list.json',{cache:'no-store'})
         .then(function(r){return r.ok?r.json():null;})
-        .then(function(snap){
-          var picks=(snap&&snap.stock_picks)||[];
-          PICKS=picks.map(function(p){return {code:p.ticker,name:p.name,tag:p.scenario_tag||p.signal||'',entry:won(p.entry),target:won(p.target),stop:won(p.stop),target_pct:p.target_pct||''};})
-            .filter(function(p){return p.code&&p.entry&&p.target&&p.stop;});
-          if(!PICKS.length){ box.style.display='none'; return; }
-          grid.innerHTML=PICKS.map(cardHTML).join('');
-          box.style.display='';
-          document.getElementById('mt-sub').textContent=briefDate()+' 코스피 픽 '+PICKS.length+'종목 · 진입/목표/손절 추적';
-          poll();
-          if(krOpen()){ setInterval(poll,45000); }
-          else { var lv=document.getElementById('mt-live'); lv.textContent='●장 마감'; lv.style.color='#94A3B8'; lv.style.background='#F1F5F9'; }
-        }).catch(function(){ box.style.display='none'; });
+        .then(function(list){ loadPicks(latestKospiDate(list)||briefDate()); })
+        .catch(function(){ loadPicks(briefDate()); });
     })();
     </script>
     <div class="home-cols">
