@@ -12,12 +12,12 @@ async function fetchMinutes(symbol) {
   const text = await r.text();
 
   // data 속성: "YYYYMMDDHHmm|open|high|low|close|volume"
-  // 종목 분봉은 open/high/low가 "null"이고 close·volume만 유효
-  const re = /data="(\d{8})(\d{4})\|[^|]*\|[^|]*\|[^|]*\|([\d.]+)\|/g;
+  // 종목 분봉은 open/high/low가 "null"이고 close·volume만 유효. volume은 당일 누적값.
+  const re = /data="(\d{8})(\d{4})\|[^|]*\|[^|]*\|[^|]*\|([\d.]+)\|([\d.]+)/g;
   const rows = [];
   let m;
   while ((m = re.exec(text)) !== null) {
-    rows.push({ date: m[1], hhmm: parseInt(m[2], 10), v: parseFloat(m[3]) });
+    rows.push({ date: m[1], hhmm: parseInt(m[2], 10), v: parseFloat(m[3]), vol: parseFloat(m[4]) });
   }
   if (!rows.length) return [];
 
@@ -30,6 +30,7 @@ async function fetchMinutes(symbol) {
   const sampled = points.filter((p, i) => p.hhmm % 5 === 0 || i === points.length - 1);
   return {
     values: sampled.map(p => p.v),
+    volumes: sampled.map(p => p.vol), // 누적 거래량 (VWAP 계산용)
     times: sampled.map(p => {
       const h = Math.floor(p.hhmm / 100), m = p.hhmm % 100;
       return `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}`;
@@ -44,10 +45,10 @@ export default async function handler(req, res) {
   const code = (req.query && req.query.code) ? String(req.query.code).replace(/[^0-9A-Za-z]/g, '') : '';
   if (code) {
     try {
-      const { values, times } = await fetchMinutes(code);
-      return res.status(200).json({ code, minutes: values, times });
+      const { values, volumes, times } = await fetchMinutes(code);
+      return res.status(200).json({ code, minutes: values, volumes, times });
     } catch (e) {
-      return res.status(502).json({ code, minutes: [], times: [], error: String(e) });
+      return res.status(502).json({ code, minutes: [], volumes: [], times: [], error: String(e) });
     }
   }
 
