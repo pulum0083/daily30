@@ -213,11 +213,18 @@ def _why_line(event: dict, tier: str) -> str:
     return f"{summ} (개별 인과 단정 안 함)"
 
 
+LEADER_CODES = ["005930", "000660", "005380"]  # 주도주(삼성전자·SK하이닉스·현대차)
+
+
 def build_payload(today: str) -> dict:
-    """무버 선별 → 종목별 뉴스·게이트 → 산출물 dict."""
-    movers = select_movers(fetch_mover_rows())
+    """주도주 3종에 대해 뉴스·게이트 → 산출물 dict. 무버 전체 선별은 유지(데이터 보존)."""
+    all_rows = fetch_mover_rows()
+    row_by_code = {r["code"]: r for r in all_rows}
     stocks = []
-    for r in movers:
+    for code in LEADER_CODES:
+        r = row_by_code.get(code)
+        if not r:
+            continue
         event = pick_event(r["name"], today)
         tier = classify_tier(event, r["change_pct"])
         events = []
