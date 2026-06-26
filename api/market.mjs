@@ -73,6 +73,22 @@ async function fetchForex() {
   };
 }
 
+async function fetchKospiHistory() {
+  const end = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10).replace(/-/g, '') + '2359';
+  const start = new Date(Date.now() + 9 * 3600 * 1000 - 20 * 86400 * 1000).toISOString().slice(0, 10).replace(/-/g, '') + '0000';
+  const r = await fetch(
+    `https://api.stock.naver.com/chart/domestic/index/KOSPI/day?startDateTime=${start}&endDateTime=${end}`,
+    { headers: { ...HDR, Referer: 'https://m.stock.naver.com/' }, signal: AbortSignal.timeout(6000) },
+  );
+  if (!r.ok) throw new Error(`kospi history ${r.status}`);
+  const d = await r.json();
+  const closes = (Array.isArray(d) ? d : [])
+    .map(row => parseFloat(row.closePrice))
+    .filter(v => Number.isFinite(v));
+  if (closes.length < 2) throw new Error('kospi history: too few closes');
+  return closes.slice(-8); // 최근 8영업일 종가
+}
+
 async function fetchInvestor() {
   const r = await fetch('https://finance.naver.com/sise/sise_index.naver?code=KOSPI', {
     headers: { ...HDR, 'Accept-Language': 'ko-KR' },
@@ -100,18 +116,20 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const [kosdaq, kospi200, forex, investor] = await Promise.allSettled([
+  const [kosdaq, kospi200, forex, investor, kospiSpark] = await Promise.allSettled([
     fetchIndex('KOSDAQ'),
     fetchIndex('KPI200'),
     fetchForex(),
     fetchInvestor(),
+    fetchKospiHistory(),
   ]);
 
   res.json({
-    kosdaq:    kosdaq.status    === 'fulfilled' ? kosdaq.value    : null,
-    kospi200:  kospi200.status  === 'fulfilled' ? kospi200.value  : null,
-    forex:     forex.status     === 'fulfilled' ? forex.value     : null,
-    investor:  investor.status  === 'fulfilled' ? investor.value  : null,
-    fetchedAt: new Date().toISOString(),
+    kosdaq:     kosdaq.status     === 'fulfilled' ? kosdaq.value     : null,
+    kospi200:   kospi200.status   === 'fulfilled' ? kospi200.value   : null,
+    forex:      forex.status      === 'fulfilled' ? forex.value      : null,
+    investor:   investor.status   === 'fulfilled' ? investor.value   : null,
+    kospiSpark: kospiSpark.status === 'fulfilled' ? kospiSpark.value : null,
+    fetchedAt:  new Date().toISOString(),
   });
 }
