@@ -64,3 +64,40 @@ def test_fallback_event():
     assert ev["summary"] == "알테오젠 급락 마감"  # 요약 대신 헤드라인 그대로
     assert ev["sentiment"] == "neg"
     assert ev["url"] == "http://x" and ev["time"] == "10:30"
+
+
+def _stub_articles(monkeypatch, arts):
+    monkeypatch.setattr(m, "_fetch_stock_articles", lambda name, today, **kw: arts)
+    # 1순위 Gemini는 첫 기사를 그대로 고른 것으로 폴백 (네트워크 없음)
+    monkeypatch.setattr(m, "_gemini_pick", lambda name, articles: m._fallback_event(articles[0]))
+
+
+def test_pick_events_red_first_and_cap(monkeypatch):
+    # 하락(-4%) 종목. 하락어 기사=why(빨강), 상승어 기사=related(회색).
+    arts = [
+        {"time": "09:30", "headline": "수주 호재 기대감", "url": "u1", "source": "A"},   # related
+        {"time": "10:00", "headline": "실적 쇼크 급락",   "url": "u2", "source": "B"},   # why
+        {"time": "11:00", "headline": "추가 약세 우려",   "url": "u3", "source": "C"},   # why
+    ]
+    _stub_articles(monkeypatch, arts)
+    evs = m.pick_events("테스트", "2026-06-27", -4.0, max_n=2)
+    assert len(evs) == 2                       # 최대 2개
+    assert evs[0]["tier"] == "why"             # 빨강 우선
+    assert all(e["tier"] in ("why", "related") for e in evs)
+
+
+def test_pick_events_gray_fallback_when_no_red(monkeypatch):
+    # 하락 종목인데 상승어뿐 → 빨강 없음 → 회색으로 채움.
+    arts = [
+        {"time": "09:30", "headline": "수주 호재", "url": "u1", "source": "A"},
+        {"time": "10:00", "headline": "신고가 기대", "url": "u2", "source": "B"},
+    ]
+    _stub_articles(monkeypatch, arts)
+    evs = m.pick_events("테스트", "2026-06-27", -4.0, max_n=2)
+    assert len(evs) == 2
+    assert all(e["tier"] == "related" for e in evs)
+
+
+def test_pick_events_empty_when_no_articles(monkeypatch):
+    _stub_articles(monkeypatch, [])
+    assert m.pick_events("테스트", "2026-06-27", -4.0) == []

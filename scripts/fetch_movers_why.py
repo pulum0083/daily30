@@ -169,11 +169,8 @@ def _fallback_event(a: dict) -> dict:
     }
 
 
-def pick_event(name: str, today: str) -> dict | None:
-    """종목 기사 중 Gemini가 1건 선별·요약·감성. Gemini 실패 시 첫 기사로 폴백. 기사 0건이면 None."""
-    articles = _fetch_stock_articles(name, today)
-    if not articles:
-        return None
+def _gemini_pick(name: str, articles: list[dict]) -> dict:
+    """기사 목록 중 Gemini가 1건 선별·요약·감성. 실패 시 첫 기사 헤드라인 폴백."""
     from google import genai
     from google.genai import types
     lst = "\n".join(f'{i}. "{a["headline"]}" ({a["source"]})' for i, a in enumerate(articles))
@@ -206,6 +203,39 @@ def pick_event(name: str, today: str) -> dict | None:
     }
 
 
+def pick_event(name: str, today: str) -> dict | None:
+    """종목 기사 중 Gemini가 1건 선별·요약·감성. 기사 0건이면 None."""
+    articles = _fetch_stock_articles(name, today)
+    if not articles:
+        return None
+    return _gemini_pick(name, articles)
+
+
+def pick_events(name: str, today: str, change_pct: float, max_n: int = 2) -> list[dict]:
+    """핀용 이벤트를 최대 max_n건 선별. 1순위는 Gemini 요약, 그다음은 남은 기사 헤드라인 폴백.
+    tier 'why'(빨강) 우선 정렬. 실데이터만 사용 — 기사가 부족하면 그만큼만(억지로 채우지 않음)."""
+    articles = _fetch_stock_articles(name, today)
+    if not articles:
+        return []
+    primary = _gemini_pick(name, articles)
+    cand = [primary]
+    seen = {primary["headline"]}
+    for a in articles:
+        if a["headline"] in seen:
+            continue
+        cand.append(_fallback_event(a))
+        seen.add(a["headline"])
+    # tier 부여 후 'none' 제거 → 빨강(why) 우선 정렬 → 상위 max_n.
+    scored = [(ev, classify_tier(ev, change_pct)) for ev in cand]
+    scored = [(ev, t) for ev, t in scored if t != "none"]
+    scored.sort(key=lambda x: 0 if x[1] == "why" else 1)
+    return [{
+        "time": ev["time"], "headline": ev["headline"], "url": ev["url"],
+        "source": ev["source"], "why": _why_line(ev, t), "tier": t,
+        "sentiment": ev["sentiment"],
+    } for ev, t in scored[:max_n]]
+
+
 def _why_line(event: dict, tier: str) -> str:
     summ = event.get("summary") or event.get("headline")
     if tier == "why":
@@ -225,16 +255,7 @@ def build_payload(today: str) -> dict:
         r = row_by_code.get(code)
         if not r:
             continue
-        event = pick_event(r["name"], today)
-        tier = classify_tier(event, r["change_pct"])
-        events = []
-        if event and tier != "none":
-            events = [{
-                "time": event["time"], "headline": event["headline"],
-                "url": event["url"], "source": event["source"],
-                "why": _why_line(event, tier), "tier": tier,
-                "sentiment": event["sentiment"],
-            }]
+        events = pick_events(r["name"], today, r["change_pct"])
         stocks.append({
             "code": r["code"], "name": r["name"],
             "changePct": round(r["change_pct"], 2),
