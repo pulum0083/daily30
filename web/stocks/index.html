@@ -695,9 +695,9 @@ function usSel(code){
       var hLabY=(hiC.y-8 < YT+2)?(hiC.y+16):(hiC.y-8);   // 상단 붙으면 점 아래로
       var lLabY=(loC.y+16 > YB-6)?(loC.y-10):(loC.y+16);  // 하단(축 라벨) 겹치면 점 위로
       s+='<circle cx="'+hiC.x.toFixed(1)+'" cy="'+hiC.y.toFixed(1)+'" r="4" fill="#E03131"/>'
-        +'<text x="'+(hiC.x+hOff).toFixed(1)+'" y="'+hLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#E03131" text-anchor="'+hAnc+'">고점 '+fmt(vals[hiIdx])+'</text>'
+        +'<text x="'+(hiC.x+hOff).toFixed(1)+'" y="'+hLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#E03131" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round" text-anchor="'+hAnc+'">고점 '+fmt(vals[hiIdx])+'</text>'
         +'<circle cx="'+loC.x.toFixed(1)+'" cy="'+loC.y.toFixed(1)+'" r="4" fill="#2775ED"/>'
-        +'<text x="'+(loC.x+lOff).toFixed(1)+'" y="'+lLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#2775ED" text-anchor="'+lAnc+'">저점 '+fmt(vals[loIdx])+'</text>';
+        +'<text x="'+(loC.x+lOff).toFixed(1)+'" y="'+lLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#2775ED" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round" text-anchor="'+lAnc+'">저점 '+fmt(vals[loIdx])+'</text>';
     }
     s+='<text x="'+X0+'" y="170" font-size="10" fill="#9CA3AF">09:00</text>'
       +'<text x="'+(X1-30)+'" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
