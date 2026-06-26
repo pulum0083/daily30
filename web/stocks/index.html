@@ -566,11 +566,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,366</span><span class="vc dn num" id="h-usd-c">−3.2</span></div>
     </div>
     <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
-    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/" style="cursor:pointer;">
-      <span class="bs-icon" id="bs-icon">📊</span>
+    <div class="brief-strip bs-live" id="brief-strip" data-baked-date="2026-06-26" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-26/kospi/" style="cursor:pointer;">
+      <span class="bs-icon" id="bs-icon">📰</span>
       <span class="bs-body">
-        <span class="bs-type" id="bs-type">더블샷 브리핑</span>
-        <span class="bs-text" id="bs-text">오늘의 코스피·미국 시장 AI 예측</span>
+        <span class="bs-type" id="bs-type">장중 이슈 브리핑</span>
+        <span class="bs-text" id="bs-text">코스피, 미국 증시 혼조에 약세…외국인 매도세 확대</span>
       </span>
       <span class="bs-arr">›</span>
     </div>
@@ -2069,7 +2069,7 @@ function showTodayBriefing(type, today, el){
       var d = bsItem(s, type);
       bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
     })
-    .catch(function(){ bsHide(el); });
+    .catch(function(){ /* fetch 실패 시 폴백 유지 — bsHide 금지 */ });
 }
 
 /* 장중(09:00~16:30) 이슈 브리핑 — kospi-news-{today}.json의 latest 헤드라인. 없으면 오늘 예측으로 폴백. */
@@ -2091,6 +2091,14 @@ function renderBriefStrip(){
   var slot = getKSTSlot();
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
+  // 날짜 불일치 → 구 baked 데이터 제거 후 제네릭 폴백으로 리셋
+  if (el.dataset.bakedDate && el.dataset.bakedDate !== today) {
+    el.className = 'brief-strip bs-kospi';
+    el.dataset.href = '/briefings/';
+    document.getElementById('bs-icon').textContent = '📊';
+    document.getElementById('bs-type').textContent = '더블샷 브리핑';
+    document.getElementById('bs-text').textContent = '오늘의 코스피·미국 시장 AI 예측';
+  }
   if (slot === 'issue') showIssueBriefing(today, el);
   else showTodayBriefing(slot, today, el); // kospi / close / us
 }
