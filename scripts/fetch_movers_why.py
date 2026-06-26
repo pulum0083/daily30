@@ -151,8 +151,26 @@ def _fetch_stock_articles(name: str, today: str, max_items: int = 8) -> list[dic
     return out
 
 
+def _infer_sentiment(headline: str) -> str:
+    """헤드라인 방향어로 감성 판정 (Gemini 폴백용). 하락어 우선."""
+    if _DOWN_WORDS.search(headline):
+        return "neg"
+    if _UP_WORDS.search(headline):
+        return "pos"
+    return "neu"
+
+
+def _fallback_event(a: dict) -> dict:
+    """Gemini 실패 시: 당일 기사 헤드라인 그대로 + 정규식 감성. 실데이터만 사용."""
+    return {
+        "time": a["time"], "headline": a["headline"], "url": a["url"],
+        "source": a["source"], "summary": a["headline"],
+        "sentiment": _infer_sentiment(a["headline"]),
+    }
+
+
 def pick_event(name: str, today: str) -> dict | None:
-    """종목 기사 중 Gemini가 1건 선별·요약·감성. 기사 0건이면 None."""
+    """종목 기사 중 Gemini가 1건 선별·요약·감성. Gemini 실패 시 첫 기사로 폴백. 기사 0건이면 None."""
     articles = _fetch_stock_articles(name, today)
     if not articles:
         return None
@@ -171,18 +189,19 @@ def pick_event(name: str, today: str) -> dict | None:
         mt = re.search(r"\{[\s\S]*\}", raw)
         parsed = json.loads(mt.group(0)) if mt else {}
     except Exception as e:
-        print(f"[movers_why] {name} Gemini 실패: {e}")
-        return None
+        print(f"[movers_why] {name} Gemini 실패 → 헤드라인 폴백: {e}")
+        return _fallback_event(articles[0])
     idx = parsed.get("idx")
     if not isinstance(idx, int) or not (0 <= idx < len(articles)):
-        return None
+        return _fallback_event(articles[0])
     a = articles[idx]
     sent = parsed.get("sentiment", "neu")
     if sent not in ("pos", "neg", "neu"):
         sent = "neu"
+    summary = (parsed.get("summary") or "").strip() or a["headline"]
     return {
         "time": a["time"], "headline": a["headline"], "url": a["url"],
-        "source": a["source"], "summary": (parsed.get("summary") or "").strip(),
+        "source": a["source"], "summary": summary,
         "sentiment": sent,
     }
 

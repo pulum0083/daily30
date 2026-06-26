@@ -49,3 +49,18 @@ def test_classify_tier():
     assert m.classify_tier({"sentiment": "pos", "headline": "수주 호재"}, -4.0) == "related"
     assert m.classify_tier({"sentiment": "neu", "headline": "급등 기대감"}, -4.0) == "related"
     assert m.classify_tier({"sentiment": "neu", "headline": "거래량 증가"}, 0.5) == "related"
+
+
+def test_infer_sentiment():
+    assert m._infer_sentiment("SK하이닉스 급락에 코스피 휘청") == "neg"
+    assert m._infer_sentiment("삼성전자 신고가 돌파 강세") == "pos"
+    assert m._infer_sentiment("현대차 신차 공개 행사 개최") == "neu"
+    assert m._infer_sentiment("반등 시도했으나 급락 마감") == "neg"  # 하락어 우선
+
+
+def test_fallback_event():
+    a = {"time": "10:30", "headline": "알테오젠 급락 마감", "url": "http://x", "source": "연합"}
+    ev = m._fallback_event(a)
+    assert ev["summary"] == "알테오젠 급락 마감"  # 요약 대신 헤드라인 그대로
+    assert ev["sentiment"] == "neg"
+    assert ev["url"] == "http://x" and ev["time"] == "10:30"
