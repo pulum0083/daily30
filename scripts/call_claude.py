@@ -31,6 +31,21 @@ DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 섹터 로테이션 풀 (코스피 아침 브리핑 — sector_focus)
+# ─────────────────────────────────────────────────────────────────────────────
+SECTOR_POOL = [
+    {"key": "semicon", "name": "반도체",     "emoji": "🏭"},
+    {"key": "power",   "name": "AI전력기기", "emoji": "⚡"},
+    {"key": "defense", "name": "방산",       "emoji": "🛡️"},
+    {"key": "ship",    "name": "조선",       "emoji": "🚢"},
+    {"key": "battery", "name": "2차전지",    "emoji": "🔋"},
+    {"key": "auto",    "name": "자동차",     "emoji": "🚗"},
+    {"key": "bio",     "name": "바이오",     "emoji": "💊"},
+    {"key": "finance", "name": "금융",       "emoji": "🏦"},
+]
+SECTOR_BY_KEY = {s["key"]: s for s in SECTOR_POOL}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # System prompts (CACHED — these are billed at 10% on cache hits)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -97,6 +112,14 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 - 금 하락 또는 횡보 (안전자산 수요 감소)
 - 미국 10년물 금리 상승 (자금이 안전자산에서 위험자산으로 이동)
 4개 중 3개 이상이 같은 방향이면 명확한 리스크온/오프 전환 시그널이고, reasons에 반드시 언급한다.
+
+### [최우선 원칙] 코스피 지수 집중도 — 반도체 메가캡이 곧 지수다
+삼성전자(005930)·SK하이닉스(000660)·SK스퀘어(402340) 등 반도체 대형주가 코스피 시가총액의 약 1/3을 차지하고, 이들이 크게 움직이는 날엔 지수 등락 기여도의 절반 이상을 좌우한다. 즉 **이 반도체 양대장의 방향이 코스피 당일 방향을 사실상 결정하는 장세**다.
+- 방향 예측의 출발점은 항상 "오늘 삼성전자·SK하이닉스가 오를까 내릴까"이다. 아래 우선순위 중 **SOX(필라델피아 반도체)·DRAM ETF·마이크론/엔비디아 동향**을 이 두 종목의 선행 지표로 **최우선 가중**한다.
+- 반도체가 강세인데 지수가 빠지거나 그 반대는 드물다. 반도체 메가캡 방향과 다른 시그널(예: 금융·내수주 흐름)이 충돌하면, 반도체 쪽에 더 큰 가중을 두되 confidence는 보수적으로 낮춘다.
+- reasons[0](전체 시장 방향 요약)에 이 반도체 메가캡 가중 관점을 반드시 반영한다.
+- ⚠️ 단, [필수 규칙 7]에 따라 reasons·watch_items **본문**에서는 삼성전자·SK하이닉스 개별 등락(%·방향)을 직접 서술하지 않는다. "반도체 섹터"·"SOX 지수" 레벨 표현으로만 쓴다. 위 가중은 내부 판단에만 사용한다.
+- 임의의 시총 비중 수치(예: "60%")를 본문에 사실처럼 기재하지 않는다. 데이터에 없는 통계는 만들지 않는다.
 
 ### 방향 예측 우선순위
 1. 미국 증시 종가 (나스닥·S&P500·다우 change_pct) — 가장 강한 선행 지표
@@ -239,6 +262,14 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - reasons에서 가장 임팩트 큰 2개를 선택해 더 짧게 압축
 - 자세한 내용은 웹에서 확인 유도 목적 — 궁금증을 유발하되 결론만 전달
 
+### 하단 심층 섹션 — sector_focus / us_linked_story 중 택1
+코스피 아침 브리핑 하단에는 두 가지 심층 섹션 중 **하나만** 들어간다.
+- **us_linked_story**: 미국 이벤트 1건이 한국 종목에 미치는 영향 심층 분석.
+- **sector_focus**: 오늘 임팩트 큰 코스피 섹터 1개 심층 분석.
+
+**user 메시지의 "## 🎯 오늘 하단 섹션 지정"이 둘 중 어느 것을 작성할지 지시한다. 지시받은 섹션만 채우고, 나머지 하나는 반드시 `null`로 출력한다.**
+us_linked_story를 지시받았더라도 뉴스 요약에 마땅한 미국 이벤트가 없으면, us_linked_story를 `null`로 두고 sector_focus를 대신 작성한다(폴백). sector_focus를 지시받은 경우엔 항상 sector_focus를 작성한다.
+
 ### 미국 연계 종목 소식(us_linked_story) 작성 규칙
 코스피 아침 브리핑 하단에 붙는, 오늘 한국 시장에 가장 임팩트가 큰 미국 이벤트 1건 심층 분석.
 
@@ -260,11 +291,47 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - 수치는 <b> 태그로 강조한다.
 - 뉴스 요약에 마땅한 미국 이벤트가 없으면 `us_linked_story`를 null로 출력한다. 억지로 만들지 않는다.
 
+### 오늘의 섹터 브리핑(sector_focus) 작성 규칙
+코스피 아침 브리핑 하단에 붙는 "오늘의 섹터" 심층 분석. 아래 8개 섹터 풀에서 1개를 골라 작성한다.
+
+| sector_key | 섹터명 | 대표 종목 |
+|---|---|---|
+| semicon | 반도체 | 삼성전자, SK하이닉스, 한미반도체 |
+| power | AI전력기기 | HD현대일렉트릭, LS일렉트릭, 효성중공업 |
+| defense | 방산 | 한화에어로스페이스, LIG넥스원, 현대로템 |
+| ship | 조선 | HD현대중공업, 한화오션, 삼성중공업 |
+| battery | 2차전지 | LG에너지솔루션, 에코프로비엠, 삼성SDI |
+| auto | 자동차 | 현대차, 기아, 현대모비스 |
+| bio | 바이오 | 삼성바이오로직스, 셀트리온, 유한양행 |
+| finance | 금융 | KB금융, 신한지주, 메리츠금융 |
+
+- **섹터 선택**: 오늘 뉴스·시장 흐름상 가장 임팩트 큰 섹터 1개를 고른다. user 메시지에 "섹터 로테이션 가이드"가 있으면 최근 다룬 섹터는 피한다.
+- **sector_key / sector_name**: 위 표의 값 그대로 사용한다.
+- **signal**: 오늘 그 섹터의 핵심을 한 문장으로. 마침표 종결. 30자 이내.
+  예시: "HBM 수요는 건재. 삼성 수율 인증 지연이 SK하이닉스에 계속 유리하게 작용 중."
+- **paragraphs 작성 절차 (반드시 순서대로 따를 것)**
+  1. 선택한 sector_key로 `sector_stocks[sector_key].stocks` 목록을 먼저 조회한다.
+  2. 각 종목의 `change_pct`와 `price`를 그대로 읽어 문장에 삽입한다.
+  3. 목록에 있는 종목만 등락률 수치를 언급한다. 목록에 없는 종목은 수치 없이 이름만 쓴다.
+  4. `sector_stocks[sector_key].etfs`에 ETF 데이터가 있으면 같은 방식으로 인용한다.
+- **paragraphs 구성**: 3개 문단, 각 문단 해요체. 문장 수는 자유 (1~2문장 권장).
+  - **각 문단 작성 원칙**: 판단·주장 문장을 먼저 쓴다. 데이터는 그 뒤에 붙이거나, 판단만 이어가도 된다.
+    - ✅ "반도체 섹터는 오늘 시장을 주도할 거예요. 엔비디아 <b>+5.6%</b>·DRAM ETF <b>+7.5%</b> 급등이 수급까지 끌어올렸어요."
+    - ❌ 데이터 먼저: "엔비디아가 +5.6% 올랐어요. 반도체 섹터에 긍정적이에요."
+  - 1문단: 오늘 그 섹터의 핵심 모멘텀 또는 이슈 (sector_stocks 수치 활용)
+  - 2문단: 종목별 차별화 — sector_stocks에서 상승·하락 종목을 대비 (실제 change_pct 사용)
+  - 3문단: 리스크 요인 또는 변곡점 시그널
+- **[데이터 금지 규칙]**
+  - sector_stocks에 없는 종목의 등락률·가격을 추정하거나 만들어 쓰는 것은 절대 금지한다.
+  - 수치 근거가 없는 항목은 정성적 문장으로만 작성한다.
+  - ❌ 금지: "삼성바이오로직스가 +1.8% 올랐다" (sector_stocks에 실제 값 없이 임의 기재)
+  - ✅ 허용: "삼성바이오로직스가 <b>+1.8%</b> 올랐다" (sector_stocks.bio.stocks에서 change_pct=1.8 확인 후)
+
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, us_linked_story, comfort_line**
+**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, comfort_line, 그리고 sector_focus·us_linked_story 두 키 (지시받은 하나는 객체, 나머지는 반드시 null)**
 reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타이틀이 공백이 된다.
 
 {
@@ -319,8 +386,12 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       {"name": "삼성전자", "code": "005930"},
       {"name": "MU", "code": "MU"}
     ]
-  }
+  },
+  "sector_focus": null
 }
+
+(위 예시는 us_linked_story를 지시받은 경우다. sector_focus를 지시받았다면 반대로 `"us_linked_story": null`로 두고 sector_focus를 아래 형태로 채운다:
+  "sector_focus": {"sector_key": "semicon", "sector_name": "반도체", "emoji": "🏭", "signal": "한 문장 30자 이내.", "paragraphs": ["문단1", "문단2", "문단3"]})
 
 **[위로 한 줄(comfort_line) 규칙 — 형식과 무관하게 항상 출력]**
 근거 섹션 맨 아래에 붙는, 글을 읽는 투자자에게 건네는 순수 정서적 위로 한 줄이다.
@@ -756,6 +827,70 @@ def save_signal_to_history(briefing_type: str, date_str: str, signals: list, kee
     print(f"[call_claude] Saved signal history → {path} ({len(history)} entries)")
 
 
+def load_sector_history(briefing_type: str) -> list:
+    """data/sector_history_{type}.json의 history 배열을 반환. 없으면 빈 리스트."""
+    path = DATA_DIR / f"sector_history_{briefing_type}.json"
+    if not path.exists():
+        return []
+    with open(path, encoding="utf-8") as f:
+        return json.load(f).get("history", [])
+
+
+def save_sector_to_history(briefing_type: str, date_str: str, sector_key: str, keep: int = 10) -> None:
+    """오늘 선정 섹터를 date 기준 upsert. 최근 keep개만 보관 (최신순)."""
+    path = DATA_DIR / f"sector_history_{briefing_type}.json"
+    history = [h for h in load_sector_history(briefing_type) if h.get("date") != date_str]
+    history.append({"date": date_str, "sector_key": sector_key})
+    history.sort(key=lambda h: h.get("date", ""), reverse=True)
+    history = history[:keep]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"history": history}, f, ensure_ascii=False, indent=2)
+    print(f"[call_claude] Saved sector history → {path} ({len(history)} entries)")
+
+
+def build_sector_avoidance_hint(history: list, days: int = 5) -> str:
+    """최근 N회 선정된 섹터를 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
+    names = []
+    for h in history[:days]:
+        s = SECTOR_BY_KEY.get(h.get("sector_key"))
+        if s:
+            names.append(f"{s['emoji']} {s['name']}")
+    if not names:
+        return ""
+    return (
+        "\n## 🔄 섹터 로테이션 가이드\n"
+        f"최근 다룬 섹터: {', '.join(names)}\n"
+        "위 섹터는 가급적 피하고, 오늘 뉴스·시장 흐름상 가장 임팩트 큰 다른 섹터를 골라 "
+        "sector_focus를 작성하세요. 단, 특정 섹터에 압도적 빅뉴스가 있으면 중복이어도 괜찮아요.\n"
+    )
+
+
+def pick_sector(focus: dict, recent_keys: list) -> dict:
+    """Claude가 고른 sector_focus를 검증·보정한다.
+    - sector_key가 풀에 없으면 최근(recent_keys) 제외하고 pool 순서상 첫 섹터로 폴백.
+    - name·emoji는 항상 풀의 정본 값으로 덮어써 불일치를 막는다.
+    - signal·paragraphs는 Claude 출력 유지.
+    """
+    focus = focus or {}
+    key = focus.get("sector_key")
+    if key not in SECTOR_BY_KEY:
+        key = next(
+            (s["key"] for s in SECTOR_POOL if s["key"] not in recent_keys),
+            SECTOR_POOL[0]["key"],
+        )
+    elif key in recent_keys:
+        # 최근 N회 중복 — 강제 교체하지 않고 경고만 남긴다 (빅뉴스 예외 허용)
+        print(f"[call_claude] WARN: sector '{key}'가 최근 선정 이력과 중복 (빅뉴스 예외로 통과)")
+    meta = SECTOR_BY_KEY[key]
+    result = dict(focus)
+    result["sector_key"] = meta["key"]
+    result["sector_name"] = meta["name"]
+    result["emoji"] = meta["emoji"]
+    result.setdefault("signal", "")
+    result.setdefault("paragraphs", [])
+    return result
+
+
 def build_avoidance_hint(history: list, days: int = 3) -> str:
     """최근 N일 시그널을 회피 가이드 문자열로 포맷. history 비면 빈 문자열."""
     recent = history[:days]
@@ -1047,17 +1182,43 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             user_content += hint
             print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
 
-    # us_linked_story 주제 오버라이드 (data/us_linked_hint.json)
+    # 하단 심층 섹션 — sector_focus / us_linked_story 중 날짜 시드 랜덤 택1 (kospi 아침만)
     if briefing_type == "kospi":
+        # us_linked 주제 힌트가 지정된 날은 us_linked로 강제 (수동 오버라이드 우선)
+        us_topic = None
         hint_path = DATA_DIR / "us_linked_hint.json"
         if hint_path.exists():
             try:
                 hint_data = json.load(open(hint_path, encoding="utf-8"))
                 if hint_data.get("date") == date_str and hint_data.get("topic"):
-                    user_content += f"\n\n## 🇺🇸 us_linked_story 주제 지정\n오늘 us_linked_story는 반드시 다음 주제로 작성한다: {hint_data['topic']}\n"
-                    print(f"[call_claude] US linked story hint: {hint_data['topic']}")
+                    us_topic = hint_data["topic"]
             except (json.JSONDecodeError, KeyError):
                 pass
+
+        # 날짜를 시드로 한 재현 가능한 랜덤 — 같은 날 재실행 시 동일 섹션 보장 (스냅샷 안정)
+        section_choice = "us" if us_topic else random.Random(f"section-{date_str}").choice(["sector", "us"])
+
+        # 섹터 로테이션 회피 힌트 — 직접 sector 선택일·us 폴백일 모두에 유효하므로 항상 주입
+        sector_history = [h for h in load_sector_history("kospi") if h.get("date") != date_str]
+        sector_hint = build_sector_avoidance_hint(sector_history, days=5)
+        if sector_hint:
+            user_content += sector_hint
+
+        if section_choice == "sector":
+            user_content += (
+                "\n\n## 🎯 오늘 하단 섹션 지정\n"
+                "오늘 하단 심층 섹션은 **sector_focus**를 작성한다. `us_linked_story`는 반드시 null로 출력한다.\n"
+            )
+        else:
+            user_content += (
+                "\n\n## 🎯 오늘 하단 섹션 지정\n"
+                "오늘 하단 심층 섹션은 **us_linked_story**를 작성한다. `sector_focus`는 반드시 null로 출력한다.\n"
+                "단, 뉴스 요약에 마땅한 미국 이벤트가 없으면 us_linked_story를 null로 두고 sector_focus를 대신 작성한다(폴백).\n"
+            )
+            if us_topic:
+                user_content += f"오늘 us_linked_story는 반드시 다음 주제로 작성한다: {us_topic}\n"
+                print(f"[call_claude] US linked story hint: {us_topic}")
+        print(f"[call_claude] Bottom section → {section_choice}")
 
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
     _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
@@ -1113,6 +1274,17 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     if briefing_type in ("kospi", "us"):
         signals = extract_signal_emojis(analysis.get("reasons", []))
         save_signal_to_history(briefing_type, date_str, signals)
+
+    # sector_focus가 채워졌으면(직접 선택 또는 us 폴백) 검증·보정 후 로테이션 이력 저장
+    if briefing_type == "kospi" and analysis.get("sector_focus"):
+        recent_keys = [
+            h.get("sector_key")
+            for h in load_sector_history("kospi")
+            if h.get("date") != date_str
+        ][:5]
+        analysis["sector_focus"] = pick_sector(analysis.get("sector_focus"), recent_keys)
+        save_sector_to_history("kospi", date_str, analysis["sector_focus"]["sector_key"])
+        print(f"[call_claude] Sector focus → {analysis['sector_focus']['sector_key']}")
 
     return analysis
 

@@ -33,7 +33,8 @@
             {% endif %}
             {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>
-            {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>{% endif %}
+            {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>
+            {% elif sector_name %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %}
             {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
           </div>
