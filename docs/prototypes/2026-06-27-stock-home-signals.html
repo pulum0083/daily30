@@ -1,0 +1,127 @@
+<!-- 종목 홈 하단 영역 재설계 프로토타입 — A.오늘의 특이 신호 + B.ETF로 읽는 시황 (2026-06-27, 라이브 미배선) -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종목 홈 하단 재설계 프로토타입 · A+B</title>
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--up:#E03131;--dn:#2775ED;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px;}
+.proto-banner{font-size:12px;font-weight:700;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:9px 13px;margin-bottom:18px;}
+.home-cols{display:flex;gap:14px;align-items:flex-start;}
+.home-main{flex:1.35 1 0;min-width:0;}
+.home-side{flex:1 1 0;min-width:0;}
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;margin-bottom:12px;box-shadow:var(--s1);}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}.block__t::before{content:'';width:3px;height:12px;background:var(--primary);border-radius:2px;}
+.block__s{font-size:11px;color:var(--muted);}
+.more{display:block;text-align:center;padding:13px;font-size:13px;font-weight:700;color:var(--dn);cursor:pointer;background:var(--canvas);text-decoration:none;}
+.sector-chips{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);}
+.sector-chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap;text-decoration:none;}
+.sector-chips a:hover{border-color:var(--primary);color:var(--primary);}
+/* A. 특이 신호 행 */
+.sig{display:block;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);}
+.sig-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.sig-nm{font-size:14px;font-weight:800;color:#0F172A;}
+.sig-nm small{font-size:11px;font-weight:600;color:#94A3B8;}
+.sig-pct{font-size:14px;font-weight:800;white-space:nowrap;}
+.sig-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;}
+.sig-why{font-size:12px;line-height:1.45;color:#475569;}
+.intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+/* B. ETF 시황 */
+.etf-head{margin:12px 16px 4px;padding:11px 13px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;}
+.etf-head-t{font-size:13px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+.etf-head-b{font-size:12px;line-height:1.5;color:#475569;}
+.etf-dp{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid #F1F5F9;background:var(--canvas);}
+.etf-dp-l{font-size:13px;font-weight:800;color:#0F172A;flex:1;}
+.etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
+.etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
+@media(max-width:720px){.home-cols{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="proto-banner">⚠ 프로토타입 — 라이브 미배선. 일부 수치(수급 배수·외국인/기관 방향·신고가 근접·거래대금 환산)는 개념 검증용 placeholder이며, 실배선 시 실측 주입됩니다. 규칙 정의는 같은 폴더의 rules 스펙 참고.</div>
+
+  <div class="home-cols">
+    <!-- ── A. 오늘의 특이 신호 (좌) ── -->
+    <div class="home-main">
+      <div class="block">
+        <div class="block__h">
+          <span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span>
+          <span class="block__s"><span style="font-size:10.5px;font-weight:800;color:#7C3AED;">규칙 기반 신호</span> · 장중 2분</span>
+        </div>
+        <p class="intro">코스피 <b style="color:#2775ED">−5.81%</b> 하락. 등락 순위 대신 <b>역행·거래량·신고가·수급</b>이 교차한 종목을 규칙으로 선별했어요.</p>
+
+        <a class="sig" style="border-left:3px solid #E03131;">
+          <div class="sig-top"><span class="sig-nm">이오테크닉스 <small>039030 · 반도체</small></span><span class="sig-pct" style="color:#E03131;">+1.7%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#FEF2F2;color:#E03131;">🔵 역행 상승</span><span class="bdg" style="background:#EFF6FF;color:#2775ED;">🌏 외국인 순매수</span></div>
+          <div class="sig-why">시장이 −5.8% 하락하는 동안 <b>+1.7% 상승</b>. 외국인 순매수가 함께 들어왔어요.</div>
+        </a>
+
+        <a class="sig" style="border-left:3px solid #7C3AED;">
+          <div class="sig-top"><span class="sig-nm">한화에어로스페이스 <small>012450 · 방산</small></span><span class="sig-pct" style="color:#E03131;">+0.3%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#F5F3FF;color:#6D28D9;">🏔️ 52주 신고가 1%↓</span><span class="bdg" style="background:#ECFDF5;color:#047857;">🏛️ 기관 5일 연속 순매수</span></div>
+          <div class="sig-why">폭락장에도 <b>52주 신고가 근접</b>. 기관이 5거래일 연속 사들이고 있어요.</div>
+        </a>
+
+        <a class="sig" style="border-left:3px solid #2775ED;">
+          <div class="sig-top"><span class="sig-nm">SK하이닉스 <small>000660 · 반도체</small></span><span class="sig-pct" style="color:#2775ED;">−8.4%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#FFF7ED;color:#C2410C;">🔥 거래량 ×3.2 급증</span><span class="bdg" style="background:#F1F5F9;color:#475569;">🌏 외국인 대량 순매도</span></div>
+          <div class="sig-why">거래량이 평소의 <b>3.2배</b>로 늘며 −8.4% 급락. 외국인 매도가 우위였어요.</div>
+        </a>
+
+        <a class="sig" style="border-left:3px solid #C2410C;">
+          <div class="sig-top"><span class="sig-nm">삼성중공업 <small>010140 · 조선</small></span><span class="sig-pct" style="color:#2775ED;">−4.1%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#FFF7ED;color:#C2410C;">🔥 거래량 ×2.1 급증</span><span class="bdg" style="background:#ECFDF5;color:#047857;">🏛️ 기관 순매수 전환</span></div>
+          <div class="sig-why">거래량 <b>2.1배 급증</b> 속 하락했지만, 기관은 순매수로 돌아섰어요.</div>
+        </a>
+
+        <a class="sig" style="border-left:3px solid #94A3B8;">
+          <div class="sig-top"><span class="sig-nm">삼성전자 <small>005930 · 반도체</small></span><span class="sig-pct" style="color:#2775ED;">−2.3%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#F5F3FF;color:#6D28D9;">💰 거래대금 1위</span><span class="bdg" style="background:#F1F5F9;color:#475569;">📊 코스피 비중 大</span></div>
+          <div class="sig-why">거래대금 코스피 <b>1위</b>. 시총 비중이 커 지수 하락에 가장 큰 영향을 줬어요.</div>
+        </a>
+
+        <a class="sig" style="border-left:3px solid #E03131;">
+          <div class="sig-top"><span class="sig-nm">DB하이텍 <small>000990 · 반도체</small></span><span class="sig-pct" style="color:#E03131;">+0.2%</span></div>
+          <div class="sig-badges"><span class="bdg" style="background:#FEF2F2;color:#E03131;">🔵 역행 상승</span><span class="bdg" style="background:#F1F5F9;color:#475569;">🙋 개인 매수 우위</span></div>
+          <div class="sig-why">낙폭과대 인식에 <b>소폭 반등</b>. 개인 매수 우위라 수급 강도는 약해요.</div>
+        </a>
+
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+    </div>
+
+    <!-- ── 우: 섹터별 보기 + B.ETF로 읽는 시황 ── -->
+    <div class="home-side">
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
+        <div class="sector-chips"><a>🔬 반도체</a><a>🔋 2차전지</a><a>🚗 자동차</a><a>🛡️ 방산</a><a>🚢 조선</a><a>🧬 바이오</a><a>🏦 금융</a><a>⚡ 전력기기</a></div>
+      </div>
+
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s">장중 2분</span></div>
+        <div class="etf-head">
+          <div class="etf-head-t">인버스 거래량 급증 · 하락 대비 수요 확대</div>
+          <div class="etf-head-b">KODEX 인버스 거래량이 <b>12.4억주</b>로 전체 ETF 1위예요. 하락에 대비하거나 베팅하는 수요가 늘었다고 볼 수 있어요.</div>
+        </div>
+        <div class="etf-dp"><span class="etf-dp-l">KODEX 인버스</span><span class="etf-dp-v" style="color:#E03131;">거래량 1위 · +6.1%</span></div>
+        <div class="etf-note">하락에 대비하는 수요가 가장 많이 몰렸어요</div>
+        <div class="etf-dp"><span class="etf-dp-l">KODEX 레버리지</span><span class="etf-dp-v" style="color:#2775ED;">−12.0%</span></div>
+        <div class="etf-note">상승 베팅 상품은 지수 낙폭의 2배로 조정됐어요</div>
+        <div class="etf-dp"><span class="etf-dp-l">KODEX 골드선물</span><span class="etf-dp-v" style="color:#E03131;">+0.9%</span></div>
+        <div class="etf-note">금 등 안전자산 ETF는 강세를 보였어요</div>
+        <a class="more">ETF 전체 랭킹 →</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
