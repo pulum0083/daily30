@@ -28,7 +28,13 @@ async function fetchMinutes(symbol) {
 
   // 5분 간격 샘플링 (00, 05, 10 ... 분 기준) + 마지막 포인트 항상 포함
   const sampled = points.filter((p, i) => p.hhmm % 5 === 0 || i === points.length - 1);
-  return sampled.map(p => p.v);
+  return {
+    values: sampled.map(p => p.v),
+    times: sampled.map(p => {
+      const h = Math.floor(p.hhmm / 100), m = p.hhmm % 100;
+      return `${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}`;
+    }),
+  };
 }
 
 export default async function handler(req, res) {
@@ -38,10 +44,10 @@ export default async function handler(req, res) {
   const code = (req.query && req.query.code) ? String(req.query.code).replace(/[^0-9A-Za-z]/g, '') : '';
   if (code) {
     try {
-      const minutes = await fetchMinutes(code);
-      return res.status(200).json({ code, minutes });
+      const { values, times } = await fetchMinutes(code);
+      return res.status(200).json({ code, minutes: values, times });
     } catch (e) {
-      return res.status(502).json({ code, minutes: [], error: String(e) });
+      return res.status(502).json({ code, minutes: [], times: [], error: String(e) });
     }
   }
 
@@ -51,9 +57,10 @@ export default async function handler(req, res) {
     fetchMinutes('FX_USDKRW'),
   ]);
 
+  // 멀티 심볼 응답은 기존대로 값 배열만 (스파크라인용) — times 불필요
   res.json({
-    kosdaq:   kosdaq.status   === 'fulfilled' ? kosdaq.value   : [],
-    kospi200: kospi200.status === 'fulfilled' ? kospi200.value : [],
-    forex:    forex.status    === 'fulfilled' ? forex.value    : [],
+    kosdaq:   kosdaq.status   === 'fulfilled' ? kosdaq.value.values   : [],
+    kospi200: kospi200.status === 'fulfilled' ? kospi200.value.values : [],
+    forex:    forex.status    === 'fulfilled' ? forex.value.values    : [],
   });
 }

@@ -285,9 +285,13 @@ document.addEventListener('DOMContentLoaded', function() {
   fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
+    var times=(d&&d.times)||[];
     var X0=14,X1=626,YT=22,YB=150;
+    function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
-    var pts=vals.map(function(v,i){var x=X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    var useT=times.length===n;  // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
+    function px2(i){return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));}
+    var pts=vals.map(function(v,i){var x=px2(i);var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
     var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED', last=pts.split(' ').pop().split(',');
     document.getElementById('intra-svg').innerHTML=
       '<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'+
@@ -295,9 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
       '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+col+'"/>'+
       '<text x="14" y="170" font-size="10" fill="#9CA3AF">09:00</text><text x="595" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
     card.style.display='';
-    var coords2=vals.map(function(v,i){return {x:X0+(X1-X0)*(i/(n-1)),y:YB-(YB-YT)*((v-lo)/span)};});
+    var coords2=vals.map(function(v,i){return {x:px2(i),y:YB-(YB-YT)*((v-lo)/span)};});
     function yAtX2(x){var b=coords2[0];for(var i=0;i<coords2.length;i++){if(Math.abs(coords2[i].x-x)<Math.abs(b.x-x))b=coords2[i];}return b.y;}
-    function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
     var dnow=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
     fetch('/data/movers-why-'+dnow+'.json').then(function(r){return r.ok?r.json():fetch('/data/movers-why-live.json').then(function(x){return x.ok?x.json():null;});}).then(function(j){
       if(!j||!j.stocks)return;
