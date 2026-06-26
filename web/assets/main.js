@@ -755,8 +755,8 @@
   function initPredictionToast() {
     // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
     if (!/\/briefings\/\d{4}-\d{2}-\d{2}\//.test(location.pathname)) return;
-    // 노출 기간: 2026-06-26 ~ 2026-07-26 (30일). 이후엔 표시하지 않으며, 만료 후 이 함수는 삭제해도 됨.
-    if (Date.now() > Date.parse('2026-07-26T23:59:59+09:00')) return;
+    // 노출 기간: 2026-06-26 ~ 2026-06-30. 이후엔 표시하지 않으며, 만료 후 이 함수는 삭제해도 됨.
+    if (Date.now() > Date.parse('2026-06-30T23:59:59+09:00')) return;
     var KEY = 'ds-toast-pred-v2';
     try { if (localStorage.getItem(KEY)) return; } catch (e) {}
 
