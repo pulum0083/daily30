@@ -755,7 +755,9 @@
   function initPredictionToast() {
     // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
     if (!/\/briefings\/\d{4}-\d{2}-\d{2}\//.test(location.pathname)) return;
-    var KEY = 'ds-toast-pred-v1';
+    // 노출 기간: 2026-06-26 ~ 2026-07-26 (30일). 이후엔 표시하지 않으며, 만료 후 이 함수는 삭제해도 됨.
+    if (Date.now() > Date.parse('2026-07-26T23:59:59+09:00')) return;
+    var KEY = 'ds-toast-pred-v2';
     try { if (localStorage.getItem(KEY)) return; } catch (e) {}
 
     if (!document.getElementById('ds-toast-style')) {
@@ -784,17 +786,19 @@
     toast.setAttribute('role', 'status');
     toast.innerHTML =
       '<div class="ds-toast-body">' +
-        '<span class="ds-toast-emoji">🧭</span>' +
+        '<span class="ds-toast-emoji">⚖️</span>' +
         '<div class="ds-toast-text">' +
-          '<b>예측 로직을 개선했어요.</b>' +
-          '<span>최근 시장 신호(선물·반도체·수급)를 우선 반영하도록 방향 판단을 바꿨어요.</span>' +
+          '<b>대장주 가중을 예측에 추가했어요.</b>' +
+          '<span>삼성전자·SK하이닉스 등 대장주의 코스피 지수 가중치를 방향 예측 로직에 반영했어요.</span>' +
         '</div>' +
       '</div>' +
       '<button class="ds-toast-close" type="button" aria-label="닫기">×</button>';
 
+    // 한 번 노출되면 다시 보지 않도록, 표시 시점에 바로 seen 기록
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+
     function dismiss() {
       toast.classList.remove('show');
-      try { localStorage.setItem(KEY, '1'); } catch (e) {}
       setTimeout(function () { toast.remove(); }, 350);
     }
     toast.querySelector('.ds-toast-close').addEventListener('click', dismiss);
