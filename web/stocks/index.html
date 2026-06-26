@@ -522,6 +522,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .gnb .sbtn{padding:6px 9px;}
   .hero h1,.phead h1{font-size:18px;}
   .hero .search{display:none;}
+  /* 터치 기기: 화살표 항상 노출 → 첫 탭이 hover에 먹히지 않고 바로 선택, 화살표는 상세 이동 전용 타겟 */
+  #us-linked-widget .us-tile .tile-go{opacity:1;}
+  #us-linked-widget .us-tile{padding-right:42px;}
   .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
   .strip .m{flex:1 1 40%;}
   .strip .m:nth-child(even){border-right:none;margin-right:0;padding-right:0;}
