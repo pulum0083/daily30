@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var evs=(me&&me.events)||[];
       var svgEl=document.getElementById('intra-svg'),add='';
       evs.forEach(function(e,i){var ax=t2x(e.time),ay=yAtX2(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
-        var px=Math.min(X1-12,Math.max(X0+12,ax)),up=(ay-41)>=YT,cy=up?ay-31:ay+31,sy=up?ay-24:ay+24,ty=up?ay-27:ay+35;
+        var px=Math.min(X1-12,Math.max(X0+12,ax)),up=(ay-41)>=YT&&(ay-31-10)>=0,cy=up?ay-31:ay+31,sy=up?ay-24:ay+24,ty=up?ay-27:ay+35;
         add+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="'+st+'" stroke-width="1.3"/><circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"/><text x="'+px.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="11" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';});
       svgEl.innerHTML+=add;
       var tl=document.getElementById('intra-tl');
