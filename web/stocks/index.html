@@ -574,7 +574,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
     <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
-    <div class="brief-strip bs-live" id="brief-strip" data-baked-date="2026-06-26" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-26/kospi/" style="cursor:pointer;">
+    <div class="brief-strip is-hidden" id="brief-strip" data-baked-date="2026-06-26" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="" style="cursor:pointer;">
       <span class="bs-icon" id="bs-icon">📰</span>
       <span class="bs-body">
         <span class="bs-type" id="bs-type">장중 이슈 브리핑</span>
@@ -2082,6 +2082,8 @@ function bsItem(s, type) {
   return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.headline || s.title || '브리핑 보기') };
 }
 
+var bsSeq = 0; // 매 renderBriefStrip 호출마다 증가 — stale async callback 무효화용
+
 function bsHide(el){ el.className = 'brief-strip is-hidden'; el.dataset.href = ''; }
 function bsPaint(el, cls, icon, type, text, url){
   el.className = 'brief-strip ' + cls;
@@ -2092,10 +2094,11 @@ function bsPaint(el, cls, icon, type, text, url){
 }
 
 /* 오늘 해당 타입 브리핑이 ready일 때만 표시 (stale 날짜 폴백 없음 → 휴일·미배포 시 자동 숨김) */
-function showTodayBriefing(type, today, el){
+function showTodayBriefing(type, today, el, seq){
   fetch('/data/briefings-list.json', {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(list){
+      if (bsSeq !== seq) return; // 이미 더 새 renderBriefStrip이 실행됨 → 무시
       var slots = list && list.slots, s = slots && slots[today] && slots[today][type];
       if (!s || s.state !== 'ready') { bsHide(el); return; }
       var d = bsItem(s, type);
@@ -2105,34 +2108,30 @@ function showTodayBriefing(type, today, el){
 }
 
 /* 장중(09:00~16:30) 이슈 브리핑 — kospi-news-{today}.json의 latest 헤드라인. 없으면 오늘 예측으로 폴백. */
-function showIssueBriefing(today, el){
+function showIssueBriefing(today, el, seq){
   fetch('/data/kospi-news-' + today + '.json', {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : fetch('/data/kospi-news-live.json', {cache:'no-store'}).then(function(x){ return x.ok ? x.json() : null; }); })
     .then(function(j){
+      if (bsSeq !== seq) return; // stale callback
       var lt = j && j.date === today && j.latest;
       var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
       if (title) bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + today + '/kospi/');
-      else showTodayBriefing('kospi', today, el); // 이슈 미수집 시 오늘 예측 브리핑으로 폴백
+      else showTodayBriefing('kospi', today, el, seq); // 이슈 미수집 시 오늘 예측 브리핑으로 폴백
     })
-    .catch(function(){ showTodayBriefing('kospi', today, el); });
+    .catch(function(){ showTodayBriefing('kospi', today, el, seq); });
 }
 
 function renderBriefStrip(){
   var el = document.getElementById('brief-strip');
   if (!el) return;
+  var seq = ++bsSeq; // 이전 async 콜백 무효화
   var slot = getKSTSlot();
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
-  // 날짜 불일치 → 구 baked 데이터 제거 후 제네릭 폴백으로 리셋
-  if (el.dataset.bakedDate && el.dataset.bakedDate !== today) {
-    el.className = 'brief-strip bs-kospi';
-    el.dataset.href = '/briefings/';
-    document.getElementById('bs-icon').textContent = '📊';
-    document.getElementById('bs-type').textContent = '더블샷 브리핑';
-    document.getElementById('bs-text').textContent = '오늘의 코스피·미국 시장 AI 예측';
-  }
-  if (slot === 'issue') showIssueBriefing(today, el);
-  else showTodayBriefing(slot, today, el); // kospi / close / us
+  bsHide(el); // async 결과 대기 중 stale 내용 노출 방지
+  el.dataset.bakedDate = ''; // 이후 중복 처리 방지
+  if (slot === 'issue') showIssueBriefing(today, el, seq);
+  else showTodayBriefing(slot, today, el, seq); // kospi / close / us
 }
 renderBriefStrip();
 setInterval(renderBriefStrip, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
