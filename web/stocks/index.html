@@ -2020,15 +2020,20 @@ var BS_META = {
   us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 예측 브리핑' }
 };
 
+/* 브리핑 스트립 타임테이블 (KST, 평일만) — 룰 고정:
+   07:30~09:00 kospi 예측 → 09:00~16:30 issue 장중 이슈(30분 갱신) →
+   16:30~21:20 close 마감 → 21:20~23:00 us 미국 예측 → 23:00~익일07:30 제거.
+   주말·휴일(브리핑 미배포)은 제거. 각 슬롯은 "오늘 해당 브리핑이 실제 ready"일 때만 표시(stale 날짜 폴백 없음). */
 function getKSTSlot() {
   var kst = new Date(Date.now() + 9 * 3600000);
   var day = kst.getUTCDay();
-  if (day === 0 || day === 6) return 'none';
+  if (day === 0 || day === 6) return 'none'; // 주말
   var hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
-  if (hm >= 730  && hm < 1630) return 'kospi'; // 시초가 예측 ~ 마감 전(장중 포함)
-  if (hm >= 1630 && hm < 2140) return 'close';
-  if (hm >= 2140 && hm < 2355) return 'us';
-  return 'none';
+  if (hm >= 730  && hm < 900)  return 'kospi'; // 시초가 예측 배포 ~ 장 시작 전
+  if (hm >= 900  && hm < 1630) return 'issue'; // 장중 이슈 브리핑 (30분 갱신)
+  if (hm >= 1630 && hm < 2120) return 'close'; // 마감 브리핑
+  if (hm >= 2120 && hm < 2300) return 'us';    // 미국 시장 예측 (21:20 배포)
+  return 'none'; // 23:00 ~ 익일 07:30
 }
 
 function kstDateStr() {
@@ -2044,47 +2049,52 @@ function bsItem(s, type) {
   return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.headline || s.title || '브리핑 보기') };
 }
 
-/* 우선순위: ① 오늘 해당 타입 ready → ② 최근 날짜의 해당 타입 ready → ③ 최근 ready 아무거나(us>close>kospi) */
-function resolveBriefing(list, type) {
-  var slots = list && list.slots;
-  if (!slots) return null;
-  var dates = Object.keys(slots).sort().reverse();
-  if (type && BS_META[type]) {
-    var today = slots[kstDateStr()];
-    if (today && today[type] && today[type].state === 'ready') return bsItem(today[type], type);
-    for (var i = 0; i < dates.length; i++) {
-      var s = slots[dates[i]][type];
-      if (s && s.state === 'ready') return bsItem(s, type);
-    }
-  }
-  for (var j = 0; j < dates.length; j++) {
-    var day = slots[dates[j]];
-    var order = ['us', 'close', 'kospi'];
-    for (var k = 0; k < order.length; k++) {
-      if (day[order[k]] && day[order[k]].state === 'ready') return bsItem(day[order[k]], order[k]);
-    }
-  }
-  return null;
+function bsHide(el){ el.className = 'brief-strip is-hidden'; el.dataset.href = ''; }
+function bsPaint(el, cls, icon, type, text, url){
+  el.className = 'brief-strip ' + cls;
+  el.dataset.href = url;
+  document.getElementById('bs-icon').textContent = icon;
+  document.getElementById('bs-type').textContent = type;
+  document.getElementById('bs-text').textContent = text;
 }
 
-(function renderBriefStrip(){
-  var el = document.getElementById('brief-strip');
-  if (!el) return;
-  var slot = getKSTSlot();
-  var type = slot === 'none' ? null : slot; // none(주말 등)이면 폴백으로 최근 브리핑
+/* 오늘 해당 타입 브리핑이 ready일 때만 표시 (stale 날짜 폴백 없음 → 휴일·미배포 시 자동 숨김) */
+function showTodayBriefing(type, today, el){
   fetch('/data/briefings-list.json', {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(list){
-      var d = resolveBriefing(list, type);
-      if (!d) { el.className = 'brief-strip is-hidden'; return; }
-      el.className = 'brief-strip ' + d.cls;
-      el.dataset.href = d.url;
-      document.getElementById('bs-icon').textContent = d.icon;
-      document.getElementById('bs-type').textContent = d.type;
-      document.getElementById('bs-text').textContent = d.text;
+      var slots = list && list.slots, s = slots && slots[today] && slots[today][type];
+      if (!s || s.state !== 'ready') { bsHide(el); return; }
+      var d = bsItem(s, type);
+      bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
     })
-    .catch(function(){});
-})();
+    .catch(function(){ bsHide(el); });
+}
+
+/* 장중(09:00~16:30) 이슈 브리핑 — kospi-news-{today}.json의 latest 헤드라인. 없으면 오늘 예측으로 폴백. */
+function showIssueBriefing(today, el){
+  fetch('/data/kospi-news-' + today + '.json', {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.json() : fetch('/data/kospi-news-live.json', {cache:'no-store'}).then(function(x){ return x.ok ? x.json() : null; }); })
+    .then(function(j){
+      var lt = j && j.date === today && j.latest;
+      var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
+      if (title) bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + today + '/kospi/');
+      else showTodayBriefing('kospi', today, el); // 이슈 미수집 시 오늘 예측 브리핑으로 폴백
+    })
+    .catch(function(){ showTodayBriefing('kospi', today, el); });
+}
+
+function renderBriefStrip(){
+  var el = document.getElementById('brief-strip');
+  if (!el) return;
+  var slot = getKSTSlot();
+  if (slot === 'none') { bsHide(el); return; }
+  var today = kstDateStr();
+  if (slot === 'issue') showIssueBriefing(today, el);
+  else showTodayBriefing(slot, today, el); // kospi / close / us
+}
+renderBriefStrip();
+setInterval(renderBriefStrip, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
 
 /* ── AI 반도체 칩보드 (밤사이 벨웨더 → 한국 밸류체인) ── */
 var CHIP_NODES=[
