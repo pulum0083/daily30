@@ -569,9 +569,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span style="font-size:10px;color:var(--muted);">09:00 – 15:30 장중</span>
     </div>
     <div class="strip">
-      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">2,712</span><span class="vc up num" id="h-kospi-c">+0.82%</span></div>
-      <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">781.2</span><span class="vc up num" id="h-kosdaq-c">+0.45%</span></div>
-      <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,366</span><span class="vc dn num" id="h-usd-c">−3.2</span></div>
+      <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
+      <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
+      <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
     <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
     <div class="brief-strip bs-live" id="brief-strip" data-baked-date="2026-06-26" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/2026-06-26/kospi/" style="cursor:pointer;">
@@ -2423,6 +2423,36 @@ renderChips('morning');
       if(krMarketOpen()) setInterval(pollVolTop,120000);
     })
     .catch(function(){ pollVolTop(); });
+})();
+
+// 상단 스트립 실시간 갱신 — 코스피(/api/kospi-live) + 코스닥·환율(/api/market)
+(function(){
+  function fmtPct(pct){return (pct>=0?'+':'')+pct.toFixed(2)+'%';}
+  function dirClass(pct){return pct>0?'up':pct<0?'dn':'';}
+  fetch('/api/kospi-live',{cache:'no-store',signal:AbortSignal.timeout(6000)})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.price) return;
+      var el=document.getElementById('h-kospi'),ec=document.getElementById('h-kospi-c');
+      if(el) el.textContent=Math.round(d.price).toLocaleString('ko-KR');
+      if(ec){ec.textContent=fmtPct(d.changePct||0);ec.className='vc '+dirClass(d.changePct||0)+' num';}
+    }).catch(function(){});
+  fetch('/api/market',{cache:'no-store',signal:AbortSignal.timeout(6000)})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d) return;
+      if(d.kosdaq&&d.kosdaq.price){
+        var el=document.getElementById('h-kosdaq'),ec=document.getElementById('h-kosdaq-c');
+        if(el) el.textContent=d.kosdaq.price.toFixed(1);
+        if(ec){ec.textContent=fmtPct(d.kosdaq.changePct||0);ec.className='vc '+dirClass(d.kosdaq.changePct||0)+' num';}
+      }
+      if(d.forex&&d.forex.price){
+        var el2=document.getElementById('h-usd'),ec2=document.getElementById('h-usd-c');
+        var p=d.forex.price,pct=d.forex.changePct||0;
+        if(el2) el2.textContent=Math.round(p).toLocaleString('ko-KR');
+        if(ec2){ec2.textContent=pct!==0?fmtPct(pct):'';ec2.className='vc '+dirClass(pct)+' num';}
+      }
+    }).catch(function(){});
 })();
 </script>
 </body>
