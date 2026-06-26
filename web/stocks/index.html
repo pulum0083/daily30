@@ -766,6 +766,9 @@ function usSel(code){
   }
   window.whyMovedPush=function(code, price){
     if(typeof price!=='number'||!isFinite(price)) return;
+    // 장중(09:00~15:30 KST)만 곡선 버퍼에 반영. 마감 후 HL 24h 환산가가 섞여 시간축·스케일을 깨뜨리는 것을 차단.
+    var _kd=new Date(Date.now()+9*3600*1000),_km=_kd.getUTCHours()*60+_kd.getUTCMinutes();
+    if(_km<540||_km>930) return;
     if(!buf[code]) buf[code]=[];
     if(!buft[code]) buft[code]=[];
     var b=buf[code];
