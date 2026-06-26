@@ -733,9 +733,10 @@ function usSel(code){
       : '<div style="font-size:12px;color:#64748B;padding:10px 2px;text-align:center;">📭 오늘 관련 뉴스 없음 · 수급/테마 추정</div>'; }
   }
   function nowHHMM(){var d=new Date(Date.now()+9*3600*1000);var h=d.getUTCHours(),m=d.getUTCMinutes();return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+  var backfilled={};   // 코드별 전일 1분봉 백필 완료 여부 — 라이브 폴러가 buf를 미리 채워도 첫 조회 시 풀 곡선 로드
   function backfill(code){
     fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
-      if(d&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); draw(code); }
+      if(d&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); backfilled[code]=true; draw(code); }
       else { if(code===curCode){var wm=document.getElementById('why-moved'); if(wm) wm.style.display='none';} }
     }).catch(function(){ if(code===curCode){var wm=document.getElementById('why-moved'); if(wm) wm.style.display='none';} });
   }
@@ -747,7 +748,7 @@ function usSel(code){
     if(!b.length||b[b.length-1]!==price){ b.push(price); buft[code].push(nowHHMM()); if(b.length>120){ b.shift(); buft[code].shift(); } }
     if(code===curCode) draw(code);
   };
-  window.whyMovedRender=function(code){ curCode=code; if(buf[code]) draw(code); else backfill(code); };
+  window.whyMovedRender=function(code){ curCode=code; if(backfilled[code]) draw(code); else backfill(code); };
   backfill(curCode);
   loadWhy();
   loadSnap();
