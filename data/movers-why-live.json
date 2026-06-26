@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T16:36:28.808555+09:00",
+  "generated_at": "2026-06-26T17:36:37.366025+09:00",
   "date": "2026-06-26",
   "stocks": [
     {
@@ -14,7 +14,17 @@
       "name": "알테오젠",
       "changePct": -8.4,
       "surge": 1.04,
-      "events": []
+      "events": [
+        {
+          "time": "16:00",
+          "headline": "알테오젠 주가 31,500원 하락 후 장마감",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9vTV9IMUZpcl9ldGtRaVZ6bENOSlM1eUd6c18zaWN1M3hXRHVUWHJ1X2dTd2VrdEtzZy1sdklIc1A4VlRfUlNMZlBwNzVWbUNwSTh6Njdmc29wZ1JPT2s1MFlR?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "알테오젠 주가가 31,500원 하락한 채 장을 마감했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
@@ -70,17 +80,7 @@
       "name": "HD현대일렉트릭",
       "changePct": -7.05,
       "surge": 0.82,
-      "events": [
-        {
-          "time": "15:32",
-          "headline": "하락장은 삼전닉스 줍줍 기회…하이브·HD현대일렉은 매도나서",
-          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE4xMmVhZmFxZGgyLXlBTHdPRDhvNXpqYVh2aXVjbktkMFdJc1FFcVY0ek5XSDdhSnFuQnpPd3RFcE1keFMwWGtFYW9fUmV4RVJzS3c?oc=5",
-          "source": "매일경제",
-          "why": "하락장에서 삼성전자와 SK하이닉스는 매수 기회로 보이나, 하이브와 HD현대일렉트릭은 매도 의견이 제시되었습니다.",
-          "tier": "why",
-          "sentiment": "neg"
-        }
-      ]
+      "events": []
     }
   ]
 }
