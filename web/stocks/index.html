@@ -2460,6 +2460,19 @@ renderChips('morning');
     var last=pts.split(' ').pop().split(',');
     return '<svg viewBox="0 0 40 14"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="1.8" fill="'+color+'"/></svg>';
   }
+  // 종가 배열 → 툴팁 본문 (날짜 · 종가 · 전일대비 %)
+  function buildSparkTip(rows){
+    return rows.map(function(r,i){
+      var md=r.d.slice(4,6)+'/'+r.d.slice(6,8);
+      var chg='';
+      if(i>0&&rows[i-1].c){
+        var p=(r.c-rows[i-1].c)/rows[i-1].c*100;
+        chg=' <span style="color:'+(p>=0?'#E03131':'#2775ED')+'">'+(p>=0?'+':'')+p.toFixed(2)+'%</span>';
+      }
+      var cv=r.c.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      return '<div style="display:flex;justify-content:space-between;gap:16px;'+(i===rows.length-1?'font-weight:800;':'')+'"><span style="color:#94A3B8">'+md+'</span><span><b>'+cv+'</b>'+chg+'</span></div>';
+    }).join('');
+  }
   fetch('/api/kospi-live',{cache:'no-store',signal:AbortSignal.timeout(6000)})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
@@ -2474,7 +2487,17 @@ renderChips('morning');
       if(!d) return;
       if(Array.isArray(d.kospiSpark)&&d.kospiSpark.length>1){
         var sp=document.getElementById('h-kospi-spark');
-        if(sp) sp.innerHTML=miniSpark(d.kospiSpark);
+        if(sp){
+          sp.innerHTML=miniSpark(d.kospiSpark.map(function(x){return x.c;}));
+          sp.dataset.tipTitle='코스피 최근 종가 · 8영업일';
+          sp.dataset.tip=buildSparkTip(d.kospiSpark);
+          if(!sp._tipBound&&typeof showTip==='function'){
+            sp.addEventListener('mouseenter',showTip);
+            sp.addEventListener('mousemove',moveTip);
+            sp.addEventListener('mouseleave',hideTip);
+            sp._tipBound=true;
+          }
+        }
       }
       if(d.kosdaq&&d.kosdaq.price){
         var el=document.getElementById('h-kosdaq'),ec=document.getElementById('h-kosdaq-c');

@@ -82,11 +82,11 @@ async function fetchKospiHistory() {
   );
   if (!r.ok) throw new Error(`kospi history ${r.status}`);
   const d = await r.json();
-  const closes = (Array.isArray(d) ? d : [])
-    .map(row => parseFloat(row.closePrice))
-    .filter(v => Number.isFinite(v));
-  if (closes.length < 2) throw new Error('kospi history: too few closes');
-  return closes.slice(-8); // 최근 8영업일 종가
+  const rows = (Array.isArray(d) ? d : [])
+    .map(row => ({ d: row.localDate, c: parseFloat(row.closePrice) }))
+    .filter(x => x.d && Number.isFinite(x.c));
+  if (rows.length < 2) throw new Error('kospi history: too few closes');
+  return rows.slice(-8); // 최근 8영업일 {날짜, 종가}
 }
 
 async function fetchInvestor() {
