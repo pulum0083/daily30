@@ -1378,12 +1378,14 @@ function usSel(code){
   <div class="screen" id="etf-rank">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
     <div class="phead">
-      <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · 등락률순 · <span class="ds-asof"></span></div></div>
+      <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · <span class="ds-asof"></span></div></div>
+      <div class="rtabs"><a class="on" onclick="etfSetTab('vol',this)">거래량</a><a onclick="etfSetTab('up',this)">상승률</a><a onclick="etfSetTab('dn',this)">하락률</a></div>
     </div>
     <div class="tbl">
       <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
       <div id="etf-rank-rows"></div>
     </div>
+    <a class="more" id="etf-rank-more" onclick="etfLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기</a>
   </div>
 
   <!-- ===== CHIPS (AI 반도체 칩보드) ===== -->
@@ -1689,21 +1691,31 @@ function etfRankTag(name){
   return '';
 }
 function fmtVolShort(v){if(v>=100000000)return (v/100000000).toFixed(1)+'억주';return Math.round(v/10000).toLocaleString('en-US')+'만주';}
+let etfTab='vol';
+let etfShown=10;
+function etfSorted(){
+  if(etfTab==='up')return ETF_ALL.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;});
+  if(etfTab==='dn')return ETF_ALL.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;});
+  return ETF_ALL.slice().sort(function(a,b){return (b.vol||0)-(a.vol||0);});
+}
 function etfRankRender(){
   var box=document.getElementById('etf-rank-rows');if(!box)return;
   var cnt=document.getElementById('etf-rank-count');if(cnt)cnt.textContent=ETF_ALL.length+'개 ETF';
-  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';return;}
-  var arr=ETF_ALL.slice().sort(function(a,b){return (b.changePct||0)-(a.changePct||0);});
-  var maxVol=Math.max.apply(null,arr.map(function(x){return x.vol||0;}))||1;
-  box.innerHTML=arr.map(function(x,i){
+  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';var btn=document.getElementById('etf-rank-more');if(btn)btn.style.display='none';return;}
+  var arr=etfSorted();
+  var maxVal=arr.length?(etfTab==='vol'?Math.max.apply(null,arr.map(function(x){return x.vol||0;})):Math.max.apply(null,arr.map(function(x){return Math.abs(x.changePct||0);}))):1;
+  if(!maxVal)maxVal=1;
+  var btn=document.getElementById('etf-rank-more');
+  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">'+(etfTab==='up'?'상승 ETF가 없어요.':'하락 ETF가 없어요.')+'</div>';if(btn)btn.style.display='none';return;}
+  box.innerHTML=arr.slice(0,etfShown).map(function(x,i){
     var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
     var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%';
-    var barW=Math.round((x.vol||0)/maxVol*100);
+    var barW=etfTab==='vol'?Math.round((x.vol||0)/maxVal*100):Math.round(Math.abs(pct)/maxVal*100);
     var tag=etfRankTag(x.name);
     var avg20=x.vol_avg20||0;
     var mult=avg20>0?((x.vol||0)/avg20):0;
     var multTxt=mult>0?mult.toFixed(1)+'×':'—';
-    var multCls=mult>=1.5?'color:var(--up);font-weight:800':mult>0?'color:var(--muted)':'color:var(--muted)';
+    var multCls=mult>=1.5?'color:var(--up);font-weight:800':'color:var(--muted)';
     return '<a class="trow" style="cursor:default">'
       +'<span class="rk'+(top3?' t':'')+' num">'+rank+'</span>'
       +'<div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+(tag?' · ':'')+'</small>'+tag+'</div>'
@@ -1713,7 +1725,12 @@ function etfRankRender(){
       +'<span class="tchg '+dir+' num" style="width:72px;text-align:right;flex:none;">'+pctTxt+'</span>'
       +'</a>';
   }).join('');
+  if(!btn)return;
+  if(etfShown>=arr.length){btn.style.display='none';}
+  else{btn.style.display='';btn.textContent='더보기 · '+(Math.min(etfShown+10,arr.length)-etfShown)+'개 더 ('+(arr.length-etfShown)+'개 남음)';}
 }
+function etfSetTab(tab,el){etfTab=tab;etfShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}etfRankRender();}
+function etfLoadMore(){etfShown=Math.min(etfShown+10,30);etfRankRender();}
 etfRankRender();
 
 /* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
