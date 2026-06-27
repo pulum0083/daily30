@@ -1,6 +1,6 @@
 // 종목·ETF 신호 판정 순수 함수(네트워크 없음). 핸들러가 fetch한 데이터를 받아 가공한다.
 
-import { SECTOR_LABEL, ETF_BET_DOWN, ETF_BET_UP, ETF_KOSPI200 } from './_etf-universe.mjs';
+import { SECTOR_LABEL, ETF_BET_DOWN, ETF_BET_UP, ETF_KOSPI200, ETF_SECTOR, ETF_SAFE } from './_etf-universe.mjs';
 
 export const COUNTER_TREND_OUTPERF = 3.0;
 export const VOL_SURGE_MIN = 1.5;
@@ -102,4 +102,32 @@ export function etfBettingFlow(byCode) {
   const invVolMultiple = refVol > 0 ? Math.round(invVol / refVol) : 0;
   const levCode = Object.keys(ETF_BET_UP)[0];
   return { downAmt, upAmt, downRatio, upRatio: 100 - downRatio, invVolMultiple, levPct: byCode[levCode]?.pct ?? null };
+}
+
+export function etfSectorRotation(byCode) {
+  return Object.keys(ETF_SECTOR)
+    .filter((c) => byCode[c] && typeof byCode[c].pct === 'number')
+    .map((c) => ({ code: c, label: ETF_SECTOR[c], pct: byCode[c].pct, amount: byCode[c].amount || 0 }))
+    .sort((a, b) => b.pct - a.pct);
+}
+
+// ETF_SAFE 선언 순서를 명시적으로 보존 (정수형 키는 V8이 숫자순 정렬)
+const ETF_SAFE_ORDER = ['132030', '148070', '114260'];
+
+export function etfSafeHaven(byCode, marketPct) {
+  const rows = ETF_SAFE_ORDER
+    .filter((c) => byCode[c] && typeof byCode[c].pct === 'number')
+    .map((c) => ({ code: c, label: ETF_SAFE[c], pct: byCode[c].pct }));
+  return { rows, market: marketPct };
+}
+
+export function etfLead(betting) {
+  const m = betting?.invVolMultiple || 0;
+  if (m >= 5) {
+    return {
+      title: '인버스 ETF 거래량 폭증 · 하락 대비 수요 확대',
+      body: `KODEX 인버스 거래량이 KODEX 200의 <b>${m}배</b>예요. 급락장에서 하락 대비·저점매수·안전자산 수요가 동시에 움직였어요.`,
+    };
+  }
+  return { title: 'ETF 시황', body: '오늘 ETF 흐름을 아래에서 나눠 봐요.' };
 }

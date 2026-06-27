@@ -60,6 +60,28 @@ test('랭킹은 신호별 그룹 + 종목수 내림차순', () => {
   assert.equal(cu.items.length, 2);
 });
 
+import { etfSectorRotation, etfSafeHaven, etfLead } from './_signals-core.mjs';
+
+test('섹터 로테이션: 등락률 내림차순', () => {
+  const byCode = { '091170': { pct: -3.15, amount: 16000 }, '139260': { pct: -6.22, amount: 534000 }, '449450': { pct: -6.29, amount: 40000 } };
+  const r = etfSectorRotation(byCode);
+  assert.equal(r[0].label, '은행');       // 가장 덜 빠짐
+  assert.equal(r[r.length - 1].label, '방산'); // 가장 약세
+});
+
+test('안전자산: 금·채권 + 시장 대비 행', () => {
+  const byCode = { '132030': { pct: 0.91 }, '148070': { pct: 0.14 }, '114260': { pct: 0.09 } };
+  const r = etfSafeHaven(byCode, -5.79);
+  assert.equal(r.market, -5.79);
+  assert.equal(r.rows[0].label, '금');
+});
+
+test('리드 헤드라인: 인버스 거래량 배수 크면 인버스 헤드라인', () => {
+  const lead = etfLead({ invVolMultiple: 46 });
+  assert.ok(lead.title.includes('인버스'));
+  assert.ok(lead.body.includes('46'));
+});
+
 test('베팅 흐름: 인버스류 거래대금 합산 vs 레버리지 + 인버스 거래량 배수', () => {
   const byCode = {
     '114800': { amount: 1122000, vol: 1239929374, pct: 6.08 }, // 인버스(백만)
