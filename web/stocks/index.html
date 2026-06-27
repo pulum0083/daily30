@@ -174,6 +174,27 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .etf-dp-l{font-size:13px;font-weight:800;color:#0F172A;flex:1;}
 .etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
 .etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
+.etf-head-b b{color:#0F172A;}
+.etf-cap{font-size:11.5px;line-height:1.5;color:#475569;background:var(--canvas);}.etf-cap b{color:#0F172A;}
+/* ETF 사이드 4카드 (베팅·섹터·안전자산) */
+.live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
+.close-pill{font-size:10px;font-weight:700;color:#6b7280;background:#F1F3F5;border-radius:999px;padding:2px 8px;}
+.gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
+.bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
+.bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
+.bet-dn{background:var(--dn);display:flex;align-items:center;justify-content:flex-start;padding-left:10px;}
+.bet-up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}.bet-legend b{color:#334155;}
+.bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
+.bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
+.gauge-note{font-size:11.5px;line-height:1.5;color:#475569;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;}.gauge-note b{color:#0F172A;}
+.etf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--canvas);border-top:1px solid #F4F6F8;}.etf-row:first-of-type{border-top:none;}
+.etf-nm{font-size:13px;font-weight:700;color:#1E2430;flex:1;}
+.etf-pct{font-size:13px;font-weight:800;white-space:nowrap;}
+.sec-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;background:var(--canvas);}
+.sh-row{display:flex;align-items:center;gap:10px;padding:7px 16px;background:var(--canvas);}
+.sh-nm{font-size:12.5px;font-weight:700;color:#1E2430;flex:1;}
+.sh-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
 /* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
 .chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
 .chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
@@ -936,25 +957,41 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span style="font-size:10.5px;font-weight:800;color:#7C3AED;">규칙 기반 신호</span> · <span class="upd-badge" id="sig-upd-badge"><span class="dot"></span>장중 2분</span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd-badge" id="sig-upd-badge"></span></span></div>
       <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
       <div id="sig-rows"></div>
       <a class="more" onclick="go('ranking')">전체 랭킹 보기 →</a>
     </div>
-    </div><!-- /home-main -->
-    <div class="home-side">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">⚡</span>신호별 랭킹</span><span class="block__s">오늘 가장 많이 터진 신호</span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">🏷️</span>신호별 랭킹</span><span class="block__s"><span class="upd-badge" id="rank-upd-badge"></span></span></div>
       <div id="sig-rank-rows"></div>
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
       <div class="sector-line__chips" style="flex-wrap:wrap;padding:12px 16px;"><a href="/stocks/sector/semicon/">🔬 반도체</a><a href="/stocks/sector/battery/">🔋 2차전지</a><a href="/stocks/sector/auto/">🚗 자동차</a><a href="/stocks/sector/defense/">🛡️ 방산</a><a href="/stocks/sector/ship/">🚢 조선</a><a href="/stocks/sector/bio/">🧬 바이오</a><a href="/stocks/sector/finance/">🏦 금융</a><a href="/stocks/sector/power/">⚡ 전력기기</a></div>
     </div>
-    <div class="block" id="etf-signal-block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-      <div class="etf-head" id="etf-signal-head"><div class="etf-head-t" id="etf-signal-title">—</div><div class="etf-head-b" id="etf-signal-body"></div></div>
-      <div id="etf-signal-rows"></div>
+    </div><!-- /home-main -->
+    <div class="home-side">
+    <!-- ⓪ ETF로 읽는 시황 (리드) -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
+      <div class="etf-head" id="etf-lead" style="margin-bottom:14px;"></div>
+    </div>
+    <!-- ① ETF 베팅 흐름 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">⚖️</span>ETF 베팅 흐름</span></div>
+      <div class="gauge-wrap" id="etf-betting"></div>
+    </div>
+    <!-- ② 섹터 로테이션 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">🔁</span>섹터 로테이션</span></div>
+      <div class="etf-cap" style="padding:10px 16px;">섹터 ETF 등락률로 본 <b>오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
+      <div id="etf-sector"></div>
+    </div>
+    <!-- ③ 안전자산 선호도 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">🛟</span>안전자산 선호도</span></div>
+      <div id="etf-safehaven"></div>
       <a class="more" onclick="go('ranking')">ETF 전체 랭킹 →</a>
     </div>
     </div><!-- /home-side -->
