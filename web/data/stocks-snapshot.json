@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T16:33:17.497057+09:00",
+  "generated_at": "2026-06-28T01:02:49.115748+09:00",
   "stocks": {
     "005930": {
       "name": "삼성전자",
@@ -2588,78 +2588,78 @@
   "bellwethers": {
     "NVDA": {
       "name": "엔비디아",
-      "close": 195.74000549316406,
+      "close": 192.52999877929688,
       "change_pct": -1.64
     },
     "MU": {
       "name": "마이크론",
-      "close": 1213.56005859375,
-      "change_pct": 15.74
+      "close": 1132.3299560546875,
+      "change_pct": -6.69
     },
     "SOXX": {
       "name": "반도체 ETF",
-      "close": 625.2000122070312,
-      "change_pct": 3.94
+      "close": 589.9400024414062,
+      "change_pct": -5.64
     },
     "GEV": {
       "name": "GE Vernova",
-      "close": 1085.469970703125,
-      "change_pct": 2.63
+      "close": 1045.1700439453125,
+      "change_pct": -3.71
     },
     "VRT": {
       "name": "Vertiv",
-      "close": 325.57000732421875,
-      "change_pct": 2.89
+      "close": 303.95001220703125,
+      "change_pct": -6.64
     },
     "ITA": {
       "name": "방산 ETF",
-      "close": 237.3800048828125,
-      "change_pct": 0.5
+      "close": 236.77999877929688,
+      "change_pct": -0.25
     },
     "LMT": {
       "name": "록히드마틴",
-      "close": 505.0199890136719,
-      "change_pct": 2.72
+      "close": 507.3999938964844,
+      "change_pct": 0.47
     },
     "ALB": {
       "name": "Albemarle",
-      "close": 141.0500030517578,
-      "change_pct": -4.59
+      "close": 133.6999969482422,
+      "change_pct": -5.21
     },
     "LIT": {
       "name": "리튬 ETF",
-      "close": 78.44999694824219,
-      "change_pct": -0.58
+      "close": 75.93000030517578,
+      "change_pct": -3.21
     },
     "TSLA": {
       "name": "테슬라",
-      "close": 375.1199951171875,
-      "change_pct": -0.11
+      "close": 379.7099914550781,
+      "change_pct": 1.22
     },
     "F": {
       "name": "포드",
-      "close": 14.109999656677246,
-      "change_pct": 1.95
+      "close": 14.130000114440918,
+      "change_pct": 0.14
     },
     "XBI": {
       "name": "바이오 ETF",
-      "close": 151.58999633789062,
-      "change_pct": 1.26
+      "close": 155.3800048828125,
+      "change_pct": 2.5
     },
     "LLY": {
       "name": "일라이릴리",
-      "close": 1127.68994140625,
-      "change_pct": 0.93
+      "close": 1208.1199951171875,
+      "change_pct": 7.13
     },
     "JPM": {
       "name": "JP모건",
-      "close": 335.1199951171875,
-      "change_pct": 0.5
+      "close": 329.04998779296875,
+      "change_pct": -1.81
     },
     "KBE": {
       "name": "은행 ETF",
-      "close": 68.22000122070312,
-      "change_pct": 1.08
+      "close": 68.41999816894531,
+      "change_pct": 0.29
     }
   },
   "etfs": {
@@ -2728,6 +2728,114 @@
       "vol": 79515325,
       "vol_avg20": 62475733,
       "change_pct": -7.98
+    },
+    "379800": {
+      "name": "KODEX 미국S&P500",
+      "vol": 20166030,
+      "vol_avg20": 24781186,
+      "change_pct": -1.84
+    },
+    "395160": {
+      "name": "KODEX AI반도체TOP2플러스",
+      "vol": 16096634,
+      "vol_avg20": 10621773,
+      "change_pct": -6.76
+    },
+    "292150": {
+      "name": "TIGER 코리아TOP10",
+      "vol": 3737140,
+      "vol_avg20": 3239643,
+      "change_pct": -6.81
+    },
+    "139260": {
+      "name": "TIGER 200 IT",
+      "vol": 2808124,
+      "vol_avg20": 2182314,
+      "change_pct": -6.22
+    },
+    "466920": {
+      "name": "SOL 조선TOP3플러스",
+      "vol": 2510676,
+      "vol_avg20": 3240184,
+      "change_pct": -5.21
+    },
+    "244580": {
+      "name": "KODEX 바이오",
+      "vol": 2261218,
+      "vol_avg20": 1380352,
+      "change_pct": -4.63
+    },
+    "102780": {
+      "name": "KODEX 삼성그룹",
+      "vol": 2021438,
+      "vol_avg20": 1608336,
+      "change_pct": -3.18
+    },
+    "117700": {
+      "name": "KODEX 건설",
+      "vol": 1960326,
+      "vol_avg20": 3072238,
+      "change_pct": -6.26
+    },
+    "381170": {
+      "name": "TIGER 미국테크TOP10 INDXX",
+      "vol": 1429252,
+      "vol_avg20": 1332331,
+      "change_pct": -3.97
+    },
+    "091170": {
+      "name": "KODEX 은행",
+      "vol": 1161238,
+      "vol_avg20": 2623832,
+      "change_pct": -3.15
+    },
+    "091180": {
+      "name": "KODEX 자동차",
+      "vol": 1118242,
+      "vol_avg20": 1280122,
+      "change_pct": -3.24
+    },
+    "371460": {
+      "name": "TIGER 차이나전기차SOLACTIVE",
+      "vol": 757080,
+      "vol_avg20": 743058,
+      "change_pct": -5.19
+    },
+    "226490": {
+      "name": "KODEX 코스피",
+      "vol": 709868,
+      "vol_avg20": 510628,
+      "change_pct": -6.31
+    },
+    "449450": {
+      "name": "PLUS K방산",
+      "vol": 709020,
+      "vol_avg20": 760262,
+      "change_pct": -6.29
+    },
+    "069660": {
+      "name": "KIWOOM 200",
+      "vol": 325541,
+      "vol_avg20": 397013,
+      "change_pct": -5.49
+    },
+    "157450": {
+      "name": "TIGER 단기통안채",
+      "vol": 290337,
+      "vol_avg20": 69538,
+      "change_pct": 0.02
+    },
+    "453810": {
+      "name": "KODEX 인도Nifty50",
+      "vol": 246700,
+      "vol_avg20": 264984,
+      "change_pct": -1.39
+    },
+    "261240": {
+      "name": "KODEX 미국달러선물",
+      "vol": 107850,
+      "vol_avg20": 147860,
+      "change_pct": -0.38
     }
   }
 }
