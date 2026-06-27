@@ -21,15 +21,19 @@
 
 <style>
   .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 48px;}
-  .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;}
   .sector-crumb a{color:var(--muted);text-decoration:none;}
   .sector-crumb a:hover{color:var(--ink);}
+  .sector-back{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;
+    background:var(--canvas);border:1px solid var(--hairline);color:var(--muted);cursor:pointer;margin-right:10px;padding:0;line-height:1;
+    flex:none;transition:background .12s,color .12s,border-color .12s;}
+  .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;}
   .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-  .sector-stat__box{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
+  .sector-stat__box{background:var(--canvas);border:1px solid var(--hairline);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
   .sector-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
   .sector-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
   .sector-stat__val.up{color:#E03131;}
@@ -41,17 +45,17 @@
   .sector-breadth__bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;}
   .sector-breadth__up{background:#E03131;}
   .sector-breadth__dn{background:#2775ED;}
-  .sector-breadth__fl{background:var(--hair);}
+  .sector-breadth__fl{background:var(--hairline);}
   .sector-breadth__legend{display:flex;gap:14px;margin-top:5px;}
   .sector-breadth__legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
   .sector-breadth__legend i{width:8px;height:8px;border-radius:2px;display:inline-block;}
-  .iu{background:#E03131;} .id{background:#2775ED;} .in{background:var(--hair);}
+  .iu{background:#E03131;} .id{background:#2775ED;} .in{background:var(--hairline);}
 
   .sector-list-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px;}
   .sector-list-head__t{font-size:13px;font-weight:800;color:var(--ink);}
   .sector-list-head__sort{font-size:11px;font-weight:600;color:var(--muted);}
   .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:28px;}
-  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hair);border-radius:14px;
+  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
   .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
@@ -66,17 +70,18 @@
   .sector-card__spark{margin:9px 0 7px;height:34px;}
   .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
   .sector-card__range{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
-  .sector-card__posbar{position:relative;height:4px;border-radius:3px;background:var(--hair);margin:6px 0 2px;overflow:hidden;}
+  .sector-card__posbar{position:relative;height:4px;border-radius:3px;background:var(--hairline);margin:6px 0 2px;overflow:hidden;}
   .sector-card__posfill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#2775ED33,#2775ED);}
   .sector-card__posfill.up{background:linear-gradient(90deg,#E0313133,#E03131);}
   .sector-card__pos{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--ink);transform:translate(-50%,-50%);}
   .sector-card__poslbl{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
   .sector-card__fr{font-size:11px;color:var(--muted);margin-top:5px;}
 
-  .sector-nav{border-top:1px solid var(--hair);padding-top:16px;}
+  .sector-nav{border-top:1px solid var(--hairline);padding-top:16px;}
+  .sector-nav--top{border-top:none;padding-top:0;margin-bottom:18px;}
   .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:8px;}
   .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;}
-  .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);
+  .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);
     border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
   .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
   .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
@@ -108,10 +113,36 @@
 
 
 <div class="sector-wrap">
-  <p class="sector-crumb"><a href="/stocks/">종목 홈</a> › 🔬 반도체</p>
+  <div class="sector-crumb">
+    <button class="sector-back" onclick="goBack()" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › 🔬 반도체</span>
+  </div>
   <h1 class="sector-page-title">🔬 반도체</h1>
   <p class="sector-page-sub">6종목 · 2026-06-26 종가 기준 (매일 실측 갱신)</p>
   <p class="sector-desc">메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.</p>
+
+  <div class="sector-nav sector-nav--top">
+    <div class="sector-nav__label">다른 섹터 보기</div>
+    <div class="sector-nav__chips">
+      
+      <a href="/stocks/sector/semicon/" class="current">🔬 반도체</a>
+      
+      <a href="/stocks/sector/power/">⚡ 전력기기</a>
+      
+      <a href="/stocks/sector/defense/">🛡️ 방산</a>
+      
+      <a href="/stocks/sector/ship/">🚢 조선</a>
+      
+      <a href="/stocks/sector/battery/">🔋 2차전지</a>
+      
+      <a href="/stocks/sector/auto/">🚗 자동차</a>
+      
+      <a href="/stocks/sector/bio/">🧬 바이오</a>
+      
+      <a href="/stocks/sector/finance/">🏦 금융</a>
+      
+    </div>
+  </div>
 
   <div class="sector-stat">
     <div class="sector-stat__box">
@@ -322,6 +353,9 @@ window.addEventListener('load', function() {
 </script>
 
 <script>
+// 뒤로 가기 — 상세 페이지와 동일 규칙 (히스토리 있으면 back, 없으면 종목 허브)
+function goBack(){ if(history.length>1) history.back(); else location.href='/stocks/'; }
+
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
     var spark=card.querySelector('.sector-card__spark');
