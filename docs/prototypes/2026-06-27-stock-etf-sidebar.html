@@ -1,0 +1,169 @@
+<!-- 종목 홈 재배치 프로토타입 — 좌:신호/랭킹/섹터, 우측사이드:ETF 콘텐츠 3종(베팅심리·섹터로테이션·안전자산). 실데이터 2026-06-26 마감 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종목 홈 재배치 · ETF 사이드 프로토타입</title>
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;--primary:#006EFF;
+  --up:#E03131;--dn:#2775ED;--badge-bg:#f2f4f6;--badge-ink:#4e5968;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.wrap{max-width:1040px;margin:0 auto;padding:24px 18px 60px;}
+.proto-banner{font-size:12px;font-weight:700;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:9px 13px;margin-bottom:18px;}
+.home-cols{display:grid;grid-template-columns:1.5fr 1fr;column-gap:16px;align-items:start;}
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--s1);}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}.block__t::before{content:'';width:3px;height:12px;background:var(--primary);border-radius:2px;}
+.block__s{font-size:11px;color:var(--muted);}
+.live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
+.close-pill{font-size:10px;font-weight:700;color:#6b7280;background:#F1F3F5;border-radius:999px;padding:2px 8px;}
+.more{display:block;text-align:center;padding:12px;font-size:13px;font-weight:700;color:var(--dn);cursor:pointer;background:var(--canvas);text-decoration:none;}
+
+/* 좌: 특이 신호 (색 절제 적용) */
+.intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+.intro b{color:var(--dn);}
+.sig{display:block;padding:12px 16px;border-bottom:1px solid #F1F5F9;background:var(--canvas);text-decoration:none;}
+.sig-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.sig-nm{font-size:14px;font-weight:800;color:#0F172A;}.sig-nm small{font-size:11px;font-weight:600;color:#94A3B8;}
+.sig-pct{font-size:14px;font-weight:800;}
+.sig-badges{display:flex;gap:6px;margin:7px 0 6px;flex-wrap:wrap;}
+.bdg{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--badge-bg);color:var(--badge-ink);}
+.sig-why{font-size:12px;line-height:1.45;color:#6b7684;}
+
+/* 좌: 신호별 랭킹 */
+.srk-grp{border-bottom:1px solid #F1F5F9;background:var(--canvas);}.srk-grp:last-child{border-bottom:none;}
+.srk-hd{display:flex;align-items:center;gap:6px;padding:9px 16px 5px;}
+.srk-ic{font-size:13px;}.srk-lb{font-size:12px;font-weight:800;flex:1;}
+.srk-cnt{font-size:11px;font-weight:800;color:#94A3B8;background:#F1F5F9;border-radius:999px;padding:1px 7px;}
+.srk-row{display:flex;align-items:baseline;justify-content:space-between;padding:4px 16px 4px 35px;text-decoration:none;}
+.srk-nm{font-size:13px;font-weight:600;color:#0F172A;}.srk-pct{font-size:12.5px;font-weight:800;}
+
+/* 좌: 섹터칩 */
+.sector-chips{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);}
+.sector-chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:5px 12px;text-decoration:none;}
+
+/* ── 우측 사이드 ETF 콘텐츠 ── */
+/* ① 베팅 심리 게이지 */
+.gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
+.bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
+.bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
+.bet-dn{background:var(--dn);display:flex;align-items:center;justify-content:flex-start;padding-left:10px;}
+.bet-up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}
+.bet-legend b{color:#334155;}
+.bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
+.bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}
+.bet-fact-row b{color:#334155;font-weight:700;}
+.gauge-note{font-size:11.5px;line-height:1.5;color:#475569;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;}
+.gauge-note b{color:#0F172A;}
+
+/* ②③ 공통 행 */
+.etf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--canvas);border-top:1px solid #F4F6F8;}
+.etf-row:first-of-type{border-top:none;}
+.etf-rank{font-size:11px;font-weight:800;color:#B6BEC8;width:14px;}
+.etf-nm{font-size:13px;font-weight:700;color:#1E2430;flex:1;}
+.etf-amt{font-size:10.5px;color:#94A3B8;font-weight:600;margin-left:5px;}
+.etf-pct{font-size:13px;font-weight:800;white-space:nowrap;}
+.etf-cap{font-size:11.5px;line-height:1.5;color:#475569;padding:10px 16px;background:#FBFCFD;border-top:1px solid #F1F5F9;}
+.etf-cap b{color:#0F172A;}
+.sec-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;background:var(--canvas);}
+
+/* 안전자산 대비 바 */
+.sh-row{display:flex;align-items:center;gap:10px;padding:7px 16px;background:var(--canvas);}
+.sh-nm{font-size:12.5px;font-weight:700;color:#1E2430;width:96px;}
+.sh-bar{flex:1;height:8px;background:#EEF1F5;border-radius:5px;position:relative;overflow:hidden;}
+.sh-fill{position:absolute;top:0;height:100%;border-radius:5px;}
+.sh-mid{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1;}
+.sh-pct{font-size:12.5px;font-weight:800;width:54px;text-align:right;}
+@media(max-width:820px){.home-cols{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="proto-banner">⚠ 프로토타입 — 실데이터(2026-06-26 마감, 코스피 −5.79% 급락일). 우측 ETF 콘텐츠는 네이버 polling 실측. ①베팅 심리 게이지는 인버스류 vs 레버리지 거래대금 기준이며 지표 정의는 추후 확정.</div>
+
+  <div class="home-cols">
+    <!-- ════ 좌측: 신호 / 랭킹 / 섹터 ════ -->
+    <div class="home-main">
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="close-pill">장 마감 기준</span></span></div>
+        <p class="intro">코스피 <b>−5.81%</b> 하락. 등락 순위 대신 역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별했어요.</p>
+        <a class="sig"><div class="sig-top"><span class="sig-nm">이오테크닉스 <small>039030 · 반도체</small></span><span class="sig-pct" style="color:var(--up)">+1.7%</span></div>
+          <div class="sig-badges"><span class="bdg">역행 상승</span><span class="bdg">외국인 순매수</span></div>
+          <div class="sig-why">시장이 하락하는 동안 <b style="color:#4e5968">+1.7% 상승</b>. 외국인 순매수가 함께 들어왔어요.</div></a>
+        <a class="sig"><div class="sig-top"><span class="sig-nm">SK하이닉스 <small>000660 · 반도체</small></span><span class="sig-pct" style="color:var(--dn)">−8.4%</span></div>
+          <div class="sig-badges"><span class="bdg">거래량 ×3.2 급증</span><span class="bdg">외국인 대량 순매도</span></div>
+          <div class="sig-why">거래량이 평소의 <b style="color:#4e5968">3.2배</b>로 늘며 급락. 외국인 매도가 우위였어요.</div></a>
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">🏷️</span>신호별 랭킹</span><span class="block__s"><span class="close-pill">장 마감 기준</span></span></div>
+        <div class="srk-grp"><div class="srk-hd"><span class="srk-ic">🔥</span><span class="srk-lb">거래량 급증</span><span class="srk-cnt">2</span></div>
+          <a class="srk-row"><span class="srk-nm">SK하이닉스</span><span class="srk-pct" style="color:var(--dn)">−8.4%</span></a>
+          <a class="srk-row"><span class="srk-nm">삼성중공업</span><span class="srk-pct" style="color:var(--dn)">−4.1%</span></a></div>
+        <div class="srk-grp"><div class="srk-hd"><span class="srk-ic">↗</span><span class="srk-lb">역행 상승</span><span class="srk-cnt">2</span></div>
+          <a class="srk-row"><span class="srk-nm">이오테크닉스</span><span class="srk-pct" style="color:var(--up)">+1.7%</span></a>
+          <a class="srk-row"><span class="srk-nm">DB하이텍</span><span class="srk-pct" style="color:var(--up)">+0.2%</span></a></div>
+        <div class="srk-grp"><div class="srk-hd"><span class="srk-ic">🏛️</span><span class="srk-lb">기관 순매수</span><span class="srk-cnt">2</span></div>
+          <a class="srk-row"><span class="srk-nm">한화에어로스페이스</span><span class="srk-pct" style="color:var(--up)">+0.3%</span></a>
+          <a class="srk-row"><span class="srk-nm">삼성중공업</span><span class="srk-pct" style="color:var(--dn)">−4.1%</span></a></div>
+      </div>
+
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
+        <div class="sector-chips"><a>🔬 반도체</a><a>🔋 2차전지</a><a>🚗 자동차</a><a>🛡️ 방산</a><a>🚢 조선</a><a>🧬 바이오</a><a>🏦 금융</a><a>⚡ 전력기기</a></div>
+      </div>
+    </div>
+
+    <!-- ════ 우측 사이드: ETF 콘텐츠 ════ -->
+    <div class="home-side">
+
+      <!-- ① 베팅 흐름 (양방향 사실, 단정 없음) -->
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚖️</span>ETF 베팅 흐름</span><span class="block__s"><span class="live-pill">●실시간</span></span></div>
+        <div class="gauge-wrap">
+          <div class="bet-label">레버리지·인버스 ETF 거래대금</div>
+          <div class="bet-split"><div class="bet-dn" style="width:42%">하락 베팅 42%</div><div class="bet-up" style="width:58%">저점매수 58%</div></div>
+          <div class="bet-legend"><span>🔵 인버스류 <b>2.3조</b></span><span>🔴 레버리지 <b>3.2조</b></span></div>
+          <div class="bet-fact">
+            <div class="bet-fact-row"><span>인버스 거래량</span><b>12.4억주 · KODEX 200의 46배</b></div>
+            <div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">−12.04%</b></div>
+          </div>
+          <div class="gauge-note">거래<b>대금</b>은 저점매수(레버리지)가, 거래<b>량</b>은 하락대비(인버스)가 우세했어요. 두 신호가 엇갈려 한쪽으로 단정하긴 일러요.</div>
+        </div>
+      </div>
+
+      <!-- ② 섹터 로테이션 -->
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">🔁</span>섹터 로테이션</span><span class="block__s"><span class="live-pill">●실시간</span></span></div>
+        <div class="etf-cap">섹터 ETF 등락률로 본 <b>오늘의 상대 강도</b>. 급락장에서 덜 빠진 섹터가 위에.</div>
+        <div class="sec-divider">상대 선방 ▲</div>
+        <div class="etf-row"><span class="etf-rank">1</span><span class="etf-nm">은행 <span class="etf-amt">160억</span></span><span class="etf-pct" style="color:var(--dn)">−3.15%</span></div>
+        <div class="etf-row"><span class="etf-rank">2</span><span class="etf-nm">자동차 <span class="etf-amt">330억</span></span><span class="etf-pct" style="color:var(--dn)">−3.24%</span></div>
+        <div class="etf-row"><span class="etf-rank">3</span><span class="etf-nm">반도체 <span class="etf-amt">1,770억</span></span><span class="etf-pct" style="color:var(--dn)">−4.26%</span></div>
+        <div class="sec-divider">상대 약세 ▼</div>
+        <div class="etf-row"><span class="etf-rank">7</span><span class="etf-nm">IT <span class="etf-amt">5,340억</span></span><span class="etf-pct" style="color:var(--dn)">−6.22%</span></div>
+        <div class="etf-row"><span class="etf-rank">8</span><span class="etf-nm">건설 <span class="etf-amt">120억</span></span><span class="etf-pct" style="color:var(--dn)">−6.26%</span></div>
+        <div class="etf-row"><span class="etf-rank">9</span><span class="etf-nm">방산 <span class="etf-amt">400억</span></span><span class="etf-pct" style="color:var(--dn)">−6.29%</span></div>
+      </div>
+
+      <!-- ③ 안전자산 vs 위험자산 -->
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">🛟</span>안전자산 선호도</span><span class="block__s"><span class="live-pill">●실시간</span></span></div>
+        <div class="etf-cap">주식이 <b style="color:var(--dn)">−5.79%</b> 폭락하는 동안 금·채권은 버텼어요. <b>위험회피 심리</b>가 짙었던 하루.</div>
+        <div class="sh-row"><span class="sh-nm">금 (골드선물)</span><div class="sh-bar"><span class="sh-mid"></span><span class="sh-fill" style="left:50%;width:9%;background:var(--up)"></span></div><span class="sh-pct" style="color:var(--up)">+0.91%</span></div>
+        <div class="sh-row"><span class="sh-nm">국고채 10년</span><div class="sh-bar"><span class="sh-mid"></span><span class="sh-fill" style="left:50%;width:2%;background:var(--up)"></span></div><span class="sh-pct" style="color:var(--up)">+0.14%</span></div>
+        <div class="sh-row"><span class="sh-nm">국고채 3년</span><div class="sh-bar"><span class="sh-mid"></span><span class="sh-fill" style="left:50%;width:1%;background:var(--up)"></span></div><span class="sh-pct" style="color:var(--up)">+0.09%</span></div>
+        <div class="sh-row"><span class="sh-nm">코스피200 (주식)</span><div class="sh-bar"><span class="sh-mid"></span><span class="sh-fill" style="left:7%;width:43%;background:var(--dn)"></span></div><span class="sh-pct" style="color:var(--dn)">−5.79%</span></div>
+        <a class="more">ETF 전체 랭킹 →</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+</body>
+</html>
