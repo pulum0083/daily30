@@ -313,8 +313,39 @@ document.addEventListener('DOMContentLoaded', function() {
       svgEl.innerHTML+=add;
       var tl=document.getElementById('intra-tl');
       if(tl&&evs.length){ tl.innerHTML=evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
-        return '<div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="flex:none;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;margin:1px 0 2px;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;margin-top:2px;">출처 · '+e.source+'</div></div></div>';}).join(''); }
+        return '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;max-width:92%;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;">출처 · '+e.source+'</div></div>';}).join(''); }
     }).catch(function(){});
   }).catch(function(){});
+})();
+
+// 외국인 보유율 스파크라인 — 직선 폴리라인을 부드러운 곡선 + 그라디언트로 재렌더
+(function(){
+  document.querySelectorAll('.frw svg.sp').forEach(function(svg){
+    var pl=svg.querySelector('polyline');
+    if(!pl) return;
+    var raw=(pl.getAttribute('points')||'').trim().split(/\s+/).map(function(p){
+      var xy=p.split(','); return {x:parseFloat(xy[0]),y:parseFloat(xy[1])};
+    }).filter(function(p){return !isNaN(p.x)&&!isNaN(p.y);});
+    if(raw.length<2) return;
+    var W=svg.clientWidth||160, H=36, padT=5, padB=5, n=raw.length;
+    var ys=raw.map(function(p){return p.y;});
+    var ymin=Math.min.apply(null,ys), ymax=Math.max.apply(null,ys), yspan=(ymax-ymin)||1;
+    var pts=raw.map(function(p,i){
+      return {x:(i/(n-1))*W, y:padT+((p.y-ymin)/yspan)*(H-padT-padB)};
+    });
+    var d='M'+pts[0].x.toFixed(1)+','+pts[0].y.toFixed(1);
+    for(var i=1;i<n;i++){
+      var cx=((pts[i-1].x+pts[i].x)/2).toFixed(1);
+      d+=' C'+cx+','+pts[i-1].y.toFixed(1)+' '+cx+','+pts[i].y.toFixed(1)+' '+pts[i].x.toFixed(1)+','+pts[i].y.toFixed(1);
+    }
+    var col='#2775ED', gid='fo-grad-'+Math.random().toString(36).slice(2,7);
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.removeAttribute('preserveAspectRatio');
+    svg.innerHTML='<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="'+col+'" stop-opacity="0.13"/>'+
+      '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
+      '<path d="'+d+' L'+W.toFixed(1)+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
+      '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
 })();
 
