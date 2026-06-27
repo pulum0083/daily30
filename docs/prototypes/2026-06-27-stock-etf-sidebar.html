@@ -46,7 +46,18 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sector-chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:5px 12px;text-decoration:none;}
 
 /* ── 우측 사이드 ETF 콘텐츠 ── */
-/* ① 베팅 심리 게이지 */
+/* ⓪ ETF로 읽는 시황 (요약 리드) */
+.etf-head{margin:12px 16px 4px;padding:11px 13px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;}
+.etf-head-t{font-size:13px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+.etf-head-b{font-size:12px;line-height:1.5;color:#475569;}
+.etf-head-b b{color:#0F172A;}
+.etf-dp{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid #F1F5F9;background:var(--canvas);}
+.etf-dp-l{font-size:13px;font-weight:800;color:#0F172A;flex:1;}
+.etf-dp-l span{font-size:11px;color:#6b7280;font-weight:600;}
+.etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
+.etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
+
+/* ① 베팅 흐름 */
 .gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
 .bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
 .bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
@@ -121,6 +132,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
     <!-- ════ 우측 사이드: ETF 콘텐츠 ════ -->
     <div class="home-side">
+
+      <!-- ⓪ ETF로 읽는 시황 (요약 리드) -->
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="live-pill">●실시간</span></span></div>
+        <div class="etf-head" style="margin-bottom:14px;">
+          <div class="etf-head-t">인버스 ETF 거래량 폭증 · 하락 대비 수요 확대</div>
+          <div class="etf-head-b">KODEX 인버스 거래량이 <b>12.4억주</b>로 KODEX 200의 <b>46배</b>예요. 급락장에서 하락 대비·저점매수·안전자산 수요가 동시에 움직였어요. 아래에서 흐름을 나눠 봐요.</div>
+        </div>
+      </div>
 
       <!-- ① 베팅 흐름 (양방향 사실, 단정 없음) -->
       <div class="block">
