@@ -5,7 +5,10 @@ import { buildSignals, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead,
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 
 function krMarketOpen() {
-  const m = ((new Date().getUTCHours() * 60 + new Date().getUTCMinutes()) + 9 * 60) % (24 * 60);
+  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const day = kst.getUTCDay(); // KST 기준 0=일, 6=토
+  if (day === 0 || day === 6) return false; // 주말은 장중 아님 (휴일은 별도 미반영 — 알려진 한계)
+  const m = kst.getUTCHours() * 60 + kst.getUTCMinutes();
   return m >= 9 * 60 && m <= 15 * 60 + 30;
 }
 
