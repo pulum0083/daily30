@@ -1150,11 +1150,17 @@ def build_stock_page(stock, peers):
     picks = build_trackrecord(stock["code"])
     bt_raw = BROKER_TARGETS.get(stock["code"])
     acc = _briefing_accuracy()
+    # 종가 날짜는 실측 스냅샷 기준 (주말·휴일에 now()를 쓰면 거래 없는 날을 종가로 잘못 표기)
+    snap_date = (snap.get("generated_at") or "")[:10]
+    close_label = (
+        f"{snap_date[5:7]}-{snap_date[8:10]} 종가" if len(snap_date) == 10
+        else datetime.now().strftime("%m-%d") + " 종가"
+    )
     ctx = {
         "stock": stock,
         "rd": rd,
         "peers": peers,
-        "generated_label": datetime.now().strftime("%m-%d") + " 종가",
+        "generated_label": close_label,
         "chips_ticker": stock.get("chips_ticker", ""),
         "bellwether": sector_bellwether(snap, _load_sectors(), stock.get("sector_key")),
         "foreign_rate": snap_stock.get("foreign_rate"),
@@ -1344,6 +1350,18 @@ _SECTOR_EMOJI = {
     "ship": "🚢", "bio": "🧬", "finance": "🏦", "power": "⚡",
 }
 
+# 섹터별 한 줄 설명 — 검색 유입·체류를 위한 본문 텍스트
+_SECTOR_DESC = {
+    "semicon": "메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.",
+    "power": "변압기·전선·중전기 등 전력 인프라 종목이에요. AI 데이터센터와 노후 전력망 교체 수요로 구조적 성장 기대를 받아요.",
+    "defense": "항공·미사일·지상장비 등 국방 수출 종목이에요. 글로벌 지정학 리스크와 대규모 수주 사이클에 따라 움직여요.",
+    "ship": "상선·해양플랜트·특수선을 건조하는 조선 종목이에요. 친환경 선박 교체 수요와 수주 잔고, 선가 흐름이 핵심 변수예요.",
+    "battery": "배터리 셀·소재·장비 종목이에요. 전기차 수요와 미국 IRA·유럽 정책, 원자재 가격 변동에 민감해요.",
+    "auto": "완성차와 부품을 아우르는 자동차 종목이에요. 글로벌 판매·환율과 전동화 전환 속도가 실적을 좌우해요.",
+    "bio": "제약·바이오시밀러·신약개발 종목이에요. 임상 결과와 기술수출, 금리 환경에 따라 변동성이 큰 섹터예요.",
+    "finance": "은행·증권·보험 지주 종목이에요. 금리와 배당 정책, 정부 밸류업 정책의 영향을 크게 받아요.",
+}
+
 
 def build_sector_pages():
     """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성."""
@@ -1385,6 +1403,9 @@ def build_sector_pages():
                 "foreign_rate": measured.get("foreign_rate"),
             })
 
+        # 등락률 높은 순 정렬 (None은 맨 뒤) — 섹터에서 지금 뭐가 움직이는지 우선 노출
+        stocks.sort(key=lambda s: (s["change_pct"] is None, -(s["change_pct"] or 0)))
+
         pcts = [s["change_pct"] for s in stocks if s["change_pct"] is not None]
         avg_pct = sum(pcts) / len(pcts) if pcts else 0
         breadth = {
@@ -1398,6 +1419,7 @@ def build_sector_pages():
             sector_label=sector["label"],
             sector_key=key,
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
+            sector_desc=_SECTOR_DESC.get(key, ""),
             stocks=stocks,
             avg_pct=avg_pct,
             avg_pct_fmt=_fmt_pct(avg_pct),
