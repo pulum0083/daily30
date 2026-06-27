@@ -151,7 +151,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sig-nm small{font-size:11px;font-weight:600;color:#94A3B8;}
 .sig-pct{font-size:14px;font-weight:800;white-space:nowrap;}
 .sig-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
-.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;}
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:6px;background:#f2f4f6;color:#4e5968;}
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
 /* 신호별 랭킹 (우측) */
@@ -2434,33 +2434,33 @@ renderChips('morning');
   /* ── 오늘의 특이 신호 렌더 (placeholder; 향후 /api/signals 배선) ── */
   /* 신호 카테고리 분류 — 좌측 카드와 우측 랭킹이 같은 키를 공유 */
   var SIGNAL_META={
-    vol_surge:{ic:'🔥',label:'거래량 급증',cl:'#C2410C'},
-    counter_up:{ic:'🔵',label:'역행 상승',cl:'#E03131'},
-    inst_buy:{ic:'🏛️',label:'기관 순매수',cl:'#047857'},
-    foreign_buy:{ic:'🌏',label:'외국인 순매수',cl:'#2775ED'},
-    foreign_sell:{ic:'🌏',label:'외국인 순매도',cl:'#475569'},
-    near_high:{ic:'🏔️',label:'52주 신고가 근접',cl:'#6D28D9'},
-    turnover:{ic:'💰',label:'거래대금 상위',cl:'#6D28D9'},
-    retail_buy:{ic:'🙋',label:'개인 매수 우위',cl:'#475569'}
+    vol_surge:{ic:'🔥',label:'거래량 급증'},
+    counter_up:{ic:'↗',label:'역행 상승'},
+    inst_buy:{ic:'🏛️',label:'기관 순매수'},
+    foreign_buy:{ic:'🌏',label:'외국인 순매수'},
+    foreign_sell:{ic:'🌏',label:'외국인 순매도'},
+    near_high:{ic:'▲',label:'52주 신고가 근접'},
+    turnover:{ic:'💰',label:'거래대금 상위'},
+    retail_buy:{ic:'🙋',label:'개인 매수 우위'}
   };
   var PROTO_SIGNALS=[
     {nm:'이오테크닉스',code:'039030',sector:'반도체',pct:+1.7,dir:'up',cats:['counter_up','foreign_buy'],
-     badges:[{bg:'#FEF2F2',cl:'#E03131',t:'🔵 역행 상승'},{bg:'#EFF6FF',cl:'#2775ED',t:'🌏 외국인 순매수'}],
+     badges:['역행 상승','외국인 순매수'],
      why:'시장이 하락하는 동안 <b>+1.7% 상승</b>. 외국인 순매수가 함께 들어왔어요.'},
     {nm:'한화에어로스페이스',code:'012450',sector:'방산',pct:+0.3,dir:'up',cats:['near_high','inst_buy'],
-     badges:[{bg:'#F5F3FF',cl:'#6D28D9',t:'🏔️ 52주 신고가 1%↓'},{bg:'#ECFDF5',cl:'#047857',t:'🏛️ 기관 5일 연속 순매수'}],
+     badges:['52주 신고가 1%↓','기관 5일 연속 순매수'],
      why:'폭락장에도 <b>52주 신고가 근접</b>. 기관이 5거래일 연속 사들이고 있어요.'},
     {nm:'SK하이닉스',code:'000660',sector:'반도체',pct:-8.4,dir:'dn',cats:['vol_surge','foreign_sell'],
-     badges:[{bg:'#FFF7ED',cl:'#C2410C',t:'🔥 거래량 ×3.2 급증'},{bg:'#F1F5F9',cl:'#475569',t:'🌏 외국인 대량 순매도'}],
+     badges:['거래량 ×3.2 급증','외국인 대량 순매도'],
      why:'거래량이 평소의 <b>3.2배</b>로 늘며 급락. 외국인 매도가 우위였어요.'},
     {nm:'삼성중공업',code:'010140',sector:'조선',pct:-4.1,dir:'dn',cats:['vol_surge','inst_buy'],
-     badges:[{bg:'#FFF7ED',cl:'#C2410C',t:'🔥 거래량 ×2.1 급증'},{bg:'#ECFDF5',cl:'#047857',t:'🏛️ 기관 순매수 전환'}],
+     badges:['거래량 ×2.1 급증','기관 순매수 전환'],
      why:'거래량 <b>2.1배 급증</b> 속 하락했지만, 기관은 순매수로 돌아섰어요.'},
     {nm:'삼성전자',code:'005930',sector:'반도체',pct:-2.3,dir:'dn',cats:['turnover'],
-     badges:[{bg:'#F5F3FF',cl:'#6D28D9',t:'💰 거래대금 1위'},{bg:'#F1F5F9',cl:'#475569',t:'📊 코스피 비중 大'}],
+     badges:['거래대금 1위','코스피 비중 大'],
      why:'거래대금 코스피 <b>1위</b>. 시총 비중이 커 지수 하락에 가장 큰 영향을 줬어요.'},
     {nm:'DB하이텍',code:'000990',sector:'반도체',pct:+0.2,dir:'up',cats:['counter_up','retail_buy'],
-     badges:[{bg:'#FEF2F2',cl:'#E03131',t:'🔵 역행 상승'},{bg:'#F1F5F9',cl:'#475569',t:'🙋 개인 매수 우위'}],
+     badges:['역행 상승','개인 매수 우위'],
      why:'낙폭과대 인식에 <b>소폭 반등</b>. 개인 매수 우위라 수급 강도는 약해요.'}
   ];
   var PROTO_ETF_SIGNAL={
@@ -2479,7 +2479,7 @@ renderChips('morning');
     w.innerHTML=PROTO_SIGNALS.map(function(s){
       var lc=s.dir==='up'?'#E03131':'#2775ED';
       var sign=s.pct>=0?'+':'';
-      var bdgs=s.badges.map(function(b){return '<span class="bdg" style="background:'+b.bg+';color:'+b.cl+';">'+b.t+'</span>';}).join('');
+      var bdgs=s.badges.map(function(b){return '<span class="bdg">'+b+'</span>';}).join('');
       return '<a class="sig" style="border-left:3px solid '+lc+';" onclick="goStock(\''+s.code+'\')">'
         +'<div class="sig-top"><span class="sig-nm">'+s.nm+' <small>'+s.code+' · '+s.sector+'</small></span>'
         +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
@@ -2507,7 +2507,7 @@ renderChips('morning');
           +'<span class="srk-pct" style="color:'+pc+';">'+sign+s.pct.toFixed(1)+'%</span></a>';
       }).join('');
       return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+m.ic+'</span>'
-        +'<span class="srk-lb" style="color:'+m.cl+';">'+m.label+'</span>'
+        +'<span class="srk-lb">'+m.label+'</span>'
         +'<span class="srk-cnt">'+list.length+'</span></div>'+rows+'</div>';
     }).join('');
   }
@@ -2519,7 +2519,7 @@ renderChips('morning');
     w.innerHTML=sig.rows.map(function(r){
       var cl=r.pct>=0?'var(--up)':'var(--dn)';
       var sign=r.pct>=0?'+':'';
-      var lbl=r.label?'<span style="font-size:11px;color:#7C3AED;font-weight:800;"> · '+r.label+'</span>':'';
+      var lbl=r.label?'<span style="font-size:11px;color:#6b7280;font-weight:600;"> · '+r.label+'</span>':'';
       return '<div class="etf-dp"><span class="etf-dp-l">'+r.nm+lbl+'</span><span class="etf-dp-v" style="color:'+cl+';">'+sign+r.pct.toFixed(1)+'%</span></div>'
         +'<div class="etf-note">'+r.note+'</div>';
     }).join('');
