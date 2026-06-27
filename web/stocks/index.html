@@ -957,7 +957,7 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd-badge" id="sig-upd-badge"></span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span></span><span class="block__s"><span class="upd-badge" id="sig-upd-badge"></span></span></div>
       <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
       <div id="sig-rows"></div>
       <a class="more" onclick="go('ranking')">전체 랭킹 보기 →</a>
@@ -985,7 +985,7 @@ function usSel(code){
     <!-- ② 섹터 로테이션 -->
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">🔁</span>섹터 로테이션</span></div>
-      <div class="etf-cap" style="padding:10px 16px;">섹터 ETF 등락률로 본 <b>오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
+      <div class="etf-cap" style="padding:10px 16px;">섹터 ETF 등락률로 본 <b id="sec-rot-title">오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
       <div id="etf-sector"></div>
     </div>
     <!-- ③ 안전자산 선호도 -->
@@ -2472,8 +2472,10 @@ renderChips('morning');
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
   function badgeHtml(b){ return '<span class="bdg">'+b+'</span>'; }
+  function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase); setBadge('rank-upd-badge', d.phase);
+    var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
     if(w) w.innerHTML=(d.signals||[]).map(function(s){
       var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
@@ -2490,8 +2492,9 @@ renderChips('morning');
       return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+g.ic+'</span><span class="srk-lb">'+g.label+'</span><span class="srk-cnt">'+g.items.length+'</span></div>'+rows+'</div>';
     }).join('');
   }
-  function applyEtf(etf, phase){
+  function applyEtf(etf, phase, asOf){
     setBadge('etf-upd-badge', phase);
+    var rt=document.getElementById('sec-rot-title'); if(rt) rt.textContent=asOfPrefix(asOf)+' 상대 강도';
     if(!etf) return;
     var lead=document.getElementById('etf-lead');
     if(lead&&etf.lead) lead.innerHTML='<div class="etf-head-t">'+etf.lead.title+'</div><div class="etf-head-b">'+etf.lead.body+'</div>';
@@ -2513,7 +2516,7 @@ renderChips('morning');
   }
   function loadSignals(){
     fetch('/api/signals',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
-      .then(function(d){ if(d&&!d.error){ applySignals(d); applyEtf(d.etf, d.phase); } }).catch(function(){});
+      .then(function(d){ if(d&&!d.error){ applySignals(d); applyEtf(d.etf, d.phase, d.asOf); } }).catch(function(){});
   }
   function pollVolTop(){
     fetch('/api/vol-top',{cache:'no-store'})

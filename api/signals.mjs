@@ -1,16 +1,9 @@
 // 종목·ETF 신호 통합 API — polling(가격·등락·거래량) + itemSummary(거래대금) + 일봉 스냅샷 조합 → 코어 가공
 import { ALL_ETF_CODES, ETF_NAME } from './_etf-universe.mjs';
 import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, SIGNAL_META } from './_signals-core.mjs';
+import { krMarketOpen, kstTodayYmd, labelFromYmd } from './_market-calendar.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
-
-function krMarketOpen() {
-  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const day = kst.getUTCDay(); // KST 기준 0=일, 6=토
-  if (day === 0 || day === 6) return false; // 주말은 장중 아님 (휴일은 별도 미반영 — 알려진 한계)
-  const m = kst.getUTCHours() * 60 + kst.getUTCMinutes();
-  return m >= 9 * 60 && m <= 15 * 60 + 30;
-}
 
 async function pollOne(code) {
   try {
@@ -86,6 +79,10 @@ export default async function handler(req, res) {
     }).filter(Boolean);
 
     const phase = krMarketOpen() ? 'intraday' : 'closed';
+    // 데이터 기준일: 장중이면 오늘(라이브), 마감이면 스냅샷 생성일(마지막 거래일)
+    const snapDate = String(snap.generated_at || '').slice(0, 10);
+    const asOfDate = phase === 'intraday' ? kstTodayYmd() : (snapDate || kstTodayYmd());
+    const asOf = { date: asOfDate, label: labelFromYmd(asOfDate), isToday: phase === 'intraday' };
     let enrich;
     if (phase === 'closed') {
       const trends = await Promise.all(stocks.map((s) => trendOne(s.code)));
@@ -109,7 +106,7 @@ export default async function handler(req, res) {
     };
 
     return res.status(200).json({
-      phase,
+      phase, asOf,
       signals, rank, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
     });
   } catch (e) {
