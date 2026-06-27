@@ -1,4 +1,4 @@
-<!-- 종목 상세 페이지 Jinja2 템플릿 -->
+<!-- 종목 상세 페이지 Jinja2 템플릿 (재설계 v2) -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,11 +8,10 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 <title>신한지주(055550) · 종목 분석 — 더블샷</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks.css">
+<link rel="stylesheet" href="/assets/stocks.css?v=2">
 <script defer src="/assets/stocks.js"></script>
 </head>
 <body>
-<!-- GNB -->
 <nav class="gnb">
   <div class="gnb__in">
     <a class="gnb__logo" href="/stocks/">종목</a>
@@ -33,30 +32,81 @@
 <div class="page-wrap">
 <div class="screen on" id="detail">
   <div class="crumb">
-    <button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <a href="/stocks/">홈</a> › <a href="/stocks/">종목</a> › <a href="/stocks/sector/finance/">금융</a> › <span style="color:var(--ink)">신한지주</span>
   </div>
   <div class="grid">
+    <!-- ===== 좌측 메인 ===== -->
     <div class="dbox">
-      <!-- 헤더 카드: 종목명 + 시세 + 차트 -->
-      <div class="hero2" id="hero-stock">
+
+      <!-- 헤더 카드: 종목명 + 시세 + 스파크라인 -->
+      <div class="hero2" id="hero-stock" style="position:relative;">
         <div class="top">
           <div>
             <div class="hn">신한지주 <a class="chip" href="/stocks/sector/finance/">금융</a></div>
-            <div class="meta"><span class="num">055550</span> · KOSPI · 06-25 종가</div>
+            <div class="meta"><span class="num">055550</span> · KOSPI · 06-27 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">94,500</div>
+            <div class="px num">91,600</div>
             
-            <div class="cg num" style="color:var(--dn)">▼ -1.25%</div>
+            <div class="cg num" style="color:var(--dn)">▼ -3.07%</div>
             
           </div>
         </div>
-        <!-- 헤더 sparkline (data-spark 속성 → stocks.js가 DOMContentLoaded 시 SVG 렌더, 고점·저점 실측 라벨 포함) -->
-        <div class="spark-header" data-spark="92800.0,93600.0,92600.0,96400.0,100100.0,107500.0,97100.0,101200.0,98200.0,96900.0,99600.0,105600.0,106700.0,103100.0,100800.0,100900.0,97500.0,97700.0,95700.0,94500.0"></div>
+        <div style="font-size:11px;color:var(--muted);padding:6px 18px 2px;">최근 20거래일 종가 <span style="color:#C7CCD4;">· 곡선에 마우스를 올리면 날짜·종가</span></div>
+        <div class="spark-header" id="spark-main"
+             data-spark="93600.0,92600.0,96400.0,100100.0,107500.0,97100.0,101200.0,98200.0,96900.0,99600.0,105600.0,106700.0,103100.0,100800.0,100900.0,97500.0,97700.0,95700.0,94500.0,91600.0"
+             data-dates="5/29,6/1,6/2,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25,6/26"
+             style="cursor:crosshair;position:relative;"></div>
+        <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
       </div>
 
-      <!-- 오늘 장중 (실측 1분봉) — 장중/장후 거래일에만 JS가 채움 -->
+      <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
+      <div class="np" id="sig-c-wrap">
+        <div class="np__h" id="sig-c-head" data-code="055550" data-date="2026-06-27">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
+            <span id="sig-c-title">시그널 로딩 중…</span>
+          </span>
+          <span class="np__s" id="sig-c-sub"></span>
+        </div>
+        <div id="sig-c-body"><div class="sigc-empty">신호 조회 중…</div></div>
+      </div>
+
+      <!-- 더블샷 AI 픽 트랙레코드 -->
+      
+      
+      
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+            더블샷 AI 픽 트랙레코드
+          </span>
+          <span class="np__s">종가 기준 실측</span>
+        </div>
+        <div class="tr-sum">
+          <span>신한지주를 <b>1번</b> 픽</span>
+          
+          <span style="color:#B07400">진행 중 <b>1</b></span>
+        </div>
+        
+        <div class="tr-row">
+          <div class="tr-top">
+            <span class="tr-date">6/24 코스피</span>
+            <span class="tr-sig">하락장 역발상</span>
+            <span class="tr-badge run">진행 중</span>
+          </div>
+          <div class="tr-line">
+            <span>진입 <b>97,000원</b></span>→<span>목표 <b>100,500원</b></span>
+            <span class="tr-ret" style="color:var(--up)">현재 -5.6%</span>
+          </div>
+        </div>
+        
+      </div>
+      
+
+      <!-- 오늘 장중 (실측 1분봉) — JS가 표시 제어 -->
       <div class="sc" id="intra-card" data-code="055550" style="display:none">
         <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
         <div class="scb" style="padding:8px 12px;">
@@ -65,64 +115,78 @@
         <div id="intra-tl" style="margin-top:6px;"></div>
       </div>
 
-      
-      <div class="sc"><div class="sc__h"><span class="sc__t">해외 연동 · 외국인 보유율</span><span class="sc__s">참고용</span></div><div class="scb">
+      <!-- 실측 핵심 지표 -->
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
+            실측 핵심 지표
+          </span>
+          <span class="np__s">06-27 종가 기준</span>
+        </div>
+
         
-        <div class="ti-row"><span class="ti-lbl">미 벨웨더 JP모건</span>
-          <span class="ti-desc"><b class="num dn">-0.2%</b> 밤사이</span>
+        <div class="mx">
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">72.0%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:72.0%"></div><div class="now" style="left:72.0%"></div></div>
+          <div class="w52-lb"><span>최저 50,700</span><span>최고 107,500</span></div>
         </div>
         
+
         
-        <div class="ti-row" style="border-bottom:none"><span class="ti-lbl">외국인 보유율</span>
-          <span class="ti-desc"><b class="num">61.73%</b></span>
+        <div class="duo">
+          
+          <div class="cell">
+            <div class="l">20일선 대비</div>
+            <div class="v" style="color:var(--dn)">-7.3%</div>
+            <div class="sub">단기 추세 아래</div>
+          </div>
+          
+          
+          <div class="cell">
+            <div class="l">200일선 대비</div>
+            <div class="v" style="color:var(--up)">+7.2%</div>
+            <div class="sub">장기 추세 위</div>
+          </div>
+          
         </div>
         
-      </div></div>
+
+        
+        <div class="frw">
+          <div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">외국인 보유율</div>
+            <div class="v">61.72<span style="font-size:12px">%</span></div>
+          </div>
+          
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,33.9 8.421052631578947,30.8 16.842105263157894,27.7 25.263157894736842,22.6 33.68421052631579,14.3 42.10526315789474,22.6 50.526315789473685,25.7 58.94736842105263,33.9 67.36842105263158,36.0 75.78947368421052,30.8 84.21052631578948,19.5 92.63157894736842,20.5 101.05263157894737,22.6 109.47368421052632,19.5 117.89473684210526,10.2 126.3157894736842,8.1 134.73684210526315,4.0 143.1578947368421,8.1 151.57894736842104,9.2 160.0,9.2 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
+          </svg>
+          
+        </div>
+        
+
+        
+        <div class="ovr">
+          <span class="lbl">해외 연동 · 미 벨웨더 JP모건 <span style="color:var(--muted)">(참고)</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--up)">+0.5% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+        </div>
+        
+      </div>
+
+      <!-- 증권사 목표주가 -->
       
 
-      <!-- chipboard 실시간 섹션 (수급·목표주가·영업이익) — JS가 fetch 후 렌더 -->
-      
-
-      <!-- 이동평균 대비 (실측) -->
-      
-      <div class="sc"><div class="sc__h"><span class="sc__t">이동평균 대비</span><span class="sc__s">06-25 종가</span></div><div class="scb">
-        
-        <div class="ti-row">
-          <span class="ti-lbl">20일선 대비</span>
-          <span class="ti-desc">현재가가 20일선보다 <b class="num dn">-4.5%</b> 아래에 있어요</span>
-        </div>
-        
-        
-        <div class="ti-row" style="border-bottom:none">
-          <span class="ti-lbl">200일선 대비</span>
-          <span class="ti-desc">현재가가 200일선보다 <b class="num up">+10.8%</b> 위에 있어요</span>
-        </div>
-        
-      </div></div>
-      
-
-      <!-- 52주 범위 (실측) -->
-      
-      <div class="sc"><div class="sc__h"><span class="sc__t">52주 범위</span><span class="sc__s">현재가 77.1% 지점</span></div><div class="scb">
-        <div class="w52-bar">
-          <div class="w52-fill" style="width:77.1%"></div>
-          <div class="w52-now" style="left:77.1%"></div>
-        </div>
-        <div class="w52-lbl"><span>최저 <span class="num">50,700</span></span><span>최고 <span class="num">107,500</span></span></div>
-      </div></div>
-      
     </div>
 
-    <!-- 우측 사이드바 -->
+    <!-- ===== 우측 사이드바 ===== -->
     <div>
-      <!-- 같은 섹터 — 실측 (peers) -->
+      <!-- 같은 섹터 -->
       <div class="panel"><div class="panel__h">같은 섹터 · 금융</div>
         
         <a class="srow" href="/stocks/105560/">
           <span class="n2">KB금융 <small class="num">105560</small></span>
           
-            
-            <span class="c up num">+0.07%</span>
+            <span class="c dn num">-1.71%</span>
             
           
         </a>
@@ -130,8 +194,7 @@
         <a class="srow" href="/stocks/138040/">
           <span class="n2">메리츠금융지주 <small class="num">138040</small></span>
           
-            
-            <span class="c dn num">-1.06%</span>
+            <span class="c dn num">-1.76%</span>
             
           
         </a>
@@ -139,8 +202,7 @@
         <a class="srow" href="/stocks/086790/">
           <span class="n2">하나금융지주 <small class="num">086790</small></span>
           
-            
-            <span class="c dn num">-0.18%</span>
+            <span class="c dn num">-3.77%</span>
             
           
         </a>
@@ -148,8 +210,7 @@
         <a class="srow" href="/stocks/316140/">
           <span class="n2">우리금융지주 <small class="num">316140</small></span>
           
-            
-            <span class="c dn num">-0.68%</span>
+            <span class="c dn num">-2.41%</span>
             
           
         </a>
@@ -170,10 +231,114 @@
           <a href="/stocks/sector/finance/">🏦 금융</a>
         </div>
       </div>
+
+      <!-- 더블샷 브리핑 적중률 -->
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            더블샷 브리핑 적중률
+          </span>
+        </div>
+        <div class="acc-grid">
+          <div class="acc-cell"><div class="l">코스피 방향</div><div class="v">64%</div></div>
+          <div class="acc-cell"><div class="l">미국 방향</div><div class="v">73%</div></div>
+        </div>
+        <a class="acc-cta" href="https://doubleshot.space/briefings">매일 아침·저녁 AI 브리핑 받아보기 →</a>
+      </div>
     </div>
   </div>
-  <p class="disc">※ 모든 수치는 직전 거래일 종가 기준 실측값입니다. 투자 판단의 참고용입니다.</p>
+
+  <div class="disc" style="line-height:1.7;">
+    <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-27 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
+    <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
+  </div>
 </div>
 </div>
+
+<script>
+// 스파크라인 마우스오버 → 날짜·종가 툴팁
+(function(){
+  var wrap=document.getElementById('spark-main');
+  var tip=document.getElementById('spark-tip');
+  var hero=document.getElementById('hero-stock');
+  if(!wrap||!tip||!hero) return;
+  var vals=(wrap.getAttribute('data-spark')||'').split(',').map(Number).filter(Boolean);
+  var dates=(wrap.getAttribute('data-dates')||'').split(',');
+  var n=vals.length; if(!n) return;
+  wrap.addEventListener('mousemove',function(e){
+    var rect=wrap.getBoundingClientRect();
+    var heroRect=hero.getBoundingClientRect();
+    var i=Math.round((e.clientX-rect.left)/rect.width*(n-1));
+    i=Math.max(0,Math.min(n-1,i));
+    tip.textContent=(dates[i]||'')+' · '+vals[i].toLocaleString()+'원';
+    tip.style.display='block';
+    tip.style.left=(e.clientX-heroRect.left)+'px';
+    tip.style.top=(e.clientY-heroRect.top-32)+'px';
+  });
+  wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+
+// 오늘의 시그널 — /api/signals 에서 종목 필터링 후 렌더
+(function(){
+  var head=document.getElementById('sig-c-head');
+  var body=document.getElementById('sig-c-body');
+  var title=document.getElementById('sig-c-title');
+  var sub=document.getElementById('sig-c-sub');
+  if(!head||!body) return;
+  var code=head.getAttribute('data-code');
+  var dataDate=head.getAttribute('data-date');
+  var kst=new Date(Date.now()+9*3600*1000);
+  var today=kst.toISOString().slice(0,10);
+  var isToday=(dataDate===today);
+
+  var CAT_WHY={
+    near_high:'52주 고점에 <b>1% 이내</b>로 근접했어요.',
+    turnover:'거래대금 <b>최상위권</b>이라 지수에 큰 영향을 줬어요.',
+    vol_surge:'평소보다 거래량이 <b>크게 늘어난</b> 날이에요.',
+    counter_up:'시장 하락 중에도 <b>역행 상승</b>했어요.',
+    foreign_buy:'외국인이 <b>꾸준히 순매수</b>하고 있어요.',
+    inst_buy:'기관이 <b>꾸준히 순매수</b>하고 있어요.',
+    foreign_sell:'외국인이 <b>꾸준히 순매도</b>하고 있어요.',
+  };
+
+  fetch('/api/signals').then(function(r){return r.json();}).then(function(d){
+    var asOf=d.asOf||{};
+    var asOfDate=asOf.date||dataDate;
+    var p=asOfDate.split('-');
+    var wd=['일','월','화','수','목','금','토'][new Date(asOfDate+'T00:00:00+09:00').getDay()];
+    var lbl=(+p[1])+'/'+(+p[2])+'('+wd+')';
+
+    if(asOf.isToday){
+      title.textContent='오늘의 시그널';
+      sub.innerHTML='<span class="live"></span>오늘 장 기준';
+    } else {
+      title.textContent=lbl+' 시그널';
+      sub.textContent=lbl+' 장 마감 기준';
+    }
+
+    var stock=(d.signals||[]).find(function(s){return s.code===code;});
+    if(!stock||!stock.cats||!stock.cats.length){
+      body.innerHTML='<div class="sigc-empty">오늘 집계된 신호가 없어요.</div>';
+      return;
+    }
+    var html='';
+    stock.cats.forEach(function(cat,i){
+      var badge=stock.badges&&stock.badges[i]?stock.badges[i]:(stock.badges&&stock.badges[0]?stock.badges[0]:cat);
+      var why=CAT_WHY[cat]||(i===0?stock.why:'');
+      html+='<div class="sigc-row"><span class="sigc-badge">'+badge+'</span>';
+      if(why) html+='<span class="sigc-why">'+why+'</span>';
+      html+='</div>';
+    });
+    body.innerHTML=html;
+  }).catch(function(){
+    title.textContent='시그널';
+    sub.textContent='조회 실패';
+    body.innerHTML='<div class="sigc-empty">신호를 불러올 수 없어요.</div>';
+  });
+})();
+</script>
 </body>
 </html>
