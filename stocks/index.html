@@ -143,6 +143,58 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .home-side .barwrap{display:none;}
 .home-side .nm{flex:1;min-width:0;}
 @media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-side .barwrap{display:block;}}
+/* 오늘의 특이 신호 */
+.sig{display:block;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);}
+.sig:last-of-type{border-bottom:none;}
+.sig-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.sig-nm{font-size:14px;font-weight:800;color:#0F172A;}
+.sig-nm small{font-size:11px;font-weight:600;color:#94A3B8;}
+.sig-pct{font-size:14px;font-weight:800;white-space:nowrap;}
+.sig-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:6px;background:#f2f4f6;color:#4e5968;}
+.sig-why{font-size:12px;line-height:1.45;color:#475569;}
+.sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+/* 신호별 랭킹 (우측) */
+.srk-grp{border-bottom:1px solid #F1F5F9;background:var(--canvas);}
+.srk-grp:last-child{border-bottom:none;}
+.srk-hd{display:flex;align-items:center;gap:6px;padding:9px 16px 5px;}
+.srk-ic{font-size:13px;}
+.srk-lb{font-size:12px;font-weight:800;flex:1;}
+.srk-cnt{font-size:11px;font-weight:800;color:#94A3B8;background:#F1F5F9;border-radius:999px;padding:1px 7px;min-width:18px;text-align:center;}
+.srk-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 16px 4px 35px;cursor:pointer;text-decoration:none;}
+.srk-row:hover{background:#F8FAFC;}
+.srk-row:last-child{padding-bottom:9px;}
+.srk-nm{font-size:13px;font-weight:600;color:#0F172A;}
+.srk-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
+/* ETF로 읽는 시황 */
+.etf-head{margin:12px 16px 4px;padding:11px 13px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;}
+.etf-head-t{font-size:13px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+.etf-head-b{font-size:12px;line-height:1.5;color:#475569;}
+.etf-dp{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid #F1F5F9;background:var(--canvas);}
+.etf-dp-l{font-size:13px;font-weight:800;color:#0F172A;flex:1;}
+.etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
+.etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
+.etf-head-b b{color:#0F172A;}
+.etf-cap{font-size:11.5px;line-height:1.5;color:#475569;background:var(--canvas);}.etf-cap b{color:#0F172A;}
+/* ETF 사이드 4카드 (베팅·섹터·안전자산) */
+.live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
+.close-pill{font-size:10px;font-weight:700;color:#6b7280;background:#F1F3F5;border-radius:999px;padding:2px 8px;}
+.gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
+.bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
+.bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
+.bet-dn{background:var(--dn);display:flex;align-items:center;justify-content:flex-start;padding-left:10px;}
+.bet-up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}.bet-legend b{color:#334155;}
+.bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
+.bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
+.gauge-note{font-size:11.5px;line-height:1.5;color:#475569;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;}.gauge-note b{color:#0F172A;}
+.etf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--canvas);border-top:1px solid #F4F6F8;}.etf-row:first-of-type{border-top:none;}
+.etf-nm{font-size:13px;font-weight:700;color:#1E2430;flex:1;}
+.etf-pct{font-size:13px;font-weight:800;white-space:nowrap;}
+.sec-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;background:var(--canvas);}
+.sh-row{display:flex;align-items:center;gap:10px;padding:7px 16px;background:var(--canvas);}
+.sh-nm{font-size:12.5px;font-weight:700;color:#1E2430;flex:1;}
+.sh-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
 /* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
 .chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
 .chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
@@ -905,41 +957,43 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🔥</span>거래량 톱</span><span class="block__s"><span class="upd-badge" id="vol-upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-      <div id="vol-top-rows"></div>
-      <a class="more" onclick="go('ranking')">거래량 전체 →</a>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span></span><span class="block__s"><span class="upd-badge" id="sig-upd-badge"></span></span></div>
+      <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
+      <div id="sig-rows"></div>
+      <a class="more" onclick="go('ranking')">전체 랭킹 보기 →</a>
     </div>
-      <div class="block">
-        <div class="block__h"><span class="block__t"><span class="ic">📈</span>상승 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-        <div id="rise-top-rows"></div>
-        <a class="more" onclick="go('ranking')">상승 전체 →</a>
-      </div>
-      <div class="block">
-        <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-        <div id="fall-top-rows"></div>
-        <a class="more" onclick="go('ranking')">하락 전체 →</a>
-      </div>
-    </div><!-- /home-main -->
-    <div class="home-side">
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🏷️</span>신호별 랭킹</span><span class="block__s"><span class="upd-badge" id="rank-upd-badge"></span></span></div>
+      <div id="sig-rank-rows"></div>
+    </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
       <div class="sector-line__chips" style="flex-wrap:wrap;padding:12px 16px;"><a href="/stocks/sector/semicon/">🔬 반도체</a><a href="/stocks/sector/battery/">🔋 2차전지</a><a href="/stocks/sector/auto/">🚗 자동차</a><a href="/stocks/sector/defense/">🛡️ 방산</a><a href="/stocks/sector/ship/">🚢 조선</a><a href="/stocks/sector/bio/">🧬 바이오</a><a href="/stocks/sector/finance/">🏦 금융</a><a href="/stocks/sector/power/">⚡ 전력기기</a></div>
     </div>
+    </div><!-- /home-main -->
+    <div class="home-side">
+    <!-- ⓪ ETF로 읽는 시황 (리드) -->
     <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 거래량 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span> AI 픽 미적용</span></div>
-      <div id="etf-top-rows"></div>
-      <a class="more" onclick="go('ranking')">ETF 전체 →</a>
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
+      <div class="etf-head" id="etf-lead" style="margin-bottom:14px;"></div>
     </div>
-      <div class="block">
-        <div class="block__h"><span class="block__t etf"><span class="ic">🚀</span>ETF 상승 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-        <div id="etf-rise-rows"></div>
-        <a class="more" onclick="go('ranking')">ETF 상승 전체 →</a>
-      </div>
-      <div class="block">
-        <div class="block__h"><span class="block__t etf"><span class="ic">📉</span>ETF 하락 톱</span><span class="block__s"><span class="upd-badge"><span class="dot"></span>장중 2분</span></span></div>
-        <div id="etf-fall-rows"></div>
-        <a class="more" onclick="go('ranking')">ETF 하락 전체 →</a>
-      </div>
+    <!-- ① ETF 베팅 흐름 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">⚖️</span>ETF 베팅 흐름</span></div>
+      <div class="gauge-wrap" id="etf-betting"></div>
+    </div>
+    <!-- ② 섹터 로테이션 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">🔁</span>섹터 로테이션</span></div>
+      <div class="etf-cap" style="padding:10px 16px;">섹터 ETF 등락률로 본 <b id="sec-rot-title">오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
+      <div id="etf-sector"></div>
+    </div>
+    <!-- ③ 안전자산 선호도 -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">🛟</span>안전자산 선호도</span></div>
+      <div id="etf-safehaven"></div>
+      <a class="more" onclick="go('ranking')">ETF 전체 랭킹 →</a>
+    </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
   </div>
@@ -2414,6 +2468,56 @@ renderChips('morning');
       el.addEventListener('mouseenter',showTip); el.addEventListener('mousemove',moveTip); el.addEventListener('mouseleave',hideTip);
     });
   }
+  /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
+  function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간' : '장 마감 기준'; }
+  function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
+  function badgeHtml(b){ return '<span class="bdg">'+b+'</span>'; }
+  function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
+  function applySignals(d){
+    setBadge('sig-upd-badge', d.phase); setBadge('rank-upd-badge', d.phase);
+    var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
+    var w=document.getElementById('sig-rows');
+    if(w) w.innerHTML=(d.signals||[]).map(function(s){
+      var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
+      return '<a class="sig" style="border-left:3px solid '+lc+';" onclick="goStock(\''+s.code+'\')">'
+        +'<div class="sig-top"><span class="sig-nm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+        +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
+        +'<div class="sig-badges">'+(s.badges||[]).map(badgeHtml).join('')+'</div>'
+        +'<div class="sig-why">'+(s.why||'')+'</div></a>';
+    }).join('');
+    var rw=document.getElementById('sig-rank-rows');
+    if(rw) rw.innerHTML=(d.rank||[]).map(function(g){
+      var rows=g.items.map(function(s){var pc=s.dir==='up'?'var(--up)':'var(--dn)',sg=s.pct>=0?'+':'';
+        return '<a class="srk-row" onclick="goStock(\''+s.code+'\')"><span class="srk-nm">'+s.name+'</span><span class="srk-pct" style="color:'+pc+';">'+sg+s.pct.toFixed(1)+'%</span></a>';}).join('');
+      return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+g.ic+'</span><span class="srk-lb">'+g.label+'</span><span class="srk-cnt">'+g.items.length+'</span></div>'+rows+'</div>';
+    }).join('');
+  }
+  function applyEtf(etf, phase, asOf){
+    setBadge('etf-upd-badge', phase);
+    var rt=document.getElementById('sec-rot-title'); if(rt) rt.textContent=asOfPrefix(asOf)+' 상대 강도';
+    if(!etf) return;
+    var lead=document.getElementById('etf-lead');
+    if(lead&&etf.lead) lead.innerHTML='<div class="etf-head-t">'+etf.lead.title+'</div><div class="etf-head-b">'+etf.lead.body+'</div>';
+    var b=etf.betting, bw=document.getElementById('etf-betting');
+    if(bw&&b) bw.innerHTML='<div class="bet-label">레버리지·인버스 ETF 거래대금</div>'
+      +'<div class="bet-split"><div class="bet-dn" style="width:'+b.downRatio+'%">하락 베팅 '+b.downRatio+'%</div><div class="bet-up" style="width:'+b.upRatio+'%">저점매수 '+b.upRatio+'%</div></div>'
+      +'<div class="bet-fact"><div class="bet-fact-row"><span>인버스 거래량</span><b>KODEX 200의 '+b.invVolMultiple+'배</b></div>'
+      +'<div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">'+(b.levPct!=null?b.levPct.toFixed(2)+'%':'—')+'</b></div></div>'
+      +'<div class="gauge-note">거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.</div>';
+    var sw=document.getElementById('etf-sector');
+    if(sw&&etf.sector){var top=etf.sector.slice(0,3),bot=etf.sector.slice(-3);
+      var row=function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';return '<div class="etf-row"><span class="etf-nm">'+x.label+'</span><span class="etf-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';};
+      sw.innerHTML='<div class="sec-divider">상대 선방 ▲</div>'+top.map(row).join('')+'<div class="sec-divider">상대 약세 ▼</div>'+bot.map(row).join('');}
+    var hw=document.getElementById('etf-safehaven');
+    if(hw&&etf.safeHaven){var rs=etf.safeHaven.rows.map(function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';
+      return '<div class="sh-row"><span class="sh-nm">'+x.label+'</span><span class="sh-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';}).join('');
+      var m=etf.safeHaven.market,mc=m>=0?'var(--up)':'var(--dn)',ms=m>=0?'+':'';
+      hw.innerHTML=rs+'<div class="sh-row"><span class="sh-nm">코스피200 (주식)</span><span class="sh-pct" style="color:'+mc+'">'+ms+m.toFixed(2)+'%</span></div>';}
+  }
+  function loadSignals(){
+    fetch('/api/signals',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(d){ if(d&&!d.error){ applySignals(d); applyEtf(d.etf, d.phase, d.asOf); } }).catch(function(){});
+  }
   function pollVolTop(){
     fetch('/api/vol-top',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
@@ -2436,11 +2540,11 @@ renderChips('morning');
     var etf=SNAP.etfs?Object.keys(SNAP.etfs).map(function(c){var e=SNAP.etfs[c];return {code:c,name:e.name,sector:'ETF',vol:e.vol||0,changePct:e.change_pct||0,price:null};}):[];
     renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list,etf:etf});
   }
+  loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(snap){
       SNAP=snap;
-      if(snap&&snap.stocks){ renderTopsFromSnap(); }
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
     })
