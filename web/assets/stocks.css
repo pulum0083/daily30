@@ -333,3 +333,87 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 body{background:var(--soft);margin:0;}
 .page-wrap{max-width:1136px;margin:0 auto;padding:24px 32px 72px;}
 .proto-tag{max-width:1200px;margin:0 auto 10px;padding:6px 12px;font-size:11px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;}
+
+/* ── 신규 패널 래퍼 (.np) ── */
+.np{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--s1);}
+.np__h{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--hair);}
+.np__t{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--ink);}
+.np__t svg{width:17px;height:17px;color:var(--primary);}
+.np__s{font-size:11px;color:var(--muted);}
+.np__s .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:#E03131;margin-right:5px;vertical-align:1px;animation:blink 1.2s ease-in-out infinite;}
+
+/* ── 트랙레코드 ── */
+.tr-sum{display:flex;gap:18px;align-items:baseline;padding:12px 16px;background:var(--soft);border-bottom:1px solid var(--hair);font-size:13px;color:var(--muted);}
+.tr-sum b{color:var(--ink);}
+.tr-row{padding:11px 16px;border-bottom:1px solid var(--hair);}
+.tr-row:last-child{border-bottom:none;}
+.tr-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.tr-date{font-size:11px;font-weight:700;background:#E8F0FE;color:#1A4FA0;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.tr-sig{font-size:12px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tr-badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;}
+.tr-badge.hit{background:#E3F5EA;color:#1A7F4B;}
+.tr-badge.run{background:#FBF0DA;color:#B07400;}
+.tr-badge.miss{background:#FBE3E3;color:#B33A3A;}
+.tr-line{display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--muted);}
+.tr-line b{color:var(--ink);}
+.tr-ret{margin-left:auto;font-weight:700;}
+
+/* ── 오늘의 시그널 ── */
+.sigc-row{display:flex;flex-direction:column;gap:3px;padding:12px 16px;border-bottom:1px solid var(--hair);}
+.sigc-row:last-child{border-bottom:none;}
+.sigc-badge{align-self:flex-start;font-size:12px;font-weight:700;color:#1A4FA0;background:#EAF2FE;padding:3px 9px;border-radius:6px;}
+.sigc-why{font-size:12.5px;color:var(--muted);line-height:1.5;}
+.sigc-why b{color:var(--ink);}
+.sigc-empty{padding:16px;font-size:13px;color:var(--muted);text-align:center;}
+
+/* ── 적중률 배지 ── */
+.acc-grid{display:flex;gap:10px;padding:14px 16px 12px;}
+.acc-cell{flex:1;background:var(--soft);border-radius:8px;padding:10px 12px;}
+.acc-cell .l{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.acc-cell .v{font-size:22px;font-weight:800;color:var(--ink);}
+.acc-cta{display:block;margin:0 16px 16px;text-align:center;font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:10px;background:#F0F7FF;border-radius:8px;}
+
+/* ── 실측 핵심 지표 (np 내부) ── */
+.mx{padding:14px 16px;border-bottom:1px solid var(--hair);}
+.mx:last-child{border-bottom:none;}
+.mx-h{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;}
+.mx-h b{color:var(--ink);}
+/* 52주 바 (np 버전 — w52-bar와 별개) */
+.w52{position:relative;height:8px;background:var(--soft);border-radius:4px;}
+.w52 .fill{position:absolute;left:0;top:0;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(224,49,49,.15),rgba(224,49,49,.4));}
+.w52 .now{position:absolute;top:-3px;width:4px;height:14px;border-radius:2px;background:var(--up);transform:translateX(-50%);}
+.w52-lb{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+/* MA 듀오 박스 */
+.duo{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.duo .cell{flex:1;background:var(--soft);border-radius:8px;padding:10px 12px;}
+.duo .cell .l{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.duo .cell .v{font-size:18px;font-weight:800;}
+.duo .cell .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+/* 외국인 보유율 행 */
+.frw{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.frw .v{font-size:18px;font-weight:800;color:var(--ink);}
+.frw svg.sp{flex:1;height:36px;}
+/* 기타 단순 행 */
+.ovr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;}
+.ovr .lbl{font-size:12px;color:var(--muted);}
+
+/* ── 증권사 목표주가 (레인지 바 + 표) ── */
+.tgt-range-wrap{padding:36px 18px 16px;border-bottom:1px solid var(--hair);}
+.tgt-range{position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#A7C8F2,#9BDDBE 45%,#F3CE94);}
+.tgt-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);}
+.tgt-cur{position:absolute;top:-32px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;white-space:nowrap;}
+.tgt-cur::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--muted);}
+.tgt-scale{display:flex;justify-content:space-between;margin-top:16px;}
+.tgt-scale .lab{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.tgt-scale .v2{font-size:15px;font-weight:800;}
+.tgt-scale .c{text-align:center;}.tgt-scale .r{text-align:right;}
+.tgt-tbl{width:100%;border-collapse:collapse;}
+.tgt-tbl th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:10px 16px 8px;border-bottom:1px solid var(--hair);}
+.tgt-tbl th:first-child{text-align:left;}
+.tgt-tbl td{font-size:13px;padding:9px 16px;border-bottom:1px solid #F1F5F9;text-align:right;}
+.tgt-tbl td:first-child{text-align:left;font-weight:600;color:var(--ink);}
+.tgt-tbl tr:last-child td{border-bottom:none;}
+.tgt-tbl .pr{font-weight:700;color:var(--primary);}
+.tgt-tbl .op2{font-size:11px;font-weight:700;color:#1A7F4B;background:#E3F5EA;padding:2px 8px;border-radius:5px;}
+.tgt-tbl .op2.hold{color:var(--muted);background:var(--soft);}
+.tgt-tbl .dt{color:var(--muted);font-size:12px;}

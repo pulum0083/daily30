@@ -878,6 +878,196 @@ def _naver_daily_closes(code):
     return [float(r["closePrice"]) for r in rows if r.get("closePrice")]
 
 
+def _naver_dated_rows(code, days=130):
+    """네이버 일봉 [{localDate, closePrice}] 리스트 (오래된→최신)."""
+    import urllib.request
+    from datetime import timedelta
+    end = datetime.now().strftime("%Y%m%d") + "0000"
+    start = (datetime.now() - timedelta(days=days)).strftime("%Y%m%d") + "0000"
+    url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
+           f"?startDateTime={start}&endDateTime={end}")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        rows = json.loads(resp.read())
+    return [r for r in rows if r.get("localDate") and r.get("closePrice")]
+
+
+def _naver_sparkline_dates(code, n=20):
+    """최근 N거래일의 'M/D' 날짜 리스트. sparkline hover용."""
+    try:
+        rows = _naver_dated_rows(code, days=60)
+        recent = rows[-n:]
+        return [f"{int(r['localDate'][4:6])}/{int(r['localDate'][6:8])}" for r in recent]
+    except Exception:
+        return []
+
+
+def _parse_price(s):
+    """'337,000원' 또는 '320,000~325,000원' → 숫자 (범위면 평균). 실패 시 None."""
+    nums = re.findall(r'[\d,]+', str(s or ""))
+    if not nums:
+        return None
+    vals = [float(n.replace(",", "")) for n in nums if n.replace(",", "").isdigit()]
+    return sum(vals) / len(vals) if vals else None
+
+
+# 증권사 목표주가 정적 데이터 (2026-06-25 기준 수집)
+BROKER_TARGETS = {
+    "005930": {
+        "count": 10,
+        "min_price": 330000, "avg_price": 432000, "max_price": 560000,
+        "rows": [
+            {"firm": "대신증권",    "price": 560000, "op": "BUY", "when": "1일 전"},
+            {"firm": "미래에셋증권", "price": 550000, "op": "BUY", "when": "2일 전"},
+            {"firm": "iM증권",      "price": 480000, "op": "BUY", "when": "5일 전"},
+            {"firm": "하나증권",    "price": 480000, "op": "BUY", "when": "1주 전"},
+            {"firm": "신한투자증권", "price": 550000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "키움증권",    "price": 330000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "교보증권",    "price": 330000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "유진투자증권", "price": 360000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "IBK투자증권", "price": 350000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "한화투자증권", "price": 330000, "op": "BUY", "when": "1개월 전"},
+        ],
+    },
+    "000660": {
+        "count": 10,
+        "min_price": 2500000, "avg_price": 3200000, "max_price": 4000000,
+        "rows": [
+            {"firm": "KB증권",      "price": 4000000, "op": "BUY", "when": "1일 전"},
+            {"firm": "미래에셋증권", "price": 3800000, "op": "BUY", "when": "3일 전"},
+            {"firm": "삼성증권",    "price": 3600000, "op": "BUY", "when": "5일 전"},
+            {"firm": "NH투자증권",  "price": 3400000, "op": "BUY", "when": "1주 전"},
+            {"firm": "한국투자증권", "price": 3200000, "op": "BUY", "when": "1주 전"},
+            {"firm": "키움증권",    "price": 3000000, "op": "BUY", "when": "1주 전"},
+            {"firm": "신한투자증권", "price": 2900000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "하나증권",    "price": 2800000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "대신증권",    "price": 2600000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "유진투자증권", "price": 2500000, "op": "BUY", "when": "1개월 전"},
+        ],
+    },
+    "005380": {
+        "count": 10,
+        "min_price": 460000, "avg_price": 600000, "max_price": 750000,
+        "rows": [
+            {"firm": "KB증권",      "price": 750000, "op": "BUY", "when": "2일 전"},
+            {"firm": "한국투자증권", "price": 700000, "op": "BUY", "when": "3일 전"},
+            {"firm": "삼성증권",    "price": 680000, "op": "BUY", "when": "1주 전"},
+            {"firm": "미래에셋증권", "price": 650000, "op": "BUY", "when": "1주 전"},
+            {"firm": "NH투자증권",  "price": 600000, "op": "BUY", "when": "1주 전"},
+            {"firm": "신한투자증권", "price": 560000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "하나증권",    "price": 530000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "키움증권",    "price": 510000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "대신증권",    "price": 480000, "op": "BUY", "when": "1개월 전"},
+            {"firm": "유진투자증권", "price": 460000, "op": "BUY", "when": "1개월 전"},
+        ],
+    },
+}
+
+
+def _enrich_broker_targets(bt, current_price):
+    """BROKER_TARGETS 항목에 현재가 기준 비율 정보를 추가해 반환."""
+    if not bt or not current_price:
+        return None
+    min_p, max_p, avg_p = bt["min_price"], bt["max_price"], bt["avg_price"]
+    span = max_p - min_p or 1
+    rows = []
+    for r in bt["rows"]:
+        upside = round((r["price"] / current_price - 1) * 100, 1)
+        rows.append({**r, "upside": upside})
+    return {
+        **bt,
+        "rows": rows,
+        "cur_pct": round((current_price - min_p) / span * 100, 1),
+        "avg_pct": round((avg_p - min_p) / span * 100, 1),
+        "avg_upside": round((avg_p / current_price - 1) * 100, 1),
+    }
+
+
+def extract_picks_for_code(code):
+    """모든 analysis_snapshot.json에서 해당 종목 코드의 픽 이력 추출."""
+    found = []
+    for snap in sorted(BRIEFINGS_DIR.rglob("analysis_snapshot.json")):
+        date_str = snap.parent.parent.name
+        btype = snap.parent.name
+        try:
+            data = load_json(snap)
+            for p in data.get("stock_picks", []):
+                if p.get("ticker") == code:
+                    found.append({"date": date_str, "briefing_type": btype, **p})
+        except Exception:
+            pass
+    return found
+
+
+def score_picks(code, raw_picks):
+    """픽 이력에 배지(hit/run)와 수익률 추가. 데이터 부족 픽은 제외."""
+    if not raw_picks:
+        return []
+    try:
+        rows = _naver_dated_rows(code, days=130)
+        dated_closes = {r["localDate"]: float(r["closePrice"]) for r in rows}
+    except Exception:
+        dated_closes = {}
+
+    btype_map = {"kospi": "코스피", "us": "미국", "close": "마감"}
+    scored = []
+    for p in raw_picks:
+        entry = _parse_price(p.get("entry"))
+        target = _parse_price(p.get("target"))
+        if not entry or not target:
+            continue
+        pick_date = p["date"].replace("-", "")
+        closes_after = {d: v for d, v in dated_closes.items() if d >= pick_date}
+        if not closes_after:
+            continue
+        max_close = max(closes_after.values())
+        latest_d = max(closes_after.keys())
+        latest_close = closes_after[latest_d]
+        if max_close >= target:
+            max_ret = round((max_close / entry - 1) * 100, 1)
+            badge, badge_label = "hit", "목표 도달"
+            ret_str = f"최대 +{max_ret}%"
+        else:
+            cur_ret = round((latest_close / entry - 1) * 100, 1)
+            badge, badge_label = "run", "진행 중"
+            sign = "+" if cur_ret >= 0 else ""
+            ret_str = f"현재 {sign}{cur_ret}%"
+
+        d = p["date"]
+        date_label = f"{int(d[5:7])}/{int(d[8:10])}"
+        btype_label = btype_map.get(p.get("briefing_type", ""), "")
+        reason = p.get("scenario_tag") or p.get("signal", "")
+        scored.append({
+            "date_str": f"{date_label} {btype_label}",
+            "reason": reason,
+            "entry_str": p.get("entry", ""),
+            "target_str": p.get("target", ""),
+            "badge": badge,
+            "badge_label": badge_label,
+            "ret_str": ret_str,
+        })
+    return scored
+
+
+def build_trackrecord(code):
+    """종목 코드 → 전체 트랙레코드 리스트 (최신순)."""
+    raw = extract_picks_for_code(code)
+    return list(reversed(score_picks(code, raw)))
+
+
+def _briefing_accuracy():
+    """briefings.json에서 코스피·미국 예측 적중률 계산."""
+    bpath = DATA_DIR / "briefings.json"
+    if not bpath.exists():
+        return {"kospi": None, "us": None}
+    records = load_json(bpath).get("briefings", [])
+    result = {}
+    for btype in ("kospi", "us"):
+        subset = [b for b in records if b.get("type") == btype and b.get("is_correct") is not None]
+        result[btype] = round(sum(1 for b in subset if b["is_correct"]) / len(subset) * 100) if subset else None
+    return result
+
+
 def _fetch_stock_closes(code):
     """일봉 종가 리스트(오래된→최신). 52주 범위 산출용. 토스 우선, 실패 시 네이버 폴백.
 
@@ -895,7 +1085,7 @@ def _fetch_stock_closes(code):
 
 
 def stock_realdata(code):
-    """종목 상세용 실측 dict. 시세·sparkline·MA + 52주 범위."""
+    """종목 상세용 실측 dict. 시세·sparkline·MA + 52주 범위 + sparkline_dates."""
     rd = _fetch_kospi_realdata(code)
     if rd.get("error"):
         return {"error": rd["error"], "price": None}
@@ -911,6 +1101,7 @@ def stock_realdata(code):
             rd["week52_pos_pct"] = round((rd["price"] - lo) / (hi - lo) * 100, 1) if hi > lo else 0
     except Exception:
         rd["week52_low"] = rd["week52_high"] = rd["week52_pos_pct"] = None
+    rd["sparkline_dates"] = _naver_sparkline_dates(code)
     return rd
 
 
@@ -956,6 +1147,9 @@ def build_stock_page(stock, peers):
     snap_stock = (snap.get("stocks") or {}).get(stock["code"], {})
     env = make_env()
     tmpl = env.get_template("stocks/detail.html")
+    picks = build_trackrecord(stock["code"])
+    bt_raw = BROKER_TARGETS.get(stock["code"])
+    acc = _briefing_accuracy()
     ctx = {
         "stock": stock,
         "rd": rd,
@@ -965,6 +1159,10 @@ def build_stock_page(stock, peers):
         "bellwether": sector_bellwether(snap, _load_sectors(), stock.get("sector_key")),
         "foreign_rate": snap_stock.get("foreign_rate"),
         "foreign_spark": snap_stock.get("foreign_spark"),
+        "picks": picks,
+        "broker_targets": _enrich_broker_targets(bt_raw, rd.get("price")),
+        "acc": acc,
+        "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
     }
     html = tmpl.render(**ctx)
     out_dir = WEB_DIR / "stocks" / stock["code"]
