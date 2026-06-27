@@ -82,6 +82,7 @@
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
             더블샷 AI 픽 트랙레코드
+            <span class="tr-help" id="tr-help-btn">?</span>
           </span>
           <span class="np__s">종가 기준 실측</span>
         </div>
@@ -155,7 +156,7 @@
         
         <div class="frw">
           <div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">외국인 보유율</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:3px;cursor:help;" id="fo-label">외국인 보유율 <span style="font-size:10px;border:1px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;line-height:1;">?</span></div>
             <div class="v">61.72<span style="font-size:12px">%</span></div>
           </div>
           
@@ -281,6 +282,42 @@
   wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
 })();
 
+// 외국인 보유율 툴팁
+(function(){
+  var btn=document.getElementById('fo-label');
+  var tip=document.getElementById('fo-tip');
+  if(!btn||!tip) return;
+  function move(e){
+    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+    var x=e.clientX+18,y=e.clientY+14;
+    if(x+w+pad>innerWidth) x=e.clientX-w-14;
+    if(y+h+pad>innerHeight) y=e.clientY-h-14;
+    tip.style.left=Math.max(pad,x)+'px';
+    tip.style.top=Math.max(pad,y)+'px';
+  }
+  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+  btn.addEventListener('mousemove',move);
+  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+
+// 트랙레코드 ? 툴팁
+(function(){
+  var btn=document.getElementById('tr-help-btn');
+  var tip=document.getElementById('tr-tip');
+  if(!btn||!tip) return;
+  function move(e){
+    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+    var x=e.clientX+18,y=e.clientY+14;
+    if(x+w+pad>innerWidth) x=e.clientX-w-14;
+    if(y+h+pad>innerHeight) y=e.clientY-h-14;
+    tip.style.left=Math.max(pad,x)+'px';
+    tip.style.top=Math.max(pad,y)+'px';
+  }
+  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+  btn.addEventListener('mousemove',move);
+  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+
 // 오늘의 시그널 — /api/signals 에서 종목 필터링 후 렌더
 (function(){
   var head=document.getElementById('sig-c-head');
@@ -321,7 +358,7 @@
 
     var stock=(d.signals||[]).find(function(s){return s.code===code;});
     if(!stock||!stock.cats||!stock.cats.length){
-      body.innerHTML='<div class="sigc-empty">오늘 집계된 신호가 없어요.</div>';
+      document.getElementById('sig-c-wrap').style.display='none';
       return;
     }
     var html='';
@@ -334,11 +371,22 @@
     });
     body.innerHTML=html;
   }).catch(function(){
-    title.textContent='시그널';
-    sub.textContent='조회 실패';
-    body.innerHTML='<div class="sigc-empty">신호를 불러올 수 없어요.</div>';
+    document.getElementById('sig-c-wrap').style.display='none';
   });
 })();
 </script>
+<div id="fo-tip" style="display:none;position:fixed;z-index:999;max-width:270px;background:#1C1E21;color:#F3F4F6;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.7;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;">
+  <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;">외국인 보유율</div>
+  <div style="color:#D1D5DB;">전체 발행 주식 중 <b style="color:#fff;">외국인이 보유한 비율</b>이에요.<br>비율이 높을수록 글로벌 기관·패시브 ETF의 수급 영향을 많이 받아요.<br><br>그래프는 <b style="color:#fff;">최근 20거래일 추이</b>를 보여줘요. 상승이면 외국인 비중이 늘고 있는 것이에요.</div>
+</div>
+<div id="tr-tip">
+  <div class="tt">더블샷 AI 픽 트랙레코드</div>
+  <div class="bd">
+    더블샷 AI 브리핑에서 <b>이 종목을 픽한 이력</b>이에요. 브리핑 당시 제시한 진입가·목표가와 이후 실제 종가를 기록해요.<br><br>
+    <span class="badge-run">진행 중</span> 픽 이후 아직 목표가에 도달하지 않은 상태. 현재까지의 등락률을 보여줘요.<br>
+    <span class="badge-hit">목표 도달</span> 종가 기준으로 목표가에 터치한 상태.<br>
+    <span class="badge-miss">미달</span> 목표가 미달로 종료된 경우.
+  </div>
+</div>
 </body>
 </html>
