@@ -1,0 +1,297 @@
+<!-- 종목 상세 재설계 프로토타입 (삼성전자 실데이터) — 미리보기 전용, 배포 안 함 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>삼성전자(005930) · 종목 분석 [재설계 프로토] — 더블샷</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/stocks.css">
+<style>
+/* 신규 섹션 공통 토큰 */
+.np{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--s1,0 1px 3px rgba(0,0,0,.06));}
+.np__h{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--hair);}
+.np__t{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--ink);}
+.np__t svg{width:17px;height:17px;color:var(--primary);}
+.np__s{font-size:11px;color:var(--muted);}
+/* 트랙레코드 */
+.tr-sum{display:flex;gap:18px;align-items:baseline;padding:12px 16px;background:var(--soft);border-bottom:1px solid var(--hair);font-size:13px;color:var(--muted);}
+.tr-sum b{color:var(--ink);}
+.tr-row{padding:11px 16px;border-bottom:1px solid var(--hair);}
+.tr-row:last-child{border-bottom:none;}
+.tr-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.tr-date{font-size:11px;font-weight:700;background:#E8F0FE;color:#1A4FA0;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.tr-sig{font-size:12px;color:var(--muted);}
+.tr-badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+.tr-badge.hit{background:#E3F5EA;color:#1A7F4B;}
+.tr-badge.run{background:#FBF0DA;color:#B07400;}
+.tr-badge.miss{background:#FBE3E3;color:#B33A3A;}
+.tr-line{display:flex;align-items:baseline;gap:6px;font-size:12px;color:var(--muted);}
+.tr-line b{color:var(--ink);}
+.tr-ret{margin-left:auto;font-weight:700;}
+/* 적중률 배지 (사이드바) */
+.acc-grid{display:flex;gap:10px;padding:14px 16px 12px;}
+.acc-cell{flex:1;background:var(--soft);border-radius:8px;padding:10px 12px;}
+.acc-cell .l{font-size:12px;color:var(--muted);margin-bottom:3px;}
+.acc-cell .v{font-size:22px;font-weight:800;color:var(--ink);}
+.acc-cta{display:block;margin:0 16px 16px;text-align:center;font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:10px;background:#F0F7FF;border-radius:8px;}
+/* 실측 지표 */
+.mx{padding:14px 16px;border-bottom:1px solid var(--hair);}
+.mx-h{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;}
+.mx-h b{color:var(--ink);}
+.w52{position:relative;height:8px;background:var(--soft);border-radius:4px;}
+.w52 .fill{position:absolute;left:0;top:0;height:8px;border-radius:4px;background:#FBD5D5;}
+.w52 .now{position:absolute;top:-3px;width:4px;height:14px;border-radius:2px;background:var(--up);transform:translateX(-50%);}
+.w52-lb{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px;}
+.duo{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.duo .cell{flex:1;background:var(--soft);border-radius:8px;padding:10px 12px;}
+.duo .cell .l{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.duo .cell .v{font-size:18px;font-weight:800;}
+.duo .cell .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.frw{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--hair);}
+.frw .v{font-size:18px;font-weight:800;color:var(--ink);}
+.frw svg.sp{flex:1;height:36px;}
+.ovr{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;}
+.ovr .lbl{font-size:12px;color:var(--muted);}
+/* 목표주가 (칩보드 스타일 — 레인지 바 + 전체 표) */
+.tgt-range-wrap{padding:36px 18px 16px;border-bottom:1px solid var(--hair);}
+.tgt-range{position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#A7C8F2,#9BDDBE 45%,#F3CE94);}
+.tgt-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);}
+.tgt-cur{position:absolute;top:-32px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;white-space:nowrap;}
+.tgt-cur::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--muted);}
+.tgt-scale{display:flex;justify-content:space-between;margin-top:16px;}
+.tgt-scale .lab{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.tgt-scale .v2{font-size:15px;font-weight:800;}
+.tgt-scale .c{text-align:center;}.tgt-scale .r{text-align:right;}
+.tgt-tbl{width:100%;border-collapse:collapse;}
+.tgt-tbl th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:10px 16px 8px;border-bottom:1px solid var(--hair);}
+.tgt-tbl th:first-child{text-align:left;}
+.tgt-tbl td{font-size:13px;padding:9px 16px;border-bottom:1px solid #F1F5F9;text-align:right;}
+.tgt-tbl td:first-child{text-align:left;font-weight:600;color:var(--ink);}
+.tgt-tbl tr:last-child td{border-bottom:none;}
+.tgt-tbl .pr{font-weight:700;color:var(--primary);}
+.tgt-tbl .op2{font-size:11px;font-weight:700;color:#1A7F4B;background:#E3F5EA;padding:2px 8px;border-radius:5px;}
+.tgt-tbl .dt{color:var(--muted);font-size:12px;}
+/* 영업이익 차트 — stocks.css의 .fin-chart/.fin-col/.fin-bar 그대로 재사용 (충돌 방지 위해 커스텀 미정의) */
+</style>
+</head>
+<body>
+<nav class="gnb">
+  <div class="gnb__in">
+    <a class="gnb__logo" href="/stocks/">종목</a>
+    <div class="gnb__subs">
+      <a class="gnb__sub" href="https://doubleshot.space/">Double-Shot</a>
+      <div class="gnb__divider"></div>
+      <a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="screen on" id="detail">
+  <div class="crumb">
+    <a href="/stocks/">홈</a> › <a href="/stocks/">종목</a> › <a href="/stocks/sector/semicon/">반도체</a> › <span style="color:var(--ink)">삼성전자</span>
+    <span style="margin-left:8px;font-size:11px;font-weight:700;background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:5px;">재설계 프로토</span>
+  </div>
+  <div class="grid">
+    <!-- ===== 좌측 메인 ===== -->
+    <div class="dbox">
+
+      <!-- 헤더 카드 -->
+      <div class="hero2" id="hero-stock">
+        <div class="top">
+          <div>
+            <div class="hn">삼성전자 <a class="chip" href="/stocks/sector/semicon/">반도체</a></div>
+            <div class="meta"><span class="num">005930</span> · KOSPI · 06-25 종가</div>
+          </div>
+          <div style="text-align:right">
+            <div class="px num">358,500</div>
+            <div class="cg num" style="color:var(--up)">▲ +5.29%</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0 0;">
+          <span style="font-size:11px;color:var(--muted);">최근 20거래일 종가</span>
+        </div>
+        <div class="spark-header" id="spark-main" data-spark="299500.0,317000.0,349000.0,360500.0,351500.0,329000.0,295500.0,322000.0,302500.0,299000.0,322500.0,337000.0,343000.0,346500.0,362500.0,354000.0,353500.0,310000.0,340500.0,358500.0" data-dates="5/29,5/30,6/2,6/3,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25" style="position:relative;cursor:crosshair;"></div>
+        <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;"></div>
+      </div>
+
+      <!-- 더블샷 트랙레코드 (A 픽 이력) -->
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>더블샷 AI 픽 트랙레코드</span>
+          <span class="np__s">종가 기준 실측</span>
+        </div>
+        <div class="tr-sum"><span>삼성전자를 <b>3번</b> 픽</span><span style="color:#1A7F4B">목표 도달 <b>2</b></span><span style="color:#B07400">진행 중 <b>1</b></span></div>
+        <div class="tr-row">
+          <div class="tr-top"><span class="tr-date">6/15 코스피</span><span class="tr-sig">20일선 상향 돌파 · AI칩 반사이익</span><span class="tr-badge hit">목표 도달</span></div>
+          <div class="tr-line"><span>진입 <b>322,500</b></span>→<span>목표 <b>360,000</b></span><span class="tr-ret" style="color:var(--up)">최대 +12.4%</span></div>
+        </div>
+        <div class="tr-row">
+          <div class="tr-top"><span class="tr-date">6/16 코스피</span><span class="tr-sig">20일선 위 강세 · 반도체 랠리</span><span class="tr-badge hit">목표 도달</span></div>
+          <div class="tr-line"><span>진입 <b>337,000</b></span>→<span>목표 <b>357,000</b></span><span class="tr-ret" style="color:var(--up)">최대 +7.6%</span></div>
+        </div>
+        <div class="tr-row">
+          <div class="tr-top"><span class="tr-date">6/25 코스피</span><span class="tr-sig">20일선 상향 돌파 · 모멘텀 폭발</span><span class="tr-badge run">진행 중</span></div>
+          <div class="tr-line"><span>진입 <b>340,000</b></span>→<span>목표 <b>360,000</b></span><span class="tr-ret" style="color:var(--up)">현재 +5.3%</span></div>
+        </div>
+      </div>
+
+      <!-- 오늘 장중 (실측 1분봉) — 조건부 -->
+      <div class="sc" id="intra-card" data-code="005930" style="display:none">
+        <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
+        <div class="scb" style="padding:8px 12px;"><svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg></div>
+        <div id="intra-tl" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- 실측 핵심 지표 (티어1) -->
+      <div class="np">
+        <div class="np__h"><span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>실측 핵심 지표</span><span class="np__s">06-25 종가 기준</span></div>
+        <div class="mx">
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">98.7%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:98.7%"></div><div class="now" style="left:98.7%"></div></div>
+          <div class="w52-lb"><span>최저 53,900</span><span>최고 362,500</span></div>
+        </div>
+        <div class="duo">
+          <div class="cell"><div class="l">20일선 대비</div><div class="v" style="color:var(--up)">+7.8%</div><div class="sub">단기 추세 위</div></div>
+          <div class="cell"><div class="l">200일선 대비</div><div class="v" style="color:var(--up)">+112.7%</div><div class="sub">장기 추세 위</div></div>
+        </div>
+        <div class="frw">
+          <div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:3px;">외국인 보유율</div>
+            <div class="v">47.41<span style="font-size:12px">%</span> <span style="font-size:11px;color:var(--dn);font-weight:600">▼ 0.9%p</span></div>
+          </div>
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,4 8,4 17,8 25,12 34,14 42,15 50,16 59,18 67,19 75,17 84,18 92,18 100,20 109,17 117,20 126,22 134,27 142,28 151,30 160,30" fill="none" stroke="#2775ED" stroke-width="2"/></svg>
+        </div>
+        <div class="ovr">
+          <span class="lbl">해외 연동 · 미 벨웨더 엔비디아 <span style="color:var(--muted)">(참고)</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--dn)">-0.5% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+        </div>
+      </div>
+
+      <!-- 증권사 목표주가 (티어2) — 칩보드 스타일 레인지 바 + 표 -->
+      <div class="np">
+        <div class="np__h"><span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10m4 11V6m4 15V12m4 9V8"/></svg>증권사 목표주가</span><span class="np__s">컨센서스 10개사</span></div>
+        <div class="tgt-range-wrap">
+          <div class="tgt-range">
+            <div class="tgt-cur" style="left:12.4%">현재가 358,500</div>
+            <div class="tgt-dot" style="left:0%;background:#378ADD"></div>
+            <div class="tgt-dot" style="left:44.3%;background:#1D9E75"></div>
+            <div class="tgt-dot" style="left:100%;background:#BA7517"></div>
+          </div>
+          <div class="tgt-scale">
+            <div><div class="lab">최저</div><div class="v2" style="color:#378ADD">330,000원</div></div>
+            <div class="c"><div class="lab">평균</div><div class="v2" style="color:#1D9E75">432,000원</div></div>
+            <div class="r"><div class="lab">최고</div><div class="v2" style="color:#BA7517">560,000원</div></div>
+          </div>
+        </div>
+        <table class="tgt-tbl">
+          <thead><tr><th>증권사</th><th>목표가</th><th>의견</th><th>발표일</th><th>상승여력</th></tr></thead>
+          <tbody>
+            <tr><td>대신증권</td><td class="pr num">560,000</td><td><span class="op2">BUY</span></td><td class="dt">1일 전</td><td class="num" style="color:var(--up);font-weight:700">+56.2%</td></tr>
+            <tr><td>미래에셋증권</td><td class="pr num">550,000</td><td><span class="op2">BUY</span></td><td class="dt">2일 전</td><td class="num" style="color:var(--up);font-weight:700">+53.4%</td></tr>
+            <tr><td>iM증권</td><td class="pr num">480,000</td><td><span class="op2">BUY</span></td><td class="dt">5일 전</td><td class="num" style="color:var(--up);font-weight:700">+33.9%</td></tr>
+            <tr><td>하나증권</td><td class="pr num">480,000</td><td><span class="op2">BUY</span></td><td class="dt">1주 전</td><td class="num" style="color:var(--up);font-weight:700">+33.9%</td></tr>
+            <tr><td>신한투자증권</td><td class="pr num">550,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--up);font-weight:700">+53.4%</td></tr>
+            <tr><td>키움증권</td><td class="pr num">330,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--dn);font-weight:700">-7.9%</td></tr>
+            <tr><td>교보증권</td><td class="pr num">330,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--dn);font-weight:700">-7.9%</td></tr>
+            <tr><td>유진투자증권</td><td class="pr num">360,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--up);font-weight:700">+0.4%</td></tr>
+            <tr><td>IBK투자증권</td><td class="pr num">350,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--dn);font-weight:700">-2.4%</td></tr>
+            <tr><td>한화투자증권</td><td class="pr num">330,000</td><td><span class="op2">BUY</span></td><td class="dt">1개월 전</td><td class="num" style="color:var(--dn);font-weight:700">-7.9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 외국인·기관 수급 (티어2) -->
+      <div class="np">
+        <div class="np__h"><span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>외국인·기관 수급</span><span class="np__s">최근 5일</span></div>
+        <div class="duo" style="border-bottom:none">
+          <div class="cell"><div class="l">외국인 순매수</div><div class="v" style="color:var(--dn)">-836만주</div><div class="sub">순매도 우위</div></div>
+          <div class="cell"><div class="l">기관 순매수</div><div class="v" style="color:var(--up)">+31만주</div><div class="sub">소폭 순매수</div></div>
+        </div>
+      </div>
+
+      <!-- 분기 영업이익 (티어2, 살림) — stocks.css 기존 차트 구조 그대로 -->
+      <div class="np">
+        <div class="np__h"><span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l3-3 3 3 5-6"/></svg>분기 영업이익 추이</span><span class="np__s">확정 실적 · 조원</span></div>
+        <div style="padding:18px 16px 14px;">
+          <div class="fin-chart">
+            <div class="fin-col"><span class="fin-cap">6.7조</span><div class="fin-bar actual" style="height:16px"></div></div>
+            <div class="fin-col"><span class="fin-cap">4.7조</span><div class="fin-bar actual" style="height:14px"></div></div>
+            <div class="fin-col"><span class="fin-cap">12.2조</span><div class="fin-bar actual" style="height:30px"></div></div>
+            <div class="fin-col"><span class="fin-cap">20.1조</span><div class="fin-bar actual" style="height:49px"></div></div>
+            <div class="fin-col"><span class="fin-cap">57.2조</span><div class="fin-bar actual" style="height:140px"></div></div>
+          </div>
+          <div class="fin-xrow">
+            <span class="fin-x">2025<br>Q1</span><span class="fin-x">2025<br>Q2</span><span class="fin-x">2025<br>Q3</span><span class="fin-x">2025<br>Q4</span><span class="fin-x">2026<br>Q1</span>
+          </div>
+          <div class="fin-foot"><div class="fin-legend"><span><i style="background:var(--up)"></i>확정 실적</span></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 우측 사이드바 ===== -->
+    <div>
+      <div class="panel"><div class="panel__h">같은 섹터 · 반도체</div>
+        <a class="srow" href="/stocks/000660/"><span class="n2">SK하이닉스 <small class="num">000660</small></span><span class="c up num">+13.06%</span></a>
+        <a class="srow" href="/stocks/042700/"><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c up num">+1.11%</span></a>
+        <a class="srow" href="/stocks/sector/semicon/"><span class="n2" style="color:var(--primary);font-weight:700;">반도체 섹터 전체 →</span></a>
+      </div>
+      <div class="panel"><div class="panel__h"><span class="tt">다른 섹터</span></div>
+        <div class="chips" style="padding:14px 16px;">
+          <a href="/stocks/sector/semicon/">🔬 반도체</a>
+          <a href="/stocks/sector/power/">⚡ 전력기기</a>
+          <a href="/stocks/sector/defense/">🛡️ 방산</a>
+          <a href="/stocks/sector/ship/">🚢 조선</a>
+          <a href="/stocks/sector/battery/">🔋 2차전지</a>
+          <a href="/stocks/sector/auto/">🚗 자동차</a>
+          <a href="/stocks/sector/bio/">🧬 바이오</a>
+          <a href="/stocks/sector/finance/">🏦 금융</a>
+        </div>
+      </div>
+
+      <!-- 적중률 배지 (B) — 사이드바 맨 아래 -->
+      <div class="np">
+        <div class="np__h"><span class="np__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>더블샷 브리핑 적중률</span></div>
+        <div class="acc-grid">
+          <div class="acc-cell"><div class="l">코스피 방향</div><div class="v">67%</div></div>
+          <div class="acc-cell"><div class="l">미국 방향</div><div class="v">77%</div></div>
+        </div>
+        <a class="acc-cta" href="https://doubleshot.space/briefings">매일 아침·저녁 AI 브리핑 받아보기 →</a>
+      </div>
+    </div>
+  </div>
+  <p class="disc">※ 픽 트랙레코드는 더블샷 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값입니다. 목표주가·수급·영업이익은 데이터 제공 종목만 표시됩니다. 모든 수치는 직전 거래일 종가 기준 실측이며 투자 판단 참고용입니다.</p>
+</div>
+</div>
+<script defer src="/assets/stocks.js"></script>
+<script>
+(function(){
+  var wrap=document.getElementById('spark-main');
+  var tip=document.getElementById('spark-tip');
+  if(!wrap||!tip) return;
+  var vals=(wrap.getAttribute('data-spark')||'').split(',').map(Number);
+  var dates=(wrap.getAttribute('data-dates')||'').split(',');
+  var n=vals.length;
+  if(!n) return;
+  var hero=wrap.closest('.hero2');
+  wrap.addEventListener('mousemove',function(e){
+    var rect=wrap.getBoundingClientRect();
+    var x=e.clientX-rect.left;
+    var i=Math.round(x/rect.width*(n-1));
+    i=Math.max(0,Math.min(n-1,i));
+    var v=vals[i], d=dates[i]||'';
+    tip.textContent=d+' · '+v.toLocaleString()+'원';
+    tip.style.display='block';
+    var heroRect=hero.getBoundingClientRect();
+    tip.style.left=(e.clientX-heroRect.left-tip.offsetWidth/2)+'px';
+    var canvas=wrap.querySelector('canvas');
+    var cy=canvas?canvas.getBoundingClientRect().top-heroRect.top:rect.top-heroRect.top;
+    tip.style.top=(cy-28)+'px';
+  });
+  wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+</script>
+</body>
+</html>
