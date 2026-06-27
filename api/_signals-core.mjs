@@ -7,6 +7,9 @@ export const VOL_SURGE_MIN = 1.5;
 export const CAPITULATION_DROP = -3.0;
 export const TURNOVER_TOP_N = 3;
 export const NEAR_HIGH_RATIO = 0.98;
+export const SIGNALS_DISPLAY_MAX = 8; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계)
+// 카드 정렬 가중치 — 역행·신고가 같은 희소 신호를 위로, 흔한 수급은 아래로
+const SIGNAL_SCORE = { counter_up: 5, near_high: 4, vol_surge: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
 
 const sgn = (x) => (x > 0 ? 1 : x < 0 ? -1 : 0);
 
@@ -43,6 +46,8 @@ function whyText(stock) {
   if (cats.includes('vol_surge')) return `거래량이 급증하며 ${pct.toFixed(1)}% 급락했어요.`;
   if (cats.includes('near_high')) return `폭락장에도 <b>52주 신고가</b>에 근접했어요.`;
   if (cats.includes('turnover')) return `거래대금 상위. 지수에 큰 영향을 줬어요.`;
+  if (cats.includes('foreign_buy')) return `외국인 수급이 꾸준히 들어오고 있어요.`;
+  if (cats.includes('inst_buy')) return `기관 수급이 꾸준히 들어오고 있어요.`;
   return '';
 }
 
@@ -86,7 +91,13 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
     .sort((a, b) => groups[b].length - groups[a].length || order.indexOf(a) - order.indexOf(b))
     .slice(0, 5)
     .map((cat) => ({ cat, ...SIGNAL_META[cat], items: groups[cat] }));
-  return { signals, rank };
+  // 5) 카드 목록: 점수순 정렬 후 상위 N (랭킹은 위에서 전체 집계 완료)
+  const display = [...signals]
+    .map((s) => ({ s, score: s.cats.reduce((a, c) => a + (SIGNAL_SCORE[c] || 1), 0) }))
+    .sort((a, b) => b.score - a.score || Math.abs(b.s.pct) - Math.abs(a.s.pct))
+    .slice(0, SIGNALS_DISPLAY_MAX)
+    .map((x) => x.s);
+  return { signals: display, rank };
 }
 
 // byCode: { code: {amount, vol, pct} } — amount는 거래대금(백만)

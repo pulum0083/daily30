@@ -116,3 +116,20 @@ test('베팅 흐름: 인버스류 거래대금 합산 vs 레버리지 + 인버�
   assert.equal(r.levPct, -12.04);
   assert.ok(r.invVolMultiple >= 45 && r.invVolMultiple <= 47); // 12.4억/0.267억 ≈ 46
 });
+
+test('why+enrich: 수급만 있는 종목도 enrich로 설명 문구가 채워진다', () => {
+  const stocks = [{ code: '1', name: 'A', sector: 'defense', pct: -1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 }];
+  const { signals } = buildSignals(stocks, -5.8, { enrich: () => ({ cats: ['inst_buy'], badges: ['기관 5일 연속 순매수'] }) });
+  assert.equal(signals.length, 1);
+  assert.ok(signals[0].cats.includes('inst_buy'));
+  assert.ok(signals[0].why && signals[0].why.length > 0);
+});
+
+test('신호 카드 목록은 최대 8개로 제한 (랭킹은 전체 집계 유지)', () => {
+  const stocks = [];
+  for (let i = 0; i < 12; i++) stocks.push({ code: String(i), name: 'S' + i, sector: 'bio', pct: -1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 });
+  const { signals, rank } = buildSignals(stocks, -5.8, { enrich: () => ({ cats: ['inst_buy'], badges: ['기관'] }) });
+  assert.ok(signals.length <= 8, 'card list capped at 8');
+  const ib = rank.find((g) => g.cat === 'inst_buy');
+  assert.equal(ib.items.length, 12); // 랭킹은 전체 12개 집계
+});
