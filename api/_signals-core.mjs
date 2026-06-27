@@ -1,6 +1,6 @@
 // 종목·ETF 신호 판정 순수 함수(네트워크 없음). 핸들러가 fetch한 데이터를 받아 가공한다.
 
-import { SECTOR_LABEL } from './_etf-universe.mjs';
+import { SECTOR_LABEL, ETF_BET_DOWN, ETF_BET_UP, ETF_KOSPI200 } from './_etf-universe.mjs';
 
 export const COUNTER_TREND_OUTPERF = 3.0;
 export const VOL_SURGE_MIN = 1.5;
@@ -87,4 +87,19 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
     .slice(0, 5)
     .map((cat) => ({ cat, ...SIGNAL_META[cat], items: groups[cat] }));
   return { signals, rank };
+}
+
+// byCode: { code: {amount, vol, pct} } — amount는 거래대금(백만)
+export function etfBettingFlow(byCode) {
+  const sum = (codes, f) => codes.reduce((a, c) => a + (byCode[c]?.[f] || 0), 0);
+  const downAmt = sum(Object.keys(ETF_BET_DOWN), 'amount');
+  const upAmt = sum(Object.keys(ETF_BET_UP), 'amount');
+  const total = downAmt + upAmt;
+  const downRatio = total > 0 ? Math.round((downAmt / total) * 100) : 0;
+  const invCode = Object.keys(ETF_BET_DOWN)[0]; // 114800 KODEX 인버스
+  const invVol = byCode[invCode]?.vol || 0;
+  const refVol = byCode[ETF_KOSPI200]?.vol || 0;
+  const invVolMultiple = refVol > 0 ? Math.round(invVol / refVol) : 0;
+  const levCode = Object.keys(ETF_BET_UP)[0];
+  return { downAmt, upAmt, downRatio, upRatio: 100 - downRatio, invVolMultiple, levPct: byCode[levCode]?.pct ?? null };
 }

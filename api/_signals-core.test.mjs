@@ -1,7 +1,7 @@
 // api/_signals-core.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyStock, buildSignals } from './_signals-core.mjs';
+import { classifyStock, buildSignals, etfBettingFlow } from './_signals-core.mjs';
 
 test('역행: 시장 -5.8%인데 종목 +1.7% → counter_up', () => {
   const s = { pct: 1.7, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
@@ -58,4 +58,19 @@ test('랭킹은 신호별 그룹 + 종목수 내림차순', () => {
   const { rank } = buildSignals(stocks, -5.8); // 둘 다 counter_up
   const cu = rank.find(g => g.cat === 'counter_up');
   assert.equal(cu.items.length, 2);
+});
+
+test('베팅 흐름: 인버스류 거래대금 합산 vs 레버리지 + 인버스 거래량 배수', () => {
+  const byCode = {
+    '114800': { amount: 1122000, vol: 1239929374, pct: 6.08 }, // 인버스(백만)
+    '252670': { amount: 1183000, vol: 17149039548, pct: 11.29 }, // 인버스2X
+    '122630': { amount: 3163000, vol: 15796886, pct: -12.04 }, // 레버리지
+    '069500': { amount: 3677000, vol: 26711323, pct: -5.79 }, // KODEX200(분모)
+  };
+  const r = etfBettingFlow(byCode);
+  assert.equal(r.downAmt, 2305000);
+  assert.equal(r.upAmt, 3163000);
+  assert.equal(r.downRatio, 42); // 2305/(2305+3163) = 42.2 → 42
+  assert.equal(r.levPct, -12.04);
+  assert.ok(r.invVolMultiple >= 45 && r.invVolMultiple <= 47); // 12.4억/0.267억 ≈ 46
 });
