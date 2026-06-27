@@ -1381,7 +1381,7 @@ function usSel(code){
       <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · 등락률순 · <span class="ds-asof"></span></div></div>
     </div>
     <div class="tbl">
-      <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;"></span><span class="block__s" style="width:78px;text-align:right;">등락률</span></div>
+      <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
       <div id="etf-rank-rows"></div>
     </div>
   </div>
@@ -1688,15 +1688,30 @@ function etfRankTag(name){
   if(/인버스|곱버스/.test(name))return '<span style="font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--dn-bg);color:var(--dn)">인버스</span>';
   return '';
 }
+function fmtVolShort(v){if(v>=100000000)return (v/100000000).toFixed(1)+'억주';return Math.round(v/10000).toLocaleString('en-US')+'만주';}
 function etfRankRender(){
   var box=document.getElementById('etf-rank-rows');if(!box)return;
   var cnt=document.getElementById('etf-rank-count');if(cnt)cnt.textContent=ETF_ALL.length+'개 ETF';
   if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';return;}
   var arr=ETF_ALL.slice().sort(function(a,b){return (b.changePct||0)-(a.changePct||0);});
+  var maxVol=Math.max.apply(null,arr.map(function(x){return x.vol||0;}))||1;
   box.innerHTML=arr.map(function(x,i){
     var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
     var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%';
-    return '<a class="trow" style="cursor:default"><span class="rk'+(top3?' t':'')+' num">'+rank+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+'</small></div><div style="flex:1;padding-left:8px;">'+etfRankTag(x.name)+'</div><span class="tchg '+dir+' num" style="width:78px;text-align:right;flex:none;">'+pctTxt+'</span></a>';
+    var barW=Math.round((x.vol||0)/maxVol*100);
+    var tag=etfRankTag(x.name);
+    var avg20=x.vol_avg20||0;
+    var mult=avg20>0?((x.vol||0)/avg20):0;
+    var multTxt=mult>0?mult.toFixed(1)+'×':'—';
+    var multCls=mult>=1.5?'color:var(--up);font-weight:800':mult>0?'color:var(--muted)':'color:var(--muted)';
+    return '<a class="trow" style="cursor:default">'
+      +'<span class="rk'+(top3?' t':'')+' num">'+rank+'</span>'
+      +'<div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+(tag?' · ':'')+'</small>'+tag+'</div>'
+      +'<div class="barwrap"><div class="bar vol" style="width:'+barW+'%"></div></div>'
+      +'<span class="barval num">'+fmtVolShort(x.vol||0)+'</span>'
+      +'<span class="num" style="width:56px;text-align:right;flex:none;font-size:11px;font-weight:700;'+multCls+'">'+multTxt+'</span>'
+      +'<span class="tchg '+dir+' num" style="width:72px;text-align:right;flex:none;">'+pctTxt+'</span>'
+      +'</a>';
   }).join('');
 }
 etfRankRender();
@@ -2514,7 +2529,11 @@ renderChips('morning');
     var dnMax=dn[0]?Math.abs(dn[0].changePct):1;
     var dnWrap=document.getElementById('fall-top-rows');
     if(dnWrap) dnWrap.innerHTML=dn.length?dn.map(function(x,i){return chgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dnMax*100));}).join(''):emptyRow('하락 종목이 없어요');
-    if(d.etf){ renderEtf(d.etf); ETF_ALL=(d.etf||[]).slice(); etfRankRender(); }
+    if(d.etf){
+      renderEtf(d.etf);
+      ETF_ALL=(d.etf||[]).map(function(e){var se=SNAP&&SNAP.etfs&&SNAP.etfs[e.code];return Object.assign({},e,{vol_avg20:se?se.vol_avg20:0});});
+      etfRankRender();
+    }
     renderSectorBreadth(all);
     bindSurgeTips();
   }
