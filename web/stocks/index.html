@@ -990,7 +990,7 @@ function usSel(code){
       <div class="gauge-wrap" id="etf-betting"></div>
       <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
       <div id="etf-top-rows"></div>
-      <a class="more" onclick="go('ranking')">ETF 전체 랭킹 →</a>
+      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
     </div>
     <!-- ② 섹터 로테이션 -->
     <div class="block">
@@ -1180,7 +1180,7 @@ function usSel(code){
       <div>
         <div class="dbox">
         <div class="shead"><div class="top">
-          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · <span class="ds-date"></span> 종가</div></div>
+          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · <span class="ds-asof"></span></div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
         </div>
         <div class="senti" id="sec-senti" style="display:none;"><div class="l"><span>섹터 AI 심리</span><span id="sec-senti-label">—</span></div><div class="gg"><div class="n" id="sec-senti-needle" style="left:50%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
@@ -1363,15 +1363,27 @@ function usSel(code){
   <div class="screen" id="ranking">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">거래량 순위</span></div>
     <div class="phead">
-      <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub">추적 142종목 · 코스피·코스닥 · <span class="ds-date"></span> 종가</div></div>
-      <div class="rtabs"><a class="on">거래량</a><a>상승률</a><a>하락률</a></div>
+      <div><h1><span class="ic">🔥</span> 거래량 순위</h1><div class="psub"><span id="rank-count">추적 —종목</span> · 코스피·코스닥 · <span class="ds-asof"></span></div></div>
+      <div class="rtabs"><a class="on" onclick="rankSetTab('vol',this)">거래량</a><a onclick="rankSetTab('up',this)">상승률</a><a onclick="rankSetTab('dn',this)">하락률</a></div>
     </div>
-    <div class="fbar"><span class="lbl">섹터</span><div class="fchips"><a class="on">전체</a><a>반도체</a><a>2차전지</a><a>바이오</a><a>자동차</a><a>금융</a><a>인터넷</a></div></div>
+    <div class="fbar"><span class="lbl">섹터</span><div class="fchips"><a class="on" onclick="rankSetSector('전체',this)">전체</a><a onclick="rankSetSector('반도체',this)">반도체</a><a onclick="rankSetSector('2차전지',this)">2차전지</a><a onclick="rankSetSector('바이오',this)">바이오</a><a onclick="rankSetSector('자동차',this)">자동차</a><a onclick="rankSetSector('금융',this)">금융</a><a onclick="rankSetSector('인터넷',this)">인터넷</a></div></div>
     <div class="tbl">
       <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">종목</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:68px;text-align:right;">등락률</span><span class="block__s" style="width:78px;text-align:right;">AI 신호</span></div>
       <div id="rank-rows"></div>
     </div>
     <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
+  </div>
+
+  <!-- ===== ETF RANKING (ETF 전체 랭킹) ===== -->
+  <div class="screen" id="etf-rank">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
+    <div class="phead">
+      <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · 등락률순 · <span class="ds-asof"></span></div></div>
+    </div>
+    <div class="tbl">
+      <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;"></span><span class="block__s" style="width:78px;text-align:right;">등락률</span></div>
+      <div id="etf-rank-rows"></div>
+    </div>
   </div>
 
   <!-- ===== CHIPS (AI 반도체 칩보드) ===== -->
@@ -1534,7 +1546,19 @@ function usSel(code){
 <div id="tip"></div>
 
 <script>
-(function(){var now=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Seoul'}));var mm=String(now.getMonth()+1).padStart(2,'0');var dd=String(now.getDate()).padStart(2,'0');var ds=mm+'-'+dd;document.querySelectorAll('.ds-date').forEach(function(el){el.textContent=ds;});})();
+/* 날짜 규칙(허브 전역) — 장중=오늘, 마감/주말/휴일=MM-DD(요일). 기준일은 스냅샷 generated_at. */
+var _asOfYmd=null; // 마지막 거래일(스냅샷 날짜). SNAP 로드 시 주입.
+function hubMarketOpen(){var d=new Date(Date.now()+9*3600*1000);var k=d.getUTCDay();if(k===0||k===6)return false;var m=d.getUTCHours()*60+d.getUTCMinutes();return m>=540&&m<=930;}
+function fmtKoDate(ymd){if(!ymd)return '';var p=ymd.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);return p[1]+'-'+p[2]+'('+'일월화수목금토'[dt.getDay()]+')';}
+function applyAsOf(){
+  var open=hubMarketOpen();
+  var todayYmd=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+  var plain=open?'오늘':fmtKoDate(_asOfYmd||todayYmd);
+  document.querySelectorAll('.ds-date').forEach(function(e){e.textContent=plain;});
+  var asof=open?'오늘 실시간':(fmtKoDate(_asOfYmd)+' 종가');
+  document.querySelectorAll('.ds-asof').forEach(function(e){e.textContent=open?'오늘 실시간':(_asOfYmd?asof:'직전 거래일 종가');});
+}
+applyAsOf();
 const navHistory=[];
 /* ── URL 체계 (실서비스 라우팅 기준) ──────────────────────────────
    /stocks/                        홈 허브 (랭킹 + 섹터 + 검색)
@@ -1550,15 +1574,6 @@ const navHistory=[];
    /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
    /briefings/                     브리핑 허브 (기존 서비스)
 ─────────────────────────────────────────────────────────────── */
-const SCREEN_URLS={
-  'home':       '/stocks/',
-  'etf-detail': '/stocks/etf/069500/',    // KODEX 200 (프로토타입 고정)
-  'sector':     '/stocks/sectors/semicon/',
-  'ranking':    '/stocks/volume/',
-  'passive':    '/stocks/passive/',
-  'income':     '/stocks/income/',
-  'chips':      '/chips/',
-};
 // 종목 상세 — standalone 페이지로 실제 이동 (생성된 종목만, 나머지는 "준비 중" 토스트)
 // 시드 3종목은 스냅샷 로드 전 즉시 클릭 대비. 나머지는 스냅샷 로드 시 유니버스 전체로 자동 채움
 // (build_all_stocks가 유니버스 종목 페이지를 일괄 빌드하므로 스냅샷=빌드된 페이지 목록).
@@ -1627,43 +1642,64 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
   wrap.addEventListener('mouseleave',()=>{tt.style.display='none';cross.style.display='none';});
 });
 
-/* 랭킹 더보기 */
-const RANK_DATA=[
-  [1,'삼성전자','005930','반도체',100,'3,210만주','dn','−6.4%','ais','신호 58'],
-  [2,'SK하이닉스','000660','반도체',71,'2,280만주','up','+3.4%','aip','AI 78'],
-  [3,'한미반도체','042700','반도체',48,'1,540만주','up','+1.8%','ais','신호 71'],
-  [4,'POSCO홀딩스','005490','2차전지',33,'1,050만주','dn','−1.2%','aid','신호 42'],
-  [5,'LG에너지솔루션','373220','2차전지',26,'820만주','up','+0.4%','ais','신호 55'],
-  [6,'현대차','005380','자동차',22,'690만주','up','+1.1%','ax','—'],
-  [7,'에코프로비엠','247540','2차전지',19,'610만주','up','+6.1%','ais','신호 63'],
-  [8,'카카오','035720','인터넷',17,'540만주','dn','−3.9%','aid','신호 38'],
-  [9,'NAVER','035420','인터넷',15,'470만주','dn','−0.9%','ax','—'],
-  [10,'기아','000270','자동차',13,'420만주','up','+0.8%','ais','신호 52'],
-  [11,'삼성바이오로직스','207940','바이오',12,'380만주','up','+0.3%','ax','—'],
-  [12,'주성엔지니어링','036930','반도체',11,'350만주','up','+9.4%','ais','신호 69'],
-  [13,'셀트리온','068270','바이오',10,'320만주','dn','−0.4%','ais','신호 51'],
-  [14,'하나금융지주','086790','금융',9,'290만주','up','+2.5%','ais','신호 66'],
-  [15,'DB하이텍','000990','반도체',8,'260만주','up','+1.8%','ais','신호 64'],
-  [16,'LG화학','051910','2차전지',8,'240만주','dn','−0.6%','aid','신호 41'],
-  [17,'두산에너빌리티','034020','방산',7,'220만주','up','+1.2%','ais','신호 59'],
-  [18,'한화에어로스페이스','012450','방산',7,'200만주','up','+1.5%','ais','신호 66'],
-  [19,'크래프톤','259960','엔터',6,'190만주','up','+0.7%','ais','신호 57'],
-  [20,'카카오뱅크','323410','금융',6,'180만주','dn','−1.1%','aid','신호 43'],
-];
+/* 거래량 순위 화면 — vol-top all 실데이터(탭 거래량/상승률/하락률 + 섹터필터 + 더보기). */
+let RANK_ALL=[];      // vol-top all (실측 ~40종목)
+let SIG_BY_CODE={};   // signals 보유 종목 code→true (AI신호 열)
+let rankTab='vol';    // vol | up | dn
+let rankSector='전체';
 let rankShown=10;
-function rankRow(r){
-  const top3=r[0]<=3;
-  const badge=r[8]==='ax'?`<span class="ax">—</span>`:`<span class="${r[8]}">${r[9]}</span>`;
-  return `<a class="trow" onclick="goStock('000660')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]} · ${r[3]}</small></div><div class="barwrap"><div class="bar vol" style="width:${r[4]}%"></div></div><span class="barval num">${r[5]}</span><span class="tchg ${r[6]} num">${r[7]}</span><div class="ai">${badge}</div></a>`;
+let _rankMax=1;
+function rankSecKo(s){return (typeof _SECKO!=='undefined'&&_SECKO[s])?_SECKO[s]:(s||'');}
+function fmtVol(v){return Math.round((v||0)/10000).toLocaleString('en-US')+'만주';}
+function rankSorted(){
+  var arr=RANK_ALL.filter(function(x){return rankSector==='전체'||rankSecKo(x.sector)===rankSector;});
+  if(rankTab==='up')return arr.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;});
+  if(rankTab==='dn')return arr.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;});
+  return arr.slice().sort(function(a,b){return (b.vol||0)-(a.vol||0);});
+}
+function rankRow(x,i){
+  var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
+  var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(1)+'%';
+  var bar=rankTab==='vol'?Math.round((x.vol||0)/(_rankMax||1)*100):Math.round(Math.abs(pct)/(_rankMax||1)*100);
+  var badge=SIG_BY_CODE[x.code]?'<span class="ais">신호</span>':'<span class="ax">—</span>';
+  return '<a class="trow" onclick="goStock(\''+x.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+rank+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+rankSecKo(x.sector)+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+bar+'%"></div></div><span class="barval num">'+fmtVol(x.vol)+'</span><span class="tchg '+dir+' num">'+pctTxt+'</span><div class="ai">'+badge+'</div></a>';
 }
 function rankRender(){
-  document.getElementById('rank-rows').innerHTML=RANK_DATA.slice(0,rankShown).map(rankRow).join('');
-  const btn=document.getElementById('rank-more');
-  if(rankShown>=RANK_DATA.length){btn.style.display='none';}
-  else{btn.textContent=`더보기 · ${Math.min(rankShown+10,RANK_DATA.length)-rankShown}개 더 (${RANK_DATA.length-rankShown}개 남음)`;}
+  var box=document.getElementById('rank-rows');if(!box)return;
+  var cnt=document.getElementById('rank-count');if(cnt)cnt.textContent='추적 '+RANK_ALL.length+'종목';
+  var arr=rankSorted();
+  _rankMax=arr.length?(rankTab==='vol'?Math.max.apply(null,arr.map(function(x){return x.vol||0;})):Math.max.apply(null,arr.map(function(x){return Math.abs(x.changePct||0);}))):1;
+  var btn=document.getElementById('rank-more');
+  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">'+(RANK_ALL.length?'해당 조건의 종목이 없어요.':'종목을 불러오는 중…')+'</div>';if(btn)btn.style.display='none';return;}
+  box.innerHTML=arr.slice(0,rankShown).map(rankRow).join('');
+  if(!btn)return;
+  if(rankShown>=arr.length){btn.style.display='none';}
+  else{btn.style.display='';btn.textContent='더보기 · '+(Math.min(rankShown+10,arr.length)-rankShown)+'개 더 ('+(arr.length-rankShown)+'개 남음)';}
 }
-function rankLoadMore(){rankShown=Math.min(rankShown+10,RANK_DATA.length);rankRender();}
+function rankLoadMore(){rankShown=Math.min(rankShown+10,rankSorted().length);rankRender();}
+function rankSetTab(tab,el){rankTab=tab;rankShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}rankRender();}
+function rankSetSector(sec,el){rankSector=sec;rankShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}rankRender();}
 rankRender();
+
+/* ETF 전체 랭킹 화면 — vol-top etf 실데이터(등락률순). */
+let ETF_ALL=[];
+function etfRankTag(name){
+  if(/레버리지|2X|2x/.test(name))return '<span style="font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--up-bg);color:var(--up)">레버리지</span>';
+  if(/인버스|곱버스/.test(name))return '<span style="font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--dn-bg);color:var(--dn)">인버스</span>';
+  return '';
+}
+function etfRankRender(){
+  var box=document.getElementById('etf-rank-rows');if(!box)return;
+  var cnt=document.getElementById('etf-rank-count');if(cnt)cnt.textContent=ETF_ALL.length+'개 ETF';
+  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';return;}
+  var arr=ETF_ALL.slice().sort(function(a,b){return (b.changePct||0)-(a.changePct||0);});
+  box.innerHTML=arr.map(function(x,i){
+    var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
+    var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%';
+    return '<a class="trow" style="cursor:default"><span class="rk'+(top3?' t':'')+' num">'+rank+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+'</small></div><div style="flex:1;padding-left:8px;">'+etfRankTag(x.name)+'</div><span class="tchg '+dir+' num" style="width:78px;text-align:right;flex:none;">'+pctTxt+'</span></a>';
+  }).join('');
+}
+etfRankRender();
 
 /* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
 const SECTOR_RANK=[
@@ -2469,6 +2505,7 @@ renderChips('morning');
     var volWrap=document.getElementById('vol-top-rows');
     if(volWrap&&d.top&&d.top.length) volWrap.innerHTML=d.top.map(volRow).join('');
     var all=(d.all||[]).slice();
+    RANK_ALL=all; rankRender();
     var up=all.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;}).slice(0,5);
     var upMax=up[0]?Math.abs(up[0].changePct):1;
     var upWrap=document.getElementById('rise-top-rows');
@@ -2477,7 +2514,7 @@ renderChips('morning');
     var dnMax=dn[0]?Math.abs(dn[0].changePct):1;
     var dnWrap=document.getElementById('fall-top-rows');
     if(dnWrap) dnWrap.innerHTML=dn.length?dn.map(function(x,i){return chgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dnMax*100));}).join(''):emptyRow('하락 종목이 없어요');
-    if(d.etf) renderEtf(d.etf);
+    if(d.etf){ renderEtf(d.etf); ETF_ALL=(d.etf||[]).slice(); etfRankRender(); }
     renderSectorBreadth(all);
     bindSurgeTips();
   }
@@ -2519,6 +2556,7 @@ renderChips('morning');
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
+    SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
     if(w) w.innerHTML=(d.signals||[]).map(function(s){
@@ -2604,6 +2642,7 @@ renderChips('morning');
         _ks.forEach(function(c){STOCK_PAGES[c]=1;});
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
+      if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
       renderChangeTop();
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
