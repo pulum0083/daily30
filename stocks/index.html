@@ -166,6 +166,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .srk-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 16px 4px 35px;cursor:pointer;text-decoration:none;}
 .srk-row:hover{background:#F8FAFC;}
 .srk-row:last-child{padding-bottom:9px;}
+.srk-rk{font-size:11px;font-weight:800;color:#94A3B8;min-width:13px;}
+.srk-row .srk-nm{flex:1;}
 .srk-nm{font-size:13px;font-weight:600;color:#0F172A;}
 .srk-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
 /* ETF로 읽는 시황 */
@@ -972,12 +974,12 @@ function usSel(code){
       <a class="more" onclick="go('ranking')">전체 랭킹 보기 →</a>
     </div>
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">🏷️</span>신호별 랭킹</span><span class="block__s"><span class="upd-badge" id="rank-upd-badge"></span></span></div>
-      <div id="sig-rank-rows"></div>
-    </div>
-    <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
       <div class="sector-line__chips" style="flex-wrap:wrap;padding:12px 16px;"><a href="/stocks/sector/semicon/">🔬 반도체</a><a href="/stocks/sector/battery/">🔋 2차전지</a><a href="/stocks/sector/auto/">🚗 자동차</a><a href="/stocks/sector/defense/">🛡️ 방산</a><a href="/stocks/sector/ship/">🚢 조선</a><a href="/stocks/sector/bio/">🧬 바이오</a><a href="/stocks/sector/finance/">🏦 금융</a><a href="/stocks/sector/power/">⚡ 전력기기</a></div>
+    </div>
+    <div class="block" id="change-top-block" style="display:none;">
+      <div class="block__h"><span class="block__t"><span class="ic">🏆</span>오늘 등락률 TOP</span><span class="block__s"><span class="close-pill">종가 기준</span></span></div>
+      <div id="change-top-rows"></div>
     </div>
     </div><!-- /home-main -->
     <div class="home-side">
@@ -2487,7 +2489,7 @@ renderChips('morning');
   function badgeHtml(b){ return '<span class="bdg">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   function applySignals(d){
-    setBadge('sig-upd-badge', d.phase); setBadge('rank-upd-badge', d.phase);
+    setBadge('sig-upd-badge', d.phase);
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
     if(w) w.innerHTML=(d.signals||[]).map(function(s){
@@ -2497,12 +2499,6 @@ renderChips('morning');
         +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
         +'<div class="sig-badges">'+(s.badges||[]).map(badgeHtml).join('')+'</div>'
         +'<div class="sig-why">'+(s.why||'')+'</div></a>';
-    }).join('');
-    var rw=document.getElementById('sig-rank-rows');
-    if(rw) rw.innerHTML=(d.rank||[]).map(function(g){
-      var rows=g.items.map(function(s){var pc=s.dir==='up'?'var(--up)':'var(--dn)',sg=s.pct>=0?'+':'';
-        return '<a class="srk-row" onclick="goStock(\''+s.code+'\')"><span class="srk-nm">'+s.name+'</span><span class="srk-pct" style="color:'+pc+';">'+sg+s.pct.toFixed(1)+'%</span></a>';}).join('');
-      return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+g.ic+'</span><span class="srk-lb">'+g.label+'</span><span class="srk-cnt">'+g.items.length+'</span></div>'+rows+'</div>';
     }).join('');
   }
   function applyEtf(etf, phase, asOf){
@@ -2553,11 +2549,28 @@ renderChips('morning');
     var etf=SNAP.etfs?Object.keys(SNAP.etfs).map(function(c){var e=SNAP.etfs[c];return {code:c,name:e.name,sector:'ETF',vol:e.vol||0,changePct:e.change_pct||0,price:null};}):[];
     renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list,etf:etf});
   }
+  // 🏆 오늘 등락률 TOP — 스냅샷 change_pct 기준 상승/하락 TOP5
+  function renderChangeTop(){
+    if(!SNAP||!SNAP.stocks) return;
+    var list=Object.keys(SNAP.stocks).map(function(c){var s=SNAP.stocks[c];return {code:c,name:s.name,pct:s.change_pct||0};});
+    var ups=list.filter(function(x){return x.pct>0;}).sort(function(a,b){return b.pct-a.pct;}).slice(0,5);
+    var dns=list.filter(function(x){return x.pct<0;}).sort(function(a,b){return a.pct-b.pct;}).slice(0,5);
+    if(!ups.length&&!dns.length) return;
+    function grp(ic,label,col,items){
+      if(!items.length) return '';
+      var rows=items.map(function(s,i){var sg=s.pct>=0?'+':'';
+        return '<a class="srk-row" onclick="goStock(\''+s.code+'\')"><span class="srk-rk">'+(i+1)+'</span><span class="srk-nm">'+s.name+'</span><span class="srk-pct" style="color:'+col+';">'+sg+s.pct.toFixed(1)+'%</span></a>';}).join('');
+      return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+ic+'</span><span class="srk-lb">'+label+'</span><span class="srk-cnt">'+items.length+'</span></div>'+rows+'</div>';
+    }
+    var rw=document.getElementById('change-top-rows'); if(rw) rw.innerHTML=grp('▲','상승 TOP5','var(--up)',ups)+grp('▼','하락 TOP5','var(--dn)',dns);
+    var blk=document.getElementById('change-top-block'); if(blk) blk.style.display='';
+  }
   loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(snap){
       SNAP=snap;
+      renderChangeTop();
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
     })
