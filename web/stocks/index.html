@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 <style>
 :root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
@@ -175,6 +177,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
 .etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
 .etf-head-b b{color:#0F172A;}
+/* ETF 거래량 톱5 행 (합친 시황 블록 내부) */
+.etf-top5-cap{font-size:11px;font-weight:700;color:#94A3B8;padding:10px 16px 4px;background:var(--canvas);border-top:1px solid #F1F5F9;}
+.row.etf-top5{cursor:default;}
+.row.etf-top5:hover{background:var(--canvas);}
+.etf-top5-nm{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.etf-top5-vol{flex-shrink:0;font-size:11px;color:var(--muted);white-space:nowrap;}
+.etf-top5-pct{flex-shrink:0;min-width:50px;text-align:right;font-size:12.5px;font-weight:800;white-space:nowrap;}
 .etf-cap{font-size:11.5px;line-height:1.5;color:#475569;background:var(--canvas);}.etf-cap b{color:#0F172A;}
 /* ETF 사이드 4카드 (베팅·섹터·안전자산) */
 .live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
@@ -972,15 +981,14 @@ function usSel(code){
     </div>
     </div><!-- /home-main -->
     <div class="home-side">
-    <!-- ⓪ ETF로 읽는 시황 (리드) -->
+    <!-- ⓪+① ETF로 읽는 시황 (시황 + 베팅 흐름 + 거래량 톱5 통합) -->
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
-      <div class="etf-head" id="etf-lead" style="margin-bottom:14px;"></div>
-    </div>
-    <!-- ① ETF 베팅 흐름 -->
-    <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">⚖️</span>ETF 베팅 흐름</span></div>
+      <div class="etf-head" id="etf-lead"></div>
       <div class="gauge-wrap" id="etf-betting"></div>
+      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
+      <div id="etf-top-rows"></div>
+      <a class="more" onclick="go('ranking')">ETF 전체 랭킹 →</a>
     </div>
     <!-- ② 섹터 로테이션 -->
     <div class="block">
@@ -992,7 +1000,6 @@ function usSel(code){
     <div class="block">
       <div class="block__h"><span class="block__t etf"><span class="ic">🛟</span>안전자산 선호도</span></div>
       <div id="etf-safehaven"></div>
-      <a class="more" onclick="go('ranking')">ETF 전체 랭킹 →</a>
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
@@ -2403,7 +2410,13 @@ renderChips('morning');
     return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+secLbl(x.sector)+'</small></div><div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div><span class="barval '+cls+' num">'+(x.changePct>=0?'+':'')+x.changePct.toFixed(1)+'%</span>'+nearHighBadge(x.code,x.price)+surgeBadge(x.code,x.vol)+'</a>';
   }
   function etfVolRow(x,i){
-    return '<a class="row" onclick="go(\'etf-detail\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · ETF</small></div><div class="barwrap"><div class="bar vol" style="width:'+(x.barPct||0)+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span></a>';
+    var pc=x.changePct>=0?'var(--up)':'var(--dn)',sg=x.changePct>=0?'+':'';
+    return '<div class="row etf-top5">'
+      +'<span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span>'
+      +'<span class="etf-top5-nm">'+x.name+'</span>'
+      +'<span class="etf-top5-vol num">'+manju(x.vol)+'</span>'
+      +'<span class="etf-top5-pct num" style="color:'+pc+'">'+sg+x.changePct.toFixed(1)+'%</span>'
+      +'</div>';
   }
   function etfChgRow(x,i,cls,barPct){
     return '<a class="row" onclick="go(\'etf-detail\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · ETF</small></div><div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div><span class="barval '+cls+' num">'+(x.changePct>=0?'+':'')+x.changePct.toFixed(1)+'%</span></a>';
