@@ -82,6 +82,26 @@ test('리드 헤드라인: 인버스 거래량 배수 크면 인버스 헤드라
   assert.ok(lead.body.includes('46'));
 });
 
+import { classifySupply } from './_signals-core.mjs';
+
+test('수급: 외국인 3일 연속 순매수 → foreign_buy', () => {
+  const trend = [{ foreign: 100 }, { foreign: 50 }, { foreign: 30 }]; // 최신순
+  const r = classifySupply(trend);
+  assert.ok(r.cats.includes('foreign_buy'));
+});
+
+test('수급: 기관 전일 매도→당일 매수 전환', () => {
+  const trend = [{ organ: 100 }, { organ: -50 }];
+  const r = classifySupply(trend);
+  assert.ok(r.cats.includes('inst_buy'));
+});
+
+test('수급: 신호 없으면 빈 cats', () => {
+  const trend = [{ foreign: -10, organ: -10 }, { foreign: -5, organ: -5 }];
+  const r = classifySupply(trend);
+  assert.deepEqual(r.cats, []);
+});
+
 test('베팅 흐름: 인버스류 거래대금 합산 vs 레버리지 + 인버스 거래량 배수', () => {
   const byCode = {
     '114800': { amount: 1122000, vol: 1239929374, pct: 6.08 }, // 인버스(백만)

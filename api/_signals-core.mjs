@@ -121,6 +121,21 @@ export function etfSafeHaven(byCode, marketPct) {
   return { rows, market: marketPct };
 }
 
+export const SUPPLY_STREAK_MIN = 3;
+// trend: 최신순 [{foreign, organ}] (순매수 수량). 연속 순매수 또는 전환 판정.
+export function classifySupply(trend) {
+  const cats = [], badges = [];
+  if (!Array.isArray(trend) || trend.length === 0) return { cats, badges };
+  const streak = (key) => { let n = 0; for (const r of trend) { if ((r[key] || 0) > 0) n++; else break; } return n; };
+  const fb = streak('foreign'); if (fb >= SUPPLY_STREAK_MIN) { cats.push('foreign_buy'); badges.push(`외국인 ${fb}일 연속 순매수`); }
+  const ib = streak('organ'); if (ib >= SUPPLY_STREAK_MIN) { cats.push('inst_buy'); badges.push(`기관 ${ib}일 연속 순매수`); }
+  if (trend.length >= 2) {
+    if ((trend[0].foreign || 0) > 0 && (trend[1].foreign || 0) < 0 && !cats.includes('foreign_buy')) { cats.push('foreign_buy'); badges.push('외국인 순매수 전환'); }
+    if ((trend[0].organ || 0) > 0 && (trend[1].organ || 0) < 0 && !cats.includes('inst_buy')) { cats.push('inst_buy'); badges.push('기관 순매수 전환'); }
+  }
+  return { cats, badges };
+}
+
 export function etfLead(betting) {
   const m = betting?.invVolMultiple || 0;
   if (m >= 5) {

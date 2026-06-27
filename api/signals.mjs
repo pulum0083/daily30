@@ -1,6 +1,6 @@
 // 종목·ETF 신호 통합 API — polling(가격·등락·거래량) + itemSummary(거래대금) + 일봉 스냅샷 조합 → 코어 가공
 import { ALL_ETF_CODES, ETF_NAME } from './_etf-universe.mjs';
-import { buildSignals, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, SIGNAL_META } from './_signals-core.mjs';
+import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, SIGNAL_META } from './_signals-core.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 
@@ -34,6 +34,17 @@ async function amountOne(code) {
     const d = await r.json();
     return Number(d.amount) || 0; // 거래대금(백만)
   } catch { return 0; }
+}
+
+async function trendOne(code) {
+  try {
+    const r = await fetch(`https://m.stock.naver.com/api/stock/${code}/trend`, { headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' }, signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return null;
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return null;
+    const num = (v) => parseInt(String(v || '0').replace(/[,+]/g, ''), 10) || 0;
+    return rows.slice(0, 5).map((x) => ({ foreign: num(x.foreignerPureBuyQuant), organ: num(x.organPureBuyQuant) }));
+  } catch { return null; }
 }
 
 async function loadSnapshot() {
@@ -74,7 +85,15 @@ export default async function handler(req, res) {
                vol_avg20: s.vol_avg20 || 0, wk52_high: s.wk52_high || 0, amount: stockAmts[i] || 0 };
     }).filter(Boolean);
 
-    const { signals, rank } = buildSignals(stocks, kPct);
+    const phase = krMarketOpen() ? 'intraday' : 'closed';
+    let enrich;
+    if (phase === 'closed') {
+      const trends = await Promise.all(stocks.map((s) => trendOne(s.code)));
+      const byTrend = {};
+      stocks.forEach((s, i) => { if (trends[i]) byTrend[s.code] = trends[i]; });
+      enrich = (s) => (byTrend[s.code] ? classifySupply(byTrend[s.code]) : { cats: [], badges: [] });
+    }
+    const { signals, rank } = buildSignals(stocks, kPct, { enrich });
 
     const byCode = {};
     ALL_ETF_CODES.forEach((code, i) => {
@@ -90,7 +109,7 @@ export default async function handler(req, res) {
     };
 
     return res.status(200).json({
-      phase: krMarketOpen() ? 'intraday' : 'closed',
+      phase,
       signals, rank, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
     });
   } catch (e) {
