@@ -76,7 +76,7 @@ export const ETF_NAME = {
 - [ ] **Step 2: import 확인**
 
 Run: `node -e "import('./api/_etf-universe.mjs').then(m=>console.log(m.ALL_ETF_CODES.length, m.SECTOR_LABEL.semicon))"`
-Expected: `15 반도체` (베팅 3 + 섹터 9 + 안전 3 = 15, 중복 없음)
+Expected: `16 반도체` (베팅·인버스 2 + 레버리지 1 + KOSPI200 1 + 섹터 9 + 안전 3 = 16, 중복 없음)
 
 - [ ] **Step 3: Commit**
 
