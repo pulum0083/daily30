@@ -1563,6 +1563,8 @@ const SCREEN_URLS={
   'chips':      '/chips/',
 };
 // 종목 상세 — standalone 페이지로 실제 이동 (생성된 종목만, 나머지는 "준비 중" 토스트)
+// 시드 3종목은 스냅샷 로드 전 즉시 클릭 대비. 나머지는 스냅샷 로드 시 유니버스 전체로 자동 채움
+// (build_all_stocks가 유니버스 종목 페이지를 일괄 빌드하므로 스냅샷=빌드된 페이지 목록).
 const STOCK_PAGES={'005930':1,'000660':1,'005380':1};
 let _stockToastT=null;
 function _stockToast(msg){
@@ -2570,6 +2572,7 @@ renderChips('morning');
     .then(function(r){return r.ok?r.json():null;})
     .then(function(snap){
       SNAP=snap;
+      if(SNAP&&SNAP.stocks) Object.keys(SNAP.stocks).forEach(function(c){STOCK_PAGES[c]=1;});
       renderChangeTop();
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
