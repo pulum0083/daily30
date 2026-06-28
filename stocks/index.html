@@ -160,6 +160,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sig-pct{font-size:14px;font-weight:800;white-space:nowrap;}
 .sig-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
 .bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:6px;background:#f2f4f6;color:#4e5968;}
+.bdg.flow{background:#E6F6F0;color:#0B8265;} /* 외국인·기관 수급 신호만 색상 강조 */
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
 /* 로딩 스켈레톤 — 특이신호·ETF 시황이 /api/signals 응답 전 빈칸으로 깜빡이는 레이아웃 시프트 방지 */
@@ -204,8 +205,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
 .bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
 .bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
-.bet-dn{background:var(--dn);display:flex;align-items:center;justify-content:flex-start;padding-left:10px;}
-.bet-up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.bet-dn{background:#3E7BD6;display:flex;align-items:center;justify-content:flex-start;padding-left:10px;} /* var(--dn) 채도 낮춤 */
+.bet-up{background:#CD4444;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;} /* var(--up) 채도 낮춤 */
 .bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}.bet-legend b{color:#334155;}
 .bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
 .bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
@@ -629,7 +630,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/#income" onclick="event.preventDefault();go('income')">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -1020,6 +1021,10 @@ function usSel(code){
 #us-evening .ue-mtile .v{font-size:16px;font-weight:800;color:#0F172A;}
 #us-evening .ue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0 18px;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:12px;padding:6px 14px;}
 #us-evening .ue-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
+#us-evening a.ue-row--link{text-decoration:none;cursor:pointer;color:inherit;}
+#us-evening a.ue-row--link:hover{background:#F8FAFF;}
+#us-evening .ue-go{color:#94A3B8;flex:none;margin-left:6px;opacity:0;transition:opacity .15s;}
+#us-evening a.ue-row--link:hover .ue-go{opacity:1;}
 #us-evening .ue-row .nm{flex:1;color:#0F172A;}
 #us-evening .ue-row .tk{color:#94A3B8;font-size:12px;}
 #us-evening .ue-row .lead{font-size:11px;color:#7C3AED;background:#F5F3FF;padding:1px 6px;border-radius:4px;margin-left:4px;}
@@ -1057,7 +1062,16 @@ function usSel(code){
     {nm:'반도체ETF',  tk:'SMH',  sym:'SMH.O'}
   ];
   var NASDAQ='QQQ.O';
-  var cur='krw', fx=null, dataBySym={}, loaded=false;
+  var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false;
+  /* 가격 변동 시 상단 대표주 위젯과 동일한 카운트업(odometer) + 방향색 플래시 */
+  (function injectUeFlash(){
+    var st=document.createElement('style');
+    st.textContent='@keyframes ueFlashUp{0%{background:rgba(224,49,49,.16)}100%{background:transparent}}'
+      +'@keyframes ueFlashDn{0%{background:rgba(39,117,237,.16)}100%{background:transparent}}'
+      +'#us-evening .px.ue-flash-up{animation:ueFlashUp .6s ease-out;border-radius:6px;}'
+      +'#us-evening .px.ue-flash-dn{animation:ueFlashDn .6s ease-out;border-radius:6px;}';
+    document.head.appendChild(st);
+  })();
   function fmtPx(usd){
     if(typeof usd!=='number'||!isFinite(usd)) return '—';
     if(cur==='usd') return '$'+usd.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1071,24 +1085,64 @@ function usSel(code){
   }
   function skeleton(){
     gridEl.innerHTML=TICKERS.map(function(){return '<div class="ue-row"><span class="nm"><span class="ue-skel" style="display:inline-block;width:90px;"></span></span><span class="ue-skel" style="width:70px;"></span></div>';}).join('');
-    macroEl.innerHTML=['나스닥 QQQ','필라델피아 반도체','원/달러'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
+    macroEl.innerHTML=['나스닥 QQQ','필라델피아 반도체','변동성 VIX'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
   }
-  function render(){
+  function renderGrid(){
     gridEl.innerHTML=TICKERS.map(function(t){
       var d=dataBySym[t.sym]||{};
-      return '<div class="ue-row"><span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
-        +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct)+'</div>';
+      var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
+        +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
+      if(t.lead) return '<div class="ue-row">'+inner+'</div>';
+      return '<a class="ue-row ue-row--link" href="/stocks/us/'+t.tk.toLowerCase()+'/">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
+  }
+  function renderMacro(){
     var qq=dataBySym[NASDAQ]||{}, soxx=dataBySym['SOXX.O']||{};
+    var vixHtml=(vix&&typeof vix.price==='number')
+      ? vix.price.toFixed(2)+' <span style="font-size:12px">'+cgHtml(vix.changePct)+'</span>'
+      : '<span class="cg" style="color:#94A3B8">—</span>';
     macroEl.innerHTML=''
       +'<div class="ue-mtile"><div class="l">나스닥 QQQ</div><div class="v">'+cgHtml(qq.changePct)+'</div></div>'
       +'<div class="ue-mtile"><div class="l">필라델피아 반도체</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>'
-      +'<div class="ue-mtile"><div class="l">원/달러</div><div class="v">'+(fx?fx.toLocaleString('en-US')+'원':'—')+'</div></div>';
+      +'<div class="ue-mtile"><div class="l">변동성 VIX</div><div class="v">'+vixHtml+'</div></div>';
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
+  function render(){ renderGrid(); renderMacro(); }
+  /* 폴링 후 행 가격을 in-place 갱신 — 카운트업 + 방향색 플래시(상단 대표주 위젯과 동일 효과) */
+  function animatePx(el, toUsd){
+    var from=parseFloat(el.getAttribute('data-usd'));
+    el.setAttribute('data-usd', toUsd);
+    if(!isFinite(from) || from===toUsd){ el.textContent=fmtPx(toUsd); return; }
+    var dir=toUsd>from?1:-1;
+    el.classList.remove('ue-flash-up','ue-flash-dn'); void el.offsetWidth;
+    el.classList.add(dir>0?'ue-flash-up':'ue-flash-dn');
+    var start=performance.now(), dur=550;
+    function step(now){
+      var t=Math.min(1,(now-start)/dur), e=1-Math.pow(1-t,3); // easeOutCubic
+      el.textContent=fmtPx(from+(toUsd-from)*e);
+      if(t<1) requestAnimationFrame(step); else el.textContent=fmtPx(toUsd);
+    }
+    requestAnimationFrame(step);
+  }
+  function patch(){
+    var rows=gridEl.querySelectorAll('.ue-row');
+    TICKERS.forEach(function(t,i){
+      var row=rows[i]; if(!row) return;
+      var d=dataBySym[t.sym]||{};
+      var px=row.querySelector('.px');
+      if(px && typeof d.price==='number') animatePx(px, d.price);
+      var cg=row.querySelector('.cg');
+      if(cg && typeof d.changePct==='number'){
+        var up=d.changePct>0;
+        cg.style.color=up?'#E03131':(d.changePct<0?'#2775ED':'#64748B');
+        cg.textContent=(up?'+':'')+d.changePct.toFixed(2)+'%';
+      }
+    });
+    renderMacro();
+  }
   function load(){
-    skeleton();
+    if(!loaded) skeleton();
     var syms=TICKERS.map(function(t){return t.sym;}).concat([NASDAQ]).join(',');
     Promise.all([
       fetch('/api/stocks-live?us='+encodeURIComponent(syms),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
@@ -1097,8 +1151,10 @@ function usSel(code){
       var live=res[0], mkt=res[1];
       if(live&&Array.isArray(live.us)) live.us.forEach(function(x){ dataBySym[x.sym]={price:x.price,changePct:x.changePct}; });
       if(mkt&&mkt.forex&&typeof mkt.forex.price==='number') fx=mkt.forex.price;
-      if(!fx){ cur='usd'; syncToggle(); }
-      loaded=true; render();
+      if(mkt&&mkt.vix&&typeof mkt.vix.price==='number') vix=mkt.vix;
+      if(!fx&&!loaded){ cur='usd'; syncToggle(); }
+      if(!loaded){ loaded=true; render(); }
+      else patch();
     });
   }
   window.__ueLoad=function(){ if(!loaded) load(); };
@@ -1155,10 +1211,7 @@ function usSel(code){
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
       <div class="sector-line__chips" style="flex-wrap:wrap;padding:12px 16px;"><a href="/stocks/sector/semicon/">🔬 반도체</a><a href="/stocks/sector/battery/">🔋 2차전지</a><a href="/stocks/sector/auto/">🚗 자동차</a><a href="/stocks/sector/defense/">🛡️ 방산</a><a href="/stocks/sector/ship/">🚢 조선</a><a href="/stocks/sector/bio/">🧬 바이오</a><a href="/stocks/sector/finance/">🏦 금융</a><a href="/stocks/sector/power/">⚡ 전력기기</a></div>
     </div>
-    <div class="block" id="change-top-block" style="display:none;">
-      <div class="block__h"><span class="block__t"><span class="ic">🏆</span>오늘 등락률 TOP</span><span class="block__s"><span class="close-pill">종가 기준</span></span></div>
-      <div id="change-top-rows"></div>
-    </div>
+
     </div><!-- /home-main -->
     <div class="home-side">
     <!-- ⓪+① ETF로 읽는 시황 (시황 + 베팅 흐름 + 거래량 톱5 통합) -->
@@ -2808,7 +2861,7 @@ renderChips('morning');
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
-  function badgeHtml(b){ return '<span class="bdg">'+b+'</span>'; }
+  function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
@@ -2874,22 +2927,6 @@ renderChips('morning');
     var etf=SNAP.etfs?Object.keys(SNAP.etfs).map(function(c){var e=SNAP.etfs[c];return {code:c,name:e.name,sector:'ETF',vol:e.vol||0,changePct:e.change_pct||0,price:null};}):[];
     renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list,etf:etf});
   }
-  // 🏆 오늘 등락률 TOP — 스냅샷 change_pct 기준 상승/하락 TOP5
-  function renderChangeTop(){
-    if(!SNAP||!SNAP.stocks) return;
-    var list=Object.keys(SNAP.stocks).map(function(c){var s=SNAP.stocks[c];return {code:c,name:s.name,pct:s.change_pct||0};});
-    var ups=list.filter(function(x){return x.pct>0;}).sort(function(a,b){return b.pct-a.pct;}).slice(0,5);
-    var dns=list.filter(function(x){return x.pct<0;}).sort(function(a,b){return a.pct-b.pct;}).slice(0,5);
-    if(!ups.length&&!dns.length) return;
-    function grp(ic,label,col,items){
-      if(!items.length) return '';
-      var rows=items.map(function(s,i){var sg=s.pct>=0?'+':'';
-        return '<a class="srk-row" onclick="goStock(\''+s.code+'\')"><span class="srk-rk">'+(i+1)+'</span><span class="srk-nm">'+s.name+'</span><span class="srk-pct" style="color:'+col+';">'+sg+s.pct.toFixed(1)+'%</span></a>';}).join('');
-      return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+ic+'</span><span class="srk-lb">'+label+'</span><span class="srk-cnt">'+items.length+'</span></div>'+rows+'</div>';
-    }
-    var rw=document.getElementById('change-top-rows'); if(rw) rw.innerHTML=grp('▲','상승 TOP5','var(--up)',ups)+grp('▼','하락 TOP5','var(--dn)',dns);
-    var blk=document.getElementById('change-top-block'); if(blk) blk.style.display='';
-  }
   loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
@@ -2901,7 +2938,6 @@ renderChips('morning');
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
-      renderChangeTop();
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
     })
