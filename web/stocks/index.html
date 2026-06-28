@@ -1020,6 +1020,10 @@ function usSel(code){
 #us-evening .ue-mtile .v{font-size:16px;font-weight:800;color:#0F172A;}
 #us-evening .ue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0 18px;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:12px;padding:6px 14px;}
 #us-evening .ue-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
+#us-evening a.ue-row--link{text-decoration:none;cursor:pointer;color:inherit;}
+#us-evening a.ue-row--link:hover{background:#F8FAFF;}
+#us-evening .ue-go{color:#94A3B8;flex:none;margin-left:6px;opacity:0;transition:opacity .15s;}
+#us-evening a.ue-row--link:hover .ue-go{opacity:1;}
 #us-evening .ue-row .nm{flex:1;color:#0F172A;}
 #us-evening .ue-row .tk{color:#94A3B8;font-size:12px;}
 #us-evening .ue-row .lead{font-size:11px;color:#7C3AED;background:#F5F3FF;padding:1px 6px;border-radius:4px;margin-left:4px;}
@@ -1076,8 +1080,10 @@ function usSel(code){
   function render(){
     gridEl.innerHTML=TICKERS.map(function(t){
       var d=dataBySym[t.sym]||{};
-      return '<div class="ue-row"><span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
-        +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct)+'</div>';
+      var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
+        +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
+      if(t.lead) return '<div class="ue-row">'+inner+'</div>';
+      return '<a class="ue-row ue-row--link" href="/stocks/us/'+t.tk.toLowerCase()+'/">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
     var qq=dataBySym[NASDAQ]||{}, soxx=dataBySym['SOXX.O']||{};
     macroEl.innerHTML=''

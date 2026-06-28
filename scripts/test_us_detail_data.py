@@ -1,0 +1,43 @@
+# us_detail_data 순수 계산함수 단위 테스트 (네트워크 없음)
+#!/usr/bin/env python3
+"""실행: python3 scripts/test_us_detail_data.py"""
+import us_detail_data as u
+
+
+def test_fmt_usd():
+    assert u.fmt_usd(81_615_000_000.0) == "$81.6B"
+    assert u.fmt_usd(1_230_000_000.0) == "$1.23B"
+    assert u.fmt_usd(543_000_000.0) == "$543M"
+    assert u.fmt_usd(-1_200_000_000.0) == "−$1.20B"
+    assert u.fmt_usd(None) == ""
+
+
+def test_yf_q_label():
+    assert u._yf_q_label("2026-04-30") == "26Q2"
+    assert u._yf_q_label("2025-10-31") == "25Q4"
+    assert u._yf_q_label("2026-01-31") == "26Q1"
+    assert u._yf_q_label("bad") == "bad"
+
+
+def test_parse_us_financials():
+    cols = [
+        ("2026-04-30", {"rev": 81_600_000_000.0, "op": 53_500_000_000.0}),
+        ("2026-01-31", {"rev": 39_300_000_000.0, "op": 24_000_000_000.0}),
+        ("2025-10-31", {"rev": None, "op": None}),
+    ]
+    out = u.parse_us_financials(cols)
+    assert [r["q"] for r in out] == ["26Q1", "26Q2"]
+    assert out[-1]["rev"] == 81_600_000_000.0
+    assert out[-1]["op"] == 53_500_000_000.0
+    assert out[0]["est"] is False
+
+
+def run():
+    fns = [v for k, v in globals().items() if k.startswith("test_")]
+    for fn in fns:
+        fn(); print(f"  ✓ {fn.__name__}")
+    print(f"{len(fns)} passed")
+
+
+if __name__ == "__main__":
+    run()

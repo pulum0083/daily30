@@ -25,9 +25,11 @@ from jinja2 import Environment, FileSystemLoader
 try:
     from scripts.validate_analysis import _fetch_kospi_realdata
     import scripts.toss_client as tc
+    import scripts.us_detail_data as ud
 except ImportError:
     from validate_analysis import _fetch_kospi_realdata
     import toss_client as tc
+    import us_detail_data as ud
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -35,6 +37,7 @@ WEB_DIR = BASE_DIR / "web"
 BRIEFINGS_DIR = WEB_DIR / "briefings"
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
+US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
 KST = pytz.timezone("Asia/Seoul")
 
 # CLI type → 내부 type(URL·config·템플릿)
@@ -1182,6 +1185,52 @@ def build_stock_page(stock, peers):
     return f"stocks/{stock['code']}/index.html"
 
 
+def build_us_stock_page(stock, peers, env):
+    """미국 종목 1개의 경량 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
+    rd = ud.fetch_us_realdata(stock["ticker"])
+    if rd.get("error") or rd.get("price") is None:
+        raise RuntimeError(f"{stock['ticker']} 실측 실패: {rd.get('error')}")
+    financials = ud.fetch_us_financials(stock["ticker"]) if stock.get("kind") == "stock" else []
+    env.filters["usd"] = ud.fmt_usd
+    tmpl = env.get_template("stocks/us_detail.html")
+    asof = rd.get("asof") or datetime.now(KST).strftime("%Y-%m-%d")
+    generated_label = f"{asof[5:7]}-{asof[8:10]} 종가"
+    html = tmpl.render(
+        stock=stock,
+        rd=rd,
+        financials=financials,
+        peers=peers,
+        generated_label=generated_label,
+        acc=_briefing_accuracy(),
+    )
+    tk = stock["ticker"].lower()
+    out_dir = WEB_DIR / "stocks" / "us" / tk
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "index.html").write_text(html, encoding="utf-8")
+    return f"stocks/us/{tk}/index.html"
+
+
+def build_all_us_stocks():
+    """us_stocks.json 전체를 순회 생성. peer 등락률은 실측에서 채운다(캐시 재사용, fail-fast)."""
+    stocks = load_json(US_STOCKS_PATH)
+    name_map = {s["ticker"]: s["name"] for s in stocks}
+    rd_cache = {}
+
+    def _peer_change(tk):
+        if tk not in rd_cache:
+            rd_cache[tk] = ud.fetch_us_realdata(tk)
+        return rd_cache[tk].get("change_pct")
+
+    results = []
+    for s in stocks:
+        peers = [
+            {"ticker": pt, "name": name_map.get(pt, pt), "change_pct": _peer_change(pt)}
+            for pt in s.get("peers", [])
+        ]
+        results.append(build_us_stock_page(s, peers, make_env()))
+    return results
+
+
 def build_all_stocks():
     """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
 
@@ -1244,6 +1293,16 @@ def write_sitemap_xml():
                 "loc": f"{BASE}/stocks/{s['code']}/",
                 "changefreq": "daily",
                 "priority": "0.8",
+            })
+
+    # 생성된 미국 반도체 상세 페이지만 포함
+    for s in load_json(US_STOCKS_PATH):
+        tk = s["ticker"].lower()
+        if (WEB_DIR / "stocks" / "us" / tk / "index.html").exists():
+            urls.append({
+                "loc": f"{BASE}/stocks/us/{tk}/",
+                "changefreq": "weekly",
+                "priority": "0.6",
             })
 
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -1454,6 +1513,8 @@ def main():
                         help="섹터별 종목 페이지 8개 생성하고 종료")
     parser.add_argument("--stocks", action="store_true",
                         help="stocks.json 종목 상세 페이지 일괄 생성하고 종료")
+    parser.add_argument("--us-stocks", dest="us_stocks", action="store_true",
+                        help="미국 반도체 종목 경량 상세 페이지 생성")
     args = parser.parse_args()
 
     if args.sectors:
@@ -1462,6 +1523,12 @@ def main():
 
     if args.stocks:
         for path in build_all_stocks():
+            print(f"생성: {path}")
+        write_sitemap_xml()
+        return
+
+    if args.us_stocks:
+        for path in build_all_us_stocks():
             print(f"생성: {path}")
         write_sitemap_xml()
         return
