@@ -1,7 +1,7 @@
 // 종목·ETF 신호 통합 API — polling(가격·등락·거래량) + itemSummary(거래대금) + 일봉 스냅샷 조합 → 코어 가공
 import { ALL_ETF_CODES, ETF_NAME } from './_etf-universe.mjs';
 import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, SIGNAL_META } from './_signals-core.mjs';
-import { krMarketOpen, kstTodayYmd, labelFromYmd } from './_market-calendar.mjs';
+import { krMarketOpen, kstTodayYmd, labelFromYmd, lastTradingDay } from './_market-calendar.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 
@@ -79,9 +79,10 @@ export default async function handler(req, res) {
     }).filter(Boolean);
 
     const phase = krMarketOpen() ? 'intraday' : 'closed';
-    // 데이터 기준일: 장중이면 오늘(라이브), 마감이면 스냅샷 생성일(마지막 거래일)
+    // 데이터 기준일: 장중이면 오늘(라이브), 마감이면 스냅샷 생성일을 마지막 거래일로 보정
+    // (스냅샷이 주말·공휴일에 생성되면 generated_at이 비거래일이라 라벨이 틀어진다)
     const snapDate = String(snap.generated_at || '').slice(0, 10);
-    const asOfDate = phase === 'intraday' ? kstTodayYmd() : (snapDate || kstTodayYmd());
+    const asOfDate = phase === 'intraday' ? kstTodayYmd() : lastTradingDay(snapDate || kstTodayYmd());
     const asOf = { date: asOfDate, label: labelFromYmd(asOfDate), isToday: phase === 'intraday' };
     let enrich;
     if (phase === 'closed') {

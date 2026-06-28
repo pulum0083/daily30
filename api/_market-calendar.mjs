@@ -31,6 +31,18 @@ export function krMarketOpen() {
 
 export function kstTodayYmd() { return ymd(kstNow()); }
 
+// 'YYYY-MM-DD' → 그 날짜를 포함해 거슬러 올라간 마지막 거래일 'YYYY-MM-DD'.
+// 주말·공휴일이면 직전 거래일로 보정한다(비거래일에 생성된 스냅샷 날짜 교정용).
+export function lastTradingDay(s) {
+  const [y, m, d] = String(s).split('-').map(Number);
+  if (!y || !m || !d) return s;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  for (let i = 0; i < 15 && isKospiHoliday(dt); i++) {
+    dt.setUTCDate(dt.getUTCDate() - 1);
+  }
+  return ymd(dt);
+}
+
 // 'YYYY-MM-DD' → 'M/D(요일)'  예: '2026-06-26' → '6/26(금)'
 export function labelFromYmd(s) {
   const [y, m, d] = String(s).split('-').map(Number);
