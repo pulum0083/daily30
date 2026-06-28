@@ -79,6 +79,92 @@ def _naver_closes(code):
     return [float(r["closePrice"]) for r in _naver_day_rows(code) if r.get("closePrice")]
 
 
+def _to_int(s):
+    """'-847,969'·'+1,864' 같은 네이버 문자열을 정수로. 빈값/None → None."""
+    if s is None:
+        return None
+    s = str(s).replace(",", "").replace("+", "").strip()
+    if s in ("", "-", "N/A"):
+        return None
+    try:
+        return int(float(s))
+    except ValueError:
+        return None
+
+
+def _q_label(key):
+    """'202509' → '25Q3'. 분기 키를 짧은 라벨로."""
+    if not key or len(key) < 6:
+        return key or ""
+    yy, mm = key[2:4], key[4:6]
+    q = {"03": "1", "06": "2", "09": "3", "12": "4"}.get(mm, "")
+    return f"{yy}Q{q}" if q else f"{yy}.{mm}"
+
+
+def parse_supply5(rows, n=5):
+    """네이버 trend 응답(최신순)에서 최근 n일 종목별 순매수 수량(주)을 시간순(오래된→최신)으로.
+    각 항목: {date:'6/26', i:개인, o:기관, f:외국인}. 셋 다 None이면 제외."""
+    out = []
+    for r in rows[:n]:
+        bd = str(r.get("bizdate", ""))
+        date = f"{int(bd[4:6])}/{int(bd[6:8])}" if len(bd) == 8 else bd
+        i = _to_int(r.get("individualPureBuyQuant"))
+        o = _to_int(r.get("organPureBuyQuant"))
+        f = _to_int(r.get("foreignerPureBuyQuant"))
+        if i is None and o is None and f is None:
+            continue
+        out.append({"date": date, "i": i or 0, "o": o or 0, "f": f or 0})
+    out.reverse()  # 오래된→최신
+    return out
+
+
+def parse_financials(finance_info, n=5):
+    """네이버 finance/quarter 응답에서 최근 n분기 매출·영업이익(억원)을 시간순으로.
+    각 항목: {q:'25Q3', rev:매출, op:영업이익, est:컨센서스추정여부}. 매출·영업이익 둘 다 없으면 제외."""
+    if not finance_info:
+        return []
+    titles = finance_info.get("trTitleList", [])[-n:]
+    rows = {r.get("title"): r.get("columns", {}) for r in finance_info.get("rowList", [])}
+    rev_col = rows.get("매출액", {})
+    op_col = rows.get("영업이익", {})
+    out = []
+    for t in titles:
+        key = t.get("key")
+        rev = _to_int((rev_col.get(key) or {}).get("value"))
+        op = _to_int((op_col.get(key) or {}).get("value"))
+        if rev is None and op is None:
+            continue
+        out.append({"q": _q_label(key), "rev": rev, "op": op,
+                    "est": t.get("isConsensus") == "Y"})
+    return out
+
+
+def _naver_supply5(code):
+    """종목별 일별 투자자 순매수 수량(외국인·기관·개인). 실패 시 []."""
+    try:
+        url = f"https://m.stock.naver.com/api/stock/{code}/trend"
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        return parse_supply5(rows) if isinstance(rows, list) else []
+    except Exception as e:
+        print(f"[snapshot] naver supply {code} 실패: {e}", file=sys.stderr)
+        return []
+
+
+def _naver_financials(code):
+    """종목별 분기 매출·영업이익(억원, 컨센서스 추정 플래그 포함). 실패 시 []."""
+    try:
+        url = f"https://m.stock.naver.com/api/stock/{code}/finance/quarter"
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+        data = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        return parse_financials(data.get("financeInfo"))
+    except Exception as e:
+        print(f"[snapshot] naver finance {code} 실패: {e}", file=sys.stderr)
+        return []
+
+
 def _yf_closes(ticker):
     """yfinance 폴백(미국). 실패 시 []."""
     try:
@@ -108,6 +194,7 @@ def load_universe():
 
 def _build_one(symbol, name, sector, market):
     vol = vol_avg20 = foreign = foreign_spark = None
+    supply5 = financials = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
         rows = _naver_day_rows(symbol)
@@ -120,6 +207,8 @@ def _build_one(symbol, name, sector, market):
         if frates:
             foreign = round(float(frates[-1]), 2)
             foreign_spark = [round(float(x), 2) for x in frates[-20:]]
+        supply5 = _naver_supply5(symbol)        # 종목별 5일 순매수 수량
+        financials = _naver_financials(symbol)  # 분기 매출·영업이익
     else:
         closes = fetch_closes(symbol, market)
     if len(closes) < 2:
@@ -141,6 +230,10 @@ def _build_one(symbol, name, sector, market):
     if foreign is not None:
         rec["foreign_rate"] = foreign
         rec["foreign_spark"] = foreign_spark
+    if supply5:
+        rec["supply5"] = supply5
+    if financials:
+        rec["financials"] = financials
     return rec
 
 

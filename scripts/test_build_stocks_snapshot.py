@@ -33,6 +33,57 @@ def test_ma200():
     assert m.ma200([1.0, 2.0]) is None           # 200개 미만
 
 
+def test_to_int():
+    assert m._to_int("-847,969") == -847969
+    assert m._to_int("+1,864,496") == 1864496
+    assert m._to_int("") is None
+    assert m._to_int(None) is None
+    assert m._to_int("-") is None
+
+
+def test_q_label():
+    assert m._q_label("202509") == "25Q3"
+    assert m._q_label("202512") == "25Q4"
+    assert m._q_label("202603") == "26Q1"
+
+
+def test_parse_supply5():
+    # API는 최신순 → 결과는 오래된→최신
+    rows = [
+        {"bizdate": "20260626", "individualPureBuyQuant": "+1,864,496",
+         "organPureBuyQuant": "-1,065,176", "foreignerPureBuyQuant": "-847,969"},
+        {"bizdate": "20260625", "individualPureBuyQuant": "-716,876",
+         "organPureBuyQuant": "+865,177", "foreignerPureBuyQuant": "-113,276"},
+    ]
+    out = m.parse_supply5(rows)
+    assert [r["date"] for r in out] == ["6/25", "6/26"]
+    assert out[-1] == {"date": "6/26", "i": 1864496, "o": -1065176, "f": -847969}
+    # 셋 다 빈값이면 제외
+    assert m.parse_supply5([{"bizdate": "20260626", "individualPureBuyQuant": "",
+                             "organPureBuyQuant": "", "foreignerPureBuyQuant": ""}]) == []
+
+
+def test_parse_financials():
+    info = {
+        "trTitleList": [
+            {"key": "202503", "isConsensus": "N"},
+            {"key": "202506", "isConsensus": "N"},
+            {"key": "202606", "isConsensus": "Y"},
+        ],
+        "rowList": [
+            {"title": "매출액", "columns": {"202503": {"value": "176,391"},
+             "202506": {"value": "222,320"}, "202606": {"value": "828,926"}}},
+            {"title": "영업이익", "columns": {"202503": {"value": "74,405"},
+             "202506": {"value": "92,129"}, "202606": {"value": "634,511"}}},
+        ],
+    }
+    out = m.parse_financials(info)
+    assert [r["q"] for r in out] == ["25Q1", "25Q2", "26Q2"]
+    assert out[0] == {"q": "25Q1", "rev": 176391, "op": 74405, "est": False}
+    assert out[-1]["est"] is True
+    assert m.parse_financials(None) == []
+
+
 def test_sector_bellwether_for_stock():
     snapshot = {"bellwethers": {"NVDA": {"name": "엔비디아", "change_pct": 1.9}}}
     sectors = {"semicon": {"bellwethers": [{"t": "NVDA"}]}}

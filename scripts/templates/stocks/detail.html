@@ -91,40 +91,6 @@
         <div id="sig-c-body"><div class="sigc-empty">신호 조회 중…</div></div>
       </div>
 
-      <!-- 더블샷 AI 픽 트랙레코드 -->
-      {% if picks %}
-      {% set hit_cnt = picks | selectattr('badge', 'eq', 'hit') | list | length %}
-      {% set run_cnt = picks | selectattr('badge', 'eq', 'run') | list | length %}
-      <div class="np">
-        <div class="np__h">
-          <span class="np__t">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
-            더블샷 AI 픽 트랙레코드
-            <span class="tr-help" id="tr-help-btn">?</span>
-          </span>
-          <span class="np__s">종가 기준 실측</span>
-        </div>
-        <div class="tr-sum">
-          <span>{{ stock.name }}를 <b>{{ picks | length }}번</b> 픽</span>
-          {% if hit_cnt %}<span style="color:#1A7F4B">목표 도달 <b>{{ hit_cnt }}</b></span>{% endif %}
-          {% if run_cnt %}<span style="color:#B07400">미도달 <b>{{ run_cnt }}</b></span>{% endif %}
-        </div>
-        {% for p in picks %}
-        <div class="tr-row">
-          <div class="tr-top">
-            <span class="tr-date">{{ p.date_str }}</span>
-            <span class="tr-sig">{{ p.reason }}</span>
-            <span class="tr-badge {{ p.badge }}">{{ p.badge_label }}</span>
-          </div>
-          <div class="tr-line">
-            <span>진입 <b>{{ p.entry_str }}</b></span>→<span>목표 <b>{{ p.target_str }}</b></span>
-            <span class="tr-ret" style="color:var(--up)">{{ p.ret_str }}</span>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-
       <!-- 실측 핵심 지표 -->
       <div class="np">
         <div class="np__h">
@@ -226,6 +192,122 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+      {% endif %}
+
+      {# ── 수치 포맷 매크로 ── #}
+      {% macro fmt_man(v) %}{{ '+' if v >= 0 else '−' }}{{ ((v | abs) / 10000) | round | int }}만{% endmacro %}
+      {% macro fmt_eok(v) %}{% if (v | abs) >= 10000 %}{{ '−' if v < 0 else '' }}{{ ((v | abs) / 10000) | round(1) }}조{% else %}{{ '−' if v < 0 else '' }}{{ "{:,}".format(v | abs) }}억{% endif %}{% endmacro %}
+
+      <!-- 수급 동향 (5일) -->
+      {% if supply5 %}
+      {% set s_i = supply5 | sum(attribute='i') %}
+      {% set s_o = supply5 | sum(attribute='o') %}
+      {% set s_f = supply5 | sum(attribute='f') %}
+      {% set s_max = ([s_i | abs, s_o | abs, s_f | abs] | max) or 1 %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg>
+            수급 동향
+          </span>
+          <span class="np__s">최근 5거래일 · 순매수 수량(주)</span>
+        </div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--hair);">
+          <div class="sd-axis"><span>순매도</span><span>5일 누적</span><span>순매수</span></div>
+          {% for label, val in [('개인', s_i), ('기관', s_o), ('외국인', s_f)] %}
+          <div class="sd-row">
+            <span class="sd-lbl">{{ label }}</span>
+            <div class="sd-track"><div class="sd-zero"></div>
+              <div class="sd-fill {{ 'buy' if val >= 0 else 'sell' }}" style="width:{{ ((val | abs) / s_max * 50) | round(1) }}%"></div>
+            </div>
+            <span class="sd-val" style="color:{{ 'var(--up)' if val >= 0 else 'var(--dn)' }}">{{ fmt_man(val) }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <table class="tgt-tbl sd-daily">
+          <thead><tr><th>날짜</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead>
+          <tbody>
+            {% for d in supply5 %}
+            <tr>
+              <td class="dt">{{ d.date }}</td>
+              {% for v in [d.i, d.o, d.f] %}
+              <td class="num" style="color:{{ 'var(--up)' if v >= 0 else 'var(--dn)' }};font-weight:700;text-align:right">{{ fmt_man(v) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      <!-- 분기 실적 (매출·영업이익) -->
+      {% if financials %}
+      {% set rev_max = (financials | map(attribute='rev') | reject('none') | list | max) or 1 %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
+            분기 실적
+          </span>
+          <span class="np__s">매출액 · 분기 기준</span>
+        </div>
+        <div style="padding:16px 16px 12px;">
+          <div class="fin-chart">
+            {% for q in financials %}
+            <div class="fin-col">
+              <span class="fin-cap{{ ' est' if q.est }}">{% if q.rev is not none %}{{ fmt_eok(q.rev) }}{% endif %}{{ '(E)' if q.est }}</span>
+              <div class="fin-bar {{ 'est' if q.est else 'actual' }}" style="height:{{ ((q.rev or 0) / rev_max * 150) | round | int }}px"></div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="fin-xrow">
+            {% for q in financials %}
+            <span class="fin-x{{ ' est' if q.est }}">{{ q.q }}<br><span style="color:{{ 'var(--up)' if (q.op or 0) >= 0 else 'var(--dn)' }}">영업 {% if q.op is not none %}{{ fmt_eok(q.op) }}{% else %}—{% endif %}</span></span>
+            {% endfor %}
+          </div>
+          <div class="fin-foot"><div class="fin-legend">
+            <span><i style="background:var(--up)"></i>확정 실적</span>
+            <span><i class="est"></i>컨센서스 추정</span>
+          </div></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 더블샷 AI 픽 트랙레코드 -->
+      {% if picks %}
+      {% set hit_cnt = picks | selectattr('badge', 'eq', 'hit') | list | length %}
+      {% set run_cnt = picks | selectattr('badge', 'eq', 'run') | list | length %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+            더블샷 AI 픽 트랙레코드
+            <span class="tr-help" id="tr-help-btn">?</span>
+          </span>
+          <span class="np__s">종가 기준 실측</span>
+        </div>
+        <div style="padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--hair);">
+          더블샷 AI 브리핑이 <b style="color:var(--ink)">이 종목을 추천했던 기록</b>과 이후 성적이에요. 추천 당시 진입가·목표가 대비 실제 종가를 채점해요.
+        </div>
+        <div class="tr-sum">
+          <span>{{ stock.name }}를 <b>{{ picks | length }}번</b> 픽</span>
+          {% if hit_cnt %}<span style="color:#1A7F4B">목표 도달 <b>{{ hit_cnt }}</b></span>{% endif %}
+          {% if run_cnt %}<span style="color:#B07400">미도달 <b>{{ run_cnt }}</b></span>{% endif %}
+        </div>
+        {% for p in picks %}
+        <div class="tr-row">
+          <div class="tr-top">
+            <span class="tr-date">{{ p.date_str }}</span>
+            <span class="tr-sig">{{ p.reason }}</span>
+            <span class="tr-badge {{ p.badge }}">{{ p.badge_label }}</span>
+          </div>
+          <div class="tr-line">
+            <span>진입 <b>{{ p.entry_str }}</b></span>→<span>목표 <b>{{ p.target_str }}</b></span>
+            <span class="tr-ret" style="color:var(--up)">{{ p.ret_str }}</span>
+          </div>
+        </div>
+        {% endfor %}
       </div>
       {% endif %}
 

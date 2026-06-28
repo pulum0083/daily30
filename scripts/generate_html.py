@@ -1167,6 +1167,8 @@ def build_stock_page(stock, peers):
         "bellwether": sector_bellwether(snap, _load_sectors(), stock.get("sector_key")),
         "foreign_rate": snap_stock.get("foreign_rate"),
         "foreign_spark": snap_stock.get("foreign_spark"),
+        "supply5": snap_stock.get("supply5"),
+        "financials": snap_stock.get("financials"),
         "picks": picks,
         "broker_targets": _enrich_broker_targets(bt_raw, rd.get("price")),
         "acc": acc,
