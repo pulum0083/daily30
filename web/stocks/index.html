@@ -1101,8 +1101,15 @@ function usSel(code){
   });
   syncToggle();
   function kstNow(){ return new Date(Date.now()+9*3600*1000); }
-  // 노출 조건: 평일 18:00~익일 07:30. 주말(토·일)은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
-  function isEvening(d){ var wd=d.getUTCDay(); if(wd===0||wd===6) return true; var hm=d.getUTCHours()*60+d.getUTCMinutes(); return hm>=1080 || hm<450; }
+  var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 노출.
+  // 노출 조건: 평일 18:00~익일 07:30. 주말(토·일)·평일 공휴일은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
+  function isEvening(d){
+    var wd=d.getUTCDay();
+    if(wd===0||wd===6) return true;                    // 주말 종일
+    var hm=d.getUTCHours()*60+d.getUTCMinutes();
+    if(hm>=1080 || hm<450) return true;                // 평일 18:00~익일 07:30
+    return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
+  }
   window.ueGate=function(){
     var ev=isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
@@ -1110,6 +1117,12 @@ function usSel(code){
     if(mt) mt.style.display = ev ? 'none' : (window.__momHasPicks ? '' : 'none');
     if(ev) window.__ueLoad();
   };
+  // 오늘 코스피 브리핑 ready 여부로 비거래일(공휴일) 판별 — 서버 휴일 로직과 정합. 확인 후 게이트 재평가.
+  fetch('/data/briefings-list.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+    var today=kstNow().toISOString().slice(0,10), s=j&&j.slots&&j.slots[today];
+    todayKospiReady = !!(s&&s.kospi&&s.kospi.state==='ready');
+    window.ueGate();
+  }).catch(function(){});
   window.ueGate();
   setInterval(window.ueGate, 5*60*1000);
   setInterval(function(){ if(isEvening(kstNow()) && loaded) load(); }, 60000);
