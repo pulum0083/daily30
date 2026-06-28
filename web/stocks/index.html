@@ -1100,10 +1100,11 @@ function usSel(code){
     b.addEventListener('click',function(){ cur=b.getAttribute('data-cur'); syncToggle(); render(); });
   });
   syncToggle();
-  function kstHm(){ var d=new Date(Date.now()+9*3600*1000); return d.getUTCHours()*60+d.getUTCMinutes(); }
-  function isEvening(hm){ return hm>=1020 || hm<450; }   // 17:00~익일 07:30
+  function kstNow(){ return new Date(Date.now()+9*3600*1000); }
+  // 노출 조건: 평일 18:00~익일 07:30. 주말(토·일)은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
+  function isEvening(d){ var wd=d.getUTCDay(); if(wd===0||wd===6) return true; var hm=d.getUTCHours()*60+d.getUTCMinutes(); return hm>=1080 || hm<450; }
   window.ueGate=function(){
-    var ev=isEvening(kstHm());
+    var ev=isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
     var mt=document.getElementById('mom-track');
     if(mt) mt.style.display = ev ? 'none' : (window.__momHasPicks ? '' : 'none');
@@ -1111,7 +1112,7 @@ function usSel(code){
   };
   window.ueGate();
   setInterval(window.ueGate, 5*60*1000);
-  setInterval(function(){ if(isEvening(kstHm()) && loaded) load(); }, 60000);
+  setInterval(function(){ if(isEvening(kstNow()) && loaded) load(); }, 60000);
 })();
 </script>
     <div class="home-cols">
