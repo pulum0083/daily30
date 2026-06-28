@@ -1,0 +1,9 @@
+[
+  { "ticker": "AVGO", "name": "브로드컴", "kind": "stock", "peers": ["NVDA", "AMD"] },
+  { "ticker": "NVDA", "name": "엔비디아", "kind": "stock", "peers": ["AMD", "AVGO"] },
+  { "ticker": "AMD",  "name": "AMD",     "kind": "stock", "peers": ["NVDA", "AVGO"] },
+  { "ticker": "MU",   "name": "마이크론", "kind": "stock", "peers": ["NVDA", "ASML"] },
+  { "ticker": "ASML", "name": "ASML",    "kind": "stock", "peers": ["MU", "NVDA"] },
+  { "ticker": "SOXX", "name": "반도체 ETF", "kind": "etf", "peers": ["SMH", "NVDA"] },
+  { "ticker": "SMH",  "name": "반도체 ETF", "kind": "etf", "peers": ["SOXX", "NVDA"] }
+]
