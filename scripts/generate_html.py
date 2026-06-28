@@ -1295,6 +1295,16 @@ def write_sitemap_xml():
                 "priority": "0.8",
             })
 
+    # 생성된 미국 반도체 상세 페이지만 포함
+    for s in load_json(US_STOCKS_PATH):
+        tk = s["ticker"].lower()
+        if (WEB_DIR / "stocks" / "us" / tk / "index.html").exists():
+            urls.append({
+                "loc": f"{BASE}/stocks/us/{tk}/",
+                "changefreq": "weekly",
+                "priority": "0.6",
+            })
+
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in urls:
