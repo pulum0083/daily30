@@ -1028,10 +1028,12 @@ def score_picks(code, raw_picks):
             badge, badge_label = "hit", "목표 도달"
             ret_str = f"최대 +{max_ret}%"
         else:
+            # 목표 미도달 — 마감 기한 개념이 없어 '진행 중'은 지난 픽에 오해를 준다.
+            # 채점(hit/run 버킷)은 유지하되 표기만 중립적인 '미도달 / 최근 ±%'로 바꾼다.
             cur_ret = round((latest_close / entry - 1) * 100, 1)
-            badge, badge_label = "run", "진행 중"
+            badge, badge_label = "run", "미도달"
             sign = "+" if cur_ret >= 0 else ""
-            ret_str = f"현재 {sign}{cur_ret}%"
+            ret_str = f"최근 {sign}{cur_ret}%"
 
         d = p["date"]
         date_label = f"{int(d[5:7])}/{int(d[8:10])}"
