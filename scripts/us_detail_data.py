@@ -20,3 +20,14 @@ def fmt_usd(v):
     if a >= 1e6:
         return f"{sign}${a/1e6:.0f}M"
     return f"{sign}${a:,.0f}"
+
+
+def _yf_q_label(date_str):
+    """'2026-04-30' → '26Q2'. 월 기준 분기 라벨. 파싱 실패 시 입력 그대로."""
+    try:
+        yy = date_str[2:4]
+        mm = int(date_str[5:7])
+        q = (mm - 1) // 3 + 1
+        return f"{yy}Q{q}"
+    except (ValueError, IndexError, TypeError):
+        return date_str

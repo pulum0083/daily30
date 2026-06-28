@@ -12,6 +12,13 @@ def test_fmt_usd():
     assert u.fmt_usd(None) == ""
 
 
+def test_yf_q_label():
+    assert u._yf_q_label("2026-04-30") == "26Q2"
+    assert u._yf_q_label("2025-10-31") == "25Q4"
+    assert u._yf_q_label("2026-01-31") == "26Q1"
+    assert u._yf_q_label("bad") == "bad"
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
