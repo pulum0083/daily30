@@ -998,6 +998,37 @@ function usSel(code){
         .catch(function(){ loadPicks(briefDate()); });
     })();
     </script>
+    <style>
+#us-evening .ue-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+#us-evening #ue-toggle button{border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;background:transparent;color:#64748B;cursor:pointer;}
+#us-evening #ue-toggle button.on{background:#0F172A;color:#fff;}
+#us-evening .ue-macro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+#us-evening .ue-mtile{background:#F7F9FC;border-radius:8px;padding:9px 11px;}
+#us-evening .ue-mtile .l{font-size:12px;color:#64748B;}
+#us-evening .ue-mtile .v{font-size:16px;font-weight:800;color:#0F172A;}
+#us-evening .ue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0 18px;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:12px;padding:6px 14px;}
+#us-evening .ue-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
+#us-evening .ue-row .nm{flex:1;color:#0F172A;}
+#us-evening .ue-row .tk{color:#94A3B8;font-size:12px;}
+#us-evening .ue-row .lead{font-size:11px;color:#7C3AED;background:#F5F3FF;padding:1px 6px;border-radius:4px;margin-left:4px;}
+#us-evening .ue-row .px{min-width:92px;text-align:right;color:#0F172A;font-weight:700;}
+#us-evening .ue-row .cg{min-width:60px;text-align:right;}
+#us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
+@keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
+</style>
+    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
+      <div class="ue-h">
+        <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
+        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
+        <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
+          <button type="button" data-cur="krw" class="on">원화</button>
+          <button type="button" data-cur="usd">달러</button>
+        </div>
+      </div>
+      <div class="ue-macro" id="ue-macro"></div>
+      <div class="ue-grid" id="ue-grid"></div>
+      <div id="ue-cap" style="font-size:11px;color:#94A3B8;margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
+    </div>
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
