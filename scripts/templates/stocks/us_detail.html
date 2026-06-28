@@ -1,0 +1,200 @@
+<!-- 미국 반도체 종목 경량 상세 페이지 Jinja2 템플릿 (US lite) -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<title>{{ stock.name }}({{ stock.ticker }}) · 미국 반도체 — 더블샷</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/stocks.css?v=2">
+<script defer src="/assets/stocks.js"></script>
+</head>
+<body>
+<nav class="gnb">
+  <div class="gnb__in">
+    <a class="gnb__logo" href="/stocks/">종목</a>
+    <div class="gnb__subs">
+      <a class="gnb__sub" href="https://doubleshot.space/">Double-Shot</a>
+      <div class="gnb__divider"></div>
+      <a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="screen on" id="detail">
+  <div class="crumb">
+    <a href="/stocks/">홈</a> › <a href="/stocks/">종목</a> › <span style="color:var(--muted)">미국 반도체</span> › <span style="color:var(--ink)">{{ stock.name }}</span>
+  </div>
+  <div class="grid">
+    <!-- ===== 좌측 메인 ===== -->
+    <div class="dbox">
+
+      <!-- 헤더 카드: 종목명 + USD 시세 + 20일 스파크라인 -->
+      <div class="hero2" id="hero-stock" style="position:relative;">
+        <div class="top">
+          <div>
+            <div class="hn">{{ stock.name }} <span class="chip">🇺🇸 {{ stock.ticker }}</span></div>
+            <div class="meta">미국 반도체 · {{ generated_label }}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="px num">${{ "%.2f"|format(rd.price) }}</div>
+            {% if rd.change_pct > 0 %}
+            <div class="cg num" style="color:var(--up)">▲ +{{ "%.2f"|format(rd.change_pct) }}%</div>
+            {% elif rd.change_pct < 0 %}
+            <div class="cg num" style="color:var(--dn)">▼ {{ "%.2f"|format(rd.change_pct) }}%</div>
+            {% else %}
+            <div class="cg num" style="color:var(--muted)">— 0.00%</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="ctabs">
+          <a class="on" id="ctab-spark">20일 종가</a>
+        </div>
+        <div class="cpane" id="pane-spark">
+          <div class="spark-header" id="spark-main"
+               data-spark="{{ rd.sparkline | join(',') }}"
+               data-dates="{{ rd.sparkline_dates | join(',') }}"
+               style="cursor:crosshair;position:relative;"></div>
+        </div>
+        <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
+      </div>
+
+      <!-- 실측 핵심 지표 -->
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
+            실측 핵심 지표
+          </span>
+          <span class="np__s">{{ generated_label }} 기준</span>
+        </div>
+
+        {% if rd.week52_low %}
+        <div class="mx">
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">{{ rd.week52_pos_pct }}%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:{{ rd.week52_pos_pct }}%"></div><div class="now" style="left:{{ rd.week52_pos_pct }}%"></div></div>
+          <div class="w52-lb"><span>최저 ${{ "%.2f"|format(rd.week52_low) }}</span><span>최고 ${{ "%.2f"|format(rd.week52_high) }}</span></div>
+        </div>
+        {% endif %}
+
+        {% if rd.ma20_dist_pct is not none or rd.ma200_dist_pct is not none %}
+        <div class="duo">
+          {% if rd.ma20_dist_pct is not none %}
+          <div class="cell">
+            <div class="l">20일선 대비</div>
+            <div class="v" style="color:{{ 'var(--up)' if rd.ma20_dist_pct >= 0 else 'var(--dn)' }}">{{ '+' if rd.ma20_dist_pct >= 0 else '' }}{{ "%.1f"|format(rd.ma20_dist_pct) }}%</div>
+            <div class="sub">{{ '단기 추세 위' if rd.ma20_dist_pct >= 0 else '단기 추세 아래' }}</div>
+          </div>
+          {% endif %}
+          {% if rd.ma200_dist_pct is not none %}
+          <div class="cell">
+            <div class="l">200일선 대비</div>
+            <div class="v" style="color:{{ 'var(--up)' if rd.ma200_dist_pct >= 0 else 'var(--dn)' }}">{{ '+' if rd.ma200_dist_pct >= 0 else '' }}{{ "%.1f"|format(rd.ma200_dist_pct) }}%</div>
+            <div class="sub">{{ '장기 추세 위' if rd.ma200_dist_pct >= 0 else '장기 추세 아래' }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- 분기 실적 (매출·영업이익, USD) -->
+      {% if financials %}
+      {% set rev_max = (financials | map(attribute='rev') | reject('none') | list | max) or 1 %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
+            분기 실적
+          </span>
+          <span class="np__s">매출액 · 분기 기준 · USD</span>
+        </div>
+        <div style="padding:16px 16px 12px;">
+          <div class="fin-chart">
+            {% for q in financials %}
+            <div class="fin-col">
+              <span class="fin-cap">{{ q.rev | usd }}</span>
+              <div class="fin-bar actual" style="height:{{ ((q.rev or 0) / rev_max * 150) | round | int }}px"></div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="fin-xrow">
+            {% for q in financials %}
+            <span class="fin-x">{{ q.q }}<br><span style="color:{{ 'var(--up)' if (q.op or 0) >= 0 else 'var(--dn)' }}">영업 {% if q.op is not none %}{{ q.op | usd }}{% else %}—{% endif %}</span></span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ===== 우측 사이드바 ===== -->
+    <div>
+      <!-- 같은 섹터 (미국 반도체) -->
+      <div class="panel"><div class="panel__h">같은 섹터 · 미국 반도체</div>
+        {% for p in peers %}
+        <a class="srow" href="/stocks/us/{{ p.ticker | lower }}/">
+          <span class="n2">{{ p.name }} <small class="num">{{ p.ticker }}</small></span>
+          {% if p.change_pct is not none %}
+            {% if p.change_pct > 0 %}<span class="c up num">+{{ "%.2f"|format(p.change_pct) }}%</span>
+            {% elif p.change_pct < 0 %}<span class="c dn num">{{ "%.2f"|format(p.change_pct) }}%</span>
+            {% else %}<span class="c num" style="color:var(--muted)">0.00%</span>{% endif %}
+          {% else %}<span class="c num" style="color:var(--muted)">—</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+
+      <!-- 더블샷 브리핑 적중률 -->
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            더블샷 브리핑 적중률
+          </span>
+        </div>
+        <div class="acc-grid">
+          <div class="acc-cell"><div class="l">코스피 방향</div><div class="v">{{ acc.kospi }}%</div></div>
+          <div class="acc-cell"><div class="l">미국 방향</div><div class="v">{{ acc.us }}%</div></div>
+        </div>
+        <a class="acc-cta" href="https://doubleshot.space/briefings">매일 아침·저녁 AI 브리핑 받아보기 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="disc" style="line-height:1.7;">
+    <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주</b> — 미국 장 마감 후 갱신. 직전 거래일({{ generated_label }}) 종가 기준 yfinance 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>분기 실적</b> — yfinance 분기 재무 기준이며 단위는 USD예요.</p>
+    <p style="margin:6px 0 0;">모든 수치는 실측이며 투자 판단 참고용이에요. 실시간 시세는 <a href="/stocks/">종목 홈</a>의 밤사이 미국 반도체 시황에서 확인하세요.</p>
+  </div>
+</div>
+</div>
+
+<script>
+// 스파크라인 마우스오버 → 날짜·종가 툴팁 (USD)
+(function(){
+  var wrap=document.getElementById('spark-main');
+  var tip=document.getElementById('spark-tip');
+  var hero=document.getElementById('hero-stock');
+  if(!wrap||!tip||!hero) return;
+  var vals=(wrap.getAttribute('data-spark')||'').split(',').map(Number).filter(Boolean);
+  var dates=(wrap.getAttribute('data-dates')||'').split(',');
+  var n=vals.length; if(!n) return;
+  wrap.addEventListener('mousemove',function(e){
+    var rect=wrap.getBoundingClientRect();
+    var heroRect=hero.getBoundingClientRect();
+    var i=Math.round((e.clientX-rect.left)/rect.width*(n-1));
+    i=Math.max(0,Math.min(n-1,i));
+    tip.textContent=(dates[i]||'')+' · $'+vals[i].toLocaleString();
+    tip.style.display='block';
+    tip.style.left=(e.clientX-heroRect.left)+'px';
+    tip.style.top=(e.clientY-heroRect.top-32)+'px';
+  });
+  wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+</script>
+</body>
+</html>
