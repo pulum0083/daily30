@@ -16,7 +16,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 .gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
 .gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
-.gnb__logo{font-size:15px;font-weight:800;color:#fff;cursor:pointer;text-decoration:none;}
+.gnb__logo{display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;flex-shrink:0;}
+.gnb__logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#E03131,#FF6A6A);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.gnb__logo-mark svg{width:17px;height:17px;}
+.gnb__title{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;}
+.gnb__title span{color:#5AA2FF;}
+.gnb__subs{display:flex;align-items:center;}
 .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
 .gnb .right{margin-left:auto;display:flex;align-items:center;gap:4px;}
 .gnb__sub{font-size:12px;font-weight:500;color:#6B7280;padding:5px 9px;border-radius:7px;transition:color .12s,background .12s;}.gnb__sub:hover{color:#C9CCD1;background:#26282B;}
@@ -618,7 +623,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><span class="gnb__logo" onclick="go('home')">종목</span><span class="gnb__subs"><a class="gnb__sub" href="https://doubleshot.space/">Double-Shot</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/" onclick="event.preventDefault();go('income')">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/#income" onclick="event.preventDefault();go('income')">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -1711,10 +1716,10 @@ function usSel(code){
 <div id="tip"></div>
 
 <script>
-/* 날짜 규칙(허브 전역) — 장중=오늘, 마감/주말/휴일=MM-DD(요일). 기준일은 스냅샷 generated_at. */
+/* 날짜 규칙(허브 전역) — 장중=오늘, 마감/주말/휴일=M/D(요일). 기준일은 스냅샷 generated_at. */
 var _asOfYmd=null; // 마지막 거래일(스냅샷 날짜). SNAP 로드 시 주입.
 function hubMarketOpen(){var d=new Date(Date.now()+9*3600*1000);var k=d.getUTCDay();if(k===0||k===6)return false;var m=d.getUTCHours()*60+d.getUTCMinutes();return m>=540&&m<=930;}
-function fmtKoDate(ymd){if(!ymd)return '';var p=ymd.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);return p[1]+'-'+p[2]+'('+'일월화수목금토'[dt.getDay()]+')';}
+function fmtKoDate(ymd){if(!ymd)return '';var p=ymd.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);return (+p[1])+'/'+(+p[2])+'('+'일월화수목금토'[dt.getDay()]+')';}
 function lastTradingDay(ymd){
   if(!ymd)return ymd;
   var p=ymd.split('-'),dt=new Date(+p[0],+p[1]-1,+p[2]);
@@ -1725,12 +1730,16 @@ function lastTradingDay(ymd){
 }
 function applyAsOf(){
   var open=hubMarketOpen();
-  var baseYmd=lastTradingDay(_asOfYmd)||_asOfYmd;
   var todayYmd=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
-  var plain=open?'오늘':fmtKoDate(baseYmd||todayYmd);
+  var baseYmd=lastTradingDay(_asOfYmd||todayYmd);
+  var plain=open?'오늘':fmtKoDate(baseYmd);
   document.querySelectorAll('.ds-date').forEach(function(e){e.textContent=plain;});
-  var asof=open?'오늘 실시간':(fmtKoDate(baseYmd)+' 종가');
-  document.querySelectorAll('.ds-asof').forEach(function(e){e.textContent=open?'오늘 실시간':(baseYmd?asof:'직전 거래일 종가');});
+  var asof=fmtKoDate(baseYmd)+' 종가';
+  document.querySelectorAll('.ds-asof').forEach(function(e){e.textContent=open?'오늘 실시간':asof;});
+  var sigT=document.getElementById('sig-title');
+  if(sigT) sigT.textContent=(open?'오늘의':plain)+' 특이 신호';
+  var secRot=document.getElementById('sec-rot-title');
+  if(secRot) secRot.textContent=(open?'오늘의':plain)+' 상대 강도';
 }
 applyAsOf();
 const navHistory=[];
