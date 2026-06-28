@@ -1088,7 +1088,15 @@ function usSel(code){
     });
   }
   window.__ueLoad=function(){ if(!loaded) load(); };
-  function syncToggle(){}
+  function syncToggle(){
+    document.querySelectorAll('#ue-toggle button').forEach(function(b){
+      b.classList.toggle('on', b.getAttribute('data-cur')===cur);
+    });
+  }
+  document.querySelectorAll('#ue-toggle button').forEach(function(b){
+    b.addEventListener('click',function(){ cur=b.getAttribute('data-cur'); syncToggle(); render(); });
+  });
+  syncToggle();
 })();
 </script>
     <div class="home-cols">
