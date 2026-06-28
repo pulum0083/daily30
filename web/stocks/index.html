@@ -160,6 +160,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sig-pct{font-size:14px;font-weight:800;white-space:nowrap;}
 .sig-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
 .bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:6px;background:#f2f4f6;color:#4e5968;}
+.bdg.flow{background:#E6F6F0;color:#0B8265;} /* 외국인·기관 수급 신호만 색상 강조 */
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
 /* 로딩 스켈레톤 — 특이신호·ETF 시황이 /api/signals 응답 전 빈칸으로 깜빡이는 레이아웃 시프트 방지 */
@@ -204,8 +205,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
 .bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
 .bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
-.bet-dn{background:var(--dn);display:flex;align-items:center;justify-content:flex-start;padding-left:10px;}
-.bet-up{background:var(--up);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+.bet-dn{background:#3E7BD6;display:flex;align-items:center;justify-content:flex-start;padding-left:10px;} /* var(--dn) 채도 낮춤 */
+.bet-up{background:#CD4444;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;} /* var(--up) 채도 낮춤 */
 .bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}.bet-legend b{color:#334155;}
 .bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
 .bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
@@ -2860,7 +2861,7 @@ renderChips('morning');
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
-  function badgeHtml(b){ return '<span class="bdg">'+b+'</span>'; }
+  function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
