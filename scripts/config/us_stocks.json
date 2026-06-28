@@ -5,5 +5,6 @@
   { "ticker": "MU",   "name": "마이크론", "kind": "stock", "peers": ["NVDA", "ASML"] },
   { "ticker": "ASML", "name": "ASML",    "kind": "stock", "peers": ["MU", "NVDA"] },
   { "ticker": "SOXX", "name": "반도체 ETF", "kind": "etf", "peers": ["SMH", "NVDA"] },
-  { "ticker": "SMH",  "name": "반도체 ETF", "kind": "etf", "peers": ["SOXX", "NVDA"] }
+  { "ticker": "SMH",  "name": "반도체 ETF", "kind": "etf", "peers": ["SOXX", "NVDA"] },
+  { "ticker": "DRAM", "name": "메모리 ETF", "kind": "etf", "peers": ["MU", "SOXX"] }
 ]
