@@ -629,7 +629,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 </style>
 </head>
 <body>
-<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/#income" onclick="event.preventDefault();go('income')">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
 
 <div class="wrap">
 
@@ -1155,10 +1155,7 @@ function usSel(code){
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
       <div class="sector-line__chips" style="flex-wrap:wrap;padding:12px 16px;"><a href="/stocks/sector/semicon/">🔬 반도체</a><a href="/stocks/sector/battery/">🔋 2차전지</a><a href="/stocks/sector/auto/">🚗 자동차</a><a href="/stocks/sector/defense/">🛡️ 방산</a><a href="/stocks/sector/ship/">🚢 조선</a><a href="/stocks/sector/bio/">🧬 바이오</a><a href="/stocks/sector/finance/">🏦 금융</a><a href="/stocks/sector/power/">⚡ 전력기기</a></div>
     </div>
-    <div class="block" id="change-top-block" style="display:none;">
-      <div class="block__h"><span class="block__t"><span class="ic">🏆</span>오늘 등락률 TOP</span><span class="block__s"><span class="close-pill">종가 기준</span></span></div>
-      <div id="change-top-rows"></div>
-    </div>
+
     </div><!-- /home-main -->
     <div class="home-side">
     <!-- ⓪+① ETF로 읽는 시황 (시황 + 베팅 흐름 + 거래량 톱5 통합) -->
@@ -2874,22 +2871,6 @@ renderChips('morning');
     var etf=SNAP.etfs?Object.keys(SNAP.etfs).map(function(c){var e=SNAP.etfs[c];return {code:c,name:e.name,sector:'ETF',vol:e.vol||0,changePct:e.change_pct||0,price:null};}):[];
     renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list,etf:etf});
   }
-  // 🏆 오늘 등락률 TOP — 스냅샷 change_pct 기준 상승/하락 TOP5
-  function renderChangeTop(){
-    if(!SNAP||!SNAP.stocks) return;
-    var list=Object.keys(SNAP.stocks).map(function(c){var s=SNAP.stocks[c];return {code:c,name:s.name,pct:s.change_pct||0};});
-    var ups=list.filter(function(x){return x.pct>0;}).sort(function(a,b){return b.pct-a.pct;}).slice(0,5);
-    var dns=list.filter(function(x){return x.pct<0;}).sort(function(a,b){return a.pct-b.pct;}).slice(0,5);
-    if(!ups.length&&!dns.length) return;
-    function grp(ic,label,col,items){
-      if(!items.length) return '';
-      var rows=items.map(function(s,i){var sg=s.pct>=0?'+':'';
-        return '<a class="srk-row" onclick="goStock(\''+s.code+'\')"><span class="srk-rk">'+(i+1)+'</span><span class="srk-nm">'+s.name+'</span><span class="srk-pct" style="color:'+col+';">'+sg+s.pct.toFixed(1)+'%</span></a>';}).join('');
-      return '<div class="srk-grp"><div class="srk-hd"><span class="srk-ic">'+ic+'</span><span class="srk-lb">'+label+'</span><span class="srk-cnt">'+items.length+'</span></div>'+rows+'</div>';
-    }
-    var rw=document.getElementById('change-top-rows'); if(rw) rw.innerHTML=grp('▲','상승 TOP5','var(--up)',ups)+grp('▼','하락 TOP5','var(--dn)',dns);
-    var blk=document.getElementById('change-top-block'); if(blk) blk.style.display='';
-  }
   loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
@@ -2901,7 +2882,6 @@ renderChips('morning');
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
-      renderChangeTop();
       pollVolTop();
       if(krMarketOpen()) setInterval(pollVolTop,120000);
     })
