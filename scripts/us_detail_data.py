@@ -47,3 +47,64 @@ def parse_us_financials(columns, n=5):
         out.append({"q": _yf_q_label(date_str), "rev": rev, "op": op, "est": False})
     out.reverse()
     return out
+
+
+def fetch_us_realdata(ticker):
+    """yfinance 일봉 → 시세·등락률·20일 스파크라인·52주·MA20/200. 실패 시 {'error':..,'price':None}.
+
+    등락률은 직전 완료 세션 종가 기준(close[-1] vs close[-2]) — 한국 페이지와 동일 원칙.
+    """
+    try:
+        import yfinance as yf
+        hist = yf.Ticker(ticker).history(period="300d").dropna(subset=["Close"])
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e), "price": None}
+    closes = [float(x) for x in hist["Close"].tolist()]
+    if len(closes) < 2:
+        return {"error": "데이터 부족", "price": None}
+    price = closes[-1]
+    hi, lo = m.wk52_high_low(closes)
+    ma20 = round(sum(closes[-20:]) / 20, 2) if len(closes) >= 20 else None
+    ma200v = m.ma200(closes)
+    idx = hist.index
+    return {
+        "error": None,
+        "price": round(price, 2),
+        "change_pct": m.change_pct(closes),
+        "sparkline": [round(c, 2) for c in m.sparkline(closes, 20)],
+        "sparkline_dates": [d.strftime("%-m/%-d") for d in idx[-20:]],
+        "week52_low": round(lo, 2),
+        "week52_high": round(hi, 2),
+        "week52_pos_pct": round((price - lo) / (hi - lo) * 100, 1) if hi > lo else 0,
+        "ma20_dist_pct": round((price / ma20 - 1) * 100, 1) if ma20 else None,
+        "ma200_dist_pct": round((price / ma200v - 1) * 100, 1) if ma200v else None,
+        "asof": idx[-1].strftime("%Y-%m-%d"),
+    }
+
+
+def fetch_us_financials(ticker):
+    """yfinance quarterly_financials → parse_us_financials 입력으로 변환 후 파싱. 실패 시 []."""
+    try:
+        import yfinance as yf
+        qf = yf.Ticker(ticker).quarterly_financials
+    except Exception as e:  # noqa: BLE001
+        print(f"[us_detail] {ticker} 분기실적 실패: {e}", file=sys.stderr)
+        return []
+    if qf is None or qf.empty:
+        return []
+
+    def _cell(field, col):
+        try:
+            v = qf.loc[field, col]
+        except KeyError:
+            return None
+        return None if v != v else float(v)  # NaN → None
+
+    columns = []
+    for col in qf.columns:
+        rev = _cell("Total Revenue", col)
+        op = _cell("Operating Income", col)
+        if op is None:
+            op = _cell("Total Operating Income As Reported", col)
+        columns.append((col.strftime("%Y-%m-%d"), {"rev": rev, "op": op}))
+    return parse_us_financials(columns)
