@@ -421,10 +421,10 @@ body{background:var(--soft);margin:0;}
 /* ── 트랙레코드 ? 버튼 + 툴팁 ── */
 .tr-help{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;font-size:10px;font-weight:700;color:var(--muted);border:1.5px solid var(--hair);border-radius:50%;cursor:help;margin-left:5px;vertical-align:middle;flex-shrink:0;line-height:1;}
 .tr-help:hover{border-color:var(--primary);color:var(--primary);}
-#tr-tip{display:none;position:fixed;z-index:999;max-width:280px;background:#1C1E21;color:#F3F4F6;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.7;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;}
-#tr-tip .tt{font-size:13px;font-weight:700;margin-bottom:8px;color:#fff;}
-#tr-tip .bd{color:#D1D5DB;}
-#tr-tip .bd b{color:#fff;}
+#tr-tip{display:none;position:fixed;z-index:999;max-width:280px;background:#fff;color:#374151;border-radius:10px;padding:14px 16px;font-size:12.5px;line-height:1.7;box-shadow:0 4px 20px rgba(0,0,0,.12);border:1px solid #E5E7EB;pointer-events:none;}
+#tr-tip .tt{font-size:13px;font-weight:700;margin-bottom:8px;color:#111827;}
+#tr-tip .bd{color:#6B7280;}
+#tr-tip .bd b{color:#111827;}
 #tr-tip .badge-run{display:inline-block;background:#FEF9C3;color:#B07400;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}
 #tr-tip .badge-hit{display:inline-block;background:#DCFCE7;color:#166534;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}
 #tr-tip .badge-miss{display:inline-block;background:#FEE2E2;color:#991B1B;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}

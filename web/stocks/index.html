@@ -1025,7 +1025,7 @@ function usSel(code){
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
         <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
-        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
+        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 18:00–07:30</span>
         <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
           <button type="button" data-cur="krw" class="on">원화</button>
           <button type="button" data-cur="usd">달러</button>
@@ -1065,7 +1065,7 @@ function usSel(code){
   }
   function skeleton(){
     gridEl.innerHTML=TICKERS.map(function(){return '<div class="ue-row"><span class="nm"><span class="ue-skel" style="display:inline-block;width:90px;"></span></span><span class="ue-skel" style="width:70px;"></span></div>';}).join('');
-    macroEl.innerHTML=['원/달러','나스닥 QQQ','필라델피아 반도체'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
+    macroEl.innerHTML=['나스닥 QQQ','필라델피아 반도체','원/달러'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
   }
   function render(){
     gridEl.innerHTML=TICKERS.map(function(t){
@@ -1075,9 +1075,9 @@ function usSel(code){
     }).join('');
     var qq=dataBySym[NASDAQ]||{}, soxx=dataBySym['SOXX.O']||{};
     macroEl.innerHTML=''
-      +'<div class="ue-mtile"><div class="l">원/달러</div><div class="v">'+(fx?fx.toLocaleString('en-US')+'원':'—')+'</div></div>'
       +'<div class="ue-mtile"><div class="l">나스닥 QQQ</div><div class="v">'+cgHtml(qq.changePct)+'</div></div>'
-      +'<div class="ue-mtile"><div class="l">필라델피아 반도체</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>';
+      +'<div class="ue-mtile"><div class="l">필라델피아 반도체</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>'
+      +'<div class="ue-mtile"><div class="l">원/달러</div><div class="v">'+(fx?fx.toLocaleString('en-US')+'원':'—')+'</div></div>';
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
