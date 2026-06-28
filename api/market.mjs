@@ -51,6 +51,22 @@ async function fetchIndex(code) {
   };
 }
 
+// VIX 변동성 지수 (CBOE) — 네이버 해외지수. 미국 장 기준 15분 지연.
+async function fetchVix() {
+  const r = await fetch('https://api.stock.naver.com/index/.VIX/basic', {
+    headers: { ...HDR, Referer: 'https://m.stock.naver.com/' },
+    signal: AbortSignal.timeout(6000),
+  });
+  if (!r.ok) throw new Error(`vix ${r.status}`);
+  const d = await r.json();
+  const sign = ['1', '2'].includes((d.compareToPreviousPrice || {}).code) ? 1
+              : ['4', '5'].includes((d.compareToPreviousPrice || {}).code) ? -1 : 0;
+  return {
+    price:     parseFloat(String(d.closePrice).replace(/,/g, '')),
+    changePct: Math.round(sign * Math.abs(parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''))) * 100) / 100,
+  };
+}
+
 async function fetchForex() {
   // 1순위: Toss Open API (공식)
   try { return await _fetchForexToss(); } catch (e) {
@@ -116,12 +132,13 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  const [kosdaq, kospi200, forex, investor, kospiSpark] = await Promise.allSettled([
+  const [kosdaq, kospi200, forex, investor, kospiSpark, vix] = await Promise.allSettled([
     fetchIndex('KOSDAQ'),
     fetchIndex('KPI200'),
     fetchForex(),
     fetchInvestor(),
     fetchKospiHistory(),
+    fetchVix(),
   ]);
 
   res.json({
@@ -130,6 +147,7 @@ export default async function handler(req, res) {
     forex:      forex.status      === 'fulfilled' ? forex.value      : null,
     investor:   investor.status   === 'fulfilled' ? investor.value   : null,
     kospiSpark: kospiSpark.status === 'fulfilled' ? kospiSpark.value : null,
+    vix:        vix.status        === 'fulfilled' ? vix.value        : null,
     fetchedAt:  new Date().toISOString(),
   });
 }
