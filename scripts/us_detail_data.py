@@ -31,3 +31,19 @@ def _yf_q_label(date_str):
         return f"{yy}Q{q}"
     except (ValueError, IndexError, TypeError):
         return date_str
+
+
+def parse_us_financials(columns, n=5):
+    """yfinance 분기실적 컬럼 → 템플릿용 리스트.
+
+    columns: [(date_str, {'rev':float|None, 'op':float|None}), ...] 최신순.
+    반환: 최근 n분기를 오래된→최신으로 [{q, rev, op, est:False}]. 둘 다 None이면 제외.
+    """
+    out = []
+    for date_str, vals in columns[:n]:
+        rev, op = vals.get("rev"), vals.get("op")
+        if rev is None and op is None:
+            continue
+        out.append({"q": _yf_q_label(date_str), "rev": rev, "op": op, "est": False})
+    out.reverse()
+    return out

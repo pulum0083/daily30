@@ -19,6 +19,19 @@ def test_yf_q_label():
     assert u._yf_q_label("bad") == "bad"
 
 
+def test_parse_us_financials():
+    cols = [
+        ("2026-04-30", {"rev": 81_600_000_000.0, "op": 53_500_000_000.0}),
+        ("2026-01-31", {"rev": 39_300_000_000.0, "op": 24_000_000_000.0}),
+        ("2025-10-31", {"rev": None, "op": None}),
+    ]
+    out = u.parse_us_financials(cols)
+    assert [r["q"] for r in out] == ["26Q1", "26Q2"]
+    assert out[-1]["rev"] == 81_600_000_000.0
+    assert out[-1]["op"] == 53_500_000_000.0
+    assert out[0]["est"] is False
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
