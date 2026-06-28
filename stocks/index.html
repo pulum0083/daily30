@@ -152,7 +152,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .home-side .nm{flex:1;min-width:0;}
 @media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-side .barwrap{display:block;}}
 /* 오늘의 특이 신호 */
-.sig{display:block;padding:13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);}
+.sig{display:block;padding:13px 32px 13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);position:relative;}
+.sig-go{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#CBD5E1;opacity:0;transition:opacity .15s;}
+.sig:hover .sig-go{opacity:1;}
 .sig:last-of-type{border-bottom:none;}
 .sig-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
 .sig-nm{font-size:14px;font-weight:800;color:#0F172A;}
@@ -1092,7 +1094,6 @@ function usSel(code){
       var d=dataBySym[t.sym]||{};
       var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
         +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
-      if(t.lead) return '<div class="ue-row">'+inner+'</div>';
       return '<a class="ue-row ue-row--link" href="/stocks/us/'+t.tk.toLowerCase()+'/">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
   }
@@ -2874,7 +2875,8 @@ renderChips('morning');
         +'<div class="sig-top"><span class="sig-nm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
         +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
         +'<div class="sig-badges">'+(s.badges||[]).map(badgeHtml).join('')+'</div>'
-        +'<div class="sig-why">'+(s.why||'')+'</div></a>';
+        +'<div class="sig-why">'+(s.why||'')+'</div>'
+        +'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
   }
   function applyEtf(etf, phase, asOf){
