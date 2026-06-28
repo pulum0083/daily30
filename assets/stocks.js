@@ -304,11 +304,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function () {});
 })();
 
-// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터로 헤더 아래 카드 렌더(데이터 있을 때만 표시)
+// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터로 차트 탭(오늘 장중)에 렌더(데이터 있을 때만 탭 노출·기본 활성화)
 (function(){
-  var card=document.getElementById('intra-card');
-  if(!card) return;
-  var code=card.getAttribute('data-code');
+  var pane=document.getElementById('pane-intra');
+  if(!pane) return;
+  var code=pane.getAttribute('data-code');
   fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
@@ -325,7 +325,10 @@ document.addEventListener('DOMContentLoaded', function() {
       '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>'+
       '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+col+'"/>'+
       '<text x="14" y="170" font-size="10" fill="#9CA3AF">09:00</text><text x="595" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
-    card.style.display='';
+    // 장중 데이터 확보 → '오늘 장중' 탭 노출 + 기본 활성화
+    var tabBtn=document.getElementById('ctab-intra');
+    if(tabBtn) tabBtn.style.display='';
+    if(window.switchChartTab) window.switchChartTab('pane-intra');
     var coords2=vals.map(function(v,i){return {x:px2(i),y:YB-(YB-YT)*((v-lo)/span)};});
     function yAtX2(x){var b=coords2[0];for(var i=0;i<coords2.length;i++){if(Math.abs(coords2[i].x-x)<Math.abs(b.x-x))b=coords2[i];}return b.y;}
     var dnow=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
@@ -339,8 +342,12 @@ document.addEventListener('DOMContentLoaded', function() {
         add+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="'+st+'" stroke-width="1.3"/><circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"/><text x="'+px.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="11" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';});
       svgEl.innerHTML+=add;
       var tl=document.getElementById('intra-tl');
-      if(tl&&evs.length){ tl.innerHTML=evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
-        return '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;max-width:92%;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;">출처 · '+e.source+'</div></div>';}).join(''); }
+      if(tl&&evs.length){
+        // 좌측 정렬 기준 = 그래프 09:00 지점(viewBox 640 중 X0=14). svg 실제 렌더 너비에 비례해 들여쓰기.
+        var sw=(svgEl.getBoundingClientRect().width)||640;
+        tl.style.paddingLeft=(14/640*sw).toFixed(1)+'px';
+        tl.innerHTML=evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
+        return '<div style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;">출처 · '+e.source+'</div></div>';}).join(''); }
     }).catch(function(){});
   }).catch(function(){});
 })();

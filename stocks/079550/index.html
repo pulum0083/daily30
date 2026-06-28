@@ -44,7 +44,7 @@
         <div class="top">
           <div>
             <div class="hn">LIG넥스원 <a class="chip" href="/stocks/sector/defense/">방산</a></div>
-            <div class="meta"><span class="num">079550</span> · KOSPI · 06-26 종가</div>
+            <div class="meta"><span class="num">079550</span> · KOSPI · 06-28 종가</div>
           </div>
           <div style="text-align:right">
             <div class="px num">735,000</div>
@@ -53,17 +53,31 @@
             
           </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);padding:6px 18px 2px;">최근 20거래일 종가 <span style="color:#C7CCD4;">· 곡선에 마우스를 올리면 날짜·종가</span></div>
-        <div class="spark-header" id="spark-main"
-             data-spark="801000.0,776000.0,726000.0,733000.0,726000.0,696000.0,725000.0,790000.0,764000.0,772000.0,845000.0,1002000.0,950000.0,884000.0,852000.0,848000.0,809000.0,824000.0,775000.0,735000.0"
-             data-dates="5/29,6/1,6/2,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25,6/26"
-             style="cursor:crosshair;position:relative;"></div>
+        <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
+        <div class="ctabs">
+          <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
+          <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
+        </div>
+        <!-- 오늘 장중 패널 (실측 1분봉) -->
+        <div class="cpane hidden" id="pane-intra" data-code="079550">
+          <div style="padding:0 14px;">
+            <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
+            <div id="intra-tl" style="margin-top:6px;"></div>
+          </div>
+        </div>
+        <!-- 20일 종가 패널 -->
+        <div class="cpane" id="pane-spark">
+          <div class="spark-header" id="spark-main"
+               data-spark="801000.0,776000.0,726000.0,733000.0,726000.0,696000.0,725000.0,790000.0,764000.0,772000.0,845000.0,1002000.0,950000.0,884000.0,852000.0,848000.0,809000.0,824000.0,775000.0,735000.0"
+               data-dates="5/29,6/1,6/2,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25,6/26"
+               style="cursor:crosshair;position:relative;"></div>
+        </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
       </div>
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="079550" data-date="2026-06-27">
+        <div class="np__h" id="sig-c-head" data-code="079550" data-date="2026-06-28">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -76,15 +90,6 @@
       <!-- 더블샷 AI 픽 트랙레코드 -->
       
 
-      <!-- 오늘 장중 (실측 1분봉) — JS가 표시 제어 -->
-      <div class="sc" id="intra-card" data-code="079550" style="display:none">
-        <div class="sc__h"><span class="sc__t">오늘 장중</span><span class="sc__s">실측 1분봉</span></div>
-        <div class="scb" style="padding:8px 12px;">
-          <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
-        </div>
-        <div id="intra-tl" style="margin-top:6px;"></div>
-      </div>
-
       <!-- 실측 핵심 지표 -->
       <div class="np">
         <div class="np__h">
@@ -92,7 +97,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">06-26 종가 기준</span>
+          <span class="np__s">06-28 종가 기준</span>
         </div>
 
         
@@ -138,7 +143,7 @@
         
         <div class="ovr">
           <span class="lbl">해외 연동 · 미 벨웨더 방산 ETF <span style="color:var(--muted)">(참고)</span></span>
-          <span style="font-size:13px;font-weight:700;color:var(--up)">+0.5% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--dn)">-0.2% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
         </div>
         
       </div>
@@ -221,7 +226,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-26 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-28 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>
@@ -229,6 +234,17 @@
 </div>
 
 <script>
+// 차트 탭 전환 (오늘 장중 / 20일 종가). stocks.js가 장중 데이터 로드 시 호출하기도 함.
+function switchChartTab(pane){
+  ['pane-intra','pane-spark'].forEach(function(id){var p=document.getElementById(id);if(p)p.classList.toggle('hidden',id!==pane);});
+  var ti=document.getElementById('ctab-intra'),ts=document.getElementById('ctab-spark');
+  if(ti)ti.classList.toggle('on',pane==='pane-intra');
+  if(ts)ts.classList.toggle('on',pane==='pane-spark');
+  // 숨겨졌던 20일 캔버스는 실제 너비로 다시 그려야 잘리지 않음 (stocks.js resize 핸들러 재사용)
+  if(pane==='pane-spark') window.dispatchEvent(new Event('resize'));
+}
+window.switchChartTab=switchChartTab;
+
 // 스파크라인 마우스오버 → 날짜·종가 툴팁
 (function(){
   var wrap=document.getElementById('spark-main');
@@ -250,6 +266,26 @@
   });
   wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
 })();
+
+// 외국인 보유율 툴팁
+(function(){
+  var btn=document.getElementById('fo-label');
+  var tip=document.getElementById('fo-tip');
+  if(!btn||!tip) return;
+  function move(e){
+    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+    var x=e.clientX+18,y=e.clientY+14;
+    if(x+w+pad>innerWidth) x=e.clientX-w-14;
+    if(y+h+pad>innerHeight) y=e.clientY-h-14;
+    tip.style.left=Math.max(pad,x)+'px';
+    tip.style.top=Math.max(pad,y)+'px';
+  }
+  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+  btn.addEventListener('mousemove',move);
+  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
+})();
+
+// 트랙레코드 ? 툴팁 바인딩은 stocks.js에서 처리 (defer라 #tr-tip 파싱 후 실행 보장)
 
 // 오늘의 시그널 — /api/signals 에서 종목 필터링 후 렌더
 (function(){
@@ -316,9 +352,8 @@
   <div class="tt">더블샷 AI 픽 트랙레코드</div>
   <div class="bd">
     더블샷 AI 브리핑에서 <b>이 종목을 픽한 이력</b>이에요. 브리핑 당시 제시한 진입가·목표가와 이후 실제 종가를 기록해요.<br><br>
-    <span class="badge-run">진행 중</span> 픽 이후 아직 목표가에 도달하지 않은 상태. 현재까지의 등락률을 보여줘요.<br>
-    <span class="badge-hit">목표 도달</span> 종가 기준으로 목표가에 터치한 상태.<br>
-    <span class="badge-miss">미달</span> 목표가 미달로 종료된 경우.
+    <span class="badge-hit">목표 도달</span> 픽 이후 종가가 목표가에 한 번이라도 터치한 상태예요.<br>
+    <span class="badge-run">미도달</span> 아직 목표가에 닿지 않은 픽. 진입가 대비 최근 종가 등락률을 보여줘요.
   </div>
 </div>
 </body>
