@@ -9,8 +9,15 @@ function goBack(){if(history.length>1)history.back();else goHub();}
 // 헤더 sparkline 렌더 — Canvas 베지어 방식 (마감 브리핑 drawCloseChart와 동일 스타일)
 function drawSparkCanvas(container, closes) {
   if (!closes || closes.length < 2) return;
-  var H = 140;
-  var W = container.offsetWidth || 600;
+  // 곡선 하단에 표기할 대략적인 날짜 축 (data-dates가 종가 개수와 일치할 때만)
+  var dates = (container.getAttribute('data-dates') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+  var hasDates = dates.length === closes.length;
+  var H = hasDates ? 156 : 140;
+  // 콘텐츠 폭 기준(패딩 제외) — offsetWidth로 잡으면 캔버스가 컨테이너 패딩을 넘어가 우측이 잘린다
+  var cstyle = getComputedStyle(container);
+  var W = (container.clientWidth || container.offsetWidth || 600)
+        - parseFloat(cstyle.paddingLeft || 0) - parseFloat(cstyle.paddingRight || 0);
+  if (!W || W < 50) W = 600;
   var dpr = window.devicePixelRatio || 1;
   var canvas = document.createElement('canvas');
   canvas.style.width = W + 'px';
@@ -25,7 +32,7 @@ function drawSparkCanvas(container, closes) {
 
   var isUp = closes[closes.length - 1] >= closes[0];
   var color = isUp ? '#E03131' : '#2775ED';
-  var pad = { t: 28, b: 8, l: 10, r: 10 };
+  var pad = { t: 28, b: hasDates ? 24 : 8, l: 10, r: 10 };
   var pW = W - pad.l - pad.r, pH = H - pad.t - pad.b;
 
   var lo = Math.min.apply(null, closes);
@@ -110,6 +117,26 @@ function drawSparkCanvas(container, closes) {
   ctx.lineWidth = 2;
   ctx.fill();
   ctx.stroke();
+
+  // 하단 날짜 축 — 너비에 맞춰 3~6개만 대략적으로 표기(양끝은 안쪽 정렬로 잘림 방지)
+  if (hasDates) {
+    ctx.font = "600 10px 'Pretendard Variable',Pretendard,sans-serif";
+    ctx.fillStyle = '#9CA3AF';
+    ctx.textBaseline = 'alphabetic';
+    var dy = H - 8;
+    var want = Math.max(3, Math.min(6, Math.floor(W / 110)));
+    var seen = {};
+    for (var t = 0; t < want; t++) {
+      var di = Math.round(t * (n - 1) / (want - 1));
+      if (seen[di]) continue;
+      seen[di] = 1;
+      var dx;
+      if (di === 0) { ctx.textAlign = 'left'; dx = pad.l; }
+      else if (di === n - 1) { ctx.textAlign = 'right'; dx = W - pad.r; }
+      else { ctx.textAlign = 'center'; dx = xf(di); }
+      ctx.fillText(dates[di], dx, dy);
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -347,5 +374,24 @@ document.addEventListener('DOMContentLoaded', function() {
       '<path d="'+d+' L'+W.toFixed(1)+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
       '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>';
   });
+})();
+
+// 트랙레코드 ? 툴팁 바인딩 — stocks.js는 defer라 DOM 파싱 후 실행돼 body 끝의 #tr-tip을 항상 찾는다
+// (페이지 인라인 스크립트는 #tr-tip보다 먼저 실행돼 바인딩에 실패하므로 여기서 처리)
+(function(){
+  var btn=document.getElementById('tr-help-btn');
+  var tip=document.getElementById('tr-tip');
+  if(!btn||!tip) return;
+  function move(e){
+    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+    var x=e.clientX+18,y=e.clientY+14;
+    if(x+w+pad>innerWidth) x=e.clientX-w-14;
+    if(y+h+pad>innerHeight) y=e.clientY-h-14;
+    tip.style.left=Math.max(pad,x)+'px';
+    tip.style.top=Math.max(pad,y)+'px';
+  }
+  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+  btn.addEventListener('mousemove',move);
+  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
 })();
 
