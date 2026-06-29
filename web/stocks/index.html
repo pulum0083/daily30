@@ -651,12 +651,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
-    <!-- AI 브리핑 스트립 (시간대별 자동 전환) -->
-    <div class="brief-strip is-hidden" id="brief-strip" data-baked-date="2026-06-26" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="" style="cursor:pointer;">
-      <span class="bs-icon" id="bs-icon">📰</span>
+    <!-- AI 브리핑 스트립 (시간대별 자동 전환) — JS가 슬롯 판단 후 숨김/표시 업데이트 -->
+    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/" style="cursor:pointer;">
+      <span class="bs-icon" id="bs-icon">📊</span>
       <span class="bs-body">
-        <span class="bs-type" id="bs-type">장중 이슈 브리핑</span>
-        <span class="bs-text" id="bs-text">코스피, 미국 증시 혼조에 약세…외국인 매도세 확대</span>
+        <span class="bs-type" id="bs-type">더블샷 브리핑</span>
+        <span class="bs-text" id="bs-text">오늘 AI 시장 분석 보기</span>
       </span>
       <span class="bs-arr">›</span>
     </div>
