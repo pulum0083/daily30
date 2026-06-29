@@ -2518,56 +2518,50 @@ function bsItem(s, type) {
   return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.headline || s.title || '브리핑 보기') };
 }
 
-var bsSeq = 0; // 매 renderBriefStrip 호출마다 증가 — stale async callback 무효화용
-
 function bsHide(el){ el.className = 'brief-strip is-hidden'; el.dataset.href = ''; }
-function bsPaint(el, cls, icon, type, text, url){
+function bsPaint(el, cls, icon, typeStr, text, url){
   el.className = 'brief-strip ' + cls;
-  el.dataset.href = url;
+  el.dataset.href = url || '';
   document.getElementById('bs-icon').textContent = icon;
-  document.getElementById('bs-type').textContent = type;
+  document.getElementById('bs-type').textContent = typeStr;
   document.getElementById('bs-text').textContent = text;
 }
 
-/* 오늘 해당 타입 브리핑이 ready일 때만 표시 (stale 날짜 폴백 없음 → 휴일·미배포 시 자동 숨김) */
-function showTodayBriefing(type, today, el, seq){
-  fetch('/data/briefings-list.json', {cache:'no-store'})
+/* fetch + JSON 파싱. 실패 시 null 반환 (throw 없음) */
+function safeJSON(url){
+  return fetch(url, {cache:'no-store'})
     .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(list){
-      if (bsSeq !== seq) return; // 이미 더 새 renderBriefStrip이 실행됨 → 무시
-      var slots = list && list.slots, s = slots && slots[today] && slots[today][type];
-      if (!s || s.state !== 'ready') { bsHide(el); return; }
-      var d = bsItem(s, type);
-      bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
-    })
-    .catch(function(){ /* fetch 실패 시 폴백 유지 — bsHide 금지 */ });
+    .catch(function(){ return null; });
 }
 
-/* 장중(09:00~16:30) 이슈 브리핑 — kospi-news-{today}.json의 latest 헤드라인. 없으면 오늘 예측으로 폴백. */
-function showIssueBriefing(today, el, seq){
-  fetch('/data/kospi-news-' + today + '.json', {cache:'no-store'})
-    .then(function(r){ return r.ok ? r.json() : fetch('/data/kospi-news-live.json', {cache:'no-store'}).then(function(x){ return x.ok ? x.json() : null; }); })
-    .then(function(j){
-      if (bsSeq !== seq) return; // stale callback
-      // j.date 날짜 엄격 비교 제거 — 캐시·타이밍 차이로 PC에서 숨김 방지
-      var lt = j && j.latest;
-      var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
-      if (title) bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
-      else showTodayBriefing('kospi', today, el, seq); // 이슈 미수집 시 오늘 예측 브리핑으로 폴백
-    })
-    .catch(function(){ showTodayBriefing('kospi', today, el, seq); });
-}
-
-function renderBriefStrip(){
+/* async/await 로 재작성 — bsSeq 콜백 체인 제거, 순차 실행으로 타이밍 경합 방지 */
+async function renderBriefStrip(){
   var el = document.getElementById('brief-strip');
   if (!el) return;
-  var seq = ++bsSeq; // 이전 async 콜백 무효화
   var slot = getKSTSlot();
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
-  // bsHide 선호출 제거 — fetch 실패 시 영구 숨김 방지, 이전 콘텐츠 유지
-  if (slot === 'issue') showIssueBriefing(today, el, seq);
-  else showTodayBriefing(slot, today, el, seq); // kospi / close / us
+
+  if (slot === 'issue') {
+    var j = await safeJSON('/data/kospi-news-' + today + '.json')
+          || await safeJSON('/data/kospi-news-live.json');
+    var lt = j && j.latest;
+    var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
+    if (title) {
+      bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
+      return;
+    }
+    slot = 'kospi'; // 이슈 미수집 → 코스피 브리핑으로 폴백
+  }
+
+  var list = await safeJSON('/data/briefings-list.json');
+  var s = list && list.slots && list.slots[today] && list.slots[today][slot];
+  if (s && s.state === 'ready') {
+    var d = bsItem(s, slot);
+    bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
+  } else {
+    bsHide(el); // 브리핑 미배포(휴일·대기 중) → 숨김
+  }
 }
 renderBriefStrip();
 setInterval(renderBriefStrip, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
