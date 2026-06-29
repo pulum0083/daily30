@@ -1155,12 +1155,18 @@ def build_stock_page(stock, peers):
     picks = build_trackrecord(stock["code"])
     bt_raw = BROKER_TARGETS.get(stock["code"])
     acc = _briefing_accuracy()
-    # 종가 날짜는 실측 스냅샷 기준 (주말·휴일에 now()를 쓰면 거래 없는 날을 종가로 잘못 표기)
-    snap_date = (snap.get("generated_at") or "")[:10]
-    close_label = (
-        f"{snap_date[5:7]}-{snap_date[8:10]} 종가" if len(snap_date) == 10
-        else datetime.now().strftime("%m-%d") + " 종가"
-    )
+    # 종가 날짜는 실측 데이터의 실제 마지막 거래일 기준.
+    # (스냅샷 generated_at은 생성일이라 주말·휴일에 생성하면 휴장일을 종가로 잘못 표기 — 예: 일요일 생성 시 "06-28 종가")
+    spark_dates = rd.get("sparkline_dates") or []
+    if spark_dates:
+        mm, dd = spark_dates[-1].split("/")
+        close_label = f"{int(mm):02d}-{int(dd):02d} 종가"
+    else:
+        snap_date = (snap.get("generated_at") or "")[:10]
+        close_label = (
+            f"{snap_date[5:7]}-{snap_date[8:10]} 종가" if len(snap_date) == 10
+            else datetime.now().strftime("%m-%d") + " 종가"
+        )
     ctx = {
         "stock": stock,
         "rd": rd,
