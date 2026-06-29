@@ -437,4 +437,7 @@ body{background:var(--soft);margin:0;}
   .page-wrap{padding:12px 14px 52px;}
   .tgt-tbl th,.tgt-tbl td{padding:7px 8px;font-size:12px;}
   .tgt-tbl th{padding:8px 8px 6px;}
+  /* 모바일에서 외부 래퍼 박스 제거 — 내부 섹션 카드가 각자의 테두리를 가짐 */
+  .dbox{background:transparent;border:none;box-shadow:none;border-radius:0;padding:0;}
+  .dbox>.hero2{box-shadow:var(--s1);}
 }
