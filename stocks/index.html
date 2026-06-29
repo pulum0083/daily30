@@ -170,6 +170,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bdg.flow{background:#E6F6F0;color:#0B8265;} /* 외국인·기관 수급 신호만 색상 강조 */
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+/* 특이 신호 — 히어로(1순위) + 컴팩트 리스트 레이아웃 */
+.sig-hero{display:block;text-decoration:none;background:linear-gradient(180deg,#FFF,#FBFCFE);padding:16px 32px 16px 16px;border-bottom:1px solid #F1F5F9;position:relative;cursor:pointer;}
+.sig-hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sig-bar,#CBD5E1);}
+.sig-flag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#4E5968;background:#F2F4F6;border-radius:5px;padding:3px 9px;margin-bottom:10px;}
+.sig-htop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.sig-hnm{font-size:18px;font-weight:800;color:#0F172A;}.sig-hnm small{font-size:12px;font-weight:600;color:#94A3B8;}
+.sig-hpct{font-size:20px;font-weight:800;white-space:nowrap;}
+.sig-hbadges{display:flex;gap:5px;margin:10px 0 8px;flex-wrap:wrap;}
+.sig-hwhy{font-size:12.5px;line-height:1.5;color:#475569;}
+.sig-row{display:flex;align-items:center;gap:10px;padding:11px 32px 11px 16px;text-decoration:none;border-bottom:1px solid #F1F5F9;cursor:pointer;background:var(--canvas);position:relative;}
+.sig-row:last-of-type{border-bottom:none;}
+.sig-rbar{width:3px;align-self:stretch;border-radius:2px;background:var(--sig-bar,#CBD5E1);min-height:30px;}
+.sig-rmain{flex:1;min-width:0;}
+.sig-rnm{font-size:13px;font-weight:800;color:#0F172A;}.sig-rnm small{font-size:10.5px;font-weight:600;color:#94A3B8;}
+.sig-rbadges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.sig-rpct{font-size:13px;font-weight:800;white-space:nowrap;}
+.sig-hero:hover .sig-go,.sig-row:hover .sig-go{opacity:1;}
 /* 로딩 스켈레톤 — 특이신호·ETF 시황이 /api/signals 응답 전 빈칸으로 깜빡이는 레이아웃 시프트 방지 */
 @keyframes sklPulse{0%,100%{opacity:.5}50%{opacity:.85}}
 .skl{background:#EEF2F7;border-radius:6px;animation:sklPulse 1.1s ease-in-out infinite;}
@@ -1253,7 +1270,7 @@ function usSel(code){
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:74%"></span></div>
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:45%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:52px;height:17px"></span><span class="skl" style="width:46px;height:17px"></span></div><span class="skl skl-line" style="width:88%"></span></div>
       </div>
-      <a class="more" onclick="go('ranking')">전체 랭킹 보기 →</a>
+      <a class="more" onclick="go('signals-all')">특이 신호 전체 보기 →</a>
     </div>
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 보기</span></div>
@@ -1665,6 +1682,19 @@ function usSel(code){
     <a class="more" id="rank-more" onclick="rankLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기 (10개씩)</a>
   </div>
 
+  <!-- ===== 특이 신호 전체 (홈 신호 영역 더보기 — D안 히어로+컴팩트 UI 유지) ===== -->
+  <div class="screen" id="signals-all">
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">특이 신호 전체</span></div>
+    <div class="phead">
+      <div><h1><span class="ic">⚡</span> <span id="sigall-title">오늘의 특이 신호</span></h1><div class="psub"><span id="sigall-count">— 종목</span> · 역행·거래량·신고가·수급 교차 · <span class="ds-asof"></span></div></div>
+      <div class="rtabs"><a class="on" onclick="sigAllSetSort('score',this)">신호 강도순</a><a onclick="sigAllSetSort('up',this)">상승률순</a><a onclick="sigAllSetSort('dn',this)">하락률순</a></div>
+    </div>
+    <div class="block" style="margin-bottom:0;">
+      <p class="sig-intro">규칙으로 선별한 특이 신호 종목 전체예요. 정렬 기준을 바꿔 볼 수 있어요.</p>
+      <div id="sigall-rows"></div>
+    </div>
+  </div>
+
   <!-- ===== ETF RANKING (ETF 전체 랭킹) ===== -->
   <div class="screen" id="etf-rank">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
@@ -1816,6 +1846,9 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
 /* 거래량 순위 화면 — vol-top all 실데이터(탭 거래량/상승률/하락률 + 섹터필터 + 더보기). */
 let RANK_ALL=[];      // vol-top all (실측 ~40종목)
 let SIG_BY_CODE={};   // signals 보유 종목 code→true (AI신호 열)
+let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
+let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
+let sigAllSort='score'; // score | up | dn
 let rankTab='vol';    // vol | up | dn
 let rankSector='전체';
 let rankShown=10;
@@ -2755,20 +2788,53 @@ if(passBtn){
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
+  // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.
+  function sigItemHtml(s,i,heroFlag){
+    var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
+    var badges=(s.badges||[]).map(badgeHtml).join('');
+    var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    if(i===0){
+      return '<a class="sig-hero" style="--sig-bar:'+lc+';" onclick="goStock(\''+s.code+'\')">'
+        +'<span class="sig-flag">'+(heroFlag||'오늘 가장 눈에 띄는 신호')+'</span>'
+        +'<div class="sig-htop"><span class="sig-hnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+        +'<span class="sig-hpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
+        +'<div class="sig-hbadges">'+badges+'</div>'
+        +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</a>';
+    }
+    return '<a class="sig-row" style="--sig-bar:'+lc+';" onclick="goStock(\''+s.code+'\')">'
+      +'<span class="sig-rbar"></span>'
+      +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+      +'<span class="sig-rbadges">'+badges+'</span></span>'
+      +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
+  }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
+    SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
-    if(w) w.innerHTML=(d.signals||[]).map(function(s){
-      var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
-      return '<a class="sig" style="border-left:3px solid '+lc+';" onclick="goStock(\''+s.code+'\')">'
-        +'<div class="sig-top"><span class="sig-nm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
-        +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
-        +'<div class="sig-badges">'+(s.badges||[]).map(badgeHtml).join('')+'</div>'
-        +'<div class="sig-why">'+(s.why||'')+'</div>'
-        +'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
-    }).join('');
+    if(w) w.innerHTML=(d.signals||[]).map(function(s,i){return sigItemHtml(s,i);}).join('');
+  }
+  /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
+  function sigAllSorted(){
+    var arr=SIGNALS_ALL.slice();
+    if(sigAllSort==='up') arr.sort(function(a,b){return b.pct-a.pct;});
+    else if(sigAllSort==='dn') arr.sort(function(a,b){return a.pct-b.pct;});
+    // 'score'는 API가 이미 강도순으로 내려준 순서를 유지
+    return arr;
+  }
+  function sigAllRender(){
+    var box=document.getElementById('sigall-rows'); if(!box) return;
+    var arr=sigAllSorted();
+    var flag={score:'신호 강도 1위',up:'오늘 최고 상승',dn:'오늘 최대 하락'}[sigAllSort];
+    box.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i,flag);}).join(''):'<p class="sig-intro" style="padding:24px 16px;text-align:center;color:#94A3B8;">표시할 특이 신호가 없어요.</p>';
+    var cnt=document.getElementById('sigall-count'); if(cnt) cnt.textContent=arr.length+'종목';
+    var t=document.getElementById('sigall-title'); if(t) t.textContent=asOfPrefix(SIG_ASOF)+' 특이 신호';
+  }
+  function sigAllSetSort(sort,el){
+    sigAllSort=sort;
+    if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
+    sigAllRender();
   }
   function applyEtf(etf, phase, asOf){
     setBadge('etf-upd-badge', phase);
