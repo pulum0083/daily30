@@ -1040,7 +1040,7 @@ function usSel(code){
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
         <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
-        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 18:00–07:30</span>
+        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
         <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
           <button type="button" data-cur="krw" class="on">원화</button>
           <button type="button" data-cur="usd">달러</button>
@@ -1172,12 +1172,12 @@ function usSel(code){
   syncToggle();
   function kstNow(){ return new Date(Date.now()+9*3600*1000); }
   var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 노출.
-  // 노출 조건: 평일 18:00~익일 07:30. 주말(토·일)·평일 공휴일은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
+  // 노출 조건: 평일 17:00~익일 07:30. 주말(토·일)·평일 공휴일은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
   function isEvening(d){
     var wd=d.getUTCDay();
     if(wd===0||wd===6) return true;                    // 주말 종일
     var hm=d.getUTCHours()*60+d.getUTCMinutes();
-    if(hm>=1080 || hm<450) return true;                // 평일 18:00~익일 07:30
+    if(hm>=1020 || hm<450) return true;                // 평일 17:00~익일 07:30
     return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
   }
   window.ueGate=function(){
