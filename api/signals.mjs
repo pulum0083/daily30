@@ -50,7 +50,8 @@ async function loadSnapshot() {
 
 async function kospiPct() {
   try {
-    const r = await fetch('https://doubleshot.space/api/kospi-live', { signal: AbortSignal.timeout(6000) });
+    const base = process.env.SNAPSHOT_BASE || 'https://doubleshot.space';
+    const r = await fetch(`${base}/api/kospi-live`, { signal: AbortSignal.timeout(6000) });
     const d = r.ok ? await r.json() : null;
     return Number(d?.changePct) || 0;
   } catch { return 0; }

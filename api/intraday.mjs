@@ -60,9 +60,11 @@ export default async function handler(req, res) {
   ]);
 
   // 멀티 심볼 응답은 기존대로 값 배열만 (스파크라인용) — times 불필요
+  // fetchMinutes는 데이터 없을 때 [] 를 반환하므로 .values 접근 전 항상 배열로 정규화한다.
+  const vals = (s) => (s.status === 'fulfilled' && s.value && s.value.values) ? s.value.values : [];
   res.json({
-    kosdaq:   kosdaq.status   === 'fulfilled' ? kosdaq.value.values   : [],
-    kospi200: kospi200.status === 'fulfilled' ? kospi200.value.values : [],
-    forex:    forex.status    === 'fulfilled' ? forex.value.values    : [],
+    kosdaq:   vals(kosdaq),
+    kospi200: vals(kospi200),
+    forex:    vals(forex),
   });
 }
