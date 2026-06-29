@@ -92,7 +92,7 @@ export default async function handler(req, res) {
       stocks.forEach((s, i) => { if (trends[i]) byTrend[s.code] = trends[i]; });
       enrich = (s) => (byTrend[s.code] ? classifySupply(byTrend[s.code]) : { cats: [], badges: [] });
     }
-    const { signals } = buildSignals(stocks, kPct, { enrich });
+    const { signals, signalsAll } = buildSignals(stocks, kPct, { enrich });
 
     const byCode = {};
     ALL_ETF_CODES.forEach((code, i) => {
@@ -109,7 +109,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       phase, asOf,
-      signals, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
+      signals, signalsAll, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
     });
   } catch (e) {
     return res.status(502).json({ error: String(e) });

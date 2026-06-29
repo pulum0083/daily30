@@ -91,13 +91,13 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
     .sort((a, b) => groups[b].length - groups[a].length || order.indexOf(a) - order.indexOf(b))
     .slice(0, 5)
     .map((cat) => ({ cat, ...SIGNAL_META[cat], items: groups[cat] }));
-  // 5) 카드 목록: 점수순 정렬 후 상위 N (랭킹은 위에서 전체 집계 완료)
-  const display = [...signals]
+  // 5) 점수순 정렬 — 카드(홈)는 상위 N, 전체(더보기)는 무제한. 랭킹은 위에서 전체 집계 완료.
+  const sorted = [...signals]
     .map((s) => ({ s, score: s.cats.reduce((a, c) => a + (SIGNAL_SCORE[c] || 1), 0) }))
     .sort((a, b) => b.score - a.score || Math.abs(b.s.pct) - Math.abs(a.s.pct))
-    .slice(0, SIGNALS_DISPLAY_MAX)
-    .map((x) => x.s);
-  return { signals: display, rank };
+    .map((x) => ({ ...x.s, score: x.score }));
+  const display = sorted.slice(0, SIGNALS_DISPLAY_MAX);
+  return { signals: display, signalsAll: sorted, rank };
 }
 
 // byCode: { code: {amount, vol, pct} } — amount는 거래대금(백만)
