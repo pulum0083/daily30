@@ -428,3 +428,13 @@ body{background:var(--soft);margin:0;}
 #tr-tip .badge-run{display:inline-block;background:#FEF9C3;color:#B07400;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}
 #tr-tip .badge-hit{display:inline-block;background:#DCFCE7;color:#166534;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}
 #tr-tip .badge-miss{display:inline-block;background:#FEE2E2;color:#991B1B;font-weight:700;font-size:11px;padding:1px 7px;border-radius:5px;}
+
+/* ── 상세 페이지 모바일 대응 (.page-wrap은 선언이 미디어쿼리 뒤라 여기서 override) ── */
+@media(max-width:900px){
+  .page-wrap{padding:16px 20px 56px;}
+}
+@media(max-width:600px){
+  .page-wrap{padding:12px 14px 52px;}
+  .tgt-tbl th,.tgt-tbl td{padding:7px 8px;font-size:12px;}
+  .tgt-tbl th{padding:8px 8px 6px;}
+}
