@@ -3,6 +3,11 @@
   "outputDirectory": "web",
   "buildCommand": "",
   "installCommand": "npm install",
+  "git": {
+    "deploymentEnabled": {
+      "gh-pages": false
+    }
+  },
   "routes": [
     { "src": "^/stocks/income-designer/?$", "dest": "/stocks/income-designer/index.html" },
     { "src": "^/$",                                       "dest": "/landing.html" },
