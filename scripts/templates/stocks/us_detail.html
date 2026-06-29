@@ -41,11 +41,14 @@
             {% endif %}
           </div>
         </div>
-        <!-- 차트 탭: 오늘 장중(프리·정규·애프터 실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
-        <div class="ctabs">
+        <!-- 차트 탭: 오늘 장중(프리·정규·애프터 실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
+        <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
           <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
+          <span class="upd-badge" id="intra-live" style="display:none;margin-left:auto;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
         </div>
+        <!-- 차트 로딩 자리(레이아웃 시프트 방지) -->
+        <div id="chart-loading" style="height:172px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">차트 불러오는 중…</div>
         <!-- 오늘 장중 패널 (야후 1분봉 · 프리/정규/애프터) -->
         <div class="cpane hidden" id="pane-intra" data-ticker="{{ stock.ticker }}">
           <div style="padding:0 14px;">
@@ -54,7 +57,7 @@
           </div>
         </div>
         <!-- 20일 종가 패널 -->
-        <div class="cpane" id="pane-spark">
+        <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
                data-spark="{{ rd.sparkline | join(',') }}"
                data-dates="{{ rd.sparkline_dates | join(',') }}"

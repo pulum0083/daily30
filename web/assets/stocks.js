@@ -185,6 +185,32 @@ document.addEventListener('DOMContentLoaded', function() {
   var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
 
+  // ── 라이브 여부·라벨 (현재 시각 기준) ──
+  // 미국: ET 04:00~20:00(프리~애프터) / 국내: KST 09:00~15:35
+  var nowMin = isUS
+    ? (function(){var s=new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');return (parseInt(s[0],10)%24)*60+parseInt(s[1],10);})()
+    : (function(){var k=new Date(Date.now()+9*3600*1000);return k.getUTCHours()*60+k.getUTCMinutes();})();
+  var isLive = isUS ? (nowMin>=240&&nowMin<=1200) : (nowMin>=540&&nowMin<=935);
+  function liveLabel(){
+    if(isUS){var s=nowMin<570?'프리장':(nowMin<960?'정규장':'애프터장');return 'LIVE · '+s+' · 20초 갱신';}
+    return 'LIVE · 장중 · 45초 갱신';
+  }
+
+  // ── 첫 로드 시 한 번만 탭을 결정 → '20일 종가'에서 '오늘 장중'으로 튕기는 현상 제거 ──
+  var decided=false;
+  function decide(showIntra){
+    if(decided) return; decided=true;
+    var ld=document.getElementById('chart-loading'); if(ld) ld.style.display='none';
+    var tb=document.getElementById('ctabs'); if(tb) tb.style.visibility='';
+    if(showIntra){
+      var bi=document.getElementById('ctab-intra'); if(bi) bi.style.display='';
+      if(window.switchChartTab) window.switchChartTab('pane-intra');
+      if(isLive){var lv=document.getElementById('intra-live');if(lv){var tx=document.getElementById('intra-live-tx');if(tx)tx.textContent=liveLabel();lv.style.display='';}}
+    } else {
+      if(window.switchChartTab) window.switchChartTab('pane-spark');
+    }
+  }
+
   // 마우스오버 툴팁 — svg 위 가이드선·도트 + 시각·가격 표시 (틱 사이 데이터는 last* 클로저로 공유)
   function bindHover(){
     if(hoverBound) return; hoverBound=true;
@@ -215,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function render(d){
     var vals=(d&&d.minutes)||[];
-    if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
+    if(vals.length<2){ decide(false); return; }   // 장중 데이터 없음 → 20일 종가 먼저 표시
     var times=(d&&d.times)||[], n=vals.length;
     var useT=times.length===n;           // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
     // 미국: ET 시각(프리~애프터)을 실제 분 간격으로 x 배치 / 국내: 09:00~15:30 고정 프레임(t2x)
@@ -266,10 +292,8 @@ document.addEventListener('DOMContentLoaded', function() {
       axis+pinsHTML+'<g id="intra-hover"></g>';
     document.getElementById('intra-svg').innerHTML=svgHTML;
 
-    // 장중 데이터 확보 → '오늘 장중' 탭 노출 + 기본 활성화(최초 1회) + 툴팁 바인딩
-    var tabBtn=document.getElementById('ctab-intra');
-    if(tabBtn) tabBtn.style.display='';
-    if(!pinsLoaded && window.switchChartTab) window.switchChartTab('pane-intra');
+    // 장중 데이터 확보 → '오늘 장중' 탭 노출·활성화(최초 1회, decide) + 툴팁 바인딩
+    decide(true);
     bindHover();
 
     // ── 헤더 시세 실시간 갱신 (국내=오늘 세션일 때만 / 미국=12h 이내 fresh일 때 — 휴장·전일 데이터 덮어쓰기 방지) ──
@@ -308,17 +332,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function(){});
   }
 
-  function tick(){fetch(apiURL).then(function(r){return r.json();}).then(render).catch(function(){});}
+  function tick(){fetch(apiURL).then(function(r){return r.json();}).then(render).catch(function(){decide(false);});}
   tick();
+  setTimeout(function(){decide(false);},3500); // 응답 지연·실패 안전장치 → 20일 종가로 폴백
   if(isUS){
     // 미국: 프리장(04:00 ET)~애프터장(20:00 ET)에만 20초 폴링
-    var es=new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');
-    var emin=(parseInt(es[0],10)%24)*60+parseInt(es[1],10);
-    if(emin>=240&&emin<=1200) setInterval(tick,20000);
+    if(isLive) setInterval(tick,20000);
   } else {
     // 국내: 장중(09:00~15:35 KST)에만 45초 폴링 — 헤더 시세·곡선 실시간 갱신
-    var km=new Date(Date.now()+9*3600*1000),kmin=km.getUTCHours()*60+km.getUTCMinutes();
-    if(kmin>=540&&kmin<=935) setInterval(tick,45000);
+    if(isLive) setInterval(tick,45000);
   }
 })();
 
