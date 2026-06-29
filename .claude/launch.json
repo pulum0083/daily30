@@ -8,6 +8,12 @@
       "port": 8788
     },
     {
+      "name": "proto-web",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8793", "--directory", "web"],
+      "port": 8793
+    },
+    {
       "name": "prototypes",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8789", "--directory", "docs/prototypes"],
