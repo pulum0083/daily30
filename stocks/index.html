@@ -2459,10 +2459,39 @@ if(passBtn){
     return null;
   }
 
-  async function render(){
-    var today = kstDate(), nm = nowMin();
+  // 현재 KST 시각의 브리핑 타임슬롯 (평일만). 슬롯 밖(심야·주말)은 null.
+  function slotNow(){
+    if (!isWeekday()) return null;
+    var nm = nowMin();
+    if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
+    if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
+    if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
+    if (nm >= 1280 && nm < 1380) return 'us';   // 21:20~23:00 미국 예측
+    return null;
+  }
 
-    // ① 장중(평일 09:00~16:30) — 실시간 이슈 브리핑 우선
+  // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
+  function paintDefault(){
+    var slot = slotNow(), today = kstDate();
+    if (slot === 'issue'){
+      paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true, time:'실시간',
+              head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/' });
+    } else if (slot){
+      var m = TYPE[slot];
+      paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
+              url:'/briefings/' + today + '/' + slot + '/' });
+    } else {
+      paint({ cls:'bc-kospi', icon:'📊', type:'더블샷 브리핑', time:'', head:'최신 브리핑 보기', url:'/briefings/' });
+    }
+  }
+
+  async function render(){
+    // ① 타임테이블 기준 즉시 표시 (fetch 실패해도 슬롯 유지)
+    paintDefault();
+
+    var today = kstDate(), nm = nowMin(), slot = slotNow();
+
+    // ② 장중(평일 09:00~16:30) — 실시간 이슈 헤드라인으로 업그레이드
     if (isWeekday() && nm >= 540 && nm < 990){
       var nj = await safeJSON('/data/kospi-news-' + today + '.json')
             || await safeJSON('/data/kospi-news-live.json')
@@ -2476,11 +2505,18 @@ if(passBtn){
       }
     }
 
-    // ② 가장 최근 발행 브리핑 연결
+    // ③ briefings-list.json으로 실제 헤드라인·발행시각 업그레이드
     var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    if (!list) return; // fetch 실패(PC 차단) → ①의 타임테이블 기본 유지
+
+    // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아니면 가장 최근 발행 브리핑
+    var activeType = (slot === 'issue') ? 'kospi' : slot;
+    if (activeType){
+      var s = list.slots && list.slots[today] && list.slots[today][activeType];
+      if (s && s.state === 'ready'){ paint(fromSlot(today, activeType, s)); return; }
+    }
     var pick = pickLatest(list);
     if (pick){ paint(fromSlot(pick.date, pick.type, pick.s)); }
-    // list 실패 시 정적 기본 표시 유지
   }
   render();
   setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
