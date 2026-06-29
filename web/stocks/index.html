@@ -2836,6 +2836,8 @@ if(passBtn){
     if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
     sigAllRender();
   }
+  // 정렬 탭은 정적 HTML의 인라인 onclick에서 호출 → 클로저 밖(전역)에서 접근 가능해야 함
+  window.sigAllSetSort=sigAllSetSort;
   function applyEtf(etf, phase, asOf){
     setBadge('etf-upd-badge', phase);
     var rt=document.getElementById('sec-rot-title'); if(rt) rt.textContent=asOfPrefix(asOf)+' 상대 강도';
