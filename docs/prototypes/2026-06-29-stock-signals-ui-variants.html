@@ -1,0 +1,217 @@
+<!-- 오늘의 특이 신호 — UI 변형 탐색 프로토타입 (2026-06-29, 라이브 미배선) -->
+<!-- 색 절제 원칙 유지: 채도색(빨강 상승/파랑 하락)은 등락 방향에만. 뱃지·메타는 회색. -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>특이 신호 UI 변형 · 2026-06-29</title>
+<style>
+:root{
+  --canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;
+  --ink:#0F172A;--muted:#6B7280;--sub:#475569;
+  --up:#E03131;--dn:#2775ED;
+  --bdg-bg:#F2F4F6;--bdg-ink:#4E5968;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;}html,body{margin:0;}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 18px 80px;}
+.proto-banner{font-size:12px;font-weight:700;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:9px 13px;margin-bottom:8px;}
+.proto-note{font-size:12px;color:var(--sub);line-height:1.55;margin:0 0 24px;}
+.proto-note b{color:var(--ink);}
+
+.lab{display:flex;align-items:baseline;gap:10px;margin:34px 0 12px;}
+.lab .tag{font-size:11px;font-weight:800;letter-spacing:.04em;color:#fff;background:#0F172A;border-radius:5px;padding:3px 8px;}
+.lab h2{font-size:16px;font-weight:800;margin:0;}
+.lab p{font-size:12px;color:var(--muted);margin:0;}
+
+/* 공통 블록 */
+.block{background:var(--soft);border:1px solid var(--hair);border-radius:12px;overflow:hidden;box-shadow:var(--s1);max-width:560px;}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+.block__t{font-size:13px;font-weight:800;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}
+.block__s{font-size:11px;color:var(--muted);}
+.upd{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#0B8265;}
+.upd .dot{width:6px;height:6px;border-radius:50%;background:#16A34A;box-shadow:0 0 0 3px rgba(22,163,74,.18);}
+.intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:var(--sub);margin:0;background:var(--canvas);}
+.intro b{color:var(--ink);}
+.more{display:block;text-align:center;padding:13px;font-size:13px;font-weight:700;color:var(--dn);cursor:pointer;background:var(--canvas);text-decoration:none;border-top:1px solid #F1F5F9;}
+.bdg{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--bdg-bg);color:var(--bdg-ink);white-space:nowrap;}
+
+/* ========== 변형 A · 현재안(참고) ========== */
+.a-sig{display:block;padding:13px 16px;border-bottom:1px solid #F1F5F9;text-decoration:none;background:var(--canvas);}
+.a-sig:last-of-type{border-bottom:none;}
+.a-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.a-nm{font-size:14px;font-weight:800;color:var(--ink);}.a-nm small{font-size:11px;font-weight:600;color:#94A3B8;}
+.a-pct{font-size:14px;font-weight:800;white-space:nowrap;}
+.a-badges{display:flex;gap:5px;margin:7px 0 6px;flex-wrap:wrap;}
+.a-why{font-size:12px;line-height:1.45;color:var(--sub);}
+
+/* ========== 변형 B · 2열 컴팩트 그리드 ========== */
+.b-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#F1F5F9;}
+.b-card{background:var(--canvas);padding:12px 13px;text-decoration:none;display:block;position:relative;}
+.b-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bar,#CBD5E1);}
+.b-top{display:flex;align-items:baseline;justify-content:space-between;gap:6px;}
+.b-nm{font-size:13px;font-weight:800;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.b-pct{font-size:13px;font-weight:800;white-space:nowrap;}
+.b-sec{font-size:10.5px;font-weight:600;color:#94A3B8;margin-top:1px;}
+.b-badges{display:flex;gap:4px;margin:8px 0 0;flex-wrap:wrap;}
+@media(max-width:520px){.b-grid{grid-template-columns:1fr;}}
+
+/* ========== 변형 C · 신호 타입별 묶음(세그먼트) ========== */
+.c-grp{background:var(--canvas);border-bottom:1px solid #F1F5F9;}
+.c-grp:last-child{border-bottom:none;}
+.c-ghd{display:flex;align-items:center;gap:8px;padding:9px 16px;background:#FAFBFC;border-bottom:1px solid #F1F5F9;}
+.c-ghd .gic{font-size:13px;width:18px;text-align:center;}
+.c-ghd .gt{font-size:12px;font-weight:800;color:var(--ink);}
+.c-ghd .gc{font-size:11px;font-weight:700;color:var(--muted);background:var(--inset);border-radius:999px;padding:1px 8px;}
+.c-row{display:flex;align-items:center;gap:10px;padding:10px 16px;text-decoration:none;border-bottom:1px solid #F6F8FA;}
+.c-grp .c-row:last-child{border-bottom:none;}
+.c-bar{width:3px;align-self:stretch;border-radius:2px;background:var(--bar,#CBD5E1);}
+.c-main{flex:1;min-width:0;}
+.c-nm{font-size:13.5px;font-weight:800;color:var(--ink);}.c-nm small{font-size:10.5px;font-weight:600;color:#94A3B8;}
+.c-why{font-size:11.5px;color:var(--sub);margin-top:2px;line-height:1.4;}
+.c-pct{font-size:13.5px;font-weight:800;white-space:nowrap;}
+
+/* ========== 변형 D · 히어로 + 컴팩트 리스트 ========== */
+.d-hero{display:block;text-decoration:none;background:linear-gradient(180deg,#FFF,#FBFCFE);padding:16px;border-bottom:1px solid #F1F5F9;position:relative;}
+.d-hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--bar,#CBD5E1);}
+.d-flag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:var(--bdg-ink);background:var(--bdg-bg);border-radius:5px;padding:3px 9px;margin-bottom:10px;}
+.d-htop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.d-hnm{font-size:18px;font-weight:800;color:var(--ink);}.d-hnm small{font-size:12px;font-weight:600;color:#94A3B8;}
+.d-hpct{font-size:20px;font-weight:800;white-space:nowrap;}
+.d-hbadges{display:flex;gap:5px;margin:10px 0 8px;flex-wrap:wrap;}
+.d-hwhy{font-size:12.5px;line-height:1.5;color:var(--sub);}
+.d-row{display:flex;align-items:center;gap:10px;padding:10px 16px;text-decoration:none;border-bottom:1px solid #F6F8FA;}
+.d-row:last-of-type{border-bottom:none;}
+.d-bar{width:3px;align-self:stretch;border-radius:2px;background:var(--bar,#CBD5E1);min-height:30px;}
+.d-rmain{flex:1;min-width:0;}
+.d-rnm{font-size:13px;font-weight:800;color:var(--ink);}.d-rnm small{font-size:10.5px;font-weight:600;color:#94A3B8;}
+.d-rbadges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.d-rpct{font-size:13px;font-weight:800;white-space:nowrap;}
+
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:20px;align-items:start;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="proto-banner">⚠ 프로토타입 — 라이브 미배선. 샘플 수치는 6/29 폭락장 가정의 placeholder입니다.</div>
+  <p class="proto-note">
+    현재 라이브(<b>변형 A</b>)는 좌측 방향 막대 + 회색 뱃지 + 한 줄 해석이 세로로 쌓이는 리스트예요.
+    아래 <b>B·C·D</b>는 같은 데이터(<code>code·name·sector·pct·dir·badges·why</code>)를 그대로 쓰면서 밀도·구조만 바꾼 대안입니다.
+    네 안 모두 <b>색 절제 원칙</b>(채도색은 등락 방향에만, 뱃지·메타는 회색)을 지켰어요.
+  </p>
+
+  <div class="cols">
+
+    <!-- ===================== 변형 A ===================== -->
+    <div>
+      <div class="lab"><span class="tag">A</span><h2>현재안 · 세로 리스트</h2><p>밀도 보통 · 한 줄 해석 강조</p></div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd"><span class="dot"></span>장중 실시간</span></span></div>
+        <p class="intro">코스피 <b style="color:var(--dn)">−5.81%</b> 하락. 역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별했어요.</p>
+        <a class="a-sig" style="border-left:3px solid var(--up);">
+          <div class="a-top"><span class="a-nm">이오테크닉스 <small>039030 · 반도체</small></span><span class="a-pct" style="color:var(--up)">+1.7%</span></div>
+          <div class="a-badges"><span class="bdg">역행 상승</span><span class="bdg">외국인 5일 연속 순매수</span></div>
+          <div class="a-why">시장이 −5.8% 하락하는 동안 <b>+1.7% 상승</b>. 외국인 순매수가 함께 들어왔어요.</div>
+        </a>
+        <a class="a-sig" style="border-left:3px solid var(--up);">
+          <div class="a-top"><span class="a-nm">한화에어로스페이스 <small>012450 · 방산</small></span><span class="a-pct" style="color:var(--up)">+0.3%</span></div>
+          <div class="a-badges"><span class="bdg">52주 신고가 1%↓</span><span class="bdg">기관 순매수 전환</span></div>
+          <div class="a-why">폭락장에도 <b>52주 신고가</b>에 근접. 기관 수급이 들어오고 있어요.</div>
+        </a>
+        <a class="a-sig" style="border-left:3px solid var(--dn);">
+          <div class="a-top"><span class="a-nm">SK하이닉스 <small>000660 · 반도체</small></span><span class="a-pct" style="color:var(--dn)">−8.4%</span></div>
+          <div class="a-badges"><span class="bdg">거래량 ×3.2 급증</span><span class="bdg">거래대금 상위</span></div>
+          <div class="a-why">거래량이 평소의 <b>3.2배</b>로 늘며 −8.4% 급락했어요.</div>
+        </a>
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+    </div>
+
+    <!-- ===================== 변형 B ===================== -->
+    <div>
+      <div class="lab"><span class="tag">B</span><h2>2열 컴팩트 그리드</h2><p>한 화면에 더 많이 · 스캔 빠름</p></div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd"><span class="dot"></span>장중 실시간</span></span></div>
+        <div class="b-grid">
+          <a class="b-card" style="--bar:var(--up)">
+            <div class="b-top"><span class="b-nm">이오테크닉스</span><span class="b-pct" style="color:var(--up)">+1.7%</span></div>
+            <div class="b-sec">039030 · 반도체</div>
+            <div class="b-badges"><span class="bdg">역행 상승</span><span class="bdg">외국인 순매수</span></div>
+          </a>
+          <a class="b-card" style="--bar:var(--up)">
+            <div class="b-top"><span class="b-nm">한화에어로</span><span class="b-pct" style="color:var(--up)">+0.3%</span></div>
+            <div class="b-sec">012450 · 방산</div>
+            <div class="b-badges"><span class="bdg">신고가 1%↓</span><span class="bdg">기관 전환</span></div>
+          </a>
+          <a class="b-card" style="--bar:var(--dn)">
+            <div class="b-top"><span class="b-nm">SK하이닉스</span><span class="b-pct" style="color:var(--dn)">−8.4%</span></div>
+            <div class="b-sec">000660 · 반도체</div>
+            <div class="b-badges"><span class="bdg">거래량 ×3.2</span><span class="bdg">거래대금 상위</span></div>
+          </a>
+          <a class="b-card" style="--bar:var(--dn)">
+            <div class="b-top"><span class="b-nm">삼성중공업</span><span class="b-pct" style="color:var(--dn)">−4.1%</span></div>
+            <div class="b-sec">010140 · 조선</div>
+            <div class="b-badges"><span class="bdg">거래량 ×2.1</span><span class="bdg">기관 전환</span></div>
+          </a>
+          <a class="b-card" style="--bar:var(--dn)">
+            <div class="b-top"><span class="b-nm">삼성전자</span><span class="b-pct" style="color:var(--dn)">−2.3%</span></div>
+            <div class="b-sec">005930 · 반도체</div>
+            <div class="b-badges"><span class="bdg">거래대금 1위</span></div>
+          </a>
+          <a class="b-card" style="--bar:var(--up)">
+            <div class="b-top"><span class="b-nm">DB하이텍</span><span class="b-pct" style="color:var(--up)">+0.2%</span></div>
+            <div class="b-sec">000990 · 반도체</div>
+            <div class="b-badges"><span class="bdg">역행 상승</span></div>
+          </a>
+        </div>
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+    </div>
+
+    <!-- ===================== 변형 C ===================== -->
+    <div>
+      <div class="lab"><span class="tag">C</span><h2>신호 타입별 묶음</h2><p>"무슨 신호인지" 먼저 · 분류 헤더</p></div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd"><span class="dot"></span>장중 실시간</span></span></div>
+        <div class="c-grp">
+          <div class="c-ghd"><span class="gic">↗</span><span class="gt">역행 상승</span><span class="gc">2종목</span></div>
+          <a class="c-row"><span class="c-bar" style="--bar:var(--up)"></span><div class="c-main"><div class="c-nm">이오테크닉스 <small>반도체</small></div><div class="c-why">−5.8% 시장에서 +1.7%. 외국인 순매수 동반.</div></div><span class="c-pct" style="color:var(--up)">+1.7%</span></a>
+          <a class="c-row"><span class="c-bar" style="--bar:var(--up)"></span><div class="c-main"><div class="c-nm">DB하이텍 <small>반도체</small></div><div class="c-why">낙폭과대 인식에 소폭 반등.</div></div><span class="c-pct" style="color:var(--up)">+0.2%</span></a>
+        </div>
+        <div class="c-grp">
+          <div class="c-ghd"><span class="gic">🔥</span><span class="gt">거래량 급증</span><span class="gc">2종목</span></div>
+          <a class="c-row"><span class="c-bar" style="--bar:var(--dn)"></span><div class="c-main"><div class="c-nm">SK하이닉스 <small>반도체</small></div><div class="c-why">거래량 3.2배 급증 속 −8.4% 급락.</div></div><span class="c-pct" style="color:var(--dn)">−8.4%</span></a>
+          <a class="c-row"><span class="c-bar" style="--bar:var(--dn)"></span><div class="c-main"><div class="c-nm">삼성중공업 <small>조선</small></div><div class="c-why">거래량 2.1배. 기관은 순매수 전환.</div></div><span class="c-pct" style="color:var(--dn)">−4.1%</span></a>
+        </div>
+        <div class="c-grp">
+          <div class="c-ghd"><span class="gic">▲</span><span class="gt">52주 신고가 근접</span><span class="gc">1종목</span></div>
+          <a class="c-row"><span class="c-bar" style="--bar:var(--up)"></span><div class="c-main"><div class="c-nm">한화에어로 <small>방산</small></div><div class="c-why">폭락장에도 신고가 1%↓. 기관 매수 전환.</div></div><span class="c-pct" style="color:var(--up)">+0.3%</span></a>
+        </div>
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+    </div>
+
+    <!-- ===================== 변형 D ===================== -->
+    <div>
+      <div class="lab"><span class="tag">D</span><h2>히어로 + 컴팩트 리스트</h2><p>오늘의 1순위 신호를 크게 · 위계 뚜렷</p></div>
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">⚡</span>오늘의 특이 신호</span><span class="block__s"><span class="upd"><span class="dot"></span>장중 실시간</span></span></div>
+        <a class="d-hero" style="--bar:var(--up)">
+          <span class="d-flag">오늘 가장 눈에 띄는 신호</span>
+          <div class="d-htop"><span class="d-hnm">이오테크닉스 <small>039030 · 반도체</small></span><span class="d-hpct" style="color:var(--up)">+1.7%</span></div>
+          <div class="d-hbadges"><span class="bdg">역행 상승</span><span class="bdg">외국인 5일 연속 순매수</span></div>
+          <div class="d-hwhy">시장이 <b>−5.8%</b> 하락하는 동안 <b>+1.7% 상승</b>. 외국인 순매수가 함께 들어온, 오늘 가장 희소한 신호예요.</div>
+        </a>
+        <a class="d-row"><span class="d-bar" style="--bar:var(--up)"></span><div class="d-rmain"><div class="d-rnm">한화에어로스페이스 <small>방산</small></div><div class="d-rbadges"><span class="bdg">신고가 1%↓</span><span class="bdg">기관 전환</span></div></div><span class="d-rpct" style="color:var(--up)">+0.3%</span></a>
+        <a class="d-row"><span class="d-bar" style="--bar:var(--dn)"></span><div class="d-rmain"><div class="d-rnm">SK하이닉스 <small>반도체</small></div><div class="d-rbadges"><span class="bdg">거래량 ×3.2</span><span class="bdg">거래대금 상위</span></div></div><span class="d-rpct" style="color:var(--dn)">−8.4%</span></a>
+        <a class="d-row"><span class="d-bar" style="--bar:var(--dn)"></span><div class="d-rmain"><div class="d-rnm">삼성중공업 <small>조선</small></div><div class="d-rbadges"><span class="bdg">거래량 ×2.1</span><span class="bdg">기관 전환</span></div></div><span class="d-rpct" style="color:var(--dn)">−4.1%</span></a>
+        <a class="more">전체 랭킹 보기 →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

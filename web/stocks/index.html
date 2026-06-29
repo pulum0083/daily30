@@ -170,6 +170,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bdg.flow{background:#E6F6F0;color:#0B8265;} /* 외국인·기관 수급 신호만 색상 강조 */
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+/* 특이 신호 — 히어로(1순위) + 컴팩트 리스트 레이아웃 */
+.sig-hero{display:block;text-decoration:none;background:linear-gradient(180deg,#FFF,#FBFCFE);padding:16px 32px 16px 16px;border-bottom:1px solid #F1F5F9;position:relative;cursor:pointer;}
+.sig-hero::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sig-bar,#CBD5E1);}
+.sig-flag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#4E5968;background:#F2F4F6;border-radius:5px;padding:3px 9px;margin-bottom:10px;}
+.sig-htop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+.sig-hnm{font-size:18px;font-weight:800;color:#0F172A;}.sig-hnm small{font-size:12px;font-weight:600;color:#94A3B8;}
+.sig-hpct{font-size:20px;font-weight:800;white-space:nowrap;}
+.sig-hbadges{display:flex;gap:5px;margin:10px 0 8px;flex-wrap:wrap;}
+.sig-hwhy{font-size:12.5px;line-height:1.5;color:#475569;}
+.sig-row{display:flex;align-items:center;gap:10px;padding:11px 32px 11px 16px;text-decoration:none;border-bottom:1px solid #F1F5F9;cursor:pointer;background:var(--canvas);position:relative;}
+.sig-row:last-of-type{border-bottom:none;}
+.sig-rbar{width:3px;align-self:stretch;border-radius:2px;background:var(--sig-bar,#CBD5E1);min-height:30px;}
+.sig-rmain{flex:1;min-width:0;}
+.sig-rnm{font-size:13px;font-weight:800;color:#0F172A;}.sig-rnm small{font-size:10.5px;font-weight:600;color:#94A3B8;}
+.sig-rbadges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+.sig-rpct{font-size:13px;font-weight:800;white-space:nowrap;}
+.sig-hero:hover .sig-go,.sig-row:hover .sig-go{opacity:1;}
 /* 로딩 스켈레톤 — 특이신호·ETF 시황이 /api/signals 응답 전 빈칸으로 깜빡이는 레이아웃 시프트 방지 */
 @keyframes sklPulse{0%,100%{opacity:.5}50%{opacity:.85}}
 .skl{background:#EEF2F7;border-radius:6px;animation:sklPulse 1.1s ease-in-out infinite;}
@@ -2760,15 +2777,28 @@ if(passBtn){
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
-    if(w) w.innerHTML=(d.signals||[]).map(function(s){
-      var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
-      return '<a class="sig" style="border-left:3px solid '+lc+';" onclick="goStock(\''+s.code+'\')">'
-        +'<div class="sig-top"><span class="sig-nm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
-        +'<span class="sig-pct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
-        +'<div class="sig-badges">'+(s.badges||[]).map(badgeHtml).join('')+'</div>'
-        +'<div class="sig-why">'+(s.why||'')+'</div>'
-        +'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
-    }).join('');
+    if(w){
+      var arr=d.signals||[];
+      var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      var html=arr.map(function(s,i){
+        var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
+        var badges=(s.badges||[]).map(badgeHtml).join('');
+        if(i===0){
+          return '<a class="sig-hero" style="--sig-bar:'+lc+';" onclick="goStock(\''+s.code+'\')">'
+            +'<span class="sig-flag">오늘 가장 눈에 띄는 신호</span>'
+            +'<div class="sig-htop"><span class="sig-hnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+            +'<span class="sig-hpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
+            +'<div class="sig-hbadges">'+badges+'</div>'
+            +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</a>';
+        }
+        return '<a class="sig-row" style="--sig-bar:'+lc+';" onclick="goStock(\''+s.code+'\')">'
+          +'<span class="sig-rbar"></span>'
+          +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+          +'<span class="sig-rbadges">'+badges+'</span></span>'
+          +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
+      }).join('');
+      w.innerHTML=html;
+    }
   }
   function applyEtf(etf, phase, asOf){
     setBadge('etf-upd-badge', phase);
