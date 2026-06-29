@@ -37,9 +37,19 @@
             
           </div>
         </div>
+        <!-- 차트 탭: 오늘 장중(프리·정규·애프터 실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
         <div class="ctabs">
-          <a class="on" id="ctab-spark">20일 종가</a>
+          <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
+          <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
         </div>
+        <!-- 오늘 장중 패널 (야후 1분봉 · 프리/정규/애프터) -->
+        <div class="cpane hidden" id="pane-intra" data-ticker="SMH">
+          <div style="padding:0 14px;">
+            <svg id="intra-svg" viewBox="0 0 640 180" style="width:100%;height:160px;display:block;overflow:visible;" role="img" aria-label="장중 1분봉 곡선"></svg>
+            <div id="intra-tl" style="margin-top:6px;"></div>
+          </div>
+        </div>
+        <!-- 20일 종가 패널 -->
         <div class="cpane" id="pane-spark">
           <div class="spark-header" id="spark-main"
                data-spark="598.93,607.81,632.21,637.9,627.53,569.69,598.16,591.01,570.91,609.45,619.96,647.1,616.0,623.97,659.88,668.91,622.05,618.92,636.88,611.61"
@@ -135,13 +145,24 @@
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
     <p style="margin:0 0 4px;">· <b>시세·이동평균·52주</b> — 미국 장 마감 후 갱신. 직전 거래일(06-26 종가) 기준 yfinance 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>오늘 장중</b> — 프리장·정규장·애프터장 실시간 1분봉(야후, ET 기준)이에요. 미국 장중엔 헤더 시세도 함께 갱신돼요.</p>
     <p style="margin:0 0 4px;">· <b>분기 실적</b> — yfinance 분기 재무 기준이며 단위는 USD예요.</p>
-    <p style="margin:6px 0 0;">모든 수치는 실측이며 투자 판단 참고용이에요. 실시간 시세는 <a href="/stocks/">종목 홈</a>의 밤사이 미국 반도체 시황에서 확인하세요.</p>
+    <p style="margin:6px 0 0;">모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>
 </div>
 </div>
 
 <script>
+// 차트 탭 전환 (오늘 장중 / 20일 종가). stocks.js가 장중 데이터 로드 시 호출하기도 함.
+function switchChartTab(pane){
+  ['pane-intra','pane-spark'].forEach(function(id){var p=document.getElementById(id);if(p)p.classList.toggle('hidden',id!==pane);});
+  var ti=document.getElementById('ctab-intra'),ts=document.getElementById('ctab-spark');
+  if(ti)ti.classList.toggle('on',pane==='pane-intra');
+  if(ts)ts.classList.toggle('on',pane==='pane-spark');
+  if(pane==='pane-spark') window.dispatchEvent(new Event('resize'));
+}
+window.switchChartTab=switchChartTab;
+
 // 스파크라인 마우스오버 → 날짜·종가 툴팁 (USD)
 (function(){
   var wrap=document.getElementById('spark-main');
