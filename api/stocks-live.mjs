@@ -34,22 +34,62 @@ async function fetchOne(code) {
   }
 }
 
-// 해외 종목(미국 벨웨더) — 네이버 해외 시세. 심볼 예: NVDA.O, MU.O, SOXX.O, TSLA.O, F
+// 네이버 심볼 → 야후 티커 변환 (NVDA.O → NVDA, DRAM.K → DRAM)
+function naverToYahoo(sym) { return sym.replace(/\.[A-Z]$/, ''); }
+
+// 야후 파이낸스 — 프리장·애프터장 실시간 데이터 포함
+async function fetchYahoo(sym) {
+  const ticker = naverToYahoo(sym);
+  try {
+    const r = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=1d&interval=1m&includePrePost=true`,
+      { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(6000) },
+    );
+    if (!r.ok) return null;
+    const d = await r.json();
+    const meta = d?.chart?.result?.[0]?.meta;
+    if (!meta) return null;
+    const price = meta.regularMarketPrice;
+    const prevClose = meta.chartPreviousClose || meta.previousClose;
+    let livePrice = price;
+    let source = 'regular';
+    if (meta.preMarketPrice && meta.preMarketPrice !== price) {
+      livePrice = meta.preMarketPrice; source = 'pre';
+    } else if (meta.postMarketPrice && meta.postMarketPrice !== price) {
+      livePrice = meta.postMarketPrice; source = 'post';
+    }
+    if (!isFinite(livePrice) || !isFinite(prevClose) || prevClose === 0) return null;
+    const pct = ((livePrice - prevClose) / prevClose) * 100;
+    return { sym, price: livePrice, changePct: Math.round(pct * 100) / 100, source };
+  } catch (e) {
+    return null;
+  }
+}
+
+// 해외 종목 — 네이버 우선, 정규장 외 시간대엔 야후 폴백 (프리장·애프터장 실시간)
 async function fetchOverseas(sym) {
   try {
     const r = await fetch(`https://api.stock.naver.com/stock/${encodeURIComponent(sym)}/basic`, {
       headers: HDR_M,
       signal: AbortSignal.timeout(6000),
     });
-    if (!r.ok) return null;
+    if (!r.ok) return fetchYahoo(sym);
     const d = await r.json();
+    if (d.marketStatus !== 'OPEN') return (await fetchYahoo(sym)) || naverFallback(sym, d);
     const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
     const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
     if (!isFinite(price)) return null;
-    return { sym, price, changePct: isFinite(pct) ? pct : null };
+    return { sym, price, changePct: isFinite(pct) ? pct : null, source: 'regular' };
   } catch (e) {
-    return null;
+    return fetchYahoo(sym);
   }
+}
+
+function naverFallback(sym, d) {
+  const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
+  const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
+  if (!isFinite(price)) return null;
+  return { sym, price, changePct: isFinite(pct) ? pct : null, source: 'close' };
 }
 
 export default async function handler(req, res) {
