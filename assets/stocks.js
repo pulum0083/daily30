@@ -304,43 +304,120 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function () {});
 })();
 
-// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터로 차트 탭(오늘 장중)에 렌더(데이터 있을 때만 탭 노출·기본 활성화)
+// 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터를 20일 종가 스파크라인과 동일한 스타일
+// (그라디언트 채움 + 베지어 곡선 + 장중 고점·저점 라벨 + 끝점 도트 + 마우스오버 툴팁)로 렌더.
+// 세션이 '오늘'이면 헤더 시세(현재가·등락률)도 장중 실시간으로 갱신하고, 장중에는 폴링으로 계속 업데이트한다.
 (function(){
   var pane=document.getElementById('pane-intra');
   if(!pane) return;
   var code=pane.getAttribute('data-code');
-  fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
+  var pxEl=document.querySelector('.px.num');
+  var cgEl=document.querySelector('.cg.num');
+  var metaEl=document.querySelector('#hero-stock .meta');
+  var prevClose=pxEl?parseFloat((pxEl.textContent||'').replace(/,/g,'')):0; // 직전 거래일 종가(서버 렌더 실측) — 등락률 기준
+  var metaOrig=metaEl?metaEl.innerHTML:'';
+  var X0=14,X1=626,YT=26,YB=148; // viewBox 640×180 기준 플롯 영역
+  function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
+  var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
+  function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
+
+  // 마우스오버 툴팁 — svg 위 가이드선·도트 + 시각·가격 표시 (틱 사이 데이터는 last* 클로저로 공유)
+  function bindHover(){
+    if(hoverBound) return; hoverBound=true;
+    var svg=document.getElementById('intra-svg'); if(!svg) return;
+    var wrap=svg.parentNode; wrap.style.position='relative';
+    var tip=document.createElement('div'); tip.id='intra-tip';
+    tip.style.cssText='position:absolute;display:none;pointer-events:none;background:var(--ink,#1C1D1F);color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:5px;white-space:nowrap;transform:translate(-50%,-100%);z-index:6;';
+    wrap.appendChild(tip);
+    svg.addEventListener('mousemove',function(ev){
+      if(!lastCoords.length) return;
+      var rect=svg.getBoundingClientRect();
+      var vbx=(ev.clientX-rect.left)/rect.width*640;
+      var best=0,bd=1e9; for(var i=0;i<lastCoords.length;i++){var dx=Math.abs(lastCoords[i].x-vbx);if(dx<bd){bd=dx;best=i;}}
+      var c=lastCoords[best];
+      var g=document.getElementById('intra-hover');
+      if(g) g.innerHTML='<line x1="'+c.x.toFixed(1)+'" y1="'+YT+'" x2="'+c.x.toFixed(1)+'" y2="'+YB+'" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>'+
+        '<circle cx="'+c.x.toFixed(1)+'" cy="'+c.y.toFixed(1)+'" r="4" fill="#fff" stroke="'+lastCol+'" stroke-width="2"/>';
+      var wr=wrap.getBoundingClientRect();
+      tip.style.left=(rect.left+c.x/640*rect.width-wr.left)+'px';
+      tip.style.top=(rect.top+c.y/180*rect.height-wr.top-10)+'px';
+      tip.style.display='';
+      tip.textContent=(lastTimes[best]||'')+' · '+Math.round(lastVals[best]).toLocaleString();
+    });
+    svg.addEventListener('mouseleave',function(){tip.style.display='none';var g=document.getElementById('intra-hover');if(g)g.innerHTML='';});
+  }
+
+  function smoothPath(co){var d='M'+co[0].x.toFixed(1)+','+co[0].y.toFixed(1);for(var i=1;i<co.length;i++){var mx=((co[i-1].x+co[i].x)/2).toFixed(1);d+=' C'+mx+','+co[i-1].y.toFixed(1)+' '+mx+','+co[i].y.toFixed(1)+' '+co[i].x.toFixed(1)+','+co[i].y.toFixed(1);}return d;}
+
+  function render(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
-    var times=(d&&d.times)||[];
-    var X0=14,X1=626,YT=22,YB=150;
-    function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
-    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
-    var useT=times.length===n;  // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
+    var times=(d&&d.times)||[], n=vals.length;
+    var useT=times.length===n;           // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
     function px2(i){return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));}
-    var pts=vals.map(function(v,i){var x=px2(i);var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
-    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED', last=pts.split(' ').pop().split(',');
-    document.getElementById('intra-svg').innerHTML=
-      '<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'+
-      '<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>'+
-      '<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="'+col+'"/>'+
-      '<text x="14" y="170" font-size="10" fill="#9CA3AF">09:00</text><text x="595" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
-    // 장중 데이터 확보 → '오늘 장중' 탭 노출 + 기본 활성화
+    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
+    var margin=(hi-lo)*0.10||hi*0.005, vMin=lo-margin, vMax=hi+margin, range=(vMax-vMin)||1;
+    function yf(v){return YT+(1-(v-vMin)/range)*(YB-YT);}
+    var coords=vals.map(function(v,i){return {x:px2(i),y:yf(v)};});
+    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
+    lastCoords=coords; lastTimes=times; lastVals=vals; lastCol=col;
+
+    var isDark=document.documentElement.classList.contains('dark');
+    var halo=isDark?'#1C1D1F':'#fff';
+    var gid='ig-'+code, line=smoothPath(coords);
+    function labelTxt(x,y,txt,c){
+      var lx=Math.min(Math.max(x,X0+48),X1-48), ly=y<YT+14?y+16:y-9;
+      return '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" font-weight="700" text-anchor="middle" fill="'+c+'" stroke="'+halo+'" stroke-width="3" paint-order="stroke" style="stroke-linejoin:round;">'+txt+'</text>';
+    }
+    var svgHTML=
+      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0" stop-color="'+col+'" stop-opacity="0.15"/><stop offset="1" stop-color="'+col+'" stop-opacity="0.01"/></linearGradient></defs>'+
+      '<line x1="'+X0+'" y1="'+YB+'" x2="'+X1+'" y2="'+YB+'" stroke="#E5E7EB" stroke-width="1"/>'+
+      '<path d="'+line+' L'+coords[n-1].x.toFixed(1)+','+YB+' L'+coords[0].x.toFixed(1)+','+YB+' Z" fill="url(#'+gid+')"/>'+
+      '<path d="'+line+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>';
+    if(hi!==lo){
+      var hiI=vals.indexOf(hi), loI=vals.indexOf(lo), hc=up?'#E03131':'#2775ED', lc=up?'#2775ED':'#E03131';
+      svgHTML+='<circle cx="'+coords[hiI].x.toFixed(1)+'" cy="'+coords[hiI].y.toFixed(1)+'" r="3.5" fill="'+hc+'"/>'+labelTxt(coords[hiI].x,coords[hiI].y,'장중 고점 '+Math.round(hi).toLocaleString(),hc)+
+        '<circle cx="'+coords[loI].x.toFixed(1)+'" cy="'+coords[loI].y.toFixed(1)+'" r="3.5" fill="'+lc+'"/>'+labelTxt(coords[loI].x,coords[loI].y,'장중 저점 '+Math.round(lo).toLocaleString(),lc);
+    }
+    svgHTML+='<circle cx="'+coords[n-1].x.toFixed(1)+'" cy="'+coords[n-1].y.toFixed(1)+'" r="4" fill="#fff" stroke="'+col+'" stroke-width="2"/>'+
+      '<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">09:00</text>'+
+      '<text x="320" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">12:00</text>'+
+      '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">15:30</text>'+
+      pinsHTML+'<g id="intra-hover"></g>';
+    document.getElementById('intra-svg').innerHTML=svgHTML;
+
+    // 장중 데이터 확보 → '오늘 장중' 탭 노출 + 기본 활성화(최초 1회) + 툴팁 바인딩
     var tabBtn=document.getElementById('ctab-intra');
     if(tabBtn) tabBtn.style.display='';
-    if(window.switchChartTab) window.switchChartTab('pane-intra');
-    var coords2=vals.map(function(v,i){return {x:px2(i),y:YB-(YB-YT)*((v-lo)/span)};});
-    function yAtX2(x){var b=coords2[0];for(var i=0;i<coords2.length;i++){if(Math.abs(coords2[i].x-x)<Math.abs(b.x-x))b=coords2[i];}return b.y;}
+    if(!pinsLoaded && window.switchChartTab) window.switchChartTab('pane-intra');
+    bindHover();
+
+    // ── 헤더 시세 실시간 갱신 (세션이 오늘일 때만 — 휴장·전일 데이터로 덮어쓰기 방지) ──
+    if(d&&d.date===todayKST()&&prevClose>0){
+      var cur=vals[n-1], chg=(cur-prevClose)/prevClose*100, u=chg>=0;
+      if(pxEl) pxEl.textContent=Math.round(cur).toLocaleString();
+      if(cgEl){cgEl.style.color=u?'var(--up)':'var(--dn)';cgEl.textContent=(u?'▲ +':'▼ ')+chg.toFixed(2)+'%';}
+      if(metaEl){var lt=times[n-1]||'';metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, '$1오늘 장중 '+lt);}
+    }
+
+    // ── 뉴스 핀(movers-why)은 최초 1회만 로드 → pinsHTML에 캐시해 매 틱 곡선과 함께 재합성 ──
+    if(pinsLoaded) return;
+    pinsLoaded=true;
+    function yAtX(x){var b=coords[0];for(var i=0;i<coords.length;i++){if(Math.abs(coords[i].x-x)<Math.abs(b.x-x))b=coords[i];}return b.y;}
     var dnow=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
     fetch('/data/movers-why-'+dnow+'.json').then(function(r){return r.ok?r.json():fetch('/data/movers-why-live.json').then(function(x){return x.ok?x.json():null;});}).then(function(j){
       if(!j||!j.stocks)return;
       var me=j.stocks.filter(function(s){return s.code===code;})[0];
-      var evs=(me&&me.events)||[];
-      var svgEl=document.getElementById('intra-svg'),add='';
-      evs.forEach(function(e,i){var ax=t2x(e.time),ay=yAtX2(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
-        var px=Math.min(X1-12,Math.max(X0+12,ax)),up=(ay-41)>=YT&&(ay-31-10)>=0,cy=up?ay-31:ay+31,sy=up?ay-24:ay+24,ty=up?ay-27:ay+35;
+      var evs=(me&&me.events)||[], add='';
+      evs.forEach(function(e,i){var ax=t2x(e.time),ay=yAtX(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
+        var px=Math.min(X1-12,Math.max(X0+12,ax)),top=(ay-41)>=YT&&(ay-31-10)>=0,cy=top?ay-31:ay+31,sy=top?ay-24:ay+24,ty=top?ay-27:ay+35;
         add+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="'+st+'" stroke-width="1.3"/><circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"/><text x="'+px.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="11" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';});
-      svgEl.innerHTML+=add;
+      pinsHTML=add;
+      var svgEl=document.getElementById('intra-svg');
+      // 핀을 hover 그룹 앞에 삽입(곡선 위, 가이드 아래)
+      var hg=document.getElementById('intra-hover');
+      if(hg) hg.insertAdjacentHTML('beforebegin',add); else svgEl.innerHTML+=add;
       var tl=document.getElementById('intra-tl');
       if(tl&&evs.length){
         // 좌측 정렬 기준 = 그래프 09:00 지점(viewBox 640 중 X0=14). svg 실제 렌더 너비에 비례해 들여쓰기.
@@ -349,7 +426,13 @@ document.addEventListener('DOMContentLoaded', function() {
         tl.innerHTML=evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
         return '<div style="display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:10px 0;border-bottom:1px solid #F1F5F9;"><div style="width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="font-size:11px;font-weight:700;color:#94A3B8;">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;">'+e.why+'</div><div style="font-size:11px;color:#94A3B8;">출처 · '+e.source+'</div></div>';}).join(''); }
     }).catch(function(){});
-  }).catch(function(){});
+  }
+
+  function tick(){fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(render).catch(function(){});}
+  tick();
+  // 장중(09:00~15:35 KST)에만 45초 폴링 — 헤더 시세·곡선 실시간 갱신
+  var km=new Date(Date.now()+9*3600*1000),kmin=km.getUTCHours()*60+km.getUTCMinutes();
+  if(kmin>=540&&kmin<=935) setInterval(tick,45000);
 })();
 
 // 외국인 보유율 스파크라인 — 직선 폴리라인을 부드러운 곡선 + 그라디언트로 재렌더

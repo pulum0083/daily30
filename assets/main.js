@@ -1802,17 +1802,21 @@
       + String(kstNow.getUTCDate()).padStart(2, '0');
     var isToday = (date === todayKst);
 
+    function tryFetch(url, timeout) {
+      return fetch(url, { signal: AbortSignal.timeout(timeout || 6000) })
+        .then(function(r) { return r.ok ? r.json() : Promise.reject(); });
+    }
+
     function fetchAndRender() {
       if (isToday) {
-        // 오늘은 live.json 직접 fetch (캐시 버스팅)
-        fetch('/data/kospi-news-live.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) })
-          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        // 오늘은 live.json → 실패 시 /api/news-live fallback (사내망 /data/ 차단 대응)
+        tryFetch('/data/kospi-news-live.json?t=' + Date.now(), 4000)
+          .catch(function() { return tryFetch('/api/data?f=news-live', 8000); })
           .then(render)
           .catch(function() { wrap.style.display = 'none'; });
       } else {
         // 과거 날짜는 아카이브 JSON
-        fetch('/data/kospi-news-' + date + '.json', { signal: AbortSignal.timeout(6000) })
-          .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+        tryFetch('/data/kospi-news-' + date + '.json', 6000)
           .then(render)
           .catch(function() { wrap.style.display = 'none'; });
       }
