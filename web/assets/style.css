@@ -782,7 +782,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   /* 시나리오 분할(sc-cols) 모바일 1단 — 기본 선언 이후에 위치해야 적용됨 */
   /* 브리핑 상세: 외부 래퍼 박스 제거 — 내부 섹션 카드들이 각자의 테두리를 가짐 */
   .accordion-item{background:transparent;border:none;box-shadow:none;border-radius:0;overflow:visible;}
-  .accordion-body__inner{padding:0 0 22px;}
+  .accordion-body__inner{padding:0 0 22px;border-top:none;}
 }
 
 /* ── 라이브 스코어보드 ── */
