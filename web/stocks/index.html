@@ -2534,7 +2534,8 @@ function safeJSON(url){
     .catch(function(){ return null; });
 }
 
-/* async/await 로 재작성 — bsSeq 콜백 체인 제거, 순차 실행으로 타이밍 경합 방지 */
+/* 슬롯 활성화 즉시 기본 링크로 표시 → fetch 성공 시 내용 업데이트.
+   fetch 실패해도 기본 표시 유지 (PC 네트워크 차단 대응) */
 async function renderBriefStrip(){
   var el = document.getElementById('brief-strip');
   if (!el) return;
@@ -2542,6 +2543,12 @@ async function renderBriefStrip(){
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
 
+  // ① 즉시 표시 — fetch 결과 기다리지 않고 기본 링크로 visible
+  var baseSlot = slot === 'issue' ? 'kospi' : slot;
+  var bm = BS_META[baseSlot];
+  bsPaint(el, bm.cls, bm.icon, bm.type, '오늘 브리핑 보기', '/briefings/' + today + '/' + baseSlot + '/');
+
+  // ② issue 슬롯: 이슈 헤드라인으로 업데이트 시도
   if (slot === 'issue') {
     var j = await safeJSON('/data/kospi-news-' + today + '.json')
           || await safeJSON('/data/kospi-news-live.json');
@@ -2551,17 +2558,19 @@ async function renderBriefStrip(){
       bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
       return;
     }
-    slot = 'kospi'; // 이슈 미수집 → 코스피 브리핑으로 폴백
+    slot = 'kospi'; // 이슈 미수집 → 코스피 브리핑으로
   }
 
+  // ③ briefings-list.json으로 실제 브리핑 타이틀 업데이트
   var list = await safeJSON('/data/briefings-list.json');
   var s = list && list.slots && list.slots[today] && list.slots[today][slot];
   if (s && s.state === 'ready') {
     var d = bsItem(s, slot);
     bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
-  } else {
-    bsHide(el); // 브리핑 미배포(휴일·대기 중) → 숨김
+  } else if (list) {
+    bsHide(el); // fetch 성공 + not ready = 휴일·미배포 → 숨김
   }
+  // list === null(fetch 실패): ①의 기본 표시 유지
 }
 renderBriefStrip();
 setInterval(renderBriefStrip, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
