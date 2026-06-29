@@ -29,6 +29,7 @@ async function fetchMinutes(symbol) {
   // 5분 간격 샘플링 (00, 05, 10 ... 분 기준) + 마지막 포인트 항상 포함
   const sampled = points.filter((p, i) => p.hhmm % 5 === 0 || i === points.length - 1);
   return {
+    date: latestDate, // 세션 날짜 YYYYMMDD — 클라이언트가 '오늘'인지 검증 후 헤더 가격 갱신
     values: sampled.map(p => p.v),
     volumes: sampled.map(p => p.vol), // 누적 거래량 (VWAP 계산용)
     times: sampled.map(p => {
@@ -45,8 +46,8 @@ export default async function handler(req, res) {
   const code = (req.query && req.query.code) ? String(req.query.code).replace(/[^0-9A-Za-z]/g, '') : '';
   if (code) {
     try {
-      const { values, volumes, times } = await fetchMinutes(code);
-      return res.status(200).json({ code, minutes: values, volumes, times });
+      const { date, values, volumes, times } = await fetchMinutes(code);
+      return res.status(200).json({ code, date, minutes: values, volumes, times });
     } catch (e) {
       return res.status(502).json({ code, minutes: [], volumes: [], times: [], error: String(e) });
     }
