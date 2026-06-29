@@ -168,13 +168,20 @@ document.addEventListener('DOMContentLoaded', function() {
   var pane=document.getElementById('pane-intra');
   if(!pane) return;
   var code=pane.getAttribute('data-code');
+  var ticker=pane.getAttribute('data-ticker');
+  var isUS=!!ticker, idKey=isUS?ticker:(code||'');   // 그라디언트 id(gid)용 키
+  var apiURL=isUS?('/api/intraday?us='+encodeURIComponent(ticker)):('/api/intraday?code='+code);
   var pxEl=document.querySelector('.px.num');
   var cgEl=document.querySelector('.cg.num');
   var metaEl=document.querySelector('#hero-stock .meta');
-  var prevClose=pxEl?parseFloat((pxEl.textContent||'').replace(/,/g,'')):0; // 직전 거래일 종가(서버 렌더 실측) — 등락률 기준
+  var prevClose=pxEl?parseFloat((pxEl.textContent||'').replace(/[^0-9.\-]/g,'')):0; // 직전 거래일 종가(서버 렌더 실측) — 등락률 기준 ($·콤마 제거)
   var metaOrig=metaEl?metaEl.innerHTML:'';
   var X0=14,X1=626,YT=26,YB=148; // viewBox 640×180 기준 플롯 영역
   function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
+  function etMin(t){var p=(t||'00:00').split(':');return (+p[0])*60+(+p[1]);} // "HH:MM"→분
+  // 가격 표기: 미국=$소수2자리, 국내=정수+콤마
+  function fmtPx(v){return isUS?('$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):Math.round(v).toLocaleString();}
+  function fmtNum(v){return isUS?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):Math.round(v).toLocaleString();}
   var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
 
@@ -199,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
       tip.style.left=(rect.left+c.x/640*rect.width-wr.left)+'px';
       tip.style.top=(rect.top+c.y/180*rect.height-wr.top-10)+'px';
       tip.style.display='';
-      tip.textContent=(lastTimes[best]||'')+' · '+Math.round(lastVals[best]).toLocaleString();
+      tip.textContent=(lastTimes[best]||'')+' · '+fmtNum(lastVals[best]);
     });
     svg.addEventListener('mouseleave',function(){tip.style.display='none';var g=document.getElementById('intra-hover');if(g)g.innerHTML='';});
   }
@@ -211,7 +218,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if(vals.length<2) return;            // 데이터 없으면 숨김 유지(정합성)
     var times=(d&&d.times)||[], n=vals.length;
     var useT=times.length===n;           // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
-    function px2(i){return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));}
+    // 미국: ET 시각(프리~애프터)을 실제 분 간격으로 x 배치 / 국내: 09:00~15:30 고정 프레임(t2x)
+    var tmins=null,wlo=0,whi=1;
+    if(isUS&&useT){tmins=times.map(etMin);wlo=Math.min.apply(null,tmins);whi=Math.max.apply(null,tmins);}
+    function px2(i){
+      if(isUS&&useT){return X0+(X1-X0)*((tmins[i]-wlo)/((whi-wlo)||1));}
+      return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));
+    }
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
     var margin=(hi-lo)*0.10||hi*0.005, vMin=lo-margin, vMax=hi+margin, range=(vMax-vMin)||1;
     function yf(v){return YT+(1-(v-vMin)/range)*(YB-YT);}
@@ -221,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var isDark=document.documentElement.classList.contains('dark');
     var halo=isDark?'#1C1D1F':'#fff';
-    var gid='ig-'+code, line=smoothPath(coords);
+    var gid='ig-'+idKey, line=smoothPath(coords);
     function labelTxt(x,y,txt,c){
       var lx=Math.min(Math.max(x,X0+48),X1-48), ly=y<YT+14?y+16:y-9;
       return '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" font-size="11" font-weight="700" text-anchor="middle" fill="'+c+'" stroke="'+halo+'" stroke-width="3" paint-order="stroke" style="stroke-linejoin:round;">'+txt+'</text>';
@@ -234,14 +247,23 @@ document.addEventListener('DOMContentLoaded', function() {
       '<path d="'+line+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>';
     if(hi!==lo){
       var hiI=vals.indexOf(hi), loI=vals.indexOf(lo), hc=up?'#E03131':'#2775ED', lc=up?'#2775ED':'#E03131';
-      svgHTML+='<circle cx="'+coords[hiI].x.toFixed(1)+'" cy="'+coords[hiI].y.toFixed(1)+'" r="3.5" fill="'+hc+'"/>'+labelTxt(coords[hiI].x,coords[hiI].y,'장중 고점 '+Math.round(hi).toLocaleString(),hc)+
-        '<circle cx="'+coords[loI].x.toFixed(1)+'" cy="'+coords[loI].y.toFixed(1)+'" r="3.5" fill="'+lc+'"/>'+labelTxt(coords[loI].x,coords[loI].y,'장중 저점 '+Math.round(lo).toLocaleString(),lc);
+      svgHTML+='<circle cx="'+coords[hiI].x.toFixed(1)+'" cy="'+coords[hiI].y.toFixed(1)+'" r="3.5" fill="'+hc+'"/>'+labelTxt(coords[hiI].x,coords[hiI].y,'장중 고점 '+fmtNum(hi),hc)+
+        '<circle cx="'+coords[loI].x.toFixed(1)+'" cy="'+coords[loI].y.toFixed(1)+'" r="3.5" fill="'+lc+'"/>'+labelTxt(coords[loI].x,coords[loI].y,'장중 저점 '+fmtNum(lo),lc);
+    }
+    // x축 라벨: 미국=데이터 시작/중간/끝 ET 시각 / 국내=09:00·12:00·15:30 고정
+    var axis;
+    if(isUS&&useT){
+      var mid=Math.floor((n-1)/2);
+      axis='<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">'+(times[0]||'')+'</text>'+
+        '<text x="'+px2(mid).toFixed(1)+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">'+(times[mid]||'')+'</text>'+
+        '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">'+(times[n-1]||'')+'</text>';
+    } else {
+      axis='<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">09:00</text>'+
+        '<text x="320" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">12:00</text>'+
+        '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">15:30</text>';
     }
     svgHTML+='<circle cx="'+coords[n-1].x.toFixed(1)+'" cy="'+coords[n-1].y.toFixed(1)+'" r="4" fill="#fff" stroke="'+col+'" stroke-width="2"/>'+
-      '<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">09:00</text>'+
-      '<text x="320" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">12:00</text>'+
-      '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">15:30</text>'+
-      pinsHTML+'<g id="intra-hover"></g>';
+      axis+pinsHTML+'<g id="intra-hover"></g>';
     document.getElementById('intra-svg').innerHTML=svgHTML;
 
     // 장중 데이터 확보 → '오늘 장중' 탭 노출 + 기본 활성화(최초 1회) + 툴팁 바인딩
@@ -250,17 +272,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if(!pinsLoaded && window.switchChartTab) window.switchChartTab('pane-intra');
     bindHover();
 
-    // ── 헤더 시세 실시간 갱신 (세션이 오늘일 때만 — 휴장·전일 데이터로 덮어쓰기 방지) ──
-    if(d&&d.date===todayKST()&&prevClose>0){
+    // ── 헤더 시세 실시간 갱신 (국내=오늘 세션일 때만 / 미국=12h 이내 fresh일 때 — 휴장·전일 데이터 덮어쓰기 방지) ──
+    if(d&&((isUS&&d.fresh)||(!isUS&&d.date===todayKST()))&&prevClose>0){
       var cur=vals[n-1], chg=(cur-prevClose)/prevClose*100, u=chg>=0;
-      if(pxEl) pxEl.textContent=Math.round(cur).toLocaleString();
+      if(pxEl) pxEl.textContent=fmtPx(cur);
       if(cgEl){cgEl.style.color=u?'var(--up)':'var(--dn)';cgEl.textContent=(u?'▲ +':'▼ ')+chg.toFixed(2)+'%';}
-      if(metaEl){var lt=times[n-1]||'';metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, '$1오늘 장중 '+lt);}
+      if(metaEl){var lt=times[n-1]||'';metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, isUS?('$1장중 '+lt+' ET'):('$1오늘 장중 '+lt));}
     }
 
     // ── 뉴스 핀(movers-why)은 최초 1회만 로드 → pinsHTML에 캐시해 매 틱 곡선과 함께 재합성 ──
     if(pinsLoaded) return;
     pinsLoaded=true;
+    if(isUS) return;                     // 미국은 movers-why 뉴스 핀 없음
     function yAtX(x){var b=coords[0];for(var i=0;i<coords.length;i++){if(Math.abs(coords[i].x-x)<Math.abs(b.x-x))b=coords[i];}return b.y;}
     var dnow=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
     fetch('/data/movers-why-'+dnow+'.json').then(function(r){return r.ok?r.json():fetch('/data/movers-why-live.json').then(function(x){return x.ok?x.json():null;});}).then(function(j){
@@ -285,11 +308,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function(){});
   }
 
-  function tick(){fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(render).catch(function(){});}
+  function tick(){fetch(apiURL).then(function(r){return r.json();}).then(render).catch(function(){});}
   tick();
-  // 장중(09:00~15:35 KST)에만 45초 폴링 — 헤더 시세·곡선 실시간 갱신
-  var km=new Date(Date.now()+9*3600*1000),kmin=km.getUTCHours()*60+km.getUTCMinutes();
-  if(kmin>=540&&kmin<=935) setInterval(tick,45000);
+  if(isUS){
+    // 미국: 프리장(04:00 ET)~애프터장(20:00 ET)에만 20초 폴링
+    var es=new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');
+    var emin=(parseInt(es[0],10)%24)*60+parseInt(es[1],10);
+    if(emin>=240&&emin<=1200) setInterval(tick,20000);
+  } else {
+    // 국내: 장중(09:00~15:35 KST)에만 45초 폴링 — 헤더 시세·곡선 실시간 갱신
+    var km=new Date(Date.now()+9*3600*1000),kmin=km.getUTCHours()*60+km.getUTCMinutes();
+    if(kmin>=540&&kmin<=935) setInterval(tick,45000);
+  }
 })();
 
 // 외국인 보유율 스파크라인 — 직선 폴리라인을 부드러운 곡선 + 그라디언트로 재렌더
