@@ -2543,12 +2543,15 @@ async function renderBriefStrip(){
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
 
-  // ① 즉시 표시 — fetch 결과 기다리지 않고 기본 링크로 visible
-  var baseSlot = slot === 'issue' ? 'kospi' : slot;
-  var bm = BS_META[baseSlot];
-  bsPaint(el, bm.cls, bm.icon, bm.type, '오늘 브리핑 보기', '/briefings/' + today + '/' + baseSlot + '/');
+  // ① 즉시 표시 — 슬롯별 기본값으로 visible (fetch 실패해도 유지)
+  if (slot === 'issue') {
+    bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', '오늘 이슈 보기', '/briefings/' + today + '/kospi/');
+  } else {
+    var bm = BS_META[slot];
+    bsPaint(el, bm.cls, bm.icon, bm.type, '오늘 브리핑 보기', '/briefings/' + today + '/' + slot + '/');
+  }
 
-  // ② issue 슬롯: 이슈 헤드라인으로 업데이트 시도
+  // ② issue 슬롯: 실제 헤드라인으로 업데이트 시도
   if (slot === 'issue') {
     var j = await safeJSON('/data/kospi-news-' + today + '.json')
           || await safeJSON('/data/kospi-news-live.json');
