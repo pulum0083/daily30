@@ -39,10 +39,20 @@ async function fetchMinutes(symbol) {
   };
 }
 
-// 미국 종목 1분봉 (프리·정규·애프터 포함) — 야후 차트 API. ET 시각 라벨 + 5분 샘플링.
+// 미국 종목 1분봉 (프리·정규·애프터 포함) — 야후 차트 API.
+// 세션을 pre/regular/post로 구분하고, 표시 시각은 한국시간(KST)으로 내려준다.
 // stocks-live.mjs와 동일한 엔드포인트지만, 여기선 마지막 체결가만이 아니라 시계열 전체를 곡선으로 반환한다.
 const ET_TIME = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour12: false, hour: '2-digit', minute: '2-digit' });
 const ET_DATE = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+const KST_TIME = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', hour12: false, hour: '2-digit', minute: '2-digit' });
+
+// ET 분(자정 기준) → 세션 구분. 프리 04:00~09:30 / 정규 09:30~16:00 / 애프터 16:00~20:00
+function usSession(etMod) {
+  if (etMod >= 240 && etMod < 570) return 'pre';
+  if (etMod >= 570 && etMod < 960) return 'regular';
+  if (etMod >= 960 && etMod <= 1200) return 'post';
+  return 'other';
+}
 
 async function fetchUSMinutes(ticker) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=1d&interval=1m&includePrePost=true`;
@@ -56,25 +66,30 @@ async function fetchUSMinutes(ticker) {
   const meta = result.meta || {};
   const prevClose = meta.chartPreviousClose ?? meta.previousClose ?? null;
 
-  const minutes = [], times = [];
+  const minutes = [], times = [], sessions = [], stamps = [];
   let lastTs = 0;
   for (let i = 0; i < ts.length; i++) {
     const c = closes[i];
     if (typeof c !== 'number') continue;            // 거래 없는 분은 close=null
-    const parts = ET_TIME.format(new Date(ts[i] * 1000)).split(':'); // ["HH","MM"] ET
-    const hh = parseInt(parts[0], 10) % 24, mm = parseInt(parts[1], 10);
-    const mod = hh * 60 + mm;
+    const ep = ET_TIME.format(new Date(ts[i] * 1000)).split(':'); // ET ["HH","MM"]
+    const eMod = (parseInt(ep[0], 10) % 24) * 60 + parseInt(ep[1], 10);
+    const sess = usSession(eMod);
+    if (sess === 'other') continue;                 // 정규 거래시간대(프리~애프터) 밖은 제외
     // 5분 간격 샘플링 + 마지막 포인트는 항상 포함 (SVG 곡선 경량화)
-    if (mod % 5 !== 0 && i !== ts.length - 1) continue;
+    if (eMod % 5 !== 0 && i !== ts.length - 1) continue;
     minutes.push(Math.round(c * 100) / 100);
-    times.push(`${hh < 10 ? '0' : ''}${hh}:${mm < 10 ? '0' : ''}${mm}`);
+    times.push(KST_TIME.format(new Date(ts[i] * 1000)));  // 표시 시각 = 한국시간 "HH:MM"
+    sessions.push(sess);
+    stamps.push(ts[i]);                             // x축 정렬용 epoch (KST 자정 넘김 방지)
     lastTs = ts[i];
   }
   const refTs = lastTs || ts[ts.length - 1] || Math.floor(Date.now() / 1000);
   return {
     date: ET_DATE.format(new Date(refTs * 1000)).replace(/-/g, ''), // 세션 날짜(ET) YYYYMMDD
     minutes,
-    times,
+    times,       // KST 시각
+    sessions,    // 'pre' | 'regular' | 'post'
+    ts: stamps,  // epoch(초) — 클라이언트 x 위치 계산
     prevClose,
     // 최신 체결이 12시간 이내면 '실시간/직전 세션'으로 간주 → 헤더 시세 갱신 허용
     fresh: lastTs ? (Date.now() / 1000 - lastTs) < 12 * 3600 : false,

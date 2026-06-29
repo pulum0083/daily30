@@ -178,21 +178,24 @@ document.addEventListener('DOMContentLoaded', function() {
   var metaOrig=metaEl?metaEl.innerHTML:'';
   var X0=14,X1=626,YT=26,YB=148; // viewBox 640×180 기준 플롯 영역
   function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
-  function etMin(t){var p=(t||'00:00').split(':');return (+p[0])*60+(+p[1]);} // "HH:MM"→분
   // 가격 표기: 미국=$소수2자리, 국내=정수+콤마
   function fmtPx(v){return isUS?('$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):Math.round(v).toLocaleString();}
   function fmtNum(v){return isUS?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):Math.round(v).toLocaleString();}
   var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
 
-  // ── 라이브 여부·라벨 (현재 시각 기준) ──
+  // ── 라이브 여부·세션 (현재 시각 기준) ──
   // 미국: ET 04:00~20:00(프리~애프터) / 국내: KST 09:00~15:35
+  function etNowMin(){var s=new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');return (parseInt(s[0],10)%24)*60+parseInt(s[1],10);}
   var nowMin = isUS
-    ? (function(){var s=new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');return (parseInt(s[0],10)%24)*60+parseInt(s[1],10);})()
+    ? etNowMin()
     : (function(){var k=new Date(Date.now()+9*3600*1000);return k.getUTCHours()*60+k.getUTCMinutes();})();
   var isLive = isUS ? (nowMin>=240&&nowMin<=1200) : (nowMin>=540&&nowMin<=935);
+  // 현재 미국 세션 구간 (라이브 아닐 땐 본장 기준)
+  function curSeg(){ if(!isLive) return 'regular'; var m=etNowMin(); return m<570?'pre':(m<960?'regular':'post'); }
+  function segLabel(seg){ return seg==='pre'?'프리장':(seg==='post'?'애프터장':'오늘 장중'); }
   function liveLabel(){
-    if(isUS){var s=nowMin<570?'프리장':(nowMin<960?'정규장':'애프터장');return 'LIVE · '+s+' · 20초 갱신';}
+    if(isUS){var s=curSeg();var nm=s==='pre'?'프리장':(s==='post'?'애프터장':'정규장');return 'LIVE · '+nm+' · 20초 갱신';}
     return 'LIVE · 장중 · 45초 갱신';
   }
 
@@ -242,13 +245,29 @@ document.addEventListener('DOMContentLoaded', function() {
   function render(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2){ decide(false); return; }   // 장중 데이터 없음 → 20일 종가 먼저 표시
-    var times=(d&&d.times)||[], n=vals.length;
-    var useT=times.length===n;           // 실제 시각 있으면 시간축 배치, 없으면 균등 분포(폴백)
-    // 미국: ET 시각(프리~애프터)을 실제 분 간격으로 x 배치 / 국내: 09:00~15:30 고정 프레임(t2x)
-    var tmins=null,wlo=0,whi=1;
-    if(isUS&&useT){tmins=times.map(etMin);wlo=Math.min.apply(null,tmins);whi=Math.max.apply(null,tmins);}
+    var times=(d&&d.times)||[];
+    var seg='regular', tsv=null;
+    if(isUS){
+      // 현재 세션 구간만 표시 (프리장/본장/애프터 분리) — 프리장 데이터가 본장에 섞이지 않게
+      seg=curSeg();
+      var sess=(d&&d.sessions)||[], tsa=(d&&d.ts)||[], idx=[];
+      for(var k=0;k<vals.length;k++){ if(sess[k]===seg) idx.push(k); }
+      if(idx.length<2){ idx=[]; for(var k2=0;k2<vals.length;k2++) idx.push(k2); } // 구간 데이터 부족 시 전체
+      vals=idx.map(function(i){return d.minutes[i];});
+      times=idx.map(function(i){return d.times[i];});
+      tsv=idx.map(function(i){return tsa[i];});
+      // 탭 라벨: 프리장 / 오늘 장중 / 애프터장
+      var ci=document.getElementById('ctab-intra'); if(ci) ci.textContent=segLabel(seg);
+      var lvtx=document.getElementById('intra-live-tx'); if(lvtx&&isLive) lvtx.textContent=liveLabel();
+    }
+    var n=vals.length;
+    if(n<2){ decide(false); return; }
+    var useT=times.length===n;
+    // 미국: epoch(ts)로 x 배치 → KST 자정 넘김에도 정렬 안정 / 국내: 09:00~15:30 고정 프레임(t2x)
+    var wlo=0,whi=1;
+    if(isUS&&tsv){wlo=Math.min.apply(null,tsv);whi=Math.max.apply(null,tsv);}
     function px2(i){
-      if(isUS&&useT){return X0+(X1-X0)*((tmins[i]-wlo)/((whi-wlo)||1));}
+      if(isUS&&tsv){return X0+(X1-X0)*((tsv[i]-wlo)/((whi-wlo)||1));}
       return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));
     }
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
@@ -301,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var cur=vals[n-1], chg=(cur-prevClose)/prevClose*100, u=chg>=0;
       if(pxEl) pxEl.textContent=fmtPx(cur);
       if(cgEl){cgEl.style.color=u?'var(--up)':'var(--dn)';cgEl.textContent=(u?'▲ +':'▼ ')+chg.toFixed(2)+'%';}
-      if(metaEl){var lt=times[n-1]||'';metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, isUS?('$1장중 '+lt+' ET'):('$1오늘 장중 '+lt));}
+      if(metaEl){var lt=times[n-1]||'';var ms=seg==='pre'?'프리장':(seg==='post'?'애프터장':'장중');metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, isUS?('$1'+ms+' '+lt):('$1오늘 장중 '+lt));}
     }
 
     // ── 뉴스 핀(movers-why)은 최초 1회만 로드 → pinsHTML에 캐시해 매 틱 곡선과 함께 재합성 ──
