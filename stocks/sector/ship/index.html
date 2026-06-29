@@ -85,6 +85,15 @@
     border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
   .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
   .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
+
+  /* 장중 실시간 / 장마감 상태 배지 */
+  .sector-live{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;margin-left:6px;}
+  .sector-live .sl-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
+  .sector-live.on{background:#FEF2F2;color:#E03131;}
+  .sector-live.on .sl-dot{background:#EF4444;animation:slblink 1.2s ease-in-out infinite;}
+  .sector-live.off{background:var(--canvas);color:var(--muted);border:1px solid var(--hairline);}
+  .sector-live.off .sl-dot{background:#94A3B8;}
+  @keyframes slblink{0%,100%{opacity:1}50%{opacity:.2}}
 </style>
 
 </head>
@@ -118,7 +127,7 @@
     <span><a href="/stocks/">종목 홈</a> › 🚢 조선</span>
   </div>
   <h1 class="sector-page-title">🚢 조선</h1>
-  <p class="sector-page-sub">5종목 · 2026-06-29 종가 기준 (매일 실측 갱신)</p>
+  <p class="sector-page-sub">5종목 · 2026-06-29 기준 <span id="live-status" class="sector-live off" data-snap="2026-06-29"><span class="sl-dot"></span>장마감 · 2026-06-29 종가 기준</span></p>
   <p class="sector-desc">상선·해양플랜트·특수선을 건조하는 조선 종목이에요. 친환경 선박 교체 수요와 수주 잔고, 선가 흐름이 핵심 변수예요.</p>
 
   <div class="sector-nav sector-nav--top">
@@ -147,35 +156,35 @@
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
-      <div class="sector-stat__val up">+4.82%</div>
+      <div class="sector-stat__val up" id="st-avg">+4.82%</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">상승</div>
-      <div class="sector-stat__val up">4</div>
+      <div class="sector-stat__val up" id="st-up">4</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">하락</div>
-      <div class="sector-stat__val down">0</div>
+      <div class="sector-stat__val down" id="st-down">0</div>
     </div>
     
     <div class="sector-stat__box">
       <div class="sector-stat__label">보합</div>
-      <div class="sector-stat__val flat">1</div>
+      <div class="sector-stat__val flat" id="st-flat">1</div>
     </div>
     
   </div>
 
   <div class="sector-breadth">
-    <div class="sector-breadth__label">시장폭 — 5종목 중 상승 4</div>
+    <div class="sector-breadth__label" id="bd-label">시장폭 — 5종목 중 상승 4</div>
     <div class="sector-breadth__bar">
-      <div class="sector-breadth__up" style="flex:4"></div>
-      <div class="sector-breadth__dn" style="flex:0"></div>
-      <div class="sector-breadth__fl" style="flex:1"></div>
+      <div class="sector-breadth__up" id="bd-up" style="flex:4"></div>
+      <div class="sector-breadth__dn" id="bd-dn" style="flex:0"></div>
+      <div class="sector-breadth__fl" id="bd-fl" style="flex:1"></div>
     </div>
     <div class="sector-breadth__legend">
-      <span><i class="iu"></i>상승 4</span>
-      <span><i class="id"></i>하락 0</span>
-      <span><i class="in"></i>보합 1</span>
+      <span><i class="iu"></i>상승 <span id="lg-up">4</span></span>
+      <span><i class="id"></i>하락 <span id="lg-dn">0</span></span>
+      <span><i class="in"></i>보합 <span id="lg-fl">1</span></span>
     </div>
   </div>
 
@@ -368,6 +377,72 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
       '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'+
       '</svg>';
   });
+})();
+
+// ── 장중 실시간 시세 갱신 + 상단 상태 배지(실시간/장마감) ──
+(function(){
+  var statusEl=document.getElementById('live-status');
+  var cards=[].slice.call(document.querySelectorAll('.sector-card[data-code]'));
+  if(!cards.length) return;
+  var snap=statusEl?(statusEl.getAttribute('data-snap')||''):'';
+  var byCode={}; var codes=[];
+  cards.forEach(function(c){var code=c.getAttribute('data-code'); if(code){byCode[code]=c; codes.push(code);}});
+
+  function pctCls(p){return p>0?'up':(p<0?'down':'flat');}
+  function pctFmt(p){return (p>0?'+':'')+p.toFixed(2)+'%';}
+  function readPct(card){var el=card.querySelector('.sector-card__pct');if(!el)return null;var v=parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));return isFinite(v)?v:null;}
+  function setText(id,txt){var el=document.getElementById(id);if(el)el.textContent=txt;}
+
+  function setStatus(open){
+    if(!statusEl) return;
+    if(open){
+      statusEl.className='sector-live on';
+      statusEl.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';
+    } else {
+      statusEl.className='sector-live off';
+      statusEl.innerHTML='<span class="sl-dot"></span>장마감 · '+snap+' 종가 기준';
+    }
+  }
+
+  // 상단 통계(섹터 평균·상승·하락·시장폭) 표시 가격 기준 재계산
+  function recomputeStats(){
+    var up=0,dn=0,fl=0,sum=0,cnt=0;
+    cards.forEach(function(c){var p=readPct(c);if(p==null)return;cnt++;sum+=p;if(p>0)up++;else if(p<0)dn++;else fl++;});
+    if(!cnt) return;
+    var avg=sum/cnt;
+    var avgEl=document.getElementById('st-avg');
+    if(avgEl){avgEl.textContent=(avg>0?'+':'')+avg.toFixed(2)+'%';avgEl.className='sector-stat__val '+(avg>0?'up':(avg<0?'down':'flat'));}
+    setText('st-up',up); setText('st-down',dn); setText('st-flat',fl);
+    setText('lg-up',up); setText('lg-dn',dn); setText('lg-fl',fl);
+    var total=cnt;
+    setText('bd-label','시장폭 — '+total+'종목 중 상승 '+up);
+    var bu=document.getElementById('bd-up'),bd=document.getElementById('bd-dn'),bf=document.getElementById('bd-fl');
+    if(bu)bu.style.flex=up; if(bd)bd.style.flex=dn; if(bf)bf.style.flex=fl;
+  }
+
+  function update(){
+    fetch('/api/stocks-live?codes='+encodeURIComponent(codes.join(',')),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d) return;
+        setStatus(!!d.open);
+        if(Array.isArray(d.prices)){
+          d.prices.forEach(function(p){
+            var card=byCode[p.code]; if(!card) return;
+            var closeEl=card.querySelector('.sector-card__close');
+            var pctEl=card.querySelector('.sector-card__pct');
+            if(closeEl&&isFinite(p.price)) closeEl.textContent=Math.round(p.price).toLocaleString();
+            if(pctEl&&p.changePct!=null){ pctEl.textContent=pctFmt(p.changePct); pctEl.className='sector-card__pct '+pctCls(p.changePct); }
+          });
+          recomputeStats();
+        }
+      }).catch(function(){});
+  }
+
+  // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감'
+  var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
+  if(kmin>=540&&kmin<=930){ update(); setInterval(update,30000); }
+  else { setStatus(false); }
 })();
 </script>
 
