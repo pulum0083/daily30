@@ -38,6 +38,8 @@ async function fetchOne(code) {
 function naverToYahoo(sym) { return sym.replace(/\.[A-Z]$/, ''); }
 
 // 야후 파이낸스 — 프리장·애프터장 실시간 데이터 포함
+// 야후 파이낸스 — 프리장·정규장·애프터장 실시간. 시세는 1분봉 시계열의 마지막 유효 체결가에서 뽑는다.
+// (chart meta에는 pre/postMarketPrice 필드가 없어 시계열을 직접 읽어야 한다.)
 async function fetchYahoo(sym) {
   const ticker = naverToYahoo(sym);
   try {
@@ -47,49 +49,78 @@ async function fetchYahoo(sym) {
     );
     if (!r.ok) return null;
     const d = await r.json();
-    const meta = d?.chart?.result?.[0]?.meta;
+    const result = d?.chart?.result?.[0];
+    const meta = result?.meta;
     if (!meta) return null;
-    const price = meta.regularMarketPrice;
-    const prevClose = meta.chartPreviousClose || meta.previousClose;
-    let livePrice = price;
-    let source = 'regular';
-    if (meta.preMarketPrice && meta.preMarketPrice !== price) {
-      livePrice = meta.preMarketPrice; source = 'pre';
-    } else if (meta.postMarketPrice && meta.postMarketPrice !== price) {
-      livePrice = meta.postMarketPrice; source = 'post';
+
+    const regClose = meta.regularMarketPrice;          // 마지막 정규장 체결가(정규장 중엔 실시간)
+    const prevDayClose = meta.chartPreviousClose ?? meta.previousClose; // 직전 거래일 종가
+
+    // 현재 세션 판별 — 야후가 내려주는 거래시간대(currentTradingPeriod)와 현재 시각 비교
+    const tp = meta.currentTradingPeriod || {};
+    const now = Math.floor(Date.now() / 1000);
+    let state = 'closed';
+    if (tp.regular && now >= tp.regular.start && now < tp.regular.end) state = 'open';
+    else if (tp.pre && now >= tp.pre.start && now < tp.pre.end) state = 'pre';
+    else if (tp.post && now >= tp.post.start && now < tp.post.end) state = 'post';
+
+    // 시계열 마지막 유효 종가 = 프리·애프터 실시간 체결가
+    let lastPx = null, lastTs = meta.regularMarketTime || null;
+    const ts = result.timestamp || [];
+    const closes = result.indicators?.quote?.[0]?.close || [];
+    for (let i = ts.length - 1; i >= 0; i--) {
+      if (typeof closes[i] === 'number') { lastPx = closes[i]; lastTs = ts[i]; break; }
     }
-    if (!isFinite(livePrice) || !isFinite(prevClose) || prevClose === 0) return null;
-    const pct = ((livePrice - prevClose) / prevClose) * 100;
-    return { sym, price: livePrice, changePct: Math.round(pct * 100) / 100, source };
+
+    // 세션별 표시가·등락 기준가
+    let price, base;
+    if (state === 'pre' || state === 'post') {
+      price = (lastPx != null) ? lastPx : regClose;    // 프리·애프터 실시간가
+      base = regClose;                                  // 직전 정규장 종가 대비
+    } else if (state === 'open') {
+      price = (typeof regClose === 'number') ? regClose : lastPx;
+      base = prevDayClose;
+    } else {                                            // closed — 마지막 정규장 종가
+      price = (typeof regClose === 'number') ? regClose : lastPx;
+      base = prevDayClose;
+    }
+    if (!isFinite(price) || !isFinite(base) || base === 0) return null;
+    const pct = ((price - base) / base) * 100;
+    return {
+      sym, price,
+      changePct: Math.round(pct * 100) / 100,
+      source: 'yahoo', state,
+      tradedAt: lastTs ? new Date(lastTs * 1000).toISOString() : null,
+    };
   } catch (e) {
     return null;
   }
 }
 
-// 해외 종목 — 네이버 우선, 정규장 외 시간대엔 야후 폴백 (프리장·애프터장 실시간)
+// 해외 종목 — 야후 우선(프리·정규·애프터 실시간), 실패 시 네이버 폴백
 async function fetchOverseas(sym) {
+  const y = await fetchYahoo(sym);
+  if (y) return y;
   try {
     const r = await fetch(`https://api.stock.naver.com/stock/${encodeURIComponent(sym)}/basic`, {
       headers: HDR_M,
       signal: AbortSignal.timeout(6000),
     });
-    if (!r.ok) return fetchYahoo(sym);
+    if (!r.ok) return null;
     const d = await r.json();
-    if (d.marketStatus !== 'OPEN') return (await fetchYahoo(sym)) || naverFallback(sym, d);
+    const open = d.marketStatus === 'OPEN';
     const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
     const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
     if (!isFinite(price)) return null;
-    return { sym, price, changePct: isFinite(pct) ? pct : null, source: 'regular' };
+    return {
+      sym, price,
+      changePct: isFinite(pct) ? pct : null,
+      source: 'naver', state: open ? 'open' : 'closed',
+      tradedAt: d.localTradedAt || null,
+    };
   } catch (e) {
-    return fetchYahoo(sym);
+    return null;
   }
-}
-
-function naverFallback(sym, d) {
-  const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
-  const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
-  if (!isFinite(price)) return null;
-  return { sym, price, changePct: isFinite(pct) ? pct : null, source: 'close' };
 }
 
 export default async function handler(req, res) {

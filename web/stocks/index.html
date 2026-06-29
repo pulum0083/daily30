@@ -1017,6 +1017,8 @@ function usSel(code){
     </script>
     <style>
 #us-evening .ue-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+#us-evening #ue-live.closed{color:#94A3B8;}
+#us-evening #ue-live.closed .dot{background:#94A3B8;animation:none;}
 #us-evening #ue-toggle button{border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;background:transparent;color:#64748B;cursor:pointer;}
 #us-evening #ue-toggle button.on{background:#0F172A;color:#fff;}
 #us-evening .ue-macro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
@@ -1040,7 +1042,8 @@ function usSel(code){
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
         <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
-        <span style="font-size:11px;color:#94A3B8;">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
+        <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
+        <span style="font-size:11px;color:#94A3B8;" id="ue-sub">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
         <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
           <button type="button" data-cur="krw" class="on">원화</button>
           <button type="button" data-cur="usd">달러</button>
@@ -1066,7 +1069,7 @@ function usSel(code){
     {nm:'반도체ETF',  tk:'SMH',  sym:'SMH.O'}
   ];
   var NASDAQ='QQQ.O';
-  var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false;
+  var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false, isLive=false, sessionState='', basisAt=null;
   /* 가격 변동 시 상단 대표주 위젯과 동일한 카운트업(odometer) + 방향색 플래시 */
   (function injectUeFlash(){
     var st=document.createElement('style');
@@ -1112,6 +1115,20 @@ function usSel(code){
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
   function render(){ renderGrid(); renderMacro(); }
+  /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
+  function updateLiveBadge(){
+    var b=document.getElementById('ue-live'); if(!b) return;
+    var label={open:'정규장',pre:'프리장',post:'애프터장'}[sessionState];
+    if(isLive && label){
+      b.classList.remove('closed');
+      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 10초 갱신';
+    }else{
+      b.classList.add('closed');
+      var dt='';
+      if(basisAt){ var d=new Date(basisAt); if(!isNaN(d)) dt=(d.getMonth()+1)+'.'+d.getDate()+' '; }
+      b.innerHTML='<span class="dot"></span>장 마감 · '+dt+'종가 기준';
+    }
+  }
   /* 폴링 후 행 가격을 in-place 갱신 — 카운트업 + 방향색 플래시(상단 대표주 위젯과 동일 효과) */
   function animatePx(el, toUsd){
     var from=parseFloat(el.getAttribute('data-usd'));
@@ -1152,19 +1169,36 @@ function usSel(code){
       fetch('/api/market',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
     ]).then(function(res){
       var live=res[0], mkt=res[1];
-      if(live&&Array.isArray(live.us)) live.us.forEach(function(x){ dataBySym[x.sym]={price:x.price,changePct:x.changePct}; });
+      if(live&&Array.isArray(live.us)){
+        live.us.forEach(function(x){ dataBySym[x.sym]={price:x.price,changePct:x.changePct,state:x.state,tradedAt:x.tradedAt}; });
+        var rep=null;
+        live.us.forEach(function(x){ if(x.sym===NASDAQ) rep=x; });
+        if(!rep) rep=live.us[0]||{};
+        sessionState=rep.state||'closed';
+        basisAt=rep.tradedAt||null;
+        // 하나라도 정규장·프리장·애프터장이면 라이브로 간주
+        isLive=live.us.some(function(x){ return x.state==='open'||x.state==='pre'||x.state==='post'; });
+      }
       if(mkt&&mkt.forex&&typeof mkt.forex.price==='number') fx=mkt.forex.price;
       if(mkt&&mkt.vix&&typeof mkt.vix.price==='number') vix=mkt.vix;
       if(!fx&&!loaded){ cur='usd'; syncToggle(); }
       if(!loaded){ loaded=true; render(); }
       else patch();
+      updateLiveBadge();
+      setPoll(isLive ? POLL_LIVE : POLL_IDLE);
     });
   }
-  var pollId=null;
+  var pollId=null, POLL_LIVE=10000, POLL_IDLE=60000, curPoll=0;
+  function setPoll(ms){
+    if(pollId && curPoll===ms) return;
+    if(pollId) clearInterval(pollId);
+    curPoll=ms; pollId=setInterval(load, ms);
+  }
   window.__ueLoad=function(){
     load();
-    if(!pollId) pollId=setInterval(load, 60000);
+    if(!pollId) setPoll(POLL_LIVE);
   };
+  window.__ueStop=function(){ if(pollId){ clearInterval(pollId); pollId=null; curPoll=0; } };
   function syncToggle(){
     document.querySelectorAll('#ue-toggle button').forEach(function(b){
       b.classList.toggle('on', b.getAttribute('data-cur')===cur);
@@ -1189,7 +1223,7 @@ function usSel(code){
     box.style.display = ev ? '' : 'none';
     var mt=document.getElementById('mom-track');
     if(mt) mt.style.display = ev ? 'none' : (window.__momHasPicks ? '' : 'none');
-    if(ev) window.__ueLoad();
+    if(ev) window.__ueLoad(); else window.__ueStop();
   };
   // 오늘 코스피 브리핑 ready 여부로 비거래일(공휴일) 판별 — 서버 휴일 로직과 정합. 확인 후 게이트 재평가.
   fetch('/data/briefings-list.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
@@ -1199,7 +1233,6 @@ function usSel(code){
   }).catch(function(){});
   window.ueGate();
   setInterval(window.ueGate, 5*60*1000);
-  setInterval(function(){ if(isEvening(kstNow()) && loaded) load(); }, 60000);
 })();
 </script>
     <div class="home-cols">
