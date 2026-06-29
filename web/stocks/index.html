@@ -2558,7 +2558,7 @@ async function renderBriefStrip(){
   if (slot === 'issue') {
     var j = await safeJSON('/data/kospi-news-' + today + '.json')
           || await safeJSON('/data/kospi-news-live.json')
-          || await safeJSON('/api/news-live');
+          || await safeJSON('/api/data?f=news-live');
     var lt = j && j.latest;
     var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
     if (title) {
@@ -2570,7 +2570,7 @@ async function renderBriefStrip(){
 
   // ③ briefings-list.json으로 실제 브리핑 타이틀 업데이트
   var list = await safeJSON('/data/briefings-list.json')
-           || await safeJSON('/api/briefings-list');
+           || await safeJSON('/api/data?f=briefings-list');
   var s = list && list.slots && list.slots[today] && list.slots[today][slot];
   if (s && s.state === 'ready') {
     var d = bsItem(s, slot);

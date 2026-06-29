@@ -1811,7 +1811,7 @@
       if (isToday) {
         // 오늘은 live.json → 실패 시 /api/news-live fallback (사내망 /data/ 차단 대응)
         tryFetch('/data/kospi-news-live.json?t=' + Date.now(), 4000)
-          .catch(function() { return tryFetch('/api/news-live', 8000); })
+          .catch(function() { return tryFetch('/api/data?f=news-live', 8000); })
           .then(render)
           .catch(function() { wrap.style.display = 'none'; });
       } else {
