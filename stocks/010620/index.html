@@ -29,7 +29,7 @@
         <div class="top">
           <div>
             <div class="hn">HD현대미포 <a class="chip" href="/stocks/sector/ship/">조선</a></div>
-            <div class="meta"><span class="num">010620</span> · KOSPI · 06-26 종가</div>
+            <div class="meta"><span class="num">010620</span> · KOSPI · 06-29 종가</div>
           </div>
           <div style="text-align:right">
             <div class="px num">223,000</div>
@@ -38,11 +38,14 @@
             
           </div>
         </div>
-        <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
-        <div class="ctabs">
+        <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
+        <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
           <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
+          <span class="upd-badge" id="intra-live" style="display:none;margin-left:auto;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
         </div>
+        <!-- 차트 로딩 자리(레이아웃 시프트 방지) -->
+        <div id="chart-loading" style="height:172px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">차트 불러오는 중…</div>
         <!-- 오늘 장중 패널 (실측 1분봉) -->
         <div class="cpane hidden" id="pane-intra" data-code="010620">
           <div style="padding:0 14px;">
@@ -51,7 +54,7 @@
           </div>
         </div>
         <!-- 20일 종가 패널 -->
-        <div class="cpane" id="pane-spark">
+        <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
                data-spark="239500.0,240000.0,227000.0,232500.0,223000.0,221500.0,219500.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0,223000.0"
                data-dates=""
@@ -62,7 +65,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="010620" data-date="2026-06-28">
+        <div class="np__h" id="sig-c-head" data-code="010620" data-date="2026-06-29">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -79,7 +82,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">06-26 종가 기준</span>
+          <span class="np__s">06-29 종가 기준</span>
         </div>
 
         
@@ -248,7 +251,7 @@
         <a class="srow" href="/stocks/329180/">
           <span class="n2">HD현대중공업 <small class="num">329180</small></span>
           
-            <span class="c dn num">-3.09%</span>
+            <span class="c up num">+4.96%</span>
             
           
         </a>
@@ -256,7 +259,7 @@
         <a class="srow" href="/stocks/042660/">
           <span class="n2">한화오션 <small class="num">042660</small></span>
           
-            <span class="c dn num">-7.20%</span>
+            <span class="c up num">+7.65%</span>
             
           
         </a>
@@ -264,7 +267,7 @@
         <a class="srow" href="/stocks/010140/">
           <span class="n2">삼성중공업 <small class="num">010140</small></span>
           
-            <span class="c dn num">-3.36%</span>
+            <span class="c up num">+6.30%</span>
             
           
         </a>
@@ -272,7 +275,7 @@
         <a class="srow" href="/stocks/009540/">
           <span class="n2">HD한국조선해양 <small class="num">009540</small></span>
           
-            <span class="c dn num">-5.60%</span>
+            <span class="c up num">+5.21%</span>
             
           
         </a>
@@ -313,7 +316,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-26 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-29 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>

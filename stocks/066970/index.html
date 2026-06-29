@@ -29,20 +29,23 @@
         <div class="top">
           <div>
             <div class="hn">엘앤에프 <a class="chip" href="/stocks/sector/battery/">2차전지</a></div>
-            <div class="meta"><span class="num">066970</span> · KOSPI · 06-26 종가</div>
+            <div class="meta"><span class="num">066970</span> · KOSPI · 06-29 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">98,900</div>
+            <div class="px num">116,900</div>
             
-            <div class="cg num" style="color:var(--dn)">▼ -8.26%</div>
+            <div class="cg num" style="color:var(--up)">▲ +18.20%</div>
             
           </div>
         </div>
-        <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
-        <div class="ctabs">
+        <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
+        <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
           <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
+          <span class="upd-badge" id="intra-live" style="display:none;margin-left:auto;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
         </div>
+        <!-- 차트 로딩 자리(레이아웃 시프트 방지) -->
+        <div id="chart-loading" style="height:172px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">차트 불러오는 중…</div>
         <!-- 오늘 장중 패널 (실측 1분봉) -->
         <div class="cpane hidden" id="pane-intra" data-code="066970">
           <div style="padding:0 14px;">
@@ -51,10 +54,10 @@
           </div>
         </div>
         <!-- 20일 종가 패널 -->
-        <div class="cpane" id="pane-spark">
+        <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
-               data-spark="168300.0,155000.0,150000.0,150100.0,139900.0,124600.0,129600.0,126400.0,125800.0,134000.0,141700.0,141700.0,140600.0,127900.0,128600.0,125700.0,112700.0,113700.0,107800.0,98900.0"
-               data-dates="5/29,6/1,6/2,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25,6/26"
+               data-spark="155000.0,150000.0,150100.0,139900.0,124600.0,129600.0,126400.0,125800.0,134000.0,141700.0,141700.0,140600.0,127900.0,128600.0,125700.0,112700.0,113700.0,107800.0,98900.0,116900.0"
+               data-dates="6/1,6/2,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/19,6/22,6/23,6/24,6/25,6/26,6/29"
                style="cursor:crosshair;position:relative;"></div>
         </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
@@ -62,7 +65,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="066970" data-date="2026-06-28">
+        <div class="np__h" id="sig-c-head" data-code="066970" data-date="2026-06-29">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -79,13 +82,13 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">06-26 종가 기준</span>
+          <span class="np__s">06-29 종가 기준</span>
         </div>
 
         
         <div class="mx">
-          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">30.9%</b> 지점</span></div>
-          <div class="w52"><div class="fill" style="width:30.9%"></div><div class="now" style="left:30.9%"></div></div>
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">41.8%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:41.8%"></div><div class="now" style="left:41.8%"></div></div>
           <div class="w52-lb"><span>최저 47,800</span><span>최고 213,000</span></div>
         </div>
         
@@ -95,14 +98,14 @@
           
           <div class="cell">
             <div class="l">20일선 대비</div>
-            <div class="v" style="color:var(--dn)">-25.2%</div>
+            <div class="v" style="color:var(--dn)">-9.8%</div>
             <div class="sub">단기 추세 아래</div>
           </div>
           
           
           <div class="cell">
             <div class="l">200일선 대비</div>
-            <div class="v" style="color:var(--dn)">-21.2%</div>
+            <div class="v" style="color:var(--dn)">-7.1%</div>
             <div class="sub">장기 추세 아래</div>
           </div>
           
@@ -113,10 +116,10 @@
         <div class="frw">
           <div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:3px;cursor:help;" id="fo-label">외국인 보유율 <span style="font-size:10px;border:1px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;line-height:1;">?</span></div>
-            <div class="v">20.71<span style="font-size:12px">%</span></div>
+            <div class="v">21.32<span style="font-size:12px">%</span></div>
           </div>
           
-          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,27.4 8.421052631578947,36.0 16.842105263157894,32.6 25.263157894736842,35.0 33.68421052631579,33.9 42.10526315789474,24.6 50.526315789473685,21.1 58.94736842105263,17.7 67.36842105263158,21.3 75.78947368421052,21.9 84.21052631578948,22.5 92.63157894736842,22.3 101.05263157894737,21.9 109.47368421052632,26.1 117.89473684210526,21.0 126.3157894736842,19.4 134.73684210526315,17.1 143.1578947368421,13.5 151.57894736842104,4.0 160.0,4.0 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,36.0 8.421052631578947,33.5 16.842105263157894,35.3 25.263157894736842,34.5 33.68421052631579,27.6 42.10526315789474,25.1 50.526315789473685,22.6 58.94736842105263,25.2 67.36842105263158,25.7 75.78947368421052,26.1 84.21052631578948,25.9 92.63157894736842,25.7 101.05263157894737,28.7 109.47368421052632,25.0 117.89473684210526,23.8 126.3157894736842,22.2 134.73684210526315,19.5 143.1578947368421,12.5 151.57894736842104,4.0 160.0,4.0 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
           </svg>
           
         </div>
@@ -317,7 +320,7 @@
         <a class="srow" href="/stocks/373220/">
           <span class="n2">LG에너지솔루션 <small class="num">373220</small></span>
           
-            <span class="c dn num">-5.82%</span>
+            <span class="c up num">+20.81%</span>
             
           
         </a>
@@ -325,7 +328,7 @@
         <a class="srow" href="/stocks/247540/">
           <span class="n2">에코프로비엠 <small class="num">247540</small></span>
           
-            <span class="c dn num">-7.15%</span>
+            <span class="c up num">+15.56%</span>
             
           
         </a>
@@ -333,7 +336,7 @@
         <a class="srow" href="/stocks/006400/">
           <span class="n2">삼성SDI <small class="num">006400</small></span>
           
-            <span class="c dn num">-5.41%</span>
+            <span class="c up num">+12.53%</span>
             
           
         </a>
@@ -341,7 +344,7 @@
         <a class="srow" href="/stocks/003670/">
           <span class="n2">포스코퓨처엠 <small class="num">003670</small></span>
           
-            <span class="c dn num">-5.64%</span>
+            <span class="c up num">+16.81%</span>
             
           
         </a>
@@ -382,7 +385,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-26 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-29 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>

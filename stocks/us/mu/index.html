@@ -28,20 +28,23 @@
         <div class="top">
           <div>
             <div class="hn">마이크론 <span class="chip">🇺🇸 MU</span></div>
-            <div class="meta">미국 반도체 · 06-26 종가</div>
+            <div class="meta">미국 반도체 · 06-29 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">$1132.33</div>
+            <div class="px num">$1089.98</div>
             
-            <div class="cg num" style="color:var(--dn)">▼ -6.69%</div>
+            <div class="cg num" style="color:var(--dn)">▼ -3.74%</div>
             
           </div>
         </div>
-        <!-- 차트 탭: 오늘 장중(프리·정규·애프터 실측 1분봉) / 20일 종가. 장중 데이터가 있으면 stocks.js가 '오늘 장중' 탭을 노출·기본 활성화한다. -->
-        <div class="ctabs">
+        <!-- 차트 탭: 오늘 장중(프리·정규·애프터 실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
+        <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
           <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
+          <span class="upd-badge" id="intra-live" style="display:none;margin-left:auto;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
         </div>
+        <!-- 차트 로딩 자리(레이아웃 시프트 방지) -->
+        <div id="chart-loading" style="height:172px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">차트 불러오는 중…</div>
         <!-- 오늘 장중 패널 (야후 1분봉 · 프리/정규/애프터) -->
         <div class="cpane hidden" id="pane-intra" data-ticker="MU">
           <div style="padding:0 14px;">
@@ -50,10 +53,10 @@
           </div>
         </div>
         <!-- 20일 종가 패널 -->
-        <div class="cpane" id="pane-spark">
+        <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
-               data-spark="971.0,1035.5,1064.1,1079.57,996.0,864.01,949.28,935.89,891.88,995.87,981.61,1087.99,1020.76,1043.19,1133.99,1211.38,1051.77,1048.51,1213.56,1132.33"
-               data-dates="5/29,6/1,6/2,6/3,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/22,6/23,6/24,6/25,6/26"
+               data-spark="1035.5,1064.1,1079.57,996.0,864.01,949.28,935.89,891.88,995.87,981.61,1087.99,1020.76,1043.19,1133.99,1211.38,1051.77,1048.51,1213.56,1132.33,1089.98"
+               data-dates="6/1,6/2,6/3,6/4,6/5,6/8,6/9,6/10,6/11,6/12,6/15,6/16,6/17,6/18,6/22,6/23,6/24,6/25,6/26,6/29"
                style="cursor:crosshair;position:relative;"></div>
         </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
@@ -66,13 +69,13 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">06-26 종가 기준</span>
+          <span class="np__s">06-29 종가 기준</span>
         </div>
 
         
         <div class="mx">
-          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">92.7%</b> 지점</span></div>
-          <div class="w52"><div class="fill" style="width:92.7%"></div><div class="now" style="left:92.7%"></div></div>
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">88.9%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:88.9%"></div><div class="now" style="left:88.9%"></div></div>
           <div class="w52-lb"><span>최저 $104.73</span><span>최고 $1213.56</span></div>
         </div>
         
@@ -82,14 +85,14 @@
           
           <div class="cell">
             <div class="l">20일선 대비</div>
-            <div class="v" style="color:var(--up)">+9.4%</div>
+            <div class="v" style="color:var(--up)">+4.7%</div>
             <div class="sub">단기 추세 위</div>
           </div>
           
           
           <div class="cell">
             <div class="l">200일선 대비</div>
-            <div class="v" style="color:var(--up)">+166.0%</div>
+            <div class="v" style="color:var(--up)">+153.2%</div>
             <div class="sub">장기 추세 위</div>
           </div>
           
@@ -164,7 +167,7 @@
         <a class="srow" href="/stocks/us/nvda/">
           <span class="n2">엔비디아 <small class="num">NVDA</small></span>
           
-            <span class="c dn num">-1.64%</span>
+            <span class="c up num">+1.56%</span>
             
           
         </a>
@@ -172,7 +175,7 @@
         <a class="srow" href="/stocks/us/asml/">
           <span class="n2">ASML <small class="num">ASML</small></span>
           
-            <span class="c dn num">-2.53%</span>
+            <span class="c up num">+1.43%</span>
             
           
         </a>
@@ -198,7 +201,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주</b> — 미국 장 마감 후 갱신. 직전 거래일(06-26 종가) 기준 yfinance 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주</b> — 미국 장 마감 후 갱신. 직전 거래일(06-29 종가) 기준 yfinance 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘 장중</b> — 프리장·정규장·애프터장 실시간 1분봉(야후, ET 기준)이에요. 미국 장중엔 헤더 시세도 함께 갱신돼요.</p>
     <p style="margin:0 0 4px;">· <b>분기 실적</b> — yfinance 분기 재무 기준이며 단위는 USD예요.</p>
     <p style="margin:6px 0 0;">모든 수치는 실측이며 투자 판단 참고용이에요.</p>
