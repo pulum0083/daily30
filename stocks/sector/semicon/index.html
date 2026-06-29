@@ -388,5 +388,62 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
 })();
 </script>
 
+<script>
+// 장중 라이브 가격 폴링 — /api/stocks-live
+(function(){
+  var kst=new Date(Date.now()+9*3600*1000);
+  var kmin=kst.getUTCHours()*60+kst.getUTCMinutes();
+  var dow=kst.getUTCDay();
+  if(dow===0||dow===6) return;
+  if(kmin<540||kmin>935) return;
+
+  var cards=document.querySelectorAll('.sector-card[data-code]');
+  if(!cards.length) return;
+  var codes=[]; cards.forEach(function(c){codes.push(c.getAttribute('data-code'));});
+
+  function fmt(n){return Math.round(n).toLocaleString();}
+
+  function refresh(){
+    fetch('/api/stocks-live?codes='+codes.join(',')).then(function(r){return r.json();}).then(function(d){
+      if(!d||!d.prices||!d.prices.length) return;
+      var map={}; d.prices.forEach(function(p){map[p.code]=p;});
+      var pcts=[];
+      cards.forEach(function(card){
+        var code=card.getAttribute('data-code');
+        var p=map[code]; if(!p) return;
+        var closeEl=card.querySelector('.sector-card__close');
+        var pctEl=card.querySelector('.sector-card__pct');
+        if(closeEl) closeEl.textContent=fmt(p.price);
+        if(pctEl&&p.changePct!=null){
+          var u=p.changePct>=0;
+          pctEl.textContent=(u?'+':'')+p.changePct.toFixed(2)+'%';
+          pctEl.className='sector-card__pct '+(u?'up':'down');
+          pcts.push(p.changePct);
+        }
+      });
+      if(!pcts.length) return;
+      var avg=pcts.reduce(function(a,b){return a+b;},0)/pcts.length;
+      var up=pcts.filter(function(v){return v>0;}).length;
+      var dn=pcts.filter(function(v){return v<0;}).length;
+      var fl=pcts.length-up-dn;
+      var statVals=document.querySelectorAll('.sector-stat__val');
+      if(statVals[0]){statVals[0].textContent=(avg>=0?'+':'')+avg.toFixed(2)+'%';statVals[0].className='sector-stat__val '+(avg>=0?'up':'down');}
+      if(statVals[1]){statVals[1].textContent=up;statVals[1].className='sector-stat__val '+(up?'up':'flat');}
+      if(statVals[2]){statVals[2].textContent=dn;statVals[2].className='sector-stat__val '+(dn?'down':'flat');}
+      var bLabel=document.querySelector('.sector-breadth__label');
+      if(bLabel) bLabel.textContent='시장폭 — '+pcts.length+'종목 중 상승 '+up;
+      var bBar=document.querySelector('.sector-breadth__bar');
+      if(bBar) bBar.innerHTML=(up?'<div class="sector-breadth__up" style="flex:'+up+'"></div>':'')+(dn?'<div class="sector-breadth__dn" style="flex:'+dn+'"></div>':'')+(fl?'<div class="sector-breadth__fl" style="flex:'+fl+'"></div>':'');
+      var bLeg=document.querySelector('.sector-breadth__legend');
+      if(bLeg) bLeg.innerHTML='<span><i class="iu"></i>상승 '+up+'</span><span><i class="id"></i>하락 '+dn+'</span>'+(fl?'<span><i class="in"></i>보합 '+fl+'</span>':'');
+      var sub=document.querySelector('.sector-page-sub');
+      if(sub){var t=new Date(Date.now()+9*3600*1000),hh=String(t.getUTCHours()).padStart(2,'0'),mm=String(t.getUTCMinutes()).padStart(2,'0');sub.textContent=pcts.length+'종목 · 장중 실시간 ('+hh+':'+mm+' 기준)';}
+    }).catch(function(){});
+  }
+  refresh();
+  setInterval(refresh,30000);
+})();
+</script>
+
 </body>
 </html>
