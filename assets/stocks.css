@@ -8,7 +8,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 .gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
 .gnb__in{max-width:1136px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
-.gnb__logo{font-size:15px;font-weight:800;color:#fff;text-decoration:none;}.gnb__logo b{color:#5AA2FF;}
+.gnb__logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;}
+.gnb__logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#E03131,#FF6A6A);display:flex;align-items:center;justify-content:center;flex-shrink:0;}.gnb__logo-mark svg{width:17px;height:17px;}
+.gnb__title{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;}.gnb__title span{color:#5AA2FF;}
 .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
 .gnb .right{margin-left:auto;display:flex;align-items:center;}
 .gnb__subs{display:flex;align-items:center;gap:2px;}
