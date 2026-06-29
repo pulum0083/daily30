@@ -7,7 +7,7 @@ export const VOL_SURGE_MIN = 1.5;
 export const CAPITULATION_DROP = -3.0;
 export const TURNOVER_TOP_N = 3;
 export const NEAR_HIGH_RATIO = 0.98;
-export const SIGNALS_DISPLAY_MAX = 8; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계)
+export const SIGNALS_DISPLAY_MAX = 10; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계)
 // 카드 정렬 가중치 — 역행·신고가 같은 희소 신호를 위로, 흔한 수급은 아래로
 const SIGNAL_SCORE = { counter_up: 5, near_high: 4, vol_surge: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
 

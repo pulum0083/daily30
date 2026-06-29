@@ -125,11 +125,11 @@ test('why+enrich: 수급만 있는 종목도 enrich로 설명 문구가 채워�
   assert.ok(signals[0].why && signals[0].why.length > 0);
 });
 
-test('신호 카드 목록은 최대 8개로 제한 (랭킹은 전체 집계 유지)', () => {
+test('신호 카드 목록은 최대 10개로 제한 (랭킹은 전체 집계 유지)', () => {
   const stocks = [];
   for (let i = 0; i < 12; i++) stocks.push({ code: String(i), name: 'S' + i, sector: 'bio', pct: -1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 });
   const { signals, rank } = buildSignals(stocks, -5.8, { enrich: () => ({ cats: ['inst_buy'], badges: ['기관'] }) });
-  assert.ok(signals.length <= 8, 'card list capped at 8');
+  assert.ok(signals.length <= 10, 'card list capped at 10');
   const ib = rank.find((g) => g.cat === 'inst_buy');
   assert.equal(ib.items.length, 12); // 랭킹은 전체 12개 집계
 });
