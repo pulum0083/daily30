@@ -47,19 +47,24 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
 .strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
 /* ── AI 브리핑 스트립 ── */
-.brief-strip{display:flex;align-items:center;gap:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:10px 14px;margin:10px 0;cursor:pointer;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,padding .14s,border-color .14s;}
-.brief-strip.is-hidden{padding:0;border-color:transparent;box-shadow:none;background:transparent;pointer-events:none;overflow:hidden;height:0;margin:0;}
-.brief-strip:hover{border-color:var(--primary);background:#F8FAFF;}
-.brief-strip.bs-kospi{background:var(--primary-bg);border-color:#BFDBFE;}.brief-strip.bs-kospi:hover{background:#DCEFFE;}
-.brief-strip.bs-close{background:#F0FDF4;border-color:#BBF7D0;}.brief-strip.bs-close:hover{background:#DCFCE7;}
-.brief-strip.bs-us{background:#FEFCE8;border-color:#FDE68A;}.brief-strip.bs-us:hover{background:#FEF9C3;}
-.brief-strip.bs-live{background:#FEF2F2;border-color:#FECACA;}.brief-strip.bs-live:hover{background:#FEE2E2;}
-.bs-icon{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.bs-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-.bs-type{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1px;}
-.bs-kospi .bs-type{color:var(--primary);}.bs-close .bs-type{color:#16A34A;}.bs-us .bs-type{color:#CA8A04;}.bs-live .bs-type{color:#EF4444;}
-.bs-text{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;word-break:keep-all;}
-.bs-arr{font-size:16px;color:#C0C4CA;flex-shrink:0;transition:color .14s;}.brief-strip:hover .bs-arr{color:var(--primary);}
+/* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
+.brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
+.brief-card:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,117,237,.10);}
+.brief-card.is-hidden{display:none;}
+.brief-card.bc-kospi{background:var(--primary-bg);border-color:#BFDBFE;}
+.brief-card.bc-close{background:#F0FDF4;border-color:#BBF7D0;}
+.brief-card.bc-us{background:#FEFCE8;border-color:#FDE68A;}
+.brief-card.bc-live{background:#FEF2F2;border-color:#FECACA;}
+.bc-ico{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.78);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+.bc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.bc-top{display:flex;align-items:center;gap:7px;}
+.bc-type{font-size:11.5px;font-weight:800;letter-spacing:-.2px;}
+.bc-kospi .bc-type{color:var(--primary);}.bc-close .bc-type{color:#16A34A;}.bc-us .bc-type{color:#CA8A04;}.bc-live .bc-type{color:#EF4444;}
+.bc-time{font-size:11px;font-weight:700;color:var(--muted);}
+.bc-head{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc-pill{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;flex:none;}
+.bc-pill.up{background:#FEE2E2;color:#E03131;}.bc-pill.dn{background:#DBEAFE;color:#2775ED;}
+.bc-arr{font-size:18px;color:#C0C4CA;flex:none;transition:color .14s;}.brief-card:hover .bc-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 /* 갱신 배지 */
@@ -623,10 +628,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .ai{width:60px;}
   .prank-row .nm{width:104px!important;}
   .ai{width:auto;}
-  /* 프로토타입 시간대 토글 — 좁은 화면에서 줄바꿈 */
-  .brief-strip{flex-wrap:wrap;}
-  .bs-arr{order:1;}
-  .proto-toggle{order:2;flex-basis:100%;margin-top:6px;}
+  /* 브리핑 커넥터 — 좁은 화면에서 줄바꿈 */
+  .brief-card{flex-wrap:wrap;}
+  .bc-head{white-space:normal;}
+  .bc-arr{order:1;}
 }
 </style>
 </head>
@@ -650,15 +655,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
-    <!-- AI 브리핑 스트립 (시간대별 자동 전환) — JS가 슬롯 판단 후 숨김/표시 업데이트 -->
-    <div class="brief-strip bs-kospi" id="brief-strip" onclick="var h=this.dataset.href;if(h)window.location.href=h;" data-href="/briefings/" style="cursor:pointer;">
-      <span class="bs-icon" id="bs-icon">📊</span>
-      <span class="bs-body">
-        <span class="bs-type" id="bs-type">더블샷 브리핑</span>
-        <span class="bs-text" id="bs-text">오늘 AI 시장 분석 보기</span>
+    <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
+    <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
+      <span class="bc-ico" id="bc-ico">📊</span>
+      <span class="bc-main">
+        <span class="bc-top">
+          <span class="bc-type" id="bc-type">더블샷 브리핑</span>
+          <span class="bc-time" id="bc-time"></span>
+        </span>
+        <span class="bc-head" id="bc-head">오늘의 AI 시장 브리핑 보기</span>
       </span>
-      <span class="bs-arr">›</span>
-    </div>
+      <span class="bc-pill" id="bc-pill" style="display:none"></span>
+      <span class="bc-arr">›</span>
+    </a>
     <style>#us-linked-widget{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;}#us-linked-widget .usw-tiles{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}.usw-tiles::-webkit-scrollbar{display:none;}.us-tile{flex:1 0 auto;min-width:0;cursor:pointer;background:#F7F9FC;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 15px;transition:border-color .12s,box-shadow .12s,background .12s;}.us-tile.on{background:#fff;border-color:#2775ED;box-shadow:0 3px 10px rgba(37,117,237,.12);}#why-moved{margin-top:18px;padding-top:16px;border-top:1px solid #F1F5F9;}.us-tile{position:relative;}.us-tile .tile-go{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(37,117,237,.08);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;cursor:pointer;text-decoration:none;}.us-tile:hover .tile-go{opacity:1;}.us-tile .tile-go svg{width:14px;height:14px;}#why-moved .wm-grid{display:flex;gap:16px;align-items:stretch;margin-top:2px;}#why-moved .wm-left{flex:1.5 1 0;min-width:0;display:flex;align-items:center;}#why-moved .wm-left svg{width:100%;height:auto;aspect-ratio:640/180;}#why-moved .wm-right{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:14px;justify-content:center;border-left:1px solid #EEF2F7;padding-left:18px;}#why-moved .wm-card-h{font-size:12px;font-weight:800;color:#0F172A;display:flex;align-items:center;margin-bottom:8px;}#why-moved .wm-card-s{margin-left:auto;font-size:11px;font-weight:700;color:#94A3B8;}#why-moved .wm-live{margin-left:8px;font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 7px;}#why-moved .wm-bell-tk{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#334155;}#why-moved .vol-bar{position:relative;flex:none;width:108px;height:8px;border-radius:5px;background:#EEF2F7;overflow:hidden;}#why-moved .vol-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;}#why-moved .vol-base{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1;}#why-moved .wm-bell-note{font-size:11px;color:#64748B;margin-top:5px;line-height:1.4;}@media(max-width:680px){#why-moved .wm-grid{flex-direction:column;}#why-moved .wm-right{border-left:none;padding-left:0;}}</style><div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><span class="help-q" data-tip-title="코스피 주도주" data-tip="코스피 시총 상위 종목의 흐름을 보여줘요.<br><br><b>장중(09:00~15:30)</b>엔 한국거래소 <b>코스피 실시간 체결가</b>로,<br><b>장 마감 이후</b>엔 하이퍼리퀴드 <b>24h 무기한선물 환산가</b>로 제공해요.<br><br>환산가는 참고용이며 실제 체결가가 아니에요.">?</span><span class="usw-sub" style="margin-left:auto;font-size:11px;color:#94A3B8;">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div><div class="usw-tiles"><div class="us-tile on" data-code="005930" onclick="usSel('005930')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">삼성전자</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">354,000</div><div style="font-size:12px;font-weight:700;color:#2775ED;margin-top:3px;">▼ 8,300 (2.34%)</div><a class="tile-go" href="/stocks/005930/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="000660" onclick="usSel('000660')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">SK하이닉스</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">248,500</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 8,500 (3.42%)</div><a class="tile-go" href="/stocks/000660/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="005380" onclick="usSel('005380')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">현대차</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">245,000</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 2,000 (0.82%)</div><a class="tile-go" href="/stocks/005380/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div id="why-moved"><div class="wm-h" style="display:flex;align-items:center;"><span style="font-size:15px;font-weight:800;color:#0F172A;">📈 <span id="wm-name">삼성전자</span> <span class="ds-date"></span> 장중</span><span style="font-size:11px;font-weight:700;color:#E03131;background:#FEF2F2;border-radius:999px;padding:2px 8px;margin-left:8px;">● 실측 1분봉</span></div><div class="wm-grid"><div class="wm-left"><svg id="wm-svg" viewBox="0 0 640 180" role="img" aria-label="장중 1분봉 곡선" style="width:100%;height:auto;display:block;overflow:visible;"></svg></div><div class="wm-right"><div id="wm-vol" style="display:none"></div><div id="wm-range" style="display:none"></div><div id="wm-vwap" style="display:none"></div></div></div><span data-code="005930" data-name="삼성전자" style="display:none"></span><span data-code="000660" data-name="SK하이닉스" style="display:none"></span><span data-code="005380" data-name="현대차" style="display:none"></span><div id="wm-tl"></div></div></div><script>
 function usSel(code){
   document.querySelectorAll('#us-linked-widget .us-tile').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-code')===code);});
@@ -2381,115 +2390,101 @@ if(passBtn){
   passBtn.addEventListener('mouseleave',hideTip);
 }
 
-/* ── AI 브리핑 스트립 ── */
-/* 예측 브리핑 스트립 — 현재 KST 시간대에 맞는 실제 브리핑을 briefings-list.json에서 연결.
-   시간대→타입: 07:30~장중=kospi(당일 예측), 마감 후=close, 저녁=us. 주말/없음=최근 ready 폴백. */
-var BS_META = {
-  kospi: { cls:'bs-kospi', icon:'📊', type:'코스피 예측 브리핑' },
-  close: { cls:'bs-close', icon:'🏁', type:'코스피 마감 브리핑' },
-  us:    { cls:'bs-us',    icon:'🌙', type:'미국 시장 예측 브리핑' }
-};
-
-/* 브리핑 스트립 타임테이블 (KST, 평일만) — 룰 고정:
-   07:30~09:00 kospi 예측 → 09:00~16:30 issue 장중 이슈(30분 갱신) →
-   16:30~21:20 close 마감 → 21:20~23:00 us 미국 예측 → 23:00~익일07:30 제거.
-   주말·휴일(브리핑 미배포)은 제거. 각 슬롯은 "오늘 해당 브리핑이 실제 ready"일 때만 표시(stale 날짜 폴백 없음). */
-function getKSTSlot() {
-  var kst = new Date(Date.now() + 9 * 3600000);
-  var day = kst.getUTCDay();
-  if (day === 0 || day === 6) return 'none'; // 주말
-  var hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
-  if (hm >= 730  && hm < 900)  return 'kospi'; // 시초가 예측 배포 ~ 장 시작 전
-  if (hm >= 900  && hm < 1630) return 'issue'; // 장중 이슈 브리핑 (30분 갱신)
-  if (hm >= 1630 && hm < 2120) return 'close'; // 마감 브리핑
-  if (hm >= 2120 && hm < 2300) return 'us';    // 미국 시장 예측 (21:20 배포)
-  return 'none'; // 23:00 ~ 익일 07:30
-}
-
-function kstDateStr() {
-  return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
-}
-
-function bsItem(s, type) {
-  var m = BS_META[type];
-  // 등락 화살표만 prefix(있으면). title이 방향 텍스트라 pill 전체를 붙이면 "하락·하락" 중복 → 화살표만.
-  var arrow = (s.pill_text || '').trim().charAt(0);
-  var pre = (arrow === '▲' || arrow === '▼') ? arrow + ' ' : '';
-  // 실제 브리핑 타이틀(headline) 우선, 없으면 방향(title)
-  return { cls:m.cls, icon:m.icon, type:m.type, url:s.url, text: pre + (s.headline || s.title || '브리핑 보기') };
-}
-
-function bsHide(el){ el.className = 'brief-strip is-hidden'; el.dataset.href = ''; }
-function bsPaint(el, cls, icon, typeStr, text, url){
-  el.className = 'brief-strip ' + cls;
-  el.dataset.href = url || '';
-  document.getElementById('bs-icon').textContent = icon;
-  document.getElementById('bs-type').textContent = typeStr;
-  document.getElementById('bs-text').textContent = text;
-}
-
-/* fetch + JSON 파싱. 실패 시 null 반환 (throw 없음) */
-function safeJSON(url){
-  return Promise.race([
-    fetch(url, {cache:'no-store'})
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .catch(function(){ return null; }),
-    new Promise(function(resolve){ setTimeout(function(){ resolve(null); }, 4000); })
-  ]);
-}
-
-/* 슬롯 활성화 즉시 기본 링크로 표시 → fetch 성공 시 내용 업데이트.
-   fetch 실패해도 기본 표시 유지 (PC 네트워크 차단 대응) */
-async function renderBriefStrip(){
+/* ── 더블샷 브리핑 커넥터 ── */
+/* 브리핑 타임테이블(KST, 평일): 07:30 코스피 예측 → 09:00~16:30 장중 이슈(실시간)
+   → 16:30 코스피 마감 → 21:20 미국 예측. 현재 시각 기준 '가장 최근 발행된 브리핑'을
+   briefings-list.json에서 골라 연결하고, 장중에는 실시간 이슈를 우선 노출한다.
+   주말·심야엔 직전 영업일의 최신 브리핑으로 폴백(항상 노출). */
+(function(){
   var el = document.getElementById('brief-strip');
   if (!el) return;
-  var slot = getKSTSlot();
-  if (slot === 'none') { bsHide(el); return; }
-  var today = kstDateStr();
+  var TYPE = {
+    kospi: { cls:'bc-kospi', icon:'📈', label:'코스피 예측 브리핑', pub:450 },   // 07:30
+    close: { cls:'bc-close', icon:'🏁', label:'코스피 마감 브리핑', pub:990 },   // 16:30
+    us:    { cls:'bc-us',    icon:'🌙', label:'미국 시장 예측 브리핑', pub:1280 } // 21:20
+  };
+  function kstNow(){ return new Date(Date.now() + 9 * 3600000); }
+  function kstDate(){ return kstNow().toISOString().slice(0, 10); }
+  function nowMin(){ var k = kstNow(); return k.getUTCHours() * 60 + k.getUTCMinutes(); }
+  function isWeekday(){ var d = kstNow().getUTCDay(); return d >= 1 && d <= 5; }
 
-  // ① 즉시 표시 — 슬롯별 기본값으로 visible (fetch 실패해도 유지)
-  if (slot === 'issue') {
-    bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', '오늘 이슈 보기', '/briefings/' + today + '/kospi/');
-  } else {
-    var bm = BS_META[slot];
-    bsPaint(el, bm.cls, bm.icon, bm.type, '오늘 브리핑 보기', '/briefings/' + today + '/' + slot + '/');
+  function paint(o){
+    el.className = 'brief-card ' + o.cls;
+    el.href = o.url; el.dataset.href = o.url;
+    document.getElementById('bc-ico').textContent = o.icon;
+    document.getElementById('bc-type').innerHTML = (o.live ? '<span class="live-dot"></span>' : '') + o.type;
+    document.getElementById('bc-time').textContent = o.time || '';
+    document.getElementById('bc-head').textContent = o.head;
+    var pill = document.getElementById('bc-pill');
+    if (o.pill && o.pillCls) { pill.textContent = o.pill; pill.className = 'bc-pill ' + o.pillCls; pill.style.display = ''; }
+    else { pill.style.display = 'none'; }
   }
 
-  // ② issue 슬롯: 실제 헤드라인으로 업데이트 시도
-  if (slot === 'issue') {
-    var j = await safeJSON('/data/kospi-news-' + today + '.json')
-          || await safeJSON('/data/kospi-news-live.json')
-          || await safeJSON('/api/data?f=news-live');
-    var lt = j && j.latest;
-    var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
-    if (title) {
-      bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
-      return;
+  function safeJSON(url){
+    return Promise.race([
+      fetch(url, {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+      new Promise(function(res){ setTimeout(function(){ res(null); }, 4000); })
+    ]);
+  }
+
+  function fromSlot(date, type, s){
+    var m = TYPE[type];
+    var arrow = (s.pill_text || '').trim().charAt(0);
+    var pillCls = (arrow === '▲') ? 'up' : (arrow === '▼' ? 'dn' : '');
+    var pill = pillCls ? s.pill_text.trim() : '';
+    return {
+      cls: m.cls, icon: m.icon, type: m.label,
+      time: s.time ? (s.time + ' 발행') : '',
+      head: s.headline || s.title || '브리핑 보기',
+      url: s.url || ('/briefings/' + date + '/' + type + '/'),
+      pill: pill, pillCls: pillCls
+    };
+  }
+
+  // 가장 최근 '발행된' 브리핑 선택 (오늘은 발행시각 지난 것만, 없으면 이전 날짜의 최신)
+  function pickLatest(list){
+    var slots = list && list.slots; if (!slots) return null;
+    var dates = Object.keys(slots).sort().reverse();
+    var today = kstDate(), nm = nowMin();
+    for (var i = 0; i < dates.length; i++){
+      var date = dates[i], day = slots[date], best = null;
+      ['kospi','close','us'].forEach(function(t){
+        var s = day[t];
+        if (!s || s.state !== 'ready') return;
+        if (date === today && nm < TYPE[t].pub) return; // 오늘 아직 발행 전
+        if (!best || TYPE[t].pub > TYPE[best].pub) best = t;
+      });
+      if (best) return { date:date, type:best, s:day[best] };
     }
-    // 이슈 미수집 → 오늘 코스피 예측이 ready면 그것을 표시, 아니면 기본 이슈 표시 유지
-    var list0 = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    var ks = list0 && list0.slots && list0.slots[today] && list0.slots[today].kospi;
-    if (ks && ks.state === 'ready') {
-      var kd = bsItem(ks, 'kospi');
-      bsPaint(el, kd.cls, kd.icon, kd.type, kd.text, kd.url);
-    }
-    return; // issue 슬롯에서는 여기서 종료 — ③으로 넘어가지 않음
+    return null;
   }
 
-  // ③ briefings-list.json으로 실제 브리핑 타이틀 업데이트
-  var list = await safeJSON('/data/briefings-list.json')
-           || await safeJSON('/api/data?f=briefings-list');
-  var s = list && list.slots && list.slots[today] && list.slots[today][slot];
-  if (s && s.state === 'ready') {
-    var d = bsItem(s, slot);
-    bsPaint(el, d.cls, d.icon, d.type, d.text, d.url);
-  } else if (list) {
-    bsHide(el); // fetch 성공 + not ready = 휴일·미배포 → 숨김
+  async function render(){
+    var today = kstDate(), nm = nowMin();
+
+    // ① 장중(평일 09:00~16:30) — 실시간 이슈 브리핑 우선
+    if (isWeekday() && nm >= 540 && nm < 990){
+      var nj = await safeJSON('/data/kospi-news-' + today + '.json')
+            || await safeJSON('/data/kospi-news-live.json')
+            || await safeJSON('/api/data?f=news-live');
+      var lt = nj && nj.latest;
+      var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
+      if (title){
+        paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true,
+                time:'실시간', head:title, url:'/briefings/' + (nj.date || today) + '/kospi/' });
+        return;
+      }
+    }
+
+    // ② 가장 최근 발행 브리핑 연결
+    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    var pick = pickLatest(list);
+    if (pick){ paint(fromSlot(pick.date, pick.type, pick.s)); }
+    // list 실패 시 정적 기본 표시 유지
   }
-  // list === null(fetch 실패): ①의 기본 표시 유지
-}
-renderBriefStrip();
-setInterval(renderBriefStrip, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
+  render();
+  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
+})();
 </script>
 <script>
 /* 미국 연동 대표주 — 실측 스냅샷 baseline + 라이브 폴링(stocks-live).
