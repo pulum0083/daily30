@@ -9,6 +9,12 @@
 <title>{{ stock.name }}({{ stock.ticker }}) · 미국 반도체 — 더블샷</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/stocks.css?v=2">
+<style>
+/* 원화/달러 전환 토글 (미국 상세 전용) */
+#cur-toggle{display:inline-flex;border:1px solid var(--line,#E2E8F0);border-radius:7px;overflow:hidden;vertical-align:middle;}
+#cur-toggle button{border:none;border-radius:0;padding:3px 10px;font-size:11px;font-weight:700;background:transparent;color:#64748B;cursor:pointer;line-height:1.4;}
+#cur-toggle button.on{background:#0F172A;color:#fff;}
+</style>
 <script defer src="/assets/stocks.js"></script>
 </head>
 <body>
@@ -45,7 +51,12 @@
         <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
           <a class="on" id="ctab-spark" onclick="switchChartTab('pane-spark')">20일 종가</a>
-          <span class="upd-badge" id="intra-live" style="display:none;margin-left:auto;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;">
+            <span class="upd-badge" id="intra-live" style="display:none;"><span class="dot"></span><span id="intra-live-tx">LIVE</span></span>
+            <span id="cur-toggle" style="display:none;">
+              <button type="button" data-cur="usd" class="on">달러</button><button type="button" data-cur="krw">원화</button>
+            </span>
+          </span>
         </div>
         <!-- 차트 로딩 자리(레이아웃 시프트 방지) -->
         <div id="chart-loading" style="height:172px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">차트 불러오는 중…</div>
@@ -189,21 +200,22 @@ function switchChartTab(pane){
 }
 window.switchChartTab=switchChartTab;
 
-// 스파크라인 마우스오버 → 날짜·종가 툴팁 (USD)
+// 스파크라인 마우스오버 → 날짜·종가 툴팁 (달러/원화 토글 반영)
 (function(){
   var wrap=document.getElementById('spark-main');
   var tip=document.getElementById('spark-tip');
   var hero=document.getElementById('hero-stock');
   if(!wrap||!tip||!hero) return;
-  var vals=(wrap.getAttribute('data-spark')||'').split(',').map(Number).filter(Boolean);
-  var dates=(wrap.getAttribute('data-dates')||'').split(',');
-  var n=vals.length; if(!n) return;
   wrap.addEventListener('mousemove',function(e){
+    var vals=(wrap.getAttribute('data-spark')||'').split(',').map(Number).filter(Boolean);
+    var dates=(wrap.getAttribute('data-dates')||'').split(',');
+    var n=vals.length; if(!n) return;
     var rect=wrap.getBoundingClientRect();
     var heroRect=hero.getBoundingClientRect();
     var i=Math.round((e.clientX-rect.left)/rect.width*(n-1));
     i=Math.max(0,Math.min(n-1,i));
-    tip.textContent=(dates[i]||'')+' · $'+vals[i].toLocaleString();
+    var krw=window.__USCUR&&window.__USCUR.isKRW();
+    tip.textContent=(dates[i]||'')+' · '+(krw?(vals[i].toLocaleString()+'원'):('$'+vals[i].toLocaleString()));
     tip.style.display='block';
     tip.style.left=(e.clientX-heroRect.left)+'px';
     tip.style.top=(e.clientY-heroRect.top-32)+'px';

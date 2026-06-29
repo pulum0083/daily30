@@ -1,5 +1,51 @@
 // 종목 상세 페이지의 sparkline 렌더를 담당하는 스크립트
 
+// ── 미국 상세 전용: 원화/달러 전환 컨트롤러 ──
+// 모든 표시 가격은 USD가 기준값. KRW 선택 시 환율(/api/market forex)로 곱해 표기한다.
+var USCUR = (function(){
+  var cur='usd', fx=null, subs=[];
+  function emit(){ subs.forEach(function(f){ try{f();}catch(e){} }); }
+  return {
+    get cur(){ return cur; },
+    get fx(){ return fx; },
+    isKRW:function(){ return cur==='krw' && !!fx; },
+    setCur:function(c){ cur=c; emit(); },
+    setFx:function(v){ fx=v; emit(); },
+    onChange:function(f){ subs.push(f); },
+    // USD 값 → 가격 표기(통화기호 포함). 원화=정수+원, 달러=$소수2자리
+    money:function(vUsd){ return (cur==='krw'&&fx) ? (Math.round(vUsd*fx).toLocaleString()+'원') : ('$'+vUsd.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})); },
+    // USD 값 → 라벨용(달러는 기호 없이 숫자만 — 기존 라벨 스타일 유지)
+    num:function(vUsd){ return (cur==='krw'&&fx) ? (Math.round(vUsd*fx).toLocaleString()+'원') : vUsd.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  };
+})();
+window.__USCUR = USCUR;
+
+// 토글 배선(미국 상세에만 #cur-toggle 존재) + 환율 로드 + 20일 종가 스파크 통화 반영
+(function(){
+  var tg=document.getElementById('cur-toggle');
+  if(!tg) return;
+  fetch('/api/market',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(m){
+    if(m&&m.forex&&typeof m.forex.price==='number'){ USCUR.setFx(m.forex.price); tg.style.display=''; }
+  }).catch(function(){});
+  tg.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      tg.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on', x===b); });
+      USCUR.setCur(b.getAttribute('data-cur'));
+    });
+  });
+  // 20일 종가 스파크: data-spark를 표시통화 값으로 교체 후 재그리기 (원본 USD는 data-spark-usd에 보존)
+  USCUR.onChange(function(){
+    document.querySelectorAll('#pane-spark [data-spark]').forEach(function(c){
+      if(!c.getAttribute('data-spark-usd')) c.setAttribute('data-spark-usd', c.getAttribute('data-spark')||'');
+      var usd=(c.getAttribute('data-spark-usd')||'').split(',').map(Number).filter(function(v){return isFinite(v);});
+      if(usd.length<2) return;
+      var disp=USCUR.isKRW()? usd.map(function(v){return Math.round(v*USCUR.fx);}) : usd;
+      c.setAttribute('data-spark', disp.join(','));
+      if(typeof drawSparkCanvas==='function') drawSparkCanvas(c, disp);
+    });
+  });
+})();
+
 // 네비게이션 — 종목 상세는 standalone 페이지로 실제 이동, 허브/섹터는 /stocks/ 해시 라우팅
 // 제너레이터가 모든 종목에 /stocks/{code}/ 페이지를 생성하므로 무조건 클린 URL 사용
 function goStock(code){location.href='/stocks/'+code+'/';}
@@ -178,9 +224,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var metaOrig=metaEl?metaEl.innerHTML:'';
   var X0=14,X1=626,YT=26,YB=148; // viewBox 640×180 기준 플롯 영역
   function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
-  // 가격 표기: 미국=$소수2자리, 국내=정수+콤마
-  function fmtPx(v){return isUS?('$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):Math.round(v).toLocaleString();}
-  function fmtNum(v){return isUS?v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):Math.round(v).toLocaleString();}
+  // 가격 표기: 미국=통화 컨트롤러(원화/달러), 국내=정수+콤마
+  function fmtPx(v){ return isUS ? USCUR.money(v) : Math.round(v).toLocaleString(); }
+  function fmtNum(v){ return isUS ? USCUR.num(v) : Math.round(v).toLocaleString(); }
+  var headerUsd = isUS ? prevClose : 0;   // 헤더 가격의 USD 기준값(통화 전환 시 재포맷)
+  function applyHeaderCurrency(){ if(isUS && pxEl && headerUsd) pxEl.textContent=fmtPx(headerUsd); }
   var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
 
@@ -318,6 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── 헤더 시세 실시간 갱신 (국내=오늘 세션일 때만 / 미국=12h 이내 fresh일 때 — 휴장·전일 데이터 덮어쓰기 방지) ──
     if(d&&((isUS&&d.fresh)||(!isUS&&d.date===todayKST()))&&prevClose>0){
       var cur=vals[n-1], chg=(cur-prevClose)/prevClose*100, u=chg>=0;
+      if(isUS) headerUsd=cur;   // 라이브 가격(USD) 기준값 보존 → 통화 전환 시 재포맷
       if(pxEl) pxEl.textContent=fmtPx(cur);
       if(cgEl){cgEl.style.color=u?'var(--up)':'var(--dn)';cgEl.textContent=(u?'▲ +':'▼ ')+chg.toFixed(2)+'%';}
       if(metaEl){var lt=times[n-1]||'';var ms=seg==='pre'?'프리장':(seg==='post'?'애프터장':'장중');metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, isUS?('$1'+ms+' '+lt):('$1오늘 장중 '+lt));}
@@ -351,9 +400,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(function(){});
   }
 
-  function tick(){fetch(apiURL).then(function(r){return r.json();}).then(render).catch(function(){decide(false);});}
+  var lastD=null;
+  function tick(){fetch(apiURL).then(function(r){return r.json();}).then(function(d){lastD=d;render(d);}).catch(function(){decide(false);});}
   tick();
   setTimeout(function(){decide(false);},3500); // 응답 지연·실패 안전장치 → 20일 종가로 폴백
+  // 통화 전환(원화/달러) 시 헤더·장중 곡선 라벨 재포맷
+  if(isUS) USCUR.onChange(function(){ if(lastD) render(lastD); applyHeaderCurrency(); });
   if(isUS){
     // 미국: 프리장(04:00 ET)~애프터장(20:00 ET)에만 20초 폴링
     if(isLive) setInterval(tick,20000);
