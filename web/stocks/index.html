@@ -935,7 +935,7 @@ function usSel(code){
       function won(s){ return parseInt(String(s).replace(/[^0-9]/g,''),10)||0; }
       function fmt(n){ return (n||0).toLocaleString('en-US'); }
       function parseEntry(s){ var parts=String(s).replace(/원/g,'').split('~'); return parts.length===2?{lo:won(parts[0]),hi:won(parts[1])}:{lo:won(s),hi:0}; }
-      function fmtEntry(p){ return p.entry_hi?fmt(p.entry)+' / '+fmt(p.entry_hi):fmt(p.entry); }
+      function fmtEntry(p){ return p.entry_hi?fmt(p.entry)+' ~ '+fmt(p.entry_hi):fmt(p.entry); }
       function kstDate(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
       function briefDate(){
         var s=document.getElementById('brief-strip');
@@ -2549,9 +2549,10 @@ function showIssueBriefing(today, el, seq){
     .then(function(r){ return r.ok ? r.json() : fetch('/data/kospi-news-live.json', {cache:'no-store'}).then(function(x){ return x.ok ? x.json() : null; }); })
     .then(function(j){
       if (bsSeq !== seq) return; // stale callback
-      var lt = j && j.date === today && j.latest;
+      // j.date 날짜 엄격 비교 제거 — 캐시·타이밍 차이로 PC에서 숨김 방지
+      var lt = j && j.latest;
       var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
-      if (title) bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + today + '/kospi/');
+      if (title) bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
       else showTodayBriefing('kospi', today, el, seq); // 이슈 미수집 시 오늘 예측 브리핑으로 폴백
     })
     .catch(function(){ showTodayBriefing('kospi', today, el, seq); });
@@ -2564,8 +2565,7 @@ function renderBriefStrip(){
   var slot = getKSTSlot();
   if (slot === 'none') { bsHide(el); return; }
   var today = kstDateStr();
-  bsHide(el); // async 결과 대기 중 stale 내용 노출 방지
-  el.dataset.bakedDate = ''; // 이후 중복 처리 방지
+  // bsHide 선호출 제거 — fetch 실패 시 영구 숨김 방지, 이전 콘텐츠 유지
   if (slot === 'issue') showIssueBriefing(today, el, seq);
   else showTodayBriefing(slot, today, el, seq); // kospi / close / us
 }
