@@ -1160,7 +1160,11 @@ function usSel(code){
       else patch();
     });
   }
-  window.__ueLoad=function(){ if(!loaded) load(); };
+  var pollId=null;
+  window.__ueLoad=function(){
+    load();
+    if(!pollId) pollId=setInterval(load, 60000);
+  };
   function syncToggle(){
     document.querySelectorAll('#ue-toggle button').forEach(function(b){
       b.classList.toggle('on', b.getAttribute('data-cur')===cur);
