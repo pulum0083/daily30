@@ -2565,7 +2565,14 @@ async function renderBriefStrip(){
       bsPaint(el, 'bs-live', '📰', '장중 이슈 브리핑', title, '/briefings/' + (j.date || today) + '/kospi/');
       return;
     }
-    slot = 'kospi'; // 이슈 미수집 → 코스피 브리핑으로
+    // 이슈 미수집 → 오늘 코스피 예측이 ready면 그것을 표시, 아니면 기본 이슈 표시 유지
+    var list0 = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    var ks = list0 && list0.slots && list0.slots[today] && list0.slots[today].kospi;
+    if (ks && ks.state === 'ready') {
+      var kd = bsItem(ks, 'kospi');
+      bsPaint(el, kd.cls, kd.icon, kd.type, kd.text, kd.url);
+    }
+    return; // issue 슬롯에서는 여기서 종료 — ③으로 넘어가지 않음
   }
 
   // ③ briefings-list.json으로 실제 브리핑 타이틀 업데이트

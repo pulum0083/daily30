@@ -6,17 +6,17 @@
 body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
 .num{font-variant-numeric:tabular-nums;}.up{color:var(--up);}.dn{color:var(--dn);}a{cursor:pointer;}
 
-.gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center;}
-.gnb__in{max-width:1136px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
-.gnb__logo{display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;}
+.gnb{position:sticky;top:0;z-index:10;background:#16181A;height:52px;display:flex;align-items:center;}
+.gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px;}
+.gnb__logo{display:flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;flex-shrink:0;}
 .gnb__logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#E03131,#FF6A6A);display:flex;align-items:center;justify-content:center;flex-shrink:0;}.gnb__logo-mark svg{width:17px;height:17px;}
 .gnb__title{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.01em;}.gnb__title span{color:#5AA2FF;}
 .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}.gnb a.on{color:#fff;}
-.gnb .right{margin-left:auto;display:flex;align-items:center;}
-.gnb__subs{display:flex;align-items:center;gap:2px;}
+.gnb .right{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.gnb__subs{display:flex;align-items:center;}
 .gnb__sub{font-size:12px;font-weight:500;color:#6B7280;padding:5px 9px;border-radius:7px;text-decoration:none;transition:color .12s,background .12s;}.gnb__sub:hover{color:#C9CCD1;background:#26282B;}
-.gnb__divider{width:1px;height:16px;background:#2E3035;flex-shrink:0;margin:0 2px;}
-.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;}.gnb .sbtn svg{width:13px;height:13px;}
+.gnb__divider{width:1px;height:16px;background:#2E3035;margin:0 4px;flex-shrink:0;}
+.gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;margin-left:8px;}.gnb .sbtn svg{width:13px;height:13px;}
 
 .wrap{max-width:1136px;margin:0 auto;padding:24px 28px 64px;}
 .screen{display:none;}.screen.on{display:block;animation:fade .18s ease;}
