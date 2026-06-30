@@ -24,6 +24,8 @@
   /* 2단 레이아웃 (좌 종목 리스트 · 우 섹터 로테이션) */
   .sector-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:start;}
   .sector-main,.sector-aside{min-width:0;}
+  /* 좌측 콘텐츠를 하나의 박스로 — 통계·시장폭·종목 리스트를 한 콘텐츠처럼 묶음 */
+  .sector-main{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;padding:18px;}
   @media(max-width:860px){.sector-cols{grid-template-columns:minmax(0,1fr);}}
   /* 섹터 로테이션 사이드 박스 */
   .rot-box{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;overflow:hidden;}
@@ -51,7 +53,7 @@
   .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-  .sector-stat__box{background:var(--canvas);border:1px solid var(--hairline);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
+  .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
   .sector-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
   .sector-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
   .sector-stat__val.up{color:#E03131;}
@@ -72,8 +74,8 @@
   .sector-list-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px;}
   .sector-list-head__t{font-size:13px;font-weight:800;color:var(--ink);}
   .sector-list-head__sort{font-size:11px;font-weight:600;color:var(--muted);}
-  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:28px;}
-  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:0;}
+  .sector-card{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
   .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
