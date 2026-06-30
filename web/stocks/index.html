@@ -2497,9 +2497,9 @@ if(passBtn){
 <script>
 /* ── 더블샷 브리핑 커넥터 ── */
 /* 브리핑 타임테이블(KST, 평일): 07:30 코스피 예측 → 09:00~16:30 장중 이슈(실시간)
-   → 16:30 코스피 마감 → 21:20 미국 예측. 현재 시각 기준 '가장 최근 발행된 브리핑'을
-   briefings-list.json에서 골라 연결하고, 장중에는 실시간 이슈를 우선 노출한다.
-   주말·심야엔 직전 영업일의 최신 브리핑으로 폴백(항상 노출). */
+   → 16:30 코스피 마감 → 21:20~23:50 미국 예측. 활성 슬롯에 해당할 때만 노출하고,
+   장중에는 실시간 이슈를 우선 노출한다.
+   미국 예측 종료(23:50) 이후 심야·주말 등 활성 슬롯 밖에서는 폴백 없이 영역을 숨긴다. */
 (function(){
   var el = document.getElementById('brief-strip');
   if (!el) return;
@@ -2571,22 +2571,21 @@ if(passBtn){
     if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
     if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
     if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
-    if (nm >= 1280 && nm < 1380) return 'us';   // 21:20~23:00 미국 예측
+    if (nm >= 1280 && nm < 1430) return 'us';   // 21:20~23:50 미국 예측
     return null;
   }
 
   // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
   function paintDefault(){
     var slot = slotNow(), today = kstDate();
+    if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
     if (slot === 'issue'){
       paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true, time:'실시간',
               head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/' });
-    } else if (slot){
+    } else {
       var m = TYPE[slot];
       paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
               url:'/briefings/' + today + '/' + slot + '/' });
-    } else {
-      paint({ cls:'bc-kospi', icon:'📊', type:'더블샷 브리핑', time:'', head:'최신 브리핑 보기', url:'/briefings/' });
     }
   }
 
@@ -2595,9 +2594,10 @@ if(passBtn){
     paintDefault();
 
     var today = kstDate(), nm = nowMin(), slot = slotNow();
+    if (!slot) return; // 활성 슬롯 밖 → paintDefault에서 이미 숨김. 폴백(가장 최근 브리핑) 없이 영역 종료.
 
     // ② 장중(평일 09:00~16:30) — 실시간 이슈 헤드라인으로 업그레이드
-    if (isWeekday() && nm >= 540 && nm < 990){
+    if (slot === 'issue'){
       // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않으므로 정적 /data는 stale일 수 있음
       var nj = await safeJSON('/api/data?f=news-live')
             || await safeJSON('/data/kospi-news-' + today + '.json')
@@ -2611,16 +2611,14 @@ if(passBtn){
       }
     }
 
-    // ③ briefings-list.json으로 실제 헤드라인·발행시각 업그레이드
+    // ③ briefings-list.json으로 실제 헤드라인·발행시각 업그레이드 (활성 슬롯 안에서만)
     var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
     if (!list) return; // fetch 실패(PC 차단) → ①의 타임테이블 기본 유지
 
-    // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아니면 가장 최근 발행 브리핑
+    // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아직이면 가장 최근 발행 브리핑(활성 슬롯 안에서만)
     var activeType = (slot === 'issue') ? 'kospi' : slot;
-    if (activeType){
-      var s = list.slots && list.slots[today] && list.slots[today][activeType];
-      if (s && s.state === 'ready'){ paint(fromSlot(today, activeType, s)); return; }
-    }
+    var s = list.slots && list.slots[today] && list.slots[today][activeType];
+    if (s && s.state === 'ready'){ paint(fromSlot(today, activeType, s)); return; }
     var pick = pickLatest(list);
     if (pick){ paint(fromSlot(pick.date, pick.type, pick.s)); }
   }
