@@ -982,7 +982,7 @@ function usSel(code){
         var lv=document.getElementById('mt-live'); if(!lv) return;
         var ph=momPhase();
         if(ph==='open'){ lv.textContent='●장중 추적'; lv.style.color='#16A34A'; lv.style.background='#ECFDF3'; }
-        else if(ph==='prep'){ lv.textContent='●장 준비'; lv.style.color='#B45309'; lv.style.background='#FEF3C7'; }
+        else if(ph==='prep'){ lv.textContent='●장 준비 중'; lv.style.color='#B45309'; lv.style.background='#FEF3C7'; }
         else { lv.textContent='●장 마감'; lv.style.color='#94A3B8'; lv.style.background='#F1F5F9'; }
       }
       var PICKS=[];
