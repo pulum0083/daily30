@@ -1284,7 +1284,7 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span></span><span class="block__s"><span class="upd-badge" id="sig-upd-badge"></span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span></span><span class="block__s" style="display:inline-flex;align-items:center;gap:8px;"><span class="upd-badge" id="sig-upd-badge"></span><span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigHomeSetSort('score',this)">신호 강도순</a><a onclick="sigHomeSetSort('up',this)">상승률순</a></span></span></div>
       <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
       <div id="sig-rows">
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
@@ -1867,8 +1867,10 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
 /* 거래량 순위 화면 — vol-top all 실데이터(탭 거래량/상승률/하락률 + 섹터필터 + 더보기). */
 let RANK_ALL=[];      // vol-top all (실측 ~40종목)
 let SIG_BY_CODE={};   // signals 보유 종목 code→true (AI신호 열)
+let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
 let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
+let sigHomeSort='score'; // score | up
 let sigAllSort='score'; // score | up | dn
 let rankTab='vol';    // vol | up | dn
 let rankSector='전체';
@@ -2828,18 +2830,27 @@ if(passBtn){
       +'<span class="sig-rbadges">'+badges+'</span></span>'
       +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
   }
+  function sigHomeRender(){
+    var w=document.getElementById('sig-rows'); if(!w) return;
+    var arr=SIGNALS_HOME.slice();
+    if(sigHomeSort==='up') arr.sort(function(a,b){return b.pct-a.pct;});
+    w.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i);}).join(''):'';
+    w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
+    setTimeout(function(){w.classList.remove('sig-updated');}, 600);
+  }
+  function sigHomeSetSort(sort,el){
+    sigHomeSort=sort;
+    if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
+    sigHomeRender();
+  }
+  window.sigHomeSetSort=sigHomeSetSort;
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
+    SIGNALS_HOME=d.signals||[];
     SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
-    var w=document.getElementById('sig-rows');
-    if(w){
-      w.innerHTML=(d.signals||[]).map(function(s,i){return sigItemHtml(s,i);}).join('');
-      // 업데이트 효과 추가
-      w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
-      setTimeout(function(){w.classList.remove('sig-updated');}, 600);
-    }
+    sigHomeRender();
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
   function sigAllSorted(){
