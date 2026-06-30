@@ -226,12 +226,34 @@
 function goBack(){ if(history.length>1) history.back(); else location.href='/stocks/'; }
 
 // ── 섹터 로테이션 사이드바 — /api/signals 의 etf.sector(전 섹터, 덜 빠진 순) 렌더 ──
+// 섹터 데이터는 전 섹터 페이지 공통이라 sessionStorage에 캐시 → 섹터 탭 이동 시 재요청 없이 즉시 렌더(좌측만 갱신)
 (function(){
   var box=document.getElementById('rot-box'); if(!box) return;
   var rows=document.getElementById('rot-rows');
   var current=(box.getAttribute('data-current')||'').trim();
+  var CACHE_KEY='ds_sector_rot', TTL=120000; // 2분(장중 갱신 주기) 내 재방문은 캐시 사용
   function pctFmt(p){return (p>=0?'+':'')+p.toFixed(2)+'%';}
   function pctColor(p){return p>=0?'#E03131':'#2775ED';}
+  function render(payload){
+    var at=document.getElementById('rot-asof'); if(at) at.textContent=(payload.pre||'오늘의')+' 상대 강도';
+    var arr=payload.sector||[];
+    if(!arr.length){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; return; }
+    // current(현재 섹터 하이라이트)는 페이지마다 다르므로 렌더 시점의 값을 사용
+    rows.innerHTML=arr.map(function(x,i){
+      var isCur=current && x.label===current;
+      return '<div class="rot-row'+(isCur?' current':'')+'">'
+        +'<span class="rot-rk">'+(i+1)+'</span>'
+        +'<span class="rot-nm">'+x.label+(isCur?'<span class="cur-tag">현재</span>':'')+'</span>'
+        +'<span class="rot-pct" style="color:'+pctColor(x.pct)+'">'+pctFmt(x.pct)+'</span>'
+        +'</div>';
+    }).join('');
+  }
+  // 1) 캐시 우선 — 섹터 탭 이동 시 네트워크 호출 없이 즉시 렌더
+  try{
+    var c=JSON.parse(sessionStorage.getItem(CACHE_KEY)||'null');
+    if(c && Array.isArray(c.sector) && (Date.now()-c.ts)<TTL){ render(c); return; }
+  }catch(e){}
+  // 2) 캐시 없거나 만료 시에만 1회 fetch 후 저장
   fetch('/api/signals',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
@@ -241,16 +263,9 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
       }
       var asOf=d.asOf||{};
       var pre=(asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의';
-      var at=document.getElementById('rot-asof'); if(at) at.textContent=pre+' 상대 강도';
-      var arr=d.etf.sector; // API가 pct 내림차순 정렬 + 전 섹터 포함
-      rows.innerHTML=arr.map(function(x,i){
-        var isCur=current && x.label===current;
-        return '<div class="rot-row'+(isCur?' current':'')+'">'
-          +'<span class="rot-rk">'+(i+1)+'</span>'
-          +'<span class="rot-nm">'+x.label+(isCur?'<span class="cur-tag">현재</span>':'')+'</span>'
-          +'<span class="rot-pct" style="color:'+pctColor(x.pct)+'">'+pctFmt(x.pct)+'</span>'
-          +'</div>';
-      }).join('');
+      var payload={pre:pre, sector:d.etf.sector, ts:Date.now()};
+      try{ sessionStorage.setItem(CACHE_KEY, JSON.stringify(payload)); }catch(e){}
+      render(payload);
     })
     .catch(function(){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; });
 })();
