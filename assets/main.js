@@ -1702,6 +1702,8 @@
     var slot = wrap.dataset.slot;   // MARKET | POST_MARKET | US_MARKET
     if (!date || !slot) return;
 
+    var anchorScrolled = false;     // #issue-briefing-wrap 앵커 진입 시 최초 1회만 수동 스크롤
+
     // 슬롯별 허용 시각 범위 (KST, 분 단위)
     var SLOT_RANGE = {
       MARKET:      { from: 540,  to: 930  },   // 09:00~15:29
@@ -1793,6 +1795,17 @@
       }).join('');
 
       wrap.style.display = '';
+
+      // 종목 홈 브리핑 커넥터에서 #issue-briefing-wrap 앵커로 진입한 경우:
+      // 이 섹션은 로드 시 display:none이라 브라우저 기본 앵커 스크롤이 동작하지 않는다.
+      // 표시로 전환된 직후 최초 1회만 수동 스크롤(스티키 GNB 높이만큼 오프셋).
+      if (!anchorScrolled && location.hash === '#issue-briefing-wrap') {
+        anchorScrolled = true;
+        wrap.style.scrollMarginTop = '72px';
+        requestAnimationFrame(function() {
+          wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
     }
 
     // 오늘 날짜 판별
