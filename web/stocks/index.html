@@ -1730,7 +1730,6 @@ function usSel(code){
           <div class="block__h"><span class="block__t"><span class="ic">📊</span>ETF 랭킹</span><span class="block__s"><span class="stabs" id="etf-rank-tabs" style="margin-bottom:0;"><a class="on" onclick="etfSetTab('vol',this)">거래량순</a><a onclick="etfSetTab('up',this)">상승률순</a></span></span></div>
           <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
           <div id="etf-rank-rows"></div>
-          <a class="more" id="etf-rank-more" onclick="etfLoadMore()">더보기</a>
         </div>
       </div>
       <!-- 우: 하락률 순 -->
@@ -1946,7 +1945,7 @@ function etfRankRender(){
   if(!maxVal)maxVal=1;
   var btn=document.getElementById('etf-rank-more');
   if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">'+(etfTab==='up'?'상승 ETF가 없어요.':'하락 ETF가 없어요.')+'</div>';if(btn)btn.style.display='none';return;}
-  box.innerHTML=arr.slice(0,etfShown).map(function(x,i){
+  box.innerHTML=arr.map(function(x,i){
     var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
     var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%';
     var barW=etfTab==='vol'?Math.round((x.vol||0)/maxVal*100):Math.round(Math.abs(pct)/maxVal*100);
@@ -1964,9 +1963,6 @@ function etfRankRender(){
       +'<span class="tchg '+dir+' num" style="width:72px;text-align:right;flex:none;">'+pctTxt+'</span>'
       +'</a>';
   }).join('');
-  if(!btn)return;
-  if(etfShown>=arr.length){btn.style.display='none';}
-  else{btn.style.display='';btn.textContent='더보기 · '+(Math.min(etfShown+10,arr.length)-etfShown)+'개 더 ('+(arr.length-etfShown)+'개 남음)';}
 }
 function etfSetTab(tab,el){etfTab=tab;etfShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}etfRankRender();}
 function etfLoadMore(){etfShown=Math.min(etfShown+10,30);etfRankRender();}
