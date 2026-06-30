@@ -97,10 +97,10 @@
   .sector-card__poslbl{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
   .sector-card__fr{font-size:11px;color:var(--muted);margin-top:5px;}
 
-  .sector-nav{border-top:1px solid var(--hairline);padding-top:16px;}
+  .sector-nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--hairline);padding-top:16px;}
   .sector-nav--top{border-top:none;padding-top:0;margin-bottom:18px;}
-  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:8px;}
-  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:0;flex:none;white-space:nowrap;}
+  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;flex:1;min-width:0;}
   .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);
     border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
   .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
