@@ -503,3 +503,28 @@ document.addEventListener('DOMContentLoaded', function() {
   bindTip('fo-label','fo-tip');    // 외국인 보유율
 })();
 
+// 증권사 목표주가 '현재가' 라벨 — 현재가가 최저가 근처/아래면 라벨이 중앙정렬(translateX(-50%))로
+// 패널 밖으로 나가 잘린다. 라벨은 레인지 안에 머물게 클램프하고, 아래 화살표만 실제 현재가를 가리킨다.
+(function(){
+  function clampTgtCur(){
+    document.querySelectorAll('.tgt-cur').forEach(function(el){
+      var range=el.parentNode; if(!range) return;        // .tgt-range
+      var rw=range.offsetWidth; if(!rw) return;
+      // 원본 위치(%)는 최초 1회 data 속성에 보존 (이후 left를 px로 덮어쓰므로)
+      var pct;
+      if(el.dataset.curPct!=null) pct=parseFloat(el.dataset.curPct);
+      else { pct=parseFloat(el.style.left); el.dataset.curPct=pct; }
+      if(isNaN(pct)) return;
+      var dotX=pct/100*rw;                                // 실제 현재가 위치(px, range 기준)
+      var lw=el.offsetWidth, half=lw/2, pad=4;
+      var center=Math.min(Math.max(dotX, half+pad), rw-half-pad); // 라벨 중심 클램프
+      el.style.left=center+'px';
+      var arrowPct=(dotX-(center-half))/lw*100;           // 라벨 내 화살표 상대 위치(%)
+      el.style.setProperty('--arrow-left', Math.min(Math.max(arrowPct,6),94)+'%');
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',clampTgtCur);
+  else clampTgtCur();
+  window.addEventListener('resize',clampTgtCur);
+})();
+
