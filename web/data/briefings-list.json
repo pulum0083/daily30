@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-01": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-01/kospi/",
+        "headline": "왜 오를까? — SOX +3.92%·EWY +2.32% 동시 급등",
+        "pill_cls": "up",
+        "pill_text": "▲ 상승",
+        "title": "상승 우위",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-06-30": {
       "kospi": {
         "state": "ready",
@@ -556,20 +575,6 @@
       }
     },
     "2026-05-20": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-05-19": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
