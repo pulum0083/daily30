@@ -2472,7 +2472,7 @@ function copyPrompt(){
   });
 }
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
-simRowsRender();simOut();
+try{ simRowsRender();simOut(); }catch(e){ /* 인컴 설계기 초기화 실패가 이후 코드(브리핑 커넥터 등)를 막지 않도록 격리 */ console.warn('[income] init skipped', e); }
 
 /* 패시브 뱃지 툴팁 */
 const passBtn=document.getElementById('badge-pass-btn');
@@ -2488,7 +2488,10 @@ if(passBtn){
   passBtn.addEventListener('mousemove',moveTip);
   passBtn.addEventListener('mouseleave',hideTip);
 }
+</script>
 
+<!-- 더블샷 브리핑 커넥터 — 독립 스크립트 블록(상단 인컴 설계기 등 다른 코드의 예외가 커넥터 실행을 막지 않도록 분리) -->
+<script>
 /* ── 더블샷 브리핑 커넥터 ── */
 /* 브리핑 타임테이블(KST, 평일): 07:30 코스피 예측 → 09:00~16:30 장중 이슈(실시간)
    → 16:30 코스피 마감 → 21:20 미국 예측. 현재 시각 기준 '가장 최근 발행된 브리핑'을
