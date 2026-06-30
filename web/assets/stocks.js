@@ -480,22 +480,26 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 })();
 
-// 트랙레코드 ? 툴팁 바인딩 — stocks.js는 defer라 DOM 파싱 후 실행돼 body 끝의 #tr-tip을 항상 찾는다
-// (페이지 인라인 스크립트는 #tr-tip보다 먼저 실행돼 바인딩에 실패하므로 여기서 처리)
+// ? 도움말 툴팁 바인딩 — stocks.js는 defer라 DOM 파싱 후 실행돼 body 끝의 #*-tip을 항상 찾는다.
+// (페이지 인라인 스크립트는 tip 요소보다 먼저 실행돼 바인딩에 실패하므로 여기서 처리)
 (function(){
-  var btn=document.getElementById('tr-help-btn');
-  var tip=document.getElementById('tr-tip');
-  if(!btn||!tip) return;
-  function move(e){
-    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
-    var x=e.clientX+18,y=e.clientY+14;
-    if(x+w+pad>innerWidth) x=e.clientX-w-14;
-    if(y+h+pad>innerHeight) y=e.clientY-h-14;
-    tip.style.left=Math.max(pad,x)+'px';
-    tip.style.top=Math.max(pad,y)+'px';
+  function bindTip(btnId, tipId){
+    var btn=document.getElementById(btnId);
+    var tip=document.getElementById(tipId);
+    if(!btn||!tip) return;
+    function move(e){
+      var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+      var x=e.clientX+18,y=e.clientY+14;
+      if(x+w+pad>innerWidth) x=e.clientX-w-14;
+      if(y+h+pad>innerHeight) y=e.clientY-h-14;
+      tip.style.left=Math.max(pad,x)+'px';
+      tip.style.top=Math.max(pad,y)+'px';
+    }
+    btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+    btn.addEventListener('mousemove',move);
+    btn.addEventListener('mouseleave',function(){tip.style.display='none';});
   }
-  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
-  btn.addEventListener('mousemove',move);
-  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
+  bindTip('tr-help-btn','tr-tip'); // 더블샷 트랙레코드
+  bindTip('fo-label','fo-tip');    // 외국인 보유율
 })();
 
