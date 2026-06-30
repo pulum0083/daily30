@@ -709,7 +709,10 @@ function usSel(code){
   function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
   function loadWhy(){
     var d=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
-    fetch('/data/movers-why-'+d+'.json').then(function(r){return r.ok?r.json():fetch('/data/movers-why-live.json').then(function(x){return x.ok?x.json():null;});})
+    // 라이브 데이터는 /api/data(raw main) 우선 — 데이터 전용 커밋은 재배포 안 되므로 정적 /data는 stale일 수 있음
+    fetch('/api/data?f=movers-why',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(j){ return j||fetch('/data/movers-why-'+d+'.json').then(function(r){return r.ok?r.json():null;}); })
+      .then(function(j){ return j||fetch('/data/movers-why-live.json').then(function(r){return r.ok?r.json():null;}); })
       .then(function(j){ if(j&&j.stocks){ j.stocks.forEach(function(s){ whyData[s.code]=s.events||[]; }); if(buf[curCode])draw(curCode); } }).catch(function(){});
   }
   function loadSnap(){
@@ -2595,9 +2598,10 @@ if(passBtn){
 
     // ② 장중(평일 09:00~16:30) — 실시간 이슈 헤드라인으로 업그레이드
     if (isWeekday() && nm >= 540 && nm < 990){
-      var nj = await safeJSON('/data/kospi-news-' + today + '.json')
-            || await safeJSON('/data/kospi-news-live.json')
-            || await safeJSON('/api/data?f=news-live');
+      // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않으므로 정적 /data는 stale일 수 있음
+      var nj = await safeJSON('/api/data?f=news-live')
+            || await safeJSON('/data/kospi-news-' + today + '.json')
+            || await safeJSON('/data/kospi-news-live.json');
       var lt = nj && nj.latest;
       var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
       if (title){
