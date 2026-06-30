@@ -78,7 +78,14 @@ function drawSparkCanvas(container, closes) {
 
   var isUp = closes[closes.length - 1] >= closes[0];
   var color = isUp ? '#E03131' : '#2775ED';
-  var pad = { t: 28, b: hasDates ? 24 : 8, l: 10, r: 10 };
+  // 좌우 여백 — 20일 종가(hasDates)는 '오늘 장중' SVG(viewBox 640×180·height 160·meet)의
+  // 좌우 여백과 일치시켜 탭 전환 시 곡선 좌우 폭이 달라 덜컹이는 현상을 제거한다.
+  var sideInset = 10;
+  if (hasDates) {
+    var s = Math.min(W / 640, 160 / 180);
+    sideInset = (W - 640 * s) / 2 + 14 * s;
+  }
+  var pad = { t: 28, b: hasDates ? 24 : 8, l: sideInset, r: sideInset };
   var pW = W - pad.l - pad.r, pH = H - pad.t - pad.b;
 
   var lo = Math.min.apply(null, closes);
