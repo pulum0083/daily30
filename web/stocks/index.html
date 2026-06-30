@@ -968,6 +968,16 @@ function usSel(code){
         return m?m[1]:kstDate();
       }
       function krOpen(){ var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+540)%1440; return m>=540&&m<=930; }
+      /* 모멘텀 추적 상태 — prep(07:30~09:00 장 준비) · open(09:00~15:30 장중) · closed(그 외 장 마감) */
+      function momPhase(){ var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+540)%1440;
+        if(m>=450&&m<540) return 'prep'; if(m>=540&&m<=930) return 'open'; return 'closed'; }
+      function setMomStatus(){
+        var lv=document.getElementById('mt-live'); if(!lv) return;
+        var ph=momPhase();
+        if(ph==='open'){ lv.textContent='●장중 추적'; lv.style.color='#16A34A'; lv.style.background='#ECFDF3'; }
+        else if(ph==='prep'){ lv.textContent='●장 준비'; lv.style.color='#B45309'; lv.style.background='#FEF3C7'; }
+        else { lv.textContent='●장 마감'; lv.style.color='#94A3B8'; lv.style.background='#F1F5F9'; }
+      }
       var PICKS=[];
       function cardHTML(p){
         return '<a class="mt-card" onclick="goStock(\''+p.code+'\')" id="mt-'+p.code+'">'
@@ -1021,8 +1031,15 @@ function usSel(code){
             window.ueGate ? window.ueGate() : (box.style.display='');
             document.getElementById('mt-sub').textContent=date+' 코스피 픽 '+PICKS.length+'종목 · 진입/목표/손절 추적';
             poll();
-            if(krOpen()){ setInterval(poll,45000); }
-            else { var lv=document.getElementById('mt-live'); lv.textContent='●장 마감'; lv.style.color='#94A3B8'; lv.style.background='#F1F5F9'; }
+            setMomStatus();
+            // 페이지를 열어둔 채 07:30·09:00·15:30 경계를 넘으면 상태·폴링을 자동 전환
+            var momTimer=null;
+            function ensurePolling(){
+              if(momPhase()==='open'){ if(!momTimer) momTimer=setInterval(poll,45000); }
+              else if(momTimer){ clearInterval(momTimer); momTimer=null; }
+            }
+            ensurePolling();
+            setInterval(function(){ setMomStatus(); ensurePolling(); }, 60000);
           }).catch(function(){ window.__momHasPicks=false; window.ueGate&&window.ueGate(); });
       }
       // 최신 kospi 브리핑 날짜를 briefings-list.json에서 권위있게 해석 — DOM에 박힌 stale data-href(생성 시점 고정) 의존 제거
