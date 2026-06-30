@@ -2926,8 +2926,18 @@ if(passBtn){
     var box=document.getElementById('sigall-dn-rows'); if(!box) return;
     if(!SIGNALS_ALL.length){ box.innerHTML=''; return; }
     var arr=sigAllDnSorted().slice(0,10);
-    // i+1 로 호출해 히어로(i===0) 없이 전부 컴팩트 행으로 렌더
-    box.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i+1);}).join(''):'<p class="sig-intro" style="padding:20px 16px;text-align:center;color:#94A3B8;">하락 중인 신호 종목이 없어요.</p>';
+    if(!arr.length){ box.innerHTML='<p class="sig-intro" style="padding:20px 16px;text-align:center;color:#94A3B8;">하락 중인 신호 종목이 없어요.</p>'; return; }
+    var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    // 좌측 색 막대 대신 순위 숫자로 표기
+    box.innerHTML=arr.map(function(s,i){
+      var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
+      var badges=(s.badges||[]).map(badgeHtml).join('');
+      return '<a class="sig-row" onclick="goStock(\''+s.code+'\')">'
+        +'<span class="num" style="min-width:16px;text-align:center;align-self:center;color:#94A3B8;font-weight:800;font-size:12px;flex-shrink:0;">'+(i+1)+'</span>'
+        +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
+        +'<span class="sig-rbadges">'+badges+'</span></span>'
+        +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
+    }).join('');
   }
   function applyEtf(etf, phase, asOf){
     setBadge('etf-upd-badge', phase);
