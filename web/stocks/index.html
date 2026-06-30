@@ -340,6 +340,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .fchips{display:flex;flex-wrap:wrap;gap:7px;}.fchips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}.fchips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
 .tbl{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
 .trow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
+.trow--static:hover{background:var(--canvas);cursor:default;}
 .tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
 .pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
 .pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
@@ -1954,7 +1955,7 @@ function etfRankRender(){
     var mult=avg20>0?((x.vol||0)/avg20):0;
     var multTxt=mult>0?mult.toFixed(1)+'×':'—';
     var multCls=mult>=1.5?'color:var(--up);font-weight:800':'color:var(--muted)';
-    return '<a class="trow" style="cursor:default">'
+    return '<a class="trow trow--static" style="cursor:default">'
       +'<span class="rk'+(top3?' t':'')+' num">'+rank+'</span>'
       +'<div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+(tag?' · ':'')+'</small>'+tag+'</div>'
       +'<div class="barwrap"><div class="bar vol" style="width:'+barW+'%"></div></div>'
