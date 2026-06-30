@@ -384,14 +384,23 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
     var arr=payload.sector||[];
     if(!arr.length){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; return; }
     // current(현재 섹터 하이라이트)는 페이지마다 다르므로 렌더 시점의 값을 사용
-    rows.innerHTML=arr.map(function(x,i){
+    var rk=0;
+    function rowHtml(x){
+      rk++;
       var isCur=current && x.label===current;
       return '<div class="rot-row'+(isCur?' current':'')+'">'
-        +'<span class="rot-rk">'+(i+1)+'</span>'
+        +'<span class="rot-rk">'+rk+'</span>'
         +'<span class="rot-nm">'+x.label+(isCur?'<span class="cur-tag">현재</span>':'')+'</span>'
         +'<span class="rot-pct" style="color:'+pctColor(x.pct)+'">'+pctFmt(x.pct)+'</span>'
         +'</div>';
-    }).join('');
+    }
+    // 홈과 동일하게 상대 선방(등락 ≥ 0) / 상대 약세(< 0)로 분류, 전체 순위는 이어서 매김
+    var win=arr.filter(function(x){return x.pct>=0;});
+    var lose=arr.filter(function(x){return x.pct<0;});
+    var html='';
+    if(win.length)  html+='<div class="rot-divider">상대 선방 ▲</div>'+win.map(rowHtml).join('');
+    if(lose.length) html+='<div class="rot-divider">상대 약세 ▼</div>'+lose.map(rowHtml).join('');
+    rows.innerHTML=html;
   }
   // 1) 캐시 우선 — 섹터 탭 이동 시 네트워크 호출 없이 즉시 렌더
   try{
