@@ -265,13 +265,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sd-sum-tag.up{background:var(--up-bg);color:var(--up);}
 .sd-sum-tag.dn{background:var(--dn-bg);color:var(--dn);}
 .sd-sum-val{font-size:19px;font-weight:800;letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
-.sd-axis{display:flex;justify-content:space-between;font-size:9.5px;font-weight:700;color:var(--muted);margin:0 68px 8px 26px;}
+.sd-axis{display:flex;justify-content:space-between;font-size:9.5px;font-weight:700;color:var(--muted);margin:0 74px 8px 52px;}
 .sd-day{padding:8px 0;border-top:1px solid var(--hair);}
 .sd-day:first-of-type{border-top:none;padding-top:2px;}
 .sd-day:last-of-type{padding-bottom:0;}
 .sd-day-date{font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
-.sd-row{display:flex;align-items:center;gap:8px;margin:4px 0;}
-.sd-lbl{width:18px;font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0;}
+.sd-row{display:flex;align-items:center;gap:14px;margin:4px 0;}
+.sd-lbl{width:38px;font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0;}
 .sd-track{position:relative;flex:1;height:10px;background:var(--inset);border-radius:5px;}
 .sd-zero{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#cbd2dc;}
 .sd-fill{position:absolute;top:0;bottom:0;border-radius:5px;}
@@ -375,6 +375,18 @@ body{background:var(--soft);margin:0;}
 .acc-cell .v{font-size:22px;font-weight:800;color:var(--ink);}
 .acc-cta{display:block;margin:0 16px 16px;text-align:center;font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;padding:10px;background:#F0F7FF;border-radius:8px;}
 
+/* ── 텔레그램 구독 CTA (적중률 카드 대체) ── */
+.sidebar-cta{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--s1);}
+.sidebar-cta__tg{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--hair);text-decoration:none;transition:background .15s;}
+.sidebar-cta__tg:hover{background:var(--soft);}
+.sidebar-cta__tg-icon{width:34px;height:34px;border-radius:8px;background:#2CA5E0;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sidebar-cta__tg-text{display:flex;flex-direction:column;gap:2px;}
+.sidebar-cta__tg-title{font-size:13px;font-weight:700;color:var(--ink);}
+.sidebar-cta__tg-sub{font-size:11px;color:var(--muted);}
+.sidebar-footer{display:flex;align-items:center;gap:10px;padding:10px 16px;}
+.sidebar-intro{font-size:11px;color:var(--muted);text-decoration:none;transition:color .15s;}
+.sidebar-intro:hover{color:var(--primary);}
+
 /* ── 실측 핵심 지표 (np 내부) ── */
 .mx{padding:14px 16px;border-bottom:1px solid var(--hair);}
 .mx:last-child{border-bottom:none;}
@@ -404,7 +416,7 @@ body{background:var(--soft);margin:0;}
 .tgt-range{position:relative;height:6px;border-radius:3px;background:linear-gradient(90deg,#A7C8F2,#9BDDBE 45%,#F3CE94);}
 .tgt-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);}
 .tgt-cur{position:absolute;top:-32px;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;white-space:nowrap;}
-.tgt-cur::after{content:'';position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--muted);}
+.tgt-cur::after{content:'';position:absolute;left:var(--arrow-left,50%);bottom:-6px;transform:translateX(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--muted);}
 .tgt-scale{display:flex;justify-content:space-between;margin-top:16px;}
 .tgt-scale .lab{font-size:11px;color:var(--muted);margin-bottom:2px;}
 .tgt-scale .v2{font-size:15px;font-weight:800;}

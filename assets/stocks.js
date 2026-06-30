@@ -192,26 +192,36 @@ function drawSparkCanvas(container, closes) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// data-spark 컨테이너 전체를 현재 폭 기준으로 재렌더 (초기 로드·리사이즈·탭 전환 공용)
+function redrawAllSparks() {
   document.querySelectorAll('[data-spark]').forEach(function(container) {
     var raw = (container.getAttribute('data-spark') || '').trim();
     if (!raw) return;
     var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
     drawSparkCanvas(container, closes);
   });
-  // 리사이즈 대응
+}
+window.redrawAllSparks = redrawAllSparks;
+
+document.addEventListener('DOMContentLoaded', function() {
+  redrawAllSparks();
+  // 리사이즈 대응 (윈도우 리사이즈는 100ms 디바운스)
   var resizeTimer;
   window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      document.querySelectorAll('[data-spark]').forEach(function(container) {
-        var raw = (container.getAttribute('data-spark') || '').trim();
-        if (!raw) return;
-        var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
-        drawSparkCanvas(container, closes);
-      });
-    }, 100);
+    resizeTimer = setTimeout(redrawAllSparks, 100);
   });
+  // 차트 탭 전환 '덜컹임' 제거 — '20일 종가' 패널은 숨김(display:none, 폭 0) 상태에서
+  // 600px 폴백으로 그려져 있다가, 기존엔 resize 이벤트(100ms 디바운스)로 뒤늦게 올바른
+  // 폭으로 다시 그려져 한 번 덜컹였다. 탭 전환 직후 동기로 재렌더하면 패널이 보이기 전
+  // 같은 프레임에 올바른 폭으로 그려져 stale 캔버스가 화면에 노출되지 않는다.
+  if (typeof window.switchChartTab === 'function') {
+    var _origSwitchChartTab = window.switchChartTab;
+    window.switchChartTab = function(pane) {
+      _origSwitchChartTab(pane);
+      if (pane === 'pane-spark') redrawAllSparks();
+    };
+  }
 });
 
 // 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터를 20일 종가 스파크라인과 동일한 스타일
@@ -470,22 +480,51 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 })();
 
-// 트랙레코드 ? 툴팁 바인딩 — stocks.js는 defer라 DOM 파싱 후 실행돼 body 끝의 #tr-tip을 항상 찾는다
-// (페이지 인라인 스크립트는 #tr-tip보다 먼저 실행돼 바인딩에 실패하므로 여기서 처리)
+// ? 도움말 툴팁 바인딩 — stocks.js는 defer라 DOM 파싱 후 실행돼 body 끝의 #*-tip을 항상 찾는다.
+// (페이지 인라인 스크립트는 tip 요소보다 먼저 실행돼 바인딩에 실패하므로 여기서 처리)
 (function(){
-  var btn=document.getElementById('tr-help-btn');
-  var tip=document.getElementById('tr-tip');
-  if(!btn||!tip) return;
-  function move(e){
-    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
-    var x=e.clientX+18,y=e.clientY+14;
-    if(x+w+pad>innerWidth) x=e.clientX-w-14;
-    if(y+h+pad>innerHeight) y=e.clientY-h-14;
-    tip.style.left=Math.max(pad,x)+'px';
-    tip.style.top=Math.max(pad,y)+'px';
+  function bindTip(btnId, tipId){
+    var btn=document.getElementById(btnId);
+    var tip=document.getElementById(tipId);
+    if(!btn||!tip) return;
+    function move(e){
+      var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
+      var x=e.clientX+18,y=e.clientY+14;
+      if(x+w+pad>innerWidth) x=e.clientX-w-14;
+      if(y+h+pad>innerHeight) y=e.clientY-h-14;
+      tip.style.left=Math.max(pad,x)+'px';
+      tip.style.top=Math.max(pad,y)+'px';
+    }
+    btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
+    btn.addEventListener('mousemove',move);
+    btn.addEventListener('mouseleave',function(){tip.style.display='none';});
   }
-  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
-  btn.addEventListener('mousemove',move);
-  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
+  bindTip('tr-help-btn','tr-tip'); // 더블샷 트랙레코드
+  bindTip('fo-label','fo-tip');    // 외국인 보유율
+})();
+
+// 증권사 목표주가 '현재가' 라벨 — 현재가가 최저가 근처/아래면 라벨이 중앙정렬(translateX(-50%))로
+// 패널 밖으로 나가 잘린다. 라벨은 레인지 안에 머물게 클램프하고, 아래 화살표만 실제 현재가를 가리킨다.
+(function(){
+  function clampTgtCur(){
+    document.querySelectorAll('.tgt-cur').forEach(function(el){
+      var range=el.parentNode; if(!range) return;        // .tgt-range
+      var rw=range.offsetWidth; if(!rw) return;
+      // 원본 위치(%)는 최초 1회 data 속성에 보존 (이후 left를 px로 덮어쓰므로)
+      var pct;
+      if(el.dataset.curPct!=null) pct=parseFloat(el.dataset.curPct);
+      else { pct=parseFloat(el.style.left); el.dataset.curPct=pct; }
+      if(isNaN(pct)) return;
+      var dotX=pct/100*rw;                                // 실제 현재가 위치(px, range 기준)
+      var lw=el.offsetWidth, half=lw/2, pad=4;
+      var center=Math.min(Math.max(dotX, half+pad), rw-half-pad); // 라벨 중심 클램프
+      el.style.left=center+'px';
+      var arrowPct=(dotX-(center-half))/lw*100;           // 라벨 내 화살표 상대 위치(%)
+      el.style.setProperty('--arrow-left', Math.min(Math.max(arrowPct,6),94)+'%');
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',clampTgtCur);
+  else clampTgtCur();
+  window.addEventListener('resize',clampTgtCur);
 })();
 
