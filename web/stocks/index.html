@@ -1284,7 +1284,7 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <div class="block">
-      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span></span><span class="block__s" style="display:inline-flex;align-items:center;gap:8px;"><span class="upd-badge" id="sig-upd-badge"></span><span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigHomeSetSort('score',this)">신호 강도순</a><a onclick="sigHomeSetSort('up',this)">상승률순</a></span></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span><span class="help-q" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 코스피와 반대로 움직이며 지수보다 3%p 이상 강세<br>· <b>거래량 급증</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환(장 마감 기준)<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고, <b>상승률순</b>으로도 볼 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</span></span><span class="block__s" style="display:inline-flex;align-items:center;gap:8px;"><span class="upd-badge" id="sig-upd-badge"></span><span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigHomeSetSort('score',this)">신호 강도순</a><a onclick="sigHomeSetSort('up',this)">상승률순</a></span></span></div>
       <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
       <div id="sig-rows">
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
@@ -1707,7 +1707,7 @@ function usSel(code){
   <div class="screen" id="signals-all">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">특이 신호 전체</span></div>
     <div class="phead">
-      <div><h1><span class="ic">⚡</span> <span id="sigall-title">오늘의 특이 신호</span></h1><div class="psub"><span id="sigall-count">— 종목</span> · 역행·거래량·신고가·수급 교차 · <span class="ds-asof"></span></div></div>
+      <div><h1><span class="ic">⚡</span> <span id="sigall-title">오늘의 특이 신호</span><span class="help-q" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 코스피와 반대로 움직이며 지수보다 3%p 이상 강세<br>· <b>거래량 급증</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환(장 마감 기준)<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고, <b>상승률·하락률순</b>으로도 볼 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</span></h1><div class="psub"><span id="sigall-count">— 종목</span> · 역행·거래량·신고가·수급 교차 · <span class="ds-asof"></span></div></div>
       <div class="rtabs"><a class="on" onclick="sigAllSetSort('score',this)">신호 강도순</a><a onclick="sigAllSetSort('up',this)">상승률순</a><a onclick="sigAllSetSort('dn',this)">하락률순</a></div>
     </div>
     <div class="block" style="margin-bottom:0;">
@@ -2832,8 +2832,10 @@ if(passBtn){
   }
   function sigHomeRender(){
     var w=document.getElementById('sig-rows'); if(!w) return;
-    var arr=SIGNALS_HOME.slice();
-    if(sigHomeSort==='up') arr.sort(function(a,b){return b.pct-a.pct;});
+    // 강도순은 API가 내려준 상위 N(SIGNALS_HOME) 유지, 상승률순은 전체 신호(SIGNALS_ALL) 기준으로 정렬 후 상위 N — 더보기와 정합성 유지
+    var arr = (sigHomeSort==='up')
+      ? SIGNALS_ALL.slice().sort(function(a,b){return b.pct-a.pct;}).slice(0, SIGNALS_HOME.length||10)
+      : SIGNALS_HOME.slice();
     w.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i);}).join(''):'';
     w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
     setTimeout(function(){w.classList.remove('sig-updated');}, 600);
