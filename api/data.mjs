@@ -5,6 +5,7 @@ const RAW_BASE = 'https://raw.githubusercontent.com/pulum0083/daily30/main/web/d
 const ALLOW = {
   'news-live': 'kospi-news-live.json',
   'briefings-list': 'briefings-list.json',
+  'movers-why': 'movers-why-live.json',
 };
 
 export default async function handler(req, res) {
