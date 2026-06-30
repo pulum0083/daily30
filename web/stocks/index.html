@@ -2581,7 +2581,7 @@ if(passBtn){
     if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
     if (slot === 'issue'){
       paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true, time:'실시간',
-              head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/' });
+              head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/#issue-briefing-wrap' });
     } else {
       var m = TYPE[slot];
       paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
@@ -2606,7 +2606,7 @@ if(passBtn){
       var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
       if (title){
         paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true,
-                time:'실시간', head:title, url:'/briefings/' + (nj.date || today) + '/kospi/' });
+                time:'실시간', head:title, url:'/briefings/' + (nj.date || today) + '/kospi/#issue-briefing-wrap' });
         return;
       }
     }
@@ -2617,10 +2617,11 @@ if(passBtn){
 
     // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아직이면 가장 최근 발행 브리핑(활성 슬롯 안에서만)
     var activeType = (slot === 'issue') ? 'kospi' : slot;
+    var anchor = (slot === 'issue') ? '#issue-briefing-wrap' : ''; // 장중 이슈 슬롯 → 이슈 섹션 앵커로 진입
     var s = list.slots && list.slots[today] && list.slots[today][activeType];
-    if (s && s.state === 'ready'){ paint(fromSlot(today, activeType, s)); return; }
+    if (s && s.state === 'ready'){ var o = fromSlot(today, activeType, s); o.url += anchor; paint(o); return; }
     var pick = pickLatest(list);
-    if (pick){ paint(fromSlot(pick.date, pick.type, pick.s)); }
+    if (pick){ var op = fromSlot(pick.date, pick.type, pick.s); op.url += anchor; paint(op); }
   }
   render();
   setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
