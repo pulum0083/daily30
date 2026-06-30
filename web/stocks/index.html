@@ -1721,13 +1721,26 @@ function usSel(code){
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
     <div class="phead">
       <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · <span class="ds-asof"></span></div></div>
-      <div class="rtabs"><a class="on" onclick="etfSetTab('vol',this)">거래량</a><a onclick="etfSetTab('up',this)">상승률</a><a onclick="etfSetTab('dn',this)">하락률</a></div>
     </div>
-    <div class="tbl">
-      <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
-      <div id="etf-rank-rows"></div>
+    <div class="home-cols">
+      <!-- 좌: 거래량·상승률 (탭 전환) -->
+      <div class="home-main">
+        <div class="block">
+          <div class="block__h"><span class="block__t"><span class="ic">📊</span>ETF 랭킹</span><span class="block__s"><span class="stabs" id="etf-rank-tabs" style="margin-bottom:0;"><a class="on" onclick="etfSetTab('vol',this)">거래량순</a><a onclick="etfSetTab('up',this)">상승률순</a></span></span></div>
+          <div class="block__h" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
+          <div id="etf-rank-rows"></div>
+          <a class="more" id="etf-rank-more" onclick="etfLoadMore()">더보기</a>
+        </div>
+      </div>
+      <!-- 우: 하락률 순 -->
+      <div class="home-side">
+        <div class="block">
+          <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락률 순</span></div>
+          <p class="sig-intro" style="padding:11px 16px 8px;">오늘 가장 많이 빠진 ETF예요.</p>
+          <div id="etf-dn-rows"></div>
+        </div>
+      </div>
     </div>
-    <a class="more" id="etf-rank-more" onclick="etfLoadMore()" style="border-radius:0 0 16px 16px;border:1px solid var(--hair);border-top:none;margin-top:-1px;">더보기</a>
   </div>
 
   <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
@@ -1956,7 +1969,24 @@ function etfRankRender(){
 }
 function etfSetTab(tab,el){etfTab=tab;etfShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}etfRankRender();}
 function etfLoadMore(){etfShown=Math.min(etfShown+10,30);etfRankRender();}
+/* 우측 사이드 — 하락률 순(상위 10) */
+function etfDnSorted(){return ETF_ALL.filter(function(x){return (x.changePct||0)<0;}).sort(function(a,b){return a.changePct-b.changePct;});}
+function etfDnRender(){
+  var box=document.getElementById('etf-dn-rows');if(!box)return;
+  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">불러오는 중…</div>';return;}
+  var arr=etfDnSorted().slice(0,10);
+  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">하락 ETF가 없어요.</div>';return;}
+  box.innerHTML=arr.map(function(x,i){
+    var pct=x.changePct||0,tag=etfRankTag(x.name);
+    return '<div class="etf-row">'
+      +'<span class="num" style="width:15px;text-align:center;font-size:11px;font-weight:800;color:#94A3B8;flex-shrink:0;">'+(i+1)+'</span>'
+      +'<span class="etf-nm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+x.name+(tag?' ':'')+tag+'</span>'
+      +'<span class="etf-pct dn num">−'+Math.abs(pct).toFixed(2)+'%</span>'
+      +'</div>';
+  }).join('');
+}
 etfRankRender();
+etfDnRender();
 
 /* 더보기 자동 트리거 — 스크롤 시 버튼이 뷰포트 근처면 자동 확장 (500ms 쓰로틀) */
 (function(){
@@ -2771,6 +2801,7 @@ if(passBtn){
       renderEtf(d.etf);
       ETF_ALL=(d.etf||[]).map(function(e){var se=SNAP&&SNAP.etfs&&SNAP.etfs[e.code];return Object.assign({},e,{vol_avg20:se?se.vol_avg20:0});});
       etfRankRender();
+      etfDnRender();
     }
     renderSectorBreadth(all);
     bindSurgeTips();
