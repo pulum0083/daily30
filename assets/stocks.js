@@ -78,7 +78,14 @@ function drawSparkCanvas(container, closes) {
 
   var isUp = closes[closes.length - 1] >= closes[0];
   var color = isUp ? '#E03131' : '#2775ED';
-  var pad = { t: 28, b: hasDates ? 24 : 8, l: 10, r: 10 };
+  // 좌우 여백 — 20일 종가(hasDates)는 '오늘 장중' SVG(viewBox 640×180·height 160·meet)의
+  // 좌우 여백과 일치시켜 탭 전환 시 곡선 좌우 폭이 달라 덜컹이는 현상을 제거한다.
+  var sideInset = 10;
+  if (hasDates) {
+    var s = Math.min(W / 640, 160 / 180);
+    sideInset = (W - 640 * s) / 2 + 14 * s;
+  }
+  var pad = { t: 28, b: hasDates ? 24 : 8, l: sideInset, r: sideInset };
   var pW = W - pad.l - pad.r, pH = H - pad.t - pad.b;
 
   var lo = Math.min.apply(null, closes);
@@ -231,6 +238,15 @@ document.addEventListener('DOMContentLoaded', function() {
   function applyHeaderCurrency(){ if(isUS && pxEl && headerUsd) pxEl.textContent=fmtPx(headerUsd); }
   var pinsLoaded=false, pinsHTML='', lastCoords=[], lastTimes=[], lastVals=[], lastCol='#E03131', hoverBound=false;
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10).replace(/-/g,'');}
+  // 거래일 'YYYYMMDD' → 'M/D(요일)' (장 마감 후 '오늘 장중' 대체 표기)
+  function fmtTradeDate(ymd){
+    ymd=String(ymd||''); if(ymd.length<8) return '';
+    var mo=+ymd.slice(4,6), da=+ymd.slice(6,8);
+    var dt=new Date(+ymd.slice(0,4), mo-1, da);
+    if(isNaN(dt.getTime())) return '';
+    var w=['일','월','화','수','목','금','토'][dt.getDay()];
+    return mo+'/'+da+'('+w+')';
+  }
 
   // ── 라이브 여부·세션 (현재 시각 기준) ──
   // 미국: ET 04:00~20:00(프리~애프터) / 국내: KST 09:00~15:35
@@ -304,10 +320,12 @@ document.addEventListener('DOMContentLoaded', function() {
       vals=idx.map(function(i){return d.minutes[i];});
       times=idx.map(function(i){return d.times[i];});
       tsv=idx.map(function(i){return tsa[i];});
-      // 탭 라벨: 프리장 / 오늘 장중 / 애프터장
-      var ci=document.getElementById('ctab-intra'); if(ci) ci.textContent=segLabel(seg);
+      // 탭 라벨/라이브 배지 — 미국 세션 라벨 갱신
       var lvtx=document.getElementById('intra-live-tx'); if(lvtx&&isLive) lvtx.textContent=liveLabel();
     }
+    // 탭 라벨 — 라이브: 세션명(오늘 장중/프리장/애프터장) · 장 마감 후: 거래일 날짜 M/D(요일)
+    var ci=document.getElementById('ctab-intra');
+    if(ci) ci.textContent = isLive ? segLabel(seg) : (fmtTradeDate(d&&d.date) || segLabel(seg));
     var n=vals.length;
     if(n<2){ decide(false); return; }
     var useT=times.length===n;
@@ -369,7 +387,13 @@ document.addEventListener('DOMContentLoaded', function() {
       if(isUS) headerUsd=cur;   // 라이브 가격(USD) 기준값 보존 → 통화 전환 시 재포맷
       if(pxEl) pxEl.textContent=fmtPx(cur);
       if(cgEl){cgEl.style.color=u?'var(--up)':'var(--dn)';cgEl.textContent=(u?'▲ +':'▼ ')+chg.toFixed(2)+'%';}
-      if(metaEl){var lt=times[n-1]||'';var ms=seg==='pre'?'프리장':(seg==='post'?'애프터장':'장중');metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, isUS?('$1'+ms+' '+lt):('$1오늘 장중 '+lt));}
+      if(metaEl){
+        var lt=times[n-1]||'';
+        var label;
+        if(isLive){ var ms=seg==='pre'?'프리장':(seg==='post'?'애프터장':'장중'); label=isUS?(ms+' '+lt):('오늘 장중 '+lt); }
+        else { label=fmtTradeDate(d&&d.date) || (isUS?'장중':'오늘 장중'); } // 장 마감 후: 거래일 날짜
+        metaEl.innerHTML=metaOrig.replace(/(·\s*)\d{2}-\d{2}\s*종가/, '$1'+label);
+      }
     }
 
     // ── 뉴스 핀(movers-why)은 최초 1회만 로드 → pinsHTML에 캐시해 매 틱 곡선과 함께 재합성 ──

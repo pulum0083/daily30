@@ -20,7 +20,27 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
 <style>
-  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 48px;}
+  .sector-wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px;}
+  /* 2단 레이아웃 (좌 종목 리스트 · 우 섹터 로테이션) */
+  .sector-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:start;}
+  .sector-main,.sector-aside{min-width:0;}
+  /* 좌측 콘텐츠를 하나의 박스로 — 통계·시장폭·종목 리스트를 한 콘텐츠처럼 묶음 */
+  .sector-main{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;padding:18px;}
+  @media(max-width:860px){.sector-cols{grid-template-columns:minmax(0,1fr);}}
+  /* 섹터 로테이션 사이드 박스 */
+  .rot-box{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;overflow:hidden;}
+  .rot-head{padding:12px 16px;border-bottom:1px solid var(--hairline);font-size:13px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px;}
+  .rot-cap{font-size:12px;line-height:1.55;color:#475569;padding:10px 16px;border-bottom:1px solid var(--hairline);}
+  .rot-cap b{color:var(--ink);}
+  .rot-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;}
+  .rot-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #F1F5F9;}
+  .rot-row:last-child{border-bottom:none;}
+  .rot-row.current{background:color-mix(in srgb,var(--primary) 8%,transparent);}
+  .rot-rk{font-size:12px;font-weight:800;color:#94A3B8;min-width:16px;text-align:center;font-variant-numeric:tabular-nums;flex:none;}
+  .rot-nm{flex:1;font-size:13px;font-weight:700;color:var(--ink);}
+  .rot-nm .cur-tag{font-size:10px;font-weight:800;color:var(--primary);margin-left:5px;}
+  .rot-pct{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .rot-skl{height:14px;margin:9px 16px;border-radius:6px;background:#EEF2F7;}
   .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;}
   .sector-crumb a{color:var(--muted);text-decoration:none;}
   .sector-crumb a:hover{color:var(--ink);}
@@ -33,7 +53,7 @@
   .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
-  .sector-stat__box{background:var(--canvas);border:1px solid var(--hairline);border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
+  .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
   .sector-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
   .sector-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
   .sector-stat__val.up{color:#E03131;}
@@ -54,8 +74,8 @@
   .sector-list-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px;}
   .sector-list-head__t{font-size:13px;font-weight:800;color:var(--ink);}
   .sector-list-head__sort{font-size:11px;font-weight:600;color:var(--muted);}
-  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:28px;}
-  .sector-card{display:block;text-decoration:none;background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;
+  .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:0;}
+  .sector-card{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
   .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
@@ -77,10 +97,10 @@
   .sector-card__poslbl{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
   .sector-card__fr{font-size:11px;color:var(--muted);margin-top:5px;}
 
-  .sector-nav{border-top:1px solid var(--hairline);padding-top:16px;}
+  .sector-nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--hairline);padding-top:16px;}
   .sector-nav--top{border-top:none;padding-top:0;margin-bottom:18px;}
-  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:8px;}
-  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .sector-nav__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:0;flex:none;white-space:nowrap;}
+  .sector-nav__chips{display:flex;flex-wrap:wrap;gap:7px;flex:1;min-width:0;}
   .sector-nav__chips a{font-size:12px;font-weight:600;color:var(--ink);background:var(--canvas);border:1px solid var(--hairline);
     border-radius:999px;padding:5px 12px;text-decoration:none;white-space:nowrap;}
   .sector-nav__chips a:hover{border-color:var(--primary);color:var(--primary);}
@@ -141,6 +161,8 @@
     </div>
   </div>
 
+  <div class="sector-cols">
+   <div class="sector-main">
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
@@ -288,6 +310,20 @@
     </a>
     
   </div>
+   </div><!-- /.sector-main -->
+
+   <aside class="sector-aside">
+     <div class="rot-box" id="rot-box" data-current="방산">
+       <div class="rot-head"><span>🔁</span>섹터 로테이션</div>
+       <div class="rot-cap">섹터 ETF 등락률로 본 <b id="rot-asof">오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
+       <div id="rot-rows">
+         <div class="rot-skl" style="width:70%"></div>
+         <div class="rot-skl" style="width:55%"></div>
+         <div class="rot-skl" style="width:62%"></div>
+       </div>
+     </div>
+   </aside>
+  </div><!-- /.sector-cols -->
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -330,6 +366,60 @@ window.addEventListener('load', function() {
 <script>
 // 뒤로 가기 — 상세 페이지와 동일 규칙 (히스토리 있으면 back, 없으면 종목 허브)
 function goBack(){ if(history.length>1) history.back(); else location.href='/stocks/'; }
+
+// ── 섹터 로테이션 사이드바 — /api/signals 의 etf.sector(전 섹터, 덜 빠진 순) 렌더 ──
+// 섹터 데이터는 전 섹터 페이지 공통이라 sessionStorage에 캐시 → 섹터 탭 이동 시 재요청 없이 즉시 렌더(좌측만 갱신)
+(function(){
+  var box=document.getElementById('rot-box'); if(!box) return;
+  var rows=document.getElementById('rot-rows');
+  var current=(box.getAttribute('data-current')||'').trim();
+  var CACHE_KEY='ds_sector_rot', TTL=120000; // 2분(장중 갱신 주기) 내 재방문은 캐시 사용
+  function pctFmt(p){return (p>=0?'+':'')+p.toFixed(2)+'%';}
+  function pctColor(p){return p>=0?'#E03131':'#2775ED';}
+  function render(payload){
+    var at=document.getElementById('rot-asof'); if(at) at.textContent=(payload.pre||'오늘의')+' 상대 강도';
+    var arr=payload.sector||[];
+    if(!arr.length){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; return; }
+    // current(현재 섹터 하이라이트)는 페이지마다 다르므로 렌더 시점의 값을 사용
+    var rk=0;
+    function rowHtml(x){
+      rk++;
+      var isCur=current && x.label===current;
+      return '<div class="rot-row'+(isCur?' current':'')+'">'
+        +'<span class="rot-rk">'+rk+'</span>'
+        +'<span class="rot-nm">'+x.label+(isCur?'<span class="cur-tag">현재</span>':'')+'</span>'
+        +'<span class="rot-pct" style="color:'+pctColor(x.pct)+'">'+pctFmt(x.pct)+'</span>'
+        +'</div>';
+    }
+    // 홈과 동일하게 상대 선방(등락 ≥ 0) / 상대 약세(< 0)로 분류, 전체 순위는 이어서 매김
+    var win=arr.filter(function(x){return x.pct>=0;});
+    var lose=arr.filter(function(x){return x.pct<0;});
+    var html='';
+    if(win.length)  html+='<div class="rot-divider">상대 선방 ▲</div>'+win.map(rowHtml).join('');
+    if(lose.length) html+='<div class="rot-divider">상대 약세 ▼</div>'+lose.map(rowHtml).join('');
+    rows.innerHTML=html;
+  }
+  // 1) 캐시 우선 — 섹터 탭 이동 시 네트워크 호출 없이 즉시 렌더
+  try{
+    var c=JSON.parse(sessionStorage.getItem(CACHE_KEY)||'null');
+    if(c && Array.isArray(c.sector) && (Date.now()-c.ts)<TTL){ render(c); return; }
+  }catch(e){}
+  // 2) 캐시 없거나 만료 시에만 1회 fetch 후 저장
+  fetch('/api/signals',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.etf||!Array.isArray(d.etf.sector)||!d.etf.sector.length){
+        if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>';
+        return;
+      }
+      var asOf=d.asOf||{};
+      var pre=(asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의';
+      var payload={pre:pre, sector:d.etf.sector, ts:Date.now()};
+      try{ sessionStorage.setItem(CACHE_KEY, JSON.stringify(payload)); }catch(e){}
+      render(payload);
+    })
+    .catch(function(){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; });
+})();
 
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
