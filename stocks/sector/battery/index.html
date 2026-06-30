@@ -29,7 +29,7 @@
     flex:none;transition:background .12s,color .12s,border-color .12s;}
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
-  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;}
+  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
@@ -87,7 +87,7 @@
   .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
 
   /* 장중 실시간 / 장마감 상태 배지 */
-  .sector-live{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;margin-left:6px;}
+  .sector-live{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;}
   .sector-live .sl-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
   .sector-live.on{background:#FEF2F2;color:#E03131;}
   .sector-live.on .sl-dot{background:#EF4444;animation:slblink 1.2s ease-in-out infinite;}
@@ -99,26 +99,9 @@
 </head>
 <body>
 
-<nav class="gnb">
-  <div class="gnb__inner">
-    <div class="gnb__left">
-      <a class="gnb__logo" href="/briefings">
-        <div class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
-        <span class="gnb__title">Double<span>-Shot</span></span>
-      </a>
-      <a class="gnb__nav-link" style="margin-left:16px;" href="/stocks/income-designer/">월배당 ETF 계산기</a>
-      <div class="gnb__divider"></div>
-      <a class="gnb__nav-link" href="/chips">Chip-Board</a>
 
-    </div>
-    <div class="gnb__meta">
-      <button class="gnb__theme-toggle" onclick="toggleTheme()" aria-label="다크모드 전환">
-        <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-      </button>
-    </div>
-  </div>
-</nav>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당 설계기</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색 ⌘K</span></span></div></div>
+
 
 
 <div class="sector-wrap">
@@ -128,6 +111,11 @@
   </div>
   <h1 class="sector-page-title">🔋 2차전지</h1>
   <p class="sector-page-sub">5종목 · 2026-06-29 기준 <span id="live-status" class="sector-live off" data-snap="2026-06-29"><span class="sl-dot"></span>장마감 · 2026-06-29 종가 기준</span></p>
+  <script>
+  /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
+  (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
+    if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
+  </script>
   <p class="sector-desc">배터리 셀·소재·장비 종목이에요. 전기차 수요와 미국 IRA·유럽 정책, 원자재 가격 변동에 민감해요.</p>
 
   <div class="sector-nav sector-nav--top">
@@ -436,7 +424,7 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
 
   // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감'
   var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
-  if(kmin>=540&&kmin<=930){ update(); setInterval(update,30000); }
+  if(kmin>=540&&kmin<=930){ setStatus(true); update(); setInterval(update,30000); }
   else { setStatus(false); }
 })();
 </script>
