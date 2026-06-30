@@ -14,7 +14,7 @@
     flex:none;transition:background .12s,color .12s,border-color .12s;}
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
-  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;}
+  .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
@@ -72,7 +72,7 @@
   .sector-nav__chips a.current{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);}
 
   /* 장중 실시간 / 장마감 상태 배지 */
-  .sector-live{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;margin-left:6px;}
+  .sector-live{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;}
   .sector-live .sl-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
   .sector-live.on{background:#FEF2F2;color:#E03131;}
   .sector-live.on .sl-dot{background:#EF4444;animation:slblink 1.2s ease-in-out infinite;}
@@ -89,6 +89,11 @@
   </div>
   <h1 class="sector-page-title">{{ sector_emoji }} {{ sector_label }}</h1>
   <p class="sector-page-sub">{{ breadth.total }}종목 · {{ snapshot_date }} 기준 <span id="live-status" class="sector-live off" data-snap="{{ snapshot_date }}"><span class="sl-dot"></span>장마감 · {{ snapshot_date }} 종가 기준</span></p>
+  <script>
+  /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
+  (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
+    if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
+  </script>
   {% if sector_desc %}<p class="sector-desc">{{ sector_desc }}</p>{% endif %}
 
   <div class="sector-nav sector-nav--top">
@@ -276,7 +281,7 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
 
   // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감'
   var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
-  if(kmin>=540&&kmin<=930){ update(); setInterval(update,30000); }
+  if(kmin>=540&&kmin<=930){ setStatus(true); update(); setInterval(update,30000); }
   else { setStatus(false); }
 })();
 </script>
