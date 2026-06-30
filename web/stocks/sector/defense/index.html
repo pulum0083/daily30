@@ -20,7 +20,25 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 
 <style>
-  .sector-wrap{max-width:920px;margin:0 auto;padding:20px 16px 48px;}
+  .sector-wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px;}
+  /* 2단 레이아웃 (좌 종목 리스트 · 우 섹터 로테이션) */
+  .sector-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px;align-items:start;}
+  .sector-main,.sector-aside{min-width:0;}
+  @media(max-width:860px){.sector-cols{grid-template-columns:minmax(0,1fr);}}
+  /* 섹터 로테이션 사이드 박스 */
+  .rot-box{background:var(--canvas);border:1px solid var(--hairline);border-radius:14px;overflow:hidden;}
+  .rot-head{padding:12px 16px;border-bottom:1px solid var(--hairline);font-size:13px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px;}
+  .rot-cap{font-size:12px;line-height:1.55;color:#475569;padding:10px 16px;border-bottom:1px solid var(--hairline);}
+  .rot-cap b{color:var(--ink);}
+  .rot-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;}
+  .rot-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid #F1F5F9;}
+  .rot-row:last-child{border-bottom:none;}
+  .rot-row.current{background:color-mix(in srgb,var(--primary) 8%,transparent);}
+  .rot-rk{font-size:12px;font-weight:800;color:#94A3B8;min-width:16px;text-align:center;font-variant-numeric:tabular-nums;flex:none;}
+  .rot-nm{flex:1;font-size:13px;font-weight:700;color:var(--ink);}
+  .rot-nm .cur-tag{font-size:10px;font-weight:800;color:var(--primary);margin-left:5px;}
+  .rot-pct{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .rot-skl{height:14px;margin:9px 16px;border-radius:6px;background:#EEF2F7;}
   .sector-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;}
   .sector-crumb a{color:var(--muted);text-decoration:none;}
   .sector-crumb a:hover{color:var(--ink);}
@@ -141,6 +159,8 @@
     </div>
   </div>
 
+  <div class="sector-cols">
+   <div class="sector-main">
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
@@ -288,6 +308,20 @@
     </a>
     
   </div>
+   </div><!-- /.sector-main -->
+
+   <aside class="sector-aside">
+     <div class="rot-box" id="rot-box" data-current="방산">
+       <div class="rot-head"><span>🔁</span>섹터 로테이션</div>
+       <div class="rot-cap">섹터 ETF 등락률로 본 <b id="rot-asof">오늘의 상대 강도</b>. 덜 빠진 섹터가 위에.</div>
+       <div id="rot-rows">
+         <div class="rot-skl" style="width:70%"></div>
+         <div class="rot-skl" style="width:55%"></div>
+         <div class="rot-skl" style="width:62%"></div>
+       </div>
+     </div>
+   </aside>
+  </div><!-- /.sector-cols -->
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -330,6 +364,36 @@ window.addEventListener('load', function() {
 <script>
 // 뒤로 가기 — 상세 페이지와 동일 규칙 (히스토리 있으면 back, 없으면 종목 허브)
 function goBack(){ if(history.length>1) history.back(); else location.href='/stocks/'; }
+
+// ── 섹터 로테이션 사이드바 — /api/signals 의 etf.sector(전 섹터, 덜 빠진 순) 렌더 ──
+(function(){
+  var box=document.getElementById('rot-box'); if(!box) return;
+  var rows=document.getElementById('rot-rows');
+  var current=(box.getAttribute('data-current')||'').trim();
+  function pctFmt(p){return (p>=0?'+':'')+p.toFixed(2)+'%';}
+  function pctColor(p){return p>=0?'#E03131':'#2775ED';}
+  fetch('/api/signals',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d||!d.etf||!Array.isArray(d.etf.sector)||!d.etf.sector.length){
+        if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>';
+        return;
+      }
+      var asOf=d.asOf||{};
+      var pre=(asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의';
+      var at=document.getElementById('rot-asof'); if(at) at.textContent=pre+' 상대 강도';
+      var arr=d.etf.sector; // API가 pct 내림차순 정렬 + 전 섹터 포함
+      rows.innerHTML=arr.map(function(x,i){
+        var isCur=current && x.label===current;
+        return '<div class="rot-row'+(isCur?' current':'')+'">'
+          +'<span class="rot-rk">'+(i+1)+'</span>'
+          +'<span class="rot-nm">'+x.label+(isCur?'<span class="cur-tag">현재</span>':'')+'</span>'
+          +'<span class="rot-pct" style="color:'+pctColor(x.pct)+'">'+pctFmt(x.pct)+'</span>'
+          +'</div>';
+      }).join('');
+    })
+    .catch(function(){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; });
+})();
 
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
