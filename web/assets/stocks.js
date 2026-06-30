@@ -192,26 +192,36 @@ function drawSparkCanvas(container, closes) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+// data-spark 컨테이너 전체를 현재 폭 기준으로 재렌더 (초기 로드·리사이즈·탭 전환 공용)
+function redrawAllSparks() {
   document.querySelectorAll('[data-spark]').forEach(function(container) {
     var raw = (container.getAttribute('data-spark') || '').trim();
     if (!raw) return;
     var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
     drawSparkCanvas(container, closes);
   });
-  // 리사이즈 대응
+}
+window.redrawAllSparks = redrawAllSparks;
+
+document.addEventListener('DOMContentLoaded', function() {
+  redrawAllSparks();
+  // 리사이즈 대응 (윈도우 리사이즈는 100ms 디바운스)
   var resizeTimer;
   window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function() {
-      document.querySelectorAll('[data-spark]').forEach(function(container) {
-        var raw = (container.getAttribute('data-spark') || '').trim();
-        if (!raw) return;
-        var closes = raw.split(',').map(Number).filter(function(v) { return !isNaN(v) && isFinite(v); });
-        drawSparkCanvas(container, closes);
-      });
-    }, 100);
+    resizeTimer = setTimeout(redrawAllSparks, 100);
   });
+  // 차트 탭 전환 '덜컹임' 제거 — '20일 종가' 패널은 숨김(display:none, 폭 0) 상태에서
+  // 600px 폴백으로 그려져 있다가, 기존엔 resize 이벤트(100ms 디바운스)로 뒤늦게 올바른
+  // 폭으로 다시 그려져 한 번 덜컹였다. 탭 전환 직후 동기로 재렌더하면 패널이 보이기 전
+  // 같은 프레임에 올바른 폭으로 그려져 stale 캔버스가 화면에 노출되지 않는다.
+  if (typeof window.switchChartTab === 'function') {
+    var _origSwitchChartTab = window.switchChartTab;
+    window.switchChartTab = function(pane) {
+      _origSwitchChartTab(pane);
+      if (pane === 'pane-spark') redrawAllSparks();
+    };
+  }
 });
 
 // 오늘 장중 1분봉 곡선 — /api/intraday?code= 실측 데이터를 20일 종가 스파크라인과 동일한 스타일
