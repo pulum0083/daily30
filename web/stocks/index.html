@@ -2917,7 +2917,10 @@ if(passBtn){
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
       pollVolTop();
-      if(krMarketOpen()) setInterval(pollVolTop,120000);
+      if(krMarketOpen()){
+        setInterval(pollVolTop,120000);
+        setInterval(loadSignals,120000); // 장중 2분마다 특이신호 자동 갱신
+      }
     })
     .catch(function(){ pollVolTop(); });
 })();
