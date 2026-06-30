@@ -70,6 +70,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 갱신 배지 */
 .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
 .upd-badge .dot{width:4px;height:4px;border-radius:50%;background:#EF4444;animation:blink 1.2s ease-in-out infinite;}
+/* 신호 업데이트 시 깜빡임 효과 */
+@keyframes flashUpdate{0%{background:var(--primary-bg);}100%{background:var(--canvas);}}
+.sig-updated{animation:flashUpdate 0.6s ease-out;}
+.etf-updated{animation:flashUpdate 0.6s ease-out;}
 /* 실시간 포커스 카드 (칩보드 상단) */
 .focus-card{background:var(--canvas);border:1.5px solid #FECACA;border-radius:14px;margin-bottom:14px;overflow:hidden;}
 .focus-card__h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;font-weight:700;color:#991B1B;}
@@ -2801,7 +2805,7 @@ if(passBtn){
     });
   }
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
-  function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간' : '장 마감 기준'; }
+  function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간 · 2분 간격' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
@@ -2830,7 +2834,12 @@ if(passBtn){
     SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     var w=document.getElementById('sig-rows');
-    if(w) w.innerHTML=(d.signals||[]).map(function(s,i){return sigItemHtml(s,i);}).join('');
+    if(w){
+      w.innerHTML=(d.signals||[]).map(function(s,i){return sigItemHtml(s,i);}).join('');
+      // 업데이트 효과 추가
+      w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
+      setTimeout(function(){w.classList.remove('sig-updated');}, 600);
+    }
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
   function sigAllSorted(){
@@ -2860,22 +2869,38 @@ if(passBtn){
     var rt=document.getElementById('sec-rot-title'); if(rt) rt.textContent=asOfPrefix(asOf)+' 상대 강도';
     if(!etf) return;
     var lead=document.getElementById('etf-lead');
-    if(lead&&etf.lead) lead.innerHTML='<div class="etf-head-t">'+etf.lead.title+'</div><div class="etf-head-b">'+etf.lead.body+'</div>';
+    if(lead&&etf.lead){
+      lead.innerHTML='<div class="etf-head-t">'+etf.lead.title+'</div><div class="etf-head-b">'+etf.lead.body+'</div>';
+      lead.classList.remove('etf-updated'); void lead.offsetWidth; lead.classList.add('etf-updated');
+      setTimeout(function(){lead.classList.remove('etf-updated');}, 600);
+    }
     var b=etf.betting, bw=document.getElementById('etf-betting');
-    if(bw&&b) bw.innerHTML='<div class="bet-label">레버리지·인버스 ETF 거래대금</div>'
-      +'<div class="bet-split"><div class="bet-dn" style="width:'+b.downRatio+'%">하락 베팅 '+b.downRatio+'%</div><div class="bet-up" style="width:'+b.upRatio+'%">저점매수 '+b.upRatio+'%</div></div>'
-      +'<div class="bet-fact"><div class="bet-fact-row"><span>인버스 거래량</span><b>KODEX 200의 '+b.invVolMultiple+'배</b></div>'
-      +'<div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">'+(b.levPct!=null?b.levPct.toFixed(2)+'%':'—')+'</b></div></div>'
-      +'<div class="gauge-note">거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.</div>';
+    if(bw&&b){
+      bw.innerHTML='<div class="bet-label">레버리지·인버스 ETF 거래대금</div>'
+        +'<div class="bet-split"><div class="bet-dn" style="width:'+b.downRatio+'%">하락 베팅 '+b.downRatio+'%</div><div class="bet-up" style="width:'+b.upRatio+'%">저점매수 '+b.upRatio+'%</div></div>'
+        +'<div class="bet-fact"><div class="bet-fact-row"><span>인버스 거래량</span><b>KODEX 200의 '+b.invVolMultiple+'배</b></div>'
+        +'<div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">'+(b.levPct!=null?b.levPct.toFixed(2)+'%':'—')+'</b></div></div>'
+        +'<div class="gauge-note">거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.</div>';
+      bw.classList.remove('etf-updated'); void bw.offsetWidth; bw.classList.add('etf-updated');
+      setTimeout(function(){bw.classList.remove('etf-updated');}, 600);
+    }
     var sw=document.getElementById('etf-sector');
-    if(sw&&etf.sector){var top=etf.sector.slice(0,3),bot=etf.sector.slice(-3);
+    if(sw&&etf.sector){
+      var top=etf.sector.slice(0,3),bot=etf.sector.slice(-3);
       var row=function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';return '<div class="etf-row"><span class="etf-nm">'+x.label+'</span><span class="etf-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';};
-      sw.innerHTML='<div class="sec-divider">상대 선방 ▲</div>'+top.map(row).join('')+'<div class="sec-divider">상대 약세 ▼</div>'+bot.map(row).join('');}
+      sw.innerHTML='<div class="sec-divider">상대 선방 ▲</div>'+top.map(row).join('')+'<div class="sec-divider">상대 약세 ▼</div>'+bot.map(row).join('');
+      sw.classList.remove('etf-updated'); void sw.offsetWidth; sw.classList.add('etf-updated');
+      setTimeout(function(){sw.classList.remove('etf-updated');}, 600);
+    }
     var hw=document.getElementById('etf-safehaven');
-    if(hw&&etf.safeHaven){var rs=etf.safeHaven.rows.map(function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';
-      return '<div class="sh-row"><span class="sh-nm">'+x.label+'</span><span class="sh-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';}).join('');
+    if(hw&&etf.safeHaven){
+      var rs=etf.safeHaven.rows.map(function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';
+        return '<div class="sh-row"><span class="sh-nm">'+x.label+'</span><span class="sh-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';}).join('');
       var m=etf.safeHaven.market,mc=m>=0?'var(--up)':'var(--dn)',ms=m>=0?'+':'';
-      hw.innerHTML=rs+'<div class="sh-row"><span class="sh-nm">코스피200 (주식)</span><span class="sh-pct" style="color:'+mc+'">'+ms+m.toFixed(2)+'%</span></div>';}
+      hw.innerHTML=rs+'<div class="sh-row"><span class="sh-nm">코스피200 (주식)</span><span class="sh-pct" style="color:'+mc+'">'+ms+m.toFixed(2)+'%</span></div>';
+      hw.classList.remove('etf-updated'); void hw.offsetWidth; hw.classList.add('etf-updated');
+      setTimeout(function(){hw.classList.remove('etf-updated');}, 600);
+    }
   }
   function clearSkel(){ ['sig-rows','etf-lead','etf-betting','etf-top-rows','etf-sector','etf-safehaven'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
   function loadSignals(){
