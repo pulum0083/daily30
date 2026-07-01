@@ -766,7 +766,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .gnb .sbtn{padding:6px 9px;}
   .gnb__date{display:none;}
   /* 종목 픽 — 섹션 전체를 하나의 박스로 감싸고, 카드는 구분선으로만 분리 */
-  .stock-picks-section{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:16px;}
+  .stock-picks-section{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:16px;}
   .stock-picks{gap:0;}
   .stock-pick-card{background:transparent;border:none;border-radius:0;padding:14px 0;border-bottom:1px solid var(--hairline);}
   .stock-pick-card:first-child{padding-top:0;}
