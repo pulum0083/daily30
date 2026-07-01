@@ -1235,8 +1235,9 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             print(f"[call_claude] JSON 파싱 실패, 재시도 {attempt}/2 ...")
 
         response = client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=4096,
+            thinking={"type": "disabled"},
             system=[
                 {
                     "type": "text",
@@ -1543,8 +1544,9 @@ def call_claude_closing(date_str: str) -> dict:
             print(f"[call_claude] JSON 파싱 실패, 재시도 {attempt}/2 ...")
 
         response = client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=2048,
+            thinking={"type": "disabled"},
             system=[
                 {
                     "type": "text",

@@ -39,7 +39,7 @@
 
 | 변수                   | 용도 |
 | -------------------- | ---- |
-| `ANTHROPIC_API_KEY`  | Claude Sonnet 4.6 |
+| `ANTHROPIC_API_KEY`  | Claude Sonnet 5 |
 | `GEMINI_API_KEY`     | Gemini 2.5 Flash |
 | `TELEGRAM_BOT_TOKEN` | 텔레그램 봇 |
 | `TELEGRAM_CHAT_ID`   | 텔레그램 채널 |

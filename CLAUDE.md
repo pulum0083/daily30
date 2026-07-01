@@ -32,7 +32,7 @@ cron-job.org → /api/trigger?type=kospi
     → 휴장일 확인 (holiday_check.py)
     → 시장 데이터 수집 (fetch_data.py / fetch_closing_kospi.py)
     → 뉴스 요약 (fetch_news.py — Gemini 2.5 Flash Lite)
-    → AI 분석·예측 (call_claude.py — Claude Sonnet 4.6, Prompt Caching)
+    → AI 분석·예측 (call_claude.py — Claude Sonnet 5, Prompt Caching)
     → latest.json 갱신 (update_latest.py)
     → 텔레그램 전송 (send_telegram.py)
     → 이메일 전송 (send_email.py → Resend API)
@@ -52,7 +52,7 @@ double-shot/
 │   ├── trigger.mjs              # Vercel Cron → GitHub Actions dispatch
 │   └── subscribe.mjs            # 이메일 구독 신청 API (최신 브리핑 즉시 발송)
 ├── scripts/
-│   ├── call_claude.py           # Claude Sonnet 4.6 + Prompt Caching 분석 생성
+│   ├── call_claude.py           # Claude Sonnet 5 + Prompt Caching 분석 생성
 │   ├── fetch_data.py            # yfinance 기반 코스피·미국 시장 데이터 수집
 │   ├── fetch_closing_kospi.py   # 코스피 마감 데이터 수집 (수급·장중·시장폭·dpick)
 │   ├── fetch_news.py            # Gemini 2.5 Flash Lite 뉴스 요약

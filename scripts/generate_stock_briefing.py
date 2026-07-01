@@ -121,8 +121,9 @@ def call_claude(client: anthropic.Anthropic, stock: dict, datetime_str: str) -> 
     print(f"[briefing] Calling Claude for {stock['name']} (~{len(user_content)//4} tokens)")
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=256,
+        thinking={"type": "disabled"},
         system=[{"type": "text", "text": SYSTEM_PROMPT, "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": user_content}],
     )
