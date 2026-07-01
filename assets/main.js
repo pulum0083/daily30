@@ -826,16 +826,15 @@
     initLiveScoreboard();
     initLiveMarketPanel();
     loadIncomeWidget();
-    loadChipWidget();
     loadVisitorCount();
     patchBriefingList();
     patchBriefingNav();
   });
 
-  /* ── 월배당 ETF 계산기 위젯 — /data/income_etfs.json (칩보드 위 사이드바) ── */
+  /* ── 월배당 ETF 계산기 위젯 — /data/income_etfs.json (텔레그램 CTA 위 사이드바) ── */
   function loadIncomeWidget() {
-    var chip = document.querySelector('.chip-widget');
-    if (!chip || document.querySelector('.income-widget')) return;
+    var anchor = document.querySelector('.sidebar-cta');
+    if (!anchor || document.querySelector('.income-widget')) return;
     var COIN = '<svg viewBox="0 0 24 24" fill="none">' +
       '<ellipse cx="12" cy="16.5" rx="6.4" ry="2.3" fill="#fff" opacity=".5"/>' +
       '<ellipse cx="12" cy="12.5" rx="6.4" ry="2.3" fill="#fff" opacity=".75"/>' +
@@ -850,7 +849,7 @@
       '</a>' +
       '<div class="income-widget__list" id="income-rows"></div>' +
       '<a class="income-widget__foot" href="/stocks/income-designer/" target="_blank" rel="noopener">분배율·건전성 한눈에 · 내 배당 계산하기 →</a>';
-    chip.insertAdjacentElement('afterend', w);
+    anchor.insertAdjacentElement('beforebegin', w);
 
     var rows = w.querySelector('#income-rows');
     fetch('/data/income_etfs.json', { signal: AbortSignal.timeout(5000) })
@@ -875,29 +874,6 @@
       .catch(function() { w.remove(); });
   }
 
-  /* ── 칩보드 위젯 — /chips/api/prices ── */
-  var CHIP_FALLBACK = [
-    { flag: '🇰🇷', name: '삼성전자',  market: 'KOSPI' },
-    { flag: '🇰🇷', name: 'SK하이닉스', market: 'KOSPI' },
-    { flag: '🇺🇸', name: 'Micron',     market: 'NASDAQ' },
-    { flag: '🇺🇸', name: 'AMD',        market: 'NASDAQ' },
-    { flag: '🇺🇸', name: 'Intel',      market: 'NASDAQ' },
-  ];
-  function formatChipPrice(price, market) {
-    if (price == null) return '—';
-    if (market === 'KOSPI') return price.toLocaleString('ko-KR');
-    return '$' + price.toFixed(2);
-  }
-  function renderChipRow(flag, name, price, chg, dir) {
-    const row = document.createElement('div');
-    row.className = 'chip-row';
-    row.innerHTML =
-      '<span class="chip-row__flag">' + flag + '</span>' +
-      '<span class="chip-row__name">' + name + '</span>' +
-      '<span class="chip-row__price">' + price + '</span>' +
-      '<span class="chip-row__chg ' + dir + '">' + chg + '</span>';
-    return row;
-  }
   function loadVisitorCount() {
     var opinionBtn = document.querySelector('.sidebar-opinion-btn');
     if (!opinionBtn) return;
@@ -1335,29 +1311,6 @@
       setInterval(updateCountdown, 1000);
       setInterval(tickRefreshCount, 1000);
     }
-  }
-
-  function loadChipWidget() {
-    var container = document.getElementById('chip-stocks');
-    if (!container) return;
-    fetch('/chips/api/prices', { signal: AbortSignal.timeout(5000) })
-      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
-      .then(function(stocks) {
-        if (!Array.isArray(stocks) || !stocks.length) throw new Error();
-        stocks.slice(0, 5).forEach(function(s) {
-          var rate  = typeof s.changeRate === 'number' ? s.changeRate : 0;
-          var dir   = rate > 0 ? 'up' : rate < 0 ? 'down' : 'flat';
-          var arrow = rate > 0 ? '▲' : rate < 0 ? '▼' : '';
-          var chg   = arrow + Math.abs(rate).toFixed(2) + '%';
-          var flag  = s.market === 'KOSPI' ? '🇰🇷' : '🇺🇸';
-          container.appendChild(renderChipRow(flag, s.name, formatChipPrice(s.price, s.market), chg, dir));
-        });
-      })
-      .catch(function() {
-        CHIP_FALLBACK.forEach(function(s) {
-          container.appendChild(renderChipRow(s.flag, s.name, '—', '—', 'flat'));
-        });
-      });
   }
 
   /* ── 장 중 실시간 시장 지표 패널 ── */
