@@ -1271,6 +1271,7 @@ def write_sitemap_xml():
     urls = [
         {"loc": f"{BASE}/",                              "changefreq": "daily",   "priority": "1.0"},
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
+        {"loc": f"{BASE}/stocks/",                        "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
     ]
 
