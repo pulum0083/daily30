@@ -791,6 +791,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .accordion-item,
   .accordion-item.is-open,
   .accordion-item.is-close{background:transparent;border:none;box-shadow:none;border-radius:0;overflow:visible;}
+  .accordion-header{padding-top:8px;padding-bottom:8px;}
   .accordion-body__inner{padding:0 0 22px;border-top:none;}
 }
 
