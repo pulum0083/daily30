@@ -622,32 +622,7 @@ html.dark .spark-tip{background:#1e2130;border-color:rgba(255,255,255,.12);}
 .dpick-take b{color:var(--ink);}
 .dpick-take::before{content:'💬 ';}
 
-/* ──────────────────────────────────────────────
-   Chip 위젯 (공통 사이드바)
-────────────────────────────────────────────── */
-.chip-widget{background:#EEF3FF;border:1.5px solid #4A7FF5;border-radius:var(--r-lg);overflow:hidden;}
-html.dark .chip-widget{background:rgba(59,130,246,.10);border-color:rgba(96,165,250,.40);}
-.chip-widget__header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 9px;cursor:pointer;transition:background .15s;}
-.chip-widget__header:hover{background:#dce8ff;}
-html.dark .chip-widget__header:hover{background:rgba(59,130,246,.16);}
-.chip-widget__left{display:flex;align-items:center;gap:7px;}
-.chip-widget__badge{width:22px;height:22px;background:#2563EB;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
-.chip-widget__title{font-size:13px;font-weight:700;color:#1E3A8A;}
-html.dark .chip-widget__title{color:#93C5FD;}
-.chip-widget__more{font-size:14px;font-weight:700;color:#2563EB;}
-html.dark .chip-widget__more{color:#60A5FA;}
-.chip-widget__stocks{padding:0 14px 8px;}
-.chip-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(74,127,245,.12);font-size:13px;}
-.chip-row:last-child{border-bottom:none;}
-.chip-row__flag{flex-shrink:0;font-size:14px;}
-.chip-row__name{flex:1;color:var(--ink);font-weight:500;}
-.chip-row__price{font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);}
-.chip-row__chg{font-size:12px;font-weight:600;min-width:52px;text-align:right;}
-.chip-row__chg.up{color:var(--up);}
-.chip-row__chg.down{color:var(--dn);}
-.chip-row__chg.flat{color:var(--muted);}
-
-/* 월배당 ETF 계산기 위젯 (칩보드 위 사이드바) */
+/* 월배당 ETF 계산기 위젯 (텔레그램 CTA 위 사이드바) */
 .income-widget{background:var(--canvas);border:1.5px solid #93B4FF;border-radius:var(--r-lg);overflow:hidden;}
 html.dark .income-widget{background:rgba(0,110,255,.07);border-color:rgba(96,165,250,.34);}
 .income-widget__header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 9px;transition:background .15s;}
