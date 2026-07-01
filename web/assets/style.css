@@ -767,6 +767,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .gnb{padding:0 16px;}
   .gnb__date{display:none;}
   /* 종목 픽 */
+  .stock-pick-card{border:none;border-radius:0;background:transparent;padding:14px 0;}
   .stock-pick-card__top{flex-wrap:wrap;}
   .stock-pick-card__info{flex:1 1 100%;}
   .stock-pick-mini-chart{display:none;}
