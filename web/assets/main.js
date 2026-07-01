@@ -849,7 +849,8 @@
     w.innerHTML =
       '<div class="leaders-widget__header">' +
         '<div class="leaders-widget__left"><span class="leaders-widget__ic">📈</span>' +
-        '<span class="leaders-widget__title">코스피 주도주</span></div>' +
+        '<span class="leaders-widget__title">코스피 주도주</span>' +
+        '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
         '<span class="leaders-widget__more">→</span>' +
       '</div>' +
       '<div class="leaders-widget__list">' +
@@ -901,7 +902,12 @@
         })
         .catch(function () {});
     }
-    function poll() { if (krOpen()) pollDay(); else pollNight(); }
+    var pill = w.querySelector('#lw-pill');
+    function poll() {
+      var night = !krOpen();
+      if (pill) pill.style.display = night ? '' : 'none';
+      if (night) pollNight(); else pollDay();
+    }
     poll();
     setInterval(poll, 10000);
 
