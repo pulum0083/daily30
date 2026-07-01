@@ -744,10 +744,9 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .gnb__in{padding:0 14px;gap:12px;}
   .gnb .sbtn{padding:6px 9px;}
   .gnb__date{display:none;}
-  /* 종목 픽 */
+  /* 종목 픽 — 순위+종목정보는 한 줄 유지, 차트는 숨김 */
   .stock-pick-card{border:none;border-radius:0;background:transparent;padding:14px 0;}
   .stock-pick-card__top{flex-wrap:wrap;}
-  .stock-pick-card__info{flex:1 1 100%;}
   .stock-pick-mini-chart{display:none;}
   .pick-nums__grid{border:none;border-radius:0;}
   /* 마감 */
