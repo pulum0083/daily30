@@ -765,7 +765,12 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .gnb__subs .gnb__sub{font-size:12px;}
   .gnb .sbtn{padding:6px 9px;}
   .gnb__date{display:none;}
-  /* 종목 픽 — 순위+종목정보는 한 줄 유지, 차트는 숨김. 카드 테두리·배경은 유지(월가 코멘트 섹션과 통일) */
+  /* 종목 픽 — 섹션 전체를 하나의 박스로 감싸고, 카드는 구분선으로만 분리 */
+  .stock-picks-section{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:16px;}
+  .stock-picks{gap:0;}
+  .stock-pick-card{background:transparent;border:none;border-radius:0;padding:14px 0;border-bottom:1px solid var(--hairline);}
+  .stock-pick-card:first-child{padding-top:0;}
+  .stock-pick-card:last-child{padding-bottom:0;border-bottom:none;}
   .stock-pick-card__top{flex-wrap:wrap;}
   .stock-pick-mini-chart{display:none;}
   /* 마감 */
