@@ -1034,7 +1034,7 @@ function usSel(code){
           .then(function(r){return r.ok?r.json():null;})
           .then(function(snap){
             var picks=(snap&&snap.stock_picks)||[];
-            PICKS=picks.map(function(p){var e=parseEntry(p.entry);return {code:p.ticker,name:p.name,tag:p.scenario_tag||p.signal||'',entry:e.lo,entry_hi:e.hi,target:won(p.target),stop:won(p.stop),target_pct:p.target_pct||''};})
+            PICKS=picks.map(function(p){var e=parseEntry(p.entry);return {code:String(p.ticker||'').replace(/\.(KS|KQ)$/i,''),name:p.name,tag:p.scenario_tag||p.signal||'',entry:e.lo,entry_hi:e.hi,target:won(p.target),stop:won(p.stop),target_pct:p.target_pct||''};})
               .filter(function(p){return p.code&&p.entry&&p.target&&p.stop;});
             window.__momHasPicks = PICKS.length>0;
             if(!PICKS.length){ window.ueGate&&window.ueGate(); return; }
