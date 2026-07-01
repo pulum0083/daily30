@@ -769,8 +769,8 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   /* 종목 픽 */
   .stock-pick-card__top{flex-wrap:wrap;}
   .stock-pick-card__info{flex:1 1 100%;}
-  .stock-pick-mini-chart{width:100%;align-items:stretch;margin-top:10px;}
-  .stock-pick-mini-chart canvas{width:100%!important;height:72px!important;}
+  .stock-pick-mini-chart{display:none;}
+  .pick-nums__grid{border:none;border-radius:0;}
   /* 마감 */
   .supply-summary__cell{grid-template-columns:1fr 160px;gap:12px;}
   .supply-summary__amt{font-size:18px;}
