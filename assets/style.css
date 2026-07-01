@@ -52,7 +52,7 @@ body.is-embed .layout-wrapper{padding-bottom:0;}
 .gnb__subs{display:flex;align-items:center;}
 .gnb a{color:#C9CCD1;font-size:13px;font-weight:600;text-decoration:none;}
 .gnb__subs .gnb__sub{font-size:13px;font-weight:500;color:#8A9099;padding:5px 4px;text-decoration:none;transition:color .12s;}.gnb__subs .gnb__sub:hover{color:#C9CCD1;}
-.gnb__subs .gnb__sub.is-active{color:#22C55E;font-weight:700;}.gnb__subs .gnb__sub.is-active:hover{color:#4ADE80;}
+.gnb__subs .gnb__sub.is-active{color:#22C55E;}.gnb__subs .gnb__sub.is-active:hover{color:#4ADE80;}
 .gnb__divider{width:1px;height:16px;background:#2E3035;margin:0 4px;flex-shrink:0;}
 .gnb .right{margin-left:auto;display:flex;align-items:center;gap:4px;}
 .gnb .sbtn{display:flex;align-items:center;gap:6px;background:#26282B;border-radius:8px;padding:6px 11px;color:#9CA0A6;font-size:12px;cursor:pointer;margin-left:8px;}.gnb .sbtn svg{width:13px;height:13px;}
@@ -750,6 +750,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 ────────────────────────────────────────────── */
 @media(max-width:900px){
   .layout-wrapper{padding:16px 20px 60px;}
+  .gnb__in{padding:0 20px;gap:16px;}
   .layout-grid{grid-template-columns:1fr;row-gap:16px;}
   .acc-box--sidebar{display:none;}
   .acc-box--mobile{display:flex;flex-direction:column;}
@@ -759,15 +760,14 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 .mkt-panel-inline{margin-top:16px!important;margin-bottom:4px;}
 @media(max-width:600px){
   .layout-wrapper{padding:12px 14px 60px;}
-  .gnb{padding:0 16px;}
   .gnb__in{padding:0 14px;gap:12px;}
+  .gnb a{font-size:12px;}
+  .gnb__subs .gnb__sub{font-size:12px;}
   .gnb .sbtn{padding:6px 9px;}
   .gnb__date{display:none;}
-  /* 종목 픽 — 순위+종목정보는 한 줄 유지, 차트는 숨김 */
-  .stock-pick-card{border:none;border-radius:0;background:transparent;padding:14px 0;}
+  /* 종목 픽 — 순위+종목정보는 한 줄 유지, 차트는 숨김. 카드 테두리·배경은 유지(월가 코멘트 섹션과 통일) */
   .stock-pick-card__top{flex-wrap:wrap;}
   .stock-pick-mini-chart{display:none;}
-  .pick-nums__grid{border:none;border-radius:0;}
   /* 마감 */
   .supply-summary__cell{grid-template-columns:1fr 160px;gap:12px;}
   .supply-summary__amt{font-size:18px;}
