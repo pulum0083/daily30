@@ -622,6 +622,25 @@ html.dark .spark-tip{background:#1e2130;border-color:rgba(255,255,255,.12);}
 .dpick-take b{color:var(--ink);}
 .dpick-take::before{content:'💬 ';}
 
+/* 코스피 주도주 위젯 (월배당 위젯 위 사이드바) — 삼성전자·SK하이닉스·현대차 실시간 */
+.leaders-widget{display:block;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;transition:border-color .15s;}
+.leaders-widget:hover{border-color:#93B4FF;}
+.leaders-widget__header{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 9px;}
+.leaders-widget__left{display:flex;align-items:center;gap:7px;}
+.leaders-widget__ic{font-size:14px;}
+.leaders-widget__title{font-size:13px;font-weight:700;color:var(--ink);}
+.leaders-widget__pill{font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;display:none;}
+.leaders-widget__more{font-size:14px;font-weight:700;color:#006EFF;}
+html.dark .leaders-widget__more{color:#5AA9FF;}
+.leaders-widget__list{padding:0 14px 10px;}
+.leaders-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--hairline);font-size:13px;}
+.leaders-row:last-child{border-bottom:none;}
+.leaders-row__name{flex:1;min-width:0;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.leaders-row__price{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);}
+.leaders-row__chg{font-weight:700;font-variant-numeric:tabular-nums;min-width:58px;text-align:right;color:var(--muted);}
+.leaders-row__chg.up{color:var(--up);}
+.leaders-row__chg.dn{color:var(--dn);}
+
 /* 월배당 ETF 계산기 위젯 (텔레그램 CTA 위 사이드바) */
 .income-widget{background:var(--canvas);border:1.5px solid #93B4FF;border-radius:var(--r-lg);overflow:hidden;}
 html.dark .income-widget{background:rgba(0,110,255,.07);border-color:rgba(96,165,250,.34);}

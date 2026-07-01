@@ -825,11 +825,95 @@
     renderSupplyFlows();
     initLiveScoreboard();
     initLiveMarketPanel();
+    loadLeadersWidget();
     loadIncomeWidget();
     loadVisitorCount();
     patchBriefingList();
     patchBriefingNav();
   });
+
+  /* ── 코스피 주도주 위젯 — 삼성전자·SK하이닉스·현대차 실시간 (월배당 위젯 위 사이드바) ── */
+  function loadLeadersWidget() {
+    var anchor = document.querySelector('.sidebar-cta');
+    if (!anchor || document.querySelector('.leaders-widget')) return;
+    var STOCKS = [
+      { code: '005930', name: '삼성전자' },
+      { code: '000660', name: 'SK하이닉스' },
+      { code: '005380', name: '현대차' }
+    ];
+    var w = document.createElement('a');
+    w.className = 'leaders-widget';
+    w.href = 'https://doubleshot.space/stocks/';
+    w.target = '_blank';
+    w.rel = 'noopener';
+    w.innerHTML =
+      '<div class="leaders-widget__header">' +
+        '<div class="leaders-widget__left"><span class="leaders-widget__ic">📈</span>' +
+        '<span class="leaders-widget__title">코스피 주도주</span>' +
+        '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
+        '<span class="leaders-widget__more">→</span>' +
+      '</div>' +
+      '<div class="leaders-widget__list">' +
+        STOCKS.map(function (s) {
+          return '<div class="leaders-row" data-code="' + s.code + '">' +
+            '<span class="leaders-row__name">' + s.name + '</span>' +
+            '<span class="leaders-row__price">—</span>' +
+            '<span class="leaders-row__chg">—</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    anchor.insertAdjacentElement('beforebegin', w);
+
+    var codes = STOCKS.map(function (s) { return s.code; });
+    var got = false;
+
+    function paint(code, price, chg) {
+      var row = w.querySelector('.leaders-row[data-code="' + code + '"]');
+      if (!row || price == null) return;
+      got = true;
+      row.querySelector('.leaders-row__price').textContent = Math.round(price).toLocaleString('ko-KR');
+      var c = row.querySelector('.leaders-row__chg');
+      if (chg == null) { c.textContent = '—'; c.className = 'leaders-row__chg'; return; }
+      var up = chg >= 0;
+      c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%';
+      c.className = 'leaders-row__chg ' + (up ? 'up' : 'dn');
+    }
+
+    // KR 정규장(평일 09:00~15:30 KST) 여부 — 마감 후엔 HL 24h 환산가로 전환
+    function krOpen() {
+      var m = ((new Date().getUTCHours() * 60 + new Date().getUTCMinutes()) + 9 * 60) % (24 * 60);
+      var kd = new Date(Date.now() + 9 * 3600 * 1000).getUTCDay();
+      if (kd === 0 || kd === 6) return false;
+      return m >= 540 && m <= 930;
+    }
+    function pollDay() {
+      fetch('/api/stocks-live?codes=' + codes.join(','), { cache: 'no-store', signal: AbortSignal.timeout(5000) })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && Array.isArray(d.prices)) d.prices.forEach(function (p) { paint(p.code, p.price, p.changePct); });
+        })
+        .catch(function () {});
+    }
+    function pollNight() {
+      fetch('/api/hl-night', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (d && Array.isArray(d.items)) d.items.forEach(function (it) { paint(it.code, it.krw, it.changePct); });
+        })
+        .catch(function () {});
+    }
+    var pill = w.querySelector('#lw-pill');
+    function poll() {
+      var night = !krOpen();
+      if (pill) pill.style.display = night ? '' : 'none';
+      if (night) pollNight(); else pollDay();
+    }
+    poll();
+    setInterval(poll, 10000);
+
+    // 8초 내 아무 실측도 못 받으면 위젯 제거 — 가짜 값 노출 금지(정합성)
+    setTimeout(function () { if (!got) w.remove(); }, 8000);
+  }
 
   /* ── 월배당 ETF 계산기 위젯 — /data/income_etfs.json (텔레그램 CTA 위 사이드바) ── */
   function loadIncomeWidget() {
