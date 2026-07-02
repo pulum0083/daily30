@@ -3,7 +3,7 @@
 매일 아침 코스피·저녁 미국 시장 AI 예측 브리핑을 자동 생성해 텔레그램·이메일로 발송하는 서비스.
 Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인으로 구동된다.
 
-호스팅: Vercel (정적 서빙 + Cron 트리거) + GitHub Pages (`gh-pages` 브랜치)
+호스팅: Vercel (정적 서빙 + API) + GitHub Pages (`gh-pages` 브랜치), 스케줄링: Cloudflare (Cron Triggers)
 
 ## 서비스 URL
 
@@ -19,15 +19,15 @@ Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인�
 
 | 브리핑       | 실행 시각 (KST) | 요일       |
 | --------- | ----------- | -------- |
-| 코스피 시초가   | 07:30       | 평일 (월~금) |
-| 코스피 마감    | 16:30       | 평일 (월~금) |
-| 미국 시장     | 21:20       | 평일 (월~금) |
+| 코스피 시초가   | 07:25       | 평일 (월~금) |
+| 코스피 마감    | 16:25       | 평일 (월~금) |
+| 미국 시장     | 21:15       | 평일 (월~금) |
 | 예측 정확도 체크 | 09:10       | 평일 (화~토) |
 
 ## 실행 흐름
 
 ```
-cron-job.org → /api/trigger?type=kospi
+Cloudflare (Cron Triggers) → /api/trigger?type=kospi
   → GitHub Actions workflow_dispatch
     → 휴장일 확인 (holiday_check.py)
     → 시장 데이터 수집 (fetch_data.py / fetch_closing_kospi.py)

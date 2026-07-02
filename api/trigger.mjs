@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     try {
       isDuplicate = await alreadyRunToday(GH_PAT, type);
     } catch (err) {
-      // 중복 확인 API 실패 — 503 반환 시 cron-job.org가 재시도해 cascade 발생하므로
+      // 중복 확인 API 실패 — 503 반환 시 스케줄러(Cloudflare)가 재시도해 cascade 발생하므로
       // 확인 불가 상태로 dispatch를 진행하고 200 반환
       console.error(`[trigger] duplicate check failed (proceeding anyway): ${err.message}`);
     }
