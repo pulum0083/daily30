@@ -3,6 +3,7 @@
   <div class="open-section__title">
     {{ picks_title | default('상승 모멘텀 종목') }}
     <button class="info-icon-btn" data-modal-open="picks-modal">?</button>
+    {% if briefing_type == 'kospi' %}<a class="picks-track-link" href="https://doubleshot.space/stocks/">종목 시그널에서 트래킹 →</a>{% endif %}
   </div>
   {% if picks_intro %}<div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">{{ picks_intro }}</div>{% endif %}
   <div class="pick-legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div>
