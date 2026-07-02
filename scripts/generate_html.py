@@ -567,6 +567,24 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         if movers_rows:
             ctx["movers_rows"] = movers_rows
 
+    # close_research — 오늘 증권가 시황 (data/research_reports.json). Gemini 요약이지만
+    # 생성 시 숫자(지수·등락률) 잔존을 이미 걸러낸 원문 요약만 담고 있다.
+    research_path = BASE_DIR / "data" / "research_reports.json"
+    if research_path.exists():
+        try:
+            research_raw = json.loads(research_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            research_raw = {}
+        if research_raw.get("date") == target_date:
+            research_rows = [
+                {"firm": r.get("firm", ""), "title": r.get("title", ""),
+                 "summary": r.get("summary", ""), "url": r.get("url", "")}
+                for r in research_raw.get("reports", [])
+                if r.get("summary")
+            ]
+            if research_rows:
+                ctx["research_rows"] = research_rows
+
     return ctx
 
 

@@ -326,6 +326,13 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_movers_why.py
 
+      - name: 📑 오늘 증권가 시황 (네이버 리서치 요약)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 scripts/fetch_research_reports.py
+
       - name: ✨ Claude 마감 시황 분석
         if: steps.holiday.outputs.open == 'true'
         run: |

@@ -1,0 +1,17 @@
+{# 오늘 증권가 시황 — 당일 국내 증권사 시황 리포트 요약 #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">오늘 증권가 시황</span>
+    <span class="section-card__sub">증권사 리포트 요약 · 네이버 금융</span>
+  </div>
+  <div class="rpt-list">
+    {% for row in research_rows %}
+    <div class="rpt-item">
+      <div class="rpt-head"><span class="rpt-tag">시황</span><span class="rpt-firm">{{ row.firm }}</span></div>
+      <div class="rpt-title">{{ row.title }}</div>
+      <div class="rpt-summary">{{ row.summary }}</div>
+      <a class="rpt-src" href="{{ row.url }}" target="_blank" rel="noopener">원문 보기 →</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
