@@ -395,7 +395,8 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 
 - **발언 생성·추론 금지.** `fetch_analyst_quotes.py`가 google_search에서 실제로 찾은 발언만 표시한다.
 - **URL hallucination 금지.** Gemini에게 URL을 직접 생성하도록 시키지 않는다. URL은 반드시 Gemini `grounding_metadata.grounding_chunks`에서 추출한다. 프롬프트에 URL 필드를 요청하면 존재하지 않는 URL이 생성된다.
-- **출처 링크 우선순위**: `url` 필드(grounding 메타데이터)가 있으면 원본 링크, 없으면 `이름 + source + time_label` 구글 검색 폴백. `generate_html.py`의 `build_analyst_quotes()`가 처리.
+- **grounding URL은 반드시 즉시 리졸브한다.** `grounding_chunks[].web.uri`는 `vertexaisearch.cloud.google.com/grounding-api-redirect/...` 형태의 **임시 리다이렉트 토큰**이라 시간이 지나면(정적 페이지를 나중에 열람할 때) 만료되어 존재하지 않는 페이지로 뜬다. `fetch_analyst_quotes.py`의 `_resolve_redirect()`가 수집 시점에 즉시 한 번 따라가 실제 최종 기사 URL(예: `yna.co.kr/view/...`)로 치환해 저장한다 — 링크가 영구적이고 브라우저에 목적지 도메인이 명확히 보인다. 리졸브 실패(타임아웃·차단 등) 시 해당 URL은 버리고(빈 문자열) 폴백으로 넘어간다 — 깨진 링크를 저장하지 않는다.
+- **출처 링크 우선순위**: `url` 필드(리졸브된 원본 링크)가 있으면 그 링크, 없으면 `이름 + source + time_label` 구글 검색 폴백. `generate_html.py`의 `build_analyst_quotes()`가 처리.
 - **수동 재수집**: `python3 scripts/fetch_analyst_quotes.py` 실행 후 `generate_html.py`로 재생성.
 - **발언이 없는 날**: `data/analyst_quotes.json`이 `[]`이면 섹션이 자동으로 생략된다. 정상 동작.
 - **감성 뱃지**: `bull`(강세) / `bear`(약세) / `neu`(중립) 세 가지만 허용. 다른 값은 스크립트가 자동으로 `neu`로 정규화한다.

@@ -14,6 +14,8 @@ import json
 import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -117,6 +119,22 @@ time_label 형식: 발언이 오늘(KST 기준)이면 "오늘 HH:MM", 어제면 
 """
 
 
+def _resolve_redirect(uri: str) -> str:
+    """grounding-api-redirect 임시 토큰을 실제 최종 기사 URL로 즉시 해석한다.
+
+    실패(타임아웃·비-200·네트워크 오류) 시 빈 문자열을 반환해 호출부가 이 URL을
+    아예 신뢰하지 않도록 한다 — 깨진 링크를 저장하는 것보다 폴백(구글 검색)이 낫다.
+    """
+    try:
+        req = urllib.request.Request(uri, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            if resp.status == 200:
+                return resp.geturl()
+    except (urllib.error.URLError, TimeoutError, OSError):
+        pass
+    return ""
+
+
 def fetch_analyst_quotes() -> list:
     try:
         from google import genai
@@ -157,13 +175,19 @@ def fetch_analyst_quotes() -> list:
         return []
 
     # grounding_metadata에서 실제 URL 추출 (Gemini가 실제로 참조한 검색 결과)
+    # web.uri는 vertexaisearch.cloud.google.com/grounding-api-redirect/... 형태의
+    # 임시 리다이렉트 토큰이라 나중에(정적 페이지 열람 시점) 만료되어 존재하지 않는
+    # 페이지로 뜰 수 있다. 생성 시점에 즉시 한 번 따라가서 실제 최종 기사 URL로
+    # 치환해 저장한다 — 링크가 영구적이고 목적지가 명확해진다.
     grounding_urls: list[dict] = []
     try:
         gm = response.candidates[0].grounding_metadata
         for chunk in (gm.grounding_chunks or []):
             web = getattr(chunk, "web", None)
             if web and getattr(web, "uri", None):
-                grounding_urls.append({"uri": web.uri, "title": getattr(web, "title", "")})
+                resolved = _resolve_redirect(web.uri)
+                if resolved:
+                    grounding_urls.append({"uri": resolved, "title": getattr(web, "title", "")})
     except Exception:
         pass
 
