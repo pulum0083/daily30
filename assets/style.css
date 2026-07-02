@@ -624,6 +624,18 @@ html.dark .spark-tip{background:#1e2130;border-color:rgba(255,255,255,.12);}
 .dpick-take b{color:var(--ink);}
 .dpick-take::before{content:'💬 ';}
 
+.movers-list{display:flex;flex-direction:column;}
+.movers-row{padding:13px 16px;border-bottom:1px solid var(--hairline);}
+.movers-row:last-child{border-bottom:none;}
+.movers-top{display:flex;align-items:center;gap:8px;}
+.movers-name{font-size:14px;font-weight:700;color:var(--ink);}
+.movers-code{font-size:11px;color:var(--muted);}
+.movers-chg{margin-left:auto;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;padding:2px 8px;border-radius:999px;}
+.movers-chg.up{color:var(--up);background:var(--up-bg);}
+.movers-chg.down{color:var(--dn);background:var(--dn-bg);}
+.movers-reason{font-size:13px;color:var(--ink);line-height:1.6;margin-top:8px;}
+.movers-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+
 /* 코스피 주도주 위젯 (월배당 위젯 위 사이드바) — 삼성전자·SK하이닉스·현대차 실시간 */
 .leaders-widget{display:block;background:var(--canvas);border:1.5px solid #93B4FF;border-radius:var(--r-lg);overflow:hidden;}
 html.dark .leaders-widget{background:rgba(0,110,255,.07);border-color:rgba(96,165,250,.34);}
