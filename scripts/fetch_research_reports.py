@@ -5,7 +5,11 @@ Usage:
     python3 scripts/fetch_research_reports.py
 
 출력: data/research_reports.json
-  - 당일(KST) 발행된 "국내 시황" 리포트만 (미국/글로벌/전일자 제목 제외)
+  - 발행 시점 기준 최근 24시간 리포트만 채택. 네이버 리서치 게시판은 발행 "날짜"만
+    제공하고 "시각"은 노출하지 않아 시각 단위 필터는 소스상 불가능 — 당일(KST) 날짜만
+    채택하는 방식으로 근사한다. 잡이 16:25(KST) 실행되므로 당일자 리포트는 구조적으로
+    발행 후 0~16시간 이내라 24시간 이내가 보장된다. 어제 날짜는 24시간 이내인지 판별
+    불가하므로 안전하게 제외 (미국/글로벌/전일자 내용 재게시 제목도 함께 제외).
   - 증권사당 1건, 최대 3건
   - Gemini 요약(해요체 1~2문장, 지수·등락률 등 숫자 절대 금지) — 숫자 잔존 시 해당 건 폐기
   - 대상 리포트가 없으면 빈 배열 (섹션 자체 생략, 파이프라인 보호)
@@ -90,18 +94,31 @@ def _list_today(today: str) -> list[dict]:
     return picks
 
 
-def _body_text(nid: str) -> str:
+def _fetch_detail(nid: str, fallback_title: str) -> tuple[str, str]:
+    """상세 페이지에서 (전체 제목, 본문) 을 반환한다.
+
+    목록 페이지 제목은 셀 폭 제한으로 "..."로 잘려 있는 경우가 많아, <title> 태그의
+    잘리지 않은 전체 제목으로 대체한다. 실패 시 목록의 잘린 제목을 그대로 쓴다.
+    """
     try:
         html = _get(READ_URL.format(nid=nid))
     except Exception as e:
-        print(f"[research_reports] {nid} body fetch failed: {e}", file=sys.stderr)
-        return ""
+        print(f"[research_reports] {nid} detail fetch failed: {e}", file=sys.stderr)
+        return fallback_title, ""
+    import html as _html
+    title = fallback_title
+    tm = re.search(r"<title>([^<]+)</title>", html)
+    if tm:
+        full = _html.unescape(tm.group(1)).strip()
+        full = re.sub(r"\s*:\s*Npay\s*증권\s*$", "", full)  # 사이트 접미사 제거
+        if full:
+            title = full
     i = html.find("view_cnt")
     if i < 0:
-        return ""
-    import html as _html
+        return title, ""
     chunk = re.sub(r"<[^>]+>", " ", html[i:i + 2500])
-    return re.sub(r"\s+", " ", _html.unescape(chunk)).strip()
+    body = re.sub(r"\s+", " ", _html.unescape(chunk)).strip()
+    return title, body
 
 
 _PROMPT = """다음은 증권사 시황 리포트 본문입니다. 개인 투자자용으로 1~2문장 한국어 요약을 만드세요.
@@ -139,16 +156,16 @@ def _summarize(body: str) -> str | None:
 def build_payload(today: str) -> list[dict]:
     out = []
     for cand in _list_today(today):
-        body = _body_text(cand["nid"])
+        title, body = _fetch_detail(cand["nid"], cand["title"])
         if not body:
             continue
         summary = _summarize(body)
         if not summary:
-            print(f"[research_reports] SKIP(숫자 잔존/요약 실패): {cand['title']}", file=sys.stderr)
+            print(f"[research_reports] SKIP(숫자 잔존/요약 실패): {title}", file=sys.stderr)
             continue
         out.append({
             "firm": cand["firm"],
-            "title": cand["title"],
+            "title": title,
             "summary": summary,
             "url": READ_URL.format(nid=cand["nid"]),
         })

@@ -29,6 +29,17 @@
 - us-briefing job에서 `fetch_news.py` 직후, `call_claude.py` 직전에 실행. `continue-on-error: true`.
 - 대상 애널리스트 (12명): Tom Lee, Ed Yardeni, Dan Ives, Mike Wilson, Savita Subramanian, Bill Ackman, Stan Druckenmiller, Mohamed El-Erian, Jeff Gundlach, Ray Dalio, Cathie Wood, Michael Burry
 
+### 오늘 증권가 시황 수집 — `fetch_research_reports.py`
+
+- 네이버 금융 리서치 시황정보 게시판(`market_info_list.naver`)에서 **당일(KST) 발행 국내 시황 리포트**만 수집.
+- **발행 시점 기준 최근 24시간 필터**: 네이버 게시판은 발행 "날짜"만 제공하고 "시각"은 노출하지 않음(원본 HTML에 시:분 정보 없음) — 시각 단위 필터는 소스상 불가능. 대신 **당일 날짜만 채택**하는 방식으로 근사한다. 잡이 16:25(KST) 실행되므로 당일자 리포트는 구조적으로 발행 후 0~16시간 이내이며 최근 24시간 이내임이 보장됨. 어제 날짜 리포트는 채택하지 않음(발행 시각을 알 수 없어 24시간 이내인지 판별 불가하므로 안전하게 제외).
+- 제목에 박힌 날짜 표기(`YY.MM.DD`, `M/D`)가 당일과 다르면 전일자 내용 재게시로 간주해 제외 (예: 7/2에 올라온 "7/1 KB 리서치 장마감코멘트" — 게시일은 오늘이지만 내용은 어제자).
+- 해외/글로벌/원자재 리포트 제외(코스피/국내/증시/시장/마켓/전략 키워드만), 증권사당 1건, 최대 3건.
+- Gemini 요약(1~2문장, **해요체 고정**) — 프롬프트로 지수·등락률·목표가 등 숫자 언급을 금지하고, 생성 후 정규식으로 숫자 잔존 여부 재검증. 잔존 시 해당 리포트 폐기(섹션에서 빠짐) — 마감 브리핑 히어로 수치(실측)와 리포트 본문 수치(장중/구버전일 수 있음)가 충돌하는 것을 방지.
+- 대상 리포트가 없으면 `reports: []` 저장 — 섹션 자체 생략, 파이프라인 보호.
+- 출력: `data/research_reports.json`
+- kospi-close-briefing job에서 `fetch_movers_why.py` 직후, `call_claude.py` 직전에 실행. `continue-on-error: true`.
+
 ### 마감 데이터 수집 — `fetch_closing_kospi.py`
 
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
@@ -413,3 +424,12 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 - **휴일 처리**: 클라이언트 휴일 목록 없이도, 휴일엔 당일 브리핑이 ready가 아니므로 자동으로 숨겨진다.
 - **issue 슬롯**: 이슈 미수집(예: 09:00~첫 수집 전)이면 오늘 kospi 예측으로 폴백, 그것도 없으면 숨김. 클릭 시 `/briefings/{date}/kospi/`로 이동.
 - `getKSTSlot` 경계값을 임의로 바꾸지 말 것. 위 표가 정본이다.
+
+### 14. 코스피 마감 브리핑 — 화제 종목 · 증권가 시황 섹션
+
+`close.html` 템플릿의 "오늘의 화제 종목"(`close_movers.html`)과 "오늘 증권가 시황"(`close_research.html`) 섹션.
+
+- **화제 종목**: `movers-why-{date}.json` 기반. 등락률은 실측(네이버 실시간), 이유는 뉴스 헤드라인 발췌. 헤드라인 속 `%` 수치가 실측 등락률과 크게(허용오차 `max(2.0, |등락률|×0.4)`) 어긋나면 다음 이벤트로 폴백, 폴백도 없으면 이유 없이 배지만 표시.
+- **증권가 시황**: `research_reports.json` 기반. 발행 시점 필터·숫자 가드는 위 `fetch_research_reports.py` 규칙 참조. **해요체 고정**.
+- 둘 다 `generate_html.py`에서 날짜 불일치 시(`date != target_date`) 표시하지 않는다 — 이전 실행의 잔존 파일이 다른 날짜 브리핑을 오염시키는 것을 방지.
+- `kospi-close-briefing` job 순서: `fetch_closing_kospi.py` → `fetch_news.py` → `fetch_movers_why.py` → `fetch_research_reports.py` → `call_claude.py`. 두 스텝 모두 `continue-on-error: true` — 실패해도 마감 브리핑 발행 자체는 막지 않는다.
