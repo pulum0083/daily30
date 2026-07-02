@@ -41,20 +41,20 @@ export default {
 
     // ── 정기 브리핑 (정확한 시각 매칭) ───────────────────────────────────
 
-    // 코스피 시초가: 07:30 KST 월~금
-    if (h === 7 && m === 30 && isWeekday) {
+    // 코스피 시초가: 07:25 KST 월~금
+    if (h === 7 && m === 25 && isWeekday) {
       console.log('[cron] → kospi briefing');
       return dispatch(env, 'daily_report.yml', { briefing_type: 'kospi', dry_run: 'false' });
     }
 
-    // 코스피 마감: 16:30 KST 월~금
-    if (h === 16 && m === 30 && isWeekday) {
+    // 코스피 마감: 16:25 KST 월~금
+    if (h === 16 && m === 25 && isWeekday) {
       console.log('[cron] → kospi-close briefing');
       return dispatch(env, 'daily_report.yml', { briefing_type: 'kospi-close', dry_run: 'false' });
     }
 
-    // 미국 시장: 21:20 KST 월~금
-    if (h === 21 && m === 20 && isWeekday) {
+    // 미국 시장: 21:15 KST 월~금
+    if (h === 21 && m === 15 && isWeekday) {
       console.log('[cron] → us briefing');
       return dispatch(env, 'daily_report.yml', { briefing_type: 'us', dry_run: 'false' });
     }
