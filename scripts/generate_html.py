@@ -529,6 +529,44 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             })
         ctx["dpick_rows"] = dpick_rows
 
+    # close_movers — 오늘의 화제 종목 (movers-why-{date}.json). 등락률은 실측,
+    # 이유는 출처를 붙인 뉴스 헤드라인 텍스트로만 노출한다 (수치 승격 금지).
+    # 헤드라인 속 %수치가 실측 등락률과 크게 어긋나면 그 이유는 숨긴다.
+    movers_path = WEB_DIR / "data" / f"movers-why-{target_date}.json"
+    if movers_path.exists():
+        try:
+            movers_raw = json.loads(movers_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            movers_raw = {}
+        movers_rows = []
+        for s in movers_raw.get("stocks", []):
+            chg = s.get("changePct")
+            if chg is None:
+                continue
+            up = chg >= 0
+            headline, meta = "", ""
+            tolerance = max(2.0, abs(chg) * 0.4)
+            for ev in (s.get("events") or [])[:2]:
+                head = (ev.get("headline") or "").strip()
+                found = [float(m) for m in re.findall(r"(\d+(?:\.\d+)?)\s*%", head)]
+                if any(abs(f - abs(chg)) > tolerance for f in found):
+                    continue
+                headline = head
+                src = (ev.get("source") or "").strip()
+                tm = (ev.get("time") or "").strip()
+                meta = " · ".join(x for x in [src, tm] if x)
+                break
+            movers_rows.append({
+                "name": s.get("name", ""),
+                "code": s.get("code", ""),
+                "dir": "up" if up else "down",
+                "chg": f"{'▲' if up else '▼'} {abs(chg):.2f}%",
+                "reason": headline,
+                "meta": meta,
+            })
+        if movers_rows:
+            ctx["movers_rows"] = movers_rows
+
     return ctx
 
 

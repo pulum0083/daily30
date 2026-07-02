@@ -1,0 +1,21 @@
+{# 오늘의 화제 종목 — 등락이 크게 움직인 주도주와 뉴스 근거 #}
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">오늘의 화제 종목</span>
+    <span class="section-card__sub">주도주 뉴스 근거</span>
+  </div>
+  <div class="movers-list">
+    {% for row in movers_rows %}
+    <div class="movers-row">
+      <div class="movers-top">
+        <span class="movers-name">{{ row.name }}</span><span class="movers-code">{{ row.code }}</span>
+        <span class="movers-chg {{ row.dir }}">{{ row.chg }}</span>
+      </div>
+      {% if row.reason %}
+      <div class="movers-reason">{{ row.reason }}</div>
+      <div class="movers-meta">{{ row.meta }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
