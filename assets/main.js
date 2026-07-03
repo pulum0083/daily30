@@ -841,30 +841,12 @@
       { code: '000660', name: 'SK하이닉스' },
       { code: '005380', name: '현대차' }
     ];
-    /* 증권사 목표주가 — scripts/generate_html.py BROKER_TARGETS와 동일한 실측값 (2026-06-25 기준 수집) */
-    var BROKER = {
-      '005930': { count: 10, min_price: 330000, avg_price: 432000, max_price: 560000, rows: [
-        { firm: '대신증권', price: 560000, op: 'BUY' },
-        { firm: '미래에셋증권', price: 550000, op: 'BUY' },
-        { firm: 'iM증권', price: 480000, op: 'BUY' }
-      ] },
-      '000660': { count: 10, min_price: 2500000, avg_price: 3200000, max_price: 4000000, rows: [
-        { firm: 'KB증권', price: 4000000, op: 'BUY' },
-        { firm: '미래에셋증권', price: 3800000, op: 'BUY' },
-        { firm: '삼성증권', price: 3600000, op: 'BUY' }
-      ] },
-      '005380': { count: 10, min_price: 460000, avg_price: 600000, max_price: 750000, rows: [
-        { firm: 'KB증권', price: 750000, op: 'BUY' },
-        { firm: '한국투자증권', price: 700000, op: 'BUY' },
-        { firm: '삼성증권', price: 680000, op: 'BUY' }
-      ] }
-    };
-
     var w = document.createElement('div');
     w.className = 'leaders-widget';
     w.innerHTML =
       '<div class="leaders-widget__header"><span class="leaders-widget__ic">📈</span>' +
         '<span class="leaders-widget__title">코스피 주도주 · 왜 움직였나</span>' +
+        '<button class="leaders-widget__refresh" id="lw-refresh" type="button" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>' +
         '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
       '<div class="leaders-widget__tiles" id="lw-tiles">' +
         STOCKS.map(function (s, i) {
@@ -883,14 +865,13 @@
         '<div id="lw-vol" style="display:none"></div>' +
         '<div id="lw-range" style="display:none"></div>' +
       '</div>' +
-      '<div class="leaders-widget__broker" id="lw-broker"></div>' +
       '<a class="leaders-widget__more" href="https://doubleshot.space/stocks/" target="_blank" rel="noopener">종목 시그널에서 자세히 보기 →</a>';
     anchor.insertAdjacentElement('beforebegin', w);
 
     var codes = STOCKS.map(function (s) { return s.code; });
     var got = false;
     var X0 = 8, X1 = 292, YT = 12, YB = 86;
-    var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, tilePrice = {}, curCode = STOCKS[0].code;
+    var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, curCode = STOCKS[0].code;
 
     function fmt(v) { return v >= 1000 ? v.toLocaleString('ko-KR') : v; }
     function timeToX(t) {
@@ -905,32 +886,14 @@
       if (kd === 0 || kd === 6) return false;
       return m >= 540 && m <= 930;
     }
-    function renderBroker(code) {
-      var wrap = w.querySelector('#lw-broker'); if (!wrap) return;
-      var b = BROKER[code];
-      if (!b) { wrap.innerHTML = ''; return; }
-      var span = (b.max_price - b.min_price) || 1;
-      var curPrice = tilePrice[code];
-      var curPct = (typeof curPrice === 'number') ? Math.max(0, Math.min(100, (curPrice - b.min_price) / span * 100)) : null;
-      wrap.innerHTML = '<div class="leaders-widget__broker-h">🏦 증권사 목표주가<span>컨센서스 ' + b.count + '개사</span></div>' +
-        '<div class="leaders-widget__broker-range"><div class="leaders-widget__broker-track"></div>' +
-        (curPct != null ? '<div class="leaders-widget__broker-cur" style="left:' + curPct.toFixed(1) + '%">현재<i></i></div>' : '') +
-        '</div>' +
-        '<div class="leaders-widget__broker-scale"><div>최저<b style="color:#378ADD">' + fmt(b.min_price) + '</b></div><div class="c">평균<b style="color:#1D9E75">' + fmt(b.avg_price) + '</b></div><div class="r">최고<b style="color:#BA7517">' + fmt(b.max_price) + '</b></div></div>' +
-        b.rows.map(function (r) {
-          return '<div class="leaders-widget__broker-row"><span class="leaders-widget__broker-firm">' + r.firm + '</span><span class="leaders-widget__broker-op">' + r.op + '</span><span class="leaders-widget__broker-price">' + fmt(r.price) + '원</span></div>';
-        }).join('');
-    }
     function paintTile(code, price, chg) {
       var t = w.querySelector('.leaders-widget__tile[data-code="' + code + '"]');
       if (!t || price == null) return;
       got = true;
-      tilePrice[code] = price;
       t.querySelector('.leaders-widget__tile-price').textContent = Math.round(price).toLocaleString('ko-KR');
       var c = t.querySelector('.leaders-widget__tile-chg');
       if (chg == null) { c.textContent = '—'; c.className = 'leaders-widget__tile-chg'; }
       else { var up = chg >= 0; c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%'; c.className = 'leaders-widget__tile-chg ' + (up ? 'up' : 'dn'); }
-      if (code === curCode) renderBroker(code);
     }
     function pollDay() {
       fetch('/api/stocks-live?codes=' + codes.join(','), { cache: 'no-store', signal: AbortSignal.timeout(5000) })
@@ -959,6 +922,19 @@
         select(t.getAttribute('data-code'));
       });
     });
+
+    var refreshBtn = w.querySelector('#lw-refresh');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', function () {
+        if (refreshBtn.classList.contains('spin')) return;
+        refreshBtn.classList.add('spin');
+        pollTiles();
+        backfill(curCode);
+        loadWhy();
+        loadSnap();
+        setTimeout(function () { refreshBtn.classList.remove('spin'); }, 700);
+      });
+    }
 
     /* ── 곡선 + 뉴스 핀 (/stocks 허브 "왜 움직였나" 로직과 동일, 사이드바 폭에 맞춰 300×110로 축소) ── */
     function loadWhy() {
@@ -1004,26 +980,41 @@
       if (!vals || vals.length < 2) return null;
       var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = (hi - lo) || 1, n = vals.length;
       var useT = times && times.length === n;
-      return vals.map(function (v, i) { var x = useT ? timeToX(times[i]) : X0 + (X1 - X0) * (i / (n - 1)); var y = YB - (YB - YT) * ((v - lo) / span); return x.toFixed(1) + ',' + y.toFixed(1); }).join(' ');
+      return vals.map(function (v, i) {
+        var x = useT ? timeToX(times[i]) : X0 + (X1 - X0) * (i / (n - 1));
+        var y = YB - (YB - YT) * ((v - lo) / span);
+        return { x: x, y: y };
+      });
+    }
+    // 좌표 배열을 부드러운 곡선 path로 변환 — drawSparkline()의 캔버스 bezier 스무딩과 동일한
+    // 중간점 앵커 방식(각 구간의 x 중간값을 컨트롤포인트로 사용). 폭 넓은 화면에서 직선 폴리라인이
+    // 각져 보이는 문제를 해결한다.
+    function smoothD(coords) {
+      var d = 'M' + coords[0].x.toFixed(1) + ',' + coords[0].y.toFixed(1);
+      for (var i = 1; i < coords.length; i++) {
+        var cx = ((coords[i - 1].x + coords[i].x) / 2).toFixed(1);
+        d += ' C' + cx + ',' + coords[i - 1].y.toFixed(1) + ' ' + cx + ',' + coords[i].y.toFixed(1) + ' ' + coords[i].x.toFixed(1) + ',' + coords[i].y.toFixed(1);
+      }
+      return d;
     }
     function draw(code) {
       var vals = buf[code] || [], svg = w.querySelector('#lw-svg');
       if (!svg) return;
       var nm = w.querySelector('#lw-name'); var meta = STOCKS.filter(function (s) { return s.code === code; })[0]; if (nm && meta) nm.textContent = meta.name;
-      var pts = pathFrom(vals, buft[code]);
-      if (!pts) { svg.innerHTML = '<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
+      var coords = pathFrom(vals, buft[code]);
+      if (!coords) { svg.innerHTML = '<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
       var up = vals[vals.length - 1] >= vals[0], colHex = up ? '#E03131' : '#2775ED';
-      var coords = pts.split(' ').map(function (p) { var a = p.split(','); return { x: +a[0], y: +a[1] }; });
       var last = coords[coords.length - 1];
-      var areaPath = pts + ' ' + last.x.toFixed(1) + ',' + YB + ' ' + X0.toFixed(1) + ',' + YB;
+      var lineD = smoothD(coords);
+      var areaD = lineD + ' L' + last.x.toFixed(1) + ',' + YB + ' L' + X0.toFixed(1) + ',' + YB + ' Z';
       var hiIdx = 0, loIdx = 0;
       for (var i = 1; i < vals.length; i++) { if (vals[i] > vals[hiIdx]) hiIdx = i; if (vals[i] < vals[loIdx]) loIdx = i; }
       var hiC = coords[hiIdx], loC = coords[loIdx];
       var gradId = 'lw-grad-' + code;
       var s = '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + colHex + '" stop-opacity=".18"/><stop offset="100%" stop-color="' + colHex + '" stop-opacity=".02"/></linearGradient></defs>' +
         '<line x1="' + X0 + '" y1="' + YB + '" x2="' + X1 + '" y2="' + YB + '" stroke="var(--hairline)" stroke-width="1"/>' +
-        '<polygon points="' + areaPath + '" fill="url(#' + gradId + ')"/>' +
-        '<polyline points="' + pts + '" fill="none" stroke="' + colHex + '" stroke-width="2" stroke-linejoin="round"/>' +
+        '<path d="' + areaD + '" fill="url(#' + gradId + ')"/>' +
+        '<path d="' + lineD + '" fill="none" stroke="' + colHex + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
         '<circle cx="' + last.x.toFixed(1) + '" cy="' + last.y.toFixed(1) + '" r="3" fill="' + colHex + '"/>';
       if (vals.length > 4 && hiIdx !== loIdx) {
         var hAnc = hiC.x < 150 ? 'start' : 'end', lAnc = loC.x < 150 ? 'start' : 'end';
@@ -1090,10 +1081,10 @@
       curCode = code;
       var meta = STOCKS.filter(function (s) { return s.code === code; })[0];
       var nm = w.querySelector('#lw-name'); if (nm && meta) nm.textContent = meta.name;
-      renderStats(code); renderNews(code); renderBroker(code);
+      renderStats(code); renderNews(code);
       if (backfilled[code]) draw(code); else { if (!(buf[code] && buf[code].length >= 2)) showSkeleton(); backfill(code); }
     }
-    backfill(curCode); loadWhy(); loadSnap(); renderBroker(curCode);
+    backfill(curCode); loadWhy(); loadSnap();
 
     // 8초 내 아무 실측도 못 받으면 위젯 제거 — 가짜 값 노출 금지(정합성)
     setTimeout(function () { if (!got) w.remove(); }, 8000);
