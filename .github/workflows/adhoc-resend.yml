@@ -12,21 +12,21 @@ jobs:
     steps:
       - name: 📤 마감 브리핑 텔레그램 재전송 (링크 원복)
         run: |
+          printf '%s\n' \
+            '🇰🇷 코스피 마감 시황 | 2026.07.03' \
+            '────────────────────' \
+            '📊 KOSPI <b>8,088.34</b>  ▲ +5.76%' \
+            '📊 KOSDAQ <b>868.41</b>  ▲ +0.19%' \
+            '────────────────────' \
+            '💬 코스피 8000선 회복, 하루 만에 무슨 일이?' \
+            '' \
+            '핵심 시그널:' \
+            '• 기관 4조 4,598억원 순매수, 삼성전자 +8.22%·SK하이닉스 +10.88% 반도체 대형주가 반등을 이끌었어요.' \
+            '• 외국인·개인 매도를 기관이 받아내며 지수가 급등, 코스닥은 +0.19%에 그쳐 온도차가 컸어요.' \
+            '🔗 상세 분석 → https://doubleshot.space/briefings/2026-07-03/close/' \
+            > /tmp/msg.txt
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
             --data-urlencode "parse_mode=HTML" \
             --data-urlencode "disable_web_page_preview=false" \
-            --data-urlencode "text=$(cat <<'EOF'
-🇰🇷 코스피 마감 시황 | 2026.07.03
-────────────────────
-📊 KOSPI <b>8,088.34</b>  ▲ +5.76%
-📊 KOSDAQ <b>868.41</b>  ▲ +0.19%
-────────────────────
-💬 코스피 8000선 회복, 하루 만에 무슨 일이?
-
-핵심 시그널:
-• 기관 4조 4,598억원 순매수, 삼성전자 +8.22%·SK하이닉스 +10.88% 반도체 대형주가 반등을 이끌었어요.
-• 외국인·개인 매도를 기관이 받아내며 지수가 급등, 코스닥은 +0.19%에 그쳐 온도차가 컸어요.
-🔗 상세 분석 → https://doubleshot.space/briefings/2026-07-03/close/
-EOF
-          )"
+            --data-urlencode "text@/tmp/msg.txt"
