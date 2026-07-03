@@ -131,6 +131,13 @@ html.dark .notice-card.is-unread{border-color:rgba(59,139,255,.3);background:rgb
 .layout-grid__main{min-width:0;}
 .layout-grid__right{display:flex;flex-direction:column;gap:12px;}
 
+.site-footer{max-width:1064px;margin:-40px auto 0;padding:16px 32px 32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;border-top:1px solid var(--hairline);}
+.site-footer__links{display:flex;flex-wrap:wrap;gap:6px 16px;}
+.site-footer__links a{font-size:12px;font-weight:600;color:var(--muted);}
+.site-footer__links a:hover{color:var(--primary);}
+.site-footer__base{font-size:11px;color:var(--muted);}
+body.is-embed .site-footer{display:none;}
+
 /* ──────────────────────────────────────────────
    아코디언 (예측 게이지 래퍼)
 ────────────────────────────────────────────── */
@@ -793,6 +800,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 ────────────────────────────────────────────── */
 @media(max-width:900px){
   .layout-wrapper{padding:16px 20px 60px;}
+  .site-footer{padding:16px 20px 32px;}
   .gnb__in{padding:0 20px;gap:16px;}
   .layout-grid{grid-template-columns:1fr;row-gap:0;}
   .leaders-widget{order:-1;}
@@ -812,6 +820,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 .mkt-panel-inline{margin-top:16px!important;margin-bottom:4px;}
 @media(max-width:600px){
   .layout-wrapper{padding:12px 14px 60px;}
+  .site-footer{padding:12px 14px 32px;}
   .gnb__in{padding:0 14px;gap:12px;}
   .gnb a{font-size:12px;}
   .gnb__subs .gnb__sub{font-size:12px;}
