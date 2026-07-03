@@ -14,8 +14,8 @@
         "state": "ready",
         "url": "/briefings/2026-07-03/close/",
         "headline": "코스피 8000선 회복, 하루 만에 무슨 일이?",
-        "title": "8,088.34",
-        "price": "8,088.34",
+        "title": "8,476.15",
+        "price": "8,476.15",
         "time": ""
       },
       "us": {
@@ -328,30 +328,16 @@
     },
     "2026-06-17": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-06-17/kospi/",
-        "headline": "긴급 점검: SOX -5.7%·EWY -1.9% 동시 경고",
-        "pill_cls": "dn",
-        "pill_text": "▼ 하락",
-        "title": "하락 우위",
-        "time": "07:32"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-06-17/close/",
-        "headline": "코스피 사상 최고치 — 반도체 주도 + 유가 하락 리스크온",
-        "title": "8,864.24",
-        "price": "8,864.24",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-06-17/us/",
-        "headline": "오늘 밤 키워드는 딱 하나 — 내일 새벽 FOMC 결정",
-        "pill_cls": "dn",
-        "pill_text": "▼ 하락",
-        "title": "하락 우위",
-        "time": "21:22"
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-06-16": {

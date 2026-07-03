@@ -600,11 +600,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
 /* 안내 푸터 */
 .ds-footer{margin:32px 2px 8px;padding-top:20px;border-top:1px solid var(--hair);}
-.ds-foot-list{font-size:12.5px;color:var(--muted);line-height:1.85;}
-.ds-foot-list .fl{margin-bottom:10px;}
+.ds-foot-list{font-size:11.5px;color:var(--muted);line-height:1.8;}
+.ds-foot-list .fl{margin-bottom:9px;}
 .ds-foot-list .fl:last-child{margin-bottom:0;}
 .ds-foot-list .fl b{color:var(--ink);font-weight:700;}
-.ds-foot-base{margin-top:14px;font-size:11px;color:var(--muted);text-align:center;}
+.ds-foot-links{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hair);}
+.ds-foot-links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;}
+.ds-foot-links a:hover{color:var(--primary);}
+.ds-foot-base{margin-top:12px;font-size:11px;color:var(--muted);text-align:center;}
 /* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
 .refsub{padding:15px 0;border-top:1px solid var(--hair);}
 .refsub:first-child{padding-top:2px;border-top:none;}
@@ -1824,7 +1827,13 @@ function usSel(code){
       <div class="fl">화면에 나오는 모든 수치는 토스증권·네이버 금융에서 가져온 <b>실측값</b>이에요. AI가 임의로 만든 숫자는 쓰지 않고, 수집되지 않은 항목은 아예 표시하지 않아요.</div>
       <div class="fl">AI 신호와 기술 신호는 투자 판단을 돕는 <b>참고용</b>일 뿐 예측이 아니고, ETF 지수 흐름도 특정 종목을 추천하는 게 아니에요. 투자에 대한 최종 책임은 투자자 본인에게 있어요.</div>
     </div>
-    <div class="ds-foot-base">Double-Shot · 종목 서비스 (베타) · 표시되는 수치는 직전 거래일 종가 기준이에요</div>
+    <div class="ds-foot-links">
+      <a href="/legal/disclaimer/">면책 고지</a>
+      <a href="/legal/privacy/">개인정보처리방침</a>
+      <a href="/legal/terms/">이용약관</a>
+      <a href="mailto:pulum0083@gmail.com">문의</a>
+    </div>
+    <div class="ds-foot-base">© 2026 Double-Shot · 종목 서비스 (베타) · 표시되는 수치는 직전 거래일 종가 기준이에요</div>
   </footer>
 
 </div>

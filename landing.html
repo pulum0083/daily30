@@ -158,9 +158,11 @@
     .foot-logo .mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center}
     .foot-logo .mark svg{width:13px;height:13px;fill:#fff}
     .foot-brand p{font-size:12.5px;color:var(--t3);max-width:340px;line-height:1.55}
+    .foot-nav-group{display:flex;flex-direction:column;gap:12px}
     .foot-links{display:flex;flex-wrap:wrap;gap:10px 20px}
     .foot-links a{font-size:13px;color:var(--t2);font-weight:500}
     .foot-links a:hover{color:var(--blue)}
+    .foot-links--legal a{font-size:12px;color:var(--t3);font-weight:400}
     .foot-base{border-top:1px solid var(--line);padding-top:18px;font-size:11.5px;color:var(--t3)}
 
     /* sticky slim subscribe bar */
@@ -341,12 +343,19 @@
           </div>
           <p>매일 아침 코스피·저녁 미국 시장, AI가 방향과 그 이유를 풀어주는 투자 브리핑.</p>
         </div>
-        <nav class="foot-links">
-          <a href="/briefings">최신 브리핑</a>
-          <a href="/stocks/income-designer/">월배당 ETF 계산기</a>
-          <a href="https://t.me/doubleshot30" target="_blank" rel="noopener">텔레그램 구독</a>
-          <a href="mailto:pulum0083@gmail.com">문의</a>
-        </nav>
+        <div class="foot-nav-group">
+          <nav class="foot-links">
+            <a href="/briefings">최신 브리핑</a>
+            <a href="/stocks/income-designer/">월배당 ETF 계산기</a>
+            <a href="https://t.me/doubleshot30" target="_blank" rel="noopener">텔레그램 구독</a>
+            <a href="mailto:pulum0083@gmail.com">문의</a>
+          </nav>
+          <nav class="foot-links foot-links--legal">
+            <a href="/legal/disclaimer/">면책 고지</a>
+            <a href="/legal/privacy/">개인정보처리방침</a>
+            <a href="/legal/terms/">이용약관</a>
+          </nav>
+        </div>
       </div>
       <div class="foot-base">© 2026 Double-Shot · doubleshot.space</div>
     </div>
