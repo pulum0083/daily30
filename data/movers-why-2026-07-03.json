@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-03T09:31:28.532476+09:00",
+  "generated_at": "2026-07-03T10:01:29.359388+09:00",
   "date": "2026-07-03",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 0.52,
-      "surge": 0.2,
+      "changePct": 0.17,
+      "surge": 0.32,
       "events": [
         {
           "time": "08:27",
@@ -31,8 +31,8 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -3.48,
-      "surge": 0.24,
+      "changePct": -5.9,
+      "surge": 0.43,
       "events": [
         {
           "time": "06:28",
@@ -57,9 +57,19 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -4.05,
-      "surge": 0.15,
-      "events": []
+      "changePct": -4.25,
+      "surge": 0.27,
+      "events": [
+        {
+          "time": "09:29",
+          "headline": "현대차 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBPVGtzTkZYMjBBY256NHdDTjZGTFl2MmZaTnBhUVQ1ZGZZb3k0NElnR3ZaelRhamJhVnBwYno4LUdNckxEME1nZ0JsN1JIX2hpUzM5dmlsY09VMi1j?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "현대차 주가가 하락세를 보이고 있다.",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     }
   ]
 }
