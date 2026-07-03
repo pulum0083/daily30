@@ -714,6 +714,7 @@ function usSel(code){
   var buft={};   // buf와 병렬: 각 포인트의 실제 시각 'HH:MM' (장중 부분 데이터를 시간축에 정확히 배치)
   var bufv={};   // buf와 병렬: 각 포인트의 누적 거래량 (VWAP 계산용, backfill 시점 스냅샷)
   var curCode='005930';
+  var wmHasData=false;   // 곡선 데이터 보유 여부 — 야간 접힘 주기 타이머가 이 값을 보고 재노출 시 빈 위젯을 띄우지 않게 한다
   var whyData={};
   var snapW={};
   function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
@@ -805,14 +806,25 @@ function usSel(code){
   }
   function fmt(v){return v>=1000?v.toLocaleString():v;}
   function idxToTime(i,n){var mm=540+Math.round((390)*i/(n-1));var h=Math.floor(mm/60),m=mm%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+  // 곡선·거래량·레인지 상세 영역 노출/숨김 — 밤사이 미국 반도체 시황(#us-evening, 17:00~익일 07:30)과 같은 시간대엔 접어 둔다.
+  function wmNightCollapsed(){
+    var d=new Date(Date.now()+9*3600*1000), wd=d.getUTCDay();
+    if(wd===0||wd===6) return true;
+    var hm=d.getUTCHours()*60+d.getUTCMinutes();
+    return hm>=1020 || hm<450;
+  }
+  function wmSetOpen(open){
+    var wm=document.getElementById('why-moved'); if(!wm) return;
+    wm.style.display = (open && !wmNightCollapsed()) ? '' : 'none';
+  }
   function draw(code){
     var vals=buf[code]||[], svg=document.getElementById('wm-svg'), wm=document.getElementById('why-moved');
     if(!svg||!wm) return;
     var meta=document.querySelector('#why-moved [data-code="'+code+'"]');
     var nm=document.getElementById('wm-name'); if(nm&&meta) nm.textContent=meta.getAttribute('data-name')||'';
         var pts=pathFrom(vals,buft[code]);
-    if(!pts){ wm.style.display='none'; return; }
-    wm.style.display='';
+    if(!pts){ wmHasData=false; wmSetOpen(false); return; }
+    wmHasData=true; wmSetOpen(true);
     var up=vals[vals.length-1]>=vals[0], col=up?'#E03131':'#2775ED';
     var colA=up?'rgba(224,49,49,.18)':'rgba(39,117,237,.18)', colB=up?'rgba(224,49,49,.02)':'rgba(39,117,237,.02)';
     var coords=pts.split(' ').map(function(p){var a=p.split(',');return {x:+a[0],y:+a[1]};});
@@ -896,7 +908,7 @@ function usSel(code){
   function showSkeleton(){
     var svg=document.getElementById('wm-svg'), wm=document.getElementById('why-moved');
     if(!svg||!wm) return;
-    ensureSkelCSS(); wm.style.display='';
+    ensureSkelCSS(); wmHasData=true; wmSetOpen(true);
     svg.innerHTML='<rect class="wm-skel" x="2" y="14" width="636" height="132" rx="10" fill="#EEF2F7"/>'
       +'<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'
       +'<text class="wm-skel" x="320" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#94A3B8">실측 1분봉 불러오는 중…</text>';
@@ -921,8 +933,8 @@ function usSel(code){
     // ③ 라이브 fetch로 최신값 갱신(캐시도 새로 저장)
     fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
       if(d&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); bufv[code]=(d.volumes||[]).slice(); backfilled[code]=true; writeCache(code,d); draw(code); }
-      else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode){var wm=document.getElementById('why-moved'); if(wm) wm.style.display='none';} }
-    }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode){var wm=document.getElementById('why-moved'); if(wm) wm.style.display='none';} } });
+      else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode){ wmHasData=false; wmSetOpen(false); } }
+    }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode){ wmHasData=false; wmSetOpen(false); } } });
   }
   window.whyMovedPush=function(code, price){
     if(typeof price!=='number'||!isFinite(price)) return;
@@ -940,6 +952,8 @@ function usSel(code){
   backfill(curCode);
   loadWhy();
   loadSnap();
+  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가
+  setInterval(function(){ wmSetOpen(wmHasData); }, 60000);
 })();
 </script>
     <style>
