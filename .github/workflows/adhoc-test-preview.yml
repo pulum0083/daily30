@@ -1,0 +1,19 @@
+name: 일회성 링크 프리뷰 검증
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+    steps:
+      - name: 📤 link_preview_options 동작 검증 (관리자 챗으로만 발송)
+        run: |
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_ADMIN_CHAT_ID}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode 'link_preview_options={"is_disabled": false}' \
+            --data-urlencode "text=테스트: 상세 분석 → https://doubleshot.space/briefings/2026-07-03/close/"
