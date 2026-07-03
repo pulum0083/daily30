@@ -426,11 +426,29 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 - **issue 슬롯**: 이슈 미수집(예: 09:00~첫 수집 전)이면 오늘 kospi 예측으로 폴백, 그것도 없으면 숨김. 클릭 시 `/briefings/{date}/kospi/`로 이동.
 - `getKSTSlot` 경계값을 임의로 바꾸지 말 것. 위 표가 정본이다.
 
-### 14. 코스피 마감 브리핑 — 화제 종목 · 증권가 시황 섹션
+### 14. 코스피 마감 브리핑 — 증권가 시황 섹션
 
-`close.html` 템플릿의 "오늘의 화제 종목"(`close_movers.html`)과 "오늘 증권가 시황"(`close_research.html`) 섹션.
+`close.html` 템플릿의 "오늘 증권가 시황"(`close_research.html`) 섹션.
 
-- **화제 종목**: `movers-why-{date}.json` 기반. 등락률은 실측(네이버 실시간), 이유는 뉴스 헤드라인 발췌. 헤드라인 속 `%` 수치가 실측 등락률과 크게(허용오차 `max(2.0, |등락률|×0.4)`) 어긋나면 다음 이벤트로 폴백, 폴백도 없으면 이유 없이 배지만 표시.
-- **증권가 시황**: `research_reports.json` 기반. 발행 시점 필터·숫자 가드는 위 `fetch_research_reports.py` 규칙 참조. **해요체 고정**.
-- 둘 다 `generate_html.py`에서 날짜 불일치 시(`date != target_date`) 표시하지 않는다 — 이전 실행의 잔존 파일이 다른 날짜 브리핑을 오염시키는 것을 방지.
-- `kospi-close-briefing` job 순서: `fetch_closing_kospi.py` → `fetch_news.py` → `fetch_movers_why.py` → `fetch_research_reports.py` → `call_claude.py`. 두 스텝 모두 `continue-on-error: true` — 실패해도 마감 브리핑 발행 자체는 막지 않는다.
+- `research_reports.json` 기반. 발행 시점 필터·숫자 가드는 위 `fetch_research_reports.py` 규칙 참조. **해요체 고정**.
+- `generate_html.py`에서 날짜 불일치 시(`date != target_date`) 표시하지 않는다 — 이전 실행의 잔존 파일이 다른 날짜 브리핑을 오염시키는 것을 방지.
+- `kospi-close-briefing` job 순서: `fetch_closing_kospi.py` → `fetch_news.py` → `fetch_movers_why.py` → `fetch_research_reports.py` → `call_claude.py`. `fetch_research_reports.py`는 `continue-on-error: true` — 실패해도 마감 브리핑 발행 자체는 막지 않는다.
+
+> "오늘의 화제 종목"(`close_movers.html`, `movers-why-{date}.json` 기반) 섹션은 2026-07-03 제거됨 — 모든 브리핑 사이드바의 "코스피 주도주" 위젯(main.js `loadLeadersWidget()`)이 같은 데이터로 실시간 곡선·뉴스 핀을 이미 보여주고 있어 본문 중복이었다. `fetch_movers_why.py`와 그 데이터 파일은 그대로 유지 — 사이드바 위젯이 계속 소비한다.
+
+### 15. 배포 사고 대응 — Vercel 자동배포 조용한 취소 (2026-07-03)
+
+**증상**: `git push`는 성공하고 `data/*.json`·커밋 내역도 정상인데, `doubleshot.space`에는 반영이 안 됨. `vercel ls`로 보면 최근 프로덕션 배포들이 빌드 없이(`Build [0ms]`) 곧바로 `Canceled` 상태로 끝나 있음 — 에러도 아니고 조용히 실패해서 알아차리기 어렵다.
+
+**발견한 원인 한 가지**: `.github/workflows/deploy.yml`의 주석("`web/data/` 변경은 제외 — kospi-news-live.yml이 직접 배포")과 실제 `paths` 목록이 어긋나 있었다 — `web/data/**`가 여전히 트리거 경로에 남아 있어서, `kospi-news-live.yml`이 데이터 커밋을 푸시할 때마다 **같은 push에 대해 배포 이벤트가 중복 발생**했다. 이 커밋(2026-07-03)에서 `paths`에서 `web/data/**`를 제거해 주석과 일치시켰다. 다만 이게 Vercel 취소의 유일한 원인인지는 대시보드 접근 없이 100% 확정하지 못했다 — 재발 가능성 있음.
+
+**재발 감지 — 자동화됨**: `kospi-news-live.yml`에 "🔍 프로덕션 배포 반영 확인" 스텝 추가. 푸시 후 30초 대기, `doubleshot.space/data/kospi-news-live.json`의 `updated_at`을 방금 커밋한 로컬 값과 대조. 불일치 시 `VERCEL_TOKEN` 시크릿이 있으면 `vercel deploy --prod`로 자동 복구 시도, 그리고 `TELEGRAM_ADMIN_CHAT_ID`로 관리자 알림 발송. `VERCEL_TOKEN`을 GitHub Secrets에 추가하면 자동 복구까지 되고, 없으면 알림만 온다(Vercel 계정 설정 → Tokens에서 발급).
+
+**수동 복구 (알림 받았을 때)**:
+```bash
+vercel ls                 # 최근 배포가 Canceled인지 확인
+vercel --prod --yes       # CLI로 강제 배포 — git 웹훅 우회, 즉시 반영됨
+curl -s https://doubleshot.space/data/kospi-news-live.json | python3 -m json.tool  # 반영 확인
+```
+
+**점검 순서**: ① `git log origin/main` — 커밋이 실제로 푸시됐는지. ② `vercel ls` — 최근 배포 상태(Canceled/Ready/Error). ③ Canceled면 위 수동 복구. ④ 반복되면 `.github/workflows/*.yml`에서 같은 push 경로에 걸리는 다른 워크플로우가 늘었는지(중복 트리거) 확인.
