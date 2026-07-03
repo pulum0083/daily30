@@ -37,6 +37,11 @@ WEB_DIR = BASE_DIR / "web"
 BRIEFINGS_DIR = WEB_DIR / "briefings"
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
+
+# 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
+ASSET_VER = "20260703"
+CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
+JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
 KST = pytz.timezone("Asia/Seoul")
 
@@ -724,7 +729,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         "gnb_date": f"{target_date} KST {gen_time}",
         "index_name": index_name,
         "prev_url": prev_url, "next_url": next_url,
-        "css_path": "/assets/style.css", "js_path": "/assets/main.js",
+        "css_path": CSS_PATH, "js_path": JS_PATH,
         "canonical_url": canonical_url,
         "briefing_type": internal_type,
         "issue_slot": _issue_slot_map.get(internal_type, "MARKET"),
@@ -1515,8 +1520,8 @@ def build_sector_pages():
             breadth=breadth,
             snapshot_date=snapshot_date,
             all_sectors=all_sectors,
-            css_path="/assets/style.css",
-            js_path="/assets/main.js",
+            css_path=CSS_PATH,
+            js_path=JS_PATH,
         )
         out_dir = WEB_DIR / "stocks" / "sector" / key
         out_dir.mkdir(parents=True, exist_ok=True)
