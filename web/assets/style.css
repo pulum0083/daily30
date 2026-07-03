@@ -796,6 +796,14 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .acc-box--sidebar{display:none;}
   .acc-box--mobile{display:flex;flex-direction:column;}
   .bottom-list{max-width:100%;}
+  /* 브리핑 상세: 외부 래퍼 박스 제거 — 내부 섹션 카드들이 각자의 테두리를 가짐 (사이드바 카드와 좌우 폭 통일) */
+  .accordion-item,
+  .accordion-item.is-open,
+  .accordion-item.is-close{background:transparent;border:none;box-shadow:none;border-radius:0;overflow:visible;}
+  .accordion-header{padding-top:4px;padding-bottom:4px;}
+  #live-scoreboard{margin-top:6px!important;}
+  .accordion-body__inner,
+  .accordion-item.is-close .accordion-body__inner{padding:0 0 22px;border-top:none;}
 }
 /* 모바일 라이브 모드 — 시장 지표 패널을 스코어보드 바로 아래 인라인 배치 */
 .mkt-panel-inline{margin-top:16px!important;margin-bottom:4px;}
@@ -829,13 +837,6 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .bl-row__date{padding:0 10px;}
   .bl-cell{padding:10px 8px;}
   /* 시나리오 분할(sc-cols) 모바일 1단 — 기본 선언 이후에 위치해야 적용됨 */
-  /* 브리핑 상세: 외부 래퍼 박스 제거 — 내부 섹션 카드들이 각자의 테두리를 가짐 */
-  .accordion-item,
-  .accordion-item.is-open,
-  .accordion-item.is-close{background:transparent;border:none;box-shadow:none;border-radius:0;overflow:visible;}
-  .accordion-header{padding-top:4px;padding-bottom:4px;}
-  #live-scoreboard{margin-top:6px!important;}
-  .accordion-body__inner{padding:0 0 22px;border-top:none;}
 }
 
 /* ── 라이브 스코어보드 ── */
