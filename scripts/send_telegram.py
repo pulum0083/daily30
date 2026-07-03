@@ -122,10 +122,10 @@ def build_fallback_message(briefing_type: str) -> str:
         label = labels.get(briefing_type, "📊 브리핑")
         url_map = {"kospi": f"{date_slug}/kospi", "us": f"{date_slug}/us", "kospi-close": f"{date_slug}/close"}
         path = url_map.get(briefing_type, f"weekly/{date_slug}")
+        link = f"{web_url}/briefings/{path}/"
         return (
-            f"{label} 브리핑 | {today}\n\n"
-            f"브리핑이 생성되었습니다.\n\n"
-            f"🔗 상세 분석 → {web_url}/briefings/{path}/"
+            f"{label} 브리핑 | {today}<a href=\"{link}\">​</a>\n\n"
+            f"브리핑이 생성되었습니다."
         )
 
     with open(analysis_file, encoding="utf-8") as f:
@@ -149,21 +149,21 @@ def build_fallback_message(briefing_type: str) -> str:
     divider = "─" * 20
 
     if briefing_type == "kospi":
-        header = f"🇰🇷 코스피 예측 브리핑 | {today}"
-        pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
         link = f"{web_url}/briefings/{date_slug}/kospi/"
-    elif briefing_type == "us":
-        header = f"🇺🇸 미국 시장 브리핑 | {today}"
+        header = f"🇰🇷 코스피 예측 브리핑 | {today}<a href=\"{link}\">​</a>"
         pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
+    elif briefing_type == "us":
         link = f"{web_url}/briefings/{date_slug}/us/"
+        header = f"🇺🇸 미국 시장 브리핑 | {today}<a href=\"{link}\">​</a>"
+        pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
     elif briefing_type == "kospi-close":
-        header = f"🇰🇷 코스피 마감 브리핑 | {today}"
-        pred_line = f"{dir_emoji} {direction}" if direction else ""
         link = f"{web_url}/briefings/{date_slug}/close/"
+        header = f"🇰🇷 코스피 마감 브리핑 | {today}<a href=\"{link}\">​</a>"
+        pred_line = f"{dir_emoji} {direction}" if direction else ""
     else:
-        header = f"📋 주간 리포트 | {today}"
-        pred_line = ""
         link = f"{web_url}/briefings/weekly/{date_slug}/"
+        header = f"📋 주간 리포트 | {today}<a href=\"{link}\">​</a>"
+        pred_line = ""
 
     parts = [header, divider, pred_line] if pred_line else [header]
     if reason_title:
@@ -171,7 +171,6 @@ def build_fallback_message(briefing_type: str) -> str:
     if reasons:
         parts += ["", "핵심 시그널:"]
         parts += [f"• {strip_html(r)}" for r in reasons[:3]]
-    parts += [divider, f"🔗 상세 분석 → {link}"]
 
     return "\n".join(parts)
 

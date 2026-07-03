@@ -1010,11 +1010,11 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
     if briefing_type == "kospi":
-        header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
         link   = f"{web_base}/briefings/ko/{date_str}/"
+        header = f"🇰🇷 코스피 예측 브리핑 | {date_display}<a href=\"{link}\">​</a>"
     else:
-        header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
         link   = f"{web_base}/briefings/us/{date_str}/"
+        header = f"🇺🇸 미국 시장 브리핑 | {date_display}<a href=\"{link}\">​</a>"
 
     divider = "─" * 20
 
@@ -1034,8 +1034,6 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         lines += ["", "핵심 시그널:"]
         for s in signals:
             lines.append(f"• {strip_html(s)}")
-
-    lines += [f"🔗 상세 분석 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1604,9 +1602,10 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     market_title   = strip_html(analysis.get("market_title", ""))
     signals        = analysis.get("telegram_signals", [])
     divider = "─" * 20
+    link = f"{web_base}/briefings/{date_str}/close/"
 
     lines = [
-        f"🇰🇷 코스피 마감 시황 | {date_display}",
+        f"🇰🇷 코스피 마감 시황 | {date_display}<a href=\"{link}\">​</a>",
         divider,
         fmt_index(kospi,  "KOSPI"),
         fmt_index(kosdaq, "KOSDAQ"),
@@ -1617,9 +1616,6 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     ]
     for sig in signals[:2]:
         lines.append(f"• {strip_html(sig)}")
-    lines += [
-        f"🔗 상세 분석 → {web_base}/briefings/{date_str}/close/",
-    ]
 
     msg = "\n".join(lines)
     out = DATA_DIR / "telegram_message_kospi_close.txt"
