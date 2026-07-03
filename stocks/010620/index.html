@@ -30,7 +30,7 @@
         <div class="top">
           <div>
             <div class="hn">HD현대미포 <a class="chip" href="/stocks/sector/ship/">조선</a></div>
-            <div class="meta"><span class="num">010620</span> · KOSPI · 06-30 종가</div>
+            <div class="meta"><span class="num">010620</span> · KOSPI · 07-03 종가</div>
           </div>
           <div style="text-align:right">
             <div class="px num">223,000</div>
@@ -66,7 +66,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="010620" data-date="2026-06-30">
+        <div class="np__h" id="sig-c-head" data-code="010620" data-date="2026-07-04">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -83,7 +83,7 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">06-30 종가 기준</span>
+          <span class="np__s">07-03 종가 기준</span>
         </div>
 
         
@@ -252,14 +252,15 @@
         <a class="srow" href="/stocks/329180/">
           <span class="n2">HD현대중공업 <small class="num">329180</small></span>
           
-            <span class="c num" style="color:var(--muted)">0.00%</span>
+            <span class="c dn num">-2.20%</span>
+            
           
         </a>
         
         <a class="srow" href="/stocks/042660/">
           <span class="n2">한화오션 <small class="num">042660</small></span>
           
-            <span class="c dn num">-4.93%</span>
+            <span class="c up num">+2.30%</span>
             
           
         </a>
@@ -267,7 +268,7 @@
         <a class="srow" href="/stocks/010140/">
           <span class="n2">삼성중공업 <small class="num">010140</small></span>
           
-            <span class="c dn num">-4.70%</span>
+            <span class="c up num">+2.40%</span>
             
           
         </a>
@@ -275,7 +276,7 @@
         <a class="srow" href="/stocks/009540/">
           <span class="n2">HD한국조선해양 <small class="num">009540</small></span>
           
-            <span class="c dn num">-3.71%</span>
+            <span class="c dn num">-0.83%</span>
             
           
         </a>
@@ -313,10 +314,20 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(06-30 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-03 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>
+
+  <footer class="ds-footer">
+    <div class="ds-foot-links">
+      <a href="/legal/disclaimer/">면책 고지</a>
+      <a href="/legal/privacy/">개인정보처리방침</a>
+      <a href="/legal/terms/">이용약관</a>
+      <a href="mailto:pulum0083@gmail.com">문의</a>
+    </div>
+    <div class="ds-foot-base">© 2026 Double-Shot</div>
+  </footer>
 </div>
 </div>
 
@@ -354,23 +365,7 @@ window.switchChartTab=switchChartTab;
   wrap.addEventListener('mouseleave',function(){tip.style.display='none';});
 })();
 
-// 외국인 보유율 툴팁
-(function(){
-  var btn=document.getElementById('fo-label');
-  var tip=document.getElementById('fo-tip');
-  if(!btn||!tip) return;
-  function move(e){
-    var pad=14,w=tip.offsetWidth,h=tip.offsetHeight;
-    var x=e.clientX+18,y=e.clientY+14;
-    if(x+w+pad>innerWidth) x=e.clientX-w-14;
-    if(y+h+pad>innerHeight) y=e.clientY-h-14;
-    tip.style.left=Math.max(pad,x)+'px';
-    tip.style.top=Math.max(pad,y)+'px';
-  }
-  btn.addEventListener('mouseenter',function(e){tip.style.display='block';move(e);});
-  btn.addEventListener('mousemove',move);
-  btn.addEventListener('mouseleave',function(){tip.style.display='none';});
-})();
+// 외국인 보유율 ? 툴팁 바인딩은 stocks.js에서 처리 (defer라 #fo-tip 파싱 후 실행 보장)
 
 // 트랙레코드 ? 툴팁 바인딩은 stocks.js에서 처리 (defer라 #tr-tip 파싱 후 실행 보장)
 

@@ -524,6 +524,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ds-foot-list .fl + .fl{border-top:1px solid var(--hair);}
 .ds-foot-list .fl b{color:var(--ink);font-weight:700;}
 .ds-foot-list .fk{color:var(--ink);font-weight:700;margin-right:6px;}
+.ds-foot-links{display:flex;flex-wrap:wrap;gap:8px 16px;padding:18px 24px 14px;}
+.ds-foot-links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;}
+.ds-foot-links a:hover{color:var(--primary);}
 .ds-foot-base{padding:12px 24px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
 /* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
 .refsub{padding:15px 0;border-top:1px solid var(--hair);}
@@ -883,6 +886,15 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
     </div>
   </div>
 
+  <footer class="ds-footer">
+    <div class="ds-foot-links">
+      <a href="/legal/disclaimer/">면책 고지</a>
+      <a href="/legal/privacy/">개인정보처리방침</a>
+      <a href="/legal/terms/">이용약관</a>
+      <a href="mailto:pulum0083@gmail.com">문의</a>
+    </div>
+    <div class="ds-foot-base">© 2026 Double-Shot</div>
+  </footer>
 </div>
 <script>
 (function(){
