@@ -845,7 +845,8 @@
     w.className = 'leaders-widget';
     w.innerHTML =
       '<div class="leaders-widget__header"><span class="leaders-widget__ic">📈</span>' +
-        '<span class="leaders-widget__title">코스피 주도주 · 왜 움직였나</span>' +
+        '<span class="leaders-widget__title">코스피 주도주</span>' +
+        '<span class="leaders-widget__live" id="lw-live" style="display:none"><span class="leaders-widget__live-dot"></span>LIVE</span>' +
         '<button class="leaders-widget__refresh" id="lw-refresh" type="button" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>' +
         '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
       '<div class="leaders-widget__tiles" id="lw-tiles">' +
@@ -908,9 +909,11 @@
         .catch(function () {});
     }
     var pill = w.querySelector('#lw-pill');
+    var liveBadge = w.querySelector('#lw-live');
     function pollTiles() {
       var night = !krOpen();
       if (pill) pill.style.display = night ? '' : 'none';
+      if (liveBadge) liveBadge.style.display = night ? 'none' : '';
       if (night) pollNight(); else pollDay();
     }
     pollTiles();

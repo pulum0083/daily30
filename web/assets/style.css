@@ -648,6 +648,9 @@ html.dark .leaders-widget{background:rgba(0,110,255,.07);border-color:rgba(96,16
 @keyframes lwSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .leaders-widget__pill{margin-left:6px;font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;display:none;}
 html.dark .leaders-widget__pill{background:rgba(109,40,217,.25);}
+.leaders-widget__live{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;color:var(--muted);background:var(--surface-soft);border-radius:999px;padding:2px 7px;}
+.leaders-widget__live-dot{width:5px;height:5px;border-radius:50%;background:#EF4444;animation:lwBlink 1.2s ease-in-out infinite;}
+@keyframes lwBlink{0%,100%{opacity:1}50%{opacity:.25}}
 .leaders-widget__tiles{display:flex;gap:6px;margin-bottom:12px;}
 .leaders-widget__tile{flex:1;min-width:0;cursor:pointer;background:var(--surface-soft);border:1.5px solid var(--hairline);border-radius:10px;padding:8px 8px 7px;transition:border-color .12s,background .12s;}
 .leaders-widget__tile.on{background:var(--canvas);border-color:var(--primary);}
