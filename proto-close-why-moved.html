@@ -1,0 +1,1017 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[PROTO] 왜 움직였나 사이드바 이식 — 2026-07-02 코스피 마감</title>
+<!-- PROTOTYPE ONLY — 파이프라인·main.js·templates 미반영. /stocks 허브의 "왜 움직였나" 위젯을 마감 브리핑 사이드바로 옮겨보는 시안. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="2026-07-02 코스피 마감 — Double-Shot">
+<meta property="og:description" content="2026-07-02 코스피 마감">
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://doubleshot.space/briefings/2026-07-02/close/">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+
+</head>
+<body>
+
+
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/briefings"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/stocks/">종목 시그널</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+
+
+
+<div class="layout-wrapper">
+  <div class="layout-grid">
+    <main class="layout-grid__main">
+      <div class="accordion-item is-close">
+        <div class="accordion-header" style="cursor:default">
+          <div class="accordion-header__left">
+            <div class="accordion-header__date"><span class="accordion-header__date-label">2026-07-02</span></div>
+          </div>
+          <div class="header-nav">
+            <a class="hnav-btn " id="btn-prev" href="/briefings/2026-07-01/close/" title="이전 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <a class="hnav-btn disabled" id="btn-next" href="#" title="다음 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+            
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">마감 스냅샷</span>
+    <span class="section-card__sub">09:00 ~ 15:30 정규장</span>
+  </div>
+  <div class="a-hero">
+    <div class="a-hero__lead">
+      <div class="a-hero__idx">
+        <div class="a-hero__idx-name">KOSPI 종가</div>
+        <div class="a-hero__idx-val">7,648.09</div>
+        <div class="a-hero__idx-chg down">▼ 655.32 (-7.89%)</div>
+      </div>
+      <div class="a-hero__vol">
+        <div class="a-hero__vol-label">코스피 거래대금</div>
+        <div class="a-hero__vol-val">48조 8,611억원</div>
+      </div>
+    </div>
+    <div class="intraday-canvas-wrap"><canvas id="intraday-chart"></canvas></div>
+    <div class="intraday-axis"><span>09:00</span><span>10:30</span><span>12:00</span><span>13:30</span><span>15:20</span></div>
+    <div class="a-sub-row">
+      
+      <div class="a-sub-cell"><span class="a-sub-cell__name">KOSDAQ</span><span class="a-sub-cell__val">866.72</span><span class="a-sub-cell__chg down">▼ -6.74%</span></div>
+      
+      <div class="a-sub-cell"><span class="a-sub-cell__name">원/달러</span><span class="a-sub-cell__val">1,552.80</span><span class="a-sub-cell__chg up">▲ +0.00%</span></div>
+      
+    </div>
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  drawCloseChart('intraday-chart', [7815.91, 7868.25, 7786.87, 7762.97, 7825.5, 7819.6, 7806.6, 7796.66, 7745.63, 7778.96, 7818.72, 7792.56, 7807.35, 7887.04, 7889.18, 7938.52, 7962.99, 7993.42, 8034.71, 8044.1, 8066.53, 8073.81, 8088.32, 8093.68, 8096.76, 8118.09, 8127.05, 8065.09, 8029.51, 8024.12, 8047.8, 8066.98, 8051.47, 8020.65, 8001.2, 8044.92, 8028.63, 7996.93, 8011.6, 7997.87, 7956.66, 7953.86, 7971.97, 7972.63, 7948.01, 7932.35, 7940.53, 7926.32, 7919.23, 7918.85, 7890.0, 7876.87, 7881.11, 7924.73, 7871.77, 7854.78, 7846.47, 7847.33, 7894.71, 7926.74, 7957.27, 7941.61, 7904.57, 7894.09, 7890.4, 7873.73, 7847.7, 7817.49, 7816.52, 7774.31, 7786.08, 7764.3], 8303.41);
+  window.redrawCharts = function () { drawCloseChart('intraday-chart', [7815.91, 7868.25, 7786.87, 7762.97, 7825.5, 7819.6, 7806.6, 7796.66, 7745.63, 7778.96, 7818.72, 7792.56, 7807.35, 7887.04, 7889.18, 7938.52, 7962.99, 7993.42, 8034.71, 8044.1, 8066.53, 8073.81, 8088.32, 8093.68, 8096.76, 8118.09, 8127.05, 8065.09, 8029.51, 8024.12, 8047.8, 8066.98, 8051.47, 8020.65, 8001.2, 8044.92, 8028.63, 7996.93, 8011.6, 7997.87, 7956.66, 7953.86, 7971.97, 7972.63, 7948.01, 7932.35, 7940.53, 7926.32, 7919.23, 7918.85, 7890.0, 7876.87, 7881.11, 7924.73, 7871.77, 7854.78, 7846.47, 7847.33, 7894.71, 7926.74, 7957.27, 7941.61, 7904.57, 7894.09, 7890.4, 7873.73, 7847.7, 7817.49, 7816.52, 7774.31, 7786.08, 7764.3], 8303.41); };
+});
+window.addEventListener('resize', function () { drawCloseChart('intraday-chart', [7815.91, 7868.25, 7786.87, 7762.97, 7825.5, 7819.6, 7806.6, 7796.66, 7745.63, 7778.96, 7818.72, 7792.56, 7807.35, 7887.04, 7889.18, 7938.52, 7962.99, 7993.42, 8034.71, 8044.1, 8066.53, 8073.81, 8088.32, 8093.68, 8096.76, 8118.09, 8127.05, 8065.09, 8029.51, 8024.12, 8047.8, 8066.98, 8051.47, 8020.65, 8001.2, 8044.92, 8028.63, 7996.93, 8011.6, 7997.87, 7956.66, 7953.86, 7971.97, 7972.63, 7948.01, 7932.35, 7940.53, 7926.32, 7919.23, 7918.85, 7890.0, 7876.87, 7881.11, 7924.73, 7871.77, 7854.78, 7846.47, 7847.33, 7894.71, 7926.74, 7957.27, 7941.61, 7904.57, 7894.09, 7890.4, 7873.73, 7847.7, 7817.49, 7816.52, 7774.31, 7786.08, 7764.3], 8303.41); });
+</script>
+            
+              
+                
+<div class="open-section">
+  <div class="open-section__title reason-section-title">코스피 7.89% 폭락, 오늘 대체 무슨 일이 있었나요?</div>
+  <div class="qa-card">
+    
+    <div class="qa-item">
+      <div class="qa-q"><span class="qa-mark qa-mark--q">Q.</span><span class="qa-q-text">오늘 코스피가 왜 이렇게 크게 떨어졌나요?</span></div>
+      <div class="qa-a"><span class="qa-mark qa-mark--a">A.</span><span class="qa-a-text">메타의 클라우드 사업 진출 소식이 AI 반도체 고점 우려로 번지면서 <b>삼성전자 -9.06%</b>, <b>SK하이닉스 -14.57%</b> 등 반도체 대형주가 동반 급락했어요. 여기에 <b>외국인 4조 3,706억원</b>, <b>기관 2조 716억원</b> 동반 순매도가 겹치면서 장 초반부터 낙폭이 커졌고, 결국 코스피는 <b>-7.89%</b>, 코스닥은 <b>-6.74%</b> 급락 마감했어요.</span></div>
+    </div>
+    
+    <div class="qa-item">
+      <div class="qa-q"><span class="qa-mark qa-mark--q">Q.</span><span class="qa-q-text">사이드카까지 발동될 정도로 상황이 심각했나요?</span></div>
+      <div class="qa-a"><span class="qa-mark qa-mark--a">A.</span><span class="qa-a-text">네, 장 초반 코스피가 <b>6% 이상</b> 급락하며 매도 사이드카가 발동됐고 코스닥도 <b>5% 이상</b> 급락하며 동시에 발동됐어요. 장중 고점 <b>8,127.05</b>에서 저점 <b>7,745.63</b>까지 밀리며 변동성이 극심했던 하루였거든요.</span></div>
+    </div>
+    
+    <div class="qa-item">
+      <div class="qa-q"><span class="qa-mark qa-mark--q">Q.</span><span class="qa-q-text">이런 급락 속에서도 오른 종목이 있었나요?</span></div>
+      <div class="qa-a"><span class="qa-mark qa-mark--a">A.</span><span class="qa-a-text">네, 반도체와 무관한 <b>은행 섹터 +3.01%</b>(신한지주 +6.02%), <b>편의점 +2.75%</b>(GS리테일 +6.14%), <b>건설 중소형 +4.55%</b> 등은 오히려 강세를 보였어요. 개인이 <b>6조 2,546억원</b> 순매수하며 낙폭 방어에 나섰지만 반도체 낙폭을 상쇄하기엔 역부족이었어요.</span></div>
+    </div>
+    
+  </div>
+</div>
+              
+              
+            
+            
+<div id="issue-briefing-wrap"
+     data-date="2026-07-02"
+     data-slot="POST_MARKET"
+     data-type="close"
+     style="display:none;margin-top:16px;margin-bottom:24px;">
+  <div class="issue-briefing-card">
+    <div class="issue-briefing-header">
+      <div class="issue-briefing-title">
+        <span class="issue-briefing-dot"></span>
+        이슈 브리핑 <span class="lsb-beta-tag">BETA</span>
+      </div>
+      <span class="issue-briefing-meta" id="issue-briefing-meta">—</span>
+    </div>
+    <div class="issue-briefing-body">
+      <div id="issue-briefing-tl">
+        <div class="ib-item"><span class="ib-time">—</span><div class="ib-body"><div class="ib-desc" style="-webkit-line-clamp:unset">이슈를 불러오는 중이에요.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+            
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">수급 현황</span>
+    <span class="section-card__sub">코스피 · 순매수 (억원)</span>
+  </div>
+  <div class="supply-summary">
+    
+    <div class="supply-summary__cell">
+      <div class="supply-summary__info">
+        <div class="supply-summary__lbl">외국인</div>
+        <div class="supply-summary__amt down">-43,710억</div>
+        <div class="supply-summary__sub">순매도</div>
+      </div>
+      <div class="flow-chart" data-values="[-46546, -8755, -46265, -77332, -37993, -17029, -43710]"></div>
+    </div>
+    
+    <div class="supply-summary__cell">
+      <div class="supply-summary__info">
+        <div class="supply-summary__lbl">기관</div>
+        <div class="supply-summary__amt down">-20,822억</div>
+        <div class="supply-summary__sub">순매도</div>
+      </div>
+      <div class="flow-chart" data-values="[19095, 33244, -37843, 29326, 29331, -702, -20822]"></div>
+    </div>
+    
+    <div class="supply-summary__cell">
+      <div class="supply-summary__info">
+        <div class="supply-summary__lbl">개인</div>
+        <div class="supply-summary__amt up">+62,661억</div>
+        <div class="supply-summary__sub">순매수</div>
+      </div>
+      <div class="flow-chart" data-values="[26315, -24155, 81898, 45975, 8403, 17393, 62661]"></div>
+    </div>
+    
+  </div>
+  
+</div>
+
+            
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">3일 수급 흐름</span>
+    <span class="section-card__sub">코스피 · 순매수 (억원)</span>
+  </div>
+  <div class="dpick-list">
+    
+    <div class="dpick-row">
+      <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
+        <span class="dpick-name">외국인</span>
+        <span class="sflow-summary">3일 연속 순매도, 규모 확대 중</span>
+      </div>
+      <div class="sflow-trend">
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg frgn seg-dn" style="width:88%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-02</span>
+            <span class="sflow-trend-amt down">−43,710억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg frgn seg-dn" style="width:34%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-01</span>
+            <span class="sflow-trend-amt down">−17,029억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg frgn seg-dn" style="width:76%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">06-30</span>
+            <span class="sflow-trend-amt down">−37,993억</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="dpick-row">
+      <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
+        <span class="dpick-name">기관</span>
+        <span class="sflow-summary">혼조세</span>
+      </div>
+      <div class="sflow-trend">
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg inst seg-dn" style="width:62%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-02</span>
+            <span class="sflow-trend-amt down">−20,822억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg inst seg-dn" style="width:4%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-01</span>
+            <span class="sflow-trend-amt down">−702억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg inst" style="width:88%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">06-30</span>
+            <span class="sflow-trend-amt up">+29,331억</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+    <div class="dpick-row">
+      <div class="dpick-top" style="margin-bottom:8px;align-items:baseline;gap:8px;">
+        <span class="dpick-name">개인</span>
+        <span class="sflow-summary">3일 연속 순매수, 규모 확대 중</span>
+      </div>
+      <div class="sflow-trend">
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg indiv" style="width:88%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-02</span>
+            <span class="sflow-trend-amt up">+62,661억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg indiv" style="width:24%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">07-01</span>
+            <span class="sflow-trend-amt up">+17,393억</span>
+          </div>
+        </div>
+        
+        <div class="sflow-trend-day">
+          <div class="sflow-trend-bar">
+            <div class="dpick-seg indiv" style="width:12%">&nbsp;</div>
+          </div>
+          <div class="sflow-trend-meta">
+            <span class="sflow-trend-date">06-30</span>
+            <span class="sflow-trend-amt up">+8,403억</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    
+  </div>
+</div>
+            
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">시장 폭</span>
+    <span class="section-card__sub">코스피 종목 기준</span>
+  </div>
+  
+  <div class="breadth-row">
+    <span class="breadth-row__label">등락</span>
+    <div class="breadth-row__items">
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">상승</span><span class="breadth-cell__val up">280</span></div>
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">하락</span><span class="breadth-cell__val down">616</span></div>
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">보합</span><span class="breadth-cell__val neutral">20</span></div>
+      
+    </div>
+  </div>
+  
+  <div class="breadth-row">
+    <span class="breadth-row__label">특이 종목</span>
+    <div class="breadth-row__items">
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">상한가</span><span class="breadth-cell__val up">4</span></div>
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">하한가</span><span class="breadth-cell__val down">1</span></div>
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">신고가</span><span class="breadth-cell__val up">0</span></div>
+      
+      <div class="breadth-cell"><span class="breadth-cell__lbl">신저가</span><span class="breadth-cell__val down">0</span></div>
+      
+    </div>
+  </div>
+  
+</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="layout-grid__right">
+      
+<div class="right-panel">
+  <div class="panel-header">
+    <span class="section-title">섹터 로테이션<button class="info-icon-btn" data-modal-open="sector-modal" style="margin-left:6px">?</button></span>
+    <span class="pub-time">자금 흐름</span>
+  </div>
+  <div class="rota-list">
+    
+    <div class="rota-row"><span class="rota-name">건설 중소형</span><span class="rota-pct up">+4.5%</span></div>
+    
+    <div class="rota-row"><span class="rota-name">은행</span><span class="rota-pct up">+3.0%</span></div>
+    
+    <div class="rota-row"><span class="rota-name">편의점</span><span class="rota-pct up">+2.8%</span></div>
+    
+    <div class="rota-row"><span class="rota-name">캐릭터상품</span><span class="rota-pct up">+2.3%</span></div>
+    
+    <div class="rota-row"><span class="rota-name">인터넷 대표주</span><span class="rota-pct up">+1.3%</span></div>
+
+  </div>
+
+</div>
+
+<style>
+.wm-proto{padding:14px 16px 12px;}
+.wm-proto__header{display:flex;align-items:center;gap:7px;margin-bottom:11px;}
+.wm-proto__ic{font-size:14px;}
+.wm-proto__title{font-size:13px;font-weight:700;color:var(--ink);}
+.wm-proto__pill{margin-left:auto;font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;}
+html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
+.wm-proto__tiles{display:flex;gap:6px;margin-bottom:12px;}
+.wmp-tile{flex:1;min-width:0;cursor:pointer;background:var(--surface-soft);border:1.5px solid var(--hairline);border-radius:10px;padding:8px 8px 7px;transition:border-color .12s,background .12s;}
+.wmp-tile.on{background:var(--canvas);border-color:var(--primary);}
+.wmp-tile__name{display:block;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wmp-tile__price{display:block;font-size:13px;font-weight:800;color:var(--ink);margin-top:3px;font-variant-numeric:tabular-nums;}
+.wmp-tile__chg{display:block;font-size:10px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;}
+.wmp-tile__chg.up{color:var(--up);}
+.wmp-tile__chg.dn{color:var(--dn);}
+.wm-proto__curve-wrap{border-top:1px solid var(--hairline);padding-top:11px;}
+.wm-proto__curve-h{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.wm-proto__curve-h b{color:var(--ink);font-weight:800;}
+.wmp-live-badge{font-size:9px;font-weight:800;color:var(--up);background:var(--up-bg);border-radius:999px;padding:1px 6px;margin-left:4px;}
+#wmp-svg{width:100%;height:auto;display:block;overflow:visible;}
+.wm-proto__stats{display:flex;flex-direction:column;gap:10px;margin-top:11px;border-top:1px solid var(--hairline);padding-top:10px;}
+.wmp-stat-h{font-size:11px;font-weight:700;color:var(--ink);display:flex;align-items:center;}
+.wmp-stat-h b{margin-left:auto;font-size:14px;font-weight:900;}
+.wmp-bar{position:relative;height:6px;border-radius:4px;background:var(--surface-soft);overflow:hidden;margin-top:5px;}
+.wmp-bar__fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;}
+.wmp-bar__base{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:var(--hairline);}
+.wmp-stat-note{font-size:10px;color:var(--muted);margin-top:4px;display:flex;justify-content:space-between;}
+.wm-proto__news{margin-top:11px;border-top:1px solid var(--hairline);padding-top:10px;}
+.wmp-news-row{display:flex;gap:8px;padding:6px 0;}
+.wmp-news-row + .wmp-news-row{border-top:1px solid var(--hairline);}
+.wmp-news-badge{flex:none;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--up);color:#fff;margin-top:1px;}
+.wmp-news-badge.related{background:var(--canvas);color:var(--muted);border:1.5px solid var(--hairline);}
+.wmp-news-time{font-size:10px;font-weight:700;color:var(--muted);}
+.wmp-news-headline{display:block;font-size:12px;font-weight:700;line-height:1.4;color:var(--ink);text-decoration:none;margin-top:1px;}
+.wmp-news-why{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.wmp-news-empty{font-size:11px;color:var(--muted);text-align:center;padding:8px 0;}
+.wm-proto__more{display:block;text-align:center;font-size:11px;font-weight:700;color:var(--primary);padding:10px 0 2px;text-decoration:none;border-top:1px solid var(--hairline);margin-top:9px;}
+.wm-proto__skel{animation:wmpPulse 1.1s ease-in-out infinite;}
+@keyframes wmpPulse{0%,100%{opacity:.45}50%{opacity:.9}}
+.wm-proto__broker{margin-top:11px;border-top:1px solid var(--hairline);padding-top:10px;}
+.wmp-bk-h{font-size:11px;font-weight:700;color:var(--ink);display:flex;align-items:center;margin-bottom:9px;}
+.wmp-bk-h span{margin-left:auto;font-size:10px;font-weight:700;color:var(--muted);}
+.wmp-bk-range{position:relative;height:18px;margin-bottom:3px;}
+.wmp-bk-track{position:absolute;left:0;right:0;top:7px;height:4px;border-radius:2px;background:linear-gradient(90deg,#378ADD,#1D9E75,#BA7517);}
+.wmp-bk-cur{position:absolute;top:-3px;font-size:9px;font-weight:800;color:var(--ink);white-space:nowrap;transform:translateX(-50%);}
+.wmp-bk-cur i{position:absolute;left:50%;top:16px;width:2px;height:7px;background:var(--ink);transform:translateX(-1px);font-style:normal;}
+.wmp-bk-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:9px;text-align:left;}
+.wmp-bk-scale .c{text-align:center;}
+.wmp-bk-scale .r{text-align:right;}
+.wmp-bk-scale b{display:block;font-size:12px;font-weight:800;margin-top:2px;}
+.wmp-bk-row{display:flex;align-items:center;gap:7px;font-size:11px;padding:5px 0;border-top:1px solid var(--hairline);}
+.wmp-bk-row:first-of-type{border-top:none;}
+.wmp-bk-firm{flex:1;min-width:0;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wmp-bk-price{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+.wmp-bk-op{font-size:9px;font-weight:800;color:#fff;background:var(--up);border-radius:5px;padding:2px 6px;flex:none;}
+@media(max-width:900px){ #wm-proto{order:-1;} }
+</style>
+<div class="leaders-widget wm-proto" id="wm-proto">
+  <div class="wm-proto__header">
+    <span class="wm-proto__ic">📈</span>
+    <span class="wm-proto__title">코스피 주도주 · 왜 움직였나</span>
+    <span class="wm-proto__pill" id="wmp-pill">🌙 HL 24h</span>
+  </div>
+  <div class="wm-proto__tiles" id="wmp-tiles">
+    <div class="wmp-tile on" data-code="005930" data-name="삼성전자"><span class="wmp-tile__name">삼성전자</span><span class="wmp-tile__price">—</span><span class="wmp-tile__chg">—</span></div>
+    <div class="wmp-tile" data-code="000660" data-name="SK하이닉스"><span class="wmp-tile__name">SK하이닉스</span><span class="wmp-tile__price">—</span><span class="wmp-tile__chg">—</span></div>
+    <div class="wmp-tile" data-code="005380" data-name="현대차"><span class="wmp-tile__name">현대차</span><span class="wmp-tile__price">—</span><span class="wmp-tile__chg">—</span></div>
+  </div>
+  <div class="wm-proto__curve-wrap">
+    <div class="wm-proto__curve-h">📊 <b id="wmp-name">삼성전자</b> 직전 세션 장중 흐름 <span class="wmp-live-badge">● 실측 1분봉</span></div>
+    <svg id="wmp-svg" viewBox="0 0 300 110" role="img" aria-label="장중 1분봉 곡선"></svg>
+  </div>
+  <div class="wm-proto__news" id="wmp-news"></div>
+  <div class="wm-proto__stats" id="wmp-stats">
+    <div id="wmp-vol" style="display:none"></div>
+    <div id="wmp-range" style="display:none"></div>
+  </div>
+  <div class="wm-proto__broker" id="wmp-broker"></div>
+  <a class="wm-proto__more" href="https://doubleshot.space/stocks/" target="_blank" rel="noopener">종목 시그널에서 자세히 보기 →</a>
+</div>
+<script>
+(function(){
+  var X0=8,X1=292,YT=12,YB=86;
+  var STOCKS=[{code:'005930',name:'삼성전자'},{code:'000660',name:'SK하이닉스'},{code:'005380',name:'현대차'}];
+  var buf={},buft={},bufv={},whyData={},snapW={},backfilled={},curCode='005930',tilePrice={};
+  /* 증권사 목표주가 — scripts/generate_html.py BROKER_TARGETS와 동일한 실측값 (2026-06-25 기준 수집) */
+  var BROKER={
+    '005930':{count:10,min_price:330000,avg_price:432000,max_price:560000,rows:[
+      {firm:'대신증권',price:560000,op:'BUY',when:'1일 전'},
+      {firm:'미래에셋증권',price:550000,op:'BUY',when:'2일 전'},
+      {firm:'iM증권',price:480000,op:'BUY',when:'5일 전'}
+    ]},
+    '000660':{count:10,min_price:2500000,avg_price:3200000,max_price:4000000,rows:[
+      {firm:'KB증권',price:4000000,op:'BUY',when:'1일 전'},
+      {firm:'미래에셋증권',price:3800000,op:'BUY',when:'3일 전'},
+      {firm:'삼성증권',price:3600000,op:'BUY',when:'5일 전'}
+    ]},
+    '005380':{count:10,min_price:460000,avg_price:600000,max_price:750000,rows:[
+      {firm:'KB증권',price:750000,op:'BUY',when:'2일 전'},
+      {firm:'한국투자증권',price:700000,op:'BUY',when:'3일 전'},
+      {firm:'삼성증권',price:680000,op:'BUY',when:'1주 전'}
+    ]}
+  };
+  /* 실제 코스피 주도주 캡처 스냅샷 — 2026-07-03 14:02 KST 장중 실측(네이버 1분봉 + 프로덕션 movers-why-live). 로컬 프리뷰(API 미가동) 폴백 전용 — 라이브 fetch 성공 시 그 값으로 갱신됨. */
+  var SEED_PRICE={"005930": {"price": 309000, "chg": 8.04}, "000660": {"price": 2398000, "chg": 9.65}, "005380": {"price": 487000, "chg": 1.04}};
+  var SEED_CURVE={"005930": {"minutes": [294000.0, 293500.0, 293000.0, 295500.0, 293500.0, 290500.0, 286500.0, 289000.0, 291000.0, 287500.0, 289500.0, 286500.0, 287000.0, 293000.0, 292500.0, 293000.0, 295750.0, 297250.0, 296000.0, 298500.0, 300000.0, 298250.0, 300000.0, 301000.0, 302500.0, 304000.0, 301500.0, 302000.0, 304250.0, 304250.0, 304500.0, 304000.0, 305000.0, 304500.0, 305500.0, 305500.0, 304000.0, 304750.0, 303500.0, 304250.0, 304500.0, 304250.0, 305750.0, 305500.0, 302250.0, 302500.0, 304000.0, 305250.0, 306750.0, 307750.0, 308250.0, 309250.0, 309750.0, 309000.0, 309500.0, 311000.0, 311500.0, 311500.0, 311250.0, 311000.0, 311000.0, 311000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [1606848.0, 2677740.0, 3776983.0, 4536175.0, 5072019.0, 5537523.0, 6442614.0, 7430686.0, 8134540.0, 8636450.0, 9039693.0, 9522583.0, 10331859.0, 11256170.0, 11921572.0, 12260217.0, 12844713.0, 13323190.0, 13876497.0, 14311285.0, 14991298.0, 15375774.0, 15675293.0, 15999913.0, 16513299.0, 16856882.0, 17189798.0, 17593314.0, 17934067.0, 18208200.0, 18406506.0, 18608596.0, 18946980.0, 19097016.0, 19240958.0, 19353370.0, 19542765.0, 19672954.0, 19839820.0, 19987481.0, 20078393.0, 20228571.0, 20403582.0, 20628901.0, 20802263.0, 20975213.0, 21123595.0, 21256543.0, 21599081.0, 21841366.0, 22037827.0, 22273749.0, 22537664.0, 22756063.0, 23196715.0, 23420320.0, 23620644.0, 23825594.0, 23993456.0, 24411894.0, 24629629.0, 24639905.0]}, "000660": {"minutes": [2222000.0, 2200000.0, 2196000.0, 2212000.0, 2190000.0, 2156000.0, 2114000.0, 2126000.0, 2126000.0, 2101000.0, 2118000.0, 2081000.0, 2064000.0, 2128000.0, 2160000.0, 2152000.0, 2195000.0, 2215000.0, 2185000.0, 2233000.0, 2263000.0, 2239000.0, 2260000.0, 2259000.0, 2284000.0, 2286000.0, 2251000.0, 2249000.0, 2264000.0, 2280000.0, 2276000.0, 2267000.0, 2293000.0, 2287000.0, 2291000.0, 2292000.0, 2283000.0, 2288000.0, 2264000.0, 2271000.0, 2276000.0, 2276500.0, 2296000.0, 2286000.0, 2268000.0, 2258000.0, 2267000.0, 2275000.0, 2304000.0, 2316000.0, 2322000.0, 2335000.0, 2332000.0, 2336000.0, 2341000.0, 2348000.0, 2368000.0, 2382000.0, 2385000.0, 2391000.0, 2398000.0, 2399000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [251452.0, 510157.0, 733068.0, 897108.0, 1031896.0, 1182923.0, 1385579.0, 1623511.0, 1781163.0, 1905095.0, 2031271.0, 2204874.0, 2486985.0, 2699563.0, 2893620.0, 3024968.0, 3140752.0, 3285026.0, 3392779.0, 3500349.0, 3640395.0, 3763930.0, 3836540.0, 3896414.0, 3981899.0, 4094877.0, 4170733.0, 4252991.0, 4323815.0, 4375964.0, 4438456.0, 4481599.0, 4567094.0, 4603030.0, 4651057.0, 4684554.0, 4759825.0, 4798475.0, 4854528.0, 4899798.0, 4930031.0, 4962944.0, 5001999.0, 5032379.0, 5072798.0, 5125479.0, 5157374.0, 5183141.0, 5253929.0, 5331729.0, 5391827.0, 5443814.0, 5502533.0, 5551086.0, 5624490.0, 5679744.0, 5765258.0, 5847274.0, 5914257.0, 6038632.0, 6121649.0, 6122577.0]}, "005380": {"minutes": [474500.0, 470000.0, 469500.0, 471500.0, 470500.0, 464500.0, 462500.0, 462000.0, 466000.0, 461500.0, 463500.0, 462000.0, 461500.0, 467000.0, 469000.0, 470500.0, 475500.0, 476000.0, 475000.0, 475000.0, 476000.0, 474500.0, 476000.0, 477500.0, 478000.0, 482500.0, 480000.0, 479500.0, 482000.0, 484000.0, 481500.0, 480500.0, 481000.0, 481000.0, 481000.0, 480000.0, 480000.0, 479500.0, 480500.0, 483000.0, 483500.0, 483000.0, 485000.0, 484000.0, 481500.0, 481500.0, 482000.0, 483000.0, 486500.0, 487000.0, 486500.0, 488000.0, 486500.0, 486000.0, 484500.0, 484500.0, 484000.0, 486500.0, 484500.0, 487500.0, 486500.0, 487000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [35484.0, 78370.0, 103983.0, 126722.0, 143966.0, 173363.0, 192221.0, 227321.0, 253960.0, 272578.0, 293273.0, 309765.0, 345028.0, 372654.0, 392752.0, 404024.0, 420744.0, 435121.0, 447876.0, 458912.0, 466058.0, 477174.0, 488049.0, 497719.0, 504999.0, 522500.0, 540423.0, 551830.0, 562642.0, 571663.0, 582480.0, 588373.0, 595263.0, 600494.0, 603846.0, 610062.0, 615942.0, 622035.0, 632650.0, 641456.0, 648417.0, 651510.0, 660501.0, 666148.0, 671605.0, 677770.0, 683980.0, 689453.0, 700949.0, 707391.0, 714558.0, 719478.0, 725450.0, 731129.0, 739882.0, 747728.0, 752648.0, 759788.0, 768025.0, 787536.0, 794323.0, 794991.0]}};
+  var SEED_NEWS={"005930": [{"time": "08:27", "headline": "한투證 “삼성전자, HBM 경쟁력 회복할 것…목표가 59만원 상향” - 조선비즈", "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSkhHMkNYS0V6WllEaDdoc0lTODJKQWFLSXVHWmphc29UaEtsOGxwcHA2a1paUmVIekFIdFEwbE5CY3ZBY2dGYXNOZ1BjaUNmQzBVRFZhb1l5X3hMY1VyaWtGV0ZRMDNGb3daQUlZT0N0cTlkenByWTNVc05lU2hqMGpHNnI4RFdn0gGcAUFVX3lxTE9NeUdUY1BhcG5NZk9NQVl3aEpsR0J4QS14V1R2akxpRFFpVDZCR3ltZ2pEeEtlY2hGOXVndzR1YVZ6N19JcU9RejBac0hnaFFrTWFseTRUTE5YT0hkQ2wyRzJwMWFwUXplcnphZ3ptS0FzcDJqVk9VNWFGRV9Mc0NGN3JiWTZjR01lclFFR0xac1ZnVDdsVnZjZGxMcg?oc=5", "source": "Chosunbiz", "why": "한국투자증권은 삼성전자의 HBM 경쟁력 회복을 예상하며 목표주가를 59만원으로 상향 조정했다.", "tier": "why"}, {"time": "08:11", "headline": "\"삼성전자 매수 유지, 메모리 가격 상승 반영\"", "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBSckxKeE5kWlNPZVBSNmFwUmxxVjN1WDZOdW1tc0tUdFYyclN2TThQeVVuR2xOM3RiRTd5dDhKVDlQWkZCUHdIRTQ2em82SzFuMVRORS1razloMjk0?oc=5", "source": "뉴스핌", "why": "\"삼성전자 매수 유지, 메모리 가격 상승 반영\"", "tier": "why"}], "000660": [{"time": "08:11", "headline": "14% 폭락 이튿날…증권가는 SK하이닉스 목표가 '420만원' 상향", "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1ZY3Zid0RXZFptbk1udHZaVU5sRnlYRW1lcllCekJmT2ZPT0M5ZHExQTQ4MFBRbVlzaXZCcXc1ZWpvdEZtRHliMC04Z09KRGplTDc4S1VwcDdkN0hGQkNvS2JRVGp2eGp2N3ZQNkdBSXY?oc=5", "source": "연합인포맥스", "why": "SK하이닉스가 14% 폭락한 다음 날, 증권가에서는 목표가를 420만원으로 상향 조정했다. (개별 인과 단정 안 함)", "tier": "related"}, {"time": "06:28", "headline": "미자 \"하이닉스 뭔일이여\" 주가 폭락에 댓글 폭발했다…1억 잃고 주식 방송 섭외까지", "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5HNG9aMDFXM3I3UDA4OHc2clBjZi1LQ1M4OUhmWmhpUk9hMF9sdWw2S2pfZ2x6b0t6cTVIZHhhU3FBZ3hLRTV6TDBZOWpjMWRqV19z?oc=5", "source": "네이트", "why": "미자 \"하이닉스 뭔일이여\" 주가 폭락에 댓글 폭발했다…1억 잃고 주식 방송 섭외까지 (개별 인과 단정 안 함)", "tier": "related"}], "005380": []};
+  function renderBroker(code){
+    var wrap=document.getElementById('wmp-broker'); if(!wrap) return;
+    var b=BROKER[code];
+    if(!b){ wrap.innerHTML=''; return; }
+    var span=(b.max_price-b.min_price)||1;
+    var curPrice=tilePrice[code];
+    var curPct=(typeof curPrice==='number')?Math.max(0,Math.min(100,(curPrice-b.min_price)/span*100)):null;
+    wrap.innerHTML='<div class="wmp-bk-h">🏦 증권사 목표주가<span>컨센서스 '+b.count+'개사</span></div>'
+      +'<div class="wmp-bk-range"><div class="wmp-bk-track"></div>'
+      +(curPct!=null?'<div class="wmp-bk-cur" style="left:'+curPct.toFixed(1)+'%">현재<i></i></div>':'')
+      +'</div>'
+      +'<div class="wmp-bk-scale"><div>최저<b style="color:#378ADD">'+fmt(b.min_price)+'</b></div><div class="c">평균<b style="color:#1D9E75">'+fmt(b.avg_price)+'</b></div><div class="r">최고<b style="color:#BA7517">'+fmt(b.max_price)+'</b></div></div>'
+      +b.rows.map(function(r){return '<div class="wmp-bk-row"><span class="wmp-bk-firm">'+r.firm+'</span><span class="wmp-bk-op">'+r.op+'</span><span class="wmp-bk-price">'+fmt(r.price)+'원</span></div>';}).join('');
+  }
+  function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
+  function fmt(v){return v>=1000?v.toLocaleString():v;}
+
+  /* ── 타일: 실시간/HL 24h 가격 (leaders-widget과 동일 폴링 패턴) ── */
+  function krOpen(){var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);var kd=new Date(Date.now()+9*3600*1000).getUTCDay();if(kd===0||kd===6)return false;return m>=540&&m<=930;}
+  function paintTile(code,price,chg){
+    var t=document.querySelector('.wmp-tile[data-code="'+code+'"]'); if(!t||price==null) return;
+    tilePrice[code]=price;
+    t.querySelector('.wmp-tile__price').textContent=Math.round(price).toLocaleString('ko-KR');
+    var c=t.querySelector('.wmp-tile__chg');
+    if(chg==null){c.textContent='—';c.className='wmp-tile__chg';}
+    else{ var up=chg>=0; c.textContent=(up?'▲':'▼')+Math.abs(chg).toFixed(2)+'%'; c.className='wmp-tile__chg '+(up?'up':'dn'); }
+    if(code===curCode) renderBroker(code);
+  }
+  function pollDay(){fetch('/api/stocks-live?codes='+STOCKS.map(function(s){return s.code;}).join(','),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&Array.isArray(d.prices))d.prices.forEach(function(p){paintTile(p.code,p.price,p.changePct);});}).catch(function(){});}
+  function pollNight(){fetch('/api/hl-night',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&Array.isArray(d.items))d.items.forEach(function(it){paintTile(it.code,it.krw,it.changePct);});}).catch(function(){});}
+  var pillEl=document.getElementById('wmp-pill');
+  function pollTiles(){var night=!krOpen(); if(pillEl)pillEl.style.display=night?'':'none'; if(night)pollNight(); else pollDay();}
+  Object.keys(SEED_PRICE).forEach(function(code){ var s=SEED_PRICE[code]; paintTile(code,s.price,s.chg); });
+  pollTiles(); setInterval(pollTiles,10000);
+
+  document.querySelectorAll('.wmp-tile').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.wmp-tile').forEach(function(o){o.classList.toggle('on',o===t);});
+      select(t.getAttribute('data-code'));
+    });
+  });
+
+  /* ── 곡선 + 뉴스 핀 (stocks 허브 "왜 움직였나" 로직 이식, 사이드바 폭에 맞춰 300×110로 축소) ── */
+  function loadWhy(){
+    var d=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+    fetch('/api/data?f=movers-why',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(j){return j||fetch('/data/movers-why-'+d+'.json').then(function(r){return r.ok?r.json():null;});})
+      .then(function(j){return j||fetch('/data/movers-why-live.json').then(function(r){return r.ok?r.json():null;});})
+      .then(function(j){if(j&&j.stocks){j.stocks.forEach(function(s){whyData[s.code]=s.events||[];});if(buf[curCode])draw(curCode);}}).catch(function(){});
+  }
+  function loadSnap(){
+    fetch('/data/stocks-snapshot.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(j){if(j&&j.stocks){snapW=j.stocks;renderStats(curCode);}}).catch(function(){});
+  }
+  function renderStats(code){
+    var s=snapW[code];
+    var vol=document.getElementById('wmp-vol');
+    if(vol){
+      if(s&&s.vol&&s.vol_avg20){
+        var surge=s.vol/s.vol_avg20;
+        var vcol=surge>=1.5?'var(--up)':(surge>=1.0?'#F59E0B':'var(--muted)'),vlbl=surge>=1.5?'급증':(surge>=1.0?'보통':'한산');
+        var fillPct=Math.max(5,Math.min(100,surge/2*100));
+        vol.style.display='';
+        vol.innerHTML='<div class="wmp-stat-h">🔥 거래량<b style="color:'+vcol+'">×'+surge.toFixed(2)+'</b></div>'
+          +'<div class="wmp-bar"><div class="wmp-bar__fill" style="width:'+fillPct.toFixed(0)+'%;background:'+vcol+'"></div><div class="wmp-bar__base"></div></div>'
+          +'<div class="wmp-stat-note"><span>20일 평균 대비</span><span>'+vlbl+'</span></div>';
+      } else { vol.style.display='none'; }
+    }
+    var rng=document.getElementById('wmp-range');
+    if(rng){
+      var rv=buf[code]||[];
+      if(rv.length>4){
+        var rlo=Math.min.apply(null,rv),rhi=Math.max.apply(null,rv),rcur=rv[rv.length-1],rspan=(rhi-rlo)||1;
+        var rpos=Math.max(0,Math.min(100,(rcur-rlo)/rspan*100));
+        rng.style.display='';
+        rng.innerHTML='<div class="wmp-stat-h">📊 직전 세션 레인지 위치<b>'+rpos.toFixed(0)+'%</b></div>'
+          +'<div class="wmp-bar" style="background:linear-gradient(90deg,var(--dn-bg),var(--up-bg));"><div style="position:absolute;left:'+rpos.toFixed(0)+'%;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--canvas);transform:translateX(-50%);"></div></div>'
+          +'<div class="wmp-stat-note"><span>저 '+fmt(rlo)+'</span><span>고 '+fmt(rhi)+'</span></div>';
+      } else { rng.style.display='none'; }
+    }
+  }
+  function pathFrom(vals,times){
+    if(!vals||vals.length<2) return null;
+    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
+    var useT=times&&times.length===n;
+    return vals.map(function(v,i){var x=useT?timeToX(times[i]):X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+  }
+  function draw(code){
+    var vals=buf[code]||[], svg=document.getElementById('wmp-svg');
+    if(!svg) return;
+    var nm=document.getElementById('wmp-name'); var meta=STOCKS.filter(function(s){return s.code===code;})[0]; if(nm&&meta) nm.textContent=meta.name;
+    var pts=pathFrom(vals,buft[code]);
+    if(!pts){ svg.innerHTML='<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
+    var up=vals[vals.length-1]>=vals[0], col=up?'var(--up)':'var(--dn)';
+    var colHex=up?'#E03131':'#2775ED';
+    var coords=pts.split(' ').map(function(p){var a=p.split(',');return {x:+a[0],y:+a[1]};});
+    var last=coords[coords.length-1];
+    var areaPath=pts+' '+last.x.toFixed(1)+','+YB+' '+X0.toFixed(1)+','+YB;
+    var hiIdx=0,loIdx=0;
+    for(var i=1;i<vals.length;i++){if(vals[i]>vals[hiIdx])hiIdx=i;if(vals[i]<vals[loIdx])loIdx=i;}
+    var hiC=coords[hiIdx],loC=coords[loIdx];
+    var gradId='wmp-grad-'+code;
+    var s='<defs><linearGradient id="'+gradId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+colHex+'" stop-opacity=".18"/><stop offset="100%" stop-color="'+colHex+'" stop-opacity=".02"/></linearGradient></defs>'
+      +'<line x1="'+X0+'" y1="'+YB+'" x2="'+X1+'" y2="'+YB+'" stroke="var(--hairline)" stroke-width="1"/>'
+      +'<polygon points="'+areaPath+'" fill="url(#'+gradId+')"/>'
+      +'<polyline points="'+pts+'" fill="none" stroke="'+colHex+'" stroke-width="2" stroke-linejoin="round"/>'
+      +'<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="3" fill="'+colHex+'"/>';
+    if(vals.length>4&&hiIdx!==loIdx){
+      var hAnc=hiC.x<150?'start':'end', lAnc=loC.x<150?'start':'end';
+      var hOff=hAnc==='start'?5:-5, lOff=lAnc==='start'?5:-5;
+      var hLabY=(hiC.y-6<YT+2)?(hiC.y+13):(hiC.y-6);
+      var lLabY=(loC.y+13>YB-4)?(loC.y-8):(loC.y+13);
+      s+='<circle cx="'+hiC.x.toFixed(1)+'" cy="'+hiC.y.toFixed(1)+'" r="3" fill="#E03131"/>'
+        +'<text x="'+(hiC.x+hOff).toFixed(1)+'" y="'+hLabY.toFixed(1)+'" font-size="9" font-weight="800" fill="#E03131" stroke="#fff" stroke-width="2.5" paint-order="stroke" text-anchor="'+hAnc+'">고 '+fmt(vals[hiIdx])+'</text>'
+        +'<circle cx="'+loC.x.toFixed(1)+'" cy="'+loC.y.toFixed(1)+'" r="3" fill="#2775ED"/>'
+        +'<text x="'+(loC.x+lOff).toFixed(1)+'" y="'+lLabY.toFixed(1)+'" font-size="9" font-weight="800" fill="#2775ED" stroke="#fff" stroke-width="2.5" paint-order="stroke" text-anchor="'+lAnc+'">저 '+fmt(vals[loIdx])+'</text>';
+    }
+    s+='<text x="'+X0+'" y="102" font-size="9" fill="var(--muted)">09:00</text><text x="'+(X1-24)+'" y="102" font-size="9" fill="var(--muted)">15:30</text>';
+    svg.innerHTML=s;
+    function yAtX(x){var b=coords[0];for(var i=0;i<coords.length;i++){if(Math.abs(coords[i].x-x)<Math.abs(b.x-x))b=coords[i];}return b.y;}
+    var evs=whyData[code]||[], pinSvg='', placedPx=[];
+    evs.forEach(function(e,i){
+      var ax=timeToX(e.time),ay=yAtX(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
+      var px=Math.min(X1-8,Math.max(X0+8,ax));
+      for(var gi=0;gi<placedPx.length;gi++){if(Math.abs(px-placedPx[gi])<16){px=Math.min(X1-8,placedPx[gi]+16);}}
+      placedPx.push(px);
+      var up2=(ay-24)>=YT, cy=up2?ay-16:ay+16;
+      pinSvg+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+cy.toFixed(1)+'" stroke="'+st+'" stroke-width="1"/>'
+        +'<circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="7" fill="'+f+'" stroke="'+st+'" stroke-width="1.3"/>'
+        +'<text x="'+px.toFixed(1)+'" y="'+(cy+2.5).toFixed(1)+'" font-size="8" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';
+    });
+    if(pinSvg){var g=document.createElementNS('http://www.w3.org/2000/svg','g');g.innerHTML=pinSvg;svg.appendChild(g);}
+    renderStats(code);
+    renderNews(code);
+  }
+  function renderNews(code){
+    var wrap=document.getElementById('wmp-news'); if(!wrap) return;
+    var evs=whyData[code]||[];
+    wrap.innerHTML = evs.length ? evs.map(function(e,i){
+      var isWhy=e.tier==='why';
+      return '<div class="wmp-news-row"><div class="wmp-news-badge'+(isWhy?'':' related')+'">'+(i+1)+'</div>'
+        +'<div style="flex:1;min-width:0;"><span class="wmp-news-time">'+e.time+(isWhy?' · 왜':' · 관련')+'</span>'
+        +'<a class="wmp-news-headline" href="'+e.url+'" target="_blank" rel="noopener">'+e.headline+'</a>'
+        +'<div class="wmp-news-why">'+e.why+'</div></div></div>';
+    }).join('') : '<div class="wmp-news-empty">📭 직전 세션 관련 뉴스 없음 · 수급/테마 추정</div>';
+  }
+  function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);}
+  function readCache(){try{var raw=sessionStorage.getItem('wmp-intra-v1');if(!raw)return{};var o=JSON.parse(raw);return(o&&o.date===todayKST()&&o.data)?o.data:{};}catch(e){return{};}}
+  function writeCache(code,d){try{var raw=sessionStorage.getItem('wmp-intra-v1'),o={};try{o=raw?JSON.parse(raw):{};}catch(_){o={};}if(!o||o.date!==todayKST())o={date:todayKST(),data:{}};if(!o.data)o.data={};o.data[code]={minutes:d.minutes||[],times:d.times||[],volumes:d.volumes||[]};sessionStorage.setItem('wmp-intra-v1',JSON.stringify(o));}catch(e){}}
+  function showSkeleton(){var svg=document.getElementById('wmp-svg');if(!svg)return;svg.innerHTML='<rect class="wm-proto__skel" x="2" y="8" width="296" height="80" rx="8" fill="var(--surface-soft)"/><text x="150" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">실측 1분봉 불러오는 중…</text>';}
+  function seedCurve(code){
+    var s=SEED_CURVE[code]; if(!s) return;
+    buf[code]=s.minutes.slice(); buft[code]=s.times.slice(); bufv[code]=s.volumes.slice(); backfilled[code]=true;
+    if(code===curCode) draw(code);
+  }
+  function backfill(code){
+    var cached=readCache()[code];
+    if(cached&&cached.minutes&&cached.minutes.length>=2){ buf[code]=cached.minutes.slice(); buft[code]=(cached.times||[]).slice(); bufv[code]=(cached.volumes||[]).slice(); draw(code); }
+    else if(code===curCode){ showSkeleton(); }
+    fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); bufv[code]=(d.volumes||[]).slice(); backfilled[code]=true; writeCache(code,d); if(code===curCode)draw(code); }
+      else { seedCurve(code); }
+    }).catch(function(){ seedCurve(code); });
+  }
+  function select(code){
+    curCode=code;
+    var meta=STOCKS.filter(function(s){return s.code===code;})[0];
+    var nm=document.getElementById('wmp-name'); if(nm&&meta) nm.textContent=meta.name;
+    renderStats(code); renderNews(code); renderBroker(code);
+    if(backfilled[code]) draw(code); else { if(!(buf[code]&&buf[code].length>=2)) showSkeleton(); backfill(code); }
+  }
+  Object.keys(SEED_NEWS).forEach(function(code){ whyData[code]=SEED_NEWS[code]; });
+  backfill(curCode); loadSnap(); renderBroker(curCode);
+})();
+</script>
+
+<div class="sidebar-cta">
+  <a class="sidebar-cta__tg" href="https://t.me/doubleshot30" target="_blank" rel="noopener">
+    <div class="sidebar-cta__tg-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+    <div class="sidebar-cta__tg-text"><span class="sidebar-cta__tg-title">텔레그램 채널 구독</span><span class="sidebar-cta__tg-sub">매일 아침·저녁 브리핑을 받아보세요</span></div>
+  </a>
+  <div class="sidebar-footer">
+    <a class="sidebar-intro" href="mailto:pulum0083@gmail.com">메일 문의</a>
+    <a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 소개 →</a>
+  </div>
+  <div class="sidebar-visitors" id="sidebar-visitors" style="display:none">
+    <span class="sidebar-visitors__label">누적 방문자</span>
+    <span class="sidebar-visitors__count" id="sidebar-visitors-count">—</span>
+  </div>
+</div>
+<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-07-02T16:31:24.143364+09:00</div>
+    </aside>
+  </div>
+
+  
+<section class="bottom-list">
+  <div class="bl-divider">
+    <span class="bl-divider__label">브리핑 목록</span>
+    <div class="bl-divider__line"></div>
+  </div>
+
+  
+  <div class="bl-today">
+    <div class="bl-today__head">
+      <span class="bl-today__date">2026-07-02</span>
+      <span class="bl-today__day">목요일</span>
+    </div>
+    <div class="bl-today__body">
+      
+      
+      <a class="bl-slot is-ready" href="/briefings/2026-07-02/kospi/">
+        <div class="bl-slot__label">코스피 예측</div>
+        <div class="bl-slot__title">하락 우위</div>
+        <div class="bl-slot__meta"><span class="bl-pill dn">▼ 하락</span><span class="bl-slot__time">07:31</span></div>
+      </a>
+      
+      
+      
+      <div class="bl-slot is-current">
+        <div class="bl-slot__label">코스피 마감</div>
+        <div class="bl-slot__title">—</div>
+        <div class="bl-slot__meta"><span class="bl-slot__time"></span></div>
+      </div>
+      
+      
+      
+      <div class="bl-slot is-pending">
+        <div class="bl-slot__label">미국 시장</div>
+        <div class="bl-slot__title">생성 예정</div>
+        <div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 21:20 예정</span></div>
+      </div>
+      
+      
+    </div>
+  </div>
+  
+
+  
+  <div class="bl-month">2026년 7월</div>
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-01</span><span class="bl-row__day">수</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">07:31</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">21:21</span></div></a>
+    
+    
+  </div>
+  
+  <div class="bl-month">2026년 6월</div>
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-30</span><span class="bl-row__day">화</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-30/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-30/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-30/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">21:21</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-29</span><span class="bl-row__day">월</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-29/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">07:31</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-29/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-29/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">21:22</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-26</span><span class="bl-row__day">금</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-26/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-26/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-26/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">21:23</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-25</span><span class="bl-row__day">목</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-25/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-25/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-25/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">21:24</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-24</span><span class="bl-row__day">수</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-24/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-24/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-24/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">21:23</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-23</span><span class="bl-row__day">화</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-23/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-23/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-23/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">21:22</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-22</span><span class="bl-row__day">월</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-22/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-22/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-22/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">21:22</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-19</span><span class="bl-row__day">금</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-19/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲ 상승</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-19/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <div class="bl-cell is-empty"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">06-18</span><span class="bl-row__day">목</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-18/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">07:32</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-18/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-06-18/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼ 하락</span><span class="bl-cell__time">21:22</span></div></a>
+    
+    
+  </div>
+  
+</section>
+</div>
+
+
+
+<div class="info-modal-backdrop" id="picks-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="picks-modal-title">
+    <button class="info-modal__close" data-modal-close="picks-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="picks-modal-title">잭 켈로그 20일선 전략이란?</div>
+    <div class="info-modal__body">
+      <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(20일선) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+      <br>
+      <p><strong>선별 기준</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+        <li>20일선을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+        <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+        <li>최소 <strong>3거래일 이상</strong> 20일선 위에서 유지 중인 종목</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 매매 추천이 아닌 상승 모멘텀 종목 탐색 목적으로 제공됩니다.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="acc-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
+    <button class="info-modal__close" data-modal-close="acc-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
+    <div class="info-modal__body">
+      <p>AI가 당일 방향(상승 / 하락)을 예측한 결과를 실제 종가와 비교해 맞힌 비율이에요.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
+        <li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
+        <li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="vix-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="vix-modal-title">
+    <button class="info-modal__close" data-modal-close="vix-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="vix-modal-title">VIX 공포지수(Volatility Index)</div>
+    <div class="info-modal__body">
+      <p>S&amp;P500 옵션 시장에서 산출되는 30일 내재변동성 지표로, 시장 참여자들이 예상하는 변동성의 크기를 나타냅니다. '월스트리트 공포지수'라고도 불립니다.</p>
+      <br>
+      <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong style="color:#16A34A">15 미만</strong> : 안정 — 시장이 매우 안정적</li>
+        <li><strong style="color:#65A30D">15~20</strong> : 보통 — 정상 변동성 범위</li>
+        <li><strong style="color:#CA8A04">20~30</strong> : 경계 — 불확실성 확대</li>
+        <li><strong style="color:#E03131">30~40</strong> : 불안 — 투자자 심리 위축</li>
+        <li><strong style="color:#B91C1C">40 이상</strong> : 극단 — 시장 패닉 수준</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="pred-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">
+    <button class="info-modal__close" data-modal-close="pred-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="pred-modal-title">당일 방향 예측이란?</div>
+    <div class="info-modal__body">
+      <p>미국 선물·지수, 외국인 수급, 반도체 지표 등 다수의 시장 데이터를 종합하여 AI가 당일 코스피 종가 방향을 분석한 결과입니다.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+        <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>
+        <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>
+        <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
+        <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="sector-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
+    <button class="info-modal__close" data-modal-close="sector-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+    <div class="info-modal__body">
+      <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+        <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요.</li>
+        <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
+    </div>
+  </div>
+</div>
+
+
+<script src="/assets/main.js"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initLiveScoreboard === 'function') initLiveScoreboard();
+  if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
+  if (typeof initIssueBriefing === 'function') initIssueBriefing();
+  if (typeof patchBriefingList === 'function') patchBriefingList();
+  if (typeof initNotices === 'function') initNotices();
+  if (typeof loadVisitorCount === 'function') loadVisitorCount();
+});
+</script>
+
+</body>
+</html>

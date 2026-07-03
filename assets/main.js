@@ -832,7 +832,7 @@
     patchBriefingNav();
   });
 
-  /* ── 코스피 주도주 위젯 — 삼성전자·SK하이닉스·현대차 실시간 (월배당 위젯 위 사이드바) ── */
+  /* ── 코스피 주도주 위젯 — 실시간 시세 + 왜 움직였나(장중 곡선·뉴스 핀) + 증권사 목표주가 (월배당 위젯 위 사이드바) ── */
   function loadLeadersWidget() {
     var anchor = document.querySelector('.sidebar-cta');
     if (!anchor || document.querySelector('.leaders-widget')) return;
@@ -841,42 +841,61 @@
       { code: '000660', name: 'SK하이닉스' },
       { code: '005380', name: '현대차' }
     ];
-    var w = document.createElement('a');
+    /* 증권사 목표주가 — scripts/generate_html.py BROKER_TARGETS와 동일한 실측값 (2026-06-25 기준 수집) */
+    var BROKER = {
+      '005930': { count: 10, min_price: 330000, avg_price: 432000, max_price: 560000, rows: [
+        { firm: '대신증권', price: 560000, op: 'BUY' },
+        { firm: '미래에셋증권', price: 550000, op: 'BUY' },
+        { firm: 'iM증권', price: 480000, op: 'BUY' }
+      ] },
+      '000660': { count: 10, min_price: 2500000, avg_price: 3200000, max_price: 4000000, rows: [
+        { firm: 'KB증권', price: 4000000, op: 'BUY' },
+        { firm: '미래에셋증권', price: 3800000, op: 'BUY' },
+        { firm: '삼성증권', price: 3600000, op: 'BUY' }
+      ] },
+      '005380': { count: 10, min_price: 460000, avg_price: 600000, max_price: 750000, rows: [
+        { firm: 'KB증권', price: 750000, op: 'BUY' },
+        { firm: '한국투자증권', price: 700000, op: 'BUY' },
+        { firm: '삼성증권', price: 680000, op: 'BUY' }
+      ] }
+    };
+
+    var w = document.createElement('div');
     w.className = 'leaders-widget';
-    w.href = 'https://doubleshot.space/stocks/';
-    w.target = '_blank';
-    w.rel = 'noopener';
     w.innerHTML =
-      '<div class="leaders-widget__header">' +
-        '<div class="leaders-widget__left"><span class="leaders-widget__ic">📈</span>' +
-        '<span class="leaders-widget__title">코스피 주도주</span>' +
+      '<div class="leaders-widget__header"><span class="leaders-widget__ic">📈</span>' +
+        '<span class="leaders-widget__title">코스피 주도주 · 왜 움직였나</span>' +
         '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
-        '<span class="leaders-widget__more">→</span>' +
-      '</div>' +
-      '<div class="leaders-widget__list">' +
-        STOCKS.map(function (s) {
-          return '<div class="leaders-row" data-code="' + s.code + '">' +
-            '<span class="leaders-row__name">' + s.name + '</span>' +
-            '<span class="leaders-row__price">—</span>' +
-            '<span class="leaders-row__chg">—</span>' +
-          '</div>';
+      '<div class="leaders-widget__tiles" id="lw-tiles">' +
+        STOCKS.map(function (s, i) {
+          return '<div class="leaders-widget__tile' + (i === 0 ? ' on' : '') + '" data-code="' + s.code + '">' +
+            '<span class="leaders-widget__tile-name">' + s.name + '</span>' +
+            '<span class="leaders-widget__tile-price">—</span>' +
+            '<span class="leaders-widget__tile-chg">—</span></div>';
         }).join('') +
-      '</div>';
+      '</div>' +
+      '<div class="leaders-widget__curve">' +
+        '<div class="leaders-widget__curve-h">📊 <b id="lw-name">' + STOCKS[0].name + '</b> 직전 세션 장중 흐름 <span class="leaders-widget__curve-badge">● 실측 1분봉</span></div>' +
+        '<svg id="lw-svg" viewBox="0 0 300 110" role="img" aria-label="장중 1분봉 곡선"></svg>' +
+      '</div>' +
+      '<div class="leaders-widget__news" id="lw-news"></div>' +
+      '<div class="leaders-widget__stats" id="lw-stats">' +
+        '<div id="lw-vol" style="display:none"></div>' +
+        '<div id="lw-range" style="display:none"></div>' +
+      '</div>' +
+      '<div class="leaders-widget__broker" id="lw-broker"></div>' +
+      '<a class="leaders-widget__more" href="https://doubleshot.space/stocks/" target="_blank" rel="noopener">종목 시그널에서 자세히 보기 →</a>';
     anchor.insertAdjacentElement('beforebegin', w);
 
     var codes = STOCKS.map(function (s) { return s.code; });
     var got = false;
+    var X0 = 8, X1 = 292, YT = 12, YB = 86;
+    var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, tilePrice = {}, curCode = STOCKS[0].code;
 
-    function paint(code, price, chg) {
-      var row = w.querySelector('.leaders-row[data-code="' + code + '"]');
-      if (!row || price == null) return;
-      got = true;
-      row.querySelector('.leaders-row__price').textContent = Math.round(price).toLocaleString('ko-KR');
-      var c = row.querySelector('.leaders-row__chg');
-      if (chg == null) { c.textContent = '—'; c.className = 'leaders-row__chg'; return; }
-      var up = chg >= 0;
-      c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%';
-      c.className = 'leaders-row__chg ' + (up ? 'up' : 'dn');
+    function fmt(v) { return v >= 1000 ? v.toLocaleString('ko-KR') : v; }
+    function timeToX(t) {
+      var p = (t || '09:00').split(':'), mm = (+p[0]) * 60 + (+p[1]);
+      return X0 + (X1 - X0) * Math.min(1, Math.max(0, (mm - 540) / (930 - 540)));
     }
 
     // KR 정규장(평일 09:00~15:30 KST) 여부 — 마감 후엔 HL 24h 환산가로 전환
@@ -886,30 +905,195 @@
       if (kd === 0 || kd === 6) return false;
       return m >= 540 && m <= 930;
     }
+    function renderBroker(code) {
+      var wrap = w.querySelector('#lw-broker'); if (!wrap) return;
+      var b = BROKER[code];
+      if (!b) { wrap.innerHTML = ''; return; }
+      var span = (b.max_price - b.min_price) || 1;
+      var curPrice = tilePrice[code];
+      var curPct = (typeof curPrice === 'number') ? Math.max(0, Math.min(100, (curPrice - b.min_price) / span * 100)) : null;
+      wrap.innerHTML = '<div class="leaders-widget__broker-h">🏦 증권사 목표주가<span>컨센서스 ' + b.count + '개사</span></div>' +
+        '<div class="leaders-widget__broker-range"><div class="leaders-widget__broker-track"></div>' +
+        (curPct != null ? '<div class="leaders-widget__broker-cur" style="left:' + curPct.toFixed(1) + '%">현재<i></i></div>' : '') +
+        '</div>' +
+        '<div class="leaders-widget__broker-scale"><div>최저<b style="color:#378ADD">' + fmt(b.min_price) + '</b></div><div class="c">평균<b style="color:#1D9E75">' + fmt(b.avg_price) + '</b></div><div class="r">최고<b style="color:#BA7517">' + fmt(b.max_price) + '</b></div></div>' +
+        b.rows.map(function (r) {
+          return '<div class="leaders-widget__broker-row"><span class="leaders-widget__broker-firm">' + r.firm + '</span><span class="leaders-widget__broker-op">' + r.op + '</span><span class="leaders-widget__broker-price">' + fmt(r.price) + '원</span></div>';
+        }).join('');
+    }
+    function paintTile(code, price, chg) {
+      var t = w.querySelector('.leaders-widget__tile[data-code="' + code + '"]');
+      if (!t || price == null) return;
+      got = true;
+      tilePrice[code] = price;
+      t.querySelector('.leaders-widget__tile-price').textContent = Math.round(price).toLocaleString('ko-KR');
+      var c = t.querySelector('.leaders-widget__tile-chg');
+      if (chg == null) { c.textContent = '—'; c.className = 'leaders-widget__tile-chg'; }
+      else { var up = chg >= 0; c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%'; c.className = 'leaders-widget__tile-chg ' + (up ? 'up' : 'dn'); }
+      if (code === curCode) renderBroker(code);
+    }
     function pollDay() {
       fetch('/api/stocks-live?codes=' + codes.join(','), { cache: 'no-store', signal: AbortSignal.timeout(5000) })
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          if (d && Array.isArray(d.prices)) d.prices.forEach(function (p) { paint(p.code, p.price, p.changePct); });
-        })
+        .then(function (d) { if (d && Array.isArray(d.prices)) d.prices.forEach(function (p) { paintTile(p.code, p.price, p.changePct); }); })
         .catch(function () {});
     }
     function pollNight() {
       fetch('/api/hl-night', { cache: 'no-store', signal: AbortSignal.timeout(5000) })
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          if (d && Array.isArray(d.items)) d.items.forEach(function (it) { paint(it.code, it.krw, it.changePct); });
-        })
+        .then(function (d) { if (d && Array.isArray(d.items)) d.items.forEach(function (it) { paintTile(it.code, it.krw, it.changePct); }); })
         .catch(function () {});
     }
     var pill = w.querySelector('#lw-pill');
-    function poll() {
+    function pollTiles() {
       var night = !krOpen();
       if (pill) pill.style.display = night ? '' : 'none';
       if (night) pollNight(); else pollDay();
     }
-    poll();
-    setInterval(poll, 10000);
+    pollTiles();
+    setInterval(pollTiles, 10000);
+
+    w.querySelectorAll('.leaders-widget__tile').forEach(function (t) {
+      t.addEventListener('click', function () {
+        w.querySelectorAll('.leaders-widget__tile').forEach(function (o) { o.classList.toggle('on', o === t); });
+        select(t.getAttribute('data-code'));
+      });
+    });
+
+    /* ── 곡선 + 뉴스 핀 (/stocks 허브 "왜 움직였나" 로직과 동일, 사이드바 폭에 맞춰 300×110로 축소) ── */
+    function loadWhy() {
+      var d = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+      fetch('/api/data?f=movers-why', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { return j || fetch('/data/movers-why-' + d + '.json').then(function (r) { return r.ok ? r.json() : null; }); })
+        .then(function (j) { return j || fetch('/data/movers-why-live.json').then(function (r) { return r.ok ? r.json() : null; }); })
+        .then(function (j) { if (j && j.stocks) { j.stocks.forEach(function (s) { whyData[s.code] = s.events || []; }); if (buf[curCode]) draw(curCode); } })
+        .catch(function () {});
+    }
+    function loadSnap() {
+      fetch('/data/stocks-snapshot.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j && j.stocks) { snapW = j.stocks; renderStats(curCode); } }).catch(function () {});
+    }
+    function renderStats(code) {
+      var s = snapW[code];
+      var vol = w.querySelector('#lw-vol');
+      if (vol) {
+        if (s && s.vol && s.vol_avg20) {
+          var surge = s.vol / s.vol_avg20;
+          var vcol = surge >= 1.5 ? 'var(--up)' : (surge >= 1.0 ? '#F59E0B' : 'var(--muted)'), vlbl = surge >= 1.5 ? '급증' : (surge >= 1.0 ? '보통' : '한산');
+          var fillPct = Math.max(5, Math.min(100, surge / 2 * 100));
+          vol.style.display = '';
+          vol.innerHTML = '<div class="leaders-widget__stat-h">🔥 거래량<b style="color:' + vcol + '">×' + surge.toFixed(2) + '</b></div>' +
+            '<div class="leaders-widget__bar"><div class="leaders-widget__bar-fill" style="width:' + fillPct.toFixed(0) + '%;background:' + vcol + '"></div><div class="leaders-widget__bar-base"></div></div>' +
+            '<div class="leaders-widget__stat-note"><span>20일 평균 대비</span><span>' + vlbl + '</span></div>';
+        } else { vol.style.display = 'none'; }
+      }
+      var rng = w.querySelector('#lw-range');
+      if (rng) {
+        var rv = buf[code] || [];
+        if (rv.length > 4) {
+          var rlo = Math.min.apply(null, rv), rhi = Math.max.apply(null, rv), rcur = rv[rv.length - 1], rspan = (rhi - rlo) || 1;
+          var rpos = Math.max(0, Math.min(100, (rcur - rlo) / rspan * 100));
+          rng.style.display = '';
+          rng.innerHTML = '<div class="leaders-widget__stat-h">📊 직전 세션 레인지 위치<b>' + rpos.toFixed(0) + '%</b></div>' +
+            '<div class="leaders-widget__bar" style="background:linear-gradient(90deg,var(--dn-bg),var(--up-bg));"><div style="position:absolute;left:' + rpos.toFixed(0) + '%;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--canvas);transform:translateX(-50%);"></div></div>' +
+            '<div class="leaders-widget__stat-note"><span>저 ' + fmt(rlo) + '</span><span>고 ' + fmt(rhi) + '</span></div>';
+        } else { rng.style.display = 'none'; }
+      }
+    }
+    function pathFrom(vals, times) {
+      if (!vals || vals.length < 2) return null;
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = (hi - lo) || 1, n = vals.length;
+      var useT = times && times.length === n;
+      return vals.map(function (v, i) { var x = useT ? timeToX(times[i]) : X0 + (X1 - X0) * (i / (n - 1)); var y = YB - (YB - YT) * ((v - lo) / span); return x.toFixed(1) + ',' + y.toFixed(1); }).join(' ');
+    }
+    function draw(code) {
+      var vals = buf[code] || [], svg = w.querySelector('#lw-svg');
+      if (!svg) return;
+      var nm = w.querySelector('#lw-name'); var meta = STOCKS.filter(function (s) { return s.code === code; })[0]; if (nm && meta) nm.textContent = meta.name;
+      var pts = pathFrom(vals, buft[code]);
+      if (!pts) { svg.innerHTML = '<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
+      var up = vals[vals.length - 1] >= vals[0], colHex = up ? '#E03131' : '#2775ED';
+      var coords = pts.split(' ').map(function (p) { var a = p.split(','); return { x: +a[0], y: +a[1] }; });
+      var last = coords[coords.length - 1];
+      var areaPath = pts + ' ' + last.x.toFixed(1) + ',' + YB + ' ' + X0.toFixed(1) + ',' + YB;
+      var hiIdx = 0, loIdx = 0;
+      for (var i = 1; i < vals.length; i++) { if (vals[i] > vals[hiIdx]) hiIdx = i; if (vals[i] < vals[loIdx]) loIdx = i; }
+      var hiC = coords[hiIdx], loC = coords[loIdx];
+      var gradId = 'lw-grad-' + code;
+      var s = '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="' + colHex + '" stop-opacity=".18"/><stop offset="100%" stop-color="' + colHex + '" stop-opacity=".02"/></linearGradient></defs>' +
+        '<line x1="' + X0 + '" y1="' + YB + '" x2="' + X1 + '" y2="' + YB + '" stroke="var(--hairline)" stroke-width="1"/>' +
+        '<polygon points="' + areaPath + '" fill="url(#' + gradId + ')"/>' +
+        '<polyline points="' + pts + '" fill="none" stroke="' + colHex + '" stroke-width="2" stroke-linejoin="round"/>' +
+        '<circle cx="' + last.x.toFixed(1) + '" cy="' + last.y.toFixed(1) + '" r="3" fill="' + colHex + '"/>';
+      if (vals.length > 4 && hiIdx !== loIdx) {
+        var hAnc = hiC.x < 150 ? 'start' : 'end', lAnc = loC.x < 150 ? 'start' : 'end';
+        var hOff = hAnc === 'start' ? 5 : -5, lOff = lAnc === 'start' ? 5 : -5;
+        var hLabY = (hiC.y - 6 < YT + 2) ? (hiC.y + 13) : (hiC.y - 6);
+        var lLabY = (loC.y + 13 > YB - 4) ? (loC.y - 8) : (loC.y + 13);
+        s += '<circle cx="' + hiC.x.toFixed(1) + '" cy="' + hiC.y.toFixed(1) + '" r="3" fill="#E03131"/>' +
+          '<text x="' + (hiC.x + hOff).toFixed(1) + '" y="' + hLabY.toFixed(1) + '" font-size="9" font-weight="800" fill="#E03131" stroke="#fff" stroke-width="2.5" paint-order="stroke" text-anchor="' + hAnc + '">고 ' + fmt(vals[hiIdx]) + '</text>' +
+          '<circle cx="' + loC.x.toFixed(1) + '" cy="' + loC.y.toFixed(1) + '" r="3" fill="#2775ED"/>' +
+          '<text x="' + (loC.x + lOff).toFixed(1) + '" y="' + lLabY.toFixed(1) + '" font-size="9" font-weight="800" fill="#2775ED" stroke="#fff" stroke-width="2.5" paint-order="stroke" text-anchor="' + lAnc + '">저 ' + fmt(vals[loIdx]) + '</text>';
+      }
+      s += '<text x="' + X0 + '" y="102" font-size="9" fill="var(--muted)">09:00</text><text x="' + (X1 - 24) + '" y="102" font-size="9" fill="var(--muted)">15:30</text>';
+      svg.innerHTML = s;
+      function yAtX(x) { var b = coords[0]; for (var i = 0; i < coords.length; i++) { if (Math.abs(coords[i].x - x) < Math.abs(b.x - x)) b = coords[i]; } return b.y; }
+      var evs = whyData[code] || [], pinSvg = '', placedPx = [];
+      evs.forEach(function (e, i) {
+        var ax = timeToX(e.time), ay = yAtX(ax), f = e.tier === 'why' ? '#E03131' : '#fff', st = e.tier === 'why' ? '#E03131' : '#94A3B8', tc = e.tier === 'why' ? '#fff' : '#64748B';
+        var px = Math.min(X1 - 8, Math.max(X0 + 8, ax));
+        for (var gi = 0; gi < placedPx.length; gi++) { if (Math.abs(px - placedPx[gi]) < 16) { px = Math.min(X1 - 8, placedPx[gi] + 16); } }
+        placedPx.push(px);
+        var up2 = (ay - 24) >= YT, cy = up2 ? ay - 16 : ay + 16;
+        pinSvg += '<line x1="' + ax.toFixed(1) + '" y1="' + ay.toFixed(1) + '" x2="' + px.toFixed(1) + '" y2="' + cy.toFixed(1) + '" stroke="' + st + '" stroke-width="1"/>' +
+          '<circle cx="' + px.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="7" fill="' + f + '" stroke="' + st + '" stroke-width="1.3"/>' +
+          '<text x="' + px.toFixed(1) + '" y="' + (cy + 2.5).toFixed(1) + '" font-size="8" font-weight="800" fill="' + tc + '" text-anchor="middle">' + (i + 1) + '</text>';
+      });
+      if (pinSvg) { var g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); g.innerHTML = pinSvg; svg.appendChild(g); }
+      renderStats(code);
+      renderNews(code);
+    }
+    function renderNews(code) {
+      var wrap = w.querySelector('#lw-news'); if (!wrap) return;
+      var evs = whyData[code] || [];
+      wrap.innerHTML = evs.length ? evs.map(function (e, i) {
+        var isWhy = e.tier === 'why';
+        return '<div class="leaders-widget__news-row"><div class="leaders-widget__news-badge' + (isWhy ? '' : ' related') + '">' + (i + 1) + '</div>' +
+          '<div style="flex:1;min-width:0;"><span class="leaders-widget__news-time">' + e.time + (isWhy ? ' · 왜' : ' · 관련') + '</span>' +
+          '<a class="leaders-widget__news-headline" href="' + e.url + '" target="_blank" rel="noopener">' + e.headline + '</a>' +
+          '<div class="leaders-widget__news-why">' + e.why + '</div></div></div>';
+      }).join('') : '<div class="leaders-widget__news-empty">📭 직전 세션 관련 뉴스 없음 · 수급/테마 추정</div>';
+    }
+    function todayKST() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
+    function readCache() { try { var raw = sessionStorage.getItem('lw-intra-v1'); if (!raw) return {}; var o = JSON.parse(raw); return (o && o.date === todayKST() && o.data) ? o.data : {}; } catch (e) { return {}; } }
+    function writeCache(code, d) {
+      try {
+        var raw = sessionStorage.getItem('lw-intra-v1'), o = {}; try { o = raw ? JSON.parse(raw) : {}; } catch (_) { o = {}; }
+        if (!o || o.date !== todayKST()) o = { date: todayKST(), data: {} }; if (!o.data) o.data = {};
+        o.data[code] = { minutes: d.minutes || [], times: d.times || [] };
+        sessionStorage.setItem('lw-intra-v1', JSON.stringify(o));
+      } catch (e) {}
+    }
+    function showSkeleton() {
+      var svg = w.querySelector('#lw-svg'); if (!svg) return;
+      svg.innerHTML = '<rect class="leaders-widget__skel" x="2" y="8" width="296" height="80" rx="8" fill="var(--surface-soft)"/><text x="150" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="var(--muted)">실측 1분봉 불러오는 중…</text>';
+    }
+    function backfill(code) {
+      var cached = readCache()[code];
+      if (cached && cached.minutes && cached.minutes.length >= 2) { buf[code] = cached.minutes.slice(); buft[code] = (cached.times || []).slice(); draw(code); }
+      else if (code === curCode) { showSkeleton(); }
+      fetch('/api/intraday?code=' + code).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && d.minutes && d.minutes.length) { buf[code] = d.minutes.slice(); buft[code] = (d.times || []).slice(); backfilled[code] = true; writeCache(code, d); if (code === curCode) draw(code); }
+      }).catch(function () {});
+    }
+    function select(code) {
+      curCode = code;
+      var meta = STOCKS.filter(function (s) { return s.code === code; })[0];
+      var nm = w.querySelector('#lw-name'); if (nm && meta) nm.textContent = meta.name;
+      renderStats(code); renderNews(code); renderBroker(code);
+      if (backfilled[code]) draw(code); else { if (!(buf[code] && buf[code].length >= 2)) showSkeleton(); backfill(code); }
+    }
+    backfill(curCode); loadWhy(); loadSnap(); renderBroker(curCode);
 
     // 8초 내 아무 실측도 못 받으면 위젯 제거 — 가짜 값 노출 금지(정합성)
     setTimeout(function () { if (!got) w.remove(); }, 8000);
