@@ -430,7 +430,7 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
     <div class="wmp-tile" data-code="005380" data-name="현대차"><span class="wmp-tile__name">현대차</span><span class="wmp-tile__price">—</span><span class="wmp-tile__chg">—</span></div>
   </div>
   <div class="wm-proto__curve-wrap">
-    <div class="wm-proto__curve-h">📊 <b id="wmp-name">삼성전자</b> 오늘 장중 흐름 <span class="wmp-live-badge">● 실측 1분봉</span></div>
+    <div class="wm-proto__curve-h">📊 <b id="wmp-name">삼성전자</b> 직전 세션 장중 흐름 <span class="wmp-live-badge">● 실측 1분봉</span></div>
     <svg id="wmp-svg" viewBox="0 0 300 110" role="img" aria-label="장중 1분봉 곡선"></svg>
   </div>
   <div class="wm-proto__news" id="wmp-news"></div>
@@ -543,7 +543,7 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
         var rlo=Math.min.apply(null,rv),rhi=Math.max.apply(null,rv),rcur=rv[rv.length-1],rspan=(rhi-rlo)||1;
         var rpos=Math.max(0,Math.min(100,(rcur-rlo)/rspan*100));
         rng.style.display='';
-        rng.innerHTML='<div class="wmp-stat-h">📊 당일 레인지 위치<b>'+rpos.toFixed(0)+'%</b></div>'
+        rng.innerHTML='<div class="wmp-stat-h">📊 직전 세션 레인지 위치<b>'+rpos.toFixed(0)+'%</b></div>'
           +'<div class="wmp-bar" style="background:linear-gradient(90deg,var(--dn-bg),var(--up-bg));"><div style="position:absolute;left:'+rpos.toFixed(0)+'%;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--canvas);transform:translateX(-50%);"></div></div>'
           +'<div class="wmp-stat-note"><span>저 '+fmt(rlo)+'</span><span>고 '+fmt(rhi)+'</span></div>';
       } else { rng.style.display='none'; }
@@ -612,7 +612,7 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
         +'<div style="flex:1;min-width:0;"><span class="wmp-news-time">'+e.time+(isWhy?' · 왜':' · 관련')+'</span>'
         +'<a class="wmp-news-headline" href="'+e.url+'" target="_blank" rel="noopener">'+e.headline+'</a>'
         +'<div class="wmp-news-why">'+e.why+'</div></div></div>';
-    }).join('') : '<div class="wmp-news-empty">📭 오늘 관련 뉴스 없음 · 수급/테마 추정</div>';
+    }).join('') : '<div class="wmp-news-empty">📭 직전 세션 관련 뉴스 없음 · 수급/테마 추정</div>';
   }
   function todayKST(){return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);}
   function readCache(){try{var raw=sessionStorage.getItem('wmp-intra-v1');if(!raw)return{};var o=JSON.parse(raw);return(o&&o.date===todayKST()&&o.data)?o.data:{};}catch(e){return{};}}

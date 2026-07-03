@@ -875,7 +875,7 @@
         }).join('') +
       '</div>' +
       '<div class="leaders-widget__curve">' +
-        '<div class="leaders-widget__curve-h">📊 <b id="lw-name">' + STOCKS[0].name + '</b> 오늘 장중 흐름 <span class="leaders-widget__curve-badge">● 실측 1분봉</span></div>' +
+        '<div class="leaders-widget__curve-h">📊 <b id="lw-name">' + STOCKS[0].name + '</b> 직전 세션 장중 흐름 <span class="leaders-widget__curve-badge">● 실측 1분봉</span></div>' +
         '<svg id="lw-svg" viewBox="0 0 300 110" role="img" aria-label="장중 1분봉 곡선"></svg>' +
       '</div>' +
       '<div class="leaders-widget__news" id="lw-news"></div>' +
@@ -994,7 +994,7 @@
           var rlo = Math.min.apply(null, rv), rhi = Math.max.apply(null, rv), rcur = rv[rv.length - 1], rspan = (rhi - rlo) || 1;
           var rpos = Math.max(0, Math.min(100, (rcur - rlo) / rspan * 100));
           rng.style.display = '';
-          rng.innerHTML = '<div class="leaders-widget__stat-h">📊 당일 레인지 위치<b>' + rpos.toFixed(0) + '%</b></div>' +
+          rng.innerHTML = '<div class="leaders-widget__stat-h">📊 직전 세션 레인지 위치<b>' + rpos.toFixed(0) + '%</b></div>' +
             '<div class="leaders-widget__bar" style="background:linear-gradient(90deg,var(--dn-bg),var(--up-bg));"><div style="position:absolute;left:' + rpos.toFixed(0) + '%;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:2px solid var(--canvas);transform:translateX(-50%);"></div></div>' +
             '<div class="leaders-widget__stat-note"><span>저 ' + fmt(rlo) + '</span><span>고 ' + fmt(rhi) + '</span></div>';
         } else { rng.style.display = 'none'; }
@@ -1062,7 +1062,7 @@
           '<div style="flex:1;min-width:0;"><span class="leaders-widget__news-time">' + e.time + (isWhy ? ' · 왜' : ' · 관련') + '</span>' +
           '<a class="leaders-widget__news-headline" href="' + e.url + '" target="_blank" rel="noopener">' + e.headline + '</a>' +
           '<div class="leaders-widget__news-why">' + e.why + '</div></div></div>';
-      }).join('') : '<div class="leaders-widget__news-empty">📭 오늘 관련 뉴스 없음 · 수급/테마 추정</div>';
+      }).join('') : '<div class="leaders-widget__news-empty">📭 직전 세션 관련 뉴스 없음 · 수급/테마 추정</div>';
     }
     function todayKST() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
     function readCache() { try { var raw = sessionStorage.getItem('lw-intra-v1'); if (!raw) return {}; var o = JSON.parse(raw); return (o && o.date === todayKST() && o.data) ? o.data : {}; } catch (e) { return {}; } }
