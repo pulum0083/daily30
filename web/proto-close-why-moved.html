@@ -366,7 +366,7 @@ window.addEventListener('resize', function () { drawCloseChart('intraday-chart',
 .wm-proto__header{display:flex;align-items:center;gap:7px;margin-bottom:11px;}
 .wm-proto__ic{font-size:14px;}
 .wm-proto__title{font-size:13px;font-weight:700;color:var(--ink);}
-.wm-proto__pill{margin-left:auto;font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;}
+.wm-proto__pill{margin-left:6px;font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;}
 html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
 .wm-proto__tiles{display:flex;gap:6px;margin-bottom:12px;}
 .wmp-tile{flex:1;min-width:0;cursor:pointer;background:var(--surface-soft);border:1.5px solid var(--hairline);border-radius:10px;padding:8px 8px 7px;transition:border-color .12s,background .12s;}
@@ -400,28 +400,18 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
 .wm-proto__more{display:block;text-align:center;font-size:11px;font-weight:700;color:var(--primary);padding:10px 0 2px;text-decoration:none;border-top:1px solid var(--hairline);margin-top:9px;}
 .wm-proto__skel{animation:wmpPulse 1.1s ease-in-out infinite;}
 @keyframes wmpPulse{0%,100%{opacity:.45}50%{opacity:.9}}
-.wm-proto__broker{margin-top:11px;border-top:1px solid var(--hairline);padding-top:10px;}
-.wmp-bk-h{font-size:11px;font-weight:700;color:var(--ink);display:flex;align-items:center;margin-bottom:9px;}
-.wmp-bk-h span{margin-left:auto;font-size:10px;font-weight:700;color:var(--muted);}
-.wmp-bk-range{position:relative;height:18px;margin-bottom:3px;}
-.wmp-bk-track{position:absolute;left:0;right:0;top:7px;height:4px;border-radius:2px;background:linear-gradient(90deg,#378ADD,#1D9E75,#BA7517);}
-.wmp-bk-cur{position:absolute;top:-3px;font-size:9px;font-weight:800;color:var(--ink);white-space:nowrap;transform:translateX(-50%);}
-.wmp-bk-cur i{position:absolute;left:50%;top:16px;width:2px;height:7px;background:var(--ink);transform:translateX(-1px);font-style:normal;}
-.wmp-bk-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:9px;text-align:left;}
-.wmp-bk-scale .c{text-align:center;}
-.wmp-bk-scale .r{text-align:right;}
-.wmp-bk-scale b{display:block;font-size:12px;font-weight:800;margin-top:2px;}
-.wmp-bk-row{display:flex;align-items:center;gap:7px;font-size:11px;padding:5px 0;border-top:1px solid var(--hairline);}
-.wmp-bk-row:first-of-type{border-top:none;}
-.wmp-bk-firm{flex:1;min-width:0;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.wmp-bk-price{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
-.wmp-bk-op{font-size:9px;font-weight:800;color:#fff;background:var(--up);border-radius:5px;padding:2px 6px;flex:none;}
+.wmp-refresh{margin-left:auto;flex:none;width:22px;height:22px;padding:0;border:none;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:background .12s,color .12s;}
+.wmp-refresh:hover{background:var(--surface-soft);color:var(--ink);}
+.wmp-refresh svg{width:13px;height:13px;}
+.wmp-refresh.spin svg{animation:wmpSpin .7s linear;}
+@keyframes wmpSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:900px){ #wm-proto{order:-1;} }
 </style>
 <div class="leaders-widget wm-proto" id="wm-proto">
   <div class="wm-proto__header">
     <span class="wm-proto__ic">📈</span>
     <span class="wm-proto__title">코스피 주도주 · 왜 움직였나</span>
+    <button class="wmp-refresh" id="wmp-refresh" type="button" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
     <span class="wm-proto__pill" id="wmp-pill">🌙 HL 24h</span>
   </div>
   <div class="wm-proto__tiles" id="wmp-tiles">
@@ -438,50 +428,17 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
     <div id="wmp-vol" style="display:none"></div>
     <div id="wmp-range" style="display:none"></div>
   </div>
-  <div class="wm-proto__broker" id="wmp-broker"></div>
   <a class="wm-proto__more" href="https://doubleshot.space/stocks/" target="_blank" rel="noopener">종목 시그널에서 자세히 보기 →</a>
 </div>
 <script>
 (function(){
   var X0=8,X1=292,YT=12,YB=86;
   var STOCKS=[{code:'005930',name:'삼성전자'},{code:'000660',name:'SK하이닉스'},{code:'005380',name:'현대차'}];
-  var buf={},buft={},bufv={},whyData={},snapW={},backfilled={},curCode='005930',tilePrice={};
-  /* 증권사 목표주가 — scripts/generate_html.py BROKER_TARGETS와 동일한 실측값 (2026-06-25 기준 수집) */
-  var BROKER={
-    '005930':{count:10,min_price:330000,avg_price:432000,max_price:560000,rows:[
-      {firm:'대신증권',price:560000,op:'BUY',when:'1일 전'},
-      {firm:'미래에셋증권',price:550000,op:'BUY',when:'2일 전'},
-      {firm:'iM증권',price:480000,op:'BUY',when:'5일 전'}
-    ]},
-    '000660':{count:10,min_price:2500000,avg_price:3200000,max_price:4000000,rows:[
-      {firm:'KB증권',price:4000000,op:'BUY',when:'1일 전'},
-      {firm:'미래에셋증권',price:3800000,op:'BUY',when:'3일 전'},
-      {firm:'삼성증권',price:3600000,op:'BUY',when:'5일 전'}
-    ]},
-    '005380':{count:10,min_price:460000,avg_price:600000,max_price:750000,rows:[
-      {firm:'KB증권',price:750000,op:'BUY',when:'2일 전'},
-      {firm:'한국투자증권',price:700000,op:'BUY',when:'3일 전'},
-      {firm:'삼성증권',price:680000,op:'BUY',when:'1주 전'}
-    ]}
-  };
+  var buf={},buft={},bufv={},whyData={},snapW={},backfilled={},curCode='005930';
   /* 실제 코스피 주도주 캡처 스냅샷 — 2026-07-03 14:02 KST 장중 실측(네이버 1분봉 + 프로덕션 movers-why-live). 로컬 프리뷰(API 미가동) 폴백 전용 — 라이브 fetch 성공 시 그 값으로 갱신됨. */
   var SEED_PRICE={"005930": {"price": 309000, "chg": 8.04}, "000660": {"price": 2398000, "chg": 9.65}, "005380": {"price": 487000, "chg": 1.04}};
   var SEED_CURVE={"005930": {"minutes": [294000.0, 293500.0, 293000.0, 295500.0, 293500.0, 290500.0, 286500.0, 289000.0, 291000.0, 287500.0, 289500.0, 286500.0, 287000.0, 293000.0, 292500.0, 293000.0, 295750.0, 297250.0, 296000.0, 298500.0, 300000.0, 298250.0, 300000.0, 301000.0, 302500.0, 304000.0, 301500.0, 302000.0, 304250.0, 304250.0, 304500.0, 304000.0, 305000.0, 304500.0, 305500.0, 305500.0, 304000.0, 304750.0, 303500.0, 304250.0, 304500.0, 304250.0, 305750.0, 305500.0, 302250.0, 302500.0, 304000.0, 305250.0, 306750.0, 307750.0, 308250.0, 309250.0, 309750.0, 309000.0, 309500.0, 311000.0, 311500.0, 311500.0, 311250.0, 311000.0, 311000.0, 311000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [1606848.0, 2677740.0, 3776983.0, 4536175.0, 5072019.0, 5537523.0, 6442614.0, 7430686.0, 8134540.0, 8636450.0, 9039693.0, 9522583.0, 10331859.0, 11256170.0, 11921572.0, 12260217.0, 12844713.0, 13323190.0, 13876497.0, 14311285.0, 14991298.0, 15375774.0, 15675293.0, 15999913.0, 16513299.0, 16856882.0, 17189798.0, 17593314.0, 17934067.0, 18208200.0, 18406506.0, 18608596.0, 18946980.0, 19097016.0, 19240958.0, 19353370.0, 19542765.0, 19672954.0, 19839820.0, 19987481.0, 20078393.0, 20228571.0, 20403582.0, 20628901.0, 20802263.0, 20975213.0, 21123595.0, 21256543.0, 21599081.0, 21841366.0, 22037827.0, 22273749.0, 22537664.0, 22756063.0, 23196715.0, 23420320.0, 23620644.0, 23825594.0, 23993456.0, 24411894.0, 24629629.0, 24639905.0]}, "000660": {"minutes": [2222000.0, 2200000.0, 2196000.0, 2212000.0, 2190000.0, 2156000.0, 2114000.0, 2126000.0, 2126000.0, 2101000.0, 2118000.0, 2081000.0, 2064000.0, 2128000.0, 2160000.0, 2152000.0, 2195000.0, 2215000.0, 2185000.0, 2233000.0, 2263000.0, 2239000.0, 2260000.0, 2259000.0, 2284000.0, 2286000.0, 2251000.0, 2249000.0, 2264000.0, 2280000.0, 2276000.0, 2267000.0, 2293000.0, 2287000.0, 2291000.0, 2292000.0, 2283000.0, 2288000.0, 2264000.0, 2271000.0, 2276000.0, 2276500.0, 2296000.0, 2286000.0, 2268000.0, 2258000.0, 2267000.0, 2275000.0, 2304000.0, 2316000.0, 2322000.0, 2335000.0, 2332000.0, 2336000.0, 2341000.0, 2348000.0, 2368000.0, 2382000.0, 2385000.0, 2391000.0, 2398000.0, 2399000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [251452.0, 510157.0, 733068.0, 897108.0, 1031896.0, 1182923.0, 1385579.0, 1623511.0, 1781163.0, 1905095.0, 2031271.0, 2204874.0, 2486985.0, 2699563.0, 2893620.0, 3024968.0, 3140752.0, 3285026.0, 3392779.0, 3500349.0, 3640395.0, 3763930.0, 3836540.0, 3896414.0, 3981899.0, 4094877.0, 4170733.0, 4252991.0, 4323815.0, 4375964.0, 4438456.0, 4481599.0, 4567094.0, 4603030.0, 4651057.0, 4684554.0, 4759825.0, 4798475.0, 4854528.0, 4899798.0, 4930031.0, 4962944.0, 5001999.0, 5032379.0, 5072798.0, 5125479.0, 5157374.0, 5183141.0, 5253929.0, 5331729.0, 5391827.0, 5443814.0, 5502533.0, 5551086.0, 5624490.0, 5679744.0, 5765258.0, 5847274.0, 5914257.0, 6038632.0, 6121649.0, 6122577.0]}, "005380": {"minutes": [474500.0, 470000.0, 469500.0, 471500.0, 470500.0, 464500.0, 462500.0, 462000.0, 466000.0, 461500.0, 463500.0, 462000.0, 461500.0, 467000.0, 469000.0, 470500.0, 475500.0, 476000.0, 475000.0, 475000.0, 476000.0, 474500.0, 476000.0, 477500.0, 478000.0, 482500.0, 480000.0, 479500.0, 482000.0, 484000.0, 481500.0, 480500.0, 481000.0, 481000.0, 481000.0, 480000.0, 480000.0, 479500.0, 480500.0, 483000.0, 483500.0, 483000.0, 485000.0, 484000.0, 481500.0, 481500.0, 482000.0, 483000.0, 486500.0, 487000.0, 486500.0, 488000.0, 486500.0, 486000.0, 484500.0, 484500.0, 484000.0, 486500.0, 484500.0, 487500.0, 486500.0, 487000.0], "times": ["09:00", "09:05", "09:10", "09:15", "09:20", "09:25", "09:30", "09:35", "09:40", "09:45", "09:50", "09:55", "10:00", "10:05", "10:10", "10:15", "10:20", "10:25", "10:30", "10:35", "10:40", "10:45", "10:50", "10:55", "11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30", "11:35", "11:40", "11:45", "11:50", "11:55", "12:00", "12:05", "12:10", "12:15", "12:20", "12:25", "12:30", "12:35", "12:40", "12:45", "12:50", "12:55", "13:00", "13:05", "13:10", "13:15", "13:20", "13:25", "13:30", "13:35", "13:40", "13:45", "13:50", "13:55", "14:00", "14:01"], "volumes": [35484.0, 78370.0, 103983.0, 126722.0, 143966.0, 173363.0, 192221.0, 227321.0, 253960.0, 272578.0, 293273.0, 309765.0, 345028.0, 372654.0, 392752.0, 404024.0, 420744.0, 435121.0, 447876.0, 458912.0, 466058.0, 477174.0, 488049.0, 497719.0, 504999.0, 522500.0, 540423.0, 551830.0, 562642.0, 571663.0, 582480.0, 588373.0, 595263.0, 600494.0, 603846.0, 610062.0, 615942.0, 622035.0, 632650.0, 641456.0, 648417.0, 651510.0, 660501.0, 666148.0, 671605.0, 677770.0, 683980.0, 689453.0, 700949.0, 707391.0, 714558.0, 719478.0, 725450.0, 731129.0, 739882.0, 747728.0, 752648.0, 759788.0, 768025.0, 787536.0, 794323.0, 794991.0]}};
   var SEED_NEWS={"005930": [{"time": "08:27", "headline": "한투證 “삼성전자, HBM 경쟁력 회복할 것…목표가 59만원 상향” - 조선비즈", "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSkhHMkNYS0V6WllEaDdoc0lTODJKQWFLSXVHWmphc29UaEtsOGxwcHA2a1paUmVIekFIdFEwbE5CY3ZBY2dGYXNOZ1BjaUNmQzBVRFZhb1l5X3hMY1VyaWtGV0ZRMDNGb3daQUlZT0N0cTlkenByWTNVc05lU2hqMGpHNnI4RFdn0gGcAUFVX3lxTE9NeUdUY1BhcG5NZk9NQVl3aEpsR0J4QS14V1R2akxpRFFpVDZCR3ltZ2pEeEtlY2hGOXVndzR1YVZ6N19JcU9RejBac0hnaFFrTWFseTRUTE5YT0hkQ2wyRzJwMWFwUXplcnphZ3ptS0FzcDJqVk9VNWFGRV9Mc0NGN3JiWTZjR01lclFFR0xac1ZnVDdsVnZjZGxMcg?oc=5", "source": "Chosunbiz", "why": "한국투자증권은 삼성전자의 HBM 경쟁력 회복을 예상하며 목표주가를 59만원으로 상향 조정했다.", "tier": "why"}, {"time": "08:11", "headline": "\"삼성전자 매수 유지, 메모리 가격 상승 반영\"", "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBSckxKeE5kWlNPZVBSNmFwUmxxVjN1WDZOdW1tc0tUdFYyclN2TThQeVVuR2xOM3RiRTd5dDhKVDlQWkZCUHdIRTQ2em82SzFuMVRORS1razloMjk0?oc=5", "source": "뉴스핌", "why": "\"삼성전자 매수 유지, 메모리 가격 상승 반영\"", "tier": "why"}], "000660": [{"time": "08:11", "headline": "14% 폭락 이튿날…증권가는 SK하이닉스 목표가 '420만원' 상향", "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1ZY3Zid0RXZFptbk1udHZaVU5sRnlYRW1lcllCekJmT2ZPT0M5ZHExQTQ4MFBRbVlzaXZCcXc1ZWpvdEZtRHliMC04Z09KRGplTDc4S1VwcDdkN0hGQkNvS2JRVGp2eGp2N3ZQNkdBSXY?oc=5", "source": "연합인포맥스", "why": "SK하이닉스가 14% 폭락한 다음 날, 증권가에서는 목표가를 420만원으로 상향 조정했다. (개별 인과 단정 안 함)", "tier": "related"}, {"time": "06:28", "headline": "미자 \"하이닉스 뭔일이여\" 주가 폭락에 댓글 폭발했다…1억 잃고 주식 방송 섭외까지", "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE5HNG9aMDFXM3I3UDA4OHc2clBjZi1LQ1M4OUhmWmhpUk9hMF9sdWw2S2pfZ2x6b0t6cTVIZHhhU3FBZ3hLRTV6TDBZOWpjMWRqV19z?oc=5", "source": "네이트", "why": "미자 \"하이닉스 뭔일이여\" 주가 폭락에 댓글 폭발했다…1억 잃고 주식 방송 섭외까지 (개별 인과 단정 안 함)", "tier": "related"}], "005380": []};
-  function renderBroker(code){
-    var wrap=document.getElementById('wmp-broker'); if(!wrap) return;
-    var b=BROKER[code];
-    if(!b){ wrap.innerHTML=''; return; }
-    var span=(b.max_price-b.min_price)||1;
-    var curPrice=tilePrice[code];
-    var curPct=(typeof curPrice==='number')?Math.max(0,Math.min(100,(curPrice-b.min_price)/span*100)):null;
-    wrap.innerHTML='<div class="wmp-bk-h">🏦 증권사 목표주가<span>컨센서스 '+b.count+'개사</span></div>'
-      +'<div class="wmp-bk-range"><div class="wmp-bk-track"></div>'
-      +(curPct!=null?'<div class="wmp-bk-cur" style="left:'+curPct.toFixed(1)+'%">현재<i></i></div>':'')
-      +'</div>'
-      +'<div class="wmp-bk-scale"><div>최저<b style="color:#378ADD">'+fmt(b.min_price)+'</b></div><div class="c">평균<b style="color:#1D9E75">'+fmt(b.avg_price)+'</b></div><div class="r">최고<b style="color:#BA7517">'+fmt(b.max_price)+'</b></div></div>'
-      +b.rows.map(function(r){return '<div class="wmp-bk-row"><span class="wmp-bk-firm">'+r.firm+'</span><span class="wmp-bk-op">'+r.op+'</span><span class="wmp-bk-price">'+fmt(r.price)+'원</span></div>';}).join('');
-  }
   function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
   function fmt(v){return v>=1000?v.toLocaleString():v;}
 
@@ -489,12 +446,10 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
   function krOpen(){var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);var kd=new Date(Date.now()+9*3600*1000).getUTCDay();if(kd===0||kd===6)return false;return m>=540&&m<=930;}
   function paintTile(code,price,chg){
     var t=document.querySelector('.wmp-tile[data-code="'+code+'"]'); if(!t||price==null) return;
-    tilePrice[code]=price;
     t.querySelector('.wmp-tile__price').textContent=Math.round(price).toLocaleString('ko-KR');
     var c=t.querySelector('.wmp-tile__chg');
     if(chg==null){c.textContent='—';c.className='wmp-tile__chg';}
     else{ var up=chg>=0; c.textContent=(up?'▲':'▼')+Math.abs(chg).toFixed(2)+'%'; c.className='wmp-tile__chg '+(up?'up':'dn'); }
-    if(code===curCode) renderBroker(code);
   }
   function pollDay(){fetch('/api/stocks-live?codes='+STOCKS.map(function(s){return s.code;}).join(','),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&Array.isArray(d.prices))d.prices.forEach(function(p){paintTile(p.code,p.price,p.changePct);});}).catch(function(){});}
   function pollNight(){fetch('/api/hl-night',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&Array.isArray(d.items))d.items.forEach(function(it){paintTile(it.code,it.krw,it.changePct);});}).catch(function(){});}
@@ -509,6 +464,16 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
       select(t.getAttribute('data-code'));
     });
   });
+
+  var refreshBtn=document.getElementById('wmp-refresh');
+  if(refreshBtn){
+    refreshBtn.addEventListener('click',function(){
+      if(refreshBtn.classList.contains('spin')) return;
+      refreshBtn.classList.add('spin');
+      pollTiles(); backfill(curCode); loadWhy(); loadSnap();
+      setTimeout(function(){ refreshBtn.classList.remove('spin'); },700);
+    });
+  }
 
   /* ── 곡선 + 뉴스 핀 (stocks 허브 "왜 움직였나" 로직 이식, 사이드바 폭에 맞춰 300×110로 축소) ── */
   function loadWhy(){
@@ -553,27 +518,41 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
     if(!vals||vals.length<2) return null;
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
     var useT=times&&times.length===n;
-    return vals.map(function(v,i){var x=useT?timeToX(times[i]):X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
+    return vals.map(function(v,i){
+      var x=useT?timeToX(times[i]):X0+(X1-X0)*(i/(n-1));
+      var y=YB-(YB-YT)*((v-lo)/span);
+      return {x:x,y:y};
+    });
+  }
+  // 좌표 배열을 부드러운 곡선 path로 변환 — drawSparkline()의 캔버스 bezier 스무딩과 동일한
+  // 중간점 앵커 방식. 폭 넓은 화면에서 직선 폴리라인이 각져 보이는 문제를 해결한다.
+  function smoothD(coords){
+    var d='M'+coords[0].x.toFixed(1)+','+coords[0].y.toFixed(1);
+    for(var i=1;i<coords.length;i++){
+      var cx=((coords[i-1].x+coords[i].x)/2).toFixed(1);
+      d+=' C'+cx+','+coords[i-1].y.toFixed(1)+' '+cx+','+coords[i].y.toFixed(1)+' '+coords[i].x.toFixed(1)+','+coords[i].y.toFixed(1);
+    }
+    return d;
   }
   function draw(code){
     var vals=buf[code]||[], svg=document.getElementById('wmp-svg');
     if(!svg) return;
     var nm=document.getElementById('wmp-name'); var meta=STOCKS.filter(function(s){return s.code===code;})[0]; if(nm&&meta) nm.textContent=meta.name;
-    var pts=pathFrom(vals,buft[code]);
-    if(!pts){ svg.innerHTML='<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
-    var up=vals[vals.length-1]>=vals[0], col=up?'var(--up)':'var(--dn)';
+    var coords=pathFrom(vals,buft[code]);
+    if(!coords){ svg.innerHTML='<text x="150" y="55" text-anchor="middle" font-size="11" fill="var(--muted)">실측 데이터 없음</text>'; return; }
+    var up=vals[vals.length-1]>=vals[0];
     var colHex=up?'#E03131':'#2775ED';
-    var coords=pts.split(' ').map(function(p){var a=p.split(',');return {x:+a[0],y:+a[1]};});
     var last=coords[coords.length-1];
-    var areaPath=pts+' '+last.x.toFixed(1)+','+YB+' '+X0.toFixed(1)+','+YB;
+    var lineD=smoothD(coords);
+    var areaD=lineD+' L'+last.x.toFixed(1)+','+YB+' L'+X0.toFixed(1)+','+YB+' Z';
     var hiIdx=0,loIdx=0;
     for(var i=1;i<vals.length;i++){if(vals[i]>vals[hiIdx])hiIdx=i;if(vals[i]<vals[loIdx])loIdx=i;}
     var hiC=coords[hiIdx],loC=coords[loIdx];
     var gradId='wmp-grad-'+code;
     var s='<defs><linearGradient id="'+gradId+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+colHex+'" stop-opacity=".18"/><stop offset="100%" stop-color="'+colHex+'" stop-opacity=".02"/></linearGradient></defs>'
       +'<line x1="'+X0+'" y1="'+YB+'" x2="'+X1+'" y2="'+YB+'" stroke="var(--hairline)" stroke-width="1"/>'
-      +'<polygon points="'+areaPath+'" fill="url(#'+gradId+')"/>'
-      +'<polyline points="'+pts+'" fill="none" stroke="'+colHex+'" stroke-width="2" stroke-linejoin="round"/>'
+      +'<path d="'+areaD+'" fill="url(#'+gradId+')"/>'
+      +'<path d="'+lineD+'" fill="none" stroke="'+colHex+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
       +'<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="3" fill="'+colHex+'"/>';
     if(vals.length>4&&hiIdx!==loIdx){
       var hAnc=hiC.x<150?'start':'end', lAnc=loC.x<150?'start':'end';
@@ -636,11 +615,11 @@ html.dark .wm-proto__pill{background:rgba(109,40,217,.25);}
     curCode=code;
     var meta=STOCKS.filter(function(s){return s.code===code;})[0];
     var nm=document.getElementById('wmp-name'); if(nm&&meta) nm.textContent=meta.name;
-    renderStats(code); renderNews(code); renderBroker(code);
+    renderStats(code); renderNews(code);
     if(backfilled[code]) draw(code); else { if(!(buf[code]&&buf[code].length>=2)) showSkeleton(); backfill(code); }
   }
   Object.keys(SEED_NEWS).forEach(function(code){ whyData[code]=SEED_NEWS[code]; });
-  backfill(curCode); loadSnap(); renderBroker(curCode);
+  backfill(curCode); loadSnap();
 })();
 </script>
 
