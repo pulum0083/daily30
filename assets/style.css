@@ -791,7 +791,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
 @media(max-width:900px){
   .layout-wrapper{padding:16px 20px 60px;}
   .gnb__in{padding:0 20px;gap:16px;}
-  .layout-grid{grid-template-columns:1fr;row-gap:16px;}
+  .layout-grid{grid-template-columns:1fr;row-gap:0;}
   .leaders-widget{order:-1;}
   .acc-box--sidebar{display:none;}
   .acc-box--mobile{display:flex;flex-direction:column;}
@@ -803,7 +803,7 @@ html.dark .income-widget__foot:hover{background:rgba(0,110,255,.12);}
   .accordion-header{padding-top:4px;padding-bottom:4px;}
   #live-scoreboard{margin-top:6px!important;}
   .accordion-body__inner,
-  .accordion-item.is-close .accordion-body__inner{padding:0 0 22px;border-top:none;}
+  .accordion-item.is-close .accordion-body__inner{padding:0;border-top:none;}
 }
 /* 모바일 라이브 모드 — 시장 지표 패널을 스코어보드 바로 아래 인라인 배치 */
 .mkt-panel-inline{margin-top:16px!important;margin-bottom:4px;}
