@@ -319,7 +319,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_news.py --type kospi-close
 
-      - name: 🗞️ 오늘의 화제 종목 (주도주 뉴스 — 종가 기준)
+      - name: 🗞️ 코스피 주도주 뉴스 근거 (사이드바 위젯용 — 종가 기준)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         env:
