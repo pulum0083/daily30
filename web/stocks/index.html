@@ -599,13 +599,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .qf-lg span{display:inline-flex;align-items:center;gap:5px;}
 .qf-lg i{width:9px;height:9px;border-radius:2px;display:inline-block;}
 /* 안내 푸터 */
-.ds-footer{margin:32px 0 8px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;}
-.ds-foot-list{padding:20px 24px;}
-.ds-foot-list .fl{font-size:12.5px;color:var(--muted);line-height:1.8;padding:7px 0;}
-.ds-foot-list .fl + .fl{border-top:1px solid var(--hair);}
+.ds-footer{margin:32px 2px 8px;padding-top:20px;border-top:1px solid var(--hair);}
+.ds-foot-list{font-size:12.5px;color:var(--muted);line-height:1.85;}
+.ds-foot-list .fl{margin-bottom:10px;}
+.ds-foot-list .fl:last-child{margin-bottom:0;}
 .ds-foot-list .fl b{color:var(--ink);font-weight:700;}
-.ds-foot-list .fk{color:var(--ink);font-weight:700;margin-right:6px;}
-.ds-foot-base{padding:12px 24px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
+.ds-foot-base{margin-top:14px;font-size:11px;color:var(--muted);text-align:center;}
 /* 참고 지표 그룹 카드 (커머디티 데이터 — 보조 톤) */
 .refsub{padding:15px 0;border-top:1px solid var(--hair);}
 .refsub:first-child{padding-top:2px;border-top:none;}
@@ -1776,10 +1775,10 @@ function usSel(code){
   <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
   <footer class="ds-footer">
     <div class="ds-foot-list">
-      <div class="fl"><span class="fk">📊 다루는 범위</span>코스피 종목은 <b>코스피200</b>만, ETF는 <b>순자산 1천억원 이상</b>만 다뤄요. 코스닥150·전체 종목은 단계적으로 넓혀가요.</div>
-      <div class="fl"><span class="fk">🕐 데이터 갱신</span>시세·수급·기술지표는 <b>매 거래일 장 마감 후</b> 갱신돼요. 목표주가·실적은 증권사·공시 반영 시점에 따라 며칠 시차가 있을 수 있어요.</div>
-      <div class="fl"><span class="fk">🔍 데이터 출처</span>모든 수치는 <b>실측값</b>이에요(토스증권·네이버 금융). AI가 만든 숫자는 쓰지 않고, 수집 안 된 항목은 표시하지 않아요.</div>
-      <div class="fl"><span class="fk">⚠️ 투자 유의</span>AI 신호·기술신호는 <b>예측이 아닌 참고용</b>이고, ETF 지수 추세는 개별 종목 픽이 아니에요. 투자 책임은 투자자 본인에게 있어요.</div>
+      <div class="fl">현재는 코스피 종목 중 <b>코스피200</b>에 속한 종목, ETF 중 <b>순자산 1천억원 이상</b>인 상품만 다루고 있어요. 코스닥150과 전체 종목은 앞으로 단계적으로 넓혀갈 예정이에요.</div>
+      <div class="fl">시세·수급·기술지표는 <b>매 거래일 장 마감 후</b> 갱신돼요. 목표주가나 실적처럼 증권사·공시 자료를 반영하는 항목은 발표 시점에 따라 며칠 정도 차이가 날 수 있어요.</div>
+      <div class="fl">화면에 나오는 모든 수치는 토스증권·네이버 금융에서 가져온 <b>실측값</b>이에요. AI가 임의로 만든 숫자는 쓰지 않고, 수집되지 않은 항목은 아예 표시하지 않아요.</div>
+      <div class="fl">AI 신호와 기술 신호는 투자 판단을 돕는 <b>참고용</b>일 뿐 예측이 아니고, ETF 지수 흐름도 특정 종목을 추천하는 게 아니에요. 투자에 대한 최종 책임은 투자자 본인에게 있어요.</div>
     </div>
     <div class="ds-foot-base">Double-Shot · 종목 서비스 (베타) · 표시되는 수치는 직전 거래일 종가 기준이에요</div>
   </footer>
