@@ -131,11 +131,11 @@ html.dark .notice-card.is-unread{border-color:rgba(59,139,255,.3);background:rgb
 .layout-grid__main{min-width:0;}
 .layout-grid__right{display:flex;flex-direction:column;gap:12px;}
 
-.site-footer{max-width:1064px;margin:-40px auto 0;padding:16px 32px 32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;border-top:1px solid var(--hairline);}
-.site-footer__links{display:flex;flex-wrap:wrap;gap:6px 16px;}
-.site-footer__links a{font-size:12px;font-weight:600;color:var(--muted);}
+.site-footer{max-width:1064px;margin:-40px auto 0;padding:20px 32px 32px;border-top:1px solid var(--hairline);}
+.site-footer__links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;}
+.site-footer__links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;}
 .site-footer__links a:hover{color:var(--primary);}
-.site-footer__base{font-size:11px;color:var(--muted);}
+.site-footer__base{margin-top:12px;font-size:11px;color:var(--muted);text-align:center;}
 body.is-embed .site-footer{display:none;}
 
 /* ──────────────────────────────────────────────
@@ -182,9 +182,8 @@ body.is-embed .site-footer{display:none;}
 .semicon-section-title::before{display:none!important;}
 .us-linked-title{font-size:14px!important;font-weight:700!important;color:var(--ink)!important;text-transform:none!important;letter-spacing:-0.2px;}
 .us-linked-title::before{display:none!important;}
-.us-badge{display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;margin-right:6px;}
-.us-linked-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
-.us-linked-chip{font-size:11px;color:var(--muted);background:var(--surface-soft);border:1px solid var(--hairline);padding:3px 8px;border-radius:12px;}
+.us-badge{display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;margin-right:6px;line-height:1;}
+.us-badge__flag{display:inline-flex;align-items:center;font-size:12px;line-height:1;}
 .divider{height:1px;background:var(--hairline);margin:18px 0;}
 
 /* ──────────────────────────────────────────────
@@ -277,9 +276,9 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .reason-block ul li{font-size:14px;line-height:1.75;color:var(--ink);}
 
 /* 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 */
-.comfort-line{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);}
+.comfort-line{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);}
 .comfort-line__icon{flex-shrink:0;color:var(--muted);}
-.comfort-line__text{margin:0;font-size:14px;line-height:1.65;color:var(--muted);font-style:italic;}
+.comfort-line__text{margin:0;font-size:14px;line-height:1.65;color:var(--muted);font-style:italic;text-align:center;}
 
 /* ──────────────────────────────────────────────
    뉴욕 마감 요약 (코스피)
