@@ -2,6 +2,7 @@
 // 토스 Open API는 IP 화이트리스트라 서버리스 유동 IP에서 막혀(access_denied: IP not allowed),
 // IP 제한 없는 네이버로 조회한다. 6자리 한국 코드만 허용.
 // 국내: polling.finance.naver.com 사용 (m.stock.naver.com은 Vercel 런타임에서 fetch failed — TLS 연결 실패).
+import { isUsMarketHoliday, nyYmd } from './_us-market-calendar.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
 
@@ -56,13 +57,17 @@ async function fetchYahoo(sym) {
     const regClose = meta.regularMarketPrice;          // 마지막 정규장 체결가(정규장 중엔 실시간)
     const prevDayClose = meta.chartPreviousClose ?? meta.previousClose; // 직전 거래일 종가
 
-    // 현재 세션 판별 — 야후가 내려주는 거래시간대(currentTradingPeriod)와 현재 시각 비교
+    // 현재 세션 판별 — 야후가 내려주는 거래시간대(currentTradingPeriod)와 현재 시각 비교.
+    // 야후는 증시 휴장일에도 currentTradingPeriod에 평시와 동일한 세션 창을 내려주는 경우가 있어(휴일 미인지),
+    // 뉴욕 로컬 날짜가 휴장일이면 세션 창 판정을 무시하고 무조건 closed로 강제한다.
     const tp = meta.currentTradingPeriod || {};
     const now = Math.floor(Date.now() / 1000);
     let state = 'closed';
-    if (tp.regular && now >= tp.regular.start && now < tp.regular.end) state = 'open';
-    else if (tp.pre && now >= tp.pre.start && now < tp.pre.end) state = 'pre';
-    else if (tp.post && now >= tp.post.start && now < tp.post.end) state = 'post';
+    if (!isUsMarketHoliday(nyYmd(now * 1000))) {
+      if (tp.regular && now >= tp.regular.start && now < tp.regular.end) state = 'open';
+      else if (tp.pre && now >= tp.pre.start && now < tp.pre.end) state = 'pre';
+      else if (tp.post && now >= tp.post.start && now < tp.post.end) state = 'post';
+    }
 
     // 시계열 마지막 유효 종가 = 프리·애프터 실시간 체결가
     let lastPx = null, lastTs = meta.regularMarketTime || null;
