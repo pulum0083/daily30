@@ -1235,7 +1235,16 @@ function usSel(code){
     }else{
       b.classList.add('closed');
       var dt='';
-      if(basisAt){ var d=new Date(basisAt); if(!isNaN(d)) dt=(d.getMonth()+1)+'.'+d.getDate()+' '; }
+      if(basisAt){
+        var d=new Date(basisAt);
+        // 미국 장 마감 시각을 KST(브라우저 로컬)로 표시하면 새벽 마감이 다음날 날짜로 밀려 보인다(예: 목요일 마감이 금요일로 표기).
+        // 실제 거래일은 뉴욕 현지 날짜 기준이라 America/New_York 타임존으로 월/일을 뽑는다.
+        if(!isNaN(d)){
+          var p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',month:'numeric',day:'numeric'}).formatToParts(d);
+          var mo=p.find(function(x){return x.type==='month';}), da=p.find(function(x){return x.type==='day';});
+          if(mo&&da) dt=mo.value+'.'+da.value+' ';
+        }
+      }
       b.innerHTML='<span class="dot"></span>장 마감 · '+dt+'종가 기준';
     }
   }
