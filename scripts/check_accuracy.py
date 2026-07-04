@@ -21,6 +21,7 @@ import yfinance as yf
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
+WEB_DATA_DIR = BASE_DIR / "web" / "data"
 KST = pytz.timezone("Asia/Seoul")
 
 
@@ -257,6 +258,37 @@ def backfill(briefing_type: str = "kospi", force: bool = False) -> None:
         check_accuracy(d, briefing_type, force=force)
 
 
+def write_accuracy_summary() -> None:
+    """누적 적중률 요약을 web/data/accuracy-summary.json에 기록한다.
+    랜딩 등에서 fetch해 쓰며, 채점 실행 때마다 실데이터로 갱신 — 하드코딩 stale 방지."""
+    data = load_briefings()
+    # bucket: [scored, hit]
+    buckets = {"cumulative": [0, 0], "kospi": [0, 0], "us": [0, 0]}
+    for b in data.get("briefings", []):
+        if b.get("is_correct") is None:
+            continue
+        hit = 1 if b.get("is_correct") else 0
+        buckets["cumulative"][0] += 1
+        buckets["cumulative"][1] += hit
+        t = b.get("type")
+        if t in ("kospi", "us"):
+            buckets[t][0] += 1
+            buckets[t][1] += hit
+
+    out = {
+        k: {"scored": s, "hit": h, "pct": (round(h / s * 100) if s else None)}
+        for k, (s, h) in buckets.items()
+    }
+    out["updated_at"] = datetime.now(KST).isoformat()
+
+    WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    path = WEB_DATA_DIR / "accuracy-summary.json"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+    c = out["cumulative"]
+    print(f"[check_accuracy] 적중률 요약 기록: 누적 {c['hit']}/{c['scored']} ({c['pct']}%)")
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
@@ -276,6 +308,9 @@ def main():
     else:
         date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
         check_accuracy(date_str, args.type)
+
+    # 채점 결과를 반영한 누적 요약을 갱신 (랜딩 fetch용)
+    write_accuracy_summary()
 
 
 if __name__ == "__main__":

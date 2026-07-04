@@ -266,7 +266,7 @@
         <span class="sig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.4 0z"/></svg>유가·금</span>
         <span class="sig"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>지정학</span>
       </div>
-      <p class="proof-foot">모든 예측은 다음 날 실제 시장 결과로 채점돼요. <b>누적 적중률 69%</b> · 확정 42건 중 29건.</p>
+      <p class="proof-foot">모든 예측은 다음 날 실제 시장 결과로 채점돼요. <b>누적 적중률 <span id="acc-pct">67%</span></b> · 확정 <span id="acc-scored">110</span>건 중 <span id="acc-hit">74</span>건.</p>
     </div>
   </section>
 
@@ -376,6 +376,18 @@
     // 슬림 구독 바: Hero를 지나면 노출
     const slim=document.getElementById('slim');
     addEventListener('scroll',()=>{slim.classList.toggle('show',scrollY>600)});
+
+    // 누적 적중률 실데이터 배선 (하드코딩 stale 방지) — 실패 시 인라인 fallback 유지
+    fetch('/data/accuracy-summary.json')
+      .then(r=>r.ok?r.json():Promise.reject())
+      .then(d=>{
+        const c=d&&d.cumulative;
+        if(!c||c.pct==null||!c.scored) return;
+        document.getElementById('acc-pct').textContent=c.pct+'%';
+        document.getElementById('acc-scored').textContent=c.scored;
+        document.getElementById('acc-hit').textContent=c.hit;
+      })
+      .catch(()=>{});
   </script>
 
   <!-- 공지 패널 등 GNB 동작 -->
