@@ -238,7 +238,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .etf-top5-vol{flex-shrink:0;font-size:11px;color:var(--muted);white-space:nowrap;}
 .etf-top5-pct{flex-shrink:0;min-width:50px;text-align:right;font-size:12.5px;font-weight:800;white-space:nowrap;}
 .etf-cap{font-size:11.5px;line-height:1.5;color:#475569;background:var(--canvas);}.etf-cap b{color:#0F172A;}
-/* ETF 사이드 4카드 (베팅·섹터·안전자산) */
+/* ETF 사이드 카드 (베팅·거래량 톱5·섹터 로테이션) */
 .live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
 .close-pill{font-size:10px;font-weight:700;color:#6b7280;background:#F1F3F5;border-radius:999px;padding:2px 8px;}
 .gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
@@ -251,12 +251,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
 .gauge-note{font-size:11.5px;line-height:1.5;color:#475569;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;}.gauge-note b{color:#0F172A;}
 .etf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--canvas);border-top:1px solid #F4F6F8;}.etf-row:first-of-type{border-top:none;}
+.etf-rk{font-size:12px;font-weight:800;color:#94A3B8;min-width:16px;text-align:center;font-variant-numeric:tabular-nums;flex:none;}
 .etf-nm{font-size:13px;font-weight:700;color:#1E2430;flex:1;}
 .etf-pct{font-size:13px;font-weight:800;white-space:nowrap;}
 .sec-divider{font-size:10.5px;font-weight:800;color:#B6BEC8;letter-spacing:.04em;padding:9px 16px 3px;background:var(--canvas);}
-.sh-row{display:flex;align-items:center;gap:10px;padding:7px 16px;background:var(--canvas);}
-.sh-nm{font-size:12.5px;font-weight:700;color:#1E2430;flex:1;}
-.sh-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
 /* chips 2-col: 좌=밤사이(과거) 우=한국종목(현재) */
 .chip-layout{display:grid;grid-template-columns:336px 1fr;column-gap:16px;align-items:start;}
 .chip-sb-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:0 2px 8px;display:flex;align-items:center;gap:6px;}
@@ -1394,15 +1392,8 @@ function usSel(code){
         <div class="etf-row"><span class="skl skl-line" style="flex:1;max-width:118px"></span><span class="skl skl-line" style="width:54px"></span></div>
         <div class="etf-row"><span class="skl skl-line" style="flex:1;max-width:96px"></span><span class="skl skl-line" style="width:54px"></span></div>
         <div class="etf-row"><span class="skl skl-line" style="flex:1;max-width:108px"></span><span class="skl skl-line" style="width:54px"></span></div>
-      </div>
-    </div>
-    <!-- ③ 안전자산 선호도 -->
-    <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">🛟</span>안전자산 선호도</span></div>
-      <div id="etf-safehaven">
-        <div class="sh-row"><span class="skl skl-line" style="flex:1;max-width:118px"></span><span class="skl skl-line" style="width:54px"></span></div>
-        <div class="sh-row"><span class="skl skl-line" style="flex:1;max-width:100px"></span><span class="skl skl-line" style="width:54px"></span></div>
-        <div class="sh-row"><span class="skl skl-line" style="flex:1;max-width:112px"></span><span class="skl skl-line" style="width:54px"></span></div>
+        <div class="etf-row"><span class="skl skl-line" style="flex:1;max-width:100px"></span><span class="skl skl-line" style="width:54px"></span></div>
+        <div class="etf-row"><span class="skl skl-line" style="flex:1;max-width:112px"></span><span class="skl skl-line" style="width:54px"></span></div>
       </div>
     </div>
     </div><!-- /home-side -->
@@ -3040,23 +3031,23 @@ if(passBtn){
     }
     var sw=document.getElementById('etf-sector');
     if(sw&&etf.sector){
-      var top=etf.sector.slice(0,3),bot=etf.sector.slice(-3);
-      var row=function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';return '<div class="etf-row"><span class="etf-nm">'+x.label+'</span><span class="etf-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';};
-      sw.innerHTML='<div class="sec-divider">상대 선방 ▲</div>'+top.map(row).join('')+'<div class="sec-divider">상대 약세 ▼</div>'+bot.map(row).join('');
+      var win=etf.sector.filter(function(x){return x.pct>=0;});
+      var lose=etf.sector.filter(function(x){return x.pct<0;});
+      var rk=0;
+      var row=function(x){
+        rk++;
+        var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';
+        return '<div class="etf-row"><span class="etf-rk">'+rk+'</span><span class="etf-nm">'+x.label+'</span><span class="etf-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';
+      };
+      var html='';
+      if(win.length)  html+='<div class="sec-divider">상대 선방 ▲</div>'+win.map(row).join('');
+      if(lose.length) html+='<div class="sec-divider">상대 약세 ▼</div>'+lose.map(row).join('');
+      sw.innerHTML=html;
       sw.classList.remove('etf-updated'); void sw.offsetWidth; sw.classList.add('etf-updated');
       setTimeout(function(){sw.classList.remove('etf-updated');}, 600);
     }
-    var hw=document.getElementById('etf-safehaven');
-    if(hw&&etf.safeHaven){
-      var rs=etf.safeHaven.rows.map(function(x){var c=x.pct>=0?'var(--up)':'var(--dn)',sg=x.pct>=0?'+':'';
-        return '<div class="sh-row"><span class="sh-nm">'+x.label+'</span><span class="sh-pct" style="color:'+c+'">'+sg+x.pct.toFixed(2)+'%</span></div>';}).join('');
-      var m=etf.safeHaven.market,mc=m>=0?'var(--up)':'var(--dn)',ms=m>=0?'+':'';
-      hw.innerHTML=rs+'<div class="sh-row"><span class="sh-nm">코스피200 (주식)</span><span class="sh-pct" style="color:'+mc+'">'+ms+m.toFixed(2)+'%</span></div>';
-      hw.classList.remove('etf-updated'); void hw.offsetWidth; hw.classList.add('etf-updated');
-      setTimeout(function(){hw.classList.remove('etf-updated');}, 600);
-    }
   }
-  function clearSkel(){ ['sig-rows','etf-lead','etf-betting','etf-top-rows','etf-sector','etf-safehaven'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
+  function clearSkel(){ ['sig-rows','etf-lead','etf-betting','etf-top-rows','etf-sector'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
   function loadSignals(){
     fetch('/api/signals',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
       .then(function(d){ if(d&&!d.error){ applySignals(d); applyEtf(d.etf, d.phase, d.asOf); } else { clearSkel(); } })
