@@ -658,7 +658,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <div class="wrap">
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
   <div id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span>홈</span> › <span>종목</span> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
       <button onclick="openCommentModal()" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:2px;">
@@ -850,7 +849,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 // standalone: 라우터 스텁 (flow-clickable에서 독립 실행)
 function go(id){ location.href='flow-clickable.html'; }
-function goBack(){ if(history.length>1) history.back(); else location.href='flow-clickable.html'; }
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 국내 20종 = data/income_etfs.json 실측(2026-06-13, build_income_etfs.py, 순자산 7천억+).

@@ -1,7 +1,7 @@
 {# 미국 연계 종목 소식 — 코스피 브리핑 전용 #}
 <div class="open-section">
   <div class="open-section__title us-linked-title">
-    <span class="us-badge">🇺🇸 US</span> {{ us_linked_title }}
+    <span class="us-badge"><span class="us-badge__flag" aria-hidden="true">🇺🇸</span>US</span> {{ us_linked_title }}
   </div>
   <div class="reason-block">
     <ul>
@@ -10,11 +10,4 @@
       {% endfor %}
     </ul>
   </div>
-  {% if us_linked_stocks %}
-  <div class="us-linked-chips">
-    {% for s in us_linked_stocks %}
-    <span class="us-linked-chip">{{ s.name }} {{ s.code }}</span>
-    {% endfor %}
-  </div>
-  {% endif %}
 </div>

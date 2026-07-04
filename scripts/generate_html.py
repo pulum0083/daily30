@@ -655,7 +655,7 @@ def build_list_context(target_date: str, active_type: str) -> dict:
             else:
                 up = "상승" in direction
                 base["pill_cls"] = "up" if up else "dn"
-                base["pill_text"] = ("▲ 상승" if up else "▼ 하락") if direction else ""
+                base["pill_text"] = ("▲" if up else "▼") if direction else ""
                 base["title"] = direction or "—"
             base["time"] = fmt_time(match.get("generated_at", ""))
         else:
@@ -873,7 +873,7 @@ def write_briefings_list_json():
                     direction = match.get("predicted_direction") or match.get("direction", "")
                     up = "상승" in direction
                     entry["pill_cls"] = "up" if up else "dn"
-                    entry["pill_text"] = ("▲ 상승" if up else "▼ 하락") if direction else ""
+                    entry["pill_text"] = ("▲" if up else "▼") if direction else ""
                     entry["title"] = direction or "—"
                     entry["time"] = fmt_time(match.get("generated_at", ""))
                 else:

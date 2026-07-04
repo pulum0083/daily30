@@ -524,7 +524,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ds-foot-list .fl + .fl{border-top:1px solid var(--hair);}
 .ds-foot-list .fl b{color:var(--ink);font-weight:700;}
 .ds-foot-list .fk{color:var(--ink);font-weight:700;margin-right:6px;}
-.ds-foot-links{display:flex;flex-wrap:wrap;gap:8px 16px;padding:18px 24px 14px;}
+.ds-foot-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 16px;padding:18px 24px 14px;}
 .ds-foot-links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;}
 .ds-foot-links a:hover{color:var(--primary);}
 .ds-foot-base{padding:12px 24px;background:var(--soft);border-top:1px solid var(--hair);font-size:11px;color:var(--muted);text-align:center;}
@@ -700,7 +700,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
 <div class="wrap">
   <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span>홈</span> › <span>종목</span> › <span style="color:#4F46E5;">월배당 ETF 계산기</span></div>
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
       <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
@@ -909,7 +908,6 @@ function toggleTheme(){
 }
 
 function go(id){ /* 종목 상세 페이지 미구현 — 추후 연결 */ }
-function goBack(){ if(history.length>1) history.back(); else location.href='/'; }
 function openSearch(){ const el=document.getElementById('sim-search'); if(el){el.focus();el.select();window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-80,behavior:'smooth'});} }
 
 /* ── 월배당 ETF 계산기 (보유=주 단위, 주가 기반 인컴 계산) ── */
