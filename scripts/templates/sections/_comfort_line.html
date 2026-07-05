@@ -1,5 +1,7 @@
-{# 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 (시안 A: 상단 구분선 + 아이콘 + 이탤릭) #}
+{# 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 (시안 B: 소프트 카드 + 아이콘 배지) #}
 <div class="comfort-line">
-  <svg class="comfort-line__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+  <div class="comfort-line__badge">
+    <svg class="comfort-line__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+  </div>
   <p class="comfort-line__text">{{ comfort_line | safe }}</p>
 </div>

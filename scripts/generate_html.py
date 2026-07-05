@@ -205,6 +205,15 @@ def build_signal_context(analysis: dict) -> dict:
     }
 
 
+def _split_comfort_line(text: str) -> str:
+    """comfort_line을 문장 단위(.!?)로 쪼개 <br>로 줄바꿈한다."""
+    text = (text or "").strip()
+    if not text:
+        return ""
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    return "<br>".join(p for p in parts if p)
+
+
 def build_reasons(analysis: dict) -> dict:
     direction = analysis.get("prediction", {}).get("direction", "")
     fallback = {
@@ -216,7 +225,7 @@ def build_reasons(analysis: dict) -> dict:
         "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
         "reasons": analysis.get("reasons", [])[:4],
-        "comfort_line": analysis.get("comfort_line", ""),
+        "comfort_line": _split_comfort_line(analysis.get("comfort_line", "")),
     }
     if fmt == "scenario":
         ctx.update(build_scenario_context(analysis))
@@ -397,7 +406,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         fmt = analysis.get("analysis_format", "why_what_so")
         ctx["analysis_format"] = fmt
         ctx["reason_title"] = analysis.get("market_title") or analysis.get("reason_title", "")
-        ctx["comfort_line"] = analysis.get("comfort_line", "")
+        ctx["comfort_line"] = _split_comfort_line(analysis.get("comfort_line", ""))
         if fmt == "scenario":
             ctx.update(build_scenario_context(analysis))
         elif fmt == "bullet":
