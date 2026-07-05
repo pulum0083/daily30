@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-06": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-06/kospi/",
+        "headline": "왜 내릴까? — 반도체 선물 급락에 발목 잡힌 코스피",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:27"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-03": {
       "kospi": {
         "state": "ready",
@@ -551,20 +570,6 @@
       }
     },
     "2026-05-26": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-05-22": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
