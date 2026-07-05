@@ -19,7 +19,7 @@ import pandas as pd
 import yfinance as yf
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from leading_signal import SIGNAL_WEIGHTS
+from leading_signal import SIGNAL_WEIGHTS, UP_BAND, DN_BAND
 
 START = sys.argv[1] if len(sys.argv) > 1 else "2026-03-01"
 END = sys.argv[2] if len(sys.argv) > 2 else None  # None = 오늘까지
@@ -31,6 +31,7 @@ US_TICKERS = {
     "^SOX": "sox",
     "EWY": "ewy",
     "^VIX": "vix",
+    "USDKRW=X": "usdkrw",
 }
 
 
@@ -79,9 +80,20 @@ def main():
         + SIGNAL_WEIGHTS["ewy"] * merged["ewy"]
         + SIGNAL_WEIGHTS["nasdaq"] * merged["nasdaq"]
         + SIGNAL_WEIGHTS["vix"] * merged["vix"]
+        + SIGNAL_WEIGHTS["usdkrw"] * merged["usdkrw"].fillna(0)
     )
 
     truth = np.sign(merged["kospi"])
+
+    # ── 밴드 적용 결합prior (프로덕션 compute_prior와 동일 의미) ──
+    banded = np.where(merged["prior_score"] > UP_BAND, 1,
+                      np.where(merged["prior_score"] < DN_BAND, -1, 1))  # 중립→상승(드리프트)
+    banded = pd.Series(banded, index=merged.index)
+    band_acc = (banded == truth).mean() * 100
+    dncall = banded == -1
+    dnprec = (truth[dncall] == -1).mean() * 100 if int(dncall.sum()) else float("nan")
+    print(f"\n밴드결합prior  적중 {band_acc:.1f}%  하락콜 {int(dncall.sum())}건 정밀도 {dnprec:.0f}%")
+
     rules = {
         "EWY부호":      np.sign(merged["ewy"]),
         "SOX부호":      np.sign(merged["sox"]),
