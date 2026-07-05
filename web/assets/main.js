@@ -846,6 +846,7 @@
     w.innerHTML =
       '<div class="leaders-widget__header"><span class="leaders-widget__ic">📈</span>' +
         '<span class="leaders-widget__title">코스피 주도주</span>' +
+        '<span class="leaders-widget__badge-24h" title="장중엔 실시간 시세, 마감 후엔 24시간 글로벌 파생 시세로 자동 갱신돼요">24H 갱신</span>' +
         '<span class="leaders-widget__live" id="lw-live" style="display:none"><span class="leaders-widget__live-dot"></span>LIVE</span>' +
         '<button class="leaders-widget__refresh" id="lw-refresh" type="button" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>' +
         '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
@@ -873,6 +874,7 @@
     var got = false;
     var X0 = 8, X1 = 292, YT = 12, YB = 86;
     var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, curCode = STOCKS[0].code;
+    var prevPrice = {};
 
     function fmt(v) { return v >= 1000 ? v.toLocaleString('ko-KR') : v; }
     function timeToX(t) {
@@ -891,7 +893,15 @@
       var t = w.querySelector('.leaders-widget__tile[data-code="' + code + '"]');
       if (!t || price == null) return;
       got = true;
-      t.querySelector('.leaders-widget__tile-price').textContent = Math.round(price).toLocaleString('ko-KR');
+      var priceEl = t.querySelector('.leaders-widget__tile-price');
+      priceEl.textContent = Math.round(price).toLocaleString('ko-KR');
+      var prev = prevPrice[code];
+      if (prev != null && prev !== price) {
+        priceEl.classList.remove('mkt-flash-up', 'mkt-flash-dn');
+        void priceEl.offsetWidth;
+        priceEl.classList.add(price > prev ? 'mkt-flash-up' : 'mkt-flash-dn');
+      }
+      prevPrice[code] = price;
       var c = t.querySelector('.leaders-widget__tile-chg');
       if (chg == null) { c.textContent = '—'; c.className = 'leaders-widget__tile-chg'; }
       else { var up = chg >= 0; c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%'; c.className = 'leaders-widget__tile-chg ' + (up ? 'up' : 'dn'); }
