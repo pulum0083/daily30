@@ -93,7 +93,7 @@ def format_prior_for_prompt(prior: dict) -> str:
         "\n## 🧭 선행신호 방향 prior (Python 결정론 계산 — 우선 참고)",
         f"- 계산 방향: **{prior['direction']}** (강도 {prior['strength']}, score {prior['score']})",
         f"- SOX {fmt(sig.get('sox'))} · 나스닥 {fmt(sig.get('nasdaq'))} · NQ선물 {fmt(sig.get('nq'))} "
-        f"· EWY {fmt(sig.get('ewy'))} · VIX {fmt(sig.get('vix'))}",
+        f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}",
         "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다.",
         "- **충돌 해소 규칙**: 전일 코스피가 ±3% 이상 크게 움직인 다음날, 위 선행신호가 전일 국내 방향과 "
         "모순되면 — 더 신선한 정보이므로 — **선행신호(prior) 방향을 따른다.** 전일 국내 등락에 앵커링하지 않는다.",

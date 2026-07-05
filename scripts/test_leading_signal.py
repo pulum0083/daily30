@@ -168,3 +168,10 @@ def test_usdkrw_weakening_pushes_down():
     #  (구 로직: usdkrw 가중치 없음 → score 0 → 중립)
     latest = {"market_data_js": {"usd": {"chg": 2.0}}}
     assert ls.compute_prior(latest)["direction"] == "하락"
+
+
+def test_format_prior_shows_usdkrw():
+    prior = ls.compute_prior({"market_data_js": {"sox": {"chg": 1.0}, "usd": {"chg": 0.4}}})
+    text = ls.format_prior_for_prompt(prior)
+    assert "원/달러" in text
+    assert "+0.40%" in text
