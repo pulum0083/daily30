@@ -16,7 +16,7 @@
 
 - Modify: `scripts/leading_signal.py` — 신호 추출(`extract_signals`), 가중치(`SIGNAL_WEIGHTS`), 밴드(`compute_prior`), 표시(`format_prior_for_prompt`).
 - Modify: `scripts/diagnose_direction_signals.py` — USD/KRW 다운로드·prior_score 반영, 밴드 결합prior 정확도·하락콜 정밀도 출력.
-- Create: `tests/test_leading_signal.py` — 순수 함수 단위 테스트.
+- Modify: `scripts/test_leading_signal.py` — 순수 함수 단위 테스트 (기존 파일에 append. ⚠️ `tests/` 아래에 같은 basename으로 새로 만들면 pytest 수집 충돌).
 
 ---
 
@@ -24,11 +24,11 @@
 
 **Files:**
 - Modify: `scripts/leading_signal.py:28-34` (`extract_signals` 반환 dict)
-- Create: `tests/test_leading_signal.py`
+- Modify: `scripts/test_leading_signal.py` (기존 파일에 append)
 
 - [ ] **Step 1: 실패 테스트 작성**
 
-`tests/test_leading_signal.py` 생성:
+`scripts/test_leading_signal.py` 생성:
 
 ```python
 # 코스피 선행신호 prior 순수 함수 단위 테스트
@@ -57,7 +57,7 @@ def test_extract_signals_usdkrw_missing_is_none():
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: FAIL — `KeyError: 'usdkrw'` (현재 `extract_signals`는 usdkrw 키를 반환하지 않음)
 
 - [ ] **Step 3: 최소 구현**
@@ -77,13 +77,13 @@ Expected: FAIL — `KeyError: 'usdkrw'` (현재 `extract_signals`는 usdkrw 키�
 
 - [ ] **Step 4: 통과 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: PASS (2 passed)
 
 - [ ] **Step 5: 커밋**
 
 ```bash
-git add scripts/leading_signal.py tests/test_leading_signal.py
+git add scripts/leading_signal.py scripts/test_leading_signal.py
 git commit -m "feat(예측): 선행신호 prior에 USD/KRW 신호 추출 추가"
 ```
 
@@ -94,11 +94,11 @@ git commit -m "feat(예측): 선행신호 prior에 USD/KRW 신호 추출 추가"
 **Files:**
 - Modify: `scripts/leading_signal.py:9-10` (`SIGNAL_WEIGHTS`, `NEUTRAL_BAND`)
 - Modify: `scripts/leading_signal.py:69-74` (`compute_prior` 판정부)
-- Modify: `tests/test_leading_signal.py`
+- Modify: `scripts/test_leading_signal.py`
 
 - [ ] **Step 1: 실패 테스트 작성**
 
-`tests/test_leading_signal.py`에 아래 테스트를 추가 (기존 코드 기준으로 실패해야 함):
+`scripts/test_leading_signal.py`에 아래 테스트를 추가 (기존 코드 기준으로 실패해야 함):
 
 ```python
 def test_up_band_lowered():
@@ -130,7 +130,7 @@ def test_usdkrw_weakening_pushes_down():
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: FAIL — `test_up_band_lowered`, `test_mild_negative_is_neutral_not_down`, `test_usdkrw_weakening_pushes_down` 3건 실패 (`test_strong_negative_is_down`은 구·신 로직 모두 하락이라 통과할 수 있음)
 
 - [ ] **Step 3: 최소 구현 — 가중치·밴드 상수 교체**
@@ -161,7 +161,7 @@ DN_BAND = -1.2    # score <  DN_BAND → 하락, 그 사이는 중립
 
 - [ ] **Step 5: 통과 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: PASS (6 passed)
 
 - [ ] **Step 6: NEUTRAL_BAND 잔존 참조 없음 확인**
@@ -172,7 +172,7 @@ Expected: 코스피 쪽 참조 0건 (미국 prior의 `NEUTRAL_BAND_US`만 남아
 - [ ] **Step 7: 커밋**
 
 ```bash
-git add scripts/leading_signal.py tests/test_leading_signal.py
+git add scripts/leading_signal.py scripts/test_leading_signal.py
 git commit -m "fix(예측): 코스피 prior SOX-heavy 재가중 + 비대칭 데드밴드로 하락 편향 교정"
 ```
 
@@ -182,11 +182,11 @@ git commit -m "fix(예측): 코스피 prior SOX-heavy 재가중 + 비대칭 데�
 
 **Files:**
 - Modify: `scripts/leading_signal.py:91-92` (`format_prior_for_prompt` 신호 표시 줄)
-- Modify: `tests/test_leading_signal.py`
+- Modify: `scripts/test_leading_signal.py`
 
 - [ ] **Step 1: 실패 테스트 작성**
 
-`tests/test_leading_signal.py`에 추가:
+`scripts/test_leading_signal.py`에 추가:
 
 ```python
 def test_format_prior_shows_usdkrw():
@@ -198,7 +198,7 @@ def test_format_prior_shows_usdkrw():
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py::test_format_prior_shows_usdkrw -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py::test_format_prior_shows_usdkrw -v`
 Expected: FAIL — `assert "원/달러" in text` (현재 표시 줄에 원/달러 없음)
 
 - [ ] **Step 3: 최소 구현**
@@ -212,13 +212,13 @@ Expected: FAIL — `assert "원/달러" in text` (현재 표시 줄에 원/달�
 
 - [ ] **Step 4: 통과 확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: PASS (7 passed)
 
 - [ ] **Step 5: 커밋**
 
 ```bash
-git add scripts/leading_signal.py tests/test_leading_signal.py
+git add scripts/leading_signal.py scripts/test_leading_signal.py
 git commit -m "feat(예측): prior 프롬프트 블록에 원/달러 신호 표시 추가"
 ```
 
@@ -296,7 +296,7 @@ Expected (성공 기준 — 라이브 yfinance 데이터라 수치는 소폭 변
 
 - [ ] **Step 6: 전체 테스트 재확인**
 
-Run: `python3 -m pytest tests/test_leading_signal.py -v`
+Run: `python3 -m pytest scripts/test_leading_signal.py -v`
 Expected: PASS (7 passed) — 가중치 재조정이 있었다면 경계 테스트 값이 여전히 유효한지 확인.
 
 - [ ] **Step 7: 커밋**
