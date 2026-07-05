@@ -31,6 +31,7 @@ def extract_signals(latest: dict) -> dict:
         "nq":     from_mdj("nq"),
         "ewy":    from_top("ewy"),
         "vix":    from_top("vix"),
+        "usdkrw": from_mdj("usd"),   # market_data_js.usd.chg (원/달러 등락률, 원화 약세=하락 압력)
     }
 
 

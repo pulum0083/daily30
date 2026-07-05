@@ -125,3 +125,19 @@ def test_format_prior_us_contains_futures():
     p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
     text = ls.format_prior_for_prompt_us(p)
     assert "선물" in text and "SOX" in text and "1.11" in text
+
+
+def test_extract_signals_includes_usdkrw():
+    latest = {
+        "market_data_js": {"usd": {"chg": 0.5}, "sox": {"chg": 1.2}},
+        "ewy": {"change_pct": -0.3},
+    }
+    sig = ls.extract_signals(latest)
+    assert sig["usdkrw"] == 0.5
+    assert sig["sox"] == 1.2
+    assert sig["ewy"] == -0.3
+
+
+def test_extract_signals_usdkrw_missing_is_none():
+    sig = ls.extract_signals({"market_data_js": {}})
+    assert sig["usdkrw"] is None
