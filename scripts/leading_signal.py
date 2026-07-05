@@ -5,9 +5,12 @@ SOX·나스닥·NQ선물은 market_data_js.*.chg, EWY·VIX는 최상위 *.change
 가중치·임계값은 scripts/diagnose_direction_signals.py 백테스트로 확정한다(초기값은 74일 진단 기반).
 """
 
-# 진단 기반 초기값 — 백테스트로 확정
-SIGNAL_WEIGHTS = {"sox": 1.0, "ewy": 1.0, "nasdaq": 0.4, "nq": 0.3, "vix": -0.2}
-NEUTRAL_BAND = 0.5   # |score| < band → 중립
+# 진단 기반 재보정값 — 백테스트(diagnose_direction_signals.py)로 확정
+SIGNAL_WEIGHTS = {"sox": 1.5, "nasdaq": 0.5, "nq": 0.3, "ewy": 0.3, "vix": -0.2, "usdkrw": -0.8}
+# 비대칭 데드밴드: 상승 드리프트(base 63% up)를 내장 — 하락 판정에 더 강한 음의 증거를 요구.
+# 레짐 전환(하락장) 시 DN_BAND 재점검 필요.
+UP_BAND =  0.3    # score >  UP_BAND → 상승
+DN_BAND = -1.2    # score <  DN_BAND → 하락, 그 사이는 중립
 T_EWY = 3.5          # strong 자격 EWY 임계 (%)
 T_SOX = 3.0          # strong 자격 SOX 임계 (%)
 VIX_CONTRA = 10.0    # 방향과 반대인 VIX 급변동(%) → strong 강등
@@ -67,9 +70,9 @@ def compute_prior(latest: dict) -> dict:
             used = True
     if not used:
         return {"direction": "중립", "score": 0.0, "strength": "weak", "signals": sig}
-    if score > NEUTRAL_BAND:
+    if score > UP_BAND:
         direction = "상승"
-    elif score < -NEUTRAL_BAND:
+    elif score < DN_BAND:
         direction = "하락"
     else:
         direction = "중립"

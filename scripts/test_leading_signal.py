@@ -141,3 +141,30 @@ def test_extract_signals_includes_usdkrw():
 def test_extract_signals_usdkrw_missing_is_none():
     sig = ls.extract_signals({"market_data_js": {}})
     assert sig["usdkrw"] is None
+
+
+def test_up_band_lowered():
+    # sox +0.3 → 신규 가중 1.5*0.3=0.45 > UP_BAND(0.3) → 상승
+    #           (구 로직: 1.0*0.3=0.3, NEUTRAL_BAND 0.5 미만 → 중립)
+    latest = {"market_data_js": {"sox": {"chg": 0.3}}}
+    assert ls.compute_prior(latest)["direction"] == "상승"
+
+
+def test_mild_negative_is_neutral_not_down():
+    # sox -0.6 → 신규 1.5*-0.6=-0.9, DN_BAND(-1.2)보다 위 → 중립
+    #           (구 로직: 1.0*-0.6=-0.6 < -0.5 → 하락. 이 하락 편향이 교정 대상)
+    latest = {"market_data_js": {"sox": {"chg": -0.6}}}
+    assert ls.compute_prior(latest)["direction"] == "중립"
+
+
+def test_strong_negative_is_down():
+    # sox -1.0 → 1.5*-1.0=-1.5 < DN_BAND(-1.2) → 하락
+    latest = {"market_data_js": {"sox": {"chg": -1.0}}}
+    assert ls.compute_prior(latest)["direction"] == "하락"
+
+
+def test_usdkrw_weakening_pushes_down():
+    # 원화 약세(usd +2.0)만 있어도 -0.8*2.0=-1.6 < -1.2 → 하락
+    #  (구 로직: usdkrw 가중치 없음 → score 0 → 중립)
+    latest = {"market_data_js": {"usd": {"chg": 2.0}}}
+    assert ls.compute_prior(latest)["direction"] == "하락"
