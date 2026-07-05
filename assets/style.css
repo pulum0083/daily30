@@ -275,10 +275,11 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .reason-block ul{padding-left:16px;display:flex;flex-direction:column;gap:10px;}
 .reason-block ul li{font-size:14px;line-height:1.75;color:var(--ink);}
 
-/* 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 */
-.comfort-line{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hairline);}
-.comfort-line__icon{flex-shrink:0;color:var(--muted);}
-.comfort-line__text{margin:0;font-size:14px;line-height:1.65;color:var(--muted);font-style:italic;text-align:center;}
+/* 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 (소프트 카드) */
+.comfort-line{display:flex;align-items:center;gap:10px;margin-top:14px;padding:14px 16px;background:var(--surface-soft);border-radius:12px;}
+.comfort-line__badge{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;}
+.comfort-line__icon{color:var(--muted);}
+.comfort-line__text{margin:0;font-size:14px;line-height:1.6;color:var(--ink);text-align:left;}
 
 /* ──────────────────────────────────────────────
    뉴욕 마감 요약 (코스피)
@@ -652,6 +653,8 @@ html.dark .leaders-widget{background:rgba(0,110,255,.07);border-color:rgba(96,16
 .leaders-widget__refresh svg{width:13px;height:13px;}
 .leaders-widget__refresh.spin svg{animation:lwSpin .7s linear;}
 @keyframes lwSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.leaders-widget__badge-24h{font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;cursor:default;}
+html.dark .leaders-widget__badge-24h{background:rgba(109,40,217,.25);}
 .leaders-widget__pill{margin-left:6px;font-size:9px;font-weight:700;color:#6D28D9;background:#EDE9FE;border-radius:999px;padding:2px 7px;display:none;}
 html.dark .leaders-widget__pill{background:rgba(109,40,217,.25);}
 .leaders-widget__live{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;color:var(--muted);background:var(--surface-soft);border-radius:999px;padding:2px 7px;}

@@ -755,9 +755,9 @@
   function initPredictionToast() {
     // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
     if (!/\/briefings\/\d{4}-\d{2}-\d{2}\//.test(location.pathname)) return;
-    // 노출 기간: 2026-06-26 ~ 2026-06-30. 이후엔 표시하지 않으며, 만료 후 이 함수는 삭제해도 됨.
-    if (Date.now() > Date.parse('2026-06-30T23:59:59+09:00')) return;
-    var KEY = 'ds-toast-pred-v2';
+    // 노출 기간: 2026-07-05 ~ 2026-07-07 11:00 KST. 이후엔 표시하지 않으며, 만료 후 이 함수는 삭제해도 됨.
+    if (Date.now() > Date.parse('2026-07-07T11:00:00+09:00')) return;
+    var KEY = 'ds-toast-pred-v3';
     try { if (localStorage.getItem(KEY)) return; } catch (e) {}
 
     if (!document.getElementById('ds-toast-style')) {
@@ -786,10 +786,10 @@
     toast.setAttribute('role', 'status');
     toast.innerHTML =
       '<div class="ds-toast-body">' +
-        '<span class="ds-toast-emoji">⚖️</span>' +
+        '<span class="ds-toast-emoji">🎯</span>' +
         '<div class="ds-toast-text">' +
-          '<b>대장주 가중을 예측에 추가했어요.</b>' +
-          '<span>삼성전자·SK하이닉스 등 대장주의 코스피 지수 가중치를 방향 예측 로직에 반영했어요.</span>' +
+          '<b>하락 예측 정확도를 개선했어요.</b>' +
+          '<span>원/달러 환율 신호를 추가하고, 하락 판정 기준을 더 엄격하게 조정해 예측 편향을 교정했어요.</span>' +
         '</div>' +
       '</div>' +
       '<button class="ds-toast-close" type="button" aria-label="닫기">×</button>';
@@ -846,6 +846,7 @@
     w.innerHTML =
       '<div class="leaders-widget__header"><span class="leaders-widget__ic">📈</span>' +
         '<span class="leaders-widget__title">코스피 주도주</span>' +
+        '<span class="leaders-widget__badge-24h" title="장중엔 실시간 시세, 마감 후엔 24시간 글로벌 파생 시세로 자동 갱신돼요">24H 갱신</span>' +
         '<span class="leaders-widget__live" id="lw-live" style="display:none"><span class="leaders-widget__live-dot"></span>LIVE</span>' +
         '<button class="leaders-widget__refresh" id="lw-refresh" type="button" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>' +
         '<span class="leaders-widget__pill" id="lw-pill">🌙 HL 24h</span></div>' +
@@ -873,6 +874,7 @@
     var got = false;
     var X0 = 8, X1 = 292, YT = 12, YB = 86;
     var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, curCode = STOCKS[0].code;
+    var prevPrice = {};
 
     function fmt(v) { return v >= 1000 ? v.toLocaleString('ko-KR') : v; }
     function timeToX(t) {
@@ -891,7 +893,15 @@
       var t = w.querySelector('.leaders-widget__tile[data-code="' + code + '"]');
       if (!t || price == null) return;
       got = true;
-      t.querySelector('.leaders-widget__tile-price').textContent = Math.round(price).toLocaleString('ko-KR');
+      var priceEl = t.querySelector('.leaders-widget__tile-price');
+      priceEl.textContent = Math.round(price).toLocaleString('ko-KR');
+      var prev = prevPrice[code];
+      if (prev != null && prev !== price) {
+        priceEl.classList.remove('mkt-flash-up', 'mkt-flash-dn');
+        void priceEl.offsetWidth;
+        priceEl.classList.add(price > prev ? 'mkt-flash-up' : 'mkt-flash-dn');
+      }
+      prevPrice[code] = price;
       var c = t.querySelector('.leaders-widget__tile-chg');
       if (chg == null) { c.textContent = '—'; c.className = 'leaders-widget__tile-chg'; }
       else { var up = chg >= 0; c.textContent = (up ? '▲' : '▼') + Math.abs(chg).toFixed(2) + '%'; c.className = 'leaders-widget__tile-chg ' + (up ? 'up' : 'dn'); }
