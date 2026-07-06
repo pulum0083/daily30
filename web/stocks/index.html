@@ -678,6 +678,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .two{grid-template-columns:minmax(0,1fr);}
   .hero{gap:14px;}
   .hero .search{min-width:0;width:100%;}
+  /* 섹터별 종목 탭 — 모바일에서 섹션 내부 스크롤 중엔 GNB 아래 고정, 섹션을 벗어나면(부모 .block 하단) 자동 해제.
+     부모 .block의 overflow:hidden이 sticky 기준을 깨뜨려 이 카드만 overflow를 풀고, 모서리 둥근 처리를 자식에 직접 부여해 유지. */
+  .sbx-block{overflow:visible;}
+  .sbx-block .block__h{border-radius:10px 10px 0 0;}
+  .sbx-block .sbx-body{border-radius:0 0 10px 10px;}
+  #sbx-tabs{position:sticky;top:52px;z-index:5;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
+  #sbx-tabs::-webkit-scrollbar{display:none;}
+  #sbx-tabs .rt{display:none;}
 }
 @media(max-width:600px){
   .wrap{padding:12px 14px 52px;}
@@ -1401,7 +1409,7 @@ function usSel(code){
     <div class="home-cols">
     <div class="home-main">
     <!-- 섹터별 종목 브라우저 (탭 전환) -->
-    <div class="block">
+    <div class="block sbx-block">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 종목</span><span class="block__s"><span class="sbx-live off" id="sbx-live"><span class="sl-dot"></span>—</span></span></div>
       <div class="sbx-tabs" id="sbx-tabs">
         <span class="skl" style="width:70px;height:28px;border-radius:999px;"></span><span class="skl" style="width:82px;height:28px;border-radius:999px;"></span><span class="skl" style="width:70px;height:28px;border-radius:999px;"></span><span class="skl" style="width:60px;height:28px;border-radius:999px;"></span>
