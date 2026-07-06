@@ -1,7 +1,7 @@
 {# 섹터별 종목 리스트 정적 페이지 (검색 유입 영구 자산) #}
 {% extends "base.html" %}
-{% block title %}{{ sector_emoji }} {{ sector_label }} 종목 — Double-Shot{% endblock %}
-{% block og_title %}{{ sector_emoji }} {{ sector_label }} 종목 — Double-Shot{% endblock %}
+{% block title %}{{ sector_emoji }} {{ sector_label }} 주도주 — Double-Shot{% endblock %}
+{% block og_title %}{{ sector_emoji }} {{ sector_label }} 주도주 — Double-Shot{% endblock %}
 {% block og_desc %}{{ sector_label }} 섹터 {{ breadth.total }}종목 · 섹터 평균 {{ avg_pct_fmt }} · 종가·52주 레인지 실측{% endblock %}
 {% block head_extra %}
 <style>
@@ -110,7 +110,7 @@
     <button class="sector-back" onclick="goBack()" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <span><a href="/stocks/">종목 홈</a> › {{ sector_emoji }} {{ sector_label }}</span>
   </div>
-  <h1 class="sector-page-title">{{ sector_emoji }} {{ sector_label }}</h1>
+  <h1 class="sector-page-title">{{ sector_emoji }} {{ sector_label }} 주도주</h1>
   <p class="sector-page-sub">{{ breadth.total }}종목 · {{ snapshot_date }} 기준 <span id="live-status" class="sector-live off" data-snap="{{ snapshot_date }}"><span class="sl-dot"></span>장마감 · {{ snapshot_date }} 종가 기준</span></p>
   <script>
   /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
