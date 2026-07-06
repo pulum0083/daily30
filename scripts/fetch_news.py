@@ -62,11 +62,18 @@ KOSPI_PROMPT = """\
 - 오늘 예정된 주요 경제 지표 또는 이벤트 (FOMC, CPI 등)
 - 반도체·기술주 관련 최신 이슈 (NVDA, TSMC 등)
 - 원유·환율 최신 동향
+- **주도주 기업 이벤트**: 코스피 대형주(삼성전자·SK하이닉스·현대차 등)의 상장·ADR·M&A·지분매각·신사업 진출·대형 수주·설비투자·실적 발표
+- **인과 촉매**: 특정 섹터/주도주 등락의 '원인'이 된 사건 — 특히 미국 빅테크 전략 뉴스(클라우드·자체 칩 설계·감산·투자)가 한국 반도체·2차전지에 미치는 파급(read-through)
 
 [key_indicators 작성 규칙]
 - 반드시 실제 수치(%, 금액)를 포함한다
 - 오늘 코스피에 직접 영향을 줄 이슈만 포함한다
 - 포함 금지: YTD 수익률, 연간 상승률, 애널리스트 중장기 전망
+
+[catalysts 작성 규칙]
+- 오늘 코스피 주도주·섹터를 움직일 '사건' 중심 뉴스만 담는다 (지수 등락률 나열이 아님)
+- 각 항목은 "무슨 사건 → 어느 종목·섹터에 왜 영향" 형태의 한 문장. 실제로 검색된 사건만 담고, 없으면 빈 배열 []
+- 예: "메타, 자체 AI 추론 칩 설계 확대 발표 → 기존 메모리 수요 둔화 우려로 한국 반도체 투자심리 위축"
 
 출력 형식 (JSON만, 다른 텍스트 없이):
 {{
@@ -76,6 +83,9 @@ KOSPI_PROMPT = """\
     "오늘 예정된 경제 지표 또는 이벤트",
     "반도체·기술주 이슈",
     "원유·환율 동향"
+  ],
+  "catalysts": [
+    "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만, 없으면 이 배열은 비운다)"
   ],
   "headlines": [
     "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1",
@@ -179,7 +189,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         config=types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.3,
-            max_output_tokens=1024,
+            max_output_tokens=1400,
         ),
     )
     if not response.text:
@@ -213,6 +223,7 @@ def _is_retryable_error(e: Exception) -> bool:
 
 EMPTY_NEWS = {
     "key_indicators": [],
+    "catalysts": [],
     "headlines": [],
     "market_sentiment": "neutral",
 }
