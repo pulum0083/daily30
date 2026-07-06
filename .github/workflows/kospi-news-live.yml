@@ -94,6 +94,13 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # doubleshot.space는 "double-shot" 프로젝트 소속. 이 저장소의 실제 GitHub repo명이
+          # "daily30"이라 프로젝트 링크 없이 `vercel deploy`를 돌리면 CLI가 이름만 보고
+          # 엉뚱한 "daily30" 프로젝트로 자동 연결해버린다(2026-07-06 발견). 그러면 복구 배포가
+          # daily30-seven.vercel.app에만 나가고 doubleshot.space는 영영 갱신되지 않아
+          # 알림이 매번 반복 발송된다 — 반드시 double-shot 프로젝트로 명시 고정한다.
+          VERCEL_ORG_ID: team_iPwo9taZIskxdoXOJu9assy2
+          VERCEL_PROJECT_ID: prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo
         run: |
           sleep 30
           expected=$(python3 -c "import json; print(json.load(open('web/data/kospi-news-live.json')).get('updated_at',''))")
@@ -107,6 +114,13 @@ jobs:
           if [ -n "$VERCEL_TOKEN" ]; then
             echo "→ vercel --prod 로 자동 복구 시도"
             npx --yes vercel deploy --prod --yes --token "$VERCEL_TOKEN" || echo "자동 복구 실패"
+            sleep 15
+            live=$(curl -s --max-time 10 "https://doubleshot.space/data/kospi-news-live.json" | python3 -c "import json,sys; print(json.load(sys.stdin).get('updated_at',''))" 2>/dev/null || echo "")
+            echo "재확인: live=$live"
+            if [ "$live" = "$expected" ]; then
+              echo "✓ 자동 복구로 반영 확인됨 — 알림 생략"
+              exit 0
+            fi
           fi
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
             curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
