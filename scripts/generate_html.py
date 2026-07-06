@@ -224,7 +224,7 @@ def build_reasons(analysis: dict) -> dict:
     ctx = {
         "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
-        "reasons": analysis.get("reasons", [])[:4],
+        "reasons": analysis.get("reasons", [])[:6],
         "comfort_line": _split_comfort_line(analysis.get("comfort_line", "")),
     }
     if fmt == "scenario":

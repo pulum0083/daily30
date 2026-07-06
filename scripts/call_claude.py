@@ -176,15 +176,16 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 - 2문장: 오늘 섹터·매크로 촉매와 추가 상승 여력 전망을 쓴다.
 
 ### 예측 근거(reasons) 작성 규칙
-- 정확히 4개. 중요도 내림차순 (배열 앞쪽 = 코스피에 영향이 큰 지표)
-- 각 항목은 **150자 이내**, 이모지 1개로 시작 (규칙 A의 두 패턴을 섞어 쓴다 — 모두 "주장→데이터"로 통일하지 않는다)
+- 정확히 6개. 중요도 내림차순 (배열 앞쪽 = 코스피에 영향이 큰 지표)
+- 각 항목은 **250자 이내**, 이모지 1개로 시작 (규칙 A의 두 패턴을 섞어 쓴다 — 모두 "주장→데이터"로 통일하지 않는다)
+- 짧게 끊지 말고 근거를 충분히 풀어 쓴다. 주장 뒤에 데이터·배경·시사점을 2~3문장으로 이어 붙여 각 항목을 밀도 있게 채운다.
 - 지표·수치는 반드시 <b>수치</b> 형식으로 강조
 
-**[구조 규칙] reasons[0]은 고정, reasons[1]~[3]은 매일 동적으로 선택**
+**[구조 규칙] reasons[0]은 고정, reasons[1]~[5]는 매일 동적으로 선택**
 
 reasons[0] — 오늘의 전체 시장 방향 요약 (항상 포함, 나스닥·S&P500·NQ선물 등 핵심 미국 지수 언급)
 
-reasons[1]~[3] — 아래 시그널 풀에서 **오늘 실제 데이터 기준으로 가장 임팩트 있는 3개**를 골라 작성한다.
+reasons[1]~[5] — 아래 시그널 풀에서 **오늘 실제 데이터 기준으로 가장 임팩트 있는 5개**를 골라 작성한다.
 매번 같은 패턴(반도체 → 경제지표 → VIX)을 반복하지 않는다.
 데이터가 크게 움직인 것, 오늘 시장에 가장 영향이 큰 것을 우선 선택한다.
 
@@ -331,7 +332,7 @@ us_linked_story를 지시받았더라도 뉴스 요약에 마땅한 미국 이�
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, comfort_line, 그리고 sector_focus·us_linked_story 두 키 (지시받은 하나는 객체, 나머지는 반드시 null)**
+**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, comfort_line, 그리고 sector_focus·us_linked_story 두 키 (하단 심층 섹션은 현재 사용하지 않으므로 두 키 모두 반드시 null)**
 reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타이틀이 공백이 된다.
 
 {
@@ -374,24 +375,11 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
     "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도할 것 같아요.",
     "🇺🇸 외국인이 <b>+3,820억원</b> 순매수 전환. 원화 강세도 외국인 유입에 우호적이에요."
   ],
-  "us_linked_story": {
-    "title": "마이크론 실적 발표 — 내일 새벽, HBM 가이던스가 핵심",
-    "paragraphs": [
-      "마이크론이 한국시간 내일 새벽 실적을 발표해요. 시장이 주목하는 건 HBM 매출 가이던스예요.",
-      "월가 컨센서스는 매출 <b>$8.8B</b>(YoY +50%)이에요. HBM 매출이 <b>$2.5B+</b> 가이던스가 나오면 SK하이닉스에 직접 호재예요.",
-      "반대로 DRAM 재고 증가 시그널이 나오면 반도체 섹터 전체가 눌릴 수 있어요."
-    ],
-    "related_stocks": [
-      {"name": "SK하이닉스", "code": "000660"},
-      {"name": "삼성전자", "code": "005930"},
-      {"name": "MU", "code": "MU"}
-    ]
-  },
+  "us_linked_story": null,
   "sector_focus": null
 }
 
-(위 예시는 us_linked_story를 지시받은 경우다. sector_focus를 지시받았다면 반대로 `"us_linked_story": null`로 두고 sector_focus를 아래 형태로 채운다:
-  "sector_focus": {"sector_key": "semicon", "sector_name": "반도체", "emoji": "🏭", "signal": "한 문장 30자 이내.", "paragraphs": ["문단1", "문단2", "문단3"]})
+(us_linked_story·sector_focus 하단 심층 섹션은 현재 사용하지 않는다. 두 키 모두 항상 null로 출력한다.)
 
 **[위로 한 줄(comfort_line) 규칙 — 형식과 무관하게 항상 출력]**
 근거 섹션 맨 아래에 붙는, 글을 읽는 투자자에게 건네는 순수 정서적 위로 한 줄이다.
@@ -402,42 +390,42 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 **[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
 
 ### 형식 A: bullet
-`reason_title`(훅 타이틀) + `reasons`(4개 불릿 배열) 출력.
-기존 방식 그대로.
+`reason_title`(훅 타이틀) + `reasons`(6개 불릿 배열) 출력.
+위 "예측 근거(reasons) 작성 규칙" 그대로 — 6개, 각 250자 이내로 충분히 밀도 있게 쓴다.
 
 ### 형식 B: scenario
 `reason_title` + 아래 6개 필드 출력:
-- `sc_summary`: 오늘 시장 한 줄 요약 (예측 방향 + 핵심 팩터)
+- `sc_summary`: 오늘 시장 2문장 요약 (예측 방향 + 핵심 팩터 + 배경)
 - `sc_left_label`: 왼쪽 컬럼 레이블 (상승우위="상승 근거", 하락우위="하락 근거")
 - `sc_right_label`: 오른쪽 컬럼 레이블 (상승우위="리스크", 하락우위="반등 가능성")
-- `sc_left_items`: 왼쪽 항목 정확히 3개 (각 60자 이내, <b> 수치 강조 포함)
-- `sc_right_items`: 오른쪽 항목 정확히 3개 (각 60자 이내)
-- `sc_footer`: 다음 세션 핵심 변수 1문장 (해요체)
+- `sc_left_items`: 왼쪽 항목 정확히 4개 (각 100자 이내, <b> 수치 강조 포함)
+- `sc_right_items`: 오른쪽 항목 정확히 4개 (각 100자 이내)
+- `sc_footer`: 다음 세션 핵심 변수 1~2문장 (해요체)
 `reasons` 필드는 출력하지 않는다.
 
 ### 형식 C: why_what_so
 `reason_title` + 아래 4개 필드 출력:
-- `reason_lead`: 오늘 시장 전반 2문장 요약 (지수 등락폭·방향과 핵심 이유)
-- `why`: 시장을 움직인 근본 원인 1~2문장
-- `what`: 강한/약한 섹터·종목 구체 수치 1~2문장
-- `so_what`: 다음 세션 시사점 정확히 1문장 (해요체)
+- `reason_lead`: 오늘 시장 전반 2~3문장 요약 (지수 등락폭·방향과 핵심 이유)
+- `why`: 시장을 움직인 근본 원인 2~3문장
+- `what`: 강한/약한 섹터·종목 구체 수치 2~3문장
+- `so_what`: 다음 세션 시사점 1~2문장 (해요체)
 `reasons` 필드는 출력하지 않는다.
 
 ### 형식 D: qa
 `reason_title`(질문을 부르는 훅 타이틀, 예: "오늘, 코스피 사야 할까요?") + 아래 필드 출력:
-- `qa_items`: 정확히 2~3개. 각 항목은 `{"q": ..., "a": ...}` 객체.
+- `qa_items`: 정확히 3~4개. 각 항목은 `{"q": ..., "a": ...}` 객체.
   - `q`: 개인투자자가 실제로 던질 법한 질문. 해요체 의문문, 40자 이내.
-  - `a`: 그 질문에 대한 답변. 완결된 해요체 2~3문장, <b> 수치 강조 포함. 데이터 근거로 답한다.
+  - `a`: 그 질문에 대한 답변. 완결된 해요체 3~4문장, <b> 수치 강조 포함. 데이터 근거로 답한다.
 `reasons` 필드는 출력하지 않는다.
 
 ### 형식 E: signal
 `reason_title`(훅 타이틀) + 아래 필드 출력:
-- `sig_verdict`: 종합 판정 한 줄 (예: "강세 우위 · 신호 5개 중 3개가 상승"). 해요체 아님, 압축 라벨.
+- `sig_verdict`: 종합 판정 한 줄 (예: "강세 우위 · 신호 6개 중 4개가 상승"). 해요체 아님, 압축 라벨.
 - `sig_tone`: `sig_verdict`의 전반 톤. "up"(강세 우위) / "neu"(중립) / "down"(약세 우위) 중 하나.
-- `sig_items`: 정확히 4~5개. 각 항목은 `{"level": ..., "label": ..., "desc": ...}` 객체.
+- `sig_items`: 정확히 6~7개. 각 항목은 `{"level": ..., "label": ..., "desc": ...}` 객체.
   - `level`: "up"(상승/강세 신호) / "neu"(중립·경계 신호) / "down"(하락/약세 신호) 중 하나.
   - `label`: 팩터명. 12자 이내 (예: "외국인 수급", "반도체", "FOMC").
-  - `desc`: 그 팩터 설명. **완결된 해요체 1문장**, <b> 수치 강조 포함.
+  - `desc`: 그 팩터 설명. **완결된 해요체 1~2문장**, <b> 수치 강조 포함.
 `reasons` 필드는 출력하지 않는다.
 """
 
@@ -1182,43 +1170,14 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             user_content += hint
             print(f"[call_claude] Avoidance hint injected ({len(history[:3])} recent days)")
 
-    # 하단 심층 섹션 — sector_focus / us_linked_story 중 날짜 시드 랜덤 택1 (kospi 아침만)
+    # 하단 심층 섹션 — 2026-07-07 중단. us_linked_story·sector_focus 모두 생성하지 않는다.
+    # 되살리려면 이전 커밋의 섹터/us 랜덤 택1 로직을 복원할 것.
     if briefing_type == "kospi":
-        # us_linked 주제 힌트가 지정된 날은 us_linked로 강제 (수동 오버라이드 우선)
-        us_topic = None
-        hint_path = DATA_DIR / "us_linked_hint.json"
-        if hint_path.exists():
-            try:
-                hint_data = json.load(open(hint_path, encoding="utf-8"))
-                if hint_data.get("date") == date_str and hint_data.get("topic"):
-                    us_topic = hint_data["topic"]
-            except (json.JSONDecodeError, KeyError):
-                pass
-
-        # 날짜를 시드로 한 재현 가능한 랜덤 — 같은 날 재실행 시 동일 섹션 보장 (스냅샷 안정)
-        section_choice = "us" if us_topic else random.Random(f"section-{date_str}").choice(["sector", "us"])
-
-        # 섹터 로테이션 회피 힌트 — 직접 sector 선택일·us 폴백일 모두에 유효하므로 항상 주입
-        sector_history = [h for h in load_sector_history("kospi") if h.get("date") != date_str]
-        sector_hint = build_sector_avoidance_hint(sector_history, days=5)
-        if sector_hint:
-            user_content += sector_hint
-
-        if section_choice == "sector":
-            user_content += (
-                "\n\n## 🎯 오늘 하단 섹션 지정\n"
-                "오늘 하단 심층 섹션은 **sector_focus**를 작성한다. `us_linked_story`는 반드시 null로 출력한다.\n"
-            )
-        else:
-            user_content += (
-                "\n\n## 🎯 오늘 하단 섹션 지정\n"
-                "오늘 하단 심층 섹션은 **us_linked_story**를 작성한다. `sector_focus`는 반드시 null로 출력한다.\n"
-                "단, 뉴스 요약에 마땅한 미국 이벤트가 없으면 us_linked_story를 null로 두고 sector_focus를 대신 작성한다(폴백).\n"
-            )
-            if us_topic:
-                user_content += f"오늘 us_linked_story는 반드시 다음 주제로 작성한다: {us_topic}\n"
-                print(f"[call_claude] US linked story hint: {us_topic}")
-        print(f"[call_claude] Bottom section → {section_choice}")
+        user_content += (
+            "\n\n## 🎯 오늘 하단 섹션 지정\n"
+            "오늘은 하단 심층 섹션을 작성하지 않는다. `us_linked_story`와 `sector_focus` 모두 반드시 null로 출력한다.\n"
+        )
+        print("[call_claude] Bottom section → disabled")
 
     # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
     _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
