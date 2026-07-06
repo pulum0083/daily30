@@ -30,6 +30,10 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
+# 브리핑 근거 섹션 형식 로테이션 — bullet은 가장 단조로운 포맷이라 가중치를 가장 낮게 둔다
+FORMAT_POOL = ["bullet", "scenario", "why_what_so", "qa", "signal"]
+FORMAT_WEIGHTS = [1, 2, 2, 2, 2]
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 섹터 로테이션 풀 (코스피 아침 브리핑 — sector_focus)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1180,9 +1184,8 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         )
         print("[call_claude] Bottom section → disabled")
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
-    _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
-    chosen_format = random.choice(_formats)
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — bullet 가중치 최소
+    chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
 
@@ -1489,9 +1492,8 @@ def call_claude_closing(date_str: str) -> dict:
     if news_summary:
         user_content += f"\n뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
-    _formats = ["bullet", "scenario", "why_what_so", "qa", "signal"]
-    chosen_format = random.choice(_formats)
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — bullet 가중치 최소
+    chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
 
