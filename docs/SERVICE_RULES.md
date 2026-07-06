@@ -444,6 +444,8 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 
 **재발 감지 — 자동화됨**: `kospi-news-live.yml`에 "🔍 프로덕션 배포 반영 확인" 스텝 추가. 푸시 후 30초 대기, `doubleshot.space/data/kospi-news-live.json`의 `updated_at`을 방금 커밋한 로컬 값과 대조. 불일치 시 `VERCEL_TOKEN` 시크릿이 있으면 `vercel deploy --prod`로 자동 복구 시도, 그리고 `TELEGRAM_ADMIN_CHAT_ID`로 관리자 알림 발송. `VERCEL_TOKEN`을 GitHub Secrets에 추가하면 자동 복구까지 되고, 없으면 알림만 온다(Vercel 계정 설정 → Tokens에서 발급).
 
+**두 번째 근본 원인 확정 (2026-07-06)**: 위 자동 복구가 매번 실패해 텔레그램 알림이 계속 반복 발송되는 사고 발생. 원인은 **자동 복구가 엉뚱한 Vercel 프로젝트에 배포하고 있었기 때문**이다. 이 GitHub 저장소의 실제 이름은 `pulum0083/daily30`인데(로컬 디렉터리명 `double-shot`과 다름), `kospi-news-live.yml`의 복구 스텝은 매번 새 체크아웃에서 `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` 없이 `vercel deploy --prod`를 돌렸다. 프로젝트 링크가 없는 상태에서 Vercel CLI는 저장소/디렉터리 이름으로 프로젝트를 자동 매칭하는데, 이때 `daily30`이라는 이름의 (실제로는 `doubleshot.space`와 무관한) 별개 프로젝트로 연결돼버렸다. 즉 복구 배포가 `daily30-seven.vercel.app`에는 매번 성공하면서 정작 `doubleshot.space`(별도 프로젝트 `double-shot`, ID `prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo`, org `team_iPwo9taZIskxdoXOJu9assy2` 소속)는 전혀 갱신되지 않아, 미반영이 영구화되고 알림이 매 실행마다 반복됐다. 해결: 복구 스텝 env에 `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID`를 `double-shot` 프로젝트로 명시 고정 + 복구 시도 후 재확인해서 실제 반영됐으면 알림을 생략하도록 수정. **Vercel 프로젝트/도메인 관련 자동화를 새로 추가할 때는 항상 프로젝트를 명시적으로 고정할 것 — 저장소 이름과 도메인이 연결된 프로젝트명이 다르면 CLI의 자동 매칭을 신뢰하지 말 것.**
+
 **수동 복구 (알림 받았을 때)**:
 ```bash
 vercel ls                 # 최근 배포가 Canceled인지 확인
