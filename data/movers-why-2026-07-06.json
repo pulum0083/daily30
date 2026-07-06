@@ -1,19 +1,45 @@
 {
-  "generated_at": "2026-07-06T09:01:24.365854+09:00",
+  "generated_at": "2026-07-06T09:31:16.835320+09:00",
   "date": "2026-07-06",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 1.62,
-      "surge": 0.03,
+      "changePct": 3.07,
+      "surge": 0.16,
       "events": [
         {
           "time": "07:56",
           "headline": "메리츠증권 \"삼성전자 2분기 영업이익 90조원 전망…목표주가 50만원 상향\"",
           "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE9vbW9CYXJhZnJ6NE9TNF9PUjc5d094Q2tyZEl4ZzBoZ0JYeHRRX0xtZDl4QWZEVHlKTzlKaHQ5VDFhUk0zaFY1UU5kVzN2UmxVbElQQWVvelFZR0oxRms1N2I4OGY4dzZ3c0Jheg?oc=5",
           "source": "나눔경제뉴스",
-          "why": "메리츠증권은 삼성전자 2분기 영업이익을 90조원으로 전망하며 목표주가를 50만원으로 상향 조정했다. (개별 인과 단정 안 함)",
+          "why": "메리츠증권은 삼성전자의 2분기 영업이익을 90조원으로 전망하며 목표주가를 50만원으로 상향 조정했다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:16",
+          "headline": "실적발표 앞둔 삼성전자, 3%대 강세...32만전자 회복",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9ZeGdDYTJ6QXhibWpiTzlSQmMwOElxd2VsZTE5ZFhIOC1abWg5cElGMDJXVzNqanNkQXpuQ2psaDg4aW5PNmVEYVBFVzhnYmg0UmRyNnY3RV80Zw?oc=5",
+          "source": "파이낸셜뉴스",
+          "why": "실적발표 앞둔 삼성전자, 3%대 강세...32만전자 회복",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
+    },
+    {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "changePct": 0.21,
+      "surge": 0.14,
+      "events": [
+        {
+          "time": "07:40",
+          "headline": "SK하이닉스, 7월 10일 나스닥 상장 추진…'294억 달러' 역대급 핵폭탄급 매크로 이벤트",
+          "url": "https://news.google.com/rss/articles/CBMid0FVX3lxTE5mQ1pnblNWRU44cy04TXY1T21UOFBiZ0YwRWV5SV9ERV8tNDRGN2dSdEFDU1YydDhvZ0ttSElpYXoya29ERHRZNlFhZGgtOTk1elRMUkFzMHduakZyb3ZibEo4ZzJYSkZya1ZIYU9WWS1wUUJiNTRV?oc=5",
+          "source": "한국경제TV",
+          "why": "SK하이닉스가 7월 10일 역대급 규모인 294억 달러 규모의 ADR을 나스닥에 상장할 예정이다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
@@ -29,36 +55,10 @@
       ]
     },
     {
-      "code": "000660",
-      "name": "SK하이닉스",
-      "changePct": -0.87,
-      "surge": 0.02,
-      "events": [
-        {
-          "time": "07:41",
-          "headline": "SK하이닉스, 7월 10일 나스닥 상장 추진…'294억 달러' 역대급 핵폭탄급 매크로 이벤트",
-          "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE8zOVViWVNDUTVvT0I3RnpSSVBRYmVvQUJYV3ZCNFRBN0xkdTRPODA0Z2RkTENVVnExXzlZcnFGbGRzTGV3ejQ1NTNCN3duQjh1SnBn?oc=5",
-          "source": "네이트",
-          "why": "SK하이닉스가 7월 10일 나스닥 상장을 추진하며 약 294억 달러 규모의 대형 이벤트가 예상됩니다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
-        },
-        {
-          "time": "08:36",
-          "headline": "삼성전자 주식 매도하는 내부자는…6월에 임원 4명 19억 처분",
-          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFAtQzFWY2h6NEkzV21HUG1veEMyZHhDSXBIaUZuTUhXakd2V1dSVW9lZDZkcTNwaS1kVklOR0ptN1U1M1pKalVRMEFwSnB4VWhQWHp5alNtakFXem0tc2FYWWg3dmlxSWM5aWhFcHV3eWk?oc=5",
-          "source": "연합인포맥스",
-          "why": "삼성전자 주식 매도하는 내부자는…6월에 임원 4명 19억 처분 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
-        }
-      ]
-    },
-    {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.71,
-      "surge": 0.01,
+      "changePct": 0.81,
+      "surge": 0.12,
       "events": []
     }
   ]
