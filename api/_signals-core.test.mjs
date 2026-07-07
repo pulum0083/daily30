@@ -9,6 +9,19 @@ test('역행: 시장 -5.8%인데 종목 +1.7% → counter_up', () => {
   assert.ok(r.cats.includes('counter_up'));
 });
 
+test('급락일 보정: 시장 -5.8%인데 종목 +0.8%(하한선 미달) → counter_up 아님', () => {
+  // 하한선 = min(1.5, 5.8*0.25=1.45) = 1.45. +0.8%는 미달이라 '살짝 초록'은 역행 상승으로 안 잡힌다.
+  const s = { pct: 0.8, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, -5.8);
+  assert.ok(!r.cats.includes('counter_up'));
+});
+
+test('상승장에선 역행 하한선 미적용: 시장 +4%인데 종목 -1% → counter_up 유지', () => {
+  const s = { pct: -1, vol: 100, vol_avg20: 100, price: 50, wk52_high: 200 };
+  const r = classifyStock(s, 4);
+  assert.ok(r.cats.includes('counter_up'));
+});
+
 test('투매: 거래량 3.2배 + -8.4% → vol_surge', () => {
   const s = { pct: -8.4, vol: 320, vol_avg20: 100, price: 100, wk52_high: 200 };
   const r = classifyStock(s, -5.8);
@@ -53,9 +66,9 @@ test('신호 없는 종목은 signals에서 제외', () => {
 test('랭킹은 신호별 그룹 + 종목수 내림차순', () => {
   const stocks = [
     { code: '1', name: 'A', sector: 'semicon', pct: 1.7, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 5 },
-    { code: '2', name: 'B', sector: 'semicon', pct: 1.2, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 4 },
+    { code: '2', name: 'B', sector: 'semicon', pct: 1.6, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 4 },
   ];
-  const { rank } = buildSignals(stocks, -5.8); // 둘 다 counter_up
+  const { rank } = buildSignals(stocks, -5.8); // 둘 다 하한선(1.45) 위 → counter_up
   const cu = rank.find(g => g.cat === 'counter_up');
   assert.equal(cu.items.length, 2);
 });
@@ -80,6 +93,17 @@ test('리드 헤드라인: 인버스 거래량 배수 크면 인버스 헤드라
   const lead = etfLead({ invVolMultiple: 46 });
   assert.ok(lead.title.includes('인버스'));
   assert.ok(lead.body.includes('46'));
+});
+
+test('리드 헤드라인: 거래량↑지만 거래대금 비중 중립(49%)이면 엇갈림 톤으로 완화', () => {
+  const lead = etfLead({ invVolMultiple: 52, downRatio: 49 });
+  assert.ok(lead.title.includes('엇갈린'));
+  assert.ok(lead.body.includes('52'));
+});
+
+test('리드 헤드라인: 거래대금도 하락 우위(72%)면 인버스 헤드라인 유지', () => {
+  const lead = etfLead({ invVolMultiple: 52, downRatio: 72 });
+  assert.ok(lead.title.includes('인버스'));
 });
 
 import { classifySupply } from './_signals-core.mjs';

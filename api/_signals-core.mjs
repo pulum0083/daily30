@@ -3,13 +3,18 @@
 import { SECTOR_LABEL, ETF_BET_DOWN, ETF_BET_UP, ETF_KOSPI200, ETF_SECTOR, ETF_SAFE } from './_etf-universe.mjs';
 
 export const COUNTER_TREND_OUTPERF = 3.0;
+// 급락일 보정: 지수가 크게 빠진 날은 '살짝 초록'인 종목까지 전부 역행 상승으로 잡혀 배지 변별력이 사라진다.
+// 시장이 하락한 날엔 종목이 실제로 이 하한선 이상 오른 경우만 역행 상승으로 인정한다(지수 낙폭에 비례, 최대 1.5%).
+export const COUNTER_MIN_GAIN_FACTOR = 0.25;
+export const COUNTER_MIN_GAIN_CAP = 1.5;
 export const VOL_SURGE_MIN = 1.5;
 export const CAPITULATION_DROP = -3.0;
 export const TURNOVER_TOP_N = 3;
 export const NEAR_HIGH_RATIO = 0.98;
 export const SIGNALS_DISPLAY_MAX = 10; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계)
-// 카드 정렬 가중치 — 역행·신고가 같은 희소 신호를 위로, 흔한 수급은 아래로
-const SIGNAL_SCORE = { counter_up: 5, near_high: 4, vol_surge: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
+// 카드 정렬 가중치 — 신고가·투매 같은 희소 신호를 최상위로. 급락일엔 역행 상승이 흔해지므로
+// '그냥 초록'인 counter_up 보다, 급락장에도 신고가에 붙은 진짜 강세(near_high)와 투매(vol_surge)를 우선한다.
+const SIGNAL_SCORE = { near_high: 5, vol_surge: 4, counter_up: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
 
 const sgn = (x) => (x > 0 ? 1 : x < 0 ? -1 : 0);
 
@@ -19,8 +24,9 @@ export function classifyStock(stock, kospiPct) {
   const badges = [];
   const { pct, vol, vol_avg20, price, wk52_high } = stock;
 
-  // 역행: 방향 반대 + 아웃퍼폼
-  if (sgn(pct) !== sgn(kospiPct) && Math.abs(pct - kospiPct) >= COUNTER_TREND_OUTPERF) {
+  // 역행: 방향 반대 + 아웃퍼폼. 단, 시장이 하락한 날엔 종목이 실제로 하한선 이상 올라야 인정(급락일 변별력 보정).
+  const counterFloor = kospiPct < 0 ? Math.min(COUNTER_MIN_GAIN_CAP, Math.abs(kospiPct) * COUNTER_MIN_GAIN_FACTOR) : -Infinity;
+  if (sgn(pct) !== sgn(kospiPct) && Math.abs(pct - kospiPct) >= COUNTER_TREND_OUTPERF && pct >= counterFloor) {
     cats.push('counter_up');
     badges.push('역행 상승');
   }
@@ -149,7 +155,17 @@ export function classifySupply(trend) {
 
 export function etfLead(betting) {
   const m = betting?.invVolMultiple || 0;
+  const dr = betting?.downRatio;
   if (m >= 5) {
+    // 거래량(인버스 회전)은 폭증했지만 방향 베팅(거래대금 비중)이 중립권(40~60%)이면
+    // 헤드라인이 '하락 대비 수요'만 단정하는 건 과장이다. 두 신호가 엇갈릴 땐 중립 톤으로 완화.
+    const conflict = typeof dr === 'number' && dr >= 40 && dr <= 60;
+    if (conflict) {
+      return {
+        title: '엇갈린 ETF 신호 · 거래량↑ 방향은 중립',
+        body: `KODEX 인버스 거래량이 KODEX 200의 <b>${m}배</b>지만, 인버스·레버리지 거래대금은 <b>${dr} : ${100 - dr}</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.`,
+      };
+    }
     return {
       title: '인버스 ETF 거래량 폭증 · 하락 대비 수요 확대',
       body: `KODEX 인버스 거래량이 KODEX 200의 <b>${m}배</b>예요. 급락장에서 하락 대비·저점매수·안전자산 수요가 동시에 움직였어요.`,
