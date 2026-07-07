@@ -3119,7 +3119,7 @@ if(passBtn){
   function sbxPctFmt(p){return (p>0?'+':'')+p.toFixed(2)+'%';}
   function sbxWon(n){return Math.round(n).toLocaleString();}
   // 섹터 상세 페이지(sector/*/index.html)와 동일한 곡선 스파크 양식 — 중간점 앵커 베지어 + 그라디언트 채움
-  function sbxSpark(vals){
+  function sbxSpark(vals, isLive){
     if(!vals||vals.length<2) return '';
     var W=240,H=34,padT=3,padB=3,n=vals.length;
     var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
@@ -3132,7 +3132,8 @@ if(passBtn){
       d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
     }
     var gid='sbx-grad-'+Math.random().toString(36).slice(2,8);
-    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
+    // data-curve: live(오늘 장중 1분봉)/static(20거래일 종가) 구분 — DOM에서 확인 가능하게
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" data-curve="'+(isLive?'live':'static')+'" aria-label="'+(isLive?'오늘 장중 추이':'최근 20거래일 종가 추이')+'">'
       +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
       +'<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'
       +'<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'
@@ -3143,6 +3144,7 @@ if(passBtn){
   // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
   var sbxIntraday={};
   function sbxCurve(s){var iv=sbxIntraday[s.code]; return (iv&&iv.length>=2)?iv:s.spark20;}
+  function sbxCurveIsLive(s){var iv=sbxIntraday[s.code]; return !!(iv&&iv.length>=2);}
   function sbxTodayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
   // 현재 섹터 종목들의 오늘 장중 곡선을 /api/intraday(CDN 30초 캐시)로 받아 해당 카드 곡선만 교체.
   function sbxLoadIntraday(){
@@ -3156,7 +3158,7 @@ if(passBtn){
           if(!d||!Array.isArray(d.minutes)||d.minutes.length<2||d.date!==today) return; // 오늘 세션 없으면 20일 곡선 유지
           sbxIntraday[code]=d.minutes;
           var el=document.querySelector('.scard[data-code="'+code+'"] .scard__spark');
-          if(el) el.innerHTML=sbxSpark(d.minutes);
+          if(el) el.innerHTML=sbxSpark(d.minutes, true);
         }).catch(function(){});
     });
   }
@@ -3184,7 +3186,7 @@ if(passBtn){
     return '<a class="scard" data-code="'+s.code+'" onclick="goStock(\''+s.code+'\')">'
       +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span></div>'
       +'<div class="scard__price"><span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span></div>'
-      +'<div class="scard__spark">'+sbxSpark(sbxCurve(s))+'</div>'
+      +'<div class="scard__spark">'+sbxSpark(sbxCurve(s), sbxCurveIsLive(s))+'</div>'
       +extra+'</a>';
   }
   function sbxRenderTabs(){
