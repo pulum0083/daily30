@@ -565,20 +565,25 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
 
 
 def build_analyst_quotes(data: dict) -> dict:
-    """월가 애널리스트 발언 섹션 컨텍스트 빌더."""
-    from urllib.parse import quote_plus
+    """월가 애널리스트 발언 섹션 컨텍스트 빌더.
+
+    url(grounding에서 리졸브된 원본 기사 링크)이 없는 항목은 표시하지 않는다.
+    구글 검색 폴백 링크는 실제 발언 근거를 확인할 수 없다는 뜻이라, 검증 안 된
+    멘트를 노출하는 셈이 된다 — 차라리 그 항목만 조용히 제외한다(섹션 자체는
+    나머지 검증된 발언이 있으면 유지).
+    """
     quotes_path = BASE_DIR / "data" / "analyst_quotes.json"
     if quotes_path.exists():
         with open(quotes_path, encoding="utf-8") as f:
-            analyst_quotes = json.load(f)
+            raw_quotes = json.load(f)
     else:
-        analyst_quotes = []
-    for q in analyst_quotes:
-        if q.get("url"):
-            q["search_url"] = q["url"]
-        else:
-            query = f"{q.get('name', '')} {q.get('source', '')} {q.get('time_label', '')}"
-            q["search_url"] = f"https://www.google.com/search?q={quote_plus(query.strip())}"
+        raw_quotes = []
+    analyst_quotes = []
+    for q in raw_quotes:
+        if not q.get("url"):
+            continue
+        q["search_url"] = q["url"]
+        analyst_quotes.append(q)
     return {"analyst_quotes": analyst_quotes}
 
 
