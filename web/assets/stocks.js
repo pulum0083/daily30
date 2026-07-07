@@ -484,6 +484,34 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 })();
 
+// '같은 섹터' 사이드바(US 상세) peer 등락률 실시간 갱신 — SSR 값은 전일 배치 스냅샷이라
+// 장중엔 히어로(실시간)와 기준 세션이 달라 보인다. /api/stocks-live로 라이브 값을 받아 덮어쓴다.
+(function(){
+  var panel=document.getElementById('peers-panel'); if(!panel) return;
+  var rows=[].slice.call(panel.querySelectorAll('.srow[data-ticker]'));
+  if(!rows.length) return;
+  var syms=rows.map(function(r){return r.getAttribute('data-ticker');});
+  function poll(){
+    fetch('/api/stocks-live?us='+encodeURIComponent(syms.join(',')),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d||!Array.isArray(d.us)) return;
+        var bySym={}; d.us.forEach(function(x){bySym[x.sym]=x;});
+        rows.forEach(function(row){
+          var x=bySym[row.getAttribute('data-ticker')];
+          if(!x||typeof x.changePct!=='number') return;
+          var el=row.querySelector('.c'); if(!el) return;
+          var pct=x.changePct, up=pct>0, cls=up?'up':(pct<0?'dn':'');
+          el.className='c num'+(cls?' '+cls:'');
+          el.style.color= cls? '' : 'var(--muted)';
+          el.textContent=(up?'+':'')+pct.toFixed(2)+'%';
+        });
+      }).catch(function(){});
+  }
+  poll();
+  setInterval(poll, 20000);
+})();
+
 // 외국인 보유율 스파크라인 — 직선 폴리라인을 부드러운 곡선 + 그라디언트로 재렌더
 (function(){
   document.querySelectorAll('.frw svg.sp').forEach(function(svg){
