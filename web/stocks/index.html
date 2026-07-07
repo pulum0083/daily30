@@ -163,6 +163,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
 .home-cols{display:grid;grid-template-columns:2fr 1fr;column-gap:20px;align-items:start;}
 .home-main,.home-side{min-width:0;}
+#today-line{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 15px;margin-bottom:12px;font-size:13.5px;line-height:1.5;color:var(--ink);}
+#today-line .tl-ic{flex:none;font-size:16px;}
+#today-line .tl-tone{font-weight:800;}
+#today-line .tl-tone.up{color:var(--up);}#today-line .tl-tone.dn{color:var(--dn);}
+#today-line b{font-weight:800;}
+#today-line .tl-lead b{color:var(--up);}#today-line .tl-lag b{color:var(--dn);}
 .home-side .barwrap{display:none;}
 .home-side .nm{flex:1;min-width:0;}
 @media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-side .barwrap{display:block;}}
@@ -1408,6 +1414,8 @@ function usSel(code){
   setInterval(window.ueGate, 5*60*1000);
 })();
 </script>
+    <!-- 오늘의 한 줄 — 아래 세 섹션(섹터·특이신호·ETF)이 같은 스토리임을 요약. JS가 스냅샷+지수로 채움 -->
+    <div id="today-line" style="display:none;"></div>
     <div class="home-cols">
     <div class="home-main">
     <!-- 섹터별 종목 브라우저 (탭 전환) -->
@@ -3075,11 +3083,15 @@ if(passBtn){
     }
     var b=etf.betting, bw=document.getElementById('etf-betting');
     if(bw&&b){
+      // 방향 베팅(거래대금 비중)이 중립권(40~60%)이면 '엇갈림', 아니면 우위 방향을 명시 — 헤드라인 톤과 일치
+      var betNote = (b.downRatio>=40&&b.downRatio<=60)
+        ? '거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.'
+        : (b.downRatio>60 ? '거래대금은 <b>하락 베팅</b>이 우위예요.' : '거래대금은 <b>저점매수</b> 심리가 우위예요.');
       bw.innerHTML='<div class="bet-label">레버리지·인버스 ETF 거래대금</div>'
         +'<div class="bet-split"><div class="bet-dn" style="width:'+b.downRatio+'%">하락 베팅 '+b.downRatio+'%</div><div class="bet-up" style="width:'+b.upRatio+'%">저점매수 '+b.upRatio+'%</div></div>'
         +'<div class="bet-fact"><div class="bet-fact-row"><span>인버스 거래량</span><b>KODEX 200의 '+b.invVolMultiple+'배</b></div>'
         +'<div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">'+(b.levPct!=null?b.levPct.toFixed(2)+'%':'—')+'</b></div></div>'
-        +'<div class="gauge-note">거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.</div>';
+        +'<div class="gauge-note">'+betNote+'</div>';
       bw.classList.remove('etf-updated'); void bw.offsetWidth; bw.classList.add('etf-updated');
       setTimeout(function(){bw.classList.remove('etf-updated');}, 600);
     }
@@ -3176,6 +3188,34 @@ if(passBtn){
     arr.forEach(function(s){var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;});
     return {avg:arr.length?sum/arr.length:0, up:up, dn:dn, total:arr.length};
   }
+  // 상단 스트립의 코스피 등락률을 읽는다(유니코드 마이너스·기호 정규화). 못 읽으면 null.
+  function tlKospiPct(){
+    var el=document.getElementById('h-kospi-c'); if(!el) return null;
+    var v=parseFloat((el.textContent||'').replace(/[−–—]/g,'-').replace(/[^0-9.\-]/g,''));
+    return isFinite(v)?v:null;
+  }
+  // '오늘의 한 줄' — 섹터 평균으로 버틴/밀린 섹터를 뽑아, 아래 세 섹션이 같은 스토리임을 요약.
+  function renderTodayLine(){
+    var wrap=document.getElementById('today-line'); if(!wrap||!SNAP) return;
+    var stats=SBX_ORDER.map(function(k){var st=sbxSectorStat(k);return {label:SECTOR_LABELS[k],avg:st.avg,total:st.total};}).filter(function(s){return s.total;});
+    if(!stats.length){ wrap.style.display='none'; return; }
+    var leaders=stats.filter(function(s){return s.avg>0;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,2);
+    var lags=stats.filter(function(s){return s.avg<0;}).sort(function(a,b){return a.avg-b.avg;}).slice(0,2);
+    var kp=tlKospiPct(), tone, cls='', ic='📊';
+    var basis = kp!=null ? kp : (stats.reduce(function(a,s){return a+s.avg;},0)/stats.length);
+    if(basis<=-2){tone='급락장이에요';cls='dn';ic='🔻';}
+    else if(basis<=-0.5){tone='약세장이에요';cls='dn';ic='🔻';}
+    else if(basis>=2){tone='급등장이에요';cls='up';ic='🔺';}
+    else if(basis>=0.5){tone='강세장이에요';cls='up';ic='🔺';}
+    else {tone='보합권이에요';cls='';ic='➖';}
+    var head=['<span class="tl-tone '+cls+'">'+tone+'</span>'];
+    if(kp!=null) head.push('코스피 <b>'+(kp>=0?'+':'')+kp.toFixed(2)+'%</b>');
+    var body=[];
+    if(leaders.length) body.push('버틴 섹터 <span class="tl-lead"><b>'+leaders.map(function(s){return s.label;}).join('·')+'</b></span>');
+    if(lags.length) body.push('밀린 섹터 <span class="tl-lag"><b>'+lags.map(function(s){return s.label;}).join('·')+'</b></span>');
+    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+head.join(' · ')+(body.length?' — '+body.join(' · '):'')+'.</span>';
+    wrap.style.display='';
+  }
   function sbxCardHtml(s){
     var wk52Pct=(s.wk52_high>s.wk52_low)?Math.max(0,Math.min(100,(s.close-s.wk52_low)/(s.wk52_high-s.wk52_low)*100)):null;
     var extra='';
@@ -3237,7 +3277,7 @@ if(passBtn){
             if(isFinite(p.price)) s.close=p.price;
             if(p.changePct!=null) s.change_pct=p.changePct;
           });
-          sbxRenderTabs(); sbxRenderBody();
+          sbxRenderTabs(); sbxRenderBody(); renderTodayLine();
         }
       }).catch(function(){});
   }
@@ -3253,6 +3293,12 @@ if(passBtn){
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
       pollVolTop();
+      // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
+      // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
+      var _best=sbxActiveKey, _bestAvg=-Infinity;
+      SBX_ORDER.forEach(function(k){var st=sbxSectorStat(k); if(st.total&&st.avg>_bestAvg){_bestAvg=st.avg;_best=k;}});
+      sbxActiveKey=_best;
+      renderTodayLine();
       sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
       if(krMarketOpen()){
         setInterval(pollVolTop,120000);
