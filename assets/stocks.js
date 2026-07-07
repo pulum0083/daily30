@@ -237,8 +237,17 @@ document.addEventListener('DOMContentLoaded', function() {
   var pxEl=document.querySelector('.px.num');
   var cgEl=document.querySelector('.cg.num');
   var metaEl=document.querySelector('#hero-stock .meta');
-  var prevClose=pxEl?parseFloat((pxEl.textContent||'').replace(/[^0-9.\-]/g,'')):0; // 직전 거래일 종가(서버 렌더 실측) — 등락률 기준 ($·콤마 제거)
+  // 직전 거래일 종가 — pxEl 렌더값은 '최신 종가/현재가'라 그대로 쓰면 등락률이 0%로 뭉개진다.
+  // 국내는 '20일 종가' 스파크(spark-main)의 마지막-전 값을 대신 쓴다. 미국은 render()에서 응답의 d.prevClose로 채운다.
+  function sparkPrevClose(){
+    var sp=document.getElementById('spark-main');
+    var arr=sp?(sp.getAttribute('data-spark')||'').split(',').map(Number).filter(function(v){return isFinite(v);}):[];
+    return arr.length>=2 ? arr[arr.length-2] : 0;
+  }
+  var prevClose = isUS ? 0 : sparkPrevClose();
   var metaOrig=metaEl?metaEl.innerHTML:'';
+  // 탭 전환 시 헤더로 복원할 원본(SSR) 시세 — '20일 종가' 탭 선택 시 이 값으로 되돌린다.
+  var origPxText=pxEl?pxEl.textContent:'', origCgText=cgEl?cgEl.textContent:'', origCgColor=cgEl?cgEl.style.color:'';
   var X0=14,X1=626,YT=26,YB=148; // viewBox 640×180 기준 플롯 영역
   function t2x(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
   // 가격 표기: 미국=통화 컨트롤러(원화/달러), 국내=정수+콤마
@@ -319,6 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function render(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2){ decide(false); return; }   // 장중 데이터 없음 → 20일 종가 먼저 표시
+    if(isUS && d && typeof d.prevClose==='number' && d.prevClose>0) prevClose=d.prevClose; // 응답의 실측 직전 종가로 교체
     var times=(d&&d.times)||[];
     var seg='regular', tsv=null;
     if(isUS){
@@ -446,6 +456,21 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     // 국내: 장중(09:00~15:35 KST)에만 45초 폴링 — 헤더 시세·곡선 실시간 갱신
     if(isLive) setInterval(tick,45000);
+  }
+
+  // 탭 전환 시 헤더 시세도 함께 전환 — '20일 종가' 탭은 원본(SSR) 시세로, '오늘 장중' 탭은 최신 장중 시세로.
+  if(typeof window.switchChartTab==='function'){
+    var _origTabForHeader=window.switchChartTab;
+    window.switchChartTab=function(pane){
+      _origTabForHeader(pane);
+      if(pane==='pane-spark'){
+        if(pxEl) pxEl.textContent=origPxText;
+        if(cgEl){ cgEl.style.color=origCgColor; cgEl.textContent=origCgText; }
+        if(metaEl) metaEl.innerHTML=metaOrig;
+      } else if(pane==='pane-intra' && lastD){
+        render(lastD);
+      }
+    };
   }
 })();
 
