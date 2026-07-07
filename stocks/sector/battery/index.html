@@ -452,34 +452,40 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
     .catch(function(){ if(rows) rows.innerHTML='<div class="rot-cap" style="border:none;">섹터 ETF 데이터를 불러오지 못했어요.</div>'; });
 })();
 
+// drawSpark: 카드 하나의 곡선(SVG)을 그린다. label 접미사로 정적(20일)/실시간(장중) 구분.
+function drawSpark(card, vals, labelSuffix){
+  var spark=card.querySelector('.sector-card__spark');
+  var name=card.querySelector('.sector-card__name');
+  var label=(name?name.textContent:'')+' '+labelSuffix;
+  if(!spark) return;
+  if(!vals||vals.length<2){ spark.style.display='none'; return; }   // 데이터 없으면 빈 공간 제거
+  spark.style.display='';
+  var W=240,H=34,padT=3,padB=3,n=vals.length;
+  var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
+  var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
+  function x(i){return (i/(n-1))*W;}
+  function y(v){return padT+(1-(v-min)/rng)*(H-padT-padB);}
+  var d='M'+x(0).toFixed(1)+','+y(vals[0]).toFixed(1);
+  for(var i=1;i<n;i++){
+    var cx=((x(i-1)+x(i))/2).toFixed(1);
+    d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
+  }
+  var gid='sp-grad-'+card.getAttribute('data-code');
+  spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+label+'">'+
+    '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'+
+    '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
+    '<path d="'+d+' L'+W+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
+    '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'+
+    '</svg>';
+}
+
 (function(){
   document.querySelectorAll('.sector-card').forEach(function(card){
-    var spark=card.querySelector('.sector-card__spark');
-    var name=card.querySelector('.sector-card__name');
-    var label=(name?name.textContent:'')+' 최근 20거래일 종가 추이';
     var raw=card.getAttribute('data-spark20');
     var vals=null;
     if(raw){ try{ vals=JSON.parse(raw); }catch(e){} }
-    if(!spark) return;
-    if(!vals||vals.length<2){ spark.style.display='none'; return; }   // 데이터 없으면 빈 공간 제거
-    var W=240,H=34,padT=3,padB=3,n=vals.length;
-    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
-    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
-    function x(i){return (i/(n-1))*W;}
-    function y(v){return padT+(1-(v-min)/rng)*(H-padT-padB);}
-    var d='M'+x(0).toFixed(1)+','+y(vals[0]).toFixed(1);
-    for(var i=1;i<n;i++){
-      var cx=((x(i-1)+x(i))/2).toFixed(1);
-      d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
-    }
-    var gid='sp-grad-'+card.getAttribute('data-code');
-    spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+label+'">'+
-      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
-      '<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'+
-      '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
-      '<path d="'+d+' L'+W+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
-      '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'+
-      '</svg>';
+    drawSpark(card, vals, '최근 20거래일 종가 추이');
   });
 })();
 
@@ -541,12 +547,29 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
           recomputeStats();
         }
       }).catch(function(){});
+    refreshLiveSparks();
   }
 
-  // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감'
+  // 카드별 곡선을 정적 20일 종가 대신 오늘 장중 1분봉(5분 샘플)으로 교체.
+  // /api/intraday?code= 는 CDN에 s-maxage=30 캐시돼 방문자 수와 무관하게 원본 호출은 30초당 1회.
+  function todayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
+  function refreshLiveSparks(){
+    var today=todayYMD();
+    codes.forEach(function(code){
+      fetch('/api/intraday?code='+code,{cache:'no-store'})
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){
+          if(!d||!Array.isArray(d.minutes)||d.minutes.length<2||d.date!==today) return; // 오늘 세션 데이터 없으면 기존 20일 곡선 유지
+          var card=byCode[code]; if(!card) return;
+          drawSpark(card, d.minutes, '오늘 장중 추이');
+        }).catch(function(){});
+    });
+  }
+
+  // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감' + 오늘자 곡선 1회 반영
   var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
   if(kmin>=540&&kmin<=930){ setStatus(true); update(); setInterval(update,30000); }
-  else { setStatus(false); }
+  else { setStatus(false); refreshLiveSparks(); }
 })();
 </script>
 
