@@ -28,6 +28,7 @@ permissions:
   contents: write   # main 브랜치 커밋·푸시
   pages: write      # GitHub Pages 배포
   id-token: write   # OIDC 토큰 (actions/deploy-pages 필수)
+  actions: write    # vercel-deploy.yml 명시적 dispatch (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시킴)
 
 concurrency:
   group: daily30-${{ github.event.inputs.briefing_type }}
@@ -128,6 +129,12 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
+
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        if: steps.holiday.outputs.open == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
@@ -241,6 +248,12 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
+
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        if: steps.holiday.outputs.open == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
@@ -387,6 +400,12 @@ jobs:
             sleep 15
           done
 
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        if: steps.holiday.outputs.open == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main
+
       - name: 🌐 GitHub Pages 배포
         if: steps.holiday.outputs.open == 'true'
         uses: peaceiris/actions-gh-pages@v4
@@ -452,6 +471,11 @@ jobs:
             sleep 15
           done
 
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main
+
   # ──────────────────────────────────────────────────────────────────
   kospi-news-live:
     name: "📰 코스피 장중 뉴스 갱신"
@@ -497,6 +521,11 @@ jobs:
               sleep 15
             done
           fi
+
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main
 
       - name: 🚀 GitHub Pages 배포
         uses: peaceiris/actions-gh-pages@v4
