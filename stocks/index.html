@@ -2879,6 +2879,7 @@ if(passBtn){
    외국인 보유율·ETF 거래량 — stocks-snapshot.json 실측 배선 */
 (function(){
   var SNAP=null;
+  var SIG_SECTORS=null, SIG_KOSPI=null; // /api/signals가 내려주는 전 섹터 라이브 평균·코스피% (장중 2분 갱신)
   var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
   function manju(v){ return Math.round(v/10000).toLocaleString('en-US')+'만주'; }
   function sparkSvg(vals,color){
@@ -3029,6 +3030,10 @@ if(passBtn){
     SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender(); sigAllDnRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     sigHomeRender();
+    // 전 섹터 라이브 평균·코스피%를 배너에 반영 — 장중에도 버틴/밀린 섹터가 후행하지 않는다
+    if(d.sectors) SIG_SECTORS=d.sectors;
+    if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
+    renderTodayLine();
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
   function sigAllSorted(){
@@ -3194,26 +3199,109 @@ if(passBtn){
     var v=parseFloat((el.textContent||'').replace(/[−–—]/g,'-').replace(/[^0-9.\-]/g,''));
     return isFinite(v)?v:null;
   }
-  // '오늘의 한 줄' — 섹터 평균으로 버틴/밀린 섹터를 뽑아, 아래 세 섹션이 같은 스토리임을 요약.
+  // ── '오늘의 한 줄' 요약 배너 ──
+  // 섹터 소스 우선순위: /api/signals가 내려준 전 섹터 라이브 평균(장중 2분 갱신) > 스냅샷(전일 종가).
+  // 문구는 맥락(장중/마감·리더/래거드 유무)에 맞는 템플릿 풀에서 하나를 골라 채운다 — 매 방문마다 달라져 지루하지 않게.
+  // 슬롯: {tone}=장세(급락장 등, 뒤에 '이에요' 붙는 명사) · {lead}=버틴 섹터 · {lag}=밀린 섹터 · {kp}=코스피% · {when}=장중/오늘
+  // 조사 토큰: {lead:이}=이/가, {lead:은}=은/는, {lead:을}=을/를, {lead:으로}=으로/로, {lead:이에요}=이에요/예요 (받침 자동)
+  var TL_TPL={
+    both:[
+      '{tone}이에요. {lead:이} 버텼고, {lag:은} 크게 밀렸어요.',
+      '{when} {tone} 속에서 {lead}만 초록불을 지켰어요. {lag:은} 낙폭이 컸고요.',
+      '{lead:이} 방어선, {lag:이} 뇌관이었어요. {tone}이에요.',
+      '돈은 {lead:으로}, 매물은 {lag:으로} 쏠렸어요. {tone}이에요.',
+      '{tone} — 그나마 버틴 건 {lead}, 발목 잡은 건 {lag:이에요}.',
+      '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버텼어요.',
+      '오늘의 온도차예요. {lead:은} 따뜻했고 {lag:은} 싸늘했어요.',
+      '희비가 갈렸어요. {lead:은} 웃고 {lag:은} 울었어요. {tone}이에요.',
+      '{tone}이지만 {lead:은} 견조했어요. 반대로 {lag:은} 부진했고요.',
+      '{lead}에 매수세가 몰렸어요. {lag}에선 이탈이 뚜렷했고요. {tone}이에요.',
+      '코스피 {kp}. {lead:이} 선방했고 {lag:은} 약세였어요.',
+      '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈렸어요.',
+      '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone}이에요.',
+      '쏠림이 뚜렷했어요. {lead}엔 온기, {lag}엔 한기가 돌았어요.'
+    ],
+    lead:[
+      '{tone}이에요. {lead:이} 상승을 이끌었어요.',
+      '고르게 초록불이 켜졌어요. 특히 {lead:이} 앞장섰고요. {tone}이에요.',
+      '{when} {tone} — 오늘의 대장은 {lead:이에요}.',
+      '위험자산 선호가 살아났어요. {lead:이} 특히 강했고요.',
+      '코스피 {kp}. {lead:이} 랠리를 주도했어요.',
+      '매수 심리가 붙었어요. {lead:이} 가장 뜨거웠고요. {tone}이에요.',
+      '{lead:으로} 온기가 번졌어요. {tone}이에요.'
+    ],
+    lag:[
+      '{tone}이에요. 대부분 약세였고 {lag:이} 특히 부진했어요.',
+      '{when} 숨을 곳이 없었어요. {lag:이} 낙폭 상위였고요. {tone}이에요.',
+      '위험회피가 짙었어요. {lag:이} 가장 크게 밀렸고요.',
+      '전반적으로 무거웠어요. {lag:이} 하락을 주도했어요. {tone}이에요.',
+      '코스피 {kp}. {lag:이} 지수를 끌어내렸어요.',
+      '{tone} — 약세가 넓었고, {lag:이} 그 중심이었어요.',
+      '매도세가 우위였어요. {lag}에서 낙폭이 두드러졌고요. {tone}이에요.'
+    ],
+    flat:[
+      '{tone}이에요. 뚜렷한 주도 섹터 없이 눈치보기 장세였어요.',
+      '{when} 방향을 정하지 못했어요. 관망세가 짙은 {tone}이에요.',
+      '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
+      '{tone}이에요. 매수도 매도도 뚜렷하지 않았어요.'
+    ]
+  };
+  var _tlCase=null, _tlPick=null; // 로드 세션 동안 문구 고정(데이터만 갱신), 구조(case)가 바뀌면 재추첨
+  function tlPick(caseKey, hasKp){
+    if(_tlCase===caseKey && _tlPick) return _tlPick;
+    var pool=TL_TPL[caseKey].filter(function(t){ return hasKp || t.indexOf('{kp}')<0; });
+    if(!pool.length) pool=TL_TPL[caseKey];
+    _tlPick=pool[Math.floor(Math.random()*pool.length)]; _tlCase=caseKey;
+    return _tlPick;
+  }
+  // 받침 유무에 따른 조사 꼬리만 반환 (섹터명 span 바깥에 붙여 조사는 색/굵기 없이 표기)
+  function josaTail(word, type){
+    var last=word.charCodeAt(word.length-1), isHan=last>=0xAC00&&last<=0xD7A3;
+    var bat=isHan?((last-0xAC00)%28):0, hasBat=bat!==0, isRieul=bat===8;
+    if(type==='이') return hasBat?'이':'가';
+    if(type==='은') return hasBat?'은':'는';
+    if(type==='을') return hasBat?'을':'를';
+    if(type==='으로') return (!hasBat||isRieul)?'로':'으로';
+    if(type==='이에요') return hasBat?'이에요':'예요';
+    return '';
+  }
+  function tlFill(tpl, c){
+    var leadSpan='<span class="tl-lead"><b>'+c.lead+'</b></span>', lagSpan='<span class="tl-lag"><b>'+c.lag+'</b></span>';
+    return tpl
+      .replace(/\{tone\}/g, '<span class="tl-tone '+c.cls+'">'+c.tone+'</span>')
+      .replace(/\{lead(?::([^}]+))?\}/g, function(_m,t){ return leadSpan+(t?josaTail(c.lead,t):''); })
+      .replace(/\{lag(?::([^}]+))?\}/g, function(_m,t){ return lagSpan+(t?josaTail(c.lag,t):''); })
+      .replace(/\{kp\}/g, c.kp!=null ? '<b>'+(c.kp>=0?'+':'')+c.kp.toFixed(2)+'%</b>' : '')
+      .replace(/\{when\}/g, c.when);
+  }
+  // 섹터 통계 소스 — 라이브(SIG_SECTORS) 우선, 없으면 스냅샷 기반
+  function tlSectorStats(){
+    if(SIG_SECTORS){
+      return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
+    }
+    return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{label:SECTOR_LABELS[k],avg:st.avg,total:st.total}:null;}).filter(Boolean);
+  }
   function renderTodayLine(){
-    var wrap=document.getElementById('today-line'); if(!wrap||!SNAP) return;
-    var stats=SBX_ORDER.map(function(k){var st=sbxSectorStat(k);return {label:SECTOR_LABELS[k],avg:st.avg,total:st.total};}).filter(function(s){return s.total;});
+    var wrap=document.getElementById('today-line'); if(!wrap) return;
+    var stats=tlSectorStats();
     if(!stats.length){ wrap.style.display='none'; return; }
     var leaders=stats.filter(function(s){return s.avg>0;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,2);
     var lags=stats.filter(function(s){return s.avg<0;}).sort(function(a,b){return a.avg-b.avg;}).slice(0,2);
-    var kp=tlKospiPct(), tone, cls='', ic='📊';
+    var kp = (SIG_KOSPI!=null) ? SIG_KOSPI : tlKospiPct();
     var basis = kp!=null ? kp : (stats.reduce(function(a,s){return a+s.avg;},0)/stats.length);
-    if(basis<=-2){tone='급락장이에요';cls='dn';ic='🔻';}
-    else if(basis<=-0.5){tone='약세장이에요';cls='dn';ic='🔻';}
-    else if(basis>=2){tone='급등장이에요';cls='up';ic='🔺';}
-    else if(basis>=0.5){tone='강세장이에요';cls='up';ic='🔺';}
-    else {tone='보합권이에요';cls='';ic='➖';}
-    var head=['<span class="tl-tone '+cls+'">'+tone+'</span>'];
-    if(kp!=null) head.push('코스피 <b>'+(kp>=0?'+':'')+kp.toFixed(2)+'%</b>');
-    var body=[];
-    if(leaders.length) body.push('버틴 섹터 <span class="tl-lead"><b>'+leaders.map(function(s){return s.label;}).join('·')+'</b></span>');
-    if(lags.length) body.push('밀린 섹터 <span class="tl-lag"><b>'+lags.map(function(s){return s.label;}).join('·')+'</b></span>');
-    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+head.join(' · ')+(body.length?' — '+body.join(' · '):'')+'.</span>';
+    var tone, cls='', ic='📊';
+    if(basis<=-2){tone='급락장';cls='dn';ic='🔻';}
+    else if(basis<=-0.5){tone='약세장';cls='dn';ic='🔻';}
+    else if(basis>=2){tone='급등장';cls='up';ic='🔺';}
+    else if(basis>=0.5){tone='강세장';cls='up';ic='🔺';}
+    else {tone='보합권';cls='';ic='➖';}
+    var caseKey = (leaders.length&&lags.length)?'both':(leaders.length?'lead':(lags.length?'lag':'flat'));
+    var ctx={
+      tone:tone, cls:cls, kp:kp, when:krMarketOpen()?'장중':'오늘',
+      lead:leaders.map(function(s){return s.label;}).join('·'),
+      lag:lags.map(function(s){return s.label;}).join('·')
+    };
+    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+tlFill(tlPick(caseKey, kp!=null), ctx)+'</span>';
     wrap.style.display='';
   }
   function sbxCardHtml(s){
