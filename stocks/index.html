@@ -3140,6 +3140,26 @@ if(passBtn){
       +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
       +'</svg>';
   }
+  // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
+  var sbxIntraday={};
+  function sbxCurve(s){var iv=sbxIntraday[s.code]; return (iv&&iv.length>=2)?iv:s.spark20;}
+  function sbxTodayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
+  // 현재 섹터 종목들의 오늘 장중 곡선을 /api/intraday(CDN 30초 캐시)로 받아 해당 카드 곡선만 교체.
+  function sbxLoadIntraday(){
+    if(!SNAP) return;
+    var today=sbxTodayYMD();
+    sbxSectorStocks(sbxActiveKey).forEach(function(s){
+      var code=s.code;
+      fetch('/api/intraday?code='+code,{cache:'no-store'})
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){
+          if(!d||!Array.isArray(d.minutes)||d.minutes.length<2||d.date!==today) return; // 오늘 세션 없으면 20일 곡선 유지
+          sbxIntraday[code]=d.minutes;
+          var el=document.querySelector('.scard[data-code="'+code+'"] .scard__spark');
+          if(el) el.innerHTML=sbxSpark(d.minutes);
+        }).catch(function(){});
+    });
+  }
   function sbxSectorStocks(key){
     if(!SNAP||!SNAP.stocks) return [];
     var arr=[];
@@ -3164,7 +3184,7 @@ if(passBtn){
     return '<a class="scard" data-code="'+s.code+'" onclick="goStock(\''+s.code+'\')">'
       +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span></div>'
       +'<div class="scard__price"><span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span></div>'
-      +'<div class="scard__spark">'+sbxSpark(s.spark20)+'</div>'
+      +'<div class="scard__spark">'+sbxSpark(sbxCurve(s))+'</div>'
       +extra+'</a>';
   }
   function sbxRenderTabs(){
@@ -3174,7 +3194,7 @@ if(passBtn){
       return '<span class="sbx-tab'+(key===sbxActiveKey?' on':'')+'" data-key="'+key+'">'+SBX_EMOJI[key]+' '+SECTOR_LABELS[key]+'<span class="rt '+cls+'">'+sbxPctFmt(st.avg)+'</span></span>';
     }).join('');
     [].slice.call(box.querySelectorAll('.sbx-tab')).forEach(function(el){
-      el.onclick=function(){ sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); };
+      el.onclick=function(){ sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday(); };
     });
   }
   function sbxRenderBody(){
@@ -3229,11 +3249,12 @@ if(passBtn){
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
       pollVolTop();
-      sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive();
+      sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
       if(krMarketOpen()){
         setInterval(pollVolTop,120000);
         setInterval(loadSignals,120000); // 장중 2분마다 특이신호 자동 갱신
         setInterval(sbxUpdateLive,30000); // 장중 30초마다 섹터 브라우저 실시간 시세 갱신
+        setInterval(sbxLoadIntraday,30000); // 장중 30초마다 섹터 브라우저 곡선(장중 1분봉) 갱신
       }
     })
     .catch(function(){ pollVolTop(); });
