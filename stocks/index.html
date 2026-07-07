@@ -1224,12 +1224,12 @@ function usSel(code){
     {nm:'메모리·HBM', tk:'DRAM', sym:'DRAM.K', lead:true},
     {nm:'브로드컴',   tk:'AVGO', sym:'AVGO.O'},
     {nm:'엔비디아',   tk:'NVDA', sym:'NVDA.O'},
+    {nm:'한국ETF',    tk:'EWY',  sym:'EWY.O', noLink:true},
     {nm:'AMD',       tk:'AMD',  sym:'AMD.O'},
     {nm:'마이크론',   tk:'MU',   sym:'MU.O'},
     {nm:'ASML',      tk:'ASML', sym:'ASML.O'},
     {nm:'반도체ETF',  tk:'SOXX', sym:'SOXX.O'},
-    {nm:'반도체ETF',  tk:'SMH',  sym:'SMH.O'},
-    {nm:'한국ETF',    tk:'EWY',  sym:'EWY.O', noLink:true}
+    {nm:'반도체ETF',  tk:'SMH',  sym:'SMH.O'}
   ];
   var NASDAQ='QQQ.O';
   var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false, isLive=false, sessionState='', basisAt=null;
@@ -1262,7 +1262,7 @@ function usSel(code){
       var d=dataBySym[t.sym]||{};
       var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
         +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
-      if(t.noLink) return '<div class="ue-row">'+inner+'</div>';
+      if(t.noLink) return '<div class="ue-row">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none" style="visibility:hidden"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
       return '<a class="ue-row ue-row--link" href="/stocks/us/'+t.tk.toLowerCase()+'/">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
   }
