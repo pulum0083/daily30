@@ -458,15 +458,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if(isLive) setInterval(tick,45000);
   }
 
-  // 탭 전환 시 헤더 시세도 함께 전환 — '20일 종가' 탭은 원본(SSR) 시세로, '오늘 장중' 탭은 최신 장중 시세로.
+  // 탭 전환 시 헤더 시세도 함께 전환 — '20일 종가' 탭은 가격은 원본(SSR) 그대로 두되
+  // 등락률만 20일 누적 변동으로 바꿔 어떤 탭을 보고 있는지 구분되게 한다. '오늘 장중' 탭은 최신 장중 시세.
+  function spark20Chg(){
+    var sp=document.getElementById('spark-main');
+    var arr=sp?(sp.getAttribute('data-spark')||'').split(',').map(Number).filter(function(v){return isFinite(v);}):[];
+    return arr.length>=2 ? (arr[arr.length-1]-arr[0])/arr[0]*100 : null;
+  }
   if(typeof window.switchChartTab==='function'){
     var _origTabForHeader=window.switchChartTab;
     window.switchChartTab=function(pane){
       _origTabForHeader(pane);
       if(pane==='pane-spark'){
         if(pxEl) pxEl.textContent=origPxText;
-        if(cgEl){ cgEl.style.color=origCgColor; cgEl.textContent=origCgText; }
         if(metaEl) metaEl.innerHTML=metaOrig;
+        var chg20=spark20Chg();
+        if(cgEl){
+          if(chg20===null){ cgEl.style.color=origCgColor; cgEl.textContent=origCgText; }
+          else { var u20=chg20>=0; cgEl.style.color=u20?'var(--up)':'var(--dn)'; cgEl.textContent=(u20?'▲ +':'▼ ')+chg20.toFixed(2)+'% (20일)'; }
+        }
       } else if(pane==='pane-intra' && lastD){
         render(lastD);
       }
