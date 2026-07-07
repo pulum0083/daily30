@@ -454,3 +454,13 @@ curl -s https://doubleshot.space/data/kospi-news-live.json | python3 -m json.too
 ```
 
 **점검 순서**: ① `git log origin/main` — 커밋이 실제로 푸시됐는지. ② `vercel ls` — 최근 배포 상태(Canceled/Ready/Error). ③ Canceled면 위 수동 복구. ④ 반복되면 `.github/workflows/*.yml`에서 같은 push 경로에 걸리는 다른 워크플로우가 늘었는지(중복 트리거) 확인.
+
+**세 번째·최종 근본 원인 확정 (2026-07-07) — git-트리거 자동배포는 항상 BLOCKED된다**: "가끔 취소된다"가 아니라, **git 커밋으로 트리거되는 Vercel 자동배포는 예외 없이 매번 막힌다**는 사실을 Vercel API로 직접 확인했다(`vercel inspect <url> --json`의 `readyState`가 `BLOCKED`, GitHub 체크에는 "Vercel - No GitHub account was found matching the commit author email address"). 최근 배포 40개를 `GET /v6/deployments`로 조회한 결과 27개가 `BLOCKED`, 나머지 13개는 전부 사람이 CLI로 수동 `vercel --prod`를 돌린 것이었다 — 즉 지금까지 사이트가 갱신된 적은 전부 수동 복구 덕분이었고, 자동배포는 단 한 번도 성공한 적이 없었다.
+
+원인: 이 저장소의 모든 자동 커밋이 봇 이메일(`dailyb-bot@users.noreply.github.com`)로 이뤄지는데, 이 이메일이 어떤 Vercel 계정과도 연결돼 있지 않다. Vercel은 git 커밋 작성자를 계정과 매칭하지 못하면 배포를 자동으로 `BLOCKED` 처리한다(빌드 성공 여부와 무관 — 애초에 빌드가 시작되지도 않는 경우가 대부분). 반면 `vercel deploy --token=...`(CLI/API 토큰 기반 배포)는 이 커밋-작성자 검증을 받지 않으므로 항상 정상 배포된다.
+
+**조치 (2026-07-07)**:
+- `.github/workflows/vercel-deploy.yml` 신설 — `main`에 대한 **모든 push**(경로 제한 없음, 어떤 워크플로우/수동 push든 상관없이)에서 무조건 `vercel deploy --prod --yes --token "$VERCEL_TOKEN"` 실행. `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID`를 `double-shot` 프로젝트로 명시 고정(위 문단과 동일 이유). 실패 시에만 관리자 텔레그램 알림.
+- `kospi-news-live.yml`의 자체 "확인 후 복구" 스텝은 제거 — 위 워크플로우가 모든 push를 공용으로 처리하므로 중복 배포를 막기 위함.
+- `scripts/vercel-ignore-build.sh`를 항상 `exit 0`(배포 스킵)으로 변경 — git-트리거 배포는 이제 시도해봐야 항상 BLOCKED로 낭비될 뿐이라(무료 플랜 "일 100회 배포" 한도 소모), 아예 시도하지 않도록 껐다. 프로덕션 배포는 100% `vercel-deploy.yml`이 담당한다.
+- **향후 이 저장소에 새 자동 커밋 워크플로우를 추가할 때, 별도로 Vercel 배포 스텝을 넣을 필요 없다** — `main` push만 되면 `vercel-deploy.yml`이 알아서 배포한다.

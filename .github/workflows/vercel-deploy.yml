@@ -1,0 +1,46 @@
+# Vercel 프로덕션(doubleshot.space) 배포 전담 워크플로우
+#
+# 배경(2026-07-07 확정): Vercel의 git-트리거 자동배포는 커밋 작성자 이메일이 어떤
+# Vercel 계정과도 연결돼 있지 않으면 예외 없이 BLOCKED 상태로 멈춘다. 이 저장소의
+# 모든 자동 커밋은 봇 이메일(dailyb-bot@users.noreply.github.com)로 이뤄지므로,
+# git 자동배포에 의존하는 한 프로덕션은 "가끔"이 아니라 매번 갱신되지 않는다.
+# 토큰 기반 `vercel deploy`는 이 검증을 받지 않으므로, main에 대한 모든 push에서
+# 무조건 이 방식으로 배포한다 — 어떤 워크플로우(또는 수동 push)가 커밋했는지 상관없이
+# 하나의 지점에서 처리해 중복 배포를 막는다.
+name: Vercel 프로덕션 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-prod-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 vercel deploy --prod (토큰 기반, 커밋 작성자 검증 우회)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          # doubleshot.space는 "double-shot" 프로젝트 소속. 이 저장소의 실제 GitHub repo명이
+          # "daily30"이라 프로젝트 링크 없이 돌리면 CLI가 이름만 보고 엉뚱한 "daily30" 프로젝트로
+          # 자동 연결해버린다(2026-07-06 발견) — 반드시 명시 고정한다.
+          VERCEL_ORG_ID: team_iPwo9taZIskxdoXOJu9assy2
+          VERCEL_PROJECT_ID: prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo
+        run: npx --yes vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+
+      - name: 📣 배포 실패 알림
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_ADMIN_CHAT_ID}" \
+              -d "text=⚠️ Vercel 프로덕션 배포 실패 (commit ${GITHUB_SHA:0:8}). GitHub Actions 로그 확인 필요." \
+              >/dev/null || true
+          fi

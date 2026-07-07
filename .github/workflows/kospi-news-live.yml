@@ -85,46 +85,7 @@ jobs:
           user_name: "DailyB Bot"
           user_email: "dailyb-bot@users.noreply.github.com"
 
-      # Vercel 프로덕션(doubleshot.space)이 이 push로 실제 배포됐는지 검증.
-      # git-트리거 자동배포가 조용히 Canceled 되는 사고가 있었음(2026-07-03) — 방치하면
-      # 데이터는 계속 정확한데 사이트만 몇 시간째 멈춰 있는 상태를 아무도 모르고 지나침.
-      - name: 🔍 프로덕션 배포 반영 확인
-        if: steps.commit.outputs.pushed == 'true'
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          # doubleshot.space는 "double-shot" 프로젝트 소속. 이 저장소의 실제 GitHub repo명이
-          # "daily30"이라 프로젝트 링크 없이 `vercel deploy`를 돌리면 CLI가 이름만 보고
-          # 엉뚱한 "daily30" 프로젝트로 자동 연결해버린다(2026-07-06 발견). 그러면 복구 배포가
-          # daily30-seven.vercel.app에만 나가고 doubleshot.space는 영영 갱신되지 않아
-          # 알림이 매번 반복 발송된다 — 반드시 double-shot 프로젝트로 명시 고정한다.
-          VERCEL_ORG_ID: team_iPwo9taZIskxdoXOJu9assy2
-          VERCEL_PROJECT_ID: prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo
-        run: |
-          sleep 30
-          expected=$(python3 -c "import json; print(json.load(open('web/data/kospi-news-live.json')).get('updated_at',''))")
-          live=$(curl -s --max-time 10 "https://doubleshot.space/data/kospi-news-live.json" | python3 -c "import json,sys; print(json.load(sys.stdin).get('updated_at',''))" 2>/dev/null || echo "")
-          echo "expected=$expected live=$live"
-          if [ "$live" = "$expected" ]; then
-            echo "✓ 프로덕션 반영 확인됨"
-            exit 0
-          fi
-          echo "⚠️ 프로덕션 미반영 감지 (expected=$expected, live=$live)"
-          if [ -n "$VERCEL_TOKEN" ]; then
-            echo "→ vercel --prod 로 자동 복구 시도"
-            npx --yes vercel deploy --prod --yes --token "$VERCEL_TOKEN" || echo "자동 복구 실패"
-            sleep 15
-            live=$(curl -s --max-time 10 "https://doubleshot.space/data/kospi-news-live.json" | python3 -c "import json,sys; print(json.load(sys.stdin).get('updated_at',''))" 2>/dev/null || echo "")
-            echo "재확인: live=$live"
-            if [ "$live" = "$expected" ]; then
-              echo "✓ 자동 복구로 반영 확인됨 — 알림 생략"
-              exit 0
-            fi
-          fi
-          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
-            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-              -d "chat_id=${TELEGRAM_ADMIN_CHAT_ID}" \
-              -d "text=⚠️ 이슈 브리핑 프로덕션 미반영 — expected=${expected} live=${live}. doubleshot.space가 최신 커밋을 안 물고 있음. Vercel 배포 상태 확인 필요." \
-              >/dev/null || true
-          fi
+      # Vercel 프로덕션 배포는 push 이벤트를 공용으로 받는 vercel-deploy.yml이 전담한다(중복 배포 방지).
+      # 근본 원인(2026-07-07 확정): 커밋 작성자(dailyb-bot@...)가 Vercel 계정과 연결돼 있지 않아
+      # git-트리거 자동배포가 "가끔"이 아니라 매번 예외 없이 BLOCKED 상태로 멈춘다. 토큰 기반
+      # `vercel deploy`는 커밋 작성자 검증을 받지 않으므로 이 경로로만 배포해야 한다.

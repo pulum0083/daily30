@@ -2,29 +2,13 @@
 # Vercel "Ignored Build Step" 스크립트.
 #   종료코드 1 → 배포 진행 / 0 → 배포 스킵
 #
-# 목적: 장중 뉴스 갱신(kospi-news-live·movers-why)이 평일 ~22회 main에 데이터
-#       전용 커밋을 푸시하면서 Vercel 무료 플랜의 "일 100회 배포" 한도를 소진해
-#       다른 변경(코드·브리핑)까지 배포가 막히는 문제를 해결한다.
-#       데이터 전용 커밋(web/data/** 만 변경)은 배포를 건너뛴다. 이 데이터는
-#       /api/data(raw.githubusercontent.com/main)로 신선하게 서빙되므로 재배포
-#       가 필요 없다.
-set -e
-
-# 직전 커밋 대비 변경 파일. 비교 불가(첫 커밋 등) 시 안전하게 배포한다.
-CHANGED="$(git diff --name-only HEAD^ HEAD 2>/dev/null || true)"
-if [ -z "$CHANGED" ]; then
-  echo "변경 파일 판별 불가 → 배포 진행"
-  exit 1
-fi
-
-echo "변경 파일:"
-echo "$CHANGED" | sed 's/^/  - /'
-
-# web/data/ 밖의 파일이 하나라도 있으면 배포, 전부 web/data/ 면 스킵.
-if echo "$CHANGED" | grep -qvE '^web/data/'; then
-  echo "→ 코드/콘텐츠 변경 포함 → 배포 진행"
-  exit 1
-fi
-
-echo "→ 데이터 전용 커밋(web/data/**) → 배포 스킵 (데이터는 /api/data로 서빙)"
+# 2026-07-07부로 항상 스킵한다. 이 저장소의 모든 자동 커밋은 봇 이메일
+# (dailyb-bot@users.noreply.github.com)로 이뤄지는데, 이 이메일이 어떤 Vercel
+# 계정과도 연결돼 있지 않아 git-트리거 자동배포는 예외 없이 BLOCKED 상태로
+# 멈춘다(빌드 자체가 성공해도 배포가 막힘 — 확인: 최근 배포 40개 중 27개 BLOCKED).
+# 프로덕션 배포는 이제 .github/workflows/vercel-deploy.yml이 push마다
+# `vercel deploy --prod --token=...`로 전담한다(커밋 작성자 검증을 받지 않음).
+# 여기서 계속 배포를 시도하면 매번 실패하는 빌드가 쌓여 무료 플랜의
+# "일 100회 배포" 한도만 낭비하므로 git 자동배포는 완전히 꺼둔다.
+echo "→ git-트리거 자동배포는 항상 BLOCKED됨 → 스킵 (vercel-deploy.yml이 대신 배포)"
 exit 0
