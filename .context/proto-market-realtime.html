@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<!-- 실시간 시장 지표 사이드바 프로토타입 v2 -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시장 지표 실시간 — 프로토타입</title>
+<style>
+:root {
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+  --gnb-bg:#16181A;
+}
+html.dark {
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#3B8BFF;--primary-bg:rgba(59,139,255,.12);
+  --up-bg:rgba(224,49,49,.14);--dn:#4A8FF5;--dn-bg:rgba(39,117,237,.14);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--surface-soft);color:var(--ink);min-height:100vh;}
+
+.page-bg{min-height:100vh;background:var(--surface-soft);display:flex;flex-direction:column;align-items:center;padding:40px 24px;gap:32px;}
+.compare-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;}
+.compare-wrap{display:flex;gap:28px;align-items:flex-start;}
+.col{display:flex;flex-direction:column;gap:8px;width:260px;}
+.col-label{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding:4px 10px;background:var(--surface-inset);border-radius:999px;align-self:center;}
+.col-label.new{background:var(--primary-bg);color:var(--primary);}
+.col-label.new::before{content:'✦ ';}
+.divider-arrow{display:flex;align-items:center;justify-content:center;padding-top:24px;color:var(--muted);font-size:22px;}
+
+/* ── 패널 ── */
+.right-panel{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 11px;border-bottom:1px solid var(--hairline);}
+.section-title{font-size:13px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:6px;}
+.pub-time{font-size:11px;font-weight:600;color:var(--muted);}
+.mkt-list{padding:0 16px;}
+.mkt-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hairline);}
+.mkt-row:last-child{border-bottom:none;}
+.mkt-row-info{flex:1;min-width:0;}
+.mkt-name{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mkt-vals{display:flex;align-items:baseline;gap:7px;}
+.mkt-val{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;}
+.mkt-chg{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mkt-chg.up{color:var(--up);}.mkt-chg.dn{color:var(--dn);}
+.mkt-spark{flex-shrink:0;width:80px;height:44px;cursor:crosshair;}
+.mkt-spark canvas{display:block;width:100%!important;height:44px!important;}
+.vix-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-inset);color:var(--muted);}
+.vix-badge.normal{background:#ECFCCB;color:#65A30D;}
+
+/* ── 섹션 헤더 ── */
+.mkt-section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 16px 2px;background:var(--surface-soft);border-bottom:1px solid var(--hairline);border-top:1px solid var(--hairline);}
+
+/* ── 라이브 닷 ── */
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22C55E;position:relative;flex-shrink:0;}
+.live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:rgba(34,197,94,.3);animation:pulse-ring 1.8s ease-out infinite;}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.8;}100%{transform:scale(2.2);opacity:0;}}
+.live-label{font-size:11px;font-weight:700;color:#22C55E;letter-spacing:-.01em;}
+
+/* ── 수급 컴포넌트 ── */
+.supply-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--hairline);}
+.supply-row:last-child{border-bottom:none;}
+.supply-info{flex:1;min-width:0;}
+.supply-name{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;}
+.supply-vals{display:flex;align-items:baseline;gap:5px;}
+.supply-val{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.supply-val.selling{color:var(--dn);}.supply-val.buying{color:var(--up);}
+.supply-unit{font-size:11px;font-weight:500;color:var(--muted);}
+
+/* 수급 방향 바 — 0 중심으로 좌(매도)/우(매수) */
+.supply-bar-outer{flex-shrink:0;width:80px;display:flex;flex-direction:column;gap:4px;}
+.supply-bar-center{position:relative;width:100%;height:6px;background:var(--surface-inset);border-radius:999px;overflow:hidden;}
+.supply-bar-center-line{position:absolute;left:50%;top:0;width:1px;height:100%;background:var(--hairline);z-index:1;}
+.supply-bar-fill2{position:absolute;top:0;height:100%;border-radius:999px;transition:width .6s ease, left .6s ease;}
+.supply-bar-fill2.sell{background:var(--dn);right:50%;left:auto;}
+.supply-bar-fill2.buy{background:var(--up);left:50%;}
+.supply-bar-labels{display:flex;justify-content:space-between;font-size:9px;font-weight:600;color:var(--muted);}
+
+/* ── 선물 배지 ── */
+.futures-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--primary-bg);color:var(--primary);}
+.fx-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--gold-bg);color:var(--gold);}
+
+/* ── 플래시 애니 ── */
+@keyframes flash-up{0%{color:var(--up);}100%{color:var(--ink);}}
+@keyframes flash-dn{0%{color:var(--dn);}100%{color:var(--ink);}}
+.flash-up{animation:flash-up .8s ease-out;}.flash-dn{animation:flash-dn .8s ease-out;}
+
+/* ── 토글 ── */
+.toggle-wrap{display:flex;justify-content:center;gap:12px;margin-bottom:8px;}
+.toggle-btn{font-size:12px;font-weight:600;padding:5px 14px;border-radius:999px;border:1.5px solid var(--hairline);background:var(--canvas);color:var(--ink);cursor:pointer;}
+.toggle-btn.active{background:var(--ink);color:var(--canvas);border-color:var(--ink);}
+.toggle-btn.sim-on{background:#22C55E;color:#fff;border-color:#22C55E;}
+</style>
+</head>
+<body>
+<div class="page-bg">
+
+  <div class="toggle-wrap">
+    <button class="toggle-btn active" onclick="setTheme('light')">라이트</button>
+    <button class="toggle-btn" onclick="setTheme('dark')">다크</button>
+    <button class="toggle-btn" id="sim-btn" onclick="toggleSim()">⟳ 값 변동 시뮬레이션</button>
+  </div>
+
+  <div class="compare-label">시장 지표 사이드바 — Before / After</div>
+
+  <div class="compare-wrap">
+
+    <!-- ── BEFORE ── -->
+    <div class="col">
+      <div class="col-label">현재</div>
+      <div class="right-panel">
+        <div class="panel-header">
+          <span class="section-title">시장 지표</span>
+          <span class="pub-time">07:31 KST</span>
+        </div>
+        <div class="mkt-list">
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">나스닥</span>
+              <div class="mkt-vals"><div class="mkt-val">26,853.98</div><div class="mkt-chg dn">-0.89%</div></div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-nd"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">필라델피아 반도체</span>
+              <div class="mkt-vals"><div class="mkt-val">13,916.96</div><div class="mkt-chg up">+1.39%</div></div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-sox"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">나스닥100 선물</span>
+              <div class="mkt-vals"><div class="mkt-val">30,417.75</div><div class="mkt-chg dn">-0.94%</div></div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-nqf"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">VIX 공포지수</span>
+              <div class="mkt-vals"><div class="mkt-val">16.06</div><div class="mkt-chg up">+1.77%</div></div>
+            </div>
+            <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end">
+              <span class="vix-badge normal">보통</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider-arrow">→</div>
+
+    <!-- ── AFTER ── -->
+    <div class="col">
+      <div class="col-label new">장 중 실시간</div>
+      <div class="right-panel">
+        <div class="panel-header">
+          <span class="section-title">시장 지표</span>
+          <span class="pub-time" style="display:flex;align-items:center;gap:5px">
+            <span class="live-dot"></span>
+            <span class="live-label">실시간</span>
+          </span>
+        </div>
+
+        <!-- 국내 지수 -->
+        <div class="mkt-section-label">국내 지수</div>
+        <div class="mkt-list">
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">코스닥</span>
+              <div class="mkt-vals">
+                <div class="mkt-val" id="rt-kdq-val">712.34</div>
+                <div class="mkt-chg dn" id="rt-kdq-chg">-1.21%</div>
+              </div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-kdq"></canvas></div>
+          </div>
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">코스피200 선물 <span class="futures-badge">FUT</span></span>
+              <div class="mkt-vals">
+                <div class="mkt-val" id="rt-fut-val">354.85</div>
+                <div class="mkt-chg dn" id="rt-fut-chg">-1.92%</div>
+              </div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-fut"></canvas></div>
+          </div>
+        </div>
+
+        <!-- 환율 -->
+        <div class="mkt-section-label">환율</div>
+        <div class="mkt-list">
+          <div class="mkt-row">
+            <div class="mkt-row-info">
+              <span class="mkt-name">원/달러 <span class="fx-badge">FX</span></span>
+              <div class="mkt-vals">
+                <div class="mkt-val" id="rt-fx-val">1,533.50</div>
+                <div class="mkt-chg up" id="rt-fx-chg">+0.31%</div>
+              </div>
+            </div>
+            <div class="mkt-spark"><canvas id="sp-fx"></canvas></div>
+          </div>
+        </div>
+
+        <!-- 오늘 수급 -->
+        <div class="mkt-section-label">오늘 수급 · 코스피</div>
+        <div class="mkt-list">
+
+          <!-- 외국인 -->
+          <div class="supply-row">
+            <div class="supply-info">
+              <div class="supply-name">외국인</div>
+              <div class="supply-vals">
+                <span class="supply-val selling" id="rt-frgn-val">-3,214</span>
+                <span class="supply-unit">억</span>
+              </div>
+            </div>
+            <div class="supply-bar-outer">
+              <div class="supply-bar-center">
+                <div class="supply-bar-center-line"></div>
+                <div class="supply-bar-fill2 sell" id="rt-frgn-bar" style="width:32%"></div>
+              </div>
+              <div class="supply-bar-labels"><span style="color:var(--dn)">매도</span><span style="color:var(--up)">매수</span></div>
+            </div>
+          </div>
+
+          <!-- 기관 -->
+          <div class="supply-row">
+            <div class="supply-info">
+              <div class="supply-name">기관</div>
+              <div class="supply-vals">
+                <span class="supply-val buying" id="rt-inst-val">+2,887</span>
+                <span class="supply-unit">억</span>
+              </div>
+            </div>
+            <div class="supply-bar-outer">
+              <div class="supply-bar-center">
+                <div class="supply-bar-center-line"></div>
+                <div class="supply-bar-fill2 buy" id="rt-inst-bar" style="width:29%"></div>
+              </div>
+              <div class="supply-bar-labels"><span style="color:var(--dn)">매도</span><span style="color:var(--up)">매수</span></div>
+            </div>
+          </div>
+
+          <!-- 개인 -->
+          <div class="supply-row">
+            <div class="supply-info">
+              <div class="supply-name">개인</div>
+              <div class="supply-vals">
+                <span class="supply-val buying" id="rt-indv-val">+412</span>
+                <span class="supply-unit">억</span>
+              </div>
+            </div>
+            <div class="supply-bar-outer">
+              <div class="supply-bar-center">
+                <div class="supply-bar-center-line"></div>
+                <div class="supply-bar-fill2 buy" id="rt-indv-bar" style="width:4%"></div>
+              </div>
+              <div class="supply-bar-labels"><span style="color:var(--dn)">매도</span><span style="color:var(--up)">매수</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="font-size:11px;color:var(--muted);text-align:center;max-width:540px;line-height:1.8">
+    코스닥·선물·환율은 스파크라인 포함 · 수급은 0 중심 좌우 방향 바<br>
+    데이터 소스: 네이버 금융 투자자별 매매현황 (5분 지연) → Vercel 프록시
+  </div>
+
+</div>
+
+<script>
+function drawSparkline(id, data, color) {
+  const c = document.getElementById(id);
+  if (!c || !data || !data.length) return;
+  const dpr = window.devicePixelRatio || 1, W = c.offsetWidth || 80, H = c.offsetHeight || 44;
+  c.width = W * dpr; c.height = H * dpr;
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+  const min = Math.min(...data), max = Math.max(...data), range = max - min || 1, pad = 2;
+  const pts = data.map((v, i) => ({ x: (i / (data.length - 1)) * W, y: H - pad - ((v - min) / range) * (H - pad * 2) }));
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, color + '38'); grad.addColorStop(1, color + '00');
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) { const cx = (pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y); }
+  ctx.lineTo(pts.at(-1).x, H); ctx.lineTo(pts[0].x, H); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) { const cx = (pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y); }
+  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(pts.at(-1).x, pts.at(-1).y, 2.2, 0, Math.PI*2); ctx.fillStyle = color; ctx.fill();
+}
+
+const ndPrices  = [27100,27050,26980,27020,26950,26900,26950,26850,26900,26860,26850,26860,26853];
+const soxPrices = [13600,13700,13750,13800,13850,13900,13880,13920,13900,13910,13900,13916,13916];
+const nqfPrices = [30700,30650,30600,30550,30500,30480,30490,30450,30430,30420,30418,30418,30417];
+const kdqPrices = [721,718,715,717,713,710,716,712,714,710,712,714,712];
+const futPrices = [362,360,358,359,357,356,357,355,356,355,355,354,354];
+const fxPrices  = [1521,1524,1527,1525,1529,1528,1530,1528,1531,1529,1532,1530,1533];
+
+function redrawAll() {
+  drawSparkline('sp-nd',  ndPrices,  '#6B7280');
+  drawSparkline('sp-sox', soxPrices, '#E03131');
+  drawSparkline('sp-nqf', nqfPrices, '#6B7280');
+  drawSparkline('sp-kdq', kdqPrices, '#2775ED');
+  drawSparkline('sp-fut', futPrices, '#2775ED');
+  drawSparkline('sp-fx',  fxPrices,  '#B7791F');
+}
+window.addEventListener('load', redrawAll);
+
+function setTheme(t) {
+  document.documentElement.classList.remove('dark','light');
+  document.documentElement.classList.add(t);
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    if (b.id === 'sim-btn') return;
+    b.classList.toggle('active', b.textContent.trim() === (t==='dark' ? '다크' : '라이트'));
+  });
+  setTimeout(redrawAll, 50);
+}
+
+/* ── 수급 바 업데이트 (0 중심) ── */
+function updateSupplyBar(barId, val, maxAbs) {
+  const bar = document.getElementById(barId);
+  const pct = Math.min(48, Math.abs(val) / maxAbs * 48);
+  bar.style.width = pct + '%';
+  if (val >= 0) {
+    bar.className = 'supply-bar-fill2 buy';
+  } else {
+    bar.className = 'supply-bar-fill2 sell';
+  }
+}
+
+/* ── 시뮬레이션 ── */
+let simInterval = null;
+let kdqBase=712.34, futBase=354.85, fxBase=1533.50;
+let frgnBase=-3214, instBase=2887, indvBase=412;
+
+function toggleSim() {
+  const btn = document.getElementById('sim-btn');
+  if (simInterval) {
+    clearInterval(simInterval); simInterval = null;
+    btn.classList.remove('sim-on');
+    btn.textContent = '⟳ 값 변동 시뮬레이션';
+  } else {
+    simInterval = setInterval(tick, 1600);
+    btn.classList.add('sim-on');
+    btn.textContent = '■ 중지';
+  }
+}
+
+function tick() {
+  kdqBase  += (Math.random()-.52)*3;
+  futBase  += (Math.random()-.52)*.8;
+  fxBase   += (Math.random()-.45)*1.2;
+  frgnBase += (Math.random()-.55)*150;
+  instBase += (Math.random()-.48)*100;
+  indvBase += (Math.random()-.50)*80;
+
+  flash('rt-kdq-val', kdqBase, true, 2);
+  updatePctChg('rt-kdq-chg', kdqBase, 721);
+  kdqPrices.push(kdqBase); kdqPrices.shift();
+  drawSparkline('sp-kdq', kdqPrices, '#2775ED');
+
+  flash('rt-fut-val', futBase, true, 2);
+  updatePctChg('rt-fut-chg', futBase, 362);
+  futPrices.push(futBase); futPrices.shift();
+  drawSparkline('sp-fut', futPrices, '#2775ED');
+
+  flash('rt-fx-val', fxBase, true, 2);
+  updatePctChg('rt-fx-chg', fxBase, 1528);
+  document.getElementById('rt-fx-chg').className = 'mkt-chg ' + (fxBase>=1528?'up':'dn');
+  fxPrices.push(fxBase); fxPrices.shift();
+  drawSparkline('sp-fx', fxPrices, '#B7791F');
+
+  updateSupply('rt-frgn-val','rt-frgn-bar', frgnBase);
+  updateSupply('rt-inst-val','rt-inst-bar', instBase);
+  updateSupply('rt-indv-val','rt-indv-bar', indvBase);
+}
+
+function flash(id, val, fmt, dp) {
+  const el = document.getElementById(id);
+  const prev = parseFloat(el.textContent.replace(/[,+]/g,''));
+  el.textContent = fmt ? val.toLocaleString('ko-KR',{minimumFractionDigits:dp,maximumFractionDigits:dp}) : val.toFixed(dp);
+  el.classList.remove('flash-up','flash-dn');
+  void el.offsetWidth;
+  el.classList.add(val > prev ? 'flash-up' : 'flash-dn');
+}
+
+function updatePctChg(id, cur, base) {
+  const pct = (cur-base)/base*100;
+  const el = document.getElementById(id);
+  el.textContent = (pct>=0?'+':'') + pct.toFixed(2)+'%';
+  el.className = 'mkt-chg '+(pct>=0?'up':'dn');
+}
+
+function updateSupply(valId, barId, val) {
+  const el = document.getElementById(valId);
+  el.textContent = (val>=0?'+':'')+Math.round(val).toLocaleString();
+  el.className = 'supply-val '+(val>=0?'buying':'selling');
+  updateSupplyBar(barId, val, 6000);
+}
+</script>
+</body>
+</html>
