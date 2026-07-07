@@ -57,7 +57,7 @@ def parse_naver_realtime(data: dict, vol_avg20: float) -> dict | None:
 
 
 def _load_universe() -> list[dict]:
-    """stocks.json(41종목)에서 code·name 유니버스를 읽는다."""
+    """stocks.json에서 code·name 유니버스를 읽는다."""
     return json.loads((CONFIG_DIR / "stocks.json").read_text(encoding="utf-8"))
 
 
