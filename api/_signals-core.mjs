@@ -106,6 +106,21 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
   return { signals: display, signalsAll: sorted, rank };
 }
 
+// 섹터별 평균 등락률·상승/하락 카운트 — '오늘의 한 줄' 배너가 장중에도 전 섹터 라이브 값을 쓰도록.
+// stocks의 sector는 영문 키(semicon 등). 반환: { [sector]: {avg, up, dn, total} }
+export function sectorAverages(stocks) {
+  const acc = {};
+  for (const s of stocks || []) {
+    const k = s.sector; if (!k) continue;
+    const a = acc[k] || (acc[k] = { sum: 0, up: 0, dn: 0, total: 0 });
+    const p = s.pct || 0;
+    a.sum += p; a.total += 1; if (p > 0) a.up += 1; else if (p < 0) a.dn += 1;
+  }
+  const out = {};
+  for (const k of Object.keys(acc)) { const a = acc[k]; out[k] = { avg: a.total ? a.sum / a.total : 0, up: a.up, dn: a.dn, total: a.total }; }
+  return out;
+}
+
 // byCode: { code: {amount, vol, pct} } — amount는 거래대금(백만)
 export function etfBettingFlow(byCode) {
   const sum = (codes, f) => codes.reduce((a, c) => a + (byCode[c]?.[f] || 0), 0);

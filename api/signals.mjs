@@ -1,6 +1,6 @@
 // 종목·ETF 신호 통합 API — polling(가격·등락·거래량) + itemSummary(거래대금) + 일봉 스냅샷 조합 → 코어 가공
 import { ALL_ETF_CODES, ETF_NAME } from './_etf-universe.mjs';
-import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, SIGNAL_META } from './_signals-core.mjs';
+import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, sectorAverages, SIGNAL_META } from './_signals-core.mjs';
 import { krMarketOpen, kstTodayYmd, labelFromYmd, lastTradingDay } from './_market-calendar.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
     };
 
     return res.status(200).json({
-      phase, asOf,
+      phase, asOf, kospiPct: kPct, sectors: sectorAverages(stocks),
       signals, signalsAll, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
     });
   } catch (e) {

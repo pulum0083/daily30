@@ -73,6 +73,21 @@ test('랭킹은 신호별 그룹 + 종목수 내림차순', () => {
   assert.equal(cu.items.length, 2);
 });
 
+import { sectorAverages } from './_signals-core.mjs';
+
+test('섹터 평균: 섹터별 평균 등락률·상승/하락 집계', () => {
+  const stocks = [
+    { sector: 'bio', pct: 2 }, { sector: 'bio', pct: 1 },
+    { sector: 'semicon', pct: -5 }, { sector: 'semicon', pct: -3 }, { sector: 'semicon', pct: 0 },
+  ];
+  const r = sectorAverages(stocks);
+  assert.equal(r.bio.avg, 1.5);
+  assert.equal(r.bio.up, 2);
+  assert.equal(r.semicon.total, 3);
+  assert.equal(r.semicon.dn, 2);
+  assert.ok(Math.abs(r.semicon.avg - (-8 / 3)) < 1e-9);
+});
+
 import { etfSectorRotation, etfSafeHaven, etfLead } from './_signals-core.mjs';
 
 test('섹터 로테이션: 등락률 내림차순', () => {
