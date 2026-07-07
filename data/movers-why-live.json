@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-07T11:31:29.212196+09:00",
+  "generated_at": "2026-07-07T12:01:33.469344+09:00",
   "date": "2026-07-07",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -8.18,
-      "surge": 0.46,
+      "changePct": -7.86,
+      "surge": 0.5,
       "events": [
         {
           "time": "09:34",
@@ -31,24 +31,24 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -7.26,
-      "surge": 0.41,
+      "changePct": -7.34,
+      "surge": 0.47,
       "events": [
         {
           "time": "07:23",
           "headline": "SK하이닉스, 美 ADR 공모 절차 돌입…AI 자금시장 시험대",
           "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1qN0FzNTk0aGpCQTlZckRTd085dlZVRTVDNm5iT0FfdEowQjk0NS1ZYjAyTUQ5LVY1eW9KX0JVLW5rOG5hRm12RWVOSHcwakZLYXlHSmI4WFFNU3pMeVZ6ckFkbWFVUm05RWU3bFNxS2c?oc=5",
           "source": "연합인포맥스",
-          "why": "SK하이닉스가 미국 증권예탁증권(ADR) 공모 절차에 돌입하며 AI 자금 시장에서의 시험대에 올랐다. (개별 인과 단정 안 함)",
+          "why": "SK하이닉스가 미국 ADR 공모 절차에 돌입하며 AI 자금 시장에서의 시험대에 올랐다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
         },
         {
-          "time": "08:56",
-          "headline": "SK하이닉스 미국 상장, 전직 오픈AI 연구원도 투자",
-          "url": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOTFM1N2JiWWdGOHB6S3NPRndIRmUzSDk2V1hQdUtMa3ZNNVpLWDBlQVlwdjBzX1hxRjRpMzE3bEZMSFpNTmtURnBqYmxNak5ZTFBObEtJTU9xMEtuNVdHQk9YcnYxeUJVSF9WTjFfXzBKSlgxVmtCUUtrUEhUT3ZBaVdtdm8tWmRUN3Rr?oc=5",
-          "source": "조선일보",
-          "why": "SK하이닉스 미국 상장, 전직 오픈AI 연구원도 투자 (개별 인과 단정 안 함)",
+          "time": "08:38",
+          "headline": "“저평가 끝낼까?”…10일 나스닥 가는 SK하이닉스, ADR 상장 승부수",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBXMFBHRzJoYXVSSTc5aTl3VzdDYlVsOTVpYW9JQ3B5ZGQ4SHd0a2ltaWVRMEVFbWlmbTBTSHJQYV9IeXVqbi1naWcxV3A3WG9weUE?oc=5",
+          "source": "매일경제",
+          "why": "“저평가 끝낼까?”…10일 나스닥 가는 SK하이닉스, ADR 상장 승부수 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
         }
@@ -57,9 +57,28 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -6.57,
-      "surge": 0.32,
-      "events": []
+      "changePct": -6.67,
+      "surge": 0.37,
+      "events": [
+        {
+          "time": "10:22",
+          "headline": "현대차, 잠정실적·풍문 해명공시 여파에 장중 5%대 급락 : 기업주식정보",
+          "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE5hSEJPYUtoZ0tRZ2UzVHREbFRScmd6ajcycUtOT1dfcDJNME40WUxtZzN6djlINUMxdkhLNkpxS3hBbUY2R2Q3NmFR?oc=5",
+          "source": "재경일보",
+          "why": "현대차는 잠정실적 발표와 풍문 해명 공시의 영향으로 장중 5% 이상 급락했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:48",
+          "headline": "현대차 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9JWE40ZV93eXJlZ2NHdHRyYTdhb1c0Zmc1NkFsUExmel9kTDNIVXdqMXI4VW1uOWs1dnZRZG10VHpkN2psbnBHQWowNHRzVXhXQTdSNUxxUktRVGFVaDhqclJfVjVxNUlHNWNtV0ZIQV94Nm05?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "현대차 주가 하락 중",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     }
   ]
 }
