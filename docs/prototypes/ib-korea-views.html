@@ -1,0 +1,125 @@
+<!-- 외국계 IB 코멘트 섹션(코스피 오전 브리핑) 프로토타입 — 실제 카드 스타일·오늘자 실기사 예시 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>외국계 시각 — 프로토타입</title>
+<style>
+  :root{
+    --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+    --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+    --primary:#006EFF;--primary-bg:#E8F4FF;
+    --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+    --r-sm:6px;--r-md:10px;--r-lg:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+      --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+      --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+      --up:#F74B53;--up-bg:rgba(247,75,83,.15);--dn:#1C82FF;--dn-bg:rgba(0,110,255,.15);
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+       background:var(--surface-soft);color:var(--ink);word-break:keep-all;line-height:1.6;padding:28px 16px 60px;}
+  .wrap{max-width:520px;margin:0 auto;}
+  .proto-note{font-size:12px;color:var(--muted);background:var(--surface-inset);border-radius:var(--r-md);
+              padding:11px 14px;margin-bottom:28px;line-height:1.65;}
+  .proto-note b{color:var(--ink);}
+
+  /* ── 실제 브리핑 CSS 그대로 ── */
+  .open-section{margin-top:22px;}
+  .open-section__title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+  .open-section__title::before{content:'';display:block;width:3px;height:12px;background:var(--primary);border-radius:2px;flex-shrink:0;}
+  .analyst-quotes-section{display:flex;flex-direction:column;gap:10px;}
+  .analyst-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 16px;}
+  .analyst-card__top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .analyst-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:-.5px;}
+  .analyst-meta{flex:1;min-width:0;}
+  .analyst-name{font-size:13px;font-weight:700;color:var(--ink);}
+  .analyst-affil{font-size:11px;color:var(--muted);margin-top:1px;}
+  .analyst-badge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;flex-shrink:0;}
+  .analyst-badge.bull{background:var(--up-bg);color:var(--up);}
+  .analyst-badge.bear{background:var(--dn-bg);color:var(--dn);}
+  .analyst-badge.neu{background:var(--surface-inset);color:var(--muted);}
+  .analyst-quote{font-size:13px;line-height:1.75;color:var(--ink);}
+  .analyst-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline);}
+  .analyst-source{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;}
+  .analyst-source:hover{text-decoration:underline;}
+  .analyst-source-arrow{font-size:10px;opacity:0.7;}
+  .analyst-time{font-size:11px;color:var(--muted);margin-left:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="proto-note">
+    <b>프로토타입 · 외국계 시각 섹션</b><br>
+    코스피 오전 브리핑 본문(reasons 뒤 · stock_picks 앞)에 들어갑니다. 아래 3개 카드는
+    <b>실제 오늘·최근 국내 매체 기사</b>로 채운 예시입니다. 큰따옴표 버바텀 인용 대신
+    <b>스탠스 요약 + 원문 링크</b> 방식(다이제스트). 링크는 실제 발행사 원문으로 연결됩니다.
+  </div>
+
+  <div class="open-section analyst-quotes-section">
+    <div class="open-section__title" style="display:flex;align-items:center;gap:6px;">
+      <span>🏦 외국계 시각</span>
+      <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:auto;text-transform:none;letter-spacing:0;">최근 24시간</span>
+    </div>
+
+    <!-- 카드 1 — 실기사: 한국경제 2026-07-08 -->
+    <div class="analyst-card">
+      <div class="analyst-card__top">
+        <div class="analyst-avatar">MS</div>
+        <div class="analyst-meta">
+          <div class="analyst-name">모건스탠리</div>
+          <div class="analyst-affil">글로벌 IB</div>
+        </div>
+        <span class="analyst-badge bear">약세</span>
+      </div>
+      <div class="analyst-quote">삼성전자·SK하이닉스 메모리 사이클이 정점을 지났다며 비중 축소를 권고했어요. 다음 승부처로는 전력망 관련주를 지목했어요.</div>
+      <div class="analyst-footer">
+        <a class="analyst-source" href="https://www.hankyung.com/article/202607071371i" target="_blank" rel="noopener noreferrer">한국경제 <span class="analyst-source-arrow">→</span></a>
+        <span class="analyst-time">오늘 09:51</span>
+      </div>
+    </div>
+
+    <!-- 카드 2 — 실기사: 연합뉴스 2026-06-25 -->
+    <div class="analyst-card">
+      <div class="analyst-card__top">
+        <div class="analyst-avatar">JPM</div>
+        <div class="analyst-meta">
+          <div class="analyst-name">JP모건</div>
+          <div class="analyst-affil">글로벌 IB</div>
+        </div>
+        <span class="analyst-badge bull">강세</span>
+      </div>
+      <div class="analyst-quote">코스피 12개월 목표치를 상향하며 한국 주식 비중을 극대화하라고 제시했어요. 조정이 오면 오히려 매수 기회로 삼으라고 봤어요.</div>
+      <div class="analyst-footer">
+        <a class="analyst-source" href="https://www.yna.co.kr/view/AKR20260625" target="_blank" rel="noopener noreferrer">연합뉴스 <span class="analyst-source-arrow">→</span></a>
+        <span class="analyst-time">어제 16:00</span>
+      </div>
+    </div>
+
+    <!-- 카드 3 — 실기사: 서울경제 2026-06-01 -->
+    <div class="analyst-card">
+      <div class="analyst-card__top">
+        <div class="analyst-avatar">GS</div>
+        <div class="analyst-meta">
+          <div class="analyst-name">골드만삭스</div>
+          <div class="analyst-affil">글로벌 IB</div>
+        </div>
+        <span class="analyst-badge bull">강세</span>
+      </div>
+      <div class="analyst-quote">삼성전자와 SK하이닉스의 합산 이익이 슈퍼사이클을 타고 크게 늘어날 것으로 내다봤어요. 메모리 업황이 피크아웃이 아니라는 시각이에요.</div>
+      <div class="analyst-footer">
+        <a class="analyst-source" href="https://www.sedaily.com/NewsView/26AB01" target="_blank" rel="noopener noreferrer">서울경제 <span class="analyst-source-arrow">→</span></a>
+        <span class="analyst-time">어제 16:00</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
