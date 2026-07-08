@@ -215,8 +215,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .scard__close{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
 .scard__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
 .scard__pct.up{color:var(--up);}.scard__pct.down{color:var(--dn);}.scard__pct.flat{color:var(--muted);}
-.scard__spark{margin:9px 0 7px;height:34px;}
+.scard__spark{margin:9px 0 7px;height:34px;position:relative;}
 .scard__spark svg{width:100%;height:34px;display:block;overflow:visible;}
+/* 곡선 끝의 실시간 점 — SVG는 preserveAspectRatio:none으로 가로만 늘어나 원이 타원으로 찌그러지므로
+   SVG 밖의 일반 HTML 원(고정 px, border-radius:50%)으로 그려 기기 폭과 무관하게 항상 정원을 유지한다. */
+.spark-livedot{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;animation:sparkdotpulse 1.6s ease-in-out infinite;pointer-events:none;}
+@keyframes sparkdotpulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.7);opacity:.35;}}
 .scard__range{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
 .scard__posbar{position:relative;height:4px;border-radius:3px;background:var(--hair);margin:6px 0 2px;overflow:hidden;}
 .scard__posfill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#2775ED33,#2775ED);}
@@ -1159,7 +1163,9 @@ function usSel(code){
             grid.innerHTML=PICKS.map(cardHTML).join('');
             window.ueGate ? window.ueGate() : (box.style.display='');
             document.getElementById('mt-sub').textContent=date+' 코스피 픽 '+PICKS.length+'종목 · 진입/목표/손절 추적';
-            poll();
+            // 장 준비 중(07:30~09:00)엔 아직 오늘 거래가 없어 전일 종가가 내려온다 — 방금 나온 픽에
+            // 이미 가격이 붙어있는 것처럼 보여 혼동을 준다. 이 구간엔 가격을 아예 띄우지 않고 종목 정보만 둔다.
+            if(momPhase()!=='prep') poll();
             setMomStatus();
             // 페이지를 열어둔 채 07:30·09:00·15:30 경계를 넘으면 상태·폴링을 자동 전환
             var momTimer=null;
@@ -3163,19 +3169,20 @@ if(passBtn){
     }
     var lastX=x(n-1).toFixed(1), lastY=y(vals[n-1]).toFixed(1);
     var gid='sbx-grad-'+Math.random().toString(36).slice(2,8);
-    // 실시간 진행 표시: 마지막 값에서 카드 끝까지 점선 가이드 + 맥동하는 점(장 마감 전까지 "여기까지 진행 중")
+    // 실시간 진행 표시: 마지막 값에서 카드 끝까지 점선 가이드(장 마감 전까지 "여기까지 진행 중")
     var trail=(isLive&&drawW<W-2) ? ('<line x1="'+lastX+'" y1="'+((H-padT-padB)/2+padT).toFixed(1)+'" x2="'+W+'" y2="'+((H-padT-padB)/2+padT).toFixed(1)+'" stroke="#94A3B8" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2,2"/>') : '';
-    var liveDot=isLive ? ('<circle cx="'+lastX+'" cy="'+lastY+'" r="2.4" fill="'+col+'"><animate attributeName="r" values="2.2;4;2.2" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/></circle>') : '';
     // data-curve: live(오늘 장중 1분봉)/static(20거래일 종가) 구분 — DOM에서 확인 가능하게
-    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" data-curve="'+(isLive?'live':'static')+'" aria-label="'+(isLive?'오늘 장중 추이':'최근 20거래일 종가 추이')+'">'
+    var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" data-curve="'+(isLive?'live':'static')+'" aria-label="'+(isLive?'오늘 장중 추이':'최근 20거래일 종가 추이')+'">'
       +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
       +'<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'
       +'<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'
       +trail
       +'<path d="'+d+' L'+lastX+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'
       +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
-      +liveDot
       +'</svg>';
+    // 맥동하는 점은 SVG 밖의 일반 HTML 원으로 — preserveAspectRatio:none의 가로 스케일에 영향받지 않아 항상 정원이다.
+    var liveDot=isLive ? ('<span class="spark-livedot" style="left:'+(lastX/W*100).toFixed(2)+'%;top:'+(lastY/H*100).toFixed(2)+'%;background:'+col+';"></span>') : '';
+    return svg+liveDot;
   }
   // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
   var sbxIntraday={};
