@@ -3205,67 +3205,129 @@ if(passBtn){
   // 슬롯: {tone}=당일 장세(상승 우위 등) · {lead}=주도 섹터 · {lag}=부진 섹터 · {kp}=코스피% · {when}=장중/오늘
   // 조사 토큰: {lead:이}=이/가, {lead:은}=은/는, {lead:을}=을/를, {lead:으로}=으로/로, {lead:이에요}=이에요/예요, {tone:이지만}=이지만/지만 (받침 자동)
   // 케이스는 톤 방향(상승/하락/보합) × 분산 여부로 나눠, 문구 프레이밍이 톤과 절대 어긋나지 않게 한다.
+  // 각 케이스는 phase(live=장중 진행형 / closed=마감 완료형)로 다시 나뉜다 — 장중에 "밀렸어요"(완료)처럼
+  // 아직 끝나지 않은 하루를 과거형으로 단정하면 안 되기 때문. live는 "~하고 있어요" 계열, closed만 "~했어요" 계열을 쓴다.
   var TL_TPL={
     // 상승일, 일부 섹터는 뒤처짐 — 주도/소외 프레이밍 (버틴·발목·방어 금지)
-    up_mix:[
-      '{tone:이에요}. {lead:이} 상승을 주도했고, {lag:은} 따라오지 못했어요.',
-      '{lead:으로} 매수세가 몰렸어요. {lag:은} 상대적으로 소외됐고요. {tone:이에요}.',
-      '{when} {tone} — 오늘의 주역은 {lead}, {lag:은} 뒤처졌어요.',
-      '코스피 {kp}. 강세는 {lead}, 부진은 {lag:으로} 갈렸어요.',
-      '{lead:이} 지수를 끌어올렸어요. {lag:은} 힘을 보태지 못했고요.',
-      '{tone:이지만} {lead:은} 특히 뜨거웠어요. {lag:은} 미지근했고요.'
-    ],
+    up_mix:{
+      live:[
+        '{tone:이에요}. {lead:이} 상승을 주도하고 있고, {lag:은} 따라오지 못하고 있어요.',
+        '{lead:으로} 매수세가 몰리고 있어요. {lag:은} 상대적으로 소외되고 있고요. {tone:이에요}.',
+        '{when} {tone} — 지금 주역은 {lead}, {lag:은} 뒤처지고 있어요.',
+        '코스피 {kp}. 강세는 {lead}, 부진은 {lag:으로} 갈리는 중이에요.',
+        '{lead:이} 지수를 끌어올리고 있어요. {lag:은} 힘을 보태지 못하고 있고요.',
+        '{tone:이지만} {lead:은} 특히 뜨겁고, {lag:은} 미지근해요.'
+      ],
+      closed:[
+        '{tone:이에요}. {lead:이} 상승을 주도했고, {lag:은} 따라오지 못했어요.',
+        '{lead:으로} 매수세가 몰렸어요. {lag:은} 상대적으로 소외됐고요. {tone:이에요}.',
+        '{when} {tone} — 오늘의 주역은 {lead}, {lag:은} 뒤처졌어요.',
+        '코스피 {kp}. 강세는 {lead}, 부진은 {lag:으로} 갈렸어요.',
+        '{lead:이} 지수를 끌어올렸어요. {lag:은} 힘을 보태지 못했고요.',
+        '{tone:이지만} {lead:은} 특히 뜨거웠어요. {lag:은} 미지근했고요.'
+      ]
+    },
     // 전면 상승 (부진 섹터 없음)
-    up:[
-      '{tone:이에요}. {lead:이} 상승을 이끌었어요.',
-      '고르게 초록불이 켜졌어요. 특히 {lead:이} 앞장섰고요. {tone:이에요}.',
-      '{when} {tone} — 오늘의 대장은 {lead:이에요}.',
-      '위험자산 선호가 살아났어요. {lead:이} 특히 강했고요.',
-      '코스피 {kp}. {lead:이} 랠리를 주도했어요.',
-      '매수 심리가 붙었어요. {lead:이} 가장 뜨거웠고요. {tone:이에요}.'
-    ],
+    up:{
+      live:[
+        '{tone:이에요}. {lead:이} 상승을 이끌고 있어요.',
+        '고르게 초록불이 켜지고 있어요. 특히 {lead:이} 앞장서고 있고요. {tone:이에요}.',
+        '{when} {tone} — 지금 대장은 {lead:이에요}.',
+        '위험자산 선호가 살아나고 있어요. {lead:이} 특히 강하고요.',
+        '코스피 {kp}. {lead:이} 랠리를 주도하고 있어요.',
+        '매수 심리가 붙고 있어요. {lead:이} 가장 뜨겁고요. {tone:이에요}.'
+      ],
+      closed:[
+        '{tone:이에요}. {lead:이} 상승을 이끌었어요.',
+        '고르게 초록불이 켜졌어요. 특히 {lead:이} 앞장섰고요. {tone:이에요}.',
+        '{when} {tone} — 오늘의 대장은 {lead:이에요}.',
+        '위험자산 선호가 살아났어요. {lead:이} 특히 강했고요.',
+        '코스피 {kp}. {lead:이} 랠리를 주도했어요.',
+        '매수 심리가 붙었어요. {lead:이} 가장 뜨거웠고요. {tone:이에요}.'
+      ]
+    },
     // 하락일, 일부 섹터는 방어 — 버틴·발목·방어 프레이밍은 여기만
-    dn_mix:[
-      '{tone:이에요}. {lead:이} 버텼고, {lag:은} 크게 밀렸어요.',
-      '{when} {tone} 속에서 {lead}만 초록불을 지켰어요. {lag:은} 낙폭이 컸고요.',
-      '{lead:이} 방어선, {lag:이} 뇌관이었어요. {tone:이에요}.',
-      '{tone} — 그나마 버틴 건 {lead}, 발목 잡은 건 {lag:이에요}.',
-      '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버텼어요.',
-      '코스피 {kp}. {lag:이} 지수를 눌렀고, {lead:은} 방어했어요.',
-      '{tone:이지만} {lead:은} 견조했어요. 반대로 {lag:은} 부진했고요.'
-    ],
+    dn_mix:{
+      live:[
+        '{tone:이에요}. {lead:이} 버티고 있고, {lag:은} 크게 밀리고 있어요.',
+        '{when} {tone} 속에서 {lead}만 초록불을 지키고 있어요. {lag:은} 낙폭이 커지고 있고요.',
+        '{lead:이} 방어선, {lag:이} 뇌관이에요. {tone:이에요}.',
+        '{tone} — 그나마 버티는 건 {lead}, 발목 잡는 건 {lag:이에요}.',
+        '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버티고 있어요.',
+        '코스피 {kp}. {lag:이} 지수를 누르고 있고, {lead:은} 방어하고 있어요.',
+        '{tone:이지만} {lead:은} 견조하고, 반대로 {lag:은} 부진해요.'
+      ],
+      closed:[
+        '{tone:이에요}. {lead:이} 버텼고, {lag:은} 크게 밀렸어요.',
+        '{when} {tone} 속에서 {lead}만 초록불을 지켰어요. {lag:은} 낙폭이 컸고요.',
+        '{lead:이} 방어선, {lag:이} 뇌관이었어요. {tone:이에요}.',
+        '{tone} — 그나마 버틴 건 {lead}, 발목 잡은 건 {lag:이에요}.',
+        '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버텼어요.',
+        '코스피 {kp}. {lag:이} 지수를 눌렀고, {lead:은} 방어했어요.',
+        '{tone:이지만} {lead:은} 견조했어요. 반대로 {lag:은} 부진했고요.'
+      ]
+    },
     // 전면 하락 (방어 섹터 없음)
-    dn:[
-      '{tone:이에요}. 대부분 약세였고 {lag:이} 특히 부진했어요.',
-      '{when} 숨을 곳이 없었어요. {lag:이} 낙폭 상위였고요. {tone:이에요}.',
-      '위험회피가 짙었어요. {lag:이} 가장 크게 밀렸고요.',
-      '전반적으로 무거웠어요. {lag:이} 하락을 주도했어요. {tone:이에요}.',
-      '코스피 {kp}. {lag:이} 지수를 끌어내렸어요.',
-      '매도세가 우위였어요. {lag}에서 낙폭이 두드러졌고요. {tone:이에요}.'
-    ],
+    dn:{
+      live:[
+        '{tone:이에요}. 대부분 약세이고 {lag:이} 특히 부진해요.',
+        '{when} 숨을 곳이 없어요. {lag:이} 낙폭 상위이고요. {tone:이에요}.',
+        '위험회피가 짙어지고 있어요. {lag:이} 가장 크게 밀리고 있고요.',
+        '전반적으로 무거워요. {lag:이} 하락을 주도하고 있어요.',
+        '코스피 {kp}. {lag:이} 지수를 끌어내리고 있어요.',
+        '매도세가 우위예요. {lag}에서 낙폭이 두드러지고 있고요. {tone:이에요}.'
+      ],
+      closed:[
+        '{tone:이에요}. 대부분 약세였고 {lag:이} 특히 부진했어요.',
+        '{when} 숨을 곳이 없었어요. {lag:이} 낙폭 상위였고요. {tone:이에요}.',
+        '위험회피가 짙었어요. {lag:이} 가장 크게 밀렸고요.',
+        '전반적으로 무거웠어요. {lag:이} 하락을 주도했어요. {tone:이에요}.',
+        '코스피 {kp}. {lag:이} 지수를 끌어내렸어요.',
+        '매도세가 우위였어요. {lag}에서 낙폭이 두드러졌고요. {tone:이에요}.'
+      ]
+    },
     // 보합일, 섹터별 온도차 — 방향 단정 없는 중립 프레이밍
-    flat_mix:[
-      '오늘의 온도차예요. {lead:은} 따뜻했고 {lag:은} 싸늘했어요.',
-      '희비가 갈렸어요. {lead:은} 웃고 {lag:은} 울었어요. {tone:이에요}.',
-      '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone:이에요}.',
-      '쏠림이 뚜렷했어요. {lead}엔 온기, {lag}엔 한기가 돌았어요.',
-      '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈렸어요.',
-      '돈은 {lead:으로}, 매물은 {lag:으로} 쏠렸어요. {tone:이에요}.'
-    ],
+    flat_mix:{
+      live:[
+        '오늘의 온도차예요. {lead:은} 따뜻하고 {lag:은} 싸늘해요.',
+        '희비가 갈리고 있어요. {lead:은} 웃고 {lag:은} 울고 있어요. {tone:이에요}.',
+        '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone:이에요}.',
+        '쏠림이 뚜렷해요. {lead}엔 온기, {lag}엔 한기가 돌고 있어요.',
+        '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈리는 중이에요.',
+        '돈은 {lead:으로}, 매물은 {lag:으로} 쏠리고 있어요. {tone:이에요}.'
+      ],
+      closed:[
+        '오늘의 온도차예요. {lead:은} 따뜻했고 {lag:은} 싸늘했어요.',
+        '희비가 갈렸어요. {lead:은} 웃고 {lag:은} 울었어요. {tone:이에요}.',
+        '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone:이에요}.',
+        '쏠림이 뚜렷했어요. {lead}엔 온기, {lag}엔 한기가 돌았어요.',
+        '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈렸어요.',
+        '돈은 {lead:으로}, 매물은 {lag:으로} 쏠렸어요. {tone:이에요}.'
+      ]
+    },
     // 분산조차 없음 (거의 안 뜨는 안전 케이스)
-    flat:[
-      '{tone:이에요}. 뚜렷한 주도 섹터 없이 눈치보기 장세였어요.',
-      '{when} 방향을 정하지 못했어요. 관망세가 짙어요.',
-      '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
-      '{tone:이에요}. 매수도 매도도 뚜렷하지 않았어요.'
-    ]
+    flat:{
+      live:[
+        '{tone:이에요}. 뚜렷한 주도 섹터 없이 눈치보기 장세예요.',
+        '{when} 방향을 정하지 못하고 있어요. 관망세가 짙어요.',
+        '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
+        '{tone:이에요}. 매수도 매도도 뚜렷하지 않아요.'
+      ],
+      closed:[
+        '{tone:이에요}. 뚜렷한 주도 섹터 없이 눈치보기 장세였어요.',
+        '{when} 방향을 정하지 못했어요. 관망세가 짙어요.',
+        '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
+        '{tone:이에요}. 매수도 매도도 뚜렷하지 않았어요.'
+      ]
+    }
   };
-  var _tlCase=null, _tlPick=null; // 로드 세션 동안 문구 고정(데이터만 갱신), 구조(case)가 바뀌면 재추첨
-  function tlPick(caseKey, hasKp){
-    if(_tlCase===caseKey && _tlPick) return _tlPick;
-    var pool=TL_TPL[caseKey].filter(function(t){ return hasKp || t.indexOf('{kp}')<0; });
-    if(!pool.length) pool=TL_TPL[caseKey];
-    _tlPick=pool[Math.floor(Math.random()*pool.length)]; _tlCase=caseKey;
+  var _tlCase=null, _tlPick=null; // 로드 세션 동안 문구 고정(데이터만 갱신), 구조(case+phase)가 바뀌면 재추첨
+  function tlPick(caseKey, hasKp, phase){
+    var stateKey=caseKey+'|'+phase;
+    if(_tlCase===stateKey && _tlPick) return _tlPick;
+    var pool=TL_TPL[caseKey][phase].filter(function(t){ return hasKp || t.indexOf('{kp}')<0; });
+    if(!pool.length) pool=TL_TPL[caseKey][phase];
+    _tlPick=pool[Math.floor(Math.random()*pool.length)]; _tlCase=stateKey;
     return _tlPick;
   }
   // 받침 유무에 따른 조사 꼬리만 반환 (섹터명 span 바깥에 붙여 조사는 색/굵기 없이 표기)
@@ -3315,12 +3377,13 @@ if(passBtn){
     var caseKey = (hasL&&hasG)
       ? (cls==='up'?'up_mix':cls==='dn'?'dn_mix':'flat_mix')
       : (hasL?'up':hasG?'dn':'flat');
+    var phase=krMarketOpen()?'live':'closed';
     var ctx={
-      tone:tone, cls:cls, kp:kp, when:krMarketOpen()?'장중':'오늘',
+      tone:tone, cls:cls, kp:kp, when:phase==='live'?'장중':'오늘',
       lead:leaders.map(function(s){return s.label;}).join('·'),
       lag:lags.map(function(s){return s.label;}).join('·')
     };
-    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+tlFill(tlPick(caseKey, kp!=null), ctx)+'</span>';
+    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+tlFill(tlPick(caseKey, kp!=null, phase), ctx)+'</span>';
     wrap.style.display='';
   }
   function sbxCardHtml(s){
