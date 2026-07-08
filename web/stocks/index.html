@@ -728,6 +728,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   /* 블록 헤더 — 타이틀이 길어 2줄이 되면 배지·탭을 아래 줄로 분리 */
   .block__h{flex-wrap:wrap;row-gap:6px;}
   .block__s{flex-basis:100%;justify-content:flex-end;}
+  /* 섹터별 대표 종목: 타이틀이 짧아 줄바꿈이 필요 없음 — 배지를 타이틀 옆에 그대로 유지 */
+  .sbx-block .block__h{flex-wrap:nowrap;}
+  .sbx-block .block__s{flex-basis:auto;}
 }
 </style>
 </head>
