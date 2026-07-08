@@ -3143,21 +3143,35 @@ if(passBtn){
     var W=240,H=34,padT=3,padB=3,n=vals.length;
     var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
     var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
-    function x(i){return (i/(n-1))*W;}
+    // 장중 곡선은 정적 20일 곡선과 똑같이 카드 폭을 꽉 채우면 "실시간 갱신 중"인지 구분이 안 간다.
+    // 09:00~15:30 경과 비율만큼만 폭을 채우고 나머지는 점선으로 비워, 하루가 진행 중임을 시각적으로 드러낸다.
+    var drawW=W;
+    if(isLive){
+      var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
+      var elapsed=Math.max(0,Math.min(390,kmin-540)); // 09:00(540분) 기준 경과분, 15:30(930분)에 390
+      drawW=Math.max(W*(elapsed/390), W*(1/n));
+    }
+    function x(i){return (i/(n-1))*drawW;}
     function y(v){return padT+(1-(v-min)/rng)*(H-padT-padB);}
     var d='M'+x(0).toFixed(1)+','+y(vals[0]).toFixed(1);
     for(var i=1;i<n;i++){
       var cx=((x(i-1)+x(i))/2).toFixed(1);
       d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
     }
+    var lastX=x(n-1).toFixed(1), lastY=y(vals[n-1]).toFixed(1);
     var gid='sbx-grad-'+Math.random().toString(36).slice(2,8);
+    // 실시간 진행 표시: 마지막 값에서 카드 끝까지 점선 가이드 + 맥동하는 점(장 마감 전까지 "여기까지 진행 중")
+    var trail=(isLive&&drawW<W-2) ? ('<line x1="'+lastX+'" y1="'+((H-padT-padB)/2+padT).toFixed(1)+'" x2="'+W+'" y2="'+((H-padT-padB)/2+padT).toFixed(1)+'" stroke="#94A3B8" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2,2"/>') : '';
+    var liveDot=isLive ? ('<circle cx="'+lastX+'" cy="'+lastY+'" r="2.4" fill="'+col+'"><animate attributeName="r" values="2.2;4;2.2" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/></circle>') : '';
     // data-curve: live(오늘 장중 1분봉)/static(20거래일 종가) 구분 — DOM에서 확인 가능하게
     return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" data-curve="'+(isLive?'live':'static')+'" aria-label="'+(isLive?'오늘 장중 추이':'최근 20거래일 종가 추이')+'">'
       +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
       +'<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'
       +'<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'
-      +'<path d="'+d+' L'+W+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'
+      +trail
+      +'<path d="'+d+' L'+lastX+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'
       +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+      +liveDot
       +'</svg>';
   }
   // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
