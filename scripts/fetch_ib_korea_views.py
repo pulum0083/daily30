@@ -197,6 +197,87 @@ def _resolve_gnews_url(link: str) -> str:
         return link
 
 
+sys.path.insert(0, str(BASE_DIR / "scripts"))
+from fetch_news_live import get_gemini_api_key  # noqa: E402
+
+
+_SUMMARY_PROMPT = """다음은 외국계 증권사(글로벌 IB)의 한국 시장·종목 관련 견해를 다룬 국내 기사입니다.
+이 IB가 어떤 스탠스를 밝혔는지 1~2문장 한국어로 요약하고, 감성을 분류하세요.
+
+규칙:
+- 반드시 해요체(예: ~했어요, ~봤어요)로 끝내세요. '~다', '~습니다'체 금지.
+- 제목·요약에 없는 내용을 생성하지 마세요. 목표가·지수 레벨 등 숫자는 제목·요약에 실제로
+  있으면 그대로 써도 되지만, 없으면 절대 만들지 마세요.
+- sentiment: 상승/비중확대/매수 견해면 "bull", 하락/비중축소/매도 견해면 "bear", 중립·혼조면 "neu".
+
+[제목] {title}
+[요약] {desc}
+
+출력(JSON만, 다른 텍스트 없이):
+{{"summary": "...", "sentiment": "bull"}}"""
+
+
+def _summarize_and_classify(title: str, desc: str) -> dict | None:
+    """제목+요약으로 스탠스 요약문·감성을 생성한다. 실패 시 None."""
+    from google import genai
+    from google.genai import types
+    try:
+        client = genai.Client(api_key=get_gemini_api_key())
+        resp = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=_SUMMARY_PROMPT.format(title=title, desc=desc),
+            config=types.GenerateContentConfig(temperature=0.2, max_output_tokens=300),
+        )
+        raw = (resp.text or "").strip()
+    except Exception as e:
+        print(f"[ib_views] Gemini 요약 실패: {e}", file=sys.stderr)
+        return None
+    m = re.search(r"\{[\s\S]*\}", raw)
+    if not m:
+        return None
+    try:
+        obj = json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return None
+    summary = str(obj.get("summary", "")).strip()
+    if not summary:
+        return None
+    return {"summary": summary, "sentiment": _normalize_sentiment(obj.get("sentiment", "neu"))}
+
+
+def build_views(now: datetime) -> list[dict]:
+    cands = _dedup_by_house(_fetch_rss_candidates(now))
+    views: list[dict] = []
+    for c in cands:
+        sc = _summarize_and_classify(c["title"], c["desc"])
+        if not sc:
+            print(f"[ib_views] SKIP(요약 실패): {c['title'][:40]}", file=sys.stderr)
+            continue
+        views.append({
+            "house": c["house"],
+            "initials": c["initials"],
+            "summary": sc["summary"],
+            "source": c["source"],
+            "url": _resolve_gnews_url(c["link"]),
+            "published_at": c["published_at"].isoformat(),
+            "time_label": _time_label(c["published_at"], now),
+            "sentiment": sc["sentiment"],
+        })
+    return views
+
+
+def main() -> None:
+    now = datetime.now(KST)
+    out_path = DATA_DIR / "ib_korea_views.json"
+    try:
+        views = build_views(now)
+    except Exception as e:
+        print(f"[ib_views] ERROR: {e}", file=sys.stderr)
+        views = []
+    payload = {"generated_at": now.isoformat(), "date": now.strftime("%Y-%m-%d"), "views": views}
+    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[ib_views] {len(views)}건 저장 → {out_path}")
+
+
 if __name__ == "__main__":
-    from fetch_ib_korea_views import main  # noqa
     main()
