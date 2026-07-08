@@ -190,10 +190,12 @@ def _resolve_gnews_url(link: str) -> str:
         )
         with urllib.request.urlopen(req2, timeout=12) as r:
             raw = r.read().decode("utf-8", "ignore")
-        seg = raw.split("garturlres")[1] if "garturlres" in raw else raw
+        if "garturlres" not in raw:
+            return link
+        seg = raw.split("garturlres")[1]
         m = re.search(r'(https?://[^\\"]+)', seg)
         return m.group(1) if m else link
-    except (urllib.error.URLError, TimeoutError, OSError, IndexError):
+    except Exception:
         return link
 
 
