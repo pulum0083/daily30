@@ -719,17 +719,20 @@ def build_list_context(target_date: str, active_type: str) -> dict:
 
 
 # ── 렌더 ──────────────────────────────────────────────────────────────────────
-def render_briefing(internal_type: str, target_date: str, market_data: dict) -> str:
+def render_briefing(internal_type: str, target_date: str, market_data: dict, force: bool = False) -> str:
     env = make_env()
     config = load_json(CONFIG_DIR / f"{internal_type}.json")
     src_type = SRC_TYPE[internal_type]
     # ── analysis 로드 우선순위 ──────────────────────────────────────────────────
     # 1순위: git에 커밋된 날짜별 snapshot (재생성 시 오염 방지)
     # 2순위: 임시 live 파일 — 반드시 날짜 검증 후 사용
+    # --force 시 snapshot을 무시하고 항상 최신 analysis_{type}.json을 사용 (의도적 정정 재생성용)
     snapshot_path = BRIEFINGS_DIR / target_date / internal_type / "analysis_snapshot.json"
     analysis_path = DATA_DIR / f"analysis_{src_type}.json"
 
-    if snapshot_path.exists():
+    if snapshot_path.exists() and not force:
+        print(f"[generate_html] ⚠️ 기존 snapshot 사용 → {snapshot_path.relative_to(BASE_DIR)} "
+              f"(새로 생성된 analysis_{src_type}.json은 무시됨. 의도적 정정이면 --force 사용)")
         analysis = load_json(snapshot_path)
     elif analysis_path.exists():
         analysis = load_json(analysis_path)
@@ -1575,6 +1578,8 @@ def main():
                         help="stocks.json 종목 상세 페이지 일괄 생성하고 종료")
     parser.add_argument("--us-stocks", dest="us_stocks", action="store_true",
                         help="미국 반도체 종목 경량 상세 페이지 생성")
+    parser.add_argument("--force", action="store_true",
+                        help="기존 analysis_snapshot.json을 무시하고 최신 analysis_{type}.json으로 강제 재생성 (의도적 정정용)")
     args = parser.parse_args()
 
     if args.sectors:
@@ -1613,7 +1618,7 @@ def main():
     data_path = Path(args.data_file)
     market_data = load_json(data_path) if data_path.exists() else {}
 
-    html, analysis = render_briefing(internal_type, args.date, market_data)
+    html, analysis = render_briefing(internal_type, args.date, market_data, force=args.force)
     write_output(html, internal_type, args.date, analysis)
     if internal_type == "kospi":
         patch_landing_hero(analysis, args.date)

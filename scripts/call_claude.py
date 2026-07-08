@@ -1311,7 +1311,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
-def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: bool = False) -> None:
+def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: bool = False, force: bool = False) -> None:
     """교정된 analysis로 텔레그램 메시지(txt)와 HTML을 생성한다 (API 호출 없음).
 
     검증 게이트(validate_analysis) 이후에 호출돼야 교정값이 출력물에 반영된다.
@@ -1336,6 +1336,8 @@ def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: b
         "--data-file", str(data_file),
         "--date", date_str,
     ]
+    if force:
+        cmd.append("--force")
     print(f"[call_claude] Generating HTML: {' '.join(cmd)}")
     result = subprocess.run(cmd)
     if result.returncode != 0:
@@ -1359,6 +1361,10 @@ def main():
         "--force-direction", default=None,
         help="prediction.direction 강제 (검증게이트 오버라이드 재생성용)",
     )
+    parser.add_argument(
+        "--force-refresh", action="store_true",
+        help="같은 날짜에 이미 발행된 analysis_snapshot.json이 있어도 무시하고 최신 분석으로 강제 재생성 (의도적 정정 재실행용)",
+    )
     args = parser.parse_args()
 
     date_str = args.date or datetime.now(KST).strftime("%Y-%m-%d")
@@ -1374,7 +1380,7 @@ def main():
         # validate 통과 후 교정된 analysis로 briefings.json 기록 (kospi-close는 prediction 필드 없음)
         if args.type != "kospi-close":
             save_prediction_to_briefings(args.type, date_str, analysis)
-        render_outputs(args.type, date_str, analysis, no_html=args.no_html)
+        render_outputs(args.type, date_str, analysis, no_html=args.no_html, force=args.force_refresh)
         print(f"[call_claude] Render-only done (type={args.type})")
         return
 
@@ -1387,7 +1393,7 @@ def main():
             sys.exit(1)
 
         save_analysis("kospi-close", analysis)
-        render_outputs("kospi-close", date_str, analysis, no_html=args.no_html)
+        render_outputs("kospi-close", date_str, analysis, no_html=args.no_html, force=args.force_refresh)
         print(f"[call_claude] Done. market_title={analysis.get('market_title', '')}")
         return
 
@@ -1399,7 +1405,7 @@ def main():
         sys.exit(1)
 
     save_analysis(args.type, analysis)
-    render_outputs(args.type, date_str, analysis, no_html=args.no_html)
+    render_outputs(args.type, date_str, analysis, no_html=args.no_html, force=args.force_refresh)
 
     print(f"[call_claude] Done. direction={analysis.get('prediction', {}).get('direction')}")
 
