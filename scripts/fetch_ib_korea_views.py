@@ -161,6 +161,42 @@ def _fetch_rss_candidates(now: datetime) -> list[dict]:
     return cands
 
 
+_BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+
+
+def _resolve_gnews_url(link: str) -> str:
+    """Google News 기사 링크를 발행사 원문 URL로 리졸브한다. 실패 시 원래 link 반환."""
+    if "/rss/articles/" not in link:
+        return link
+    try:
+        art = link.split("/articles/")[1].split("?")[0]
+        req = urllib.request.Request(link, headers=_HDR)
+        with urllib.request.urlopen(req, timeout=12) as r:
+            page = r.read().decode("utf-8", "ignore")
+        sig = re.search(r'data-n-a-sg="([^"]+)"', page)
+        ts = re.search(r'data-n-a-ts="([^"]+)"', page)
+        if not (sig and ts):
+            return link
+        inner = (
+            '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,'
+            'null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
+            f'"{art}",{ts.group(1)},"{sig.group(1)}"]'
+        )
+        payload = [[["Fbv4je", inner, None, "generic"]]]
+        body = "f.req=" + urllib.parse.quote(json.dumps(payload))
+        req2 = urllib.request.Request(
+            _BATCH_URL, data=body.encode(),
+            headers={**_HDR, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        )
+        with urllib.request.urlopen(req2, timeout=12) as r:
+            raw = r.read().decode("utf-8", "ignore")
+        seg = raw.split("garturlres")[1] if "garturlres" in raw else raw
+        m = re.search(r'(https?://[^\\"]+)', seg)
+        return m.group(1) if m else link
+    except (urllib.error.URLError, TimeoutError, OSError, IndexError):
+        return link
+
+
 if __name__ == "__main__":
     from fetch_ib_korea_views import main  # noqa
     main()
