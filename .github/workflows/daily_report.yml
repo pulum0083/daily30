@@ -92,6 +92,12 @@ jobs:
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type kospi
 
+      - name: 🏦 외국계 IB 코멘트 수집 (Gemini, 실패해도 발행 계속)
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 scripts/fetch_ib_korea_views.py
+
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/call_claude.py --type kospi --no-html

@@ -29,6 +29,17 @@
 - us-briefing job에서 `fetch_news.py` 직후, `call_claude.py` 직전에 실행. `continue-on-error: true`.
 - 대상 애널리스트 (12명): Tom Lee, Ed Yardeni, Dan Ives, Mike Wilson, Savita Subramanian, Bill Ackman, Stan Druckenmiller, Mohamed El-Erian, Jeff Gundlach, Ray Dalio, Cathie Wood, Michael Burry
 
+### 외국계 IB 코멘트 수집 — `fetch_ib_korea_views.py`
+
+- Google News 한국어 RSS로 화이트리스트 IB(골드만·모건스탠리·JP모건·UBS·씨티·노무라·맥쿼리·HSBC·CLSA·번스타인·BofA·바클레이스) × 코스피/대형주 쿼리로 **최근 24시간** 국내 2차 보도를 실수집.
+- 제목/요약에 화이트리스트 IB명이 실제로 있어야 채택(귀속 불가 시 제외). IB당 1건, 최대 3건.
+- 원문 링크: Google News 링크를 batchexecute로 발행사 원문 URL로 리졸브, 실패 시 Google News 링크 폴백(둘 다 실기사 연결).
+- Gemini는 **요약·분류만** — 날짜·URL·출처는 RSS 실데이터라 생성 불가. 목표가·지수 숫자는 제목·요약에 있으면 허용, 없으면 생성 금지. 해요체 고정.
+- **다이제스트 방식**: 원문 발언 전문을 갖고 있지 않으므로 큰따옴표 버바텀 인용을 하지 않고 스탠스 요약 + 원문 링크로 제시.
+- 출력: `data/ib_korea_views.json`. 대상 없으면 `views: []` → 섹션 생략(파이프라인 보호).
+- 표시: 코스피 오전 브리핑 "🏦 외국계 시각" 섹션(reasons 뒤·stock_picks 앞). `generate_html.build_ib_korea_views()`가 url 없는 항목 제외.
+- kospi-briefing job에서 `fetch_news.py` 직후, `call_claude.py` 직전 실행. `continue-on-error: true`.
+
 ### 오늘 증권가 시황 수집 — `fetch_research_reports.py`
 
 - 네이버 금융 리서치 시황정보 게시판(`market_info_list.naver`)에서 **당일(KST) 발행 국내 시황 리포트**만 수집.
