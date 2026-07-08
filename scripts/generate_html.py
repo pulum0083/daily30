@@ -587,6 +587,21 @@ def build_analyst_quotes(data: dict) -> dict:
     return {"analyst_quotes": analyst_quotes}
 
 
+def build_ib_korea_views() -> dict:
+    """외국계 IB 코멘트 섹션 컨텍스트 빌더 (코스피 전용).
+
+    url이 없는 항목은 표시하지 않는다(원본 링크 이동 보장). 데이터 없으면 빈 리스트 →
+    템플릿에서 섹션 자체 생략.
+    """
+    views_path = BASE_DIR / "data" / "ib_korea_views.json"
+    if not views_path.exists():
+        return {"ib_korea_views": []}
+    with open(views_path, encoding="utf-8") as f:
+        payload = json.load(f)
+    views = [v for v in payload.get("views", []) if v.get("url")]
+    return {"ib_korea_views": views}
+
+
 def build_accuracy(internal_type: str) -> dict:
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
@@ -763,6 +778,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict) -> 
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         if internal_type == "kospi":
+            ctx.update(build_ib_korea_views())
             uls = analysis.get("us_linked_story") or {}
             if uls.get("title"):
                 ctx["us_linked_title"] = uls["title"]
