@@ -99,6 +99,68 @@ def _dedup_by_house(cands: list[dict], max_items: int = MAX_ITEMS) -> list[dict]
     return ordered[:max_items]
 
 
+_GN_KR = "https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR:ko&q="
+_HDR = {"User-Agent": "Mozilla/5.0"}
+
+# 화이트리스트 IB × 한국 시장·대형주 조합 쿼리. 커버리지 확보용으로 넉넉히.
+_QUERIES = [
+    "외국계 증권사 코스피",
+    "골드만삭스 삼성전자", "골드만삭스 코스피",
+    "모건스탠리 SK하이닉스", "모건스탠리 코스피",
+    "JP모건 코스피", "JP모건 한국 증시",
+    "UBS 코스피", "노무라 한국 증시", "씨티 코스피",
+    "맥쿼리 삼성전자", "HSBC 한국 증시", "CLSA 코스피",
+]
+
+
+def _clean_title(title: str) -> str:
+    """Google News RSS 제목 끝 '- 출처명' 제거."""
+    title = re.sub(r"\s*-\s*[^-]{1,30}$", "", title.strip())
+    return re.sub(r"\s{2,}", " ", title).strip()
+
+
+def _fetch_rss_candidates(now: datetime) -> list[dict]:
+    """쿼리 세트로 RSS를 돌며 24h 이내·IB 귀속 가능한 후보를 수집한다.
+
+    각 후보: {house, initials, title, desc, source, link, published_at(datetime)}
+    """
+    seen_titles: set[str] = set()
+    cands: list[dict] = []
+    for q in _QUERIES:
+        url = _GN_KR + urllib.parse.quote(q)
+        try:
+            req = urllib.request.Request(url, headers=_HDR)
+            with urllib.request.urlopen(req, timeout=12) as r:
+                root = ET.fromstring(r.read())
+        except Exception as e:
+            print(f"[ib_views] RSS 실패 ({q}): {e}", file=sys.stderr)
+            continue
+        for item in root.iter("item"):
+            title = _clean_title((item.findtext("title") or "").strip())
+            desc = re.sub(r"<[^>]+>", "", (item.findtext("description") or "")).strip()[:200]
+            link = (item.findtext("link") or "").strip()
+            src_el = item.find("source")
+            source = (src_el.text or "").strip() if src_el is not None else ""
+            try:
+                pub = parsedate_to_datetime((item.findtext("pubDate") or "")).astimezone(KST)
+            except Exception:
+                continue
+            if not title or title in seen_titles:
+                continue
+            if not _within_24h(pub, now):
+                continue
+            house = _match_house(title + " " + desc)
+            if house is None:
+                continue
+            seen_titles.add(title)
+            cands.append({
+                "house": house["name"], "initials": house["initials"],
+                "title": title, "desc": desc, "source": source,
+                "link": link, "published_at": pub,
+            })
+    return cands
+
+
 if __name__ == "__main__":
     from fetch_ib_korea_views import main  # noqa
     main()
