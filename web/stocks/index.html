@@ -227,7 +227,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .scard__posfill.up{background:linear-gradient(90deg,#E0313133,#E03131);}
 .scard__pos{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--ink);transform:translate(-50%,-50%);}
 .scard__poslbl{font-size:10.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
-.scard__fr{font-size:11px;color:var(--muted);margin-top:5px;}
+.scard__fr-h{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;}
 /* 오늘의 특이 신호 */
 .sig{display:block;padding:13px 32px 13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);position:relative;}
 .sig-go{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#CBD5E1;opacity:0;transition:opacity .15s;}
@@ -3433,12 +3433,13 @@ if(passBtn){
       extra+='<div class="scard__posbar"><div class="scard__posfill '+(s.change_pct>0?'up':'')+'" style="width:'+wk52Pct.toFixed(1)+'%"></div><div class="scard__pos" style="left:'+wk52Pct.toFixed(1)+'%"></div></div>'
         +'<div class="scard__poslbl">52주 중 '+Math.round(wk52Pct)+'% 지점</div>';
     }
-    if(s.foreign_rate!=null) extra+='<div class="scard__fr">외국인 보유 '+s.foreign_rate.toFixed(1)+'%</div>';
     // 장중인데 아직 이 종목의 실시간 곡선을 못 받아온 상태면, 나중에 폭이 줄어드는 정적 곡선 대신
     // placeholder를 먼저 보여준다 — sbxLoadIntraday가 도착하면 최종 크기로 한 번에 교체한다.
     var sparkHtml = (krMarketOpen()&&!sbxIntraday[s.code]) ? sbxSparkSkeleton() : sbxSpark(sbxCurve(s), sbxCurveIsLive(s));
+    // 외국인 보유율은 카드 하단에선 눈에 잘 안 띄어 타이틀 줄 우측으로 이동
+    var frHtml = s.foreign_rate!=null ? '<span class="scard__fr-h">외국인 '+s.foreign_rate.toFixed(1)+'%</span>' : '';
     return '<a class="scard" data-code="'+s.code+'" onclick="goStock(\''+s.code+'\')">'
-      +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span></div>'
+      +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span>'+frHtml+'</div>'
       +'<div class="scard__price"><span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span></div>'
       +'<div class="scard__spark">'+sparkHtml+'</div>'
       +extra+'</a>';
