@@ -1,0 +1,309 @@
+<title>Double-Shot 서비스 진단 보고서</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--soft:#F7F8FA;--inset:#EEF1F5;
+  --line:#E4E7EC;--ink:#14161B;--muted:#68707D;
+  --accent:#0059D0;--accent-bg:#EBF3FF;
+  --risk:#D6303A;--risk-bg:#FDF1F2;
+  --warn:#A06A10;--warn-bg:#FBF3E2;
+  --good:#0E7A4A;--good-bg:#EBF7F1;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --canvas:#1B1C1F;--soft:#232529;--inset:#2A2C31;
+    --line:#3A3D43;--ink:#F2F4F7;--muted:#8E96A3;
+    --accent:#4D9AFF;--accent-bg:rgba(77,154,255,.13);
+    --risk:#F26A72;--risk-bg:rgba(242,106,114,.13);
+    --warn:#E0B252;--warn-bg:rgba(224,178,82,.13);
+    --good:#4CC38A;--good-bg:rgba(76,195,138,.12);
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#1B1C1F;--soft:#232529;--inset:#2A2C31;
+  --line:#3A3D43;--ink:#F2F4F7;--muted:#8E96A3;
+  --accent:#4D9AFF;--accent-bg:rgba(77,154,255,.13);
+  --risk:#F26A72;--risk-bg:rgba(242,106,114,.13);
+  --warn:#E0B252;--warn-bg:rgba(224,178,82,.13);
+  --good:#4CC38A;--good-bg:rgba(76,195,138,.12);
+}
+:root[data-theme="light"]{
+  --canvas:#FFFFFF;--soft:#F7F8FA;--inset:#EEF1F5;
+  --line:#E4E7EC;--ink:#14161B;--muted:#68707D;
+  --accent:#0059D0;--accent-bg:#EBF3FF;
+  --risk:#D6303A;--risk-bg:#FDF1F2;
+  --warn:#A06A10;--warn-bg:#FBF3E2;
+  --good:#0E7A4A;--good-bg:#EBF7F1;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--canvas);color:var(--ink);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  font-size:15px;line-height:1.75;word-break:keep-all;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:760px;margin:0 auto;padding:52px 22px 90px;}
+
+/* ── 헤더 ── */
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
+h1{font-size:27px;line-height:1.35;font-weight:800;letter-spacing:-.02em;margin:10px 0 14px;text-wrap:balance;}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--muted);}
+.meta b{color:var(--ink);font-weight:600;}
+
+/* ── 종합 판정 ── */
+.verdict{margin-top:34px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.verdict-head{padding:13px 20px;background:var(--soft);border-bottom:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;}
+.verdict-body{padding:20px;}
+.verdict-line{font-size:17px;font-weight:700;line-height:1.6;letter-spacing:-.01em;text-wrap:balance;margin:0 0 14px;}
+.verdict-line em{font-style:normal;color:var(--accent);}
+.verdict-pts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;font-size:14px;color:var(--muted);}
+.verdict-pts li{display:flex;gap:10px;align-items:baseline;}
+.verdict-pts .k{flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:4px;position:relative;top:-1px;}
+.k.good{background:var(--good-bg);color:var(--good);}
+.k.risk{background:var(--risk-bg);color:var(--risk);}
+.k.warn{background:var(--warn-bg);color:var(--warn);}
+.verdict-pts b{color:var(--ink);font-weight:600;}
+
+/* ── 스탯 ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{border:1px solid var(--line);border-radius:8px;padding:14px 15px;background:var(--soft);}
+.stat .l{font-size:11.5px;font-weight:600;color:var(--muted);}
+.stat .v{font-size:24px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.3;margin-top:2px;}
+.stat .v.risk{color:var(--risk);}
+.stat .c{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:2px;}
+
+/* ── 섹션 ── */
+section{margin-top:56px;}
+.sec-no{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent);}
+h2{font-size:20px;font-weight:800;letter-spacing:-.015em;line-height:1.4;margin:6px 0 4px;text-wrap:balance;}
+.sec-sub{font-size:13.5px;color:var(--muted);margin:0 0 20px;}
+h3{font-size:15.5px;font-weight:700;margin:26px 0 8px;letter-spacing:-.01em;}
+p{margin:0 0 12px;}
+p.dim, li.dim{color:var(--muted);}
+strong{font-weight:700;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ── 표 ── */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:14px 0 4px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:540px;}
+th{font-size:12px;font-weight:700;color:var(--muted);text-align:left;padding:10px 14px;background:var(--soft);border-bottom:1px solid var(--line);white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6;}
+tr:last-child td{border-bottom:none;}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+.chip.good{background:var(--good-bg);color:var(--good);}
+.chip.risk{background:var(--risk-bg);color:var(--risk);}
+.chip.warn{background:var(--warn-bg);color:var(--warn);}
+.chip.neu{background:var(--inset);color:var(--muted);}
+.chip.acc{background:var(--accent-bg);color:var(--accent);}
+
+/* ── 메뉴 카드 ── */
+.menu-card{border:1px solid var(--line);border-radius:8px;margin-top:16px;overflow:hidden;}
+.menu-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:14px 18px;background:var(--soft);border-bottom:1px solid var(--line);}
+.menu-head .nm{font-size:15.5px;font-weight:800;letter-spacing:-.01em;}
+.menu-head .role{font-size:12.5px;color:var(--muted);}
+.menu-body{padding:16px 18px 18px;}
+.mrow{display:flex;gap:12px;margin-bottom:12px;font-size:14px;}
+.mrow:last-child{margin-bottom:0;}
+.mrow .ml{flex:0 0 52px;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);padding-top:4px;}
+.mrow .mt{flex:1;color:var(--muted);}
+.mrow .mt b{color:var(--ink);font-weight:600;}
+.fix-list{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;}
+.fix-list li{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--muted);}
+.fix-list li::before{content:'';flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--accent);position:relative;top:-3px;}
+.fix-list b{color:var(--ink);font-weight:600;}
+
+/* ── 로드맵 ── */
+.road{margin:16px 0 0;padding:0;list-style:none;counter-reset:rd;display:flex;flex-direction:column;gap:12px;}
+.road li{counter-increment:rd;display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;padding:14px 16px;}
+.road li::before{content:counter(rd);flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.road .rt{font-size:14.5px;font-weight:700;}
+.road .rd{font-size:13.5px;color:var(--muted);margin-top:2px;line-height:1.65;}
+.road .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+
+.dont{margin-top:22px;border:1px solid var(--line);border-left:3px solid var(--risk);border-radius:8px;padding:14px 18px;background:var(--soft);}
+.dont .dt{font-size:13px;font-weight:800;color:var(--risk);margin-bottom:6px;}
+.dont ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:5px;}
+.dont b{color:var(--ink);font-weight:600;}
+
+.callout{border:1px solid var(--line);border-radius:8px;padding:15px 18px;background:var(--accent-bg);font-size:14px;line-height:1.7;margin:16px 0;}
+.callout b{font-weight:700;}
+
+.foot{margin-top:64px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.8;}
+</style>
+
+<div class="page">
+  <div class="eyebrow">Double-Shot · Service Diagnosis</div>
+  <h1>서비스 전반 진단 — 경쟁력, 메뉴 구조, 습관 전략</h1>
+  <div class="meta">
+    <span>작성일 <b>2026-07-09</b></span>
+    <span>데이터 근거 <b>briefings.json 119건 실측 · 저장소 전수 조사</b></span>
+    <span>운영 기간 <b>2026-04-07 ~ 07-09 (94일)</b></span>
+  </div>
+
+  <!-- ══════════ 종합 판정 ══════════ -->
+  <div class="verdict">
+    <div class="verdict-head">종합 판정</div>
+    <div class="verdict-body">
+      <p class="verdict-line">생산 인프라는 이미 경쟁력이 있으나 시장에서 증명되지 않았다. 승부처는 예측력이 아니라 <em>"매일 돌아올 이유"와 "검색으로 들어올 문"</em>이며, 6월에 결정한 영구 페이지 피벗 방향이 데이터상으로도 옳다.</p>
+      <ul class="verdict-pts">
+        <li><span class="k good">강점</span><span>하루 3건 브리핑 + 이슈 22회 + 종목 페이지를 <b>무인 자동화</b>로 생산 — 원가 구조는 1인 서비스 중 최상급. 실측 검증 게이트·픽 트랙레코드는 아무도 안 하는 <b>정직성 자산</b>.</span></li>
+        <li><span class="k risk">위험</span><span>코스피 예측 적중률이 최근 15건 <b>47%(7/15)</b> — 동전 수준. 서비스 간판인 "예측"이 신뢰 자산에서 <b>신뢰 리스크로 전환</b>되는 중.</span></li>
+        <li><span class="k warn">공백</span><span>3개 메뉴가 섬처럼 고립(크로스링크 사실상 0), 사용자가 서비스에 <b>쌓아두는 것이 전무</b>(워치리스트·저장 없음), 종목 커버리지 46개는 SEO 임계질량 미달.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="l">코스피 적중률 (전체)</div><div class="v num">64%</div><div class="c">39/61건 · 94일 누적</div></div>
+    <div class="stat"><div class="l">코스피 적중률 (최근 15건)</div><div class="v num risk">47%</div><div class="c">7/15건 · 하락 추세 지속</div></div>
+    <div class="stat"><div class="l">미국 적중률</div><div class="v num">71%</div><div class="c">39/55건 · 검증 공백 수리 완료</div></div>
+    <div class="stat"><div class="l">색인 대상 페이지</div><div class="v num">94</div><div class="c">종목 46 + US 8 + 섹터 8 외</div></div>
+  </div>
+
+  <!-- ══════════ 1. 경쟁력 ══════════ -->
+  <section>
+    <div class="sec-no">SECTION 1</div>
+    <h2>전반 경쟁력 — 있는가?</h2>
+    <p class="sec-sub">결론부터: 잠재 경쟁력은 있으나, 현재의 간판(예측)으로는 못 이긴다.</p>
+
+    <h3>경쟁 지형에서의 위치</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>영역</th><th>대표 주자</th><th>그들의 무기</th><th>더블샷의 상대 우위</th></tr></thead>
+      <tbody>
+        <tr><td>시세·데이터</td><td>네이버 금융, 토스증권</td><td>완전한 데이터, 압도적 트래픽</td><td>없음 — 정면 승부 불가 영역</td></tr>
+        <tr><td>아침 브리핑</td><td>순살브리핑, 어피티 등 뉴스레터</td><td>필진 브랜드, 구독자 규모</td><td><b>정량 예측 + 성적 공개</b> (그들은 절대 안 함)</td></tr>
+        <tr><td>투자 도구</td><td>ETFNow 등</td><td>수천 페이지 롱테일 SEO</td><td>실측 파이프라인 재사용 시 <b>더 깊은 페이지</b> 가능</td></tr>
+        <tr><td>AI 분석</td><td>다수 신규 진입자</td><td>화려한 UI, 마케팅</td><td><b>94일 누적 트랙레코드</b> — 시간이 만든 해자</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>냉정한 현실 세 가지</h3>
+    <p><strong>① 예측은 더 이상 세일즈 포인트가 아니다.</strong> 전체 64%는 동전보다 유의미하게 높지만, 최근 15건 47%는 사용자가 체감하는 "요즘 성적"이다. 예측을 전면에 세울수록 매일 심판받고, 최근 성적표로는 심판에서 진다. 반면 미국 브리핑 71%는 상대적으로 건재 — 자산과 부채가 갈리고 있다.</p>
+    <p><strong>② 유입 구조가 닫혀 있다.</strong> 텔레그램·이메일 푸시 루프는 기존 구독자를 유지할 뿐 새 사용자를 데려오지 못한다. 일 방문 40~50명 감소 추세(6/16 보고 기준)가 그 증거다. 색인 페이지 94개는 시작이지만, ETFNow류 서비스의 수천 페이지 대비 임계질량 미달이다.</p>
+    <p><strong>③ 그러나 원가 구조가 남다르다.</strong> 이 서비스의 진짜 경쟁력은 예측 정확도가 아니라 <strong>"사람 손 없이 매일 실측 데이터 기반 콘텐츠를 찍어내는 공장"</strong>이다. 콘텐츠 생산 한계비용이 0에 가까우므로, 페이지를 46개에서 200개로 늘리는 데 드는 비용이 경쟁자 대비 압도적으로 낮다. 이 공장을 어디에 돌리느냐가 전부다.</p>
+
+    <div class="callout"><b>포지셔닝 재정의 제안</b> — "오를지 내릴지 맞히는 서비스"가 아니라 <b>"매일 아침 3분, 오늘 시장의 인과를 정리해주고 자기 성적을 숨기지 않는 서비스"</b>. 예측은 여러 코너 중 하나로 내리고, 정직한 트랙레코드를 브랜드 그 자체로 올린다.</div>
+  </section>
+
+  <!-- ══════════ 2. 메뉴 구조 ══════════ -->
+  <section>
+    <div class="sec-no">SECTION 2</div>
+    <h2>3개 메뉴 구조 — 적절한가?</h2>
+    <p class="sec-sub">구조는 적절하다. 문제는 개수가 아니라 연결이다.</p>
+
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>메뉴</th><th>퍼널에서의 역할</th><th>측정할 핵심 지표</th><th>현재 상태</th></tr></thead>
+      <tbody>
+        <tr><td><b>브리핑</b></td><td>습관 — 매일 돌아오게 하는 심장박동</td><td>재방문율 · 푸시 클릭률</td><td><span class="chip warn">예측 의존 과다</span></td></tr>
+        <tr><td><b>종목 시그널</b></td><td>유입 — 검색으로 들어오는 문</td><td>검색 유입 수 · 색인 페이지 수</td><td><span class="chip warn">커버리지 부족</span></td></tr>
+        <tr><td><b>월배당</b></td><td>심화 — 체류·공유·차별화 도구</td><td>체류 시간 · 공유 수</td><td><span class="chip neu">단일 페이지</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <p style="margin-top:14px;">유입(검색) → 습관(브리핑) → 심화(도구)라는 역할 분담은 교과서적으로 옳고, 1인 운영 리소스에서 메뉴를 늘리는 것은 금물이다. <strong>3개 유지가 정답이다.</strong></p>
+    <p>진짜 문제는 저장소 전수 조사에서 나왔다. <strong>브리핑 → 종목 페이지 링크 2개, 종목 페이지 → 브리핑 링크 0개.</strong> 매일 브리핑이 삼성전자를 언급하는데 그 자리에서 삼성전자 영구 페이지로 이어지지 않고, 종목 페이지에 온 검색 방문자는 "이 서비스가 매일 아침 브리핑도 한다"는 사실을 알 방법이 없다. 세 메뉴가 각자 잘하는 걸 서로에게 넘겨주지 못하는 구조 — <strong>퍼널이 아니라 세 개의 섬</strong>이다. 연결 배선은 템플릿 수정만으로 가능해 비용 대비 효과가 가장 크다.</p>
+  </section>
+
+  <!-- ══════════ 3. 메뉴별 보강 ══════════ -->
+  <section>
+    <div class="sec-no">SECTION 3</div>
+    <h2>메뉴별 보강 포인트</h2>
+    <p class="sec-sub">각 메뉴의 역할에 맞춰 — 습관은 심판받지 않게, 유입은 임계질량을, 도구는 반복 사용을.</p>
+
+    <div class="menu-card">
+      <div class="menu-head"><span class="nm">브리핑</span><span class="role">역할: 습관 · 심장박동</span></div>
+      <div class="menu-body">
+        <div class="mrow"><span class="ml">현재</span><span class="mt">하루 3건 + 이슈 22회 무인 발행. 라이브 스코어보드·포맷 로테이션(오늘 flow·keynum 추가로 6종) 등 읽는 재미 장치는 갖춰짐. 단 <b>아침 브리핑이 예측 적중 여부에 매일 노출</b>되는 구조.</span></div>
+        <div class="mrow"><span class="ml">보강</span><span class="mt">
+          <ul class="fix-list">
+            <li><b>무게중심을 "심판받지 않는 콘텐츠"로</b> — 마감 브리핑(예측 없음)과 이슈 브리핑은 틀릴 수가 없다. 아침 브리핑도 "방향 맞히기"보다 "오늘 뭘 봐야 하는가" 큐레이션 비중을 키운다. 포맷 다양화는 정확히 이 방향.</li>
+            <li><b>성적표를 숨기지 말고 무기로</b> — "우리 성적표" 상설 페이지(월별 적중률·최근 추세·틀린 날 복기)를 만들어 전면 배치. 47%든 71%든 그대로 공개하는 서비스는 없다. 정직함 자체가 차별화다.</li>
+            <li><b>푸시 제목에 가변 보상 심기</b> — "어제 예측 ○/× + 오늘의 한 줄"을 제목에 넣으면 결과 확인 심리로 열게 된다.</li>
+            <li><b>브리핑 본문의 모든 종목명을 영구 페이지로 링크</b> — 매일 자동으로 내부 링크가 쌓이는 SEO 배선이기도 하다.</li>
+          </ul>
+        </span></div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-head"><span class="nm">종목 시그널</span><span class="role">역할: 유입 · 검색의 문</span></div>
+      <div class="menu-body">
+        <div class="mrow"><span class="ml">현재</span><span class="mt">KR 46 + US 8 + 섹터 8 페이지. 오늘의 시그널·수급·외국인 보유율·분기 실적·픽 트랙레코드까지 페이지 깊이는 이미 경쟁작 수준. 문제는 <b>폭</b> — 코스피200 대비 23% 커버리지로는 롱테일 검색을 못 받는다.</span></div>
+        <div class="mrow"><span class="ml">보강</span><span class="mt">
+          <ul class="fix-list">
+            <li><b>커버리지 46 → 코스피200</b> — 생산 한계비용이 0에 가까운 이 서비스의 최대 레버. "○○전자 주가 전망" 롱테일 하나하나가 문이다.</li>
+            <li><b>"어제와 달라진 것" 델타 표시</b> — 시그널 전환·수급 방향 전환·외국인 보유율 변화를 페이지 상단에 배지로. 매일 갱신되는 게 보여야 재방문한다.</li>
+            <li><b>픽 트랙레코드를 상단으로</b> — "이 종목을 더블샷이 N번 픽했고 성적은 이랬다"는 유일무이한 콘텐츠. 검색 방문자의 체류를 만든다.</li>
+            <li><b>Search Console 색인 실태 점검</b> — 94개 URL 중 실제 색인·노출·클릭을 확인해야 커버리지 확대의 효과를 측정할 수 있다.</li>
+          </ul>
+        </span></div>
+      </div>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-head"><span class="nm">월배당</span><span class="role">역할: 심화 · 도구</span></div>
+      <div class="menu-body">
+        <div class="mrow"><span class="ml">현재</span><span class="mt">계산기 + 진단 리포트 단일 페이지. 도구 완성도는 있으나 <b>한 번 쓰고 떠나는 구조</b> — 결과 저장·공유·재방문 장치가 없다.</span></div>
+        <div class="mrow"><span class="ml">보강</span><span class="mt">
+          <ul class="fix-list">
+            <li><b>결과 공유 URL</b> — 진단 리포트를 URL 파라미터로 재현 가능하게. 커뮤니티·단톡방에 퍼지는 유일한 경로가 공유 링크다.</li>
+            <li><b>"내 월배당 플랜" 저장</b> — localStorage만으로 시작. 저장한 플랜이 있으면 재방문 이유가 생긴다.</li>
+            <li><b>ETF별 영구 페이지 + 분배금 캘린더</b> — "○○ETF 분배금 지급일" 검색 수요는 매월 반복된다. 월간 회귀 트리거이자 SEO 자산.</li>
+          </ul>
+        </span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4. 습관 트리거 ══════════ -->
+  <section>
+    <div class="sec-no">SECTION 4</div>
+    <h2>매일 쓰게 만드는 트리거</h2>
+    <p class="sec-sub">습관 = 계기 → 행동 → 가변 보상 → 사용자가 쌓는 것. 지금 더블샷은 계기만 있고 마지막 고리가 없다.</p>
+
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>트리거</th><th>시점</th><th>사용자 심리</th><th>현재</th></tr></thead>
+      <tbody>
+        <tr><td><b>아침 3분 체크</b> — 오늘 뭘 볼지 브리핑</td><td>07:30 출근길</td><td>"장 열리기 전에 흐름만 잡자"</td><td><span class="chip good">보유</span></td></tr>
+        <tr><td><b>어제 성적 확인</b> — 예측 결과·스코어보드</td><td>09:00 / 15:30</td><td>"어제 그 예측, 맞았나?" (가변 보상)</td><td><span class="chip warn">부분</span> 푸시 제목엔 없음</td></tr>
+        <tr><td><b>마감 복기</b> — 오늘 왜 이랬는지</td><td>16:30 퇴근길</td><td>"내 계좌가 왜 이런지 설명이 필요해"</td><td><span class="chip good">보유</span></td></tr>
+        <tr><td><b>내 종목 시그널 변화</b> — 워치리스트</td><td>수시</td><td>"내가 가진 종목만 빨리 보고 싶다"</td><td><span class="chip risk">없음</span> 최대 공백</td></tr>
+        <tr><td><b>분배금 캘린더</b> — 이번 달 지급일</td><td>매월 초·지급일</td><td>"이번 달 배당 언제 들어오지?"</td><td><span class="chip risk">없음</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>핵심 공백: 사용자가 쌓는 것이 없다</h3>
+    <p>지금 사용자가 더블샷에 남겨둔 것은 이메일 주소 하나뿐이다. 관심종목도, 저장된 플랜도, 설정도 없다. 떠나는 데 아무 비용이 들지 않는다. <strong>워치리스트(localStorage, 로그인 불필요)</strong>가 첫 단추다 — 종목 페이지에 ☆ 버튼 하나, 종목 허브 상단에 "내 종목" 줄 하나. 내 종목이 등록되는 순간 "오늘 내 종목 시그널 어때?"라는 <strong>개인화된 방문 이유</strong>가 생기고, 이것이 위 표의 모든 시간 트리거를 "남의 브리핑"에서 "내 것 확인"으로 바꾼다.</p>
+    <p class="dim">참고: 발송 시각은 한국 개미의 실제 루틴(08:50 장전 · 15:40 마감 직후 · 22:30 미장 개장)과의 정렬을 점검해볼 가치가 있다. 습관은 기존 루틴에 얹힐 때 가장 싸게 만들어진다.</p>
+  </section>
+
+  <!-- ══════════ 5. 로드맵 ══════════ -->
+  <section>
+    <div class="sec-no">SECTION 5</div>
+    <h2>우선순위 로드맵</h2>
+    <p class="sec-sub">효과 대비 비용 순. 1~3번은 기존 자산의 재배선이라 신규 개발이 거의 없다.</p>
+
+    <ol class="road">
+      <li><div><div class="rt">크로스링크 배선 — 세 섬을 퍼널로</div><div class="rd">브리핑 본문 종목명 → 영구 페이지 자동 링크, 종목 페이지 → 오늘 브리핑 배너. 템플릿 수정만으로 가능.</div><div class="tags"><span class="chip acc">비용 최소</span><span class="chip good">SEO 내부링크 부수 효과</span></div></div></li>
+      <li><div><div class="rt">워치리스트 MVP — 사용자가 쌓는 첫 자산</div><div class="rd">localStorage ☆ 버튼 + 허브 "내 종목" 섹션. 로그인 없이 시작하고, 반응이 오면 이메일 연동으로 승격.</div><div class="tags"><span class="chip acc">습관 고리의 마지막 조각</span></div></div></li>
+      <li><div><div class="rt">종목 커버리지 46 → 코스피200</div><div class="rd">기존 파이프라인 확장. 생산비 0에 가까운 유일한 참가자라는 이점을 실제 페이지 수로 전환. Search Console 색인 점검 병행.</div><div class="tags"><span class="chip acc">유입의 임계질량</span></div></div></li>
+      <li><div><div class="rt">성적표 상설 페이지 — 정직함의 브랜드화</div><div class="rd">월별 적중률, 최근 추세, 틀린 날 복기까지. 47%도 그대로 공개한다 — 이것이 경쟁 뉴스레터가 따라올 수 없는 지점.</div><div class="tags"><span class="chip good">신뢰 자산</span></div></div></li>
+      <li><div><div class="rt">월배당 확장 — 공유 URL + 분배금 캘린더</div><div class="rd">계산 결과 공유 링크(확산 경로) → ETF별 페이지·지급일 캘린더(월간 회귀 트리거 + 롱테일 SEO).</div><div class="tags"><span class="chip neu">중기</span></div></div></li>
+    </ol>
+
+    <div class="dont">
+      <div class="dt">하지 말 것</div>
+      <ul>
+        <li><b>네 번째 메뉴 추가</b> — 1인 운영에서 지금 필요한 건 폭이 아니라 연결이다.</li>
+        <li><b>예측 모델 고도화 투자</b> — 6월 피벗 결정 그대로. 예측은 유지·보수만, 승부는 영구 자산에서.</li>
+        <li><b>로그인·회원 시스템 선제 구축</b> — localStorage로 검증 후에. 지금 만들면 마찰만 늘린다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">
+    데이터 출처 — 적중률: data/briefings.json 119건 (2026-04-07~07-09, 본 보고서 작성 시점 실측 계산) · 페이지 수: web/ 디렉토리 및 sitemap.xml 전수 · 크로스링크: 발행 HTML grep 조사 · 방문자 수: 2026-06-16 운영자 보고 기준(애널리틱스 미연동, 확인 필요).<br>
+    본 보고서의 적중률·페이지 수는 전부 저장소 실데이터에서 계산했으며 추정치가 아닙니다. 방문자 수만 미확인 보고값입니다.
+  </div>
+</div>
