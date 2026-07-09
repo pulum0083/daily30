@@ -229,6 +229,20 @@ hist = yf.Ticker("BAC").history(period="5d").dropna(subset=["Close"])
 python3 scripts/generate_html.py --type kospi --date 2026-06-08 --data-file data/latest_kospi.json
 ```
 
+**⚠️ 같은 날짜 재실행 시 스냅샷이 새 분석을 무음으로 덮는 함정 (2026-07-09 실제 사고, 수정 완료):**
+
+스냅샷 우선 규칙은 "다른 날짜 워크플로우의 오염 방지"가 목적이지만, **같은 날짜에 정정 재실행**을 할 때도 그대로 적용돼 방금 새로 만든 분석이 항상 무시되고 옛 스냅샷이 계속 쓰이는 사고가 있었다(정정 재실행을 해도 데이터만 바뀌고 예측 문구는 옛날 그대로 남음). 원인은 `render_briefing()`이 스냅샷 존재 여부만 보고 무조건 우선했기 때문 — 재실행 의도(정정 vs 단순 재빌드)를 구분하지 못했다.
+
+수정: 스냅샷을 무시하고 최신 `data/analysis_{type}.json`으로 강제 재생성하는 `--force` 플래그 추가. 스냅샷을 실제로 사용할 때는 이제 **경고 로그**를 출력한다(기존엔 완전 무음).
+
+```
+generate_html.py --force              스냅샷 무시, 최신 analysis_{type}.json 강제 사용
+call_claude.py --render --force-refresh   위 --force를 generate_html.py 서브프로세스에 전달
+GitHub Actions workflow_dispatch의 force_refresh=true   kospi/us/kospi-close 3개 잡의 --render 스텝에 --force-refresh 전달
+```
+
+**브리핑을 같은 날짜에 정정 재실행할 때는 반드시 `--force-refresh`(또는 GHA의 `force_refresh=true`)를 함께 써야 한다.** 안 쓰면 정정이 조용히 무시된다. 스냅샷 사용 로그(`⚠️ 기존 snapshot 사용`)가 뜨는데 정정을 의도한 상황이라면 플래그 누락을 의심할 것.
+
 **스냅샷 수동 생성 (원복 후 등 스냅샷 없을 때):**
 ```python
 import json
