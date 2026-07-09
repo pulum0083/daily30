@@ -988,3 +988,34 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .sig-dot.down{background:var(--dn);}
 .sig-txt{flex:1;}
 .sig-txt b{color:var(--ink);font-weight:700;}
+
+/* ── 인과 흐름 체인 형식 (analysis_format == flow) ── */
+.flow-card{margin-top:12px;}
+.flow-lead{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:18px;}
+.flow-lead b{color:var(--ink);font-weight:600;}
+.flow-track{position:relative;padding-left:36px;}
+.flow-track::before{content:'';position:absolute;left:12px;top:8px;bottom:8px;width:2px;background:var(--hairline);}
+.flow-step{position:relative;padding-bottom:20px;}
+.flow-step:last-child{padding-bottom:0;}
+.flow-node{position:absolute;left:-36px;top:-1px;width:26px;height:26px;border-radius:50%;background:var(--canvas);border:2px solid var(--hairline);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);z-index:1;}
+.flow-step.up .flow-node{border-color:var(--up);color:var(--up);}
+.flow-step.down .flow-node{border-color:var(--dn);color:var(--dn);}
+.flow-step.end .flow-node{background:var(--primary);border-color:var(--primary);color:#fff;font-size:14px;}
+.flow-stage{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.flow-title{font-size:14px;font-weight:700;color:var(--ink);line-height:1.5;margin-bottom:4px;}
+.flow-step.end .flow-title{color:var(--primary);}
+.flow-text{font-size:13.5px;color:var(--muted);line-height:1.7;}
+.flow-text b{color:var(--ink);font-weight:600;}
+
+/* ── 핵심 숫자 카드 형식 (analysis_format == keynum) ── */
+.keynum-wrap{margin-top:12px;}
+.keynum-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.keynum-tile{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px 14px;display:flex;flex-direction:column;gap:5px;}
+.keynum-label{font-size:11px;font-weight:600;color:var(--muted);}
+.keynum-value{font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink);}
+.keynum-value.up{color:var(--up);}
+.keynum-value.down{color:var(--dn);}
+.keynum-cap{font-size:12px;color:var(--muted);line-height:1.55;}
+.keynum-cap b{color:var(--ink);font-weight:600;}
+.keynum-take{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.75;padding:12px 14px;background:var(--primary-bg);border-radius:var(--r-md);}
+.keynum-take b{color:var(--ink);font-weight:600;}
