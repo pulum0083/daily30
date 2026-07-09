@@ -1,0 +1,132 @@
+{
+  "analysis_format": "keynum",
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 68,
+    "down_pct": 32,
+    "confidence": 74
+  },
+  "reason_title": "반도체가 이끈다 — SOX +3%, VIX는 진정 국면",
+  "comfort_line": "장이 곧 열려요. 오늘도 담담하게 시작해봐요.",
+  "num_cards": [
+    {
+      "label": "필라델피아 반도체",
+      "value": "+3.06%",
+      "dir": "up",
+      "caption": "SOX 급등이 반도체 대형주에 훈풍을 예고해요."
+    },
+    {
+      "label": "VIX",
+      "value": "-6.16%",
+      "dir": "up",
+      "caption": "공포지수가 <b>15.84</b>로 내려앉아 안도감이 커요."
+    },
+    {
+      "label": "WTI 유가",
+      "value": "-3.43%",
+      "dir": "up",
+      "caption": "유가 하락이 인플레 부담을 덜어줘요."
+    },
+    {
+      "label": "EWY(한국 ETF)",
+      "value": "+1.07%",
+      "dir": "up",
+      "caption": "외국인 자금이 조심스레 돌아오고 있어요."
+    }
+  ],
+  "num_take": "반도체 강세와 유가 하락, VIX 안정까지 세 박자가 맞아떨어지는 아침이에요. 다만 나스닥이 소폭 조정받았던 점은 상단을 살짝 제한할 수 있어요.",
+  "stock_picks": [
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "price": "2,186,000원",
+      "change": "+5.30%",
+      "change_cls": "up",
+      "signal": "SOX 급등 동반 강세",
+      "golden": true,
+      "ma20_dist_pct": -12.01,
+      "ma200_dist_pct": 104.85,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "전일 <b>+5.30%</b> 급등하며 반도체 랠리를 주도한 종목이에요. 오늘 SOX가 <b>+3.06%</b> 오른 만큼 HBM 수요 기대감이 이어지며 추가 상승 여력이 있어요.",
+      "action_guide": "시가 2,190,000원 이내 진입. 목표: 2,300,000원(+5.2%) / 손절: 2,100,000원 이탈 시.",
+      "entry": "2,190,000원",
+      "target": "2,300,000원",
+      "target_pct": "+5.2%",
+      "stop": "2,100,000원",
+      "stop_pct": "-4.0%"
+    },
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "price": "215,500원",
+      "change": "+8.18%",
+      "change_cls": "up",
+      "signal": "반도체 장비주 급등",
+      "golden": true,
+      "ma20_dist_pct": -20.05,
+      "ma200_dist_pct": 0.5,
+      "scenario_tag": "수급 개선",
+      "scenario": "전일 <b>+8.18%</b> 급등한 종목이에요. MA200 부근까지 회복하며 HBM 장비 수요 기대감이 반영되고 있어요.",
+      "action_guide": "시가 216,000원 이내 진입. 목표: 232,000원(+7.4%) / 손절: 205,000원 이탈 시.",
+      "entry": "216,000원",
+      "target": "232,000원",
+      "target_pct": "+7.4%",
+      "stop": "205,000원",
+      "stop_pct": "-5.1%"
+    },
+    {
+      "ticker": "010120",
+      "name": "LS일렉트릭",
+      "price": "189,400원",
+      "change": "+3.22%",
+      "change_cls": "up",
+      "signal": "AI전력기기 강세",
+      "golden": false,
+      "ma20_dist_pct": -17.77,
+      "ma200_dist_pct": 29.24,
+      "scenario_tag": "섹터 모멘텀",
+      "scenario": "전일 <b>+3.22%</b> 상승하며 20일선 위에서 견고하게 움직이는 종목이에요. AI 데이터센터 전력 인프라 수요가 계속 부각되며 섹터 전반에 매수세가 유입되고 있어요.",
+      "action_guide": "시가 190,000원 이내 진입. 목표: 200,000원(+5.3%) / 손절: 182,000원 이탈 시.",
+      "entry": "190,000원",
+      "target": "200,000원",
+      "target_pct": "+5.3%",
+      "stop": "182,000원",
+      "stop_pct": "-4.0%"
+    }
+  ],
+  "watch_items": [
+    {
+      "icon": "💡",
+      "label": "SOX +3% 갭업 반영 여부",
+      "text": "미국 반도체 지수가 크게 오른 만큼, 오늘 국내 반도체 섹터가 얼마나 이어받을지가 관전 포인트예요."
+    },
+    {
+      "icon": "📊",
+      "label": "코스피 지지·저항 레벨",
+      "levels": [
+        {
+          "label": "지지",
+          "num": "7,060",
+          "cls": "dn"
+        },
+        {
+          "label": "저항",
+          "num": "8,330",
+          "cls": "up"
+        }
+      ]
+    },
+    {
+      "icon": "😊",
+      "label": "VIX 15.84, 안정권 진입",
+      "text": "공포지수가 20 아래로 내려앉으며 위험자산 선호 심리가 살아나고 있어요."
+    }
+  ],
+  "telegram_signals": [
+    "💡 SOX <b>+3.06%</b> 급등, 반도체 섹터가 오늘 장을 이끌 것 같아요.",
+    "🛢️ WTI 유가 <b>-3.43%</b> 급락, VIX도 <b>-6.16%</b> 진정되며 리스크온 분위기예요."
+  ],
+  "us_linked_story": null,
+  "sector_focus": null,
+  "generated_at": "2026-07-10T07:27:15.167364+09:00"
+}
