@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T15:31:26.101956+09:00",
+  "generated_at": "2026-07-09T16:27:53.456356+09:00",
   "date": "2026-07-09",
   "stocks": [
     {
@@ -13,18 +13,18 @@
           "headline": "삼성전자 주가 5% 상승...하반기 '어닝서프라이즈' 전망",
           "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9MOXdqM0hXUGNDZVhOaWxINnlFUjVYY3o4SGlxbkRkTzBWd2tPVV96TVl2bDdybkRFWTN2dUxOb0xScS1zZUZtaVl6bm9pbWVUQWZYVm16Nm5vWFBQVHBHNHJSVmRqeWd2VUFmMTlR?oc=5",
           "source": "gukjenews.com",
-          "why": "삼성전자 주가가 하반기 어닝서프라이즈 전망에 힘입어 5% 상승했다. (개별 인과 단정 안 함)",
+          "why": "삼성전자 주가가 하반기 어닝 서프라이즈 전망에 힘입어 5% 상승했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
         {
-          "time": "08:19",
-          "headline": "'메모리 정점' 공포 확산...삼성전자 반등은 언제?",
-          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE5wMjcxc2FxTFg4blBub2pjaFhfaVhKNGltVWpOcHRKWXEyeDMxd29TS3F2WHFmd1hsdGtKYy1XdmZXTjM3dEtEdVRvMzhoeTZzSUV0MVptRV9qQjUwUGd4U2tld2Vvdmp0VWpYZ3RpTQ?oc=5",
-          "source": "YTN",
-          "why": "'메모리 정점' 공포 확산...삼성전자 반등은 언제? (개별 인과 단정 안 함)",
+          "time": "09:53",
+          "headline": "삼성전자 조정에도…\"업황 이상 없다\" 입 모으는 증권가, 이유는?",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5KNlpIVHphdmRiQzJrVTdmLTFuWnFZTjNLYWs2QS03OFJuZFVMYkpESm5pZFR6VlZKNFFoREEwNnRObnFncDdweHh0MlhHZklXRTBEeVp5aUw4QUhiRHVJQkpB?oc=5",
+          "source": "매일신문",
+          "why": "삼성전자 조정에도…\"업황 이상 없다\" 입 모으는 증권가, 이유는? (개별 인과 단정 안 함)",
           "tier": "related",
-          "sentiment": "pos"
+          "sentiment": "neu"
         }
       ]
     },
@@ -57,9 +57,28 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -4.76,
-      "surge": 0.8,
-      "events": []
+      "changePct": -3.68,
+      "surge": 0.97,
+      "events": [
+        {
+          "time": "16:14",
+          "headline": "현대차 주가 17,000원 하락 후 장마감",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9tQmNoMUlJNjlUMEtrTGhKTFZWSGZOWGNiRmNOeDJMTUNlYng0WFdFNGRqcUVZY1hucU5YZFRydkZxWHRnenFvMjZjT1NncDJ3cktGelJfVGhqNGdU?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "현대차 주가가 17,000원 하락하며 장을 마감했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "15:48",
+          "headline": "'한화오션' 저가매수 '현대차' 팔았다",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1PREdjTEV6SDZjOHYxQWltcnotLW5MMHFDVWJUdWFCblRBRlNMU3hVVzdQdWVWNVhhdUg1dlRJeEpBYTNGeF9pTGpUOWQ1c1A2VC1XYmg2OG1LNWR5cmVDMlNidW51c3Bs?oc=5",
+          "source": "ebn.co.kr",
+          "why": "'한화오션' 저가매수 '현대차' 팔았다 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
