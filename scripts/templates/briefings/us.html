@@ -20,14 +20,16 @@
             {% include "sections/prediction.html" %}
             {% if analysis_format == 'scenario' %}
               {% include "sections/scenario_split.html" %}
-            {% elif analysis_format == 'why_what_so' %}
-              {% include "sections/why_what_so.html" %}
             {% elif analysis_format == 'qa' %}
               {% include "sections/qa.html" %}
             {% elif analysis_format == 'signal' %}
               {% include "sections/signal_board.html" %}
+            {% elif analysis_format == 'flow' %}
+              {% include "sections/flow_chain.html" %}
+            {% elif analysis_format == 'keynum' %}
+              {% include "sections/key_numbers.html" %}
             {% else %}
-              {% include "sections/reasons.html" %}
+              {% include "sections/why_what_so.html" %}
             {% endif %}
             {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>

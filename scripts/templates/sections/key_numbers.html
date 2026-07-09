@@ -1,0 +1,16 @@
+{# 핵심 숫자 카드 형식 (analysis_format == keynum) — 오늘을 규정하는 수치 3~4개를 타일로 #}
+<div class="open-section">
+  <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+  <div class="keynum-wrap">
+    <div class="keynum-grid">
+      {% for c in num_cards %}
+      <div class="keynum-tile">
+        <div class="keynum-label">{{ c.label }}</div>
+        <div class="keynum-value {{ c.dir }}">{{ c.value }}</div>
+        <div class="keynum-cap">{{ c.caption | safe }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% if num_take %}<div class="keynum-take">{{ num_take | safe }}</div>{% endif %}
+  </div>
+</div>

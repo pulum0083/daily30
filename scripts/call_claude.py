@@ -30,9 +30,13 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
-# 브리핑 근거 섹션 형식 로테이션 — bullet은 가장 단조로운 포맷이라 가중치를 가장 낮게 둔다
-FORMAT_POOL = ["bullet", "scenario", "why_what_so", "qa", "signal"]
-FORMAT_WEIGHTS = [1, 2, 2, 2, 2]
+# 브리핑 근거 섹션 형식 로테이션 (코스피 예측·미국 브리핑) — bullet은 완전 제거됨
+FORMAT_POOL = ["scenario", "why_what_so", "qa", "signal", "flow", "keynum"]
+FORMAT_WEIGHTS = [2, 2, 2, 2, 2, 2]
+
+# 마감 브리핑 전용 풀 — flow/keynum은 close.html이 렌더하지 않으므로 제외, bullet도 제거됨
+FORMAT_POOL_CLOSE = ["scenario", "why_what_so", "qa", "signal"]
+FORMAT_WEIGHTS_CLOSE = [2, 2, 2, 2]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 섹터 로테이션 풀 (코스피 아침 브리핑 — sector_focus)
@@ -419,10 +423,6 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 
 **[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
 
-### 형식 A: bullet
-`reason_title`(훅 타이틀) + `reasons`(최대 6개 불릿 배열) 출력.
-위 "예측 근거(reasons) 작성 규칙" 그대로 — 최대 6개(최소 4개), 각 250자 이내로 충분히 밀도 있게 쓴다.
-
 ### 형식 B: scenario
 `reason_title` + 아래 6개 필드 출력:
 - `sc_summary`: 오늘 시장 2문장 요약 (예측 방향 + 핵심 팩터 + 배경)
@@ -456,6 +456,26 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   - `level`: "up"(상승/강세 신호) / "neu"(중립·경계 신호) / "down"(하락/약세 신호) 중 하나.
   - `label`: 팩터명. 12자 이내 (예: "외국인 수급", "반도체", "FOMC").
   - `desc`: 그 팩터 설명. **완결된 해요체 1~2문장**, <b> 수치 강조 포함.
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 F: flow
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `flow_lead`: 오늘 결론을 먼저 던지는 1~2문장 (해요체, 방향 + 핵심 스토리 한 줄).
+- `flow_steps`: 정확히 3~4개. 각 항목은 `{"stage": ..., "dir": ..., "title": ..., "text": ...}` 객체. **원인 → 반응 → 결과 순서로 인과가 한 줄로 이어지게** 배열한다.
+  - `stage`: 단계 라벨. 8자 이내 (예: "해외 트리거", "새벽 선물", "아침 수급"). **마지막 항목은 "그래서 오늘은" 같은 결론 라벨**을 쓴다.
+  - `dir`: "up"(상승 요인) / "neu"(중립) / "down"(하락 요인) 중 하나.
+  - `title`: 그 단계 핵심 한 줄. 30자 이내, <b> 수치 강조 가능.
+  - `text`: 완결된 해요체 1~2문장, <b> 수치 강조 포함. **마지막 항목(결론)은 오늘 방향과 관전 포인트를 담는다.**
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 G: keynum
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `num_cards`: 정확히 3~4개. 각 항목은 `{"label": ..., "value": ..., "dir": ..., "caption": ...}` 객체. **오늘을 규정하는 핵심 수치**만 고른다.
+  - `label`: 지표명. 12자 이내 (예: "필라델피아 반도체", "외국인 수급", "원/달러").
+  - `value`: 큰 숫자로 보여줄 값. 짧게 (예: "+3.1%", "+2,400억", "1,362원"). 부호 포함.
+  - `dir`: 그 수치가 **오늘 코스피에 주는 영향** 기준. "up"(우호) / "neu"(중립) / "down"(부담) 중 하나 — 숫자 부호가 아니라 시장 영향으로 판단한다.
+  - `caption`: 그 수치의 의미 한 줄. 완결된 해요체, 25자 안팎, <b> 강조 가능.
+- `num_take`: 카드들을 종합한 결론 1~2문장 (해요체, 오늘 방향 + 관전 포인트).
 `reasons` 필드는 출력하지 않는다.
 """
 
@@ -737,10 +757,6 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 
 **[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
 
-### 형식 A: bullet
-`reason_title`(훅 타이틀) + `reasons`(4개 불릿 배열) 출력.
-기존 방식 그대로.
-
 ### 형식 B: scenario
 `reason_title` + 아래 6개 필드 출력:
 - `sc_summary`: 오늘 미국 시장 한 줄 요약 (예측 방향 + 핵심 팩터)
@@ -774,6 +790,26 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   - `level`: "up"(강세 신호) / "neu"(중립·경계 신호) / "down"(약세 신호) 중 하나.
   - `label`: 팩터명. 12자 이내 (예: "기술주", "국채금리", "연준").
   - `desc`: 그 팩터 설명. **완결된 해요체 1문장**, <b> 수치 강조 포함.
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 F: flow
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `flow_lead`: 오늘 결론을 먼저 던지는 1~2문장 (해요체, 방향 + 핵심 스토리 한 줄).
+- `flow_steps`: 정확히 3~4개. 각 항목은 `{"stage": ..., "dir": ..., "title": ..., "text": ...}` 객체. **원인 → 반응 → 결과 순서로 인과가 한 줄로 이어지게** 배열한다.
+  - `stage`: 단계 라벨. 8자 이내 (예: "간밤 지표", "실적 발표", "금리 반응"). **마지막 항목은 "그래서 오늘은" 같은 결론 라벨**을 쓴다.
+  - `dir`: "up"(상승 요인) / "neu"(중립) / "down"(하락 요인) 중 하나.
+  - `title`: 그 단계 핵심 한 줄. 30자 이내, <b> 수치 강조 가능.
+  - `text`: 완결된 해요체 1~2문장, <b> 수치 강조 포함. **마지막 항목(결론)은 오늘 방향과 관전 포인트를 담는다.**
+`reasons` 필드는 출력하지 않는다.
+
+### 형식 G: keynum
+`reason_title`(훅 타이틀) + 아래 필드 출력:
+- `num_cards`: 정확히 3~4개. 각 항목은 `{"label": ..., "value": ..., "dir": ..., "caption": ...}` 객체. **오늘을 규정하는 핵심 수치**만 고른다.
+  - `label`: 지표명. 12자 이내 (예: "나스닥100 선물", "10년물 금리", "VIX").
+  - `value`: 큰 숫자로 보여줄 값. 짧게 (예: "+0.8%", "4.21%", "17.3"). 부호 포함.
+  - `dir`: 그 수치가 **오늘 미국 증시에 주는 영향** 기준. "up"(우호) / "neu"(중립) / "down"(부담) 중 하나 — 숫자 부호가 아니라 시장 영향으로 판단한다.
+  - `caption`: 그 수치의 의미 한 줄. 완결된 해요체, 25자 안팎, <b> 강조 가능.
+- `num_take`: 카드들을 종합한 결론 1~2문장 (해요체, 오늘 방향 + 관전 포인트).
 `reasons` 필드는 출력하지 않는다.
 """
 
@@ -1238,7 +1274,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         )
         print("[call_claude] Bottom section → disabled")
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — bullet 가중치 최소
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — 예측·미국 풀
     chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
@@ -1493,10 +1529,6 @@ sentiment shift는 마감 흐름의 근본 원인이 되기도 하고 다음 세
 
 **[형식 지시] 유저 메시지 하단에 오늘 사용할 형식이 지정된다.**
 
-### 형식 A: bullet
-`reason_title` + `reasons` 4개 불릿 배열 출력.
-`market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
-
 ### 형식 B: scenario
 `reason_title` + `sc_summary`, `sc_left_label`("버틴 요인"), `sc_right_label`("내린 요인"), `sc_left_items`(3개), `sc_right_items`(3개), `sc_footer` 출력.
 `market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
@@ -1552,8 +1584,8 @@ def call_claude_closing(date_str: str) -> dict:
     if news_summary:
         user_content += f"\n뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — bullet 가중치 최소
-    chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — 마감 전용 풀
+    chosen_format = random.choices(FORMAT_POOL_CLOSE, weights=FORMAT_WEIGHTS_CLOSE, k=1)[0]
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
 

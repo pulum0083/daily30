@@ -205,6 +205,40 @@ def build_signal_context(analysis: dict) -> dict:
     }
 
 
+def build_flow_context(analysis: dict) -> dict:
+    """인과 흐름 체인 형식용 컨텍스트. analysis_format == 'flow' 일 때 사용."""
+    steps = []
+    for it in analysis.get("flow_steps", [])[:4]:
+        d = it.get("dir", "neu")
+        if d not in ("up", "neu", "down"):
+            d = "neu"
+        if it.get("title") and it.get("text"):
+            steps.append({
+                "stage": it.get("stage", ""),
+                "dir": d,
+                "title": it["title"],
+                "text": it["text"],
+            })
+    return {"flow_lead": analysis.get("flow_lead", ""), "flow_steps": steps}
+
+
+def build_keynum_context(analysis: dict) -> dict:
+    """핵심 숫자 카드 형식용 컨텍스트. analysis_format == 'keynum' 일 때 사용."""
+    cards = []
+    for it in analysis.get("num_cards", [])[:4]:
+        d = it.get("dir", "neu")
+        if d not in ("up", "neu", "down"):
+            d = "neu"
+        if it.get("label") and it.get("value"):
+            cards.append({
+                "label": it["label"],
+                "value": it["value"],
+                "dir": d,
+                "caption": it.get("caption", ""),
+            })
+    return {"num_cards": cards, "num_take": analysis.get("num_take", "")}
+
+
 def _split_comfort_line(text: str) -> str:
     """comfort_line을 문장 단위(.!?)로 쪼개 <br>로 줄바꿈한다."""
     text = (text or "").strip()
@@ -220,11 +254,10 @@ def build_reasons(analysis: dict) -> dict:
         "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
         "하락 우위": "왜 내릴까? — 오늘의 하락 시그널",
     }.get(direction, "오를까 내릴까? — 오늘의 핵심 변수")
-    fmt = analysis.get("analysis_format", "bullet")
+    fmt = analysis.get("analysis_format", "why_what_so")
     ctx = {
         "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
-        "reasons": analysis.get("reasons", [])[:6],
         "comfort_line": _split_comfort_line(analysis.get("comfort_line", "")),
     }
     if fmt == "scenario":
@@ -235,6 +268,10 @@ def build_reasons(analysis: dict) -> dict:
         ctx.update(build_qa_context(analysis))
     elif fmt == "signal":
         ctx.update(build_signal_context(analysis))
+    elif fmt == "flow":
+        ctx.update(build_flow_context(analysis))
+    elif fmt == "keynum":
+        ctx.update(build_keynum_context(analysis))
     return ctx
 
 
@@ -409,8 +446,6 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         ctx["comfort_line"] = _split_comfort_line(analysis.get("comfort_line", ""))
         if fmt == "scenario":
             ctx.update(build_scenario_context(analysis))
-        elif fmt == "bullet":
-            ctx["reasons"] = analysis.get("reasons", [])[:4]
         elif fmt == "qa":
             ctx.update(build_qa_context(analysis))
         elif fmt == "signal":

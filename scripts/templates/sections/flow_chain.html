@@ -1,0 +1,17 @@
+{# 인과 흐름 체인 형식 (analysis_format == flow) — 오늘 시장을 원인→결과 순서로 연결 #}
+<div class="open-section">
+  <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+  <div class="flow-card">
+    {% if flow_lead %}<div class="flow-lead">{{ flow_lead | safe }}</div>{% endif %}
+    <div class="flow-track">
+      {% for step in flow_steps %}
+      <div class="flow-step {{ step.dir }}{% if loop.last %} end{% endif %}">
+        <div class="flow-node">{% if loop.last %}∴{% else %}{{ loop.index }}{% endif %}</div>
+        <div class="flow-stage">{{ step.stage }}</div>
+        <div class="flow-title">{{ step.title | safe }}</div>
+        <div class="flow-text">{{ step.text | safe }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

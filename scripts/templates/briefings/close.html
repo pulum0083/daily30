@@ -23,8 +23,6 @@
             {% if reason_title %}
               {% if analysis_format == 'scenario' %}
                 {% include "sections/scenario_split.html" %}
-              {% elif analysis_format == 'bullet' %}
-                {% include "sections/reasons.html" %}
               {% elif analysis_format == 'qa' %}
                 {% include "sections/qa.html" %}
               {% elif analysis_format == 'signal' %}
