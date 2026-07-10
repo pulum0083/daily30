@@ -7,12 +7,23 @@
 # 토큰 기반 `vercel deploy`는 이 검증을 받지 않으므로, main에 대한 모든 push에서
 # 무조건 이 방식으로 배포한다 — 어떤 워크플로우(또는 수동 push)가 커밋했는지 상관없이
 # 하나의 지점에서 처리해 중복 배포를 막는다.
+#
+# 레이스 컨디션 방지(2026-07-10 실제 사고): daily_report.yml이 git push 직후 곧바로
+# `gh workflow run vercel-deploy.yml --ref main`을 호출하면, GitHub가 아직 main 브랜치의
+# ref를 최신 커밋으로 갱신하지 못한 시점에 dispatch가 처리돼 방금 푸시한 커밋이 아니라
+# 그 이전 커밋이 배포되는 사고가 있었다. 이를 원천 차단하기 위해 dispatch 쪽에서 정확한
+# 커밋 SHA를 `sha` input으로 명시 전달하고, 체크아웃 시 그 SHA를 그대로 사용한다.
 name: Vercel 프로덕션 배포
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      sha:
+        description: "배포할 정확한 커밋 SHA (미지정 시 dispatch 시점의 main HEAD)"
+        required: false
+        type: string
 
 concurrency:
   group: vercel-prod-deploy
@@ -24,6 +35,8 @@ jobs:
     steps:
       - name: 📥 체크아웃
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sha || github.sha }}
 
       - name: 🚀 vercel deploy --prod (토큰 기반, 커밋 작성자 검증 우회)
         env:

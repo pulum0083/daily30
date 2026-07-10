@@ -150,7 +150,7 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
@@ -271,7 +271,7 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
@@ -423,7 +423,7 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
 
       - name: 🌐 GitHub Pages 배포
         if: steps.holiday.outputs.open == 'true'
@@ -493,7 +493,7 @@ jobs:
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
 
   # ──────────────────────────────────────────────────────────────────
   kospi-news-live:
@@ -544,7 +544,7 @@ jobs:
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
 
       - name: 🚀 GitHub Pages 배포
         uses: peaceiris/actions-gh-pages@v4
