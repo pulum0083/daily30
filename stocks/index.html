@@ -1253,15 +1253,15 @@ function usSel(code){
   if(!box) return;
   var gridEl=document.getElementById('ue-grid'), macroEl=document.getElementById('ue-macro');
   var TICKERS=[
-    {nm:'메모리·HBM', tk:'DRAM', sym:'DRAM.K', lead:true},
-    {nm:'브로드컴',   tk:'AVGO', sym:'AVGO.O'},
-    {nm:'엔비디아',   tk:'NVDA', sym:'NVDA.O'},
-    {nm:'한국ETF',    tk:'EWY',  sym:'EWY.O', noLink:true},
-    {nm:'AMD',       tk:'AMD',  sym:'AMD.O'},
-    {nm:'ASML',      tk:'ASML', sym:'ASML.O'},
-    {nm:'마이크론',   tk:'MU',   sym:'MU.O'},
-    {nm:'반도체ETF',  tk:'SOXX', sym:'SOXX.O'},
-    {nm:'반도체ETF',  tk:'SMH',  sym:'SMH.O'}
+    {nm:'메모리·HBM', tk:'DRAM',  sym:'DRAM.K', lead:true},
+    {nm:'한국ETF',    tk:'EWY',   sym:'EWY.O', noLink:true},
+    {nm:'SK하이닉스', tk:'SKHYV', sym:'SKHYV.O'},
+    {nm:'브로드컴',   tk:'AVGO',  sym:'AVGO.O'},
+    {nm:'엔비디아',   tk:'NVDA',  sym:'NVDA.O'},
+    {nm:'AMD',       tk:'AMD',   sym:'AMD.O'},
+    {nm:'ASML',      tk:'ASML',  sym:'ASML.O'},
+    {nm:'마이크론',   tk:'MU',    sym:'MU.O'},
+    {nm:'반도체ETF',  tk:'SOXX',  sym:'SOXX.O'}
   ];
   var NASDAQ='QQQ.O';
   var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false, isLive=false, sessionState='', basisAt=null;
