@@ -377,8 +377,9 @@ python3 scripts/generate_html.py --write-list-only
 | 브리핑 | 위치 | 표시 슬롯 |
 | --- | --- | --- |
 | 코스피 예측 브리핑 | 스코어보드 아래, 예측 카드 위 | `MARKET` |
-| 코스피 마감 브리핑 | 마감 시황 아래, 수급 위 | `POST_MARKET` |
 | 미국 시장 브리핑 | 본문 최상단 | `US_MARKET` |
+
+**코스피 마감 브리핑(POST_MARKET)은 2026-07-10 섹션 제거됨.** `close.html` 템플릿에서 `_issue_briefing.html` include 삭제, `fetch_news_live.py`는 `slot == "POST_MARKET"`이면 RSS 수집·Gemini 호출 없이 즉시 종료(API 비용 차단). 같은 job이 돌리는 `fetch_movers_why.py`(사이드바 "코스피 주도주" 위젯 데이터)는 계속 정상 실행 — 스케줄 자체(cron-job.org "장 후" 트리거)를 끄면 그 데이터도 같이 끊기므로 유지.
 
 **`initIssueBriefing()` 동작 (`web/assets/main.js`):**
 - `#issue-briefing-wrap`의 `data-date`, `data-slot` 읽기

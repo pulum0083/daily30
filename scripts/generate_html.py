@@ -788,7 +788,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     prev_url, next_url = find_adjacent(internal_type, target_date)
 
     canonical_url = f"https://doubleshot.space/briefings/{target_date}/{internal_type}/"
-    _issue_slot_map = {"kospi": "MARKET", "close": "POST_MARKET", "us": "US_MARKET"}
+    _issue_slot_map = {"kospi": "MARKET", "us": "US_MARKET"}
     ctx = {
         "date_str": target_date,
         "generated_at": generated_at,

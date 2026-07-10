@@ -366,6 +366,10 @@ def main() -> None:
     time_str = now.strftime("%H:%M")
     slot = get_slot(now.hour, now.minute)
 
+    if slot == "POST_MARKET":
+        print("[fetch_news_live] POST_MARKET 슬롯 — 코스피 마감 브리핑 이슈 섹션 제거됨, 수집 생략")
+        sys.exit(0)
+
     print(f"[fetch_news_live] {today} {time_str} KST — 슬롯={slot} — RSS 수집 시작")
 
     # 1단계: RSS로 오늘 날짜 기사 수집 (pub_time 포함, 최신순 정렬)
