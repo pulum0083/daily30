@@ -264,21 +264,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .skl{background:#EEF2F7;border-radius:6px;animation:sklPulse 1.1s ease-in-out infinite;}
 .skl-line{height:13px;display:block;}
 .skl-sig{padding:13px 16px;border-bottom:1px solid #F1F5F9;}.skl-sig:last-child{border-bottom:none;}
-/* 💰 밸류에이션 시그널 — 좁은 사이드바용 컴팩트 2행 행 */
-.val-row{display:flex;align-items:flex-start;gap:9px;padding:11px 16px;text-decoration:none;border-bottom:1px solid #F1F5F9;cursor:pointer;background:var(--canvas);}
+/* 💰 밸류에이션 시그널 — 좁은 사이드바용 컴팩트 행 (종목 · PER비교 · 배지+문구) */
+.val-row{display:flex;align-items:center;gap:9px;padding:11px 16px;text-decoration:none;border-bottom:1px solid #F1F5F9;cursor:pointer;background:var(--canvas);}
 .val-row:last-of-type{border-bottom:none;}
 .val-row:hover{background:var(--primary-bg);}
-.val-rk{flex:none;width:18px;font-size:12.5px;font-weight:800;color:#B4BAC2;font-variant-numeric:tabular-nums;line-height:1.35;}
+.val-rk{flex:none;width:16px;font-size:12.5px;font-weight:800;color:#B4BAC2;font-variant-numeric:tabular-nums;text-align:center;}
 .val-main{flex:1;min-width:0;}
-.val-l1{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
 .val-nm{font-size:13.5px;font-weight:800;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.val-badge{flex:none;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.val-badge.pos{color:#0F9D58;}.val-badge.neg{color:var(--up);}
-.val-l2{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
-.val-sect{font-size:10.5px;font-weight:600;color:#4B5563;background:var(--inset);border-radius:5px;padding:1px 6px;}
-.val-per{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;}
+.val-l2{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.val-sect{flex:none;font-size:10.5px;font-weight:600;color:#4B5563;background:var(--inset);border-radius:5px;padding:1px 6px;}
+.val-per{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .val-per b{color:#0F172A;font-weight:700;}
-.val-per .vs{color:#B4BAC2;font-weight:600;margin:0 1px;}
+.val-per .vs{color:#B4BAC2;font-weight:600;margin:0 2px;}
+.val-cmp{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.val-badge{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;}
+.val-badge.pos{color:#0F9D58;}.val-badge.neg{color:var(--up);}
+.val-phrase{font-size:10.5px;font-weight:600;white-space:nowrap;}
+.val-phrase.pos{color:#0F9D58;}.val-phrase.neg{color:var(--up);}
 /* 신호별 랭킹 (우측) */
 .srk-grp{border-bottom:1px solid #F1F5F9;background:var(--canvas);}
 .srk-grp:last-child{border-bottom:none;}
@@ -1457,6 +1459,19 @@ function usSel(code){
         </div>
       </div>
     </div>
+    <!-- 📊 ETF로 읽는 시황 (섹터 대표 종목 아래로 이동) -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
+      <div class="etf-head" id="etf-lead"><span class="skl skl-line" style="width:58%;margin-bottom:8px"></span><span class="skl skl-line" style="width:92%;height:11px"></span></div>
+      <div class="gauge-wrap" id="etf-betting"><span class="skl skl-line" style="width:42%;height:11px;margin-bottom:9px"></span><span class="skl" style="display:block;height:32px;border-radius:8px"></span><span class="skl skl-line" style="width:70%;height:11px;margin-top:11px"></span></div>
+      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
+      <div id="etf-top-rows">
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div>
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:52px"></span></div>
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:50%"></span><span class="skl skl-line" style="width:52px"></span></div>
+      </div>
+      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
+    </div>
     </div><!-- /home-main -->
     <div class="home-side">
     <!-- 💰 밸류에이션 시그널 (업종 상대 PER 저평가·고평가) -->
@@ -1473,18 +1488,18 @@ function usSel(code){
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:45%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:78%;margin-top:9px"></span></div>
       </div>
     </div>
-    <!-- ETF로 읽는 시황 (시황 + 베팅 흐름 + 거래량 톱5 통합) -->
+    <!-- ⚡ 오늘의 특이 신호 (밸류에이션 아래로 이동) -->
     <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
-      <div class="etf-head" id="etf-lead"><span class="skl skl-line" style="width:58%;margin-bottom:8px"></span><span class="skl skl-line" style="width:92%;height:11px"></span></div>
-      <div class="gauge-wrap" id="etf-betting"><span class="skl skl-line" style="width:42%;height:11px;margin-bottom:9px"></span><span class="skl" style="display:block;height:32px;border-radius:8px"></span><span class="skl skl-line" style="width:70%;height:11px;margin-top:11px"></span></div>
-      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
-      <div id="etf-top-rows">
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:50%"></span><span class="skl skl-line" style="width:52px"></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span><span class="help-q" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 코스피와 반대로 움직이며 지수보다 3%p 이상 강세<br>· <b>거래량 급증</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환(장 마감 기준)<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고, <b>상승률순</b>으로도 볼 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</span></span></div>
+      <div class="sig-subhead">
+        <span class="upd-badge" id="sig-upd-badge"></span>
+        <span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigHomeSetSort('score',this)">신호 강도순</a><a onclick="sigHomeSetSort('up',this)">상승률순</a></span>
       </div>
-      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
+      <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
+      <div id="sig-rows">
+        <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
+        <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:74%"></span></div>
+      </div>
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
@@ -3050,13 +3065,18 @@ if(passBtn){
   /* 💰 밸류에이션 시그널 — /data/valuation.json 실측 배선 (업종 상대 PER) */
   var VAL_DATA=null, valTab='under';
   function valRowHtml(o,i){
-    var neg=o.disc<0, cls=neg?'pos':'neg', sign=o.disc>0?'+':'';
+    var neg=o.disc<0, cls=neg?'pos':'neg';
+    var mag=Math.round(Math.abs(o.disc));   // 배지·문구가 같은 반올림 값을 쓰도록 한 번만 계산
+    var badge=(neg?'-':'+')+mag+'%';
+    var phrase=neg?('업종보다 '+mag+'% 싸요'):('업종보다 '+mag+'% 비싸요');
     return '<a class="val-row" onclick="goStock(\''+o.code+'\')">'
       +'<span class="val-rk">'+(i+1)+'</span>'
       +'<div class="val-main">'
-        +'<div class="val-l1"><span class="val-nm">'+o.name+'</span><span class="val-badge '+cls+'">'+sign+Math.round(o.disc)+'%</span></div>'
+        +'<div class="val-nm">'+o.name+'</div>'
         +'<div class="val-l2"><span class="val-sect">'+o.sector+'</span><span class="val-per">선행 <b>'+o.per.toFixed(1)+'</b><span class="vs">vs</span>업종 '+o.sectorMed.toFixed(1)+'</span></div>'
-      +'</div></a>';
+      +'</div>'
+      +'<div class="val-cmp"><span class="val-badge '+cls+'">'+badge+'</span><span class="val-phrase '+cls+'">'+phrase+'</span></div>'
+      +'</a>';
   }
   function valRender(){
     var w=document.getElementById('val-rows'); if(!w||!VAL_DATA) return;
