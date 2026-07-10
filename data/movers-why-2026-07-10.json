@@ -1,27 +1,84 @@
 {
-  "generated_at": "2026-07-10T11:01:46.754138+09:00",
+  "generated_at": "2026-07-10T11:31:20.163312+09:00",
   "date": "2026-07-10",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
       "changePct": 4.14,
-      "surge": 0.3,
-      "events": []
+      "surge": 0.33,
+      "events": [
+        {
+          "time": "09:32",
+          "headline": "삼성전자 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5BTDFVSkFxUlJDaVJvSXB3cXo1R1FtS2xBN2VjbG9ocURNdGRCbXRLWV9seGhFYnhJN1BuRXVuV2FIYzFWdzE4Rld2b0ZTTWhEMGh5TTFXUEtqeVdn?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 상승 중",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "07:57",
+          "headline": "사상 최대 실적에도 '레버리지 쇼크'…삼성전자 ETF 줄줄이 20%대 급락",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1vakpGXzdvTjlKX2hiVDNWNGVfQ2piOXBJLVg0aEc1bUJaUTFPcHdJOU84aF83Z3dKbnRnTG81YU11T2oydmtwYXdvYVdEM1NaZDFjUkIyOEVqdw?oc=5",
+          "source": "파이낸셜뉴스",
+          "why": "사상 최대 실적에도 불구하고 삼성전자 ETF가 20%대 급락하며 레버리지 쇼크를 겪고 있습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.87,
-      "surge": 0.43,
-      "events": []
+      "changePct": 1.01,
+      "surge": 0.47,
+      "events": [
+        {
+          "time": "05:00",
+          "headline": "\"동력 둔화 중\"…200만원 넘은 SK하이닉스에 목표가 185만원",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE4za2NmNDcxQ0F2OEdEY1ZJS1hMOEc0bGt2dFFKTkZHc0ZXRkpuZlBKUzdxQU5YRGhwLVhFaFVBSHRncld1andMQURvZ3Z1Uk1xY1FPZ04xLTJtQQ?oc=5",
+          "source": "파이낸셜뉴스",
+          "why": "SK하이닉스의 동력 둔화 우려로 목표가가 하향 조정되었다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:59",
+          "headline": "SK하이닉스",
+          "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPb1JrV3VYSU1pdGlENWxFYWU1WmsxVUk4YzhCN0dFRm84OHhCOE5ZZHdUSTh1NUUtN0FuSzZabk9lN2hsdDV0R1U0S0RJMEJwdWNtN05OVXpDamFuZlhQR2RwcW1BZ3pMTGd3YVhYS2pCa2dWaVpTcmdYTF9vMmhJMURWampsMWJJRnB2UEFXbGdLeVkyOWw0?oc=5",
+          "source": "매일경제 마켓",
+          "why": "SK하이닉스 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 3.82,
-      "surge": 0.3,
-      "events": []
+      "changePct": 3.93,
+      "surge": 0.32,
+      "events": [
+        {
+          "time": "08:48",
+          "headline": "“현대차 상승여력 75%…하반기 반등 이벤트 줄대기”",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE85SkhhbHJQWS05NG04SU5qeGpOVFM2VVJzc0tickJhUWswTDF3eU5WU01aTWpaY2tyWGhONGREcXVmZjF3ZFVXYk52LV9CTDhGanc?oc=5",
+          "source": "매일경제 마켓",
+          "why": "신한투자증권은 현대차의 하반기 반등 가능성을 높게 전망하며 목표주가를 78만원으로 하향 조정했다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:00",
+          "headline": "신한證 \"현대차, 하반기 주가 반등 기대…목표가 78만원으로 하향\"",
+          "url": "https://news.google.com/rss/articles/CBMiX0FVX3lxTFBNVXZiV014STl1T0pIN05yX2V2Sm5ZN0ZUSDNQYnNlQm8xRW03X0lQVzZmb1lsaEZjb3BvWGF5RkEyRERRMmZQSzVodk9TLVV6eXFfSVF1LWp2NmZyQ1l3?oc=5",
+          "source": "뉴스1",
+          "why": "신한證 \"현대차, 하반기 주가 반등 기대…목표가 78만원으로 하향\"",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
     }
   ]
 }
