@@ -1019,3 +1019,25 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .keynum-cap b{color:var(--ink);font-weight:600;}
 .keynum-take{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.75;padding:12px 14px;background:var(--primary-bg);border-radius:var(--r-md);}
 .keynum-take b{color:var(--ink);font-weight:600;}
+
+/* ──────────────────────────────────────────────
+   오늘의 관점(todays_view) — 큐레이션 헤드라인 (지난 장 복기 + 오늘 볼 것)
+   validate_analysis 실측 검증 통과 데이터. 코스피 오전 브리핑 전용.
+   ────────────────────────────────────────────── */
+.tv-lead{background:linear-gradient(180deg,var(--primary-bg),transparent 70%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:20px 20px 22px;}
+.tv-kicker{font-size:11px;font-weight:800;letter-spacing:0.08em;color:var(--primary);text-transform:uppercase;margin-bottom:9px;}
+.tv-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1.32;color:var(--ink);margin:0;}
+.tv-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tv-col{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 15px;}
+.tv-col__h{font-size:12px;font-weight:800;letter-spacing:-0.01em;margin-bottom:10px;}
+.tv-col__h.recap{color:var(--muted);}
+.tv-col__h.today{color:var(--primary);}
+.tv-col ul{list-style:none;display:grid;gap:11px;margin:0;padding:0;}
+.tv-col li{font-size:13px;line-height:1.55;color:var(--ink);display:flex;gap:8px;}
+.tv-col li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--muted);margin-top:7px;flex-shrink:0;}
+.tv-col--today li::before{background:var(--primary);}
+.tv-col li b{font-weight:700;}
+.tv-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:5px;vertical-align:middle;}
+.tv-tag--watch{background:var(--gold-bg);color:var(--gold);}
+.tv-tag--event{background:var(--primary-bg);color:var(--primary);}
+@media(max-width:520px){.tv-cols{grid-template-columns:1fr;}}

@@ -815,6 +815,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
+        # 오늘의 관점(todays_view) — 코스피 오전 브리핑 전용. 없으면 None → 템플릿에서 섹션 생략.
+        ctx["todays_view"] = analysis.get("todays_view") if internal_type == "kospi" else None
         if internal_type == "kospi":
             ctx.update(build_ib_korea_views())
             uls = analysis.get("us_linked_story") or {}

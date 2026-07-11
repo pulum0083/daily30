@@ -1,0 +1,29 @@
+{# 오늘의 관점(todays_view) — 지난 장 복기 + 오늘 볼 것. 실측 검증(validate_analysis) 통과 데이터. #}
+{% if todays_view and todays_view.view_title %}
+<div class="open-section tv-lead">
+  <div class="tv-kicker">🧭 오늘의 관점</div>
+  <h2 class="tv-title">{{ todays_view.view_title }}</h2>
+  <div class="tv-cols">
+    {% if todays_view.recap %}
+    <div class="tv-col">
+      <div class="tv-col__h recap">↩︎ 지난 장 복기</div>
+      <ul>
+        {% for r in todays_view.recap %}
+        <li>{{ r.text | safe }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% if todays_view.outlook %}
+    <div class="tv-col tv-col--today">
+      <div class="tv-col__h today">→ 오늘 볼 것</div>
+      <ul>
+        {% for o in todays_view.outlook %}
+        <li>{% if o.tag == 'event' %}<span class="tv-tag tv-tag--event">이벤트</span>{% else %}<span class="tv-tag tv-tag--watch">관전</span>{% endif %}{{ o.text | safe }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
