@@ -826,6 +826,7 @@
     initLiveScoreboard();
     initLiveMarketPanel();
     initNowBand();
+    initStockSignals();
     loadLeadersWidget();
     loadIncomeWidget();
     loadVisitorCount();
@@ -2072,6 +2073,64 @@
     } else { // after
       pollKospi(); pollMarket(); loadIssues();           // 최종값 1회
     }
+  }
+
+  /* ── 종목 신호 사이드바 위젯 — /api/signals 상위 3개. 코스피 브리핑 전용.
+     과거/미래 브리핑·데이터 없음이면 숨김. phase로 장중/마감 헤더·힌트 토글. ── */
+  function initStockSignals() {
+    var box = document.getElementById('stock-signals');
+    if (!box) return;
+
+    function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }
+    var k0 = kstNow();
+    var todayKst = k0.getUTCFullYear() + '-' +
+      String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
+      String(k0.getUTCDate()).padStart(2, '0');
+    var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
+    var urlDate = m ? m[1] : todayKst;
+    if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 신호는 '오늘' 값만 의미 → 숨김
+
+    var CAT_COLOR = {
+      vol_surge: 'gold', turnover: 'gold',
+      inst_buy: 'blue', foreign_buy: 'blue', foreign_sell: 'blue',
+      near_high: 'green', counter_up: 'green'
+    };
+
+    function render(data) {
+      if (!data || !Array.isArray(data.signals) || !data.signals.length) return;
+      var top = data.signals.slice(0, 3);
+      var closed = data.phase === 'closed';
+
+      var title = document.getElementById('ssig-title');
+      var note = document.getElementById('ssig-note');
+      var hint = document.getElementById('ssig-hint');
+      if (title) title.textContent = closed ? '지난 장 포착 신호' : '오늘의 종목 신호';
+      if (note) note.hidden = !closed;
+      if (hint) hint.hidden = !closed;
+
+      var rows = top.map(function (s) {
+        var color = CAT_COLOR[(s.cats || [])[0]] || 'gold';
+        var badge = (s.badges || [])[0] || '';
+        var pct = Number(s.pct) || 0;
+        var dir = pct >= 0 ? 'up' : 'dn';
+        var pctTxt = (pct > 0 ? '+' : '') + pct.toFixed(1) + '%';
+        return '<a class="ssig-row" href="/stocks/' + encodeURIComponent(s.code) + '/">'
+          + '<span class="ssig-name">' + escHtml(s.name || '') + '</span>'
+          + '<span class="ssig-badge ' + color + '">' + escHtml(badge) + '</span>'
+          + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></a>';
+      }).join('');
+      var list = document.getElementById('ssig-list');
+      if (list) list.innerHTML = rows;
+      box.hidden = false;
+    }
+
+    function poll() {
+      fetch('/api/signals', { signal: AbortSignal.timeout(8000) })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(render).catch(function () {});
+    }
+    poll();
+    setInterval(poll, 60000);
   }
 
   /* ── 이슈 브리핑 동적 fetch (B안) ──────────────────────────────────────
