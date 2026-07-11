@@ -323,6 +323,19 @@ def test_todays_view_recap_removes_contradicted_stock(monkeypatch):
     assert any("todays_view" in c for c in corrections)
 
 
+def test_todays_view_recap_warns_on_fetch_failure(monkeypatch):
+    """실측 실패 종목은 fail-open(항목 유지)하되 경고를 남긴다."""
+    monkeypatch.setattr(v, "_fetch_kospi_realdata", lambda code: {"error": "n/a"})
+    analysis = {"todays_view": {"view_title": "t", "recap": [
+        {"text": "<b>미검증종목</b>이 강세였어요.", "codes": ["123456"]},
+    ], "outlook": []}}
+    corrections, warnings = [], []
+    v.validate_todays_view_recap(analysis, "kospi", corrections, warnings)
+    # 실측 실패라 교차검증 불가 → 항목은 유지되고 경고만 남음
+    assert len(analysis["todays_view"]["recap"]) == 1
+    assert any("123456" in w and "실측 실패" in w for w in warnings)
+
+
 # ── validate_todays_view_outlook ──────────────────────────────────────────────
 def test_todays_view_outlook_drops_ungrounded_event():
     analysis = {"todays_view": {"view_title": "t", "recap": [], "outlook": [

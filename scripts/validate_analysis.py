@@ -431,12 +431,17 @@ def validate_todays_view_recap(analysis: dict, btype: str,
     if not isinstance(recap, list):
         return
     real: dict = {}
+    seen: set = set()
     for item in recap:
         for code in (item.get("codes") or []):
-            if code not in real:
-                d = _fetch_kospi_realdata(code)
-                if "error" not in d and d.get("change_pct") is not None:
-                    real[code] = d["change_pct"]
+            if code in seen:
+                continue
+            seen.add(code)
+            d = _fetch_kospi_realdata(code)
+            if "error" not in d and d.get("change_pct") is not None:
+                real[code] = d["change_pct"]
+            else:
+                warnings.append(f"todays_view.recap 종목 '{code}' 실측 실패 — 방향 교차검증 생략")
     kept = []
     for item in recap:
         codes = [c for c in (item.get("codes") or []) if c in real]
