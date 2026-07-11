@@ -39,7 +39,7 @@
             {# 하단 심층 섹션(us_linked_story·sector_focus) 2026-07-07 중단 — 되살리려면 아래 두 줄 복원 #}
             {# {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>
             {% elif sector_name %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %} #}
-            {% if watch_items %}{% include "sections/watchpoints.html" %}<div class="divider"></div>{% endif %}
+            {# 관전 포인트(watchpoints)는 오늘의 관점 outlook(관전 태그)과 내용이 겹쳐 코스피에서 제거(2026-07-12). 미국 브리핑은 유지. #}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
           </div>
         </div>
