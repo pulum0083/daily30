@@ -1080,3 +1080,40 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 /* 종목 픽 종목명 → 영구 상세 페이지 링크 (페이지 실재 시에만 렌더). 검색 유입 내부링크. */
 .pick-name-link{color:inherit;text-decoration:none;border-bottom:1px solid var(--hairline);transition:border-color .15s,color .15s;}
 .pick-name-link:hover{color:var(--primary);border-bottom-color:var(--primary);}
+
+/* ──────────────────────────────────────────────
+   지금 코스피 밴드 — 본문 최상단 라이브 지표(지수·코스닥·원달러·수급·스파크·장중이슈). 코스피 전용.
+   initNowBand()가 상태별로 채우고 노출. 프로토타입 대비 --dim→--muted 매핑.
+   ────────────────────────────────────────────── */
+@keyframes nb-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.nowband{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;margin-bottom:22px;background:var(--canvas);}
+.nowband[hidden]{display:none;}
+.nowband__head{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid var(--hairline);flex-wrap:wrap;}
+.nowband__title{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px;}
+.nowband__title.live{color:var(--up);}
+.nb-dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-bg);animation:nb-pulse 1.8s infinite;}
+.nb-dot.pre{background:var(--muted);box-shadow:none;animation:none;}
+.nowband__sub{font-size:11px;color:var(--muted);font-weight:600;}
+.nb-mktrow{display:flex;align-items:center;gap:16px;padding:14px 15px 12px;}
+.nb-idx{min-width:0;}
+.nb-idx__k{font-size:11.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;}
+.nb-idx__k small{font-size:10px;color:var(--muted);border:1px solid var(--hairline);border-radius:5px;padding:0 5px;font-weight:700;}
+.nb-idx__v{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums;}
+.nb-idx__v small{font-size:13px;font-weight:800;margin-left:4px;}
+.nb-idx__v small.up{color:var(--up);}.nb-idx__v small.dn{color:var(--dn);}
+.nb-idx__sub{font-size:11px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums;}
+.nb-idx__sub b{color:var(--ink);font-weight:700;}
+.nb-idx__sub small{font-weight:700;}
+.nb-idx__sub small.up{color:var(--up);}.nb-idx__sub small.dn{color:var(--dn);}
+.nb-sparkwrap{position:relative;margin-left:auto;flex-shrink:0;width:118px;height:38px;}
+.nb-spark{width:118px;height:38px;display:block;}
+.nb-supply{display:flex;align-items:center;gap:13px;padding:11px 15px;background:var(--surface-soft);border-top:1px solid var(--hairline);flex-wrap:wrap;}
+.nb-supply__lbl{font-size:11px;font-weight:700;color:var(--muted);}
+.nb-sup{display:flex;align-items:center;gap:6px;font-size:12.5px;}
+.nb-sup i{font-style:normal;color:var(--muted);}
+.nb-sup b{font-weight:800;font-variant-numeric:tabular-nums;}
+.nb-sup b.up{color:var(--up);}.nb-sup b.dn{color:var(--dn);}
+.nb-supply__unit{font-size:11px;color:var(--muted);margin-left:-6px;}
+.nb-issues{padding:12px 15px;display:grid;gap:9px;border-top:1px solid var(--hairline);}
+.nb-issue{font-size:12.5px;color:var(--ink);display:flex;gap:10px;line-height:1.5;}
+.nb-issue__t{font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;padding-top:1px;min-width:38px;}

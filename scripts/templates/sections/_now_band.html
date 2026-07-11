@@ -1,0 +1,24 @@
+{# 지금 코스피 밴드 — 본문 최상단 라이브 지표(지수·코스닥·원달러·수급·스파크·장중이슈). 코스피 전용. #}
+{# 기본 hidden. main.js initNowBand()가 상태(장전/장중/장후/과거)를 판정해 실측 데이터로 채운 뒤에만 노출한다(데이터 없으면 계속 숨김 — 데이터 정합성). 날짜는 URL에서 파싱. #}
+<div class="nowband" id="now-band" hidden>
+  <div class="nowband__head">
+    <span class="nowband__title" id="nb-title"><span class="nb-dot" id="nb-dot"></span><span id="nb-title-text">지금 코스피</span></span>
+    <span class="nowband__sub" id="nb-sub"></span>
+  </div>
+  <div class="nb-mktrow">
+    <div class="nb-idx">
+      <div class="nb-idx__k">코스피 <small id="nb-kospi-tag" hidden>지난 종가</small></div>
+      <div class="nb-idx__v"><span id="nb-kospi-val">—</span> <small id="nb-kospi-chg"></small></div>
+      <div class="nb-idx__sub">코스닥 <b id="nb-kosdaq-val">—</b> <small id="nb-kosdaq-chg"></small> · 원/달러 <b id="nb-fx-val">—</b> <small id="nb-fx-chg"></small></div>
+    </div>
+    <div class="nb-sparkwrap"><canvas class="nb-spark" id="nb-spark" width="118" height="38"></canvas></div>
+  </div>
+  <div class="nb-supply" id="nb-supply" hidden>
+    <span class="nb-supply__lbl" id="nb-supply-lbl">수급</span>
+    <span class="nb-sup"><i>개인</i><b id="nb-indv">—</b></span>
+    <span class="nb-sup"><i>기관</i><b id="nb-inst">—</b></span>
+    <span class="nb-sup"><i>외국인</i><b id="nb-frgn">—</b></span>
+    <span class="nb-supply__unit">억</span>
+  </div>
+  <div class="nb-issues" id="nb-issues" hidden></div>
+</div>

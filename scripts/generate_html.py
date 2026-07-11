@@ -375,8 +375,9 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
     if "vix" not in mdj and market_data.get("vix"):
         mdj["vix"] = market_data["vix"]
     if internal_type == "kospi":
+        # 원/달러(usdkrw)는 '지금 코스피 밴드'로 이관 — 사이드바에서 제외(중복 방지).
         spec = [("나스닥", "nasdaq"), ("필라델피아 반도체", "sox"),
-                ("나스닥100 선물", "nq"), ("원/달러", "usdkrw")]
+                ("나스닥100 선물", "nq")]
     else:
         spec = [("나스닥100 선물", "nq"), ("나스닥", "nasdaq"),
                 ("필라델피아 반도체", "sox")]
