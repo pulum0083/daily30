@@ -935,6 +935,24 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .analyst-source-arrow{font-size:10px;opacity:0.7;}
 .analyst-time{font-size:11px;color:var(--muted);margin-left:auto;}
 
+/* 외국계 시각(ib_korea_views) — 프로토타입 .ibrow 스타일 + 출처·시각 유지. analyst-card와 별개(코스피 전용). */
+.ib-list{margin-top:2px;}
+.ib-row{display:flex;gap:11px;padding:13px 0;border-bottom:1px solid var(--hairline);}
+.ib-row:last-child{border-bottom:none;}
+.ib-logo{width:34px;height:34px;border-radius:8px;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;letter-spacing:-.5px;}
+.ib-body{flex:1;min-width:0;}
+.ib-name{font-size:12.5px;font-weight:800;color:var(--ink);}
+.ib-badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;margin-left:6px;}
+.ib-badge.bull{background:var(--up-bg);color:var(--up);}
+.ib-badge.bear{background:var(--dn-bg);color:var(--dn);}
+.ib-badge.neu{background:var(--surface-inset);color:var(--muted);}
+.ib-text{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6;}
+.ib-foot{display:flex;align-items:center;gap:6px;margin-top:7px;}
+.ib-src{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;}
+.ib-src:hover{text-decoration:underline;}
+.ib-src-arrow{font-size:10px;opacity:0.7;}
+.ib-time{font-size:11px;color:var(--muted);margin-left:auto;}
+
 /* ──────────────────────────────────────────────
    시나리오 분기 형식 (sc-card)
 ────────────────────────────────────────────── */
@@ -1040,7 +1058,17 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .tv-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:5px;vertical-align:middle;}
 .tv-tag--watch{background:var(--gold-bg);color:var(--gold);}
 .tv-tag--event{background:var(--primary-bg);color:var(--primary);}
+.tv-dek{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.6;}
 @media(max-width:520px){.tv-cols{grid-template-columns:1fr;}}
+
+/* 이렇게 보는 이유 — 예측 근거 3줄 넘버링(코스피). 프로토타입 .rlist/.ritem 이식 */
+.rz-title{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.rz-title::before{content:'💬';font-size:14px;}
+.rz-list{display:grid;gap:13px;}
+.rz-item{display:flex;gap:11px;}
+.rz-num{width:22px;height:22px;border-radius:7px;background:var(--primary-bg);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.rz-text{font-size:13.5px;line-height:1.68;color:var(--ink);}
+.rz-text b{font-weight:700;}
 
 /* ──────────────────────────────────────────────
    예측 강등 스트립 — 방향 예측을 '참고 지표'로. 오늘의 관점 승격에 따른 재배치. 코스피 전용.
