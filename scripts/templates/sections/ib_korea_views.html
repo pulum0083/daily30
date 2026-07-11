@@ -1,26 +1,24 @@
-{# 외국계 IB 코멘트 다이제스트 카드 — ib_korea_views 리스트가 비면 전체 생략 #}
+{# 외국계 IB 코멘트 다이제스트 — 프로토타입 .ibrow 스타일(로고+이름 옆 인라인 배지+텍스트) + 출처·시각 유지. 리스트 비면 전체 생략. #}
 {% if ib_korea_views %}
-<div class="open-section analyst-quotes-section">
+<div class="open-section">
   <div class="open-section__title" style="display:flex;align-items:center;gap:6px;">
     <span>🏦 외국계 시각</span>
     <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:auto;text-transform:none;letter-spacing:0;">최근 24시간</span>
   </div>
-  {% for v in ib_korea_views %}
-  <div class="analyst-card">
-    <div class="analyst-card__top">
-      <div class="analyst-avatar">{{ v.initials }}</div>
-      <div class="analyst-meta">
-        <div class="analyst-name">{{ v.house }}</div>
-        <div class="analyst-affil">글로벌 IB</div>
+  <div class="ib-list">
+    {% for v in ib_korea_views %}
+    <div class="ib-row">
+      <div class="ib-logo">{{ v.initials }}</div>
+      <div class="ib-body">
+        <div class="ib-name">{{ v.house }} <span class="ib-badge {{ v.sentiment }}">{% if v.sentiment == 'bull' %}강세{% elif v.sentiment == 'bear' %}약세{% else %}중립{% endif %}</span></div>
+        <div class="ib-text">{{ v.summary }}</div>
+        <div class="ib-foot">
+          <a class="ib-src" href="{{ v.url }}" target="_blank" rel="noopener noreferrer">{{ v.source }} <span class="ib-src-arrow">→</span></a>
+          <span class="ib-time">{{ v.time_label }}</span>
+        </div>
       </div>
-      <span class="analyst-badge {{ v.sentiment }}">{% if v.sentiment == 'bull' %}강세{% elif v.sentiment == 'bear' %}약세{% else %}중립{% endif %}</span>
     </div>
-    <div class="analyst-quote">{{ v.summary }}</div>
-    <div class="analyst-footer">
-      <a class="analyst-source" href="{{ v.url }}" target="_blank" rel="noopener noreferrer">{{ v.source }} <span class="analyst-source-arrow">→</span></a>
-      <span class="analyst-time">{{ v.time_label }}</span>
-    </div>
+    {% endfor %}
   </div>
-  {% endfor %}
 </div>
 {% endif %}
