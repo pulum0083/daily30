@@ -330,6 +330,8 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .sw-badge.green{background:rgba(47,191,113,.14);color:var(--green);}
 .sw-chg{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
 .sw-chg.up{color:var(--up);}.sw-chg.dn{color:var(--dn);}
+.side-note{margin-left:auto;font-size:10px;font-weight:700;color:var(--dim);border:1px solid var(--hairline);border-radius:5px;padding:1px 6px;}
+.sw-hint{font-size:11px;color:var(--dim);padding:9px 16px 2px;font-style:italic;line-height:1.5;}
 
 /* 도구 링크 카드 (월배당 계산기) */
 .toolcard{display:flex;align-items:center;gap:12px;padding:15px 16px;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);}
@@ -703,24 +705,27 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
       <a class="side__cta" id="scoreMore">틀린 날까지 전부 공개해요 <span>→</span></a>
     </div>
 
-    <!-- 텔레그램 구독 (재디자인) -->
-    <div class="subcard">
-      <div class="subcard__ic">✈</div>
-      <div class="subcard__t">브리핑을 텔레그램으로</div>
-      <div class="subcard__d">매일 아침·저녁, 예측 결과와 오늘의 관점을 놓치지 않게 자동으로 받아보세요.</div>
-      <a class="subcard__btn">텔레그램으로 구독 <span>→</span></a>
-      <div class="subcard__meta">무료 · 광고 없음 · 앱 설치 없이 텔레그램에서</div>
-    </div>
-
-    <!-- 종목 시그널 위젯 (3종목 티저 → 시그널 페이지) -->
-    <div class="side">
-      <div class="side__h">📡 오늘의 종목 신호 <a class="more">전체 →</a></div>
+    <!-- 종목 시그널 위젯 — 장중/장 전 상태 전환 (더보기 1개, 시그널 영역 앵커로 이동) -->
+    <!-- 장중: 오늘의 실시간 신호 -->
+    <div class="side" data-nbview="live">
+      <div class="side__h">📡 오늘의 종목 신호</div>
       <div class="sw-list">
-        <a class="sw-row"><span class="sw-name">한미반도체</span><span class="sw-badge gold">거래량 급증</span><span class="sw-chg up">+5.2%</span></a>
-        <a class="sw-row"><span class="sw-name">두산에너빌리티</span><span class="sw-badge blue">외국인 대량매수</span><span class="sw-chg up">+3.1%</span></a>
-        <a class="sw-row"><span class="sw-name">알테오젠</span><span class="sw-badge green">골든크로스</span><span class="sw-chg up">+2.4%</span></a>
+        <a class="sw-row" href="/stocks/042700/"><span class="sw-name">한미반도체</span><span class="sw-badge gold">거래량 급증</span><span class="sw-chg up">+5.2%</span></a>
+        <a class="sw-row" href="/stocks/034020/"><span class="sw-name">두산에너빌리티</span><span class="sw-badge blue">외국인 대량매수</span><span class="sw-chg up">+3.1%</span></a>
+        <a class="sw-row" href="/stocks/196170/"><span class="sw-name">알테오젠</span><span class="sw-badge green">골든크로스</span><span class="sw-chg up">+2.4%</span></a>
       </div>
-      <a class="side__cta">종목 신호 전체 보기 <span>→</span></a>
+      <a class="side__cta" href="/stocks/#signals">종목 신호 전체 보기 <span>→</span></a>
+    </div>
+    <!-- 장 전: 지난 마감 기준 포착 신호 (실시간 신호는 09시부터) -->
+    <div class="side" data-nbview="pre" hidden>
+      <div class="side__h">📡 지난 장 포착 신호 <span class="side-note">지난 마감 기준</span></div>
+      <div class="sw-list">
+        <a class="sw-row" href="/stocks/000660/"><span class="sw-name">SK하이닉스</span><span class="sw-badge blue">외국인 대량매수</span><span class="sw-chg up">+3.2%</span></a>
+        <a class="sw-row" href="/stocks/005930/"><span class="sw-name">삼성전자</span><span class="sw-badge gold">거래량 급증</span><span class="sw-chg up">+1.8%</span></a>
+        <a class="sw-row" href="/stocks/042700/"><span class="sw-name">한미반도체</span><span class="sw-badge green">골든크로스</span><span class="sw-chg up">+4.1%</span></a>
+      </div>
+      <div class="sw-hint">실시간 신호는 09:00 장 시작부터 갱신돼요.</div>
+      <a class="side__cta" href="/stocks/#signals">종목 신호 전체 보기 <span>→</span></a>
     </div>
 
     <!-- 월배당 계산기 (링크 동선만) -->
@@ -732,6 +737,15 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
       </div>
       <span class="toolcard__arr">→</span>
     </a>
+
+    <!-- 텔레그램 구독 (맨 아래) -->
+    <div class="subcard">
+      <div class="subcard__ic">✈</div>
+      <div class="subcard__t">브리핑을 텔레그램으로</div>
+      <div class="subcard__d">매일 아침·저녁, 예측 결과와 오늘의 관점을 놓치지 않게 자동으로 받아보세요.</div>
+      <a class="subcard__btn">텔레그램으로 구독 <span>→</span></a>
+      <div class="subcard__meta">무료 · 광고 없음 · 앱 설치 없이 텔레그램에서</div>
+    </div>
   </aside>
 </div></div>
 
@@ -790,7 +804,7 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
   document.querySelectorAll('.nb-sw').forEach(t=>t.onclick=()=>{
     const v=t.dataset.nb;
     document.querySelectorAll('.nb-sw').forEach(x=>x.classList.toggle('on',x===t));
-    document.querySelectorAll('.nowband').forEach(x=>x.hidden=(x.dataset.nbview!==v));
+    document.querySelectorAll('[data-nbview]').forEach(x=>x.hidden=(x.dataset.nbview!==v));
   });
   // 스파크라인 호버 툴팁
   const NB_PTS=[
