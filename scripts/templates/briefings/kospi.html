@@ -19,7 +19,7 @@
           <div class="accordion-body__inner">
             {% include "sections/_issue_briefing.html" %}
             {% if todays_view %}{% include "sections/todays_view.html" %}{% endif %}
-            {% include "sections/prediction.html" %}
+            {% if todays_view %}{% include "sections/prediction_strip.html" %}{% else %}{% include "sections/prediction.html" %}{% endif %}
             {% if analysis_format == 'scenario' %}
               {% include "sections/scenario_split.html" %}
             {% elif analysis_format == 'qa' %}
