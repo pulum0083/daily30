@@ -1,0 +1,9 @@
+{# 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개 넘버링. key_drivers 있을 때만(코스피 전용). #}
+<div class="open-section">
+  <div class="rz-title">이렇게 보는 이유</div>
+  <div class="rz-list">
+    {% for r in key_drivers %}
+    <div class="rz-item"><div class="rz-num">{{ loop.index }}</div><div class="rz-text">{{ r.text | safe }}</div></div>
+    {% endfor %}
+  </div>
+</div>

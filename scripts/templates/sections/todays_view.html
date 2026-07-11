@@ -1,8 +1,11 @@
-{# 오늘의 관점(todays_view) — 지난 장 복기 + 오늘 볼 것. 실측 검증(validate_analysis) 통과 데이터. #}
+{# 오늘의 관점 — 제목 + dek + (split 형식일 때만) 복기/관전 2단. 실측 검증 통과 데이터. #}
+{# split이 아니면 관점 본문은 kospi.html이 형식 템플릿(scenario/qa/…)을 이어서 렌더한다. #}
 {% if todays_view and todays_view.view_title %}
 <div class="open-section tv-lead">
   <div class="tv-kicker">🧭 오늘의 관점</div>
   <h2 class="tv-title">{{ todays_view.view_title }}</h2>
+  {% if todays_view.dek %}<p class="tv-dek">{{ todays_view.dek | safe }}</p>{% endif %}
+  {% if analysis_format == 'split' %}
   <div class="tv-cols">
     {% if todays_view.recap %}
     <div class="tv-col">
@@ -25,5 +28,6 @@
     </div>
     {% endif %}
   </div>
+  {% endif %}
 </div>
 {% endif %}

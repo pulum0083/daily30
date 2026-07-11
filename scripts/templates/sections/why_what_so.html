@@ -1,6 +1,6 @@
 {# WHY / WHAT / SO WHAT 형식 — 코스피·미국 브리핑용 #}
 <div class="open-section">
-  <div class="open-section__title reason-section-title">{{ reason_title }}</div>
+  {% if not format_in_view %}<div class="open-section__title reason-section-title">{{ reason_title }}</div>{% endif %}
   <div class="section-card" style="margin-top:10px;">
     {% if reason_lead %}
     <div class="reason-body" style="padding:12px 16px 0;">
