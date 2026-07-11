@@ -275,6 +275,23 @@ def build_reasons(analysis: dict) -> dict:
     return ctx
 
 
+def _pick_detail_url(ticker: str, internal_type: str) -> str:
+    """종목 상세 영구 페이지가 실재할 때만 URL 반환 (없으면 빈 문자열 → 링크 생략).
+    실재하지 않는 페이지로 링크해 '준비 중'/404를 노출하지 않기 위한 존재 게이트."""
+    t = (ticker or "").strip()
+    if not t:
+        return ""
+    if internal_type == "us":
+        slug = t.lower()
+        if (WEB_DIR / "stocks" / "us" / slug / "index.html").exists():
+            return f"/stocks/us/{slug}/"
+        return ""
+    # 한국: 6자리 코드만
+    if re.fullmatch(r"\d{6}", t) and (WEB_DIR / "stocks" / t / "index.html").exists():
+        return f"/stocks/{t}/"
+    return ""
+
+
 def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> list:
     """analysis.stock_picks → 카드 컨텍스트.
     price/change는 candidates 실데이터로 덮어쓴다 (Claude 할루시네이션 방지).
@@ -327,6 +344,7 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
 
         result.append({
             "name": p.get("name", ""),
+            "detail_url": _pick_detail_url(p.get("ticker", ""), internal_type),
             "ma20_badge": p.get("signal", ""),
             "price": price_str,
             "change": change_str,

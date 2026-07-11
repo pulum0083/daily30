@@ -1076,3 +1076,7 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .toolcard__t{font-size:13.5px;font-weight:800;}
 .toolcard__d{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45;}
 .toolcard__arr{margin-left:auto;color:var(--primary);font-weight:800;flex-shrink:0;}
+
+/* 종목 픽 종목명 → 영구 상세 페이지 링크 (페이지 실재 시에만 렌더). 검색 유입 내부링크. */
+.pick-name-link{color:inherit;text-decoration:none;border-bottom:1px solid var(--hairline);transition:border-color .15s,color .15s;}
+.pick-name-link:hover{color:var(--primary);border-bottom-color:var(--primary);}
