@@ -682,6 +682,87 @@ def build_accuracy(internal_type: str) -> dict:
     }
 
 
+def build_scorecard(internal_type: str) -> dict:
+    """예측 성적표(카드+더보기 모달) 컨텍스트. briefings.json의 실측 채점값(is_correct)만 사용.
+    월별 적중률·최근 결과는 모두 실데이터 집계 — 사후 '복기 사유' 서술은 저장돼 있지 않으므로
+    생성하지 않고 사실(예측→실제)만 표시한다(데이터 정합성 철칙)."""
+    bpath = DATA_DIR / "briefings.json"
+    if not bpath.exists():
+        return {}
+    rows = load_json(bpath).get("briefings", [])
+    src = SRC_TYPE.get(internal_type, internal_type)
+    typed = [b for b in rows if b.get("type") in (internal_type, src)]
+    scored = [b for b in typed if b.get("is_correct") is not None]
+    if len(scored) < 5:                       # 표본이 너무 적으면 카드 생략
+        return {}
+
+    def pct(lst):
+        return round(sum(1 for b in lst if b["is_correct"]) / len(lst) * 100) if lst else 0
+
+    def cls(p):                               # accuracy.html의 acc_cls와 동일 규칙
+        return "good" if p >= 70 else ("mid" if p >= 50 else "bad")
+
+    r15 = scored[-15:]
+    cum_pct = pct(scored)
+    hits = [b for b in scored if b["is_correct"]]
+    hit_avg = (sum(abs(b.get("actual_change_pct") or 0) for b in hits) / len(hits)) if hits else 0
+
+    # 최근 30건 기준 적중/오류/미결 막대
+    r30 = scored[-30:]
+    hit30 = sum(1 for b in r30 if b["is_correct"])
+    miss30 = len(r30) - hit30
+    pending = sum(1 for b in typed if b.get("is_correct") is None)
+    total = max(hit30 + miss30 + pending, 1)
+
+    # 월별 적중률 (최근 5개월)
+    from collections import defaultdict
+    mon = defaultdict(lambda: [0, 0])
+    for b in scored:
+        mkey = b["date"][:7]
+        mon[mkey][0] += 1
+        mon[mkey][1] += 1 if b["is_correct"] else 0
+    monthly = []
+    for mkey in sorted(mon)[-5:]:
+        s, h = mon[mkey]
+        p = round(h / s * 100) if s else 0
+        monthly.append({"label": f"{int(mkey[5:7])}월", "pct": p, "cls": cls(p)})
+
+    # 최근 결과 (맞은 날·틀린 날 그대로, 사실만)
+    dows = ["월", "화", "수", "목", "금", "토", "일"]
+    recent = []
+    for b in reversed(scored[-6:]):
+        try:
+            dt = datetime.strptime(b["date"], "%Y-%m-%d")
+            dlabel = f"{dt.month}/{dt.day} ({dows[dt.weekday()]})"
+        except Exception:
+            dlabel = b.get("date", "")
+        d = b.get("predicted_direction", "")
+        pred_word = "상승 예측" if "상승" in d else ("하락 예측" if "하락" in d else "중립 예측")
+        chg = b.get("actual_change_pct")
+        chg_str = f"{chg:+.2f}%" if isinstance(chg, (int, float)) else "—"
+        recent.append({
+            "date_label": dlabel,
+            "pred_word": pred_word,
+            "actual": chg_str,
+            "ok": bool(b["is_correct"]),
+        })
+
+    return {
+        "sc_recent15_pct": pct(r15),
+        "sc_recent15_cls": cls(pct(r15)),
+        "sc_cum_pct": cum_pct,
+        "sc_cum_cls": cls(cum_pct),
+        "sc_cum_count": len(scored),
+        "sc_hit_avg": f"{hit_avg:.1f}%",
+        "sc_hit": hit30, "sc_miss": miss30, "sc_pending": pending,
+        "sc_hit_pct": round(hit30 / total * 100),
+        "sc_miss_pct": round(miss30 / total * 100),
+        "sc_pending_pct": round(pending / total * 100),
+        "sc_monthly": monthly,
+        "sc_recent": recent,
+    }
+
+
 # ── 인접 브리핑 + 목록 ─────────────────────────────────────────────────────────
 def existing_dates(internal_type: str) -> list:
     if not BRIEFINGS_DIR.exists():
@@ -823,6 +904,11 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         **build_accuracy(internal_type),
     }
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
+
+    # 코스피 성적표 카드 — 사이드바 accuracy.html 대체(kospi 전용). 데이터 부족 시 빈 dict → 카드 생략.
+    if internal_type == "kospi":
+        ctx.update(build_scorecard(internal_type))
+        ctx["scorecard"] = bool(ctx.get("sc_monthly"))
 
     if internal_type == "close":
         ctx.update(build_close_sections(analysis, market_data, index_name, target_date))

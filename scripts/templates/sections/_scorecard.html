@@ -1,0 +1,46 @@
+{# 코스피 예측 성적표 카드 + 더보기 모달 — briefings.json 실측 채점 집계. kospi 전용(사이드바 accuracy.html 대체). #}
+{# 모달은 기존 info-modal 시스템(initModals가 document 전역 스캔) 재사용 — 새 JS 불필요. 복기 사유는 미저장이라 사실(예측→실제)만 표시. #}
+<div class="sc-card">
+  <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+  <div class="sc-stats">
+    <div class="sc-stat"><div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div><div class="sc-stat__l">최근 15건</div></div>
+    <div class="sc-stat"><div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div><div class="sc-stat__l">누적 {{ sc_cum_count }}건</div></div>
+    <div class="sc-stat"><div class="sc-stat__v">{{ sc_hit_avg }}</div><div class="sc-stat__l">적중일 평균</div></div>
+  </div>
+  <div class="sc-bar">
+    <i class="sc-bar__h" style="width:{{ sc_hit_pct }}%"></i><i class="sc-bar__m" style="width:{{ sc_miss_pct }}%"></i><i class="sc-bar__p" style="width:{{ sc_pending_pct }}%"></i>
+  </div>
+  <button class="sc-card__cta" data-modal-open="scorecard-modal">틀린 날까지 전부 공개해요 <span>→</span></button>
+</div>
+
+<div class="info-modal-backdrop" id="scorecard-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="scorecard-modal-title">
+    <button class="info-modal__close" data-modal-close="scorecard-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="scorecard-modal-title">우리 예측 성적표</div>
+    <div class="info-modal__body">
+      <div class="sc-stats">
+        <div class="sc-stat"><div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div><div class="sc-stat__l">최근 15건</div></div>
+        <div class="sc-stat"><div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div><div class="sc-stat__l">누적 {{ sc_cum_count }}건</div></div>
+        <div class="sc-stat"><div class="sc-stat__v">{{ sc_hit_avg }}</div><div class="sc-stat__l">적중일 평균</div></div>
+      </div>
+
+      <div class="sc-modal-sec">월별 적중률</div>
+      <div class="sc-mrate">
+        {% for m in sc_monthly %}
+        <div class="sc-mrate__row"><span class="sc-mrate__m">{{ m.label }}</span><div class="sc-mrate__bar"><i class="{{ m.cls }}" style="width:{{ m.pct }}%"></i></div><span class="sc-mrate__v">{{ m.pct }}%</span></div>
+        {% endfor %}
+      </div>
+
+      <div class="sc-modal-sec">최근 예측 결과</div>
+      <div class="sc-miss">
+        {% for r in sc_recent %}
+        <div class="sc-miss__item"><span class="sc-miss__date">{{ r.date_label }}</span><span class="sc-miss__tag {{ 'ok' if r.ok else 'no' }}">{{ '✓' if r.ok else '✗' }} {{ r.pred_word }} → 실제 {{ r.actual }}</span></div>
+        {% endfor %}
+      </div>
+
+      <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
+    </div>
+  </div>
+</div>
