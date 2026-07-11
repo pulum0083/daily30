@@ -420,6 +420,59 @@ def validate_prose_nonpick_stocks(analysis: dict, btype: str,
         pick["scenario"] = _join_sentences(kept_sents)
 
 
+def validate_todays_view_recap(analysis: dict, btype: str,
+                               corrections: list, warnings: list) -> None:
+    """오늘의 관점 recap 항목 중, codes로 명시된 종목의 방향 서술이
+    실측과 모순이면 해당 항목을 제거한다. (한국 종목: 코드로 직접 실측)"""
+    if btype != "kospi":
+        return
+    tv = analysis.get("todays_view") or {}
+    recap = tv.get("recap")
+    if not isinstance(recap, list):
+        return
+    real: dict = {}
+    seen: set = set()
+    for item in recap:
+        for code in (item.get("codes") or []):
+            if code in seen:
+                continue
+            seen.add(code)
+            d = _fetch_kospi_realdata(code)
+            if "error" not in d and d.get("change_pct") is not None:
+                real[code] = d["change_pct"]
+            else:
+                warnings.append(f"todays_view.recap 종목 '{code}' 실측 실패 — 방향 교차검증 생략")
+    kept = []
+    for item in recap:
+        codes = [c for c in (item.get("codes") or []) if c in real]
+        bad = [c for c in codes if _direction_contradicts(item.get("text", ""), real[c])]
+        if bad:
+            corrections.append(f"todays_view.recap 항목 제거 (종목 방향 모순 {bad}): {item.get('text','')[:50]}")
+        else:
+            kept.append(item)
+    tv["recap"] = kept
+
+
+def validate_todays_view_outlook(analysis: dict, btype: str,
+                                 corrections: list, warnings: list) -> None:
+    """오늘의 관점 outlook 중 사실 주장(tag=='event')은 source가 있어야 유지한다.
+    source가 없는 event는 근거 없는 일정 주장(할루시네이션 위험)이므로 제거.
+    tag=='watch'(정성 관전)는 소스 없이 유지."""
+    if btype != "kospi":
+        return
+    tv = analysis.get("todays_view") or {}
+    outlook = tv.get("outlook")
+    if not isinstance(outlook, list):
+        return
+    kept = []
+    for o in outlook:
+        if o.get("tag") == "event" and not (o.get("source") or "").strip():
+            corrections.append(f"todays_view.outlook event 제거 (근거 소스 없음): {o.get('text','')[:50]}")
+            continue
+        kept.append(o)
+    tv["outlook"] = kept
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
@@ -899,6 +952,10 @@ def validate(analysis, latest, btype):
     # 2-c) 산문 교차검증 — 픽 외 개별 종목 방향 모순 (us 전용)
     if btype == "us":
         validate_prose_nonpick_stocks(a, btype, corrections, warnings)
+
+    # 2-d) 오늘의 관점 검증 (kospi 전용)
+    validate_todays_view_recap(a, btype, corrections, warnings)
+    validate_todays_view_outlook(a, btype, corrections, warnings)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):

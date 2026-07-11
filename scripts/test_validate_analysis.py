@@ -306,6 +306,70 @@ def test_enrich_picks_unresolvable_ticker_warns():
     assert any("티커 해석 실패" in w for w in warn)
 
 
+# ── validate_todays_view_recap ────────────────────────────────────────────────
+def test_todays_view_recap_removes_contradicted_stock(monkeypatch):
+    def fake_fetch(code):
+        return {"change_pct": -1.5, "price": 70000.0} if code == "005930" else {"error": "n/a"}
+    monkeypatch.setattr(v, "_fetch_kospi_realdata", fake_fetch)
+    analysis = {"todays_view": {"view_title": "t", "recap": [
+        {"text": "<b>삼성전자</b>가 급등하며 지수를 끌어올렸어요.", "codes": ["005930"]},
+        {"text": "외국인이 순매수로 전환했어요.", "codes": []},
+    ], "outlook": []}}
+    corrections, warnings = [], []
+    v.validate_todays_view_recap(analysis, "kospi", corrections, warnings)
+    texts = [r["text"] for r in analysis["todays_view"]["recap"]]
+    assert "삼성전자" not in " ".join(texts)
+    assert "외국인" in " ".join(texts)
+    assert any("todays_view" in c for c in corrections)
+
+
+def test_todays_view_recap_warns_on_fetch_failure(monkeypatch):
+    """실측 실패 종목은 fail-open(항목 유지)하되 경고를 남긴다."""
+    monkeypatch.setattr(v, "_fetch_kospi_realdata", lambda code: {"error": "n/a"})
+    analysis = {"todays_view": {"view_title": "t", "recap": [
+        {"text": "<b>미검증종목</b>이 강세였어요.", "codes": ["123456"]},
+    ], "outlook": []}}
+    corrections, warnings = [], []
+    v.validate_todays_view_recap(analysis, "kospi", corrections, warnings)
+    # 실측 실패라 교차검증 불가 → 항목은 유지되고 경고만 남음
+    assert len(analysis["todays_view"]["recap"]) == 1
+    assert any("123456" in w and "실측 실패" in w for w in warnings)
+
+
+# ── validate_todays_view_outlook ──────────────────────────────────────────────
+def test_todays_view_outlook_drops_ungrounded_event():
+    analysis = {"todays_view": {"view_title": "t", "recap": [], "outlook": [
+        {"tag": "event", "text": "삼성전자 잠정실적 임박.", "source": "news"},
+        {"tag": "event", "text": "FOMC가 오늘 열려요.", "source": None},
+        {"tag": "watch", "text": "외국인 순매수 이어질지 보세요.", "source": None},
+    ]}}
+    corrections, warnings = [], []
+    v.validate_todays_view_outlook(analysis, "kospi", corrections, warnings)
+    kept = analysis["todays_view"]["outlook"]
+    assert any("삼성전자 잠정실적 임박." in o["text"] for o in kept)
+    assert all("FOMC" not in o["text"] for o in kept)
+    assert any(o["tag"] == "watch" for o in kept)
+    assert any("todays_view.outlook" in c for c in corrections)
+
+
+# ── validate() wiring ─────────────────────────────────────────────────────────
+def test_validate_wires_todays_view(monkeypatch):
+    def fake_fetch(code):
+        return {"change_pct": -1.5, "price": 70000.0} if code == "005930" else {"error": "n/a"}
+    monkeypatch.setattr(v, "_fetch_kospi_realdata", fake_fetch)
+    analysis = {
+        "prediction": {"direction": "상승 우위", "up_pct": 55},
+        "todays_view": {"view_title": "t", "recap": [
+            {"text": "<b>삼성전자</b>가 급등하며 지수를 끌어올렸어요.", "codes": ["005930"]},
+        ], "outlook": [
+            {"tag": "event", "text": "FOMC가 오늘 열려요.", "source": None},
+        ]},
+    }
+    r = v.validate(analysis, {}, "kospi")
+    assert any("todays_view.recap" in c for c in r["corrections"])
+    assert any("todays_view.outlook" in c for c in r["corrections"])
+
+
 if __name__ == "__main__":
     import traceback
     fns = [g for n, g in sorted(globals().items()) if n.startswith("test_") and callable(g)]
