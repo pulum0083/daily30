@@ -1141,19 +1141,17 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
 
     divider = "─" * 20
 
-    # 가변 알림 제목(첫 줄) — 어제 결과(실측 채점) + 오늘 한 줄(todays_view). 코스피 전용.
-    # 어제 결과를 제목에 넣어 "맞았나?" 확인차 열게 하는 가변 보상. 데이터 없으면 생략(현행 유지).
+    # 가변 알림 제목(첫 줄) — 오늘 예측 방향·확률 + 오늘의 관점 한 줄(todays_view). 코스피 전용.
+    # 지난(직전 채점) 예측 결과는 본문 헤더 아래로 강등한다 — 알림 메인은 '오늘'이어야 함.
+    # 월요일·휴일 다음 날엔 직전 채점이 어제가 아닐 수 있어 라벨은 "지난 예측"으로 고정.
     lead_title = ""
+    prev_result = ""
     if briefing_type == "kospi":
         view_title = strip_html((analysis.get("todays_view") or {}).get("view_title", ""))
+        pred_txt = f"{dir_emoji} 오늘 {direction} {dir_pct}%"
+        lead_title = f"{pred_txt} · {view_title}" if view_title else pred_txt
         prev = _last_scored_result("kospi", date_str)
-        result_txt = "어제 예측 ✓ 적중" if prev is True else ("어제 예측 ✗ 빗나감" if prev is False else "")
-        if result_txt and view_title:
-            lead_title = f"{result_txt} · {view_title}"
-        elif view_title:
-            lead_title = view_title
-        elif result_txt:
-            lead_title = result_txt
+        prev_result = "지난 예측 ✓ 적중" if prev is True else ("지난 예측 ✗ 빗나감" if prev is False else "")
 
     lines = ([lead_title] if lead_title else []) + [
         header,
@@ -1161,6 +1159,8 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
         f"신뢰도: <b>{confidence}%</b>",
     ]
+    if prev_result:
+        lines += [prev_result]
 
     if reason_title:
         lines += [divider, f"💬 {reason_title}"]
