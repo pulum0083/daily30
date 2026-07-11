@@ -17,7 +17,12 @@
 - 슬라이스3 d7f53478: 사이드바 텔레그램 subcard + 월배당 계산기 링크
 - 슬라이스4 f9b0085c: 종목 픽 이름 → 영구 상세 페이지 링크(존재 게이트)
 - 슬라이스5 27e4c38e: 텔레그램 알림 제목 가변화(어제 결과 + 오늘 한 줄)
-- 슬라이스6(밴드): 이 계획 — 미착수
+- 슬라이스6(밴드): f2f46909·9c938c12 — 지금 코스피 밴드 라이브 배선
+- 슬라이스7 4b9eb1f4: 사이드바 성적표 카드 + 더보기 모달
+- 슬라이스8(종목신호): /api/signals 상위 3개 사이드바 위젯(성적표 아래). 과거·미래 브리핑·빈 signals 숨김.
+  phase로 장중("오늘의 종목 신호")/마감("지난 장 포착 신호"+힌트) 헤더 토글. 장중만 60초 폴링, 마감은 1회.
+  파일: sections/_stock_signals.html · style.css(.ssig*) · main.js initStockSignals() · kospi.html include.
+  검증: mock 하니스로 intraday/closed/empty/dark 4상태 렌더 확인. 계획: docs/superpowers/plans/2026-07-12-kospi-stock-signals-sidebar.md
 
 ## 기술 해소 (2026-07-11, 구현 착수 전 조사 완료)
 - /api/kospi-live → {price, changePct} (코스피 지수, 10초). initLiveScoreboard fetchKospi 참고.
