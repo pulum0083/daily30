@@ -61,6 +61,30 @@ a{color:inherit;text-decoration:none;}button{cursor:pointer;border:none;backgrou
 .push-desc{font-size:12px;color:var(--muted);margin-top:1px;}
 .push-plat{margin-left:auto;flex-shrink:0;font-size:10.5px;font-weight:700;color:var(--dim);border:1px solid var(--hairline);border-radius:999px;padding:2px 8px;align-self:flex-start;}
 
+/* 텔레그램 미리보기 — 제목 + 본문 2단 */
+.tg-grid{display:grid;grid-template-columns:0.92fr 1.08fr;gap:18px;align-items:start;}
+@media(max-width:760px){.tg-grid{grid-template-columns:1fr;}}
+.tg-col__lbl{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.tg-col__lbl b{color:var(--primary);}
+.tg-chat{background:var(--surface-inset);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px;}
+.tg-head{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.tg-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tg-name{font-size:12.5px;font-weight:800;}
+.tg-sub{font-size:10.5px;color:var(--muted);}
+.tg-bubble{position:relative;background:var(--canvas);border-radius:5px 13px 13px 13px;padding:12px 14px 22px;box-shadow:var(--s1);max-width:350px;}
+.tg-hook{font-size:13px;font-weight:800;line-height:1.42;}
+.tg-hook .hit{color:var(--green);}
+.tg-hook .miss{color:var(--up);}
+.tg-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.tg-hr{height:1px;background:var(--hairline);margin:10px 0;}
+.tg-sec{font-size:12.5px;font-weight:800;}
+.tg-txt{font-size:12px;line-height:1.55;margin-top:5px;}
+.tg-txt b{font-weight:700;}
+.tg-bul{font-size:12px;line-height:1.5;margin-top:3px;}
+.tg-dim{color:var(--muted);}
+.tg-link{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#229ED9;}
+.tg-time{position:absolute;right:12px;bottom:7px;font-size:10px;color:var(--dim);}
+
 /* layout */
 .layout-wrapper{max-width:1200px;margin:0 auto;padding:18px 20px 72px;}
 .layout-grid{display:grid;grid-template-columns:1fr 336px;column-gap:20px;align-items:start;}
@@ -365,25 +389,61 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 
 <!-- 텔레그램 발송 제목 미리보기 (보강 ③ 가변 보상) — 페이지가 아니라 '발송 메시지 제목' 예시 -->
 <div class="pushwrap"><div class="pushcard">
-  <div class="pushcard__h">텔레그램 발송 제목 미리보기 <span class="pushcard__sub">가변 보상 — 어제 결과 + 오늘 한 줄</span></div>
-  <p style="font-size:12px;color:var(--muted);margin:-4px 0 12px;line-height:1.5;">브리핑이 발송될 때 구독 채널 알림에 뜨는 <b>제목</b>이에요. 어제 예측 결과를 제목에 넣으면 "맞았나?" 확인하려고 열게 됩니다. <span style="color:var(--dim);">(웹 페이지 본문이 아니라 알림 제목 예시)</span></p>
-  <div class="push-list">
-    <div class="push-item">
-      <div class="push-app">✈</div>
-      <div class="push-body">
-        <div class="push-title"><span class="hit">어제 예측 ✓ 적중</span> · 오늘 코스피, 금리가 가른다</div>
-        <div class="push-desc">반도체 반등 이어질까 — 오늘 꼭 볼 3가지</div>
+  <div class="pushcard__h">텔레그램 미리보기 <span class="pushcard__sub">알림 제목(훅) → 열었을 때 메시지 본문</span></div>
+  <div class="tg-grid">
+
+    <!-- ① 알림에 뜰 때 — 제목(훅) -->
+    <div>
+      <div class="tg-col__lbl">① 알림에 뜰 때 <b>— 제목/훅</b></div>
+      <div class="push-list">
+        <div class="push-item">
+          <div class="push-app">✈</div>
+          <div class="push-body">
+            <div class="push-title"><span class="hit">어제 예측 ✓ 적중</span> · 오늘은 금리가 가른다</div>
+            <div class="push-desc">반도체 반등 이어질까 — 오늘 꼭 볼 3가지</div>
+          </div>
+          <span class="push-plat">적중한 날</span>
+        </div>
+        <div class="push-item">
+          <div class="push-app">✈</div>
+          <div class="push-body">
+            <div class="push-title"><span class="miss">어제 예측 ✗ 빗나감</span> · 오늘은 외국인 손바뀜이 관건</div>
+            <div class="push-desc">틀린 이유 복기 + 오늘의 관점</div>
+          </div>
+          <span class="push-plat">빗나간 날</span>
+        </div>
       </div>
-      <span class="push-plat">적중한 날</span>
+      <p style="font-size:11.5px;color:var(--dim);margin-top:10px;line-height:1.5;">알림·채팅 목록에 뜨는 첫 줄이에요. 어제 결과를 넣어 "맞았나?" 확인하려고 열게 만듭니다.</p>
     </div>
-    <div class="push-item">
-      <div class="push-app">✈</div>
-      <div class="push-body">
-        <div class="push-title"><span class="miss">어제 예측 ✗ 빗나감</span> · 오늘은 외국인 손바뀜이 관건</div>
-        <div class="push-desc">틀린 이유 복기 + 오늘의 관점</div>
+
+    <!-- ② 열었을 때 — 메시지 본문 (웹 재설계와 같은 철학: 관점 헤드라인·예측 강등·성적표) -->
+    <div>
+      <div class="tg-col__lbl">② 열었을 때 <b>— 메시지 본문</b></div>
+      <div class="tg-chat">
+        <div class="tg-head">
+          <div class="tg-ava">D</div>
+          <div><div class="tg-name">DoubleShot 브리핑</div><div class="tg-sub">채널 · 구독자 1,240명</div></div>
+        </div>
+        <div class="tg-bubble">
+          <div class="tg-hook">어제 예측 <span class="hit">✓ 적중</span> · 오늘은 금리가 가른다</div>
+          <div class="tg-meta">🇰🇷 코스피 오전 브리핑 · 7/13 (월)</div>
+          <div class="tg-hr"></div>
+          <div class="tg-sec">🧭 오늘의 관점</div>
+          <div class="tg-txt">반도체가 다시 끌어올렸지만, 오늘 진짜 변수는 금리예요.</div>
+          <div class="tg-txt"><b>↩︎ 어제</b> — SK하이닉스·삼성전자가 지수 견인, 외국인 6일 만에 순매수 전환.</div>
+          <div class="tg-txt"><b>→ 오늘 볼 것</b></div>
+          <div class="tg-bul">• 삼성전자 잠정실적 D-1 — 이번 주 방향의 1순위</div>
+          <div class="tg-bul">• 외국인 순매수 이틀째 이어지나</div>
+          <div class="tg-bul">• 원/달러 1,380선 방어</div>
+          <div class="tg-hr"></div>
+          <div class="tg-txt tg-dim">📊 참고 · 당일 예측 상승 우위 62% (신뢰도 71%)</div>
+          <div class="tg-txt tg-dim">🎯 최근 15건 47% · 누적 67% — 틀린 날도 공개해요</div>
+          <a class="tg-link">🔗 전문 보기 → doubleshot.space</a>
+          <div class="tg-time">07:30</div>
+        </div>
       </div>
-      <span class="push-plat">빗나간 날</span>
     </div>
+
   </div>
 </div></div>
 
@@ -417,8 +477,11 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
             </div>
             <div class="nb-sparkwrap" id="nbSpark">
               <svg class="nb-spark" viewBox="0 0 118 38" preserveAspectRatio="none">
+                <defs><linearGradient id="nbGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--up)" stop-opacity=".18"/><stop offset="100%" stop-color="var(--up)" stop-opacity=".02"/></linearGradient></defs>
                 <line x1="0" y1="28" x2="118" y2="28" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="2 2"/>
+                <path d="M0,28 L13,26 L26,29 L39,23 L52,24 L65,18 L78,20 L91,13 L104,10 L118,7 L118,28 L0,28 Z" fill="url(#nbGrad)"/>
                 <polyline points="0,28 13,26 26,29 39,23 52,24 65,18 78,20 91,13 104,10 118,7" fill="none" stroke="var(--up)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="118" cy="7" r="3" fill="var(--up)"/>
               </svg>
               <div class="nb-marker" id="nbMarker"></div>
               <div class="nb-tip" id="nbTip"></div>
