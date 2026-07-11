@@ -2124,13 +2124,20 @@
       box.hidden = false;
     }
 
+    var scheduled = false;
     function poll() {
       fetch('/api/signals', { signal: AbortSignal.timeout(8000) })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(render).catch(function () {});
+        .then(function (data) {
+          render(data);
+          if (!scheduled && data && data.phase !== 'closed') {   // 장중일 때만 60초 폴링. 마감·주말은 1회 조회.
+            scheduled = true;
+            setInterval(poll, 60000);
+          }
+        })
+        .catch(function () {});
     }
     poll();
-    setInterval(poll, 60000);
   }
 
   /* ── 이슈 브리핑 동적 fetch (B안) ──────────────────────────────────────

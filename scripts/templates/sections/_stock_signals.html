@@ -1,5 +1,5 @@
 {# 종목 신호 사이드바 위젯 — /api/signals 상위 3개 라이브 렌더. 코스피 전용. #}
-{# 기본 hidden. main.js initStockSignals()가 과거/미래 브리핑·주말·데이터 없음이면 계속 숨기고, #}
+{# 기본 hidden. main.js initStockSignals()가 과거/미래 브리핑·데이터 없음이면 계속 숨기고, #}
 {# 데이터가 있을 때만 phase(장중/마감)로 헤더·힌트를 토글해 노출한다. 날짜는 URL에서 파싱. #}
 <div class="ssig" id="stock-signals" hidden>
   <div class="ssig__h"><span class="ssig__dot"></span><span id="ssig-title">오늘의 종목 신호</span><small class="ssig__note" id="ssig-note" hidden>지난 마감 기준</small></div>
