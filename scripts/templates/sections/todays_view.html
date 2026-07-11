@@ -19,7 +19,7 @@
       <div class="tv-col__h today">→ 오늘 볼 것</div>
       <ul>
         {% for o in todays_view.outlook %}
-        <li>{% if o.tag == 'event' %}<span class="tv-tag tv-tag--event">이벤트</span>{% else %}<span class="tv-tag tv-tag--watch">관전</span>{% endif %}{{ o.text | safe }}</li>
+        <li><span>{% if o.tag == 'event' %}<span class="tv-tag tv-tag--event">이벤트</span>{% else %}<span class="tv-tag tv-tag--watch">관전</span>{% endif %}{{ o.text | safe }}</span></li>
         {% endfor %}
       </ul>
     </div>
