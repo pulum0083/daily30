@@ -25,14 +25,14 @@
 - [ ] 스파크라인 색: 상승=빨강(#E03131)/하락=파랑(#2775ED), 시초가 점선
 
 ## 구현 단계
-- [ ] 1. 밴드 마크업 템플릿 sections/_now_band.html (코스피 본문 최상단, todays_view 위)
-- [ ] 2. .nowband CSS를 style.css에 이식(테마 변수·html.dark)
-- [ ] 3. main.js: initNowBand() — initLiveMarketPanel의 fetch/poll/스파크 헬퍼 재사용, 밴드 DOM 갱신
-- [ ] 4. base.html에서 initNowBand() 호출 배선
-- [ ] 5. kospi.html에 _now_band include (issue_briefing 위 or 대체 검토)
-- [ ] 6. 기존 죽은 initLiveScoreboard/initLiveMarketPanel·market_data.html 사이드바 처리 결정
+- [x] 1. 밴드 마크업 템플릿 sections/_now_band.html (코스피 본문 최상단, todays_view 위)
+- [x] 2. .nowband CSS를 style.css에 이식(테마 변수·html.dark)
+- [x] 3. main.js: initNowBand() — initLiveMarketPanel의 fetch/poll/스파크 헬퍼 재사용, 밴드 DOM 갱신
+- [x] 4. (호출부는 main.js IIFE 내부 load 핸들러에 등록 — base.html 아님) initNowBand에서 initNowBand() 호출 배선
+- [x] 5. kospi.html에 _now_band include (issue_briefing 위 or 대체 검토)
+- [x] 6. 사이드바 원달러 제거+이슈섹션 제거 완료. 죽은 initLiveScoreboard/Panel은 그대로 둠(무해). 기존 죽은 initLiveScoreboard/initLiveMarketPanel·market_data.html 사이드바 처리 결정
        (밴드가 지수·수급을 흡수하면 사이드바 시장지표 중복 → 유지/축소/제거 결정 필요)
-- [ ] 7. 검증: 장중/장후/과거/주말 상태별 렌더, 폴링 실패 시 빈칸, 다크
+- [x] 7. 검증(mock 하니스 장중 재현 + 다크). 잔여: 실제 배포 후 라이브 API 확인. 검증: 장중/장후/과거/주말 상태별 렌더, 폴링 실패 시 빈칸, 다크
 
 ## 결정됨 (2026-07-11 유저 확인)
 - [x] 원/달러: 밴드에 포함, 사이드바 시장지표에서 제거 → build_market_items kospi spec에서 usdkrw 제외
