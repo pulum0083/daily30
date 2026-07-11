@@ -1019,3 +1019,155 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .keynum-cap b{color:var(--ink);font-weight:600;}
 .keynum-take{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.75;padding:12px 14px;background:var(--primary-bg);border-radius:var(--r-md);}
 .keynum-take b{color:var(--ink);font-weight:600;}
+
+/* ──────────────────────────────────────────────
+   오늘의 관점(todays_view) — 큐레이션 헤드라인 (지난 장 복기 + 오늘 볼 것)
+   validate_analysis 실측 검증 통과 데이터. 코스피 오전 브리핑 전용.
+   ────────────────────────────────────────────── */
+.tv-lead{background:linear-gradient(180deg,var(--primary-bg),transparent 70%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:20px 20px 22px;}
+.tv-kicker{font-size:11px;font-weight:800;letter-spacing:0.08em;color:var(--primary);text-transform:uppercase;margin-bottom:9px;}
+.tv-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1.32;color:var(--ink);margin:0;}
+.tv-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+.tv-col{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 15px;}
+.tv-col__h{font-size:12px;font-weight:800;letter-spacing:-0.01em;margin-bottom:10px;}
+.tv-col__h.recap{color:var(--muted);}
+.tv-col__h.today{color:var(--primary);}
+.tv-col ul{list-style:none;display:grid;gap:11px;margin:0;padding:0;}
+.tv-col li{font-size:13px;line-height:1.55;color:var(--ink);display:flex;gap:8px;}
+.tv-col li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--muted);margin-top:7px;flex-shrink:0;}
+.tv-col--today li::before{background:var(--primary);}
+.tv-col li b{font-weight:700;}
+.tv-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:5px;vertical-align:middle;}
+.tv-tag--watch{background:var(--gold-bg);color:var(--gold);}
+.tv-tag--event{background:var(--primary-bg);color:var(--primary);}
+@media(max-width:520px){.tv-cols{grid-template-columns:1fr;}}
+
+/* ──────────────────────────────────────────────
+   예측 강등 스트립 — 방향 예측을 '참고 지표'로. 오늘의 관점 승격에 따른 재배치. 코스피 전용.
+   ────────────────────────────────────────────── */
+.predc{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 16px;}
+.predc__lbl{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.03em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.predc__lbl .ref{border:1px solid var(--hairline);border-radius:999px;padding:1px 7px;font-size:10px;color:var(--muted);font-weight:700;}
+.predc__main{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.pchip{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:800;padding:5px 12px;border-radius:999px;background:var(--surface-inset);color:var(--muted);}
+.pchip.up{background:var(--up-bg);color:var(--up);}
+.pchip.dn{background:var(--dn-bg);color:var(--dn);}
+.predc__pct{font-size:26px;font-weight:800;letter-spacing:-.02em;}
+.predc__pct.up{color:var(--up);}
+.predc__pct.dn{color:var(--dn);}
+.predc__pct-u{font-size:15px;}
+.predc__conf{font-size:12px;color:var(--muted);margin-left:2px;}
+.predc__note{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;}
+
+/* ──────────────────────────────────────────────
+   코스피 사이드바 재구성 — 텔레그램 구독 카드 + 월배당 계산기 링크. 코스피 전용.
+   ────────────────────────────────────────────── */
+.subcard{border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;background:linear-gradient(160deg,rgba(34,158,217,.10),transparent 60%);box-shadow:var(--s1);padding:16px;}
+html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transparent 60%);}
+.subcard__ic{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2AABEE,#229ED9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;margin-bottom:11px;box-shadow:0 3px 8px rgba(34,158,217,.35);}
+.subcard__t{font-size:14px;font-weight:800;letter-spacing:-.01em;}
+.subcard__d{font-size:12px;color:var(--muted);line-height:1.55;margin-top:5px;}
+.subcard__btn{margin-top:13px;width:100%;background:#229ED9;color:#fff;font-size:13px;font-weight:800;padding:10px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;gap:6px;}
+.subcard__btn:hover{background:#1E8FC4;}
+.subcard__meta{margin-top:9px;font-size:11px;color:var(--muted);text-align:center;}
+.toolcard{display:flex;align-items:center;gap:12px;padding:15px 16px;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);}
+.toolcard:hover{border-color:var(--primary);}
+.toolcard__ic{width:36px;height:36px;border-radius:10px;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.toolcard__t{font-size:13.5px;font-weight:800;}
+.toolcard__d{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.45;}
+.toolcard__arr{margin-left:auto;color:var(--primary);font-weight:800;flex-shrink:0;}
+
+/* 종목 픽 종목명 → 영구 상세 페이지 링크 (페이지 실재 시에만 렌더). 검색 유입 내부링크. */
+.pick-name-link{color:inherit;text-decoration:none;border-bottom:1px solid var(--hairline);transition:border-color .15s,color .15s;}
+.pick-name-link:hover{color:var(--primary);border-bottom-color:var(--primary);}
+
+/* ──────────────────────────────────────────────
+   지금 코스피 밴드 — 본문 최상단 라이브 지표(지수·코스닥·원달러·수급·스파크·장중이슈). 코스피 전용.
+   initNowBand()가 상태별로 채우고 노출. 프로토타입 대비 --dim→--muted 매핑.
+   ────────────────────────────────────────────── */
+@keyframes nb-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.nowband{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;margin-bottom:22px;background:var(--canvas);}
+.nowband[hidden]{display:none;}
+.nowband__head{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid var(--hairline);flex-wrap:wrap;}
+.nowband__title{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px;}
+.nowband__title.live{color:var(--up);}
+.nb-dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-bg);animation:nb-pulse 1.8s infinite;}
+.nb-dot.pre{background:var(--muted);box-shadow:none;animation:none;}
+.nowband__sub{font-size:11px;color:var(--muted);font-weight:600;}
+.nb-mktrow{display:flex;align-items:center;gap:16px;padding:14px 15px 12px;}
+.nb-idx{min-width:0;}
+.nb-idx__k{font-size:11.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px;}
+.nb-idx__k small{font-size:10px;color:var(--muted);border:1px solid var(--hairline);border-radius:5px;padding:0 5px;font-weight:700;}
+.nb-idx__v{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums;}
+.nb-idx__v small{font-size:13px;font-weight:800;margin-left:4px;}
+.nb-idx__v small.up{color:var(--up);}.nb-idx__v small.dn{color:var(--dn);}
+.nb-idx__sub{font-size:11px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums;}
+.nb-idx__sub b{color:var(--ink);font-weight:700;}
+.nb-idx__sub small{font-weight:700;}
+.nb-idx__sub small.up{color:var(--up);}.nb-idx__sub small.dn{color:var(--dn);}
+.nb-sparkwrap{position:relative;margin-left:auto;flex-shrink:0;width:118px;height:38px;}
+.nb-spark{width:118px;height:38px;display:block;}
+.nb-supply{display:flex;align-items:center;gap:13px;padding:11px 15px;background:var(--surface-soft);border-top:1px solid var(--hairline);flex-wrap:wrap;}
+.nb-supply__lbl{font-size:11px;font-weight:700;color:var(--muted);}
+.nb-sup{display:flex;align-items:center;gap:6px;font-size:12.5px;}
+.nb-sup i{font-style:normal;color:var(--muted);}
+.nb-sup b{font-weight:800;font-variant-numeric:tabular-nums;}
+.nb-sup b.up{color:var(--up);}.nb-sup b.dn{color:var(--dn);}
+.nb-supply__unit{font-size:11px;color:var(--muted);margin-left:-6px;}
+.nb-issues{padding:12px 15px;display:grid;gap:9px;border-top:1px solid var(--hairline);}
+.nb-issue{font-size:12.5px;color:var(--ink);display:flex;gap:10px;line-height:1.5;}
+.nb-issue__t{font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0;padding-top:1px;min-width:38px;}
+
+/* ──────────────────────────────────────────────
+   코스피 예측 성적표 카드 + 더보기 모달 — briefings.json 실측 집계. kospi 전용.
+   색 규칙: good=#16A34A / mid=#D97706 / bad=var(--up) (accuracy.html과 동일).
+   ────────────────────────────────────────────── */
+.sc-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;padding:14px 16px 4px;}
+.sc-card__h{font-size:12px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.sc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+.sc-stats{display:flex;gap:0;margin-bottom:10px;}
+.sc-stat{flex:1;text-align:center;}
+.sc-stat+.sc-stat{border-left:1px solid var(--hairline);}
+.sc-stat__v{font-size:19px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);}
+.sc-stat__v.good{color:#16A34A;}.sc-stat__v.mid{color:#D97706;}.sc-stat__v.bad{color:var(--up);}
+.sc-stat__l{font-size:10px;color:var(--muted);margin-top:4px;}
+.sc-bar{height:5px;border-radius:999px;display:flex;gap:2px;overflow:hidden;margin:12px 0 4px;}
+.sc-bar i{display:block;border-radius:999px;}
+.sc-bar__h{background:#A2BFA5;}.sc-bar__m{background:#C8AAAA;}.sc-bar__p{background:var(--hairline);}
+.sc-card__cta{width:100%;margin-top:10px;padding:11px 0;border-top:1px solid var(--hairline);font-size:12px;font-weight:800;color:var(--primary);display:flex;align-items:center;justify-content:space-between;background:none;cursor:pointer;}
+.sc-card__cta:hover{opacity:.75;}
+/* 모달 본문 (info-modal 재사용) */
+.info-modal__body .sc-stats{margin:4px 0 6px;}
+.sc-modal-sec{font-size:12px;font-weight:800;color:var(--ink);margin:18px 0 10px;}
+.sc-mrate{display:grid;gap:7px;}
+.sc-mrate__row{display:flex;align-items:center;gap:10px;}
+.sc-mrate__m{font-size:12px;color:var(--muted);width:30px;flex-shrink:0;}
+.sc-mrate__bar{flex:1;height:7px;background:var(--surface-inset);border-radius:999px;overflow:hidden;}
+.sc-mrate__bar i{display:block;height:100%;border-radius:999px;}
+.sc-mrate__bar i.good{background:#16A34A;}.sc-mrate__bar i.mid{background:#D97706;}.sc-mrate__bar i.bad{background:var(--up);}
+.sc-mrate__v{font-size:12px;font-weight:700;width:36px;text-align:right;font-variant-numeric:tabular-nums;flex-shrink:0;color:var(--ink);}
+.sc-miss{display:grid;gap:9px;}
+.sc-miss__item{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-md);padding:10px 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.sc-miss__date{font-size:12px;font-weight:800;color:var(--ink);}
+.sc-miss__tag{font-size:11px;font-weight:700;color:var(--up);}
+.sc-miss__tag.ok{color:#16A34A;}
+.sc-modal-note{font-size:11.5px;color:var(--muted);margin-top:14px;line-height:1.6;}
+/* 종목 신호 사이드바 위젯 (코스피 브리핑) — /api/signals 상위 3개 라이브 */
+.ssig{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas);box-shadow:var(--s1);overflow:hidden;}
+.ssig__h{display:flex;align-items:center;gap:6px;padding:13px 16px 4px;font-size:13px;font-weight:800;color:var(--ink);}
+.ssig__dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none;}
+.ssig__note{margin-left:auto;font-size:10.5px;font-weight:600;color:var(--muted);}
+.ssig__list{display:flex;flex-direction:column;padding:6px 0 2px;}
+.ssig-row{display:flex;align-items:center;gap:9px;padding:9px 16px;text-decoration:none;border-top:1px solid var(--hairline);}
+.ssig-row:first-child{border-top:none;}
+.ssig-row:hover{background:var(--surface-soft);}
+.ssig-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:96px;}
+.ssig-badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.ssig-badge.gold{background:var(--gold-bg);color:var(--gold);}
+.ssig-badge.blue{background:var(--primary-bg);color:var(--primary);}
+.ssig-badge.green{background:rgba(22,163,74,.12);color:#16A34A;}
+.ssig-chg{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+.ssig-chg.up{color:var(--up);}.ssig-chg.dn{color:var(--dn);}
+.ssig__hint{font-size:11px;color:var(--muted);padding:6px 16px 2px;font-style:italic;line-height:1.5;}
+.ssig__cta{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;border-top:1px solid var(--hairline);}
+.ssig__cta:hover{background:var(--surface-soft);}
