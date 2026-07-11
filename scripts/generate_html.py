@@ -259,8 +259,12 @@ def build_reasons(analysis: dict) -> dict:
         "analysis_format": fmt,
         "reason_title": analysis.get("reason_title") or fallback,
         "comfort_line": _split_comfort_line(analysis.get("comfort_line", "")),
+        # 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개(넘버링). 형식과 무관하게 항상 표시.
+        "key_drivers": analysis.get("key_drivers") or [],
     }
-    if fmt == "scenario":
+    if fmt == "split":
+        pass  # split은 오늘의 관점 본문이 todays_view.recap/outlook — 별도 형식 컨텍스트 불필요
+    elif fmt == "scenario":
         ctx.update(build_scenario_context(analysis))
     elif fmt == "why_what_so":
         ctx.update(build_why_what_so_context(analysis))
@@ -922,6 +926,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         # 오늘의 관점(todays_view) — 코스피 오전 브리핑 전용. 없으면 None → 템플릿에서 섹션 생략.
         ctx["todays_view"] = analysis.get("todays_view") if internal_type == "kospi" else None
+        # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더 → 형식별 자체 제목(reason_title) 숨김.
+        ctx["format_in_view"] = (internal_type == "kospi")
         if internal_type == "kospi":
             ctx.update(build_ib_korea_views())
             uls = analysis.get("us_linked_story") or {}
