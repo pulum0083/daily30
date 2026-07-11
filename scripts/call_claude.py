@@ -1090,6 +1090,23 @@ def get_web_base_url() -> str:
     return web_base.rstrip("/")
 
 
+def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
+    """직전(오늘 이전) 채점된 예측의 적중 여부(is_correct)를 반환. 없으면 None.
+    briefings.json에 check_accuracy가 기록한 실측 채점값만 사용 — 재계산·추정 없음."""
+    bpath = DATA_DIR / "briefings.json"
+    if not bpath.exists():
+        return None
+    try:
+        rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
+    except Exception:
+        return None
+    scored = [b for b in rows
+              if b.get("type") == briefing_type
+              and b.get("is_correct") is not None
+              and str(b.get("date", "")) < before_date]
+    return scored[-1].get("is_correct") if scored else None
+
+
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
     import re
@@ -1123,7 +1140,21 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
 
     divider = "─" * 20
 
-    lines = [
+    # 가변 알림 제목(첫 줄) — 어제 결과(실측 채점) + 오늘 한 줄(todays_view). 코스피 전용.
+    # 어제 결과를 제목에 넣어 "맞았나?" 확인차 열게 하는 가변 보상. 데이터 없으면 생략(현행 유지).
+    lead_title = ""
+    if briefing_type == "kospi":
+        view_title = strip_html((analysis.get("todays_view") or {}).get("view_title", ""))
+        prev = _last_scored_result("kospi", date_str)
+        result_txt = "어제 예측 ✓ 적중" if prev is True else ("어제 예측 ✗ 빗나감" if prev is False else "")
+        if result_txt and view_title:
+            lead_title = f"{result_txt} · {view_title}"
+        elif view_title:
+            lead_title = view_title
+        elif result_txt:
+            lead_title = result_txt
+
+    lines = ([lead_title] if lead_title else []) + [
         header,
         divider,
         f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
