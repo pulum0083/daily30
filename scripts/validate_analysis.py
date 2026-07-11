@@ -473,6 +473,44 @@ def validate_todays_view_outlook(analysis: dict, btype: str,
     tv["outlook"] = kept
 
 
+def validate_key_drivers(analysis: dict, btype: str,
+                         corrections: list, warnings: list) -> None:
+    """이렇게 보는 이유(key_drivers) 항목 중, codes로 명시된 종목의 방향 서술이
+    실측과 모순이면 해당 항목을 제거한다. recap과 동일 로직. (한국 종목: 코드로 직접 실측)"""
+    if btype != "kospi":
+        return
+    drivers = analysis.get("key_drivers")
+    if not isinstance(drivers, list):
+        return
+    real: dict = {}
+    seen: set = set()
+    for item in drivers:
+        if not isinstance(item, dict):
+            continue
+        for code in (item.get("codes") or []):
+            if code in seen:
+                continue
+            seen.add(code)
+            d = _fetch_kospi_realdata(code)
+            if "error" not in d and d.get("change_pct") is not None:
+                real[code] = d["change_pct"]
+            else:
+                warnings.append(f"key_drivers 종목 '{code}' 실측 실패 — 방향 교차검증 생략")
+    kept = []
+    for item in drivers:
+        if not isinstance(item, dict):
+            continue
+        codes = [c for c in (item.get("codes") or []) if c in real]
+        bad = [c for c in codes if _direction_contradicts(item.get("text", ""), real[c])]
+        if bad:
+            corrections.append(f"key_drivers 항목 제거 (종목 방향 모순 {bad}): {item.get('text','')[:50]}")
+        else:
+            kept.append(item)
+    if len(kept) < len(drivers):
+        warnings.append(f"key_drivers {len(drivers)}→{len(kept)}개 (모순 항목 제거)")
+    analysis["key_drivers"] = kept
+
+
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
@@ -956,6 +994,7 @@ def validate(analysis, latest, btype):
     # 2-d) 오늘의 관점 검증 (kospi 전용)
     validate_todays_view_recap(a, btype, corrections, warnings)
     validate_todays_view_outlook(a, btype, corrections, warnings)
+    validate_key_drivers(a, btype, corrections, warnings)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):
