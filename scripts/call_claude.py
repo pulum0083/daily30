@@ -30,9 +30,13 @@ BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 KST = pytz.timezone("Asia/Seoul")
 
-# 브리핑 근거 섹션 형식 로테이션 (코스피 예측·미국 브리핑) — bullet은 완전 제거됨
+# 브리핑 근거 섹션 형식 로테이션 (미국 브리핑) — bullet은 완전 제거됨
 FORMAT_POOL = ["scenario", "why_what_so", "qa", "signal", "flow", "keynum"]
 FORMAT_WEIGHTS = [2, 2, 2, 2, 2, 2]
+
+# 코스피 아침 전용 풀 — split(복기/관전)이 '오늘의 관점' 본문의 한 얼굴로 편입됨(2026-07-12 재구조)
+FORMAT_POOL_KOSPI = ["split", "scenario", "why_what_so", "qa", "signal", "flow", "keynum"]
+FORMAT_WEIGHTS_KOSPI = [3, 2, 2, 2, 2, 2, 2]
 
 # 마감 브리핑 전용 풀 — flow/keynum은 close.html이 렌더하지 않으므로 제외, bullet도 제거됨
 FORMAT_POOL_CLOSE = ["scenario", "why_what_so", "qa", "signal"]
@@ -282,8 +286,10 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - 주목할 이벤트가 전혀 없으면 빈 배열 []로 출력한다.
 
 ### 오늘의 관점(todays_view) 작성 규칙 (코스피 오전 브리핑 전용)
+- **⚠️ todays_view는 선택된 형식(split/scenario/qa 등)과 무관하게 항상 완전히 출력한다. view_title·dek·recap·outlook 네 필드를 모두 채운다.** view_title은 '오늘의 관점' 섹션 제목이라 어떤 형식에서도 반드시 필요하다. recap/outlook은 split 형식일 때 관점 본문으로 표시되지만, 다른 형식일 때도 생략하지 말고 항상 생성한다.
 - **구조적·대형 테마 우선**: news_summary에 대형주 상장·ADR·정책 대전환·구조적 수급 변화처럼 하루로 끝나지 않고 여러 날에 걸쳐 시장을 지배하는 테마가 있으면, 그날의 단발 등락보다 우선해 view_title 또는 outlook 최상단에 반영한다. 단 news_summary에 실제로 존재하는 테마만 반영하고, 없으면 지어내지 않는다(데이터 정합성).
 - view_title: 오늘 시장을 한 줄로 규정하는 에디토리얼 제목. 예측 방향 단정 금지, 관점 제시.
+- dek: view_title 아래 붙는 1~2문장 부제(해요체). 오늘 관점의 맥락을 풀어 설명한다. `<b>` 강조 허용. **항상 채운다.**
 - recap(어제 복기, 2~3개): 전일 마감 데이터(지수·수급·섹터)에 근거해 "어제 무슨 일"을 서술한다.
   · 개별 종목을 언급하면 반드시 그 종목의 6자리 코드를 codes 배열에 넣는다. (미기재 시 검증 단계에서 제거됨)
   · codes를 넣으면 픽에 없는 종목이라도 실측 검증을 통과할 수 있다. 코드 없이 개별 종목의 등락 방향·등락률을 서술하지 않는다.
@@ -376,7 +382,7 @@ us_linked_story를 지시받았더라도 뉴스 요약에 마땅한 미국 이�
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, reasons, stock_picks, comfort_line, todays_view, 그리고 sector_focus·us_linked_story 두 키 (하단 심층 섹션은 현재 사용하지 않으므로 두 키 모두 반드시 null)**
+**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, key_drivers(정확히 3개), stock_picks, comfort_line, todays_view(view_title·dek·recap·outlook), 그리고 지정된 형식의 필드 세트, 그리고 sector_focus·us_linked_story 두 키 (하단 심층 섹션은 현재 사용하지 않으므로 두 키 모두 반드시 null)**
 reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타이틀이 공백이 된다.
 
 {
@@ -390,6 +396,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   "comfort_line": "장이 곧 열려요. 너무 서두르지 않기로 해요.",
   "todays_view": {
     "view_title": "반도체가 다시 끌어올렸지만, 오늘 진짜 변수는 금리",
+    "dek": "지난주 후반 반등을 이끈 건 결국 <b>SK하이닉스</b>·<b>삼성전자</b> 두 축이었어요. 오늘은 방향보다 무엇을 확인하고 들어갈지가 중요해요.",
     "recap": [
       { "text": "반도체가 지수를 끌어올렸어요. <b>SK하이닉스</b>·<b>삼성전자</b>가 상승분 대부분을 만들었어요.", "codes": ["000660", "005930"] },
       { "text": "외국인이 6거래일 만에 순매수로 전환했어요.", "codes": [] }
@@ -399,11 +406,10 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
       { "tag": "watch", "text": "외국인 순매수가 이틀째 이어질지 확인하세요.", "source": null }
     ]
   },
-  "reasons": [
-    "🚀 코스피가 오늘 강하게 상승할 것 같아요. 나스닥이 <b>+X.X%</b> 올랐고 NQ선물도 <b>+X.X%</b> 상승하며 미국 증시가 사상 최고 수준에 근접했거든요.",
-    "🛢️ 국제 유가 급락이 오늘 성장주에 긍정적으로 작용할 것 같아요. WTI 유가가 <b>-X.X%</b> 떨어지며 인플레이션 부담이 줄었고 금리 부담도 다소 완화됐거든요.",
-    "💡 반도체·메모리 섹터가 오늘 강세 출발할 것 같아요. 미국 반도체 지수(SOX)가 <b>+X.X%</b> 올랐고 삼성전자·SK하이닉스 같은 대형 반도체주에 우호적인 흐름이거든요.",
-    "🌏 외국인 수급이 오늘 코스피에 우호적으로 작용할 것 같아요. 닛케이 <b>+X.X%</b>·상해 <b>+X.X%</b>로 아시아 증시가 동반 강세를 보이며 리스크온 분위기가 형성됐거든요."
+  "key_drivers": [
+    { "text": "<b>미 반도체 강세가 하루 더 이어질 자리예요.</b> 간밤 SOX가 <b>+X.X%</b> 오르며 국내 반도체 갭업 출발 가능성이 커졌어요.", "codes": ["000660", "005930"] },
+    { "text": "<b>삼성 실적 발표 전 관망이 상단을 눌러요.</b> 대형주에 적극 베팅하기엔 부담이라 상승하더라도 폭은 제한적일 수 있어요.", "codes": [] },
+    { "text": "<b>외국인 수급은 아직 확신이 부족해요.</b> 순매수가 이틀째 이어져야 방향을 신뢰할 수 있어요.", "codes": [] }
   ],
   "watch_items": [
     {"icon": "🇺🇸", "label": "오늘밤 美 PCE 물가", "text": "예상치 <b>+0.2%</b> 부합 여부가 금리 경로의 분수령이에요."},
@@ -444,7 +450,17 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 - 감성형(하락·불안한 날엔 살짝 따뜻하게)과 담백형(평온한 날엔 군더더기 없이)을 그날 분위기에 맞춰 고른다.
 - 예: "오늘 마음 졸인 만큼, 충분히 애쓰셨어요." / "장이 곧 열려요. 너무 서두르지 않기로 해요." / "맞는 날도 틀리는 날도 있어요."
 
+**[핵심 동인(key_drivers) 규칙 — 형식과 무관하게 항상 출력]**
+'이렇게 보는 이유'로 예측 아래에 넘버링 리스트로 표시되는, 오늘 예측 방향의 핵심 동인 3개.
+- `key_drivers`: 정확히 3개. 각 항목은 `{"text": ..., "codes": [...]}` 객체.
+  - `text`: 해요체 완결 1~2문장. 문장 앞머리에 **핵심 주장을 `<b>`로 강조**한다 (예: "<b>미 반도체 강세가 하루 더 이어질 자리예요.</b> 간밤 SOX가 …").
+  - 아래 형식 본문(관점)과 **같은 문장을 반복하지 말고**, 예측 방향의 동인만 다른 각도로 압축한다.
+  - 개별 종목을 언급하면 그 종목 6자리 코드를 `codes`에 넣는다(미기재 시 검증 단계에서 제거). 없으면 `[]`.
+
 **[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
+
+### 형식 A: split (복기·프레임)
+`reason_title`·형식별 필드 불필요. 이 형식에서는 '오늘의 관점' 본문이 위 todays_view의 recap(지난 장 복기)·outlook(오늘 볼 것) 2단으로 표시된다. 형식별 필드(sc_*, qa_items, sig_items, flow_steps, num_cards 등)는 출력하지 않는다.
 
 ### 형식 B: scenario
 `reason_title` + 아래 6개 필드 출력:
@@ -1328,8 +1344,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         )
         print("[call_claude] Bottom section → disabled")
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용) — 예측·미국 풀
-    chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
+    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
+    if briefing_type == "kospi":
+        chosen_format = random.choices(FORMAT_POOL_KOSPI, weights=FORMAT_WEIGHTS_KOSPI, k=1)[0]
+    else:
+        chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
     user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
     print(f"[call_claude] Selected format: {chosen_format}")
 
