@@ -1,0 +1,226 @@
+<!-- 종목 시그널(/stocks/) 서비스 전략 점검 보고서 — 경쟁력·리텐션·개선안 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종목 시그널 전략 점검 — Double-Shot</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --ink:#141619; --muted:#6b7280; --faint:#9aa0a8;
+    --line:#e8eaee; --soft:#f3f4f6; --accent:#2775ED; --accent-bg:#eaf1fd;
+    --up:#E03131; --up-bg:#fdecec; --warn:#B45309; --warn-bg:#fdf3e3;
+    --good:#0F7B5A; --good-bg:#e7f5ef; --r:14px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0e0f12; --card:#16181c; --ink:#eceef1; --muted:#9aa0a8; --faint:#71767e;
+    --line:#282b31; --soft:#1c1f24; --accent:#5b9dff; --accent-bg:#152238;
+    --up:#ff6b6b; --up-bg:#2a1719; --warn:#e0a044; --warn-bg:#2a2113;
+    --good:#3ec49a; --good-bg:#12271f;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",Segoe UI,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px;}
+  .kicker{font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.02em;text-transform:uppercase;}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:6px 0 8px;line-height:1.25;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 4px;}
+  .meta{color:var(--faint);font-size:12.5px;margin-top:10px;}
+  h2{font-size:21px;font-weight:800;letter-spacing:-.01em;margin:44px 0 4px;display:flex;align-items:center;gap:9px;}
+  h2 .n{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;font-weight:800;flex:none;}
+  h3{font-size:16px;font-weight:800;margin:22px 0 6px;}
+  p{margin:8px 0;}
+  .lead{color:var(--muted);font-size:14px;margin:2px 0 14px;padding-left:36px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin:14px 0;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr}.lead{padding-left:0}}
+  ul{margin:8px 0;padding-left:20px;}
+  li{margin:5px 0;}
+  b{font-weight:800;}
+  .tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;vertical-align:middle;}
+  .t-good{background:var(--good-bg);color:var(--good);}
+  .t-warn{background:var(--warn-bg);color:var(--warn);}
+  .t-up{background:var(--up-bg);color:var(--up);}
+  .t-acc{background:var(--accent-bg);color:var(--accent);}
+  .pill{font-size:11.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:3px 10px;display:inline-block;margin:3px 4px 3px 0;}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-size:12px;color:var(--muted);font-weight:700;background:var(--soft);}
+  td.c{white-space:nowrap;}
+  .prio{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:6px;font-size:12px;font-weight:800;color:#fff;}
+  .p1{background:var(--up);} .p2{background:var(--warn);} .p3{background:var(--muted);}
+  .cardhead{font-weight:800;font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+  .quote{border-left:3px solid var(--accent);padding:4px 0 4px 14px;color:var(--muted);font-size:14px;margin:14px 0;}
+  .big{font-size:26px;font-weight:800;letter-spacing:-.02em;}
+  .statlab{font-size:12px;color:var(--muted);font-weight:700;}
+  .divider{height:1px;background:var(--line);margin:8px 0;}
+  .foot{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;}
+  .callout{background:var(--accent-bg);border:1px solid transparent;border-radius:var(--r);padding:16px 18px;margin:16px 0;}
+  @media (prefers-color-scheme:dark){.callout{border-color:var(--line)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">전략 점검 보고서</div>
+  <h1>종목 시그널, 매일 오게 만들 수 있을까</h1>
+  <p class="sub"><b>/stocks/</b> 서비스의 경쟁력 진단과 리텐션(재방문) 개선 전략</p>
+  <p class="meta">Double-Shot 내부 검토 · 2026-07-12 · 라이브 서비스 실측 기준</p>
+
+  <!-- ── 총평 ── -->
+  <div class="callout">
+    <div class="cardhead">한 줄 결론</div>
+    <p style="margin:4px 0 0">데이터 밀도와 <b>‘실측만 쓴다’는 신뢰 자산</b>은 이미 경쟁력 있는 수준이다.
+    문제는 품질이 아니라 <b>“내가 매일 여기 와야 할 이유”가 없다는 것</b> — 관심종목·알림·개인화가 없어
+    아무리 좋은 신호도 <b>사용자가 우연히 들어와야만</b> 보인다. 리텐션의 핵심은 새 기능이 아니라
+    <b>이미 있는 신호를 사용자에게 밀어주는(push) 구조</b>다.</p>
+  </div>
+
+  <!-- ── 1. 현황 ── -->
+  <h2><span class="n">1</span> 지금 서비스에 뭐가 있나</h2>
+  <p class="lead">허브(/stocks/)와 종목 상세, 두 면으로 구성. 실제 라이브에서 확인한 기능 인벤토리.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="cardhead">🏠 허브 <span class="tag t-acc">/stocks/</span></div>
+      <ul>
+        <li><b>LIVE 지수</b> — 코스피·코스닥·원달러 10초 갱신</li>
+        <li><b>코스피 주도주</b> — 3종목 HL 24h 시세 + 1분봉 곡선</li>
+        <li><b>밤사이 미국 반도체</b> — 10개 티커, 원화/달러 토글</li>
+        <li><b>섹터별 대표 종목</b> — 8섹터, 외국인%·52주 위치</li>
+        <li><b>ETF로 읽는 시황</b> — 레버리지/인버스 거래대금·거래량 톱5</li>
+        <li><b>밸류에이션 시그널</b> — 선행 PER vs 업종 (저평가 랭킹)</li>
+        <li><b>특이 신호</b> — 신고가·기관 연속순매수·역행상승 규칙 큐레이션</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="cardhead">📄 종목 상세 <span class="tag t-acc">/stocks/{code}/</span></div>
+      <ul>
+        <li><b>곡선 차트</b> — 오늘 장중(1분봉)/20일 종가 + 뉴스 핀</li>
+        <li><b>실측 핵심 지표</b> — 52주 범위·MA20/200·외국인 보유율</li>
+        <li><b>AI 픽 트랙레코드</b> — 브리핑이 픽한 이력 + 이후 성적 채점</li>
+        <li><b>목표주가·진입/손절</b> 테이블</li>
+        <li><b>같은 섹터</b> 피어 실시간 등락</li>
+        <li>영구 URL → 검색 유입용 SEO 자산</li>
+      </ul>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--muted)">커버리지: <span class="pill">8개 섹터</span><span class="pill">종목 40여 개</span><span class="pill">ETF 30여 개</span> · 데이터 소스: 토스증권·네이버 금융 실측.</p>
+
+  <!-- ── 2. 강점 ── -->
+  <h2><span class="n">2</span> 강점 — 이미 남다른 것</h2>
+  <p class="lead">경쟁 서비스가 쉽게 흉내 못 내는 3가지 자산.</p>
+
+  <div class="card">
+    <h3 style="margin-top:2px">① ‘실측만 쓴다’는 신뢰 <span class="tag t-good">해자</span></h3>
+    <p>“AI가 임의로 만든 숫자는 안 쓰고, 수집 안 된 항목은 아예 표시 안 함.” 생성형 AI가 넘치는 시대에
+    <b>숫자를 지어내지 않는다는 원칙</b>은 그 자체로 차별화다. 대부분의 ‘AI 주식 서비스’가 여기서 신뢰를 잃는다.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:2px">② AI 예측의 <b>정확도를 공개</b>한다 <span class="tag t-good">투명성</span></h3>
+    <p>종목 상세의 <b>픽 트랙레코드</b>(추천 이력 + 이후 성적 채점)와 브리핑 예측 적중률은,
+    “맞았다고 우기는” 리딩방·유튜브와 정반대 포지션이다. <b>틀린 것까지 공개</b>하는 서비스는 드물고, 신뢰를 복리로 쌓는다.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:2px">③ ‘왜 움직였나’를 <b>곡선 위 뉴스 핀</b>으로 <span class="tag t-good">해석</span></h3>
+    <p>가격 곡선에 뉴스 이벤트를 시각적으로 얹는 건 네이버·토스도 잘 안 한다. 숫자가 아니라
+    <b>맥락(내러티브)</b>을 파는 것 — 이게 브리핑 서비스와 결합했을 때의 진짜 무기다.</p>
+  </div>
+
+  <!-- ── 3. 경쟁 지형 ── -->
+  <h2><span class="n">3</span> 경쟁 지형 — 누구와 싸우나</h2>
+  <p class="lead">한국 개인투자자가 종목 정보를 얻는 곳들과의 위치 비교.</p>
+  <div style="overflow-x:auto">
+  <table>
+    <tr><th>서비스</th><th>강점</th><th>Double-Shot이 이기는 지점</th></tr>
+    <tr><td class="c"><b>네이버페이 증권</b></td><td>압도적 커버리지·실시간·토론방</td><td>해석(왜)·AI 예측 정확도·큐레이션</td></tr>
+    <tr><td class="c"><b>토스증권</b></td><td>UX·매매 연결·“산 이유” 커뮤니티</td><td>중립성(매매 안 팜)·규칙기반 신호·트랙레코드</td></tr>
+    <tr><td class="c"><b>증권사 앱</b></td><td>실거래·HTS급 데이터</td><td>가볍게 읽는 큐레이션·비로그인 접근</td></tr>
+    <tr><td class="c"><b>유튜브·텔레그램 리딩방</b></td><td>강한 서사·팬덤</td><td><b>검증 가능한 실측·틀린 것도 공개</b></td></tr>
+    <tr><td class="c"><b>인베스팅닷컴 등</b></td><td>지표·알림 풍부</td><td>한국 개인 관점·해석·경량</td></tr>
+  </table>
+  </div>
+  <div class="quote">포지셔닝 한 줄: <b>“매매는 안 붙어 있지만, 가장 정직하게 해석해주는 곳.”</b>
+  중립적 제3자라는 점이 매매를 파는 증권사·토스가 못 가지는 자리다.</div>
+
+  <!-- ── 4. 핵심 문제 ── -->
+  <h2><span class="n">4</span> 핵심 문제 — <span style="color:var(--up)">매일 올 이유가 없다</span></h2>
+  <p class="lead">품질은 충분하다. 진짜 병목은 리텐션 구조. 발견한 5가지 갭.</p>
+
+  <div class="card" style="border-color:var(--up)">
+    <div class="cardhead">🕳️ 리텐션을 막는 5가지 갭</div>
+    <table>
+      <tr><th>갭</th><th>지금 상태</th><th>결과</th></tr>
+      <tr><td class="c"><b>관심종목 없음</b></td><td>내 종목을 저장·추적할 방법이 없다</td><td>“내 것”이 없어 남의 대시보드로 느껴짐</td></tr>
+      <tr><td class="c"><b>알림 없음</b></td><td>신호가 떠도 사용자가 들어와야만 봄</td><td>좋은 신호가 <b>도달하지 못함</b></td></tr>
+      <tr><td class="c"><b>개인화 없음</b></td><td>모두에게 같은 화면</td><td>재방문 동기 약함</td></tr>
+      <tr><td class="c"><b>주말·장외 정적</b></td><td>“직전 거래일 종가 기준”이 대부분</td><td>장 없는 시간엔 볼 게 없음</td></tr>
+      <tr><td class="c"><b>신호 사후검증 부재</b></td><td>특이신호가 <b>실제로 먹혔는지</b> 안 보여줌</td><td>신뢰·재방문 루프 미완성</td></tr>
+    </table>
+  </div>
+  <p>핵심은 이것이다 — <b>이미 매일 좋은 신호를 만들고 있는데, 그걸 사용자에게 밀어주는 파이프가 없다.</b>
+  브리핑은 텔레그램·이메일로 밀지만, <b>종목 시그널은 순수 pull(사용자가 와야만)</b>이다.</p>
+
+  <!-- ── 5. 개선 전략 ── -->
+  <h2><span class="n">5</span> 개선 전략 — 매일 오게 만드는 훅</h2>
+  <p class="lead">우선순위 순. <span class="tag t-up">P1</span> 리텐션 직결·저비용부터.</p>
+
+  <div class="card">
+    <div class="cardhead"><span class="prio p1">1</span> 관심종목 + “오늘 내 종목 신호” <span class="tag t-up">P1 · 즉시</span></div>
+    <p>로그인 없이 <b>localStorage 워치리스트</b>부터. 상세 페이지에 ★ 버튼, 허브 최상단에
+    “<b>내 관심종목 오늘의 신호</b>” 요약 스트립. 이 하나로 화면이 “남의 것 → 내 것”으로 바뀐다.
+    지금 있는 신호 데이터를 <b>필터만</b> 하면 되므로 신규 데이터 불필요.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><span class="prio p1">2</span> 텔레그램 종목 알림 <span class="tag t-up">P1 · 인프라 재활용</span></div>
+    <p>이미 <b>텔레그램 봇·발송 인프라가 있다.</b> “관심종목에 특이신호(신고가·기관 연속매수·역행상승) 발생 시
+    아침에 한 번 요약 발송.” 브리핑 구독자에게 자연스럽게 얹을 수 있는 <b>가장 강력한 재방문 훅</b>.
+    푸시가 곧 방문이다.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><span class="prio p2">3</span> 신호 사후검증(“어제 신호 성적표”) <span class="tag t-warn">P2</span></div>
+    <p>어제 특이신호로 뽑힌 종목들이 오늘 어떻게 됐는지 <b>매일 채점·공개</b>. 예측 정확도 로직을
+    그대로 종목 신호에 확장. “이 신호는 실제로 먹힌다”가 쌓이면 <b>매일 성적표 보러 오는</b> 루프가 생긴다.
+    강점 ②(투명성)를 리텐션 엔진으로 전환.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><span class="prio p2">4</span> 브리핑 ↔ 종목 시그널 순환 동선 <span class="tag t-warn">P2</span></div>
+    <p>지금 둘은 분리돼 있다. 코스피/미국 브리핑 본문의 종목을 <b>상세 페이지로 링크</b>(SEO+체류),
+    반대로 상세 페이지에서 <b>“이 종목이 오늘 브리핑에 나왔어요”</b>를 노출. 이미 있는 두 자산을 서로 먹여준다.</p>
+  </div>
+  <div class="card">
+    <div class="cardhead"><span class="prio p3">5</span> 커버리지 확대 + 장외 콘텐츠 <span class="tag t-warn">P3 · 큰 베팅</span></div>
+    <p>코스피200/코스닥150로 종목 확장(보유종목 미스 줄임). 주말엔 <b>“이번 주 신호 리캡”·밸류에이션 위클리</b> 같은
+    정적이어도 읽을거리를 배치해 장외 공백을 메운다. 비용이 크므로 P1·P2 리텐션이 검증된 뒤.</p>
+  </div>
+
+  <!-- ── 6. 로드맵 요약 ── -->
+  <h2><span class="n">6</span> 실행 로드맵</h2>
+  <div style="overflow-x:auto">
+  <table>
+    <tr><th>단계</th><th>과제</th><th>비용</th><th>리텐션 효과</th></tr>
+    <tr><td><span class="prio p1">1</span></td><td>관심종목(localStorage) + “내 종목 오늘 신호” 스트립</td><td class="c">낮음</td><td class="c"><b style="color:var(--up)">매우 높음</b></td></tr>
+    <tr><td><span class="prio p1">1</span></td><td>텔레그램 종목 알림(관심종목 신호 아침 요약)</td><td class="c">낮음★</td><td class="c"><b style="color:var(--up)">매우 높음</b></td></tr>
+    <tr><td><span class="prio p2">2</span></td><td>신호 사후검증 “성적표” 매일 공개</td><td class="c">중간</td><td class="c">높음</td></tr>
+    <tr><td><span class="prio p2">2</span></td><td>브리핑↔상세 양방향 링크 동선</td><td class="c">낮음</td><td class="c">중간(+SEO)</td></tr>
+    <tr><td><span class="prio p3">3</span></td><td>커버리지 확대 · 주말 리캡 콘텐츠</td><td class="c">높음</td><td class="c">중간</td></tr>
+  </table>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted)">★ 텔레그램 봇·발송 파이프가 이미 있어 한계비용이 특히 낮다.</p>
+
+  <div class="callout">
+    <div class="cardhead">가장 먼저 한다면</div>
+    <p style="margin:4px 0 0"><b>관심종목 ★ + “내 관심종목 오늘의 신호”</b> 하나. 신규 데이터 없이 기존 신호를 필터만 하면 되고,
+    서비스를 “구경거리”에서 <b>“내 대시보드”</b>로 바꾸는 전환점이다. 그 위에 <b>텔레그램 알림</b>을 얹으면
+    pull-only였던 종목 시그널이 브리핑처럼 <b>push 리텐션 자산</b>이 된다.</p>
+  </div>
+
+  <div class="foot">
+    이 보고서는 라이브 <b>doubleshot.space/stocks/</b> 실측 화면과 코드베이스 점검을 근거로 작성됐습니다.
+    수치·기능은 2026-07-12 기준이며, 개선안 우선순위는 리텐션 효과 대비 구현 비용으로 정렬했습니다.
+  </div>
+
+</div>
+</body>
+</html>
