@@ -477,8 +477,15 @@ document.addEventListener('DOMContentLoaded', function() {
           if(chg20===null){ cgEl.style.color=origCgColor; cgEl.textContent=origCgText; }
           else { var u20=chg20>=0; cgEl.style.color=u20?'var(--up)':'var(--dn)'; cgEl.textContent=(u20?'▲ +':'▼ ')+chg20.toFixed(2)+'% (20일)'; }
         }
-      } else if(pane==='pane-intra' && lastD){
-        render(lastD);
+      } else if(pane==='pane-intra'){
+        if(lastD) render(lastD);
+        // 마감 후·주말엔 render()의 '오늘 세션' 가드로 헤더가 갱신되지 않아, 직전에 '20일 종가'
+        // 탭이 세팅한 '(20일)' 라벨이 그대로 남는다 → SSR(최신 종가) 헤더로 복원해 거래일 탭과 일치시킨다.
+        if(!(lastD && lastD.date===todayKST())){
+          if(pxEl) pxEl.textContent=origPxText;
+          if(cgEl){ cgEl.style.color=origCgColor; cgEl.textContent=origCgText; }
+          if(metaEl) metaEl.innerHTML=metaOrig;
+        }
       }
     };
   }
