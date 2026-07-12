@@ -2090,34 +2090,24 @@
     var urlDate = m ? m[1] : todayKst;
     if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 신호는 '오늘' 값만 의미 → 숨김
 
-    var CAT_COLOR = {
-      vol_surge: 'gold', turnover: 'gold',
-      inst_buy: 'blue', foreign_buy: 'blue', foreign_sell: 'blue',
-      near_high: 'green', counter_up: 'green'
-    };
-
     function render(data) {
       if (!data || !Array.isArray(data.signals) || !data.signals.length) return;
       var top = data.signals.slice(0, 3);
       var closed = data.phase === 'closed';
 
-      var title = document.getElementById('ssig-title');
       var note = document.getElementById('ssig-note');
-      var hint = document.getElementById('ssig-hint');
-      if (title) title.textContent = closed ? '지난 장 포착 신호' : '오늘의 종목 신호';
-      if (note) note.hidden = !closed;
-      if (hint) hint.hidden = !closed;
+      if (note) note.hidden = !closed;   // 마감·주말이면 '지난 마감 기준' 표시
 
       var rows = top.map(function (s) {
-        var color = CAT_COLOR[(s.cats || [])[0]] || 'gold';
-        var badge = (s.badges || [])[0] || '';
         var pct = Number(s.pct) || 0;
         var dir = pct >= 0 ? 'up' : 'dn';
-        var pctTxt = (pct > 0 ? '+' : '') + pct.toFixed(1) + '%';
+        var pctTxt = (pct >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '%';
+        var price = Number(s.price) || 0;
+        var pxTxt = price > 0 ? price.toLocaleString('ko-KR') : '—';
         return '<a class="ssig-row" href="/stocks/' + encodeURIComponent(s.code) + '/">'
           + '<span class="ssig-name">' + escHtml(s.name || '') + '</span>'
-          + '<span class="ssig-badge ' + color + '">' + escHtml(badge) + '</span>'
-          + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></a>';
+          + '<span class="ssig-px"><span class="ssig-px-val">' + pxTxt + '</span>'
+          + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></span></a>';
       }).join('');
       var list = document.getElementById('ssig-list');
       if (list) list.innerHTML = rows;
