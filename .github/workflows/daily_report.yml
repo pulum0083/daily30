@@ -396,6 +396,11 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/generate_html.py --sectors
 
+      - name: 🇰🇷 국내 종목 상세 페이지 재생성 (스냅샷 종가로 갱신)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/generate_html.py --stocks
+
       - name: 🇺🇸 미국 반도체 상세 페이지 생성 (yfinance 종가)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
