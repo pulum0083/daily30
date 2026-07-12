@@ -69,6 +69,46 @@ def _within_24h(dt: datetime, now: datetime) -> bool:
     return (now - dt) <= timedelta(hours=24)
 
 
+def _get_kospi_ref() -> float | None:
+    """yfinance ^KS11 직전 종가 반환. 실패 시 None."""
+    try:
+        import yfinance as yf
+        hist = yf.Ticker("^KS11").history(period="3d")
+        if hist.empty:
+            return None
+        return float(hist["Close"].iloc[-1])
+    except Exception as e:
+        print(f"[ib_views] 코스피 기준 레벨 조회 실패: {e}", file=sys.stderr)
+        return None
+
+
+_KOSPI_MAN_PAT = re.compile(r"(\d{1,2})\s*만\s*(\d{0,4})")
+_KOSPI_PLAIN_PAT = re.compile(r"(\d{3,5})\s*(?:선|포인트)")
+
+
+def _extract_index_levels(text: str) -> list:
+    """텍스트에서 '1만2000선', '8700포인트' 등 코스피 지수 레벨 언급을 숫자로 추출."""
+    levels = []
+    for m in _KOSPI_MAN_PAT.finditer(text):
+        rest = m.group(2)
+        levels.append(int(m.group(1)) * 10000 + (int(rest) if rest else 0))
+    for m in _KOSPI_PLAIN_PAT.finditer(text):
+        levels.append(float(m.group(1)))
+    return levels
+
+
+def _is_stale_index_level(text: str, ref: float) -> bool:
+    """언급된 지수 레벨이 실제 코스피(ref) 대비 ±30%를 벗어나면 True (구글 뉴스가 재노출한 옛 기사로 판단).
+
+    Google News RSS의 pubDate는 원 기사 발행일이 아니라 재크롤링/재노출 시각을 반영하는 경우가 있어,
+    24시간 필터를 통과해도 실제로는 지수 레벨이 몇 달~몇 년 전 수준인 옛 기사가 섞여 들어올 수 있다.
+    """
+    for lvl in _extract_index_levels(text):
+        if lvl < ref * 0.7 or lvl > ref * 1.3:
+            return True
+    return False
+
+
 def _time_label(dt: datetime, now: datetime) -> str:
     """오늘(KST)이면 '오늘 HH:MM', 어제면 '어제 HH:MM', 그 밖이면 'M/D HH:MM'."""
     d0 = now.astimezone(KST).date()
@@ -119,7 +159,7 @@ def _clean_title(title: str) -> str:
     return re.sub(r"\s{2,}", " ", title).strip()
 
 
-def _fetch_rss_candidates(now: datetime) -> list[dict]:
+def _fetch_rss_candidates(now: datetime, kospi_ref: float | None) -> list[dict]:
     """쿼리 세트로 RSS를 돌며 24h 이내·IB 귀속 가능한 후보를 수집한다.
 
     각 후보: {house, initials, title, desc, source, link, published_at(datetime)}
@@ -151,6 +191,9 @@ def _fetch_rss_candidates(now: datetime) -> list[dict]:
                 continue
             house = _match_house(title + " " + desc)
             if house is None:
+                continue
+            if kospi_ref and _is_stale_index_level(title + " " + desc, kospi_ref):
+                print(f"[ib_views] SKIP(지수 레벨 이상 — 옛 기사 재노출 추정): {title[:50]}", file=sys.stderr)
                 continue
             seen_titles.add(title)
             cands.append({
@@ -248,7 +291,10 @@ def _summarize_and_classify(title: str, desc: str) -> dict | None:
 
 
 def build_views(now: datetime) -> list[dict]:
-    cands = _dedup_by_house(_fetch_rss_candidates(now))
+    kospi_ref = _get_kospi_ref()
+    if kospi_ref:
+        print(f"[ib_views] 코스피 기준 레벨 {kospi_ref:.0f}", file=sys.stderr)
+    cands = _dedup_by_house(_fetch_rss_candidates(now, kospi_ref))
     views: list[dict] = []
     for c in cands:
         sc = _summarize_and_classify(c["title"], c["desc"])
