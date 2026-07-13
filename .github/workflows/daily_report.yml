@@ -406,6 +406,11 @@ jobs:
         continue-on-error: true
         run: python3 scripts/generate_html.py --us-stocks
 
+      - name: 💰 밸류에이션 시그널 갱신 (업종 상대 PER, 종가 기준)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        run: python3 scripts/fetch_valuation.py
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
