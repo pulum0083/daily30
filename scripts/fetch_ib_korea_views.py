@@ -5,10 +5,12 @@ Usage:
     python3 scripts/fetch_ib_korea_views.py
 
 출력: data/ib_korea_views.json
-  - Google News 한국어 RSS에서 화이트리스트 IB × 코스피/대형주 쿼리로 최근 24시간 기사만 수집
+  - Google News 한국어 RSS에서 화이트리스트 IB × 코스피/대형주 쿼리로 24시간 이내 pubDate 기사만 1차 수집
   - 제목/요약에 화이트리스트 IB명이 실제로 박혀 있어야 채택 (귀속 불가하면 버림)
-  - IB당 1건, 최대 3건 (동일 IB는 가장 최근 1건)
-  - batchexecute로 발행사 원문 URL 리졸브 → 실패 시 Google News 링크 폴백
+  - RSS pubDate는 재크롤링으로 조작될 수 있어 신뢰하지 않는다 — batchexecute로 원문 URL을 리졸브한 뒤
+    원문 페이지의 실제 발행일시(JSON-LD/meta, MSN은 콘텐츠 API)를 다시 조회해 그 값이 24시간 이내인지로
+    최종 판정한다(_select_verified_candidates). 실제 발행일 추출 실패 시 후보를 버린다.
+  - IB당 1건, 최대 3건 (동일 IB는 pubDate 최신순으로 시도해 검증 통과하는 첫 후보)
   - Gemini는 제목+요약 기반 스탠스 요약(해요체)·bull/bear/neu 분류만 수행 (날짜·URL·출처 생성 불가)
   - 대상 없으면 빈 배열 저장 (섹션 생략, 파이프라인 보호)
 """
@@ -84,16 +86,22 @@ def _get_kospi_ref() -> float | None:
 
 _KOSPI_MAN_PAT = re.compile(r"(\d{1,2})\s*만\s*(\d{0,4})")
 _KOSPI_PLAIN_PAT = re.compile(r"(\d{3,5})\s*(?:선|포인트)")
+# 콤마 표기·접미사 없는 숫자("15,000 간다", "15000 가능") — 만/선/포인트 패턴이 놓치는 케이스 보강.
+# 예측·전망 동사가 바로 뒤에 와야 매칭(임의의 4~5자리 숫자를 다 지수로 오인하지 않도록 범위 제한).
+_KOSPI_FORECAST_PAT = re.compile(r"(\d{1,2},\d{3}|\d{3,5})\s*(?:까지|간다|가능|돌파|도달|넘본다|넘어선다)")
 
 
 def _extract_index_levels(text: str) -> list:
-    """텍스트에서 '1만2000선', '8700포인트' 등 코스피 지수 레벨 언급을 숫자로 추출."""
+    """텍스트에서 '1만2000선', '8700포인트', '15,000 간다', '15000 가능' 등
+    코스피 지수 레벨 언급을 숫자로 추출."""
     levels = []
     for m in _KOSPI_MAN_PAT.finditer(text):
         rest = m.group(2)
         levels.append(int(m.group(1)) * 10000 + (int(rest) if rest else 0))
     for m in _KOSPI_PLAIN_PAT.finditer(text):
         levels.append(float(m.group(1)))
+    for m in _KOSPI_FORECAST_PAT.finditer(text):
+        levels.append(float(m.group(1).replace(",", "")))
     return levels
 
 
@@ -126,17 +134,6 @@ def _normalize_sentiment(s: str) -> str:
     if low in _SENT_MAP:
         return _SENT_MAP[low]
     return low if low in VALID_SENTIMENTS else "neu"
-
-
-def _dedup_by_house(cands: list[dict], max_items: int = MAX_ITEMS) -> list[dict]:
-    """동일 하우스는 published_at 최신 1건만 유지, 최신순 정렬 후 max_items건 반환."""
-    seen: dict[str, dict] = {}
-    for c in cands:
-        name = c["house"]
-        if name not in seen or c["published_at"] > seen[name]["published_at"]:
-            seen[name] = c
-    ordered = sorted(seen.values(), key=lambda c: c["published_at"], reverse=True)
-    return ordered[:max_items]
 
 
 _GN_KR = "https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR:ko&q="
@@ -207,6 +204,26 @@ def _fetch_rss_candidates(now: datetime, kospi_ref: float | None) -> list[dict]:
 _BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
 
 
+def _extract_resolved_url(raw: str) -> str | None:
+    """batchexecute 응답 원문(garturlres 포함)에서 실제 원문 URL을 복원한다.
+
+    Google이 내부 JSON 문자열을 한 번 더 JSON으로 감싸 이스케이프하기 때문에, 쿼리스트링에
+    =·& 같은 특수문자가 있으면 \\u003d·\\u0026 형태로 이중 이스케이프된다. 단순히 '역슬래시가
+    아닌 문자'만 매칭하는 정규식은 이 이스케이프 시퀀스의 첫 역슬래시에서 멈춰버려 URL이
+    쿼리스트링 시작 지점(예: '?no', '?apiversion')에서 잘린다. \\uXXXX를 실제 문자로 복원한
+    뒤 반환해 이 잘림을 막는다.
+    """
+    if "garturlres" not in raw:
+        return None
+    seg = raw.split("garturlres", 1)[1]
+    m = re.search(r'"(https?://.*?)\\*"', seg)
+    if not m:
+        return None
+    url = m.group(1)
+    url = re.sub(r"\\+u([0-9a-fA-F]{4})", lambda mm: chr(int(mm.group(1), 16)), url)
+    return url.replace("\\/", "/")
+
+
 def _resolve_gnews_url(link: str) -> str:
     """Google News 기사 링크를 발행사 원문 URL로 리졸브한다. 실패 시 원래 link 반환."""
     if "/rss/articles/" not in link:
@@ -233,13 +250,105 @@ def _resolve_gnews_url(link: str) -> str:
         )
         with urllib.request.urlopen(req2, timeout=12) as r:
             raw = r.read().decode("utf-8", "ignore")
-        if "garturlres" not in raw:
-            return link
-        seg = raw.split("garturlres")[1]
-        m = re.search(r'(https?://[^\\"]+)', seg)
-        return m.group(1) if m else link
+        return _extract_resolved_url(raw) or link
     except Exception:
         return link
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 실제 발행일시 검증 — Google News RSS pubDate는 재크롤링/재노출 시각을 반영할 수 있어
+# 신뢰하지 않는다(2026-07-13·2026-07-14 두 차례 실사고로 확인됨). 원문 페이지의 구조화
+# 데이터(JSON-LD datePublished, article:published_time 등)에서 실제 발행일시를 다시 조회해
+# 그 값으로만 24시간 이내 여부를 최종 판정한다. 추출 실패 시 신뢰할 수 없는 것으로 간주해
+# 후보를 버린다(데이터 정합성 > 완전성).
+# ─────────────────────────────────────────────────────────────────────────────
+
+_JSONLD_DATE_PAT = re.compile(r'"datePublished"\s*:\s*"([^"]+)"')
+_META_DATE_PAT = re.compile(
+    r'<meta[^>]+(?:property|name|itemprop)=["\']'
+    r'(?:article:published_time|og:published_time|datePublished)["\']'
+    r'[^>]*content=["\']([^"\']+)["\']',
+    re.IGNORECASE,
+)
+_MSN_ARTICLE_ID_PAT = re.compile(r"/ar-([A-Za-z0-9]+)")
+
+
+def _parse_iso_datetime(raw: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _parse_real_published_at(html: str) -> datetime | None:
+    """기사 페이지 HTML에서 실제 발행일시(JSON-LD datePublished 또는 meta published_time)를
+    추출한다. 구조화 데이터가 없으면 None(신뢰 불가 — 상위에서 후보를 드롭)."""
+    for pat in (_JSONLD_DATE_PAT, _META_DATE_PAT):
+        m = pat.search(html)
+        if m:
+            dt = _parse_iso_datetime(m.group(1))
+            if dt:
+                return dt
+    return None
+
+
+def _fetch_msn_published_at(url: str) -> datetime | None:
+    """MSN은 기사 정적 HTML이 클라이언트 렌더링(SPA)이라 meta 태그가 없다.
+    MSN 콘텐츠 API(assets.msn.com)로 실제 발행일시(publishedDateTime)를 직접 조회한다."""
+    m = _MSN_ARTICLE_ID_PAT.search(url)
+    if not m:
+        return None
+    try:
+        api_url = f"https://assets.msn.com/content/view/v2/Detail/ko-kr/{m.group(1)}"
+        req = urllib.request.Request(api_url, headers=_HDR)
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8", "ignore"))
+        raw = data.get("publishedDateTime")
+        return _parse_iso_datetime(raw) if raw else None
+    except Exception as e:
+        print(f"[ib_views] MSN 발행일 조회 실패: {e}", file=sys.stderr)
+        return None
+
+
+def _verify_real_published_at(url: str) -> datetime | None:
+    """기사 원문 URL의 실제 발행일시를 조회한다. MSN은 전용 API, 그 외는 페이지 메타데이터.
+    조회 실패(추출 불가·네트워크 오류) 시 None."""
+    if "msn.com" in url:
+        return _fetch_msn_published_at(url)
+    try:
+        req = urllib.request.Request(url, headers=_HDR)
+        with urllib.request.urlopen(req, timeout=10) as r:
+            html = r.read().decode("utf-8", "ignore")
+    except Exception as e:
+        print(f"[ib_views] 원문 페이지 조회 실패: {e}", file=sys.stderr)
+        return None
+    return _parse_real_published_at(html)
+
+
+def _select_verified_candidates(cands: list[dict], now: datetime, max_items: int = MAX_ITEMS) -> list[dict]:
+    """하우스별로 RSS pubDate 최신순으로 시도하며, 원문 URL을 리졸브해 실제 발행일시가
+    24시간 이내로 검증되는 첫 후보만 채택한다. 검증 불가·24시간 초과 후보는 다음 후보로 넘어간다.
+    (RSS pubDate는 재노출로 조작될 수 있어 최종 판정 근거로 쓰지 않는다.)"""
+    by_house: dict[str, list[dict]] = {}
+    for c in cands:
+        by_house.setdefault(c["house"], []).append(c)
+    selected: list[dict] = []
+    for items in by_house.values():
+        items.sort(key=lambda c: c["published_at"], reverse=True)
+        for c in items:
+            resolved_url = _resolve_gnews_url(c["link"])
+            real_dt = _verify_real_published_at(resolved_url)
+            if real_dt is None:
+                print(f"[ib_views] SKIP(실발행일 확인 불가): {c['title'][:40]}", file=sys.stderr)
+                continue
+            real_dt_kst = real_dt.astimezone(KST)
+            if not _within_24h(real_dt_kst, now):
+                print(f"[ib_views] SKIP(실발행일 24h 초과 — {real_dt_kst.isoformat()}): {c['title'][:40]}", file=sys.stderr)
+                continue
+            selected.append({**c, "resolved_url": resolved_url, "real_published_at": real_dt_kst})
+            break
+    selected.sort(key=lambda c: c["real_published_at"], reverse=True)
+    return selected[:max_items]
 
 
 sys.path.insert(0, str(BASE_DIR / "scripts"))
@@ -294,7 +403,7 @@ def build_views(now: datetime) -> list[dict]:
     kospi_ref = _get_kospi_ref()
     if kospi_ref:
         print(f"[ib_views] 코스피 기준 레벨 {kospi_ref:.0f}", file=sys.stderr)
-    cands = _dedup_by_house(_fetch_rss_candidates(now, kospi_ref))
+    cands = _select_verified_candidates(_fetch_rss_candidates(now, kospi_ref), now)
     views: list[dict] = []
     for c in cands:
         sc = _summarize_and_classify(c["title"], c["desc"])
@@ -306,9 +415,9 @@ def build_views(now: datetime) -> list[dict]:
             "initials": c["initials"],
             "summary": sc["summary"],
             "source": c["source"],
-            "url": _resolve_gnews_url(c["link"]),
-            "published_at": c["published_at"].isoformat(),
-            "time_label": _time_label(c["published_at"], now),
+            "url": c["resolved_url"],
+            "published_at": c["real_published_at"].isoformat(),
+            "time_label": _time_label(c["real_published_at"], now),
             "sentiment": sc["sentiment"],
         })
     return views
