@@ -1,8 +1,0 @@
-{# 코스피 주도주 사이드바 위젯 — /api/signals 상위 3개의 이름·실시간가·등락% 라이브 렌더. 코스피 전용. #}
-{# 기본 hidden. main.js initStockSignals()가 과거/미래 브리핑·데이터 없음이면 계속 숨기고, #}
-{# 데이터가 있을 때만 phase(장중/마감)로 헤더 note를 토글해 노출한다. 날짜는 URL에서 파싱. #}
-<div class="ssig" id="stock-signals" hidden>
-  <div class="ssig__h"><span class="ssig__ic">📈</span><span id="ssig-title">코스피 주도주</span><small class="ssig__note" id="ssig-note" hidden>지난 마감 기준</small></div>
-  <div class="ssig__list" id="ssig-list"></div>
-  <a class="ssig__cta" href="/stocks/#signals-all">종목 시그널 전체 보기 <span>→</span></a>
-</div>

@@ -826,7 +826,7 @@
     initLiveScoreboard();
     initLiveMarketPanel();
     initNowBand();
-    initStockSignals();
+    initSidebarSignals();
     loadLeadersWidget();
     loadIncomeWidget();
     loadVisitorCount();
@@ -1591,6 +1591,9 @@
   function initLiveMarketPanel() {
     var panel = document.getElementById('market-data-panel');
     if (!panel) return;
+    // 장중 '오늘의 특이 신호' 위젯이 있으면(코스피 당일 브리핑) 라이브 시장 지표 패널은 비활성화 —
+    // initSidebarSignals()가 장중에 시장 지표를 특이신호로 완전 교체하기 때문(2026-07-13).
+    if (document.getElementById('signals-today')) return;
     // 코스피 아침 브리핑(live-scoreboard 포함)에서만 활성화
     if (!document.getElementById('live-scoreboard')) return;
 
@@ -2075,11 +2078,14 @@
     }
   }
 
-  /* ── 종목 신호 사이드바 위젯 — /api/signals 상위 3개. 코스피 브리핑 전용.
-     과거/미래 브리핑·데이터 없음이면 숨김. phase로 장중/마감 헤더·힌트 토글. ── */
-  function initStockSignals() {
-    var box = document.getElementById('stock-signals');
+  /* ── 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(/api/signals phase==='intraday')에만
+     노출하며 시장 지표 패널(#market-data-panel)을 완전히 대체한다. 장외·과거/미래 브리핑·
+     데이터 없음이면 위젯을 숨기고 시장 지표를 그대로 둔다. 코스피 당일 브리핑 전용. ── */
+  function initSidebarSignals() {
+    var box = document.getElementById('signals-today');
     if (!box) return;
+    var list = document.getElementById('signals-today-list');
+    var mktPanel = document.getElementById('market-data-panel');
 
     function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }
     var k0 = kstNow();
@@ -2088,30 +2094,21 @@
       String(k0.getUTCDate()).padStart(2, '0');
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var urlDate = m ? m[1] : todayKst;
-    if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 신호는 '오늘' 값만 의미 → 숨김
+    if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 장중 신호는 '오늘'만 의미 → 시장 지표 유지
 
-    function render(data) {
-      if (!data || !Array.isArray(data.signals) || !data.signals.length) return;
-      var top = data.signals.slice(0, 3);
-      var closed = data.phase === 'closed';
-
-      var note = document.getElementById('ssig-note');
-      if (note) note.hidden = !closed;   // 마감·주말이면 '지난 마감 기준' 표시
-
-      var rows = top.map(function (s) {
-        var pct = Number(s.pct) || 0;
-        var dir = pct >= 0 ? 'up' : 'dn';
-        var pctTxt = (pct >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '%';
-        var price = Number(s.price) || 0;
-        var pxTxt = price > 0 ? price.toLocaleString('ko-KR') : '—';
-        return '<a class="ssig-row" href="/stocks/' + encodeURIComponent(s.code) + '/">'
-          + '<span class="ssig-name">' + escHtml(s.name || '') + '</span>'
-          + '<span class="ssig-px"><span class="ssig-px-val">' + pxTxt + '</span>'
-          + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></span></a>';
+    var SIDEBAR_MAX = 6;   // 사이드바 컴팩트 노출 개수 (API는 최대 8개 내려줌)
+    function rowHtml(s) {
+      var pct = Number(s.pct) || 0;
+      var dir = pct >= 0 ? 'up' : 'dn';
+      var pctTxt = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+      var badges = (s.badges || []).slice(0, 2).map(function (b) {
+        var flow = /^(외국인|기관)/.test(b);
+        return '<span class="ssig-bdg' + (flow ? ' flow' : '') + '">' + escHtml(b) + '</span>';
       }).join('');
-      var list = document.getElementById('ssig-list');
-      if (list) list.innerHTML = rows;
-      box.hidden = false;
+      return '<a class="ssig-row ssig-row--sig" href="/stocks/' + encodeURIComponent(s.code) + '/">'
+        + '<span class="ssig-sig-main"><span class="ssig-name">' + escHtml(s.name || '') + '</span>'
+        + (badges ? '<span class="ssig-bdgs">' + badges + '</span>' : '') + '</span>'
+        + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></a>';
     }
 
     var scheduled = false;
@@ -2119,11 +2116,16 @@
       fetch('/api/signals', { signal: AbortSignal.timeout(8000) })
         .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
         .then(function (data) {
-          render(data);
-          if (!scheduled && data && data.phase !== 'closed') {   // 장중일 때만 60초 폴링. 마감·주말은 1회 조회.
-            scheduled = true;
-            setInterval(poll, 60000);
+          // 장외(마감·주말·휴장)이거나 신호가 없으면 특이신호를 숨기고 시장 지표를 유지한다.
+          if (!data || data.phase !== 'intraday' || !Array.isArray(data.signals) || !data.signals.length) {
+            box.hidden = true;
+            if (mktPanel) mktPanel.style.display = '';
+            return;
           }
+          if (list) list.innerHTML = data.signals.slice(0, SIDEBAR_MAX).map(rowHtml).join('');
+          box.hidden = false;
+          if (mktPanel) mktPanel.style.display = 'none';   // 장중: 시장 지표 완전 교체
+          if (!scheduled) { scheduled = true; setInterval(poll, 60000); }
         })
         .catch(function () {});
     }

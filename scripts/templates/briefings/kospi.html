@@ -53,8 +53,9 @@
 
     <aside class="layout-grid__right">
       {% if market_items %}{% include "sections/market_data.html" %}{% endif %}
+      {# 장중이면 위 시장 지표를 숨기고 이 특이신호 위젯이 그 자리를 대체(JS). 장외엔 hidden 유지. #}
+      {% include "sections/_signals_today.html" %}
       {% if scorecard %}{% include "sections/_scorecard.html" %}{% elif accuracy %}{% include "sections/accuracy.html" %}{% endif %}
-      {% include "sections/_stock_signals.html" %}
       {% include "sections/_sidebar_kospi.html" %}
     </aside>
   </div>

@@ -1,0 +1,7 @@
+{# 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(phase intraday)에만 노출되며 시장 지표 패널을 대체한다. #}
+{# 기본 hidden. main.js initSidebarSignals()가 /api/signals로 채우고, 장중이면 노출하며 #market-data-panel을 숨긴다. 코스피 당일 브리핑 전용. #}
+<div class="ssig" id="signals-today" hidden>
+  <div class="ssig__h"><span class="ssig__ic">⚡</span><span>오늘의 특이 신호</span><small class="ssig__note">장중 실시간</small></div>
+  <div class="ssig__list" id="signals-today-list"></div>
+  <a class="ssig__cta" href="/stocks/#signals-all">종목 시그널 전체 보기 <span>→</span></a>
+</div>

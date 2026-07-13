@@ -1196,3 +1196,11 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .ssig-chg.up{color:var(--up);}.ssig-chg.dn{color:var(--dn);}
 .ssig__cta{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;border-top:1px solid var(--hairline);}
 .ssig__cta:hover{background:var(--surface-soft);}
+/* 장중 '오늘의 특이 신호' 사이드바 행 — 종목명+신호 배지 2줄 + 등락률 */
+.ssig-row--sig{align-items:flex-start;gap:8px;}
+.ssig-sig-main{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1;}
+.ssig-row--sig .ssig-name{max-width:none;}
+.ssig-bdgs{display:flex;flex-wrap:wrap;gap:4px;}
+.ssig-bdg{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--surface-inset);color:var(--muted);white-space:nowrap;}
+.ssig-bdg.flow{background:var(--primary-bg);color:var(--primary);}
+.ssig-row--sig .ssig-chg{margin-left:auto;padding-top:1px;font-size:12.5px;white-space:nowrap;}
