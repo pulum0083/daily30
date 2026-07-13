@@ -1,0 +1,151 @@
+<!doctype html>
+<!-- 코스피 브리핑 사이드바: 장중 시장지표 → '오늘의 특이 신호' 교체 프로토타입 (2026-07-13) -->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>코스피 사이드바 특이신호 교체 — 프로토타입</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --r-lg:16px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+  --up:#F74B53;--up-bg:rgba(247,75,83,.15);--dn:#1C82FF;--dn-bg:rgba(0,110,255,.15);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--surface-soft);color:var(--ink);padding:28px 20px 60px;-webkit-font-smoothing:antialiased;}
+.pagettl{max-width:760px;margin:0 auto 6px;font-size:18px;font-weight:800;}
+.pagedesc{max-width:760px;margin:0 auto 20px;font-size:13px;color:var(--muted);line-height:1.6;}
+.controls{max-width:760px;margin:0 auto 22px;display:flex;gap:8px;flex-wrap:wrap;}
+.controls button{font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;border:1px solid var(--hairline);background:var(--canvas);color:var(--muted);cursor:pointer;}
+.controls button.on{background:var(--ink);color:var(--canvas);border-color:var(--ink);}
+.stage{max-width:760px;margin:0 auto;display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start;}
+.fakemain{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);min-height:420px;padding:20px;color:var(--muted);font-size:13px;line-height:1.7;}
+.fakemain h3{font-size:15px;color:var(--ink);margin-bottom:8px;}
+aside{display:flex;flex-direction:column;gap:16px;}
+.statelabel{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--primary);}
+
+/* ── 실제 style.css 발췌 ── */
+.right-panel{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 11px;border-bottom:1px solid var(--hairline);}
+.section-title{font-size:13px;font-weight:700;color:var(--ink);display:inline-flex;align-items:center;gap:6px;}
+.pub-time{font-size:11px;font-weight:600;color:var(--muted);}
+.mkt-list{padding:0 14px;}
+.mkt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--hairline);}
+.mkt-row:last-child{border-bottom:none;}
+.mkt-row-info{flex:1;min-width:0;}
+.mkt-name{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mkt-vals{display:flex;align-items:baseline;gap:7px;}
+.mkt-val{font-size:15px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;}
+.mkt-chg{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mkt-chg.up{color:var(--up);}
+.mkt-chg.down{color:var(--dn);}
+.mkt-spark{flex-shrink:0;width:78px;height:44px;position:relative;}
+.mkt-spark svg{display:block;width:100%;height:44px;}
+.vix-badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--surface-inset);color:var(--muted);}
+.vix-badge.normal{background:#ECFCCB;color:#65A30D;}
+
+.ssig{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas);box-shadow:var(--s1);overflow:hidden;}
+.ssig__h{display:flex;align-items:center;gap:6px;padding:13px 16px 4px;font-size:13px;font-weight:800;color:var(--ink);}
+.ssig__ic{font-size:14px;line-height:1;flex:none;}
+.ssig__note{margin-left:auto;font-size:10.5px;font-weight:600;color:var(--muted);}
+.ssig__list{display:flex;flex-direction:column;padding:6px 0 2px;}
+.ssig-row{display:flex;align-items:center;gap:9px;padding:10px 16px;text-decoration:none;border-top:1px solid var(--hairline);}
+.ssig-row:first-child{border-top:none;}
+.ssig-row:hover{background:var(--surface-soft);}
+.ssig-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;}
+.ssig-chg{font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+.ssig-chg.up{color:var(--up);}.ssig-chg.dn{color:var(--dn);}
+.ssig__cta{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;border-top:1px solid var(--hairline);}
+.ssig__cta:hover{background:var(--surface-soft);}
+.ssig-row--sig{align-items:flex-start;gap:8px;}
+.ssig-sig-main{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1;}
+.ssig-row--sig .ssig-name{max-width:none;}
+.ssig-bdgs{display:flex;flex-wrap:wrap;gap:4px;}
+.ssig-bdg{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--surface-inset);color:var(--muted);white-space:nowrap;}
+.ssig-bdg.flow{background:var(--primary-bg);color:var(--primary);}
+.ssig-row--sig .ssig-chg{margin-left:auto;padding-top:1px;font-size:12.5px;white-space:nowrap;}
+</style></head>
+<body>
+<div class="pagettl">코스피 브리핑 사이드바 — 장중 '오늘의 특이 신호' 교체</div>
+<div class="pagedesc">아래 토글로 <b>장중(09:00–15:30)</b>과 <b>장외(장전·마감 후·주말)</b> 상태를 비교하세요. 장중에는 우측 상단 <b>시장 지표</b> 패널이 <b>오늘의 특이 신호</b>로 완전히 바뀝니다. 나머지 사이드바(스코어카드·구독 CTA)는 그대로예요. ※ 데이터는 예시(mock)입니다.</div>
+<div class="controls">
+  <button id="btn-intraday" class="on" onclick="setState('intraday')">🟢 장중 (특이신호)</button>
+  <button id="btn-closed" onclick="setState('closed')">⚫ 장외 (시장지표)</button>
+  <button onclick="toggleDark()" style="margin-left:auto">🌗 다크모드</button>
+</div>
+
+<div class="stage">
+  <div class="fakemain">
+    <h3>📈 오늘의 관점 · 코스피 예측 본문</h3>
+    (본문 영역 — 프로토타입에서는 생략)<br><br>
+    이 페이지는 <b>우측 사이드바</b>만 확인하기 위한 프로토타입입니다.
+  </div>
+  <aside>
+    <div class="statelabel" id="statelabel">장중 상태</div>
+
+    <!-- 시장 지표 (장외) -->
+    <div class="right-panel" id="market-data-panel">
+      <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:26 KST</span></div>
+      <div class="mkt-list">
+        <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥</span><div class="mkt-vals"><div class="mkt-val">26,281.61</div><div class="mkt-chg up">+0.29%</div></div></div><div class="mkt-spark"><svg viewBox="0 0 78 44" preserveAspectRatio="none"><polyline fill="none" stroke="var(--up)" stroke-width="2" points="0,34 16,32 30,36 44,20 60,14 78,10"/></svg></div></div>
+        <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">필라델피아 반도체</span><div class="mkt-vals"><div class="mkt-val">12,967.16</div><div class="mkt-chg up">+0.06%</div></div></div><div class="mkt-spark"><svg viewBox="0 0 78 44" preserveAspectRatio="none"><polyline fill="none" stroke="var(--dn)" stroke-width="2" points="0,20 16,26 30,14 44,30 60,24 78,22"/></svg></div></div>
+        <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">나스닥100 선물</span><div class="mkt-vals"><div class="mkt-val">29,869.75</div><div class="mkt-chg down">-0.54%</div></div></div><div class="mkt-spark"><svg viewBox="0 0 78 44" preserveAspectRatio="none"><polyline fill="none" stroke="var(--dn)" stroke-width="2" points="0,14 16,10 30,18 44,16 60,30 78,34"/></svg></div></div>
+        <div class="mkt-row"><div class="mkt-row-info"><span class="mkt-name">VIX 공포지수</span><div class="mkt-vals"><div class="mkt-val">15.03</div><div class="mkt-chg down">-5.11%</div></div></div><div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal">보통</span></div></div>
+      </div>
+    </div>
+
+    <!-- 오늘의 특이 신호 (장중) -->
+    <div class="ssig" id="signals-today" hidden>
+      <div class="ssig__h"><span class="ssig__ic">⚡</span><span>오늘의 특이 신호</span><small class="ssig__note">장중 실시간</small></div>
+      <div class="ssig__list" id="signals-today-list"></div>
+      <a class="ssig__cta" href="#">종목 시그널 전체 보기 <span>→</span></a>
+    </div>
+
+    <!-- 스코어카드 (변화 없음) -->
+    <div class="right-panel">
+      <div class="panel-header"><span class="section-title">🎯 예측 스코어카드</span><span class="pub-time">누적</span></div>
+      <div style="padding:14px 16px;font-size:12px;color:var(--muted)">적중률 68% · 최근 20회 중 13회 (변화 없음)</div>
+    </div>
+    <!-- 구독 CTA (변화 없음) -->
+    <div class="right-panel"><div style="padding:16px;font-size:12px;color:var(--muted)">✈ 텔레그램 구독 카드 (변화 없음)</div></div>
+  </aside>
+</div>
+
+<script>
+function escHtml(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var SIGNALS=[
+ {code:'000660',name:'SK하이닉스',pct:3.4,dir:'up',badges:['52주 신고가 2%↓','거래대금 상위']},
+ {code:'005930',name:'삼성전자',pct:-6.4,dir:'dn',badges:['거래량 ×2.3 급증']},
+ {code:'042700',name:'한미반도체',pct:9.4,dir:'up',badges:['역행 상승','외국인 3일 연속 순매수']},
+ {code:'086790',name:'하나금융지주',pct:1.8,dir:'up',badges:['기관 순매수 전환']},
+ {code:'036930',name:'주성엔지니어링',pct:5.1,dir:'up',badges:['거래량 ×1.8 급증','52주 신고가 4%↓']},
+ {code:'068270',name:'셀트리온',pct:-0.4,dir:'dn',badges:['거래대금 상위']}
+];
+function rowHtml(s){var pct=Number(s.pct)||0;var dir=pct>=0?'up':'dn';var pctTxt=(pct>=0?'+':'')+pct.toFixed(1)+'%';
+ var badges=(s.badges||[]).slice(0,2).map(function(b){var flow=/^(외국인|기관)/.test(b);return '<span class="ssig-bdg'+(flow?' flow':'')+'">'+escHtml(b)+'</span>';}).join('');
+ return '<a class="ssig-row ssig-row--sig" href="#"><span class="ssig-sig-main"><span class="ssig-name">'+escHtml(s.name)+'</span>'+(badges?'<span class="ssig-bdgs">'+badges+'</span>':'')+'</span><span class="ssig-chg '+dir+'">'+pctTxt+'</span></a>';}
+document.getElementById('signals-today-list').innerHTML=SIGNALS.slice(0,6).map(rowHtml).join('');
+
+function setState(state){
+  var mkt=document.getElementById('market-data-panel'), sig=document.getElementById('signals-today');
+  var intraday=state==='intraday';
+  mkt.style.display=intraday?'none':'';
+  sig.hidden=!intraday;
+  document.getElementById('btn-intraday').classList.toggle('on',intraday);
+  document.getElementById('btn-closed').classList.toggle('on',!intraday);
+  document.getElementById('statelabel').textContent=intraday?'장중 상태 — 특이신호 노출':'장외 상태 — 시장지표 노출';
+}
+function toggleDark(){document.documentElement.classList.toggle('dark');}
+setState('intraday');
+</script>
+</body></html>
