@@ -1459,22 +1459,7 @@ function usSel(code){
         </div>
       </div>
     </div>
-    <!-- 📊 ETF로 읽는 시황 (섹터 대표 종목 아래로 이동) -->
-    <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
-      <div class="etf-head" id="etf-lead"><span class="skl skl-line" style="width:58%;margin-bottom:8px"></span><span class="skl skl-line" style="width:92%;height:11px"></span></div>
-      <div class="gauge-wrap" id="etf-betting"><span class="skl skl-line" style="width:42%;height:11px;margin-bottom:9px"></span><span class="skl" style="display:block;height:32px;border-radius:8px"></span><span class="skl skl-line" style="width:70%;height:11px;margin-top:11px"></span></div>
-      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
-      <div id="etf-top-rows">
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:50%"></span><span class="skl skl-line" style="width:52px"></span></div>
-      </div>
-      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
-    </div>
-    </div><!-- /home-main -->
-    <div class="home-side">
-    <!-- 💰 밸류에이션 시그널 (업종 상대 PER 저평가·고평가) -->
+    <!-- 💰 밸류에이션 시그널 (업종 상대 PER 저평가·고평가, ETF 자리로 이동) -->
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">💰</span><span id="val-title">밸류에이션 시그널</span><span class="help-q" data-tip-title="밸류에이션 시그널이란?" data-tip="코스피200 종목의 <b>선행 PER</b>(애널리스트 컨센서스 예상 실적 기준)을 <b>같은 업종 종목들의 중앙값</b>과 비교해 상대적으로 싸거나 비싼 종목을 자동 선별해요.<br><br>· <b>저평가</b> — 업종 평균보다 PER이 낮아요(상대적으로 쌈)<br>· <b>고평가</b> — 업종 평균보다 PER이 높아요(상대적으로 비쌈)<br><br>괴리율 = (종목 선행 PER − 업종 중앙값) ÷ 업종 중앙값. 선행 PER이 없으면 후행(실적 확정) PER로 대체하고, 적자·특이 업종은 제외해요. 업종보다 싸다고 반드시 오르는 건 아니에요(밸류 트랩). 투자 권유가 아닌 참고용이에요.">?</span></span></div>
       <div class="sig-subhead">
@@ -1488,7 +1473,9 @@ function usSel(code){
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:45%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:78%;margin-top:9px"></span></div>
       </div>
     </div>
-    <!-- ⚡ 오늘의 특이 신호 (밸류에이션 아래로 이동) -->
+    </div><!-- /home-main -->
+    <div class="home-side">
+    <!-- ⚡ 오늘의 특이 신호 (밸류에이션 자리로 이동) -->
     <div class="block">
       <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span><span class="help-q" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 코스피와 반대로 움직이며 지수보다 3%p 이상 강세<br>· <b>거래량 급증</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환(장 마감 기준)<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고, <b>상승률순</b>으로도 볼 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</span></span></div>
       <div class="sig-subhead">
@@ -1500,6 +1487,19 @@ function usSel(code){
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:74%"></span></div>
       </div>
+    </div>
+    <!-- 📊 ETF로 읽는 시황 (특이 신호 아래로 이동) -->
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
+      <div class="etf-head" id="etf-lead"><span class="skl skl-line" style="width:58%;margin-bottom:8px"></span><span class="skl skl-line" style="width:92%;height:11px"></span></div>
+      <div class="gauge-wrap" id="etf-betting"><span class="skl skl-line" style="width:42%;height:11px;margin-bottom:9px"></span><span class="skl" style="display:block;height:32px;border-radius:8px"></span><span class="skl skl-line" style="width:70%;height:11px;margin-top:11px"></span></div>
+      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
+      <div id="etf-top-rows">
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div>
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:52px"></span></div>
+        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:50%"></span><span class="skl skl-line" style="width:52px"></span></div>
+      </div>
+      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
