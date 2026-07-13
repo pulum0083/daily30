@@ -1116,8 +1116,17 @@ def get_web_base_url() -> str:
 
 
 def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
-    """직전(오늘 이전) 채점된 예측의 적중 여부(is_correct)를 반환. 없으면 None.
-    briefings.json에 check_accuracy가 기록한 실측 채점값만 사용 — 재계산·추정 없음."""
+    """직전(오늘 이전) 예측의 적중 여부(is_correct)를 반환. 없거나 아직 채점 전이면 None.
+
+    ⚠️ 직전 항목이 미채점(is_correct=None)이어도 더 과거의 채점된 항목으로 조용히
+    건너뛰지 않는다 — check_accuracy --backfill은 09:10 KST에 실행되어 이 텔레그램
+    발송 시점(07:25~07:30 KST, 아침 브리핑)보다 항상 늦다. 즉 어제 예측은 이 함수가
+    호출되는 시점에 구조적으로 항상 미채점 상태다. 과거엔 이 경우 더 이전(예: 3일 전)
+    채점 결과를 "지난 예측"이라는 이름으로 그대로 보여줘, 실제로는 갓 나온 예측이
+    크게 틀렸는데도(2026-07-13 "검은 월요일" -8.95% 급락 vs "상승 우위" 예측) 며칠 전의
+    적중 결과가 "지난 예측 ✓ 적중"으로 표시되는 오도 사고가 있었다. 직전 항목이 미채점이면
+    무조건 None을 반환해 배지 자체를 생략한다(호출부에서 표시 안 함).
+    """
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
         return None
@@ -1125,11 +1134,13 @@ def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
         rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
     except Exception:
         return None
-    scored = [b for b in rows
-              if b.get("type") == briefing_type
-              and b.get("is_correct") is not None
-              and str(b.get("date", "")) < before_date]
-    return scored[-1].get("is_correct") if scored else None
+    prior = [b for b in rows
+             if b.get("type") == briefing_type
+             and str(b.get("date", "")) < before_date]
+    if not prior:
+        return None
+    prior.sort(key=lambda b: b["date"])
+    return prior[-1].get("is_correct")
 
 
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
@@ -1165,7 +1176,8 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
 
     divider = "─" * 20
 
-    # 지난(직전 채점) 예측 결과. 월요일·휴일 다음 날엔 직전 채점이 어제가 아닐 수 있어 라벨은 "지난 예측"으로 고정.
+    # 직전 예측 결과. 아직 채점 전(check_accuracy가 이 발송 이후인 09:10 KST에 실행)이면
+    # None → 배지 자체를 생략한다(_last_scored_result 참고 — 옛 채점 결과로 대체 금지).
     prev_result = ""
     if briefing_type == "kospi":
         prev = _last_scored_result("kospi", date_str)
