@@ -1100,8 +1100,8 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         )
         print("[call_claude] Post-holiday catch-up context injected")
 
-    # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 예측 + us 브리핑)
-    if briefing_type in ("kospi", "us"):
+    # 다양성 가이드: 최근 시그널 카테고리 회피 (kospi 예측 전용 — US는 reasons 없음)
+    if briefing_type == "kospi":
         history = load_signal_history(briefing_type)
         # 오늘 분 entry는 회피 대상에서 제외 (재실행 시 자기 자신을 회피하지 않도록)
         history = [h for h in history if h.get("date") != date_str]
@@ -1119,13 +1119,12 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         )
         print("[call_claude] Bottom section → disabled")
 
-    # 브리핑 형식 랜덤 선택 (Python이 제어, Claude는 지시받은 형식만 사용)
+    # 브리핑 형식 랜덤 선택 — kospi 예측 브리핑 전용. US는 이슈 중심이라 형식 로테이션을 쓰지 않는다.
+    chosen_format = None
     if briefing_type == "kospi":
         chosen_format = random.choices(FORMAT_POOL_KOSPI, weights=FORMAT_WEIGHTS_KOSPI, k=1)[0]
-    else:
-        chosen_format = random.choices(FORMAT_POOL, weights=FORMAT_WEIGHTS, k=1)[0]
-    user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
-    print(f"[call_claude] Selected format: {chosen_format}")
+        user_content += f"\n\n## 오늘 브리핑 근거 섹션 형식\n반드시 `{chosen_format}` 형식으로 출력하고, JSON에 `\"analysis_format\": \"{chosen_format}\"`을 포함한다.\n"
+        print(f"[call_claude] Selected format: {chosen_format}")
 
     print(f"[call_claude] Calling Claude API (type={briefing_type}, date={date_str})")
     print(f"[call_claude] User message: ~{len(user_content)//4} tokens estimated")
@@ -1169,11 +1168,12 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     else:
         raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
 
-    # 브리핑 형식 강제 주입 — Claude가 빠뜨려도 항상 올바른 형식 보장
-    analysis["analysis_format"] = chosen_format
+    # 브리핑 형식 강제 주입 — kospi 전용(US는 형식 없음)
+    if chosen_format:
+        analysis["analysis_format"] = chosen_format
 
-    # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 + us 브리핑)
-    if briefing_type in ("kospi", "us"):
+    # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 전용 — US는 reasons 없음)
+    if briefing_type == "kospi":
         signals = extract_signal_emojis(analysis.get("reasons", []))
         save_signal_to_history(briefing_type, date_str, signals)
 
@@ -1261,8 +1261,9 @@ def main():
             sys.exit(1)
         with open(analysis_path, encoding="utf-8") as f:
             analysis = json.load(f)
-        # validate 통과 후 교정된 analysis로 briefings.json 기록 (kospi-close는 prediction 필드 없음)
-        if args.type != "kospi-close":
+        # validate 통과 후 교정된 analysis로 briefings.json 기록.
+        # kospi만 예측 채점 대상 — US는 이슈 중심 전환(2026-07-14)으로 채점 탈퇴, kospi-close는 prediction 없음.
+        if args.type == "kospi":
             save_prediction_to_briefings(args.type, date_str, analysis)
         render_outputs(args.type, date_str, analysis, no_html=args.no_html, force=args.force_refresh)
         print(f"[call_claude] Render-only done (type={args.type})")
