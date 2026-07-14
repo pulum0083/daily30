@@ -123,6 +123,43 @@ def day_label(d: str, full: bool = False) -> str:
 
 
 # ── 섹션 컨텍스트 빌더 ─────────────────────────────────────────────────────────
+# 이슈 카드 title·body에서 새어든 수치(등락률·가격·지수 레벨)를 제거하는 최종 방어선.
+# 운영 규칙 0: 이슈 카드에는 실측이 없으므로 어떤 숫자도 표시하지 않는다(티커는 별도 필드라 무관).
+_ISSUE_NUM_PATTERNS = [
+    re.compile(r"[-+]?\d[\d,.]*\s*%"),          # 등락률: -4%, +2.3%
+    re.compile(r"\$\s?\d[\d,.]*"),               # 가격: $168, $ 168.5
+    re.compile(r"\b\d{1,3}(?:,\d{3})+\b"),       # 콤마 그룹 지수 레벨: 5,431
+]
+
+
+def _strip_issue_numbers(text: str) -> str:
+    if not text:
+        return ""
+    out = text
+    for pat in _ISSUE_NUM_PATTERNS:
+        out = pat.sub("", out)
+    # 숫자 제거로 생긴 이중 공백·공백앞 구두점 정리
+    out = re.sub(r"\s{2,}", " ", out)
+    out = re.sub(r"\s+([,.·])", r"\1", out)
+    return out.strip()
+
+
+def build_issues(analysis: dict) -> dict:
+    """analysis.issues → 렌더용 이슈 리스트. title 없는 항목 제외, title·body 숫자 가드 적용."""
+    issues = []
+    for it in (analysis.get("issues") or []):
+        title = _strip_issue_numbers(it.get("title", ""))
+        if not title:
+            continue
+        entry = {"title": title, "body": _strip_issue_numbers(it.get("body", ""))}
+        for side in ("down", "up"):
+            s = it.get(side)
+            if isinstance(s, dict) and (s.get("label") or s.get("tickers")):
+                entry[side] = {"label": s.get("label", ""), "tickers": list(s.get("tickers") or [])}
+        issues.append(entry)
+    return {"issues": issues}
+
+
 def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time: str) -> dict:
     pred = analysis.get("prediction", {})
     up_pct = pred.get("up_pct", 50)
