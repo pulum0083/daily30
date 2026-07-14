@@ -1043,7 +1043,9 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
    validate_analysis 실측 검증 통과 데이터. 코스피 오전 브리핑 전용.
    ────────────────────────────────────────────── */
 .tv-lead{background:linear-gradient(180deg,var(--primary-bg),transparent 70%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:20px 20px 22px;}
+.tv-lead.up{background:linear-gradient(180deg,var(--up-bg),transparent 70%);border-color:var(--up-bg);}
 .tv-kicker{font-size:11px;font-weight:800;letter-spacing:0.08em;color:var(--primary);text-transform:uppercase;margin-bottom:9px;}
+.tv-lead.up .tv-kicker{color:var(--up);}
 .tv-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;line-height:1.32;color:var(--ink);margin:0;}
 .tv-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
 .tv-col{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 15px;}

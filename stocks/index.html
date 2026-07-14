@@ -215,6 +215,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .scard__close{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
 .scard__pct{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
 .scard__pct.up{color:var(--up);}.scard__pct.down{color:var(--dn);}.scard__pct.flat{color:var(--muted);}
+/* 실시간 시세 로딩 중 빗금 placeholder — 스냅샷(전일 종가) 숫자를 먼저 보였다가 라이브로 튀는 혼란 방지.
+   장중인데 아직 해당 섹터 /api/stocks-live 응답 전이면 숫자 대신 대각선 해치를 그리고, 도착하면 최종값으로 한 번에 채운다. */
+.scard__skel{display:inline-block;vertical-align:middle;border-radius:4px;background-image:repeating-linear-gradient(45deg,#D3DAE3 0,#D3DAE3 3px,#EEF2F7 3px,#EEF2F7 6px);background-size:200% 100%;animation:skelHatch .8s linear infinite;}
+@keyframes skelHatch{to{background-position:8.49px 0;}}
 .scard__spark{margin:9px 0 7px;height:34px;position:relative;}
 .scard__spark svg{width:100%;height:34px;display:block;overflow:visible;}
 /* 곡선 끝의 실시간 점 — SVG는 preserveAspectRatio:none으로 가로만 늘어나 원이 타원으로 찌그러지므로
@@ -3265,6 +3269,11 @@ if(passBtn){
   }
   // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
   var sbxIntraday={};
+  // 섹터별 라이브 시세 응답을 한 번이라도 받았는지(성공·실패·휴장 무관). 미해결이면 카드 숫자에 빗금 placeholder를 그린다.
+  var sbxLiveTried={};
+  // 장중인데 현재 탭 섹터의 라이브 응답이 아직 안 온 상태 — 스냅샷(전일 종가) 숫자를 노출하지 않고 빗금으로 대기.
+  function sbxPending(){ return krMarketOpen() && !sbxLiveTried[sbxActiveKey]; }
+  function sbxSkel(w,h){ return '<span class="scard__skel" style="width:'+w+'px;height:'+h+'px;"></span>'; }
   function sbxCurve(s){var iv=sbxIntraday[s.code]; return (iv&&iv.length>=2)?iv:s.spark20;}
   function sbxCurveIsLive(s){var iv=sbxIntraday[s.code]; return !!(iv&&iv.length>=2);}
   function sbxTodayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
@@ -3517,9 +3526,13 @@ if(passBtn){
     var sparkHtml = (krMarketOpen()&&!sbxIntraday[s.code]) ? sbxSparkSkeleton() : sbxSpark(sbxCurve(s), sbxCurveIsLive(s));
     // 외국인 보유율은 카드 하단에선 눈에 잘 안 띄어 타이틀 줄 우측으로 이동
     var frHtml = s.foreign_rate!=null ? '<span class="scard__fr-h">외국인 '+s.foreign_rate.toFixed(1)+'%</span>' : '';
+    // 라이브 미해결이면 가격·등락률을 스냅샷 숫자 대신 빗금으로 — 도착 즉시 최종값으로 교체돼 "튐"이 사라진다.
+    var priceHtml = sbxPending()
+      ? '<span class="scard__close">'+sbxSkel(72,19)+'</span><span class="scard__pct flat">'+sbxSkel(46,13)+'</span>'
+      : '<span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span>';
     return '<a class="scard" data-code="'+s.code+'" onclick="goStock(\''+s.code+'\')">'
       +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span>'+frHtml+'</div>'
-      +'<div class="scard__price"><span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span></div>'
+      +'<div class="scard__price">'+priceHtml+'</div>'
       +'<div class="scard__spark">'+sparkHtml+'</div>'
       +extra+'</a>';
   }
@@ -3537,15 +3550,26 @@ if(passBtn){
     var body=document.getElementById('sbx-body'); if(!body||!SNAP) return;
     var arr=sbxSectorStocks(sbxActiveKey), st=sbxSectorStat(sbxActiveKey);
     var avgCls=sbxPctCls(st.avg), upFlex=st.up||0.001, dnFlex=st.dn||0.001;
+    // 집계값(평균·상승·하락·시장폭)도 카드와 같은 라이브 데이터에서 나오므로, 미해결이면 빗금으로 대기해 튐을 막는다.
+    var pend=sbxPending();
+    var statBlock = pend
+      ? '<div class="sbx-stat">'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">섹터 평균</div><div class="sbx-stat__val flat">'+sbxSkel(56,17)+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
+        +'</div>'
+        +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — 집계 중…</div>'
+          +'<div class="sbx-breadth__bar"><span class="scard__skel" style="flex:1;height:8px;border-radius:4px;"></span></div></div>'
+      : '<div class="sbx-stat">'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">섹터 평균</div><div class="sbx-stat__val '+avgCls+'">'+sbxPctFmt(st.avg)+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val up">'+st.up+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val down">'+st.dn+'</div></div>'
+        +'</div>'
+        +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — '+st.total+'종목 중 상승 '+st.up+'</div>'
+          +'<div class="sbx-breadth__bar"><div class="sbx-breadth__up" style="flex:'+upFlex+'"></div><div class="sbx-breadth__dn" style="flex:'+dnFlex+'"></div></div>'
+          +'<div class="sbx-breadth__legend"><span><i class="iu"></i>상승 '+st.up+'</span><span><i class="id"></i>하락 '+st.dn+'</span></div></div>';
     body.innerHTML=
-      '<div class="sbx-stat">'
-        +'<div class="sbx-stat__box"><div class="sbx-stat__label">섹터 평균</div><div class="sbx-stat__val '+avgCls+'">'+sbxPctFmt(st.avg)+'</div></div>'
-        +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val up">'+st.up+'</div></div>'
-        +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val down">'+st.dn+'</div></div>'
-      +'</div>'
-      +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — '+st.total+'종목 중 상승 '+st.up+'</div>'
-        +'<div class="sbx-breadth__bar"><div class="sbx-breadth__up" style="flex:'+upFlex+'"></div><div class="sbx-breadth__dn" style="flex:'+dnFlex+'"></div></div>'
-        +'<div class="sbx-breadth__legend"><span><i class="iu"></i>상승 '+st.up+'</span><span><i class="id"></i>하락 '+st.dn+'</span></div></div>'
+      statBlock
       +'<div class="sbx-list-head"><span class="sbx-list-head__t">종목 '+arr.length+'</span><span class="sbx-list-head__sort">등락률 높은 순 ↓</span></div>'
       +'<div class="sbx-list">'+arr.map(sbxCardHtml).join('')+'</div>';
   }
@@ -3556,22 +3580,29 @@ if(passBtn){
   }
   function sbxUpdateLive(){
     if(!SNAP||!krMarketOpen()) { sbxSetLiveBadge(false); return; }
-    var codes=sbxSectorStocks(sbxActiveKey).map(function(s){return s.code;});
+    var key=sbxActiveKey; // 응답 도착 전 탭이 바뀔 수 있어 요청 시점 섹터를 고정
+    var codes=sbxSectorStocks(key).map(function(s){return s.code;});
     if(!codes.length) return;
+    // 응답이 성공이든 실패든(휴장·API 장애 포함) 일단 시도가 끝나면 빗금을 풀고 가진 값(라이브 또는 스냅샷)을 노출한다.
+    function resolve(){
+      sbxLiveTried[key]=true;
+      if(key===sbxActiveKey){ sbxRenderTabs(); sbxRenderBody(); renderTodayLine(); }
+    }
     fetch('/api/stocks-live?codes='+encodeURIComponent(codes.join(',')),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
-        if(!d) return;
-        sbxSetLiveBadge(!!d.open);
-        if(Array.isArray(d.prices)){
-          d.prices.forEach(function(p){
-            var s=SNAP.stocks[p.code]; if(!s) return;
-            if(isFinite(p.price)) s.close=p.price;
-            if(p.changePct!=null) s.change_pct=p.changePct;
-          });
-          sbxRenderTabs(); sbxRenderBody(); renderTodayLine();
+        if(d){
+          sbxSetLiveBadge(!!d.open);
+          if(Array.isArray(d.prices)){
+            d.prices.forEach(function(p){
+              var s=SNAP.stocks[p.code]; if(!s) return;
+              if(isFinite(p.price)) s.close=p.price;
+              if(p.changePct!=null) s.change_pct=p.changePct;
+            });
+          }
         }
-      }).catch(function(){});
+        resolve();
+      }).catch(function(){ resolve(); });
   }
   loadSignals();
   loadValuation();
