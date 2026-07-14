@@ -1118,7 +1118,7 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 @keyframes nb-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .nowband{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;margin-bottom:22px;background:var(--canvas);}
 .nowband[hidden]{display:none;}
-.nowband__head{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid var(--hairline);flex-wrap:wrap;}
+.nowband__head{display:flex;align-items:center;gap:9px;padding:14px 15px;border-bottom:1px solid var(--hairline);flex-wrap:wrap;}
 .nowband__title{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px;}
 .nowband__title.live{color:var(--up);}
 .nb-dot{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px var(--up-bg);animation:nb-pulse 1.8s infinite;}
