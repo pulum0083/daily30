@@ -928,42 +928,59 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     dir_pct   = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
-    if briefing_type == "kospi":
-        header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
-        link   = f"{web_base}/briefings/ko/{date_str}/"
-    else:
-        header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
-        link   = f"{web_base}/briefings/us/{date_str}/"
-
     divider = "─" * 20
 
-    # 직전 예측 결과. 아직 채점 전(check_accuracy가 이 발송 이후인 09:10 KST에 실행)이면
-    # None → 배지 자체를 생략한다(_last_scored_result 참고 — 옛 채점 결과로 대체 금지).
-    prev_result = ""
-    if briefing_type == "kospi":
-        prev = _last_scored_result("kospi", date_str)
-        prev_result = "지난 예측 ✓ 적중" if prev is True else ("지난 예측 ✗ 빗나감" if prev is False else "")
+    if briefing_type == "us":
+        # US 이슈 중심: 예측 대신 오늘의 관점 + 이슈 제목으로 구성
+        header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
+        link   = f"{web_base}/briefings/us/{date_str}/"
+        tv = analysis.get("todays_view") or {}
+        view_title = strip_html(tv.get("view_title", ""))
+        issues = analysis.get("issues") or []
+        lines = [header, divider]
+        if view_title:
+            lines += [f"🧭 {view_title}"]
+        issue_titles = [strip_html(it.get("title", "")) for it in issues if it.get("title")]
+        if issue_titles:
+            lines += ["", "오늘 점검할 이슈:"]
+            for t in issue_titles[:3]:
+                lines.append(f"• {t}")
+        lines += [f"🔗 상세 분석 → {link}"]
+    else:
+        if briefing_type == "kospi":
+            header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
+            link   = f"{web_base}/briefings/ko/{date_str}/"
+        else:
+            header = f"📊 브리핑 | {date_display}"
+            link   = f"{web_base}/briefings/{date_str}/"
 
-    lines = [
-        header,
-        divider,
-        f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
-        f"신뢰도: <b>{confidence}%</b>",
-    ]
-    if prev_result:
-        lines += [prev_result]
+        # 직전 예측 결과. 아직 채점 전(check_accuracy가 이 발송 이후인 09:10 KST에 실행)이면
+        # None → 배지 자체를 생략한다(_last_scored_result 참고 — 옛 채점 결과로 대체 금지).
+        prev_result = ""
+        if briefing_type == "kospi":
+            prev = _last_scored_result("kospi", date_str)
+            prev_result = "지난 예측 ✓ 적중" if prev is True else ("지난 예측 ✗ 빗나감" if prev is False else "")
 
-    if reason_title:
-        lines += [divider, f"💬 {reason_title}"]
+        lines = [
+            header,
+            divider,
+            f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
+            f"신뢰도: <b>{confidence}%</b>",
+        ]
+        if prev_result:
+            lines += [prev_result]
 
-    # telegram_signals 우선 사용, 없으면 reasons 앞 2개로 폴백
-    signals = telegram_signals[:2] if telegram_signals else [strip_html(r) for r in reasons[:2]]
-    if signals:
-        lines += ["", "핵심 시그널:"]
-        for s in signals:
-            lines.append(f"• {strip_html(s)}")
+        if reason_title:
+            lines += [divider, f"💬 {reason_title}"]
 
-    lines += [f"🔗 상세 분석 → {link}"]
+        # telegram_signals 우선 사용, 없으면 reasons 앞 2개로 폴백
+        signals = telegram_signals[:2] if telegram_signals else [strip_html(r) for r in reasons[:2]]
+        if signals:
+            lines += ["", "핵심 시그널:"]
+            for s in signals:
+                lines.append(f"• {strip_html(s)}")
+
+        lines += [f"🔗 상세 분석 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
