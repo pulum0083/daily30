@@ -1,0 +1,442 @@
+<!-- 미국 브리핑 이슈 중심 전환 프로토타입 (자체 완결) — 오늘의 관점 + 이슈 카드(양면/단면) + 월가 코멘트 + 프리장 신고가 + 종목 픽 -->
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미국 브리핑 이슈 중심 — 프로토타입</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s2:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+  --gnb-bg:#16181A;--gnb-h:52px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+  --up:#F74B53;--up-bg:rgba(247,75,83,.15);--dn:#1C82FF;--dn-bg:rgba(0,110,255,.15);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+  --s1:0 1px 4px rgba(0,0,0,.35);--s2:0 4px 12px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{background:var(--surface-soft);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+  line-height:1.5;}
+
+/* GNB */
+.gnb{background:var(--gnb-bg);height:var(--gnb-h);display:flex;align-items:center;position:sticky;top:0;z-index:100;}
+.gnb__in{max-width:1064px;width:100%;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:14px;}
+.gnb__title{color:#fff;font-weight:800;font-size:16px;letter-spacing:-.02em;}
+.gnb__title span{color:#7fb3ff;}
+.gnb__subs{display:flex;align-items:center;gap:12px;margin-left:8px;}
+.gnb__sub{color:#c8ccd2;font-size:12.5px;text-decoration:none;font-weight:600;}
+.gnb__divider{width:1px;height:12px;background:#3a3d42;}
+.gnb .right{margin-left:auto;}
+.sbtn{color:#c8ccd2;font-size:12.5px;display:flex;align-items:center;gap:5px;cursor:pointer;}
+.sbtn svg{width:14px;height:14px;}
+
+/* Layout */
+.layout-wrapper{max-width:1064px;margin:0 auto;padding:24px 32px 72px;}
+.layout-grid{display:grid;grid-template-columns:1fr 336px;column-gap:20px;align-items:start;}
+.layout-grid__main{min-width:0;}
+.layout-grid__right{display:flex;flex-direction:column;gap:12px;}
+
+.accordion-item{background:var(--canvas);border-radius:var(--r-lg);border:1px solid var(--hairline);box-shadow:var(--s1);overflow:hidden;}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;}
+.accordion-header__date-label{font-size:15px;font-weight:800;letter-spacing:-.02em;}
+.header-nav{display:flex;gap:6px;}
+.hnav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline);border-radius:var(--r-sm);}
+.hnav-btn.disabled{opacity:.4;}
+.accordion-body__inner{border-top:1px solid var(--hairline);padding:0 18px 22px;}
+.divider{height:1px;background:var(--hairline);margin:18px 0;}
+
+.open-section{margin-top:22px;}
+.open-section__title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.open-section__title::before{content:'';display:block;width:3px;height:12px;background:var(--primary);border-radius:2px;flex-shrink:0;}
+
+/* 오늘의 관점 */
+.tv-lead{background:linear-gradient(180deg,var(--primary-bg),transparent 70%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:20px 20px 22px;margin-top:22px;}
+.tv-kicker{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--primary);text-transform:uppercase;margin-bottom:9px;}
+.tv-title{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1.32;color:var(--ink);margin:0;}
+.tv-dek{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.6;}
+.tv-dek b{color:var(--ink);}
+
+/* ── 이슈 카드 (신규) ── */
+.issue-list{display:flex;flex-direction:column;gap:12px;}
+.issue-card{border:1px solid var(--hairline);border-radius:var(--r-md);padding:15px 16px;background:var(--canvas);}
+.issue-card__title{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.4;}
+.issue-card__body{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.65;}
+.issue-card__impact{display:flex;flex-direction:column;gap:7px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--hairline);}
+.imp-side{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.imp-arrow{font-size:11px;font-weight:800;flex-shrink:0;line-height:1.3;}
+.imp-label{font-size:12px;font-weight:800;flex-shrink:0;}
+.imp-side.down .imp-arrow,.imp-side.down .imp-label{color:var(--dn);}
+.imp-side.up .imp-arrow,.imp-side.up .imp-label{color:var(--up);}
+.imp-tickers{display:flex;gap:6px;flex-wrap:wrap;}
+.imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
+.imp-side.down .imp-tk{background:var(--dn-bg);color:var(--dn);}
+.imp-side.up .imp-tk{background:var(--up-bg);color:var(--up);}
+
+/* 월가 코멘트 (ib-row) */
+.ib-list{margin-top:2px;}
+.ib-row{display:flex;gap:11px;padding:13px 0;border-bottom:1px solid var(--hairline);}
+.ib-row:last-child{border-bottom:none;}
+.ib-logo{width:34px;height:34px;border-radius:8px;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;letter-spacing:-.5px;}
+.ib-body{flex:1;min-width:0;}
+.ib-name{font-size:12.5px;font-weight:800;color:var(--ink);}
+.ib-badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;margin-left:6px;}
+.ib-badge.bull{background:var(--up-bg);color:var(--up);}
+.ib-badge.bear{background:var(--dn-bg);color:var(--dn);}
+.ib-badge.neu{background:var(--surface-inset);color:var(--muted);}
+.ib-text{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6;}
+.ib-foot{display:flex;align-items:center;gap:6px;margin-top:7px;}
+.ib-src{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;}
+.ib-src-arrow{font-size:10px;opacity:.7;}
+.ib-time{font-size:11px;color:var(--muted);margin-left:auto;}
+
+/* 프리장 신고가 */
+.premarket-highs{border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;background:var(--canvas);}
+.pmh-c-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--hairline);}
+.pmh-c-row:last-child{border-bottom:none;}
+.pmh-c-row__main{flex:1;min-width:0;}
+.pmh-c-row__line1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pmh-c-row__ticker{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.2px;}
+.pmh-c-row__name{font-size:11px;color:var(--muted);}
+.hi-pill-sm{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--up-bg);color:var(--up);}
+.hi-pill-sm.alltime{background:var(--gold-bg);color:var(--gold);}
+.pmh-c-row__break{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:12.5px;color:var(--ink);line-height:1.6;}
+.pmh-c-row__break .arrow{color:var(--up);font-weight:800;}
+.pmh-c-row__break .dot{color:var(--hairline);}
+
+/* 종목 픽 (실제 stock_picks 템플릿) */
+.info-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:var(--muted);color:var(--canvas);border-radius:50%;font-size:11px;font-weight:800;flex-shrink:0;}
+.pick-legend{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--muted);margin:-2px 0 12px 2px;}
+.pick-legend span{display:flex;align-items:center;gap:4px;}
+.pick-legend span::before{content:'';display:inline-block;width:14px;height:2px;}
+.leg-price::before{background:var(--ink);}
+.leg-ma::before{background:var(--primary);}
+.leg-ma200::before{background:repeating-linear-gradient(to right,#7C3AED 0,#7C3AED 4px,transparent 4px,transparent 7px)!important;width:16px!important;height:2.5px!important;}
+.stock-picks{display:flex;flex-direction:column;gap:10px;}
+.stock-pick-card{background:var(--surface-soft);border-radius:var(--r-md);border:1px solid var(--hairline);padding:14px 16px;}
+.stock-pick-card__top{display:flex;gap:12px;align-items:flex-start;}
+.stock-pick-card__rank{width:24px;height:24px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.stock-pick-card__info{flex:1;min-width:0;}
+.stock-pick-card__name{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:4px;}
+.ma20-badge{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;background:var(--primary-bg);color:var(--primary);}
+.stock-pick-card__meta{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.stock-pick-card__price{font-size:14px;font-weight:600;color:var(--ink);}
+.stock-pick-card__change{font-size:13px;font-weight:600;padding:1px 6px;border-radius:4px;}
+.stock-pick-card__change.up{background:var(--up-bg);color:var(--up);}
+.stock-pick-card__change.down{background:var(--dn-bg);color:var(--dn);}
+.stock-pick-card__scenario{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.85;}
+.stock-pick-card__scenario b{color:var(--ink);}
+.ma200-gauge{display:block;margin-top:8px;}
+.ma200-gauge__row{display:flex;align-items:center;gap:8px;}
+.ma200-gauge__label{font-size:10px;font-weight:600;color:var(--muted);flex-shrink:0;width:62px;}
+.ma200-gauge__track{position:relative;flex:1;height:6px;background:var(--surface-inset);border-radius:999px;}
+.ma200-gauge__zero{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--hairline);}
+.ma200-gauge__fill{position:absolute;top:0;height:100%;border-radius:999px;}
+.ma200-gauge__fill.up{background:var(--up);left:50%;}
+.ma200-gauge__pct{font-size:11px;font-weight:700;flex-shrink:0;width:48px;text-align:right;}
+.ma200-gauge__pct.up{color:var(--up);}
+.ma200-gauge__scale{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin:3px 0 0 70px;}
+.stock-pick-mini-chart{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:1px;}
+.pick-nums{margin-top:12px;padding-top:12px;border-top:1px solid var(--hairline);}
+.pick-nums__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:var(--r-md);overflow:hidden;}
+.pick-num{background:var(--surface-soft);padding:9px 12px;display:flex;flex-direction:column;gap:3px;}
+.pick-num__label{font-size:10px;color:var(--muted);font-weight:600;}
+.pick-num__val{font-size:14px;font-weight:700;}
+.pick-num__val.up{color:var(--up);}
+.pick-num__val.dn{color:var(--dn);}
+.pick-num__sub{font-size:10px;font-weight:600;}
+.pick-num__sub.up{color:var(--up);}
+.pick-num__sub.dn{color:var(--dn);}
+.pick-name-link{color:inherit;text-decoration:none;border-bottom:1px solid var(--hairline);}
+
+/* 사이드바 */
+.side-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;}
+.side-card__head{padding:12px 16px 11px;border-bottom:1px solid var(--hairline);font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px;}
+.mkt-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hairline);}
+.mkt-row:last-child{border-bottom:none;}
+.mkt-name{font-size:12.5px;color:var(--muted);font-weight:600;}
+.mkt-val{text-align:right;}
+.mkt-price{font-size:14px;font-weight:800;color:var(--ink);}
+.mkt-chg{font-size:11.5px;font-weight:700;}
+.mkt-chg.up{color:var(--up);}
+.mkt-chg.down{color:var(--dn);}
+.cta-card{background:linear-gradient(155deg,var(--primary-bg),var(--canvas) 75%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:18px;}
+.cta-card__t{font-size:15px;font-weight:800;letter-spacing:-.02em;}
+.cta-card__d{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6;}
+.cta-card__btn{display:block;text-align:center;margin-top:14px;background:var(--primary);color:#fff;font-size:13px;font-weight:800;padding:11px;border-radius:var(--r-md);text-decoration:none;}
+
+/* 다크 토글 */
+.theme-toggle{position:fixed;right:16px;bottom:16px;z-index:200;background:var(--canvas);border:1px solid var(--hairline);border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:var(--s2);color:var(--ink);}
+
+@media(max-width:860px){
+  .layout-grid{grid-template-columns:1fr;row-gap:16px;}
+  .gnb__subs{display:none;}
+  .layout-wrapper{padding:16px 16px 60px;}
+}
+</style>
+</head>
+<body>
+
+<div class="gnb"><div class="gnb__in">
+  <span class="gnb__title">Double<span>-Shot</span></span>
+  <span class="gnb__subs">
+    <a class="gnb__sub" href="#">종목 시그널</a><span class="gnb__divider"></span>
+    <a class="gnb__sub" href="#">월배당</a>
+  </span>
+  <span class="right"><span class="sbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span>
+</div></div>
+
+<div class="layout-wrapper">
+<div class="layout-grid">
+
+  <main class="layout-grid__main">
+    <div class="accordion-item">
+      <div class="accordion-header">
+        <div class="accordion-header__date-label">2026-07-14 · 미국 시장</div>
+        <div class="header-nav">
+          <a class="hnav-btn" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+          <a class="hnav-btn disabled" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+        </div>
+      </div>
+      <div class="accordion-body__inner">
+
+        <!-- ① 오늘의 관점 -->
+        <div class="tv-lead">
+          <div class="tv-kicker">🧭 오늘의 관점</div>
+          <h2 class="tv-title">돈이 소프트웨어를 떠나 AI 인프라로 — CPI가 그 속도를 정한다</h2>
+          <p class="tv-dek">IBM CEO의 "고객사가 AI 인프라 투자하느라 SW 지출을 줄인다"는 발언에 <b>SaaS 전반이 흔들리고</b>, 그 자금이 반도체·데이터센터로 쏠리고 있어요. 오늘 밤 나올 <b>6월 CPI</b>가 예상을 웃돌면 이 회전의 속도가 더 빨라질 수 있어요.</p>
+        </div>
+
+        <!-- ② 오늘의 이슈 -->
+        <div class="open-section">
+          <div class="open-section__title">📌 오늘 점검할 이슈</div>
+          <div class="issue-list">
+
+            <!-- 양면 이슈 -->
+            <div class="issue-card">
+              <div class="issue-card__title">IBM CEO "고객사, AI 인프라 투자하느라 SW 지출 줄인다"</div>
+              <div class="issue-card__body">실적 콜에서 나온 발언에 SaaS 전반이 흔들렸어요. 기업 IT 예산이 소프트웨어 구독에서 클라우드·AI 인프라로 옮겨가는 구조적 반작용이 부각됐어요.</div>
+              <div class="issue-card__impact">
+                <div class="imp-side down">
+                  <span class="imp-arrow">▼</span><span class="imp-label">소프트웨어</span>
+                  <span class="imp-tickers"><span class="imp-tk">CRM</span><span class="imp-tk">NOW</span><span class="imp-tk">ADBE</span></span>
+                </div>
+                <div class="imp-side up">
+                  <span class="imp-arrow">▲</span><span class="imp-label">AI 인프라</span>
+                  <span class="imp-tickers"><span class="imp-tk">NVDA</span><span class="imp-tk">AVGO</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 단면 이슈 (매크로) -->
+            <div class="issue-card">
+              <div class="issue-card__title">오늘 밤 6월 CPI 발표 — 금리 인하 기대의 분수령</div>
+              <div class="issue-card__body">헤드라인 물가가 컨센서스를 웃돌면 연내 인하 기대가 후퇴하며 위험자산 전반에 부담이에요. 반대로 둔화가 확인되면 성장주에 안도 랠리가 나올 수 있어요.</div>
+              <div class="issue-card__impact">
+                <div class="imp-side down">
+                  <span class="imp-arrow">⚠️</span><span class="imp-label">지수 전반 관망</span>
+                  <span class="imp-tickers"><span class="imp-tk">발표 전 변동성 확대</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 양면 이슈 -->
+            <div class="issue-card">
+              <div class="issue-card__title">엔비디아, 중국 H20 수출 재개 승인 소식</div>
+              <div class="issue-card__body">규제 완화 기대에 반도체 장비·설계주가 프리장에서 강세예요. 다만 중국 매출 의존도가 낮은 일부 종목엔 영향이 제한적이에요.</div>
+              <div class="issue-card__impact">
+                <div class="imp-side up">
+                  <span class="imp-arrow">▲</span><span class="imp-label">반도체</span>
+                  <span class="imp-tickers"><span class="imp-tk">NVDA</span><span class="imp-tk">AMD</span><span class="imp-tk">ASML</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 단면 이슈 -->
+            <div class="issue-card">
+              <div class="issue-card__title">대형은행 실적 시즌 개막 — JP모건 순이자마진 주목</div>
+              <div class="issue-card__body">오늘 장전 JP모건을 시작으로 은행 실적이 나와요. 순이자마진과 대손충당금 가이던스가 금융 섹터 방향을 좌우해요.</div>
+              <div class="issue-card__impact">
+                <div class="imp-side up">
+                  <span class="imp-arrow">▲</span><span class="imp-label">은행</span>
+                  <span class="imp-tickers"><span class="imp-tk">JPM</span><span class="imp-tk">WFC</span><span class="imp-tk">C</span></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ③ 월가 코멘트 -->
+        <div class="open-section">
+          <div class="open-section__title">
+            💬 월가 코멘트
+            <span style="font-size:11px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">· 최근 48시간</span>
+          </div>
+          <div class="ib-list">
+            <div class="ib-row">
+              <div class="ib-logo">TL</div>
+              <div class="ib-body">
+                <div class="ib-name">Tom Lee <span class="ib-badge bull">강세</span></div>
+                <div class="ib-text">CPI 둔화가 확인되면 하반기 랠리의 발판이 될 것이라며, 소프트웨어 조정을 매수 기회로 봤어요.</div>
+                <div class="ib-foot"><a class="ib-src" href="#">CNBC <span class="ib-src-arrow">→</span></a><span class="ib-time">오늘 04:12</span></div>
+              </div>
+            </div>
+            <div class="ib-row">
+              <div class="ib-logo">MW</div>
+              <div class="ib-body">
+                <div class="ib-name">Mike Wilson <span class="ib-badge bear">약세</span></div>
+                <div class="ib-text">AI 자본지출 쏠림이 나머지 섹터의 이익 전망을 갉아먹고 있다며 SW 이익 추정 하향을 경고했어요.</div>
+                <div class="ib-foot"><a class="ib-src" href="#">Bloomberg <span class="ib-src-arrow">→</span></a><span class="ib-time">어제 22:40</span></div>
+              </div>
+            </div>
+            <div class="ib-row">
+              <div class="ib-logo">DI</div>
+              <div class="ib-body">
+                <div class="ib-name">Dan Ives <span class="ib-badge bull">강세</span></div>
+                <div class="ib-text">엔비디아 중국 재개는 AI 트레이드의 게임체인저라며 반도체 비중 확대를 권했어요.</div>
+                <div class="ib-foot"><a class="ib-src" href="#">Yahoo Finance <span class="ib-src-arrow">→</span></a><span class="ib-time">어제 21:05</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ④ 프리장 신고가 -->
+        <div class="open-section">
+          <div class="open-section__title">🏆 프리장 신고가 종목</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.7">오늘 프리장에서 52주 신고가 또는 역대 최고가를 기록한 종목이에요.</div>
+          <div class="premarket-highs">
+            <div class="pmh-c-row">
+              <div class="pmh-c-row__main">
+                <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">NVDA</span><span class="pmh-c-row__name">엔비디아</span><span class="hi-pill-sm alltime">역대 최고</span></div>
+                <div class="pmh-c-row__break"><span class="arrow">▲</span><span>중국 H20 수출 재개 승인 기대</span></div>
+              </div>
+            </div>
+            <div class="pmh-c-row">
+              <div class="pmh-c-row__main">
+                <div class="pmh-c-row__line1"><span class="pmh-c-row__ticker">AVGO</span><span class="pmh-c-row__name">브로드컴</span><span class="hi-pill-sm">52주 신고가</span></div>
+                <div class="pmh-c-row__break"><span class="arrow">▲</span><span>AI 인프라 수요 지속 기대</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- ⑤ 종목 픽 (실제 stock_picks 템플릿) -->
+        <div class="open-section stock-picks-section">
+          <div class="open-section__title">상승 모멘텀 종목<button class="info-icon-btn">?</button></div>
+          <div class="pick-legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div>
+          <div class="stock-picks">
+
+            <div class="stock-pick-card">
+              <div class="stock-pick-card__top">
+                <div class="stock-pick-card__rank">1</div>
+                <div class="stock-pick-card__info">
+                  <div class="stock-pick-card__name">NVDA (엔비디아)<span class="ma20-badge">20일선 상향 돌파</span></div>
+                  <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$168.20</span><span class="stock-pick-card__change up">+3.42%</span></div>
+                  <div class="stock-pick-card__scenario">중국 H20 재개 기대에 20일선을 상향 돌파한 종목이에요. AI 인프라로의 자금 회전에서 최대 수혜가 예상돼요.</div>
+                  <div class="ma200-gauge">
+                    <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:18.5%"></div></div><span class="ma200-gauge__pct up">+22.1%</span></div>
+                    <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                  </div>
+                </div>
+                <div class="stock-pick-mini-chart"><svg width="88" height="52" viewBox="0 0 88 52"><polyline points="2,42 20,38 38,30 54,22 70,14 86,8" fill="none" stroke="var(--up)" stroke-width="2"/><line x1="2" y1="40" x2="86" y2="40" stroke="var(--primary)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/></svg></div>
+              </div>
+              <div class="pick-nums"><div class="pick-nums__grid">
+                <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">$168</span></div>
+                <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">$185</span><span class="pick-num__sub up">+10.1%</span></div>
+                <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">$159</span><span class="pick-num__sub dn">-5.4%</span></div>
+              </div></div>
+            </div>
+
+            <div class="stock-pick-card">
+              <div class="stock-pick-card__top">
+                <div class="stock-pick-card__rank">2</div>
+                <div class="stock-pick-card__info">
+                  <div class="stock-pick-card__name"><a class="pick-name-link" href="#">AVGO (브로드컴)</a><span class="ma20-badge">20일선 지지 유지</span></div>
+                  <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$384.05</span><span class="stock-pick-card__change up">+1.18%</span></div>
+                  <div class="stock-pick-card__scenario">20일선을 지지선 삼아 안정적으로 움직이는 종목이에요. AI 인프라 수요가 견조해 SW 회전의 수혜가 이어지고 있어요.</div>
+                  <div class="ma200-gauge">
+                    <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:5.2%"></div></div><span class="ma200-gauge__pct up">+6.2%</span></div>
+                    <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                  </div>
+                </div>
+                <div class="stock-pick-mini-chart"><svg width="88" height="52" viewBox="0 0 88 52"><polyline points="2,30 20,26 38,28 54,20 70,22 86,16" fill="none" stroke="var(--up)" stroke-width="2"/><line x1="2" y1="27" x2="86" y2="27" stroke="var(--primary)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/></svg></div>
+              </div>
+              <div class="pick-nums"><div class="pick-nums__grid">
+                <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">$384</span></div>
+                <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">$398</span><span class="pick-num__sub up">+3.6%</span></div>
+                <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">$372</span><span class="pick-num__sub dn">-3.1%</span></div>
+              </div></div>
+            </div>
+
+            <div class="stock-pick-card">
+              <div class="stock-pick-card__top">
+                <div class="stock-pick-card__rank">3</div>
+                <div class="stock-pick-card__info">
+                  <div class="stock-pick-card__name">JPM (JP모건)<span class="ma20-badge">20일선 상회</span></div>
+                  <div class="stock-pick-card__meta"><span class="stock-pick-card__price">$212.40</span><span class="stock-pick-card__change up">+0.62%</span></div>
+                  <div class="stock-pick-card__scenario">실적 발표를 앞두고 20일선 위에서 꾸준히 지지받고 있어요. 순이자마진 개선 기대가 은행주 전반의 투자심리를 받치고 있어요.</div>
+                  <div class="ma200-gauge">
+                    <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:10.8%"></div></div><span class="ma200-gauge__pct up">+12.9%</span></div>
+                    <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+                  </div>
+                </div>
+                <div class="stock-pick-mini-chart"><svg width="88" height="52" viewBox="0 0 88 52"><polyline points="2,34 20,30 38,32 54,26 70,24 86,20" fill="none" stroke="var(--up)" stroke-width="2"/><line x1="2" y1="31" x2="86" y2="31" stroke="var(--primary)" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/></svg></div>
+              </div>
+              <div class="pick-nums"><div class="pick-nums__grid">
+                <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">$212</span></div>
+                <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">$224</span><span class="pick-num__sub up">+5.5%</span></div>
+                <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">$204</span><span class="pick-num__sub dn">-3.8%</span></div>
+              </div></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- 사이드바 -->
+  <aside class="layout-grid__right">
+    <div class="side-card">
+      <div class="side-card__head">📊 시장 지표</div>
+      <div class="mkt-row"><span class="mkt-name">S&P500</span><span class="mkt-val"><span class="mkt-price">5,431.6</span> <span class="mkt-chg down">-0.62%</span></span></div>
+      <div class="mkt-row"><span class="mkt-name">나스닥</span><span class="mkt-val"><span class="mkt-price">17,689.4</span> <span class="mkt-chg down">-0.91%</span></span></div>
+      <div class="mkt-row"><span class="mkt-name">다우</span><span class="mkt-val"><span class="mkt-price">39,721.0</span> <span class="mkt-chg up">+0.14%</span></span></div>
+      <div class="mkt-row"><span class="mkt-name">필라델피아 반도체</span><span class="mkt-val"><span class="mkt-price">5,102.3</span> <span class="mkt-chg up">+1.83%</span></span></div>
+      <div class="mkt-row"><span class="mkt-name">원/달러</span><span class="mkt-val"><span class="mkt-price">1,388.5</span> <span class="mkt-chg up">+3.2</span></span></div>
+    </div>
+
+    <div class="cta-card">
+      <div class="cta-card__t">매일 밤, 오늘의 이슈를 먼저</div>
+      <div class="cta-card__d">미국장 이슈 브리핑을 텔레그램·이메일로 자동으로 받아보세요.</div>
+      <a class="cta-card__btn" href="#">구독하기</a>
+    </div>
+  </aside>
+
+</div>
+</div>
+
+<button class="theme-toggle" onclick="document.documentElement.classList.toggle('dark');this.textContent=document.documentElement.classList.contains('dark')?'☀️ 라이트':'🌙 다크';">🌙 다크</button>
+
+</body>
+</html>
