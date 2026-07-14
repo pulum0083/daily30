@@ -967,6 +967,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     elif internal_type == "us":
         # 미국 이슈 중심 브리핑 — 예측 대신 오늘의 관점 + 이슈 카드. 성적표 사이드바 없음.
         ctx.update(build_issues(analysis))
+        ctx.update(build_us_tone(market_data))
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
