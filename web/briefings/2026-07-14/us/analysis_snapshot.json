@@ -1,0 +1,151 @@
+{
+  "analysis_format": "signal",
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 40,
+    "down_pct": 60,
+    "confidence": 62
+  },
+  "reason_title": "오늘 밤 최대 변수는 CPI, 신호는 엇갈려요",
+  "sig_verdict": "혼조 속 약세 우위 · 신호 5개 중 3개가 하락",
+  "sig_tone": "down",
+  "sig_items": [
+    {
+      "level": "down",
+      "label": "반도체(SOX)",
+      "desc": "프리마켓 반도체 지수(SOX)가 <b>-4.78%</b>로 크게 밀리며 오늘 장의 가장 큰 부담 요인으로 꼽혀요."
+    },
+    {
+      "level": "neu",
+      "label": "CPI·연준 발언",
+      "desc": "오늘 밤 9시 30분 미국 CPI 발표에 이어 워시 연준 의장 증언까지 예정돼 있어서 물가·금리 방향이 한꺼번에 갈릴 수 있어요."
+    },
+    {
+      "level": "down",
+      "label": "국채금리",
+      "desc": "미국 10년물 금리가 <b>4.609%</b>로 전일 대비 <b>+0.88%</b> 올라있어 성장주 밸류에이션에 부담을 줄 수 있어요."
+    },
+    {
+      "level": "neu",
+      "label": "S&P·나스닥 선물",
+      "desc": "S&P500 선물은 <b>+0.06%</b>로 거의 보합이고, 다우 선물은 <b>-0.23%</b>로 방향이 뚜렷하지 않아요."
+    },
+    {
+      "level": "up",
+      "label": "VIX",
+      "desc": "VIX가 <b>17.4</b>로 20 아래 안정권을 유지하고 있어서 극단적인 공포 심리는 아니에요."
+    }
+  ],
+  "comfort_line": "방향이 애매한 날엔, 무리해서 확신을 만들지 않아도 괜찮아요.",
+  "watch_items": [
+    {
+      "icon": "🇺🇸",
+      "label": "美 CPI 발표 (오늘 21:30)",
+      "text": "예상치는 전월비 <b>-0.1%</b>, 전년비 <b>3.8%</b>예요. 전월 <b>4.2%</b>보다 낮아지는지가 금리 인하 기대의 분수령이에요."
+    },
+    {
+      "icon": "🏛️",
+      "label": "워시 연준 의장 증언 (23:00)",
+      "text": "CPI 발표 직후라 물가 언급 수위에 따라 시장이 다시 한 번 흔들릴 수 있어요."
+    },
+    {
+      "icon": "📊",
+      "label": "S&P500 20일선 지지 여부",
+      "levels": [
+        {
+          "label": "지지",
+          "num": "7,470",
+          "cls": "dn"
+        },
+        {
+          "label": "저항",
+          "num": "7,575",
+          "cls": "up"
+        }
+      ]
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "XOM",
+      "name": "XOM (엑슨모빌)",
+      "price": "$144.51",
+      "change": "+4.05%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 3.82,
+      "ma200_dist_pct": 6.92,
+      "scenario_tag": "에너지 모멘텀",
+      "scenario": "전일 조정에도 20일선을 막 상향 돌파한 종목이에요. 브렌트유가 <b>+1.96%</b> 오르며 에너지주 전반에 우호적인 환경이 만들어지고 있어요.",
+      "action_guide": "시가 $144 이내 진입. 목표: $150(+3.8%) / 손절: $139 이탈 시.",
+      "entry": "$144",
+      "target": "$150",
+      "target_pct": "+3.8%",
+      "stop": "$139",
+      "stop_pct": "-3.8%"
+    },
+    {
+      "ticker": "AVGO",
+      "name": "AVGO (브로드컴)",
+      "price": "$384.05",
+      "change": "-3.98%",
+      "change_cls": "down",
+      "signal": "20일선 지지 유지",
+      "golden": false,
+      "ma20_dist_pct": 0.4,
+      "ma200_dist_pct": 6.24,
+      "scenario_tag": "AI 인프라 수혜",
+      "scenario": "20일선을 지지선 삼아 안정적으로 움직이는 종목이에요. 반도체 섹터 전반의 변동성 속에서도 AI 인프라 수요는 여전히 견조해요.",
+      "action_guide": "시가 $384 이내 진입. 목표: $398(+3.6%) / 손절: $372 이탈 시.",
+      "entry": "$384",
+      "target": "$398",
+      "target_pct": "+3.6%",
+      "stop": "$372",
+      "stop_pct": "-3.1%"
+    },
+    {
+      "ticker": "BAC",
+      "name": "BAC (뱅크오브아메리카)",
+      "price": "$59.50",
+      "change": "-0.28%",
+      "change_cls": "down",
+      "signal": "20일선 상회",
+      "golden": false,
+      "ma20_dist_pct": 2.68,
+      "ma200_dist_pct": 13.68,
+      "scenario_tag": "금리 상승 수혜",
+      "scenario": "20일선 위에서 꾸준히 지지받고 있는 종목이에요. 국채 금리가 오르는 국면에서는 은행주 마진 개선 기대가 커질 수 있어요.",
+      "action_guide": "시가 $59.5 이내 진입. 목표: $62(+4.2%) / 손절: $57.5 이탈 시.",
+      "entry": "$59.5",
+      "target": "$62",
+      "target_pct": "+4.2%",
+      "stop": "$57.5",
+      "stop_pct": "-3.4%"
+    },
+    {
+      "ticker": "MSFT",
+      "name": "MSFT (마이크로소프트)",
+      "price": "$221.09",
+      "change": "-0.32%",
+      "change_cls": "down",
+      "signal": "20일선 상회",
+      "golden": false,
+      "ma20_dist_pct": 2.74,
+      "ma200_dist_pct": -11.17,
+      "scenario_tag": "AI 협력 확대",
+      "scenario": "20일선을 지지선 삼아 반등 흐름을 이어가는 종목이에요. OpenAI와의 협력 강화 소식이 클라우드·AI 서비스 경쟁력에 대한 기대를 키우고 있어요.",
+      "action_guide": "시가 $391 이내 진입. 목표: $405(+3.6%) / 손절: $378 이탈 시.",
+      "entry": "$221.10",
+      "target": "$229.01",
+      "target_pct": "+3.6%",
+      "stop": "$213.74",
+      "stop_pct": "-3.3%"
+    }
+  ],
+  "telegram_signals": [
+    "📅 오늘 밤 9시 30분 미국 CPI가 최대 분수령이에요. 예상대로 <b>3.8%</b>로 내려오면 시장이 안도할 수 있어요.",
+    "💡 반도체 섹터가 오늘 부담이에요. 프리마켓 반도체 지수(SOX)가 <b>-4.78%</b>로 크게 밀렸거든요."
+  ],
+  "generated_at": "2026-07-14T21:17:37.149635+09:00"
+}
