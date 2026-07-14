@@ -1042,6 +1042,9 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
    오늘의 관점(todays_view) — 큐레이션 헤드라인 (지난 장 복기 + 오늘 볼 것)
    validate_analysis 실측 검증 통과 데이터. 코스피 오전 브리핑 전용.
    ────────────────────────────────────────────── */
+/* .dn/.neutral는 US 톤 신호(build_us_tone)용으로 추가됐지만, 코스피 dir_cls("하락"일 때 "dn")도
+   같은 .tv-lead 클래스를 쓰므로 이 규칙을 공유한다 — --dn/--dn-bg를 조정하면 코스피 하락 히어로도
+   함께 바뀐다. US 전용으로 분리하려면 별도 클래스(예: .tv-lead-us)가 필요하다. */
 .tv-lead{background:linear-gradient(180deg,var(--primary-bg),transparent 70%);border:1px solid var(--primary-bg);border-radius:var(--r-lg);padding:20px 20px 22px;}
 .tv-lead.up{background:linear-gradient(180deg,var(--up-bg),transparent 70%);border-color:var(--up-bg);}
 .tv-lead.dn{background:linear-gradient(180deg,var(--dn-bg),transparent 70%);border-color:var(--dn-bg);}
