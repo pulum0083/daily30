@@ -810,6 +810,16 @@
   }
 
   /* ── 초기화 ── */
+  // 레이아웃을 정의하는 라이브 패널(지금 코스피 밴드·스코어보드·사이드바 특이신호)은
+  // window.load(이미지·위젯까지 로드 완료)까지 기다리지 않고 파싱 직후 즉시 노출한다.
+  // 이 스크립트는 <body> 끝에 있어 이 시점에 대상 DOM이 이미 준비돼 있으며, 노출 판정은
+  // fetch 없이 KST 시각·URL 날짜만으로 동기 결정되므로, 본문이 먼저 그려진 뒤 밴드가
+  // 뒤늦게 끼어들며 267px 밀려나는 레이아웃 튐(CLS)을 방지한다.
+  initLiveScoreboard();
+  initLiveMarketPanel();
+  initNowBand();
+  initSidebarSignals();
+
   window.addEventListener('load', () => {
     const params = new URLSearchParams(location.search);
     if (params.get('embed') === '1') document.body.classList.add('is-embed');
@@ -823,10 +833,6 @@
     initNotices();
     initPredictionToast();
     renderSupplyFlows();
-    initLiveScoreboard();
-    initLiveMarketPanel();
-    initNowBand();
-    initSidebarSignals();
     loadLeadersWidget();
     loadIncomeWidget();
     loadVisitorCount();
