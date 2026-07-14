@@ -289,6 +289,9 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - **⚠️ todays_view는 선택된 형식(split/scenario/qa 등)과 무관하게 항상 완전히 출력한다. view_title·dek·recap·outlook 네 필드를 모두 채운다.** view_title은 '오늘의 관점' 섹션 제목이라 어떤 형식에서도 반드시 필요하다. recap/outlook은 split 형식일 때 관점 본문으로 표시되지만, 다른 형식일 때도 생략하지 말고 항상 생성한다.
 - **구조적·대형 테마 우선**: news_summary에 대형주 상장·ADR·정책 대전환·구조적 수급 변화처럼 하루로 끝나지 않고 여러 날에 걸쳐 시장을 지배하는 테마가 있으면, 그날의 단발 등락보다 우선해 view_title 또는 outlook 최상단에 반영한다. 단 news_summary에 실제로 존재하는 테마만 반영하고, 없으면 지어내지 않는다(데이터 정합성).
 - view_title: 오늘 시장을 한 줄로 규정하는 에디토리얼 제목. 예측 방향 단정 금지, 관점 제시.
+  - **⚠️ 이 한 줄이 브리핑 전체에서 가장 중요하다. 그날 브리핑의 퀄리티를 좌우한다.** 오늘 시장을 관통하는
+    단 하나의 핵심을 센스 있게 압축한 한 문장이어야 한다 — 여러 이슈를 나열하지 말고, 가장 중요한 것 하나로
+    프레이밍한다. 밋밋한 요약("혼조세 속 관망")이 아니라, 읽는 순간 오늘이 무슨 날인지 잡히는 헤드라인으로 쓴다.
 - dek: view_title 아래 붙는 1~2문장 부제(해요체). 오늘 관점의 맥락을 풀어 설명한다. `<b>` 강조 허용. **항상 채운다.**
 - recap(어제 복기, 정확히 3개): 전일 마감 데이터(지수·수급·섹터)에 근거해 "어제 무슨 일"을 서술한다.
   · 개별 종목을 언급하면 반드시 그 종목의 6자리 코드를 codes 배열에 넣는다. (미기재 시 검증 단계에서 제거됨)
@@ -314,6 +317,8 @@ DRAM ETF·EWY는 변동성이 커서 거의 매일 reasons의 임팩트 상위�
 - 💡 반도체·🇺🇸 외국인 수급 두 카테고리 다 함께 telegram_signals에 넣는 것은, 오늘 다른 카테고리에 쓸 만한
   항목이 정말 하나도 없을 때만 예외로 허용한다.
 - 두 카테고리 중 하나를 넣더라도, 전날과 똑같은 문형("EWY가 -X% 빠졌어요" 등)을 반복하지 말고 표현을 바꾼다.
+- **순서: 이슈(뉴스·이벤트 촉매)를 먼저, 💡·🇺🇸 단순 수치 항목을 뒤에 둔다.** 독자가 먼저 읽는 첫 줄이
+  단순 등락 수치가 아니라 "오늘 무슨 일이 있었나"가 되도록 한다. (발송 단계에서도 이 순서로 재정렬된다.)
 
 ### 하단 심층 섹션 — sector_focus / us_linked_story 중 택1
 코스피 아침 브리핑 하단에는 두 가지 심층 섹션 중 **하나만** 들어간다.
@@ -459,6 +464,7 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
 - `key_drivers`: 정확히 3개. 각 항목은 `{"text": ..., "codes": [...]}` 객체.
   - `text`: 해요체 완결 1~2문장. 문장 앞머리에 **핵심 주장을 `<b>`로 강조**한다 (예: "<b>미 반도체 강세가 하루 더 이어질 자리예요.</b> 간밤 SOX가 …").
   - 아래 형식 본문(관점)과 **같은 문장을 반복하지 말고**, 예측 방향의 동인만 다른 각도로 압축한다.
+  - **순서(이슈 우선)**: `key_drivers[0]`은 그날 가장 큰 뉴스·이벤트 촉매(실적·정책·대형주 이벤트·경제지표 등)를 앞세운다. DRAM ETF·SOX·EWY 등 **단순 등락 수치만 있는 동인은 뉴스 촉매 동인보다 뒤에** 배치한다. 독자가 첫 번째로 읽는 근거가 "오늘 무슨 일"이 되도록 한다.
   - 개별 종목을 언급하면 그 종목 6자리 코드를 `codes`에 넣는다(미기재 시 검증 단계에서 제거). 없으면 `[]`.
 
 **[형식 지시] 매 실행 시 유저 메시지 하단에 오늘 사용할 형식이 지정된다. 지정된 형식에 따라 아래 중 하나의 필드 세트만 출력한다.**
@@ -546,6 +552,9 @@ US_SYSTEM_PROMPT = """\
 
 하루 전체를 한 줄로 프레이밍하는 리드다. 두 필드를 반드시 채운다.
 - `view_title`: 오늘 미국장의 지배적 테마를 한 문장으로. 헤드라인 톤. (예: "돈이 소프트웨어를 떠나 AI 인프라로 — CPI가 그 속도를 정한다")
+  - **⚠️ 이 한 줄이 브리핑 전체에서 가장 중요하다. 그날 브리핑의 퀄리티를 좌우한다.** 오늘 미국장을 관통하는
+    단 하나의 핵심을 센스 있게 압축한 한 문장으로 쓴다 — 여러 이슈를 나열하지 말고 가장 중요한 것 하나로 프레이밍.
+    밋밋한 요약이 아니라, 읽는 순간 오늘이 무슨 날인지 잡히는 헤드라인이어야 한다.
 - `dek`: view_title을 뒷받침하는 1~2문장. 오늘의 대표 촉매와 그 파급을 요약. 해요체. 숫자 금지, 단어 강조만 허용.
 
 ## 오늘의 이슈(issues) 작성 규칙
@@ -904,6 +913,21 @@ def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
     return prior[-1].get("is_correct")
 
 
+# 💡(반도체 ETF·SOX)·🇺🇸(EWY 외국인수급)은 단순 등락 수치 계열 — 텔레그램에서 뒤로 민다.
+# 나머지 이모지(📰📅🏦🛢️🌏📉😊😐😰 등)는 뉴스·이벤트 촉매 계열이라 앞에 둔다.
+_ETF_NUMBER_LEAD_EMOJIS = ("💡", "🇺🇸")
+
+
+def _issue_first_sort(signals: list) -> list:
+    """텔레그램 시그널을 이슈 우선으로 안정 정렬한다.
+    맨 앞 이모지가 💡·🇺🇸(단순 등락 수치)인 항목을 뒤로, 뉴스·이벤트 촉매 계열을 앞으로.
+    안정 정렬이라 같은 계열 내부의 상대 순서는 그대로 보존한다."""
+    def is_number_signal(s):
+        t = str(s).lstrip()
+        return t.startswith(_ETF_NUMBER_LEAD_EMOJIS)
+    return sorted(signals, key=is_number_signal)  # False(이슈)=0 먼저, True(수치)=1 뒤로
+
+
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
     import re
@@ -973,8 +997,10 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if reason_title:
             lines += [divider, f"💬 {reason_title}"]
 
-        # telegram_signals 우선 사용, 없으면 reasons 앞 2개로 폴백
-        signals = telegram_signals[:2] if telegram_signals else [strip_html(r) for r in reasons[:2]]
+        # telegram_signals 우선 사용, 없으면 reasons로 폴백. 이슈(뉴스·이벤트)를 ETF·수치 계열보다
+        # 먼저 배치하도록 정렬한 뒤 2개를 고른다(선택·순서 모두 이슈 우선).
+        sig_src = telegram_signals if telegram_signals else [strip_html(r) for r in reasons]
+        signals = _issue_first_sort(sig_src)[:2]
         if signals:
             lines += ["", "핵심 시그널:"]
             for s in signals:
@@ -1535,7 +1561,7 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
         "",
         "핵심 시그널:",
     ]
-    for sig in signals[:2]:
+    for sig in _issue_first_sort(signals)[:2]:  # 이슈를 ETF·수치 계열보다 먼저
         lines.append(f"• {strip_html(sig)}")
     lines += [
         f"🔗 상세 분석 → {web_base}/briefings/{date_str}/close/",
