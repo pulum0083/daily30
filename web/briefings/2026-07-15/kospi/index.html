@@ -1,0 +1,810 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026-07-15 코스피 당일 방향 예측 — Double-Shot</title>
+<meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+<meta property="og:type" content="website">
+<meta property="og:title" content="2026-07-15 코스피 당일 방향 예측 — Double-Shot">
+<meta property="og:description" content="KOSPI 당일 방향 예측: 상승 우위 78% · 신뢰도 80%">
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=20260703">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="canonical" href="https://doubleshot.space/briefings/2026-07-15/kospi/">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+
+</head>
+<body>
+
+
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/briefings"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/stocks/">종목 시그널</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+
+
+
+<div class="layout-wrapper">
+  <div class="layout-grid">
+    <main class="layout-grid__main">
+      <div class="accordion-item is-open is-today">
+        <div class="accordion-header">
+          <div class="accordion-header__date-label">2026-07-15</div>
+          <div class="header-nav">
+            <a class="hnav-btn " id="btn-prev" href="/briefings/2026-07-14/kospi/" title="이전 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></a>
+            <a class="hnav-btn disabled" id="btn-next" href="#" title="다음 브리핑"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body__inner">
+            
+
+<div class="nowband" id="now-band" hidden>
+  <div class="nowband__head">
+    <span class="nowband__title" id="nb-title"><span class="nb-dot" id="nb-dot"></span><span id="nb-title-text">지금 코스피</span></span>
+    <span class="nowband__sub" id="nb-sub"></span>
+  </div>
+  <div class="nb-mktrow">
+    <div class="nb-idx">
+      <div class="nb-idx__k">코스피 <small id="nb-kospi-tag" hidden>지난 종가</small></div>
+      <div class="nb-idx__v"><span id="nb-kospi-val">—</span> <small id="nb-kospi-chg"></small></div>
+      <div class="nb-idx__sub" id="nb-subline">코스닥 <b id="nb-kosdaq-val">—</b> <small id="nb-kosdaq-chg"></small> · 원/달러 <b id="nb-fx-val">—</b> <small id="nb-fx-chg"></small></div>
+    </div>
+    <div class="nb-sparkwrap"><canvas class="nb-spark" id="nb-spark" width="118" height="38"></canvas></div>
+  </div>
+  <div class="nb-supply" id="nb-supply" hidden>
+    <span class="nb-supply__lbl" id="nb-supply-lbl">수급</span>
+    <span class="nb-sup"><i>개인</i><b id="nb-indv">—</b></span>
+    <span class="nb-sup"><i>기관</i><b id="nb-inst">—</b></span>
+    <span class="nb-sup"><i>외국인</i><b id="nb-frgn">—</b></span>
+    <span class="nb-supply__unit">억</span>
+  </div>
+  <div class="nb-issues" id="nb-issues" hidden></div>
+</div>
+            
+            
+
+
+<div class="open-section tv-lead up">
+  <div class="tv-kicker">🧭 오늘의 관점</div>
+  <h2 class="tv-title">SK하이닉스 ADR발 수급 폭발, 반도체가 코스피 전체를 밀어올려요</h2>
+  <p class="tv-dek">간밤 EWY가 <b>+5.85%</b>, DRAM ETF가 <b>+9.53%</b> 폭등하며 외국인 자금이 한국 반도체로 쏠리는 그림이 확인됐어요. 오늘은 반도체 쏠림이 지수 전체를 얼마나 끌어올릴지가 관전 포인트예요.</p>
+  
+</div>
+
+            
+              
+                
+<div class="open-section">
+  
+  <div class="flow-card">
+    <div class="flow-lead">간밤 미국 증시가 사상 최고치를 다시 썼고, 한국 반도체를 향한 외국인 수급은 폭발적이었어요. 오늘 코스피는 반도체가 이끄는 상승 우위로 출발할 가능성이 커요.</div>
+    <div class="flow-track">
+      
+      <div class="flow-step up">
+        <div class="flow-node">1</div>
+        <div class="flow-stage">해외 트리거</div>
+        <div class="flow-title">SK하이닉스 ADR 상장, 외국인 수급 폭발</div>
+        <div class="flow-text">SK하이닉스의 미국 ADR 상장이 화제가 되며 EWY가 <b>+5.85%</b>, DRAM ETF는 <b>+9.53%</b> 급등했어요. 외국인 자금이 한국 반도체로 쏠리는 흐름이 뚜렷해요.</div>
+      </div>
+      
+      <div class="flow-step up">
+        <div class="flow-node">2</div>
+        <div class="flow-stage">새벽 선물·나스닥</div>
+        <div class="flow-title">나스닥·S&P500 동반 신고가</div>
+        <div class="flow-text">S&P500이 <b>+0.38%</b> 오르며 사상 최고치를 다시 썼고, 엔비디아는 <b>+4.21%</b> 급등했어요. AI 인프라 투자 기대감이 위험자산 전반을 밀어올렸어요.</div>
+      </div>
+      
+      <div class="flow-step up">
+        <div class="flow-node">3</div>
+        <div class="flow-stage">아침 반도체 read-through</div>
+        <div class="flow-title">SOX +2.54%, 필라델피아 반도체 강세</div>
+        <div class="flow-text">OpenAI 신모델 공개 소식에 AI 인프라 투자 확대 기대가 커지면서 SOX가 <b>+2.54%</b> 올랐어요. 다만 메타의 자체 AI 칩 확대 소식은 메모리 수요 둔화 우려로 부담이 될 수 있어요.</div>
+      </div>
+      
+      <div class="flow-step up end">
+        <div class="flow-node">∴</div>
+        <div class="flow-stage">그래서 오늘은</div>
+        <div class="flow-title">반도체 주도 상승, PPI·연준 발언은 변수</div>
+        <div class="flow-text">반도체 수급과 미국 증시 훈풍이 겹치며 코스피는 상승 우위로 출발할 것 같아요. 다만 오늘 밤 미국 PPI 발표와 워시 연준의장 증언이 있어서 후반 변동성은 열어두는 게 좋아요.</div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+              
+            
+            
+<div class="open-section">
+  <div class="predc">
+    <div class="predc__lbl">
+      당일 방향 예측 <span class="ref">참고 지표</span>
+      <button class="info-icon-btn" data-modal-open="pred-modal">?</button>
+      <span class="section-time">07:27 KST 생성</span>
+    </div>
+    <div class="predc__main">
+      <span class="pchip up">↑ 상승 우위</span>
+      <span class="predc__pct up num">78<span class="predc__pct-u">%</span></span>
+      <span class="predc__conf num">신뢰도 80%</span>
+    </div>
+    <div class="predc__note">모델의 방향 확률일 뿐이에요. 매매 판단은 위 '오늘의 관점'과 아래 분석을 함께 보세요.</div>
+  </div>
+</div>
+            
+            
+<div class="open-section">
+  <div class="rz-title">이렇게 보는 이유</div>
+  <div class="rz-list">
+    
+    <div class="rz-item"><div class="rz-num">1</div><div class="rz-text"><b>SK하이닉스 ADR 상장이 만든 외국인 수급 폭발이 오늘도 이어질 자리예요.</b> 이 이슈로 EWY가 <b>+5.85%</b> 급등하며 외국인 자금이 한국 반도체로 몰리는 신호가 뚜렷해졌어요.</div></div>
+    
+    <div class="rz-item"><div class="rz-num">2</div><div class="rz-text"><b>OpenAI 신모델 공개가 HBM 수요 기대를 다시 키웠어요.</b> AI 인프라 투자 확대 전망이 삼성전자·SK하이닉스 반도체 투자심리를 개선시키고 있어요.</div></div>
+    
+    <div class="rz-item"><div class="rz-num">3</div><div class="rz-text"><b>미국 증시가 사상 최고치를 경신하며 위험선호 분위기를 넘겨줬어요.</b> S&P500이 신고가를 찍었고 VIX도 <b>16.5</b>까지 내려오며 리스크온 환경이 이어지고 있어요.</div></div>
+    
+  </div>
+</div>
+            
+<div class="comfort-line">
+  <div class="comfort-line__badge">
+    <svg class="comfort-line__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+  </div>
+  <p class="comfort-line__text">장이 곧 열려요.<br>오늘은 흐름에 몸을 맡겨봐도 좋을 것 같아요.</p>
+</div>
+            <div class="divider"></div>
+            
+
+<div class="open-section">
+  <div class="open-section__title" style="display:flex;align-items:center;gap:6px;">
+    <span>🏦 외국계 시각</span>
+    <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:auto;text-transform:none;letter-spacing:0;">최근 24시간</span>
+  </div>
+  <div class="ib-list">
+    
+    <div class="ib-row">
+      <div class="ib-logo">GS</div>
+      <div class="ib-body">
+        <div class="ib-name">골드만삭스 <span class="ib-badge bull">강세</span></div>
+        <div class="ib-text">골드만삭스는 코스피가 6800선을 주요 지지선으로 삼아 일단 반등할 것으로 봤어요.</div>
+        <div class="ib-foot">
+          <a class="ib-src" href="https://www.msn.com/ko-kr/money/topstories/%EC%99%B8%EA%B5%AD%EC%9D%B8-1%EC%A1%B0-%EB%8B%B4%EC%9D%80-%EC%BD%94%EC%8A%A4%ED%94%BC-%EC%9D%BC%EB%8B%A8-%EB%B0%98%EB%93%B1-%EA%B3%A8%EB%93%9C%EB%A7%8C%EC%82%AD%EC%8A%A4-6800%EC%84%A0-%EC%A3%BC%EC%9A%94-%EC%A7%80%EC%A7%80%EC%84%A0/ar-AA27U29X" target="_blank" rel="noopener noreferrer">MSN <span class="ib-src-arrow">→</span></a>
+          <span class="ib-time">오늘 01:03</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+<div class="divider"></div>
+            
+            
+            
+            
+<div class="open-section stock-picks-section">
+  <div class="open-section__title">
+    상승 모멘텀 종목
+    <button class="info-icon-btn" data-modal-open="picks-modal">?</button>
+    <a class="picks-track-link" href="https://doubleshot.space/stocks/#mom-track">종목 시그널에서 트래킹 →</a>
+  </div>
+  
+  <div class="pick-legend"><span class="leg-price">주가</span><span class="leg-ma">20일선</span><span class="leg-ma200">200일선</span></div>
+  <div class="stock-picks">
+    
+    <div class="stock-pick-card">
+      <div class="stock-pick-card__top">
+        <div class="stock-pick-card__rank">1</div>
+        <div class="stock-pick-card__info">
+          <div class="stock-pick-card__name"><a class="pick-name-link" href="/stocks/005930/">삼성전자</a><span class="ma20-badge">반도체 수급 폭발 속 강한 반등</span></div>
+          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">263,000원</span><span class="stock-pick-card__change up">+3.34%</span></div>
+          <div class="stock-pick-card__scenario">전일 <b>+3.34%</b> 급등했지만 여전히 20일선을 크게 밑도는 자리예요. 외국인 자금이 한국 반도체로 몰리는 흐름 속에서 낙폭 과대 인식이 반등을 이끌 여력이 있어요.</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:36.2%"></div></div><span class="ma200-gauge__pct up">+43.5%</span></div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        <div class="stock-pick-mini-chart"><canvas id="mc-1" width="88" height="52"></canvas></div>
+      </div>
+      
+      <div class="pick-nums">
+        <div class="pick-nums__grid">
+          <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">265,000원</span></div>
+          <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">278,000원</span><span class="pick-num__sub up">+5.7%</span></div>
+          <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">253,000원</span><span class="pick-num__sub dn">-3.8%</span></div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div class="stock-pick-card">
+      <div class="stock-pick-card__top">
+        <div class="stock-pick-card__rank">2</div>
+        <div class="stock-pick-card__info">
+          <div class="stock-pick-card__name"><a class="pick-name-link" href="/stocks/000660/">SK하이닉스</a><span class="ma20-badge">ADR 상장 이슈로 수급 집중</span></div>
+          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">1,913,000원</span><span class="stock-pick-card__change up">+3.69%</span></div>
+          <div class="stock-pick-card__scenario">전일 <b>+3.69%</b> 오르며 강한 반등을 보였지만 여전히 20일선 아래에 있는 눌림목 자리예요. ADR 상장 이슈로 외국인 매수세가 유입되면서 단기 모멘텀이 살아있어요.</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:50.0%"></div></div><span class="ma200-gauge__pct up">+75.2%</span></div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        <div class="stock-pick-mini-chart"><canvas id="mc-2" width="88" height="52"></canvas></div>
+      </div>
+      
+      <div class="pick-nums">
+        <div class="pick-nums__grid">
+          <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">1,930,000원</span></div>
+          <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">2,050,000원</span><span class="pick-num__sub up">+6.2%</span></div>
+          <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">1,850,000원</span><span class="pick-num__sub dn">-4.1%</span></div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div class="stock-pick-card">
+      <div class="stock-pick-card__top">
+        <div class="stock-pick-card__rank">3</div>
+        <div class="stock-pick-card__info">
+          <div class="stock-pick-card__name"><a class="pick-name-link" href="/stocks/086790/">하나금융지주</a><span class="ma20-badge">20일선 상회, 구조적 강세 지속</span></div>
+          <div class="stock-pick-card__meta"><span class="stock-pick-card__price">134,000원</span><span class="stock-pick-card__change up">+1.06%</span></div>
+          <div class="stock-pick-card__scenario">20일선을 지지선 삼아 완만한 상승을 이어가는 종목이에요. MA200 대비로도 크게 상회하고 있어 구조적 강세 흐름이 살아있어요.</div>
+          <div class="ma200-gauge">
+            <div class="ma200-gauge__row"><span class="ma200-gauge__label">200일선 대비</span><div class="ma200-gauge__track"><div class="ma200-gauge__zero"></div><div class="ma200-gauge__fill up" style="width:21.3%"></div></div><span class="ma200-gauge__pct up">+25.5%</span></div>
+            <div class="ma200-gauge__scale"><span>-60%</span><span>0</span><span>+60%</span></div>
+          </div>
+        </div>
+        <div class="stock-pick-mini-chart"><canvas id="mc-3" width="88" height="52"></canvas></div>
+      </div>
+      
+      <div class="pick-nums">
+        <div class="pick-nums__grid">
+          <div class="pick-num"><span class="pick-num__label">진입 (시가 이내)</span><span class="pick-num__val">135,500원</span></div>
+          <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">142,000원</span><span class="pick-num__sub up">+4.8%</span></div>
+          <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">129,500원</span><span class="pick-num__sub dn">-4.4%</span></div>
+        </div>
+      </div>
+      
+    </div>
+    
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  
+  drawMiniChart('mc-1', [346500.0, 362500.0, 354000.0, 353500.0, 310000.0, 340500.0, 358500.0, 339500.0, 323000.0, 334000.0, 314500.0, 286000.0, 309500.0, 318000.0, 296000.0, 277500.0, 278000.0, 285000.0, 254500.0, 263000.0], [316200.0, 320550.0, 324450.0, 327150.0, 328025.0, 330100.0, 332675.0, 334675.0, 334975.0, 334225.0, 331925.0, 328650.0, 327675.0, 328800.0, 327500.0, 326250.0, 325200.0, 323325.0, 319200.0, 315200.0], [160245.5, 161705.5, 163122.5, 164533.0, 165725.5, 167076.5, 168516.0, 169865.5, 171132.0, 172464.0, 173691.0, 174772.0, 175969.0, 177211.5, 178341.0, 179371.0, 180398.0, 181456.0, 182351.5, 183284.0]);
+  
+  drawMiniChart('mc-2', [2521000.0, 2685000.0, 2764000.0, 2919000.0, 2555000.0, 2580000.0, 2917000.0, 2673000.0, 2628000.0, 2650000.0, 2560000.0, 2187000.0, 2425000.0, 2343000.0, 2201000.0, 2076000.0, 2186000.0, 2180000.0, 1845000.0, 1913000.0], [2149750.0, 2196750.0, 2247700.0, 2296650.0, 2327350.0, 2353750.0, 2387450.0, 2406650.0, 2421400.0, 2435750.0, 2445750.0, 2440200.0, 2457950.0, 2479550.0, 2478850.0, 2480250.0, 2484500.0, 2486000.0, 2463850.0, 2440400.0], [886670.0, 898817.5, 911412.5, 924752.5, 936230.0, 947822.5, 961107.5, 973130.0, 984925.0, 996895.0, 1008392.5, 1018015.0, 1028812.5, 1039160.0, 1048780.0, 1057720.0, 1067130.0, 1076495.0, 1084077.5, 1091987.5]);
+  
+  drawMiniChart('mc-3', [126800.0, 126100.0, 123500.0, 119700.0, 115500.0, 114200.0, 114000.0, 109700.0, 114800.0, 114600.0, 116400.0, 120800.0, 125600.0, 124800.0, 126900.0, 122300.0, 122600.0, 128500.0, 132600.0, 134000.0], [119475.0, 120015.0, 120410.0, 120425.0, 120095.0, 119805.0, 119585.0, 119305.0, 119290.0, 119325.0, 119295.0, 119305.0, 119405.0, 120025.0, 120420.0, 120640.0, 121030.0, 121405.0, 121570.0, 121670.0], [103151.0, 103368.0, 103571.0, 103758.0, 103922.5, 104085.0, 104245.0, 104379.0, 104542.0, 104708.5, 104879.5, 105068.0, 105288.0, 105506.0, 105733.0, 105928.0, 106105.5, 106309.5, 106529.0, 106744.5]);
+  
+});
+</script>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="layout-grid__right">
+      
+<div class="right-panel" id="market-data-panel">
+  <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:27 KST</span></div>
+  <div class="mkt-list">
+    
+    <div class="mkt-row">
+      <div class="mkt-row-info">
+        <span class="mkt-name">나스닥</span>
+        <div class="mkt-vals"><div class="mkt-val">26,107.01</div><div class="mkt-chg up">+0.90%</div></div>
+      </div>
+      
+      <div class="mkt-spark"><canvas id="c-nasdaq"></canvas></div>
+      
+    </div>
+    
+    <div class="mkt-row">
+      <div class="mkt-row-info">
+        <span class="mkt-name">필라델피아 반도체</span>
+        <div class="mkt-vals"><div class="mkt-val">12,661.93</div><div class="mkt-chg up">+2.54%</div></div>
+      </div>
+      
+      <div class="mkt-spark"><canvas id="c-sox"></canvas></div>
+      
+    </div>
+    
+    <div class="mkt-row">
+      <div class="mkt-row-info">
+        <span class="mkt-name">나스닥100 선물</span>
+        <div class="mkt-vals"><div class="mkt-val">29,765.25</div><div class="mkt-chg up">+1.16%</div></div>
+      </div>
+      
+      <div class="mkt-spark"><canvas id="c-nq"></canvas></div>
+      
+    </div>
+    
+    <div class="mkt-row">
+      <div class="mkt-row-info">
+        <span class="mkt-name" style="display:flex;align-items:center;gap:4px">VIX 공포지수<button class="info-icon-btn" data-modal-open="vix-modal">?</button></span>
+        <div class="mkt-vals"><div class="mkt-val">16.50</div><div class="mkt-chg down">-3.79%</div></div>
+      </div>
+      
+      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal">보통</span></div>
+      
+    </div>
+    
+  </div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  
+  drawSparkline('c-nasdaq', [25887.0039, 25838.1113, 25878.7891, 26002.1426, 26156.8418, 26083.8457, 26146.2793, 26155.4297, 26126.4941, 26106.8066], '#E03131');
+  
+  drawSparkline('c-sox', [12327.207, 12313.0049, 12348.0039, 12585.7754, 12792.5654, 12690.7246, 12727.6533, 12750.0889, 12646.7119, 12661.7471], '#E03131');
+  
+  drawSparkline('c-nq', [29772.5, 29781.25, 29772.5, 29785.5, 29826.75, 29863.25, 29824.0, 29786.75, 29793.5, 29765.25], '#E03131');
+  
+});
+</script>
+      
+      
+
+<div class="ssig" id="signals-today" hidden>
+  <div class="ssig__h"><span class="ssig__ic">⚡</span><span>오늘의 특이 신호</span><small class="ssig__note">장중 실시간</small></div>
+  <div class="ssig__list" id="signals-today-list"></div>
+  <a class="ssig__cta" href="/stocks/#signals-all">종목 시그널 전체 보기 <span>→</span></a>
+</div>
+      
+
+<div class="sc-card">
+  <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+  <div class="sc-stats">
+    <div class="sc-stat"><div class="sc-stat__v mid">60%</div><div class="sc-stat__l">최근 15건</div></div>
+    <div class="sc-stat"><div class="sc-stat__v mid">64%</div><div class="sc-stat__l">누적 64건</div></div>
+    <div class="sc-stat"><div class="sc-stat__v">2.9%</div><div class="sc-stat__l">적중일 평균</div></div>
+  </div>
+  <div class="sc-bar">
+    <i class="sc-bar__h" style="width:55%"></i><i class="sc-bar__m" style="width:36%"></i><i class="sc-bar__p" style="width:9%"></i>
+  </div>
+  <button class="sc-card__cta" data-modal-open="scorecard-modal">틀린 날까지 전부 공개해요 <span>→</span></button>
+</div>
+
+<div class="info-modal-backdrop" id="scorecard-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="scorecard-modal-title">
+    <button class="info-modal__close" data-modal-close="scorecard-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="scorecard-modal-title">우리 예측 성적표</div>
+    <div class="info-modal__body">
+      <div class="sc-stats">
+        <div class="sc-stat"><div class="sc-stat__v mid">60%</div><div class="sc-stat__l">최근 15건</div></div>
+        <div class="sc-stat"><div class="sc-stat__v mid">64%</div><div class="sc-stat__l">누적 64건</div></div>
+        <div class="sc-stat"><div class="sc-stat__v">2.9%</div><div class="sc-stat__l">적중일 평균</div></div>
+      </div>
+
+      <div class="sc-modal-sec">월별 적중률</div>
+      <div class="sc-mrate">
+        
+        <div class="sc-mrate__row"><span class="sc-mrate__m">4월</span><div class="sc-mrate__bar"><i class="mid" style="width:69%"></i></div><span class="sc-mrate__v">69%</span></div>
+        
+        <div class="sc-mrate__row"><span class="sc-mrate__m">5월</span><div class="sc-mrate__bar"><i class="mid" style="width:67%"></i></div><span class="sc-mrate__v">67%</span></div>
+        
+        <div class="sc-mrate__row"><span class="sc-mrate__m">6월</span><div class="sc-mrate__bar"><i class="mid" style="width:62%"></i></div><span class="sc-mrate__v">62%</span></div>
+        
+        <div class="sc-mrate__row"><span class="sc-mrate__m">7월</span><div class="sc-mrate__bar"><i class="mid" style="width:56%"></i></div><span class="sc-mrate__v">56%</span></div>
+        
+      </div>
+
+      <div class="sc-modal-sec">최근 예측 결과</div>
+      <div class="sc-miss">
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/13 (월)</span><span class="sc-miss__tag no">✗ 상승 예측 → 실제 -8.95%</span></div>
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/10 (금)</span><span class="sc-miss__tag ok">✓ 상승 예측 → 실제 +2.52%</span></div>
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/9 (목)</span><span class="sc-miss__tag ok">✓ 상승 예측 → 실제 +0.62%</span></div>
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/8 (수)</span><span class="sc-miss__tag ok">✓ 하락 예측 → 실제 -5.35%</span></div>
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/7 (화)</span><span class="sc-miss__tag no">✗ 상승 예측 → 실제 -4.91%</span></div>
+        
+        <div class="sc-miss__item"><span class="sc-miss__date">7/6 (월)</span><span class="sc-miss__tag ok">✓ 하락 예측 → 실제 -0.46%</span></div>
+        
+      </div>
+
+      <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
+    </div>
+  </div>
+</div>
+      
+<div class="subcard">
+  <div class="subcard__ic">✈</div>
+  <div class="subcard__t">브리핑을 텔레그램으로</div>
+  <div class="subcard__d">매일 아침·저녁, 예측 결과와 오늘의 관점을 놓치지 않게 자동으로 받아보세요.</div>
+  <a class="subcard__btn" href="https://t.me/doubleshot30" target="_blank" rel="noopener">텔레그램으로 구독 <span>→</span></a>
+  <div class="subcard__meta">무료 · 광고 없음 · 앱 설치 없이 텔레그램에서</div>
+</div>
+
+<a class="toolcard" href="/stocks/income-designer/">
+  <div class="toolcard__ic">🗓️</div>
+  <div>
+    <div class="toolcard__t">월배당 계산기</div>
+    <div class="toolcard__d">배당 ETF로 매달 현금흐름 설계하기</div>
+  </div>
+  <span class="toolcard__arr">→</span>
+</a>
+
+<div class="sidebar-footer">
+  <a class="sidebar-intro" href="mailto:pulum0083@gmail.com">메일 문의</a>
+  <a class="sidebar-intro" href="https://doubleshot.space/">Double-Shot 소개 →</a>
+</div>
+<div class="sidebar-visitors" id="sidebar-visitors" style="display:none">
+  <span class="sidebar-visitors__label">누적 방문자</span>
+  <span class="sidebar-visitors__count" id="sidebar-visitors-count">—</span>
+</div>
+<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-07-15T07:27:22.577473+09:00</div>
+    </aside>
+  </div>
+
+  
+<section class="bottom-list">
+  <div class="bl-divider">
+    <span class="bl-divider__label">브리핑 목록</span>
+    <div class="bl-divider__line"></div>
+  </div>
+
+  
+  <div class="bl-today">
+    <div class="bl-today__head">
+      <span class="bl-today__date">2026-07-15</span>
+      <span class="bl-today__day">수요일</span>
+    </div>
+    <div class="bl-today__body">
+      
+      
+      <div class="bl-slot is-current">
+        <div class="bl-slot__label">코스피 예측</div>
+        <div class="bl-slot__title">상승 우위</div>
+        <div class="bl-slot__meta"><span class="bl-pill up">▲</span><span class="bl-slot__time">07:28</span></div>
+      </div>
+      
+      
+      
+      <div class="bl-slot is-pending">
+        <div class="bl-slot__label">코스피 마감</div>
+        <div class="bl-slot__title">생성 예정</div>
+        <div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 16:30 예정</span></div>
+      </div>
+      
+      
+      
+      <div class="bl-slot is-pending">
+        <div class="bl-slot__label">미국 시장</div>
+        <div class="bl-slot__title">생성 예정</div>
+        <div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 21:20 예정</span></div>
+      </div>
+      
+      
+    </div>
+  </div>
+  
+
+  
+  <div class="bl-month">2026년 7월</div>
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-14</span><span class="bl-row__day">화</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-14/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-14/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-14/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-13</span><span class="bl-row__day">월</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-13/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-13/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-13/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-10</span><span class="bl-row__day">금</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-10/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-10/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-10/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-09</span><span class="bl-row__day">목</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-09/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:45</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-09/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-09/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-08</span><span class="bl-row__day">수</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-08/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-08/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-08/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-07</span><span class="bl-row__day">화</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-07/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-07/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-07/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-06</span><span class="bl-row__day">월</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-06/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-06/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-06/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:17</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-03</span><span class="bl-row__day">금</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-03/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:27</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-03/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <div class="bl-cell is-empty"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__empty">미생성</span></div></div>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-02</span><span class="bl-row__day">목</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-02/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:31</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-02/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-02/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">21:39</span></div></a>
+    
+    
+  </div>
+  
+  
+  <div class="bl-row">
+    <div class="bl-row__date"><span class="bl-row__num">07-01</span><span class="bl-row__day">수</span></div>
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:31</span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+    
+    
+    
+    <a class="bl-cell is-ready" href="/briefings/2026-07-01/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">21:21</span></div></a>
+    
+    
+  </div>
+  
+</section>
+</div>
+
+
+
+<div class="info-modal-backdrop" id="picks-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="picks-modal-title">
+    <button class="info-modal__close" data-modal-close="picks-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="picks-modal-title">잭 켈로그 20일선 전략이란?</div>
+    <div class="info-modal__body">
+      <p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(20일선) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+      <br>
+      <p><strong>선별 기준</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+        <li>20일선을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+        <li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+        <li>최소 <strong>3거래일 이상</strong> 20일선 위에서 유지 중인 종목</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 매매 추천이 아닌 상승 모멘텀 종목 탐색 목적으로 제공됩니다.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="acc-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="acc-modal-title">
+    <button class="info-modal__close" data-modal-close="acc-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
+    <div class="info-modal__body">
+      <p>AI가 당일 방향(상승 / 하락)을 예측한 결과를 실제 종가와 비교해 맞힌 비율이에요.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
+        <li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
+        <li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="vix-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="vix-modal-title">
+    <button class="info-modal__close" data-modal-close="vix-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="vix-modal-title">VIX 공포지수(Volatility Index)</div>
+    <div class="info-modal__body">
+      <p>S&amp;P500 옵션 시장에서 산출되는 30일 내재변동성 지표로, 시장 참여자들이 예상하는 변동성의 크기를 나타냅니다. '월스트리트 공포지수'라고도 불립니다.</p>
+      <br>
+      <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong style="color:#16A34A">15 미만</strong> : 안정 — 시장이 매우 안정적</li>
+        <li><strong style="color:#65A30D">15~20</strong> : 보통 — 정상 변동성 범위</li>
+        <li><strong style="color:#CA8A04">20~30</strong> : 경계 — 불확실성 확대</li>
+        <li><strong style="color:#E03131">30~40</strong> : 불안 — 투자자 심리 위축</li>
+        <li><strong style="color:#B91C1C">40 이상</strong> : 극단 — 시장 패닉 수준</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="pred-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">
+    <button class="info-modal__close" data-modal-close="pred-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="pred-modal-title">당일 방향 예측이란?</div>
+    <div class="info-modal__body">
+      <p>미국 선물·지수, 외국인 수급, 반도체 지표 등 다수의 시장 데이터를 종합하여 AI가 당일 코스피 종가 방향을 분석한 결과입니다.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+        <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>
+        <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>
+        <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
+        <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
+    </div>
+  </div>
+</div>
+
+
+<div class="info-modal-backdrop" id="sector-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
+    <button class="info-modal__close" data-modal-close="sector-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+    <div class="info-modal__body">
+      <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+      <br>
+      <p><strong>읽는 법</strong></p>
+      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+        <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+        <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요.</li>
+        <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
+    </div>
+  </div>
+</div>
+
+
+<footer class="site-footer">
+  <div class="site-footer__links">
+    <a href="/legal/disclaimer/">면책 고지</a>
+    <a href="/legal/privacy/">개인정보처리방침</a>
+    <a href="/legal/terms/">이용약관</a>
+    <a href="mailto:pulum0083@gmail.com">문의</a>
+  </div>
+  <div class="site-footer__base">© 2026 Double-Shot</div>
+</footer>
+
+<script src="/assets/main.js?v=20260703"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initLiveScoreboard === 'function') initLiveScoreboard();
+  if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
+  if (typeof initIssueBriefing === 'function') initIssueBriefing();
+  if (typeof patchBriefingList === 'function') patchBriefingList();
+  if (typeof initNotices === 'function') initNotices();
+  if (typeof loadVisitorCount === 'function') loadVisitorCount();
+});
+</script>
+
+</body>
+</html>
