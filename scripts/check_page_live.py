@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """텔레그램 발송 전, 상세 브리핑 페이지가 실제로 배포되어 열리는지 확인한다.
 
-GitHub Pages 배포(peaceiris/actions-gh-pages) 직후에도 CDN 반영까지 수십 초~
-수 분 지연될 수 있어, 배포 스텝이 끝났다고 곧바로 페이지가 열린다는 보장이 없다.
-이 스크립트는 페이지가 실제로 열릴 때까지(200 OK) 재시도한다 — 시간/횟수
-제한으로 포기하지 않는다. 잘못된 조기 포기로 텔레그램 발송이 스킵되는 것을
-막기 위함(2026-07-06: 10회 시도 제한 때문에 정상 배포된 페이지를 못 잡아
-발송이 누락된 사고). 워크플로우 잡 자체의 타임아웃이 최종 안전망 역할을 한다.
+실제 서비스 URL(doubleshot.space, Vercel)이 열릴 때까지 재시도한다.
+배포 스텝이 끝났다고 곧바로 페이지가 열린다는 보장이 없어(CDN 반영 지연) 몇 차례
+재시도는 필요하지만(2026-07-06: 10회 시도 제한 때문에 정상 배포된 페이지를 못 잡아
+발송이 누락된 사고), 무제한 재시도는 반대로 "영원히 안 뜨는 페이지"를 못 걸러낸다
+(2026-07-14: GitHub Pages 자체가 저장소에서 비활성화된 채로 이 스크립트가 gh-pages
+URL을 무한 재시도해 잡이 멈추고 텔레그램이 끝내 발송되지 않은 사고 — 이후 확인
+대상을 실제 서비스 URL로 바꾸고 상한을 둠). 상한 초과 시 조용히 넘어가지 않고
+실패(exit 1)한다 — 무음 스킵보다 명시적 실패가 낫다.
 """
 
 import argparse
@@ -29,13 +31,14 @@ URL_MAP = {
 }
 
 RETRY_INTERVAL_SEC = 10
+MAX_ATTEMPTS = 60  # 10초 간격 60회 = 최대 10분
 
 
 def get_web_base_url() -> str:
     base = os.environ.get("WEB_BASE_URL")
     if base:
         return base.rstrip("/")
-    return "https://pulum0083.github.io/daily30"
+    return "https://doubleshot.space"
 
 
 def build_url(briefing_type: str) -> str:
@@ -65,14 +68,16 @@ def main():
     url = build_url(args.type)
     print(f"상세 페이지 라이브 확인: {url}")
 
-    attempt = 0
-    while True:
-        attempt += 1
+    for attempt in range(1, MAX_ATTEMPTS + 1):
         if is_live(url):
             print(f"✅ 확인 완료 (시도 {attempt})")
             sys.exit(0)
-        print(f"⏳ 아직 미반영 (시도 {attempt}) — {RETRY_INTERVAL_SEC}초 후 재시도")
-        time.sleep(RETRY_INTERVAL_SEC)
+        if attempt < MAX_ATTEMPTS:
+            print(f"⏳ 아직 미반영 (시도 {attempt}/{MAX_ATTEMPTS}) — {RETRY_INTERVAL_SEC}초 후 재시도")
+            time.sleep(RETRY_INTERVAL_SEC)
+
+    print(f"❌ {MAX_ATTEMPTS}회 시도 후에도 페이지가 열리지 않음 — 배포 실패로 간주하고 중단", file=sys.stderr)
+    sys.exit(1)
 
 
 if __name__ == "__main__":
