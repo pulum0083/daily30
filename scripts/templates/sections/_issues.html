@@ -1,0 +1,30 @@
+{# 미국 브리핑 오늘의 이슈 카드 (양면/단면 분기, 감성 색) #}
+{% if issues %}
+<div class="open-section">
+  <div class="open-section__title">📌 오늘 점검할 이슈</div>
+  <div class="issue-list">
+    {% for it in issues %}
+    <div class="issue-card">
+      <div class="issue-card__title">{{ it.title }}</div>
+      {% if it.body %}<div class="issue-card__body">{{ it.body }}</div>{% endif %}
+      {% if it.down or it.up %}
+      <div class="issue-card__impact">
+        {% if it.down %}
+        <div class="imp-side down">
+          <span class="imp-arrow">▼</span><span class="imp-label">{{ it.down.label }}</span>
+          {% if it.down.tickers %}<span class="imp-tickers">{% for t in it.down.tickers %}<span class="imp-tk">{{ t }}</span>{% endfor %}</span>{% endif %}
+        </div>
+        {% endif %}
+        {% if it.up %}
+        <div class="imp-side up">
+          <span class="imp-arrow">▲</span><span class="imp-label">{{ it.up.label }}</span>
+          {% if it.up.tickers %}<span class="imp-tickers">{% for t in it.up.tickers %}<span class="imp-tk">{{ t }}</span>{% endfor %}</span>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
