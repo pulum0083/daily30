@@ -18,7 +18,7 @@
         <div class="accordion-body">
           <div class="accordion-body__inner">
             {% if todays_view %}
-            <div class="open-section tv-lead">
+            <div class="open-section tv-lead {{ dir_cls }}">
               <div class="tv-kicker">🧭 오늘의 관점</div>
               <h2 class="tv-title">{{ todays_view.view_title }}</h2>
               {% if todays_view.dek %}<p class="tv-dek">{{ todays_view.dek | safe }}</p>{% endif %}
