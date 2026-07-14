@@ -946,8 +946,9 @@ def validate(analysis, latest, btype):
     a = copy.deepcopy(analysis)
     corrections, warnings, blocks = [], [], []
 
-    # 1) 구조 필드 — 예측형 브리핑(kospi/us)만. 마감(kospi-close)은 예측 필드가 없는 시황 요약이라 제외.
-    if btype in ("kospi", "us"):
+    # 1) 구조 필드 — 예측형 브리핑(kospi)만. 마감(kospi-close)은 예측 필드가 없는 시황 요약이라 제외.
+    #    us는 이슈 중심 구조로 재정의되며 prediction 필드가 없어졌으므로(예측 정확도 채점 탈퇴) 제외.
+    if btype == "kospi":
         pred = a.get("prediction") or {}
         up = pred.get("up_pct")
         if not isinstance(up, (int, float)) or isinstance(up, bool) or not (0 <= up <= 100):
