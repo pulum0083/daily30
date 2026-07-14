@@ -1206,3 +1206,20 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .ssig-bdg{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--surface-inset);color:var(--muted);white-space:nowrap;}
 .ssig-bdg.flow{background:var(--primary-bg);color:var(--primary);}
 .ssig-row--sig .ssig-chg{margin-left:auto;padding-top:1px;font-size:12.5px;white-space:nowrap;}
+
+/* ── 미국 브리핑 오늘의 이슈 카드 ── */
+.issue-list{display:flex;flex-direction:column;gap:12px;}
+.issue-card{border:1px solid var(--hairline);border-radius:var(--r-md);padding:15px 16px;background:var(--canvas);}
+.issue-card__title{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.4;}
+.issue-card__body{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.65;}
+.issue-card__body b{color:var(--ink);}
+.issue-card__impact{display:flex;flex-direction:column;gap:7px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--hairline);}
+.imp-side{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.imp-arrow{font-size:11px;font-weight:800;flex-shrink:0;line-height:1.3;}
+.imp-label{font-size:12px;font-weight:800;flex-shrink:0;}
+.imp-side.down .imp-arrow,.imp-side.down .imp-label{color:var(--dn);}
+.imp-side.up .imp-arrow,.imp-side.up .imp-label{color:var(--up);}
+.imp-tickers{display:flex;gap:6px;flex-wrap:wrap;}
+.imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
+.imp-side.down .imp-tk{background:var(--dn-bg);color:var(--dn);}
+.imp-side.up .imp-tk{background:var(--up-bg);color:var(--up);}
