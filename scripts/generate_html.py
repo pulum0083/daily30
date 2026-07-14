@@ -954,6 +954,16 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     if internal_type == "close":
         ctx.update(build_close_sections(analysis, market_data, index_name, target_date))
         ctx["og_description"] = analysis.get("market_title", f"{target_date} 코스피 마감")
+    elif internal_type == "us":
+        # 미국 이슈 중심 브리핑 — 예측 대신 오늘의 관점 + 이슈 카드. 성적표 사이드바 없음.
+        ctx.update(build_issues(analysis))
+        ctx.update(build_analyst_quotes(market_data))
+        ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
+        ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
+        ctx["todays_view"] = analysis.get("todays_view")
+        ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
+        tv = analysis.get("todays_view") or {}
+        ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx.update(build_reasons(analysis))
@@ -961,25 +971,22 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
-        # 오늘의 관점(todays_view) — 코스피 오전 브리핑 전용. 없으면 None → 템플릿에서 섹션 생략.
-        ctx["todays_view"] = analysis.get("todays_view") if internal_type == "kospi" else None
-        # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더 → 형식별 자체 제목(reason_title) 숨김.
-        ctx["format_in_view"] = (internal_type == "kospi")
-        if internal_type == "kospi":
-            ctx.update(build_ib_korea_views())
-            uls = analysis.get("us_linked_story") or {}
-            if uls.get("title"):
-                ctx["us_linked_title"] = uls["title"]
-                ctx["us_linked_paragraphs"] = uls.get("paragraphs", [])
-                ctx["us_linked_stocks"] = uls.get("related_stocks", [])
-            else:
-                # us_linked_story가 없으면(또는 폴백) 섹터 리뷰를 렌더한다 — 날짜 시드 랜덤으로 택1됨
-                sf = analysis.get("sector_focus") or {}
-                if sf.get("signal") and sf.get("paragraphs"):
-                    ctx["sector_emoji"] = sf.get("emoji", "🏭")
-                    ctx["sector_name"] = sf.get("sector_name", "반도체")
-                    ctx["sector_signal"] = sf["signal"]
-                    ctx["sector_paragraphs"] = sf.get("paragraphs", [])
+        ctx["todays_view"] = analysis.get("todays_view")
+        ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더
+        ctx.update(build_ib_korea_views())
+        uls = analysis.get("us_linked_story") or {}
+        if uls.get("title"):
+            ctx["us_linked_title"] = uls["title"]
+            ctx["us_linked_paragraphs"] = uls.get("paragraphs", [])
+            ctx["us_linked_stocks"] = uls.get("related_stocks", [])
+        else:
+            # us_linked_story가 없으면(또는 폴백) 섹터 리뷰를 렌더한다 — 날짜 시드 랜덤으로 택1됨
+            sf = analysis.get("sector_focus") or {}
+            if sf.get("signal") and sf.get("paragraphs"):
+                ctx["sector_emoji"] = sf.get("emoji", "🏭")
+                ctx["sector_name"] = sf.get("sector_name", "반도체")
+                ctx["sector_signal"] = sf["signal"]
+                ctx["sector_paragraphs"] = sf.get("paragraphs", [])
         d = ctx.get("direction", "")
         rp = ctx.get("readout_pct", "")
         ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
