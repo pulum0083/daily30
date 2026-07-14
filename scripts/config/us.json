@@ -2,10 +2,9 @@
   "type": "us",
   "index_name": "S&P500",
   "template": "briefings/us.html",
-  "pred_title": "S&P500 방향 예측",
   "url_prefix": "us",
   "scheduled_time": "21:20",
   "gnb_time": "21:20",
-  "sections_main": ["prediction", "reasons", "nh_stock", "analyst_quotes", "stock_picks"],
-  "sections_sidebar": ["accuracy", "market_data"]
+  "sections_main": ["todays_view", "issues", "analyst_quotes", "stock_picks"],
+  "sections_sidebar": ["market_data"]
 }
