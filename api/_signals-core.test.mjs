@@ -16,10 +16,18 @@ test('급락일 보정: 시장 -5.8%인데 종목 +0.8%(하한선 미달) → co
   assert.ok(!r.cats.includes('counter_up'));
 });
 
-test('상승장에선 역행 하한선 미적용: 시장 +4%인데 종목 -1% → counter_up 유지', () => {
-  const s = { pct: -1, vol: 100, vol_avg20: 100, price: 50, wk52_high: 200 };
-  const r = classifyStock(s, 4);
-  assert.ok(r.cats.includes('counter_up'));
+test('상승장에서 급락 종목은 역행 상승이 아니다: 시장 +0.65%인데 종목 -10.9% → counter_up 아님', () => {
+  // '역행 상승'은 하락장에서 위로 튄 종목만. 시장이 오르는데 폭락한 종목(역행 하락)을
+  // '역행 상승/선방'으로 오분류하면 안 된다.
+  const s = { pct: -10.9, vol: 100, vol_avg20: 100, price: 50, wk52_high: 200 };
+  const r = classifyStock(s, 0.65);
+  assert.ok(!r.cats.includes('counter_up'));
+});
+
+test('역행 상승: 시장 +0.5%인데 종목 +4% → counter_up 아님(동반 상승은 역행 아님)', () => {
+  const s = { pct: 4, vol: 100, vol_avg20: 100, price: 50, wk52_high: 200 };
+  const r = classifyStock(s, 0.5);
+  assert.ok(!r.cats.includes('counter_up'));
 });
 
 test('투매: 거래량 3.2배 + -8.4% → vol_surge', () => {

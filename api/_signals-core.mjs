@@ -24,9 +24,12 @@ export function classifyStock(stock, kospiPct) {
   const badges = [];
   const { pct, vol, vol_avg20, price, wk52_high } = stock;
 
-  // 역행: 방향 반대 + 아웃퍼폼. 단, 시장이 하락한 날엔 종목이 실제로 하한선 이상 올라야 인정(급락일 변별력 보정).
+  // 역행 상승: 하락장에서 종목이 위로 튀는 경우만. 종목이 시장을 '위로' 아웃퍼폼해야 하므로
+  // 부호 있는 비교(pct - kospiPct)를 쓴다. Math.abs를 쓰면 상승장에서 급락한 종목(역행 하락)까지
+  // '역행 상승'으로 오분류돼 "시장이 하락하는 동안 선방"이라는 모순된 문구가 나온다.
+  // 단, 시장이 하락한 날엔 종목이 실제로 하한선 이상 올라야 인정(급락일 변별력 보정).
   const counterFloor = kospiPct < 0 ? Math.min(COUNTER_MIN_GAIN_CAP, Math.abs(kospiPct) * COUNTER_MIN_GAIN_FACTOR) : -Infinity;
-  if (sgn(pct) !== sgn(kospiPct) && Math.abs(pct - kospiPct) >= COUNTER_TREND_OUTPERF && pct >= counterFloor) {
+  if (sgn(pct) !== sgn(kospiPct) && (pct - kospiPct) >= COUNTER_TREND_OUTPERF && pct >= counterFloor) {
     cats.push('counter_up');
     badges.push('역행 상승');
   }
