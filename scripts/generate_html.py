@@ -160,6 +160,16 @@ def build_issues(analysis: dict) -> dict:
     return {"issues": issues}
 
 
+def build_us_tone(market_data: dict) -> dict:
+    """leading_signal.compute_prior_us() 방향(실측 프리마켓·SOX·VIX 기반)을
+    '오늘의 관점' 배경색 CSS 클래스로 매핑한다. 숫자·점수는 절대 반환하지 않는다 —
+    코스피 dir_cls와 동일한 방식으로 색만 동기화하되 채점 대상은 아니다."""
+    from leading_signal import compute_prior_us
+    prior = compute_prior_us(market_data)
+    dir_map = {"상승": "up", "하락": "dn", "중립": "neutral"}
+    return {"dir_cls": dir_map.get(prior["direction"], "neutral")}
+
+
 def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time: str) -> dict:
     pred = analysis.get("prediction", {})
     up_pct = pred.get("up_pct", 50)
