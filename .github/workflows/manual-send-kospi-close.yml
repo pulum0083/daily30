@@ -1,0 +1,44 @@
+# 07/14 마감 브리핑 발행 파이프라인 장애(check_page_live.py 무한 대기) 복구용 1회성 발송 잡.
+# 로컬 네트워크에서 Telegram API TLS가 막혀 있어 GitHub Actions에서 대신 실행한다.
+# 사용 후 삭제할 것.
+name: 수동 발송 (코스피 마감 07/14 복구)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 📄 analysis_kospi-close.json 복구 (snapshot에서)
+        run: cp web/briefings/2026-07-14/close/analysis_snapshot.json data/analysis_kospi-close.json
+
+      - name: 📨 Telegram 전송
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python3 scripts/send_telegram.py --type kospi-close --force --message "$(cat <<'MSG'
+          🇰🇷 코스피 마감 브리핑 | 2026.07.14
+          ────────────────────
+          📊 코스피 6,856.83 (+0.73%) 마감
+
+          💬 코스피 6800 사수, 반도체가 지켰다
+
+          코스피는 장중 6975.11까지 올랐다가 6473.29까지 밀리는 극심한 변동을 겪은 후 결국 +0.73%로 반등 마감했어요. 개인이 4조 1,424억원 대거 던진 물량을 외국인과 기관이 각각 9,523억원, 3조 2,159억원 순매수로 받아내며 지수를 방어한 하루였어요.
+          ────────────────────
+          🔗 상세 분석 → https://doubleshot.space/briefings/2026-07-14/close/
+          MSG
+          )"
