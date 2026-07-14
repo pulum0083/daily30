@@ -17,21 +17,14 @@
         </div>
         <div class="accordion-body">
           <div class="accordion-body__inner">
-            {% include "sections/prediction.html" %}
-            {% if analysis_format == 'scenario' %}
-              {% include "sections/scenario_split.html" %}
-            {% elif analysis_format == 'qa' %}
-              {% include "sections/qa.html" %}
-            {% elif analysis_format == 'signal' %}
-              {% include "sections/signal_board.html" %}
-            {% elif analysis_format == 'flow' %}
-              {% include "sections/flow_chain.html" %}
-            {% elif analysis_format == 'keynum' %}
-              {% include "sections/key_numbers.html" %}
-            {% else %}
-              {% include "sections/why_what_so.html" %}
+            {% if todays_view %}
+            <div class="open-section tv-lead">
+              <div class="tv-kicker">🧭 오늘의 관점</div>
+              <h2 class="tv-title">{{ todays_view.view_title }}</h2>
+              {% if todays_view.dek %}<p class="tv-dek">{{ todays_view.dek | safe }}</p>{% endif %}
+            </div>
             {% endif %}
-            {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
+            {% include "sections/_issues.html" %}
             <div class="divider"></div>
             {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
@@ -41,7 +34,6 @@
     </main>
 
     <aside class="layout-grid__right">
-      {% if accuracy %}{% include "sections/accuracy.html" %}{% endif %}
       {% if market_items %}{% include "sections/market_data.html" %}{% endif %}
       {% include "sections/_chip_cta.html" %}
     </aside>
