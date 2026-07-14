@@ -168,6 +168,9 @@ def _save_market_archive(date_str: str, kospi_close: float, kospi_chg_pct: float
 
 
 def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = False) -> None:
+    if briefing_type == "us":
+        print("[check_accuracy] US는 이슈 중심 전환(2026-07-14)으로 채점 대상이 아니에요 — skip", file=sys.stderr)
+        return
     data = load_briefings()
     briefings = data.get("briefings", [])
 
@@ -242,6 +245,9 @@ def backfill(briefing_type: str = "kospi", force: bool = False) -> None:
     09:10 실행 시점엔 당일 일봉이 아직 없으므로 오늘 이전 날짜만 대상으로 한다.
     force=True 이면 이미 검증된 항목도 종가 기준으로 재정산한다(기준 변경 마이그레이션용).
     """
+    if briefing_type == "us":
+        print("[check_accuracy] US backfill skip — 채점 탈퇴", file=sys.stderr)
+        return
     data = load_briefings()
     today = datetime.now(KST).strftime("%Y-%m-%d")
     pending = sorted({
