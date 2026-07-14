@@ -1,27 +1,84 @@
 {
-  "generated_at": "2026-07-14T09:31:58.621531+09:00",
+  "generated_at": "2026-07-14T10:01:25.082169+09:00",
   "date": "2026-07-14",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.75,
-      "surge": 0.27,
-      "events": []
+      "changePct": 5.4,
+      "surge": 0.41,
+      "events": [
+        {
+          "time": "09:39",
+          "headline": "삼성전자 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFA4SUV0eXRLUVNBYXhaWXZVTE9lbXdkaXZIVW1yRWNFX1hzdGxHWUZvR2VLdG1hQjkwLWtNWHh1dFdDRFlXeFhHa1FYTFNzZEd6SXBWbGhfOEhkMUZa?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 상승 중",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "08:45",
+          "headline": "삼성전자·SK하이닉스 프리마켓서 동반 급락",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE52QjlSZ3lxY0NRb0VnZ1F3anEyaDBKaEhuT21ab1VDRGRSQlo0dmlhclY0Vk1tVFl6QjFUU1A5UVFiekNCbUwtZlJGcGdsLU5fb1oxZW52YzBFYVRlQlphMDBWQWQ3eldm?oc=5",
+          "source": "2news.co.kr",
+          "why": "삼성전자와 SK하이닉스가 프리마켓에서 동반 급락했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.0,
-      "surge": 0.31,
-      "events": []
+      "changePct": 3.85,
+      "surge": 0.45,
+      "events": [
+        {
+          "time": "08:56",
+          "headline": "\"이유없이 급락한 SK하이닉스…美, 고레버리지 韓증시에 물려\"",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE45ak90all2Wk1qcFVaMXNNeUkzTFZLSUhGNUwybl8zWHdMZHg0dXdnYktidDNxRWFZeU9ITTNVVnRWX0tjR0E5TjNGNWU3Vk51WU5XNWZFYkUwVzFraTdxdzR3MnRVVnlmd2FhNW1uT291UQ?oc=5",
+          "source": "KB Think",
+          "why": "미국 증시의 고레버리지 투자 영향으로 SK하이닉스 주가가 이유 없이 급락했다는 분석이 나왔습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "08:50",
+          "headline": "SK하이닉스 실적전망 또 하향...\"이미 주가 급락, 저점 매수 기회\" - 머니투데이",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBVV2ZNOUstODBJRElIaF9QbWJXSWJLMm9IcW54c0syd0h2UU5fNVp0bEJ6Mlg3TldWdWlPdUF0a1h1aVBWb2dkOUIwVjlYZVNGS0VsZXFvVzZDeWdicXp5TmpmdzNFcnRE0gFuQVVfeXFMUDg2emZTbDNHZGhCUHVfWE9FQi1lTlVhSHNCUWg1VnNCU19ySVcweU5SLWoxckxzNFo3OEp2RG9OUFdiTlp6Vjh4TDJLak9VbEVOUUl4a19JN19iTW9VejlTNHNPcGRaaV94RXJqUEE?oc=5",
+          "source": "머니투데이",
+          "why": "SK하이닉스 실적전망 또 하향...\"이미 주가 급락, 저점 매수 기회\" - 머니투데이 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -3.94,
-      "surge": 0.23,
-      "events": []
+      "changePct": -3.38,
+      "surge": 0.34,
+      "events": [
+        {
+          "time": "08:53",
+          "headline": "대신증권, 현대차 목표주가 74만원으로 하향",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9CZXNrWEZEamQ5RVc5ajRXZlI1SC1RNTVvUzQ0OHNDWGs4cGpDNkZ0b0NpZURLQ25fbHpuNmcxOExvNW5qdGtaM21BQjY4NzBIZzRFY1VXR0FSWE8wQWZLalBVVEpwUDRr?oc=5",
+          "source": "2news.co.kr",
+          "why": "대신증권이 현대차의 목표주가를 74만원으로 하향 조정했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:37",
+          "headline": "\"현대차 목표가 74만원 하향…매수 유지\"",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1KUFJfallQV3FtMi02dk1HWlZ2eTA2ZnVyWk44Z3BBaXdOWmtHczQtQUdBREJDcVZQTUl6SE0yYWljQVhIeUItUEVodTR0VWtxM3BfdTNGNHFDS1dU?oc=5",
+          "source": "뉴스핌",
+          "why": "\"현대차 목표가 74만원 하향…매수 유지\" (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
