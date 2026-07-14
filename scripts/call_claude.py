@@ -933,7 +933,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     if briefing_type == "us":
         # US 이슈 중심: 예측 대신 오늘의 관점 + 이슈 제목으로 구성
         header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
-        link   = f"{web_base}/briefings/us/{date_str}/"
+        link   = f"{web_base}/briefings/{date_str}/us/"
         tv = analysis.get("todays_view") or {}
         view_title = strip_html(tv.get("view_title", ""))
         issues = analysis.get("issues") or []
@@ -943,7 +943,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         issue_titles = [strip_html(it.get("title", "")) for it in issues if it.get("title")]
         if issue_titles:
             lines += ["", "오늘 점검할 이슈:"]
-            for t in issue_titles[:3]:
+            for t in issue_titles[:2]:
                 lines.append(f"• {t}")
         lines += [f"🔗 상세 분석 → {link}"]
     else:
