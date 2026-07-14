@@ -177,7 +177,7 @@ def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time:
     direction = pred.get("direction", "중립")
     confidence = pred.get("confidence", 70)
     is_up = "상승" in direction
-    dir_cls = "up" if is_up else ("dn" if "하락" in direction else "")
+    dir_cls = "up" if is_up else ("dn" if "하락" in direction else "neutral")
     band_color = "#E03131" if is_up else "#2775ED"
     dots = max(1, min(5, round(confidence / 20)))
     conf_label = "강함" if confidence >= 80 else ("보통" if confidence >= 60 else "약함")
