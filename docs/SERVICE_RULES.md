@@ -531,3 +531,18 @@ curl -s https://doubleshot.space/data/kospi-news-live.json | python3 -m json.too
 
 - **방지 룰**: 커밋 push를 재시도 루프로 감쌀 때는 반드시 루프 종료 후 성공 여부를 확인하고 실패 시 잡을 중단한다(다음 스텝이 그 커밋의 SHA를 전제로 동작하는 한 특히). "무제한 재시도로 조기 포기를 막는다"는 설계(2026-07-06 사고 방지용)를 적용할 때는, 그 대상이 애초에 살아날 수 있는 것인지(예: Pages가 활성화돼 있는지) 먼저 확인 — 상한 없는 재시도는 "느린 성공"과 "영원한 실패"를 구분하지 못한다.
 - **재발 시 진단 순서**: ① `gh run view <run-id>`로 어느 스텝에서 멈췄는지 확인. ② 그 스텝이 재시도 루프면 대상 URL/리소스가 원리적으로 존재하는지 직접 확인(`curl`, `gh api repos/.../has_pages` 등). ③ 커밋 push 스텝이 ✓(성공)인데 이후 스텝이 이상하면 `git log origin/main`으로 실제로 반영됐는지 직접 대조 — 스텝의 성공 표시를 신뢰하지 않는다.
+
+### 18. 마감 브리핑 커밋이 movers-why 파일 경합으로 재차 발행 중단 (2026-07-15 실사고, 수정 완료)
+
+**증상**: 16:25 KST `kospi-close-briefing` 잡이 데이터 수집·분석·검증·HTML 생성까지 전부 정상 완료했는데, "💾 HTML & 데이터 커밋 → main 푸시" 스텝이 5회 rebase 재시도 모두 동일하게 실패 → §17에서 추가한 `exit 1` 가드가 정상 작동해 잡이 깨끗하게 중단됐지만, 그 결과로 **그날 마감 브리핑(HTML·텔레그램·이메일)이 통째로 발행되지 못하고 유실**됐다(`doubleshot.space/briefings/2026-07-15/close/` → 404로 확인).
+
+**근본 원인**: `kospi-close-briefing` 잡의 "🗞️ 코스피 주도주 뉴스 근거(종가 기준)" 스텝이 `fetch_movers_why.py`로 `web/data/movers-why-{date}.json`·`movers-why-live.json`을 직접 재생성하고, 이후 "💾 HTML & 데이터 커밋" 스텝이 `git add web/ data/`로 이 파일들을 같이 커밋했다. 그런데 같은 시각(16:35~) cron-job.org가 트리거하는 별도 워크플로우 [kospi-news-live.yml](../.github/workflows/kospi-news-live.yml)("이슈 브리핑 수집")도 **같은 파일들**을 독립적으로 `fetch_movers_why.py`로 재수집·커밋한다(POST_MARKET 슬롯, §10 참조). 두 워크플로우가 매번 같은 JSON 파일을 통째로 다른 값으로 재작성하므로 git이 자동 병합을 못 하고, rebase를 몇 번을 재시도해도 **매번 동일한 충돌**이 재현됐다(일시적 경합이 아니라 구조적으로 항상 재현되는 충돌).
+
+`movers-why-*.json`은 `generate_html.py`·`call_claude.py` 어디서도 읽지 않는다 — 사이드바 "코스피 주도주" 위젯이 클라이언트에서 직접 fetch하는 독립 데이터이며, §10 기준 원 소유자는 `kospi-news-live.yml`이다. 즉 `kospi-close-briefing` 잡이 이 파일을 커밋할 이유가 애초에 없었다.
+
+**1차 수정 시도(버그)**: `git add web/ data/ ':(exclude,glob)web/data/movers-why-*.json'`로 스테이징에서만 제외했더니, 워킹트리에는 여전히 unstaged 변경이 남아 `git rebase`가 겹치는 파일이 없어도 `cannot rebase: you have unstaged changes`로 즉시 거부됨 — 같은 스텝이 다른 원인으로 다시 5회 실패했다.
+
+**최종 수정**: [daily_report.yml](../.github/workflows/daily_report.yml) `git add` 직전에 `git checkout -- web/data/movers-why-*.json 2>/dev/null || true`를 추가해 이 잡이 로컬에서 만든 movers-why 변경분을 커밋 전에 완전히 폐기 — 워킹트리를 깨끗한 상태로 만들어 rebase도 정상 동작하고 애초에 충돌 소지 자체가 사라진다. 재실행([run 29399172821](https://github.com/pulum0083/daily30/actions/runs/29399172821))으로 정상 발행 확인.
+
+- **방지 룰**: 한 워크플로우가 `git add web/ data/`처럼 넓은 경로를 통째로 커밋할 때, 그 안에 **다른 워크플로우가 독립 스케줄로 소유·커밋하는 파일**이 섞여 있으면 안 된다. 잡 안에서 그 파일을 스크립트가 재생성했더라도(다른 목적의 부수 효과라도) 커밋 직전에 `git checkout --`으로 폐기해 워킹트리를 깨끗하게 유지할 것. **`git add`에서 pathspec으로 제외하는 것만으로는 부족하다** — `git rebase`는 대상 파일이 겹치지 않아도 unstaged 변경이 하나라도 있으면 무조건 거부한다.
+- **재발 시 진단 순서**: ① 실패 로그에서 `CONFLICT`(내용 충돌)인지 `cannot rebase: you have unstaged changes`(워킹트리 오염)인지 구분 — 원인이 다르다. ② `CONFLICT`면 `git log origin/main`으로 같은 시각에 같은 파일을 커밋한 다른 워크플로우가 있는지 확인(`.github/workflows/*.yml`에서 같은 파일 경로를 `git add`하는 곳 grep). ③ 그 파일이 이 잡의 HTML/텔레그램 생성에 실제로 쓰이는지(`grep`으로 generate_html.py·call_claude.py 등에서 참조 여부) 확인 — 안 쓰이면 커밋 대상에서 완전히 빼는 게 정답, 쓰이면 소유권을 한쪽 워크플로우로 통합하는 게 정답.
