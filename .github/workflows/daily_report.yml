@@ -420,7 +420,8 @@ jobs:
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
-          git add web/ data/ ':(exclude,glob)web/data/movers-why-*.json'
+          git checkout -- web/data/movers-why-*.json 2>/dev/null || true
+          git add web/ data/
           git diff --staged --quiet || git commit -m "🇰🇷 코스피 마감: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           pushed=false
           for i in 1 2 3 4 5; do
