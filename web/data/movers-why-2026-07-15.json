@@ -1,27 +1,84 @@
 {
-  "generated_at": "2026-07-15T09:31:54.586077+09:00",
+  "generated_at": "2026-07-15T10:01:32.133735+09:00",
   "date": "2026-07-15",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 6.75,
-      "surge": 0.14,
-      "events": []
+      "changePct": 4.94,
+      "surge": 0.2,
+      "events": [
+        {
+          "time": "09:34",
+          "headline": "삼성전자 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1jTGxvSV9JelVQLTJfSUlhTGxzSVhRekhfaXYtLVVQUlZFLXI1d1d1SG50M1hJRlNHSlVIYXR6XzFybGVDeENjclBFRmw4cHA4QTVZQzEtb05MQmt1?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 상승 중",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:18",
+          "headline": "美 반도체 훈풍…삼성전자·SK하이닉스 강세",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTFBMNVlrTVRJUEIwV0xqcjY2TmZvVDY0LWNnVUxDTGRwREpTNk5PdWFZcTVvS1RSd3hMWXhWdUx2QzR2eDBFRW1tSDZQemNjVk5rOWhHM3Z2MUhmWnNzaVFKY2c5QQ?oc=5",
+          "source": "에너지경제신문",
+          "why": "美 반도체 훈풍…삼성전자·SK하이닉스 강세",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 12.55,
-      "surge": 0.22,
-      "events": []
+      "changePct": 11.45,
+      "surge": 0.3,
+      "events": [
+        {
+          "time": "06:30",
+          "headline": "SK하이닉스 ADR, 27% 급등…美 바클레이스, 목표 주가 330달러 제시",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5HV1hZVE9JWnRDbE5XdHlTVXdmVWRzVklpT1MtMGlEWU54RHZrV1dhWk1vNnppUkhZSEczOXdrZW0zQnpRSGR0N2puaG1hQUM0S2dLR1paX3VUVEsyQmRsM9IBeEFVX3lxTE41T2dWb0hoUjcydjljOHRjQU1RSUtkS1pGbDNRanZ2VF9SbjdHTXFVQVhYQlpIeE5kdlJDNExfWmlLbnhMeWVsOWlVYlFKVS1EMTBueng0d2REcVI1elR5U04xTm1kTlVNaVVjNjFjYWROc2IzbmlhcA?oc=5",
+          "source": "뉴시스",
+          "why": "미국 바클레이스가 SK하이닉스 ADR에 330달러의 목표 주가를 제시하며 27% 급등을 이끌었다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "07:30",
+          "headline": "“SK하이닉스 ADR 330달러까지 상승 여력”…주가 27% 급등",
+          "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE8xbGRMVHU2VE5tYXVWbl9TUl9acWtSU2J5dnAyTzRQdE5EcGdxOHFFMG5vMnNybDZsaUFqdjN0bU91WDRyRWYwYjJ3ZXk5SnN2eEQweDVR?oc=5",
+          "source": "중앙일보",
+          "why": "“SK하이닉스 ADR 330달러까지 상승 여력”…주가 27% 급등",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 2.12,
-      "surge": 0.17,
-      "events": []
+      "changePct": 1.12,
+      "surge": 0.24,
+      "events": [
+        {
+          "time": "01:04",
+          "headline": "현대차에 물렸는데 탈출 언제 해요? 40% 폭락에도 증권가는 오를 건데 왜요? 목표가 84만 원",
+          "url": "https://news.google.com/rss/articles/CBMiowRBVV95cUxQQklrQ3g3VjZHblV1LU80S1RwOHJ2c3VVLWQ0X3RoUFJFYjlMbkZHNUh3S0psWEZEVGFYMmV0UzQxNEZ0b19uclBaVlVMSFplLTJwTjBfRVJIRTNQTDV3aXVwbjcxd0drQjVLb1dUZ1pNN2tNdjBFQ1pMR2ZJYmpYcWo5R0lZbzBEd0k4NDNsV0JGdnZaa0VZRDBtUVdjY2c5d1p5QlVvaEc1Yjh5TXhwMW9VNGo1MnUzOEdZU2xHNV80bVUybDQ5NVhFTmpvdHJNOXJtY1M1dkt4aTRqRGp0TG1EV2FhdkJ2ZlNUZWItN1ZCbWVYZmRDLTJXbnFyMXJtSTFOcEo1ektjVzd4eHEwbmU4TkhvNzBTOUdGM0RfeWFUZjZtQ1VLcS1EVVhCTkFYTk9yYmxDS0dvMmllVUcyOWlpQi1sN0d0MXFNSDVkY0J1TjdPUi03Ukt5bDk0amo4NWp4eWNPVGkwaWRIS0g3eHRuRnVKY01ZdTYtTGlpcTcwQ2pTdGRnT3ozNlZaUjFwc0tDV3hmVlBIY3NYYzQ4b3NzZnVkSVZhdmhVQ0JvalpZZmUwcEN1RmMwZXVwRGxBeFFYWTZOR2k4aW9vVVNZdFprM184WURIWi0ya19HZWNPTzNuZzJhLUlDZE42MzUyVy00WGJqaXotQWt6MGNKRmRMTlpJNDJad1I2c25idGxfVlM4UXNRUmNYREs0MGtBQUxF?oc=5",
+          "source": "MSN",
+          "why": "증권가에서는 현대차 주가가 40% 폭락했음에도 불구하고 목표가 84만 원을 제시하며 상승을 전망하고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:28",
+          "headline": "물려도 반도체에 물려라?...내릴 땐 같이 울고, 오를 땐 소외되는 현대차 딜레마",
+          "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxNZVRkdmE0UkJuZEdLNWVsY3N1ZGh1NkNTRFpDN0RlekxxS3JlVXBwbWZ0ZXdtMmMxbXBtQ3pKcTg0WW1GejNxT09ocmlSVWNhcTNsZXhyNVVWNVhWcXlsOWFuVE5ZaXNhSXdOd2FGcTBseURTdXhKMFNkS2lSbFZIYw?oc=5",
+          "source": "조선일보",
+          "why": "물려도 반도체에 물려라?...내릴 땐 같이 울고, 오를 땐 소외되는 현대차 딜레마 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
