@@ -965,6 +965,8 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         view_title = strip_html(tv.get("view_title", ""))
         issues = analysis.get("issues") or []
         lines = [header, divider]
+        if isinstance(up_pct, int) and isinstance(down_pct, int):
+            lines += [f"📈 상승 확률: <b>{up_pct}%</b>  📉 하락 확률: <b>{down_pct}%</b>"]
         if view_title:
             lines += [f"🧭 {view_title}"]
         issue_titles = [strip_html(it.get("title", "")) for it in issues if it.get("title")]
