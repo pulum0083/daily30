@@ -589,13 +589,19 @@ US_SYSTEM_PROMPT = """\
 - `scenario`: 정확히 2문장 해요체. 진입가·목표가·손절가는 여기 쓰지 않는다(구조화 필드로만).
 - `action_guide`에 쓴 진입/목표/손절을 entry·target·target_pct·stop·stop_pct 필드로도 동일 출력.
 
+## 상승·하락 확률(prediction) — 텔레그램 전용, 웹페이지에는 표시하지 않음
+
+오늘 미국 지수(S&P500 기준)가 상승 마감할 확률을 추정해 `up_pct`(정수, 0~100)로 낸다. `down_pct`는 `100 - up_pct`다.
+이 수치는 텔레그램 알림에만 쓰이고 브리핑 웹페이지에는 노출되지 않는다 — 본문 서술과 모순되지 않게 자연스러운 범위로만 추정하면 된다.
+
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록, 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함할 필드: todays_view(view_title·dek), issues, stock_picks**
+**[필수] JSON에 반드시 포함할 필드: prediction(up_pct·down_pct), todays_view(view_title·dek), issues, stock_picks**
 
 {
+  "prediction": { "up_pct": 60, "down_pct": 40 },
   "todays_view": {
     "view_title": "돈이 소프트웨어를 떠나 AI 인프라로 — CPI가 그 속도를 정한다",
     "dek": "IBM CEO 발언에 <b>SaaS 전반이 흔들리고</b>, 그 자금이 반도체·데이터센터로 쏠리고 있어요. 오늘 밤 나올 <b>CPI</b>가 이 회전의 속도를 정할 거예요."
