@@ -72,7 +72,12 @@ async function fetchYahoo(sym) {
     // 세션별 표시가·등락 기준가
     let price, base;
     if (state === 'pre' || state === 'post') {
-      price = (lastPx != null) ? lastPx : regClose;    // 프리·애프터 실시간가
+      // 실시간 체결(lastPx)이 없으면 regClose를 price·base 양쪽에 그대로 써서
+      // 항상 등락률이 정확히 0.00%로 계산되는 가짜 "플랫" 데이터가 만들어진다(SK하이닉스 ADR처럼
+      // 사실상 미거래인 심볼에서 확인됨 — 최근 1개월 일봉 0개, 마지막 체결 6일 전).
+      // 진짜 프리·애프터 체결이 없으면 수집 실패로 보고 표시하지 않는다(운영규칙 0).
+      if (lastPx == null) return null;
+      price = lastPx;
       base = regClose;                                  // 직전 정규장 종가 대비
     } else if (state === 'open') {
       price = (typeof regClose === 'number') ? regClose : lastPx;
