@@ -167,6 +167,17 @@ def _save_market_archive(date_str: str, kospi_close: float, kospi_chg_pct: float
     print(f"[check_accuracy] 마켓 아카이브 저장: {archive_path.name}")
 
 
+def classify_direction_correct(predicted_direction: str, change_pct: float) -> bool:
+    """예측 방향 문자열과 실제 등락률로 적중 여부를 판정한다.
+    상승/하락 예측은 실제 방향과 일치 여부로, 중립 예측은 실제 변동폭 ±0.5% 이내로 채점한다."""
+    actual_direction = "상승" if change_pct >= 0 else "하락"
+    if "상승" in predicted_direction:
+        return actual_direction == "상승"
+    if "하락" in predicted_direction:
+        return actual_direction == "하락"
+    return abs(change_pct) <= 0.5
+
+
 def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = False) -> None:
     if briefing_type == "us":
         print("[check_accuracy] US는 이슈 중심 전환(2026-07-14)으로 채점 대상이 아니에요 — skip", file=sys.stderr)
@@ -198,15 +209,8 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
         print(f"[check_accuracy] {date_str} ({briefing_type}): change_pct NaN — 채점 보류", file=sys.stderr)
         return
     actual_direction = "상승" if change_pct >= 0 else "하락"
-
     predicted = entry.get("predicted_direction", "")
-    if "상승" in predicted:
-        is_correct = actual_direction == "상승"
-    elif "하락" in predicted:
-        is_correct = actual_direction == "하락"
-    else:
-        # 중립 예측: 실제 변동폭 ±0.5% 이내면 정확으로 채점
-        is_correct = abs(change_pct) <= 0.5
+    is_correct = classify_direction_correct(predicted, change_pct)
 
     entry["actual_direction"] = actual_direction
     entry["actual_change_pct"] = round(change_pct, 2)

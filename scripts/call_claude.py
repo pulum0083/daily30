@@ -922,6 +922,40 @@ def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
     return prior[-1].get("is_correct")
 
 
+def _today_kospi_prediction(date_str: str) -> dict | None:
+    """오늘(date_str) 날짜의 kospi 예측 항목을 briefings.json에서 찾는다. 없으면 None.
+
+    §16 방지 룰(SERVICE_RULES.md): 오늘 항목이 없으면 절대 다른 날짜로 대체하지 않는다 —
+    호출부는 반드시 배지 자체를 생략해야 한다."""
+    bpath = DATA_DIR / "briefings.json"
+    if not bpath.exists():
+        return None
+    try:
+        rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
+    except Exception:
+        return None
+    return next((b for b in rows if b.get("type") == "kospi" and b.get("date") == date_str), None)
+
+
+def _cumulative_kospi_accuracy(before_date: str) -> "tuple[int, int] | None":
+    """before_date 이전(오늘 미포함)까지 채점 완료된 kospi 예측의 (적중건, 전체건). 없으면 None."""
+    bpath = DATA_DIR / "briefings.json"
+    if not bpath.exists():
+        return None
+    try:
+        rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
+    except Exception:
+        return None
+    scored = [b for b in rows
+              if b.get("type") == "kospi"
+              and str(b.get("date", "")) < before_date
+              and b.get("is_correct") is not None]
+    if not scored:
+        return None
+    hit = sum(1 for b in scored if b.get("is_correct"))
+    return hit, len(scored)
+
+
 # 💡(반도체 ETF·SOX)·🇺🇸(EWY 외국인수급)은 단순 등락 수치 계열 — 텔레그램에서 뒤로 민다.
 # 나머지 이모지(📰📅🏦🛢️🌏📉😊😐😰 등)는 뉴스·이벤트 촉매 계열이라 앞에 둔다.
 _ETF_NUMBER_LEAD_EMOJIS = ("💡", "🇺🇸")
@@ -1536,6 +1570,9 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     """KOSPI 마감 시황 텔레그램 메시지를 파일로 저장한다."""
     import re
 
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from check_accuracy import classify_direction_correct
+
     def strip_html(text):
         return re.sub(r"<[^>]+>", "", str(text))
 
@@ -1562,9 +1599,25 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     signals        = analysis.get("telegram_signals", [])
     divider = "─" * 20
 
+    # 결과 배지: 오늘 아침 kospi 예측 → 오늘 종가로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
+    result_badge = ""
+    today_pred = _today_kospi_prediction(date_str)
+    kospi_chg = kospi.get("change_pct") if "error" not in kospi else None
+    if today_pred and isinstance(kospi_chg, (int, float)):
+        predicted = today_pred.get("predicted_direction", "")
+        is_correct = classify_direction_correct(predicted, kospi_chg)
+        mark = "✓ 적중" if is_correct else "✗ 빗나감"
+        cum = _cumulative_kospi_accuracy(date_str)
+        cum_txt = f" (누적 {round(cum[0] / cum[1] * 100)}%)" if cum else ""
+        result_badge = f"🎯 오늘 아침 예측: {predicted} → 실제 {kospi_chg:+.2f}% {mark}{cum_txt}"
+
     lines = [
         f"🇰🇷 코스피 마감 시황 | {date_display}",
         divider,
+    ]
+    if result_badge:
+        lines += [result_badge, divider]
+    lines += [
         fmt_index(kospi,  "KOSPI"),
         fmt_index(kosdaq, "KOSDAQ"),
         divider,
