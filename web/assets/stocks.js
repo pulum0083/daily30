@@ -273,7 +273,10 @@ document.addEventListener('DOMContentLoaded', function() {
   var nowMin = isUS
     ? etNowMin()
     : (function(){var k=new Date(Date.now()+9*3600*1000);return k.getUTCHours()*60+k.getUTCMinutes();})();
-  var isLive = isUS ? (nowMin>=240&&nowMin<=1200) : (nowMin>=540&&nowMin<=935);
+  // 국내: 주말·공휴일이면 장중 아님(비거래일에 '오늘 장중'·실시간 헤더로 오판 방지). 목록은 api/_market-calendar.mjs 미러.
+  var KR_HOL={'2026-01-01':1,'2026-02-16':1,'2026-02-17':1,'2026-02-18':1,'2026-03-02':1,'2026-05-01':1,'2026-05-05':1,'2026-05-25':1,'2026-06-03':1,'2026-07-17':1,'2026-08-17':1,'2026-09-24':1,'2026-09-25':1,'2026-09-26':1,'2026-10-05':1,'2026-10-09':1,'2026-12-25':1,'2026-12-31':1,'2025-12-25':1,'2025-12-31':1};
+  function krTradingDay(){var d=new Date(Date.now()+9*3600*1000),wd=d.getUTCDay();return !(wd===0||wd===6||KR_HOL[d.toISOString().slice(0,10)]);}
+  var isLive = isUS ? (nowMin>=240&&nowMin<=1200) : (krTradingDay() && nowMin>=540 && nowMin<=935);
   // 현재 미국 세션 구간 (라이브 아닐 땐 본장 기준)
   function curSeg(){ if(!isLive) return 'regular'; var m=etNowMin(); return m<570?'pre':(m<960?'regular':'post'); }
   function segLabel(seg){ return seg==='pre'?'프리장':(seg==='post'?'애프터장':'오늘 장중'); }

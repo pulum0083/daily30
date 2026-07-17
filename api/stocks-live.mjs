@@ -3,18 +3,10 @@
 // IP 제한 없는 네이버로 조회한다. 6자리 한국 코드만 허용.
 // 국내: polling.finance.naver.com 사용 (m.stock.naver.com은 Vercel 런타임에서 fetch failed — TLS 연결 실패).
 import { isUsMarketHoliday, nyYmd } from './_us-market-calendar.mjs';
+// 개장 판정은 주말·공휴일까지 아는 공용 캘린더를 쓴다(로컬 시간 전용 판정은 평일 공휴일에 장중으로 오판).
+import { krMarketOpen } from './_market-calendar.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
-
-function krNowMinutes() {
-  const now = new Date();
-  return ((now.getUTCHours() * 60 + now.getUTCMinutes()) + 9 * 60) % (24 * 60);
-}
-
-function krMarketOpen() {
-  const m = krNowMinutes();
-  return m >= 9 * 60 && m <= 15 * 60 + 30; // 09:00–15:30 KST
-}
 
 async function fetchOne(code) {
   try {
