@@ -75,7 +75,7 @@ KOSPI_PROMPT = """\
 [catalysts 작성 규칙]
 - 오늘 코스피 주도주·섹터를 움직일 '사건' 중심 뉴스만 담는다 (지수 등락률 나열이 아님)
 - 각 항목은 "무슨 사건 → 어느 종목·섹터에 왜 영향" 형태의 한 문장. 실제로 검색된 사건만 담고, 없으면 빈 배열 []
-- 예: "메타, 자체 AI 추론 칩 설계 확대 발표 → 기존 메모리 수요 둔화 우려로 한국 반도체 투자심리 위축"
+- 문장 형태 예시(회사명·사건은 형식 참고용일 뿐이다 — 절대 그대로 베끼지 말고, 오늘 실제 검색으로 찾은 회사명·사건·수치로만 채운다): "[해외 기업]의 [발표·이벤트] → [한국 관련 섹터·종목]에 [영향 방향]"
 
 출력 형식 (JSON만, 다른 텍스트 없이):
 {{
@@ -155,10 +155,11 @@ US_PROMPT = """\
 - 각 항목은 "무슨 사건 → 어느 종목·섹터에 왜 영향" 형태의 한 문장. 실제로 검색된 사건만 담고, 없으면 빈 배열 []
 - **오늘/어제 발표된 주요 기업 실적(어닝)은 catalysts에 최우선으로 담는다** — 실적 서프라이즈·가이던스·경영진 발언이 해당 종목뿐 아니라 다른 종목·섹터로 파급된 경우(read-through)를 인과로 정리한다.
 - **개장 전 실적으로 프리마켓에서 이미 움직인 섹터도 catalysts에 담는다** — 이 브리핑은 프리마켓 시점에 나가므로, 개장 전 반응은 오늘 세션을 예고하는 핵심 촉매다.
-- 예: "엔비디아, 차세대 GPU 조기 양산 발표 → AI 반도체 수요 기대 확대로 필라델피아 반도체지수 강세"
-- 예: "모건스탠리, 트레이딩 수익 서프라이즈로 실적 호조 → 골드만삭스·JP모건 등 대형 은행주 동반 강세"
-- 예: "IBM 실적 콜, 고객사 AI 인프라 투자 확대 언급 → 마이크론·SK하이닉스 등 메모리·데이터센터주 상승"
-- 예: "ASML 실적·수주 서프라이즈 → 프리마켓에서 램리서치·어플라이드머티리얼즈 등 반도체 장비주 강세"
+- 문장 형태 예시 4개(회사명·사건은 형식 참고용일 뿐이다 — 절대 그대로 베끼지 말고, 오늘 실제 검색으로 찾은 회사명·사건·수치로만 채운다):
+  · "[기업]의 [제품·전략 발표] → [파급되는 섹터·종목]에 [영향 방향]"
+  · "[대형 은행]의 [실적 지표] 서프라이즈 → [동종 대형 은행들]에 동반 [영향 방향]"
+  · "[기업] 실적 콜의 [경영진 코멘트] → [연관 섹터]로 파급"
+  · "[해외 반도체 장비사]의 [실적·수주] 서프라이즈 → 프리마켓에서 [관련 장비주]에 [영향 방향]"
 
 출력 형식 (JSON만, 다른 텍스트 없이):
 {{
@@ -192,6 +193,25 @@ PROMPT_MAP = {
 # Gemini Google Search grounding으로 뉴스 수집·요약
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _load_prev_catalysts(briefing_type: str, max_items: int = 6) -> list:
+    """직전 실행이 저장한 data/news_summary_{type}.json의 catalysts·headlines를 읽는다.
+
+    이 파일은 매 실행마다 덮어써지므로, 오늘 실행이 덮어쓰기 전 시점엔 어제(직전) 실행분이
+    그대로 남아 있다 — 이 시점에 읽어 "이미 다룬 주제" 목록으로 프롬프트에 주입한다.
+    2026-07-15~17 실사고: ASML·모건스탠리 실적 촉매가 프롬프트의 예시 문장과 겹치는 데다
+    이 중복 방지 장치가 없어 사흘 연속 같은 이슈가 "오늘의 이슈"로 재포장됐다.
+    파일 없음·파싱 실패 시 빈 리스트를 반환해 중복 방지 없이 정상 진행한다(수집 자체를 막지 않음)."""
+    path = DATA_DIR / f"news_summary_{briefing_type}.json"
+    if not path.exists():
+        return []
+    try:
+        prev = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return []
+    items = (prev.get("catalysts") or []) + (prev.get("headlines") or [])
+    return items[:max_items]
+
+
 def fetch_and_summarize(briefing_type: str) -> dict:
     """Gemini Google Search grounding으로 최신 뉴스를 검색·요약해 dict로 반환한다."""
     try:
@@ -203,6 +223,16 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     client = genai.Client(api_key=get_gemini_api_key())
     today = datetime.now(KST).strftime("%Y-%m-%d")
     prompt = PROMPT_MAP[briefing_type].format(today=today)
+
+    prev_items = _load_prev_catalysts(briefing_type)
+    if prev_items:
+        listed = "\n".join(f"- {x}" for x in prev_items)
+        prompt += (
+            "\n\n[중복 방지] 아래는 직전 브리핑에서 이미 다룬 이슈다. 오늘 검색 결과가 이 목록과"
+            " 같은 사건이면(단순 재보도·반복 요약) 우선순위를 낮추고 실제로 새로 발생한 다른 이슈를"
+            " 우선 검색해 담는다. 같은 사건이라도 오늘 새로운 후속 전개(추가 발표·주가 반응 변화 등)가"
+            f" 있다면 그 새 전개 중심으로 다시 담아도 된다:\n{listed}"
+        )
 
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
