@@ -1097,9 +1097,11 @@ def write_briefings_list_json():
                 snap_path = BRIEFINGS_DIR / d / btype / "analysis_snapshot.json"
                 if snap_path.exists():
                     snap = load_json(snap_path)
-                    headline = snap.get("reason_title") or snap.get("market_title")
+                    # US 브리핑은 reason_title/market_title이 없고 todays_view.view_title(오늘의 관점)이 헤드라인.
+                    headline = (snap.get("reason_title") or snap.get("market_title")
+                                or (snap.get("todays_view") or {}).get("view_title"))
                     if headline:
-                        entry["headline"] = headline
+                        entry["headline"] = re.sub(r"<[^>]+>", "", str(headline)).strip()
                 if btype == "close":
                     price = _parse_close_price(new_path)
                     entry["title"] = price or "마감"
