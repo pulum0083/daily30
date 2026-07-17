@@ -1014,7 +1014,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += ["", "오늘 점검할 이슈:"]
             for t in issue_titles[:2]:
                 lines.append(f"• {t}")
-        lines += [f"🔗 상세 분석 → {link}"]
+        lines += [divider, f"🔗 전체 이슈·종목 픽 → {link}"]
     else:
         if briefing_type == "kospi":
             header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
@@ -1043,15 +1043,16 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += [divider, f"💬 {reason_title}"]
 
         # telegram_signals 우선 사용, 없으면 reasons로 폴백. 이슈(뉴스·이벤트)를 ETF·수치 계열보다
-        # 먼저 배치하도록 정렬한 뒤 2개를 고른다(선택·순서 모두 이슈 우선).
+        # 먼저 배치하도록 정렬한 뒤 핵심 1개만 고른다 — 전체 근거는 사이트에서 읽도록 유도(Phase B).
         sig_src = telegram_signals if telegram_signals else [strip_html(r) for r in reasons]
-        signals = _issue_first_sort(sig_src)[:2]
+        signals = _issue_first_sort(sig_src)[:1]
         if signals:
             lines += ["", "핵심 시그널:"]
             for s in signals:
                 lines.append(f"• {strip_html(s)}")
 
-        lines += [f"🔗 상세 분석 → {link}"]
+        # 유도형 CTA: 텔레그램엔 방향·핵심 시그널만, 실시간·전체 분석은 사이트 몫으로.
+        lines += [divider, f"🔗 전체 근거·종목 픽·장중 라이브 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1625,10 +1626,11 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
         "",
         "핵심 시그널:",
     ]
-    for sig in _issue_first_sort(signals)[:2]:  # 이슈를 ETF·수치 계열보다 먼저
+    for sig in _issue_first_sort(signals)[:1]:  # 이슈 우선, 핵심 1개만 — 나머지는 사이트에서(Phase B)
         lines.append(f"• {strip_html(sig)}")
     lines += [
-        f"🔗 상세 분석 → {web_base}/briefings/{date_str}/close/",
+        divider,
+        f"🔗 수급·시장폭 상세 → {web_base}/briefings/{date_str}/close/",
     ]
 
     msg = "\n".join(lines)
