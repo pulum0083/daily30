@@ -1,0 +1,17 @@
+{
+  "name": "Double-Shot — 종목 시그널",
+  "short_name": "Double-Shot",
+  "description": "코스피·미국 시장 AI 브리핑과 매일 갱신되는 실측 종목 시그널",
+  "lang": "ko",
+  "start_url": "/stocks/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F9FC",
+  "theme_color": "#0F172A",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

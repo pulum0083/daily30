@@ -11,6 +11,8 @@
   "routes": [
     { "src": "^/data/.*\\.json$",        "headers": { "cache-control": "no-store, no-cache, must-revalidate" }, "continue": true },
     { "src": "^/assets/.*\\.(css|js)$",  "headers": { "cache-control": "no-cache, must-revalidate" }, "continue": true },
+    { "src": "^/sw\\.js$",               "headers": { "cache-control": "no-cache, must-revalidate" }, "continue": true },
+    { "src": "^/manifest\\.webmanifest$", "headers": { "cache-control": "no-cache, must-revalidate" }, "continue": true },
     { "src": "^/stocks(?:/.*)?$",        "headers": { "cache-control": "no-cache, must-revalidate" }, "continue": true },
     { "src": "^/stocks/income-designer/?$", "dest": "/stocks/income-designer/index.html" },
     { "src": "^/stocks/010620(?:/.*)?$",  "status": 301, "headers": { "Location": "/stocks/329180/" } },
