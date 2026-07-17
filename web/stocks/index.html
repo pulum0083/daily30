@@ -2741,7 +2741,7 @@ if(passBtn){
     return {
       cls: m.cls, icon: m.icon, type: m.label,
       time: s.time ? (s.time + ' 발행') : '',
-      head: s.headline || s.title || '브리핑 보기',
+      head: s.headline || (s.title && s.title !== '—' ? s.title : '') || '오늘 브리핑 보기',
       url: s.url || ('/briefings/' + date + '/' + type + '/'),
       pill: pill, pillCls: pillCls
     };
@@ -2765,14 +2765,21 @@ if(passBtn){
     return null;
   }
 
-  // 현재 KST 시각의 브리핑 타임슬롯 (평일만). 슬롯 밖(심야·주말)은 null.
+  // 현재 KST 시각의 브리핑 타임슬롯. 슬롯 밖(심야·주말)은 null.
   function slotNow(){
-    if (!isWeekday()) return null;
     var nm = nowMin();
-    if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
-    if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
-    if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
-    if (nm >= 1280 && nm < 1430) return 'us';   // 21:20~23:50 미국 예측
+    var d = kstNow().getUTCDay();
+    var isKstWeekday = (d >= 1 && d <= 5);
+    // 코스피 브리핑(예측·장중이슈·마감)은 한국 거래일(평일·비공휴일)에만 노출
+    if (isWeekday()){
+      if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
+      if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
+      if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
+    }
+    // 미국 예측은 한국 공휴일(예: 제헌절)이어도 미국장이 열리면 발행되므로, 한국 휴일 여부와
+    // 무관하게 KST 평일이면 슬롯을 연다. 실제 노출은 render()의 s.state==='ready'가 최종 판정
+    // (미국 휴장일엔 당일 us가 ready가 아니라 자동으로 숨겨진다).
+    if (isKstWeekday && nm >= 1280 && nm < 1430) return 'us'; // 21:20~23:50 미국 예측
     return null;
   }
 

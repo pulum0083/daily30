@@ -458,7 +458,7 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 | 주말·휴일 | `none` | **영역 제거** |
 
 - **stale 날짜 폴백 금지.** 각 슬롯은 "오늘(`kstDateStr()`) 해당 타입이 `briefings-list.json`에서 `state==='ready'`"일 때만 표시한다. 과거 날짜 브리핑으로 폴백하지 않는다 (생성 시점에 박힌 정적 HTML 값도 신뢰 금지 — 초기 `is-hidden`으로 두고 JS가 채운다).
-- **휴일 처리**: 클라이언트 휴일 목록 없이도, 휴일엔 당일 브리핑이 ready가 아니므로 자동으로 숨겨진다.
+- **휴일 처리**: 한국 공휴일엔 코스피 슬롯(`kospi`·`issue`·`close`)은 `krIsKospiHoliday()`로 자동 숨김. **단 미국 예측(`us`) 슬롯은 한국 공휴일 여부와 무관하게 KST 평일이면 노출한다** — 미국장은 제헌절 등 한국 공휴일에도 열려 미국 브리핑이 발행되기 때문(2026-07-17 제헌절 실사고로 확정). `slotNow()`에서 `us`만 `isWeekday()`(한국 거래일) 게이트에서 분리하고, 실제 노출 여부는 `render()`의 `state==='ready'`가 최종 판정(미국 휴장일엔 당일 us가 ready가 아니라 자동 숨김).
 - **issue 슬롯**: 이슈 미수집(예: 09:00~첫 수집 전)이면 오늘 kospi 예측으로 폴백, 그것도 없으면 숨김. 클릭 시 `/briefings/{date}/kospi/`로 이동.
 - `getKSTSlot` 경계값을 임의로 바꾸지 말 것. 위 표가 정본이다.
 
