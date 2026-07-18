@@ -276,14 +276,31 @@ def summarize(name, items):
         if not m:
             raise ValueError("응답에서 JSON 배열을 찾을 수 없음")
         arr = json.loads(m.group(0))
-        return [str(s) for s in arr]
+        # 문자열이 아닌 원소가 섞이면 응답 전체를 폐기한다.
+        # str()로 감싸면 {'summary': '...'} 같은 파이썬 repr이 그대로 요약칸에 노출된다.
+        if not all(isinstance(s, str) for s in arr):
+            raise ValueError("응답 배열에 문자열이 아닌 원소가 있음")
+        return arr
     except Exception as e:
         print(f"[fetch_stock_news] Gemini 요약 실패: {e}", file=sys.stderr)
         return []
 
 
 def apply_summaries(merged, todo, summaries):
-    # todo·summaries 개수가 어긋나도(짧게/길게 와도) zip이 짧은 쪽에 맞춰 멈추므로 안전하다.
+    # 개수가 하나라도 어긋나면 전부 버린다.
+    # Gemini가 중간 항목을 빠뜨리면 이후 요약이 통째로 한 칸씩 밀려 엉뚱한 기사에 붙는다
+    # (예: '파운드리 수주 실패' 기사에 '자사주 매입을 발표했어요.'가 달림).
+    # 순서로는 어느 항목이 빠졌는지 알 수 없고, 유사도 재정렬은 추측이라 하지 않는다.
+    # 요약 없이 제목만 보여주는 건 괜찮지만 틀린 요약은 안 된다 (운영규칙 0).
+    if len(summaries) != len(todo):
+        if summaries:
+            print(
+                f"[fetch_stock_news] 요약 개수 불일치 (요청 {len(todo)}건, 응답 "
+                f"{len(summaries)}건) — 오배치 방지를 위해 전부 폐기",
+                file=sys.stderr,
+            )
+        return
+
     for item, summary in zip(todo, summaries):
         for m in merged:
             if m["url"] == item["url"]:
@@ -311,9 +328,11 @@ def _extract_resolved_gnews_url(raw):
 def _resolve_gnews_url(link):
     # 구글 뉴스 RSS의 <link>는 실제 기사 페이지가 아니라 구글 뉴스 인터스티셜 리다이렉트다.
     # 이 상태로 fetch하면 og:site_name이 항상 "Google News"로 나와 발행사명을 복구할 수 없다.
-    # 실패 시 원래 link를 그대로 반환한다 — 호출부가 리다이렉트 페이지로 폴백해서 처리한다.
+    # 반환값은 (조회할 URL, 이미 받아둔 HTML 또는 None)이다.
+    # 리졸브에 실패했을 때 인터스티셜 HTML을 함께 돌려줘 호출부가 같은 URL을 두 번 받지 않게 한다.
     if "/rss/articles/" not in link:
-        return link
+        return link, None
+    page = None
     try:
         art = link.split("/articles/")[1].split("?")[0]
         req = urllib.request.Request(link, headers=UA)
@@ -322,7 +341,7 @@ def _resolve_gnews_url(link):
         sig = re.search(r'data-n-a-sg="([^"]+)"', page)
         ts = re.search(r'data-n-a-ts="([^"]+)"', page)
         if not (sig and ts):
-            return link
+            return link, page
         inner = (
             '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,'
             'null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
@@ -336,9 +355,10 @@ def _resolve_gnews_url(link):
         )
         with urllib.request.urlopen(req2, timeout=12) as r:
             raw = r.read().decode("utf-8", "ignore")
-        return _extract_resolved_gnews_url(raw) or link
+        resolved = _extract_resolved_gnews_url(raw)
+        return (resolved, None) if resolved else (link, page)
     except Exception:
-        return link
+        return link, page
 
 
 def enrich_new_items(merged, todo):
@@ -348,9 +368,10 @@ def enrich_new_items(merged, todo):
         if not m:
             continue
 
-        fetch_url = _resolve_gnews_url(item["url"])
+        fetch_url, cached_page = _resolve_gnews_url(item["url"])
         try:
-            page = _fetch(fetch_url)
+            # 리졸브 단계에서 이미 받아둔 HTML이 있으면 재요청하지 않는다.
+            page = cached_page if cached_page is not None else _fetch(fetch_url)
         except Exception as e:
             print(f"[fetch_stock_news] 기사 페이지 조회 실패 ({item['url']}): {e}", file=sys.stderr)
             continue

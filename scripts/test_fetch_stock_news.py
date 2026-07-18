@@ -343,21 +343,21 @@ def test_apply_summaries_matches_by_index():
     assert merged[1]["summary"] == "기존"
 
 
-def test_apply_summaries_tolerates_short_response():
-    # Gemini가 요청보다 적게 돌려줘도 죽지 않아야 한다
+def test_apply_summaries_discards_short_response():
+    # 개수가 모자라면 어느 항목이 빠졌는지 알 수 없어 전부 버린다.
+    # 예전엔 앞에서부터 채웠는데, 중간이 빠진 경우 엉뚱한 기사에 요약이 붙었다.
     merged = [{"url": "u1", "summary": ""}, {"url": "u2", "summary": ""}]
     todo = [{"url": "u1"}, {"url": "u2"}]
     fsn.apply_summaries(merged, todo, ["하나만 왔어요."])
-    assert merged[0]["summary"] == "하나만 왔어요."
-    assert merged[1]["summary"] == ""
+    assert [m["summary"] for m in merged] == ["", ""]
 
 
-def test_apply_summaries_tolerates_long_response():
-    # Gemini가 요청보다 많이 돌려줘도 초과분은 무시한다
+def test_apply_summaries_discards_long_response():
+    # 초과 응답도 정렬이 어긋났다는 신호이므로 전부 버린다
     merged = [{"url": "u1", "summary": ""}]
     todo = [{"url": "u1"}]
     fsn.apply_summaries(merged, todo, ["요약이에요.", "여분1", "여분2"])
-    assert merged[0]["summary"] == "요약이에요."
+    assert merged[0]["summary"] == ""
 
 
 def test_summarize_returns_empty_without_api_key(monkeypatch):
@@ -459,8 +459,9 @@ def test_enrich_new_items_leaves_domain_when_site_name_absent(monkeypatch):
 
 
 def test_resolve_gnews_url_passes_through_non_gnews_links():
-    # 구글 뉴스 리다이렉트 형태가 아니면 네트워크 호출 없이 그대로 반환한다
-    assert fsn._resolve_gnews_url("https://v.daum.net/v/123") == "https://v.daum.net/v/123"
+    # 구글 뉴스 리다이렉트 형태가 아니면 네트워크 호출 없이 그대로 반환한다.
+    # 받아둔 HTML은 없으므로 호출부가 직접 fetch해야 한다는 뜻으로 None을 함께 돌려준다.
+    assert fsn._resolve_gnews_url("https://v.daum.net/v/123") == ("https://v.daum.net/v/123", None)
 
 
 def test_enrich_new_items_never_promotes_google_news_as_publisher(monkeypatch):
@@ -470,7 +471,8 @@ def test_enrich_new_items_never_promotes_google_news_as_publisher(monkeypatch):
     merged = [{"url": link, "source": "v.daum.net", "thumb": None}]
     todo = [{"url": link}]
 
-    monkeypatch.setattr(fsn, "_resolve_gnews_url", lambda url: url)  # 리졸브 실패 시뮬레이션
+    # 리졸브 실패 시뮬레이션 — 인터스티셜 HTML을 함께 돌려주지 않아 호출부가 직접 받는 경로
+    monkeypatch.setattr(fsn, "_resolve_gnews_url", lambda url: (url, None))
     html_page = (
         '<meta property="og:site_name" content="Google News">'
         '<meta property="og:image" content="https://lh3.googleusercontent.com/icon.png">'
@@ -479,3 +481,52 @@ def test_enrich_new_items_never_promotes_google_news_as_publisher(monkeypatch):
 
     fsn.enrich_new_items(merged, todo)
     assert merged[0]["source"] == "v.daum.net"
+
+
+def test_apply_summaries_discards_all_on_dropped_middle():
+    # Gemini가 중간 항목을 빠뜨리면 이후 요약이 한 칸씩 밀려 엉뚱한 기사에 붙는다.
+    # 예전 구현은 '파운드리 수주 실패' 기사에 '자사주 매입을 발표했어요.'를 달았다 — 거짓 표시다.
+    merged = [
+        {"url": "u1", "title": "HBM4 공급 계약", "summary": ""},
+        {"url": "u2", "title": "파운드리 수주 실패", "summary": ""},
+        {"url": "u3", "title": "자사주 매입 발표", "summary": ""},
+    ]
+    todo = [{"url": "u1"}, {"url": "u2"}, {"url": "u3"}]
+    fsn.apply_summaries(merged, todo, ["HBM4 공급 계약을 맺었어요.", "자사주 매입을 발표했어요."])
+    assert [m["summary"] for m in merged] == ["", "", ""]
+
+
+def test_summarize_discards_non_string_elements(monkeypatch):
+    # 모델이 문자열 대신 객체를 돌려주면 str()로 감쌌을 때 파이썬 repr이 요약칸에 노출된다.
+    payload = {"candidates": [{"content": {"parts": [
+        {"text": '[{"summary": "요약1이에요."}, {"summary": "요약2이에요."}]'}
+    ]}}]}
+
+    class _Resp:
+        def read(self): return __import__("json").dumps(payload).encode()
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+
+    monkeypatch.setattr(fsn, "get_gemini_api_key", lambda: "dummy")
+    monkeypatch.setattr(fsn.urllib.request, "urlopen", lambda *a, **k: _Resp())
+    assert fsn.summarize("삼성전자", [{"title": "t", "source": "s"}]) == []
+
+
+def test_resolve_gnews_url_returns_page_for_reuse(monkeypatch):
+    # 리졸브 실패 시 인터스티셜 HTML을 함께 돌려줘야 호출부가 같은 URL을 두 번 받지 않는다.
+    calls = []
+
+    class _Resp:
+        def read(self): return b"<html>no signature attrs</html>"
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+
+    def _open(req, *a, **k):
+        calls.append(getattr(req, "full_url", req))
+        return _Resp()
+
+    monkeypatch.setattr(fsn.urllib.request, "urlopen", _open)
+    url, page = fsn._resolve_gnews_url("https://news.google.com/rss/articles/ABC?oc=5")
+    assert url == "https://news.google.com/rss/articles/ABC?oc=5"
+    assert page is not None and "no signature" in page
+    assert len(calls) == 1
