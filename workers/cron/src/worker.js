@@ -65,6 +65,15 @@ export default {
       return dispatch(env, 'daily_report.yml', { briefing_type: 'accuracy', dry_run: 'false' });
     }
 
+    // 주말 종목뉴스: 08/11/14/17/20 KST 토·일 (3시간 간격)
+    // cron 표현식엔 요일을 넣지 않는다 — UTC 23시 항목이 KST로는 다음날이라
+    // cron의 DOW(UTC 기준)와 KST 기준 주말 여부가 어긋난다. 항상 이 KST 변환값으로 판정한다.
+    const isWeekend = dow === 0 || dow === 6;
+    if (isWeekend && m === 0 && [8, 11, 14, 17, 20].includes(h)) {
+      console.log('[cron] → weekend issue briefing');
+      return dispatch(env, 'kospi-news-live.yml');
+    }
+
     // ── 이슈 브리핑 (시간대 범위 매칭) ──────────────────────────────────
 
     if (!isWeekday) return; // 주말 제외
