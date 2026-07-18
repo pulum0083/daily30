@@ -798,6 +798,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span class="bc-pill" id="bc-pill" style="display:none"></span>
       <span class="bc-arr">›</span>
     </a>
+    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
+      <div class="ue-h">
+        <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
+        <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
+        <span style="font-size:11px;color:#94A3B8;" id="ue-sub">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
+        <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
+          <button type="button" data-cur="krw" class="on">원화</button>
+          <button type="button" data-cur="usd">달러</button>
+        </div>
+      </div>
+      <div class="ue-macro" id="ue-macro"></div>
+      <div class="ue-grid" id="ue-grid"></div>
+      <div id="ue-cap" style="font-size:11px;color:#94A3B8;margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
+    </div>
     <script>
     /* 코스피 거래일 판별(허브 전역) — 주말+공휴일이면 비거래일. 공휴일 목록은 api/_market-calendar.mjs(서버 권위)의 미러.
        서버 API의 open 필드는 이미 휴일을 반영하지만, 라벨·폴링 여부를 시간만으로 판단하던 클라이언트 체크들이
@@ -1390,20 +1404,6 @@ function usSel(code){
 #us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
 @keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
 </style>
-    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
-      <div class="ue-h">
-        <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
-        <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
-        <span style="font-size:11px;color:#94A3B8;" id="ue-sub">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
-        <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
-          <button type="button" data-cur="krw" class="on">원화</button>
-          <button type="button" data-cur="usd">달러</button>
-        </div>
-      </div>
-      <div class="ue-macro" id="ue-macro"></div>
-      <div class="ue-grid" id="ue-grid"></div>
-      <div id="ue-cap" style="font-size:11px;color:#94A3B8;margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
-    </div>
     <script>
 (function(){
   var box=document.getElementById('us-evening');
@@ -3054,8 +3054,12 @@ if(passBtn){
     });
     sub.textContent=on?'하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님':'코스피 시총 상위 3 · 마감 후 미국 LIVE';
     // 곡선·장중지표는 정규장 실측이라 그대로 두고, 뉴스 갱신 주기 표기만 시간대에 맞춘다.
+    // 종목 뉴스 수집(fetch_stock_news.py)은 cron-job.org가 평일(1-5)에만 트리거한다 — 주말·공휴일엔 수집 자체가 없다.
     var upd=document.getElementById('lw-upd');
-    if(upd) upd.textContent=on?'최신순 · 1시간 주기':'최신순 · 30분 주기';
+    if(upd){
+      var isHoliday=window.krIsKospiHoliday&&window.krIsKospiHoliday();
+      upd.textContent=isHoliday?'최신순 · 주말·휴장일 갱신 없음':(on?'최신순 · 1시간 주기':'최신순 · 30분 주기');
+    }
   }
   /* 장중: 네이버 실측 KRW(stocks-live)로 타일 갱신 */
   function pollDay(){
