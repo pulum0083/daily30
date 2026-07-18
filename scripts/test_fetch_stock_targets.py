@@ -1,4 +1,5 @@
 # 네이버 증권사 리포트 목록·상세 파싱과 컨센서스 계산을 검증하는 테스트
+import json
 import sys
 from pathlib import Path
 
@@ -94,3 +95,30 @@ def test_compute_consensus_returns_none_when_no_valid_reports():
     # 목표가가 전부 없으면 억지로 0을 만들지 않고 None (운영규칙 0)
     reports = [{"firm": "A증권", "date": "26.07.08", "target_price": None}]
     assert fst.compute_consensus(reports, today="26.07.18")["consensus"] is None
+
+
+def test_append_history_writes_one_point_per_day(tmp_path):
+    p = tmp_path / "consensus_history.json"
+    fst.append_history(p, "005930", 100000, "2026-07-18")
+    fst.append_history(p, "005930", 105000, "2026-07-18")  # 같은 날 두 번째 호출
+    data = json.loads(p.read_text(encoding="utf-8"))
+    # 하루 1점만 — 두 번째 호출이 덮어쓰되 점 개수는 늘지 않는다
+    assert len(data["005930"]) == 1
+    assert data["005930"][0] == {"date": "2026-07-18", "value": 105000}
+
+
+def test_append_history_keeps_separate_days(tmp_path):
+    p = tmp_path / "consensus_history.json"
+    fst.append_history(p, "005930", 100000, "2026-07-17")
+    fst.append_history(p, "005930", 105000, "2026-07-18")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert [d["date"] for d in data["005930"]] == ["2026-07-17", "2026-07-18"]
+
+
+def test_append_history_ignores_none(tmp_path):
+    # 컨센서스를 못 구한 날은 히스토리에 점을 남기지 않는다. 기존 점도 지우면 안 된다.
+    p = tmp_path / "consensus_history.json"
+    fst.append_history(p, "005930", 100000, "2026-07-17")
+    fst.append_history(p, "005930", None, "2026-07-18")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert [d["date"] for d in data["005930"]] == ["2026-07-17"]
