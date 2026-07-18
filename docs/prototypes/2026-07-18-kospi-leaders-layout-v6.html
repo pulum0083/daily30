@@ -1,0 +1,408 @@
+<!-- 코스피 주도주 위젯 재구성 v6(확정안) — 컨센서스 추이를 리포트 리스트 하단으로 이동 + 데이터 부족 시 숨김 게이트. 더미 데이터 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코스피 주도주 — 재구성 프로토타입 v6 (확정안)</title>
+<style>
+  :root{
+    --canvas:#fff; --page:#f4f5f7; --ink:#0F172A; --ink2:#334155; --muted:#94A3B8;
+    --hairline:#E5E7EB; --soft:#F7F9FC; --soft2:#F1F5F9; --primary:#2775ED;
+    --up:#E03131; --up-bg:#FEF2F2; --dn:#2775ED; --dn-bg:#EFF4FE;
+    --r:14px; --s1:0 1px 2px rgba(20,22,26,.06);
+    --buy:#16A34A; --buy-bg:#ECFDF3; --night:#6D28D9; --night-bg:#EDE9FE;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --canvas:#16181c; --page:#0e0f12; --ink:#eceef1; --ink2:#c3c8cf; --muted:#8b919a;
+      --hairline:#282b31; --soft:#1c1f24; --soft2:#22262c; --primary:#5b9dff;
+      --up:#ff6b6b; --up-bg:#3a1f22; --dn:#5b9dff; --dn-bg:#1c2740;
+      --buy:#4ade80; --buy-bg:#16301f; --night:#c4b5fd; --night-bg:#2e2545; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);padding:28px 16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+  .stage{max-width:880px;margin:0 auto}
+  .stage>h4{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 12px;text-align:center}
+
+  .widget{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r);
+    box-shadow:var(--s1);padding:15px 16px}
+  .w-head{display:flex;align-items:center;margin-bottom:11px;gap:8px;flex-wrap:wrap}
+  .w-title{font-size:15px;font-weight:800}
+  .w-sub{margin-left:auto;font-size:11px;color:var(--muted)}
+
+  .tiles{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
+  .tiles::-webkit-scrollbar{display:none}
+  .tile{flex:1 0 auto;cursor:pointer;background:var(--soft);border:1.5px solid var(--hairline);
+    border-radius:12px;padding:12px 14px;transition:.12s}
+  .tile.on{background:var(--canvas);border-color:var(--primary);box-shadow:0 3px 10px rgba(37,117,237,.12)}
+  .t-mkt{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .t-pill{font-size:9px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;
+    color:var(--buy);background:var(--buy-bg)}
+  .t-pill.night{color:var(--night);background:var(--night-bg)}
+  .t-name{font-size:13px;font-weight:800}
+  .t-px{font-size:22px;font-weight:900;margin-top:4px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .t-chg{font-size:12px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+  .t-chg.up{color:var(--up)} .t-chg.dn{color:var(--dn)}
+
+  .body{margin-top:18px;padding-top:15px;border-top:1px solid var(--soft2)}
+  .row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+  .row + .row{margin-top:16px;padding-top:16px;border-top:1px solid var(--soft2)}
+  .cL{flex:1.55 1 330px;min-width:0}
+  .cR{flex:1 1 240px;min-width:0;border-left:1px solid var(--soft2);padding-left:18px}
+  @media(max-width:700px){ .cR{flex:0 0 100%;border-left:none;padding-left:0;
+    border-top:1px solid var(--soft2);padding-top:14px} }
+
+  .ch{font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px}
+  .ch .note{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .ch .live{font-size:10px;font-weight:800;color:var(--up);background:var(--up-bg);border-radius:999px;padding:2px 7px}
+  .chart svg{width:100%;height:auto;display:block;overflow:visible}
+  .ax{font-size:10px;fill:var(--muted);font-weight:600}
+  .c-hint{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+  .m-blk{background:var(--soft);border:1px solid var(--hairline);border-radius:11px;padding:11px 13px}
+  .m-blk + .m-blk{margin-top:9px}
+  .m-h{display:flex;align-items:center;font-size:11.5px;font-weight:800;color:var(--ink2)}
+  .m-h .v{margin-left:auto;font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+  .m-bar{position:relative;height:7px;border-radius:5px;background:var(--soft2);margin:8px 0 5px;overflow:hidden}
+  .m-bar .f{position:absolute;left:0;top:0;height:100%;border-radius:5px;background:#94A3B8}
+  .m-bar .base{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1}
+  .m-rng{position:relative;height:7px;border-radius:5px;margin:8px 0 5px;
+    background:linear-gradient(90deg,#EFF4FE,#FEE9E9)}
+  .m-rng .dot{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:var(--ink);transform:translateX(-50%)}
+  .m-cap{font-size:10.5px;color:var(--muted);line-height:1.45}
+  .m-cap.sp{display:flex;justify-content:space-between}
+  .m-moved{font-size:10.5px;color:var(--muted);margin-top:9px;line-height:1.5}
+  .m-moved a{color:var(--primary);font-weight:700;text-decoration:none}
+
+  .tp-hero{display:flex;align-items:baseline;gap:7px}
+  .tp-hero .lbl{font-size:11px;font-weight:700;color:var(--muted)}
+  .tp-hero .val{font-size:16px;font-weight:800;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .tp-up{font-size:11.5px;font-weight:800;color:var(--up)}
+  .tp-meta{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .tp-gauge{position:relative;height:5px;border-radius:4px;background:var(--soft2);margin:10px 0 12px;overflow:hidden}
+  .tp-gauge .cur{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:#94A3B8}
+  .brk{display:flex;align-items:center;gap:8px;padding:6.5px 0;border-top:1px solid var(--soft2)}
+  .brk:first-of-type{border-top:none}
+  .b-firm{font-size:12px;font-weight:700;min-width:62px;color:var(--ink2)}
+  .b-op{font-size:9.5px;font-weight:800;color:var(--buy);background:var(--buy-bg);border-radius:5px;padding:1px 6px}
+  .b-tp{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+  .b-date{font-size:10px;color:var(--muted);min-width:34px;text-align:right}
+
+  /* 컨센서스 추이 — 리포트 리스트 하단으로 이동 */
+  .tr-box{background:var(--soft);border:1px solid var(--hairline);border-radius:11px;
+    padding:10px 12px 8px;margin-top:13px}
+  .tr-h{display:flex;align-items:baseline;font-size:10.5px;font-weight:800;color:var(--ink2)}
+  .tr-h .d{margin-left:auto;font-size:11px;font-weight:800}
+  .tr-h .d.up{color:var(--up)} .tr-h .d.dn{color:var(--dn)}
+  .tr-box svg{width:100%;height:auto;display:block;margin-top:5px}
+  .tr-ax{font-size:9px;fill:var(--muted);font-weight:600}
+
+  .news a{display:flex;gap:11px;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid var(--soft2)}
+  .news a:first-child{border-top:none}
+  .news a:hover .n-title{color:var(--primary)}
+  .n-txt{flex:1 1 auto;min-width:0}
+  .n-time{font-size:10.5px;font-weight:700;color:var(--muted)}
+  .n-title{font-size:12.5px;font-weight:800;line-height:1.4;margin:3px 0 4px}
+  .n-sum{font-size:11.5px;color:var(--ink2);line-height:1.5;margin-bottom:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .n-src{font-size:10.5px;color:var(--muted)}
+  .n-thumb{flex:0 0 74px;width:74px;height:56px;border-radius:8px;object-fit:cover;
+    background:var(--soft2);border:1px solid var(--hairline);margin-top:14px}
+  .n-nothumb{flex:0 0 74px;width:74px;height:56px;border-radius:8px;margin-top:14px;
+    background:var(--soft2);border:1px dashed var(--hairline);display:flex;align-items:center;
+    justify-content:center;font-size:9.5px;color:var(--muted);font-weight:700;text-align:center;line-height:1.3}
+
+  .ib{margin-top:16px;padding-top:15px;border-top:2px solid var(--soft2)}
+  .ib-h{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .ib-h .bar{width:3px;height:14px;border-radius:2px;background:var(--primary)}
+  .ib-h .t{font-size:13px;font-weight:800}
+  .ib-h .n{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .ib-note{font-size:10.5px;color:var(--muted);margin-bottom:9px}
+  .ib-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--soft2)}
+  .ib-logo{flex:0 0 40px;height:40px;border-radius:9px;background:var(--soft2);
+    display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--ink2)}
+  .ib-body{flex:1 1 auto;min-width:0}
+  .ib-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .ib-name{font-size:12.5px;font-weight:800}
+  .ib-tag{font-size:9.5px;font-weight:800;border-radius:5px;padding:1px 7px}
+  .ib-tag.bull{color:var(--up);background:var(--up-bg)}
+  .ib-tag.bear{color:var(--dn);background:var(--dn-bg)}
+  .ib-tag.neu{color:var(--muted);background:var(--soft2)}
+  .ib-txt{font-size:11.5px;color:var(--ink2);line-height:1.55;margin:4px 0 5px}
+  .ib-src{font-size:10.5px;color:var(--primary);font-weight:700;text-decoration:none}
+  .ib-time{flex:0 0 auto;font-size:10.5px;color:var(--muted);text-align:right;line-height:1.4}
+
+  .switcher{max-width:880px;margin:14px auto 0;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .switcher span{font-size:11.5px;color:var(--muted);font-weight:700}
+  .sw-btn{font-size:11.5px;font-weight:800;padding:6px 13px;border-radius:999px;cursor:pointer;
+    border:1.5px solid var(--hairline);background:var(--canvas);color:var(--ink2)}
+  .sw-btn.on{border-color:var(--primary);color:var(--primary);background:rgba(39,117,237,.07)}
+
+  .foot{max-width:880px;margin:18px auto 0;font-size:11.5px;color:var(--muted);line-height:1.75;
+    background:var(--canvas);border:1px solid var(--hairline);border-radius:12px;padding:15px 17px}
+  .foot b{color:var(--ink2)} .foot h5{margin:14px 0 7px;font-size:12.5px;color:var(--ink)}
+  .foot h5:first-child{margin-top:0}
+  .foot ul{margin:6px 0 0;padding-left:17px} .foot li{margin-bottom:5px}
+</style>
+
+<div class="stage">
+  <h4>v6(확정안) — 컨센서스 추이를 리포트 하단으로 · 데이터 부족 시 숨김</h4>
+
+  <div class="widget">
+    <div class="w-head">
+      <span class="w-title" id="w-title">📈 코스피 주도주</span>
+      <span class="w-sub" id="w-sub">코스피 시총 상위 3 · 실시간</span>
+    </div>
+    <div class="tiles" id="tiles"></div>
+
+    <div class="body">
+      <div class="row">
+        <div class="cL chart">
+          <div class="ch">📈 <span id="c-name">삼성전자</span> 7/17(금) 장중
+            <span class="live">● 실측 1분봉</span></div>
+          <svg id="svg" viewBox="0 0 640 200" role="img" aria-label="장중 1분봉 곡선"></svg>
+          <div class="c-hint" id="c-hint"></div>
+        </div>
+        <div class="cR">
+          <div class="ch">📊 장중 지표<span class="note">당일</span></div>
+          <div id="metrics"></div>
+          <div class="m-moved">평균체결가(VWAP)·외국인 보유율은 <a href="#">종목 상세</a>에서 볼 수 있어요.</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="cL">
+          <div class="ch">📰 관련 뉴스<span class="note" id="nw-upd">최신순 · 30분 주기</span></div>
+          <div class="news" id="news"></div>
+        </div>
+        <div class="cR">
+          <div class="ch">🎯 증권사 목표주가<span class="note" id="tp-cnt">리포트 8건</span></div>
+          <div class="tp-hero">
+            <span class="lbl">컨센서스</span><span class="val" id="tp-val">105,000</span>
+            <span class="tp-up" id="tp-up">+24.6%</span>
+          </div>
+          <div class="tp-meta" id="tp-meta">종가 84,300 기준 · 3개월 12개사 평균</div>
+          <div class="tp-gauge"><div class="cur" id="tp-cur" style="width:80%"></div></div>
+          <div id="brk"></div>
+          <!-- 컨센서스 추이 — 리스트 하단 -->
+          <div class="tr-box" id="tr-box">
+            <div class="tr-h">컨센서스 추이 · 최근 3개월<span class="d up" id="tr-d">+14.1%</span></div>
+            <svg id="tr-svg" viewBox="0 0 240 60"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="ib">
+        <div class="ib-h"><span class="bar"></span><span class="t">🏦 외국계 시각</span>
+          <span class="n">코스피 · 최근 24시간</span></div>
+        <div class="ib-note">개별 종목이 아닌 <b>코스피 지수 전반</b>에 대한 외국계 IB 코멘트예요. 종목 탭과 무관하게 항상 같아요.</div>
+        <div id="ib-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="switcher">
+    <span>시간대:</span>
+    <button class="sw-btn on" id="sw-day" onclick="setPhase('day')">장중</button>
+    <button class="sw-btn" id="sw-night" onclick="setPhase('night')">마감 후 · HL 24h</button>
+    <span style="margin-left:10px">컨센 히스토리:</span>
+    <button class="sw-btn on" id="sw-hist" onclick="setHist(true)">충분(표시)</button>
+    <button class="sw-btn" id="sw-nohist" onclick="setHist(false)">부족(숨김·리포트 10건)</button>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const TH=(a,b)=>`data:image/svg+xml;utf8,`+encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="148" height="112"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="148" height="112" fill="url(#g)"/></svg>`);
+const DATA={
+  "005930":{name:"삼성전자",seed:7,px:"84,300",chg:"▲ 1,000 (1.20%)",up:true,
+    pxN:"84,120",chgN:"▼ 180 (0.21%)",upN:false,
+    consensus:"105,000",upside:"+24.6%",cur:80,meta:"종가 84,300 기준 · 3개월 12개사 평균",
+    trend:[92000,94500,96000,99000,102000,105000],trendD:"+14.1%",
+    brokers:[{f:"한국투자",o:"매수",tp:"110,000",d:"7/17"},{f:"삼성증권",o:"매수",tp:"108,000",d:"7/16"},
+      {f:"KB증권",o:"매수",tp:"100,000",d:"7/15"},{f:"메리츠",o:"매수",tp:"98,000",d:"7/12"},
+      {f:"NH투자",o:"매수",tp:"105,000",d:"7/11"},{f:"하나증권",o:"중립",tp:"92,000",d:"7/09"},
+      {f:"미래에셋",o:"매수",tp:"112,000",d:"7/08"},{f:"신한투자",o:"매수",tp:"103,000",d:"7/05"},
+      {f:"키움증권",o:"매수",tp:"107,000",d:"7/03"},{f:"대신증권",o:"매수",tp:"99,000",d:"7/01"}],
+    news:[{t:"09:40",ti:"삼성전자, HBM4 샘플 엔비디아 공급 임박설… 외국인 매수 유입",
+        su:"엔비디아 차세대 GPU용 HBM4 퀄 테스트가 마무리 단계라는 관측에 외국인 순매수가 유입됐어요.",s:"이데일리",th:TH('#93c5fd','#3b82f6')},
+      {t:"08:55",ti:"\"메모리 다운사이클 끝\" 3분기 실적 컨센서스 상향",
+        su:"D램 고정가 반등이 확인되면서 증권가가 3분기 영업이익 눈높이를 잇따라 올리고 있어요.",s:"한국경제",th:TH('#fca5a5','#ef4444')},
+      {t:"08:20",ti:"파운드리 2나노 수율 개선… 퀄컴 물량 확보 관측",
+        su:"2나노 공정 수율이 목표 구간에 진입하며 대형 고객사 수주 기대가 커지고 있어요.",s:"매일경제",th:null},
+      {t:"어제",ti:"삼성전자 자사주 매입 3조원 규모 발표",
+        su:"주주환원 강화 차원에서 자사주 매입을 결정했고 절반은 소각할 예정이라고 밝혔어요.",s:"연합뉴스",th:TH('#a7f3d0','#10b981')},
+      {t:"어제",ti:"외국인 5거래일 연속 순매수… 반도체 비중 확대",
+        su:"외국인이 반도체 대형주를 중심으로 5거래일 연속 순매수를 이어가고 있어요.",s:"서울경제",th:TH('#fde68a','#f59e0b')}],
+    m:{vol:"×0.81",volPct:40,volCap:"20일 평균 대비 · 한산",rng:"14%",
+      rngLo:"저 82,100",rngHi:"고 85,900",rngCap:"저점서 +0.6% 회복 · 고점 대비 -3.4%"}},
+  "000660":{name:"SK하이닉스",seed:19,px:"251,000",chg:"▲ 8,500 (3.51%)",up:true,
+    pxN:"253,400",chgN:"▲ 2,400 (0.96%)",upN:true,
+    consensus:"300,000",upside:"+19.5%",cur:84,meta:"종가 251,000 기준 · 3개월 14개사 평균",
+    trend:[240000,252000,265000,272000,288000,300000],trendD:"+25.0%",
+    brokers:[{f:"메리츠",o:"매수",tp:"340,000",d:"7/17"},{f:"NH투자",o:"매수",tp:"310,000",d:"7/16"},
+      {f:"하나증권",o:"매수",tp:"300,000",d:"7/14"},{f:"신한투자",o:"매수",tp:"290,000",d:"7/11"},
+      {f:"한국투자",o:"매수",tp:"305,000",d:"7/10"},{f:"KB증권",o:"매수",tp:"285,000",d:"7/08"},
+      {f:"삼성증권",o:"매수",tp:"315,000",d:"7/07"},{f:"키움증권",o:"매수",tp:"295,000",d:"7/04"},
+      {f:"미래에셋",o:"매수",tp:"320,000",d:"7/02"},{f:"대신증권",o:"중립",tp:"278,000",d:"6/30"}],
+    news:[{t:"10:05",ti:"SK하이닉스, HBM3E 12단 양산 확대… 4분기 가격 협상 우위",
+        su:"12단 제품 양산 비중이 늘면서 4분기 공급 계약에서 가격 협상력이 높아졌다는 분석이에요.",s:"연합인포맥스",th:TH('#c4b5fd','#8b5cf6')},
+      {t:"09:20",ti:"D램 현물가 3주 연속 반등, 실적 눈높이 상향",
+        su:"현물가가 3주째 오르며 하반기 실적 추정치가 전반적으로 올라가는 흐름이에요.",s:"서울경제",th:TH('#fca5a5','#ef4444')},
+      {t:"08:40",ti:"HBM 캐파 증설 앞당긴다… 청주 M15X 조기 가동",
+        su:"HBM 수요에 대응해 청주 신규 라인 가동 시점을 앞당기기로 했다고 알려졌어요.",s:"전자신문",th:null},
+      {t:"어제",ti:"외국계, 목표주가 34만원 제시 \"AI 메모리 최선호주\"",
+        su:"AI 서버 수요가 메모리 업사이클을 길게 끌고 갈 것이라며 최선호주로 제시했어요.",s:"인베스트조선",th:TH('#93c5fd','#3b82f6')},
+      {t:"어제",ti:"낸드 감산 축소 검토… 수급 개선 신호",
+        su:"낸드 가격이 바닥을 찍었다는 판단에 감산 폭을 줄이는 방안을 검토 중이에요.",s:"머니투데이",th:TH('#a7f3d0','#10b981')}],
+    m:{vol:"×1.64",volPct:78,volCap:"20일 평균 대비 · 활발",rng:"81%",
+      rngLo:"저 241,500",rngHi:"고 253,000",rngCap:"저점서 +3.9% 상승 · 고점 대비 -0.8%"}},
+  "005380":{name:"현대차",seed:33,px:"245,000",chg:"▲ 2,000 (0.82%)",up:true,
+    pxN:"244,300",chgN:"▼ 700 (0.29%)",upN:false,
+    consensus:"300,000",upside:"+22.4%",cur:82,meta:"종가 245,000 기준 · 3개월 15개사 평균",
+    trend:[312000,308000,305000,302000,301000,300000],trendD:"-3.8%",
+    brokers:[{f:"삼성증권",o:"매수",tp:"320,000",d:"7/16"},{f:"KB증권",o:"매수",tp:"300,000",d:"7/15"},
+      {f:"신한투자",o:"매수",tp:"290,000",d:"7/12"},{f:"대신증권",o:"중립",tp:"270,000",d:"7/10"},
+      {f:"미래에셋",o:"매수",tp:"310,000",d:"7/09"},{f:"키움증권",o:"매수",tp:"295,000",d:"7/07"},
+      {f:"NH투자",o:"매수",tp:"305,000",d:"7/04"},{f:"하나증권",o:"중립",tp:"280,000",d:"7/02"},
+      {f:"한국투자",o:"매수",tp:"315,000",d:"6/30"},{f:"메리츠",o:"매수",tp:"298,000",d:"6/27"}],
+    news:[{t:"09:33",ti:"현대차, 미국 IRA 보조금 확대 수혜… 2분기 영업익 컨센 상회",
+        su:"북미 전기차 보조금 요건 완화로 판매 인센티브 부담이 줄어든 점이 실적에 반영됐어요.",s:"뉴스핌",th:TH('#93c5fd','#3b82f6')},
+      {t:"08:47",ti:"인도 법인 상장 기대감에 밸류에이션 재평가 목소리",
+        su:"인도 법인 기업가치가 부각되며 지주 할인 축소 논의가 다시 나오고 있어요.",s:"머니투데이",th:TH('#fde68a','#f59e0b')},
+      {t:"08:10",ti:"3분기 신차 사이클 진입… 팰리세이드·아이오닉 신형 대기",
+        su:"하반기 신차 출시가 몰리며 판매 믹스 개선이 기대된다는 분석이에요.",s:"이투데이",th:null},
+      {t:"어제",ti:"현대차 2분기 배당 확대 검토… 주주환원 강화",
+        su:"중간배당 확대를 포함한 주주환원 방안을 이사회에서 논의 중인 것으로 전해졌어요.",s:"한국경제",th:TH('#a7f3d0','#10b981')},
+      {t:"어제",ti:"로보택시 파일럿 확대, 자율주행 밸류 부각",
+        su:"북미 로보택시 시범 운영 지역을 넓히며 자율주행 사업 가치가 재조명되고 있어요.",s:"디지털타임스",th:TH('#c4b5fd','#8b5cf6')}],
+    m:{vol:"×0.95",volPct:47,volCap:"20일 평균 대비 · 보통",rng:"58%",
+      rngLo:"저 241,000",rngHi:"고 247,500",rngCap:"저점서 +1.7% 상승 · 고점 대비 -1.0%"}}
+};
+const IB=[
+  {logo:"Citi",name:"씨티",tag:"bull",tagL:"강세",
+   txt:"씨티는 코스피 조정으로 외국인 자금 유출 압력이 완화되었고 환율이 추가로 안정화될 것으로 전망했어요.",src:"연합인포맥스",time:"어제 12:46"},
+  {logo:"GS",name:"골드만삭스",tag:"neu",tagL:"중립",
+   txt:"골드만삭스는 최근 코스피 급락의 원인을 레버리지 ETF 수급 영향으로 분석했어요.",src:"서울경제",time:"어제 10:00"},
+  {logo:"MS",name:"모건스탠리",tag:"bear",tagL:"약세",
+   txt:"모건스탠리는 반도체 업황 개선에도 밸류에이션 부담이 남아 있다며 비중 확대에는 신중한 입장을 보였어요.",src:"이데일리",time:"어제 09:00"}
+];
+let PHASE='day', CUR='005930', HIST=true;
+
+function series(seed,n){let v=100,out=[],s=seed;
+  const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  for(let i=0;i<n;i++){v+=(rnd()-0.47)*2.2;out.push(v);}return out;}
+function drawChart(d){
+  const pts=series(d.seed,78),W=640,H=200,P={t:22,b:34,l:14,r:14};
+  const mn=Math.min(...pts),mx=Math.max(...pts),span=(mx-mn)||1;
+  const X=i=>P.l+(W-P.l-P.r)*(i/(pts.length-1)),Y=v=>P.t+(H-P.t-P.b)*(1-(v-mn)/span);
+  const line=pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const base=H-P.b,iMax=pts.indexOf(mx),iMin=pts.indexOf(mn),up=pts[pts.length-1]>=pts[0];
+  const col=up?'#E03131':'#2775ED',fill=up?'rgba(224,49,49,.14)':'rgba(39,117,237,.14)';
+  document.getElementById('svg').innerHTML=`
+    <line x1="${P.l}" y1="${base}" x2="${W-P.r}" y2="${base}" stroke="var(--hairline)" stroke-width="1"/>
+    <polygon points="${X(0)},${base} ${line} ${X(pts.length-1)},${base}" fill="${fill}"/>
+    <polyline points="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(iMax)}" cy="${Y(mx)}" r="3" fill="${col}"/>
+    <text class="ax" x="${Math.min(X(iMax)+6,W-90)}" y="${Y(mx)-7}" font-weight="700" fill="${col}">고점</text>
+    <circle cx="${X(iMin)}" cy="${Y(mn)}" r="3" fill="var(--muted)"/>
+    <text class="ax" x="${Math.min(X(iMin)+6,W-90)}" y="${Y(mn)+15}" font-weight="700">저점</text>
+    <circle cx="${X(pts.length-1)}" cy="${Y(pts[pts.length-1])}" r="3.5" fill="${col}"/>
+    <text class="ax" x="${P.l}" y="${base+16}">09:00</text>
+    <text class="ax" x="${W-P.r}" y="${base+16}" text-anchor="end">15:30</text>`;
+}
+function drawTrend(d){
+  const p=d.trend,W=240,H=60,P={t:8,b:14,l:4,r:4};
+  const mn=Math.min(...p),mx=Math.max(...p),span=(mx-mn)||1;
+  const X=i=>P.l+(W-P.l-P.r)*(i/(p.length-1)),Y=v=>P.t+(H-P.t-P.b)*(1-(v-mn)/span);
+  const line=p.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const rising=p[p.length-1]>=p[0],base=H-P.b;
+  const col=rising?'#E03131':'#2775ED',fill=rising?'rgba(224,49,49,.12)':'rgba(39,117,237,.12)';
+  const f=v=>v.toLocaleString('ko-KR');
+  document.getElementById('tr-svg').innerHTML=`
+    <polygon points="${X(0)},${base} ${line} ${X(p.length-1)},${base}" fill="${fill}"/>
+    <polyline points="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+    <circle cx="${X(p.length-1)}" cy="${Y(p[p.length-1])}" r="2.8" fill="${col}"/>
+    <text class="tr-ax" x="${P.l}" y="${H-3}">${f(p[0])}</text>
+    <text class="tr-ax" x="${W-P.r}" y="${H-3}" text-anchor="end">${f(p[p.length-1])}</text>`;
+  const dEl=document.getElementById('tr-d');
+  dEl.textContent=d.trendD; dEl.className='d '+(rising?'up':'dn');
+}
+function renderTiles(){
+  const night=PHASE==='night';
+  document.getElementById('tiles').innerHTML=Object.keys(DATA).map(code=>{
+    const d=DATA[code],px=night?d.pxN:d.px,chg=night?d.chgN:d.chg,u=night?d.upN:d.up;
+    return `<div class="tile ${code===CUR?'on':''}" data-code="${code}" onclick="sel('${code}')">
+      <div class="t-mkt">🇰🇷 KOSPI <span class="t-pill ${night?'night':''}">${night?'🌙 HL 24h':'●실시간'}</span></div>
+      <div class="t-name">${d.name}</div><div class="t-px">${px}</div>
+      <div class="t-chg ${u?'up':'dn'}">${chg}</div></div>`;}).join('');
+}
+function sel(code){
+  CUR=code; const d=DATA[code];
+  renderTiles();
+  document.getElementById('c-name').textContent=d.name;
+  drawChart(d);
+  const m=d.m;
+  document.getElementById('metrics').innerHTML=`
+    <div class="m-blk"><div class="m-h">🔥 거래량<span class="v">${m.vol}</span></div>
+      <div class="m-bar"><div class="f" style="width:${m.volPct}%"></div><div class="base"></div></div>
+      <div class="m-cap" style="text-align:right">${m.volCap}</div></div>
+    <div class="m-blk"><div class="m-h">📊 당일 레인지 위치<span class="v">${m.rng}</span></div>
+      <div class="m-rng"><div class="dot" style="left:${parseInt(m.rng)}%"></div></div>
+      <div class="m-cap sp"><span>${m.rngLo}</span><span>${m.rngHi}</span></div>
+      <div class="m-cap" style="margin-top:3px">${m.rngCap}</div></div>`;
+  const n = HIST?8:10;                       // 히스토리 없으면 리포트를 늘려 여백 보전
+  const list=d.brokers.slice(0,n);
+  document.getElementById('tp-cnt').textContent='리포트 '+n+'건';
+  document.getElementById('tp-val').textContent=d.consensus;
+  document.getElementById('tp-up').textContent=d.upside;
+  document.getElementById('tp-meta').textContent=d.meta;
+  document.getElementById('tp-cur').style.width=d.cur+'%';
+  document.getElementById('brk').innerHTML=list.map(b=>
+    `<div class="brk"><span class="b-firm">${b.f}</span>`+
+    `<span class="b-op" style="${b.o==='중립'?'color:var(--muted);background:var(--soft2)':''}">${b.o}</span>`+
+    `<span class="b-tp">${b.tp}</span><span class="b-date">${b.d}</span></div>`).join('');
+  document.getElementById('tr-box').style.display=HIST?'':'none';
+  if(HIST) drawTrend(d);
+  document.getElementById('news').innerHTML=d.news.map(nw=>
+    `<a href="#"><div class="n-txt"><div class="n-time">${nw.t}</div>`+
+    `<div class="n-title">${nw.ti}</div><div class="n-sum">${nw.su}</div>`+
+    `<div class="n-src">${nw.s}</div></div>`+
+    (nw.th?`<img class="n-thumb" src="${nw.th}" alt="">`
+        :`<div class="n-nothumb">이미지<br>없음</div>`)+`</a>`).join('');
+}
+document.getElementById('ib-list').innerHTML=IB.map(v=>
+  `<div class="ib-row"><div class="ib-logo">${v.logo}</div>
+   <div class="ib-body"><div class="ib-top"><span class="ib-name">${v.name}</span>
+     <span class="ib-tag ${v.tag}">${v.tagL}</span></div>
+     <div class="ib-txt">${v.txt}</div><a class="ib-src" href="#">${v.src} →</a></div>
+   <div class="ib-time">${v.time}</div></div>`).join('');
+function setPhase(p){
+  PHASE=p;
+  document.getElementById('sw-day').classList.toggle('on',p==='day');
+  document.getElementById('sw-night').classList.toggle('on',p==='night');
+  const night=p==='night';
+  document.getElementById('w-title').textContent=night?'📈 지금 이시각 추정가':'📈 코스피 주도주';
+  document.getElementById('w-sub').textContent=night
+    ?'하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님':'코스피 시총 상위 3 · 실시간';
+  document.getElementById('nw-upd').textContent=night?'최신순 · 1시간 주기':'최신순 · 30분 주기';
+  document.getElementById('c-hint').textContent=night
+    ?'※ 곡선은 한국거래소 1분봉이라 24h가 없어요. 마감 후에도 직전 정규장 흐름을 그대로 보여줘요.':'';
+  sel(CUR);
+}
+function setHist(v){
+  HIST=v;
+  document.getElementById('sw-hist').classList.toggle('on',v);
+  document.getElementById('sw-nohist').classList.toggle('on',!v);
+  sel(CUR);
+}
+sel('005930');
+
+document.getElementById('foot').innerHTML=`
+  <h5>📉 컨센서스 추이 — 리포트 리스트 하단으로 이동</h5>
+  <ul>
+    <li>지적대로 <b>상승여력 바 바로 아래 또 그래프</b>가 오면서 시선이 갈라졌다. 이제 <b>컨센 숫자 → 상승여력 바 → 증권사 근거 리스트 → 추이 그래프</b> 순으로, 숫자·근거를 다 읽은 뒤 마지막에 "그래서 이 눈높이가 오르는 중인가"로 마무리된다.</li>
+    <li>그래프가 블록 맨 아래에 오면서 리스트의 시각적 종결부 역할도 한다.</li>
+    <li><b>히스토리 부족 시 숨김</b>(1번안) 적용. 토글로 두 상태를 비교할 수 있다. 숨김일 때는 리포트를 <b>8건 → 10건</b>으로 자동 확장해 여백을 메운다.</li>
+  </ul>`;
+</script>

@@ -1,0 +1,339 @@
+<!-- 코스피 주도주 위젯 재구성 v3 — 장중지표 2종 축소·증권사 확대·뉴스 요약 추가·목표주가 강조 하향. 장중/마감후(HL 24h) 토글 포함. 더미 데이터 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코스피 주도주 — 재구성 프로토타입 v3</title>
+<style>
+  :root{
+    --canvas:#fff; --page:#f4f5f7; --ink:#0F172A; --ink2:#334155; --muted:#94A3B8;
+    --hairline:#E5E7EB; --soft:#F7F9FC; --soft2:#F1F5F9; --primary:#2775ED;
+    --up:#E03131; --up-bg:#FEF2F2; --dn:#2775ED;
+    --r:14px; --s1:0 1px 2px rgba(20,22,26,.06); --gold:#B45309; --gold-bg:#FEF3C7;
+    --buy:#16A34A; --buy-bg:#ECFDF3; --night:#6D28D9; --night-bg:#EDE9FE;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --canvas:#16181c; --page:#0e0f12; --ink:#eceef1; --ink2:#c3c8cf; --muted:#8b919a;
+      --hairline:#282b31; --soft:#1c1f24; --soft2:#22262c; --primary:#5b9dff;
+      --up:#ff6b6b; --up-bg:#3a1f22; --dn:#5b9dff;
+      --gold:#f0b850; --gold-bg:#3a2f1a; --buy:#4ade80; --buy-bg:#16301f;
+      --night:#c4b5fd; --night-bg:#2e2545; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);padding:28px 16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;}
+  .stage{max-width:860px;margin:0 auto}
+  .stage>h4{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 12px;text-align:center}
+
+  .widget{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r);
+    box-shadow:var(--s1);padding:15px 16px}
+  .w-head{display:flex;align-items:center;margin-bottom:11px;gap:8px;flex-wrap:wrap}
+  .w-title{font-size:15px;font-weight:800}
+  .w-sub{margin-left:auto;font-size:11px;color:var(--muted)}
+
+  /* 탭 타일 — 실시간 가격이 페이지 최상위 강조 */
+  .tiles{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
+  .tiles::-webkit-scrollbar{display:none}
+  .tile{flex:1 0 auto;cursor:pointer;background:var(--soft);border:1.5px solid var(--hairline);
+    border-radius:12px;padding:12px 14px;transition:.12s}
+  .tile.on{background:var(--canvas);border-color:var(--primary);box-shadow:0 3px 10px rgba(37,117,237,.12)}
+  .t-mkt{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .t-pill{font-size:9px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;
+    color:var(--buy);background:var(--buy-bg)}
+  .t-pill.night{color:var(--night);background:var(--night-bg)}
+  .t-name{font-size:13px;font-weight:800}
+  .t-px{font-size:22px;font-weight:900;margin-top:4px;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+  .t-chg{font-size:12px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+  .t-chg.up{color:var(--up)} .t-chg.dn{color:var(--dn)}
+
+  .body{margin-top:18px;padding-top:15px;border-top:1px solid var(--soft2)}
+  .row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+  .row + .row{margin-top:16px;padding-top:16px;border-top:1px solid var(--soft2)}
+  .cL{flex:1.55 1 330px;min-width:0}
+  .cR{flex:1 1 240px;min-width:0;border-left:1px solid var(--soft2);padding-left:18px}
+  @media(max-width:680px){ .cR{flex:0 0 100%;border-left:none;padding-left:0;
+    border-top:1px solid var(--soft2);padding-top:14px} }
+
+  .ch{font-size:12px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px}
+  .ch .note{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted)}
+  .ch .live{font-size:10px;font-weight:800;color:var(--up);background:var(--up-bg);border-radius:999px;padding:2px 7px}
+  .ch .live.night{color:var(--night);background:var(--night-bg)}
+  .chart svg{width:100%;height:auto;display:block;overflow:visible}
+  .ax{font-size:10px;fill:var(--muted);font-weight:600}
+
+  /* 목표주가 — 강조 낮춤: 실시간가(22px/900)보다 확실히 아래 단계 */
+  .tp-hero{display:flex;align-items:baseline;gap:7px}
+  .tp-hero .lbl{font-size:11px;font-weight:700;color:var(--muted)}
+  .tp-hero .val{font-size:16px;font-weight:800;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .tp-up{font-size:11.5px;font-weight:800;color:var(--up)}
+  .tp-meta{font-size:10.5px;color:var(--muted);margin-top:3px}
+  .tp-gauge{position:relative;height:5px;border-radius:4px;background:var(--soft2);margin:10px 0 11px;overflow:hidden}
+  .tp-gauge .cur{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:#94A3B8}
+  .brk{display:flex;align-items:center;gap:8px;padding:6.5px 0;border-top:1px solid var(--soft2)}
+  .brk:first-of-type{border-top:none}
+  .b-firm{font-size:12px;font-weight:700;min-width:62px;color:var(--ink2)}
+  .b-op{font-size:9.5px;font-weight:800;color:var(--buy);background:var(--buy-bg);border-radius:5px;padding:1px 6px}
+  .b-tp{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+  .b-date{font-size:10px;color:var(--muted);min-width:34px;text-align:right}
+
+  /* 뉴스 — 제목 + 한 문장 요약 */
+  .news a{display:block;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid var(--soft2)}
+  .news a:first-child{border-top:none}
+  .news a:hover .n-title{color:var(--primary)}
+  .n-time{font-size:10.5px;font-weight:700;color:var(--muted)}
+  .n-title{font-size:12.5px;font-weight:800;line-height:1.4;margin:3px 0 4px}
+  .n-sum{font-size:11.5px;color:var(--ink2);line-height:1.55;margin-bottom:4px}
+  .n-src{font-size:10.5px;color:var(--muted)}
+
+  /* 장중 지표 — 2종만, 세로 스택 */
+  .m-blk{background:var(--soft);border:1px solid var(--hairline);border-radius:11px;padding:11px 13px}
+  .m-blk + .m-blk{margin-top:9px}
+  .m-h{display:flex;align-items:center;font-size:11.5px;font-weight:800;color:var(--ink2)}
+  .m-h .v{margin-left:auto;font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums}
+  .m-bar{position:relative;height:7px;border-radius:5px;background:var(--soft2);margin:8px 0 5px;overflow:hidden}
+  .m-bar .f{position:absolute;left:0;top:0;height:100%;border-radius:5px;background:#94A3B8}
+  .m-bar .base{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1}
+  .m-rng{position:relative;height:7px;border-radius:5px;margin:8px 0 5px;
+    background:linear-gradient(90deg,#EFF4FE,#FEE9E9)}
+  .m-rng .dot{position:absolute;top:-3px;width:13px;height:13px;border-radius:50%;background:var(--ink);transform:translateX(-50%)}
+  .m-cap{font-size:10.5px;color:var(--muted);line-height:1.45}
+  .m-cap.sp{display:flex;justify-content:space-between}
+  .m-moved{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.5;
+    padding-top:9px;border-top:1px dashed var(--hairline)}
+  .m-moved a{color:var(--primary);font-weight:700;text-decoration:none}
+
+  .switcher{max-width:860px;margin:14px auto 0;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .switcher span{font-size:11.5px;color:var(--muted);font-weight:700}
+  .sw-btn{font-size:11.5px;font-weight:800;padding:6px 13px;border-radius:999px;cursor:pointer;
+    border:1.5px solid var(--hairline);background:var(--canvas);color:var(--ink2)}
+  .sw-btn.on{border-color:var(--primary);color:var(--primary);background:rgba(39,117,237,.07)}
+
+  .foot{max-width:860px;margin:18px auto 0;font-size:11.5px;color:var(--muted);line-height:1.75;
+    background:var(--canvas);border:1px solid var(--hairline);border-radius:12px;padding:15px 17px}
+  .foot b{color:var(--ink2)} .foot h5{margin:0 0 8px;font-size:12.5px;color:var(--ink)}
+  .foot .ok{color:var(--buy);font-weight:800}
+  .foot ul{margin:6px 0 0;padding-left:17px} .foot li{margin-bottom:5px}
+  .hier{display:flex;gap:8px;align-items:baseline;margin:8px 0 2px;flex-wrap:wrap}
+  .hier i{font-style:normal;background:var(--soft);border:1px solid var(--hairline);border-radius:7px;padding:3px 9px;color:var(--ink2)}
+</style>
+
+<div class="stage">
+  <h4>v3 — 장중지표 2종 · 증권사 6건 · 뉴스 요약 추가 · 목표주가 강조 하향</h4>
+
+  <div class="widget">
+    <div class="w-head">
+      <span class="w-title" id="w-title">📈 코스피 주도주</span>
+      <span class="w-sub" id="w-sub">코스피 시총 상위 3 · 실시간</span>
+    </div>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="body">
+      <!-- ROW 1 : 곡선 | 목표주가 -->
+      <div class="row">
+        <div class="cL chart">
+          <div class="ch">📈 <span id="c-name">삼성전자</span> <span id="c-date">7/18(토) 장중</span>
+            <span class="live" id="c-live">● 실측 1분봉</span></div>
+          <svg id="svg" viewBox="0 0 640 210" role="img" aria-label="장중 1분봉 곡선"></svg>
+        </div>
+        <div class="cR">
+          <div class="ch">🎯 증권사 목표주가<span class="note" id="tp-cnt">리포트 6건</span></div>
+          <div class="tp-hero">
+            <span class="lbl">컨센서스</span><span class="val" id="tp-val">105,000</span>
+            <span class="tp-up" id="tp-up">+24.6%</span>
+          </div>
+          <div class="tp-meta" id="tp-meta">현재가 84,300 · 3개월 12개사 평균</div>
+          <div class="tp-gauge"><div class="cur" id="tp-cur" style="width:80%"></div></div>
+          <div id="brk"></div>
+        </div>
+      </div>
+
+      <!-- ROW 2 : 뉴스(제목+요약) | 장중 지표 2종 -->
+      <div class="row">
+        <div class="cL">
+          <div class="ch">📰 관련 뉴스<span class="note">최신순</span></div>
+          <div class="news" id="news"></div>
+        </div>
+        <div class="cR">
+          <div class="ch">📊 장중 지표<span class="note">당일</span></div>
+          <div id="metrics"></div>
+          <div class="m-moved">평균체결가(VWAP)·외국인 보유율은
+            <a href="#">종목 상세</a>에서 확인할 수 있어요.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="switcher">
+    <span>시간대 미리보기:</span>
+    <button class="sw-btn on" id="sw-day" onclick="setPhase('day')">장중 (09:00~15:30) · 실시간</button>
+    <button class="sw-btn" id="sw-night" onclick="setPhase('night')">마감 후 · 하이퍼리퀴드 24h</button>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const DATA = {
+  "005930": {
+    name:"삼성전자", seed:7,
+    px:"84,300", chg:"▲ 1,000 (1.20%)", up:true,
+    pxN:"84,120", chgN:"▼ 180 (0.21%)", upN:false,
+    consensus:"105,000", upside:"+24.6%", cur:80, cnt:"리포트 6건",
+    meta:"현재가 84,300 · 3개월 12개사 평균",
+    brokers:[{f:"한국투자",o:"매수",tp:"110,000",d:"7/17"},{f:"삼성증권",o:"매수",tp:"108,000",d:"7/16"},
+             {f:"KB증권",o:"매수",tp:"100,000",d:"7/15"},{f:"메리츠",o:"매수",tp:"98,000",d:"7/12"},
+             {f:"NH투자",o:"매수",tp:"105,000",d:"7/11"},{f:"하나증권",o:"중립",tp:"92,000",d:"7/09"}],
+    news:[{t:"09:40",ti:"삼성전자, HBM4 샘플 엔비디아 공급 임박설… 외국인 매수 유입",
+           su:"엔비디아 차세대 GPU용 HBM4 퀄 테스트가 마무리 단계라는 관측에 외국인 순매수가 유입됐어요.",s:"이데일리"},
+          {t:"08:55",ti:"\"메모리 다운사이클 끝\" 3분기 실적 컨센서스 상향",
+           su:"D램 고정가 반등이 확인되면서 증권가가 3분기 영업이익 눈높이를 잇따라 올리고 있어요.",s:"한국경제"},
+          {t:"어제",ti:"파운드리 2나노 수율 개선 소식에 목표주가 잇단 상향",
+           su:"2나노 공정 수율이 목표 구간에 진입했다는 소식에 목표주가 상향 리포트가 나왔어요.",s:"매일경제"}],
+    m:{vol:"×0.81",volPct:40,volCap:"20일 평균 대비 · 한산",
+       rng:"14%",rngLo:"저 82,100",rngHi:"고 85,900",rngCap:"저점서 +0.6% 회복 · 고점 대비 -3.4%"}
+  },
+  "000660": {
+    name:"SK하이닉스", seed:19,
+    px:"251,000", chg:"▲ 8,500 (3.51%)", up:true,
+    pxN:"253,400", chgN:"▲ 2,400 (0.96%)", upN:true,
+    consensus:"300,000", upside:"+19.5%", cur:84, cnt:"리포트 6건",
+    meta:"현재가 251,000 · 3개월 14개사 평균",
+    brokers:[{f:"메리츠",o:"매수",tp:"340,000",d:"7/17"},{f:"NH투자",o:"매수",tp:"310,000",d:"7/16"},
+             {f:"하나증권",o:"매수",tp:"300,000",d:"7/14"},{f:"신한투자",o:"매수",tp:"290,000",d:"7/11"},
+             {f:"한국투자",o:"매수",tp:"305,000",d:"7/10"},{f:"KB증권",o:"매수",tp:"285,000",d:"7/08"}],
+    news:[{t:"10:05",ti:"SK하이닉스, HBM3E 12단 양산 확대… 4분기 가격 협상 우위",
+           su:"12단 제품 양산 비중이 늘면서 4분기 공급 계약에서 가격 협상력이 높아졌다는 분석이에요.",s:"연합인포맥스"},
+          {t:"09:20",ti:"D램 현물가 3주 연속 반등, 실적 눈높이 상향",
+           su:"현물가가 3주째 오르며 하반기 실적 추정치가 전반적으로 올라가는 흐름이에요.",s:"서울경제"},
+          {t:"어제",ti:"외국계, 목표주가 34만원 제시 \"AI 메모리 최선호주\"",
+           su:"AI 서버 수요가 메모리 업사이클을 길게 끌고 갈 것이라며 최선호주로 제시했어요.",s:"인베스트조선"}],
+    m:{vol:"×1.64",volPct:78,volCap:"20일 평균 대비 · 활발",
+       rng:"81%",rngLo:"저 241,500",rngHi:"고 253,000",rngCap:"저점서 +3.9% 상승 · 고점 대비 -0.8%"}
+  },
+  "005380": {
+    name:"현대차", seed:33,
+    px:"245,000", chg:"▲ 2,000 (0.82%)", up:true,
+    pxN:"244,300", chgN:"▼ 700 (0.29%)", upN:false,
+    consensus:"300,000", upside:"+22.4%", cur:82, cnt:"리포트 6건",
+    meta:"현재가 245,000 · 3개월 15개사 평균",
+    brokers:[{f:"삼성증권",o:"매수",tp:"320,000",d:"7/16"},{f:"KB증권",o:"매수",tp:"300,000",d:"7/15"},
+             {f:"신한투자",o:"매수",tp:"290,000",d:"7/12"},{f:"대신증권",o:"중립",tp:"270,000",d:"7/10"},
+             {f:"미래에셋",o:"매수",tp:"310,000",d:"7/09"},{f:"키움증권",o:"매수",tp:"295,000",d:"7/07"}],
+    news:[{t:"09:33",ti:"현대차, 미국 IRA 보조금 확대 수혜… 2분기 영업익 컨센 상회",
+           su:"북미 전기차 보조금 요건 완화로 판매 인센티브 부담이 줄어든 점이 실적에 반영됐어요.",s:"뉴스핌"},
+          {t:"08:47",ti:"인도 법인 상장 기대감에 밸류에이션 재평가 목소리",
+           su:"인도 법인 기업가치가 부각되며 지주 할인 축소 논의가 다시 나오고 있어요.",s:"머니투데이"},
+          {t:"어제",ti:"3분기 신차 사이클 진입… 목표주가 32만원 상향 리포트",
+           su:"하반기 신차 출시가 몰리며 믹스 개선이 기대된다는 이유로 목표주가가 올랐어요.",s:"이투데이"}],
+    m:{vol:"×0.95",volPct:47,volCap:"20일 평균 대비 · 보통",
+       rng:"58%",rngLo:"저 241,000",rngHi:"고 247,500",rngCap:"저점서 +1.7% 상승 · 고점 대비 -1.0%"}
+  }
+};
+let PHASE='day', CUR='005930';
+
+function series(seed,n){
+  let v=100,out=[],s=seed;
+  const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  for(let i=0;i<n;i++){ v+=(rnd()-0.47)*2.2; out.push(v); }
+  return out;
+}
+function drawChart(d){
+  const pts=series(PHASE==='day'?d.seed:d.seed+5,78), W=640,H=210,P={t:22,b:34,l:14,r:14};
+  const mn=Math.min(...pts),mx=Math.max(...pts),span=(mx-mn)||1;
+  const X=i=>P.l+(W-P.l-P.r)*(i/(pts.length-1));
+  const Y=v=>P.t+(H-P.t-P.b)*(1-(v-mn)/span);
+  const line=pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+  const base=H-P.b, iMax=pts.indexOf(mx), iMin=pts.indexOf(mn);
+  const up=pts[pts.length-1]>=pts[0];
+  const col=up?'#E03131':'#2775ED', fill=up?'rgba(224,49,49,.14)':'rgba(39,117,237,.14)';
+  const t0=PHASE==='day'?'09:00':'15:40', t1=PHASE==='day'?'15:30':'익일 08:50';
+  document.getElementById('svg').innerHTML=`
+    <line x1="${P.l}" y1="${base}" x2="${W-P.r}" y2="${base}" stroke="var(--hairline)" stroke-width="1"/>
+    <polygon points="${X(0)},${base} ${line} ${X(pts.length-1)},${base}" fill="${fill}"/>
+    <polyline points="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(iMax)}" cy="${Y(mx)}" r="3" fill="${col}"/>
+    <text class="ax" x="${Math.min(X(iMax)+6,W-90)}" y="${Y(mx)-7}" font-weight="700" fill="${col}">고점</text>
+    <circle cx="${X(iMin)}" cy="${Y(mn)}" r="3" fill="var(--muted)"/>
+    <text class="ax" x="${Math.min(X(iMin)+6,W-90)}" y="${Y(mn)+15}" font-weight="700">저점</text>
+    <circle cx="${X(pts.length-1)}" cy="${Y(pts[pts.length-1])}" r="3.5" fill="${col}"/>
+    <text class="ax" x="${P.l}" y="${base+16}">${t0}</text>
+    <text class="ax" x="${W-P.r}" y="${base+16}" text-anchor="end">${t1}</text>`;
+}
+function renderTiles(){
+  const night = PHASE==='night';
+  document.getElementById('tiles').innerHTML = Object.keys(DATA).map(code=>{
+    const d=DATA[code], px=night?d.pxN:d.px, chg=night?d.chgN:d.chg, u=night?d.upN:d.up;
+    return `<div class="tile ${code===CUR?'on':''}" data-code="${code}" onclick="sel('${code}')">
+      <div class="t-mkt">🇰🇷 KOSPI <span class="t-pill ${night?'night':''}">${night?'🌙 HL 24h':'●실시간'}</span></div>
+      <div class="t-name">${d.name}</div>
+      <div class="t-px">${px}</div>
+      <div class="t-chg ${u?'up':'dn'}">${chg}</div></div>`;
+  }).join('');
+}
+function sel(code){
+  CUR=code; const d=DATA[code];
+  renderTiles();
+  document.getElementById('c-name').textContent=d.name;
+  drawChart(d);
+  document.getElementById('tp-cnt').textContent=d.cnt;
+  document.getElementById('tp-val').textContent=d.consensus;
+  document.getElementById('tp-up').textContent=d.upside;
+  document.getElementById('tp-meta').textContent=d.meta;
+  document.getElementById('tp-cur').style.width=d.cur+'%';
+  document.getElementById('brk').innerHTML=d.brokers.map(b=>
+    `<div class="brk"><span class="b-firm">${b.f}</span>`+
+    `<span class="b-op" style="${b.o==='중립'?'color:var(--muted);background:var(--soft2)':''}">${b.o}</span>`+
+    `<span class="b-tp">${b.tp}</span><span class="b-date">${b.d}</span></div>`).join('');
+  document.getElementById('news').innerHTML=d.news.map(n=>
+    `<a href="#"><div class="n-time">${n.t}</div><div class="n-title">${n.ti}</div>`+
+    `<div class="n-sum">${n.su}</div><div class="n-src">${n.s}</div></a>`).join('');
+  const m=d.m;
+  document.getElementById('metrics').innerHTML=`
+    <div class="m-blk"><div class="m-h">🔥 거래량<span class="v">${m.vol}</span></div>
+      <div class="m-bar"><div class="f" style="width:${m.volPct}%"></div><div class="base"></div></div>
+      <div class="m-cap" style="text-align:right">${m.volCap}</div></div>
+    <div class="m-blk"><div class="m-h">📊 당일 레인지 위치<span class="v">${m.rng}</span></div>
+      <div class="m-rng"><div class="dot" style="left:${parseInt(m.rng)}%"></div></div>
+      <div class="m-cap sp"><span>${m.rngLo}</span><span>${m.rngHi}</span></div>
+      <div class="m-cap" style="margin-top:3px">${m.rngCap}</div></div>`;
+}
+function setPhase(p){
+  PHASE=p;
+  document.getElementById('sw-day').classList.toggle('on',p==='day');
+  document.getElementById('sw-night').classList.toggle('on',p==='night');
+  const night=p==='night';
+  document.getElementById('w-title').textContent = night?'📈 지금 이시각 추정가':'📈 코스피 주도주';
+  document.getElementById('w-sub').textContent = night
+    ? '하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님'
+    : '코스피 시총 상위 3 · 실시간';
+  document.getElementById('c-date').textContent = night?'마감 후 24h':'7/18(토) 장중';
+  const live=document.getElementById('c-live');
+  live.textContent = night?'🌙 HL 24h 환산':'● 실측 1분봉';
+  live.classList.toggle('night',night);
+  sel(CUR);
+}
+sel('005930');
+
+document.getElementById('foot').innerHTML=`
+  <h5>✅ 이번 반영 사항</h5>
+  <ul>
+    <li><b>장중 지표 2종으로 축소</b> — 거래량·레인지 위치만 남기고, VWAP·외국인 보유율은 종목 상세로 이관(하단에 안내 링크). 오른쪽 칼럼 세로가 약 40% 줄어 뉴스와 높이가 맞는다.</li>
+    <li><b>증권사 목표주가 4건 → 6건</b> — 지표에서 비운 세로를 목표주가가 가져가, 이 위젯의 새 주인공이 무엇인지가 분명해진다.</li>
+    <li><b>뉴스에 한 문장 요약 추가</b> — 제목만으로는 "왜 움직였나"가 안 잡혔던 부분 보완. 해요체 고정(기존 운영 규칙과 동일).</li>
+    <li><b>목표주가 강조 하향</b> — 아래 위계 참고.</li>
+  </ul>
+  <h5 style="margin-top:12px">🔤 숫자 위계 (의도한 순서)</h5>
+  <div class="hier">
+    <i>① 실시간가 <b>22px / 900</b></i>
+    <i>② 장중지표 값 16px / 900</i>
+    <i>③ 목표주가 컨센 <b>16px / 800 · 회색조</b></i>
+    <i>④ 증권사별 12.5px</i>
+  </div>
+  목표주가는 크기(25→16px)·굵기(900→800)·색(먹색→회색조)을 모두 낮췄고, 게이지도 파란 그라데이션에서 회색으로 바꿔 시선을 뺏지 않게 했다. 이제 화면에서 가장 큰 숫자는 항상 <b>타일의 실시간 가격</b>이다.
+  <h5 style="margin-top:12px">🌙 실시간 / 하이퍼리퀴드 24h 전환 — <span class="ok">그대로 유지</span></h5>
+  위 토글로 확인. 기존 <code>krOpen()</code> → <code>setNight()</code> 로직은 <b>손대지 않았다</b>. 장중이면 <code>●실시간</code>(초록), 마감 후면 <code>🌙 HL 24h</code>(보라)로 타일 뱃지·헤더 문구·서브 카피가 전환되는 동작 그대로다. 이번 재구성은 타일 <em>아래 본문 영역</em>만 바꾼 것이라 전환 로직과 충돌하지 않는다.
+  <h5 style="margin-top:12px">💬 남은 판단거리</h5>
+  <ul>
+    <li>마감 후에는 <b>레인지 위치·거래량</b>도 의미가 옅어진다. 그 시간엔 지표 블록을 접고 목표주가·뉴스만 남기는 편이 깔끔할 수 있다.</li>
+    <li>증권사 6건이 많다고 느껴지면 4건 + "더보기"로 접는 방식도 가능하다.</li>
+  </ul>`;
+</script>
