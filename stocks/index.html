@@ -3054,11 +3054,13 @@ if(passBtn){
     });
     sub.textContent=on?'하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님':'코스피 시총 상위 3 · 마감 후 미국 LIVE';
     // 곡선·장중지표는 정규장 실측이라 그대로 두고, 뉴스 갱신 주기 표기만 시간대에 맞춘다.
-    // 종목 뉴스 수집(fetch_stock_news.py)은 cron-job.org가 평일(1-5)에만 트리거한다 — 주말·공휴일엔 수집 자체가 없다.
+    // 주말·공휴일엔 주기를 표기하지 않는다 — 종목 뉴스 수집(fetch_stock_news.py)의 cron-job.org 트리거가
+    // 평일에만 발화하는 상태라(2026-07-18 토 실행 0건 확인) 어떤 주기를 적더라도 사실과 다르다.
+    // 주말 스케줄이 실제로 발화하기 시작하면 그 주기를 여기에 명시할 것.
     var upd=document.getElementById('lw-upd');
     if(upd){
       var isHoliday=window.krIsKospiHoliday&&window.krIsKospiHoliday();
-      upd.textContent=isHoliday?'최신순 · 주말·휴장일 갱신 없음':(on?'최신순 · 1시간 주기':'최신순 · 30분 주기');
+      upd.textContent=isHoliday?'최신순':(on?'최신순 · 1시간 주기':'최신순 · 30분 주기');
     }
   }
   /* 장중: 네이버 실측 KRW(stocks-live)로 타일 갱신 */
