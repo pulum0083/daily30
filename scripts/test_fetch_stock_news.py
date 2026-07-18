@@ -1,4 +1,5 @@
 # 종목별 뉴스 수집의 중복 제거와 og:image 추출을 검증하는 테스트
+import json
 import sys
 from datetime import datetime, timedelta
 from email.utils import format_datetime
@@ -279,3 +280,159 @@ def test_extract_og_image_handles_reversed_attribute_order():
 def test_extract_og_image_returns_none_when_absent():
     # 썸네일 없는 기사가 반드시 생긴다 — 폴백이 동작해야 한다
     assert fsn.extract_og_image("<html><body>no meta</body></html>") is None
+
+
+def test_build_prompt_lists_all_titles():
+    items = [{"title": "제목A", "source": "S1"}, {"title": "제목B", "source": "S2"}]
+    p = fsn.build_prompt("삼성전자", items)
+    assert "제목A" in p and "제목B" in p
+    assert "삼성전자" in p
+    assert "해요체" in p
+    assert "습니다" in p  # 합쇼체 금지 문구 포함 확인
+    assert "JSON" in p
+
+
+def test_apply_summaries_matches_by_index():
+    merged = [{"url": "u1", "summary": ""}, {"url": "u2", "summary": "기존"}]
+    todo = [{"url": "u1"}]
+    fsn.apply_summaries(merged, todo, ["새 요약이에요."])
+    assert merged[0]["summary"] == "새 요약이에요."
+    assert merged[1]["summary"] == "기존"
+
+
+def test_apply_summaries_tolerates_short_response():
+    # Gemini가 요청보다 적게 돌려줘도 죽지 않아야 한다
+    merged = [{"url": "u1", "summary": ""}, {"url": "u2", "summary": ""}]
+    todo = [{"url": "u1"}, {"url": "u2"}]
+    fsn.apply_summaries(merged, todo, ["하나만 왔어요."])
+    assert merged[0]["summary"] == "하나만 왔어요."
+    assert merged[1]["summary"] == ""
+
+
+def test_apply_summaries_tolerates_long_response():
+    # Gemini가 요청보다 많이 돌려줘도 초과분은 무시한다
+    merged = [{"url": "u1", "summary": ""}]
+    todo = [{"url": "u1"}]
+    fsn.apply_summaries(merged, todo, ["요약이에요.", "여분1", "여분2"])
+    assert merged[0]["summary"] == "요약이에요."
+
+
+def test_summarize_returns_empty_without_api_key(monkeypatch):
+    # 키가 없으면 HTTP 호출 자체를 하지 않아야 한다 — 조용히 실패해도 절대 죽지 않는다
+    monkeypatch.setattr(fsn, "get_gemini_api_key", lambda: "")
+
+    def _fail_if_called(*args, **kwargs):
+        raise AssertionError("GEMINI_API_KEY 없이 HTTP 호출을 시도했다")
+
+    monkeypatch.setattr(fsn.urllib.request, "urlopen", _fail_if_called)
+
+    result = fsn.summarize("삼성전자", [{"title": "제목", "source": "S"}])
+    assert result == []
+
+
+def test_summarize_returns_empty_when_no_todo_items(monkeypatch):
+    # todo가 비어 있으면(가장 흔한 폴링) 애초에 Gemini를 호출하지 않는다 — 비용 모델의 핵심
+    def _fail_if_called(*args, **kwargs):
+        raise AssertionError("todo가 비었는데 HTTP 호출을 시도했다")
+
+    monkeypatch.setattr(fsn.urllib.request, "urlopen", _fail_if_called)
+    assert fsn.summarize("삼성전자", []) == []
+
+
+class _FakeResponse:
+    def __init__(self, body):
+        self._body = body
+
+    def read(self):
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def test_summarize_parses_gemini_response(monkeypatch):
+    monkeypatch.setattr(fsn, "get_gemini_api_key", lambda: "fake-key")
+    gemini_body = json.dumps({
+        "candidates": [{"content": {"parts": [{"text": '["요약1이에요.", "요약2이에요."]'}]}}]
+    }).encode("utf-8")
+    monkeypatch.setattr(
+        fsn.urllib.request, "urlopen", lambda *a, **k: _FakeResponse(gemini_body)
+    )
+    result = fsn.summarize("삼성전자", [{"title": "제목A", "source": "S"}, {"title": "제목B", "source": "S"}])
+    assert result == ["요약1이에요.", "요약2이에요."]
+
+
+def test_summarize_returns_empty_on_http_error(monkeypatch):
+    monkeypatch.setattr(fsn, "get_gemini_api_key", lambda: "fake-key")
+
+    def _raise(*a, **k):
+        raise OSError("network down")
+
+    monkeypatch.setattr(fsn.urllib.request, "urlopen", _raise)
+    assert fsn.summarize("삼성전자", [{"title": "제목", "source": "S"}]) == []
+
+
+def test_enrich_new_items_recovers_publisher_from_bare_domain(monkeypatch):
+    merged = [{"url": "https://v.daum.net/v/123", "source": "v.daum.net", "thumb": None}]
+    todo = [{"url": "https://v.daum.net/v/123"}]
+
+    html_page = (
+        '<meta property="og:site_name" content="이데일리">'
+        '<meta property="og:image" content="https://img.com/a.jpg">'
+    )
+    monkeypatch.setattr(fsn, "_fetch", lambda url, timeout=15: html_page)
+
+    fsn.enrich_new_items(merged, todo)
+    assert merged[0]["source"] == "이데일리"
+    assert merged[0]["thumb"] == "https://img.com/a.jpg"
+
+
+def test_enrich_new_items_keeps_proper_publisher_name(monkeypatch):
+    # 이미 정상적인 한글 언론사명이면 og:site_name이 달라도 절대 덮어쓰지 않는다
+    merged = [{"url": "https://a.com/1", "source": "한국경제", "thumb": None}]
+    todo = [{"url": "https://a.com/1"}]
+
+    html_page = '<meta property="og:site_name" content="다른이름">'
+    monkeypatch.setattr(fsn, "_fetch", lambda url, timeout=15: html_page)
+
+    fsn.enrich_new_items(merged, todo)
+    assert merged[0]["source"] == "한국경제"
+
+
+def test_enrich_new_items_leaves_domain_when_site_name_absent(monkeypatch):
+    # og:site_name이 없으면 도메인이어도 임의로 값을 만들어내지 않는다 (운영규칙 0)
+    merged = [{"url": "https://ebn.co.kr/1", "source": "ebn.co.kr", "thumb": None}]
+    todo = [{"url": "https://ebn.co.kr/1"}]
+
+    html_page = "<html><body>no meta</body></html>"
+    monkeypatch.setattr(fsn, "_fetch", lambda url, timeout=15: html_page)
+
+    fsn.enrich_new_items(merged, todo)
+    assert merged[0]["source"] == "ebn.co.kr"
+    assert merged[0]["thumb"] is None
+
+
+def test_resolve_gnews_url_passes_through_non_gnews_links():
+    # 구글 뉴스 리다이렉트 형태가 아니면 네트워크 호출 없이 그대로 반환한다
+    assert fsn._resolve_gnews_url("https://v.daum.net/v/123") == "https://v.daum.net/v/123"
+
+
+def test_enrich_new_items_never_promotes_google_news_as_publisher(monkeypatch):
+    # 구글 뉴스 링크 리졸브가 실패해 인터스티셜 페이지를 그대로 fetch하면
+    # og:site_name이 "Google News"로 나온다 — 발행사명이 아니므로 절대 승격하지 않는다.
+    link = "https://news.google.com/rss/articles/abc123"
+    merged = [{"url": link, "source": "v.daum.net", "thumb": None}]
+    todo = [{"url": link}]
+
+    monkeypatch.setattr(fsn, "_resolve_gnews_url", lambda url: url)  # 리졸브 실패 시뮬레이션
+    html_page = (
+        '<meta property="og:site_name" content="Google News">'
+        '<meta property="og:image" content="https://lh3.googleusercontent.com/icon.png">'
+    )
+    monkeypatch.setattr(fsn, "_fetch", lambda url, timeout=15: html_page)
+
+    fsn.enrich_new_items(merged, todo)
+    assert merged[0]["source"] == "v.daum.net"
