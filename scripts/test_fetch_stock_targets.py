@@ -54,3 +54,31 @@ def test_parse_report_detail_returns_none_when_placeholder():
     assert fst.parse_report_detail(DETAIL_NO_TARGET) == {
         "target_price": None, "opinion": None
     }
+
+
+def test_compute_consensus_uses_latest_per_firm():
+    # 같은 증권사가 2건을 냈으면 최신 1건만 평균에 들어가야 한다
+    reports = [
+        {"firm": "하나증권", "date": "26.07.08", "target_price": 100000},
+        {"firm": "하나증권", "date": "26.05.02", "target_price": 60000},
+        {"firm": "대신증권", "date": "26.07.07", "target_price": 120000},
+    ]
+    r = fst.compute_consensus(reports, today="26.07.18")
+    assert r["firm_count"] == 2
+    assert r["consensus"] == 110000  # (100000 + 120000) / 2
+
+
+def test_compute_consensus_drops_reports_older_than_3_months():
+    reports = [
+        {"firm": "A증권", "date": "26.07.08", "target_price": 100000},
+        {"firm": "B증권", "date": "26.01.05", "target_price": 999999},
+    ]
+    r = fst.compute_consensus(reports, today="26.07.18")
+    assert r["firm_count"] == 1
+    assert r["consensus"] == 100000
+
+
+def test_compute_consensus_returns_none_when_no_valid_reports():
+    # 목표가가 전부 없으면 억지로 0을 만들지 않고 None (운영규칙 0)
+    reports = [{"firm": "A증권", "date": "26.07.08", "target_price": None}]
+    assert fst.compute_consensus(reports, today="26.07.18")["consensus"] is None

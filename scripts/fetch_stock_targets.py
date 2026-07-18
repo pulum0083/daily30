@@ -1,6 +1,7 @@
 # 네이버 증권사 리포트에서 종목별 목표주가·투자의견을 수집해 컨센서스를 계산하는 스크립트
 import re
 import urllib.request
+from datetime import datetime, timedelta
 
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
 LIST_URL = ("https://finance.naver.com/research/company_list.naver"
@@ -47,3 +48,33 @@ def parse_report_detail(html):
         "target_price": int(tp.group(1).replace(",", "")) if tp else None,
         "opinion": opinion,
     }
+
+
+def _to_date(yymmdd):
+    """'26.07.08' → date. 네이버는 2자리 연도를 쓴다."""
+    return datetime.strptime(yymmdd, "%y.%m.%d").date()
+
+
+def compute_consensus(reports, today, months=3):
+    """증권사당 최신 1건만 골라 최근 N개월 목표주가 평균을 낸다.
+
+    유효한 목표가가 하나도 없으면 consensus=None을 반환한다 —
+    억지로 0이나 추정치를 만들지 않는다(운영규칙 0).
+    """
+    cutoff = _to_date(today) - timedelta(days=months * 31)
+    latest = {}
+    for r in reports:
+        if r.get("target_price") is None:
+            continue
+        d = _to_date(r["date"])
+        if d < cutoff:
+            continue
+        prev = latest.get(r["firm"])
+        if prev is None or d > _to_date(prev["date"]):
+            latest[r["firm"]] = r
+    picked = list(latest.values())
+    if not picked:
+        return {"consensus": None, "firm_count": 0, "reports": []}
+    avg = round(sum(p["target_price"] for p in picked) / len(picked))
+    picked.sort(key=lambda p: _to_date(p["date"]), reverse=True)
+    return {"consensus": avg, "firm_count": len(picked), "reports": picked}
