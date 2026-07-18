@@ -798,6 +798,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span class="bc-pill" id="bc-pill" style="display:none"></span>
       <span class="bc-arr">›</span>
     </a>
+    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
+      <div class="ue-h">
+        <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
+        <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
+        <span style="font-size:11px;color:#94A3B8;" id="ue-sub">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
+        <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
+          <button type="button" data-cur="krw" class="on">원화</button>
+          <button type="button" data-cur="usd">달러</button>
+        </div>
+      </div>
+      <div class="ue-macro" id="ue-macro"></div>
+      <div class="ue-grid" id="ue-grid"></div>
+      <div id="ue-cap" style="font-size:11px;color:#94A3B8;margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
+    </div>
     <script>
     /* 코스피 거래일 판별(허브 전역) — 주말+공휴일이면 비거래일. 공휴일 목록은 api/_market-calendar.mjs(서버 권위)의 미러.
        서버 API의 open 필드는 이미 휴일을 반영하지만, 라벨·폴링 여부를 시간만으로 판단하던 클라이언트 체크들이
@@ -1390,20 +1404,6 @@ function usSel(code){
 #us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
 @keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
 </style>
-    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
-      <div class="ue-h">
-        <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
-        <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
-        <span style="font-size:11px;color:#94A3B8;" id="ue-sub">삼성전자·SK하이닉스 연계 · 17:00–07:30</span>
-        <div id="ue-toggle" style="margin-left:auto;display:inline-flex;border:1px solid #CBD5E1;border-radius:8px;overflow:hidden;">
-          <button type="button" data-cur="krw" class="on">원화</button>
-          <button type="button" data-cur="usd">달러</button>
-        </div>
-      </div>
-      <div class="ue-macro" id="ue-macro"></div>
-      <div class="ue-grid" id="ue-grid"></div>
-      <div id="ue-cap" style="font-size:11px;color:#94A3B8;margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
-    </div>
     <script>
 (function(){
   var box=document.getElementById('us-evening');
