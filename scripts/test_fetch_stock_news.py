@@ -163,6 +163,75 @@ def test_merge_selects_five_newest_not_first_five():
     assert len(todo) == 5
 
 
+RSS_ENTITIES = """<rss><channel>
+<item><title>&quot;삼성전자&quot; 최대 실적&amp;신고가</title><link>https://a.com/1</link>
+<pubDate>Fri, 18 Jul 2026 09:40:00 GMT</pubDate><source>한경매거진&amp;북</source></item>
+<item><title>현대차 &#39;아이오닉 5 N&#39; 출시</title><link>https://a.com/2</link>
+<pubDate>Fri, 18 Jul 2026 09:30:00 GMT</pubDate><source>대한경제</source></item>
+</channel></rss>"""
+
+
+def test_parse_rss_unescapes_html_entities():
+    # 엔티티가 그대로 남으면 위젯에 &amp;·&quot;가 문자 그대로 노출된다.
+    items = fsn.parse_rss(RSS_ENTITIES)
+    assert items[0]["title"] == '"삼성전자" 최대 실적&신고가'
+    assert items[0]["source"] == "한경매거진&북"
+    assert items[1]["title"] == "현대차 '아이오닉 5 N' 출시"
+
+
+def test_parse_rss_does_not_revive_escaped_tags():
+    # 태그 제거 후 언이스케이프해야 &lt;script&gt;가 진짜 태그로 되살아나지 않는다.
+    xml = ("<rss><channel><item><title>&lt;script&gt;위험&lt;/script&gt;</title>"
+           "<link>https://a.com/1</link><source>대한경제</source></item>"
+           "</channel></rss>")
+    assert fsn.parse_rss(xml)[0]["title"] == "<script>위험</script>"
+
+
+# UGC 플랫폼 글이 섞인 피드 — 날짜는 실행 시점 기준으로 만든다.
+def _rss_with_ugc():
+    now = datetime.now(fsn.KST).replace(second=0, microsecond=0)
+    rows = [
+        ("정상 기사1", "대한경제", now - timedelta(minutes=1)),
+        ("블로그 글", "Naver Blog", now - timedelta(minutes=2)),
+        ("카페 글", "네이버 카페", now - timedelta(minutes=3)),
+        ("정상 기사2", "머니투데이", now - timedelta(minutes=4)),
+        ("티스토리 글", "티스토리", now - timedelta(minutes=5)),
+        ("정상 기사3", "서울경제", now - timedelta(minutes=6)),
+        ("정상 기사4", "매일경제", now - timedelta(minutes=7)),
+        ("정상 기사5", "코리아포스트", now - timedelta(minutes=8)),
+        ("정상 기사6", "뉴시스", now - timedelta(minutes=9)),
+    ]
+    body = "".join(
+        f"<item><title>{t}</title><link>https://a.com/{i}</link>"
+        f"<pubDate>{format_datetime(d)}</pubDate><source>{s}</source></item>"
+        for i, (t, s, d) in enumerate(rows)
+    )
+    return f"<rss><channel>{body}</channel></rss>"
+
+
+def test_parse_rss_drops_ugc_platform_sources():
+    # 블로그·카페 글은 "관련 뉴스"가 아니다.
+    sources = [i["source"] for i in fsn.parse_rss(_rss_with_ugc())]
+    assert "Naver Blog" not in sources
+    assert "네이버 카페" not in sources
+    assert "티스토리" not in sources
+
+
+def test_parse_rss_keeps_publisher_with_similar_name():
+    # "코리아포스트"는 언론사다 — 부분 일치로 잘라내면 안 된다.
+    sources = [i["source"] for i in fsn.parse_rss(_rss_with_ugc())]
+    assert "코리아포스트" in sources
+
+
+def test_ugc_slot_is_backfilled_not_lost():
+    # UGC를 걸러낸 자리는 다음 기사로 채워진다 — 5건이 4건으로 줄지 않는다.
+    merged, _ = fsn.merge([], fsn.parse_rss(_rss_with_ugc()))
+    assert len(merged) == 5
+    assert [m["title"] for m in merged] == [
+        "정상 기사1", "정상 기사2", "정상 기사3", "정상 기사4", "정상 기사5",
+    ]
+
+
 def test_merge_keeps_existing_summaries():
     # 이미 요약된 기사는 재요약하지 않는다 — Gemini 호출 비용이 여기서 결정된다
     old = [{"url": "https://a.com/1", "title": "옛 제목", "summary": "이미 요약됨",

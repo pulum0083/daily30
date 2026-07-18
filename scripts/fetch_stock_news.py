@@ -1,4 +1,5 @@
 # 종목별 관련 뉴스를 RSS로 수집해 요약·썸네일을 붙여 위젯용 JSON을 만드는 스크립트
+import html
 import re
 import urllib.parse
 import urllib.request
@@ -33,8 +34,26 @@ _OG_IMAGE = re.compile(
 _MAX_SOURCE_LEN = 20
 
 
+# 뉴스가 아닌 UGC 플랫폼 출처 — 언론사가 아니라 플랫폼만 제외한다.
+_UGC_SOURCES = {
+    "네이버블로그", "naverblog", "blog.naver.com",
+    "네이버포스트", "naverpost", "post.naver.com",
+    "네이버카페", "navercafe", "cafe.naver.com",
+    "다음카페", "daumcafe", "cafe.daum.net",
+    "티스토리", "tistory", "tistory.com",
+    "브런치", "brunch", "brunch.co.kr",
+    "벨로그", "velog", "velog.io",
+}
+
+
 def _strip_tags(text):
-    return _TAG.sub("", text).strip()
+    # 태그를 먼저 지운 뒤 엔티티를 복원한다 — 순서가 반대면 &lt;script&gt;가 진짜 태그가 된다.
+    return html.unescape(_TAG.sub("", text).strip()).strip()
+
+
+def _is_ugc_source(source):
+    # 부분 일치는 쓰지 않는다 — "OO포스트" 같은 실제 언론사를 잘못 걸러낼 수 있다.
+    return source.replace(" ", "").lower() in _UGC_SOURCES
 
 
 def _is_domain_like(source):
@@ -98,6 +117,9 @@ def parse_rss(xml):
         title, source = _clean_title(
             _strip_tags(fields["title"]), _strip_tags(fields["source"])
         )
+        # 최신 5건을 자르기 전에 걸러야 빈 자리가 다음 기사로 채워진다.
+        if _is_ugc_source(source):
+            continue
         items.append({
             "title": title,
             "url": fields["url"],
