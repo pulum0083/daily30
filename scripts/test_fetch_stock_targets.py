@@ -27,7 +27,11 @@ DETAIL_HTML = """
 """
 
 DETAIL_NO_TARGET = """
-<div class="view_info_1">투자의견 <em class="coment">Buy</em></div>
+<div class="view_info_1">
+    목표가 <em class="money">없음</em>
+    <span class="division">|</span>
+    투자의견 <em class="coment">없음</em>
+    </div>
 """
 
 
@@ -44,6 +48,9 @@ def test_parse_report_detail_extracts_target_and_opinion():
     }
 
 
-def test_parse_report_detail_returns_none_target_when_absent():
-    # 목표가 없는 리포트가 실제로 존재한다 — 조용히 0으로 만들지 말고 None을 반환해야 한다
-    assert fst.parse_report_detail(DETAIL_NO_TARGET)["target_price"] is None
+def test_parse_report_detail_returns_none_when_placeholder():
+    # 목표가가 없는 리포트는 네이버가 '없음' 플레이스홀더를 렌더한다.
+    # 이걸 그대로 두면 UI에 '없음' 투자의견 뱃지가 뜬다 — 둘 다 None이어야 한다.
+    assert fst.parse_report_detail(DETAIL_NO_TARGET) == {
+        "target_price": None, "opinion": None
+    }

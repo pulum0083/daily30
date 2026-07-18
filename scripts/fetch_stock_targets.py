@@ -39,7 +39,11 @@ def parse_report_detail(html):
     """상세 HTML에서 목표가·투자의견을 뽑는다. 목표가가 없는 리포트는 None."""
     tp = re.search(r"목표가[\s\S]{0,40}?([\d][\d,]{2,})", html)
     op = re.search(r"투자의견\s*<em[^>]*>([^<]+)</em>", html)
+    opinion = op.group(1).strip() if op else None
+    # 목표가 없는 리포트는 네이버가 투자의견에도 '없음'을 렌더한다 — 실제 의견이 아니므로 버린다.
+    if opinion == "없음":
+        opinion = None
     return {
         "target_price": int(tp.group(1).replace(",", "")) if tp else None,
-        "opinion": op.group(1).strip() if op else None,
+        "opinion": opinion,
     }
