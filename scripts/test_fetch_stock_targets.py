@@ -1,0 +1,49 @@
+# 네이버 증권사 리포트 목록·상세 파싱과 컨센서스 계산을 검증하는 테스트
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import fetch_stock_targets as fst
+
+LIST_HTML = """
+<table><tbody>
+<tr><td><a href="/item/main.naver?code=005930">삼성전자</a></td>
+<td><a href="company_read.naver?nid=93991&page=1">메모리 이익 체력 확인</a></td>
+<td>하나증권</td><td>26.07.08</td><td>5527</td></tr>
+<tr><td><a href="/item/main.naver?code=005930">삼성전자</a></td>
+<td><a href="company_read.naver?nid=93978&page=1">체급의 위력</a></td>
+<td>대신증권</td><td>26.07.07</td><td>5081</td></tr>
+<tr><td colspan="5">광고행</td></tr>
+</tbody></table>
+"""
+
+DETAIL_HTML = """
+<div class="view_info">
+    <div class="view_info_1">
+        목표가 <em class="money"><strong>480,000</strong></em>
+    <span class="division">|</span>
+    투자의견 <em class="coment">Buy</em>
+    </div></div>
+"""
+
+DETAIL_NO_TARGET = """
+<div class="view_info_1">투자의견 <em class="coment">Buy</em></div>
+"""
+
+
+def test_parse_report_list_extracts_rows():
+    rows = fst.parse_report_list(LIST_HTML)
+    assert len(rows) == 2
+    assert rows[0] == {"firm": "하나증권", "date": "26.07.08", "nid": "93991"}
+    assert rows[1]["firm"] == "대신증권"
+
+
+def test_parse_report_detail_extracts_target_and_opinion():
+    assert fst.parse_report_detail(DETAIL_HTML) == {
+        "target_price": 480000, "opinion": "Buy"
+    }
+
+
+def test_parse_report_detail_returns_none_target_when_absent():
+    # 목표가 없는 리포트가 실제로 존재한다 — 조용히 0으로 만들지 말고 None을 반환해야 한다
+    assert fst.parse_report_detail(DETAIL_NO_TARGET)["target_price"] is None
