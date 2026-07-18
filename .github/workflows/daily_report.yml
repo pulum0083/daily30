@@ -100,11 +100,25 @@ jobs:
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type kospi
 
+      - name: 🎯 증권사 목표주가 수집 (개장 전)
+        continue-on-error: true
+        run: python3 scripts/fetch_stock_targets.py
+
       - name: 🏦 외국계 IB 코멘트 수집 (Gemini, 실패해도 발행 계속)
         continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_ib_korea_views.py
+
+      # 주도주 위젯이 브라우저에서 직접 fetch하는 경로는 web/ 아래뿐이다.
+      # 수집 스크립트는 data/에 쓰므로 서빙 디렉터리로 복사해야 섹션이 표시된다.
+      - name: 🏦 외국계 시각 데이터 웹 서빙 경로로 복사
+        continue-on-error: true
+        run: |
+          if [ -f data/ib_korea_views.json ]; then
+            mkdir -p web/data
+            cp data/ib_korea_views.json web/data/ib_korea_views.json
+          fi
 
       - name: ✨ Claude 분석 생성 (Prompt Caching + JSON only)
         if: steps.holiday.outputs.open == 'true'
@@ -133,6 +147,7 @@ jobs:
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
+          git checkout -- web/data/stock-news.json 2>/dev/null || true
           git add web/ data/
           git diff --staged --quiet || git commit -m "📊 코스피 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           pushed=false
@@ -256,6 +271,7 @@ jobs:
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
+          git checkout -- web/data/stock-news.json 2>/dev/null || true
           git add web/ data/
           git diff --staged --quiet || git commit -m "🇺🇸 미국 브리핑: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           pushed=false
@@ -368,6 +384,10 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_research_reports.py
 
+      - name: 🎯 증권사 목표주가 수집 (마감 후)
+        continue-on-error: true
+        run: python3 scripts/fetch_stock_targets.py
+
       - name: ✨ Claude 마감 시황 분석
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -421,6 +441,7 @@ jobs:
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
           git checkout -- web/data/movers-why-*.json 2>/dev/null || true
+          git checkout -- web/data/stock-news.json 2>/dev/null || true
           git add web/ data/
           git diff --staged --quiet || git commit -m "🇰🇷 코스피 마감: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
           pushed=false

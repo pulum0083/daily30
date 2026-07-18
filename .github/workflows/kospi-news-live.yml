@@ -51,12 +51,20 @@ jobs:
         continue-on-error: true
         run: python3 scripts/fetch_movers_why.py
 
+      # 주도주 위젯 '관련 뉴스'. 이미 요약한 기사는 재요약하지 않으므로
+      # 신규 기사가 없는 폴링은 Gemini 호출 0회로 끝난다.
+      - name: 📰 종목별 관련 뉴스 수집
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 scripts/fetch_stock_news.py
+
       - name: 💾 JSON 커밋 & 푸시
         id: commit
         run: |
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
-          git add web/data/kospi-news-live.json "web/data/kospi-news-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/movers-why-live.json "web/data/movers-why-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" 2>/dev/null || true
+          git add web/data/kospi-news-live.json "web/data/kospi-news-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/movers-why-live.json "web/data/movers-why-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/stock-news.json 2>/dev/null || true
           git add web/data/kospi-news-live.json
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
