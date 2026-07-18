@@ -78,6 +78,18 @@ def test_compute_consensus_drops_reports_older_than_3_months():
     assert r["consensus"] == 100000
 
 
+def test_compute_consensus_skips_malformed_date_instead_of_crashing():
+    # 스크랩 글리치로 날짜 한 건이 깨져도 종목 전체 컨센서스가 죽으면 안 된다.
+    # 목록 파서는 날짜 모양만 보고 유효성은 안 보므로 여기서 방어한다.
+    reports = [
+        {"firm": "A증권", "date": "26.07.08", "target_price": 100000},
+        {"firm": "B증권", "date": "26.13.01", "target_price": 999999},
+    ]
+    r = fst.compute_consensus(reports, today="26.07.18")
+    assert r["firm_count"] == 1
+    assert r["consensus"] == 100000
+
+
 def test_compute_consensus_returns_none_when_no_valid_reports():
     # 목표가가 전부 없으면 억지로 0을 만들지 않고 None (운영규칙 0)
     reports = [{"firm": "A증권", "date": "26.07.08", "target_price": None}]

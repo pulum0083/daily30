@@ -55,6 +55,14 @@ def _to_date(yymmdd):
     return datetime.strptime(yymmdd, "%y.%m.%d").date()
 
 
+def _try_date(yymmdd):
+    """날짜가 깨졌으면 None. 목록 파서는 모양만 보고 유효성은 안 본다."""
+    try:
+        return _to_date(yymmdd)
+    except (ValueError, TypeError):
+        return None
+
+
 def compute_consensus(reports, today, months=3):
     """증권사당 최신 1건만 골라 최근 N개월 목표주가 평균을 낸다.
 
@@ -66,8 +74,9 @@ def compute_consensus(reports, today, months=3):
     for r in reports:
         if r.get("target_price") is None:
             continue
-        d = _to_date(r["date"])
-        if d < cutoff:
+        d = _try_date(r.get("date"))
+        # 한 건이 깨져도 그 건만 빼고 나머지로 컨센서스를 낸다.
+        if d is None or d < cutoff:
             continue
         prev = latest.get(r["firm"])
         if prev is None or d > _to_date(prev["date"]):
