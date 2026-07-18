@@ -1,5 +1,6 @@
 # 네이버 증권사 리포트에서 종목별 목표주가·투자의견을 수집해 컨센서스를 계산하는 스크립트
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -98,22 +99,48 @@ HISTORY_JSON = ROOT / "data" / "consensus_history.json"
 STOCKS = {"005930": "삼성전자", "000660": "SK하이닉스", "005380": "현대차"}
 MIN_HISTORY_POINTS = 20   # 이 개수 미만이면 프런트에서 추이 그래프를 숨긴다
 MAX_HISTORY_POINTS = 120  # 약 6개월치 거래일
+MAX_DETAIL_FAILURE_RATIO = 0.3  # 상세 조회가 이 비율을 넘게 실패하면 컨센서스를 못 믿는다
+
+
+def _write_atomic(path, text):
+    """같은 디렉터리 임시 파일에 쓴 뒤 교체한다.
+
+    web/data/stock-targets.json은 브라우저에 그대로 서빙되므로
+    읽는 쪽이 절반만 쓰인 파일을 관측하면 안 된다.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _read_history(path):
+    """히스토리 파일을 읽는다. 깨져 있으면 빈 dict로 되돌린다.
+
+    이전 실행이 쓰다 죽어 파일이 깨졌을 때 그대로 예외를 올리면
+    이후 모든 실행이 영구히 막힌다 — 경고만 남기고 다음 쓰기에서 스스로 복구시킨다.
+    """
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (ValueError, OSError) as e:
+        print(f"⚠️ 히스토리 파일이 손상돼 초기화합니다 ({path}): {e}", file=sys.stderr)
+        return {}
 
 
 def append_history(path, code, value, date_str):
     """컨센서스를 하루 1점만 누적한다. 같은 날 재실행은 덮어쓴다."""
+    data = _read_history(path)
     if value is None:
-        return
-    if path.exists():
-        data = json.loads(path.read_text(encoding="utf-8"))
-    else:
-        data = {}
+        # 컨센서스를 못 구한 날은 점을 남기지 않는다 — 파일도 건드리지 않는다.
+        return data.get(code, [])
     points = [p for p in data.get(code, []) if p["date"] != date_str]
     points.append({"date": date_str, "value": value})
     points.sort(key=lambda p: p["date"])
     data[code] = points[-MAX_HISTORY_POINTS:]
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    _write_atomic(path, json.dumps(data, ensure_ascii=False, indent=2))
+    return data[code]
 
 
 def fetch_close_price(code):
@@ -134,8 +161,14 @@ def fetch_close_price(code):
 
 
 def collect(code, pages=2):
-    """종목 하나의 리포트를 수집해 목표가·투자의견까지 채운다."""
+    """종목 하나의 리포트를 수집해 목표가·투자의견까지 채운다.
+
+    (리포트 목록, 상세 조회 실패 건수)를 돌려준다. 실패 건수를 같이 내보내야
+    호출부가 '살아남은 소수로 낸 평균'인지 판별할 수 있다.
+    목표가가 '없음'인 리포트는 정상 데이터지 실패가 아니다 — 여기서 세지 않는다.
+    """
     reports = []
+    failed = 0
     for page in range(1, pages + 1):
         try:
             html = fetch_euckr(LIST_URL.format(code=code, page=page))
@@ -149,9 +182,10 @@ def collect(code, pages=2):
                 detail = parse_report_detail(detail_html)
             except Exception as e:
                 print(f"⚠️ {code} 리포트 nid={row['nid']} 상세 수집 실패: {e}", file=sys.stderr)
+                failed += 1
                 continue
             reports.append({**row, **detail})
-    return reports
+    return reports, failed
 
 
 def main():
@@ -160,19 +194,30 @@ def main():
     stocks_out = {}
     for code, name in STOCKS.items():
         print(f"수집 중: {name} ({code})")
-        reports = collect(code)
+        reports, failed = collect(code)
         consensus = compute_consensus(reports, today=today_str)
         close_price = fetch_close_price(code)
-        append_history(HISTORY_JSON, code, consensus["consensus"], today.strftime("%Y-%m-%d"))
 
-        history_data = json.loads(HISTORY_JSON.read_text(encoding="utf-8")) if HISTORY_JSON.exists() else {}
-        points = history_data.get(code, [])
+        # 상세 조회가 대량 실패하면 살아남은 소수로 낸 평균은 신뢰할 수 없다.
+        # 1개사 평균이 정상 데이터와 구조적으로 똑같이 렌더되는 조용한 오염을 막는다(운영규칙 0).
+        attempted = len(reports) + failed
+        unreliable = attempted > 0 and failed / attempted > MAX_DETAIL_FAILURE_RATIO
+        if unreliable:
+            print(
+                f"⚠️ {name}({code}) 상세 조회 {attempted}건 중 {failed}건 실패 — "
+                f"컨센서스를 표시하지 않습니다.",
+                file=sys.stderr,
+            )
+            # 오염된 평균으로 추이를 더럽히지 않는다 — 이 종목은 히스토리를 건너뛴다.
+            points = _read_history(HISTORY_JSON).get(code, [])
+        else:
+            points = append_history(HISTORY_JSON, code, consensus["consensus"], today.strftime("%Y-%m-%d"))
         history = points if len(points) >= MIN_HISTORY_POINTS else []
 
         stocks_out[code] = {
             "name": name,
-            "consensus": consensus["consensus"],
-            "firm_count": consensus["firm_count"],
+            "consensus": None if unreliable else consensus["consensus"],
+            "firm_count": 0 if unreliable else consensus["firm_count"],
             "close_price": close_price,
             "reports": [
                 {
@@ -186,14 +231,13 @@ def main():
             "history": history,
         }
 
-    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(
+    _write_atomic(
+        OUT_JSON,
         json.dumps(
             {"updated_at": today.strftime("%Y-%m-%d"), "stocks": stocks_out},
             ensure_ascii=False,
             indent=2,
         ),
-        encoding="utf-8",
     )
     print(f"✅ {OUT_JSON} 저장 완료 ({len(stocks_out)}개 종목)")
 

@@ -122,3 +122,64 @@ def test_append_history_ignores_none(tmp_path):
     fst.append_history(p, "005930", None, "2026-07-18")
     data = json.loads(p.read_text(encoding="utf-8"))
     assert [d["date"] for d in data["005930"]] == ["2026-07-17"]
+
+
+def test_append_history_recovers_from_corrupt_file(tmp_path):
+    # 이전 실행이 쓰다 죽어 파일이 깨져도 이후 실행이 영구히 막히면 안 된다.
+    p = tmp_path / "consensus_history.json"
+    p.write_text('{"005930": [{"date": "2026-07-1', encoding="utf-8")
+    fst.append_history(p, "005930", 100000, "2026-07-18")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert data["005930"] == [{"date": "2026-07-18", "value": 100000}]
+
+
+def test_main_suppresses_consensus_when_most_detail_fetches_fail(monkeypatch, tmp_path):
+    # 상세 조회가 대량 실패하면 살아남은 소수로 평균을 내지 않는다.
+    # 1개사 평균이 정상 데이터와 똑같이 렌더되면 조용한 오염이다(운영규칙 0).
+    history = tmp_path / "consensus_history.json"
+    out = tmp_path / "stock-targets.json"
+    monkeypatch.setattr(fst, "HISTORY_JSON", history)
+    monkeypatch.setattr(fst, "OUT_JSON", out)
+    monkeypatch.setattr(fst, "STOCKS", {"005930": "삼성전자"})
+    monkeypatch.setattr(fst, "fetch_close_price", lambda code: 255000)
+
+    calls = {"detail": 0}
+
+    def fake_fetch(url):
+        if "company_list" in url:
+            return LIST_HTML  # 2건짜리 목록이 페이지마다 반환된다
+        calls["detail"] += 1
+        # 상세 4건 중 3건 실패 (75% > 30% 임계)
+        if calls["detail"] % 4 != 0:
+            raise OSError("네트워크 오류")
+        return DETAIL_HTML
+
+    monkeypatch.setattr(fst, "fetch_euckr", fake_fetch)
+    fst.main()
+
+    data = json.loads(out.read_text(encoding="utf-8"))
+    stock = data["stocks"]["005930"]
+    assert stock["consensus"] is None
+    assert stock["firm_count"] == 0
+    # 오염된 평균으로 추이를 더럽히지 않는다 — 히스토리 파일 자체가 생기지 않는다
+    assert not history.exists()
+
+
+def test_main_keeps_consensus_when_detail_fetches_succeed(monkeypatch, tmp_path):
+    # 대조군 — 실패가 없으면 컨센서스와 히스토리가 정상적으로 나와야 한다.
+    history = tmp_path / "consensus_history.json"
+    out = tmp_path / "stock-targets.json"
+    monkeypatch.setattr(fst, "HISTORY_JSON", history)
+    monkeypatch.setattr(fst, "OUT_JSON", out)
+    monkeypatch.setattr(fst, "STOCKS", {"005930": "삼성전자"})
+    monkeypatch.setattr(fst, "fetch_close_price", lambda code: 255000)
+    monkeypatch.setattr(
+        fst, "fetch_euckr",
+        lambda url: LIST_HTML if "company_list" in url else DETAIL_HTML,
+    )
+    fst.main()
+
+    stock = json.loads(out.read_text(encoding="utf-8"))["stocks"]["005930"]
+    assert stock["consensus"] == 480000
+    assert stock["firm_count"] == 2
+    assert len(json.loads(history.read_text(encoding="utf-8"))["005930"]) == 1
