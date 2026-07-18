@@ -21,6 +21,55 @@ def test_parse_rss_extracts_items():
     assert items[0]["source"] == "이데일리"
 
 
+RSS_SUFFIX = """<rss><channel>
+<item><title>로봇 도입 경계하는 현대차 노조 - 지디넷코리아</title><link>https://a.com/1</link>
+<pubDate>Fri, 18 Jul 2026 09:40:00 GMT</pubDate><source>지디넷코리아</source></item>
+<item><title>사측 직격한 현대차 노조 - 머니투데이 - 머니투데이</title><link>https://a.com/2</link>
+<pubDate>Fri, 18 Jul 2026 09:30:00 GMT</pubDate><source>머니투데이</source></item>
+<item><title>현대차그룹 보스턴다이나믹스 지분 확보 - 조선비즈 - Chosunbiz</title><link>https://a.com/3</link>
+<pubDate>Fri, 18 Jul 2026 09:20:00 GMT</pubDate><source>Chosunbiz</source></item>
+<item><title>아이오닉 5 N - 성능 리뷰 - 다나와 자동차</title><link>https://a.com/4</link>
+<pubDate>Fri, 18 Jul 2026 09:10:00 GMT</pubDate><source>다나와 자동차</source></item>
+<item><title>산업부 이익 분배 논의 안 해</title><link>https://a.com/5</link>
+<pubDate>Fri, 18 Jul 2026 09:00:00 GMT</pubDate><source>v.daum.net</source></item>
+</channel></rss>"""
+
+
+def test_parse_rss_strips_single_source_suffix():
+    # 구글 뉴스는 제목 끝에 " - 언론사"를 붙인다 — 표시 전에 제거한다
+    item = fsn.parse_rss(RSS_SUFFIX)[0]
+    assert item["title"] == "로봇 도입 경계하는 현대차 노조"
+    assert item["source"] == "지디넷코리아"
+
+
+def test_parse_rss_strips_duplicated_source_suffix():
+    # 같은 언론사명이 두 번 붙는 경우가 있어 반복 제거해야 한다
+    item = fsn.parse_rss(RSS_SUFFIX)[1]
+    assert item["title"] == "사측 직격한 현대차 노조"
+    assert item["source"] == "머니투데이"
+
+
+def test_parse_rss_promotes_korean_name_over_domain_source():
+    # source가 도메인·로마자면 제목에 남은 한글 언론사명을 출처로 승격한다
+    item = fsn.parse_rss(RSS_SUFFIX)[2]
+    assert item["title"] == "현대차그룹 보스턴다이나믹스 지분 확보"
+    assert item["source"] == "조선비즈"
+
+
+def test_parse_rss_keeps_legitimate_hyphen_in_title():
+    # 제목 안의 진짜 " - "는 보존한다 — source와 일치하는 접미사만 제거한다
+    item = fsn.parse_rss(RSS_SUFFIX)[3]
+    assert item["title"] == "아이오닉 5 N - 성능 리뷰"
+    assert item["source"] == "다나와 자동차"
+
+
+def test_parse_rss_keeps_domain_source_when_no_better_name():
+    # 대체할 이름이 없으면 도메인을 그대로 둔다 — 표시값을 지어내지 않는다
+    item = fsn.parse_rss(RSS_SUFFIX)[4]
+    assert item["title"] == "산업부 이익 분배 논의 안 해"
+    assert item["source"] == "v.daum.net"
+
+
 def test_merge_keeps_existing_summaries():
     # 이미 요약된 기사는 재요약하지 않는다 — Gemini 호출 비용이 여기서 결정된다
     old = [{"url": "https://a.com/1", "title": "옛 제목", "summary": "이미 요약됨",

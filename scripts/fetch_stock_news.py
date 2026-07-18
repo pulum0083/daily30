@@ -29,8 +29,37 @@ _OG_IMAGE = re.compile(
 )
 
 
+# 승격 대상으로 인정할 언론사명 최대 길이 — 이보다 길면 제목 일부로 보고 건드리지 않는다.
+_MAX_SOURCE_LEN = 20
+
+
 def _strip_tags(text):
     return _TAG.sub("", text).strip()
+
+
+def _is_domain_like(source):
+    # 공백 없이 점을 포함하거나 전부 로마자면 도메인·영문 표기로 본다.
+    if not source or " " in source:
+        return False
+    return "." in source or source.isascii()
+
+
+def _clean_title(title, source):
+    # 구글 뉴스는 제목 끝에 " - 언론사"를 붙이고, 같은 이름이 두 번 붙는 경우도 있다.
+    if source:
+        suffix = " - " + source
+        while title.endswith(suffix):
+            title = title[: -len(suffix)].strip()
+
+    # source가 도메인·로마자면 제목에 남은 한글 언론사명을 출처로 승격한다.
+    if _is_domain_like(source):
+        head, sep, tail = title.rpartition(" - ")
+        candidate = tail.strip()
+        if sep and candidate and len(candidate) <= _MAX_SOURCE_LEN \
+                and not any(c.isdigit() for c in candidate):
+            return head.strip(), candidate
+
+    return title, source
 
 
 def _fetch(url, timeout=15):
@@ -57,11 +86,14 @@ def parse_rss(xml):
             except (TypeError, ValueError):
                 time_label = ""
 
+        title, source = _clean_title(
+            _strip_tags(fields["title"]), _strip_tags(fields["source"])
+        )
         items.append({
-            "title": _strip_tags(fields["title"]),
+            "title": title,
             "url": fields["url"],
             "time": time_label,
-            "source": _strip_tags(fields["source"]),
+            "source": source,
         })
     return items
 
