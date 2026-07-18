@@ -78,6 +78,7 @@ def parse_rss(xml):
 
         pub_date = fields["pubDate"]
         time_label = ""
+        published = ""
         if pub_date:
             try:
                 dt = parsedate_to_datetime(pub_date).astimezone(KST)
@@ -89,8 +90,10 @@ def parse_rss(xml):
                     time_label = "어제"
                 else:
                     time_label = f"{dt.month}/{dt.day}"
+                published = dt.isoformat()
             except (TypeError, ValueError):
                 time_label = ""
+                published = ""
 
         title, source = _clean_title(
             _strip_tags(fields["title"]), _strip_tags(fields["source"])
@@ -99,22 +102,36 @@ def parse_rss(xml):
             "title": title,
             "url": fields["url"],
             "time": time_label,
+            "published": published,
             "source": source,
         })
-    return items
+
+    # 구글 뉴스 피드 순서는 발행 시각순이 아니다 — 실제 발행 시각으로 다시 정렬한다.
+    return _sort_by_published(items)
+
+
+def _sort_by_published(items):
+    # 발행 시각을 못 읽은 항목은 순위를 매길 수 없으므로 버리지 않고 맨 뒤로 보낸다.
+    return sorted(
+        items,
+        key=lambda i: (bool(i.get("published")), i.get("published") or ""),
+        reverse=True,
+    )
 
 
 def merge(old, new):
     old_by_url = {o["url"]: o for o in old}
     merged = []
     todo = []
-    for item in new[:MAX_ITEMS]:
+    # 피드 순서가 아니라 실제 발행 시각 기준 최신 5건을 고른다.
+    for item in _sort_by_published(new)[:MAX_ITEMS]:
         prev = old_by_url.get(item["url"])
         if prev and prev.get("summary"):
             merged.append({
                 "url": item["url"],
                 "title": item["title"],
                 "time": item["time"],
+                "published": item.get("published", ""),
                 "source": item["source"],
                 "summary": prev["summary"],
                 "thumb": prev.get("thumb"),
@@ -124,6 +141,7 @@ def merge(old, new):
                 "url": item["url"],
                 "title": item["title"],
                 "time": item["time"],
+                "published": item.get("published", ""),
                 "source": item["source"],
                 "summary": "",
                 "thumb": None,

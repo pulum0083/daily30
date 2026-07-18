@@ -114,6 +114,55 @@ def test_time_label_missing_pubdate_is_empty():
     assert fsn.parse_rss(xml)[3]["time"] == ""
 
 
+# 구글 뉴스 실제 피드처럼 순서가 뒤섞인 XML — 날짜는 실행 시점 기준으로 만든다.
+def _rss_jumbled():
+    now = datetime.now(fsn.KST)
+    today = now.replace(hour=9, minute=57, second=0, microsecond=0)
+    two_days = today - timedelta(days=2)
+    three_days = today - timedelta(days=3)
+    return f"""<rss><channel>
+<item><title>이틀 전 기사</title><link>https://a.com/old2</link>
+<pubDate>{format_datetime(two_days)}</pubDate><source>한국경제</source></item>
+<item><title>오늘 기사</title><link>https://a.com/today</link>
+<pubDate>{format_datetime(today)}</pubDate><source>한국경제</source></item>
+<item><title>날짜 없는 기사</title><link>https://a.com/none</link>
+<source>한국경제</source></item>
+<item><title>사흘 전 기사</title><link>https://a.com/old3</link>
+<pubDate>{format_datetime(three_days)}</pubDate><source>한국경제</source></item>
+</channel></rss>"""
+
+
+def test_parse_rss_sorts_newest_first():
+    # 피드 순서는 발행 시각순이 아니다 — 실제 발행 시각으로 정렬해야 한다.
+    titles = [i["title"] for i in fsn.parse_rss(_rss_jumbled())]
+    assert titles[:3] == ["오늘 기사", "이틀 전 기사", "사흘 전 기사"]
+
+
+def test_parse_rss_puts_undated_items_last_without_dropping():
+    # 발행 시각을 못 읽은 기사는 버리지 않고 맨 뒤에 둔다.
+    items = fsn.parse_rss(_rss_jumbled())
+    assert len(items) == 4
+    assert items[-1]["title"] == "날짜 없는 기사"
+    assert items[-1]["published"] == ""
+
+
+def test_merge_selects_five_newest_not_first_five():
+    # 최신 5건이 입력 앞쪽 5건과 다른 경우 — 발행 시각 기준으로 골라야 한다.
+    now = datetime.now(fsn.KST)
+    # 오래된 3건이 앞, 최신 5건이 뒤에 오도록 배치한다.
+    stale = [{"url": f"https://a.com/old{n}", "title": f"오래됨{n}",
+              "time": "7/10", "source": "s",
+              "published": (now - timedelta(days=10 + n)).isoformat()}
+             for n in range(3)]
+    fresh = [{"url": f"https://a.com/new{n}", "title": f"최신{n}",
+              "time": "09:00", "source": "s",
+              "published": (now - timedelta(minutes=n)).isoformat()}
+             for n in range(5)]
+    merged, todo = fsn.merge([], stale + fresh)
+    assert [m["url"] for m in merged] == [f"https://a.com/new{n}" for n in range(5)]
+    assert len(todo) == 5
+
+
 def test_merge_keeps_existing_summaries():
     # 이미 요약된 기사는 재요약하지 않는다 — Gemini 호출 비용이 여기서 결정된다
     old = [{"url": "https://a.com/1", "title": "옛 제목", "summary": "이미 요약됨",
