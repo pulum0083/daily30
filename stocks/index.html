@@ -1132,18 +1132,8 @@ function usSel(code){
       +'<rect id="wm-hit" x="'+X0+'" y="0" width="'+(X1-X0)+'" height="'+YB+'" fill="transparent" style="cursor:crosshair"/>';
     svg.innerHTML=s;
     var evs=whyData[code]||[];
-    function yAtX(x){var b=coords[0];for(var i=0;i<coords.length;i++){if(Math.abs(coords[i].x-x)<Math.abs(b.x-x))b=coords[i];}return b.y;}
-    var pinSvg='',placedPx=[];
-    evs.forEach(function(e,i){var ax=timeToX(e.time),ay=yAtX(ax),f=e.tier==='why'?'#E03131':'#fff',st=e.tier==='why'?'#E03131':'#94A3B8',tc=e.tier==='why'?'#fff':'#64748B';
-      var px=Math.min(X1-12,Math.max(X0+12,ax));
-      // 번호 뱃지 겹침 방지: 이미 찍힌 뱃지와 22px 미만이면 옆으로 민다(연결선은 실제 시각 위치를 가리킨 채로).
-      for(var gi=0;gi<placedPx.length;gi++){ if(Math.abs(px-placedPx[gi])<22){ px=Math.min(X1-12,placedPx[gi]+22); } }
-      placedPx.push(px);
-      var up=(ay-41)>=YT&&(ay-31-10)>=0,cy=up?ay-31:ay+31,sy=up?ay-24:ay+24,ty=up?ay-27:ay+35;
-      pinSvg+='<line x1="'+ax.toFixed(1)+'" y1="'+ay.toFixed(1)+'" x2="'+px.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="'+st+'" stroke-width="1.3"/>'
-        +'<circle cx="'+px.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="10" fill="'+f+'" stroke="'+st+'" stroke-width="1.6"/>'
-        +'<text x="'+px.toFixed(1)+'" y="'+ty.toFixed(1)+'" font-size="11" font-weight="800" fill="'+tc+'" text-anchor="middle">'+(i+1)+'</text>';});
-    if(pinSvg){ var g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.innerHTML=pinSvg; svg.appendChild(g); }
+    // 곡선 위 번호 핀(①②…)은 허브에서 제거했다. 곡선은 가격 흐름만 보여주고,
+    // 뉴스는 아래 '관련 뉴스' 목록이 담당한다 — 같은 정보를 두 군데서 다르게 보여주지 않는다.
     renderRight(code);
     // tooltip
     var tip=document.getElementById('wm-tip');
