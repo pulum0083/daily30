@@ -1,6 +1,7 @@
 # 네이버 증권사 리포트 목록·상세 파싱과 컨센서스 계산을 검증하는 테스트
 import json
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -14,6 +15,30 @@ LIST_HTML = """
 <tr><td><a href="/item/main.naver?code=005930">삼성전자</a></td>
 <td><a href="company_read.naver?nid=93978&page=1">체급의 위력</a></td>
 <td>대신증권</td><td>26.07.07</td><td>5081</td></tr>
+<tr><td colspan="5">광고행</td></tr>
+</tbody></table>
+"""
+
+
+def recent_list_html():
+    """리포트 날짜를 실행 시점 기준 상대 날짜로 만든 목록 HTML.
+
+    main()은 오늘 날짜로 컨센서스를 계산하고 compute_consensus는 3개월 이전 리포트를 버린다.
+    날짜를 하드코딩하면 그 날짜가 3개월을 지나는 순간, 코드와 무관하게 컨센서스가 None이 되어
+    테스트가 달력 때문에 깨진다 — 하드코딩으로 되돌리지 말 것.
+    fst.datetime을 참조하므로 테스트가 시계를 바꿔 끼우면 픽스처 날짜도 같이 따라온다.
+    """
+    now = fst.datetime.now()
+    d1 = (now - timedelta(days=2)).strftime("%y.%m.%d")
+    d2 = (now - timedelta(days=3)).strftime("%y.%m.%d")
+    return f"""
+<table><tbody>
+<tr><td><a href="/item/main.naver?code=005930">삼성전자</a></td>
+<td><a href="company_read.naver?nid=93991&page=1">메모리 이익 체력 확인</a></td>
+<td>하나증권</td><td>{d1}</td><td>5527</td></tr>
+<tr><td><a href="/item/main.naver?code=005930">삼성전자</a></td>
+<td><a href="company_read.naver?nid=93978&page=1">체급의 위력</a></td>
+<td>대신증권</td><td>{d2}</td><td>5081</td></tr>
 <tr><td colspan="5">광고행</td></tr>
 </tbody></table>
 """
@@ -147,7 +172,7 @@ def test_main_suppresses_consensus_when_most_detail_fetches_fail(monkeypatch, tm
 
     def fake_fetch(url):
         if "company_list" in url:
-            return LIST_HTML  # 2건짜리 목록이 페이지마다 반환된다
+            return recent_list_html()  # 2건짜리 목록이 페이지마다 반환된다
         calls["detail"] += 1
         # 상세 4건 중 3건 실패 (75% > 30% 임계)
         if calls["detail"] % 4 != 0:
@@ -175,7 +200,7 @@ def test_main_keeps_consensus_when_detail_fetches_succeed(monkeypatch, tmp_path)
     monkeypatch.setattr(fst, "fetch_close_price", lambda code: 255000)
     monkeypatch.setattr(
         fst, "fetch_euckr",
-        lambda url: LIST_HTML if "company_list" in url else DETAIL_HTML,
+        lambda url: recent_list_html() if "company_list" in url else DETAIL_HTML,
     )
     fst.main()
 
