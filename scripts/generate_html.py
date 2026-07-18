@@ -1178,7 +1178,12 @@ def _parse_price(s):
 # 증권사 목표주가 — web/data/stock-targets.json(fetch_stock_targets.py가 네이버에서 실측 수집)을 읽는다.
 # 과거엔 이 자리에 2026-06-25 시점 값을 코드에 박아둔 BROKER_TARGETS 정적 딕셔너리가 있었는데,
 # 매일 재생성되면서도 값이 갱신되지 않아 "1일 전" 라벨이 실제로는 3주 넘게 고정된 채 나갔다(운영규칙 0 위반).
+# 재발 방지(SERVICE_RULES.md §20): 실데이터로 바꿨어도 fetch_stock_targets.py가 조용히 실패하면
+# 똑같이 "낡은 값을 계속 진짜처럼 보여주는" 상태로 되돌아갈 수 있다 — updated_at 신선도를 매번 확인해
+# 임계치를 넘으면 섹션 자체를 생략한다(완전성보다 정합성 우선, 운영규칙 0).
 _STOCK_TARGETS_CACHE = None
+_TARGETS_MAX_STALE_DAYS = 5  # 평일 하루 2회 갱신 — 3일 연휴 + 주말 버퍼
+_TARGETS_STALE_WARNED = False  # 45종목 루프에서 같은 경고가 반복 출력되지 않게
 
 
 def _load_stock_targets():
@@ -1187,6 +1192,17 @@ def _load_stock_targets():
         p = WEB_DIR / "data" / "stock-targets.json"
         _STOCK_TARGETS_CACHE = load_json(p) if p.exists() else {}
     return _STOCK_TARGETS_CACHE
+
+
+def _targets_data_is_stale():
+    """stock-targets.json의 updated_at이 임계치보다 오래됐으면 True.
+    날짜 파싱이 안 되는 경우(필드 누락 등)도 신뢰 불가로 보고 True."""
+    updated = str(_load_stock_targets().get("updated_at") or "")[:10]
+    try:
+        d = datetime.strptime(updated, "%Y-%m-%d").date()
+    except ValueError:
+        return True
+    return (datetime.now(KST).date() - d).days > _TARGETS_MAX_STALE_DAYS
 
 
 def _opinion_ko(op):
@@ -1231,8 +1247,15 @@ def _rel_when(yymmdd, today=None):
 
 def _broker_targets_for_code(code, current_price):
     """실측 목표주가(web/data/stock-targets.json)를 상세 페이지 표 형태로 변환.
-    데이터가 없으면 섹션 자체를 생략한다(억지로 채우지 않음, 운영규칙 0)."""
+    데이터가 없거나 낡았으면 섹션 자체를 생략한다(억지로 채우지 않음, 운영규칙 0)."""
     if not current_price:
+        return None
+    global _TARGETS_STALE_WARNED
+    if _targets_data_is_stale():
+        if not _TARGETS_STALE_WARNED:
+            print(f"[generate_html] ⚠️ stock-targets.json이 {_TARGETS_MAX_STALE_DAYS}일 넘게 안 갱신됨 "
+                  f"— 전 종목 목표주가 섹션 생략 (fetch_stock_targets.py 확인 필요)")
+            _TARGETS_STALE_WARNED = True
         return None
     s = (_load_stock_targets().get("stocks") or {}).get(code)
     reports = (s or {}).get("reports") or []
