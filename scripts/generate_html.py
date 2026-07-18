@@ -1175,71 +1175,84 @@ def _parse_price(s):
     return sum(vals) / len(vals) if vals else None
 
 
-# 증권사 목표주가 정적 데이터 (2026-06-25 기준 수집)
-BROKER_TARGETS = {
-    "005930": {
-        "count": 10,
-        "min_price": 330000, "avg_price": 432000, "max_price": 560000,
-        "rows": [
-            {"firm": "대신증권",    "price": 560000, "op": "BUY", "when": "1일 전"},
-            {"firm": "미래에셋증권", "price": 550000, "op": "BUY", "when": "2일 전"},
-            {"firm": "iM증권",      "price": 480000, "op": "BUY", "when": "5일 전"},
-            {"firm": "하나증권",    "price": 480000, "op": "BUY", "when": "1주 전"},
-            {"firm": "신한투자증권", "price": 550000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "키움증권",    "price": 330000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "교보증권",    "price": 330000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "유진투자증권", "price": 360000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "IBK투자증권", "price": 350000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "한화투자증권", "price": 330000, "op": "BUY", "when": "1개월 전"},
-        ],
-    },
-    "000660": {
-        "count": 10,
-        "min_price": 2500000, "avg_price": 3200000, "max_price": 4000000,
-        "rows": [
-            {"firm": "KB증권",      "price": 4000000, "op": "BUY", "when": "1일 전"},
-            {"firm": "미래에셋증권", "price": 3800000, "op": "BUY", "when": "3일 전"},
-            {"firm": "삼성증권",    "price": 3600000, "op": "BUY", "when": "5일 전"},
-            {"firm": "NH투자증권",  "price": 3400000, "op": "BUY", "when": "1주 전"},
-            {"firm": "한국투자증권", "price": 3200000, "op": "BUY", "when": "1주 전"},
-            {"firm": "키움증권",    "price": 3000000, "op": "BUY", "when": "1주 전"},
-            {"firm": "신한투자증권", "price": 2900000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "하나증권",    "price": 2800000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "대신증권",    "price": 2600000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "유진투자증권", "price": 2500000, "op": "BUY", "when": "1개월 전"},
-        ],
-    },
-    "005380": {
-        "count": 10,
-        "min_price": 460000, "avg_price": 600000, "max_price": 750000,
-        "rows": [
-            {"firm": "KB증권",      "price": 750000, "op": "BUY", "when": "2일 전"},
-            {"firm": "한국투자증권", "price": 700000, "op": "BUY", "when": "3일 전"},
-            {"firm": "삼성증권",    "price": 680000, "op": "BUY", "when": "1주 전"},
-            {"firm": "미래에셋증권", "price": 650000, "op": "BUY", "when": "1주 전"},
-            {"firm": "NH투자증권",  "price": 600000, "op": "BUY", "when": "1주 전"},
-            {"firm": "신한투자증권", "price": 560000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "하나증권",    "price": 530000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "키움증권",    "price": 510000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "대신증권",    "price": 480000, "op": "BUY", "when": "1개월 전"},
-            {"firm": "유진투자증권", "price": 460000, "op": "BUY", "when": "1개월 전"},
-        ],
-    },
-}
+# 증권사 목표주가 — web/data/stock-targets.json(fetch_stock_targets.py가 네이버에서 실측 수집)을 읽는다.
+# 과거엔 이 자리에 2026-06-25 시점 값을 코드에 박아둔 BROKER_TARGETS 정적 딕셔너리가 있었는데,
+# 매일 재생성되면서도 값이 갱신되지 않아 "1일 전" 라벨이 실제로는 3주 넘게 고정된 채 나갔다(운영규칙 0 위반).
+_STOCK_TARGETS_CACHE = None
 
 
-def _enrich_broker_targets(bt, current_price):
-    """BROKER_TARGETS 항목에 현재가 기준 비율 정보를 추가해 반환."""
-    if not bt or not current_price:
+def _load_stock_targets():
+    global _STOCK_TARGETS_CACHE
+    if _STOCK_TARGETS_CACHE is None:
+        p = WEB_DIR / "data" / "stock-targets.json"
+        _STOCK_TARGETS_CACHE = load_json(p) if p.exists() else {}
+    return _STOCK_TARGETS_CACHE
+
+
+def _opinion_ko(op):
+    """네이버 리포트 투자의견을 영·국문 혼용에서 한국어 표시용으로 통일. web/stocks/index.html의 opinionKo()와 동일 규칙."""
+    s = str(op or "").strip()
+    if not s:
+        return ""
+    if re.match(r"^strong\s*buy$", s, re.I) or "적극매수" in s:
+        return "적극매수"
+    if re.match(r"^buy$", s, re.I) or s == "매수":
+        return "매수"
+    if re.match(r"^(hold|neutral|marketperform)$", s, re.I) or s == "중립":
+        return "중립"
+    if re.match(r"^(sell|underperform|reduce)$", s, re.I) or s == "매도":
+        return "매도"
+    return s
+
+
+def _rel_when(yymmdd, today=None):
+    """'26.07.08' → '11일 전' 상대 라벨. 페이지 생성 시점(대개 평일 매일) 기준으로 매번 새로 계산한다."""
+    m = re.fullmatch(r"(\d{2})\.(\d{2})\.(\d{2})", str(yymmdd or ""))
+    if not m:
+        return ""
+    try:
+        d = date(2000 + int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError:
+        return ""
+    today = today or datetime.now(KST).date()
+    diff = (today - d).days
+    if diff <= 0:
+        return "오늘"
+    if diff == 1:
+        return "1일 전"
+    if diff < 7:
+        return f"{diff}일 전"
+    if diff < 30:
+        return f"{diff // 7}주 전"
+    if diff < 365:
+        return f"{diff // 30}개월 전"
+    return f"{diff // 365}년 전"
+
+
+def _broker_targets_for_code(code, current_price):
+    """실측 목표주가(web/data/stock-targets.json)를 상세 페이지 표 형태로 변환.
+    데이터가 없으면 섹션 자체를 생략한다(억지로 채우지 않음, 운영규칙 0)."""
+    if not current_price:
         return None
-    min_p, max_p, avg_p = bt["min_price"], bt["max_price"], bt["avg_price"]
-    span = max_p - min_p or 1
-    rows = []
-    for r in bt["rows"]:
-        upside = round((r["price"] / current_price - 1) * 100, 1)
-        rows.append({**r, "upside": upside})
+    s = (_load_stock_targets().get("stocks") or {}).get(code)
+    reports = (s or {}).get("reports") or []
+    priced = [r for r in reports if r.get("target_price")]
+    if not priced:
+        return None
+    prices = [r["target_price"] for r in priced]
+    min_p, max_p = min(prices), max(prices)
+    avg_p = s.get("consensus") or round(sum(prices) / len(prices))
+    span = (max_p - min_p) or 1
+    rows = [{
+        "firm": r.get("firm", ""),
+        "price": r["target_price"],
+        "op": _opinion_ko(r.get("opinion")),
+        "when": _rel_when(r.get("date")),
+        "upside": round((r["target_price"] / current_price - 1) * 100, 1),
+    } for r in priced]
     return {
-        **bt,
+        "count": s.get("firm_count") or len(rows),
+        "min_price": min_p, "avg_price": avg_p, "max_price": max_p,
         "rows": rows,
         "cur_pct": round((current_price - min_p) / span * 100, 1),
         "avg_pct": round((avg_p - min_p) / span * 100, 1),
@@ -1414,7 +1427,6 @@ def build_stock_page(stock, peers):
     env = make_env()
     tmpl = env.get_template("stocks/detail.html")
     picks = build_trackrecord(stock["code"])
-    bt_raw = BROKER_TARGETS.get(stock["code"])
     acc = _briefing_accuracy()
     # 종가 날짜는 실측 데이터의 실제 마지막 거래일 기준.
     # (스냅샷 generated_at은 생성일이라 주말·휴일에 생성하면 휴장일을 종가로 잘못 표기 — 예: 일요일 생성 시 "06-28 종가")
@@ -1440,7 +1452,7 @@ def build_stock_page(stock, peers):
         "supply5": snap_stock.get("supply5"),
         "financials": snap_stock.get("financials"),
         "picks": picks,
-        "broker_targets": _enrich_broker_targets(bt_raw, rd.get("price")),
+        "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
         "acc": acc,
         "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
     }

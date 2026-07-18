@@ -174,7 +174,7 @@
             <tr>
               <td>{{ r.firm }}</td>
               <td class="pr num">{{ "{:,}".format(r.price) }}</td>
-              <td><span class="op2 {{ 'hold' if r.op not in ('BUY','Strong Buy') else '' }}">{{ r.op }}</span></td>
+              <td><span class="op2 {{ 'hold' if r.op not in ('매수','적극매수') else '' }}">{{ r.op }}</span></td>
               <td class="dt">{{ r.when }}</td>
               <td class="num" style="color:{{ 'var(--up)' if r.upside >= 0 else 'var(--dn)' }};font-weight:700">{{ '+' if r.upside >= 0 else '' }}{{ "%.1f"|format(r.upside) }}%</td>
             </tr>
