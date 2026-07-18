@@ -155,6 +155,23 @@ def _sort_by_published(items):
     )
 
 
+def _carry_source(new_source, prev_source):
+    """재수집 시 표시할 출처를 고른다.
+
+    enrich_new_items가 복구한 발행사명은 summary·thumb과 똑같은 파생 데이터라서
+    폴링마다 유지돼야 한다. 그냥 새 RSS 값을 쓰면 이미 복구한 이름이 매번
+    원래 도메인(ebn.co.kr 등)으로 되돌아간다 — 기사는 몇 시간씩 상위 5건에 남으므로
+    사실상 항상 도메인이 노출된다.
+
+    단 통째로 보존하지는 않는다. RSS가 제대로 된 언론사명을 주기 시작하면 그쪽이 이긴다.
+    """
+    if not prev_source:
+        return new_source
+    if _is_domain_like(new_source) and not _is_domain_like(prev_source):
+        return prev_source
+    return new_source
+
+
 def merge(old, new):
     old_by_url = {o["url"]: o for o in old}
     merged = []
@@ -162,13 +179,15 @@ def merge(old, new):
     # 피드 순서가 아니라 실제 발행 시각 기준 최신 5건을 고른다.
     for item in _sort_by_published(new)[:MAX_ITEMS]:
         prev = old_by_url.get(item["url"])
+        # 제목·시각은 새 RSS 값을 그대로 쓴다 — 실제로 바뀌는 값이다.
+        source = _carry_source(item["source"], (prev or {}).get("source", ""))
         if prev and prev.get("summary"):
             merged.append({
                 "url": item["url"],
                 "title": item["title"],
                 "time": item["time"],
                 "published": item.get("published", ""),
-                "source": item["source"],
+                "source": source,
                 "summary": prev["summary"],
                 "thumb": prev.get("thumb"),
             })
@@ -178,7 +197,7 @@ def merge(old, new):
                 "title": item["title"],
                 "time": item["time"],
                 "published": item.get("published", ""),
-                "source": item["source"],
+                "source": source,
                 "summary": "",
                 "thumb": None,
             })

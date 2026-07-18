@@ -260,6 +260,49 @@ def test_merge_refreshes_title_of_existing_item():
     assert todo == []
 
 
+def test_merge_keeps_recovered_publisher_over_bare_domain():
+    # 복구한 발행사명은 summary·thumb과 같은 파생 데이터다 — 폴링마다 도메인으로 되돌아가면
+    # 기사가 상위 5건에 남아 있는 내내 위젯에 도메인이 노출된다.
+    old = [{"url": "https://a.com/1", "title": "제목", "summary": "요약이에요.",
+            "thumb": None, "time": "09:00", "source": "이비엔(EBN)뉴스센터"}]
+    new = [{"url": "https://a.com/1", "title": "제목", "time": "09:30",
+            "source": "ebn.co.kr"}]
+    merged, _ = fsn.merge(old, new)
+    assert merged[0]["source"] == "이비엔(EBN)뉴스센터"
+
+
+def test_merge_lets_fresh_publisher_name_override_stored_one():
+    # RSS가 제대로 된 언론사명을 주기 시작하면 그쪽이 이긴다 — 통째로 보존하지 않는다.
+    old = [{"url": "https://a.com/1", "title": "제목", "summary": "요약이에요.",
+            "thumb": None, "time": "09:00", "source": "옛언론사"}]
+    new = [{"url": "https://a.com/1", "title": "제목", "time": "09:30",
+            "source": "새언론사"}]
+    merged, _ = fsn.merge(old, new)
+    assert merged[0]["source"] == "새언론사"
+
+
+def test_merge_still_refreshes_title_and_time_on_carry_over():
+    # 출처 보존이 제목·시각까지 얼려버리면 안 된다 — 그 둘은 실제로 바뀌는 값이다.
+    old = [{"url": "https://a.com/1", "title": "옛 제목", "summary": "요약이에요.",
+            "thumb": "t.jpg", "time": "08:00", "source": "이비엔(EBN)뉴스센터"}]
+    new = [{"url": "https://a.com/1", "title": "새 제목", "time": "09:30",
+            "source": "ebn.co.kr"}]
+    merged, _ = fsn.merge(old, new)
+    assert merged[0]["title"] == "새 제목"
+    assert merged[0]["time"] == "09:30"
+    assert merged[0]["source"] == "이비엔(EBN)뉴스센터"
+
+
+def test_merge_source_carry_over_does_not_retrigger_summarize():
+    # 출처를 보존해도 todo 판정은 summary 유무로만 한다 — 여기가 무너지면 비용 모델이 깨진다.
+    old = [{"url": "https://a.com/1", "title": "제목", "summary": "요약이에요.",
+            "thumb": None, "time": "09:00", "source": "이비엔(EBN)뉴스센터"}]
+    new = [{"url": "https://a.com/1", "title": "제목", "time": "09:30",
+            "source": "ebn.co.kr"}]
+    _, todo = fsn.merge(old, new)
+    assert todo == []
+
+
 def test_merge_caps_at_five():
     new = [{"url": f"https://a.com/{i}", "title": f"t{i}", "time": "09:00",
             "source": "s"} for i in range(8)]
