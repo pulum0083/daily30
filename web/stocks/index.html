@@ -858,6 +858,20 @@ function usSel(code){
     var m=/^\d{2}\.(\d{2})\.(\d{2})$/.exec(String(d||''));
     return m ? String(Number(m[1]))+'/'+m[2] : String(d||'');
   }
+  // ISO 발행일시 → 표시 라벨을 '지금 이 순간' 기준으로 계산한다.
+  // time_label을 JSON에 박아두면(예: 생성 당시 '어제 12:46') 며칠 뒤엔 거짓이 되므로,
+  // 저장값은 쓰지 않고 published_at으로 매 렌더마다 다시 만든다. 오늘/어제만 시:분, 그 이전은 날짜.
+  function relTime(iso){
+    var t=Date.parse(String(iso||''));
+    if(isNaN(t)) return '';
+    var toKstDay=function(ms){ return Math.floor((ms+9*3600*1000)/(24*3600*1000)); };
+    var diff=toKstDay(Date.now())-toKstDay(t);
+    var kst=new Date(t+9*3600*1000);
+    var hh=String(kst.getUTCHours()).padStart(2,'0'), mm=String(kst.getUTCMinutes()).padStart(2,'0');
+    if(diff<=0) return '오늘 '+hh+':'+mm;
+    if(diff===1) return '어제 '+hh+':'+mm;
+    return (kst.getUTCMonth()+1)+'/'+kst.getUTCDate();
+  }
 
   function renderTargets(code){
     var b=LW.targets&&LW.targets.stocks&&LW.targets.stocks[code];
@@ -942,17 +956,21 @@ function usSel(code){
     var views=(LW.ib&&(LW.ib.views||LW.ib))||[];
     if(!Array.isArray(views)||!views.length){ wrap.style.display='none'; return; }  // 없으면 섹션 생략
     wrap.style.display='';
+    // 발행일시 내림차순(최신 먼저). published_at이 없는 항목은 뒤로.
+    views=views.slice().sort(function(a,b){ return (Date.parse(b.published_at)||0)-(Date.parse(a.published_at)||0); });
     document.getElementById('lw-ib-list').innerHTML=views.map(function(v){
       // 실제 JSON 필드명은 sentiment다 (stance 아님). 로고는 initials를 쓰고 없으면 하우스명을 자른다.
       var st=(v.sentiment==='bull'||v.sentiment==='bear')?v.sentiment:'neu';
       var label=st==='bull'?'강세':(st==='bear'?'약세':'중립');
       var href=safeUrl(v.url);
+      // time_label(생성 당시 박제값)은 시간이 지나면 거짓이 되므로 쓰지 않고 published_at으로 현재 기준 재계산.
+      var tm=relTime(v.published_at)||esc(v.time_label);
       return '<div class="lw-ib-row"><div class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</div>'+
         '<div class="bd"><div><span class="nm">'+esc(v.house)+'</span>'+
         '<span class="tg '+st+'">'+label+'</span></div>'+
         '<div class="tx">'+esc(v.summary)+'</div>'+
         (href?'<a class="sr" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(v.source||'원문')+' →</a>':'')+
-        '</div><div class="tm">'+esc(v.time_label)+'</div></div>';
+        '</div><div class="tm">'+esc(tm)+'</div></div>';
     }).join('');
   }
 
