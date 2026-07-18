@@ -81,8 +81,14 @@ def parse_rss(xml):
         if pub_date:
             try:
                 dt = parsedate_to_datetime(pub_date).astimezone(KST)
-                now = datetime.now(KST)
-                time_label = dt.strftime("%H:%M") if dt.date() == now.date() else "어제"
+                # 경과 시간이 아니라 KST 달력 날짜로 비교한다 — 어제 23:50은 "어제"다.
+                days = (datetime.now(KST).date() - dt.date()).days
+                if days == 0:
+                    time_label = dt.strftime("%H:%M")
+                elif days == 1:
+                    time_label = "어제"
+                else:
+                    time_label = f"{dt.month}/{dt.day}"
             except (TypeError, ValueError):
                 time_label = ""
 

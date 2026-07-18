@@ -1,5 +1,7 @@
 # 종목별 뉴스 수집의 중복 제거와 og:image 추출을 검증하는 테스트
 import sys
+from datetime import datetime, timedelta
+from email.utils import format_datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -68,6 +70,48 @@ def test_parse_rss_keeps_domain_source_when_no_better_name():
     item = fsn.parse_rss(RSS_SUFFIX)[4]
     assert item["title"] == "산업부 이익 분배 논의 안 해"
     assert item["source"] == "v.daum.net"
+
+
+# 날짜 픽스처는 실행 시점 기준으로 만든다 — 날짜를 박아두면 다음 주에 조용히 깨진다.
+def _rss_with_dates():
+    now = datetime.now(fsn.KST)
+    today = now.replace(hour=10, minute=17, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    yesterday = yesterday.replace(hour=23, minute=50)
+    older = today - timedelta(days=3)
+    xml = f"""<rss><channel>
+<item><title>오늘 기사</title><link>https://a.com/1</link>
+<pubDate>{format_datetime(today)}</pubDate><source>한국경제</source></item>
+<item><title>어제 늦은 밤 기사</title><link>https://a.com/2</link>
+<pubDate>{format_datetime(yesterday)}</pubDate><source>한국경제</source></item>
+<item><title>사흘 전 기사</title><link>https://a.com/3</link>
+<pubDate>{format_datetime(older)}</pubDate><source>한국경제</source></item>
+<item><title>날짜 없는 기사</title><link>https://a.com/4</link>
+<source>한국경제</source></item>
+</channel></rss>"""
+    return xml, today, older
+
+
+def test_time_label_today_is_clock_time():
+    xml, today, _ = _rss_with_dates()
+    assert fsn.parse_rss(xml)[0]["time"] == today.strftime("%H:%M")
+
+
+def test_time_label_yesterday_late_night_is_yesterday():
+    # 경과 시간이 아니라 달력 날짜 기준이다 — 어제 23:50은 몇 시간 전이어도 "어제"다.
+    xml, _, _ = _rss_with_dates()
+    assert fsn.parse_rss(xml)[1]["time"] == "어제"
+
+
+def test_time_label_older_than_yesterday_is_month_day():
+    # 하루 넘은 기사를 "어제"로 표기하면 독자에게 거짓이 된다.
+    xml, _, older = _rss_with_dates()
+    assert fsn.parse_rss(xml)[2]["time"] == f"{older.month}/{older.day}"
+
+
+def test_time_label_missing_pubdate_is_empty():
+    xml, _, _ = _rss_with_dates()
+    assert fsn.parse_rss(xml)[3]["time"] == ""
 
 
 def test_merge_keeps_existing_summaries():
