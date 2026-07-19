@@ -3072,13 +3072,22 @@ if(passBtn){
     });
     sub.textContent=on?'하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님':'코스피 시총 상위 3 · 마감 후 미국 LIVE';
     // 곡선·장중지표는 정규장 실측이라 그대로 두고, 뉴스 갱신 주기 표기만 시간대에 맞춘다.
-    // 주말·공휴일엔 주기를 표기하지 않는다 — 종목 뉴스 수집(fetch_stock_news.py)의 cron-job.org 트리거가
-    // 평일에만 발화하는 상태라(2026-07-18 토 실행 0건 확인) 어떤 주기를 적더라도 사실과 다르다.
-    // 주말 스케줄이 실제로 발화하기 시작하면 그 주기를 여기에 명시할 것.
+    // 표기는 실제 수집 스케줄과 1:1로 맞춰야 한다(없는 주기를 적지 않는다):
+    //   평일 장중 09:00~15:30 → 30분  | 평일 그 외 → 1시간   : kospi-news-live.yml(cron-job.org)
+    //   주말 09~21시          → 3시간                        : stock-news-weekend.yml(GHA native cron)
+    //   주말 21시~익일 09시   → 수집 없음 → 주기 표기 생략
+    // 공휴일엔 두 스케줄 모두 발화하지 않으므로 주말과 달리 주기를 적지 않는다.
     var upd=document.getElementById('lw-upd');
     if(upd){
+      var kstH=(new Date().getUTCHours()+9)%24;
+      var wd=new Date(Date.now()+9*3600*1000).getUTCDay();
+      var isWeekend=(wd===0||wd===6);
       var isHoliday=window.krIsKospiHoliday&&window.krIsKospiHoliday();
-      upd.textContent=isHoliday?'최신순':(on?'최신순 · 1시간 주기':'최신순 · 30분 주기');
+      var label;
+      if(isWeekend) label=(kstH>=9&&kstH<21)?'최신순 · 3시간 주기':'최신순';
+      else if(isHoliday) label='최신순';           // 평일 공휴일 — 어느 스케줄도 안 돎
+      else label=on?'최신순 · 1시간 주기':'최신순 · 30분 주기';
+      upd.textContent=label;
     }
   }
   /* 장중: 네이버 실측 KRW(stocks-live)로 타일 갱신 */
