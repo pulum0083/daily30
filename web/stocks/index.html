@@ -61,6 +61,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
 .strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
+/* 수급 행 — 지수 스트립과 같은 형태로 아래에 붙인다(브리핑 페이지 .nb-supply와 표기 통일). */
+.supply{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.supply[hidden]{display:none;}
+.supply .lbl{font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s:last-of-type{border-right:none;margin-right:0;padding-right:0;}
+.supply .s i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);}
+.supply .s b{font-size:13px;font-weight:800;}
+.supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
 .brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
@@ -92,6 +101,24 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bc-fi .t{font-size:11px;font-weight:700;color:#94A3B8;flex:none;font-variant-numeric:tabular-nums;}
 .bc-fi .h{font-size:12.5px;font-weight:600;color:#475569;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .bc-fi:hover .h{color:var(--primary);}
+/* 장중 — 이슈 피드가 主가 되는 모드. 카드가 숨고 피드가 상단 카드 자리를 차지한다. */
+.bc-feed--lead{border:1px solid #FECACA;background:#FEF2F2;border-radius:12px 12px 0 0;}
+.bc-feed--lead.bc-feed--solo{border-radius:12px;margin-bottom:12px;}
+.bc-feed--lead .bc-feed-h{color:#EF4444;padding:11px 14px 7px;}
+.bc-feed--lead .bc-feed-h .n{color:var(--muted);}
+.bc-feed--lead .bc-fi{border-top-color:rgba(255,255,255,.8);padding:9px 14px;}
+.bc-feed--lead .bc-fi:hover{background:rgba(255,255,255,.6);}
+.bc-feed--lead .bc-fi .t{color:#EF4444;font-weight:800;}
+.bc-feed--lead .bc-fi .h{font-size:13px;font-weight:700;color:var(--ink);}
+.bc-feed--lead .bc-fi:first-of-type .h{font-size:14px;font-weight:800;}
+/* 副 — 예측 브리핑 한 줄 */
+.bc-sub{display:flex;align-items:center;gap:8px;background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;padding:9px 14px;margin-bottom:12px;text-decoration:none;color:var(--ink);transition:background .14s;}
+.bc-sub.is-hidden{display:none;}
+.bc-sub:hover{background:var(--primary-bg);}
+.bc-sub .ic{font-size:13px;flex:none;}
+.bc-sub .lb{font-size:11px;font-weight:800;color:var(--primary);flex:none;}
+.bc-sub .tx{font-size:12px;color:#475569;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bc-sub .arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex:none;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 /* 갱신 배지 */
 .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
@@ -770,6 +797,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
     </div>
+    <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
+         순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
+    <div class="supply" id="h-supply" hidden>
+      <span class="lbl">수급</span>
+      <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
+      <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
+      <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
+      <span class="unit">억원 · 코스피 누적 순매수</span>
+    </div>
     <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
     <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
       <span class="bc-ico" id="bc-ico">📊</span>
@@ -786,6 +822,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     <!-- 직전 이슈 헤드라인 — 브리핑 페이지와 같은 30분 갱신 데이터(kospi-news-{date}.json)를 JS가 채운다.
          브리핑 커넥터가 숨겨진 시간대(심야·주말)엔 이 영역도 함께 숨는다. -->
     <div class="bc-feed is-hidden" id="bc-feed"></div>
+    <!-- 장중(09:00~16:30) 전용 부(副) 줄 — 이 시간대엔 이슈가 主가 되고 예측 브리핑이 이 한 줄로 내려온다. -->
+    <a class="bc-sub is-hidden" id="bc-sub" href="/briefings/">
+      <span class="ic">📈</span>
+      <span class="lb">오늘 예측</span>
+      <span class="tx" id="bc-sub-tx"></span>
+      <span class="arr">›</span>
+    </a>
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
         <span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국 반도체 시황</span>
@@ -2916,99 +2959,145 @@ if(passBtn){
     return null;
   }
 
+  /* 슬롯별 이슈 피드 제목·갱신 주기 표기.
+     실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
+     신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
+     history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
+     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다. */
+  function inMarket(mm){ return mm >= 540 && mm < 930; }    // MARKET     09:00~15:30
+  function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
+  var FEED = {
+    kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다
+    issue: { title:'장중 이슈',      cadence:'30분 갱신',    inSlot:inMarket },
+    close: { title:'오늘 장중 이슈', cadence:'장 마감 기준', inSlot:inMarket },
+    us:    { title:'직전 이슈',      cadence:'1시간 갱신',   inSlot:inUsMarket }
+  };
+
+  var feedEl = document.getElementById('bc-feed');
+  var subEl  = document.getElementById('bc-sub');
+
+  function hideFeed(){ if(feedEl){ feedEl.classList.add('is-hidden'); feedEl.classList.remove('bc-feed--lead','bc-feed--solo'); feedEl.textContent=''; } }
+  function hideSub(){ if(subEl) subEl.classList.add('is-hidden'); }
+
   // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
-  function paintDefault(){
-    var slot = slotNow(), today = kstDate();
+  function paintDefault(slot, today){
     if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
-    if (slot === 'issue'){
-      paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true, time:'실시간',
-              head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/' });
-    } else {
-      var m = TYPE[slot];
-      paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
-              url:'/briefings/' + today + '/' + slot + '/' });
-    }
+    if (slot === 'issue'){ el.classList.add('is-hidden'); return; } // 장중엔 카드 대신 이슈 피드가 主
+    var m = TYPE[slot];
+    paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
+            url:'/briefings/' + today + '/' + slot + '/' });
   }
 
-  async function renderStrip(){
-    // ① 타임테이블 기준 즉시 표시 (fetch 실패해도 슬롯 유지)
-    paintDefault();
+  /* 브리핑 카드(主) — 장중 외 슬롯에서만 그린다. 반환값은 카드가 가리키는 URL. */
+  async function renderCard(slot, today){
+    paintDefault(slot, today);
+    if (!slot || slot === 'issue') return null;
 
-    var today = kstDate(), nm = nowMin(), slot = slotNow();
-    if (!slot) return; // 활성 슬롯 밖 → paintDefault에서 이미 숨김. 폴백(가장 최근 브리핑) 없이 영역 종료.
-
-    // ② 장중(평일 09:00~16:30) — 실시간 이슈 헤드라인으로 업그레이드
-    if (slot === 'issue'){
-      // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않으므로 정적 /data는 stale일 수 있음
-      var nj = await safeJSON('/api/data?f=news-live')
-            || await safeJSON('/data/kospi-news-' + today + '.json')
-            || await safeJSON('/data/kospi-news-live.json');
-      var lt = nj && nj.latest;
-      var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
-      if (title){
-        paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true,
-                time:'실시간', head:title, url:'/briefings/' + (nj.date || today) + '/kospi/' });
-        return;
-      }
-    }
-
-    // ③ briefings-list.json으로 실제 헤드라인·발행시각 업그레이드 (활성 슬롯 안에서만)
     var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    if (!list) return; // fetch 실패(PC 차단) → ①의 타임테이블 기본 유지
+    if (!list) return el.dataset.href;   // fetch 실패(PC 차단) → 타임테이블 기본 유지
 
-    // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아직이면 가장 최근 발행 브리핑(활성 슬롯 안에서만)
-    var activeType = (slot === 'issue') ? 'kospi' : slot;
-    var s = list.slots && list.slots[today] && list.slots[today][activeType];
-    if (s && s.state === 'ready'){ var o = fromSlot(today, activeType, s); paint(o); return; }
+    var s = list.slots && list.slots[today] && list.slots[today][slot];
+    if (s && s.state === 'ready'){ paint(fromSlot(today, slot, s)); return el.dataset.href; }
     var pick = pickLatest(list);
-    if (pick){ var op = fromSlot(pick.date, pick.type, pick.s); paint(op); }
+    if (pick) paint(fromSlot(pick.date, pick.type, pick.s));
+    return el.dataset.href;
   }
-  /* 직전 이슈 헤드라인 피드 — 브리핑 페이지가 30분마다 갱신하는 같은 데이터를 종목 메인에도 노출한다.
-     각 행은 브리핑 커넥터가 이미 검증해 가리키고 있는 URL로 보낸다(자체 URL을 만들지 않는다 —
-     아직 발행 안 된 날짜로 링크가 나가는 것을 막기 위함). 오늘 날짜 데이터가 아니면 표시하지 않는다. */
-  async function renderFeed(){
-    var feed = document.getElementById('bc-feed');
-    if (!feed) return;
-    function hide(){ feed.classList.add('is-hidden'); feed.textContent = ''; }
-    if (el.classList.contains('is-hidden')) return hide();   // 활성 슬롯 밖 → 커넥터와 함께 숨김
 
-    var today = kstDate();
+  /* 장중(09:00~16:30) 부(副) 줄 — 오늘 코스피 예측 브리핑. ready가 아니면 줄을 숨긴다(폴백 없음). */
+  async function renderSub(today){
+    if (!subEl) return false;
+    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    var s = list && list.slots && list.slots[today] && list.slots[today].kospi;
+    if (!s || s.state !== 'ready'){ hideSub(); return false; }
+    // pill_text는 화살표만("▼"), 방향 문구는 title("하락 우위")에 있다 — 둘을 합쳐야 뜻이 통한다.
+    var dir = ((s.pill_text || '') + ' ' + (s.title && s.title !== '—' ? s.title : '')).trim();
+    var head = s.headline || '';
+    subEl.href = s.url || ('/briefings/' + today + '/kospi/');
+    document.getElementById('bc-sub-tx').textContent =
+      (dir && head) ? (dir + ' — ' + head) : (dir || head || '오늘 예측 브리핑 보기');
+    subEl.classList.remove('is-hidden');
+    return true;
+  }
+
+  /* 이슈 헤드라인 피드 — 브리핑 페이지와 같은 데이터(kospi-news-{date}.json)를 종목 메인에도 노출한다.
+     각 행은 자체 URL을 만들지 않고 그 시간대 브리핑 URL로 보낸다(아직 발행 안 된 날짜로 나가는 것 방지).
+     오늘 날짜 데이터가 아니면 표시하지 않는다. lead=true면 카드 자리를 대신하는 主 모드. */
+  async function renderFeed(slot, today, href, lead){
+    if (!feedEl) return false;
+    var cfg = FEED[slot];
+    if (!cfg) { hideFeed(); return false; }
+
+    // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않아 정적 /data는 stale일 수 있음
     var nj = await safeJSON('/api/data?f=news-live')
           || await safeJSON('/data/kospi-news-' + today + '.json')
           || await safeJSON('/data/kospi-news-live.json');
-    if (!nj || nj.date !== today) return hide();             // 어제 데이터를 오늘인 척 보여주지 않는다
+    if (!nj || nj.date !== today){ hideFeed(); return false; }   // 어제 데이터를 오늘인 척 보여주지 않는다
 
-    var shown = (document.getElementById('bc-head').textContent || '').trim();
     var rows = [], seen = {};
     (nj.history || []).forEach(function(h){
       if (rows.length >= 3) return;
+      var p = (h.time || '').split(':');
+      if (p.length < 2) return;
+      if (!cfg.inSlot(parseInt(p[0],10) * 60 + parseInt(p[1],10))) return;   // 다른 슬롯 이슈 배제
       var t = (h.market && h.market.title) || (h.stock && h.stock.title);
-      if (!t || t.trim() === shown || seen[t]) return;
+      if (!t || seen[t]) return;
       seen[t] = 1; rows.push({ time: h.time || '', title: t });
     });
-    if (!rows.length) return hide();
+    if (!rows.length){ hideFeed(); return false; }
 
-    var href = el.dataset.href || '/briefings/';
-    feed.textContent = '';
+    feedEl.textContent = '';
     var head = document.createElement('div');
     head.className = 'bc-feed-h';
-    head.textContent = '직전 이슈';
+    if (lead){ var dot = document.createElement('span'); dot.className = 'live-dot'; head.appendChild(dot); }
+    head.appendChild(document.createTextNode(cfg.title));
     var n = document.createElement('span');
-    n.className = 'n'; n.textContent = '30분 갱신';
+    n.className = 'n'; n.textContent = cfg.cadence;
     head.appendChild(n);
-    feed.appendChild(head);
+    feedEl.appendChild(head);
     rows.forEach(function(r){
       var a = document.createElement('a');
-      a.className = 'bc-fi'; a.href = href;
+      a.className = 'bc-fi'; a.href = href || '/briefings/';
       var tm = document.createElement('span'); tm.className = 't'; tm.textContent = r.time;
       var hd = document.createElement('span'); hd.className = 'h'; hd.textContent = r.title;
       a.appendChild(tm); a.appendChild(hd);
-      feed.appendChild(a);
+      feedEl.appendChild(a);
     });
-    feed.classList.remove('is-hidden');
+    feedEl.classList.toggle('bc-feed--lead', !!lead);
+    if (!lead) feedEl.classList.remove('bc-feed--solo');
+    feedEl.classList.remove('is-hidden');
+    return true;
   }
 
-  async function render(){ await renderStrip(); await renderFeed(); }
+  /* 시간대별 구성 (KST, 평일) — docs/prototypes/2026-07-19-brief-strip-supply.html 참조
+       07:30~09:00  코스피 예측 카드 (이슈 없음)
+       09:00~16:30  장중 이슈 3건이 主 · 예측 브리핑이 副 한 줄     ← 이 슬롯만 위아래가 뒤집힌다
+       16:30~21:20  마감 카드 主 · 장 마감까지의 이슈 3건이 副
+       21:20~23:50  미국 예측 카드 主 · 미국장 이슈 3건이 副
+       그 외(심야·주말·휴일)  전체 숨김 (과거 날짜 폴백 없음) */
+  async function render(){
+    var today = kstDate(), slot = slotNow();
+
+    if (!slot){ el.classList.add('is-hidden'); hideFeed(); hideSub(); return; }
+
+    if (slot === 'issue'){
+      el.classList.add('is-hidden');   // 장중엔 카드 대신 이슈 피드가 主
+      var kospiUrl = '/briefings/' + today + '/kospi/';
+      var hasFeed = await renderFeed('issue', today, kospiUrl, true);
+      var hasSub  = await renderSub(today);
+      if (!hasFeed){
+        // 이슈 미수집(09:00~첫 수집 전) → 예측 카드로 폴백해 영역이 비지 않게 한다
+        hideSub(); hideFeed();
+        await renderCard('kospi', today);
+        return;
+      }
+      feedEl.classList.toggle('bc-feed--solo', !hasSub);
+      return;
+    }
+
+    hideSub();
+    var href = await renderCard(slot, today);
+    await renderFeed(slot, today, href, false);
+  }
   render();
   setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
 })();
@@ -3908,6 +3997,19 @@ if(passBtn){
         var p=d.forex.price,pct=d.forex.changePct||0;
         if(el2) el2.textContent=Math.round(p).toLocaleString('ko-KR');
         if(ec2){ec2.textContent=pct!==0?fmtPct(pct):'';ec2.className='vc '+dirClass(pct)+' num';}
+      }
+      // 수급 — 하나라도 실측이 들어와야 행을 연다. 수집 실패 시 행은 숨긴 채로 둔다(운영규칙 0).
+      if(d.investor){
+        var sup=document.getElementById('h-supply'), any=false;
+        var map={'h-indv':d.investor.individual,'h-inst':d.investor.institution,'h-frgn':d.investor.foreign};
+        Object.keys(map).forEach(function(id){
+          var v=map[id], e=document.getElementById(id);
+          if(!e||v==null) return;
+          any=true;
+          e.textContent=(v>=0?'+':'−')+Math.abs(Math.round(v)).toLocaleString('ko-KR');
+          e.className='num '+(v>=0?'up':'dn');
+        });
+        if(any&&sup) sup.hidden=false;
       }
     }).catch(function(){});
 })();
