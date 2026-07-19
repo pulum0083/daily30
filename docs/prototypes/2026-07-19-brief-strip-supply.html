@@ -1,0 +1,237 @@
+<!doctype html>
+<!-- 종목 메인 상단 재구성 프로토타입 — 수급 표시 위치(A/B안) + 브리핑 커넥터 시간대별 4상태 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>브리핑 커넥터 + 수급 — 프로토타입</title>
+<style>
+:root{
+  --ink:#0F172A; --muted:#94A3B8; --hair:#E5E7EB; --canvas:#fff; --bg:#F7F9FC;
+  --primary:#2775ED; --primary-bg:#EFF4FE; --up:#E03131; --dn:#2775ED;
+  --s1:0 1px 2px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Segoe UI',sans-serif;color:var(--ink);padding:28px 20px 80px;}
+.wrap{max-width:920px;margin:0 auto;}
+h1{font-size:20px;margin:0 0 4px;}
+.lede{font-size:13px;color:#475569;line-height:1.6;margin:0 0 8px;}
+.warn{display:inline-block;font-size:11.5px;font-weight:700;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:7px;padding:5px 10px;margin-bottom:26px;}
+h2{font-size:15px;margin:34px 0 3px;padding-top:22px;border-top:2px solid #E2E8F0;}
+h2:first-of-type{border-top:none;padding-top:0}
+.note{font-size:12px;color:#64748B;line-height:1.6;margin:5px 0 14px;}
+.note b{color:var(--ink)}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:5px;padding:2px 7px;margin-left:6px;vertical-align:middle;}
+.tag.rec{color:#16A34A;background:#ECFDF3;}
+.tag.no{color:#94A3B8;background:#F1F5F9;}
+.num{font-variant-numeric:tabular-nums;}
+
+/* ── 상단 지수 스트립 (현행) ── */
+.strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
+.strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}
+.strip .m .v{font-size:13px;font-weight:800;}
+.strip .m .vc{font-size:11px;font-weight:700;}
+.up{color:var(--up)} .dn{color:var(--dn)}
+
+/* ── B안: 독립 수급 행 ── */
+.supply{display:flex;align-items:center;gap:0;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.supply .lbl{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s:last-of-type{border-right:none;margin-right:0;padding-right:0;}
+.supply .s i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);}
+.supply .s b{font-size:13px;font-weight:800;}
+.supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;}
+
+/* ── 브리핑 커넥터 ── */
+.brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;text-decoration:none;color:var(--ink);cursor:pointer;}
+.brief-card.bc-kospi{background:var(--primary-bg);border-color:#BFDBFE;}
+.brief-card.bc-close{background:#F0FDF4;border-color:#BBF7D0;}
+.brief-card.bc-us{background:#FEFCE8;border-color:#FDE68A;}
+.bc-ico{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.78);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+.bc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.bc-top{display:flex;align-items:center;gap:7px;}
+.bc-type{font-size:11px;font-weight:800;letter-spacing:.01em;}
+.bc-kospi .bc-type{color:var(--primary)} .bc-close .bc-type{color:#16A34A} .bc-us .bc-type{color:#CA8A04}
+.bc-time{font-size:10.5px;color:var(--muted);font-weight:600;}
+.bc-head{font-size:13.5px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc-pill{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;flex:none;}
+.bc-pill.dn{background:#DBEAFE;color:#2775ED;} .bc-pill.up{background:#FEE2E2;color:#E03131;}
+.bc-arr{font-size:18px;color:#C0C4CA;flex:none;}
+
+/* 커넥터 + 피드가 붙을 때 */
+.stack .brief-card{border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.bc-feed{border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;background:var(--canvas);overflow:hidden;}
+.bc-feed-h{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);padding:9px 14px 5px;}
+.bc-feed-h .n{margin-left:auto;font-weight:700;}
+.bc-fi{display:flex;align-items:baseline;gap:9px;padding:8px 14px;text-decoration:none;border-top:1px solid #F4F6F8;cursor:pointer;}
+.bc-fi:hover{background:var(--primary-bg);}
+.bc-fi .t{font-size:11px;font-weight:700;color:var(--muted);flex:none;}
+.bc-fi .h{font-size:12.5px;font-weight:600;color:#475569;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* 장중 전용 — 이슈가 主, 예측이 副 */
+.live-card{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px 12px 0 0;overflow:hidden;}
+.lc-h{display:flex;align-items:center;gap:7px;padding:11px 14px 8px;}
+.lc-h .ic{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.78);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none;}
+.lc-h .ttl{font-size:11px;font-weight:800;color:#EF4444;}
+.lc-h .cad{font-size:10.5px;color:var(--muted);font-weight:600;}
+.lc-h .n{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted);}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.lc-i{display:flex;align-items:baseline;gap:9px;padding:9px 14px;text-decoration:none;border-top:1px solid rgba(255,255,255,.75);cursor:pointer;}
+.lc-i:first-of-type{border-top:1px solid rgba(255,255,255,.75);}
+.lc-i:hover{background:rgba(255,255,255,.55);}
+.lc-i .t{font-size:11px;font-weight:800;color:#EF4444;flex:none;}
+.lc-i .h{font-size:13px;font-weight:700;color:var(--ink);line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lc-i.top .h{font-size:14px;font-weight:800;}
+/* 副 — 예측 브리핑 한 줄 */
+.sub-brief{display:flex;align-items:center;gap:8px;background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;padding:9px 14px;text-decoration:none;color:var(--ink);cursor:pointer;}
+.sub-brief:hover{background:var(--primary-bg);}
+.sub-brief .ic{font-size:13px;flex:none;}
+.sub-brief .lb{font-size:11px;font-weight:800;color:var(--primary);flex:none;}
+.sub-brief .tx{font-size:12px;color:#475569;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sub-brief .arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex:none;}
+
+.dest{font-size:11.5px;color:#64748B;background:#F1F5F9;border-radius:7px;padding:7px 11px;margin-top:9px;line-height:1.6;}
+.dest code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#0F172A;background:#fff;border:1px solid var(--hair);border-radius:4px;padding:1px 5px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;background:var(--canvas);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid #F1F5F9;vertical-align:top;line-height:1.5;}
+th{background:#F8FAFC;font-size:11px;font-weight:800;color:#475569;}
+tr:last-child td{border-bottom:none}
+td code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#F8FAFC;border:1px solid var(--hair);border-radius:4px;padding:1px 5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>종목 메인 상단 재구성</h1>
+<p class="lede">① 수급 표시 위치 A/B안 · ② 브리핑 커넥터 시간대별 4상태</p>
+<div class="warn">⚠️ 프로토타입 — 아래 모든 수치·헤드라인은 <b>레이아웃 확인용 샘플</b>입니다. 실제 화면은 <code>/api/market</code>·<code>kospi-news-{date}.json</code> 실측값만 씁니다.</div>
+
+
+<h2>① 수급 표시 — A안: 지수 스트립에 통합 <span class="tag no">비권장</span></h2>
+<p class="note">항목이 3개 → 6개가 되면서 가로 스크롤이 상시 발생합니다. 성격도 다릅니다 — 지수는 <b>가격</b>, 수급은 <b>주체별 순매수</b>라 같은 줄에서 눈이 섞입니다.</p>
+<div class="strip">
+  <div class="m"><span class="l">코스피</span><span class="v num">8,411</span><span class="vc dn num">−5.81%</span></div>
+  <div class="m"><span class="l">코스닥</span><span class="v num">851.4</span><span class="vc dn num">−4.10%</span></div>
+  <div class="m"><span class="l">원/달러</span><span class="v num">1,538</span><span class="vc num"></span></div>
+  <div class="m"><span class="l">개인</span><span class="v num up">+12,480</span></div>
+  <div class="m"><span class="l">기관</span><span class="v num dn">−3,150</span></div>
+  <div class="m"><span class="l">외국인</span><span class="v num dn">−9,330</span></div>
+</div>
+
+<h2>① 수급 표시 — B안: 독립 행 <span class="tag rec">권장</span></h2>
+<p class="note">지수 스트립 바로 아래 별도 행. 브리핑 페이지 시장 지표 패널(<code>.nb-supply</code>)과 같은 형태라 두 화면의 표기가 일치합니다. 순서는 <b>개인 → 기관 → 외국인</b> 고정(운영규칙 §10).</p>
+<div class="strip">
+  <div class="m"><span class="l">코스피</span><span class="v num">8,411</span><span class="vc dn num">−5.81%</span></div>
+  <div class="m"><span class="l">코스닥</span><span class="v num">851.4</span><span class="vc dn num">−4.10%</span></div>
+  <div class="m"><span class="l">원/달러</span><span class="v num">1,538</span><span class="vc num"></span></div>
+</div>
+<div class="supply">
+  <span class="lbl">수급</span>
+  <span class="s"><i>개인</i><b class="num up">+12,480</b></span>
+  <span class="s"><i>기관</i><b class="num dn">−3,150</b></span>
+  <span class="s"><i>외국인</i><b class="num dn">−9,330</b></span>
+  <span class="unit">억원 · 코스피 누적 순매수</span>
+</div>
+<p class="note">데이터 없을 때(수집 실패·장 시작 전)는 <b>행 자체를 숨깁니다</b> — <code>—</code>로 채우지 않습니다(운영규칙 0).</p>
+
+
+<h2>② 커넥터 — 07:30~09:00 · 코스피 예측</h2>
+<p class="note">이슈가 아직 없는 시간대. 브리핑 카드 단독.</p>
+<div>
+  <div class="brief-card bc-kospi" style="border-radius:12px">
+    <span class="bc-ico">📈</span>
+    <span class="bc-main">
+      <span class="bc-top"><span class="bc-type">코스피 예측 브리핑</span><span class="bc-time">07:25 발행</span></span>
+      <span class="bc-head">반도체가 끌어올린 지수, 오늘은 미국발 조정이 발목을 잡아요</span>
+    </span>
+    <span class="bc-pill dn">▼ 하락 우위</span>
+    <span class="bc-arr">›</span>
+  </div>
+</div>
+<div class="dest">클릭 → <code>/briefings/{today}/kospi/</code></div>
+
+
+<h2>② 커넥터 — 09:00~16:30 · 장중 <span class="tag rec">구조 반전</span></h2>
+<p class="note">이슈가 <b>主</b>(위·크게), 예측 브리핑이 <b>副</b>(아래·한 줄). 다른 시간대와 위아래가 뒤집힙니다.</p>
+<div>
+  <div class="live-card">
+    <div class="lc-h">
+      <span class="ic">📰</span>
+      <span class="ttl"><span class="live-dot"></span>장중 이슈</span>
+      <span class="cad">30분 갱신</span>
+      <span class="n">14:00 기준</span>
+    </div>
+    <a class="lc-i top"><span class="t">14:00</span><span class="h">외국인 매도 8일째, 반도체 대형주에 집중… 코스피 8,400선 위협</span></a>
+    <a class="lc-i"><span class="t">13:30</span><span class="h">원/달러 1,540원 터치, 연고점 경신 부담 확대</span></a>
+    <a class="lc-i"><span class="t">13:00</span><span class="h">2차전지 반등 시도, 개인 순매수 유입</span></a>
+  </div>
+  <a class="sub-brief">
+    <span class="ic">📈</span><span class="lb">오늘 예측</span>
+    <span class="tx">하락 우위 · 신뢰도 72% — 반도체가 끌어올린 지수, 오늘은 미국발 조정이…</span>
+    <span class="arr">›</span>
+  </a>
+</div>
+<div class="dest">이슈 행 클릭 → <code>/briefings/{today}/kospi/</code> · 예측 행 클릭 → <code>/briefings/{today}/kospi/</code><br>같은 페이지지만 <b>라벨이 목적지와 일치</b>합니다. 지금은 카드가 "장중 이슈"라고 쓰여 있는데 예측 브리핑으로 보내서 어긋나 있어요.</div>
+
+
+<h2>② 커넥터 — 16:30~21:20 · 코스피 마감</h2>
+<p class="note">브리핑 카드가 다시 主. 피드는 <b>장 마감까지 쌓인 이슈</b>를 보여줍니다 — 이 시간대엔 신규 수집이 없으므로(<code>fetch_news_live.py</code>가 POST_MARKET 슬롯에서 즉시 종료) <b>"30분 갱신"이라고 쓰면 안 됩니다.</b></p>
+<div class="stack">
+  <div class="brief-card bc-close">
+    <span class="bc-ico">🏁</span>
+    <span class="bc-main">
+      <span class="bc-top"><span class="bc-type">코스피 마감 브리핑</span><span class="bc-time">16:25 발행</span></span>
+      <span class="bc-head">외국인 8일 연속 순매도, 8,411로 마감… 낙폭은 오후 들어 줄었어요</span>
+    </span>
+    <span class="bc-pill dn">▼ 5.81%</span>
+    <span class="bc-arr">›</span>
+  </div>
+  <div class="bc-feed">
+    <div class="bc-feed-h">오늘 장중 이슈<span class="n">장 마감 기준</span></div>
+    <a class="bc-fi"><span class="t">15:00</span><span class="h">코스피 8,411 마감, 외국인 순매도 9,330억</span></a>
+    <a class="bc-fi"><span class="t">14:00</span><span class="h">외국인 매도 8일째, 반도체 대형주에 집중</span></a>
+    <a class="bc-fi"><span class="t">13:30</span><span class="h">원/달러 1,540원 터치, 연고점 경신 부담 확대</span></a>
+  </div>
+</div>
+<div class="dest">클릭 → <code>/briefings/{today}/close/</code> (카드·피드 행 모두)</div>
+
+
+<h2>② 커넥터 — 21:20~23:50 · 미국 예측</h2>
+<p class="note">US_MARKET 슬롯은 <b>1시간 주기</b>라 배지도 그렇게 씁니다.</p>
+<div class="stack">
+  <div class="brief-card bc-us">
+    <span class="bc-ico">🌙</span>
+    <span class="bc-main">
+      <span class="bc-top"><span class="bc-type">미국 시장 예측 브리핑</span><span class="bc-time">21:15 발행</span></span>
+      <span class="bc-head">TSMC는 잘했는데 왜 다 팔지? — AI 밸류에이션에 대한 첫 균열</span>
+    </span>
+    <span class="bc-pill dn">▼ 하락 우위</span>
+    <span class="bc-arr">›</span>
+  </div>
+  <div class="bc-feed">
+    <div class="bc-feed-h">직전 이슈<span class="n">1시간 갱신</span></div>
+    <a class="bc-fi"><span class="t">23:30</span><span class="h">Nasdaq hammered by chips sell-off, Dow and S&amp;P 500 fall after Netflix whiff</span></a>
+    <a class="bc-fi"><span class="t">22:30</span><span class="h">S&amp;P 500 and Nasdaq futures drop as chipmaker sell-off intensifies</span></a>
+    <a class="bc-fi"><span class="t">21:30</span><span class="h">뉴욕증시 프리뷰, 반도체주 투매에 나스닥 선물 1.8% 급락</span></a>
+  </div>
+</div>
+<div class="dest">클릭 → <code>/briefings/{today}/us/</code> (카드·피드 행 모두)</div>
+
+
+<h2>② 정리된 시간대 규칙</h2>
+<table>
+<tr><th style="width:15%">시간 (KST, 평일)</th><th style="width:22%">主</th><th style="width:22%">副</th><th style="width:19%">갱신 배지</th><th>클릭 목적지</th></tr>
+<tr><td>07:30 ~ 09:00</td><td>📈 코스피 예측 카드</td><td>— (이슈 없음)</td><td>—</td><td><code>/kospi/</code></td></tr>
+<tr><td>09:00 ~ 16:30</td><td>📰 <b>장중 이슈 3건</b></td><td>📈 예측 한 줄</td><td>30분 갱신</td><td><code>/kospi/</code></td></tr>
+<tr><td>16:30 ~ 21:20</td><td>🏁 마감 카드</td><td>장중 이슈 3건</td><td><b>장 마감 기준</b><br>(신규 수집 없음)</td><td><code>/close/</code></td></tr>
+<tr><td>21:20 ~ 23:50</td><td>🌙 미국 예측 카드</td><td>미국장 이슈 3건</td><td>1시간 갱신</td><td><code>/us/</code></td></tr>
+<tr><td>23:50 ~ 07:30<br>주말 · 공휴일</td><td colspan="4">영역 전체 숨김 — 과거 날짜로 폴백하지 않음 (운영규칙 §13)</td></tr>
+</table>
+<p class="note" style="margin-top:12px">공휴일 예외는 그대로 유지합니다 — 한국 공휴일엔 코스피 슬롯(예측·이슈·마감)만 숨기고 <b>미국 예측은 노출</b>합니다(2026-07-17 제헌절 사고로 확정된 규칙).</p>
+
+</div>
+</body>
+</html>
