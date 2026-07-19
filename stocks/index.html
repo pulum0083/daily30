@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>종목 시그널 — Double-Shot</title>
-<meta name="description" content="코스피·코스닥 대장주 실시간 시세와 AI 예측 랭킹, 특이 신호, 섹터별 종목을 한눈에. 매일 갱신되는 실측 데이터.">
+<meta name="description" content="코스피·코스닥 실시간 대시보드. 지수·수급·주도주·장중 이슈와 AI 예측 브리핑을 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
 <link rel="canonical" href="https://doubleshot.space/stocks/">
 <meta property="og:url" content="https://doubleshot.space/stocks/">
 <meta property="og:title" content="종목 시그널 — Double-Shot">
-<meta property="og:description" content="코스피·코스닥 대장주 실시간 시세와 AI 예측 랭킹, 특이 신호, 섹터별 종목을 한눈에. 매일 갱신되는 실측 데이터.">
+<meta property="og:description" content="코스피·코스닥 실시간 대시보드. 지수·수급·주도주·장중 이슈와 AI 예측 브리핑을 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
@@ -61,6 +61,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
 .strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
+/* 수급 행 — 지수 스트립과 같은 형태로 아래에 붙인다(브리핑 페이지 .nb-supply와 표기 통일). */
+.supply{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+.supply[hidden]{display:none;}
+.supply .lbl{font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s:last-of-type{border-right:none;margin-right:0;padding-right:0;}
+.supply .s i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);}
+.supply .s b{font-size:13px;font-weight:800;}
+.supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
 .brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
@@ -81,6 +90,35 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bc-pill.up{background:#FEE2E2;color:#E03131;}.bc-pill.dn{background:#DBEAFE;color:#2775ED;}
 .bc-arr{font-size:18px;color:#C0C4CA;flex:none;transition:color .14s;}.brief-card:hover .bc-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
+/* 브리핑 커넥터 하위 이슈 피드 — 카드 바로 아래에 붙여 하나의 덩어리로 읽히게 한다. */
+.brief-card:has(+ .bc-feed:not(.is-hidden)){border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;}
+.bc-feed{margin:0 0 12px;border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;background:var(--canvas);overflow:hidden;}
+.bc-feed.is-hidden{display:none;}
+.bc-feed-h{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#94A3B8;padding:9px 14px 5px;}
+.bc-feed-h .n{margin-left:auto;font-weight:700;}
+.bc-fi{display:flex;align-items:baseline;gap:9px;padding:8px 14px;text-decoration:none;border-top:1px solid #F4F6F8;transition:background .14s;}
+.bc-fi:hover{background:var(--primary-bg);}
+.bc-fi .t{font-size:11px;font-weight:700;color:#94A3B8;flex:none;font-variant-numeric:tabular-nums;}
+.bc-fi .h{font-size:12.5px;font-weight:600;color:#475569;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bc-fi:hover .h{color:var(--primary);}
+/* 장중 — 이슈 피드가 主가 되는 모드. 카드가 숨고 피드가 상단 카드 자리를 차지한다. */
+.bc-feed--lead{border:1px solid #FECACA;background:#FEF2F2;border-radius:12px 12px 0 0;}
+.bc-feed--lead.bc-feed--solo{border-radius:12px;margin-bottom:12px;}
+.bc-feed--lead .bc-feed-h{color:#EF4444;padding:11px 14px 7px;}
+.bc-feed--lead .bc-feed-h .n{color:var(--muted);}
+.bc-feed--lead .bc-fi{border-top-color:rgba(255,255,255,.8);padding:9px 14px;}
+.bc-feed--lead .bc-fi:hover{background:rgba(255,255,255,.6);}
+.bc-feed--lead .bc-fi .t{color:#EF4444;font-weight:800;}
+.bc-feed--lead .bc-fi .h{font-size:13px;font-weight:700;color:var(--ink);}
+.bc-feed--lead .bc-fi:first-of-type .h{font-size:14px;font-weight:800;}
+/* 副 — 예측 브리핑 한 줄 */
+.bc-sub{display:flex;align-items:center;gap:8px;background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;padding:9px 14px;margin-bottom:12px;text-decoration:none;color:var(--ink);transition:background .14s;}
+.bc-sub.is-hidden{display:none;}
+.bc-sub:hover{background:var(--primary-bg);}
+.bc-sub .ic{font-size:13px;flex:none;}
+.bc-sub .lb{font-size:11px;font-weight:800;color:var(--primary);flex:none;}
+.bc-sub .tx{font-size:12px;color:#475569;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bc-sub .arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex:none;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 /* 갱신 배지 */
 .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
@@ -88,7 +126,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 신호 업데이트 시 깜빡임 효과 */
 @keyframes flashUpdate{0%{background:var(--primary-bg);}100%{background:var(--canvas);}}
 .sig-updated{animation:flashUpdate 0.6s ease-out;}
-.etf-updated{animation:flashUpdate 0.6s ease-out;}
 /* 실시간 포커스 카드 (칩보드 상단) */
 .focus-card{background:var(--canvas);border:1.5px solid #FECACA;border-radius:14px;margin-bottom:14px;overflow:hidden;}
 .focus-card__h{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;font-weight:700;color:#991B1B;}
@@ -305,35 +342,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .srk-row .srk-nm{flex:1;}
 .srk-nm{font-size:13px;font-weight:600;color:#0F172A;}
 .srk-pct{font-size:12.5px;font-weight:800;white-space:nowrap;}
-/* ETF로 읽는 시황 */
-.etf-head{margin:12px 16px 4px;padding:11px 13px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;}
-.etf-head-t{font-size:13px;font-weight:800;color:#0F172A;margin-bottom:4px;}
-.etf-head-b{font-size:12px;line-height:1.5;color:#475569;}
-.etf-dp{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid #F1F5F9;background:var(--canvas);}
-.etf-dp-l{font-size:13px;font-weight:800;color:#0F172A;flex:1;}
-.etf-dp-v{font-size:13px;font-weight:800;white-space:nowrap;}
-.etf-note{font-size:11.5px;color:#64748B;padding:0 16px 8px;line-height:1.4;background:var(--canvas);}
-.etf-head-b b{color:#0F172A;}
-/* ETF 거래량 톱5 행 (합친 시황 블록 내부) */
-.etf-top5-cap{font-size:11px;font-weight:700;color:#94A3B8;padding:10px 16px 4px;background:var(--canvas);border-top:1px solid #F1F5F9;}
-.row.etf-top5{cursor:default;}
-.row.etf-top5:hover{background:var(--canvas);}
-.etf-top5-nm{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.etf-top5-vol{flex-shrink:0;font-size:11px;color:var(--muted);white-space:nowrap;}
-.etf-top5-pct{flex-shrink:0;min-width:50px;text-align:right;font-size:12.5px;font-weight:800;white-space:nowrap;}
 .etf-cap{font-size:11.5px;line-height:1.5;color:#475569;background:var(--canvas);}.etf-cap b{color:#0F172A;}
 /* ETF 사이드 카드 (베팅·거래량 톱5·섹터 로테이션) */
 .live-pill{font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 8px;}
 .close-pill{font-size:10px;font-weight:700;color:#6b7280;background:#F1F3F5;border-radius:999px;padding:2px 8px;}
-.gauge-wrap{padding:14px 16px 16px;background:var(--canvas);}
-.bet-label{font-size:11px;font-weight:700;color:#94A3B8;margin-bottom:8px;}
-.bet-split{display:flex;height:32px;border-radius:8px;overflow:hidden;font-size:11px;font-weight:800;color:#fff;}
-.bet-dn{background:#3E7BD6;display:flex;align-items:center;justify-content:flex-start;padding-left:10px;} /* var(--dn) 채도 낮춤 */
-.bet-up{background:#CD4444;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;} /* var(--up) 채도 낮춤 */
-.bet-legend{display:flex;justify-content:space-between;font-size:11px;color:#64748B;margin-top:7px;}.bet-legend b{color:#334155;}
-.bet-fact{margin-top:11px;border-top:1px solid #F1F5F9;padding-top:9px;}
-.bet-fact-row{display:flex;justify-content:space-between;font-size:11.5px;color:#64748B;padding:3px 0;}.bet-fact-row b{color:#334155;font-weight:700;}
-.gauge-note{font-size:11.5px;line-height:1.5;color:#475569;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;}.gauge-note b{color:#0F172A;}
 .etf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--canvas);border-top:1px solid #F4F6F8;}.etf-row:first-of-type{border-top:none;}
 .etf-rk{font-size:12px;font-weight:800;color:#94A3B8;min-width:16px;text-align:center;font-variant-numeric:tabular-nums;flex:none;}
 .etf-nm{font-size:13px;font-weight:700;color:#1E2430;flex:1;}
@@ -773,7 +785,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <!-- ===== HOME ===== -->
   <div class="screen on" id="home">
     <div class="hero">
-      <div><h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:10px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1><p>코스피·코스닥 AI 전망과 매일 갱신되는 실측 랭킹 · <span class="ds-date"></span></p></div>
+      <div><h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:10px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1><p>코스피·코스닥 실시간 대시보드 — 지수·수급·주도주와 장중 이슈를 한 화면에서 봐요 · <span class="ds-date"></span></p></div>
       <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -784,6 +796,15 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
       <div class="m"><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
       <div class="m"><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
+    </div>
+    <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
+         순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
+    <div class="supply" id="h-supply" hidden>
+      <span class="lbl">수급</span>
+      <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
+      <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
+      <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
+      <span class="unit">억원 · 코스피 누적 순매수</span>
     </div>
     <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
     <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
@@ -797,6 +818,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       </span>
       <span class="bc-pill" id="bc-pill" style="display:none"></span>
       <span class="bc-arr">›</span>
+    </a>
+    <!-- 직전 이슈 헤드라인 — 브리핑 페이지와 같은 30분 갱신 데이터(kospi-news-{date}.json)를 JS가 채운다.
+         브리핑 커넥터가 숨겨진 시간대(심야·주말)엔 이 영역도 함께 숨는다. -->
+    <div class="bc-feed is-hidden" id="bc-feed"></div>
+    <!-- 장중(09:00~16:30) 전용 부(副) 줄 — 이 시간대엔 이슈가 主가 되고 예측 브리핑이 이 한 줄로 내려온다. -->
+    <a class="bc-sub is-hidden" id="bc-sub" href="/briefings/">
+      <span class="ic">📈</span>
+      <span class="lb">오늘 예측</span>
+      <span class="tx" id="bc-sub-tx"></span>
+      <span class="arr">›</span>
     </a>
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
@@ -826,13 +857,18 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </script>
     <style>#us-linked-widget{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;}#us-linked-widget .usw-tiles{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}.usw-tiles::-webkit-scrollbar{display:none;}.us-tile{flex:1 0 auto;min-width:0;cursor:pointer;background:#F7F9FC;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 15px;transition:border-color .12s,box-shadow .12s,background .12s;}.us-tile.on{background:#fff;border-color:#2775ED;box-shadow:0 3px 10px rgba(37,117,237,.12);}#why-moved{margin-top:18px;padding-top:16px;border-top:1px solid #F1F5F9;}.us-tile{position:relative;}.us-tile .tile-go{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:rgba(37,117,237,.08);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;cursor:pointer;text-decoration:none;}.us-tile:hover .tile-go{opacity:1;}.us-tile .tile-go svg{width:14px;height:14px;}#why-moved .wm-card-h{font-size:12px;font-weight:800;color:#0F172A;display:flex;align-items:center;margin-bottom:8px;}#why-moved .wm-live{margin-left:8px;font-size:10px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:2px 7px;}#why-moved .vol-bar{position:relative;flex:none;width:108px;height:8px;border-radius:5px;background:#EEF2F7;overflow:hidden;}#why-moved .vol-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;}#why-moved .vol-base{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1;}#why-moved .wm-bell-note{font-size:11px;color:#64748B;margin-top:5px;line-height:1.4;}#why-moved .wm-toggle{margin-left:auto;flex:none;width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#94A3B8;border-radius:50%;transition:background .12s,color .12s,transform .2s;}#why-moved #wm-h-toggle:hover .wm-toggle{background:#F1F5F9;color:#0F172A;}#why-moved .wm-toggle svg{width:15px;height:15px;transition:transform .2s;}#why-moved .wm-toggle.is-collapsed svg{transform:rotate(-90deg);}#why-moved .lw-row{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}#why-moved .lw-row + .lw-row,#why-moved #wm-curve-block + .lw-row{margin-top:16px;padding-top:16px;border-top:1px solid #F1F5F9}
 /* 곡선 블록이 숨겨지면 그 아래 구분선이 허공에 뜬다 — #why-moved 자체 상단선과 겹쳐 이중선이 된다. */
-#why-moved.lw-nocurve > #wm-curve-block + .lw-row{margin-top:0;padding-top:0;border-top:none}#why-moved .lw-l{flex:1.55 1 330px;min-width:0}#why-moved .lw-r{flex:1 1 240px;min-width:0;border-left:1px solid #F1F5F9;padding-left:18px}@media(max-width:700px){#why-moved .lw-r{flex:0 0 100%;border-left:none;padding-left:0;border-top:1px solid #F1F5F9;padding-top:14px}}#why-moved .lw-h{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px;color:#0F172A}#why-moved .lw-note{margin-left:auto;font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-moved{font-size:10.5px;color:#94A3B8;margin-top:9px;line-height:1.5}#why-moved .lw-moved a{color:#2775ED;font-weight:700;text-decoration:none}#why-moved .lw-tp-hero{display:flex;align-items:baseline;gap:7px}#why-moved .lw-tp-hero .lbl{font-size:11px;font-weight:700;color:#94A3B8}#why-moved .lw-tp-hero .val{font-size:16px;font-weight:800;color:#334155;font-variant-numeric:tabular-nums}#why-moved .lw-tp-up{font-size:11.5px;font-weight:800;color:#E03131}#why-moved .lw-tp-meta{font-size:10.5px;color:#94A3B8;margin-top:3px}#why-moved .lw-gauge{position:relative;height:5px;border-radius:4px;background:#F1F5F9;margin:10px 0 12px;overflow:hidden}#why-moved .lw-gauge .cur{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:#94A3B8}#why-moved .lw-brk{display:flex;align-items:center;gap:8px;padding:6.5px 0;border-top:1px solid #F1F5F9}#why-moved .lw-brk:first-of-type{border-top:none}#why-moved .lw-brk .f{font-size:12px;font-weight:700;min-width:62px;color:#334155}#why-moved .lw-brk .o{font-size:9.5px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:5px;padding:1px 6px}#why-moved .lw-brk .o.neu{color:#94A3B8;background:#F1F5F9}#why-moved .lw-brk .t{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}#why-moved .lw-brk .d{font-size:10px;color:#94A3B8;min-width:34px;text-align:right}#why-moved .lw-tr{background:#F7F9FC;border:1px solid #E5E7EB;border-radius:11px;padding:10px 12px 8px;margin-top:13px}#why-moved .lw-tr-h{display:flex;align-items:baseline;font-size:10.5px;font-weight:800;color:#334155}#why-moved .lw-tr-h .d{margin-left:auto;font-size:11px;font-weight:800}#why-moved .lw-tr svg{width:100%;height:auto;display:block;margin-top:5px}#why-moved .lw-news a{display:flex;gap:11px;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid #F1F5F9}#why-moved .lw-news a:first-child{border-top:none}#why-moved .lw-news .nt{font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-news .nh{font-size:14px;font-weight:800;line-height:1.45;margin:3px 0 4px;color:#0F172A}#why-moved .lw-news a:hover .nh{color:#2775ED}#why-moved .lw-news .ns{font-size:13px;color:#334155;line-height:1.55;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}#why-moved .lw-news .nsrc{font-size:11.5px;color:#94A3B8}#why-moved .lw-news .nimg{flex:0 0 74px;width:74px;height:56px;border-radius:8px;object-fit:cover;background:#F1F5F9;border:1px solid #E5E7EB;margin-top:14px}#why-moved .lw-ib{margin-top:16px;padding-top:15px;border-top:2px solid #F1F5F9}#why-moved .lw-ib-h{display:flex;align-items:center;gap:7px;margin-bottom:4px}#why-moved .lw-ib-h .bar{width:3px;height:14px;border-radius:2px;background:#2775ED}#why-moved .lw-ib-h .t{font-size:14px;font-weight:800;color:#0F172A}#why-moved .lw-ib-h .n{margin-left:auto;font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-ib-note{font-size:11.5px;color:#94A3B8;margin-bottom:9px;line-height:1.5}#why-moved .lw-ib-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid #F1F5F9}#why-moved .lw-ib-row .lg{flex:0 0 40px;height:40px;border-radius:9px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#334155}#why-moved .lw-ib-row .bd{flex:1 1 auto;min-width:0}#why-moved .lw-ib-row .nm{font-size:13.5px;font-weight:800;color:#0F172A}#why-moved .lw-ib-row .tg{font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 7px;margin-left:6px}#why-moved .lw-ib-row .tg.bull{color:#E03131;background:#FEF2F2}#why-moved .lw-ib-row .tg.bear{color:#2775ED;background:#EFF4FE}#why-moved .lw-ib-row .tg.neu{color:#94A3B8;background:#F1F5F9}#why-moved .lw-ib-row .tx{font-size:13px;color:#334155;line-height:1.6;margin:4px 0 5px}#why-moved .lw-ib-row .sr{font-size:11.5px;color:#2775ED;font-weight:700;text-decoration:none}#why-moved .lw-ib-row .tm{flex:0 0 auto;font-size:11.5px;color:#94A3B8;text-align:right}</style><div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span id="usw-title" style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><span class="help-q" data-tip-title="코스피 주도주" data-tip="코스피 시총 상위 종목의 흐름을 보여줘요.<br><br><b>장중(09:00~15:30)</b>엔 한국거래소 <b>코스피 실시간 체결가</b>로,<br><b>장 마감 이후</b>엔 하이퍼리퀴드 <b>24h 무기한선물 환산가</b>로 제공해요.<br><br>환산가는 참고용이며 실제 체결가가 아니에요.">?</span><span class="usw-sub" style="margin-left:auto;font-size:11px;color:#94A3B8;">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div><div class="usw-tiles"><div class="us-tile on" data-code="005930" onclick="usSel('005930')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">삼성전자</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">354,000</div><div style="font-size:12px;font-weight:700;color:#2775ED;margin-top:3px;">▼ 8,300 (2.34%)</div><a class="tile-go" href="/stocks/005930/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="000660" onclick="usSel('000660')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">SK하이닉스</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">248,500</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 8,500 (3.42%)</div><a class="tile-go" href="/stocks/000660/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="005380" onclick="usSel('005380')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">현대차</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">245,000</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 2,000 (0.82%)</div><a class="tile-go" href="/stocks/005380/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div id="why-moved"><div id="wm-curve-block"><div class="wm-h" id="wm-h-toggle" style="display:flex;align-items:center;cursor:pointer;"><span style="font-size:15px;font-weight:800;color:#0F172A;">📈 <span id="wm-name">삼성전자</span> <span class="ds-date"></span> 장중</span><span style="font-size:11px;font-weight:700;color:#E03131;background:#FEF2F2;border-radius:999px;padding:2px 8px;margin-left:8px;">● 실측 1분봉</span><span class="wm-toggle" id="wm-toggle" aria-label="펼치기·접기" title="펼치기·접기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div><div id="wm-body"><div class="lw-row"><div class="lw-l"><svg id="wm-svg" viewBox="0 0 640 180" role="img" aria-label="장중 1분봉 곡선" style="width:100%;height:auto;display:block;overflow:visible;"></svg></div><div class="lw-r"><div class="lw-h">📊 장중 지표<span class="lw-note">당일</span></div><div id="wm-vol" style="display:none"></div><div id="wm-range" style="display:none"></div><div class="lw-moved">평균체결가(VWAP)·외국인 보유율은 <a id="lw-detail-link" href="#">종목 상세</a>에서 볼 수 있어요.</div></div></div></div></div><div class="lw-row"><div class="lw-l"><div class="lw-h">📰 관련 뉴스<span class="lw-note" id="lw-upd">최신순</span></div><div class="lw-news" id="lw-news"></div></div><div class="lw-r"><div class="lw-h">🎯 증권사 목표주가<span class="lw-note" id="lw-tp-cnt"></span></div><div class="lw-tp-hero"><span class="lbl">컨센서스</span><span class="val" id="lw-tp-val">—</span><span class="lw-tp-up" id="lw-tp-up"></span></div><div class="lw-tp-meta" id="lw-tp-meta"></div><div class="lw-gauge"><div class="cur" id="lw-tp-cur" style="width:0%"></div></div><div id="lw-brk"></div><div class="lw-tr" id="lw-tr" style="display:none"><div class="lw-tr-h"><span id="lw-tr-label">컨센서스 추이</span><span class="d" id="lw-tr-d"></span></div><svg id="lw-tr-svg" viewBox="0 0 240 60"></svg></div></div></div><div class="lw-ib" id="lw-ib" style="display:none"><div class="lw-ib-h"><span class="bar"></span><span class="t">🏦 외국계 시각</span></div><div class="lw-ib-note">개별 종목이 아닌 <b>코스피 지수 전반</b>에 대한 외국계 IB 코멘트예요.</div><div id="lw-ib-list"></div></div><span data-code="005930" data-name="삼성전자" style="display:none"></span><span data-code="000660" data-name="SK하이닉스" style="display:none"></span><span data-code="005380" data-name="현대차" style="display:none"></span></div></div><script>
+#why-moved.lw-nocurve > #wm-curve-block + .lw-row{margin-top:0;padding-top:0;border-top:none}#why-moved .lw-l{flex:1.55 1 330px;min-width:0}#why-moved .lw-r{flex:1 1 240px;min-width:0;border-left:1px solid #F1F5F9;padding-left:18px}@media(max-width:700px){#why-moved .lw-r{flex:0 0 100%;border-left:none;padding-left:0;border-top:1px solid #F1F5F9;padding-top:14px}}#why-moved .lw-h{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:10px;color:#0F172A}#why-moved .lw-note{margin-left:auto;font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-moved{font-size:10.5px;color:#94A3B8;margin-top:9px;line-height:1.5}#why-moved .lw-moved a{color:#2775ED;font-weight:700;text-decoration:none}#why-moved .lw-tp-hero{display:flex;align-items:baseline;gap:7px}#why-moved .lw-tp-hero .lbl{font-size:11px;font-weight:700;color:#94A3B8}#why-moved .lw-tp-hero .val{font-size:16px;font-weight:800;color:#334155;font-variant-numeric:tabular-nums}#why-moved .lw-tp-up{font-size:11.5px;font-weight:800;color:#E03131}#why-moved .lw-tp-meta{font-size:10.5px;color:#94A3B8;margin-top:3px}#why-moved .lw-gauge{position:relative;height:5px;border-radius:4px;background:#F1F5F9;margin:10px 0 12px;overflow:hidden}#why-moved .lw-gauge .cur{position:absolute;left:0;top:0;height:100%;border-radius:4px;background:#94A3B8}#why-moved .lw-brk{display:flex;align-items:center;gap:8px;padding:6.5px 0;border-top:1px solid #F1F5F9}#why-moved .lw-brk:first-of-type{border-top:none}#why-moved .lw-brk .f{font-size:12px;font-weight:700;min-width:62px;color:#334155}#why-moved .lw-brk .o{font-size:9.5px;font-weight:800;color:#16A34A;background:#ECFDF3;border-radius:5px;padding:1px 6px}#why-moved .lw-brk .o.neu{color:#94A3B8;background:#F1F5F9}#why-moved .lw-brk .t{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}#why-moved .lw-brk .d{font-size:10px;color:#94A3B8;min-width:34px;text-align:right}#why-moved .lw-tr{background:#F7F9FC;border:1px solid #E5E7EB;border-radius:11px;padding:10px 12px 8px;margin-top:13px}#why-moved .lw-tr-h{display:flex;align-items:baseline;font-size:10.5px;font-weight:800;color:#334155}#why-moved .lw-tr-h .d{margin-left:auto;font-size:11px;font-weight:800}#why-moved .lw-tr svg{width:100%;height:auto;display:block;margin-top:5px}#why-moved .lw-news a{display:flex;gap:11px;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid #F1F5F9}#why-moved .lw-news a:first-child{border-top:none}#why-moved .lw-news .nt{font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-news .nh{font-size:14px;font-weight:800;line-height:1.45;margin:3px 0 4px;color:#0F172A}#why-moved .lw-news a:hover .nh{color:#2775ED}#why-moved .lw-news .ns{font-size:13px;color:#334155;line-height:1.55;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}#why-moved .lw-news .nsrc{font-size:11.5px;color:#94A3B8}#why-moved .lw-news .nimg{flex:0 0 74px;width:74px;height:56px;border-radius:8px;object-fit:cover;background:#F1F5F9;border:1px solid #E5E7EB;margin-top:14px}#why-moved .lw-ib{margin-top:16px;padding-top:15px;border-top:2px solid #F1F5F9}#why-moved .lw-ib-h{display:flex;align-items:center;gap:7px;margin-bottom:4px}#why-moved .lw-ib-h .bar{width:3px;height:14px;border-radius:2px;background:#2775ED}#why-moved .lw-ib-h .t{font-size:14px;font-weight:800;color:#0F172A}#why-moved .lw-ib-h .n{margin-left:auto;font-size:11.5px;font-weight:700;color:#94A3B8}#why-moved .lw-ib-note{font-size:11.5px;color:#94A3B8;margin-bottom:9px;line-height:1.5}#why-moved .lw-ib-row{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-top:1px solid #F1F5F9}#why-moved .lw-ib-row .lg{flex:0 0 40px;height:40px;border-radius:9px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#334155}#why-moved .lw-ib-row .bd{flex:1 1 auto;min-width:0}#why-moved .lw-ib-row .nm{font-size:13.5px;font-weight:800;color:#0F172A}#why-moved .lw-ib-row .tg{font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 7px;margin-left:6px}#why-moved .lw-ib-row .tg.bull{color:#E03131;background:#FEF2F2}#why-moved .lw-ib-row .tg.bear{color:#2775ED;background:#EFF4FE}#why-moved .lw-ib-row .tg.neu{color:#94A3B8;background:#F1F5F9}#why-moved .lw-ib-row .tx{font-size:13px;color:#334155;line-height:1.6;margin:4px 0 0}#why-moved .lw-ib-row .tm{flex:0 0 auto;font-size:11.5px;color:#94A3B8;text-align:right;line-height:1.5}#why-moved .lw-ib-row .tm .src{display:block;font-size:10.5px;color:#CBD5E1;font-weight:600}#why-moved .lw-ib-row .hd{display:flex;align-items:center}#why-moved .lw-ib-row .go{font-size:15px;font-weight:700;color:#2775ED;margin-left:5px;opacity:0;transform:translateX(-3px);transition:opacity .14s,transform .14s}#why-moved a.lw-ib-row--link{text-decoration:none;color:inherit;border-radius:9px;margin:0 -8px;padding-left:8px;padding-right:8px;transition:background .14s}#why-moved a.lw-ib-row--link:hover{background:#F8FAFF}#why-moved a.lw-ib-row--link:hover .nm{color:#2775ED}#why-moved a.lw-ib-row--link:hover .go{opacity:1;transform:none}</style><div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span id="usw-title" style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><span class="help-q" data-tip-title="코스피 주도주" data-tip="코스피 시총 상위 종목의 흐름을 보여줘요.<br><br><b>장중(09:00~15:30)</b>엔 한국거래소 <b>코스피 실시간 체결가</b>로,<br><b>장 마감 이후</b>엔 하이퍼리퀴드 <b>24h 무기한선물 환산가</b>로 제공해요.<br><br>환산가는 참고용이며 실제 체결가가 아니에요.">?</span><span class="usw-sub" style="margin-left:auto;font-size:11px;color:#94A3B8;">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div><div class="usw-tiles"><div class="us-tile on" data-code="005930" onclick="usSel('005930')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">삼성전자</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">354,000</div><div style="font-size:12px;font-weight:700;color:#2775ED;margin-top:3px;">▼ 8,300 (2.34%)</div><a class="tile-go" href="/stocks/005930/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="000660" onclick="usSel('000660')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">SK하이닉스</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">248,500</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 8,500 (3.42%)</div><a class="tile-go" href="/stocks/000660/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="005380" onclick="usSel('005380')"><div style="font-size:10px;font-weight:700;color:#94A3B8;margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:9px;font-weight:700;color:#16A34A;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">현대차</div><div style="font-size:21px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">245,000</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 2,000 (0.82%)</div><a class="tile-go" href="/stocks/005380/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div id="why-moved"><div id="wm-curve-block"><div class="wm-h" id="wm-h-toggle" style="display:flex;align-items:center;cursor:pointer;"><span style="font-size:15px;font-weight:800;color:#0F172A;">📈 <span id="wm-name">삼성전자</span> <span class="ds-date"></span> 장중</span><span style="font-size:11px;font-weight:700;color:#E03131;background:#FEF2F2;border-radius:999px;padding:2px 8px;margin-left:8px;">● 실측 1분봉</span><span class="wm-toggle" id="wm-toggle" aria-label="펼치기·접기" title="펼치기·접기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div><div id="wm-body"><div class="lw-row"><div class="lw-l"><svg id="wm-svg" viewBox="0 0 640 180" role="img" aria-label="장중 1분봉 곡선" style="width:100%;height:auto;display:block;overflow:visible;"></svg></div><div class="lw-r"><div class="lw-h">📊 장중 지표<span class="lw-note">당일</span></div><div id="wm-vol" style="display:none"></div><div id="wm-range" style="display:none"></div><div class="lw-moved">평균체결가(VWAP)·외국인 보유율은 <a id="lw-detail-link" href="#">종목 상세</a>에서 볼 수 있어요.</div></div></div></div></div><div class="lw-row"><div class="lw-l"><div class="lw-h">📰 관련 뉴스<span class="lw-note" id="lw-upd">최신순</span></div><div class="lw-news" id="lw-news"></div></div><div class="lw-r"><div class="lw-h">🎯 증권사 목표주가<span class="lw-note" id="lw-tp-cnt"></span></div><div class="lw-tp-hero"><span class="lbl">컨센서스</span><span class="val" id="lw-tp-val">—</span><span class="lw-tp-up" id="lw-tp-up"></span></div><div class="lw-tp-meta" id="lw-tp-meta"></div><div class="lw-gauge"><div class="cur" id="lw-tp-cur" style="width:0%"></div></div><div id="lw-brk"></div><div class="lw-tr" id="lw-tr" style="display:none"><div class="lw-tr-h"><span id="lw-tr-label">컨센서스 추이</span><span class="d" id="lw-tr-d"></span></div><svg id="lw-tr-svg" viewBox="0 0 240 60"></svg></div></div></div><div class="lw-ib" id="lw-ib" style="display:none"><div class="lw-ib-h"><span class="bar"></span><span class="t">🏦 외국계 시각</span></div><div class="lw-ib-note">개별 종목이 아닌 <b>코스피 지수 전반</b>에 대한 외국계 IB 코멘트예요.</div><div id="lw-ib-list"></div></div><span data-code="005930" data-name="삼성전자" style="display:none"></span><span data-code="000660" data-name="SK하이닉스" style="display:none"></span><span data-code="005380" data-name="현대차" style="display:none"></span></div></div><script>
 function usSel(code){
   document.querySelectorAll('#us-linked-widget .us-tile').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-code')===code);});
   if(window.whyMovedRender) window.whyMovedRender(code);
   window.__lwCode = code;
   if(window.lwRenderAll) window.lwRenderAll(code);
 }
+/* 진입·새로고침마다 주도주 3종목 중 하나를 랜덤 선택 — 삼성전자에만 노출이 쏠리는 것을 막는다.
+   curCode·__lwCode 초기값으로도 쓰이므로 위젯 렌더러들보다 먼저 정해둔다. */
+window.__lwCode = ['005930','000660','005380'][Math.floor(Math.random()*3)];
+usSel(window.__lwCode);   // 타일 선택 표시를 즉시 맞춰 깜빡임을 없앤다(렌더러는 아직 없어 no-op).
+window.addEventListener('load', function(){ usSel(window.__lwCode); });
 /* 주도주 위젯 — 목표주가·관련뉴스·외국계 시각 렌더러.
    제목·요약·출처는 외부 RSS에서 온 값이라 innerHTML에 넣기 전 반드시 이스케이프한다. */
 (function(){
@@ -965,12 +1001,18 @@ function usSel(code){
       var href=safeUrl(v.url);
       // time_label(생성 당시 박제값)은 시간이 지나면 거짓이 되므로 쓰지 않고 published_at으로 현재 기준 재계산.
       var tm=relTime(v.published_at)||esc(v.time_label);
-      return '<div class="lw-ib-row"><div class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</div>'+
-        '<div class="bd"><div><span class="nm">'+esc(v.house)+'</span>'+
-        '<span class="tg '+st+'">'+label+'</span></div>'+
-        '<div class="tx">'+esc(v.summary)+'</div>'+
-        (href?'<a class="sr" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+esc(v.source||'원문')+' →</a>':'')+
-        '</div><div class="tm">'+esc(tm)+'</div></div>';
+      // 출처를 단독 줄로 두지 않고 행 전체를 링크로 만든다 — 하우스명 옆 화살표가 hover 시 나타나
+      // 이동 가능함을 알린다. 출처명은 날짜 아래 작게 남겨 귀속(attribution)은 유지한다.
+      var body='<div class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</div>'+
+        '<div class="bd"><div class="hd"><span class="nm">'+esc(v.house)+'</span>'+
+        '<span class="tg '+st+'">'+label+'</span>'+
+        (href?'<span class="go" aria-hidden="true">›</span>':'')+'</div>'+
+        '<div class="tx">'+esc(v.summary)+'</div></div>'+
+        '<div class="tm">'+esc(tm)+
+        (v.source?'<span class="src">'+esc(v.source)+'</span>':'')+'</div>';
+      return href
+        ? '<a class="lw-ib-row lw-ib-row--link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+body+'</a>'
+        : '<div class="lw-ib-row">'+body+'</div>';
     }).join('');
   }
 
@@ -992,7 +1034,7 @@ function usSel(code){
   var buf={};
   var buft={};   // buf와 병렬: 각 포인트의 실제 시각 'HH:MM' (장중 부분 데이터를 시간축에 정확히 배치)
   var bufv={};   // buf와 병렬: 각 포인트의 누적 거래량 (VWAP 계산용, backfill 시점 스냅샷)
-  var curCode='005930';
+  var curCode=window.__lwCode||'005930';
   var whyData={};
   var snapW={};
   function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
@@ -1430,7 +1472,10 @@ function usSel(code){
   var TICKERS=[
     {nm:'메모리·HBM', tk:'DRAM',  sym:'DRAM.K', lead:true},
     {nm:'한국ETF',    tk:'EWY',   sym:'EWY.O', noLink:true},
-    {nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O', noLink:true},
+    // SKHY(OTC ADR)는 미국 상세 페이지를 만들지 않는다 — yfinance에 6영업일치밖에 없어
+    // MA20·MA200이 안 나오고, fetch_us_financials가 SK하이닉스 원화 실적을 돌려줘 USD로 찍힌다.
+    // 실측이 온전한 한국 상세 페이지로 보낸다(운영규칙 0).
+    {nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O', href:'/stocks/000660/'},
     {nm:'브로드컴',   tk:'AVGO',  sym:'AVGO.O'},
     {nm:'엔비디아',   tk:'NVDA',  sym:'NVDA.O'},
     {nm:'AMD',       tk:'AMD',   sym:'AMD.O'},
@@ -1470,7 +1515,8 @@ function usSel(code){
       var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
         +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
       if(t.noLink) return '<div class="ue-row">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none" style="visibility:hidden"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
-      return '<a class="ue-row ue-row--link" href="/stocks/us/'+t.tk.toLowerCase()+'/">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+      // href가 지정된 항목은 그쪽으로(예: SK하이닉스 → 한국 상세), 없으면 미국 상세 규칙 경로
+      return '<a class="ue-row ue-row--link" href="'+(t.href||('/stocks/us/'+t.tk.toLowerCase()+'/'))+'">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
     }).join('');
   }
   function renderMacro(){
@@ -1662,19 +1708,6 @@ function usSel(code){
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:74%"></span></div>
       </div>
-    </div>
-    <!-- 📊 ETF로 읽는 시황 (특이 신호 아래로 이동) -->
-    <div class="block">
-      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF로 읽는 시황</span><span class="block__s"><span class="upd-badge" id="etf-upd-badge"></span></span></div>
-      <div class="etf-head" id="etf-lead"><span class="skl skl-line" style="width:58%;margin-bottom:8px"></span><span class="skl skl-line" style="width:92%;height:11px"></span></div>
-      <div class="gauge-wrap" id="etf-betting"><span class="skl skl-line" style="width:42%;height:11px;margin-bottom:9px"></span><span class="skl" style="display:block;height:32px;border-radius:8px"></span><span class="skl skl-line" style="width:70%;height:11px;margin-top:11px"></span></div>
-      <div class="etf-top5-cap">거래량 톱5 ETF · 실측</div>
-      <div id="etf-top-rows">
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:52px"></span></div>
-        <div class="row" style="justify-content:space-between"><span class="skl skl-line" style="width:50%"></span><span class="skl skl-line" style="width:52px"></span></div>
-      </div>
-      <a class="more" onclick="go('etf-rank')">ETF 전체 랭킹 →</a>
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
@@ -2936,52 +2969,144 @@ if(passBtn){
     return null;
   }
 
+  /* 슬롯별 이슈 피드 제목·갱신 주기 표기.
+     실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
+     신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
+     history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
+     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다. */
+  function inMarket(mm){ return mm >= 540 && mm < 930; }    // MARKET     09:00~15:30
+  function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
+  var FEED = {
+    kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다
+    issue: { title:'장중 이슈',      cadence:'30분 갱신',    inSlot:inMarket },
+    close: { title:'오늘 장중 이슈', cadence:'장 마감 기준', inSlot:inMarket },
+    us:    { title:'직전 이슈',      cadence:'1시간 갱신',   inSlot:inUsMarket }
+  };
+
+  var feedEl = document.getElementById('bc-feed');
+  var subEl  = document.getElementById('bc-sub');
+
+  function hideFeed(){ if(feedEl){ feedEl.classList.add('is-hidden'); feedEl.classList.remove('bc-feed--lead','bc-feed--solo'); feedEl.textContent=''; } }
+  function hideSub(){ if(subEl) subEl.classList.add('is-hidden'); }
+
   // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
-  function paintDefault(){
-    var slot = slotNow(), today = kstDate();
+  function paintDefault(slot, today){
     if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
-    if (slot === 'issue'){
-      paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true, time:'실시간',
-              head:'오늘 장중 이슈 보기', url:'/briefings/' + today + '/kospi/' });
-    } else {
-      var m = TYPE[slot];
-      paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
-              url:'/briefings/' + today + '/' + slot + '/' });
-    }
+    if (slot === 'issue'){ el.classList.add('is-hidden'); return; } // 장중엔 카드 대신 이슈 피드가 主
+    var m = TYPE[slot];
+    paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
+            url:'/briefings/' + today + '/' + slot + '/' });
   }
 
+  /* 브리핑 카드(主) — 장중 외 슬롯에서만 그린다. 반환값은 카드가 가리키는 URL. */
+  async function renderCard(slot, today){
+    paintDefault(slot, today);
+    if (!slot || slot === 'issue') return null;
+
+    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    if (!list) return el.dataset.href;   // fetch 실패(PC 차단) → 타임테이블 기본 유지
+
+    var s = list.slots && list.slots[today] && list.slots[today][slot];
+    if (s && s.state === 'ready'){ paint(fromSlot(today, slot, s)); return el.dataset.href; }
+    var pick = pickLatest(list);
+    if (pick) paint(fromSlot(pick.date, pick.type, pick.s));
+    return el.dataset.href;
+  }
+
+  /* 장중(09:00~16:30) 부(副) 줄 — 오늘 코스피 예측 브리핑. ready가 아니면 줄을 숨긴다(폴백 없음). */
+  async function renderSub(today){
+    if (!subEl) return false;
+    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
+    var s = list && list.slots && list.slots[today] && list.slots[today].kospi;
+    if (!s || s.state !== 'ready'){ hideSub(); return false; }
+    // pill_text는 화살표만("▼"), 방향 문구는 title("하락 우위")에 있다 — 둘을 합쳐야 뜻이 통한다.
+    var dir = ((s.pill_text || '') + ' ' + (s.title && s.title !== '—' ? s.title : '')).trim();
+    var head = s.headline || '';
+    subEl.href = s.url || ('/briefings/' + today + '/kospi/');
+    document.getElementById('bc-sub-tx').textContent =
+      (dir && head) ? (dir + ' — ' + head) : (dir || head || '오늘 예측 브리핑 보기');
+    subEl.classList.remove('is-hidden');
+    return true;
+  }
+
+  /* 이슈 헤드라인 피드 — 브리핑 페이지와 같은 데이터(kospi-news-{date}.json)를 종목 메인에도 노출한다.
+     각 행은 자체 URL을 만들지 않고 그 시간대 브리핑 URL로 보낸다(아직 발행 안 된 날짜로 나가는 것 방지).
+     오늘 날짜 데이터가 아니면 표시하지 않는다. lead=true면 카드 자리를 대신하는 主 모드. */
+  async function renderFeed(slot, today, href, lead){
+    if (!feedEl) return false;
+    var cfg = FEED[slot];
+    if (!cfg) { hideFeed(); return false; }
+
+    // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않아 정적 /data는 stale일 수 있음
+    var nj = await safeJSON('/api/data?f=news-live')
+          || await safeJSON('/data/kospi-news-' + today + '.json')
+          || await safeJSON('/data/kospi-news-live.json');
+    if (!nj || nj.date !== today){ hideFeed(); return false; }   // 어제 데이터를 오늘인 척 보여주지 않는다
+
+    var rows = [], seen = {};
+    (nj.history || []).forEach(function(h){
+      if (rows.length >= 3) return;
+      var p = (h.time || '').split(':');
+      if (p.length < 2) return;
+      if (!cfg.inSlot(parseInt(p[0],10) * 60 + parseInt(p[1],10))) return;   // 다른 슬롯 이슈 배제
+      var t = (h.market && h.market.title) || (h.stock && h.stock.title);
+      if (!t || seen[t]) return;
+      seen[t] = 1; rows.push({ time: h.time || '', title: t });
+    });
+    if (!rows.length){ hideFeed(); return false; }
+
+    feedEl.textContent = '';
+    var head = document.createElement('div');
+    head.className = 'bc-feed-h';
+    if (lead){ var dot = document.createElement('span'); dot.className = 'live-dot'; head.appendChild(dot); }
+    head.appendChild(document.createTextNode(cfg.title));
+    var n = document.createElement('span');
+    n.className = 'n'; n.textContent = cfg.cadence;
+    head.appendChild(n);
+    feedEl.appendChild(head);
+    rows.forEach(function(r){
+      var a = document.createElement('a');
+      a.className = 'bc-fi'; a.href = href || '/briefings/';
+      var tm = document.createElement('span'); tm.className = 't'; tm.textContent = r.time;
+      var hd = document.createElement('span'); hd.className = 'h'; hd.textContent = r.title;
+      a.appendChild(tm); a.appendChild(hd);
+      feedEl.appendChild(a);
+    });
+    feedEl.classList.toggle('bc-feed--lead', !!lead);
+    if (!lead) feedEl.classList.remove('bc-feed--solo');
+    feedEl.classList.remove('is-hidden');
+    return true;
+  }
+
+  /* 시간대별 구성 (KST, 평일) — docs/prototypes/2026-07-19-brief-strip-supply.html 참조
+       07:30~09:00  코스피 예측 카드 (이슈 없음)
+       09:00~16:30  장중 이슈 3건이 主 · 예측 브리핑이 副 한 줄     ← 이 슬롯만 위아래가 뒤집힌다
+       16:30~21:20  마감 카드 主 · 장 마감까지의 이슈 3건이 副
+       21:20~23:50  미국 예측 카드 主 · 미국장 이슈 3건이 副
+       그 외(심야·주말·휴일)  전체 숨김 (과거 날짜 폴백 없음) */
   async function render(){
-    // ① 타임테이블 기준 즉시 표시 (fetch 실패해도 슬롯 유지)
-    paintDefault();
+    var today = kstDate(), slot = slotNow();
 
-    var today = kstDate(), nm = nowMin(), slot = slotNow();
-    if (!slot) return; // 활성 슬롯 밖 → paintDefault에서 이미 숨김. 폴백(가장 최근 브리핑) 없이 영역 종료.
+    if (!slot){ el.classList.add('is-hidden'); hideFeed(); hideSub(); return; }
 
-    // ② 장중(평일 09:00~16:30) — 실시간 이슈 헤드라인으로 업그레이드
     if (slot === 'issue'){
-      // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않으므로 정적 /data는 stale일 수 있음
-      var nj = await safeJSON('/api/data?f=news-live')
-            || await safeJSON('/data/kospi-news-' + today + '.json')
-            || await safeJSON('/data/kospi-news-live.json');
-      var lt = nj && nj.latest;
-      var title = lt && ((lt.market && lt.market.title) || (lt.stock && lt.stock.title));
-      if (title){
-        paint({ cls:'bc-live', icon:'📰', type:'장중 이슈 브리핑', live:true,
-                time:'실시간', head:title, url:'/briefings/' + (nj.date || today) + '/kospi/' });
+      el.classList.add('is-hidden');   // 장중엔 카드 대신 이슈 피드가 主
+      var kospiUrl = '/briefings/' + today + '/kospi/';
+      var hasFeed = await renderFeed('issue', today, kospiUrl, true);
+      var hasSub  = await renderSub(today);
+      if (!hasFeed){
+        // 이슈 미수집(09:00~첫 수집 전) → 예측 카드로 폴백해 영역이 비지 않게 한다
+        hideSub(); hideFeed();
+        await renderCard('kospi', today);
         return;
       }
+      feedEl.classList.toggle('bc-feed--solo', !hasSub);
+      return;
     }
 
-    // ③ briefings-list.json으로 실제 헤드라인·발행시각 업그레이드 (활성 슬롯 안에서만)
-    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    if (!list) return; // fetch 실패(PC 차단) → ①의 타임테이블 기본 유지
-
-    // 활성 슬롯의 오늘 브리핑이 ready면 그것을, 아직이면 가장 최근 발행 브리핑(활성 슬롯 안에서만)
-    var activeType = (slot === 'issue') ? 'kospi' : slot;
-    var s = list.slots && list.slots[today] && list.slots[today][activeType];
-    if (s && s.state === 'ready'){ var o = fromSlot(today, activeType, s); paint(o); return; }
-    var pick = pickLatest(list);
-    if (pick){ var op = fromSlot(pick.date, pick.type, pick.s); paint(op); }
+    hideSub();
+    var href = await renderCard(slot, today);
+    await renderFeed(slot, today, href, false);
   }
   render();
   setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
@@ -3367,34 +3492,10 @@ if(passBtn){
         +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
     }).join('');
   }
-  function applyEtf(etf, phase, asOf){
-    setBadge('etf-upd-badge', phase);
-    if(!etf) return;
-    var lead=document.getElementById('etf-lead');
-    if(lead&&etf.lead){
-      lead.innerHTML='<div class="etf-head-t">'+etf.lead.title+'</div><div class="etf-head-b">'+etf.lead.body+'</div>';
-      lead.classList.remove('etf-updated'); void lead.offsetWidth; lead.classList.add('etf-updated');
-      setTimeout(function(){lead.classList.remove('etf-updated');}, 600);
-    }
-    var b=etf.betting, bw=document.getElementById('etf-betting');
-    if(bw&&b){
-      // 방향 베팅(거래대금 비중)이 중립권(40~60%)이면 '엇갈림', 아니면 우위 방향을 명시 — 헤드라인 톤과 일치
-      var betNote = (b.downRatio>=40&&b.downRatio<=60)
-        ? '거래<b>대금</b>과 거래<b>량</b> 신호가 엇갈려 한쪽으로 단정하긴 일러요.'
-        : (b.downRatio>60 ? '거래대금은 <b>하락 베팅</b>이 우위예요.' : '거래대금은 <b>저점매수</b> 심리가 우위예요.');
-      bw.innerHTML='<div class="bet-label">레버리지·인버스 ETF 거래대금</div>'
-        +'<div class="bet-split"><div class="bet-dn" style="width:'+b.downRatio+'%">하락 베팅 '+b.downRatio+'%</div><div class="bet-up" style="width:'+b.upRatio+'%">저점매수 '+b.upRatio+'%</div></div>'
-        +'<div class="bet-fact"><div class="bet-fact-row"><span>인버스 거래량</span><b>KODEX 200의 '+b.invVolMultiple+'배</b></div>'
-        +'<div class="bet-fact-row"><span>레버리지 등락률</span><b style="color:var(--dn)">'+(b.levPct!=null?b.levPct.toFixed(2)+'%':'—')+'</b></div></div>'
-        +'<div class="gauge-note">'+betNote+'</div>';
-      bw.classList.remove('etf-updated'); void bw.offsetWidth; bw.classList.add('etf-updated');
-      setTimeout(function(){bw.classList.remove('etf-updated');}, 600);
-    }
-  }
-  function clearSkel(){ ['sig-rows','etf-lead','etf-betting','etf-top-rows'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
+  function clearSkel(){ ['sig-rows'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
   function loadSignals(){
     fetch('/api/signals',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
-      .then(function(d){ if(d&&!d.error){ applySignals(d); applyEtf(d.etf, d.phase, d.asOf); } else { clearSkel(); } })
+      .then(function(d){ if(d&&!d.error){ applySignals(d); } else { clearSkel(); } })
       .catch(function(){ clearSkel(); });
   }
   function pollVolTop(){
@@ -3906,6 +4007,19 @@ if(passBtn){
         var p=d.forex.price,pct=d.forex.changePct||0;
         if(el2) el2.textContent=Math.round(p).toLocaleString('ko-KR');
         if(ec2){ec2.textContent=pct!==0?fmtPct(pct):'';ec2.className='vc '+dirClass(pct)+' num';}
+      }
+      // 수급 — 하나라도 실측이 들어와야 행을 연다. 수집 실패 시 행은 숨긴 채로 둔다(운영규칙 0).
+      if(d.investor){
+        var sup=document.getElementById('h-supply'), any=false;
+        var map={'h-indv':d.investor.individual,'h-inst':d.investor.institution,'h-frgn':d.investor.foreign};
+        Object.keys(map).forEach(function(id){
+          var v=map[id], e=document.getElementById(id);
+          if(!e||v==null) return;
+          any=true;
+          e.textContent=(v>=0?'+':'−')+Math.abs(Math.round(v)).toLocaleString('ko-KR');
+          e.className='num '+(v>=0?'up':'dn');
+        });
+        if(any&&sup) sup.hidden=false;
       }
     }).catch(function(){});
 })();
