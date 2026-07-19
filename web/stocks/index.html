@@ -71,6 +71,55 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .supply .s b{font-size:13px;font-weight:800;}
 .supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
 .supply .unit .live{color:#16A34A;font-weight:700;}
+.supply.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
+.sup-more{flex-shrink:0;margin-left:12px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
+.sup-more[hidden]{display:none;}
+.sup-more:hover{background:#E0EBFD;}
+.sup-more .cv{font-size:9px;transition:transform .18s;}
+.supply.is-open .sup-more .cv{transform:rotate(180deg);}
+/* 10일 추이 패널 */
+.sup-panel{background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 10px 10px;box-shadow:var(--s1);padding:2px 14px 12px;margin-bottom:10px;}
+.sup-panel[hidden]{display:none;}
+.sp-head{display:flex;align-items:center;flex-wrap:wrap;gap:7px 11px;padding:11px 0 9px;border-bottom:1px solid #EEF2F6;}
+.sp-t{font-size:12.5px;font-weight:800;}
+.sp-sub{font-size:10.5px;color:var(--muted);}
+.sp-legend{display:inline-flex;align-items:center;gap:10px;margin-left:auto;}
+.sp-legend .lg{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#475569;}
+.sp-legend .sw{width:9px;height:9px;border-radius:2px;flex:none;}
+.sp-tbl{font-size:11px;font-weight:700;color:#475569;background:#F1F5F9;border:1px solid var(--hair);border-radius:6px;padding:4px 9px;cursor:pointer;}
+.sp-tbl:hover{background:#E8EDF3;}
+.sp-tbl[aria-pressed="true"]{background:var(--primary-bg);border-color:#DBEAFE;color:var(--primary);}
+.sp-row{display:flex;align-items:center;gap:12px;padding:8px 0;}
+.sp-row + .sp-row{border-top:1px solid #EEF2F6;}
+.sp-row .who{flex:0 0 46px;font-size:12px;font-weight:800;}
+.sp-row .plot{flex:1 1 auto;min-width:0;}
+.sp-row .plot svg{display:block;width:100%;height:60px;overflow:visible;}
+.sp-row .sum{flex:0 0 86px;text-align:right;}
+.sp-row .sum .k{display:block;font-size:9.5px;color:var(--muted);font-weight:600;}
+.sp-row .sum .v{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+.sp-axis{display:flex;gap:12px;padding-top:2px;}
+.sp-axis .who{flex:0 0 46px;}.sp-axis .plot{flex:1 1 auto;min-width:0;}.sp-axis .sum{flex:0 0 86px;}
+.xax{position:relative;height:14px;}
+.xax span{position:absolute;top:0;font-size:9.5px;color:var(--muted);white-space:nowrap;}
+.sp-foot{font-size:10.5px;color:var(--muted);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid #EEF2F6;}
+.sp-foot b{color:#475569;}
+.sp-tblwrap{overflow-x:auto;margin-top:8px;}
+.sp-tblwrap table{width:100%;border-collapse:collapse;font-size:12px;}
+.sp-tblwrap th,.sp-tblwrap td{padding:6px 9px;border-bottom:1px solid #EEF2F6;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;}
+.sp-tblwrap th:first-child,.sp-tblwrap td:first-child{text-align:left;font-variant-numeric:normal;}
+.sp-tblwrap th{font-size:10.5px;font-weight:800;color:var(--muted);background:#FAFBFC;}
+.sp-tblwrap tr:last-child td{border-bottom:none;}
+.sp-tblwrap td.na{color:#CBD5E1;}
+@media(max-width:640px){
+  /* 가로 3분할하면 11개 막대에 200px도 안 남는다 — 이름·합계를 한 줄로 올리고 차트가 폭을 다 쓴다 */
+  .sp-row{flex-wrap:wrap;gap:0 8px;}
+  .sp-row .who{flex:0 0 auto;font-size:11.5px;}
+  .sp-row .sum{flex:1 1 auto;text-align:right;}
+  .sp-row .sum .k{display:inline;margin-right:5px;}
+  .sp-row .plot{flex:0 0 100%;order:3;margin-top:2px;}
+  .sp-axis .who,.sp-axis .sum{display:none;}
+  .sp-axis .plot{flex:0 0 100%;}
+}
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
 .brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
@@ -806,6 +855,27 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
       <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
       <span class="unit">억원 · 코스피 누적 순매수</span>
+      <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv">▼</span></button>
+    </div>
+    <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
+    <div class="sup-panel" id="sup-panel" hidden>
+      <div class="sp-head">
+        <span class="sp-t" id="sup-title">최근 순매수</span>
+        <span class="sp-sub">억원 · 세 축 공통 스케일</span>
+        <span class="sp-legend">
+          <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
+          <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
+        </span>
+        <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
+      </div>
+      <div id="sup-chart">
+        <div id="sup-rows"></div>
+        <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
+      </div>
+      <div id="sup-table" hidden class="sp-tblwrap">
+        <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
+      </div>
+      <div class="sp-foot" id="sup-foot"></div>
     </div>
     <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
     <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
@@ -853,6 +923,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
       window.krIsKospiHoliday=function(){
         var d=new Date(Date.now()+9*3600*1000), wd=d.getUTCDay();
         return wd===0||wd===6||H.has(d.toISOString().slice(0,10));
+      };
+      // 임의 날짜(YYYY-MM-DD) 판별 — 수급 히스토리에서 '거래일인데 데이터가 빠진 날'을 가려낼 때 쓴다.
+      window.krIsKospiHolidayOn=function(ymd){
+        var p=String(ymd).split('-');
+        var d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2])), wd=d.getUTCDay();
+        return wd===0||wd===6||H.has(ymd);
       };
     })();
     </script>
@@ -4044,6 +4120,162 @@ if(passBtn){
   pollMarket();
   // 장중에만 폴링 — 코스닥·환율·수급을 60초 주기로 갱신(브리핑 시장 지표 패널과 동일 주기).
   if(typeof hubMarketOpen==='function'&&hubMarketOpen()) setInterval(pollMarket,60000);
+})();
+
+/* ── 수급 10거래일 추이 (수급 행 '10일 추이' 토글) ──────────────────────────────
+   데이터: /data/supply-history.json — generate_html.update_supply_history()가 매일 미러링.
+   억원 단위 실측. 값이 없으면 버튼째 숨긴다(운영규칙 0).
+   기하는 컨테이너 실제 폭(px)으로 계산한다 — 고정 viewBox 균일 스케일로 두면 좁은 화면에서
+   행 높이까지 같이 줄어 막대가 실오라기가 되고, preserveAspectRatio="none"으로 늘리면
+   둥근 막대 끝이 타원으로 찌그러진다. */
+(function(){
+  var sup=document.getElementById('h-supply'), btn=document.getElementById('sup-more'),
+      panel=document.getElementById('sup-panel');
+  if(!sup||!btn||!panel) return;
+
+  var SERIES=[['individual','개인'],['institution','기관'],['foreign','외국인']];
+  var ROWS=[], maxAbs=0, W=600, H=60, ZERO=H/2, PAD=2, n=0, slot=0, bw=30;
+
+  function fmt(v){ return (v>=0?'+':'−')+Math.abs(Math.round(v)).toLocaleString('ko-KR'); }
+  function md(d){ return d.slice(5).replace('-','/'); }
+  function kday(d){ var p=d.split('-'); return '일월화수목금토'[new Date(+p[0],+p[1]-1,+p[2]).getDay()]; }
+  function ymdAdd(ymd,k){
+    var p=ymd.split('-'), d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));
+    d.setUTCDate(d.getUTCDate()+k);
+    return d.toISOString().slice(0,10);
+  }
+
+  /* 최근 10거래일 슬롯 구성 — 데이터가 있는 날 10개를 뒤에서 세되, 그 구간 안의 거래일인데
+     데이터가 없는 날(수집 실패)은 빈 슬롯으로 남긴다. 당겨 붙이면 없던 연속성이 생긴다. */
+  function buildRows(hist){
+    var have=Object.keys(hist).sort();
+    if(have.length<2) return [];
+    var take=have.slice(-10);
+    var start=take[0], end=take[take.length-1], out=[];
+    for(var d=start; d<=end; d=ymdAdd(d,1)){
+      if(window.krIsKospiHolidayOn && window.krIsKospiHolidayOn(d)) continue;  // 주말·공휴일은 슬롯 자체가 없다
+      var r=hist[d]||null;
+      out.push({d:d, individual:r?r.individual:null, institution:r?r.institution:null, foreign:r?r.foreign:null});
+    }
+    return out;
+  }
+
+  function rowSvg(key){
+    var bars=ROWS.map(function(r,i){
+      var x=i*slot+(slot-bw)/2, v=r[key];
+      if(v==null){
+        return '<rect class="sp-hit" x="'+x+'" y="'+(ZERO-7)+'" width="'+bw+'" height="14" fill="#F1F5F9" rx="3"'
+             + ' data-d="'+r.d+'" data-v="na" tabindex="0"></rect>';
+      }
+      var h=Math.max(1.5, Math.abs(v)/maxAbs*(ZERO-PAD));
+      var y=v>=0?ZERO-h:ZERO;
+      var c=v>=0?'#E03131':'#2775ED';
+      var r4=Math.min(4,bw/2,h);
+      var path=v>=0
+        ? 'M'+x+','+(y+h)+'V'+(y+r4)+'a'+r4+','+r4+' 0 0 1 '+r4+',-'+r4+'h'+(bw-2*r4)+'a'+r4+','+r4+' 0 0 1 '+r4+','+r4+'V'+(y+h)+'Z'
+        : 'M'+x+','+y+'V'+(y+h-r4)+'a'+r4+','+r4+' 0 0 0 '+r4+','+r4+'h'+(bw-2*r4)+'a'+r4+','+r4+' 0 0 0 '+r4+',-'+r4+'V'+y+'Z';
+      return '<path d="'+path+'" fill="'+c+'"></path>'
+           + '<rect class="sp-hit" x="'+(i*slot)+'" y="0" width="'+slot+'" height="'+H+'" fill="transparent"'
+           + ' data-d="'+r.d+'" data-v="'+v+'" data-k="'+key+'" tabindex="0"></rect>';
+    }).join('');
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img">'
+         + '<line x1="0" y1="'+ZERO+'" x2="'+W+'" y2="'+ZERO+'" stroke="#E2E8F0" stroke-width="1"></line>'
+         + bars + '</svg>';
+  }
+
+  function draw(){
+    document.getElementById('sup-rows').innerHTML = SERIES.map(function(s){
+      var t=ROWS.reduce(function(a,r){ return a+(r[s[0]]||0); },0);
+      return '<div class="sp-row"><span class="who">'+s[1]+'</span>'
+           + '<span class="plot">'+rowSvg(s[0])+'</span>'
+           + '<span class="sum"><span class="k">10일 합</span><span class="v '+(t>=0?'up':'dn')+'">'+fmt(t)+'</span></span></div>';
+    }).join('');
+    document.getElementById('sup-xax').innerHTML = ROWS.map(function(r,i){
+      if(i!==0 && i!==n-1 && !(i%3===0 && i<n-2)) return '';
+      if(i===0)   return '<span style="left:0">'+md(r.d)+'</span>';
+      if(i===n-1) return '<span style="right:0;left:auto">'+md(r.d)+'</span>';
+      return '<span style="left:'+((i+0.5)/n*100)+'%;transform:translateX(-50%)">'+md(r.d)+'</span>';
+    }).join('');
+  }
+
+  function measure(){
+    var probe=panel.querySelector('.sp-axis .plot');
+    var w=probe?probe.clientWidth:0;
+    if(!w||!n) return;
+    W=w; slot=W/n; bw=Math.max(5, Math.min(34, slot*0.42));
+    draw();
+  }
+
+  function init(hist){
+    ROWS=buildRows(hist); n=ROWS.length;
+    if(n<2) return;                                   // 시계열이 안 되면 기능 자체를 노출하지 않는다
+    maxAbs=0;
+    ROWS.forEach(function(r){ SERIES.forEach(function(s){ var v=r[s[0]]; if(v!=null) maxAbs=Math.max(maxAbs,Math.abs(v)); }); });
+    if(!maxAbs) return;
+
+    document.getElementById('sup-tbody').innerHTML = ROWS.slice().reverse().map(function(r){
+      var cells=SERIES.map(function(s){
+        var v=r[s[0]];
+        return v==null?'<td class="na">수집 없음</td>':'<td class="'+(v>=0?'up':'dn')+'">'+fmt(v)+'</td>';
+      }).join('');
+      return '<tr><td>'+md(r.d)+'('+kday(r.d)+')</td>'+cells+'</tr>';
+    }).join('');
+
+    // 제목·푸터가 같은 n을 쓰게 한다 — 공백 슬롯 때문에 구간 길이가 데이터 일수보다 클 수 있다
+    document.getElementById('sup-title').textContent='최근 '+n+'거래일 순매수';
+    var missing=ROWS.filter(function(r){ return r.individual==null; }).map(function(r){ return md(r.d); });
+    document.getElementById('sup-foot').innerHTML =
+      '단위 억원 · 코스피 투자자별 순매수'
+      + (missing.length?' · <b>'+missing.join(', ')+'</b>는 수집 데이터가 없어 비워 뒀어요(0이라는 뜻이 아니에요)':'');
+
+    btn.hidden=false;
+    draw();
+  }
+
+  btn.addEventListener('click',function(){
+    var open=panel.hidden;
+    panel.hidden=!open; sup.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
+    if(open) measure();                               // 열린 뒤라야 폭이 잡힌다(hidden이면 clientWidth가 0)
+  });
+  var rt;
+  window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ if(!panel.hidden) measure(); },120); });
+
+  var tblBtn=document.getElementById('sup-tbl-btn'), cv=document.getElementById('sup-chart'), tv=document.getElementById('sup-table');
+  tblBtn.addEventListener('click',function(){
+    var toTable=tv.hidden;
+    tv.hidden=!toTable; cv.hidden=toTable;
+    tblBtn.setAttribute('aria-pressed',String(toTable));
+    tblBtn.textContent=toTable?'그래프로 보기':'표로 보기';
+    if(!toTable) measure();
+  });
+
+  /* 툴팁 — hover와 keyboard focus가 같은 내용을 낸다. 기존 전역 툴팁(showTip)은
+     data-tip 속성 기반이라 여기선 쓰지 않고 제목/값을 직접 만든다. */
+  var NAME={individual:'개인',institution:'기관',foreign:'외국인'};
+  var tipEl=null;
+  function tip(){ if(!tipEl){ tipEl=document.createElement('div');
+    tipEl.style.cssText='position:fixed;z-index:60;pointer-events:none;background:#0F172A;color:#fff;border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.55;box-shadow:0 6px 20px rgba(15,23,42,.22);opacity:0;transition:opacity .12s;white-space:nowrap;';
+    document.body.appendChild(tipEl); } return tipEl; }
+  panel.addEventListener('mouseover',onIn); panel.addEventListener('focusin',onIn);
+  panel.addEventListener('mouseout',onOut); panel.addEventListener('focusout',onOut);
+  function onIn(e){
+    var t=e.target; if(!t.classList||!t.classList.contains('sp-hit')) return;
+    var d=t.getAttribute('data-d'), v=t.getAttribute('data-v'), k=t.getAttribute('data-k'), el=tip();
+    el.innerHTML = v==='na'
+      ? '<span style="color:#94A3B8;font-size:10.5px">'+md(d)+'('+kday(d)+')</span><br>수집 데이터 없음'
+      : '<span style="color:#94A3B8;font-size:10.5px">'+md(d)+'('+kday(d)+') · '+NAME[k]+'</span><br>'
+        +'<b style="font-variant-numeric:tabular-nums;color:'+(+v>=0?'#F87171':'#93C5FD')+'">'+fmt(+v)+'</b> <span style="color:#94A3B8">억원</span>';
+    var r=t.getBoundingClientRect();
+    el.style.left=Math.max(8,Math.min(window.innerWidth-170, r.left+r.width/2-70))+'px';
+    el.style.top=Math.max(8, r.top-54)+'px';
+    el.style.opacity='1';
+  }
+  function onOut(){ if(tipEl) tipEl.style.opacity='0'; }
+
+  fetch('/data/supply-history.json',{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(h){ if(h&&Object.keys(h).length) init(h); })
+    .catch(function(){});
 })();
 </script>
 </body>

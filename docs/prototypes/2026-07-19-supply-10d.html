@@ -1,0 +1,296 @@
+<!doctype html>
+<!-- 수급 10거래일 추이 프로토타입 — 수급 행 '더보기' 확장 시 나타나는 다이버징 바 차트 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>수급 10일 추이 — 프로토타입</title>
+<style>
+:root{
+  --ink:#0F172A; --ink2:#475569; --muted:#94A3B8; --hair:#E5E7EB; --canvas:#fff; --bg:#F7F9FC;
+  --primary:#2775ED; --primary-bg:#EFF4FE;
+  --buy:#E03131;   /* 순매수 — 국내 관행상 빨강 */
+  --sell:#2775ED;  /* 순매도 — 파랑 */
+  --grid:#EEF2F6;
+  --s1:0 1px 2px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Segoe UI',sans-serif;color:var(--ink);padding:28px 20px 80px;}
+.wrap{max-width:920px;margin:0 auto;}
+h1{font-size:20px;margin:0 0 4px;}
+.lede{font-size:13px;color:var(--ink2);line-height:1.6;margin:0 0 8px;}
+.warn{display:inline-block;font-size:11.5px;font-weight:700;color:#166534;background:#ECFDF3;border:1px solid #BBF7D0;border-radius:7px;padding:5px 10px;margin-bottom:24px;}
+h2{font-size:14px;margin:30px 0 8px;color:var(--ink2);}
+
+/* ── 수급 행 (현행) ── */
+.supply{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);box-shadow:var(--s1);padding:8px 14px;overflow-x:auto;border-radius:10px;}
+.supply.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;}
+.supply .lbl{font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
+.supply .s:last-of-type{border-right:none;margin-right:0;padding-right:0;}
+.supply .s i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);}
+.supply .s b{font-size:13px;font-weight:800;}
+.supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
+.up{color:var(--buy)} .dn{color:var(--sell)}
+/* 더보기 토글 */
+.sup-more{flex-shrink:0;margin-left:12px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
+.sup-more:hover{background:#E0EBFD;}
+.sup-more .cv{transition:transform .18s;font-size:9px;}
+.supply.is-open .sup-more .cv{transform:rotate(180deg);}
+
+/* ── 확장 패널 ── */
+.sup-panel{background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 10px 10px;box-shadow:var(--s1);padding:4px 16px 14px;margin-bottom:14px;}
+.sup-panel[hidden]{display:none;}
+.sp-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:12px 0 10px;border-bottom:1px solid var(--grid);}
+.sp-t{font-size:12.5px;font-weight:800;}
+.sp-sub{font-size:11px;color:var(--muted);}
+.legend{display:inline-flex;align-items:center;gap:11px;margin-left:auto;}
+.legend .lg{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--ink2);}
+.legend .sw{width:9px;height:9px;border-radius:2px;flex:none;}
+.tbl-btn{font-size:11px;font-weight:700;color:var(--ink2);background:#F1F5F9;border:1px solid var(--hair);border-radius:6px;padding:4px 9px;cursor:pointer;}
+.tbl-btn:hover{background:#E8EDF3;}
+.tbl-btn[aria-pressed="true"]{background:var(--primary-bg);border-color:#DBEAFE;color:var(--primary);}
+
+/* 3행 스몰멀티플 */
+.row{display:flex;align-items:center;gap:12px;padding:9px 0;}
+.row + .row{border-top:1px solid var(--grid);}
+.row .who{flex:0 0 46px;font-size:12px;font-weight:800;color:var(--ink);}
+.row .plot{flex:1 1 auto;min-width:0;}
+.row .plot svg{display:block;width:100%;height:64px;overflow:visible;}
+.row .sum{flex:0 0 86px;text-align:right;}
+.row .sum .k{display:block;font-size:9.5px;color:var(--muted);font-weight:600;}
+.row .sum .v{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;}
+.axis{display:flex;gap:12px;padding-top:2px;}
+.axis .who{flex:0 0 46px;}
+.axis .plot{flex:1 1 auto;min-width:0;}
+.axis .sum{flex:0 0 86px;}
+/* x축 라벨은 HTML로 — SVG text로 두면 좁은 화면에서 뷰박스와 함께 축소돼 읽을 수 없게 된다. */
+.xax{position:relative;height:14px;}
+.xax span{position:absolute;top:0;font-size:9.5px;color:var(--muted);white-space:nowrap;}
+.foot{font-size:10.5px;color:var(--muted);line-height:1.6;margin-top:9px;padding-top:9px;border-top:1px solid var(--grid);}
+.foot b{color:var(--ink2);}
+
+/* 표 뷰 */
+.tblwrap{overflow-x:auto;margin-top:10px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th,td{padding:6px 9px;border-bottom:1px solid var(--grid);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right;}
+th:first-child,td:first-child{text-align:left;font-variant-numeric:normal;}
+th{font-size:10.5px;font-weight:800;color:var(--muted);background:#FAFBFC;}
+tr:last-child td{border-bottom:none;}
+td.na{color:#CBD5E1;font-style:normal;}
+
+/* 툴팁 */
+.tip{position:fixed;z-index:50;pointer-events:none;background:#0F172A;color:#fff;border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.55;box-shadow:0 6px 20px rgba(15,23,42,.22);opacity:0;transition:opacity .12s;white-space:nowrap;}
+.tip.on{opacity:1;}
+.tip .d{color:#94A3B8;font-size:10.5px;}
+.tip .v{font-weight:800;font-variant-numeric:tabular-nums;}
+.hit{cursor:pointer;}
+.hit:focus{outline:2px solid var(--primary);outline-offset:1px;}
+/* 좁은 화면 — 이름·합계를 한 줄로 올리고 차트가 폭을 다 쓰게 한다.
+   가로로 3분할하면 11개 막대에 200px도 안 남아 실오라기가 된다. */
+@media(max-width:640px){
+  .row{flex-wrap:wrap;gap:0 8px;}
+  .row .who{flex:0 0 auto;font-size:11.5px;}
+  .row .sum{flex:1 1 auto;text-align:right;}
+  .row .sum .k{display:inline;margin-right:5px;}
+  .row .plot{flex:0 0 100%;order:3;margin-top:2px;}
+  .axis .who,.axis .sum{display:none;}
+  .axis .plot{flex:0 0 100%;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>수급 10거래일 추이</h1>
+<p class="lede">수급 행 오른쪽 <b>10일 추이</b>를 누르면 아래 패널이 열립니다.</p>
+<div class="warn">✅ 아래 수치는 <b>실측입니다</b> — <code>data/supply_history.json</code>의 2026-07-02 ~ 07-16 실제 값을 그대로 썼습니다.</div>
+
+<h2>접힌 상태 → 클릭 → 펼친 상태</h2>
+
+<div class="supply" id="sup">
+  <span class="lbl">수급</span>
+  <span class="s"><i>개인</i><b class="up">+36,647</b></span>
+  <span class="s"><i>기관</i><b class="dn">−23,831</b></span>
+  <span class="s"><i>외국인</i><b class="dn">−13,665</b></span>
+  <span class="unit">억원 · 코스피 누적 순매수 · 7/16(목) 마감 기준</span>
+  <button class="sup-more" id="moreBtn" aria-expanded="false" aria-controls="supPanel">10일 추이 <span class="cv">▼</span></button>
+</div>
+
+<div class="sup-panel" id="supPanel" hidden>
+  <div class="sp-head">
+    <span class="sp-t">최근 10거래일 순매수</span>
+    <span class="sp-sub">억원 · 세 축 공통 스케일</span>
+    <span class="legend">
+      <span class="lg"><span class="sw" style="background:var(--buy)"></span>순매수</span>
+      <span class="lg"><span class="sw" style="background:var(--sell)"></span>순매도</span>
+    </span>
+    <button class="tbl-btn" id="tblBtn" aria-pressed="false">표로 보기</button>
+  </div>
+
+  <div id="chartView">
+    <div id="rows"></div>
+    <div class="axis"><span class="who"></span><span class="plot"><div class="xax" id="xax"></div></span><span class="sum"></span></div>
+    <div class="foot" id="foot"></div>
+  </div>
+
+  <div id="tableView" hidden class="tblwrap">
+    <table>
+      <thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="foot" id="foot2"></div>
+  </div>
+</div>
+
+<h2>설계 메모</h2>
+<p class="lede" style="font-size:12.5px">
+· <b>공통 스케일</b> — 세 투자자가 같은 y축을 씁니다. 축을 따로 쓰면 "개인이 외국인보다 많이 샀다"를 눈으로 비교할 수 없어요.<br>
+· <b>색은 방향만</b> — 빨강=순매수 / 파랑=순매도. 0선 위아래 위치가 색과 함께 방향을 이중으로 표시해서 색각 이상에서도 읽힙니다(검증 ΔE 94.1 통과).<br>
+· <b>빠진 날은 비워 둡니다</b> — 07-14는 수집이 없던 날이라 막대를 그리지 않고 자리만 남겼어요. 10칸으로 당겨 붙이면 없는 연속성이 생깁니다.<br>
+· <b>표 뷰</b>를 함께 둡니다 — 색으로만 읽히는 화면을 남기지 않기 위해서예요.
+</p>
+
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+/* 실측 — data/supply_history.json 2026-07-02 ~ 07-16.
+   07-14는 그날 파이프라인 정지(SERVICE_RULES §17)로 수집이 없다 → null 슬롯으로 남긴다. */
+var DATA = [
+  {d:'2026-07-02', individual: 62661, institution:-20822, foreign:-43710},
+  {d:'2026-07-03', individual:-22942, institution: 44451, foreign:-22123},
+  {d:'2026-07-06', individual: 26806, institution:-14675, foreign:-13088},
+  {d:'2026-07-07', individual: 31361, institution: -3108, foreign:-29175},
+  {d:'2026-07-08', individual:  -354, institution: -3479, foreign:  3361},
+  {d:'2026-07-09', individual:-13278, institution: 12879, foreign:  1348},
+  {d:'2026-07-10', individual: -7722, institution: 11314, foreign: -3226},
+  {d:'2026-07-13', individual: 38822, institution:-22194, foreign:-16850},
+  {d:'2026-07-14', individual:  null, institution:  null, foreign:  null},   // 수집 없음
+  {d:'2026-07-15', individual:-24666, institution:  1824, foreign: 23214},
+  {d:'2026-07-16', individual: 36630, institution:-23690, foreign:-13788}
+];
+var SERIES=[['individual','개인'],['institution','기관'],['foreign','외국인']];
+
+/* 기하는 실제 컨테이너 폭(px)으로 계산하고 viewBox를 1:1로 맞춘다.
+   고정 viewBox + 균일 스케일로 두면 좁은 화면에서 행 높이까지 같이 줄어 막대가 실오라기가 된다.
+   preserveAspectRatio="none"으로 늘리면 둥근 끝이 타원으로 찌그러진다. 그래서 폭 기준 재계산. */
+var H=64, ZERO=H/2, PAD=2;
+var n=DATA.length;
+var W=600, slot=W/n, bw=34;   // 첫 렌더 전 기본값 — measure()가 실제 폭으로 덮어쓴다
+var maxAbs=0;
+DATA.forEach(function(r){ SERIES.forEach(function(s){ var v=r[s[0]]; if(v!=null) maxAbs=Math.max(maxAbs,Math.abs(v)); }); });
+
+function fmt(v){ return (v>=0?'+':'−')+Math.abs(v).toLocaleString('ko-KR'); }
+function md(d){ return d.slice(5).replace('-','/'); }
+function kday(d){ var p=d.split('-'); return '일월화수목금토'[new Date(+p[0],+p[1]-1,+p[2]).getDay()]; }
+
+function rowSvg(key){
+  var bars=DATA.map(function(r,i){
+    var x=i*slot+(slot-bw)/2, v=r[key];
+    if(v==null){
+      // 수집 없는 날 — 막대 대신 옅은 자리표시. 값이 0이라는 뜻이 아님을 툴팁으로 밝힌다.
+      return '<rect class="hit" x="'+x+'" y="'+(ZERO-7)+'" width="'+bw+'" height="14" fill="#F1F5F9" rx="3"'
+           + ' data-d="'+r.d+'" data-v="na" tabindex="0"></rect>';
+    }
+    var h=Math.max(1.5, Math.abs(v)/maxAbs*(ZERO-PAD));
+    var y=v>=0?ZERO-h:ZERO;
+    var c=v>=0?'var(--buy)':'var(--sell)';
+    // 데이터 끝만 둥글게(4px), 0선 쪽은 각지게 — 베이스라인에 붙어 있음을 유지
+    var r4=Math.min(4,bw/2,h);
+    var path=v>=0
+      ? 'M'+x+','+(y+h)+'V'+(y+r4)+'a'+r4+','+r4+' 0 0 1 '+r4+',-'+r4+'h'+(bw-2*r4)+'a'+r4+','+r4+' 0 0 1 '+r4+','+r4+'V'+(y+h)+'Z'
+      : 'M'+x+','+y+'V'+(y+h-r4)+'a'+r4+','+r4+' 0 0 0 '+r4+','+r4+'h'+(bw-2*r4)+'a'+r4+','+r4+' 0 0 0 '+r4+',-'+r4+'V'+y+'Z';
+    return '<path d="'+path+'" fill="'+c+'"></path>'
+         + '<rect class="hit" x="'+(i*slot)+'" y="0" width="'+slot+'" height="'+H+'" fill="transparent"'
+         + ' data-d="'+r.d+'" data-v="'+v+'" data-k="'+key+'" tabindex="0"></rect>';
+  }).join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img">'
+       + '<line x1="0" y1="'+ZERO+'" x2="'+W+'" y2="'+ZERO+'" stroke="#E2E8F0" stroke-width="1"></line>'
+       + bars + '</svg>';
+}
+
+function sum(key){ return DATA.reduce(function(a,r){ return a+(r[key]||0); },0); }
+
+function draw(){
+  document.getElementById('rows').innerHTML = SERIES.map(function(s){
+    var t=sum(s[0]);
+    return '<div class="row"><span class="who">'+s[1]+'</span>'
+         + '<span class="plot">'+rowSvg(s[0])+'</span>'
+         + '<span class="sum"><span class="k">10일 합</span><span class="v '+(t>=0?'up':'dn')+'">'+fmt(t)+'</span></span></div>';
+  }).join('');
+
+  // x축 — 첫·마지막과 3칸 간격만 표기(모든 칸에 날짜를 박으면 뭉갠다)
+  document.getElementById('xax').innerHTML = DATA.map(function(r,i){
+    if(i!==0 && i!==n-1 && !(i%3===0 && i<n-2)) return '';
+    if(i===0)   return '<span style="left:0">'+md(r.d)+'</span>';
+    if(i===n-1) return '<span style="right:0;left:auto">'+md(r.d)+'</span>';
+    return '<span style="left:'+((i+0.5)/n*100)+'%;transform:translateX(-50%)">'+md(r.d)+'</span>';
+  }).join('');
+}
+
+/* 컨테이너 실제 폭으로 기하 재계산 — 열릴 때와 리사이즈마다 */
+function measure(){
+  var probe=document.querySelector('.axis .plot');
+  var w=probe?probe.clientWidth:0;
+  if(!w) return;
+  W=w; slot=W/n; bw=Math.max(5, Math.min(34, slot*0.42));
+  draw();
+}
+
+draw();   // 초기 1회 — 실제 폭은 패널이 열릴 때 measure()가 다시 잡는다
+
+var missing=DATA.filter(function(r){ return r.individual==null; }).map(function(r){ return md(r.d); });
+var footTxt='단위 억원 · 코스피 투자자별 순매수 · 최근 10거래일'
+  + (missing.length?' · <b>'+missing.join(', ')+'</b>는 수집 데이터가 없어 비워 뒀어요(0이라는 뜻이 아니에요)':'');
+document.getElementById('foot').innerHTML=footTxt;
+document.getElementById('foot2').innerHTML=footTxt;
+
+document.getElementById('tbody').innerHTML = DATA.slice().reverse().map(function(r){
+  var cells=SERIES.map(function(s){
+    var v=r[s[0]];
+    return v==null?'<td class="na">수집 없음</td>':'<td class="'+(v>=0?'up':'dn')+'">'+fmt(v)+'</td>';
+  }).join('');
+  return '<tr><td>'+md(r.d)+'('+kday(r.d)+')</td>'+cells+'</tr>';
+}).join('');
+
+/* 토글 */
+var sup=document.getElementById('sup'), panel=document.getElementById('supPanel'), btn=document.getElementById('moreBtn');
+btn.addEventListener('click',function(){
+  var open=panel.hidden;
+  panel.hidden=!open; sup.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
+  if(open) measure();   // 열린 뒤라야 폭이 잡힌다(hidden 상태에선 clientWidth가 0)
+});
+var rt;
+window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ if(!panel.hidden) measure(); },120); });
+var tblBtn=document.getElementById('tblBtn'), cv=document.getElementById('chartView'), tv=document.getElementById('tableView');
+tblBtn.addEventListener('click',function(){
+  var toTable=tv.hidden;
+  tv.hidden=!toTable; cv.hidden=toTable;
+  tblBtn.setAttribute('aria-pressed',String(toTable));
+  tblBtn.textContent=toTable?'그래프로 보기':'표로 보기';
+});
+
+/* 툴팁 — hover와 keyboard focus가 같은 내용을 낸다 */
+var tip=document.getElementById('tip');
+var NAME={individual:'개인',institution:'기관',foreign:'외국인'};
+function showTip(e){
+  var t=e.target; if(!t.classList||!t.classList.contains('hit')) return;
+  var d=t.getAttribute('data-d'), v=t.getAttribute('data-v'), k=t.getAttribute('data-k');
+  tip.innerHTML = v==='na'
+    ? '<span class="d">'+md(d)+'('+kday(d)+')</span><br>수집 데이터 없음'
+    : '<span class="d">'+md(d)+'('+kday(d)+') · '+NAME[k]+'</span><br><span class="v '+(+v>=0?'up':'dn')+'">'+fmt(+v)+'</span> <span class="d">억원</span>';
+  var r=t.getBoundingClientRect();
+  tip.style.left=Math.min(window.innerWidth-160, r.left+r.width/2-60)+'px';
+  tip.style.top=Math.max(8, r.top-52)+'px';
+  tip.classList.add('on');
+}
+function hideTip(){ tip.classList.remove('on'); }
+panel.addEventListener('mouseover',showTip);
+panel.addEventListener('mouseout',hideTip);
+panel.addEventListener('focusin',showTip);
+panel.addEventListener('focusout',hideTip);
+</script>
+</body>
+</html>

@@ -75,6 +75,17 @@ def _load_supply_history() -> dict:
         return {}
 
 
+def write_supply_history_web(hist: dict) -> None:
+    """수급 히스토리를 web/data/로 미러링한다 — 종목 대시보드 수급 행의 '10일 추이' 패널이 fetch한다.
+    data/ 는 웹 루트 밖이라 브라우저에서 직접 읽을 수 없다. 이 파일의 소유 워크플로우는
+    kospi-briefing 하나뿐이므로 다른 잡과 커밋이 겹치지 않는다(SERVICE_RULES §18)."""
+    if not hist:
+        return
+    out = WEB_DIR / "data" / "supply-history.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(hist, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def update_supply_history(date: str, inv: dict) -> dict:
     """당일 시장 수급(외국인/기관/개인 순매수)을 날짜별로 멱등 upsert하고 전체를 반환한다(억원 단위)."""
     rec = {}
@@ -88,6 +99,7 @@ def update_supply_history(date: str, inv: dict) -> dict:
     hist[date] = rec
     hist = {k: hist[k] for k in sorted(hist)[-30:]}  # 최근 30일만 보관
     SUPPLY_HISTORY_FILE.write_text(json.dumps(hist, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_supply_history_web(hist)
     return hist
 
 
