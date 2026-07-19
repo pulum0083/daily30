@@ -371,7 +371,31 @@ python3 scripts/generate_html.py --write-list-only
 | 16:35 ~ 21:00 | 1시간 | `POST_MARKET` |
 | 21:30 ~ 01:00 | 1시간 | `US_MARKET` |
 
-총 22회/일. Vercel cron 사용 금지 (Hobby 플랜 cron 2개 제한) — GHA native schedule 사용.
+총 22회/일. Vercel cron 사용 금지 (Hobby 플랜 cron 2개 제한).
+트리거는 **cron-job.org → GitHub API dispatch**(`workflow_dispatch`). 2026-06-08에 GHA native schedule에서 전환됨([kospi-news-live.yml](../.github/workflows/kospi-news-live.yml) 헤더 주석이 정본).
+
+#### 종목 뉴스(`fetch_stock_news.py`) 수집 스케줄 — 평일/주말 이원화
+
+주도주 위젯 "관련 뉴스"(`web/data/stock-news.json`)는 **이슈 브리핑과 다른 스케줄**로 돈다. 평일은 이슈 브리핑 워크플로우에 얹혀 있고, 주말은 전용 워크플로우가 담당한다.
+
+| 요일 | 구간 (KST) | 주기 | 담당 워크플로우 | 트리거 |
+| --- | --- | --- | --- | --- |
+| 평일 | 09:00 ~ 15:30 | 30분 | `kospi-news-live.yml` | cron-job.org |
+| 평일 | 16:35 ~ 23:30 | 1시간 | `kospi-news-live.yml` | cron-job.org |
+| **주말(토·일)** | **09:00 ~ 21:00** | **3시간** (09·12·15·18·21시, 5회/일) | **`stock-news-weekend.yml`** | **GHA native cron** |
+| 주말 | 21:00 ~ 익일 09:00 | 수집 없음 | — | — |
+| 공휴일(평일) | 종일 | 수집 없음 | — | — |
+
+**주말 워크플로우가 `fetch_stock_news.py`만 실행하는 이유 (다른 스크립트를 추가하지 말 것):**
+
+- `fetch_news_live.py` — `get_slot()`이 **시각만** 보고 요일을 안 본다. 토요일 12시에 `MARKET`을 반환해 **휴장일인데 "장중 이슈"를 발행**한다.
+- `fetch_movers_why.py` — 요일 게이팅이 없어 주말에 movers 데이터를 덮어쓴다. 이 파일들의 소유자는 `kospi-news-live.yml`이다(§18 파일 소유권 충돌).
+
+주말 워크플로우는 `git add web/data/stock-news.json` **한 파일만** 커밋한다. 넓은 경로를 통째로 add 하면 §18 사고가 재발한다.
+
+**GHA cron 지연 발화 방어**: GHA native cron은 지연 발화가 잦아 평일 새벽으로 밀릴 수 있다. 워크플로우 첫 스텝에서 `TZ=Asia/Seoul date +%u`로 실제 실행 시점의 요일을 재확인하고, 주말이 아니면 이후 스텝을 전부 건너뛴다. **cron 표현식만 믿지 않는다.**
+
+**화면 표기와 스케줄의 1:1 대응 (필수)**: `web/stocks/index.html`의 `setNight()`이 `#lw-upd`에 갱신 주기를 표기한다. 위 표가 정본이며, **스케줄을 바꾸면 이 표기도 같이 바꾼다.** 수집이 없는 구간(주말 심야·공휴일)에는 주기를 적지 않고 "최신순"만 표기한다 — 실제로 돌지 않는 주기를 광고하지 않는다(운영 규칙 0). 2026-07-18 실사고: 주말에 수집이 0건인데 "1시간 주기"가 그대로 떠 있었다.
 
 **`get_slot()` 시간대 경계값:**
 ```

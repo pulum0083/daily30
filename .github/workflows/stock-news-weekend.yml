@@ -1,0 +1,117 @@
+# 주말 종목 뉴스 수집 워크플로우
+#
+# 평일 수집은 kospi-news-live.yml(cron-job.org 트리거)이 담당하고, 이 워크플로우는
+# 주말(토·일)만 맡는다. 평일엔 절대 돌지 않는다 — 같은 파일을 두 워크플로우가
+# 동시에 커밋해 rebase 충돌을 일으키는 사고(SERVICE_RULES §18)를 구조적으로 차단한다.
+#
+# ⚠️ 이 워크플로우는 fetch_stock_news.py만 실행한다. kospi-news-live.yml이 함께 돌리는
+#    나머지 두 스크립트를 주말에 돌리면 안 되기 때문이다:
+#      - fetch_news_live.py  : get_slot()이 시각만 보므로 토 12시에 "MARKET"을 반환해
+#                              휴장일인데 "장중 이슈"를 발행한다.
+#      - fetch_movers_why.py : 요일 게이팅이 없어 주말에 movers 데이터를 덮어쓴다.
+#                              이 파일들의 소유자는 kospi-news-live.yml이다(§18).
+#
+# 스케줄(GHA native cron, UTC 기준 — KST = UTC+9):
+#   '0 0,3,6,9,12 * * 6,0' → KST 토·일 09·12·15·18·21시 (3시간 간격, 하루 5회)
+#   KST 09~21시는 UTC 00~12시로 같은 날짜 안에 들어와 요일 경계 문제가 없다.
+
+name: 주말 종목 뉴스 수집
+
+on:
+  schedule:
+    - cron: '0 0,3,6,9,12 * * 6,0'
+  workflow_dispatch:   # 수동 실행·테스트용
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write   # vercel-deploy.yml 명시적 dispatch (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시킴)
+
+env:
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+# kospi-news-live.yml과 다른 그룹 — 평일/주말로 실행 시점이 갈려 서로 겹치지 않는다.
+concurrency:
+  group: stock-news-weekend
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: "📰 주말 종목 뉴스 수집"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # GHA cron은 지연 발화가 잦아 평일 새벽에 밀려 실행될 수 있다. 실제 실행 시점이
+      # 주말이 아니면 즉시 중단해 평일 파이프라인과 같은 파일을 건드리지 않는다.
+      - name: 🗓️ 주말 여부 확인 (지연 발화 방어)
+        id: guard
+        run: |
+          dow=$(TZ=Asia/Seoul date +%u)   # 1=월 … 6=토, 7=일
+          if [ "$dow" -ge 6 ]; then
+            echo "weekend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "weekend=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::KST 기준 평일($dow)이라 주말 수집을 건너뜁니다 — cron 지연 발화로 판단."
+          fi
+
+      - name: 🐍 Python 세팅
+        if: steps.guard.outputs.weekend == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📦 의존성 설치
+        if: steps.guard.outputs.weekend == 'true'
+        run: pip install google-genai
+
+      # 이미 요약한 기사는 재요약하지 않으므로 신규 기사가 없는 실행은 Gemini 호출 0회로 끝난다.
+      - name: 📰 종목별 관련 뉴스 수집
+        if: steps.guard.outputs.weekend == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python3 scripts/fetch_stock_news.py
+
+      - name: 💾 JSON 커밋 & 푸시
+        id: commit
+        if: steps.guard.outputs.weekend == 'true'
+        run: |
+          git config user.name  "DailyB Bot"
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          # 이 워크플로우가 소유한 파일만 커밋한다(§18 — 넓은 경로를 통째로 add 하지 않는다).
+          git add web/data/stock-news.json
+          if git diff --cached --quiet; then
+            echo "변경 없음, 커밋 스킵"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: 주말 종목 뉴스 갱신 $(TZ=Asia/Seoul date +'%H:%M') KST"
+            pushed=false
+            for i in 1 2 3 4 5; do
+              git fetch origin main
+              if git rebase origin/main; then
+                if git push; then pushed=true; break; fi
+              else
+                git rebase --abort 2>/dev/null || true
+              fi
+              echo "Push attempt $i failed, retrying in 15s..."
+              sleep 15
+            done
+            echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
+            # 5회 모두 실패하면 명시적으로 중단한다 — 무음 실패로 다음 스텝이 존재하지 않는
+            # SHA로 배포를 트리거하던 사고(SERVICE_RULES §17) 방지.
+            if [ "$pushed" != "true" ]; then
+              echo "::error::push 5회 재시도 모두 실패 — 잡을 중단합니다."
+              exit 1
+            fi
+          fi
+
+      - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
