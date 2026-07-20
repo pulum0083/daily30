@@ -63,6 +63,7 @@ jobs:
   kospi-briefing:
     name: "📈 코스피 브리핑 (KST 07:30)"
     runs-on: ubuntu-latest
+    timeout-minutes: 35   # 상한 없는 네트워크 스텝 지연으로 텔레그램이 막히는 것 방지(백스톱)
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi'
 
@@ -102,6 +103,7 @@ jobs:
 
       - name: 🎯 증권사 목표주가 수집 (개장 전)
         continue-on-error: true
+        timeout-minutes: 5
         run: python3 scripts/fetch_stock_targets.py
 
       - name: 🏦 외국계 IB 코멘트 수집 (Gemini, 실패해도 발행 계속)
@@ -211,6 +213,7 @@ jobs:
   us-briefing:
     name: "🇺🇸 미국 브리핑 (KST 21:45)"
     runs-on: ubuntu-latest
+    timeout-minutes: 35   # 상한 없는 네트워크 스텝 지연으로 텔레그램이 막히는 것 방지(백스톱)
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'us'
 
@@ -347,6 +350,7 @@ jobs:
   kospi-close-briefing:
     name: "🇰🇷 코스피 마감 시황 (KST 16:30)"
     runs-on: ubuntu-latest
+    timeout-minutes: 35   # 상한 없는 네트워크 스텝 지연으로 텔레그램이 막히는 것 방지(백스톱)
     if: >-
       github.event_name == 'workflow_dispatch' && github.event.inputs.briefing_type == 'kospi-close'
 
@@ -408,6 +412,7 @@ jobs:
 
       - name: 🎯 증권사 목표주가 수집 (마감 후)
         continue-on-error: true
+        timeout-minutes: 5
         run: python3 scripts/fetch_stock_targets.py
 
       - name: ✨ Claude 마감 시황 분석
@@ -433,6 +438,8 @@ jobs:
 
       - name: 📈 종목 스냅샷 빌드 (시세·52주)
         if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true   # 종목 서비스용 — 실패·타임아웃해도 마감 브리핑 발행은 계속(스냅샷은 직전 값 유지)
+        timeout-minutes: 5
         env:
           TOSS_CLIENT_ID: ${{ secrets.TOSS_CLIENT_ID }}
           TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
@@ -445,6 +452,7 @@ jobs:
       - name: 🇰🇷 국내 종목 상세 페이지 재생성 (스냅샷 종가로 갱신)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
+        timeout-minutes: 5
         run: python3 scripts/generate_html.py --stocks
 
       - name: 🇺🇸 미국 반도체 상세 페이지 생성 (yfinance 종가)
@@ -455,6 +463,7 @@ jobs:
       - name: 💰 밸류에이션 시그널 갱신 (업종 상대 PER, 종가 기준)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
+        timeout-minutes: 5
         run: python3 scripts/fetch_valuation.py
 
       - name: 💾 HTML & 데이터 커밋 → main 푸시
