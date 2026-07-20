@@ -270,6 +270,116 @@ def _filter_stale_catalysts(catalysts: list, today: date) -> list:
     return kept
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 교차일 recap 게이트 — 자기보고 날짜에 의존하지 않는 하드 방어
+#
+# flash-lite는 "오늘/어제만" 규칙을 stale 항목을 빼서가 아니라 날짜를 오늘·어제로 위조해
+# 지킨다(모건스탠리 실적을 실제 발표일이 아니라 07-19로 찍는 식). 그래서 _filter_stale_catalysts
+# (자기보고 날짜 기반)만으론 며칠 된 사건이 매일 재등장하는 걸 못 막는다.
+# 이 게이트는 날짜를 믿지 않고, '2일 이상 전 브리핑에 실제로 나왔던 catalyst'와 내용이 실질적으로
+# 같으면(문자 3-gram 유사도 + 공유 고유엔티티) 하드 제외한다. 2026-07-15~20 ASML 실사고 대응.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 고유 식별력이 없는 범용 대문자 토큰 — 엔티티로 치지 않는다(AI·CPI 등은 매일 등장)
+_GENERIC_UPPER = {
+    "AI", "CPI", "PPI", "WTI", "VIX", "EPS", "GDP", "FOMC", "ETF", "IPO", "US",
+    "USD", "SP", "NASDAQ", "DOW", "Q", "KPI", "M", "ADR", "HBM", "DRAM", "SOX",
+    "GPU", "CPU", "CEO", "CFO", "M&A", "S", "P", "PCE", "NFP", "BOJ", "ECB",
+}
+
+
+def _norm_for_match(s: str) -> str:
+    """한글·영숫자만 남기고 소문자로 붙인다(조사·구두점·공백 제거)."""
+    return re.sub(r"[^0-9a-z가-힣]", "", (s or "").lower())
+
+
+def _char_ngrams(s: str, n: int = 3) -> set:
+    s = _norm_for_match(s)
+    if len(s) < n:
+        return {s} if s else set()
+    return {s[i:i + n] for i in range(len(s) - n + 1)}
+
+
+def _jaccard(a: set, b: set) -> float:
+    return len(a & b) / len(a | b) if a and b else 0.0
+
+
+def _distinctive_entities(text: str) -> set:
+    """티커·영문 사명 등 고유 식별 토큰(2자 이상 라틴). 범용어(_GENERIC_UPPER)는 제외."""
+    return {t for t in re.findall(r"[A-Za-z]{2,}", (text or "").upper())
+            if t not in _GENERIC_UPPER}
+
+
+def _is_cross_day_recap(text: str, stale_texts: list) -> bool:
+    """text가 2일 이상 전 catalyst(stale_texts) 중 하나의 재탕이면 True.
+
+    판정: 어떤 stale와 (유사도 ≥ 0.40) 이거나 (공유 고유엔티티 존재 AND 유사도 ≥ 0.15).
+    실측(2026-07 ASML 변형)으로 튜닝 — 같은 사건 재탕은 잡고, 같은 엔티티라도 다른 뉴스는 유지."""
+    g = _char_ngrams(text)
+    ents = _distinctive_entities(text)
+    for s in stale_texts:
+        sim = _jaccard(g, _char_ngrams(s))
+        if sim >= 0.40 or (ents & _distinctive_entities(s) and sim >= 0.15):
+            return True
+    return False
+
+
+def _drop_cross_day_recaps(catalysts: list, stale_texts: list) -> list:
+    """catalysts에서 stale_texts(2일+ 전)와 실질 중복인 항목을 하드 제외한다."""
+    if not stale_texts:
+        return catalysts
+    kept = []
+    for c in catalysts:
+        if _is_cross_day_recap(c, stale_texts):
+            print(f"[fetch_news] 교차일 recap 제외: {c}", file=sys.stderr)
+        else:
+            kept.append(c)
+    return kept
+
+
+def _history_path(briefing_type: str) -> Path:
+    return DATA_DIR / f"catalyst_history_{briefing_type}.json"
+
+
+def _load_stale_catalysts(briefing_type: str, today: date, min_age_days: int = 2) -> list:
+    """catalyst_history_{type}.json에서 (today - min_age_days) 이전 날짜의 catalyst를 모아 반환.
+
+    '오늘/어제'는 정상(신선)이므로 제외하고, 이틀 이상 전에 등장했던 것만 recap 판정 대상으로 쓴다."""
+    path = _history_path(briefing_type)
+    if not path.exists():
+        return []
+    try:
+        hist = json.load(open(path, encoding="utf-8"))
+    except Exception:
+        return []
+    cutoff = today - timedelta(days=min_age_days)
+    stale = []
+    for entry in hist:
+        d = _parse_iso_date(entry.get("date", ""))
+        if d is not None and d <= cutoff:
+            stale.extend(entry.get("catalysts", []))
+    return stale
+
+
+def _append_catalyst_history(briefing_type: str, today: date, catalysts: list,
+                             keep_days: int = 5) -> None:
+    """오늘 발행한 catalyst(문자열 리스트)를 히스토리에 기록하고 최근 keep_days개 날짜만 유지."""
+    path = _history_path(briefing_type)
+    hist = []
+    if path.exists():
+        try:
+            hist = json.load(open(path, encoding="utf-8"))
+        except Exception:
+            hist = []
+    today_str = today.isoformat()
+    hist = [e for e in hist if e.get("date") != today_str]  # 같은 날 재실행 시 갱신
+    hist.append({"date": today_str, "catalysts": list(catalysts)})
+    hist.sort(key=lambda e: e.get("date", ""))
+    hist = hist[-keep_days:]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(hist, f, ensure_ascii=False, indent=2)
+
+
 def fetch_and_summarize(briefing_type: str) -> dict:
     """Gemini Google Search grounding으로 최신 뉴스를 검색·요약해 dict로 반환한다."""
     try:
@@ -317,7 +427,12 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 
     data = json.loads(raw)
     if isinstance(data.get("catalysts"), list):
-        data["catalysts"] = _filter_stale_catalysts(data["catalysts"], datetime.now(KST).date())
+        today_kst = datetime.now(KST).date()
+        # 1차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
+        cats = _filter_stale_catalysts(data["catalysts"], today_kst)
+        # 2차: 자기보고 날짜를 못 믿으므로, 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외
+        stale = _load_stale_catalysts(briefing_type, today_kst)
+        data["catalysts"] = _drop_cross_day_recaps(cats, stale)
     return data
 
 
@@ -385,6 +500,10 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
     print(f"[fetch_news] Saved → {out_path}")
+
+    # 오늘 발행한 catalyst를 히스토리에 기록(다음 실행의 교차일 recap 판정 기준)
+    if summary.get("catalysts"):
+        _append_catalyst_history(args.type, datetime.now(KST).date(), summary["catalysts"])
 
 
 if __name__ == "__main__":
