@@ -11,7 +11,7 @@ export const VOL_SURGE_MIN = 1.5;
 export const CAPITULATION_DROP = -3.0;
 export const TURNOVER_TOP_N = 3;
 export const NEAR_HIGH_RATIO = 0.98;
-export const SIGNALS_DISPLAY_MAX = 8; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계)
+export const SIGNALS_DISPLAY_MAX = 15; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계). 상한일 뿐 — 그날 신호가 잡힌 종목만 노출(패딩 없음)
 // 카드 정렬 가중치 — 신고가·투매 같은 희소 신호를 최상위로. 급락일엔 역행 상승이 흔해지므로
 // '그냥 초록'인 counter_up 보다, 급락장에도 신고가에 붙은 진짜 강세(near_high)와 투매(vol_surge)를 우선한다.
 const SIGNAL_SCORE = { near_high: 5, vol_surge: 4, counter_up: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };

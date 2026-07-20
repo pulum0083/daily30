@@ -173,10 +173,11 @@ test('why+enrich: 수급만 있는 종목도 enrich로 설명 문구가 채워�
 });
 
 test('신호 카드 목록은 SIGNALS_DISPLAY_MAX개로 제한 (랭킹은 전체 집계 유지)', () => {
+  const N = SIGNALS_DISPLAY_MAX + 4; // 상한을 실제로 넘겨 slice가 동작하는지 검증(상수 변경에 내성)
   const stocks = [];
-  for (let i = 0; i < 12; i++) stocks.push({ code: String(i), name: 'S' + i, sector: 'bio', pct: -1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 });
+  for (let i = 0; i < N; i++) stocks.push({ code: String(i), name: 'S' + i, sector: 'bio', pct: -1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 });
   const { signals, rank } = buildSignals(stocks, -5.8, { enrich: () => ({ cats: ['inst_buy'], badges: ['기관'] }) });
   assert.equal(signals.length, SIGNALS_DISPLAY_MAX);
   const ib = rank.find((g) => g.cat === 'inst_buy');
-  assert.equal(ib.items.length, 12); // 랭킹은 전체 12개 집계
+  assert.equal(ib.items.length, N); // 랭킹은 전체 집계(상한과 무관)
 });
