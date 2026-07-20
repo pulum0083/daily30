@@ -1,0 +1,171 @@
+{
+  "prediction": {
+    "up_pct": 58,
+    "down_pct": 42
+  },
+  "todays_view": {
+    "view_title": "전일 급락 뒤 선물은 반등 — ASML이 반도체 장비를 끌어올리고 은행 실적이 오늘 분위기를 결정한다",
+    "dek": "전날 지수가 크게 눌렸지만 오늘 <b>프리마켓 선물</b>은 반등 시도를 보이고 있어요. <b>ASML 호실적</b>이 반도체 장비주에 온기를 불어넣는 가운데, 오늘 나올 <b>대형 은행 실적</b>이 금융 섹터 전체의 방향을 정할 것 같아요."
+  },
+  "issues": [
+    {
+      "title": "ASML 호실적, 반도체 장비주 프리마켓 강세 견인",
+      "body": "ASML이 예상을 웃도는 실적을 내놓으면서 반도체 장비 업종 전반에 온기가 돌고 있어요. AMAT·LRCX·KLAC 같은 장비주들이 전날 20일선 아래로 밀렸던 만큼, 이번 실적이 반등의 계기가 될 수 있을지가 관전 포인트예요.",
+      "down": {
+        "label": "지수 전반",
+        "tickers": []
+      },
+      "up": {
+        "label": "반도체 장비",
+        "tickers": [
+          "AMAT",
+          "LRCX",
+          "KLAC"
+        ]
+      }
+    },
+    {
+      "title": "대형 은행 실적 발표, 금융 섹터 방향성 가른다",
+      "body": "이번 주 이어지는 주요 은행 실적이 금융 섹터 전체 분위기를 좌우할 것 같아요. 대출 성장, 트레이딩 수익, 신용 손실 충당금 관련 코멘트가 GS·JPM·MS·BAC 같은 종목에 직접 영향을 줄 거예요.",
+      "down": {
+        "label": "금융(실적 부진 시)",
+        "tickers": [
+          "MS"
+        ]
+      },
+      "up": {
+        "label": "금융(실적 호조 시)",
+        "tickers": [
+          "GS",
+          "JPM",
+          "BAC"
+        ]
+      }
+    },
+    {
+      "title": "AI 인프라 신규 투자 발표 지속, 관련 기술주 주목",
+      "body": "AI 관련 기업들의 신규 투자·설비 확장 발표가 이어지면서 데이터센터·인프라 관련주에 긍정적으로 작용하고 있어요. NVDA·AVGO·AMZN처럼 AI 인프라와 클라우드 확장에 직접 연결된 종목들이 이 흐름의 수혜를 받을 가능성이 커요.",
+      "up": {
+        "label": "AI 인프라·클라우드",
+        "tickers": [
+          "NVDA",
+          "AVGO",
+          "AMZN"
+        ]
+      }
+    },
+    {
+      "title": "전일 급락 이후 프리마켓 선물 반등, VIX도 진정",
+      "body": "전날 나스닥·S&P가 크게 눌린 뒤 오늘 프리마켓 선물은 소폭 반등하고 있고 VIX(변동성 지수)도 낮아지는 모습이에요. 다만 SOX(반도체 지수) 선물은 아직 약세라 반도체 업종 내에서도 종목별 온도차가 클 것 같아요.",
+      "down": {
+        "label": "반도체(선물 약세분)",
+        "tickers": [
+          "MU",
+          "AMD"
+        ]
+      },
+      "up": {
+        "label": "지수 전반(리스크 완화)",
+        "tickers": []
+      }
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "GS",
+      "name": "GS (골드만삭스)",
+      "price": "$1,065.22",
+      "change": "-2.76%",
+      "change_cls": "down",
+      "signal": "20일선 위 안착",
+      "golden": false,
+      "ma20_dist_pct": 0.17,
+      "ma200_dist_pct": 18.76,
+      "scenario_tag": "은행 실적 시즌 수혜",
+      "scenario": "20일선 바로 위에서 버티고 있는 종목이에요. 이번 주 은행 실적 발표 흐름에서 트레이딩·IB 수익이 잘 나오면 추가 상승 여력이 있을 것 같아요.",
+      "action_guide": "시가 $1070 이내 진입. 목표: $1110 / 손절: $1040 이탈 시.",
+      "entry": "$1070",
+      "target": "$1110",
+      "target_pct": "+3.7%",
+      "stop": "$1040",
+      "stop_pct": "-2.8%"
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVDA (엔비디아)",
+      "price": "$202.81",
+      "change": "-2.21%",
+      "change_cls": "down",
+      "signal": "20일선 위 유지",
+      "golden": false,
+      "ma20_dist_pct": 0.34,
+      "ma200_dist_pct": 5.52,
+      "scenario_tag": "AI 인프라 투자 지속 수혜",
+      "scenario": "20일선을 지지선 삼아 버티는 흐름이에요. AI 인프라 투자 발표가 계속 이어지는 한 이 종목의 수요 스토리는 흔들리지 않을 것 같아요.",
+      "action_guide": "시가 $203 이내 진입. 목표: $215 / 손절: $196 이탈 시.",
+      "entry": "$203",
+      "target": "$215",
+      "target_pct": "+5.9%",
+      "stop": "$196",
+      "stop_pct": "-3.4%"
+    },
+    {
+      "ticker": "AMZN",
+      "name": "AMZN (아마존)",
+      "price": "$247.23",
+      "change": "-1.06%",
+      "change_cls": "down",
+      "signal": "20일선 위 상승",
+      "golden": false,
+      "ma20_dist_pct": 2.14,
+      "ma200_dist_pct": 5.63,
+      "scenario_tag": "클라우드·AI 인프라 확장 수혜",
+      "scenario": "20일선 위에서 꾸준히 우상향하고 있는 종목이에요. AWS 클라우드 인프라 확장 투자가 이어지는 한 이 흐름이 유지될 가능성이 높아요.",
+      "action_guide": "시가 $248 이내 진입. 목표: $260 / 손절: $239 이탈 시.",
+      "entry": "$248",
+      "target": "$260",
+      "target_pct": "+4.8%",
+      "stop": "$239",
+      "stop_pct": "-3.6%"
+    },
+    {
+      "ticker": "AMAT",
+      "name": "AMAT (어플라이드머티리얼즈)",
+      "price": "$529.66",
+      "change": "-5.57%",
+      "change_cls": "down",
+      "signal": "20일선 아래, ASML 훈풍 반등 시도",
+      "golden": false,
+      "ma20_dist_pct": -12.8,
+      "ma200_dist_pct": 48.02,
+      "scenario_tag": "장비주 동반 반등",
+      "scenario": "20일선 아래에 있지만 오늘 상승폭이 두드러진 종목이에요.",
+      "action_guide": "시가 $535 이내 진입. 목표: $565 / 손절: $505 이탈 시.",
+      "entry": "$535",
+      "target": "$565",
+      "target_pct": "+5.6%",
+      "stop": "$505",
+      "stop_pct": "-5.6%"
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPM (JP모건)",
+      "price": "$341.10",
+      "change": "-0.60%",
+      "change_cls": "down",
+      "signal": "20일선 위 유지",
+      "golden": false,
+      "ma20_dist_pct": 2.02,
+      "ma200_dist_pct": 11.12,
+      "scenario_tag": "은행 실적 시즌 바로미터",
+      "scenario": "20일선 위에서 견조하게 움직이는 대형 은행주예요. 실적 시즌 첫 타자로서 금융 섹터 전체 분위기를 좌우할 수 있는 종목이에요.",
+      "action_guide": "시가 $342 이내 진입. 목표: $358 / 손절: $328 이탈 시.",
+      "entry": "$342",
+      "target": "$358",
+      "target_pct": "+4.7%",
+      "stop": "$328",
+      "stop_pct": "-4.1%"
+    }
+  ],
+  "generated_at": "2026-07-20T21:17:25.730681+09:00"
+}
