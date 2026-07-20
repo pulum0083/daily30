@@ -1,20 +1,20 @@
 {
-  "generated_at": "2026-07-20T09:01:42.867806+09:00",
+  "generated_at": "2026-07-20T09:31:37.841407+09:00",
   "date": "2026-07-20",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -5.1,
-      "surge": 0.05,
+      "changePct": -0.39,
+      "surge": 0.2,
       "events": [
         {
           "time": "08:25",
           "headline": "삼성전자·SK하이닉스, 프리마켓서 5%대 주가 급락",
           "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9rVGZnRjBWSDFweUlKWWtJSk4xbFdFT05iUFRLVkhXcGVCa0FwSWMtN0lVMW9wS1h6cVExb3hDZ1k3Z3JFZGkzMW03bGxaS3FhajVKSHBOa1ZpZDBsSVl4M0l6RnhxNHNBQXBZd3J3?oc=5",
           "source": "gukjenews.com",
-          "why": "삼성전자와 SK하이닉스의 주가가 프리마켓에서 5% 이상 급락했습니다.",
-          "tier": "why",
+          "why": "삼성전자와 SK하이닉스가 프리마켓에서 5%대 주가 급락을 기록했다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "neg"
         },
         {
@@ -22,8 +22,8 @@
           "headline": "삼성전자 급락에 반도체 한파까지…20일 증시 ‘긴장’ : 네이버 블로그",
           "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPa192YklXNWtXODFZQXIwYUd6T0ZjWjRmOWE3WV80a2VyWmRIa09iMUZUTjRVRkVrelQ0VThMdnNYRkI1dHczcHpFT2oyWGZOZW10blgzel9nU2IxWjJwdlRPVFAxX2dkRklzZFZNVXY0XzlBcVpuRnJOLXZTVnd6MnJiQVhYSHBqeWhUV1ZIcw?oc=5",
           "source": "Naver Blog",
-          "why": "삼성전자 급락에 반도체 한파까지…20일 증시 ‘긴장’ : 네이버 블로그",
-          "tier": "why",
+          "why": "삼성전자 급락에 반도체 한파까지…20일 증시 ‘긴장’ : 네이버 블로그 (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "neg"
         }
       ]
@@ -31,35 +31,54 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -5.32,
-      "surge": 0.06,
+      "changePct": 0.98,
+      "surge": 0.24,
       "events": [
         {
           "time": "08:25",
           "headline": "삼성전자·SK하이닉스, 프리마켓서 5%대 주가 급락",
           "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9rVGZnRjBWSDFweUlKWWtJSk4xbFdFT05iUFRLVkhXcGVCa0FwSWMtN0lVMW9wS1h6cVExb3hDZ1k3Z3JFZGkzMW03bGxaS3FhajVKSHBOa1ZpZDBsSVl4M0l6RnhxNHNBQXBZd3J3?oc=5",
           "source": "gukjenews.com",
-          "why": "SK하이닉스가 프리마켓에서 5%대 주가 급락을 기록했다.",
-          "tier": "why",
+          "why": "SK하이닉스와 삼성전자가 프리마켓에서 5%대 주가 급락을 기록했다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "neg"
         },
         {
-          "time": "05:20",
-          "headline": "①실적은 역대급, 주가는 급락…반도체 ‘디커플링’ 본격화",
-          "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE45TVQ0b1pXZ1RYN2JIYTdhcGhLVkc2dWh3eWlHT0lzOHpaY1U1amN3OUdTb0lfMU5YemladWF6S3RDU3haNDQyMGlJdF9XZE9iUnM1bFJEZW1yb2xZbXRKTENnYVZYOTE3X1RvaWlaVmp5dU5R?oc=5",
-          "source": "대한경제",
-          "why": "①실적은 역대급, 주가는 급락…반도체 ‘디커플링’ 본격화",
-          "tier": "why",
-          "sentiment": "neg"
+          "time": "00:17",
+          "headline": "SK하이닉스",
+          "url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNSTRqb2F4RlVtb01zOEV2RzQwdW5ZRDRNcGpNZjlTc0NHcHduRzFkRklPLTA5TzNUV21YM0ZibWxsZ1p6Mm5Bektob0FYZENGTTFDSEhaMmRrWEhDWkxGMU1QTktReXJNVmFqMnlJNkVHVEd2Q2x5TXVsYl95eHl2ME50ZkRlV1dJcHYwcWdrUVhoeUYwekVV?oc=5",
+          "source": "매일경제 마켓",
+          "why": "SK하이닉스 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -4.94,
-      "surge": 0.03,
-      "events": []
+      "changePct": -4.59,
+      "surge": 0.18,
+      "events": [
+        {
+          "time": "09:27",
+          "headline": "현대차 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9fYWc2ZU5uQzd3R3JDYUxjYXpiYm9BcXI5Y01McWdldTJ5TE5GdERMcG1RZUYxQ2llbG1xTEJySDJvaWNDbkwxZGE1V3hPT3NmbFZ6V2Q3XzNyYkxn?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "현대차 주가가 현재 하락세를 보이고 있다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "06:42",
+          "headline": "투자자 이목, 현대차그룹으로 쏠리는 이유있다",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE45ejVmUXdkaUkzLUFLM0ZEclFSSTdmdmVTTnMtQkhBZTV3Um5DMHVYQ0s0a0Zrd3g2NUV1ZHpDdi1qQlJLX1cxNHdoQlNKaFh5NEdMMU43d013RzU2d0wzNkdlU01kQ3g5MVNTbG13dTM?oc=5",
+          "source": "코리아리포트",
+          "why": "투자자 이목, 현대차그룹으로 쏠리는 이유있다 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
