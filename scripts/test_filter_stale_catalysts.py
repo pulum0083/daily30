@@ -18,6 +18,27 @@ def test_drops_stale_dated_catalyst():
     assert out == []
 
 
+def test_dict_form_drops_stale_keeps_text():
+    # 프롬프트가 요구하는 구조화 형태({date,text})에서 오래된 항목 제외
+    out = fn._filter_stale_catalysts([
+        {"date": "2026-07-15", "text": "ASML 2분기 실적 → 반도체 장비주 강세"},
+        {"date": "2026-07-20", "text": "유가 급등 → 에너지주 강세"},
+    ], TODAY)
+    assert out == ["유가 급등 → 에너지주 강세"]
+
+
+def test_dict_form_missing_date_is_kept():
+    out = fn._filter_stale_catalysts([
+        {"text": "날짜 없는 거시 촉매 → 지수 전반"},
+    ], TODAY)
+    assert out == ["날짜 없는 거시 촉매 → 지수 전반"]
+
+
+def test_dict_form_empty_text_skipped():
+    out = fn._filter_stale_catalysts([{"date": "2026-07-20", "text": ""}], TODAY)
+    assert out == []
+
+
 def test_keeps_today_and_strips_prefix():
     out = fn._filter_stale_catalysts(
         ["[2026-07-20] 중동 정세 긴장으로 유가 급등 → 에너지주 강세"], TODAY

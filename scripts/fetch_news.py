@@ -155,9 +155,9 @@ US_PROMPT = """\
 
 [catalysts 작성 규칙]
 - 오늘 미국 증시 주도주·섹터를 움직일 '사건' 중심 뉴스만 담는다 (지수 등락률 나열이 아님)
-- **각 항목 맨 앞에 그 사건이 실제 발생·발표된 날짜를 `[YYYY-MM-DD]` 형식으로 붙인다** (실적이면 실적 발표일, 지정학·정책·유가면 사건 발생일). 날짜는 검색으로 확인한 실제 날짜여야 하며 추측하지 않는다. 예: "[2026-07-20] ○○의 △△ 발표 → □□ 섹터에 영향".
-- **어닝(실적)은 오늘 또는 어제 발표된 것만 담는다.** 이틀 이상 전에 이미 발표된 실적은, 오늘 후속 기사·리캡·주가 잔여 반응이 검색되더라도 '오늘의 촉매'로 다시 담지 않는다(며칠 전 실적이 계속 검색된다고 매일 재등장시키지 않는다). 유가·지정학·정책 등 사건형 촉매도 오늘·어제 새로 전개된 것만 담는다.
-- 각 항목은 "무슨 사건 → 어느 종목·섹터에 왜 영향" 형태의 한 문장. 실제로 검색된 사건만 담고, 없으면 빈 배열 []
+- **catalysts의 각 항목은 반드시 `{{"date": "YYYY-MM-DD", "text": "사건 → 영향"}}` 형태의 객체다** (문자열이 아니다). `date`는 그 사건이 실제 발생·발표된 날짜(실적이면 실적 발표일, 지정학·정책·유가면 사건 발생일)로, 검색으로 확인한 실제 날짜만 넣고 추측하지 않는다. `text`는 "무슨 사건 → 어느 종목·섹터에 왜 영향" 한 문장.
+- **`date`는 오늘({today}) 또는 어제만 허용한다.** 이틀 이상 전에 발생·발표된 사건은, 오늘 후속 기사·리캡·주가 잔여 반응이 검색되더라도 담지 않는다. 특히 어닝(실적)은 며칠 전 발표분이 계속 검색된다고 매일 재등장시키지 않는다 — 발표일이 이틀 이상 전이면 catalysts에 넣지 말 것. 유가·지정학·정책 등 사건형 촉매도 오늘·어제 새로 전개된 것만 담는다.
+- 실제로 검색된 사건만 담고, 없으면 빈 배열 []
 - **오늘/어제 발표된 주요 기업 실적(어닝)은 catalysts에 최우선으로 담는다** — 실적 서프라이즈·가이던스·경영진 발언이 해당 종목뿐 아니라 다른 종목·섹터로 파급된 경우(read-through)를 인과로 정리한다.
 - **개장 전 실적으로 프리마켓에서 이미 움직인 섹터도 catalysts에 담는다** — 이 브리핑은 프리마켓 시점에 나가므로, 개장 전 반응은 오늘 세션을 예고하는 핵심 촉매다.
 - 문장 형태 예시 4개(회사명·사건은 형식 참고용일 뿐이다 — 절대 그대로 베끼지 말고, 오늘 실제 검색으로 찾은 회사명·사건·수치로만 채운다):
@@ -179,7 +179,7 @@ US_PROMPT = """\
     "아시아·유럽 증시 흐름"
   ],
   "catalysts": [
-    "[YYYY-MM-DD] 주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·오늘/어제 발생분만, 없으면 이 배열은 비운다)"
+    {{"date": "YYYY-MM-DD", "text": "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·오늘/어제 발생분만, 없으면 이 배열은 비운다)"}}
   ],
   "headlines": [
     "미국 증시 방향에 영향을 줄 헤드라인 1",
@@ -220,38 +220,51 @@ def _load_prev_catalysts(briefing_type: str, max_items: int = 6) -> list:
     return items[:max_items]
 
 
-# catalyst 문장 맨 앞의 [YYYY-MM-DD] 발생일 접두사 (US 프롬프트가 붙이도록 지시)
+# 문자열형 catalyst 맨 앞의 [YYYY-MM-DD] 발생일 접두사 (하위호환 파싱용)
 _DATE_PREFIX_RE = re.compile(r"^\s*\[(\d{4})-(\d{2})-(\d{2})\]\s*")
 
 
+def _parse_iso_date(s: str):
+    """'YYYY-MM-DD' → date, 파싱 불가 시 None."""
+    m = re.match(r"^\s*(\d{4})-(\d{2})-(\d{2})", s or "")
+    if not m:
+        return None
+    try:
+        return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError:
+        return None
+
+
 def _filter_stale_catalysts(catalysts: list, today: date) -> list:
-    """catalysts 각 항목 앞의 [YYYY-MM-DD] 발생일 접두사를 읽어, 오늘/어제(today-1)보다
-    오래된 사건은 버리고 남긴 항목은 접두사를 떼어 순수 문자열로 반환한다.
+    """catalyst별 발생일을 읽어 오늘/어제(today-1)보다 오래된 사건은 버리고, 남긴 항목은
+    순수 문자열(사건 → 영향)로 반환한다. 다운스트림(call_claude)은 문자열 리스트를 기대한다.
+
+    항목 형태 2가지를 모두 받는다:
+      · {"date": "YYYY-MM-DD", "text": "사건 → 영향"}  ← US 프롬프트가 요구하는 구조화 형태
+      · "사건 → 영향"  또는  "[YYYY-MM-DD] 사건 → 영향"  ← 문자열/인라인 접두사(하위호환)
 
     2026-07-15~20 실사고: 7/15 발표된 ASML 2분기 실적이 사흘 넘게 '오늘 프리마켓 촉매'로
     재등장했다(_load_prev_catalysts 소프트 중복 방지만으론 못 막음). 이 함수가 하드 게이트다.
-
-    접두사가 없는 항목(날짜 미상)은 버리지 않고 그대로 둔다 — 유가·지정학 등 날짜 태그 없이
-    오는 거시 촉매를 보호한다. 완전성보다 정합성이 우선이되, '날짜 미상'과 '오래됨'은 구분한다."""
+    날짜 미상 항목은 버리지 않는다 — 유가·지정학 등 날짜 태그 없이 오는 거시 촉매를 보호한다.
+    완전성보다 정합성이 우선이되, '날짜 미상'과 '오래됨'은 구분한다."""
     cutoff = today - timedelta(days=1)
     kept, dropped = [], []
     for c in catalysts:
-        if not isinstance(c, str):
-            continue
-        m = _DATE_PREFIX_RE.match(c)
-        clean = _DATE_PREFIX_RE.sub("", c).strip() if m else c.strip()
-        if not m:
-            kept.append(clean)
-            continue
-        try:
-            ev = date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-        except ValueError:
-            kept.append(clean)  # 파싱 불가 접두사는 판단 보류 → 유지
-            continue
-        if ev >= cutoff:
-            kept.append(clean)
+        if isinstance(c, dict):
+            text = (c.get("text") or c.get("catalyst") or "").strip()
+            if not text:
+                continue
+            ev = _parse_iso_date(c.get("date") or c.get("event_date") or "")
+        elif isinstance(c, str):
+            m = _DATE_PREFIX_RE.match(c)
+            text = _DATE_PREFIX_RE.sub("", c).strip() if m else c.strip()
+            ev = _parse_iso_date(f"{m.group(1)}-{m.group(2)}-{m.group(3)}") if m else None
         else:
-            dropped.append((clean, ev.isoformat()))
+            continue
+        if ev is not None and ev < cutoff:
+            dropped.append((text, ev.isoformat()))
+        else:
+            kept.append(text)  # 최신이거나 날짜 미상 → 유지
     for txt, ev in dropped:
         print(f"[fetch_news] stale catalyst 제외({ev}): {txt}", file=sys.stderr)
     return kept
