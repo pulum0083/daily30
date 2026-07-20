@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-21": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-21/kospi/",
+        "headline": "급락 다음날, 반등 신호가 우세해요",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:43"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-20": {
       "kospi": {
         "state": "ready",
@@ -527,20 +546,6 @@
       }
     },
     "2026-06-09": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-08": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
