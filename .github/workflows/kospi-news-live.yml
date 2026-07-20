@@ -89,7 +89,18 @@ jobs:
         if: steps.commit.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run vercel-deploy.yml --ref main -f sha=$(git rev-parse HEAD)
+        run: |
+          sha=$(git rev-parse HEAD)
+          for i in 1 2 3 4 5; do
+            if gh workflow run vercel-deploy.yml --ref main -f sha="$sha"; then
+              echo "✅ 배포 트리거 성공 (시도 $i/5)"
+              exit 0
+            fi
+            echo "⚠️ 배포 트리거 실패 (시도 $i/5) — GitHub API 일시 오류로 추정, 10초 후 재시도"
+            sleep 10
+          done
+          echo "::error::5회 시도 후에도 Vercel 배포 트리거 실패 — 데이터는 커밋됐지만 프로덕션에 반영 안 됨. 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
+          exit 1
 
       - name: 🚀 GitHub Pages 배포
         uses: peaceiris/actions-gh-pages@v4
