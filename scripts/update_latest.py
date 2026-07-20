@@ -46,14 +46,22 @@ def main():
     with open(analysis_file, encoding="utf-8") as f:
         data = json.load(f)
 
-    pred    = data.get("prediction", {})
-    reasons = [strip_html(r) for r in data.get("reasons", [])[:3]]
+    pred    = data.get("prediction") or {}
+
+    # 신 분석 포맷은 reasons·reason_title을 만들지 않고 key_drivers·todays_view를 쓴다.
+    # 키가 존재하면서 값이 null인 경우가 있어 .get(k, default)로는 막히지 않는다.
+    raw_reasons = data.get("reasons") or [
+        d.get("text", "") for d in (data.get("key_drivers") or []) if isinstance(d, dict)
+    ]
+    reasons = [strip_html(r) for r in raw_reasons[:3] if r]
+
+    title = data.get("reason_title") or (data.get("todays_view") or {}).get("view_title") or ""
 
     latest = {
         "date":       date_slug,
         "type":       args.type,
         "label":      TYPE_LABEL[args.type],
-        "title":      strip_html(data.get("reason_title", "")),
+        "title":      strip_html(title),
         "direction":  pred.get("direction", ""),
         "up_pct":     pred.get("up_pct", 0),
         "confidence": pred.get("confidence", 0),
