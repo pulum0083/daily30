@@ -155,8 +155,9 @@ US_PROMPT = """\
 
 [catalysts 작성 규칙]
 - 오늘 미국 증시 주도주·섹터를 움직일 '사건' 중심 뉴스만 담는다 (지수 등락률 나열이 아님)
-- **catalysts의 각 항목은 반드시 `{{"date": "YYYY-MM-DD", "text": "사건 → 영향"}}` 형태의 객체다** (문자열이 아니다). `date`는 그 사건이 실제 발생·발표된 날짜(실적이면 실적 발표일, 지정학·정책·유가면 사건 발생일)로, 검색으로 확인한 실제 날짜만 넣고 추측하지 않는다. `text`는 "무슨 사건 → 어느 종목·섹터에 왜 영향" 한 문장.
+- **catalysts의 각 항목은 반드시 `{{"date": "YYYY-MM-DD", "text": "사건 → 영향", "ticker": "대표 티커"}}` 형태의 객체다** (문자열이 아니다). `date`는 그 사건이 실제 발생·발표된 날짜(실적이면 실적 발표일, 지정학·정책·유가면 사건 발생일)로, 검색으로 확인한 실제 날짜만 넣고 추측하지 않는다. `text`는 "무슨 사건 → 어느 종목·섹터에 왜 영향" 한 문장. `ticker`는 그 사건의 주체 기업 미국 티커(예: 마이크론이면 "MU", 여러 곳이면 "JPM,GS"). 거시·지정학·유가 등 특정 기업이 없으면 빈 문자열 "".
 - **`date`는 오늘({today}) 또는 어제만 허용한다.** 이틀 이상 전에 발생·발표된 사건은, 오늘 후속 기사·리캡·주가 잔여 반응이 검색되더라도 담지 않는다. 특히 어닝(실적)은 며칠 전 발표분이 계속 검색된다고 매일 재등장시키지 않는다 — 발표일이 이틀 이상 전이면 catalysts에 넣지 말 것. 유가·지정학·정책 등 사건형 촉매도 오늘·어제 새로 전개된 것만 담는다.
+- **오늘·어제 새로 발표된 실적이 없으면 실적 catalyst를 억지로 만들지 않는다.** 어닝시즌이라도 오늘 실제로 나온 실적이 없는 날이 있다 — 그런 날은 빈자리를 며칠 전 실적으로 채우지 말고, 유가·지정학·매크로·개별 이벤트 등 오늘 실제로 움직인 촉매만 담거나 빈 배열로 둔다. 완전성보다 정합성이 우선이다.
 - 실제로 검색된 사건만 담고, 없으면 빈 배열 []
 - **오늘/어제 발표된 주요 기업 실적(어닝)은 catalysts에 최우선으로 담는다** — 실적 서프라이즈·가이던스·경영진 발언이 해당 종목뿐 아니라 다른 종목·섹터로 파급된 경우(read-through)를 인과로 정리한다.
 - **개장 전 실적으로 프리마켓에서 이미 움직인 섹터도 catalysts에 담는다** — 이 브리핑은 프리마켓 시점에 나가므로, 개장 전 반응은 오늘 세션을 예고하는 핵심 촉매다.
@@ -179,7 +180,7 @@ US_PROMPT = """\
     "아시아·유럽 증시 흐름"
   ],
   "catalysts": [
-    {{"date": "YYYY-MM-DD", "text": "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·오늘/어제 발생분만, 없으면 이 배열은 비운다)"}}
+    {{"date": "YYYY-MM-DD", "text": "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·오늘/어제 발생분만, 없으면 이 배열은 비운다)", "ticker": "대표 티커 또는 빈 문자열"}}
   ],
   "headlines": [
     "미국 증시 방향에 영향을 줄 헤드라인 1",
@@ -337,6 +338,88 @@ def _drop_cross_day_recaps(catalysts: list, stale_texts: list) -> list:
     return kept
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 독립 어닝 캘린더 검증 — flash-lite의 자기보고 날짜 대신 yfinance 실제 발표일로 판정
+#
+# 2026-07-20 실사고: 오늘(월) 신선한 실적이 없는데도 프롬프트가 "실적 최우선"을 요구하니
+# flash-lite가 몇 주 된 실적(마이크론 6/24·테슬라 인도량 7/2·JP모건 7/14)을 '오늘 촉매'로
+# 재소환했다. 교차일 게이트는 히스토리 창(5일) 밖 사건은 못 잡는다. 근본 차단을 위해,
+# 실적형 catalyst의 티커를 yfinance로 조회해 실제 최근 발표일이 max_age_days를 넘으면 제외한다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+_EARNINGS_KEYWORDS = ("실적", "어닝", "earnings", "eps", "매출", "순이익",
+                      "가이던스", "guidance", "분기", "컨퍼런스콜", "실적 발표")
+
+
+def _is_earnings_catalyst(text: str) -> bool:
+    t = (text or "").lower()
+    return any(k in t for k in _EARNINGS_KEYWORDS)
+
+
+def _parse_tickers(ticker_field) -> list:
+    """catalyst의 ticker 필드(문자열/리스트)에서 유효 티커(1~5자 라틴)만 추출."""
+    if isinstance(ticker_field, list):
+        raw = " ".join(str(x) for x in ticker_field)
+    else:
+        raw = str(ticker_field or "")
+    return [t for t in re.findall(r"[A-Za-z]{1,5}", raw.upper())
+            if t not in _GENERIC_UPPER]
+
+
+_earnings_age_cache: dict = {}
+
+
+def _days_since_last_earnings(ticker: str, today: date):
+    """yfinance로 ticker의 '가장 최근 과거 실적 발표일'을 조회해 today와의 일수 차를 반환.
+    조회 실패·데이터 없음이면 None(검증 불가 → 상위 로직이 '유지'로 판단)."""
+    if ticker in _earnings_age_cache:
+        return _earnings_age_cache[ticker]
+    age = None
+    try:
+        import yfinance as yf
+        df = yf.Ticker(ticker).get_earnings_dates(limit=12)
+        if df is not None and not df.empty:
+            past = [d.date() for d in df.index if getattr(d, "tzinfo", None) and d.date() <= today]
+            if past:
+                age = (today - max(past)).days
+    except Exception as e:
+        print(f"[fetch_news] 어닝일 조회 실패({ticker}): {e}", file=sys.stderr)
+    _earnings_age_cache[ticker] = age
+    return age
+
+
+def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
+                         age_fn=None) -> list:
+    """실적형 catalyst 중, 티커의 실제 최근 발표일이 max_age_days를 초과한 것을 제외.
+
+    - 실적형이 아니면(거시·지정학·제품 등) 검증하지 않고 유지.
+    - 티커가 없거나 조회 실패면 검증 불가 → 유지(과잉 제외 방지, 교차일 게이트가 백스톱).
+    - 여러 티커 중 하나라도 최근(≤max_age_days) 발표면 신선한 실적으로 보고 유지.
+    catalysts 항목은 {date,text,ticker} dict 또는 문자열. 반환 shape는 입력과 동일."""
+    age_fn = age_fn or _days_since_last_earnings
+    kept = []
+    for c in catalysts:
+        text = c.get("text", "") if isinstance(c, dict) else str(c)
+        ticker_field = c.get("ticker", "") if isinstance(c, dict) else ""
+        if not _is_earnings_catalyst(text):
+            kept.append(c)
+            continue
+        tickers = _parse_tickers(ticker_field)
+        if not tickers:
+            kept.append(c)  # 검증 불가 → 유지
+            continue
+        ages = [a for a in (age_fn(t, today) for t in tickers) if a is not None]
+        if not ages:
+            kept.append(c)  # 전부 조회 실패 → 유지
+            continue
+        if min(ages) > max_age_days:
+            print(f"[fetch_news] stale 실적 제외(최근 발표 {min(ages)}일 전 > {max_age_days}): {text}",
+                  file=sys.stderr)
+        else:
+            kept.append(c)
+    return kept
+
+
 def _history_path(briefing_type: str) -> Path:
     return DATA_DIR / f"catalyst_history_{briefing_type}.json"
 
@@ -428,9 +511,11 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     data = json.loads(raw)
     if isinstance(data.get("catalysts"), list):
         today_kst = datetime.now(KST).date()
-        # 1차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
-        cats = _filter_stale_catalysts(data["catalysts"], today_kst)
-        # 2차: 자기보고 날짜를 못 믿으므로, 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외
+        # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
+        cats = _drop_stale_earnings(data["catalysts"], today_kst)
+        # 2차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
+        cats = _filter_stale_catalysts(cats, today_kst)
+        # 3차: 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외(날짜 창 밖 재탕 백스톱)
         stale = _load_stale_catalysts(briefing_type, today_kst)
         data["catalysts"] = _drop_cross_day_recaps(cats, stale)
     return data
