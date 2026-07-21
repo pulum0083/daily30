@@ -213,12 +213,13 @@
   <tr><td>진입 HTML 크기</td><td class="num no">332 KB</td><td class="num ok">68 KB</td></tr>
   <tr><td>TTFB(측정값)</td><td class="num ok">0.11 s</td><td class="num">0.23 s</td></tr>
   <tr><td>폰트 로딩</td><td class="no">jsDelivr CDN, <code>@latest</code> 미고정</td><td>자체 번들</td></tr>
-  <tr><td>PWA</td><td class="ok">manifest + SW</td><td class="ok">manifest + SW + 설치 유도 버튼</td></tr>
+  <tr><td>PWA 설치 유도</td><td class="ok">허브·랜딩·섹터 있음 / 종목 상세 누락</td><td class="ok">전 페이지</td></tr>
 </table>
 </div>
 <p>정적 서빙이라 TTFB는 우리가 빠르지만, <code>web/stocks/index.html</code>은 CSS·JS가 전부 인라인된 332KB 단일 파일(4,290줄)이다. 초기 파싱 비용보다 <b>유지보수 리스크가 더 크다</b> — 이번 특이 신호 수정 때도 3천 줄대 인라인 스크립트를 헤집어야 했다.</p>
 <p><code>pretendard@latest</code>를 CDN에서 받는 것도 문제다. 버전이 고정돼 있지 않아 외부 변경이 예고 없이 레이아웃에 반영될 수 있고, 렌더 블로킹 서드파티 요청이 하나 더 붙는다.</p>
-<p>manifest는 양쪽 다 있지만 <code>beforeinstallprompt</code>를 잡아 설치를 권하는 UI가 우리 쪽엔 <b>0건</b>이라 홈 화면 추가로 이어질 확률이 낮다.</p>
+<p class="note" style="background:var(--warn-bg);color:var(--warn);padding:10px 12px;border-radius:8px;font-weight:600;">정정(2026-07-21) — 초판에 "설치 유도 UI 0건"이라 적었으나 <b>사실이 아니다.</b> <code>web/assets/pwa-install.js</code>가 <code>beforeinstallprompt</code>를 처리하며 허브·랜딩·인컴 설계기·섹터 8개에 이미 적용돼 있다. 인라인 코드만 grep해 외부 파일을 놓친 조사 오류였다.</p>
+<p>실제 갭은 <b>종목 상세 46개와 미국 상세 8개</b>다 — 이 두 템플릿만 <code>manifest</code> 링크와 설치 스크립트를 include하지 않아 <code>beforeinstallprompt</code>가 발화하지 않았다. 검색 유입이 도착하는 자리가 정작 종목 상세라 손실이 컸다. (수정 완료)</p>
 </div>
 
 <h2>3. 우리가 확실히 앞서는 것</h2>
@@ -312,6 +313,7 @@
   <li>티어1 카드 — <code>scripts/templates/stocks/detail.html</code>에 "AI 오늘의 전망" 0건</li>
   <li>적중률 — <code>web/data/accuracy-summary.json</code> (126전 85적중 67%)</li>
   <li>HTML 크기·TTFB — <code>curl</code> <code>size_download</code>·<code>time_total</code></li>
+  <li>⚠️ PWA 항목 초판 오류 — 인라인만 grep해 외부 <code>pwa-install.js</code>를 놓쳤다. <b>기능 유무는 인라인 코드가 아니라 로드되는 스크립트까지 확인할 것.</b></li>
   <li>코스피랩 기능 — <code>/updates</code> 릴리스 노트 및 각 페이지 직접 열람</li>
 </ul>
 <p class="note" style="margin-top:14px;">코스피랩 페이지의 문구·수치는 그쪽 서비스가 표시한 값을 관찰한 것이며, 정확성을 우리가 검증한 것은 아니다.</p>
