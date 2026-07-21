@@ -181,3 +181,103 @@ test('신호 카드 목록은 SIGNALS_DISPLAY_MAX개로 제한 (랭킹은 전체
   const ib = rank.find((g) => g.cat === 'inst_buy');
   assert.equal(ib.items.length, N); // 랭킹은 전체 집계(상한과 무관)
 });
+
+// ── ② 상승장 카테고리 (counter_down · surge_up) ──
+test('역행 하락: 시장 +4.14%인데 종목 -2.01% → counter_down', () => {
+  // 2026-07-21 LIG넥스원 실측 케이스. 지수 대비 6.15%p 언더퍼폼인데 기존 규칙으론 아무 신호도 없었다.
+  const s = { pct: -2.01, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, 4.14);
+  assert.ok(r.cats.includes('counter_down'));
+  assert.ok(!r.cats.includes('counter_up'));
+});
+
+test('역행 하락 하한선: 시장 +4.14%인데 종목 -0.84%(하한선 미달) → counter_down 아님', () => {
+  // 하한선 = -min(1.5, 4.14*0.25=1.035) = -1.035. '살짝 빨강'은 역행 하락으로 안 잡는다.
+  const s = { pct: -0.84, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, 4.14);
+  assert.ok(!r.cats.includes('counter_down'));
+});
+
+test('하락장에서 상승 종목은 역행 하락이 아니다: 시장 -5.8%인데 종목 +1.7%', () => {
+  const s = { pct: 1.7, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, -5.8);
+  assert.ok(!r.cats.includes('counter_down'));
+});
+
+test('동반 하락은 역행 하락이 아니다: 시장 -5.8%, 종목 -9%', () => {
+  const s = { pct: -9, vol: 100, vol_avg20: 100, price: 50, wk52_high: 200 };
+  const r = classifyStock(s, -5.8);
+  assert.ok(!r.cats.includes('counter_down'));
+});
+
+test('급등 + 거래량 급증: 거래량 2.4배 + +6.5% → surge_up', () => {
+  const s = { pct: 6.5, vol: 240, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, 4.14);
+  assert.ok(r.cats.includes('surge_up'));
+  assert.ok(!r.cats.includes('vol_surge'));
+  assert.ok(r.badges.some((b) => b.includes('거래량') && b.includes('2.4')));
+});
+
+test('급등해도 거래량이 안 늘면 surge_up 아님: +6.5%, 거래량 0.9배', () => {
+  const s = { pct: 6.5, vol: 90, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, 4.14);
+  assert.ok(!r.cats.includes('surge_up'));
+});
+
+// ── ③ 장중 거래량 배수 정규화 ──
+test('장중 정규화: 경과 50% 시점의 0.9배 누적은 페이스 1.8배 → vol_surge', () => {
+  // 분모(종일 평균)를 경과 비율로 축소해야 장중에도 임계 1.5를 정상 판정한다.
+  const s = { pct: -8.4, vol: 90, vol_avg20: 100, price: 100, wk52_high: 200 };
+  assert.ok(!classifyStock(s, -5.8).cats.includes('vol_surge'));      // 정규화 없으면 0.9배 → 미발화
+  const r = classifyStock(s, -5.8, { progress: 0.5 });
+  assert.ok(r.cats.includes('vol_surge'));
+  assert.ok(r.badges.some((b) => b.includes('1.8')));
+});
+
+test('progress 기본값은 1(종일 기준) — 기존 호출부 동작 불변', () => {
+  const s = { pct: -8.4, vol: 320, vol_avg20: 100, price: 100, wk52_high: 200 };
+  assert.deepEqual(classifyStock(s, -5.8).cats, classifyStock(s, -5.8, { progress: 1 }).cats);
+});
+
+test('개장 직후 하한(VOL_PROGRESS_FLOOR)으로 배수 폭발을 막는다', () => {
+  // progress=0.01이면 분모가 0에 수렴해 100배가 나온다. 하한 0.2로 눌러 보수적으로 동작해야 한다.
+  const s = { pct: -8.4, vol: 10, vol_avg20: 100, price: 100, wk52_high: 200 };
+  const r = classifyStock(s, -5.8, { progress: 0.01 });
+  assert.ok(!r.cats.includes('vol_surge'), '하한 없으면 10/(100*0.01)=10배로 오탐');
+});
+
+test('buildSignals가 progress를 classifyStock으로 전달한다', () => {
+  const stocks = [{ code: '1', name: 'A', sector: 'bio', pct: -8.4, vol: 90, vol_avg20: 100, price: 1, wk52_high: 99, amount: 1 }];
+  const { signals } = buildSignals(stocks, -5.8, { progress: 0.5 });
+  assert.ok(signals[0].cats.includes('vol_surge'));
+});
+
+// ── ④ 장중 수급 배지 접미사 ──
+test('수급 배지 접미사: 장중이면 (전일 기준) 부착', () => {
+  // 네이버 trend API는 장중에 당일 행을 주지 않는다(최신=전일). '잠정'이 아니라 '전일 기준'이 정확.
+  const trend = [{ foreign: 10, organ: 10 }, { foreign: 10, organ: 10 }, { foreign: 10, organ: 10 }];
+  const r = classifySupply(trend, { suffix: ' (전일 기준)' });
+  assert.ok(r.cats.includes('foreign_buy'));
+  assert.ok(r.badges.every((b) => b.endsWith(' (전일 기준)')), JSON.stringify(r.badges));
+});
+
+test('수급 배지 접미사: 미지정이면 기존 문구 그대로', () => {
+  const trend = [{ foreign: 10, organ: 10 }, { foreign: 10, organ: 10 }, { foreign: 10, organ: 10 }];
+  const r = classifySupply(trend);
+  assert.ok(r.badges.every((b) => !b.includes('전일 기준')));
+});
+
+// ── ① 거래대금 단위 버그 회귀 (코어 계약) ──
+test('turnover는 amount 순수 크기순 — 어댑터가 단위를 통일해 넘겨야 한다', () => {
+  // 실사고: 네이버 amount가 코스닥만 천원 단위라 1000배 뻥튀기돼 상위 3을 독식했다.
+  // 코어는 단위를 모르므로, 어댑터(signals.mjs)가 price*vol로 통일해 넘기는 계약을 문서화한다.
+  const stocks = [
+    { code: 'KOSPI-BIG', name: '대형주', sector: 'semicon', pct: 1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 6_492_088_713_000 },
+    { code: 'KOSDAQ-SM', name: '중소형', sector: 'bio', pct: 1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 33_906_600_000 },
+    { code: 'X', name: 'X', sector: 'bio', pct: 1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 1 },
+    { code: 'Y', name: 'Y', sector: 'bio', pct: 1, vol: 1, vol_avg20: 1, price: 1, wk52_high: 99, amount: 0 },
+  ];
+  const { signals } = buildSignals(stocks, 4.14);
+  const big = signals.find((s) => s.code === 'KOSPI-BIG');
+  assert.ok(big && big.cats.includes('turnover'), '실제 거래대금 1위가 turnover에 들어가야 한다');
+});
