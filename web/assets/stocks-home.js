@@ -2013,44 +2013,6 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
-  /* 💰 밸류에이션 시그널 — /data/valuation.json 실측 배선 (업종 상대 PER) */
-  var VAL_DATA=null, valTab='under';
-  function valRowHtml(o,i){
-    var neg=o.disc<0, cls=neg?'pos':'neg';
-    var mag=Math.round(Math.abs(o.disc));   // 배지·문구가 같은 반올림 값을 쓰도록 한 번만 계산
-    var badge=(neg?'-':'+')+mag+'%';
-    var phrase=neg?('업종보다 '+mag+'% 싸요'):('업종보다 '+mag+'% 비싸요');
-    return '<a class="val-row" onclick="goStock(\''+o.code+'\')">'
-      +'<span class="val-rk">'+(i+1)+'</span>'
-      +'<div class="val-main">'
-        +'<div class="val-nm">'+o.name+'</div>'
-        +'<div class="val-l2"><span class="val-sect">'+o.sector+'</span><span class="val-per">선행 <b>'+o.per.toFixed(1)+'</b><span class="vs">vs</span>업종 '+o.sectorMed.toFixed(1)+'</span></div>'
-      +'</div>'
-      +'<div class="val-cmp"><span class="val-badge '+cls+'">'+badge+'</span><span class="val-phrase '+cls+'">'+phrase+'</span></div>'
-      +'</a>';
-  }
-  function valRender(){
-    var w=document.getElementById('val-rows'); if(!w||!VAL_DATA) return;
-    var arr=(valTab==='under'?VAL_DATA.undervalued:VAL_DATA.overvalued).slice(0,10);
-    w.innerHTML=arr.length?arr.map(valRowHtml).join(''):'<p class="sig-intro" style="padding:20px 16px;text-align:center;color:#94A3B8;">표시할 종목이 없어요.</p>';
-    var intro=document.getElementById('val-intro');
-    if(intro) intro.textContent=(valTab==='under')
-      ?'업종 평균 대비 선행 PER이 낮은 코스피200 종목이에요.'
-      :'업종 평균 대비 선행 PER이 높은 코스피200 종목이에요.';
-  }
-  function valSetTab(tab,el){
-    valTab=tab;
-    if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
-    valRender();
-  }
-  window.valSetTab=valSetTab;
-  function loadValuation(){
-    fetch('/data/valuation.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
-      .then(function(d){ if(!d) return; VAL_DATA=d;
-        var b=document.getElementById('val-upd-badge'); if(b&&d.asOf) b.textContent=d.asOf+' 기준';
-        valRender();
-      }).catch(function(){});
-  }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
@@ -2518,7 +2480,6 @@ if(passBtn){
       }).catch(function(){ resolve(); });
   }
   loadSignals();
-  loadValuation();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(snap){

@@ -341,22 +341,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .skl-line{height:13px;display:block;}
 .skl-sig{padding:13px 16px;border-bottom:1px solid #F1F5F9;}.skl-sig:last-child{border-bottom:none;}
 /* 💰 밸류에이션 시그널 — 좁은 사이드바용 컴팩트 행 (종목 · PER비교 · 배지+문구) */
-.val-row{display:flex;align-items:center;gap:9px;padding:11px 16px;text-decoration:none;border-bottom:1px solid #F1F5F9;cursor:pointer;background:var(--canvas);}
-.val-row:last-of-type{border-bottom:none;}
-.val-row:hover{background:var(--primary-bg);}
-.val-rk{flex:none;width:16px;font-size:12.5px;font-weight:800;color:#B4BAC2;font-variant-numeric:tabular-nums;text-align:center;}
-.val-main{flex:1;min-width:0;}
-.val-nm{font-size:13.5px;font-weight:800;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.val-l2{display:flex;align-items:center;gap:6px;margin-top:4px;}
-.val-sect{flex:none;font-size:10.5px;font-weight:600;color:#4B5563;background:var(--inset);border-radius:5px;padding:1px 6px;}
-.val-per{font-size:11.5px;color:#64748B;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.val-per b{color:#0F172A;font-weight:700;}
-.val-per .vs{color:#B4BAC2;font-weight:600;margin:0 2px;}
-.val-cmp{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
-.val-badge{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1;}
-.val-badge.pos{color:#0F9D58;}.val-badge.neg{color:var(--up);}
-.val-phrase{font-size:10.5px;font-weight:600;white-space:nowrap;}
-.val-phrase.pos{color:#0F9D58;}.val-phrase.neg{color:var(--up);}
 /* 신호별 랭킹 (우측) */
 .srk-grp{border-bottom:1px solid #F1F5F9;background:var(--canvas);}
 .srk-grp:last-child{border-bottom:none;}
