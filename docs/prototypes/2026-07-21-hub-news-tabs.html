@@ -1,0 +1,196 @@
+<!-- 허브 밸류에이션 자리 → 3종 뉴스 리스트(코스피·미국 반도체·미국 시황) 교체 프로토타입 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>허브 뉴스 탭 프로토타입 — Double-Shot</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --canvas:#fff; --inset:#F1F5F9; --ink:#0F172A; --muted:#64748B; --hair:#E2E8F0;
+    --primary:#2775ED; --primary-bg:#EFF6FF; --up:#E03131; --dn:#2775ED; --bg:#F7F9FC;
+  }
+  @media(prefers-color-scheme:dark){:root{
+    --canvas:#16181c; --inset:#1c1f24; --ink:#eceef1; --muted:#9aa0a8; --hair:#282b31;
+    --primary:#5b9dff; --primary-bg:#152238; --bg:#0e0f12;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+       line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .page{max-width:640px;margin:0 auto;padding:24px 16px 60px;}
+  .proto-note{background:var(--primary-bg);border:1px solid var(--hair);border-left:3px solid var(--primary);
+              border-radius:10px;padding:14px 16px;margin:0 0 20px;font-size:13px;color:var(--ink);}
+  .proto-note b{font-weight:750;}
+  .proto-note code{background:var(--inset);border-radius:4px;padding:1px 5px;font-size:12px;}
+  .proto-h{font-size:12px;font-weight:800;color:var(--muted);margin:26px 0 8px;letter-spacing:.02em;}
+
+  /* ── 허브 실제 클래스 재현 ── */
+  .block{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin:0 0 14px;}
+  .block__h{display:flex;align-items:center;padding:13px 16px 11px;border-bottom:1px solid var(--hair);}
+  .block__t{display:flex;align-items:center;gap:6px;font-size:14.5px;font-weight:800;}
+  .block__t .ic{font-size:15px;}
+  .help-q{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;
+          border-radius:50%;background:var(--inset);color:var(--muted);font-size:10px;font-weight:800;cursor:help;}
+  .sig-subhead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:6px;
+               padding:8px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+  .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);
+             border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;}
+  .stabs{display:inline-flex;background:var(--inset);border-radius:8px;padding:3px;gap:2px;}
+  .stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 11px;
+           border-radius:6px;cursor:pointer;white-space:nowrap;}
+  .stabs a.on{background:var(--canvas);color:#0284C7;box-shadow:0 1px 2px rgba(0,0,0,.06);}
+  .sig-intro{margin:0;padding:10px 16px 4px;font-size:12px;color:var(--muted);}
+
+  /* ── 뉴스 행 (val-row 골격을 뉴스용으로) ── */
+  .nw-row{display:flex;gap:10px;padding:11px 16px;text-decoration:none;color:inherit;
+          border-bottom:1px solid var(--hair);background:var(--canvas);transition:background .14s;}
+  .nw-row:last-child{border-bottom:none;}
+  .nw-row:hover{background:var(--primary-bg);}
+  .nw-t{flex:none;width:38px;font-size:11px;font-weight:800;color:#94A3B8;
+        font-variant-numeric:tabular-nums;padding-top:2px;}
+  .nw-main{flex:1;min-width:0;}
+  .nw-hl{font-size:13.5px;font-weight:700;line-height:1.45;color:var(--ink);
+         display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .nw-row:hover .nw-hl{color:var(--primary);}
+  .nw-sm{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px;
+         display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+  .nw-src{font-size:10.5px;color:#94A3B8;font-weight:700;margin-top:3px;}
+  .nw-thumb{flex:none;width:56px;height:56px;border-radius:8px;background:var(--inset);
+            object-fit:cover;}
+  .nw-foot{padding:10px 16px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--hair);
+           display:flex;justify-content:space-between;gap:8px;}
+  .nw-foot a{color:var(--primary);text-decoration:none;font-weight:700;}
+  .stale{background:#FEF3C7;color:#92400E;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;}
+  @media(prefers-color-scheme:dark){.stale{background:#2a2113;color:#e0a044;}}
+  .mock{background:#FEE2E2;color:#B91C1C;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:800;}
+  @media(prefers-color-scheme:dark){.mock{background:#2a1719;color:#ff6b6b;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="proto-note">
+  <b>프로토타입 — 허브 <code>/stocks/</code>의 「💰 밸류에이션 시그널」 블록 교체안</b><br><br>
+  한 블록 + 탭 3개 구조(A안). <b>페이지 접근마다 활성 탭이 랜덤</b>으로 정해집니다 —
+  새로고침해서 확인해 보세요. 지금 열린 탭은 <b id="picked">—</b>입니다.<br><br>
+  코스피·미국 시황 항목은 <code>kospi-news-live.json</code>의 <b>실제 수집 데이터</b>입니다.
+  미국 반도체는 <span class="mock">MOCK</span> — 아직 수집기가 없어 형태만 보여주는 가짜 데이터입니다.
+</div>
+
+<div class="proto-h">교체 후 — 블록 미리보기</div>
+
+<div class="block">
+  <div class="block__h">
+    <span class="block__t">
+      <span class="ic">📰</span><span id="nw-title">시장 뉴스</span>
+      <span class="help-q" title="코스피 장중 이슈, 미국 반도체, 미국 시황 뉴스를 모아 보여줘요. 제목을 누르면 원문 기사로 이동해요.">?</span>
+    </span>
+  </div>
+  <div class="sig-subhead">
+    <span class="upd-badge" id="nw-upd">15:31 갱신</span>
+    <span class="stabs" id="nw-tabs">
+      <a data-k="kospi" onclick="nwTab('kospi',this)">코스피</a>
+      <a data-k="chip"  onclick="nwTab('chip',this)">미국 반도체</a>
+      <a data-k="us"    onclick="nwTab('us',this)">미국 시황</a>
+    </span>
+  </div>
+  <p class="sig-intro" id="nw-intro"></p>
+  <div id="nw-rows"></div>
+  <div class="nw-foot">
+    <span id="nw-cnt"></span>
+    <a href="#" onclick="return false;">전체 보기 →</a>
+  </div>
+</div>
+
+<div class="proto-h">참고 — 랜덤 탭 동작 규칙</div>
+<div class="proto-note" style="border-left-color:#94A3B8;background:var(--canvas);">
+  · 데이터가 <b>1건 이상 있는 탭 중에서만</b> 랜덤 선택합니다. 빈 탭이 열려 "표시할 뉴스가 없어요"가
+  첫인상이 되는 걸 막습니다(운영 규칙 0 — 빈 상태 노출 대신 생략).<br>
+  · 미국 시황은 <b>21:30~01:00에만 수집</b>되므로 낮에는 어젯밤 데이터입니다.
+  그 경우 <span class="stale">어젯밤</span> 배지를 붙여 사실대로 표기합니다.<br>
+  · 세 탭 모두 비면 블록 자체를 숨깁니다.
+</div>
+
+<script>
+/* ── 프로토타입 목업 데이터 ──
+   kospi/us : web/data/kospi-news-live.json 및 아카이브의 실제 수집 항목
+   chip     : 수집기 미구현 → 형태 확인용 MOCK (실서비스에서는 fetch_us_chip_news.py가 채운다) */
+var DATA = {
+  kospi: {
+    label: '코스피',
+    intro: '장중 30분마다 갱신되는 코스피 이슈예요.',
+    stale: false, mock: false, updated: '15:31',
+    items: [
+      {t:'15:31', h:'외국인 매도 완화, 코스피 1만2,500 유지', s:'외국인 순매도 규모가 줄면서 지수가 1만2,500선을 지켰어요.', src:'SBS Biz'},
+      {t:'15:31', h:'JP모건 "코스피 급락, 과도한 레버리지 청산 탓…목표치 12,500 유지"', s:'JP모건은 이번 급락을 레버리지 청산으로 보고 목표치를 유지했어요.', src:'연합인포맥스'},
+      {t:'14:31', h:'코스피, 5% 급등에 매수 사이드카…올해 19번째 발동', s:'프로그램 매수호가 효력이 일시 정지됐어요.', src:'뉴스핌'},
+      {t:'14:31', h:'월가가 주목하는 코스피…"너무 빠졌다 vs 변동성 우려"', s:'월가에서 저가 매수론과 변동성 경계론이 엇갈리고 있어요.', src:'오피니언뉴스'},
+      {t:'14:01', h:'코스피, 외국인·기관 쌍끌이 속 6800선 회복', s:'외국인과 기관이 동시에 순매수하며 낙폭을 만회했어요.', src:'뉴데일리'},
+      {t:'13:01', h:"'코스피 1만피' 가능할까…개미 투자자들의 전망은", s:'개인 투자자 사이에서 지수 전망이 엇갈리고 있어요.', src:'지디넷코리아'}
+    ]
+  },
+  chip: {
+    label: '미국 반도체',
+    intro: '엔비디아·AMD·마이크론 등 미국 반도체 종목 뉴스예요.',
+    stale: false, mock: true, updated: '14:30',
+    items: [
+      {t:'14:30', h:'[MOCK] Nvidia unveils next-gen data center GPU roadmap', s:'차세대 데이터센터 GPU 로드맵을 공개했어요.', src:'Reuters', thumb:1},
+      {t:'13:10', h:'[MOCK] Micron raises HBM capacity guidance on AI demand', s:'AI 수요를 근거로 HBM 생산능력 전망을 올렸어요.', src:'Bloomberg', thumb:1},
+      {t:'11:45', h:'[MOCK] ASML books record orders as EUV backlog grows', s:'EUV 수주잔고가 늘며 사상 최대 수주를 기록했어요.', src:'CNBC', thumb:1},
+      {t:'09:20', h:'[MOCK] AMD expands MI series lineup for inference workloads', s:'추론 워크로드용 MI 시리즈 라인업을 넓혔어요.', src:'The Verge', thumb:1},
+      {t:'08:05', h:'[MOCK] Broadcom signs multi-year custom silicon deal', s:'대형 고객사와 다년 커스텀 실리콘 계약을 맺었어요.', src:'WSJ', thumb:1}
+    ]
+  },
+  us: {
+    label: '미국 시황',
+    intro: '미국 장중(21:30~01:00 KST)에 수집한 시황 뉴스예요.',
+    stale: true, mock: false, updated: '어제 23:31',
+    items: [
+      {t:'23:31', h:'Wall Street futures rise as oil eases and investors weigh earnings', s:'유가가 진정되며 선물이 올랐고 실적 시즌을 주시하고 있어요.', src:'Yahoo Finance'},
+      {t:'22:31', h:'Stock Market Today: Oil in Focus as Mideast Tensions Persist', s:'중동 긴장이 이어지며 유가가 시장의 초점이 됐어요.', src:'WSJ'},
+      {t:'21:31', h:'Stock Market Today: Dow, S&P 500 and Nasdaq look set to open higher', s:'3대 지수가 상승 출발할 것으로 보여요.', src:'MarketWatch'}
+    ]
+  }
+};
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function nwRender(k){
+  var d = DATA[k];
+  document.getElementById('nw-intro').textContent = d.intro;
+  document.getElementById('nw-upd').innerHTML =
+    esc(d.updated) + ' 갱신' + (d.stale ? ' <span class="stale">어젯밤</span>' : '')
+                   + (d.mock ? ' <span class="mock">MOCK</span>' : '');
+  document.getElementById('nw-rows').innerHTML = d.items.map(function(it){
+    return '<a class="nw-row" href="#" onclick="return false;">'
+      + '<span class="nw-t">' + esc(it.t) + '</span>'
+      + '<span class="nw-main">'
+        + '<span class="nw-hl">' + esc(it.h) + '</span>'
+        + '<span class="nw-sm">' + esc(it.s) + '</span>'
+        + '<span class="nw-src">' + esc(it.src) + '</span>'
+      + '</span>'
+      + (it.thumb ? '<span class="nw-thumb"></span>' : '')
+      + '</a>';
+  }).join('');
+  document.getElementById('nw-cnt').textContent = d.items.length + '건 · 제목을 누르면 원문으로 이동해요';
+  [].forEach.call(document.querySelectorAll('#nw-tabs a'), function(a){
+    a.classList.toggle('on', a.getAttribute('data-k') === k);
+  });
+}
+function nwTab(k, el){ nwRender(k); }
+
+/* 페이지 접근마다 활성 탭 랜덤 — 단, 데이터가 있는 탭 중에서만 고른다 */
+(function(){
+  var keys = Object.keys(DATA).filter(function(k){ return (DATA[k].items || []).length > 0; });
+  if (!keys.length) { document.querySelector('.block').style.display = 'none'; return; }
+  var pick = keys[Math.floor(Math.random() * keys.length)];
+  nwRender(pick);
+  document.getElementById('picked').textContent = DATA[pick].label;
+})();
+</script>
+
+</div>
+</body>
+</html>
