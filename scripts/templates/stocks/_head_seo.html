@@ -1,0 +1,18 @@
+{# 종목·미국 상세 페이지 공용 SEO 메타 partial — generate_html._seo_ctx()가 채운다 #}
+{# 값은 Python에서 이미 HTML 이스케이프됨(make_env는 autoescape=False) #}
+<meta name="description" content="{{ seo_desc }}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="{{ seo_url }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Double-Shot">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="{{ seo_url }}">
+<meta property="og:title" content="{{ seo_title }}">
+<meta property="og:description" content="{{ seo_desc }}">
+<meta property="og:image" content="{{ seo_image }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo_title }}">
+<meta name="twitter:description" content="{{ seo_desc }}">
+<meta name="twitter:image" content="{{ seo_image }}">
+{% for block in seo_jsonld %}<script type="application/ld+json">{{ block }}</script>
+{% endfor %}

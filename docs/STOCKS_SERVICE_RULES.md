@@ -206,3 +206,28 @@ SK하이닉스(6.5조)·삼성전자(3.9조)는 **구조적으로 선정 불가*
 3. 스냅샷의 `vol_avg20`·`wk52_high` 결측을 확인한다. 결측이면 해당 규칙이 통째로 죽는다.
 4. **임계값을 낮춰 개수를 늘리지 않는다.** `near_high`(98%)처럼 그 국면에 드문 게 정상인 신호가 있다.
    신호 개수를 위해 임계를 낮추면 라벨이 거짓이 된다(운영 규칙 0).
+
+### SEO 메타는 생성기가 주입한다 — 템플릿에 손으로 넣지 말 것 (2026-07-21)
+
+종목 상세 46개가 `<title>` 외에 `description`·`canonical`·OG·JSON-LD를 **하나도 갖지 않은 채**
+발행되고 있었다. §9 발행 전 검증 기준 4번("JSON-LD 유효")이 문서상 체크리스트로만 존재해
+아무도 못 잡았다. 섹터 8개는 `sitemap.xml`에도 빠져 색인 경로 자체가 없었다.
+
+- **주입 지점**: `generate_html.py`의 `_seo_ctx()` / `_breadcrumb()` / `_stock_seo()`.
+  standalone 템플릿(`stocks/detail.html`·`stocks/us_detail.html`)은 공용 partial
+  `stocks/_head_seo.html`을 include하고, `base.html` 상속 페이지(섹터·브리핑)는 base가 처리한다.
+- **⚠️ 이스케이프는 Python에서.** `make_env()`가 `autoescape=False`라 템플릿에서 그대로 찍으면
+  따옴표가 섞였을 때 속성이 깨진다. `_attr()`로 미리 이스케이프해 넘긴다.
+  JSON-LD는 `_jsonld()`가 `</` → `<\/`로 바꿔 script 조기 종료를 막는다.
+- **description은 그 페이지에 실제로 있는 섹션만 나열한다.** 목표주가는 현재 3종목만
+  수집되므로 전 종목에 적으면 43종목이 없는 걸 있다고 말하게 된다(운영 규칙 0 위반).
+  `_stock_seo()`가 데이터 유무를 보고 문구를 조립한다.
+- **JSON-LD는 페이지에 실제로 있는 것만 선언한다.** `BreadcrumbList`(화면의 브레드크럼과 1:1) +
+  `Corporation`(종목). **`FAQPage`는 실제 FAQ 콘텐츠를 만들기 전엔 선언 금지** — 구글 구조화
+  데이터 가이드라인 위반이다. `SearchAction`도 우리 검색이 URL 기반이 아니라 선언할 수 없다.
+  미국 **ETF에는 `Corporation`을 붙이지 않는다**(법인이 아님).
+- **회귀 방지**: `scripts/test_stock_seo_meta.py`. 템플릿을 네트워크 없이 렌더해 5종 메타·
+  JSON-LD 파싱·브레드크럼 경로 일치·이스케이프·sitemap 섹터 포함을 검사한다.
+- **재발 시 진단**: ① `curl` 로 실제 발행 페이지 `<head>`를 직접 확인(로컬 템플릿만 보지 말 것).
+  ② 없으면 `generate_html.py`가 `_seo_ctx()` 결과를 render 컨텍스트에 실제로 넘기는지 확인.
+  ③ 새 페이지 타입을 추가할 때 partial include 또는 base 상속 중 하나를 반드시 태울 것.

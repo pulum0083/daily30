@@ -6,10 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Double-Shot{% endblock %}</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+{# description은 og_desc 블록을 그대로 재사용 — 두 곳이 어긋나지 않게 한 곳에서만 쓴다 #}
+<meta name="description" content="{{ self.og_desc() }}">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Double-Shot">
+<meta property="og:locale" content="ko_KR">
+{% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}">{% endif %}
 <meta property="og:title" content="{% block og_title %}Double-Shot — AI 투자 브리핑{% endblock %}">
 <meta property="og:description" content="{% block og_desc %}매일 아침·저녁 AI 시장 예측 브리핑{% endblock %}">
-{% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+<meta property="og:image" content="{{ og_image | default('https://doubleshot.space/assets/og-image.png') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ self.og_title() }}">
+<meta name="twitter:description" content="{{ self.og_desc() }}">
+<meta name="twitter:image" content="{{ og_image | default('https://doubleshot.space/assets/og-image.png') }}">
+{% for block in seo_jsonld | default([]) %}<script type="application/ld+json">{{ block }}</script>
+{% endfor %}
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <link rel="stylesheet" href="{{ css_path | default('/assets/style.css?v=20260704') }}">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">

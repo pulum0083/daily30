@@ -13,6 +13,7 @@ web/briefings/{date}/{internal}/index.html 로 출력한다.
 """
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -114,6 +115,58 @@ def make_env() -> Environment:
     env.filters["tojson"] = lambda v: json.dumps(v, ensure_ascii=False)
     env.filters["acc_cls"] = lambda p: "good" if p >= 70 else ("mid" if p >= 50 else "bad")
     return env
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SEO 메타 (2026-07-21 신설) — 종목·미국·섹터 상세 페이지의 head 메타를 한곳에서 만든다.
+#
+# 배경: 종목 상세 46개가 <title> 외에 description·canonical·OG·JSON-LD를 하나도 갖지
+# 않은 채 발행되고 있었다(STOCKS_SERVICE_RULES §9 발행 게이트 4번 미이행). 검색 유입을
+# 노린 영구 자산인데 정작 검색엔진에 제출되는 형태가 비어 있었다.
+#
+# ⚠️ make_env()가 autoescape=False라 meta content를 템플릿에서 그대로 찍으면 따옴표가
+#    섞였을 때 속성이 깨진다. 반드시 여기서 이스케이프해 넘긴다.
+
+SITE_BASE = "https://doubleshot.space"
+OG_IMAGE_URL = f"{SITE_BASE}/assets/og-image.png"
+
+
+def _attr(value) -> str:
+    """meta content 등 HTML 속성에 넣을 값을 이스케이프한다."""
+    return html.escape(str(value or ""), quote=True)
+
+
+def _jsonld(obj) -> str:
+    """JSON-LD 직렬화. 본문에 '</'가 들어가면 <script>가 조기 종료되므로 이스케이프한다."""
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+
+
+def _breadcrumb(items) -> dict:
+    """items: [(name, path|None)] — 마지막 항목은 현재 페이지라 path가 없어도 된다."""
+    elements = []
+    for i, (name, path) in enumerate(items, start=1):
+        el = {"@type": "ListItem", "position": i, "name": name}
+        if path:
+            el["item"] = f"{SITE_BASE}{path}"
+        elements.append(el)
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": elements}
+
+
+def _seo_ctx(*, title: str, description: str, path: str, jsonld=None) -> dict:
+    """템플릿 partial(_head_seo.html)이 쓰는 컨텍스트를 만든다.
+
+    jsonld: dict 또는 dict 리스트. 리스트면 @graph 없이 script 태그를 여러 개 낸다.
+    """
+    blocks = []
+    if jsonld:
+        blocks = jsonld if isinstance(jsonld, list) else [jsonld]
+    return {
+        "seo_title": _attr(title),
+        "seo_desc": _attr(description),
+        "seo_url": f"{SITE_BASE}{path}",
+        "seo_image": OG_IMAGE_URL,
+        "seo_jsonld": [_jsonld(b) for b in blocks],
+    }
 
 
 def fmt_time(generated_at: str) -> str:
@@ -1452,6 +1505,50 @@ def _load_sectors():
     return _SECTORS_CACHE
 
 
+def _stock_seo(stock, ctx) -> dict:
+    """종목 상세 페이지의 SEO 메타 컨텍스트.
+
+    description은 그 페이지에 **실제로 있는 섹션만** 나열한다. 목표주가·수급·분기 실적은
+    종목마다 수집 여부가 달라서(목표주가는 현재 3종목뿐) 없는 걸 적으면 운영 규칙 0 위반이다.
+    """
+    name, code = stock["name"], stock["code"]
+    sector = stock.get("sector") or ""
+
+    have = ["종가·등락률", "52주 범위", "20일선·200일선"]
+    if ctx.get("foreign_rate") is not None:
+        have.append("외국인 보유율")
+    if ctx.get("supply5"):
+        have.append("수급")
+    if ctx.get("financials"):
+        have.append("분기 실적")
+    if ctx.get("broker_targets"):
+        have.append("증권사 목표주가")
+    desc = (
+        f"{name}({code}) {sector} 종목 분석. "
+        f"{' · '.join(have)}을 실측 데이터로 정리했어요. "
+        "특이 신호와 더블샷 AI 픽 트랙레코드도 함께 봐요."
+    )
+
+    crumbs = [("홈", "/stocks/"), ("종목", "/stocks/")]
+    if stock.get("sector_key"):
+        crumbs.append((sector, f"/stocks/sector/{stock['sector_key']}/"))
+    crumbs.append((name, f"/stocks/{code}/"))
+
+    corp = {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "name": name,
+        "tickerSymbol": code,
+        "url": f"{SITE_BASE}/stocks/{code}/",
+    }
+    return _seo_ctx(
+        title=f"{name}({code}) · 종목 분석 — 더블샷",
+        description=desc,
+        path=f"/stocks/{code}/",
+        jsonld=[_breadcrumb(crumbs), corp],
+    )
+
+
 def build_stock_page(stock, peers):
     """종목 1개의 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
     rd = stock_realdata(stock["code"])
@@ -1491,6 +1588,7 @@ def build_stock_page(stock, peers):
         "acc": acc,
         "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
     }
+    ctx.update(_stock_seo(stock, ctx))
     html = tmpl.render(**ctx)
     out_dir = WEB_DIR / "stocks" / stock["code"]
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1509,6 +1607,28 @@ def build_us_stock_page(stock, peers, env):
     tmpl = env.get_template("stocks/us_detail.html")
     asof = rd.get("asof") or datetime.now(KST).strftime("%Y-%m-%d")
     generated_label = f"{asof[5:7]}-{asof[8:10]} 종가"
+    tk = stock["ticker"].lower()
+    ticker, name = stock["ticker"], stock["name"]
+    is_etf = stock.get("kind") != "stock"
+    have = ["시세·등락률", "52주 범위", "프리·정규·애프터 1분봉"]
+    if financials:
+        have.append("분기 실적")
+    seo = _seo_ctx(
+        title=f"{name}({ticker}) · 미국 반도체 — 더블샷",
+        description=(
+            f"{name}({ticker}) {'ETF' if is_etf else '종목'} 분석. "
+            f"{' · '.join(have)}을 실측 데이터로 정리했어요. 원화 환산으로도 볼 수 있어요."
+        ),
+        path=f"/stocks/us/{tk}/",
+        # ETF는 Corporation이 아니므로 브레드크럼만 낸다(타입을 억지로 붙이지 않는다).
+        jsonld=[_breadcrumb([
+            ("홈", "/stocks/"), ("종목", "/stocks/"),
+            ("미국 반도체", None), (name, f"/stocks/us/{tk}/"),
+        ])] + ([] if is_etf else [{
+            "@context": "https://schema.org", "@type": "Corporation",
+            "name": name, "tickerSymbol": ticker, "url": f"{SITE_BASE}/stocks/us/{tk}/",
+        }]),
+    )
     html = tmpl.render(
         stock=stock,
         rd=rd,
@@ -1516,8 +1636,8 @@ def build_us_stock_page(stock, peers, env):
         peers=peers,
         generated_label=generated_label,
         acc=_briefing_accuracy(),
+        **seo,
     )
-    tk = stock["ticker"].lower()
     out_dir = WEB_DIR / "stocks" / "us" / tk
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
@@ -1609,6 +1729,17 @@ def write_sitemap_xml():
                 "changefreq": "daily",
                 "priority": "0.8",
             })
+
+    # 생성된 섹터 페이지만 포함 (2026-07-21 추가 — 생성은 되는데 sitemap에 빠져 색인 경로가 없었다)
+    universe_path = CONFIG_DIR / "stock_universe.json"
+    if universe_path.exists():
+        for key in load_json(universe_path).get("sectors", {}):
+            if (WEB_DIR / "stocks" / "sector" / key / "index.html").exists():
+                urls.append({
+                    "loc": f"{BASE}/stocks/sector/{key}/",
+                    "changefreq": "daily",
+                    "priority": "0.7",
+                })
 
     # 생성된 미국 반도체 상세 페이지만 포함
     for s in load_json(US_STOCKS_PATH):
@@ -1793,9 +1924,16 @@ def build_sector_pages():
             "total": len(pcts),
         }
 
+        # description·og:title은 템플릿의 og_desc/og_title 블록이 정본이다(base.html이 재사용).
+        # 여기서는 그 블록이 만들지 못하는 canonical·JSON-LD만 넘긴다.
         html = tpl.render(
             sector_label=sector["label"],
             sector_key=key,
+            canonical_url=f"{SITE_BASE}/stocks/sector/{key}/",
+            seo_jsonld=[_jsonld(_breadcrumb([
+                ("홈", "/stocks/"), ("종목", "/stocks/"),
+                (sector["label"], f"/stocks/sector/{key}/"),
+            ]))],
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
             sector_desc=_SECTOR_DESC.get(key, ""),
             stocks=stocks,
