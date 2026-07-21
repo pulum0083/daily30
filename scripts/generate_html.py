@@ -132,6 +132,11 @@ def make_env() -> Environment:
 SITE_BASE = "https://doubleshot.space"
 OG_IMAGE_URL = f"{SITE_BASE}/assets/og-image.png"
 
+# 하이퍼리퀴드 xyz dex에 상장돼 야간 추정가(/api/hl-night)를 받을 수 있는 한국 종목.
+# api/hl-night.mjs 의 SYM2CODE 미러 — 거기에 심볼이 늘면 여기도 함께 늘린다.
+# 여기 없는 종목은 야간 소스 자체가 없으므로 히어로 스트립을 아예 렌더하지 않는다(빈 자리 노출 금지).
+HL_NIGHT_CODES = {"005930", "000660", "005380"}
+
 # 발행 게이트(verify_publish_gate)에 걸려 파일로 쓰이지 않은 페이지 URL.
 # 비어 있지 않으면 main()이 exit 1 한다 — 다만 그 페이지의 직전 정상본은 그대로 살아 있다.
 GATE_BLOCKED = []
@@ -1593,6 +1598,7 @@ def build_stock_page(stock, peers):
         "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
         "acc": acc,
         "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
+        "hl_night": stock["code"] in HL_NIGHT_CODES,
     }
     ctx.update(_stock_seo(stock, ctx))
     html = tmpl.render(**ctx)
