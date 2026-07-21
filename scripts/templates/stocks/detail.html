@@ -9,8 +9,14 @@
 <title>{{ stock.name }}({{ stock.code }}) · 종목 분석 — 더블샷</title>
 {% include "stocks/_head_seo.html" %}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/stocks.css?v=4">
+{# PWA — manifest 링크가 없으면 beforeinstallprompt가 발화하지 않아 설치 버튼이 뜨지 않는다.
+   허브·랜딩·섹터엔 이미 있었는데 종목 상세에만 빠져 있었다(2026-07-21). #}
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0F172A">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="/assets/pwa-install.js" defer></script>
 <script defer src="/assets/stocks.js"></script>
 </head>
 <body>
