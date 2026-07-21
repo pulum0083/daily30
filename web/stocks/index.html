@@ -1782,7 +1782,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       <div class="block__h"><span class="block__t"><span class="ic">⚡</span><span id="sig-title">오늘의 특이 신호</span><span class="help-q" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 하락장에서 코스피와 반대로 오르며 지수보다 3%p 이상 강세<br>· <b>역행 하락</b> — 상승장에서 코스피와 반대로 내리며 지수보다 3%p 이상 약세<br>· <b>거래량 급증 · 급락</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>거래량 급증 · 급등</b> — 거래량이 20일 평균의 1.5배 이상이면서 +3% 이상 급등<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환. 수급은 장 마감 후 집계돼서, 장중에는 <b>전일 기준</b> 값으로 표시해요<br><br>장중 거래량 배수는 <b>경과 시간을 반영한 페이스 기준</b>이에요. 예를 들어 정오에 하루 평균의 0.9배가 쌓였다면 1.8배 페이스로 봐요.<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고, <b>상승률순</b>으로도 볼 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</span></span></div>
       <div class="sig-subhead">
         <span class="upd-badge" id="sig-upd-badge"></span>
-        <span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigHomeSetSort('score',this)">신호 강도순</a><a onclick="sigHomeSetSort('up',this)">상승률순</a></span>
+        <span class="stabs" id="sighome-sort-tabs" style="margin-bottom:0;"><a onclick="sigHomeSetSort('score',this)">신호 강도순</a><a class="on" onclick="sigHomeSetSort('up',this)">상승률순</a></span>
       </div>
       <p class="sig-intro" id="sig-intro">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</p>
       <div id="sig-rows">
@@ -2171,7 +2171,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       <!-- 좌: 신호 강도순·상승률순 (탭 전환) -->
       <div class="home-main">
         <div class="block" style="margin-bottom:0;">
-          <div class="block__h"><span class="block__t"><span class="ic">⚡</span>특이 신호</span><span class="block__s"><span class="stabs" id="sigall-sort-tabs" style="margin-bottom:0;"><a class="on" onclick="sigAllSetSort('score',this)">신호 강도순</a><a onclick="sigAllSetSort('up',this)">상승률순</a></span></span></div>
+          <div class="block__h"><span class="block__t"><span class="ic">⚡</span>특이 신호</span><span class="block__s"><span class="stabs" id="sigall-sort-tabs" style="margin-bottom:0;"><a onclick="sigAllSetSort('score',this)">신호 강도순</a><a class="on" onclick="sigAllSetSort('up',this)">상승률순</a></span></span></div>
           <p class="sig-intro">규칙으로 선별한 특이 신호 종목 전체예요. 정렬 기준을 바꿔 볼 수 있어요.</p>
           <div id="sigall-rows"></div>
         </div>
@@ -2369,8 +2369,8 @@ let SIG_BY_CODE={};   // signals 보유 종목 code→true (AI신호 열)
 let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
 let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
-let sigHomeSort='score'; // score | up
-let sigAllSort='score'; // score | up | dn
+let sigHomeSort='up'; // score | up
+let sigAllSort='up'; // score | up | dn
 let rankTab='vol';    // vol | up | dn
 let rankSector='전체';
 let rankShown=10;
