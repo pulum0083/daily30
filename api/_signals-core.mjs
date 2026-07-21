@@ -9,17 +9,23 @@ export const COUNTER_MIN_GAIN_FACTOR = 0.25;
 export const COUNTER_MIN_GAIN_CAP = 1.5;
 export const VOL_SURGE_MIN = 1.5;
 export const CAPITULATION_DROP = -3.0;
+export const SURGE_RISE = 3.0;
+// 장중 누적 거래량을 '종일 평균'과 비교하면 축이 안 맞아 배수가 체계적으로 과소 계산된다
+// (13:50이면 평균 수준 종목도 0.74배로 찍힘). 분모를 경과 비율로 축소해 축을 맞춘다.
+// 다만 개장 직후엔 비율이 0에 수렴해 배수가 폭발하므로 하한을 둬 보수적으로(미탐 쪽으로) 동작시킨다.
+export const VOL_PROGRESS_FLOOR = 0.2;
 export const TURNOVER_TOP_N = 3;
 export const NEAR_HIGH_RATIO = 0.98;
 export const SIGNALS_DISPLAY_MAX = 15; // 특이 신호 카드 목록 최대 노출 수 (랭킹은 전체 집계). 상한일 뿐 — 그날 신호가 잡힌 종목만 노출(패딩 없음)
 // 카드 정렬 가중치 — 신고가·투매 같은 희소 신호를 최상위로. 급락일엔 역행 상승이 흔해지므로
 // '그냥 초록'인 counter_up 보다, 급락장에도 신고가에 붙은 진짜 강세(near_high)와 투매(vol_surge)를 우선한다.
-const SIGNAL_SCORE = { near_high: 5, vol_surge: 4, counter_up: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
+const SIGNAL_SCORE = { near_high: 5, vol_surge: 4, surge_up: 4, counter_up: 3, counter_down: 3, turnover: 2, foreign_buy: 1.5, inst_buy: 1.5 };
 
 const sgn = (x) => (x > 0 ? 1 : x < 0 ? -1 : 0);
 
 // 종목 1건의 가격·거래량 신호. stock={pct,vol,vol_avg20,price,wk52_high}
-export function classifyStock(stock, kospiPct) {
+// opts.progress: 정규장 경과 비율(0~1). 장중 누적 거래량 비교용 분모 보정. 기본 1(=종일 기준).
+export function classifyStock(stock, kospiPct, opts = {}) {
   const cats = [];
   const badges = [];
   const { pct, vol, vol_avg20, price, wk52_high } = stock;
@@ -33,10 +39,25 @@ export function classifyStock(stock, kospiPct) {
     cats.push('counter_up');
     badges.push('역행 상승');
   }
-  // 투매(거래량 부분): 급증 + 급락
-  const mult = vol_avg20 > 0 ? vol / vol_avg20 : 0;
+  // 역행 하락: 상승장에서 종목만 아래로 빠지는 경우. counter_up의 부호 대칭.
+  // 대응 카테고리가 없으면 상승장엔 counter_* 자체가 발화 불가라(수학적으로 모순) 신호가 통째로 비었다.
+  const counterCeil = kospiPct > 0 ? -Math.min(COUNTER_MIN_GAIN_CAP, kospiPct * COUNTER_MIN_GAIN_FACTOR) : Infinity;
+  if (sgn(pct) !== sgn(kospiPct) && (kospiPct - pct) >= COUNTER_TREND_OUTPERF && pct <= counterCeil) {
+    cats.push('counter_down');
+    badges.push('역행 하락');
+  }
+  // 거래량 배수 — 장중이면 경과 비율로 분모를 축소해 분자(당일 누적)와 축을 맞춘다.
+  const progress = Math.min(1, Math.max(VOL_PROGRESS_FLOOR, opts.progress ?? 1));
+  const denom = vol_avg20 > 0 ? vol_avg20 * progress : 0;
+  const mult = denom > 0 ? vol / denom : 0;
+  // 투매: 급증 + 급락
   if (mult >= VOL_SURGE_MIN && pct <= CAPITULATION_DROP) {
     cats.push('vol_surge');
+    badges.push(`거래량 ×${mult.toFixed(1)} 급증`);
+  }
+  // 급등: 급증 + 급등 (투매의 부호 대칭 — 상승장에서 가장 의미 있는 신호인데 기존엔 없었다)
+  if (mult >= VOL_SURGE_MIN && pct >= SURGE_RISE) {
+    cats.push('surge_up');
     badges.push(`거래량 ×${mult.toFixed(1)} 급증`);
   }
   // 신고가 근접
@@ -52,7 +73,9 @@ export function classifyStock(stock, kospiPct) {
 function whyText(stock) {
   const { pct, cats } = stock;
   if (cats.includes('counter_up')) return `시장이 하락하는 동안 <b>${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% ${pct >= 0 ? '상승' : '선방'}</b>했어요.`;
+  if (cats.includes('counter_down')) return `시장이 오르는 동안 <b>${pct.toFixed(1)}% 하락</b>했어요.`;
   if (cats.includes('vol_surge')) return `거래량이 급증하며 ${pct.toFixed(1)}% 급락했어요.`;
+  if (cats.includes('surge_up')) return `거래량이 급증하며 <b>+${pct.toFixed(1)}% 급등</b>했어요.`;
   if (cats.includes('near_high')) return `폭락장에도 <b>52주 신고가</b>에 근접했어요.`;
   if (cats.includes('turnover')) return `거래대금 상위. 지수에 큰 영향을 줬어요.`;
   if (cats.includes('foreign_buy')) return `외국인 수급이 꾸준히 들어오고 있어요.`;
@@ -62,8 +85,10 @@ function whyText(stock) {
 
 // 신호 카테고리 메타(랭킹 라벨·아이콘) — 색 없음(색 절제 규칙)
 export const SIGNAL_META = {
-  vol_surge:  { ic: '🔥', label: '거래량 급증' },
+  vol_surge:  { ic: '🔥', label: '거래량 급증 · 급락' },
+  surge_up:   { ic: '🚀', label: '거래량 급증 · 급등' },
   counter_up: { ic: '↗',  label: '역행 상승' },
+  counter_down:{ ic: '↘', label: '역행 하락' },
   near_high:  { ic: '▲',  label: '52주 신고가 근접' },
   turnover:   { ic: '💰', label: '거래대금 상위' },
   inst_buy:   { ic: '🏛️', label: '기관 순매수' },
@@ -76,7 +101,7 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
   const enrich = opts.enrich; // Task 9에서 수급 cats 주입용 (stock)=>({cats,badges})
   // 1) per-stock 분류
   const classified = stocks.map((s) => {
-    const r = classifyStock(s, kospiPct);
+    const r = classifyStock(s, kospiPct, { progress: opts.progress });
     const cats = [...r.cats];
     const badges = [...r.badges];
     if (enrich) { const e = enrich(s); cats.push(...e.cats); badges.push(...e.badges); }
@@ -158,15 +183,18 @@ export function etfSafeHaven(byCode, marketPct) {
 
 export const SUPPLY_STREAK_MIN = 3;
 // trend: 최신순 [{foreign, organ}] (순매수 수량). 연속 순매수 또는 전환 판정.
-export function classifySupply(trend) {
+// opts.suffix: 배지 뒤에 붙일 문구. 장중엔 네이버 trend API가 당일 행을 주지 않아(최신=전일)
+//   판정 근거가 전일 확정치이므로 ' (전일 기준)'을 붙여 사실대로 표기한다.
+export function classifySupply(trend, opts = {}) {
   const cats = [], badges = [];
   if (!Array.isArray(trend) || trend.length === 0) return { cats, badges };
+  const sfx = opts.suffix || '';
   const streak = (key) => { let n = 0; for (const r of trend) { if ((r[key] || 0) > 0) n++; else break; } return n; };
-  const fb = streak('foreign'); if (fb >= SUPPLY_STREAK_MIN) { cats.push('foreign_buy'); badges.push(`외국인 ${fb}일 연속 순매수`); }
-  const ib = streak('organ'); if (ib >= SUPPLY_STREAK_MIN) { cats.push('inst_buy'); badges.push(`기관 ${ib}일 연속 순매수`); }
+  const fb = streak('foreign'); if (fb >= SUPPLY_STREAK_MIN) { cats.push('foreign_buy'); badges.push(`외국인 ${fb}일 연속 순매수${sfx}`); }
+  const ib = streak('organ'); if (ib >= SUPPLY_STREAK_MIN) { cats.push('inst_buy'); badges.push(`기관 ${ib}일 연속 순매수${sfx}`); }
   if (trend.length >= 2) {
-    if ((trend[0].foreign || 0) > 0 && (trend[1].foreign || 0) < 0 && !cats.includes('foreign_buy')) { cats.push('foreign_buy'); badges.push('외국인 순매수 전환'); }
-    if ((trend[0].organ || 0) > 0 && (trend[1].organ || 0) < 0 && !cats.includes('inst_buy')) { cats.push('inst_buy'); badges.push('기관 순매수 전환'); }
+    if ((trend[0].foreign || 0) > 0 && (trend[1].foreign || 0) < 0 && !cats.includes('foreign_buy')) { cats.push('foreign_buy'); badges.push(`외국인 순매수 전환${sfx}`); }
+    if ((trend[0].organ || 0) > 0 && (trend[1].organ || 0) < 0 && !cats.includes('inst_buy')) { cats.push('inst_buy'); badges.push(`기관 순매수 전환${sfx}`); }
   }
   return { cats, badges };
 }

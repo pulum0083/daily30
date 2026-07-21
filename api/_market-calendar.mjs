@@ -31,6 +31,24 @@ export function krMarketOpen() {
 
 export function kstTodayYmd() { return ymd(kstNow()); }
 
+const SESSION_OPEN = 9 * 60;        // 09:00
+const SESSION_CLOSE = 15 * 60 + 30; // 15:30
+
+// KST 자정 기준 분(min)을 받아 정규장 경과 비율 0~1을 반환한다(순수 함수, 테스트용).
+// 장중 누적 거래량을 '종일 평균 거래량'과 비교할 때 분모를 이 비율로 축소해 축을 맞춘다.
+export function sessionProgressAt(min) {
+  if (min <= SESSION_OPEN) return 0;
+  if (min >= SESSION_CLOSE) return 1;
+  return (min - SESSION_OPEN) / (SESSION_CLOSE - SESSION_OPEN);
+}
+
+// 지금 시점의 정규장 경과 비율. 휴장일·장 마감 후는 1(종일 기준).
+export function krSessionProgress() {
+  const k = kstNow();
+  if (isKospiHoliday(k)) return 1;
+  return sessionProgressAt(k.getUTCHours() * 60 + k.getUTCMinutes());
+}
+
 // 'YYYY-MM-DD' → 그 날짜를 포함해 거슬러 올라간 마지막 거래일 'YYYY-MM-DD'.
 // 주말·공휴일이면 직전 거래일로 보정한다(비거래일에 생성된 스냅샷 날짜 교정용).
 export function lastTradingDay(s) {
