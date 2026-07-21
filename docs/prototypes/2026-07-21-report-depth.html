@@ -1,0 +1,309 @@
+<!-- 리포트 깊이 개선(⑤) 프로토타입 — 전건 표시·PDF 링크·정렬·연도별 실적 컨센서스 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리포트 깊이 개선 프로토타입 — 종목 상세</title>
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--dn:#2775ED;--gold:#B7791F;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 70px}
+
+/* 프로토타입 크롬 (실제 서비스엔 없음) */
+.proto{max-width:560px;margin:0 auto 18px;padding:16px 16px 4px}
+.proto h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+.proto p{font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.65}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.seg{display:flex;background:var(--inset);border-radius:9px;padding:3px}
+.seg button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--muted);
+  padding:6px 13px;border-radius:7px;cursor:pointer;transition:.12s}
+.seg button.on{background:var(--canvas);color:var(--ink);box-shadow:var(--s1)}
+.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);
+  font-weight:600;cursor:pointer;margin-left:auto;user-select:none}
+.chk input{accent-color:var(--primary);width:15px;height:15px}
+.legend{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;
+  padding:12px 14px;font-size:12.5px;line-height:1.9;color:var(--muted);margin-bottom:16px}
+.legend b{color:var(--ink)}
+.legend .k{display:inline-block;width:7px;height:7px;border-radius:2px;background:#F5A524;
+  margin-right:7px;vertical-align:1px}
+
+/* 변경점 하이라이트 */
+.hl{position:relative}
+body.mark .hl{outline:2px solid #F5A524;outline-offset:3px;border-radius:6px}
+body.mark .hl::after{content:attr(data-tag);position:absolute;top:-9px;right:6px;
+  background:#F5A524;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.02em;
+  padding:1px 6px;border-radius:4px;z-index:2}
+
+/* 카드 (stocks.css 원본) */
+.np{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;
+  overflow:hidden;margin-bottom:14px;box-shadow:var(--s1)}
+.np__h{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;
+  border-bottom:1px solid var(--hair)}
+.np__t{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--ink)}
+.np__t svg{width:17px;height:17px;color:var(--primary)}
+.np__s{font-size:11px;color:var(--muted)}
+.tgt-range-wrap{padding:36px 18px 16px;border-bottom:1px solid var(--hair)}
+.tgt-range{position:relative;height:6px;border-radius:3px;
+  background:linear-gradient(90deg,#A7C8F2,#9BDDBE 45%,#F3CE94)}
+.tgt-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+  transform:translate(-50%,-50%);border:2px solid var(--canvas)}
+.tgt-cur{position:absolute;top:-32px;transform:translateX(-50%);font-size:10px;font-weight:700;
+  color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:5px;
+  padding:2px 7px;white-space:nowrap}
+.tgt-scale{display:flex;justify-content:space-between;margin-top:16px}
+.tgt-scale .lab{font-size:11px;color:var(--muted);margin-bottom:2px}
+.tgt-scale .v2{font-size:15px;font-weight:800}
+.tgt-scale .c{text-align:center}.tgt-scale .r{text-align:right}
+.tgt-tbl{width:100%;border-collapse:collapse}
+.tgt-tbl th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;
+  padding:10px 16px 8px;border-bottom:1px solid var(--hair)}
+.tgt-tbl th:first-child{text-align:left}
+.tgt-tbl td{font-size:13px;padding:9px 16px;border-bottom:1px solid #F1F5F9;text-align:right}
+.tgt-tbl td:first-child{text-align:left;font-weight:600;color:var(--ink)}
+.tgt-tbl tr:last-child td{border-bottom:none}
+.tgt-tbl .pr{font-weight:700;color:var(--primary)}
+.tgt-tbl .op2{font-size:11px;font-weight:700;color:#1A7F4B;background:#E3F5EA;
+  padding:2px 8px;border-radius:5px}
+.tgt-tbl .op2.hold{color:var(--muted);background:var(--inset)}
+.tgt-tbl .dt{color:var(--muted);font-size:12px}
+
+/* 신규 — 증권사명 PDF 링크 */
+.firm-pdf{color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.firm-pdf:hover{color:var(--primary);text-decoration:underline}
+.firm-pdf svg{width:11px;height:11px;color:#B0B6BE;flex-shrink:0}
+.firm-pdf:hover svg{color:var(--primary)}
+
+/* 신규 — 정렬 */
+.sortbar{display:flex;gap:4px}
+.sortbar button{border:1px solid var(--hair);background:var(--canvas);font:inherit;font-size:11px;
+  font-weight:700;color:var(--muted);padding:3px 9px;border-radius:6px;cursor:pointer}
+.sortbar button.on{background:var(--primary-bg);border-color:#B9DCFF;color:var(--primary)}
+
+/* 신규 — 연도별 실적 */
+.fin-tbl{width:100%;border-collapse:collapse}
+.fin-tbl th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;
+  padding:10px 14px 8px;border-bottom:1px solid var(--hair);white-space:nowrap}
+.fin-tbl th:first-child{text-align:left}
+.fin-tbl td{font-size:12.5px;padding:9px 14px;border-bottom:1px solid #F1F5F9;
+  text-align:right;white-space:nowrap}
+.fin-tbl td:first-child{text-align:left;font-weight:600;color:var(--ink)}
+.fin-tbl tr:last-child td{border-bottom:none}
+.fin-tbl .est{background:#FFFDF5}
+.fin-tbl th.est{background:#FEF6E0;color:var(--gold)}
+.fin-tbl .ebadge{display:inline-block;font-size:9px;font-weight:800;background:var(--gold);
+  color:#fff;border-radius:3px;padding:0 4px;margin-left:4px;vertical-align:1px}
+.fin-tbl .val{font-weight:700}
+.fin-tbl .nil{color:#C3C8CF;font-weight:400}
+.fin-sep td{border-bottom:1px solid var(--hair)!important;padding:0;height:0}
+.fin-note{padding:10px 14px;font-size:11px;color:var(--muted);line-height:1.6;background:var(--soft)}
+.scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:420px){
+  .tgt-tbl th,.tgt-tbl td{padding:7px 8px;font-size:12px}
+  .fin-tbl th,.fin-tbl td{padding:7px 9px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="proto">
+  <h1>리포트 깊이 개선 — 종목 상세 미리보기</h1>
+  <p>코스피랩 대비 점검 ⑤의 4개 격차를 메운 화면입니다. <b>네이버 실측 데이터</b>로 렌더했고, 숫자·PDF 링크 모두 실제로 동작합니다.</p>
+  <div class="bar">
+    <div class="seg" id="stockSeg"></div>
+  </div>
+  <div class="bar">
+    <div class="seg" id="modeSeg">
+      <button data-mode="before">개선 전</button>
+      <button data-mode="after" class="on">개선 후</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="markChk" checked> 변경점 표시</label>
+  </div>
+  <div class="legend">
+    <div><span class="k"></span><b>표본</b> — 표시 캐(10건) 제거, 컨센서스에 들어간 증권사 전건 노출</div>
+    <div><span class="k"></span><b>원문 PDF</b> — 증권사명 클릭 시 리포트 원문. 추가 수집 없음</div>
+    <div><span class="k"></span><b>정렬</b> — 최신순·목표가순 (상승여력순은 목표가순과 순서가 같아 제외)</div>
+    <div><span class="k"></span><b>연도별 실적 컨센서스</b> — 신규 섹션. 확정 3년 + 예상 1년</div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+const DATA = {"005930": {"name": "삼성전자", "close": 259000, "consensus": 473571, "firm_count": 14, "years": [{"key": "202312", "label": "2023", "estimate": false}, {"key": "202412", "label": "2024", "estimate": false}, {"key": "202512", "label": "2025", "estimate": false}, {"key": "202612", "label": "2026", "estimate": true}], "rows": [{"title": "매출액", "unit": "억원", "values": {"202312": 2589355.0, "202412": 3008709.0, "202512": 3336059.0, "202612": 7324732.0}}, {"title": "영업이익", "unit": "억원", "values": {"202312": 65670.0, "202412": 327260.0, "202512": 436011.0, "202612": 3832404.0}}, {"title": "당기순이익", "unit": "억원", "values": {"202312": 154871.0, "202412": 344514.0, "202512": 452068.0, "202612": 3159304.0}}, {"title": "EPS", "unit": "원", "values": {"202312": 2131.0, "202412": 4950.0, "202512": 6564.0, "202612": 46664.0}}, {"title": "PER", "unit": "배", "values": {"202312": 36.84, "202412": 10.75, "202512": 18.27, "202612": 5.23}}, {"title": "PBR", "unit": "배", "values": {"202312": 1.51, "202412": 0.92, "202512": 1.87, "202612": 2.24}}], "reports": [{"firm": "하나증권", "price": 480000, "opinion": "Buy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/57/20260708_company_304505000.pdf"}, {"firm": "대신증권", "price": 560000, "opinion": "Buy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/15/20260708_company_323577000.pdf"}, {"firm": "유진투자증권", "price": 560000, "opinion": "StrongBuy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/63/20260708_company_228905000.pdf"}, {"firm": "iM증권", "price": 480000, "opinion": "Buy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/61/20260708_company_427704000.pdf"}, {"firm": "IBK투자증권", "price": 460000, "opinion": "매수", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/40/20260708_company_282975000.pdf"}, {"firm": "키움증권", "price": 390000, "opinion": "Buy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/39/20260708_company_67382000.pdf"}, {"firm": "미래에셋증권", "price": 550000, "opinion": "매수", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/56/20260708_company_733219000.pdf"}, {"firm": "한화투자증권", "price": 580000, "opinion": "Buy", "date": "26.07.07", "pdf": "https://stock.pstatic.net/stock-research/company/16/20260707_company_593501000.pdf"}, {"firm": "교보증권", "price": 500000, "opinion": "Buy", "date": "26.07.01", "pdf": "https://stock.pstatic.net/stock-research/company/62/20260701_company_957350000.pdf"}, {"firm": "신한투자증권", "price": 590000, "opinion": "매수", "date": "26.06.30", "pdf": null}, {"firm": "현대차증권", "price": 440000, "opinion": "Buy", "date": "26.06.30", "pdf": "https://stock.pstatic.net/stock-research/company/38/20260630_company_438746000.pdf"}, {"firm": "DS투자증권", "price": 300000, "opinion": "매수", "date": "26.05.04", "pdf": "https://stock.pstatic.net/stock-research/company/66/20260504_company_964689000.pdf"}, {"firm": "유안타증권", "price": 340000, "opinion": "Buy", "date": "26.05.04", "pdf": "https://stock.pstatic.net/stock-research/company/18/20260504_company_67792000.pdf"}, {"firm": "SK증권", "price": 400000, "opinion": "매수", "date": "26.04.30", "pdf": "https://stock.pstatic.net/stock-research/company/64/20260430_company_231040000.pdf"}]}, "000660": {"name": "SK하이닉스", "close": 1836000, "consensus": 3070000, "firm_count": 15, "years": [{"key": "202312", "label": "2023", "estimate": false}, {"key": "202412", "label": "2024", "estimate": false}, {"key": "202512", "label": "2025", "estimate": false}, {"key": "202612", "label": "2026", "estimate": true}], "rows": [{"title": "매출액", "unit": "억원", "values": {"202312": 327657.0, "202412": 661930.0, "202512": 971467.0, "202612": 3543680.0}}, {"title": "영업이익", "unit": "억원", "values": {"202312": -77303.0, "202412": 234673.0, "202512": 472063.0, "202612": 2728836.0}}, {"title": "당기순이익", "unit": "억원", "values": {"202312": -91375.0, "202412": 197969.0, "202512": 429479.0, "202612": 2281089.0}}, {"title": "EPS", "unit": "원", "values": {"202312": -12517.0, "202412": 27182.0, "202512": 58955.0, "202612": 314787.0}}, {"title": "PER", "unit": "배", "values": {"202312": -11.3, "202412": 6.4, "202512": 11.04, "202612": 5.6}}, {"title": "PBR", "unit": "배", "values": {"202312": 1.82, "202412": 1.62, "202512": 3.79, "202612": 3.67}}], "reports": [{"firm": "미래에셋증권", "price": 4200000, "opinion": "매수", "date": "26.07.14", "pdf": "https://stock.pstatic.net/stock-research/company/56/20260714_company_93205000.pdf"}, {"firm": "대신증권", "price": 3900000, "opinion": "Buy", "date": "26.07.07", "pdf": "https://stock.pstatic.net/stock-research/company/15/20260707_company_38726000.pdf"}, {"firm": "IBK투자증권", "price": 4000000, "opinion": "매수", "date": "26.07.02", "pdf": "https://stock.pstatic.net/stock-research/company/40/20260702_company_710748000.pdf"}, {"firm": "교보증권", "price": 4000000, "opinion": "Buy", "date": "26.07.01", "pdf": "https://stock.pstatic.net/stock-research/company/62/20260701_company_285972000.pdf"}, {"firm": "신한투자증권", "price": 4200000, "opinion": "매수", "date": "26.06.30", "pdf": null}, {"firm": "하나증권", "price": 3600000, "opinion": "Buy", "date": "26.06.26", "pdf": "https://stock.pstatic.net/stock-research/company/57/20260626_company_614113000.pdf"}, {"firm": "한화투자증권", "price": 4300000, "opinion": "Buy", "date": "26.06.22", "pdf": "https://stock.pstatic.net/stock-research/company/16/20260622_company_50964000.pdf"}, {"firm": "iM증권", "price": 3500000, "opinion": "Buy", "date": "26.06.22", "pdf": "https://stock.pstatic.net/stock-research/company/61/20260623_company_775709000.pdf"}, {"firm": "현대차증권", "price": 2650000, "opinion": "Buy", "date": "26.05.27", "pdf": "https://stock.pstatic.net/stock-research/company/38/20260527_company_80592000.pdf"}, {"firm": "키움증권", "price": 1900000, "opinion": "OutPerform", "date": "26.05.11", "pdf": "https://stock.pstatic.net/stock-research/company/39/20260511_company_143289000.pdf"}, {"firm": "유진투자증권", "price": 2300000, "opinion": "StrongBuy", "date": "26.05.04", "pdf": "https://stock.pstatic.net/stock-research/company/63/20260504_company_267576000.pdf"}, {"firm": "메리츠증권", "price": 2000000, "opinion": "Buy", "date": "26.04.29", "pdf": "https://stock.pstatic.net/stock-research/company/17/20260429_company_568167000.pdf"}, {"firm": "DS투자증권", "price": 1600000, "opinion": "매수", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/66/20260424_company_997745000.pdf"}, {"firm": "유안타증권", "price": 1900000, "opinion": "Buy", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/18/20260424_company_68079000.pdf"}, {"firm": "SK증권", "price": 2000000, "opinion": "매수", "date": "26.04.23", "pdf": "https://stock.pstatic.net/stock-research/company/64/20260423_company_226275000.pdf"}]}, "005380": {"name": "현대차", "close": 399000, "consensus": 743636, "firm_count": 11, "years": [{"key": "202312", "label": "2023", "estimate": false}, {"key": "202412", "label": "2024", "estimate": false}, {"key": "202512", "label": "2025", "estimate": false}, {"key": "202612", "label": "2026", "estimate": true}], "rows": [{"title": "매출액", "unit": "억원", "values": {"202312": 1626636.0, "202412": 1752312.0, "202512": 1862545.0, "202612": 1934043.0}}, {"title": "영업이익", "unit": "억원", "values": {"202312": 151269.0, "202412": 142396.0, "202512": 114679.0, "202612": 117411.0}}, {"title": "당기순이익", "unit": "억원", "values": {"202312": 122723.0, "202412": 132299.0, "202512": 103648.0, "202612": 111297.0}}, {"title": "EPS", "unit": "원", "values": {"202312": 43589.0, "202412": 46042.0, "202512": 35331.0, "202612": 38694.0}}, {"title": "PER", "unit": "배", "values": {"202312": 4.67, "202412": 4.6, "202512": 8.39, "202612": 10.31}}, {"title": "PBR", "unit": "배", "values": {"202312": 0.58, "202412": 0.51, "202512": 0.67, "202612": 0.84}}], "reports": [{"firm": "미래에셋증권", "price": 840000, "opinion": "매수", "date": "26.07.21", "pdf": "https://stock.pstatic.net/stock-research/company/56/20260721_company_13228000.pdf"}, {"firm": "신한투자증권", "price": 780000, "opinion": "매수", "date": "26.07.10", "pdf": null}, {"firm": "유진투자증권", "price": 900000, "opinion": "Buy", "date": "26.07.10", "pdf": "https://stock.pstatic.net/stock-research/company/63/20260710_company_751681000.pdf"}, {"firm": "키움증권", "price": 700000, "opinion": "Buy", "date": "26.07.08", "pdf": "https://stock.pstatic.net/stock-research/company/39/20260708_company_803828000.pdf"}, {"firm": "한화투자증권", "price": 760000, "opinion": "Buy", "date": "26.07.06", "pdf": "https://stock.pstatic.net/stock-research/company/16/20260706_company_995486000.pdf"}, {"firm": "유안타증권", "price": 690000, "opinion": "Hold", "date": "26.06.16", "pdf": "https://stock.pstatic.net/stock-research/company/18/20260616_company_170154000.pdf"}, {"firm": "교보증권", "price": 800000, "opinion": "Buy", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/62/20260424_company_548097000.pdf"}, {"firm": "DS투자증권", "price": 740000, "opinion": "매수", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/66/20260424_company_696646000.pdf"}, {"firm": "하나증권", "price": 660000, "opinion": "Buy", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/57/20260424_company_548812000.pdf"}, {"firm": "대신증권", "price": 660000, "opinion": "Buy", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/15/20260424_company_595493000.pdf"}, {"firm": "iM증권", "price": 650000, "opinion": "Buy", "date": "26.04.24", "pdf": "https://stock.pstatic.net/stock-research/company/61/20260424_company_731859000.pdf"}]}};
+
+const $ = s => document.querySelector(s);
+let code = '000660', mode = 'after';
+
+const won = v => v.toLocaleString('ko-KR');
+const eok = v => {
+  const a = Math.abs(v), s = v < 0 ? '−' : '';
+  return a >= 10000 ? s + (a / 10000).toFixed(1) + '조' : s + won(Math.round(a)) + '억';
+};
+const fmt = (v, unit) => {
+  if (v === null || v === undefined) return null;
+  if (unit === '억원') return eok(v);
+  if (unit === '원') return won(Math.round(v)) + '원';
+  return v.toFixed(2) + '배';
+};
+const opKo = o => {
+  const s = (o || '').trim();
+  if (/^strong\s*buy$/i.test(s) || s === '적극매수') return '적극매수';
+  if (/^buy$/i.test(s) || s === '매수') return '매수';
+  if (/^(hold|neutral|marketperform)$/i.test(s) || s === '중립') return '중립';
+  if (/^(sell|underperform|reduce)$/i.test(s) || s === '매도') return '매도';
+  return s || '—';
+};
+const relWhen = d => {
+  const m = /^(\d{2})\.(\d{2})\.(\d{2})$/.exec(d);
+  if (!m) return '';
+  const then = new Date(2000 + +m[1], +m[2] - 1, +m[3]);
+  const diff = Math.floor((new Date(2026, 6, 21) - then) / 864e5);
+  if (diff <= 0) return '오늘';
+  if (diff < 7) return diff + '일 전';
+  if (diff < 31) return Math.floor(diff / 7) + '주 전';
+  return Math.floor(diff / 30) + '개월 전';
+};
+
+let sortKey = 'date';
+
+function render() {
+  const s = DATA[code];
+  const after = mode === 'after';
+  const cur = s.close;
+
+  // ── 목표주가 ──
+  let rows = s.reports.filter(r => r.price);
+  rows.sort((a, b) => sortKey === 'price'
+    ? b.price - a.price
+    : b.date.localeCompare(a.date));
+  const shown = after ? rows : rows.slice(0, 10);
+  const prices = rows.map(r => r.price);
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const avg = s.consensus || Math.round(prices.reduce((x, y) => x + y, 0) / prices.length);
+  const span = (max - min) || 1;
+  const pct = v => Math.max(0, Math.min(100, (v - min) / span * 100));
+
+  const firmCell = r => {
+    if (!after || !r.pdf) return r.firm;
+    return `<a class="firm-pdf" href="${r.pdf}" target="_blank" rel="noopener">${r.firm}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+      <path d="M14 3h7v7M21 3l-9 9M19 14v6H4V5h6"/></svg></a>`;
+  };
+
+  const sortBar = after
+    ? `<div class="sortbar hl" data-tag="정렬">
+         <button data-sort="date" class="${sortKey === 'date' ? 'on' : ''}">최신순</button>
+         <button data-sort="price" class="${sortKey === 'price' ? 'on' : ''}">목표가순</button>
+       </div>`
+    : `<span class="np__s">컨센서스 ${s.firm_count}개사</span>`;
+
+  let html = `
+  <div class="np">
+    <div class="np__h">
+      <span class="np__t">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10m4 11V6m4 15V12m4 9V8"/></svg>
+        증권사 목표주가
+      </span>
+      ${sortBar}
+    </div>
+    <div class="tgt-range-wrap">
+      <div class="tgt-range">
+        <div class="tgt-cur" style="left:${pct(cur)}%">현재가 ${won(cur)}</div>
+        <div class="tgt-dot" style="left:0%;background:#378ADD"></div>
+        <div class="tgt-dot" style="left:${pct(avg)}%;background:#1D9E75"></div>
+        <div class="tgt-dot" style="left:100%;background:#BA7517"></div>
+      </div>
+      <div class="tgt-scale">
+        <div><div class="lab">최저</div><div class="v2" style="color:#378ADD">${won(min)}원</div></div>
+        <div class="c"><div class="lab">평균</div><div class="v2" style="color:#1D9E75">${won(avg)}원</div></div>
+        <div class="r"><div class="lab">최고</div><div class="v2" style="color:#BA7517">${won(max)}원</div></div>
+      </div>
+    </div>
+    <table class="tgt-tbl">
+      <thead><tr><th>증권사</th><th>목표가</th><th>의견</th><th>발표일</th><th>상승여력</th></tr></thead>
+      <tbody>`;
+
+  shown.forEach((r, i) => {
+    const up = (r.price / cur - 1) * 100;
+    const isNew = after && i >= 10;
+    html += `<tr${isNew ? ' class="hl" data-tag="전건"' : ''}>
+      <td>${firmCell(r)}</td>
+      <td class="pr num">${won(r.price)}</td>
+      <td><span class="op2 ${['매수','적극매수'].includes(opKo(r.opinion)) ? '' : 'hold'}">${opKo(r.opinion)}</span></td>
+      <td class="dt">${relWhen(r.date)}</td>
+      <td class="num" style="color:${up >= 0 ? 'var(--up)' : 'var(--dn)'};font-weight:700">${up >= 0 ? '+' : ''}${up.toFixed(1)}%</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  if (!after) html += `<div class="fin-note">${rows.length}개사 중 10건만 표시 — 상단 "컨센서스 ${s.firm_count}개사"와 행 수가 어긋납니다.</div>`;
+  html += `</div>`;
+
+  // ── 연도별 실적 컨센서스 (개선 후 전용) ──
+  if (after) {
+    const ys = s.years;
+    html += `
+    <div class="np hl" data-tag="신규 섹션">
+      <div class="np__h">
+        <span class="np__t">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-5 3 3 5-7"/></svg>
+          연도별 실적 컨센서스
+        </span>
+        <span class="np__s">확정 ${ys.filter(y => !y.estimate).length}년 + 예상 ${ys.filter(y => y.estimate).length}년</span>
+      </div>
+      <div class="scrollx"><table class="fin-tbl">
+        <thead><tr><th>항목</th>`;
+    ys.forEach(y => {
+      html += `<th class="${y.estimate ? 'est' : ''}">${y.label}${y.estimate ? '<span class="ebadge">E</span>' : ''}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+    s.rows.forEach((r, i) => {
+      if (i === 3) html += `<tr class="fin-sep"><td colspan="${ys.length + 1}"></td></tr>`;
+      html += `<tr><td>${r.title}</td>`;
+      ys.forEach(y => {
+        const v = fmt(r.values[y.key], r.unit);
+        html += `<td class="num ${y.estimate ? 'est' : ''}">
+          ${v ? `<span class="val">${v}</span>` : '<span class="nil">—</span>'}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>
+      <div class="fin-note">네이버 금융 실측 · <b>E</b> 표시 연도는 증권사 컨센서스 추정치입니다. 값이 없는 항목은 <b>—</b>로 두고 채우지 않습니다.</div>
+    </div>`;
+  }
+
+  $('#app').innerHTML = html;
+  document.querySelectorAll('[data-sort]').forEach(b =>
+    b.onclick = () => { sortKey = b.dataset.sort; render(); });
+}
+
+function boot() {
+  const seg = $('#stockSeg');
+  seg.innerHTML = Object.entries(DATA)
+    .map(([c, s]) => `<button data-code="${c}" class="${c === code ? 'on' : ''}">${s.name}</button>`).join('');
+  seg.onclick = e => {
+    const b = e.target.closest('[data-code]'); if (!b) return;
+    code = b.dataset.code;
+    seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    render();
+  };
+  $('#modeSeg').onclick = e => {
+    const b = e.target.closest('[data-mode]'); if (!b) return;
+    mode = b.dataset.mode;
+    $('#modeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    render();
+  };
+  $('#markChk').onchange = e => document.body.classList.toggle('mark', e.target.checked);
+  document.body.classList.add('mark');
+  render();
+}
+boot();
+</script>
+</body>
+</html>
