@@ -20,9 +20,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
-<script src="/assets/stocks-home.js?v=4" defer></script>
+<script src="/assets/stocks-home.js?v=5" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=4">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=5">
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
@@ -143,16 +143,6 @@
           <div class="sbx-stat__box"><span class="skl skl-line" style="width:40%"></span></div>
         </div>
       </div>
-    </div>
-    <!-- 📅 실적 발표 캘린더 (기업 IR 공시 예정일, 일정 없으면 JS가 숨김) -->
-    <div class="block" id="ern-block" hidden>
-      <div class="block__h"><span class="block__t"><span class="ic">📅</span><span>실적 발표 캘린더</span><span class="help-q" data-tip-title="실적 발표 캘린더란?" data-tip="종목이 <b>직접 공시한 IR 일정</b>(기업설명회·경영실적 발표 예정일)이에요.<br><br>· 출처는 각 기업의 IR 공시라 회사가 예고한 날짜 그대로예요.<br>· 회사가 일정을 바꾸면 함께 바뀌고, 아직 공시하지 않은 종목은 나오지 않아요.<br>· 보통 발표 2~4주 전에 공시되므로 시간이 지나면 목록이 채워져요.<br><br>실적 발표일 전후로는 주가 변동이 커질 수 있어요. 투자 권유가 아닌 참고용이에요.">?</span></span></div>
-      <div class="sig-subhead">
-        <span class="upd-badge" id="ern-upd-badge"></span>
-        <span class="ern-cnt" id="ern-cnt"></span>
-      </div>
-      <p class="sig-intro">종목이 공시한 실적 발표 예정일이에요.</p>
-      <div id="ern-rows"></div>
     </div>
     </div><!-- /home-main -->
     <div class="home-side">
