@@ -108,6 +108,15 @@ def test_check_sitemap_detects_missing(monkeypatch, tmp_path):
     assert any(missing in e for e in g.check_sitemap([URL, missing]))
 
 
+def test_audit_flags_page_that_was_never_generated(monkeypatch, tmp_path):
+    """설정에 있는데 생성된 적 없는 페이지는 404다 — 조용히 통과하면 안 된다(QA 발견, 2026-07-21)."""
+    monkeypatch.setattr(g, "WEB_DIR", tmp_path)
+    monkeypatch.setattr(g, "expected_pages", lambda: [
+        (tmp_path / "stocks" / "999999" / "index.html", "https://doubleshot.space/stocks/999999/"),
+    ])
+    assert g.audit() == 1
+
+
 def test_published_output_passes_gate():
     """실제 발행본 전수 감사 — 이 테스트가 깨지면 지금 라이브가 위반 상태다."""
     assert g.audit() == 0

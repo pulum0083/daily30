@@ -127,24 +127,21 @@ def _load(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def published_pages() -> list:
-    """감사 대상 (경로, URL) 목록. 생성기가 만드는 페이지만 본다 — 수기 페이지는 대상 밖."""
+def expected_pages() -> list:
+    """설정에 선언된 (경로, URL) 목록. 생성기가 만드는 페이지만 본다 — 수기 페이지는 대상 밖."""
     pages = []
     for s in _load(CONFIG_DIR / "stocks.json"):
-        p = WEB_DIR / "stocks" / s["code"] / "index.html"
-        if p.exists():
-            pages.append((p, f"{SITE_BASE}/stocks/{s['code']}/"))
+        pages.append((WEB_DIR / "stocks" / s["code"] / "index.html",
+                      f"{SITE_BASE}/stocks/{s['code']}/"))
     for s in _load(CONFIG_DIR / "us_stocks.json"):
         tk = s["ticker"].lower()
-        p = WEB_DIR / "stocks" / "us" / tk / "index.html"
-        if p.exists():
-            pages.append((p, f"{SITE_BASE}/stocks/us/{tk}/"))
+        pages.append((WEB_DIR / "stocks" / "us" / tk / "index.html",
+                      f"{SITE_BASE}/stocks/us/{tk}/"))
     universe = CONFIG_DIR / "stock_universe.json"
     if universe.exists():
         for key in _load(universe).get("sectors", {}):
-            p = WEB_DIR / "stocks" / "sector" / key / "index.html"
-            if p.exists():
-                pages.append((p, f"{SITE_BASE}/stocks/sector/{key}/"))
+            pages.append((WEB_DIR / "stocks" / "sector" / key / "index.html",
+                          f"{SITE_BASE}/stocks/sector/{key}/"))
     return pages
 
 
@@ -161,19 +158,28 @@ def check_sitemap(urls) -> list:
 
 
 def audit() -> int:
-    pages = published_pages()
+    pages = expected_pages()
     if not pages:
         print("::error::[발행 게이트] 감사 대상 페이지가 0건 — 생성이 통째로 실패했는지 확인할 것")
         return 1
 
     violations = 0
+    existing = []
     for path, url in pages:
+        # §9 4번의 '접근 가능' — 설정에 있는데 한 번도 생성된 적 없는 페이지는 404다.
+        # 존재하는 것만 훑으면(초기 구현) 새 종목 첫 생성이 실패했을 때 감사가 조용히 통과한다.
+        if not path.exists():
+            violations += 1
+            print(f"::error::{url} 페이지 없음 — 설정에는 있는데 생성된 적이 없다. "
+                  f"generate_html.py --stocks / --us-stocks / --sectors 로 생성할 것")
+            continue
+        existing.append(url)
         errs = check_html(path.read_text(encoding="utf-8"), url)
         if errs:
             violations += 1
             print(f"::error file={path.relative_to(BASE_DIR)}::{url} — {'; '.join(errs)}")
 
-    for err in check_sitemap([u for _, u in pages]):
+    for err in check_sitemap(existing):
         violations += 1
         print(f"::error::{err}")
 
