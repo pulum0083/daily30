@@ -27,10 +27,12 @@ try:
     from scripts.validate_analysis import _fetch_kospi_realdata
     import scripts.toss_client as tc
     import scripts.us_detail_data as ud
+    from scripts.verify_publish_gate import gate_write, check_sitemap
 except ImportError:
     from validate_analysis import _fetch_kospi_realdata
     import toss_client as tc
     import us_detail_data as ud
+    from verify_publish_gate import gate_write, check_sitemap
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -129,6 +131,10 @@ def make_env() -> Environment:
 
 SITE_BASE = "https://doubleshot.space"
 OG_IMAGE_URL = f"{SITE_BASE}/assets/og-image.png"
+
+# 발행 게이트(verify_publish_gate)에 걸려 파일로 쓰이지 않은 페이지 URL.
+# 비어 있지 않으면 main()이 exit 1 한다 — 다만 그 페이지의 직전 정상본은 그대로 살아 있다.
+GATE_BLOCKED = []
 
 
 def _attr(value) -> str:
@@ -1590,10 +1596,10 @@ def build_stock_page(stock, peers):
     }
     ctx.update(_stock_seo(stock, ctx))
     html = tmpl.render(**ctx)
-    out_dir = WEB_DIR / "stocks" / stock["code"]
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "index.html"
-    out_path.write_text(html, encoding="utf-8")
+    url = f"{SITE_BASE}/stocks/{stock['code']}/"
+    if gate_write(WEB_DIR / "stocks" / stock["code"] / "index.html", html, url):
+        GATE_BLOCKED.append(url)
+        return None
     return f"stocks/{stock['code']}/index.html"
 
 
@@ -1638,9 +1644,9 @@ def build_us_stock_page(stock, peers, env):
         acc=_briefing_accuracy(),
         **seo,
     )
-    out_dir = WEB_DIR / "stocks" / "us" / tk
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "index.html").write_text(html, encoding="utf-8")
+    if gate_write(WEB_DIR / "stocks" / "us" / tk / "index.html", html, seo["seo_url"]):
+        GATE_BLOCKED.append(seo["seo_url"])
+        return None
     return f"stocks/us/{tk}/index.html"
 
 
@@ -1946,11 +1952,29 @@ def build_sector_pages():
             css_path=CSS_PATH,
             js_path=JS_PATH,
         )
-        out_dir = WEB_DIR / "stocks" / "sector" / key
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_file = out_dir / "index.html"
-        out_file.write_text(html, encoding="utf-8")
+        out_file = WEB_DIR / "stocks" / "sector" / key / "index.html"
+        url = f"{SITE_BASE}/stocks/sector/{key}/"
+        if gate_write(out_file, html, url):
+            GATE_BLOCKED.append(url)
+            continue
         print(f"섹터 페이지 {key} → {out_file}")
+
+
+def _finish_page_build(written_paths):
+    """페이지 배치 생성 뒤 발행 게이트 결과를 종합한다. 위반이 있으면 exit 1.
+
+    sitemap 포함 여부는 여기서만 검사할 수 있다 — write_sitemap_xml()이 '파일이 존재하는 페이지'만
+    담기 때문에 쓰기 시점엔 아직 판정이 불가능하다.
+    """
+    problems = [f"메타 위반으로 발행 차단: {u}" for u in GATE_BLOCKED]
+    problems += check_sitemap([f"{SITE_BASE}/{p[:-len('index.html')]}" for p in written_paths])
+    if not problems:
+        return
+    for p in problems:
+        print(f"::error::[발행 게이트] {p}", file=sys.stderr)
+    print(f"\n❌ 발행 게이트 위반 {len(problems)}건 — 차단된 페이지는 직전 정상본이 유지됩니다",
+          file=sys.stderr)
+    sys.exit(1)
 
 
 def main():
@@ -1974,18 +1998,24 @@ def main():
 
     if args.sectors:
         build_sector_pages()
+        write_sitemap_xml()   # 섹터 URL이 sitemap에 들어가야 게이트의 색인 경로 검사가 성립한다
+        _finish_page_build([])
         return
 
     if args.stocks:
-        for path in build_all_stocks():
+        paths = [p for p in build_all_stocks() if p]
+        for path in paths:
             print(f"생성: {path}")
         write_sitemap_xml()
+        _finish_page_build(paths)
         return
 
     if args.us_stocks:
-        for path in build_all_us_stocks():
+        paths = [p for p in build_all_us_stocks() if p]
+        for path in paths:
             print(f"생성: {path}")
         write_sitemap_xml()
+        _finish_page_build(paths)
         return
 
     if args.write_list_only:

@@ -155,6 +155,29 @@ score = 50
 4. **라우팅·sitemap** — `/stocks/{code}/` 접근 가능, sitemap 포함, JSON-LD 유효.
 5. **적중률 기록** — `check_accuracy` 후 픽 종목 결과 누적.
 
+### 4번은 이제 자동 게이트다 — `scripts/verify_publish_gate.py` (2026-07-21)
+
+위 4번이 **문서상 체크리스트로만 존재해** 종목 상세 46개 전부가 SEO 메타 없이 발행됐다. 규칙을
+글로만 적어두면 지켜지지 않는다는 게 확인됐으므로 코드로 강제한다. 두 겹이다.
+
+- **쓰기 시점 차단** — `gate_write()`가 위반한 HTML을 **파일로 쓰지 않는다.** 직전 정상본이 그대로
+  남으므로 깨진 페이지가 발행되는 일 자체가 없다(운영 규칙 0 — 구식이지만 정상 > 최신이지만 깨짐).
+  `generate_html.py`의 종목·미국·섹터 3개 쓰기 경로 전부가 이 함수를 지난다.
+- **빌드 실패** — `.github/workflows/ci.yml`이 push·PR마다 회귀 테스트 전체 + 발행본 전수 감사를
+  돌린다. 저장소 테스트 22개가 **어느 워크플로우에서도 실행되지 않던 상태**를 함께 해소했다.
+
+검사 항목: `<title>` · `description`(20자 이상) · `robots` · `canonical`(URL 일치) ·
+`og:url`(일치)·`og:title`·`og:description`·`og:image`(절대 URL) · `twitter:card` ·
+JSON-LD 파싱 성공 + `@type` 존재 + `BreadcrumbList` 포함 · `/v2/` 경로 부재 · sitemap 포함.
+
+- **일간 잡의 종목 페이지 스텝은 `continue-on-error: true`를 유지한다**(§21 — 종목 서비스 작업이
+  마감 브리핑 발행을 막지 않는다). 게이트 위반 시 `generate_html.py`는 exit 1이지만 브리핑은 계속 나가고,
+  차단 흔적은 잡 로그와 CI 양쪽에 남는다.
+- **sitemap 포함 검사는 쓰기 시점에 못 한다** — `write_sitemap_xml()`이 "파일이 존재하는 페이지"만
+  담기 때문이다. 배치 종료 후 `_finish_page_build()`에서 검사한다.
+- 회귀 테스트: `scripts/test_publish_gate.py`(게이트 자체가 항목별 누락을 실제로 잡는지) +
+  `scripts/test_stock_seo_meta.py`(템플릿이 메타를 실제로 낸다).
+
 ## 10. 특이 신호 (`/api/signals`) — 운영 규칙
 
 `api/_signals-core.mjs`(순수 판정)와 `api/signals.mjs`(데이터 수집 어댑터)로 분리돼 있다.
