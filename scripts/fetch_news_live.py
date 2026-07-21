@@ -72,6 +72,7 @@ def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
         for item in root.iter("item"):
             title = (item.findtext("title") or "").strip()
             desc = (item.findtext("description") or "").strip()
+            link = (item.findtext("link") or "").strip()
             pub_date, pub_time = _parse_rss_datetime(item.findtext("pubDate") or "")
             source_el = item.find("source")
             source = (source_el.text or "").strip() if source_el is not None else ""
@@ -86,6 +87,7 @@ def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
                 "pub_time": pub_time or "00:00",
                 "source": source,
                 "desc": desc,
+                "link": link,
             })
             if len(items) >= max_items:
                 break
@@ -125,6 +127,57 @@ def fetch_articles(slot: str, today: str) -> list[dict]:
                 articles.append(item)
 
     return articles
+
+
+# ── Google News 링크 리졸브 (원문 URL 복원) ──────────────────────────────────
+# RSS의 <link>는 실제 기사 페이지가 아니라 Google News 리다이렉트 인터스티셜이다.
+# batchexecute로 한 번 리졸브해 발행사 원문 URL로 치환한다 (fetch_ib_korea_views.py와 동일 패턴).
+
+_HDR = {"User-Agent": "Mozilla/5.0"}
+_BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
+
+
+def _extract_resolved_url(raw: str) -> str | None:
+    if "garturlres" not in raw:
+        return None
+    seg = raw.split("garturlres", 1)[1]
+    m = re.search(r'"(https?://.*?)\\*"', seg)
+    if not m:
+        return None
+    url = m.group(1)
+    url = re.sub(r"\\+u([0-9a-fA-F]{4})", lambda mm: chr(int(mm.group(1), 16)), url)
+    return url.replace("\\/", "/")
+
+
+def _resolve_gnews_url(link: str) -> str:
+    """Google News 기사 링크를 발행사 원문 URL로 리졸브한다. 실패 시 원래 link 반환."""
+    if not link or "/rss/articles/" not in link:
+        return link
+    try:
+        art = link.split("/articles/")[1].split("?")[0]
+        req = urllib.request.Request(link, headers=_HDR)
+        with urllib.request.urlopen(req, timeout=12) as r:
+            page = r.read().decode("utf-8", "ignore")
+        sig = re.search(r'data-n-a-sg="([^"]+)"', page)
+        ts = re.search(r'data-n-a-ts="([^"]+)"', page)
+        if not (sig and ts):
+            return link
+        inner = (
+            '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,'
+            'null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
+            f'"{art}",{ts.group(1)},"{sig.group(1)}"]'
+        )
+        payload = [[["Fbv4je", inner, None, "generic"]]]
+        body = "f.req=" + urllib.parse.quote(json.dumps(payload))
+        req2 = urllib.request.Request(
+            _BATCH_URL, data=body.encode(),
+            headers={**_HDR, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+        )
+        with urllib.request.urlopen(req2, timeout=12) as r:
+            raw = r.read().decode("utf-8", "ignore")
+        return _extract_resolved_url(raw) or link
+    except Exception:
+        return link
 
 
 # ── Gemini 선별 (google_search 미사용) ───────────────────────────────────────
@@ -224,6 +277,7 @@ def _call_gemini_select(
                 "summary": (sel.get("summary") or "").strip(),
                 "pub_date": articles[idx]["date"],
                 "source":  articles[idx].get("source", ""),
+                "link":    articles[idx].get("link", ""),
             }
         else:
             result[key] = None
@@ -469,6 +523,13 @@ def main() -> None:
     else:
         print("[fetch_news_live] ❌ 4회 후에도 유효한 기사 없음. 발행 생략.", file=sys.stderr)
         sys.exit(0)
+
+    # 선택된 기사의 Google News 링크를 원문 URL로 리졸브 (link → url, 원본 link 필드는 제거)
+    for key in ("market", "stock"):
+        if not result.get(key):
+            continue
+        link = result[key].pop("link", "")
+        result[key]["url"] = _resolve_gnews_url(link) if link else ""
 
     # history 이어받기
     history: list = []
