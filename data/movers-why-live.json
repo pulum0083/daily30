@@ -1,13 +1,22 @@
 {
-  "generated_at": "2026-07-21T09:31:35.194293+09:00",
+  "generated_at": "2026-07-21T10:01:36.709659+09:00",
   "date": "2026-07-21",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.25,
-      "surge": 0.1,
+      "changePct": 2.87,
+      "surge": 0.15,
       "events": [
+        {
+          "time": "09:36",
+          "headline": "삼성전자 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5ST0FFY19aU0pTdVh2VmNVZjVjREx0V2V5YjV3aWdhdlJ6WWExWjZoMU94Y2Z1VGl6X25KZTRNb2V3ZEVJZW9Lam44RWhxaWp3dXZDQmJxRW1zR254?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 상승 중",
+          "tier": "why",
+          "sentiment": "pos"
+        },
         {
           "time": "09:03",
           "headline": "삼성·하이닉스 2배 베팅…결과는 '40%↓ 참사'",
@@ -16,23 +25,14 @@
           "why": "삼성전자와 SK하이닉스에 대한 레버리지 투자 결과 40% 하락이라는 참사가 발생했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
-        },
-        {
-          "time": "01:46",
-          "headline": "삼성전자 급락에 반도체 한파까지…20일 증시 ‘긴장’ : 네이버 블로그",
-          "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPa192YklXNWtXODFZQXIwYUd6T0ZjWjRmOWE3WV80a2VyWmRIa09iMUZUTjRVRkVrelQ0VThMdnNYRkI1dHczcHpFT2oyWGZOZW10blgzel9nU2IxWjJwdlRPVFAxX2dkRklzZFZNVXY0XzlBcVpuRnJOLXZTVnd6MnJiQVhYSHBqeWhUV1ZIcw?oc=5",
-          "source": "Naver Blog",
-          "why": "삼성전자 급락에 반도체 한파까지…20일 증시 ‘긴장’ : 네이버 블로그 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neg"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.62,
-      "surge": 0.13,
+      "changePct": 1.19,
+      "surge": 0.19,
       "events": [
         {
           "time": "09:00",
@@ -44,13 +44,13 @@
           "sentiment": "neu"
         },
         {
-          "time": "01:05",
-          "headline": "‘레버리지 규제안’ 약발 안 먹힌 첫날…12조원 사고 팔아 주가 출렁",
-          "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFAwbUp3VjVjMzExNlVlcW91aEd2Q2lSU1d4Ml9aN3hEUXNxN0h3ZUZ2cVo2SFdHWHllOG5kQjdROE14dHNUWnVDeFVXUDY4aGExdUF4RE55eXVJVEYxUnhKbU53RUhENk0?oc=5",
-          "source": "한겨레",
-          "why": "‘레버리지 규제안’ 약발 안 먹힌 첫날…12조원 사고 팔아 주가 출렁 (개별 인과 단정 안 함)",
+          "time": "09:05",
+          "headline": "SK하이닉스 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBuWmdPNHhzekl4UlBFRWhQTnJEb3U1emZjMnZGdUl4VGFpU0tqeXIzTWJTa0hVVTlmZ2tZQWkybmtfcFE0NC1INWF4OEhQeHU1UFUxbVZKemt0ZTNf?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "SK하이닉스 주가 상승 중 (개별 인과 단정 안 함)",
           "tier": "related",
-          "sentiment": "neu"
+          "sentiment": "pos"
         }
       ]
     },
@@ -58,23 +58,23 @@
       "code": "005380",
       "name": "현대차",
       "changePct": -3.38,
-      "surge": 0.23,
+      "surge": 0.31,
       "events": [
         {
           "time": "07:46",
           "headline": "현대차, 목표주가 25% 하향…2분기 영업이익 부진 전망-KB",
           "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQcFl5VUt2THNNbmxLUFVtek1WYVRQUXhQN3pmckpmSzNMV0duVm5GVGdpWFhad0tJTHZSN1h2V1dvRXlXemQ3VDQ4VlhIbmZ4MGVLazVSendYeEpoVkJrZjVmRzBoNkxEZF9GeEdzX2QxN0ZsdjhWa09IZlFBWGVGNg?oc=5",
           "source": "edaily.co.kr",
-          "why": "KB증권은 2분기 영업이익 부진 전망을 이유로 현대차의 목표주가를 25% 하향 조정했다.",
+          "why": "KB증권은 현대차의 2분기 영업이익 부진 전망을 근거로 목표주가를 25% 하향 조정했다.",
           "tier": "why",
           "sentiment": "neg"
         },
         {
-          "time": "09:24",
-          "headline": "현대차 주가 하락 중",
-          "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE13c3BJTlJ5UlVid3B0ZGctMlVvdk9HRWo4N2JibHNGR0pWOG5MZ2lrUHNWOFdPVTNxZXRRcG51M3NpamJDVmlaa1YzODZyU2tjWXNMSE5iUnphaTgxdUFqd2JIemdFV3Frc3ZYLUF6YVZXZkFj?oc=5",
-          "source": "아시아뉴스통신",
-          "why": "현대차 주가 하락 중",
+          "time": "09:32",
+          "headline": "현대차, 실적 둔화 우려에 장초반 4%대 하락세",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1qZmVYbkI4c3VqalRjV1Z0NVpwc0tfdUZzX2hPMzc1MVM4cFNnZEJNaTRfdDRhZW5xWjhZOEtVWUZoMUtjLWZrRENfQXJYa242WHNGQXlnYXFMaFlOT0hYaGllNlVYcDhM?oc=5",
+          "source": "2news.co.kr",
+          "why": "현대차, 실적 둔화 우려에 장초반 4%대 하락세",
           "tier": "why",
           "sentiment": "neg"
         }
