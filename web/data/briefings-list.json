@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-22": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-22/kospi/",
+        "headline": "오늘, 코스피 반도체 랠리 더 갈까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-21": {
       "kospi": {
         "state": "ready",
@@ -539,20 +558,6 @@
       }
     },
     "2026-06-10": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-09": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
