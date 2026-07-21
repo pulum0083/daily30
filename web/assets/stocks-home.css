@@ -318,6 +318,17 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bdg.flow{background:#E6F6F0;color:#0B8265;} /* 외국인·기관 수급 신호만 색상 강조 */
 .sig-why{font-size:12px;line-height:1.45;color:#475569;}
 .sig-intro{padding:11px 16px 4px;font-size:12.5px;line-height:1.5;color:#475569;margin:0;background:var(--canvas);}
+/* 📅 실적 발표 캘린더 — 날짜 헤더 + 그 날짜의 종목 행 */
+.ern-cnt{font-size:11px;font-weight:700;color:var(--muted);}
+.ern-day{display:flex;align-items:center;gap:7px;padding:9px 16px 5px;background:var(--canvas);}
+.ern-date{font-size:12px;font-weight:800;color:#0F172A;font-variant-numeric:tabular-nums;}
+.ern-dday{font-size:10px;font-weight:800;color:var(--muted);background:var(--inset);border-radius:4px;padding:1px 6px;}
+.ern-dday.soon{color:var(--up);background:var(--up-bg);}
+.ern-row{display:flex;align-items:baseline;gap:8px;padding:7px 16px 7px 28px;text-decoration:none;cursor:pointer;background:var(--canvas);border-bottom:1px solid #F1F5F9;}
+.ern-row:last-of-type{border-bottom:none;}
+.ern-row:hover{background:var(--primary-bg);}
+.ern-nm{flex:none;font-size:13px;font-weight:700;color:#0F172A;}
+.ern-title{flex:1;min-width:0;font-size:11.5px;color:#64748B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 /* 특이 신호 — 히어로(1순위) + 컴팩트 리스트 레이아웃 */
 .sig-hero{display:block;text-decoration:none;background:linear-gradient(180deg,#FFF,#FBFCFE);padding:16px 32px 16px 20px;border-bottom:1px solid #F1F5F9;position:relative;cursor:pointer;}
 .sig-flag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#4E5968;background:#F2F4F6;border-radius:5px;padding:3px 9px;margin-bottom:10px;}

@@ -2013,6 +2013,66 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
+  /* 📅 실적 발표 캘린더 — /data/earnings-calendar.json (기업 IR 공시 예정일) */
+  var ERN_MAX_STALE_DAYS=5;   // 평일 하루 1회 갱신 + 연휴·주말 버퍼
+  // 공용 kstNow()·esc()는 다른 IIFE 소속이라 여기서 안 보인다 — 필요한 것만 지역으로 둔다.
+  function ernToday(){ return new Date(Date.now()+9*3600000).toISOString().slice(0,10); }
+  var ERN_ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  function ernEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ERN_ENT[c];}); }
+  function ernDaysUntil(ymd,todayYmd){
+    // 날짜 문자열끼리 UTC 자정 기준으로 빼서 DST·시간대 영향을 없앤다.
+    var a=Date.UTC(+ymd.slice(0,4),+ymd.slice(5,7)-1,+ymd.slice(8,10));
+    var b=Date.UTC(+todayYmd.slice(0,4),+todayYmd.slice(5,7)-1,+todayYmd.slice(8,10));
+    return Math.round((a-b)/86400000);
+  }
+  function ernDday(n){
+    // 저장된 라벨을 쓰지 않고 매 렌더마다 계산한다(§20).
+    if(n<=0) return '오늘';
+    if(n===1) return '내일';
+    return 'D-'+n;
+  }
+  function ernDateLabel(ymd){
+    var W=['일','월','화','수','목','금','토'];
+    var d=new Date(Date.UTC(+ymd.slice(0,4),+ymd.slice(5,7)-1,+ymd.slice(8,10)));
+    return (+ymd.slice(5,7))+'/'+(+ymd.slice(8,10))+'('+W[d.getUTCDay()]+')';
+  }
+  function ernRender(d){
+    var wrap=document.getElementById('ern-rows'), block=document.getElementById('ern-block');
+    if(!wrap||!block) return;
+    var todayYmd=ernToday();
+    // 수집이 멈춘 사이 날짜가 지난 항목은 화면에서도 뺀다 — 지난 일정은 캘린더가 아니다.
+    var events=(d&&d.events||[]).filter(function(e){return ernDaysUntil(e.date,todayYmd)>=0;});
+    if(!events.length){ block.hidden=true; return; }
+    var html='', lastDate='';
+    events.forEach(function(e){
+      var n=ernDaysUntil(e.date,todayYmd);
+      if(e.date!==lastDate){
+        lastDate=e.date;
+        html+='<div class="ern-day"><span class="ern-date">'+ernDateLabel(e.date)+'</span>'
+            + '<span class="ern-dday'+(n<=1?' soon':'')+'">'+ernDday(n)+'</span></div>';
+      }
+      html+='<a class="ern-row" onclick="goStock(\''+ernEsc(e.code)+'\')">'
+          + '<span class="ern-nm">'+ernEsc(e.name)+'</span>'
+          + '<span class="ern-title">'+ernEsc(e.title)+'</span></a>';
+    });
+    wrap.innerHTML=html;
+    var cnt=document.getElementById('ern-cnt');
+    if(cnt) cnt.textContent='예정 '+events.length+'건';
+    var badge=document.getElementById('ern-upd-badge');
+    if(badge&&d.updated_at) badge.textContent=d.updated_at+' 기준';
+    block.hidden=false;
+  }
+  function loadEarnings(){
+    fetch('/data/earnings-calendar.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d) return;
+        // 수집 잡이 조용히 죽었을 때 낡은 일정을 계속 보여주지 않는다(§20).
+        var stale=!d.updated_at||ernDaysUntil(ernToday(),d.updated_at)>ERN_MAX_STALE_DAYS;
+        if(stale){ console.warn('[stocks] earnings-calendar.json이 '+ERN_MAX_STALE_DAYS+'일 넘게 안 갱신됨 — 캘린더 숨김'); return; }
+        ernRender(d);
+      // 렌더 예외를 조용히 삼키면 블록이 이유 없이 사라진다 — 콘솔에 남긴다.
+      }).catch(function(e){ console.warn('[stocks] 실적 캘린더 로드 실패:',e); });
+  }
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
@@ -2480,6 +2540,7 @@ if(passBtn){
       }).catch(function(){ resolve(); });
   }
   loadSignals();
+  loadEarnings();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(snap){
