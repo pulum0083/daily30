@@ -94,7 +94,7 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML",
-        "link_preview_options": json.dumps({"is_disabled": False}),
+        "link_preview_options": json.dumps({"is_disabled": True}),
     }
     data = urllib.parse.urlencode(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, method="POST")
