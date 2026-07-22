@@ -234,7 +234,7 @@ def build_us_issues(analysis: dict) -> dict:
         if not title or any(p in joined for p in ("확인되지 않", "확인되지않", "관련 뉴스는", "뉴스가 없", "검색 결과에서 확인")):
             continue
         out.append({"title": title, "body": body})
-    return {"us_issues": out}
+    return {"us_issues": out[:2]}  # 최대 2개 (프롬프트 지시의 하드 백스톱)
 
 
 def build_issues(analysis: dict) -> dict:

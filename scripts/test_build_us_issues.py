@@ -28,6 +28,18 @@ def test_drops_placeholder_no_news():
     assert out[0]["title"] == "간밤 미 반도체지수 강세"
 
 
+def test_caps_at_two():
+    # 실측 이슈가 3개 이상이어도 최대 2개만 노출
+    a = {"us_issues": [
+        {"title": "이슈1", "body": "본문1"},
+        {"title": "이슈2", "body": "본문2"},
+        {"title": "이슈3", "body": "본문3"},
+    ]}
+    out = g.build_us_issues(a)["us_issues"]
+    assert len(out) == 2
+    assert [o["title"] for o in out] == ["이슈1", "이슈2"]
+
+
 def test_drops_title_less():
     a = {"us_issues": [
         {"title": "", "body": "제목 없는 항목"},
