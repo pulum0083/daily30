@@ -54,15 +54,25 @@
         <div class="top">
           <div>
             <div class="hn">삼성전자 <a class="chip" href="/stocks/sector/semicon/">반도체</a></div>
-            <div class="meta"><span class="num">005930</span> · KOSPI · 07-21 종가</div>
+            <div class="meta"><span class="num">005930</span> · KOSPI · 07-22 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">259,000</div>
+            <div class="px num">260,500</div>
             
-            <div class="cg num" style="color:var(--up)">▲ +6.15%</div>
+            <div class="cg num" style="color:var(--up)">▲ +0.58%</div>
             
           </div>
         </div>
+        
+        
+        <div id="night-px" data-code="005930" data-close="260500"
+             style="display:none;margin:10px 14px 0;padding:9px 11px;border-radius:9px;background:#F5F3FF;border:1px solid #DDD6FE;align-items:baseline;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:800;color:#6D28D9;background:#EDE9FE;border-radius:5px;padding:2px 7px;white-space:nowrap;">🌙 지금 이시각 추정가</span>
+          <b class="num" id="night-px-val" style="font-size:18px;font-weight:800;color:var(--ink);"></b>
+          <span class="num" id="night-px-chg" style="font-size:13px;font-weight:700;"></span>
+          <span style="font-size:11px;color:var(--muted);flex-basis:100%;">하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님 · 30초 갱신</span>
+        </div>
+        
         <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
         <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
@@ -81,8 +91,8 @@
         <!-- 20일 종가 패널 -->
         <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
-               data-spark="310000.0,340500.0,358500.0,339500.0,323000.0,334000.0,314500.0,286000.0,309500.0,318000.0,296000.0,277500.0,278000.0,285000.0,254500.0,263000.0,279500.0,255000.0,244000.0,259000.0"
-               data-dates="6/23,6/24,6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21"
+               data-spark="340500.0,358500.0,339500.0,323000.0,334000.0,314500.0,286000.0,309500.0,318000.0,296000.0,277500.0,278000.0,285000.0,254500.0,263000.0,279500.0,255000.0,244000.0,259000.0,260500.0"
+               data-dates="6/24,6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21,7/22"
                style="cursor:crosshair;position:relative;"></div>
         </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
@@ -90,7 +100,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="005930" data-date="2026-07-21">
+        <div class="np__h" id="sig-c-head" data-code="005930" data-date="2026-07-22">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -107,14 +117,14 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">07-21 종가 기준</span>
+          <span class="np__s">07-22 종가 기준</span>
         </div>
 
         
         <div class="mx">
-          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">66.5%</b> 지점</span></div>
-          <div class="w52"><div class="fill" style="width:66.5%"></div><div class="now" style="left:66.5%"></div></div>
-          <div class="w52-lb"><span>최저 53,900</span><span>최고 362,500</span></div>
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">66.7%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:66.7%"></div><div class="now" style="left:66.7%"></div></div>
+          <div class="w52-lb"><span>최저 55,900</span><span>최고 362,500</span></div>
         </div>
         
 
@@ -123,14 +133,14 @@
           
           <div class="cell">
             <div class="l">20일선 대비</div>
-            <div class="v" style="color:var(--dn)">-12.6%</div>
+            <div class="v" style="color:var(--dn)">-11.3%</div>
             <div class="sub">단기 추세 아래</div>
           </div>
           
           
           <div class="cell">
             <div class="l">200일선 대비</div>
-            <div class="v" style="color:var(--up)">+38.6%</div>
+            <div class="v" style="color:var(--up)">+38.7%</div>
             <div class="sub">장기 추세 위</div>
           </div>
           
@@ -141,10 +151,10 @@
         <div class="frw">
           <div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:3px;cursor:help;" id="fo-label">외국인 보유율 <span style="font-size:10px;border:1px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;line-height:1;">?</span></div>
-            <div class="v">46.59<span style="font-size:12px">%</span></div>
+            <div class="v">46.63<span style="font-size:12px">%</span></div>
           </div>
           
-          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,4.0 8.421052631578947,4.7 16.842105263157894,6.2 25.263157894736842,10.9 33.68421052631579,19.3 42.10526315789474,21.1 50.526315789473685,24.0 58.94736842105263,28.4 67.36842105263158,29.8 75.78947368421052,30.9 84.21052631578948,34.9 92.63157894736842,36.0 101.05263157894737,35.3 109.47368421052632,34.5 117.89473684210526,34.9 126.3157894736842,34.9 134.73684210526315,34.2 143.1578947368421,35.6 151.57894736842104,34.5 160.0,34.5 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,4.0 8.421052631578947,5.5 16.842105263157894,10.3 25.263157894736842,18.9 33.68421052631579,20.7 42.10526315789474,23.7 50.526315789473685,28.2 58.94736842105263,29.7 67.36842105263158,30.8 75.78947368421052,34.9 84.21052631578948,36.0 92.63157894736842,35.3 101.05263157894737,34.5 109.47368421052632,34.9 117.89473684210526,34.9 126.3157894736842,34.1 134.73684210526315,35.6 143.1578947368421,34.5 151.57894736842104,33.0 160.0,33.0 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
           </svg>
           
         </div>
@@ -153,7 +163,7 @@
         
         <div class="ovr">
           <span class="lbl">해외 연동 · 미 벨웨더 엔비디아 <span style="color:var(--muted)">(참고)</span></span>
-          <span style="font-size:13px;font-weight:700;color:var(--up)">+0.2% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--up)">+2.0% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
         </div>
         
       </div>
@@ -170,7 +180,7 @@
         </div>
         <div class="tgt-range-wrap">
           <div class="tgt-range">
-            <div class="tgt-cur" style="left:-65.5%">현재가 259,000</div>
+            <div class="tgt-cur" style="left:-64.8%">현재가 260,500</div>
             <div class="tgt-dot" style="left:0%;background:#378ADD"></div>
             <div class="tgt-dot" style="left:41.8%;background:#1D9E75"></div>
             <div class="tgt-dot" style="left:100%;background:#BA7517"></div>
@@ -189,56 +199,56 @@
               <td>하나증권</td>
               <td class="pr num">480,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+85.3%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+84.3%</td>
             </tr>
             
             <tr>
               <td>대신증권</td>
               <td class="pr num">560,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+116.2%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+115.0%</td>
             </tr>
             
             <tr>
               <td>유진투자증권</td>
               <td class="pr num">560,000</td>
               <td><span class="op2 ">적극매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+116.2%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+115.0%</td>
             </tr>
             
             <tr>
               <td>iM증권</td>
               <td class="pr num">480,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+85.3%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+84.3%</td>
             </tr>
             
             <tr>
               <td>IBK투자증권</td>
               <td class="pr num">460,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+77.6%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+76.6%</td>
             </tr>
             
             <tr>
               <td>키움증권</td>
               <td class="pr num">390,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+50.6%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+49.7%</td>
             </tr>
             
             <tr>
               <td>미래에셋증권</td>
               <td class="pr num">550,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">1주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+112.4%</td>
+              <td class="dt">2주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+111.1%</td>
             </tr>
             
             <tr>
@@ -246,15 +256,15 @@
               <td class="pr num">580,000</td>
               <td><span class="op2 ">매수</span></td>
               <td class="dt">2주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+123.9%</td>
+              <td class="num" style="color:var(--up);font-weight:700">+122.6%</td>
             </tr>
             
             <tr>
               <td>교보증권</td>
               <td class="pr num">500,000</td>
               <td><span class="op2 ">매수</span></td>
-              <td class="dt">2주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+93.1%</td>
+              <td class="dt">3주 전</td>
+              <td class="num" style="color:var(--up);font-weight:700">+91.9%</td>
             </tr>
             
             <tr>
@@ -262,7 +272,7 @@
               <td class="pr num">590,000</td>
               <td><span class="op2 ">매수</span></td>
               <td class="dt">3주 전</td>
-              <td class="num" style="color:var(--up);font-weight:700">+127.8%</td>
+              <td class="num" style="color:var(--up);font-weight:700">+126.5%</td>
             </tr>
             
           </tbody>
@@ -294,42 +304,31 @@
           <div class="sd-row">
             <span class="sd-lbl">개인</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill buy" style="width:47.8%"></div>
+              <div class="sd-fill sell" style="width:50.0%"></div>
             </div>
-            <span class="sd-val" style="color:var(--up)">+418만</span>
+            <span class="sd-val" style="color:var(--dn)">−368만</span>
           </div>
           
           <div class="sd-row">
             <span class="sd-lbl">기관</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill sell" style="width:50.0%"></div>
+              <div class="sd-fill buy" style="width:9.5%"></div>
             </div>
-            <span class="sd-val" style="color:var(--dn)">−437만</span>
+            <span class="sd-val" style="color:var(--up)">+70만</span>
           </div>
           
           <div class="sd-row">
             <span class="sd-lbl">외국인</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill buy" style="width:2.9%"></div>
+              <div class="sd-fill buy" style="width:39.6%"></div>
             </div>
-            <span class="sd-val" style="color:var(--up)">+26만</span>
+            <span class="sd-val" style="color:var(--up)">+292만</span>
           </div>
           
         </div>
         <table class="tgt-tbl sd-daily">
           <thead><tr><th>날짜</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead>
           <tbody>
-            
-            <tr>
-              <td class="dt">7/13</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+421만</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−325만</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−72만</td>
-              
-            </tr>
             
             <tr>
               <td class="dt">7/14</td>
@@ -372,6 +371,17 @@
               <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−147만</td>
               
               <td class="num" style="color:var(--up);font-weight:700;text-align:right">+113만</td>
+              
+            </tr>
+            
+            <tr>
+              <td class="dt">7/21</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−365만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+182만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+194만</td>
               
             </tr>
             
@@ -458,9 +468,21 @@
           더블샷 AI 브리핑이 <b style="color:var(--ink)">이 종목을 추천했던 기록</b>과 이후 성적이에요. 추천 당시 진입가·목표가 대비 실제 종가를 채점해요.
         </div>
         <div class="tr-sum">
-          <span>삼성전자를 <b>3번</b> 픽</span>
+          <span>삼성전자를 <b>4번</b> 픽</span>
           <span style="color:#1A7F4B">목표 도달 <b>2</b></span>
-          <span style="color:#B07400">미도달 <b>1</b></span>
+          <span style="color:#B07400">미도달 <b>2</b></span>
+        </div>
+        
+        <div class="tr-row">
+          <div class="tr-top">
+            <span class="tr-date">7/22 코스피</span>
+            <span class="tr-sig">모멘텀 폭발</span>
+            <span class="tr-badge run">미도달</span>
+          </div>
+          <div class="tr-line">
+            <span>진입 <b>259,000원</b></span>→<span>목표 <b>272,000원</b></span>
+            <span class="tr-ret" style="color:var(--up)">최근 +0.6%</span>
+          </div>
         </div>
         
         <div class="tr-row">
@@ -471,7 +493,7 @@
           </div>
           <div class="tr-line">
             <span>진입 <b>244,000원</b></span>→<span>목표 <b>253,000원</b></span>
-            <span class="tr-ret" style="color:var(--up)">최대 +6.1%</span>
+            <span class="tr-ret" style="color:var(--up)">최대 +6.8%</span>
           </div>
         </div>
         
@@ -495,7 +517,7 @@
           </div>
           <div class="tr-line">
             <span>진입 <b>320,000원</b></span>→<span>목표 <b>330,000원</b></span>
-            <span class="tr-ret" style="color:var(--up)">최근 -19.1%</span>
+            <span class="tr-ret" style="color:var(--up)">최근 -18.6%</span>
           </div>
         </div>
         
@@ -512,7 +534,7 @@
         <a class="srow" href="/stocks/000660/">
           <span class="n2">SK하이닉스 <small class="num">000660</small></span>
           
-            <span class="c up num">+4.08%</span>
+            <span class="c dn num">-0.33%</span>
             
           
         </a>
@@ -520,7 +542,7 @@
         <a class="srow" href="/stocks/042700/">
           <span class="n2">한미반도체 <small class="num">042700</small></span>
           
-            <span class="c up num">+0.90%</span>
+            <span class="c dn num">-4.02%</span>
             
           
         </a>
@@ -558,7 +580,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-21 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-22 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>
