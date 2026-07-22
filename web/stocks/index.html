@@ -172,6 +172,7 @@
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:82%"></span></div>
         <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:74%"></span></div>
       </div>
+      <a class="more" onclick="go('signals-all')">특이 신호 전체 보기 →</a>
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
@@ -556,7 +557,13 @@
         <div class="block" style="margin-bottom:0;">
           <div class="block__h"><span class="block__t"><span class="ic">⚡</span>특이 신호</span><span class="block__s"><span class="stabs" id="sigall-sort-tabs" style="margin-bottom:0;"><a onclick="sigAllSetSort('score',this)">신호 강도순</a><a class="on" onclick="sigAllSetSort('up',this)">상승률순</a></span></span></div>
           <p class="sig-intro">규칙으로 선별한 특이 신호 종목 전체예요. 정렬 기준을 바꿔 볼 수 있어요.</p>
-          <div id="sigall-rows"></div>
+          <div id="sigall-rows">
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:56px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:56px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:88%"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:40%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:48px;height:17px"></span><span class="skl" style="width:60px;height:17px"></span></div><span class="skl skl-line" style="width:72%"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:44%"></span><span class="skl skl-line" style="width:52px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:52px;height:17px"></span><span class="skl" style="width:40px;height:17px"></span></div><span class="skl skl-line" style="width:80%"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:60px;height:17px"></span><span class="skl" style="width:44px;height:17px"></span></div><span class="skl skl-line" style="width:76%"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:50px"></span></div><div style="display:flex;gap:5px;margin:9px 0 8px;"><span class="skl" style="width:50px;height:17px"></span><span class="skl" style="width:56px;height:17px"></span></div><span class="skl skl-line" style="width:84%"></span></div>
+          </div>
         </div>
       </div>
       <!-- 우: 하락률 순 -->
@@ -564,7 +571,11 @@
         <div class="block" style="margin-bottom:0;">
           <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락률 순</span></div>
           <p class="sig-intro" style="padding:11px 16px 8px;">신호 종목 중 오늘 가장 많이 빠진 종목이에요.</p>
-          <div id="sigall-dn-rows"></div>
+          <div id="sigall-dn-rows">
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:44%"></span><span class="skl skl-line" style="width:50px"></span></div><span class="skl skl-line" style="width:70%;margin-top:9px"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:62%;margin-top:9px"></span></div>
+            <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div><span class="skl skl-line" style="width:76%;margin-top:9px"></span></div>
+          </div>
         </div>
       </div>
     </div>
