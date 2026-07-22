@@ -154,6 +154,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 갱신 배지 */
 .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;}
 .upd-badge .dot{width:4px;height:4px;border-radius:50%;background:#EF4444;animation:blink 1.2s ease-in-out infinite;}
+/* 실시간(장중) 상태 — 섹터 배지(.sbx-live.on)와 동일한 빨강/핑크 컬러로 통일 */
+.upd-badge.is-live{background:#FEF2F2;color:#E03131;}
 /* 신호 업데이트 시 깜빡임 효과 */
 @keyframes flashUpdate{0%{background:var(--primary-bg);}100%{background:var(--canvas);}}
 .sig-updated{animation:flashUpdate 0.6s ease-out;}
@@ -245,7 +247,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #today-line .tl-lead b{color:var(--up);}#today-line .tl-lag b{color:var(--dn);}
 .home-side .barwrap{display:none;}
 .home-side .nm{flex:1;min-width:0;}
-@media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-side .barwrap{display:block;}}
+/* 모바일: home-main/home-side를 display:contents로 풀어 3블록을 단일 그리드 아이템으로 만들고,
+   order로 특이 신호(맨 위)·밸류에이션(맨 아래) 순서를 PC와 독립적으로 제어한다. */
+@media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-main,.home-side{display:contents;}.home-side .barwrap{display:block;}.sig-block{order:-1;}.val-block{order:1;}}
 /* ── 섹터별 종목 브라우저 ── */
 .sbx-live{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;}
 .sbx-live .sl-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
