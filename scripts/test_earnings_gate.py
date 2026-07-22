@@ -83,3 +83,33 @@ def test_string_catalyst_without_ticker_kept():
     # dict가 아닌 문자열 형태(하위호환)는 티커가 없어 검증 불가 → 유지
     out = fn._drop_stale_earnings(["○○ 실적 발표 → 강세"], TODAY, age_fn=_fake_age({}))
     assert out == ["○○ 실적 발표 → 강세"]
+
+
+# ── 텍스트 사명 → 티커 resolve (2026-07-22 '엔비디아 실적 발표' 실사고) ──────────
+def test_resolve_company_tickers():
+    assert fn._resolve_company_tickers("엔비디아 실적 발표 이후 차익 실현") == ["NVDA"]
+    assert fn._resolve_company_tickers("마이크론 2분기 실적") == ["MU"]
+    assert "MU" in fn._resolve_company_tickers("micron 실적")
+    assert fn._resolve_company_tickers("삼성전자 잠정실적 발표") == []   # 국내주 미등록 → fail-open
+    assert fn._resolve_company_tickers("중동 지정학 긴장 → 유가 급등") == []
+
+
+def test_drops_stale_earnings_from_named_text_no_ticker():
+    # 실사고 재현: Gemini 문자열 catalyst(ticker 필드 없음)에 '엔비디아 실적 발표'.
+    # NVDA 실제 최근 발표가 55일 전이면 오늘 촉매로 부적합 → 제외.
+    cats = ["엔비디아 실적 발표 이후 차익 실현 매물 출회 → 미국 기술주 전반 하락"]
+    out = fn._drop_stale_earnings(cats, TODAY, age_fn=_fake_age({"NVDA": 55}))
+    assert out == []
+
+
+def test_keeps_fresh_named_earnings_from_text():
+    cats = ["엔비디아 실적 발표 서프라이즈 → 반도체 강세"]
+    out = fn._drop_stale_earnings(cats, TODAY, age_fn=_fake_age({"NVDA": 1}))
+    assert out == cats
+
+
+def test_unmapped_korean_name_fail_open():
+    # 국내주(맵 미등록)는 resolve 안 됨 → 티커 없음 → 유지(과잉 제외 방지).
+    cats = ["삼성전자 잠정실적 발표 → 강세"]
+    out = fn._drop_stale_earnings(cats, TODAY, age_fn=_fake_age({"005930": 55}))
+    assert out == cats

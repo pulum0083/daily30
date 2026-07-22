@@ -388,6 +388,49 @@ def _days_since_last_earnings(ticker: str, today: date):
     return age
 
 
+# 뉴스 텍스트에 한글/영문 사명으로만 언급된 회사를 티커로 resolve — Gemini 문자열 catalyst엔
+# ticker 필드가 없어 어닝 캘린더 검증이 건너뛰어지던 구멍을 막는다(2026-07-22 '엔비디아 실적 발표'
+# 실사고: NVIDIA는 7월 하순에 실적이 없는데 Gemini가 오늘 촉매로 소환, ticker 필드가 없어 통과).
+# yfinance 어닝 조회가 신뢰 가능한 미국 대형주만 등록(국내주는 .KS 어닝이 불안정 → 미등록=fail-open).
+_NAME_TO_TICKER = {
+    "엔비디아": "NVDA", "nvidia": "NVDA",
+    "애플": "AAPL",
+    "마이크로소프트": "MSFT",
+    "아마존": "AMZN",
+    "메타": "META",
+    "알파벳": "GOOGL", "구글": "GOOGL",
+    "테슬라": "TSLA",
+    "마이크론": "MU", "micron": "MU",
+    "브로드컴": "AVGO",
+    "인텔": "INTC",
+    "퀄컴": "QCOM",
+    "넷플릭스": "NFLX",
+    "오라클": "ORCL",
+    "세일즈포스": "CRM",
+    "어도비": "ADBE",
+    "asml": "ASML",
+    "tsmc": "TSM", "대만반도체": "TSM",
+    "제이피모건": "JPM", "jp모건": "JPM", "jpmorgan": "JPM",
+    "골드만삭스": "GS",
+    "모건스탠리": "MS",
+    "뱅크오브아메리카": "BAC",
+    "씨티그룹": "C",
+    "웰스파고": "WFC",
+    "블랙록": "BLK",
+}
+_NAME_TO_TICKER_NORM = {_norm_for_match(k): v for k, v in _NAME_TO_TICKER.items()}
+
+
+def _resolve_company_tickers(text: str) -> list:
+    """뉴스 텍스트에 언급된 (매핑된) 회사명을 티커 리스트로 변환. 등장 회사만, 중복 제거."""
+    t = _norm_for_match(text)
+    out = []
+    for name_norm, ticker in _NAME_TO_TICKER_NORM.items():
+        if name_norm and name_norm in t and ticker not in out:
+            out.append(ticker)
+    return out
+
+
 def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
                          age_fn=None) -> list:
     """실적형 catalyst 중, 티커의 실제 최근 발표일이 max_age_days를 초과한 것을 제외.
@@ -404,7 +447,8 @@ def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
         if not _is_earnings_catalyst(text):
             kept.append(c)
             continue
-        tickers = _parse_tickers(ticker_field)
+        # ticker 필드 + 텍스트에서 resolve한 사명(엔비디아→NVDA 등)을 합쳐 검증
+        tickers = list(dict.fromkeys(_parse_tickers(ticker_field) + _resolve_company_tickers(text)))
         if not tickers:
             kept.append(c)  # 검증 불가 → 유지
             continue
@@ -509,8 +553,8 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         raw = m.group(0)
 
     data = json.loads(raw)
+    today_kst = datetime.now(KST).date()
     if isinstance(data.get("catalysts"), list):
-        today_kst = datetime.now(KST).date()
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
         # 2차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
@@ -518,6 +562,12 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         # 3차: 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외(날짜 창 밖 재탕 백스톱)
         stale = _load_stale_catalysts(briefing_type, today_kst)
         data["catalysts"] = _drop_cross_day_recaps(cats, stale)
+    # headlines·key_indicators도 stale 실적 서사를 제외 — Gemini가 텍스트에 심은 '엔비디아 실적 발표'
+    # 류 날조가 catalysts만 걸러도 다른 필드로 Claude에 새어나가던 것을 차단(실측 지수는 fetch_data가
+    # 별도 소스라 해당 항목이 통째 빠져도 §0 안전).
+    for _fld in ("headlines", "key_indicators"):
+        if isinstance(data.get(_fld), list):
+            data[_fld] = _drop_stale_earnings(data[_fld], today_kst)
     return data
 
 
