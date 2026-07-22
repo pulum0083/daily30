@@ -473,16 +473,36 @@ def validate_todays_view_outlook(analysis: dict, btype: str,
     tv["outlook"] = kept
 
 
+def _us_figure_stale(text: str, real_chg: float, tol: float = 2.0) -> bool:
+    """key_drivers 산문에 인용된 US 지수/ETF 일간 변동률이 실측과 tol%p 넘게 벌어지면 True.
+
+    is_contradicted(5%p·5배·부호반전)는 '인접 세션 stale'(어제·그제처럼 실제로 존재하는
+    옆 세션 값을 그대로 인용한 경우)을 못 잡는다. 예: EWY '+6.18%'(전 세션 값) vs 실측 '+1.72%'
+    → diff 4.46%p로 is_contradicted 임계 미만이라 통과. SOX·EWY change_pct는 fetch_data와
+    게이트가 같은 일봉 소스로 계산해 같은 세션이면 소수점까지 일치하므로, 정밀 데이터 인용에
+    한해 더 타이트한 임계치(기본 2%p)를 별도 적용해 세션 어긋남을 잡는다."""
+    for c in _extract_change_claims(strip_tags(text)):
+        if abs(c - real_chg) > tol:
+            return True
+    return False
+
+
 def validate_key_drivers(analysis: dict, btype: str,
                          corrections: list, warnings: list) -> None:
-    """이렇게 보는 이유(key_drivers) 항목 중, codes로 명시된 종목의 방향 서술이
-    실측과 모순이면 해당 항목을 제거한다. recap과 동일 로직. (한국 종목: 코드로 직접 실측)"""
+    """이렇게 보는 이유(key_drivers) 항목의 종목·지수 서술이 실측과 모순이면 항목을 제거한다.
+
+    - 한국 종목: codes로 명시된 코드를 직접 실측해 방향 교차검증 (recap과 동일 로직).
+    - 미국 지수/ETF(SOX·EWY·NVDA 등): codes가 비어도 본문 티커를 추출해 실측 재조회한 뒤,
+      방향 모순 또는 정량 stale(_us_figure_stale)이면 제거. codes 없는 US 서사가 무검증으로
+      통과하던 구멍을 막는다 (2026-07-22 stale·날조 US 서사 실사고)."""
     if btype != "kospi":
         return
     drivers = analysis.get("key_drivers")
     if not isinstance(drivers, list):
         return
-    real: dict = {}
+
+    # ── 한국 종목 실측 (codes 명시) ──────────────────────────────────────────
+    kr_real: dict = {}
     seen: set = set()
     for item in drivers:
         if not isinstance(item, dict):
@@ -493,17 +513,38 @@ def validate_key_drivers(analysis: dict, btype: str,
             seen.add(code)
             d = _fetch_kospi_realdata(code)
             if "error" not in d and d.get("change_pct") is not None:
-                real[code] = d["change_pct"]
+                kr_real[code] = d["change_pct"]
             else:
                 warnings.append(f"key_drivers 종목 '{code}' 실측 실패 — 방향 교차검증 생략")
+
+    # ── 미국 지수/ETF 실측 (codes 없이 본문 티커 추출) ────────────────────────
+    us_real: dict = {}
+    for item in drivers:
+        if not isinstance(item, dict):
+            continue
+        for m in _US_TICKER_RE.finditer(strip_tags(item.get("text", ""))):
+            tk = m.group(1)
+            if tk in _NON_TICKER or tk in us_real:
+                continue
+            d = _fetch_us_realdata(_PROSE_FETCH_ALIAS.get(tk, tk))
+            if "error" not in d and d.get("change_pct") is not None:
+                us_real[tk] = d["change_pct"]
+            # fetch 실패 시 조용히 생략(fail-open) — 깨진 실측으로 정상 항목을 오제거하지 않는다
+
     kept = []
     for item in drivers:
         if not isinstance(item, dict):
             continue
-        codes = [c for c in (item.get("codes") or []) if c in real]
-        bad = [c for c in codes if _direction_contradicts(item.get("text", ""), real[c])]
+        text = item.get("text", "")
+        bad = [c for c in (item.get("codes") or []) if c in kr_real
+               and _direction_contradicts(text, kr_real[c])]
+        for m in _US_TICKER_RE.finditer(strip_tags(text)):
+            tk = m.group(1)
+            if tk in us_real and (_direction_contradicts(text, us_real[tk])
+                                  or _us_figure_stale(text, us_real[tk])):
+                bad.append(tk)
         if bad:
-            corrections.append(f"key_drivers 항목 제거 (종목 방향 모순 {bad}): {item.get('text','')[:50]}")
+            corrections.append(f"key_drivers 항목 제거 (방향·수치 모순 {bad}): {text[:50]}")
         else:
             kept.append(item)
     if len(kept) < len(drivers):
