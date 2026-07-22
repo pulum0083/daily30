@@ -220,6 +220,23 @@ def _strip_issue_numbers(text: str) -> str:
     return out.strip()
 
 
+def build_us_issues(analysis: dict) -> dict:
+    """analysis.us_issues → 코스피 아침 브리핑 '간밤 미국 시장' 이슈 리스트.
+    title 없는 항목·미검색 placeholder 문장은 제외한다. (US 저녁 브리핑 build_issues의 경량판)"""
+    out = []
+    for it in (analysis.get("us_issues") or []):
+        if not isinstance(it, dict):
+            continue
+        title = (it.get("title") or "").strip()
+        body = (it.get("body") or "").strip()
+        # '확인되지 않았습니다'·'관련 뉴스 없음' 류 미검색 placeholder는 이슈가 아니므로 제외
+        joined = re.sub(r"<[^>]+>", "", f"{title} {body}")
+        if not title or any(p in joined for p in ("확인되지 않", "확인되지않", "관련 뉴스는", "뉴스가 없", "검색 결과에서 확인")):
+            continue
+        out.append({"title": title, "body": body})
+    return {"us_issues": out}
+
+
 def build_issues(analysis: dict) -> dict:
     """analysis.issues → 렌더용 이슈 리스트. title 없는 항목 제외, title·body 숫자 가드 적용."""
     issues = []
@@ -385,6 +402,8 @@ def build_reasons(analysis: dict) -> dict:
         # 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개(넘버링). 형식과 무관하게 항상 표시.
         "key_drivers": analysis.get("key_drivers") or [],
     }
+    # 간밤 미국 시장 이슈 — us_issues(뉴스 요약 기반). 항목 없으면 템플릿에서 자동 생략.
+    ctx.update(build_us_issues(analysis))
     if fmt == "split":
         pass  # split은 오늘의 관점 본문이 todays_view.recap/outlook — 별도 형식 컨텍스트 불필요
     elif fmt == "scenario":
