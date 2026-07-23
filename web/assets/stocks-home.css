@@ -853,3 +853,24 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #us-evening .ue-row .cg{min-width:60px;text-align:right;}
 #us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
 @keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
+
+/* ── 🧭 이번 주 자금 지도 (ETF 자금흐름 히트맵) ── */
+#flow-block .block__t::before{background:#0F172A;}
+.flow-body{padding:14px 16px 4px;display:flex;flex-direction:column;gap:5px;}
+.flow-row{display:flex;gap:5px;}
+.flow-tile{border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;min-width:0;cursor:pointer;}
+.flow-tile .ft-nm{font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.flow-tile .ft-amt{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:4px;}
+.ft-expand{background:var(--soft,#F7F9FC);border-radius:8px;padding:6px 12px;margin:5px 0 0;}
+.ft-ex-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hair,#EEF2F7);}
+.ft-ex-row:last-child{border-bottom:none;}
+.ft-in{color:#E03131;font-weight:700;font-variant-numeric:tabular-nums;}
+.ft-out{color:#2775ED;font-weight:700;font-variant-numeric:tabular-nums;}
+.flow-quiet{font-size:11.5px;color:#B0B6BE;margin:9px 16px 0;}
+.flow-leg{font-size:11px;color:#94A3B8;padding:11px 16px 14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.flow-scale{display:inline-flex;vertical-align:middle;}
+.flow-scale i{width:15px;height:11px;display:inline-block;}
+@media(max-width:640px){
+  .flow-tile .ft-nm{font-size:11px;}
+  .flow-tile .ft-amt{font-size:11px;}
+}
