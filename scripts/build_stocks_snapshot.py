@@ -139,6 +139,10 @@ def parse_financials(finance_info, n=5):
     return out
 
 
+# 연간 실적 컨센서스 수집 대상 — 리포트가 지목한 3종목만(스코프 좁혀 QA 단순화, §후속 확대)
+ANNUAL_FIN_CODES = {"005930", "000660", "005380"}
+
+
 def parse_financials_annual(finance_info):
     """네이버 finance/annual 응답에서 연도별 매출·영업이익(억원)을 순서대로.
     각 항목: {year:'2026', rev:매출, op:영업이익, est:컨센서스추정여부}.
@@ -190,6 +194,19 @@ def _naver_financials(code):
         return []
 
 
+def _naver_financials_annual(code):
+    """종목별 연간 매출·영업이익(억원, 컨센서스 플래그 포함). 실패 시 []."""
+    try:
+        url = f"https://m.stock.naver.com/api/stock/{code}/finance/annual"
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+        data = json.loads(urllib.request.urlopen(req, timeout=10).read())
+        return parse_financials_annual(data.get("financeInfo"))
+    except Exception as e:
+        print(f"[snapshot] naver finance/annual {code} 실패: {e}", file=sys.stderr)
+        return []
+
+
 def _yf_closes(ticker):
     """yfinance 폴백(미국). 실패 시 []."""
     try:
@@ -219,7 +236,7 @@ def load_universe():
 
 def _build_one(symbol, name, sector, market):
     vol = vol_avg20 = foreign = foreign_spark = None
-    supply5 = financials = None
+    supply5 = financials = financials_annual = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
         rows = _naver_day_rows(symbol)
@@ -234,6 +251,8 @@ def _build_one(symbol, name, sector, market):
             foreign_spark = [round(float(x), 2) for x in frates[-20:]]
         supply5 = _naver_supply5(symbol)        # 종목별 5일 순매수 수량
         financials = _naver_financials(symbol)  # 분기 매출·영업이익
+        if symbol in ANNUAL_FIN_CODES:
+            financials_annual = _naver_financials_annual(symbol)  # 연간 매출·영업이익(3종목)
     else:
         closes = fetch_closes(symbol, market)
     if len(closes) < 2:
@@ -259,6 +278,8 @@ def _build_one(symbol, name, sector, market):
         rec["supply5"] = supply5
     if financials:
         rec["financials"] = financials
+    if financials_annual:
+        rec["financials_annual"] = financials_annual
     return rec
 
 
