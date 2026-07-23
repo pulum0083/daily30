@@ -412,6 +412,38 @@ def _find_duplicate(result: dict, existing_titles: list, threshold: float = 0.55
     return sorted(blocked)
 
 
+def _bump_latest_time(today: str, time_str: str, slot: str) -> bool:
+    """[상시 룰] 새로 발행할 이슈가 없을 때(신규 기사 부족·전부 기존과 동일한 내용·재시도 소진) —
+    콘텐츠는 그대로 두고 최신 항목의 시각만 현재 시각으로 갱신한다.
+
+    이유: '오늘 장중 이슈' 목록이 마지막 발행 이후 몇 시간째 옛 시각에 멈춰 있으면, 실제로는
+    파이프라인이 정상 실행 중(같은 이슈가 여전히 최신이라 발행 생략)인데도 사용자에게는 파이프라인이
+    죽은 것처럼 보인다. 내용을 새로 지어내지는 않되(운영 규칙 0 — 없는 이슈를 만들지 않는다),
+    '이 시각까지 확인해봤지만 여전히 같은 이슈가 최신이다'라는 사실만 시각으로 반영한다.
+
+    새 history 항목을 추가하지 않고 history[0](가장 최근 항목)의 time과 최상위 updated_at만 덮어쓴다.
+    오늘 첫 발행 전(today 데이터 자체가 없음)이면 아무것도 할 게 없어 False를 반환한다.
+    """
+    if not OUT_PATH.exists():
+        return False
+    try:
+        existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    if existing.get("date") != today or not existing.get("history"):
+        return False
+    existing["history"][0]["time"] = time_str
+    existing["updated_at"] = time_str
+    existing["slot"] = slot
+    payload = json.dumps(existing, ensure_ascii=False, indent=2)
+    OUT_PATH.write_text(payload, encoding="utf-8")
+    # 프론트(initIssueBriefing)는 날짜별 아카이브를 우선 읽으므로(§ CLAUDE.md) 이것도 함께 갱신한다 —
+    # live만 갱신하면 화면엔 여전히 옛 시각으로 보인다.
+    (OUT_PATH.parent / f"kospi-news-{today}.json").write_text(payload, encoding="utf-8")
+    print(f"[fetch_news_live] 새 이슈 없음 — 최신 항목 시각만 {time_str}로 갱신(콘텐츠 동일)")
+    return True
+
+
 # ── 메인 ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -445,6 +477,7 @@ def main() -> None:
 
     if len(articles) < 2:
         print("[fetch_news_live] 오늘 날짜 기사 부족 (2건 미만) — 발행 생략.", file=sys.stderr)
+        _bump_latest_time(today, time_str, slot)
         sys.exit(0)
 
     # 오늘 이미 발행된 타이틀 목록 (중복 방지용)
@@ -480,6 +513,7 @@ def main() -> None:
     print(f"[fetch_news_live] 중복 제거 후 기사: {len(fresh_articles)}/{len(articles)}건")
     if len(fresh_articles) < 2:
         print("[fetch_news_live] 신규 기사 부족 (2건 미만) — 발행 생략.", file=sys.stderr)
+        _bump_latest_time(today, time_str, slot)
         sys.exit(0)
 
     # 2단계: Gemini 선별 + 검증 루프
@@ -522,6 +556,7 @@ def main() -> None:
         break
     else:
         print("[fetch_news_live] ❌ 4회 후에도 유효한 기사 없음. 발행 생략.", file=sys.stderr)
+        _bump_latest_time(today, time_str, slot)
         sys.exit(0)
 
     # 선택된 기사의 Google News 링크를 원문 URL로 리졸브 (link → url, 원본 link 필드는 제거)
