@@ -27,6 +27,7 @@ Usage:
 """
 import argparse
 import json
+import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -41,6 +42,7 @@ HISTORY_PATH = ROOT / "data" / "etf_flow_history.json"
 OUT_PATH = ROOT / "web" / "data" / "etf-flows.json"
 
 MAX_WINDOW = 5      # 최대 누적 거래일
+MIN_ETFS = 100      # 정상 수집 최소치 — 이보다 적으면 얇은 응답으로 보고 히스토리 오염 방지
 KEEP_DAYS = 7       # 히스토리 보관 거래일(윈도우 + 버퍼)
 TOP_ETFS = 5        # 테마별 상위 ETF 노출 수
 
@@ -141,21 +143,26 @@ def load_json(path, default):
 
 
 def fetch_etf_list():
-    """네이버 ETF 목록(euc-kr) → [{code,name,nav,aum_eok}] (AUM·NAV 유효한 것만)."""
-    req = urllib.request.Request(ETF_LIST_URL, headers={"User-Agent": UA})
-    raw = urllib.request.urlopen(req, timeout=15).read().decode("euc-kr")
+    """네이버 ETF 목록(cp949) → [{code,name,nav,aum_eok}] (AUM·NAV 유효한 것만)."""
+    req = urllib.request.Request(ETF_LIST_URL, headers={
+        "User-Agent": UA,
+        "Referer": "https://finance.naver.com/",
+    })
+    raw = urllib.request.urlopen(req, timeout=15).read().decode("cp949", errors="replace")
     items = json.loads(raw)["result"]["etfItemList"]
     out = []
     for e in items:
+        code = e.get("itemcode")
+        name = e.get("itemname")
         nav = e.get("nav")
         aum = e.get("marketSum")   # 억원
-        if not nav or not aum:
+        if not code or not name or not nav or not aum:
             continue
         out.append({
-            "code": e["itemcode"],
-            "name": e["itemname"],
+            "code": code,
+            "name": name,
             "nav": float(nav),
-            "aum_eok": aum,
+            "aum_eok": float(aum),
         })
     return out
 
@@ -199,6 +206,11 @@ def main():
 
     etfs = fetch_etf_list()
     today_snap = build_today_snapshot(etfs, args.aum_floor)
+
+    if len(today_snap) < MIN_ETFS:
+        print(f"[etf-flows] ✗ ETF 수집 {len(today_snap)}개 — 정상({MIN_ETFS}+) 미달, "
+              f"파일을 건드리지 않고 중단(운영규칙 0 — 얇은 응답이 히스토리를 오염시키지 않게).")
+        sys.exit(1)
 
     history = load_json(HISTORY_PATH, {})
     prior_dates = sorted([d for d in history if d < today], reverse=True)
