@@ -1,13 +1,22 @@
 {
-  "generated_at": "2026-07-23T10:31:33.039260+09:00",
+  "generated_at": "2026-07-23T11:01:42.379613+09:00",
   "date": "2026-07-23",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 3.07,
-      "surge": 0.19,
+      "changePct": 2.69,
+      "surge": 0.22,
       "events": [
+        {
+          "time": "10:29",
+          "headline": "\"삼성전자 영업익 110조 찍는다\" 60만전자 고수한 증권가, 깜짝실적 전망한 이유",
+          "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE0yZE1aSVBFaFdkS0xOY0tUMTdKb0Znd2ZRSl81Um9BUU9xb1lxQWgwR0tWQUhxYmxpMVAtU00yTzNRS2k3VU40NUpoVTVlQkk?oc=5",
+          "source": "v.daum.net",
+          "why": "증권가에서 삼성전자의 110조 원 영업이익 전망과 함께 '60만전자' 가능성을 언급하며 깜짝 실적에 대한 이유를 분석했다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
         {
           "time": "09:36",
           "headline": "삼성전자 주가 상승 중",
@@ -16,23 +25,14 @@
           "why": "삼성전자 주가 상승 중",
           "tier": "why",
           "sentiment": "pos"
-        },
-        {
-          "time": "09:25",
-          "headline": "삼성전자·SK하이닉스, 알파벳 호실적 영향.. '강세'",
-          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPM01wV1I2SHpNTlJLeG15aGZOdlpxOWhoeF9CVmlucE5ic2xUaml2MkFxX0JGXzBDeUlzNWtDWGFfbFdObzF1cXpRZTRrS0R3ejlVaS1yMUlKcU8yLVdwMDg3M0ZKX2lJN1phN2lCRTRFeGZNVUx5a3lkcHRwQVBQNmlZVlpCaklE?oc=5",
-          "source": "글로벌이코노믹",
-          "why": "삼성전자·SK하이닉스, 알파벳 호실적 영향.. '강세'",
-          "tier": "why",
-          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 3.66,
-      "surge": 0.21,
+      "changePct": 2.46,
+      "surge": 0.26,
       "events": [
         {
           "time": "08:47",
@@ -57,26 +57,26 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 2.27,
-      "surge": 0.24,
+      "changePct": 1.73,
+      "surge": 0.28,
       "events": [
         {
           "time": "10:22",
           "headline": "현대차, IR 개최 공시 기대감에 장중 주가 강세 지속 : 기업주식정보",
           "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE9sSGNNNVZKQ3otV2JIQXl2VUxlREZnSGVvd1FSRTlNTFNIaXdKWHBFZzhzNU9zYW9XVUJXVzZudUZ6alFzaFZpQVh3?oc=5",
           "source": "재경일보",
-          "why": "현대차는 IR 개최 공시에 대한 기대감으로 장중 주가 강세를 지속하고 있다.",
-          "tier": "why",
+          "why": "현대차는 IR 개최 공시에 대한 기대감으로 장중 주가 강세를 지속하고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         },
         {
-          "time": "09:23",
-          "headline": "현대차 주가 상승 중",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBNc3hockdzbDdReGg5ZnBMT0xRUGVxMktHR2NJdHAzaHdDRWtaT3RkQVlxV3ZQclN1cTJqY2dJY1g2R1JhSXJ1NnpzeEhlV0R3dU04dUJUeDVQZmth?oc=5",
-          "source": "아시아뉴스통신",
-          "why": "현대차 주가 상승 중",
-          "tier": "why",
-          "sentiment": "pos"
+          "time": "09:30",
+          "headline": "‘로봇 프리미엄’ 식은 현대차…보스턴다이내믹스 승부수로 반전?",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFB2bG9LVlJNRldCVXcxRFEyMFlRZjBCU3h0UWJBWTZnQVFyRnhkc0l2bS0zWFdwWXNpeVdFY3VvZC1WczNRNUYtUHNETDdZTTN1Zk1qUnVJdTNkbGVfWUJoTW82VFdTRk5kejdEakF4Qko?oc=5",
+          "source": "리더스팩트",
+          "why": "‘로봇 프리미엄’ 식은 현대차…보스턴다이내믹스 승부수로 반전? (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     }
