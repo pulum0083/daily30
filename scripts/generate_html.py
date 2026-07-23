@@ -1048,6 +1048,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         "issue_slot": _issue_slot_map.get(internal_type, "MARKET"),
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
+        # 브리핑 페이지는 og:image를 내보내지 않아 텔레그램 링크 프리뷰가 썸네일 없는 텍스트 카드로 뜬다.
+        "no_og_image": True,
     }
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
 
