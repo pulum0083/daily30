@@ -197,6 +197,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var buf={};
   var buft={};   // buf와 병렬: 각 포인트의 실제 시각 'HH:MM' (장중 부분 데이터를 시간축에 정확히 배치)
   var bufv={};   // buf와 병렬: 각 포인트의 누적 거래량 (VWAP 계산용, backfill 시점 스냅샷)
+  var bufDay=todayKST();   // buf가 담고 있는 거래일(KST). 페이지를 자정 넘겨 열어두면 전일 곡선에 오늘 실측이 이어붙어(시간축이 HH:MM만 써 날짜를 무시) 곡선이 대각선으로 깨진다 → 날짜가 바뀌면 버퍼를 전량 무효화한다.
   var curCode=window.__lwCode||'005930';
   var whyData={};
   var snapW={};
@@ -446,8 +447,16 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); }
     }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); } });
   }
+  // 날짜 롤오버 방어 — 자정 넘겨 열어둔 탭에서 전일 buf에 오늘 실측이 이어붙지 않도록 전량 리셋 후 재백필한다.
+  function resetForNewDay(){
+    bufDay=todayKST();
+    buf={}; buft={}; bufv={}; backfilled={};
+    try{ sessionStorage.removeItem('wm-intra-v1'); }catch(e){}
+    backfill(curCode);
+  }
   window.whyMovedPush=function(code, price){
     if(typeof price!=='number'||!isFinite(price)) return;
+    if(todayKST()!==bufDay){ resetForNewDay(); return; }   // 자정 넘겨 열어둔 경우 전일 곡선에 오늘 값을 이어붙이지 않는다
     // 장중(평일 09:00~15:30 KST)만 곡선 버퍼에 반영. 마감 후·주말·공휴일 HL 24h 환산가가 섞여 시간축·스케일을 깨뜨리는 것을 차단.
     // 주말·공휴일 09:00~15:30엔 krOpen()이 false라 pollNight(HL)이 돌므로, 시각뿐 아니라 비거래일도 막아야 한다.
     var _kd=new Date(Date.now()+9*3600*1000),_km=_kd.getUTCHours()*60+_kd.getUTCMinutes();
@@ -465,8 +474,11 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var wmHeaderToggle=document.getElementById('wm-h-toggle');
   if(wmHeaderToggle) wmHeaderToggle.addEventListener('click', wmToggleManual);
   wmBodyGate();
-  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가
-  setInterval(wmBodyGate, 60000);
+  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가.
+  // + 날짜 롤오버(자정)도 함께 감시 — 오래 켜둔 탭이 전일 곡선을 계속 그리는 것을 자가 치유한다.
+  setInterval(function(){ wmBodyGate(); if(todayKST()!==bufDay) resetForNewDay(); }, 60000);
+  // 탭에 다시 돌아왔을 때(오래 켜뒀다 재방문) 날짜가 바뀌었으면 즉시 곡선을 새 거래일로 복구한다.
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && todayKST()!==bufDay) resetForNewDay(); });
 })();
 
 /* ── 블록 3 (원본 index.html) ── */
