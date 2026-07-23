@@ -166,13 +166,17 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       var tm=relTime(v.published_at)||esc(v.time_label);
       // 출처를 단독 줄로 두지 않고 행 전체를 링크로 만든다 — 하우스명 옆 화살표가 hover 시 나타나
       // 이동 가능함을 알린다. 출처명은 날짜 아래 작게 남겨 귀속(attribution)은 유지한다.
-      var body='<div class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</div>'+
-        '<div class="bd"><div class="hd"><span class="nm">'+esc(v.house)+'</span>'+
+      // 아이콘(하우스 이니셜)을 좌측 별도 열이 아니라 하우스명 앞 작은 뱃지로 인라인 배치 →
+      // 본문 텍스트가 좌우 열에 눌리지 않고 한 행 전체를 좌측 정렬로 사용한다.
+      var body='<div class="bd">'+
+        '<div class="hd"><span class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</span>'+
+        '<span class="nm">'+esc(v.house)+'</span>'+
         '<span class="tg '+st+'">'+label+'</span>'+
+        '<span class="tm">'+esc(tm)+'</span>'+
         (href?'<span class="go" aria-hidden="true">›</span>':'')+'</div>'+
-        '<div class="tx">'+esc(v.summary)+'</div></div>'+
-        '<div class="tm">'+esc(tm)+
-        (v.source?'<span class="src">'+esc(v.source)+'</span>':'')+'</div>';
+        '<div class="tx">'+esc(v.summary)+'</div>'+
+        (v.source?'<div class="src">출처 · '+esc(v.source)+'</div>':'')+
+        '</div>';
       return href
         ? '<a class="lw-ib-row lw-ib-row--link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+body+'</a>'
         : '<div class="lw-ib-row">'+body+'</div>';
