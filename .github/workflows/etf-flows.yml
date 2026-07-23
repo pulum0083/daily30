@@ -1,0 +1,121 @@
+# ETF 자금 지도 수집 워크플로우
+#
+# 평일 장 마감 후(KST 18:00) ETF 순자금흐름 스냅샷을 찍어 web/data/etf-flows.json을 낸다.
+# 자기 파일만 커밋한다(SERVICE_RULES §18 — 넓은 경로를 통째로 add 하지 않는다).
+# 순자산 EOD 확정 후라야 좌수 추정이 정확하므로 마감보다 늦게 돈다.
+#
+# 평일이어도 한국 공휴일(휴장)엔 건너뛴다 — 휴장일엔 순자산이 안 바뀌어 평평한 스냅샷이
+# 히스토리 롤링 윈도우의 한 칸을 차지해 "최근 N거래일" 라벨이 실제보다 넓게 잡히는 걸 막는다.
+# (다른 일일 잡들과 동일하게 holiday_check.py로 판정.)
+#
+# 스케줄(GHA native cron, UTC 기준 — KST = UTC+9):
+#   '0 9 * * 1-5' → KST 평일 18:00
+
+name: ETF 자금 지도 수집
+
+on:
+  schedule:
+    - cron: '0 9 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write   # vercel-deploy.yml 명시적 dispatch
+
+concurrency:
+  group: etf-flows
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: "🧭 ETF 자금 지도 수집"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # GHA cron 지연 발화 방어 — 실제 실행이 주말이면 여기서 즉시 스킵(python 세팅도 안 함).
+      - name: 🗓️ 평일 여부 확인
+        id: guard
+        run: |
+          dow=$(TZ=Asia/Seoul date +%u)   # 1=월 … 7=일
+          if [ "$dow" -le 5 ]; then
+            echo "weekday=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "weekday=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::KST 기준 주말($dow)이라 건너뜁니다 — cron 지연 발화로 판단."
+          fi
+
+      - name: 🐍 Python 세팅
+        if: steps.guard.outputs.weekday == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📦 holiday_check 의존성 설치
+        if: steps.guard.outputs.weekday == 'true'
+        run: pip install pytz
+
+      # 평일이어도 한국 공휴일(휴장)이면 스킵 — 평평한 스냅샷이 히스토리 윈도우를 희석하지 않게.
+      - name: 🗓️ 한국 개장일 확인
+        id: holiday
+        if: steps.guard.outputs.weekday == 'true'
+        run: |
+          if python3 scripts/holiday_check.py --market kospi; then
+            echo "open=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "open=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::KST 공휴일(휴장)이라 건너뜁니다 — 평평한 스냅샷이 히스토리를 희석하지 않게."
+          fi
+
+      - name: 🧭 ETF 자금흐름 수집
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/build_etf_flows.py
+
+      - name: 💾 JSON 커밋 & 푸시
+        id: commit
+        if: steps.holiday.outputs.open == 'true'
+        run: |
+          git config user.name  "DailyB Bot"
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          # 이 워크플로우가 소유한 파일만 커밋한다(§18).
+          git add web/data/etf-flows.json data/etf_flow_history.json
+          if git diff --cached --quiet; then
+            echo "변경 없음, 커밋 스킵"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "data: ETF 자금 지도 갱신 $(TZ=Asia/Seoul date +'%Y-%m-%d') KST"
+            pushed=false
+            for i in 1 2 3 4 5; do
+              git fetch origin main
+              if git rebase origin/main; then
+                if git push; then pushed=true; break; fi
+              else
+                git rebase --abort 2>/dev/null || true
+              fi
+              echo "Push attempt $i failed, retrying in 15s..."
+              sleep 15
+            done
+            echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
+            # 5회 모두 실패하면 명시적으로 중단(§17 — 무음 실패 방지).
+            if [ "$pushed" != "true" ]; then
+              echo "::error::push 5회 재시도 모두 실패 — 잡을 중단합니다."
+              exit 1
+            fi
+          fi
+
+      - name: 🚀 Vercel 배포 트리거
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          for i in 1 2 3 4 5; do
+            if gh workflow run vercel-deploy.yml --ref main -f sha="$sha"; then break; fi
+            echo "dispatch attempt $i failed, retrying in 10s..."
+            sleep 10
+          done

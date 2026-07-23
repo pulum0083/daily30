@@ -2810,3 +2810,93 @@ if(passBtn){
     .then(function(h){ if(h&&Object.keys(h).length) init(h); })
     .catch(function(){});
 })();
+
+/* ── 🧭 이번 주 자금 지도 (ETF 순유입·유출 히트맵) ── */
+(function(){
+  var block=document.getElementById('flow-block');
+  if(!block) return;
+  var body=document.getElementById('flow-body');
+  var TIERS=[[0,2,98],[2,4,74],[4,7,60],[7,10,48]];  // [start,end,rowHeightPx]
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
+
+  function fmtEok(v){
+    var a=Math.abs(v), sign=v>0?'+':(v<0?'−':'');
+    if(a>=10000) return sign+(a/10000).toFixed(1).replace(/\.0$/,'')+'조';
+    return sign+a.toLocaleString('en-US')+'억';
+  }
+  function tileStyle(flow,maxFlow){
+    var inten=maxFlow?Math.abs(flow)/maxFlow:0;
+    var alpha=(0.15+0.85*inten).toFixed(2);
+    var rgb=flow>=0?'224,49,49':'39,117,237';
+    var fg=alpha>0.46?'#fff':'#0F172A';
+    return 'background:rgba('+rgb+','+alpha+');color:'+fg+';';
+  }
+  function tileHtml(t,maxFlow){
+    return '<div class="flow-tile" style="flex:'+Math.abs(t.flow_eok)+';'+tileStyle(t.flow_eok,maxFlow)
+      +'" data-theme="'+t.theme+'">'
+      +'<div class="ft-nm">'+t.theme+'</div><div class="ft-amt">'+fmtEok(t.flow_eok)+'</div></div>';
+  }
+  function expandHtml(t){
+    var rows=(t.top_etfs||[]).map(function(e){
+      return '<div class="ft-ex-row"><span>'+esc(e.name)+'</span><span class="'+(e.flow_eok>=0?'ft-in':'ft-out')+'">'
+        +fmtEok(e.flow_eok)+'</span></div>';
+    }).join('');
+    return '<div class="ft-expand" data-for="'+t.theme+'">'+rows+'</div>';
+  }
+
+  function render(data){
+    var themes=(data.themes||[]).slice();
+    if(!themes.length){ block.style.display='none'; return; }
+    var visible=themes.slice(0,10), rest=themes.slice(10);
+    var maxFlow=Math.max.apply(null, visible.map(function(t){return Math.abs(t.flow_eok);}));
+    if(!maxFlow){ block.style.display='none'; return; }  // 유의미한 자금 이동 없음 — 숨김
+
+    var html='';
+    TIERS.forEach(function(tier){
+      var seg=visible.slice(tier[0],tier[1]);
+      if(!seg.length) return;
+      html+='<div class="flow-row" style="height:'+tier[2]+'px;">'
+        +seg.map(function(t){return tileHtml(t,maxFlow);}).join('')+'</div>';
+    });
+    body.innerHTML=html;
+
+    var win=document.getElementById('flow-window');
+    if(win) win.textContent='최근 '+(data.window_days||1)+'거래일 · 실측 설정/환매';
+    var quiet=document.getElementById('flow-quiet');
+    if(quiet){
+      quiet.textContent=rest.length
+        ? '그 외 '+rest.length+'개 테마는 이번 주 자금 이동이 크지 않았어요.' : '';
+      quiet.style.display=rest.length?'':'none';
+    }
+    // 타일 클릭 → 인라인 확장(상위 ETF). 다시 누르면 접힘.
+    body.querySelectorAll('.flow-tile').forEach(function(el){
+      el.addEventListener('click',function(){
+        var theme=el.getAttribute('data-theme');
+        var open=body.querySelector('.ft-expand[data-for="'+CSS.escape(theme)+'"]');
+        body.querySelectorAll('.ft-expand').forEach(function(x){x.remove();});
+        if(open) return;
+        var t=visible.filter(function(x){return x.theme===theme;})[0];
+        if(t) el.closest('.flow-row').insertAdjacentHTML('afterend',expandHtml(t));
+      });
+    });
+    block.style.display='';
+  }
+
+  function isFresh(iso){
+    if(!iso) return false;
+    // 5일 = 평일 갱신 + 주말·연휴 버퍼(§20 밸류에이션 가드와 동일 기준).
+    // 달력 2일로 잡으면 월요일마다 금요일 데이터(3일 전)를 stale로 오판해 꺼진다.
+    var age=(Date.now()-new Date(iso).getTime())/86400000;  // 일
+    if(isNaN(age)||age>5){ console.warn('[flow-map] etf-flows.json 타임스탬프 이상 또는 5일 넘게 안 갱신됨 — 블록 숨김'); return false; }
+    return true;
+  }
+
+  fetch('/data/etf-flows.json',{cache:'no-store'})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(data){
+      if(!data || !isFresh(data.generated_at)){ block.style.display='none'; return; }
+      render(data);
+    })
+    .catch(function(){ block.style.display='none'; });
+})();
