@@ -131,3 +131,98 @@ def aggregate_by_theme(flows, top_n=TOP_ETFS):
         })
     out.sort(key=lambda t: -abs(t["flow_eok"]))
     return out
+
+
+def load_json(path, default):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
+
+
+def fetch_etf_list():
+    """네이버 ETF 목록(euc-kr) → [{code,name,nav,aum_eok}] (AUM·NAV 유효한 것만)."""
+    req = urllib.request.Request(ETF_LIST_URL, headers={"User-Agent": UA})
+    raw = urllib.request.urlopen(req, timeout=15).read().decode("euc-kr")
+    items = json.loads(raw)["result"]["etfItemList"]
+    out = []
+    for e in items:
+        nav = e.get("nav")
+        aum = e.get("marketSum")   # 억원
+        if not nav or not aum:
+            continue
+        out.append({
+            "code": e["itemcode"],
+            "name": e["itemname"],
+            "nav": float(nav),
+            "aum_eok": aum,
+        })
+    return out
+
+
+def build_today_snapshot(etfs, aum_floor):
+    """AUM 필터 통과 ETF의 오늘 스냅샷 {code: {shares, nav, name}}."""
+    snap = {}
+    for e in etfs:
+        if e["aum_eok"] < aum_floor:
+            continue
+        shares = estimate_shares(e["aum_eok"], e["nav"])
+        if shares is None:
+            continue
+        snap[e["code"]] = {"shares": shares, "nav": e["nav"], "name": e["name"]}
+    return snap
+
+
+def compute_flows(today_snap, baseline_snap):
+    """오늘 vs 기준 스냅샷 차분 → ETF별 flow 리스트(양쪽에 다 있는 종목만)."""
+    flows = []
+    for code, cur in today_snap.items():
+        base = baseline_snap.get(code)
+        if not base:
+            continue   # 신규 상장 등 기준에 없는 종목은 제외
+        flows.append({
+            "code": code,
+            "name": cur["name"],
+            "theme": classify_theme(cur["name"]),
+            "flow_eok": net_flow_eok(cur["shares"], base["shares"], cur["nav"]),
+        })
+    return flows
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--aum-floor", type=int, default=300, help="집계 대상 최소 AUM(억원)")
+    args = ap.parse_args()
+
+    now = datetime.now(KST)
+    today = now.strftime("%Y-%m-%d")
+
+    etfs = fetch_etf_list()
+    today_snap = build_today_snapshot(etfs, args.aum_floor)
+
+    history = load_json(HISTORY_PATH, {})
+    prior_dates = sorted([d for d in history if d < today], reverse=True)
+    baseline_date, window_days = select_baseline(prior_dates, MAX_WINDOW)
+
+    themes = []
+    if baseline_date:
+        themes = aggregate_by_theme(compute_flows(today_snap, history[baseline_date]))
+
+    OUT_PATH.write_text(json.dumps({
+        "generated_at": now.isoformat(),
+        "window_days": window_days,
+        "aum_floor_eok": args.aum_floor,
+        "coverage": {"etf_count": len(today_snap), "theme_count": len(themes)},
+        "themes": themes,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    new_history = roll_history(history, today, today_snap)
+    HISTORY_PATH.write_text(json.dumps(new_history, ensure_ascii=False), encoding="utf-8")
+
+    print(f"[etf-flows] {today} · ETF {len(today_snap)}개 · window {window_days}일 · 테마 {len(themes)}개")
+    if not baseline_date:
+        print("[etf-flows] ⚠️ 스냅샷 부족(워밍업) — themes 비어있음, 블록 숨김 상태")
+
+
+if __name__ == "__main__":
+    main()
