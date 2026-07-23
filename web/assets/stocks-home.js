@@ -663,7 +663,22 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
-  function render(){ renderGrid(); renderMacro(); }
+  // 11개 종목 상승/하락 요약(마켓 브레드스) — 타이틀 하단에서 한 번 짚어준다. 유효 changePct만 집계.
+  function renderBreadth(){
+    var el=document.getElementById('ue-breadth'); if(!el) return;
+    var up=0,down=0,flat=0,n=0;
+    TICKERS.forEach(function(t){
+      var d=dataBySym[t.sym];
+      if(!d||typeof d.changePct!=='number'||!isFinite(d.changePct)) return;
+      n++; if(d.changePct>0) up++; else if(d.changePct<0) down++; else flat++;
+    });
+    if(!n){ el.style.display='none'; return; }
+    el.style.display='';
+    var p=['<b style="color:#E03131">'+up+' 상승</b>','<b style="color:#2775ED">'+down+' 하락</b>'];
+    if(flat) p.push('<b style="color:#64748B">'+flat+' 보합</b>');
+    el.innerHTML='지금 '+n+'종목 중 '+p.join(' · ');
+  }
+  function render(){ renderGrid(); renderMacro(); renderBreadth(); }
   /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
   function updateLiveBadge(){
     var b=document.getElementById('ue-live'); if(!b) return;
