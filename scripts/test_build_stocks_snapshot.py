@@ -138,6 +138,17 @@ def test_parse_financials_annual_sanity_gate():
     assert [r["year"] for r in out] == ["2025"]
 
 
+def test_parse_financials_annual_op_none_not_gated():
+    # 영업이익 컬럼 자체가 없어도(op=None) 매출만 유효하면 게이트에 안 걸려야 한다
+    # (op>rev 비교는 op가 숫자일 때만 적용 — None과의 비교로 오탈락하면 안 됨)
+    info = {
+        "trTitleList": [{"key": "202512", "isConsensus": "N"}],
+        "rowList": [{"title": "매출액", "columns": {"202512": {"value": "1,000"}}}],
+    }
+    out = m.parse_financials_annual(info)
+    assert out == [{"year": "2025", "rev": 1000, "op": None, "est": False}]
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
