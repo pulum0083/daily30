@@ -274,6 +274,39 @@
       </div>
       {% endif %}
 
+      <!-- 연간 실적 (매출·영업이익 · 확정 + 컨센서스) -->
+      {% if financials_annual %}
+      {% set arev_max = (financials_annual | map(attribute='rev') | reject('none') | list | max) or 1 %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
+            연간 실적
+          </span>
+          <span class="np__s">매출액 · 연간</span>
+        </div>
+        <div style="padding:16px 16px 12px;">
+          <div class="fin-chart">
+            {% for y in financials_annual %}
+            <div class="fin-col">
+              <span class="fin-cap{{ ' est' if y.est }}">{% if y.rev is not none %}{{ fmt_eok(y.rev) }}{% endif %}{{ '(E)' if y.est }}</span>
+              <div class="fin-bar {{ 'est' if y.est else 'actual' }}" style="height:{{ ((y.rev or 0) / arev_max * 150) | round | int }}px"></div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="fin-xrow">
+            {% for y in financials_annual %}
+            <span class="fin-x{{ ' est' if y.est }}">{{ y.year }}<br><span style="color:{{ 'var(--up)' if (y.op or 0) >= 0 else 'var(--dn)' }}">영업 {% if y.op is not none %}{{ fmt_eok(y.op) }}{% else %}—{% endif %}</span></span>
+            {% endfor %}
+          </div>
+          <div class="fin-foot"><div class="fin-legend">
+            <span><i style="background:var(--up)"></i>확정 실적</span>
+            <span><i class="est"></i>컨센서스 추정</span>
+          </div></div>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- 분기 실적 (매출·영업이익) -->
       {% if financials %}
       {% set rev_max = (financials | map(attribute='rev') | reject('none') | list | max) or 1 %}
