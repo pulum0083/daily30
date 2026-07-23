@@ -2817,6 +2817,8 @@ if(passBtn){
   if(!block) return;
   var body=document.getElementById('flow-body');
   var TIERS=[[0,2,98],[2,4,74],[4,7,60],[7,10,48]];  // [start,end,rowHeightPx]
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
 
   function fmtEok(v){
     var a=Math.abs(v), sign=v>0?'+':(v<0?'−':'');
@@ -2837,7 +2839,7 @@ if(passBtn){
   }
   function expandHtml(t){
     var rows=(t.top_etfs||[]).map(function(e){
-      return '<div class="ft-ex-row"><span>'+e.name+'</span><span class="'+(e.flow_eok>=0?'ft-in':'ft-out')+'">'
+      return '<div class="ft-ex-row"><span>'+esc(e.name)+'</span><span class="'+(e.flow_eok>=0?'ft-in':'ft-out')+'">'
         +fmtEok(e.flow_eok)+'</span></div>';
     }).join('');
     return '<div class="ft-expand" data-for="'+t.theme+'">'+rows+'</div>';
