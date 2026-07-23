@@ -436,6 +436,22 @@ body{background:var(--soft);margin:0;}
 .tgt-tbl .op2.hold{color:var(--muted);background:var(--soft);}
 .tgt-tbl .dt{color:var(--muted);font-size:12px;}
 
+/* ── 업종 대비 밸류에이션 (2026-07-21 홈에서 상세로 이전) ── */
+.val-wrap{padding:16px 18px 14px;}
+.val-hero{display:flex;align-items:baseline;gap:9px;margin-bottom:14px;}
+.val-big{font-size:26px;font-weight:800;letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
+.val-big.cheap,.val-say.cheap{color:#0F9D58;}
+.val-big.rich,.val-say.rich{color:var(--up);}
+.val-say{font-size:13px;font-weight:700;}
+.val-bar{position:relative;height:6px;border-radius:3px;background:var(--inset);margin:0 0 9px;}
+.val-med{position:absolute;left:50%;top:-3px;width:2px;height:12px;background:#B0B6BE;transform:translateX(-50%);}
+.val-dot{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);}
+.val-dot.cheap{background:#0F9D58;}
+.val-dot.rich{background:var(--up);}
+.val-legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.val-legend b{color:var(--ink);font-weight:700;}
+.val-note{margin:0;padding:10px 18px;font-size:11px;line-height:1.6;color:var(--muted);background:var(--soft);border-top:1px solid var(--hair);}
+
 /* ── 트랙레코드 ? 버튼 + 툴팁 ── */
 .tr-help{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;font-size:10px;font-weight:700;color:var(--muted);border:1.5px solid var(--hair);border-radius:50%;cursor:help;margin-left:5px;vertical-align:middle;flex-shrink:0;line-height:1;}
 .tr-help:hover{border-color:var(--primary);color:var(--primary);}

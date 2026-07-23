@@ -20,9 +20,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
-<script src="/assets/stocks-home.js?v=1" defer></script>
+<script src="/assets/stocks-home.js?v=5" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=1">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=5">
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
@@ -148,18 +148,16 @@
         </div>
       </div>
     </div>
-    <!-- 💰 밸류에이션 시그널 (PC 좌측 하단 · 모바일 맨 하단) -->
-    <div class="block val-block">
-      <div class="block__h"><span class="block__t"><span class="ic">💰</span><span id="val-title">밸류에이션 시그널</span><span class="help-q" data-tip-title="밸류에이션 시그널이란?" data-tip="코스피200 종목의 <b>선행 PER</b>(애널리스트 컨센서스 예상 실적 기준)을 <b>같은 업종 종목들의 중앙값</b>과 비교해 상대적으로 싸거나 비싼 종목을 자동 선별해요.<br><br>· <b>저평가</b> — 업종 평균보다 PER이 낮아요(상대적으로 쌈)<br>· <b>고평가</b> — 업종 평균보다 PER이 높아요(상대적으로 비쌈)<br><br>괴리율 = (종목 선행 PER − 업종 중앙값) ÷ 업종 중앙값. 선행 PER이 없으면 후행(실적 확정) PER로 대체하고, 적자·특이 업종은 제외해요. 업종보다 싸다고 반드시 오르는 건 아니에요(밸류 트랩). 투자 권유가 아닌 참고용이에요.">?</span></span></div>
-      <div class="sig-subhead">
-        <span class="upd-badge" id="val-upd-badge"></span>
-        <span class="stabs" id="val-tabs" style="margin-bottom:0;"><a class="on" onclick="valSetTab('under',this)">저평가</a><a onclick="valSetTab('over',this)">고평가</a></span>
-      </div>
-      <p class="sig-intro" id="val-intro">업종 평균 대비 선행 PER이 낮은 코스피200 종목이에요.</p>
-      <div id="val-rows">
-        <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:42%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:72%;margin-top:9px"></span></div>
-        <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:64%;margin-top:9px"></span></div>
-        <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:45%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:78%;margin-top:9px"></span></div>
+
+    <!-- 🧭 이번 주 자금 지도 (ETF 순유입·유출 히트맵) · JS가 /data/etf-flows.json 로드해 렌더, 데이터 없으면 숨김 -->
+    <div class="block flow-block" id="flow-block" style="display:none;">
+      <div class="block__h"><span class="block__t"><span class="ic">🧭</span><span id="flow-title">이번 주 자금 지도</span><span class="help-q" data-tip-title="자금 지도란?" data-tip="국내·해외·채권·원자재 <b>ETF로 실제로 들어오고 나간 돈</b>(설정·환매)을 테마별로 묶어 보여줘요.<br><br>· <b>타일 크기</b> = 이번 주 움직인 자금 규모<br>· <b>색</b> = 방향(빨강 유입 / 파랑 유출), 진할수록 큼<br><br>ETF 순자산 ÷ 기준가로 추정한 발행좌수의 하루하루 변화를 누적했어요(최대 5거래일). 가격이 올라 순자산이 는 건 제외하고, <b>순수하게 좌수가 늘고 준 것</b>만 집계해요. 투자 권유가 아닌 참고용이에요.">?</span></span><span class="block__s" id="flow-window"></span></div>
+      <div class="flow-body" id="flow-body"></div>
+      <p class="flow-quiet" id="flow-quiet"></p>
+      <div class="flow-leg">
+        <span>크기 = 움직인 자금</span>
+        <span>유입 <span class="flow-scale"><i style="background:rgba(224,49,49,0.25)"></i><i style="background:rgba(224,49,49,0.55)"></i><i style="background:rgba(224,49,49,1)"></i></span></span>
+        <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
       </div>
     </div>
     </div><!-- /home-main -->
