@@ -846,6 +846,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 @media(max-width:640px){
   #us-evening .ue-h-mrow{flex:1 1 100%;margin-left:0;}
   #us-evening #ue-breadth.has-data{display:inline-flex;align-items:center;}
+  /* 모바일 1번째 줄: 타이틀 왼쪽·기준 배지(장 마감·종가 기준 등) 오른쪽 정렬 */
+  #us-evening #ue-live{margin-left:auto;}
 }
 #us-evening #ue-live.closed{color:#94A3B8;}
 #us-evening #ue-live.closed .dot{background:#94A3B8;animation:none;}
