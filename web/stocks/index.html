@@ -148,6 +148,18 @@
         </div>
       </div>
     </div>
+
+    <!-- 🧭 이번 주 자금 지도 (ETF 순유입·유출 히트맵) · JS가 /data/etf-flows.json 로드해 렌더, 데이터 없으면 숨김 -->
+    <div class="block flow-block" id="flow-block" style="display:none;">
+      <div class="block__h"><span class="block__t"><span class="ic">🧭</span><span id="flow-title">이번 주 자금 지도</span><span class="help-q" data-tip-title="자금 지도란?" data-tip="국내·해외·채권·원자재 <b>ETF로 실제로 들어오고 나간 돈</b>(설정·환매)을 테마별로 묶어 보여줘요.<br><br>· <b>타일 크기</b> = 이번 주 움직인 자금 규모<br>· <b>색</b> = 방향(빨강 유입 / 파랑 유출), 진할수록 큼<br><br>ETF 순자산 ÷ 기준가로 추정한 발행좌수의 하루하루 변화를 누적했어요(최대 5거래일). 가격이 올라 순자산이 는 건 제외하고, <b>순수하게 좌수가 늘고 준 것</b>만 집계해요. 투자 권유가 아닌 참고용이에요.">?</span></span><span class="block__s" id="flow-window"></span></div>
+      <div class="flow-body" id="flow-body"></div>
+      <p class="flow-quiet" id="flow-quiet"></p>
+      <div class="flow-leg">
+        <span>크기 = 움직인 자금</span>
+        <span>유입 <span class="flow-scale"><i style="background:rgba(224,49,49,0.25)"></i><i style="background:rgba(224,49,49,0.55)"></i><i style="background:rgba(224,49,49,1)"></i></span></span>
+        <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
+      </div>
+    </div>
     </div><!-- /home-main -->
     <div class="home-side">
     <!-- ⚡ 오늘의 특이 신호 (PC 우측 사이드바 · 모바일 최상단) -->
