@@ -1380,6 +1380,75 @@ def _broker_targets_for_code(code, current_price):
     }
 
 
+# 업종 상대 밸류에이션 — web/data/valuation.json(fetch_valuation.py가 네이버에서 실측 수집).
+# 원래 종목 허브 홈의 랭킹 블록이었는데, 홈이 이미 "종목을 골라주는 랭킹"만 넷이라 성격이 겹쳐
+# 2026-07-21에 홈에서 제거하고 상세 페이지로 옮겼다(docs/plans/2026-07-21-home-earnings-valuation).
+# 코스피200 기반이라 46개 상세 페이지 중 27개만 데이터가 있다 — 없으면 섹션을 생략한다(운영규칙 0).
+_VALUATION_CACHE = None
+_VALUATION_MAX_STALE_DAYS = 5  # 목표주가와 같은 기준 — 연휴 + 주말 버퍼
+_VALUATION_STALE_WARNED = False
+
+
+def _load_valuation():
+    global _VALUATION_CACHE
+    if _VALUATION_CACHE is None:
+        p = WEB_DIR / "data" / "valuation.json"
+        _VALUATION_CACHE = load_json(p) if p.exists() else {}
+    return _VALUATION_CACHE
+
+
+def _valuation_data_is_stale():
+    """asOf가 임계치보다 오래됐으면 True. 날짜 파싱 실패도 신뢰 불가로 본다."""
+    as_of = str(_load_valuation().get("asOf") or "")[:10]
+    try:
+        d = datetime.strptime(as_of, "%Y-%m-%d").date()
+    except ValueError:
+        return True
+    return (datetime.now(KST).date() - d).days > _VALUATION_MAX_STALE_DAYS
+
+
+def _valuation_for_code(code):
+    """종목의 업종 상대 PER 괴리를 상세 페이지용 dict로 돌려준다.
+
+    수집이 조용히 죽었을 때 낡은 값을 계속 보여주지 않도록 신선도를 매번 확인한다(§20).
+    랭킹에 없는 종목(코스피200 밖·적자·이상치)은 None — 억지로 채우지 않는다.
+    """
+    global _VALUATION_STALE_WARNED
+    data = _load_valuation()
+    if not data:
+        return None
+    if _valuation_data_is_stale():
+        if not _VALUATION_STALE_WARNED:
+            print(f"[generate_html] ⚠️ valuation.json이 {_VALUATION_MAX_STALE_DAYS}일 넘게 안 갱신됨 "
+                  f"— 전 종목 밸류에이션 섹션 생략 (fetch_valuation.py 확인 필요)")
+            _VALUATION_STALE_WARNED = True
+        return None
+    for bucket in ("undervalued", "overvalued"):
+        for row in data.get(bucket) or []:
+            if row.get("code") != code:
+                continue
+            disc = row.get("disc")
+            per, med = row.get("per"), row.get("sectorMed")
+            if disc is None or not per or not med:
+                return None
+            cheap = disc < 0
+            # 배지와 문구가 어긋나 보이지 않도록 반올림을 한 번만 하고 둘 다 그 값을 쓴다
+            # (구 홈 위젯 valRowHtml의 의도를 그대로 옮김 — -4.8%인데 "5% 싸요"로 보이면 안 된다).
+            mag = round(abs(disc))
+            return {
+                "sector": row.get("sector") or "",
+                "per": per,
+                "sector_med": med,
+                "basis": row.get("basis") or "선행",
+                "disc": mag,
+                "cheap": cheap,
+                "phrase": f"업종보다 {mag}% " + ("싸요" if cheap else "비싸요"),
+                # 막대는 업종 중앙값을 100%로 두고 종목 PER의 상대 위치를 그린다(0~200%로 클램프).
+                "bar_pct": max(0, min(200, round(per / med * 100))) / 2,
+            }
+    return None
+
+
 def extract_picks_for_code(code):
     """모든 analysis_snapshot.json에서 해당 종목 코드의 픽 이력 추출."""
     found = []
@@ -1617,6 +1686,7 @@ def build_stock_page(stock, peers):
         "financials": snap_stock.get("financials"),
         "picks": picks,
         "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
+        "valuation": _valuation_for_code(stock["code"]),
         "acc": acc,
         "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
         "hl_night": stock["code"] in HL_NIGHT_CODES,

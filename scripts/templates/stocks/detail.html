@@ -203,6 +203,31 @@
       </div>
       {% endif %}
 
+      <!-- 업종 상대 밸류에이션 (코스피200 밖 종목은 데이터가 없어 섹션 생략) -->
+      {% if valuation %}
+      <div class="np">
+        <div class="np__h">
+          <span class="np__t">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            업종 대비 밸류에이션
+          </span>
+          <span class="np__s">{{ valuation.sector }} 업종 중앙값 기준</span>
+        </div>
+        <div class="val-wrap">
+          <div class="val-hero">
+            <span class="val-big {{ 'cheap' if valuation.cheap else 'rich' }}">{{ '-' if valuation.cheap else '+' }}{{ valuation.disc }}%</span>
+            <span class="val-say {{ 'cheap' if valuation.cheap else 'rich' }}">{{ valuation.phrase }}</span>
+          </div>
+          <div class="val-bar"><div class="val-med"></div><div class="val-dot {{ 'cheap' if valuation.cheap else 'rich' }}" style="left:{{ valuation.bar_pct }}%"></div></div>
+          <div class="val-legend">
+            <span>{{ valuation.basis }} PER <b>{{ "%.1f"|format(valuation.per) }}</b></span>
+            <span>업종 중앙값 <b>{{ "%.1f"|format(valuation.sector_med) }}</b></span>
+          </div>
+        </div>
+        <p class="val-note">업종보다 싸다고 반드시 오르는 건 아니에요(밸류 트랩). 적자·특이 업종은 집계에서 빠져요.</p>
+      </div>
+      {% endif %}
+
       {# ── 수치 포맷 매크로 ── #}
       {% macro fmt_man(v) %}{{ '+' if v >= 0 else '−' }}{{ ((v | abs) / 10000) | round | int }}만{% endmacro %}
       {% macro fmt_eok(v) %}{% if (v | abs) >= 10000 %}{{ '−' if v < 0 else '' }}{{ ((v | abs) / 10000) | round(1) }}조{% else %}{{ '−' if v < 0 else '' }}{{ "{:,}".format(v | abs) }}억{% endif %}{% endmacro %}
