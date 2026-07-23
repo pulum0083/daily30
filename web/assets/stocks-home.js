@@ -2848,6 +2848,7 @@ if(passBtn){
     if(!themes.length){ block.style.display='none'; return; }
     var visible=themes.slice(0,10), rest=themes.slice(10);
     var maxFlow=Math.max.apply(null, visible.map(function(t){return Math.abs(t.flow_eok);}));
+    if(!maxFlow){ block.style.display='none'; return; }  // 유의미한 자금 이동 없음 — 숨김
 
     var html='';
     TIERS.forEach(function(tier){
@@ -2885,7 +2886,7 @@ if(passBtn){
     // 5일 = 평일 갱신 + 주말·연휴 버퍼(§20 밸류에이션 가드와 동일 기준).
     // 달력 2일로 잡으면 월요일마다 금요일 데이터(3일 전)를 stale로 오판해 꺼진다.
     var age=(Date.now()-new Date(iso).getTime())/86400000;  // 일
-    if(age>5){ console.warn('[flow-map] etf-flows.json이 5일 넘게 안 갱신됨 — 블록 숨김'); return false; }
+    if(isNaN(age)||age>5){ console.warn('[flow-map] etf-flows.json 타임스탬프 이상 또는 5일 넘게 안 갱신됨 — 블록 숨김'); return false; }
     return true;
   }
 
