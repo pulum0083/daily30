@@ -139,6 +139,31 @@ def parse_financials(finance_info, n=5):
     return out
 
 
+def parse_financials_annual(finance_info):
+    """네이버 finance/annual 응답에서 연도별 매출·영업이익(억원)을 순서대로.
+    각 항목: {year:'2026', rev:매출, op:영업이익, est:컨센서스추정여부}.
+    구조적 sanity 게이트(운영규칙 0): 매출 결측/≤0 또는 영업이익>매출(불가능)인 연도는 폐기.
+    컨센서스 값의 크기 자체는 손대지 않는다(벤더 실측)."""
+    if not finance_info:
+        return []
+    titles = finance_info.get("trTitleList", [])
+    rows = {r.get("title"): r.get("columns", {}) for r in finance_info.get("rowList", [])}
+    rev_col = rows.get("매출액", {})
+    op_col = rows.get("영업이익", {})
+    out = []
+    for t in titles:
+        key = t.get("key") or ""
+        rev = _to_int((rev_col.get(key) or {}).get("value"))
+        op = _to_int((op_col.get(key) or {}).get("value"))
+        if rev is None or rev <= 0:
+            continue
+        if op is not None and op > rev:
+            continue
+        out.append({"year": key[:4], "rev": rev, "op": op,
+                    "est": t.get("isConsensus") == "Y"})
+    return out
+
+
 def _naver_supply5(code):
     """종목별 일별 투자자 순매수 수량(외국인·기관·개인). 실패 시 []."""
     try:

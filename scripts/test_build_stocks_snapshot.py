@@ -94,6 +94,50 @@ def test_sector_bellwether_for_stock():
     assert g.sector_bellwether(snapshot, sectors, "nonexist") is None
 
 
+def test_parse_financials_annual():
+    info = {
+        "trTitleList": [
+            {"key": "202312", "isConsensus": "N"},
+            {"key": "202412", "isConsensus": "N"},
+            {"key": "202512", "isConsensus": "N"},
+            {"key": "202612", "isConsensus": "Y"},
+        ],
+        "rowList": [
+            {"title": "매출액", "columns": {"202312": {"value": "2,589,355"},
+             "202412": {"value": "3,008,709"}, "202512": {"value": "3,336,059"},
+             "202612": {"value": "7,324,732"}}},
+            {"title": "영업이익", "columns": {"202312": {"value": "65,670"},
+             "202412": {"value": "327,260"}, "202512": {"value": "436,011"},
+             "202612": {"value": "3,832,404"}}},
+        ],
+    }
+    out = m.parse_financials_annual(info)
+    assert [r["year"] for r in out] == ["2023", "2024", "2025", "2026"]
+    assert out[0] == {"year": "2023", "rev": 2589355, "op": 65670, "est": False}
+    # 2026 컨센서스 — 영업(383조)<매출(732조)이라 게이트 통과, 크기는 손대지 않음
+    assert out[-1]["est"] is True and out[-1]["rev"] == 7324732
+    assert m.parse_financials_annual(None) == []
+
+
+def test_parse_financials_annual_sanity_gate():
+    # 구조적으로 불가능한 값만 폐기: 영업이익>매출, 매출≤0
+    info = {
+        "trTitleList": [
+            {"key": "202512", "isConsensus": "N"},   # 정상 → 유지
+            {"key": "202612", "isConsensus": "Y"},   # 영업>매출 → 폐기
+            {"key": "202712", "isConsensus": "Y"},   # 매출 0 → 폐기
+        ],
+        "rowList": [
+            {"title": "매출액", "columns": {"202512": {"value": "1,000"},
+             "202612": {"value": "500"}, "202712": {"value": "0"}}},
+            {"title": "영업이익", "columns": {"202512": {"value": "100"},
+             "202612": {"value": "900"}, "202712": {"value": "50"}}},
+        ],
+    }
+    out = m.parse_financials_annual(info)
+    assert [r["year"] for r in out] == ["2025"]
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
