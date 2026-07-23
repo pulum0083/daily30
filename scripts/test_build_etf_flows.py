@@ -46,6 +46,32 @@ def test_select_baseline():
     assert m.select_baseline([], 5) == (None, 0)
 
 
+def test_roll_history():
+    hist = {"2026-07-16": {"A": 1}, "2026-07-17": {"A": 2}}
+    snap = {"A": 3}
+    out = m.roll_history(hist, "2026-07-20", snap, keep_days=2)
+    # 오늘 추가 + 최근 2거래일만 보관(가장 오래된 07-16 프룬)
+    assert set(out.keys()) == {"2026-07-17", "2026-07-20"}
+    assert out["2026-07-20"] == {"A": 3}
+
+
+def test_aggregate_by_theme():
+    flows = [
+        {"code": "1", "name": "KODEX 반도체", "theme": "반도체", "flow_eok": 900},
+        {"code": "2", "name": "TIGER 반도체TOP10", "theme": "반도체", "flow_eok": -200},
+        {"code": "3", "name": "KODEX 국고채", "theme": "채권", "flow_eok": -500},
+        {"code": "4", "name": "미분류", "theme": None, "flow_eok": 999},  # 제외돼야
+    ]
+    themes = m.aggregate_by_theme(flows, top_n=5)
+    # None 테마 제외, |합| 내림차순: 반도체(+700), 채권(-500)
+    assert [t["theme"] for t in themes] == ["반도체", "채권"]
+    assert themes[0]["flow_eok"] == 700
+    assert themes[0]["etf_count"] == 2
+    # top_etfs는 |flow| 내림차순
+    assert themes[0]["top_etfs"][0]["code"] == "1"
+    assert themes[0]["top_etfs"][1]["code"] == "2"
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:

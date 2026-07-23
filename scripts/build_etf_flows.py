@@ -100,3 +100,34 @@ def select_baseline(prior_dates_desc, max_window):
         return (None, 0)
     k = min(max_window, p)
     return (prior_dates_desc[k - 1], k)
+
+
+def roll_history(history, today, snapshot, keep_days=KEEP_DAYS):
+    """오늘 스냅샷을 추가하고 최근 keep_days거래일만 남긴다."""
+    out = dict(history)
+    out[today] = snapshot
+    keep = sorted(out.keys(), reverse=True)[:keep_days]
+    return {d: out[d] for d in keep}
+
+
+def aggregate_by_theme(flows, top_n=TOP_ETFS):
+    """ETF별 flow 리스트 → 테마별 집계. None 테마 제외, |합| 내림차순."""
+    buckets = {}
+    for f in flows:
+        theme = f.get("theme")
+        if not theme:
+            continue
+        b = buckets.setdefault(theme, {"theme": theme, "flow_eok": 0, "etfs": []})
+        b["flow_eok"] += f["flow_eok"]
+        b["etfs"].append(f)
+    out = []
+    for b in buckets.values():
+        top = sorted(b["etfs"], key=lambda x: -abs(x["flow_eok"]))[:top_n]
+        out.append({
+            "theme": b["theme"],
+            "flow_eok": b["flow_eok"],
+            "etf_count": len(b["etfs"]),
+            "top_etfs": [{"code": e["code"], "name": e["name"], "flow_eok": e["flow_eok"]} for e in top],
+        })
+    out.sort(key=lambda t: -abs(t["flow_eok"]))
+    return out
