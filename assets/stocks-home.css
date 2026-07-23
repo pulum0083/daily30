@@ -835,6 +835,18 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     .mt-st.hit{color:#15803D;background:#DCFCE7;}
     .mt-st.loss{color:#B91C1C;background:#FEE2E2;}
 #us-evening .ue-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+#us-evening .ue-h-lead{display:flex;align-items:center;gap:8px;}
+/* 요약(#ue-breadth)+토글을 한 그룹(.ue-h-mrow)으로 묶어 줄바꿈 시 함께 다음 줄로 내려가게 한다.
+   PC: mrow가 콘텐츠 크기만큼만 차지하고 margin-left:auto로 우측 끝에 붙음 — 예전 토글 단독 배치와 동일해 보임.
+   모바일: mrow가 줄 전체 폭을 차지(flex:1 1 100%)해 토글의 margin-left:auto가 그 안에서 우측 끝으로 밀리고,
+   요약은 자연스럽게 좌측에 남는다 — 결과적으로 "요약 좌측·토글 우측, 같은 줄". */
+#us-evening .ue-h-mrow{display:flex;align-items:center;margin-left:auto;}
+/* 상승/하락 요약 — PC에선 항상 숨김(줄이 남아도 어색해서). 모바일에서만 노출. */
+#us-evening #ue-breadth{display:none;font-size:12px;color:#94A3B8;white-space:nowrap;}
+@media(max-width:640px){
+  #us-evening .ue-h-mrow{flex:1 1 100%;margin-left:0;}
+  #us-evening #ue-breadth.has-data{display:inline-flex;align-items:center;}
+}
 #us-evening #ue-live.closed{color:#94A3B8;}
 #us-evening #ue-live.closed .dot{background:#94A3B8;animation:none;}
 #us-evening #ue-toggle button{border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;background:transparent;color:#64748B;cursor:pointer;}

@@ -663,7 +663,24 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
-  function render(){ renderGrid(); renderMacro(); }
+  // 11개 종목 상승/하락 요약(마켓 브레드스) — 모바일 전용(원화/달러 토글과 같은 줄, 좌측 정렬).
+  // PC는 CSS(stocks-home.css)에서 항상 숨김 — 여기선 데이터 유무만 has-data 클래스로 표시하고
+  // 실제 표시 여부(PC 숨김/모바일만 노출)는 전부 CSS 미디어쿼리가 결정한다(display를 JS가 직접 건드리지 않음).
+  function renderBreadth(){
+    var el=document.getElementById('ue-breadth'); if(!el) return;
+    var up=0,down=0,flat=0,n=0;
+    TICKERS.forEach(function(t){
+      var d=dataBySym[t.sym];
+      if(!d||typeof d.changePct!=='number'||!isFinite(d.changePct)) return;
+      n++; if(d.changePct>0) up++; else if(d.changePct<0) down++; else flat++;
+    });
+    if(!n){ el.classList.remove('has-data'); el.innerHTML=''; return; }
+    var p=['<b style="color:#E03131">'+up+' 상승</b>','<b style="color:#2775ED">'+down+' 하락</b>'];
+    if(flat) p.push('<b style="color:#64748B">'+flat+' 보합</b>');
+    el.innerHTML=p.join(' · ');
+    el.classList.add('has-data');
+  }
+  function render(){ renderGrid(); renderMacro(); renderBreadth(); }
   /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
   function updateLiveBadge(){
     var b=document.getElementById('ue-live'); if(!b) return;
