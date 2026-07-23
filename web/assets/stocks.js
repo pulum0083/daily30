@@ -1,5 +1,11 @@
 // 종목 상세 페이지의 sparkline 렌더를 담당하는 스크립트
 
+// ── 국내 거래일 판정 (장중 곡선·야간 추정가가 공유) ──
+// 목록은 api/_market-calendar.mjs 미러. 두 곳에서 쓰므로 파일 스코프에 둔다(맵 중복 금지).
+var KR_HOL={'2026-01-01':1,'2026-02-16':1,'2026-02-17':1,'2026-02-18':1,'2026-03-02':1,'2026-05-01':1,'2026-05-05':1,'2026-05-25':1,'2026-06-03':1,'2026-07-17':1,'2026-08-17':1,'2026-09-24':1,'2026-09-25':1,'2026-09-26':1,'2026-10-05':1,'2026-10-09':1,'2026-12-25':1,'2026-12-31':1,'2025-12-25':1,'2025-12-31':1};
+function krTradingDay(){var d=new Date(Date.now()+9*3600*1000),wd=d.getUTCDay();return !(wd===0||wd===6||KR_HOL[d.toISOString().slice(0,10)]);}
+function krMinNow(){var k=new Date(Date.now()+9*3600*1000);return k.getUTCHours()*60+k.getUTCMinutes();}
+
 // ── 미국 상세 전용: 원화/달러 전환 컨트롤러 ──
 // 모든 표시 가격은 USD가 기준값. KRW 선택 시 환율(/api/market forex)로 곱해 표기한다.
 var USCUR = (function(){
@@ -273,9 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var nowMin = isUS
     ? etNowMin()
     : (function(){var k=new Date(Date.now()+9*3600*1000);return k.getUTCHours()*60+k.getUTCMinutes();})();
-  // 국내: 주말·공휴일이면 장중 아님(비거래일에 '오늘 장중'·실시간 헤더로 오판 방지). 목록은 api/_market-calendar.mjs 미러.
-  var KR_HOL={'2026-01-01':1,'2026-02-16':1,'2026-02-17':1,'2026-02-18':1,'2026-03-02':1,'2026-05-01':1,'2026-05-05':1,'2026-05-25':1,'2026-06-03':1,'2026-07-17':1,'2026-08-17':1,'2026-09-24':1,'2026-09-25':1,'2026-09-26':1,'2026-10-05':1,'2026-10-09':1,'2026-12-25':1,'2026-12-31':1,'2025-12-25':1,'2025-12-31':1};
-  function krTradingDay(){var d=new Date(Date.now()+9*3600*1000),wd=d.getUTCDay();return !(wd===0||wd===6||KR_HOL[d.toISOString().slice(0,10)]);}
+  // 국내: 주말·공휴일이면 장중 아님(비거래일에 '오늘 장중'·실시간 헤더로 오판 방지). krTradingDay는 파일 스코프.
   var isLive = isUS ? (nowMin>=240&&nowMin<=1200) : (krTradingDay() && nowMin>=540 && nowMin<=935);
   // 현재 미국 세션 구간 (라이브 아닐 땐 본장 기준)
   function curSeg(){ if(!isLive) return 'regular'; var m=etNowMin(); return m<570?'pre':(m<960?'regular':'post'); }
@@ -599,5 +603,60 @@ document.addEventListener('DOMContentLoaded', function() {
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',clampTgtCur);
   else clampTgtCur();
   window.addEventListener('resize',clampTgtCur);
+})();
+
+// ── 야간 추정가 (국내장 마감 후) ─────────────────────────────────────────────
+// /api/hl-night = 하이퍼리퀴드 xyz dex의 24h 무기한선물 USD가 × 환율. 마감 후에도 움직이는 참고가다.
+// 마크업은 HL 상장 3종목(삼성전자·SK하이닉스·현대차)에만 렌더된다(generate_html.HL_NIGHT_CODES).
+//
+// 표시 규칙 (전부 운영 규칙 0에서 나온다):
+//  · 히어로의 큰 숫자는 KRX 실측 종가다. 덮어쓰지 않고 별도 행으로 붙여 실측/참고 경계를 유지한다.
+//  · 등락률은 응답의 changePct(HL 자체 24시간 전 mark 대비)를 쓰지 않는다 — 화면의 KRX 일간
+//    등락률과 기준이 달라 나란히 놓으면 오독된다. 실측 종가(data-close) 대비로 다시 계산하고
+//    라벨에 '종가 대비'를 명시한다.
+//  · adjusted:true는 HL 합성가가 실제가 대비 5% 넘게 벗어나 서버가 '실제 종가로 대체'한 값이다.
+//    그걸 '추정가'라 부르면 종가를 추정가라고 말하는 게 되므로 표시하지 않는다.
+(function(){
+  var box=document.getElementById('night-px'); if(!box) return;
+  var code=box.getAttribute('data-code');
+  if(!code) return;
+  var valEl=document.getElementById('night-px-val'), chgEl=document.getElementById('night-px-chg');
+
+  // 비교 기준은 '화면에 실제로 보이는 종가'다. 장중 곡선 IIFE가 실측 1분봉 마지막 값으로 히어로를
+  // 보정하는 경우가 있어(SSR 값과 다를 수 있다), data-close만 믿으면 사용자가 못 보는 숫자를
+  // 기준으로 '종가 대비'를 말하게 된다. 히어로를 먼저 읽고, 못 읽을 때만 SSR 값으로 폴백한다.
+  function closePx(){
+    var el=document.querySelector('#hero-stock .px.num');
+    var shown=el?parseFloat((el.textContent||'').replace(/[^\d.]/g,'')):NaN;
+    if(isFinite(shown)&&shown>0) return shown;
+    var ssr=parseFloat(box.getAttribute('data-close'));
+    return isFinite(ssr)&&ssr>0?ssr:0;
+  }
+
+  // 마감 상태 = 비거래일(주말·공휴일)이거나 09:00~15:30 밖
+  function krClosed(){ if(!krTradingDay()) return true; var m=krMinNow(); return m<540||m>930; }
+
+  function hide(){ box.style.display='none'; }
+
+  function poll(){
+    if(!krClosed()){ hide(); return; }
+    fetch('/api/hl-night',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        var it=(d&&d.items||[]).filter(function(x){return x.code===code;})[0];
+        if(!it||it.krw==null||it.adjusted){ hide(); return; }   // 값 없음·실제가로 대체됨 → 표시 안 함
+        var close=closePx();
+        if(!close){ hide(); return; }                           // 비교 기준을 못 구하면 % 를 지어내지 않는다
+        var pct=(it.krw-close)/close*100;
+        valEl.textContent=Math.round(it.krw).toLocaleString('ko-KR');
+        var up=pct>0;
+        chgEl.textContent=(up?'▲ +':(pct<0?'▼ ':'— '))+Math.abs(pct).toFixed(2)+'% (종가 대비)';
+        chgEl.style.color=up?'var(--up)':(pct<0?'var(--dn)':'var(--muted)');
+        box.style.display='flex';   // 숨김 해제 시 flex — ''로 두면 div 기본값 block이라 정렬이 깨진다
+      })
+      .catch(hide);
+  }
+  poll();
+  setInterval(poll,30000);   // 문구의 '30초 갱신'과 반드시 일치시킬 것
 })();
 

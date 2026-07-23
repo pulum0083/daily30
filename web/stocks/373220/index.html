@@ -54,15 +54,16 @@
         <div class="top">
           <div>
             <div class="hn">LG에너지솔루션 <a class="chip" href="/stocks/sector/battery/">2차전지</a></div>
-            <div class="meta"><span class="num">373220</span> · KOSPI · 07-21 종가</div>
+            <div class="meta"><span class="num">373220</span> · KOSPI · 07-23 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">317,000</div>
+            <div class="px num">348,000</div>
             
-            <div class="cg num" style="color:var(--dn)">▼ -0.16%</div>
+            <div class="cg num" style="color:var(--up)">▲ +8.41%</div>
             
           </div>
         </div>
+        
         <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
         <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
@@ -81,8 +82,8 @@
         <!-- 20일 종가 패널 -->
         <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
-               data-spark="362000.0,365500.0,352000.0,331500.0,400500.0,362000.0,348000.0,354000.0,362500.0,354500.0,332000.0,315500.0,313500.0,326000.0,328500.0,322000.0,335000.0,334000.0,317500.0,317000.0"
-               data-dates="6/23,6/24,6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21"
+               data-spark="352000.0,331500.0,400500.0,362000.0,348000.0,354000.0,362500.0,354500.0,332000.0,315500.0,313500.0,326000.0,328500.0,322000.0,335000.0,334000.0,317500.0,317000.0,321000.0,348000.0"
+               data-dates="6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21,7/22,7/23"
                style="cursor:crosshair;position:relative;"></div>
         </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
@@ -90,7 +91,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="373220" data-date="2026-07-21">
+        <div class="np__h" id="sig-c-head" data-code="373220" data-date="2026-07-23">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -107,14 +108,14 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">07-21 종가 기준</span>
+          <span class="np__s">07-23 종가 기준</span>
         </div>
 
         
         <div class="mx">
-          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">18.4%</b> 지점</span></div>
-          <div class="w52"><div class="fill" style="width:18.4%"></div><div class="now" style="left:18.4%"></div></div>
-          <div class="w52-lb"><span>최저 272,500</span><span>최고 514,000</span></div>
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">27.7%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:27.7%"></div><div class="now" style="left:27.7%"></div></div>
+          <div class="w52-lb"><span>최저 284,500</span><span>최고 514,000</span></div>
         </div>
         
 
@@ -123,14 +124,14 @@
           
           <div class="cell">
             <div class="l">20일선 대비</div>
-            <div class="v" style="color:var(--dn)">-7.2%</div>
-            <div class="sub">단기 추세 아래</div>
+            <div class="v" style="color:var(--up)">+2.7%</div>
+            <div class="sub">단기 추세 위</div>
           </div>
           
           
           <div class="cell">
             <div class="l">200일선 대비</div>
-            <div class="v" style="color:var(--dn)">-22.0%</div>
+            <div class="v" style="color:var(--dn)">-14.3%</div>
             <div class="sub">장기 추세 아래</div>
           </div>
           
@@ -144,7 +145,7 @@
             <div class="v">5.54<span style="font-size:12px">%</span></div>
           </div>
           
-          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,21.5 8.421052631578947,33.1 16.842105263157894,30.2 25.263157894736842,30.2 33.68421052631579,4.0 42.10526315789474,27.3 50.526315789473685,36.0 58.94736842105263,36.0 67.36842105263158,27.3 75.78947368421052,24.4 84.21052631578948,18.5 92.63157894736842,21.5 101.05263157894737,21.5 109.47368421052632,21.5 117.89473684210526,21.5 126.3157894736842,27.3 134.73684210526315,24.4 143.1578947368421,21.5 151.57894736842104,21.5 160.0,21.5 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,30.2 8.421052631578947,30.2 16.842105263157894,4.0 25.263157894736842,27.3 33.68421052631579,36.0 42.10526315789474,36.0 50.526315789473685,27.3 58.94736842105263,24.4 67.36842105263158,18.5 75.78947368421052,21.5 84.21052631578948,21.5 92.63157894736842,21.5 101.05263157894737,21.5 109.47368421052632,27.3 117.89473684210526,24.4 126.3157894736842,21.5 134.73684210526315,21.5 143.1578947368421,21.5 151.57894736842104,21.5 160.0,21.5 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
           </svg>
           
         </div>
@@ -153,7 +154,7 @@
         
         <div class="ovr">
           <span class="lbl">해외 연동 · 미 벨웨더 Albemarle <span style="color:var(--muted)">(참고)</span></span>
-          <span style="font-size:13px;font-weight:700;color:var(--dn)">-2.1% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--dn)">-1.0% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
         </div>
         
       </div>
@@ -185,53 +186,31 @@
           <div class="sd-row">
             <span class="sd-lbl">개인</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill sell" style="width:30.0%"></div>
+              <div class="sd-fill buy" style="width:23.3%"></div>
             </div>
-            <span class="sd-val" style="color:var(--dn)">−4만</span>
+            <span class="sd-val" style="color:var(--up)">+2만</span>
           </div>
           
           <div class="sd-row">
             <span class="sd-lbl">기관</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill buy" style="width:50.0%"></div>
+              <div class="sd-fill sell" style="width:50.0%"></div>
             </div>
-            <span class="sd-val" style="color:var(--up)">+6만</span>
+            <span class="sd-val" style="color:var(--dn)">−4만</span>
           </div>
           
           <div class="sd-row">
             <span class="sd-lbl">외국인</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill sell" style="width:23.3%"></div>
+              <div class="sd-fill buy" style="width:25.4%"></div>
             </div>
-            <span class="sd-val" style="color:var(--dn)">−3만</span>
+            <span class="sd-val" style="color:var(--up)">+2만</span>
           </div>
           
         </div>
         <table class="tgt-tbl sd-daily">
           <thead><tr><th>날짜</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead>
           <tbody>
-            
-            <tr>
-              <td class="dt">7/13</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−5만</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+6만</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−1만</td>
-              
-            </tr>
-            
-            <tr>
-              <td class="dt">7/14</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−1만</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+5만</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−4만</td>
-              
-            </tr>
             
             <tr>
               <td class="dt">7/15</td>
@@ -263,6 +242,28 @@
               <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−2만</td>
               
               <td class="num" style="color:var(--up);font-weight:700;text-align:right">+1만</td>
+              
+            </tr>
+            
+            <tr>
+              <td class="dt">7/21</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+2만</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−2만</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−0만</td>
+              
+            </tr>
+            
+            <tr>
+              <td class="dt">7/22</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−2만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+2만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
               
             </tr>
             
@@ -345,7 +346,7 @@
         <a class="srow" href="/stocks/247540/">
           <span class="n2">에코프로비엠 <small class="num">247540</small></span>
           
-            <span class="c up num">+1.73%</span>
+            <span class="c up num">+9.95%</span>
             
           
         </a>
@@ -353,7 +354,7 @@
         <a class="srow" href="/stocks/006400/">
           <span class="n2">삼성SDI <small class="num">006400</small></span>
           
-            <span class="c up num">+3.87%</span>
+            <span class="c up num">+11.46%</span>
             
           
         </a>
@@ -361,7 +362,7 @@
         <a class="srow" href="/stocks/003670/">
           <span class="n2">포스코퓨처엠 <small class="num">003670</small></span>
           
-            <span class="c up num">+1.32%</span>
+            <span class="c up num">+7.87%</span>
             
           
         </a>
@@ -369,7 +370,7 @@
         <a class="srow" href="/stocks/066970/">
           <span class="n2">엘앤에프 <small class="num">066970</small></span>
           
-            <span class="c dn num">-0.96%</span>
+            <span class="c up num">+8.13%</span>
             
           
         </a>
@@ -407,7 +408,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-21 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-23 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>

@@ -1,5 +1,57 @@
 {
   "slots": {
+    "2026-07-23": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-23/kospi/",
+        "headline": "구글 클라우드 +82% 확인 — HBM엔 순풍, 단기 심리는 혼조예요",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "중립",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "ready",
+        "url": "/briefings/2026-07-23/close/",
+        "headline": "전선·2차전지·정유 동반 폭등 — 코스피 4%대 급등",
+        "title": "7,096.89",
+        "price": "7,096.89",
+        "time": ""
+      },
+      "us": {
+        "state": "ready",
+        "url": "/briefings/2026-07-23/us/",
+        "headline": "CPI는 예상보다 뜨겁고, VIX는 급등하고, 메모리는 주저앉았다",
+        "title": "—",
+        "time": ""
+      }
+    },
+    "2026-07-22": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-22/kospi/",
+        "headline": "오늘, 코스피 반도체 랠리 더 갈까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "ready",
+        "url": "/briefings/2026-07-22/close/",
+        "headline": "코스피 6800 육박, 오늘 장 어떻게 봐야 할까요?",
+        "title": "6,797.70",
+        "price": "6,797.70",
+        "time": ""
+      },
+      "us": {
+        "state": "ready",
+        "url": "/briefings/2026-07-22/us/",
+        "headline": "S&P는 20일선을 뚫었는데, 메모리·장비주는 나 홀로 후퇴 중이에요",
+        "title": "—",
+        "time": ""
+      }
+    },
     "2026-07-21": {
       "kospi": {
         "state": "ready",
@@ -246,58 +298,30 @@
     },
     "2026-07-07": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-07/kospi/",
-        "headline": "오늘, 코스피 다시 반등할까요?",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:27"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-07/close/",
-        "headline": "코스피 4.91% 급락, 서킷브레이커까지 — 무슨 일이었을까요?",
-        "title": "7,656.31",
-        "price": "7,656.31",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-07/us/",
-        "headline": "신호 점검: 반도체 급등·VIX 안정, 상승 무게중심",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-07-06": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-06/kospi/",
-        "headline": "왜 내릴까? — 반도체 선물 급락에 발목 잡힌 코스피",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:27"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-06/close/",
-        "headline": "외국인·기관 2.7조 매도, 코스피 8000선 턱걸이",
-        "title": "8,051.33",
-        "price": "8,051.33",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-06/us/",
-        "headline": "선물은 웃는데 반도체는 울어요 — 신호 엇갈린 하루",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-07-03": {
@@ -525,34 +549,6 @@
       }
     },
     "2026-06-11": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-10": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-09": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"

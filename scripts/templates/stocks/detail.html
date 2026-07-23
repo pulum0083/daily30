@@ -50,6 +50,18 @@
             {% endif %}
           </div>
         </div>
+        {% if hl_night %}
+        {# 야간 추정가 — 국내장 마감 후에도 움직이는 참고가(하이퍼리퀴드 24h 무기한선물 환산).
+           위의 큰 숫자는 KRX 실측 종가라 덮어쓰지 않고 아래에 별도 행으로 붙인다.
+           기본 숨김 — stocks.js가 값을 실제로 받았을 때만 표시한다(빈 상태 노출 금지). #}
+        <div id="night-px" data-code="{{ stock.code }}" data-close="{{ rd.price | int }}"
+             style="display:none;margin:10px 14px 0;padding:9px 11px;border-radius:9px;background:#F5F3FF;border:1px solid #DDD6FE;align-items:baseline;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:800;color:#6D28D9;background:#EDE9FE;border-radius:5px;padding:2px 7px;white-space:nowrap;">🌙 지금 이시각 추정가</span>
+          <b class="num" id="night-px-val" style="font-size:18px;font-weight:800;color:var(--ink);"></b>
+          <span class="num" id="night-px-chg" style="font-size:13px;font-weight:700;"></span>
+          <span style="font-size:11px;color:var(--muted);flex-basis:100%;">하이퍼리퀴드 24h 무기한선물 환산 · 실제 체결가 아님 · 30초 갱신</span>
+        </div>
+        {% endif %}
         <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
         <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>

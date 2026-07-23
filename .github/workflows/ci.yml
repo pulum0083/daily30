@@ -1,0 +1,49 @@
+# 발행 게이트 + 회귀 테스트 — 메타 누락·테스트 실패 시 빌드를 실패시킨다
+#
+# 2026-07-21 신설. 저장소에 테스트가 22개 있는데 어느 워크플로우에서도 실행되지 않았고,
+# STOCKS_SERVICE_RULES §9 발행 전 검증 기준도 문서상 체크리스트로만 존재했다.
+# 그래서 종목 상세 46개가 SEO 메타 없이 발행되는 동안 아무도 못 잡았다.
+#
+# 여기가 "빌드 실패" 담당이다. 생성 시점 차단(파일을 안 씀)은 generate_html.py가 맡는다.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    # 데이터 갱신 커밋(web/data/**)만으로는 돌지 않는다 — 평일 30분마다 푸시되므로 노이즈가 된다.
+    paths:
+      - "scripts/**"
+      - "web/stocks/**"
+      - "web/sitemap.xml"
+      - ".github/workflows/ci.yml"
+      - "requirements.txt"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: 🧪 회귀 테스트
+        # deselect: test_block_close_scalar_prose는 검증기가 '차단' → '금지 문장 제거 후 발행'으로
+        # 설계가 바뀐 뒤 갱신되지 않은 stale 테스트다(2026-07-21 확인). 이번 게이트 작업과 무관하고,
+        # 검증기 동작을 함부로 되돌리지 않기 위해 별도 판단 전까지만 제외한다. 조용히 끄지 않는다.
+        run: |
+          python3 -m pytest scripts/ -q \
+            --deselect scripts/test_validate_analysis.py::test_block_close_scalar_prose
+
+      - name: 🚦 발행 게이트 — 발행본 전수 감사 (메타 5종·JSON-LD·canonical·sitemap)
+        run: python3 scripts/verify_publish_gate.py

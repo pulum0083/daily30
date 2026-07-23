@@ -94,7 +94,10 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML",
-        "link_preview_options": json.dumps({"is_disabled": True}),
+        # 링크 프리뷰를 켜되 썸네일 없는 '텍스트 카드'로 표시한다. 브리핑 페이지는 og:image를
+        # 내보내지 않으므로(generate_html no_og_image) 텔레그램이 도메인·제목·설명만 그린다.
+        # prefer_small_media는 혹시 다른 이미지가 잡혀도 크게 뜨지 않게 하는 안전장치.
+        "link_preview_options": json.dumps({"is_disabled": False, "prefer_small_media": True}),
     }
     data = urllib.parse.urlencode(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, method="POST")

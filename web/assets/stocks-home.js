@@ -166,13 +166,17 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       var tm=relTime(v.published_at)||esc(v.time_label);
       // 출처를 단독 줄로 두지 않고 행 전체를 링크로 만든다 — 하우스명 옆 화살표가 hover 시 나타나
       // 이동 가능함을 알린다. 출처명은 날짜 아래 작게 남겨 귀속(attribution)은 유지한다.
-      var body='<div class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</div>'+
-        '<div class="bd"><div class="hd"><span class="nm">'+esc(v.house)+'</span>'+
+      // 아이콘(하우스 이니셜)을 좌측 별도 열이 아니라 하우스명 앞 작은 뱃지로 인라인 배치 →
+      // 본문 텍스트가 좌우 열에 눌리지 않고 한 행 전체를 좌측 정렬로 사용한다.
+      var body='<div class="bd">'+
+        '<div class="hd"><span class="lg">'+esc(v.initials||String(v.house||'').slice(0,4))+'</span>'+
+        '<span class="nm">'+esc(v.house)+'</span>'+
         '<span class="tg '+st+'">'+label+'</span>'+
+        '<span class="tm">'+esc(tm)+'</span>'+
         (href?'<span class="go" aria-hidden="true">›</span>':'')+'</div>'+
-        '<div class="tx">'+esc(v.summary)+'</div></div>'+
-        '<div class="tm">'+esc(tm)+
-        (v.source?'<span class="src">'+esc(v.source)+'</span>':'')+'</div>';
+        '<div class="tx">'+esc(v.summary)+'</div>'+
+        (v.source?'<div class="src">출처 · '+esc(v.source)+'</div>':'')+
+        '</div>';
       return href
         ? '<a class="lw-ib-row lw-ib-row--link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">'+body+'</a>'
         : '<div class="lw-ib-row">'+body+'</div>';
@@ -197,6 +201,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var buf={};
   var buft={};   // buf와 병렬: 각 포인트의 실제 시각 'HH:MM' (장중 부분 데이터를 시간축에 정확히 배치)
   var bufv={};   // buf와 병렬: 각 포인트의 누적 거래량 (VWAP 계산용, backfill 시점 스냅샷)
+  var bufDay=todayKST();   // buf가 담고 있는 거래일(KST). 페이지를 자정 넘겨 열어두면 전일 곡선에 오늘 실측이 이어붙어(시간축이 HH:MM만 써 날짜를 무시) 곡선이 대각선으로 깨진다 → 날짜가 바뀌면 버퍼를 전량 무효화한다.
   var curCode=window.__lwCode||'005930';
   var whyData={};
   var snapW={};
@@ -446,8 +451,16 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); }
     }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); } });
   }
+  // 날짜 롤오버 방어 — 자정 넘겨 열어둔 탭에서 전일 buf에 오늘 실측이 이어붙지 않도록 전량 리셋 후 재백필한다.
+  function resetForNewDay(){
+    bufDay=todayKST();
+    buf={}; buft={}; bufv={}; backfilled={};
+    try{ sessionStorage.removeItem('wm-intra-v1'); }catch(e){}
+    backfill(curCode);
+  }
   window.whyMovedPush=function(code, price){
     if(typeof price!=='number'||!isFinite(price)) return;
+    if(todayKST()!==bufDay){ resetForNewDay(); return; }   // 자정 넘겨 열어둔 경우 전일 곡선에 오늘 값을 이어붙이지 않는다
     // 장중(평일 09:00~15:30 KST)만 곡선 버퍼에 반영. 마감 후·주말·공휴일 HL 24h 환산가가 섞여 시간축·스케일을 깨뜨리는 것을 차단.
     // 주말·공휴일 09:00~15:30엔 krOpen()이 false라 pollNight(HL)이 돌므로, 시각뿐 아니라 비거래일도 막아야 한다.
     var _kd=new Date(Date.now()+9*3600*1000),_km=_kd.getUTCHours()*60+_kd.getUTCMinutes();
@@ -465,8 +478,11 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var wmHeaderToggle=document.getElementById('wm-h-toggle');
   if(wmHeaderToggle) wmHeaderToggle.addEventListener('click', wmToggleManual);
   wmBodyGate();
-  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가
-  setInterval(wmBodyGate, 60000);
+  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가.
+  // + 날짜 롤오버(자정)도 함께 감시 — 오래 켜둔 탭이 전일 곡선을 계속 그리는 것을 자가 치유한다.
+  setInterval(function(){ wmBodyGate(); if(todayKST()!==bufDay) resetForNewDay(); }, 60000);
+  // 탭에 다시 돌아왔을 때(오래 켜뒀다 재방문) 날짜가 바뀌었으면 즉시 곡선을 새 거래일로 복구한다.
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && todayKST()!==bufDay) resetForNewDay(); });
 })();
 
 /* ── 블록 3 (원본 index.html) ── */
@@ -592,7 +608,11 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     {nm:'엔비디아',   tk:'NVDA',  sym:'NVDA.O'},
     {nm:'AMD',       tk:'AMD',   sym:'AMD.O'},
     {nm:'ASML',      tk:'ASML',  sym:'ASML.O'},
+    // 파운드리·AI 반도체 벨웨더 — 밤사이 반도체 심리 최대 선행 지표. 상세 페이지 없어 noLink(추후 생성 시 해제).
+    {nm:'TSMC',      tk:'TSM',   sym:'TSM.N', noLink:true},
     {nm:'마이크론',   tk:'MU',    sym:'MU.O'},
+    // 순수 NAND 플래시 — 삼성·SK하이닉스 NAND read-through. 상세 페이지 없어 noLink(추후 생성 시 해제).
+    {nm:'샌디스크',   tk:'SNDK',  sym:'SNDK.O', noLink:true},
     {nm:'반도체ETF',  tk:'SOXX',  sym:'SOXX.O'}
   ];
   var NASDAQ='QQQ.O';
@@ -643,7 +663,24 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
   }
-  function render(){ renderGrid(); renderMacro(); }
+  // 11개 종목 상승/하락 요약(마켓 브레드스) — 모바일 전용(원화/달러 토글과 같은 줄, 좌측 정렬).
+  // PC는 CSS(stocks-home.css)에서 항상 숨김 — 여기선 데이터 유무만 has-data 클래스로 표시하고
+  // 실제 표시 여부(PC 숨김/모바일만 노출)는 전부 CSS 미디어쿼리가 결정한다(display를 JS가 직접 건드리지 않음).
+  function renderBreadth(){
+    var el=document.getElementById('ue-breadth'); if(!el) return;
+    var up=0,down=0,flat=0,n=0;
+    TICKERS.forEach(function(t){
+      var d=dataBySym[t.sym];
+      if(!d||typeof d.changePct!=='number'||!isFinite(d.changePct)) return;
+      n++; if(d.changePct>0) up++; else if(d.changePct<0) down++; else flat++;
+    });
+    if(!n){ el.classList.remove('has-data'); el.innerHTML=''; return; }
+    var p=['<b style="color:#E03131">'+up+' 상승</b>','<b style="color:#2775ED">'+down+' 하락</b>'];
+    if(flat) p.push('<b style="color:#64748B">'+flat+' 보합</b>');
+    el.innerHTML=p.join(' · ');
+    el.classList.add('has-data');
+  }
+  function render(){ renderGrid(); renderMacro(); renderBreadth(); }
   /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
   function updateLiveBadge(){
     var b=document.getElementById('ue-live'); if(!b) return;
@@ -1976,7 +2013,7 @@ if(passBtn){
   }
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간 · 2분 간격' : '장 마감 기준'; }
-  function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge':'close-pill'; b.innerHTML=phaseLabel(phase); }
+  function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge is-live':'close-pill'; b.innerHTML=phaseLabel(phase); }
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.

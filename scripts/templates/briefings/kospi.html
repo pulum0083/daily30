@@ -35,6 +35,8 @@
                 {% include "sections/why_what_so.html" %}
               {% endif %}
             {% endif %}
+            {# 간밤 미국 시장 이슈 — 어제 국내 마감 다음, 오늘 예측 앞. 항목 없으면 자동 생략. #}
+            {% if us_issues %}{% include "sections/_us_issues.html" %}{% endif %}
             {% if todays_view %}{% include "sections/prediction_strip.html" %}{% else %}{% include "sections/prediction.html" %}{% endif %}
             {# 이렇게 보는 이유 — 예측 근거 3줄 넘버링 (항상, 형식 무관) #}
             {% if key_drivers %}{% include "sections/reasons.html" %}{% endif %}

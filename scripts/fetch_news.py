@@ -64,6 +64,8 @@ KOSPI_PROMPT = """\
 - 원유·환율 최신 동향
 - **주도주 기업 이벤트**: 코스피 대형주(삼성전자·SK하이닉스·현대차 등)의 상장·ADR·M&A·지분매각·신사업 진출·대형 수주·설비투자·실적 발표
 - **[임시 2026-07-12 추가, 테마 소멸 시 제거]** SK하이닉스 ADR 미국 상장 이후 한국 증시(특히 SK하이닉스 본주) 반응·수급 대응 — 이번 주 핵심 테마이므로 명시 검색
+- **[상시 룰·최우선] 간밤 미국 빅테크 실적은 코스피 대장주와 직결되므로 반드시 주요하게 다룬다.** 빅테크(구글·MS·아마존·메타·엔비디아 등)의 **AI 설비투자(capex) 성장률**이 곧 메모리·HBM 수요의 선행지표다 — capex가 늘면 삼성전자·SK하이닉스 HBM 수요 기대가 커지고(코스피 상승 압력), **capex 성장률이 꺾이면 메모리 수요 둔화 우려로 대장주·코스피 하락으로 직결된다.** 따라서 빅테크 실적일엔 실적·클라우드 성장률·**capex 규모와 증감 방향**을 핵심 촉매로 최우선 검색·수집하고, 삼성전자·SK하이닉스 read-through를 반드시 함께 정리한다.
+- **[상시 룰] 간밤 미국 빅테크 '실적 발표' — 이미 발표됐으면 '예정'이 아니라 '결과'를 담는다.** 미국 대형주 실적은 통상 미 증시 마감 후(= 이 브리핑 생성 직전 KST 새벽)에 나오므로, 코스피 아침 브리핑 시점엔 **이미 발표가 끝나 실제 결과가 공개된 경우가 대부분**이다. 이럴 때 "실적 발표 예정"·"오늘 밤 발표" 같은 **프리뷰(발표 전) 프레이밍 기사에 속지 말고**, 반드시 **실제 발표된 결과 기사**를 찾아 수치와 함께 담는다 — 매출·전년비 증감률, 클라우드/데이터센터 매출 성장률, **설비투자(capex) 규모·연간 가이던스**, 그리고 **발표 후 시간외/프리마켓 주가 반응**까지. 이 결과(특히 AI capex·클라우드 성장)가 한국 반도체·HBM(삼성전자·SK하이닉스) 수요 기대에 주는 파급(read-through)을 함께 정리한다. 아직 발표 전(장 마감 후 콜만 예정 등)이면 그때만 '예정'으로 표기하고 결과 수치를 지어내지 않는다(운영 규칙 0). **[임시 2026-07-22, 실적 시즌 종료 시 이 종목 예시만 제거]** 현재 진행 중인 빅테크 실적 시즌(구글/알파벳 등)을 명시적으로 검색한다.
 - **인과 촉매**: 특정 섹터/주도주 등락의 '원인'이 된 사건 — 특히 미국 빅테크 전략 뉴스(클라우드·자체 칩 설계·감산·투자)가 한국 반도체·2차전지에 미치는 파급(read-through)
 - **AI 모델 개발사 이슈(비상장이지만 핵심 촉매)**: OpenAI·Anthropic의 신모델 출시, 대형 칩·HBM·클라우드 계약, 대규모 투자·펀딩 — 이런 AI 인프라 수요 신호가 SK하이닉스·삼성전자 HBM·반도체 투자심리에 미치는 파급
 
@@ -388,6 +390,49 @@ def _days_since_last_earnings(ticker: str, today: date):
     return age
 
 
+# 뉴스 텍스트에 한글/영문 사명으로만 언급된 회사를 티커로 resolve — Gemini 문자열 catalyst엔
+# ticker 필드가 없어 어닝 캘린더 검증이 건너뛰어지던 구멍을 막는다(2026-07-22 '엔비디아 실적 발표'
+# 실사고: NVIDIA는 7월 하순에 실적이 없는데 Gemini가 오늘 촉매로 소환, ticker 필드가 없어 통과).
+# yfinance 어닝 조회가 신뢰 가능한 미국 대형주만 등록(국내주는 .KS 어닝이 불안정 → 미등록=fail-open).
+_NAME_TO_TICKER = {
+    "엔비디아": "NVDA", "nvidia": "NVDA",
+    "애플": "AAPL",
+    "마이크로소프트": "MSFT",
+    "아마존": "AMZN",
+    "메타": "META",
+    "알파벳": "GOOGL", "구글": "GOOGL",
+    "테슬라": "TSLA",
+    "마이크론": "MU", "micron": "MU",
+    "브로드컴": "AVGO",
+    "인텔": "INTC",
+    "퀄컴": "QCOM",
+    "넷플릭스": "NFLX",
+    "오라클": "ORCL",
+    "세일즈포스": "CRM",
+    "어도비": "ADBE",
+    "asml": "ASML",
+    "tsmc": "TSM", "대만반도체": "TSM",
+    "제이피모건": "JPM", "jp모건": "JPM", "jpmorgan": "JPM",
+    "골드만삭스": "GS",
+    "모건스탠리": "MS",
+    "뱅크오브아메리카": "BAC",
+    "씨티그룹": "C",
+    "웰스파고": "WFC",
+    "블랙록": "BLK",
+}
+_NAME_TO_TICKER_NORM = {_norm_for_match(k): v for k, v in _NAME_TO_TICKER.items()}
+
+
+def _resolve_company_tickers(text: str) -> list:
+    """뉴스 텍스트에 언급된 (매핑된) 회사명을 티커 리스트로 변환. 등장 회사만, 중복 제거."""
+    t = _norm_for_match(text)
+    out = []
+    for name_norm, ticker in _NAME_TO_TICKER_NORM.items():
+        if name_norm and name_norm in t and ticker not in out:
+            out.append(ticker)
+    return out
+
+
 def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
                          age_fn=None) -> list:
     """실적형 catalyst 중, 티커의 실제 최근 발표일이 max_age_days를 초과한 것을 제외.
@@ -404,7 +449,8 @@ def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
         if not _is_earnings_catalyst(text):
             kept.append(c)
             continue
-        tickers = _parse_tickers(ticker_field)
+        # ticker 필드 + 텍스트에서 resolve한 사명(엔비디아→NVDA 등)을 합쳐 검증
+        tickers = list(dict.fromkeys(_parse_tickers(ticker_field) + _resolve_company_tickers(text)))
         if not tickers:
             kept.append(c)  # 검증 불가 → 유지
             continue
@@ -509,8 +555,8 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         raw = m.group(0)
 
     data = json.loads(raw)
+    today_kst = datetime.now(KST).date()
     if isinstance(data.get("catalysts"), list):
-        today_kst = datetime.now(KST).date()
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
         # 2차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
@@ -518,6 +564,12 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         # 3차: 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외(날짜 창 밖 재탕 백스톱)
         stale = _load_stale_catalysts(briefing_type, today_kst)
         data["catalysts"] = _drop_cross_day_recaps(cats, stale)
+    # headlines·key_indicators도 stale 실적 서사를 제외 — Gemini가 텍스트에 심은 '엔비디아 실적 발표'
+    # 류 날조가 catalysts만 걸러도 다른 필드로 Claude에 새어나가던 것을 차단(실측 지수는 fetch_data가
+    # 별도 소스라 해당 항목이 통째 빠져도 §0 안전).
+    for _fld in ("headlines", "key_indicators"):
+        if isinstance(data.get(_fld), list):
+            data[_fld] = _drop_stale_earnings(data[_fld], today_kst)
     return data
 
 

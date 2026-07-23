@@ -370,6 +370,59 @@ def test_validate_wires_todays_view(monkeypatch):
     assert any("todays_view.outlook" in c for c in r["corrections"])
 
 
+# ── validate_key_drivers: codes 없는 US 지수·ETF 검증 (2026-07-22 실사고) ──────
+def test_us_figure_stale_catches_adjacent_session():
+    # EWY '+6.18%'(전 세션 값) vs 실측 '+1.72%' → diff 4.46%p. tol 2%p 초과 → stale.
+    assert v._us_figure_stale("EWY가 <b>+6.18%</b> 폭등했어요.", 1.72) is True
+    # 같은 세션 값 인용 → 통과.
+    assert v._us_figure_stale("EWY가 <b>+1.72%</b> 올랐어요.", 1.72) is False
+    # 반올림 오차 수준 → 통과.
+    assert v._us_figure_stale("SOX가 <b>+5.20%</b> 급등했어요.", 5.23) is False
+
+
+def test_is_contradicted_misses_adjacent_session():
+    # 왜 별도 타이트 임계치가 필요한지 문서화: 기존 게이트는 이 stale을 못 잡는다.
+    assert v.is_contradicted(6.18, 1.72) is False
+
+
+def test_key_drivers_removes_stale_us_figure(monkeypatch):
+    # 실사고 재현: 직전 세션 EWY 실측이 +1.72%인데 브리핑은 +6.18%(전 세션)를 인용.
+    monkeypatch.setattr(v, "_fetch_us_realdata",
+                        lambda t: {"change_pct": 1.72} if t == "EWY" else {"error": "n/a"})
+    analysis = {"key_drivers": [
+        {"text": "<b>외국인 자금이 유입되고 있어요.</b> EWY가 <b>+6.18%</b> 폭등했어요.", "codes": []},
+        {"text": "<b>수급이 개선됐어요.</b> 기관이 순매수로 전환했어요.", "codes": []},
+    ]}
+    corrections, warnings = [], []
+    v.validate_key_drivers(analysis, "kospi", corrections, warnings)
+    texts = " ".join(d["text"] for d in analysis["key_drivers"])
+    assert "EWY" not in texts          # stale 항목 제거
+    assert "기관" in texts             # 정상 항목 유지
+    assert any("EWY" in c for c in corrections)
+
+
+def test_key_drivers_keeps_fresh_us_figure(monkeypatch):
+    monkeypatch.setattr(v, "_fetch_us_realdata",
+                        lambda t: {"change_pct": 1.72} if t == "EWY" else {"error": "n/a"})
+    analysis = {"key_drivers": [
+        {"text": "<b>외국인 자금이 유입되고 있어요.</b> EWY가 <b>+1.72%</b> 올랐어요.", "codes": []},
+    ]}
+    corrections, warnings = [], []
+    v.validate_key_drivers(analysis, "kospi", corrections, warnings)
+    assert len(analysis["key_drivers"]) == 1   # 실측과 일치 → 유지
+
+
+def test_key_drivers_us_fetch_failure_fail_open(monkeypatch):
+    # 실측 실패 시 정상 항목을 오제거하지 않는다(fail-open).
+    monkeypatch.setattr(v, "_fetch_us_realdata", lambda t: {"error": "n/a"})
+    analysis = {"key_drivers": [
+        {"text": "<b>반도체 강세예요.</b> SOX가 <b>+5.21%</b> 급등했어요.", "codes": []},
+    ]}
+    corrections, warnings = [], []
+    v.validate_key_drivers(analysis, "kospi", corrections, warnings)
+    assert len(analysis["key_drivers"]) == 1
+
+
 if __name__ == "__main__":
     import traceback
     fns = [g for n, g in sorted(globals().items()) if n.startswith("test_") and callable(g)]

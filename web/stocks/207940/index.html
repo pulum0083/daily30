@@ -54,15 +54,16 @@
         <div class="top">
           <div>
             <div class="hn">삼성바이오로직스 <a class="chip" href="/stocks/sector/bio/">바이오</a></div>
-            <div class="meta"><span class="num">207940</span> · KOSPI · 07-21 종가</div>
+            <div class="meta"><span class="num">207940</span> · KOSPI · 07-23 종가</div>
           </div>
           <div style="text-align:right">
-            <div class="px num">1,395,000</div>
+            <div class="px num">1,379,000</div>
             
-            <div class="cg num" style="color:var(--up)">▲ +3.72%</div>
+            <div class="cg num" style="color:var(--up)">▲ +0.51%</div>
             
           </div>
         </div>
+        
         <!-- 차트 탭: 오늘 장중(실측 1분봉) / 20일 종가. 첫 로드 시 stocks.js가 장중 데이터 유무를 판단해 알맞은 탭을 보여줘 '튕김'을 막는다. -->
         <div class="ctabs" id="ctabs" style="visibility:hidden;">
           <a id="ctab-intra" onclick="switchChartTab('pane-intra')" style="display:none">오늘 장중</a>
@@ -81,8 +82,8 @@
         <!-- 20일 종가 패널 -->
         <div class="cpane hidden" id="pane-spark">
           <div class="spark-header" id="spark-main"
-               data-spark="1273000.0,1385000.0,1386000.0,1343000.0,1448000.0,1391000.0,1396000.0,1406000.0,1421000.0,1405000.0,1422000.0,1363000.0,1325000.0,1395000.0,1400000.0,1368000.0,1383000.0,1396000.0,1345000.0,1395000.0"
-               data-dates="6/23,6/24,6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21"
+               data-spark="1386000.0,1343000.0,1448000.0,1391000.0,1396000.0,1406000.0,1421000.0,1405000.0,1422000.0,1363000.0,1325000.0,1395000.0,1400000.0,1368000.0,1383000.0,1396000.0,1345000.0,1395000.0,1372000.0,1379000.0"
+               data-dates="6/25,6/26,6/29,6/30,7/1,7/2,7/3,7/6,7/7,7/8,7/9,7/10,7/13,7/14,7/15,7/16,7/20,7/21,7/22,7/23"
                style="cursor:crosshair;position:relative;"></div>
         </div>
         <div id="spark-tip" style="display:none;position:absolute;pointer-events:none;font-size:11px;font-weight:700;background:var(--ink);color:#fff;padding:4px 8px;border-radius:5px;white-space:nowrap;z-index:5;transform:translateX(-50%);"></div>
@@ -90,7 +91,7 @@
 
       <!-- 오늘의 시그널 (JS가 /api/signals 읽어서 채움) -->
       <div class="np" id="sig-c-wrap">
-        <div class="np__h" id="sig-c-head" data-code="207940" data-date="2026-07-21">
+        <div class="np__h" id="sig-c-head" data-code="207940" data-date="2026-07-23">
           <span class="np__t">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7v8l10-12h-7z"/></svg>
             <span id="sig-c-title">시그널 로딩 중…</span>
@@ -107,13 +108,13 @@
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V8l5-4 5 4v13M9 9h2m-2 4h2m4-4h2m-2 4h2"/></svg>
             실측 핵심 지표
           </span>
-          <span class="np__s">07-21 종가 기준</span>
+          <span class="np__s">07-23 종가 기준</span>
         </div>
 
         
         <div class="mx">
-          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">21.1%</b> 지점</span></div>
-          <div class="w52"><div class="fill" style="width:21.1%"></div><div class="now" style="left:21.1%"></div></div>
+          <div class="mx-h"><span>52주 범위</span><span>현재가 <b style="color:var(--up)">18.8%</b> 지점</span></div>
+          <div class="w52"><div class="fill" style="width:18.8%"></div><div class="now" style="left:18.8%"></div></div>
           <div class="w52-lb"><span>최저 1,243,000</span><span>최고 1,965,000</span></div>
         </div>
         
@@ -123,14 +124,14 @@
           
           <div class="cell">
             <div class="l">20일선 대비</div>
-            <div class="v" style="color:var(--up)">+0.9%</div>
-            <div class="sub">단기 추세 위</div>
+            <div class="v" style="color:var(--dn)">-0.6%</div>
+            <div class="sub">단기 추세 아래</div>
           </div>
           
           
           <div class="cell">
             <div class="l">200일선 대비</div>
-            <div class="v" style="color:var(--dn)">-12.8%</div>
+            <div class="v" style="color:var(--dn)">-13.7%</div>
             <div class="sub">장기 추세 아래</div>
           </div>
           
@@ -141,10 +142,10 @@
         <div class="frw">
           <div>
             <div style="font-size:12px;color:var(--muted);margin-bottom:3px;cursor:help;" id="fo-label">외국인 보유율 <span style="font-size:10px;border:1px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;line-height:1;">?</span></div>
-            <div class="v">12.78<span style="font-size:12px">%</span></div>
+            <div class="v">12.79<span style="font-size:12px">%</span></div>
           </div>
           
-          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,36.0 8.421052631578947,29.6 16.842105263157894,26.4 25.263157894736842,23.2 33.68421052631579,20.0 42.10526315789474,17.9 50.526315789473685,17.9 58.94736842105263,13.6 67.36842105263158,13.6 75.78947368421052,12.5 84.21052631578948,12.5 92.63157894736842,13.6 101.05263157894737,13.6 109.47368421052632,9.3 117.89473684210526,9.3 126.3157894736842,9.3 134.73684210526315,5.1 143.1578947368421,4.0 151.57894736842104,7.2 160.0,7.2 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
+          <svg class="sp" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"><polyline points="0.0,36.0 8.421052631578947,31.4 16.842105263157894,26.9 25.263157894736842,23.8 33.68421052631579,23.8 42.10526315789474,17.7 50.526315789473685,17.7 58.94736842105263,16.2 67.36842105263158,16.2 75.78947368421052,17.7 84.21052631578948,17.7 92.63157894736842,11.6 101.05263157894737,11.6 109.47368421052632,11.6 117.89473684210526,5.5 126.3157894736842,4.0 134.73684210526315,8.6 143.1578947368421,8.6 151.57894736842104,7.0 160.0,7.0 " fill="none" stroke="var(--dn)" stroke-width="1.5"/>
           </svg>
           
         </div>
@@ -153,7 +154,7 @@
         
         <div class="ovr">
           <span class="lbl">해외 연동 · 미 벨웨더 바이오 ETF <span style="color:var(--muted)">(참고)</span></span>
-          <span style="font-size:13px;font-weight:700;color:var(--dn)">-2.1% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
+          <span style="font-size:13px;font-weight:700;color:var(--dn)">-1.6% <span style="font-size:11px;color:var(--muted);font-weight:500">밤사이</span></span>
         </div>
         
       </div>
@@ -193,7 +194,7 @@
           <div class="sd-row">
             <span class="sd-lbl">기관</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill buy" style="width:27.4%"></div>
+              <div class="sd-fill buy" style="width:20.4%"></div>
             </div>
             <span class="sd-val" style="color:var(--up)">+1만</span>
           </div>
@@ -201,7 +202,7 @@
           <div class="sd-row">
             <span class="sd-lbl">외국인</span>
             <div class="sd-track"><div class="sd-zero"></div>
-              <div class="sd-fill buy" style="width:16.0%"></div>
+              <div class="sd-fill buy" style="width:22.0%"></div>
             </div>
             <span class="sd-val" style="color:var(--up)">+1만</span>
           </div>
@@ -210,28 +211,6 @@
         <table class="tgt-tbl sd-daily">
           <thead><tr><th>날짜</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead>
           <tbody>
-            
-            <tr>
-              <td class="dt">7/13</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−1만</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+1만</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
-              
-            </tr>
-            
-            <tr>
-              <td class="dt">7/14</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
-              
-              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
-              
-              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−0만</td>
-              
-            </tr>
             
             <tr>
               <td class="dt">7/15</td>
@@ -263,6 +242,28 @@
               <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
               
               <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−1만</td>
+              
+            </tr>
+            
+            <tr>
+              <td class="dt">7/21</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−1만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+1만</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−0만</td>
+              
+            </tr>
+            
+            <tr>
+              <td class="dt">7/22</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−0만</td>
+              
+              <td class="num" style="color:var(--dn);font-weight:700;text-align:right">−0만</td>
+              
+              <td class="num" style="color:var(--up);font-weight:700;text-align:right">+0만</td>
               
             </tr>
             
@@ -349,9 +350,21 @@
           더블샷 AI 브리핑이 <b style="color:var(--ink)">이 종목을 추천했던 기록</b>과 이후 성적이에요. 추천 당시 진입가·목표가 대비 실제 종가를 채점해요.
         </div>
         <div class="tr-sum">
-          <span>삼성바이오로직스를 <b>3번</b> 픽</span>
+          <span>삼성바이오로직스를 <b>4번</b> 픽</span>
           
-          <span style="color:#B07400">미도달 <b>3</b></span>
+          <span style="color:#B07400">미도달 <b>4</b></span>
+        </div>
+        
+        <div class="tr-row">
+          <div class="tr-top">
+            <span class="tr-date">7/22 코스피</span>
+            <span class="tr-sig">모멘텀 가속</span>
+            <span class="tr-badge run">미도달</span>
+          </div>
+          <div class="tr-line">
+            <span>진입 <b>1,395,000원</b></span>→<span>목표 <b>1,460,000원</b></span>
+            <span class="tr-ret" style="color:var(--up)">최근 -1.1%</span>
+          </div>
         </div>
         
         <div class="tr-row">
@@ -362,7 +375,7 @@
           </div>
           <div class="tr-line">
             <span>진입 <b>1,383,000원</b></span>→<span>목표 <b>1,452,000원</b></span>
-            <span class="tr-ret" style="color:var(--up)">최근 +0.9%</span>
+            <span class="tr-ret" style="color:var(--up)">최근 -0.3%</span>
           </div>
         </div>
         
@@ -374,7 +387,7 @@
           </div>
           <div class="tr-line">
             <span>진입 <b>1,400,000원</b></span>→<span>목표 <b>1,470,000원</b></span>
-            <span class="tr-ret" style="color:var(--up)">최근 -0.4%</span>
+            <span class="tr-ret" style="color:var(--up)">최근 -1.5%</span>
           </div>
         </div>
         
@@ -386,7 +399,7 @@
           </div>
           <div class="tr-line">
             <span>진입 <b>1,425,000원</b></span>→<span>목표 <b>1,470,000원</b></span>
-            <span class="tr-ret" style="color:var(--up)">최근 -2.1%</span>
+            <span class="tr-ret" style="color:var(--up)">최근 -3.2%</span>
           </div>
         </div>
         
@@ -403,7 +416,7 @@
         <a class="srow" href="/stocks/068270/">
           <span class="n2">셀트리온 <small class="num">068270</small></span>
           
-            <span class="c dn num">-0.58%</span>
+            <span class="c up num">+1.23%</span>
             
           
         </a>
@@ -411,7 +424,7 @@
         <a class="srow" href="/stocks/000100/">
           <span class="n2">유한양행 <small class="num">000100</small></span>
           
-            <span class="c up num">+0.58%</span>
+            <span class="c up num">+1.71%</span>
             
           
         </a>
@@ -419,7 +432,7 @@
         <a class="srow" href="/stocks/326030/">
           <span class="n2">SK바이오팜 <small class="num">326030</small></span>
           
-            <span class="c up num">+1.04%</span>
+            <span class="c up num">+3.78%</span>
             
           
         </a>
@@ -427,7 +440,7 @@
         <a class="srow" href="/stocks/196170/">
           <span class="n2">알테오젠 <small class="num">196170</small></span>
           
-            <span class="c up num">+1.30%</span>
+            <span class="c up num">+14.37%</span>
             
           
         </a>
@@ -465,7 +478,7 @@
 
   <div class="disc" style="line-height:1.7;">
     <p style="margin:0 0 6px;"><b>📅 업데이트 기준</b></p>
-    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-21 종가) 종가 기준 실측이에요.</p>
+    <p style="margin:0 0 4px;">· <b>시세·이동평균·52주·트랙레코드</b> — 매 거래일 <b>장 마감 후 갱신</b>. 직전 거래일(07-23 종가) 종가 기준 실측이에요.</p>
     <p style="margin:0 0 4px;">· <b>오늘의 시그널</b> — 장중 실시간으로 갱신되고 마감 후 확정돼요. 휴장일·다음 날엔 직전 거래일 기준으로 표시돼요.</p>
     <p style="margin:6px 0 0;">픽 트랙레코드는 브리핑 스냅샷의 진입·목표가와 픽 이후 실측 종가로 채점한 값이에요. 모든 수치는 실측이며 투자 판단 참고용이에요.</p>
   </div>

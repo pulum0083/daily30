@@ -27,10 +27,12 @@ try:
     from scripts.validate_analysis import _fetch_kospi_realdata
     import scripts.toss_client as tc
     import scripts.us_detail_data as ud
+    from scripts.verify_publish_gate import gate_write, check_sitemap
 except ImportError:
     from validate_analysis import _fetch_kospi_realdata
     import toss_client as tc
     import us_detail_data as ud
+    from verify_publish_gate import gate_write, check_sitemap
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -130,6 +132,15 @@ def make_env() -> Environment:
 SITE_BASE = "https://doubleshot.space"
 OG_IMAGE_URL = f"{SITE_BASE}/assets/og-image.png"
 
+# 하이퍼리퀴드 xyz dex에 상장돼 야간 추정가(/api/hl-night)를 받을 수 있는 한국 종목.
+# api/hl-night.mjs 의 SYM2CODE 미러 — 거기에 심볼이 늘면 여기도 함께 늘린다.
+# 여기 없는 종목은 야간 소스 자체가 없으므로 히어로 스트립을 아예 렌더하지 않는다(빈 자리 노출 금지).
+HL_NIGHT_CODES = {"005930", "000660", "005380"}
+
+# 발행 게이트(verify_publish_gate)에 걸려 파일로 쓰이지 않은 페이지 URL.
+# 비어 있지 않으면 main()이 exit 1 한다 — 다만 그 페이지의 직전 정상본은 그대로 살아 있다.
+GATE_BLOCKED = []
+
 
 def _attr(value) -> str:
     """meta content 등 HTML 속성에 넣을 값을 이스케이프한다."""
@@ -207,6 +218,23 @@ def _strip_issue_numbers(text: str) -> str:
     out = re.sub(r"\s{2,}", " ", out)
     out = re.sub(r"\s+([,.·])", r"\1", out)
     return out.strip()
+
+
+def build_us_issues(analysis: dict) -> dict:
+    """analysis.us_issues → 코스피 아침 브리핑 '간밤 미국 시장' 이슈 리스트.
+    title 없는 항목·미검색 placeholder 문장은 제외한다. (US 저녁 브리핑 build_issues의 경량판)"""
+    out = []
+    for it in (analysis.get("us_issues") or []):
+        if not isinstance(it, dict):
+            continue
+        title = (it.get("title") or "").strip()
+        body = (it.get("body") or "").strip()
+        # '확인되지 않았습니다'·'관련 뉴스 없음' 류 미검색 placeholder는 이슈가 아니므로 제외
+        joined = re.sub(r"<[^>]+>", "", f"{title} {body}")
+        if not title or any(p in joined for p in ("확인되지 않", "확인되지않", "관련 뉴스는", "뉴스가 없", "검색 결과에서 확인")):
+            continue
+        out.append({"title": title, "body": body})
+    return {"us_issues": out[:2]}  # 최대 2개 (프롬프트 지시의 하드 백스톱)
 
 
 def build_issues(analysis: dict) -> dict:
@@ -374,6 +402,8 @@ def build_reasons(analysis: dict) -> dict:
         # 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개(넘버링). 형식과 무관하게 항상 표시.
         "key_drivers": analysis.get("key_drivers") or [],
     }
+    # 간밤 미국 시장 이슈 — us_issues(뉴스 요약 기반). 항목 없으면 템플릿에서 자동 생략.
+    ctx.update(build_us_issues(analysis))
     if fmt == "split":
         pass  # split은 오늘의 관점 본문이 todays_view.recap/outlook — 별도 형식 컨텍스트 불필요
     elif fmt == "scenario":
@@ -1018,6 +1048,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         "issue_slot": _issue_slot_map.get(internal_type, "MARKET"),
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
+        # 브리핑 페이지는 og:image를 내보내지 않아 텔레그램 링크 프리뷰가 썸네일 없는 텍스트 카드로 뜬다.
+        "no_og_image": True,
     }
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
 
@@ -1587,13 +1619,14 @@ def build_stock_page(stock, peers):
         "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
         "acc": acc,
         "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
+        "hl_night": stock["code"] in HL_NIGHT_CODES,
     }
     ctx.update(_stock_seo(stock, ctx))
     html = tmpl.render(**ctx)
-    out_dir = WEB_DIR / "stocks" / stock["code"]
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "index.html"
-    out_path.write_text(html, encoding="utf-8")
+    url = f"{SITE_BASE}/stocks/{stock['code']}/"
+    if gate_write(WEB_DIR / "stocks" / stock["code"] / "index.html", html, url):
+        GATE_BLOCKED.append(url)
+        return None
     return f"stocks/{stock['code']}/index.html"
 
 
@@ -1638,9 +1671,9 @@ def build_us_stock_page(stock, peers, env):
         acc=_briefing_accuracy(),
         **seo,
     )
-    out_dir = WEB_DIR / "stocks" / "us" / tk
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "index.html").write_text(html, encoding="utf-8")
+    if gate_write(WEB_DIR / "stocks" / "us" / tk / "index.html", html, seo["seo_url"]):
+        GATE_BLOCKED.append(seo["seo_url"])
+        return None
     return f"stocks/us/{tk}/index.html"
 
 
@@ -1946,11 +1979,29 @@ def build_sector_pages():
             css_path=CSS_PATH,
             js_path=JS_PATH,
         )
-        out_dir = WEB_DIR / "stocks" / "sector" / key
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_file = out_dir / "index.html"
-        out_file.write_text(html, encoding="utf-8")
+        out_file = WEB_DIR / "stocks" / "sector" / key / "index.html"
+        url = f"{SITE_BASE}/stocks/sector/{key}/"
+        if gate_write(out_file, html, url):
+            GATE_BLOCKED.append(url)
+            continue
         print(f"섹터 페이지 {key} → {out_file}")
+
+
+def _finish_page_build(written_paths):
+    """페이지 배치 생성 뒤 발행 게이트 결과를 종합한다. 위반이 있으면 exit 1.
+
+    sitemap 포함 여부는 여기서만 검사할 수 있다 — write_sitemap_xml()이 '파일이 존재하는 페이지'만
+    담기 때문에 쓰기 시점엔 아직 판정이 불가능하다.
+    """
+    problems = [f"메타 위반으로 발행 차단: {u}" for u in GATE_BLOCKED]
+    problems += check_sitemap([f"{SITE_BASE}/{p[:-len('index.html')]}" for p in written_paths])
+    if not problems:
+        return
+    for p in problems:
+        print(f"::error::[발행 게이트] {p}", file=sys.stderr)
+    print(f"\n❌ 발행 게이트 위반 {len(problems)}건 — 차단된 페이지는 직전 정상본이 유지됩니다",
+          file=sys.stderr)
+    sys.exit(1)
 
 
 def main():
@@ -1974,18 +2025,24 @@ def main():
 
     if args.sectors:
         build_sector_pages()
+        write_sitemap_xml()   # 섹터 URL이 sitemap에 들어가야 게이트의 색인 경로 검사가 성립한다
+        _finish_page_build([])
         return
 
     if args.stocks:
-        for path in build_all_stocks():
+        paths = [p for p in build_all_stocks() if p]
+        for path in paths:
             print(f"생성: {path}")
         write_sitemap_xml()
+        _finish_page_build(paths)
         return
 
     if args.us_stocks:
-        for path in build_all_us_stocks():
+        paths = [p for p in build_all_us_stocks() if p]
+        for path in paths:
             print(f"생성: {path}")
         write_sitemap_xml()
+        _finish_page_build(paths)
         return
 
     if args.write_list_only:
