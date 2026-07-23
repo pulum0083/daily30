@@ -608,7 +608,11 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     {nm:'엔비디아',   tk:'NVDA',  sym:'NVDA.O'},
     {nm:'AMD',       tk:'AMD',   sym:'AMD.O'},
     {nm:'ASML',      tk:'ASML',  sym:'ASML.O'},
+    // 파운드리·AI 반도체 벨웨더 — 밤사이 반도체 심리 최대 선행 지표. 상세 페이지 없어 noLink(추후 생성 시 해제).
+    {nm:'TSMC',      tk:'TSM',   sym:'TSM.N', noLink:true},
     {nm:'마이크론',   tk:'MU',    sym:'MU.O'},
+    // 순수 NAND 플래시 — 삼성·SK하이닉스 NAND read-through. 상세 페이지 없어 noLink(추후 생성 시 해제).
+    {nm:'샌디스크',   tk:'SNDK',  sym:'SNDK.O', noLink:true},
     {nm:'반도체ETF',  tk:'SOXX',  sym:'SOXX.O'}
   ];
   var NASDAQ='QQQ.O';
