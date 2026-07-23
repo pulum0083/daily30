@@ -882,7 +882,15 @@
     var got = false;
     var X0 = 8, X1 = 292, YT = 12, YB = 86;
     var buf = {}, buft = {}, whyData = {}, snapW = {}, backfilled = {}, curCode = STOCKS[0].code;
+    var bufDay = todayKST();   // buf가 담은 거래일(KST) — 자정 넘겨 탭을 열어두면 전일 곡선이 오늘 타일과 어긋나므로 날짜가 바뀌면 재백필한다.
     var prevPrice = {};
+    // 날짜 롤오버 방어 — 자정을 넘겼으면 전일 곡선 버퍼를 버리고 오늘 곡선으로 재백필한다.
+    function leadersDayRoll() {
+      if (todayKST() === bufDay) return;
+      bufDay = todayKST(); buf = {}; buft = {}; backfilled = {};
+      try { sessionStorage.removeItem('lw-intra-v1'); } catch (e) {}
+      backfill(curCode);
+    }
 
     function fmt(v) { return v >= 1000 ? v.toLocaleString('ko-KR') : v; }
     function timeToX(t) {
@@ -929,6 +937,7 @@
     var pill = w.querySelector('#lw-pill');
     var liveBadge = w.querySelector('#lw-live');
     function pollTiles() {
+      leadersDayRoll();   // 자정 넘긴 오래 켜둔 탭이 전일 곡선을 계속 그리지 않도록 매 폴링마다 날짜 확인
       var night = !krOpen();
       if (pill) pill.style.display = night ? '' : 'none';
       if (liveBadge) liveBadge.style.display = night ? 'none' : '';
@@ -936,6 +945,8 @@
     }
     pollTiles();
     setInterval(pollTiles, 10000);
+    // 탭에 다시 돌아왔을 때(오래 켜뒀다 재방문) 날짜가 바뀌었으면 즉시 곡선을 새 거래일로 복구한다.
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) leadersDayRoll(); });
 
     w.querySelectorAll('.leaders-widget__tile').forEach(function (t) {
       t.addEventListener('click', function () {
