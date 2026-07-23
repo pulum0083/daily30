@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-07-23T09:31:39.829758+09:00",
+  "generated_at": "2026-07-23T10:01:39.988956+09:00",
   "date": "2026-07-23",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 3.07,
-      "surge": 0.11,
+      "changePct": 3.65,
+      "surge": 0.15,
       "events": [
-        {
-          "time": "07:35",
-          "headline": "삼성전자, 구글 AI 생태계 최대 수혜주…\"60만전자 간다\"-KB",
-          "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQbENwbWdXNmFrYXowZ3RobDFyeGRuOG9wMnYybzdCdHQ5YzB4cVlBZUZqV0gyWE42QmFzNURMTFMwRFYtTVNnRGpmcHFHajRmTjlYMzVpbHlaN0RFaEg3MVk3TXl0VUxhU1hQQjFnbTdPZ1ZtVDBWWmoySFlrSkdyRA?oc=5",
-          "source": "edaily.co.kr",
-          "why": "KB증권은 삼성전자가 구글 AI 생태계의 최대 수혜주가 될 것이라며 목표 주가를 60만 전자로 제시했다.",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "09:25",
           "headline": "삼성전자·SK하이닉스, 알파벳 호실적 영향.. '강세'",
           "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPM01wV1I2SHpNTlJLeG15aGZOdlpxOWhoeF9CVmlucE5ic2xUaml2MkFxX0JGXzBDeUlzNWtDWGFfbFdObzF1cXpRZTRrS0R3ejlVaS1yMUlKcU8yLVdwMDg3M0ZKX2lJN1phN2lCRTRFeGZNVUx5a3lkcHRwQVBQNmlZVlpCaklE?oc=5",
           "source": "글로벌이코노믹",
-          "why": "삼성전자·SK하이닉스, 알파벳 호실적 영향.. '강세'",
+          "why": "알파벳의 호실적이 삼성전자와 SK하이닉스의 주가 강세에 영향을 미쳤다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:36",
+          "headline": "삼성전자 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE0zYXktYk9NSWxMVFNWVW5NRWhyVHZCb0ZfeGpiR2k4SmlXSWVlcTdNcUxHc0hxeVotbE1XWFoxWl9QSl9FZVVkbmxqTVZyajcwcFVsaDhwdEphX3dO?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 상승 중",
           "tier": "why",
           "sentiment": "pos"
         }
@@ -31,8 +31,8 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 4.15,
-      "surge": 0.1,
+      "changePct": 4.97,
+      "surge": 0.15,
       "events": [
         {
           "time": "08:47",
@@ -57,17 +57,26 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 2.63,
-      "surge": 0.14,
+      "changePct": 2.39,
+      "surge": 0.2,
       "events": [
         {
           "time": "09:23",
           "headline": "현대차 주가 상승 중",
           "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFBNc3hockdzbDdReGg5ZnBMT0xRUGVxMktHR2NJdHAzaHdDRWtaT3RkQVlxV3ZQclN1cTJqY2dJY1g2R1JhSXJ1NnpzeEhlV0R3dU04dUJUeDVQZmth?oc=5",
           "source": "아시아뉴스통신",
-          "why": "현대차 주가가 상승세를 보이고 있다.",
+          "why": "현대차 주가 상승 중",
           "tier": "why",
           "sentiment": "pos"
+        },
+        {
+          "time": "09:30",
+          "headline": "‘로봇 프리미엄’ 식은 현대차…보스턴다이내믹스 승부수로 반전?",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTFB2bG9LVlJNRldCVXcxRFEyMFlRZjBCU3h0UWJBWTZnQVFyRnhkc0l2bS0zWFdwWXNpeVdFY3VvZC1WczNRNUYtUHNETDdZTTN1Zk1qUnVJdTNkbGVfWUJoTW82VFdTRk5kejdEakF4Qko?oc=5",
+          "source": "리더스팩트",
+          "why": "현대차가 보스턴다이내믹스를 통해 로봇 사업으로 주가 반전을 꾀하고 있다는 분석이 나왔습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     }
