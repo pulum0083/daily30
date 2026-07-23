@@ -1684,6 +1684,7 @@ def build_stock_page(stock, peers):
         "foreign_spark": snap_stock.get("foreign_spark"),
         "supply5": snap_stock.get("supply5"),
         "financials": snap_stock.get("financials"),
+        "financials_annual": snap_stock.get("financials_annual"),
         "picks": picks,
         "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
         "valuation": _valuation_for_code(stock["code"]),
