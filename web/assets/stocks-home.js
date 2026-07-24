@@ -2846,7 +2846,7 @@ if(passBtn){
       return '<div class="ft-ex-row"><span>'+esc(e.name)+'</span><span class="'+(e.flow_eok>=0?'ft-in':'ft-out')+'">'
         +fmtEok(e.flow_eok)+'</span></div>';
     }).join('');
-    return '<div class="ft-expand" data-for="'+t.theme+'">'+rows+'</div>';
+    return '<div class="ft-expand" data-for="'+esc(t.theme)+'"><div class="ft-expand-in">'+rows+'</div></div>';
   }
 
   function render(data){
@@ -2873,15 +2873,52 @@ if(passBtn){
         ? '그 외 '+rest.length+'개 테마는 이번 주 자금 이동이 크지 않았어요.' : '';
       quiet.style.display=rest.length?'':'none';
     }
-    // 타일 클릭 → 인라인 확장(상위 ETF). 다시 누르면 접힘.
+    // 타일 클릭 → 인라인 확장(상위 ETF)이 부드럽게 펼쳐짐. 다시 누르면 접힘.
+    // height를 실측 px로 직접 애니메이션(0fr/1fr 그리드 방식은 프레임별 재계산으로 버벅여 폐기).
+    function openExpand(wrap){
+      var inner=wrap.querySelector('.ft-expand-in');
+      var target=inner.offsetHeight;
+      wrap.style.height='0px';
+      // eslint-disable-next-line no-unused-expressions
+      wrap.offsetHeight;  // 강제 리플로우 — 0px가 실제로 적용된 뒤 트랜지션 시작하도록
+      requestAnimationFrame(function(){
+        wrap.classList.add('open');
+        wrap.style.height=target+'px';
+      });
+      wrap.addEventListener('transitionend',function onEnd(e){
+        if(e.propertyName!=='height') return;
+        wrap.removeEventListener('transitionend',onEnd);
+        wrap.style.height='auto';  // 이후 폰트 로딩 등으로 내용 높이 바뀌어도 잘리지 않게
+      });
+    }
+    function closeExpand(elx){
+      if(!elx || elx._closing) return;
+      elx._closing=true;
+      var cur=elx.offsetHeight;
+      elx.style.height=cur+'px';
+      // eslint-disable-next-line no-unused-expressions
+      elx.offsetHeight;  // 강제 리플로우
+      requestAnimationFrame(function(){
+        elx.classList.remove('open');
+        elx.style.height='0px';
+      });
+      var done=false;
+      function fin(){ if(done)return; done=true; if(elx.parentNode) elx.remove(); }
+      elx.addEventListener('transitionend',function(e){ if(e.propertyName==='height') fin(); });
+      setTimeout(fin,360);  // transitionend 미발화 대비 폴백
+    }
     body.querySelectorAll('.flow-tile').forEach(function(el){
       el.addEventListener('click',function(){
         var theme=el.getAttribute('data-theme');
-        var open=body.querySelector('.ft-expand[data-for="'+CSS.escape(theme)+'"]');
-        body.querySelectorAll('.ft-expand').forEach(function(x){x.remove();});
-        if(open) return;
+        var existing=[].slice.call(body.querySelectorAll('.ft-expand')).filter(function(x){return !x._closing;})[0];
+        var wasThis=existing && existing.getAttribute('data-for')===theme;
+        body.querySelectorAll('.ft-expand').forEach(closeExpand);  // 열린 것 애니메이션 닫기
+        if(wasThis) return;  // 같은 타일 재클릭 → 토글 접힘만
         var t=visible.filter(function(x){return x.theme===theme;})[0];
-        if(t) el.closest('.flow-row').insertAdjacentHTML('afterend',expandHtml(t));
+        if(!t) return;
+        var row=el.closest('.flow-row');
+        row.insertAdjacentHTML('afterend',expandHtml(t));
+        openExpand(row.nextElementSibling);
       });
     });
     block.style.display='';
