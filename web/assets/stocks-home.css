@@ -258,7 +258,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-live.off{background:var(--inset);color:var(--muted);}
 .sbx-live.off .sl-dot{background:#94A3B8;}
 @keyframes slblink{0%,100%{opacity:1}50%{opacity:.2}}
-.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+/* 섹터 탭 — PC에서도 섹션(.sbx-block) 내부 스크롤 중엔 GNB 아래 고정, 섹션을 벗어나면(부모 하단) 자동 해제.
+   부모 .block의 overflow:hidden이 sticky 기준을 깨뜨려 이 카드만 overflow를 풀고, 모서리 둥근 처리를 자식에 직접 부여해 유지. */
+.sbx-block{overflow:visible;}
+.sbx-block .block__h{border-radius:10px 10px 0 0;}
+.sbx-block .sbx-body{border-radius:0 0 10px 10px;}
+.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:52px;z-index:5;}
 .sbx-tab{font-size:12.5px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s,background .12s;}
 .sbx-tab:hover{border-color:var(--primary);color:var(--primary);}
 .sbx-tab.on{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);font-weight:800;}
@@ -746,12 +751,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .two{grid-template-columns:minmax(0,1fr);}
   .hero{gap:14px;}
   .hero .search{min-width:0;width:100%;}
-  /* 섹터별 종목 탭 — 모바일에서 섹션 내부 스크롤 중엔 GNB 아래 고정, 섹션을 벗어나면(부모 .block 하단) 자동 해제.
-     부모 .block의 overflow:hidden이 sticky 기준을 깨뜨려 이 카드만 overflow를 풀고, 모서리 둥근 처리를 자식에 직접 부여해 유지. */
-  .sbx-block{overflow:visible;}
-  .sbx-block .block__h{border-radius:10px 10px 0 0;}
-  .sbx-block .sbx-body{border-radius:0 0 10px 10px;}
-  #sbx-tabs{position:sticky;top:52px;z-index:5;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
+  /* 섹터별 종목 탭 — sticky 자체는 base 규칙(.sbx-tabs)으로 이동해 PC에도 적용됨.
+     모바일 전용 추가: 가로 스크롤 탭(줄바꿈 대신 스와이프) + 등락률 숨김(공간 절약). */
+  #sbx-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
   #sbx-tabs::-webkit-scrollbar{display:none;}
   #sbx-tabs .rt{display:none;}
 }
