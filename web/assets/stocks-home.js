@@ -2060,6 +2060,7 @@ if(passBtn){
     if(d.sectors) SIG_SECTORS=d.sectors;
     if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
     renderTodayLine();
+    sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
   function sigAllSorted(){
@@ -2226,7 +2227,10 @@ if(passBtn){
     arr.sort(function(a,b){return (b.change_pct||0)-(a.change_pct||0);});
     return arr;
   }
+  // 라이브(SIG_SECTORS, /api/signals가 전 섹터 동시에 내려줌) 우선 — 스냅샷 폴백은 클릭한 탭만
+  // 실시간이고 나머지 탭은 정적 스냅샷에 머물러 있다가 클릭 시 갑자기 값이 바뀌는 불일치를 막는다.
   function sbxSectorStat(key){
+    if(SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
     var arr=sbxSectorStocks(key), sum=0,up=0,dn=0;
     arr.forEach(function(s){var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;});
     return {avg:arr.length?sum/arr.length:0, up:up, dn:dn, total:arr.length};
