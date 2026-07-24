@@ -524,19 +524,10 @@
     panel.id = 'notice-panel';
     panel.innerHTML =
       '<div class="notice-panel__header">' +
-        '<span class="notice-panel__title">공지 · 게시판</span>' +
+        '<span class="notice-panel__title">공지사항</span>' +
         '<button class="notice-panel__close" onclick="closeNoticePanel()">✕</button>' +
       '</div>' +
-      '<div class="notice-panel__tabs">' +
-        '<button class="notice-tab is-active" id="tab-btn-notice" onclick="switchPanelTab(\'notice\')">공지사항</button>' +
-        '<button class="notice-tab" id="tab-btn-board" onclick="switchPanelTab(\'board\')">게시판</button>' +
-      '</div>' +
-      '<div class="notice-panel__body" id="notice-panel-body"><p class="notice-panel__empty">불러오는 중...</p></div>' +
-      '<div class="board-panel" id="board-panel-body" style="display:none"></div>' +
-      '<div class="board-input" id="board-input-area" style="display:none">' +
-        '<textarea class="board-input__textarea" id="board-textarea" placeholder="자유롭게 의견을 남겨주세요..."></textarea>' +
-        '<button class="board-input__submit" id="board-submit" onclick="submitBoardPost()">등록</button>' +
-      '</div>';
+      '<div class="notice-panel__body" id="notice-panel-body"><p class="notice-panel__empty">불러오는 중...</p></div>';
 
     document.body.appendChild(overlay);
     document.body.appendChild(panel);
@@ -544,7 +535,6 @@
 
   function openNoticePanel() {
     injectNoticePanel();
-    switchPanelTab('notice');
     var overlay = document.getElementById('notice-overlay');
     var panel = document.getElementById('notice-panel');
     if (overlay) overlay.classList.add('is-open');
@@ -573,140 +563,6 @@
     if (panel) panel.classList.remove('is-open');
   }
 
-  var BOARD_JSON_URL   = '/api/board';
-  var BOARD_POST_URL   = '/api/board';
-  var BOARD_AUTHOR_KEY = 'ds_board_author';
-  var BOARD_SEEN_KEY   = 'ds_board_last_seen';
-
-  function getBoardAuthor() {
-    var stored = localStorage.getItem(BOARD_AUTHOR_KEY);
-    if (stored) return stored;
-    var rnd    = Math.random().toString(16).slice(2, 5);
-    var author = '익명_' + rnd;
-    localStorage.setItem(BOARD_AUTHOR_KEY, author);
-    return author;
-  }
-
-  function fmtBoardDate(iso) {
-    var d   = new Date(iso);
-    var kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-    return (kst.getUTCMonth() + 1) + '/' + kst.getUTCDate() + ' ' +
-      String(kst.getUTCHours()).padStart(2, '0') + ':' +
-      String(kst.getUTCMinutes()).padStart(2, '0');
-  }
-
-  function renderBoardPosts(posts) {
-    var originals = posts.filter(function(p) { return !p.parent_id; });
-    var replies   = posts.filter(function(p) { return  p.parent_id; });
-    if (!originals.length) {
-      return '<p class="notice-panel__empty">아직 등록된 글이 없어요.<br>첫 번째 의견을 남겨보세요!</p>';
-    }
-    return originals.slice().reverse().map(function(p) {
-      var myReplies = replies.filter(function(r) { return r.parent_id === p.id; });
-      var replyHtml = myReplies.map(function(r) {
-        return '<div class="board-reply">' +
-          '<div class="board-reply__author">운영AI봇</div>' +
-          '<div class="board-reply__content">' + escHtml(r.content) + '</div>' +
-          '<div class="board-reply__time">' + fmtBoardDate(r.created_at) + '</div>' +
-        '</div>';
-      }).join('');
-      return '<div class="board-post">' +
-        '<div class="board-post__header">' +
-          '<span class="board-post__author">' + escHtml(p.author) + '</span>' +
-          '<span class="board-post__time">' + fmtBoardDate(p.created_at) + '</span>' +
-        '</div>' +
-        '<div class="board-post__content">' + escHtml(p.content) + '</div>' +
-      '</div>' + replyHtml;
-    }).join('');
-  }
-
-  function fetchBoard() {
-    var body = document.getElementById('board-panel-body');
-    if (!body) return;
-    body.innerHTML = '<p class="notice-panel__empty">불러오는 중...</p>';
-    fetch(BOARD_JSON_URL + '?t=' + Date.now(), { signal: AbortSignal.timeout(8000) })
-      .then(function(r) {
-        if (!r.ok) throw new Error('api error ' + r.status);
-        return r.json();
-      })
-      .then(function(data) {
-        var posts = (data && data.posts) || [];
-        if (body) body.innerHTML = renderBoardPosts(posts);
-        localStorage.setItem(BOARD_SEEN_KEY, new Date().toISOString());
-        checkAndShowDot();
-      })
-      .catch(function() {
-        if (body) body.innerHTML = '<p class="notice-panel__empty">불러오지 못했습니다.</p>';
-      });
-  }
-
-  function switchPanelTab(tab) {
-    var noticeBody = document.getElementById('notice-panel-body');
-    var boardBody  = document.getElementById('board-panel-body');
-    var boardInput = document.getElementById('board-input-area');
-    var btnNotice  = document.getElementById('tab-btn-notice');
-    var btnBoard   = document.getElementById('tab-btn-board');
-    if (!noticeBody || !boardBody) return;
-
-    if (tab === 'board') {
-      noticeBody.style.display = 'none';
-      boardBody.style.display  = '';
-      boardInput.style.display = '';
-      if (btnNotice) btnNotice.classList.remove('is-active');
-      if (btnBoard)  btnBoard.classList.add('is-active');
-      fetchBoard();
-    } else {
-      noticeBody.style.display = '';
-      boardBody.style.display  = 'none';
-      boardInput.style.display = 'none';
-      if (btnBoard)  btnBoard.classList.remove('is-active');
-      if (btnNotice) btnNotice.classList.add('is-active');
-    }
-  }
-
-  function submitBoardPost() {
-    var ta      = document.getElementById('board-textarea');
-    var btn     = document.getElementById('board-submit');
-    var content = ta ? ta.value.trim() : '';
-    if (!content) { if (ta) ta.focus(); return; }
-    if (btn) { btn.disabled = true; btn.textContent = '전송 중...'; }
-
-    var author = getBoardAuthor();
-    fetch(BOARD_POST_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: content, author: author }),
-    })
-      .then(function(r) {
-        if (!r.ok) throw new Error('fail');
-        return r.json();
-      })
-      .then(function(data) {
-        if (ta) ta.value = '';
-        if (btn) { btn.disabled = false; btn.textContent = '등록'; }
-        // 낙관적 업데이트 — Vercel 재배포 대기 없이 즉시 DOM에 표시
-        var body = document.getElementById('board-panel-body');
-        if (body && data && data.post) {
-          var p = data.post;
-          var postHtml =
-            '<div class="board-post">' +
-              '<div class="board-post__header">' +
-                '<span class="board-post__author">' + escHtml(p.author) + '</span>' +
-                '<span class="board-post__time">' + fmtBoardDate(p.created_at) + '</span>' +
-              '</div>' +
-              '<div class="board-post__content">' + escHtml(p.content) + '</div>' +
-            '</div>';
-          // 빈 목록 메시지를 지우고 새 글 prepend
-          var empty = body.querySelector('.notice-panel__empty');
-          if (empty) body.innerHTML = '';
-          body.insertAdjacentHTML('afterbegin', postHtml);
-        }
-      })
-      .catch(function() {
-        if (btn) { btn.disabled = false; btn.textContent = '다시 시도'; }
-      });
-  }
-
   function checkAndShowDot() {
     var dot = document.getElementById('gnb-notif-dot');
     if (!dot) return;
@@ -717,34 +573,9 @@
         var notices   = (data && data.notices) || [];
         var readIds   = getReadIds();
         var hasUnread = notices.some(function(n) { return readIds.indexOf(n.id) === -1; });
-        if (hasUnread) { dot.classList.add('is-visible'); return; }
-
-        fetch(BOARD_JSON_URL, { signal: AbortSignal.timeout(5000) })
-          .then(function(r) { return r.json(); })
-          .then(function(boardData) {
-            var posts  = (boardData && boardData.posts) || [];
-            var seen   = localStorage.getItem(BOARD_SEEN_KEY);
-            var hasNew = posts.some(function(p) {
-              return !p.parent_id && (!seen || p.created_at > seen);
-            });
-            if (hasNew) dot.classList.add('is-visible');
-          })
-          .catch(function() {});
+        if (hasUnread) dot.classList.add('is-visible');
       })
-      .catch(function() {
-        // 공지 fetch 실패해도 게시판 새글 배지는 확인
-        fetch(BOARD_JSON_URL, { signal: AbortSignal.timeout(5000) })
-          .then(function(r) { return r.json(); })
-          .then(function(boardData) {
-            var posts = (boardData && boardData.posts) || [];
-            var seen  = localStorage.getItem(BOARD_SEEN_KEY);
-            var hasNew = posts.some(function(p) {
-              return !p.parent_id && (!seen || p.created_at > seen);
-            });
-            if (hasNew) dot.classList.add('is-visible');
-          })
-          .catch(function() {});
-      });
+      .catch(function() {});
   }
 
   function initNotices() {
@@ -2321,7 +2152,5 @@
   window.renderInstList = renderInstList;
   window.openNoticePanel = openNoticePanel;
   window.closeNoticePanel = closeNoticePanel;
-  window.switchPanelTab  = switchPanelTab;
-  window.submitBoardPost = submitBoardPost;
   window.initIssueBriefing = initIssueBriefing;
 })();
