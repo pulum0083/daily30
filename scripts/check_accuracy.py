@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import urllib.request
@@ -268,6 +268,39 @@ def backfill(briefing_type: str = "kospi", force: bool = False) -> None:
         check_accuracy(d, briefing_type, force=force)
 
 
+def compute_publish_streak(briefings: list) -> dict:
+    """코스피 브리핑의 **거래일 기준** 연속 발행 일수를 센다.
+
+    주말·공휴일은 끊김이 아니다 — holiday_check로 거래일만 골라 세므로
+    "주말에 왜 안 늘지?" 오해가 생기지 않도록 화면에는 항상 "거래일"을 붙인다.
+
+    아직 발행되지 않은 오늘(07:25 브리핑 전)을 끊김으로 오판하지 않기 위해,
+    가장 최근 발행일부터 거꾸로 센다.
+    """
+    from holiday_check import check_kospi_open
+
+    dates = {b["date"] for b in briefings if b.get("type") == "kospi"}
+    if not dates:
+        return {"days": 0, "from": None, "to": None}
+
+    last = max(dates)
+    first = min(dates)
+    cur = date.fromisoformat(last)
+    floor = date.fromisoformat(first)
+    days = 0
+    start = last
+    while cur >= floor:
+        if check_kospi_open(cur):
+            if cur.isoformat() in dates:
+                days += 1
+                start = cur.isoformat()
+            else:
+                break
+        cur -= timedelta(days=1)
+
+    return {"days": days, "from": start, "to": last}
+
+
 def write_accuracy_summary() -> None:
     """누적 적중률 요약을 web/data/accuracy-summary.json에 기록한다.
     랜딩 등에서 fetch해 쓰며, 채점 실행 때마다 실데이터로 갱신 — 하드코딩 stale 방지."""
@@ -289,14 +322,23 @@ def write_accuracy_summary() -> None:
         k: {"scored": s, "hit": h, "pct": (round(h / s * 100) if s else None)}
         for k, (s, h) in buckets.items()
     }
+    # US는 2026-07-14 이슈 중심 전환으로 채점 탈퇴(call_claude.py / check_accuracy 상단 가드).
+    # us 수치는 그 시점에 동결됐고 cumulative는 동결값이 섞인 혼합값이라, 새 소비자가
+    # 무심코 "지금 성적"으로 쓰지 않도록 데이터에 명시한다. 살아 있는 지표는 kospi뿐이다.
+    out["us"]["retired"] = True
+    out["us"]["note"] = "2026-07-14 이슈 중심 전환으로 채점 탈퇴 — 수치 동결"
+    out["cumulative"]["note"] = "kospi(진행) + us(동결) 혼합 — 현재 성적은 kospi를 쓸 것"
+    out["live_key"] = "kospi"
+    out["streak"] = compute_publish_streak(data.get("briefings", []))
     out["updated_at"] = datetime.now(KST).isoformat()
 
     WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
     path = WEB_DATA_DIR / "accuracy-summary.json"
     with open(path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
-    c = out["cumulative"]
-    print(f"[check_accuracy] 적중률 요약 기록: 누적 {c['hit']}/{c['scored']} ({c['pct']}%)")
+    k, st = out["kospi"], out["streak"]
+    print(f"[check_accuracy] 적중률 요약 기록: 코스피 {k['hit']}/{k['scored']} ({k['pct']}%) "
+          f"· 연속 발행 {st['days']} 거래일")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
