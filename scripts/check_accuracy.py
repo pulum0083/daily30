@@ -19,6 +19,8 @@ import urllib.request
 import pytz
 import yfinance as yf
 
+from holiday_check import check_kospi_open
+
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 WEB_DATA_DIR = BASE_DIR / "web" / "data"
@@ -277,28 +279,25 @@ def compute_publish_streak(briefings: list) -> dict:
     아직 발행되지 않은 오늘(07:25 브리핑 전)을 끊김으로 오판하지 않기 위해,
     가장 최근 발행일부터 거꾸로 센다.
     """
-    from holiday_check import check_kospi_open
-
-    dates = {b["date"] for b in briefings if b.get("type") == "kospi"}
-    if not dates:
+    published = {b["date"] for b in briefings if b.get("type") == "kospi"}
+    if not published:
         return {"days": 0, "from": None, "to": None}
 
-    last = max(dates)
-    first = min(dates)
-    cur = date.fromisoformat(last)
-    floor = date.fromisoformat(first)
-    days = 0
-    start = last
-    while cur >= floor:
-        if check_kospi_open(cur):
-            if cur.isoformat() in dates:
-                days += 1
-                start = cur.isoformat()
-            else:
-                break
-        cur -= timedelta(days=1)
+    newest = max(published)
+    oldest = date.fromisoformat(min(published))
 
-    return {"days": days, "from": start, "to": last}
+    days = 0
+    streak_start = newest
+    cursor = date.fromisoformat(newest)
+    while cursor >= oldest:
+        if check_kospi_open(cursor):
+            if cursor.isoformat() not in published:
+                break
+            days += 1
+            streak_start = cursor.isoformat()
+        cursor -= timedelta(days=1)
+
+    return {"days": days, "from": streak_start, "to": newest}
 
 
 def write_accuracy_summary() -> None:

@@ -1036,16 +1036,21 @@
   var TRUST_STALE_HOURS = 96;  /* 채점 잡은 평일(화~토) 09:10 — 토→화 72h가 정상 최대치.
                                   공휴일 하루를 더 얹은 96h를 초과하면 잡이 죽은 것으로 본다. */
 
+  /* 경과 시간 → { text: 표시 라벨, hours: stale 판정용 실수 시간 }.
+     stocks-home.js의 relTime()과는 합치지 말 것 — 그쪽은 "오늘 14:32 / 어제 12:46 / 7/14"
+     처럼 달력일 기준 기사 발행 라벨이고, 이쪽은 경과 시간 + stale 판정값이다. */
   function trustRelTime(iso) {
-    var t = new Date(iso).getTime();
-    if (!t) return null;
+    var t = Date.parse(String(iso || ''));
+    if (isNaN(t)) return null;
     var mins = Math.floor((Date.now() - t) / 60000);
     if (mins < 0) return null;                       /* 미래 시각 — 신뢰하지 않는다 */
-    if (mins < 1)  return { text: '방금', hours: 0 };
-    if (mins < 60) return { text: mins + '분 전', hours: mins / 60 };
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return { text: hrs + '시간 전', hours: hrs };
-    return { text: Math.floor(hrs / 24) + '일 전', hours: hrs };
+    var hours = mins / 60;
+    var text;
+    if (mins < 1)       text = '방금';
+    else if (mins < 60) text = mins + '분 전';
+    else if (hours < 24) text = Math.floor(hours) + '시간 전';
+    else                text = Math.floor(hours / 24) + '일 전';
+    return { text: text, hours: hours };
   }
 
   function renderTrustStrip() {
