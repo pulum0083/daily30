@@ -1,0 +1,279 @@
+<!-- 엑셀코스피(excelkospi.pages.dev) 벤치마크 분석 — 2026-07-25 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>엑셀코스피 벤치마크 분석 — Double-Shot 종목 시그널</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --ink:#141619; --muted:#6b7280; --faint:#9aa0a8;
+    --line:#e8eaee; --soft:#f3f4f6; --accent:#2775ED; --accent-bg:#eaf1fd;
+    --up:#E03131; --up-bg:#fdecec; --warn:#B45309; --warn-bg:#fdf3e3;
+    --good:#0F7B5A; --good-bg:#e7f5ef; --r:14px;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0e0f12; --card:#16181c; --ink:#eceef1; --muted:#9aa0a8; --faint:#71767e;
+    --line:#282b31; --soft:#1c1f24; --accent:#5b9dff; --accent-bg:#152238;
+    --up:#ff6b6b; --up-bg:#2a1719; --warn:#e0a044; --warn-bg:#2a2113;
+    --good:#3ec49a; --good-bg:#12271f;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",Segoe UI,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px;}
+  h1{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:0 0 8px;line-height:1.3;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 6px;}
+  .asof{color:var(--faint);font-size:12.5px;margin:0 0 30px;}
+  h2{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:38px 0 14px;
+     padding-top:22px;border-top:1px solid var(--line);}
+  h2:first-of-type{border-top:none;padding-top:0;}
+  h3{font-size:15.5px;font-weight:750;margin:24px 0 8px;}
+  p{margin:0 0 12px;font-size:14.5px;}
+  ul{margin:0 0 12px;padding-left:20px;font-size:14.5px;}
+  li{margin:0 0 6px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+        padding:18px 20px;margin:0 0 14px;}
+  .lead{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+        border-radius:var(--r);padding:20px 22px;margin:0 0 24px;}
+  .lead p:last-child{margin-bottom:0;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 14px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-weight:700;color:var(--muted);font-size:12.5px;background:var(--soft);}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .tag{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;
+       padding:2px 8px;margin-right:6px;vertical-align:1px;}
+  .t-crit{background:var(--up-bg);color:var(--up);}
+  .t-warn{background:var(--warn-bg);color:var(--warn);}
+  .t-good{background:var(--good-bg);color:var(--good);}
+  .t-info{background:var(--accent-bg);color:var(--accent);}
+  .ok{color:var(--good);font-weight:700;}
+  .no{color:var(--up);font-weight:700;}
+  .mid{color:var(--warn);font-weight:700;}
+  code{background:var(--soft);border-radius:5px;padding:1px 6px;font-size:12.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .note{color:var(--muted);font-size:13px;}
+  .foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+        color:var(--faint);font-size:12.5px;}
+  @media(max-width:640px){.wrap{padding:28px 16px 60px;} h1{font-size:23px;}
+    table{font-size:12.5px;} th,td{padding:7px 6px;}}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px;}
+  .kpi__i{flex:1 1 150px;background:var(--card);border:1px solid var(--line);
+          border-radius:12px;padding:13px 15px;}
+  .kpi__l{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:3px;}
+  .kpi__v{font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+  .kpi__n{font-size:11.5px;color:var(--faint);margin-top:2px;}
+  .quote{border-left:3px solid var(--line);padding:2px 0 2px 14px;margin:10px 0;
+         color:var(--muted);font-size:13.5px;}
+  .big{background:var(--accent-bg);border:1px solid transparent;border-radius:var(--r);
+       padding:18px 20px;margin:0 0 14px;}
+  @media (prefers-color-scheme:dark){.big{border-color:var(--line);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>엑셀코스피 벤치마크 분석</h1>
+<p class="sub">excelkospi.pages.dev 관찰 · Double-Shot 종목 시그널(<code>/stocks/</code>) 대비 시사점</p>
+<p class="asof">2026년 7월 25일 · 브라우저로 서비스를 직접 열람해 관찰. 코스피랩 점검과 달리 이 리포트는 <b>경쟁 우열 판정이 아니라 벤치마킹</b>이 목적이다 — 우리가 갖지 못한 축을 왜 그들이 가졌는지 규명한다.</p>
+
+<div class="lead">
+  <p><b>이 서비스는 주식 서비스가 아니라 "회사에서 안 걸리고 주식 보는 도구"다.</b> 화면 전체가 마이크로소프트 엑셀 클론이고(창 제목 <code>excelkospi_brief_20260725.xlsx</code>, 리본 메뉴, 수식 입력줄 <code>=MARKETBRIEF(AUTO)</code>, A·B·C 열 머리글), 시세·뉴스·커뮤니티 글·심지어 <b>광고까지 전부 스프레드시트 행으로 렌더링</b>된다. <code>Esc</code>를 두 번 누르면 즉시 업무 화면으로 전환되는 <b>보스 긴급키</b>가 기본 ON이고, 아예 <b>아웃룩 메일함으로 위장하는 두 번째 모드</b>까지 있다.</p>
+  <p><b>핵심 진단 — 그들이 판 시장은 "정보"가 아니라 "상황"이다.</b> 우리를 포함한 모든 주식 서비스는 <b>더 좋은 정보</b>로 경쟁한다. 엑셀코스피는 정보 품질로 경쟁하지 않는다. <b>근무 중 주식을 보고 싶은데 눈치가 보인다</b>는, 정보와 무관한 상황적 고통을 해결한다. 그래서 대체재가 없다 — 네이버 금융이 더 정확해도 <b>회사에서는 못 켠다.</b></p>
+  <p><b>방문자가 많은 이유는 SEO가 아니다.</b> 그들의 <code>sitemap</code>은 <b>19 URL</b>로 우리(<b>102</b>)의 5분의 1이다. 그런데 화면 하단에 <b>"오늘 사용자 1,547명 · 현재 접속 63명"</b>이 실시간으로 표시된다. 검색 지면은 우리가 5배 넓은데 체감 트래픽은 반대다 — <b>유입이 검색이 아니라 개념의 입소문과 재방문에서 나온다</b>는 뜻이다.</p>
+  <p><b>우리가 가져올 것은 위장 기능이 아니다.</b> 엑셀 UI를 흉내내는 건 우리 정체성(실측·검증 기반 분석 콘텐츠)과 충돌한다. 가져올 것은 그 아래에 깔린 <b>세 가지 설계 원리</b>다 — ① <b>AI와 사용자를 대결시키는 예측 게임</b>, ② <b>자체 커뮤니티 데이터를 지표로 재가공</b>, ③ <b>서비스 상태를 사용자에게 보여주는 투명성</b>. 셋 다 우리가 이미 가진 자산(AI 예측 130전 68%, 텔레그램 구독자)에 얹을 수 있다.</p>
+</div>
+
+<h2>0. 관찰된 수치</h2>
+<div class="kpi">
+  <div class="kpi__i"><div class="kpi__l">오늘 사용자</div><div class="kpi__v">1,547명</div><div class="kpi__n">화면 하단 실시간 표시</div></div>
+  <div class="kpi__i"><div class="kpi__l">현재 접속</div><div class="kpi__v">63명</div><div class="kpi__n">동시 접속</div></div>
+  <div class="kpi__i"><div class="kpi__l">모의투자 참가</div><div class="kpi__v">1,506명</div><div class="kpi__n">일 사용자의 대부분</div></div>
+  <div class="kpi__i"><div class="kpi__l">채팅 24시간</div><div class="kpi__v">5,384개</div><div class="kpi__n">참여 351명</div></div>
+  <div class="kpi__i"><div class="kpi__l">sitemap URL</div><div class="kpi__v">19</div><div class="kpi__n">우리는 102</div></div>
+  <div class="kpi__i"><div class="kpi__l">배포 버전</div><div class="kpi__v">1.4310</div><div class="kpi__n">2026-07-25 13:43</div></div>
+</div>
+<p class="note"><b>모의투자 참가 1,506명 대 일 사용자 1,547명</b>이 이 서비스의 성격을 가장 압축적으로 보여준다. 방문자의 대부분이 <b>계정을 만들고 게임에 참여</b>한다 — 시세만 확인하고 떠나는 구조가 아니다. 버전 <code>1.4310</code>은 하루에도 여러 번 배포한다는 뜻으로, 개발 속도 자체가 경쟁력이다.</p>
+<p class="note">위 수치는 <b>그쪽 서비스가 자기 화면에 표시한 값</b>을 관찰한 것이며 우리가 검증한 것이 아니다. 우리 서비스의 대응 트래픽 수치는 이 리포트에서 다루지 않는다(GA 접근 없이 추정하지 않는다 — 운영 규칙 0).</p>
+
+<h2>1. 무엇을 만들었나 — 기능 해부</h2>
+
+<h3><span class="tag t-crit">핵심</span>① 위장(스텔스) 계층</h3>
+<div class="card">
+<p>이 서비스의 정체성 전부가 여기 있다. 단순히 "심플한 UI"가 아니라 <b>특정 소프트웨어를 정밀하게 흉내낸다.</b></p>
+<div class="scroll">
+<table>
+  <tr><th style="width:26%">장치</th><th style="width:74%">관찰 내용</th></tr>
+  <tr><td><b>엑셀 UI 클론</b></td><td>창 제목 <code>excelkospi_brief_20260725.xlsx - Excol</code>(상표 회피로 Excel→<b>Excol</b>), 리본 탭 9종(파일·홈·삽입·페이지 레이아웃·수식·데이터·검토·보기·자동화·도움말), 이름 상자 <code>A1</code>, 수식 입력줄 <code>=MARKETBRIEF(AUTO)</code>, 열 머리글 A·B·C, 행 번호, 하단 시트 탭(자동/국장/미장/코인/주식 전체/보유)</td></tr>
+  <tr><td><b>보스 긴급키</b></td><td><code>Esc</code> 두 번 빠르게 → 업무 화면으로 전환. <b>기본값 ON</b></td></tr>
+  <tr><td><b>위장 시트</b></td><td>진짜 빈 스프레드시트 탭. 누르면 아무것도 없는 격자만 남는다</td></tr>
+  <tr><td><b>Ootlook 위장</b></td><td>2차 위장 모드 — 시세·뉴스·게시판을 <b>메일함처럼</b> 표시. 받은 편지함·보낸 편지함·플래그·검색 폴더까지 재현. 게시판은 메일 폴더로, 기능은 "업무 앱"(근태보고·내 자산 보고서·ETF 자료실) 메뉴로 위장</td></tr>
+  <tr><td><b>콘텐츠의 시트화</b></td><td>뉴스는 <code>시각·헤드라인</code> 2열 표, 커뮤니티 글도 행 번호가 붙은 표, <b>광고까지 "광고"·"후원" 라벨이 붙은 행</b>으로 삽입 — 위장이 깨지지 않는다</td></tr>
+</table>
+</div>
+<p class="note">디테일의 밀도가 이 기능의 본질이다. 리본 메뉴는 눌러도 별 기능이 없지만 <b>있어야 위장이 성립한다.</b> "대충 엑셀 느낌"으로는 옆자리에서 봤을 때 안 속는다 — 이들은 그 지점을 정확히 알고 만들었다.</p>
+</div>
+
+<h3><span class="tag t-crit">핵심</span>② 리텐션 게임 — AI와 대결시킨다</h3>
+<div class="card">
+<p><b>"했제? 내가 말했제?"</b>라는 이름의 일일 예측 대결. 우리 서비스와 가장 직접적으로 비교되는 기능이라 자세히 본다.</p>
+<div class="quote">
+  <b>내 예측 · 7/27 코스피</b> — AI <b>하락</b> · 사람들 <b>46% 상승</b> · 나는? &nbsp;[상승] [보합] [하락]<br>
+  맞히고 <b>AI까지 이기면</b> 모의주식 뽑기권 1장 · 로그인하면 모의투자 계좌에 적립
+</div>
+<p>구조가 영리하다.</p>
+<ul>
+  <li><b>AI 예측을 게임의 상대로 만든다.</b> 우리는 AI 예측을 <b>보여주기만</b> 한다(적중률 130전 88적중 68% 공개). 이들은 같은 것을 <b>이겨야 할 대상</b>으로 세워 사용자를 참여시킨다 — 같은 데이터에서 나온 완전히 다른 제품.</li>
+  <li><b>군중 예측을 함께 보여준다.</b> "사람들 46% 상승"이 표시돼 <b>나는 다수와 다른가</b>라는 판단 재미가 붙는다. 이건 그들만 가진 데이터다.</li>
+  <li><b>매 거래일 리셋된다.</b> 개장 10분 전 마감 → 하루에 한 번 반드시 돌아올 이유가 생긴다.</li>
+  <li><b>보상이 계정으로 유도한다.</b> 비로그인도 참여 가능하지만 뽑기권은 로그인해야 적립 — 강요 없이 가입 동기를 만든다.</li>
+</ul>
+<p class="note">부수적으로 이 게임은 <b>사용자 예측 데이터</b>를 모은다. 그 집계가 다시 "사람들 46% 상승"으로 화면에 나오는 <b>자기 강화 루프</b>다 — 참여자가 늘수록 지표가 정확해지고, 지표가 좋아지면 참여할 이유가 커진다.</p>
+</div>
+
+<h3><span class="tag t-crit">핵심</span>③ 커뮤니티를 지표로 재가공한다</h3>
+<div class="card">
+<p>커뮤니티가 있다는 것 자체보다 <b>그 데이터를 지표로 만든 것</b>이 핵심이다. "채팅 장세 지표" 패널에서 관찰한 내용.</p>
+<div class="scroll">
+<table>
+  <tr><th style="width:24%">지표</th><th style="width:76%">관찰값</th></tr>
+  <tr><td><b>채팅 투심</b></td><td><b>49</b>/100 · 중립 (공포↔탐욕 게이지)</td></tr>
+  <tr><td><b>방향</b></td><td>상승 42% · 관망 14% · 하락 44%</td></tr>
+  <tr><td><b>종목별 투심</b></td><td>SK하이닉스 238 · 코스피 75(▲기대 우세) · 삼성전자 71 · 테슬라 30 — 언급량 기준 쏠림 51%</td></tr>
+  <tr><td><b>심리 톤</b></td><td>패닉 40% · 흥분 8% · 곡소리 1%</td></tr>
+  <tr><td><b>지금 뜨는 말</b></td><td>월급루팡 185 · 하닉 117 · 하이닉스 47 · QQQ 45 · api 41</td></tr>
+  <tr><td><b>표본</b></td><td>지난 24시간 채팅 5,384개 · 참여 351명</td></tr>
+</table>
+</div>
+<p><b>이건 돈으로 살 수 없는 데이터다.</b> 시세·수급·목표주가는 누구나 네이버·토스에서 가져올 수 있어 서비스 간 차별화가 안 된다. 반면 <b>자기 사용자들이 지금 무슨 말을 하고 있는지</b>는 그 서비스에만 있다. 이들은 커뮤니티를 "댓글 기능"이 아니라 <b>독점 데이터 소스</b>로 설계했다.</p>
+<p class="note">커뮤니티 자체도 실제로 살아 있다. 게시판 5종(국내주식토론·해외주식토론·코인토론·<b>탕비실</b>·운영게시판), 종목 태그별 글 수(TIGER 미국우주테크 93 · 삼성전자 37 · NAVER 30 …), 조회수 280건짜리 글, 답글, 투표("다음 개장일 코스피 분위기는?" 33명 참여), <b>수익인증</b> 첨부 기능. 익명 닉네임이 <code>월급루팡_5dc</code> 형식으로 자동 생성돼 <b>위장 콘셉트가 커뮤니티 안에서도 유지</b>된다.</p>
+</div>
+
+<h3><span class="tag t-warn">참고</span>④ 나머지 기능들</h3>
+<div class="card">
+<div class="scroll">
+<table>
+  <tr><th style="width:22%">기능</th><th style="width:78%">내용</th></tr>
+  <tr><td><b>모의투자</b></td><td>가상 5,000만원 연습 투자 · <b>참가 1,506명</b>. 예측 게임의 보상(뽑기권)이 여기로 흘러든다</td></tr>
+  <tr><td><b>AI 브리핑</b></td><td>우리 핵심 상품과 정면으로 겹친다. "다음 개장일은 하락 출발 가능성이 큽니다(정렬 98%)" + 근거 3줄 + 코스피/코스닥 카드. <b>카드 편집</b>으로 사용자가 구성 변경, <b>공유 버튼</b> 제공</td></tr>
+  <tr><td><b>실시간 접속자 공개</b></td><td>"오늘 사용자 1,547명 · 현재 접속 63명"을 하단에 상시 노출 — <b>붐비는 가게</b> 효과</td></tr>
+  <tr><td><b>HyperLiquid 24시간 시세</b></td><td>장 마감 후 무기한선물 환산가. <b>우리 "밤사이 미국 반도체 시황"과 같은 데이터 소스</b> · 김프 ON/OFF 토글 제공</td></tr>
+  <tr><td><b>알림</b></td><td>텔레그램 시세알림 · 가격 알림 · 알림 센터</td></tr>
+  <tr><td><b>모바일 앱</b></td><td>PWA 설치 유도. <b>떠다니는 버튼</b>으로 상시 노출(설정에서 끌 수 있음)</td></tr>
+  <tr><td><b>수익화</b></td><td>스프레드시트 행으로 위장한 네이티브 광고("광고"·"후원" 라벨). 블룸버그 X 중앙일보 등 <b>제휴 광고</b> 확인</td></tr>
+  <tr><td><b>AI 검색봇 허용</b></td><td><code>robots.txt</code>에서 <code>OAI-SearchBot</code>·<code>PerplexityBot</code>·<code>Claude-User</code> 등을 명시 허용 — <b>AI 검색 유입까지 설계</b></td></tr>
+</table>
+</div>
+</div>
+
+<h2>2. 왜 방문자가 많은가 — 네 가지 원인</h2>
+
+<div class="big">
+<p style="margin-bottom:8px;"><b>먼저 아닌 것부터.</b> 검색 최적화 때문이 아니다. <code>sitemap</code> 19 URL, <code>pages.dev</code> 무료 서브도메인, 종목별 상세 페이지 없음 — <b>롱테일 검색 자산은 우리가 압도적으로 앞선다.</b> 그런데도 트래픽은 반대다. 원인은 다른 데 있다.</p>
+</div>
+
+<h3>① 검색어가 "종목명"이 아니라 "상황"이다</h3>
+<div class="card">
+<p>그들의 <code>meta description</code> 첫 문장이 전략 전체를 요약한다.</p>
+<div class="quote">엑셀코스피 / excelkospi — <b>회사에서 엑셀 보는 척 주식 보기</b></div>
+<p>사람들이 실제로 검색창에 치는 말이다. <b>"삼성전자 주가"</b>는 네이버·토스가 다 먹은 레드오션이지만, <b>"회사에서 주식 보는 법"</b>은 경쟁자가 없다. 검색량은 적어도 <b>전환율이 극단적으로 높다</b> — 그 검색을 한 사람은 정확히 이 서비스를 원하고 있고, 대체재가 없어서 그대로 눌러앉는다.</p>
+<p class="note">우리 <code>/glossary/</code>는 "역행 상승이 뭐야" 같은 <b>지식 검색</b>을 노린다. 방향은 맞지만, 지식 검색은 답을 얻으면 떠난다. 반면 상황 검색은 <b>도구를 얻고 머문다.</b></p>
+</div>
+
+<h3>② 공유가 자연스럽다 — 콘셉트 자체가 밈이다</h3>
+<div class="card">
+<p>"AI가 코스피를 68% 맞힌다"는 설명하기 어렵고 공유하면 잘난 척처럼 보인다. <b>"회사에서 엑셀인 척하면서 주식 보는 사이트 있음"</b>은 한 문장으로 끝나고, 듣는 사람이 즉시 웃고, 직장인이면 누구나 자기 얘기다. 커뮤니티·단톡방에서 <b>퍼지는 비용이 0</b>이다.</p>
+<p class="note">우리 서비스에서 이 역할을 할 수 있는 건 <b>적중률</b>과 <b>커버드콜 원금성 분배 폭로</b>다. 둘 다 "한 문장으로 흥미로운" 재료인데 <b>공유 장치가 없다</b> — 공유 버튼도, 공유용 이미지 카드도 없다.</p>
+</div>
+
+<h3>③ 매일 돌아올 이유를 심어놨다</h3>
+<div class="card">
+<p>재방문 장치가 <b>겹겹이</b> 깔려 있다. 하나가 안 통해도 다른 게 붙잡는다.</p>
+<ul>
+  <li><b>예측 게임</b> — 매 거래일 개장 10분 전 마감. 안 하면 그날 판이 끝난다</li>
+  <li><b>모의투자</b> — 내 계좌 손익이 매일 바뀐다(참가 1,506명)</li>
+  <li><b>커뮤니티</b> — 내 글에 답글이 달렸는지 확인해야 한다</li>
+  <li><b>채팅</b> — 24시간 5,384개, 실시간이라 놓치면 사라진다</li>
+  <li><b>알림</b> — 텔레그램·가격 알림이 밖에서 불러들인다</li>
+</ul>
+<p class="note">우리에게 있는 재방문 장치는 <b>매일 갱신되는 데이터</b>뿐이다. 사용자가 <b>스스로 기억해서</b> 들어와야 한다 — 코스피랩 점검에서도 3판 연속 지적된 구멍이다.</p>
+</div>
+
+<h3>④ 근무 중에 켠다 — 체류 시간의 성격이 다르다</h3>
+<div class="card">
+<p>구조적으로 가장 강력한 요인이다. 일반 주식 서비스는 출퇴근·점심·장 마감 후에 <b>짧게</b> 열린다. 엑셀코스피는 <b>업무 시간 내내 탭에 떠 있는다</b> — 그게 이 서비스의 용도이기 때문이다.</p>
+<p>탭이 열려 있으면 채팅이 쌓이고, 채팅이 쌓이면 투심 지표가 생기고, 지표가 생기면 다시 볼 이유가 된다. <b>위장 기능이 트래픽을 만들고, 그 트래픽이 독점 데이터를 만들고, 그 데이터가 다시 서비스를 강하게 만드는</b> 구조다.</p>
+</div>
+
+<h2>3. 우리와의 포지션 대조</h2>
+<div class="scroll">
+<table>
+  <tr><th style="width:24%">항목</th><th style="width:38%">Double-Shot 종목 시그널</th><th style="width:38%">엑셀코스피</th></tr>
+  <tr><td>파는 것</td><td><b>정보의 품질</b> — 실측·검증된 분석</td><td><b>상황의 해결</b> — 안 걸리고 보기</td></tr>
+  <tr><td>핵심 훅</td><td>AI 예측 + 적중률 공개 · 특이 신호 8종</td><td>엑셀 위장 · 보스 긴급키</td></tr>
+  <tr><td>AI 예측</td><td class="ok">130전 88적중 68% 공개 · 사후 채점</td><td>있음(정렬 %) · <b>적중률 공개는 미확인</b></td></tr>
+  <tr><td>AI 예측의 용도</td><td class="mid">읽는 것</td><td class="ok"><b>이기는 것</b>(대결 게임)</td></tr>
+  <tr><td>커뮤니티</td><td class="no">없음<span class="note"> (월배당 의견 기능도 07-25 제거)</span></td><td class="ok">게시판 5종 · 채팅 5,384개/24h</td></tr>
+  <tr><td>커뮤니티 데이터 활용</td><td class="no">해당 없음</td><td class="ok"><b>채팅 투심 지표로 재가공</b></td></tr>
+  <tr><td>게임·보상</td><td class="no">없음</td><td class="ok">예측 대결 · 모의투자 1,506명</td></tr>
+  <tr><td>계정</td><td class="no">없음</td><td>선택(비로그인 우선, 보상은 로그인)</td></tr>
+  <tr><td>재방문 장치</td><td class="no">데이터 갱신뿐</td><td class="ok">게임·모의투자·커뮤니티·채팅·알림</td></tr>
+  <tr><td>검색 자산</td><td class="ok">sitemap <b>102</b> · 종목 상세 56 · 용어 페이지</td><td class="no">sitemap <b>19</b> · 종목 상세 없음</td></tr>
+  <tr><td>데이터 깊이</td><td class="ok">밸류에이션 134종목 · 연간 실적 · 목표주가 · 수급</td><td>시세·뉴스 중심</td></tr>
+  <tr><td>데이터 정합성</td><td class="ok">검증 게이트 · 미수집 시 섹션 생략</td><td class="mid">화면에 "조회 실패" 노출됨</td></tr>
+  <tr><td>수익화</td><td class="no">없음</td><td class="ok">네이티브 광고 · 제휴</td></tr>
+  <tr><td>상태 투명성</td><td class="no">없음</td><td class="ok">접속자 수 · 버전 · 배포 시각 공개</td></tr>
+</table>
+</div>
+<p class="note"><b>강점이 정확히 엇갈린다.</b> 우리는 <b>깊이·정합성·검색 자산</b>이 앞서고, 그들은 <b>훅·재방문·독점 데이터·수익화</b>가 앞선다. 겹치는 영역이 적어 <b>직접 경쟁이 아니라 상호 보완에 가깝다</b> — 그래서 이 리포트는 "이겨야 할 상대"가 아니라 "가져올 설계"로 다룬다.</p>
+
+<h2>4. 벤치마킹 제안</h2>
+<p class="note">위장 기능 자체는 <b>가져오지 않는다.</b> 우리 정체성(실측·검증 기반 분석)과 충돌하고, 이미 선점된 콘셉트를 뒤늦게 흉내내는 건 승산이 없다. 대신 그 아래의 <b>설계 원리</b>만 가져온다. 아래는 <b>우리가 이미 가진 자산에 얹을 수 있는 것</b> 순으로 정렬했다.</p>
+<div class="scroll">
+<table>
+  <tr><th style="width:5%">순위</th><th style="width:26%">제안</th><th style="width:11%">비용</th><th style="width:58%">근거와 설계</th></tr>
+  <tr><td class="num"><b>1</b></td><td><b>AI 예측 대결</b><br><span class="note">사용자 vs AI 일일 예측</span></td><td>중간</td><td>우리는 이미 <b>매일 AI 예측 + 사후 채점 파이프라인</b>을 갖고 있다(<code>check_accuracy.py</code>). 여기에 "당신은 어떻게 봅니까" 버튼 하나와 로컬 기록만 붙이면 게임이 된다. <b>AI 68% 대 내 성적</b>을 누적 표시하면 매일 돌아올 이유가 생긴다. 계정 없이 <code>localStorage</code>로 시작 가능 — 코스피랩 점검의 "관심종목" 항목과 같은 저장 인프라를 공유한다.</td></tr>
+  <tr><td class="num"><b>2</b></td><td><b>공유 카드</b><br><span class="note">적중률·예측 결과 이미지</span></td><td>낮음</td><td>우리 최고의 이야깃거리(<b>130전 88적중 68%</b>)에 공유 장치가 없다. 예측 결과·적중률을 <b>OG 이미지 카드</b>로 만들고 공유 버튼을 붙이면, 지금 0인 바이럴 경로가 열린다. 엑셀코스피도 "AI 코스피예측 공유" 버튼을 두고 있다.</td></tr>
+  <tr><td class="num"><b>3</b></td><td><b>서비스 상태 공개</b><br><span class="note">갱신 시각·데이터 신선도</span></td><td>낮음</td><td>그들은 접속자 수·버전·배포 시각을 상시 노출해 <b>살아 있는 서비스</b>임을 증명한다. 우리는 접속자 수를 쓸 필요는 없지만(수치가 약하면 역효과), <b>"마지막 수집 N분 전 · 다음 갱신 HH:MM"</b> 같은 신선도 표시는 우리 강점인 <b>실측·정합성</b>을 눈에 보이게 만든다. 이미 §20에서 신선도 가드를 코드로 갖고 있으니 <b>그 상태를 화면에 올리기만</b> 하면 된다.</td></tr>
+  <tr><td class="num"><b>4</b></td><td><b>알림 채널 확장</b><br><span class="note">가격·신호 알림</span></td><td>중간</td><td>우리는 이미 <b>텔레그램 발송 인프라</b>가 있다(브리핑 구독). 여기에 "이 종목 특이 신호 뜨면 알려줘"를 얹으면, 밖에서 사용자를 불러들이는 경로가 생긴다. 재방문 장치 중 <b>기존 자산 재활용도가 가장 높다.</b></td></tr>
+  <tr><td class="num"><b>5</b></td><td><b>상황형 검색어 페이지</b><br><span class="note">"장중에 뭘 봐야 하나" 류</span></td><td>중간</td><td>그들의 <code>description</code> 전략에서 배울 점. 우리 <code>/glossary/</code>는 <b>용어 검색</b>을 받는데, 용어 검색자는 답만 얻고 떠난다. <b>"코스피 마감 후 뭘 확인해야 하나"</b>처럼 <b>상황·루틴</b>을 노린 페이지는 서비스 화면으로 자연스럽게 이어진다.</td></tr>
+  <tr><td class="num"><b>6</b></td><td><b>커뮤니티</b><br><span class="note">— 권하지 않음</span></td><td>높음</td><td class="note">가장 큰 격차지만 <b>지금은 만들지 말 것을 권한다.</b> 커뮤니티는 <b>임계 인원 전까지 빈 방으로 보여</b> 오히려 신뢰를 깎는다(코스피랩 커뮤니티가 글 0건으로 방치된 상태가 그 증거다). 우리는 오늘 월배당 의견 기능을 <b>제거</b>했는데, 그 판단 자체는 옳다 — 사람이 모이는 훅(1·2번)이 먼저고 커뮤니티는 그 다음이다.</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h3 style="margin-top:0">한 줄 결론</h3>
+<p style="margin-bottom:0">엑셀코스피는 <b>정보로 이기려 하지 않고 상황으로 이겼다.</b> 우리가 흉내낼 것은 그 위장이 아니라, <b>이미 가진 AI 예측을 "읽는 것"에서 "겨루는 것"으로 바꾸는 발상</b>이다. 우리 적중률 파이프라인은 이미 다 만들어져 있고, 빠진 건 <b>사용자가 참여할 버튼 하나</b>다.</p>
+</div>
+
+<h2>5. 실측 근거</h2>
+<div class="card">
+<p class="note">2026-07-25 브라우저로 <code>excelkospi.pages.dev</code>를 직접 열람해 관찰했다. 추정 없음.</p>
+<ul class="note">
+  <li>위장 UI — 창 제목 <code>excelkospi_brief_20260725.xlsx</code>, 수식 입력줄 <code>=MARKETBRIEF(AUTO)</code>, 리본 탭·행 번호·시트 탭 렌더 확인</li>
+  <li>보스 긴급키 — 설정 &gt; 위장·바로가기: "Esc를 두 번 빠르게 누르면 업무 화면으로 전환됩니다" <b>토글 ON</b></li>
+  <li>Ootlook 위장 — 같은 설정 화면의 토글 + 메일함 UI(받은 편지함·게시판 폴더·업무 앱) 텍스트 추출로 확인</li>
+  <li>예측 게임 — "했제? 내가 말했제? 대결" 패널: AI 하락 / 사람들 46% 상승 / 상승·보합·하락 선택 버튼 / "맞히고 AI까지 이기면 모의주식 뽑기권 1장"</li>
+  <li>채팅 장세 지표 — 투심 49/100 중립 · 방향 상승42%·관망14%·하락44% · 종목별(SK하이닉스 238·코스피 75·삼성전자 71·테슬라 30) · 패닉 40% · 총 5,384개·참여 351명</li>
+  <li>모의투자 — "가상 5,000만원으로 하는 연습 투자 · 참가 <b>1,506명</b>"</li>
+  <li>사용자 수 — 화면 하단 상태바 "오늘 사용자 <b>1,547명</b>", "현재 접속 <b>63명</b>"</li>
+  <li>버전 — 설정 헤더 "버전 1.4310 · 배포 2026-07-25 13:43"</li>
+  <li>커뮤니티 — 국내주식토론 종목 태그별 글 수(TIGER 미국우주테크 93·삼성전자 37·NAVER 30·SK하이닉스 29 등), 조회 280건 글, 투표 33명 참여, 익명 닉네임 <code>월급루팡_5dc</code> 형식</li>
+  <li>SEO — <code>meta description</code> "회사에서 엑셀 보는 척 주식 보기", <code>canonical</code>·OG·JSON-LD 1블록·<code>robots: index,follow</code> 존재. <code>sitemap.xml</code> <b>loc 19</b>(<code>/guide</code>·<code>/fear-greed</code>·<code>/forecast</code>·게시판 5종 등)</li>
+  <li><code>robots.txt</code> — <code>OAI-SearchBot</code>·<code>PerplexityBot</code>·<code>ChatGPT-User</code>·<code>Claude-User</code>·<code>Claude-Web</code> 등 AI 검색봇 <code>Allow: /</code> 명시</li>
+  <li>수익화 — 시트 행에 "광고"·"후원" 라벨이 붙은 네이티브 광고(블룸버그 X 중앙일보 등) 확인</li>
+  <li>대조군(우리) — <code>sitemap.xml</code> loc <b>102</b>, 국내 상세 46·미국 10, <code>/data/accuracy-summary.json</code> 130전 88적중 68%, 커뮤니티·계정·모의투자 <b>0건</b>(코드 검색)</li>
+</ul>
+<p class="note" style="margin-top:14px;">엑셀코스피가 표시한 수치(사용자 수·참가자 수·채팅 수)는 <b>그쪽 서비스가 자기 화면에 표시한 값을 관찰</b>한 것이며, 정확성을 우리가 검증한 것은 아니다. 우리 서비스의 트래픽 수치는 GA 접근 없이 추정하지 않았으므로 이 리포트에 포함하지 않았다.</p>
+</div>
+
+<div class="foot">
+  Double-Shot 종목 시그널 · 엑셀코스피 벤치마크 분석 · 2026-07-25<br>
+  관찰 대상: excelkospi.pages.dev (2026-07-25 브라우저 직접 열람)
+</div>
+
+</div>
+</body>
+</html>
