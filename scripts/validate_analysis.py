@@ -37,6 +37,37 @@ SCALAR_PROSE = {
     "kospi": [],
     "us": [],
 }
+
+# analysis_format 분기로 렌더되는 산문 필드 (2026-07-25 갭 수정).
+# 위 SCALAR_PROSE는 브리핑 타입별 고정 필드만 담고 있어서, generate_html의
+# build_{scenario,qa,signal,flow,keynum,why_what_so}_context가 렌더하는 필드는
+# 금지패턴 스캔을 통째로 우회했다 — SERVICE_RULES §22와 같은 "새 포맷 필드가
+# 옛 검증기를 우회한다" 패턴. 아래 두 표는 generate_html의 각 build_*_context가
+# 실제로 렌더하는 필드만 등재한다. 포맷을 추가·변경하면 이 표도 같이 고칠 것.
+# 라벨·헤드라인(sc_left_label·reason_title 등)은 숫자가 없어 패턴에 걸릴 수 없고
+# 비면 태그가 빈 채로 남으므로 EXCLUDED_FIELDS 정책대로 스캔하지 않는다.
+FORMAT_SCALAR_PROSE = {
+    "scenario": ["sc_summary", "sc_footer"],
+    "qa": [],
+    "signal": ["sig_verdict"],
+    "flow": ["flow_lead"],
+    "keynum": ["num_take"],
+    "why_what_so": ["reason_lead", "why", "what", "so_what"],
+    "split": [],   # 관점 본문이 todays_view.recap/outlook — ALWAYS_LIST_PROSE에서 처리
+}
+# (필드명, 스캔할 dict 키들). 키가 None이면 문자열 리스트(또는 dict의 text 키).
+FORMAT_LIST_PROSE = {
+    "scenario": [("sc_left_items", None), ("sc_right_items", None)],
+    "qa": [("qa_items", ("q", "a"))],
+    "signal": [("sig_items", ("label", "desc"))],
+    "flow": [("flow_steps", ("title", "text"))],
+    "keynum": [("num_cards", ("label", "value", "caption"))],
+    "why_what_so": [],
+    "split": [],
+}
+# 포맷과 무관하게 항상 렌더되는 리스트형 산문 (build_reasons·todays_view.html)
+ALWAYS_LIST_PROSE = [("key_drivers", None), ("us_issues", ("title", "body"))]
+
 # 헤드라인은 검사 제외
 EXCLUDED_FIELDS = {"reason_title", "market_title"}
 
@@ -896,13 +927,22 @@ def forbidden_in_pick(pick):
     return bad
 
 
-def _filter_list_prose(items, label, corrections):
-    """리스트형 본문 원소 중 금지 패턴이 있는 것을 제거하고, 남은 리스트를 반환."""
+def _filter_list_prose(items, label, corrections, keys=None):
+    """리스트형 본문 원소 중 금지 패턴이 있는 것을 제거하고, 남은 리스트를 반환.
+
+    keys: dict 원소에서 스캔할 키 튜플 (예: qa_items → ("q", "a")).
+          None이면 text 키만 본다(기존 동작).
+    """
     if not isinstance(items, list):
         return items, 0
     kept, removed = [], 0
     for it in items:
-        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
+        if isinstance(it, str):
+            text = it
+        elif isinstance(it, dict):
+            text = " ".join(str(it.get(k) or "") for k in (keys or ("text",)))
+        else:
+            text = ""
         bad = find_forbidden(text)
         if bad:
             corrections.append(f"{label} 원소 제거: {bad}")
@@ -910,6 +950,30 @@ def _filter_list_prose(items, label, corrections):
             continue
         kept.append(it)
     return kept, removed
+
+
+def _scrub_scalar_prose(obj, fld, label, corrections, warnings):
+    """스칼라 본문에서 금지 패턴이 있는 문장만 제거한다. 전체가 위반이면 필드를 비우고 warning.
+
+    차단하지 않는 게 정책이다 (2026-06-04 aa0e4eb3) — 필드가 빌 수 있으므로
+    이 필드를 렌더하는 템플릿은 빈 값 가드가 있어야 한다.
+    """
+    if fld in EXCLUDED_FIELDS:
+        return
+    text = obj.get(fld)
+    if not isinstance(text, str) or not text:
+        return
+    bad = find_forbidden(text)
+    if not bad:
+        return
+    sentences = re.split(r'(?<=[.!?요])\s+', text)
+    kept = [s for s in sentences if not find_forbidden(s)]
+    if kept:
+        obj[fld] = " ".join(kept)
+        corrections.append(f"본문 '{label}' 금지 문장 제거: {bad}")
+    else:
+        obj[fld] = ""
+        warnings.append(f"본문 '{label}' 전체 제거 (금지 패턴 {bad})")
 
 
 # ── 수급 수치 스케일 크로스체크 (kospi-close) ────────────────────────────────
@@ -1082,27 +1146,34 @@ def validate(analysis, latest, btype):
             a["telegram_signals"], "telegram_signals", corrections
         )
 
+    # 3-c) analysis_format 분기 필드 + 항상 렌더되는 리스트형 산문
+    #      (포맷 템플릿이 SCALAR_PROSE를 우회하던 갭 — SERVICE_RULES §22 동일 패턴)
+    fmt = a.get("analysis_format") or "why_what_so"
+    if fmt not in FORMAT_LIST_PROSE:
+        # 표에 없는 새 포맷 = 그 포맷의 산문이 무검증으로 통과한다는 뜻. 조용히 넘기지 않는다.
+        warnings.append(
+            f"analysis_format '{fmt}' 미등재 — 포맷 산문 금지패턴 스캔 생략 "
+            f"(FORMAT_SCALAR_PROSE·FORMAT_LIST_PROSE 표 갱신 필요)"
+        )
+    for fld, keys in FORMAT_LIST_PROSE.get(fmt, []) + ALWAYS_LIST_PROSE:
+        if isinstance(a.get(fld), list):
+            a[fld], _ = _filter_list_prose(a[fld], fld, corrections, keys=keys)
+
+    # 3-d) 오늘의 관점 — dek(스칼라)·recap·outlook(리스트). 방향 검증(2-d)과 별개로 금지패턴 스캔.
+    tv = a.get("todays_view")
+    if isinstance(tv, dict):
+        _scrub_scalar_prose(tv, "dek", "todays_view.dek", corrections, warnings)
+        for fld in ("recap", "outlook"):
+            if isinstance(tv.get(fld), list):
+                tv[fld], _ = _filter_list_prose(tv[fld], f"todays_view.{fld}", corrections)
+
     # 4) 계층 2 — 스칼라 본문 (금지 문장 제거 후 계속 발행)
-    for fld in SCALAR_PROSE.get(btype, []):
-        if fld in EXCLUDED_FIELDS:
-            continue
-        text = a.get(fld)
-        if not isinstance(text, str) or not text:
-            continue
-        bad = find_forbidden(text)
-        if not bad:
-            continue
-        # 금지 패턴을 포함한 문장만 제거
-        import re as _re
-        sentences = _re.split(r'(?<=[.!?요])\s+', text)
-        kept = [s for s in sentences if not find_forbidden(s)]
-        if kept:
-            a[fld] = " ".join(kept)
-            corrections.append(f"본문 '{fld}' 금지 문장 제거: {bad}")
-        else:
-            # 전체가 금지 패턴인 경우 필드 삭제
-            a[fld] = ""
-            warnings.append(f"본문 '{fld}' 전체 제거 (금지 패턴 {bad})")
+    #    브리핑 타입 고정 필드 + 현재 analysis_format이 렌더하는 필드 (순서 유지·중복 제거)
+    scalar_fields = list(dict.fromkeys(
+        SCALAR_PROSE.get(btype, []) + FORMAT_SCALAR_PROSE.get(fmt, [])
+    ))
+    for fld in scalar_fields:
+        _scrub_scalar_prose(a, fld, fld, corrections, warnings)
 
     # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
     if btype == "kospi-close":

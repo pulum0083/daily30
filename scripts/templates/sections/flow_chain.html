@@ -1,4 +1,6 @@
 {# 인과 흐름 체인 형식 (analysis_format == flow) — 오늘 시장을 원인→결과 순서로 연결 #}
+{# validate_analysis가 금지 패턴으로 flow_lead·flow_steps를 통째로 비울 수 있다 — 빈 카드 가드. #}
+{% if flow_lead or flow_steps %}
 <div class="open-section">
   {% if not format_in_view %}<div class="open-section__title reason-section-title">{{ reason_title }}</div>{% endif %}
   <div class="flow-card">
@@ -15,3 +17,4 @@
     </div>
   </div>
 </div>
+{% endif %}
