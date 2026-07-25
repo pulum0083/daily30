@@ -860,10 +860,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #flow-block .block__t::before{background:#0F172A;}
 .flow-body{padding:14px 16px 4px;display:flex;flex-direction:column;gap:5px;}
 .flow-row{display:flex;gap:5px;}
-.flow-tile{border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;min-width:0;cursor:pointer;transition:transform .12s ease;}
+.flow-tile{border-radius:8px;padding:7px 11px;display:flex;flex-direction:column;justify-content:center;gap:3px;overflow:hidden;min-width:0;cursor:pointer;transition:transform .12s ease;}
 .flow-tile:active{transform:scale(.985);}
 .flow-tile .ft-nm{font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.flow-tile .ft-amt{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:4px;}
+.flow-tile .ft-amt{font-size:12.5px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums;}
 /* 클릭 시 부드럽게 펼쳐지는 확장 목록 — JS가 실측 px 높이로 직접 애니메이션(grid-rows 0fr/1fr은 브라우저마다 프레임별 트랙 재계산이 버벅여 교체됨) */
 .ft-expand{overflow:hidden;height:0;opacity:0;margin-top:0;transition:height .28s cubic-bezier(.22,.61,.36,1),opacity .22s ease,margin-top .28s cubic-bezier(.22,.61,.36,1);}
 .ft-expand.open{opacity:1;margin-top:5px;}
