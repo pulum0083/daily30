@@ -1,0 +1,498 @@
+<!-- AI 예측 대결(1번) + 공유 카드(2번) 프로토타입 — 2026-07-25 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 예측 대결 · 공유 카드 — 프로토타입</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{
+  --canvas:#fff; --soft:#F7F8FA; --inset:#F1F3F5; --hair:#E5E7EB;
+  --ink:#13151A; --muted:#6B7280; --faint:#9AA0A8;
+  --primary:#006EFF; --primary-bg:#E8F4FF;
+  --up:#E03131; --up-bg:#FDECEC; --dn:#2775ED; --dn-bg:#EAF1FD;
+  --flat:#6B7280; --flat-bg:#F1F3F5;
+  --good:#0F7B5A; --good-bg:#E7F5EF; --warn:#B45309; --warn-bg:#FDF3E3;
+  --s1:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#EEF0F3;color:var(--ink);
+  font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased;word-break:keep-all;}
+.page{max-width:940px;margin:0 auto;padding:30px 18px 80px;}
+.phead{margin-bottom:8px;}
+.phead h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px;}
+.phead p{margin:0;font-size:13.5px;color:var(--muted);}
+.demo-note{background:#FFF8E6;border:1px solid #F5DFA8;border-radius:10px;
+  padding:11px 14px;font-size:12.5px;color:#7A5A12;margin:16px 0 26px;line-height:1.65;}
+.sec{margin-top:34px;}
+.sec__h{display:flex;align-items:baseline;gap:9px;margin-bottom:5px;}
+.sec__n{font-size:11px;font-weight:800;color:#fff;background:var(--ink);
+  border-radius:5px;padding:2px 7px;letter-spacing:.02em;}
+.sec__t{font-size:17px;font-weight:800;letter-spacing:-.01em;}
+.sec__d{font-size:13px;color:var(--muted);margin:0 0 15px;}
+
+/* ── 상태 전환 데모 바 ── */
+.states{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.states button{font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;
+  border:1px solid var(--hair);background:var(--canvas);color:var(--muted);
+  border-radius:999px;padding:6px 13px;transition:.12s;}
+.states button:hover{border-color:var(--primary);color:var(--primary);}
+.states button.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+/* ── 카드 공통 ── */
+.card{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;
+  box-shadow:var(--s1);overflow:hidden;}
+.card__h{display:flex;align-items:center;gap:7px;padding:13px 16px 11px;border-bottom:1px solid var(--hair);}
+.card__t{font-size:14.5px;font-weight:800;letter-spacing:-.01em;}
+.card__s{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:600;}
+.card__b{padding:15px 16px 16px;}
+
+/* ── 대결 카드 ── */
+.duel-q{font-size:15.5px;font-weight:800;letter-spacing:-.01em;margin-bottom:3px;}
+.duel-sub{font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:9px;margin-bottom:14px;}
+.side{background:var(--soft);border:1px solid var(--hair);border-radius:11px;padding:12px 13px;text-align:center;}
+.side__l{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;
+  display:flex;align-items:center;justify-content:center;gap:4px;}
+.side__v{font-size:17px;font-weight:900;letter-spacing:-.02em;line-height:1.25;}
+.side__m{font-size:11px;color:var(--faint);margin-top:4px;font-variant-numeric:tabular-nums;}
+.vs__mid{display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:var(--faint);letter-spacing:.06em;padding:0 2px;}
+.side.ai .side__l{color:var(--primary);}
+.side.me{border-style:dashed;}
+.side.me.picked{border-style:solid;background:var(--canvas);}
+
+.dirs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px;}
+.dir{border:1.5px solid var(--hair);background:var(--canvas);border-radius:11px;
+  padding:13px 8px;cursor:pointer;font-family:inherit;text-align:center;transition:.13s;}
+.dir:hover{border-color:var(--ink);transform:translateY(-1px);}
+.dir__i{font-size:19px;line-height:1;margin-bottom:5px;}
+.dir__t{font-size:13.5px;font-weight:800;}
+.dir__s{font-size:10.5px;color:var(--faint);margin-top:2px;}
+.dir.up:hover{border-color:var(--up);} .dir.up .dir__t{color:var(--up);}
+.dir.flat:hover{border-color:var(--flat);} .dir.flat .dir__t{color:var(--flat);}
+.dir.dn:hover{border-color:var(--dn);} .dir.dn .dir__t{color:var(--dn);}
+
+.lock{display:flex;align-items:center;gap:9px;background:var(--primary-bg);
+  border-radius:10px;padding:11px 13px;font-size:12.5px;color:#0B4FA8;line-height:1.55;}
+.lock b{font-weight:800;}
+
+.verdict{border-radius:11px;padding:13px 15px;margin-bottom:12px;}
+.verdict.win{background:var(--good-bg);}
+.verdict.lose{background:var(--up-bg);}
+.verdict.tie{background:var(--inset);}
+.verdict__t{font-size:15px;font-weight:900;letter-spacing:-.01em;margin-bottom:3px;}
+.verdict.win .verdict__t{color:var(--good);}
+.verdict.lose .verdict__t{color:var(--up);}
+.verdict__d{font-size:12.5px;color:var(--muted);}
+
+.tally{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.tally__i{background:var(--soft);border-radius:10px;padding:11px 13px;}
+.tally__l{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px;}
+.tally__v{font-size:19px;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.tally__n{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums;}
+.tally__i.lead{background:var(--good-bg);}
+.tally__i.lead .tally__v{color:var(--good);}
+
+.streak{display:flex;align-items:center;gap:6px;margin-top:11px;
+  font-size:12px;color:var(--muted);}
+.dots{display:flex;gap:3px;}
+.dot{width:15px;height:15px;border-radius:4px;background:var(--inset);
+  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
+.dot.o{background:var(--good);} .dot.x{background:#D1D5DB;}
+.foot-note{font-size:11.5px;color:var(--faint);margin-top:11px;line-height:1.6;}
+
+/* ── 공유 카드 ── */
+.share-grid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+@media(max-width:760px){.share-grid{grid-template-columns:1fr;}}
+#shareCanvas{width:100%;height:auto;display:block;border-radius:12px;
+  border:1px solid var(--hair);box-shadow:var(--s1);background:#fff;}
+.opt{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:14px;}
+.opt__l{font-size:11.5px;font-weight:800;color:var(--muted);margin:0 0 7px;letter-spacing:.02em;}
+.opt__l:not(:first-child){margin-top:15px;}
+.radios{display:flex;flex-direction:column;gap:5px;}
+.radio{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;
+  border:1px solid var(--hair);border-radius:9px;padding:9px 11px;transition:.12s;}
+.radio:hover{border-color:var(--primary);}
+.radio input{accent-color:var(--primary);margin:0;}
+.radio.on{border-color:var(--primary);background:var(--primary-bg);font-weight:700;}
+.btn{width:100%;border:none;border-radius:10px;padding:11px;font-size:13.5px;
+  font-weight:800;font-family:inherit;cursor:pointer;margin-top:12px;transition:.12s;}
+.btn--p{background:var(--primary);color:#fff;}
+.btn--p:hover{background:#0059CC;}
+.btn--g{background:var(--inset);color:var(--ink);margin-top:7px;}
+.btn--g:hover{background:#E4E7EB;}
+
+/* ── 구현 메모 ── */
+.impl{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;}
+.impl h4{font-size:13.5px;font-weight:800;margin:0 0 8px;}
+.impl h4:not(:first-child){margin-top:18px;}
+.impl ul{margin:0;padding-left:18px;font-size:13px;color:#3A3F47;}
+.impl li{margin-bottom:5px;line-height:1.62;}
+.impl code{background:var(--inset);border-radius:4px;padding:1px 5px;font-size:11.5px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.impl b{color:var(--ink);}
+.pill{display:inline-block;font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 7px;margin-right:5px;}
+.pill--have{background:var(--good-bg);color:var(--good);}
+.pill--new{background:var(--warn-bg);color:var(--warn);}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="phead">
+  <h1>AI 예측 대결 · 공유 카드</h1>
+  <p>엑셀코스피 벤치마크 1·2번 제안의 동작 프로토타입 — 2026-07-25</p>
+</div>
+
+<div class="demo-note">
+  <b>프로토타입 안내.</b> 아래 상태 버튼으로 시나리오를 전환해 볼 수 있어요. AI 예측·적중률은
+  <code>web/data/accuracy-summary.json</code>의 실제 값(130전 88적중 68%)과 2026-07-24 실제 예측을 썼고,
+  내 전적은 데모용 가상 기록이에요. 라이브 서비스에는 아직 반영하지 않았습니다.
+</div>
+
+<!-- ═══════════ 1. AI 예측 대결 ═══════════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">01</span><span class="sec__t">AI 예측 대결</span></div>
+  <p class="sec__d">매 거래일 개장 전, AI 예측을 보고 나도 방향을 고른다. 다음 날 09:10 채점 잡이 둘 다 매긴다.</p>
+
+  <div class="states" id="duelStates">
+    <button data-s="open" class="on">① 예측 가능</button>
+    <button data-s="locked">② 예측 완료·채점 대기</button>
+    <button data-s="win">③ 결과 — 내가 이김</button>
+    <button data-s="lose">④ 결과 — AI가 이김</button>
+    <button data-s="miss">⑤ 마감 지남·미참여</button>
+  </div>
+
+  <div class="card">
+    <div class="card__h">
+      <span class="card__t">⚔️ 오늘의 대결</span>
+      <span class="card__s" id="duelDate">7월 25일(금) · 08:50 마감</span>
+    </div>
+    <div class="card__b" id="duelBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════ 2. 공유 카드 ═══════════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">02</span><span class="sec__t">공유 카드</span></div>
+  <p class="sec__d">캔버스로 1200×630 이미지를 만들어 내려받거나 바로 공유한다. 서버 렌더링 없이 클라이언트에서 처리.</p>
+
+  <div class="share-grid">
+    <div><canvas id="shareCanvas" width="1200" height="630"></canvas></div>
+    <div class="opt">
+      <p class="opt__l">카드 종류</p>
+      <div class="radios" id="cardKind">
+        <label class="radio on"><input type="radio" name="k" value="acc" checked>AI 누적 적중률</label>
+        <label class="radio"><input type="radio" name="k" value="duel">내 대결 전적</label>
+        <label class="radio"><input type="radio" name="k" value="today">오늘의 예측</label>
+      </div>
+      <p class="opt__l">배경</p>
+      <div class="radios" id="cardTheme">
+        <label class="radio on"><input type="radio" name="t" value="light" checked>라이트</label>
+        <label class="radio"><input type="radio" name="t" value="dark">다크</label>
+      </div>
+      <button class="btn btn--p" id="btnShare">공유하기</button>
+      <button class="btn btn--g" id="btnDown">이미지 내려받기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 구현 메모 ═══════════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">03</span><span class="sec__t">구현에 필요한 것</span></div>
+  <p class="sec__d">이미 있는 것과 새로 만들 것을 구분했다.</p>
+  <div class="impl">
+    <h4>① AI 예측 대결</h4>
+    <ul>
+      <li><span class="pill pill--have">있음</span> AI 예측 생성 — 매일 07:25 <code>call_claude.py</code>가 <code>prediction.direction</code> 산출</li>
+      <li><span class="pill pill--have">있음</span> 사후 채점 — 09:10 <code>check_accuracy.py</code>가 <code>actual_direction</code>·<code>is_correct</code> 기록</li>
+      <li><span class="pill pill--have">있음</span> 누적 집계 — <code>web/data/accuracy-summary.json</code></li>
+      <li><span class="pill pill--new">새로</span> <b>공개 채점 파일</b> — <code>data/briefings.json</code>은 루트에 있어 <b>클라이언트가 못 읽는다.</b>
+          <code>check_accuracy.py</code>가 최근 30일치만 <code>web/data/duel.json</code>으로 내보내면 된다
+          (<code>date · ai_direction · actual_direction · actual_change_pct</code>)</li>
+      <li><span class="pill pill--new">새로</span> <b>내 예측 저장</b> — <code>localStorage</code>에 <code>{date: 'up'|'flat'|'dn'}</code>.
+          계정 불필요. 월배당 계산기의 보유 저장과 <b>같은 패턴</b>이라 코드를 옮겨 쓸 수 있다</li>
+      <li><span class="pill pill--new">새로</span> <b>채점 로직</b> — 클라이언트에서 내 기록 × <code>duel.json</code> 대조.
+          서버 작업 없음</li>
+      <li>마감 시각은 <b>08:50</b>(개장 10분 전). 그 뒤엔 선택 불가·결과 대기</li>
+    </ul>
+
+    <h4>② 공유 카드</h4>
+    <ul>
+      <li><span class="pill pill--have">있음</span> 소재 — 적중률 130전 88적중 68%, 당일 예측, 내 전적</li>
+      <li><span class="pill pill--new">새로</span> <b>캔버스 렌더러</b> — 이 프로토타입의 <code>drawCard()</code>가 그대로 쓸 수 있는 수준.
+          1200×630(OG 규격), 폰트는 시스템 폰트로 폴백</li>
+      <li><span class="pill pill--new">새로</span> <b>공유 동작</b> — <code>navigator.share()</code>에 파일 첨부(모바일),
+          미지원 시 자동으로 내려받기로 폴백(데스크톱)</li>
+      <li>서버 렌더링·이미지 저장소 <b>불필요</b> — 정적 호스팅 그대로 유지</li>
+    </ul>
+
+    <h4>주의할 점</h4>
+    <ul>
+      <li><b>적중률을 부풀리지 않는다.</b> 카드에 68%를 쓸 땐 분모(130전)도 같이 박는다 —
+          운영 규칙 0의 정합성 원칙이 공유 이미지에도 적용된다</li>
+      <li><b>투자 권유로 읽히지 않게 한다.</b> 카드 하단에 참고용 표기를 고정으로 넣는다</li>
+      <li><b>휴장일 처리</b> — 주말·공휴일엔 대결 카드를 아예 숨긴다.
+          <code>briefings-list.json</code>의 <code>state</code>로 이미 판별 가능</li>
+      <li><b>군중 지표는 v2</b> — "사람들 46% 상승"은 서버 집계가 필요하다.
+          지금은 백엔드가 없으니 나 vs AI 1:1로 시작하고, 참여가 붙으면 그때 검토</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ══════════ 실제 데이터 (accuracy-summary.json + 2026-07-24 실제 예측) ══════════ */
+const AI = { scored:130, hit:88, pct:68, kospiPct:65, usPct:71 };
+const TODAY = { date:'2026-07-25', label:'7월 25일(금)', dir:'dn', dirKo:'하락 우위', conf:66, upPct:32 };
+/* 데모용 내 전적 (실제로는 localStorage × duel.json 대조 결과) */
+const ME = { scored:12, hit:8, pct:67, recent:[1,0,1,1,0,1,1,0] };
+const DIRKO = { up:'상승', flat:'보합', dn:'하락' };
+const DIRCLS = { up:'up', flat:'flat', dn:'dn' };
+
+/* ══════════ 1. 대결 카드 ══════════ */
+function sideAI(){
+  return `<div class="side ai">
+    <div class="side__l">🤖 더블샷 AI</div>
+    <div class="side__v" style="color:var(--dn)">${TODAY.dirKo}</div>
+    <div class="side__m">신뢰도 ${TODAY.conf}% · 상승확률 ${TODAY.upPct}%</div>
+  </div>`;
+}
+function sideMe(pick){
+  if(!pick) return `<div class="side me">
+    <div class="side__l">🙋 나</div>
+    <div class="side__v" style="color:var(--faint)">?</div>
+    <div class="side__m">아래에서 골라주세요</div>
+  </div>`;
+  const c = pick==='up'?'var(--up)':pick==='dn'?'var(--dn)':'var(--flat)';
+  return `<div class="side me picked">
+    <div class="side__l">🙋 나</div>
+    <div class="side__v" style="color:${c}">${DIRKO[pick]}</div>
+    <div class="side__m">${TODAY.label} 예측</div>
+  </div>`;
+}
+function tally(){
+  const meLead = ME.pct >= AI.pct;
+  return `<div class="tally">
+    <div class="tally__i ${meLead?'lead':''}">
+      <div class="tally__l">내 적중률</div>
+      <div class="tally__v">${ME.pct}%</div>
+      <div class="tally__n">${ME.scored}전 ${ME.hit}적중</div>
+    </div>
+    <div class="tally__i ${!meLead?'lead':''}">
+      <div class="tally__l">AI 적중률</div>
+      <div class="tally__v">${AI.pct}%</div>
+      <div class="tally__n">${AI.scored}전 ${AI.hit}적중</div>
+    </div>
+  </div>
+  <div class="streak">
+    <span>최근 8회</span>
+    <span class="dots">${ME.recent.map(v=>`<span class="dot ${v?'o':'x'}">${v?'○':'✕'}</span>`).join('')}</span>
+  </div>`;
+}
+const VIEWS = {
+  open: () => `
+    <div class="duel-q">내일 코스피, 어느 쪽으로 볼까요?</div>
+    <div class="duel-sub">AI는 이미 답을 냈어요. 당신 생각과 비교해봐요.</div>
+    ${`<div class="vs">${sideAI()}<div class="vs__mid">VS</div>${sideMe(null)}</div>`}
+    <div class="dirs">
+      <button class="dir up"><div class="dir__i">📈</div><div class="dir__t">상승</div><div class="dir__s">+0.3% 초과</div></button>
+      <button class="dir flat"><div class="dir__i">➖</div><div class="dir__t">보합</div><div class="dir__s">±0.3% 이내</div></button>
+      <button class="dir dn"><div class="dir__i">📉</div><div class="dir__t">하락</div><div class="dir__s">−0.3% 미만</div></button>
+    </div>
+    ${tally()}
+    <p class="foot-note">한 번 고르면 바꿀 수 없어요. 08:50 마감 · 다음 날 09:10에 채점돼요.<br>
+    기록은 이 브라우저에만 저장되고 계정은 필요 없어요.</p>`,
+
+  locked: () => `
+    <div class="duel-q">예측을 접수했어요.</div>
+    <div class="duel-sub">내일 09:10 채점 결과를 여기서 볼 수 있어요.</div>
+    ${`<div class="vs">${sideAI()}<div class="vs__mid">VS</div>${sideMe('up')}</div>`}
+    <div class="lock">⏳ <span><b>AI는 하락, 나는 상승</b> — 서로 반대로 봤어요.
+      내일 아침 누가 맞았는지 확인해봐요.</span></div>
+    <div style="height:12px"></div>
+    ${tally()}`,
+
+  win: () => `
+    <div class="verdict win">
+      <div class="verdict__t">🎉 내가 이겼어요</div>
+      <div class="verdict__d">코스피 <b>+1.24%</b> 상승 마감 — 나는 상승, AI는 하락으로 봤어요.</div>
+    </div>
+    ${`<div class="vs">
+      <div class="side ai"><div class="side__l">🤖 더블샷 AI</div>
+        <div class="side__v" style="color:var(--faint)">하락 ✕</div>
+        <div class="side__m">신뢰도 66%였어요</div></div>
+      <div class="vs__mid">VS</div>
+      <div class="side me picked" style="border-color:var(--good)">
+        <div class="side__l">🙋 나</div>
+        <div class="side__v" style="color:var(--good)">상승 ○</div>
+        <div class="side__m">2연승 중</div></div>
+    </div>`}
+    ${tally()}
+    <p class="foot-note">내일 예측은 <b>07:30 브리핑 발행 후</b>에 열려요.</p>`,
+
+  lose: () => `
+    <div class="verdict lose">
+      <div class="verdict__t">AI가 맞혔어요</div>
+      <div class="verdict__d">코스피 <b>−5.72%</b> 하락 마감 — AI는 하락, 나는 상승으로 봤어요.</div>
+    </div>
+    ${`<div class="vs">
+      <div class="side ai" style="border-color:var(--good)"><div class="side__l">🤖 더블샷 AI</div>
+        <div class="side__v" style="color:var(--good)">하락 ○</div>
+        <div class="side__m">신뢰도 66%로 적중</div></div>
+      <div class="vs__mid">VS</div>
+      <div class="side me picked"><div class="side__l">🙋 나</div>
+        <div class="side__v" style="color:var(--faint)">상승 ✕</div>
+        <div class="side__m">다음엔 이겨봐요</div></div>
+    </div>`}
+    ${tally()}
+    <p class="foot-note">AI가 왜 하락으로 봤는지는 <b>오늘 브리핑의 "이렇게 보는 이유"</b>에서 확인할 수 있어요.</p>`,
+
+  miss: () => `
+    <div class="duel-q">오늘 대결은 마감됐어요.</div>
+    <div class="duel-sub">예측은 개장 10분 전(08:50)까지 받아요.</div>
+    ${`<div class="vs">${sideAI()}<div class="vs__mid">VS</div>
+      <div class="side me"><div class="side__l">🙋 나</div>
+        <div class="side__v" style="color:var(--faint)">—</div>
+        <div class="side__m">참여하지 않았어요</div></div>
+    </div>`}
+    ${tally()}
+    <p class="foot-note">내일 예측은 <b>07:30 브리핑 발행 후</b>에 열려요. 알림을 받으면 놓치지 않아요.</p>`
+};
+function renderDuel(s){ document.getElementById('duelBody').innerHTML = VIEWS[s](); }
+document.getElementById('duelStates').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#duelStates button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); renderDuel(b.dataset.s);
+});
+renderDuel('open');
+/* 방향 버튼을 실제로 눌러보면 locked 상태로 전환 */
+document.getElementById('duelBody').addEventListener('click', e=>{
+  if(e.target.closest('.dir')){
+    document.querySelectorAll('#duelStates button').forEach(x=>x.classList.remove('on'));
+    document.querySelector('[data-s="locked"]').classList.add('on');
+    renderDuel('locked');
+  }
+});
+
+/* ══════════ 2. 공유 카드 ══════════ */
+const cv = document.getElementById('shareCanvas'), cx = cv.getContext('2d');
+let kind='acc', theme='light';
+const F = "'Pretendard Variable',Pretendard,-apple-system,sans-serif";
+
+function rr(x,y,w,h,r){ cx.beginPath(); cx.roundRect(x,y,w,h,r); }
+function drawCard(){
+  const dark = theme==='dark';
+  const bg = dark?'#0E0F12':'#FFFFFF', ink = dark?'#F3F5F7':'#13151A',
+        mut = dark?'#9AA0A8':'#6B7280', hair = dark?'#282B31':'#E5E7EB',
+        soft = dark?'#16181C':'#F7F8FA';
+  cx.fillStyle = bg; cx.fillRect(0,0,1200,630);
+
+  /* 상단 브랜드 */
+  cx.fillStyle = '#006EFF'; rr(64,58,34,34,9); cx.fill();
+  cx.fillStyle = '#fff'; cx.font = `900 19px ${F}`; cx.textAlign='center';
+  cx.fillText('D', 81, 82);
+  cx.textAlign='left';
+  cx.fillStyle = ink; cx.font = `800 23px ${F}`;
+  cx.fillText('Double-Shot', 112, 82);
+  cx.fillStyle = mut; cx.font = `600 16px ${F}`;
+  cx.fillText('AI 코스피 예측 브리핑', 112, 104);
+
+  /* 하단 고정 푸터 */
+  cx.strokeStyle = hair; cx.lineWidth = 1;
+  cx.beginPath(); cx.moveTo(64,540); cx.lineTo(1136,540); cx.stroke();
+  cx.fillStyle = mut; cx.font = `600 17px ${F}`;
+  cx.fillText('doubleshot.space', 64, 574);
+  cx.fillStyle = dark?'#71767E':'#9AA0A8'; cx.font = `500 15px ${F}`;
+  cx.textAlign='right';
+  cx.fillText('투자 권유가 아닌 참고용 정보예요', 1136, 574);
+  cx.textAlign='left';
+
+  if(kind==='acc'){
+    cx.fillStyle = mut; cx.font = `700 21px ${F}`;
+    cx.fillText('AI 예측 누적 성적', 64, 190);
+    cx.fillStyle = ink; cx.font = `900 116px ${F}`;
+    cx.fillText('68%', 64, 300);
+    cx.fillStyle = mut; cx.font = `700 26px ${F}`;
+    cx.fillText('130전 88적중', 290, 297);
+    cx.fillStyle = ink; cx.font = `800 27px ${F}`;
+    cx.fillText('예측을 맞히든 틀리든 전부 공개해요.', 64, 372);
+    /* 두 칸 요약 */
+    const box=(x,l,v,n)=>{
+      cx.fillStyle=soft; rr(x,404,340,102,14); cx.fill();
+      cx.fillStyle=mut; cx.font=`700 16px ${F}`; cx.fillText(l,x+22,436);
+      cx.fillStyle=ink; cx.font=`900 36px ${F}`; cx.fillText(v,x+22,478);
+      cx.fillStyle=mut; cx.font=`600 15px ${F}`; cx.textAlign='right';
+      cx.fillText(n,x+318,478); cx.textAlign='left';
+    };
+    box(64,'코스피','65%','72전 47적중');
+    box(432,'미국 시장','71%','58전 41적중');
+  }
+
+  if(kind==='duel'){
+    cx.fillStyle = mut; cx.font = `700 21px ${F}`;
+    cx.fillText('AI와 예측 대결 중', 64, 190);
+    cx.fillStyle = ink; cx.font = `900 46px ${F}`;
+    cx.fillText('나는 AI를 이기고 있어요', 64, 250);
+    const vsBox=(x,l,v,n,hl)=>{
+      cx.fillStyle = hl?'#E7F5EF':soft; rr(x,290,470,150,16); cx.fill();
+      cx.fillStyle = hl?'#0F7B5A':mut; cx.font=`700 19px ${F}`; cx.fillText(l,x+26,332);
+      cx.fillStyle = hl?'#0F7B5A':ink; cx.font=`900 62px ${F}`; cx.fillText(v,x+26,402);
+      cx.fillStyle = mut; cx.font=`600 17px ${F}`; cx.textAlign='right';
+      cx.fillText(n,x+444,402); cx.textAlign='left';
+    };
+    vsBox(64,'🙋 나','67%','12전 8적중',true);
+    vsBox(602,'🤖 더블샷 AI','68%','130전 88적중',false);
+    cx.fillStyle = mut; cx.font = `600 18px ${F}`;
+    cx.fillText('매 거래일 개장 전, 나도 코스피 방향을 예측해요.', 64, 496);
+  }
+
+  if(kind==='today'){
+    cx.fillStyle = mut; cx.font = `700 21px ${F}`;
+    cx.fillText('2026년 7월 25일 코스피 예측', 64, 190);
+    cx.fillStyle = '#2775ED'; rr(64,216,196,58,12); cx.fill();
+    cx.fillStyle = '#fff'; cx.font = `900 30px ${F}`;
+    cx.fillText('하락 우위', 88, 256);
+    cx.fillStyle = ink; cx.font = `900 44px ${F}`;
+    cx.fillText('상승확률 32% · 신뢰도 66%', 64, 340);
+    cx.fillStyle = mut; cx.font = `600 22px ${F}`;
+    cx.fillText('간밤 미국 반도체 약세와 야간선물 하락을 반영했어요.', 64, 386);
+    cx.fillStyle = soft; rr(64,418,1072,90,14); cx.fill();
+    cx.fillStyle = ink; cx.font = `800 22px ${F}`;
+    cx.fillText('당신은 어떻게 보나요? 대결에 참여해보세요 →', 92, 472);
+  }
+}
+document.getElementById('cardKind').addEventListener('change', e=>{
+  kind = e.target.value;
+  document.querySelectorAll('#cardKind .radio').forEach(l=>l.classList.toggle('on', l.querySelector('input').checked));
+  drawCard();
+});
+document.getElementById('cardTheme').addEventListener('change', e=>{
+  theme = e.target.value;
+  document.querySelectorAll('#cardTheme .radio').forEach(l=>l.classList.toggle('on', l.querySelector('input').checked));
+  drawCard();
+});
+document.getElementById('btnDown').addEventListener('click', ()=>{
+  const a=document.createElement('a');
+  a.download=`doubleshot-${kind}-20260725.png`; a.href=cv.toDataURL('image/png'); a.click();
+});
+document.getElementById('btnShare').addEventListener('click', async ()=>{
+  cv.toBlob(async b=>{
+    const file = new File([b], 'doubleshot.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], text:'더블샷 AI 코스피 예측'}); }catch(e){}
+    } else {
+      alert('이 브라우저는 이미지 공유를 지원하지 않아 내려받기로 대체돼요.\n(실제 서비스에서도 같은 폴백이 동작합니다)');
+      const a=document.createElement('a');
+      a.download=`doubleshot-${kind}.png`; a.href=cv.toDataURL('image/png'); a.click();
+    }
+  });
+});
+drawCard();
+</script>
+</body>
+</html>
