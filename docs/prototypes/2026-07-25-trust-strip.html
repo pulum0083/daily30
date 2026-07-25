@@ -1,0 +1,339 @@
+<!-- 신뢰 스트립(연속 발행·누적 적중·데이터 신선도) 배치 3안 × 상태 4종 프로토타입 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>신뢰 스트립 — 프로토타입</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;
+  --gold:#B7791F;--gold-bg:#FEF3C7;--ok:#16A34A;--ok-bg:#DCFCE7;--warn:#B45309;--warn-bg:#FEF3C7;
+  --bad:#DC2626;--bad-bg:#FEE2E2;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--gnb:#16181A;}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);
+  color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding-bottom:150px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── 페이지 셸 ── */
+.gnb{position:sticky;top:0;z-index:10;background:var(--gnb);height:52px;display:flex;align-items:center}
+.gnb__in{max-width:1120px;margin:0 auto;width:100%;padding:0 28px;display:flex;align-items:center;gap:22px}
+.gnb__mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#E03131,#FF6A6A);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px}
+.gnb__t{font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em}.gnb__t span{color:#5AA2FF}
+.gnb__nav{display:flex;gap:14px;margin-left:8px}
+.gnb__nav a{color:#8A9099;font-size:13px;font-weight:700;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 28px 40px}
+.phead h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0 0 5px}
+.phead p{font-size:13px;color:var(--muted);margin:0}
+
+.note{background:var(--primary-bg);border:1px solid #BFDBFE;border-radius:10px;padding:13px 15px;
+  font-size:12.5px;line-height:1.75;color:#1E3A8A;margin:16px 0 30px}
+.note code{background:rgba(255,255,255,.7);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+.sec{margin:0 0 40px}
+.sec__h{display:flex;align-items:center;gap:9px;margin:0 0 6px}
+.sec__n{font-size:10.5px;font-weight:800;color:var(--primary);background:var(--primary-bg);
+  padding:2px 7px;border-radius:5px;letter-spacing:.04em}
+.sec__t{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.sec__d{font-size:12.5px;color:var(--muted);line-height:1.7;margin:0 0 15px}
+
+.stub{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);overflow:hidden}
+.stub__h{padding:16px 18px 13px}
+.stub__h h2{font-size:17px;font-weight:800;letter-spacing:-.02em;margin:0 0 3px}
+.stub__h p{font-size:12px;color:var(--muted);margin:0}
+.ghost{padding:14px 18px 18px;border-top:1px solid var(--hair)}
+.ghost i{display:block;height:11px;border-radius:5px;background:var(--inset);margin:0 0 9px}
+.ghost i:nth-child(2){width:72%}.ghost i:nth-child(3){width:54%;margin:0}
+
+/* ═══ A안. 인라인 한 줄 ═══ */
+.ts-a{display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:9px 18px;
+  background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);
+  font-size:12px;color:var(--muted)}
+.ts-a .it{display:inline-flex;align-items:center;gap:6px;padding:0 14px 0 0;white-space:nowrap}
+.ts-a .it+.it{padding-left:14px;border-left:1px solid var(--hair)}
+.ts-a .it b{color:var(--ink);font-weight:700}
+.ts-a .it .big{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.ts-a .sub{font-size:11px;color:#9CA3AF}
+.ts-a .more{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--primary);
+  text-decoration:none;white-space:nowrap}
+
+/* 상태 점 */
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;position:relative}
+.dot.ok{background:var(--ok)}
+.dot.ok::after{content:'';position:absolute;inset:-4px;border-radius:50%;
+  background:var(--ok);opacity:.25;animation:pulse 2.2s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.5);opacity:.35}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+.dot.warn{background:var(--warn)}
+.dot.bad{background:var(--bad)}
+.dot.off{background:#C6CBD2}
+
+/* ═══ B안. 3분할 카드 ═══ */
+.ts-b{display:grid;grid-template-columns:repeat(3,1fr);background:var(--canvas);
+  border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);overflow:hidden}
+.ts-b .cell{padding:14px 17px;position:relative}
+.ts-b .cell+.cell{border-left:1px solid var(--hair)}
+.ts-b .k{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.01em;margin:0 0 7px}
+.ts-b .v{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:0 0 4px}
+.ts-b .v em{font-style:normal;font-size:12.5px;font-weight:700;color:var(--muted);margin-left:3px;letter-spacing:0}
+.ts-b .n{font-size:11.5px;color:#9CA3AF;line-height:1.5}
+.ts-b .n b{color:var(--muted);font-weight:600}
+.ts-b .cell.is-warn{background:var(--warn-bg)}
+.ts-b .cell.is-warn .v{color:var(--warn)}
+.ts-b .cell.is-bad{background:var(--bad-bg)}
+.ts-b .cell.is-bad .v{color:var(--bad)}
+.ts-b .bars{display:flex;gap:2.5px;margin:7px 0 0}
+.ts-b .bars s{width:5px;height:13px;border-radius:2px;background:var(--inset);text-decoration:none}
+.ts-b .bars s.h{background:var(--up)}
+.ts-b .bars s.m{background:#D7DBE0}
+
+/* ═══ C안. 푸터 조용 ═══ */
+.ts-c{padding:15px 18px;background:var(--inset);border-radius:10px;
+  font-size:11.5px;color:var(--muted);line-height:1.85}
+.ts-c b{color:var(--ink);font-weight:700}
+.ts-c .r1{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ts-c .r2{margin:5px 0 0;font-size:11px;color:#9CA3AF}
+.ts-c a{color:var(--primary);text-decoration:none;font-weight:700}
+
+/* ═══ 상태 스위처 ═══ */
+#sw{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(255,255,255,.97);
+  backdrop-filter:blur(10px);border-top:1px solid var(--hair);padding:11px 20px 13px;
+  box-shadow:0 -6px 20px rgba(0,0,0,.07)}
+#sw .hd{font-size:11.5px;color:var(--muted);line-height:1.7;max-width:1120px;margin:0 auto 9px}
+#sw .hd b{color:var(--ink)}
+#sw .bs{display:flex;gap:7px;max-width:1120px;margin:0 auto;flex-wrap:wrap}
+#sw button{flex:1;min-width:130px;background:var(--canvas);border:1px solid var(--hair);
+  border-radius:9px;padding:8px 11px;font:inherit;font-size:12px;font-weight:700;color:var(--ink);
+  cursor:pointer;text-align:left;line-height:1.35;transition:.12s}
+#sw button i{display:block;font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:2px}
+#sw button:hover{border-color:#C6CBD2}
+#sw button.on{background:var(--primary);border-color:var(--primary);color:#fff}
+#sw button.on i{color:rgba(255,255,255,.8)}
+
+/* 논점 표 */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--canvas);
+  border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.tbl th,.tbl td{padding:11px 14px;text-align:left;vertical-align:top;line-height:1.7;
+  border-bottom:1px solid var(--hair)}
+.tbl th{background:var(--soft);font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.02em}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl code{background:var(--inset);padding:1px 5px;border-radius:4px;font-size:11.5px}
+.pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;
+  margin-right:5px;vertical-align:1px}
+.pill--have{background:var(--ok-bg);color:#15803D}
+.pill--new{background:var(--gold-bg);color:var(--gold)}
+.pill--risk{background:var(--bad-bg);color:#B91C1C}
+</style>
+
+<div class="gnb"><div class="gnb__in">
+  <div class="gnb__mark">◗</div>
+  <div class="gnb__t">Double-<span>Shot</span></div>
+  <div class="gnb__nav"><a>브리핑</a><a>종목</a><a>월배당</a></div>
+</div></div>
+
+<div class="wrap">
+
+<div class="phead">
+  <h1>신뢰 스트립 — 연속 발행 · 누적 적중 · 데이터 신선도</h1>
+  <p>"살아 있는 서비스"를 접속자 수 대신 실측 운영 지표로 증명하는 3개 배치안 — 2026-07-25</p>
+</div>
+
+<div class="note">
+  <b>실측 데이터로 만들었어요.</b>
+  연속 발행 <b>68 거래일</b>은 <code>data/briefings.json</code>(2026-04-15 ~ 07-24)을
+  <code>holiday_check.py</code>로 거래일만 세어 계산한 값이고, 제헌절(7/17)·5/25는 공휴일이라 정상 제외했어요.
+  누적 예측 <b>130전 88적중 68%</b>는 <code>web/data/accuracy-summary.json</code> 그대로예요.
+  신선도 시각만 아래 버튼으로 시나리오를 전환합니다.
+</div>
+
+<!-- ═══════ A안 ═══════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">A안</span><span class="sec__t">인라인 한 줄 — 헤더 바로 아래</span></div>
+  <p class="sec__d">가장 가볍다. 종목 홈·브리핑 헤더 밑에 한 줄로 붙어 스크롤 전에 눈에 들어온다. 숫자를 자랑하지 않고 상태로 읽힌다.</p>
+  <div id="a"></div>
+  <div class="stub" style="margin-top:12px">
+    <div class="stub__h"><h2>종목 시그널</h2><p>코스피 주도주 실시간 대시보드</p></div>
+    <div class="ghost"><i></i><i></i><i></i></div>
+  </div>
+</div>
+
+<!-- ═══════ B안 ═══════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">B안</span><span class="sec__t">3분할 카드 — 독립 블록</span></div>
+  <p class="sec__d">가장 강하다. 세 지표를 각각 주인공으로 세운다. 적중률 막대까지 넣어 track record를 시각화. 다만 자리를 많이 먹고 "성적 자랑"으로 읽힐 수 있다.</p>
+  <div id="b"></div>
+</div>
+
+<!-- ═══════ C안 ═══════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">C안</span><span class="sec__t">푸터 조용 버전</span></div>
+  <p class="sec__d">가장 조용하다. 찾는 사람만 본다. 신뢰 지표를 마케팅이 아니라 각주로 다룬다 — 과시 위험이 0이지만 신규 방문자에게는 거의 전달되지 않는다.</p>
+  <div id="c"></div>
+</div>
+
+<!-- ═══════ 논점 ═══════ -->
+<div class="sec">
+  <div class="sec__h"><span class="sec__n">04</span><span class="sec__t">결정해야 할 것</span></div>
+  <p class="sec__d">배치를 고르기 전에 짚어야 하는 판단들이다.</p>
+  <table class="tbl">
+    <tr><th style="width:150px">논점</th><th>내용</th></tr>
+    <tr>
+      <td>적중률 상시 노출</td>
+      <td><span class="pill pill--risk">위험</span>코스피 단독은 <b>65%</b>다. 동전던지기 대비 +15%p라 정직한 성과지만,
+        큰 글씨로 상시 박으면 <b>투자 권유</b>로 읽히거나 반대로 "겨우 65%냐"는 반응을 부를 수 있다.
+        분모(130전)를 반드시 붙이고, A·C안처럼 작게 다루는 편이 안전하다.</td>
+    </tr>
+    <tr>
+      <td>신선도 가드</td>
+      <td><span class="pill pill--risk">필수</span>§20의 교훈이 여기서 더 위험하다 — 수집이 죽었는데 "3분 전"이 굳어 있으면
+        <b>신뢰 지표가 거짓말을 하는</b> 셈이다. 상대 시각은 저장하지 않고 렌더 시점에 계산하고(§20),
+        지연·중단 상태를 <b>스스로 노출</b>해야 한다. 아래 ③④ 상태가 그 모습이다.</td>
+    </tr>
+    <tr>
+      <td>연속 발행 정의</td>
+      <td>거래일 기준이며 공휴일·주말은 끊김이 아니다(<code>holiday_check.py</code>). 정의를 화면에 안 쓰면
+        "주말에 왜 안 늘지?" 오해가 생기므로 <b>"거래일"</b>을 항상 붙인다.
+        <span class="pill pill--new">주의</span>미국 브리핑만 발행된 날을 연속으로 셀지 결정해야 한다 —
+        현재 계산은 <b>날짜 단위</b>라 타입 구분이 없다.</td>
+    </tr>
+    <tr>
+      <td>다음 갱신 시각</td>
+      <td>§10 스케줄 표를 클라이언트가 알아야 한다. 하드코딩하면 스케줄 변경 시 어긋나므로
+        <span class="pill pill--new">새로</span><code>web/data/schedule.json</code>으로 내보내는 게 맞다.
+        주말·공휴일·심야엔 <b>주기를 적지 않는다</b>(§10 — 실제로 돌지 않는 주기를 광고하지 않는다).</td>
+    </tr>
+    <tr>
+      <td>필요한 작업</td>
+      <td><span class="pill pill--have">있음</span>적중률 — <code>accuracy-summary.json</code><br>
+        <span class="pill pill--new">새로</span>연속 발행 — <code>check_accuracy.py</code>가 스트릭을 계산해 같은 파일에 <code>streak</code> 필드 추가<br>
+        <span class="pill pill--new">새로</span>신선도 — 각 수집 잡의 <code>updated_at</code>을 모은 <code>web/data/health.json</code><br>
+        <span class="pill pill--new">새로</span>렌더러 — <code>main.js</code>에 <code>renderTrustStrip()</code>. 서버 작업 없음</td>
+    </tr>
+  </table>
+</div>
+
+</div>
+
+<script>
+/* ══ 실측 ══ */
+var STREAK = { days: 68, from: '2026-04-15', to: '2026-07-24' };
+var ACC = { scored: 130, hit: 88, pct: 68, kospi: 65, us: 71 };
+/* 최근 16회 채점 결과(적중=h) — accuracy 막대용, 데모 배열 */
+var BARS = 'hhmhhhmhhmhhhmhh';
+
+/* ══ 신선도 시나리오 ══ */
+var FRESH = {
+  ok:    { cls:'ok',   ago:'3분 전',    next:'16:25',  msg:null,
+           label:'실시간 수집 중' },
+  quiet: { cls:'off',  ago:'2시간 전',  next:'월 07:25', msg:null,
+           label:'장 마감 · 다음 거래일 대기' },
+  warn:  { cls:'warn', ago:'47분 전',   next:'재시도 중', msg:'예정보다 17분 지연됐어요',
+           label:'수집 지연' },
+  bad:   { cls:'bad',  ago:'3시간 12분 전', next:'—',  msg:'수집이 멈췄어요 · 확인 중',
+           label:'수집 중단' }
+};
+var cur = 'ok';
+
+function f(){ return FRESH[cur]; }
+
+/* ── A안 ── */
+function drawA(){
+  var x = f();
+  var nx = x.next === '—' ? '' : ' · 다음 <b>' + x.next + '</b>';
+  document.getElementById('a').innerHTML =
+    '<div class="ts-a">'
+    + '<span class="it"><span class="dot ' + x.cls + '"></span>'
+      + '<span><b class="big num">' + STREAK.days + '</b> <b>거래일</b> 연속 발행</span></span>'
+    + '<span class="it">누적 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중</b> '
+      + '<b class="big num">' + ACC.pct + '%</b></span>'
+    + '<span class="it">'
+      + (x.msg
+          ? '<span style="color:var(--' + (x.cls === 'bad' ? 'bad' : 'warn') + ');font-weight:700">'
+            + x.msg + '</span> <span class="sub">' + x.ago + '</span>'
+          : '데이터 <b>' + x.ago + '</b> 갱신' + nx)
+      + '</span>'
+    + '<a class="more" href="#">적중률 상세 ›</a>'
+    + '</div>';
+}
+
+/* ── B안 ── */
+function drawB(){
+  var x = f();
+  var cell3cls = x.cls === 'warn' ? ' is-warn' : x.cls === 'bad' ? ' is-bad' : '';
+  var bars = BARS.split('').map(function(c){
+    return '<s class="' + (c === 'h' ? 'h' : 'm') + '"></s>';
+  }).join('');
+  document.getElementById('b').innerHTML =
+    '<div class="ts-b">'
+    + '<div class="cell"><p class="k"><span class="dot ' + (x.cls === 'bad' ? 'bad' : 'ok')
+      + '"></span>연속 발행</p>'
+      + '<p class="v num">' + STREAK.days + '<em>거래일</em></p>'
+      + '<p class="n">' + STREAK.from.slice(5).replace('-', '/') + ' 이후 한 번도 안 쉬었어요<br>'
+      + '<b>주말·공휴일은 끊김이 아니에요</b></p></div>'
+
+    + '<div class="cell"><p class="k">예측 적중률</p>'
+      + '<p class="v num">' + ACC.pct + '<em>%</em></p>'
+      + '<p class="n"><b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중</b> · '
+      + '코스피 ' + ACC.kospi + '% · 미국 ' + ACC.us + '%</p>'
+      + '<div class="bars">' + bars + '</div></div>'
+
+    + '<div class="cell' + cell3cls + '"><p class="k"><span class="dot ' + x.cls + '"></span>'
+      + x.label + '</p>'
+      + '<p class="v" style="font-size:15px">' + x.ago + '</p>'
+      + '<p class="n">' + (x.msg
+          ? '<b>' + x.msg + '</b>'
+          : (x.next === '—' ? '다음 갱신 미정' : '다음 갱신 <b>' + x.next + '</b>'))
+      + '</p></div>'
+    + '</div>';
+}
+
+/* ── C안 ── */
+function drawC(){
+  var x = f();
+  document.getElementById('c').innerHTML =
+    '<div class="ts-c">'
+    + '<p class="r1" style="margin:0"><span class="dot ' + x.cls + '"></span>'
+      + '매 거래일 자동 발행 · <b class="num">' + STREAK.days + ' 거래일</b> 연속 · '
+      + '누적 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중(' + ACC.pct + '%)</b>'
+      + '<a href="#">채점 기록 전체 보기</a></p>'
+    + '<p class="r2">'
+      + (x.msg
+          ? '<b style="color:var(--' + (x.cls === 'bad' ? 'bad' : 'warn') + ')">' + x.msg + '</b> — 마지막 갱신 ' + x.ago
+          : '데이터 ' + x.ago + ' 갱신' + (x.next === '—' ? '' : ' · 다음 ' + x.next))
+      + ' · 모든 수치는 수집 시점 실측이며 투자 권유가 아니에요</p>'
+    + '</div>';
+}
+
+function draw(){ drawA(); drawB(); drawC(); }
+
+/* ══ 스위처 ══ */
+var SW = [
+  ['ok',    '① 정상 · 장중',    '3분 전 · 다음 16:25'],
+  ['quiet', '② 정상 · 장 마감',  '수집 없는 구간'],
+  ['warn',  '③ 수집 지연',      '가드 발동 · 앰버'],
+  ['bad',   '④ 수집 중단',      '가드 발동 · 레드']
+];
+(function(){
+  var bar = document.createElement('div');
+  bar.id = 'sw';
+  bar.innerHTML = '<div class="hd"><b>상태 확인용 프로토타입.</b> '
+    + '연속 발행·적중률은 실측이고, <b>신선도만</b> 시나리오예요. '
+    + '③④는 §20 신선도 가드가 발동한 모습 — 수집이 죽었을 때 낡은 값을 진짜처럼 보여주지 않고 '
+    + '<b>스스로 상태를 노출</b>합니다.</div>'
+    + '<div class="bs">' + SW.map(function(x, i){
+        return '<button data-s="' + x[0] + '"' + (i === 0 ? ' class="on"' : '') + '>'
+             + x[1] + '<i>' + x[2] + '</i></button>';
+      }).join('') + '</div>';
+  document.body.appendChild(bar);
+  bar.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    bar.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    cur = b.dataset.s;
+    draw();
+  });
+  draw();
+})();
+</script>
