@@ -271,7 +271,10 @@
         <span class="sig"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.7l5.7 5.7a8 8 0 1 1-11.4 0z"/></svg>유가·금</span>
         <span class="sig"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg>지정학</span>
       </div>
-      <p class="proof-foot">모든 예측은 다음 날 실제 시장 결과로 채점돼요. <b>누적 적중률 <span id="acc-pct">67%</span></b> · 확정 <span id="acc-scored">110</span>건 중 <span id="acc-hit">74</span>건.</p>
+      <!-- 수치를 HTML에 박지 않는다 — fetch가 실패하면 옛 숫자가 그대로 남아 거짓이 된다
+           (이전엔 67%/110/74가 하드코딩돼 있었다). 문장만 먼저 보이고, 실측이 도착하면
+           아래 스크립트가 #acc-stat을 채워 노출한다. -->
+      <p class="proof-foot">코스피 예측은 다음 날 실제 시장 결과로 채점돼요.<span id="acc-stat" hidden> <b>적중률 <span id="acc-pct"></span></b> · 확정 <span id="acc-scored"></span>건 중 <span id="acc-hit"></span>건.</span></p>
     </div>
   </section>
 
@@ -382,15 +385,26 @@
     const slim=document.getElementById('slim');
     addEventListener('scroll',()=>{slim.classList.toggle('show',scrollY>600)});
 
-    // 누적 적중률 실데이터 배선 (하드코딩 stale 방지) — 실패 시 인라인 fallback 유지
+    // 적중률 실데이터 배선.
+    //
+    // cumulative(130전 68%)가 아니라 kospi를 쓴다 — US는 2026-07-14 이슈 중심 전환으로
+    // 채점에서 빠져(call_claude.py / check_accuracy.py) 그 수치가 2026-07-13에 동결됐고,
+    // cumulative는 동결값이 섞인 혼합값이라 "지금 성적"이 아니다. 살아 있는 지표는 kospi뿐.
+    //
+    // 데이터가 없거나 낡았으면 문장만 남기고 수치는 아예 표시하지 않는다 — 낡은 값을
+    // 진짜처럼 보여주는 것보다 생략이 낫다(운영 규칙 0).
     fetch('/data/accuracy-summary.json')
       .then(r=>r.ok?r.json():Promise.reject())
       .then(d=>{
-        const c=d&&d.cumulative;
-        if(!c||c.pct==null||!c.scored) return;
-        document.getElementById('acc-pct').textContent=c.pct+'%';
-        document.getElementById('acc-scored').textContent=c.scored;
-        document.getElementById('acc-hit').textContent=c.hit;
+        const k=d&&d.kospi;
+        if(!k||k.pct==null||!k.scored) return;
+        // 채점 잡은 평일(화~토) 09:10 — 토→화 72h가 정상 최대 공백. 공휴일 여유를 얹어 96h.
+        const upd=Date.parse((d&&d.updated_at)||'');
+        if(isNaN(upd)||Date.now()-upd>96*3600*1000) return;
+        document.getElementById('acc-pct').textContent=k.pct+'%';
+        document.getElementById('acc-scored').textContent=k.scored;
+        document.getElementById('acc-hit').textContent=k.hit;
+        document.getElementById('acc-stat').hidden=false;
       })
       .catch(()=>{});
   </script>
