@@ -3,6 +3,28 @@
 (function () {
   'use strict';
 
+  /* ── KST 시각 공용 헬퍼 ──
+     브라우저 로컬 타임존과 무관하게 KST 기준으로 판단해야 하므로, UTC에 +9h를 더한
+     Date를 만들고 getUTC*()로 읽는다. (getHours() 같은 로컬 접근자를 섞으면 사용자
+     타임존에 따라 날짜가 하루 밀린다.)
+     이 세 함수는 원래 initLiveScoreboard·initNowBand·initSidebarSignals 등에 각각
+     복제돼 있었다 — 동일 구현이 3벌, 날짜 문자열 조립이 5벌이었다. */
+  function kstNow() {
+    return new Date(Date.now() + 9 * 3600 * 1000);
+  }
+  /** KST 날짜를 'YYYY-MM-DD'로. 인자를 주면 그 시각 기준, 없으면 지금. */
+  function kstDateStr(d) {
+    var k = d || kstNow();
+    return k.getUTCFullYear() + '-' +
+      String(k.getUTCMonth() + 1).padStart(2, '0') + '-' +
+      String(k.getUTCDate()).padStart(2, '0');
+  }
+  /** 자정부터 흐른 분 (09:00 → 540). 장중 판정용. */
+  function kstMinsOfDay(d) {
+    var k = d || kstNow();
+    return k.getUTCHours() * 60 + k.getUTCMinutes();
+  }
+
   /* ── 다크모드 ── */
   const root = document.documentElement;
   if (localStorage.getItem('theme') === 'dark') {
@@ -1036,16 +1058,21 @@
   var TRUST_STALE_HOURS = 96;  /* 채점 잡은 평일(화~토) 09:10 — 토→화 72h가 정상 최대치.
                                   공휴일 하루를 더 얹은 96h를 초과하면 잡이 죽은 것으로 본다. */
 
+  /* 경과 시간 → { text: 표시 라벨, hours: stale 판정용 실수 시간 }.
+     stocks-home.js의 relTime()과는 합치지 말 것 — 그쪽은 "오늘 14:32 / 어제 12:46 / 7/14"
+     처럼 달력일 기준 기사 발행 라벨이고, 이쪽은 경과 시간 + stale 판정값이다. */
   function trustRelTime(iso) {
-    var t = new Date(iso).getTime();
-    if (!t) return null;
+    var t = Date.parse(String(iso || ''));
+    if (isNaN(t)) return null;
     var mins = Math.floor((Date.now() - t) / 60000);
     if (mins < 0) return null;                       /* 미래 시각 — 신뢰하지 않는다 */
-    if (mins < 1)  return { text: '방금', hours: 0 };
-    if (mins < 60) return { text: mins + '분 전', hours: mins / 60 };
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24) return { text: hrs + '시간 전', hours: hrs };
-    return { text: Math.floor(hrs / 24) + '일 전', hours: hrs };
+    var hours = mins / 60;
+    var text;
+    if (mins < 1)       text = '방금';
+    else if (mins < 60) text = mins + '분 전';
+    else if (hours < 24) text = Math.floor(hours) + '시간 전';
+    else                text = Math.floor(hours / 24) + '일 전';
+    return { text: text, hours: hours };
   }
 
   function renderTrustStrip() {
@@ -1123,9 +1150,6 @@
 
     var dir     = el.dataset.dir || 'up';   // 'up' | 'dn'
 
-    function kstNow() {
-      return new Date(Date.now() + 9 * 3600 * 1000);
-    }
     function isPreOpen() {
       var k = kstNow(), day = k.getUTCDay();
       if (day === 0 || day === 6) return false;
@@ -1149,12 +1173,9 @@
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var isPast = false;
     if (m) {
-      var k0 = kstNow();
-      var todayKst = k0.getUTCFullYear() + '-' +
-        String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-        String(k0.getUTCDate()).padStart(2, '0');
-      if (m[1] > todayKst) return;        // 미래 날짜는 표시 안 함
-      if (m[1] < todayKst) isPast = true; // 과거 브리핑
+      var todayKst = kstDateStr();
+      if (m[1] > todayKst) return;         // 미래 날짜는 표시 안 함
+      if (m[1] < todayKst) isPast = true;  // 과거 브리핑
     }
 
     if (!isPast && !isMarketHours() && !isAfterMarket()) return;
@@ -1281,6 +1302,12 @@
       }
       updatePreOpenTimer();
       setInterval(updatePreOpenTimer, 1000);
+      // FIXME fetchNews()는 이 저장소 어디에도 정의돼 있지 않다 — 호출되면 ReferenceError다.
+      // 지금 터지지 않는 이유는 이 함수를 감싼 initLiveScoreboard 자체가 죽은 경로이기 때문:
+      // sections/_live_scoreboard.html이 kospi/close/us 어느 config의 섹션 목록에도 없어
+      // #live-scoreboard 엘리먼트가 생성되지 않고 함수가 맨 위에서 조기 return한다.
+      // 스코어보드를 되살릴 때 이 줄을 먼저 해결할 것(2026-07-25 eslint no-undef로 발견).
+      // eslint-disable-next-line no-undef
       fetchNews();
       return;
     }
@@ -1368,8 +1395,7 @@
         // 장 마감: 메인=예측 결과 요약, 보조=등락률 한 줄
         if (prefixEl) prefixEl.textContent = '';
         if (headEl)   headEl.style.color = '';
-        var sign = changePct >= 0 ? '+' : '';
-        var pct  = sign + changePct.toFixed(2) + '%';
+        var pct  = sign + changePct.toFixed(2) + '%';   // sign은 위(1380)에서 계산됨
         // 대표 타이틀(emEl)과 서브 타이틀(subElU)을 각각 분리 관리
         // hit.dn(하락 예측 적중)은 아쉬움 표현을 대표 타이틀 뒤에 붙인다
         var CLOSE_MSGS = {
@@ -1533,11 +1559,7 @@
     var mktUrlMatch = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var mktIsPast = false;
     if (mktUrlMatch) {
-      var mktNow = new Date(Date.now() + 9 * 3600 * 1000);
-      var mktToday = mktNow.getUTCFullYear() + '-' +
-        String(mktNow.getUTCMonth() + 1).padStart(2, '0') + '-' +
-        String(mktNow.getUTCDate()).padStart(2, '0');
-      if (mktUrlMatch[1] < mktToday) mktIsPast = true;
+      if (mktUrlMatch[1] < kstDateStr()) mktIsPast = true;
     }
 
     if (!mktIsPast && !isLiveMode()) return;
@@ -1841,20 +1863,16 @@
     var band = document.getElementById('now-band');
     if (!band) return;
 
-    function kstNow()  { return new Date(Date.now() + 9 * 3600 * 1000); }
-    function kstMins() { var k = kstNow(); return k.getUTCHours() * 60 + k.getUTCMinutes(); }
-
-    var k0 = kstNow();
-    var todayKst = k0.getUTCFullYear() + '-' +
-      String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-      String(k0.getUTCDate()).padStart(2, '0');
+    // 날짜·요일·분을 같은 시각으로 판단해야 하므로 한 번만 찍는다
+    var kNow = kstNow();
+    var todayKst = kstDateStr(kNow);
     var m       = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var urlDate = m ? m[1] : todayKst;
     if (urlDate > todayKst) return;                 // 미래: 숨김
     var isPast  = urlDate < todayKst;
 
     // 상태 판정 (당일)
-    var mins = kstMins(), day = k0.getUTCDay(), weekend = (day === 0 || day === 6);
+    var mins = kstMinsOfDay(kNow), day = kNow.getUTCDay(), weekend = (day === 0 || day === 6);
     var mode = null;                                // 'past' | 'pre' | 'live' | 'after'
     if (isPast)              mode = 'past';
     else if (weekend)        return;                // 주말 당일: 숨김
@@ -2006,11 +2024,7 @@
     var list = document.getElementById('signals-today-list');
     var mktPanel = document.getElementById('market-data-panel');
 
-    function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }
-    var k0 = kstNow();
-    var todayKst = k0.getUTCFullYear() + '-' +
-      String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-      String(k0.getUTCDate()).padStart(2, '0');
+    var todayKst = kstDateStr();
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var urlDate = m ? m[1] : todayKst;
     if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 장중 신호는 '오늘'만 의미 → 시장 지표 유지
@@ -2175,11 +2189,9 @@
       }
     }
 
-    // 오늘 날짜 판별
-    var kstNow = new Date(Date.now() + 9 * 3600 * 1000);
-    var todayKst = kstNow.getUTCFullYear() + '-'
-      + String(kstNow.getUTCMonth() + 1).padStart(2, '0') + '-'
-      + String(kstNow.getUTCDate()).padStart(2, '0');
+    // 오늘 날짜 판별 (아래 kstMins 계산과 같은 시각을 써야 하므로 한 번만 찍는다)
+    var kNow = kstNow();
+    var todayKst = kstDateStr(kNow);
     var isToday = (date === todayKst);
 
     function tryFetch(url, timeout) {
@@ -2206,7 +2218,7 @@
 
     // 장중(09:00~15:30 KST) 5분마다 자동 갱신
     if (isToday) {
-      var kstMins = kstNow.getUTCHours() * 60 + kstNow.getUTCMinutes();
+      var kstMins = kstMinsOfDay(kNow);
       if (kstMins >= 540 && kstMins < 930) {
         setInterval(fetchAndRender, 5 * 60 * 1000);
       }
@@ -2225,4 +2237,19 @@
   window.closeNoticePanel = closeNoticePanel;
   window.initIssueBriefing = initIssueBriefing;
   window.renderTrustStrip = renderTrustStrip;
+
+  /* ── 테스트 훅 ──
+     IIFE 안의 순수 함수는 밖에서 참조할 방법이 없어 단위 테스트가 불가능하다.
+     main.js를 별도 모듈로 쪼개 브라우저가 <script>를 하나 더 받게 만드는 대신
+     (로드 순서 실패가 곧 전체 JS 중단이라 라이브 서비스에 위험), 이 훅으로
+     '실제 프로덕션 파일'을 그대로 테스트한다 — 사본을 두면 사본이 어긋난다.
+     web/assets/main.test.mjs가 node:vm 샌드박스에서 이 객체를 읽는다.
+     프로덕션 동작에는 영향이 없다(읽기 전용 참조). */
+  window.__dsTestables = {
+    kstNow: kstNow,
+    kstDateStr: kstDateStr,
+    kstMinsOfDay: kstMinsOfDay,
+    trustRelTime: trustRelTime,
+    TRUST_STALE_HOURS: TRUST_STALE_HOURS,
+  };
 })();
