@@ -7,8 +7,8 @@
 //   내부 함수를 꺼내 테스트한다.
 //
 // 스텁 범위
-//   main.js는 로드 시점에 initLiveScoreboard·initLiveMarketPanel·initNowBand·
-//   initSidebarSignals를 즉시 호출하는데, 모두 `if (!el) return`으로 시작한다.
+//   main.js는 로드 시점에 initLiveMarketPanel·initNowBand·initSidebarSignals를
+//   즉시 호출하는데, 모두 `if (!el) return`으로 시작한다.
 //   따라서 getElementById/querySelector가 null만 돌려주면 조용히 빠져나온다.
 //
 // 실행: node --test web/assets/
