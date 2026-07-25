@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>용어 설명 — Double-Shot</title>
+<meta name="description" content="Double-Shot 종목 서비스가 쓰는 특이 신호·자금 지도·AI 뱃지·커버드콜 침식 등 지표와 용어를 설명합니다.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="용어 설명 — Double-Shot">
+<meta property="og:description" content="Double-Shot 종목 서비스가 쓰는 특이 신호·자금 지도·AI 뱃지·커버드콜 침식 등 지표와 용어를 설명합니다.">
+<link rel="canonical" href="https://doubleshot.space/glossary/">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=20260704">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+.legal-wrap{max-width:760px;margin:0 auto;padding:34px 20px 90px;}
+.legal-crumb{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.legal-crumb a{color:var(--muted);text-decoration:none;}
+.legal-crumb a:hover{color:var(--primary);}
+.legal-h1{font-size:25px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:7px;}
+.legal-meta{font-size:12.5px;color:var(--muted);margin-bottom:22px;}
+.legal-lead{font-size:14px;color:#3A3F47;line-height:1.75;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--hairline);}
+.gloss-toc{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:30px;}
+.gloss-toc a{font-size:12.5px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:6px 12px;text-decoration:none;}
+.gloss-toc a:hover{opacity:.8;}
+.legal-sec{margin-bottom:30px;scroll-margin-top:20px;}
+.legal-sec h2{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:11px;}
+.legal-sec p{font-size:14px;color:#3A3F47;line-height:1.78;margin-bottom:9px;}
+.legal-sec ul{padding-left:19px;margin:8px 0 10px;}
+.legal-sec li{font-size:14px;color:#3A3F47;line-height:1.72;margin-bottom:6px;}
+.legal-sec a{color:var(--primary);text-decoration:none;}
+.legal-sec a:hover{text-decoration:underline;}
+.legal-sec b{color:var(--ink);font-weight:700;}
+.legal-sec .note{font-size:12.5px;color:var(--muted);margin-top:10px;}
+html.dark .legal-lead,html.dark .legal-sec p,html.dark .legal-sec li{color:#C4C8CE;}
+.legal-foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--hairline);}
+.legal-foot__links{display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:12px;}
+.legal-foot__links a{font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;}
+.legal-foot__links a:hover{color:var(--primary);}
+.legal-foot__base{font-size:11.5px;color:var(--muted);line-height:1.7;}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"역행 상승이란?","acceptedAnswer":{"@type":"Answer","text":"하락장에서 코스피와 반대로 오르며 지수보다 3%p 이상 강세를 보이는 종목을 가리키는 특이 신호예요."}},
+    {"@type":"Question","name":"역행 하락이란?","acceptedAnswer":{"@type":"Answer","text":"상승장에서 코스피와 반대로 내리며 지수보다 3%p 이상 약세를 보이는 종목을 가리키는 특이 신호예요."}},
+    {"@type":"Question","name":"자금 지도란?","acceptedAnswer":{"@type":"Answer","text":"테마별 ETF의 순자금흐름을 트리맵 히트맵으로 보여줘 어느 섹터로 돈이 몰리고 빠지는지 한눈에 보여주는 화면이에요."}},
+    {"@type":"Question","name":"AI 상승확률과 기술신호 점수의 차이는?","acceptedAnswer":{"@type":"Answer","text":"AI 상승확률은 Claude가 뉴스·수급·차트를 종합 분석해 오늘 픽한 종목에만 매기는 확률이고, 기술신호 점수는 전 종목에 이동평균선·모멘텀 등 규칙 기반으로 매기는 0~100점 참고 점수예요."}},
+    {"@type":"Question","name":"커버드콜 침식이란?","acceptedAnswer":{"@type":"Answer","text":"커버드콜 ETF가 분배금을 지급하는 과정에서 기초가격이 하락하는 정도를 뜻해요. 가격이 유지·상승하며 분배하면 건전, 소폭 하락하면 주의, 분배금에 원금이 섞이는 구조면 원금성으로 분류해요."}}
+  ]
+}
+</script>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+<div class="legal-wrap">
+  <div class="legal-crumb"><a href="/">Double-Shot</a> › 용어 설명</div>
+  <h1 class="legal-h1">용어 설명</h1>
+  <div class="legal-meta">종목 서비스 화면에 나오는 지표·신호의 판정 기준을 설명해요</div>
+  <p class="legal-lead">아래 용어는 <a href="/stocks/">종목 대시보드</a> 화면 곳곳의 <b>?</b> 아이콘에 담긴 설명을 그대로 옮긴 거예요. 화면에서 직접 확인하려면 각 항목의 "화면에서 보기" 링크를 눌러주세요.</p>
+  <div class="gloss-toc">
+    <a href="#signals">특이 신호 8종</a>
+    <a href="#flow-map">자금 지도</a>
+    <a href="#leaders">코스피 주도주</a>
+    <a href="#momentum">상승 모멘텀 종목</a>
+    <a href="#us-semi">밤사이 미국 반도체 시황</a>
+    <a href="#ai-score">AI 뱃지·기술신호 점수</a>
+    <a href="#volume">거래량 급증·패시브 노출</a>
+    <a href="#covered-call">커버드콜 침식</a>
+  </div>
+
+  <div class="legal-sec" id="signals">
+    <h2>특이 신호 8종</h2>
+    <p>평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 하나라도 잡히면 <a href="/stocks/#sig-block">오늘의 특이 신호</a>에 올라와요.</p>
+    <ul>
+      <li><b>역행 상승</b> — 하락장에서 코스피와 반대로 오르며 지수보다 3%p 이상 강세</li>
+      <li><b>역행 하락</b> — 상승장에서 코스피와 반대로 내리며 지수보다 3%p 이상 약세</li>
+      <li><b>거래량 급증 · 급락</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락</li>
+      <li><b>거래량 급증 · 급등</b> — 거래량이 20일 평균의 1.5배 이상이면서 +3% 이상 급등</li>
+      <li><b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상</li>
+      <li><b>거래대금 상위</b> — 당일 거래대금 상위 3종목</li>
+      <li><b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환. 수급은 장 마감 후 집계돼서, 장중에는 전일 기준 값으로 표시해요</li>
+    </ul>
+    <p>장중 거래량 배수는 경과 시간을 반영한 페이스 기준이에요. 예를 들어 정오에 하루 평균의 0.9배가 쌓였다면 1.8배 페이스로 봐요. 기본은 신호 강도순(드문 신호일수록 위)이고, 상승률순·하락률순으로도 볼 수 있어요.</p>
+    <p class="note">투자 권유가 아닌 참고용 신호예요. <a href="/stocks/#sig-block">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-sec" id="flow-map">
+    <h2>자금 지도</h2>
+    <p>테마별 ETF의 순자금흐름을 트리맵 히트맵으로 보여주는 화면이에요. 타일 크기는 자금 규모를, 색은 순유입·순유출 방향을 나타내 어느 섹터로 돈이 몰리고 빠지는지 한눈에 볼 수 있어요.</p>
+    <p class="note"><a href="/stocks/#flow-block">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-sec" id="leaders">
+    <h2>코스피 주도주</h2>
+    <p>당일 코스피 등락을 실질적으로 이끈 대형주를 실시간 곡선과 관련 뉴스 핀으로 보여주는 위젯이에요. 시가총액 기여도가 큰 종목의 움직임을 코스피 지수 흐름과 함께 참고할 수 있어요.</p>
+    <p class="note"><a href="/stocks/#us-linked-widget">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-sec" id="momentum">
+    <h2>상승 모멘텀 종목</h2>
+    <p>최근 며칠간 상승 추세가 이어지고 있는 종목을 모아 보여줘요. 단기 급등이 아니라 <b>추세의 지속성</b>에 초점을 맞춘 목록이에요.</p>
+    <p class="note"><a href="/stocks/#mom-track">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-sec" id="us-semi">
+    <h2>밤사이 미국 반도체 시황</h2>
+    <p>전날 밤 미국 증시에서 있었던 반도체·AI 인프라 관련 주요 뉴스와 주가 흐름을 요약해 보여줘요. 미국 빅테크·장비주의 실적·설비투자(capex) 동향이 삼성전자·SK하이닉스 등 국내 대장주 수요와 직결되기 때문에 코스피 개장 전 참고 지표로 제공해요.</p>
+    <p class="note"><a href="/stocks/#us-evening">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-sec" id="ai-score">
+    <h2>AI 뱃지 · 기술신호 점수</h2>
+    <p>종목 옆에 붙는 배지는 두 종류로 나뉘어요.</p>
+    <ul>
+      <li><b>AI 상승확률</b> (파란 배지) — 오늘 AI 브리핑이 픽한 종목에만 표시돼요. Claude가 뉴스·수급·차트를 종합 분석해 상승 방향에 둔 확률로, 더블샷의 프리미엄 신호예요.</li>
+      <li><b>기술신호 점수</b> (흰색·빨간 배지) — 전 종목에 매기는 규칙 기반 점수(0~100)예요. 20일선·200일선 위치, 골든크로스, 최근 5일 모멘텀을 합산해요. 58점 이상은 상승 우위, 42점 이하는 약세로 분류돼요. AI 예측이 아닌 기술적 참고 신호예요.</li>
+      <li><b>신호 없음</b> — 상장·거래일이 200일 미만이거나 데이터가 부족해 점수를 산출하지 못한 경우예요.</li>
+    </ul>
+  </div>
+
+  <div class="legal-sec" id="volume">
+    <h2>거래량 급증 · 패시브 노출</h2>
+    <p><b>거래량 급증</b> 배지는 오늘 거래량이 최근 20일 평균 대비 몇 배인지 보여줘요. 수치가 높을수록 이례적인 거래 폭증이고, 외국인·기관 수급이 함께 들어왔다면 의미 있는 수급 유입 신호로 볼 수 있어요.</p>
+    <p><b>패시브 노출</b>은 코스피200·반도체 등 주요 ETF가 구조적으로 대량 보유하는 종목에 붙는 배지예요. 노출도가 高인 종목은 분기 말·지수 변경일마다 ETF 기계매매가 자동으로 대규모 수급을 만들어 리밸런싱 시즌에 변동성이 커질 수 있어요. 中은 그보다 낮은 중간 수준의 패시브 영향을 받는 종목이에요.</p>
+  </div>
+
+  <div class="legal-sec" id="covered-call">
+    <h2>커버드콜 침식</h2>
+    <p><a href="/stocks/income-designer/">월배당 인컴 설계기</a>에서 커버드콜 ETF의 분배 건전성을 나타내는 지표예요. 커버드콜 ETF는 콜옵션을 매도해 프리미엄을 분배금으로 지급하는데, 이 과정에서 기초가격이 하락하는 정도(=침식)를 세 단계로 분류해요.</p>
+    <ul>
+      <li><b>건전</b> — 가격이 유지·상승하며 분배해요.</li>
+      <li><b>주의 · 소폭 침식</b> — 분배 과정에서 가격이 소폭 하락해요.</li>
+      <li><b>원금성</b> — 분배금에 원금이 섞인 구조예요.</li>
+    </ul>
+    <p class="note"><a href="/stocks/income-designer/">화면에서 보기 →</a></p>
+  </div>
+
+  <div class="legal-foot"><div class="legal-foot__links"><a href="/glossary/" style="color:var(--ink);cursor:default">용어 설명</a><a href="/legal/disclaimer/">면책 고지</a><a href="/legal/privacy/">개인정보처리방침</a><a href="/legal/terms/">이용약관</a><a href="mailto:pulum0083@gmail.com">문의</a></div><div class="legal-foot__base">Double-Shot은 개인이 운영하는 비상업적 투자 정보 서비스입니다. 본 서비스가 제공하는 정보는 투자 자문·권유가 아니며, 투자 판단과 그 결과에 대한 책임은 이용자 본인에게 있습니다.<br>문의: <a href="mailto:pulum0083@gmail.com" style="color:var(--muted)">pulum0083@gmail.com</a> · © 2026 Double-Shot</div></div>
+</div>
+</body>
+</html>
