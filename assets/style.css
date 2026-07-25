@@ -118,6 +118,14 @@ html.dark .notice-card.is-unread{border-color:rgba(59,139,255,.3);background:rgb
 .site-footer__links a:hover{color:var(--primary);}
 .site-footer__base{margin-top:12px;font-size:11px;color:var(--muted);text-align:center;}
 body.is-embed .site-footer{display:none;}
+/* 신뢰 스트립 — main.js renderTrustStrip()이 푸터 링크 위에 삽입 */
+.trust-strip{margin:0 auto 14px;padding:13px 16px;background:var(--inset,#EEF1F5);border-radius:10px;line-height:1.8;}
+.trust-strip__r1{margin:0;display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);}
+.trust-strip__r1 b{color:var(--ink,#13151A);font-weight:700;font-variant-numeric:tabular-nums;}
+.trust-strip__g{white-space:nowrap;}
+.trust-strip__r1 a{color:var(--primary);text-decoration:none;font-weight:700;}
+.trust-strip__r2{margin:5px 0 0;font-size:11px;color:#9CA3AF;}
+.trust-strip__dot{width:7px;height:7px;border-radius:50%;background:#16A34A;flex-shrink:0;}
 
 /* ──────────────────────────────────────────────
    아코디언 (예측 게이지 래퍼)

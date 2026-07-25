@@ -1021,6 +1021,77 @@
       .catch(function() {});
   }
 
+  /* ── 신뢰 스트립 (푸터) ──
+     연속 발행 거래일 · 코스피 예측 적중률 · 채점 데이터 신선도를 푸터 각주로 표시한다.
+     접속자 수 대신 실측 운영 지표로 "살아 있는 서비스"를 증명하는 자리.
+
+     설계 원칙:
+     - 상대 시각("N분 전")은 저장하지 않고 **렌더 시점에 계산**한다 (SERVICE_RULES §20 —
+       저장된 라벨은 페이지가 재생성돼도 계속 옛 기준으로 남는다).
+     - 적중률은 **코스피 단독**만 쓴다. cumulative는 2026-07-14 채점 탈퇴로 동결된 us가
+       섞인 혼합값이라 "현재 성적"이 아니다 (§16 — 라벨이 가리키는 대상이 최근인지 확인).
+     - 데이터가 없거나 낡았으면 **아무것도 그리지 않는다**. 낡은 값을 진짜처럼 보여주는 것보다
+       섹션 생략 + 콘솔 경고가 항상 낫다 (§20 _targets_data_is_stale 선례). */
+
+  var TRUST_STALE_HOURS = 96;  /* 채점 잡은 평일(화~토) 09:10 — 토→화 72h가 정상 최대치.
+                                  공휴일 하루를 더 얹은 96h를 초과하면 잡이 죽은 것으로 본다. */
+
+  function trustRelTime(iso) {
+    var t = new Date(iso).getTime();
+    if (!t) return null;
+    var mins = Math.floor((Date.now() - t) / 60000);
+    if (mins < 0) return null;                       /* 미래 시각 — 신뢰하지 않는다 */
+    if (mins < 1)  return { text: '방금', hours: 0 };
+    if (mins < 60) return { text: mins + '분 전', hours: mins / 60 };
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return { text: hrs + '시간 전', hours: hrs };
+    return { text: Math.floor(hrs / 24) + '일 전', hours: hrs };
+  }
+
+  function renderTrustStrip() {
+    var foot = document.querySelector('.site-footer') || document.querySelector('.ds-footer');
+    if (!foot || document.getElementById('trust-strip')) return;
+
+    fetch('/data/accuracy-summary.json', { signal: AbortSignal.timeout(5000) })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(d) {
+        var k  = d && d.kospi;
+        var st = d && d.streak;
+        /* 필수 필드가 하나라도 없으면 그리지 않는다 — 부분 표시로 오해를 만들지 않는다. */
+        if (!k || !k.scored || k.pct == null || !st || !st.days || !d.updated_at) return;
+
+        var rel = trustRelTime(d.updated_at);
+        if (!rel) return;
+        if (rel.hours > TRUST_STALE_HOURS) {
+          console.warn('[trust-strip] 채점 데이터가 ' + rel.text +
+                       ' 갱신 — ' + TRUST_STALE_HOURS + '시간 초과라 스트립을 숨겼어요.');
+          return;
+        }
+
+        var el = document.createElement('div');
+        el.id = 'trust-strip';
+        el.className = 'trust-strip';
+        el.innerHTML =
+          '<p class="trust-strip__r1">' +
+            '<span class="trust-strip__dot"></span>' +
+            /* 좁은 화면에서 라벨과 숫자가 갈라지지 않도록 의미 단위로 묶는다.
+               구분자 ·는 앞 그룹 끝에 붙여 줄 시작에 오지 않게 한다. */
+            '<span class="trust-strip__g">매 거래일 자동 발행 ·</span>' +
+            '<span class="trust-strip__g"><b>' + st.days + ' 거래일</b> 연속 ·</span>' +
+            '<span class="trust-strip__g">코스피 예측 <b>' +
+              k.scored + '전 ' + k.hit + '적중(' + k.pct + '%)</b></span>' +
+            '<a href="/briefings/">채점 기록 전체 보기</a>' +
+          '</p>' +
+          '<p class="trust-strip__r2">채점 데이터 ' + rel.text +
+            ' 갱신 · 모든 수치는 수집 시점 실측이며 투자 권유가 아니에요</p>';
+
+        var links = foot.querySelector('.site-footer__links, .ds-foot-links');
+        if (links) foot.insertBefore(el, links);
+        else foot.insertBefore(el, foot.firstChild);
+      })
+      .catch(function() {});   /* 수집 실패 시 조용히 아무것도 안 그린다 */
+  }
+
   /* ── 라이브 스코어보드 아코디언 ── */
   function lsbToggleAccordion() {
     var btn  = document.getElementById('lsb-accordion-btn');
@@ -2153,4 +2224,5 @@
   window.openNoticePanel = openNoticePanel;
   window.closeNoticePanel = closeNoticePanel;
   window.initIssueBriefing = initIssueBriefing;
+  window.renderTrustStrip = renderTrustStrip;
 })();
