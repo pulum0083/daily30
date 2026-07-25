@@ -3,6 +3,28 @@
 (function () {
   'use strict';
 
+  /* ── KST 시각 공용 헬퍼 ──
+     브라우저 로컬 타임존과 무관하게 KST 기준으로 판단해야 하므로, UTC에 +9h를 더한
+     Date를 만들고 getUTC*()로 읽는다. (getHours() 같은 로컬 접근자를 섞으면 사용자
+     타임존에 따라 날짜가 하루 밀린다.)
+     이 세 함수는 원래 initLiveScoreboard·initNowBand·initSidebarSignals 등에 각각
+     복제돼 있었다 — 동일 구현이 3벌, 날짜 문자열 조립이 5벌이었다. */
+  function kstNow() {
+    return new Date(Date.now() + 9 * 3600 * 1000);
+  }
+  /** KST 날짜를 'YYYY-MM-DD'로. 인자를 주면 그 시각 기준, 없으면 지금. */
+  function kstDateStr(d) {
+    var k = d || kstNow();
+    return k.getUTCFullYear() + '-' +
+      String(k.getUTCMonth() + 1).padStart(2, '0') + '-' +
+      String(k.getUTCDate()).padStart(2, '0');
+  }
+  /** 자정부터 흐른 분 (09:00 → 540). 장중 판정용. */
+  function kstMinsOfDay(d) {
+    var k = d || kstNow();
+    return k.getUTCHours() * 60 + k.getUTCMinutes();
+  }
+
   /* ── 다크모드 ── */
   const root = document.documentElement;
   if (localStorage.getItem('theme') === 'dark') {
@@ -1128,9 +1150,6 @@
 
     var dir     = el.dataset.dir || 'up';   // 'up' | 'dn'
 
-    function kstNow() {
-      return new Date(Date.now() + 9 * 3600 * 1000);
-    }
     function isPreOpen() {
       var k = kstNow(), day = k.getUTCDay();
       if (day === 0 || day === 6) return false;
@@ -1154,11 +1173,7 @@
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var isPast = false;
     if (m) {
-      var k0 = kstNow();
-      var todayKst = k0.getUTCFullYear() + '-' +
-        String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-        String(k0.getUTCDate()).padStart(2, '0');
-      if (m[1] > todayKst) return;        // 미래 날짜는 표시 안 함
+      if (m[1] > kstDateStr()) return;   // 미래 날짜는 표시 안 함
       if (m[1] < todayKst) isPast = true; // 과거 브리핑
     }
 
@@ -1538,11 +1553,7 @@
     var mktUrlMatch = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var mktIsPast = false;
     if (mktUrlMatch) {
-      var mktNow = new Date(Date.now() + 9 * 3600 * 1000);
-      var mktToday = mktNow.getUTCFullYear() + '-' +
-        String(mktNow.getUTCMonth() + 1).padStart(2, '0') + '-' +
-        String(mktNow.getUTCDate()).padStart(2, '0');
-      if (mktUrlMatch[1] < mktToday) mktIsPast = true;
+      if (mktUrlMatch[1] < kstDateStr()) mktIsPast = true;
     }
 
     if (!mktIsPast && !isLiveMode()) return;
@@ -1846,20 +1857,16 @@
     var band = document.getElementById('now-band');
     if (!band) return;
 
-    function kstNow()  { return new Date(Date.now() + 9 * 3600 * 1000); }
-    function kstMins() { var k = kstNow(); return k.getUTCHours() * 60 + k.getUTCMinutes(); }
-
-    var k0 = kstNow();
-    var todayKst = k0.getUTCFullYear() + '-' +
-      String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-      String(k0.getUTCDate()).padStart(2, '0');
+    // 날짜·요일·분을 같은 시각으로 판단해야 하므로 한 번만 찍는다
+    var kNow = kstNow();
+    var todayKst = kstDateStr(kNow);
     var m       = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var urlDate = m ? m[1] : todayKst;
     if (urlDate > todayKst) return;                 // 미래: 숨김
     var isPast  = urlDate < todayKst;
 
     // 상태 판정 (당일)
-    var mins = kstMins(), day = k0.getUTCDay(), weekend = (day === 0 || day === 6);
+    var mins = kstMinsOfDay(kNow), day = kNow.getUTCDay(), weekend = (day === 0 || day === 6);
     var mode = null;                                // 'past' | 'pre' | 'live' | 'after'
     if (isPast)              mode = 'past';
     else if (weekend)        return;                // 주말 당일: 숨김
@@ -2011,11 +2018,7 @@
     var list = document.getElementById('signals-today-list');
     var mktPanel = document.getElementById('market-data-panel');
 
-    function kstNow() { return new Date(Date.now() + 9 * 3600 * 1000); }
-    var k0 = kstNow();
-    var todayKst = k0.getUTCFullYear() + '-' +
-      String(k0.getUTCMonth() + 1).padStart(2, '0') + '-' +
-      String(k0.getUTCDate()).padStart(2, '0');
+    var todayKst = kstDateStr();
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var urlDate = m ? m[1] : todayKst;
     if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 장중 신호는 '오늘'만 의미 → 시장 지표 유지
@@ -2180,11 +2183,9 @@
       }
     }
 
-    // 오늘 날짜 판별
-    var kstNow = new Date(Date.now() + 9 * 3600 * 1000);
-    var todayKst = kstNow.getUTCFullYear() + '-'
-      + String(kstNow.getUTCMonth() + 1).padStart(2, '0') + '-'
-      + String(kstNow.getUTCDate()).padStart(2, '0');
+    // 오늘 날짜 판별 (아래 kstMins 계산과 같은 시각을 써야 하므로 한 번만 찍는다)
+    var kNow = kstNow();
+    var todayKst = kstDateStr(kNow);
     var isToday = (date === todayKst);
 
     function tryFetch(url, timeout) {
@@ -2211,7 +2212,7 @@
 
     // 장중(09:00~15:30 KST) 5분마다 자동 갱신
     if (isToday) {
-      var kstMins = kstNow.getUTCHours() * 60 + kstNow.getUTCMinutes();
+      var kstMins = kstMinsOfDay(kNow);
       if (kstMins >= 540 && kstMins < 930) {
         setInterval(fetchAndRender, 5 * 60 * 1000);
       }
