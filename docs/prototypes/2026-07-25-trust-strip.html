@@ -125,6 +125,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .pill--have{background:var(--ok-bg);color:#15803D}
 .pill--new{background:var(--gold-bg);color:var(--gold)}
 .pill--risk{background:var(--bad-bg);color:#B91C1C}
+.vbtn{background:var(--canvas);border:1px solid var(--hair);border-radius:8px;padding:6px 12px;
+  font:inherit;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:.12s}
+.vbtn.on{background:var(--primary);border-color:var(--primary);color:#fff}
 </style>
 
 <div class="gnb"><div class="gnb__in">
@@ -168,8 +171,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 <!-- ═══════ C안 ═══════ -->
 <div class="sec">
-  <div class="sec__h"><span class="sec__n">C안</span><span class="sec__t">푸터 조용 버전</span></div>
+  <div class="sec__h"><span class="sec__n">C안</span><span class="sec__t">푸터 조용 버전</span>
+    <span class="sec__n" style="color:#15803D;background:var(--ok-bg)">✓ 채택</span></div>
   <p class="sec__d">가장 조용하다. 찾는 사람만 본다. 신뢰 지표를 마케팅이 아니라 각주로 다룬다 — 과시 위험이 0이지만 신규 방문자에게는 거의 전달되지 않는다.</p>
+  <div class="radios" style="display:flex;gap:7px;margin:0 0 12px">
+    <button class="vbtn on" data-next="1">다음 갱신 포함</button>
+    <button class="vbtn" data-next="0">생략 — schedule.json 불필요</button>
+  </div>
   <div id="c"></div>
 </div>
 
@@ -180,10 +188,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   <table class="tbl">
     <tr><th style="width:150px">논점</th><th>내용</th></tr>
     <tr>
+      <td>어느 적중률을<br>쓸 것인가</td>
+      <td><span class="pill pill--risk">확인됨</span><b>US는 2026-07-14 이슈 중심 전환으로 채점에서 탈퇴했다</b>
+        (<code>call_claude.py:1367</code>이 <code>kospi</code>일 때만 기록,
+        <code>check_accuracy.py:182</code>가 <code>us</code>면 즉시 return).
+        그래서 <code>accuracy-summary.json</code>의 <b>us 58전 71%는 2026-07-13에 동결</b>됐고,
+        <b>cumulative 130전 68%는 그 동결값이 떠받치는 혼합값</b>이다 — 앞으로 코스피만 움직이니
+        시간이 갈수록 무의미해진다(§16 패턴).
+        스트립에는 <b>살아 있는 코스피 72전 47적중 65%</b>만 쓴다.
+        <span class="pill pill--risk">라이브</span><code>landing.html:274</code>가 지금 이 혼합값을
+        그대로 노출 중이라 별건으로 손봐야 한다. <code>2026-07-14</code> us 항목은
+        <code>is_correct: null</code>로 영구 미채점 상태로 남아 있다.</td>
+    </tr>
+    <tr>
       <td>적중률 상시 노출</td>
       <td><span class="pill pill--risk">위험</span>코스피 단독은 <b>65%</b>다. 동전던지기 대비 +15%p라 정직한 성과지만,
         큰 글씨로 상시 박으면 <b>투자 권유</b>로 읽히거나 반대로 "겨우 65%냐"는 반응을 부를 수 있다.
-        분모(130전)를 반드시 붙이고, A·C안처럼 작게 다루는 편이 안전하다.</td>
+        분모(72전)를 반드시 붙인다 — C안이 각주로 다루므로 이 위험은 해소된다.</td>
     </tr>
     <tr>
       <td>신선도 가드</td>
@@ -200,16 +221,20 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
     </tr>
     <tr>
       <td>다음 갱신 시각</td>
-      <td>§10 스케줄 표를 클라이언트가 알아야 한다. 하드코딩하면 스케줄 변경 시 어긋나므로
-        <span class="pill pill--new">새로</span><code>web/data/schedule.json</code>으로 내보내는 게 맞다.
-        주말·공휴일·심야엔 <b>주기를 적지 않는다</b>(§10 — 실제로 돌지 않는 주기를 광고하지 않는다).</td>
+      <td>넣으려면 §10 스케줄 표를 클라이언트가 알아야 하고, 하드코딩하면 스케줄 변경 시 어긋나므로
+        <code>web/data/schedule.json</code>이 필요하다.
+        <span class="pill pill--have">추천</span><b>C안에서는 생략하는 편이 낫다</b> —
+        푸터 각주에서 신선도는 "N분 전 갱신"만으로 충분히 전달되고,
+        새 데이터 파일 하나와 주말·공휴일·심야 예외 처리(§10 — 실제로 돌지 않는 주기를 광고하지 않는다)가
+        모두 사라진다. 위 토글로 두 문구를 비교할 수 있다.</td>
     </tr>
     <tr>
       <td>필요한 작업</td>
-      <td><span class="pill pill--have">있음</span>적중률 — <code>accuracy-summary.json</code><br>
-        <span class="pill pill--new">새로</span>연속 발행 — <code>check_accuracy.py</code>가 스트릭을 계산해 같은 파일에 <code>streak</code> 필드 추가<br>
+      <td><span class="pill pill--have">있음</span>적중률 — <code>accuracy-summary.json</code>의 <code>kospi</code> 필드<br>
+        <span class="pill pill--new">새로</span>연속 발행 — <code>check_accuracy.py</code>가 거래일 스트릭을 계산해 같은 파일에 <code>streak</code> 필드 추가<br>
         <span class="pill pill--new">새로</span>신선도 — 각 수집 잡의 <code>updated_at</code>을 모은 <code>web/data/health.json</code><br>
-        <span class="pill pill--new">새로</span>렌더러 — <code>main.js</code>에 <code>renderTrustStrip()</code>. 서버 작업 없음</td>
+        <span class="pill pill--new">새로</span>렌더러 — <code>main.js</code>에 <code>renderTrustStrip()</code>. 서버 작업 없음<br>
+        <span class="pill pill--have">불필요</span><code>schedule.json</code> — "다음 갱신"을 생략하면 안 만들어도 된다</td>
     </tr>
   </table>
 </div>
@@ -219,7 +244,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 <script>
 /* ══ 실측 ══ */
 var STREAK = { days: 68, from: '2026-04-15', to: '2026-07-24' };
-var ACC = { scored: 130, hit: 88, pct: 68, kospi: 65, us: 71 };
+/* 살아 있는 지표는 코스피뿐 — US는 2026-07-14 이슈 중심 전환으로 채점 탈퇴
+   (call_claude.py:1367 / check_accuracy.py:182). us 58전 71%는 2026-07-13에 동결됐고
+   cumulative 130전 68%는 그 동결값이 떠받치는 혼합값이라 스트립에 쓰지 않는다. */
+var ACC   = { scored: 72, hit: 47, pct: 65 };
+var RETIRED = { scored: 58, hit: 41, pct: 71, frozen: '2026-07-13' };
 /* 최근 16회 채점 결과(적중=h) — accuracy 막대용, 데모 배열 */
 var BARS = 'hhmhhhmhhmhhhmhh';
 
@@ -235,6 +264,8 @@ var FRESH = {
            label:'수집 중단' }
 };
 var cur = 'ok';
+/* C안 문구 변형 — "다음 갱신 HH:MM"을 넣을지. 빼면 schedule.json 의존이 사라진다. */
+var showNext = true;
 
 function f(){ return FRESH[cur]; }
 
@@ -246,7 +277,7 @@ function drawA(){
     '<div class="ts-a">'
     + '<span class="it"><span class="dot ' + x.cls + '"></span>'
       + '<span><b class="big num">' + STREAK.days + '</b> <b>거래일</b> 연속 발행</span></span>'
-    + '<span class="it">누적 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중</b> '
+    + '<span class="it">코스피 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중</b> '
       + '<b class="big num">' + ACC.pct + '%</b></span>'
     + '<span class="it">'
       + (x.msg
@@ -273,10 +304,10 @@ function drawB(){
       + '<p class="n">' + STREAK.from.slice(5).replace('-', '/') + ' 이후 한 번도 안 쉬었어요<br>'
       + '<b>주말·공휴일은 끊김이 아니에요</b></p></div>'
 
-    + '<div class="cell"><p class="k">예측 적중률</p>'
+    + '<div class="cell"><p class="k">코스피 예측 적중률</p>'
       + '<p class="v num">' + ACC.pct + '<em>%</em></p>'
       + '<p class="n"><b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중</b> · '
-      + '코스피 ' + ACC.kospi + '% · 미국 ' + ACC.us + '%</p>'
+      + '미국은 채점 대상이 아니에요</p>'
       + '<div class="bars">' + bars + '</div></div>'
 
     + '<div class="cell' + cell3cls + '"><p class="k"><span class="dot ' + x.cls + '"></span>'
@@ -296,12 +327,12 @@ function drawC(){
     '<div class="ts-c">'
     + '<p class="r1" style="margin:0"><span class="dot ' + x.cls + '"></span>'
       + '매 거래일 자동 발행 · <b class="num">' + STREAK.days + ' 거래일</b> 연속 · '
-      + '누적 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중(' + ACC.pct + '%)</b>'
+      + '코스피 예측 <b class="num">' + ACC.scored + '전 ' + ACC.hit + '적중(' + ACC.pct + '%)</b>'
       + '<a href="#">채점 기록 전체 보기</a></p>'
     + '<p class="r2">'
       + (x.msg
           ? '<b style="color:var(--' + (x.cls === 'bad' ? 'bad' : 'warn') + ')">' + x.msg + '</b> — 마지막 갱신 ' + x.ago
-          : '데이터 ' + x.ago + ' 갱신' + (x.next === '—' ? '' : ' · 다음 ' + x.next))
+          : '데이터 ' + x.ago + ' 갱신' + (showNext && x.next !== '—' ? ' · 다음 ' + x.next : ''))
       + ' · 모든 수치는 수집 시점 실측이며 투자 권유가 아니에요</p>'
     + '</div>';
 }
@@ -333,6 +364,16 @@ var SW = [
     b.classList.add('on');
     cur = b.dataset.s;
     draw();
+  });
+
+  /* C안 문구 변형 토글 */
+  document.querySelectorAll('.vbtn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.vbtn').forEach(function(x){ x.classList.remove('on'); });
+      btn.classList.add('on');
+      showNext = btn.dataset.next === '1';
+      drawC();
+    });
   });
   draw();
 })();
