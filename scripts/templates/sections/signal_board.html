@@ -1,4 +1,7 @@
 {# 신호등 스코어보드 형식 — 팩터별 강세/중립/약세 신호 (모든 브리핑 타입 공용) #}
+{# validate_analysis가 금지 패턴으로 sig_verdict·sig_items를 통째로 비울 수 있다 —
+   그때 제목만 남은 빈 카드가 렌더되지 않게 섹션 전체를 가드한다. #}
+{% if sig_verdict or sig_items %}
 <div class="open-section">
   {% if not format_in_view %}<div class="open-section__title reason-section-title">{{ reason_title }}</div>{% endif %}
   <div class="sig-card">
@@ -11,3 +14,4 @@
     {% endfor %}
   </div>
 </div>
+{% endif %}

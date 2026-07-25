@@ -1,20 +1,30 @@
 {# 시나리오 분기 형식 — 상승/하락 대비 2컬럼 (모든 브리핑 타입 공용) #}
+{# validate_analysis가 금지 패턴으로 요약·항목·푸터를 통째로 비울 수 있다 —
+   빈 문단·라벨만 남은 컬럼이 렌더되지 않게 각각 가드한다. #}
+{% if sc_summary or sc_left_items or sc_right_items or sc_footer %}
 <div class="sc-card">
   {% if not format_in_view %}<div class="sc-head">{{ reason_title }}</div>{% endif %}
-  <div class="sc-summary">{{ sc_summary | safe }}</div>
+  {% if sc_summary %}<div class="sc-summary">{{ sc_summary | safe }}</div>{% endif %}
+  {% if sc_left_items or sc_right_items %}
   <div class="sc-cols">
+    {% if sc_left_items %}
     <div class="sc-col">
       <div class="sc-tag up">{{ sc_left_label }}</div>
       {% for item in sc_left_items %}
       <div class="sc-row"><div class="sc-dot up"></div><span>{{ item | safe }}</span></div>
       {% endfor %}
     </div>
+    {% endif %}
+    {% if sc_right_items %}
     <div class="sc-col">
       <div class="sc-tag dn">{{ sc_right_label }}</div>
       {% for item in sc_right_items %}
       <div class="sc-row"><div class="sc-dot dn"></div><span>{{ item | safe }}</span></div>
       {% endfor %}
     </div>
+    {% endif %}
   </div>
-  <div class="sc-footer">{{ sc_footer | safe }}</div>
+  {% endif %}
+  {% if sc_footer %}<div class="sc-footer">{{ sc_footer | safe }}</div>{% endif %}
 </div>
+{% endif %}

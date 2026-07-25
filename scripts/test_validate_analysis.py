@@ -445,6 +445,171 @@ def test_key_drivers_us_fetch_failure_fail_open(monkeypatch):
     assert len(analysis["key_drivers"]) == 1
 
 
+# ── analysis_format 분기 필드 금지패턴 스캔 (2026-07-25 갭) ────────────────────
+# generate_html.build_{signal,qa,scenario,flow,keynum}_context가 렌더하는 산문이
+# SCALAR_PROSE·_filter_list_prose 어디에도 배선되지 않아 스캔을 통째로 우회했다.
+def _fmt_base(fmt, **fields):
+    a = {"prediction": {"direction": "상승 우위", "up_pct": 55}, "analysis_format": fmt}
+    a.update(fields)
+    return a
+
+
+def test_signal_format_prose_scanned():
+    a = _fmt_base(
+        "signal",
+        sig_verdict="코스피 시총이 <b>7경 원</b>을 넘었어요.",
+        sig_items=[
+            {"level": "up", "label": "수급", "desc": "외국인이 순매수로 돌아섰어요."},
+            {"level": "down", "label": "환율", "desc": "원/달러 환율이 2,500원을 넘었어요."},
+        ],
+    )
+    r = v.validate(a, {}, "kospi-close")
+    assert not r["blocks"]
+    assert r["analysis"]["sig_verdict"] == ""
+    assert any("sig_verdict" in w for w in r["warnings"])
+    labels = [i["label"] for i in r["analysis"]["sig_items"]]
+    assert labels == ["수급"], labels
+    assert any("sig_items" in c for c in r["corrections"])
+
+
+def test_qa_format_prose_scanned():
+    a = _fmt_base("qa", qa_items=[
+        {"q": "오늘 사도 될까요?", "a": "외국인 수급을 먼저 보세요."},
+        {"q": "시총이 얼마예요?", "a": "코스피 시총이 6경 원이에요."},
+        {"q": "코스피가 +45% 오를까요?", "a": "정상 답변이에요."},
+    ])
+    r = v.validate(a, {}, "kospi-close")
+    qs = [i["q"] for i in r["analysis"]["qa_items"]]
+    assert qs == ["오늘 사도 될까요?"], qs   # a 위반·q 위반 모두 제거
+    assert any("qa_items" in c for c in r["corrections"])
+
+
+def test_scenario_format_prose_scanned():
+    a = _fmt_base(
+        "scenario",
+        sc_summary="외국인이 순매수로 돌아섰어요. 코스피 시총은 7경 원이에요.",
+        sc_left_items=["정상 근거예요.", "환율이 950원까지 급락했어요."],
+        sc_right_items=["반등 근거예요."],
+        sc_footer="코스피가 +45% 폭등할 수 있어요.",
+    )
+    r = v.validate(a, {}, "kospi-close")
+    assert not r["blocks"]
+    assert "경" not in r["analysis"]["sc_summary"]
+    assert "외국인이 순매수로 돌아섰어요." in r["analysis"]["sc_summary"]
+    assert r["analysis"]["sc_left_items"] == ["정상 근거예요."]
+    assert r["analysis"]["sc_right_items"] == ["반등 근거예요."]
+    assert r["analysis"]["sc_footer"] == ""
+    assert any("sc_footer" in w for w in r["warnings"])
+
+
+def test_flow_format_prose_scanned():
+    a = _fmt_base(
+        "flow",
+        flow_lead="시총 6경 원 돌파예요.",
+        flow_steps=[
+            {"stage": "원인", "dir": "up", "title": "간밤 미국 강세", "text": "SOX가 올랐어요."},
+            {"stage": "결과", "dir": "up", "title": "지수", "text": "코스피가 +45% 폭등해요."},
+        ],
+    )
+    r = v.validate(a, {}, "kospi")
+    assert r["analysis"]["flow_lead"] == ""
+    assert [s["stage"] for s in r["analysis"]["flow_steps"]] == ["원인"]
+
+
+def test_keynum_format_prose_scanned():
+    a = _fmt_base(
+        "keynum",
+        num_take="코스피 시총 7경 원 시대예요.",
+        num_cards=[
+            {"label": "외국인", "value": "+1,200억", "dir": "up", "caption": "순매수예요."},
+            {"label": "환율", "value": "2,500원", "dir": "down", "caption": "원/달러 환율이 2,500원이에요."},
+        ],
+    )
+    r = v.validate(a, {}, "kospi")
+    assert r["analysis"]["num_take"] == ""
+    assert [c["label"] for c in r["analysis"]["num_cards"]] == ["외국인"]
+
+
+def test_why_what_so_format_prose_scanned_for_kospi():
+    """kospi는 SCALAR_PROSE가 빈 리스트라 기본 포맷(why_what_so) 본문도 무검증이었다."""
+    a = _fmt_base(
+        "why_what_so",
+        reasons=["이유1 해요.", "이유2 해요."],
+        reason_lead="코스피 시총이 7경 원이에요.",
+        why="외국인이 순매수했어요. 환율은 950원이에요.",
+        what="정상이에요.", so_what="정상이에요.",
+    )
+    r = v.validate(a, {}, "kospi")
+    assert r["analysis"]["reason_lead"] == ""
+    assert "950원" not in r["analysis"]["why"]
+    assert "외국인이 순매수했어요." in r["analysis"]["why"]
+
+
+def test_other_format_fields_untouched():
+    """렌더되지 않는 다른 포맷 필드는 스캔 대상이 아니다(죽은 필드를 건드리지 않는다)."""
+    a = _fmt_base("qa",
+                  qa_items=[{"q": "정상 질문이에요?", "a": "정상 답변이에요."}],
+                  sig_verdict="코스피 시총 7경 원이에요.")
+    r = v.validate(a, {}, "kospi-close")
+    assert r["analysis"]["sig_verdict"] == "코스피 시총 7경 원이에요."
+
+
+def test_unknown_format_warns():
+    """표에 없는 새 포맷은 경고로 알린다 — 무검증 통과를 조용히 넘기지 않는다."""
+    a = _fmt_base("newformat", newfmt_body="아무 산문이에요.")
+    r = v.validate(a, {}, "kospi")
+    assert any("newformat" in w and "미등재" in w for w in r["warnings"]), r["warnings"]
+
+
+def test_known_format_does_not_warn():
+    a = _fmt_base("signal", sig_verdict="정상 판정이에요.", sig_items=[])
+    r = v.validate(a, {}, "kospi-close")
+    assert not any("미등재" in w for w in r["warnings"]), r["warnings"]
+
+
+def test_key_drivers_forbidden_removed():
+    a = _fmt_base("signal", key_drivers=[
+        {"text": "<b>수급이 개선됐어요.</b> 외국인이 순매수예요.", "codes": []},
+        {"text": "<b>시총 확대예요.</b> 코스피 시총이 7경 원이에요.", "codes": []},
+    ])
+    r = v.validate(a, {}, "kospi")
+    texts = " ".join(d["text"] for d in r["analysis"]["key_drivers"])
+    assert "수급이 개선됐어요" in texts
+    assert "경" not in texts
+    assert any("key_drivers" in c for c in r["corrections"])
+
+
+def test_todays_view_dek_and_lists_scanned(monkeypatch):
+    monkeypatch.setattr(v, "_fetch_kospi_realdata", lambda code: {"error": "n/a"})
+    a = _fmt_base("split", todays_view={
+        "view_title": "제목",
+        "dek": "코스피 시총이 7경 원을 넘었어요.",
+        "recap": [
+            {"text": "외국인이 순매수로 전환했어요.", "codes": []},
+            {"text": "환율이 950원까지 급락했어요.", "codes": []},
+        ],
+        "outlook": [
+            {"tag": "watch", "text": "코스피가 +45% 폭등할지 보세요.", "source": None},
+            {"tag": "watch", "text": "수급 지속 여부를 보세요.", "source": None},
+        ],
+    })
+    r = v.validate(a, {}, "kospi")
+    tv = r["analysis"]["todays_view"]
+    assert tv["dek"] == ""
+    assert [x["text"] for x in tv["recap"]] == ["외국인이 순매수로 전환했어요."]
+    assert [x["text"] for x in tv["outlook"]] == ["수급 지속 여부를 보세요."]
+
+
+def test_us_issues_forbidden_removed():
+    a = _fmt_base("signal", us_issues=[
+        {"title": "엔비디아 강세", "body": "AI 수요가 견조해요."},
+        {"title": "시총 급증", "body": "시총이 7경 원을 넘었어요."},
+    ])
+    r = v.validate(a, {}, "kospi")
+    titles = [i["title"] for i in r["analysis"]["us_issues"]]
+    assert titles == ["엔비디아 강세"], titles
+
+
 if __name__ == "__main__":
     # monkeypatch 등 pytest 픽스처를 받는 테스트는 이 러너가 인자를 줄 수 없어 건너뛴다.
     # (예전엔 인자 없이 호출해 TypeError를 '실패'로 세서, 코드가 정상인데도 항상

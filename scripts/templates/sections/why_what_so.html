@@ -1,4 +1,7 @@
 {# WHY / WHAT / SO WHAT 형식 — 코스피·미국 브리핑용 #}
+{# validate_analysis가 금지 패턴으로 reason_lead·why·what·so_what을 통째로 비울 수 있다
+   (b_rows는 빈 필드를 담지 않는다) — 빈 카드 가드. #}
+{% if reason_lead or b_rows %}
 <div class="open-section">
   {% if not format_in_view %}<div class="open-section__title reason-section-title">{{ reason_title }}</div>{% endif %}
   <div class="section-card" style="margin-top:10px;">
@@ -19,3 +22,4 @@
     </div>
   </div>
 </div>
+{% endif %}
