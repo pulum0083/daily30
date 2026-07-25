@@ -2,7 +2,9 @@
 <div class="section-card">
   <div class="reason-title-bar">{{ reason_title }}</div>
   <div class="reason-body">
-    <p>{{ reason_lead | safe }}</p>
+    {# validate_analysis가 금지 패턴으로 market_summary를 통째로 비울 수 있다 —
+       그때 빈 <p>가 렌더되지 않게 가드한다. WHY/WHAT/SO가 본문을 이어받는다. #}
+    {% if reason_lead %}<p>{{ reason_lead | safe }}</p>{% endif %}
     <div class="b-format">
       {% for row in b_rows %}
       <div class="b-row{% if row.so_what %} so-what{% endif %}"><span class="b-label">{{ row.label }}</span><p class="b-text">{{ row.text | safe }}</p></div>

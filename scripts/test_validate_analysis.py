@@ -123,14 +123,36 @@ def test_block_reasons_gutted():
     assert any("reasons" in b for b in r["blocks"])   # 1개만 남아 최소 2 미만
 
 
-def test_block_close_scalar_prose():
+def test_close_scalar_prose_all_forbidden_is_emptied_not_blocked():
+    """스칼라 본문이 전부 금지 패턴이면 필드를 비우고 warning만 남긴다 — 차단하지 않는다.
+
+    2026-06-04(aa0e4eb3)에 "한 문장 때문에 브리핑 전체를 막는 건 과하다"로 정책이
+    바뀌었다. WHY/WHAT/SO가 본문을 이어받고, 템플릿이 빈 값을 가드한다.
+    """
     a = {
         "prediction": {"direction": "상승 우위", "up_pct": 55},
         "market_summary": "코스피 시가총액이 6경 원을 돌파했어요.",
         "why": "정상", "what": "정상", "so_what": "정상",
     }
     r = v.validate(a, {}, "kospi-close")
-    assert any("market_summary" in b for b in r["blocks"])
+    assert not r["blocks"], "발행을 막아서는 안 된다"
+    assert r["analysis"]["market_summary"] == "", "금지 문장은 남지 않아야 한다"
+    assert any("market_summary" in w for w in r["warnings"]), "warning으로 알려야 한다"
+
+
+def test_close_scalar_prose_partial_forbidden_keeps_clean_sentences():
+    """일부 문장만 금지 패턴이면 그 문장만 빼고 나머지로 발행한다."""
+    a = {
+        "prediction": {"direction": "상승 우위", "up_pct": 55},
+        "market_summary": "외국인이 순매수로 돌아섰어요. 시가총액이 6경 원을 넘었어요.",
+        "why": "정상", "what": "정상", "so_what": "정상",
+    }
+    r = v.validate(a, {}, "kospi-close")
+    assert not r["blocks"]
+    ms = r["analysis"]["market_summary"]
+    assert "외국인이 순매수로 돌아섰어요." in ms
+    assert "경" not in ms, f"금지 단위가 남았다: {ms!r}"
+    assert any("market_summary" in c for c in r["corrections"])
 
 
 def test_clean_analysis_passes():
@@ -424,10 +446,19 @@ def test_key_drivers_us_fetch_failure_fail_open(monkeypatch):
 
 
 if __name__ == "__main__":
+    # monkeypatch 등 pytest 픽스처를 받는 테스트는 이 러너가 인자를 줄 수 없어 건너뛴다.
+    # (예전엔 인자 없이 호출해 TypeError를 '실패'로 세서, 코드가 정상인데도 항상
+    #  7건 실패로 보였다.) 전체 검증은 pytest로 돌릴 것.
+    import inspect
     import traceback
+
     fns = [g for n, g in sorted(globals().items()) if n.startswith("test_") and callable(g)]
     passed = failed = 0
+    needs_fixture = []
     for fn in fns:
+        if inspect.signature(fn).parameters:
+            needs_fixture.append(fn.__name__)
+            continue
         try:
             fn()
             print(f"  ✓ {fn.__name__}")
@@ -436,5 +467,11 @@ if __name__ == "__main__":
             print(f"  ✗ {fn.__name__}")
             traceback.print_exc()
             failed += 1
+
     print(f"\n{passed} passed, {failed} failed")
+    if needs_fixture:
+        print(f"픽스처 필요로 건너뜀 {len(needs_fixture)}건 — 전체는 "
+              f"'python3 -m pytest {Path(__file__).name}'로 돌리세요:")
+        for n in needs_fixture:
+            print(f"  · {n}")
     sys.exit(1 if failed else 0)

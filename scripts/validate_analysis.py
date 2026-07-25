@@ -27,7 +27,11 @@ LATEST_FILE = {
     "kospi-close": "latest_kospi_close.json",
 }
 
-# 본문 스캔: 타입별 스칼라 필드(위반 시 차단) / 리스트 필드(원소 제거)
+# 본문 스캔 대상 스칼라 필드. 위반 시 **차단하지 않고** 금지 문장만 제거하고 발행을 잇는다
+# (2026-06-04 aa0e4eb3 — 한 문장 때문에 브리핑 전체를 막는 게 과했다).
+# 전체가 금지 패턴이면 필드를 비우고 warning만 남기므로, 이 필드를 렌더하는 템플릿은
+# 빈 값 가드가 있어야 한다(close_reason.html·why_what_so.html 참고).
+# 리스트 필드는 위반 원소만 제거된다.
 SCALAR_PROSE = {
     "kospi-close": ["market_summary", "why", "what", "so_what"],
     "kospi": [],
