@@ -1,10 +1,10 @@
-<!-- 코스피랩(kospilab.com) 대비 종목 시그널 서비스 경쟁력 점검 — 초판 2026-07-21 · 재점검 2026-07-23 -->
+<!-- 코스피랩(kospilab.com) 대비 종목 시그널 서비스 경쟁력 점검 — 초판 2026-07-21 · 재점검 2026-07-23 · 3차 2026-07-25 -->
 <!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>코스피랩 대비 경쟁력 점검 (재점검) — Double-Shot 종목 시그널</title>
+<title>코스피랩 대비 경쟁력 점검 (3차) — Double-Shot 종목 시그널</title>
 <style>
   :root{
     --bg:#f5f6f8; --card:#fff; --ink:#141619; --muted:#6b7280; --faint:#9aa0a8;
@@ -65,35 +65,49 @@
 <body>
 <div class="wrap">
 
-<h1>코스피랩 대비 경쟁력 점검 <span style="font-size:15px;font-weight:700;color:var(--good);vertical-align:3px;">재점검</span></h1>
+<h1>코스피랩 대비 경쟁력 점검 <span style="font-size:15px;font-weight:700;color:var(--good);vertical-align:3px;">3차</span></h1>
 <p class="sub">Double-Shot 종목 시그널(<code>/stocks/</code>) vs kospilab.com</p>
-<p class="asof">초판 2026년 7월 21일 · <b>재점검 2026년 7월 23일</b> — 초판 지적사항을 반영한 뒤의 진행 상황. 두 서비스 라이브 응답·<code>sitemap</code>·저장소를 다시 직접 대조.</p>
+<p class="asof">초판 2026년 7월 21일 · 재점검 2026년 7월 23일 · <b>3차 점검 2026년 7월 25일</b> — 재점검이 지목한 상위 2개 격차 중 1개가 해소됐다. 라이브 응답·<code>sitemap</code>·저장소를 다시 직접 대조.</p>
 
 <div class="lead">
-  <p><b>2일 만에 판이 바뀐 지점부터.</b> 초판의 <b>1·2순위였던 SEO 인프라가 사실상 해결됐다.</b> 종목·섹터 상세 46+8개에 <code>meta description</code>·<code>canonical</code>·<code>OG</code>·<code>JSON-LD</code>(BreadcrumbList+Corporation)·<code>robots</code>가 전면 주입됐고, 메타 누락 시 발행을 막는 <b>자동 게이트</b>까지 코드로 붙었다. 성장 전략의 1번 자산이 드디어 검색엔진에 <b>제대로 제출</b>되기 시작했다.</p>
-  <p>함께 정리된 것 — 섹터 8개 <code>sitemap</code> 등록(89→<b>98</b> URL), 죽어 있던 <b>특이 신호 전체 화면</b> 진입 링크 복원, 종목 상세 <b>PWA 설치 유도</b> 적용, 폰트 CDN <b>버전 고정</b>. 초판이 "신규 개발이 아니라 회수"라 불렀던 항목들이 대부분 회수됐다.</p>
-  <p><b>이제 남은 격차는 성격이 다르다.</b> 트래픽을 만드는 인프라는 거의 따라잡았고, 남은 건 <b>트래픽을 돈·재방문·검색자산으로 바꾸는 장치</b>다 — 수익화(AdSense), 검색을 받아낼 콘텐츠 페이지(용어·가이드), 리포트 깊이(연도별 컨센서스), 재방문 훅(관심종목). 코스피랩은 정확히 이 축들에서 아직 앞선다. 다만 이건 초판의 "인프라가 텅 비었다"와는 급이 다른, <b>한 단계 올라간 싸움</b>이다.</p>
+  <p><b>재점검의 1순위였던 콘텐츠 페이지가 해결됐다.</b> <code>/glossary/</code>가 신설돼 특이 신호 8종의 판정 임계값·자금 지도·AI 뱃지·커버드콜 침식 등 <b>8개 항목이 툴팁에서 페이지로 승격</b>됐다. 더 중요한 건 배선 방식이다 — 허브의 <b>?</b> 아이콘 6개가 실제 <code>&lt;a&gt;</code> 링크가 돼 해당 섹션으로 연결되고, 전 화면 공통 푸터(허브·월배당·상세 57개)에도 진입점이 붙었다. 재점검이 예고한 "서비스 화면과 1:1 연결되는 내부 링크"가 그대로 구현됐다.</p>
+  <p><b>리포트 깊이의 최대 격차였던 연도별 실적 컨센서스도 해소됐다.</b> 종목 상세에 <b>연간 실적</b> 섹션이 붙어 확정 실적과 컨센서스 추정(E)을 함께 렌더한다. 재점검이 "실측 소스 확보 선행 필요, 비용 높음"으로 6순위에 뒀던 항목이 네이버 실측으로 처리됐다 — 다만 <b>3종목 한정</b>이라 코스피랩과 정면으로 붙는 범위까지만 좁혀졌다.</p>
+  <p><b>덤으로 확보한 신규 자산.</b> ETF <b>자금 지도</b>(테마 16개·ETF 719개 실측 트리맵), 종목 상세 <b>업종 대비 밸류에이션</b> 섹션, 밤사이 반도체 11종목 확대. 코스피랩에 대응물이 없는 축들이다.</p>
+  <p><b>남은 격차는 이제 셋으로 줄었다</b> — 수익화(AdSense), 재방문 훅(관심종목), 커버리지 확대(뉴스·목표주가 3종목). 앞의 둘은 코스피랩이 여전히 앞서고, 셋 다 초판·재점검에서 <b>한 번도 움직이지 않은</b> 항목이라는 점이 이번 판의 핵심 관전 포인트다.</p>
 </div>
 
 <h2>0. 진행 상황 한눈에 (초판 대비)</h2>
-<p class="note">초판에서 지적한 14개 항목의 현재 상태. <b>6건 해결 · 8건 미해결.</b> 해결된 6건이 전부 초판 우선순위 상위(1·2·3·5)에 몰려 있다.</p>
+<p class="note">초판에서 지적한 14개 항목의 현재 상태. <b>8건 해결 · 6건 미해결</b>(재점검 6/8 → 3차 8/6). 이번 판에서 <b>용어 페이지·연도별 컨센서스</b> 2건이 추가로 해결됐고, 둘 다 재점검 우선순위 <b>1순위·6순위</b>였다.</p>
 <div class="scroll">
 <table>
-  <tr><th style="width:40%">초판 항목</th><th style="width:12%">초판 순위</th><th style="width:14%">상태(07-23)</th><th style="width:34%">실측 근거</th></tr>
-  <tr class="done-row"><td>종목·섹터 상세 SEO 메타<br><span class="note">desc·canonical·OG·JSON-LD·robots</span></td><td class="num">1 (치명)</td><td><span class="ok">✔ 해결</span></td><td><code>_head_seo.html</code> 공용 partial + <code>_seo_ctx()</code>. <code>/stocks/005930/</code> head 실측 전부 존재</td></tr>
-  <tr class="done-row"><td>발행 게이트 자동화</td><td class="num">2</td><td><span class="ok">✔ 해결</span></td><td>메타 누락 시 페이지 발행 차단 + CI 실패(<code>ef89346a</code>)</td></tr>
-  <tr class="done-row"><td>섹터 페이지 sitemap 등록</td><td class="num">—</td><td><span class="ok">✔ 해결</span></td><td>섹터 8개 등록 · 총 loc 89→<b>98</b></td></tr>
-  <tr class="done-row"><td>죽은 자산: 특이 신호 전체 화면 진입 링크</td><td class="num">3</td><td><span class="ok">✔ 해결</span></td><td>"특이 신호 전체 보기 →" 버튼 복원(<code>d44440e5</code>)</td></tr>
-  <tr class="done-row"><td>PWA 설치 유도 — 종목 상세</td><td class="num">5(부분)</td><td><span class="ok">✔ 해결</span></td><td><code>/stocks/{code}/</code>에 <code>manifest</code> 링크 적용</td></tr>
-  <tr class="done-row"><td>폰트 CDN 버전 고정</td><td class="num">⑧</td><td><span class="ok">✔ 해결</span></td><td><code>pretendard@v1.3.9</code> static(<code>@latest</code>→고정)</td></tr>
-  <tr><td>죽은 자산: ETF 전체 랭킹 진입 링크</td><td class="num">3</td><td><span class="no">✗ 미해결</span></td><td>화면 div만 존재 · <code>go('etf-rank')</code> 호출 0건</td></tr>
-  <tr><td>죽은 자산: 패시브 노출도 파이프라인</td><td class="num">3</td><td><span class="no">✗ 미해결</span></td><td><code>build_etf_exposure.py</code>는 있으나 워크플로우 미등록 · <code>web/data</code> 출력 없음</td></tr>
-  <tr><td>티어1 "AI 오늘의 전망" 카드</td><td class="num">—</td><td><span class="no">✗ 미해결</span></td><td><code>detail.html</code>에 0건</td></tr>
-  <tr><td>AdSense 수익화</td><td class="num">4</td><td><span class="no">✗ 미해결</span></td><td>전 페이지 광고 코드 0건(코스피랩은 계속 운영)</td></tr>
-  <tr><td>용어·지표 설명 페이지</td><td class="num">6</td><td><span class="no">✗ 미해결</span></td><td><code>/glossary</code>·<code>/guide</code> 등 404</td></tr>
-  <tr><td>관심종목 저장(localStorage)</td><td class="num">7</td><td><span class="no">✗ 미해결</span></td><td>0건</td></tr>
-  <tr><td>뉴스·목표주가 커버리지 확대</td><td class="num">8</td><td><span class="no">✗ 미해결</span></td><td>여전히 3종목(005930·000660·005380)</td></tr>
-  <tr><td>연도별 실적 컨센서스</td><td class="num">9</td><td><span class="no">✗ 미해결</span></td><td>0건 · 실측 소스 확보 선행 필요</td></tr>
+  <tr><th style="width:36%">초판 항목</th><th style="width:11%">초판 순위</th><th style="width:13%">상태(07-23)</th><th style="width:13%">상태(07-25)</th><th style="width:27%">실측 근거</th></tr>
+  <tr class="done-row"><td>종목·섹터 상세 SEO 메타<br><span class="note">desc·canonical·OG·JSON-LD·robots</span></td><td class="num">1 (치명)</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 유지</span></td><td><code>_head_seo.html</code> 공용 partial + <code>_seo_ctx()</code>. <code>/stocks/005930/</code> head 실측 전부 존재</td></tr>
+  <tr class="done-row"><td>발행 게이트 자동화</td><td class="num">2</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 유지</span></td><td>메타 누락 시 페이지 발행 차단 + CI 실패(<code>ef89346a</code>)</td></tr>
+  <tr class="done-row"><td>섹터 페이지 sitemap 등록</td><td class="num">—</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 확대</span></td><td>총 loc 89→98→<b>102</b>(<code>/glossary/</code> 포함)</td></tr>
+  <tr class="done-row"><td>죽은 자산: 특이 신호 전체 화면 진입 링크</td><td class="num">3</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 유지</span></td><td>"특이 신호 전체 보기 →" 버튼 복원(<code>d44440e5</code>)</td></tr>
+  <tr class="done-row"><td>PWA 설치 유도 — 종목 상세</td><td class="num">5(부분)</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 유지</span></td><td><code>/stocks/{code}/</code>에 <code>manifest</code> 링크 적용</td></tr>
+  <tr class="done-row"><td>폰트 CDN 버전 고정</td><td class="num">⑧</td><td><span class="ok">✔</span></td><td><span class="ok">✔ 유지</span></td><td><code>pretendard@v1.3.9</code> static(<code>@latest</code>→고정)</td></tr>
+  <tr class="done-row"><td><b>용어·지표 설명 페이지</b></td><td class="num">6</td><td><span class="no">✗</span></td><td><span class="ok">✔ 신규해결</span></td><td><code>/glossary/</code> HTTP 200 · 8개 섹션 · FAQPage JSON-LD · 허브 <b>?</b> 6개 링크화 + 전 화면 푸터 배선(<code>4364c4bb</code>)</td></tr>
+  <tr class="done-row"><td><b>연도별 실적 컨센서스</b></td><td class="num">9</td><td><span class="no">✗</span></td><td><span class="mid">◐ 부분해결</span></td><td>상세 "연간 실적" 섹션 라이브 — 확정+컨센서스(E) 렌더. 단 <code>ANNUAL_FIN_CODES</code> <b>3종목 한정</b></td></tr>
+  <tr><td>죽은 자산: ETF 전체 랭킹 진입 링크</td><td class="num">3</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td>화면 div만 존재 · <code>go('etf-rank')</code> 호출 0건 (3판 연속 동일)</td></tr>
+  <tr><td>죽은 자산: 패시브 노출도 파이프라인</td><td class="num">3</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td><code>.github/workflows/</code>에 <code>build_etf_exposure</code> 0건 (3판 연속 동일)</td></tr>
+  <tr><td>티어1 "AI 오늘의 전망" 카드</td><td class="num">—</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td><code>detail.html</code>에 0건</td></tr>
+  <tr><td>AdSense 수익화</td><td class="num">4</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td>전 페이지 <code>adsbygoogle</code> 0건. 코스피랩은 3판 연속 운영 중(브라우저 실측)</td></tr>
+  <tr><td>관심종목 저장(localStorage)</td><td class="num">7</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td><code>localStorage</code>는 보유 시뮬레이터·야간 토글 용도만. 관심종목 0건</td></tr>
+  <tr><td>뉴스·목표주가 커버리지 확대</td><td class="num">8</td><td><span class="no">✗</span></td><td><span class="no">✗ 미해결</span></td><td>여전히 3종목(005930·000660·005380)</td></tr>
+</table>
+</div>
+<p class="note"><b>3판 연속 안 움직인 항목이 5개</b>(etf-rank·패시브·티어1·AdSense·관심종목)다. 해결된 8건은 전부 "SEO·콘텐츠 자산" 축인 반면, 정체된 5건은 "수익화·재방문·죽은 자산 회수" 축에 몰려 있다 — 손이 가는 쪽만 반복해서 진행되고 있다는 신호로 읽힌다.</p>
+
+<h2>0-1. 리포트에 없던 신규 자산 (07-23 이후)</h2>
+<p class="note">재점검 이후 추가된 것 중 경쟁 축에 영향을 주는 항목. 전부 코스피랩에 대응물이 없다.</p>
+<div class="scroll">
+<table>
+  <tr><th style="width:26%">자산</th><th style="width:16%">상태</th><th style="width:58%">실측 내용</th></tr>
+  <tr><td><b>ETF 자금 지도</b></td><td class="ok">라이브</td><td>테마 16개 · ETF 719개 집계 트리맵. 순자산÷기준가로 추정한 발행좌수 차분(가격 상승분 제외) — <code>/data/etf-flows.json</code> 실측 갱신 중</td></tr>
+  <tr><td><b>업종 대비 밸류에이션</b></td><td class="ok">라이브</td><td>종목 상세에 섹션 추가 — PER·PBR을 업종 중앙값과 대조</td></tr>
+  <tr><td><b>밤사이 반도체 11종목</b></td><td class="ok">확대</td><td>9→11(TSMC·샌디스크). 코스피랩 핵심 훅과 같은 축</td></tr>
+  <tr><td><b>공지 패널</b></td><td class="ok">라이브</td><td>GNB에 공지 진입 — 갱신 이력을 사용자에게 노출</td></tr>
 </table>
 </div>
 
@@ -106,124 +120,135 @@
   <tr><td>시세·신호 커버리지</td><td class="ok">46종목</td><td>3종목(+미국 종목 추가 가능)</td></tr>
   <tr><td>뉴스·목표주가 커버리지</td><td class="no">3종목</td><td>3종목</td></tr>
   <tr><td>종목 상세 SEO 메타</td><td class="ok">전면(desc·canonical·OG·JSON-LD·robots)</td><td class="ok">있음</td></tr>
-  <tr><td>sitemap URL 수</td><td class="num ok">98 <span class="note">(초판 89)</span></td><td class="num">24</td></tr>
+  <tr><td>sitemap URL 수</td><td class="num ok">102 <span class="note">(초판 89 · 재점검 98)</span></td><td class="num">24</td></tr>
   <tr><td>수익화</td><td class="no">없음</td><td class="ok">Google AdSense 운영 중</td></tr>
-  <tr><td>정보성 콘텐츠 페이지</td><td class="no">없음</td><td class="ok">용어·가이드·인사이트·FAQ</td></tr>
-  <tr><td>재방문 장치</td><td>매일 갱신 데이터(수동 재방문)</td><td>관심종목 핀 · 커뮤니티 · 활동 등급</td></tr>
+  <tr><td>정보성 콘텐츠 페이지</td><td class="mid">용어 설명 1종<span class="note"> (8개 섹션)</span></td><td class="ok">용어·가이드·인사이트·FAQ</td></tr>
+  <tr><td>연도별 실적 컨센서스</td><td class="mid">3종목</td><td class="ok">3종목</td></tr>
+  <tr><td>ETF 자금 흐름</td><td class="ok">테마 16 · ETF 719 트리맵</td><td class="no">없음</td></tr>
+  <tr><td>재방문 장치</td><td class="no">매일 갱신 데이터(수동 재방문)</td><td class="ok">관심종목 핀 · 커뮤니티 · 활동 등급</td></tr>
 </table>
 </div>
-<p class="note">초판의 "SEO 메타 전무" 행이 사라졌다는 게 이번 재점검의 핵심 변화다. 남은 우위 축(수익화·콘텐츠·재방문)은 코스피랩이 여전히 갖고 있지만, 커버리지(46 대 3)·검색 인프라는 이제 우리 쪽으로 기울었다.</p>
+<p class="note">재점검에서 "없음"이던 <b>정보성 콘텐츠·연도별 컨센서스</b> 두 행이 이번에 채워졌다. 콘텐츠는 아직 1종 대 4종이라 열세지만 "0 대 4"에서 성격이 바뀌었고, 컨센서스는 <b>같은 3종목 범위에서 동률</b>이 됐다. 남은 명확한 열세는 <b>수익화·재방문</b> 둘뿐이다.</p>
 
 <h2>2. 남은 격차</h2>
 
-<h3><span class="tag t-crit">치명</span>① 수익화 장치가 여전히 없다</h3>
+<h3><span class="tag t-crit">치명</span>① 수익화 장치가 여전히 없다 <span class="note" style="font-weight:400">— 3판 연속 무변화</span></h3>
 <div class="card">
-<p>초판 이후 <b>가장 움직이지 않은 항목</b>이다. 허브·종목 상세 어디에도 광고 코드가 <b>0건</b>이고, 코스피랩은 전 페이지 AdSense + <code>google-adsense-account</code> 메타로 소유권까지 선언한 상태가 그대로다.</p>
-<p>이제는 <b>트래픽을 만드는 쪽(SEO)이 해결됐으니</b> 돈으로 바꾸는 쪽의 공백이 더 도드라진다. 승인 심사 기간을 고려하면, 색인이 막 시작된 지금이 오히려 신청 적기다 — 트래픽이 실제로 늘어난 뒤 신청하면 그 사이 기간을 통째로 버린다.</p>
+<p>초판·재점검·3차에 걸쳐 <b>단 한 번도 움직이지 않은 유일한 치명 항목</b>이다. 허브·종목 상세 어디에도 광고 코드가 <b>0건</b>이고, 코스피랩은 전 페이지 AdSense + <code>google-adsense-account</code> 메타로 소유권까지 선언한 상태가 그대로다.</p>
+<p>재점검이 "색인이 막 시작된 지금이 신청 적기"라 했던 시점에서 <b>이틀이 더 지났다.</b> 그 사이 <code>/glossary/</code>까지 붙어 색인 대상은 오히려 늘었는데(sitemap 102), 심사 대기 시계는 여전히 <b>돌기 시작하지도 않았다.</b> 이제 이 항목은 "우선순위가 낮아서 밀린 것"이 아니라 <b>구조적으로 계속 미뤄지는 항목</b>으로 봐야 한다 — 다음 사이클에서 다른 무엇보다 먼저 처리하지 않으면 4판에서도 같은 문장을 쓰게 된다.</p>
 </div>
 
-<h3><span class="tag t-crit">치명</span>② 검색 유입을 받아낼 콘텐츠 페이지가 없다</h3>
+<h3><span class="tag t-good">해결</span>② 검색 유입을 받아낼 콘텐츠 페이지 <span class="note" style="font-weight:400">— 재점검 1순위, 해소됨</span></h3>
 <div class="card">
-<p>메타를 붙여 색인 <b>경로</b>는 열었지만, 정작 <b>검색어를 받아낼 페이지</b>가 없다. <code>/glossary</code>·<code>/guide</code> 등은 전부 404다. 코스피랩은 용어사전·투자가이드·인사이트·FAQ를 이번 재확인에서도 그대로 링크하고 있었다.</p>
-<p class="note">우리에겐 설명할 거리가 이미 많다 — 특이 신호 8종의 판정 임계값, 역행 상승·투매, 밸류에이션 괴리율, 커버드콜 침식 프록시. 전부 <b>툴팁 안에만 갇혀</b> 검색엔진이 못 본다. 툴팁을 페이지로 승격하면 서비스 화면과 1:1로 연결돼 내부 링크도 자연스럽다. <b>SEO 메타 공사가 끝난 지금, 이 콘텐츠 페이지가 다음 최대 레버다.</b></p>
+<p>재점검이 "다음 최대 레버"로 지목한 항목이 처리됐다. <code>/glossary/</code>가 신설돼 <b>특이 신호 8종의 판정 임계값</b>(역행 상승·하락 3%p, 거래량 20일 평균 1.5배, 52주 신고가 98% 등)·자금 지도·코스피 주도주·상승 모멘텀·밤사이 반도체·AI 뱃지·거래량/패시브·커버드콜 침식 <b>8개 섹션</b>이 툴팁에서 페이지로 승격됐다.</p>
+<p>배선이 특히 재점검 예고대로다 — 허브의 <b>?</b> 아이콘 6개를 <code>&lt;a href="/glossary/#앵커"&gt;</code>로 바꿔 <b>서비스 화면과 1:1로 연결</b>했다. 부수 효과로 <b>모바일에서 툴팁을 볼 수 없던 문제</b>까지 해소됐다(hover가 없어 원래 열리지 않았다). 전 화면 공통 푸터(허브·월배당·상세 57개)에도 진입점이 붙어 내부 링크가 사이트 전역에 깔렸다.</p>
+<p class="note">남은 격차는 <b>양</b>이다 — 코스피랩은 용어·가이드·인사이트·FAQ 4종을 운영한다. 우리는 1종(8섹션)이라 "0 대 4"에서 "1 대 4"가 됐다. 다만 우리 쪽 콘텐츠는 <b>남이 못 쓰는 것</b>(자체 신호의 판정 임계값 공개)이라 일반 용어사전과 검색어가 겹치지 않는다는 차이가 있다.</p>
 </div>
 
-<h3><span class="tag t-warn">중요</span>③ 죽은 자산 — 절반만 회수됐다</h3>
+<h3><span class="tag t-warn">중요</span>③ 죽은 자산 — 절반만 회수된 채 2판째 정지</h3>
 <div class="card">
-<p>초판이 지적한 4개 중 <b>특이 신호 전체 화면 진입 링크는 복원</b>됐다(✔). 나머지 셋은 그대로다.</p>
+<p>초판이 지적한 4개 중 <b>특이 신호 전체 화면 진입 링크는 복원</b>됐다(✔). 나머지 셋은 재점검 이후에도 <b>변화 0</b>이다.</p>
 <div class="scroll">
 <table>
   <tr><th style="width:30%">자산</th><th style="width:20%">상태</th><th style="width:50%">확인 내용</th></tr>
   <tr><td><b>특이 신호 전체 화면</b></td><td class="ok">✔ 회수</td><td>"특이 신호 전체 보기 →" 버튼 복원 · 스켈레톤 로딩까지 추가</td></tr>
-  <tr><td><b>ETF 전체 랭킹</b><br><span class="note">etf-rank</span></td><td class="no">도달 불가</td><td>화면 마크업은 완성이나 진입 링크(<code>go('etf-rank')</code>) 여전히 0건</td></tr>
-  <tr><td><b>패시브 노출도</b></td><td class="no">정지</td><td><code>build_etf_exposure.py</code>가 어느 워크플로우에도 없고 출력이 <code>web/data</code> 밖. 초판 이후 변화 없음</td></tr>
+  <tr><td><b>ETF 전체 랭킹</b><br><span class="note">etf-rank</span></td><td class="no">도달 불가</td><td>화면 마크업은 완성이나 진입 링크(<code>go('etf-rank')</code>) <b>3판 연속 0건</b></td></tr>
+  <tr><td><b>패시브 노출도</b></td><td class="no">정지</td><td><code>build_etf_exposure.py</code>가 어느 워크플로우에도 없고 출력이 <code>web/data</code> 밖. <b>초판 이후 변화 없음</b></td></tr>
   <tr><td><b>티어1 "AI 오늘의 전망"</b></td><td class="no">미구현</td><td><code>detail.html</code>에 0건. 사후 트랙레코드만 있고 당일 예측 표시 없음</td></tr>
 </table>
 </div>
-<p class="note">ETF 랭킹은 <b>링크 한 줄</b>이면 살아난다 — 특이 신호 화면과 같은 방식으로 이미 검증됐으니 가장 싼 회수다.</p>
+<p class="note">ETF 랭킹은 <b>링크 한 줄</b>이면 살아난다 — 특이 신호 화면과 같은 방식으로 이미 검증됐으니 가장 싼 회수인데, 그 싼 것이 두 판째 밀려 있다. 이번 판에서 <code>/glossary/</code> 같은 <b>더 비싼 신규 개발</b>은 진행된 반면 이건 그대로라는 점이 대비된다 — 비용이 아니라 <b>눈에 덜 띄어서</b> 밀리는 항목으로 보인다.</p>
 </div>
 
-<h3><span class="tag t-warn">중요</span>④ 리포트 깊이 — 같은 3종목에서 아직 밀린다</h3>
+<h3><span class="tag t-good">해결</span>④ 리포트 깊이 — 연도별 컨센서스 확보로 동률 <span class="note" style="font-weight:400">(3종목 한정)</span></h3>
 <div class="card">
-<p>양쪽 다 삼성전자·SK하이닉스·현대차만 다뤄 정면 비교가 성립하는 영역. 초판 이후 이 축의 격차는 거의 그대로다.</p>
+<p>양쪽 다 삼성전자·SK하이닉스·현대차만 다뤄 정면 비교가 성립하는 영역. <b>재점검이 "가장 큰 격차"로 지목한 연도별 영업이익 컨센서스가 이번에 붙었다.</b></p>
 <div class="scroll">
 <table>
   <tr><th style="width:34%">항목</th><th style="width:33%">우리</th><th style="width:33%">코스피랩</th></tr>
   <tr><td>목표가</td><td class="ok">최저·평균·최고 + 상승여력 + 투자의견</td><td>평균·최고 + 상승여력 + 도달률 막대</td></tr>
   <tr><td>컨센서스 추이</td><td class="ok">6개월 변화 그래프</td><td class="no">없음</td></tr>
-  <tr><td>연도별 실적 컨센서스</td><td class="no">없음</td><td class="ok">25 확정 / 26·27 예상 영업이익</td></tr>
+  <tr class="done-row"><td>연도별 실적 컨센서스</td><td class="ok">확정 실적 + 추정(E) 차트<span class="note"> — 신규</span></td><td class="ok">25 확정 / 26·27 예상 영업이익</td></tr>
+  <tr><td>업종 대비 밸류에이션</td><td class="ok">PER·PBR 업종 중앙값 대조<span class="note"> — 신규</span></td><td class="no">없음</td></tr>
   <tr><td>정렬</td><td class="no">고정</td><td class="ok">최신·영업이익·목표가순</td></tr>
   <tr><td>원문 PDF 링크</td><td class="no">없음</td><td class="ok">건별 제공</td></tr>
 </table>
 </div>
-<p><b>가장 큰 격차는 여전히 연도별 영업이익 컨센서스</b>다. 목표주가만으론 "왜 그 가격인지"가 안 보이는데, 실적 추정치가 붙으면 근거가 생긴다. 단, 실측 소스 확보가 선행돼야 하고 없으면 섹션 생략이 원칙이다(운영 규칙 0).</p>
+<p>이 축의 <b>구조적 열세는 해소됐다.</b> 남은 건 정렬·PDF 링크 같은 편의 기능뿐이고, 반대로 <b>컨센서스 추이·업종 대비 밸류에이션</b>은 우리에게만 있다.</p>
+<p class="note">단, <code>ANNUAL_FIN_CODES</code>가 <b>3종목 고정</b>이라 나머지 43개 상세에는 이 섹션이 없다. 코스피랩의 3종목은 구조적 제약이지만 우리는 <b>수집 범위 선택</b>이므로, 이 축의 우위를 굳히려면 확대가 다음 수순이다(실측 소스 없으면 섹션 생략 — 운영 규칙 0).</p>
 </div>
 
-<h3><span class="tag t-warn">중요</span>⑤ 재방문 장치(관심종목)가 없다</h3>
+<h3><span class="tag t-crit">치명</span>⑤ 재방문 장치(관심종목)가 없다 <span class="note" style="font-weight:400">— 3판 연속 무변화</span></h3>
 <div class="card">
-<p>초판 이후 미변경. 관심종목 저장(<code>localStorage</code>)이 없어 <b>46종목을 커버해도 사용자는 매번 찾아 들어가야 한다.</b> 커버리지 우위가 재방문으로 이어지지 못하고 상쇄된다.</p>
-<p class="note">로그인·커뮤니티까지 갈 필요는 없다(코스피랩 커뮤니티도 글 0건). <b>계정 없이 localStorage로 관심종목만 저장</b>하는 중간 단계가 비용 대비 효과가 가장 좋다 — <code>income-designer</code>에서 이미 검증된 패턴이다.</p>
+<p>초판 이후 미변경. 관심종목 저장이 없어 <b>46종목을 커버해도 사용자는 매번 찾아 들어가야 한다.</b> 커버리지 우위가 재방문으로 이어지지 못하고 상쇄된다.</p>
+<p><b>이번 판에서 중요도가 올라갔다.</b> <code>/glossary/</code>로 검색 유입 경로가 열리고 연간 실적으로 페이지 체류 가치도 붙었는데, <b>돌아올 이유</b>가 없으면 유입이 1회성으로 끝난다. 유입을 늘리는 공사가 진행될수록 재방문 훅의 부재가 손실로 환산된다 — 그래서 이 항목을 <b>중요 → 치명</b>으로 올렸다.</p>
+<p class="note">로그인·커뮤니티까지 갈 필요는 없다(코스피랩 커뮤니티도 글 0건). <b>계정 없이 localStorage로 관심종목만 저장</b>하는 중간 단계가 비용 대비 효과가 가장 좋다 — 월배당 계산기의 보유 종목 저장에서 <b>이미 검증된 패턴</b>이라 코드를 그대로 옮길 수 있다.</p>
 </div>
 
-<h3><span class="tag t-info">참고</span>⑥ 뉴스·목표주가 커버리지는 3종목 그대로</h3>
+<h3><span class="tag t-warn">중요</span>⑥ 뉴스·목표주가 커버리지는 3종목 그대로 <span class="note" style="font-weight:400">— 연간 실적도 같은 3종목</span></h3>
 <div class="card">
-<p>46개 상세 페이지 중 43개는 뉴스·목표주가 섹션이 비어 있다. SEO 메타가 붙어 색인은 되지만, 정작 <b>페이지 본문의 콘텐츠 밀도</b>가 3종목 외엔 얇다. 검색 유입이 늘수록 이 얇음이 이탈률로 드러날 수 있다.</p>
-<p class="note">코스피랩의 3종목 한정은 <b>구조적 제약</b>(해외 영구선물 상장 종목이 그 3개뿐)이라 못 늘리지만, 우리의 3종목 한정은 <b>수집 범위 선택</b>이라 바꿀 수 있다. 룰 §8 "최소 콘텐츠 기준"에 걸리는 페이지가 없는지 함께 점검할 것.</p>
+<p>46개 상세 페이지 중 43개는 뉴스·목표주가 섹션이 비어 있다. 이번에 추가된 <b>연간 실적도 정확히 같은 3종목</b>(<code>ANNUAL_FIN_CODES</code>)이라, 깊이 있는 콘텐츠가 붙는 페이지와 얇은 페이지의 <b>격차가 오히려 더 벌어졌다.</b></p>
+<p>구조가 이렇게 굳어지고 있다 — 3종목은 뉴스·목표주가·컨센서스 추이·연간 실적을 전부 갖춘 <b>두꺼운 페이지</b>, 나머지 43종목은 시세·신호·밸류에이션만 있는 <b>얇은 페이지</b>. SEO 메타로 43개 전부 색인은 되지만, 유입된 사용자가 만나는 밀도가 다르다. 그래서 이 항목을 <b>참고 → 중요</b>로 올렸다.</p>
+<p class="note">코스피랩의 3종목 한정은 <b>구조적 제약</b>(해외 영구선물 상장 종목이 그 3개뿐)이라 못 늘리지만, 우리의 3종목 한정은 <b>수집 범위 선택</b>이라 바꿀 수 있다 — 이 비대칭이 우리 쪽 최대 확장 여지다. 룰 §8 "최소 콘텐츠 기준"에 걸리는 페이지가 없는지 함께 점검할 것.</p>
 </div>
 
 <h2>3. 우리가 확실히 앞서는 것</h2>
 <div class="card">
-<p>재점검 시점에도 코스피랩이 흉내내기 어려운 축, 그리고 이번에 <b>새로 확보한 우위</b>를 함께 정리한다.</p>
+<p>코스피랩이 흉내내기 어려운 축, 그리고 이번 판에서 <b>새로 확보한 우위</b>를 함께 정리한다.</p>
 <ul>
-  <li><span class="tag t-good" style="margin:0">NEW</span> <b>검색 인프라를 따라잡았다.</b> 종목·섹터 54개 상세에 SEO 메타 전면 + 발행 게이트 자동화. 초판의 최대 약점이 2일 만에 강점으로 전환됐다.</li>
+  <li><span class="tag t-good" style="margin:0">NEW</span> <b>용어 페이지 = 남이 못 쓰는 콘텐츠.</b> <code>/glossary/</code>는 일반 용어사전이 아니라 <b>우리 신호의 판정 임계값 자체를 공개</b>한 문서다. 코스피랩의 용어사전과 검색어가 겹치지 않고, 서비스 화면과 1:1로 링크돼 내부 링크 구조까지 만든다.</li>
+  <li><span class="tag t-good" style="margin:0">NEW</span> <b>ETF 자금 지도.</b> 테마 16개·ETF 719개의 발행좌수 차분으로 순자금 흐름을 트리맵으로 제시. <b>가격 상승분을 제외한 순수 좌수 증감</b>만 집계하는 방식이라 단순 순자산 비교와 다르다. 코스피랩에 대응물 없음.</li>
+  <li><b>검색 인프라.</b> 종목·섹터 54개 상세에 SEO 메타 전면 + 발행 게이트 자동화. sitemap 102 대 24.</li>
   <li><b>시세·신호 커버리지 46 대 3.</b> 코스피랩의 3종목은 구조적 한계라 쉽게 못 늘린다.</li>
-  <li><b>규칙 기반 특이 신호 8종</b> — 역행 상승·하락·거래량 급증·신고가 근접·거래대금·수급 교차. <b>임계값을 툴팁에 전부 공개</b>하는 투명성도 차별점(이걸 페이지로 승격하면 §2②의 콘텐츠 자산이 된다).</li>
-  <li><b>섹터 브라우저 · ETF 랭킹 · 밸류에이션 시그널(코스피200 134종목) · 배당 인컴 설계기</b> — 전부 우리에게만.</li>
-  <li><b>AI 예측 + 사후 채점 공개.</b> 누적 <b>128전 87적중 68%</b>(코스피 66% · 미국 71%)를 부풀리지 않고 그대로 표기. 신뢰 자산이자 YMYL 방어 논리.</li>
+  <li><b>규칙 기반 특이 신호 8종</b> — 역행 상승·하락·거래량 급증·신고가 근접·거래대금·수급 교차. <b>임계값을 전부 공개</b>하는 투명성이 이번에 페이지 자산으로 전환됐다.</li>
+  <li><b>섹터 브라우저 · ETF 랭킹 · 밸류에이션 시그널(코스피200 134종목) · 업종 대비 밸류에이션 · 배당 인컴 설계기</b> — 전부 우리에게만.</li>
+  <li><b>AI 예측 + 사후 채점 공개.</b> 누적 <b>130전 88적중 68%</b>(코스피 65% · 미국 71%)를 부풀리지 않고 그대로 표기. 신뢰 자산이자 YMYL 방어 논리.</li>
   <li><b>커버드콜 원금성 분배 폭로 · 데이터 정합성 파이프라인.</b> 검증 불가 데이터는 섹션을 생략한다 — 코스피랩은 면책 문구로 방어하는 쪽.</li>
-  <li><span class="tag t-good" style="margin:0">확장</span> <b>야간 24시간 가격.</b> "밤사이 미국 반도체 시황"을 9→11종목으로 확대(TSMC·샌디스크 추가 — NAND·파운드리 벨웨더 보강). 코스피랩 핵심 훅과 같은 축을 삼성·하이닉스 read-through로 운영 중.</li>
+  <li><b>야간 24시간 가격 11종목.</b> 코스피랩 핵심 훅과 같은 축을 삼성·하이닉스 read-through로 운영 중.</li>
 </ul>
 </div>
 
 <h2>4. 다음 우선순위</h2>
-<p class="note">초판 1·2·3(부분)·5는 완료. 아래는 <b>남은 항목만</b> 현재 시점 기준으로 재정렬했다. 상위 3개는 여전히 "이미 있는 것을 노출/회수"에 가까워 비용이 낮다.</p>
+<p class="note">재점검의 1순위(용어 페이지)·6순위(연도별 컨센서스)가 완료돼 목록에서 빠졌다. 남은 항목을 현재 시점 기준으로 재정렬한다. <b>1·2번은 3판 연속 밀린 항목</b>이라 이번엔 다른 무엇보다 먼저 처리할 것을 권한다.</p>
 <div class="scroll">
 <table>
-  <tr><th style="width:6%">순위</th><th style="width:32%">할 일</th><th style="width:14%">비용</th><th style="width:48%">근거</th></tr>
-  <tr><td class="num"><b>1</b></td><td><b>용어·지표 설명 페이지 신설</b><br><span class="note">특이 신호 8종·밸류에이션·침식 프록시</span></td><td>중간</td><td>SEO 메타로 경로는 열렸으나 검색어를 받을 페이지가 없다. 설명은 툴팁에 이미 다 써놨다 — 페이지로 승격만 하면 서비스 화면과 1:1로 연결돼 내부 링크도 자연스럽다.</td></tr>
-  <tr><td class="num"><b>2</b></td><td><b>AdSense 도입</b></td><td>낮음</td><td>수익화 0. 색인이 막 시작된 지금이 심사 기간을 감안한 신청 적기.</td></tr>
-  <tr><td class="num"><b>3</b></td><td><b>죽은 자산 나머지 회수</b><br><span class="note">etf-rank 링크 · 패시브 노출도 파이프라인</span></td><td>낮음</td><td>ETF 랭킹은 링크 한 줄(특이 신호 화면과 동일 방식). 패시브 노출도는 워크플로우 등록 + 출력 경로를 <code>web/data/</code>로 옮기면 살아난다.</td></tr>
-  <tr><td class="num"><b>4</b></td><td><b>관심종목 저장(localStorage)</b></td><td>중간</td><td>계정 없이 재방문 동기를 만드는 가장 싼 방법. 46종목 우위가 "매번 찾아 들어가야 함"으로 상쇄되는 걸 막는다.</td></tr>
-  <tr><td class="num"><b>5</b></td><td><b>뉴스·목표주가 커버리지 확대</b><br><span class="note">3종목 → 주요 종목</span></td><td>중간~높음</td><td>SEO로 유입되는 43개 페이지의 본문 밀도를 채운다. 룰 §8 최소 콘텐츠 기준 점검 병행.</td></tr>
-  <tr><td class="num"><b>6</b></td><td><b>연도별 실적 컨센서스</b></td><td>높음</td><td>같은 3종목에서 밀리는 가장 큰 격차. 실측 소스 확보가 선행, 없으면 섹션 생략(운영 규칙 0).</td></tr>
-  <tr><td class="num"><b>7</b></td><td><b>티어1 "AI 오늘의 전망" 카드</b></td><td>중간</td><td>룰 §2가 정의한 2티어 신호 구조의 절반. 당일 예측 표시가 빠져 있다.</td></tr>
+  <tr><th style="width:6%">순위</th><th style="width:30%">할 일</th><th style="width:12%">비용</th><th style="width:12%">이전 순위</th><th style="width:40%">근거</th></tr>
+  <tr><td class="num"><b>1</b></td><td><b>AdSense 도입</b></td><td>낮음</td><td class="num">2 → <b>1</b></td><td>수익화 0인 채 3판째. 색인 대상은 오히려 늘었는데(sitemap 102) 심사 시계는 아직 시작도 안 했다. 더 미루면 4판에서도 같은 문장을 쓰게 된다.</td></tr>
+  <tr><td class="num"><b>2</b></td><td><b>관심종목 저장(localStorage)</b></td><td>중간</td><td class="num">4 → <b>2</b></td><td>유입 경로(용어 페이지)와 체류 가치(연간 실적)가 붙은 지금, <b>돌아올 이유</b>가 없으면 유입이 1회성으로 끝난다. 월배당 계산기의 보유 저장 패턴을 그대로 옮길 수 있다.</td></tr>
+  <tr><td class="num"><b>3</b></td><td><b>죽은 자산 나머지 회수</b><br><span class="note">etf-rank 링크 · 패시브 노출도 파이프라인</span></td><td>낮음</td><td class="num">3 → <b>3</b></td><td>ETF 랭킹은 <b>링크 한 줄</b>인데 두 판째 정지. 비용이 아니라 눈에 덜 띄어서 밀리는 항목이라 의식적으로 끼워넣어야 한다.</td></tr>
+  <tr><td class="num"><b>4</b></td><td><b>깊은 콘텐츠 커버리지 확대</b><br><span class="note">뉴스·목표주가·연간 실적 3종목 → 확대</span></td><td>중간~높음</td><td class="num">5 → <b>4</b></td><td>연간 실적이 같은 3종목에만 붙어 두꺼운 페이지 3개 대 얇은 페이지 43개 구도가 심화됐다. 코스피랩과 달리 우리는 <b>수집 범위 선택</b>이라 늘릴 수 있다.</td></tr>
+  <tr><td class="num"><b>5</b></td><td><b>티어1 "AI 오늘의 전망" 카드</b></td><td>중간</td><td class="num">7 → <b>5</b></td><td>룰 §2가 정의한 2티어 신호 구조의 절반. 당일 예측 표시가 빠져 있다.</td></tr>
+  <tr><td class="num"><b>6</b></td><td><b>콘텐츠 페이지 2종차</b><br><span class="note">투자 가이드 · FAQ</span></td><td>중간</td><td class="num">신규</td><td>용어 페이지로 "0 대 4"가 "1 대 4"가 됐다. 다만 우선순위는 낮다 — 일반 가이드는 검색 경쟁이 치열하고, 우리 차별점은 <b>자체 신호 공개</b> 쪽에 있다.</td></tr>
 </table>
 </div>
-<p class="note">1~3번은 신규 개발이 거의 없는 노출·회수 작업이라 먼저 처리하고, 4번 이후를 별도 사이클로 잡는 걸 권한다.</p>
+<p class="note"><b>패턴 관찰.</b> 3판에 걸쳐 해결된 8건은 전부 "만들면 보이는 것"(SEO 메타·용어 페이지·연간 실적)이고, 정체된 5건은 "안 만들어도 티가 안 나는 것"(광고·관심종목·죽은 링크 회수)이다. 이번 사이클은 의식적으로 <b>후자만</b> 처리하는 걸 권한다.</p>
 
 <h2>5. 실측 근거</h2>
 <div class="card">
-<p class="note">모든 수치는 2026-07-23 두 사이트의 라이브 응답과 저장소를 다시 조회해 확인했다. 추정 없음.</p>
+<p class="note">모든 수치는 2026-07-25 라이브 응답과 저장소를 다시 조회해 확인했다. 추정 없음.</p>
 <ul class="note">
-  <li>SEO 메타(해결) — <code>/stocks/005930/</code> HTTP 응답 head에 description·canonical·og:title·robots·manifest 각 1건, JSON-LD 2블록(BreadcrumbList·Corporation). 소스는 <code>scripts/templates/stocks/_head_seo.html</code> + <code>detail.html</code> include</li>
-  <li>발행 게이트(해결) — commit <code>ef89346a</code> "발행 게이트 자동화"</li>
-  <li>sitemap — <code>/sitemap.xml</code> loc 98(섹터 8·미국 상세 8 포함). 초판 89</li>
-  <li>signals-all(해결) — <code>web/stocks/index.html</code>에 <code>go('signals-all')</code> 진입 링크 존재(commit <code>d44440e5</code>)</li>
-  <li>etf-rank(미해결) — 화면 div만, <code>go('etf-rank')</code> 호출 0건</li>
-  <li>AdSense(미해결) — <code>adsbygoogle</code>·<code>ca-pub-</code> 출현 우리 0 / 코스피랩 존재(브라우저 실측)</li>
-  <li>커버리지 — <code>web/data/stock-news.json</code>·<code>stock-targets.json</code>의 <code>stocks</code> 키 각 3건(005930·000660·005380)</li>
-  <li>용어 페이지 — <code>/glossary</code>·<code>/guide</code>·<code>/terms</code> 등 HTTP 404</li>
-  <li>패시브 정지 — <code>.github/workflows/</code>에 <code>build_etf_exposure</code> 0건, <code>web/data</code>에 출력 파일 없음</li>
-  <li>적중률 — <code>web/data/accuracy-summary.json</code> (128전 87적중 68% · kospi 66% · us 71%)</li>
-  <li>야간 가격 확장 — <code>web/assets/stocks-home.js</code> us-evening TICKERS 11종(TSMC·SNDK 추가, 라이브 <code>/api/stocks-live</code> 실측 12/12 반환)</li>
-  <li>코스피랩 재확인 — 브라우저로 <code>kospilab.com</code> 직접 열람(AdSense·JSON-LD WebSite/Organization·용어/가이드/인사이트/FAQ 링크 확인). WebFetch는 403 봇 차단이라 브라우저로 대체</li>
+  <li><b>용어 페이지(신규해결)</b> — <code>https://doubleshot.space/glossary/</code> HTTP <b>200</b>. 8개 섹션(<code>#signals</code>·<code>#flow-map</code>·<code>#leaders</code>·<code>#momentum</code>·<code>#us-semi</code>·<code>#ai-score</code>·<code>#volume</code>·<code>#covered-call</code>) + FAQPage JSON-LD. 허브 <code>.help-q</code> 6개가 <code>&lt;a href="/glossary/#…"&gt;</code>로 전환(접근성 트리에서 link로 확인). 상세 페이지 푸터에 <code>/glossary/</code> 링크 1건 실측. commit <code>4364c4bb</code></li>
+  <li><b>연간 실적(부분해결)</b> — <code>/stocks/005930/</code> 응답에 "연간 실적" 섹션, 확정(2023·2024·2025)+추정(2026 E) 렌더 확인. 대상은 <code>scripts/build_stocks_snapshot.py</code>의 <code>ANNUAL_FIN_CODES = {005930, 000660, 005380}</code> 3종목</li>
+  <li>자금 지도(신규) — <code>/data/etf-flows.json</code> <code>coverage.etf_count</code> 719 · <code>theme_count</code> 16 · <code>generated_at</code> 2026-07-24 갱신</li>
+  <li>sitemap — <code>/sitemap.xml</code> loc <b>102</b>(<code>/glossary/</code> 1건 포함). 초판 89 · 재점검 98</li>
+  <li>SEO 메타 — <code>/stocks/005930/</code> head에 description·canonical·og:title·robots·manifest, JSON-LD 2블록. 소스 <code>_head_seo.html</code></li>
+  <li>발행 게이트 — commit <code>ef89346a</code></li>
+  <li>signals-all — <code>go('signals-all')</code> 진입 링크 존재(commit <code>d44440e5</code>)</li>
+  <li><b>etf-rank(미해결)</b> — <code>go('etf-rank')</code> 호출 <code>web/stocks/index.html</code> 0건 · <code>stocks-home.js</code> 0건</li>
+  <li><b>AdSense(미해결)</b> — <code>https://doubleshot.space/stocks/</code> 응답에 <code>adsbygoogle</code>·<code>ca-pub-</code> <b>0건</b>. 코스피랩은 브라우저 실측 <code>adsbygoogle</code> <b>존재</b></li>
+  <li><b>관심종목(미해결)</b> — <code>stocks-home.js</code>의 <code>localStorage</code> 용도는 야간 토글 override·보유 시뮬레이터 저장뿐. 관심종목 저장 0건</li>
+  <li><b>커버리지(미해결)</b> — <code>web/data/stock-news.json</code>·<code>stock-targets.json</code>의 <code>stocks</code> 키 각 <b>3건</b></li>
+  <li>패시브 정지 — <code>.github/workflows/</code>에 <code>build_etf_exposure</code> 0건</li>
+  <li>적중률 — <code>/data/accuracy-summary.json</code> (<b>130전 88적중 68%</b> · kospi 72전 47적중 65% · us 58전 41적중 71%, <code>updated_at</code> 2026-07-25T09:11 KST)</li>
+  <li>상세 페이지 수 — 국내 <code>web/stocks/{6자리}/</code> 46개 · 미국 <code>web/stocks/us/</code> 10개</li>
+  <li>코스피랩 재확인 — 브라우저로 <code>kospilab.com</code> 직접 열람. AdSense 존재·용어/가이드 링크 존재·관심종목 존재 <b>3개 모두 유지</b> 확인(2026-07-25). WebFetch는 403 봇 차단이라 브라우저로 대체</li>
 </ul>
-<p class="note" style="margin-top:14px;">코스피랩 페이지의 문구·수치는 그쪽 서비스가 표시한 값을 관찰한 것이며, 정확성을 우리가 검증한 것은 아니다.</p>
+<p class="note" style="margin-top:14px;">코스피랩 페이지의 문구·수치는 그쪽 서비스가 표시한 값을 관찰한 것이며, 정확성을 우리가 검증한 것은 아니다. 이번 3차 점검에서는 코스피랩 측 <b>핵심 3개 항목만</b> 재확인했고 목표가·실적 표시 등 세부는 재점검(07-23) 관찰값을 유지했다.</p>
 </div>
 
 <div class="foot">
-  Double-Shot 종목 시그널 경쟁력 점검 · 초판 2026-07-21 · <b>재점검 2026-07-23</b><br>
-  대조 대상: kospilab.com (2026-07-23 재확인)
+  Double-Shot 종목 시그널 경쟁력 점검 · 초판 2026-07-21 · 재점검 2026-07-23 · <b>3차 점검 2026-07-25</b><br>
+  대조 대상: kospilab.com (2026-07-25 핵심 항목 재확인)
 </div>
 
 </div>
