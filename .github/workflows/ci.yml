@@ -17,6 +17,11 @@ on:
       - "web/sitemap.xml"
       - ".github/workflows/ci.yml"
       - "requirements.txt"
+      # 2026-07-25 추가 — main.js·stocks-home.js를 고쳐도 CI가 돌지 않고 있었다.
+      # web/assets/**는 데이터 갱신 경로(web/data/**)와 달리 사람이 고치는 코드다.
+      - "web/assets/**"
+      - "api/**"
+      - "eslint.config.mjs"
   pull_request:
   workflow_dispatch:
 
@@ -32,18 +37,36 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: 📦 Python 패키지 설치
         run: |
           pip install -r requirements.txt
           pip install pytest
 
-      - name: 🧪 회귀 테스트
-        # deselect: test_block_close_scalar_prose는 검증기가 '차단' → '금지 문장 제거 후 발행'으로
-        # 설계가 바뀐 뒤 갱신되지 않은 stale 테스트다(2026-07-21 확인). 이번 게이트 작업과 무관하고,
-        # 검증기 동작을 함부로 되돌리지 않기 위해 별도 판단 전까지만 제외한다. 조용히 끄지 않는다.
+      - name: 🧪 Python 회귀 테스트
+        # 2026-07-21에 걸어둔 --deselect(test_block_close_scalar_prose)는 2026-07-25에
+        # 제거했다. "별도 판단"을 미뤄둔 stale 테스트였고, 판단 결과 구현이 맞고 테스트가
+        # 낡은 것이었다 — 의도된 동작(금지 문장 제거 후 발행)을 검증하도록 재작성했으므로
+        # 이제 전부 돌린다. 파헤치는 과정에서 close_reason.html의 빈 <p> 렌더 결함도 나왔다.
+        run: python3 -m pytest scripts/ -q
+
+      - name: 🧪 JS 회귀 테스트
+        # 2026-07-25 신설. api/*.test.mjs 4개와 web/assets/main.test.mjs가 저장소에
+        # 있는데도 어느 워크플로우에서도 실행되지 않았다.
         run: |
-          python3 -m pytest scripts/ -q \
-            --deselect scripts/test_validate_analysis.py::test_block_close_scalar_prose
+          node --test api/*.test.mjs
+          node --test web/assets/*.test.mjs
+
+      - name: 🔍 JS 정적 검사 (no-undef 등 런타임 에러 클래스)
+        # 2026-07-25 신설. main.js 리팩토링 중 삭제한 변수를 계속 참조하는 고아 참조를
+        # 두 번 만들었고(k0·todayKst), node --check·브라우저 콘솔·단위 테스트가 모두
+        # 통과했다 — 해당 코드 경로가 DOM 없는 환경에서 조기 return되기 때문이다.
+        # no-undef가 둘 다 즉시 잡았다. warning은 실패시키지 않는다(인라인 onclick
+        # 전역 함수를 ESLint가 미사용으로 오탐하므로).
+        run: npx --yes eslint@9 web/assets/ api/
 
       - name: 🚦 발행 게이트 — 발행본 전수 감사 (메타 5종·JSON-LD·canonical·sitemap)
         run: python3 scripts/verify_publish_gate.py

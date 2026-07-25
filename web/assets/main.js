@@ -1173,8 +1173,9 @@
     var m = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
     var isPast = false;
     if (m) {
-      if (m[1] > kstDateStr()) return;   // 미래 날짜는 표시 안 함
-      if (m[1] < todayKst) isPast = true; // 과거 브리핑
+      var todayKst = kstDateStr();
+      if (m[1] > todayKst) return;         // 미래 날짜는 표시 안 함
+      if (m[1] < todayKst) isPast = true;  // 과거 브리핑
     }
 
     if (!isPast && !isMarketHours() && !isAfterMarket()) return;
@@ -1301,6 +1302,12 @@
       }
       updatePreOpenTimer();
       setInterval(updatePreOpenTimer, 1000);
+      // FIXME fetchNews()는 이 저장소 어디에도 정의돼 있지 않다 — 호출되면 ReferenceError다.
+      // 지금 터지지 않는 이유는 이 함수를 감싼 initLiveScoreboard 자체가 죽은 경로이기 때문:
+      // sections/_live_scoreboard.html이 kospi/close/us 어느 config의 섹션 목록에도 없어
+      // #live-scoreboard 엘리먼트가 생성되지 않고 함수가 맨 위에서 조기 return한다.
+      // 스코어보드를 되살릴 때 이 줄을 먼저 해결할 것(2026-07-25 eslint no-undef로 발견).
+      // eslint-disable-next-line no-undef
       fetchNews();
       return;
     }
@@ -1388,8 +1395,7 @@
         // 장 마감: 메인=예측 결과 요약, 보조=등락률 한 줄
         if (prefixEl) prefixEl.textContent = '';
         if (headEl)   headEl.style.color = '';
-        var sign = changePct >= 0 ? '+' : '';
-        var pct  = sign + changePct.toFixed(2) + '%';
+        var pct  = sign + changePct.toFixed(2) + '%';   // sign은 위(1380)에서 계산됨
         // 대표 타이틀(emEl)과 서브 타이틀(subElU)을 각각 분리 관리
         // hit.dn(하락 예측 적중)은 아쉬움 표현을 대표 타이틀 뒤에 붙인다
         var CLOSE_MSGS = {
@@ -2231,4 +2237,19 @@
   window.closeNoticePanel = closeNoticePanel;
   window.initIssueBriefing = initIssueBriefing;
   window.renderTrustStrip = renderTrustStrip;
+
+  /* ── 테스트 훅 ──
+     IIFE 안의 순수 함수는 밖에서 참조할 방법이 없어 단위 테스트가 불가능하다.
+     main.js를 별도 모듈로 쪼개 브라우저가 <script>를 하나 더 받게 만드는 대신
+     (로드 순서 실패가 곧 전체 JS 중단이라 라이브 서비스에 위험), 이 훅으로
+     '실제 프로덕션 파일'을 그대로 테스트한다 — 사본을 두면 사본이 어긋난다.
+     web/assets/main.test.mjs가 node:vm 샌드박스에서 이 객체를 읽는다.
+     프로덕션 동작에는 영향이 없다(읽기 전용 참조). */
+  window.__dsTestables = {
+    kstNow: kstNow,
+    kstDateStr: kstDateStr,
+    kstMinsOfDay: kstMinsOfDay,
+    trustRelTime: trustRelTime,
+    TRUST_STALE_HOURS: TRUST_STALE_HOURS,
+  };
 })();

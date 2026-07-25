@@ -991,11 +991,12 @@ function etfSorted(){
 function etfRankRender(){
   var box=document.getElementById('etf-rank-rows');if(!box)return;
   var cnt=document.getElementById('etf-rank-count');if(cnt)cnt.textContent=ETF_ALL.length+'개 ETF';
-  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';var btn=document.getElementById('etf-rank-more');if(btn)btn.style.display='none';return;}
+  var btn=document.getElementById('etf-rank-more');
+  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">ETF를 불러오는 중…</div>';if(btn)btn.style.display='none';return;}
   var arr=etfSorted();
   var maxVal=arr.length?(etfTab==='vol'?Math.max.apply(null,arr.map(function(x){return x.vol||0;})):Math.max.apply(null,arr.map(function(x){return Math.abs(x.changePct||0);}))):1;
   if(!maxVal)maxVal=1;
-  var btn=document.getElementById('etf-rank-more');
+  btn=document.getElementById('etf-rank-more');
   if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:#94A3B8;">'+(etfTab==='up'?'상승 ETF가 없어요.':'하락 ETF가 없어요.')+'</div>';if(btn)btn.style.display='none';return;}
   box.innerHTML=arr.map(function(x,i){
     var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';

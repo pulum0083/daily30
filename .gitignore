@@ -34,3 +34,6 @@ data/telegram_message_*.txt
 .DS_Store
 .claude/worktrees/
 .gstack/
+
+# npm (eslint 등은 npx로 즉석 실행 — 커밋하지 않는다)
+node_modules/
