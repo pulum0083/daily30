@@ -65,13 +65,19 @@ export default {
       return dispatch(env, 'daily_report.yml', { briefing_type: 'accuracy', dry_run: 'false' });
     }
 
-    // 주말 종목뉴스: 08/11/14/17/20 KST 토·일 (3시간 간격)
+    // 주말 종목뉴스: 09/12/15/18/21 KST 토·일 (3시간 간격)
     // cron 표현식엔 요일을 넣지 않는다 — UTC 23시 항목이 KST로는 다음날이라
     // cron의 DOW(UTC 기준)와 KST 기준 주말 여부가 어긋난다. 항상 이 KST 변환값으로 판정한다.
+    //
+    // ⚠️ kospi-news-live.yml이 아니라 반드시 stock-news-weekend.yml을 호출한다.
+    // kospi-news-live.yml은 fetch_news_live.py·fetch_movers_why.py도 같이 돌리는데
+    // 둘 다 요일 게이팅이 없어 주말에 호출하면 "장중 이슈" 오발행·movers 데이터
+    // 덮어쓰기 사고가 난다(SERVICE_RULES §10). stock-news-weekend.yml은
+    // fetch_stock_news.py 하나만 돌도록 분리된 전용 워크플로우다.
     const isWeekend = dow === 0 || dow === 6;
-    if (isWeekend && m === 0 && [8, 11, 14, 17, 20].includes(h)) {
-      console.log('[cron] → weekend issue briefing');
-      return dispatch(env, 'kospi-news-live.yml');
+    if (isWeekend && m === 0 && [9, 12, 15, 18, 21].includes(h)) {
+      console.log('[cron] → weekend stock news');
+      return dispatch(env, 'stock-news-weekend.yml');
     }
 
     // ── 이슈 브리핑 (시간대 범위 매칭) ──────────────────────────────────

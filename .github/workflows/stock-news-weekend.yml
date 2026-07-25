@@ -1,6 +1,6 @@
 # 주말 종목 뉴스 수집 워크플로우
 #
-# 평일 수집은 kospi-news-live.yml(cron-job.org 트리거)이 담당하고, 이 워크플로우는
+# 평일 수집은 kospi-news-live.yml(workers/cron 트리거)이 담당하고, 이 워크플로우는
 # 주말(토·일)만 맡는다. 평일엔 절대 돌지 않는다 — 같은 파일을 두 워크플로우가
 # 동시에 커밋해 rebase 충돌을 일으키는 사고(SERVICE_RULES §18)를 구조적으로 차단한다.
 #
@@ -11,16 +11,20 @@
 #      - fetch_movers_why.py : 요일 게이팅이 없어 주말에 movers 데이터를 덮어쓴다.
 #                              이 파일들의 소유자는 kospi-news-live.yml이다(§18).
 #
-# 스케줄(GHA native cron, UTC 기준 — KST = UTC+9):
-#   '0 0,3,6,9,12 * * 6,0' → KST 토·일 09·12·15·18·21시 (3시간 간격, 하루 5회)
-#   KST 09~21시는 UTC 00~12시로 같은 날짜 안에 들어와 요일 경계 문제가 없다.
+# 트리거: workers/cron (Cloudflare Workers 스케줄러) → GitHub API dispatch
+# GHA native schedule 제거(2026-07-25) — 신설 첫 주말(7/19·7/25) 모두 09:00 슬롯이
+# 자동 발화하지 않고 다른 슬롯도 최대 1h45 지연되는 것을 실측 확인. cron-job.org는
+# 2026-06-11에 이미 Cloudflare Workers로 전면 이전됐으므로(workers/cron/src/worker.js
+# 주석 "cron-job.org 전체 이전") 같은 방식으로 맞춘다. cron-job.org는 신규 등록 대상이 아니다.
+#
+# 실제 스케줄은 workers/cron/wrangler.toml의 cron 트리거 + worker.js의 KST 09/12/15/18/21시·
+# 토·일 판정 로직이 정의한다(3시간 간격, 하루 5회). 이 워크플로우 파일엔 스케줄을 두지 않는다 —
+# 시각을 바꿀 땐 이 헤더가 아니라 workers/cron 쪽을 고치고 `wrangler deploy`로 재배포할 것.
 
 name: 주말 종목 뉴스 수집
 
 on:
-  schedule:
-    - cron: '0 0,3,6,9,12 * * 6,0'
-  workflow_dispatch:   # 수동 실행·테스트용
+  workflow_dispatch:   # workers/cron(Cloudflare Workers)이 호출. 수동 실행·테스트도 겸함
 
 permissions:
   contents: write
@@ -47,39 +51,22 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # GHA cron은 지연 발화가 잦아 평일 새벽에 밀려 실행될 수 있다. 실제 실행 시점이
-      # 주말이 아니면 즉시 중단해 평일 파이프라인과 같은 파일을 건드리지 않는다.
-      - name: 🗓️ 주말 여부 확인 (지연 발화 방어)
-        id: guard
-        run: |
-          dow=$(TZ=Asia/Seoul date +%u)   # 1=월 … 6=토, 7=일
-          if [ "$dow" -ge 6 ]; then
-            echo "weekend=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "weekend=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::KST 기준 평일($dow)이라 주말 수집을 건너뜁니다 — cron 지연 발화로 판단."
-          fi
-
       - name: 🐍 Python 세팅
-        if: steps.guard.outputs.weekend == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       - name: 📦 의존성 설치
-        if: steps.guard.outputs.weekend == 'true'
         run: pip install google-genai
 
       # 이미 요약한 기사는 재요약하지 않으므로 신규 기사가 없는 실행은 Gemini 호출 0회로 끝난다.
       - name: 📰 종목별 관련 뉴스 수집
-        if: steps.guard.outputs.weekend == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_stock_news.py
 
       - name: 💾 JSON 커밋 & 푸시
         id: commit
-        if: steps.guard.outputs.weekend == 'true'
         run: |
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
