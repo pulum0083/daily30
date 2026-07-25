@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
+# 프로토타입 미리보기 — 2026-06-06 시점 수치가 하드코딩된 개발용 페이지다.
+# sitemap에는 없지만 URL이 공개(200)라 크롤링될 수 있었다. 브리핑 서비스에서
+# 7주 전 수치가 검색에 노출되면 실측 원칙(SERVICE_RULES 운영 규칙 0)에 어긋난다.
+# 2026-07-26 추가. 페이지 자체는 개발 참고용으로 남겨둔다.
+Disallow: /preview-close.html
+Disallow: /preview-issue-ui.html
+Disallow: /preview-kospi.html
+Disallow: /preview-scoreboard.html
+Disallow: /preview-us.html
+
 Sitemap: https://doubleshot.space/sitemap.xml

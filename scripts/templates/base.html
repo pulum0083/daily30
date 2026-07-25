@@ -59,9 +59,7 @@
 <script src="{{ js_path | default('/assets/main.js?v=20260703') }}"></script>
 <script>
 window.addEventListener('load', function() {
-  if (typeof initLiveScoreboard === 'function') initLiveScoreboard();
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
-  if (typeof initIssueBriefing === 'function') initIssueBriefing();
   if (typeof patchBriefingList === 'function') patchBriefingList();
   if (typeof initNotices === 'function') initNotices();
   if (typeof loadVisitorCount === 'function') loadVisitorCount();

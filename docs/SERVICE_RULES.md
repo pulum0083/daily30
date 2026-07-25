@@ -326,23 +326,18 @@ python3 scripts/generate_html.py --write-list-only
 - **hit.up (상승 예측 적중)**: "상승 예측이 맞았어요."로만.
 - CLOSE_MSGS 구조: 각 케이스마다 `title` 배열과 `sub` 배열 분리 관리.
 
-### 10. 라이브 스코어보드 — 구조와 운영 규칙
+### 10. 브리핑 라이브 패널 — 구조와 운영 규칙
 
-`web/assets/main.js`의 `initLiveScoreboard()` 함수가 담당. 당일·과거 브리핑 모두 표시.
-
-#### 상태별 동작
-
-| 상태         | 조건             | 동작 |
-| ---------- | -------------- | ---- |
-| 장 전 (준비 중) | 당일 08:50~08:59 | 카운트다운 표시 |
-| 장 중 (LIVE) | 당일 09:00~15:30 | `/api/kospi-live` 10초 폴링 |
-| 장 후 (당일)   | 당일 15:30 이후    | 최종 종가 fetch 후 예측 결과 표시 |
-| 과거 브리핑     | URL 날짜 < 오늘    | 정적 결과 표시 (폴링 없음) |
-| 숨김         | 장 시작 전(~08:49) | `display:none` |
-
-- **결과 미집계**: `data-actual-pct`가 비어 있으면 "결과 집계 중…". 다음 날 09:10 `check_accuracy.py` 실행 후 자동 주입.
-- 스코어보드 HTML은 `buildPanel()`이 동적 생성 — 인라인 HTML에서 ID를 찾으려 하면 찾을 수 없다.
-- `isPast` 플래그는 `initLiveScoreboard()` 내부 클로저 변수. `initLiveMarketPanel()`은 별도로 `mktIsPast`를 계산한다.
+> **라이브 스코어보드는 2026-07-26에 코드째 제거됐다.** `initLiveScoreboard()`(413줄)와
+> `sections/_live_scoreboard.html`이 있었지만, 그 섹션은 `scripts/config/*.json`의 섹션 목록에
+> **한 번도 들어간 적이 없어**(`git log -S`로 확인) 발행 페이지에 `#live-scoreboard`가 생성되지
+> 않았다. 즉 함수는 매 로드마다 조기 return만 하는 죽은 코드였고, 그 안에는 정의조차 없는
+> `fetchNews()` 호출이 남아 있었다(되살렸다면 즉시 ReferenceError). 이 문서가 동작 명세를
+> 상세히 적고 있어 살아 있는 기능처럼 보였던 것이 발견을 늦췄다 — **문서가 코드보다 오래
+> 사는 상황을 경계할 것.** 복구가 필요하면 git 이력에서 꺼낸다.
+>
+> 현재 브리핑에서 실제로 동작하는 라이브 패널은 아래 셋이다.
+> `initLiveMarketPanel()`(시장 지표), `initNowBand()`(지금 코스피 밴드), `initSidebarSignals()`(특이 신호).
 
 #### 시장 지표 패널 (`initLiveMarketPanel()`)
 
@@ -404,21 +399,22 @@ python3 scripts/generate_html.py --write-list-only
 21:30~01:00 KST → US_MARKET
 ```
 
-#### 이슈 브리핑 섹션 위치·표시 규칙
+#### 이슈 브리핑 섹션 — 브리핑 페이지에서는 제거됨 (수집은 계속한다)
 
-표시 조건: `issue_news.history` 1개 이상일 때만 섹션 표시.
-
-| 브리핑 | 위치 | 표시 슬롯 |
-| --- | --- | --- |
-| 코스피 예측 브리핑 | 스코어보드 아래, 예측 카드 위 | `MARKET` |
-| 미국 시장 브리핑 | 본문 최상단 | `US_MARKET` |
-
-**코스피 마감 브리핑(POST_MARKET)은 2026-07-10 섹션 제거됨.** `close.html` 템플릿에서 `_issue_briefing.html` include 삭제, `fetch_news_live.py`는 `slot == "POST_MARKET"`이면 RSS 수집·Gemini 호출 없이 즉시 종료(API 비용 차단). 같은 job이 돌리는 `fetch_movers_why.py`(사이드바 "코스피 주도주" 위젯 데이터)는 계속 정상 실행 — 스케줄 자체(cron-job.org "장 후" 트리거)를 끄면 그 데이터도 같이 끊기므로 유지.
-
-**`initIssueBriefing()` 동작 (`web/assets/main.js`):**
-- `#issue-briefing-wrap`의 `data-date`, `data-slot` 읽기
-- `/data/kospi-news-{date}.json` fetch (없으면 `kospi-news-live.json` fallback)
-- `data-slot` 범위로 history 필터링 후 1개 이상이면 표시, 0개면 `display:none`
+> **브리핑 페이지의 이슈 브리핑 섹션은 2026-07-26에 코드째 제거됐다.** `initIssueBriefing()`(160줄)과
+> `sections/_issue_briefing.html`이 있었지만, 마감 브리핑에서 include를 뺀 2026-07-10 이후
+> **어느 템플릿에서도 include되지 않아** `#issue-briefing-wrap`이 생성되지 않았다(라이브 코스피
+> 브리핑 HTML에서 0건 확인). 스코어보드와 같은 죽은 코드 상태였다.
+>
+> **⚠️ 수집 파이프라인(`fetch_news_live.py`, 하루 22회)은 계속 필요하다 — 끄지 말 것.**
+> 산출물 `kospi-news-{date}.json`·`kospi-news-live.json`을 아래가 실제로 소비한다.
+> - `main.js` `initNowBand()` — 브리핑 상단 "지금 코스피" 밴드의 장중 뉴스 이슈
+> - `stocks-home.js` / `web/stocks/index.html` — 종목 홈 브리핑 스트립(§13 `issue` 슬롯)
+>
+> `fetch_news_live.py`는 `slot == "POST_MARKET"`이면 RSS 수집·Gemini 호출 없이 즉시 종료한다
+> (2026-07-10, API 비용 차단). 같은 job의 `fetch_movers_why.py`(사이드바 "코스피 주도주" 위젯
+> 데이터)는 계속 정상 실행 — 스케줄 자체(cron-job.org "장 후" 트리거)를 끄면 그 데이터도 같이
+> 끊기므로 유지한다.
 
 **수집 구조 — RSS 기반 2단계 파이프라인 (2026-06-16 적용):**
 
@@ -436,7 +432,7 @@ python3 scripts/generate_html.py --write-list-only
 기존엔 신규 기사가 없으면(①RSS 자체가 2건 미만 ②기존 발행분과 55% 이상 유사해 중복 제거 후 2건 미만 ③Gemini 4회 재시도까지 전부 중복) `sys.exit(0)`으로 조용히 발행을 생략했다. 이 자체는 §0(없는 이슈를 지어내지 않는다) 원칙상 맞는 동작이지만, 부작용으로 "오늘 장중 이슈" 목록이 마지막 발행 시각에 몇 시간씩 멈춰 있어 사용자에게는 파이프라인이 죽은 것처럼 보였다(2026-07-23 실사고 조사 — 12:30 이후 15:00까지 세 차례 정상 실행됐으나 전부 스킵, 국내 언론이 같은 "외국인 순매수·7000선 회복" 서사를 반복 재보도했을 뿐 실제 신규 소재가 없었음이 확인됨).
 
 - 해결: `_bump_latest_time()` — 위 세 스킵 지점 모두에서 새 history 항목을 추가하지 않고, **`history[0]`(최신 항목)의 `time`과 최상위 `updated_at`만 현재 시각으로 덮어쓴다.** `market`/`stock`의 제목·본문 등 콘텐츠는 절대 건드리지 않는다 — "이 시각까지 확인했지만 여전히 같은 이슈가 최신"이라는 사실만 반영한다.
-- `kospi-news-live.json`뿐 아니라 프론트(`initIssueBriefing()`)가 우선 읽는 날짜별 아카이브 `kospi-news-{date}.json`도 함께 갱신한다 — live만 갱신하면 화면엔 여전히 옛 시각으로 남는다.
+- `kospi-news-live.json`뿐 아니라 소비처(`initNowBand()`·종목 홈 브리핑 스트립)가 우선 읽는 날짜별 아카이브 `kospi-news-{date}.json`도 함께 갱신한다 — live만 갱신하면 화면엔 여전히 옛 시각으로 남는다.
 - 오늘자 데이터 자체가 없으면(당일 첫 발행 전) 아무것도 하지 않는다 — 갱신할 대상이 없다.
 - 워크플로우(`kospi-news-live.yml`)의 커밋 스텝은 이미 두 파일을 전부 `git add` 대상에 포함하고 `git diff --cached`가 비어있지 않으면 커밋하므로, 이 변경만으로 스킵 시에도 "시각 갱신" 커밋이 자동으로 만들어진다(워크플로우 수정 불필요).
 - 테스트: `scripts/test_bump_latest_time.py` — 오늘자 없음(False)·오늘자 있음(시각만 갱신, 콘텐츠·seen_titles 불변, history 개수 불변)·아카이브 동시 갱신·날짜 다름(안 건드림)·history 없음(False) 5케이스.
