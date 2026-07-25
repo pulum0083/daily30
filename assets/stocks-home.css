@@ -511,7 +511,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 #tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}
 #tip .bd b{color:var(--ink);font-weight:700;}
-.help-q{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:6px;border-radius:50%;background:#E5E7EB;color:#64748B;font-size:11px;font-weight:800;line-height:1;cursor:help;flex-shrink:0;transition:background .12s,color .12s;}
+.help-q{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:6px;border-radius:50%;background:#E5E7EB;color:#64748B;font-size:11px;font-weight:800;line-height:1;cursor:help;flex-shrink:0;transition:background .12s,color .12s;text-decoration:none;}
 .help-q:hover{background:#2775ED;color:#fff;}
 
 /* ── 패시브 민감주 ── */

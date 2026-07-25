@@ -2820,7 +2820,9 @@ if(passBtn){
   var block=document.getElementById('flow-block');
   if(!block) return;
   var body=document.getElementById('flow-body');
-  var TIERS=[[0,2,98],[2,4,74],[4,7,60],[7,10,48]];  // [start,end,rowHeightPx]
+  // rowHeightPx는 종목명+금액 2줄(패딩 포함 약 46.4px)이 들어갈 최소 여유를 둔 값.
+  // 마지막 tier(48px)는 여유가 1.6px뿐이라 기기별 폰트 줄높이 차이로 텍스트가 잘렸다(2026-07-24 실사고) — 56px로 보정.
+  var TIERS=[[0,2,98],[2,4,74],[4,7,60],[7,10,56]];  // [start,end,rowHeightPx]
   var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
 
