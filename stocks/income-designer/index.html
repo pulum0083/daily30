@@ -11,7 +11,6 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <script src="/assets/pwa-install.js" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
 <style>
@@ -640,59 +639,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   #add-sheet-handle{display:none;}
 }
 
-/* ── 의견 모달 ── */
-#cm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:flex-end;justify-content:center;}
-#cm-overlay.open{display:flex;}
-#cm-dialog{background:var(--canvas);width:100%;max-width:520px;border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);}
-#cm-overlay.open #cm-dialog{transform:translateY(0);}
-@media(min-width:600px){
-  #cm-overlay{align-items:center;}
-  #cm-dialog{border-radius:20px;max-height:80vh;transform:scale(.96);opacity:0;transition:transform .22s ease-out,opacity .22s ease-out;}
-  #cm-overlay.open #cm-dialog{transform:scale(1);opacity:1;}
-}
-.cm-handle{width:36px;height:4px;background:var(--hair);border-radius:2px;margin:10px auto 0;flex-shrink:0;}
-@media(min-width:600px){.cm-handle{display:none;}}
-.cm-head{display:flex;align-items:center;gap:8px;padding:14px 16px 12px;border-bottom:1px solid var(--hair);flex-shrink:0;}
-.cm-title{font-size:15px;font-weight:700;color:var(--ink);}
-.cm-count{font-size:12px;font-weight:700;color:#4F46E5;background:#EEF2FF;border-radius:99px;padding:2px 9px;}
-.cm-close{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);display:flex;padding:4px;}
-.cm-close svg{width:16px;height:16px;}
-.cm-list{overflow-y:auto;flex:1;padding:0 16px;overscroll-behavior:contain;}
-.ci{padding:14px 0;border-bottom:1px solid var(--hair);}
-.ci:last-child{border-bottom:none;}
-.ci-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.ci-av{width:28px;height:28px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#4F46E5;flex-shrink:0;}
-.ci-author{font-size:13px;font-weight:600;color:var(--ink);}
-.ci-time{font-size:11px;color:var(--muted);margin-left:auto;}
-.ci-body{font-size:13px;color:var(--ink);line-height:1.65;padding-left:36px;margin-bottom:5px;}
-.ci-reply-btn{background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding-left:36px;font-family:inherit;display:flex;align-items:center;gap:3px;}
-.ci-reply-btn:hover{color:var(--ink);}
-.cs-replies{margin:8px 0 0 36px;border-left:2px solid #EEF2FF;padding-left:12px;}
-.cr{padding:8px 0;}
-.cr-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
-.cr-av{width:22px;height:22px;border-radius:50%;background:var(--inset);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);flex-shrink:0;}
-.cr-author{font-size:12px;font-weight:600;color:var(--ink);}
-.cr-time{font-size:10px;color:var(--muted);margin-left:auto;}
-.cr-body{font-size:12px;color:var(--ink);line-height:1.55;padding-left:29px;}
-.cs-reply-form{margin:8px 0 0 36px;display:flex;gap:6px;}
-.cs-reply-input{flex:1;border:1.5px solid #4F46E5;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);}
-.cs-reply-submit{background:#4F46E5;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
-.cm-form{padding:12px 16px 16px;border-top:1px solid var(--hair);flex-shrink:0;}
-.cm-nick{width:150px;border:1.5px solid var(--hair);border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
-.cm-nick:focus{border-color:#4F46E5;}
-.cm-textarea{width:100%;border:1.5px solid var(--hair);border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:none;min-height:68px;background:var(--canvas);color:var(--ink);margin-bottom:8px;display:block;}
-.cm-textarea:focus{border-color:#4F46E5;}
-.cm-foot-row{display:flex;align-items:center;justify-content:space-between;}
-.cm-hint{font-size:11px;color:var(--muted);}
-.cm-submit{background:#4F46E5;color:#fff;border:none;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
-.cm-submit:hover{background:#4338CA;}
-.cm-empty{padding:32px 16px;text-align:center;font-size:13px;color:var(--muted);}
-.cm-tags{display:flex;gap:6px;margin-bottom:8px;}
-.cm-tag{font-size:12px;font-weight:600;padding:5px 13px;border-radius:999px;border:1.5px solid var(--hair);background:var(--canvas);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .12s;}
-.cm-tag.on{background:#EEF2FF;border-color:#A5B4FC;color:#4F46E5;}
-.ci-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;margin-right:4px;vertical-align:middle;}
-.ci-tag.프리톡{background:#EEF2FF;color:#4F46E5;}
-.ci-tag.개선의견{background:#FEF3C7;color:#92400E;}
 .gnb__theme-toggle{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;margin-left:auto;flex-shrink:0;}
 .gnb__theme-toggle:hover{background:rgba(255,255,255,.16);color:#fff;}
 .icon-sun,.icon-moon{display:none;}
@@ -707,10 +653,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
       <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-        <button onclick="openCommentModal()" style="display:flex;align-items:center;gap:5px;background:#EEF2FF;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:#4F46E5;cursor:pointer;font-family:inherit;white-space:nowrap;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          의견 남기기
-        </button>
         <span id="data-updated-at" style="font-size:11px;color:#9CA3AF;">데이터 매주 월요일 갱신</span>
       </div>
     </div>
@@ -747,12 +689,6 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
           <div class="sim__out" id="sim-out"></div>
         </div>
 
-        <!-- 의견 남기기 진입 -->
-        <button onclick="openCommentModal()" style="width:100%;display:flex;align-items:center;gap:10px;margin-top:10px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:12px 16px;cursor:pointer;font-family:inherit;text-align:left;color:var(--muted);font-size:13px;transition:border-color .15s,background .15s;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span style="flex:1;">사용해보셨나요? 의견을 남겨주세요.</span>
-          <span style="font-size:12px;font-weight:700;color:#4F46E5;">의견 남기기 →</span>
-        </button>
       </div>
 
       <!-- 사이드바: 인컴 ETF 전체 -->
@@ -1436,146 +1372,10 @@ fetch('/data/income_etfs.json')
     simRowsRender();simOut();
   });
 
-/* ── 의견 모달 (Supabase) ── */
-const SB_URL='https://ofrxlvjsirkbuejijiaz.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mcnhsdmpzaXJrYnVlamlqaWF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE2ODUsImV4cCI6MjA5NzI3NzY4NX0.Ih5EeYydwSvQmIxPbu2wKNsJTfUfbfRsiZVSv2YOC1Y';
-let _sb=null;
-function getSb(){
-  if(!_sb&&window.supabase){_sb=window.supabase.createClient(SB_URL,SB_KEY);}
-  return _sb;
-}
-const NICK_ADJ=['배당하는','월배당','인컴','복리','장기','건전한','분배하는','커버드'];
-const NICK_ANIMAL=['판다','코알라','펭귄','고양이','토끼','다람쥐','수달','라마'];
-const AV_COLORS=[
-  {bg:'#EEF2FF',fg:'#4F46E5'},{bg:'#FEF3C7',fg:'#92400E'},
-  {bg:'#DCFCE7',fg:'#15803D'},{bg:'#FEE2E2',fg:'#B91C1C'},
-  {bg:'#F3E8FF',fg:'#7E22CE'},{bg:'#E0F2FE',fg:'#0369A1'}
-];
-let openReplyId=null;
-const _sessionNick=NICK_ADJ[Math.floor(Math.random()*NICK_ADJ.length)]+' '+NICK_ANIMAL[Math.floor(Math.random()*NICK_ANIMAL.length)];
-function getNick(){return _sessionNick;}
-function timeAgo(iso){
-  const d=Date.now()-new Date(iso).getTime(),m=Math.floor(d/60000),h=Math.floor(d/3600000);
-  if(d<60000)return '방금';if(m<60)return m+'분 전';if(h<24)return h+'시간 전';
-  return Math.floor(d/86400000)+'일 전';
-}
-function avColor(idx){return AV_COLORS[idx%AV_COLORS.length];}
-function renderCmList(tree){
-  const el=document.getElementById('cm-list');
-  const total=tree.reduce((a,c)=>a+1+c.replies.length,0);
-  document.getElementById('cm-count').textContent=total;
-  if(!tree.length){el.innerHTML='<div class="cm-empty">아직 의견이 없어요. 첫 번째 의견을 남겨보세요.</div>';return;}
-  el.innerHTML=tree.map(c=>{
-    const av=avColor(c.av);
-    const replies=(c.replies||[]).map(r=>{
-      const ra=avColor(r.av);
-      return `<div class="cr"><div class="cr-head"><div class="cr-av" style="background:${ra.bg};color:${ra.fg};">${r.author[0]}</div><span class="cr-author">${r.author}</span><span class="cr-time">${timeAgo(r.created_at)}</span></div><div class="cr-body">${r.body}</div></div>`;
-    }).join('');
-    const replyForm=openReplyId===c.id?`<div class="cs-reply-form"><input class="cs-reply-input" id="rf-${c.id}" placeholder="답글 입력…"><button class="cs-reply-submit" onclick="submitReply(${c.id})">등록</button></div>`:'';
-    const replyCount=c.replies.length?` ${c.replies.length}`:'';
-    const tagBadge=c.tag?`<span class="ci-tag ${c.tag}">${c.tag}</span>`:'';
-    return `<div class="ci"><div class="ci-head"><div class="ci-av" style="background:${av.bg};color:${av.fg};">${c.author[0]}</div><span class="ci-author">${c.author}</span><span class="ci-time">${timeAgo(c.created_at)}</span></div><div class="ci-body">${tagBadge}${c.body}</div><button class="ci-reply-btn" onclick="toggleReply(${c.id})">↩ 답글${replyCount}</button>${replies?`<div class="cs-replies">${replies}</div>`:''}${replyForm}</div>`;
-  }).join('');
-}
-let cmTree=[];
-async function loadAndRenderComments(){
-  const el=document.getElementById('cm-list');
-  el.innerHTML='<div class="cm-empty">불러오는 중…</div>';
-  const sb=getSb();
-  if(!sb){el.innerHTML='<div class="cm-empty">댓글을 불러올 수 없어요.</div>';return;}
-  const {data,error}=await sb.from('comments').select('*').order('created_at',{ascending:false});
-  if(error||!data){el.innerHTML='<div class="cm-empty">불러오기 실패. 잠시 후 다시 시도해주세요.</div>';return;}
-  const tops=data.filter(c=>!c.parent_id);
-  const reps=data.filter(c=>c.parent_id);
-  cmTree=tops.map(c=>({...c,replies:reps.filter(r=>r.parent_id===c.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}));
-  renderCmList(cmTree);
-}
-function toggleReply(id){
-  openReplyId=openReplyId===id?null:id;
-  renderCmList(cmTree);
-  if(openReplyId){setTimeout(()=>document.getElementById('rf-'+id)?.focus(),30);}
-}
-async function submitReply(parentId){
-  const inp=document.getElementById('rf-'+parentId);
-  const body=inp?.value.trim();
-  if(!body||body.length<2)return;
-  const nick=document.getElementById('cm-nick').value.trim()||getNick();
-  const btn=inp.nextElementSibling;
-  if(btn)btn.disabled=true;
-  const sb=getSb();
-  if(sb){await sb.from('comments').insert({author:nick,body,av:Math.floor(Math.random()*AV_COLORS.length),parent_id:parentId});}
-  openReplyId=null;
-  await loadAndRenderComments();
-}
-let _selectedTag='프리톡';
-function selectTag(tag){
-  _selectedTag=tag;
-  ['프리톡','개선의견'].forEach(t=>{
-    const el=document.getElementById('cm-tag-'+t);
-    if(el)el.classList.toggle('on',t===tag);
-  });
-}
-async function submitComment(){
-  const nick=document.getElementById('cm-nick').value.trim()||getNick();
-  const body=document.getElementById('cm-textarea').value.trim();
-  if(!body||body.length<2)return;
-  const btn=document.querySelector('.cm-submit');
-  if(btn){btn.disabled=true;btn.textContent='등록 중…';}
-  const sb=getSb();
-  if(sb){
-    const {error}=await sb.from('comments').insert({author:nick,body,tag:_selectedTag,av:Math.floor(Math.random()*AV_COLORS.length)});
-    if(!error){document.getElementById('cm-textarea').value='';}
-  }
-  if(btn){btn.disabled=false;btn.textContent='등록';}
-  await loadAndRenderComments();
-}
-async function openCommentModal(){
-  document.getElementById('cm-nick').value=getNick();
-  const ov=document.getElementById('cm-overlay');
-  ov.style.display='flex';
-  document.body.style.overflow='hidden';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
-  await loadAndRenderComments();
-}
-function closeCommentModal(){
-  const ov=document.getElementById('cm-overlay');
-  ov.classList.remove('open');
-  document.body.style.overflow='';
-  setTimeout(()=>{ov.style.display='none';},300);
-}
-function handleCmOverlayClick(e){if(e.target===document.getElementById('cm-overlay'))closeCommentModal();}
 
 
 </script>
 <!-- ===== ETF 추가 모달/바텀시트 ===== -->
-<!-- ===== 의견 모달 ===== -->
-<div id="cm-overlay" onclick="handleCmOverlayClick(event)">
-  <div id="cm-dialog">
-    <div class="cm-handle"></div>
-    <div class="cm-head">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="cm-title">의견</span>
-      <span class="cm-count" id="cm-count">0</span>
-      <button class="cm-close" onclick="closeCommentModal()" aria-label="닫기">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="cm-list" id="cm-list"></div>
-    <div class="cm-form">
-      <div class="cm-tags">
-        <button class="cm-tag on" id="cm-tag-프리톡" onclick="selectTag('프리톡')">프리톡</button>
-        <button class="cm-tag" id="cm-tag-개선의견" onclick="selectTag('개선의견')">개선의견</button>
-      </div>
-      <input class="cm-nick" id="cm-nick" placeholder="닉네임">
-      <textarea class="cm-textarea" id="cm-textarea" placeholder="의견을 남겨보세요. 투자 경험, 질문, ETF 추천 등 무엇이든 괜찮아요." rows="3"></textarea>
-      <div class="cm-foot-row">
-        <span class="cm-hint">익명으로 저장됩니다.</span>
-        <button class="cm-submit" onclick="submitComment()">등록</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="add-sheet-overlay" onclick="closeAddSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:299;"></div>
 <div id="add-sheet" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:300;transform:translateY(100%);transition:transform .25s ease-out;padding:0 0 env(safe-area-inset-bottom);">
   <div id="add-sheet-handle" style="width:36px;height:4px;background:#E5E7EB;border-radius:2px;margin:10px auto 0;"></div>
