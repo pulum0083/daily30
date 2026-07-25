@@ -994,7 +994,36 @@ def _extract_eok_values(text):
     return values
 
 
-def _check_supply_scale(analysis, latest, warnings):
+def _collect_format_prose(analysis, btype, fmt):
+    """현재 analysis_format이 실제로 렌더하는 산문(스칼라 + 리스트 원소 지정 키)을 모아 반환.
+
+    SCALAR_PROSE·FORMAT_SCALAR_PROSE·FORMAT_LIST_PROSE·ALWAYS_LIST_PROSE 표를
+    validate()의 3-c/4단계와 동일하게 재사용한다 — 본문 스캔기(_check_supply_scale
+    등)가 새 analysis_format이 추가될 때마다 별도로 필드 목록을 유지하지 않도록.
+    """
+    parts = []
+    scalar_fields = list(dict.fromkeys(
+        SCALAR_PROSE.get(btype, []) + FORMAT_SCALAR_PROSE.get(fmt, [])
+    ))
+    for fld in scalar_fields:
+        text = analysis.get(fld)
+        if isinstance(text, str):
+            parts.append(text)
+
+    for fld, keys in FORMAT_LIST_PROSE.get(fmt, []) + ALWAYS_LIST_PROSE:
+        items = analysis.get(fld)
+        if not isinstance(items, list):
+            continue
+        for it in items:
+            if isinstance(it, str):
+                parts.append(it)
+            elif isinstance(it, dict):
+                parts.append(" ".join(str(it.get(k) or "") for k in (keys or ("text",))))
+
+    return " ".join(parts)
+
+
+def _check_supply_scale(analysis, latest, warnings, btype="kospi-close"):
     """마감 브리핑 분석 본문의 수급 수치 스케일을 크로스체크한다.
 
     investor_trading.net(백만원 → 억원 변환값)과 본문 언급 수치를 비교.
@@ -1015,11 +1044,9 @@ def _check_supply_scale(analysis, latest, warnings):
     if not actuals:
         return
 
-    # 분석 본문 전체에서 억원 숫자 추출
-    prose = " ".join(
-        analysis.get(f, "") or ""
-        for f in ("market_summary", "why", "what", "so_what")
-    )
+    # 분석 본문 전체에서 억원 숫자 추출 (현재 analysis_format이 렌더하는 필드 전체)
+    fmt = analysis.get("analysis_format") or "why_what_so"
+    prose = _collect_format_prose(analysis, btype, fmt)
     mentioned = _extract_eok_values(prose)
     if not mentioned:
         return
@@ -1177,7 +1204,7 @@ def validate(analysis, latest, btype):
 
     # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
     if btype == "kospi-close":
-        _check_supply_scale(a, latest, warnings)
+        _check_supply_scale(a, latest, warnings, btype)
 
     return {"analysis": a, "corrections": corrections, "warnings": warnings, "blocks": blocks}
 

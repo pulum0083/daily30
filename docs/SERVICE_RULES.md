@@ -651,7 +651,7 @@ curl -s https://doubleshot.space/data/kospi-news-live.json | python3 -m json.too
 - 수정: `validate_analysis.py`에 `FORMAT_SCALAR_PROSE`·`FORMAT_LIST_PROSE` 선언 표 + 포맷 무관 필드용 `ALWAYS_LIST_PROSE`(`key_drivers`·`us_issues`) 추가. `_filter_list_prose(..., keys=)`로 dict 원소의 임의 키(`qa_items`의 `q`/`a` 등)를 스캔하고, 스칼라는 `_scrub_scalar_prose()`로 통일(문장 제거 → 전체 위반 시 필드 비움 + warning). `todays_view.dek`·`recap`·`outlook`도 금지패턴 스캔에 배선(2-d의 방향 검증과는 별개 축).
 - 필드를 비울 수 있게 되면서 `signal_board.html`·`qa.html`·`scenario_split.html`·`flow_chain.html`·`key_numbers.html`·`why_what_so.html`에 빈 값 가드 추가 — 제목만 남은 빈 카드가 렌더되지 않게 섹션 전체를 감쌌다.
 - **포맷을 추가·변경할 때는 위 두 선언 표와 해당 템플릿의 빈 값 가드를 반드시 같이 고친다.** `generate_html.build_*_context`가 렌더하는 필드 목록이 정본이다. 표에 없는 `analysis_format`이 들어오면 `validate`가 "미등재 — 포맷 산문 금지패턴 스캔 생략" warning을 남긴다(무검증 통과를 조용히 넘기지 않기 위한 안전핀).
-- **잔여 갭(남음)**: `_check_supply_scale()`은 여전히 `market_summary`·`why`·`what`·`so_what`만 읽는다 — `signal` 등 신규 포맷 마감 브리핑에서는 수급 100배 스케일 크로스체크가 사실상 무효(스캔할 산문이 없음).
+- **후속 수정 완료 (2026-07-26)**: `_check_supply_scale()`이 `market_summary`·`why`·`what`·`so_what` 네 필드만 읽어 `signal` 등 신규 포맷 마감 브리핑에서 수급 100배 스케일 크로스체크가 사실상 무효했던 갭을 해소. `_collect_format_prose(analysis, btype, fmt)` 헬퍼를 신설해 위 `SCALAR_PROSE`/`FORMAT_SCALAR_PROSE`/`FORMAT_LIST_PROSE`/`ALWAYS_LIST_PROSE` 표를 재사용 — 현재 `analysis_format`이 실제로 렌더하는 스칼라 필드 + 리스트 원소의 지정 키(`sig_items[].desc` 등)를 모두 모아 스캔한다. 표를 두 번 선언하지 않고 3-c/4단계와 동일한 소스를 공유하므로, 포맷을 추가·변경할 때 위 두 표만 고치면 이 체크도 자동으로 따라온다. 차단이 아니라 warning만 남기는 기존 정책은 유지. 테스트: `test_supply_scale_warns_on_signal_format`(`scripts/test_validate_analysis.py`).
 
 ### 23. 코스피 아침 브리핑이 '이미 발표된' 간밤 빅테크 실적을 '발표 예정'으로 오표기 (2026-07-23 실사고, 수정 완료)
 

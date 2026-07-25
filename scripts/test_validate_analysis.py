@@ -226,6 +226,20 @@ def test_supply_scale_skipped_for_kospi():
     assert not any("스케일" in w for w in r["warnings"]), r["warnings"]
 
 
+def test_supply_scale_warns_on_signal_format():
+    # signal 포맷(마감 브리핑 최신 형태)은 market_summary/why/what/so_what이 없고
+    # sig_verdict·sig_items[].desc에 산문이 들어있다 — 이 필드까지 스캔해야 한다.
+    a = {
+        "analysis_format": "signal",
+        "sig_verdict": "",
+        "sig_items": [
+            {"label": "수급", "desc": "외국인이 <b>659억원</b> 순매도했어요."},
+        ],
+    }
+    r = v.validate(a, _SUPPLY_LATEST, "kospi-close")
+    assert any("외국인" in w and "스케일" in w for w in r["warnings"]), r["warnings"]
+
+
 # ── 픽 종목 티커 해석 ─────────────────────────────────────────────────────────
 def test_resolve_ticker_us():
     assert v._resolve_ticker({"name": "NVDA (엔비디아)", "ticker": None}, "us") == "NVDA"
