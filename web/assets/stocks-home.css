@@ -66,6 +66,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .supply .s b{font-size:13px;font-weight:800;}
 .supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
 .supply .unit .live{color:#16A34A;font-weight:700;}
+/* 모바일 2행 강제 줄바꿈 지점 — 데스크탑 기본값은 폭 0이라 레이아웃에 영향 없음(아래 모바일 미디어쿼리가 flex-basis:100%로 전환). */
+.sup-brk{flex-basis:0;width:0;height:0;overflow:hidden;}
 .sup-more{flex-shrink:0;margin-left:16px;margin-right:2px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
 .sup-more[hidden]{display:none;}
 .sup-more:hover{background:#E0EBFD;}
@@ -797,8 +799,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .strip,.supply{flex-wrap:wrap;row-gap:7px;column-gap:12px;}
   .strip .m+.m,.supply .s+.s{border-left:none;margin-left:0;padding-left:0;}
   .idx-more{margin-left:0;}
-  .supply .unit{margin-left:0;padding-left:0;}
-  .sup-more{margin-left:auto;}
+  /* 수급 2행 강제 배치 — 1행: 수급·기준일(좌) + 10일 추이(우) / 2행: 개인·기관·외국인.
+     .sup-brk가 flex-basis:100%로 두 행을 가른다(desktop에선 폭 0이라 무영향). */
+  .supply .lbl{order:1;border-right:none;padding-right:0;margin-right:6px;}
+  .supply .unit{order:2;margin-left:0;padding-left:0;}
+  .sup-more{order:3;margin-left:auto;}
+  .sup-brk{order:4;flex-basis:100%;height:0;}
+  .supply .s{order:5;}
   .refrow{grid-template-columns:1fr;gap:0;}
   .refrow .rp{flex-direction:row;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);}
   .refrow .rp:last-child{border-bottom:none;padding-bottom:0;}

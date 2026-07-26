@@ -54,6 +54,9 @@
              순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
         <div class="supply" id="h-supply" hidden>
           <span class="lbl">수급</span>
+          <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
+               1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
+          <span class="sup-brk" aria-hidden="true"></span>
           <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
           <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
           <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
