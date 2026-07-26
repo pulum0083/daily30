@@ -809,6 +809,46 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   setInterval(window.ueGate, 5*60*1000);
 })();
 
+/* 주말 섹션 순서 — 갱신되는 블록을 위로, 정지된 블록을 아래로 재배치.
+   주말엔 "지금 이시각 추정가"(HL24h 실시간)와 "관련 뉴스"(3시간 주기)만 갱신되고
+   장중 차트·목표주가·외국계 시각·밤사이 미국 반도체 시황은 전부 금요일 값에 멈춘다.
+   적용 구간: 토·일 종일 + 월요일 07:30(오전 브리핑 발행) 전까지. 그 뒤 평일 순서로 원복. */
+(function(){
+  var usEve=document.getElementById('us-evening');
+  var usLinked=document.getElementById('us-linked-widget');
+  var why=document.getElementById('why-moved');
+  if(!usEve||!usLinked||!why) return;
+  var curve=document.getElementById('wm-curve-block');
+  // #why-moved 직계 .lw-row = 관련뉴스+목표주가 2단 행(#wm-body 안의 .lw-row와 구분하려면 직계여야 한다).
+  var newsRow=why.querySelector(':scope > .lw-row');
+  if(!curve||!newsRow) return;
+
+  // 원복용 앵커 — 각 블록의 원래 다음 형제. 재배치 뒤에도 참조가 유효하다.
+  var eveAnchor=usEve.nextElementSibling;      // = #us-linked-widget
+  var newsAnchor=newsRow.nextElementSibling;   // = #lw-ib
+
+  var applied=null;
+  function weekendLayout(){
+    var d=new Date(Date.now()+9*3600*1000);
+    var wd=d.getUTCDay();
+    if(wd===0||wd===6) return true;                                  // 토·일 종일
+    return wd===1 && (d.getUTCHours()*60+d.getUTCMinutes())<450;     // 월 07:30 이전
+  }
+  function apply(on){
+    if(applied===on) return;
+    applied=on;
+    if(on){
+      why.insertBefore(newsRow, curve);                              // 뉴스를 장중 차트 위로
+      usLinked.parentNode.insertBefore(usEve, usLinked.nextElementSibling); // 미국 반도체 시황을 맨 아래로
+    }else{
+      why.insertBefore(newsRow, newsAnchor);
+      eveAnchor.parentNode.insertBefore(usEve, eveAnchor);
+    }
+  }
+  apply(weekendLayout());
+  setInterval(function(){apply(weekendLayout());}, 60*1000);
+})();
+
 /* ── 블록 5 (원본 index.html) ── */
 /* 날짜 규칙(허브 전역) — 장중=오늘, 마감/주말/휴일=M/D(요일). 기준일은 스냅샷 generated_at. */
 var _asOfYmd=null; // 마지막 거래일(스냅샷 날짜). SNAP 로드 시 주입.
