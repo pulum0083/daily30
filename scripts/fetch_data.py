@@ -4,6 +4,8 @@ Market data fetcher for DailyB Investment Assistant.
 Pre-collects ALL data needed for briefings so Claude makes ≤3 web searches per run.
 """
 
+from __future__ import annotations  # `X | None` 어노테이션을 구버전 파이썬에서도 임포트 가능하게
+
 import argparse
 import json
 import sys
@@ -254,6 +256,40 @@ def _yf_history(ticker: str, retries: int = 3, **kwargs):
 
 
 
+def _prev_close_from_daily(closes, price: float) -> float | None:
+    """일봉 종가 시리즈에서 `price`가 속한 세션의 '직전 세션 종가'를 구한다.
+
+    yfinance `fast_info.previous_close`는 직전 세션이 아닌 더 과거 세션의 종가를
+    돌려주는 경우가 있다(2026-07-27 실사고: EWY previous_close=172.964 = 7/21 종가,
+    실제 직전 종가는 173.86 = 7/23 → 등락률이 -6.27%가 아닌 -5.78%로 표시됨).
+    실시간 가격 자체(last_price)는 정확하므로, 기준가만 일봉에서 다시 구해 교정한다.
+
+    실패하거나 판별 불가하면 None → 호출부가 기존 값을 유지한다.
+    """
+    try:
+        if closes is None or len(closes) < 2 or not price:
+            return None
+        last = float(closes.iloc[-1])
+        if not last:
+            return None
+
+        # ① price가 마지막 일봉 종가와 같으면 장 마감 상태 → 그 직전 종가가 기준가
+        if abs(price - last) / last < 1e-4:
+            return float(closes.iloc[-2])
+
+        # ② 세션 진행 중(또는 시간외) — 마지막 일봉이 '오늘' 바인지로 갈린다.
+        #    거래소 현지 시각 기준으로 판별한다(yfinance 인덱스는 거래소 tz).
+        ts = closes.index[-1]
+        tzinfo = getattr(ts, "tzinfo", None)
+        if tzinfo is None:
+            return None
+        if ts.date() >= datetime.now(tzinfo).date():
+            return float(closes.iloc[-2])  # 마지막 바 = 오늘 진행 중 바
+        return last                        # 마지막 바 = 직전 세션 종가
+    except Exception:
+        return None
+
+
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
@@ -309,6 +345,12 @@ def get_ticker_full(ticker: str) -> dict:
         rt = _get_realtime_price(ticker)
         if rt is not None:
             price, prev_price = rt
+            # fast_info.previous_close가 과거 세션 종가를 주는 경우가 있어 일봉으로 교정
+            fixed = _prev_close_from_daily(closes, price)
+            if fixed and abs(fixed - prev_price) / fixed > 1e-4:
+                print(f"[fetch_data] {ticker}: previous_close 교정 {prev_price:.4f} → {fixed:.4f}",
+                      file=sys.stderr)
+                prev_price = fixed
         else:
             price = float(closes.iloc[-1])
             prev_price = float(closes.iloc[-2])
@@ -423,6 +465,12 @@ def build_sidebar_market_data(sidebar_map: dict) -> dict:
             rt = _get_realtime_price(ticker)
             if rt is not None:
                 price, prev = rt
+                # fast_info.previous_close가 과거 세션 종가를 주는 경우가 있어 일봉으로 교정
+                fixed = _prev_close_from_daily(closes, price)
+                if fixed and abs(fixed - prev) / fixed > 1e-4:
+                    print(f"[fetch_data] sidebar {key}/{ticker}: previous_close 교정 "
+                          f"{prev:.4f} → {fixed:.4f}", file=sys.stderr)
+                    prev = fixed
             else:
                 price = float(closes.iloc[-1])
                 prev = float(closes.iloc[-2])

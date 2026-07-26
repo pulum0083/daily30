@@ -491,6 +491,56 @@ def _us_figure_stale(text: str, real_chg: float, tol: float = 2.0) -> bool:
     return False
 
 
+# 산문에 한글·기호로 등장하는 미국 지수명 → 실측 조회 심볼.
+# _US_TICKER_RE는 ASCII 티커만 잡아서 "나스닥"·"S&P500"이 무검증으로 통과했다
+# (2026-07-27 실사고: 실제 S&P500 +0.05%인데 "-0.05% 조정 마감"으로 발행).
+# 긴 이름부터 매칭해야 "나스닥100 선물"이 "나스닥"으로 오인식되지 않는다.
+_INDEX_NAME_SYMBOL = [
+    ("필라델피아 반도체지수", "^SOX"),
+    ("필라델피아 반도체", "^SOX"),
+    ("필라델피아반도체", "^SOX"),
+    ("나스닥100", None),   # 선물 — 일봉 실측과 기준이 달라 검증 대상에서 제외
+    ("나스닥", "^IXIC"),
+    ("S&P500", "^GSPC"),
+    ("S&P 500", "^GSPC"),
+    ("다우존스", "^DJI"),
+    ("다우", "^DJI"),
+]
+
+# 지수명 바로 뒤(최대 12자 이내)에 붙은 등락률만 그 지수의 주장으로 본다.
+# 문자열 전체를 훑으면 "나스닥 -0.64%, S&P500 +0.05%"처럼 여러 지수가 한 문장에 있을 때
+# 서로의 수치와 교차 비교돼 정상 항목을 오제거한다.
+_PCT_NEAR_RE = r"[^%]{0,12}?([+-]?\d+(?:\.\d+)?)\s*%"
+
+
+def _index_figures(text: str) -> dict:
+    """산문에서 '지수명 + 인접 등락률'을 뽑아 {심볼: 주장 등락률}로 돌려준다."""
+    plain = strip_tags(text)
+    # 검증 제외 이름(나스닥100 선물 등)을 먼저 마스킹한다.
+    # 안 하면 짧은 별칭('나스닥')이 "나스닥100 선물 +1.17%"를 잡아 엉뚱한 지수로 오인식한다.
+    for name, symbol in _INDEX_NAME_SYMBOL:
+        if symbol is None:
+            plain = plain.replace(name, "○" * len(name))
+
+    out: dict = {}
+    for name, symbol in _INDEX_NAME_SYMBOL:
+        if symbol is None or symbol in out:
+            continue
+        m = re.search(re.escape(name) + _PCT_NEAR_RE, plain)
+        if m:
+            out[symbol] = float(m.group(1))
+            # 매칭 구간을 지워 짧은 별칭(다우존스→다우)이 같은 수치를 다시 잡지 않게 한다
+            plain = plain[:m.start()] + "○" * (m.end() - m.start()) + plain[m.end():]
+    return out
+
+
+def _index_figure_wrong(claimed: float, real: float) -> bool:
+    """지수 등락률 주장이 실측과 어긋나는지. 부호 반전 또는 2%p 초과 차이."""
+    if claimed * real < 0 and abs(claimed - real) > 0.02:
+        return True   # 부호 반전 (0.00 근처 노이즈는 제외)
+    return abs(claimed - real) > 2.0
+
+
 def validate_key_drivers(analysis: dict, btype: str,
                          corrections: list, warnings: list) -> None:
     """이렇게 보는 이유(key_drivers) 항목의 종목·지수 서술이 실측과 모순이면 항목을 제거한다.
@@ -535,6 +585,18 @@ def validate_key_drivers(analysis: dict, btype: str,
                 us_real[tk] = d["change_pct"]
             # fetch 실패 시 조용히 생략(fail-open) — 깨진 실측으로 정상 항목을 오제거하지 않는다
 
+    # ── 한글·기호 지수명(나스닥·S&P500 등) 실측 ─────────────────────────────────
+    idx_real: dict = {}
+    for item in drivers:
+        if not isinstance(item, dict):
+            continue
+        for symbol in _index_figures(item.get("text", "")):
+            if symbol in idx_real:
+                continue
+            d = _fetch_us_realdata(symbol)
+            if "error" not in d and d.get("change_pct") is not None:
+                idx_real[symbol] = d["change_pct"]
+
     kept = []
     for item in drivers:
         if not isinstance(item, dict):
@@ -547,6 +609,9 @@ def validate_key_drivers(analysis: dict, btype: str,
             if tk in us_real and (_direction_contradicts(text, us_real[tk])
                                   or _us_figure_stale(text, us_real[tk])):
                 bad.append(tk)
+        for symbol, claimed in _index_figures(text).items():
+            if symbol in idx_real and _index_figure_wrong(claimed, idx_real[symbol]):
+                bad.append(f"{symbol}({claimed:+.2f}% vs 실측 {idx_real[symbol]:+.2f}%)")
         if bad:
             corrections.append(f"key_drivers 항목 제거 (방향·수치 모순 {bad}): {text[:50]}")
         else:
@@ -557,6 +622,55 @@ def validate_key_drivers(analysis: dict, btype: str,
 
 
 # ── 종목 후보(실측) 수집·매칭 ──────────────────────────────────────────────────
+def _walk_strings(obj, fn) -> int:
+    """dict/list를 재귀 순회하며 모든 문자열에 fn을 적용한다. 바뀐 개수를 반환."""
+    n = 0
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if isinstance(v, str):
+                new = fn(v)
+                if new != v:
+                    obj[k] = new
+                    n += 1
+            else:
+                n += _walk_strings(v, fn)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, str):
+                new = fn(v)
+                if new != v:
+                    obj[i] = new
+                    n += 1
+            else:
+                n += _walk_strings(v, fn)
+    return n
+
+
+def fix_overnight_labels(analysis, btype, corrections):
+    """'간밤' 표기 교정 — 월요일·휴일 다음날은 직전 미국장이 어제가 아니다.
+
+    2026-07-27 실사고: 월요일 코스피 브리핑이 지난 금요일(7/24) 미국장을 "간밤"으로 서술.
+    프롬프트 지시만으로는 새는 표현이라(§22 교훈) 발행 직전 결정론적으로 치환한다.
+    """
+    if btype != "kospi":
+        return
+    try:
+        from datetime import datetime as _dt
+        import pytz
+        from session_label import fix_overnight_wording, is_overnight_us, us_session_label
+    except Exception as e:
+        print(f"[validate] 간밤 표기 검사 생략: {e}", file=sys.stderr)
+        return
+
+    today = _dt.now(pytz.timezone("Asia/Seoul")).date()
+    if is_overnight_us(today):
+        return  # 직전 미국장이 실제로 간밤 — 교정 불필요
+    label = us_session_label(today)
+    n = _walk_strings(analysis, lambda s: fix_overnight_wording(s, today))
+    if n:
+        corrections.append(f"'간밤' 표기 {n}건 → '{label}' 교정 (직전 미국장이 어제가 아님)")
+
+
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
     out = []
@@ -1041,6 +1155,9 @@ def validate(analysis, latest, btype):
     validate_todays_view_recap(a, btype, corrections, warnings)
     validate_todays_view_outlook(a, btype, corrections, warnings)
     validate_key_drivers(a, btype, corrections, warnings)
+
+    # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
+    fix_overnight_labels(a, btype, corrections)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):

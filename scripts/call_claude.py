@@ -686,6 +686,33 @@ def load_market_data(briefing_type: str) -> dict:
         return json.load(f)
 
 
+def _session_label_directive(date_str: str, briefing_type: str) -> str:
+    """'간밤' 표기 지시문 — 월요일·휴일 다음날은 직전 미국장이 어제가 아니다.
+
+    2026-07-27 실사고: 월요일 브리핑이 지난 금요일(7/24) 미국장을 "간밤"으로 서술.
+    프롬프트만으로는 새므로 validate_analysis.fix_overnight_labels가 발행 직전 한 번 더 잡는다.
+    """
+    if briefing_type != "kospi":
+        return ""
+    try:
+        from datetime import date as _d
+        from session_label import prev_us_session, us_session_label
+        y, m, dd = (int(x) for x in date_str.split("-"))
+        today = _d(y, m, dd)
+        prev = prev_us_session(today)
+        label = us_session_label(today)
+    except Exception:
+        return ""
+    if label == "간밤":
+        return ""
+    return (
+        f"## 직전 미국장 표기 (중요)\n"
+        f"오늘({date_str})이 참조하는 직전 미국장은 **{prev} ({label})**이다. "
+        f"어젯밤 미국장은 열리지 않았으므로 **'간밤'·'어젯밤'·'밤사이'라고 쓰지 말고 "
+        f"'{label}'로 쓴다.** 국내 직전 거래일도 같은 날이다.\n\n"
+    )
+
+
 def load_news_summary(briefing_type: str) -> dict:
     path = DATA_DIR / f"news_summary_{briefing_type}.json"
     if not path.exists():
@@ -1161,6 +1188,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         ]
 
     user_content = f"오늘 날짜: {date_str}\n\n"
+    user_content += _session_label_directive(date_str, briefing_type)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

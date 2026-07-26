@@ -220,8 +220,20 @@ def _strip_issue_numbers(text: str) -> str:
     return out.strip()
 
 
-def build_us_issues(analysis: dict) -> dict:
-    """analysis.us_issues → 코스피 아침 브리핑 '간밤 미국 시장' 이슈 리스트.
+def _us_issues_label(target_date: str) -> str:
+    """섹션 제목의 '간밤' 표기. 월요일·휴일 다음날은 직전 미국장이 어제가 아니므로
+    '지난 금요일'처럼 실제 세션을 가리킨다 (2026-07-27 실사고)."""
+    try:
+        from datetime import date as _d
+        from session_label import us_session_label
+        y, m, dd = (int(x) for x in target_date.split("-"))
+        return us_session_label(_d(y, m, dd))
+    except Exception:
+        return "간밤"
+
+
+def build_us_issues(analysis: dict, target_date: str = "") -> dict:
+    """analysis.us_issues → 코스피 아침 브리핑 '직전 미국장' 이슈 리스트.
     title 없는 항목·미검색 placeholder 문장은 제외한다. (US 저녁 브리핑 build_issues의 경량판)"""
     out = []
     for it in (analysis.get("us_issues") or []):
@@ -234,7 +246,10 @@ def build_us_issues(analysis: dict) -> dict:
         if not title or any(p in joined for p in ("확인되지 않", "확인되지않", "관련 뉴스는", "뉴스가 없", "검색 결과에서 확인")):
             continue
         out.append({"title": title, "body": body})
-    return {"us_issues": out[:2]}  # 최대 2개 (프롬프트 지시의 하드 백스톱)
+    return {
+        "us_issues": out[:2],  # 최대 2개 (프롬프트 지시의 하드 백스톱)
+        "us_issues_label": _us_issues_label(target_date) if target_date else "간밤",
+    }
 
 
 def build_issues(analysis: dict) -> dict:
@@ -388,7 +403,7 @@ def _split_comfort_line(text: str) -> str:
     return "<br>".join(p for p in parts if p)
 
 
-def build_reasons(analysis: dict) -> dict:
+def build_reasons(analysis: dict, target_date: str = "") -> dict:
     direction = analysis.get("prediction", {}).get("direction", "")
     fallback = {
         "상승 우위": "왜 오를까? — 오늘의 상승 시그널",
@@ -402,8 +417,8 @@ def build_reasons(analysis: dict) -> dict:
         # 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개(넘버링). 형식과 무관하게 항상 표시.
         "key_drivers": analysis.get("key_drivers") or [],
     }
-    # 간밤 미국 시장 이슈 — us_issues(뉴스 요약 기반). 항목 없으면 템플릿에서 자동 생략.
-    ctx.update(build_us_issues(analysis))
+    # 직전 미국장 이슈 — us_issues(뉴스 요약 기반). 항목 없으면 템플릿에서 자동 생략.
+    ctx.update(build_us_issues(analysis, target_date))
     if fmt == "split":
         pass  # split은 오늘의 관점 본문이 todays_view.recap/outlook — 별도 형식 컨텍스트 불필요
     elif fmt == "scenario":
@@ -1074,7 +1089,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
-        ctx.update(build_reasons(analysis))
+        ctx.update(build_reasons(analysis, target_date))
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
