@@ -16,7 +16,7 @@
     { "src": "^/stocks(?:/.*)?$",        "headers": { "cache-control": "no-cache, must-revalidate" }, "continue": true },
     { "src": "^/stocks/income-designer/?$", "dest": "/stocks/income-designer/index.html" },
     { "src": "^/stocks/010620(?:/.*)?$",  "status": 301, "headers": { "Location": "/stocks/329180/" } },
-    { "src": "^/$",                                       "dest": "/landing.html" },
+    { "src": "^/$",                                       "status": 301, "headers": { "Location": "/stocks/" } },
     { "src": "^/briefings/([0-9]{4}-[0-9]{2}-[0-9]{2})/(kospi|close|us)/?$", "dest": "/briefings/$1/$2/index.html" },
     { "src": "^/briefings/ko/([^/]+)/?$",                 "dest": "/briefings/$1/kospi/index.html" },
     { "src": "^/briefings/us/([^/]+)/?$",                 "dest": "/briefings/$1/us/index.html" },
