@@ -822,8 +822,9 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
    (stocks-live가 실체결 없으면 아예 null 반환) 히어로로 올릴 만한 두께가 아니라,
    주말과 같은 취급으로 묶었다.
 
-   장 마감 상태(us_open·quiet)에선 상단 코스피 지수 스트립도 함께 아래로 내린다 —
-   야간·주말 첫 화면 최상단이 직전 거래일 종가로 채워지던 문제(정지 데이터가 히어로 자리 점유).
+   상단 코스피 지수 스트립(배지줄·strip·수급)은 국면과 무관하게 항상 최상단 고정 —
+   한때 us_open·quiet에서 아래로 내렸으나, 화면 중앙에 떠 있는 게 어색하다는 피드백(2026-07-26)으로
+   되돌림. 주말·야간에도 이 자리를 지킨다.
 
    ⚠️ 재배치는 페이지 로드 시점 1회만. 국면 경계(22:30·05:00 등)가 보는 도중 지나가도
    블록이 튀지 않게 한다 — 인터벌 재평가를 넣지 말 것. */
@@ -869,16 +870,9 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var newsRow=why.querySelector(':scope > .lw-row');
   if(!curve||!newsRow) return;
 
-  // 상단 지수 스트립 묶음 — 배지줄·스트립·수급·수급패널을 한 덩어리로 옮긴다(#sup-more가 #sup-panel을 토글하므로 붙어 있어야 한다).
-  var strip=document.querySelector('#home .strip');
-  var stripGroup=strip
-    ? [strip.previousElementSibling, strip, document.getElementById('h-supply'), document.getElementById('sup-panel')]
-    : [];
-
   why.insertBefore(newsRow, curve);              // 갱신되는 뉴스를 정지된 장중 차트 위로
-  // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)는 건드리지 않는다.
+  // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
   (ph==='us_open' ? [usEve, usLinked] : [usLinked, usEve])
-    .concat(stripGroup)
     .forEach(function(n){ if(n) momTrack.parentNode.insertBefore(n, momTrack); });
 })();
 
@@ -2733,6 +2727,23 @@ if(passBtn){
   if(typeof hubMarketOpen==='function'&&hubMarketOpen()) setInterval(pollMarket,60000);
 })();
 
+/* ── 보조 지표(코스닥·환율) 인라인 토글 ─────────────────────────────────────────
+   지수 줄의 주인공은 코스피 하나. 코스닥·환율은 칩을 눌러야 같은 줄에 펼쳐진다.
+   값 자체는 접혀 있어도 pollMarket이 계속 갱신하므로(숨김일 뿐 DOM에 있음) 펼치는 즉시 최신값이다. */
+(function(){
+  var btn=document.getElementById('idx-more');
+  if(!btn) return;
+  var extra=[].slice.call(document.querySelectorAll('.strip .idx-x'));
+  if(!extra.length){ btn.hidden=true; return; }
+  var card=document.getElementById('idx-card');
+  btn.addEventListener('click',function(){
+    var open=btn.getAttribute('aria-expanded')!=='true';
+    extra.forEach(function(el){ el.hidden=!open; });
+    btn.setAttribute('aria-expanded',String(open));
+    if(card) card.classList.toggle('idx-open',open);   // 펼치면 수급이 아랫줄로(위 CSS)
+  });
+})();
+
 /* ── 수급 10거래일 추이 (수급 행 '10일 추이' 토글) ──────────────────────────────
    데이터: /data/supply-history.json — generate_html.update_supply_history()가 매일 미러링.
    억원 단위 실측. 값이 없으면 버튼째 숨긴다(운영규칙 0).
@@ -2741,7 +2752,7 @@ if(passBtn){
    둥근 막대 끝이 타원으로 찌그러진다. */
 (function(){
   var sup=document.getElementById('h-supply'), btn=document.getElementById('sup-more'),
-      panel=document.getElementById('sup-panel');
+      panel=document.getElementById('sup-panel'), card=document.getElementById('idx-card');
   if(!sup||!btn||!panel) return;
 
   var SERIES=[['individual','개인'],['institution','기관'],['foreign','외국인']];
@@ -2845,7 +2856,7 @@ if(passBtn){
 
   btn.addEventListener('click',function(){
     var open=panel.hidden;
-    panel.hidden=!open; sup.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
+    panel.hidden=!open; if(card) card.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
     if(open) measure();                               // 열린 뒤라야 폭이 잡힌다(hidden이면 clientWidth가 0)
   });
   var rt;
