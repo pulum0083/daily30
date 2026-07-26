@@ -1207,6 +1207,9 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .issue-list{display:flex;flex-direction:column;gap:12px;}
 .issue-card{border:1px solid var(--hairline);border-radius:var(--r-md);padding:15px 16px;background:var(--canvas);}
 .issue-card__title{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.4;}
+.issue-list--numbered{counter-reset:issue;}
+.issue-list--numbered .issue-card__title{display:flex;align-items:center;gap:8px;}
+.issue-list--numbered .issue-card__title::before{counter-increment:issue;content:counter(issue);flex:0 0 20px;width:20px;height:20px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
 .issue-card__body{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.65;}
 .issue-card__body b{color:var(--ink);}
 .issue-card__impact{display:flex;flex-direction:column;gap:7px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--hairline);}

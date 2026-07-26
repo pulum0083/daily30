@@ -2,7 +2,7 @@
 {% if issues %}
 <div class="open-section">
   <div class="open-section__title">📌 오늘 점검할 이슈</div>
-  <div class="issue-list">
+  <div class="issue-list issue-list--numbered">
     {% for it in issues %}
     <div class="issue-card">
       <div class="issue-card__title">{{ it.title }}</div>
