@@ -2735,7 +2735,7 @@ if(passBtn){
    둥근 막대 끝이 타원으로 찌그러진다. */
 (function(){
   var sup=document.getElementById('h-supply'), btn=document.getElementById('sup-more'),
-      panel=document.getElementById('sup-panel');
+      panel=document.getElementById('sup-panel'), card=document.getElementById('idx-card');
   if(!sup||!btn||!panel) return;
 
   var SERIES=[['individual','개인'],['institution','기관'],['foreign','외국인']];
@@ -2839,7 +2839,7 @@ if(passBtn){
 
   btn.addEventListener('click',function(){
     var open=panel.hidden;
-    panel.hidden=!open; sup.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
+    panel.hidden=!open; if(card) card.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',String(open));
     if(open) measure();                               // 열린 뒤라야 폭이 잡힌다(hidden이면 clientWidth가 0)
   });
   var rt;

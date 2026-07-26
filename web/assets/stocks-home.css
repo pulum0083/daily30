@@ -35,12 +35,16 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .search{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:9px 13px;box-shadow:var(--s1);min-width:320px;cursor:text;}
 .search svg{width:15px;height:15px;color:var(--muted);}.search span{color:var(--muted);font-size:13px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
 
-.strip{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+/* 지수 스트립 + 수급 병합 카드 — 예전엔 각자 테두리·그림자를 가진 별개 박스라 사이 여백이 붕 떠 보였다.
+   하나의 카드로 묶고 내부는 구분선(border-top)만으로 나눈다. */
+.idx-card{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);margin-bottom:10px;}
+.idx-card.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
+.strip{display:flex;align-items:center;padding:8px 14px;overflow-x:auto;}
 .strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
 .strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
-/* 수급 행 — 지수 스트립과 같은 형태로 아래에 붙인다(브리핑 페이지 .nb-supply와 표기 통일). */
-.supply{display:flex;align-items:center;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:8px 14px;margin-bottom:10px;overflow-x:auto;}
+/* 수급 행 — 지수 스트립 바로 아래, 구분선으로만 나뉜다(브리핑 페이지 .nb-supply와 표기 통일). */
+.supply{display:flex;align-items:center;padding:8px 14px;border-top:1px solid var(--hair);overflow-x:auto;}
 .supply[hidden]{display:none;}
 .supply .lbl{font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
 .supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
@@ -49,13 +53,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .supply .s b{font-size:13px;font-weight:800;}
 .supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
 .supply .unit .live{color:#16A34A;font-weight:700;}
-.supply.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
 .sup-more{flex-shrink:0;margin-left:16px;margin-right:2px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
 .sup-more[hidden]{display:none;}
 .sup-more:hover{background:#E0EBFD;}
 .sup-more .cv{display:inline-flex;transition:transform .18s;}
 .sup-more .cv svg{width:11px;height:11px;}
-.supply.is-open .sup-more .cv{transform:rotate(180deg);}
+.idx-card.is-open .sup-more .cv{transform:rotate(180deg);}
 /* 10일 추이 패널 */
 .sup-panel{background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 10px 10px;box-shadow:var(--s1);padding:2px 14px 12px;margin-bottom:10px;}
 .sup-panel[hidden]{display:none;}
