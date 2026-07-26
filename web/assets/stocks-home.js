@@ -809,44 +809,77 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   setInterval(window.ueGate, 5*60*1000);
 })();
 
-/* 주말 섹션 순서 — 갱신되는 블록을 위로, 정지된 블록을 아래로 재배치.
-   주말엔 "지금 이시각 추정가"(HL24h 실시간)와 "관련 뉴스"(3시간 주기)만 갱신되고
-   장중 차트·목표주가·외국계 시각·밤사이 미국 반도체 시황은 전부 금요일 값에 멈춘다.
-   적용 구간: 토·일 종일 + 월요일 07:30(오전 브리핑 발행) 전까지. 그 뒤 평일 순서로 원복. */
+/* 국면별 섹션 순서 — 지금 갱신 중인 블록을 위로, 정지된 블록을 아래로.
+   장중/야간/주말을 각각 특수 케이스로 두지 않고 "무엇이 지금 살아있나" 하나의 규칙으로 정렬한다.
+
+   국면 (KST)                              히어로            근거
+   ─────────────────────────────────────────────────────────────────────────────
+   day    거래일 07:30~17:00                (원래 순서)       코스피 실시간이 주인공
+   us_open 미국 정규장 (ET 09:30~16:00)     밤사이 미국 반도체 10초 갱신 · 야간 유일의 두꺼운 실시간
+   quiet  그 외 전부(평일 저녁·심야·주말)   지금 이시각 추정가 HL 24h만 두껍게 살아있음
+
+   quiet엔 평일 저녁·애프터장과 주말이 함께 들어간다. 미국 프리·애프터장은 거래가 얇아
+   (stocks-live가 실체결 없으면 아예 null 반환) 히어로로 올릴 만한 두께가 아니라,
+   주말과 같은 취급으로 묶었다.
+
+   장 마감 상태(us_open·quiet)에선 상단 코스피 지수 스트립도 함께 아래로 내린다 —
+   야간·주말 첫 화면 최상단이 직전 거래일 종가로 채워지던 문제(정지 데이터가 히어로 자리 점유).
+
+   ⚠️ 재배치는 페이지 로드 시점 1회만. 국면 경계(22:30·05:00 등)가 보는 도중 지나가도
+   블록이 튀지 않게 한다 — 인터벌 재평가를 넣지 말 것. */
 (function(){
+  // 한국 거래일 낮 — 코스피 실시간이 주인공인 구간.
+  function krxDay(){
+    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false;
+    var d=new Date(Date.now()+9*3600*1000), wd=d.getUTCDay();
+    if(wd===0||wd===6) return false;
+    var t=d.getUTCHours()*60+d.getUTCMinutes();
+    return t>=450&&t<1020;                       // 07:30~17:00
+  }
+  // 미국 정규장 — 서머타임 때문에 KST 고정 시각(22:30/23:30)으로 잡으면 반년마다 틀린다.
+  // 뉴욕 현지 시각으로 직접 판정한다. 미국 공휴일은 여기서 거르지 않지만(장 마감 데이터가
+  // 그대로 보일 뿐 순서만 바뀜) 배지·수치는 stocks-live의 세션 판정이 정확히 표시한다.
+  function usRegularOpen(){
+    var p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());
+    function v(t){var x=p.find(function(e){return e.type===t;});return x?x.value:'';}
+    var wd=v('weekday');
+    if(wd==='Sat'||wd==='Sun') return false;
+    var t=(+v('hour'))*60+(+v('minute'));
+    return t>=570&&t<960;                        // 09:30~16:00 ET
+  }
+  function phase(){
+    if(krxDay()) return 'day';
+    if(usRegularOpen()) return 'us_open';
+    return 'quiet';
+  }
+  // 회귀 테스트 훅 — stocks-home.test.mjs가 시각별 국면 판정을 고정한다(DOM 이동은 여기서 검증 못 함).
+  // DOM 조회보다 앞에 둔다. 아래 가드에 걸려 조기 return하면 훅이 안 걸린다.
+  window.__layoutPhase=phase;
+
+  var ph=phase();
+  if(ph==='day') return;                         // 원래 순서 그대로
+
   var usEve=document.getElementById('us-evening');
   var usLinked=document.getElementById('us-linked-widget');
   var why=document.getElementById('why-moved');
-  if(!usEve||!usLinked||!why) return;
+  var momTrack=document.getElementById('mom-track');
+  if(!usEve||!usLinked||!why||!momTrack) return;
   var curve=document.getElementById('wm-curve-block');
   // #why-moved 직계 .lw-row = 관련뉴스+목표주가 2단 행(#wm-body 안의 .lw-row와 구분하려면 직계여야 한다).
   var newsRow=why.querySelector(':scope > .lw-row');
   if(!curve||!newsRow) return;
 
-  // 원복용 앵커 — 각 블록의 원래 다음 형제. 재배치 뒤에도 참조가 유효하다.
-  var eveAnchor=usEve.nextElementSibling;      // = #us-linked-widget
-  var newsAnchor=newsRow.nextElementSibling;   // = #lw-ib
+  // 상단 지수 스트립 묶음 — 배지줄·스트립·수급·수급패널을 한 덩어리로 옮긴다(#sup-more가 #sup-panel을 토글하므로 붙어 있어야 한다).
+  var strip=document.querySelector('#home .strip');
+  var stripGroup=strip
+    ? [strip.previousElementSibling, strip, document.getElementById('h-supply'), document.getElementById('sup-panel')]
+    : [];
 
-  var applied=null;
-  function weekendLayout(){
-    var d=new Date(Date.now()+9*3600*1000);
-    var wd=d.getUTCDay();
-    if(wd===0||wd===6) return true;                                  // 토·일 종일
-    return wd===1 && (d.getUTCHours()*60+d.getUTCMinutes())<450;     // 월 07:30 이전
-  }
-  function apply(on){
-    if(applied===on) return;
-    applied=on;
-    if(on){
-      why.insertBefore(newsRow, curve);                              // 뉴스를 장중 차트 위로
-      usLinked.parentNode.insertBefore(usEve, usLinked.nextElementSibling); // 미국 반도체 시황을 맨 아래로
-    }else{
-      why.insertBefore(newsRow, newsAnchor);
-      eveAnchor.parentNode.insertBefore(usEve, eveAnchor);
-    }
-  }
-  apply(weekendLayout());
-  setInterval(function(){apply(weekendLayout());}, 60*1000);
+  why.insertBefore(newsRow, curve);              // 갱신되는 뉴스를 정지된 장중 차트 위로
+  // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)는 건드리지 않는다.
+  (ph==='us_open' ? [usEve, usLinked] : [usLinked, usEve])
+    .concat(stripGroup)
+    .forEach(function(n){ if(n) momTrack.parentNode.insertBefore(n, momTrack); });
 })();
 
 /* ── 블록 5 (원본 index.html) ── */
