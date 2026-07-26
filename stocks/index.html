@@ -130,13 +130,15 @@
     
     
     
-    <!-- 오늘의 한 줄 — 아래 세 섹션(섹터·특이신호·ETF)이 같은 스토리임을 요약. JS가 스냅샷+지수로 채움 -->
-    <div id="today-line" style="display:none;"></div>
     <div class="home-cols">
-    <div class="home-main">
-    <!-- 섹터별 종목 브라우저 (탭 전환) -->
+    <div class="home-full">
+    <!-- 섹터별 종목 브라우저 (탭 전환) — PC 1단 전폭 (곡선 그래프 종목이 많아 넓게 보여줌) -->
     <div class="block sbx-block">
-      <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 대표 종목</span><span class="block__s"><span class="sbx-live off" id="sbx-live"><span class="sl-dot"></span>—</span></span></div>
+      <div class="sbx-hdr">
+        <div class="block__h"><span class="block__t"><span class="ic">🧭</span>섹터별 대표 종목</span><span class="block__s"><span class="sbx-live off" id="sbx-live"><span class="sl-dot"></span>—</span></span></div>
+        <!-- 오늘의 한 줄 — 섹터별 대표 종목 요약. JS가 스냅샷+지수로 채움 -->
+        <div id="today-line" style="display:none;"></div>
+      </div>
       <div class="sbx-tabs" id="sbx-tabs">
         <span class="skl" style="width:70px;height:28px;border-radius:999px;"></span><span class="skl" style="width:82px;height:28px;border-radius:999px;"></span><span class="skl" style="width:70px;height:28px;border-radius:999px;"></span><span class="skl" style="width:60px;height:28px;border-radius:999px;"></span>
       </div>
@@ -149,7 +151,8 @@
         </div>
       </div>
     </div>
-
+    </div><!-- /home-full -->
+    <div class="home-main">
     <!-- 🧭 이번 주 자금 지도 (ETF 순유입·유출 히트맵) · JS가 /data/etf-flows.json 로드해 렌더, 데이터 없으면 숨김 -->
     <div class="block flow-block" id="flow-block" style="display:none;">
       <div class="block__h"><span class="block__t"><span class="ic">🧭</span><span id="flow-title">이번 주 자금 지도</span><a class="help-q" href="/glossary/#flow-map" data-tip-title="자금 지도란?" data-tip="국내·해외·채권·원자재 <b>ETF로 실제로 들어오고 나간 돈</b>(설정·환매)을 테마별로 묶어 보여줘요.<br><br>· <b>타일 크기</b> = 이번 주 움직인 자금 규모<br>· <b>색</b> = 방향(빨강 유입 / 파랑 유출), 진할수록 큼<br><br>ETF 순자산 ÷ 기준가로 추정한 발행좌수의 하루하루 변화를 누적했어요(최대 5거래일). 가격이 올라 순자산이 는 건 제외하고, <b>순수하게 좌수가 늘고 준 것</b>만 집계해요. 투자 권유가 아닌 참고용이에요.">?</a></span><span class="block__s" id="flow-window"></span></div>

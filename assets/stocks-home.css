@@ -239,7 +239,11 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
 .home-cols{display:grid;grid-template-columns:2fr 1fr;column-gap:20px;align-items:start;}
 .home-main,.home-side{min-width:0;}
+.home-full{grid-column:1/-1;}
 #today-line{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 15px;margin-bottom:12px;font-size:13.5px;line-height:1.5;color:var(--ink);}
+.sbx-block .sbx-hdr{background:var(--canvas);border-bottom:1px solid var(--hair);border-radius:10px 10px 0 0;}
+.sbx-block .sbx-hdr .block__h{border-bottom:none;}
+.sbx-block #today-line{background:none;border:none;box-shadow:none;padding:0 16px 11px;margin-bottom:0;color:var(--muted);}
 #today-line .tl-ic{flex:none;font-size:16px;}
 #today-line .tl-tone{font-weight:800;}
 #today-line .tl-tone.up{color:var(--up);}#today-line .tl-tone.dn{color:var(--dn);}
