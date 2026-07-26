@@ -35,20 +35,33 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .search{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1.5px solid var(--hair);border-radius:10px;padding:9px 13px;box-shadow:var(--s1);min-width:320px;cursor:text;}
 .search svg{width:15px;height:15px;color:var(--muted);}.search span{color:var(--muted);font-size:13px;}.search kbd{margin-left:auto;font-size:11px;color:var(--muted);background:var(--soft);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;}
 
-/* 지수 스트립 + 수급 병합 카드 — 예전엔 각자 테두리·그림자를 가진 별개 박스라 사이 여백이 붕 떠 보였다.
-   하나의 카드로 묶고 내부는 구분선(border-top)만으로 나눈다. */
+/* 지수 + 수급 한 줄 카드 — 예전엔 각자 테두리·그림자를 가진 별개 박스라 두 줄을 차지하며 사이가 붕 떠 보였다.
+   지금은 한 카드 한 줄: 코스피 + [코스닥·환율 칩] | 수급. 칩을 누르면 보조 지표가 인라인으로 펼쳐진다.
+   구분선은 border-left(인접 형제)로 준다 — 숨긴 항목이 있어도 고아 구분선이 남지 않는다. */
 .idx-card{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);margin-bottom:10px;}
 .idx-card.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
-.strip{display:flex;align-items:center;padding:8px 14px;overflow-x:auto;}
-.strip .m{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}.strip .m:last-child{border-right:none;margin-right:0;padding-right:0;}
+.mkt-line{display:flex;align-items:center;flex-wrap:wrap;}
+.strip{display:flex;align-items:center;flex:0 0 auto;padding:8px 14px;min-width:0;}
+.strip .m{display:inline-flex;align-items:baseline;gap:5px;flex-shrink:0;white-space:nowrap;}
+.strip .m+.m{border-left:1px solid var(--hair);margin-left:14px;padding-left:14px;}
+.strip .m[hidden]{display:none;}
 .strip .m .l{font-size:10.5px;font-weight:600;color:var(--muted);}.strip .m .v{font-size:13px;font-weight:800;}.strip .m .vc{font-size:11px;font-weight:700;}
 .strip .m .ksp{display:inline-flex;align-self:center;width:40px;height:14px;}.strip .m .ksp svg{width:40px;height:14px;display:block;overflow:visible;}.strip .m .ksp:empty{display:none;}
-/* 수급 행 — 지수 스트립 바로 아래, 구분선으로만 나뉜다(브리핑 페이지 .nb-supply와 표기 통일). */
-.supply{display:flex;align-items:center;padding:8px 14px;border-top:1px solid var(--hair);overflow-x:auto;}
+/* 보조 지표(코스닥·환율) 토글 칩 — 눌러야 나오는 정보임을 칩 형태로 알린다. */
+.idx-more{flex-shrink:0;margin-left:12px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);background:var(--inset);border:1px solid var(--hair);border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
+.idx-more:hover{color:var(--ink);border-color:#CBD5E1;}
+.idx-more .cv{display:inline-flex;transition:transform .18s;}
+.idx-more .cv svg{width:11px;height:11px;}
+.idx-more[aria-expanded="true"] .cv{transform:rotate(180deg);}
+/* 수급 — 같은 줄 우측. 구분선은 세로 hairline(모바일에선 아래 줄로 내려가며 가로선으로 바뀐다). */
+.supply{display:flex;align-items:center;flex:1 1 auto;min-width:0;padding:8px 14px;border-left:1px solid var(--hair);}
+/* 보조 지표를 펼치면 한 줄에 다 안 들어간다(카드 폭 상한 ~1064px). 어중간하게 줄바꿈되며
+   세로 구분선만 남는 대신, 수급을 통째로 아랫줄로 내리고 구분선도 가로선으로 바꾼다. */
+.idx-card.idx-open .supply{flex-basis:100%;border-left:none;border-top:1px solid var(--hair);}
 .supply[hidden]{display:none;}
 .supply .lbl{font-size:10.5px;font-weight:700;color:var(--muted);padding-right:13px;margin-right:13px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
-.supply .s{display:inline-flex;align-items:baseline;gap:5px;padding-right:14px;margin-right:14px;border-right:1px solid var(--hair);flex-shrink:0;white-space:nowrap;}
-.supply .s:last-of-type{border-right:none;margin-right:0;padding-right:0;}
+.supply .s{display:inline-flex;align-items:baseline;gap:5px;flex-shrink:0;white-space:nowrap;}
+.supply .s+.s{border-left:1px solid var(--hair);margin-left:14px;padding-left:14px;}
 .supply .s i{font-style:normal;font-size:10.5px;font-weight:600;color:var(--muted);}
 .supply .s b{font-size:13px;font-weight:800;}
 .supply .unit{font-size:10.5px;color:var(--muted);margin-left:auto;padding-left:14px;flex-shrink:0;white-space:nowrap;}
@@ -763,6 +776,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   #sbx-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
   #sbx-tabs::-webkit-scrollbar{display:none;}
   #sbx-tabs .rt{display:none;}
+  /* 지수+수급 한 줄이 안 들어가는 폭 — 수급을 아래 줄로 내리고 구분선을 세로에서 가로로 바꾼다. */
+  .strip,.supply{flex-basis:100%;}
+  .supply{border-left:none;border-top:1px solid var(--hair);}
 }
 @media(max-width:600px){
   .wrap{padding:12px 14px 52px;}
@@ -777,9 +793,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   /* 헤더 안내 텍스트: 모바일에선 다음 줄로 (데스크탑은 우측 정렬 유지) */
   #mom-track .mt-h #mt-sub{flex-basis:100%;margin-left:0;margin-top:2px;}
   #us-linked-widget .usw-sub{flex-basis:100%;margin-left:0;margin-top:2px;}
-  .strip{flex-wrap:wrap;overflow-x:visible;row-gap:6px;}
-  .strip .m{flex:1 1 40%;}
-  .strip .m:nth-child(even){border-right:none;margin-right:0;padding-right:0;}
+  /* 좁은 폭에선 항목이 줄바꿈된다 — 세로 구분선은 줄 첫머리에 고아로 남으므로 간격으로 대체한다. */
+  .strip,.supply{flex-wrap:wrap;row-gap:7px;column-gap:12px;}
+  .strip .m+.m,.supply .s+.s{border-left:none;margin-left:0;padding-left:0;}
+  .idx-more{margin-left:0;}
+  .supply .unit{margin-left:0;padding-left:0;}
+  .sup-more{margin-left:auto;}
   .refrow{grid-template-columns:1fr;gap:0;}
   .refrow .rp{flex-direction:row;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);}
   .refrow .rp:last-child{border-bottom:none;padding-bottom:0;}

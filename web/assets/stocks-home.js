@@ -2727,6 +2727,23 @@ if(passBtn){
   if(typeof hubMarketOpen==='function'&&hubMarketOpen()) setInterval(pollMarket,60000);
 })();
 
+/* ── 보조 지표(코스닥·환율) 인라인 토글 ─────────────────────────────────────────
+   지수 줄의 주인공은 코스피 하나. 코스닥·환율은 칩을 눌러야 같은 줄에 펼쳐진다.
+   값 자체는 접혀 있어도 pollMarket이 계속 갱신하므로(숨김일 뿐 DOM에 있음) 펼치는 즉시 최신값이다. */
+(function(){
+  var btn=document.getElementById('idx-more');
+  if(!btn) return;
+  var extra=[].slice.call(document.querySelectorAll('.strip .idx-x'));
+  if(!extra.length){ btn.hidden=true; return; }
+  var card=document.getElementById('idx-card');
+  btn.addEventListener('click',function(){
+    var open=btn.getAttribute('aria-expanded')!=='true';
+    extra.forEach(function(el){ el.hidden=!open; });
+    btn.setAttribute('aria-expanded',String(open));
+    if(card) card.classList.toggle('idx-open',open);   // 펼치면 수급이 아랫줄로(위 CSS)
+  });
+})();
+
 /* ── 수급 10거래일 추이 (수급 행 '10일 추이' 토글) ──────────────────────────────
    데이터: /data/supply-history.json — generate_html.update_supply_history()가 매일 미러링.
    억원 단위 실측. 값이 없으면 버튼째 숨긴다(운영규칙 0).
