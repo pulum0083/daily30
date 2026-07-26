@@ -69,6 +69,12 @@ export default {
     // cron 표현식엔 요일을 넣지 않는다 — UTC 23시 항목이 KST로는 다음날이라
     // cron의 DOW(UTC 기준)와 KST 기준 주말 여부가 어긋난다. 항상 이 KST 변환값으로 판정한다.
     //
+    // ⚠️ 09/12/15 KST는 wrangler.toml의 MARKET 이슈 크론이, 18/21 KST는 별도 크론이 발화시킨다
+    // (두 크론 다 이 h/m 조건에 걸림). 겹치는 시각을 두 크론 모두에 넣으면 Cloudflare가
+    // scheduled()를 두 번 호출해 같은 슬롯이 중복 dispatch된다(2026-07-26 실사고 — 09:00
+    // 동시 실행 2건이 같은 stock-news.json을 커밋하려다 rebase 충돌). wrangler.toml에서
+    // 시각을 늘릴 땐 반드시 다른 크론과 겹치지 않는지 먼저 확인할 것.
+    //
     // ⚠️ kospi-news-live.yml이 아니라 반드시 stock-news-weekend.yml을 호출한다.
     // kospi-news-live.yml은 fetch_news_live.py·fetch_movers_why.py도 같이 돌리는데
     // 둘 다 요일 게이팅이 없어 주말에 호출하면 "장중 이슈" 오발행·movers 데이터
