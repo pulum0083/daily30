@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<!-- 종목 시그널 전환 이후 MAU·재방문 성장 전략 보고서 (2026-07-26) — 3면 구조 역할 재배치 -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Shot 성장 전략 — 매일 오는 서비스 만들기</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --ink: #1a1f2b;
+    --sub: #5b6470;
+    --line: #e5e8ee;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1fe;
+    --red: #d6455d;
+    --red-soft: #fdeef1;
+    --green: #1d8a5f;
+    --green-soft: #e9f6f0;
+    --amber: #b07a1e;
+    --amber-soft: #fdf4e3;
+    --violet: #6b4bd6;
+    --violet-soft: #f0ecfd;
+    --mono: "SF Mono", "D2Coding", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    line-height: 1.7;
+    font-size: 15px;
+    padding: 48px 20px 80px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  .doc-label {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 14px;
+  }
+  h1 { font-size: 30px; line-height: 1.3; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .doc-meta { color: var(--sub); font-size: 13px; margin-bottom: 40px; }
+
+  h2 {
+    font-size: 21px; letter-spacing: -0.01em; margin: 56px 0 6px;
+    padding-top: 28px; border-top: 1px solid var(--line);
+  }
+  h2 .no { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 6px; }
+  .h2-sub { color: var(--sub); font-size: 14px; margin-bottom: 20px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; }
+  h4 { font-size: 14.5px; margin: 0 0 8px; }
+  p { margin-bottom: 14px; }
+  strong { font-weight: 700; }
+  em { font-style: normal; background: linear-gradient(transparent 62%, #ffe8a3 62%); }
+  ul, ol { padding-left: 20px; margin-bottom: 14px; }
+  li { margin-bottom: 7px; }
+  code { font-family: var(--mono); font-size: 13px; background: #eef0f4; padding: 1px 6px; border-radius: 5px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 24px; margin: 18px 0;
+  }
+  .tldr { border-left: 4px solid var(--accent); }
+  .tldr h3 { margin-top: 0; }
+  .tldr ol { padding-left: 20px; }
+  .tldr li { margin-bottom: 10px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0; font-size: 14px; background: var(--card); }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin: 16px 0; }
+  th { background: #f0f2f6; text-align: left; padding: 10px 14px; font-size: 13px; color: var(--sub); font-weight: 700; white-space: nowrap; }
+  td { padding: 11px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.center, th.center { text-align: center; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-red { color: var(--red); background: var(--red-soft); }
+  .b-green { color: var(--green); background: var(--green-soft); }
+  .b-amber { color: var(--amber); background: var(--amber-soft); }
+  .b-blue { color: var(--accent); background: var(--accent-soft); }
+  .b-violet { color: var(--violet); background: var(--violet-soft); }
+  .b-gray { color: var(--sub); background: #eef0f4; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  @media (max-width: 700px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .mini { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .mini p { font-size: 13.5px; color: var(--sub); margin-bottom: 0; }
+  .mini .tag { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--sub); display: block; margin-bottom: 7px; }
+
+  .flow {
+    background: #10141d; color: #d7dde8; border-radius: 12px;
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.85;
+    padding: 20px 22px; margin: 16px 0; overflow-x: auto; white-space: pre;
+  }
+  .flow .hl { color: #7db4ff; }
+  .flow .bad { color: #ff8fa1; }
+  .flow .ok { color: #7fe0ac; }
+  .flow .dim { color: #6b7688; }
+
+  /* 진단 항목 */
+  .leak { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 12px; padding: 18px 22px; margin: 14px 0; }
+  .leak.sev-hi { border-left-color: var(--red); }
+  .leak.sev-mid { border-left-color: var(--amber); }
+  .leak.sev-lo { border-left-color: var(--sub); }
+  .leak-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 9px; }
+  .leak-head .n { font-family: var(--mono); font-size: 12px; color: var(--sub); }
+  .leak-head h4 { margin: 0; font-size: 15.5px; }
+  .leak p { margin-bottom: 10px; }
+  .leak p:last-child { margin-bottom: 0; }
+  .ev { font-size: 13px; color: var(--sub); background: #f5f6f9; border-radius: 8px; padding: 9px 13px; margin-top: 10px; }
+  .ev b { color: var(--ink); }
+
+  /* 우선순위 블록 */
+  .prio { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 24px; margin: 14px 0; }
+  .prio-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .prio-head h3 { margin: 0; font-size: 16.5px; }
+  .prio ul { margin-bottom: 0; }
+  .win { font-size: 13px; color: var(--green); background: var(--green-soft); border-radius: 8px; padding: 8px 13px; margin-top: 12px; }
+  .win b { font-weight: 700; }
+
+  .dont { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin: 12px 0; }
+  .dont h4 { color: var(--red); }
+  .dont p { font-size: 13.5px; color: var(--sub); margin: 0; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0; }
+  @media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 15px 16px; text-align: center; }
+  .kpi .v { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .kpi .l { font-size: 12px; color: var(--sub); margin-top: 3px; }
+
+  .note { font-size: 13px; color: var(--sub); border-top: 1px solid var(--line); margin-top: 48px; padding-top: 18px; }
+  .callout { background: var(--accent-soft); border-radius: 12px; padding: 18px 22px; margin: 18px 0; font-size: 14.5px; }
+  .callout strong { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="doc-label">GROWTH STRATEGY</span>
+<h1>세 개의 문, 하나의 루프<br>— 매일 오는 서비스로 가는 길</h1>
+<p class="doc-meta">
+  종목 시그널 전환 이후 성장 전략 · MAU·재방문 진단 · 2026-07-26 · doubleshot.space<br>
+  종목 시그널 / 브리핑 / 월배당 3면 구조 기준
+</p>
+
+<div class="card tldr">
+  <h3>요약 (TL;DR)</h3>
+  <ol>
+    <li><strong>"매일 방문"과 "MAU"는 다른 문제이고, 지금 병목도 서로 다르다.</strong> 같은 사람이 한 달에 30번 와도 MAU는 1이다. 매일 방문은 <em>고착도</em>를 올리고, MAU는 <em>도달</em>이 올린다. 둘 다 필요하지만 지금 더블샷이 막혀 있는 지점은 각각 다른 곳이다.</li>
+    <li><strong>MAU 병목은 "회수 장치 부재"다.</strong> 검색 유입 잠재력이 가장 큰 두 화면 — 종목 시그널과 월배당 계산기 — 에 텔레그램 CTA도, 구독 폼도, 저장 기능도 <em>하나도 없다</em>. 사람이 들어와도 다시 부를 수단이 0이라 유입이 그대로 증발한다.</li>
+    <li><strong>고착도 병목은 "내 것이 없음 + 주말 정지 + 46종목"이다.</strong> 브라우저에 저장되는 사용자 자산은 테마·공지 읽음·월배당 보유뿐이고, 관심종목은 프로토타입만 만든 채 8일째 미배포다. 검색창은 46종목만 커버해 47번째 종목을 친 사람은 "검색 결과가 없어요"를 본다.</li>
+    <li><strong>그리고 문 앞이 아직 구(舊)제품이다.</strong> <code>doubleshot.space/</code>는 여전히 "AI 투자 브리핑" 랜딩이고, 메인 제품인 <code>/stocks/</code>로 가는 링크가 <em>한 개도 없다</em>. 심지어 이 랜딩은 발행 페이지에 한 번도 렌더된 적 없는 기능("라이브 스코어보드")을 지금도 광고하고 있다.</li>
+    <li><strong>역할이 서로 뒤바뀌어 있다.</strong> 개인 데이터가 쌓이는 유일한 화면은 방문 빈도가 가장 낮은 월배당이고, 회수 장치가 달린 유일한 화면은 정작 텔레그램에서 소비가 끝나는 브리핑이며, 매일 올 이유가 있는 종목 시그널엔 저장도 회수도 없다. <em>세 메뉴가 각자 남의 무기를 들고 있다.</em></li>
+    <li><strong>권고 —</strong> P0(2주): 문 고치기 = 랜딩 전환 · 3면 회수 장치 · 관심종목 · 커버리지 확대. P1(4~6주): 되돌아올 이유 = 트랙레코드 URL · 주말/야간 모드 · 내 종목 알림. P2(7주~): 확장 = AI 예측 대결 · 3면 상호 링크 · 검색 표면적. <strong>새 메뉴를 만들 때가 아니라 있는 3면을 하나의 루프로 잇는 국면이다.</strong></li>
+  </ol>
+</div>
+
+<h2><span class="no">1.</span>먼저 지표를 분해하자</h2>
+<p class="h2-sub">"매일 방문해서 MAU가 늘었으면 좋겠다"는 요청 안에는 사실 두 개의 다른 과제가 들어 있다.</p>
+
+<p>MAU는 한 달 동안 방문한 <strong>순 사용자 수</strong>다. 어떤 사람이 매일 왔든 한 번만 왔든 MAU 기여는 똑같이 1이다. 그러니 <strong>재방문을 아무리 늘려도 그것만으로는 MAU가 오르지 않는다.</strong> 반대로 신규 유입만 늘리면 MAU는 오르지만, 다음 달에 아무도 남아있지 않으면 매달 처음부터 다시 채워야 하는 새는 양동이가 된다.</p>
+
+<div class="flow">MAU ≈ (<span class="hl">월 신규 도달</span> × <span class="hl">정착률</span>)  +  (<span class="ok">기존 사용자</span> × <span class="ok">잔존율</span>)
+        └─ 유입 엔진 ─┘                   └─ 고착 엔진 ─┘
+
+"매일 방문" = <span class="hl">DAU / MAU</span> (고착도)   ← 사용자가 <span class="dim">얼마나 자주</span> 오는가
+"MAU 증가"  = <span class="ok">신규 + 잔존</span>          ← 사용자가 <span class="dim">몇 명</span> 인가</div>
+
+<p>업계 감각으로 도구형 서비스의 고착도(DAU/MAU)는 이렇게 읽는다. 10% 미만이면 "가끔 들르는 사이트"(월 3일), 20%면 "주에 한두 번"(주 1.4일), 30%를 넘으면 "습관"이다(주 2.1일). 매일 열리는 주식 시장을 다루는 서비스는 구조적으로 30~40%가 가능한 카테고리다. 지금 더블샷은 브리핑 시절의 구조(발행 3회 = 방문 동기 3회, 그마저 텔레그램에서 종료)에서 막 벗어난 참이라 여기가 아직 낮을 수밖에 없다.</p>
+
+<div class="callout">
+  <strong>결론 —</strong> 두 엔진을 동시에 돌려야 한다. 다만 순서가 있다. <strong>회수 장치 없이 유입을 늘리는 건 밑 빠진 독에 물 붓기</strong>이므로, 먼저 들어온 사람을 붙잡을 수단(관심종목·구독·알림)을 만들고 그다음 유입 표면적(커버리지·검색)을 넓히는 게 맞다. P0에 둘을 같이 넣은 이유다.
+</div>
+
+<h2><span class="no">2.</span>3면 구조 진단 — 세 메뉴는 서로 다른 시계로 돈다</h2>
+<p class="h2-sub">종목 시그널 · 브리핑 · 월배당은 데이터 갱신 주기가 다르고, 따라서 방문 빈도의 상한도 애초에 다르다. 세 메뉴에 똑같이 "매일 올 이유"를 심으려 하면 실패한다.</p>
+
+<div class="table-scroll">
+<table>
+  <tr>
+    <th>메뉴</th>
+    <th>데이터 갱신</th>
+    <th>방문 동기</th>
+    <th>자연 방문 상한</th>
+    <th>검색 유입 잠재력</th>
+    <th>회수 장치</th>
+  </tr>
+  <tr>
+    <td><strong>종목 시그널</strong><br><span style="font-size:12.5px;color:var(--sub)">/stocks/</span></td>
+    <td>장중 실시간<br>+ 종가 1회</td>
+    <td>상태 확인<br>("지금 어떻지")</td>
+    <td class="center"><span class="badge b-green">상한 없음</span><br><span style="font-size:12px;color:var(--sub)">볼 때마다 다름</span></td>
+    <td>종목 상세 56면<br>(국내 46·미국 10)</td>
+    <td class="center"><span class="badge b-red">없음</span></td>
+  </tr>
+  <tr>
+    <td><strong>브리핑</strong><br><span style="font-size:12.5px;color:var(--sub)">/briefings/</span></td>
+    <td>하루 3회 발행</td>
+    <td>콘텐츠 소비<br>("왜 움직였지")</td>
+    <td class="center"><span class="badge b-amber">하루 3회</span><br><span style="font-size:12px;color:var(--sub)">실제론 텔레그램에서 종료</span></td>
+    <td>날짜형 URL<br>(수명 1일, 색인 가치 낮음)</td>
+    <td class="center"><span class="badge b-green">텔레그램·이메일</span></td>
+  </tr>
+  <tr>
+    <td><strong>월배당 계산기</strong><br><span style="font-size:12.5px;color:var(--sub)">/stocks/income-designer/</span></td>
+    <td>주 1회 (월요일)</td>
+    <td>계획 수립<br>(1회성·고의도)</td>
+    <td class="center"><span class="badge b-red">월 1회 미만</span><br><span style="font-size:12px;color:var(--sub)">한 번 짜면 끝</span></td>
+    <td class="center"><span class="badge b-green">최상</span><br><span style="font-size:12px;color:var(--sub)">"월배당 ETF" 고의도 검색</span></td>
+    <td class="center"><span class="badge b-red">없음</span></td>
+  </tr>
+</table>
+</div>
+
+<h3>표가 드러내는 것 — 무기가 서로 엇갈려 있다</h3>
+<p>세 메뉴는 각자 강점이 뚜렷한데, <strong>그 강점을 살릴 장치가 다른 메뉴에 붙어 있다.</strong></p>
+
+<div class="grid3">
+  <div class="mini">
+    <span class="tag">엇갈림 ①</span>
+    <h4>축적이 엉뚱한 곳에</h4>
+    <p>브라우저에 개인 데이터가 쌓이는 유일한 화면은 <code>ds-income-holdings-v1</code>(월배당 보유 종목)이다. 그런데 월배당은 한 번 설계하면 다시 올 이유가 가장 적은 메뉴다. <strong>이탈 비용이 방문 빈도가 가장 낮은 곳에만 생겨 있다.</strong></p>
+  </div>
+  <div class="mini">
+    <span class="tag">엇갈림 ②</span>
+    <h4>회수가 소비 끝난 곳에</h4>
+    <p>텔레그램·이메일 구독 장치는 브리핑 페이지에만 있다. 그런데 브리핑은 메시지 안에서 소비가 완결돼 사이트로 넘어오지 않는다. <strong>사람을 부를 수단이, 부를 필요가 가장 적은 화면에 달려 있다.</strong></p>
+  </div>
+  <div class="mini">
+    <span class="tag">엇갈림 ③</span>
+    <h4>엔진에 연료 주입구가 없다</h4>
+    <p>매일 여러 번 올 이유가 있는 건 종목 시그널뿐인데, 여기엔 저장도 구독도 알림도 없다. 검색으로 들어온 사람이 <strong>보고 나가는 것 말고 할 수 있는 게 없다.</strong></p>
+  </div>
+</div>
+
+<h3>그래서 역할을 이렇게 재정의한다</h3>
+<div class="flow"><span class="hl">종목 시그널</span> = <span class="hl">엔진</span>   매일 여러 번 오는 이유를 만든다 (고착도 담당)
+<span class="ok">브 리 핑</span> = <span class="ok">펌프</span>   사람을 사이트로 밀어넣고 신뢰를 증명한다 (회수·전환 담당)
+<span class="bad">월 배 당</span> = <span class="bad">닻</span>     검색으로 데려오고 개인 데이터로 묶어둔다 (유입·이탈비용 담당)
+
+세 메뉴에 "매일 올 이유"를 <span class="dim">균등 배분하지 않는다.</span>
+<span class="hl">엔진</span>이 빈도를 만들고, <span class="ok">펌프</span>가 데려오고, <span class="bad">닻</span>이 붙잡는다.</div>
+
+<h2><span class="no">3.</span>실측으로 확인한, 지금 새고 있는 곳</h2>
+<p class="h2-sub">2026-07-26 기준 라이브 사이트와 저장소를 직접 확인한 결과다. 심각도 순으로 일곱 가지.</p>
+
+<div class="leak sev-hi">
+  <div class="leak-head"><span class="n">01</span><span class="badge b-red">치명</span><h4>문 앞이 아직 구제품이다</h4></div>
+  <p>도메인 루트 <code>doubleshot.space/</code>는 여전히 <code>landing.html</code>이고, 제품명은 "AI 투자 브리핑", 주 CTA는 텔레그램 구독이다. <strong>메인 제품인 종목 시그널로 가는 링크가 한 개도 없다</strong> — 월배당 링크만 두 곳에 있다. 검색·공유·직접입력으로 들어온 신규 방문자는 우리가 가장 잘 만든 화면의 존재를 알 수 없다.</p>
+  <p>더 나쁜 건, 이 랜딩이 <strong>존재한 적 없는 기능을 지금도 광고 중</strong>이라는 점이다. "장중 · 라이브 스코어보드 · 09:00~15:30 실시간 지수·예측 적중 추적"이라고 적혀 있는데, 이 섹션은 섹션 설정에 한 번도 포함된 적이 없어 발행 페이지에 렌더된 적이 없고(<code>SERVICE_RULES §10</code>), 오늘 코드째 삭제됐다. 화면의 모든 수치를 실측으로 검증하는 서비스가 <em>기능 설명은 검증하지 않고</em> 있었던 셈이다.</p>
+  <div class="ev"><b>확인:</b> <code>web/landing.html</code>에 <code>/stocks/</code> 링크 0건(월배당 2건) · 샘플 브리핑이 <code>2026-06-22</code>로 5주 전 고정 · "라이브 스코어보드" 문구 잔존 · 커밋 <code>9a92c52b</code>(7/26)에서 해당 기능 573줄 제거</div>
+</div>
+
+<div class="leak sev-hi">
+  <div class="leak-head"><span class="n">02</span><span class="badge b-red">치명</span><h4>유입이 가장 큰 두 화면에 회수 장치가 0이다</h4></div>
+  <p>텔레그램 CTA와 구독 폼은 <strong>브리핑 페이지에만</strong> 있다. 종목 시그널 허브와 월배당 계산기에는 구독 링크도, 이메일 폼도, 저장 기능도, 알림 신청도 없다. 검색으로 "월배당 ETF 계산기"를 찾아 들어온 사람, "삼성전자 목표주가"로 상세 페이지에 도착한 사람 모두 <strong>보고 나가면 끝이고 다시 부를 방법이 없다.</strong></p>
+  <p>이게 MAU의 1차 병목이다. 유입을 아무리 늘려도 정착률이 0에 수렴하면 MAU는 그 달 유입량만큼만 오르고 다음 달에 리셋된다. <em>지금 구조에서는 마케팅을 해도 남지 않는다.</em></p>
+  <div class="ev"><b>확인:</b> <code>t.me/doubleshot30</code> 출현 — landing 4건 · 브리핑 페이지 1건 · <code>/stocks/</code> <b>0건</b> · <code>/stocks/income-designer/</code> <b>0건</b></div>
+</div>
+
+<div class="leak sev-hi">
+  <div class="leak-head"><span class="n">03</span><span class="badge b-amber">높음</span><h4>사용자의 것이 없다 — 프로토타입까지 만들고 미배포</h4></div>
+  <p>브라우저에 저장되는 것은 테마 설정, 공지 읽음 표시, 그리고 월배당 보유 종목뿐이다. <strong>종목 관심목록이 없다.</strong> 사용자는 매번 8개 섹터를 스크롤해 자기 종목을 찾아야 하고, 서비스에 시간을 쓸수록 쌓이는 자산이 없으니 떠나도 잃는 게 없다.</p>
+  <p>주목할 점은 이게 몰라서가 아니라는 것이다. <code>docs/prototypes/2026-07-18-watchlist.html</code>이 8일 전에 이미 만들어져 있다. 직전 전략 문서(7/17)의 최우선 권고였고, 프로토타입까지 나왔는데 배포가 안 됐다. <strong>가장 싼 개인화가 가장 오래 대기 중이다.</strong></p>
+  <div class="ev"><b>확인:</b> <code>localStorage</code> 사용 키 — <code>theme</code> · 공지 읽음 · <code>ds-income-holdings-v1</code>(월배당). 종목 관련 키 없음 · watchlist 프로토타입 존재, 라이브 미반영</div>
+</div>
+
+<div class="leak sev-hi">
+  <div class="leak-head"><span class="n">04</span><span class="badge b-amber">높음</span><h4>46종목 검색창 = 이탈 장치</h4></div>
+  <p>허브 상단 검색(⌘K)이 참조하는 유니버스는 <code>stocks-snapshot.json</code>의 <strong>46종목</strong>이다. 47번째 종목을 입력한 사람은 "검색 결과가 없어요"를 보고 나간다. 첫 방문에서 자기 종목을 못 찾으면 그날로 끝이라, <em>검색창이 유입 장치가 아니라 이탈 장치로 작동하고 있다.</em></p>
+  <p>이건 관심종목(항목 03)과 순서 관계가 아니라 <strong>세트</strong>다. 담을 종목이 46개뿐이면 관심종목의 가치도 46/2,700로 제한된다. 직전 문서에서 관심종목을 P0, 커버리지를 P2로 나눈 건 재검토가 필요하다 — 둘은 같이 가야 각각의 값이 나온다.</p>
+  <div class="ev"><b>확인:</b> <code>stocks-home.js:2531</code> — <code>STOCK_LIST</code>가 스냅샷의 <code>stocks</code>(46건)에서만 구성 · 상세 페이지 국내 46 + 미국 10 · sitemap 총 102 URL</div>
+</div>
+
+<div class="leak sev-mid">
+  <div class="leak-head"><span class="n">05</span><span class="badge b-amber">높음</span><h4>주말·야간이 통째로 비어 있다 — 한 주의 2/7</h4></div>
+  <p>이 문서를 쓰는 오늘(일요일) 기준, 종목 시그널은 <strong>7/24(금) 종가</strong>를 보여주고 특이 신호 목록은 비어 있으며, <code>/briefings/</code>는 7/24 미국 브리핑으로 리다이렉트된다. 주말 이틀 동안 서비스 전체가 정지 화면이다. 주 5일만 살아 있는 서비스는 고착도 상한이 구조적으로 <strong>71%(5/7)</strong>에 걸린다.</p>
+  <p>그런데 아이러니하게도 <strong>주말에도 뛰는 숫자를 이미 갖고 있다.</strong> "지금 이시각 추정가"(HL 24h 환산)는 지금 이 순간에도 삼성전자 250,120원 ▲4.52%, SK하이닉스 ▲4.90%를 표시하고 있다. 유일하게 살아 움직이는 데이터가 페이지 중간에 3종목 위젯으로 묻혀 있고, 주말 전용 진입점도 없다. <em>주말 방문 이유가 이미 만들어져 있는데 안내를 안 하고 있다.</em></p>
+  <div class="ev"><b>확인:</b> 일요일 <code>/stocks/</code> 헤더 "7/24(금) · 장 마감 · 종가 기준" · 특이 신호 섹션 항목 0 · HL 24h 추정가 3종목은 정상 갱신 중</div>
+</div>
+
+<div class="leak sev-mid">
+  <div class="leak-head"><span class="n">06</span><span class="badge b-blue">중간</span><h4>최대 차별 자산에 아직 URL이 없다</h4></div>
+  <p>"매일 예측하고 다음 날 시장이 채점한다"는 구조는 경쟁 서비스에 없고, 개인 유튜버·리딩방과는 정반대다(그들은 틀린 예측을 지운다). 데이터도 이미 충분히 쌓였다 — <strong>2026-04-07부터 133건, 채점 완료 130건.</strong> 그런데 <code>/track-record</code>는 여전히 404이고, 프로토타입만 저장소에 있다. 7/25에 추가한 신뢰 스트립은 푸터에 있다.</p>
+  <p>이건 재방문보다 <strong>신규 유입과 전환</strong>의 자산이다. 공유 가능한 URL이 있어야 "이 서비스는 채점받는다"가 서사에서 증거로 바뀐다.</p>
+  <div class="ev"><b>확인:</b> <code>/track-record</code> → HTTP 404 · <code>data/briefings.json</code> 133건 · 코스피 65.3%(72건 중 47) · 미국 70.7%(58건 중 41) · 프로토타입 <code>docs/prototypes/track-record.html</code> 존재</div>
+</div>
+
+<div class="leak sev-lo">
+  <div class="leak-head"><span class="n">07</span><span class="badge b-blue">중간</span><h4>서비스가 자기 MAU를 모른다</h4></div>
+  <p>GA4는 붙어 있다(<code>G-PW9RHHFPM4</code>, 랜딩·종목·브리핑 전면). 그런데 이 숫자를 서비스 안으로 가져오는 <code>/api/visitors</code>는 지금 <code>{"error":"GA not configured"}</code>를 반환한다 — 코드는 완성돼 있고 환경변수 4개가 안 붙어 있다. <strong>MAU를 늘리자고 하면서 MAU를 자동으로 읽을 수 없는 상태</strong>다.</p>
+  <p>이번 로드맵의 모든 항목은 "재방문이 올랐나"로 판정해야 하는데, 지금은 매번 GA 콘솔을 수동으로 열어야 한다. 가장 싸고 가장 먼저 해야 할 일이다.</p>
+  <div class="ev"><b>확인:</b> <code>curl /api/visitors</code> → <code>GA not configured</code> · 필요 env — <code>GOOGLE_CLIENT_ID</code> · <code>GOOGLE_CLIENT_SECRET</code> · <code>GOOGLE_REFRESH_TOKEN</code> · <code>GA_PROPERTY_ID</code></div>
+</div>
+
+<h2><span class="no">4.</span>목표 구조 — 세 문을 하나의 루프로</h2>
+<p class="h2-sub">지금은 세 개의 메뉴가 각자 독립된 사이트처럼 서 있다. 이걸 하나의 순환으로 연결하는 게 이번 국면의 전부다.</p>
+
+<h3>지금의 흐름 — 루프가 아니라 막다른 길</h3>
+<div class="flow"><span class="dim">검색</span> ──▶ 월배당 계산기 ──▶ <span class="bad">이탈</span>          <span class="dim">(회수 장치 없음)</span>
+<span class="dim">검색</span> ──▶ 종목 상세      ──▶ <span class="bad">이탈</span>          <span class="dim">(회수 장치 없음)</span>
+<span class="dim">직접</span> ──▶ 랜딩(구제품)  ──▶ 텔레그램 구독 ──▶ <span class="bad">텔레그램에서 소비 종료</span>
+
+                                        <span class="bad">└ 사이트로 돌아오지 않음</span></div>
+
+<h3>목표 흐름 — 유입이 고착으로, 고착이 다시 유입으로</h3>
+<div class="flow"><span class="hl">① 데려온다</span>   검색(종목 상세·월배당) · 텔레그램 · 트랙레코드 공유
+                     │
+                     ▼
+<span class="ok">② 붙잡는다</span>   착륙 화면에서 바로 → <span class="ok">★관심종목 담기</span> · 알림 신청 · 구독
+                     │           <span class="dim">(로그인 없이 localStorage로 시작)</span>
+                     ▼
+<span class="hl">③ 부른다</span>     내 종목 특이 신호 → 텔레그램 푸시
+                     아침 브리핑 첫 줄 = 어제 예측 채점 결과
+                     │
+                     ▼
+<span class="ok">④ 머문다</span>     종목 시그널 = 장중 실시간 · 마감 후 정리 · <span class="ok">주말엔 24h 추정가</span>
+                     │
+                     ▼
+<span class="hl">⑤ 쌓인다</span>     관심종목 · 내 예측 전적 · 월배당 포트폴리오
+                     └──▶ <span class="bad">이탈 비용 발생</span> ──▶ 다시 ③으로 순환
+
+     공유 가능한 산출물(트랙레코드·예측 대결 카드) ──▶ 다시 ①로</div>
+
+<div class="callout">
+  이 루프에서 <strong>지금 완전히 빠져 있는 고리는 ②(붙잡는다)와 ⑤(쌓인다)</strong>다. ①은 이미 돌고 있고(검색·텔레그램), ③④도 부분적으로 있다(브리핑 푸시·장중 실시간). <em>고리 두 개만 채우면 나머지는 이미 깔려 있다</em> — 그래서 P0가 새 제품을 만드는 일이 아니라 배선을 잇는 일이다.
+</div>
+
+<h2><span class="no">5.</span>실행 로드맵</h2>
+<p class="h2-sub">1인 운영·기존 파이프라인 재사용을 전제로 했다. P0는 대부분 이미 만들어둔 것을 꺼내 잇는 작업이다.</p>
+
+<div class="prio">
+  <div class="prio-head"><span class="badge b-red">P0 · 2주</span><h3>문 고치기 — 새는 곳부터 막는다</h3></div>
+  <p>순서가 중요하다. 회수 장치 없이 유입을 늘리면 그대로 증발한다.</p>
+  <ol>
+    <li><strong>랜딩을 종목 시그널 중심으로 전환.</strong> 최소안은 <code>landing.html</code> 히어로·CTA·하루 루프 섹션을 종목 시그널 기준으로 교체하고 GNB에 "종목" 라벨과 활성 표시를 추가하는 것. 최대안은 <code>/</code>를 <code>/stocks/</code>로 보내고 기존 랜딩을 <code>/about</code>으로 옮기는 것. <span class="badge b-red">즉시</span> 존재하지 않는 "라이브 스코어보드" 문구 삭제와 5주 전(6/22) 샘플 브리핑 교체는 오늘 안에 할 수 있다.</li>
+    <li><strong>3면 전체에 회수 장치 배선.</strong> 종목 허브·종목 상세·월배당 하단에 텔레그램 구독 CTA를 넣는다. 월배당은 "내 포트폴리오 저장됨 → 분배금 변동 알림 받기", 종목 상세는 "이 종목 신호 뜨면 알림"처럼 <strong>그 화면의 맥락에 맞는 문구</strong>로. 일반 구독 배너보다 전환율이 크게 다르다.</li>
+    <li><strong>관심종목 ★ 배포 (localStorage).</strong> 프로토타입이 이미 있다. 종목 카드·상세 페이지에 ★를 달고, 허브 최상단에 "내 종목" 스트립을 고정한다. 시세만 보여주면 네이버와 같으니 <strong>더블샷 레이어</strong>(특이 신호 발생 여부·밸류에이션 시그널·수급 전환)를 함께 얹는다.</li>
+    <li><strong>커버리지 확대 — 코스피200 + 코스닥150.</strong> 46 → 350종목. 검색 무결과를 없애고 관심종목의 담을 대상을 7배로 늘린다. 상세 페이지 전면 생성이 부담이면 <strong>검색·관심종목·시세 레벨(스냅샷)만 먼저</strong> 확장하고 풀 상세 페이지는 단계적으로 늘려도 효과의 대부분을 얻는다.</li>
+    <li><strong>GA 환경변수 연결.</strong> env 4개를 붙여 <code>/api/visitors</code>를 살린다. 이후 모든 항목의 성공 판정 근거가 된다.</li>
+  </ol>
+  <div class="win"><b>성공 판정 —</b> 재방문 사용자의 관심종목 등록률 30%+ · 검색 무결과율 5% 미만 · 종목/월배당 화면 유입 대비 구독 전환이 0에서 유의미한 수치로</div>
+</div>
+
+<div class="prio">
+  <div class="prio-head"><span class="badge b-amber">P1 · 4~6주</span><h3>되돌아올 이유 만들기</h3></div>
+  <ol>
+    <li><strong><code>/track-record</code> 배포.</strong> 133건 전 예측을 날짜·방향·결과와 함께 공개한다. 틀린 것도 그대로 — 그게 이 자산의 전부다. 랜딩과 브리핑 상단에 "어제 예측 → 결과" 배지를 상시 노출하되, <strong>미채점이면 생략한다</strong>(§16 방지 룰 — 옛 결과로 대체 금지).</li>
+    <li><strong>주말·야간 모드.</strong> HL 24h 추정가를 주말·야간 히어로로 승격한다. 국내 서비스 대부분이 비워두는 시간대라 "밤에 보는 코스피 화면"이라는 고유 슬롯을 가질 수 있다. 밤사이 미국 반도체 시황과 묶으면 하나의 완결된 야간 화면이 된다. <strong>고착도 상한을 5/7에서 7/7로 여는 유일한 카드다.</strong></li>
+    <li><strong>내 종목 신호 알림.</strong> 관심종목에 특이 신호(신고가 근접·기관 순매수 전환 등)가 뜨면 텔레그램 푸시. 기존 <code>/api/signals</code> 엔진을 그대로 재사용하므로 새 데이터 수집이 필요 없다. <em>이게 루프 ③의 핵심 고리</em>다 — 발행 스케줄이 아니라 사용자의 종목이 방문을 부른다.</li>
+    <li><strong>텔레그램을 완결형에서 유도형으로.</strong> 첫 줄을 어제 예측 채점 결과로 바꾸고, 링크는 "오늘 내 종목 신호 보기"로 건다. 다만 정보를 인질로 잡는 느낌이 나면 역효과다 — 메시지 단독으로도 유용하되, 사이트에만 있는 것(실시간·개인화)을 명확히 안내하는 선까지.</li>
+  </ol>
+  <div class="win"><b>성공 판정 —</b> 주말 방문 비중이 전체의 10%+ · 알림 클릭 후 재방문 발생 · 텔레그램 → 사이트 클릭률 상승</div>
+</div>
+
+<div class="prio">
+  <div class="prio-head"><span class="badge b-blue">P2 · 7주~</span><h3>확장 — 참여와 표면적</h3></div>
+  <ol>
+    <li><strong>AI 예측 대결 (원탭 투표).</strong> 프로토타입이 7/25에 이미 나와 있다. "AI는 하락 우위 65%. 당신은?" 버튼 하나. 다음 날 AI와 함께 채점하고, 내 적중률·연속 스트릭·"AI를 이긴 날"이 쌓인다. 커뮤니티의 콜드스타트 위험 없이 참여감과 익일 재방문 동기를 동시에 만든다.</li>
+    <li><strong>3면 상호 링크.</strong> 브리핑의 종목 픽 → 상세 페이지, 상세 페이지 → "오늘 브리핑에서 이 종목 언급" 배지, 월배당의 ETF → 해당 ETF 시그널. <strong>새 데이터 없이 링크만으로</strong> 세 메뉴가 서로 트래픽을 주고받는다. 종목별 픽 트랙레코드가 이미 브리핑과 종목을 잇는 다리로 만들어져 있으니 양쪽에서 안내만 하면 된다.</li>
+    <li><strong>검색 표면적 확대.</strong> 종목 상세 페이지를 커버리지에 맞춰 늘리고, "삼성전자 목표주가"·"코스피 야간 시세"·"월배당 ETF 원금 잠식" 같은 고의도 질의에 대응하는 영구 URL을 쌓는다. 날짜형 브리핑 URL과 달리 <strong>수명이 긴 자산</strong>이라 유입이 복리로 붙는다.</li>
+  </ol>
+  <div class="win"><b>성공 판정 —</b> 투표 참여자의 익일 재방문율 · 메뉴 간 교차 방문 비율 · 검색 유입 비중 증가</div>
+</div>
+
+<h3>하지 말 것 (지금은)</h3>
+<div class="grid2">
+  <div class="dont">
+    <h4>❌ 네 번째 메뉴 추가</h4>
+    <p>지금 문제는 기능 부족이 아니라 세 면이 서로 안 이어져 있다는 것이다. 메뉴가 하나 더 늘면 연결해야 할 관계가 3개에서 6개로 늘어난다. <strong>새 문을 열 때가 아니라 있는 문들을 복도로 잇는 국면이다.</strong></p>
+  </div>
+  <div class="dont">
+    <h4>❌ 게시판형 커뮤니티</h4>
+    <p>콜드스타트가 가장 어려운 기능이고, 빈 게시판은 오히려 "죽은 서비스" 신호가 된다. 7/24에 공지 패널에서 게시판 탭을 이미 뺀 판단이 맞다. 예측 투표와 참여 분포 표시로 참여감을 먼저 검증할 것.</p>
+  </div>
+  <div class="dont">
+    <h4>❌ 브리핑 발행 횟수 늘리기</h4>
+    <p>콘텐츠를 늘리면 "방문 상한 = 발행 횟수"인 구조가 강해질 뿐이다. 지금 필요한 건 발행과 발행 사이의 시간을 채우는 상태 화면과, 발행 없는 주말을 채우는 야간 시세다.</p>
+  </div>
+  <div class="dont">
+    <h4>❌ 로그인·회원가입 도입</h4>
+    <p>관심종목·투표·포트폴리오는 전부 localStorage로 시작할 수 있고, 계정 요구는 초기 전환의 가장 큰 마찰이다. 기기 간 동기화 요구가 실제로 관측된 뒤에 붙여도 늦지 않다.</p>
+  </div>
+</div>
+
+<h2><span class="no">6.</span>측정 — 무엇을 보고 판단할 것인가</h2>
+<p class="h2-sub">기능보다 계기판이 먼저다. 지금은 "늘었다"는 감각만 있고 어디서 늘고 어디서 새는지 숫자가 없다.</p>
+
+<h3>북극성 지표</h3>
+<div class="card">
+  <p style="margin-bottom:8px"><strong>주 3일 이상 방문한 사용자 수</strong> — WAU 중 습관 사용자.</p>
+  <p style="margin-bottom:0;color:var(--sub);font-size:14px">단순 MAU나 페이지뷰가 아니라 이걸 북극성으로 두는 이유는, 이 숫자만이 <strong>"콘텐츠가 발행돼서 온 것"과 "도구라서 온 것"을 구분</strong>하기 때문이다. 브리핑 조회수는 발행 스케줄을 재고, 이 지표는 습관을 잰다. 종목 시그널을 메인으로 잡은 전환이 실제로 먹히고 있는지를 재는 유일한 숫자다.</p>
+</div>
+
+<h3>계기판 (주간 확인)</h3>
+<div class="table-scroll">
+<table>
+  <tr><th>지표</th><th>지금</th><th>1차 목표</th><th>무엇을 검증하나</th></tr>
+  <tr><td>DAU / MAU (고착도)</td><td class="num">미계측</td><td class="num">20% → 30%</td><td>도구가 습관이 됐는가</td></tr>
+  <tr><td>관심종목 등록률<br><span style="font-size:12px;color:var(--sub)">재방문 사용자 기준</span></td><td class="num">기능 없음</td><td class="num">30%+</td><td>이탈 비용이 생겼는가 (P0-3)</td></tr>
+  <tr><td>검색 무결과율</td><td class="num">미계측<br><span style="font-size:12px;color:var(--sub)">46종목 커버</span></td><td class="num">5% 미만</td><td>커버리지가 충분한가 (P0-4)</td></tr>
+  <tr><td>종목·월배당 → 구독 전환</td><td class="num">0<br><span style="font-size:12px;color:var(--sub)">장치 없음</span></td><td class="num">유의미한 수치</td><td>유입이 회수되는가 (P0-2)</td></tr>
+  <tr><td>주말 방문 비중</td><td class="num">사실상 0</td><td class="num">10%+</td><td>7/7 서비스가 됐는가 (P1-2)</td></tr>
+  <tr><td>메뉴 간 교차 방문률</td><td class="num">미계측</td><td class="num">측정 후 설정</td><td>3면이 하나의 루프인가 (P2-2)</td></tr>
+</table>
+</div>
+
+<h3>참고 — 현재 보유 자산 실측</h3>
+<div class="kpi-row">
+  <div class="kpi"><div class="v">133</div><div class="l">누적 예측 (4/07~7/24)</div></div>
+  <div class="kpi"><div class="v">65%</div><div class="l">코스피 적중 (72건)</div></div>
+  <div class="kpi"><div class="v">71%</div><div class="l">미국 적중 (58건)</div></div>
+  <div class="kpi"><div class="v">56</div><div class="l">종목 상세 페이지</div></div>
+</div>
+
+<h2><span class="no">7.</span>이번 주에 바로 할 수 있는 것</h2>
+<p class="h2-sub">전체 로드맵과 별개로, 반나절 안에 끝나면서 지금 명백히 잘못된 것을 고치는 항목들이다.</p>
+
+<div class="card">
+  <ol style="margin-bottom:0">
+    <li><strong>랜딩에서 "라이브 스코어보드" 문구 제거.</strong> 발행 페이지에 존재한 적 없는 기능이고 오늘 코드도 삭제됐다. 모든 수치를 실측으로 검증하는 서비스가 기능 설명에서 검증을 빠뜨린 상태다.</li>
+    <li><strong>랜딩 샘플 브리핑을 최신으로.</strong> 지금 6/22로 5주 전에 고정돼 있다. 최신 브리핑으로 자동 링크되게 바꾼다.</li>
+    <li><strong>GNB에 "종목" 라벨과 활성 표시 추가.</strong> 현재 로고가 곧 종목 메뉴라 3면 중 메인이 이름조차 없다. 하위 메뉴는 "브리핑 · 월배당" 둘뿐이다.</li>
+    <li><strong>종목 허브·월배당 푸터에 텔레그램 CTA.</strong> 한 줄 추가로 회수 장치가 0에서 1이 된다. 정식 P0-2 배선 전의 임시 조치로도 값이 있다.</li>
+    <li><strong>GA 환경변수 4개 연결.</strong> 이후 모든 판단의 근거가 되므로 가장 먼저.</li>
+    <li><strong>모바일 수급 스트립 잘림 수정.</strong> 375px에서 외국인 수치가 화면 밖으로 잘린다(<code>−32,6…</code>). 개미 사용자의 절대다수가 모바일이고, 첫 화면에서 잘린 숫자는 데이터 신뢰도 인상을 직접 깎는다.</li>
+  </ol>
+</div>
+
+<p class="note">
+  본 보고서는 2026-07-26 기준 doubleshot.space 라이브 3면(<code>/stocks/</code> · <code>/briefings/</code> · <code>/stocks/income-designer/</code>) 실사용 관찰과 저장소 코드·데이터 직접 확인을 근거로 작성됨.
+  적중률·예측 건수는 <code>data/briefings.json</code> 및 <code>web/data/accuracy-summary.json</code>(2026-07-25 09:11 KST 갱신) 실측.
+  직전 전략 문서 <code>2026-07-17-growth-strategy.html</code>의 진단(도구화 전환)은 실행돼 효과가 확인됐으므로 반복하지 않고, 그 이후 드러난 구조적 병목만 다룸.
+</p>
+
+</div>
+</body>
+</html>
