@@ -1741,6 +1741,34 @@
       "is_correct": null,
       "generated_at": "2026-07-27T07:29:51.333025+09:00",
       "checked_at": null
+    },
+    {
+      "date": "2026-07-28",
+      "type": "kospi",
+      "predicted_direction": "하락 우위",
+      "up_pct": 33,
+      "down_pct": 67,
+      "confidence": 62,
+      "actual_direction": null,
+      "actual_change_pct": null,
+      "is_correct": null,
+      "generated_at": "2026-07-28T07:30:53.373859+09:00",
+      "checked_at": null,
+      "prior_direction": "하락",
+      "prior_score": -4.501,
+      "prior_strength": "mid",
+      "signals": {
+        "sox": -2.23,
+        "nasdaq": -0.18,
+        "nq": -0.44,
+        "es": -0.0101,
+        "ym": 0.5429,
+        "ewy": -1.8225,
+        "ewy_resid": -2.792,
+        "kospi": 0.97,
+        "usdkrw": 0.0,
+        "vix": 0.4844
+      }
     }
   ]
 }
