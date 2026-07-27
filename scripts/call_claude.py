@@ -125,6 +125,21 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 - 미국 10년물 금리 상승 (자금이 안전자산에서 위험자산으로 이동)
 4개 중 3개 이상이 같은 방향이면 명확한 리스크온/오프 전환 시그널이고, reasons에 반드시 언급한다.
 
+### 상승·하락 확률(up_pct·down_pct·confidence) — 정의와 규칙
+
+- **`up_pct` = 오늘 코스피가 전일 종가 대비 상승 마감할 확률**(정수 0~100). `down_pct = 100 - up_pct`.
+  이건 "얼마나 확신하는지"를 나타내는 값이 **아니라 실제 확률**이다. 같은 상황이 100번 오면 그중 몇 번
+  오를지로 생각하고 낸다.
+- **`confidence` = 그 확률 추정의 근거가 얼마나 단단한지**(선행신호 일치도·데이터 완결성). 방향의 세기가
+  아니다. 신호가 서로 엇갈리거나 뉴스 요약이 빈약하면 낮춘다. 신호가 한 방향으로 모이면 높인다.
+- **선행신호 prior가 출발점이다.** 아래 prior 블록의 방향·score를 1차 기준으로 삼고 뉴스·이벤트로 조정한다.
+  prior와 **반대 방향으로 뒤집으려면 그 근거를 key_drivers에 반드시 쓴다.**
+- **근거가 갈리는 날은 40~59를 쓴다.** 상방 근거와 하방 근거가 비슷한 무게면 45~55로 낸다.
+  확률을 확신의 표시로 오용해 애매한 날에도 극단값을 내지 않는다.
+- **극단값(15 이하·85 이상)은 선행신호가 한 방향으로 강하게 일치할 때만** 쓴다.
+- 코스피는 하루 등락폭이 큰 장세다. 방향이 맞아도 폭은 크게 어긋날 수 있으니, up_pct는 **방향 확률**만
+  나타내고 등락폭 전망을 섞지 않는다.
+
 ### [최우선 원칙] 코스피 지수 집중도 — 반도체 메가캡이 곧 지수다
 삼성전자(005930)·SK하이닉스(000660)·SK스퀘어(402340) 등 반도체 대형주가 코스피 시가총액의 약 1/3을 차지하고, 이들이 크게 움직이는 날엔 지수 등락 기여도의 절반 이상을 좌우한다. 즉 **이 반도체 양대장의 방향이 코스피 당일 방향을 사실상 결정하는 장세**다.
 - 방향 예측의 출발점은 항상 "오늘 삼성전자·SK하이닉스가 오를까 내릴까"이다. 아래 우선순위 중 **SOX(필라델피아 반도체)·DRAM ETF·마이크론/엔비디아 동향**을 이 두 종목의 선행 지표로 **최우선 가중**한다.
@@ -934,6 +949,62 @@ def get_web_base_url() -> str:
     return web_base.rstrip("/")
 
 
+def build_calibration_hint(briefing_type: str = "kospi", min_n: int = 20) -> str:
+    """지금까지의 up_pct 구간별 실제 적중 실적을 프롬프트용 표로 만든다.
+
+    모델은 자기 성적을 한 번도 본 적이 없었다 — briefings.json은 발송 **후** 기록이고
+    check_accuracy는 09:10 KST에 돌아 07:25 브리핑보다 항상 늦다. 그래서 up_pct가
+    실현 분포와 무관하게 표류했다(2026-07-27 진단: 하락 예측 구간 20~39의 실제 상승률이
+    41~50%로 사실상 동전던지기, 반면 40~59 구간은 74회 중 3회만 사용).
+
+    **채점 완료된 항목만** 집계한다. 미채점을 옛 결과로 대신 채우지 않는다(§16 방지 룰).
+    표본이 min_n 미만이면 빈 문자열 — 근거 없는 표를 보여주느니 안 보여준다.
+    """
+    path = BASE_DIR / "data" / "briefings.json"
+    if not path.exists():
+        return ""
+    try:
+        rows = json.load(open(path, encoding="utf-8")).get("briefings", [])
+    except Exception:
+        return ""
+
+    scored = [
+        r for r in rows
+        if r.get("type") == briefing_type
+        and isinstance(r.get("up_pct"), (int, float))
+        and isinstance(r.get("actual_change_pct"), (int, float))
+    ]
+    if len(scored) < min_n:
+        return ""
+
+    buckets = {}
+    for r in scored:
+        lo = int(r["up_pct"]) // 10 * 10
+        buckets.setdefault(lo, []).append(r["actual_change_pct"] > 0)
+
+    lines = [
+        "\n## 📊 지금까지의 up_pct 캘리브레이션 (본인 실적 — 확률 보정에 반영할 것)",
+        f"채점 완료 {len(scored)}건 기준. '실제 상승률'은 그 구간으로 예측한 날 중 실제로 오른 비율이다.",
+        "",
+        "| up_pct 구간 | 예측 횟수 | 실제 상승률 |",
+        "|---|---|---|",
+    ]
+    for lo in sorted(buckets):
+        ups = buckets[lo]
+        lines.append(f"| {lo}~{lo + 9} | {len(ups)}회 | {100 * sum(ups) / len(ups):.0f}% |")
+
+    overall_up = 100 * sum(1 for r in scored if r["actual_change_pct"] > 0) / len(scored)
+    lines += [
+        "",
+        f"- 전체 기간 실제 상승 비율(기저율)은 **{overall_up:.0f}%** 다.",
+        "- **읽는 법**: 어떤 구간의 '실제 상승률'이 그 구간 값과 크게 어긋나면 그 구간을 잘못 쓰고 있다는 뜻이다."
+        " 예를 들어 up_pct 30대로 낸 날의 실제 상승률이 40%를 넘는다면 하락 확신이 과했다는 신호다.",
+        "- 이 표는 과거 실적일 뿐 오늘의 정답이 아니다. 오늘 선행신호가 명확하면 그쪽을 따르고,"
+        " **애매할 때 기저율 쪽으로 당기는 기준**으로만 쓴다.",
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
     """직전(오늘 이전) 예측의 적중 여부(is_correct)를 반환. 없거나 아직 채점 전이면 None.
 
@@ -1199,6 +1270,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         prior = compute_prior(market_data)
         user_content += format_prior_for_prompt(prior)
         print(f"[call_claude] Leading-signal prior: {prior['direction']} ({prior['strength']}, score {prior['score']})")
+        # 자기 실적 캘리브레이션 표 — up_pct가 실현 분포와 무관하게 표류하는 것을 막는다
+        calib = build_calibration_hint("kospi")
+        if calib:
+            user_content += calib
+            print("[call_claude] 캘리브레이션 표 주입됨")
     elif briefing_type == "us":
         # 미국은 프리마켓 선물·SOX·VIX 기반 advisory prior (방향 강제 없음)
         from leading_signal import compute_prior_us, format_prior_for_prompt_us
