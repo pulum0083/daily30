@@ -6,6 +6,16 @@
   "url_prefix": "kospi",
   "scheduled_time": "07:30",
   "gnb_time": "07:30",
-  "sections_main": ["prediction", "reasons", "ib_korea_views", "watchpoints", "stock_picks"],
-  "sections_sidebar": ["market_data", "accuracy"]
+  "sections_main": [
+    "prediction",
+    "reasons",
+    "domestic_issues",
+    "ib_korea_views",
+    "watchpoints",
+    "stock_picks"
+  ],
+  "sections_sidebar": [
+    "market_data",
+    "accuracy"
+  ]
 }

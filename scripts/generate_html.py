@@ -817,6 +817,59 @@ def build_ib_korea_views() -> dict:
     return {"ib_korea_views": views}
 
 
+def build_domestic_issues(target_date: str = None) -> dict:
+    """국내 이슈 섹션 컨텍스트 빌더 (코스피 아침 전용).
+
+    url 없는 항목은 제외한다(원본 링크 이동 보장). 데이터가 없거나 날짜가 다르면
+    빈 리스트 → 템플릿에서 섹션 자체 생략(운영 규칙 0 — 없으면 지어내지 않는다).
+    날짜 검증은 이전 실행의 잔존 파일이 다른 날짜 브리핑을 오염시키는 것을 막는다(§14와 동일 패턴).
+
+    `time_label`은 **렌더 시점에 계산한다** — 저장된 상대 라벨은 페이지가 재생성될 때마다
+    낡아간다(§20·§24에서 세 번 재발한 패턴).
+    """
+    path = BASE_DIR / "data" / "domestic_issues.json"
+    if not path.exists():
+        return {"domestic_issues": [], "domestic_window_label": ""}
+    try:
+        with open(path, encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as e:
+        print(f"[generate_html] domestic_issues 읽기 실패: {e}")
+        return {"domestic_issues": [], "domestic_window_label": ""}
+
+    if target_date and payload.get("date") != target_date:
+        print(f"[generate_html] domestic_issues 날짜 불일치"
+              f"({payload.get('date')} != {target_date}) → 섹션 생략")
+        return {"domestic_issues": [], "domestic_window_label": ""}
+
+    now = datetime.now(KST)
+    items = []
+    for it in payload.get("issues", []):
+        if not it.get("url"):
+            continue
+        items.append({**it, "time_label": _rel_time_label(it.get("published_at"), now)})
+    return {
+        "domestic_issues": items,
+        "domestic_window_label": (payload.get("window") or {}).get("label", ""),
+    }
+
+
+def _rel_time_label(published_at: str, now) -> str:
+    """'N시간 전' 라벨을 렌더 시점 기준으로 계산한다 (저장하지 않는다 — §20)."""
+    if not published_at:
+        return ""
+    try:
+        dt = KST.localize(datetime.strptime(published_at, "%Y-%m-%d %H:%M"))
+    except Exception:
+        return ""
+    mins = int((now - dt).total_seconds() // 60)
+    if mins < 60:
+        return f"{max(mins, 0)}분 전"
+    if mins < 60 * 24:
+        return f"{mins // 60}시간 전"
+    return f"{mins // (60 * 24)}일 전"
+
+
 def build_accuracy(internal_type: str) -> dict:
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
@@ -1097,6 +1150,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더
         ctx.update(build_ib_korea_views())
+        ctx.update(build_domestic_issues(target_date))
         uls = analysis.get("us_linked_story") or {}
         if uls.get("title"):
             ctx["us_linked_title"] = uls["title"]

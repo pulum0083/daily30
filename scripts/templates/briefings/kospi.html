@@ -42,6 +42,7 @@
             {% if key_drivers %}{% include "sections/reasons.html" %}{% endif %}
             {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>
+            {% if domestic_issues %}{% include "sections/domestic_issues.html" %}<div class="divider"></div>{% endif %}
             {% if ib_korea_views %}{% include "sections/ib_korea_views.html" %}<div class="divider"></div>{% endif %}
             {# 하단 심층 섹션(us_linked_story·sector_focus) 2026-07-07 중단 — 되살리려면 아래 두 줄 복원 #}
             {# {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>
