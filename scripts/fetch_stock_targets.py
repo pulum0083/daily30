@@ -7,6 +7,10 @@ import urllib.request
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import pytz
+
+KST = pytz.timezone("Asia/Seoul")
+
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
 LIST_URL = ("https://finance.naver.com/research/company_list.naver"
             "?searchType=itemCode&itemCode={code}&page={page}")
@@ -189,7 +193,10 @@ def collect(code, pages=2):
 
 
 def main():
-    today = datetime.now()
+    # datetime.now()는 GHA 러너(UTC) 기준이라 KST 07:2x 아침 실행 시 하루 전 날짜로 찍힌다
+    # (2026-07-27 실사고: 07:29 KST 실행이 "2026-07-26"로 기록돼 consensus_history에
+    # 존재하지 않는 휴장일 항목이 남았다). 반드시 KST로 명시한다.
+    today = datetime.now(KST)
     today_str = today.strftime("%y.%m.%d")
     stocks_out = {}
     for code, name in STOCKS.items():

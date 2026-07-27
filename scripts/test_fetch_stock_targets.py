@@ -1,8 +1,10 @@
 # 네이버 증권사 리포트 목록·상세 파싱과 컨센서스 계산을 검증하는 테스트
 import json
 import sys
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
+
+import pytz
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import fetch_stock_targets as fst
@@ -208,3 +210,36 @@ def test_main_keeps_consensus_when_detail_fetches_succeed(monkeypatch, tmp_path)
     assert stock["consensus"] == 480000
     assert stock["firm_count"] == 2
     assert len(json.loads(history.read_text(encoding="utf-8"))["005930"]) == 1
+
+
+def test_main_stamps_kst_date_not_utc_date(monkeypatch, tmp_path):
+    """2026-07-27 실사고 재현: GHA 러너(UTC)에서 KST 07:2x 아침 실행 시
+    datetime.now()가 UTC 날짜(전날)를 돌려줘 updated_at·히스토리가 하루 밀렸다.
+    월요일 07:29 KST(=일요일 22:29 UTC) 실행을 재현해 오늘 날짜(월요일)로
+    찍히는지 검증한다 — 일요일(비거래일) 날짜가 남으면 회귀."""
+    history = tmp_path / "consensus_history.json"
+    out = tmp_path / "stock-targets.json"
+    monkeypatch.setattr(fst, "HISTORY_JSON", history)
+    monkeypatch.setattr(fst, "OUT_JSON", out)
+    monkeypatch.setattr(fst, "STOCKS", {"005930": "삼성전자"})
+    monkeypatch.setattr(fst, "fetch_close_price", lambda code: 254000)
+    monkeypatch.setattr(
+        fst, "fetch_euckr",
+        lambda url: recent_list_html() if "company_list" in url else DETAIL_HTML,
+    )
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            # 2026-07-27(월) 07:29 KST = 2026-07-26(일) 22:29 UTC
+            utc_now = datetime(2026, 7, 26, 22, 29, 51, tzinfo=pytz.UTC)
+            return utc_now.astimezone(tz) if tz else utc_now
+
+    monkeypatch.setattr(fst, "datetime", FrozenDatetime)
+    fst.main()
+
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["updated_at"] == "2026-07-27"
+    hist_dates = [h["date"] for h in json.loads(history.read_text(encoding="utf-8"))["005930"]]
+    assert hist_dates == ["2026-07-27"]
+    assert "2026-07-26" not in hist_dates  # 실제로 실행되지 않은 일요일 날짜가 남으면 안 된다
