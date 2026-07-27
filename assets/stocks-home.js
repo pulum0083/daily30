@@ -870,7 +870,16 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var newsRow=why.querySelector(':scope > .lw-row');
   if(!curve||!newsRow) return;
 
-  why.insertBefore(newsRow, curve);              // 갱신되는 뉴스를 정지된 장중 차트 위로
+  // wm-body(장중 곡선)가 접혀 있으면 curve 블록은 토글 헤더 한 줄뿐이다 — 이땐 숨길 "정지된 차트"가
+  // 없으므로 원래 순서(헤더가 관련 뉴스 바로 위)를 유지한다. krxDay 종료~다음날 개장 전은 기본이
+  // 접힘 상태라(wmBodyGate) 이 분기가 사실상 상시 케이스다. 사용자가 수동으로 펼쳤을 때만
+  // 뉴스를 위로 올려 정지된 차트를 아래로 보낸다(2026-07-27 피드백: 접힌 토글이 뉴스 아래
+  // 동떨어져 보이는 문제).
+  var wmBody=document.getElementById('wm-body');
+  var curveCollapsed = wmBody && wmBody.style.display==='none';
+  if(!curveCollapsed){
+    why.insertBefore(newsRow, curve);              // 갱신되는 뉴스를 정지된 장중 차트 위로
+  }
   // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
   (ph==='us_open' ? [usEve, usLinked] : [usLinked, usEve])
     .forEach(function(n){ if(n) momTrack.parentNode.insertBefore(n, momTrack); });
