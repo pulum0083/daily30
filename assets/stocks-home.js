@@ -335,6 +335,10 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var open = (ov && ov.night===night) ? ov.open : !night;
     body.style.display = open ? '' : 'none';
     if(btn) btn.classList.toggle('is-collapsed', !open);
+    // 접히면 헤더 한 줄만 남아 바로 아래 '📰 관련 뉴스' 제목과 붙어 보인다(2026-07-27 피드백).
+    // CSS가 이 상태를 알아야 헤더를 '눌러서 펼치는 컨트롤'로 보이게 처리할 수 있다.
+    var wm=document.getElementById('why-moved');
+    if(wm) wm.classList.toggle('lw-curve-collapsed', !open);
   }
   function wmToggleManual(){
     var body=document.getElementById('wm-body');
