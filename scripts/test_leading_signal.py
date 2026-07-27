@@ -241,3 +241,42 @@ def test_existing_fixtures_unaffected_without_kospi():
     p = ls.compute_prior(_latest(sox=-10.26, nasdaq=-4.18, nq=-2.0, ewy=-14.11, vix=39.68))
     assert p["direction"] == "하락"
     assert p["signals"]["ewy_resid"] == -14.11
+
+
+# ── 실시간 미 지수선물 (2026-07-27 추가, score 미반영 advisory) ────────────────
+def test_extract_signals_includes_index_futures():
+    latest = {
+        "market_data_js": {"nq": {"chg": 0.42}},
+        "futures": {"sp500_fut": {"change_pct": 0.31}, "dow_fut": {"change_pct": 0.18}},
+    }
+    sig = ls.extract_signals(latest)
+    assert sig["es"] == 0.31 and sig["ym"] == 0.18 and sig["nq"] == 0.42
+
+
+def test_index_futures_missing_is_none():
+    sig = ls.extract_signals({"market_data_js": {}})
+    assert sig["es"] is None and sig["ym"] is None
+
+
+def test_futures_not_added_to_score():
+    """가중치가 아직 피팅되지 않았으므로 선물은 score를 바꾸지 않는다."""
+    base = {"market_data_js": {"sox": {"chg": -1.0}}}
+    with_fut = {**base, "futures": {"sp500_fut": {"change_pct": 5.0},
+                                    "dow_fut": {"change_pct": 5.0}}}
+    assert ls.compute_prior(base)["score"] == ls.compute_prior(with_fut)["score"]
+
+
+def test_prompt_shows_live_futures():
+    latest = {
+        "market_data_js": {"sox": {"chg": -4.25}, "nq": {"chg": 0.42}},
+        "futures": {"sp500_fut": {"change_pct": 0.31}, "dow_fut": {"change_pct": 0.18}},
+    }
+    text = ls.format_prior_for_prompt(ls.compute_prior(latest))
+    assert "살아있는 유일한 신호" in text
+    assert "+0.31%" in text and "+0.18%" in text
+    assert "score에는 반영돼 있지 않다" in text or "score 가중 합산에 넣지 않았" in text
+
+
+def test_prompt_omits_futures_block_when_absent():
+    text = ls.format_prior_for_prompt(ls.compute_prior({"market_data_js": {"sox": {"chg": 1.0}}}))
+    assert "살아있는 유일한 신호" not in text

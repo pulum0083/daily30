@@ -675,6 +675,11 @@ def fetch_kospi_data() -> dict:
     macro_tickers = ["^GSPC", "^VIX", "BZ=F", "GC=F", "^TNX",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
                      "DRAM",  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
+                     # 미 지수선물 — 브리핑 생성 시각(07:25 KST)에 **유일하게 실시간인** 신호.
+                     # SOX·나스닥·EWY는 전부 6시간 이상 묵은 미국장 종가다.
+                     # NQ=F는 이미 사이드바(market_data_js.nq)에 있고, ES/YM은 그동안
+                     # 미국 브리핑 경로에만 있어 코스피 prior가 쓰지 못했다.
+                     "ES=F", "YM=F",
                      "^N225", "^HSI", "^TWII", "000001.SS"]  # 아시아 지역 지수 (catch-up 시그널)
     macro = {}
     for t in macro_tickers:
@@ -722,6 +727,12 @@ def fetch_kospi_data() -> dict:
         "vix":    macro.get("^VIX", {}),
         "ewy":    macro.get("EWY", {}),
         "dram_etf": macro.get("DRAM", {}),  # Roundhill Memory ETF (HBM·DRAM 수요 선행)
+        # 미 지수선물 (07:25 KST 기준 실시간). nasdaq_fut은 사이드바와 같은 NQ=F를 재사용한다.
+        "futures": {
+            "sp500_fut":  macro.get("ES=F", {}),
+            "nasdaq_fut": market_data_js.get("nq", {}),
+            "dow_fut":    macro.get("YM=F", {}),
+        },
         "oil": {
             "wti":   market_data_js.get("oil", {}),
             "brent": macro.get("BZ=F", {}),

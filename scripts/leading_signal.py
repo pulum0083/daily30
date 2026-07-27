@@ -28,6 +28,10 @@ def extract_signals(latest: dict) -> dict:
         v = latest.get(key)
         return v.get("change_pct") if isinstance(v, dict) else None
 
+    def from_fut(key):   # futures.{key}.change_pct
+        v = (latest.get("futures") or {}).get(key)
+        return v.get("change_pct") if isinstance(v, dict) else None
+
     return {
         "sox":    from_mdj("sox"),
         "nasdaq": from_mdj("nasdaq"),
@@ -38,6 +42,9 @@ def extract_signals(latest: dict) -> dict:
         # 아래 둘은 가중 합산에 직접 쓰지 않고 EWY 잔차 계산에만 쓴다
         "kospi":  from_mdj("kospi"),               # 직전 코스피 세션 등락률
         "post_holiday": bool(latest.get("post_holiday_catchup")),
+        # 실시간 미 지수선물 — 아직 score에 넣지 않는다(가중치 미피팅). 프롬프트 참고용.
+        "es":     from_fut("sp500_fut"),
+        "ym":     from_fut("dow_fut"),
     }
 
 
@@ -128,6 +135,17 @@ def format_prior_for_prompt(prior: dict) -> str:
         f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}",
         "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다.",
     ]
+    live = [(n, sig.get(k)) for n, k in (("S&P선물", "es"), ("NQ선물", "nq"), ("다우선물", "ym"))
+            if sig.get(k) is not None]
+    if live:
+        lines.append(
+            "- **지금 이 순간 살아있는 유일한 신호 — 미 지수선물**: "
+            + " · ".join(f"{n} {fmt(v)}" for n, v in live)
+            + ". 위 SOX·나스닥·EWY는 전부 직전 미국장 **종가**라 6시간 이상 묵은 값이고, 선물은"
+            " 브리핑 생성 시각까지 계속 거래된 값이다. **종가와 선물 방향이 엇갈리면 선물이 더 신선한"
+            " 정보다.** (단 선물은 아직 score 가중 합산에 넣지 않았으므로 위 score에는 반영돼 있지 않다 —"
+            " 판단할 때 별도로 감안하라.)"
+        )
     resid = sig.get("ewy_resid")
     if resid is not None and sig.get("kospi") is not None and resid != sig.get("ewy"):
         lines.append(

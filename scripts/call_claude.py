@@ -888,6 +888,37 @@ def build_avoidance_hint(history: list, days: int = 3) -> str:
     return "\n".join(lines)
 
 
+def _signal_snapshot(briefing_type: str) -> dict:
+    """예측 시점의 선행신호·prior를 그대로 남긴다 (사후 캘리브레이션용).
+
+    지금까지 이 값들이 어디에도 아카이브되지 않아 **prior의 실전 성적을 추적할 방법이
+    없었다.** diagnose_direction_signals.py는 yfinance로 과거를 복원하는데, 선물(NQ·ES·YM)은
+    과거 시세를 정확히 되살릴 수 없어 백테스트에서 통째로 제외된다 — 그래서 정작 07:25에
+    유일하게 실시간인 신호의 가중치(nq=0.3)만 피팅 없이 손으로 들어가 있었다.
+    예측 행에 신호를 같이 적어두면 앞으로는 briefings.json 하나로 신호↔결과 조인이 된다.
+
+    실패해도 조용히 빈 dict — 아카이브 때문에 발행이 막히면 안 된다.
+    """
+    if briefing_type != "kospi":
+        return {}
+    try:
+        from leading_signal import compute_prior
+        latest = json.load(open(DATA_DIR / "latest_kospi.json", encoding="utf-8"))
+        prior = compute_prior(latest)
+        sig = prior["signals"]
+        return {
+            "prior_direction": prior["direction"],
+            "prior_score": prior["score"],
+            "prior_strength": prior["strength"],
+            "signals": {k: sig.get(k) for k in
+                        ("sox", "nasdaq", "nq", "es", "ym", "ewy", "ewy_resid",
+                         "kospi", "usdkrw", "vix")},
+        }
+    except Exception as e:
+        print(f"[call_claude] 선행신호 스냅샷 생략: {e}", file=sys.stderr)
+        return {}
+
+
 def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: dict) -> None:
     """Append or update the prediction record in data/briefings.json for accuracy tracking."""
     path = DATA_DIR / "briefings.json"
@@ -923,6 +954,8 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
         "is_correct": None,
         "generated_at": datetime.now(KST).isoformat(),
         "checked_at": None,
+        # 예측 시점 선행신호 스냅샷 — 사후 캘리브레이션·가중치 재피팅용
+        **_signal_snapshot(briefing_type),
     }
 
     if existing_idx is not None:
