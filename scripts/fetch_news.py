@@ -146,7 +146,15 @@ KOSPI_PROMPT = """\
 [catalysts 작성 규칙]
 - 오늘 코스피 주도주·섹터를 움직일 '사건' 중심 뉴스만 담는다 (지수 등락률 나열이 아님)
 - **해외 사건뿐 아니라 국내 사건도 담는다** — 공시·수주·정책·지표 발표가 국내 종목·섹터를 움직인 경우
-- 각 항목은 "무슨 사건 → 어느 종목·섹터에 왜 영향" 형태의 한 문장. 실제로 검색된 사건만 담고, 없으면 빈 배열 []
+- **각 항목은 반드시 `{{"date": "YYYY-MM-DD", "text": "사건 → 영향"}}` 형태의 객체다** (문자열이 아니다).
+  `date`는 그 사건이 실제 발생·발표된 날짜로, 검색으로 확인한 실제 날짜만 넣고 추측하지 않는다.
+  `text`는 "무슨 사건 → 어느 종목·섹터에 왜 영향" 한 문장.
+- **`date`는 위 [시점 기준]의 검색 대상 구간 안에 있어야 한다.** 그 구간보다 앞선 사건은 이미 지난 브리핑에서
+  다뤘으므로 담지 않는다(오늘 후속 기사가 검색되더라도 마찬가지).
+- 실제로 검색된 사건만 담고, 없으면 빈 배열 []
+- **[필수] 모든 항목의 주어는 실제 기업·기관 실명이어야 한다.** 이름을 특정하지 못했다면 "A사"·"B사"·"모 기업"처럼
+  익명화하거나 아래 예시의 대괄호 슬롯을 그대로 남기지 말고, **그 항목을 통째로 버린다.** 실명 없는 사건은
+  검증이 불가능해 발행할 수 없다. 남는 게 없으면 빈 배열 []로 둔다 — 완전성보다 정합성이 우선이다.
 - 문장 형태 예시(회사명·사건은 형식 참고용일 뿐이다 — 절대 그대로 베끼지 말고, 오늘 실제 검색으로 찾은 회사명·사건·수치로만 채운다): "[해외 기업]의 [발표·이벤트] → [한국 관련 섹터·종목]에 [영향 방향]"
 
 출력 형식 (JSON만, 다른 텍스트 없이):
@@ -159,7 +167,7 @@ KOSPI_PROMPT = """\
     "원유·환율 동향"
   ],
   "catalysts": [
-    "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만, 없으면 이 배열은 비운다)"
+    {{"date": "YYYY-MM-DD", "text": "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·검색 대상 구간 내 발생분만, 없으면 이 배열은 비운다)"}}
   ],
   "headlines": [
     "오늘 코스피 방향에 직접 영향을 줄 헤드라인 1",
@@ -312,7 +320,27 @@ def _parse_iso_date(s: str):
         return None
 
 
-def _filter_stale_catalysts(catalysts: list, today: date) -> list:
+def _catalyst_cutoff(briefing_type: str, today: date) -> date:
+    """브리핑 타입별 catalyst 허용 시작일(이 날짜 이상만 채택).
+
+    기본은 어제(today-1)다. **코스피 아침 브리핑만 직전 미국장까지 창을 넓힌다** —
+    월요일 07:25에 직전 미국장은 지난 금요일이라, 어제(일요일) 기준으로 자르면
+    그 브리핑이 실제로 다뤄야 할 금요일 미국장 사건이 통째로 잘려나간다(§24 세션 갭).
+    평일에는 직전 미국장 = 어제라 기존 동작과 같다.
+    """
+    default = today - timedelta(days=1)
+    if briefing_type != "kospi":
+        return default
+    try:
+        from session_label import prev_us_session
+        prev_us = prev_us_session(today)
+    except Exception as e:
+        print(f"[fetch_news] session_label 사용 불가, 기본 cutoff 사용: {e}", file=sys.stderr)
+        return default
+    return min(default, prev_us) if prev_us else default
+
+
+def _filter_stale_catalysts(catalysts: list, today: date, cutoff: date = None) -> list:
     """catalyst별 발생일을 읽어 오늘/어제(today-1)보다 오래된 사건은 버리고, 남긴 항목은
     순수 문자열(사건 → 영향)로 반환한다. 다운스트림(call_claude)은 문자열 리스트를 기대한다.
 
@@ -323,8 +351,11 @@ def _filter_stale_catalysts(catalysts: list, today: date) -> list:
     2026-07-15~20 실사고: 7/15 발표된 ASML 2분기 실적이 사흘 넘게 '오늘 프리마켓 촉매'로
     재등장했다(_load_prev_catalysts 소프트 중복 방지만으론 못 막음). 이 함수가 하드 게이트다.
     날짜 미상 항목은 버리지 않는다 — 유가·지정학 등 날짜 태그 없이 오는 거시 촉매를 보호한다.
-    완전성보다 정합성이 우선이되, '날짜 미상'과 '오래됨'은 구분한다."""
-    cutoff = today - timedelta(days=1)
+    완전성보다 정합성이 우선이되, '날짜 미상'과 '오래됨'은 구분한다.
+
+    cutoff를 명시하면 그 날짜 이상만 채택한다(코스피 월요일의 주말 공백 — `_catalyst_cutoff`)."""
+    if cutoff is None:
+        cutoff = today - timedelta(days=1)
     kept, dropped = [], []
     for c in catalysts:
         if isinstance(c, dict):
@@ -705,7 +736,10 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
         # 2차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
-        cats = _filter_stale_catalysts(cats, today_kst)
+        # 코스피 아침은 직전 미국장까지 창을 넓힌다(월요일 주말 공백 — _catalyst_cutoff)
+        cats = _filter_stale_catalysts(
+            cats, today_kst, cutoff=_catalyst_cutoff(briefing_type, today_kst)
+        )
         # 3차: 2일+ 전 catalyst와 실질 중복인 재탕을 하드 제외(날짜 창 밖 재탕 백스톱)
         stale = _load_stale_catalysts(briefing_type, today_kst)
         data["catalysts"] = _drop_cross_day_recaps(cats, stale)
