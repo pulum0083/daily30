@@ -82,6 +82,23 @@ def test_no_fast_last_uses_latest_bar():
     assert _extended_hours_price(bars, None, now=_et(2026, 7, 27, 8, 35)) == 935.10
 
 
+# ── 선물 롤오버 가드가 개별주 프리마켓 급등락을 덮지 않는지 ────────────────────
+from fetch_data import _is_futures_like  # noqa: E402
+
+
+def test_rollover_guard_scope():
+    """롤오버 가드는 선물·지수·금리에만 적용된다 — 개별주엔 적용 금지.
+
+    2026-07-27: XOM이 프리마켓 -3.19%였는데 가드가 정규장 종가로 되돌려 +4.15%로
+    부호까지 뒤집었다. 가드가 쓰는 1시간봉은 prepost를 포함하지 않아, 연장시간대
+    실체결가를 '롤오버 갭'으로 오인한다.
+    """
+    for t in ("CL=F", "BZ=F", "GC=F", "NQ=F", "^TNX", "^IXIC", "^SOX"):
+        assert _is_futures_like(t), t
+    for t in ("XOM", "CVX", "MU", "AAPL", "BRK-B", "SMH", "EWY"):
+        assert not _is_futures_like(t), t
+
+
 if __name__ == "__main__":
     for name, fn_ in sorted(globals().items()):
         if name.startswith("test_") and callable(fn_):

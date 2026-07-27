@@ -290,6 +290,17 @@ def _prev_close_from_daily(closes, price: float) -> float | None:
         return None
 
 
+def _is_futures_like(ticker: str) -> bool:
+    """선물·지수·금리 심볼인가 (롤오버 가드 적용 대상).
+
+    개별 주식·ETF는 롤오버가 없다. 가드를 개별주에 적용하면 프리마켓 실체결가를
+    '롤오버 갭'으로 오인해 정규장 종가로 되돌린다(2026-07-27: XOM 프리마켓 -3.19%가
+    +4.15%로 부호까지 반전). 가드가 쓰는 1시간봉은 prepost를 포함하지 않기 때문이다.
+    """
+    t = (ticker or "").upper()
+    return t.endswith("=F") or t.startswith("^") or t.endswith("=X")
+
+
 def _extended_hours_price(intraday, fast_last: float | None, now=None,
                           max_age_hours: float = 12.0) -> float | None:
     """프리마켓·애프터마켓을 포함한 '지금 이 시점'의 최근 체결가를 돌려준다.
@@ -399,10 +410,12 @@ def get_ticker_full(ticker: str) -> dict:
         change_pct = (price - prev_price) / prev_price * 100
 
         # Futures rollover guard: same as build_sidebar_market_data.
-        # Applies to commodity/rate futures (BZ=F, CL=F, GC=F, ^TNX, etc.).
+        # Applies to commodity/rate futures (BZ=F, CL=F, GC=F, ^TNX, etc.) ONLY —
+        # 개별주에 적용하면 프리마켓 실체결가를 롤오버 갭으로 오인해 되돌린다.
         try:
-            h = _yf_history(ticker, period="5d", interval="1h")
-            hc = h["Close"].dropna()
+            h = _yf_history(ticker, period="5d", interval="1h") \
+                if _is_futures_like(ticker) else None
+            hc = h["Close"].dropna() if h is not None else []
             if len(hc) >= 25:
                 hp = float(hc.iloc[-1])
                 gap = abs(price - hp) / hp if hp != 0 else 0
