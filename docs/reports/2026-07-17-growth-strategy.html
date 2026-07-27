@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<!-- 더블샷 사용자 이탈 진단 및 서비스 개편 전략 보고서 (2026-07-17) -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Shot 서비스 개편 전략 보고서</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --ink: #1a1f2b;
+    --sub: #5b6470;
+    --line: #e5e8ee;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1fe;
+    --red: #d6455d;
+    --red-soft: #fdeef1;
+    --green: #1d8a5f;
+    --green-soft: #e9f6f0;
+    --amber: #b07a1e;
+    --amber-soft: #fdf4e3;
+    --mono: "SF Mono", "D2Coding", Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    line-height: 1.7;
+    font-size: 15px;
+    padding: 48px 20px 80px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  .doc-label {
+    display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 4px 10px; border-radius: 999px; margin-bottom: 14px;
+  }
+  h1 { font-size: 30px; line-height: 1.3; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .doc-meta { color: var(--sub); font-size: 13px; margin-bottom: 40px; }
+
+  h2 {
+    font-size: 21px; letter-spacing: -0.01em; margin: 56px 0 6px;
+    padding-top: 28px; border-top: 1px solid var(--line);
+  }
+  h2 .no { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 6px; }
+  .h2-sub { color: var(--sub); font-size: 14px; margin-bottom: 20px; }
+  h3 { font-size: 16px; margin: 28px 0 10px; }
+  p { margin-bottom: 14px; }
+  strong { font-weight: 700; }
+  em { font-style: normal; background: linear-gradient(transparent 62%, #ffe8a3 62%); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 24px; margin: 18px 0;
+  }
+  .tldr { border-left: 4px solid var(--accent); }
+  .tldr h3 { margin-top: 0; }
+  .tldr ol { padding-left: 20px; }
+  .tldr li { margin-bottom: 8px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin: 16px 0; }
+  .table-scroll table { margin: 0; border-radius: 0; }
+  th { background: #f0f2f6; text-align: left; padding: 10px 14px; font-size: 13px; color: var(--sub); font-weight: 700; white-space: nowrap; }
+  td { padding: 11px 14px; border-top: 1px solid var(--line); vertical-align: top; }
+  td.center, th.center { text-align: center; }
+
+  .badge { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .b-red { color: var(--red); background: var(--red-soft); }
+  .b-green { color: var(--green); background: var(--green-soft); }
+  .b-amber { color: var(--amber); background: var(--amber-soft); }
+  .b-blue { color: var(--accent); background: var(--accent-soft); }
+  .b-gray { color: var(--sub); background: #eef0f4; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  .mini { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .mini h4 { font-size: 14px; margin-bottom: 8px; }
+  .mini p { font-size: 13.5px; color: var(--sub); margin-bottom: 0; }
+
+  .flow {
+    background: #10141d; color: #d7dde8; border-radius: 12px;
+    font-family: var(--mono); font-size: 13px; line-height: 1.9;
+    padding: 18px 22px; margin: 16px 0; overflow-x: auto; white-space: pre;
+  }
+  .flow .hl { color: #7db4ff; }
+  .flow .bad { color: #ff8fa1; }
+  .flow .good { color: #6fd8a8; }
+
+  .prio { display: flex; gap: 10px; align-items: baseline; margin: 26px 0 8px; }
+  .prio .tag { font-family: var(--mono); font-weight: 800; font-size: 13px; padding: 3px 10px; border-radius: 8px; }
+  .p0 { background: var(--red-soft); color: var(--red); }
+  .p1 { background: var(--amber-soft); color: var(--amber); }
+  .p2 { background: var(--accent-soft); color: var(--accent); }
+  .prio h3 { margin: 0; }
+  ul.plain { padding-left: 20px; margin-bottom: 14px; }
+  ul.plain li { margin-bottom: 7px; }
+
+  .quote {
+    border-left: 3px solid var(--line); padding: 4px 0 4px 16px;
+    color: var(--sub); font-size: 14px; margin: 14px 0;
+  }
+  .footnote { color: var(--sub); font-size: 12.5px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <span class="doc-label">STRATEGY REPORT</span>
+  <h1>더블샷, "읽고 끝나는 브리핑"에서<br>"하루 종일 켜두는 시장 도구"로</h1>
+  <div class="doc-meta">사용자 이탈 진단 · 경쟁 서비스 분석 · 종목 시그널 정밀 분석 · 개편 로드맵 — 2026-07-17 · doubleshot.space (v2)</div>
+
+  <div class="card tldr">
+    <h3>요약 (TL;DR)</h3>
+    <ol>
+      <li>사용자가 떨어지는 근본 원인은 콘텐츠 품질이 아니라 <strong>구조</strong>다. 더블샷은 하루 3번 "읽고 끝나는" 서비스이고, 벤치마크 두 곳은 하루 수십 번 "돌아오게 만드는" 도구다.</li>
+      <li>사이트에 <em>사용자의 것</em>이 하나도 없다. 관심종목도, 기록도, 참여도 없다. 다시 올 이유가 콘텐츠 갱신뿐이면 재방문은 발행 횟수(3회)가 상한이 된다.</li>
+      <li><strong>종목 시그널은 "절반쯤 완성된 도구"다.</strong> 데이터 깊이(목표주가 컨센서스·수급·분기실적·종목별 픽 채점)는 경쟁사를 이미 앞서는데, 종가 기준 정적 화면 + 개인화 부재 + 40종목 커버리지 + 브리핑과의 단절 때문에 습관이 되지 못하고 있다. 개편의 중심 무대는 여기다.</li>
+      <li>반격 카드는 이미 손에 있다. <strong>① 채점되는 예측(적중률 67%·확정 125건)</strong>은 두 경쟁사 모두 없는 유일 자산이고, <strong>② HL 24h 환산 시세</strong>는 코스피랩의 핵심 훅과 같은 데이터인데 이미 수집 중이며, <strong>③ 종목 상세 페이지의 데이터 위계</strong>는 코스피랩 리포트 섹션의 상위 호환이다. 문제는 이것들이 화면 구석에 묻혀 있거나 서로 연결돼 있지 않다는 것.</li>
+      <li>권고: <strong>P0 = 관심종목(로그인 없이) + 24시간 시세 홈 전면화</strong>, <strong>P1 = 예측 트랙레코드 전면화 + "나도 예측" 투표·스트릭</strong>, <strong>P2 = 종목 커버리지 확대 + 텔레그램 유입 구조 개선</strong>. 커뮤니티·모의투자 같은 무거운 기능은 지금 단계에선 비권장.</li>
+    </ol>
+  </div>
+
+  <h2><span class="no">1.</span>진단 — 왜 사용자가 떨어지는가</h2>
+  <div class="h2-sub">문제는 "무엇을 보여주느냐"가 아니라 "언제 다시 오게 하느냐"다.</div>
+
+  <p>더블샷의 현재 사용자 여정을 그대로 옮기면 이렇다.</p>
+
+  <div class="flow">텔레그램 알림 도착 (07:30 / 16:30 / 21:20)
+   → 텔레그램 안에서 요약을 읽음
+   → <span class="bad">대부분 여기서 종료</span> (텔레그램만으로 충분히 소비됨)
+   → 일부만 상세 페이지 클릭
+      → 읽고 닫음. <span class="bad">저장할 것도, 남길 것도, 내일 확인할 것도 없음</span></div>
+
+  <p>이 구조에는 세 가지 상한이 있다.</p>
+
+  <ul class="plain">
+    <li><strong>방문 횟수의 상한 — 발행 스케줄.</strong> 콘텐츠가 하루 3번 나오면 방문 동기도 하루 3번이 최대다. 반면 시세·랭킹 같은 "상태"는 볼 때마다 다르므로 방문 횟수에 상한이 없다.</li>
+    <li><strong>텔레그램이 목적지가 되어버림.</strong> 브리핑의 핵심(방향·확률·근거)이 텔레그램 메시지 안에서 완결되므로, 사이트는 "더 긴 버전"일 뿐이다. 채널 구독자 수와 사이트 사용자 수가 따로 노는 이유다.</li>
+    <li><strong>축적되는 것이 없음.</strong> 사용자가 서비스에 시간을 쓸수록 쌓이는 자산(내 종목 리스트, 내 예측 기록, 내 수익률)이 없으면 이탈 비용이 0이다. 떠나도 잃는 게 없다.</li>
+  </ul>
+
+  <p>종목 시그널 페이지는 데이터 품질(전 수치 실측, 출처 명시)이 강점이지만, 지금은 <strong>"모두에게 같은 화면"</strong>이다. 내 종목이 8개 섹터 40여 종목 안에 없으면 그날로 이탈한다. 개인화 없는 대시보드는 첫 방문 감탄은 만들어도 재방문 습관은 만들지 못한다. 종목 시그널이 가진 자산과 한계는 §3에서 따로 뜯어본다.</p>
+
+  <h2><span class="no">2.</span>벤치마크 분석 — 두 서비스는 무엇을 다르게 하나</h2>
+  <div class="h2-sub">2026-07-17 실사용 기준. 공통점은 "도구 + 개인 자산 + 옆에 사람"이다.</div>
+
+  <h3>엑셀코스피 (excelkospi.pages.dev)</h3>
+  <p>마이크로소프트 엑셀·아웃룩을 픽셀 단위로 위장한 실시간 시세창. 콘셉트("회사에서 몰래 본다")가 강렬하지만, 실제 리텐션을 만드는 건 위장이 아니라 그 아래의 <strong>도구 스택</strong>이다.</p>
+  <ul class="plain">
+    <li><strong>실시간 시세창</strong> — 관심종목 직접 등록, 일간/15분/30분 자동 갱신, 장 종료 후엔 HyperLiquid 24시간 시세로 전환. 하루 종일 켜둘 이유가 된다.</li>
+    <li><strong>모의투자 리그</strong> — 개미 III부터 챌린저 I까지 9단계 리그, 예약매수·예약매도까지. 게임형 축적 장치.</li>
+    <li><strong>내 자산</strong> — 보유 종목·현금·손익·배당·리밸런싱 자동 계산. 개인 데이터가 서비스에 쌓인다.</li>
+    <li><strong>커뮤니티</strong> — 국내·해외·코인 토론방과 "탕비실"(잡담), 실시간 채팅, 현재 접속자 수 상시 노출("현재 접속 90명"). 혼자 쓰는 느낌을 지운다.</li>
+    <li><strong>뉴스 피드</strong> — "다음 갱신 8분 후 · 뉴스 37건 · 신규 +36" 식으로 갱신 예고를 노출해 대기 심리를 만든다.</li>
+    <li>수익화: 광고 슬롯 판매, 텔레그램 시세알림, 모바일 앱.</li>
+  </ul>
+
+  <h3>코스피랩 (kospilab.com)</h3>
+  <p>기능 수는 적지만 훅이 하나로 명확하다. <em>"장 마감 후에도, 지금 삼성전자가 얼마인지 보여준다."</em></p>
+  <ul class="plain">
+    <li><strong>해외 실시간 추정가</strong> — 바이낸스 무기한선물 가격을 환율로 환산해 삼성전자·SK하이닉스·현대차의 "지금 가격"을 10초 갱신으로 제공. 국내장 마감(15:30) 이후 밤 시간대의 검색 수요를 정확히 겨냥.</li>
+    <li><strong>증권사 리포트 컨센서스</strong> — 목표주가 평균 대비 상승여력을 막대로 시각화.</li>
+    <li>대시보드 / 인사이트 / 뉴스 / 리포트 / 커뮤니티 5개 탭, 다크모드, 앱 설치(PWA), 데이터 출처·면책 명시.</li>
+  </ul>
+
+  <h3>구조 비교</h3>
+  <div class="table-scroll"><table>
+    <tr><th>리텐션 장치</th><th class="center">엑셀코스피</th><th class="center">코스피랩</th><th class="center">더블샷 (현재)</th></tr>
+    <tr><td>실시간 갱신되는 "상태" 화면</td><td class="center"><span class="badge b-green">시세창 상시</span></td><td class="center"><span class="badge b-green">10초 갱신</span></td><td class="center"><span class="badge b-amber">장중 스코어보드만</span></td></tr>
+    <tr><td>장 마감 후 시세 (24h)</td><td class="center"><span class="badge b-green">HL 24h</span></td><td class="center"><span class="badge b-green">핵심 훅</span></td><td class="center"><span class="badge b-amber">주도주 3종목 위젯에만</span></td></tr>
+    <tr><td>사용자 개인 데이터 축적</td><td class="center"><span class="badge b-green">자산·모의투자</span></td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-red">없음</span></td></tr>
+    <tr><td>관심종목 등록</td><td class="center"><span class="badge b-green">있음</span></td><td class="center"><span class="badge b-gray">고정 3종목</span></td><td class="center"><span class="badge b-red">없음</span></td></tr>
+    <tr><td>게임·참여 장치</td><td class="center"><span class="badge b-green">모의투자 리그</span></td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-red">없음</span></td></tr>
+    <tr><td>커뮤니티·사회적 존재감</td><td class="center"><span class="badge b-green">토론방+채팅+접속자수</span></td><td class="center"><span class="badge b-amber">커뮤니티 탭</span></td><td class="center"><span class="badge b-red">없음</span></td></tr>
+    <tr><td>종목별 상세 페이지 (수급·실적·차트)</td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-amber">대형 3종목</span></td><td class="center"><span class="badge b-green">유니버스 전 종목</span></td></tr>
+    <tr><td>증권사 목표주가 컨센서스</td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-amber">헤드라인 수준</span></td><td class="center"><span class="badge b-green">개별사 목표가·상승여력</span></td></tr>
+    <tr><td>AI 방향 예측</td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-green">유일 보유</span></td></tr>
+    <tr><td>예측을 실제 결과로 채점</td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-green">67% · 125건 확정</span></td></tr>
+    <tr><td>데이터 정합성 파이프라인</td><td class="center"><span class="badge b-gray">불명</span></td><td class="center"><span class="badge b-amber">출처 명시</span></td><td class="center"><span class="badge b-green">실측 검증 게이트</span></td></tr>
+    <tr><td>푸시 채널 (텔레그램)</td><td class="center"><span class="badge b-amber">시세알림</span></td><td class="center"><span class="badge b-gray">없음</span></td><td class="center"><span class="badge b-green">브리핑 3회/일</span></td></tr>
+  </table></div>
+
+  <p>표가 말해주는 것은 두 가지다. 첫째, <strong>더블샷이 지는 영역은 전부 "리텐션 장치"</strong>이고, 둘째, <strong>더블샷만 가진 자산(채점되는 예측, 검증 파이프라인, 푸시 채널)은 경쟁사가 단기간에 못 베끼는 것들</strong>이라는 점이다. 이길 수 있는 판은 "그들처럼 되기 + 우리 것 전면화"의 조합이지, 그들의 복제가 아니다.</p>
+
+  <h2><span class="no">3.</span>종목 시그널 정밀 분석 — 이미 절반쯤 만들어진 도구</h2>
+  <div class="h2-sub">허브(/stocks)와 상세(/stocks/{code}/)를 2026-07-17 기준으로 실사용 점검했다.</div>
+
+  <h3>이미 갖춘 것 — 데이터 위계는 경쟁사보다 깊다</h3>
+  <p>허브 페이지는 시간대 인지형 헤더(장중/마감), 주도주 3종목의 HL 24h 환산 + 실측 1분봉 + 뉴스 핀, 거래량 배수·레인지 위치·VWAP, 밤사이 미국 반도체 시황(원화 환산), 섹터 8개 대표 종목, 밸류에이션 시그널(업종 대비 선행 PER), 특이 신호(역행 상승·신고가 근접·수급 전환 교차 규칙), ETF로 읽는 시황(인버스/레버리지 거래대금 비율)까지 담고 있다. 상세 페이지는 종목당 이렇게 쌓여 있다.</p>
+
+  <div class="table-scroll"><table>
+    <tr><th>상세 페이지 구성</th><th>내용</th><th>경쟁사 대비</th></tr>
+    <tr><td>20일 차트 + 뉴스 핀</td><td>실측 종가 곡선 위에 급등락 시점 뉴스를 "why" 핀으로 연결</td><td><span class="badge b-green">둘 다 없음</span></td></tr>
+    <tr><td>증권사 목표주가</td><td>개별사 목표가·의견·발표일·상승여력 (삼성전자 기준 10개사)</td><td><span class="badge b-green">코스피랩(평균만)보다 깊음</span></td></tr>
+    <tr><td>수급 동향</td><td>개인·기관·외국인 5거래일 일별 + 누적 순매수</td><td><span class="badge b-green">둘 다 없음</span></td></tr>
+    <tr><td>분기 실적</td><td>확정 실적 + 컨센서스 추정(E) 구분 표기</td><td><span class="badge b-green">둘 다 없음</span></td></tr>
+    <tr><td>종목별 AI 픽 트랙레코드</td><td>브리핑이 이 종목을 픽한 기록을 진입가·목표가 대비 실측 채점 (목표 도달/미도달 그대로 공개)</td><td><span class="badge b-green">유일 — 브리핑×종목 연결 자산</span></td></tr>
+    <tr><td>오늘의 시그널</td><td>역행 상승·기관 순매수 전환 등 규칙 기반 신호를 종목 단위로</td><td><span class="badge b-green">둘 다 없음</span></td></tr>
+  </table></div>
+
+  <p>특히 <strong>종목별 픽 트랙레코드</strong>는 주목할 만하다. "7/15 픽 → 목표 도달 +5.5%, 7/7 픽 → 미도달 -20.3%"를 실측으로, 실패까지 그대로 보여준다. 브리핑(예측)과 종목 페이지(도구)를 잇는 유일한 다리이자, 서비스 전체의 신뢰 서사("우리는 채점받는다")를 종목 단위로 증명하는 장치다. 지금은 페이지 하단에 조용히 놓여 있다.</p>
+
+  <h3>그런데 왜 리텐션으로 이어지지 않는가</h3>
+  <ul class="plain">
+    <li><strong>본질이 "일일 리포트"다.</strong> 시세·수급·시그널이 전부 직전 거래일 종가 기준으로 하루 1번 갱신된다(장중 실시간은 주도주·시그널 일부뿐). 하루 1번 보면 더 볼 게 없으니 방문 상한도 하루 1번 — 브리핑과 같은 구조적 한계를 반복하고 있다. 경쟁사 둘은 같은 화면이 10초~수분마다 달라진다.</li>
+    <li><strong>모두에게 같은 화면.</strong> 관심종목이 없으니 사용자는 매번 8개 섹터를 스크롤해서 자기 종목을 찾아야 하고, 유니버스 밖 종목이면 그마저 없다. 데이터가 깊을수록 "내 종목만 모아 보고 싶다"는 욕구는 더 커진다.</li>
+    <li><strong>커버리지 40여 종목.</strong> 상세 페이지 품질은 높은데 존재하는 페이지가 적어, 검색 유입도 재방문도 그 수에 갇힌다. 품질×수량 중 수량이 병목이다.</li>
+    <li><strong>브리핑과의 동선이 끊겨 있다.</strong> 아침 브리핑의 종목 픽에서 해당 종목 상세 페이지로, 종목 페이지에서 오늘 브리핑으로 오가는 흐름이 약하다. 픽 트랙레코드라는 다리를 이미 만들어 놓고 양쪽에서 안내하지 않는 셈이다.</li>
+    <li><strong>발견성.</strong> "종목 시그널"이라는 이름만으로는 목표주가·수급·실적까지 있다는 걸 알 수 없고, 랜딩 페이지에서도 이 페이지의 존재감이 작다(footer급 "인컴 디자이너" 링크 수준). 가장 잘 만든 자산이 가장 덜 알려져 있다.</li>
+  </ul>
+
+  <p>정리하면 종목 시그널은 <em>"경쟁사보다 깊은 데이터를, 경쟁사보다 얕은 빈도로"</em> 보여주고 있다. §5의 P0(관심종목·24h 전면화)가 다른 곳이 아니라 바로 이 페이지 위에서 실행돼야 하는 이유다 — 새 제품을 만드는 게 아니라, 이미 있는 도구에 "실시간"과 "내 것"을 얹는 일이다.</p>
+
+  <h2><span class="no">4.</span>방향 — 포지셔닝 재정의</h2>
+  <div class="h2-sub">한 문장으로: "AI가 예측하고, 시장이 채점하고, 나는 하루 종일 확인한다."</div>
+
+  <p>브리핑을 버리자는 게 아니다. <strong>브리핑을 "제품"에서 "제품 안의 콘텐츠"로 강등</strong>시키고, 제품 자체는 "24시간 살아있는 코스피 화면 + 내 종목 + 채점되는 예측"으로 재정의하자는 것이다.</p>
+
+  <div class="flow"><span class="hl">개편 후 사용자 여정 (목표)</span>
+아침   텔레그램: "어제 예측 <span class="good">적중</span> ✓ (누적 67%) · 오늘은 하락 우위 65%"
+        → 사이트에서 근거 확인 + <span class="good">내 관심종목</span> 오늘 신호 확인
+장중   내 종목 실시간 + 주도주 곡선 + 이슈 브리핑 30분 갱신 → <span class="good">n회 재방문</span>
+저녁   마감 브리핑 + "오늘 내 예측은 맞았나" 채점 확인
+밤     <span class="good">"지금 삼성전자 얼마?"</span> — HL 24h 환산 시세 (검색 유입 + 재방문)
+반복   내 관심종목·내 예측 스트릭이 쌓임 → <span class="good">이탈 비용 발생</span></div>
+
+  <h2><span class="no">5.</span>실행 제안 — 우선순위별</h2>
+  <div class="h2-sub">P0는 2주 내, P1은 4~6주 내, P2는 그 이후. 1인 운영·현재 파이프라인 재사용을 전제로 했다.</div>
+
+  <div class="prio"><span class="tag p0">P0</span><h3>관심종목 — 로그인 없이, localStorage로 시작</h3></div>
+  <p>재방문을 만드는 최소 단위이자 가장 싼 개인화다. 종목 시그널 페이지에 ★ 버튼 하나 추가하고, 등록한 종목을 홈 최상단에 "내 종목" 스트립으로 고정한다. 이미 종목별 실측 데이터 파이프라인(토스·네이버)이 있으므로 <strong>새 데이터 수집이 필요 없다</strong>. localStorage면 계정·서버 비용도 0이다.</p>
+  <ul class="plain">
+    <li>내 종목에는 현재가·등락률에 더해 <strong>더블샷만의 레이어</strong>를 얹는다 — 특이 신호 발생 여부, 밸류에이션 시그널, 수급 전환. "네이버에도 있는 시세"가 아니라 "더블샷이라 보이는 신호"가 차별점.</li>
+    <li>텔레그램 확장 훅: 내 종목에 특이 신호(52주 신고가 근접, 기관 순매수 전환 등)가 뜨면 알림 — 기존 신호 엔진(/api/signals) 재사용.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p0">P0</span><h3>24시간 시세를 구석에서 전면으로</h3></div>
+  <p>코스피랩의 존재 이유인 "장 마감 후 추정가"를 더블샷은 <strong>이미 갖고 있다</strong>(주도주 위젯의 HL 24h 환산). 이걸 3종목 위젯에서 꺼내 독립 화면급으로 승격한다.</p>
+  <ul class="plain">
+    <li>종목 시그널 홈 히어로를 시간대 인지형으로: 장중엔 실시간 지수·주도주, <strong>장 마감 후엔 "지금 이 시각 추정가" 모드</strong>로 자동 전환. 밤 시간대(미국장·해외 변수)가 오히려 개미들이 제일 궁금해하는 시간이다.</li>
+    <li>"밤사이 미국 반도체 시황" 섹션과 결합하면 "밤에 보는 코스피 화면"이라는 고유 슬롯을 가질 수 있다 — 국내 서비스 대부분이 비워두는 시간대다.</li>
+    <li>검색 유입 노림수: "삼성전자 실시간", "코스피 야간 시세" 류 검색어에 대응하는 영구 URL. 기존 /stocks/{code}/ 페이지 전략과 합류.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p1">P1</span><h3>트랙레코드를 서비스의 얼굴로</h3></div>
+  <p>"매일 예측하고 다음 날 시장이 채점한다"는 구조는 두 경쟁사 모두 없고, 개인 유튜버·리딩방과도 정반대(그들은 틀린 예측을 지운다)인 <strong>신뢰 자산</strong>이다. 지금은 랜딩 한 줄("누적 적중률 67%")에 묻혀 있다.</p>
+  <ul class="plain">
+    <li>전용 페이지 /track-record — 전 예측 이력을 날짜·방향·결과와 함께 전부 공개. 틀린 것도 그대로. 데이터는 data/briefings.json에 이미 다 있다 (프로토타입 docs/prototypes/track-record.html 존재 — 이걸 완성해 배포하는 것으로 충분).</li>
+    <li>매 브리핑 상단에 "어제 예측 → 결과" 배지 상시 노출 (§16 방지 룰 준수 — 미채점이면 생략, 옛 결과 대체 금지).</li>
+    <li>텔레그램 아침 메시지 첫 줄을 결과 보고로: "어제 하락 우위 예측 → 실제 -6.37% ✓ (누적 67%)". 공유하고 싶은 카드 이미지로도 제작.</li>
+    <li><strong>종목별 픽 트랙레코드를 다리로 쓴다.</strong> 이미 종목 상세 페이지에 픽 채점("7/15 픽 → 목표 도달 +5.5%")이 있으니, 브리핑의 종목 픽에는 상세 페이지 링크를, 종목 페이지 상단에는 "오늘 브리핑에서 이 종목 언급" 배지를 달아 브리핑↔종목 양방향 동선을 만든다. 새 데이터 없이 링크만으로 두 축이 연결된다.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p1">P1</span><h3>"나도 예측" — 커뮤니티 없이 참여를 만드는 최소 장치</h3></div>
+  <p>엑셀코스피의 모의투자 리그를 그대로 만들기엔 무겁다. 같은 심리(경쟁·축적·매일 확인)를 훨씬 싸게 얻는 방법이 <strong>원탭 방향 투표</strong>다.</p>
+  <ul class="plain">
+    <li>아침 브리핑에서 "AI는 하락 우위 65%. 당신의 예측은?" — 상승/하락 버튼 하나. 다음 날 AI와 함께 채점.</li>
+    <li>사용자에게 쌓이는 것: 내 적중률, 연속 적중 스트릭, "AI를 이긴 날" 카운트. localStorage로 시작 가능, 집계는 경량 API 하나면 된다.</li>
+    <li>사회적 존재감은 접속자 수·투표 분포("오늘 참여자의 62%가 하락에 투표")로 대신한다 — 커뮤니티 콜드스타트 리스크 없이.</li>
+    <li>이것이 자리 잡으면 자연스럽게 리그·랭킹(P3)으로 확장할 수 있다. 처음부터 리그를 만들지 않는다.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p1">P1</span><h3>텔레그램 메시지 구조 개편 — 완결형에서 유도형으로</h3></div>
+  <p>지금의 텔레그램은 너무 친절해서 사이트에 올 이유를 없앤다. 메시지에서 다 주지 말고, <strong>사이트에서만 볼 수 있는 것</strong>을 명시적으로 남긴다.</p>
+  <ul class="plain">
+    <li>텔레그램: 결과 배지 + 오늘 방향·확률 + 핵심 근거 1줄 + "나도 예측하기" 링크.</li>
+    <li>사이트 전용: 근거 전체, 종목 픽, 내 종목 신호, 투표, 라이브 스코어보드. "실시간"과 "개인화"는 메신저로 배달할 수 없는 것들이라 자연스럽게 사이트 몫이 된다.</li>
+    <li>주의: 정보를 인질로 잡는 느낌이 들면 역효과다. 텔레그램 단독으로도 유용하되, 사이트가 "더 살아있는" 구조로.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p2">P2</span><h3>커버리지 확대 — "내 종목이 없어서 나가는" 이탈 차단</h3></div>
+  <ul class="plain">
+    <li>현재 8개 섹터 40여 종목 → 코스피200 + 코스닥150 단계 확대 (이미 페이지에 예고돼 있음). 관심종목 기능(P0)의 가치가 커버리지에 비례하므로 P0 이후 최우선.</li>
+    <li>/stocks/{code}/ 영구 페이지 확대는 기존 검색 유입 전략(ETFNow → 종목 엔진)과 동일 방향 — 별도 전략 수립 불요, 실행만 남음.</li>
+  </ul>
+
+  <div class="prio"><span class="tag p2">P2</span><h3>PWA·홈 화면 설치</h3></div>
+  <ul class="plain">
+    <li>두 경쟁사 모두 "앱 설치" 버튼이 있다. 매일 여는 서비스가 되려면 브라우저 북마크보다 홈 화면 아이콘이 유리하다. manifest + 서비스워커 수준의 경량 PWA로 충분.</li>
+  </ul>
+
+  <h3>하지 말 것 (지금은)</h3>
+  <div class="grid2">
+    <div class="mini"><h4>❌ 게시판형 커뮤니티</h4><p>콜드스타트가 가장 어려운 기능. 빈 게시판은 오히려 "죽은 서비스" 신호가 된다. 투표·분포 표시로 참여감을 먼저 만들고, 임계 사용자 확보 후 검토.</p></div>
+    <div class="mini"><h4>❌ 위장 UI 콘셉트 추종</h4><p>엑셀코스피의 위장은 그 서비스의 정체성이라 따라하면 아류가 된다. 더블샷의 정체성은 "검증된 예측"이다. 콘셉트가 아니라 구조(도구화)를 배울 것.</p></div>
+    <div class="mini"><h4>❌ 풀 모의투자 리그</h4><p>체결 엔진·계정·리그 운영은 1인 운영 범위를 넘는다. "나도 예측" 투표가 같은 심리를 1/20 비용으로 검증해 준다.</p></div>
+    <div class="mini"><h4>❌ 브리핑 발행 횟수 늘리기</h4><p>콘텐츠 추가는 상한이 발행 횟수인 구조를 강화할 뿐이다. 지금 필요한 건 발행 사이 시간을 채우는 "상태" 화면이다.</p></div>
+  </div>
+
+  <h2><span class="no">6.</span>로드맵과 측정</h2>
+  <div class="h2-sub">기능보다 측정을 먼저. 지금은 "떨어진다"는 감각만 있고 어디서 새는지 수치가 없다.</div>
+
+  <div class="table-scroll"><table>
+    <tr><th>주차</th><th>할 일</th><th>성공 판정</th></tr>
+    <tr><td><strong>0주</strong> (즉시)</td><td>계측 먼저 — 경량 애널리틱스 도입(방문·재방문·텔레그램 클릭률·페이지별 체류), 텔레그램 링크에 UTM</td><td>주간 재방문율·유입 경로가 숫자로 보임</td></tr>
+    <tr><td><strong>1~2주</strong></td><td>P0: 관심종목(localStorage) + 24h 시세 홈 전면화</td><td>재방문 사용자의 관심종목 등록률 30%+</td></tr>
+    <tr><td><strong>3~4주</strong></td><td>P1: 트랙레코드 페이지 배포 + 텔레그램 첫 줄 결과 보고</td><td>텔레그램 → 사이트 클릭률 상승</td></tr>
+    <tr><td><strong>5~6주</strong></td><td>P1: "나도 예측" 투표 + 스트릭</td><td>일 투표 참여 · 익일 재방문(채점 확인) 발생</td></tr>
+    <tr><td><strong>7주~</strong></td><td>P2: 코스피200 확대, PWA, 종목 페이지 SEO</td><td>검색 유입 비중 증가</td></tr>
+  </table></div>
+
+  <p><strong>북극성 지표</strong>는 "주 3일 이상 방문하는 사용자 수(WAU 중 습관 사용자)"를 권한다. 브리핑 서비스의 조회수가 아니라 도구의 습관성을 재는 지표이기 때문이다. 보조 지표는 관심종목 등록률, 투표 참여율, 텔레그램 클릭률, 장외 시간대(15:30~다음날 07:30) 방문 비중.</p>
+
+  <div class="quote">한 줄 결론 — 엑셀코스피는 "하루 종일 켜둘 이유"를, 코스피랩은 "밤에도 볼 이유"를 팔고 있다. 더블샷은 이미 그 재료(실측 파이프라인, HL 24h, 신호 엔진)를 다 갖고 있으면서 "하루 3번 읽을 이유"만 팔아 왔다. 자산을 재배치하면 된다. 새로 만들 것보다 꺼내서 전면에 놓을 것이 더 많다.</div>
+
+  <div class="footnote">
+    본 보고서는 2026-07-17 기준 excelkospi.pages.dev · kospilab.com · doubleshot.space(랜딩 / 종목 시그널 허브 / 삼성전자·한화오션 상세 페이지) 실사용 관찰과 더블샷 내부 파이프라인 구조를 바탕으로 작성됨.
+    적중률 수치(67% · 확정 125건 중 84건)는 doubleshot.space 랜딩 표기 기준.
+  </div>
+
+</div>
+</body>
+</html>

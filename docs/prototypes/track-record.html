@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예측 성적표 — Double-Shot (프로토타입)</title>
+<style>
+  :root{
+    --canvas:#0F1115; --card:#171A21; --inset:#1E222B; --hair:#2A2F3A;
+    --ink:#F1F4F9; --muted:#8B93A2; --dim:#5C6474;
+    --up:#F0454B; --dn:#3B82F6; --gold:#F5B342; --green:#2FBF71;
+    --primary:#5AA2FF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--canvas);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .num{font-variant-numeric:tabular-nums;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px;}
+  /* header */
+  .gnb{background:#0B0D11;border-bottom:1px solid var(--hair);}
+  .gnb__in{max-width:760px;margin:0 auto;padding:13px 18px;display:flex;align-items:center;gap:10px;}
+  .gnb__logo{font-weight:800;font-size:16px;color:#fff;text-decoration:none;letter-spacing:-.02em;}
+  .gnb__logo span{color:var(--primary);}
+  .gnb__tag{font-size:11px;color:var(--dim);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;margin-left:auto;}
+  /* hero */
+  .head{padding:30px 0 10px;}
+  .head h1{font-size:24px;font-weight:800;margin:0 0 6px;letter-spacing:-.02em;}
+  .head p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.6;}
+  .hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0 8px;}
+  .hcard{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:18px 18px 16px;position:relative;overflow:hidden;}
+  .hcard__mkt{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .hcard__main{display:flex;align-items:baseline;gap:8px;}
+  .hcard__pct{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1;}
+  .hcard__win{color:var(--green);} .hcard__mid{color:var(--gold);} .hcard__lose{color:var(--dn);}
+  .hcard__unit{font-size:14px;font-weight:700;color:var(--muted);}
+  .hcard__lbl{font-size:11.5px;color:var(--dim);margin-top:5px;}
+  .hcard__cum{font-size:12px;color:var(--muted);margin-top:12px;padding-top:11px;border-top:1px solid var(--hair);}
+  .hcard__cum b{color:var(--ink);font-weight:700;}
+  /* form guide */
+  .form{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:16px 18px;margin:12px 0;}
+  .form__top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .form__ttl{font-size:13px;font-weight:700;}
+  .form__streak{font-size:12px;color:var(--muted);}
+  .form__streak b{font-weight:800;}
+  .form__row{display:flex;gap:5px;flex-wrap:wrap;}
+  .fdot{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:800;color:#fff;}
+  .fdot.w{background:var(--green);} .fdot.l{background:var(--dn);}
+  .form__legend{font-size:11px;color:var(--dim);margin-top:10px;}
+  /* honest callout */
+  .note{background:rgba(245,179,66,.09);border:1px solid rgba(245,179,66,.25);border-radius:12px;
+    padding:12px 14px;margin:12px 0;font-size:12.5px;color:#E8C78A;line-height:1.6;}
+  .note b{color:var(--gold);}
+  /* filter */
+  .fbar{display:flex;align-items:center;gap:8px;margin:22px 0 10px;}
+  .fbar__ttl{font-size:15px;font-weight:800;margin-right:auto;}
+  .chip{font-size:12px;font-weight:700;color:var(--muted);background:var(--inset);border:1px solid var(--hair);
+    border-radius:8px;padding:6px 12px;cursor:pointer;user-select:none;}
+  .chip.on{background:var(--primary);border-color:var(--primary);color:#06101f;}
+  /* table */
+  .tl{background:var(--card);border:1px solid var(--hair);border-radius:14px;overflow:hidden;}
+  .trow{display:grid;grid-template-columns:64px 52px 1fr 78px 34px;gap:8px;align-items:center;
+    padding:11px 14px;border-bottom:1px solid var(--hair);font-size:13px;}
+  .trow:last-child{border-bottom:none;}
+  .trow.head{background:var(--inset);font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;}
+  .t-date{color:var(--muted);}
+  .t-type{font-size:11px;font-weight:700;padding:2px 6px;border-radius:5px;text-align:center;}
+  .t-type.kospi{background:rgba(240,69,75,.14);color:#F58a8d;}
+  .t-type.us{background:rgba(90,162,255,.14);color:#8EC0FF;}
+  .t-pred{font-weight:600;}
+  .t-pct{text-align:right;font-weight:700;}
+  .t-pct.up{color:var(--up);} .t-pct.dn{color:var(--dn);}
+  .t-res{text-align:center;font-weight:800;font-size:14px;}
+  .t-res.ok{color:var(--green);} .t-res.no{color:var(--dn);}
+  .mag{font-size:10px;color:var(--dim);margin-left:4px;}
+  .foot{color:var(--dim);font-size:11.5px;text-align:center;padding:26px 0 40px;line-height:1.7;}
+  @media(max-width:520px){
+    .hcard__pct{font-size:32px;}
+    .trow{grid-template-columns:56px 44px 1fr 64px 28px;font-size:12px;gap:6px;}
+  }
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in">
+  <a class="gnb__logo" href="#">Double<span>-Shot</span></a>
+  <span class="gnb__tag">PROTOTYPE</span>
+</div></div>
+
+<div class="wrap">
+  <div class="head">
+    <h1>예측 성적표</h1>
+    <p>모든 예측은 다음 날 실제 시장 종가로 채점돼요. 숨기지 않고 전부 공개해요.</p>
+  </div>
+
+  <div class="hero" id="hero"></div>
+  <div class="note" id="note" style="display:none;"></div>
+
+  <div class="form" id="form"></div>
+
+  <div class="fbar">
+    <span class="fbar__ttl">예측 타임라인</span>
+    <span class="chip on" data-f="all">전체</span>
+    <span class="chip" data-f="kospi">코스피</span>
+    <span class="chip" data-f="us">미국</span>
+  </div>
+  <div class="tl" id="table"></div>
+
+  <div class="foot">
+    ※ AI 분석 결과이며 투자 권고가 아니에요. 과거 적중률이 미래 수익을 보장하지 않아요.<br>
+    프로토타입 · 실측 데이터 <span id="cnt"></span>건 · 채점 기준: 지수 종가 vs 전일 종가 방향
+  </div>
+</div>
+
+<script>
+const RAW = [{"date": "2026-04-07", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.82, "ok": true, "conf": 78}, {"date": "2026-04-08", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 6.87, "ok": false, "conf": 72}, {"date": "2026-04-09", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -1.61, "ok": false, "conf": 80}, {"date": "2026-04-10", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 1.4, "ok": true, "conf": 75}, {"date": "2026-04-15", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.07, "ok": true, "conf": 81}, {"date": "2026-04-15", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.8, "ok": true, "conf": 68}, {"date": "2026-04-16", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.21, "ok": true, "conf": 81}, {"date": "2026-04-16", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.26, "ok": true, "conf": 68}, {"date": "2026-04-17", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -0.55, "ok": false, "conf": 82}, {"date": "2026-04-20", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.44, "ok": true, "conf": 84}, {"date": "2026-04-20", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.24, "ok": true, "conf": 68}, {"date": "2026-04-21", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.72, "ok": true, "conf": 74}, {"date": "2026-04-21", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.63, "ok": false, "conf": 62}, {"date": "2026-04-22", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.46, "ok": true, "conf": 81}, {"date": "2026-04-22", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.05, "ok": true, "conf": 65}, {"date": "2026-04-23", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.9, "ok": true, "conf": 82}, {"date": "2026-04-23", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.41, "ok": true, "conf": 63}, {"date": "2026-04-24", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -0.0, "ok": false, "conf": 68}, {"date": "2026-04-24", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.8, "ok": true, "conf": 63}, {"date": "2026-04-27", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.15, "ok": true, "conf": 72}, {"date": "2026-04-27", "type": "us", "pred": "중립", "act": "상승", "pct": 0.12, "ok": true, "conf": 52}, {"date": "2026-04-28", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.39, "ok": true, "conf": 85}, {"date": "2026-04-28", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.49, "ok": true, "conf": 65}, {"date": "2026-04-29", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.75, "ok": true, "conf": 68}, {"date": "2026-04-29", "type": "us", "pred": "중립", "act": "하락", "pct": -0.04, "ok": true, "conf": 55}, {"date": "2026-04-30", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -1.38, "ok": false, "conf": 68}, {"date": "2026-04-30", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.02, "ok": true, "conf": 68}, {"date": "2026-05-01", "type": "kospi", "pred": "상승 우위", "act": null, "pct": null, "ok": null, "conf": 62}, {"date": "2026-05-01", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.29, "ok": true, "conf": 70}, {"date": "2026-05-04", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 5.12, "ok": true, "conf": 68}, {"date": "2026-05-04", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.41, "ok": true, "conf": 68}, {"date": "2026-05-05", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.81, "ok": true, "conf": 68}, {"date": "2026-05-06", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 6.45, "ok": true, "conf": 88}, {"date": "2026-05-06", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.46, "ok": true, "conf": 74}, {"date": "2026-05-07", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 1.43, "ok": true, "conf": 82}, {"date": "2026-05-07", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.38, "ok": false, "conf": 78}, {"date": "2026-05-08", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 0.11, "ok": false, "conf": 70}, {"date": "2026-05-08", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.84, "ok": true, "conf": 74}, {"date": "2026-05-11", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 4.32, "ok": true, "conf": 88}, {"date": "2026-05-11", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.19, "ok": true, "conf": 62}, {"date": "2026-05-12", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -2.29, "ok": false, "conf": 85}, {"date": "2026-05-12", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.16, "ok": true, "conf": 65}, {"date": "2026-05-13", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 2.63, "ok": false, "conf": 72}, {"date": "2026-05-13", "type": "us", "pred": "하락 우위", "act": "상승", "pct": 0.58, "ok": false, "conf": 68}, {"date": "2026-05-14", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 1.75, "ok": true, "conf": 80}, {"date": "2026-05-14", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.77, "ok": true, "conf": 68}, {"date": "2026-05-15", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -6.12, "ok": false, "conf": 63}, {"date": "2026-05-16", "type": "us", "pred": "하락 우위", "act": null, "pct": null, "ok": null, "conf": 75}, {"date": "2026-05-18", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 0.31, "ok": false, "conf": 85}, {"date": "2026-05-18", "type": "us", "pred": "중립", "act": "하락", "pct": -0.07, "ok": true, "conf": 55}, {"date": "2026-05-19", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -3.25, "ok": true, "conf": 68}, {"date": "2026-05-19", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.67, "ok": true, "conf": 74}, {"date": "2026-05-20", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -0.86, "ok": true, "conf": 82}, {"date": "2026-05-20", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.08, "ok": true, "conf": 58}, {"date": "2026-05-21", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 8.42, "ok": true, "conf": 65}, {"date": "2026-05-21", "type": "us", "pred": "하락 우위", "act": "상승", "pct": 0.17, "ok": false, "conf": 63}, {"date": "2026-05-22", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.41, "ok": true, "conf": 88}, {"date": "2026-05-22", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.37, "ok": true, "conf": 62}, {"date": "2026-05-26", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 2.55, "ok": false, "conf": 62}, {"date": "2026-05-26", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.61, "ok": true, "conf": 65}, {"date": "2026-05-27", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.25, "ok": true, "conf": 75}, {"date": "2026-05-27", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.02, "ok": true, "conf": 65}, {"date": "2026-05-28", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -0.53, "ok": true, "conf": 62}, {"date": "2026-05-28", "type": "us", "pred": "중립", "act": "상승", "pct": 0.58, "ok": false, "conf": 52}, {"date": "2026-05-29", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 3.55, "ok": true, "conf": 72}, {"date": "2026-05-29", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.22, "ok": true, "conf": 65}, {"date": "2026-06-01", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 3.68, "ok": true, "conf": 72}, {"date": "2026-06-01", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.26, "ok": true, "conf": 68}, {"date": "2026-06-02", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.15, "ok": true, "conf": 88}, {"date": "2026-06-02", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.13, "ok": true, "conf": 62}, {"date": "2026-06-03", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.74, "ok": false, "conf": 62}, {"date": "2026-06-04", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -1.84, "ok": true, "conf": 62}, {"date": "2026-06-04", "type": "us", "pred": "하락 우위", "act": "상승", "pct": 0.41, "ok": false, "conf": 63}, {"date": "2026-06-05", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -5.54, "ok": true, "conf": 72}, {"date": "2026-06-08", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -8.29, "ok": true, "conf": 88}, {"date": "2026-06-08", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.3, "ok": true, "conf": 60}, {"date": "2026-06-09", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 8.18, "ok": false, "conf": 88}, {"date": "2026-06-09", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.26, "ok": false, "conf": 65}, {"date": "2026-06-10", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -4.52, "ok": true, "conf": 62}, {"date": "2026-06-10", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -1.62, "ok": true, "conf": 68}, {"date": "2026-06-11", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 0.43, "ok": false, "conf": 79}, {"date": "2026-06-11", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.75, "ok": true, "conf": 55}, {"date": "2026-06-12", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 4.63, "ok": true, "conf": 80}, {"date": "2026-06-12", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.5, "ok": true, "conf": 62}, {"date": "2026-06-15", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 5.2, "ok": true, "conf": 74}, {"date": "2026-06-15", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 1.65, "ok": true, "conf": 78}, {"date": "2026-06-16", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 2.11, "ok": true, "conf": 85}, {"date": "2026-06-16", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.57, "ok": false, "conf": 65}, {"date": "2026-06-17", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 1.58, "ok": false, "conf": 68}, {"date": "2026-06-17", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -1.21, "ok": true, "conf": 58}, {"date": "2026-06-18", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 2.25, "ok": false, "conf": 68}, {"date": "2026-06-18", "type": "us", "pred": "하락 우위", "act": "상승", "pct": 1.08, "ok": false, "conf": 62}, {"date": "2026-06-19", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -0.13, "ok": false, "conf": 76}, {"date": "2026-06-22", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 0.69, "ok": false, "conf": 68}, {"date": "2026-06-22", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.37, "ok": false, "conf": 68}, {"date": "2026-06-23", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -9.99, "ok": false, "conf": 60}, {"date": "2026-06-23", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -1.44, "ok": true, "conf": 70}, {"date": "2026-06-24", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 3.26, "ok": false, "conf": 88}, {"date": "2026-06-24", "type": "us", "pred": "하락 우위", "act": "하락", "pct": -0.1, "ok": true, "conf": 58}, {"date": "2026-06-25", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 5.42, "ok": true, "conf": 61}, {"date": "2026-06-25", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.01, "ok": false, "conf": 62}, {"date": "2026-06-26", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -5.81, "ok": true, "conf": 62}, {"date": "2026-06-26", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.05, "ok": false, "conf": 62}, {"date": "2026-06-29", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -0.2, "ok": true, "conf": 88}, {"date": "2026-06-29", "type": "us", "pred": "하락 우위", "act": "상승", "pct": 1.18, "ok": false, "conf": 58}, {"date": "2026-06-30", "type": "kospi", "pred": "상승 우위", "act": "상승", "pct": 0.97, "ok": true, "conf": 58}, {"date": "2026-06-30", "type": "us", "pred": "상승 우위", "act": "상승", "pct": 0.79, "ok": true, "conf": 65}, {"date": "2026-07-01", "type": "kospi", "pred": "상승 우위", "act": "하락", "pct": -2.04, "ok": false, "conf": 78}, {"date": "2026-07-01", "type": "us", "pred": "상승 우위", "act": "하락", "pct": -0.22, "ok": false, "conf": 68}, {"date": "2026-07-02", "type": "kospi", "pred": "하락 우위", "act": "하락", "pct": -7.89, "ok": true, "conf": 82}, {"date": "2026-07-02", "type": "us", "pred": "중립", "act": "상승", "pct": 0.0, "ok": true, "conf": 58}, {"date": "2026-07-03", "type": "kospi", "pred": "하락 우위", "act": "상승", "pct": 5.76, "ok": false, "conf": 74}];
+const KLBL = {kospi:'코스피', us:'미국'};
+const scored = RAW.filter(r=>r.ok!==null);
+const maxDate = scored.reduce((m,r)=>r.date>m?r.date:m, '');
+
+function daysBefore(dateStr, n){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()-n);
+  return d.toISOString().slice(0,10);
+}
+function rate(arr){
+  if(!arr.length) return null;
+  const h = arr.filter(r=>r.ok).length;
+  return {pct:Math.round(h/arr.length*100), hit:h, n:arr.length};
+}
+function cls(pct){ return pct>=60?'hcard__win':pct>=50?'hcard__mid':'hcard__lose'; }
+
+// ── hero: 타입별 롤링30일 + 누적 ──
+const cut30 = daysBefore(maxDate, 30);
+let hero='';
+['kospi','us'].forEach(t=>{
+  const all = scored.filter(r=>r.type===t);
+  const r30 = rate(all.filter(r=>r.date>=cut30));
+  const cum = rate(all);
+  const c = r30?cls(r30.pct):'hcard__mid';
+  const dotc = t==='kospi'?'var(--up)':'var(--dn)';
+  hero += `<div class="hcard">
+    <div class="hcard__mkt"><span class="dot" style="background:${dotc}"></span>${KLBL[t]}</div>
+    <div class="hcard__main"><span class="hcard__pct ${c} num">${r30?r30.pct:'—'}<span class="hcard__unit">%</span></span></div>
+    <div class="hcard__lbl">최근 30일 · ${r30?r30.hit+'/'+r30.n:'데이터 없음'}</div>
+    <div class="hcard__cum">누적 <b class="num">${cum.pct}%</b> · ${cum.hit}/${cum.n}건</div>
+  </div>`;
+});
+document.getElementById('hero').innerHTML = hero;
+
+// ── honest note: 롤링<누적 이면 정직하게 명시 ──
+const allR30 = rate(scored.filter(r=>r.date>=cut30));
+const allCum = rate(scored);
+if(allR30 && allR30.pct < allCum.pct - 5){
+  const el=document.getElementById('note');
+  el.style.display='';
+  el.innerHTML = `<b>최근 폼 저하.</b> 누적 ${allCum.pct}%지만 최근 30일은 ${allR30.pct}%로 내려왔어요. 이 구간 지수 변동성이 커지며 방향 예측 난도가 올라간 영향이에요. 성적은 매일 갱신돼요.`;
+}
+
+// ── form guide: 최근 10건 + 스트릭 ──
+const recent = [...scored].sort((a,b)=>a.date<b.date?1:-1).slice(0,10);
+let streak=0, sres=recent.length?recent[0].ok:null;
+for(const r of recent){ if(r.ok===sres) streak++; else break; }
+const dots = recent.map(r=>`<span class="fdot ${r.ok?'w':'l'}" title="${r.date} ${KLBL[r.type]}">${r.ok?'W':'L'}</span>`).join('');
+document.getElementById('form').innerHTML =
+  `<div class="form__top"><span class="form__ttl">최근 폼</span>
+   <span class="form__streak">현재 <b style="color:${sres?'var(--green)':'var(--dn)'}">${streak}${sres?'연승':'연패'}</b></span></div>
+   <div class="form__row">${dots}</div>
+   <div class="form__legend">최신 → 과거 순 · <b style="color:var(--green)">W</b> 적중 · <b style="color:var(--dn)">L</b> 오답</div>`;
+
+// ── timeline table ──
+let filter='all';
+function magLabel(pct){
+  const a=Math.abs(pct);
+  if(a<0.3) return '보합권';
+  if(a>=3) return '큰폭';
+  return '';
+}
+function render(){
+  const rows=[...scored].filter(r=>filter==='all'||r.type===filter).sort((a,b)=>a.date<b.date?1:-1);
+  let h=`<div class="trow head"><span>날짜</span><span>시장</span><span>예측</span><span>실제</span><span>결과</span></div>`;
+  rows.forEach(r=>{
+    const up=r.pct>=0;
+    const mag=magLabel(r.pct);
+    h+=`<div class="trow">
+      <span class="t-date num">${r.date.slice(5)}</span>
+      <span class="t-type ${r.type}">${KLBL[r.type]}</span>
+      <span class="t-pred">${r.pred}</span>
+      <span class="t-pct ${up?'up':'dn'} num">${up?'+':''}${r.pct}%${mag?`<span class="mag">${mag}</span>`:''}</span>
+      <span class="t-res ${r.ok?'ok':'no'}">${r.ok?'✓':'✗'}</span>
+    </div>`;
+  });
+  document.getElementById('table').innerHTML=h;
+}
+document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); filter=c.dataset.f; render();
+}));
+render();
+document.getElementById('cnt').textContent=scored.length;
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!-- 코스피 사이드바 '종목 신호 → 주도주 가격형' 교체안 프로토타입 (자체 완결) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코스피 주도주 가격형 사이드바 — 프로토타입</title>
+<style>
+  :root{
+    --canvas:#fff; --page:#f4f5f7; --ink:#1a1c1e; --muted:#8b8f96;
+    --hairline:#e9eaee; --surface-soft:#f6f7f9; --primary:#2775ED;
+    --up:#E03131; --dn:#2775ED; --r-lg:16px; --s1:0 1px 2px rgba(20,22,26,.05);
+    --gold:#E8A020; --gold-bg:#FBEEDA;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --canvas:#16181c; --page:#0e0f12; --ink:#eceef1; --muted:#9aa0a8;
+      --hairline:#282b31; --surface-soft:#1d2025; --up:#ff6b6b; --dn:#5b9dff;
+      --primary:#5b9dff; --gold:#f0b850; --gold-bg:#3a2f1a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+    display:flex;gap:28px;flex-wrap:wrap;padding:32px;justify-content:center;align-items:flex-start}
+  .col{width:300px}
+  .col h4{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 10px;text-align:center}
+
+  /* 공통 카드 */
+  .card{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas);
+    box-shadow:var(--s1);overflow:hidden}
+  .card__h{display:flex;align-items:center;gap:6px;padding:13px 16px 4px;font-size:13px;font-weight:800;color:var(--ink)}
+  .note{margin-left:auto;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .list{display:flex;flex-direction:column;padding:6px 0 2px}
+  .row{display:flex;align-items:center;gap:9px;padding:10px 16px;text-decoration:none;border-top:1px solid var(--hairline);color:inherit}
+  .row:first-child{border-top:none}
+  .row:hover{background:var(--surface-soft)}
+  .name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:88px}
+  .cta{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;border-top:1px solid var(--hairline)}
+  .cta:hover{background:var(--surface-soft)}
+
+  /* BEFORE(현재): 신호 뱃지형 */
+  .badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .badge.gold{background:var(--gold-bg);color:var(--gold)}
+  .badge.blue{background:rgba(39,117,237,.12);color:var(--primary)}
+  .badge.green{background:rgba(22,163,74,.12);color:#16A34A}
+  .chg{margin-left:auto;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums}
+  .chg.up{color:var(--up)}.chg.dn{color:var(--dn)}
+
+  /* AFTER(제안): 가격형 */
+  .pxwrap{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;line-height:1.25}
+  .px{font-size:13.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+  .pchg{font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums}
+  .pchg.up{color:var(--up)}.pchg.dn{color:var(--dn)}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+</style>
+
+<div class="col">
+  <h4>BEFORE — 현재(신호 뱃지형)</h4>
+  <div class="card">
+    <div class="card__h"><span class="dot"></span>오늘의 종목 신호</div>
+    <div class="list">
+      <a class="row" href="#"><span class="name">한미반도체</span><span class="badge gold">거래량 급증</span><span class="chg up">+5.2%</span></a>
+      <a class="row" href="#"><span class="name">두산에너빌리티</span><span class="badge blue">외국인 대량매수</span><span class="chg up">+3.1%</span></a>
+      <a class="row" href="#"><span class="name">알테오젠</span><span class="badge green">골든크로스</span><span class="chg up">+2.4%</span></a>
+    </div>
+    <a class="cta" href="#">종목 신호 전체 보기 <span>→</span></a>
+  </div>
+</div>
+
+<div class="col">
+  <h4>AFTER — 제안(주도주 가격형)</h4>
+  <div class="card">
+    <div class="card__h">📈 코스피 주도주<span class="note">실시간</span></div>
+    <div class="list">
+      <a class="row" href="#"><span class="name">한미반도체</span><span class="pxwrap"><span class="px">185,300</span><span class="pchg up">▲ +5.2%</span></span></a>
+      <a class="row" href="#"><span class="name">두산에너빌리티</span><span class="pxwrap"><span class="px">62,400</span><span class="pchg up">▲ +3.1%</span></span></a>
+      <a class="row" href="#"><span class="name">알테오젠</span><span class="pxwrap"><span class="px">412,000</span><span class="pchg up">▲ +2.4%</span></span></a>
+    </div>
+    <a class="cta" href="#">종목 시그널 전체 보기 <span>→</span></a>
+  </div>
+  <p style="font-size:11px;color:var(--muted);line-height:1.6;margin:12px 2px 0">
+    · 뱃지(거래량 급증 등) 제거 → 이름 + 실시간가 + 등락%만.<br>
+    · 통로 CTA는 유지(종목 시그널 페이지로 연결).<br>
+    · 마감 후엔 헤더 "지난 마감 기준"으로 자동 전환.
+  </p>
+</div>
