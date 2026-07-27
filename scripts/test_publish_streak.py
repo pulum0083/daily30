@@ -56,13 +56,24 @@ def test_us_entries_are_ignored():
 
 
 def test_real_data_matches_manual_count():
-    """실제 briefings.json에서 계산한 값이 수동 검증치와 일치한다."""
+    """실제 briefings.json에서 계산한 값이 드리프트 없는 불변식을 만족한다.
+
+    이전에는 `days == 68`·`to == "2026-07-24"`를 하드코딩해, 브리핑이 하루 더 발행될
+    때마다 테스트가 깨졌다(§20의 "상대 값을 저장하지 말라"와 같은 계열의 실수 — 매일
+    자라는 데이터에 고정 기댓값을 박은 것). 날짜가 지나도 유효한 불변식으로 바꾼다.
+    """
     import json
     p = Path(__file__).parent.parent / "data" / "briefings.json"
     rows = json.load(open(p, encoding="utf-8"))["briefings"]
     r = compute_publish_streak(rows)
-    assert r["days"] == 68, r
-    assert r["from"] == "2026-04-15" and r["to"] == "2026-07-24", r
+
+    latest_kospi = max(
+        b["date"] for b in rows
+        if (b.get("type") or "kospi") == "kospi" and b.get("date")
+    )
+    assert r["from"] == "2026-04-15", r      # 스트릭 시작점은 고정 (끊기면 바뀐다)
+    assert r["to"] == latest_kospi, r        # 끝은 항상 최신 kospi 발행일
+    assert r["days"] >= 68, r                # 단조 증가 — 줄었다면 계산 회귀
 
 
 if __name__ == "__main__":

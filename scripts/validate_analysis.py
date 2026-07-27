@@ -882,6 +882,50 @@ def _fetch_kospi_realdata(code):
         return {"error": str(e)}
 
 
+# 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
+# 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
+_NO_PREMARKET_INDEX = (
+    r"(?:SOX|반도체지수|필라델피아\s*반도체|나스닥|S&P\s*500|S&P500|다우|코스피|코스닥)"
+    r"(?!\s*(?:\d+\s*)?선물)"
+)
+_SESSION_WORDS = r"(?:프리마켓|프리장|시간\s*외|장\s*전)"
+# 한국어 문장 종결 기준 분할 (…요. / …다. / ? / ! / 줄바꿈)
+_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
+
+
+def find_session_mislabels(issues) -> list:
+    """프리장에 거래되지 않는 지수를 '프리마켓에서'로 서술한 항목을 찾는다.
+
+    2026-07-27 재생성 중 실제 재발: 모델이 SOX 금요일 종가(-4.25%)를 보고
+    "반도체지수(SOX)는 프리마켓에서 눌리고 있어요"라고 썼다. SOX는 지수라 프리장에
+    갱신되지 않으므로 그 수치는 직전 정규장 값이고, 실제 프리마켓 반도체주는 반등 중이라
+    서사가 정반대였다(§26과 같은 계열 — 발행 시각과 데이터 기준의 불일치).
+
+    **문장 단위로 판정한다** — 본문 전체를 훑으면 "SOX는 금요일 밀렸어요. 다만 오늘
+    프리마켓에서는 AMD가 올랐어요"처럼 정상적으로 세션을 구분한 서술까지 걸린다.
+    """
+    bad = []
+    for it in issues or []:
+        # 제목과 본문은 **따로** 본다 — 이어붙이면 제목의 세션 표현이 본문 첫 문장과
+        # 한 덩어리가 돼, 세션을 올바로 구분한 서술까지 걸린다.
+        fields = ([str(it.get(k, "")) for k in ("title", "body")]
+                  if isinstance(it, dict) else [str(it)])
+        hit = None
+        for field in fields:
+            for sent in _SENT_SPLIT.split(field):
+                if not re.search(_SESSION_WORDS, sent):
+                    continue
+                m = re.search(_NO_PREMARKET_INDEX, sent)
+                if m:
+                    hit = {"subject": m.group(0).strip(), "sentence": sent.strip()}
+                    break
+            if hit:
+                break
+        if hit:
+            bad.append(hit)
+    return bad
+
+
 def _fetch_pick_realdata(ticker, is_us):
     """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함.
 
@@ -1192,6 +1236,14 @@ def validate(analysis, latest, btype):
     validate_todays_view_recap(a, btype, corrections, warnings)
     validate_todays_view_outlook(a, btype, corrections, warnings)
     validate_key_drivers(a, btype, corrections, warnings)
+
+    # 2-d-2) 이슈 세션 오표기 — 프리장 미거래 지수를 '프리마켓에서'로 서술 (us 전용)
+    if btype == "us":
+        for hit in find_session_mislabels(a.get("issues")):
+            warnings.append(
+                f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"
+                f"(그 수치는 직전 정규장 값): {hit['sentence'][:80]}"
+            )
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)

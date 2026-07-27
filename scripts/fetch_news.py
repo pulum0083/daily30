@@ -11,6 +11,7 @@ Usage:
     python3 scripts/fetch_news.py --type us
     python3 scripts/fetch_news.py --type kospi-close
 """
+from __future__ import annotations  # `X | None` 어노테이션을 구버전 파이썬(로컬 3.9)에서도 허용
 
 import argparse
 import json
@@ -318,6 +319,84 @@ def _parse_iso_date(s: str):
         return date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
     except ValueError:
         return None
+
+
+# 방향 주장 어휘 — 대상 키워드 근처에 이 표현이 있으면 그 방향을 주장한 것으로 본다.
+_UP_WORDS = r"(?:급등|상승|강세|오르|올라|뛰|치솟|반등|돌파|회복|상승세)"
+_DOWN_WORDS = r"(?:급락|하락|약세|내리|떨어|밀리|빠지|폭락|급감|하락세|후퇴)"
+
+# 실측 대조 대상 — 키워드 → latest 데이터 키
+_REALITY_SUBJECTS = {
+    "유가": "oil",
+    "국제유가": "oil",
+    "WTI": "oil",
+    "브렌트": "oil",
+}
+
+
+def _claim_direction(text: str, subject: str) -> str | None:
+    """text가 subject에 대해 주장하는 방향("up"/"down")을 뽑는다. 없으면 None.
+
+    subject 등장 위치 기준 앞뒤 25자 안에서만 방향어를 찾는다 — 문장 전체를 훑으면
+    "유가 하락으로 항공주 상승"처럼 서로 다른 대상의 방향어가 교차 매칭된다.
+    """
+    if not text or subject not in text:
+        return None
+    for m in re.finditer(re.escape(subject), text):
+        win = text[max(0, m.start() - 25): m.end() + 25]
+        up = re.search(_UP_WORDS, win)
+        down = re.search(_DOWN_WORDS, win)
+        if up and not down:
+            return "up"
+        if down and not up:
+            return "down"
+    return None
+
+
+def _drop_reality_contradictions(items: list, real: dict) -> list:
+    """실측 시장데이터와 **방향이 반대**인 주장을 담은 항목을 제거한다.
+
+    2026-07-27 실사고: 미국 브리핑 재수집분이 "국제유가 80달러 돌파 → 에너지 관련주 상승세"·
+    "중동 긴장 완화 속 국제유가 상승세 지속"을 냈는데, 실측은 **WTI -6.05%·브렌트 -6.67%**로
+    정반대였다(CVX -2.9%, XOM -3.3%). 익명 플레이스홀더 게이트(§25)는 실명이 있어 통과시키고,
+    어닝 게이트(§22)는 실적 서사가 아니라 통과시키며, validate_analysis는 call_claude
+    **이후**라 이미 서사가 만들어진 뒤다. 그래서 수집 단계에서 잘라낸다.
+
+    real이 비었거나 값이 없으면 판단하지 않는다(fail-open) — 정상 항목 오제거를 막는다.
+    """
+    out = []
+    for it in items or []:
+        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
+        bad = False
+        for subject, key in _REALITY_SUBJECTS.items():
+            actual = real.get(key)
+            if actual is None:
+                continue
+            claimed = _claim_direction(text, subject)
+            if claimed is None:
+                continue
+            actual_dir = "up" if actual > 0 else "down"
+            if claimed != actual_dir:
+                print(f"[fetch_news] 실측 모순 제거({subject} 실측 {actual:+.2f}%, "
+                      f"주장 {claimed}): {text[:60]}", file=sys.stderr)
+                bad = True
+                break
+        if not bad:
+            out.append(it)
+    return out
+
+
+def _fetch_reality_snapshot() -> dict:
+    """실측 대조에 쓸 시장 스냅샷. 조회 실패 항목은 None으로 두어 fail-open한다."""
+    real = {"oil": None}
+    try:
+        import yfinance as yf
+        h = yf.Ticker("CL=F").history(period="7d")["Close"].dropna()
+        if len(h) >= 2:
+            real["oil"] = round((float(h.iloc[-1]) / float(h.iloc[-2]) - 1) * 100, 2)
+    except Exception as e:
+        print(f"[fetch_news] 유가 실측 조회 실패(대조 생략): {e}", file=sys.stderr)
+    return real
 
 
 def _catalyst_cutoff(briefing_type: str, today: date) -> date:
@@ -751,10 +830,13 @@ def fetch_and_summarize(briefing_type: str) -> dict:
             data[_fld] = _drop_stale_earnings(data[_fld], today_kst)
     # "…확인되지 않았습니다" 류 검색 실패 보고를 전 필드에서 제거 (이슈가 아니라 메타 서술)
     # + "B사"·"C은행"·"[기업]" 류 익명 플레이스홀더 주어를 담은 날조 항목도 함께 제거
+    # + 실측 시장데이터와 방향이 반대인 주장도 제거 (유가 등)
+    reality = _fetch_reality_snapshot()
     for _fld in ("catalysts", "headlines", "key_indicators"):
         if isinstance(data.get(_fld), list):
             data[_fld] = _drop_search_failure_notes(data[_fld])
             data[_fld] = _drop_placeholder_entities(data[_fld])
+            data[_fld] = _drop_reality_contradictions(data[_fld], reality)
     return data
 
 
