@@ -35,7 +35,37 @@ def extract_signals(latest: dict) -> dict:
         "ewy":    from_top("ewy"),
         "vix":    from_top("vix"),
         "usdkrw": from_mdj("usd"),   # market_data_js.usd.chg (원/달러 등락률, 원화 약세=하락 압력)
+        # 아래 둘은 가중 합산에 직접 쓰지 않고 EWY 잔차 계산에만 쓴다
+        "kospi":  from_mdj("kospi"),               # 직전 코스피 세션 등락률
+        "post_holiday": bool(latest.get("post_holiday_catchup")),
     }
+
+
+def ewy_residual(sig: dict):
+    """EWY 등락률에서 '이미 실현된 코스피 등락분'을 뺀 잔차.
+
+    EWY(iShares MSCI Korea)는 같은 날 코스피 종가를 그대로 반영한다. 그래서 EWY 등락률을
+    통째로 선행신호로 쓰면 **어제 이미 일어난 하락을 오늘 악재로 두 번 세게 된다.**
+    (2026-07-24: 코스피 -5.72%, EWY -6.27% → 실제 신규 정보는 잔차 -0.55%뿐인데
+     기존 계산은 -6.27×0.3 = -1.88을 통째로 넣어 그것만으로 DN_BAND(-1.2)를 넘겼다.)
+    §24가 서사 차원에서 명시한 방지 룰을 prior 계산에도 적용한 것이다.
+
+    잔차 = EWY% − 직전 코스피 세션% — 즉 **미국 시간대에 새로 매겨진 한국 가격**만 남긴다.
+    환율 조정은 하지 않는다. usdkrw가 이미 별도 항(가중 -0.8)으로 들어가 있어
+    여기서 또 반영하면 FX를 이중 계상한다.
+
+    두 경우엔 잔차를 쓰지 않고 원본 EWY를 그대로 돌려준다.
+      · 코스피 등락률이 없을 때 — 뺄 기준이 없다
+      · 한국만 단독 휴장한 다음날(post_holiday_catchup) — 두 값의 세션 날짜가 어긋난다.
+        이때 EWY 등락은 코스피에 아직 반영된 적 없는 '진짜 신규 정보'가 맞다.
+    """
+    ewy = sig.get("ewy")
+    if ewy is None:
+        return None
+    kospi = sig.get("kospi")
+    if kospi is None or sig.get("post_holiday"):
+        return ewy
+    return round(ewy - kospi, 3)
 
 
 def _strength(sig: dict, direction: str) -> str:
@@ -61,10 +91,12 @@ def compute_prior(latest: dict) -> dict:
               "strength": "strong"|"mid"|"weak", "signals": {...}}
     """
     sig = extract_signals(latest)
+    # EWY는 원본이 아니라 잔차로 합산한다(이중 계상 제거). 표시용 원본은 signals에 그대로 남긴다.
+    sig["ewy_resid"] = ewy_residual(sig)
     score = 0.0
     used = False
     for key, w in SIGNAL_WEIGHTS.items():
-        v = sig.get(key)
+        v = sig["ewy_resid"] if key == "ewy" else sig.get(key)
         if v is not None:
             score += w * v
             used = True
@@ -95,6 +127,16 @@ def format_prior_for_prompt(prior: dict) -> str:
         f"- SOX {fmt(sig.get('sox'))} · 나스닥 {fmt(sig.get('nasdaq'))} · NQ선물 {fmt(sig.get('nq'))} "
         f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}",
         "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다.",
+    ]
+    resid = sig.get("ewy_resid")
+    if resid is not None and sig.get("kospi") is not None and resid != sig.get("ewy"):
+        lines.append(
+            f"- **EWY 이중 계상 주의**: EWY {fmt(sig.get('ewy'))} 중 직전 코스피 {fmt(sig.get('kospi'))}는"
+            f" **이미 실현된 하락/상승분**이다. 오늘 새로 들어온 정보는 잔차 **{fmt(resid)}**뿐이다."
+            " prior는 이 잔차로 계산했다. 본문에서도 EWY 등락률 전체를 '간밤 새로 들어온 악재/호재'로"
+            " 쓰지 말고, 쓰려면 반드시 직전 코스피 등락률과 함께 제시해 중복분을 드러내라."
+        )
+    lines += [
         "- **충돌 해소 규칙**: 전일 코스피가 ±3% 이상 크게 움직인 다음날, 위 선행신호가 전일 국내 방향과 "
         "모순되면 — 더 신선한 정보이므로 — **선행신호(prior) 방향을 따른다.** 전일 국내 등락에 앵커링하지 않는다.",
     ]

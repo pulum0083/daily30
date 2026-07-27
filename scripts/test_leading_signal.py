@@ -175,3 +175,69 @@ def test_format_prior_shows_usdkrw():
     text = ls.format_prior_for_prompt(prior)
     assert "원/달러" in text
     assert "+0.40%" in text
+
+
+# ── EWY 이중 계상 제거 (2026-07-27 진단) ──────────────────────────────────────
+def _latest_with_kospi(ewy, kospi, sox=None, post_holiday=False):
+    return {
+        "market_data_js": {
+            "kospi": {"chg": kospi},
+            **({"sox": {"chg": sox}} if sox is not None else {}),
+        },
+        "ewy": {"change_pct": ewy},
+        "post_holiday_catchup": post_holiday,
+    }
+
+
+def test_ewy_residual_real_case_2026_07_24():
+    """실사례: 코스피 -5.72%, EWY -6.27% → 신규 정보는 잔차 -0.55%뿐."""
+    sig = ls.extract_signals(_latest_with_kospi(ewy=-6.27, kospi=-5.72))
+    assert ls.ewy_residual(sig) == -0.55
+
+
+def test_ewy_residual_removes_double_count_from_score():
+    """EWY만 있는 날, 잔차를 쓰면 하락 판정이 과도하게 나오지 않는다."""
+    # 원본 -6.27 사용 시: -6.27*0.3 = -1.88 < DN_BAND(-1.2) → 하락
+    # 잔차 -0.55 사용 시: -0.55*0.3 = -0.17 → 중립
+    p = ls.compute_prior(_latest_with_kospi(ewy=-6.27, kospi=-5.72))
+    assert p["signals"]["ewy_resid"] == -0.55
+    assert p["direction"] == "중립"
+
+
+def test_ewy_raw_used_when_kospi_missing():
+    """코스피 등락률이 없으면 뺄 기준이 없으므로 원본을 쓴다(폴백)."""
+    sig = ls.extract_signals({"ewy": {"change_pct": -4.0}, "market_data_js": {}})
+    assert ls.ewy_residual(sig) == -4.0
+
+
+def test_ewy_raw_used_on_post_holiday_catchup():
+    """한국만 휴장한 다음날엔 EWY 전체가 진짜 신규 정보다 — 빼지 않는다."""
+    sig = ls.extract_signals(_latest_with_kospi(ewy=-4.0, kospi=1.0, post_holiday=True))
+    assert ls.ewy_residual(sig) == -4.0
+
+
+def test_ewy_residual_keeps_genuine_us_hours_move():
+    """미국 시간대에 한국이 추가로 밀린 날은 잔차가 그 몫을 그대로 남긴다."""
+    sig = ls.extract_signals(_latest_with_kospi(ewy=-3.0, kospi=1.0))
+    assert ls.ewy_residual(sig) == -4.0
+
+
+def test_prompt_warns_about_double_count():
+    """잔차가 원본과 다르면 프롬프트에 이중 계상 경고가 붙는다."""
+    p = ls.compute_prior(_latest_with_kospi(ewy=-6.27, kospi=-5.72))
+    text = ls.format_prior_for_prompt(p)
+    assert "EWY 이중 계상 주의" in text
+    assert "-0.55%" in text
+
+
+def test_prompt_omits_warning_when_no_kospi():
+    """코스피 값이 없으면 경고를 붙이지 않는다(잘못된 안내 방지)."""
+    p = ls.compute_prior({"ewy": {"change_pct": -4.0}, "market_data_js": {}})
+    assert "EWY 이중 계상 주의" not in ls.format_prior_for_prompt(p)
+
+
+def test_existing_fixtures_unaffected_without_kospi():
+    """kospi 키가 없는 기존 fixture는 동작이 바뀌지 않는다(회귀 방지)."""
+    p = ls.compute_prior(_latest(sox=-10.26, nasdaq=-4.18, nq=-2.0, ewy=-14.11, vix=39.68))
+    assert p["direction"] == "하락"
+    assert p["signals"]["ewy_resid"] == -14.11
