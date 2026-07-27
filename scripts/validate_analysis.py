@@ -743,18 +743,28 @@ def _inject_candidate(cands, clean_ticker, name, data):
     cands.append(entry)
 
 
-def _closes_to_realdata(closes, ndigits):
+def _closes_to_realdata(closes, ndigits, live_price=None):
     """일봉 종가 리스트(오래된→최신)로 실측 dict를 만든다.
-    '전일 등락률' = close[-1] vs close[-2] (실시간 장중가 아님).
+
+    기본(live_price=None): '전일 등락률' = close[-1] vs close[-2] (실시간 장중가 아님).
+    코스피 아침 브리핑처럼 **직전 완료 세션**이 기준인 경로가 이 동작을 쓴다.
+
+    live_price 지정 시: 발행 시점의 실체결가(프리마켓·장중)를 현재가로 삼고
+    **직전 정규장 종가(close[-1])를 기준가**로 등락률을 낸다. 미국 브리핑은
+    21:15 KST = 프리마켓 한복판에 발행되므로 이 경로를 쓴다 — close[-1] vs close[-2]를
+    쓰면 "지금"이 아니라 직전 세션의 등락이 실린다(2026-07-27 실사고, 운영 규칙 0).
     """
     if len(closes) < 2:
         return {"error": "insufficient data"}
     price, prev = closes[-1], closes[-2]
+    if live_price:
+        price, prev = float(live_price), closes[-1]
     r = (lambda v: round(v, ndigits))
+    spark = closes[-20:] if not live_price else (closes[-19:] + [float(live_price)])
     out = {
         "price": r(price),
         "change_pct": round((price - prev) / prev * 100, 4),
-        "sparkline": [r(x) for x in closes[-20:]],
+        "sparkline": [r(x) for x in spark],
     }
 
     def _ma_series(window):
@@ -773,10 +783,10 @@ def _closes_to_realdata(closes, ndigits):
     return out
 
 
-def _closes_from_toss_candles(candles: list, ndigits: int) -> dict:
+def _closes_from_toss_candles(candles: list, ndigits: int, live_price=None) -> dict:
     """Toss 캔들 리스트(오래된→최신)에서 실측 dict를 만든다."""
     closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
-    result = _closes_to_realdata(closes, ndigits)
+    result = _closes_to_realdata(closes, ndigits, live_price=live_price)
     # vol_mult: 최신 거래량 / 직전 20일 평균 (tradingVolume 필드가 있을 때만)
     volumes = [float(c["tradingVolume"]) for c in candles if c.get("tradingVolume")]
     if len(volumes) >= 2:
@@ -786,8 +796,31 @@ def _closes_from_toss_candles(candles: list, ndigits: int) -> dict:
     return result
 
 
-def _fetch_us_realdata(ticker):
-    """미국 종목 실측. Toss 캔들 우선, 실패 시 yfinance 폴백."""
+def _us_live_price(ticker):
+    """발행 시점의 미국 종목 실체결가(프리마켓·장중 포함). 실패 시 None.
+
+    yfinance fast_info는 연장시간대를 반영하지 않으므로 prepost intraday를 함께 본다
+    (`fetch_data._extended_hours_price` 참조 — 2026-07-27 실사고).
+    """
+    try:
+        try:
+            from scripts.fetch_data import _get_realtime_price
+        except ImportError:
+            from fetch_data import _get_realtime_price
+        rt = _get_realtime_price(ticker)
+        return float(rt[0]) if rt and rt[0] else None
+    except Exception:
+        return None
+
+
+def _fetch_us_realdata(ticker, live=False):
+    """미국 종목 실측. Toss 캔들 우선, 실패 시 yfinance 폴백.
+
+    live=True면 발행 시점 실체결가(프리마켓 포함)를 현재가로, 직전 정규장 종가를
+    기준가로 삼는다. 미국 브리핑은 프리마켓 한복판에 나가므로 이 경로를 쓴다.
+    """
+    live_price = _us_live_price(ticker) if live else None
+
     # 1) 토스 API
     try:
         import scripts.toss_client as tc
@@ -800,7 +833,7 @@ def _fetch_us_realdata(ticker):
         try:
             candles = tc.get_candles(ticker, interval="1d", count=300)
             if candles:
-                return _closes_from_toss_candles(candles, ndigits=4)
+                return _closes_from_toss_candles(candles, ndigits=4, live_price=live_price)
         except Exception:
             pass
 
@@ -809,7 +842,7 @@ def _fetch_us_realdata(ticker):
         import yfinance as yf
         hist = yf.Ticker(ticker).history(period="300d").dropna(subset=["Close"])
         closes = [float(x) for x in hist["Close"].tolist()]
-        return _closes_to_realdata(closes, ndigits=4)
+        return _closes_to_realdata(closes, ndigits=4, live_price=live_price)
     except Exception as e:
         return {"error": str(e)}
 
@@ -850,8 +883,12 @@ def _fetch_kospi_realdata(code):
 
 
 def _fetch_pick_realdata(ticker, is_us):
-    """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함."""
-    return _fetch_us_realdata(ticker) if is_us else _fetch_kospi_realdata(ticker)
+    """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함.
+
+    미국 픽은 live=True — 미국 브리핑이 프리마켓 시점에 발행되므로 그 시점 실체결가가 기준이다.
+    한국 픽은 코스피 아침 브리핑(장 시작 전 07:25) 기준이라 직전 완료 세션 종가를 유지한다.
+    """
+    return _fetch_us_realdata(ticker, live=is_us) if is_us else _fetch_kospi_realdata(ticker)
 
 
 def _fetch_kospi_index_levels():

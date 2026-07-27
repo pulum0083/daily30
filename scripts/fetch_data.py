@@ -290,33 +290,75 @@ def _prev_close_from_daily(closes, price: float) -> float | None:
         return None
 
 
+def _extended_hours_price(intraday, fast_last: float | None, now=None,
+                          max_age_hours: float = 12.0) -> float | None:
+    """프리마켓·애프터마켓을 포함한 '지금 이 시점'의 최근 체결가를 돌려준다.
+
+    yfinance `fast_info.last_price`는 **연장시간대(프리·애프터) 체결을 반영하지 않는다** —
+    프리마켓 한복판에도 직전 정규장 종가를 그대로 준다(2026-07-27 실측: 프리마켓에서
+    MU가 938.18에 거래되는데 fast_info는 금요일 종가 920.95를 반환).
+    미국 브리핑은 21:15 KST = 프리마켓 한복판에 발행되므로, 이 값을 그대로 쓰면
+    "발행 시점 데이터"가 아니라 항상 직전 세션 종가가 실린다(운영 규칙 0 위반).
+
+    판정은 **값이 아니라 타임스탬프**로 한다 — fast_info 값을 5분봉에서 되찾는 방식은
+    공식 종가와 봉 종가가 미세하게 달라 자주 빗나간다(실측에서 10종목 중 4종목 실패).
+    `prepost=True` intraday의 마지막 바가 `max_age_hours` 이내로 신선하면 그 값을 쓰고,
+    비어 있거나 오래됐으면(주말·휴장·데이터 지연) fast_last를 유지한다(fail-open).
+    """
+    if intraday is None or len(intraday) == 0:
+        return float(fast_last) if fast_last else None
+    closes = intraday["Close"].dropna()
+    if not len(closes):
+        return float(fast_last) if fast_last else None
+
+    last_ts = closes.index[-1]
+    if now is None:
+        now = datetime.now(last_ts.tzinfo) if last_ts.tzinfo else datetime.now()
+    age_h = (now - last_ts).total_seconds() / 3600.0
+    if age_h > max_age_hours:
+        # 마지막 체결이 너무 오래됨 — 주말·휴장 구간이라 연장시간대가 아니다.
+        return float(fast_last) if fast_last else float(closes.iloc[-1])
+    return float(closes.iloc[-1])
+
+
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
-    1순위: yfinance fast_info (단일 속성, 빠름)
-    2순위: intraday 5m + prepost=True
+    fast_info로 기준가(전일 종가)를 잡되, 현재가는 prepost intraday로 교차 검증해
+    **연장시간대 체결을 반영한다**(fast_info는 프리·애프터를 반영하지 않는다 — 위 함수 참조).
     실패 시 None 반환 → 호출부에서 일봉 fallback 처리.
     """
     import yfinance as yf
 
-    # 1순위: fast_info
+    intraday = None
+    try:
+        intraday = _yf_history(ticker, period="2d", interval="5m", prepost=True)
+    except Exception:
+        intraday = None
+
+    # 1순위: fast_info (기준가) + intraday 교차 검증 (현재가)
     try:
         fi = yf.Ticker(ticker).fast_info
         last = fi.last_price
         prev = fi.previous_close
         if last and prev and float(last) > 0 and float(prev) > 0:
-            return float(last), float(prev)
+            live = _extended_hours_price(intraday, float(last))
+            if live and live > 0 and abs(live - float(last)) > 0.005:
+                print(
+                    f"[fetch_data] {ticker} 연장시간대 체결 반영: "
+                    f"{float(last):.2f} → {live:.2f}",
+                    file=sys.stderr,
+                )
+            return float(live or last), float(prev)
     except Exception:
         pass
 
-    # 2순위: intraday 5m (프리마켓 포함)
+    # 2순위: fast_info 실패 시 intraday만으로 구성
     try:
-        intraday = _yf_history(ticker, period="2d", interval="5m", prepost=True)
-        if not intraday.empty:
+        if intraday is not None and not intraday.empty:
             intraday_closes = intraday["Close"].dropna()
             if len(intraday_closes) > 0:
                 # 전일 종가는 intraday에서 날짜 경계로 구분
-                import pandas as pd
                 today = intraday_closes.index[-1].date()
                 prev_closes = intraday_closes[intraday_closes.index.date < today]
                 if not prev_closes.empty:
