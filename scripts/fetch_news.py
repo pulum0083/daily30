@@ -233,6 +233,10 @@ US_PROMPT = """\
 - 실제로 검색된 사건만 담고, 없으면 빈 배열 []
 - **오늘/어제 발표된 주요 기업 실적(어닝)은 catalysts에 최우선으로 담는다** — 실적 서프라이즈·가이던스·경영진 발언이 해당 종목뿐 아니라 다른 종목·섹터로 파급된 경우(read-through)를 인과로 정리한다.
 - **개장 전 실적으로 프리마켓에서 이미 움직인 섹터도 catalysts에 담는다** — 이 브리핑은 프리마켓 시점에 나가므로, 개장 전 반응은 오늘 세션을 예고하는 핵심 촉매다.
+- **[필수] 모든 항목의 주어는 실제 기업·기관 실명이어야 한다.** 검색으로 회사 이름을 특정하지 못했다면
+  "A사"·"B사"·"C은행"·"모 기업"·"익명의 한 기업"처럼 익명화하거나 아래 예시의 대괄호 슬롯(`[기업]`)을
+  그대로 남기지 말고, **그 항목을 통째로 버린다.** 실명 없는 사건은 검증이 불가능해 발행할 수 없다.
+  실명으로 채울 수 있는 항목이 하나도 없으면 빈 배열 []로 둔다 — 완전성보다 정합성이 우선이다.
 - 문장 형태 예시 4개(회사명·사건은 형식 참고용일 뿐이다 — 절대 그대로 베끼지 말고, 오늘 실제 검색으로 찾은 회사명·사건·수치로만 채운다):
   · "[기업]의 [제품·전략 발표] → [파급되는 섹터·종목]에 [영향 방향]"
   · "[대형 은행]의 [실적 지표] 서프라이즈 → [동종 대형 은행들]에 동반 [영향 방향]"
@@ -589,6 +593,44 @@ _SEARCH_FAILURE_RE = re.compile(
 )
 
 
+# 익명 플레이스홀더 주어 (실존 기업이 아니라 "A사"·"[기업]" 같은 빈 슬롯)
+_PLACEHOLDER_ENTITY_RE = re.compile(
+    # "A사"·"B사의" — 단일 영문 대문자 + 사 (뒤에 조사·구두점·공백만 허용)
+    r"(?<![A-Za-z0-9])[A-Z]사(?=[\s,.·)]|의|는|가|도|을|를|와|과|에|만|$)|"
+    # "C은행"·"D증권"·"E그룹"·"F기업" — 접미어 자체가 명확해 뒤 제약 불필요
+    r"(?<![A-Za-z0-9])[A-Z](?:은행|증권|그룹|기업|테크)|"
+    # 프롬프트 예시의 대괄호 슬롯이 그대로 남은 형태 — "[기업]의 …"
+    r"\[[가-힣][가-힣·\s]*\]|"
+    # 기호 마스킹 — "○○사", "XX사", "△△ 반도체"
+    r"[○◯●△▲□■X×]{2,}|"
+    # 한국어 익명 지칭 — "모 기업", "익명의 한 기술기업"
+    r"익명의?\s|(?<![가-힣])모\s+(?:기업|기술|대형|주요|반도체|은행|증권|글로벌)"
+)
+
+
+def _drop_placeholder_entities(items: list) -> list:
+    """"B사"·"C은행"·"[기업]" 처럼 익명 플레이스홀더가 주어인 항목을 제거한다.
+
+    2026-07-27 미국 브리핑 실사고: Gemini가 google_search로 실제 소재를 못 찾자,
+    US_PROMPT의 예시 슬롯("[기업]의 [제품·전략 발표] → …") 구조만 남기고 주어를
+    "A사"·"B사"·"C은행"·"D사"로 익명화해 형식상 그럴듯한 뉴스를 만들어냈다.
+    수치 게이트(validate_analysis)는 "주어가 가짜"를 검출하지 못하고,
+    _drop_search_failure_notes는 자백형 실패만 잡으며, _drop_stale_earnings는
+    "B사"가 어떤 티커로도 resolve되지 않아 fail-open으로 통과시킨다.
+
+    실명 없는 사건 서술은 검증 자체가 불가능하므로 항목째 버린다 —
+    완전성보다 정합성이 우선이다(운영 규칙 0).
+    """
+    out = []
+    for it in items or []:
+        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
+        if _PLACEHOLDER_ENTITY_RE.search(text or ""):
+            print(f"[fetch_news] 익명 플레이스홀더 제거: {text[:60]}", file=sys.stderr)
+            continue
+        out.append(it)
+    return out
+
+
 def _drop_search_failure_notes(items: list) -> list:
     """"현재까지 확인되지 않았습니다" 류의 검색 실패 보고를 제거한다.
 
@@ -674,9 +716,11 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         if isinstance(data.get(_fld), list):
             data[_fld] = _drop_stale_earnings(data[_fld], today_kst)
     # "…확인되지 않았습니다" 류 검색 실패 보고를 전 필드에서 제거 (이슈가 아니라 메타 서술)
+    # + "B사"·"C은행"·"[기업]" 류 익명 플레이스홀더 주어를 담은 날조 항목도 함께 제거
     for _fld in ("catalysts", "headlines", "key_indicators"):
         if isinstance(data.get(_fld), list):
             data[_fld] = _drop_search_failure_notes(data[_fld])
+            data[_fld] = _drop_placeholder_entities(data[_fld])
     return data
 
 
