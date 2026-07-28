@@ -940,7 +940,23 @@ html.dark .ib-item.is-latest{background:rgba(253,126,20,.06);}
 .ib-src{font-size:11px;font-weight:600;color:var(--primary);text-decoration:none;}
 .ib-src:hover{text-decoration:underline;}
 .ib-src-arrow{font-size:10px;opacity:0.7;}
-.ib-time{font-size:11px;color:var(--muted);margin-left:auto;}
+/* 위 .ib-item(이슈 브리핑)의 .ib-time{width:36px}이 여기까지 상속돼 "2시간 전"이 두 줄로 깨진다 — 폭 해제 */
+.ib-time{font-size:11px;color:var(--muted);margin-left:auto;width:auto;flex-shrink:0;white-space:nowrap;}
+
+/* ──────────────────────────────────────────────
+   국내 이슈 다이제스트 (domestic_issues) — 박스형 카드
+────────────────────────────────────────────── */
+.dom-window{font-size:11px;font-weight:400;color:var(--muted);margin-left:auto;text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums;}
+.dom-list{display:flex;flex-direction:column;gap:9px;}
+.dom-card{display:block;background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-md);padding:13px 15px 14px;text-decoration:none;color:inherit;transition:border-color .15s ease,box-shadow .15s ease;}
+.dom-card:hover{border-color:var(--primary);box-shadow:var(--s1);}
+.dom-card__head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.dom-src{font-size:11px;font-weight:700;color:var(--primary);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dom-card:hover .dom-src{text-decoration:underline;}
+.dom-time{margin-left:auto;flex-shrink:0;white-space:nowrap;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+.dom-title{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.45;}
+.dom-summary{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:6px;}
+html.dark .dom-card{background:var(--surface-soft);}
 
 /* ──────────────────────────────────────────────
    시나리오 분기 형식 (sc-card)
