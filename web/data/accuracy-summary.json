@@ -1,18 +1,27 @@
 {
   "cumulative": {
-    "scored": 130,
+    "scored": 131,
     "hit": 88,
-    "pct": 68
+    "pct": 67,
+    "note": "kospi(진행) + us(동결) 혼합 — 현재 성적은 kospi를 쓸 것"
   },
   "kospi": {
-    "scored": 72,
+    "scored": 73,
     "hit": 47,
-    "pct": 65
+    "pct": 64
   },
   "us": {
     "scored": 58,
     "hit": 41,
-    "pct": 71
+    "pct": 71,
+    "retired": true,
+    "note": "2026-07-14 이슈 중심 전환으로 채점 탈퇴 — 수치 동결"
   },
-  "updated_at": "2026-07-25T09:11:34.544123+09:00"
+  "live_key": "kospi",
+  "streak": {
+    "days": 70,
+    "from": "2026-04-15",
+    "to": "2026-07-28"
+  },
+  "updated_at": "2026-07-28T09:11:32.538859+09:00"
 }
