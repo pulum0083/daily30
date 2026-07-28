@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-07-28T10:01:39.068131+09:00",
+  "generated_at": "2026-07-28T10:31:47.328132+09:00",
   "date": "2026-07-28",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -9.06,
-      "surge": 0.3,
+      "changePct": -9.45,
+      "surge": 0.34,
       "events": [
         {
           "time": "08:22",
@@ -31,15 +31,15 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -10.63,
-      "surge": 0.29,
+      "changePct": -11.01,
+      "surge": 0.32,
       "events": [
         {
           "time": "05:49",
           "headline": "SK하이닉스 ADR 7.5% 급락…엔비디아 우려에 결국 공모가 밑으로",
           "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5Icl9HZGVNbkxRZnBpWHFDdkd3UnNvYmxBYkc4Z3BzZFJvR3A3WEN4OHVhTTU2S0JoTnRWUzhfQ0VQRUNsLTFOaVRTVnN5REt3REcxUTI4Y0hlRzVwQmJmNGFSMnBiRlppX05MaXdiWWY?oc=5",
           "source": "연합인포맥스",
-          "why": "SK하이닉스 ADR이 엔비디아 관련 우려로 인해 공모가 아래로 7.5% 급락했다.",
+          "why": "SK하이닉스 ADR이 엔비디아 관련 우려로 인해 7.5% 급락하며 공모가 아래로 떨어졌다.",
           "tier": "why",
           "sentiment": "neg"
         },
@@ -57,15 +57,24 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -6.95,
-      "surge": 0.22,
+      "changePct": -7.2,
+      "surge": 0.25,
       "events": [
+        {
+          "time": "10:02",
+          "headline": "\"80만원 갈 줄 알았는데\"…두 달간 44% 빠진 현대차, 시총 상위 낙폭 1위",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1KVGphcFJPcWFRcklmWlpSWHIteWxtYVpmdFRLU0g5YmQweWY4Q0VVUEhRcWM2d0QzbjJOdkRFSnpBbnRFZVBoelpkNlpWdzVOeEV3cHlEaThpZTA3STNLX1N3?oc=5",
+          "source": "매일신문",
+          "why": "현대차 주가가 두 달간 44% 하락하며 시가총액 상위 종목 중 가장 큰 낙폭을 기록했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
         {
           "time": "09:27",
           "headline": "현대차 주가 하락 중",
           "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9WODF3VVFSN096X3QtUjVsWDhxTjNkbVhBWlpPcDNERld5TV9VaHFYcTZSOHAtUHhZN01Sc3Q3R0NvQUZick9WWVFocmliTVJTamN4cXNGejZEektl?oc=5",
           "source": "아시아뉴스통신",
-          "why": "현대차 주가가 하락세를 보이고 있습니다.",
+          "why": "현대차 주가 하락 중",
           "tier": "why",
           "sentiment": "neg"
         }
