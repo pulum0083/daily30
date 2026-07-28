@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-29": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-29/kospi/",
+        "headline": "종가는 하락, 선물은 반등 — 오늘은 시그널이 엇갈려요",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "혼조",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-28": {
       "kospi": {
         "state": "ready",
@@ -529,20 +548,6 @@
       }
     },
     "2026-06-17": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-16": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
