@@ -786,6 +786,16 @@ def fetch_and_summarize(briefing_type: str) -> dict:
             f" 있다면 그 새 전개 중심으로 다시 담아도 된다:\n{listed}"
         )
 
+    # 2026-07-28 저녁 미국 브리핑 1회성 힌트 (사용자 요청) — 코카콜라(KO) 52주 신고가
+    # 실측 확인(토스증권 API, 07-28 장중 고가 86.79 > 직전 52주 내 최고치 85.68).
+    # 오늘 날짜에만 적용되고 다음 날부터는 자동으로 빠진다 — 상시 규칙으로 코드에 박지 않는다.
+    if briefing_type == "us" and today == "2026-07-28":
+        prompt += (
+            "\n\n[오늘의 참고 소재] 코카콜라(KO)가 오늘 52주 신고가를 경신했다(실측 확인됨)."
+            " 관련 뉴스(실적·배당·투자의견 등 상승 배경)가 검색되면 catalysts에 포함한다."
+            " 검색되지 않으면 억지로 만들지 않는다."
+        )
+
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite",
         contents=prompt,
