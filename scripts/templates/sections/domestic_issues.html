@@ -1,22 +1,20 @@
 {# 국내 이슈 다이제스트 — RSS 실수집 + 발행일 검증분만. 리스트 비면 전체 생략(운영 규칙 0). #}
 {% if domestic_issues %}
 <div class="open-section">
-  <div class="open-section__title" style="display:flex;align-items:center;gap:6px;">
+  <div class="open-section__title">
     <span>🇰🇷 국내 이슈</span>
-    <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:auto;text-transform:none;letter-spacing:0;">{{ domestic_window_label }}</span>
+    <span class="dom-window">{{ domestic_window_label }}</span>
   </div>
-  <div class="ib-list">
+  <div class="dom-list">
     {% for it in domestic_issues %}
-    <div class="ib-row">
-      <div class="ib-body">
-        <div class="ib-name">{{ it.title }}</div>
-        <div class="ib-text">{{ it.summary }}</div>
-        <div class="ib-foot">
-          <a class="ib-src" href="{{ it.url }}" target="_blank" rel="noopener noreferrer">{{ it.source }} <span class="ib-src-arrow">→</span></a>
-          <span class="ib-time">{{ it.time_label }}</span>
-        </div>
+    <a class="dom-card" href="{{ it.url }}" target="_blank" rel="noopener noreferrer">
+      <div class="dom-card__head">
+        <span class="dom-src">{{ it.source }}</span>
+        <span class="dom-time">{{ it.time_label }}</span>
       </div>
-    </div>
+      <div class="dom-title">{{ it.title }}</div>
+      <div class="dom-summary">{{ it.summary }}</div>
+    </a>
     {% endfor %}
   </div>
 </div>
