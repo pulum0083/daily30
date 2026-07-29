@@ -643,7 +643,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   }
   function skeleton(){
     gridEl.innerHTML=TICKERS.map(function(){return '<div class="ue-row"><span class="nm"><span class="ue-skel" style="display:inline-block;width:90px;"></span></span><span class="ue-skel" style="width:70px;"></span></div>';}).join('');
-    macroEl.innerHTML=['나스닥 QQQ','필라델피아 반도체','변동성 VIX'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
+    macroEl.innerHTML=['나스닥 QQQ','반도체 ETF SOXX','변동성 VIX'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
   }
   function renderGrid(){
     gridEl.innerHTML=TICKERS.map(function(t){
@@ -662,7 +662,12 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       : '<span class="cg" style="color:var(--muted)">—</span>';
     macroEl.innerHTML=''
       +'<div class="ue-mtile"><div class="l">나스닥 QQQ</div><div class="v">'+cgHtml(qq.changePct)+'</div></div>'
-      +'<div class="ue-mtile"><div class="l">필라델피아 반도체</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>'
+      // 라벨은 '필라델피아 반도체'가 아니라 실제 소스인 SOXX ETF로 적는다.
+      // 브리핑 사이드바의 '필라델피아 반도체'는 지수 ^SOX라 서로 다른 상품이고, 실제로 수치도
+      // 갈린다(2026-07-28: ^SOX -4.49% vs SOXX -4.80%). 같은 라벨을 두 소스에 쓰면
+      // 사이트 안에서 같은 이름이 다른 값을 가리킨다(§20 '같은 데이터의 이중 소스').
+      // 프리장엔 지수가 갱신되지 않아 여기서 ETF를 실시간 프록시로 쓰는 것 자체는 맞다(§26).
+      +'<div class="ue-mtile"><div class="l">반도체 ETF SOXX</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>'
       +'<div class="ue-mtile"><div class="l">변동성 VIX</div><div class="v">'+vixHtml+'</div></div>';
     var cap=document.getElementById('ue-cap');
     if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
