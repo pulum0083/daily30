@@ -72,8 +72,13 @@
   .sector-card__pct.up{color:#E03131;}
   .sector-card__pct.down{color:#2775ED;}
   .sector-card__pct.flat{color:var(--muted);}
-  .sector-card__spark{margin:9px 0 7px;height:34px;}
+  .sector-card__spark{margin:9px 0 7px;height:34px;position:relative;}
   .sector-card__spark svg{width:100%;height:34px;display:block;overflow:visible;}
+  /* 장중 곡선 끝의 맥동 점 — SVG는 preserveAspectRatio:none으로 가로만 늘어나 원이 타원으로 찌그러지므로
+     SVG 밖의 일반 HTML 원(고정 px)으로 그려 기기 폭과 무관하게 항상 정원을 유지한다. */
+  .spark-livedot{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;
+    animation:sparkdotpulse 1.6s ease-in-out infinite;pointer-events:none;}
+  @keyframes sparkdotpulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.7);opacity:.35;}}
   .sector-card__range{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
   .sector-card__posbar{position:relative;height:4px;border-radius:3px;background:var(--hairline);margin:6px 0 2px;overflow:hidden;}
   .sector-card__posfill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#2775ED33,#2775ED);}
@@ -282,7 +287,10 @@ function goBack(){ if(history.length>1) history.back(); else location.href='/sto
 })();
 
 // drawSpark: 카드 하나의 곡선(SVG)을 그린다. label 접미사로 정적(20일)/실시간(장중) 구분.
-function drawSpark(card, vals, labelSuffix){
+// isLive=true(오늘 장중)면 09:00~15:30 경과 비율만큼만 폭을 채우고 나머지는 점선으로 비운다 —
+// 정적 20일 곡선과 똑같이 꽉 채우면 "지금 어디까지 진행됐는지"가 화면에서 사라진다.
+// 홈(/stocks/)의 섹터별 종목 카드(stocks-home.js sbxSpark)와 동일한 규격.
+function drawSpark(card, vals, labelSuffix, isLive){
   var spark=card.querySelector('.sector-card__spark');
   var name=card.querySelector('.sector-card__name');
   var label=(name?name.textContent:'')+' '+labelSuffix;
@@ -292,21 +300,33 @@ function drawSpark(card, vals, labelSuffix){
   var W=240,H=34,padT=3,padB=3,n=vals.length;
   var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
   var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
-  function x(i){return (i/(n-1))*W;}
+  var drawW=W;
+  if(isLive){
+    var kk=new Date(Date.now()+9*3600*1000), kmin=kk.getUTCHours()*60+kk.getUTCMinutes();
+    var elapsed=Math.max(0,Math.min(390,kmin-540)); // 09:00(540분) 기준 경과분, 15:30(930분)에 390
+    drawW=Math.max(W*(elapsed/390), W*(1/n));
+  }
+  function x(i){return (i/(n-1))*drawW;}
   function y(v){return padT+(1-(v-min)/rng)*(H-padT-padB);}
   var d='M'+x(0).toFixed(1)+','+y(vals[0]).toFixed(1);
   for(var i=1;i<n;i++){
     var cx=((x(i-1)+x(i))/2).toFixed(1);
     d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
   }
+  var lastX=x(n-1), lastY=y(vals[n-1]), midY=((H-padT-padB)/2+padT).toFixed(1);
   var gid='sp-grad-'+card.getAttribute('data-code');
-  spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="'+label+'">'+
+  var trail=(isLive&&drawW<W-2)
+    ? '<line x1="'+lastX.toFixed(1)+'" y1="'+midY+'" x2="'+W+'" y2="'+midY+'" stroke="#94A3B8" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2,2"/>' : '';
+  spark.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" data-curve="'+(isLive?'live':'static')+'" aria-label="'+label+'">'+
     '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
     '<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'+
     '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
-    '<path d="'+d+' L'+W+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
+    trail+
+    '<path d="'+d+' L'+lastX.toFixed(1)+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'+
     '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'+
-    '</svg>';
+    '</svg>'+
+    // 맥동 점은 SVG 밖의 HTML 원으로 — preserveAspectRatio:none의 가로 스케일에 영향받지 않아 항상 정원이다.
+    (isLive ? '<span class="spark-livedot" style="left:'+(lastX/W*100).toFixed(2)+'%;top:'+(lastY/H*100).toFixed(2)+'%;background:'+col+';"></span>' : '');
 }
 
 (function(){
@@ -314,7 +334,7 @@ function drawSpark(card, vals, labelSuffix){
     var raw=card.getAttribute('data-spark20');
     var vals=null;
     if(raw){ try{ vals=JSON.parse(raw); }catch(e){} }
-    drawSpark(card, vals, '최근 20거래일 종가 추이');
+    drawSpark(card, vals, '최근 20거래일 종가 추이', false);
   });
 })();
 
@@ -382,6 +402,8 @@ function drawSpark(card, vals, labelSuffix){
   // 카드별 곡선을 정적 20일 종가 대신 오늘 장중 1분봉(5분 샘플)으로 교체.
   // /api/intraday?code= 는 CDN에 s-maxage=30 캐시돼 방문자 수와 무관하게 원본 호출은 30초당 1회.
   function todayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
+  // 장중(09:00~15:30 KST)이면 곡선을 경과분만큼만 채우고 끝점에 맥동 점을 붙인다. 마감 후엔 완성된 곡선이라 꽉 채운다.
+  function krOpenNow(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();return m>=540&&m<=930;}
   function refreshLiveSparks(){
     var today=todayYMD();
     codes.forEach(function(code){
@@ -390,7 +412,7 @@ function drawSpark(card, vals, labelSuffix){
         .then(function(d){
           if(!d||!Array.isArray(d.minutes)||d.minutes.length<2||d.date!==today) return; // 오늘 세션 데이터 없으면 기존 20일 곡선 유지
           var card=byCode[code]; if(!card) return;
-          drawSpark(card, d.minutes, '오늘 장중 추이');
+          drawSpark(card, d.minutes, '오늘 장중 추이', krOpenNow());
         }).catch(function(){});
     });
   }
