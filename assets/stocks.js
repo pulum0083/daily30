@@ -289,6 +289,25 @@ document.addEventListener('DOMContentLoaded', function() {
     return 'LIVE · 장중 · 45초 갱신';
   }
 
+  // ── 세션 고정 프레임 (실시간 곡선 표기 규격 — 홈 섹터 카드 sbxSpark와 동일) ──
+  // x축 기준을 '수집된 데이터 범위'가 아니라 '세션 전체 길이'로 잡는다. 데이터 범위에 맞추면
+  // 장 시작 30분이든 6시간이든 곡선이 항상 폭을 꽉 채워, 하루가 어디까지 진행됐는지가 화면에서 사라진다.
+  // 국내는 t2x()가 이미 09:00~15:30 고정 프레임이고, 미국만 데이터 범위 정규화라 여기서 교정한다.
+  function usSegBounds(seg){ return seg==='pre'?[240,570]:(seg==='post'?[960,1200]:[570,960]); } // ET 분
+  function etMinOfTs(tsSec){
+    var s=new Date(tsSec*1000).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');
+    return (parseInt(s[0],10)%24)*60+parseInt(s[1],10);
+  }
+  // 데이터 한 점의 epoch와 그 시점 ET 분으로 세션 시작·끝 epoch를 역산 (세션 중 DST 전환은 없다)
+  function usSegWindow(seg, anchorTs){
+    var b=usSegBounds(seg), start=anchorTs-(etMinOfTs(anchorTs)-b[0])*60;
+    return [start, start+(b[1]-b[0])*60];
+  }
+  function kstHM(tsSec){
+    var s=new Date(tsSec*1000).toLocaleTimeString('en-US',{timeZone:'Asia/Seoul',hour12:false,hour:'2-digit',minute:'2-digit'}).split(':');
+    return String((parseInt(s[0],10)%24)).padStart(2,'0')+':'+s[1];
+  }
+
   // ── 첫 로드 시 한 번만 탭을 결정 → '20일 종가'에서 '오늘 장중'으로 튕기는 현상 제거 ──
   var decided=false;
   function decide(showIntra){
@@ -357,10 +376,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if(n<2){ decide(false); return; }
     var useT=times.length===n;
     // 미국: epoch(ts)로 x 배치 → KST 자정 넘김에도 정렬 안정 / 국내: 09:00~15:30 고정 프레임(t2x)
-    var wlo=0,whi=1;
-    if(isUS&&tsv){wlo=Math.min.apply(null,tsv);whi=Math.max.apply(null,tsv);}
+    // 미국도 세션 고정 프레임(프리/정규/애프터 각 구간의 시작~끝)을 폭으로 쓴다 — 경과분만큼만 채워진다.
+    var wlo=0,whi=1,useFrame=false;
+    if(isUS&&tsv&&tsv.length){
+      var win=usSegWindow(seg, tsv[0]);
+      if(win[1]>win[0]){ wlo=win[0]; whi=win[1]; useFrame=true; }
+      else { wlo=Math.min.apply(null,tsv); whi=Math.max.apply(null,tsv); }
+    }
     function px2(i){
-      if(isUS&&tsv){return X0+(X1-X0)*((tsv[i]-wlo)/((whi-wlo)||1));}
+      if(isUS&&tsv){return X0+(X1-X0)*Math.min(1,Math.max(0,(tsv[i]-wlo)/((whi-wlo)||1)));}
       return useT?t2x(times[i]):X0+(X1-X0)*(i/(n-1));
     }
     var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);
@@ -388,9 +412,14 @@ document.addEventListener('DOMContentLoaded', function() {
       svgHTML+='<circle cx="'+coords[hiI].x.toFixed(1)+'" cy="'+coords[hiI].y.toFixed(1)+'" r="3.5" fill="'+hc+'"/>'+labelTxt(coords[hiI].x,coords[hiI].y,'장중 고점 '+fmtNum(hi),hc)+
         '<circle cx="'+coords[loI].x.toFixed(1)+'" cy="'+coords[loI].y.toFixed(1)+'" r="3.5" fill="'+lc+'"/>'+labelTxt(coords[loI].x,coords[loI].y,'장중 저점 '+fmtNum(lo),lc);
     }
-    // x축 라벨: 미국=데이터 시작/중간/끝 ET 시각 / 국내=09:00·12:00·15:30 고정
+    // x축 라벨: 미국=세션 프레임 시작/중간/끝(KST) / 국내=09:00·12:00·15:30 고정
+    // 데이터 마지막 시각을 오른쪽 끝에 찍으면 "장이 여기서 끝났다"로 읽혀 진행형 곡선과 어긋난다.
     var axis;
-    if(isUS&&useT){
+    if(isUS&&useFrame){
+      axis='<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">'+kstHM(wlo)+'</text>'+
+        '<text x="320" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">'+kstHM((wlo+whi)/2)+'</text>'+
+        '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">'+kstHM(whi)+'</text>';
+    } else if(isUS&&useT){
       var mid=Math.floor((n-1)/2);
       axis='<text x="'+X0+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="start">'+(times[0]||'')+'</text>'+
         '<text x="'+px2(mid).toFixed(1)+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">'+(times[mid]||'')+'</text>'+
@@ -400,7 +429,19 @@ document.addEventListener('DOMContentLoaded', function() {
         '<text x="320" y="168" font-size="10" fill="#9CA3AF" text-anchor="middle">12:00</text>'+
         '<text x="'+X1+'" y="168" font-size="10" fill="#9CA3AF" text-anchor="end">15:30</text>';
     }
-    svgHTML+='<circle cx="'+coords[n-1].x.toFixed(1)+'" cy="'+coords[n-1].y.toFixed(1)+'" r="4" fill="#fff" stroke="'+col+'" stroke-width="2"/>'+
+    // 끝점 — 장중이면 오른쪽 끝까지 점선 가이드("여기까지 진행 중") + 맥동하는 라이브 도트.
+    // 홈 섹터 카드(.spark-livedot)와 같은 규격이되, 이 SVG는 preserveAspectRatio 기본값(meet)이라
+    // 가로만 늘어나는 왜곡이 없어 SVG 안의 <circle>로 그린다(별도 CSS 없이 SMIL로 맥동).
+    var lx=coords[n-1].x, ly=coords[n-1].y;
+    if(isLive && lx<X1-4){
+      svgHTML+='<line x1="'+lx.toFixed(1)+'" y1="'+ly.toFixed(1)+'" x2="'+X1+'" y2="'+ly.toFixed(1)+'" stroke="'+col+'" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="3,3"/>';
+    }
+    if(isLive){
+      svgHTML+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="4" fill="'+col+'">'+
+        '<animate attributeName="r" values="4;11;4" dur="1.8s" repeatCount="indefinite"/>'+
+        '<animate attributeName="opacity" values="0.38;0;0.38" dur="1.8s" repeatCount="indefinite"/></circle>';
+    }
+    svgHTML+='<circle cx="'+lx.toFixed(1)+'" cy="'+ly.toFixed(1)+'" r="4" fill="#fff" stroke="'+col+'" stroke-width="2"/>'+
       axis+pinsHTML+'<g id="intra-hover"></g>';
     document.getElementById('intra-svg').innerHTML=svgHTML;
 
