@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-30": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-30/kospi/",
+        "headline": "반도체 패닉, SOX -5.3%에 코스피도 직격탄",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-29": {
       "kospi": {
         "state": "ready",
@@ -527,20 +546,6 @@
       }
     },
     "2026-06-18": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-17": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
