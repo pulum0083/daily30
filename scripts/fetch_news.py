@@ -356,6 +356,8 @@ _LOW_SUPERLATIVE_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|
 
 # "5,500선"·"5500 포인트"·"5,500 돌파" 형태의 지수 레벨 표기 (3~5자리)
 _INDEX_LEVEL_RE = re.compile(r"(\d{1,2}[,]?\d{3})\s*(?:선|포인트|p\b|돌파|회복|안착)")
+# "배럴당 78달러" 형태 — 유가는 자릿수가 짧아 위 지수 패턴에 안 걸린다
+_PRICE_LEVEL_RE = re.compile(r"(\d{2,3}(?:\.\d+)?)\s*달러")
 
 
 def _claim_direction(text: str, subject: str) -> str | None:
@@ -417,12 +419,15 @@ def _level_claim_wrong(text: str, subject: str, snap: dict, tol: float = 0.15) -
     level = snap.get("level")
     if level is None or subject not in text:
         return None
+    # 유가는 자릿수가 짧아(78달러) 지수 패턴에 안 걸리므로 달러 표기도 함께 본다
+    pats = (_INDEX_LEVEL_RE, _PRICE_LEVEL_RE) if level < 1000 else (_INDEX_LEVEL_RE,)
     for m in re.finditer(re.escape(subject), text):
         win = text[m.start(): m.end() + 30]
-        for lm in _INDEX_LEVEL_RE.finditer(win):
-            claimed = float(lm.group(1).replace(",", ""))
-            if abs(claimed / level - 1) > tol:
-                return f"레벨 {claimed:,.0f} vs 실측 {level:,.0f}"
+        for pat in pats:
+            for lm in pat.finditer(win):
+                claimed = float(lm.group(1).replace(",", ""))
+                if abs(claimed / level - 1) > tol:
+                    return f"레벨 {claimed:,.1f} vs 실측 {level:,.1f}"
     return None
 
 

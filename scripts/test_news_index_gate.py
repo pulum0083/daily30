@@ -70,6 +70,27 @@ def test_oil_gate_unchanged():
     assert _drop_reality_contradictions(keep, REAL) == keep
 
 
+def test_oil_dollar_level_gate():
+    """유가는 자릿수가 짧아 지수 레벨 패턴에 안 걸린다 — 달러 표기를 따로 본다."""
+    real = {"oil": {"change_pct": -1.2, "level": 83.91,
+                    "high_52w": None, "low_52w": None}}
+    assert _drop_reality_contradictions(["WTI가 배럴당 40달러 선까지 하락했습니다"], real) == []
+    keep = ["WTI가 배럴당 84달러 선에서 하락 마감했습니다"]
+    assert _drop_reality_contradictions(keep, real) == keep
+
+
+def test_level_tolerance_is_not_hair_trigger():
+    """±15% 안쪽 오차는 통과시킨다 — 벤치마크·시점 차이로 정상 항목을 오제거하지 않기 위함.
+
+    실사고의 'WTI 78달러'(실측 83.91, -7%)는 이 정책상 의도적으로 통과한다.
+    명백한 학습시점 레벨 날조(S&P 5,500 vs 7,412 = -26%)만 잡는 것이 이 게이트의 목적이다.
+    """
+    real = {"oil": {"change_pct": -1.2, "level": 83.91,
+                    "high_52w": None, "low_52w": None}}
+    keep = ["WTI는 배럴당 78달러 선에서 거래되며 하락했습니다"]
+    assert _drop_reality_contradictions(keep, real) == keep
+
+
 def test_slot_echo_dropped():
     """프롬프트 출력 예시의 슬롯 라벨을 그대로 되뱉은 항목 — 그라운딩 실패 신호."""
     items = [
