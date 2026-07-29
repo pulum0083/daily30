@@ -882,6 +882,145 @@ def _fetch_kospi_realdata(code):
         return {"error": str(e)}
 
 
+# ── 정성 최상급 주장 게이트 (2026-07-29 실사고 §28) ─────────────────────────────
+# "나스닥이 사상 최고치를 경신"처럼 **숫자가 하나도 없는** 주장은 등락률 게이트
+# (_index_figure_wrong·_us_figure_stale)가 구조적으로 발화할 수 없다 — 인접 수치가 있어야
+# 비교가 성립하기 때문이다. 실제로 그날 나스닥은 -0.22% 하락 마감이었고, 같은 페이지
+# 사이드바(실측)에 -0.22%가 찍혀 있는데도 본문만 "사상 최고"로 나갔다.
+_SUPERLATIVE_HIGH_RE = re.compile(r"(?:사상\s*최고|역대\s*최고|최고치|신고가|사상최고)")
+_SUPERLATIVE_LOW_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|신저가|사상최저)")
+# 최상급 주장은 이 리스트 필드에서 발견되면 항목을 제거하고, 그 밖(스칼라 산문)에서
+# 발견되면 발행을 차단한다 — 산문은 자동 수정이 불가능하고, 틀린 전제 위에 쓰인 글이라
+# 문장 하나만 지워도 나머지 서사가 그대로 남기 때문이다.
+_SUPERLATIVE_LIST_FIELDS = (
+    "us_issues", "key_drivers", "watch_items", "telegram_signals", "reasons", "issues",
+)
+
+
+def _index_extremes(symbol):
+    """지수 실측 스냅샷 {level, change_pct, high_52w, low_52w}. 실패 시 None(fail-open)."""
+    closes = []
+    try:
+        import scripts.toss_client as tc
+    except ImportError:
+        try:
+            import toss_client as tc
+        except ImportError:
+            tc = None
+    if tc:
+        try:
+            candles = tc.get_candles(symbol, interval="1d", count=300)
+            closes = [float(c["closePrice"]) for c in candles or [] if c.get("closePrice")]
+        except Exception:
+            closes = []
+    if len(closes) < 2:
+        try:
+            import yfinance as yf
+            hist = yf.Ticker(symbol).history(period="1y").dropna(subset=["Close"])
+            closes = [float(x) for x in hist["Close"].tolist()]
+        except Exception as e:
+            print(f"[validate] {symbol} 실측 조회 실패(최상급 대조 생략): {e}", file=sys.stderr)
+            return None
+    if len(closes) < 2:
+        return None
+    return {
+        "level": closes[-1],
+        "change_pct": round((closes[-1] / closes[-2] - 1) * 100, 2),
+        "high_52w": max(closes),
+        "low_52w": min(closes),
+    }
+
+
+def find_superlative_violations(text, idx_real):
+    """text의 '지수명 + 사상 최고/최저' 주장 중 실측과 어긋나는 것들의 사유 목록.
+
+    지수명 등장 위치 기준 앞뒤 25자 창에서만 최상급 표현을 찾는다 — 문장 전체를 훑으면
+    "나스닥은 밀렸지만 금값은 사상 최고"처럼 주어가 다른 표현이 교차 매칭된다.
+    """
+    plain = strip_tags(text or "")
+    hits = []
+    for name, symbol in _INDEX_NAME_SYMBOL:
+        if symbol is None or name not in plain:
+            continue
+        snap = idx_real.get(symbol)
+        if not snap:
+            continue
+        win = "".join(plain[max(0, m.start() - 25): m.end() + 25]
+                      for m in re.finditer(re.escape(name), plain))
+        if _SUPERLATIVE_HIGH_RE.search(win):
+            if snap["change_pct"] < 0:
+                hits.append(f"{name} '최고' 주장이나 실측 {snap['change_pct']:+.2f}% 하락")
+            elif snap["level"] < snap["high_52w"] * 0.99:
+                hits.append(f"{name} '최고' 주장이나 실측 {snap['level']:,.0f} "
+                            f"< 52주 고점 {snap['high_52w']:,.0f}")
+        if _SUPERLATIVE_LOW_RE.search(win):
+            if snap["change_pct"] > 0:
+                hits.append(f"{name} '최저' 주장이나 실측 {snap['change_pct']:+.2f}% 상승")
+            elif snap["level"] > snap["low_52w"] * 1.01:
+                hits.append(f"{name} '최저' 주장이나 실측 {snap['level']:,.0f} "
+                            f"> 52주 저점 {snap['low_52w']:,.0f}")
+    return hits
+
+
+def _superlative_texts(obj):
+    """dict/list를 재귀 순회하며 최상급 표현이 든 문자열만 모은다(실측 조회 전 사전 필터)."""
+    found = []
+    if isinstance(obj, str):
+        if _SUPERLATIVE_HIGH_RE.search(obj) or _SUPERLATIVE_LOW_RE.search(obj):
+            found.append(obj)
+    elif isinstance(obj, dict):
+        for v in obj.values():
+            found += _superlative_texts(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            found += _superlative_texts(v)
+    return found
+
+
+def validate_index_superlatives(analysis, corrections, warnings, blocks):
+    """지수의 '사상 최고/최저' 주장을 실측과 대조해 리스트 항목은 제거, 산문은 발행 차단.
+
+    최상급 표현이 아예 없으면 네트워크 조회 없이 즉시 반환한다(대부분의 날).
+    실측 조회 실패 시엔 판단하지 않는다(fail-open) — 정상 항목 오제거·오차단을 막는다.
+    """
+    texts = _superlative_texts(analysis)
+    if not texts:
+        return
+    symbols = {sym for name, sym in _INDEX_NAME_SYMBOL
+               if sym and any(name in strip_tags(t) for t in texts)}
+    if not symbols:
+        return
+    idx_real = {}
+    for sym in symbols:
+        snap = _index_extremes(sym)
+        if snap:
+            idx_real[sym] = snap
+    if not idx_real:
+        warnings.append("지수 최상급 주장 발견했으나 실측 조회 실패 — 대조 생략")
+        return
+
+    # 1) 리스트 필드는 위반 항목만 제거
+    for fld in _SUPERLATIVE_LIST_FIELDS:
+        items = analysis.get(fld)
+        if not isinstance(items, list):
+            continue
+        kept = []
+        for it in items:
+            blob = json.dumps(it, ensure_ascii=False) if not isinstance(it, str) else it
+            hits = find_superlative_violations(blob, idx_real)
+            if hits:
+                corrections.append(f"{fld} 항목 제거 (실측 모순 {hits}): {strip_tags(blob)[:60]}")
+            else:
+                kept.append(it)
+        analysis[fld] = kept
+
+    # 2) 남은 곳(스칼라 산문 등)에 위반이 있으면 차단 — 산문은 자동 교정이 불가능하다
+    for t in _superlative_texts(analysis):
+        hits = find_superlative_violations(t, idx_real)
+        if hits:
+            blocks.append(f"지수 최상급 주장이 실측과 모순 ({hits}): {strip_tags(t)[:80]}")
+
+
 # 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
 # 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
 _NO_PREMARKET_INDEX = (
@@ -1244,6 +1383,9 @@ def validate(analysis, latest, btype):
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"
                 f"(그 수치는 직전 정규장 값): {hit['sentence'][:80]}"
             )
+
+    # 2-d-3) 지수 '사상 최고/최저' 정성 주장 실측 대조 (전 타입)
+    validate_index_superlatives(a, corrections, warnings, blocks)
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)

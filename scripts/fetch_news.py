@@ -119,7 +119,6 @@ KOSPI_PROMPT = """\
 - 반도체·기술주 관련 최신 이슈 (NVDA, TSMC 등)
 - 원유·환율 최신 동향
 - **주도주 기업 이벤트**: 코스피 대형주(삼성전자·SK하이닉스·현대차 등)의 상장·ADR·M&A·지분매각·신사업 진출·대형 수주·설비투자·실적 발표
-- **[임시 2026-07-12 추가, 테마 소멸 시 제거]** SK하이닉스 ADR 미국 상장 이후 한국 증시(특히 SK하이닉스 본주) 반응·수급 대응 — 이번 주 핵심 테마이므로 명시 검색
 - **[상시 룰·최우선] {us_label} 미국 빅테크 실적은 코스피 대장주와 직결되므로 반드시 주요하게 다룬다.** 빅테크(구글·MS·아마존·메타·엔비디아 등)의 **AI 설비투자(capex) 성장률**이 곧 메모리·HBM 수요의 선행지표다 — capex가 늘면 삼성전자·SK하이닉스 HBM 수요 기대가 커지고(코스피 상승 압력), **capex 성장률이 꺾이면 메모리 수요 둔화 우려로 대장주·코스피 하락으로 직결된다.** 따라서 빅테크 실적일엔 실적·클라우드 성장률·**capex 규모와 증감 방향**을 핵심 촉매로 최우선 검색·수집하고, 삼성전자·SK하이닉스 read-through를 반드시 함께 정리한다.
 - **[상시 룰] {us_label} 미국 빅테크 '실적 발표' — 이미 발표됐으면 '예정'이 아니라 '결과'를 담는다.** 미국 대형주 실적은 통상 미 증시 마감 후(= 직전 미국장 마감 직후 KST 새벽)에 나오므로, 코스피 아침 브리핑 시점엔 **이미 발표가 끝나 실제 결과가 공개된 경우가 대부분**이다. 이럴 때 "실적 발표 예정"·"오늘 밤 발표" 같은 **프리뷰(발표 전) 프레이밍 기사에 속지 말고**, 반드시 **실제 발표된 결과 기사**를 찾아 수치와 함께 담는다 — 매출·전년비 증감률, 클라우드/데이터센터 매출 성장률, **설비투자(capex) 규모·연간 가이던스**, 그리고 **발표 후 시간외/프리마켓 주가 반응**까지. 이 결과(특히 AI capex·클라우드 성장)가 한국 반도체·HBM(삼성전자·SK하이닉스) 수요 기대에 주는 파급(read-through)을 함께 정리한다. 아직 발표 전(장 마감 후 콜만 예정 등)이면 그때만 '예정'으로 표기하고 결과 수치를 지어내지 않는다(운영 규칙 0). **[임시 2026-07-22, 실적 시즌 종료 시 이 종목 예시만 제거]** 현재 진행 중인 빅테크 실적 시즌(구글/알파벳 등)을 명시적으로 검색한다.
 - **인과 촉매**: 특정 섹터/주도주 등락의 '원인'이 된 사건 — 특히 미국 빅테크 전략 뉴스(클라우드·자체 칩 설계·감산·투자)가 한국 반도체·2차전지에 미치는 파급(read-through)
@@ -161,11 +160,11 @@ KOSPI_PROMPT = """\
 출력 형식 (JSON만, 다른 텍스트 없이):
 {{
   "key_indicators": [
-    "{us_label} 미국 증시 관련 구체적 이슈 (수치 포함)",
-    "반도체·기술주 이슈",
-    "국내 트랙 이슈 1 — 정책·지표·공시·수급 중 실제로 검색된 것 (수치 포함)",
-    "국내 트랙 이슈 2 — 위와 다른 국내 소재 (수치 포함)",
-    "원유·환율 동향"
+    "(1) {us_label} 미국 증시 관련 구체적 이슈 (수치 포함)",
+    "(2) 반도체·기술주 이슈",
+    "(3) 국내 정책·지표·공시·수급 중 실제로 검색된 것 (수치 포함)",
+    "(4) 위와 다른 국내 소재 (수치 포함)",
+    "(5) 원유·환율 동향"
   ],
   "catalysts": [
     {{"date": "YYYY-MM-DD", "text": "주도주·섹터를 움직인 사건 → 영향 (실제 검색된 것만·검색 대상 구간 내 발생분만, 없으면 이 배열은 비운다)"}}
@@ -177,6 +176,10 @@ KOSPI_PROMPT = """\
   ],
   "market_sentiment": "bullish or bearish or neutral"
 }}
+
+위 예시의 괄호 번호·설명 문구는 **무엇을 담을지 알려주는 안내일 뿐**이다. 실제 출력에는 번호도
+설명 문구도 남기지 말고, 검색으로 확인한 사실만 한 문장씩 적는다. 못 찾은 슬롯은 안내 문구를
+그대로 두거나 지어내지 말고 **배열에서 빼서 짧게 낸다**.
 """
 
 KOSPI_CLOSE_PROMPT = """\
@@ -325,13 +328,34 @@ def _parse_iso_date(s: str):
 _UP_WORDS = r"(?:급등|상승|강세|오르|올라|뛰|치솟|반등|돌파|회복|상승세)"
 _DOWN_WORDS = r"(?:급락|하락|약세|내리|떨어|밀리|빠지|폭락|급감|하락세|후퇴)"
 
-# 실측 대조 대상 — 키워드 → latest 데이터 키
+# 실측 대조 대상 — 키워드 → 실측 스냅샷 키
+# 지수는 2026-07-29 실사고로 추가됐다(§28): "나스닥 사상 최고치 경신"(실측 -0.22%)·
+# "S&P500 5,500선 돌파"(실측 ~7,4xx)가 방향·레벨 무검증으로 통과했다.
+# 긴 이름을 먼저 둬야 "필라델피아 반도체"가 부분 매칭으로 갈리지 않는다.
 _REALITY_SUBJECTS = {
     "유가": "oil",
     "국제유가": "oil",
     "WTI": "oil",
     "브렌트": "oil",
+    "필라델피아 반도체지수": "sox",
+    "필라델피아 반도체": "sox",
+    "나스닥": "nasdaq",
+    "S&P500": "sp500",
+    "S&P 500": "sp500",
+    "다우존스": "dow",
+    "다우": "dow",
 }
+
+# 지수 실측 조회 심볼 (change_pct·현재 레벨을 함께 본다)
+_INDEX_SYMBOLS = {"nasdaq": "^IXIC", "sp500": "^GSPC", "dow": "^DJI", "sox": "^SOX"}
+
+# "사상 최고치 경신"처럼 **수치가 없는 정성 최상급 주장**. 등락률 게이트(§22·§24)는
+# 인접 숫자가 있어야 발화하므로 이런 주장에 구조적으로 눈이 먼다 — 별도로 잡는다.
+_HIGH_SUPERLATIVE_RE = re.compile(r"(?:사상\s*최고|역대\s*최고|최고치|신고가|사상최고)")
+_LOW_SUPERLATIVE_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|신저가|사상최저)")
+
+# "5,500선"·"5500 포인트"·"5,500 돌파" 형태의 지수 레벨 표기 (3~5자리)
+_INDEX_LEVEL_RE = re.compile(r"(\d{1,2}[,]?\d{3})\s*(?:선|포인트|p\b|돌파|회복|안착)")
 
 
 def _claim_direction(text: str, subject: str) -> str | None:
@@ -353,8 +377,59 @@ def _claim_direction(text: str, subject: str) -> str | None:
     return None
 
 
+def _superlative_claim_wrong(text: str, subject: str, snap: dict) -> str | None:
+    """subject에 대한 '사상 최고/최저' 류 주장이 실측과 어긋나면 사유 문자열, 아니면 None.
+
+    2026-07-29 실사고(§28): "나스닥이 사상 최고치를 경신"이 그대로 발행됐는데 실측은
+    **-0.22% 하락 마감**이었고 최근 고점 대비로도 한참 아래였다. 이 주장엔 숫자가 하나도
+    없어서 등락률 게이트(§22·§24)가 구조적으로 발화할 수 없었다 — 그래서 별도 게이트다.
+
+    판정: 최고 주장인데 (그날 하락했거나 | 최근 고점의 99% 미만) → 틀림. 최저는 대칭.
+    52주 고·저를 못 구했으면 등락 방향만으로 판정한다(fail-open 우선).
+    """
+    if subject not in text:
+        return None
+    win_all = "".join(text[max(0, m.start() - 25): m.end() + 25]
+                      for m in re.finditer(re.escape(subject), text))
+    chg, level = snap.get("change_pct"), snap.get("level")
+    if _HIGH_SUPERLATIVE_RE.search(win_all):
+        if chg is not None and chg < 0:
+            return f"'최고' 주장이나 실측 {chg:+.2f}% 하락"
+        hi = snap.get("high_52w")
+        if level is not None and hi and level < hi * 0.99:
+            return f"'최고' 주장이나 실측 {level:,.0f} < 52주 고점 {hi:,.0f}"
+    if _LOW_SUPERLATIVE_RE.search(win_all):
+        if chg is not None and chg > 0:
+            return f"'최저' 주장이나 실측 {chg:+.2f}% 상승"
+        lo = snap.get("low_52w")
+        if level is not None and lo and level > lo * 1.01:
+            return f"'최저' 주장이나 실측 {level:,.0f} > 52주 저점 {lo:,.0f}"
+    return None
+
+
+def _level_claim_wrong(text: str, subject: str, snap: dict, tol: float = 0.15) -> str | None:
+    """subject 근처에 적힌 지수 레벨이 실측과 tol(기본 ±15%)를 넘게 어긋나면 사유, 아니면 None.
+
+    2026-07-29 실사고(§28): "S&P 500 지수는 0.3% 상승한 5,500선을 돌파" — **등락률은 맞고
+    레벨만 틀린** 형태라 방향 게이트를 그대로 통과했다(실측 ~7,4xx, -26%). 학습 시점의
+    옛 지수 레벨을 그대로 뱉는 그라운딩 실패의 전형이라, 레벨을 따로 대조한다.
+    """
+    level = snap.get("level")
+    if level is None or subject not in text:
+        return None
+    for m in re.finditer(re.escape(subject), text):
+        win = text[m.start(): m.end() + 30]
+        for lm in _INDEX_LEVEL_RE.finditer(win):
+            claimed = float(lm.group(1).replace(",", ""))
+            if abs(claimed / level - 1) > tol:
+                return f"레벨 {claimed:,.0f} vs 실측 {level:,.0f}"
+    return None
+
+
 def _drop_reality_contradictions(items: list, real: dict) -> list:
-    """실측 시장데이터와 **방향이 반대**인 주장을 담은 항목을 제거한다.
+    """실측 시장데이터와 어긋나는 주장을 담은 항목을 제거한다.
+
+    검사 3종 — ① 방향 반대 ② 정성 최상급(사상 최고/최저) 모순 ③ 지수 레벨 이탈.
 
     2026-07-27 실사고: 미국 브리핑 재수집분이 "국제유가 80달러 돌파 → 에너지 관련주 상승세"·
     "중동 긴장 완화 속 국제유가 상승세 지속"을 냈는데, 실측은 **WTI -6.05%·브렌트 -6.67%**로
@@ -362,40 +437,68 @@ def _drop_reality_contradictions(items: list, real: dict) -> list:
     어닝 게이트(§22)는 실적 서사가 아니라 통과시키며, validate_analysis는 call_claude
     **이후**라 이미 서사가 만들어진 뒤다. 그래서 수집 단계에서 잘라낸다.
 
+    2026-07-29 실사고(§28)로 ②③이 추가됐다 — ①만으로는 "나스닥 사상 최고치 경신"(숫자 없음)과
+    "S&P500 5,500선 돌파"(방향은 맞고 레벨만 틀림)를 둘 다 놓친다.
+
     real이 비었거나 값이 없으면 판단하지 않는다(fail-open) — 정상 항목 오제거를 막는다.
     """
     out = []
     for it in items or []:
         text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
-        bad = False
+        reason = None
         for subject, key in _REALITY_SUBJECTS.items():
-            actual = real.get(key)
-            if actual is None:
+            snap = real.get(key)
+            if not snap:
                 continue
-            claimed = _claim_direction(text, subject)
-            if claimed is None:
-                continue
-            actual_dir = "up" if actual > 0 else "down"
-            if claimed != actual_dir:
-                print(f"[fetch_news] 실측 모순 제거({subject} 실측 {actual:+.2f}%, "
-                      f"주장 {claimed}): {text[:60]}", file=sys.stderr)
-                bad = True
+            # 하위호환: 예전 스냅샷은 등락률 float 하나였다(§27) — dict로 승격해서 받는다
+            if isinstance(snap, (int, float)):
+                snap = {"change_pct": float(snap), "level": None}
+            chg = snap.get("change_pct")
+            if chg is not None:
+                claimed = _claim_direction(text, subject)
+                if claimed and claimed != ("up" if chg > 0 else "down"):
+                    reason = f"{subject} 방향 모순(실측 {chg:+.2f}%, 주장 {claimed})"
+            reason = reason or _superlative_claim_wrong(text, subject, snap)
+            reason = reason or _level_claim_wrong(text, subject, snap)
+            if reason:
+                print(f"[fetch_news] 실측 모순 제거({subject}: {reason}): {text[:60]}",
+                      file=sys.stderr)
                 break
-        if not bad:
+        if not reason:
             out.append(it)
     return out
 
 
 def _fetch_reality_snapshot() -> dict:
-    """실측 대조에 쓸 시장 스냅샷. 조회 실패 항목은 None으로 두어 fail-open한다."""
-    real = {"oil": None}
+    """실측 대조에 쓸 시장 스냅샷. 조회 실패 항목은 None으로 두어 fail-open한다.
+
+    각 키는 {"change_pct":…, "level":…, "high_52w":…, "low_52w":…} 형태다(없는 값은 None).
+    """
+    real: dict = {}
     try:
         import yfinance as yf
-        h = yf.Ticker("CL=F").history(period="7d")["Close"].dropna()
-        if len(h) >= 2:
-            real["oil"] = round((float(h.iloc[-1]) / float(h.iloc[-2]) - 1) * 100, 2)
-    except Exception as e:
-        print(f"[fetch_news] 유가 실측 조회 실패(대조 생략): {e}", file=sys.stderr)
+    except Exception as e:                                     # pragma: no cover
+        print(f"[fetch_news] yfinance 없음 — 실측 대조 생략: {e}", file=sys.stderr)
+        return real
+
+    def _snap(symbol: str, with_52w: bool) -> dict | None:
+        h = yf.Ticker(symbol).history(period="1y" if with_52w else "7d")["Close"].dropna()
+        if len(h) < 2:
+            return None
+        last, prev = float(h.iloc[-1]), float(h.iloc[-2])
+        s = {"change_pct": round((last / prev - 1) * 100, 2), "level": last,
+             "high_52w": None, "low_52w": None}
+        if with_52w:
+            s["high_52w"], s["low_52w"] = float(h.max()), float(h.min())
+        return s
+
+    for key, symbol in [("oil", "CL=F"), *_INDEX_SYMBOLS.items()]:
+        try:
+            snap = _snap(symbol, with_52w=(key != "oil"))
+            if snap:
+                real[key] = snap
+        except Exception as e:
+            print(f"[fetch_news] {key}({symbol}) 실측 조회 실패(대조 생략): {e}", file=sys.stderr)
     return real
 
 
@@ -741,6 +844,35 @@ def _drop_placeholder_entities(items: list) -> list:
     return out
 
 
+# 출력 형식 예시의 슬롯 설명을 모델이 그대로 되돌려준 흔적.
+# 예: "국내 트랙 이슈 1 — 한국 증권거래소는 …" (2026-07-29 실사고 §28)
+_SLOT_ECHO_RE = re.compile(
+    r"^\s*(?:국내\s*트랙\s*이슈\s*\d*|헤드라인\s*\d+|이슈\s*\d+|"
+    r"[가-힣·\s]*이슈\s*\d+)\s*[—\-–:]\s*"
+)
+
+
+def _drop_prompt_slot_echoes(items: list) -> list:
+    """출력 형식 예시의 슬롯 라벨("국내 트랙 이슈 1 — ")을 그대로 되뱉은 항목을 제거한다.
+
+    2026-07-29 실사고(§28): Gemini가 google_search 그라운딩에 실패한 채 프롬프트의 출력
+    형식 예시를 '채워 넣기'만 했고, 슬롯 라벨까지 그대로 남긴 key_indicators가 나왔다.
+    라벨 echo는 "검색이 아니라 템플릿을 메웠다"는 강한 신호라, 내용이 그럴듯해 보여도 버린다
+    (실제로 그 두 항목이 ADR·금통위 미검증 서사의 출처였다).
+
+    §25의 교훈("슬롯형 예시는 LLM이 빈칸으로 메운다")과 같은 계열이므로,
+    프롬프트 쪽 슬롯 라벨 제거(1차 방어)와 이 게이트(최종 방어선)를 함께 둔다.
+    """
+    out = []
+    for it in items or []:
+        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
+        if _SLOT_ECHO_RE.match(text or ""):
+            print(f"[fetch_news] 프롬프트 슬롯 echo 제거: {text[:60]}", file=sys.stderr)
+            continue
+        out.append(it)
+    return out
+
+
 def _drop_search_failure_notes(items: list) -> list:
     """"현재까지 확인되지 않았습니다" 류의 검색 실패 보고를 제거한다.
 
@@ -821,6 +953,13 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 
     data = json.loads(raw)
     today_kst = datetime.now(KST).date()
+    # 스키마 위반은 그라운딩 실패의 선행 신호다 — 프롬프트는 catalysts를 {date,text} 객체로
+    # 요구하는데 문자열 배열로 오면, 검색이 아니라 형식만 흉내낸 출력일 가능성이 크다(§25·§28).
+    # 날짜 미상 catalyst 자체는 허용(거시 촉매 보호)이라 버리지 않고 경고만 남긴다.
+    _cats = data.get("catalysts")
+    if isinstance(_cats, list) and _cats and not any(isinstance(c, dict) for c in _cats):
+        print("[fetch_news] ⚠️ catalysts가 객체가 아닌 문자열 배열 — 그라운딩 실패 의심"
+              f"({len(_cats)}건). 아래 실측·슬롯 게이트 결과를 함께 확인할 것.", file=sys.stderr)
     if isinstance(data.get("catalysts"), list):
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
@@ -846,6 +985,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         if isinstance(data.get(_fld), list):
             data[_fld] = _drop_search_failure_notes(data[_fld])
             data[_fld] = _drop_placeholder_entities(data[_fld])
+            data[_fld] = _drop_prompt_slot_echoes(data[_fld])
             data[_fld] = _drop_reality_contradictions(data[_fld], reality)
     return data
 
