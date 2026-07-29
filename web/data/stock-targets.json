@@ -3,10 +3,16 @@
   "stocks": {
     "005930": {
       "name": "삼성전자",
-      "consensus": 473571,
+      "consensus": 460714,
       "firm_count": 14,
-      "close_price": 220000,
+      "close_price": 208500,
       "reports": [
+        {
+          "firm": "미래에셋증권",
+          "opinion": "매수",
+          "target_price": 370000,
+          "date": "26.07.29"
+        },
         {
           "firm": "하나증권",
           "opinion": "Buy",
@@ -44,12 +50,6 @@
           "date": "26.07.08"
         },
         {
-          "firm": "미래에셋증권",
-          "opinion": "매수",
-          "target_price": 550000,
-          "date": "26.07.08"
-        },
-        {
           "firm": "한화투자증권",
           "opinion": "Buy",
           "target_price": 580000,
@@ -72,15 +72,15 @@
     },
     "000660": {
       "name": "SK하이닉스",
-      "consensus": 3379167,
+      "consensus": 3262500,
       "firm_count": 12,
-      "close_price": 1550000,
+      "close_price": 1401000,
       "reports": [
         {
           "firm": "미래에셋증권",
           "opinion": "매수",
-          "target_price": 4200000,
-          "date": "26.07.14"
+          "target_price": 2800000,
+          "date": "26.07.29"
         },
         {
           "firm": "대신증권",
@@ -143,7 +143,7 @@
       "name": "현대차",
       "consensus": 752000,
       "firm_count": 10,
-      "close_price": 364000,
+      "close_price": 353500,
       "reports": [
         {
           "firm": "DS투자증권",
