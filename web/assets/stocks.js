@@ -354,7 +354,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function render(d){
     var vals=(d&&d.minutes)||[];
     if(vals.length<2){ decide(false); return; }   // 장중 데이터 없음 → 20일 종가 먼저 표시
-    if(isUS && d && typeof d.prevClose==='number' && d.prevClose>0) prevClose=d.prevClose; // 응답의 실측 직전 종가로 교체
+    // 기준가는 세션별로 다르다 — 프리·애프터장엔 prevClose가 한 세션 과거라 -7%대 허수가 나온다(§30).
+    // 서버(_us-session.mjs)가 세션을 보고 정해준 baseClose를 우선 쓰고, 없으면 prevClose로 폴백한다.
+    if(isUS && d){
+      var b=(typeof d.baseClose==='number'&&d.baseClose>0)?d.baseClose
+           :((typeof d.prevClose==='number'&&d.prevClose>0)?d.prevClose:0);
+      if(b>0) prevClose=b;
+    }
     var times=(d&&d.times)||[];
     var seg='regular', tsv=null;
     if(isUS){

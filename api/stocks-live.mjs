@@ -2,7 +2,8 @@
 // 토스 Open API는 IP 화이트리스트라 서버리스 유동 IP에서 막혀(access_denied: IP not allowed),
 // IP 제한 없는 네이버로 조회한다. 6자리 한국 코드만 허용.
 // 국내: polling.finance.naver.com 사용 (m.stock.naver.com은 Vercel 런타임에서 fetch failed — TLS 연결 실패).
-import { isUsMarketHoliday, nyYmd } from './_us-market-calendar.mjs';
+// 세션 판정·기준가 선택은 intraday와 공유하는 _us-session.mjs가 정본(§30 — 이중 구현 금지).
+import { usSessionState, usBaseClose } from './_us-session.mjs';
 // 개장 판정은 주말·공휴일까지 아는 공용 캘린더를 쓴다(로컬 시간 전용 판정은 평일 공휴일에 장중으로 오판).
 import { krMarketOpen } from './_market-calendar.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -47,19 +48,10 @@ async function fetchYahoo(sym) {
     if (!meta) return null;
 
     const regClose = meta.regularMarketPrice;          // 마지막 정규장 체결가(정규장 중엔 실시간)
-    const prevDayClose = meta.chartPreviousClose ?? meta.previousClose; // 직전 거래일 종가
 
-    // 현재 세션 판별 — 야후가 내려주는 거래시간대(currentTradingPeriod)와 현재 시각 비교.
-    // 야후는 증시 휴장일에도 currentTradingPeriod에 평시와 동일한 세션 창을 내려주는 경우가 있어(휴일 미인지),
-    // 뉴욕 로컬 날짜가 휴장일이면 세션 창 판정을 무시하고 무조건 closed로 강제한다.
-    const tp = meta.currentTradingPeriod || {};
-    const now = Math.floor(Date.now() / 1000);
-    let state = 'closed';
-    if (!isUsMarketHoliday(nyYmd(now * 1000))) {
-      if (tp.regular && now >= tp.regular.start && now < tp.regular.end) state = 'open';
-      else if (tp.pre && now >= tp.pre.start && now < tp.pre.end) state = 'pre';
-      else if (tp.post && now >= tp.post.start && now < tp.post.end) state = 'post';
-    }
+    // 현재 세션 판별 + 세션별 기준가 — intraday와 공유하는 _us-session.mjs가 정본(§30).
+    const state = usSessionState(meta, Date.now() / 1000);
+    const base = usBaseClose(meta, state);
 
     // 시계열 마지막 유효 종가 = 프리·애프터 실시간 체결가
     let lastPx = null, lastTs = meta.regularMarketTime || null;
@@ -69,8 +61,8 @@ async function fetchYahoo(sym) {
       if (typeof closes[i] === 'number') { lastPx = closes[i]; lastTs = ts[i]; break; }
     }
 
-    // 세션별 표시가·등락 기준가
-    let price, base;
+    // 세션별 표시가 — 기준가(base)는 위 usBaseClose가 이미 정했다.
+    let price;
     if (state === 'pre' || state === 'post') {
       // 실시간 체결(lastPx)이 없으면 regClose를 price·base 양쪽에 그대로 써서
       // 항상 등락률이 정확히 0.00%로 계산되는 가짜 "플랫" 데이터가 만들어진다(SK하이닉스 ADR처럼
@@ -78,15 +70,11 @@ async function fetchYahoo(sym) {
       // 진짜 프리·애프터 체결이 없으면 수집 실패로 보고 표시하지 않는다(운영규칙 0).
       if (lastPx == null) return null;
       price = lastPx;
-      base = regClose;                                  // 직전 정규장 종가 대비
-    } else if (state === 'open') {
+    } else {                                            // open·closed — 정규장 체결가/마지막 종가
       price = (typeof regClose === 'number') ? regClose : lastPx;
-      base = prevDayClose;
-    } else {                                            // closed — 마지막 정규장 종가
-      price = (typeof regClose === 'number') ? regClose : lastPx;
-      base = prevDayClose;
     }
-    if (!isFinite(price) || !isFinite(base) || base === 0) return null;
+    // price가 null이면 isFinite(null)===true라 통과해 -100%가 만들어진다 — 타입까지 확인한다.
+    if (base == null || typeof price !== 'number' || !isFinite(price)) return null;
     const pct = ((price - base) / base) * 100;
     return {
       sym, price,

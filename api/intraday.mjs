@@ -1,4 +1,6 @@
 // 코스닥·코스피200·환율 일중 1분봉 데이터 프록시 — 스파크라인 히스토리 초기화용
+import { usSessionState, usBaseClose } from './_us-session.mjs';
+
 const HDR = {
   'User-Agent': 'Mozilla/5.0 (compatible)',
   'Referer': 'https://finance.naver.com/',
@@ -65,6 +67,10 @@ async function fetchUSMinutes(ticker) {
   const closes = result.indicators?.quote?.[0]?.close || [];
   const meta = result.meta || {};
   const prevClose = meta.chartPreviousClose ?? meta.previousClose ?? null;
+  // 등락률 기준가는 세션에 따라 다르다 — 프리·애프터장엔 prevClose가 한 세션 과거라 쓸 수 없다(§30).
+  // stocks-live와 같은 _us-session.mjs로 판정해 홈·상세가 갈리지 않게 한다.
+  const session = usSessionState(meta, Date.now() / 1000);
+  const baseClose = usBaseClose(meta, session);
 
   const minutes = [], times = [], sessions = [], stamps = [];
   let lastTs = 0;
@@ -90,7 +96,9 @@ async function fetchUSMinutes(ticker) {
     times,       // KST 시각
     sessions,    // 'pre' | 'regular' | 'post'
     ts: stamps,  // epoch(초) — 클라이언트 x 위치 계산
-    prevClose,
+    prevClose,   // 전일 종가 (하위호환 — 정규장·마감 기준가와 동일)
+    baseClose,   // 세션별 등락률 기준가 — 클라이언트는 이 값을 우선 사용한다
+    session,     // 'pre' | 'open' | 'post' | 'closed'
     // 최신 체결이 12시간 이내면 '실시간/직전 세션'으로 간주 → 헤더 시세 갱신 허용
     fresh: lastTs ? (Date.now() / 1000 - lastTs) < 12 * 3600 : false,
   };
