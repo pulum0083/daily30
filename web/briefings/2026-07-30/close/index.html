@@ -343,28 +343,7 @@ window.addEventListener('resize', function () { drawCloseChart('intraday-chart',
     </main>
 
     <aside class="layout-grid__right">
-      
-<div class="right-panel">
-  <div class="panel-header">
-    <span class="section-title">섹터 로테이션<button class="info-icon-btn" data-modal-open="sector-modal" style="margin-left:6px">?</button></span>
-    <span class="pub-time">자금 흐름</span>
-  </div>
-  <div class="rota-list">
-    
-    <div class="rota-row"><span class="rota-name">2026 하반기 신규상장</span><span class="rota-pct up">+10.0%</span></div>
-    
-    <div class="rota-row"><span class="rota-name">조선</span><span class="rota-pct up">+6.6%</span></div>
-    
-    <div class="rota-row"><span class="rota-name">토스(toss)</span><span class="rota-pct up">+5.4%</span></div>
-    
-    <div class="rota-row"><span class="rota-name">정유</span><span class="rota-pct up">+4.1%</span></div>
-    
-    <div class="rota-row"><span class="rota-name">항공/저가 항공사(LCC)</span><span class="rota-pct up">+4.0%</span></div>
-    
-  </div>
-  
-</div>
-      
+
 <div class="subcard">
   <div class="subcard__ic">✈</div>
   <div class="subcard__t">브리핑을 텔레그램으로</div>
@@ -706,28 +685,6 @@ window.addEventListener('resize', function () { drawCloseChart('intraday-chart',
       </ul>
       <br>
       <p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
-    </div>
-  </div>
-</div>
-
-
-<div class="info-modal-backdrop" id="sector-modal">
-  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="sector-modal-title">
-    <button class="info-modal__close" data-modal-close="sector-modal" aria-label="닫기">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
-    <div class="info-modal__body">
-      <p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
-      <br>
-      <p><strong>읽는 법</strong></p>
-      <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
-        <li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
-        <li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요.</li>
-        <li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
-      </ul>
-      <br>
-      <p style="color:var(--muted); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
     </div>
   </div>
 </div>
