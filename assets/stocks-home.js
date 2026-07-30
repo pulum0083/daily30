@@ -83,13 +83,20 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     cnt.textContent='리포트 '+reports.length+'건';
     document.getElementById('lw-tp-val').textContent=num(b.consensus);
     var up=document.getElementById('lw-tp-up');
+    var pct=null;
     if(b.consensus&&close){
-      var pct=(b.consensus-close)/close*100;
+      pct=(b.consensus-close)/close*100;
       up.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';
       document.getElementById('lw-tp-cur').style.width=Math.max(0,Math.min(100,close/b.consensus*100))+'%';
     } else { up.textContent=''; document.getElementById('lw-tp-cur').style.width='0%'; }
+    // 급락 직후엔 증권사가 목표가를 아직 못 낮춰 컨센서스가 종가 대비 비정상적으로 높게 뜰 수
+    // 있다(2026-07-31 실사고 — SK하이닉스 +133%·현대차 +114%. 리포트 원문 대조 결과 스크래핑
+    // 오류가 아니라 실제로 미수정된 목표가였다). 데이터를 숨기거나 고치지 않고, 그 가능성만
+    // 짧게 알려준다 — 운영규칙 0(실측은 그대로 보여주되 오독은 막는다).
+    var TP_STALE_THRESHOLD=50;
+    var staleNote=(pct!==null&&pct>=TP_STALE_THRESHOLD)?' · 급락 후 미수정 목표가 포함 가능':'';
     document.getElementById('lw-tp-meta').textContent=
-      (close?'종가 '+num(close)+' 기준 · ':'')+'3개월 '+(b.firm_count||0)+'개사 평균';
+      (close?'종가 '+num(close)+' 기준 · ':'')+'3개월 '+(b.firm_count||0)+'개사 평균'+staleNote;
     document.getElementById('lw-brk').innerHTML=reports.map(function(r){
       var op=opinionKo(r.opinion), neu=/중립|매도/.test(op)?' neu':'';
       return '<div class="lw-brk"><span class="f">'+esc(r.firm)+'</span>'+
