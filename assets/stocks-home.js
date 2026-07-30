@@ -1231,11 +1231,38 @@ function moveTip(e){
   tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
 function hideTip(){tip.style.display='none';}
-document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge,.pbdg,.help-q').forEach(el=>{
+document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge,.pbdg').forEach(el=>{
   el.addEventListener('mouseenter',showTip);
   el.addEventListener('mousemove',moveTip);
   el.addEventListener('mouseleave',hideTip);
 });
+// 물음표(help-q) 안내 — 호버 가능한 기기(마우스)는 기존 툴팁, 그 외(터치)는 탭 시 모달.
+// hover:none 기기에서도 mouseenter가 "고스트 이벤트"로 한 번 발화해 툴팁이 붙어버리는 걸 막기 위해
+// help-q만 별도로 분기하고, 호버 리스너 자체를 붙이지 않는다(모바일).
+(function(){
+  const canHover=matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const bg=document.getElementById('help-modal-bg'), body=document.getElementById('help-modal-body');
+  function openHelpModal(el){
+    if(!bg||!body) return;
+    body.innerHTML=tipHTML(el);
+    bg.classList.add('open');
+  }
+  function closeHelpModal(){ if(bg) bg.classList.remove('open'); }
+  document.querySelectorAll('.help-q').forEach(el=>{
+    if(canHover){
+      el.addEventListener('mouseenter',showTip);
+      el.addEventListener('mousemove',moveTip);
+      el.addEventListener('mouseleave',hideTip);
+    }else{
+      el.addEventListener('click',e=>{ e.preventDefault(); openHelpModal(el); });
+    }
+  });
+  if(bg){
+    bg.addEventListener('click',e=>{ if(e.target===bg) closeHelpModal(); });
+    document.getElementById('help-modal-close')?.addEventListener('click',closeHelpModal);
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHelpModal(); });
+  }
+})();
 // 검색 유니버스 — 스냅샷 로드 시 채움. [{code,name,sector}]
 let STOCK_LIST=[];
 let _sqSel=0;
