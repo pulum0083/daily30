@@ -1439,13 +1439,18 @@ def _broker_targets_for_code(code, current_price):
         "when": _rel_when(r.get("date")),
         "upside": round((r["target_price"] / current_price - 1) * 100, 1),
     } for r in priced]
+    avg_upside = round((avg_p / current_price - 1) * 100, 1)
     return {
         "count": s.get("firm_count") or len(rows),
         "min_price": min_p, "avg_price": avg_p, "max_price": max_p,
         "rows": rows,
         "cur_pct": round((current_price - min_p) / span * 100, 1),
         "avg_pct": round((avg_p - min_p) / span * 100, 1),
-        "avg_upside": round((avg_p / current_price - 1) * 100, 1),
+        "avg_upside": avg_upside,
+        # 급락 직후 증권사가 목표가를 못 낮춰 상승여력이 비정상적으로 커질 수 있다
+        # (2026-07-31 실사고 — 원문 대조로 스크래핑 오류 아님을 확인). 데이터는 그대로 보여주고
+        # 오독만 막는다(운영규칙 0). 임계치는 stocks-home.js TP_STALE_THRESHOLD와 맞춘다.
+        "maybe_stale": avg_upside >= 50,
     }
 
 
