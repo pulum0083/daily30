@@ -541,6 +541,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #tip .tt{font-size:13px;font-weight:800;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 #tip .bd{font-size:12px;color:var(--muted);line-height:1.65;}
 #tip .bd b{color:var(--ink);font-weight:700;}
+/* 물음표(help-q) 안내 — 모바일 전용 모달 (호버 불가 기기에선 툴팁이 "고스트 호버"로 붙어 불편해 탭 시 모달로 대체) */
+.help-modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.help-modal-bg.open{display:flex;}
+.help-modal{background:#fff;border-radius:16px;padding:20px 20px 18px;max-width:360px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.2);position:relative;max-height:80vh;overflow-y:auto;}
+.help-modal .close-btn{position:absolute;top:12px;right:14px;background:none;border:none;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:4px;}
+.help-modal .tt{font-size:15px;font-weight:800;margin:0 26px 8px 0;display:flex;align-items:center;gap:6px;}
+.help-modal .bd{font-size:13px;color:var(--muted);line-height:1.7;}
+.help-modal .bd b{color:var(--ink);font-weight:700;}
 /* 보이는 크기는 16px 그대로 두고, ::after로 44×44 투명 히트영역만 넓힌다(터치 최소 타깃).
    position:relative는 그 기준점 — 레이아웃(가로폭·정렬)에는 영향이 없다. */
 .help-q{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:6px;border-radius:50%;background:#E5E7EB;color:var(--muted);font-size:11px;font-weight:800;line-height:1;cursor:help;flex-shrink:0;transition:background .12s,color .12s;text-decoration:none;}
