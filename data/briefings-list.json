@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-07-31": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-07-31/kospi/",
+        "headline": "간밤 미국 랠리 후폭풍 — SOX +8%, 반도체가 코스피 견인",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-07-30": {
       "kospi": {
         "state": "ready",
@@ -525,20 +544,6 @@
       }
     },
     "2026-06-19": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-18": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
