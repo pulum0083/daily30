@@ -80,3 +80,33 @@ if __name__ == "__main__":
             fn_()
             print(f"✅ {name}")
     print("모든 테스트 통과")
+
+
+# ── 2026-07-30 실사고 — 공백 변형이 게이트를 우회했다 ──────────────────────────
+
+def test_space_separated_placeholder_is_blocked():
+    """"C 은행"(공백)도 "C은행"과 같은 익명 플레이스홀더다.
+
+    2026-07-30 미국 브리핑에서 이 형태가 통과한 뒤, 분석 단계가 이를
+    실명 씨티그룹(티커 C)으로 승격시켜 날조 이슈를 발행했다.
+    """
+    out = _drop_placeholder_entities([
+        "C 은행, 예상치 하회하는 순이자마진 발표 → 금융 섹터 전반에 대한 우려감 확산",
+    ])
+    assert out == []
+
+
+def test_space_separated_variants_all_blocked():
+    for text in ["A 사의 신제품 발표", "D 증권 목표가 상향", "E 그룹 지배구조 개편"]:
+        assert _drop_placeholder_entities([text]) == [], text
+
+
+def test_real_company_names_still_pass_with_space_rule():
+    """공백 허용이 실명 항목을 오제거하지 않는다."""
+    keep = [
+        "씨티그룹, 순이자마진 예상치 하회",
+        "JP모건 은행 부문 실적 호조",
+        "SK하이닉스 HBM 공급 확대",
+        "S&P500 지수 0.24% 상승",
+    ]
+    assert _drop_placeholder_entities(list(keep)) == keep

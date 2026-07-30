@@ -813,10 +813,11 @@ _SEARCH_FAILURE_RE = re.compile(
 
 # 익명 플레이스홀더 주어 (실존 기업이 아니라 "A사"·"[기업]" 같은 빈 슬롯)
 _PLACEHOLDER_ENTITY_RE = re.compile(
-    # "A사"·"B사의" — 단일 영문 대문자 + 사 (뒤에 조사·구두점·공백만 허용)
-    r"(?<![A-Za-z0-9])[A-Z]사(?=[\s,.·)]|의|는|가|도|을|를|와|과|에|만|$)|"
-    # "C은행"·"D증권"·"E그룹"·"F기업" — 접미어 자체가 명확해 뒤 제약 불필요
-    r"(?<![A-Za-z0-9])[A-Z](?:은행|증권|그룹|기업|테크)|"
+    # "A사"·"B사의"·"A 사" — 단일 영문 대문자 + 사 (뒤에 조사·구두점·공백만 허용)
+    # \s* — 2026-07-30 실사고: 공백 하나("C 은행")로 게이트가 통째로 우회됐다.
+    r"(?<![A-Za-z0-9])[A-Z]\s*사(?=[\s,.·)]|의|는|가|도|을|를|와|과|에|만|$)|"
+    # "C은행"·"C 은행"·"D증권"·"E그룹"·"F기업" — 접미어 자체가 명확해 뒤 제약 불필요
+    r"(?<![A-Za-z0-9])[A-Z]\s*(?:은행|증권|그룹|기업|테크)|"
     # 프롬프트 예시의 대괄호 슬롯이 그대로 남은 형태 — "[기업]의 …"
     r"\[[가-힣][가-힣·\s]*\]|"
     # 기호 마스킹 — "○○사", "XX사", "△△ 반도체"
@@ -824,6 +825,70 @@ _PLACEHOLDER_ENTITY_RE = re.compile(
     # 한국어 익명 지칭 — "모 기업", "익명의 한 기술기업"
     r"익명의?\s|(?<![가-힣])모\s+(?:기업|기술|대형|주요|반도체|은행|증권|글로벌)"
 )
+
+
+def _load_today_calendar(briefing_type: str) -> dict:
+    """fetch_data가 앞서 저장한 오늘 경제 캘린더를 읽는다 (워크플로우상 항상 선행 실행)."""
+    path = DATA_DIR / f"latest_{briefing_type.replace('-', '_')}.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8")).get("economic_calendar") or {}
+    except Exception:
+        return {}
+
+
+def _item_text(it) -> str:
+    """뉴스 항목(문자열 또는 {text:…} 객체)에서 본문을 뽑는다."""
+    if isinstance(it, str):
+        return it
+    if isinstance(it, dict):
+        return str(it.get("text", "") or "")
+    return ""
+
+
+# "오늘 발표될 주요 경제 지표는 예정되어 있지 않으나" — 캘린더에 고영향 일정이 버젓이
+# 있는데도 없다고 답하면, 그날을 실제로 검색하지 않았다는 뜻이다 (2026-07-30 실사고).
+_NO_EVENT_CLAIM_RE = re.compile(
+    r"(경제\s*지표|주요\s*지표|고영향\s*지표|경제\s*일정|발표\s*일정)"
+    r"[^.\n]{0,30}?(없|예정되어\s*있지\s*않|예정돼\s*있지\s*않|부재)"
+)
+
+
+def _grounding_failure_signals(data: dict, calendar: dict | None = None) -> list:
+    """수집이 검색 대신 **학습 시점 지식**으로 답했다는 신호를 모은다.
+
+    2026-07-30 실사고에서 세 신호가 모두 데이터에 남아 있었는데도, 개별 항목을
+    정규식으로 하나씩 반박하는 기존 게이트들은 전부 통과시켰다. 개별 문장을 쫓는
+    대신 **수집 결과 전체의 신뢰도**를 판정하기 위한 함수다(SERVICE_RULES §29).
+    """
+    signals = []
+
+    cats = data.get("catalysts") or []
+    if cats and all(isinstance(c, str) for c in cats):
+        signals.append("catalysts_schema_violation")
+
+    fields = ("catalysts", "headlines", "key_indicators")
+    blob = " ".join(
+        _item_text(it) for f in fields for it in (data.get(f) or []) if isinstance(data.get(f), list)
+    )
+
+    today_events = [e for e in ((calendar or {}).get("today") or []) if isinstance(e, dict)]
+    if today_events and _NO_EVENT_CLAIM_RE.search(blob):
+        signals.append("denies_scheduled_events")
+
+    if _PLACEHOLDER_ENTITY_RE.search(blob):
+        signals.append("placeholder_entities")
+
+    return signals
+
+
+def _is_grounding_failure(data: dict, calendar: dict | None = None) -> bool:
+    """신호 2개 이상이면 수집 실패로 본다.
+
+    1개는 정상 수집에서도 우연히 나올 수 있어 오제거 위험이 크다. 2개 이상이면
+    뉴스 요약을 통째로 버리고 **뉴스 없이 발행**한다 — 이슈 섹션이 비는 것보다
+    방향이 틀린 브리핑이 훨씬 위험하다(§27).
+    """
+    return len(_grounding_failure_signals(data, calendar)) >= 2
 
 
 def _drop_placeholder_entities(items: list) -> list:
@@ -985,6 +1050,18 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     # "…확인되지 않았습니다" 류 검색 실패 보고를 전 필드에서 제거 (이슈가 아니라 메타 서술)
     # + "B사"·"C은행"·"[기업]" 류 익명 플레이스홀더 주어를 담은 날조 항목도 함께 제거
     # + 실측 시장데이터와 방향이 반대인 주장도 제거 (유가 등)
+    # [최우선] 수집 결과 **전체**의 신뢰도를 먼저 판정한다. 개별 항목 게이트보다 앞서야 한다 —
+    # 익명 플레이스홀더 신호는 _drop_placeholder_entities가 항목을 지우기 전에만 관측된다.
+    _signals = _grounding_failure_signals(data, _load_today_calendar(briefing_type))
+    if len(_signals) >= 2:
+        print(f"[fetch_news] ⚠️ 그라운딩 실패로 뉴스 요약 전체 폐기: {_signals}", file=sys.stderr)
+        print("[fetch_news] 뉴스 없이 발행한다 — 방향이 틀린 브리핑보다 빈 섹션이 안전하다(§27).",
+              file=sys.stderr)
+        return {"key_indicators": [], "catalysts": [], "headlines": [],
+                "market_sentiment": "neutral", "grounding_failure": _signals}
+    if _signals:
+        print(f"[fetch_news] 그라운딩 경고(폐기 임계 미만): {_signals}", file=sys.stderr)
+
     reality = _fetch_reality_snapshot()
     for _fld in ("catalysts", "headlines", "key_indicators"):
         if isinstance(data.get(_fld), list):

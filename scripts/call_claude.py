@@ -170,9 +170,11 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
    - EWY + investor_trading 둘 다 긍정이면 수급 신뢰도 최고
 6. economic_calendar — 오늘·이번주 고영향 경제 이벤트
-   - today 배열: 오늘 KST 기준 발표될 지표 (CPI·FOMC·NFP 등)
-   - actual이 빈 문자열이면 아직 미발표, 수치가 있으면 이미 발표됨
-   - forecast vs actual 비교: actual > forecast = 서프라이즈(호재), actual < forecast = 쇼크(악재)
+   - today 배열: 오늘 KST 기준 이벤트. 각 항목의 **status가 시제의 유일한 근거**다.
+     · status="released" → 이 브리핑이 나가는 시점에 **이미 끝났다**. 예고형으로 쓰지 않는다.
+     · status="upcoming" → 아직 발표 전이다. 예고형으로 쓴다.
+   - **actual 필드는 이 소스가 채우지 않아 항상 비어 있다 — 발표 여부 판단에 쓰지 말 것.**
+   - forecast는 시장 예상치다. 이미 끝난 이벤트에 예상치를 결과처럼 쓰지 않는다.
    - 오늘 고영향 지표가 있으면 반드시 reasons에 언급
 7. VIX — 글로벌 리스크 선호도
    - VIX 20 이하 = 리스크온, 20~30 = 주의, 30 이상 = 리스크오프
@@ -292,7 +294,8 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 
 ### 관전 포인트(watch_items) 작성 규칙
 오늘 장중 주목해야 할 이벤트·지표·레벨을 2~3개 선별한다.
-- economic_calendar.today에 고영향 지표(CPI·FOMC·NFP 등)가 있으면 우선 포함한다.
+- economic_calendar.today 중 **status="upcoming"인 지표만** 관전 포인트로 넣는다.
+  이미 끝난(status="released") 이벤트는 앞으로 지켜볼 대상이 아니다.
 - 각 항목은 {icon, label, text} 형태. text는 왜 중요한지 해요체 1~2문장.
 - 가격 레벨(지지·저항)이 핵심인 항목은 text 대신 levels 배열을 쓴다:
   "levels": [{"label":"지지","num":"2,800","cls":"dn"},{"label":"저항","num":"2,850","cls":"up"}]
@@ -726,6 +729,46 @@ def _session_label_directive(date_str: str, briefing_type: str) -> str:
         f"어젯밤 미국장은 열리지 않았으므로 **'간밤'·'어젯밤'·'밤사이'라고 쓰지 말고 "
         f"'{label}'로 쓴다.** 국내 직전 거래일도 같은 날이다.\n\n"
     )
+
+
+def _calendar_tense_directive(analysis_data: dict | None) -> str:
+    """이미 끝난 고영향 경제 이벤트를 예고형으로 쓰지 않도록 발행 시점 시제를 주입한다.
+
+    코스피 아침(07:25)·미국(21:15) 브리핑은 그날 03:00 KST FOMC보다 뒤에 나가는데,
+    캘린더 소스가 `actual`을 절대 채우지 않아 모델에겐 모든 이벤트가 "미발표"로 보였다
+    (2026-07-30 실사고 — SERVICE_RULES §29). fetch_data가 시각을 비교해 붙인
+    `status`가 유일한 근거이므로, 그 결과를 프롬프트에 명시적으로 넣는다.
+
+    US 프롬프트에는 economic_calendar 설명 자체가 없었으므로 이 지시가 세 브리핑
+    모두를 한 번에 덮는다.
+    """
+    cal = (analysis_data or {}).get("economic_calendar") or {}
+    today = [e for e in (cal.get("today") or []) if isinstance(e, dict)]
+    released = [e for e in today if e.get("status") == "released"]
+    if not released:
+        return ""
+
+    def _fmt(e):
+        return f"- {e.get('title', '')} ({e.get('date_kst', '')})"
+
+    lines = [
+        "## 경제 이벤트 시제 (반드시 지킬 것)",
+        "",
+        "아래 이벤트는 이 브리핑이 나가는 시점에 **이미 끝났다**. "
+        "'예정'·'앞두고'·'대기'·'유력하지만'처럼 예고형으로 쓰지 말고 결과로 서술한다.",
+        *[_fmt(e) for e in released],
+        "",
+        "결과 수치는 **뉴스 요약에 실제로 있을 때만** 쓴다. 없으면 발표됐다는 사실만 적거나 "
+        "아예 언급하지 않는다 — 결과를 추정·생성하지 않는다.",
+        "forecast는 시장 예상치일 뿐이므로 이미 끝난 이벤트에 결과처럼 쓰지 않는다.",
+    ]
+
+    upcoming = [e for e in today if e.get("status") == "upcoming"]
+    if upcoming:
+        lines += ["", "반면 아래는 아직 발표 전이므로 예고형으로 쓴다.",
+                  *[_fmt(e) for e in upcoming]]
+
+    return "\n".join(lines) + "\n\n"
 
 
 def load_news_summary(briefing_type: str) -> dict:
@@ -1293,6 +1336,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
 
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += _session_label_directive(date_str, briefing_type)
+    user_content += _calendar_tense_directive(analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

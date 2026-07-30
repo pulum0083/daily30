@@ -1021,6 +1021,97 @@ def validate_index_superlatives(analysis, corrections, warnings, blocks):
             blocks.append(f"지수 최상급 주장이 실측과 모순 ({hits}): {strip_tags(t)[:80]}")
 
 
+# ── 이미 끝난 경제 이벤트의 예고형 서술 (2026-07-30 실사고 §29) ──────────────
+# 03:00 KST FOMC가 07:25 코스피·21:15 미국 브리핑에서 모두 "예정"으로 나갔다.
+# 캘린더 소스가 actual을 안 채워 모델에겐 모든 이벤트가 미발표로 보였던 게 원인이고,
+# 이 게이트는 프롬프트 지시가 새더라도 발행 직전에 잡는 최종 방어선이다.
+_PREVIEW_TENSE_RE = re.compile(
+    r"(예정|앞두고|앞둔|대기|유력|기다리|나올\s*것|발표를\s*앞|관망)"
+)
+# 제목에서 뽑아낼 한글 본문용 키워드 — 대문자 약어는 한국어 기사에 그대로 쓰인다.
+_EVENT_ACRONYM_RE = re.compile(r"\b([A-Z]{3,5})\b")
+
+def _walk_strings(obj):
+    """dict/list를 재귀 순회하며 문자열만 모은다."""
+    if isinstance(obj, str):
+        return [obj]
+    if isinstance(obj, dict):
+        return [s for v in obj.values() for s in _walk_strings(v)]
+    if isinstance(obj, list):
+        return [s for v in obj for s in _walk_strings(v)]
+    return []
+
+
+def _event_keywords(calendar):
+    """캘린더에서 (이미 끝난 이벤트 키워드, 아직 안 온 이벤트 키워드)를 뽑는다."""
+    released, upcoming = set(), set()
+    for e in ((calendar or {}).get("today") or []):
+        if not isinstance(e, dict):
+            continue
+        bucket = released if e.get("status") == "released" else upcoming
+        bucket.update(_EVENT_ACRONYM_RE.findall(e.get("title", "")))
+    return released - upcoming, upcoming
+
+
+def find_event_tense_violations(text, released_kws, upcoming_kws):
+    """이미 끝난 이벤트를 예고형으로 서술한 **문장**을 찾는다.
+
+    문장 단위로 판정한다 — 실제 사고 문장("오늘 새벽 FOMC 결정 + 파월 기자회견 …
+    기준금리 동결이 유력하지만")은 이벤트명과 예고 표현이 수십 자 떨어져 있어
+    좁은 문자 창으로는 잡히지 않았다. 반대로 본문 전체를 한 덩어리로 보면
+    "FOMC는 동결했어요. 실적 발표가 예정된 종목을 봐요"처럼 무관한 예고까지 걸린다.
+
+    아직 안 온 이벤트 키워드가 같은 문장에 있으면 그쪽에 걸린 예고로 보고 넘어간다
+    (예: "FOMC 결과가 나온 뒤 PCE 발표가 예정돼 있어요").
+    """
+    if not text or not released_kws:
+        return []
+    hits = []
+    for sent in _SENT_SPLIT.split(strip_tags(text)):
+        if any(u in sent for u in upcoming_kws):
+            continue
+        kw = next((k for k in released_kws if k in sent), None)
+        if not kw:
+            continue
+        hit = _PREVIEW_TENSE_RE.search(sent)
+        if hit:
+            hits.append(f"{kw}…{hit.group(1)}")
+    return hits
+
+
+def validate_event_tense(analysis, calendar, corrections, warnings, blocks):
+    """끝난 이벤트의 예고형 서술을 리스트 항목은 제거, 스칼라 산문은 발행 차단.
+
+    끝난 이벤트가 없는 날(대부분)에는 즉시 반환한다. 네트워크 조회가 없어 비용이 없다.
+    """
+    released, upcoming = _event_keywords(calendar)
+    if not released:
+        return
+
+    for fld in _SUPERLATIVE_LIST_FIELDS:
+        items = analysis.get(fld)
+        if not isinstance(items, list):
+            continue
+        kept = []
+        for it in items:
+            blob = it if isinstance(it, str) else json.dumps(it, ensure_ascii=False)
+            hits = find_event_tense_violations(blob, released, upcoming)
+            if hits:
+                corrections.append(f"{fld} 항목 제거 (끝난 이벤트를 예고형 서술 {hits}): "
+                                   f"{strip_tags(blob)[:60]}")
+            else:
+                kept.append(it)
+        analysis[fld] = kept
+
+    # 리스트 필드를 뺀 나머지를 **재귀로** 훑는다 — todays_view.outlook처럼 중첩된
+    # 산문에 실제 사고 문장이 들어 있었다. 산문은 자동 교정이 불가능하므로 차단한다.
+    rest = {k: v for k, v in analysis.items() if k not in _SUPERLATIVE_LIST_FIELDS}
+    for val in _walk_strings(rest):
+        hits = find_event_tense_violations(val, released, upcoming)
+        if hits:
+            blocks.append(f"이미 끝난 경제 이벤트를 예고형으로 서술 ({hits}): {strip_tags(val)[:80]}")
+
+
 # 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
 # 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
 _NO_PREMARKET_INDEX = (
@@ -1386,6 +1477,9 @@ def validate(analysis, latest, btype):
 
     # 2-d-3) 지수 '사상 최고/최저' 정성 주장 실측 대조 (전 타입)
     validate_index_superlatives(a, corrections, warnings, blocks)
+
+    # 2-d-2) 이미 끝난 경제 이벤트를 예고형으로 쓴 서술 차단 (§29)
+    validate_event_tense(a, (latest or {}).get("economic_calendar"), corrections, warnings, blocks)
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)
