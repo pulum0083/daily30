@@ -14,7 +14,7 @@
 - [x] `web/assets/stocks.js` — 헤더 등락률 기준가를 `d.baseClose` 우선으로 교체 → verify: 상세 헤더가 홈과 같은 값
 - [x] 전체 테스트 실행 → verify: `node --test api/*.test.mjs web/assets/*.test.mjs` 통과, `python3 -m pytest scripts/ -q` 회귀 없음
 - [x] SERVICE_RULES.md §30 방지 룰 추가 → verify: 재발 시 진단 순서까지 기재
-- [ ] 커밋 · 배포 · 라이브 검증 → verify: 상세 페이지와 홈의 등락률이 일치
+- [x] 커밋 · 배포 · 라이브 검증 → verify: 상세 페이지와 홈의 등락률이 일치
 
 ## 성공 기준
 
