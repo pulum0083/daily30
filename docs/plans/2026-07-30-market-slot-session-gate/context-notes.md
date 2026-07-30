@@ -57,3 +57,25 @@
 - RSS `pubDate`는 여전히 Google이 재스탬프할 수 있다(SERVICE_RULES의 IB 코멘트 항목 참조).
   재스탬프된 옛 기사는 장 개시 게이트를 통과할 수 있으나, 어제 dedup + 2-gram 판정이
   두 번째 방어선이 된다. 원문 발행일 재조회까지는 넣지 않았다(장중 30분 주기에 비용 과다).
+
+## 배포 시 발견 — GitHub Actions가 계정 결제 문제로 전면 차단됨 (2026-07-30 09:30 KST~)
+
+푸시 후 `vercel-deploy.yml`이 실행되지 않았다. 원인은 워크플로우 결함이 아니라 계정 단위 차단이다.
+
+> The job was not started because recent account payments have failed or your spending limit
+> needs to be increased.
+
+09:30 KST(00:30 UTC) 이후 모든 워크플로우가 `failure`로 시작조차 못 했다 — `이슈 브리핑 수집`(09:30),
+`Daily 30 Report (accuracy)`, `CI`, `Vercel 프로덕션 배포`. 09:00 잘못된 항목이 그대로 남아 있던 것도
+09:30 수집이 아예 돌지 않았기 때문이다.
+
+이번 배포는 §15의 수동 복구 경로로 처리했다(프로젝트 명시 고정 필수).
+
+```
+VERCEL_ORG_ID=team_iPwo9taZIskxdoXOJu9assy2 \
+VERCEL_PROJECT_ID=prj_XRVsCkXlroRpbd9WVPgtH3OiE6Fo \
+vercel deploy --prod --yes
+```
+
+**결제가 정상화되기 전에는 브리핑·이슈 수집 파이프라인이 하나도 돌지 않는다.** 코드 수정은
+반영돼 있으므로 결제 해결 후 다음 스케줄부터 게이트가 자동으로 작동한다.
