@@ -377,22 +377,38 @@ def _title_kw(title: str) -> set:
     return set(re.findall(r"[가-힣A-Za-z]{2,}", title)) - _STOPWORDS
 
 
+def _title_bigrams(title: str) -> set:
+    """제목의 문자 2-gram 집합. 조사·어미 변형에 강하다."""
+    s = re.sub(r"[^가-힣A-Za-z0-9]", "", title)
+    return {s[i:i + 2] for i in range(len(s) - 1)}
+
+
+_BIGRAM_THRESHOLD = 0.40
+
+
+def _is_dup_title(a: str, b: str, threshold: float = 0.55) -> bool:
+    """두 제목이 같은 이슈를 가리키는지 판정한다 — 어절 겹침 **또는** 문자 2-gram 겹침.
+
+    어절 단위 비교만으로는 한국어 재작성을 못 잡는다. 2026-07-30 실사고의 두 쌍은
+    "외인 대규모 매도" vs "외국인 대규모 매도와", "이틀째" vs "이틀 연속"처럼 조사·어미만
+    달라 어절 겹침이 0.29·0.33에 그쳤다(임계 0.55 미달 → 통과). 같은 쌍의 문자 2-gram
+    겹침은 0.48·0.68로, 서로 다른 이슈(0.00~0.27)와 뚜렷이 갈린다.
+    """
+    wa, wb = _title_kw(a), _title_kw(b)
+    if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= threshold:
+        return True
+    ga, gb = _title_bigrams(a), _title_bigrams(b)
+    return bool(ga and gb) and len(ga & gb) / min(len(ga), len(gb)) >= _BIGRAM_THRESHOLD
+
+
 def _filter_seen_articles(articles: list, seen_titles: list, threshold: float = 0.55) -> list:
-    """이미 발행된 타이틀과 키워드가 겹치는 기사를 목록에서 사전 제거한다."""
+    """이미 발행된 타이틀과 같은 이슈를 가리키는 기사를 목록에서 사전 제거한다."""
     if not seen_titles:
         return articles
-    filtered = []
-    for a in articles:
-        wa = _title_kw(a["title"])
-        dup = False
-        for st in seen_titles:
-            wb = _title_kw(st)
-            if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= threshold:
-                dup = True
-                break
-        if not dup:
-            filtered.append(a)
-    return filtered
+    return [
+        a for a in articles
+        if not any(_is_dup_title(a["title"], st, threshold) for st in seen_titles)
+    ]
 
 
 def _find_duplicate(result: dict, existing_titles: list, threshold: float = 0.55) -> list:
@@ -404,12 +420,64 @@ def _find_duplicate(result: dict, existing_titles: list, threshold: float = 0.55
     for nt in new_titles:
         if not nt:
             continue
-        wa = _title_kw(nt)
         for et in existing_titles:
-            wb = _title_kw(et)
-            if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= threshold:
-                blocked |= wa & wb
+            if not _is_dup_title(nt, et, threshold):
+                continue
+            # 겹친 어절을 근거로 보고한다. 2-gram만으로 걸린 경우엔 겹친 어절이 없을 수
+            # 있으므로, 그때는 매칭된 기존 제목을 근거로 남긴다 (호출부가 truthiness로 판정).
+            overlap = _title_kw(nt) & _title_kw(et)
+            blocked |= overlap or {et[:30]}
     return sorted(blocked)
+
+
+_MARKET_OPEN = "09:00"
+
+
+def filter_after_market_open(articles: list, floor: str = _MARKET_OPEN) -> list:
+    """장 개시(09:00 KST) 이후 발행된 기사만 남긴다.
+
+    '장중 이슈'는 정의상 장이 열린 뒤의 뉴스다. 개장 전(새벽)에 발행된 기사는 오늘 날짜를
+    달고 있어도 내용은 **어제 장 요약**이다 — 2026-07-30 09:00 실사고에서 어제(7/29) 서킷브레이커
+    리캡 두 건이 그대로 오늘 장중 이슈로 발행됐다(RSS 날짜 필터는 '오늘 날짜'만 보고,
+    기존 3시간 컷오프는 09:00 실행 시 06:00이 되어 새벽 리캡을 통과시킨다).
+
+    09:00 정각 실행은 이 게이트로 거의 항상 빈손이 되는데 그게 정상이다 —
+    개장 직후엔 장중 이슈가 존재하지 않는다. 빈손이면 발행을 생략한다(운영 규칙 0).
+    """
+    return [a for a in articles if a.get("pub_time", "00:00") >= floor]
+
+
+def _titles_from_payload(data: dict) -> list[str]:
+    """뉴스 JSON 한 덩어리에서 발행된 타이틀을 모두 뽑는다(seen_titles + latest + history)."""
+    titles: list[str] = list(data.get("seen_titles") or [])
+    for entry in [data.get("latest") or {}] + (data.get("history") or []):
+        for key in ("market", "stock"):
+            t = (entry.get(key) or {}).get("title", "")
+            if t and t not in titles:
+                titles.append(t)
+    return titles
+
+
+def load_prev_day_titles(today: str, out_dir: Path) -> list[str]:
+    """어제 발행한 타이틀 목록을 반환한다 — 중복 제거 **입력용**.
+
+    기존 dedup은 오늘 발행분(`date == today`)만 대상으로 삼았다. 그래서 그날 첫 실행(09:00)엔
+    비교 대상이 하나도 없어, 어제 이미 낸 이슈를 제목만 바꿔 다시 발행하는 것을 막을 근거가
+    없었다(2026-07-30 실사고 — 어제 14:01·15:01 항목이 오늘 09:00에 재발행됨).
+
+    반환값은 dedup 입력으로만 쓴다. 저장되는 `seen_titles`에는 어제 타이틀을 넣지 않는다.
+    """
+    try:
+        prev = (datetime.strptime(today, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    except ValueError:
+        return []
+    path = out_dir / f"kospi-news-{prev}.json"
+    if not path.exists():
+        return []
+    try:
+        return _titles_from_payload(json.loads(path.read_text(encoding="utf-8")))
+    except Exception:
+        return []
 
 
 def _bump_latest_time(today: str, time_str: str, slot: str) -> bool:
@@ -462,6 +530,14 @@ def main() -> None:
     articles = fetch_articles(slot, today)
     articles.sort(key=lambda a: a.get("pub_time", "00:00"), reverse=True)
 
+    # MARKET 슬롯: 장 개시 이후 발행분만 — 새벽에 나온 '어제 장 요약'을 차단한다
+    if slot == "MARKET":
+        opened = filter_after_market_open(articles)
+        dropped = len(articles) - len(opened)
+        if dropped:
+            print(f"[fetch_news_live] 개장 전({_MARKET_OPEN} 이전) 발행 기사 {dropped}건 제외 — 어제 장 요약 차단")
+        articles = opened
+
     # 최근 3시간 내 기사 우선 — 장 초반 기사가 오후에 선택되는 것을 방지
     cutoff = f"{(now.hour - 3):02d}:{now.minute:02d}" if now.hour >= 3 else "00:00"
     recent = [a for a in articles if a.get("pub_time", "00:00") >= cutoff]
@@ -500,6 +576,12 @@ def main() -> None:
         except Exception:
             pass
 
+    # 어제 발행분도 중복 판정 대상에 넣는다 (저장되는 seen_titles에는 넣지 않는다)
+    prev_day_titles = load_prev_day_titles(today, OUT_PATH.parent)
+    avoid_all = all_today_titles + [t for t in prev_day_titles if t not in all_today_titles]
+    if prev_day_titles:
+        print(f"[fetch_news_live] 어제 발행 타이틀 {len(prev_day_titles)}건도 중복 판정에 포함")
+
     # MARKET 슬롯: 실측 방향 + 코스피 레벨 조회
     market_reality = _get_market_reality() if slot == "MARKET" else None
     kospi_ref = _get_kospi_ref() if slot == "MARKET" else None
@@ -509,7 +591,7 @@ def main() -> None:
         print(f"[fetch_news_live] 코스피 기준 {kospi_ref:.0f}")
 
     # 이미 발행된 기사를 RSS 목록에서 사전 제거 — Gemini가 선택 자체를 못 하게
-    fresh_articles = _filter_seen_articles(articles, all_today_titles)
+    fresh_articles = _filter_seen_articles(articles, avoid_all)
     print(f"[fetch_news_live] 중복 제거 후 기사: {len(fresh_articles)}/{len(articles)}건")
     if len(fresh_articles) < 2:
         print("[fetch_news_live] 신규 기사 부족 (2건 미만) — 발행 생략.", file=sys.stderr)
@@ -519,7 +601,7 @@ def main() -> None:
     # 2단계: Gemini 선별 + 검증 루프
     result = None
     for attempt in range(4):
-        avoid_titles = all_today_titles or None
+        avoid_titles = avoid_all or None
         try:
             result = _call_gemini_select(fresh_articles, slot, today, time_str, avoid_titles)
         except Exception as e:
@@ -547,8 +629,8 @@ def main() -> None:
             print(f"[fetch_news_live] ⚠️ 큐레이션 기사 (시도 {attempt+1}) — 재시도")
             continue
 
-        if all_today_titles:
-            dup = _find_duplicate(result, all_today_titles)
+        if avoid_all:
+            dup = _find_duplicate(result, avoid_all)
             if dup:
                 print(f"[fetch_news_live] ⚠️ 중복 (시도 {attempt+1}): {dup} — 재시도")
                 continue  # 항상 재시도 — 마지막 시도도 중복이면 for-else에서 발행 생략
