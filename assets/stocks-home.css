@@ -929,6 +929,32 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ft-ex-row:last-child{border-bottom:none;}
 .ft-in{color:#E03131;font-weight:700;font-variant-numeric:tabular-nums;}
 .ft-out{color:#2775ED;font-weight:700;font-variant-numeric:tabular-nums;}
+/* 확장 패널 — 일별 막대 · 집중도 · 유입/유출 그룹 (2026-07-31) */
+.ft-sub{font-size:11px;color:var(--muted);margin:7px 0 4px;line-height:1.45;}
+.ft-sub b{color:#0F172A;}
+/* 0축 기준 발산 — 유입은 위, 유출은 아래. 색만이 아니라 위치로도 방향을 읽게 한다. */
+.ftd{display:flex;gap:6px;margin:2px 0 4px;}
+.ftd-col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
+.ftd-up,.ftd-dn{width:100%;display:flex;flex-direction:column;height:38px;}
+.ftd-up{justify-content:flex-end;}
+.ftd-dn{justify-content:flex-start;height:26px;}
+.ftd-zero{height:1px;width:100%;background:#CBD5E1;}
+.ftd-bar{display:block;width:100%;}
+.ftd-bar.p{background:rgba(224,49,49,.82);border-radius:3px 3px 0 0;}
+.ftd-bar.m{background:rgba(39,117,237,.82);border-radius:0 0 3px 3px;}
+.ftd-v{font-size:9.5px;font-weight:800;margin-bottom:2px;white-space:nowrap;}
+.ftd-v.b{margin:2px 0 0;}
+.ftd-d{font-size:9.5px;color:var(--muted);margin-top:4px;white-space:nowrap;}
+.ft-gauge{height:7px;border-radius:4px;background:#E8EDF4;overflow:hidden;margin:0 0 9px;}
+.ft-gauge i{display:block;height:100%;background:rgba(224,49,49,.75);}
+.ft-grp{margin-bottom:7px;}
+.ft-grp-h{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;margin-bottom:3px;}
+.ft-grp-h .dot{width:7px;height:7px;border-radius:2px;background:currentColor;}
+.ft-grp-h .sum{margin-left:auto;font-variant-numeric:tabular-nums;}
+.ft-grp-r{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12.5px;
+  background:#fff;border-radius:7px;padding:5px 9px;margin-bottom:3px;}
+.ft-grp-r .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ft-grp-r .v{white-space:nowrap;}
 .flow-quiet{font-size:12px;color:var(--muted);margin:9px 16px 0;}
 .flow-leg{font-size:11px;color:var(--muted);padding:11px 16px 14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
 .flow-scale{display:inline-flex;vertical-align:middle;}
