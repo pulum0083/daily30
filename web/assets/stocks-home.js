@@ -441,14 +441,24 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   }
   // 세션 캐시 — 같은 날 직전 fetch한 실측 1분봉을 보관해 새로고침 시 곡선을 즉시 복원(날짜 다르면 자동 무효화)
   function todayKST(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
+  // /api/intraday는 네이버 피드의 '최신 세션'을 돌려준다 — 오늘 첫 1분봉이 생기기 전(개장 전·
+  // 공휴일·주말)엔 그게 전 거래일이다. 검증 없이 받으면 어제 곡선(09:00~15:30)에 오늘 라이브
+  // 실측(09:00~)이 같은 버퍼로 이어붙어 시간축이 09:00으로 되감기며 곡선이 대각선으로 깨지고,
+  // 당일 레인지·VWAP까지 전일 저가로 오염된 채 '오늘 장중'으로 표기된다(2026-07-31 실사고).
+  // 상세 페이지(stocks.js)는 같은 API에 이미 d.date===todayKST() 검증이 있었다 — 같은 데이터의
+  // 소비처가 갈릴 때 한쪽만 검증하면 그쪽만 조용히 깨진다(SERVICE_RULES §20·§30).
+  function isTodaySession(d){ return !!(d&&d.date&&String(d.date)===todayKST().replace(/-/g,'')); }
+  window.__wmIsTodaySession=isTodaySession;   // 테스트 훅 (stocks-home.test.mjs)
+  // 캐시 키 v2 — v1엔 위 사고로 전일 세션이 '오늘'로 저장된 탭이 있어 통째로 버린다.
   function readCache(){
-    try{ var raw=sessionStorage.getItem('wm-intra-v1'); if(!raw) return {}; var o=JSON.parse(raw); return (o&&o.date===todayKST()&&o.data)?o.data:{}; }catch(e){ return {}; }
+    try{ var raw=sessionStorage.getItem('wm-intra-v2'); if(!raw) return {}; var o=JSON.parse(raw); return (o&&o.date===todayKST()&&o.data)?o.data:{}; }catch(e){ return {}; }
   }
   function writeCache(code,d){
-    try{ var raw=sessionStorage.getItem('wm-intra-v1'),o={}; try{ o=raw?JSON.parse(raw):{}; }catch(_){ o={}; }
+    if(!isTodaySession(d)) return;   // 전일 세션을 '오늘' 캐시로 굳히지 않는다
+    try{ var raw=sessionStorage.getItem('wm-intra-v2'),o={}; try{ o=raw?JSON.parse(raw):{}; }catch(_){ o={}; }
       if(!o||o.date!==todayKST()) o={date:todayKST(),data:{}}; if(!o.data) o.data={};
       o.data[code]={minutes:d.minutes||[],times:d.times||[],volumes:d.volumes||[]};
-      sessionStorage.setItem('wm-intra-v1',JSON.stringify(o)); }catch(e){}
+      sessionStorage.setItem('wm-intra-v2',JSON.stringify(o)); }catch(e){}
   }
   function backfill(code){
     // ① 세션 캐시 즉시 복원 — 같은 날 직전 실측값으로 먼저 그린다(빈 칸 방지). ② 없으면 스켈레톤.
@@ -458,7 +468,9 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     } else if(code===curCode){ showSkeleton(); }
     // ③ 라이브 fetch로 최신값 갱신(캐시도 새로 저장)
     fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
-      if(d&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); bufv[code]=(d.volumes||[]).slice(); backfilled[code]=true; writeCache(code,d); draw(code); }
+      // 오늘 세션이 아니면 버린다 — backfilled도 세우지 않아, 오늘 첫 봉이 생긴 뒤 종목을 다시
+      // 고르면 정상 백필된다. 그 전까진 라이브 폴러가 09:00부터 쌓는 실측만으로 곡선을 만든다.
+      if(isTodaySession(d)&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); bufv[code]=(d.volumes||[]).slice(); backfilled[code]=true; writeCache(code,d); draw(code); }
       else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); }
     }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); } });
   }
