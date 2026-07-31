@@ -3,79 +3,85 @@
   "stocks": {
     "005930": {
       "name": "삼성전자",
-      "consensus": 460714,
+      "consensus": 467143,
       "firm_count": 14,
-      "close_price": 207000,
+      "close_price": 262500,
       "reports": [
         {
-          "firm": "미래에셋증권",
+          "firm": "교보증권",
+          "opinion": "Buy",
+          "target_price": 500000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "DS투자증권",
           "opinion": "매수",
-          "target_price": 370000,
-          "date": "26.07.29"
-        },
-        {
-          "firm": "하나증권",
-          "opinion": "Buy",
-          "target_price": 480000,
-          "date": "26.07.08"
-        },
-        {
-          "firm": "대신증권",
-          "opinion": "Buy",
-          "target_price": 560000,
-          "date": "26.07.08"
-        },
-        {
-          "firm": "유진투자증권",
-          "opinion": "StrongBuy",
-          "target_price": 560000,
-          "date": "26.07.08"
-        },
-        {
-          "firm": "iM증권",
-          "opinion": "Buy",
-          "target_price": 480000,
-          "date": "26.07.08"
-        },
-        {
-          "firm": "IBK투자증권",
-          "opinion": "매수",
-          "target_price": 460000,
-          "date": "26.07.08"
-        },
-        {
-          "firm": "키움증권",
-          "opinion": "Buy",
-          "target_price": 390000,
-          "date": "26.07.08"
+          "target_price": 530000,
+          "date": "26.07.31"
         },
         {
           "firm": "한화투자증권",
           "opinion": "Buy",
           "target_price": 580000,
-          "date": "26.07.07"
+          "date": "26.07.31"
         },
         {
-          "firm": "교보증권",
+          "firm": "하나증권",
           "opinion": "Buy",
-          "target_price": 500000,
-          "date": "26.07.01"
+          "target_price": 480000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "대신증권",
+          "opinion": "Buy",
+          "target_price": 560000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "IBK투자증권",
+          "opinion": "매수",
+          "target_price": 460000,
+          "date": "26.07.31"
         },
         {
           "firm": "신한투자증권",
           "opinion": "매수",
-          "target_price": 590000,
-          "date": "26.06.30"
+          "target_price": 450000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "유진투자증권",
+          "opinion": "StrongBuy",
+          "target_price": 560000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "키움증권",
+          "opinion": "Buy",
+          "target_price": 390000,
+          "date": "26.07.31"
+        },
+        {
+          "firm": "미래에셋증권",
+          "opinion": "매수",
+          "target_price": 370000,
+          "date": "26.07.29"
         }
       ],
       "history": []
     },
     "000660": {
       "name": "SK하이닉스",
-      "consensus": 3085714,
+      "consensus": 3185714,
       "firm_count": 14,
-      "close_price": 1322000,
+      "close_price": 1718000,
       "reports": [
+        {
+          "firm": "유진투자증권",
+          "opinion": "StrongBuy",
+          "target_price": 3700000,
+          "date": "26.07.31"
+        },
         {
           "firm": "DS투자증권",
           "opinion": "매수",
@@ -129,12 +135,6 @@
           "opinion": "매수",
           "target_price": 4000000,
           "date": "26.07.30"
-        },
-        {
-          "firm": "미래에셋증권",
-          "opinion": "매수",
-          "target_price": 2800000,
-          "date": "26.07.29"
         }
       ],
       "history": []
@@ -143,7 +143,7 @@
       "name": "현대차",
       "consensus": 752000,
       "firm_count": 10,
-      "close_price": 351000,
+      "close_price": 388000,
       "reports": [
         {
           "firm": "DS투자증권",
