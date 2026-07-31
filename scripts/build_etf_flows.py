@@ -112,6 +112,54 @@ def roll_history(history, today, snapshot, keep_days=KEEP_DAYS):
     return {d: out[d] for d in keep}
 
 
+def daily_by_theme(snapshots, final_snap, codes):
+    """연속 스냅샷 쌍의 좌수 차분을 테마별·날짜별로 합산한다.
+
+    snapshots: [(date, snap), ...] 기준일 → 오늘 순서 (오름차순).
+    final_snap: 최종(오늘) 스냅샷 — NAV와 종목명의 단일 출처.
+    codes: 집계 대상 종목. 누적 flow와 같은 집합을 넘겨야 합이 어긋나지 않는다.
+
+    환산은 각 날의 NAV가 아니라 **최종 NAV**로 통일한다. 그래야
+    Σ(shares[d]−shares[d−1])×nav_final = (shares[last]−shares[first])×nav_final 로
+    telescoping 되어 일별 합이 헤더의 누적값과 일치한다. 날짜별 NAV를 쓰면 실측 기준
+    최대 17.9%까지 어긋나(반도체) 사용자가 막대를 더했을 때 헤더와 다른 숫자가 나온다.
+
+    중간 스냅샷에 없는 종목은 직전 좌수를 유지한다(= 그날 변화 없음). 결측을 0좌수로
+    보면 telescoping이 깨져 없는 유출이 만들어진다.
+    """
+    if len(snapshots) < 2:
+        return {}
+    dates = [d for d, _ in snapshots[1:]]
+    prev_shares = {}
+    for code in codes:
+        base = snapshots[0][1].get(code)
+        if base:
+            prev_shares[code] = base["shares"]
+
+    per_theme = {}   # theme -> {date: eok(float)}
+    for date, snap in snapshots[1:]:
+        for code in codes:
+            if code not in prev_shares:
+                continue
+            cur = snap.get(code)
+            if not cur:
+                continue          # carry-forward — prev_shares 유지
+            fin = final_snap.get(code)
+            if not fin:
+                continue
+            theme = classify_theme(fin["name"])
+            if theme:
+                delta = (cur["shares"] - prev_shares[code]) * fin["nav"] / 1e8
+                per_theme.setdefault(theme, {}).setdefault(date, 0.0)
+                per_theme[theme][date] += delta
+            prev_shares[code] = cur["shares"]
+
+    return {
+        theme: [{"date": d, "eok": round(byd.get(d, 0.0))} for d in dates]
+        for theme, byd in per_theme.items()
+    }
+
+
 def aggregate_by_theme(flows, top_n=TOP_ETFS):
     """ETF별 flow 리스트 → 테마별 집계. None 테마 제외, |합| 내림차순."""
     buckets = {}
@@ -128,6 +176,10 @@ def aggregate_by_theme(flows, top_n=TOP_ETFS):
         out.append({
             "theme": b["theme"],
             "flow_eok": b["flow_eok"],
+            # gross = |흐름| 총합. 집중도의 분모는 이 값이어야 한다 — net으로 나누면 방향이
+            # 갈린 테마에서 130% 같은 불가능한 값이 나온다(반도체 실측). gross/|net| 배수는
+            # "테마 안에서 얼마나 돌았나"를 나타낸다.
+            "gross_eok": sum(abs(e["flow_eok"]) for e in b["etfs"]),
             "etf_count": len(b["etfs"]),
             "top_etfs": [{"code": e["code"], "name": e["name"], "flow_eok": e["flow_eok"]} for e in top],
         })
@@ -218,7 +270,14 @@ def main():
 
     themes = []
     if baseline_date:
-        themes = aggregate_by_theme(compute_flows(today_snap, history[baseline_date]))
+        flows = compute_flows(today_snap, history[baseline_date])
+        themes = aggregate_by_theme(flows)
+        # 일별 분해 — 누적과 같은 종목 집합(codes)을 넘겨 합이 어긋나지 않게 한다.
+        window_dates = list(reversed(prior_dates[:window_days]))   # 기준일 → 직전 거래일
+        snapshots = [(d, history[d]) for d in window_dates] + [(today, today_snap)]
+        daily = daily_by_theme(snapshots, today_snap, [f["code"] for f in flows])
+        for t in themes:
+            t["daily"] = daily.get(t["theme"], [])
 
     OUT_PATH.write_text(json.dumps({
         "generated_at": now.isoformat(),

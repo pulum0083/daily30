@@ -2999,12 +2999,56 @@ if(passBtn){
       +'" data-theme="'+t.theme+'">'
       +'<div class="ft-nm">'+t.theme+'</div><div class="ft-amt">'+fmtEok(t.flow_eok)+'</div></div>';
   }
-  function expandHtml(t){
-    var rows=(t.top_etfs||[]).map(function(e){
-      return '<div class="ft-ex-row"><span>'+esc(e.name)+'</span><span class="'+(e.flow_eok>=0?'ft-in':'ft-out')+'">'
-        +fmtEok(e.flow_eok)+'</span></div>';
+  // 일별 흐름 막대 — 0축 기준으로 유입은 위, 유출은 아래. 방향을 색뿐 아니라 위치로도 구분한다.
+  // daily가 없으면(구버전 JSON — 다음 빌더 실행 전) 블록을 통째로 생략한다. 0으로 채우지 않는다.
+  function daysHtml(t){
+    var d=t.daily||[];
+    if(d.length<2) return '';
+    var max=Math.max.apply(null,d.map(function(x){return Math.abs(x.eok);}))||1;
+    var bars=d.map(function(x){
+      var pos=x.eok>=0, h=Math.max(2,Math.round(Math.abs(x.eok)/max*(pos?30:22)));
+      var lab='<span class="ftd-v '+(pos?'ft-in':'ft-out')+(pos?'':' b')+'">'+fmtEok(x.eok)+'</span>';
+      return '<div class="ftd-col">'
+        +'<div class="ftd-up">'+(pos?lab+'<i class="ftd-bar p" style="height:'+h+'px"></i>':'')+'</div>'
+        +'<div class="ftd-zero"></div>'
+        +'<div class="ftd-dn">'+(pos?'':'<i class="ftd-bar m" style="height:'+h+'px"></i>'+lab)+'</div>'
+        +'<span class="ftd-d">'+esc(x.date).slice(5).replace('-','/')+'</span></div>';
     }).join('');
-    return '<div class="ft-expand" data-for="'+esc(t.theme)+'"><div class="ft-expand-in">'+rows+'</div></div>';
+    return '<div class="ft-sub">일별 순유입 · 최근 '+d.length+'거래일</div><div class="ftd">'+bars+'</div>';
+  }
+
+  // 집중도 — 분모는 gross(|흐름| 총합). net으로 나누면 방향이 갈린 테마에서 100%를 넘는다.
+  function concHtml(t){
+    if(!t.gross_eok) return '';
+    var top=(t.top_etfs||[]).reduce(function(s,e){return s+Math.abs(e.flow_eok);},0);
+    var pct=Math.max(0,Math.min(100,Math.round(top/t.gross_eok*100)));
+    var churn=Math.abs(t.flow_eok)?Math.round(t.gross_eok/Math.abs(t.flow_eok)*10)/10:0;
+    return '<div class="ft-sub">상위 '+(t.top_etfs||[]).length+'개가 테마 <b>움직인 자금</b>의 <b>'+pct+'%</b>'
+      +' · ETF '+t.etf_count+'개'
+      +(churn>=1.8?' · 오간 돈이 순증의 <b>'+churn+'배</b>':'')+'</div>'
+      +'<div class="ft-gauge"><i style="width:'+pct+'%"></i></div>';
+  }
+
+  // 유입/유출 세로 그룹 — 각 그룹이 전체 폭을 써서 종목명이 잘리지 않는다.
+  // 2단 분할은 모바일에서 'KODEX AI반도체…'와 'SOL AI반도체…'가 같은 글자로 잘려,
+  // 같은 지수를 추종하는 경쟁 ETF 간 자금 이동이라는 사실이 가려진다.
+  function groupHtml(title,list,cls){
+    if(!list.length) return '';
+    var sum=list.reduce(function(s,e){return s+e.flow_eok;},0);
+    return '<div class="ft-grp"><div class="ft-grp-h '+cls+'"><i class="dot"></i>'+title
+      +'<span class="sum">'+fmtEok(sum)+'</span></div>'
+      +list.map(function(e){
+        return '<div class="ft-grp-r"><span class="nm">'+esc(e.name)+'</span>'
+          +'<span class="v '+cls+'">'+fmtEok(e.flow_eok)+'</span></div>';
+      }).join('')+'</div>';
+  }
+
+  function expandHtml(t){
+    var etfs=t.top_etfs||[];
+    var body=daysHtml(t)+concHtml(t)
+      +groupHtml('유입',etfs.filter(function(e){return e.flow_eok>=0;}),'ft-in')
+      +groupHtml('유출',etfs.filter(function(e){return e.flow_eok<0;}),'ft-out');
+    return '<div class="ft-expand" data-for="'+esc(t.theme)+'"><div class="ft-expand-in">'+body+'</div></div>';
   }
 
   function render(data){
