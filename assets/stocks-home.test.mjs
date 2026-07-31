@@ -49,8 +49,8 @@ function makeFrozenDate(fixedMs) {
   };
 }
 
-/** stocks-home.js를 스텁 환경에서 실행하고 국면 판정 함수를 꺼낸다. */
-function loadStocksHome({ now } = {}) {
+/** stocks-home.js를 스텁 환경에서 실행하고 window(샌드박스)를 돌려준다. */
+function loadWindow({ now } = {}) {
   const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
   const doc = {
     documentElement: mkEl(), head: mkEl(), body: mkEl(),
@@ -79,8 +79,12 @@ function loadStocksHome({ now } = {}) {
   sandbox.globalThis = sandbox;
 
   runInContext(src, createContext(sandbox), { filename: 'stocks-home.js' });
+  return sandbox.window;
+}
 
-  const fn = sandbox.window.__layoutPhase;
+/** stocks-home.js를 스텁 환경에서 실행하고 국면 판정 함수를 꺼낸다. */
+function loadStocksHome({ now } = {}) {
+  const fn = loadWindow({ now }).__layoutPhase;
   assert.ok(fn, 'window.__layoutPhase가 없다 — 섹션 재배치 IIFE의 테스트 훅이 제거됐는지 확인할 것');
   return fn;
 }
@@ -183,4 +187,50 @@ test('quiet: 토요일 저녁 — 미국장도 닫혀 완전 정지', () => {
 
 test('quiet: 월요일 07:30 이전 (주말이 이어지는 구간)', () => {
   assert.equal(phaseAt('2026-08-03T07:00:00'), 'quiet');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 장중 곡선 세션 검증 (__wmIsTodaySession)
+//
+// 2026-07-31 실사고: /api/intraday는 네이버 피드의 '최신 세션'을 돌려준다 — 오늘 첫 1분봉이
+// 생기기 전(개장 전·공휴일)엔 그게 전 거래일이다. 허브 위젯이 이걸 검증 없이 받아
+// buf에 채운 뒤, 09:00부터 라이브 폴러가 오늘 실측을 같은 버퍼에 이어붙였다.
+// buft의 시각이 09:00→15:30(어제) 후 09:00(오늘)으로 되감기며 곡선이 대각선으로 깨지고,
+// 당일 레인지 저점이 전일 저가(202,750)로 오염됐다. 상세 페이지(stocks.js)는 같은 API에
+// d.date===todayKST() 검증이 있어 멀쩡했다 — 같은 데이터의 이중 소비처 중 한쪽만 검증한
+// SERVICE_RULES §20·§30 패턴.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** 해당 KST 시각 기준으로 payload를 오늘 세션으로 인정하는가 */
+function acceptsAt(when, payload) {
+  const fn = loadWindow({ now: kst(when) }).__wmIsTodaySession;
+  assert.ok(fn, 'window.__wmIsTodaySession이 없다 — 장중 곡선 세션 검증 훅이 제거됐는지 확인할 것');
+  return fn(payload);
+}
+
+test('오늘 세션 1분봉은 받는다', () => {
+  assert.equal(acceptsAt('2026-07-31T10:00:00', { date: '20260731', minutes: [1, 2], times: ['09:05', '09:10'] }), true);
+});
+
+test('전 거래일 1분봉은 거부한다 (개장 전 백필 — 실사고 리플레이)', () => {
+  // 07-31 08:00엔 오늘 봉이 아직 없어 피드가 07-30 세션을 돌려준다
+  assert.equal(acceptsAt('2026-07-31T08:00:00', { date: '20260730', minutes: [214000, 207000], times: ['09:00', '15:30'] }), false);
+});
+
+test('공휴일·주말엔 직전 거래일 세션을 거부한다', () => {
+  assert.equal(acceptsAt('2026-08-01T11:00:00', { date: '20260731', minutes: [1, 2], times: ['09:00', '15:30'] }), false);
+});
+
+test('date가 없는 응답(502 등)은 거부한다', () => {
+  assert.equal(acceptsAt('2026-07-31T10:00:00', { minutes: [1, 2], times: ['09:05', '09:10'] }), false);
+  assert.equal(acceptsAt('2026-07-31T10:00:00', {}), false);
+  assert.equal(acceptsAt('2026-07-31T10:00:00', null), false);
+});
+
+test('KST 자정 직후에도 전일 세션을 오늘로 받지 않는다', () => {
+  assert.equal(acceptsAt('2026-07-31T00:10:00', { date: '20260730', minutes: [1, 2], times: ['09:00', '15:30'] }), false);
+});
+
+test('UTC 기준으로 날짜가 갈리지 않는다 (KST 09:00 = UTC 전날 00:00)', () => {
+  assert.equal(acceptsAt('2026-07-31T09:00:00', { date: '20260731', minutes: [1, 2], times: ['09:00', '09:05'] }), true);
 });
