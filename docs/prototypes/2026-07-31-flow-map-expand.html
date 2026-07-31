@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- 자금 지도 타일 확장 패널 강화안 비교 목업 — 실데이터(2026-07-31) 기준, 구현 전 방향 결정용 -->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자금 지도 확장 패널 — 강화안 비교</title>
+<style>
+:root{--muted:#64748B;--line:#E9EEF5;--inset:#F6F8FB;--in:#E03131;--out:#2775ED}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 14px 60px;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color:#0F172A;background:#F1F5F9}
+.wrap{max-width:430px;margin:0 auto}
+h1{font-size:17px;margin:0 0 4px}
+.lede{font-size:12.5px;color:var(--muted);margin:0 0 18px;line-height:1.55}
+.opt{background:#fff;border-radius:16px;padding:15px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.opt-h{display:flex;align-items:baseline;gap:7px;margin-bottom:3px}
+.tag{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:#EEF2FF;color:#4338CA}
+.tag.ok{background:#ECFDF3;color:#15803D}
+.opt-t{font-size:14.5px;font-weight:800}
+.opt-d{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+/* 타일 */
+.tile{border-radius:10px;padding:9px 11px;color:#fff;background:rgba(224,49,49,.86);margin-bottom:0}
+.tile .n{font-size:13px;font-weight:800}
+.tile .a{font-size:12px;font-weight:700;opacity:.95}
+.panel{border:1px solid var(--line);border-top:none;border-radius:0 0 11px 11px;padding:11px 12px 12px;background:#fff}
+/* ETF 행 */
+.row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #F4F7FA;font-size:12.5px}
+.row:last-child{border-bottom:none}
+.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eok{font-weight:800;white-space:nowrap}
+.in{color:var(--in)}.out{color:var(--out)}
+.px{text-align:right;line-height:1.25;white-space:nowrap}
+.px b{font-size:12.5px;font-weight:800;display:block}
+.px s{display:block;font-size:11px;font-weight:700;text-decoration:none}
+/* 일별 막대 */
+/* 0축 기준 발산 — 유입은 위, 유출은 아래. 방향을 색뿐 아니라 위치로도 구분한다. */
+.days{display:flex;gap:6px;margin:3px 0 5px}
+.day{flex:1;display:flex;flex-direction:column;align-items:center}
+.up,.dn{width:100%;display:flex;flex-direction:column;height:38px}
+.up{justify-content:flex-end}
+.dn{justify-content:flex-start;height:26px}
+.bar{width:100%;border-radius:3px}
+.bar.p{background:rgba(224,49,49,.82);border-radius:3px 3px 0 0}
+.bar.m{background:rgba(39,117,237,.82);border-radius:0 0 3px 3px}
+.zero{height:1px;background:#CBD5E1;width:100%}
+.dl{font-size:9.5px;color:var(--muted);margin-top:4px}
+.dv{font-size:9.5px;font-weight:800;margin-bottom:2px}
+.dv.b{margin:2px 0 0}
+.axis{height:0;margin:0 0 8px}
+.note{font-size:11.5px;color:#334155;background:var(--inset);border-radius:8px;padding:7px 9px;margin-top:9px;line-height:1.5}
+.sub{font-size:11px;color:var(--muted);margin:2px 0 9px}
+.conc{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+.gauge{flex:1;height:7px;border-radius:4px;background:#E8EDF4;overflow:hidden}
+.gauge i{display:block;height:100%;background:rgba(224,49,49,.75)}
+.split{display:flex;gap:7px;margin:0 0 9px}
+.half{flex:1;min-width:0;background:var(--inset);border-radius:9px;padding:8px 9px}
+.half .h{font-size:10.5px;font-weight:800;margin-bottom:5px}
+.half .l{font-size:11.5px;display:flex;justify-content:space-between;gap:6px;padding:2px 0}
+.half .l span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style></head><body><div class="wrap">
+
+<h1>자금 지도 — 타일 클릭 패널 강화안</h1>
+<p class="lede">전부 <b>2026-07-31 실데이터</b>입니다. 지어낸 수치 없음.<br>
+「미국 나스닥·기술」 타일을 눌렀을 때를 기준으로 비교합니다.</p>
+
+<div class="opt">
+  <div class="opt-h"><span class="tag">현재</span><span class="opt-t">지금 화면</span></div>
+  <p class="opt-d">상위 ETF 5개의 이름과 금액. 테마 규모·기간·구성은 패널 안에서 알 수 없습니다.</p>
+  <div class="tile"><div class="n">미국 나스닥·기술</div><div class="a">+1.2조</div></div>
+  <div class="panel" id="p0"></div>
+</div>
+
+<div class="opt">
+  <div class="opt-h"><span class="tag ok">확정</span><span class="opt-t">A · 일별 흐름 막대</span></div>
+  <p class="opt-d">5거래일을 하루씩 펼칩니다. 히스토리가 이미 있어 수집 추가 없이 가능합니다.</p>
+  <div class="tile"><div class="n">미국 나스닥·기술</div><div class="a">+1.2조</div></div>
+  <div class="panel" id="pA"></div>
+</div>
+
+<div class="opt">
+  <div class="opt-h"><span class="tag">검토</span><span class="opt-t">B · A + ETF 시세·스파크라인</span></div>
+  <p class="opt-d">각 ETF의 현재가·등락률과 20일 종가 곡선을 함께 보여줍니다. 첨부하신 카드와 같은 시각 언어입니다.</p>
+  <div class="tile"><div class="n">미국 나스닥·기술</div><div class="a">+1.2조</div></div>
+  <div class="panel" id="pB"></div>
+</div>
+
+<div class="opt">
+  <div class="opt-h"><span class="tag">검토</span><span class="opt-t">C · A + 집중도 · 유입/유출 분리</span></div>
+  <p class="opt-d">상위 5개가 테마 전체의 몇 %인지, 그리고 같은 테마 안에서 방향이 갈린 ETF를 나눠 보여줍니다.</p>
+  <div class="tile"><div class="n">미국 나스닥·기술</div><div class="a">+1.2조</div></div>
+  <div class="panel" id="pC"></div>
+  <p class="opt-d" style="margin:11px 0 8px">↑ 이 테마는 상위 5개가 전부 유입이라 유출 칸이 비었습니다. 방향이 갈리는 테마에서 진가가 나옵니다 — 16개 중 <b>11개</b>가 혼재입니다.</p>
+  <div class="tile" style="background:rgba(224,49,49,.34);color:#0F172A"><div class="n" id="c2n"></div><div class="a" id="c2a"></div></div>
+  <div class="panel" id="pC2"></div>
+</div>
+
+</div>
+<script src="./flow_data.js"></script>
+<script>
+(function(){
+  var T=window.FLOW[0];
+  // C안 두 번째 사례 — 방향이 갈린 테마(자금이 테마 '안에서' 도는 경우)
+  var T2=window.FLOW.filter(function(t){
+    var s=t.top_etfs.map(function(e){return e.flow_eok;});
+    return s.some(function(x){return x>=0;})&&s.some(function(x){return x<0;});
+  })[0]||window.FLOW[1];
+  function eok(v){var a=Math.abs(v),s=v>0?'+':(v<0?'−':'');
+    return a>=10000?s+(a/10000).toFixed(1).replace(/\.0$/,'')+'조':s+a.toLocaleString('en-US')+'억';}
+  function cls(v){return v>=0?'in':'out';}
+  function rows(t,withPx){
+    return t.top_etfs.map(function(e){
+      var px='';
+      if(withPx&&e.price){
+        var c=e.changePct>=0?'in':'out';
+        px='<span class="px"><b>'+e.price.toLocaleString()+'</b><s class="'+c+'">'
+          +(e.changePct>=0?'+':'')+e.changePct.toFixed(2)+'%</s></span>';
+      }
+      return '<div class="row">'+(withPx?spark(e.spark):'')
+        +'<span class="nm">'+e.name+'</span>'
+        +'<span class="eok '+cls(e.flow_eok)+'">'+eok(e.flow_eok)+'</span>'+px+'</div>';
+    }).join('');
+  }
+  function spark(a){
+    if(!a||a.length<2) return '';
+    var lo=Math.min.apply(null,a),hi=Math.max.apply(null,a),sp=(hi-lo)||1,W=52,H=20,P=2;
+    var pts=a.map(function(v,i){return (P+(W-2*P)*(i/(a.length-1))).toFixed(1)+','
+      +(H-P-(H-2*P)*((v-lo)/sp)).toFixed(1);}).join(' ');
+    var c=a[a.length-1]>=a[0]?'#E03131':'#2775ED';
+    return '<svg viewBox="0 0 '+W+' '+H+'" width="52" height="20" style="flex:none"><polyline points="'
+      +pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  }
+  function days(t){
+    var m=Math.max.apply(null,t.daily.map(function(d){return Math.abs(d.eok);}))||1;
+    return '<div class="sub">일별 순유입 (최근 5거래일 · 억원)</div><div class="days">'
+      +t.daily.map(function(d){
+        var pos=d.eok>=0, h=Math.max(2,Math.round(Math.abs(d.eok)/m*(pos?30:22)));
+        var lab='<span class="dv'+(pos?'':' b')+' '+cls(d.eok)+'">'+(pos?'+':'−')
+          +Math.round(Math.abs(d.eok)/1000*10)/10+'천</span>';
+        return '<div class="day">'
+          +'<div class="up">'+(pos?lab+'<div class="bar p" style="height:'+h+'px"></div>':'')+'</div>'
+          +'<div class="zero"></div>'
+          +'<div class="dn">'+(pos?'':'<div class="bar m" style="height:'+h+'px"></div>'+lab)+'</div>'
+          +'<span class="dl">'+d.date.slice(5).replace('-','/')+'</span></div>';
+      }).join('')+'</div><div class="axis"></div>';
+  }
+  function half(title,list,c){
+    return '<div class="half"><div class="h '+c+'">'+title+'</div>'
+      +(list.length?list.map(function(e){return '<div class="l"><span title="'+e.name+'">'+e.name
+        +'</span><span class="eok '+c+'">'+eok(e.flow_eok)+'</span></div>';}).join('')
+        :'<div class="l" style="color:var(--muted)">없음</div>')+'</div>';
+  }
+  function panelC(t){
+    // 분모는 net 합이 아니라 gross(|흐름| 총합)여야 한다 — net으로 나누면 방향이 갈린 테마에서
+    // 130% 같은 불가능한 값이 나온다(반도체 실측으로 확인).
+    var top5=t.top_etfs.reduce(function(s,e){return s+Math.abs(e.flow_eok);},0);
+    var share=t.gross?Math.round(top5/t.gross*100):0;
+    var churn=(t.gross&&Math.abs(t.total))?Math.round(t.gross/Math.abs(t.total)*10)/10:0;
+    return days(t)
+      +'<div class="sub">상위 5개가 테마 <b>움직인 자금</b>의 <b>'+share+'%</b> · ETF '+t.etf_count+'개'
+      +(churn>=1.8?' · 오간 돈이 순증의 <b>'+churn+'배</b>(내부 이동 큼)':'')+'</div>'
+      +'<div class="conc"><div class="gauge"><i style="width:'+Math.min(100,share)+'%"></i></div></div>'
+      +'<div class="split">'+half('유입',t.top_etfs.filter(function(e){return e.flow_eok>=0;}),'in')
+      +half('유출',t.top_etfs.filter(function(e){return e.flow_eok<0;}),'out')+'</div>';
+  }
+  document.getElementById('p0').innerHTML=rows(T,false);
+  document.getElementById('pA').innerHTML=days(T)+rows(T,false)
+    +'<div class="note">누적 <b>+1.2조</b> 한 줄로는 안 보이던 것 — <b>7/28 하루에 1조가 빠져나갔다가</b> 이후 이틀에 걸쳐 되돌아왔습니다.</div>';
+  document.getElementById('pB').innerHTML=days(T)+rows(T,true)
+    +'<div class="note">20일 곡선은 전부 <b>파랑(하락)</b>인데 자금은 <b>유입</b>입니다 — 값이 빠진 구간에 돈이 들어왔다는 뜻으로, 금액만 봐서는 안 보입니다.</div>';
+  document.getElementById('pC').innerHTML=panelC(T);
+  document.getElementById('c2n').textContent=T2.theme;
+  document.getElementById('c2a').textContent=eok(T2.total);
+  document.getElementById('pC2').innerHTML=panelC(T2)
+    +'<div class="note">테마 전체로는 <b>'+eok(T2.total)+'</b>이지만, 안에서는 한쪽에서 빠져 다른 쪽으로 옮겨가는 중입니다. 누적 한 숫자로는 <b>정반대로 읽힐 수 있는</b> 케이스예요.</div>';
+})();
+</script></body></html>
