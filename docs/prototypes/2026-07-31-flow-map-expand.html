@@ -55,6 +55,15 @@ h1{font-size:17px;margin:0 0 4px}
 .half .h{font-size:10.5px;font-weight:800;margin-bottom:5px}
 .half .l{font-size:11.5px;display:flex;justify-content:space-between;gap:6px;padding:2px 0}
 .half .l span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* C-2 세로 그룹 — 전체 폭을 써서 종목명이 잘리지 않는다 */
+.grp{margin-bottom:8px}
+.grp-h{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;margin-bottom:3px}
+.grp-h .dot{width:7px;height:7px;border-radius:2px}
+.grp-h .sum{margin-left:auto;font-variant-numeric:tabular-nums}
+.grp .l{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:5px 9px;
+  background:var(--inset);border-radius:7px;margin-bottom:3px;align-items:center}
+.grp .l .nm2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grp .l .v{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
 </style></head><body><div class="wrap">
 
 <h1>자금 지도 — 타일 클릭 패널 강화안</h1>
@@ -90,6 +99,15 @@ h1{font-size:17px;margin:0 0 4px}
   <p class="opt-d" style="margin:11px 0 8px">↑ 이 테마는 상위 5개가 전부 유입이라 유출 칸이 비었습니다. 방향이 갈리는 테마에서 진가가 나옵니다 — 16개 중 <b>11개</b>가 혼재입니다.</p>
   <div class="tile" style="background:rgba(224,49,49,.34);color:#0F172A"><div class="n" id="c2n"></div><div class="a" id="c2a"></div></div>
   <div class="panel" id="pC2"></div>
+</div>
+
+<div class="opt" style="border:2px solid #4338CA">
+  <div class="opt-h"><span class="tag">레이아웃 결정</span><span class="opt-t">C-1 · 2단 분할 vs C-2 · 세로 그룹</span></div>
+  <p class="opt-d">C안의 유입/유출 표시 방식만 다릅니다. 2단은 좁아서 <b>종목명이 잘리고</b>, 세로 그룹은 전체 폭을 써서 <b>이름이 온전히</b> 보입니다. 같은 테마(혼재)로 비교합니다.</p>
+  <div class="sub" style="font-weight:800;color:#0F172A">C-1 · 2단 분할 (현재 목업)</div>
+  <div class="panel" id="pL1" style="border-radius:11px;border-top:1px solid var(--line)"></div>
+  <div class="sub" style="font-weight:800;color:#0F172A;margin-top:14px">C-2 · 세로 그룹</div>
+  <div class="panel" id="pL2" style="border-radius:11px;border-top:1px solid var(--line)"></div>
 </div>
 
 </div>
@@ -168,6 +186,23 @@ h1{font-size:17px;margin:0 0 4px}
   document.getElementById('pC').innerHTML=panelC(T);
   document.getElementById('c2n').textContent=T2.theme;
   document.getElementById('c2a').textContent=eok(T2.total);
+  // C-2 세로 그룹 — 방향별로 묶되 각 그룹이 전체 폭을 쓴다
+  function group(title,list,c,color){
+    if(!list.length) return '';
+    var sum=list.reduce(function(s,e){return s+e.flow_eok;},0);
+    return '<div class="grp"><div class="grp-h '+c+'"><span class="dot" style="background:'+color+'"></span>'
+      +title+'<span class="sum '+c+'">'+eok(sum)+'</span></div>'
+      +list.map(function(e){return '<div class="l"><span class="nm2">'+e.name
+        +'</span><span class="v '+c+'">'+eok(e.flow_eok)+'</span></div>';}).join('')+'</div>';
+  }
+  function splitVertical(t){
+    return group('유입',t.top_etfs.filter(function(e){return e.flow_eok>=0;}),'in','#E03131')
+      +group('유출',t.top_etfs.filter(function(e){return e.flow_eok<0;}),'out','#2775ED');
+  }
+  document.getElementById('pL1').innerHTML=
+    '<div class="split">'+half('유입',T2.top_etfs.filter(function(e){return e.flow_eok>=0;}),'in')
+    +half('유출',T2.top_etfs.filter(function(e){return e.flow_eok<0;}),'out')+'</div>';
+  document.getElementById('pL2').innerHTML=splitVertical(T2);
   document.getElementById('pC2').innerHTML=panelC(T2)
     +'<div class="note">테마 전체로는 <b>'+eok(T2.total)+'</b>이지만, 안에서는 한쪽에서 빠져 다른 쪽으로 옮겨가는 중입니다. 누적 한 숫자로는 <b>정반대로 읽힐 수 있는</b> 케이스예요.</div>';
 })();
