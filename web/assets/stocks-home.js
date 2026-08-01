@@ -460,12 +460,27 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       o.data[code]={minutes:d.minutes||[],times:d.times||[],volumes:d.volumes||[]};
       sessionStorage.setItem('wm-intra-v2',JSON.stringify(o)); }catch(e){}
   }
+  // 오늘 안에 실측 1분봉이 생길 수 있는 상태인지 — 휴장일이거나 아직 개장 전이 아니면 false.
+  // 주말·공휴일·개장 전(09:00 이전)엔 /api/intraday가 항상 전일 세션을 돌려주므로 isTodaySession이
+  // 영원히 실패한다. 이 상태에서 backfilled를 세우지 않으면 탭을 전환할 때마다 스켈레톤이 떴다
+  // 사라지는 게 반복돼 곡선 영역이 튕겨 보인다(2026-08-01 실사고).
+  function todayCandleImpossible(){
+    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return true;
+    var d=new Date(Date.now()+9*3600*1000), hm=d.getUTCHours()*60+d.getUTCMinutes();
+    return hm<540;   // 09:00 KST 이전
+  }
   function backfill(code){
     // ① 세션 캐시 즉시 복원 — 같은 날 직전 실측값으로 먼저 그린다(빈 칸 방지). ② 없으면 스켈레톤.
     var cached=readCache()[code];
+    var impossible=todayCandleImpossible();
     if(cached&&cached.minutes&&cached.minutes.length>=2){
       buf[code]=cached.minutes.slice(); buft[code]=(cached.times||[]).slice(); bufv[code]=(cached.volumes||[]).slice(); draw(code);
-    } else if(code===curCode){ showSkeleton(); }
+    } else if(code===curCode){
+      if(impossible) wmSetOpen(false); else showSkeleton();
+    }
+    // 휴장일·개장 전엔 오늘 1분봉이 나올 수 없으니 매 탭 전환마다 재요청·재플리커할 필요가 없다 —
+    // 한 번만 시도하고 backfilled를 세워 이후 전환에서는 곧장 (숨김 상태로) draw()만 타게 한다.
+    if(impossible&&!(cached&&cached.minutes&&cached.minutes.length>=2)){ backfilled[code]=true; return; }
     // ③ 라이브 fetch로 최신값 갱신(캐시도 새로 저장)
     fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
       // 오늘 세션이 아니면 버린다 — backfilled도 세우지 않아, 오늘 첫 봉이 생긴 뒤 종목을 다시
