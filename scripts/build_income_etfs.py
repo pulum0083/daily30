@@ -21,7 +21,7 @@
 산출: web/data/income_etfs.json  (사이드바 랭킹 + 시뮬레이터 공용)
 
 Usage:
-  python3 scripts/build_income_etfs.py                 # 운영(순자산 7천억+)
+  python3 scripts/build_income_etfs.py                 # 운영(순자산 1,000억+)
   python3 scripts/build_income_etfs.py --aum-floor 10000   # 1조+
   python3 scripts/build_income_etfs.py --no-us        # 미국 ETF 제외
 """
@@ -355,7 +355,7 @@ def sanitize_nonfinite(obj):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--aum-floor", type=int, default=7000, help="국내 순자산 하한 (억원)")
+    ap.add_argument("--aum-floor", type=int, default=1000, help="국내 순자산 하한 (억원)")
     ap.add_argument("--out", default="web/data/income_etfs.json")
     ap.add_argument("--no-us", action="store_true", help="미국 ETF 수집 건너뜀")
     args = ap.parse_args()
