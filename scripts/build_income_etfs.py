@@ -27,6 +27,7 @@ Usage:
 """
 import argparse
 import json
+import math
 import re
 import time
 import urllib.request
@@ -71,10 +72,18 @@ def is_income_etf(name):
 
 
 def return_y1(perf_list):
-    """returnPerformanceList에서 Y1(1년 총수익) 값을 추출. 없으면 None."""
+    """returnPerformanceList에서 Y1(1년 총수익) 값을 추출. 없거나 NaN/inf(벤더 오류)면 None.
+
+    네이버 API가 드물게 value에 NaN을 실어 보낸다 — json.dump는 이를 그대로 리터럴
+    NaN으로 직렬화해 프론트 JSON.parse가 통째로 실패하는 사고(income-designer 0건 표시)로
+    이어지므로, 소스에서부터 유한하지 않은 값은 데이터 없음(None)으로 처리한다.
+    """
     for p in perf_list or []:
         if p.get("periodTypeCode") == "Y1":
-            return p.get("value")
+            v = p.get("value")
+            if isinstance(v, (int, float)) and not math.isfinite(v):
+                return None
+            return v
     return None
 
 
@@ -233,7 +242,8 @@ def build_us(usd_krw, sleep=0.5):
                 if not past.empty:
                     p0 = float(past["Close"].iloc[-1])
                     p1 = float(hist["Close"].iloc[-1])
-                    return_1y = round((p1 - p0 + float(recent.sum())) / p0 * 100, 2)
+                    if p0 and math.isfinite(p0) and math.isfinite(p1):
+                        return_1y = round((p1 - p0 + float(recent.sum())) / p0 * 100, 2)
 
             health, erosion = classify_health(yield_ttm, return_1y)
             price_krw = round(float(price_usd) * usd_krw) if usd_krw else None
@@ -325,13 +335,31 @@ def build(aum_floor_eok, include_us=True, sleep=0.25):
     }
 
 
+def sanitize_nonfinite(obj):
+    """dict/list를 재귀 순회해 NaN·Infinity를 None으로 치환.
+
+    json.dump(allow_nan=True 기본값)는 float('nan')을 리터럴 NaN으로 그대로 써버리는데,
+    이건 유효한 JSON이 아니라 브라우저 JSON.parse가 통째로 실패한다(2026-08-02 실사고 —
+    income-designer 페이지가 "전체 ETF 보기 (0)"으로 조용히 빈 화면이 됨). 소스 단계
+    가드(return_y1 등)와 별개로, 예기치 못한 경로로 NaN이 섞여도 발행 직전에 반드시 걸러
+    발행 중단 대신 "그 항목만 null(데이터 부족)"로 낮춰 서비스를 지킨다.
+    """
+    if isinstance(obj, dict):
+        return {k: sanitize_nonfinite(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [sanitize_nonfinite(v) for v in obj]
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    return obj
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--aum-floor", type=int, default=7000, help="국내 순자산 하한 (억원)")
     ap.add_argument("--out", default="web/data/income_etfs.json")
     ap.add_argument("--no-us", action="store_true", help="미국 ETF 수집 건너뜀")
     args = ap.parse_args()
-    result = build(args.aum_floor, include_us=not args.no_us)
+    result = sanitize_nonfinite(build(args.aum_floor, include_us=not args.no_us))
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     kr = result["coverage"]["kr_count"]

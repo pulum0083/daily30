@@ -25,6 +25,33 @@ def test_return_y1():
     assert m.return_y1(None) is None
 
 
+def test_return_y1_rejects_nonfinite():
+    # 2026-08-02 실사고: 벤더가 value에 NaN을 실어 보내면 json.dump가 리터럴 NaN을
+    # 그대로 써버려 프론트 JSON.parse가 통째로 실패했다 — 소스에서부터 걸러야 한다.
+    import math
+
+    assert m.return_y1([{"periodTypeCode": "Y1", "value": float("nan")}]) is None
+    assert m.return_y1([{"periodTypeCode": "Y1", "value": math.inf}]) is None
+    assert m.return_y1([{"periodTypeCode": "Y1", "value": -math.inf}]) is None
+
+
+def test_sanitize_nonfinite():
+    import math
+
+    raw = {
+        "a": float("nan"),
+        "b": [1, math.inf, {"c": -math.inf, "d": 2.5}],
+        "e": None,
+        "f": "ok",
+    }
+    out = m.sanitize_nonfinite(raw)
+    assert out == {"a": None, "b": [1, None, {"c": None, "d": 2.5}], "e": None, "f": "ok"}
+    # 결과가 실제로 유효한 JSON으로 직렬화되는지까지 확인 (이번 사고의 핵심 증상)
+    import json
+
+    json.dumps(out)
+
+
 def test_classify_health():
     # 원금성: 분배 13.02 vs 총수익 1.85 → 침식 −11.17 < −분배/2(−6.51)
     assert m.classify_health(13.02, 1.85) == ("bad", -11.17)
