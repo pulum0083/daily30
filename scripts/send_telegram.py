@@ -214,7 +214,7 @@ def pick_quote() -> str:
             quotes = json.load(f)
     except (json.JSONDecodeError, OSError):
         return ""
-    if not quotes:
+    if not isinstance(quotes, list) or not quotes:
         return ""
     item = random.choice(quotes)
     if not isinstance(item, dict) or not item.get("quote") or not item.get("author"):

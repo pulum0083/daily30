@@ -62,3 +62,14 @@ def test_pick_quote_falls_back_when_quote_today_missing(tmp_path, monkeypatch):
     result = st.pick_quote()
 
     assert "폴백 명언2" in result
+
+
+def test_pick_quote_returns_empty_when_guru_quotes_is_dict(tmp_path, monkeypatch):
+    quotes_file = tmp_path / "guru_quotes.json"
+    quotes_file.write_text(json.dumps({"a": 1}, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(st, "QUOTE_TODAY_FILE", tmp_path / "does_not_exist.json")
+    monkeypatch.setattr(st, "GURU_QUOTES_FILE", quotes_file)
+
+    result = st.pick_quote()
+
+    assert result == ""
