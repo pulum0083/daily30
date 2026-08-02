@@ -28,6 +28,8 @@ import pytz
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
+GURU_QUOTES_FILE = DATA_DIR / "guru_quotes.json"
+QUOTE_TODAY_FILE = DATA_DIR / "quote_today.json"
 KST = pytz.timezone("Asia/Seoul")
 
 # 브리핑 근거 섹션 형식 로테이션 (미국 브리핑) — bullet은 완전 제거됨
@@ -1478,11 +1480,38 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _save_todays_quote(date_str: str) -> None:
+    """오늘 코스피 브리핑에 쓸 구루 명언을 하나 뽑아 quote_today.json에 저장한다.
+
+    텔레그램(send_telegram.pick_quote)이 발송 직전 이 파일을 읽어 같은 명언을 쓴다
+    — 웹·텔레그램이 같은 날 서로 다른 명언을 보여주지 않도록 뽑는 시점을 여기로 당긴다.
+    실패해도 조용히 넘어간다(명언은 위로 카드의 부가 요소라 §0 실측 게이트 대상이 아님).
+    """
+    if not GURU_QUOTES_FILE.exists():
+        return
+    try:
+        with open(GURU_QUOTES_FILE, encoding="utf-8") as f:
+            quotes = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return
+    if not quotes:
+        return
+    item = random.choice(quotes)
+    with open(QUOTE_TODAY_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            {"date": date_str, "quote": item["quote"], "author": item["author"]},
+            f, ensure_ascii=False, indent=2,
+        )
+
+
 def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: bool = False, force: bool = False) -> None:
     """교정된 analysis로 텔레그램 메시지(txt)와 HTML을 생성한다 (API 호출 없음).
 
     검증 게이트(validate_analysis) 이후에 호출돼야 교정값이 출력물에 반영된다.
     """
+    if briefing_type == "kospi":
+        _save_todays_quote(date_str)
+
     if briefing_type == "kospi-close":
         data_file = DATA_DIR / "latest_kospi_close.json"
         with open(data_file, encoding="utf-8") as f:
