@@ -1492,16 +1492,16 @@ def _save_todays_quote(date_str: str) -> None:
     try:
         with open(GURU_QUOTES_FILE, encoding="utf-8") as f:
             quotes = json.load(f)
-    except (json.JSONDecodeError, OSError):
+        if not quotes:
+            return
+        item = random.choice(quotes)
+        with open(QUOTE_TODAY_FILE, "w", encoding="utf-8") as f:
+            json.dump(
+                {"date": date_str, "quote": item["quote"], "author": item["author"]},
+                f, ensure_ascii=False, indent=2,
+            )
+    except Exception:
         return
-    if not quotes:
-        return
-    item = random.choice(quotes)
-    with open(QUOTE_TODAY_FILE, "w", encoding="utf-8") as f:
-        json.dump(
-            {"date": date_str, "quote": item["quote"], "author": item["author"]},
-            f, ensure_ascii=False, indent=2,
-        )
 
 
 def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: bool = False, force: bool = False) -> None:
