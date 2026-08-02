@@ -180,19 +180,45 @@ def build_fallback_message(briefing_type: str) -> str:
 
 
 GURU_QUOTES_FILE = DATA_DIR / "guru_quotes.json"
+QUOTE_TODAY_FILE = DATA_DIR / "quote_today.json"
 SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
 
 
 def pick_quote() -> str:
-    """guru_quotes.json에서 랜덤으로 명언 한 줄을 반환한다."""
+    """오늘 코스피 브리핑이 뽑아둔 quote_today.json을 우선 쓰고,
+    없거나 날짜가 오늘이 아니면 guru_quotes.json에서 랜덤으로 뽑는다.
+    (웹·텔레그램이 같은 날 다른 명언을 보여주지 않도록 동기화 — kospi 타입만 quote_today.json을 씀)"""
     import random
+    import pytz
+    from datetime import datetime
+
+    if QUOTE_TODAY_FILE.exists():
+        try:
+            with open(QUOTE_TODAY_FILE, encoding="utf-8") as f:
+                today_quote = json.load(f)
+            today_str = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+            if (
+                isinstance(today_quote, dict)
+                and today_quote.get("date") == today_str
+                and today_quote.get("quote")
+                and today_quote.get("author")
+            ):
+                return f"\n\n━━━━━━━━━━━━━━━━━━━━\n💡 <i>\"{today_quote['quote']}\"</i>\n— {today_quote['author']}"
+        except (json.JSONDecodeError, OSError):
+            pass
+
     if not GURU_QUOTES_FILE.exists():
         return ""
-    with open(GURU_QUOTES_FILE, encoding="utf-8") as f:
-        quotes = json.load(f)
+    try:
+        with open(GURU_QUOTES_FILE, encoding="utf-8") as f:
+            quotes = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return ""
     if not quotes:
         return ""
     item = random.choice(quotes)
+    if not isinstance(item, dict) or not item.get("quote") or not item.get("author"):
+        return ""
     return f"\n\n━━━━━━━━━━━━━━━━━━━━\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
 
 
