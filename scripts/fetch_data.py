@@ -22,6 +22,21 @@ DATA_DIR.mkdir(exist_ok=True)
 KST = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
 
+# 밤사이 브리지 — 섹터별 미국 비교 대상 (ETF 있으면 ETF 단독, 없으면 개별주 평균).
+# stock_universe.json의 bellwethers를 손으로 골랐다 — ETF 여부가 데이터에 없어 수동 매핑.
+# ⚠️ SECTOR_FOCUS_STOCKS(바로 아래, 중단된 sector_focus 섹션용)와 섹터 구성이 다르다.
+# 재사용 금지 — stock_universe.json만 단일 소스로 쓴다(§20·§30 이중소스 재발 방지).
+BRIDGE_US_LEG = {
+    "semicon": (["SOXX"], "반도체 ETF"),
+    "power":   (["GEV", "VRT"], "GE Vernova·Vertiv"),
+    "defense": (["ITA"], "방산 ETF"),
+    "battery": (["LIT"], "리튬 ETF"),
+    "auto":    (["TSLA", "F"], "테슬라·포드"),
+    "bio":     (["XBI"], "바이오 ETF"),
+    "finance": (["JPM", "KBE"], "JP모건·은행 ETF"),
+}
+_BRIDGE_MAX_STALE_DAYS = 5
+
 # 섹터 로테이션 대표 종목·ETF (sector_focus 브리핑용 실시간 데이터 수집)
 SECTOR_FOCUS_STOCKS = {
     "semicon": {
@@ -724,6 +739,88 @@ def fetch_sector_stocks() -> dict:
                 print(f"[fetch_data] sector ETF {etf_ticker} 수집 실패", file=sys.stderr)
         result[sector_key] = {"stocks": stocks, "etfs": etfs}
     return result
+
+
+def _bridge_change_pct(entry) -> float | None:
+    """등락률을 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지)."""
+    if not isinstance(entry, dict):
+        return None
+    v = entry.get("change_pct")
+    return float(v) if isinstance(v, (int, float)) else None
+
+
+def fetch_overnight_bridge(macro: dict, snapshot: dict) -> list | None:
+    """섹터별 간밤 미국 정규장 vs 한국 직전 마감 등락 비교(§24 이중계상 UI화, 순수함수).
+
+    macro: get_ticker_full() 결과 딕셔너리 (티커 → {price, change_pct, ...}, 실패한 티커는 키 자체가 없음).
+    snapshot: web/data/stocks-snapshot.json 파싱 결과.
+    반환: [{"sector","us_label","us_change","kr_label","kr_change","gap_pp"}, ...] 또는 None(섹션 생략).
+    """
+    if not isinstance(macro, dict) or not isinstance(snapshot, dict):
+        print("[fetch_data] overnight_bridge: 입력 형식이 예상과 달라 섹션 생략", file=sys.stderr)
+        return None
+
+    snap_date_str = str(snapshot.get("generated_at") or "")[:10]
+    try:
+        snap_date = datetime.strptime(snap_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print("[fetch_data] overnight_bridge: stocks-snapshot.json generated_at 파싱 실패 — 섹션 생략", file=sys.stderr)
+        return None
+    if (datetime.now(KST).date() - snap_date).days > _BRIDGE_MAX_STALE_DAYS:
+        print(f"[fetch_data] overnight_bridge: stocks-snapshot.json이 {_BRIDGE_MAX_STALE_DAYS}일 넘게 스테일 — 섹션 생략", file=sys.stderr)
+        return None
+
+    # 유니버스는 저장소에 커밋된 파일이라 정상 상태에선 항상 읽히지만,
+    # 여기서 예외가 나면 브리핑 발행 자체가 죽는다 — 섹션만 생략하고 넘어간다.
+    universe_path = BASE_DIR / "scripts" / "config" / "stock_universe.json"
+    try:
+        with open(universe_path, encoding="utf-8") as f:
+            sectors = json.load(f)["sectors"]
+        if not isinstance(sectors, dict):
+            raise ValueError("sectors가 객체가 아님")
+    except Exception as e:
+        print(f"[fetch_data] overnight_bridge: stock_universe.json 로드 실패({e}) — 섹션 생략", file=sys.stderr)
+        return None
+
+    snap_stocks = snapshot.get("stocks")
+    if not isinstance(snap_stocks, dict):
+        print("[fetch_data] overnight_bridge: stocks-snapshot.json stocks 형식 오류 — 섹션 생략", file=sys.stderr)
+        return None
+
+    rows = []
+    for key, (us_tickers, us_label) in BRIDGE_US_LEG.items():
+        cfg = sectors.get(key)
+        if not isinstance(cfg, dict):
+            continue
+        us_vals = [v for v in (_bridge_change_pct(macro.get(t)) for t in us_tickers) if v is not None]
+        if not us_vals:
+            print(f"[fetch_data] overnight_bridge: {key} 미국 벨웨더 수집 실패 — 해당 섹터 생략", file=sys.stderr)
+            continue
+
+        kr_codes = [s["code"] for s in (cfg.get("stocks") or [])[:2] if isinstance(s, dict) and s.get("code")]
+        kr_vals, kr_names = [], []
+        for code in kr_codes:
+            s = snap_stocks.get(code)
+            v = _bridge_change_pct(s)
+            if v is not None:
+                kr_vals.append(v)
+                kr_names.append(s.get("name") or code)
+        if not kr_vals:
+            print(f"[fetch_data] overnight_bridge: {key} 한국 대표종목 데이터 없음 — 해당 섹터 생략", file=sys.stderr)
+            continue
+
+        us_change = round(sum(us_vals) / len(us_vals), 2)
+        kr_change = round(sum(kr_vals) / len(kr_vals), 2)
+        rows.append({
+            "sector": cfg.get("label", key),
+            "us_label": us_label,
+            "us_change": us_change,
+            "kr_label": "·".join(kr_names),
+            "kr_change": kr_change,
+            "gap_pp": round(kr_change - us_change, 1),
+        })
+
+    return rows or None
 
 
 def fetch_kospi_data() -> dict:
