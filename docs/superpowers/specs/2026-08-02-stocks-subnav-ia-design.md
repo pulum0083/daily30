@@ -76,7 +76,36 @@ GNB
 
 `/themes/`·`/calendar/`에는 이 시장 패널을 복제하지 않는다. 실시간 폴링이 걸린 홈 전용 위젯이라 옮기는 비용이 크고, 그 페이지의 주제와도 직접 관계가 없다. 규칙은 **"각 페이지의 머리말이 끝나는 자리"** 로 통일한다 — `/stocks/`에서는 시장 패널 아래, 신규 두 페이지에서는 페이지 제목 아래가 그 자리다. 탭 바의 화면상 y좌표는 페이지마다 다르지만 "머리말 다음"이라는 의미 위치는 같다.
 
-스타일은 **언더라인 탭**이다. 알약 탭 대비 6개가 들어가도 시각적으로 가볍고, 콘텐츠를 가르는 경계로 읽혀 조용하다.
+### 시각 규격 — ncai-design-system Tabs 준거
+
+스타일은 **언더라인 탭**이다. 알약 탭 대비 6개가 들어가도 시각적으로 가볍고, 콘텐츠를 가르는 경계로 읽혀 조용하다. 이는 취향이 아니라 [ncai-design-system](https://github.com/GronkOut/ncai-design-system)의 규정이다 — Tabs는 **Underline 변형을 기본**으로 한다.
+
+조사 결과 **Double-Shot은 이미 이 시스템의 토큰을 쓰고 있다.** 변수명만 줄여 놓았을 뿐 값이 일치한다.
+
+| ncai | Double-Shot | 값 |
+| --- | --- | --- |
+| `--color-canvas` | `--canvas` | `#ffffff` |
+| `--color-surface-soft` | `--surface-soft` | `#f9fafb` |
+| `--color-surface-inset` | `--surface-inset` | `#eef1f5` |
+| `--color-hairline` | `--hairline` | `#e5e7eb` |
+| `--color-ink` | `--ink` | `#13151a` |
+| `--color-primary` | `--primary` | `#006eff` (다크 `#1c82ff`) |
+
+따라서 새 토큰을 도입할 필요가 없다. 시스템이 React + Base UI(`@ncai/design-system` + `@base-ui/react`) 전제인데 Double-Shot은 빌드 없는 정적 HTML이므로, **컴포넌트는 가져오지 않고 토큰·규칙만 따른다.**
+
+탭 규격은 다음과 같다.
+
+| 항목 | 값 |
+| --- | --- |
+| List | 하단 1px `--hairline` 디바이더, flex 좌측 정렬, gap 없음 |
+| Tab 크기 | `min-height: 40px`, 좌우 패딩 16px |
+| Tab 타이포 | `.label-14m` — 14px / weight 500 / line-height 1.2 / letter-spacing −0.16px |
+| 기본 색 | `--body-muted` |
+| Hover | 텍스트 `--ink` |
+| **Active** | **텍스트·언더라인 모두 `--primary`.** 언더라인은 2px, `margin-bottom: -1px`로 List 디바이더 위에 겹친다 |
+| Focus | 언더라인 색 유지 + dotted outline 1px (전역 정책의 예외) |
+
+**weight는 500으로 고정한다 — 활성 탭을 굵게 만들지 않는다.** 시스템의 명시적 금지 사항이며(굵기 변화는 레이아웃 점프를 만든다), 활성 신호는 primary 컬러 하나로 통일한다. 초기 목업이 활성 탭을 `ink` + 굵게로 그렸는데 그건 규격 위반이었다.
 
 ## 범위
 
@@ -191,7 +220,7 @@ const TABS = [
 
 - `#ds-subnav` 껍데기가 없는 페이지에서 스크립트가 로드되면 조용히 아무것도 안 한다. `main.js`가 쓰는 `if (!el) return` 가드 관례와 같다.
 - `resolveActiveTab`이 `null`을 주면 아무 탭도 강조하지 않고 탭 바 자체는 그대로 보인다.
-- CSS는 **모든 변수에 폴백을 둔다** — `var(--hair, #E5E7EB)` 형태. §5에서 CSS 변수 하나가 없어 랜딩이 통째로 빈 화면이 된 사고가 있었다. 세 페이지가 서로 다른 스타일시트(`stocks-home.css` / `style.css`)를 쓰므로 변수가 없을 수 있다고 전제한다.
+- CSS는 **모든 변수에 폴백을 둔다** — `var(--hair, #E5E7EB)` 형태. §5에서 CSS 변수 하나가 없어 랜딩이 통째로 빈 화면이 된 사고가 있었다. 세 페이지가 서로 다른 스타일시트(`stocks-home.css` / `style.css`)를 쓰고 변수명도 갈려 있으므로(`--hair` vs `--hairline`), 값이 없을 수 있다고 전제하고 위 표의 ncai 값을 폴백으로 박는다.
 - 스크립트 로드는 `defer`. 렌더를 막지 않는다.
 
 ## 테스트
