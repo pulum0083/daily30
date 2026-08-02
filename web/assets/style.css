@@ -267,6 +267,9 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 /* 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 (소프트 카드) */
 .comfort-line{margin-top:14px;padding:14px 16px;background:var(--surface-soft);border-radius:12px;}
 .comfort-line__row{display:flex;align-items:center;gap:10px;}
+/* 2026-08-02 이전 발행분 하위호환 — __row 래퍼 없이 badge가 .comfort-line 직계 자식인 구버전 마크업.
+   style.css는 전 페이지 공용이라 이 규칙이 없으면 기존 발행분에서 아이콘이 텍스트 위로 쌓인다. */
+.comfort-line:not(:has(.comfort-line__row)){display:flex;align-items:center;gap:10px;}
 .comfort-line__badge{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;}
 .comfort-line__icon{color:var(--muted);}
 .comfort-line__text{margin:0;font-size:14px;line-height:1.6;color:var(--ink);text-align:left;}
