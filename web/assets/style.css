@@ -265,10 +265,15 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .reason-block ul li{font-size:14px;line-height:1.75;color:var(--ink);}
 
 /* 위로 한 줄 — 근거 섹션 맨 아래 정서적 공감 한 줄 (소프트 카드) */
-.comfort-line{display:flex;align-items:center;gap:10px;margin-top:14px;padding:14px 16px;background:var(--surface-soft);border-radius:12px;}
+.comfort-line{margin-top:14px;padding:14px 16px;background:var(--surface-soft);border-radius:12px;}
+.comfort-line__row{display:flex;align-items:center;gap:10px;}
 .comfort-line__badge{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--surface-inset);display:flex;align-items:center;justify-content:center;}
 .comfort-line__icon{color:var(--muted);}
 .comfort-line__text{margin:0;font-size:14px;line-height:1.6;color:var(--ink);text-align:left;}
+.guru-quote__mark{font-family:Georgia,serif;font-size:38px;line-height:1;color:var(--hairline);margin:0 0 -6px;user-select:none;}
+.guru-quote__text{margin:0;font-size:15px;line-height:1.6;font-weight:600;color:var(--ink);letter-spacing:-.01em;}
+.guru-quote__author{margin:8px 0 0;font-size:13px;color:var(--muted);font-weight:500;}
+.guru-quote__hr{height:1px;background:var(--hairline);margin:13px 0;}
 
 /* ──────────────────────────────────────────────
    뉴욕 마감 요약 (코스피)
