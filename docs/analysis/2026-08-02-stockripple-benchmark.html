@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StockRipple 벤치마크 분석 — Double-Shot 적용 점검</title>
+<style>
+:root{
+  --bg:#fbfbfa; --fg:#1a1a19; --muted:#6b6b66; --line:#e4e3df;
+  --card:#ffffff; --accent:#2775ED; --warn:#E03131; --ok:#0f8a5f;
+  --chip:#f2f1ee; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#151513; --fg:#eceae4; --muted:#9c9a92; --line:#2e2e2a;
+    --card:#1d1d1a; --accent:#6ba4f8; --warn:#f2726f; --ok:#4cc79a;
+    --chip:#26261f; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.75 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:48px 24px 96px}
+header{border-bottom:2px solid var(--fg);padding-bottom:22px;margin-bottom:40px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:32px;line-height:1.3;margin:10px 0 12px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:14px;margin:0}
+h2{font-size:22px;margin:56px 0 6px;letter-spacing:-.01em;padding-top:8px}
+h2 .num{color:var(--muted);font-weight:400;margin-right:10px;font-variant-numeric:tabular-nums}
+h3{font-size:17px;margin:32px 0 8px}
+p{margin:12px 0}
+.lead{font-size:17px;color:var(--fg)}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0;box-shadow:var(--shadow)}
+.card h3{margin-top:0}
+.verdict{border-left:4px solid var(--accent);background:var(--card);border-radius:0 12px 12px 0;padding:18px 22px;margin:24px 0}
+.verdict.warn{border-left-color:var(--warn)}
+.verdict.ok{border-left-color:var(--ok)}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14.5px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;font-weight:600;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+code{background:var(--chip);padding:2px 6px;border-radius:5px;font-size:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+ul,ol{padding-left:22px;margin:12px 0}
+li{margin:7px 0}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;
+  letter-spacing:.03em;vertical-align:middle;white-space:nowrap}
+.t-p1{background:#e03131;color:#fff}
+.t-p2{background:#d9840a;color:#fff}
+.t-p3{background:#5b6470;color:#fff}
+.t-no{background:var(--chip);color:var(--muted);border:1px solid var(--line)}
+.t-rule{background:var(--chip);color:var(--fg);border:1px solid var(--line);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:18px 0}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.mini b{display:block;font-size:14px;margin-bottom:4px}
+.mini span{font-size:13.5px;color:var(--muted);line-height:1.6}
+.rec{border:1px solid var(--line);border-radius:12px;margin:20px 0;overflow:hidden;background:var(--card)}
+.rec-h{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.rec-h b{font-size:16.5px}
+.rec-b{padding:16px 20px}
+.rec-b dl{margin:0;display:grid;grid-template-columns:88px 1fr;gap:8px 14px;font-size:14.5px}
+.rec-b dt{color:var(--muted);font-size:12.5px;font-weight:600;letter-spacing:.03em;padding-top:3px}
+.rec-b dd{margin:0}
+.q{border-left:3px solid var(--line);padding:2px 0 2px 16px;margin:14px 0;color:var(--muted);font-size:14.5px}
+footer{margin-top:72px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media(max-width:600px){
+  .wrap{padding:32px 18px 64px} h1{font-size:25px} h2{font-size:19px}
+  .rec-b dl{grid-template-columns:1fr;gap:2px 0}
+  .rec-b dt{padding-top:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">경쟁 서비스 분석 · Double-Shot</div>
+  <h1>StockRipple 벤치마크 — 무엇을 배우고, 무엇을 배우지 말아야 하는가</h1>
+  <p class="sub">대상 <code>stockripple.vercel.app</code> · 조사일 2026-08-02 (토, 국내외 휴장) · 8개 페이지 실사</p>
+</header>
+
+<p class="lead">StockRipple은 <b>뉴스를 상시 스트림으로 흘리며 산업 파급을 태깅하는 서비스</b>다. 더블샷은 <b>하루 3회 정해진 시각에 검증된 예측을 발행하는 서비스</b>다. 정체성이 다르므로 기능을 통째로 복사할 대상은 아니다. 다만 StockRipple이 잘 푼 문제 중 <b>더블샷이 이미 룰 문서(§19·§23·§24·§29)에서 "문제다"라고 규정해놓고 아직 UI·데이터로 풀지 않은 것</b>이 세 가지 있다. 그 셋이 이 리포트의 핵심이다.</p>
+
+<div class="verdict">
+  <b>결론 요약.</b> 도입 1순위는 ① <b>실적발표 캘린더</b>(§19·§23·§29 시제 사고를 구조적으로 차단) ② <b>테마 타임라인</b>(60일치 쌓아둔 뉴스 아카이브를 재활용해 브리핑의 "하루 지나면 죽는" 약점을 해결) ③ <b>밤사이 브리지 · 국장 선반영 %p</b>(§24 EWY 이중 계상을 숨기는 대신 화면에 드러내는 방식). 반대로 <b>해외 실시간 추정가·실시간 채팅·모의투자는 도입하지 않는다</b> — 각각 §0 원칙 위반, 운영 리스크, 핵심 경쟁력과 무관이라는 이유가 뚜렷하다.</p>
+</div>
+
+<h2><span class="num">01</span>서비스 구조 스캔</h2>
+
+<p>홈 외에 7개 독립 페이지를 운영한다. 더블샷과 겹치는 영역과 없는 영역이 뚜렷하게 갈린다.</p>
+
+<div class="scroll">
+<table>
+<thead><tr><th>페이지</th><th>내용</th><th>더블샷 대응</th></tr></thead>
+<tbody>
+<tr><td><code>/</code> 홈</td><td>뉴스 스트림 + 산업 온도 + 시장 요약 + AI 시장 종합 + 데일리 리포트 + 일정 + 섹터 모멘텀</td><td>랜딩 + <code>/briefings</code> + <code>/stocks</code>로 분산</td></tr>
+<tr><td><code>/news.html</code></td><td>뉴스 2,574건, 카테고리 10종 × 섹터 15종 필터</td><td>없음 (브리핑 내 이슈 섹션만)</td></tr>
+<tr><td><code>/analysis.html?id=</code></td><td>뉴스 1건 → AI 요약 · 핵심 포인트 · 산업 영향 · 근거 · 같은 섹터 과거 이슈</td><td><code>flow_chain</code> · <code>us_linked_story</code> (더 깊지만 브리핑에 종속)</td></tr>
+<tr><td><code>/talks.html</code> 말말말</td><td><b>테마 타임라인</b> — 진행 중 이슈를 시간순 축적 + 연관 지수·종목 시세</td><td class="muted"><b>없음 ← 최대 갭</b></td></tr>
+<tr><td><code>/earnings.html</code></td><td><b>실적 캘린더</b> 87건, KST 변환 · BMO/AMC · 컨센서스 EPS · 예정/완료 탭</td><td class="muted"><b>없음 ← 사고 재발 지점</b></td></tr>
+<tr><td><code>/kr-market.html</code></td><td>해외 역산 추정가 · 밤사이 브리지 · 시장 온도계 · 수급 · 뉴스온도 vs 주가</td><td>사이드바 · 마감 브리핑에 부분 존재</td></tr>
+<tr><td><code>/heatmap.html</code></td><td>시총 트리맵 (미장/국장 탭)</td><td><code>stocks-home.js</code>에 존재</td></tr>
+<tr><td><code>/etf.html</code> · <code>/portfolio.html</code></td><td>ETF 목록 · 모의투자(가상 1,000만원, 로그인 필요)</td><td>ETF 자금지도 있음 / 모의투자 없음</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2><span class="num">02</span>StockRipple이 잘하는 것</h2>
+
+<h3>① 테마 타임라인 — 이슈에 수명을 부여한다</h3>
+<p><code>/talks.html</code>의 "미·이란 전쟁" 테마는 <b>08-01 05:18부터 08-02 07:14까지 20건의 헤드라인이 시간 역순으로 한 화면에 쌓여</b> 있다. 각 항목에 출처(Bloomberg · CNBC · FinancialJuice · MarketWatch)와 한국어 한 줄 요약이 붙고, 상단에 <b>연관 지수·종목 실시간 시세</b>(WTI +1.29%, 금 +0.17%, 한화에어로스페이스 +6.01%, LIG넥스원 +9.05%, 대한항공 +5.07%)가 함께 걸린다.</p>
+<p>이 포맷의 힘은 <b>"이 이슈가 며칠째 진행 중이고, 그동안 관련 종목이 얼마나 움직였는가"를 한 번에 보여준다</b>는 데 있다. 일간 브리핑은 구조적으로 이걸 못 한다 — 어제 브리핑은 오늘 아무도 안 본다.</p>
+
+<h3>② 실적발표 캘린더 — 시제를 데이터로 고정한다</h3>
+<p>KST로 변환된 발표 시각을 명시한다. <code>PLTR · AMC · 마감 후(미국 8/3장) · 한국시간 05:00</code>, <code>CAT · BMO · 개장 전 · 한국시간 22:30</code> 형식이다. 컨센서스 EPS까지 붙고 예정 87건 / 완료가 탭으로 갈린다.</p>
+
+<h3>③ 밤사이 브리지 — 미→한 파급을 %p로 정량화</h3>
+<p>테마별로 <span class="muted">미국 평균 등락 → 한국 평균 등락 → 차이(%p)</span>를 계산하고 <b>"국장 선반영 −27.8%p"</b>처럼 라벨링한다. 하단 주석이 특히 좋다.</p>
+<div class="q">"국장 미반영은 미국 평균만큼 한국이 아직 못 따라갔다는 뜻, 국장 선반영은 한국이 미국 평균보다 이미 더 크게 움직였다는 뜻입니다. %p는 두 시장 평균 등락률의 차이일 뿐, 다음 개장의 방향을 보장하지 않습니다."</div>
+
+<h3>④ 불확실성 커뮤니케이션 UX</h3>
+<p>해외 역산 추정가 카드에 <b>반영 소스 칩</b>(바이낸스 · EWY · SOX), <b>신뢰도 등급</b>(매우 높음/높음), <b>모델 버전</b>(<code>v2026-08-01.2 · 정확도 집계 대기 중</code>), 그리고 상단에 경고 박스가 함께 붙는다. 브라우저별로 값이 달라질 수 있다는 사실까지 설명한다. 추정치를 다루는 태도 자체는 배울 만하다.</p>
+
+<h3>⑤ 나머지</h3>
+<div class="grid">
+  <div class="mini"><b>뉴스 온도 vs 실제 주가</b><span>뉴스 톤 집계와 대표 종목 평균 등락을 나란히 놓아 괴리 구간을 찾게 한다.</span></div>
+  <div class="mini"><b>시장 온도계</b><span>VIX · 외국인 수급 · 환율 · 코스피 52주 위치를 0~100 합성 점수로. 현재 59 중립.</span></div>
+  <div class="mini"><b>근거 블록</b><span>분석 하단에 출처 기사 · 핵심 포인트 개수 · 같은 섹터 과거 이슈를 고정 배치.</span></div>
+  <div class="mini"><b>인라인 면책</b><span>집계 위젯마다 "특정 종목의 매수·매도 의견이 아닙니다"를 바로 옆에 붙인다.</span></div>
+  <div class="mini"><b>리텐션 루프</b><span>관심종목 · 최근 본 · 실시간 채팅 · 랭킹 · 모의투자 · 계정.</span></div>
+  <div class="mini"><b>수익화</b><span>쿠팡 파트너스 고지를 전 페이지 하단에 노출.</span></div>
+</div>
+
+<h2><span class="num">03</span>StockRipple의 약점 — 더블샷이 이미 앞서 있는 지점</h2>
+
+<div class="verdict warn">
+  <b>데이터 정합성에서 명백한 결함을 발견했다.</b> <code>/kr-market.html</code>의 "인기 검색 종목"과 "거래량 TOP"에 <b>삼성전자 +26.81%, SK하이닉스 +29.95%, 삼성전기 +29.92%, KODEX 레버리지 +46.76%</b>가 <b>일간 등락률 자리에 표기</b>돼 있다. 조사 시점은 <b>토요일 휴장</b>이고, 같은 페이지 상단은 코스피를 <code>0.00%</code>로 정확히 표기한다. 개별 종목만 30% 안팎이 무더기로 찍히는 것은 <b>기준가(분모)가 다른 시점을 가리키고 있다</b>는 뜻이다 — 더블샷이 <b>§30(기준가 이중 구현)·§24(분모 실측 검증)</b>에서 이미 실사고를 겪고 공용 모듈로 해결한 것과 정확히 같은 유형의 버그다.
+</div>
+
+<div class="scroll">
+<table>
+<thead><tr><th>항목</th><th>StockRipple</th><th>Double-Shot</th></tr></thead>
+<tbody>
+<tr><td>수치 검증</td><td>확인되는 게이트 없음. 위 기준가 오류가 라이브 노출 중</td><td><code>validate_analysis</code> 게이트 + §0~§30 룰 + 테스트 450건</td></tr>
+<tr><td>"파급효과" 실제 깊이</td><td>뉴스 요약 + 섹터 태그(우호/중립/비우호) + 같은 섹터 과거 기사 나열. <b>종목 단위 인과 체인은 없다</b></td><td><code>flow_chain</code> 원인→결과 체인, <code>us_linked_story</code> read-through</td></tr>
+<tr><td>예측과 채점</td><td>없음. 사후 요약형</td><td>방향 예측 + 신뢰도 + <code>check_accuracy</code> 채점 (코스피 67% · 미국 77%)</td></tr>
+<tr><td>편집 위계</td><td>홈에 7개 블록이 평면 나열. 무엇부터 봐야 할지 불명확</td><td>브리핑 = 하나의 서사. 히어로 → 이유 → 픽 순서 고정</td></tr>
+<tr><td>발행 시각 정합</td><td>상시 스트림이라 "지금" 기준이 모호</td><td>발행 시각별 시장 국면 정의(§26 프리마켓 실체결가 등)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p class="muted">즉 <b>StockRipple은 넓고 얕고, 더블샷은 좁고 깊다.</b> 우리가 가져올 것은 <b>넓이(포맷·표면)</b>이지 그들의 <b>얕음(검증 없는 수치)</b>이 아니다.</p>
+
+<h2><span class="num">04</span>적용 후보 — 우선순위</h2>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p1">P1</span><b>실적발표 캘린더</b><span class="tag t-rule">§19 · §23 · §29</span></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>더블샷은 실적 시제 오류로 <b>이미 두 번 사고</b>가 났다. §23은 이미 발표된 구글 실적을 "오늘 밤 발표 예정"으로 냈고, §29는 끝난 FOMC를 두 브리핑이 동시에 "예정"으로 냈다. 두 사고 모두 <b>"이벤트가 언제 발표되는지"를 실데이터로 들고 있지 않아서</b> 벌어졌다. 프롬프트 지시와 사후 게이트로 막고 있는데, 캘린더가 있으면 <b>구조적으로 발생하지 않는다</b>.</dd>
+      <dt>무엇</dt><dd><code>data/earnings_calendar.json</code> — 티커 · KST 발표일시 · BMO/AMC · 컨센서스 EPS. 발행 시각과 비교해 <code>released</code>/<code>upcoming</code>을 <b>시각 단위로</b> 판정(§29 <code>_bucket_calendar_events</code>와 동일 패턴).</dd>
+      <dt>어디에</dt><dd>① <code>call_claude</code> user_content에 시제 지시로 주입 ② 미국 브리핑 "다가오는 핵심 이벤트" 섹션 ③ 코스피 아침 브리핑의 간밤 빅테크 실적 서술 근거(§23 상시 원칙)</dd>
+      <dt>난이도</dt><dd>중. <code>fetch_data.py</code>에 <code>_days_since_last_earnings</code> 인프라가 이미 있어 재활용 가능. 소스는 yfinance <code>earnings_dates</code> 또는 Nasdaq 캘린더.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p1">P1</span><b>테마 타임라인 (말말말형)</b><span class="tag t-rule">신규 표면</span></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>더블샷의 구조적 약점은 <b>브리핑이 하루살이</b>라는 것이다. 어제 브리핑은 아무도 안 본다. 그런데 우리는 <code>web/data/kospi-news-{date}.json</code>을 <b>2026-06-05부터 60일치</b> 이미 쌓아두고 있다 — 자산이 있는데 안 쓰고 있다. 테마 클러스터만 얹으면 새 수집 없이 새 표면이 생긴다.</dd>
+      <dt>무엇</dt><dd>아카이브를 테마 키(반도체 수출 · 중동 정세 · 금리 · 환율 등)로 묶어 시간순 타임라인 생성. 상단에 <b>연관 지표 실측 시세</b>를 걸어 "이슈 진행 중 관련 종목이 얼마나 움직였나"를 보여준다.</dd>
+      <dt>어디에</dt><dd><code>/themes/{slug}/</code> 영구 페이지. <b><code>project_etfnow_strategy</code>(검색 유입 복리 루프)와 정확히 같은 논리</b> — 오래 사는 트래픽 자산이 된다. <code>/stocks/{code}/</code>가 종목 축이라면 테마 페이지는 사건 축이다.</dd>
+      <dt>난이도</dt><dd>중. 데이터는 이미 있다. 테마 분류 정확도가 관건이며, <b>§25·§28 기준으로 실명·실측만 태우는 게이트를 처음부터 붙여야 한다.</b></dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p1">P1</span><b>밤사이 브리지 · 국장 선반영 %p</b><span class="tag t-rule">§24 이중 계상</span></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>§24 방지 룰은 <b>"EWY 등락률은 같은 날 코스피 등락을 이미 반영한 값이라 신규 악재로 쓰면 이중 계상"</b>이고, 해법으로 <b>"EWY를 근거로 쓸 땐 당일 코스피 등락률과 함께 제시해 중복분을 드러낸다"</b>고 적어뒀다. StockRipple의 선반영 %p가 정확히 그 구현체다. <b>우리 룰에 이미 답이 적혀 있고, UI만 없다.</b></dd>
+      <dt>무엇</dt><dd>테마별(AI 반도체·메모리 / 전기차·2차전지 / 빅테크) 미국 평균 vs 한국 평균 등락, 차이를 <code>선반영 / 미반영 ±N%p</code>로 표기. 방향 보장이 아니라는 주석 필수.</dd>
+      <dt>어디에</dt><dd>코스피 아침 브리핑 사이드바 또는 <code>_now_band</code> 하단. <code>/stocks</code> 홈에도 적용 가능.</dd>
+      <dt>난이도</dt><dd>하. <code>fetch_data</code>가 이미 SOX·EWY·나스닥을 수집한다. 한국 측은 <code>build_stocks_snapshot</code> 재활용.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p2">P2</span><b>검증 근거(provenance) 노출</b><span class="tag t-rule">§0 자산화</span></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>더블샷의 <b>최대 자산은 검증 파이프라인인데, 그게 화면에 전혀 안 보인다.</b> 사용자 입장에서 우리 숫자와 StockRipple의 (틀린) 숫자는 겉보기에 똑같다. StockRipple은 검증이 없는데도 "반영 소스 · 신뢰도 · 모델 버전"을 노출해 <b>신뢰의 외형을 만든다</b>. 우리는 실체가 있으면서 외형이 없다.</dd>
+      <dt>무엇</dt><dd>수치 옆 소스 칩(<code>토스 API 실측</code> / <code>네이버 일봉</code> / <code>yfinance</code>), 브리핑 하단에 <code>실측 주입 N건 · 검증 게이트 통과</code> 요약. 이미 <code>validate_analysis</code>가 다 알고 있는 정보이므로 <b>기록해서 렌더하기만</b> 하면 된다.</dd>
+      <dt>난이도</dt><dd>하~중. <code>validate_analysis</code>가 교정 이력을 스냅샷에 남기고 <code>generate_html</code>이 렌더.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p2">P2</span><b>뉴스 온도 vs 실제 주가 괴리</b></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>"뉴스는 좋은데 주가는 빠진 곳"은 정보 가치가 실제로 있고, 우리는 <b>뉴스 톤과 실측 등락을 둘 다 이미 갖고 있다</b>. 두 축을 나란히 놓는 것뿐이라 신규 수집이 없다.</dd>
+      <dt>주의</dt><dd>톤 집계는 <b>편집성 분류</b>이지 실측이 아니다. StockRipple처럼 <b>"뉴스 톤은 기사 N건의 분류이며 매수·매도 의견이 아닙니다"를 위젯 옆에 인라인으로</b> 붙여야 §0 정신에 부합한다.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p3">P3</span><b>관심종목 · 최근 본 (localStorage)</b></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>우리는 리텐션 장치가 <b>텔레그램·이메일 구독뿐</b>이다. 웹 재방문 유인이 없다. 로그인 없이 localStorage만으로도 <code>/stocks</code> 45종목에 즉시 붙는다.</dd>
+      <dt>난이도</dt><dd>하. 계정·서버 불필요.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="rec">
+  <div class="rec-h"><span class="tag t-p3">P3</span><b>시장 온도계 합성 점수</b></div>
+  <div class="rec-b">
+    <dl>
+      <dt>왜</dt><dd>VIX · 외국인 수급 · 환율 · 코스피 52주 위치를 0~100으로 합성. <b>4개 입력을 전부 이미 수집 중</b>이라 계산만 하면 된다.</dd>
+      <dt>주의</dt><dd>합성 점수는 <b>파생 지표라 실측이 아니다.</b> 산식을 페이지에 명시하고, 입력값이 하나라도 결측이면 <b>추정으로 메우지 말고 위젯을 생략</b>한다(§0 ②).</dd>
+    </dl>
+  </div>
+</div>
+
+<h2><span class="num">05</span>도입하지 않을 것</h2>
+
+<div class="scroll">
+<table>
+<thead><tr><th>기능</th><th>판단</th><th>이유</th></tr></thead>
+<tbody>
+<tr>
+  <td><b>해외 실시간 추정가</b><br><span class="muted">ADR·EWY·SOX 역산</span></td>
+  <td><span class="tag t-no">도입 안 함</span></td>
+  <td><b>§0 ② 정면 위반이다.</b> "데이터가 없으면 그 섹션은 비운다. 절대 지어내지 않는다"가 제1원칙인데, 이건 휴장 중 실측이 없는 값을 모델로 만들어 <b>원 단위까지 표기</b>한다(₩261,488). StockRipple은 라벨링으로 방어하지만 우리 원칙과는 양립하지 않는다. <b>단, 라벨링 UX(소스 칩·신뢰도·모델 버전)만 분리해 P2에 차용한다.</b></td>
+</tr>
+<tr>
+  <td><b>실시간 채팅 · 랭킹</b></td>
+  <td><span class="tag t-no">도입 안 함</span></td>
+  <td>상시 모더레이션 부담이 크고, 종목 게시판은 리딩·시세 조작 유인이 붙는다. 그쪽도 이미 "신고 3회 누적 시 임시 숨김"으로 방어 중이다. 소규모 운영에는 리스크 대비 이득이 낮다.</td>
+</tr>
+<tr>
+  <td><b>모의투자</b></td>
+  <td><span class="tag t-no">도입 안 함</span></td>
+  <td>계정·주문·체결·정산이 필요해 개발 비용이 가장 큰데, 더블샷의 핵심 경쟁력(예측 정확도·검증)과 <b>아무 관계가 없다</b>. 그쪽도 로그인 벽 뒤라 실사용 규모를 확인할 수 없었다.</td>
+</tr>
+<tr>
+  <td><b>홈 정보 과밀</b></td>
+  <td><span class="tag t-no">따라가지 않음</span></td>
+  <td>홈에 7개 블록이 평면 나열돼 시선 우선순위가 없다. <b>더블샷의 강한 편집 위계는 지켜야 할 강점</b>이지 개선 대상이 아니다.</td>
+</tr>
+<tr>
+  <td><b>뉴스 전량 노출</b><br><span class="muted">2,574건</span></td>
+  <td><span class="tag t-no">따라가지 않음</span></td>
+  <td>양으로 승부하면 §25(익명 날조)·§27(방향 반대)·§28(그라운딩 실패) 검증 비용이 선형으로 늘어난다. <b>완전성보다 정합성 우선</b>이라는 우리 원칙과 반대 방향이다.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2><span class="num">06</span>제안하는 순서</h2>
+
+<div class="card">
+<ol>
+<li><b>실적발표 캘린더</b> — 사고 재발 방지가 걸려 있어 가장 급하다. 데이터 수집 → 시제 판정 → 프롬프트 주입 → 미국 브리핑 섹션 순서로. <span class="muted">검증 기준: §23·§29 실사고 데이터로 리플레이해 "예정" 오표기가 실제로 차단되는지 확인.</span></li>
+<li><b>밤사이 브리지 %p</b> — 데이터가 전부 있어 가장 싸다. §24 룰의 UI 구현이라는 명분도 명확하다. <span class="muted">검증 기준: 2026-07-27 사고 데이터(EWY −6.27%)에서 코스피 −5.72%가 나란히 표기되는지 확인.</span></li>
+<li><b>검증 근거 노출</b> — 신규 수집 없이 이미 아는 정보를 렌더하는 것뿐인데 체감 차별화가 가장 크다.</li>
+<li><b>테마 타임라인</b> — 가장 크고 가장 전략적이다. 앞의 셋을 끝낸 뒤 별도 기획으로 착수. <span class="muted">착수 전 <code>superpowers:brainstorming</code> → <code>checklist.md</code> · <code>context-notes.md</code> 선행.</span></li>
+</ol>
+</div>
+
+<div class="verdict ok">
+  <b>한 문장으로.</b> StockRipple에서 배울 것은 <b>"이슈에 수명을 주고, 이벤트 시각을 데이터로 갖고, 파급을 숫자로 드러내는 포맷"</b>이다. 배우지 말 것은 <b>"검증 없이 넓게 펴는 방식"</b>이며, 그 대가는 그들의 라이브 페이지에 지금 찍혀 있는 삼성전자 +26.81%가 보여준다.
+</div>
+
+<footer>
+  Double-Shot 내부 분석 · 2026-08-02 작성 · 조사 방식: 브라우저 실사(8개 페이지) + 자체 코드베이스 대조<br>
+  인용한 StockRipple 수치는 2026-08-02 10:36~10:37 KST 조회 시점 화면값이며, 서비스 개선에 따라 달라질 수 있다.
+</footer>
+
+</div>
+</body>
+</html>
