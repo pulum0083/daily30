@@ -1,0 +1,548 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;padding:20px;background:#fbfbfa;font-family:-apple-system,sans-serif;max-width:1120px}h2{font-size:20px}h3{font-size:15px}.subtitle{font-size:12px;color:#666;line-height:1.6}.options,.option,.content{display:block}</style>
+
+<style>
+.cal{--ink:#13151A;--mut:#5B6472;--hair:#E5E7EB;--cv:#F9FAFB;--w:#fff;--pri:#006EFF;
+ --up:#E03131;--dn:#2775ED;--gold:#B7791F;--gbg:#FEF3C7;
+ font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+ color:var(--ink);background:var(--w);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.cal *{box-sizing:border-box}
+.cal-gnb{height:42px;background:#16181A;display:flex;align-items:center;gap:10px;padding:0 16px;color:#fff}
+.cal-gnb .lg{font-size:13px;font-weight:800;letter-spacing:-.02em}
+.cal-gnb .lg em{font-style:normal;color:#7DA8FF}
+.cal-gnb .mi{font-size:11px;opacity:.65}
+.cal-sn{display:flex;padding:0 16px;border-bottom:1px solid var(--hair);background:var(--w);overflow-x:auto}
+.cal-sn span{font-size:12px;padding:9px 2px;margin-right:16px;color:var(--mut);white-space:nowrap;border-bottom:2px solid transparent}
+.cal-sn span.on{color:var(--ink);font-weight:800;border-bottom-color:var(--ink)}
+.crumb{font-size:10.5px;color:var(--mut);padding:10px 16px 0}
+.phead{padding:2px 16px 0}
+.phead h3{margin:0;font-size:16.5px;font-weight:800;letter-spacing:-.02em}
+.phead p{margin:3px 0 0;font-size:11.5px;color:var(--mut)}
+/* 2단 — stocks-home.css .home-cols 규격 */
+.home-cols{display:grid;grid-template-columns:2fr 1fr;column-gap:20px;align-items:start;padding:12px 16px 16px}
+.home-main,.home-side{min-width:0}
+@media(max-width:760px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:14px}}
+.block{border:1px solid var(--hair);border-radius:10px;background:var(--w);padding:11px 12px;margin-bottom:12px}
+.block.side{background:var(--cv)}
+.block__h{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:5px;margin-bottom:8px;
+  padding-bottom:7px;border-bottom:1px solid var(--hair)}
+.block__h .st{margin-left:auto;font-size:10px;color:var(--mut);font-weight:600}
+.sub-h{font-size:12px;font-weight:800;margin:0 0 7px}
+.dg{margin:0 0 13px}
+.dg-h{font-size:12px;font-weight:800;padding:0 0 6px;border-bottom:1px solid var(--hair);margin-bottom:4px;display:flex;align-items:baseline;gap:5px}
+.dg-h .wd{color:var(--mut);font-weight:600}
+.dg-h .cnt{margin-left:auto;font-size:10px;color:var(--mut);font-weight:600}
+.er{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px;flex-wrap:wrap}
+.er:nth-child(even){background:var(--cv)}
+.er.is-w{background:#FFFBEB;box-shadow:inset 2px 0 0 var(--gold)}
+.er.is-e{background:#F0F7FF;box-shadow:inset 2px 0 0 var(--pri)}
+.er-l{flex:1 1 170px;min-width:0;display:flex;align-items:baseline;gap:6px}
+.er-l b{font-size:12.5px;font-weight:800}
+.er-l .nm{font-size:10.5px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.er-l .nm.ttl{font-size:11.5px;color:var(--ink);font-weight:600;white-space:normal}
+.er-m{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+.er-r{flex:0 0 auto;display:flex;align-items:baseline;gap:5px;margin-left:auto}
+.wb{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.wb.bmo{background:#FFE8E8;color:#C92A2A}
+.wb.amc{background:#DBE8FE;color:#1864AB}
+.wb.tbd{background:#EFF1F4;color:#868E96}
+.ei{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ei.hi{background:#E8F4FF;color:#0B5ED7}
+.ei.md{background:#EFF1F4;color:#5B6472}
+.kst{font-size:10.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+.kst.dim,.ep.dim{color:#B0B6BE}
+.lb{font-size:9.5px;color:var(--mut)}
+.ep{font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.nest{font-size:9.5px;color:#9AA1AC}
+.krw{font-size:9px;font-weight:800;background:var(--gbg);color:var(--gold);padding:1.5px 5px;border-radius:3px;white-space:nowrap}
+.arw{color:#C6CBD2;font-size:10px}
+.more{font-size:10.5px;color:var(--pri);font-weight:700;padding:6px 8px}
+/* 사이드 */
+.sd-sum{display:flex;gap:8px;margin-bottom:9px}
+.sd-sum div{flex:1;background:var(--w);border:1px solid var(--hair);border-radius:8px;padding:7px 9px}
+.sd-sum b{display:block;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25}
+.sd-sum span{font-size:9.5px;color:var(--mut)}
+.sd-d{font-size:10px;font-weight:800;color:var(--mut);margin:9px 0 3px;letter-spacing:.02em}
+.sd-d .wd{font-weight:600}
+.sr{background:var(--w);border:1px solid var(--hair);border-radius:8px;padding:7px 9px;margin-bottom:5px}
+.sr-t{display:flex;align-items:center;gap:5px}
+.sr-t b{font-size:12px;font-weight:800}
+.sr-b{font-size:10.5px;color:var(--mut);margin-top:2px;display:flex;align-items:baseline;gap:4px;font-variant-numeric:tabular-nums}
+.sr-b b{color:var(--ink);font-size:11px;font-weight:800}
+.sur{margin-left:auto;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.sur.up{color:var(--up)} .sur.dn{color:var(--dn)} .sur.dim{color:#B0B6BE;font-weight:600;font-size:10px}
+/* 홈 블록 */
+.hr{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:6px;font-size:11.5px}
+.hr:nth-child(even){background:var(--cv)}
+.hr.is-e{background:#F0F7FF}
+.hr .hd2{font-size:10px;color:var(--mut);font-weight:700;min-width:44px}
+.hr b{font-size:12px;font-weight:800}
+.hr .hw{font-size:10px;color:var(--mut)}
+.hr .he{margin-left:auto;font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.foot{font-size:10.5px;color:var(--mut);padding:10px 16px 13px;line-height:1.65;border-top:1px solid var(--hair);background:var(--cv)}
+</style>
+
+<h2>실적 캘린더 — 2단 레이아웃 (좌 본문 / 우 발표 완료)</h2>
+<p class="subtitle"><code>#signals-all</code>의 <code>.home-cols</code> 규격(2fr 1fr, 900px 이하 1단)을 그대로 따랐어요.
+Nasdaq API와 yfinance에서 <b>방금 실제 수집한 데이터</b>예요 — 가짜 값은 하나도 없어요.<br>
+수집 2026-08-02 15:12 KST · 예정 99건(10영업일 × 일 상위 12, $10B+) · 코스피 연관 6건 · 경제지표 9건 · 발표 완료 28건(실제 결과 25건)</p>
+
+<div class="options" style="display:block;margin:0">
+<div class="option" data-choice="a" onclick="toggleSelect(this)" style="display:block"><div class="content" style="width:100%">
+<h3>A — 좌측에서 실적과 지표를 날짜별로 함께</h3>
+<div class="cal">
+  <div class="cal-gnb"><span class="lg">Double<em>-Shot</em></span><span class="mi">브리핑</span><span class="mi">월배당</span></div>
+  <div class="cal-sn"><span>전체</span><span>특이신호</span><span>테마</span><span>섹터</span><span>ETF</span><span class="on">일정</span></div>
+  <div class="crumb">← 시그널</div>
+  <div class="phead"><h3>일정</h3><p>미국 실적발표와 경제지표를 한국시간으로 · 시총 $10B 이상</p></div>
+  <div class="home-cols">
+    <div class="home-main"><div class="dg"><div class="dg-h">8월 3일 <span class="wd">(월)</span><span class="cnt">실적 12건 · 지표 2건</span></div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">ISM Manufacturing PMI</span></div>
+      <div class="er-m"><span class="kst">08/03 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">54.0</b><span class="nest">이전 53.3</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ISM Manufacturing Prices</span></div>
+      <div class="er-m"><span class="kst">08/03 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">70.0</b><span class="nest">이전 73.0</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PLTR</b><span class="nm">Palantir Technologies Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.28</b><span class="nest">10곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MUFG</b><span class="nm">Mitsubishi UFJ Financial Group Inc</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.34</b><span class="nest">1곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>VRTX</b><span class="nm">Vertex Pharmaceuticals Incorporated</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$4.30</b><span class="nest">5곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MAR</b><span class="nm">Marriott International</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/03 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$3.06</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>WMB</b><span class="nm">Williams Companies, Inc. (The)</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.52</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>FANG</b><span class="nm">Diamondback Energy, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.08</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>OKE</b><span class="nm">ONEOK, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.39</b><span class="nest">6곳</span></div>
+    </div><div class="more">+ 5건 더 보기</div></div><div class="dg"><div class="dg-h">8월 4일 <span class="wd">(화)</span><span class="cnt">실적 12건 · 지표 1건</span></div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">JOLTS Job Openings</span></div>
+      <div class="er-m"><span class="kst">08/04 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">7.42M</b><span class="nest">이전 7.59M</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>SPCX</b><span class="nm">Space Exploration Technologies Corp.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">−$0.26</b><span class="nest">5곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>AMD</b><span class="krw">🇰🇷 연관</span><span class="nm">Advanced Micro Devices, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.35</b><span class="nest">13곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>CAT</b><span class="nm">Caterpillar, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/04 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.25</b><span class="nest">10곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MRK</b><span class="nm">Merck &amp; Company, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/04 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">−$0.26</b><span class="nest">3곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>ANET</b><span class="krw">🇰🇷 연관</span><span class="nm">Arista Networks, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.80</b><span class="nest">7곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>AMGN</b><span class="nm">Amgen Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$5.60</b><span class="nest">9곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MCD</b><span class="nm">McDonald's Corporation</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/04 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$3.32</b><span class="nest">9곳</span></div>
+    </div><div class="more">+ 5건 더 보기</div></div><div class="dg"><div class="dg-h">8월 5일 <span class="wd">(수)</span><span class="cnt">실적 12건 · 지표 2건</span></div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ADP Non-Farm Employment Change</span></div>
+      <div class="er-m"><span class="kst">08/05 21:15 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">71K</b><span class="nest">이전 98K</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ISM Services PMI</span></div>
+      <div class="er-m"><span class="kst">08/05 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">54.5</b><span class="nest">이전 54.0</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>LLY</b><span class="nm">Eli Lilly and Company</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.71</b><span class="nest">4곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>NVO</b><span class="nm">Novo Nordisk A/S</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.81</b><span class="nest">4곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>SNDK</b><span class="krw">🇰🇷 연관</span><span class="nm">Sandisk Corporation</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/06 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$33.28</b><span class="nest">4곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>WDC</b><span class="krw">🇰🇷 연관</span><span class="nm">Western Digital Corporation</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/06 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$3.24</b><span class="nest">4곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>DIS</b><span class="nm">Walt Disney Company (The)</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.89</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>SHOP</b><span class="nm">Shopify Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.28</b><span class="nest">13곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>UBER</b><span class="nm">Uber Technologies, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.83</b><span class="nest">10곳</span></div>
+    </div><div class="more">+ 5건 더 보기</div></div><div class="dg"><div class="dg-h">8월 6일 <span class="wd">(목)</span><span class="cnt">실적 12건 · 지표 1건</span></div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">Unemployment Claims</span></div>
+      <div class="er-m"><span class="kst">08/06 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">205K</b><span class="nest">이전 197K</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>TM</b><span class="nm">Toyota Motor Corp Ltd Ord</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">—</b><span class="nest">N/A곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>COP</b><span class="nm">ConocoPhillips</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/06 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$2.96</b><span class="nest">6곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>SONY</b><span class="nm">Sony Group Corporation</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.33</b><span class="nest">2곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PBR</b><span class="nm">Petroleo Brasileiro S.A.- Petrobras</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/07 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.36</b><span class="nest">2곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PBR.A</b><span class="nm">Petroleo Brasileiro S.A.- Petrobras</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/07 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">—</b><span class="nest">1곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PH</b><span class="nm">Parker-Hannifin Corporation</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/06 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$8.30</b><span class="nest">7곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>HWM</b><span class="nm">Howmet Aerospace Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/06 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.23</b><span class="nest">4곳</span></div>
+    </div><div class="more">+ 5건 더 보기</div></div><div class="dg"><div class="dg-h">8월 7일 <span class="wd">(금)</span><span class="cnt">실적 9건 · 지표 3건</span></div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Average Hourly Earnings m/m</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">0.3%</b><span class="nest">이전 0.3%</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Non-Farm Employment Change</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">88K</b><span class="nest">이전 57K</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Unemployment Rate</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">4.2%</b><span class="nest">이전 4.2%</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>BRK.A</b><span class="nm">Berkshire Hathaway Inc.</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">—</b><span class="nest">1곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>BRK.B</b><span class="nm">Berkshire Hathaway Inc.</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$5.24</b><span class="nest">2곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>VST</b><span class="nm">Vistra Corp.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/07 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$2.02</b><span class="nest">4곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>TTWO</b><span class="nm">Take-Two Interactive Software, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/07 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.08</b><span class="nest">9곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>AU</b><span class="nm">AngloGold Ashanti PLC</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$2.04</b><span class="nest">2곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PPL</b><span class="nm">PPL Corporation</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/07 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.35</b><span class="nest">5곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>PAA</b><span class="nm">Plains All American Pipeline, L.P.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/07 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.41</b><span class="nest">5곳</span></div>
+    </div><div class="more">+ 2건 더 보기</div></div></div>
+    <div class="home-side"><div class="block side">
+  <div class="block__h">✅ 발표 완료 <span class="st">최근 5영업일</span></div>
+  <div class="sd-sum">
+    <div><b>28</b><span>발표 완료</span></div>
+    <div><b style="color:#E03131">21</b><span>컨센 상회</span></div>
+    <div><b style="color:#2775ED">4</b><span>하회</span></div>
+  </div>
+  <div class="sd-d">7월 31일 <span class="wd">(금)</span></div><div class="sr">
+              <div class="sr-t"><b>XOM</b><span class="sur up">+13.3%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.63
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.11</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>ABBV</b><span class="sur up">+1.1%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.61
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.65</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>CVX</b><span class="sur up">+8.6%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$5.58
+                <span class="arw">→</span><span class="lb">실제</span><b>$6.06</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>LIN</b><span class="sur up">+0.7%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.12
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.15</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>SMFG</b><span class="sur up">+13.3%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$0.44
+                <span class="arw">→</span><span class="lb">실제</span><b>$0.50</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>ETN</b><span class="sur up">+2.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.08
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.15</b></div>
+            </div><div class="sd-d">7월 30일 <span class="wd">(목)</span></div><div class="sr">
+              <div class="sr-t"><b>AAPL</b><span class="krw">🇰🇷</span><span class="sur up">+6.7%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.89
+                <span class="arw">→</span><span class="lb">실제</span><b>$2.02</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>AMZN</b><span class="krw">🇰🇷</span><span class="sur up">+215.0%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.83
+                <span class="arw">→</span><span class="lb">실제</span><b>$5.75</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>MA</b><span class="sur up">+5.5%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.78
+                <span class="arw">→</span><span class="lb">실제</span><b>$5.04</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>SHEL</b><span class="sur up">+10.6%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.18
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.52</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>BUD</b><span class="sur up">+6.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.14
+                <span class="arw">→</span><span class="lb">실제</span><b>$1.21</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>BBVA</b><span class="sur dim">확인 중</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$0.59
+                <span class="arw">→</span><span class="lb">실제</span><b>—</b></div>
+            </div><div class="sd-d">7월 29일 <span class="wd">(수)</span></div><div class="sr">
+              <div class="sr-t"><b>MSFT</b><span class="krw">🇰🇷</span><span class="sur up">+11.8%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.24
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.74</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>META</b><span class="krw">🇰🇷</span><span class="sur dn">-14.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$7.22
+                <span class="arw">→</span><span class="lb">실제</span><b>$6.18</b></div>
+            </div><div class="more">발표 완료 전체 보기 →</div>
+</div></div>
+  </div>
+  <div class="foot">시각은 <b>개장·마감 시각 기준 관례값</b>이에요 — 기업이 공시한 정확한 발표 시각이 아니에요. 개장 전은 22:30 KST, 마감 후는 다음 날 05:00 KST로 적어요. 컨센서스는 Nasdaq 집계, 실제 실적은 발표 후 확인된 값이에요. 투자 권유가 아닌 정보 제공용이에요.</div>
+</div>
+<p class="subtitle" style="margin-top:9px">하루 묶음 안에서 지표를 위에, 실적을 시총순으로. 노란 줄이 코스피 연관 종목(반도체·빅테크), 파란 줄이 경제지표예요. 우측 사이드는 발표 완료 종목의 <b>컨센서스 대비 실제 결과</b>고, 맨 위 3칸이 상회·하회 요약이에요.</p>
+</div></div>
+
+<div class="option" data-choice="b" onclick="toggleSelect(this)" style="display:block;margin-top:26px"><div class="content" style="width:100%">
+<h3>B — 좌측에서 지표를 위에 모으고 실적을 아래로</h3>
+<div class="cal">
+  <div class="cal-gnb"><span class="lg">Double<em>-Shot</em></span><span class="mi">브리핑</span><span class="mi">월배당</span></div>
+  <div class="cal-sn"><span>전체</span><span>특이신호</span><span>테마</span><span>섹터</span><span>ETF</span><span class="on">일정</span></div>
+  <div class="crumb">← 시그널</div>
+  <div class="phead"><h3>일정</h3><p>미국 실적발표와 경제지표를 한국시간으로 · 시총 $10B 이상</p></div>
+  <div class="home-cols">
+    <div class="home-main"><div class="sub-h">📈 이번 주 경제지표</div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">ISM Manufacturing PMI</span></div>
+      <div class="er-m"><span class="kst">08/03 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">54.0</b><span class="nest">이전 53.3</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ISM Manufacturing Prices</span></div>
+      <div class="er-m"><span class="kst">08/03 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">70.0</b><span class="nest">이전 73.0</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">JOLTS Job Openings</span></div>
+      <div class="er-m"><span class="kst">08/04 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">7.42M</b><span class="nest">이전 7.59M</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ADP Non-Farm Employment Change</span></div>
+      <div class="er-m"><span class="kst">08/05 21:15 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">71K</b><span class="nest">이전 98K</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">ISM Services PMI</span></div>
+      <div class="er-m"><span class="kst">08/05 23:00 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">54.5</b><span class="nest">이전 54.0</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei md">지표</span><span class="nm ttl">Unemployment Claims</span></div>
+      <div class="er-m"><span class="kst">08/06 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">205K</b><span class="nest">이전 197K</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Average Hourly Earnings m/m</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">0.3%</b><span class="nest">이전 0.3%</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Non-Farm Employment Change</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">88K</b><span class="nest">이전 57K</span></div>
+    </div><div class="er is-e">
+      <div class="er-l"><span class="ei hi">지표</span><span class="nm ttl">Unemployment Rate</span></div>
+      <div class="er-m"><span class="kst">08/07 21:30 KST</span></div>
+      <div class="er-r"><span class="lb">예상</span><b class="ep">4.2%</b><span class="nest">이전 4.2%</span></div>
+    </div><div class="sub-h" style="margin-top:16px">📊 실적발표</div><div class="dg"><div class="dg-h">8월 3일 <span class="wd">(월)</span></div><div class="er">
+      <div class="er-l"><b>PLTR</b><span class="nm">Palantir Technologies Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.28</b><span class="nest">10곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MUFG</b><span class="nm">Mitsubishi UFJ Financial Group Inc</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.34</b><span class="nest">1곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>VRTX</b><span class="nm">Vertex Pharmaceuticals Incorporated</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$4.30</b><span class="nest">5곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MAR</b><span class="nm">Marriott International</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/03 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$3.06</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>WMB</b><span class="nm">Williams Companies, Inc. (The)</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.52</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>FANG</b><span class="nm">Diamondback Energy, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/04 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.08</b><span class="nest">8곳</span></div>
+    </div></div><div class="dg"><div class="dg-h">8월 4일 <span class="wd">(화)</span></div><div class="er">
+      <div class="er-l"><b>SPCX</b><span class="nm">Space Exploration Technologies Corp.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">−$0.26</b><span class="nest">5곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>AMD</b><span class="krw">🇰🇷 연관</span><span class="nm">Advanced Micro Devices, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.35</b><span class="nest">13곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>CAT</b><span class="nm">Caterpillar, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/04 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.25</b><span class="nest">10곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>MRK</b><span class="nm">Merck &amp; Company, Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/04 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">−$0.26</b><span class="nest">3곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>ANET</b><span class="krw">🇰🇷 연관</span><span class="nm">Arista Networks, Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.80</b><span class="nest">7곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>AMGN</b><span class="nm">Amgen Inc.</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/05 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$5.60</b><span class="nest">9곳</span></div>
+    </div></div><div class="dg"><div class="dg-h">8월 5일 <span class="wd">(수)</span></div><div class="er">
+      <div class="er-l"><b>LLY</b><span class="nm">Eli Lilly and Company</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$6.71</b><span class="nest">4곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>NVO</b><span class="nm">Novo Nordisk A/S</span></div>
+      <div class="er-m"><span class="wb tbd">시각 미정</span><span class="kst dim">—</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.81</b><span class="nest">4곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>SNDK</b><span class="krw">🇰🇷 연관</span><span class="nm">Sandisk Corporation</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/06 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$33.28</b><span class="nest">4곳</span></div>
+    </div><div class="er is-w">
+      <div class="er-l"><b>WDC</b><span class="krw">🇰🇷 연관</span><span class="nm">Western Digital Corporation</span></div>
+      <div class="er-m"><span class="wb amc">마감 후</span><span class="kst">08/06 05:00 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$3.24</b><span class="nest">4곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>DIS</b><span class="nm">Walt Disney Company (The)</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$1.89</b><span class="nest">8곳</span></div>
+    </div><div class="er">
+      <div class="er-l"><b>SHOP</b><span class="nm">Shopify Inc.</span></div>
+      <div class="er-m"><span class="wb bmo">개장 전</span><span class="kst">08/05 22:30 KST</span></div>
+      <div class="er-r"><span class="lb">컨센</span><b class="ep">$0.28</b><span class="nest">13곳</span></div>
+    </div></div></div>
+    <div class="home-side"><div class="block side">
+  <div class="block__h">✅ 발표 완료 <span class="st">최근 5영업일</span></div>
+  <div class="sd-sum">
+    <div><b>28</b><span>발표 완료</span></div>
+    <div><b style="color:#E03131">21</b><span>컨센 상회</span></div>
+    <div><b style="color:#2775ED">4</b><span>하회</span></div>
+  </div>
+  <div class="sd-d">7월 31일 <span class="wd">(금)</span></div><div class="sr">
+              <div class="sr-t"><b>XOM</b><span class="sur up">+13.3%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.63
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.11</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>ABBV</b><span class="sur up">+1.1%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.61
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.65</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>CVX</b><span class="sur up">+8.6%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$5.58
+                <span class="arw">→</span><span class="lb">실제</span><b>$6.06</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>LIN</b><span class="sur up">+0.7%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.12
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.15</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>SMFG</b><span class="sur up">+13.3%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$0.44
+                <span class="arw">→</span><span class="lb">실제</span><b>$0.50</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>ETN</b><span class="sur up">+2.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.08
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.15</b></div>
+            </div><div class="sd-d">7월 30일 <span class="wd">(목)</span></div><div class="sr">
+              <div class="sr-t"><b>AAPL</b><span class="krw">🇰🇷</span><span class="sur up">+6.7%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.89
+                <span class="arw">→</span><span class="lb">실제</span><b>$2.02</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>AMZN</b><span class="krw">🇰🇷</span><span class="sur up">+215.0%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.83
+                <span class="arw">→</span><span class="lb">실제</span><b>$5.75</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>MA</b><span class="sur up">+5.5%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.78
+                <span class="arw">→</span><span class="lb">실제</span><b>$5.04</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>SHEL</b><span class="sur up">+10.6%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$3.18
+                <span class="arw">→</span><span class="lb">실제</span><b>$3.52</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>BUD</b><span class="sur up">+6.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$1.14
+                <span class="arw">→</span><span class="lb">실제</span><b>$1.21</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>BBVA</b><span class="sur dim">확인 중</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$0.59
+                <span class="arw">→</span><span class="lb">실제</span><b>—</b></div>
+            </div><div class="sd-d">7월 29일 <span class="wd">(수)</span></div><div class="sr">
+              <div class="sr-t"><b>MSFT</b><span class="krw">🇰🇷</span><span class="sur up">+11.8%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$4.24
+                <span class="arw">→</span><span class="lb">실제</span><b>$4.74</b></div>
+            </div><div class="sr">
+              <div class="sr-t"><b>META</b><span class="krw">🇰🇷</span><span class="sur dn">-14.4%</span></div>
+              <div class="sr-b"><span class="lb">컨센</span>$7.22
+                <span class="arw">→</span><span class="lb">실제</span><b>$6.18</b></div>
+            </div><div class="more">발표 완료 전체 보기 →</div>
+</div></div>
+  </div>
+  <div class="foot">시각은 <b>개장·마감 시각 기준 관례값</b>이에요 — 기업이 공시한 정확한 발표 시각이 아니에요. 개장 전은 22:30 KST, 마감 후는 다음 날 05:00 KST로 적어요. 컨센서스는 Nasdaq 집계, 실제 실적은 발표 후 확인된 값이에요. 투자 권유가 아닌 정보 제공용이에요.</div>
+</div>
+<p class="subtitle" style="margin-top:9px">지표가 주 9건뿐이라 한자리에 모아두면 놓치기 어려워요. 대신 "그날 무슨 일이 있나"는 A가 더 잘 보여줘요. 우측 사이드는 동일해요.</p>
+</div></div>
+</div>
+
+<h3 style="margin-top:32px">홈 "이번 주 일정" 요약 블록</h3>
+<p class="subtitle">시그널 홈 <b>맨 아래</b>에 들어가요. 코스피 연관 종목을 먼저 올리고 나머지를 시총순으로 채웠어요.</p>
+<div class="cal" style="padding:12px">
+  <div class="block">
+    <div class="block__h">📅 이번 주 일정 <span class="st" style="color:#006EFF">전체 보기 →</span></div>
+    <div class="hr"><span class="hd2">8월 4일</span><b>AMD</b><span class="krw">🇰🇷</span>
+      <span class="hw">마감 후</span><span class="he">컨센 $1.35</span></div><div class="hr"><span class="hd2">8월 4일</span><b>ANET</b><span class="krw">🇰🇷</span>
+      <span class="hw">마감 후</span><span class="he">컨센 $0.80</span></div><div class="hr"><span class="hd2">8월 5일</span><b>SNDK</b><span class="krw">🇰🇷</span>
+      <span class="hw">마감 후</span><span class="he">컨센 $33.28</span></div><div class="hr"><span class="hd2">8월 5일</span><b>WDC</b><span class="krw">🇰🇷</span>
+      <span class="hw">마감 후</span><span class="he">컨센 $3.24</span></div><div class="hr is-e"><span class="hd2">08/03</span>
+      <span class="ei hi">지표</span><span class="nm ttl">ISM Manufacturing PMI</span>
+      <span class="he">예상 54.0</span></div>
+  </div>
+</div>
