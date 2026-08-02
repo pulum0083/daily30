@@ -1031,14 +1031,18 @@ _PREVIEW_TENSE_RE = re.compile(
 # 제목에서 뽑아낼 한글 본문용 키워드 — 대문자 약어는 한국어 기사에 그대로 쓰인다.
 _EVENT_ACRONYM_RE = re.compile(r"\b([A-Z]{3,5})\b")
 
-def _walk_strings(obj):
-    """dict/list를 재귀 순회하며 문자열만 모은다."""
+def _collect_strings(obj):
+    """dict/list를 재귀 순회하며 문자열만 모은다.
+
+    ⚠️ 치환용 `_walk_strings(obj, fn)`(§24)과 이름이 겹치면 그쪽을 덮어써서
+    '간밤' 표기 교정이 TypeError로 죽는다(2026-08-03 실사고). 이름을 되돌리지 말 것.
+    """
     if isinstance(obj, str):
         return [obj]
     if isinstance(obj, dict):
-        return [s for v in obj.values() for s in _walk_strings(v)]
+        return [s for v in obj.values() for s in _collect_strings(v)]
     if isinstance(obj, list):
-        return [s for v in obj for s in _walk_strings(v)]
+        return [s for v in obj for s in _collect_strings(v)]
     return []
 
 
@@ -1106,7 +1110,7 @@ def validate_event_tense(analysis, calendar, corrections, warnings, blocks):
     # 리스트 필드를 뺀 나머지를 **재귀로** 훑는다 — todays_view.outlook처럼 중첩된
     # 산문에 실제 사고 문장이 들어 있었다. 산문은 자동 교정이 불가능하므로 차단한다.
     rest = {k: v for k, v in analysis.items() if k not in _SUPERLATIVE_LIST_FIELDS}
-    for val in _walk_strings(rest):
+    for val in _collect_strings(rest):
         hits = find_event_tense_violations(val, released, upcoming)
         if hits:
             blocks.append(f"이미 끝난 경제 이벤트를 예고형으로 서술 ({hits}): {strip_tags(val)[:80]}")
