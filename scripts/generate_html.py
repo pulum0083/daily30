@@ -37,6 +37,7 @@ except ImportError:
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 WEB_DIR = BASE_DIR / "web"
+QUOTE_TODAY_FILE = DATA_DIR / "quote_today.json"
 BRIEFINGS_DIR = WEB_DIR / "briefings"
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
@@ -401,6 +402,22 @@ def _split_comfort_line(text: str) -> str:
         return ""
     parts = re.split(r"(?<=[.!?])\s+", text)
     return "<br>".join(p for p in parts if p)
+
+
+def _load_quote_today(target_date: str) -> dict:
+    """quote_today.json이 이 브리핑 날짜와 일치할 때만 {quote, author}를 반환한다.
+    call_claude.py의 render_outputs()가 코스피 타입일 때만 이 파일을 쓴다."""
+    if not QUOTE_TODAY_FILE.exists():
+        return {}
+    try:
+        q = load_json(QUOTE_TODAY_FILE)
+    except (json.JSONDecodeError, OSError):
+        return {}
+    if not isinstance(q, dict):
+        return {}
+    if q.get("date") != target_date or not q.get("quote") or not q.get("author"):
+        return {}
+    return {"quote": q["quote"], "author": q["author"]}
 
 
 def build_reasons(analysis: dict, target_date: str = "") -> dict:
@@ -1142,6 +1159,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
+        ctx["quote_today"] = _load_quote_today(target_date)
         ctx.update(build_reasons(analysis, target_date))
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
