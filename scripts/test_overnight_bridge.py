@@ -64,22 +64,32 @@ def _snapshot(session_date, stocks: dict) -> dict:
     }
 
 
-def _macro(**overrides) -> dict:
+# 미국 레그는 fetch_bridge_us_changes()가 만드는 {change_pct, session_date} 형태다.
+# session_date는 한국 레그(_SNAP_DATE)와 같은 세션이어야 채택된다 — 한국 세션 D의 종가가
+# 02:30 ET에 확정된 뒤 같은 ET 날짜 D의 미국 정규장이 열리므로, 평일에는 두 날짜가 같다.
+_US_SESSION = _SNAP_DATE.isoformat()
+
+
+def _us(**overrides) -> dict:
+    """미국 레그 픽스처. 값만 주면 session_date는 한국 레그와 같은 세션으로 채운다.
+    overrides는 등락률(float) 또는 완전한 dict 둘 다 받는다."""
     base = {
-        "SOXX": {"change_pct": 8.5},
-        "GEV": {"change_pct": 6.0}, "VRT": {"change_pct": 5.08},
-        "ITA": {"change_pct": 0.79},
-        "LIT": {"change_pct": 4.6},
-        "TSLA": {"change_pct": 0.5}, "F": {"change_pct": 0.28},
-        "XBI": {"change_pct": 2.4},
-        "JPM": {"change_pct": -0.1}, "KBE": {"change_pct": -0.38},
+        "SOXX": 8.5,
+        "GEV": 6.0, "VRT": 5.08,
+        "ITA": 0.79,
+        "LIT": 4.6,
+        "TSLA": 0.5, "F": 0.28,
+        "XBI": 2.4,
+        "JPM": -0.1, "KBE": -0.38,
     }
-    base.update(overrides)
-    return base
+    out = {t: {"change_pct": v, "session_date": _US_SESSION} for t, v in base.items()}
+    for t, v in overrides.items():
+        out[t] = v if isinstance(v, dict) else {"change_pct": v, "session_date": _US_SESSION}
+    return out
 
 
 def test_normal_case_returns_seven_sectors_no_ship():
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     assert rows is not None
     sectors = {r["sector"] for r in rows}
@@ -94,10 +104,10 @@ def test_normal_case_returns_seven_sectors_no_ship():
 
 
 def test_one_us_bellwether_missing_drops_only_that_sector():
-    macro = _macro()
-    del macro["SOXX"]  # 반도체 미국 측 결측
+    us = _us()
+    del us["SOXX"]  # 반도체 미국 측 결측
 
-    rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     sectors = {r["sector"] for r in rows}
     assert "반도체" not in sectors
@@ -106,10 +116,10 @@ def test_one_us_bellwether_missing_drops_only_that_sector():
 
 def test_us_label_drops_missing_ticker_name():
     """VRT가 결측이면 라벨도 GEV 하나만 남아야 한다(§20, 데이터 없는 티커를 계속 가리키지 않음)."""
-    macro = _macro()
-    del macro["VRT"]
+    us = _us()
+    del us["VRT"]
 
-    rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     power = next(r for r in rows if r["sector"] == "전력기기")
     assert power["us_label"] == "GE Vernova"
@@ -117,7 +127,7 @@ def test_us_label_drops_missing_ticker_name():
 
 
 def test_us_label_full_multi_ticker_sectors_unchanged():
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     power = next(r for r in rows if r["sector"] == "전력기기")
     auto = next(r for r in rows if r["sector"] == "자동차")
@@ -141,7 +151,7 @@ def test_us_label_name_change_in_universe_propagates(monkeypatch, tmp_path):
     (cfg_dir / "stock_universe.json").write_text(json.dumps(universe, ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(m, "BASE_DIR", tmp_path)
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     defense = next(r for r in rows if r["sector"] == "방산")
     assert defense["us_label"] == "테스트변경방산ETF"
@@ -159,7 +169,7 @@ def test_us_ticker_not_in_bellwethers_is_treated_as_missing(monkeypatch, tmp_pat
     (cfg_dir / "stock_universe.json").write_text(json.dumps(universe, ensure_ascii=False), encoding="utf-8")
     monkeypatch.setattr(m, "BASE_DIR", tmp_path)
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     power = next(r for r in rows if r["sector"] == "전력기기")
     assert power["us_label"] == "GE Vernova"  # VRT는 이름을 못 찾아 빠지고 GEV만 남음
@@ -177,7 +187,7 @@ def test_kr_label_uses_top2_only_even_with_more_stocks_available():
         semicon_stocks[2]["code"]: {"name": semicon_stocks[2]["name"], "change_pct": 999.0},
     }
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
 
     semicon = next(r for r in rows if r["sector"] == "반도체")
     assert semicon["kr_label"] == f"{semicon_stocks[0]['name']}·{semicon_stocks[1]['name']}"
@@ -195,7 +205,7 @@ def test_kr_label_reflects_only_stocks_with_data_not_full_universe_config():
         # power_stocks[1](2번째 대표종목)은 의도적으로 누락 — 그날 수집 실패 시나리오
     }
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
 
     power = next(r for r in rows if r["sector"] == "전력기기")
     assert power["kr_label"] == power_stocks[0]["name"]
@@ -203,7 +213,7 @@ def test_kr_label_reflects_only_stocks_with_data_not_full_universe_config():
 
 
 def test_session_date_present_and_matching_returns_rows():
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     assert rows is not None
     assert len(rows) > 0
@@ -215,7 +225,7 @@ def test_session_date_missing_returns_none():
     snap = _snapshot(_SNAP_DATE, _kr_top2_all_sectors())
     del snap["session_date"]
 
-    rows = m.fetch_overnight_bridge(_macro(), snap, today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), snap, today=_TODAY)
 
     assert rows is None
 
@@ -224,7 +234,7 @@ def test_session_date_unparseable_returns_none():
     snap = _snapshot(_SNAP_DATE, _kr_top2_all_sectors())
     snap["session_date"] = "not-a-date"
 
-    rows = m.fetch_overnight_bridge(_macro(), snap, today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), snap, today=_TODAY)
 
     assert rows is None
 
@@ -232,7 +242,7 @@ def test_session_date_unparseable_returns_none():
 def test_session_date_mismatched_returns_none_incident_2026_07_15():
     """§24 실사고 재현 — 화요일(07-14) 세션이 빠진 채 월요일(07-13) session_date를 읽으면 안 된다."""
     rows = m.fetch_overnight_bridge(
-        _macro(), _snapshot(_INCIDENT_SNAP_DATE, _kr_top2_all_sectors()), today=_INCIDENT_TODAY
+        _us(), _snapshot(_INCIDENT_SNAP_DATE, _kr_top2_all_sectors()), today=_INCIDENT_TODAY
     )
 
     assert rows is None
@@ -250,7 +260,7 @@ def test_prev_kospi_session_none_returns_none(monkeypatch):
     except ImportError:
         pass
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     assert rows is None
 
@@ -265,12 +275,12 @@ def test_2026_07_27_incident_replay_shows_double_count():
     """§24 실사고 리플레이 — EWY -6.27%는 같은 날 코스피 -5.72% 급락을 이미 반영한 값이었다.
     반도체 섹터로 근사 재현: 미국이 크게 밀렸는데 한국도 비슷하게 밀리면 gap이 0에 가까워야
     '이미 반영됨'이 드러난다(선반영이 거의 없다는 뜻)."""
-    macro = _macro(SOXX={"change_pct": -4.25})
+    us = _us(SOXX=-4.25)
     stocks = _kr_top2_all_sectors()
     stocks["005930"] = {"name": "삼성전자", "change_pct": -5.72}
     stocks["000660"] = {"name": "SK하이닉스", "change_pct": -5.72}
 
-    rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, stocks), today=_TODAY)
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, stocks), today=_TODAY)
 
     semicon = next(r for r in rows if r["sector"] == "반도체")
     assert semicon["us_change"] == -4.25
@@ -280,21 +290,21 @@ def test_2026_07_27_incident_replay_shows_double_count():
 
 def test_bool_change_pct_treated_as_missing_not_as_one():
     """isinstance(True, int)가 True라서 change_pct: true가 1.0%로 둔갑하지 않는지 확인."""
-    macro = _macro(SOXX={"change_pct": True})
+    us = _us(SOXX={"change_pct": True, "session_date": _US_SESSION})
 
-    rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     sectors = {r["sector"] for r in rows}
     assert "반도체" not in sectors  # SOXX가 결측 취급돼 반도체 섹터 자체가 생략됨
 
 
-def test_non_dict_macro_returns_none():
+def test_non_dict_us_changes_returns_none():
     rows = m.fetch_overnight_bridge("not-a-dict", _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
     assert rows is None
 
 
 def test_non_dict_snapshot_returns_none():
-    rows = m.fetch_overnight_bridge(_macro(), "not-a-dict", today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), "not-a-dict", today=_TODAY)
     assert rows is None
 
 
@@ -302,7 +312,7 @@ def test_universe_load_failure_returns_none(monkeypatch, tmp_path):
     # BASE_DIR을 stock_universe.json이 없는 경로로 바꿔 로드 실패를 강제한다.
     monkeypatch.setattr(m, "BASE_DIR", tmp_path)
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
     assert rows is None
 
@@ -311,7 +321,7 @@ def test_snapshot_stocks_as_list_returns_none():
     snapshot = _snapshot(_SNAP_DATE, _kr_top2_all_sectors())
     snapshot["stocks"] = ["005930", "000660"]  # 딕셔너리가 아니라 리스트
 
-    rows = m.fetch_overnight_bridge(_macro(), snapshot, today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), snapshot, today=_TODAY)
 
     assert rows is None
 
@@ -324,8 +334,8 @@ def test_nonfinite_change_pct_treated_as_missing():
     그 섹터 행이 통째로 오염된다.
     """
     for bad in (float("nan"), float("inf"), float("-inf")):
-        macro = _macro(SOXX={"change_pct": bad})
-        rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+        us = _us(SOXX={"change_pct": bad, "session_date": _US_SESSION})
+        rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
 
         assert "반도체" not in {r["sector"] for r in rows}, bad
         # 나머지 섹터는 정상 진행 — 한 티커의 오염이 섹션 전체를 죽이지 않는다.
@@ -338,6 +348,131 @@ def test_nonfinite_kr_change_pct_treated_as_missing():
     for code in ("005930", "000660"):
         stocks[code] = {**stocks[code], "change_pct": float("nan")}
 
-    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
+    rows = m.fetch_overnight_bridge(_us(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
 
     assert "반도체" not in {r["sector"] for r in rows}
+
+
+# ── 미국 레그가 정규장 종가-종가인지 고정하는 회귀 테스트 ──────────────────────
+# 07:25 KST = 18:25 ET는 미국 애프터마켓 한복판이라, get_ticker_full() 경로로 되돌리면
+# _extended_hours_price()가 항상 이겨 시간외 체결가가 미국 레그에 실린다(§26). 아래 테스트는
+# 호출 형태가 아니라 **결과값의 성질**을 고정한다 — 시간외 가격을 주입해도 정규장 값이 나와야 한다.
+
+
+class _FakeDailyHistory:
+    """_yf_history(period="1mo")가 돌려주는 일봉 프레임의 최소 흉내."""
+
+    def __init__(self, closes, last_date):
+        import datetime as _dt
+        self._closes = list(closes)
+        self._dates = [last_date - _dt.timedelta(days=len(closes) - 1 - i) for i in range(len(closes))]
+
+    def __len__(self):
+        return len(self._closes)
+
+    def __getitem__(self, key):
+        assert key == "Close"
+        return self
+
+    def dropna(self):
+        return self
+
+    @property
+    def iloc(self):
+        return self._closes
+
+    @property
+    def index(self):
+        return [type("_Ts", (), {"date": staticmethod(lambda d=d: d)})() for d in self._dates]
+
+
+def _patch_daily(monkeypatch, closes, last_date):
+    calls = []
+
+    def fake_hist(ticker, **kwargs):
+        calls.append((ticker, kwargs))
+        return _FakeDailyHistory(closes, last_date)
+
+    monkeypatch.setattr(m, "_yf_history", fake_hist)
+    return calls
+
+
+def test_us_leg_is_regular_close_to_close_and_carries_session_date(monkeypatch):
+    calls = _patch_daily(monkeypatch, [90.0, 100.0, 103.0], _SNAP_DATE)
+
+    rec = m._regular_session_change("GEV")
+
+    assert rec == {"change_pct": 3.0, "session_date": _SNAP_DATE.isoformat()}
+    # 일봉만 읽는다 — 5분봉·prepost를 켜면 정규장 종가-종가가 아니게 된다.
+    _, kwargs = calls[0]
+    assert kwargs.get("period") == "1mo"
+    assert not kwargs.get("prepost")
+    assert kwargs.get("interval") in (None, "1d")
+
+
+def test_us_leg_ignores_extended_hours_price_incident_gev(monkeypatch):
+    """실적 발표 종목이 시간외로 +6% 뛰어도 미국 레그는 정규장 값이어야 한다.
+
+    get_ticker_full()로 되돌리면 _get_realtime_price()가 주는 시간외 체결가가 그대로
+    실려 이 테스트가 실패한다 — 호출 형태가 아니라 값의 성질을 고정한다.
+    """
+    _patch_daily(monkeypatch, [100.0, 103.0], _SNAP_DATE)
+    # 정규장 종가 103 위에 애프터마켓 +6% 체결(109.18)이 있는 상황을 주입한다.
+    monkeypatch.setattr(m, "_get_realtime_price", lambda t: (109.18, 103.0))
+    monkeypatch.setattr(m, "_extended_hours_price", lambda *a, **k: 109.18)
+
+    rec = m._regular_session_change("GEV")
+
+    assert rec["change_pct"] == 3.0  # 시간외 +6%가 섞이면 9.18이 된다
+
+
+def test_bridge_us_leg_end_to_end_ignores_extended_hours(monkeypatch):
+    """수집→조립 전 구간에서 시간외 가격이 새어 들어오지 않는지 확인한다."""
+    _patch_daily(monkeypatch, [100.0, 103.0], _SNAP_DATE)
+    monkeypatch.setattr(m, "_get_realtime_price", lambda t: (109.18, 103.0))
+
+    us = m.fetch_bridge_us_changes()
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+
+    assert set(us) == {t for ts in m.BRIDGE_US_TICKERS.values() for t in ts}
+    assert all(r["us_change"] == 3.0 for r in rows)
+
+
+def test_us_and_kr_legs_must_be_same_session(monkeypatch):
+    """미국 레그가 한국 레그보다 한 세션 뒤처지면(미국 휴장 등) 그 티커는 결측이다(§24)."""
+    import datetime as _dt
+    _patch_daily(monkeypatch, [100.0, 103.0], _SNAP_DATE - _dt.timedelta(days=1))
+
+    us = m.fetch_bridge_us_changes()
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+
+    assert rows is None  # 전 섹터가 세션 불일치로 빠져 섹션 자체가 생략됨
+
+
+def test_us_leg_without_session_date_is_treated_as_missing():
+    """session_date가 없는 항목은 같은 세션인지 확인할 수 없으므로 채택하지 않는다."""
+    us = _us(SOXX={"change_pct": 8.5})  # session_date 없음
+
+    rows = m.fetch_overnight_bridge(us, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+
+    assert "반도체" not in {r["sector"] for r in rows}
+    assert len(rows) == 6
+
+
+def test_regular_session_change_returns_none_on_short_history(monkeypatch):
+    _patch_daily(monkeypatch, [100.0], _SNAP_DATE)
+    assert m._regular_session_change("GEV") is None
+
+
+def test_regular_session_change_returns_none_on_zero_prev_close(monkeypatch):
+    _patch_daily(monkeypatch, [0.0, 103.0], _SNAP_DATE)
+    assert m._regular_session_change("GEV") is None
+
+
+def test_regular_session_change_swallows_network_failure(monkeypatch):
+    def boom(ticker, **kwargs):
+        raise RuntimeError("네트워크 실패")
+
+    monkeypatch.setattr(m, "_yf_history", boom)
+    assert m._regular_session_change("GEV") is None
+    assert m.fetch_bridge_us_changes() == {}
