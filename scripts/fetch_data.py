@@ -23,14 +23,13 @@ KST = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
 
 # 밤사이 브리지 — 섹터별 미국 비교 대상 티커(고정, 손으로 골랐다).
-# ETF 하나만 쓰는 섹터도 있고(semicon·defense·battery·bio), 개별주와 ETF를 섞어
-# 평균하는 섹터도 있다(power: GEV+VRT 개별주 2개, auto: TSLA+F 개별주 2개,
-# finance: JPM 개별주 + KBE ETF 혼합). kind가 ETF·개별주 구분 없이 전부 "US"라
+# ETF가 있는 섹터는 ETF 단독으로 쓴다(semicon·defense·battery·bio·finance) — 개별주 하나가
+# 섹터 전체와 같은 가중치를 갖는 것을 피하기 위함. ETF가 마땅치 않은 섹터만 개별주를
+# 평균한다(power: GEV+VRT, auto: TSLA+F). kind가 ETF·개별주 구분 없이 전부 "US"라
 # 어느 티커를 쓸지는 자동화할 수 없어 티커 선택만 수동 매핑으로 남긴다.
 # 표시 이름은 여기 담지 않는다 — stock_universe.json의 bellwethers[].name을 매 호출마다
-# 그대로 가져와 쓴다(§20·§30 이중소스 재발 방지). 이름을 두 곳에 따로 두면 한쪽만
-# 바뀌었을 때(예: universe에서 "은행 ETF"→"미국 은행 ETF"로 개명) 이 브리핑만 옛 이름을
-# 계속 보여주는 사고가 난다 — 실제로 그 형태로 재발해 이번에 수정됨.
+# 그대로 가져와 쓴다(§20·§30 이중소스 재발 방지). 이름을 두 곳에 따로 두면 universe에서
+# 이름이 바뀌어도 이 브리핑만 옛 이름을 계속 보여주게 된다.
 # ⚠️ SECTOR_FOCUS_STOCKS(바로 아래, 중단된 sector_focus 섹션용)와 섹터 구성이 다르다.
 # 재사용 금지 — stock_universe.json만 단일 소스로 쓴다.
 BRIDGE_US_TICKERS = {
@@ -40,7 +39,7 @@ BRIDGE_US_TICKERS = {
     "battery": ["LIT"],
     "auto":    ["TSLA", "F"],
     "bio":     ["XBI"],
-    "finance": ["JPM", "KBE"],
+    "finance": ["KBE"],
 }
 
 # 섹터 로테이션 대표 종목·ETF (sector_focus 브리핑용 실시간 데이터 수집)

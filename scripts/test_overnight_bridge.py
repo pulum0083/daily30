@@ -124,7 +124,9 @@ def test_us_label_full_multi_ticker_sectors_unchanged():
     finance = next(r for r in rows if r["sector"] == "금융")
     assert power["us_label"] == "GE Vernova·Vertiv"
     assert auto["us_label"] == "테슬라·포드"
-    assert finance["us_label"] == "JP모건·미국 은행 ETF"  # stock_universe.json 실제 이름과 동기화됨
+    # 금융은 ETF 단독 섹터라 개별주(JPM)가 섞이지 않는다.
+    assert finance["us_label"] == "은행 ETF"
+    assert finance["us_change"] == -0.38  # KBE 단독
 
 
 def test_us_label_name_change_in_universe_propagates(monkeypatch, tmp_path):
