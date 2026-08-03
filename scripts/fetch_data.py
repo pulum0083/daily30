@@ -905,7 +905,9 @@ def fetch_kospi_data() -> dict:
                      # NQ=F는 이미 사이드바(market_data_js.nq)에 있고, ES/YM은 그동안
                      # 미국 브리핑 경로에만 있어 코스피 prior가 쓰지 못했다.
                      "ES=F", "YM=F",
-                     "^N225", "^HSI", "^TWII", "000001.SS"]  # 아시아 지역 지수 (catch-up 시그널)
+                     "^N225", "^HSI", "^TWII", "000001.SS",  # 아시아 지역 지수 (catch-up 시그널)
+                     # overnight_bridge 섹터 벨웨더 — BRIDGE_US_TICKERS(위 상수) 참조.
+                     "SOXX", "GEV", "VRT", "ITA", "LIT", "TSLA", "F", "XBI", "KBE"]
     macro = {}
     for t in macro_tickers:
         d = get_ticker_full(t)
@@ -931,6 +933,20 @@ def fetch_kospi_data() -> dict:
     # 7. 섹터 대표 종목 데이터 (sector_focus 할루시네이션 방지)
     print("[fetch_data]   → sector focus stocks")
     sector_stocks = fetch_sector_stocks()
+
+    # 7b. 간밤 미국-한국 섹터 갭 브리지 (overnight_bridge, §24 이중계상 UI화)
+    print("[fetch_data]   → overnight bridge")
+    snapshot_path = BASE_DIR / "web" / "data" / "stocks-snapshot.json"
+    try:
+        with open(snapshot_path, encoding="utf-8") as f:
+            stocks_snapshot = json.load(f)
+    except FileNotFoundError:
+        print(f"[fetch_data] overnight_bridge: 스냅샷 파일 없음({snapshot_path}) — 섹션 생략", file=sys.stderr)
+        stocks_snapshot = {}
+    except json.JSONDecodeError as e:
+        print(f"[fetch_data] overnight_bridge: 스냅샷 JSON 파싱 실패({e}) — 섹션 생략", file=sys.stderr)
+        stocks_snapshot = {}
+    overnight_bridge = fetch_overnight_bridge(macro, stocks_snapshot)
 
     # 8. 휴장 직후(post-holiday catch-up) 플래그 — 한국만 단독 휴장한 다음날 판정
     print("[fetch_data]   → post-holiday catch-up flag")
@@ -983,6 +999,8 @@ def fetch_kospi_data() -> dict:
         "kospi_candidates": kospi_candidates,
         # 섹터 로테이션 — 대표 종목·ETF 전일 종가·등락률 (할루시네이션 방지용 실제 데이터)
         "sector_stocks": sector_stocks,
+        # 간밤 미국-한국 섹터 갭 브리지 — None이면 섹션 생략 (§0 없으면 비운다)
+        "overnight_bridge": overnight_bridge,
     }
 
     # 품질 게이트: 핵심 지수 데이터 누락 시 발행 중단
