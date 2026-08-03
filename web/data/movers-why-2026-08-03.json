@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-08-03T10:31:45.818026+09:00",
+  "generated_at": "2026-08-03T11:01:33.050532+09:00",
   "date": "2026-08-03",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -7.43,
-      "surge": 0.37,
+      "changePct": -7.52,
+      "surge": 0.42,
       "events": [
         {
           "time": "09:55",
           "headline": "삼성전자·하이닉스, 장 초반 8% 급락",
           "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE9lVGFWaWE2Wkk4YlQtVGo1MlZURTFQWTJ1ZGVKbHdybVlMaVZ5ZG01WGl1MHN5clpXemRXQ2t0c3E2YmcxWkd1VnZnOE5QTS0zeXZVNzhTSlVZUDF2Z1hGZUI3UQ?oc=5",
           "source": "에너지경제신문",
-          "why": "삼성전자와 하이닉스가 장 초반 8% 급락했다.",
+          "why": "삼성전자와 하이닉스가 장 초반 8% 급락하며 약세를 보였다.",
           "tier": "why",
           "sentiment": "neg"
         },
@@ -31,35 +31,54 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -7.8,
-      "surge": 0.35,
+      "changePct": -7.16,
+      "surge": 0.4,
       "events": [
+        {
+          "time": "10:25",
+          "headline": "삼성전자와 SK하이닉스, 주초 주가 하락세… 투자자들 긴장감 증대",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1zSF9NWFQwdUJJQWxHV1owdUZZYzVwM0tyNS10Q2tFSGRpdFRteHZMSlhTU1pwblg4eWF1OG1ieFRLVlBMMlNLNUxlSVdRcldoWGNlMzFwSDZiWXgyQldfWUppQ0JlQ0NX?oc=5",
+          "source": "공감신문",
+          "why": "삼성전자와 SK하이닉스, 주초 주가 하락세… 투자자들 긴장감 증대",
+          "tier": "why",
+          "sentiment": "neg"
+        },
         {
           "time": "06:54",
           "headline": "“SK하이닉스 흔든 진범 잡혔다”…다시 ‘300만닉스’ 갈까?",
           "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9fMUxDaDRobkFqc1pUV1FGNnppdXJXMnZkVWpxWVdPdlFXMnRiX2Fvb2FTYTFfTm1GaFJoSERDUWJXcHNQOWF4cm5oNGxIaTlXQ2dIam51d1RIZG8?oc=5",
           "source": "KBS 뉴스",
-          "why": "SK하이닉스를 흔든 요인이 해결되어 주가 상승에 대한 기대감이 높아지고 있다. (개별 인과 단정 안 함)",
+          "why": "SK하이닉스를 흔든 원인이 해결되어 주가 상승에 대한 기대감이 커지고 있다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
-        },
-        {
-          "time": "05:20",
-          "headline": "삼성전자 65만원 vs 36만원…'역대급 폭등' 뒤 가려진 극과 극 전망",
-          "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBTR2tGSlh5bnp4OGhncF96NDBmdnplMFpFd2dXNm9jaThEQlk5VzEzemVSZ2ZYNERKR2YweFZLT2ZGZmp6NUpoUzRKTWwwR0FlWWJJ?oc=5",
-          "source": "네이트",
-          "why": "삼성전자 65만원 vs 36만원…'역대급 폭등' 뒤 가려진 극과 극 전망 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 0.52,
-      "surge": 0.34,
-      "events": []
+      "changePct": 1.16,
+      "surge": 0.38,
+      "events": [
+        {
+          "time": "10:21",
+          "headline": "현대차·기아, 미국 판매 역대 최대…주가 반등 기대 커지나",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9ELTRJUFZzZkV6aW5tbmQ5RzBFakg2S3BlUHdiMnJaZ2hZUm5Jc1NteWl2TURBTzBtZVJURVFaU2Y1aTQ5cVVnWG02SGdOS0xscVVUSXN5bXhtM1dBc1ZoUTUtSGxIUmx3?oc=5",
+          "source": "kizmom.com",
+          "why": "현대차와 기아가 미국에서 역대 최대 판매량을 기록하며 주가 반등에 대한 기대감을 높이고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "10:23",
+          "headline": "현대차, 미확정 풍문 공시 속 상승세…숨겨진 기대감 자극하나 : 기업주식정보",
+          "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE90OE5rLXBLVUFzSE1Ua005MWJDeWhOaFRlQzNweU9IQWpmYmJCR01VME5VckVJQ1M0RFFfRDBLdmtQMTlyVUJkRUJn?oc=5",
+          "source": "재경일보",
+          "why": "현대차, 미확정 풍문 공시 속 상승세…숨겨진 기대감 자극하나 : 기업주식정보 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        }
+      ]
     }
   ]
 }
