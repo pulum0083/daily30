@@ -279,6 +279,49 @@ def build_us_tone(market_data: dict) -> dict:
     return {"dir_cls": dir_map.get(prior["direction"], "neutral")}
 
 
+def build_overnight_bridge(market_data: dict) -> dict:
+    """fetch_data.fetch_overnight_bridge()가 만든 원시 수치를 템플릿용 표시 문자열로 변환한다(§20).
+
+    market_data["overnight_bridge"]는 섹터별 행 리스트({sector, us_label, us_change,
+    kr_label, kr_change, gap_pp, kr_session_date}) 또는 None(섹션 생략)이다.
+    None이거나 키가 없으면(또는 빈 리스트면) 템플릿이 섹션을 건너뛸 수 있도록 빈 리스트를 돌려준다 —
+    fetch 단계가 이미 데이터 없음을 판정했으므로 여기서 다시 채워 넣지 않는다(§0).
+
+    kr_session_date는 모든 행에서 동일한 값이라 행마다 반복하지 않고 최상위 키
+    overnight_bridge_date로 한 번만 올린다 — 템플릿이 "N일 한국 마감 vs 간밤 미국장" 같은
+    섹션 헤더 라벨을 한 곳에서만 채우면 되고(§24 상대 시간 라벨 금지 규칙과 동일하게
+    렌더 시점에 실제 날짜를 명시), 행마다 같은 문자열을 반복해 템플릿에서 매번 [0]을
+    꺼내 쓰게 만들지 않기 위함이다.
+    """
+    rows = market_data.get("overnight_bridge")
+    if not isinstance(rows, list) or not rows:
+        return {"overnight_bridge": [], "overnight_bridge_date": ""}
+
+    out = []
+    session_date = ""
+    for r in rows:
+        us_change = r.get("us_change", 0.0)
+        kr_change = r.get("kr_change", 0.0)
+        gap = r.get("gap_pp", 0.0)
+        session_date = r.get("kr_session_date") or session_date
+        gap_cls = "up" if gap > 0 else ("dn" if gap < 0 else "")
+        gap_word = "선반영" if gap > 0 else ("미반영" if gap < 0 else "동조")
+        out.append({
+            "sector": r.get("sector", ""),
+            "us_label": r.get("us_label", ""),
+            "kr_label": r.get("kr_label", ""),
+            "us_change_fmt": f"{us_change:+.2f}%",
+            "kr_change_fmt": f"{kr_change:+.2f}%",
+            "us_cls": "up" if us_change >= 0 else "dn",
+            "kr_cls": "up" if kr_change >= 0 else "dn",
+            "gap_fmt": f"{gap:+.1f}%p",
+            "gap_cls": gap_cls,
+            "gap_word": gap_word,
+        })
+
+    return {"overnight_bridge": out, "overnight_bridge_date": session_date}
+
+
 def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time: str) -> dict:
     pred = analysis.get("prediction", {})
     up_pct = pred.get("up_pct", 50)
@@ -1160,6 +1203,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx["quote_today"] = _load_quote_today(target_date)
+        ctx.update(build_overnight_bridge(market_data))
         ctx.update(build_reasons(analysis, target_date))
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
