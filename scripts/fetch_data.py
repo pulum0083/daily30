@@ -937,14 +937,15 @@ def fetch_kospi_data() -> dict:
     # 7b. 간밤 미국-한국 섹터 갭 브리지 (overnight_bridge, §24 이중계상 UI화)
     print("[fetch_data]   → overnight bridge")
     snapshot_path = BASE_DIR / "web" / "data" / "stocks-snapshot.json"
+    # 이 섹션은 부가 요소다 — 스냅샷을 읽다 어떤 예외가 나든 브리핑 발행 자체를 막지 않는다.
+    # FileNotFoundError·JSONDecodeError만 잡으면 PermissionError·UnicodeDecodeError·
+    # IsADirectoryError가 그대로 올라가 07:25 브리핑이 통째로 죽는다(§0 부칙).
+    # fetch_overnight_bridge 안의 stock_universe.json 로드도 같은 이유로 except Exception이다.
     try:
         with open(snapshot_path, encoding="utf-8") as f:
             stocks_snapshot = json.load(f)
-    except FileNotFoundError:
-        print(f"[fetch_data] overnight_bridge: 스냅샷 파일 없음({snapshot_path}) — 섹션 생략", file=sys.stderr)
-        stocks_snapshot = {}
-    except json.JSONDecodeError as e:
-        print(f"[fetch_data] overnight_bridge: 스냅샷 JSON 파싱 실패({e}) — 섹션 생략", file=sys.stderr)
+    except Exception as e:
+        print(f"[fetch_data] overnight_bridge: 스냅샷 로드 실패({type(e).__name__}: {e}) — 섹션 생략", file=sys.stderr)
         stocks_snapshot = {}
     overnight_bridge = fetch_overnight_bridge(macro, stocks_snapshot)
 
