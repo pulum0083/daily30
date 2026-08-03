@@ -1,0 +1,185 @@
+{
+  "prediction": {
+    "up_pct": 58,
+    "down_pct": 42
+  },
+  "todays_view": {
+    "view_title": "메가캡은 웃고 반도체는 운다 — 실적 발표 이후 갈라지는 빅테크 내부 순환매",
+    "dek": "MSFT·AMZN·GOOGL은 <b>MA20을 뚫고 올라서며</b> 실적 기대에 화답하는데, 정작 반도체·메모리 쪽은 <b>MU·AMAT·LRCX·KLAC이 일제히 눌리며</b> 온도차가 뚜렷해요. 오늘 밤 나올 <b>ISM 제조업 PMI</b>가 이 온도차의 다음 방향을 정할 거예요."
+  },
+  "issues": [
+    {
+      "title": "MSFT·AMZN·GOOGL, MA20 상향 돌파하며 나란히 강세",
+      "body": "빅테크 실적 시즌 이후 클라우드·AI 투자 스토리가 재확인되면서 메가캡 3인방이 20일선을 뚫고 올라섰어요. 반면 같은 빅테크 안에서도 META·TSLA는 20일선 아래에 머물러 있어서, 빅테크 내부에서도 종목별 온도차가 커지고 있어요.",
+      "down": {
+        "label": "META·TSLA",
+        "tickers": [
+          "META",
+          "TSLA"
+        ]
+      },
+      "up": {
+        "label": "클라우드·플랫폼 빅테크",
+        "tickers": [
+          "MSFT",
+          "AMZN",
+          "GOOGL"
+        ]
+      }
+    },
+    {
+      "title": "메모리·반도체 장비주, MU 실적 여진에 동반 약세",
+      "body": "MU가 20일선 대비 크게 밀리면서 DRAM ETF도 함께 눌렸고, AMAT·LRCX·KLAC 같은 반도체 장비주까지 줄줄이 20일선 아래로 후퇴했어요. 메모리 업황 눈높이가 조정받으면서 반도체 밸류체인 전반에 부담이 번지는 모습이에요.",
+      "down": {
+        "label": "메모리·반도체 장비",
+        "tickers": [
+          "MU",
+          "AMAT",
+          "LRCX",
+          "KLAC",
+          "AMD"
+        ]
+      },
+      "up": {
+        "label": "AI 인프라 대형주",
+        "tickers": [
+          "AVGO",
+          "NVDA"
+        ]
+      }
+    },
+    {
+      "title": "7월 고용 둔화, 금리 인하 기대 다시 살아나",
+      "body": "비농업 고용이 예상보다 덜 늘고 실업률도 소폭 올라오면서 연준이 금리를 더 낮출 여지가 생겼다는 해석이 나왔어요. 이 기대감이 기술주 전반의 투자 심리를 개선시키는 쪽으로 작용하고 있어요.",
+      "down": {
+        "label": "지수 전반",
+        "tickers": []
+      },
+      "up": {
+        "label": "금리 민감 성장주",
+        "tickers": [
+          "MSFT",
+          "AMZN",
+          "GOOGL"
+        ]
+      }
+    },
+    {
+      "title": "오늘 밤 ISM 제조업 PMI 발표",
+      "body": "제조업 경기 판단 지표가 예상치를 넘어서면 경기 연착륙 기대가 강해지지만, 반대로 부진하면 금리 인하 기대와 경기 둔화 우려가 동시에 부딪히면서 변동성이 커질 수 있어요. 산업재·에너지 섹터가 특히 이 지표에 민감하게 반응할 것 같아요.",
+      "down": {
+        "label": "지수 전반",
+        "tickers": []
+      }
+    },
+    {
+      "title": "국채 금리 급등과 VIX 반등, 위험자산에 견제구",
+      "body": "10년물 금리가 20일선을 크게 웃돌며 올라온 상태라 밸류에이션 부담이 남아있고, VIX도 소폭 반등하면서 변동성 경계감이 살아있어요. 다만 아직 20일선 아래 수준이라 시장 전체를 짓누를 정도는 아니에요.",
+      "down": {
+        "label": "고밸류 성장주",
+        "tickers": [
+          "NVDA",
+          "TSLA"
+        ]
+      }
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "GOOGL",
+      "name": "GOOGL (알파벳)",
+      "price": "$362.11",
+      "change": "+1.68%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 4.04,
+      "ma200_dist_pct": 11.08,
+      "scenario_tag": "실적 후 재평가",
+      "scenario": "20일선을 막 돌파하며 클라우드·AI 투자 스토리가 시장에서 재평가받는 흐름이에요. 메가캡 순환매 수혜가 이어질 가능성이 있어요.",
+      "action_guide": "시가 $365 이내 진입. 목표: $385 / 손절: $345 이탈 시.",
+      "entry": "$365",
+      "target": "$385",
+      "target_pct": "+5.5%",
+      "stop": "$345",
+      "stop_pct": "-4.7%"
+    },
+    {
+      "ticker": "AMZN",
+      "name": "AMZN (아마존)",
+      "price": "$276.35",
+      "change": "+1.76%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 13.32,
+      "ma200_dist_pct": 17.59,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "실적 발표 이후 갭업하며 20일선을 강하게 뚫고 올라온 종목이에요. 클라우드 부문 성장 기대가 이어지는 한 단기 모멘텀이 유지될 것 같아요.",
+      "action_guide": "시가 $280 이내 진입. 목표: $300 / 손절: $260 이탈 시.",
+      "entry": "$280",
+      "target": "$300",
+      "target_pct": "+7.1%",
+      "stop": "$260",
+      "stop_pct": "-7.1%"
+    },
+    {
+      "ticker": "AVGO",
+      "name": "AVGO (브로드컴)",
+      "price": "$385.67",
+      "change": "-0.93%",
+      "change_cls": "down",
+      "signal": "20일선 위 안착",
+      "golden": false,
+      "ma20_dist_pct": 0.24,
+      "ma200_dist_pct": 5.69,
+      "scenario_tag": "저점 근접 매수",
+      "scenario": "메모리·장비주는 흔들려도 AVGO는 20일선 바로 위에서 버티고 있는 종목이에요. AI 커스텀칩 수요가 견조하다면 반도체 조정장에서 상대적 강세를 보일 수 있어요.",
+      "action_guide": "시가 $388 이내 진입. 목표: $410 / 손절: $370 이탈 시.",
+      "entry": "$388",
+      "target": "$410",
+      "target_pct": "+5.7%",
+      "stop": "$370",
+      "stop_pct": "-4.6%"
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPM (JP모건)",
+      "price": "$355.22",
+      "change": "+0.97%",
+      "change_cls": "up",
+      "signal": "20일선 위 안착",
+      "golden": false,
+      "ma20_dist_pct": 3.2,
+      "ma200_dist_pct": 14.85,
+      "scenario_tag": "금리 상승 수혜",
+      "scenario": "국채 금리 상승 국면에서 은행주 수익성 개선 기대가 이어지는 종목이에요. 20일선 위에서 안정적으로 움직이고 있어서 금융 섹터 대표주로 볼만해요.",
+      "action_guide": "시가 $358 이내 진입. 목표: $375 / 손절: $340 이탈 시.",
+      "entry": "$358",
+      "target": "$375",
+      "target_pct": "+4.7%",
+      "stop": "$340",
+      "stop_pct": "-5.0%"
+    },
+    {
+      "ticker": "MSFT",
+      "name": "MSFT (마이크로소프트)",
+      "price": "$473.65",
+      "change": "+1.92%",
+      "change_cls": "up",
+      "signal": "20일선 위 안착",
+      "golden": false,
+      "ma20_dist_pct": 19.35,
+      "ma200_dist_pct": 9.58,
+      "scenario_tag": "실적 서프라이즈",
+      "scenario": "실적 발표 후 큰 폭 갭업하며 20일선을 크게 벗어난 강세 흐름을 보이고 있어요. 클라우드·AI 매출 성장세가 확인된 만큼 단기 추격 매수보다는 눌림목을 기다리는 전략이 나을 것 같아요.",
+      "action_guide": "시가 $470 이내 진입. 목표: $500 / 손절: $450 이탈 시.",
+      "entry": "$470",
+      "target": "$500",
+      "target_pct": "+6.4%",
+      "stop": "$450",
+      "stop_pct": "-4.3%"
+    }
+  ],
+  "generated_at": "2026-08-03T21:17:23.694672+09:00"
+}
