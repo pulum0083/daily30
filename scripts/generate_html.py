@@ -15,6 +15,7 @@ web/briefings/{date}/{internal}/index.html 로 출력한다.
 import argparse
 import html
 import json
+import math
 import re
 import sys
 from datetime import datetime, date
@@ -295,11 +296,14 @@ def _fmt_signed(value: float, decimals: int) -> tuple:
 
 
 def build_overnight_bridge(market_data: dict) -> dict:
-    """fetch_data.fetch_overnight_bridge()가 만든 원시 수치를 템플릿용 표시 문자열로 변환한다(§20).
+    """fetch_data.fetch_overnight_bridge()가 만든 원시 수치를 표시 문자열로 변환한다(§20).
+
+    출력은 write_overnight_bridge_json()이 web/data/overnight-bridge.json으로 발행하고
+    /stocks/ 홈 클라이언트가 렌더한다 — 브리핑 페이지에는 넣지 않는다(2026-08-03 배치 변경).
 
     market_data["overnight_bridge"]는 섹터별 행 리스트({sector, us_label, us_change,
     kr_label, kr_change, gap_pp, kr_session_date}) 또는 None(섹션 생략)이다.
-    None이거나 키가 없으면(또는 빈 리스트면) 템플릿이 섹션을 건너뛸 수 있도록 빈 리스트를 돌려준다 —
+    None이거나 키가 없으면(또는 빈 리스트면) 소비처가 섹션을 건너뛸 수 있도록 빈 리스트를 돌려준다 —
     fetch 단계가 이미 데이터 없음을 판정했으므로 여기서 다시 채워 넣지 않는다(§0).
 
     이 섹션은 선택 섹션이다 — 행 하나가 깨져 있다고 07:25 브리핑 전체를 죽이면 안 된다
@@ -313,9 +317,9 @@ def build_overnight_bridge(market_data: dict) -> dict:
     편집 실수가 몇 번이고 재현돼도 아무도 못 알아챈다.
 
     kr_session_date는 모든 행에서 동일한 값이라 행마다 반복하지 않고 최상위 키
-    overnight_bridge_date로 한 번만 올린다 — 템플릿이 "N일 한국 마감 vs 간밤 미국장" 같은
+    overnight_bridge_date로 한 번만 올린다 — 소비처가 "N일 한국 마감 vs 간밤 미국장" 같은
     섹션 헤더 라벨을 한 곳에서만 채우면 되고(§24 상대 시간 라벨 금지 규칙과 동일하게
-    렌더 시점에 실제 날짜를 명시), 행마다 같은 문자열을 반복해 템플릿에서 매번 [0]을
+    렌더 시점에 실제 날짜를 명시), 행마다 같은 문자열을 반복해 소비처에서 매번 [0]을
     꺼내 쓰게 만들지 않기 위함이다. fetch_data.py가 단일 루프 안 로컬 변수 하나에서
     모든 행의 날짜를 채우므로 정상 상태에선 항상 하나로 일치하지만(구조적 보장), 그
     보장이 깨진 경우(수동 편집 등)엔 첫 값을 유지하고 불일치를 stderr에 남긴다 — 조용히
@@ -346,6 +350,19 @@ def build_overnight_bridge(market_data: dict) -> dict:
                 print(
                     f"[generate_html] overnight_bridge: {sector} 행의 {key} 값({val!r})이 "
                     "숫자가 아니라 행을 건너뜀.",
+                    file=sys.stderr,
+                )
+                malformed = True
+                break
+            if not math.isfinite(val):
+                # NaN·Infinity도 float이라 위 타입 검사를 통과한다. 그대로 두면
+                # NaN은 "+nan%p"·gap_cls="" 로 렌더돼 문자열과 분류가 어긋나고
+                # (이 함수가 지키기로 한 불변식 위반), Infinity는 "+inf%"가 그대로 나간다.
+                # 파이썬 표준 json이 NaN·Infinity 리터럴을 그대로 읽고 쓰므로
+                # §23/§28 수동 정정으로 latest_kospi.json을 손으로 고치다 실제로 섞일 수 있다.
+                print(
+                    f"[generate_html] overnight_bridge: {sector} 행의 {key} 값({val!r})이 "
+                    "유한한 숫자가 아니라 행을 건너뜀.",
                     file=sys.stderr,
                 )
                 malformed = True
@@ -1275,7 +1292,6 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx["quote_today"] = _load_quote_today(target_date)
-        ctx.update(build_overnight_bridge(market_data))
         ctx.update(build_reasons(analysis, target_date))
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
@@ -1364,6 +1380,50 @@ def _parse_close_price(html_path):
         return m.group(1) if m else None
     except Exception:
         return None
+
+
+def write_overnight_bridge_json(market_data: dict, target_date: str):
+    """web/data/overnight-bridge.json 을 생성한다.
+
+    밤사이 브리지는 브리핑 페이지가 아니라 종목 시그널 홈 `/stocks/`에서 07:30~09:00에만
+    렌더한다(2026-08-03 배치 변경). `/stocks/index.html`은 손으로 쓴 정적 HTML이고 클라이언트
+    JS가 web/data/*.json을 fetch하는 구조라, 표시용 행을 정적 JSON으로 발행한다.
+
+    스키마:
+      {
+        "date": "YYYY-MM-DD",             # 이 데이터를 만든 코스피 브리핑의 발행일(KST)
+        "generated_at": "ISO8601 +09:00",  # 생성 시각
+        "kr_session_date": "YYYY-MM-DD",   # 비교 대상 한국 마감 세션의 실제 거래일
+        "rows": [...]                      # build_overnight_bridge()가 구운 표시용 행
+      }
+
+    date는 클라이언트가 "이 파일이 오늘 것인가"를 판정하는 유일한 근거다. 어제 파일이
+    그대로 남아 있어도 date가 오늘과 다르면 렌더하지 않는다 — 어제 갭을 오늘 갭으로
+    보여주는 것이 이 기능이 드러내려던 §24 이중계상 사고 그 자체라, 완전성보다 정합성을
+    택한다(§0). kr_session_date는 별도 필드로 둔다 — 발행일과 비교 대상 거래일은 다른
+    날짜이고(월요일이면 3일 차이), 화면 머리말에는 상대어가 아니라 이 실제 날짜를
+    적어야 한다(§24).
+
+    표시 문자열은 파이썬에서 이미 다 구워 내보낸다. 클라이언트는 렌더만 하고
+    `>= 0` / `> 0` 경계 판정을 JS로 다시 구현하지 않는다 — 그게 §30이 지적한 이중 구현이다.
+
+    행이 없어도 파일은 항상 쓴다. 쓰지 않고 넘어가면 어제 파일이 어제 내용 그대로
+    남아, 클라이언트 날짜 게이트가 유일한 방어선이 된다. 오늘 날짜 + 빈 rows로 덮어쓰면
+    "오늘은 보여줄 것이 없다"가 파일 자체로 분명해진다(빈 상태 모호성 제거).
+    """
+    built = build_overnight_bridge(market_data)
+    rows = built["overnight_bridge"]
+    payload = {
+        "date": target_date,
+        "generated_at": datetime.now(KST).isoformat(timespec="seconds"),
+        "kr_session_date": built["overnight_bridge_date"],
+        "rows": rows,
+    }
+
+    out_path = WEB_DIR / "data" / "overnight-bridge.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[generate_html] wrote web/data/overnight-bridge.json ({len(rows)}개 섹터)")
 
 
 def write_briefings_list_json():
@@ -2348,6 +2408,14 @@ def main():
     write_output(html, internal_type, args.date, analysis)
     if internal_type == "kospi":
         patch_landing_hero(analysis, args.date)
+        # 밤사이 브리지는 /stocks/ 홈에서만 쓰는 부가 데이터다 — 여기서 예외가 새어나가
+        # 07:25 브리핑 발행 자체가 죽으면 안 된다(§0 부칙). 실패하면 파일만 갱신되지
+        # 않고(어제 파일이 남아도 클라이언트가 date로 걸러낸다) 브리핑은 그대로 나간다.
+        try:
+            write_overnight_bridge_json(market_data, args.date)
+        except Exception as e:
+            print(f"[generate_html] overnight_bridge JSON 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
+                  file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
     write_sitemap_xml()

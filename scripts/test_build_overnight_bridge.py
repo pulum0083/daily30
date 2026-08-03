@@ -201,3 +201,41 @@ def test_row_with_empty_session_date_is_skipped():
     result = g.build_overnight_bridge({"overnight_bridge": [row]})
 
     assert result == {"overnight_bridge": [], "overnight_bridge_date": ""}
+
+
+# ── bool·비유한 값은 숫자가 아니다(§0 — 없으면 비운다) ────────────────────────
+
+
+def test_bool_numeric_field_is_skipped_not_rendered_as_one_percent():
+    # bool은 int의 서브클래스라 isinstance(True, (int, float))가 True다.
+    # 별도로 걸러내지 않으면 True가 조용히 "+1.00%"로 둔갑한다.
+    for key in ("us_change", "kr_change", "gap_pp"):
+        result = g.build_overnight_bridge({"overnight_bridge": [_row(**{key: True})]})
+        assert result == {"overnight_bridge": [], "overnight_bridge_date": ""}, key
+
+    result = g.build_overnight_bridge({"overnight_bridge": [_row(us_change=False)]})
+    assert result == {"overnight_bridge": [], "overnight_bridge_date": ""}
+
+
+def test_nan_numeric_field_is_skipped():
+    # NaN은 float이라 타입 검사를 통과한다. 그대로 두면 gap_pp=NaN이
+    # "+nan%p" + gap_word="동조" + gap_cls="" 로 렌더돼 문자열과 분류가 어긋난다.
+    for key in ("us_change", "kr_change", "gap_pp"):
+        result = g.build_overnight_bridge({"overnight_bridge": [_row(**{key: float("nan")})]})
+        assert result == {"overnight_bridge": [], "overnight_bridge_date": ""}, key
+
+
+def test_inf_numeric_field_is_skipped():
+    for val in (float("inf"), float("-inf")):
+        for key in ("us_change", "kr_change", "gap_pp"):
+            result = g.build_overnight_bridge({"overnight_bridge": [_row(**{key: val})]})
+            assert result == {"overnight_bridge": [], "overnight_bridge_date": ""}, (key, val)
+
+
+def test_nonfinite_row_skipped_but_healthy_row_survives():
+    bad = _row(sector="자동차", gap_pp=float("nan"))
+    good = _row(sector="반도체")
+    result = g.build_overnight_bridge({"overnight_bridge": [bad, good]})
+
+    assert [r["sector"] for r in result["overnight_bridge"]] == ["반도체"]
+    assert result["overnight_bridge_date"] == "2026-07-31"

@@ -314,3 +314,30 @@ def test_snapshot_stocks_as_list_returns_none():
     rows = m.fetch_overnight_bridge(_macro(), snapshot, today=_TODAY)
 
     assert rows is None
+
+
+def test_nonfinite_change_pct_treated_as_missing():
+    """NaN·Infinity도 float이라 타입 검사만으론 통과한다 — 결측으로 걸러 섹터를 생략한다.
+
+    파이썬 표준 json이 NaN·Infinity 리터럴을 그대로 읽고 쓰므로(§23/§28 수동 정정 절차),
+    스냅샷을 손으로 고치다 실제로 섞여 들어올 수 있다. 통과시키면 평균이 NaN이 되어
+    그 섹터 행이 통째로 오염된다.
+    """
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        macro = _macro(SOXX={"change_pct": bad})
+        rows = m.fetch_overnight_bridge(macro, _snapshot(_SNAP_DATE, _kr_top2_all_sectors()), today=_TODAY)
+
+        assert "반도체" not in {r["sector"] for r in rows}, bad
+        # 나머지 섹터는 정상 진행 — 한 티커의 오염이 섹션 전체를 죽이지 않는다.
+        assert len(rows) == 6, bad
+
+
+def test_nonfinite_kr_change_pct_treated_as_missing():
+    stocks = _kr_top2_all_sectors()
+    # 반도체 한국 대표 2종을 모두 NaN으로 오염시키면 그 섹터만 빠진다.
+    for code in ("005930", "000660"):
+        stocks[code] = {**stocks[code], "change_pct": float("nan")}
+
+    rows = m.fetch_overnight_bridge(_macro(), _snapshot(_SNAP_DATE, stocks), today=_TODAY)
+
+    assert "반도체" not in {r["sector"] for r in rows}

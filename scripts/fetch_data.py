@@ -8,6 +8,7 @@ from __future__ import annotations  # `X | None` 어노테이션을 구버전 �
 
 import argparse
 import json
+import math
 import sys
 import time
 import urllib.request
@@ -747,15 +748,23 @@ def fetch_sector_stocks() -> dict:
 
 
 def _bridge_change_pct(entry) -> float | None:
-    """등락률을 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지).
+    """등락률을 유한한 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지).
     bool은 int의 서브클래스라 isinstance(True, int)가 True로 나오므로 별도로 걸러낸다
-    (예: "change_pct": true 가 1.0%로 둔갑하는 사고 방지)."""
+    (예: "change_pct": true 가 1.0%로 둔갑하는 사고 방지).
+
+    NaN·Infinity도 float이라 타입 검사만으로는 통과한다. 파이썬 표준 json은 기본 설정에서
+    NaN·Infinity 리터럴을 그대로 쓰고 그대로 읽으므로(json.dumps({"x": float("nan")}) →
+    '{"x": NaN}'), §23/§28 수동 정정 절차로 사람이 스냅샷을 손으로 고치다 이 값이
+    섞여 들어올 수 있다. 들어오면 평균이 통째로 NaN이 되어 그 섹터 행 전체가 오염되므로
+    결측으로 처리해 행을 생략한다(§0 — 없으면 비우고 지어내지 않는다)."""
     if not isinstance(entry, dict):
         return None
     v = entry.get("change_pct")
-    if isinstance(v, bool):
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
         return None
-    return float(v) if isinstance(v, (int, float)) else None
+    if not math.isfinite(v):
+        return None
+    return float(v)
 
 
 def fetch_overnight_bridge(macro: dict, snapshot: dict, today: date | None = None) -> list | None:
