@@ -16,6 +16,7 @@ import argparse
 import html
 import json
 import math
+import os
 import re
 import sys
 from datetime import datetime, date
@@ -340,7 +341,32 @@ def build_overnight_bridge(market_data: dict) -> dict:
             print("[generate_html] overnight_bridge: 행이 dict가 아니라 건너뜀.", file=sys.stderr)
             continue
 
-        sector = r.get("sector") or "?"
+        # 진단 로그용 이름. sector가 문자열이 아니면(NaN 등) 그대로 찍어도 오해만 부르므로
+        # "?"로 대체한다 — float("nan")은 truthy라 `or "?"` 만으로는 걸러지지 않는다.
+        raw_sector = r.get("sector")
+        sector = raw_sector if isinstance(raw_sector, str) and raw_sector else "?"
+
+        # 라벨 3종은 그대로 JSON에 실려 나가는 값이라 숫자 필드와 같은 강도로 검사한다.
+        # 이름을 못 붙이는 행은 화면에 설명할 수단이 없으므로 자리표시자를 채우지 않고
+        # 행 자체를 건너뛴다(§0 — 없으면 비우고 지어내지 않는다). 특히 라벨에 NaN·Infinity가
+        # 들어오면 json.dumps가 예외 없이 맨몸 NaN 리터럴을 써서 파일 전체가 유효하지 않은
+        # JSON이 되고, 클라이언트의 JSON.parse가 통째로 실패해 /stocks/ 블록이 죽는다 —
+        # 숫자 필드의 "+nan%p" 표시 불일치보다 훨씬 단단한 고장이라 같은 자리에서 막는다.
+        labels = {}
+        bad_label = False
+        for key in ("sector", "us_label", "kr_label"):
+            val = r.get(key)
+            if not isinstance(val, str) or not val:
+                print(
+                    f"[generate_html] overnight_bridge: {sector} 행의 {key} 값({val!r})이 "
+                    "비어 있지 않은 문자열이 아니라 행을 건너뜀.",
+                    file=sys.stderr,
+                )
+                bad_label = True
+                break
+            labels[key] = val
+        if bad_label:
+            continue
 
         nums = {}
         malformed = False
@@ -393,9 +419,9 @@ def build_overnight_bridge(market_data: dict) -> dict:
         gap_r, gap_num = _fmt_signed(nums["gap_pp"], 1)
 
         out.append({
-            "sector": r.get("sector", ""),
-            "us_label": r.get("us_label", ""),
-            "kr_label": r.get("kr_label", ""),
+            "sector": labels["sector"],
+            "us_label": labels["us_label"],
+            "kr_label": labels["kr_label"],
             "us_change_fmt": f"{us_num}%",
             "kr_change_fmt": f"{kr_num}%",
             "us_cls": "up" if us_r >= 0 else "dn",
@@ -1382,6 +1408,18 @@ def _parse_close_price(html_path):
         return None
 
 
+def _bridge_target_is_today(target_date: str) -> bool:
+    """밤사이 브리지 라이브 JSON을 지금 덮어써도 되는 날짜인지 판정한다.
+
+    §2가 정한 과거 날짜 재생성(--date 2026-06-08 등)은 상시 절차인데, 그때 이 파일까지
+    덮으면 6월 행이 라이브 파일에 실린다. 클라이언트 date 게이트가 걸러내므로 틀린 값이
+    뜨지는 않지만, 다음 07:25까지 /stocks/에서 브리지가 조용히 사라지고 코스피 잡의
+    git add web/ 이 그 퇴행을 커밋한다. 라이브 데이터 파일이 아카이브 재렌더의 부수
+    효과가 되면 안 된다.
+    """
+    return target_date == datetime.now(KST).strftime("%Y-%m-%d")
+
+
 def write_overnight_bridge_json(market_data: dict, target_date: str):
     """web/data/overnight-bridge.json 을 생성한다.
 
@@ -1420,9 +1458,26 @@ def write_overnight_bridge_json(market_data: dict, target_date: str):
         "rows": rows,
     }
 
+    # allow_nan=False — build_overnight_bridge가 이미 비유한 값을 걸러내지만, 그걸 뚫고
+    # NaN·Infinity가 남아 있으면 기본 설정의 json.dumps는 예외 없이 맨몸 NaN 리터럴을 써서
+    # 표준 JSON이 아닌 파일을 만든다(클라이언트 JSON.parse가 통째로 실패 → 블록 전체 사망).
+    # 여기서 ValueError로 터뜨리면 호출부의 가드가 잡아 파일을 아예 건드리지 않는다 —
+    # 직전 파일이 낡았을지언정 유효하고 date로 걸러지므로, 깨진 파일을 내보내는 것보다 낫다(§0).
+    body = json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False)
+
     out_path = WEB_DIR / "data" / "overnight-bridge.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 브라우저가 이 파일을 직접 fetch하므로 절반만 써진 상태를 절대 노출하지 않는다
+    # (fetch_stock_news.py의 선례와 동일한 이유).
+    tmp_path = out_path.with_suffix(".json.tmp")
+    tmp_path.write_text(body, encoding="utf-8")
+    try:
+        os.replace(tmp_path, out_path)
+    except Exception:
+        # 교체가 실패하면 tmp를 치우고 예외를 그대로 올린다. 남겨두면 코스피 잡의
+        # git add web/ 이 찌꺼기 파일을 그대로 커밋한다.
+        tmp_path.unlink(missing_ok=True)
+        raise
     print(f"[generate_html] wrote web/data/overnight-bridge.json ({len(rows)}개 섹터)")
 
 
@@ -2411,11 +2466,17 @@ def main():
         # 밤사이 브리지는 /stocks/ 홈에서만 쓰는 부가 데이터다 — 여기서 예외가 새어나가
         # 07:25 브리핑 발행 자체가 죽으면 안 된다(§0 부칙). 실패하면 파일만 갱신되지
         # 않고(어제 파일이 남아도 클라이언트가 date로 걸러낸다) 브리핑은 그대로 나간다.
-        try:
-            write_overnight_bridge_json(market_data, args.date)
-        except Exception as e:
-            print(f"[generate_html] overnight_bridge JSON 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
-                  file=sys.stderr)
+        #
+        # 오늘 날짜일 때만 쓴다 — 근거는 _bridge_target_is_today() 참조.
+        if not _bridge_target_is_today(args.date):
+            print(f"[generate_html] overnight_bridge: 과거 날짜 재생성({args.date}) — "
+                  "라이브 JSON은 건드리지 않음.", file=sys.stderr)
+        else:
+            try:
+                write_overnight_bridge_json(market_data, args.date)
+            except Exception as e:
+                print(f"[generate_html] overnight_bridge JSON 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
+                      file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
     write_sitemap_xml()
