@@ -3189,12 +3189,20 @@ if(passBtn){
   // gap_cls는 '동조'(갭 0)일 때 빈 문자열로 온다 — 그때는 색 클래스를 붙이지 않는다.
   function cls(c){ return (c==='up'||c==='dn') ? ' '+c : ''; }
 
-  /* 노출 여부 — (시각·요일·공휴일·데이터 날짜)만의 순수 판정. 회귀 테스트가 직접 호출한다. */
-  function shouldShow(data){
+  /* 표시 구간(코스피 거래일 07:30~09:00) 안인가 — 데이터와 무관한 시계 판정만. */
+  function inWindow(){
     if(window.krIsKospiHoliday && window.krIsKospiHoliday()) return false;   // 주말·공휴일 포함
     var d=kstNow(), t=d.getUTCHours()*60+d.getUTCMinutes();
-    if(t<450 || t>=540) return false;                                        // 07:30~09:00만
+    return t>=450 && t<540;                                                  // 07:30~09:00
+  }
+
+  /* 노출 여부 — (시각·요일·공휴일·데이터 날짜)만의 순수 판정. 회귀 테스트가 직접 호출한다. */
+  function shouldShow(data){
+    if(!inWindow()) return false;
     if(!data || data.date!==todayKST()) return false;                        // 어제 파일 금지
+    // 비교 대상 거래일이 없으면 머리말의 날짜가 빈칸으로 나간다 — 상대어 금지(§24) 이전에
+    // 날짜 자체가 없는 상태라 렌더하지 않는다.
+    if(typeof data.kr_session_date!=='string' || !data.kr_session_date) return false;
     return Array.isArray(data.rows) && data.rows.length>0;                   // 빈 껍데기 금지
   }
 
@@ -3212,15 +3220,15 @@ if(passBtn){
   window.__obShouldShow=shouldShow;
   window.__obRowHtml=rowHtml;
 
-  var data=null, painted=false;
+  var data=null, paintedDate='', fetching=false;
   function paint(){
-    if(painted || !data) return;
+    if(!data || paintedDate===data.date) return;
     var list=document.getElementById('ob-list'), dt=document.getElementById('ob-date');
     if(!list||!dt) return;
     // 비교 대상 한국 세션은 반드시 실제 날짜로 적는다 — '전일'·'어제' 같은 상대어 금지(§24).
     dt.textContent='한국 '+fmtKoDate(data.kr_session_date)+' 마감 vs 미국 직전 정규장';
     list.innerHTML=data.rows.map(rowHtml).join('');
-    painted=true;
+    paintedDate=data.date;
   }
   function gate(){
     var ok=shouldShow(data);
@@ -3228,10 +3236,32 @@ if(passBtn){
     box.style.display = ok ? '' : 'none';
   }
 
-  fetch('/data/overnight-bridge.json',{cache:'no-store'})
-    .then(function(r){ return r.ok?r.json():null; })
-    .then(function(j){ data=j; gate(); })
-    .catch(function(){ data=null; gate(); });   // 파일 미발행·네트워크 실패 → 조용히 숨긴 채로 둔다
+  /* 데이터 획득 — 오늘자를 손에 넣기 전까지만 다시 받는다.
+     밤새 켜둔 탭은 07:00에 받은 어제 파일(또는 404)을 그대로 들고 07:30을 맞는다. 날짜
+     게이트가 그 stale 파일을 정확히 걷어내므로(§0) 다시 받지 않으면 그 탭에서는 브리지가
+     그날 내내 안 뜬다 — 인터벌이 09:00에 내리기만 하고 07:30에 올리지는 못하는 비대칭이었다.
+     파일은 하루 한 번(07:26경)만 바뀌므로 무조건 폴링하지 않는다. 도움이 될 수 있는
+     구간(표시 구간 안) + 아직 오늘자가 없을 때만 재시도하고, 받는 즉시 멈춘다.
+     실패(404·네트워크·JSON 아님)하면 data를 건드리지 않는다 — 이미 그려진 블록을 지우지 않는다. */
+  function refresh(){
+    if(fetching) return;
+    if(data && data.date===todayKST()) return;   // 이미 오늘자 — 더 받을 이유가 없다
+    fetching=true;
+    fetch('/data/overnight-bridge.json',{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ fetching=false; if(j) data=j; gate(); })
+      .catch(function(){ fetching=false; });     // 이전 상태 유지 — 조용히 넘어간다
+  }
+
+  refresh();
   gate();
-  setInterval(gate, 60*1000);
+  setInterval(function(){ if(inWindow()) refresh(); gate(); }, 60*1000);
+  // 탭을 오래 켜뒀다 돌아왔을 때 인터벌(최대 1분)을 기다리지 않고 즉시 자가 치유한다.
+  // 위 장중 곡선 블록의 visibilitychange 자가 치유와 같은 취지 — 거기선 날짜 롤오버,
+  // 여기선 '표시 구간이 열렸는데 아직 오늘자 파일이 없는' 상태를 복구한다.
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) return;
+    if(inWindow()) refresh();
+    gate();
+  });
 })();
