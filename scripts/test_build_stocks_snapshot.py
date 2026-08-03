@@ -84,6 +84,36 @@ def test_parse_financials():
     assert m.parse_financials(None) == []
 
 
+def test_last_bar_date():
+    rows = [
+        {"localDate": "20260728", "closePrice": 100.0},
+        {"localDate": "20260729", "closePrice": 101.0},
+        {"localDate": "20260730", "closePrice": None},  # 종가 없는 행(휴장·결측)은 건너뜀
+    ]
+    assert m._last_bar_date(rows) == "2026-07-29"
+    assert m._last_bar_date([]) is None
+    assert m._last_bar_date([{"localDate": "20260730", "closePrice": None}]) is None
+
+
+def test_reconcile_session_date_unanimous():
+    assert m._reconcile_session_date(["2026-07-31", "2026-07-31", "2026-07-31"]) == "2026-07-31"
+
+
+def test_reconcile_session_date_ignores_missing():
+    # 일부 종목 조회 실패(None)는 투표에서 제외 — 나머지가 일치하면 채택
+    assert m._reconcile_session_date(["2026-07-31", None, "2026-07-31"]) == "2026-07-31"
+
+
+def test_reconcile_session_date_disagreement_returns_none():
+    # 종목별 마지막 봉 날짜가 엇갈리면 다수결로 추정하지 않고 None(§0)
+    assert m._reconcile_session_date(["2026-07-31", "2026-07-30"]) is None
+
+
+def test_reconcile_session_date_all_missing_returns_none():
+    assert m._reconcile_session_date([None, None]) is None
+    assert m._reconcile_session_date([]) is None
+
+
 def test_sector_bellwether_for_stock():
     snapshot = {"bellwethers": {"NVDA": {"name": "엔비디아", "change_pct": 1.9}}}
     sectors = {"semicon": {"bellwethers": [{"t": "NVDA"}]}}
