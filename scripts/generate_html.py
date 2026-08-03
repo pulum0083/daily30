@@ -279,6 +279,21 @@ def build_us_tone(market_data: dict) -> dict:
     return {"dir_cls": dir_map.get(prior["direction"], "neutral")}
 
 
+def _fmt_signed(value: float, decimals: int) -> tuple:
+    """부호 있는 퍼센트 문자열을 만들되, 표시 자릿수로 반올림한 값을 그대로 분류에도 써서
+    문자열과 up/dn 판정이 항상 일치하게 한다.
+
+    round()가 -0.0을 만들 수 있고(예: round(-0.04, 1) == -0.0), -0.0은 파이썬에서
+    0과 같다고 비교되면서도(-0.0 >= 0 은 True) 문자열 포맷은 부호를 그대로 찍어
+    "-0.00%" 처럼 보인다 — 반올림 전 원값으로 up/dn을 판정하면 화면엔 0.00%인데
+    파란색(dn)이 뜨는 모순이 생긴다. round() 이후 값이 0이면 +0.0으로 정규화해
+    문자열도 부호도 항상 같은 값에서 나오게 한다."""
+    v = round(value, decimals)
+    if v == 0:
+        v = 0.0
+    return v, f"{v:+.{decimals}f}"
+
+
 def build_overnight_bridge(market_data: dict) -> dict:
     """fetch_data.fetch_overnight_bridge()가 만든 원시 수치를 템플릿용 표시 문자열로 변환한다(§20).
 
@@ -287,37 +302,94 @@ def build_overnight_bridge(market_data: dict) -> dict:
     None이거나 키가 없으면(또는 빈 리스트면) 템플릿이 섹션을 건너뛸 수 있도록 빈 리스트를 돌려준다 —
     fetch 단계가 이미 데이터 없음을 판정했으므로 여기서 다시 채워 넣지 않는다(§0).
 
+    이 섹션은 선택 섹션이다 — 행 하나가 깨져 있다고 07:25 브리핑 전체를 죽이면 안 된다
+    (§0 부칙). market_data는 latest_kospi.json에서 오는데, §23/§28 정정 절차로 사람이
+    직접 손으로 고치는 파일이라 필드가 null이거나 타입이 틀린 실제 실패 모드가 있다.
+    build_us_issues가 컨테이너가 아니라 항목 단위로 isinstance(dict) 가드를 거는 것과
+    같은 방식으로, 행 하나가 dict가 아니거나 숫자 필드가 숫자가 아니거나(None·문자열 등)
+    거래일이 없으면 그 행만 건너뛴다 — 자리표시자를 채워 넣지 않는다(§0, 없으면 지어내지
+    않고 비운다). 건너뛴 행은 stderr에 로그를 남긴다 — 이 데이터가 수동 편집 파일에서
+    오므로, 조용히 넘어가면 §20류 사고(낡거나 깨진 값이 계속 진짜처럼 보이는 것)처럼
+    편집 실수가 몇 번이고 재현돼도 아무도 못 알아챈다.
+
     kr_session_date는 모든 행에서 동일한 값이라 행마다 반복하지 않고 최상위 키
     overnight_bridge_date로 한 번만 올린다 — 템플릿이 "N일 한국 마감 vs 간밤 미국장" 같은
     섹션 헤더 라벨을 한 곳에서만 채우면 되고(§24 상대 시간 라벨 금지 규칙과 동일하게
     렌더 시점에 실제 날짜를 명시), 행마다 같은 문자열을 반복해 템플릿에서 매번 [0]을
-    꺼내 쓰게 만들지 않기 위함이다.
+    꺼내 쓰게 만들지 않기 위함이다. fetch_data.py가 단일 루프 안 로컬 변수 하나에서
+    모든 행의 날짜를 채우므로 정상 상태에선 항상 하나로 일치하지만(구조적 보장), 그
+    보장이 깨진 경우(수동 편집 등)엔 첫 값을 유지하고 불일치를 stderr에 남긴다 — 조용히
+    마지막 값으로 덮어써 엉뚱한 날짜를 모든 행에 붙이는 것보다, 실패를 눈에 띄게 하는
+    쪽을 택한다. 날짜 없는 행은 그 행 자체를 건너뛰므로, 표시되는 행이 하나라도 있으면
+    overnight_bridge_date는 항상 비어 있지 않다 — 날짜 없이 행만 떠 있는 상태(§24 위반)를
+    구조적으로 방지한다.
     """
     rows = market_data.get("overnight_bridge")
+    empty = {"overnight_bridge": [], "overnight_bridge_date": ""}
     if not isinstance(rows, list) or not rows:
-        return {"overnight_bridge": [], "overnight_bridge_date": ""}
+        return empty
 
     out = []
     session_date = ""
     for r in rows:
-        us_change = r.get("us_change", 0.0)
-        kr_change = r.get("kr_change", 0.0)
-        gap = r.get("gap_pp", 0.0)
-        session_date = r.get("kr_session_date") or session_date
-        gap_cls = "up" if gap > 0 else ("dn" if gap < 0 else "")
-        gap_word = "선반영" if gap > 0 else ("미반영" if gap < 0 else "동조")
+        if not isinstance(r, dict):
+            print("[generate_html] overnight_bridge: 행이 dict가 아니라 건너뜀.", file=sys.stderr)
+            continue
+
+        sector = r.get("sector") or "?"
+
+        nums = {}
+        malformed = False
+        for key in ("us_change", "kr_change", "gap_pp"):
+            val = r.get(key, 0.0)
+            if isinstance(val, bool) or not isinstance(val, (int, float)):
+                print(
+                    f"[generate_html] overnight_bridge: {sector} 행의 {key} 값({val!r})이 "
+                    "숫자가 아니라 행을 건너뜀.",
+                    file=sys.stderr,
+                )
+                malformed = True
+                break
+            nums[key] = float(val)
+        if malformed:
+            continue
+
+        row_date = r.get("kr_session_date")
+        if not isinstance(row_date, str) or not row_date:
+            print(
+                f"[generate_html] overnight_bridge: {sector} 행에 kr_session_date가 없어 건너뜀.",
+                file=sys.stderr,
+            )
+            continue
+
+        if not session_date:
+            session_date = row_date
+        elif row_date != session_date:
+            print(
+                f"[generate_html] overnight_bridge: 행 간 kr_session_date 불일치"
+                f"({session_date!r} vs {row_date!r}) — 먼저 나온 값을 유지.",
+                file=sys.stderr,
+            )
+
+        us_r, us_num = _fmt_signed(nums["us_change"], 2)
+        kr_r, kr_num = _fmt_signed(nums["kr_change"], 2)
+        gap_r, gap_num = _fmt_signed(nums["gap_pp"], 1)
+
         out.append({
             "sector": r.get("sector", ""),
             "us_label": r.get("us_label", ""),
             "kr_label": r.get("kr_label", ""),
-            "us_change_fmt": f"{us_change:+.2f}%",
-            "kr_change_fmt": f"{kr_change:+.2f}%",
-            "us_cls": "up" if us_change >= 0 else "dn",
-            "kr_cls": "up" if kr_change >= 0 else "dn",
-            "gap_fmt": f"{gap:+.1f}%p",
-            "gap_cls": gap_cls,
-            "gap_word": gap_word,
+            "us_change_fmt": f"{us_num}%",
+            "kr_change_fmt": f"{kr_num}%",
+            "us_cls": "up" if us_r >= 0 else "dn",
+            "kr_cls": "up" if kr_r >= 0 else "dn",
+            "gap_fmt": f"{gap_num}%p",
+            "gap_cls": "up" if gap_r > 0 else ("dn" if gap_r < 0 else ""),
+            "gap_word": "선반영" if gap_r > 0 else ("미반영" if gap_r < 0 else "동조"),
         })
+
+    if not out:
+        return empty
 
     return {"overnight_bridge": out, "overnight_bridge_date": session_date}
 
