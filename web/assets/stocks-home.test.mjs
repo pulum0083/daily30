@@ -234,3 +234,98 @@ test('KST 자정 직후에도 전일 세션을 오늘로 받지 않는다', () =
 test('UTC 기준으로 날짜가 갈리지 않는다 (KST 09:00 = UTC 전날 00:00)', () => {
   assert.equal(acceptsAt('2026-07-31T09:00:00', { date: '20260731', minutes: [1, 2], times: ['09:00', '09:05'] }), true);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 밤사이 브리지 노출 게이트 (__obShouldShow)
+//
+// 거래일 07:30~09:00(KST)에만 뜬다. 07:30은 '밤사이 미국 반도체 시황'이 꺼지는 경계(핸드오프),
+// 09:00은 코스피 개장 — 개장 뒤에도 갭을 띄우면 '한국 직전 마감'이 어제 종가가 되면서 오늘
+// 등락과 이중 계상된다(§24). 09:00 off-by-one이 곧 §24 위반이라 경계를 분 단위로 고정한다.
+// 파일은 주말·공휴일에도 배포된 채 남으므로, 그날들을 실제로 막는 건 date 게이트다(§0).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** 해당 KST 시각에 이 payload로 브리지를 노출하는가 */
+function bridgeShows(when, payload) {
+  const fn = loadWindow({ now: kst(when) }).__obShouldShow;
+  assert.ok(fn, 'window.__obShouldShow가 없다 — 밤사이 브리지 게이트 훅이 제거됐는지 확인할 것');
+  return fn(payload);
+}
+
+/** 표시용 행 하나의 HTML */
+function bridgeRowHtml(row) {
+  const fn = loadWindow().__obRowHtml;
+  assert.ok(fn, 'window.__obRowHtml이 없다 — 밤사이 브리지 렌더 훅이 제거됐는지 확인할 것');
+  return fn(row);
+}
+
+/** date를 지정한 정상 payload */
+function payload(date) {
+  return {
+    date, kr_session_date: '2026-07-31',
+    rows: [{
+      sector: '반도체', us_label: '반도체 ETF', kr_label: '삼성전자·SK하이닉스',
+      us_change_fmt: '+8.50%', kr_change_fmt: '+28.38%', us_cls: 'up', kr_cls: 'up',
+      gap_fmt: '+19.9%p', gap_cls: 'up', gap_word: '선반영',
+    }],
+  };
+}
+
+test('브리지: 거래일 08:00, 오늘자 데이터 → 노출', () => {
+  assert.equal(bridgeShows('2026-08-03T08:00:00', payload('2026-08-03')), true);
+});
+
+test('브리지 경계: 07:29는 아직 안 뜨고 07:30부터 뜬다', () => {
+  assert.equal(bridgeShows('2026-08-03T07:29:00', payload('2026-08-03')), false);
+  assert.equal(bridgeShows('2026-08-03T07:30:00', payload('2026-08-03')), true);
+});
+
+test('브리지 경계: 08:59는 뜨고 09:00(개장)엔 내려간다 — off-by-one이 곧 §24 위반', () => {
+  assert.equal(bridgeShows('2026-08-03T08:59:00', payload('2026-08-03')), true);
+  assert.equal(bridgeShows('2026-08-03T09:00:00', payload('2026-08-03')), false);
+});
+
+test('브리지: 개장 후 장중엔 뜨지 않는다', () => {
+  assert.equal(bridgeShows('2026-08-03T10:30:00', payload('2026-08-03')), false);
+});
+
+test('브리지: 주말엔 시간대가 맞아도 뜨지 않는다', () => {
+  assert.equal(bridgeShows('2026-08-01T08:00:00', payload('2026-08-01')), false); // 토
+  assert.equal(bridgeShows('2026-08-02T08:00:00', payload('2026-08-02')), false); // 일
+});
+
+test('브리지: 공휴일(광복절 대체 08-17)엔 뜨지 않는다', () => {
+  assert.equal(bridgeShows('2026-08-17T08:00:00', payload('2026-08-17')), false);
+});
+
+test('브리지: 어제 날짜 파일은 렌더하지 않는다 (§0 — 완전성보다 정합성)', () => {
+  assert.equal(bridgeShows('2026-08-03T08:00:00', payload('2026-07-31')), false);
+});
+
+test('브리지: 파일이 없거나(null) rows가 비면 뜨지 않는다', () => {
+  assert.equal(bridgeShows('2026-08-03T08:00:00', null), false);
+  assert.equal(bridgeShows('2026-08-03T08:00:00', undefined), false);
+  assert.equal(bridgeShows('2026-08-03T08:00:00', { date: '2026-08-03', rows: [] }), false);
+  assert.equal(bridgeShows('2026-08-03T08:00:00', { date: '2026-08-03' }), false);
+});
+
+test('브리지: 파일이 없어도 스크립트 로드가 죽지 않는다 (fetch 거부 경로)', () => {
+  // loadWindow의 fetch 스텁은 항상 reject한다 — 여기까지 오면 catch가 살아 있다는 뜻.
+  assert.equal(typeof loadWindow().__obShouldShow, 'function');
+});
+
+test('브리지: gap_cls가 빈 문자열(동조)이면 색 클래스를 붙이지 않는다', () => {
+  const html = bridgeRowHtml({
+    sector: '자동차', us_label: 'TSLA·F', kr_label: '현대차·기아',
+    us_change_fmt: '+1.00%', kr_change_fmt: '+1.00%', us_cls: 'up', kr_cls: 'up',
+    gap_fmt: '+0.0%p', gap_cls: '', gap_word: '동조',
+  });
+  assert.match(html, /class="ob-pill">동조</);
+  assert.match(html, /class="num">\+0\.0%p</);
+});
+
+test('브리지: 색 클래스는 파이썬이 구운 us_cls·kr_cls·gap_cls를 그대로 쓴다 (§30 재계산 금지)', () => {
+  const html = bridgeRowHtml(payload('2026-08-03').rows[0]);
+  assert.match(html, /class="ob-pill up">선반영</);
+  assert.match(html, /class="num up">\+19\.9%p</);
+  assert.match(html, /class="num up">\+8\.50%</);
+});

@@ -3158,3 +3158,80 @@ if(passBtn){
     })
     .catch(function(){ block.style.display='none'; });
 })();
+
+/* ── 밤사이 브리지 (#overnight-bridge) ──────────────────────────────────────────
+   간밤 미국 정규장 등락 vs 한국 직전 마감 등락을 섹터별 %p 갭으로 보여준다.
+   등락 문자열·색 클래스(up/dn)·선반영/미반영/동조 판정은 파이썬
+   (generate_html.build_overnight_bridge)이 전부 구워서 web/data/overnight-bridge.json으로
+   내보낸다. 여기서는 렌더만 한다 — 경계 판정을 JS로 다시 구현하면 §30 이중 구현이 재현된다.
+
+   노출 구간: 코스피 거래일 07:30~09:00 (KST).
+     07:30 — #us-evening('밤사이 미국 반도체 시황')이 꺼지고 krxDay() 낮 레이아웃이 켜지는
+             바로 그 경계다. 밤사이 블록이 내려간 자리를 그대로 이어받는다.
+     09:00 — 코스피 개장. 그 뒤로는 '한국 직전 마감'이 어제 종가가 되고 오늘 장은 따로
+             움직인다. 그 상태로 갭을 계속 띄우면 오늘 등락과 이중으로 세게 되는데,
+             그게 정확히 이 기능이 드러내려던 §24 사고다. 개장과 동시에 내린다.
+
+   날짜 게이트: JSON의 date가 오늘(KST)이 아니면 아무것도 렌더하지 않는다. 이 파일은
+   주말·공휴일에도 배포된 채 남아 있으므로, 실제로 그 날들을 막는 것은 요일 검사가 아니라
+   이 날짜 게이트다(§0 — 완전성보다 정합성).
+
+   재평가: ueGate(5분)·wmBodyGate(1분) 관례를 따라 1분마다 게이트만 다시 본다 — 탭을 열어둔
+   채 09:00을 넘기면 스스로 내려간다. 섹션 재배치는 하지 않는다(위 phase() 주석의 '재배치는
+   로드 1회' 원칙 유지). */
+(function(){
+  var box=document.getElementById('overnight-bridge');
+  if(!box) return;
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
+  function kstNow(){ return new Date(Date.now()+9*3600*1000); }
+  function todayKST(){ return kstNow().toISOString().slice(0,10); }
+  // gap_cls는 '동조'(갭 0)일 때 빈 문자열로 온다 — 그때는 색 클래스를 붙이지 않는다.
+  function cls(c){ return (c==='up'||c==='dn') ? ' '+c : ''; }
+
+  /* 노출 여부 — (시각·요일·공휴일·데이터 날짜)만의 순수 판정. 회귀 테스트가 직접 호출한다. */
+  function shouldShow(data){
+    if(window.krIsKospiHoliday && window.krIsKospiHoliday()) return false;   // 주말·공휴일 포함
+    var d=kstNow(), t=d.getUTCHours()*60+d.getUTCMinutes();
+    if(t<450 || t>=540) return false;                                        // 07:30~09:00만
+    if(!data || data.date!==todayKST()) return false;                        // 어제 파일 금지
+    return Array.isArray(data.rows) && data.rows.length>0;                   // 빈 껍데기 금지
+  }
+
+  function rowHtml(r){
+    if(!r) return '';
+    return '<div class="ob-row">'
+      + '<span class="ob-sec">'+esc(r.sector)+'</span>'
+      + '<span class="ob-leg"><span class="ob-mk">미</span><b class="num'+cls(r.us_cls)+'">'+esc(r.us_change_fmt)+'</b><span class="ob-nm">'+esc(r.us_label)+'</span></span>'
+      + '<span class="ob-leg"><span class="ob-mk">한</span><b class="num'+cls(r.kr_cls)+'">'+esc(r.kr_change_fmt)+'</b><span class="ob-nm">'+esc(r.kr_label)+'</span></span>'
+      + '<span class="ob-gap"><span class="ob-pill'+cls(r.gap_cls)+'">'+esc(r.gap_word)+'</span><b class="num'+cls(r.gap_cls)+'">'+esc(r.gap_fmt)+'</b></span>'
+      + '</div>';
+  }
+
+  // 회귀 테스트 훅 — 프로덕션 동작에는 영향 없음(읽기 전용 참조).
+  window.__obShouldShow=shouldShow;
+  window.__obRowHtml=rowHtml;
+
+  var data=null, painted=false;
+  function paint(){
+    if(painted || !data) return;
+    var list=document.getElementById('ob-list'), dt=document.getElementById('ob-date');
+    if(!list||!dt) return;
+    // 비교 대상 한국 세션은 반드시 실제 날짜로 적는다 — '전일'·'어제' 같은 상대어 금지(§24).
+    dt.textContent='한국 '+fmtKoDate(data.kr_session_date)+' 마감 vs 미국 직전 정규장';
+    list.innerHTML=data.rows.map(rowHtml).join('');
+    painted=true;
+  }
+  function gate(){
+    var ok=shouldShow(data);
+    if(ok) paint();
+    box.style.display = ok ? '' : 'none';
+  }
+
+  fetch('/data/overnight-bridge.json',{cache:'no-store'})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){ data=j; gate(); })
+    .catch(function(){ data=null; gate(); });   // 파일 미발행·네트워크 실패 → 조용히 숨긴 채로 둔다
+  gate();
+  setInterval(gate, 60*1000);
+})();

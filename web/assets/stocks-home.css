@@ -1010,3 +1010,37 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #why-moved.lw-curve-collapsed > #wm-curve-block + .lw-row{
   margin-top:0;padding-top:0;border-top:none;
 }
+
+/* ── 밤사이 브리지(#overnight-bridge) — 거래일 07:30~09:00에만 노출(stocks-home.js) ──
+   ncai 규칙: 좌측 컬러 액센트 바 금지, 강조는 surface-soft 톤 + 굵기. 상태는 pill 배지로만.
+   색은 한국 시장 관례 그대로 --up=빨강(상승) / --dn=파랑(하락) — semantic 팔레트 금지.
+   변수엔 전부 폴백을 준다(§5 — 변수 하나가 비어 페이지가 통째로 빈 화면이 된 적이 있다). */
+#overnight-bridge{background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);border-radius:16px;box-shadow:var(--s1,0 1px 3px rgba(0,0,0,.06));padding:14px 16px;margin-bottom:16px;}
+.ob-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:2px;}
+.ob-t{font-size:15px;font-weight:800;color:var(--ink,#13151A);}
+.ob-date{font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
+.ob-list{margin-top:4px;}
+.ob-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:10px 0;border-bottom:1px solid var(--hair,#E5E7EB);}
+.ob-row:last-child{border-bottom:none;}
+.ob-sec{flex:0 0 auto;min-width:66px;font-size:13px;font-weight:700;color:var(--ink,#13151A);}
+.ob-leg{display:inline-flex;align-items:center;gap:4px;min-width:0;font-size:13px;}
+.ob-mk{flex:0 0 auto;font-size:13px;font-weight:500;color:var(--muted,#5B6472);background:var(--soft,#F9FAFB);border-radius:6px;padding:1px 6px;}
+.ob-leg b{font-weight:800;font-variant-numeric:tabular-nums;}
+.ob-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted,#5B6472);}
+.ob-gap{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;}
+.ob-pill{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:999px;background:var(--soft,#F9FAFB);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
+.ob-pill.up{color:var(--up,#E03131);}
+.ob-pill.dn{color:var(--dn,#2775ED);}
+/* 색은 붙여준 .up/.dn(전역 규칙)이 결정한다 — 여기서 color를 지정하면 특이도가 높아 그걸 덮어써
+   '동조'가 아닌 행까지 먹색으로 나온다. 동조(gap_cls="")일 땐 클래스가 없어 본문색을 그대로 쓴다. */
+.ob-gap b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.ob-note{font-size:13px;line-height:1.55;color:var(--muted,#5B6472);margin:0;padding-top:10px;border-top:1px solid var(--hair,#E5E7EB);}
+/* 좁은 화면에선 한 줄에 다 넣으면 행마다 줄바꿈 위치가 달라져 들쭉날쭉해진다.
+   섹터명+갭을 첫 줄에 고정하고, 미국·한국 다리를 각각 한 줄씩 내린다(행 3줄 고정). */
+@media(max-width:600px){
+  #overnight-bridge{padding:13px 14px;}
+  .ob-row{gap:3px 10px;padding:11px 0;}
+  .ob-sec{order:1;flex:1 1 auto;}
+  .ob-gap{order:2;}
+  .ob-leg{order:3;flex:0 0 100%;}
+}
