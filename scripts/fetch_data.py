@@ -22,21 +22,25 @@ DATA_DIR.mkdir(exist_ok=True)
 KST = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
 
-# 밤사이 브리지 — 섹터별 미국 비교 대상 (ETF 있으면 ETF 단독, 없으면 개별주 평균).
-# stock_universe.json의 bellwethers를 손으로 골랐다 — ETF 여부가 데이터에 없어 수동 매핑.
-# 티커별로 표시 이름을 따로 들고 있는 이유(§20): us_label은 실제로 수집에 성공한
-# 티커만으로 매번 다시 조립한다 — 일부 티커가 결측이어도 라벨이 없는 티커를 계속
-# 가리키는 사고(예: VRT 결측인데 라벨은 "GE Vernova·Vertiv" 그대로)를 막기 위함.
+# 밤사이 브리지 — 섹터별 미국 비교 대상 티커(고정, 손으로 골랐다).
+# ETF 하나만 쓰는 섹터도 있고(semicon·defense·battery·bio), 개별주와 ETF를 섞어
+# 평균하는 섹터도 있다(power: GEV+VRT 개별주 2개, auto: TSLA+F 개별주 2개,
+# finance: JPM 개별주 + KBE ETF 혼합). kind가 ETF·개별주 구분 없이 전부 "US"라
+# 어느 티커를 쓸지는 자동화할 수 없어 티커 선택만 수동 매핑으로 남긴다.
+# 표시 이름은 여기 담지 않는다 — stock_universe.json의 bellwethers[].name을 매 호출마다
+# 그대로 가져와 쓴다(§20·§30 이중소스 재발 방지). 이름을 두 곳에 따로 두면 한쪽만
+# 바뀌었을 때(예: universe에서 "은행 ETF"→"미국 은행 ETF"로 개명) 이 브리핑만 옛 이름을
+# 계속 보여주는 사고가 난다 — 실제로 그 형태로 재발해 이번에 수정됨.
 # ⚠️ SECTOR_FOCUS_STOCKS(바로 아래, 중단된 sector_focus 섹션용)와 섹터 구성이 다르다.
-# 재사용 금지 — stock_universe.json만 단일 소스로 쓴다(§20·§30 이중소스 재발 방지).
-BRIDGE_US_LEG = {
-    "semicon": {"SOXX": "반도체 ETF"},
-    "power":   {"GEV": "GE Vernova", "VRT": "Vertiv"},
-    "defense": {"ITA": "방산 ETF"},
-    "battery": {"LIT": "리튬 ETF"},
-    "auto":    {"TSLA": "테슬라", "F": "포드"},
-    "bio":     {"XBI": "바이오 ETF"},
-    "finance": {"JPM": "JP모건", "KBE": "은행 ETF"},
+# 재사용 금지 — stock_universe.json만 단일 소스로 쓴다.
+BRIDGE_US_TICKERS = {
+    "semicon": ["SOXX"],
+    "power":   ["GEV", "VRT"],
+    "defense": ["ITA"],
+    "battery": ["LIT"],
+    "auto":    ["TSLA", "F"],
+    "bio":     ["XBI"],
+    "finance": ["JPM", "KBE"],
 }
 
 # 섹터 로테이션 대표 종목·ETF (sector_focus 브리핑용 실시간 데이터 수집)
@@ -744,10 +748,14 @@ def fetch_sector_stocks() -> dict:
 
 
 def _bridge_change_pct(entry) -> float | None:
-    """등락률을 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지)."""
+    """등락률을 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지).
+    bool은 int의 서브클래스라 isinstance(True, int)가 True로 나오므로 별도로 걸러낸다
+    (예: "change_pct": true 가 1.0%로 둔갑하는 사고 방지)."""
     if not isinstance(entry, dict):
         return None
     v = entry.get("change_pct")
+    if isinstance(v, bool):
+        return None
     return float(v) if isinstance(v, (int, float)) else None
 
 
@@ -760,31 +768,46 @@ def fetch_overnight_bridge(macro: dict, snapshot: dict, today: date | None = Non
     반환: [{"sector","us_label","us_change","kr_label","kr_change","gap_pp","kr_session_date"}, ...]
           또는 None(섹션 생략).
 
-    스냅샷 신선도는 "N일 이내"가 아니라 "직전 코스피 개장일과 정확히 일치"로 판정한다
-    (§24) — 며칠 이내면 통과시키는 방식은 스냅샷 수집이 하루 조용히 빠졌을 때
-    월요일 마감을 화요일 밤 미국장과 비교하는 식의 세션 밀림(이중계상)을 놓친다.
+    신선도는 snapshot.get("generated_at")(스냅샷을 "언제 만들었나")가 아니라
+    snapshot.get("session_date")(실제로 반영된 한국 종목 마지막 봉이 "며칠자 장인가")로
+    판정한다. generated_at은 네이버가 아직 당일 봉을 안 올린 채로 잡이 실행되면 실제
+    반영된 봉보다 하루 앞서갈 수 있다(build_stocks_snapshot.py 상단 경고 참조) — 그
+    어긋남을 그대로 두면 "N일 이내" 검사든 "직전 개장일과 정확히 일치" 검사든 잘못된
+    날짜를 옳다고 통과시킨다. session_date는 build_stocks_snapshot.py가 실제 종가 봉의
+    날짜에서 직접 뽑아 기록하므로 이 값만 신뢰한다. session_date가 없으면(구버전 스냅샷
+    등) generated_at으로 폴백하지 않고 섹션을 생략한다 — 폴백은 이 사고를 그대로
+    재현하는 길이다.
     """
     if not isinstance(macro, dict) or not isinstance(snapshot, dict):
         print("[fetch_data] overnight_bridge: 입력 형식이 예상과 달라 섹션 생략", file=sys.stderr)
         return None
 
-    snap_date_str = str(snapshot.get("generated_at") or "")[:10]
+    session_date_str = snapshot.get("session_date")
+    if not isinstance(session_date_str, str) or not session_date_str:
+        print("[fetch_data] overnight_bridge: stocks-snapshot.json에 session_date가 없음 — 섹션 생략", file=sys.stderr)
+        return None
     try:
-        snap_date = datetime.strptime(snap_date_str, "%Y-%m-%d").date()
+        snap_date = datetime.strptime(session_date_str, "%Y-%m-%d").date()
     except ValueError:
-        print("[fetch_data] overnight_bridge: stocks-snapshot.json generated_at 파싱 실패 — 섹션 생략", file=sys.stderr)
+        print(f"[fetch_data] overnight_bridge: session_date({session_date_str}) 파싱 실패 — 섹션 생략", file=sys.stderr)
         return None
 
+    # stock_universe.json 로드 실패와 동일한 이유로 fail-closed — 임포트 실패가 그대로
+    # 새어나가면 07:25 코스피 데이터 수집 전체가 죽는다. 섹션만 생략하고 넘어간다.
     try:
-        from session_label import prev_kospi_session
-    except ImportError:
-        from scripts.session_label import prev_kospi_session
+        try:
+            from scripts.session_label import prev_kospi_session
+        except ImportError:
+            from session_label import prev_kospi_session
+    except ImportError as e:
+        print(f"[fetch_data] overnight_bridge: session_label 임포트 실패({e}) — 섹션 생략", file=sys.stderr)
+        return None
 
     ref_date = today or datetime.now(KST).date()
     prev_session = prev_kospi_session(ref_date)
     if prev_session is None or snap_date != prev_session:
         print(
-            f"[fetch_data] overnight_bridge: 스냅샷 날짜({snap_date})가 직전 코스피 개장일"
+            f"[fetch_data] overnight_bridge: session_date({snap_date})가 직전 코스피 개장일"
             f"({prev_session})과 불일치 — 섹션 생략",
             file=sys.stderr,
         )
@@ -808,14 +831,31 @@ def fetch_overnight_bridge(macro: dict, snapshot: dict, today: date | None = Non
         return None
 
     rows = []
-    for key, us_ticker_names in BRIDGE_US_LEG.items():
+    for key, us_tickers in BRIDGE_US_TICKERS.items():
         cfg = sectors.get(key)
         if not isinstance(cfg, dict):
             continue
-        us_contrib = [
-            (t, v) for t in us_ticker_names
-            if (v := _bridge_change_pct(macro.get(t))) is not None
-        ]
+
+        # 표시 이름은 stock_universe.json bellwethers에서만 가져온다(§20·§30).
+        # 거기 없는 티커는 검증된 이름이 없으므로 결측 취급하고 건너뛴다 — 이름 없이
+        # 티커만으로 라벨을 지어내지 않는다.
+        bw_names = {
+            b["t"]: b.get("name") for b in (cfg.get("bellwethers") or [])
+            if isinstance(b, dict) and b.get("t")
+        }
+        us_contrib = []
+        for t in us_tickers:
+            name = bw_names.get(t)
+            if not name:
+                print(
+                    f"[fetch_data] overnight_bridge: {key} 티커 {t}가 bellwethers에 없어 "
+                    "표시 이름 불명 — 결측 취급",
+                    file=sys.stderr,
+                )
+                continue
+            v = _bridge_change_pct(macro.get(t))
+            if v is not None:
+                us_contrib.append((name, v))
         if not us_contrib:
             print(f"[fetch_data] overnight_bridge: {key} 미국 벨웨더 수집 실패 — 해당 섹터 생략", file=sys.stderr)
             continue
@@ -837,7 +877,7 @@ def fetch_overnight_bridge(macro: dict, snapshot: dict, today: date | None = Non
         kr_change = round(sum(kr_vals) / len(kr_vals), 2)
         rows.append({
             "sector": cfg.get("label", key),
-            "us_label": "·".join(us_ticker_names[t] for t, _ in us_contrib),
+            "us_label": "·".join(name for name, _ in us_contrib),
             "us_change": us_change,
             "kr_label": "·".join(kr_names),
             "kr_change": kr_change,
