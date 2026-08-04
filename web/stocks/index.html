@@ -434,7 +434,10 @@
           <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목 · 코스피·코스닥 · —</div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
         </div>
-        <div class="senti" id="sec-senti" style="display:none;"><div class="l"><span>섹터 AI 심리</span><span id="sec-senti-label">—</span></div><div class="gg"><div class="n" id="sec-senti-needle" style="left:50%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
+        <!-- "섹터 AI 심리" 게이지는 2026-08-04 제거. 값이 upN/total(단순 상승 비율)이라
+             AI가 관여하지 않는데 라벨만 그렇게 달려 있었고(§0 과장), 바로 아래 시장폭이
+             같은 값을 더 많은 정보(하락·보합 수)와 함께 보여줘 중복이었다.
+             스냅샷에 심리·AI 계열 필드가 없어 정직하게 채울 방법도 없다. -->
         <div class="breadth" id="sec-breadth">
           <div class="l"><span>시장폭</span><span id="sec-breadth-label">—</span></div>
           <div class="bbar" id="sec-bbar"><i class="bu" style="width:0"></i><i class="bd" style="width:0"></i><i class="bn" style="width:100%"></i></div>

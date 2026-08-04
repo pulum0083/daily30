@@ -2145,10 +2145,6 @@ if(passBtn){
     var bk=document.getElementById('sec-bk');
     if(bk) bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+d.upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+d.dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+d.flatN+'</span></span>';
 
-    var senti=document.getElementById('sec-senti'), pct=Math.round(d.upN/d.total*100);
-    var slbl=document.getElementById('sec-senti-label'), needle=document.getElementById('sec-senti-needle');
-    if(senti&&slbl&&needle){senti.style.display='';slbl.innerHTML=(pct>=55?'상승 우위':pct<=45?'하락 우위':'중립')+' <b class="num">'+pct+'%</b>';needle.style.left=pct+'%';}
-
     var lw=document.getElementById('sec-leaders');
     if(lw) lw.innerHTML=d.leaders.map(function(r,i){var cls=r.pct>=0?'up':'dn',sign=r.pct>=0?'+':'−';
       return '<a class="srow" onclick="goStock(\''+r.code+'\')"><span class="n2">'+['①','②','③'][i]+' '+r.name+' <small class="num">'+r.code+'</small></span><span class="c '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
