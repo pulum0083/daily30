@@ -139,6 +139,31 @@ test('secAllAverages는 데이터가 있는 섹터만 돌려준다', () => {
   assert.equal(out.auto.label, '자동차');
 });
 
+// 시가총액이 스냅샷에 없어(발행주식수 미보유) '섹터 크기' 대용으로 거래대금
+// (종가×거래량 합산)을 쓴다 — 사용자 지정(2026-08-04). 지어낸 값이 아니라 있는
+// 실측(close·vol)으로 합산한 것인지 검증한다(§0).
+test('dvol(거래대금)은 섹터 내 종목들의 종가×거래량 합산이다', () => {
+  const { secBuildSectorData, secAllAverages } = load();
+  const snap = {
+    stocks: {
+      '005930': { name:'삼성전자', sector:'semicon', change_pct:1, close:100, vol:10 },   // 1,000
+      '000660': { name:'SK하이닉스', sector:'semicon', change_pct:1, close:50, vol:20 },  // 1,000
+      '005380': { name:'현대차', sector:'auto', change_pct:1, close:10, vol:5 },           // 50
+    },
+  };
+  const semicon = secBuildSectorData(snap, 'semicon');
+  assert.equal(semicon.dvol, 2000);
+  const all = secAllAverages(snap);
+  assert.equal(all.semicon.dvol, 2000);
+  assert.equal(all.auto.dvol, 50);
+});
+
+test('close·vol이 없는 종목은 dvol 계산에서 0으로 취급한다 — 지어내지 않는다(§0)', () => {
+  const { secBuildSectorData } = load();
+  const d = secBuildSectorData(fixtureSnap(), 'semicon'); // fixtureSnap엔 close/vol이 없다
+  assert.equal(d.dvol, 0);
+});
+
 test('마감 라벨은 장중 여부와 무관하게 항상 "N일 마감"이다', () => {
   // .ds-asof(장중 '오늘 실시간')와 다른 별도 라벨이어야 한다 — 이 화면은 항상 스냅샷(마감) 기준.
   const { secAsOfLabel } = load();
@@ -195,19 +220,38 @@ test('secShowSector — 데이터 없는 섹터는 기존 DOM을 그대로 둔�
   assert.equal(els['sec-rows'].innerHTML, before, '없는 섹터로 전환 시도 시 화면이 깨지면 안 된다');
 });
 
-test('secRenderChips — 항상 평균 내림차순, 활성 섹터를 앞으로 보내지 않는다', () => {
+test('secRenderChips — 반도체가 거래대금 꼴찌여도 항상 맨 앞, 나머지는 거래대금 내림차순', () => {
   const { doc, els } = mkDoc();
   const { secRenderChips } = load(doc);
-  const avgs = { semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'} };
-  secRenderChips(els['secsel'], 'semicon', avgs);
+  // semicon의 dvol을 일부러 가장 작게 둔다 — "크기순 1위라서 앞"이 아니라
+  // "반도체라서 무조건 앞"임을 검증한다.
+  const avgs = {
+    semicon:{avg:-4.1,label:'반도체',dvol:10},
+    auto:{avg:1.5,label:'자동차',dvol:300},
+    bio:{avg:-0.1,label:'바이오',dvol:200},
+  };
+  secRenderChips(els['secsel'], 'auto', avgs);
   const order = [...els['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(order, ['auto', 'bio', 'semicon']); // 순수 평균 내림차순: 1.5 > -0.1 > -4.1
+  assert.deepEqual(order, ['semicon', 'auto', 'bio']); // 반도체 고정, 그다음 300 > 200
+});
+
+test('secRenderChips — 반도체 섹터 자체가 없으면 나머지만 거래대금순으로 채운다', () => {
+  const { doc, els } = mkDoc();
+  const { secRenderChips } = load(doc);
+  const avgs = { auto:{avg:1.5,label:'자동차',dvol:100}, bio:{avg:-0.1,label:'바이오',dvol:500} };
+  secRenderChips(els['secsel'], 'auto', avgs);
+  const order = [...els['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(order, ['bio', 'auto']); // 반도체 없음 → 지어내지 않고 그냥 거래대금순(§0)
 });
 
 // Regression: 클릭할 때마다 칩 순서가 바뀌어 메뉴가 들썩였다 — 활성 섹터를 바꿔도
 // 같은 데이터면 배열 순서가 완전히 동일해야 한다(강조만 이동, 위치는 고정).
 test('secRenderChips — 활성 섹터가 바뀌어도 칩 순서 자체는 고정이다', () => {
-  const avgs = { semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'} };
+  const avgs = {
+    semicon:{avg:-4.1,label:'반도체',dvol:10},
+    auto:{avg:1.5,label:'자동차',dvol:300},
+    bio:{avg:-0.1,label:'바이오',dvol:200},
+  };
   const { doc: doc1, els: els1 } = mkDoc();
   const { secRenderChips: r1 } = load(doc1);
   r1(els1['secsel'], 'semicon', avgs);

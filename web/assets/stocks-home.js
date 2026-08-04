@@ -2063,10 +2063,15 @@ if(passBtn){
   // 섞지 않는다(§0 정합성 우선, §24 시점 불일치 방지) — 이 화면은 항상 "직전 마감 기준"이다.
   function secBuildSectorData(snap, key){
     if(!snap||!snap.stocks) return null;
-    var rows=[];
+    var rows=[], dvol=0;
     Object.keys(snap.stocks).forEach(function(code){
       var s=snap.stocks[code];
-      if(s&&s.sector===key&&typeof s.change_pct==='number') rows.push({code:code,name:s.name,pct:s.change_pct});
+      if(s&&s.sector===key&&typeof s.change_pct==='number'){
+        rows.push({code:code,name:s.name,pct:s.change_pct});
+        // 시가총액이 스냅샷에 없어(발행주식수 미보유) '섹터 크기' 대용으로 거래대금
+        // (종가×거래량)을 쓴다 — §0: 없는 실측을 지어내지 않고, 있는 실측으로 근사한다.
+        if(typeof s.close==='number'&&typeof s.vol==='number') dvol+=s.close*s.vol;
+      }
     });
     if(!rows.length) return null;
     rows.sort(function(a,b){return b.pct-a.pct;});
@@ -2075,15 +2080,15 @@ if(passBtn){
     var total=rows.length,avg=sum/total;
     var byCode={}; rows.forEach(function(r){byCode[r.code]=r;});
     var leaders=(SECTOR_LEADERS[key]||[]).map(function(c){return byCode[c];}).filter(Boolean);
-    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,leaders:leaders};
+    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,leaders:leaders,dvol:dvol};
   }
 
-  // 8개 섹터 전부의 평균 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
+  // 8개 섹터 전부의 평균·거래대금 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
   function secAllAverages(snap){
     var out={};
     Object.keys(SECTOR_LABELS).forEach(function(key){
       var d=secBuildSectorData(snap,key);
-      if(d) out[key]={avg:d.avg,label:d.label};
+      if(d) out[key]={avg:d.avg,label:d.label,dvol:d.dvol};
     });
     return out;
   }
@@ -2112,13 +2117,16 @@ if(passBtn){
       +'<b class="'+cls+' num">'+sign+Math.abs(avg).toFixed(2)+'%</b></a>';
   }
 
-  // order: 항상 평균 내림차순 고정, activeKey와 무관하다. SNAP은 세션당 한 번만 로드되고
+  // order: 반도체 항상 맨 앞 고정, 나머지는 거래대금(종가×거래량 합산) 내림차순 —
+  // 사용자 지정(2026-08-04). activeKey와 무관하다. SNAP은 세션당 한 번만 로드되고
   // 재할당되지 않으므로(§24, 라이브 폴링 없음) 이 정렬은 클릭해도 절대 바뀌지 않는다.
   // 예전엔 활성 섹터를 맨 앞으로 보냈는데, 클릭할 때마다 칩 전체가 재배치돼 메뉴가
-  // 들썩이는 것처럼 보였다(2026-08-04 사용자 신고) — 위치는 고정하고 강조(.on)만 옮긴다.
+  // 들썩이는 것처럼 보였다(같은 날 사용자 신고) — 위치는 고정하고 강조(.on)만 옮긴다.
   function secRenderChips(box, activeKey, allAvgs){
     if(!box) return;
-    var order=Object.keys(allAvgs).sort(function(a,b){return allAvgs[b].avg-allAvgs[a].avg;});
+    var rest=Object.keys(allAvgs).filter(function(k){return k!=='semicon';})
+      .sort(function(a,b){return (allAvgs[b].dvol||0)-(allAvgs[a].dvol||0);});
+    var order=allAvgs['semicon']?['semicon'].concat(rest):rest;
     box.innerHTML=order.map(function(k){
       var d=allAvgs[k]; return secChipHtml(k,d.label,d.avg,k===activeKey);
     }).join('');
