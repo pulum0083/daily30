@@ -144,6 +144,26 @@ def test_incident_replay_two_signals_discard():
     assert fn._is_grounding_failure(raw, grounding_chunks=0)
 
 
+# ─── 출처 0건 = 하드 폐기 (2026-08-04 사용자 결정) ───
+
+def test_zero_sources_is_hard_failure_alone():
+    """다른 신호가 하나도 없어도 출처가 0건이면 그 응답은 통째로 폐기한다."""
+    raw = {"catalysts": [{"date": "2026-08-04", "text": MU_TEXT, "ticker": "MU"}]}
+    assert fn._is_grounding_failure(raw, grounding_chunks=0)
+
+
+def test_sources_present_needs_two_signals():
+    """출처가 있으면 기존 임계(신호 2개)를 그대로 적용한다."""
+    raw = {"catalysts": ["문자열 촉매"]}          # 스키마 위반 1개뿐
+    assert not fn._is_grounding_failure(raw, grounding_chunks=2)
+
+
+def test_unknown_sources_never_hard_fails():
+    """grounding 확인 자체가 실패하면 판단하지 않는다(fail-open)."""
+    raw = {"catalysts": [{"date": "2026-08-04", "text": MU_TEXT, "ticker": "MU"}]}
+    assert not fn._is_grounding_failure(raw, grounding_chunks=None)
+
+
 if __name__ == "__main__":
     import traceback
     fails = 0

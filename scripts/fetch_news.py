@@ -1028,13 +1028,18 @@ def _count_grounding_chunks(response) -> int | None:
 
 def _is_grounding_failure(data: dict, calendar: dict | None = None,
                           grounding_chunks: int | None = None) -> bool:
-    """신호 2개 이상이면 수집 실패로 본다.
+    """출처 0건이면 즉시, 그 외에는 신호 2개 이상이면 수집 실패로 본다.
 
-    1개는 정상 수집에서도 우연히 나올 수 있어 오제거 위험이 크다. 2개 이상이면
-    뉴스 요약을 통째로 버리고 **뉴스 없이 발행**한다 — 이슈 섹션이 비는 것보다
+    **출처(grounding chunk) 0건은 단독으로 폐기 사유다** (2026-08-04 결정). 어떤 문서로도
+    뒷받침되지 않는 답은 검증할 대상이 아니라 버릴 대상이다 — 게이트로 반박 가능한 주장만
+    걸러지고 나머지는 그대로 실린다는 게 §22~§31에서 여덟 번 확인됐다.
+
+    나머지 신호는 1개만으론 정상 수집에서도 우연히 나올 수 있어 2개 이상을 요구한다.
+    어느 쪽이든 뉴스 요약을 통째로 버리고 **뉴스 없이 발행**한다 — 이슈 섹션이 비는 것보다
     방향이 틀린 브리핑이 훨씬 위험하다(§27).
     """
-    return len(_grounding_failure_signals(data, calendar, grounding_chunks)) >= 2
+    signals = _grounding_failure_signals(data, calendar, grounding_chunks)
+    return "no_grounding_sources" in signals or len(signals) >= 2
 
 
 def _drop_placeholder_entities(items: list) -> list:
@@ -1177,7 +1182,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     _signals = _grounding_failure_signals(data, _load_today_calendar(briefing_type), _gchunks)
     print(f"[fetch_news] 그라운딩 출처 {('%d건' % _gchunks) if _gchunks is not None else '조회불가'}"
           f", 신호 {_signals or '없음'}", file=sys.stderr)
-    if len(_signals) >= 2:
+    if _is_grounding_failure(data, _load_today_calendar(briefing_type), _gchunks):
         print(f"[fetch_news] ⚠️ 그라운딩 실패로 뉴스 요약 전체 폐기: {_signals}", file=sys.stderr)
         print("[fetch_news] 뉴스 없이 발행한다 — 방향이 틀린 브리핑보다 빈 섹션이 안전하다(§27).",
               file=sys.stderr)
