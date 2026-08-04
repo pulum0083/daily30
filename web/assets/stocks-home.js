@@ -995,6 +995,9 @@ function go(id,noHistory){
   el.classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({screen:id},'','#'+id);
+  // pushState는 hashchange를 발생시키지 않으므로 서브탭 강조를 직접 갱신한다.
+  // 프로젝트의 옵셔널 호출 관례를 따라 결합을 최소로 둔다 — 없으면 그냥 넘어간다.
+  if(typeof window.dsSubnavSync==='function')window.dsSubnavSync();
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
