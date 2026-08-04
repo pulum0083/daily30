@@ -188,6 +188,7 @@
           <div class="sbx-stat__box"><span class="skl skl-line" style="width:40%"></span></div>
         </div>
       </div>
+      <a class="more" onclick="go('sector')">섹터 전체 보기 →</a>
     </div>
     </div><!-- /home-full -->
     <div class="home-main">
@@ -227,6 +228,13 @@
       </div>
       <div class="etfsig-ext" id="etfsig-ext"></div>
       <a class="etfsig-more" onclick="go('etf-rank')">ETF 전체 보기 →</a>
+    </div>
+    <!-- 탭에 없는 화면 진입점 — 서브탭에는 넣지 않되(스펙: 탭 넘침 방지) 홈에서는 도달 가능해야 한다.
+         지금까지 이 두 화면은 홈에 링크가 없어 사실상 고립돼 있었다. -->
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🔗</span> 더 보기</span></div>
+      <a class="xlink" onclick="go('passive')"><span class="n">패시브 민감주</span><span class="d">ETF 기계매매에 노출된 종목</span><span class="go">›</span></a>
+      <a class="xlink" onclick="go('ranking')"><span class="n">거래량 순위</span><span class="d">추적 40종목 거래량·상승률</span><span class="go">›</span></a>
     </div>
     </div><!-- /home-main -->
     <div class="home-side">

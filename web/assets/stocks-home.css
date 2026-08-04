@@ -1072,3 +1072,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .etfsig-ext__r .v.up{color:var(--up,#E03131);}
 .etfsig-ext__r .v.dn{color:var(--dn,#2775ED);}
 .etfsig-more{display:block;padding:12px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--primary,#006EFF);cursor:pointer;border-top:1px solid var(--hair,#E5E7EB);}
+/* 탭에 없는 화면 진입 링크. '전체 보기' 링크는 기존 .more(stocks-home.css:258)를 그대로 쓴다 — 새로 만들지 않는다. */
+.xlink{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--hair,#E5E7EB);cursor:pointer;}
+.xlink:last-child{border-bottom:0;}
+.xlink .n{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
+.xlink .d{font-size:13px;color:var(--muted,#5B6472);}
+.xlink .go{margin-left:auto;color:var(--muted,#5B6472);font-size:16px;}
