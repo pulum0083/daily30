@@ -106,3 +106,22 @@ test('껍데기(#ds-subnav)가 없는 페이지에서 로드해도 예외가 없
   // main.js의 `if (!el) return` 가드 관례. 로드만 되면 통과 — load()가 이미 그 상황이다.
   assert.ok(load().TABS.length > 0);
 });
+
+test('해시 대소문자와 무관하게 같은 탭으로 판정한다', () => {
+  // 이 파일이 만드는 href는 전부 소문자지만, 손으로 친 링크·옛 북마크 등 다른 출처의
+  // 해시가 다른 대소문자로 들어올 수 있다 — 그 경우도 '전체'로 조용히 떨어지면 안 된다.
+  const { resolveActiveTab } = load();
+  assert.equal(resolveActiveTab('/stocks/', '#SIGNALS-ALL'), 'signals');
+  assert.equal(resolveActiveTab('/stocks/', '#Sector'), 'sector');
+  assert.equal(resolveActiveTab('/stocks/', '#ETF-RANK'), 'etf');
+});
+
+test('탭을 TABS에 하나 추가하면 해시 판정도 별도 편집 없이 즉시 따라온다 (드리프트 회귀)', () => {
+  // 코드 리뷰에서 지적된 실제 드리프트 재현: 해시→탭 매핑을 손으로 유지하는 두 번째 표로
+  // 두면, TABS에 새 탭을 추가해도 그 표를 깜빡하면 잘못된 탭이 조용히 활성화된다. 이 테스트는
+  // TABS 배열 자체를 직접 조작해(테스트 전용 항목 — 실제 정의의 주석 처리된 테마·일정 탭은
+  // 건드리지 않는다) TABS 하나만 고치는 것으로 충분함을 증명한다.
+  const { TABS, resolveActiveTab } = load();
+  TABS.push({ id: 'income', label: '배당', href: '/stocks/#income', screen: 'income' });
+  assert.equal(resolveActiveTab('/stocks/', '#income'), 'income');
+});
