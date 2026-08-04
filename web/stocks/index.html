@@ -424,12 +424,14 @@
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span id="sec-crumb-label" style="color:var(--ink)">반도체</span></div>
+    <!-- 섹터 선택 칩 — secRenderChips()가 채운다. 8개 섹터 평균은 stocks-snapshot.json 실측. -->
+    <div class="secsel" id="secsel" role="tablist" aria-label="섹터 선택"></div>
     <div class="grid">
       <div>
         <div class="dbox">
         <div class="shead"><div class="top">
-          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · <span class="ds-asof"></span></div></div>
+          <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목 · 코스피·코스닥 · —</div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
         </div>
         <div class="senti" id="sec-senti" style="display:none;"><div class="l"><span>섹터 AI 심리</span><span id="sec-senti-label">—</span></div><div class="gg"><div class="n" id="sec-senti-needle" style="left:50%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
@@ -439,36 +441,20 @@
           <div class="bk" id="sec-bk"><span><i class="iu"></i>상승 <span class="num">—</span></span><span><i class="id"></i>하락 <span class="num">—</span></span><span><i class="in"></i>보합 <span class="num">—</span></span></div>
         </div>
         </div>
-        <p class="lede">반도체 섹터는 <b>HBM·메모리 업황 회복</b> 기대로 외국인 수급이 유입되고 있어요. AI 픽은 <b>SK하이닉스(78%)</b>, 기술신호 강세는 <b>한미반도체·DB하이텍</b>이에요.</p>
         <div class="block">
-          <div class="block__h"><span class="block__t">반도체 종목 랭킹</span><span class="block__s">시총순</span></div>
+          <div class="block__h"><span class="block__t">종목 랭킹</span><span class="block__s">등락률순</span></div>
           <div id="sec-rows"></div>
-          <a class="more" id="sec-more"></a>
         </div>
-        <!-- 패시브 쏠림 (섹터 고도 차별 블록 — 종목별 노출도 섹터 합산) -->
-        <div class="block" style="border-color:#BAE6FD;">
-          <div class="block__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
-          <p class="p1line" style="padding:12px 16px 4px;">반도체 섹터는 <b>주요 ETF 자금에 가장 많이 묶인 섹터</b>예요. 추적 28종목 중 <b>7종목</b>이 반도체 테마 ETF에 고비중으로 담겨 있어요.</p>
-          <div class="pmet">
-            <div class="mc"><div class="l">섹터 합산 노출</div><div class="v num">약 2.8조</div><div class="sub">반도체 테마 ETF 보유액</div></div>
-            <div class="mc"><div class="l">고노출 종목</div><div class="v num">7<span style="font-size:11px;color:var(--muted)">/28</span></div><div class="sub">노출도 高 등급</div></div>
-          </div>
-          <a class="row" onclick="goStock('039030')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div></div><span class="barval num" style="color:#0C4A6E;">15.0일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="goStock('058140')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div></div><span class="barval num" style="color:#0C4A6E;">13.9일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="goStock('240810')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div></div><span class="barval num" style="color:#0C4A6E;">10.5일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="more" onclick="go('passive')">패시브 민감주 전체 →</a>
+        <!-- 패시브 쏠림 — ETF 보유비중·소진일수 실측 소스가 없다(§0, 2026-08-04 확정). 준비 중 상태만 표시. -->
+        <div class="block">
+          <div class="block__h"><span class="block__t"><span class="ic">🧲</span> 패시브 쏠림</span></div>
+          <div class="empty-note">🧲 ETF 기계매매 노출 데이터는 아직 실측 소스가 없어요.<br>곧 추가할 예정이에요.</div>
         </div>
         </div>
       </div>
       <div>
-        <div class="panel"><div class="panel__h">반도체 대장주</div>
+        <div class="panel"><div class="panel__h">대장주</div>
           <div id="sec-leaders"></div>
-        </div>
-        <div class="panel"><div class="panel__h">반도체 대표 ETF <span class="phase">PHASE 2</span></div>
-          <a class="srow"><span class="n2">KODEX 반도체 <small class="num">091160</small></span><span class="c up num">+2.8%</span></a>
-        </div>
-        <div class="panel"><div class="panel__h">다른 섹터</div>
-          <div class="chips" style="padding:14px 16px;"><a onclick="go('sector')">2차전지</a><a onclick="go('sector')">바이오</a><a onclick="go('sector')">자동차</a><a onclick="go('sector')">금융</a></div>
         </div>
       </div>
     </div>
@@ -579,32 +565,15 @@
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">패시브 민감주</span></div>
     <div class="phead">
       <div>
         <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
-        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · <span class="ds-date"></span></div>
-      </div>
-      <div class="stabs" id="psort-tabs">
-        <a class="on" onclick="passiveSort('dov',this)">거래일수</a>
-        <a onclick="passiveSort('conc',this)">집중도</a>
-        <a onclick="passiveSort('score',this)">민감도</a>
+        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목</div>
       </div>
     </div>
-    <div class="sector-bias"><span class="ic2">📡</span><span>지금 패시브 자금은 <b>반도체 소부장</b>에 집중돼 있어요. 상위 9종목 중 7종목이 반도체 테마 ETF에 고비중으로 담겨 있어요.</span></div>
-    <div class="tbl" id="passive-tbl">
-      <div class="block__h" style="background:var(--soft);">
-        <span class="block__s" style="font-weight:700;width:160px;">종목</span>
-        <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);" id="pbar-label">거래일수 (ETF 물량 소화일)</span>
-        <span class="block__s" style="width:56px;text-align:right;" id="pconc-label">집중도</span>
-        <span class="block__s" style="width:44px;text-align:right;">민감도</span>
-        <span class="block__s" style="width:36px;text-align:right;">뱃지</span>
-      </div>
-      <div id="passive-rows"></div>
-    </div>
-    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:0 0 10px 10px;border-top:none;padding:10px 16px;font-size:11px;color:var(--muted);line-height:1.6;margin-top:-1px;">
-      주요 ETF TOP10 구성종목 기준 추정 · 소수 비중 누락 가능 · 인과 주장 아님 · 구조적 노출도 지표예요.<br>
-      高: 거래일수 ≥ 8일 AND 시총 집중도 ≥ 10% · 中: 거래일수 ≥ 4일 AND 집중도 ≥ 5%
+    <div class="block">
+      <div class="empty-note">🧲 ETF 보유비중·거래일수 소진 데이터는 아직 실측 소스가 없어요.<br>수집이 준비되는 대로 채울게요.</div>
     </div>
   </div>
 

@@ -1180,54 +1180,6 @@ etfDnRender();
   },{passive:true});
 })();
 
-/* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
-const SECTOR_RANK=[
-  [1,'삼성전자','005930','dn','−6.4%',100,'ais','신호 58'],
-  [2,'SK하이닉스','000660','up','+3.4%',62,'aip','AI 78'],
-  [3,'한미반도체','042700','up','+1.8%',40,'ais','신호 71'],
-  [4,'DB하이텍','000990','up','+1.8%',38,'ais','신호 64'],
-  [5,'리노공업','058470','up','+0.9%',26,'ais','신호 60'],
-  [6,'이오테크닉스','039030','up','+2.1%',44,'ais','신호 62'],
-  [7,'주성엔지니어링','036930','up','+9.4%',96,'ais','신호 69'],
-  [8,'원익IPS','240810','up','+1.4%',32,'ais','신호 55'],
-  [9,'ISC','095340','up','+0.6%',20,'ax','—'],
-  [10,'솔브레인','357780','dn','−1.2%',28,'aid','신호 47'],
-  [11,'HPSP','403870','up','+3.1%',56,'ais','신호 67'],
-  [12,'테스','095610','up','+2.7%',50,'ais','신호 58'],
-  [13,'하나마이크론','067310','dn','−2.4%',46,'aid','신호 44'],
-  [14,'동진쎄미켐','005290','up','+0.4%',16,'ax','—'],
-  [15,'티씨케이','064760','dn','−0.8%',22,'ais','신호 52'],
-  [16,'고영','098460','up','+1.1%',28,'ais','신호 56'],
-  [17,'피에스케이','319660','up','+4.2%',70,'ais','신호 65'],
-  [18,'유진테크','084370','up','+1.6%',34,'ais','신호 59'],
-  [19,'네패스','033640','dn','−3.1%',54,'aid','신호 39'],
-  [20,'심텍','222800','up','+5.5%',82,'ais','신호 68'],
-  [21,'가온칩스','399720','up','+2.0%',42,'ais','신호 61'],
-  [22,'에스앤에스텍','101490','up','+1.3%',30,'ais','신호 54'],
-  [23,'케이씨텍','281820','up','+0.7%',20,'ax','—'],
-  [24,'코미코','183300','dn','−1.5%',32,'aid','신호 46'],
-  [25,'대주전자재료','078600','up','+6.8%',88,'ais','신호 66'],
-  [26,'월덱스','101160','up','+0.5%',18,'ax','—'],
-  [27,'엘오티베큠','083310','dn','−0.6%',18,'ais','신호 50'],
-  [28,'어보브반도체','102120','up','+1.9%',40,'ais','신호 57'],
-];
-let secShown=15;
-function secRow(r){
-  const top3=r[0]<=3;
-  const badge=r[6]==='ax'?`<span class="ax">—</span>`:`<span class="${r[6]}">${r[7]}</span>`;
-  return `<a class="row" onclick="goStock('000660')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]}</small></div><div class="barwrap"><div class="bar ${r[3]}" style="width:${r[5]}%"></div></div><span class="barval ${r[3]} num">${r[4]}</span><div class="ai">${badge}</div></a>`;
-}
-function secRender(){
-  const wrap=document.getElementById('sec-rows');
-  if(!wrap)return;
-  wrap.innerHTML=SECTOR_RANK.slice(0,secShown).map(secRow).join('');
-  const btn=document.getElementById('sec-more');
-  if(secShown>=SECTOR_RANK.length){btn.textContent=`반도체 ${SECTOR_RANK.length}종목 전체 →`;btn.setAttribute('onclick',"go('ranking')");}
-  else{btn.textContent=`더보기 · ${Math.min(secShown+10,SECTOR_RANK.length)-secShown}개 더 (${SECTOR_RANK.length-secShown}개 남음)`;btn.setAttribute('onclick','secLoadMore()');}
-}
-function secLoadMore(){secShown=Math.min(secShown+10,SECTOR_RANK.length);secRender();}
-secRender();
-
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
 function tipHTML(el){
@@ -1333,48 +1285,6 @@ function closeSearch(){document.getElementById('ov').classList.remove('on');docu
   });
 })();
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
-
-/* ── 패시브 민감주 랭킹 ── */
-const PASSIVE_DATA=[
-  {code:'039030',name:'이오테크닉스',sector:'반도체',conc:20.2,dov:15.0,score:98,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'058140',name:'리노공업',sector:'반도체',conc:21.0,dov:13.9,score:96,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'240810',name:'원익IPS',sector:'반도체',conc:18.9,dov:10.5,score:80,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'000990',name:'DB하이텍',sector:'반도체',conc:18.0,dov:9.2,score:74,badge:'high',etf:'KODEX 반도체'},
-  {code:'042700',name:'한미반도체',sector:'반도체',conc:12.3,dov:8.7,score:58,badge:'high',etf:'KODEX 반도체'},
-  {code:'095340',name:'ISC',sector:'반도체',conc:10.4,dov:7.6,score:50,badge:'mid',etf:'TIGER 반도체TOP10'},
-  {code:'247540',name:'에코프로비엠',sector:'2차전지',conc:6.0,dov:6.8,score:37,badge:'mid',etf:'TIGER 2차전지테마'},
-  {code:'357780',name:'솔브레인',sector:'반도체',conc:6.8,dov:6.3,score:37,badge:'mid',etf:'TIGER 반도체TOP10'},
-  {code:'086520',name:'에코프로',sector:'2차전지',conc:6.4,dov:4.8,score:31,badge:'mid',etf:'TIGER 2차전지테마'},
-];
-let pSortKey='dov';
-const maxDov=15.0;
-function passiveRow(r,i){
-  const pct=Math.round(r.dov/maxDov*100);
-  const badgeHtml=r.badge==='high'?'<span class="pbdg high">高</span>':'<span class="pbdg mid">中</span>';
-  const barVal=pSortKey==='conc'?r.conc+'%':pSortKey==='score'?r.score:r.dov+'일';
-  const barPct=pSortKey==='conc'?Math.round(r.conc/21*100):pSortKey==='score'?r.score:pct;
-  return `<a class="prank-row" onclick="goStock('000660')">
-    <span class="rk2 num">${i+1}</span>
-    <div class="nm" style="width:136px;flex-shrink:0;"><b style="font-size:13px;">${r.name}</b><small class="num" style="font-size:11px;color:var(--muted);">${r.code} · ${r.sector}</small></div>
-    <div class="dov-bar"><div class="fill" style="width:${barPct}%"></div><span class="val">${barVal}</span></div>
-    <span class="conc-col num">${r.conc}%</span>
-    <span class="score-col num">${r.score}</span>
-    <div style="width:36px;text-align:right;flex-shrink:0;">${badgeHtml}</div>
-  </a>`;
-}
-function passiveRender(){
-  const sorted=[...PASSIVE_DATA].sort((a,b)=>b[pSortKey]-a[pSortKey]);
-  document.getElementById('passive-rows').innerHTML=sorted.map((r,i)=>passiveRow(r,i)).join('');
-  const labels={dov:'거래일수 (ETF 물량 소화일)',conc:'집중도 (시총 대비 패시브 자금)',score:'민감도 점수 (0~100)'};
-  document.getElementById('pbar-label').textContent=labels[pSortKey];
-}
-function passiveSort(key,el){
-  pSortKey=key;
-  document.querySelectorAll('#psort-tabs a').forEach(a=>a.classList.remove('on'));
-  el.classList.add('on');
-  passiveRender();
-}
-passiveRender();
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
@@ -2132,7 +2042,6 @@ if(passBtn){
       etfRankRender();
       etfDnRender();
     }
-    renderSectorBreadth(all);
     bindSurgeTips();
   }
   // 8개 섹터 대표 종목(대장주) — stock_universe.json 순서 그대로 상위 2~3종목 선별.
@@ -2891,6 +2800,7 @@ if(passBtn){
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
+      if(SNAP&&SNAP.stocks) secShowSector(SNAP, secActiveKey);
       pollVolTop();
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.

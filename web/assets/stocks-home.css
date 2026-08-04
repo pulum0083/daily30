@@ -1078,3 +1078,18 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .xlink .n{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
 .xlink .d{font-size:13px;color:var(--muted,#5B6472);}
 .xlink .go{margin-left:auto;color:var(--muted,#5B6472);font-size:16px;}
+
+/* 섹터 선택 칩 — docs/prototypes/2026-08-03-stocks-subnav-fullsize.html에서 확정된 디자인 그대로.
+   서브탭 바(#ds-subnav, 언더라인+primary)와 시각적으로 겹치지 않도록 먹색 채움 방식을 쓴다. */
+.secsel{display:flex;align-items:center;gap:6px;margin:0 0 16px;padding-bottom:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.secsel::-webkit-scrollbar{display:none;}
+.secsel__i{display:inline-flex;align-items:center;gap:4px;flex:none;height:32px;padding:0 10px;border-radius:999px;background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:#475569;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .12s,background .12s;}
+.secsel__i:hover{border-color:#CBD5E1;background:var(--soft,#F9FAFB);}
+.secsel__i .ic{font-size:13px;line-height:1;}
+.secsel__i b{font-size:13px;font-weight:700;}
+.secsel__i.on{background:var(--ink,#13151A);border-color:var(--ink,#13151A);color:#fff;}
+.secsel__i.on b.up{color:#FF7B7B;}
+.secsel__i.on b.dn{color:#7FB0FF;}
+
+/* 실측 소스가 없어 준비 중으로 표시하는 블록 공용 스타일. */
+.empty-note{padding:24px 16px;text-align:center;font-size:12px;color:var(--muted,#5B6472);line-height:1.6;}
