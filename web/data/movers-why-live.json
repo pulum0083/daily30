@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-08-04T11:31:40.606436+09:00",
+  "generated_at": "2026-08-04T12:01:45.183581+09:00",
   "date": "2026-08-04",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -1.88,
-      "surge": 0.49,
+      "changePct": -2.51,
+      "surge": 0.52,
       "events": [
-        {
-          "time": "04:25",
-          "headline": "한투, 삼성전자 목표가 65만원으로 상향… 흔들리는 주가에도 왜?",
-          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1wbHRzcmZZSDlHTzhhTTZVLXRLN2tpcjhoZDJrdHVMNFRyYThENjZPS0tnUk4zZGJ1NXpwU1pZMFlNbkl6ZUFOS2pEYnJoTkl1ZHBHWU5adG8wOEFsVXBfaE9nSlJYV2FZT3c?oc=5",
-          "source": "금강일보",
-          "why": "한국투자증권은 삼성전자 목표가를 65만원으로 상향 조정하며 흔들리는 주가에도 긍정적인 전망을 제시했습니다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
-        },
         {
           "time": "09:35",
           "headline": "삼성전자 주가 하락 중",
           "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE10YWk2NUVndEtFRUUwVW9MczhfdnFNSFRBZUloU1FhOVdpRUplRHhvblRvQV90dHNQV19CejM5blI1bXFGT0pFZzBhYWZhaTlKM2d1ZmxNeWtrVTNs?oc=5",
           "source": "아시아뉴스통신",
-          "why": "삼성전자 주가 하락 중 (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "삼성전자 주가 하락 중",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:03",
+          "headline": "삼성전자·SK하이닉스, 차익실현 매물 출회.. '하락세' 전환",
+          "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPbFpteXlBcmVtM1IwVVhGVGg2YzBIOUMyZ3pzVG9XZTh3LW1mWldDZzNjMEoxeWM1cGlLUWI2eXdyRnVBTHZvWjlGaXIyRmhqTlp4ak9MVjFWWTRGdXd0Ymp3cnp5SWo5M0ZDLUk3UlBTa0FUVG16RjFVSFpCLWdWQmk0bVZHcUk?oc=5",
+          "source": "글로벌이코노믹",
+          "why": "삼성전자·SK하이닉스, 차익실현 매물 출회.. '하락세' 전환",
+          "tier": "why",
           "sentiment": "neg"
         }
       ]
@@ -31,18 +31,9 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -1.98,
-      "surge": 0.44,
+      "changePct": -2.04,
+      "surge": 0.47,
       "events": [
-        {
-          "time": "03:08",
-          "headline": "SK하이닉스 지분 첫 매입한 최태원 회장…배경에 관심 증폭",
-          "url": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE1HaWd4bGcya1lILS1CNFdCYkJBNHRONlA5OFh3VVpsLThrRy02M0JJMS1sUUdTeTByMHF2bTc5SjVmeTdlRlE?oc=5",
-          "source": "v.daum.net",
-          "why": "최태원 회장이 SK하이닉스 지분을 처음 매입했다는 소식이 전해지며 그 배경에 대한 관심이 높아지고 있습니다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neu"
-        },
         {
           "time": "07:03",
           "headline": "SK하이닉스 ‘그림자 시장’ 커졌다…본주로 충격 번질까",
@@ -51,14 +42,23 @@
           "why": "SK하이닉스 ‘그림자 시장’ 커졌다…본주로 충격 번질까 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
+        },
+        {
+          "time": "07:30",
+          "headline": "두 달간 주가 반토막 난 SK하이닉스…핵심 관전포인트 4가지",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE01MnpJS2pwZndoSkpMQlR0NUdOc2NKWV9kSGRSMDR0aGFSUmVDYmtCSnZMVkliNE8xWGVITVpCR0RDWkltejBCRG1uUWVVZW92S1Uxd3haaE5kQQ?oc=5",
+          "source": "한국경제",
+          "why": "두 달간 주가 반토막 난 SK하이닉스…핵심 관전포인트 4가지 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -2.54,
-      "surge": 0.38,
+      "changePct": -2.16,
+      "surge": 0.41,
       "events": [
         {
           "time": "09:26",
