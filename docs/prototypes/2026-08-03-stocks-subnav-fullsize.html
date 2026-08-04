@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>종목 서브내비 — 풀사이즈 프로토타입 (2026-08-03)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
 /* 종목 시그널 허브(/stocks/) 스타일 — 2026-07-21 index.html 인라인 <style> 4블록에서 추출.
    문서 등장 순서대로 이어붙였다(cascade 동일). 편집은 이 파일에서 한다. */
 /* --muted는 흰 배경(4.83:1)뿐 아니라 --inset 위(4.27:1)에도 얹히므로, 옅은 배경 기준으로 WCAG AA(4.5:1)를
@@ -293,10 +301,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-block{overflow:visible;}
 .sbx-block .block__h{border-radius:10px 10px 0 0;}
 .sbx-block .sbx-body{border-radius:0 0 10px 10px;}
-/* top:108px = GNB 52 + 서브탭 40 + 서브탭 margin-bottom 16.
-   서브탭(#ds-subnav)이 sticky top:52px이라 예전 값 52px을 그대로 두면 정면으로 겹쳐
-   이 칩들의 윗부분이 잘린다. ds-subnav.css의 top/margin을 바꾸면 이 값도 같이 고칠 것. */
-.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:108px;z-index:5;}
+.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:52px;z-index:5;}
 .sbx-tab{font-size:13px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s,background .12s;}
 .sbx-tab:hover{border-color:var(--primary);color:var(--primary);}
 .sbx-tab.on{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);font-weight:800;}
@@ -474,8 +479,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .shead .top{display:flex;justify-content:space-between;align-items:flex-start;}
 .shead .st{font-size:20px;font-weight:800;display:flex;align-items:center;gap:9px;}.shead .ss{font-size:12px;color:var(--muted);margin-top:5px;}
 .shead .kpi{text-align:right;}.shead .kpi .l{font-size:11px;color:var(--muted);}.shead .kpi .v{font-size:18px;font-weight:800;}
-/* .senti / .gg / .gg__s ("섹터 AI 심리" 게이지) 는 2026-08-04 제거 — 이 화면 전용이라
-   마크업이 사라지면서 같이 죽었다. 복구가 필요하면 git 이력에서 꺼낼 것. */
+.senti{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}.senti .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}.senti .l b{color:var(--up);}
+.gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}.gg__s{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-top:8px;}
 .lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}.lede b{color:var(--ink);}
 .dbox{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.05);padding:14px;margin-bottom:16px;}
 .dbox .shead,.dbox .lede,.dbox .block{box-shadow:none;}
@@ -1048,51 +1053,406 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .ob-leg{order:3;flex:0 0 100%;}
 }
 
-/* ETF 요약 블록(홈) — 상세는 #etf-rank. 모든 변수에 폴백을 둔다(§5). */
-.etfsig-lead{padding:14px 16px 12px;}
-.etfsig-lead__t{font-size:14px;font-weight:700;color:var(--ink,#13151A);margin-bottom:6px;}
-.etfsig-lead__b{margin:0;font-size:13px;line-height:1.6;color:var(--muted,#5B6472);}
-.etfsig-lead__b b{font-weight:700;color:var(--ink,#13151A);}
-.etfsig-bet{padding:0 16px 12px;}
-.etfsig-bet__lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
-.etfsig-bet__lbl .dn{color:var(--dn,#2775ED);}
-.etfsig-bet__lbl .up{color:var(--up,#E03131);}
-.etfsig-bet__lbl b{font-weight:700;}
-.etfsig-bar{position:relative;height:8px;border-radius:999px;background:var(--up,#E03131);overflow:hidden;}
-.etfsig-bar__dn{position:absolute;left:0;top:0;bottom:0;background:var(--dn,#2775ED);}
-.etfsig-bet__pct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted,#5B6472);margin-top:5px;}
-.etfsig-kpi{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair,#E5E7EB);border-top:1px solid var(--hair,#E5E7EB);border-bottom:1px solid var(--hair,#E5E7EB);}
-.etfsig-kpi>div{background:var(--soft,#F9FAFB);padding:10px 16px;display:flex;flex-direction:column;gap:3px;}
-.etfsig-kpi .k{font-size:13px;color:var(--muted,#5B6472);}
-.etfsig-kpi .v{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
-.etfsig-kpi .v.up{color:var(--up,#E03131);}
-.etfsig-kpi .v.dn{color:var(--dn,#2775ED);}
-.etfsig-ext__r{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--hair,#E5E7EB);font-size:13px;}
-.etfsig-ext__r:last-child{border-bottom:0;}
-.etfsig-ext__r .k{color:var(--muted,#5B6472);}
-.etfsig-ext__r .n{font-weight:700;color:var(--ink,#13151A);}
-.etfsig-ext__r .v{margin-left:auto;font-weight:700;}
-.etfsig-ext__r .v.up{color:var(--up,#E03131);}
-.etfsig-ext__r .v.dn{color:var(--dn,#2775ED);}
-.etfsig-more{display:block;padding:12px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--primary,#006EFF);cursor:pointer;border-top:1px solid var(--hair,#E5E7EB);}
-/* 탭에 없는 화면 진입 링크. '전체 보기' 링크는 기존 .more(stocks-home.css:258)를 그대로 쓴다 — 새로 만들지 않는다. */
-.xlink{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--hair,#E5E7EB);cursor:pointer;}
-.xlink:last-child{border-bottom:0;}
-.xlink .n{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
-.xlink .d{font-size:13px;color:var(--muted,#5B6472);}
-.xlink .go{margin-left:auto;color:var(--muted,#5B6472);font-size:16px;}
 
-/* 섹터 선택 칩 — docs/prototypes/2026-08-03-stocks-subnav-fullsize.html에서 확정된 디자인 그대로.
-   서브탭 바(#ds-subnav, 언더라인+primary)와 시각적으로 겹치지 않도록 먹색 채움 방식을 쓴다. */
+/* ── 프로토타입 전용 (프로덕션 CSS 뒤에 붙는다) ── */
+body{background:#F1F3F6;}
+.pbar{position:sticky;top:0;z-index:40;background:var(--gnb);color:#fff;padding:11px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.pbar b{font-size:14px;font-weight:700;letter-spacing:-.2px;}
+.pbar span{font-size:12px;color:#9CA0A6;}
+.pbar .jump{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+.pbar .jump a{font-size:12px;font-weight:500;color:#C9CCD1;text-decoration:none;background:#26282B;border-radius:7px;padding:5px 11px;}
+.pbar .jump a:hover{background:#34373B;color:#fff;}
+.sechd{max-width:1120px;margin:0 auto;padding:34px 28px 0;}
+.sechd h2{font-size:15px;font-weight:700;margin:0 0 8px;display:flex;align-items:center;gap:9px;}
+.sechd h2 .n{width:22px;height:22px;border-radius:7px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex:none;}
+.sechd .meta{font-size:13px;color:var(--muted);line-height:1.7;}
+.sechd .meta code{background:var(--inset);border-radius:4px;padding:1px 5px;font-size:12px;}
+.pnote{max-width:1120px;margin:0 auto;padding:0 28px;font-size:13px;color:var(--muted);line-height:1.7;}
+.wrap{padding-bottom:20px;}
+.wrap + .sechd{border-top:1px solid #DDE1E6;margin-top:12px;}
+
+/* 신규 서브내비 — 언더라인 탭 */
+.pnav{display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--hair);background:var(--canvas);border-radius:10px 10px 0 0;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.pnav::-webkit-scrollbar{display:none;}
+.pnav__i{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;font-size:14px;font-weight:500;color:var(--muted);text-decoration:none;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s,border-color .12s;}
+.pnav__i:hover{color:var(--ink);}
+.pnav__i.on{color:var(--primary);border-bottom-color:var(--primary);}
+
+/* ── 섹터 선택 행 (신규) ──
+   서브내비가 언더라인 탭이라 그 바로 아래에 또 언더라인 행을 두면 탭 레벨이 둘로 읽힌다.
+   그래서 칩(필터 문법)으로 대비를 주고, 활성색도 primary가 아니라 ink 채움으로 잡아
+   primary + 2px 언더라인이라는 서브내비의 활성 신호를 이 행이 흉내내지 않게 한다. */
 .secsel{display:flex;align-items:center;gap:6px;margin:0 0 16px;padding-bottom:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
 .secsel::-webkit-scrollbar{display:none;}
-.secsel__i{display:inline-flex;align-items:center;gap:4px;flex:none;height:32px;padding:0 10px;border-radius:999px;background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:#475569;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .12s,background .12s;}
-.secsel__i:hover{border-color:#CBD5E1;background:var(--soft,#F9FAFB);}
+.secsel__i{display:inline-flex;align-items:center;gap:4px;flex:none;height:32px;padding:0 10px;border-radius:999px;background:var(--canvas);border:1px solid var(--hair);font-size:13px;font-weight:500;color:#475569;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .12s,background .12s;}
+.secsel__i:hover{border-color:#CBD5E1;background:var(--soft);}
 .secsel__i .ic{font-size:13px;line-height:1;}
 .secsel__i b{font-size:13px;font-weight:700;}
-.secsel__i.on{background:var(--ink,#13151A);border-color:var(--ink,#13151A);color:#fff;}
+.secsel__i.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+/* 어두운 활성 칩 위에서도 상승=빨강·하락=파랑 관례를 유지하되 대비를 확보한 톤(7.3:1 / 8.3:1) */
 .secsel__i.on b.up{color:#FF7B7B;}
 .secsel__i.on b.dn{color:#7FB0FF;}
+/* .shead의 섹터명을 h1으로 올렸다 — 화면상 크기는 그대로 두고 문서 구조만 바로잡는다 */
+h1.st{margin:0;letter-spacing:-.4px;}
 
-/* 실측 소스가 없어 준비 중으로 표시하는 블록 공용 스타일. */
-.empty-note{padding:24px 16px;text-align:center;font-size:12px;color:var(--muted,#5B6472);line-height:1.6;}
+.fixlist{margin-top:14px;display:grid;gap:8px;}
+.fx{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.75;color:var(--muted);}
+.fx b{color:var(--ink);font-weight:500;}
+.fxk{display:inline-flex;align-items:center;height:24px;padding:0 8px;margin-right:8px;border-radius:999px;background:var(--inset);color:#475569;font-size:13px;font-weight:500;}
+
+/* 기존(미변경) 블록 참조 행 */
+.ref-slot{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px dashed #D3D8DE;border-radius:10px;padding:11px 14px;margin-bottom:8px;flex-wrap:wrap;}
+.ref-k{font-size:13px;font-weight:500;color:var(--muted);background:var(--inset);border-radius:999px;padding:2px 9px;flex:none;}
+.ref-t{font-size:13px;font-weight:500;color:#475569;}
+.ref-v{font-size:13px;color:var(--ink);font-weight:500;}
+.ref-n{font-size:13px;color:var(--muted);margin-left:auto;}
+.ref-slot--idx{background:var(--canvas);border-style:solid;border-color:var(--hair);}
+.ref-join{margin-bottom:8px;}
+.ref-join .ref-slot{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none;}
+.more--attached{border:1px dashed #D3D8DE;border-top:none;border-radius:0 0 10px 10px;background:var(--canvas);display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* 신규 표시 */
+.nb-tag{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;font-size:13px;font-weight:500;background:var(--primary-bg);color:var(--primary);}
+.nb-tag::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--primary);flex:none;}
+.nb-tag.mini{height:22px;font-size:13px;}
+.nb-tag.gray{background:var(--inset);color:var(--muted);}
+.nb-tag.gray::before{background:#B6BDC6;}
+.nb-mark{margin-bottom:8px;}
+.block__h .nb-tag{margin-right:8px;}
+.block.nb{border-color:#BFDBFE;}
+.block.nb > .block__h{background:#F7FBFF;border-bottom-color:#DBEAFE;}
+
+/* 빈 슬롯 고지 */
+.pgap{background:var(--canvas);border:1px dashed #D3D8DE;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--muted);margin:0 0 16px;}
+.pgap b{color:var(--ink);font-weight:500;}
+.pgap code{background:var(--inset);border-radius:4px;padding:1px 5px;font-size:12px;}
+.mini-gap{padding:12px 16px;}
+.mini-gap p{font-size:13px;line-height:1.7;color:var(--muted);margin:0 0 10px;}
+.mini-gap p:last-child{margin-bottom:0;}
+.mini-gap b{color:var(--ink);font-weight:500;}
+.mini-gap code{background:var(--inset);border-radius:4px;padding:1px 5px;font-size:12px;}
+
+/* ETF 신규 블록 내부 */
+.betwrap{padding:4px 16px 12px;background:var(--canvas);}
+.bet-lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:7px;}
+.bet-lbl b{font-weight:700;}
+.bet-lbl--sm{margin:6px 0 0;font-size:13px;}
+.bet-bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--inset);}
+.bet-bar .d{background:var(--dn);}
+.bet-bar .u{background:var(--up);}
+.kpi2{display:grid;grid-template-columns:1fr 1fr;background:var(--canvas);border-top:1px solid var(--hair);}
+.kpi2__c{padding:12px 16px;}
+.kpi2__c + .kpi2__c{border-left:1px solid var(--hair);}
+.kpi2__c .l{font-size:13px;color:var(--muted);margin-bottom:3px;}
+.kpi2__c .v{font-size:15px;font-weight:700;}
+.ext2{background:var(--canvas);border-top:1px solid var(--hair);}
+.ext2__r{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);}
+.ext2__r .l{font-size:13px;color:var(--muted);width:110px;flex:none;}
+.ext2__r .n{font-size:13px;font-weight:700;flex:1;}
+.ext2__r .p{font-size:13px;font-weight:700;}
+.fine{font-size:13px;color:var(--muted);line-height:1.6;padding:11px 16px;margin:0;background:var(--canvas);}
+
+/* 섹터·ETF 표 보조 열 */
+.secval{flex:none;width:78px;text-align:right;font-size:13px;font-weight:500;color:var(--muted);}
+.secval--w{width:132px;}
+.secval small{font-size:13px;}
+.secval .na{color:#C3C9D1;}
+.avg20{width:78px;flex:none;text-align:right;font-size:13px;font-weight:500;color:#C3C9D1;}
+.trow.is-cur{background:var(--soft);}
+.etag{display:inline-flex;align-items:center;height:20px;padding:0 7px;margin-left:5px;border-radius:999px;font-size:13px;font-weight:500;}
+.etag.up{background:var(--up-bg);color:var(--up);}
+.etag.dn{background:var(--dn-bg);color:var(--dn);}
+.srow .rk{width:16px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);flex:none;}
+.srow .n2{flex:1;min-width:0;font-size:13px;font-weight:700;}
+.srow .n2 small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px;}
+.srow .c{font-size:13px;font-weight:700;flex:none;}
+.srow .am{font-size:13px;color:var(--muted);flex:none;margin-right:10px;}
+.panel__h{display:flex;align-items:center;}
+.ccp-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;background:var(--canvas);}
+.ccp{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;font-size:13px;font-weight:500;background:var(--inset);color:#4E5968;}
+.ccp b{font-weight:700;color:var(--ink);}
+.chips a{cursor:default;}
+
+@media(max-width:640px){
+  /* 표 헤더는 좁은 폭에서 라벨이 4줄로 쪼개져 오히려 방해된다 — 행 자체가 자기 설명적이라 감춘다. */
+  .thead{display:none;}
+  .avg20{display:none;}
+  .secval{width:auto;min-width:54px;margin-left:8px;}
+  .secval--w{display:none;}
+  .pbar{padding:10px 16px;}
+  .sechd,.pnote{padding-left:16px;padding-right:16px;}
+}
+@media(max-width:900px){
+  .home-side .block{margin-bottom:12px;}
+}
+
+</style>
+</head>
+<body>
+
+<div class="pbar">
+  <b>종목 서브내비 — 풀사이즈 프로토타입</b>
+  <span>실데이터 7/31(금) 종가 · /api/signals + /api/vol-top + valuation.json · 프로토타입(프로덕션 미반영)</span>
+  <div class="jump">
+    <a href="#s1">1 · 전체</a><a href="#s2">2 · 특이신호</a><a href="#s3">3 · 섹터</a><a href="#s4">4 · ETF</a>
+  </div>
+</div>
+
+<div class="sechd" id="s1">
+  <h2><span class="n">1</span>전체 (홈)</h2>
+  <div class="meta">홈은 이번에 재설계 대상이 아니다. 추가되는 것은 <b>서브내비 바</b>·<b>ETF 신호 블록(유일한 신규 블록)</b>·<b>링크 3종</b>뿐이라,
+  기존 블록은 위치만 알 수 있게 <b>얇은 라벨 행</b>으로 두고 신규 블록만 실제 크기로 렌더한다.
+  라이브 홈은 세로 15,095px이라 전부 재현하면 정작 봐야 할 신규분이 묻힌다.</div>
+</div>
+<div class="wrap">
+<div class="phead">
+  <div><h1><span class="ic">📈</span> 종목 시그널</h1>
+  <div class="psub">코스피 주도주 실시간 대시보드 · 7/31(금) 종가</div></div>
+</div>
+
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">히어로 + 검색</span></div>
+<div class="ref-slot ref-slot--idx">
+  <span class="ref-k">기존</span>
+  <span class="ref-t">지수 · 수급 카드</span>
+  <span class="ref-v">코스피 <b class="num dn">−5.12%</b> · 7/31(금) 종가</span>
+  <span class="ref-n">수급 3항목은 비움 — 근거는 주석 참조</span>
+</div>
+<div class="nb-mark"><span class="nb-tag">신규 · 서브내비 바</span></div>
+<nav class="pnav" aria-label="종목 시그널 하위 메뉴"><a class="pnav__i on" aria-current="page">전체</a><a class="pnav__i">특이신호</a><a class="pnav__i">섹터</a><a class="pnav__i">ETF</a></nav>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">장중 이슈 피드</span></div>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">오늘 예측 링크</span></div>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">밤사이 미국 반도체</span><span class="ref-n">17:00–07:30만 노출</span></div>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">코스피 주도주 + 관련 뉴스 + 증권사 목표주가</span></div>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">상승 모멘텀 종목</span></div>
+<div class="ref-join"><div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">섹터별 대표 종목</span></div><a class="more more--attached">섹터 전체 보기 → <span class="nb-tag mini">신규 링크</span></a></div>
+<div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">이번 주 자금 지도</span></div>
+<div class="block nb">
+  <div class="block__h">
+    <span class="block__t etf"><span class="ic">📊</span>ETF 신호</span>
+    <span class="block__s"><span class="nb-tag">신규 블록</span>7/31(금) 종가</span>
+  </div>
+  <p class="sig-intro"><b>엇갈린 ETF 신호 · 거래량↑ 방향은 중립</b></p>
+  <p class="sig-intro" style="padding:4px 16px 12px;">KODEX 인버스 거래량이 KODEX 200의 <b>41배</b>지만, 인버스·레버리지 거래대금은 <b>50 : 50</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.</p>
+
+  <div class="betwrap">
+    <div class="bet-lbl">
+      <span>하락 베팅 <b class="num dn">1조 9,855억</b></span>
+      <span><b class="num up">1조 9,923억</b> 상승 베팅</span>
+    </div>
+    <div class="bet-bar">
+      <i class="d" style="width:50%"></i><i class="u" style="width:50%"></i>
+    </div>
+    <div class="bet-lbl bet-lbl--sm">
+      <span class="num">50%</span><span class="num">50%</span>
+    </div>
+  </div>
+
+  <div class="kpi2">
+    <div class="kpi2__c"><div class="l">인버스 거래량</div><div class="v num">KODEX 200 대비 ×41</div></div>
+    <div class="kpi2__c"><div class="l">KODEX 레버리지</div><div class="v num dn">−15.57%</div></div>
+  </div>
+
+  <div class="ext2">
+    <div class="ext2__r"><span class="l">섹터 ETF 최고</span><span class="n">바이오</span>
+      <span class="p num" style="color:var(--up)">+4.59%</span></div>
+    <div class="ext2__r"><span class="l">섹터 ETF 최저</span><span class="n">IT</span>
+      <span class="p num" style="color:var(--dn)">−7.06%</span></div>
+  </div>
+  <p class="fine">섹터 ETF 9종 중 양 극단만 보여줘요. 나머지 7종과 안전자산·전체 순위는 ETF 탭에 있어요.</p>
+  <a class="more">ETF 전체 보기 · 29종 →</a>
+</div>
+<div class="ref-join"><div class="ref-slot"><span class="ref-k">기존</span><span class="ref-t">오늘의 특이 신호</span></div><a class="more more--attached">특이 신호 전체 보기 → <span class="nb-tag mini gray">기존 링크</span></a></div>
+<div class="block nb">
+  <div class="block__h"><span class="block__t"><span class="ic">🔗</span>탭에 없는 화면</span><span class="block__s"><span class="nb-tag">링크 복구</span></span></div>
+  <a class="trow"><div class="nm" style="width:auto;flex:1"><b>패시브 민감주</b><small>ETF 기계매매 노출 종목</small></div><span style="color:#C0C4CA">›</span></a>
+  <a class="trow"><div class="nm" style="width:auto;flex:1"><b>거래량 순위</b><small>추적 40종목 · 섹터 필터</small></div><span style="color:#C0C4CA">›</span></a>
+</div>
+
+</div>
+
+<div class="sechd" id="s2">
+  <h2><span class="n">2</span>특이신호 <code>#signals-all</code></h2>
+  <div class="meta">풀사이즈. 좌 696px — 히어로 1건 + 행 31건(<code>signalsAll</code> 전체 32종목, 상승률순) · 우 348px — 하락률 순 10건 + 신호 종류 분포.
+  마크업·클래스는 라이브와 동일(<code>sig-hero / sig-row / sig-rmain / sig-rnm / sig-rbadges / sig-rpct / sig-go / bdg / bdg flow / num</code>).</div>
+</div>
+<div class="wrap">
+<div class="crumb"><button class="back-btn"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a>홈</a> › <a>종목</a> › <span style="color:var(--ink)">특이 신호 전체</span></div>
+<div class="phead">
+  <div><h1><span class="ic">⚡</span> 7/31(금) 특이 신호</h1>
+  <div class="psub">32종목 · 역행·거래량·신고가·수급 교차 · 7/31(금) 종가</div></div>
+</div>
+<nav class="pnav" aria-label="종목 시그널 하위 메뉴"><a class="pnav__i">전체</a><a class="pnav__i on" aria-current="page">특이신호</a><a class="pnav__i">섹터</a><a class="pnav__i">ETF</a></nav>
+<div class="home-cols">
+  <div class="home-main">
+    <div class="block" style="margin-bottom:0;">
+      <div class="block__h"><span class="block__t"><span class="ic">⚡</span>특이 신호</span>
+        <span class="block__s"><span class="stabs" style="margin-bottom:0;"><a>신호 강도순</a><a class="on">상승률순</a></span></span></div>
+      <p class="sig-intro">규칙으로 선별한 특이 신호 종목 전체예요. 정렬 기준을 바꿔 볼 수 있어요.</p>
+      <a class="sig-hero"><span class="sig-flag">오늘 최고 상승</span><div class="sig-htop"><span class="sig-hnm">HL만도 <small>204320 · 자동차</small></span><span class="sig-hpct" style="color:var(--up);">+4.9%</span></div><div class="sig-hbadges"><span class="bdg">역행 상승</span><span class="bdg">거래량 ×1.6 급증</span><span class="bdg flow">기관 순매수 전환</span></div><div class="sig-hwhy">시장이 하락하는 동안 <b>+4.9% 상승</b>했어요.</div><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">현대모비스 <small>012330 · 자동차</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 4일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--up);">+3.7%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">한미약품 <small>128940 · 바이오</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--up);">+3.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">효성중공업 <small>298040 · 전력기기</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 3일 연속 순매수</span><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+3.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">알테오젠 <small>196170 · 바이오</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span></span></span><span class="sig-rpct" style="color:var(--up);">+2.9%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">주성엔지니어링 <small>036930 · 반도체</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 5일 연속 순매수</span><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+2.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">현대위아 <small>011210 · 자동차</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span></span></span><span class="sig-rpct" style="color:var(--up);">+2.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">신한지주 <small>055550 · 금융</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+2.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">LS일렉트릭 <small>010120 · 전력기기</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 3일 연속 순매수</span><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+1.9%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">현대차 <small>005380 · 자동차</small></span><span class="sig-rbadges"><span class="bdg">역행 상승</span><span class="bdg flow">외국인 3일 연속 순매수</span><span class="bdg">거래대금 상위</span></span></span><span class="sig-rpct" style="color:var(--up);">+1.3%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">하나금융지주 <small>086790 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+1.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">한화시스템 <small>272210 · 방산</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--up);">+1.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">두산에너빌리티 <small>034020 · 전력기기</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--up);">+0.9%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">KB금융 <small>105560 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--up);">+0.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">LIG넥스원 <small>079550 · 방산</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--muted);">+0.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">포스코퓨처엠 <small>003670 · 2차전지</small></span><span class="sig-rbadges"><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-0.7%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">엘앤에프 <small>066970 · 2차전지</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 4일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-0.8%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">한국타이어앤테크놀로지 <small>161390 · 자동차</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-1.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">기아 <small>000270 · 자동차</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-1.7%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">삼성SDI <small>006400 · 2차전지</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-1.9%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">삼성화재 <small>000810 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-2.5%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">한화오션 <small>042660 · 조선</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 3일 연속 순매수</span><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-2.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">DB하이텍 <small>000990 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-2.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">메리츠금융지주 <small>138040 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">기관 5일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-3.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">현대로템 <small>064350 · 방산</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 4일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-3.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">HD한국조선해양 <small>009540 · 조선</small></span><span class="sig-rbadges"><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-4.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">리노공업 <small>058470 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-4.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">한미반도체 <small>042700 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 4일 연속 순매수</span><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-5.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">에코프로비엠 <small>247540 · 2차전지</small></span><span class="sig-rbadges"><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-6.5%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">삼성생명 <small>032830 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-7.7%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">삼성전자 <small>005930 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span><span class="bdg">거래대금 상위</span></span></span><span class="sig-rpct" style="color:var(--dn);">-8.8%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="sig-rmain"><span class="sig-rnm">SK하이닉스 <small>000660 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span><span class="bdg">거래대금 상위</span></span></span><span class="sig-rpct" style="color:var(--dn);">-8.8%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </div>
+  <div class="home-side">
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락률 순</span></div>
+      <p class="sig-intro" style="padding:11px 16px 8px;">신호 종목 중 7/31(금)에 가장 많이 빠진 종목이에요.</p>
+      <a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">1</span><span class="sig-rmain"><span class="sig-rnm">SK하이닉스 <small>000660 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span><span class="bdg">거래대금 상위</span></span></span><span class="sig-rpct" style="color:var(--dn);">-8.8%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">2</span><span class="sig-rmain"><span class="sig-rnm">삼성전자 <small>005930 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span><span class="bdg">거래대금 상위</span></span></span><span class="sig-rpct" style="color:var(--dn);">-8.8%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">3</span><span class="sig-rmain"><span class="sig-rnm">삼성생명 <small>032830 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-7.7%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">4</span><span class="sig-rmain"><span class="sig-rnm">에코프로비엠 <small>247540 · 2차전지</small></span><span class="sig-rbadges"><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-6.5%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">5</span><span class="sig-rmain"><span class="sig-rnm">한미반도체 <small>042700 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 4일 연속 순매수</span><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-5.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">6</span><span class="sig-rmain"><span class="sig-rnm">리노공업 <small>058470 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-4.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">7</span><span class="sig-rmain"><span class="sig-rnm">HD한국조선해양 <small>009540 · 조선</small></span><span class="sig-rbadges"><span class="bdg flow">기관 3일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-4.2%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">8</span><span class="sig-rmain"><span class="sig-rnm">현대로템 <small>064350 · 방산</small></span><span class="sig-rbadges"><span class="bdg flow">외국인 4일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-3.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">9</span><span class="sig-rmain"><span class="sig-rnm">메리츠금융지주 <small>138040 · 금융</small></span><span class="sig-rbadges"><span class="bdg flow">기관 5일 연속 순매수</span></span></span><span class="sig-rpct" style="color:var(--dn);">-3.0%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a><a class="sig-row"><span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">10</span><span class="sig-rmain"><span class="sig-rnm">DB하이텍 <small>000990 · 반도체</small></span><span class="sig-rbadges"><span class="bdg flow">기관 순매수 전환</span></span></span><span class="sig-rpct" style="color:var(--dn);">-2.6%</span><svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🏷️</span>신호 종류</span>
+        <span class="block__s">32종목 · 중복 포함</span></div>
+      <div class="ccp-wrap"><span class="ccp">🔥 거래량 급증 · 급락<b class="num">0</b></span><span class="ccp">🚀 거래량 급증 · 급등<b class="num">1</b></span><span class="ccp">↗ 역행 상승<b class="num">10</b></span><span class="ccp">↘ 역행 하락<b class="num">0</b></span><span class="ccp">▲ 52주 신고가 근접<b class="num">0</b></span><span class="ccp">💰 거래대금 상위<b class="num">3</b></span><span class="ccp">🏛️ 기관 순매수<b class="num">14</b></span><span class="ccp">🌏 외국인 순매수<b class="num">21</b></span><span class="ccp">🌏 외국인 순매도<b class="num">0</b></span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sechd" id="s3">
+  <h2><span class="n">3</span>섹터 <code>#sector</code> · 반도체</h2>
+  <div class="meta">풀사이즈 684 / 360(<code>.grid</code>).
+  실데이터가 뒷받침하는 범위 = <code>/api/vol-top</code> 상위 40종 + <code>/api/signals</code>의 신호 종목 합집합 <b>7종목</b>.
+  이 7종목 평균이 <code>signals.sectors.semicon.avg</code>(-4.1)와 정확히 일치해 재구성이 맞는 것을 확인했다.
+
+  <div class="fixlist">
+    <div class="fx"><span class="fxk">이 탭이 고치는 것</span>
+      <b>라이브 <code>#sector</code>에는 섹터 전환 수단이 아예 없다.</b>
+      화면은 반도체로 하드코딩돼 있고, 사이드바 "다른 섹터" 칩 4개(2차전지·바이오·자동차·금융)는 전부
+      <code>onclick="go('sector')"</code>다 — <code>go(id)</code>는 화면 id만 받고 섹터 인자가 없어서, 무엇을 눌러도 같은 반도체 화면이 다시 뜬다.
+      8개 섹터 중 4개는 칩으로도 노출되지 않는다. 즉 섹터 탭은 지금 <b>단수 화면이 복수 이름을 달고 있는 상태</b>이고,
+      선택 행이 이 탭을 실제 탭 목적지로 만드는 핵심이다. 그래서 선택 행을 서브내비 바로 아래로 올렸다.</div>
+
+    <div class="fx"><span class="fxk">라이브 버그 · 기록만</span>
+      <b>종목 랭킹 15행 전부가 같은 종목으로 이동한다.</b>
+      <code>stocks-home.js:1215</code>의 <code>secRow()</code>가 행마다 <code>onclick="goStock('000660')"</code>를 그대로 박아,
+      삼성전자·한미반도체 등 어느 행을 눌러도 SK하이닉스 상세로 간다. 아래 하드코딩 리터럴과 같은 뿌리다
+      (<code>SECTOR_RANK</code> 28행 배열이 종목명·등락률·"AI 78"·"신호 58"까지 전부 리터럴). <b>이 프로토타입에서 고치지 않았다 — 별건으로 남긴다.</b></div>
+
+    <div class="fx"><span class="fxk">옮기지 않은 값</span>
+      라이브의 "추적 28종목"·"약 2.8조"·"15.0일"과 위 <code>SECTOR_RANK</code>의 등락률·AI 점수는 전부 하드코딩이라 옮기지 않았다.
+      이 화면의 7종목·평균·시장폭은 전부 API 실측이다.</div>
+
+    <div class="fx"><span class="fxk">구조 변경</span>
+      <b>crumb·phead를 뺐다.</b> 서브내비가 "섹터", 선택 행이 "반도체"를 이미 말하고 있어
+      <code>홈 › 종목 › 섹터 › 반도체</code> + <code>🔧 반도체</code> 헤더는 같은 말의 세 번째·네 번째 반복이었다.
+      화면 첫 요소인 <code>.shead</code>가 섹터명·종목수·기준일·평균·시장폭을 다 들고 있어 헤더 역할을 그대로 한다
+      (문서 구조를 위해 <code>.shead .st</code>만 <code>h1</code>으로 올렸고 겉모습은 동일하다).
+      같은 논리가 특이신호·ETF 탭의 crumb에도 적용되지만, 이번 지시 범위가 섹터라 두 화면은 건드리지 않았다 — 별도 판단거리로 남긴다.</div>
+
+    <div class="fx"><span class="fxk">칩 순서</span>
+      활성 섹터를 맨 앞에 두고 나머지는 평균 등락률 내림차순. 평균순으로만 정렬하면 반도체(최하위)가 오른쪽 끝으로 밀려
+      390px 가로 스크롤에서 <b>지금 보고 있는 섹터가 초기 화면 밖으로 나간다</b>(정적 목업이라 <code>scrollIntoView</code>가 없다).</div>
+  </div></div>
+</div>
+<div class="wrap">
+<nav class="pnav" aria-label="종목 시그널 하위 메뉴"><a class="pnav__i">전체</a><a class="pnav__i">특이신호</a><a class="pnav__i on" aria-current="page">섹터</a><a class="pnav__i">ETF</a></nav>
+<div class="secsel" role="tablist" aria-label="섹터 선택"><a class="secsel__i on" role="tab" aria-selected="true"><span class="ic">🔧</span>반도체<b class="dn num">−4.10%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🚗</span>자동차<b class="up num">+1.53%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">⚡</span>전력기기<b class="up num">+1.01%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🧬</span>바이오<b class="dn num">−0.12%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🛡️</span>방산<b class="dn num">−0.93%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🏦</span>금융<b class="dn num">−1.45%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🔋</span>2차전지<b class="dn num">−2.62%</b></a><a class="secsel__i" role="tab" aria-selected="false"><span class="ic">🚢</span>조선<b class="dn num">−2.76%</b></a></div>
+<div class="grid">
+  <div>
+    <div class="dbox">
+      <div class="shead">
+        <div class="top">
+          <div><h1 class="st">🔧 반도체</h1><div class="ss">추적 7종목 · 코스피·코스닥 · 7/31(금) 종가</div></div>
+          <div class="kpi"><div class="l">섹터 평균</div><div class="v num dn">−4.10%</div></div>
+        </div>
+        <div class="breadth">
+          <div class="l"><span>시장폭</span><span>7종목 중 6종목 하락</span></div>
+          <div class="bbar"><i class="bu" style="width:14%"></i><i class="bd" style="width:86%"></i><i class="bn" style="width:0%"></i></div>
+          <div class="bk"><span><i class="iu"></i>상승 <span class="num">1</span></span><span><i class="id"></i>하락 <span class="num">6</span></span><span><i class="in"></i>보합 <span class="num">0</span></span></div>
+        </div>
+      </div>
+      <p class="lede">반도체는 7/31(금) 기준 추적 8개 섹터 중 <b>평균 등락률이 가장 낮은 섹터</b>예요(−4.10%).
+        추적 7종목 중 6종목이 내렸고, 지수(−5.12%)보다도 낮아요.
+        섹터 ETF도 <b>TIGER 반도체 −6.92%</b>로 9개 섹터 ETF 중 아래에서 두 번째예요.</p>
+
+      <div class="block">
+        <div class="block__h"><span class="block__t">반도체 종목 랭킹</span><span class="block__s">등락률순 · 막대 = 등락 폭</span></div>
+        <div class="block__h thead" style="background:var(--soft);">
+          <span class="block__s" style="font-weight:700;width:16px;"></span>
+          <span class="block__s" style="font-weight:700;width:148px;">종목</span>
+          <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:12px;">등락률</span>
+          <span class="block__s" style="width:66px;text-align:right;"></span>
+          <span class="block__s secval">거래량</span>
+          <span class="block__s secval secval--w">밸류에이션</span>
+        </div>
+        <a class="trow"><span class="rk t num">1</span><div class="nm"><b>주성엔지니어링<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">036930</small></div><div class="barwrap"><div class="bar up" style="width:30%"></div></div><span class="barval up num">+2.65%</span><span class="secval num"><span class="na">—</span></span><span class="secval secval--w num"><span class="na">—</span></span></a><a class="trow"><span class="rk t num">2</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar dn" style="width:15%"></div></div><span class="barval dn num">−1.35%</span><span class="secval num">10만주</span><span class="secval secval--w num"><span class="na">—</span></span></a><a class="trow"><span class="rk t num">3</span><div class="nm"><b>DB하이텍<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">000990</small></div><div class="barwrap"><div class="bar dn" style="width:30%"></div></div><span class="barval dn num">−2.65%</span><span class="secval num">29만주</span><span class="secval secval--w num">PER 9.88<small> / PBR 1.54</small></span></a><a class="trow"><span class="rk num">4</span><div class="nm"><b>리노공업<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">058470</small></div><div class="barwrap"><div class="bar dn" style="width:48%"></div></div><span class="barval dn num">−4.21%</span><span class="secval num">70만주</span><span class="secval secval--w num"><span class="na">—</span></span></a><a class="trow"><span class="rk num">5</span><div class="nm"><b>한미반도체<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">042700</small></div><div class="barwrap"><div class="bar dn" style="width:64%"></div></div><span class="barval dn num">−5.59%</span><span class="secval num">68만주</span><span class="secval secval--w num"><span class="na">—</span></span></a><a class="trow"><span class="rk num">6</span><div class="nm"><b>삼성전자<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">005930</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div></div><span class="barval dn num">−8.76%</span><span class="secval num">2,739만주</span><span class="secval secval--w num"><span class="na">—</span></span></a><a class="trow"><span class="rk num">7</span><div class="nm"><b>SK하이닉스<span class="bdg" style="margin-left:6px">신호</span></b><small class="num">000660</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div></div><span class="barval dn num">−8.79%</span><span class="secval num">543만주</span><span class="secval secval--w num">PER 5.03<small> / PBR 7.41</small></span></a>
+      </div>
+
+      <p class="pgap"><b>빈 슬롯</b> — <b>패시브 쏠림</b> — 라이브 화면의 "섹터 합산 노출 약 2.8조", "이오테크닉스 15.0일" 등은 <code>web/stocks/index.html</code>에 리터럴로 박힌 값이고 어떤 수집 스크립트도 이 값을 만들지 않아요(§20 목표주가 사고와 같은 패턴). 이 프로토타입에서는 채우지 않고 비워 뒀어요 — ETF 보유액·거래일수를 실측하는 소스가 붙기 전까지는 블록 자체를 내보내면 안 돼요.</p>
+
+      <div class="block">
+        <div class="block__h"><span class="block__t"><span class="ic">📊</span>섹터 비교 · 평균과 시장폭</span><span class="block__s">위 선택 행의 평균에 상승·하락 종목 수를 더한 표예요</span></div>
+        <a class="trow"><div class="nm" style="width:118px"><b>🚗 자동차</b><small class="num">6종목</small></div><div class="barwrap"><div class="bar up" style="width:37%"></div></div><span class="barval up num">+1.53%</span><span class="secval num">↑4 ↓2</span></a><a class="trow"><div class="nm" style="width:118px"><b>⚡ 전력기기</b><small class="num">5종목</small></div><div class="barwrap"><div class="bar up" style="width:25%"></div></div><span class="barval up num">+1.01%</span><span class="secval num">↑4 ↓1</span></a><a class="trow"><div class="nm" style="width:118px"><b>🧬 바이오</b><small class="num">6종목</small></div><div class="barwrap"><div class="bar dn" style="width:3%"></div></div><span class="barval dn num">−0.12%</span><span class="secval num">↑3 ↓3</span></a><a class="trow"><div class="nm" style="width:118px"><b>🛡️ 방산</b><small class="num">5종목</small></div><div class="barwrap"><div class="bar dn" style="width:23%"></div></div><span class="barval dn num">−0.93%</span><span class="secval num">↑2 ↓2</span></a><a class="trow"><div class="nm" style="width:118px"><b>🏦 금융</b><small class="num">7종목</small></div><div class="barwrap"><div class="bar dn" style="width:35%"></div></div><span class="barval dn num">−1.45%</span><span class="secval num">↑3 ↓4</span></a><a class="trow"><div class="nm" style="width:118px"><b>🔋 2차전지</b><small class="num">6종목</small></div><div class="barwrap"><div class="bar dn" style="width:64%"></div></div><span class="barval dn num">−2.62%</span><span class="secval num">↑0 ↓6</span></a><a class="trow"><div class="nm" style="width:118px"><b>🚢 조선</b><small class="num">4종목</small></div><div class="barwrap"><div class="bar dn" style="width:67%"></div></div><span class="barval dn num">−2.76%</span><span class="secval num">↑0 ↓4</span></a><a class="trow is-cur"><div class="nm" style="width:118px"><b>🔧 반도체</b><small class="num">7종목</small></div><div class="barwrap"><div class="bar dn" style="width:100%"></div></div><span class="barval dn num">−4.10%</span><span class="secval num">↑1 ↓6</span></a>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="panel"><div class="panel__h">반도체 대장주 <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:600;">거래량순</span></div><a class="srow"><span class="rk num">1</span><span class="n2">삼성전자 <small class="num">005930</small></span><span class="c dn num">−8.76%</span></a><a class="srow"><span class="rk num">2</span><span class="n2">SK하이닉스 <small class="num">000660</small></span><span class="c dn num">−8.79%</span></a><a class="srow"><span class="rk num">3</span><span class="n2">리노공업 <small class="num">058470</small></span><span class="c dn num">−4.21%</span></a><a class="srow"><span class="rk num">4</span><span class="n2">한미반도체 <small class="num">042700</small></span><span class="c dn num">−5.59%</span></a><a class="srow"><span class="rk num">5</span><span class="n2">DB하이텍 <small class="num">000990</small></span><span class="c dn num">−2.65%</span></a></div>
+    <div class="panel"><div class="panel__h">반도체 관련 ETF</div><a class="srow"><span class="n2">TIGER 반도체 <small class="num">091230</small></span><span class="c dn num">−6.92%</span></a><a class="srow"><span class="n2">TIGER 200 IT <small class="num">139260</small></span><span class="c dn num">−7.06%</span></a></div>
+    <div class="panel"><div class="panel__h">이 화면의 빈 항목</div>
+      <div class="mini-gap">
+        <p><b>시총순 정렬</b> — 시가총액이 <code>valuation.json</code>의 저평가·고평가 목록(119종)에만 있어 반도체 7종 중 2종만 커버돼요. 정렬을 시총순으로 못 해서 <b>등락률순</b>으로 뒀어요.</p>
+        <p><b>섹터 AI 심리 게이지</b> — 라이브 화면에도 <code>display:none</code>으로 숨겨져 있고 이를 채우는 API가 없어요.</p>
+        <p><b>다른 7개 섹터 화면</b> — 선택 행의 칩은 평균 등락률까지 실데이터(<code>signals.sectors</code>)지만, 클릭했을 때 열릴 <b>각 섹터의 종목 랭킹은 이 목업에 없어요</b>. 반도체만 풀 렌더예요.</p>
+        <p><b>주성엔지니어링 거래량</b> — <code>/api/vol-top</code> 상위 40종에 없어 <code>/api/signals</code>의 등락률만 있어요. 거래량 칸은 —로 뒀어요.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sechd" id="s4">
+  <h2><span class="n">4</span>ETF <code>#etf-rank</code></h2>
+  <div class="meta">풀사이즈. 좌 696px — ETF 29종 거래량순(막대 = 최대 거래량 대비) · 우 348px — 안전자산 3종 + 섹터 ETF 9종.
+  <b>vs 20일평균 칸은 비어 있다</b> — 아래 고지 참조.</div>
+</div>
+<div class="wrap">
+<div class="crumb"><button class="back-btn"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a>홈</a> › <a>종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
+<div class="phead">
+  <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1>
+  <div class="psub">29개 ETF · 7/31(금) 종가</div></div>
+</div>
+<nav class="pnav" aria-label="종목 시그널 하위 메뉴"><a class="pnav__i">전체</a><a class="pnav__i">특이신호</a><a class="pnav__i">섹터</a><a class="pnav__i on" aria-current="page">ETF</a></nav>
+<div class="home-cols">
+  <div class="home-main">
+    <div class="block">
+      <div class="block__h"><span class="block__t etf"><span class="ic">📊</span>ETF 랭킹</span>
+        <span class="block__s"><span class="stabs" style="margin-bottom:0;"><a class="on">거래량순</a><a>상승률순</a></span></span></div>
+      <div class="block__h thead" style="background:var(--soft);">
+        <span class="block__s" style="font-weight:700;width:16px;"></span>
+        <span class="block__s" style="font-weight:700;width:148px;">ETF</span>
+        <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:12px;">거래량</span>
+        <span class="block__s" style="width:66px;text-align:right;"></span>
+        <span class="block__s avg20" style="text-align:right;">vs 20일평균</span>
+        <span class="block__s" style="width:72px;text-align:right;">등락률</span>
+      </div>
+      <a class="trow trow--static" style="cursor:default"><span class="rk t num">1</span><div class="nm"><b>KODEX 인버스</b><small class="num">114800</small><span class="etag dn">인버스</span></div><div class="barwrap"><div class="bar vol" style="width:100%"></div></div><span class="barval num">10.0억주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+9.56%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk t num">2</span><div class="nm"><b>KODEX 코스닥150레버리지</b><small class="num">233740</small><span class="etag up">레버리지</span></div><div class="barwrap"><div class="bar vol" style="width:12%"></div></div><span class="barval num">1.2억주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+7.28%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk t num">3</span><div class="nm"><b>KODEX 코스닥150</b><small class="num">229200</small></div><div class="barwrap"><div class="bar vol" style="width:4%"></div></div><span class="barval num">4,188만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+3.06%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">4</span><div class="nm"><b>TIGER 미국S&P500</b><small class="num">360750</small></div><div class="barwrap"><div class="bar vol" style="width:3%"></div></div><span class="barval num">2,703만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.58%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">5</span><div class="nm"><b>KODEX 200</b><small class="num">069500</small></div><div class="barwrap"><div class="bar vol" style="width:2%"></div></div><span class="barval num">2,444만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−8.93%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">6</span><div class="nm"><b>KODEX 레버리지</b><small class="num">122630</small><span class="etag up">레버리지</span></div><div class="barwrap"><div class="bar vol" style="width:2%"></div></div><span class="barval num">2,100만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−15.57%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">7</span><div class="nm"><b>KODEX 미국S&P500</b><small class="num">379800</small></div><div class="barwrap"><div class="bar vol" style="width:2%"></div></div><span class="barval num">1,867만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.98%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">8</span><div class="nm"><b>KODEX AI반도체TOP2플러스</b><small class="num">395160</small></div><div class="barwrap"><div class="bar vol" style="width:1%"></div></div><span class="barval num">616만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−6.12%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">9</span><div class="nm"><b>KODEX 은행</b><small class="num">091170</small></div><div class="barwrap"><div class="bar vol" style="width:1%"></div></div><span class="barval num">554만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.57%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">10</span><div class="nm"><b>TIGER 200</b><small class="num">102110</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">409만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−9.28%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">11</span><div class="nm"><b>KODEX 2차전지산업</b><small class="num">305720</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">297만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−3.75%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">12</span><div class="nm"><b>KODEX 건설</b><small class="num">117700</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">168만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+2.87%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">13</span><div class="nm"><b>TIGER 미국나스닥100</b><small class="num">133690</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">119만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.27%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">14</span><div class="nm"><b>TIGER 200 IT</b><small class="num">139260</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">71만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−7.06%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">15</span><div class="nm"><b>SOL 조선TOP3플러스</b><small class="num">466920</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">62만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−2.86%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">16</span><div class="nm"><b>KODEX 삼성그룹</b><small class="num">102780</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">57만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−4.93%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">17</span><div class="nm"><b>TIGER 코리아TOP10</b><small class="num">292150</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">55만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−6.37%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">18</span><div class="nm"><b>KODEX 바이오</b><small class="num">244580</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">51만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+4.59%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">19</span><div class="nm"><b>TIGER 반도체</b><small class="num">091230</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">48만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−6.92%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">20</span><div class="nm"><b>TIGER 미국테크TOP10 INDXX</b><small class="num">381170</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">45만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+2.10%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">21</span><div class="nm"><b>KODEX 자동차</b><small class="num">091180</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">40만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.98%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">22</span><div class="nm"><b>KODEX 코스피</b><small class="num">226490</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">27만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−5.53%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">23</span><div class="nm"><b>PLUS K방산</b><small class="num">449450</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">25만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−1.01%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">24</span><div class="nm"><b>TIGER 차이나전기차SOLACTIVE</b><small class="num">371460</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">11만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.14%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">25</span><div class="nm"><b>KODEX 인도Nifty50</b><small class="num">453810</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">10만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+1.06%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">26</span><div class="nm"><b>KODEX 미국달러선물</b><small class="num">261240</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">9만주</span><span class="num avg20">—</span><span class="tchg up num" style="width:72px;text-align:right;flex:none;">+0.24%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">27</span><div class="nm"><b>KIWOOM 200</b><small class="num">069660</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">8만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−8.96%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">28</span><div class="nm"><b>KODEX 골드선물</b><small class="num">132030</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">5만주</span><span class="num avg20">—</span><span class="tchg dn num" style="width:72px;text-align:right;flex:none;">−0.33%</span></a><a class="trow trow--static" style="cursor:default"><span class="rk num">29</span><div class="nm"><b>TIGER 단기통안채</b><small class="num">157450</small></div><div class="barwrap"><div class="bar vol" style="width:0%"></div></div><span class="barval num">2만주</span><span class="num avg20">—</span><span class="tchg  num" style="width:72px;text-align:right;flex:none;">0.00%</span></a>
+    </div>
+    <p class="pgap"><b>빈 슬롯</b> — <b>vs 20일평균 배수</b> — 라이브 <code>etfRankRender()</code>는 <code>x.vol_avg20</code>으로 배수를 계산하는데, <code>/api/vol-top</code>의 ETF 29종 <b>전부에 이 필드가 없어요</b>(오늘 07:27 재조회로 재확인). 즉 운영 화면에서도 이 칸은 항상 —로 뜨고 있어요. 값을 지어내지 않고 그대로 —로 뒀어요.</p>
+  </div>
+  <div class="home-side">
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🛡️</span>안전자산</span></div>
+      <p class="sig-intro" style="padding:11px 16px 8px;">시장이 <b class="dn">−8.93%</b>인 날 안전자산은 이렇게 움직였어요.</p>
+      <a class="srow"><span class="n2">금 <small class="num">KODEX 골드선물 · 132030</small></span><span class="c dn num">−0.33%</span></a><a class="srow"><span class="n2">국고채10년 <small class="num">148070</small></span><span class="c  num">0.00%</span></a><a class="srow"><span class="n2">국고채3년 <small class="num">114260</small></span><span class="c up num">+0.02%</span></a>
+    </div>
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🔄</span>섹터 ETF</span><span class="block__s">9종 · 거래대금</span></div>
+      <a class="srow"><span class="n2">바이오 <small class="num">KODEX 바이오</small></span><span class="am num">40억</span><span class="c up num">+4.59%</span></a><a class="srow"><span class="n2">건설 <small class="num">KODEX 건설</small></span><span class="am num">96억</span><span class="c up num">+2.87%</span></a><a class="srow"><span class="n2">자동차 <small class="num">KODEX 자동차</small></span><span class="am num">111억</span><span class="c up num">+0.98%</span></a><a class="srow"><span class="n2">은행 <small class="num">KODEX 은행</small></span><span class="am num">865억</span><span class="c up num">+0.57%</span></a><a class="srow"><span class="n2">방산 <small class="num">PLUS K방산</small></span><span class="am num">122억</span><span class="c dn num">−1.01%</span></a><a class="srow"><span class="n2">조선 <small class="num">SOL 조선TOP3플러스</small></span><span class="am num">169억</span><span class="c dn num">−2.86%</span></a><a class="srow"><span class="n2">2차전지 <small class="num">KODEX 2차전지산업</small></span><span class="am num">364억</span><span class="c dn num">−3.75%</span></a><a class="srow"><span class="n2">반도체 <small class="num">TIGER 반도체</small></span><span class="am num">574억</span><span class="c dn num">−6.92%</span></a><a class="srow"><span class="n2">IT <small class="num">TIGER 200 IT</small></span><span class="am num">868억</span><span class="c dn num">−7.06%</span></a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sechd">
+  <h2><span class="n">✓</span>데이터 출처</h2>
+  <div class="meta">
+    <code>/api/signals</code> — asOf <b>2026-07-31 (7/31(금))</b> 종가, phase <code>closed</code>, updatedAt 2026-08-03T07:25:55.000Z · 코스피 −5.12%<br>
+    <code>/api/vol-top</code> — updatedAt 2026-08-03T07:25:56.446Z · 종목 40종 / ETF 29종<br>
+    <code>web/data/valuation.json</code> — asOf 2026-07-31 · 코스피200 199종 중 133종 평가<br>
+    <b>쓰지 않은 것</b> — <code>web/data/stocks-snapshot.json</code>(같은 7/31 16:33 생성인데도 삼성전자 종가 262,500·+26.81%로 <code>/api/vol-top</code>의 239,500·−8.76%와 어긋나 두 소스를 섞으면 한 화면에서 서로를 부정한다. §30 교훈에 따라 한 소스로 통일했다) ·
+    <code>/api/market</code>의 수급 3항목(fetchedAt 8/3 07:29로 이 화면의 7/31 종가와 기준일이 달라 지수·수급 카드에 넣지 않았다)
+  </div>
+</div>
+<div style="height:56px"></div>
+
+</body>
+</html>

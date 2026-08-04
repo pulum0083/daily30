@@ -995,6 +995,9 @@ function go(id,noHistory){
   el.classList.add('on');
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({screen:id},'','#'+id);
+  // pushState는 hashchange를 발생시키지 않으므로 서브탭 강조를 직접 갱신한다.
+  // 프로젝트의 옵셔널 호출 관례를 따라 결합을 최소로 둔다 — 없으면 그냥 넘어간다.
+  if(typeof window.dsSubnavSync==='function')window.dsSubnavSync();
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
@@ -1177,54 +1180,6 @@ etfDnRender();
   },{passive:true});
 })();
 
-/* 섹터 종목 랭킹 — 15개 기본 + 10개씩 더보기 (시총순, 바=등락률) */
-const SECTOR_RANK=[
-  [1,'삼성전자','005930','dn','−6.4%',100,'ais','신호 58'],
-  [2,'SK하이닉스','000660','up','+3.4%',62,'aip','AI 78'],
-  [3,'한미반도체','042700','up','+1.8%',40,'ais','신호 71'],
-  [4,'DB하이텍','000990','up','+1.8%',38,'ais','신호 64'],
-  [5,'리노공업','058470','up','+0.9%',26,'ais','신호 60'],
-  [6,'이오테크닉스','039030','up','+2.1%',44,'ais','신호 62'],
-  [7,'주성엔지니어링','036930','up','+9.4%',96,'ais','신호 69'],
-  [8,'원익IPS','240810','up','+1.4%',32,'ais','신호 55'],
-  [9,'ISC','095340','up','+0.6%',20,'ax','—'],
-  [10,'솔브레인','357780','dn','−1.2%',28,'aid','신호 47'],
-  [11,'HPSP','403870','up','+3.1%',56,'ais','신호 67'],
-  [12,'테스','095610','up','+2.7%',50,'ais','신호 58'],
-  [13,'하나마이크론','067310','dn','−2.4%',46,'aid','신호 44'],
-  [14,'동진쎄미켐','005290','up','+0.4%',16,'ax','—'],
-  [15,'티씨케이','064760','dn','−0.8%',22,'ais','신호 52'],
-  [16,'고영','098460','up','+1.1%',28,'ais','신호 56'],
-  [17,'피에스케이','319660','up','+4.2%',70,'ais','신호 65'],
-  [18,'유진테크','084370','up','+1.6%',34,'ais','신호 59'],
-  [19,'네패스','033640','dn','−3.1%',54,'aid','신호 39'],
-  [20,'심텍','222800','up','+5.5%',82,'ais','신호 68'],
-  [21,'가온칩스','399720','up','+2.0%',42,'ais','신호 61'],
-  [22,'에스앤에스텍','101490','up','+1.3%',30,'ais','신호 54'],
-  [23,'케이씨텍','281820','up','+0.7%',20,'ax','—'],
-  [24,'코미코','183300','dn','−1.5%',32,'aid','신호 46'],
-  [25,'대주전자재료','078600','up','+6.8%',88,'ais','신호 66'],
-  [26,'월덱스','101160','up','+0.5%',18,'ax','—'],
-  [27,'엘오티베큠','083310','dn','−0.6%',18,'ais','신호 50'],
-  [28,'어보브반도체','102120','up','+1.9%',40,'ais','신호 57'],
-];
-let secShown=15;
-function secRow(r){
-  const top3=r[0]<=3;
-  const badge=r[6]==='ax'?`<span class="ax">—</span>`:`<span class="${r[6]}">${r[7]}</span>`;
-  return `<a class="row" onclick="goStock('000660')"><span class="rk${top3?' t':''} num">${r[0]}</span><div class="nm"><b>${r[1]}</b><small class="num">${r[2]}</small></div><div class="barwrap"><div class="bar ${r[3]}" style="width:${r[5]}%"></div></div><span class="barval ${r[3]} num">${r[4]}</span><div class="ai">${badge}</div></a>`;
-}
-function secRender(){
-  const wrap=document.getElementById('sec-rows');
-  if(!wrap)return;
-  wrap.innerHTML=SECTOR_RANK.slice(0,secShown).map(secRow).join('');
-  const btn=document.getElementById('sec-more');
-  if(secShown>=SECTOR_RANK.length){btn.textContent=`반도체 ${SECTOR_RANK.length}종목 전체 →`;btn.setAttribute('onclick',"go('ranking')");}
-  else{btn.textContent=`더보기 · ${Math.min(secShown+10,SECTOR_RANK.length)-secShown}개 더 (${SECTOR_RANK.length-secShown}개 남음)`;btn.setAttribute('onclick','secLoadMore()');}
-}
-function secLoadMore(){secShown=Math.min(secShown+10,SECTOR_RANK.length);secRender();}
-secRender();
-
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
 function tipHTML(el){
@@ -1330,48 +1285,6 @@ function closeSearch(){document.getElementById('ov').classList.remove('on');docu
   });
 })();
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
-
-/* ── 패시브 민감주 랭킹 ── */
-const PASSIVE_DATA=[
-  {code:'039030',name:'이오테크닉스',sector:'반도체',conc:20.2,dov:15.0,score:98,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'058140',name:'리노공업',sector:'반도체',conc:21.0,dov:13.9,score:96,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'240810',name:'원익IPS',sector:'반도체',conc:18.9,dov:10.5,score:80,badge:'high',etf:'TIGER 반도체TOP10'},
-  {code:'000990',name:'DB하이텍',sector:'반도체',conc:18.0,dov:9.2,score:74,badge:'high',etf:'KODEX 반도체'},
-  {code:'042700',name:'한미반도체',sector:'반도체',conc:12.3,dov:8.7,score:58,badge:'high',etf:'KODEX 반도체'},
-  {code:'095340',name:'ISC',sector:'반도체',conc:10.4,dov:7.6,score:50,badge:'mid',etf:'TIGER 반도체TOP10'},
-  {code:'247540',name:'에코프로비엠',sector:'2차전지',conc:6.0,dov:6.8,score:37,badge:'mid',etf:'TIGER 2차전지테마'},
-  {code:'357780',name:'솔브레인',sector:'반도체',conc:6.8,dov:6.3,score:37,badge:'mid',etf:'TIGER 반도체TOP10'},
-  {code:'086520',name:'에코프로',sector:'2차전지',conc:6.4,dov:4.8,score:31,badge:'mid',etf:'TIGER 2차전지테마'},
-];
-let pSortKey='dov';
-const maxDov=15.0;
-function passiveRow(r,i){
-  const pct=Math.round(r.dov/maxDov*100);
-  const badgeHtml=r.badge==='high'?'<span class="pbdg high">高</span>':'<span class="pbdg mid">中</span>';
-  const barVal=pSortKey==='conc'?r.conc+'%':pSortKey==='score'?r.score:r.dov+'일';
-  const barPct=pSortKey==='conc'?Math.round(r.conc/21*100):pSortKey==='score'?r.score:pct;
-  return `<a class="prank-row" onclick="goStock('000660')">
-    <span class="rk2 num">${i+1}</span>
-    <div class="nm" style="width:136px;flex-shrink:0;"><b style="font-size:13px;">${r.name}</b><small class="num" style="font-size:11px;color:var(--muted);">${r.code} · ${r.sector}</small></div>
-    <div class="dov-bar"><div class="fill" style="width:${barPct}%"></div><span class="val">${barVal}</span></div>
-    <span class="conc-col num">${r.conc}%</span>
-    <span class="score-col num">${r.score}</span>
-    <div style="width:36px;text-align:right;flex-shrink:0;">${badgeHtml}</div>
-  </a>`;
-}
-function passiveRender(){
-  const sorted=[...PASSIVE_DATA].sort((a,b)=>b[pSortKey]-a[pSortKey]);
-  document.getElementById('passive-rows').innerHTML=sorted.map((r,i)=>passiveRow(r,i)).join('');
-  const labels={dov:'거래일수 (ETF 물량 소화일)',conc:'집중도 (시총 대비 패시브 자금)',score:'민감도 점수 (0~100)'};
-  document.getElementById('pbar-label').textContent=labels[pSortKey];
-}
-function passiveSort(key,el){
-  pSortKey=key;
-  document.querySelectorAll('#psort-tabs a').forEach(a=>a.classList.remove('on'));
-  el.classList.add('on');
-  passiveRender();
-}
-passiveRender();
 
 /* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
 // 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
@@ -2129,33 +2042,133 @@ if(passBtn){
       etfRankRender();
       etfDnRender();
     }
-    renderSectorBreadth(all);
     bindSurgeTips();
   }
-  function renderSectorBreadth(all){
-    var sec=all.filter(function(x){return x.sector==='반도체'||x.sector==='semicon';});
-    if(!sec.length) return;
+  // 8개 섹터 대표 종목(대장주) — stock_universe.json 순서 그대로 상위 2~3종목 선별.
+  // 종목 "선택"만 손으로 골랐을 뿐 값은 전부 SNAP(stocks-snapshot.json) 실측이다 —
+  // 밤사이 브리지의 BRIDGE_US_TICKERS와 같은 패턴(§20 위반 아님, 종목 선택 큐레이션).
+  var SECTOR_LEADERS={
+    semicon:['005930','000660','042700'],
+    power:['267260','010120','298040'],
+    defense:['012450','079550','064350'],
+    ship:['329180','042660','010140'],
+    battery:['373220','247540','006400'],
+    auto:['005380','000270','012330'],
+    bio:['207940','068270','000100'],
+    finance:['032830','105560','055550'],
+  };
+  var SECTOR_ICONS={semicon:'🔧',power:'⚡',defense:'🛡️',ship:'🚢',battery:'🔋',auto:'🚗',bio:'🧬',finance:'🏦'};
+
+  // 섹터 화면 데이터 — stocks-snapshot.json(SNAP)만 쓴다. vol-top·API 라이브 소스와
+  // 섞지 않는다(§0 정합성 우선, §24 시점 불일치 방지) — 이 화면은 항상 "직전 마감 기준"이다.
+  function secBuildSectorData(snap, key){
+    if(!snap||!snap.stocks) return null;
+    var rows=[];
+    Object.keys(snap.stocks).forEach(function(code){
+      var s=snap.stocks[code];
+      if(s&&s.sector===key&&typeof s.change_pct==='number') rows.push({code:code,name:s.name,pct:s.change_pct});
+    });
+    if(!rows.length) return null;
+    rows.sort(function(a,b){return b.pct-a.pct;});
     var upN=0,dnN=0,flatN=0,sum=0;
-    sec.forEach(function(x){sum+=x.changePct;if(x.changePct>0)upN++;else if(x.changePct<0)dnN++;else flatN++;});
-    var total=sec.length,avg=sum/total;
-    var el=document.getElementById('sec-avg');
-    if(el){el.textContent=(avg>=0?'+':'')+avg.toFixed(1)+'%';el.className='v num '+(avg>=0?'up':'dn');}
-    var lbl=document.getElementById('sec-breadth-label');
-    if(lbl)lbl.innerHTML=total+'종목 중 <b class="up num">'+upN+' 상승</b>';
-    var bbar=document.getElementById('sec-bbar');
-    if(bbar){var bu=Math.round(upN/total*1000)/10,bd=Math.round(dnN/total*1000)/10,bn=Math.round(flatN/total*1000)/10;bbar.innerHTML='<i class="bu" style="width:'+bu+'%"></i><i class="bd" style="width:'+bd+'%"></i><i class="bn" style="width:'+bn+'%"></i>';}
-    var bk=document.getElementById('sec-bk');
-    if(bk)bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+flatN+'</span></span>';
-    var senti=document.getElementById('sec-senti');
-    var pct=Math.round(upN/total*100);
-    var slbl=document.getElementById('sec-senti-label');
-    var needle=document.getElementById('sec-senti-needle');
-    if(senti&&slbl&&needle){senti.style.display='';slbl.innerHTML=(pct>=55?'상승 우위':pct<=45?'하락 우위':'중립')+' <b class="num">'+pct+'%</b>';needle.style.left=pct+'%';}
-    var leaders=['005930','000660','042700'];
-    var lw=document.getElementById('sec-leaders');
-    if(lw){var lmap={};sec.forEach(function(x){lmap[x.code]=x;});
-      lw.innerHTML=leaders.map(function(c,i){var x=lmap[c];if(!x)return '';var cls=x.changePct>=0?'up':'dn';var sign=x.changePct>=0?'+':'';return '<a class="srow" onclick="goStock(\''+c+'\')"><span class="n2">'+['①','②','③'][i]+' '+x.name+' <small class="num">'+c+'</small></span><span class="c '+cls+' num">'+sign+x.changePct.toFixed(2)+'%</span></a>';}).join('');}
+    rows.forEach(function(r){sum+=r.pct;if(r.pct>0)upN++;else if(r.pct<0)dnN++;else flatN++;});
+    var total=rows.length,avg=sum/total;
+    var byCode={}; rows.forEach(function(r){byCode[r.code]=r;});
+    var leaders=(SECTOR_LEADERS[key]||[]).map(function(c){return byCode[c];}).filter(Boolean);
+    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,leaders:leaders};
   }
+
+  // 8개 섹터 전부의 평균 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
+  function secAllAverages(snap){
+    var out={};
+    Object.keys(SECTOR_LABELS).forEach(function(key){
+      var d=secBuildSectorData(snap,key);
+      if(d) out[key]={avg:d.avg,label:d.label};
+    });
+    return out;
+  }
+
+  // 이 화면은 항상 스냅샷(마감) 기준이라 .ds-asof(장중 '오늘 실시간')를 재사용하면 안 된다.
+  function secAsOfLabel(snap){
+    if(!snap||!snap.generated_at) return '';
+    var ymd=String(snap.generated_at).slice(0,10);
+    return fmtKoDate(ymd)+' 마감';
+  }
+
+  function secSectorRow(r,i){
+    var top3=i<3;
+    var cls=r.pct>=0?'up':'dn', sign=r.pct>=0?'+':'−';
+    var barPct=Math.max(4,Math.min(100,Math.round(Math.abs(r.pct)/10*100)));
+    return '<a class="row" onclick="goStock(\''+r.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+(i+1)+'</span>'
+      +'<div class="nm"><b>'+r.name+'</b><small class="num">'+r.code+'</small></div>'
+      +'<div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div>'
+      +'<span class="barval '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
+  }
+
+  function secChipHtml(key,label,avg,active){
+    var cls=avg>=0?'up':'dn', sign=avg>=0?'+':'−';
+    return '<a class="secsel__i'+(active?' on':'')+'" role="tab" aria-selected="'+(active?'true':'false')+'" data-sector="'+key+'">'
+      +'<span class="ic">'+(SECTOR_ICONS[key]||'')+'</span>'+label
+      +'<b class="'+cls+' num">'+sign+Math.abs(avg).toFixed(2)+'%</b></a>';
+  }
+
+  // order: 활성 섹터 먼저, 나머지는 평균 내림차순. 순수 평균순이면 최하위 섹터를 보는 중일 때
+  // 그 섹터가 390px 가로스크롤 밖으로 밀려 자기 자신이 안 보인다(목업 설계 노트 그대로).
+  function secRenderChips(box, activeKey, allAvgs){
+    if(!box) return;
+    var order=Object.keys(allAvgs).filter(function(k){return k!==activeKey;})
+      .sort(function(a,b){return allAvgs[b].avg-allAvgs[a].avg;});
+    if(allAvgs[activeKey]) order.unshift(activeKey);
+    box.innerHTML=order.map(function(k){
+      var d=allAvgs[k]; return secChipHtml(k,d.label,d.avg,k===activeKey);
+    }).join('');
+  }
+
+  var secActiveKey='semicon';
+  function secShowSector(snap, key){
+    var d=secBuildSectorData(snap,key);
+    if(!d) return;   // 없는 섹터면 화면을 건드리지 않는다(§0) — 직전 상태 유지
+    secActiveKey=key;
+
+    var crumbEl=document.getElementById('sec-crumb-label'); if(crumbEl) crumbEl.textContent=d.label;
+    var titleEl=document.getElementById('sec-title'); if(titleEl) titleEl.textContent=(SECTOR_ICONS[key]||'')+' '+d.label;
+    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목 · 코스피·코스닥 · '+secAsOfLabel(snap);
+
+    var avgEl=document.getElementById('sec-avg');
+    if(avgEl){avgEl.textContent=(d.avg>=0?'+':'−')+Math.abs(d.avg).toFixed(2)+'%';avgEl.className='v num '+(d.avg>=0?'up':'dn');}
+
+    var lbl=document.getElementById('sec-breadth-label');
+    if(lbl) lbl.innerHTML=d.total+'종목 중 <b class="up num">'+d.upN+' 상승</b>';
+    var bbar=document.getElementById('sec-bbar');
+    if(bbar){var bu=Math.round(d.upN/d.total*1000)/10,bdw=Math.round(d.dnN/d.total*1000)/10,bn=Math.round(d.flatN/d.total*1000)/10;
+      bbar.innerHTML='<i class="bu" style="width:'+bu+'%"></i><i class="bd" style="width:'+bdw+'%"></i><i class="bn" style="width:'+bn+'%"></i>';}
+    var bk=document.getElementById('sec-bk');
+    if(bk) bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+d.upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+d.dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+d.flatN+'</span></span>';
+
+    var lw=document.getElementById('sec-leaders');
+    if(lw) lw.innerHTML=d.leaders.map(function(r,i){var cls=r.pct>=0?'up':'dn',sign=r.pct>=0?'+':'−';
+      return '<a class="srow" onclick="goStock(\''+r.code+'\')"><span class="n2">'+['①','②','③'][i]+' '+r.name+' <small class="num">'+r.code+'</small></span><span class="c '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
+    }).join('');
+
+    var rowsWrap=document.getElementById('sec-rows');
+    if(rowsWrap) rowsWrap.innerHTML=d.rows.map(secSectorRow).join('');
+
+    secRenderChips(document.getElementById('secsel'), key, secAllAverages(snap));
+  }
+
+  // 칩 클릭 위임 — 칩은 매번 innerHTML로 다시 그려지므로 개별 리스너 대신 문서 레벨 위임 1개만 둔다.
+  document.addEventListener('click', function(e){
+    var chip=e.target&&e.target.closest?e.target.closest('.secsel__i'):null;
+    if(!chip) return;
+    var key=chip.getAttribute('data-sector');
+    if(key&&SNAP) secShowSector(SNAP, key);
+  });
+
+  // 테스트 훅 — node:vm에서 함수만 꺼내 검증한다(실제 DOM 결과는 브라우저에서 확인).
+  window.__sectorScreen={
+    secBuildSectorData:secBuildSectorData, secAllAverages:secAllAverages, secAsOfLabel:secAsOfLabel,
+    secShowSector:secShowSector, secRenderChips:secRenderChips,
+  };
   function bindSurgeTips(){
     if(typeof showTip!=='function') return;
     document.querySelectorAll('.vol-surge-badge').forEach(function(el){
@@ -2202,6 +2215,105 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
+  // ETF 요약 블록 — /api/signals의 etf(lead·betting·sector). 상세는 #etf-rank 탭.
+  // ⚠️ 위쪽 renderEtf()는 /api/vol-top 배열을 받는 다른 함수다. 혼동 금지.
+  function fmtEok(mw){                       // 백만원 → '1조 9,855억'
+    var eok = Math.round(mw/100);
+    if(eok >= 10000){
+      var jo = Math.floor(eok/10000), rest = eok % 10000;
+      return jo + '조' + (rest ? ' ' + rest.toLocaleString() + '억' : '');
+    }
+    return eok.toLocaleString() + '억';
+  }
+  // 극단값(최고·최저)은 서로 다른 두 종목이 있어야 '범위'다. 1개(나머지 폴링 전멸)면 최고=최저로
+  // 같은 종목이 중복 표시되던 문제(코드리뷰 Minor) — 그럴 땐 범위 자체를 숨긴다.
+  function pickExtremes(rows){
+    if(!rows || rows.length < 2) return null;
+    var s = rows.slice().sort(function(a,b){ return b.pct - a.pct; });
+    return { top: s[0], bottom: s[s.length-1] };
+  }
+  function isFiniteNum(v){ return typeof v === 'number' && isFinite(v); }
+  function shouldShowEtfSignal(etf){
+    if(!(etf && etf.lead && etf.lead.title && etf.lead.body && etf.betting)) return false;
+    var b = etf.betting;
+    // 폴링이 전종목 실패해도 api/_signals-core.mjs의 etfBettingFlow()는 모양은 온전한
+    // {downAmt:0,upAmt:0,downRatio:0,upRatio:100,invVolMultiple:0,levPct:null} 객체를 돌려준다
+    // (필드는 다 있지만 값이 전부 미측정) — 타입 체크로 그 함정을 먼저 거른다(코드리뷰 Critical).
+    if(!isFiniteNum(b.downAmt) || !isFiniteNum(b.upAmt) || !isFiniteNum(b.downRatio) ||
+       !isFiniteNum(b.upRatio) || !isFiniteNum(b.invVolMultiple)) return false;
+    // 인버스·레버리지 ETF 거래대금이 하루 종일 양쪽 다 0인 날은 현실에 없다 — 이 조합은 수집
+    // 전체 실패의 신호다. API 응답엔 "몇 종목이 성공했는지"를 구분하는 필드가 없어(byCode가
+    // 성공분만 채워지고 실패 개수는 응답에 안 실린다) 이 값 조합 자체로 "데이터 없음"을 판정한다.
+    // 없으면 지어내지 않고 비운다(운영 규칙 §0) — "조용한 평온한 하루"처럼 보이게 두지 않는다.
+    if(b.downAmt === 0 && b.upAmt === 0) return false;
+    return true;
+  }
+  // levPct처럼 개별 종목 폴링 하나만 실패해도 null이 될 수 있는 값은 여기서 안전하게 처리한다.
+  // null/undefined를 0으로 취급하면 "+0.00%"라는, 실측된 적 없는 숫자가 빨간색(상승)으로
+  // 나타난다(코드리뷰 Critical) — 숫자가 아니면 포맷·색 모두 아무것도 반환하지 않는다.
+  function pctCls(v){ return isFiniteNum(v) ? (v >= 0 ? 'up' : 'dn') : ''; }
+  function pctFmt(v){ return isFiniteNum(v) ? (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%' : null; }
+  // lead.body는 api/_signals-core.mjs의 etfLead()가 만드는 문자열이고, 오늘은 숫자만 보간해
+  // <b>...</b> 굵게 강조 외엔 태그가 없다. 그 전제를 주석으로만 남기면 나중에 다른 필드가
+  // 섞여도 아무도 못 알아챈다(SERVICE_RULES §20·§25와 같은 실패 패턴) — <b>·</b>(속성 없이)만
+  // 통과시키고 그 외 태그는 전부 제거해 innerHTML에 안전하게 넣을 수 있도록 코드로 강제한다.
+  function sanitizeBodyHtml(html){
+    return String(html == null ? '' : html).replace(/<(?!\/?b>)[^>]*>/gi, '');
+  }
+  function renderEtfSignal(etf, asOf){
+    var box = document.getElementById('etf-signal');
+    if(!box) return;
+    if(!shouldShowEtfSignal(etf)){ box.style.display = 'none'; return; }   // 없으면 비운다(§0)
+    var b = etf.betting;
+    var set = function(id, txt){ var e = document.getElementById(id); if(e) e.textContent = txt; };
+    set('etfsig-asof', asOf && asOf.label ? asOf.label + ' 종가' : '');
+    set('etfsig-title', etf.lead.title);
+    var bodyEl = document.getElementById('etfsig-body'); if(bodyEl) bodyEl.innerHTML = sanitizeBodyHtml(etf.lead.body);
+    set('etfsig-dn-amt', fmtEok(b.downAmt));
+    set('etfsig-up-amt', fmtEok(b.upAmt));
+    set('etfsig-dn-pct', b.downRatio + '%');
+    set('etfsig-up-pct', b.upRatio + '%');
+    var bar = document.getElementById('etfsig-bar-dn'); if(bar) bar.style.width = b.downRatio + '%';
+    set('etfsig-inv', 'KODEX 200 대비 ×' + b.invVolMultiple);
+    var lev = document.getElementById('etfsig-lev');
+    var inv = document.getElementById('etfsig-inv');
+    var invRow = inv && inv.parentElement;
+    if(lev){
+      var levTxt = pctFmt(b.levPct), levRow = lev.parentElement;
+      if(levTxt){
+        lev.textContent = levTxt; lev.className = 'v num ' + pctCls(b.levPct);
+        if(levRow) levRow.style.display='';
+        if(invRow) invRow.style.gridColumn='';   // 짝이 돌아오면 원래 폭(1fr)으로 되돌린다
+      } else {
+        lev.textContent = '';
+        if(levRow) levRow.style.display = 'none';   // 이 종목만 미측정 — 행을 비운다(§0)
+        // grid-template-columns:1fr 1fr에서 짝(레버리지)이 사라지면 오른쪽에 빈 칸(격자선 배경)이
+        // 그대로 남는다(코드리뷰 재검토 지적) — 남은 칸이 전체 폭을 차지하도록 넓힌다.
+        if(invRow) invRow.style.gridColumn = '1 / -1';
+      }
+    }
+    var ext = document.getElementById('etfsig-ext'), ex = pickExtremes(etf.sector);
+    if(ext){
+      ext.innerHTML = '';   // 라벨·값은 아래에서 textContent로만 채운다 — 문자열 조립 innerHTML 금지(코드리뷰 Important)
+      if(ex){
+        [['섹터 ETF 최고', ex.top], ['섹터 ETF 최저', ex.bottom]].forEach(function(p){
+          var row = document.createElement('div'); row.className = 'etfsig-ext__r';
+          var k = document.createElement('span'); k.className = 'k'; k.textContent = p[0];
+          var n = document.createElement('span'); n.className = 'n'; n.textContent = p[1].label;
+          var v = document.createElement('span'); v.className = 'v num ' + pctCls(p[1].pct); v.textContent = pctFmt(p[1].pct) || '';
+          row.appendChild(k); row.appendChild(n); row.appendChild(v);
+          ext.appendChild(row);
+        });
+      }
+    }
+    box.style.display = '';
+  }
+  // 테스트 훅 — node:vm에서 순수 포맷터 + renderEtfSignal 자체를 DOM 스텁으로 검증한다(코드리뷰 재검토).
+  window.__etfSignal = {
+    fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal,
+    pctFmt: pctFmt, pctCls: pctCls, sanitizeBodyHtml: sanitizeBodyHtml, renderEtfSignal: renderEtfSignal
+  };
+
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
@@ -2213,6 +2325,7 @@ if(passBtn){
     if(d.sectors) SIG_SECTORS=d.sectors;
     if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
     renderTodayLine();
+    renderEtfSignal(d.etf, d.asOf);
     sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
@@ -2683,6 +2796,7 @@ if(passBtn){
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
+      if(SNAP&&SNAP.stocks) secShowSector(SNAP, secActiveKey);
       pollVolTop();
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
@@ -3157,4 +3271,111 @@ if(passBtn){
       render(data);
     })
     .catch(function(){ block.style.display='none'; });
+})();
+
+/* ── 밤사이 브리지 (#overnight-bridge) ──────────────────────────────────────────
+   간밤 미국 정규장 등락 vs 한국 직전 마감 등락을 섹터별 %p 갭으로 보여준다.
+   등락 문자열·색 클래스(up/dn)·선반영/미반영/동조 판정은 파이썬
+   (generate_html.build_overnight_bridge)이 전부 구워서 web/data/overnight-bridge.json으로
+   내보낸다. 여기서는 렌더만 한다 — 경계 판정을 JS로 다시 구현하면 §30 이중 구현이 재현된다.
+
+   노출 구간: 코스피 거래일 07:30~09:00 (KST).
+     07:30 — #us-evening('밤사이 미국 반도체 시황')이 꺼지고 krxDay() 낮 레이아웃이 켜지는
+             바로 그 경계다. 밤사이 블록이 내려간 자리를 그대로 이어받는다.
+     09:00 — 코스피 개장. 그 뒤로는 '한국 직전 마감'이 어제 종가가 되고 오늘 장은 따로
+             움직인다. 그 상태로 갭을 계속 띄우면 오늘 등락과 이중으로 세게 되는데,
+             그게 정확히 이 기능이 드러내려던 §24 사고다. 개장과 동시에 내린다.
+
+   날짜 게이트: JSON의 date가 오늘(KST)이 아니면 아무것도 렌더하지 않는다. 이 파일은
+   주말·공휴일에도 배포된 채 남아 있으므로, 실제로 그 날들을 막는 것은 요일 검사가 아니라
+   이 날짜 게이트다(§0 — 완전성보다 정합성).
+
+   재평가: ueGate(5분)·wmBodyGate(1분) 관례를 따라 1분마다 게이트만 다시 본다 — 탭을 열어둔
+   채 09:00을 넘기면 스스로 내려간다. 섹션 재배치는 하지 않는다(위 phase() 주석의 '재배치는
+   로드 1회' 원칙 유지). */
+(function(){
+  var box=document.getElementById('overnight-bridge');
+  if(!box) return;
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
+  function kstNow(){ return new Date(Date.now()+9*3600*1000); }
+  function todayKST(){ return kstNow().toISOString().slice(0,10); }
+  // gap_cls는 '동조'(갭 0)일 때 빈 문자열로 온다 — 그때는 색 클래스를 붙이지 않는다.
+  function cls(c){ return (c==='up'||c==='dn') ? ' '+c : ''; }
+
+  /* 표시 구간(코스피 거래일 07:30~09:00) 안인가 — 데이터와 무관한 시계 판정만. */
+  function inWindow(){
+    if(window.krIsKospiHoliday && window.krIsKospiHoliday()) return false;   // 주말·공휴일 포함
+    var d=kstNow(), t=d.getUTCHours()*60+d.getUTCMinutes();
+    return t>=450 && t<540;                                                  // 07:30~09:00
+  }
+
+  /* 노출 여부 — (시각·요일·공휴일·데이터 날짜)만의 순수 판정. 회귀 테스트가 직접 호출한다. */
+  function shouldShow(data){
+    if(!inWindow()) return false;
+    if(!data || data.date!==todayKST()) return false;                        // 어제 파일 금지
+    // 비교 대상 거래일이 없으면 머리말의 날짜가 빈칸으로 나간다 — 상대어 금지(§24) 이전에
+    // 날짜 자체가 없는 상태라 렌더하지 않는다.
+    if(typeof data.kr_session_date!=='string' || !data.kr_session_date) return false;
+    return Array.isArray(data.rows) && data.rows.length>0;                   // 빈 껍데기 금지
+  }
+
+  function rowHtml(r){
+    if(!r) return '';
+    return '<div class="ob-row">'
+      + '<span class="ob-sec">'+esc(r.sector)+'</span>'
+      + '<span class="ob-leg"><span class="ob-mk">미</span><b class="num'+cls(r.us_cls)+'">'+esc(r.us_change_fmt)+'</b><span class="ob-nm">'+esc(r.us_label)+'</span></span>'
+      + '<span class="ob-leg"><span class="ob-mk">한</span><b class="num'+cls(r.kr_cls)+'">'+esc(r.kr_change_fmt)+'</b><span class="ob-nm">'+esc(r.kr_label)+'</span></span>'
+      + '<span class="ob-gap"><span class="ob-pill'+cls(r.gap_cls)+'">'+esc(r.gap_word)+'</span><b class="num'+cls(r.gap_cls)+'">'+esc(r.gap_fmt)+'</b></span>'
+      + '</div>';
+  }
+
+  // 회귀 테스트 훅 — 프로덕션 동작에는 영향 없음(읽기 전용 참조).
+  window.__obShouldShow=shouldShow;
+  window.__obRowHtml=rowHtml;
+
+  var data=null, paintedDate='', fetching=false;
+  function paint(){
+    if(!data || paintedDate===data.date) return;
+    var list=document.getElementById('ob-list'), dt=document.getElementById('ob-date');
+    if(!list||!dt) return;
+    // 비교 대상 한국 세션은 반드시 실제 날짜로 적는다 — '전일'·'어제' 같은 상대어 금지(§24).
+    dt.textContent='한국 '+fmtKoDate(data.kr_session_date)+' 마감 vs 미국 직전 정규장';
+    list.innerHTML=data.rows.map(rowHtml).join('');
+    paintedDate=data.date;
+  }
+  function gate(){
+    var ok=shouldShow(data);
+    if(ok) paint();
+    box.style.display = ok ? '' : 'none';
+  }
+
+  /* 데이터 획득 — 오늘자를 손에 넣기 전까지만 다시 받는다.
+     밤새 켜둔 탭은 07:00에 받은 어제 파일(또는 404)을 그대로 들고 07:30을 맞는다. 날짜
+     게이트가 그 stale 파일을 정확히 걷어내므로(§0) 다시 받지 않으면 그 탭에서는 브리지가
+     그날 내내 안 뜬다 — 인터벌이 09:00에 내리기만 하고 07:30에 올리지는 못하는 비대칭이었다.
+     파일은 하루 한 번(07:26경)만 바뀌므로 무조건 폴링하지 않는다. 도움이 될 수 있는
+     구간(표시 구간 안) + 아직 오늘자가 없을 때만 재시도하고, 받는 즉시 멈춘다.
+     실패(404·네트워크·JSON 아님)하면 data를 건드리지 않는다 — 이미 그려진 블록을 지우지 않는다. */
+  function refresh(){
+    if(fetching) return;
+    if(data && data.date===todayKST()) return;   // 이미 오늘자 — 더 받을 이유가 없다
+    fetching=true;
+    fetch('/data/overnight-bridge.json',{cache:'no-store'})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ fetching=false; if(j) data=j; gate(); })
+      .catch(function(){ fetching=false; });     // 이전 상태 유지 — 조용히 넘어간다
+  }
+
+  refresh();
+  gate();
+  setInterval(function(){ if(inWindow()) refresh(); gate(); }, 60*1000);
+  // 탭을 오래 켜뒀다 돌아왔을 때 인터벌(최대 1분)을 기다리지 않고 즉시 자가 치유한다.
+  // 위 장중 곡선 블록의 visibilitychange 자가 치유와 같은 취지 — 거기선 날짜 롤오버,
+  // 여기선 '표시 구간이 열렸는데 아직 오늘자 파일이 없는' 상태를 복구한다.
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) return;
+    if(inWindow()) refresh();
+    gate();
+  });
 })();

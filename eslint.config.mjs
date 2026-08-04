@@ -34,6 +34,7 @@ const NODE = {
   __dirname: 'readonly', __filename: 'readonly',
   setTimeout: 'readonly', clearTimeout: 'readonly',
   setInterval: 'readonly', clearInterval: 'readonly',
+  setImmediate: 'readonly',
   URL: 'readonly', URLSearchParams: 'readonly', TextEncoder: 'readonly',
   TextDecoder: 'readonly', fetch: 'readonly', AbortSignal: 'readonly',
   structuredClone: 'readonly', queueMicrotask: 'readonly', crypto: 'readonly',

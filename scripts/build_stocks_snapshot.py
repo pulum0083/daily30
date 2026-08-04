@@ -79,6 +79,30 @@ def _naver_closes(code):
     return [float(r["closePrice"]) for r in _naver_day_rows(code) if r.get("closePrice")]
 
 
+def _last_bar_date(rows):
+    """change_pct()의 closes[-1]에 실제로 대응하는 마지막 종가 봉의 날짜(YYYY-MM-DD).
+    rows는 _naver_day_rows()가 준 오래된→최신 원본 행 — closePrice 없는 행(휴장·결측)은
+    건너뛰고 실제로 종가가 있는 마지막 행의 localDate(YYYYMMDD, 실측 확인됨)를 쓴다.
+    유효한 행이 하나도 없으면 None."""
+    for r in reversed(rows):
+        d = r.get("localDate")
+        if r.get("closePrice") and d and len(str(d)) == 8:
+            s = str(d)
+            return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
+    return None
+
+
+def _reconcile_session_date(bar_dates):
+    """한국 종목별 마지막 봉 날짜들에서 스냅샷 전체의 session_date를 엄격하게 결정한다.
+    조회에 실패한 종목(None)은 투표에서 제외하고, 응답한 종목들의 날짜가 전부 같을 때만
+    그 날짜를 채택한다. 하나라도 엇갈리면(예: 일부 종목만 최신 봉이 아직 안 올라옴)
+    다수결이나 최빈값으로 추정하지 않고 None을 반환한다 — 완전성보다 정합성(§0)."""
+    dates = {d for d in bar_dates if d}
+    if len(dates) == 1:
+        return next(iter(dates))
+    return None
+
+
 def _to_int(s):
     """'-847,969'·'+1,864' 같은 네이버 문자열을 정수로. 빈값/None → None."""
     if s is None:
@@ -235,12 +259,17 @@ def load_universe():
 
 
 def _build_one(symbol, name, sector, market):
+    """종목 하나의 스냅샷 레코드를 만든다. (rec, bar_date) 튜플을 반환한다 —
+    bar_date는 market='kr'일 때만 채워지는, change_pct의 closes[-1]에 대응하는 실제 봉 날짜다.
+    실패 시 (None, None)."""
     vol = vol_avg20 = foreign = foreign_spark = None
     supply5 = financials = financials_annual = None
+    bar_date = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
         rows = _naver_day_rows(symbol)
         closes = [float(r["closePrice"]) for r in rows if r.get("closePrice")]
+        bar_date = _last_bar_date(rows)
         vols = [r["accumulatedTradingVolume"] for r in rows if r.get("accumulatedTradingVolume") not in (None, _VOL_SENTINEL)]
         frates = [r["foreignRetentionRate"] for r in rows if r.get("foreignRetentionRate") is not None]
         if vols:
@@ -257,7 +286,7 @@ def _build_one(symbol, name, sector, market):
         closes = fetch_closes(symbol, market)
     if len(closes) < 2:
         print(f"[snapshot] {symbol}({name}) 데이터 부족 → 생략", file=sys.stderr)
-        return None
+        return None, None
     hi, lo = wk52_high_low(closes)
     rec = {
         "name": name, "sector": sector,
@@ -280,7 +309,7 @@ def _build_one(symbol, name, sector, market):
         rec["financials"] = financials
     if financials_annual:
         rec["financials_annual"] = financials_annual
-    return rec
+    return rec, bar_date
 
 
 def _build_etf(code, name):
@@ -305,6 +334,7 @@ def _build_etf(code, name):
 def build_snapshot():
     uni = load_universe()
     stocks, bellwethers, etfs = {}, {}, {}
+    kr_bar_dates = []
     for e in uni.get("etfs", []):
         rec = _build_etf(e["code"], e["name"])
         if rec:
@@ -313,22 +343,37 @@ def build_snapshot():
             print(f"[snapshot] ETF {e['code']}({e['name']}) 거래량 무효 → 생략", file=sys.stderr)
     for key, sec in uni["sectors"].items():
         for s in sec["stocks"]:
-            rec = _build_one(s["code"], s["name"], key, "kr")
+            rec, bar_date = _build_one(s["code"], s["name"], key, "kr")
             if rec:
                 stocks[s["code"]] = rec
+                kr_bar_dates.append(bar_date)
         for b in sec.get("bellwethers", []):
             if b["t"] in bellwethers:
                 continue
-            rec = _build_one(b["t"], b["name"], key, "us")
+            rec, _ = _build_one(b["t"], b["name"], key, "us")
             if rec:
                 bellwethers[b["t"]] = {"name": b["name"], "close": rec["close"],
                                        "change_pct": rec["change_pct"]}
-    return {
+
+    # session_date: 한국 종목들의 마지막 봉 날짜가 전부 일치할 때만 채택(§0 — 엇갈리면 생략).
+    # 밤사이 브리지(fetch_data.fetch_overnight_bridge)가 이 값으로만 세션 정합성을 게이트한다.
+    session_date = _reconcile_session_date(kr_bar_dates)
+    if session_date is None:
+        distinct = sorted({d for d in kr_bar_dates if d})
+        if len(distinct) > 1:
+            print(f"[snapshot] 종목별 마지막 봉 날짜가 엇갈림({distinct}) — session_date 생략", file=sys.stderr)
+        else:
+            print("[snapshot] 유효한 한국 종목 봉 날짜를 하나도 얻지 못함 — session_date 생략", file=sys.stderr)
+
+    result = {
         "generated_at": datetime.now(KST).isoformat(),
         "stocks": stocks,
         "bellwethers": bellwethers,
         "etfs": etfs,
     }
+    if session_date is not None:
+        result["session_date"] = session_date
+    return result
 
 
 def main():

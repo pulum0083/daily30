@@ -8,10 +8,11 @@ from __future__ import annotations  # `X | None` 어노테이션을 구버전 �
 
 import argparse
 import json
+import math
 import sys
 import time
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 import pytz
 
@@ -22,20 +23,27 @@ DATA_DIR.mkdir(exist_ok=True)
 KST = pytz.timezone("Asia/Seoul")
 UTC = pytz.utc
 
-# 밤사이 브리지 — 섹터별 미국 비교 대상 (ETF 있으면 ETF 단독, 없으면 개별주 평균).
-# stock_universe.json의 bellwethers를 손으로 골랐다 — ETF 여부가 데이터에 없어 수동 매핑.
+# 밤사이 브리지 — 섹터별 미국 비교 대상 티커(고정, 손으로 골랐다).
+# ETF가 있는 섹터는 ETF 단독으로 쓴다(semicon·defense·battery·bio·finance) — 개별주 하나가
+# 섹터 전체와 같은 가중치를 갖는 것을 피하기 위함. ETF가 마땅치 않은 섹터만 개별주를
+# 평균한다(power: GEV+VRT, auto: TSLA+F). kind가 ETF·개별주 구분 없이 전부 "US"라
+# 어느 티커를 쓸지는 자동화할 수 없어 티커 선택만 수동 매핑으로 남긴다.
+# 표시 이름은 여기 담지 않는다 — stock_universe.json의 bellwethers[].name을 매 호출마다
+# 그대로 가져와 쓴다(§20·§30 이중소스 재발 방지). 이름을 두 곳에 따로 두면 universe에서
+# 이름이 바뀌어도 이 브리핑만 옛 이름을 계속 보여주게 된다.
 # ⚠️ SECTOR_FOCUS_STOCKS(바로 아래, 중단된 sector_focus 섹션용)와 섹터 구성이 다르다.
-# 재사용 금지 — stock_universe.json만 단일 소스로 쓴다(§20·§30 이중소스 재발 방지).
-BRIDGE_US_LEG = {
-    "semicon": (["SOXX"], "반도체 ETF"),
-    "power":   (["GEV", "VRT"], "GE Vernova·Vertiv"),
-    "defense": (["ITA"], "방산 ETF"),
-    "battery": (["LIT"], "리튬 ETF"),
-    "auto":    (["TSLA", "F"], "테슬라·포드"),
-    "bio":     (["XBI"], "바이오 ETF"),
-    "finance": (["JPM", "KBE"], "JP모건·은행 ETF"),
+# 재사용 금지 — stock_universe.json만 단일 소스로 쓴다.
+# 이 티커들의 등락률은 fetch_bridge_us_changes()가 일봉에서 직접 만든다(정규장 종가-종가).
+# get_ticker_full()/macro_tickers 경로로 가져오지 말 것 — 이유는 _regular_session_change() 참조.
+BRIDGE_US_TICKERS = {
+    "semicon": ["SOXX"],
+    "power":   ["GEV", "VRT"],
+    "defense": ["ITA"],
+    "battery": ["LIT"],
+    "auto":    ["TSLA", "F"],
+    "bio":     ["XBI"],
+    "finance": ["KBE"],
 }
-_BRIDGE_MAX_STALE_DAYS = 5
 
 # 섹터 로테이션 대표 종목·ETF (sector_focus 브리핑용 실시간 데이터 수집)
 SECTOR_FOCUS_STOCKS = {
@@ -742,32 +750,153 @@ def fetch_sector_stocks() -> dict:
 
 
 def _bridge_change_pct(entry) -> float | None:
-    """등락률을 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지)."""
+    """등락률을 유한한 숫자일 때만 꺼낸다 — None·문자열은 결측 취급(평균 계산 시 TypeError 방지).
+    bool은 int의 서브클래스라 isinstance(True, int)가 True로 나오므로 별도로 걸러낸다
+    (예: "change_pct": true 가 1.0%로 둔갑하는 사고 방지).
+
+    NaN·Infinity도 float이라 타입 검사만으로는 통과한다. 파이썬 표준 json은 기본 설정에서
+    NaN·Infinity 리터럴을 그대로 쓰고 그대로 읽으므로(json.dumps({"x": float("nan")}) →
+    '{"x": NaN}'), §23/§28 수동 정정 절차로 사람이 스냅샷을 손으로 고치다 이 값이
+    섞여 들어올 수 있다. 들어오면 평균이 통째로 NaN이 되어 그 섹터 행 전체가 오염되므로
+    결측으로 처리해 행을 생략한다(§0 — 없으면 비우고 지어내지 않는다)."""
     if not isinstance(entry, dict):
         return None
     v = entry.get("change_pct")
-    return float(v) if isinstance(v, (int, float)) else None
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    if not math.isfinite(v):
+        return None
+    return float(v)
 
 
-def fetch_overnight_bridge(macro: dict, snapshot: dict) -> list | None:
+def _regular_session_change(ticker: str) -> dict | None:
+    """미국 종목 하나의 **정규장 종가-종가** 등락률과 그 종가가 속한 세션 날짜를 돌려준다.
+
+    반환: {"change_pct": float, "session_date": "YYYY-MM-DD"} 또는 None(수집 실패).
+
+    밤사이 브리지 전용이다. 한국 레그(build_stocks_snapshot.change_pct)가 순수한 정규장
+    종가-종가라서, 미국 레그도 똑같이 재야 두 값의 차(gap_pp)가 의미를 갖는다(§24 —
+    기준이 다른 세션끼리 비교하지 않는다).
+
+    **`get_ticker_full()`을 쓰면 안 된다.** 그쪽은 `_get_realtime_price()` →
+    `_extended_hours_price()`를 거쳐 프리·애프터 체결가를 현재가로 채택한다(§26). 코스피
+    브리핑이 나가는 07:25 KST는 18:25 ET = 미국 애프터마켓 한복판이라 그 경로가 **항상**
+    이긴다. 실적을 낸 종목이 시간외로 크게 움직이면 그 값이 그대로 미국 레그에 실려,
+    "미국 직전 정규장"이라고 적힌 자리에 시간외까지 섞인 수치가 들어간다(GEV가 장 마감 후
+    +6% 뛰면 전력기기 행이 통째로 어긋난다). §26의 연장시간대 로직은 다른 소비처를 위해
+    그대로 두고, 브리지만 일봉을 직접 읽는다.
+
+    session_date는 마지막 일봉의 날짜(거래소 현지 = ET)다. 호출부가 한국 레그의
+    session_date와 대조해 같은 세션인지 **확인**한다 — 같다고 가정하지 않는다.
+    """
+    try:
+        hist = _yf_history(ticker, period="1mo")  # interval 기본 1d, prepost 미지정 = 정규장만
+        if hist is None or len(hist) < 2:
+            return None
+        closes = hist["Close"].dropna()
+        if len(closes) < 2:
+            return None
+        last, prev = float(closes.iloc[-1]), float(closes.iloc[-2])
+        if not math.isfinite(last) or not math.isfinite(prev) or prev == 0:
+            return None
+        change = (last - prev) / prev * 100
+        if not math.isfinite(change):
+            return None
+        session_date = closes.index[-1].date().isoformat()
+    except Exception as e:
+        print(f"[fetch_data] overnight_bridge: {ticker} 정규장 일봉 수집 실패({e})", file=sys.stderr)
+        return None
+    return {"change_pct": round(change, 2), "session_date": session_date}
+
+
+def fetch_bridge_us_changes(tickers=None) -> dict:
+    """밤사이 브리지 미국 레그를 수집한다(네트워크). 티커 → _regular_session_change() 결과.
+
+    tickers를 생략하면 BRIDGE_US_TICKERS의 티커 전체를 중복 없이 수집한다.
+    실패한 티커는 키 자체가 빠진다 — 호출부가 결측으로 보고 해당 섹터를 생략한다(§0).
+    """
+    if tickers is None:
+        tickers = sorted({t for ts in BRIDGE_US_TICKERS.values() for t in ts})
+    out = {}
+    for t in tickers:
+        rec = _regular_session_change(t)
+        if rec is not None:
+            out[t] = rec
+    return out
+
+
+def _bridge_us_change(entry, kr_session_date: str) -> float | None:
+    """미국 레그 한 티커의 등락률 — 한국 레그와 **같은 세션**일 때만 꺼낸다.
+
+    한국 세션 D의 종가는 그날 15:30 KST(02:30 ET)에 확정되고, 미국 ET 날짜 D 정규장은
+    그 뒤인 22:30 KST에 열려 다음날 05:00 KST에 닫힌다. 즉 정상적인 평일에는 두 레그의
+    세션 날짜가 같은 D로 맞아떨어지고, 그 미국 세션이 곧 "밤사이"다. 어긋나면(미국 휴장,
+    한국 단독 휴장 다음날, 스냅샷 지연 등) 비교 자체가 성립하지 않으므로 결측 처리한다 —
+    §24가 금지하는 '기준이 다른 세션 비교'를 코드로 막는다.
+    """
+    if not isinstance(entry, dict):
+        return None
+    sd = entry.get("session_date")
+    if not isinstance(sd, str) or sd != kr_session_date:
+        return None
+    return _bridge_change_pct(entry)
+
+
+def fetch_overnight_bridge(us_changes: dict, snapshot: dict, today: date | None = None) -> list | None:
     """섹터별 간밤 미국 정규장 vs 한국 직전 마감 등락 비교(§24 이중계상 UI화, 순수함수).
 
-    macro: get_ticker_full() 결과 딕셔너리 (티커 → {price, change_pct, ...}, 실패한 티커는 키 자체가 없음).
+    us_changes: fetch_bridge_us_changes() 결과 (티커 → {change_pct, session_date},
+        실패한 티커는 키 자체가 없음). 두 레그 모두 **정규장 종가-종가**이며, 세션 날짜가
+        서로 같은 티커만 채택한다(_bridge_us_change).
     snapshot: web/data/stocks-snapshot.json 파싱 결과.
-    반환: [{"sector","us_label","us_change","kr_label","kr_change","gap_pp"}, ...] 또는 None(섹션 생략).
+    today: 기준 날짜(KST). 생략하면 실행 시각의 KST 날짜. 테스트에서 시계 고정용으로만 넘긴다.
+    반환: [{"sector","us_label","us_change","kr_label","kr_change","gap_pp","kr_session_date"}, ...]
+          또는 None(섹션 생략). 미국 레그를 같은 세션 날짜로만 채택하므로 kr_session_date는
+          두 레그 공통의 세션 날짜다 — 날짜를 하나만 싣는 이유가 여기 있다.
+
+    신선도는 snapshot.get("generated_at")(스냅샷을 "언제 만들었나")가 아니라
+    snapshot.get("session_date")(실제로 반영된 한국 종목 마지막 봉이 "며칠자 장인가")로
+    판정한다. generated_at은 네이버가 아직 당일 봉을 안 올린 채로 잡이 실행되면 실제
+    반영된 봉보다 하루 앞서갈 수 있다(build_stocks_snapshot.py 상단 경고 참조) — 그
+    어긋남을 그대로 두면 "N일 이내" 검사든 "직전 개장일과 정확히 일치" 검사든 잘못된
+    날짜를 옳다고 통과시킨다. session_date는 build_stocks_snapshot.py가 실제 종가 봉의
+    날짜에서 직접 뽑아 기록하므로 이 값만 신뢰한다. session_date가 없으면(구버전 스냅샷
+    등) generated_at으로 폴백하지 않고 섹션을 생략한다 — 폴백은 이 사고를 그대로
+    재현하는 길이다.
     """
-    if not isinstance(macro, dict) or not isinstance(snapshot, dict):
+    if not isinstance(us_changes, dict) or not isinstance(snapshot, dict):
         print("[fetch_data] overnight_bridge: 입력 형식이 예상과 달라 섹션 생략", file=sys.stderr)
         return None
 
-    snap_date_str = str(snapshot.get("generated_at") or "")[:10]
-    try:
-        snap_date = datetime.strptime(snap_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        print("[fetch_data] overnight_bridge: stocks-snapshot.json generated_at 파싱 실패 — 섹션 생략", file=sys.stderr)
+    session_date_str = snapshot.get("session_date")
+    if not isinstance(session_date_str, str) or not session_date_str:
+        print("[fetch_data] overnight_bridge: stocks-snapshot.json에 session_date가 없음 — 섹션 생략", file=sys.stderr)
         return None
-    if (datetime.now(KST).date() - snap_date).days > _BRIDGE_MAX_STALE_DAYS:
-        print(f"[fetch_data] overnight_bridge: stocks-snapshot.json이 {_BRIDGE_MAX_STALE_DAYS}일 넘게 스테일 — 섹션 생략", file=sys.stderr)
+    try:
+        snap_date = datetime.strptime(session_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"[fetch_data] overnight_bridge: session_date({session_date_str}) 파싱 실패 — 섹션 생략", file=sys.stderr)
+        return None
+
+    # stock_universe.json 로드 실패와 동일한 이유로 fail-closed — 임포트 실패가 그대로
+    # 새어나가면 07:25 코스피 데이터 수집 전체가 죽는다. 섹션만 생략하고 넘어간다.
+    try:
+        try:
+            from scripts.session_label import prev_kospi_session
+        except ImportError:
+            from session_label import prev_kospi_session
+    except ImportError as e:
+        print(f"[fetch_data] overnight_bridge: session_label 임포트 실패({e}) — 섹션 생략", file=sys.stderr)
+        return None
+
+    ref_date = today or datetime.now(KST).date()
+    prev_session = prev_kospi_session(ref_date)
+    if prev_session is None or snap_date != prev_session:
+        print(
+            f"[fetch_data] overnight_bridge: session_date({snap_date})가 직전 코스피 개장일"
+            f"({prev_session})과 불일치 — 섹션 생략",
+            file=sys.stderr,
+        )
         return None
 
     # 유니버스는 저장소에 커밋된 파일이라 정상 상태에선 항상 읽히지만,
@@ -788,13 +917,33 @@ def fetch_overnight_bridge(macro: dict, snapshot: dict) -> list | None:
         return None
 
     rows = []
-    for key, (us_tickers, us_label) in BRIDGE_US_LEG.items():
+    for key, us_tickers in BRIDGE_US_TICKERS.items():
         cfg = sectors.get(key)
         if not isinstance(cfg, dict):
             continue
-        us_vals = [v for v in (_bridge_change_pct(macro.get(t)) for t in us_tickers) if v is not None]
-        if not us_vals:
-            print(f"[fetch_data] overnight_bridge: {key} 미국 벨웨더 수집 실패 — 해당 섹터 생략", file=sys.stderr)
+
+        # 표시 이름은 stock_universe.json bellwethers에서만 가져온다(§20·§30).
+        # 거기 없는 티커는 검증된 이름이 없으므로 결측 취급하고 건너뛴다 — 이름 없이
+        # 티커만으로 라벨을 지어내지 않는다.
+        bw_names = {
+            b["t"]: b.get("name") for b in (cfg.get("bellwethers") or [])
+            if isinstance(b, dict) and b.get("t")
+        }
+        us_contrib = []
+        for t in us_tickers:
+            name = bw_names.get(t)
+            if not name:
+                print(
+                    f"[fetch_data] overnight_bridge: {key} 티커 {t}가 bellwethers에 없어 "
+                    "표시 이름 불명 — 결측 취급",
+                    file=sys.stderr,
+                )
+                continue
+            v = _bridge_us_change(us_changes.get(t), snap_date.isoformat())
+            if v is not None:
+                us_contrib.append((name, v))
+        if not us_contrib:
+            print(f"[fetch_data] overnight_bridge: {key} 미국 벨웨더 정규장 데이터 없음(또는 한국 레그와 세션 불일치) — 해당 섹터 생략", file=sys.stderr)
             continue
 
         kr_codes = [s["code"] for s in (cfg.get("stocks") or [])[:2] if isinstance(s, dict) and s.get("code")]
@@ -809,15 +958,17 @@ def fetch_overnight_bridge(macro: dict, snapshot: dict) -> list | None:
             print(f"[fetch_data] overnight_bridge: {key} 한국 대표종목 데이터 없음 — 해당 섹터 생략", file=sys.stderr)
             continue
 
+        us_vals = [v for _, v in us_contrib]
         us_change = round(sum(us_vals) / len(us_vals), 2)
         kr_change = round(sum(kr_vals) / len(kr_vals), 2)
         rows.append({
             "sector": cfg.get("label", key),
-            "us_label": us_label,
+            "us_label": "·".join(name for name, _ in us_contrib),
             "us_change": us_change,
             "kr_label": "·".join(kr_names),
             "kr_change": kr_change,
             "gap_pp": round(kr_change - us_change, 1),
+            "kr_session_date": snap_date.isoformat(),
         })
 
     return rows or None
@@ -842,6 +993,10 @@ def fetch_kospi_data() -> dict:
                      # 미국 브리핑 경로에만 있어 코스피 prior가 쓰지 못했다.
                      "ES=F", "YM=F",
                      "^N225", "^HSI", "^TWII", "000001.SS"]  # 아시아 지역 지수 (catch-up 시그널)
+    # ⚠️ 밤사이 브리지 벨웨더(BRIDGE_US_TICKERS)를 여기 다시 넣지 말 것.
+    #    get_ticker_full()은 애프터마켓 체결가를 현재가로 채택하므로(§26) 07:25 KST
+    #    = 18:25 ET에는 정규장 등락률이 나오지 않는다. 브리지는 fetch_bridge_us_changes()로
+    #    일봉을 직접 읽는다(아래 7b).
     macro = {}
     for t in macro_tickers:
         d = get_ticker_full(t)
@@ -867,6 +1022,29 @@ def fetch_kospi_data() -> dict:
     # 7. 섹터 대표 종목 데이터 (sector_focus 할루시네이션 방지)
     print("[fetch_data]   → sector focus stocks")
     sector_stocks = fetch_sector_stocks()
+
+    # 7b. 간밤 미국-한국 섹터 갭 브리지 (overnight_bridge, §24 이중계상 UI화)
+    print("[fetch_data]   → overnight bridge")
+    snapshot_path = BASE_DIR / "web" / "data" / "stocks-snapshot.json"
+    # 이 섹션은 부가 요소다 — 스냅샷을 읽다 어떤 예외가 나든 브리핑 발행 자체를 막지 않는다.
+    # FileNotFoundError·JSONDecodeError만 잡으면 PermissionError·UnicodeDecodeError·
+    # IsADirectoryError가 그대로 올라가 07:25 브리핑이 통째로 죽는다(§0 부칙).
+    # fetch_overnight_bridge 안의 stock_universe.json 로드도 같은 이유로 except Exception이다.
+    try:
+        with open(snapshot_path, encoding="utf-8") as f:
+            stocks_snapshot = json.load(f)
+    except Exception as e:
+        print(f"[fetch_data] overnight_bridge: 스냅샷 로드 실패({type(e).__name__}: {e}) — 섹션 생략", file=sys.stderr)
+        stocks_snapshot = {}
+    # 미국 레그는 macro(get_ticker_full)를 쓰지 않는다 — 한국 레그와 같은 정규장
+    # 종가-종가로 맞추기 위해 일봉을 직접 읽는다(§24·§26, _regular_session_change 참조).
+    # 수집 자체가 통째로 실패해도 브리핑 발행은 막지 않는다(§0 부칙).
+    try:
+        us_changes = fetch_bridge_us_changes()
+    except Exception as e:
+        print(f"[fetch_data] overnight_bridge: 미국 레그 수집 실패({type(e).__name__}: {e}) — 섹션 생략", file=sys.stderr)
+        us_changes = {}
+    overnight_bridge = fetch_overnight_bridge(us_changes, stocks_snapshot)
 
     # 8. 휴장 직후(post-holiday catch-up) 플래그 — 한국만 단독 휴장한 다음날 판정
     print("[fetch_data]   → post-holiday catch-up flag")
@@ -919,6 +1097,8 @@ def fetch_kospi_data() -> dict:
         "kospi_candidates": kospi_candidates,
         # 섹터 로테이션 — 대표 종목·ETF 전일 종가·등락률 (할루시네이션 방지용 실제 데이터)
         "sector_stocks": sector_stocks,
+        # 간밤 미국-한국 섹터 갭 브리지 — None이면 섹션 생략 (§0 없으면 비운다)
+        "overnight_bridge": overnight_bridge,
     }
 
     # 품질 게이트: 핵심 지수 데이터 누락 시 발행 중단

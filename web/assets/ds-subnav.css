@@ -1,0 +1,22 @@
+/* 종목 시그널 서브탭 — ncai-design-system Tabs의 Underline 변형.
+   알약 탭 대비 6개가 들어가도 시각적으로 가볍고, 콘텐츠를 가르는 경계로 읽혀 조용하다.
+
+   모든 변수에 폴백을 둔다 — 세 페이지가 서로 다른 스타일시트(stocks-home.css / style.css)를
+   쓰고 변수명도 갈려 있어(--hair vs --hairline) 값이 없을 수 있다. §5에서 CSS 변수 하나가
+   없어 랜딩이 통째로 빈 화면이 된 사고가 있었다. */
+/* 스크롤해도 상단에 고정한다. 이 화면의 1차 IA인데 스크롤 195px면 사라져
+   홈 기준 페이지의 4~6% 구간에서만 보였다(다른 탭으로 가려면 5,000px를 거슬러 올라가야 했다).
+
+   top:52px = GNB 높이(.gnb는 sticky top:0, height:52px).
+   z-index:6 = .sbx-tabs(5)보다 위, .gnb(10)보다 아래. 이 3단 순서를 바꾸지 말 것.
+
+   box-shadow는 장식이 아니라 margin-bottom:16px 구간을 배경색으로 덮는 용도다.
+   margin은 배경을 칠하지 않아서, 없으면 그 16px 띠로 스크롤 콘텐츠가 비쳐 지나간다.
+   이 값을 건드리면 .sbx-tabs의 top(108px = 52+40+16)도 같이 맞춰야 한다. */
+#ds-subnav{position:sticky;top:52px;z-index:6;background:var(--soft,#F9FAFB);box-shadow:0 16px 0 var(--soft,#F9FAFB);display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--hair,#E5E7EB);margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#ds-subnav::-webkit-scrollbar{display:none;}
+.ds-subnav__tab{display:inline-flex;align-items:center;flex:0 0 auto;min-height:40px;padding:0 16px;font-size:14px;font-weight:500;line-height:1.2;letter-spacing:-.16px;color:var(--muted,#5B6472);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.ds-subnav__tab:hover{color:var(--ink,#13151A);}
+/* 활성 = 텍스트·언더라인 모두 primary. weight는 500 고정 — 굵기 변화는 레이아웃 점프를 만든다(ncai 명시 금지). */
+.ds-subnav__tab.is-active{color:var(--primary,#006EFF);border-bottom-color:var(--primary,#006EFF);}
+.ds-subnav__tab:focus-visible{outline:1px dotted var(--primary,#006EFF);outline-offset:-3px;}
