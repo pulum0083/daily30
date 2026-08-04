@@ -2266,10 +2266,21 @@ if(passBtn){
     var bar = document.getElementById('etfsig-bar-dn'); if(bar) bar.style.width = b.downRatio + '%';
     set('etfsig-inv', 'KODEX 200 대비 ×' + b.invVolMultiple);
     var lev = document.getElementById('etfsig-lev');
+    var inv = document.getElementById('etfsig-inv');
+    var invRow = inv && inv.parentElement;
     if(lev){
       var levTxt = pctFmt(b.levPct), levRow = lev.parentElement;
-      if(levTxt){ lev.textContent = levTxt; lev.className = 'v num ' + pctCls(b.levPct); if(levRow) levRow.style.display=''; }
-      else { lev.textContent = ''; if(levRow) levRow.style.display = 'none'; }   // 이 종목만 미측정 — 행을 비운다(§0)
+      if(levTxt){
+        lev.textContent = levTxt; lev.className = 'v num ' + pctCls(b.levPct);
+        if(levRow) levRow.style.display='';
+        if(invRow) invRow.style.gridColumn='';   // 짝이 돌아오면 원래 폭(1fr)으로 되돌린다
+      } else {
+        lev.textContent = '';
+        if(levRow) levRow.style.display = 'none';   // 이 종목만 미측정 — 행을 비운다(§0)
+        // grid-template-columns:1fr 1fr에서 짝(레버리지)이 사라지면 오른쪽에 빈 칸(격자선 배경)이
+        // 그대로 남는다(코드리뷰 재검토 지적) — 남은 칸이 전체 폭을 차지하도록 넓힌다.
+        if(invRow) invRow.style.gridColumn = '1 / -1';
+      }
     }
     var ext = document.getElementById('etfsig-ext'), ex = pickExtremes(etf.sector);
     if(ext){
@@ -2287,10 +2298,10 @@ if(passBtn){
     }
     box.style.display = '';
   }
-  // 테스트 훅 — node:vm에서 순수 포맷터만 꺼내 검증한다(DOM 결과는 브라우저에서 확인).
+  // 테스트 훅 — node:vm에서 순수 포맷터 + renderEtfSignal 자체를 DOM 스텁으로 검증한다(코드리뷰 재검토).
   window.__etfSignal = {
     fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal,
-    pctFmt: pctFmt, pctCls: pctCls, sanitizeBodyHtml: sanitizeBodyHtml
+    pctFmt: pctFmt, pctCls: pctCls, sanitizeBodyHtml: sanitizeBodyHtml, renderEtfSignal: renderEtfSignal
   };
 
   function applySignals(d){
