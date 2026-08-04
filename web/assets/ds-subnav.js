@@ -12,6 +12,14 @@
 (function () {
   'use strict';
 
+  // 이 파일이 같은 페이지에 두 번 로드돼도(예: 템플릿 중복 include) 초기화는 한 번만 한다.
+  // 가드 없이 두 번 실행되면 #ds-subnav의 click 리스너·window의 hashchange·popstate 리스너가
+  // 매번 새로 쌓여, 탭 클릭 한 번에 go()가 여러 번 불려 history.pushState도 여러 번 쌓인다
+  // (뒤로가기 한 번으로 안 돌아옴). window.dsSubnavSync·window.__dsSubnav는 첫 실행에서
+  // 이미 정상 동작하는 클로저로 설정돼 있으므로, 두 번째 실행은 통째로 건너뛰어도 안전하다.
+  if (window.__dsSubnavInited) return;
+  window.__dsSubnavInited = true;
+
   // 점등하는 탭은 이번 범위인 4개뿐이다. 테마·일정은 각 기능이 완성될 때 그 작업에서
   // 주석을 푼다 — 빈 탭을 먼저 만들지 않는다.
   // screen이 있으면 /stocks/ 내부 화면, 없으면 독립 페이지다. Task 3의 클릭 동작이 이
@@ -87,7 +95,7 @@
     var a = e.target && e.target.closest ? e.target.closest('.ds-subnav__tab') : null;
     if (!a) return;
     var tab = tabById(a.getAttribute('data-tab'));
-    // 독립 페이지이거나, go()가 없는 페이지이거나, /stocks/가 아니면 기본 링크 이동에 맡긴다.
+    // 독립 페이지이거나, /stocks/가 아니거나, go()가 없는 페이지면 기본 링크 이동에 맡긴다.
     if (!tab || !tab.screen) return;
     if (!isStocksHome(location.pathname)) return;
     if (typeof window.go !== 'function') return;

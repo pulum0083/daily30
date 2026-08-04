@@ -227,3 +227,48 @@ test('CSS — 활성 탭 굵기를 바꾸지 않는다(레이아웃 점프 금�
   assert.ok(active, '.ds-subnav__tab.is-active 규칙이 없다');
   assert.ok(!/font-weight/.test(active[1]), '활성 탭에 font-weight를 주면 안 된다');
 });
+
+test('같은 window에 스크립트가 두 번 실행돼도 리스너가 중복 등록되지 않는다 (더블 로드)', () => {
+  // load()는 호출마다 새 vm 컨텍스트를 만들어 이 상황을 재현하지 못하므로, 여기서만
+  // 같은 컨텍스트에 소스를 두 번 runInContext한다 — 페이지에 스크립트 태그가 실수로
+  // 두 번 include되는 상황(예: 템플릿 중복 include)을 그대로 흉내낸다.
+  const host = mkHost();
+  let clickAdds = 0;
+  const origAddEventListener = host.addEventListener.bind(host);
+  host.addEventListener = (type, fn) => {
+    if (type === 'click') clickAdds++;
+    origAddEventListener(type, fn);
+  };
+
+  const hashHandlers = [];
+  const popHandlers = [];
+  const calls = [];
+  const win = {
+    location: { pathname: '/stocks/', hash: '' },
+    addEventListener: (type, fn) => {
+      if (type === 'hashchange') hashHandlers.push(fn);
+      if (type === 'popstate') popHandlers.push(fn);
+    },
+    document: {
+      readyState: 'complete',
+      getElementById: (id) => (id === 'ds-subnav' ? host : null),
+      addEventListener: noop,
+    },
+    go: (s) => calls.push(s),
+  };
+  win.window = win;
+  const ctx = createContext(win);
+  const src = readFileSync(join(HERE, 'ds-subnav.js'), 'utf8');
+  runInContext(src, ctx);
+  runInContext(src, ctx);   // 같은 컨텍스트에 두 번째 실행
+
+  assert.equal(clickAdds, 1, 'click 리스너가 두 번 등록됐다');
+  assert.equal(hashHandlers.length, 1, 'hashchange 리스너가 두 번 등록됐다');
+  assert.equal(popHandlers.length, 1, 'popstate 리스너가 두 번 등록됐다');
+
+  host._click({
+    target: { closest: () => ({ getAttribute: () => 'sector' }) },
+    preventDefault: noop,
+  });
+  assert.deepEqual(calls, ['sector'], '클릭 한 번에 go()가 정확히 한 번만 호출돼야 한다');
+});
