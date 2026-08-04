@@ -57,5 +57,58 @@
     return null;
   }
 
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function tabById(id) {
+    for (var i = 0; i < TABS.length; i++) if (TABS[i].id === id) return TABS[i];
+    return null;
+  }
+
+  function host() {
+    return document.getElementById('ds-subnav');
+  }
+
+  /** 현재 위치로 강조를 다시 계산해 반영한다. 껍데기가 없는 페이지에서는 조용히 아무것도 안 한다. */
+  function render() {
+    var el = host();
+    if (!el) return;
+    var active = resolveActiveTab(location.pathname, location.hash);
+    el.innerHTML = TABS.map(function (t) {
+      var on = t.id === active;
+      return '<a class="ds-subnav__tab' + (on ? ' is-active' : '') + '"'
+        + ' href="' + esc(t.href) + '" data-tab="' + esc(t.id) + '"'
+        + (on ? ' aria-current="page"' : '') + '>' + esc(t.label) + '</a>';
+    }).join('');
+  }
+
+  function onClick(e) {
+    var a = e.target && e.target.closest ? e.target.closest('.ds-subnav__tab') : null;
+    if (!a) return;
+    var tab = tabById(a.getAttribute('data-tab'));
+    // 독립 페이지이거나, go()가 없는 페이지이거나, /stocks/가 아니면 기본 링크 이동에 맡긴다.
+    if (!tab || !tab.screen) return;
+    if (!isStocksHome(location.pathname)) return;
+    if (typeof window.go !== 'function') return;
+    e.preventDefault();
+    window.go(tab.screen);
+    render();
+  }
+
+  function init() {
+    var el = host();
+    if (el) el.addEventListener('click', onClick);
+    render();
+  }
+
+  window.dsSubnavSync = render;
   window.__dsSubnav = { TABS: TABS, resolveActiveTab: resolveActiveTab };
+
+  window.addEventListener('hashchange', render);   // 주소창 직접 수정·외부 앵커 링크
+  window.addEventListener('popstate', render);     // 뒤로/앞으로 가기
+
+  // defer 스크립트는 DOMContentLoaded 전에 실행되지만, 다른 로드 경로도 견디게 둔다.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
