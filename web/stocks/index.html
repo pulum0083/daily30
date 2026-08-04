@@ -30,67 +30,70 @@
 
 <div class="wrap">
 
+  <!-- 페이지 머리말 — 화면(.screen) 밖에 둔다. 탭을 눌러 화면이 바뀌어도 종목 시그널의
+       제목·검색·시장 맥락은 계속 남아 있어야 하기 때문이다(서브탭 IA 스펙). -->
+  <div class="hero">
+    <div>
+      <div class="hero-title-row">
+        <h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:11px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1>
+        <button class="hero-search-m" onclick="openSearch()" aria-label="종목 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>
+      </div>
+      <p>코스피 주도주 실시간 대시보드</p>
+    </div>
+    <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
+    <span style="font-size:11px;color:var(--muted);">09:00 – 15:30 장중</span>
+  </div>
+  <!-- 지수 + 수급 한 줄 카드(2026-07-26) — 코스피와 수급을 한눈에 두고, 보조 지표(코스닥·환율)는
+       칩을 눌러 펼친다. 예전엔 지수/수급이 각자 카드라 두 줄을 차지하며 사이가 붕 떠 보였다. -->
+  <div class="idx-card" id="idx-card">
+    <div class="mkt-line">
+      <div class="strip">
+        <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
+        <div class="m idx-x" id="m-kosdaq" hidden><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
+        <div class="m idx-x" id="m-usd" hidden><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
+        <button class="idx-more" id="idx-more" aria-expanded="false" aria-controls="m-kosdaq m-usd">코스닥·환율 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
+      </div>
+      <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
+           순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
+      <div class="supply" id="h-supply" hidden>
+        <span class="lbl">수급</span>
+        <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
+             1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
+        <span class="sup-brk" aria-hidden="true"></span>
+        <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
+        <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
+        <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
+        <span class="unit"></span>
+        <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
+      </div>
+    </div>
+  </div>
+  <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
+  <div class="sup-panel" id="sup-panel" hidden>
+    <div class="sp-head">
+      <span class="sp-t" id="sup-title">최근 순매수</span>
+      <span class="sp-sub">억원 · 세 축 공통 스케일</span>
+      <span class="sp-legend">
+        <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
+        <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
+      </span>
+      <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
+    </div>
+    <div id="sup-chart">
+      <div id="sup-rows"></div>
+      <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
+    </div>
+    <div id="sup-table" hidden class="sp-tblwrap">
+      <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
+    </div>
+    <div class="sp-foot" id="sup-foot"></div>
+  </div>
+
   <!-- ===== HOME ===== -->
   <div class="screen on" id="home">
-    <div class="hero">
-      <div>
-        <div class="hero-title-row">
-          <h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:11px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1>
-          <button class="hero-search-m" onclick="openSearch()" aria-label="종목 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>
-        </div>
-        <p>코스피 주도주 실시간 대시보드</p>
-      </div>
-      <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-      <span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
-      <span style="font-size:11px;color:var(--muted);">09:00 – 15:30 장중</span>
-    </div>
-    <!-- 지수 + 수급 한 줄 카드(2026-07-26) — 코스피와 수급을 한눈에 두고, 보조 지표(코스닥·환율)는
-         칩을 눌러 펼친다. 예전엔 지수/수급이 각자 카드라 두 줄을 차지하며 사이가 붕 떠 보였다. -->
-    <div class="idx-card" id="idx-card">
-      <div class="mkt-line">
-        <div class="strip">
-          <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
-          <div class="m idx-x" id="m-kosdaq" hidden><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
-          <div class="m idx-x" id="m-usd" hidden><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
-          <button class="idx-more" id="idx-more" aria-expanded="false" aria-controls="m-kosdaq m-usd">코스닥·환율 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
-        </div>
-        <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
-             순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
-        <div class="supply" id="h-supply" hidden>
-          <span class="lbl">수급</span>
-          <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
-               1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
-          <span class="sup-brk" aria-hidden="true"></span>
-          <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
-          <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
-          <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
-          <span class="unit"></span>
-          <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
-        </div>
-      </div>
-    </div>
-    <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
-    <div class="sup-panel" id="sup-panel" hidden>
-      <div class="sp-head">
-        <span class="sp-t" id="sup-title">최근 순매수</span>
-        <span class="sp-sub">억원 · 세 축 공통 스케일</span>
-        <span class="sp-legend">
-          <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
-          <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
-        </span>
-        <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
-      </div>
-      <div id="sup-chart">
-        <div id="sup-rows"></div>
-        <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
-      </div>
-      <div id="sup-table" hidden class="sp-tblwrap">
-        <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
-      </div>
-      <div class="sp-foot" id="sup-foot"></div>
-    </div>
     <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
     <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
       <span class="bc-ico" id="bc-ico">📊</span>
