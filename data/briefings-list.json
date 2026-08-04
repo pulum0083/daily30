@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-08-05": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-08-05/kospi/",
+        "headline": "오늘, 코스피 사야 할까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-08-04": {
       "kospi": {
         "state": "ready",
@@ -21,7 +40,7 @@
       "us": {
         "state": "ready",
         "url": "/briefings/2026-08-04/us/",
-        "headline": "메모리 슈퍼사이클 재점화 — 마이크론이 반도체 랠리에 불을 지폈다",
+        "headline": "이란 리스크가 걷혔다 — 나스닥 +2.13%, 반도체가 앞장서는 중",
         "title": "—",
         "time": ""
       }
@@ -537,20 +556,6 @@
       }
     },
     "2026-06-24": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-23": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
