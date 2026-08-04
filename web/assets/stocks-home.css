@@ -1044,3 +1044,31 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .ob-gap{order:2;}
   .ob-leg{order:3;flex:0 0 100%;}
 }
+
+/* ETF 요약 블록(홈) — 상세는 #etf-rank. 모든 변수에 폴백을 둔다(§5). */
+.etfsig-lead{padding:14px 16px 12px;}
+.etfsig-lead__t{font-size:14px;font-weight:700;color:var(--ink,#13151A);margin-bottom:6px;}
+.etfsig-lead__b{margin:0;font-size:13px;line-height:1.6;color:var(--muted,#5B6472);}
+.etfsig-lead__b b{font-weight:700;color:var(--ink,#13151A);}
+.etfsig-bet{padding:0 16px 12px;}
+.etfsig-bet__lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.etfsig-bet__lbl .dn{color:var(--dn,#2775ED);}
+.etfsig-bet__lbl .up{color:var(--up,#E03131);}
+.etfsig-bet__lbl b{font-weight:700;}
+.etfsig-bar{position:relative;height:8px;border-radius:999px;background:var(--up,#E03131);overflow:hidden;}
+.etfsig-bar__dn{position:absolute;left:0;top:0;bottom:0;background:var(--dn,#2775ED);}
+.etfsig-bet__pct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted,#5B6472);margin-top:5px;}
+.etfsig-kpi{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair,#E5E7EB);border-top:1px solid var(--hair,#E5E7EB);border-bottom:1px solid var(--hair,#E5E7EB);}
+.etfsig-kpi>div{background:var(--soft,#F9FAFB);padding:10px 16px;display:flex;flex-direction:column;gap:3px;}
+.etfsig-kpi .k{font-size:13px;color:var(--muted,#5B6472);}
+.etfsig-kpi .v{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
+.etfsig-kpi .v.up{color:var(--up,#E03131);}
+.etfsig-kpi .v.dn{color:var(--dn,#2775ED);}
+.etfsig-ext__r{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--hair,#E5E7EB);font-size:13px;}
+.etfsig-ext__r:last-child{border-bottom:0;}
+.etfsig-ext__r .k{color:var(--muted,#5B6472);}
+.etfsig-ext__r .n{font-weight:700;color:var(--ink,#13151A);}
+.etfsig-ext__r .v{margin-left:auto;font-weight:700;}
+.etfsig-ext__r .v.up{color:var(--up,#E03131);}
+.etfsig-ext__r .v.dn{color:var(--dn,#2775ED);}
+.etfsig-more{display:block;padding:12px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--primary,#006EFF);cursor:pointer;border-top:1px solid var(--hair,#E5E7EB);}

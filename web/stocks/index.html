@@ -202,6 +202,32 @@
         <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
       </div>
     </div>
+    <!-- ETF 신호 — /api/signals의 etf(lead·betting·sector)로 채운다. 데이터가 없으면 통째로 숨긴다.
+         홈 4개 서브탭 중 ETF만 대응 블록이 없어 신설한 요약 블록이다(서브탭 IA 스펙). -->
+    <div class="block etfsig-block" id="etf-signal" style="display:none">
+      <div class="block__h">
+        <span class="block__t"><span class="ic">📊</span> ETF 신호</span>
+        <span class="block__s" id="etfsig-asof"></span>
+      </div>
+      <div class="etfsig-lead">
+        <div class="etfsig-lead__t" id="etfsig-title"></div>
+        <p class="etfsig-lead__b" id="etfsig-body"></p>
+      </div>
+      <div class="etfsig-bet">
+        <div class="etfsig-bet__lbl">
+          <span class="dn">하락 베팅 <b id="etfsig-dn-amt"></b></span>
+          <span class="up"><b id="etfsig-up-amt"></b> 상승 베팅</span>
+        </div>
+        <div class="etfsig-bar"><span class="etfsig-bar__dn" id="etfsig-bar-dn"></span></div>
+        <div class="etfsig-bet__pct"><span id="etfsig-dn-pct"></span><span id="etfsig-up-pct"></span></div>
+      </div>
+      <div class="etfsig-kpi">
+        <div><span class="k">인버스 거래량</span><span class="v" id="etfsig-inv"></span></div>
+        <div><span class="k">KODEX 레버리지</span><span class="v num" id="etfsig-lev"></span></div>
+      </div>
+      <div class="etfsig-ext" id="etfsig-ext"></div>
+      <a class="etfsig-more" onclick="go('etf-rank')">ETF 전체 보기 →</a>
+    </div>
     </div><!-- /home-main -->
     <div class="home-side">
     <!-- ⚡ 오늘의 특이 신호 (PC 우측 사이드바 · 모바일 최상단) -->

@@ -2205,6 +2205,59 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
+  // ETF 요약 블록 — /api/signals의 etf(lead·betting·sector). 상세는 #etf-rank 탭.
+  // ⚠️ 위쪽 renderEtf()는 /api/vol-top 배열을 받는 다른 함수다. 혼동 금지.
+  function fmtEok(mw){                       // 백만원 → '1조 9,855억'
+    var eok = Math.round(mw/100);
+    if(eok >= 10000){
+      var jo = Math.floor(eok/10000), rest = eok % 10000;
+      return jo + '조' + (rest ? ' ' + rest.toLocaleString() + '억' : '');
+    }
+    return eok.toLocaleString() + '억';
+  }
+  function pickExtremes(rows){
+    if(!rows || !rows.length) return null;
+    var s = rows.slice().sort(function(a,b){ return b.pct - a.pct; });
+    return { top: s[0], bottom: s[s.length-1] };
+  }
+  function shouldShowEtfSignal(etf){
+    return !!(etf && etf.lead && etf.lead.title && etf.lead.body && etf.betting);
+  }
+  function pctCls(v){ return v >= 0 ? 'up' : 'dn'; }
+  function pctFmt(v){ return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; }
+  function renderEtfSignal(etf, asOf){
+    var box = document.getElementById('etf-signal');
+    if(!box) return;
+    if(!shouldShowEtfSignal(etf)){ box.style.display = 'none'; return; }   // 없으면 비운다(§0)
+    var b = etf.betting;
+    var set = function(id, txt){ var e = document.getElementById(id); if(e) e.textContent = txt; };
+    set('etfsig-asof', asOf && asOf.label ? asOf.label + ' 종가' : '');
+    set('etfsig-title', etf.lead.title);
+    // lead.body는 우리 API가 만든 문자열이고 <b>만 들어간다 — 그대로 렌더한다.
+    var bodyEl = document.getElementById('etfsig-body'); if(bodyEl) bodyEl.innerHTML = etf.lead.body;
+    set('etfsig-dn-amt', fmtEok(b.downAmt));
+    set('etfsig-up-amt', fmtEok(b.upAmt));
+    set('etfsig-dn-pct', b.downRatio + '%');
+    set('etfsig-up-pct', b.upRatio + '%');
+    var bar = document.getElementById('etfsig-bar-dn'); if(bar) bar.style.width = b.downRatio + '%';
+    set('etfsig-inv', 'KODEX 200 대비 ×' + b.invVolMultiple);
+    var lev = document.getElementById('etfsig-lev');
+    if(lev){ lev.textContent = pctFmt(b.levPct); lev.className = 'v num ' + pctCls(b.levPct); }
+    var ext = document.getElementById('etfsig-ext'), ex = pickExtremes(etf.sector);
+    if(ext){
+      ext.innerHTML = ex ? [
+        ['섹터 ETF 최고', ex.top], ['섹터 ETF 최저', ex.bottom]
+      ].map(function(p){
+        return '<div class="etfsig-ext__r"><span class="k">' + p[0] + '</span>'
+             + '<span class="n">' + p[1].label + '</span>'
+             + '<span class="v num ' + pctCls(p[1].pct) + '">' + pctFmt(p[1].pct) + '</span></div>';
+      }).join('') : '';
+    }
+    box.style.display = '';
+  }
+  // 테스트 훅 — node:vm에서 순수 포맷터만 꺼내 검증한다(DOM 결과는 브라우저에서 확인).
+  window.__etfSignal = { fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal };
+
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
@@ -2216,6 +2269,7 @@ if(passBtn){
     if(d.sectors) SIG_SECTORS=d.sectors;
     if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
     renderTodayLine();
+    renderEtfSignal(d.etf, d.asOf);
     sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
