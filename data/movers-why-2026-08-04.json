@@ -1,54 +1,54 @@
 {
-  "generated_at": "2026-08-04T09:01:40.314976+09:00",
+  "generated_at": "2026-08-04T09:31:37.758290+09:00",
   "date": "2026-08-04",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 1.67,
-      "surge": 0.03,
+      "changePct": -2.09,
+      "surge": 0.17,
       "events": [
-        {
-          "time": "04:25",
-          "headline": "한투, 삼성전자 목표가 65만원으로 상향… 흔들리는 주가에도 왜?",
-          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1wbHRzcmZZSDlHTzhhTTZVLXRLN2tpcjhoZDJrdHVMNFRyYThENjZPS0tnUk4zZGJ1NXpwU1pZMFlNbkl6ZUFOS2pEYnJoTkl1ZHBHWU5adG8wOEFsVXBfaE9nSlJYV2FZT3c?oc=5",
-          "source": "금강일보",
-          "why": "한국투자증권은 삼성전자 목표가를 65만원으로 상향 조정하며 주가 하락에도 긍정적인 전망을 제시했다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
-        },
         {
           "time": "06:29",
           "headline": "\"삼전닉스 또 8% 급락했는데\"…폭등도 폭락도 비켜간 '목표가'",
           "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1obkRHREE1VlZHLTkzU1Fya1dsOGhqYzVDVUJubzE2OXd0d0lVUUJNV0ttMGszTTd6X1hrY3JqTm5kUl8zQlpNdXJodDQ5WnRNR3JXbXFmLXhRUQ?oc=5",
           "source": "파이낸셜뉴스",
-          "why": "\"삼전닉스 또 8% 급락했는데\"…폭등도 폭락도 비켜간 '목표가' (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "\"삼전닉스 또 8% 급락했는데\"…폭등도 폭락도 비켜간 '목표가'",
+          "tier": "why",
           "sentiment": "neg"
+        },
+        {
+          "time": "04:25",
+          "headline": "한투, 삼성전자 목표가 65만원으로 상향… 흔들리는 주가에도 왜?",
+          "url": "https://news.google.com/rss/articles/CBMiakFVX3lxTE1wbHRzcmZZSDlHTzhhTTZVLXRLN2tpcjhoZDJrdHVMNFRyYThENjZPS0tnUk4zZGJ1NXpwU1pZMFlNbkl6ZUFOS2pEYnJoTkl1ZHBHWU5adG8wOEFsVXBfaE9nSlJYV2FZT3c?oc=5",
+          "source": "금강일보",
+          "why": "한국투자증권은 삼성전자 주가 변동에도 불구하고 목표가를 65만원으로 상향 조정했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 3.13,
-      "surge": 0.03,
+      "changePct": -1.15,
+      "surge": 0.14,
       "events": [
         {
-          "time": "08:09",
-          "headline": "삼성證 “SK하이닉스, 투자심리 위축⋯목표가 350→300만원 하향”",
-          "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBVWk4wM3ZVcEVpenhNWUtHaXBfYVZldHlnMFZfamxNWDdaVzF2d05qMUlDdnYyekxRa1lKbk5ZQnpxY2xRWEZUU3ZSSFVvWFIyZi1Pbg?oc=5",
-          "source": "이투데이",
-          "why": "삼성증권은 SK하이닉스의 투자심리 위축을 이유로 목표주가를 350만원에서 300만원으로 하향 조정했습니다. (개별 인과 단정 안 함)",
+          "time": "07:30",
+          "headline": "두 달간 주가 반토막 난 SK하이닉스…핵심 관전포인트 4가지",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE01MnpJS2pwZndoSkpMQlR0NUdOc2NKWV9kSGRSMDR0aGFSUmVDYmtCSnZMVkliNE8xWGVITVpCR0RDWkltejBCRG1uUWVVZW92S1Uxd3haaE5kQQ?oc=5",
+          "source": "한국경제",
+          "why": "SK하이닉스가 두 달간 주가가 반토막 나는 상황에서 핵심 관전포인트 4가지가 제시되었습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
         },
         {
-          "time": "07:03",
-          "headline": "SK하이닉스 ‘그림자 시장’ 커졌다…본주로 충격 번질까",
-          "url": "https://news.google.com/rss/articles/CBMimAJBVV95cUxNeEVXT2k4dHB4dWtCZk8zWmtKXzY0Y2l0QUxDczBqRk9YSDliQkNwLThOajhZbUpKSUo4X0NoVFZMQ2t5akNLMVFHbGZvMWVfekh5ekVYVW9odnc2Wl80aTA5MHphamdGc3ZBM2FYcFhMZ1ZTelpQV2UxSDh6WEp3V1NvSzBDVFZTRHY1NHRCQTcwc05IV2d5WEVHdFJvRW9qUEc0eEo2UDN6UURUZ0xGNWFtWGRSOEV5SEJ5OFVlYWRvQThzQ2NIWmNrWlRrNHFmRU51TF9QSWt1WXFaZVkxLXBvd2c1TFVabnpHbG10TXN1a3R3eDU0TjJ3aXpKN2Q0dFhTa0JBb1lJc3NUdW50Y1ZmYjFTZWtw?oc=5",
-          "source": "데일리안",
-          "why": "SK하이닉스 ‘그림자 시장’ 커졌다…본주로 충격 번질까 (개별 인과 단정 안 함)",
+          "time": "08:33",
+          "headline": "'최태원 회장이 SK하이닉스 주식 사라고 한 이유' 글 급속 확산",
+          "url": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBwSTctT2h2QW9vSkc4OE5OSkp2TVVObmJpWnEyeWZSU0gtbjJsSHBXY0kyay1GeE5xXzdiTGlsZVRqNi05R29KX08zR0xCckxXM2t2aVVR?oc=5",
+          "source": "위키트리",
+          "why": "'최태원 회장이 SK하이닉스 주식 사라고 한 이유' 글 급속 확산 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
         }
@@ -57,9 +57,19 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.64,
-      "surge": 0.03,
-      "events": []
+      "changePct": -2.42,
+      "surge": 0.15,
+      "events": [
+        {
+          "time": "09:26",
+          "headline": "현대차 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9KU0VGV0NkSUpJajN3bm9Qb0hQM0Yxc0dsSE9RMjB4c2h3TzVVempSSmFtNnAtZHVpcU50TXh2a0JpanBVb0I3YkRobjdsUkhJTm1YcXRaQ0tSNENN?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "현대차 주가가 하락세를 보이고 있다.",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     }
   ]
 }
