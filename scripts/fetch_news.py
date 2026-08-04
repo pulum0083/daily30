@@ -449,7 +449,7 @@ def _drop_reality_contradictions(items: list, real: dict) -> list:
     """
     out = []
     for it in items or []:
-        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
+        text = _item_text(it)
         reason = None
         for subject, key in _REALITY_SUBJECTS.items():
             snap = real.get(key)
@@ -546,7 +546,7 @@ def _filter_stale_catalysts(catalysts: list, today: date, cutoff: date = None) -
     kept, dropped = [], []
     for c in catalysts:
         if isinstance(c, dict):
-            text = (c.get("text") or c.get("catalyst") or "").strip()
+            text = _item_text(c)
             if not text:
                 continue
             ev = _parse_iso_date(c.get("date") or c.get("event_date") or "")
@@ -617,6 +617,37 @@ def _is_cross_day_recap(text: str, stale_texts: list) -> bool:
         if sim >= 0.40 or (ents & _distinctive_entities(s) and sim >= 0.15):
             return True
     return False
+
+
+def _drop_prev_run_echoes(items: list, prev_texts: list) -> list:
+    """직전 실행 결과(중복 방지용으로 프롬프트에 주입한 목록)를 그대로 되뱉은 항목을 제거한다.
+
+    2026-08-04 재현 확인: `_load_prev_catalysts`가 "이미 다룬 주제"로 넣어준 목록을
+    Gemini가 **오늘의 catalysts로 그대로 복사**해 돌려줬다. 심지어 각 항목 끝에
+    "(참고: 직전 브리핑에서 언급된 내용으로…)"라고 스스로 주석까지 달았다.
+    즉 중복 방지 장치가 오히려 **날조를 매일 되살리는 급식기**로 작동하고 있었다 —
+    어제 실린 거짓이 오늘 프롬프트에 들어가 오늘 다시 실린다(§28 '프롬프트의 임시 항목'과 같은 계열).
+
+    판정은 교차일 recap과 같은 유사도(문자 3-gram + 공유 고유엔티티)를 쓴다.
+    prev_texts가 비어 있으면 아무것도 하지 않는다.
+    """
+    prev = [t for t in (_item_text(p) for p in (prev_texts or [])) if t]
+    if not prev:
+        return items
+    kept = []
+    for it in items or []:
+        text = _item_text(it)
+        if _SELF_LABELED_ECHO_RE.search(text) or _is_cross_day_recap(text, prev):
+            print(f"[fetch_news] 직전 실행 에코 제거: {text[:70]}", file=sys.stderr)
+            continue
+        kept.append(it)
+    return kept
+
+
+# 모델이 스스로 "직전 브리핑에서 언급된 내용"이라 밝힌 흔적 — 그건 오늘의 뉴스가 아니다.
+_SELF_LABELED_ECHO_RE = re.compile(
+    r"(직전|이전|앞선|지난)\s*브리핑에서\s*(언급|다룬|다뤄진|소개)"
+)
 
 
 def _drop_cross_day_recaps(catalysts: list, stale_texts: list) -> list:
@@ -725,6 +756,35 @@ def _resolve_company_tickers(text: str) -> list:
     return out
 
 
+# 프롬프트가 요구하는 catalyst 형식이 "사건 → 영향"이므로, 화살표 왼쪽이 사건의 주어다.
+_ARROW_RE = re.compile(r"\s*(?:→|->|⇒|=>)\s*")
+_PAREN_TICKER_RE = re.compile(r"\(([A-Z]{1,5})(?:[,\s]|\))")
+
+
+def _earnings_subject_tickers(text: str, ticker_field="") -> list:
+    """실적 주장의 **주어** 티커만 뽑는다.
+
+    2026-08-04 실사고: "마이크론(MU)의 3분기 실적 예상치 상회 → 프리마켓에서 반도체
+    관련주(AMD, QCOM) 강세"의 ticker 필드가 "MU,AMD,QCOM"이었는데, 마침 **AMD가 그날
+    실적을 발표**해 "여러 티커 중 하나라도 최근이면 유지" 규칙에 걸렸다. 그래서 41일 전
+    (2026-06-24)에 발표된 마이크론 실적이 '오늘의 촉매'로 통과했다. 같은 날조가
+    headlines(순수 문자열, ticker 필드 없음)에서는 MU만 잡혀 정상 제외됐다 —
+    **ticker 필드에 영향 종목까지 섞여 들어온 것이 게이트를 무력화한 것**이다.
+
+    ticker 필드는 사건 주체와 영향 종목을 구분하지 않으므로 주어 판정에 쓸 수 없다.
+    화살표가 없어 주어를 특정할 수 없으면 기존 동작(전체 티커)으로 fail-open한다.
+    """
+    if _ARROW_RE.search(text or ""):
+        cause = _ARROW_RE.split(text, 1)[0]
+        # 산문에서는 티커가 괄호 안에 온다. 맨 문자열 스캔은 "JP모건"의 "JP"처럼
+        # 사명 앞머리를 티커로 오인하므로 쓰지 않는다.
+        paren = [t for t in _PAREN_TICKER_RE.findall(cause) if t not in _GENERIC_UPPER]
+        subj = list(dict.fromkeys(paren + _resolve_company_tickers(cause)))
+        if subj:
+            return subj
+    return list(dict.fromkeys(_parse_tickers(ticker_field) + _resolve_company_tickers(text)))
+
+
 def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
                          age_fn=None) -> list:
     """실적형 catalyst 중, 티커의 실제 최근 발표일이 max_age_days를 초과한 것을 제외.
@@ -736,13 +796,14 @@ def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
     age_fn = age_fn or _days_since_last_earnings
     kept = []
     for c in catalysts:
-        text = c.get("text", "") if isinstance(c, dict) else str(c)
+        text = _item_text(c)
         ticker_field = c.get("ticker", "") if isinstance(c, dict) else ""
         if not _is_earnings_catalyst(text):
             kept.append(c)
             continue
-        # ticker 필드 + 텍스트에서 resolve한 사명(엔비디아→NVDA 등)을 합쳐 검증
-        tickers = list(dict.fromkeys(_parse_tickers(ticker_field) + _resolve_company_tickers(text)))
+        # 사건의 **주어** 티커만 검증한다 — 영향 종목(방관자)이 마침 오늘 실적을 냈다는
+        # 이유로 몇 주 된 실적 주장이 통과하던 구멍을 막는다(2026-08-04 실사고).
+        tickers = _earnings_subject_tickers(text, ticker_field)
         if not tickers:
             kept.append(c)  # 검증 불가 → 유지
             continue
@@ -836,13 +897,61 @@ def _load_today_calendar(briefing_type: str) -> dict:
         return {}
 
 
+# 본문이 담기는 키의 관측된 이름들. **이 목록은 최종 판단 근거가 아니다** — 아래 값 기반
+# 폴백이 진짜 방어선이다(키 이름은 모델이 언제든 바꾼다).
+_TEXT_KEY_HINTS = ("text", "catalyst", "headline", "event", "summary",
+                   "title", "content", "body", "indicator", "description")
+# 본문일 리 없는 키(날짜·티커·메타). 값 기반 폴백에서 제외한다.
+_NON_TEXT_KEYS = {"date", "event_date", "time", "ticker", "tickers", "symbol", "code",
+                  "impact", "sentiment", "source", "url", "link", "id"}
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
 def _item_text(it) -> str:
-    """뉴스 항목(문자열 또는 {text:…} 객체)에서 본문을 뽑는다."""
+    """뉴스 항목에서 본문을 뽑는다 — **키 이름에 의존하지 않는다**.
+
+    2026-08-04 실사고: Gemini가 catalysts 항목을 프롬프트가 요구한 `text`가 아니라
+    `catalyst` 키로 반환했다. 내용 게이트들은 전부 `c["text"]`만 읽어 본문이 빈 문자열이 됐고,
+    41일 전(2026-06-24) 마이크론 실적이 "실적 촉매 아님"으로 판정돼 무검증 통과했다.
+    반면 `_filter_stale_catalysts`만 `catalyst` 폴백이 있어 그 항목을 본문으로 되살려
+    최종 출력에 실었다 — **JSON 키 이름 하나로 모든 게이트가 우회된 것**이다.
+
+    그래서 키 이름 목록(_TEXT_KEY_HINTS)은 빠른 경로일 뿐이고, 모르는 키가 와도
+    값에서 본문을 찾아낸다. 키 목록을 늘리는 방식이면 다음 변형에 또 뚫린다.
+    """
     if isinstance(it, str):
-        return it
-    if isinstance(it, dict):
-        return str(it.get("text", "") or "")
-    return ""
+        return it.strip()
+    if not isinstance(it, dict):
+        return ""
+    for k in _TEXT_KEY_HINTS:
+        v = it.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    cands = [v.strip() for k, v in it.items()
+             if isinstance(v, str) and str(k).lower() not in _NON_TEXT_KEYS
+             and len(v.strip()) >= 8 and not _ISO_DATE_RE.match(v.strip())]
+    return max(cands, key=len) if cands else ""
+
+
+def _normalize_news_items(items) -> list:
+    """뉴스 항목을 {date, text, ticker} 한 가지 모양으로 통일한다(게이트 이전에 1회).
+
+    모든 게이트가 같은 본문을 보게 만드는 경계다. 본문을 못 찾은 항목은 검증 자체가
+    불가능하므로 버린다 — 완전성보다 정합성이 우선이다(운영 규칙 0).
+    """
+    out = []
+    for it in items or []:
+        text = _item_text(it)
+        if not text:
+            print(f"[fetch_news] 본문 없는 항목 제거(검증 불가): {str(it)[:80]}", file=sys.stderr)
+            continue
+        date_s, ticker = "", ""
+        if isinstance(it, dict):
+            date_s = str(it.get("date") or it.get("event_date") or "").strip()
+            tk = it.get("ticker") or it.get("tickers") or ""
+            ticker = ",".join(str(x) for x in tk) if isinstance(tk, list) else str(tk).strip()
+        out.append({"date": date_s, "text": text, "ticker": ticker})
+    return out
 
 
 # "오늘 발표될 주요 경제 지표는 예정되어 있지 않으나" — 캘린더에 고영향 일정이 버젓이
@@ -853,18 +962,35 @@ _NO_EVENT_CLAIM_RE = re.compile(
 )
 
 
-def _grounding_failure_signals(data: dict, calendar: dict | None = None) -> list:
+def _grounding_failure_signals(data: dict, calendar: dict | None = None,
+                               grounding_chunks: int | None = None) -> list:
     """수집이 검색 대신 **학습 시점 지식**으로 답했다는 신호를 모은다.
 
     2026-07-30 실사고에서 세 신호가 모두 데이터에 남아 있었는데도, 개별 항목을
     정규식으로 하나씩 반박하는 기존 게이트들은 전부 통과시켰다. 개별 문장을 쫓는
     대신 **수집 결과 전체의 신뢰도**를 판정하기 위한 함수다(SERVICE_RULES §29).
+
+    ⚠️ 반드시 **정규화·게이트 이전의 원본 응답**으로 호출한다. 2026-08-04까지는 이 함수가
+    `_filter_stale_catalysts`가 문자열로 환원한 **뒤에** 호출돼, catalysts가 비어있지만
+    않으면 `catalysts_schema_violation`이 **항상** 발화했다 — 정보량 0인 신호였고, 정작
+    그날의 진짜 스키마 위반(dict인데 본문 키가 text가 아님)은 아무도 감지하지 못했다.
     """
     signals = []
 
     cats = data.get("catalysts") or []
-    if cats and all(isinstance(c, str) for c in cats):
-        signals.append("catalysts_schema_violation")
+    if cats:
+        # 프롬프트는 {date,text,ticker} 객체를 요구한다. 전부 문자열이거나, dict인데 본문이
+        # text에 없으면 검색이 아니라 형식만 흉내 낸 출력이다(2026-08-04 실사고의 직접 원인).
+        all_strings = not any(isinstance(c, dict) for c in cats)
+        textless_dict = any(isinstance(c, dict) and not str(c.get("text") or "").strip()
+                            for c in cats)
+        if all_strings or textless_dict:
+            signals.append("catalysts_schema_violation")
+
+    # 출처가 하나도 붙지 않은 응답 — 어떤 문서로도 뒷받침되지 않는 주장이라는 뜻이다.
+    # None이면 조회 불가 → 판단하지 않는다(fail-open).
+    if grounding_chunks is not None and grounding_chunks <= 0:
+        signals.append("no_grounding_sources")
 
     fields = ("catalysts", "headlines", "key_indicators")
     blob = " ".join(
@@ -881,14 +1007,34 @@ def _grounding_failure_signals(data: dict, calendar: dict | None = None) -> list
     return signals
 
 
-def _is_grounding_failure(data: dict, calendar: dict | None = None) -> bool:
+def _count_grounding_chunks(response) -> int | None:
+    """응답에 붙은 검색 출처(grounding chunk) 개수. 판정 불가면 None(fail-open).
+
+    google_search 툴을 쓰면 Gemini는 실제로 참조한 문서를 grounding_chunks로 돌려준다.
+    이 값이 0이면 **어떤 문서로도 뒷받침되지 않는 답**이라는 뜻이다 — 검색 쿼리를 날렸는지
+    (web_search_queries)와는 별개다. 2026-08-04 실사고 응답이 정확히 그 상태였다.
+    """
+    try:
+        cand = (response.candidates or [None])[0]
+        gm = getattr(cand, "grounding_metadata", None)
+        if gm is None:
+            # 툴을 아예 호출하지 않았다는 뜻 — 출처 0과 같게 본다.
+            return 0
+        return len(getattr(gm, "grounding_chunks", None) or [])
+    except Exception as e:
+        print(f"[fetch_news] grounding_metadata 확인 실패(판정 생략): {e}", file=sys.stderr)
+        return None
+
+
+def _is_grounding_failure(data: dict, calendar: dict | None = None,
+                          grounding_chunks: int | None = None) -> bool:
     """신호 2개 이상이면 수집 실패로 본다.
 
     1개는 정상 수집에서도 우연히 나올 수 있어 오제거 위험이 크다. 2개 이상이면
     뉴스 요약을 통째로 버리고 **뉴스 없이 발행**한다 — 이슈 섹션이 비는 것보다
     방향이 틀린 브리핑이 훨씬 위험하다(§27).
     """
-    return len(_grounding_failure_signals(data, calendar)) >= 2
+    return len(_grounding_failure_signals(data, calendar, grounding_chunks)) >= 2
 
 
 def _drop_placeholder_entities(items: list) -> list:
@@ -906,8 +1052,8 @@ def _drop_placeholder_entities(items: list) -> list:
     """
     out = []
     for it in items or []:
-        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
-        if _PLACEHOLDER_ENTITY_RE.search(text or ""):
+        text = _item_text(it)
+        if _PLACEHOLDER_ENTITY_RE.search(text):
             print(f"[fetch_news] 익명 플레이스홀더 제거: {text[:60]}", file=sys.stderr)
             continue
         out.append(it)
@@ -935,8 +1081,8 @@ def _drop_prompt_slot_echoes(items: list) -> list:
     """
     out = []
     for it in items or []:
-        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
-        if _SLOT_ECHO_RE.match(text or ""):
+        text = _item_text(it)
+        if _SLOT_ECHO_RE.match(text):
             print(f"[fetch_news] 프롬프트 슬롯 echo 제거: {text[:60]}", file=sys.stderr)
             continue
         out.append(it)
@@ -953,8 +1099,8 @@ def _drop_search_failure_notes(items: list) -> list:
     """
     out = []
     for it in items or []:
-        text = it if isinstance(it, str) else (it.get("text", "") if isinstance(it, dict) else "")
-        if _SEARCH_FAILURE_RE.search(text or ""):
+        text = _item_text(it)
+        if _SEARCH_FAILURE_RE.search(text):
             print(f"[fetch_news] 검색 실패 보고 제거: {text[:60]}", file=sys.stderr)
             continue
         out.append(it)
@@ -1023,13 +1169,30 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 
     data = json.loads(raw)
     today_kst = datetime.now(KST).date()
-    # 스키마 위반은 그라운딩 실패의 선행 신호다 — 프롬프트는 catalysts를 {date,text} 객체로
-    # 요구하는데 문자열 배열로 오면, 검색이 아니라 형식만 흉내낸 출력일 가능성이 크다(§25·§28).
-    # 날짜 미상 catalyst 자체는 허용(거시 촉매 보호)이라 버리지 않고 경고만 남긴다.
-    _cats = data.get("catalysts")
-    if isinstance(_cats, list) and _cats and not any(isinstance(c, dict) for c in _cats):
-        print("[fetch_news] ⚠️ catalysts가 객체가 아닌 문자열 배열 — 그라운딩 실패 의심"
-              f"({len(_cats)}건). 아래 실측·슬롯 게이트 결과를 함께 확인할 것.", file=sys.stderr)
+
+    # ── ① 수집 결과 **전체**의 신뢰도를 원본 그대로 먼저 판정한다 ──────────────────
+    # 반드시 정규화·게이트 **이전**이어야 한다. 게이트를 통과한 뒤 재면 스키마 위반은
+    # 이미 지워져 있고(2026-08-04 실사고), 익명 플레이스홀더도 이미 제거된 뒤다.
+    _gchunks = _count_grounding_chunks(response)
+    _signals = _grounding_failure_signals(data, _load_today_calendar(briefing_type), _gchunks)
+    print(f"[fetch_news] 그라운딩 출처 {('%d건' % _gchunks) if _gchunks is not None else '조회불가'}"
+          f", 신호 {_signals or '없음'}", file=sys.stderr)
+    if len(_signals) >= 2:
+        print(f"[fetch_news] ⚠️ 그라운딩 실패로 뉴스 요약 전체 폐기: {_signals}", file=sys.stderr)
+        print("[fetch_news] 뉴스 없이 발행한다 — 방향이 틀린 브리핑보다 빈 섹션이 안전하다(§27).",
+              file=sys.stderr)
+        return {"key_indicators": [], "catalysts": [], "headlines": [],
+                "market_sentiment": "neutral", "grounding_failure": _signals}
+
+    # ── ② 정규화 경계 — 모든 게이트가 같은 본문을 보게 만든다 ─────────────────────
+    # LLM이 키 이름을 바꿔도(text → catalyst) 게이트가 통째로 눈이 머는 일을 막는다.
+    for _fld in ("catalysts", "headlines", "key_indicators"):
+        if isinstance(data.get(_fld), list):
+            data[_fld] = _normalize_news_items(data[_fld])
+            # 중복 방지용으로 프롬프트에 넣어준 직전 실행 목록을 그대로 되뱉는 경우가 있다
+            # (2026-08-04 확인) — 그러면 어제의 날조가 매일 되살아난다.
+            data[_fld] = _drop_prev_run_echoes(data[_fld], prev_items)
+
     if isinstance(data.get("catalysts"), list):
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
@@ -1050,15 +1213,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     # "…확인되지 않았습니다" 류 검색 실패 보고를 전 필드에서 제거 (이슈가 아니라 메타 서술)
     # + "B사"·"C은행"·"[기업]" 류 익명 플레이스홀더 주어를 담은 날조 항목도 함께 제거
     # + 실측 시장데이터와 방향이 반대인 주장도 제거 (유가 등)
-    # [최우선] 수집 결과 **전체**의 신뢰도를 먼저 판정한다. 개별 항목 게이트보다 앞서야 한다 —
-    # 익명 플레이스홀더 신호는 _drop_placeholder_entities가 항목을 지우기 전에만 관측된다.
-    _signals = _grounding_failure_signals(data, _load_today_calendar(briefing_type))
-    if len(_signals) >= 2:
-        print(f"[fetch_news] ⚠️ 그라운딩 실패로 뉴스 요약 전체 폐기: {_signals}", file=sys.stderr)
-        print("[fetch_news] 뉴스 없이 발행한다 — 방향이 틀린 브리핑보다 빈 섹션이 안전하다(§27).",
-              file=sys.stderr)
-        return {"key_indicators": [], "catalysts": [], "headlines": [],
-                "market_sentiment": "neutral", "grounding_failure": _signals}
+    # ※ 수집 전체의 신뢰도 판정(①)은 이 위, 정규화·게이트 이전에 이미 끝났다.
     if _signals:
         print(f"[fetch_news] 그라운딩 경고(폐기 임계 미만): {_signals}", file=sys.stderr)
 
@@ -1069,6 +1224,11 @@ def fetch_and_summarize(briefing_type: str) -> dict:
             data[_fld] = _drop_placeholder_entities(data[_fld])
             data[_fld] = _drop_prompt_slot_echoes(data[_fld])
             data[_fld] = _drop_reality_contradictions(data[_fld], reality)
+    # 다운스트림(call_claude)이 기대하는 출력 shape은 문자열 리스트다 — 정규화는 게이트 내부
+    # 용도이므로 여기서 되돌린다(catalysts는 _filter_stale_catalysts가 이미 문자열로 환원).
+    for _fld in ("headlines", "key_indicators"):
+        if isinstance(data.get(_fld), list):
+            data[_fld] = [_item_text(it) for it in data[_fld] if _item_text(it)]
     return data
 
 
