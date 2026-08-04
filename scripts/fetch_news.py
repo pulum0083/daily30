@@ -23,6 +23,8 @@ from pathlib import Path
 
 import pytz
 
+import news_sources as ns
+
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -1112,6 +1114,214 @@ def _drop_search_failure_notes(items: list) -> list:
     return out
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# RSS 우선 수집 (retrieve-then-summarize) — 미국 브리핑 전환 1단계
+#
+# google_search 그라운딩은 응답에 출처를 붙이지 않는다(실측 확인 — §31, 2026-08-04).
+# 그래서 순서를 뒤집는다: ① RSS로 실제 기사를 먼저 모으고 ② LLM은 그 목록에서
+# **인덱스로 골라 요약만** 한다. 날짜·출처 URL은 기사에서 그대로 오므로 LLM이 만들 수 없고,
+# 목록에 없는 숫자·기업을 텍스트에 섞으면 이 게이트가 항목째 버린다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _dedupe_articles(articles: list) -> list:
+    """같은 사건을 다룬 여러 기사를 대표 1건으로 묶는다.
+
+    대표는 **가장 이른 발행 기사**(pub_time 최소). `source_count`는 보도 매체 수 —
+    신뢰도 신호로 참고할 수는 있지만 "사실 여부" 판정에 쓰지 않는다(통신사 기사를 그대로
+    받아쓴 기사도 매체 수만 늘린다).
+    """
+    groups: list[list[dict]] = []
+    for a in articles:
+        placed = False
+        for g in groups:
+            if ns.is_dup_title(a["title"], g[0]["title"]):
+                g.append(a)
+                placed = True
+                break
+        if not placed:
+            groups.append([a])
+    out = []
+    for g in groups:
+        rep = min(g, key=lambda a: a.get("pub_time", "99:99"))
+        rep = dict(rep)
+        rep["source_count"] = len(g)
+        out.append(rep)
+    return out
+
+
+def _articles_prompt_block(articles: list) -> str:
+    """기사 목록을 1부터 번호를 매겨 프롬프트에 넣을 텍스트로 만든다."""
+    if not articles:
+        return ""
+    lines = []
+    for i, a in enumerate(articles, start=1):
+        lines.append(f"{i}. [{a.get('pub_time', '')}] {a['title']} ({a.get('source', '')})")
+        if a.get("desc"):
+            lines.append(f"   {a['desc']}")
+    return "\n".join(lines)
+
+
+_PCT_RE = re.compile(r"\d+(?:\.\d+)?%")
+
+
+def _article_blob(article: dict) -> str:
+    return f"{article.get('title', '')} {article.get('desc', '')}"
+
+
+def _unsourced_claim(text: str, ticker_field, article: dict) -> str | None:
+    """text·ticker가 주장하는 수치·기업이 그 기사(article)에 실제로 있는지 확인한다.
+
+    없으면 사유 문자열을 반환(있으면 None). 검증 대상은 두 가지뿐이다 — ① 텍스트에 등장하는
+    퍼센트 수치가 기사 본문에 문자 그대로 있는가 ② 텍스트·ticker가 가리키는 기업이 기사에
+    등장하는가. §31 사고(마이크론)는 기사 목록에 그 사건 자체가 없었으므로, 텍스트가 목록
+    밖의 기업·수치를 끌어오면 이 시점에 걸러진다.
+    """
+    blob = _article_blob(article)
+    for pct in _PCT_RE.findall(text or ""):
+        if pct not in blob:
+            return f"기사에 없는 수치({pct})"
+
+    tickers = list(dict.fromkeys(_parse_tickers(ticker_field) + _resolve_company_tickers(text)))
+    blob_tickers = set(_parse_tickers(blob) + _resolve_company_tickers(blob))
+    for t in tickers:
+        if t not in blob_tickers and t not in blob.upper():
+            return f"기사에 없는 기업/티커({t})"
+    return None
+
+
+def _resolve_selection(selection: list, articles: list) -> list:
+    """LLM이 고른 {idx, text, ticker} 목록을 실제 기사와 대조해 검증된 항목만 남긴다.
+
+    idx는 1부터 시작하는 _articles_prompt_block의 번호와 같다. 범위 밖·누락이면 그 자체로
+    검증 불가이므로 버린다. 살아남은 항목에는 원본 기사(article)와 그 기사의 실제 발행
+    날짜(date)를 붙인다 — 날짜는 기사에서만 오므로 LLM이 날짜를 위조할 수 없다.
+    """
+    out = []
+    for sel in selection or []:
+        idx = sel.get("idx") if isinstance(sel, dict) else None
+        if not isinstance(idx, int) or not (1 <= idx <= len(articles)):
+            print(f"[fetch_news] RSS 선택 범위 밖 idx 제거: {sel}", file=sys.stderr)
+            continue
+        article = articles[idx - 1]
+        text = str(sel.get("text") or "").strip()
+        if not text:
+            continue
+        reason = _unsourced_claim(text, sel.get("ticker", ""), article)
+        if reason:
+            print(f"[fetch_news] RSS 미검증 주장 제거({reason}): {text[:60]}", file=sys.stderr)
+            continue
+        out.append({
+            "date": article.get("date", ""),
+            "text": text,
+            "ticker": str(sel.get("ticker") or ""),
+            "article": article,
+        })
+    return out
+
+
+def _attach_verified_sources(catalysts: list, log_prefix: str = "fetch_news") -> list:
+    """각 항목의 Google News 링크를 원문 URL로 리졸브하고 실제 발행일시를 재확인한다.
+
+    확인 실패(리졸브 실패·구조화 데이터 없음)면 그 항목을 버린다 — RSS pubDate만으로는
+    신뢰하지 않는다는 §Google News 재크롤링 원칙(2026-07-13·14 실사고)을 그대로 적용한다.
+    검증에 성공한 항목만 실제 출처 URL·발행일시를 달고 살아남는다.
+    """
+    out = []
+    for c in catalysts:
+        article = c.get("article") or {}
+        link = article.get("link", "")
+        url = ns.resolve_gnews_url(link) if link else ""
+        published = ns.verify_real_published_at(url, log_prefix=log_prefix) if url else None
+        if not url or not published:
+            print(f"[fetch_news] RSS 발행일 검증 실패 — 항목 제외: {c.get('text', '')[:60]}",
+                  file=sys.stderr)
+            continue
+        out.append({
+            "date": c["date"], "text": c["text"], "ticker": c.get("ticker", ""),
+            "url": url, "source": article.get("source", ""),
+            "published_at": published.isoformat(),
+        })
+    return out
+
+
+# 미국 브리핑 RSS 쿼리 — §19 우선순위(실적·프리마켓 반응·매크로)를 따른다.
+_US_RSS_QUERIES = [
+    ("뉴욕증시 나스닥", "kr"), ("미국 증시 반도체", "kr"), ("월가 실적 발표", "kr"),
+    ("나스닥 프리마켓", "kr"),
+    ("Wall Street stocks premarket", "en"), ("US stock market earnings", "en"),
+]
+
+_RSS_SELECT_PROMPT = """아래는 오늘({today}) 실제로 수집된 미국 시장 관련 기사 목록이다(번호·발행시각·매체·요약 포함).
+이 목록에 있는 사건 중, 오늘 미국 증시 브리핑에 담을 만큼 중요한 것을 최대 4개 골라라.
+
+[기사 목록]
+{articles}
+
+[출력 규칙]
+- 반드시 목록의 번호(idx)를 참조한다. 목록에 없는 사건·기업·수치를 새로 만들지 않는다.
+- text는 "사건 → 영향" 한 문장. 숫자를 쓸 때는 **목록에 있는 숫자만** 그대로 옮겨 쓴다.
+- ticker는 그 사건의 주체 기업 미국 티커. 거시·지정학이면 빈 문자열.
+- 중요한 기사가 없으면 selection을 빈 배열로 둔다. 억지로 채우지 않는다.
+
+출력 형식 (JSON만):
+{{"selection": [{{"idx": 1, "text": "사건 → 영향", "ticker": "MU"}}]}}"""
+
+
+def fetch_and_summarize_rss(briefing_type: str) -> dict:
+    """RSS로 실제 기사를 먼저 모으고, LLM은 그 목록에서 고르고 요약만 한다.
+
+    google_search 그라운딩과 달리 날짜·출처 URL이 기사에서 그대로 온다 — LLM이 위조할 수
+    없다. 목록 밖 숫자·기업이 텍스트에 섞이면 _resolve_selection이 항목째 버린다(§31).
+    현재 미국 브리핑만 지원한다(계획 2단계 — 코스피·마감은 확대 검증 후).
+    """
+    if briefing_type != "us":
+        raise NotImplementedError(f"RSS 수집 경로는 아직 us만 지원한다: {briefing_type}")
+
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    articles: list[dict] = []
+    seen: set[str] = set()
+    for q, lang in _US_RSS_QUERIES:
+        for a in ns.fetch_rss(ns.gnews_url(q, lang), today, max_items=12, log_prefix="fetch_news"):
+            if a["title"] not in seen:
+                seen.add(a["title"])
+                articles.append(a)
+    articles.sort(key=lambda a: a.get("pub_time", "99:99"))
+    articles = _dedupe_articles(articles)
+
+    if not articles:
+        print("[fetch_news] RSS 수집 0건 — 뉴스 없이 발행(§27)", file=sys.stderr)
+        return dict(EMPTY_NEWS)
+
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=get_gemini_api_key())
+    prompt = _RSS_SELECT_PROMPT.format(today=today, articles=_articles_prompt_block(articles))
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite", contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.2, max_output_tokens=800),
+    )
+    raw = (response.text or "").strip()
+    if raw.startswith("```"):
+        lines = raw.split("\n")
+        raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+    m = re.search(r"\{[\s\S]*\}", raw)
+    data = json.loads(m.group(0) if m else raw)
+
+    resolved = _resolve_selection(data.get("selection"), articles)
+    prev_items = _load_prev_catalysts(briefing_type)
+    resolved = _drop_prev_run_echoes(resolved, prev_items)
+    resolved = _drop_placeholder_entities(resolved)
+    verified = _attach_verified_sources(resolved)
+
+    return {
+        "key_indicators": [],
+        "catalysts": [c["text"] for c in verified],
+        "catalyst_sources": verified,   # 계획 3단계(출처 표시)에서 소비 — url·source·published_at
+        "headlines": [],
+        "market_sentiment": "neutral",
+    }
+
+
 def fetch_and_summarize(briefing_type: str) -> dict:
     """Gemini Google Search grounding으로 최신 뉴스를 검색·요약해 dict로 반환한다."""
     try:
@@ -1258,17 +1468,20 @@ EMPTY_NEWS = {
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Gemini Google Search grounding으로 시장 뉴스 수집·요약")
+    parser = argparse.ArgumentParser(description="시장 뉴스 수집·요약")
     parser.add_argument("--type", choices=["kospi", "kospi-close", "us"], required=True)
+    parser.add_argument("--source", choices=["gemini", "rss"], default="gemini",
+                        help="gemini=google_search 그라운딩(기존), rss=RSS 실기사 우선 수집(§31 이후 미국 브리핑)")
     args = parser.parse_args()
 
-    print(f"[fetch_news] Fetching news via Gemini Google Search grounding (type={args.type})")
+    collect = fetch_and_summarize_rss if args.source == "rss" else fetch_and_summarize
+    print(f"[fetch_news] Fetching news (type={args.type}, source={args.source})")
 
     summary = None
     last_err = None
     for attempt in range(1, 4):
         try:
-            summary = fetch_and_summarize(args.type)
+            summary = collect(args.type)
             print(
                 f"[fetch_news] OK (attempt {attempt}): "
                 f"{len(summary.get('key_indicators', []))} indicators, "

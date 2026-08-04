@@ -26,14 +26,24 @@
 지금 통합하면 스테이지 2와 무관한 회귀 위험만 커진다 — 4단계 이후 별건으로 정리한다.
 `_clean_title`은 두 소비처의 동작이 실제로 달라(괄호 태그 제거 여부) 파라미터로 보존했다.
 
-## 2단계 — 미국 브리핑 수집기 전환
-- [ ] 실패 테스트 먼저 — 목록에 없는 사건을 LLM이 반환하면 폐기되는지
-- [ ] US 검색 쿼리 세트 정의 (§19 기준: 실적·프리마켓 반응·매크로)
-- [ ] `fetch_news.py` RSS 경로 구현 (미국 타입 한정)
-- [ ] 인덱스 참조 프롬프트 + 범위 검증 게이트
-- [ ] 목록 밖 고유명사 검출 게이트 → verify: §31 사고 데이터로 리플레이
-- [ ] 라이브 1회 실행 → verify: catalyst마다 실제 원문 URL이 붙는지 직접 열어 확인
-- [ ] 커밋
+## 2단계 — 미국 브리핑 수집기 전환 ✅ 2026-08-04
+- [x] 실패 테스트 먼저 — `test_rss_news_selection.py` 15건, 구현 전 전부 실패 확인
+- [x] US RSS 쿼리 세트 정의 (§19 기준: 실적·프리마켓 반응·반도체·매크로, 한/영 6개)
+- [x] `fetch_news.py --source rss` 경로 구현 (`fetch_and_summarize_rss`, us 한정)
+- [x] 인덱스 참조 프롬프트(`_articles_prompt_block`) + 범위 검증 게이트(`_resolve_selection`)
+- [x] 목록 밖 숫자·기업 검출 게이트(`_unsourced_claim`) → verify: §31 마이크론 리플레이로 구조적 배제 확인
+- [x] 원문 URL 리졸브 + 실제 발행일시 검증(`_attach_verified_sources`) — 검증 실패 항목은 버림
+- [x] 라이브 1회 실행 → verify: 4개 선택 중 1건(맥도날드, 발행일 검증 실패)은 정상 제외,
+      3건은 실제 원문 URL + 발행일시 확인(Fortune 08-03 16:03 UTC, 블루밍비트·매일일보 08-04)
+- [x] 전체 611건 통과. 커밋·푸시
+
+**RSS 경로가 만드는 것**: `catalysts`(문자열, 기존 계약 유지) + `catalyst_sources`
+(url·source·published_at — 3단계가 소비할 원자재). `key_indicators`·`headlines`는 비운다 —
+이 경로는 "사건 → 영향" 서사만 담당하고, 지표류는 fetch_data.py 실측이 이미 맡는다.
+
+**아직 파이프라인에 배선 안 됨**: `daily_report.yml`의 us-briefing job은 여전히
+`fetch_news.py --type us`(기존 gemini 경로)를 호출한다. `--source rss`로 바꾸는 건
+런타임 코드 변경 없는 원라이너지만, 정규 발행에 앞서 수동 실행으로 하루 더 관찰한다.
 
 ## 3단계 — 출처 표시
 - [ ] catalyst에 `url` 보존 (`fetch_news.py` → `call_claude.py` → `generate_html.py`)
