@@ -1,0 +1,99 @@
+# 발행은 됐는데 텔레그램만 실패한 브리핑을 커밋된 analysis_snapshot.json으로 재발송한다.
+#
+# 정규 잡(daily_report.yml)의 텔레그램 스텝은 continue-on-error라 전송 실패가 잡을 멈추지
+# 않는다 — 페이지는 이미 배포된 상태로 남고 구독자에게만 안 간다. 이때 정규 잡을 통째로
+# 재실행하면 Claude 재호출·시장데이터 재수집으로 이미 발행된 페이지가 바뀌므로,
+# 발행물은 그대로 두고 메시지만 다시 만들어 보낸다.
+#
+# 메시지는 항상 web/briefings/{date}/{type}/analysis_snapshot.json(git 커밋본)에서
+# 재생성한다 — 발행된 페이지와 동일한 내용임이 구조적으로 보장된다.
+
+name: 🔁 브리핑 텔레그램 재발송
+
+on:
+  workflow_dispatch:
+    inputs:
+      briefing_type:
+        description: "재발송할 브리핑 종류"
+        required: true
+        default: "kospi"
+        type: choice
+        options:
+          - kospi
+          - us
+      date:
+        description: "브리핑 날짜 (YYYY-MM-DD)"
+        required: true
+        type: string
+      force:
+        description: "force=true 시 하루 1회 제한·날짜 검사를 무시하고 발송"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+jobs:
+  resend:
+    name: "🔁 텔레그램 재발송"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      WEB_BASE_URL: "https://doubleshot.space"
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 📝 스냅샷에서 텔레그램 메시지 재생성
+        env:
+          BRIEFING_TYPE: ${{ inputs.briefing_type }}
+          BRIEFING_DATE: ${{ inputs.date }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+
+          sys.path.insert(0, "scripts")
+          import call_claude as cc
+
+          btype = os.environ["BRIEFING_TYPE"]
+          date_str = os.environ["BRIEFING_DATE"]
+          snap = Path(f"web/briefings/{date_str}/{btype}/analysis_snapshot.json")
+          if not snap.exists():
+              sys.exit(f"❌ 스냅샷 없음: {snap} — 그 날짜 브리핑이 발행되지 않았습니다.")
+
+          analysis = json.loads(snap.read_text(encoding="utf-8"))
+          cc.save_telegram_message(btype, date_str, analysis)
+          print("─" * 40)
+          print(Path(f"data/telegram_message_{btype}.txt").read_text(encoding="utf-8"))
+          print("─" * 40)
+          PY
+
+      - name: 📨 Telegram 전송
+        env:
+          BRIEFING_TYPE: ${{ inputs.briefing_type }}
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            python3 scripts/send_telegram.py --type "$BRIEFING_TYPE" --force
+          else
+            python3 scripts/send_telegram.py --type "$BRIEFING_TYPE"
+          fi
