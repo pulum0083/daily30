@@ -29,7 +29,38 @@ function mkEl() {
   return e;
 }
 
-function load() {
+/**
+ * id별로 실제 엘리먼트를 돌려주는 문서 스텁. 렌더 함수가 innerHTML/textContent를 쓰는 걸 검증한다.
+ *
+ * `els`는 Proxy다 — 일부 렌더 함수(secRenderChips)는 엘리먼트를 내부에서 getElementById로
+ * 찾지 않고 인자로 직접 받으므로, 테스트가 `document.getElementById(id)`를 거치지 않고
+ * `els[id]`로 먼저 접근하는 경우가 있다(etf-signal.test.mjs의 Map 사전등록 패턴과 달리
+ * id를 미리 나열하지 않는다). 평범한 객체 + 지연 생성 클로저였다면 이 경우 `els[id]`가
+ * `getElementById`와 별개로 undefined를 반환해 같은 id가 서로 다른 엘리먼트로 갈리는
+ * 문제가 있었다 — Proxy로 두 경로가 항상 같은 엘리먼트를 공유하도록 보장한다.
+ */
+function mkDoc() {
+  const store = {};
+  const els = new Proxy(store, {
+    get(target, id) {
+      if (typeof id !== 'string') return target[id];
+      if (!target[id]) target[id] = mkEl();
+      return target[id];
+    },
+  });
+  return {
+    els,
+    doc: {
+      readyState:'complete',
+      getElementById: (id) => els[id],
+      querySelector: () => mkEl(), querySelectorAll: () => [],
+      createElement:()=>mkEl(), addEventListener:noop,
+      body:mkEl(), documentElement:mkEl(), head:mkEl(),
+    },
+  };
+}
+
+function load(docOverride) {
   const win = {
     location:{pathname:'/stocks/', hash:'', href:'https://x/stocks/'},
     addEventListener:noop, removeEventListener:noop,
@@ -41,7 +72,7 @@ function load() {
     Intl, Date, Math, JSON, console:{log:noop, warn:noop, error:noop},
     navigator:{userAgent:'node'},
     history:{pushState:noop, replaceState:noop},
-    document:{
+    document: docOverride || {
       readyState:'complete',
       getElementById:()=>mkEl(), querySelector:()=>mkEl(), querySelectorAll:()=>[],
       createElement:()=>mkEl(), addEventListener:noop,
@@ -120,4 +151,66 @@ test('generated_at이 없으면 빈 문자열 — 지어내지 않는다', () =>
   const { secAsOfLabel } = load();
   assert.equal(secAsOfLabel({}), '');
   assert.equal(secAsOfLabel(null), '');
+});
+
+test('secShowSector — 실제 DOM에 등락률·상승/하락 개수를 쓴다', () => {
+  const { doc, els } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+
+  assert.equal(els['sec-avg'].textContent, '−0.40%'); // (−6.4+3.4+1.8)/3 = −0.4
+  assert.equal(els['sec-avg'].className, 'v num dn');
+  assert.match(els['sec-breadth-label'].innerHTML, /3종목 중/);
+  assert.match(els['sec-rows'].innerHTML, /SK하이닉스/);
+});
+
+test('secShowSector — 각 행의 onclick이 그 행의 실제 코드를 쓴다 (goStock 하드코딩 버그 회귀 방지)', () => {
+  const { doc, els } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+
+  assert.match(els['sec-rows'].innerHTML, /goStock\('000660'\)/);   // 1위: SK하이닉스
+  assert.match(els['sec-rows'].innerHTML, /goStock\('042700'\)/);   // 2위: 한미반도체
+  assert.match(els['sec-rows'].innerHTML, /goStock\('005930'\)/);   // 3위: 삼성전자
+  // 세 행의 코드가 전부 같은 값이면(예전 버그) 위 세 assert 중 최소 하나는 실패한다.
+});
+
+test('secShowSector — 대장주 3명을 순서대로 렌더한다', () => {
+  const { doc, els } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+
+  const html = els['sec-leaders'].innerHTML;
+  const i1 = html.indexOf('①'), i2 = html.indexOf('②'), i3 = html.indexOf('③');
+  assert.ok(i1 >= 0 && i2 > i1 && i3 > i2, '①②③ 순서가 맞아야 한다');
+  assert.match(html, /goStock\('005930'\)/);
+});
+
+test('secShowSector — 데이터 없는 섹터는 기존 DOM을 그대로 둔다(지우지 않는다)', () => {
+  const { doc, els } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+  const before = els['sec-rows'].innerHTML;
+  secShowSector(fixtureSnap(), 'ship'); // fixtureSnap에는 ship 데이터가 없다
+  assert.equal(els['sec-rows'].innerHTML, before, '없는 섹터로 전환 시도 시 화면이 깨지면 안 된다');
+});
+
+test('secRenderChips — 활성 섹터가 맨 앞, 나머지는 평균 내림차순', () => {
+  const { doc, els } = mkDoc();
+  const { secRenderChips } = load(doc);
+  secRenderChips(els['secsel'], 'semicon', {
+    semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'},
+  });
+  const order = [...els['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(order, ['semicon', 'auto', 'bio']); // semicon 먼저(활성), 그다음 1.5 > -0.1
+});
+
+test('secRenderChips — 활성 칩만 is-active 클래스를 갖는다', () => {
+  const { doc, els } = mkDoc();
+  const { secRenderChips } = load(doc);
+  secRenderChips(els['secsel'], 'auto', { semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'} });
+  const autoTag = els['secsel'].innerHTML.match(/<a[^>]*data-sector="auto"[^>]*>/)[0];
+  const semiTag = els['secsel'].innerHTML.match(/<a[^>]*data-sector="semicon"[^>]*>/)[0];
+  assert.ok(autoTag.includes(' on'), '활성 칩에 on 클래스가 없다');
+  assert.ok(!semiTag.includes(' on'), '비활성 칩에 on이 붙었다');
 });

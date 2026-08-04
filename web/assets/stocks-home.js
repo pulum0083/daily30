@@ -2186,8 +2186,84 @@ if(passBtn){
     return fmtKoDate(ymd)+' 마감';
   }
 
-  // 테스트 훅 — node:vm에서 순수 함수만 꺼내 검증한다(DOM 결과는 브라우저에서 확인).
-  window.__sectorScreen={secBuildSectorData:secBuildSectorData, secAllAverages:secAllAverages, secAsOfLabel:secAsOfLabel};
+  function secSectorRow(r,i){
+    var top3=i<3;
+    var cls=r.pct>=0?'up':'dn', sign=r.pct>=0?'+':'−';
+    var barPct=Math.max(4,Math.min(100,Math.round(Math.abs(r.pct)/10*100)));
+    return '<a class="row" onclick="goStock(\''+r.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+(i+1)+'</span>'
+      +'<div class="nm"><b>'+r.name+'</b><small class="num">'+r.code+'</small></div>'
+      +'<div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div>'
+      +'<span class="barval '+cls+' num">'+sign+Math.abs(r.pct).toFixed(1)+'%</span></a>';
+  }
+
+  function secChipHtml(key,label,avg,active){
+    var cls=avg>=0?'up':'dn', sign=avg>=0?'+':'−';
+    return '<a class="secsel__i'+(active?' on':'')+'" role="tab" aria-selected="'+(active?'true':'false')+'" data-sector="'+key+'">'
+      +'<span class="ic">'+(SECTOR_ICONS[key]||'')+'</span>'+label
+      +'<b class="'+cls+' num">'+sign+Math.abs(avg).toFixed(2)+'%</b></a>';
+  }
+
+  // order: 활성 섹터 먼저, 나머지는 평균 내림차순. 순수 평균순이면 최하위 섹터를 보는 중일 때
+  // 그 섹터가 390px 가로스크롤 밖으로 밀려 자기 자신이 안 보인다(목업 설계 노트 그대로).
+  function secRenderChips(box, activeKey, allAvgs){
+    if(!box) return;
+    var order=Object.keys(allAvgs).filter(function(k){return k!==activeKey;})
+      .sort(function(a,b){return allAvgs[b].avg-allAvgs[a].avg;});
+    if(allAvgs[activeKey]) order.unshift(activeKey);
+    box.innerHTML=order.map(function(k){
+      var d=allAvgs[k]; return secChipHtml(k,d.label,d.avg,k===activeKey);
+    }).join('');
+  }
+
+  var secActiveKey='semicon';
+  function secShowSector(snap, key){
+    var d=secBuildSectorData(snap,key);
+    if(!d) return;   // 없는 섹터면 화면을 건드리지 않는다(§0) — 직전 상태 유지
+    secActiveKey=key;
+
+    var crumbEl=document.getElementById('sec-crumb-label'); if(crumbEl) crumbEl.textContent=d.label;
+    var titleEl=document.getElementById('sec-title'); if(titleEl) titleEl.textContent=(SECTOR_ICONS[key]||'')+' '+d.label;
+    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목 · 코스피·코스닥 · '+secAsOfLabel(snap);
+
+    var avgEl=document.getElementById('sec-avg');
+    if(avgEl){avgEl.textContent=(d.avg>=0?'+':'−')+Math.abs(d.avg).toFixed(2)+'%';avgEl.className='v num '+(d.avg>=0?'up':'dn');}
+
+    var lbl=document.getElementById('sec-breadth-label');
+    if(lbl) lbl.innerHTML=d.total+'종목 중 <b class="up num">'+d.upN+' 상승</b>';
+    var bbar=document.getElementById('sec-bbar');
+    if(bbar){var bu=Math.round(d.upN/d.total*1000)/10,bdw=Math.round(d.dnN/d.total*1000)/10,bn=Math.round(d.flatN/d.total*1000)/10;
+      bbar.innerHTML='<i class="bu" style="width:'+bu+'%"></i><i class="bd" style="width:'+bdw+'%"></i><i class="bn" style="width:'+bn+'%"></i>';}
+    var bk=document.getElementById('sec-bk');
+    if(bk) bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+d.upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+d.dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+d.flatN+'</span></span>';
+
+    var senti=document.getElementById('sec-senti'), pct=Math.round(d.upN/d.total*100);
+    var slbl=document.getElementById('sec-senti-label'), needle=document.getElementById('sec-senti-needle');
+    if(senti&&slbl&&needle){senti.style.display='';slbl.innerHTML=(pct>=55?'상승 우위':pct<=45?'하락 우위':'중립')+' <b class="num">'+pct+'%</b>';needle.style.left=pct+'%';}
+
+    var lw=document.getElementById('sec-leaders');
+    if(lw) lw.innerHTML=d.leaders.map(function(r,i){var cls=r.pct>=0?'up':'dn',sign=r.pct>=0?'+':'−';
+      return '<a class="srow" onclick="goStock(\''+r.code+'\')"><span class="n2">'+['①','②','③'][i]+' '+r.name+' <small class="num">'+r.code+'</small></span><span class="c '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
+    }).join('');
+
+    var rowsWrap=document.getElementById('sec-rows');
+    if(rowsWrap) rowsWrap.innerHTML=d.rows.map(secSectorRow).join('');
+
+    secRenderChips(document.getElementById('secsel'), key, secAllAverages(snap));
+  }
+
+  // 칩 클릭 위임 — 칩은 매번 innerHTML로 다시 그려지므로 개별 리스너 대신 문서 레벨 위임 1개만 둔다.
+  document.addEventListener('click', function(e){
+    var chip=e.target&&e.target.closest?e.target.closest('.secsel__i'):null;
+    if(!chip) return;
+    var key=chip.getAttribute('data-sector');
+    if(key&&SNAP) secShowSector(SNAP, key);
+  });
+
+  // 테스트 훅 — node:vm에서 함수만 꺼내 검증한다(실제 DOM 결과는 브라우저에서 확인).
+  window.__sectorScreen={
+    secBuildSectorData:secBuildSectorData, secAllAverages:secAllAverages, secAsOfLabel:secAsOfLabel,
+    secShowSector:secShowSector, secRenderChips:secRenderChips,
+  };
   function bindSurgeTips(){
     if(typeof showTip!=='function') return;
     document.querySelectorAll('.vol-surge-badge').forEach(function(el){
