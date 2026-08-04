@@ -22,75 +22,84 @@
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
 <script src="/assets/stocks-home.js?v=6" defer></script>
+<script src="/assets/ds-subnav.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/stocks-home.css?v=6">
+<link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><a class="gnb__tg-btn" href="https://t.me/doubleshot30" target="_blank" rel="noopener" aria-label="브리핑을 텔레그램으로 구독"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></a><button class="gnb__notif-btn" id="gnb-notif-btn" onclick="openNoticePanel()" aria-label="공지 및 게시판"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><rect x="13" y="1" width="9" height="7" rx="2" fill="currentColor" opacity=".75"/><path d="M15.5 3.5h4M15.5 5.5h2.5" stroke="var(--gnb-bg,#16181A)" stroke-width="1.1" stroke-linecap="round"/><path d="M13 8l1.8 2" stroke="currentColor" stroke-width="1.1" opacity=".75" fill="none"/></svg><span class="gnb__notif-dot" id="gnb-notif-dot"></span></button></span></div></div>
 
 <div class="wrap">
 
+  <!-- 페이지 머리말 — 화면(.screen) 밖에 둔다. 탭을 눌러 화면이 바뀌어도 종목 시그널의
+       제목·검색·시장 맥락은 계속 남아 있어야 하기 때문이다(서브탭 IA 스펙). -->
+  <div class="hero">
+    <div>
+      <div class="hero-title-row">
+        <h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:11px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1>
+        <button class="hero-search-m" onclick="openSearch()" aria-label="종목 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>
+      </div>
+      <p>코스피 주도주 실시간 대시보드</p>
+    </div>
+    <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
+    <span style="font-size:11px;color:var(--muted);">09:00 – 15:30 장중</span>
+  </div>
+  <!-- 지수 + 수급 한 줄 카드(2026-07-26) — 코스피와 수급을 한눈에 두고, 보조 지표(코스닥·환율)는
+       칩을 눌러 펼친다. 예전엔 지수/수급이 각자 카드라 두 줄을 차지하며 사이가 붕 떠 보였다. -->
+  <div class="idx-card" id="idx-card">
+    <div class="mkt-line">
+      <div class="strip">
+        <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
+        <div class="m idx-x" id="m-kosdaq" hidden><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
+        <div class="m idx-x" id="m-usd" hidden><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
+        <button class="idx-more" id="idx-more" aria-expanded="false" aria-controls="m-kosdaq m-usd">코스닥·환율 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
+      </div>
+      <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
+           순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
+      <div class="supply" id="h-supply" hidden>
+        <span class="lbl">수급</span>
+        <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
+             1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
+        <span class="sup-brk" aria-hidden="true"></span>
+        <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
+        <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
+        <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
+        <span class="unit"></span>
+        <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
+      </div>
+    </div>
+  </div>
+  <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
+  <div class="sup-panel" id="sup-panel" hidden>
+    <div class="sp-head">
+      <span class="sp-t" id="sup-title">최근 순매수</span>
+      <span class="sp-sub">억원 · 세 축 공통 스케일</span>
+      <span class="sp-legend">
+        <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
+        <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
+      </span>
+      <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
+    </div>
+    <div id="sup-chart">
+      <div id="sup-rows"></div>
+      <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
+    </div>
+    <div id="sup-table" hidden class="sp-tblwrap">
+      <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
+    </div>
+    <div class="sp-foot" id="sup-foot"></div>
+  </div>
+
+  <!-- 시그널 서브탭 — 마크업은 비워 두고 ds-subnav.js가 채운다. 탭 정의를 한 곳에만 두기
+       위해서다(§30 이중 구현 방지). 이 껍데기가 없으면 스크립트는 조용히 아무것도 안 한다. -->
+  <nav id="ds-subnav" aria-label="종목 시그널 메뉴"></nav>
+
   <!-- ===== HOME ===== -->
   <div class="screen on" id="home">
-    <div class="hero">
-      <div>
-        <div class="hero-title-row">
-          <h1>종목 <span class="a">시그널</span> <span style="display:inline-block;font-size:11px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;line-height:1.4;">BETA</span></h1>
-          <button class="hero-search-m" onclick="openSearch()" aria-label="종목 검색"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg></button>
-        </div>
-        <p>코스피 주도주 실시간 대시보드</p>
-      </div>
-      <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-      <span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
-      <span style="font-size:11px;color:var(--muted);">09:00 – 15:30 장중</span>
-    </div>
-    <!-- 지수 + 수급 한 줄 카드(2026-07-26) — 코스피와 수급을 한눈에 두고, 보조 지표(코스닥·환율)는
-         칩을 눌러 펼친다. 예전엔 지수/수급이 각자 카드라 두 줄을 차지하며 사이가 붕 떠 보였다. -->
-    <div class="idx-card" id="idx-card">
-      <div class="mkt-line">
-        <div class="strip">
-          <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
-          <div class="m idx-x" id="m-kosdaq" hidden><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
-          <div class="m idx-x" id="m-usd" hidden><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
-          <button class="idx-more" id="idx-more" aria-expanded="false" aria-controls="m-kosdaq m-usd">코스닥·환율 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
-        </div>
-        <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
-             순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
-        <div class="supply" id="h-supply" hidden>
-          <span class="lbl">수급</span>
-          <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
-               1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
-          <span class="sup-brk" aria-hidden="true"></span>
-          <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
-          <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
-          <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
-          <span class="unit"></span>
-          <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
-        </div>
-      </div>
-    </div>
-    <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
-    <div class="sup-panel" id="sup-panel" hidden>
-      <div class="sp-head">
-        <span class="sp-t" id="sup-title">최근 순매수</span>
-        <span class="sp-sub">억원 · 세 축 공통 스케일</span>
-        <span class="sp-legend">
-          <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
-          <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
-        </span>
-        <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
-      </div>
-      <div id="sup-chart">
-        <div id="sup-rows"></div>
-        <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
-      </div>
-      <div id="sup-table" hidden class="sp-tblwrap">
-        <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
-      </div>
-      <div class="sp-foot" id="sup-foot"></div>
-    </div>
     <!-- 더블샷 브리핑 커넥터 — 현재 브리핑 타임의 실제 브리핑으로 JS가 연결 -->
     <a class="brief-card" id="brief-strip" href="/briefings/" data-href="/briefings/">
       <span class="bc-ico" id="bc-ico">📊</span>
@@ -132,7 +141,20 @@
       <div class="ue-grid" id="ue-grid"></div>
       <div id="ue-cap" style="font-size:11px;color:var(--muted);margin-top:9px;">미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</div>
     </div>
-    
+
+    <!-- 밤사이 브리지 — 위 '밤사이 미국 반도체 시황'이 07:30에 꺼지는 그 자리를 이어받아
+         코스피 개장(09:00)까지만 뜬다. 행·색·선반영 판정은 web/data/overnight-bridge.json에
+         이미 구워져 오고, stocks-home.js는 렌더와 시간 게이트만 한다(§30 이중 구현 금지). -->
+    <div id="overnight-bridge" style="display:none">
+      <div class="ob-h">
+        <span class="ob-t">🌉 밤사이 브리지</span>
+        <span class="ob-date" id="ob-date"></span>
+      </div>
+      <div class="ob-list" id="ob-list"></div>
+      <p class="ob-note">선반영은 한국이 미국 평균보다 이미 더 크게 움직였다는 뜻, 미반영은 아직 못 따라갔다는 뜻입니다. %p는 두 시장 평균 등락률의 차이일 뿐 오늘 방향을 보장하지 않습니다. 조선은 대응 미국 지표가 없어 제외했습니다.</p>
+    </div>
+
+
     <div id="us-linked-widget"><div class="usw-head" style="display:flex;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:2px 0;"><span id="usw-title" style="font-size:15px;font-weight:800;color:#0F172A;">📈 코스피 주도주</span><a class="help-q" href="/glossary/#leaders" data-tip-title="코스피 주도주" data-tip="코스피 시총 상위 종목의 흐름을 보여줘요.<br><br><b>장중(09:00~15:30)</b>엔 한국거래소 <b>코스피 실시간 체결가</b>로,<br><b>장 마감 이후</b>엔 <b>종가에 하이퍼리퀴드 24h 무기한선물의 야간 변동률을 실은 추정가</b>로 제공해요.<br><br>추정가는 참고용이며 실제 체결가가 아니에요.">?</a><span class="usw-sub" style="margin-left:auto;font-size:11px;color:var(--muted);">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div><div class="usw-tiles"><div class="us-tile on" data-code="005930" onclick="usSel('005930')"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:11px;font-weight:700;color:#15803D;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">삼성전자</div><div style="font-size:20px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">354,000</div><div style="font-size:12px;font-weight:700;color:#2775ED;margin-top:3px;">▼ 8,300 (2.34%)</div><a class="tile-go" href="/stocks/005930/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="000660" onclick="usSel('000660')"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:11px;font-weight:700;color:#15803D;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">SK하이닉스</div><div style="font-size:20px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">248,500</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 8,500 (3.42%)</div><a class="tile-go" href="/stocks/000660/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div><div class="us-tile" data-code="005380" onclick="usSel('005380')"><div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;">🇰🇷 KOSPI <span class="usw-pill" style="font-size:11px;font-weight:700;color:#15803D;background:#ECFDF3;border-radius:999px;padding:1px 6px;margin-left:4px;">●실시간</span></div><div style="font-size:13px;font-weight:800;color:#0F172A;">현대차</div><div style="font-size:20px;font-weight:900;color:#0F172A;margin-top:5px;letter-spacing:-0.5px;">245,000</div><div style="font-size:12px;font-weight:700;color:#E03131;margin-top:3px;">▲ 2,000 (0.82%)</div><a class="tile-go" href="/stocks/005380/" onclick="event.stopPropagation()"><svg viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div></div><div id="why-moved"><div id="wm-curve-block"><div class="wm-h" id="wm-h-toggle" style="display:flex;align-items:center;cursor:pointer;"><span style="font-size:15px;font-weight:800;color:#0F172A;">📈 <span id="wm-name">삼성전자</span> <span class="ds-date"></span> 장중</span><span style="font-size:11px;font-weight:700;color:var(--muted);background:var(--inset);border-radius:999px;padding:2px 8px;margin-left:8px;">● 실측 1분봉</span><span class="wm-toggle" id="wm-toggle" aria-label="펼치기·접기" title="펼치기·접기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></div><div id="wm-body"><div class="lw-row"><div class="lw-l"><svg id="wm-svg" viewBox="0 0 640 180" role="img" aria-label="장중 1분봉 곡선" style="width:100%;height:auto;display:block;overflow:visible;"></svg></div><div class="lw-r"><div class="lw-h">⏱️ 장중 지표<span class="lw-note">당일</span></div><div id="wm-range" style="display:none"></div><div id="wm-wk52" style="display:none"></div><div class="lw-moved">평균체결가(VWAP)·외국인 보유율은 <a id="lw-detail-link" href="#">종목 상세</a>에서 볼 수 있어요.</div></div></div></div></div><div class="lw-row"><div class="lw-l"><div class="lw-h">📰 관련 뉴스<span class="lw-note" id="lw-upd">최신순</span></div><div class="lw-news" id="lw-news"></div></div><div class="lw-r"><div class="lw-h">🎯 증권사 목표주가<span class="lw-note" id="lw-tp-cnt"></span></div><div class="lw-tp-hero"><span class="lbl">컨센서스</span><span class="val" id="lw-tp-val">—</span><span class="lw-tp-up" id="lw-tp-up"></span></div><div class="lw-tp-meta" id="lw-tp-meta"></div><div class="lw-gauge"><div class="cur" id="lw-tp-cur" style="width:0%"></div></div><div id="lw-brk"></div><div class="lw-tr" id="lw-tr" style="display:none"><div class="lw-tr-h"><span id="lw-tr-label">컨센서스 추이</span><span class="d" id="lw-tr-d"></span></div><svg id="lw-tr-svg" viewBox="0 0 240 60"></svg></div></div></div><div class="lw-ib" id="lw-ib" style="display:none"><div class="lw-ib-h"><span class="bar"></span><span class="t">🏦 외국계 시각</span></div><div class="lw-ib-note">개별 종목이 아닌 <b>코스피 지수 전반</b>에 대한 외국계 IB 코멘트예요.</div><div id="lw-ib-list"></div></div><span data-code="005930" data-name="삼성전자" style="display:none"></span><span data-code="000660" data-name="SK하이닉스" style="display:none"></span><span data-code="005380" data-name="현대차" style="display:none"></span></div></div>
     
     <div id="mom-track" style="display:none">
@@ -166,6 +188,7 @@
           <div class="sbx-stat__box"><span class="skl skl-line" style="width:40%"></span></div>
         </div>
       </div>
+      <a class="more" onclick="go('sector')">섹터 전체 보기 →</a>
     </div>
     </div><!-- /home-full -->
     <div class="home-main">
@@ -179,6 +202,39 @@
         <span>유입 <span class="flow-scale"><i style="background:rgba(224,49,49,0.25)"></i><i style="background:rgba(224,49,49,0.55)"></i><i style="background:rgba(224,49,49,1)"></i></span></span>
         <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
       </div>
+    </div>
+    <!-- ETF 신호 — /api/signals의 etf(lead·betting·sector)로 채운다. 데이터가 없으면 통째로 숨긴다.
+         홈 4개 서브탭 중 ETF만 대응 블록이 없어 신설한 요약 블록이다(서브탭 IA 스펙). -->
+    <div class="block etfsig-block" id="etf-signal" style="display:none">
+      <div class="block__h">
+        <span class="block__t"><span class="ic">📊</span> ETF 신호</span>
+        <span class="block__s" id="etfsig-asof"></span>
+      </div>
+      <div class="etfsig-lead">
+        <div class="etfsig-lead__t" id="etfsig-title"></div>
+        <p class="etfsig-lead__b" id="etfsig-body"></p>
+      </div>
+      <div class="etfsig-bet">
+        <div class="etfsig-bet__lbl">
+          <span class="dn">하락 베팅 <b id="etfsig-dn-amt"></b></span>
+          <span class="up"><b id="etfsig-up-amt"></b> 상승 베팅</span>
+        </div>
+        <div class="etfsig-bar"><span class="etfsig-bar__dn" id="etfsig-bar-dn"></span></div>
+        <div class="etfsig-bet__pct"><span id="etfsig-dn-pct"></span><span id="etfsig-up-pct"></span></div>
+      </div>
+      <div class="etfsig-kpi">
+        <div><span class="k">인버스 거래량</span><span class="v" id="etfsig-inv"></span></div>
+        <div><span class="k">KODEX 레버리지</span><span class="v num" id="etfsig-lev"></span></div>
+      </div>
+      <div class="etfsig-ext" id="etfsig-ext"></div>
+      <a class="etfsig-more" onclick="go('etf-rank')">ETF 전체 보기 →</a>
+    </div>
+    <!-- 탭에 없는 화면 진입점 — 서브탭에는 넣지 않되(스펙: 탭 넘침 방지) 홈에서는 도달 가능해야 한다.
+         지금까지 이 두 화면은 홈에 링크가 없어 사실상 고립돼 있었다. -->
+    <div class="block">
+      <div class="block__h"><span class="block__t"><span class="ic">🔗</span> 더 보기</span></div>
+      <a class="xlink" onclick="go('passive')"><span class="n">패시브 민감주</span><span class="d">ETF 기계매매에 노출된 종목</span><span class="go">›</span></a>
+      <a class="xlink" onclick="go('ranking')"><span class="n">거래량 순위</span><span class="d">추적 40종목 거래량·상승률</span><span class="go">›</span></a>
     </div>
     </div><!-- /home-main -->
     <div class="home-side">
@@ -368,51 +424,40 @@
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span style="color:var(--ink)">반도체</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span id="sec-crumb-label" style="color:var(--ink)">반도체</span></div>
+    <!-- 섹터 선택 칩 — secRenderChips()가 채운다. 8개 섹터 평균은 stocks-snapshot.json 실측. -->
+    <div class="secsel" id="secsel" role="tablist" aria-label="섹터 선택"></div>
     <div class="grid">
       <div>
         <div class="dbox">
         <div class="shead"><div class="top">
-          <div><div class="st">🔧 반도체</div><div class="ss">추적 28종목 · 코스피·코스닥 · <span class="ds-asof"></span></div></div>
+          <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목 · 코스피·코스닥 · —</div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
         </div>
-        <div class="senti" id="sec-senti" style="display:none;"><div class="l"><span>섹터 AI 심리</span><span id="sec-senti-label">—</span></div><div class="gg"><div class="n" id="sec-senti-needle" style="left:50%"></div></div><div class="gg__s"><span>약세</span><span>중립</span><span>강세</span></div></div>
+        <!-- "섹터 AI 심리" 게이지는 2026-08-04 제거. 값이 upN/total(단순 상승 비율)이라
+             AI가 관여하지 않는데 라벨만 그렇게 달려 있었고(§0 과장), 바로 아래 시장폭이
+             같은 값을 더 많은 정보(하락·보합 수)와 함께 보여줘 중복이었다.
+             스냅샷에 심리·AI 계열 필드가 없어 정직하게 채울 방법도 없다. -->
         <div class="breadth" id="sec-breadth">
           <div class="l"><span>시장폭</span><span id="sec-breadth-label">—</span></div>
           <div class="bbar" id="sec-bbar"><i class="bu" style="width:0"></i><i class="bd" style="width:0"></i><i class="bn" style="width:100%"></i></div>
           <div class="bk" id="sec-bk"><span><i class="iu"></i>상승 <span class="num">—</span></span><span><i class="id"></i>하락 <span class="num">—</span></span><span><i class="in"></i>보합 <span class="num">—</span></span></div>
         </div>
         </div>
-        <p class="lede">반도체 섹터는 <b>HBM·메모리 업황 회복</b> 기대로 외국인 수급이 유입되고 있어요. AI 픽은 <b>SK하이닉스(78%)</b>, 기술신호 강세는 <b>한미반도체·DB하이텍</b>이에요.</p>
         <div class="block">
-          <div class="block__h"><span class="block__t">반도체 종목 랭킹</span><span class="block__s">시총순</span></div>
+          <div class="block__h"><span class="block__t">종목 랭킹</span><span class="block__s">등락률순</span></div>
           <div id="sec-rows"></div>
-          <a class="more" id="sec-more"></a>
         </div>
-        <!-- 패시브 쏠림 (섹터 고도 차별 블록 — 종목별 노출도 섹터 합산) -->
-        <div class="block" style="border-color:#BAE6FD;">
-          <div class="block__h" style="background:#F0F9FF;border-color:#BAE6FD;"><span class="block__t pass"><span class="ic">🧲</span>패시브 쏠림</span><span class="block__s">ETF 기계매매 노출 · 거래일수순</span></div>
-          <p class="p1line" style="padding:12px 16px 4px;">반도체 섹터는 <b>주요 ETF 자금에 가장 많이 묶인 섹터</b>예요. 추적 28종목 중 <b>7종목</b>이 반도체 테마 ETF에 고비중으로 담겨 있어요.</p>
-          <div class="pmet">
-            <div class="mc"><div class="l">섹터 합산 노출</div><div class="v num">약 2.8조</div><div class="sub">반도체 테마 ETF 보유액</div></div>
-            <div class="mc"><div class="l">고노출 종목</div><div class="v num">7<span style="font-size:11px;color:var(--muted)">/28</span></div><div class="sub">노출도 高 등급</div></div>
-          </div>
-          <a class="row" onclick="goStock('039030')"><span class="rk t num">1</span><div class="nm"><b>이오테크닉스</b><small class="num">039030</small></div><div class="barwrap"><div class="bar pbar" style="width:100%"></div></div><span class="barval num" style="color:#0C4A6E;">15.0일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="goStock('058140')"><span class="rk t num">2</span><div class="nm"><b>리노공업</b><small class="num">058140</small></div><div class="barwrap"><div class="bar pbar" style="width:93%"></div></div><span class="barval num" style="color:#0C4A6E;">13.9일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="row" onclick="goStock('240810')"><span class="rk t num">3</span><div class="nm"><b>원익IPS</b><small class="num">240810</small></div><div class="barwrap"><div class="bar pbar" style="width:70%"></div></div><span class="barval num" style="color:#0C4A6E;">10.5일</span><div class="ai"><span class="pbdg high">高</span></div></a>
-          <a class="more" onclick="go('passive')">패시브 민감주 전체 →</a>
+        <!-- 패시브 쏠림 — ETF 보유비중·소진일수 실측 소스가 없다(§0, 2026-08-04 확정). 준비 중 상태만 표시. -->
+        <div class="block">
+          <div class="block__h"><span class="block__t"><span class="ic">🧲</span> 패시브 쏠림</span></div>
+          <div class="empty-note">🧲 ETF 기계매매 노출 데이터는 아직 실측 소스가 없어요.<br>곧 추가할 예정이에요.</div>
         </div>
         </div>
       </div>
       <div>
-        <div class="panel"><div class="panel__h">반도체 대장주</div>
+        <div class="panel"><div class="panel__h">대장주</div>
           <div id="sec-leaders"></div>
-        </div>
-        <div class="panel"><div class="panel__h">반도체 대표 ETF <span class="phase">PHASE 2</span></div>
-          <a class="srow"><span class="n2">KODEX 반도체 <small class="num">091160</small></span><span class="c up num">+2.8%</span></a>
-        </div>
-        <div class="panel"><div class="panel__h">다른 섹터</div>
-          <div class="chips" style="padding:14px 16px;"><a onclick="go('sector')">2차전지</a><a onclick="go('sector')">바이오</a><a onclick="go('sector')">자동차</a><a onclick="go('sector')">금융</a></div>
         </div>
       </div>
     </div>
@@ -523,32 +568,15 @@
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#0284C7;">패시브 민감주</span></div>
+    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">패시브 민감주</span></div>
     <div class="phead">
       <div>
         <h1 style="color:#0C4A6E;"><span class="ic">🧲</span> 패시브 민감주</h1>
-        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목 · ETF 상위 150개 기준 · <span class="ds-date"></span></div>
-      </div>
-      <div class="stabs" id="psort-tabs">
-        <a class="on" onclick="passiveSort('dov',this)">거래일수</a>
-        <a onclick="passiveSort('conc',this)">집중도</a>
-        <a onclick="passiveSort('score',this)">민감도</a>
+        <div class="psub">ETF 기계매매에 구조적으로 노출된 종목</div>
       </div>
     </div>
-    <div class="sector-bias"><span class="ic2">📡</span><span>지금 패시브 자금은 <b>반도체 소부장</b>에 집중돼 있어요. 상위 9종목 중 7종목이 반도체 테마 ETF에 고비중으로 담겨 있어요.</span></div>
-    <div class="tbl" id="passive-tbl">
-      <div class="block__h" style="background:var(--soft);">
-        <span class="block__s" style="font-weight:700;width:160px;">종목</span>
-        <span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);" id="pbar-label">거래일수 (ETF 물량 소화일)</span>
-        <span class="block__s" style="width:56px;text-align:right;" id="pconc-label">집중도</span>
-        <span class="block__s" style="width:44px;text-align:right;">민감도</span>
-        <span class="block__s" style="width:36px;text-align:right;">뱃지</span>
-      </div>
-      <div id="passive-rows"></div>
-    </div>
-    <div style="background:var(--canvas);border:1px solid var(--hair);border-radius:0 0 10px 10px;border-top:none;padding:10px 16px;font-size:11px;color:var(--muted);line-height:1.6;margin-top:-1px;">
-      주요 ETF TOP10 구성종목 기준 추정 · 소수 비중 누락 가능 · 인과 주장 아님 · 구조적 노출도 지표예요.<br>
-      高: 거래일수 ≥ 8일 AND 시총 집중도 ≥ 10% · 中: 거래일수 ≥ 4일 AND 집중도 ≥ 5%
+    <div class="block">
+      <div class="empty-note">🧲 ETF 보유비중·거래일수 소진 데이터는 아직 실측 소스가 없어요.<br>수집이 준비되는 대로 채울게요.</div>
     </div>
   </div>
 

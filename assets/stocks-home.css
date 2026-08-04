@@ -293,7 +293,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-block{overflow:visible;}
 .sbx-block .block__h{border-radius:10px 10px 0 0;}
 .sbx-block .sbx-body{border-radius:0 0 10px 10px;}
-.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:52px;z-index:5;}
+/* top:108px = GNB 52 + 서브탭 40 + 서브탭 margin-bottom 16.
+   서브탭(#ds-subnav)이 sticky top:52px이라 예전 값 52px을 그대로 두면 정면으로 겹쳐
+   이 칩들의 윗부분이 잘린다. ds-subnav.css의 top/margin을 바꾸면 이 값도 같이 고칠 것. */
+.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:108px;z-index:5;}
 .sbx-tab{font-size:13px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s,background .12s;}
 .sbx-tab:hover{border-color:var(--primary);color:var(--primary);}
 .sbx-tab.on{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);font-weight:800;}
@@ -471,8 +474,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .shead .top{display:flex;justify-content:space-between;align-items:flex-start;}
 .shead .st{font-size:20px;font-weight:800;display:flex;align-items:center;gap:9px;}.shead .ss{font-size:12px;color:var(--muted);margin-top:5px;}
 .shead .kpi{text-align:right;}.shead .kpi .l{font-size:11px;color:var(--muted);}.shead .kpi .v{font-size:18px;font-weight:800;}
-.senti{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}.senti .l{font-size:12px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:8px;}.senti .l b{color:var(--up);}
-.gg{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(39,117,237,.35),var(--inset) 50%,rgba(224,49,49,.35));}.gg .n{position:absolute;top:-5px;width:4px;height:22px;border-radius:2px;background:var(--up);box-shadow:0 0 0 2px var(--canvas);transform:translateX(-50%);}.gg__s{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-weight:600;margin-top:8px;}
+/* .senti / .gg / .gg__s ("섹터 AI 심리" 게이지) 는 2026-08-04 제거 — 이 화면 전용이라
+   마크업이 사라지면서 같이 죽었다. 복구가 필요하면 git 이력에서 꺼낼 것. */
 .lede{font-size:13px;color:var(--muted);line-height:1.85;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px;}.lede b{color:var(--ink);}
 .dbox{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.05);padding:14px;margin-bottom:16px;}
 .dbox .shead,.dbox .lede,.dbox .block{box-shadow:none;}
@@ -1010,3 +1013,86 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #why-moved.lw-curve-collapsed > #wm-curve-block + .lw-row{
   margin-top:0;padding-top:0;border-top:none;
 }
+
+/* ── 밤사이 브리지(#overnight-bridge) — 거래일 07:30~09:00에만 노출(stocks-home.js) ──
+   ncai 규칙: 좌측 컬러 액센트 바 금지, 강조는 surface-soft 톤 + 굵기. 상태는 pill 배지로만.
+   색은 한국 시장 관례 그대로 --up=빨강(상승) / --dn=파랑(하락) — semantic 팔레트 금지.
+   변수엔 전부 폴백을 준다(§5 — 변수 하나가 비어 페이지가 통째로 빈 화면이 된 적이 있다). */
+#overnight-bridge{background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);border-radius:16px;box-shadow:var(--s1,0 1px 3px rgba(0,0,0,.06));padding:14px 16px;margin-bottom:16px;}
+.ob-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-bottom:2px;}
+.ob-t{font-size:15px;font-weight:800;color:var(--ink,#13151A);}
+.ob-date{font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
+.ob-list{margin-top:4px;}
+.ob-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:10px 0;border-bottom:1px solid var(--hair,#E5E7EB);}
+.ob-row:last-child{border-bottom:none;}
+.ob-sec{flex:0 0 auto;min-width:66px;font-size:13px;font-weight:700;color:var(--ink,#13151A);}
+.ob-leg{display:inline-flex;align-items:center;gap:4px;min-width:0;font-size:13px;}
+.ob-mk{flex:0 0 auto;font-size:13px;font-weight:500;color:var(--muted,#5B6472);background:var(--soft,#F9FAFB);border-radius:6px;padding:1px 6px;}
+.ob-leg b{font-weight:800;font-variant-numeric:tabular-nums;}
+.ob-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted,#5B6472);}
+.ob-gap{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;}
+.ob-pill{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:999px;background:var(--soft,#F9FAFB);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:var(--muted,#5B6472);}
+.ob-pill.up{color:var(--up,#E03131);}
+.ob-pill.dn{color:var(--dn,#2775ED);}
+/* 색은 붙여준 .up/.dn(전역 규칙)이 결정한다 — 여기서 color를 지정하면 특이도가 높아 그걸 덮어써
+   '동조'가 아닌 행까지 먹색으로 나온다. 동조(gap_cls="")일 땐 클래스가 없어 본문색을 그대로 쓴다. */
+.ob-gap b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+.ob-note{font-size:13px;line-height:1.55;color:var(--muted,#5B6472);margin:0;padding-top:10px;border-top:1px solid var(--hair,#E5E7EB);}
+/* 좁은 화면에선 한 줄에 다 넣으면 행마다 줄바꿈 위치가 달라져 들쭉날쭉해진다.
+   섹터명+갭을 첫 줄에 고정하고, 미국·한국 다리를 각각 한 줄씩 내린다(행 3줄 고정). */
+@media(max-width:600px){
+  #overnight-bridge{padding:13px 14px;}
+  .ob-row{gap:3px 10px;padding:11px 0;}
+  .ob-sec{order:1;flex:1 1 auto;}
+  .ob-gap{order:2;}
+  .ob-leg{order:3;flex:0 0 100%;}
+}
+
+/* ETF 요약 블록(홈) — 상세는 #etf-rank. 모든 변수에 폴백을 둔다(§5). */
+.etfsig-lead{padding:14px 16px 12px;}
+.etfsig-lead__t{font-size:14px;font-weight:700;color:var(--ink,#13151A);margin-bottom:6px;}
+.etfsig-lead__b{margin:0;font-size:13px;line-height:1.6;color:var(--muted,#5B6472);}
+.etfsig-lead__b b{font-weight:700;color:var(--ink,#13151A);}
+.etfsig-bet{padding:0 16px 12px;}
+.etfsig-bet__lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.etfsig-bet__lbl .dn{color:var(--dn,#2775ED);}
+.etfsig-bet__lbl .up{color:var(--up,#E03131);}
+.etfsig-bet__lbl b{font-weight:700;}
+.etfsig-bar{position:relative;height:8px;border-radius:999px;background:var(--up,#E03131);overflow:hidden;}
+.etfsig-bar__dn{position:absolute;left:0;top:0;bottom:0;background:var(--dn,#2775ED);}
+.etfsig-bet__pct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted,#5B6472);margin-top:5px;}
+.etfsig-kpi{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair,#E5E7EB);border-top:1px solid var(--hair,#E5E7EB);border-bottom:1px solid var(--hair,#E5E7EB);}
+.etfsig-kpi>div{background:var(--soft,#F9FAFB);padding:10px 16px;display:flex;flex-direction:column;gap:3px;}
+.etfsig-kpi .k{font-size:13px;color:var(--muted,#5B6472);}
+.etfsig-kpi .v{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
+.etfsig-kpi .v.up{color:var(--up,#E03131);}
+.etfsig-kpi .v.dn{color:var(--dn,#2775ED);}
+.etfsig-ext__r{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--hair,#E5E7EB);font-size:13px;}
+.etfsig-ext__r:last-child{border-bottom:0;}
+.etfsig-ext__r .k{color:var(--muted,#5B6472);}
+.etfsig-ext__r .n{font-weight:700;color:var(--ink,#13151A);}
+.etfsig-ext__r .v{margin-left:auto;font-weight:700;}
+.etfsig-ext__r .v.up{color:var(--up,#E03131);}
+.etfsig-ext__r .v.dn{color:var(--dn,#2775ED);}
+.etfsig-more{display:block;padding:12px 16px;text-align:center;font-size:13px;font-weight:500;color:var(--primary,#006EFF);cursor:pointer;border-top:1px solid var(--hair,#E5E7EB);}
+/* 탭에 없는 화면 진입 링크. '전체 보기' 링크는 기존 .more(stocks-home.css:258)를 그대로 쓴다 — 새로 만들지 않는다. */
+.xlink{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--hair,#E5E7EB);cursor:pointer;}
+.xlink:last-child{border-bottom:0;}
+.xlink .n{font-size:14px;font-weight:700;color:var(--ink,#13151A);}
+.xlink .d{font-size:13px;color:var(--muted,#5B6472);}
+.xlink .go{margin-left:auto;color:var(--muted,#5B6472);font-size:16px;}
+
+/* 섹터 선택 칩 — docs/prototypes/2026-08-03-stocks-subnav-fullsize.html에서 확정된 디자인 그대로.
+   서브탭 바(#ds-subnav, 언더라인+primary)와 시각적으로 겹치지 않도록 먹색 채움 방식을 쓴다. */
+.secsel{display:flex;align-items:center;gap:6px;margin:0 0 16px;padding-bottom:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}
+.secsel::-webkit-scrollbar{display:none;}
+.secsel__i{display:inline-flex;align-items:center;gap:4px;flex:none;height:32px;padding:0 10px;border-radius:999px;background:var(--canvas,#FFF);border:1px solid var(--hair,#E5E7EB);font-size:13px;font-weight:500;color:#475569;text-decoration:none;white-space:nowrap;cursor:pointer;transition:border-color .12s,background .12s;}
+.secsel__i:hover{border-color:#CBD5E1;background:var(--soft,#F9FAFB);}
+.secsel__i .ic{font-size:13px;line-height:1;}
+.secsel__i b{font-size:13px;font-weight:700;}
+.secsel__i.on{background:var(--ink,#13151A);border-color:var(--ink,#13151A);color:#fff;}
+.secsel__i.on b.up{color:#FF7B7B;}
+.secsel__i.on b.dn{color:#7FB0FF;}
+
+/* 실측 소스가 없어 준비 중으로 표시하는 블록 공용 스타일. */
+.empty-note{padding:24px 16px;text-align:center;font-size:12px;color:var(--muted,#5B6472);line-height:1.6;}
