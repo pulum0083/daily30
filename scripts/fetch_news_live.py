@@ -10,12 +10,36 @@ import re
 import sys
 import urllib.parse
 import urllib.request
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
-from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 KST = timezone(timedelta(hours=9))
+
+# ── 공용 뉴스 수집 모듈 별칭 ──────────────────────────────────────────────────
+# 실제 구현은 news_sources.py에 있다(§30 — 같은 판정 로직을 두 벌 두지 않는다).
+# 기존 private 이름을 별칭으로 유지해 호출부·테스트(monkeypatch 포함)를 그대로 둔다.
+import news_sources as _ns
+
+_GN_KR, _GN_EN = _ns.GN_KR, _ns.GN_EN
+_HDR, _BATCH_URL = _ns.HDR, _ns.BATCH_URL
+_STOPWORDS, _BIGRAM_THRESHOLD = _ns.STOPWORDS, _ns.BIGRAM_THRESHOLD
+_parse_rss_datetime = _ns.parse_rss_datetime
+_extract_resolved_url = _ns.extract_resolved_url
+_resolve_gnews_url = _ns.resolve_gnews_url
+_title_kw, _title_bigrams, _is_dup_title = _ns.title_kw, _ns.title_bigrams, _ns.is_dup_title
+
+
+def _clean_title(title: str) -> str:
+    """Google News RSS 제목 끝 '- 출처명' 제거 + 괄호 태그 제거."""
+    return _ns.clean_title(title, strip_brackets=True)
+
+
+def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
+    """RSS URL에서 오늘 날짜(KST) 기사만 수집한다. pub_time(HH:MM) 포함."""
+    return _ns.fetch_rss(url, today, max_items, strip_brackets=True,
+                         log_prefix="fetch_news_live")
+
+
 REPO_ROOT = Path(__file__).parent.parent
 OUT_PATH = REPO_ROOT / "web" / "data" / "kospi-news-live.json"
 MAX_HISTORY = 6
@@ -42,63 +66,12 @@ def get_slot(hour: int, minute: int) -> str:
 
 # ── RSS 수집 ─────────────────────────────────────────────────────────────────
 
-def _parse_rss_datetime(date_str: str) -> tuple[str | None, str | None]:
-    """RSS pubDate → (YYYY-MM-DD, HH:MM) KST. 실패 시 (None, None)."""
-    if not date_str:
-        return None, None
-    try:
-        dt = parsedate_to_datetime(date_str.strip()).astimezone(KST)
-        return dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")
-    except Exception:
-        return None, None
 
 
-def _clean_title(title: str) -> str:
-    """Google News RSS 제목 끝 '- 출처명' 제거 + 괄호 태그 제거."""
-    title = re.sub(r"\s*-\s*[^-]{1,30}$", "", title.strip())
-    title = re.sub(r"\[.*?\]", "", title)
-    title = re.sub(r"\(.*?\)", "", title)
-    return re.sub(r"\s{2,}", " ", title).strip()
 
 
-def _fetch_rss(url: str, today: str, max_items: int = 15) -> list[dict]:
-    """RSS URL에서 오늘 날짜(KST) 기사만 수집한다. pub_time(HH:MM) 포함."""
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=12) as r:
-            xml_bytes = r.read()
-        root = ET.fromstring(xml_bytes)
-        items = []
-        for item in root.iter("item"):
-            title = (item.findtext("title") or "").strip()
-            desc = (item.findtext("description") or "").strip()
-            link = (item.findtext("link") or "").strip()
-            pub_date, pub_time = _parse_rss_datetime(item.findtext("pubDate") or "")
-            source_el = item.find("source")
-            source = (source_el.text or "").strip() if source_el is not None else ""
-
-            if not title or pub_date != today:
-                continue
-
-            desc = re.sub(r"<[^>]+>", "", desc)[:180].strip()
-            items.append({
-                "title": _clean_title(title),
-                "date": pub_date,
-                "pub_time": pub_time or "00:00",
-                "source": source,
-                "desc": desc,
-                "link": link,
-            })
-            if len(items) >= max_items:
-                break
-        return items
-    except Exception as e:
-        print(f"[fetch_news_live] RSS 수집 실패 ({url[:70]}): {e}")
-        return []
 
 
-_GN_KR = "https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR:ko&q="
-_GN_EN = "https://news.google.com/rss/search?hl=en-US&gl=US&ceid=US:en&q="
 
 
 def fetch_articles(slot: str, today: str) -> list[dict]:
@@ -133,51 +106,10 @@ def fetch_articles(slot: str, today: str) -> list[dict]:
 # RSS의 <link>는 실제 기사 페이지가 아니라 Google News 리다이렉트 인터스티셜이다.
 # batchexecute로 한 번 리졸브해 발행사 원문 URL로 치환한다 (fetch_ib_korea_views.py와 동일 패턴).
 
-_HDR = {"User-Agent": "Mozilla/5.0"}
-_BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
 
 
-def _extract_resolved_url(raw: str) -> str | None:
-    if "garturlres" not in raw:
-        return None
-    seg = raw.split("garturlres", 1)[1]
-    m = re.search(r'"(https?://.*?)\\*"', seg)
-    if not m:
-        return None
-    url = m.group(1)
-    url = re.sub(r"\\+u([0-9a-fA-F]{4})", lambda mm: chr(int(mm.group(1), 16)), url)
-    return url.replace("\\/", "/")
 
 
-def _resolve_gnews_url(link: str) -> str:
-    """Google News 기사 링크를 발행사 원문 URL로 리졸브한다. 실패 시 원래 link 반환."""
-    if not link or "/rss/articles/" not in link:
-        return link
-    try:
-        art = link.split("/articles/")[1].split("?")[0]
-        req = urllib.request.Request(link, headers=_HDR)
-        with urllib.request.urlopen(req, timeout=12) as r:
-            page = r.read().decode("utf-8", "ignore")
-        sig = re.search(r'data-n-a-sg="([^"]+)"', page)
-        ts = re.search(r'data-n-a-ts="([^"]+)"', page)
-        if not (sig and ts):
-            return link
-        inner = (
-            '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,'
-            'null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
-            f'"{art}",{ts.group(1)},"{sig.group(1)}"]'
-        )
-        payload = [[["Fbv4je", inner, None, "generic"]]]
-        body = "f.req=" + urllib.parse.quote(json.dumps(payload))
-        req2 = urllib.request.Request(
-            _BATCH_URL, data=body.encode(),
-            headers={**_HDR, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
-        )
-        with urllib.request.urlopen(req2, timeout=12) as r:
-            raw = r.read().decode("utf-8", "ignore")
-        return _extract_resolved_url(raw) or link
-    except Exception:
-        return link
 
 
 # ── Gemini 선별 (google_search 미사용) ───────────────────────────────────────
@@ -296,11 +228,6 @@ _CURATION_PAT = re.compile(
     r"(?:월|화|수|목|금|토|일)요일[^\n]{0,5}주목|주목할\s*주식|추천\s*종목\s*[0-9]",
     re.IGNORECASE,
 )
-_STOPWORDS = {
-    "이슈", "뉴스", "기자", "오늘", "어제", "지난", "이번", "관련", "대한", "따른",
-    "코스피", "코스닥", "주가", "주식", "시장", "장중", "장세", "상승", "하락",
-    "전환", "반등", "급등", "급락", "강세", "약세", "회복", "마감",
-}
 
 
 def _get_market_reality():
@@ -373,32 +300,12 @@ def _is_curation(result: dict) -> bool:
     return bool(_CURATION_PAT.search(stock_title or ""))
 
 
-def _title_kw(title: str) -> set:
-    return set(re.findall(r"[가-힣A-Za-z]{2,}", title)) - _STOPWORDS
 
 
-def _title_bigrams(title: str) -> set:
-    """제목의 문자 2-gram 집합. 조사·어미 변형에 강하다."""
-    s = re.sub(r"[^가-힣A-Za-z0-9]", "", title)
-    return {s[i:i + 2] for i in range(len(s) - 1)}
 
 
-_BIGRAM_THRESHOLD = 0.40
 
 
-def _is_dup_title(a: str, b: str, threshold: float = 0.55) -> bool:
-    """두 제목이 같은 이슈를 가리키는지 판정한다 — 어절 겹침 **또는** 문자 2-gram 겹침.
-
-    어절 단위 비교만으로는 한국어 재작성을 못 잡는다. 2026-07-30 실사고의 두 쌍은
-    "외인 대규모 매도" vs "외국인 대규모 매도와", "이틀째" vs "이틀 연속"처럼 조사·어미만
-    달라 어절 겹침이 0.29·0.33에 그쳤다(임계 0.55 미달 → 통과). 같은 쌍의 문자 2-gram
-    겹침은 0.48·0.68로, 서로 다른 이슈(0.00~0.27)와 뚜렷이 갈린다.
-    """
-    wa, wb = _title_kw(a), _title_kw(b)
-    if wa and wb and len(wa & wb) / min(len(wa), len(wb)) >= threshold:
-        return True
-    ga, gb = _title_bigrams(a), _title_bigrams(b)
-    return bool(ga and gb) and len(ga & gb) / min(len(ga), len(gb)) >= _BIGRAM_THRESHOLD
 
 
 def _filter_seen_articles(articles: list, seen_titles: list, threshold: float = 0.55) -> list:

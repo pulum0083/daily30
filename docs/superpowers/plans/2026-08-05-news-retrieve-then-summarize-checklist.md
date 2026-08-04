@@ -10,14 +10,21 @@
 - [x] 2026-08-04 미국 브리핑 정정·배포, 공지 게시
 - [x] SERVICE_RULES §31 기록
 
-## 1단계 — 공용 모듈 추출 (동작 변화 없음)
-- [ ] `scripts/news_sources.py` 신설 (헤더 주석 한국어 1줄)
-- [ ] `_fetch_rss` / `_GN_KR` / `_GN_EN` 이동 → verify: `test_fetch_news_dedup.py` 통과
-- [ ] `_resolve_gnews_url` / `_extract_resolved_url` 이동 → verify: 쿼리스트링 있는 URL로 재검증(§Google News 이중 이스케이프 버그)
-- [ ] `_parse_real_published_at` 이동 → verify: MSN 콘텐츠 API 경로 포함 기존 테스트 통과
-- [ ] `_is_dup_title` 이동 → verify: `test_market_session_gate.py` 통과
-- [ ] `fetch_news_live.py` · `fetch_ib_korea_views.py` 호출부 교체 → verify: 전체 596건 통과
-- [ ] 커밋: "refactor(뉴스): RSS 수집 공용 모듈 추출"
+## 1단계 — 공용 모듈 추출 (동작 변화 없음) ✅ 2026-08-04
+- [x] `scripts/news_sources.py` 신설
+- [x] `fetch_rss` / `GN_KR` / `GN_EN` / `parse_rss_datetime` / `clean_title` 이동
+- [x] `resolve_gnews_url` / `extract_resolved_url` 이동
+- [x] `parse_real_published_at` / `fetch_msn_published_at` / `verify_real_published_at` 이동
+- [x] `is_dup_title` / `title_kw` / `title_bigrams` 이동
+- [x] 두 소비처를 별칭으로 교체 (기존 private 이름 유지 → 호출부·monkeypatch 테스트 무변경)
+- [x] 내 변경이 만든 고아 import 제거 (`ET`, `parsedate_to_datetime`)
+- [x] verify: 전체 596건 통과 + 실 네트워크 스모크(30건 수집 → yna.co.kr 리졸브 → 발행일 05:10 검증)
+- [x] 커밋
+
+**남긴 것(의도적)**: `fetch_stock_news.py`의 `_resolve_gnews_url`은 반환 타입이 다르고
+(`(url, page)` 튜플), `fetch_domestic_issues.py`의 `_parse_rss_datetime`도 별도다.
+지금 통합하면 스테이지 2와 무관한 회귀 위험만 커진다 — 4단계 이후 별건으로 정리한다.
+`_clean_title`은 두 소비처의 동작이 실제로 달라(괄호 태그 제거 여부) 파라미터로 보존했다.
 
 ## 2단계 — 미국 브리핑 수집기 전환
 - [ ] 실패 테스트 먼저 — 목록에 없는 사건을 LLM이 반환하면 폐기되는지

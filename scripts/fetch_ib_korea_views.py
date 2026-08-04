@@ -28,6 +28,34 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
 
+# ── 공용 뉴스 수집 모듈 별칭 ──────────────────────────────────────────────────
+# 실제 구현은 news_sources.py에 있다(§30). 기존 private 이름을 별칭으로 유지해
+# 호출부·테스트(test_domestic_issues.py의 monkeypatch 포함)를 그대로 둔다.
+import news_sources as _ns
+
+_GN_KR = _ns.GN_KR
+_HDR, _BATCH_URL = _ns.HDR, _ns.BATCH_URL
+_extract_resolved_url = _ns.extract_resolved_url
+_resolve_gnews_url = _ns.resolve_gnews_url
+_parse_iso_datetime = _ns.parse_iso_datetime
+_parse_real_published_at = _ns.parse_real_published_at
+
+
+def _clean_title(title: str) -> str:
+    """Google News RSS 제목 끝 '- 출처명' 제거."""
+    return _ns.clean_title(title)
+
+
+def _fetch_msn_published_at(url: str):
+    return _ns.fetch_msn_published_at(url, log_prefix="ib_views")
+
+
+def _verify_real_published_at(url: str):
+    """기사 원문 URL의 실제 발행일시를 조회한다. 조회 실패 시 None."""
+    return _ns.verify_real_published_at(url, log_prefix="ib_views")
+
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -136,8 +164,6 @@ def _normalize_sentiment(s: str) -> str:
     return low if low in VALID_SENTIMENTS else "neu"
 
 
-_GN_KR = "https://news.google.com/rss/search?hl=ko&gl=KR&ceid=KR:ko&q="
-_HDR = {"User-Agent": "Mozilla/5.0"}
 
 # 화이트리스트 IB × 한국 시장·대형주 조합 쿼리. 커버리지 확보용으로 넉넉히.
 _QUERIES = [
@@ -150,10 +176,6 @@ _QUERIES = [
 ]
 
 
-def _clean_title(title: str) -> str:
-    """Google News RSS 제목 끝 '- 출처명' 제거."""
-    title = re.sub(r"\s*-\s*[^-]{1,30}$", "", title.strip())
-    return re.sub(r"\s{2,}", " ", title).strip()
 
 
 def _fetch_rss_candidates(now: datetime, kospi_ref: float | None) -> list[dict]:
@@ -201,58 +223,10 @@ def _fetch_rss_candidates(now: datetime, kospi_ref: float | None) -> list[dict]:
     return cands
 
 
-_BATCH_URL = "https://news.google.com/_/DotsSplashUi/data/batchexecute"
 
 
-def _extract_resolved_url(raw: str) -> str | None:
-    """batchexecute 응답 원문(garturlres 포함)에서 실제 원문 URL을 복원한다.
-
-    Google이 내부 JSON 문자열을 한 번 더 JSON으로 감싸 이스케이프하기 때문에, 쿼리스트링에
-    =·& 같은 특수문자가 있으면 \\u003d·\\u0026 형태로 이중 이스케이프된다. 단순히 '역슬래시가
-    아닌 문자'만 매칭하는 정규식은 이 이스케이프 시퀀스의 첫 역슬래시에서 멈춰버려 URL이
-    쿼리스트링 시작 지점(예: '?no', '?apiversion')에서 잘린다. \\uXXXX를 실제 문자로 복원한
-    뒤 반환해 이 잘림을 막는다.
-    """
-    if "garturlres" not in raw:
-        return None
-    seg = raw.split("garturlres", 1)[1]
-    m = re.search(r'"(https?://.*?)\\*"', seg)
-    if not m:
-        return None
-    url = m.group(1)
-    url = re.sub(r"\\+u([0-9a-fA-F]{4})", lambda mm: chr(int(mm.group(1), 16)), url)
-    return url.replace("\\/", "/")
 
 
-def _resolve_gnews_url(link: str) -> str:
-    """Google News 기사 링크를 발행사 원문 URL로 리졸브한다. 실패 시 원래 link 반환."""
-    if "/rss/articles/" not in link:
-        return link
-    try:
-        art = link.split("/articles/")[1].split("?")[0]
-        req = urllib.request.Request(link, headers=_HDR)
-        with urllib.request.urlopen(req, timeout=12) as r:
-            page = r.read().decode("utf-8", "ignore")
-        sig = re.search(r'data-n-a-sg="([^"]+)"', page)
-        ts = re.search(r'data-n-a-ts="([^"]+)"', page)
-        if not (sig and ts):
-            return link
-        inner = (
-            '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,'
-            'null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],'
-            f'"{art}",{ts.group(1)},"{sig.group(1)}"]'
-        )
-        payload = [[["Fbv4je", inner, None, "generic"]]]
-        body = "f.req=" + urllib.parse.quote(json.dumps(payload))
-        req2 = urllib.request.Request(
-            _BATCH_URL, data=body.encode(),
-            headers={**_HDR, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
-        )
-        with urllib.request.urlopen(req2, timeout=12) as r:
-            raw = r.read().decode("utf-8", "ignore")
-        return _extract_resolved_url(raw) or link
-    except Exception:
-        return link
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -263,66 +237,14 @@ def _resolve_gnews_url(link: str) -> str:
 # 후보를 버린다(데이터 정합성 > 완전성).
 # ─────────────────────────────────────────────────────────────────────────────
 
-_JSONLD_DATE_PAT = re.compile(r'"datePublished"\s*:\s*"([^"]+)"')
-_META_DATE_PAT = re.compile(
-    r'<meta[^>]+(?:property|name|itemprop)=["\']'
-    r'(?:article:published_time|og:published_time|datePublished)["\']'
-    r'[^>]*content=["\']([^"\']+)["\']',
-    re.IGNORECASE,
-)
-_MSN_ARTICLE_ID_PAT = re.compile(r"/ar-([A-Za-z0-9]+)")
 
 
-def _parse_iso_datetime(raw: str) -> datetime | None:
-    try:
-        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
-        return None
 
 
-def _parse_real_published_at(html: str) -> datetime | None:
-    """기사 페이지 HTML에서 실제 발행일시(JSON-LD datePublished 또는 meta published_time)를
-    추출한다. 구조화 데이터가 없으면 None(신뢰 불가 — 상위에서 후보를 드롭)."""
-    for pat in (_JSONLD_DATE_PAT, _META_DATE_PAT):
-        m = pat.search(html)
-        if m:
-            dt = _parse_iso_datetime(m.group(1))
-            if dt:
-                return dt
-    return None
 
 
-def _fetch_msn_published_at(url: str) -> datetime | None:
-    """MSN은 기사 정적 HTML이 클라이언트 렌더링(SPA)이라 meta 태그가 없다.
-    MSN 콘텐츠 API(assets.msn.com)로 실제 발행일시(publishedDateTime)를 직접 조회한다."""
-    m = _MSN_ARTICLE_ID_PAT.search(url)
-    if not m:
-        return None
-    try:
-        api_url = f"https://assets.msn.com/content/view/v2/Detail/ko-kr/{m.group(1)}"
-        req = urllib.request.Request(api_url, headers=_HDR)
-        with urllib.request.urlopen(req, timeout=10) as r:
-            data = json.loads(r.read().decode("utf-8", "ignore"))
-        raw = data.get("publishedDateTime")
-        return _parse_iso_datetime(raw) if raw else None
-    except Exception as e:
-        print(f"[ib_views] MSN 발행일 조회 실패: {e}", file=sys.stderr)
-        return None
 
 
-def _verify_real_published_at(url: str) -> datetime | None:
-    """기사 원문 URL의 실제 발행일시를 조회한다. MSN은 전용 API, 그 외는 페이지 메타데이터.
-    조회 실패(추출 불가·네트워크 오류) 시 None."""
-    if "msn.com" in url:
-        return _fetch_msn_published_at(url)
-    try:
-        req = urllib.request.Request(url, headers=_HDR)
-        with urllib.request.urlopen(req, timeout=10) as r:
-            html = r.read().decode("utf-8", "ignore")
-    except Exception as e:
-        print(f"[ib_views] 원문 페이지 조회 실패: {e}", file=sys.stderr)
-        return None
-    return _parse_real_published_at(html)
 
 
 def _select_verified_candidates(cands: list[dict], now: datetime, max_items: int = MAX_ITEMS) -> list[dict]:
