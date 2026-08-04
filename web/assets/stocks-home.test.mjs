@@ -436,3 +436,37 @@ test('브리지 CSS: .ob-gap b 규칙은 color를 지정하지 않는다 (전역
   assert.ok(m, '.ob-gap b 규칙을 찾지 못했다 — 선택자가 바뀌었으면 이 테스트도 같이 고칠 것');
   assert.doesNotMatch(m[1], /(^|[^-])color\s*:/, '.ob-gap b에 color를 지정하면 .up/.dn 색이 죽는다');
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// go() — pushState 뒤 서브탭 동기화 훅. pushState는 hashchange를 발생시키지 않으므로
+// go()가 화면을 바꿀 때마다 window.dsSubnavSync를 직접 불러 서브탭 강조를 맞춘다(/stocks/
+// 서브탭 배선). loadWindow()의 스텁 document/window엔 history·scrollTo가 없어 go()가 그
+// 지점에서 바로 예외를 던지므로, 이 두 테스트에서만 최소로 채워 넣는다.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** go()를 실행할 수 있는 상태로 만든다 — 대상 화면 el이 .screen 클래스를 가진 것처럼 위장하고,
+ *  go() 본문이 무조건 건드리는 window.scrollTo·history.pushState를 최소 스텁으로 채운다. */
+function loadWindowForGo() {
+  const win = loadWindow();
+  const el = win.document.getElementById('sector');
+  el.classList.contains = (cls) => cls === 'screen';
+  win.scrollTo = noop;
+  win.history = { pushState: noop };
+  return win;
+}
+
+test('go(): 화면 전환 후 window.dsSubnavSync를 정확히 한 번 호출한다', () => {
+  const win = loadWindowForGo();
+  let calls = 0;
+  win.dsSubnavSync = () => { calls++; };
+  win.go('sector');
+  assert.equal(calls, 1);
+});
+
+test('go(): window.dsSubnavSync가 함수가 아니어도(미정의·문자열) 예외 없이 넘어간다', () => {
+  for (const bad of [undefined, 'not-a-function']) {
+    const win = loadWindowForGo();
+    win.dsSubnavSync = bad;
+    assert.doesNotThrow(() => win.go('sector'), `dsSubnavSync=${String(bad)} 케이스에서 예외 발생`);
+  }
+});
