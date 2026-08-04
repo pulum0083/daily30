@@ -214,3 +214,22 @@ test('secRenderChips — 활성 칩만 is-active 클래스를 갖는다', () => 
   assert.ok(autoTag.includes(' on'), '활성 칩에 on 클래스가 없다');
   assert.ok(!semiTag.includes(' on'), '비활성 칩에 on이 붙었다');
 });
+
+// Regression: QA-001 — 같은 종목이 종목 랭킹은 +29.9%, 대장주는 +29.95%로 자릿수가 갈렸다
+// Found by /qa on 2026-08-04
+// Report: .gstack/qa-reports/qa-report-localhost-2026-08-04.md
+test('secShowSector — 같은 종목은 랭킹·대장주에서 동일한 자릿수로 표기된다', () => {
+  const { doc, els } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+
+  // 000660(SK하이닉스, +3.4)은 랭킹 1위이자 대장주 ②라 한 화면에 두 번 나온다.
+  const rowPct = els['sec-rows'].innerHTML.match(/000660[\s\S]*?([+−]\d+\.\d+)%/)[1];
+  const leadPct = els['sec-leaders'].innerHTML.match(/000660[\s\S]*?([+−]\d+\.\d+)%/)[1];
+  assert.equal(rowPct, leadPct, `같은 종목인데 표기가 다르다: 랭킹 ${rowPct} vs 대장주 ${leadPct}`);
+
+  // 섹터 평균과도 자릿수를 맞춘다(전부 소수점 2자리).
+  const decimals = (s) => s.split('.')[1].length;
+  assert.equal(decimals(rowPct), 2, `랭킹 행은 소수점 2자리여야 하는데: ${rowPct}`);
+  assert.equal(decimals(els['sec-avg'].textContent.replace('%', '')), 2);
+});
