@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.parse
 from datetime import datetime
@@ -18,6 +19,13 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
+
+# 전송 재시도 — 2026-08-05 07:32 코스피 브리핑이 read timeout 한 번에 미발송된 사고 대응.
+# 워크플로우의 텔레그램 스텝은 continue-on-error라 실패해도 잡이 초록색으로 끝나므로,
+# 일시적 네트워크 요동은 여기서 흡수해야 한다.
+SEND_MAX_ATTEMPTS = 3
+SEND_TIMEOUT_SEC = 30      # 15초는 응답이 느릴 뿐인 요청까지 잘랐다 — 여유를 둔다
+SEND_BACKOFF_SEC = 3       # 시도 간 대기: 3s → 9s
 
 
 def load_credentials(lang: str = "ko") -> tuple[str, str]:
@@ -100,13 +108,57 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
         "link_preview_options": json.dumps({"is_disabled": False, "prefer_small_media": True}),
     }
     data = urllib.parse.urlencode(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, method="POST")
+
+    # 재시도는 중복 발송 위험을 감수한다. read timeout은 "요청이 도달하지 못했다"와
+    # "도달했는데 응답만 못 읽었다"를 구분할 수 없고, sendMessage에는 멱등키가 없다.
+    # 미발송(구독자가 브리핑을 아예 못 받음)이 중복보다 훨씬 해로우므로 재시도를 택한다.
+    last_err = None
+    for attempt in range(1, SEND_MAX_ATTEMPTS + 1):
+        req = urllib.request.Request(url, data=data, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=SEND_TIMEOUT_SEC) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8")
+            # 4xx는 토큰·chat_id·본문 오류라 재시도해도 결과가 같다 — 즉시 포기.
+            if e.code < 500:
+                raise RuntimeError(f"HTTP {e.code}: {body}") from e
+            last_err = RuntimeError(f"HTTP {e.code}: {body}")
+        except Exception as e:  # 타임아웃·연결 끊김 등 일시적 네트워크 오류
+            last_err = RuntimeError(str(e))
+
+        if attempt < SEND_MAX_ATTEMPTS:
+            wait = SEND_BACKOFF_SEC * (3 ** (attempt - 1))
+            print(
+                f"[send_telegram] 전송 실패 ({attempt}/{SEND_MAX_ATTEMPTS}): {last_err} "
+                f"— {wait}초 후 재시도",
+                file=sys.stderr,
+            )
+            time.sleep(wait)
+
+    raise RuntimeError(f"{SEND_MAX_ATTEMPTS}회 시도 모두 실패: {last_err}")
+
+
+def send_admin_alert(message: str) -> None:
+    """전송 실패를 관리자 텔레그램으로 알린다. 키 미설정이면 조용히 건너뜀.
+
+    브리핑 전송 스텝은 continue-on-error라 실패해도 잡이 success로 끝난다 —
+    이 알림이 없으면 로그를 직접 열기 전까지 미발송을 알 방법이 없다.
+    """
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
+    if not token or not chat_id:
+        print("[send_telegram] 관리자 알림 키 미설정 — 알림 건너뜀", file=sys.stderr)
+        return
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")
-        raise RuntimeError(f"HTTP {e.code}: {body}") from e
+        data = urllib.parse.urlencode({"chat_id": chat_id, "text": message}).encode()
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/sendMessage", data=data)
+        urllib.request.urlopen(req, timeout=10)
+        print("[send_telegram] 관리자 알림 발송 완료", file=sys.stderr)
+    except Exception as e:
+        # 알림 실패가 원래 오류를 가리면 안 된다.
+        print(f"[send_telegram] 관리자 알림 실패: {e}", file=sys.stderr)
 
 
 def build_fallback_message(briefing_type: str) -> str:
@@ -351,6 +403,14 @@ def main():
             sys.exit(1)
     except Exception as e:
         print(f"[send_telegram] ERROR: {e}", file=sys.stderr)
+        # 러너는 UTC라 date는 반드시 KST로 — 07:30 브리핑이 전날 날짜로 안내되는 것을 막는다.
+        import pytz
+        today_kst = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+        send_admin_alert(
+            f"🚨 텔레그램 미발송 (type={args.type}, lang={args.lang})\n{e}\n"
+            f"복구: gh workflow run telegram-resend.yml "
+            f"-f briefing_type={args.type} -f date={today_kst}"
+        )
         sys.exit(1)
 
 
