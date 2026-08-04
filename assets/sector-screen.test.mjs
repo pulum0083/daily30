@@ -195,14 +195,30 @@ test('secShowSector — 데이터 없는 섹터는 기존 DOM을 그대로 둔�
   assert.equal(els['sec-rows'].innerHTML, before, '없는 섹터로 전환 시도 시 화면이 깨지면 안 된다');
 });
 
-test('secRenderChips — 활성 섹터가 맨 앞, 나머지는 평균 내림차순', () => {
+test('secRenderChips — 항상 평균 내림차순, 활성 섹터를 앞으로 보내지 않는다', () => {
   const { doc, els } = mkDoc();
   const { secRenderChips } = load(doc);
-  secRenderChips(els['secsel'], 'semicon', {
-    semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'},
-  });
+  const avgs = { semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'} };
+  secRenderChips(els['secsel'], 'semicon', avgs);
   const order = [...els['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(order, ['semicon', 'auto', 'bio']); // semicon 먼저(활성), 그다음 1.5 > -0.1
+  assert.deepEqual(order, ['auto', 'bio', 'semicon']); // 순수 평균 내림차순: 1.5 > -0.1 > -4.1
+});
+
+// Regression: 클릭할 때마다 칩 순서가 바뀌어 메뉴가 들썩였다 — 활성 섹터를 바꿔도
+// 같은 데이터면 배열 순서가 완전히 동일해야 한다(강조만 이동, 위치는 고정).
+test('secRenderChips — 활성 섹터가 바뀌어도 칩 순서 자체는 고정이다', () => {
+  const avgs = { semicon:{avg:-4.1,label:'반도체'}, auto:{avg:1.5,label:'자동차'}, bio:{avg:-0.1,label:'바이오'} };
+  const { doc: doc1, els: els1 } = mkDoc();
+  const { secRenderChips: r1 } = load(doc1);
+  r1(els1['secsel'], 'semicon', avgs);
+  const orderWhenSemiconActive = [...els1['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
+
+  const { doc: doc2, els: els2 } = mkDoc();
+  const { secRenderChips: r2 } = load(doc2);
+  r2(els2['secsel'], 'bio', avgs);
+  const orderWhenBioActive = [...els2['secsel'].innerHTML.matchAll(/data-sector="([a-z]+)"/g)].map((m) => m[1]);
+
+  assert.deepEqual(orderWhenSemiconActive, orderWhenBioActive, '활성 섹터만 바뀌었는데 칩 위치가 달라지면 안 된다');
 });
 
 test('secRenderChips — 활성 칩만 is-active 클래스를 갖는다', () => {
