@@ -211,6 +211,12 @@ jobs:
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi
 
+      - name: 🧾 발송 기록 커밋 (중복 발송 가드 유지)
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
+        continue-on-error: true
+        run: |
+          bash .github/scripts/commit_sent_log.sh "kospi"
+
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
@@ -346,6 +352,12 @@ jobs:
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type us
+
+      - name: 🧾 발송 기록 커밋 (중복 발송 가드 유지)
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
+        continue-on-error: true
+        run: |
+          bash .github/scripts/commit_sent_log.sh "us"
 
       - name: 📧 이메일 전송
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
@@ -533,6 +545,12 @@ jobs:
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         continue-on-error: true
         run: python3 scripts/send_telegram.py --type kospi-close
+
+      - name: 🧾 발송 기록 커밋 (중복 발송 가드 유지)
+        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
+        continue-on-error: true
+        run: |
+          bash .github/scripts/commit_sent_log.sh "kospi-close"
 
   # ──────────────────────────────────────────────────────────────────
   kospi-accuracy:

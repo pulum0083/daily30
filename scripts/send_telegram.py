@@ -14,7 +14,7 @@ import sys
 import time
 import urllib.request
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.parent
@@ -26,6 +26,10 @@ DATA_DIR = BASE_DIR / "data"
 SEND_MAX_ATTEMPTS = 3
 SEND_TIMEOUT_SEC = 30      # 15초는 응답이 느릴 뿐인 요청까지 잘랐다 — 여유를 둔다
 SEND_BACKOFF_SEC = 3       # 시도 간 대기: 3s → 9s
+
+# 발송 기록이 이 일수보다 오래 멈춰 있으면 중복 발송 가드가 죽은 것으로 본다.
+# 최장 연휴(설·추석 + 주말)를 넘기도록 여유를 둔다.
+STALE_LOG_DAYS = 7
 
 
 def load_credentials(lang: str = "ko") -> tuple[str, str]:
@@ -290,24 +294,48 @@ def _save_sent_log(log: dict) -> None:
         json.dump(log, f, indent=2, ensure_ascii=False)
 
 
+def _today_kst() -> str:
+    import pytz
+    return datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+
+
+def _warn_if_guard_is_dead(log: dict, today: str) -> None:
+    """기록이 오래 멈춰 있으면 경고한다. 가드는 fail-open이라 죽어도 티가 안 난다.
+
+    2026-07-02 b257bdc9가 텔레그램 스텝을 커밋 스텝 뒤로 옮기면서 mark_sent_today()가
+    쓴 기록이 더는 커밋되지 않게 됐고, 가드는 한 달간 조용히 아무것도 막지 않았다.
+    발송을 막지는 않는다 — 경고 때문에 브리핑이 끊기면 본말전도다.
+    """
+    dates = [d for per_lang in log.values() if isinstance(per_lang, dict)
+             for d in per_lang.values() if isinstance(d, str)]
+    newest = max(dates, default="")
+    cutoff = (datetime.strptime(today, "%Y-%m-%d")
+              - timedelta(days=STALE_LOG_DAYS)).strftime("%Y-%m-%d")
+    if newest >= cutoff:
+        return
+    print(
+        f"[send_telegram] ⚠️  중복 발송 가드가 죽어 있습니다 — 최근 기록 "
+        f"{newest or '(없음)'}, 오늘 {today}. mark_sent_today()가 쓴 "
+        f"{SENT_LOG_FILE.name}이 커밋되고 있는지 확인하세요 (SERVICE_RULES §32).",
+        file=sys.stderr,
+    )
+
+
 def already_sent_today(briefing_type: str, lang: str = "ko") -> bool:
     """Return True if a message was already sent today (KST) for this type/lang.
 
     telegram_sent_log.json에 날짜를 기록하여 git에 커밋 — GitHub Actions
     ephemeral 환경에서도 체크아웃 시 이전 발송 기록을 읽을 수 있다.
     """
-    from datetime import datetime
-    import pytz
-    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
+    today = _today_kst()
     log = _load_sent_log()
+    _warn_if_guard_is_dead(log, today)
     return log.get(briefing_type, {}).get(lang) == today
 
 
 def mark_sent_today(briefing_type: str, lang: str = "ko") -> None:
-    from datetime import datetime
-    import pytz
-    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y-%m-%d")
-    log = _load_sent_log()
+    today = _today_kst()
+    log = _load_sent_log()   # 갱신 대상 — 여기선 신선도 경고를 내지 않는다
     if briefing_type not in log:
         log[briefing_type] = {}
     log[briefing_type][lang] = today
