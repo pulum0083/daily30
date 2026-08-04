@@ -2215,16 +2215,41 @@ if(passBtn){
     }
     return eok.toLocaleString() + '억';
   }
+  // 극단값(최고·최저)은 서로 다른 두 종목이 있어야 '범위'다. 1개(나머지 폴링 전멸)면 최고=최저로
+  // 같은 종목이 중복 표시되던 문제(코드리뷰 Minor) — 그럴 땐 범위 자체를 숨긴다.
   function pickExtremes(rows){
-    if(!rows || !rows.length) return null;
+    if(!rows || rows.length < 2) return null;
     var s = rows.slice().sort(function(a,b){ return b.pct - a.pct; });
     return { top: s[0], bottom: s[s.length-1] };
   }
+  function isFiniteNum(v){ return typeof v === 'number' && isFinite(v); }
   function shouldShowEtfSignal(etf){
-    return !!(etf && etf.lead && etf.lead.title && etf.lead.body && etf.betting);
+    if(!(etf && etf.lead && etf.lead.title && etf.lead.body && etf.betting)) return false;
+    var b = etf.betting;
+    // 폴링이 전종목 실패해도 api/_signals-core.mjs의 etfBettingFlow()는 모양은 온전한
+    // {downAmt:0,upAmt:0,downRatio:0,upRatio:100,invVolMultiple:0,levPct:null} 객체를 돌려준다
+    // (필드는 다 있지만 값이 전부 미측정) — 타입 체크로 그 함정을 먼저 거른다(코드리뷰 Critical).
+    if(!isFiniteNum(b.downAmt) || !isFiniteNum(b.upAmt) || !isFiniteNum(b.downRatio) ||
+       !isFiniteNum(b.upRatio) || !isFiniteNum(b.invVolMultiple)) return false;
+    // 인버스·레버리지 ETF 거래대금이 하루 종일 양쪽 다 0인 날은 현실에 없다 — 이 조합은 수집
+    // 전체 실패의 신호다. API 응답엔 "몇 종목이 성공했는지"를 구분하는 필드가 없어(byCode가
+    // 성공분만 채워지고 실패 개수는 응답에 안 실린다) 이 값 조합 자체로 "데이터 없음"을 판정한다.
+    // 없으면 지어내지 않고 비운다(운영 규칙 §0) — "조용한 평온한 하루"처럼 보이게 두지 않는다.
+    if(b.downAmt === 0 && b.upAmt === 0) return false;
+    return true;
   }
-  function pctCls(v){ return v >= 0 ? 'up' : 'dn'; }
-  function pctFmt(v){ return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%'; }
+  // levPct처럼 개별 종목 폴링 하나만 실패해도 null이 될 수 있는 값은 여기서 안전하게 처리한다.
+  // null/undefined를 0으로 취급하면 "+0.00%"라는, 실측된 적 없는 숫자가 빨간색(상승)으로
+  // 나타난다(코드리뷰 Critical) — 숫자가 아니면 포맷·색 모두 아무것도 반환하지 않는다.
+  function pctCls(v){ return isFiniteNum(v) ? (v >= 0 ? 'up' : 'dn') : ''; }
+  function pctFmt(v){ return isFiniteNum(v) ? (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%' : null; }
+  // lead.body는 api/_signals-core.mjs의 etfLead()가 만드는 문자열이고, 오늘은 숫자만 보간해
+  // <b>...</b> 굵게 강조 외엔 태그가 없다. 그 전제를 주석으로만 남기면 나중에 다른 필드가
+  // 섞여도 아무도 못 알아챈다(SERVICE_RULES §20·§25와 같은 실패 패턴) — <b>·</b>(속성 없이)만
+  // 통과시키고 그 외 태그는 전부 제거해 innerHTML에 안전하게 넣을 수 있도록 코드로 강제한다.
+  function sanitizeBodyHtml(html){
+    return String(html == null ? '' : html).replace(/<(?!\/?b>)[^>]*>/gi, '');
+  }
   function renderEtfSignal(etf, asOf){
     var box = document.getElementById('etf-signal');
     if(!box) return;
@@ -2233,8 +2258,7 @@ if(passBtn){
     var set = function(id, txt){ var e = document.getElementById(id); if(e) e.textContent = txt; };
     set('etfsig-asof', asOf && asOf.label ? asOf.label + ' 종가' : '');
     set('etfsig-title', etf.lead.title);
-    // lead.body는 우리 API가 만든 문자열이고 <b>만 들어간다 — 그대로 렌더한다.
-    var bodyEl = document.getElementById('etfsig-body'); if(bodyEl) bodyEl.innerHTML = etf.lead.body;
+    var bodyEl = document.getElementById('etfsig-body'); if(bodyEl) bodyEl.innerHTML = sanitizeBodyHtml(etf.lead.body);
     set('etfsig-dn-amt', fmtEok(b.downAmt));
     set('etfsig-up-amt', fmtEok(b.upAmt));
     set('etfsig-dn-pct', b.downRatio + '%');
@@ -2242,21 +2266,32 @@ if(passBtn){
     var bar = document.getElementById('etfsig-bar-dn'); if(bar) bar.style.width = b.downRatio + '%';
     set('etfsig-inv', 'KODEX 200 대비 ×' + b.invVolMultiple);
     var lev = document.getElementById('etfsig-lev');
-    if(lev){ lev.textContent = pctFmt(b.levPct); lev.className = 'v num ' + pctCls(b.levPct); }
+    if(lev){
+      var levTxt = pctFmt(b.levPct), levRow = lev.parentElement;
+      if(levTxt){ lev.textContent = levTxt; lev.className = 'v num ' + pctCls(b.levPct); if(levRow) levRow.style.display=''; }
+      else { lev.textContent = ''; if(levRow) levRow.style.display = 'none'; }   // 이 종목만 미측정 — 행을 비운다(§0)
+    }
     var ext = document.getElementById('etfsig-ext'), ex = pickExtremes(etf.sector);
     if(ext){
-      ext.innerHTML = ex ? [
-        ['섹터 ETF 최고', ex.top], ['섹터 ETF 최저', ex.bottom]
-      ].map(function(p){
-        return '<div class="etfsig-ext__r"><span class="k">' + p[0] + '</span>'
-             + '<span class="n">' + p[1].label + '</span>'
-             + '<span class="v num ' + pctCls(p[1].pct) + '">' + pctFmt(p[1].pct) + '</span></div>';
-      }).join('') : '';
+      ext.innerHTML = '';   // 라벨·값은 아래에서 textContent로만 채운다 — 문자열 조립 innerHTML 금지(코드리뷰 Important)
+      if(ex){
+        [['섹터 ETF 최고', ex.top], ['섹터 ETF 최저', ex.bottom]].forEach(function(p){
+          var row = document.createElement('div'); row.className = 'etfsig-ext__r';
+          var k = document.createElement('span'); k.className = 'k'; k.textContent = p[0];
+          var n = document.createElement('span'); n.className = 'n'; n.textContent = p[1].label;
+          var v = document.createElement('span'); v.className = 'v num ' + pctCls(p[1].pct); v.textContent = pctFmt(p[1].pct) || '';
+          row.appendChild(k); row.appendChild(n); row.appendChild(v);
+          ext.appendChild(row);
+        });
+      }
     }
     box.style.display = '';
   }
   // 테스트 훅 — node:vm에서 순수 포맷터만 꺼내 검증한다(DOM 결과는 브라우저에서 확인).
-  window.__etfSignal = { fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal };
+  window.__etfSignal = {
+    fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal,
+    pctFmt: pctFmt, pctCls: pctCls, sanitizeBodyHtml: sanitizeBodyHtml
+  };
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
