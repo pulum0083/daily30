@@ -2102,7 +2102,7 @@ if(passBtn){
     return '<a class="row" onclick="goStock(\''+r.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+(i+1)+'</span>'
       +'<div class="nm"><b>'+r.name+'</b><small class="num">'+r.code+'</small></div>'
       +'<div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div>'
-      +'<span class="barval '+cls+' num">'+sign+Math.abs(r.pct).toFixed(1)+'%</span></a>';
+      +'<span class="barval '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
   }
 
   function secChipHtml(key,label,avg,active){
