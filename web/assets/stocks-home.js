@@ -2135,30 +2135,59 @@ if(passBtn){
     renderSectorBreadth(all);
     bindSurgeTips();
   }
-  function renderSectorBreadth(all){
-    var sec=all.filter(function(x){return x.sector==='반도체'||x.sector==='semicon';});
-    if(!sec.length) return;
+  // 8개 섹터 대표 종목(대장주) — stock_universe.json 순서 그대로 상위 2~3종목 선별.
+  // 종목 "선택"만 손으로 골랐을 뿐 값은 전부 SNAP(stocks-snapshot.json) 실측이다 —
+  // 밤사이 브리지의 BRIDGE_US_TICKERS와 같은 패턴(§20 위반 아님, 종목 선택 큐레이션).
+  var SECTOR_LEADERS={
+    semicon:['005930','000660','042700'],
+    power:['267260','010120','298040'],
+    defense:['012450','079550','064350'],
+    ship:['329180','042660','010140'],
+    battery:['373220','247540','006400'],
+    auto:['005380','000270','012330'],
+    bio:['207940','068270','000100'],
+    finance:['032830','105560','055550'],
+  };
+  var SECTOR_ICONS={semicon:'🔧',power:'⚡',defense:'🛡️',ship:'🚢',battery:'🔋',auto:'🚗',bio:'🧬',finance:'🏦'};
+
+  // 섹터 화면 데이터 — stocks-snapshot.json(SNAP)만 쓴다. vol-top·API 라이브 소스와
+  // 섞지 않는다(§0 정합성 우선, §24 시점 불일치 방지) — 이 화면은 항상 "직전 마감 기준"이다.
+  function secBuildSectorData(snap, key){
+    if(!snap||!snap.stocks) return null;
+    var rows=[];
+    Object.keys(snap.stocks).forEach(function(code){
+      var s=snap.stocks[code];
+      if(s&&s.sector===key&&typeof s.change_pct==='number') rows.push({code:code,name:s.name,pct:s.change_pct});
+    });
+    if(!rows.length) return null;
+    rows.sort(function(a,b){return b.pct-a.pct;});
     var upN=0,dnN=0,flatN=0,sum=0;
-    sec.forEach(function(x){sum+=x.changePct;if(x.changePct>0)upN++;else if(x.changePct<0)dnN++;else flatN++;});
-    var total=sec.length,avg=sum/total;
-    var el=document.getElementById('sec-avg');
-    if(el){el.textContent=(avg>=0?'+':'')+avg.toFixed(1)+'%';el.className='v num '+(avg>=0?'up':'dn');}
-    var lbl=document.getElementById('sec-breadth-label');
-    if(lbl)lbl.innerHTML=total+'종목 중 <b class="up num">'+upN+' 상승</b>';
-    var bbar=document.getElementById('sec-bbar');
-    if(bbar){var bu=Math.round(upN/total*1000)/10,bd=Math.round(dnN/total*1000)/10,bn=Math.round(flatN/total*1000)/10;bbar.innerHTML='<i class="bu" style="width:'+bu+'%"></i><i class="bd" style="width:'+bd+'%"></i><i class="bn" style="width:'+bn+'%"></i>';}
-    var bk=document.getElementById('sec-bk');
-    if(bk)bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+flatN+'</span></span>';
-    var senti=document.getElementById('sec-senti');
-    var pct=Math.round(upN/total*100);
-    var slbl=document.getElementById('sec-senti-label');
-    var needle=document.getElementById('sec-senti-needle');
-    if(senti&&slbl&&needle){senti.style.display='';slbl.innerHTML=(pct>=55?'상승 우위':pct<=45?'하락 우위':'중립')+' <b class="num">'+pct+'%</b>';needle.style.left=pct+'%';}
-    var leaders=['005930','000660','042700'];
-    var lw=document.getElementById('sec-leaders');
-    if(lw){var lmap={};sec.forEach(function(x){lmap[x.code]=x;});
-      lw.innerHTML=leaders.map(function(c,i){var x=lmap[c];if(!x)return '';var cls=x.changePct>=0?'up':'dn';var sign=x.changePct>=0?'+':'';return '<a class="srow" onclick="goStock(\''+c+'\')"><span class="n2">'+['①','②','③'][i]+' '+x.name+' <small class="num">'+c+'</small></span><span class="c '+cls+' num">'+sign+x.changePct.toFixed(2)+'%</span></a>';}).join('');}
+    rows.forEach(function(r){sum+=r.pct;if(r.pct>0)upN++;else if(r.pct<0)dnN++;else flatN++;});
+    var total=rows.length,avg=sum/total;
+    var byCode={}; rows.forEach(function(r){byCode[r.code]=r;});
+    var leaders=(SECTOR_LEADERS[key]||[]).map(function(c){return byCode[c];}).filter(Boolean);
+    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,leaders:leaders};
   }
+
+  // 8개 섹터 전부의 평균 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
+  function secAllAverages(snap){
+    var out={};
+    Object.keys(SECTOR_LABELS).forEach(function(key){
+      var d=secBuildSectorData(snap,key);
+      if(d) out[key]={avg:d.avg,label:d.label};
+    });
+    return out;
+  }
+
+  // 이 화면은 항상 스냅샷(마감) 기준이라 .ds-asof(장중 '오늘 실시간')를 재사용하면 안 된다.
+  function secAsOfLabel(snap){
+    if(!snap||!snap.generated_at) return '';
+    var ymd=String(snap.generated_at).slice(0,10);
+    return fmtKoDate(ymd)+' 마감';
+  }
+
+  // 테스트 훅 — node:vm에서 순수 함수만 꺼내 검증한다(DOM 결과는 브라우저에서 확인).
+  window.__sectorScreen={secBuildSectorData:secBuildSectorData, secAllAverages:secAllAverages, secAsOfLabel:secAsOfLabel};
   function bindSurgeTips(){
     if(typeof showTip!=='function') return;
     document.querySelectorAll('.vol-surge-badge').forEach(function(el){
