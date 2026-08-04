@@ -967,3 +967,33 @@ DRAM 실제 일봉은 07-28 **47.77** → 07-29 **44.85**다. 07-29에 이미 -6
 - **최종 처방은 게이트가 아니라 수집 구조다.** 검증 가능한 뉴스를 원하면 **문서를 먼저 가져오고 LLM은 그 안에서 고르고 요약만** 하게 한다(`fetch_news_live.py`가 §10에서 이미 전환한 방식, `fetch_ib_korea_views.py`도 동일). 날짜·사건·수치가 실제 기사에서만 나오면 날조는 구조적으로 불가능해진다.
 
 **재발 시 진단 순서**: ① 실적 서사가 보이면 그 종목의 실제 발표일을 `yf.Ticker(t).get_earnings_dates()`로 직접 확인 — "며칠 전"이 아니라 **날짜**를 본다. ② 게이트를 통과했다면 그 catalyst의 `ticker` 필드에 **영향 종목이 섞여 있는지**, 그중 오늘 실적을 낸 종목이 있는지 확인. ③ `data/catalyst_history_{type}.json`에서 같은 서사가 며칠 연속 실렸는지 본다 — 연속이면 직전 실행 에코를 의심한다. ④ 수집 로그의 `그라운딩 출처 N건`을 확인한다 — 0건이면 그날 뉴스는 전부 무출처 생성물이므로 개별 항목을 따지기 전에 수집 자체를 폐기 대상으로 본다.
+
+### 32. 브리핑은 배포됐는데 텔레그램만 미발송 — 재시도 부재 + continue-on-error 무음 실패 (2026-08-05 실사고, 수정 완료)
+
+**증상**: 2026-08-05 07:25 코스피 브리핑 잡([run 30956359948](https://github.com/pulum0083/daily30/actions/runs/30956359948))이 **전 스텝 완료·잡 결론 success**로 끝났는데 구독자 텔레그램이 오지 않았다. 페이지(`/briefings/2026-08-05/kospi/` HTTP 200)·`briefings-list.json`(`kospi: ready, 07:31`)·main 커밋(`00fae990`)·Vercel 배포는 **전부 정상**이었다. 사용자에게는 텔레그램이 유일한 도착 신호라 "발행 자체가 안 됐다"로 보였다.
+
+**근본 원인 (두 겹)**:
+
+1. **재시도 없음** — `send_telegram.send_message()`가 `urlopen(req, timeout=15)` 단발 호출이었다. 로그에 `[send_telegram] ERROR: The read operation timed out` → `exit code 1` 한 줄만 남고 끝났다. 15초는 응답이 느릴 뿐인 요청까지 자른다.
+2. **무음 실패** — 그 스텝의 `continue-on-error: true` 때문에 **exit 1이 나도 스텝·잡 결론이 `success`로 찍힌다**. GHA UI·`gh run list` 어디에도 실패 흔적이 없고, 로그를 직접 열어야만 보인다. 알림도 없었다.
+
+`continue-on-error` 자체는 옳다 — 전송 실패가 잡을 죽이면 이미 만들어진 페이지의 후속 스텝(이메일 등)까지 막힌다. 문제는 **실패를 아무도 모르게 만든 것**이다.
+
+**복구**: 정규 잡 재실행은 Claude 재호출·시장데이터 재수집으로 **이미 발행된 페이지를 바꾼다**(§2·§23). 발행물은 그대로 두고 메시지만 다시 만들어야 하므로, 커밋된 `analysis_snapshot.json`에서 메시지를 재생성해 보내는 [telegram-resend.yml](../.github/workflows/telegram-resend.yml)을 신설했다. 스냅샷이 출처라 **발행된 페이지와 내용이 같음이 구조적으로 보장**된다.
+
+```bash
+gh workflow run telegram-resend.yml -f briefing_type=kospi -f date=2026-08-05
+```
+
+**수정** ([send_telegram.py](../scripts/send_telegram.py)):
+- 3회 재시도(3s→9s 백오프), 타임아웃 15s→30s. 4xx(토큰·chat_id 오류)는 재시도해도 결과가 같으므로 즉시 포기, 5xx·네트워크 오류만 재시도.
+- `send_admin_alert()` — 최종 실패 시 `TELEGRAM_ADMIN_CHAT_ID`로 알림 + 재발송 명령 안내. 알림 실패가 원래 오류를 가리지 않도록 예외를 삼킨다. 날짜는 반드시 KST(러너는 UTC라 07:30 브리핑이 전날로 안내된다).
+- 테스트 `scripts/test_send_telegram_retry.py`(6) — 사고 리플레이(첫 시도 timeout → 재시도 성공) 포함.
+
+- **방지 룰(중복보다 미발송이 해롭다)**: `sendMessage`에는 멱등키가 없어 read timeout으로는 "요청이 도달 못 했다"와 "도달했는데 응답만 못 읽었다"를 **구분할 수 없다**. 그래도 재시도가 맞다 — 중복 발송은 거슬리는 수준이지만 미발송은 그날 브리핑이 구독자에게 아예 도달하지 않는 것이다. 이 트레이드오프를 코드 주석에 남겨 다음 사람이 "중복 위험"만 보고 재시도를 걷어내지 않게 한다.
+- **방지 룰(`continue-on-error`에는 반드시 알림을 짝지운다)**: `continue-on-error: true`는 **실패를 성공으로 표시**한다. 이 플래그를 붙이는 순간 그 스텝은 감시 대상에서 사라지므로, 붙일 때마다 "이게 실패하면 누가 어떻게 아는가"를 함께 답해야 한다. 답이 없으면 알림을 같이 넣는다. §21에서 발행 지연을 막으려 `continue-on-error`를 늘렸는데, 그 부작용이 이번에 드러났다.
+- **방지 룰(단발 네트워크 호출을 의심한다)**: 사용자에게 나가는 산출물의 마지막 관문이 **재시도 없는 단발 네트워크 호출**이면 그 자체가 사고 대기 상태다. `grep -n "urlopen\|requests\." scripts/send_*.py`로 발송 경로의 호출을 주기적으로 점검한다.
+
+**남은 결함(별건, 미수정)**: `data/telegram_sent_log.json`의 "하루 1회 발송 제한" 가드가 **죽어 있다**. `mark_sent_today()`가 커밋 스텝 *이후*의 전송 스텝에서 파일을 쓰기 때문에 그 기록이 커밋되지 않는다 — 로그는 2026-07-02에 멈춰 있고 `already_sent_today()`는 항상 False를 반환한다. 이번 재발송이 막히지 않은 것도 이 때문이다. 중복 발송 위험이라는 성격이 달라 별도로 다룬다.
+
+**재발 시 진단 순서**: ① 잡이 success여도 **텔레그램 스텝의 로그를 직접 연다** — `continue-on-error` 스텝은 결론이 항상 success다. `gh run view <id> --log | grep send_telegram`. ② 페이지가 실제로 배포됐는지 먼저 확인(`curl -o /dev/null -w '%{http_code}' <url>` + `briefings-list.json`) — 배포는 됐는데 텔레그램만 실패한 경우와 파이프라인 전체가 죽은 경우는 대응이 완전히 다르다. ③ 배포가 정상이면 정규 잡을 재실행하지 말고 `telegram-resend.yml`을 쓴다 — 재실행은 발행된 페이지를 바꾼다.
