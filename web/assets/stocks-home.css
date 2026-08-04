@@ -293,7 +293,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-block{overflow:visible;}
 .sbx-block .block__h{border-radius:10px 10px 0 0;}
 .sbx-block .sbx-body{border-radius:0 0 10px 10px;}
-.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:52px;z-index:5;}
+/* top:108px = GNB 52 + 서브탭 40 + 서브탭 margin-bottom 16.
+   서브탭(#ds-subnav)이 sticky top:52px이라 예전 값 52px을 그대로 두면 정면으로 겹쳐
+   이 칩들의 윗부분이 잘린다. ds-subnav.css의 top/margin을 바꾸면 이 값도 같이 고칠 것. */
+.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:108px;z-index:5;}
 .sbx-tab{font-size:13px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s,background .12s;}
 .sbx-tab:hover{border-color:var(--primary);color:var(--primary);}
 .sbx-tab.on{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);font-weight:800;}
