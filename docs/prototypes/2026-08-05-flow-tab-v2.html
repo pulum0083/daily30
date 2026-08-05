@@ -1,0 +1,344 @@
+<!doctype html>
+<!-- 자금 지도 탭 v2 — 전체 맵 확대 + 테마 클릭 시 ETF 단위 상세. 실데이터(2026-07-29~08-04), 구현 전 방향 결정용 -->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자금 지도 탭 v2 — 맵 확대 + 상세</title>
+<style>
+:root{
+  --ink:#0F172A;--muted:#64748B;--line:#E9EEF5;--inset:#F6F8FB;
+  --in:#E03131;--out:#2775ED;--primary:#4F46E5;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:22px 16px 80px;background:#F1F5F9;color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif}
+.wrap{max-width:1120px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:-.01em}
+.lede{font-size:13px;color:var(--muted);margin:0 0 8px;line-height:1.6}
+.lede b{color:var(--ink)}
+.meta{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:8px 11px;margin:0 0 18px;line-height:1.6}
+
+.subnav{display:flex;border-bottom:1px solid var(--line);margin-bottom:16px;background:#fff;
+  border-radius:12px 12px 0 0;padding:0 6px}
+.subnav a{padding:12px 15px;font-size:13.5px;font-weight:700;color:var(--muted);
+  text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav a.on{color:var(--primary);border-bottom-color:var(--primary)}
+
+.block{background:#fff;border-radius:16px;padding:16px 16px 18px;margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.bh{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;flex-wrap:wrap}
+.bt{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.bs{font-size:11.5px;color:var(--muted);margin-left:auto}
+.bd{font-size:12px;color:var(--muted);margin:0 0 13px;line-height:1.55}
+
+/* ── 시장 요약 스트립 ── */
+.mkt{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+.mk{flex:1;min-width:150px;background:var(--inset);border-radius:11px;padding:10px 12px}
+.mk .k{font-size:10.5px;font-weight:800;color:var(--muted);margin-bottom:3px}
+.mk .v{font-size:17px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.mk .s{font-size:11px;color:var(--muted);margin-top:2px}
+.mk .v.up{color:var(--in)}.mk .v.dn{color:var(--out)}
+
+/* ── 전체 맵 ── */
+.map{display:flex;flex-direction:column;gap:5px}
+.row{display:flex;gap:5px}
+.tile{flex:1 1 0;min-width:96px;border-radius:10px;padding:8px 10px 7px;cursor:pointer;
+  display:flex;flex-direction:column;justify-content:space-between;position:relative;
+  border:2px solid transparent;transition:transform .12s,box-shadow .12s;overflow:hidden}
+.tile:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(15,23,42,.16)}
+.tile.on{border-color:var(--ink);box-shadow:0 3px 12px rgba(15,23,42,.22)}
+.tile .tn{font-size:12.5px;font-weight:800;line-height:1.2;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.tile .ta{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:1px}
+/* 타일 미니 막대 — 0축 기준 위=유입 / 아래=유출. 방향을 투명도가 아니라 위치로 구분한다
+   (홈 위젯 .ftd와 같은 규칙). currentColor 단색이라 밝은 타일·어두운 타일 모두에서 읽힌다. */
+.tile .tm{display:flex;gap:1.5px;height:16px;margin-top:5px;opacity:.62}
+.tile .tm .c{flex:1;display:flex;flex-direction:column;height:100%}
+.tile .tm .h{flex:1;display:flex}
+.tile .tm .h.u{align-items:flex-end}
+.tile .tm i{width:100%;border-radius:1px;min-height:1px;background:currentColor;display:block}
+.tile .tm .z{height:1px;background:currentColor;opacity:.45}
+.tile .tc{font-size:9.5px;opacity:.72;margin-top:3px;font-weight:600}
+
+/* ── 상세 패널 ── */
+.dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dh .nm{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.dh .amt{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.dh .amt.up{color:var(--in)}.dh .amt.dn{color:var(--out)}
+.kpis{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.kpi{background:var(--inset);border-radius:9px;padding:6px 11px;text-align:right}
+.kpi .k{font-size:10px;color:var(--muted);font-weight:700}
+.kpi .v{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+
+.st{font-size:11.5px;font-weight:800;color:#334155;margin:16px 0 7px;display:flex;
+  align-items:baseline;gap:6px}
+.st .n{font-weight:600;color:var(--muted);font-size:11px}
+
+/* 일별 막대 */
+.days{display:flex;gap:8px;align-items:flex-end}
+.dy{flex:1;display:flex;flex-direction:column;align-items:center}
+.dy .up,.dy .dn{width:100%;display:flex;flex-direction:column}
+.dy .up{height:56px;justify-content:flex-end}
+.dy .dn{height:44px;justify-content:flex-start}
+.dy .bar{width:100%;border-radius:4px}
+.dy .bar.p{background:rgba(224,49,49,.85);border-radius:4px 4px 0 0}
+.dy .bar.m{background:rgba(39,117,237,.85);border-radius:0 0 4px 4px}
+.dy .zero{height:1px;background:#CBD5E1;width:100%}
+.dy .v{font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dy .d{font-size:10.5px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.3}
+.dy .mkq{font-size:9.5px;font-weight:700;margin-top:2px}
+.dy .mkq.same{color:#94A3B8}.dy .mkq.opp{color:#D97706}
+
+/* 집중도 */
+.conc{display:flex;align-items:center;gap:10px;margin-top:4px}
+.gauge{flex:1;height:8px;border-radius:5px;background:#E8EDF4;overflow:hidden}
+.gauge i{display:block;height:100%;background:rgba(224,49,49,.72)}
+.conc .t{font-size:11.5px;color:var(--muted)}
+.conc .t b{color:var(--ink)}
+
+/* ETF 목록 */
+.grps{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.grps{grid-template-columns:1fr}}
+.grp-h{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;
+  margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.grp-h .dot{width:8px;height:8px;border-radius:2px;display:block}
+.grp-h .sum{margin-left:auto;font-variant-numeric:tabular-nums}
+.grp-h.i .dot{background:var(--in)}.grp-h.i{color:var(--in)}
+.grp-h.o .dot{background:var(--out)}.grp-h.o{color:var(--out)}
+.er{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:7px 9px;
+  border-radius:8px;margin-bottom:4px;background:var(--inset);align-items:center}
+.er .nm{font-size:12.5px;font-weight:700;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.er .fl{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;
+  white-space:nowrap;text-align:right}
+.er .fl.i{color:var(--in)}.er .fl.o{color:var(--out)}
+.er .sub{font-size:10.5px;color:var(--muted);display:flex;gap:7px;align-items:center;
+  font-variant-numeric:tabular-nums;grid-column:1}
+.er .spark{display:flex;gap:1.5px;align-items:center;height:14px;grid-column:2;
+  justify-self:end;width:52px}
+.er .spark i{flex:1;border-radius:1px;min-height:1.5px;display:block}
+.pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;
+  background:#fff;border:1px solid var(--line)}
+.pill.hot{background:#FEF2F2;border-color:#FCA5A5;color:#B91C1C}
+.pill.cold{background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8}
+.rest{font-size:11.5px;color:var(--muted);background:var(--inset);border-radius:8px;
+  padding:8px 10px;margin-top:8px;line-height:1.5}
+.rest b{color:#334155}
+
+.legend{display:flex;gap:13px;align-items:center;font-size:11px;color:var(--muted);
+  margin-top:10px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:3px;display:block}
+.foot{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;line-height:1.65}
+.foot b{color:#334155}
+</style></head><body><div class="wrap">
+
+<h1>자금 지도 탭 — 맵 확대 + 테마 상세</h1>
+<p class="lede">홈 위젯의 지도 구조를 그대로 키우고, <b>테마를 누르면 ETF 단위까지</b> 내려갑니다.
+  홈은 10개 테마 · 테마당 상위 5개 ETF만 보여주지만, 여기선 <b>16개 전부 · 테마당 최대 20개</b>를 봅니다.</p>
+<p class="meta" id="meta"></p>
+
+<div class="subnav">
+  <a href="#">전체</a><a href="#">특이신호</a><a href="#">섹터</a>
+  <a href="#" class="on">자금</a><a href="#">ETF</a>
+</div>
+
+<div class="block">
+  <div class="bh"><span class="bt">🧭 전체 자금 지도</span>
+    <span class="bs" id="map-win"></span></div>
+  <p class="bd">타일 크기 = 움직인 자금 규모 · 색 = 방향(빨강 유입 / 파랑 유출) ·
+    타일 안 작은 막대 = 일별 흐름. <b>타일을 누르면 아래 상세가 바뀝니다.</b></p>
+  <div class="mkt" id="mkt"></div>
+  <div class="map" id="map"></div>
+  <div class="legend">
+    <span><i style="background:rgba(224,49,49,.85)"></i>유입</span>
+    <span><i style="background:rgba(39,117,237,.85)"></i>유출</span>
+    <span>진할수록 큰 금액 · 홈에 안 나오는 하위 6개 테마까지 전부 표시</span>
+  </div>
+</div>
+
+<div class="block" id="detail"></div>
+
+<p class="foot" id="foot"></p>
+
+</div>
+<script src="./2026-08-05-flow-tab-v2-data.js"></script>
+<script>
+(function(){
+  var D=window.FLOWDATA, TH=D.themes, DATES=D.dates, MKT=D.market_daily, N=DATES.length;
+  // 화면에 나온 뒤 정렬 순서가 바뀌면 클릭 대상이 어긋나므로 여기서 한 번만 정렬한다.
+  TH=TH.slice().sort(function(a,b){return Math.abs(b.flow_eok)-Math.abs(a.flow_eok);});
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function eok(v){
+    var a=Math.abs(v),sg=v>0?'+':(v<0?'−':'');
+    if(a>=10000) return sg+(a/10000).toFixed(a>=100000?0:1).replace(/\.0$/,'')+'조';
+    return sg+a.toLocaleString('en-US')+'억';
+  }
+  function amt(v){ return eok(Math.abs(v)).replace(/^[+−]/,''); }   // 총량 — 부호 없음
+  function md(d){ return d.slice(5).replace('-','/'); }
+  // Date.UTC로 조립해 getUTCDay()로 읽는다(stocks-home.js krIsKospiHolidayOn과 동일).
+  // 'T00:00:00+09:00' 파싱은 KST 자정=전날 15:00 UTC라 요일이 하루 밀린다.
+  function wd(d){ var p=String(d).split('-');
+    return ['일','월','화','수','목','금','토'][
+      new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()]; }
+
+  document.getElementById('meta').innerHTML=
+    '실데이터 — <b>'+DATES[0]+' ~ '+DATES[N-1]+'</b> ('+N+'거래일) · ETF '+D.coverage.etf_count
+    +'개 중 테마 분류된 것만 · AUM '+D.aum_floor_eok+'억+ · 수집 '
+    +D.generated_at.slice(0,16).replace('T',' ')+' KST'
+    +'<br>테마 합계는 발행본(<code>/data/etf-flows.json</code>)과 동일하고, ETF 분해는 빌더와 같은 규약'
+    +'(최종 NAV 고정·중간 결측 carry-forward)으로 재계산해 16개 테마 전부 ±2억 이내 일치를 확인했습니다.';
+  document.getElementById('map-win').textContent=
+    md(DATES[0])+'~'+md(DATES[N-1])+' 누적 · 실측 설정/환매';
+
+  /* ── 시장 요약 ── */
+  (function(){
+    var cum=MKT.reduce(function(a,b){return a+b;},0);
+    var same=MKT.map(function(m,i){
+      return TH.filter(function(t){return m>=0?t.daily[i]>0:t.daily[i]<0;}).length;});
+    var piv=0;
+    for(var i=1;i<N;i++) if(same[i]>same[piv]||(same[i]===same[piv]
+      &&Math.abs(MKT[i])>Math.abs(MKT[piv]))) piv=i;
+    var inflow=TH.filter(function(t){return t.flow_eok>0;}).length;
+    document.getElementById('mkt').innerHTML=
+      '<div class="mk"><div class="k">'+N+'거래일 누적</div><div class="v '+(cum>=0?'up':'dn')+'">'
+        +eok(cum)+'</div><div class="s">'+md(DATES[0])+'~'+md(DATES[N-1])+' 전 테마 합계</div></div>'
+      +'<div class="mk"><div class="k">가장 많은 테마가 한꺼번에 움직인 날</div>'
+        +'<div class="v '+(MKT[piv]>=0?'up':'dn')+'">'+md(DATES[piv])+'('+wd(DATES[piv])+')</div>'
+        +'<div class="s">'+same[piv]+'/'+TH.length+'개 테마가 동시에 '
+        +(MKT[piv]<0?'유출':'유입')+' · '+eok(MKT[piv])+'</div></div>'
+      +'<div class="mk"><div class="k">유입 / 유출 테마</div>'
+        +'<div class="v">'+inflow+' <span style="color:var(--muted);font-size:13px">/ '
+        +(TH.length-inflow)+'</span></div><div class="s">'+N+'일 누적 기준</div></div>';
+  })();
+
+  /* ── 전체 맵 ── */
+  var TIERS=[[0,2,116],[2,5,94],[5,8,82],[8,12,72],[12,16,66]];
+  (function(){
+    var mx=Math.max.apply(null,TH.map(function(t){return Math.abs(t.flow_eok);}));
+    var h='';
+    TIERS.forEach(function(tr){
+      var seg=TH.slice(tr[0],tr[1]);
+      if(!seg.length) return;
+      h+='<div class="row" style="height:'+tr[2]+'px">'+seg.map(function(t){
+        var inten=Math.abs(t.flow_eok)/mx;
+        var alpha=(0.14+0.86*Math.sqrt(inten)).toFixed(3);
+        var rgb=t.flow_eok>=0?'224,49,49':'39,117,237';
+        var fg=alpha>0.5?'#fff':'#0F172A';
+        var dmx=Math.max.apply(null,t.daily.map(Math.abs))||1;
+        var spark=t.daily.map(function(v){
+          var hh=Math.max(1,Math.abs(v)/dmx*7);
+          return '<div class="c"><div class="h u">'
+            +(v>=0?'<i style="height:'+hh+'px"></i>':'')+'</div>'
+            +'<div class="z"></div><div class="h">'
+            +(v<0?'<i style="height:'+hh+'px"></i>':'')+'</div></div>';}).join('');
+        return '<div class="tile" data-th="'+esc(t.theme)+'" style="flex:'
+          +Math.max(Math.abs(t.flow_eok),1)+' 1 0;background:rgba('+rgb+','+alpha
+          +');color:'+fg+'">'
+          +'<div><div class="tn">'+esc(t.theme)+'</div>'
+          +'<div class="ta">'+eok(t.flow_eok)+'</div></div>'
+          +'<div><div class="tm">'+spark+'</div>'
+          +'<div class="tc">ETF '+t.etf_count+'개</div></div></div>';
+      }).join('')+'</div>';
+    });
+    document.getElementById('map').innerHTML=h;
+  })();
+
+  /* ── 테마 상세 ── */
+  function detail(theme){
+    var t=TH.filter(function(x){return x.theme===theme;})[0];
+    if(!t) return;
+    var churn=Math.abs(t.flow_eok)?t.gross_eok/Math.abs(t.flow_eok):0;
+    var shown=t.etfs.reduce(function(s,e){return s+Math.abs(e.flow);},0);
+    var pct=t.gross_eok?Math.max(0,Math.min(100,Math.round(shown/t.gross_eok*100))):0;
+
+    var h='<div class="dh"><span class="nm">'+esc(t.theme)+'</span>'
+      +'<span class="amt '+(t.flow_eok>=0?'up':'dn')+'">'+eok(t.flow_eok)+'</span>'
+      +'<div class="kpis">'
+      +'<div class="kpi"><div class="k">오간 돈</div><div class="v">'+amt(t.gross_eok)+'</div></div>'
+      +'<div class="kpi"><div class="k">회전율</div><div class="v">'+churn.toFixed(1)+'배</div></div>'
+      +'<div class="kpi"><div class="k">ETF</div><div class="v">'+t.etf_count+'개</div></div>'
+      +'</div></div>';
+
+    // 일별 + 시장 대비
+    var dmx=Math.max.apply(null,t.daily.map(Math.abs))||1;
+    h+='<div class="st">일별 순유입 <span class="n">막대 합 = 위 누적값 · '
+      +'아래 라벨은 그날 시장 전체와 같은 방향이었는지</span></div><div class="days">';
+    t.daily.forEach(function(v,i){
+      var pos=v>=0, ht=Math.max(3,Math.round(Math.abs(v)/dmx*(pos?48:36)));
+      var opp=(MKT[i]>0&&v<0)||(MKT[i]<0&&v>0);
+      h+='<div class="dy">'
+        +'<div class="up">'+(pos?'<span class="v" style="color:var(--in)">'+eok(v)
+          +'</span><i class="bar p" style="height:'+ht+'px"></i>':'')+'</div>'
+        +'<div class="zero"></div>'
+        +'<div class="dn">'+(pos?'':'<i class="bar m" style="height:'+ht+'px"></i>'
+          +'<span class="v" style="color:var(--out)">'+eok(v)+'</span>')+'</div>'
+        +'<span class="d">'+md(DATES[i])+'('+wd(DATES[i])+')'
+        +'<span class="mkq '+(opp?'opp':'same')+'">'+(opp?'시장과 반대':'시장과 같이')
+        +'</span></span></div>';
+    });
+    h+='</div>';
+
+    h+='<div class="st">집중도</div><div class="conc"><div class="gauge">'
+      +'<i style="width:'+pct+'%"></i></div><div class="t">아래 <b>'+t.etfs.length
+      +'개</b>가 이 테마에서 <b>오간 돈의 '+pct+'%</b></div></div>';
+
+    // ETF 그룹
+    function grp(title,list,cls){
+      if(!list.length) return '<div><div class="grp-h '+cls+'"><i class="dot"></i>'+title
+        +'<span class="sum">없음</span></div></div>';
+      var sum=list.reduce(function(s,e){return s+e.flow;},0);
+      var emx=Math.max.apply(null,list.map(function(e){
+        return Math.max.apply(null,e.daily.map(Math.abs));}))||1;
+      return '<div><div class="grp-h '+cls+'"><i class="dot"></i>'+title+' '+list.length+'개'
+        +'<span class="sum">'+eok(sum)+'</span></div>'
+        +list.map(function(e){
+          var sp=e.daily.map(function(v){
+            return '<i style="height:'+Math.max(1.5,Math.abs(v)/emx*14)+'px;background:'
+              +(v>=0?'rgba(224,49,49,.8)':'rgba(39,117,237,.8)')+'"></i>';}).join('');
+          // AUM 대비 % — 덩치 대비 얼마나 움직였나. 큰 ETF의 큰 금액보다 이쪽이 강도를 보여준다.
+          var pl='';
+          if(e.pct!=null&&Math.abs(e.pct)>=10)
+            pl='<span class="pill '+(e.pct>0?'hot':'cold')+'">덩치 대비 '
+              +(e.pct>0?'+':'−')+Math.abs(e.pct)+'%</span>';
+          return '<div class="er"><div class="nm">'+esc(e.name)+'</div>'
+            +'<div class="fl '+(e.flow>=0?'i':'o')+'">'+eok(e.flow)+'</div>'
+            +'<div class="sub">AUM '+amt(e.aum)+pl+'</div>'
+            +'<div class="spark">'+sp+'</div></div>';
+        }).join('')+'</div>';
+    }
+    h+='<div class="st">개별 ETF <span class="n">'+N+'일 순유입 순 · '
+      +'막대는 이 ETF의 일별 흐름</span></div><div class="grps">'
+      +grp('유입',t.etfs.filter(function(e){return e.flow>=0;}),'i')
+      +grp('유출',t.etfs.filter(function(e){return e.flow<0;}),'o')+'</div>';
+
+    if(t.rest_n)
+      h+='<div class="rest">그 외 <b>'+t.rest_n+'개</b> ETF 합계 <b>'+eok(t.rest_flow)
+        +'</b> — 개별 금액이 작아 목록에서 생략했지만 위 누적값에는 포함돼 있어요.</div>';
+
+    document.getElementById('detail').innerHTML=h;
+    document.querySelectorAll('.tile').forEach(function(el){
+      el.classList.toggle('on',el.getAttribute('data-th')===theme);});
+  }
+
+  document.getElementById('map').addEventListener('click',function(e){
+    var el=e.target.closest?e.target.closest('.tile'):null;
+    if(el) detail(el.getAttribute('data-th'));
+  });
+  detail(TH[0].theme);   // 빈 상태를 두지 않는다 — 1위 테마로 시작
+
+  document.getElementById('foot').innerHTML=
+    '<b>홈 위젯과의 차이.</b> 홈은 상위 10개 테마 · 테마당 상위 5개 ETF까지만 보여주고, '
+    +'ETF 행에는 이름과 순유입액만 있습니다. 이 탭은 <b>16개 테마 전부</b>, 테마당 <b>최대 20개</b> ETF를 '
+    +'보여주고 각 행에 <b>AUM · 덩치 대비 증감률 · 일별 흐름 막대</b>를 더했습니다. '
+    +'큰 ETF의 큰 금액보다 <b>작은 ETF가 덩치 대비 크게 움직인 것</b>이 더 드문 신호라, 그걸 놓치지 않게 한 장치입니다.'
+    +'<br><br><b>절단은 숨기지 않습니다.</b> 상위 20개 밖으로 밀린 ETF는 개수와 합계를 명시합니다'
+    +'(채권은 108개 중 88개가 여기 해당). 목록에서 빠졌을 뿐 누적값에는 포함돼 있습니다.'
+    +'<br><br><b>제약.</b> 네이버가 현재 AUM만 주므로 백필이 불가능합니다. 오늘은 '+N+'칸으로 시작해 '
+    +'매일 한 칸씩 늘어나고, 보관·윈도우를 20일로 올려두면 한 달 뒤 20칸이 됩니다.';
+})();
+</script>
+</body></html>

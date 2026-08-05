@@ -1,0 +1,392 @@
+<!doctype html>
+<!-- 자금 지도 탭(섹터 다음) 확대안 A·B·C 비교 목업 — 실데이터(2026-08-04 수집) 기준, 구현 전 방향 결정용 -->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자금 지도 탭 — 확대안 비교</title>
+<style>
+:root{
+  --ink:#0F172A;--muted:#64748B;--line:#E9EEF5;--inset:#F6F8FB;
+  --in:#E03131;--out:#2775ED;--primary:#4F46E5;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:22px 16px 80px;background:#F1F5F9;color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;}
+.wrap{max-width:1120px;margin:0 auto}
+h1{font-size:20px;margin:0 0 6px;letter-spacing:-.01em}
+.lede{font-size:13px;color:var(--muted);margin:0 0 8px;line-height:1.6}
+.lede b{color:var(--ink)}
+.meta{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:8px 11px;margin:0 0 22px;line-height:1.6}
+
+/* 서브탭 재현 */
+.subnav{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:18px;background:#fff;
+  border-radius:12px 12px 0 0;padding:0 6px}
+.subnav a{padding:12px 15px;font-size:13.5px;font-weight:700;color:var(--muted);text-decoration:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav a.on{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* 옵션 카드 */
+.opt{background:#fff;border-radius:16px;padding:18px 18px 20px;margin-bottom:20px;
+  box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.opt-h{display:flex;align-items:baseline;gap:9px;margin-bottom:4px;flex-wrap:wrap}
+.tag{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;background:#EEF2FF;color:#4338CA}
+.tag.rec{background:#ECFDF3;color:#15803D}
+.opt-t{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.opt-d{font-size:12.5px;color:var(--muted);margin:0 0 16px;line-height:1.6}
+.opt-d b{color:#334155}
+
+.sec-t{font-size:12px;font-weight:800;color:#334155;margin:18px 0 8px;display:flex;
+  align-items:baseline;gap:7px}
+.sec-t .n{font-weight:600;color:var(--muted);font-size:11px}
+.sec-t:first-of-type{margin-top:0}
+
+/* ── A안 히트맵 ── */
+.hm{width:100%;border-collapse:separate;border-spacing:2px;font-variant-numeric:tabular-nums}
+.hm th{font-size:10.5px;font-weight:700;color:var(--muted);padding:0 0 4px;text-align:center}
+.hm th.lb{text-align:left;width:118px}
+.hm th.tot{text-align:right;width:74px;padding-right:2px}
+.hm td.lb{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:118px;padding-right:6px}
+.hm td.c{height:26px;border-radius:5px;text-align:center;font-size:10.5px;font-weight:700;
+  cursor:default}
+.hm td.tot{text-align:right;font-size:11.5px;font-weight:800;padding-right:2px;white-space:nowrap}
+.hm tr.mkt td.lb,.hm tr.mkt td.tot{font-weight:800}
+.hm tr.mkt td.c{height:30px;font-size:11px}
+.hm tr.mkt+tr td{padding-top:6px}
+.hm .sp td{height:4px;padding:0}
+
+/* ── B안 파고 ── */
+.wave{display:flex;gap:8px;align-items:flex-end;margin:4px 0 2px}
+.wv{flex:1;display:flex;flex-direction:column;align-items:center;gap:0}
+.wv .up,.wv .dn{width:100%;display:flex;flex-direction:column}
+.wv .up{height:76px;justify-content:flex-end}
+.wv .dn{height:60px;justify-content:flex-start}
+.wv .bar{width:100%;border-radius:4px}
+.wv .bar.p{background:rgba(224,49,49,.85);border-radius:4px 4px 0 0}
+.wv .bar.m{background:rgba(39,117,237,.85);border-radius:0 0 4px 4px}
+.wv .zero{height:1px;background:#CBD5E1;width:100%}
+.wv .v{font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wv .d{font-size:10.5px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.35}
+.wv .cnt{font-size:9.5px;color:var(--muted)}
+.wv.pivot .d{color:var(--out);font-weight:800}
+
+.rel{display:grid;grid-template-columns:118px 1fr 78px;gap:3px 9px;align-items:center;
+  font-variant-numeric:tabular-nums}
+.rel .nm{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rel .track{height:15px;background:var(--inset);border-radius:4px;position:relative;overflow:hidden}
+.rel .track i{position:absolute;top:0;bottom:0;border-radius:3px}
+.rel .val{font-size:11.5px;font-weight:800;text-align:right;white-space:nowrap}
+.rel .hd{font-size:10.5px;color:var(--muted);font-weight:700}
+
+.dots{display:flex;gap:3px}
+.dots i{width:14px;height:14px;border-radius:3px;display:block}
+
+/* ── C안 스토리 카드 ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:11px}
+.card{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff}
+.card.hero{grid-column:1/-1;background:linear-gradient(180deg,#FEF2F2 0%,#fff 62%);
+  border-color:#FCA5A5}
+.card.hero.dn{background:linear-gradient(180deg,#EFF6FF 0%,#fff 62%);border-color:#93C5FD}
+.card .k{font-size:10.5px;font-weight:800;color:var(--muted);letter-spacing:.02em;margin-bottom:5px}
+.card .big{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.15;
+  font-variant-numeric:tabular-nums}
+.card .big.dn{color:var(--out)}.card .big.up{color:var(--in)}
+.card .tx{font-size:12.5px;color:#334155;margin-top:6px;line-height:1.55}
+.card .tx b{font-weight:800;color:var(--ink)}
+.mini{display:flex;gap:3px;align-items:flex-end;height:34px;margin-top:10px}
+.mini i{flex:1;border-radius:2px;min-height:2px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;
+  background:var(--inset);color:#334155;white-space:nowrap}
+
+.foot{font-size:11.5px;color:var(--muted);background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;line-height:1.65;margin-top:6px}
+.foot b{color:#334155}
+.legend{display:flex;gap:14px;align-items:center;font-size:11px;color:var(--muted);margin-top:9px;
+  flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:3px;display:block}
+
+@media(max-width:720px){
+  .hm th.lb,.hm td.lb{width:82px;max-width:82px;font-size:10.5px}
+  .hm td.c{font-size:9px}
+  .rel{grid-template-columns:82px 1fr 66px}
+  .card .big{font-size:19px}
+}
+</style></head><body><div class="wrap">
+
+<h1>자금 지도 탭 — 확대안 A · B · C 비교</h1>
+<p class="lede">섹터 다음 탭에 들어갈 <b>확대판 자금 지도</b>. 핵심 질문은 <b>"흐름이 언제 뒤집혔나"</b>.<br>
+세 안 모두 같은 실데이터를 쓰고, 지어낸 수치는 없습니다.</p>
+<p class="meta" id="meta"></p>
+
+<div class="subnav">
+  <a href="#">전체</a><a href="#">특이신호</a><a href="#">섹터</a>
+  <a href="#" class="on">자금</a><a href="#">ETF</a>
+</div>
+
+<!-- ══ A안 ══ -->
+<div class="opt">
+  <div class="opt-h"><span class="tag">A안</span><span class="opt-t">로테이션 히트맵</span></div>
+  <p class="opt-d">테마 × 거래일 격자. 셀 색이 그날 순유입 방향·강도.
+    <b>8/3 세로줄이 통째로 파래지는 것</b>이 설명 없이 보이는 게 이 안의 전부입니다.
+    정보밀도가 가장 높고 구현이 단순한 대신, 격자라 차갑고 "전부 파랗다" 이상은 말해주지 않습니다.</p>
+  <div id="a-hm"></div>
+  <div class="legend">
+    <span><i style="background:rgba(224,49,49,.85)"></i>유입</span>
+    <span><i style="background:rgba(39,117,237,.85)"></i>유출</span>
+    <span>진할수록 큰 금액 · 면적 왜곡을 줄이려 제곱근 스케일</span>
+  </div>
+</div>
+
+<!-- ══ B안 ══ -->
+<div class="opt">
+  <div class="opt-h"><span class="tag rec">B안 · 추천</span><span class="opt-t">시장 파고 + 상대강도</span></div>
+  <p class="opt-d">먼저 <b>시장 전체가 어느 날 뒤집혔는지</b>를 기준선으로 세우고, 각 테마를 그 파도 대비
+    <b>버텼나 / 휩쓸렸나</b>로 다시 봅니다. 순진한 "반전" 판정은 16개 중 14개에서 발화해 사실상
+    노이즈인데, 그건 테마가 뒤집힌 게 아니라 <b>시장이 뒤집힌 걸 16번 중복 보고</b>한 것이기 때문입니다.
+    이 안만 그 문제를 정면으로 풉니다.</p>
+
+  <div class="sec-t">시장 전체 일별 순유입
+    <span class="n">전 테마 합계 · "같은 방향"이 많은 날일수록 시장이 통째로 움직인 날</span></div>
+  <div class="wave" id="b-wave"></div>
+
+  <div class="sec-t" id="b-piv-t">시장이 빠진 날, 유출은 어디서 나왔나</div>
+  <div class="rel" id="b-piv"></div>
+
+  <div class="sec-t">시장과 따로 논 테마 <span class="n">시장 방향과 반대로 움직인 날</span></div>
+  <div class="rel" id="b-ind"></div>
+</div>
+
+<!-- ══ C안 ══ -->
+<div class="opt">
+  <div class="opt-h"><span class="tag">C안</span><span class="opt-t">스토리 카드</span></div>
+  <p class="opt-d">규칙으로 뽑은 <b>사실 문장</b> + 근거 미니차트. 진입 3초를 잡는 데는 가장 강합니다.
+    위험은 운영규칙 0 — 문구 규칙이 느슨하면 <b>"왜"를 지어내게</b> 됩니다.
+    아래 카드는 전부 <b>사실 서술만</b>이고 원인 추정이 한 줄도 없습니다. 이 선을 넘지 않는 게 조건입니다.</p>
+  <div class="cards" id="c-cards"></div>
+</div>
+
+<p class="foot" id="foot"></p>
+
+</div>
+<script src="./2026-08-05-flow-tab-data.js"></script>
+<script>
+(function(){
+  var D=window.FLOWDATA, TH=D.themes;
+  var DATES=TH[0].daily.map(function(x){return x.date;});
+  var N=DATES.length;
+
+  // 시장 전체 일별 합계 + 그날 유출 테마 수
+  var MKT=[],NEGN=[];
+  for(var i=0;i<N;i++){
+    var s=0,n=0;
+    TH.forEach(function(t){ var v=t.daily[i].eok; s+=v; if(v<0)n++; });
+    MKT.push(s); NEGN.push(n);
+  }
+  // 그날 시장과 같은 방향으로 움직인 테마 수 — 이 탭이 말하려는 '시장이 통째로 움직였다'의 실제 척도.
+  var SAME=MKT.map(function(m,i){
+    return TH.filter(function(t){ var v=t.daily[i].eok;
+      return m>=0 ? v>0 : v<0; }).length; });
+  // 피벗일 = 동조 테마가 가장 많은 날(동수면 금액이 큰 쪽).
+  // 금액 최대로 고르면 07/30(+3조, 14/16 동조)이 잡혀 '15/16이 한꺼번에 뒤집힌 08/03'을 놓친다 —
+  // 이 화면의 주제는 규모가 아니라 폭(breadth)이다.
+  var PIV=0;
+  for(var i=1;i<N;i++){
+    if(SAME[i]>SAME[PIV]||(SAME[i]===SAME[PIV]&&Math.abs(MKT[i])>Math.abs(MKT[PIV]))) PIV=i;
+  }
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function eok(v){
+    var a=Math.abs(v), sg=v>0?'+':(v<0?'−':'');
+    if(a>=10000) return sg+(a/10000).toFixed(a>=100000?0:1).replace(/\.0$/,'')+'조';
+    return sg+a.toLocaleString('en-US')+'억';
+  }
+  // gross(오간 돈)는 방향 없는 총량이라 부호를 붙이지 않는다.
+  function amt(v){ return eok(Math.abs(v)).replace(/^[+−]/,''); }
+  function md(d){ return d.slice(5).replace('-','/'); }
+  // Date.UTC로 Y/M/D를 직접 조립해서 getUTCDay()로 읽는다(stocks-home.js krIsKospiHolidayOn과 같은 방식).
+  // 'T00:00:00+09:00'으로 파싱하면 KST 자정 = 전날 15:00 UTC라 getUTCDay()가 하루 밀린다.
+  function wd(d){ var p=String(d).split('-');
+    return ['일','월','화','수','목','금','토'][
+      new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()]; }
+
+  document.getElementById('meta').innerHTML=
+    '실데이터 — <b>'+DATES[0]+' ~ '+DATES[N-1]+'</b> ('+N+'거래일) · ETF '
+    +D.coverage.etf_count+'개 / '+D.coverage.theme_count+'테마 · AUM '+D.aum_floor_eok
+    +'억+ · 수집 '+D.generated_at.slice(0,16).replace('T',' ')+' KST';
+
+  /* ── A안 ── */
+  (function(){
+    var mx=0; TH.forEach(function(t){t.daily.forEach(function(x){
+      mx=Math.max(mx,Math.abs(x.eok));});});
+    var mmx=Math.max.apply(null,MKT.map(Math.abs));
+    function cell(v,scale){
+      // 제곱근 스케일 — 반도체(1.1만억)와 인터넷·게임(17억)이 같은 판에서 둘 다 보이게
+      var a=(0.06+0.94*Math.sqrt(Math.abs(v)/scale)).toFixed(3);
+      var rgb=v>=0?'224,49,49':'39,117,237';
+      var fg=a>0.5?'#fff':'#334155';
+      return '<td class="c" style="background:rgba('+rgb+','+a+');color:'+fg+'">'
+        +(Math.abs(v)/scale>0.08?eok(v):'')+'</td>';
+    }
+    var h='<table class="hm"><tr><th class="lb"></th>';
+    DATES.forEach(function(d,i){
+      h+='<th>'+md(d)+'<br><span style="font-weight:600">('+wd(d)+')</span></th>';});
+    h+='<th class="tot">'+N+'일 누적</th></tr>';
+    h+='<tr class="mkt"><td class="lb">시장 전체</td>';
+    MKT.forEach(function(v){ h+=cell(v,mmx); });
+    h+='<td class="tot" style="color:'+(MKT.reduce(function(a,b){return a+b;},0)>=0?'var(--in)':'var(--out)')+'">'
+      +eok(MKT.reduce(function(a,b){return a+b;},0))+'</td></tr><tr class="sp"><td colspan="'+(N+2)+'"></td></tr>';
+    TH.forEach(function(t){
+      h+='<tr><td class="lb">'+esc(t.theme)+'</td>';
+      t.daily.forEach(function(x){ h+=cell(x.eok,mx); });
+      h+='<td class="tot" style="color:'+(t.flow_eok>=0?'var(--in)':'var(--out)')+'">'
+        +eok(t.flow_eok)+'</td></tr>';
+    });
+    document.getElementById('a-hm').innerHTML=h+'</table>';
+  })();
+
+  /* ── B안 ── */
+  (function(){
+    var mmx=Math.max.apply(null,MKT.map(Math.abs));
+    var h='';
+    MKT.forEach(function(v,i){
+      var pos=v>=0, ht=Math.max(3,Math.round(Math.abs(v)/mmx*(pos?66:50)));
+      h+='<div class="wv'+(i===PIV?' pivot':'')+'">'
+        +'<div class="up">'+(pos?'<span class="v" style="color:var(--in)">'+eok(v)
+          +'</span><i class="bar p" style="height:'+ht+'px"></i>':'')+'</div>'
+        +'<div class="zero"></div>'
+        +'<div class="dn">'+(pos?'':'<i class="bar m" style="height:'+ht+'px"></i>'
+          +'<span class="v" style="color:var(--out)">'+eok(v)+'</span>')+'</div>'
+        +'<span class="d">'+md(DATES[i])+'('+wd(DATES[i])+')<br>'
+        +'<span class="cnt">같은 방향 '+SAME[i]+'/'+TH.length+'</span></span></div>';
+    });
+    document.getElementById('b-wave').innerHTML=h;
+
+    // 피벗일 기여도 — 그날 시장이 움직인 방향으로 얼마나 밀었나
+    var dir=MKT[PIV]<0?-1:1;
+    document.getElementById('b-piv-t').innerHTML=
+      md(DATES[PIV])+'('+wd(DATES[PIV])+') 시장 '+eok(MKT[PIV])
+      +' <span class="n">— '+SAME[PIV]+'/'+TH.length+'개 테마가 동시에 '
+      +(dir<0?'유출':'유입')+'. 그 금액이 어디서 나왔나</span>';
+    var rows=TH.map(function(t){return {nm:t.theme,v:t.daily[PIV].eok};})
+      .sort(function(a,b){return dir<0?a.v-b.v:b.v-a.v;});
+    var rmx=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}));
+    var ph='<div class="hd">테마</div><div class="hd">'+md(DATES[PIV])+' 순유입</div>'
+      +'<div class="hd" style="text-align:right">시장 대비</div>';
+    rows.forEach(function(r){
+      var w=Math.max(1,Math.abs(r.v)/rmx*100);
+      var share=MKT[PIV]?Math.round(r.v/MKT[PIV]*100):0;
+      ph+='<div class="nm">'+esc(r.nm)+'</div>'
+        +'<div class="track"><i style="left:0;width:'+w+'%;background:'
+        +(r.v>=0?'rgba(224,49,49,.8)':'rgba(39,117,237,.8)')+'"></i></div>'
+        +'<div class="val" style="color:'+(r.v>=0?'var(--in)':'var(--out)')+'">'
+        +eok(r.v)+(Math.abs(share)>=5?' <span style="color:var(--muted);font-weight:700">'
+        +share+'%</span>':'')+'</div>';
+    });
+    document.getElementById('b-piv').innerHTML=ph;
+
+    // 시장과 역행 — 시장 방향과 반대로 움직인 날
+    var ind=TH.map(function(t){
+      var days=t.daily.map(function(x,i){
+        return (MKT[i]>0&&x.eok<0)||(MKT[i]<0&&x.eok>0)?-1:(x.eok===0?0:1);});
+      var cnt=days.filter(function(d){return d===-1;}).length;
+      var amt=t.daily.reduce(function(s,x,i){
+        return s+((MKT[i]>0&&x.eok<0)||(MKT[i]<0&&x.eok>0)?Math.abs(x.eok):0);},0);
+      return {nm:t.theme,days:days,cnt:cnt,amt:amt};
+    }).sort(function(a,b){return b.cnt-a.cnt||b.amt-a.amt;}).slice(0,6);
+    var ih='<div class="hd">테마</div><div class="hd">일별 · 시장과 같이(■) / 거슬러(■)</div>'
+      +'<div class="hd" style="text-align:right">역행 일수</div>';
+    ind.forEach(function(r){
+      ih+='<div class="nm">'+esc(r.nm)+'</div><div class="dots">'
+        +r.days.map(function(d){
+          return '<i style="background:'+(d===-1?'rgba(245,158,11,.9)'
+            :(d===0?'#E2E8F0':'rgba(148,163,184,.45)'))+'"></i>';}).join('')
+        +'</div><div class="val">'+r.cnt+'일</div>';
+    });
+    document.getElementById('b-ind').innerHTML=ih;
+  })();
+
+  /* ── C안 ── */
+  (function(){
+    var mmx=Math.max.apply(null,MKT.map(Math.abs));
+    var mini=MKT.map(function(v,i){
+      var ht=Math.max(2,Math.round(Math.abs(v)/mmx*32));
+      return '<i style="height:'+ht+'px;background:'
+        +(v>=0?'rgba(224,49,49,'+(i===PIV?'.95':'.5')+')'
+              :'rgba(39,117,237,'+(i===PIV?'.95':'.5')+')')+'"></i>';}).join('');
+
+    // 피벗일 기여 상위
+    var dir=MKT[PIV]<0?-1:1;
+    var contrib=TH.map(function(t){return {nm:t.theme,v:t.daily[PIV].eok};})
+      .filter(function(r){return dir<0?r.v<0:r.v>0;})
+      .sort(function(a,b){return dir<0?a.v-b.v:b.v-a.v;});
+    var top=contrib[0];
+    var topShare=Math.round(top.v/MKT[PIV]*100);
+
+    // 그날 꿈쩍 안 한 테마
+    var calm=TH.map(function(t){return {nm:t.theme,v:t.daily[PIV].eok};})
+      .sort(function(a,b){return Math.abs(a.v)-Math.abs(b.v);}).slice(0,4);
+
+    // 순증은 작은데 안에서 격렬한 테마
+    var churn=TH.map(function(t){
+      return {nm:t.theme,net:t.flow_eok,gross:t.gross_eok,
+              r:t.gross_eok/Math.max(Math.abs(t.flow_eok),1)};})
+      .filter(function(t){return t.gross>=300;})
+      .sort(function(a,b){return b.r-a.r;})[0];
+
+    var cum=MKT.reduce(function(a,b){return a+b;},0);
+    var h='';
+    h+='<div class="card hero'+(MKT[PIV]<0?' dn':'')+'">'
+      +'<div class="k">'+md(DATES[PIV])+'('+wd(DATES[PIV])
+      +') · 가장 많은 테마가 한꺼번에 움직인 날</div>'
+      +'<div class="big '+(MKT[PIV]<0?'dn':'up')+'">'+eok(MKT[PIV])+'</div>'
+      +'<div class="tx">ETF '+D.coverage.etf_count+'개 전체에서 하루 만에 오간 순액이에요. '
+      +'<b>'+TH.length+'개 테마 중 '+SAME[PIV]+'개</b>가 같은 날 '
+      +(MKT[PIV]<0?'유출':'유입')+'로 움직였어요.</div>'
+      +'<div class="mini">'+mini+'</div></div>';
+
+    h+='<div class="card"><div class="k">그날 유출이 나온 곳</div>'
+      +'<div class="big dn">'+esc(top.nm)+'</div>'
+      +'<div class="tx"><b>'+eok(top.v)+'</b> — 그날 시장 전체 움직임의 <b>'
+      +Math.abs(topShare)+'%</b>가 이 테마 한 곳에서 나왔어요.</div></div>';
+
+    h+='<div class="card"><div class="k">그날 거의 안 움직인 곳</div>'
+      +'<div class="big" style="font-size:15px;line-height:1.4">'+esc(calm[0].nm)+' 외 3개</div>'
+      +'<div class="tx">시장이 '+eok(MKT[PIV])+' 움직인 날에도 아래 테마는 사실상 제자리였어요.</div>'
+      +'<div class="chips">'+calm.map(function(c){
+        return '<span class="chip">'+esc(c.nm)+' '+eok(c.v)+'</span>';}).join('')+'</div></div>';
+
+    h+='<div class="card"><div class="k">조용해 보이지만 안에서 갈아타는 중</div>'
+      +'<div class="big" style="font-size:17px">'+esc(churn.nm)+'</div>'
+      +'<div class="tx">'+N+'일 순증은 <b>'+eok(churn.net)+'</b>인데 오간 돈은 <b>'
+      +amt(churn.gross)+'</b>. 들어온 만큼 빠져나가 <b>'+churn.r.toFixed(1)
+      +'배</b>가 회전했어요.</div></div>';
+
+    h+='<div class="card"><div class="k">'+N+'거래일 누적</div>'
+      +'<div class="big '+(cum>=0?'up':'dn')+'">'+eok(cum)+'</div>'
+      +'<div class="tx">'+md(DATES[0])+'~'+md(DATES[N-1])+' 합계예요. '
+      +'앞 3일 <b>'+eok(MKT.slice(0,3).reduce(function(a,b){return a+b;},0))+'</b> → 뒤 '
+      +(N-3)+'일 <b>'+eok(MKT.slice(3).reduce(function(a,b){return a+b;},0))+'</b>.</div></div>';
+
+    document.getElementById('c-cards').innerHTML=h;
+  })();
+
+  /* 하단 주석 */
+  var naive=TH.filter(function(t){
+    var e=t.daily.slice(0,3).reduce(function(a,b){return a+b.eok;},0);
+    var l=t.daily.slice(3).reduce(function(a,b){return a+b.eok;},0);
+    return e*l<0;}).length;
+  document.getElementById('foot').innerHTML=
+    '<b>왜 B안을 추천하나.</b> 앞 3일 대 뒤 '+(N-3)+'일 부호 반전이라는 순진한 "추세 전환" 판정은 지금 데이터에서 '
+    +'<b>'+TH.length+'개 중 '+naive+'개</b>에서 발화합니다. 테마가 각자 뒤집힌 게 아니라 '
+    +md(DATES[PIV])+'에 시장이 통째로 뒤집힌 것을 '+naive+'번 중복 보고하는 것뿐이라, 화면엔 "전부 빨간불"로 '
+    +'나와 정보가 0이 됩니다. 시장 전체를 기준선으로 먼저 세우고 테마를 그 대비로 읽어야 '
+    +'<b>"전체가 빠질 때 누가 버텼나"</b>라는 진짜 신호가 남습니다.<br><br>'
+    +'<b>공통 제약.</b> 네이버가 현재 AUM만 주므로 <b>백필이 불가능</b>합니다. 오늘은 '+N+'칸으로 시작해 '
+    +'매일 한 칸씩 자라고, 보관·윈도우를 20일로 올려두면 한 달 뒤 20칸이 됩니다. '
+    +'화면은 "보유한 만큼만" 그리면 됩니다(이미 적응형 윈도우 구조).';
+})();
+</script>
+</body></html>
