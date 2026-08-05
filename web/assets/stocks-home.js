@@ -1691,8 +1691,12 @@ if(passBtn){
      실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
      신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
      history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
-     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다. */
-  function inMarket(mm){ return mm >= 540 && mm < 930; }    // MARKET     09:00~15:30
+     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다.
+     상한은 15:30이 아니라 995분(16:35, POST_MARKET 시작)이어야 한다 — fetch_news_live.py의
+     _bump_latest_time()이 새 이슈 없을 때 history[0].time을 실행 시각(최대 16:35 직전)까지
+     그대로 찍기 때문에, 여기를 15:30으로 좁혀두면 정작 최신 이슈가 자기 필터에 걸려
+     사라진다(2026-08-05 실사고 — 13:01 이슈가 15:31까지 시각만 갱신되다 화면에서 통째로 빠짐). */
+  function inMarket(mm){ return mm >= 540 && mm < 995; }    // MARKET 실질 상한 09:00~16:35(POST_MARKET 시작)
   function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
   var FEED = {
     kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다
