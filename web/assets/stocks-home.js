@@ -988,6 +988,14 @@ function _stockToast(msg){
 function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else _stockToast('해당 종목 상세 페이지는 준비 중이에요.');}
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
 function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
+// 탭·화면별 트래픽을 GA4에서 구분해 볼 수 있도록 가상 pageview를 보낸다.
+// index.html의 gtag config에 send_page_view:false를 줘서 자동 최초 pageview를 껐고,
+// 이 함수가 최초 진입(아래 해시 복원 IIFE)과 이후 모든 화면 전환(go()) 양쪽에서 한 번씩만 호출되므로
+// 실제 조회 1회당 정확히 pageview 1건이 잡힌다(자동 pageview와의 중복 없음).
+function dsTrackPageview(){
+  if(typeof gtag!=='function')return;
+  gtag('event','page_view',{page_title:document.title,page_location:location.href,page_path:location.pathname+location.hash});
+}
 function go(id,noHistory){
   const el=document.getElementById(id);if(!el||!el.classList.contains('screen'))return;
   if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
@@ -998,11 +1006,12 @@ function go(id,noHistory){
   // pushState는 hashchange를 발생시키지 않으므로 서브탭 강조를 직접 갱신한다.
   // 프로젝트의 옵셔널 호출 관례를 따라 결합을 최소로 둔다 — 없으면 그냥 넘어간다.
   if(typeof window.dsSubnavSync==='function')window.dsSubnavSync();
+  dsTrackPageview();
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
 // 진입 시 해시(#sector 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
-(function(){const h=location.hash.slice(1);if(!h)return;document.getElementById(h)?go(h,true):go('sector',true);})();
+(function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('sector',true);})();
 // #mom-track 앵커 — 코스피 브리핑 "종목 시그널에서 트래킹" CTA 진입 시 상승 모멘텀 종목 섹션으로 스크롤.
 // 데이터 fetch·시간대 게이트(ueGate)로 표시가 비동기라 표시될 때까지 잠깐 폴링한다.
 (function(){
