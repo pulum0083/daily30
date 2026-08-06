@@ -124,3 +124,99 @@ test('staleDays — 마지막 갱신 경과 일수', () => {
   assert.equal(staleDays('2026-08-07T08:00:00+09:00', now), 0);   // 12시간 뒤(미래) — 0으로 clamp
   assert.equal(staleDays('2026-08-08T02:00:00+09:00', now), 0);   // 30시간 뒤(미래) — 0으로 clamp
 });
+
+/** 렌더 테스트용 최소 데이터 — 테마 2개, 3거래일. */
+function fixture() {
+  return {
+    generated_at: '2026-07-31T18:05:00+09:00',
+    source_generated_at: '2026-07-31T18:00:00+09:00',
+    window_days: 3, aum_floor_eok: 300,
+    coverage: { etf_count: 712, theme_count: 2 },
+    dates: ['2026-07-29', '2026-07-30', '2026-07-31'],
+    market_daily: [100, -200, 300],
+    themes: [
+      { theme: '반도체', flow_eok: 1500, gross_eok: 1800, etf_count: 30,
+        daily: [400, -100, 1200],
+        etfs: [
+          { code: '1', name: 'TIGER 반도체', flow: 900, aum: 5000, pct: 18.0, daily: [300, -50, 650] },
+          { code: '2', name: 'KODEX 반도체', flow: -200, aum: 4000, pct: -5.0, daily: [-50, -50, -100] },
+        ],
+        rest_n: 28, rest_flow: 800 },
+      { theme: '채권', flow_eok: -74, gross_eok: 900, etf_count: 108,
+        daily: [-30, -24, -20],
+        etfs: [{ code: '3', name: 'KODEX 국고채', flow: -74, aum: 2000, pct: -3.7, daily: [-30, -24, -20] }],
+        rest_n: 0, rest_flow: 0 },
+    ],
+  };
+}
+
+test('render — 시장 요약 3칸이 채워지고 pivot이 동조 수로 뽑힌다', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  const html = els['fmap-mkt'].innerHTML;
+  assert.match(html, /3거래일 누적/);
+  assert.match(html, /\+200억/);                 // 100 − 200 + 300
+  // 금액 최대일은 07/31(+300)이지만 동조 테마는 1개뿐이고, 07/30은 −200으로 작아도
+  // 두 테마가 함께 움직였다. 이 화면의 주제는 규모가 아니라 폭이므로 07/30이 뽑혀야 한다.
+  assert.match(html, /07\/30\(목\)/);
+  assert.match(html, /2\/2개 동시 유출/);
+});
+
+test('render — 전체 테마를 그리고 첫 테마가 기본 선택된다', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  const html = els['fmap-list'].innerHTML;
+  assert.match(html, /data-th="반도체"/);
+  assert.match(html, /data-th="채권"/);
+  assert.match(html, /class="fmap-r on" data-th="반도체"/);
+});
+
+test('render — 막대 기준값은 정렬과 무관하게 전체 최대치로 고정', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  const before = els['fmap-list'].innerHTML.match(/data-th="반도체"[\s\S]*?width:([\d.]+)%/)[1];
+  api.setSort('churn');
+  const after = els['fmap-list'].innerHTML.match(/data-th="반도체"[\s\S]*?width:([\d.]+)%/)[1];
+  assert.equal(before, after);
+  assert.equal(before, '50.00');                 // |1500|이 전체 최대치
+});
+
+test('render — 정렬을 바꿔도 선택된 테마와 상세는 유지된다', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  api.select('채권');
+  assert.match(els['fmap-detail'].innerHTML, /채권/);
+  api.setSort('net');
+  assert.match(els['fmap-list'].innerHTML, /class="fmap-r on" data-th="채권"/);
+  assert.match(els['fmap-detail'].innerHTML, /채권/);   // 상세는 그대로
+});
+
+test('detail — 그 외 N개 절단을 명시하고, 10% 미만은 뱃지를 달지 않는다', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  const html = els['fmap-detail'].innerHTML;
+  assert.match(html, /그 외 <b>28개<\/b>/);
+  assert.match(html, /\+800억/);
+  assert.match(html, /fmap-pill hot">\+18%/);          // 18.0% → 뱃지
+  assert.doesNotMatch(html, /fmap-pill cold">−5%/);    // 5.0% → 뱃지 없음
+});
+
+test('detail — 일별 막대에 시장 동조/반대가 붙는다', () => {
+  const { api, els } = load();
+  api.render(fixture());
+  api.select('반도체');
+  const html = els['fmap-detail'].innerHTML;
+  // 시장 [100,−200,300] vs 반도체 [400,−100,1200] → 전부 같은 방향
+  assert.equal((html.match(/시장 동조/g) || []).length, 3);
+  api.select('채권');
+  // 채권 [−30,−24,−20] vs 시장 [+,−,+] → 1·3일차가 반대
+  assert.equal((els['fmap-detail'].innerHTML.match(/시장 반대/g) || []).length, 2);
+});
+
+test('render — 데이터가 비면 빈 상태만 보여주고 본문을 그리지 않는다', () => {
+  const { api, els } = load();
+  api.render({ dates: [], market_daily: [], themes: [] });
+  assert.equal(els['fmap-content'].style.display, 'none');
+  assert.equal(els['fmap-empty'].style.display, '');
+  assert.match(els['fmap-empty'].textContent, /준비 중/);
+});
