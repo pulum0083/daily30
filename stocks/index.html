@@ -11,7 +11,7 @@
 <meta property="og:description" content="코스피·코스닥 실시간 대시보드. 지수·수급·주도주·장중 이슈와 AI 예측 브리핑을 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4',{send_page_view:false});</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -21,11 +21,13 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=6" defer></script>
+<script src="/assets/stocks-home.js?v=8" defer></script>
 <script src="/assets/ds-subnav.js?v=1" defer></script>
+<script src="/assets/flow-map.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=6">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=7">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
+<link rel="stylesheet" href="/assets/flow-map.css?v=1">
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><a class="gnb__tg-btn" href="https://t.me/doubleshot30" target="_blank" rel="noopener" aria-label="브리핑을 텔레그램으로 구독"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></a><button class="gnb__notif-btn" id="gnb-notif-btn" onclick="openNoticePanel()" aria-label="공지 및 게시판"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><rect x="13" y="1" width="9" height="7" rx="2" fill="currentColor" opacity=".75"/><path d="M15.5 3.5h4M15.5 5.5h2.5" stroke="var(--gnb-bg,#16181A)" stroke-width="1.1" stroke-linecap="round"/><path d="M13 8l1.8 2" stroke="currentColor" stroke-width="1.1" opacity=".75" fill="none"/></svg><span class="gnb__notif-dot" id="gnb-notif-dot"></span></button></span></div></div>
@@ -194,7 +196,7 @@
     <div class="home-main">
     <!-- 🧭 이번 주 자금 지도 (ETF 순유입·유출 히트맵) · JS가 /data/etf-flows.json 로드해 렌더, 데이터 없으면 숨김 -->
     <div class="block flow-block" id="flow-block" style="display:none;">
-      <div class="block__h"><span class="block__t"><span class="ic">🧭</span><span id="flow-title">이번 주 자금 지도</span><a class="help-q" href="/glossary/#flow-map" data-tip-title="자금 지도란?" data-tip="국내·해외·채권·원자재 <b>ETF로 실제로 들어오고 나간 돈</b>(설정·환매)을 테마별로 묶어 보여줘요.<br><br>· <b>타일 크기</b> = 이번 주 움직인 자금 규모<br>· <b>색</b> = 방향(빨강 유입 / 파랑 유출), 진할수록 큼<br><br>ETF 순자산 ÷ 기준가로 추정한 발행좌수의 하루하루 변화를 누적했어요(최대 5거래일). 가격이 올라 순자산이 는 건 제외하고, <b>순수하게 좌수가 늘고 준 것</b>만 집계해요. 투자 권유가 아닌 참고용이에요.">?</a></span><span class="block__s" id="flow-window"></span></div>
+      <div class="block__h"><span class="block__t"><span class="ic">🧭</span><span id="flow-title">이번 주 자금 지도</span><a class="help-q" href="/glossary/#flow-map" data-tip-title="자금 지도란?" data-tip="국내·해외·채권·원자재 <b>ETF로 실제로 들어오고 나간 돈</b>(설정·환매)을 테마별로 묶어 보여줘요.<br><br>· <b>타일 크기</b> = 이번 주 움직인 자금 규모<br>· <b>색</b> = 방향(빨강 유입 / 파랑 유출), 진할수록 큼<br><br>ETF 순자산 ÷ 기준가로 추정한 발행좌수의 하루하루 변화를 누적했어요(최대 5거래일). 가격이 올라 순자산이 는 건 제외하고, <b>순수하게 좌수가 늘고 준 것</b>만 집계해요. 투자 권유가 아닌 참고용이에요.">?</a></span><span class="block__s"><span id="flow-window"></span> <a href="/stocks/#flow-map" onclick="go('flow-map');return false;" style="color:var(--primary);text-decoration:none;font-weight:700;">전체 보기 →</a></span></div>
       <div class="flow-body" id="flow-body"></div>
       <p class="flow-quiet" id="flow-quiet"></p>
       <div class="flow-leg">
@@ -424,7 +426,6 @@
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › 섹터 › <span id="sec-crumb-label" style="color:var(--ink)">반도체</span></div>
     <!-- 섹터 선택 칩 — secRenderChips()가 채운다. 8개 섹터 평균은 stocks-snapshot.json 실측. -->
     <div class="secsel" id="secsel" role="tablist" aria-label="섹터 선택"></div>
     <div class="grid">
@@ -597,7 +598,6 @@
 
   <!-- ===== 특이 신호 전체 (홈 신호 영역 더보기 — D안 히어로+컴팩트 UI 유지) ===== -->
   <div class="screen" id="signals-all">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">특이 신호 전체</span></div>
     <div class="phead">
       <div><h1><span class="ic">⚡</span> <span id="sigall-title">오늘의 특이 신호</span><a class="help-q" href="/glossary/#signals" data-tip-title="특이 신호란?" data-tip="평소와 다른 움직임이 포착된 종목을 규칙으로 자동 선별한 목록이에요. 아래 신호 중 <b>하나라도</b> 잡히면 올라와요.<br><br>· <b>역행 상승</b> — 하락장에서 코스피와 반대로 오르며 지수보다 3%p 이상 강세<br>· <b>역행 하락</b> — 상승장에서 코스피와 반대로 내리며 지수보다 3%p 이상 약세<br>· <b>거래량 급증 · 급락</b> — 거래량이 20일 평균의 1.5배 이상이면서 −3% 이상 급락<br>· <b>거래량 급증 · 급등</b> — 거래량이 20일 평균의 1.5배 이상이면서 +3% 이상 급등<br>· <b>52주 신고가 근접</b> — 현재가가 52주 최고가의 98% 이상<br>· <b>거래대금 상위</b> — 당일 거래대금 상위 3종목<br>· <b>외국인·기관 순매수</b> — 3일 연속 순매수 또는 순매수 전환. 수급은 장 마감 후 집계돼서, 장중에는 <b>전일 기준</b> 값으로 표시해요<br><br>장중 거래량 배수는 <b>경과 시간을 반영한 페이스 기준</b>이에요. 예를 들어 정오에 하루 평균의 0.9배가 쌓였다면 1.8배 페이스로 봐요.<br><br>기본은 <b>신호 강도순</b>(드문 신호일수록 위)이고 <b>상승률순</b>으로도 볼 수 있어요. 우측에서 <b>하락률 순</b>도 확인할 수 있어요. 투자 권유가 아닌 참고용 신호예요.">?</a></h1><div class="psub"><span id="sigall-count">— 종목</span> · 역행·거래량·신고가·수급 교차 · <span class="ds-asof"></span></div></div>
     </div>
@@ -631,9 +631,47 @@
     </div>
   </div>
 
+  <!-- 🧭 자금 지도 — flow-map.js가 /data/flow-map.json을 받아 채운다.
+       테마 합계·일별·시장 요약은 전부 발행본 etf-flows.json 값을 승계한 것이고,
+       ETF 분해만 히스토리에서 재계산한 값이다(빌더 scripts/build_flow_map.py). -->
+  <div class="screen" id="flow-map">
+    <div class="phead">
+      <div><h1><span class="ic">🧭</span> 자금 지도</h1>
+        <div class="psub" id="fmap-sub">—</div></div>
+    </div>
+    <p class="fmap-stale" id="fmap-stale" style="display:none;"></p>
+    <p class="fmap-empty" id="fmap-empty" style="display:none;"></p>
+    <div id="fmap-content" style="display:none;">
+      <div class="block" style="margin-bottom:14px;"><div class="fmap-mkt" id="fmap-mkt"></div></div>
+      <div class="home-cols">
+        <div class="home-main">
+          <div class="block fmap-block" style="margin-bottom:0;">
+            <div class="block__h"><span class="block__t"><span class="ic">🧭</span>테마별 순유입</span>
+              <span class="block__s"><span class="stabs" id="fmap-sorttabs">
+                <a class="on" data-sort="size">규모순</a><a data-sort="net">유입순</a><a data-sort="churn">회전율순</a>
+              </span></span></div>
+            <p class="fmap-intro">가운데 선이 0. 오른쪽으로 뻗으면 <b>유입</b>, 왼쪽이면 <b>유출</b>.
+              <b>행을 누르면 오른쪽 상세가 바뀌어요.</b> <span id="fmap-win"></span></p>
+            <div class="fmap-pad">
+              <div class="fmap-hd"><span>테마</span><span class="c">유출 ← 0 → 유입</span><span class="r">순유입</span></div>
+              <div class="fmap-list" id="fmap-list"></div>
+            </div>
+            <div class="fmap-leg">
+              <span><i style="background:var(--up)"></i>유입</span>
+              <span><i style="background:var(--dn)"></i>유출</span>
+              <span id="fmap-legn"></span>
+            </div>
+          </div>
+        </div>
+        <div class="home-side">
+          <div class="block" style="margin-bottom:0;" id="fmap-detail"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== ETF RANKING (ETF 전체 랭킹) ===== -->
   <div class="screen" id="etf-rank">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:var(--ink)">ETF 전체 랭킹</span></div>
     <div class="phead">
       <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · <span class="ds-asof"></span></div></div>
     </div>

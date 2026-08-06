@@ -46,13 +46,13 @@ function mkHost() {
   };
 }
 
-test('탭 정의는 이번 범위인 4개만 점등한다', () => {
+test('탭 정의는 이번 범위인 5개만 점등한다', () => {
   const { TABS } = load().api;
   // Array.from으로 vm 컨텍스트 배열을 호스트 realm 배열로 재구성한다 — assert.deepEqual(=deepStrictEqual)이
   // 값이 같아도 realm이 다른 배열의 prototype/constructor를 비교해 실패시키는 Node 고질적 이슈 회피
   // (nodejs/node#44462, Node 22·24 모두 재현 확인).
-  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'sector', 'etf']);
-  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '섹터', 'ETF']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'sector', 'flow', 'etf']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '섹터', '자금 지도', 'ETF']);
 });
 
 test('경로·해시 조합별 활성 탭 판정', () => {

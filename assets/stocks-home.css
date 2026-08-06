@@ -935,14 +935,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 확장 패널 — 일별 막대 · 집중도 · 유입/유출 그룹 (2026-07-31) */
 .ft-sub{font-size:11px;color:var(--muted);margin:7px 0 4px;line-height:1.45;}
 .ft-sub b{color:#0F172A;}
-/* 0축 기준 발산 — 유입은 위, 유출은 아래. 색만이 아니라 위치로도 방향을 읽게 한다. */
-.ftd{display:flex;gap:6px;margin:2px 0 4px;}
+/* 0축 기준 발산 — 유입은 위, 유출은 아래. 색만이 아니라 위치로도 방향을 읽게 한다.
+   폭을 470px로 묶고 가운데 정렬한다. 홈 위젯 본문이 638px까지 넓어지는데 .ftd-col이
+   flex:1로 그 폭을 다 나눠 먹으면 막대 하나가 123px 폭 × 13px 높이(가로세로 9.4:1)가 된다 —
+   가로:세로 3:1을 넘으면 막대가 아니라 납작한 판으로 읽힌다. 자금 지도 탭의 일별 차트
+   (flow-map.css .fmap-days)와 같은 규약이다. 막대 폭도 54px로 함께 묶어야 컬럼만 좁아지고
+   막대는 그대로인 상태를 막는다. */
+.ftd{display:flex;gap:6px;margin:2px auto 4px;max-width:470px;}
 .ftd-col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
-.ftd-up,.ftd-dn{width:100%;display:flex;flex-direction:column;height:38px;}
+.ftd-up,.ftd-dn{width:100%;display:flex;flex-direction:column;align-items:center;height:38px;}
 .ftd-up{justify-content:flex-end;}
 .ftd-dn{justify-content:flex-start;height:26px;}
 .ftd-zero{height:1px;width:100%;background:#CBD5E1;}
-.ftd-bar{display:block;width:100%;}
+.ftd-bar{display:block;width:54px;max-width:100%;}
 .ftd-bar.p{background:rgba(224,49,49,.82);border-radius:3px 3px 0 0;}
 .ftd-bar.m{background:rgba(39,117,237,.82);border-radius:0 0 3px 3px;}
 .ftd-v{font-size:9.5px;font-weight:800;margin-bottom:2px;white-space:nowrap;}
