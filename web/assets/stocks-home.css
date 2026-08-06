@@ -240,6 +240,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
 .block__t{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}.block__t .ic{font-size:14px;}.block__t::before{content:'';width:3px;height:12px;background:var(--primary);border-radius:2px;}
 .block__s{font-size:11px;color:var(--muted);}
+/* 표의 컬럼 헤더로 .block__h를 재사용하는 자리(.colhead) — 아래 데이터 행(.trow)과
+   컬럼이 맞아야 하므로 .trow의 gap:12px를 그대로 따라간다. 이게 없으면 좌우 여백과
+   고정 컬럼 폭이 같아도 gap만큼 밀려, 'vs평균' 머리글이 그 아래 값보다 12px 오른쪽에 선다. */
+.block__h.colhead{gap:12px;}
 /* 특이 신호 — 2행 헤더: 1행 타이틀+도움말, 2행 좌(배지)·우(정렬 탭) */
 .sig-subhead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:6px;padding:8px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
 .row{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
