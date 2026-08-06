@@ -151,3 +151,23 @@ def etf_rows(flows, today_snap, baseline_snap, per_etf_daily, dates, top_n=TOP_E
     rest_n = len(rest) + dropped_n
     rest_flow = sum(f["flow_eok"] for f in rest) + dropped_flow
     return rows, rest_n, rest_flow
+
+
+def dates_of(themes_pub):
+    """발행본 테마들의 daily에서 날짜축을 뽑는다(가장 긴 것 기준)."""
+    best = []
+    for t in themes_pub:
+        ds = [x["date"] for x in (t.get("daily") or [])]
+        if len(ds) > len(best):
+            best = ds
+    return best
+
+
+def market_daily(themes_pub, dates):
+    """전 테마 일별 순유입 합계. 날짜 키로 맞춰 더한다(인덱스 위치로 더하지 않는다)."""
+    acc = {d: 0 for d in dates}
+    for t in themes_pub:
+        for x in (t.get("daily") or []):
+            if x["date"] in acc:
+                acc[x["date"]] += x["eok"]
+    return [acc[d] for d in dates]

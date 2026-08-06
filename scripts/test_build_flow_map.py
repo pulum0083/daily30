@@ -139,6 +139,25 @@ def test_etf_rows_pct_none_when_shares_zero():
     assert rows[0]["pct"] is None
 
 
+def test_dates_of_takes_longest_daily():
+    """일별이 비어 있는 테마가 섞여도 날짜축은 가장 긴 것을 쓴다."""
+    themes = [
+        {"theme": "A", "daily": []},
+        {"theme": "B", "daily": [{"date": "d1", "eok": 5}, {"date": "d2", "eok": 6}]},
+    ]
+    assert m.dates_of(themes) == ["d1", "d2"]
+    assert m.dates_of([{"theme": "A", "daily": []}]) == []
+
+
+def test_market_daily_sums_published_values_by_date():
+    """전 테마 일별 합. 날짜로 맞춰 더한다 — 인덱스 위치로 더하면 축이 어긋난 테마에서 깨진다."""
+    themes = [
+        {"theme": "A", "daily": [{"date": "d1", "eok": 10}, {"date": "d2", "eok": -3}]},
+        {"theme": "B", "daily": [{"date": "d2", "eok": 7}]},        # d1이 없는 테마
+    ]
+    assert m.market_daily(themes, ["d1", "d2"]) == [10, 4]
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
