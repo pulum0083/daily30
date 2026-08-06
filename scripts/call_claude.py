@@ -1328,7 +1328,9 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             usdkrw = {"price": usd_data["price"], "change_pct": usd_data.get("change_pct")}
     if usdkrw.get("price"):
         analysis_data["usdkrw"] = usdkrw
-        print(f"[call_claude] usdkrw = {usdkrw['price']}원 ({usdkrw.get('change_pct'):+.2f}%)")
+        _fx_chg = usdkrw.get("change_pct")
+        print(f"[call_claude] usdkrw = {usdkrw['price']}원 "
+              f"({f'{_fx_chg:+.2f}%' if _fx_chg is not None else '등락률 없음'})")
     # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
     if candidates_key in analysis_data:
         analysis_data[candidates_key] = [

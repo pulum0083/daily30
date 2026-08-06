@@ -419,6 +419,11 @@ html.dark .semicon-brief{border-color:rgba(99,102,241,.22);}
 .a-sub-cell__chg{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;margin-left:auto;}
 .a-sub-cell__chg.up{color:var(--up);}
 .a-sub-cell__chg.down{color:var(--dn);}
+/* 보합(정확히 0)은 상승도 하락도 아니다 — 화살표 없이 중립색. 예전엔 0.00%가
+   ▲·빨강으로 나가 '안 움직임'과 '올랐음'이 구분되지 않았다. */
+.a-sub-cell__chg.flat{color:var(--muted);}
+/* 등락률을 아예 모를 때. 빈 문자열이라 보이지 않지만 여백은 차지하지 않게 한다. */
+.a-sub-cell__chg.unknown{display:none;}
 
 /* 장중 흐름 차트 (마감 스냅샷 내) */
 .intraday-canvas-wrap{position:relative;width:100%;height:104px;}
