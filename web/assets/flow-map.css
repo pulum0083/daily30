@@ -1,0 +1,147 @@
+/* 자금 지도 탭(#flow-map) 전용 스타일 — 클래스는 전부 fmap- 접두사 + #flow-map 스코프 */
+
+/* stocks-home.css에 이미 .st/.nm/.sp/.kpi/.mk/.leg/.conc가 있어(특히 .sp는 35곳) 접두사와
+   스코프를 이중으로 건다. 색 토큰(--up/--dn/--inset/--hair)과 .up/.dn/.block/.stabs는
+   stocks-home.css 정의를 그대로 재사용한다 — 여기서 다시 정의하지 않는다. */
+
+/* 2단 — 좌측을 바 리스트로 바꾸면서 3.5 : 6.5로 좁혔다(홈의 2:1 아님). */
+#flow-map .home-cols{grid-template-columns:3.5fr 6.5fr;}
+/* 우측(ETF 20개)이 좌측보다 훨씬 길다. 좌측을 sticky로 붙여야 하단이 비지 않고 스크롤 중에도
+   테마를 바꿀 수 있다. ⚠ .home-cols가 align-items:start라 .home-main이 콘텐츠 높이로 줄면
+   sticky가 움직일 공간이 없어 그냥 밀려 올라간다 — stretch로 그 열만 되돌린다. */
+#flow-map .home-main{align-self:stretch;}
+#flow-map .fmap-block{position:sticky;top:14px;}
+
+#flow-map .fmap-empty{font-size:12.5px;color:var(--muted);background:var(--canvas);
+  border:1px solid var(--hair);border-radius:10px;padding:14px 16px;line-height:1.6;margin:0;}
+#flow-map .fmap-stale{font-size:11.5px;color:#B45309;background:#FEF3C7;
+  border-radius:8px;padding:8px 11px;margin:0 0 12px;line-height:1.55;}
+
+/* 시장 요약 3칸 */
+#flow-map .fmap-mkt{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);}
+#flow-map .fmap-mk{background:var(--canvas);padding:10px 14px;}
+#flow-map .fmap-mk .k{font-size:10.5px;font-weight:700;color:var(--muted);margin-bottom:3px;}
+#flow-map .fmap-mk .v{font-size:16px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+#flow-map .fmap-mk .s{font-size:11px;color:var(--muted);margin-top:2px;}
+
+#flow-map .fmap-intro{font-size:11.5px;color:var(--muted);padding:10px 14px 0;margin:0;line-height:1.55;}
+#flow-map .fmap-intro b{color:var(--ink);}
+#flow-map .fmap-pad{padding:10px 14px 12px;}
+
+/* ── 좌: 발산 바 리스트 ──
+   가운데 0축 기준으로 유입은 오른쪽(빨강)·유출은 왼쪽(파랑). 방향을 색뿐 아니라 위치로도 구분한다.
+   길이는 제곱근이 아니라 선형이다 — 상위 6개가 전체의 대부분이고 나머지는 실제로 미미하다는
+   사실이 그대로 보이는 게 정직하다. 대신 아주 작은 값도 사라지지 않게 최소 3px을 준다. */
+#flow-map .fmap-list{display:flex;flex-direction:column;gap:1px;}
+/* 선택은 테두리가 아니라 음영 값으로만 구분한다 — 검은 라인 박스는 표 안에서 지나치게 튀고,
+   행마다 두께가 생겨 리듬이 깨진다. 색상(hue)은 쓰지 않는다: 이 리스트는 이미
+   빨강=유입/파랑=유출로 색을 쓰고 있어 선택에 색을 넣으면 방향처럼 읽힌다. */
+#flow-map .fmap-r{display:grid;grid-template-columns:88px 1fr 62px;gap:8px;align-items:center;
+  padding:7px 8px;border-radius:7px;cursor:pointer;background:transparent;transition:background .12s;}
+#flow-map .fmap-r:hover{background:var(--inset);}
+#flow-map .fmap-r.on{background:#DCE2EA;}
+#flow-map .fmap-r.on .fmap-nm{font-weight:800;}
+#flow-map .fmap-nm{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#flow-map .fmap-nm em{font-style:normal;font-weight:700;color:var(--muted);font-size:10.5px;margin-left:4px;}
+#flow-map .fmap-bw{position:relative;height:15px;}
+#flow-map .fmap-ax{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--hair);}
+#flow-map .fmap-bar{position:absolute;top:3px;bottom:3px;border-radius:2px;min-width:3px;}
+#flow-map .fmap-bar.p{left:50%;background:var(--up);}
+#flow-map .fmap-bar.m{right:50%;background:var(--dn);}
+#flow-map .fmap-v{font-size:11.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums;}
+#flow-map .fmap-hd{display:grid;grid-template-columns:88px 1fr 62px;gap:8px;padding:0 8px 6px;
+  font-size:10px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--hair);margin-bottom:5px;}
+#flow-map .fmap-hd .c{text-align:center;}
+#flow-map .fmap-hd .r{text-align:right;}
+#flow-map .fmap-leg{display:flex;gap:13px;align-items:center;font-size:11px;color:var(--muted);
+  padding:9px 14px 12px;flex-wrap:wrap;}
+#flow-map .fmap-leg span{display:flex;align-items:center;gap:5px;}
+#flow-map .fmap-leg i{width:11px;height:11px;border-radius:3px;display:block;}
+#flow-map #fmap-sorttabs{margin-bottom:0;}
+
+/* ── 우: 상세 ── */
+#flow-map .fmap-dh{padding:13px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
+#flow-map .fmap-dh .r1{display:flex;align-items:baseline;gap:10px;}
+#flow-map .fmap-dh .fmap-tt{font-size:17px;font-weight:800;letter-spacing:-.02em;}
+#flow-map .fmap-dh .fmap-amt{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;}
+#flow-map .fmap-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px;}
+#flow-map .fmap-kpi{background:var(--inset);border-radius:7px;padding:6px 10px;}
+#flow-map .fmap-kpi .k{font-size:10px;color:var(--muted);font-weight:700;}
+#flow-map .fmap-kpi .v{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+#flow-map .fmap-st{font-size:11.5px;font-weight:800;color:var(--ink);margin:0 0 8px;
+  display:flex;align-items:baseline;gap:5px;}
+#flow-map .fmap-st .n{font-weight:600;color:var(--muted);font-size:10.5px;}
+
+/* 일별 차트 — 폭을 470px로 묶고 막대를 54px로 좁힌다. 우측 패널이 679px가 되면서 flex:1이
+   폭을 다 먹어 막대 하나가 130px 폭 × 7~28px 높이가 됐고, 가로:세로 3:1을 넘으면 막대가
+   아니라 납작한 판으로 읽힌다. */
+#flow-map .fmap-days{display:flex;gap:8px;align-items:flex-end;max-width:470px;margin:0 auto;}
+#flow-map .fmap-dy{flex:1;display:flex;flex-direction:column;align-items:center;}
+#flow-map .fmap-dy .u,#flow-map .fmap-dy .d{width:100%;display:flex;flex-direction:column;align-items:center;}
+#flow-map .fmap-dy .u{height:56px;justify-content:flex-end;}
+#flow-map .fmap-dy .d{height:40px;justify-content:flex-start;}
+#flow-map .fmap-dy .b{width:54px;max-width:100%;border-radius:3px;}
+#flow-map .fmap-dy .b.p{background:rgba(224,49,49,.85);border-radius:3px 3px 0 0;}
+#flow-map .fmap-dy .b.m{background:rgba(39,117,237,.85);border-radius:0 0 3px 3px;}
+#flow-map .fmap-dy .z{height:1px;background:#CBD5E1;width:100%;}
+#flow-map .fmap-dy .v{font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;}
+#flow-map .fmap-dy .lb{font-size:10px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.35;}
+#flow-map .fmap-dy .q{font-size:9.5px;font-weight:700;}
+#flow-map .fmap-dy .q.same{color:#94A3B8;}
+#flow-map .fmap-dy .q.opp{color:#B45309;}
+
+/* 좌우 패딩 11px = 아래 .fmap-er 행의 border(1) + padding(10). 이 값을 맞춰야 그룹 헤더의
+   "유입 N개"·합계가 아래 ETF 이름·금액과 같은 세로선에 선다. .fmap-er의 padding이나 border를
+   바꾸면 여기도 같이 바꿔야 한다. */
+#flow-map .fmap-gh{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;
+  margin:16px 0 6px;padding:0 11px 6px;border-bottom:1px solid var(--hair);}
+#flow-map .fmap-gh .dot{width:7px;height:7px;border-radius:2px;display:block;}
+#flow-map .fmap-gh .sum{margin-left:auto;font-variant-numeric:tabular-nums;}
+#flow-map .fmap-gh.i{color:var(--up);}
+#flow-map .fmap-gh.i .dot{background:var(--up);}
+#flow-map .fmap-gh.o{color:var(--dn);}
+#flow-map .fmap-gh.o .dot{background:var(--dn);}
+#flow-map .fmap-er{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;
+  padding:8px 10px;border-radius:7px;margin-bottom:4px;background:var(--canvas);border:1px solid var(--hair);}
+#flow-map .fmap-er .en{font-size:12.5px;font-weight:700;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+#flow-map .fmap-er .eaum{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+  white-space:nowrap;display:flex;align-items:center;gap:5px;}
+#flow-map .fmap-er .efl{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;
+  white-space:nowrap;text-align:right;min-width:66px;}
+/* 스파크라인 — 0축 위 유입 / 아래 유출. 각 ETF 자기 최대로 정규화한다(그룹 공통 기준이면
+   작은 ETF가 전부 납작한 점선이 돼 '데이터 없음'처럼 보인다). 절대 규모는 옆 금액이 말해준다. */
+#flow-map .fmap-sp{display:flex;gap:2px;height:15px;width:54px;}
+#flow-map .fmap-sp .c{flex:1;display:flex;flex-direction:column;height:100%;}
+#flow-map .fmap-sp .h{flex:1;display:flex;}
+#flow-map .fmap-sp .h.u{align-items:flex-end;}
+#flow-map .fmap-sp i{width:100%;border-radius:1px;min-height:1px;display:block;}
+#flow-map .fmap-sp .z{height:1px;background:var(--hair);}
+#flow-map .fmap-pill{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;white-space:nowrap;}
+#flow-map .fmap-pill.hot{background:var(--up-bg);color:#B91C1C;}
+#flow-map .fmap-pill.cold{background:var(--dn-bg);color:#1D4ED8;}
+#flow-map .fmap-rest{font-size:11px;color:var(--muted);background:var(--inset);border-radius:7px;
+  padding:8px 10px;margin-top:8px;line-height:1.5;}
+#flow-map .fmap-rest b{color:var(--ink);}
+#flow-map .fmap-conc{font-size:11px;color:var(--muted);margin-top:8px;}
+#flow-map .fmap-conc b{color:var(--ink);}
+
+/* ⚠ 미디어쿼리는 반드시 위 기본 규칙들보다 **뒤에** 둔다. 앞에 두면 같은 특이도의 뒤따르는
+   기본 규칙에 덮여 좁은 화면에서 조용히 무시된다(프로토타입에서 실제로 겪은 실수). */
+@media(max-width:900px){
+  /* stocks-home.css의 .home-cols 축소 규칙(minmax(0,1fr))은 specificity가 낮아
+     이 파일의 무조건 규칙(#flow-map .home-cols, 위)에 항상 진다 — 미디어쿼리 안에
+     있어도 소용없다. 여기서 같은 값으로 직접 되돌려야 실제로 1단으로 풀린다. */
+  #flow-map .home-cols{grid-template-columns:minmax(0,1fr);}
+  /* stocks-home.css가 .home-main/.home-side를 display:contents로 이미 풀어준다.
+     여기선 좌측 블록을 위로 올리고 sticky만 해제한다. */
+  #flow-map .fmap-block{order:-1;position:static;}
+}
+@media(max-width:560px){
+  #flow-map .fmap-mkt{grid-template-columns:1fr;}
+  #flow-map .fmap-r{grid-template-columns:74px 1fr 58px;gap:6px;}
+  #flow-map .fmap-hd{grid-template-columns:74px 1fr 58px;gap:6px;}
+  #flow-map .fmap-er{grid-template-columns:1fr auto;row-gap:6px;}
+  #flow-map .fmap-days{gap:5px;}
+  #flow-map .fmap-dy .b{width:38px;}
+}
