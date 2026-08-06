@@ -23,9 +23,11 @@
 <script src="/assets/main.js" defer></script>
 <script src="/assets/stocks-home.js?v=8" defer></script>
 <script src="/assets/ds-subnav.js?v=1" defer></script>
+<script src="/assets/flow-map.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/stocks-home.css?v=6">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
+<link rel="stylesheet" href="/assets/flow-map.css?v=1">
 </head>
 <body>
 <div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><a class="gnb__tg-btn" href="https://t.me/doubleshot30" target="_blank" rel="noopener" aria-label="브리핑을 텔레그램으로 구독"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></a><button class="gnb__notif-btn" id="gnb-notif-btn" onclick="openNoticePanel()" aria-label="공지 및 게시판"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><rect x="13" y="1" width="9" height="7" rx="2" fill="currentColor" opacity=".75"/><path d="M15.5 3.5h4M15.5 5.5h2.5" stroke="var(--gnb-bg,#16181A)" stroke-width="1.1" stroke-linecap="round"/><path d="M13 8l1.8 2" stroke="currentColor" stroke-width="1.1" opacity=".75" fill="none"/></svg><span class="gnb__notif-dot" id="gnb-notif-dot"></span></button></span></div></div>
@@ -624,6 +626,45 @@
             <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:38%"></span><span class="skl skl-line" style="width:48px"></span></div><span class="skl skl-line" style="width:62%;margin-top:9px"></span></div>
             <div class="skl-sig"><div style="display:flex;justify-content:space-between;gap:8px;"><span class="skl skl-line" style="width:46%"></span><span class="skl skl-line" style="width:52px"></span></div><span class="skl skl-line" style="width:76%;margin-top:9px"></span></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧭 자금 지도 — flow-map.js가 /data/flow-map.json을 받아 채운다.
+       테마 합계·일별·시장 요약은 전부 발행본 etf-flows.json 값을 승계한 것이고,
+       ETF 분해만 히스토리에서 재계산한 값이다(빌더 scripts/build_flow_map.py). -->
+  <div class="screen" id="flow-map">
+    <div class="phead">
+      <div><h1><span class="ic">🧭</span> 자금 지도</h1>
+        <div class="psub" id="fmap-sub">—</div></div>
+    </div>
+    <p class="fmap-stale" id="fmap-stale" style="display:none;"></p>
+    <p class="fmap-empty" id="fmap-empty" style="display:none;"></p>
+    <div id="fmap-content" style="display:none;">
+      <div class="block" style="margin-bottom:14px;"><div class="fmap-mkt" id="fmap-mkt"></div></div>
+      <div class="home-cols">
+        <div class="home-main">
+          <div class="block fmap-block" style="margin-bottom:0;">
+            <div class="block__h"><span class="block__t"><span class="ic">🧭</span>테마별 순유입</span>
+              <span class="block__s"><span class="stabs" id="fmap-sorttabs">
+                <a class="on" data-sort="size">규모순</a><a data-sort="net">유입순</a><a data-sort="churn">회전율순</a>
+              </span></span></div>
+            <p class="fmap-intro">가운데 선이 0. 오른쪽으로 뻗으면 <b>유입</b>, 왼쪽이면 <b>유출</b>.
+              <b>행을 누르면 오른쪽 상세가 바뀌어요.</b> <span id="fmap-win"></span></p>
+            <div class="fmap-pad">
+              <div class="fmap-hd"><span>테마</span><span class="c">유출 ← 0 → 유입</span><span class="r">순유입</span></div>
+              <div class="fmap-list" id="fmap-list"></div>
+            </div>
+            <div class="fmap-leg">
+              <span><i style="background:var(--up)"></i>유입</span>
+              <span><i style="background:var(--dn)"></i>유출</span>
+              <span id="fmap-legn"></span>
+            </div>
+          </div>
+        </div>
+        <div class="home-side">
+          <div class="block" style="margin-bottom:0;" id="fmap-detail"></div>
         </div>
       </div>
     </div>
