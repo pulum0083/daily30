@@ -1147,7 +1147,7 @@ function etfRankRender(){
       +'<div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+(tag?' · ':'')+'</small>'+tag+'</div>'
       +'<div class="barwrap"><div class="bar vol" style="width:'+barW+'%"></div></div>'
       +'<span class="barval num">'+fmtVolShort(x.vol||0)+'</span>'
-      +'<span class="num" style="width:56px;text-align:right;flex:none;font-size:11px;font-weight:700;'+multCls+'">'+multTxt+'</span>'
+      +'<span class="num vsavg" style="text-align:right;flex:none;font-size:11px;font-weight:700;'+multCls+'">'+multTxt+'</span>'
       +'<span class="tchg '+dir+' num" style="width:72px;text-align:right;flex:none;">'+pctTxt+'</span>'
       +'</a>';
   }).join('');
