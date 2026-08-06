@@ -65,3 +65,51 @@ def daily_by_etf(snapshots, final_snap, codes):
             out.setdefault(code, {})[date] = (cur["shares"] - prev_shares[code]) * fin["nav"] / 1e8
             prev_shares[code] = cur["shares"]
     return out
+
+
+def rebuild_context(history):
+    """히스토리에서 발행본과 동일한 계산 컨텍스트를 복원한다.
+
+    build_etf_flows.main()이 파일을 쓴 뒤에 히스토리를 롤링하므로, 잡 종료 시점의
+    히스토리에는 오늘 스냅샷이 들어 있고 select_baseline이 고르는 기준일도 그때와 같다.
+    반환 dict: today / baseline / window_days / today_snap / baseline_snap /
+              snapshots(기준일→오늘) / dates(일별 날짜) / flows / codes
+    """
+    today = max(history)
+    prior = sorted([d for d in history if d < today], reverse=True)
+    baseline, window_days = base.select_baseline(prior, base.MAX_WINDOW)
+    if not baseline:
+        return None                                  # 워밍업 — flow 계산 불가
+    today_snap = history[today]
+    baseline_snap = history[baseline]
+    flows = base.compute_flows(today_snap, baseline_snap)
+    window_dates = list(reversed(prior[:window_days]))
+    snapshots = [(d, history[d]) for d in window_dates] + [(today, today_snap)]
+    return {
+        "today": today,
+        "baseline": baseline,
+        "window_days": window_days,
+        "today_snap": today_snap,
+        "baseline_snap": baseline_snap,
+        "snapshots": snapshots,
+        "dates": [d for d, _ in snapshots[1:]],
+        "flows": flows,
+        "codes": [f["code"] for f in flows],
+    }
+
+
+def rollup_to_theme(per_etf, final_snap, dates):
+    """ETF별 일별값을 테마로 합산. daily_by_theme와 같은 형태로 돌려준다(대조 테스트용)."""
+    agg = {}
+    for code, byd in per_etf.items():
+        fin = final_snap.get(code)
+        theme = base.classify_theme(fin["name"]) if fin else None
+        if not theme:
+            continue
+        bucket = agg.setdefault(theme, {})
+        for d, v in byd.items():
+            bucket[d] = bucket.get(d, 0.0) + v
+    return {
+        theme: [{"date": d, "eok": round(byd.get(d, 0.0))} for d in dates]
+        for theme, byd in agg.items()
+    }
