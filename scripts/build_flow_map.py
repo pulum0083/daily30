@@ -1,0 +1,67 @@
+# 자금 지도 탭용 ETF 단위 분해 데이터 빌더 — 테마 합계는 발행본(etf-flows.json)을 그대로 승계한다
+#!/usr/bin/env python3
+"""
+자금 지도 탭 데이터 빌더.
+
+`web/data/etf-flows.json`(발행본)의 테마 합계·일별 값을 정본으로 승계하고,
+`data/etf_flow_history.json`에서 ETF 단위 분해만 재계산해 합친다.
+네트워크를 쓰지 않는다 — 커밋된 두 파일만 읽는다.
+
+왜 재계산인가
+  히스토리는 좌수·NAV 스냅샷일 뿐 ETF별 흐름이 저장돼 있지 않다. 다만 build_etf_flows가
+  파일을 쓴 **뒤에** 히스토리를 롤링하므로, 잡 종료 시점의 히스토리로 발행본을 오차 0으로
+  재구성할 수 있다(실측 확인). 분류·환산은 build_etf_flows의 함수를 그대로 import한다 —
+  재구현하면 한쪽만 고쳐져도 겉보기엔 둘 다 정상으로 보인다(SERVICE_RULES §30).
+
+산출:
+  web/data/flow-map.json
+
+Usage:
+  python3 scripts/build_flow_map.py
+"""
+import json
+import sys
+from datetime import datetime
+
+import build_etf_flows as base
+
+KST = base.KST
+ROOT = base.ROOT
+HISTORY_PATH = base.HISTORY_PATH
+FLOWS_PATH = base.OUT_PATH                       # web/data/etf-flows.json — 입력이자 정본
+OUT_PATH = ROOT / "web" / "data" / "flow-map.json"
+
+TOP_ETFS_DETAIL = 20     # 테마당 노출 ETF 수. 밖으로 밀린 것은 개수·합계를 명시한다(무음 절단 금지)
+
+
+def daily_by_etf(snapshots, final_snap, codes):
+    """연속 스냅샷 쌍의 좌수 차분을 ETF별·날짜별로 낸다. {code: {date: eok(float)}}.
+
+    build_etf_flows.daily_by_theme와 **같은 규약**이다 — 환산은 각 날의 NAV가 아니라 최종
+    NAV로 통일하고(telescoping 보장), 중간 스냅샷에 없는 종목은 직전 좌수를 유지한다.
+    이 함수의 테마 롤업이 daily_by_theme와 일치하는지는 테스트가 실데이터로 대조한다.
+
+    반올림하지 않고 float로 돌려준다 — 합산 후 한 번만 반올림해야 오차가 누적되지 않는다.
+    """
+    if len(snapshots) < 2:
+        return {}
+    prev_shares = {}
+    for code in codes:
+        b = snapshots[0][1].get(code)
+        if b:
+            prev_shares[code] = b["shares"]
+
+    out = {}
+    for date, snap in snapshots[1:]:
+        for code in codes:
+            if code not in prev_shares:
+                continue
+            cur = snap.get(code)
+            if not cur:
+                continue                 # carry-forward — prev_shares 유지
+            fin = final_snap.get(code)
+            if not fin:
+                continue
+            out.setdefault(code, {})[date] = (cur["shares"] - prev_shares[code]) * fin["nav"] / 1e8
+            prev_shares[code] = cur["shares"]
+    return out
