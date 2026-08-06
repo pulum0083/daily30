@@ -266,3 +266,38 @@ def build(history, published, now_iso, top_n=TOP_ETFS_DETAIL):
         "market_daily": market_daily(themes_pub, dates),
         "themes": themes,
     }
+
+
+def main():
+    now = datetime.now(KST)
+    history = base.load_json(HISTORY_PATH, {})
+
+    if not history:
+        print("[flow-map] ✗ 히스토리가 비어 있음 — 파일을 건드리지 않고 중단")
+        sys.exit(1)
+
+    # base.load_json()은 파일 없음·파싱 실패를 조용히 {}로 죽인다 — 그대로 쓰면 "발행본이
+    # 손상됐다"와 "진짜 워밍업(themes: [] 정상 기록)"이 구분되지 않는다. 워밍업 때도
+    # build_etf_flows.main()은 항상 유효한 JSON을 쓰므로, 파일 존재·파싱 성공 여부로
+    # 두 상태를 가른다.
+    if not FLOWS_PATH.exists():
+        print(f"[flow-map] ✗ 발행본 없음({FLOWS_PATH}) — 파일을 건드리지 않고 중단")
+        sys.exit(1)
+    published = base.load_json(FLOWS_PATH, {})
+    if not published:
+        print(f"[flow-map] ✗ 발행본이 손상됨(JSON 파싱 실패) — 파일을 건드리지 않고 중단")
+        sys.exit(1)
+
+    out = build(history, published, now.isoformat())
+    if out is None:
+        print("[flow-map] ⚠️ 워밍업(발행본 themes 없음) — 파일을 쓰지 않고 종료")
+        return
+
+    OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    etfs = sum(len(t["etfs"]) for t in out["themes"])
+    print(f"[flow-map] {out['dates'][0]}~{out['dates'][-1]} · 테마 {len(out['themes'])}개 · "
+          f"ETF {etfs}개 노출 · {OUT_PATH.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()
