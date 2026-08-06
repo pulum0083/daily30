@@ -253,6 +253,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .barwrap{flex:1;height:19px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
 .bar{height:100%;border-radius:5px;}.bar.up{background:linear-gradient(90deg,#FFD3D3,#E03131);}.bar.dn{background:linear-gradient(90deg,#CFE0FF,#2775ED);}.bar.vol{background:linear-gradient(90deg,#CFE0FF,#006EFF);}
 .barval{flex:none;min-width:66px;text-align:right;font-size:11px;font-weight:800;color:var(--ink);}.barval.up{color:var(--up);}.barval.dn{color:var(--dn);}
+/* ETF 랭킹의 'vs평균' 컬럼. 헤더(index.html)와 데이터 행(stocks-home.js)이 폭을 각자
+   인라인으로 들고 있으면 한쪽만 바뀌어도 컬럼이 어긋나므로 여기 한 곳에서만 정한다. */
+.vsavg{width:56px;}
 .ai{width:72px;text-align:right;flex-shrink:0;}
 .aip{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--primary);color:#fff;border:1.5px solid transparent;}
 .ais{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--canvas);border:1.5px solid #BFDBFE;color:var(--primary);}
@@ -842,6 +845,19 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .refrow .rk{font-size:12px;white-space:nowrap;}
   .refrow b{font-size:15px;}
   .row{gap:8px;}
+  /* 종목명이 좁아진 .nm 폭을 넘치면 옆 숫자 위에 겹쳐 그려지던 문제.
+     body가 word-break:keep-all이라 '코스닥150레버리지'처럼 띄어쓰기 없는 한국어는
+     통째로 한 덩어리가 되고, .nm은 flex로 줄어드는데 .nm b에 overflow 제어가 없어
+     텍스트만 박스 밖으로 새어나왔다(실측 84px 박스에 101px 텍스트 → 17px 넘침).
+     anywhere는 '넘칠 때만' 끊으므로, 들어맞는 이름의 keep-all 가독성은 그대로 둔다.
+     데스크톱은 .nm이 148px 고정이라 넘침이 없어(실측 0건) 모바일에만 건다.
+     line-clamp+overflow:hidden도 검토했으나 말줄임표 없이 글자가 반만 잘려
+     ('미국S&P50C') 더 나빠서 폐기했다. */
+  .block .nm b,.cols2 .nm b{overflow-wrap:anywhere;}
+  /* 'vs평균'은 '1.0×' 정도라 56px이 과하다. 좁은 화면에선 그 여유를 종목명에 넘겨
+     이름이 쪼개지는 횟수를 줄인다 — 실측 .nm 84→91px, 이 7px 덕에 '미국S&P500'이
+     한 줄에 들어가 숫자가 '미국S&P50'/'0'으로 갈리지 않는다. */
+  .vsavg{width:42px;}
   .block .barwrap,.cols2 .barwrap{display:none;}
   .block .nm,.cols2 .nm{width:auto;flex:1;min-width:0;}
   .barval{min-width:0;}
