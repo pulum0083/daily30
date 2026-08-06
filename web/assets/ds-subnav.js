@@ -20,7 +20,7 @@
   if (window.__dsSubnavInited) return;
   window.__dsSubnavInited = true;
 
-  // 점등하는 탭은 이번 범위인 4개뿐이다. 테마·일정은 각 기능이 완성될 때 그 작업에서
+  // 점등하는 탭은 이번 범위인 5개뿐이다. 테마·일정은 각 기능이 완성될 때 그 작업에서
   // 주석을 푼다 — 빈 탭을 먼저 만들지 않는다.
   // screen이 있으면 /stocks/ 내부 화면, 없으면 독립 페이지다. Task 3의 클릭 동작이 이
   // 필드로 화면 전환 여부를 가른다.
@@ -29,6 +29,7 @@
     { id: 'signals', label: '특이신호', href: '/stocks/#signals-all', screen: 'signals-all' },
     // { id: 'themes',   label: '테마', href: '/themes/' },    // 테마 타임라인 완성 시 점등
     { id: 'sector',  label: '섹터',     href: '/stocks/#sector',      screen: 'sector' },
+    { id: 'flow',    label: '자금 지도', href: '/stocks/#flow-map',    screen: 'flow-map' },
     { id: 'etf',     label: 'ETF',      href: '/stocks/#etf-rank',    screen: 'etf-rank' },
     // { id: 'calendar', label: '일정', href: '/calendar/' },  // 실적 캘린더 완성 시 점등
   ];

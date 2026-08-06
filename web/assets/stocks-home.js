@@ -988,6 +988,14 @@ function _stockToast(msg){
 function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else _stockToast('해당 종목 상세 페이지는 준비 중이에요.');}
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
 function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
+// 탭·화면별 트래픽을 GA4에서 구분해 볼 수 있도록 가상 pageview를 보낸다.
+// index.html의 gtag config에 send_page_view:false를 줘서 자동 최초 pageview를 껐고,
+// 이 함수가 최초 진입(아래 해시 복원 IIFE)과 이후 모든 화면 전환(go()) 양쪽에서 한 번씩만 호출되므로
+// 실제 조회 1회당 정확히 pageview 1건이 잡힌다(자동 pageview와의 중복 없음).
+function dsTrackPageview(){
+  if(typeof gtag!=='function')return;
+  gtag('event','page_view',{page_title:document.title,page_location:location.href,page_path:location.pathname+location.hash});
+}
 function go(id,noHistory){
   const el=document.getElementById(id);if(!el||!el.classList.contains('screen'))return;
   if(!noHistory){const cur=document.querySelector('.screen.on');if(cur&&cur.id!==id)navHistory.push(cur.id);}
@@ -998,11 +1006,12 @@ function go(id,noHistory){
   // pushState는 hashchange를 발생시키지 않으므로 서브탭 강조를 직접 갱신한다.
   // 프로젝트의 옵셔널 호출 관례를 따라 결합을 최소로 둔다 — 없으면 그냥 넘어간다.
   if(typeof window.dsSubnavSync==='function')window.dsSubnavSync();
+  dsTrackPageview();
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
 // 진입 시 해시(#sector 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
-(function(){const h=location.hash.slice(1);if(!h)return;document.getElementById(h)?go(h,true):go('sector',true);})();
+(function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('sector',true);})();
 // #mom-track 앵커 — 코스피 브리핑 "종목 시그널에서 트래킹" CTA 진입 시 상승 모멘텀 종목 섹션으로 스크롤.
 // 데이터 fetch·시간대 게이트(ueGate)로 표시가 비동기라 표시될 때까지 잠깐 폴링한다.
 (function(){
@@ -1682,8 +1691,12 @@ if(passBtn){
      실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
      신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
      history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
-     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다. */
-  function inMarket(mm){ return mm >= 540 && mm < 930; }    // MARKET     09:00~15:30
+     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다.
+     상한은 15:30이 아니라 995분(16:35, POST_MARKET 시작)이어야 한다 — fetch_news_live.py의
+     _bump_latest_time()이 새 이슈 없을 때 history[0].time을 실행 시각(최대 16:35 직전)까지
+     그대로 찍기 때문에, 여기를 15:30으로 좁혀두면 정작 최신 이슈가 자기 필터에 걸려
+     사라진다(2026-08-05 실사고 — 13:01 이슈가 15:31까지 시각만 갱신되다 화면에서 통째로 빠짐). */
+  function inMarket(mm){ return mm >= 540 && mm < 995; }    // MARKET 실질 상한 09:00~16:35(POST_MARKET 시작)
   function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
   var FEED = {
     kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다

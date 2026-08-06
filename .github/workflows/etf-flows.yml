@@ -76,6 +76,12 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/build_etf_flows.py
 
+      # build_etf_flows가 파일을 쓴 뒤 히스토리를 롤링하므로, 반드시 그 다음에 돌아야
+      # 오늘 스냅샷이 히스토리에 들어 있다. 정합성 게이트가 어긋나면 여기서 실패한다(§0).
+      - name: 🗺️ 자금 지도 탭 데이터 생성
+        if: steps.holiday.outputs.open == 'true'
+        run: python3 scripts/build_flow_map.py
+
       - name: 💾 JSON 커밋 & 푸시
         id: commit
         if: steps.holiday.outputs.open == 'true'
@@ -83,7 +89,7 @@ jobs:
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
           # 이 워크플로우가 소유한 파일만 커밋한다(§18).
-          git add web/data/etf-flows.json data/etf_flow_history.json
+          git add web/data/etf-flows.json web/data/flow-map.json data/etf_flow_history.json
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
             echo "pushed=false" >> "$GITHUB_OUTPUT"
