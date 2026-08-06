@@ -146,6 +146,9 @@ def etf_rows(flows, today_snap, baseline_snap, per_etf_daily, dates, top_n=TOP_E
             "flow": f["flow_eok"],
             "aum": round(shares * cur["nav"] / 1e8),
             "pct": round((shares - bas["shares"]) / shares * 100, 1) if shares else None,
+            # 하루씩 반올림하므로 합계가 flow와 최대 몇 억 어긋날 수 있다(반올림 노이즈).
+            # 테마 daily도 같은 성격 — 정합성 게이트(reconcile)는 이 노이즈와 무관하게
+            # 발행본 총합 대조가 목적이라 영향받지 않는다.
             "daily": [round(byd.get(d, 0.0)) for d in dates],
         })
     rest_n = len(rest) + dropped_n
@@ -171,3 +174,95 @@ def market_daily(themes_pub, dates):
             if x["date"] in acc:
                 acc[x["date"]] += x["eok"]
     return [acc[d] for d in dates]
+
+
+RECONCILE_TOL_EOK = 2      # 재계산 vs 발행 테마 합계 허용 오차(억). 실측은 0이다.
+
+
+def reconcile(themes_pub, flows_by_theme, tol=RECONCILE_TOL_EOK):
+    """재계산 ETF 합계와 발행 테마 합계를 대조해 어긋난 항목 설명을 돌려준다."""
+    bad = []
+    for t in themes_pub:
+        fs = flows_by_theme.get(t["theme"], [])
+        got = sum(f["flow_eok"] for f in fs)
+        if abs(got - t["flow_eok"]) > tol:
+            bad.append(f"{t['theme']} 합계 {got} vs 발행 {t['flow_eok']}")
+        if len(fs) != t["etf_count"]:
+            bad.append(f"{t['theme']} ETF수 {len(fs)} vs 발행 {t['etf_count']}")
+    return bad
+
+
+def build(history, published, now_iso, top_n=TOP_ETFS_DETAIL):
+    """발행본(테마 합계 정본) + 히스토리(ETF 분해) → 자금 지도 탭 데이터. 워밍업이면 None."""
+    themes_pub = published.get("themes") or []
+    if not themes_pub:
+        return None
+
+    if not history:
+        raise RuntimeError(
+            "[flow-map] 히스토리 없음 — 발행본엔 테마가 있는데 히스토리가 비어 있다. "
+            "두 파일이 같은 시점을 가리키지 않는다(운영규칙 0)."
+        )
+
+    today = max(history)
+    pub_date = (published.get("generated_at") or "")[:10]
+    if pub_date != today:
+        raise RuntimeError(
+            f"[flow-map] 날짜 불일치 — 히스토리 최신 {today} vs 발행본 {pub_date}. "
+            f"어긋난 두 소스를 섞어 발행하지 않는다(운영규칙 0)."
+        )
+
+    ctx = rebuild_context(history)
+    if ctx is None:
+        # themes_pub가 비어있지 않다는 건 발행 당시 기준 스냅샷이 있었다는 뜻 — 날짜도
+        # 이미 일치를 확인했다. 그런데도 재구성이 실패하면 히스토리가 그 사이 잘렸거나
+        # 초기화된 것이다. 진짜 워밍업(themes_pub 자체가 비어있는 경우)과는 다른
+        # 상태이므로 조용히 None을 반환하지 않고 크게 알린다.
+        raise RuntimeError(
+            f"[flow-map] 히스토리 재구성 실패 — 발행본은 {pub_date} 테마 {len(themes_pub)}개를 "
+            f"갖고 있는데 히스토리에서 기준 스냅샷을 복원할 수 없다. 히스토리가 잘렸거나 "
+            f"초기화됐을 가능성(운영규칙 0)."
+        )
+
+    flows_by_theme = {}
+    for f in ctx["flows"]:
+        if f["theme"]:
+            flows_by_theme.setdefault(f["theme"], []).append(f)
+
+    bad = reconcile(themes_pub, flows_by_theme)
+    if bad:
+        raise RuntimeError(
+            "[flow-map] 정합성 실패 — 재계산이 발행본과 어긋난다: " + " / ".join(bad)
+        )
+
+    dates = dates_of(themes_pub)
+    per_etf = daily_by_etf(ctx["snapshots"], ctx["today_snap"], ctx["codes"])
+
+    themes = []
+    for t in themes_pub:
+        rows, rest_n, rest_flow = etf_rows(
+            flows_by_theme.get(t["theme"], []),
+            ctx["today_snap"], ctx["baseline_snap"], per_etf, dates, top_n,
+        )
+        by_date = {x["date"]: x["eok"] for x in (t.get("daily") or [])}
+        themes.append({
+            "theme": t["theme"],
+            "flow_eok": t["flow_eok"],
+            "gross_eok": t["gross_eok"],
+            "etf_count": t["etf_count"],
+            "daily": [by_date.get(d, 0) for d in dates],
+            "etfs": rows,
+            "rest_n": rest_n,
+            "rest_flow": rest_flow,
+        })
+
+    return {
+        "generated_at": now_iso,
+        "source_generated_at": published.get("generated_at"),
+        "window_days": published.get("window_days"),
+        "aum_floor_eok": published.get("aum_floor_eok"),
+        "coverage": published.get("coverage"),
+        "dates": dates,
+        "market_daily": market_daily(themes_pub, dates),
+        "themes": themes,
+    }

@@ -158,6 +158,100 @@ def test_market_daily_sums_published_values_by_date():
     assert m.market_daily(themes, ["d1", "d2"]) == [10, 4]
 
 
+def test_build_aborts_when_history_and_published_disagree():
+    """히스토리 최신일과 발행본 날짜가 다르면 섞지 않고 중단한다(§0)."""
+    hist = {"2026-07-30": _snap({"A": (100.0, 1e8, "KODEX 반도체")}),
+            "2026-07-31": _snap({"A": (110.0, 1e8, "KODEX 반도체")})}
+    pub = {"generated_at": "2026-07-28T18:00:00+09:00", "window_days": 1,
+           "aum_floor_eok": 300, "coverage": {"etf_count": 1, "theme_count": 1},
+           "themes": [{"theme": "반도체", "flow_eok": 10, "gross_eok": 10, "etf_count": 1,
+                       "daily": [{"date": "2026-07-31", "eok": 10}]}]}
+    try:
+        m.build(hist, pub, "2026-07-31T18:05:00+09:00")
+        assert False, "날짜 불일치인데 중단하지 않았다"
+    except RuntimeError as e:
+        assert "날짜" in str(e)
+
+
+def test_build_aborts_when_recomputed_totals_drift():
+    """재계산 합계가 발행 합계와 ±2억을 넘게 벌어지면 중단한다."""
+    hist = {"2026-07-30": _snap({"A": (100.0, 1e8, "KODEX 반도체")}),
+            "2026-07-31": _snap({"A": (110.0, 1e8, "KODEX 반도체")})}
+    pub = {"generated_at": "2026-07-31T18:00:00+09:00", "window_days": 1,
+           "aum_floor_eok": 300, "coverage": {"etf_count": 1, "theme_count": 1},
+           "themes": [{"theme": "반도체", "flow_eok": 999, "gross_eok": 999, "etf_count": 1,
+                       "daily": [{"date": "2026-07-31", "eok": 999}]}]}
+    try:
+        m.build(hist, pub, "2026-07-31T18:05:00+09:00")
+        assert False, "합계가 어긋났는데 중단하지 않았다"
+    except RuntimeError as e:
+        assert "정합" in str(e)
+
+
+def test_build_returns_none_on_warmup():
+    """발행본 themes가 비어 있으면(워밍업) None — 파일을 쓰지 않는다."""
+    hist = {"2026-07-31": _snap({"A": (100.0, 1e8, "KODEX 반도체")})}
+    pub = {"generated_at": "2026-07-31T18:00:00+09:00", "window_days": 0,
+           "aum_floor_eok": 300, "coverage": {"etf_count": 1, "theme_count": 0}, "themes": []}
+    assert m.build(hist, pub, "2026-07-31T18:05:00+09:00") is None
+
+
+def test_build_raises_when_history_empty_but_published_has_themes():
+    """발행본엔 테마가 있는데 히스토리가 비어 있으면 — 두 파일이 어긋난 것, 조용히 넘어가지 않는다."""
+    hist = {}
+    pub = {"generated_at": "2026-07-31T18:00:00+09:00", "window_days": 1,
+           "aum_floor_eok": 300, "coverage": {"etf_count": 1, "theme_count": 1},
+           "themes": [{"theme": "반도체", "flow_eok": 10, "gross_eok": 10, "etf_count": 1,
+                       "daily": [{"date": "2026-07-31", "eok": 10}]}]}
+    try:
+        m.build(hist, pub, "2026-07-31T18:05:00+09:00")
+        assert False, "히스토리가 비었는데 중단하지 않았다"
+    except RuntimeError as e:
+        assert "히스토리" in str(e)
+
+
+def test_build_raises_when_rebuild_context_fails_despite_matching_date():
+    """날짜는 맞는데 재구성이 실패하면(기준 스냅샷 없음) — 진짜 워밍업과 다르므로 크게 알린다."""
+    hist = {"2026-07-31": _snap({"A": (100.0, 1e8, "KODEX 반도체")})}   # 오늘 하루뿐, 기준일 없음
+    pub = {"generated_at": "2026-07-31T18:00:00+09:00", "window_days": 1,
+           "aum_floor_eok": 300, "coverage": {"etf_count": 1, "theme_count": 1},
+           "themes": [{"theme": "반도체", "flow_eok": 500, "gross_eok": 500, "etf_count": 1,
+                       "daily": [{"date": "2026-07-31", "eok": 500}]}]}
+    try:
+        m.build(hist, pub, "2026-07-31T18:05:00+09:00")
+        assert False, "재구성 실패인데 중단하지 않았다"
+    except RuntimeError as e:
+        assert "재구성" in str(e) or "히스토리" in str(e)
+
+
+def test_build_real_data_invariants():
+    """저장소 실데이터로 스펙의 불변식 2개를 확인한다.
+
+      ① ETF 목록 합 + 그 외 합계 = 헤더 순유입액 (±3억)
+      ② 일별 막대 합 = 헤더 순유입액 (±3억)
+    """
+    real = _load_real()
+    if real is None:
+        print("    (워밍업 데이터 — 스킵)"); return
+    hist, pub = real
+    out = m.build(hist, pub, "2026-01-01T00:00:00+09:00")
+    assert out is not None
+    assert len(out["themes"]) == len(pub["themes"])
+    assert len(out["market_daily"]) == len(out["dates"])
+
+    for t in out["themes"]:
+        listed = sum(e["flow"] for e in t["etfs"]) + t["rest_flow"]
+        assert abs(listed - t["flow_eok"]) <= 3, f"불변식① {t['theme']}: {listed} vs {t['flow_eok']}"
+        bars = sum(t["daily"])
+        assert abs(bars - t["flow_eok"]) <= 3, f"불변식② {t['theme']}: {bars} vs {t['flow_eok']}"
+        assert len(t["daily"]) == len(out["dates"])
+        assert len(t["etfs"]) <= m.TOP_ETFS_DETAIL
+        for e in t["etfs"]:
+            assert len(e["daily"]) == len(out["dates"])
+            assert abs(sum(e["daily"]) - e["flow"]) <= 3, (
+                f"ETF 반올림 노이즈 초과 {e['name']}: {sum(e['daily'])} vs {e['flow']}")
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
