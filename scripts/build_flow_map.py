@@ -113,3 +113,41 @@ def rollup_to_theme(per_etf, final_snap, dates):
         theme: [{"date": d, "eok": round(byd.get(d, 0.0))} for d in dates]
         for theme, byd in agg.items()
     }
+
+
+def etf_rows(flows, today_snap, baseline_snap, per_etf_daily, dates, top_n=TOP_ETFS_DETAIL):
+    """테마 하나의 ETF flow 목록 → 화면용 행 + 잘린 나머지 요약.
+
+    반환 (rows, rest_n, rest_flow). rows는 |flow| 내림차순 상위 top_n개.
+
+    pct(덩치 대비 증감률) = (현재좌수 − 기준좌수) / 현재좌수 × 100.
+    NAV가 약분되므로 가격 효과 없는 순수 설정/환매 비율이다. 큰 ETF의 큰 금액보다
+    작은 ETF가 덩치 대비 크게 움직인 것이 더 드문 신호라서 별도로 낸다.
+    """
+    ranked = sorted(flows, key=lambda f: -abs(f["flow_eok"]))
+    top, rest = ranked[:top_n], ranked[top_n:]
+
+    rows = []
+    dropped_n, dropped_flow = 0, 0
+    for f in top:
+        cur = today_snap.get(f["code"])
+        bas = baseline_snap.get(f["code"])
+        if not cur or not bas:
+            # compute_flows가 걸렀어야 할 상태 — 지어내지 않되, "무음 절단 금지" 약속을
+            # 이 함수 스스로 지킨다. rest로 접어 어떤 경로로도 flow_eok가 안 사라지게 한다.
+            dropped_n += 1
+            dropped_flow += f["flow_eok"]
+            continue
+        shares = cur["shares"]
+        byd = per_etf_daily.get(f["code"], {})
+        rows.append({
+            "code": f["code"],
+            "name": f["name"],
+            "flow": f["flow_eok"],
+            "aum": round(shares * cur["nav"] / 1e8),
+            "pct": round((shares - bas["shares"]) / shares * 100, 1) if shares else None,
+            "daily": [round(byd.get(d, 0.0)) for d in dates],
+        })
+    rest_n = len(rest) + dropped_n
+    rest_flow = sum(f["flow_eok"] for f in rest) + dropped_flow
+    return rows, rest_n, rest_flow

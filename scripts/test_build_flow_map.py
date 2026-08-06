@@ -88,6 +88,57 @@ def test_theme_rollup_matches_published_builder():
     assert checked > 0, "발행본과 대조된 (테마, 날짜) 쌍이 하나도 없음 — 게이트가 공회전 중"
 
 
+def test_etf_rows_pct_is_share_change_over_current():
+    """덩치 대비 % = (현재좌수 − 기준좌수) / 현재좌수 × 100. NAV가 약분돼 순수 좌수 증감률."""
+    today = _snap({"A": (70.0, 1e8, "KODEX 은행")})
+    baseline = _snap({"A": (100.0, 1e8, "KODEX 은행")})
+    flows = [{"code": "A", "name": "KODEX 은행", "theme": "금융·은행", "flow_eok": -30}]
+    rows, rest_n, rest_flow = m.etf_rows(flows, today, baseline, {}, ["d1"], top_n=20)
+    assert rows[0]["aum"] == 70                       # 70 × 1e8 / 1e8
+    assert rows[0]["pct"] == -42.9                    # (70−100)/70×100
+    assert rows[0]["daily"] == [0]                    # 일별 데이터 없으면 0으로 채운다
+    assert (rest_n, rest_flow) == (0, 0)
+
+
+def test_etf_rows_cuts_at_top_n_and_reports_rest():
+    """상위 N개에서 끊되 밖으로 밀린 것은 개수·합계를 명시한다 — 무음 절단 금지(운영규칙 0)."""
+    today, baseline, flows = {}, {}, []
+    for i in range(25):
+        code = f"C{i:02d}"
+        today[code] = {"shares": 100.0, "nav": 1e8, "name": "KODEX 반도체"}
+        baseline[code] = {"shares": 100.0 - (25 - i), "nav": 1e8, "name": "KODEX 반도체"}
+        flows.append({"code": code, "name": "KODEX 반도체", "theme": "반도체", "flow_eok": 25 - i})
+    rows, rest_n, rest_flow = m.etf_rows(flows, today, baseline, {}, ["d1"], top_n=20)
+    assert len(rows) == 20
+    assert rows[0]["flow"] == 25                      # |flow| 내림차순
+    assert rest_n == 5
+    assert rest_flow == sum(range(1, 6))              # 밀린 5개(5,4,3,2,1)의 합
+    assert sum(r["flow"] for r in rows) + rest_flow == sum(f["flow_eok"] for f in flows)
+
+
+def test_etf_rows_folds_unresolvable_top_item_into_rest():
+    """상위 N 안에 today/baseline 스냅샷이 없는 종목이 있어도 금액이 사라지지 않는다."""
+    today = _snap({"A": (100.0, 1e8, "KODEX 반도체"), "B": (50.0, 1e8, "KODEX 반도체")})
+    baseline = _snap({"A": (80.0, 1e8, "KODEX 반도체")})   # B는 baseline에 없음(비정상 상태 시뮬레이션)
+    flows = [
+        {"code": "A", "name": "KODEX 반도체", "theme": "반도체", "flow_eok": 20},
+        {"code": "B", "name": "KODEX 반도체", "theme": "반도체", "flow_eok": 999},   # 해석 불가
+    ]
+    rows, rest_n, rest_flow = m.etf_rows(flows, today, baseline, {}, ["d1"], top_n=20)
+    assert len(rows) == 1 and rows[0]["code"] == "A"
+    assert rest_n == 1 and rest_flow == 999            # B가 사라지지 않고 rest로 잡힌다
+    assert sum(r["flow"] for r in rows) + rest_flow == sum(f["flow_eok"] for f in flows)
+
+
+def test_etf_rows_pct_none_when_shares_zero():
+    """좌수 0이면 비율을 만들 수 없다 — 지어내지 않고 None(뱃지 생략)."""
+    today = _snap({"A": (0.0, 1e8, "KODEX 은행")})
+    baseline = _snap({"A": (100.0, 1e8, "KODEX 은행")})
+    flows = [{"code": "A", "name": "KODEX 은행", "theme": "금융·은행", "flow_eok": -100}]
+    rows, _n, _f = m.etf_rows(flows, today, baseline, {}, ["d1"], top_n=20)
+    assert rows[0]["pct"] is None
+
+
 def run():
     fns = [v for k, v in globals().items() if k.startswith("test_")]
     for fn in fns:
