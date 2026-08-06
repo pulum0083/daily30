@@ -25,7 +25,7 @@
 <script src="/assets/ds-subnav.js?v=1" defer></script>
 <script src="/assets/flow-map.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=9">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=10">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/flow-map.css?v=1">
 </head>
@@ -680,7 +680,7 @@
       <div class="home-main">
         <div class="block">
           <div class="block__h"><span class="block__s" style="margin-left:auto;"><span class="stabs" id="etf-rank-tabs" style="margin-bottom:0;"><a class="on" onclick="etfSetTab('vol',this)">거래량순</a><a onclick="etfSetTab('up',this)">상승률순</a></span></span></div>
-          <div class="block__h colhead" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s" style="width:56px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
+          <div class="block__h colhead" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s vsavg" style="text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
           <div id="etf-rank-rows"></div>
         </div>
       </div>
