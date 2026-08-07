@@ -106,3 +106,34 @@ def daily_frames(cums: dict) -> list:
             }
         frames.append(row)
     return frames
+
+
+def qualifying_sets(frames: list, i: int, allowed: set | None = None) -> tuple[set, set]:
+    """i시점에서 '최근 HYST_WINDOW일 중 HYST_MIN일 이상' 조건을 만족한 바스켓 집합.
+
+    히스테리시스를 상태가 아니라 이 입력 집합에 건다. 상태 판정과 문구 생성이
+    둘 다 이 반환값만 쓰므로, 상태가 있으면 문구 재료도 반드시 있다.
+    """
+    lo = max(0, i - HYST_WINDOW + 1)
+    window = frames[lo:i + 1]
+    need = min(HYST_MIN, len(window))
+    cool_n, high_n = {}, {}
+    for row in window:
+        for k, v in row.items():
+            if allowed is not None and k not in allowed:
+                continue
+            if v["is_cooled"]:
+                cool_n[k] = cool_n.get(k, 0) + 1
+            if v["is_high"]:
+                high_n[k] = high_n.get(k, 0) + 1
+    return ({k for k, c in cool_n.items() if c >= need},
+            {k for k, c in high_n.items() if c >= need})
+
+
+def classify(cooled: set, rising: set) -> str:
+    """swap = 식은 것과 신고점이 동시에 / lead = 신고점만 / none = 신고점 없음."""
+    if cooled and rising:
+        return "swap"
+    if rising:
+        return "lead"
+    return "none"

@@ -113,3 +113,40 @@ def test_daily_frames_gap_matches_displayed_value_at_rounding_boundary():
     last = fr[2]["x"]
     assert last["gap"] == -15.0
     assert last["is_cooled"] is True   # gap이 -15.0으로 보이는데 플래그가 False면 모순
+
+
+from market_regime_core import qualifying_sets, classify  # noqa: E402
+
+
+def _frame(**kw):
+    return {k: {"is_cooled": c, "is_high": h} for k, (c, h) in kw.items()}
+
+
+def test_qualifying_needs_k_of_n_days():
+    """최근 5일 중 3일 이상 충족해야 집합에 들어간다."""
+    frames = [_frame(a=(False, True)) for _ in range(2)] + \
+             [_frame(a=(True, False)) for _ in range(3)]
+    cooled, rising = qualifying_sets(frames, 4)
+    assert cooled == {"a"}      # 최근 5일 중 3일 cooled
+    assert rising == set()      # 2일뿐이라 미달
+
+
+def test_qualifying_short_window_at_start():
+    """창이 5일보다 짧으면 있는 날 수 기준으로 판단한다."""
+    frames = [_frame(a=(True, False)), _frame(a=(True, False))]
+    cooled, _ = qualifying_sets(frames, 1)
+    assert cooled == {"a"}      # 2일 전부 충족
+
+
+def test_qualifying_restricts_to_allowed_keys():
+    """헤드라인용 집합은 글로벌 바스켓으로 한정할 수 있어야 한다."""
+    frames = [_frame(g=(True, False), kr=(True, False)) for _ in range(5)]
+    cooled, _ = qualifying_sets(frames, 4, allowed={"g"})
+    assert cooled == {"g"}
+
+
+def test_classify_three_states():
+    assert classify({"a"}, {"b"}) == "swap"
+    assert classify(set(), {"b"}) == "lead"
+    assert classify({"a"}, set()) == "none"
+    assert classify(set(), set()) == "none"
