@@ -41,3 +41,21 @@ def test_basket_cum_returns_none_when_no_member_usable():
     closes = {"LATE": {"d2": 50}}
     cum, n = basket_cum(["LATE"], closes, dates)
     assert cum is None and n == 0
+
+
+def test_basket_cum_empty_dates_returns_none():
+    """빈 창은 크래시가 아니라 (None, 0) — 다른 계산 불가 경로와 동작을 맞춘다."""
+    cum, n = basket_cum(["A"], {"A": {"d1": 100}}, [])
+    assert cum is None and n == 0
+
+
+def test_basket_cum_treats_nan_as_missing():
+    """NaN 종가는 없는 데이터다. 조용히 평균에 섞이면 바스켓 전체가 NaN이 된다(§0)."""
+    nan = float("nan")
+    dates = ["d1", "d2", "d3"]
+    closes = {"A": {"d1": 100, "d2": nan, "d3": 120}}
+    cum, n = basket_cum(["A"], closes, dates)
+    assert n == 1
+    assert cum[1] == 0.0      # NaN 대신 직전 종가(d1) 사용
+    assert cum[2] == 20.0
+    assert all(v == v for v in cum), f"NaN이 남아있다: {cum}"
