@@ -21,7 +21,7 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=8" defer></script>
+<script src="/assets/stocks-home.js?v=9" defer></script>
 <script src="/assets/ds-subnav.js?v=1" defer></script>
 <script src="/assets/flow-map.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -426,13 +426,20 @@
 
   <!-- ===== SECTOR (반도체) ===== -->
   <div class="screen" id="sector">
+    <!-- 화면 타이틀. 다른 화면(거래량 순위·ETF 랭킹·특이 신호)과 같은 phead 규격이다.
+         날짜는 .ds-asof를 쓰지 않는다 — 이 화면은 스냅샷(마감)만 쓰는데 .ds-asof는
+         장중에 '오늘 실시간'으로 바뀌어 없는 갱신을 광고하게 된다(secAsOfLabel 주석 참조). -->
+    <div class="phead">
+      <div><h1><span class="ic">🧭</span> 섹터 현황</h1><div class="psub" id="sec-phead-sub">—</div></div>
+    </div>
     <!-- 섹터 선택 칩 — secRenderChips()가 채운다. 8개 섹터 평균은 stocks-snapshot.json 실측. -->
     <div class="secsel" id="secsel" role="tablist" aria-label="섹터 선택"></div>
     <div class="grid">
       <div>
         <div class="dbox">
         <div class="shead"><div class="top">
-          <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목 · 코스피·코스닥 · —</div></div>
+          <!-- 종목수만 남긴다. 시장·기준일은 화면 타이틀(psub)이 이미 말하고 있어 중복이었다. -->
+          <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목</div></div>
           <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
         </div>
         <!-- "섹터 AI 심리" 게이지는 2026-08-04 제거. 값이 upN/total(단순 상승 비율)이라

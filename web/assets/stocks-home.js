@@ -2107,10 +2107,19 @@ if(passBtn){
   }
 
   // 이 화면은 항상 스냅샷(마감) 기준이라 .ds-asof(장중 '오늘 실시간')를 재사용하면 안 된다.
+  // session_date를 먼저 본다 — 종목별 마지막 봉 날짜가 전부 일치할 때만 채워지는 필드라
+  // (build_stocks_snapshot._reconcile_session_date) 이 데이터가 실제로 '어느 장'의 것인지를
+  // 가리킨다. generated_at은 빌드가 돈 시각일 뿐이라, 빌드가 늦게 돌면 봉은 어제 건데
+  // 날짜만 오늘로 찍힌다. 둘 다 없으면 빈 문자열 — 모르는 날짜를 지어내지 않는다(§0).
+  function secAsOfYmd(snap){
+    if(!snap) return '';
+    if(typeof snap.session_date==='string' && snap.session_date) return snap.session_date;
+    if(typeof snap.generated_at==='string' && snap.generated_at) return snap.generated_at.slice(0,10);
+    return '';
+  }
   function secAsOfLabel(snap){
-    if(!snap||!snap.generated_at) return '';
-    var ymd=String(snap.generated_at).slice(0,10);
-    return fmtKoDate(ymd)+' 마감';
+    var ymd=secAsOfYmd(snap);
+    return ymd?fmtKoDate(ymd)+' 마감':'';
   }
 
   function secSectorRow(r,i){
@@ -2151,9 +2160,20 @@ if(passBtn){
     if(!d) return;   // 없는 섹터면 화면을 건드리지 않는다(§0) — 직전 상태 유지
     secActiveKey=key;
 
+    var allAvgs=secAllAverages(snap);   // 아래 phead 표기와 칩 렌더가 같이 쓴다(중복 계산 방지)
+
     var crumbEl=document.getElementById('sec-crumb-label'); if(crumbEl) crumbEl.textContent=d.label;
     var titleEl=document.getElementById('sec-title'); if(titleEl) titleEl.textContent=(SECTOR_ICONS[key]||'')+' '+d.label;
-    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목 · 코스피·코스닥 · '+secAsOfLabel(snap);
+    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목';
+
+    // 화면 타이틀 아래 기준 표기. 기준일을 모르면 그 조각만 빼고 나머지는 그대로 쓴다(§0).
+    var pheadEl=document.getElementById('sec-phead-sub');
+    if(pheadEl){
+      var nSec=Object.keys(allAvgs||{}).length;
+      var asof=secAsOfLabel(snap);
+      pheadEl.textContent=[nSec?nSec+'개 섹터':'', '코스피·코스닥', asof?asof+' 종가':'']
+        .filter(Boolean).join(' · ');
+    }
 
     var avgEl=document.getElementById('sec-avg');
     if(avgEl){avgEl.textContent=(d.avg>=0?'+':'−')+Math.abs(d.avg).toFixed(2)+'%';avgEl.className='v num '+(d.avg>=0?'up':'dn');}
@@ -2174,7 +2194,7 @@ if(passBtn){
     var rowsWrap=document.getElementById('sec-rows');
     if(rowsWrap) rowsWrap.innerHTML=d.rows.map(secSectorRow).join('');
 
-    secRenderChips(document.getElementById('secsel'), key, secAllAverages(snap));
+    secRenderChips(document.getElementById('secsel'), key, allAvgs);
   }
 
   // 칩 클릭 위임 — 칩은 매번 innerHTML로 다시 그려지므로 개별 리스너 대신 문서 레벨 위임 1개만 둔다.
