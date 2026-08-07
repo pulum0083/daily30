@@ -1,0 +1,13 @@
+{
+  "_comment": "국면 판정용 바스켓. scripts/config/stock_universe.json(종목 상세용 벨웨더)과 별개 파일이다 — 목적이 다르고 SCHD·XLP·IWD 등은 벨웨더가 아니다. NVDA·MU·SOXX는 양쪽에 겹치므로 한쪽을 바꿀 때 다른 쪽도 확인할 것.",
+  "window_days": 126,
+  "baskets": [
+    { "key": "memory",            "name": "메모리 반도체",  "scope": "global", "members": ["MU", "SOXX", "DRAM"] },
+    { "key": "ai_infra",          "name": "AI 인프라",     "scope": "global", "members": ["NVDA", "MSFT", "AMZN", "AVGO"] },
+    { "key": "consumer_platform", "name": "소비 플랫폼",    "scope": "global", "members": ["AAPL", "GOOGL", "META"] },
+    { "key": "dividend_defensive","name": "배당 방어",      "scope": "global", "members": ["SCHD", "XLP", "XLU"] },
+    { "key": "value_cyclical",    "name": "가치 경기민감",   "scope": "global", "members": ["IWD", "XLF", "XLE"] },
+    { "key": "kr_semi",           "name": "한국 반도체",    "scope": "korea",  "members": ["005930.KS", "000660.KS"] },
+    { "key": "kr_rest",           "name": "한국 그 외",     "scope": "korea",  "members": ["305720.KS", "449450.KS", "091170.KS", "091180.KS"] }
+  ]
+}
