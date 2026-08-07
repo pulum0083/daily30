@@ -59,3 +59,33 @@ def test_basket_cum_treats_nan_as_missing():
     assert cum[1] == 0.0      # NaN 대신 직전 종가(d1) 사용
     assert cum[2] == 20.0
     assert all(v == v for v in cum), f"NaN이 남아있다: {cum}"
+
+
+from market_regime_core import daily_frames  # noqa: E402
+
+
+def test_daily_frames_gap_from_running_peak():
+    """gap은 '그 시점까지의 최고' 대비 거리다. 미래를 보지 않는다."""
+    cums = {"a": [0.0, 10.0, 5.0]}
+    fr = daily_frames(cums)
+    assert fr[0]["a"]["gap"] == 0.0     # 첫날은 자기가 정점
+    assert fr[1]["a"]["gap"] == 0.0     # 신고점
+    assert fr[2]["a"]["gap"] == -5.0    # 정점 10에서 5 내려옴
+
+
+def test_daily_frames_flags():
+    cums = {"cooled": [0.0, 30.0, 10.0], "high": [0.0, 1.0, 2.0]}
+    fr = daily_frames(cums)
+    last = fr[2]
+    assert last["cooled"]["is_cooled"] is True    # -20 <= -15
+    assert last["cooled"]["is_high"] is False
+    assert last["high"]["is_high"] is True        # gap 0 >= -3
+    assert last["high"]["is_cooled"] is False
+
+
+def test_daily_frames_threshold_boundaries():
+    """경계값은 포함이다 — 정확히 -15.0이면 식음, -3.0이면 신고점."""
+    fr = daily_frames({"x": [0.0, 100.0, 85.0]})   # gap = -15.0
+    assert fr[2]["x"]["is_cooled"] is True
+    fr2 = daily_frames({"y": [0.0, 100.0, 97.0]})  # gap = -3.0
+    assert fr2[2]["y"]["is_high"] is True

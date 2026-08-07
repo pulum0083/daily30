@@ -64,3 +64,31 @@ def basket_cum(members: list, closes: dict, dates: list) -> tuple[list | None, i
         return None, 0
     cum = [round(sum(s[i] for s in series) / len(series), 4) for i in range(len(dates))]
     return cum, len(series)
+
+
+def daily_frames(cums: dict) -> list:
+    """일자별 {key: {cum, peak, gap, is_cooled, is_high}}.
+
+    peak은 그 시점까지의 러닝 최고다. 창 전체 최고를 쓰면 미래를 보게 된다.
+    """
+    keys = [k for k, v in cums.items() if v]
+    if not keys:
+        return []
+    n = len(cums[keys[0]])
+    frames = []
+    peaks = {k: float("-inf") for k in keys}
+    for i in range(n):
+        row = {}
+        for k in keys:
+            v = cums[k][i]
+            peaks[k] = max(peaks[k], v)
+            gap = round(v - peaks[k], 4)
+            row[k] = {
+                "cum": round(v, 1),
+                "peak": round(peaks[k], 1),
+                "gap": round(gap, 1),
+                "is_cooled": gap <= COOL_THRESHOLD,
+                "is_high": gap >= HIGH_THRESHOLD,
+            }
+        frames.append(row)
+    return frames
