@@ -255,3 +255,35 @@ def test_headline_rejects_blank_basket_name():
                  {"memory": 89.4, "ai_infra": 17.2, "value_cyclical": 9.8},
                  {"memory": -53.2, "ai_infra": 0.0, "value_cyclical": 0.0},
                  bad_names, ORDER)
+
+
+from market_regime_core import resolve_regimes  # noqa: E402
+
+
+def _mk_frames(n, cooled_keys, high_keys):
+    return [{k: {"is_cooled": k in cooled_keys, "is_high": k in high_keys,
+                 "cum": 10.0 if k in high_keys else -30.0,
+                 "gap": 0.0 if k in high_keys else -40.0}
+             for k in ("memory", "ai_infra")} for _ in range(n)]
+
+
+def test_resolve_holds_one_sentence_per_regime():
+    """같은 국면 안에서는 문장이 바뀌지 않는다."""
+    frames = _mk_frames(30, {"memory"}, {"ai_infra"})
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra"})
+    texts = {r["headline"] for r in out}
+    assert len(texts) == 1
+    assert out[0]["state"] == "swap"
+
+
+def test_resolve_marks_regime_start():
+    frames = _mk_frames(30, {"memory"}, {"ai_infra"})
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra"})
+    assert all(r["regime_index"] == 0 for r in out)
+
+
+def test_resolve_never_emits_null_headline():
+    """스펙의 검증 기준 — 문구 생성 실패 0건."""
+    frames = _mk_frames(30, set(), set())     # 신고점 없음 → none
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra"})
+    assert all(r["headline"] for r in out)

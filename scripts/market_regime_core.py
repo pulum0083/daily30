@@ -204,3 +204,38 @@ def headline(state, cooled, rising, cum, gap, names, order):
         joined = ", ".join(tos)
         return f"주도주가 {frm}에서 {joined}{josa(joined)} 넘어가는 중이에요"
     return None
+
+
+def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> list:
+    """일자별 [{state, headline, regime_index}].
+
+    문구는 국면 단위로 한 번 확정한다 — 같은 국면 안에서 문장이 매일 미묘하게
+    달라지면 '국면'이라는 개념 자체가 흐려진다. 그 국면에서 재료가 유효한 가장
+    최근 값으로 만들어 국면 내내 유지한다.
+    """
+    raw = []
+    for i in range(len(frames)):
+        cooled, rising = qualifying_sets(frames, i, allowed)
+        raw.append((classify(cooled, rising), cooled, rising))
+    states = absorb_short_runs([r[0] for r in raw])
+
+    out = [None] * len(frames)
+    i = 0
+    regime_index = 0
+    while i < len(states):
+        j = i
+        while j + 1 < len(states) and states[j + 1] == states[i]:
+            j += 1
+        text = None
+        for t in range(j, i - 1, -1):        # 국면 안에서 가장 최근 유효 재료
+            cooled, rising = qualifying_sets(frames, t, allowed)
+            cum = {k: v["cum"] for k, v in frames[t].items()}
+            gap = {k: v["gap"] for k, v in frames[t].items()}
+            text = headline(states[i], cooled, rising, cum, gap, names, order)
+            if text:
+                break
+        for t in range(i, j + 1):
+            out[t] = {"state": states[i], "headline": text, "regime_index": regime_index}
+        regime_index += 1
+        i = j + 1
+    return out
