@@ -70,23 +70,37 @@ def daily_frames(cums: dict) -> list:
     """일자별 {key: {cum, peak, gap, is_cooled, is_high}}.
 
     peak은 그 시점까지의 러닝 최고다. 창 전체 최고를 쓰면 미래를 보게 된다.
+
+    cums의 각 값은 basket_cum()이 만든, 길이가 같고 NaN이 없는 시계열이어야 한다
+    (basket_cum은 _price_at의 NaN 가드 덕에 NaN을 만들지 않는다). 이 계약이 깨지면
+    — 길이가 다르거나 NaN이 섞이면 — 조용히 자르거나 통과시키는 대신 즉시 실패한다(§0).
     """
     keys = [k for k, v in cums.items() if v]
     if not keys:
         return []
     n = len(cums[keys[0]])
+    for k in keys:
+        if len(cums[k]) != n:
+            raise ValueError(
+                f"daily_frames: 바스켓 '{k}'의 길이({len(cums[k])})가 "
+                f"'{keys[0]}'({n})와 다르다 — 같은 dates로 계산된 시계열만 넣을 것.")
+        if any(v != v for v in cums[k]):
+            raise ValueError(f"daily_frames: 바스켓 '{k}'에 NaN이 섞여 있다.")
+
     frames = []
-    peaks = {k: float("-inf") for k in keys}
+    peaks = {k: float("-inf") for k in keys}  # 첫날은 자기 자신이 정점이라 gap=0.0, is_high=True가 항상 성립한다.
     for i in range(n):
         row = {}
         for k in keys:
             v = cums[k][i]
             peaks[k] = max(peaks[k], v)
-            gap = round(v - peaks[k], 4)
+            # 반올림은 한 번만 한다 — 표시값과 플래그가 서로 다른 정밀도에서 나오면
+            # "gap이 -15.0인데 is_cooled가 False"처럼 사람 눈에 모순으로 보인다.
+            gap = round(v - peaks[k], 1)
             row[k] = {
                 "cum": round(v, 1),
                 "peak": round(peaks[k], 1),
-                "gap": round(gap, 1),
+                "gap": gap,
                 "is_cooled": gap <= COOL_THRESHOLD,
                 "is_high": gap >= HIGH_THRESHOLD,
             }

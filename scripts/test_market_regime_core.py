@@ -2,6 +2,8 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent))
 from market_regime_core import basket_cum  # noqa: E402
 
@@ -89,3 +91,25 @@ def test_daily_frames_threshold_boundaries():
     assert fr[2]["x"]["is_cooled"] is True
     fr2 = daily_frames({"y": [0.0, 100.0, 97.0]})  # gap = -3.0
     assert fr2[2]["y"]["is_high"] is True
+
+
+def test_daily_frames_rejects_mismatched_lengths():
+    """길이가 다른 시계열은 조용히 자르거나 죽지 않고 명시적으로 실패한다.
+    딕셔너리 키 순서에 따라 크래시하거나 데이터가 사라지던 문제의 회귀 가드."""
+    with pytest.raises(ValueError):
+        daily_frames({"a": [0.0, 10.0, 5.0], "b": [0.0, 10.0]})
+
+
+def test_daily_frames_rejects_nan():
+    """NaN은 결측이다. 조용히 통과시키면 그날의 플래그가 '정상'으로 오판된다(§0)."""
+    nan = float("nan")
+    with pytest.raises(ValueError):
+        daily_frames({"a": [0.0, nan, 5.0]})
+
+
+def test_daily_frames_gap_matches_displayed_value_at_rounding_boundary():
+    """gap 표시값과 is_cooled 판정이 같은 값에서 나와야 한다 — 이중 반올림으로 어긋나면 안 된다."""
+    fr = daily_frames({"x": [0.0, 100.0, 85.04]})
+    last = fr[2]["x"]
+    assert last["gap"] == -15.0
+    assert last["is_cooled"] is True   # gap이 -15.0으로 보이는데 플래그가 False면 모순
