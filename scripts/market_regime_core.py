@@ -184,6 +184,11 @@ def headline(state, cooled, rising, cum, gap, names, order):
         return sorted(keys, key=lambda k: (-metric[k] if reverse else metric[k],
                                            order.index(k) if k in order else 999))
 
+    for k in cooled | rising:
+        if not (names.get(k) or "").strip():
+            raise ValueError(f"headline: 바스켓 '{k}'의 이름이 비어있다 — "
+                              "설정 파일(regime_baskets.json)의 name 필드를 확인할 것.")
+
     if state == "none":
         return "뚜렷한 주도주가 없어요"
     if state == "lead":

@@ -243,3 +243,15 @@ def test_headline_ties_break_by_declaration_order():
     gap = {"ai_infra": 0.0, "value_cyclical": 0.0}
     txt = headline("lead", set(), {"ai_infra", "value_cyclical"}, cum, gap, NAMES, ORDER)
     assert txt == "AI 인프라 주도가 이어지고 있어요"
+
+
+def test_headline_rejects_blank_basket_name():
+    """이름이 빈 바스켓이 섞이면 쉼표만 남은 깨진 문장 대신 명시적으로 실패한다.
+    설정 파일에 name이 비거나 공백뿐일 때(오타 등)의 회귀 가드."""
+    bad_names = dict(NAMES)
+    bad_names["value_cyclical"] = ""
+    with pytest.raises(ValueError):
+        headline("swap", {"memory"}, {"ai_infra", "value_cyclical"},
+                 {"memory": 89.4, "ai_infra": 17.2, "value_cyclical": 9.8},
+                 {"memory": -53.2, "ai_infra": 0.0, "value_cyclical": 0.0},
+                 bad_names, ORDER)
