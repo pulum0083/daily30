@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-08-07T10:01:48.777872+09:00",
+  "generated_at": "2026-08-07T10:31:38.101809+09:00",
   "date": "2026-08-07",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.6,
-      "surge": 0.2,
+      "changePct": 1.3,
+      "surge": 0.25,
       "events": [
+        {
+          "time": "08:30",
+          "headline": "\"툭하면 10% 폭락\"…'삼전·닉스' 목표주가 줄하향 \"반도체업황 고점 지났다\"",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5FdXVWblptdlRlenVsSFlqcFhuSzhLenB2Rlg0aGFLODd2Uk93dkdnbmFUNzc2c2MxMV9MS0lpbk1IdnpkVC1WUnE5VjZpbzFKNGZ2Rzk2NndXdw?oc=5",
+          "source": "파이낸셜뉴스",
+          "why": "반도체 업황 고점 통과 우려로 삼성전자와 SK하이닉스의 목표주가가 하향 조정되었습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
         {
           "time": "09:40",
           "headline": "삼성전자 주가 상승 중",
           "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9YcFhtM25RbENtVThEOGI4MnRuc21VSllYbWo3WDNjcGpGWTBKUm9BZ2N0UUVTd0VlQ3lOZ0tmcGt6T0ZmQk9yLTZfUFhnWnZpS0h0OU5GTVk5aURv?oc=5",
           "source": "아시아뉴스통신",
-          "why": "삼성전자 주가 상승 중",
-          "tier": "why",
-          "sentiment": "pos"
-        },
-        {
-          "time": "09:26",
-          "headline": "코스피, 외인 매수에 6330선 반등…삼성전자 2.2%↑",
-          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE5xRXlRVnEtQ0oyaVpLaWFDRVl4bWxNU1d3Z0JDbGVLUERjN1owUElCaU5Vd3hfN29YbHFkNWM3a0FGUUxuUXYzRWFVRUNmZ2pzN2pRNEpZazQwR3FGbDVvWXl3?oc=5",
-          "source": "디지털데일리",
-          "why": "코스피, 외인 매수에 6330선 반등…삼성전자 2.2%↑",
-          "tier": "why",
+          "why": "삼성전자 주가 상승 중 (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         }
       ]
@@ -31,41 +31,50 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -1.27,
-      "surge": 0.21,
+      "changePct": -3.75,
+      "surge": 0.31,
       "events": [
         {
           "time": "08:30",
-          "headline": "한 달 새 40% 급락…'삼전·닉스' 목표주가 줄하향",
+          "headline": "\"툭하면 10% 폭락\"…'삼전·닉스' 목표주가 줄하향 \"반도체업황 고점 지났다\"",
           "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5FdXVWblptdlRlenVsSFlqcFhuSzhLenB2Rlg0aGFLODd2Uk93dkdnbmFUNzc2c2MxMV9MS0lpbk1IdnpkVC1WUnE5VjZpbzFKNGZ2Rzk2NndXdw?oc=5",
           "source": "파이낸셜뉴스",
-          "why": "SK하이닉스를 포함한 삼성전자 목표주가가 한 달 새 40% 급락하며 줄하향 조정되었다. (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "반도체 업황 고점 통과 전망에 따라 삼성전자와 SK하이닉스의 목표주가가 하향 조정되고 있다.",
+          "tier": "why",
           "sentiment": "neg"
         },
         {
-          "time": "09:24",
-          "headline": "\"주주 환원 확대 모색\" 삼전·SK하닉 주가 반등 성공",
-          "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBiZG9FY3FQTklNM0djOTdYX3ptSTV5dVlkXzlKOE9IWDNEeVBVUzBadk5YMnV4bHlRRzRDV3V0b0dIZFNuMWdYYzNOdjFCVkkxX0lob2p1dHQydmw2ZE9jcGxCNjJaTkpnMHRyYzh3?oc=5",
-          "source": "gukjenews.com",
-          "why": "\"주주 환원 확대 모색\" 삼전·SK하닉 주가 반등 성공 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
+          "time": "09:57",
+          "headline": "SK하이닉스 주가, 8월 7일 장중 1,468,000원 1.81% 하락",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9ldWRId3UtSzhuS3I1UlRZeXYxVmdzMjJ2S29VRnpBcDlYaVdJbFB5VFF3OU93M1ViODZnb3FodEY0UEFXbUx5WmdLSUE4dFJBMTNHelIxcUFKMDZXX0lZTjRWQ002X0VxSU5DZXNjamt1dw?oc=5",
+          "source": "톱스타뉴스",
+          "why": "SK하이닉스 주가, 8월 7일 장중 1,468,000원 1.81% 하락",
+          "tier": "why",
+          "sentiment": "neg"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -1.25,
-      "surge": 0.14,
+      "changePct": -1.88,
+      "surge": 0.2,
       "events": [
+        {
+          "time": "10:14",
+          "headline": "현대차 주가, 8월 7일 장중 40만원 선 이탈 약세",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFB1LUo1Sy1rZHU3dkx5LXQxUjZiOFR1TnVKZWltazQyTzFlUk1Yd0VMOEVSMndNc0JnRjBRVVR2Yl9rSDlRZzd0ZjREcG9yQ1MwaFdEZ1JCSjliWUt3OXdHcy1aMnJuMGxJMTZDR0tYTUIzdw?oc=5",
+          "source": "톱스타뉴스",
+          "why": "현대차 주가가 8월 7일 장중 40만원 선을 이탈하며 약세를 보였다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
         {
           "time": "09:28",
           "headline": "현대차 주가 하락 중",
           "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE5lVlVrMzkzem5GdnJxNk5KeGR5ZHRJbFk0YzFyTk91WmlDUmNxTjVIZUxLMGZMNENSeGZqYU1uV1hlNFNWaXY3ME5rY1lCeHpxUE9MSjcxQlFNY3dI?oc=5",
           "source": "아시아뉴스통신",
-          "why": "현대차 주가가 하락세를 보이고 있다. (개별 인과 단정 안 함)",
+          "why": "현대차 주가 하락 중 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
         }
