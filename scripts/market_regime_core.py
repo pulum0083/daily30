@@ -184,7 +184,7 @@ def headline(state, cooled, rising, cum, gap, names, order):
         return sorted(keys, key=lambda k: (-metric[k] if reverse else metric[k],
                                            order.index(k) if k in order else 999))
 
-    for k in cooled | rising:
+    for k in set(cooled) | set(rising) | set(cum):
         if not (names.get(k) or "").strip():
             raise ValueError(f"headline: 바스켓 '{k}'의 이름이 비어있다 — "
                               "설정 파일(regime_baskets.json)의 name 필드를 확인할 것.")
@@ -194,7 +194,10 @@ def headline(state, cooled, rising, cum, gap, names, order):
     if state == "lead":
         if not rising:
             return None
-        top = rank(rising, cum, True)[0]
+        # 슬롯 C는 '신고점 집합'이 아니라 글로벌 전체에서 누적 1위를 고른다.
+        # 정점에서 내려왔어도 6개월 누적 1위면 여전히 주도주다 — 신고점만 보면
+        # 누적 +12%짜리가 누적 +214%짜리를 제치고 '주도'로 불린다(백테스트에서 실제 발생).
+        top = rank(list(cum), cum, True)[0]
         return f"{names[top]} 주도가 이어지고 있어요"
     if state == "swap":
         if not cooled or not rising:
@@ -229,8 +232,9 @@ def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> lis
         text = None
         for t in range(j, i - 1, -1):        # 국면 안에서 가장 최근 유효 재료
             _, cooled, rising = raw[t]        # 위 raw 루프에서 이미 구한 값 재사용
-            cum = {k: v["cum"] for k, v in frames[t].items()}
-            gap = {k: v["gap"] for k, v in frames[t].items()}
+            # 한국 바스켓은 헤드라인 주어가 될 수 없다 — allowed(글로벌)로 걸러서 넘긴다.
+            cum = {k: v["cum"] for k, v in frames[t].items() if k in allowed}
+            gap = {k: v["gap"] for k, v in frames[t].items() if k in allowed}
             text = headline(states[i], cooled, rising, cum, gap, names, order)
             if text:
                 break

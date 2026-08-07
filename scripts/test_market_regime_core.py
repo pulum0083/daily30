@@ -245,6 +245,15 @@ def test_headline_ties_break_by_declaration_order():
     assert txt == "AI 인프라 주도가 이어지고 있어요"
 
 
+def test_headline_lead_ranks_all_globals_not_just_rising():
+    """슬롯 C는 글로벌 전체에서 누적 1위. 신고점 집합으로 좁히면
+    누적 +214%짜리를 제치고 +12%짜리가 '주도'로 불린다(백테스트 실사례)."""
+    cum = {"memory": 214.9, "value_cyclical": 12.5}
+    gap = {"memory": -40.9, "value_cyclical": -2.2}
+    txt = headline("lead", set(), {"value_cyclical"}, cum, gap, NAMES, ORDER)
+    assert txt == "메모리 반도체 주도가 이어지고 있어요", txt
+
+
 def test_headline_rejects_blank_basket_name():
     """이름이 빈 바스켓이 섞이면 쉼표만 남은 깨진 문장 대신 명시적으로 실패한다.
     설정 파일에 name이 비거나 공백뿐일 때(오타 등)의 회귀 가드."""
