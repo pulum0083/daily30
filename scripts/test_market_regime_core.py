@@ -287,3 +287,46 @@ def test_resolve_never_emits_null_headline():
     frames = _mk_frames(30, set(), set())     # 신고점 없음 → none
     out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra"})
     assert all(r["headline"] for r in out)
+
+
+def _mk_frames_shifting(n, switch_at):
+    """switch_at일부터 value_cyclical이 신고점에 합류하는 프레임.
+    국면(swap)은 내내 유지되지만 '재료'는 도중에 바뀐다 — 뒤로걷기가 최신 재료를 쓰는지 보려는 것."""
+    out = []
+    for d in range(n):
+        vc_high = d >= switch_at
+        out.append({
+            "memory": {"is_cooled": True, "is_high": False, "cum": -30.0, "gap": -40.0},
+            "ai_infra": {"is_cooled": False, "is_high": True, "cum": 10.0, "gap": 0.0},
+            "value_cyclical": {"is_cooled": False, "is_high": vc_high,
+                               "cum": 50.0 if vc_high else -5.0,
+                               "gap": 0.0 if vc_high else -40.0},
+        })
+    return out
+
+
+def test_resolve_uses_freshest_material_in_regime():
+    """국면 내내 재료가 바뀌면 '가장 최근' 재료로 문장을 만든다.
+    뒤로걷기를 시작일 고정으로 되돌리면 이 테스트가 깨진다(회귀 가드)."""
+    frames = _mk_frames_shifting(30, switch_at=10)
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra", "value_cyclical"})
+    assert out[0]["state"] == "swap"
+    # 후반부에 합류한 가치 경기민감이 문장에 들어와야 한다
+    assert "가치 경기민감" in out[-1]["headline"], out[-1]["headline"]
+
+
+def test_resolve_regime_index_increments_across_transition():
+    """국면이 실제로 바뀌면 regime_index가 정확히 1 증가한다."""
+    lead = [{"ai_infra": {"is_cooled": False, "is_high": True, "cum": 10.0, "gap": 0.0},
+             "memory": {"is_cooled": False, "is_high": False, "cum": 1.0, "gap": -5.0}}
+            for _ in range(20)]
+    swap = [{"ai_infra": {"is_cooled": False, "is_high": True, "cum": 10.0, "gap": 0.0},
+             "memory": {"is_cooled": True, "is_high": False, "cum": -30.0, "gap": -40.0}}
+            for _ in range(20)]
+    out = resolve_regimes(lead + swap, NAMES, ORDER, {"memory", "ai_infra"})
+    idxs = [r["regime_index"] for r in out]
+    assert idxs[0] == 0
+    assert max(idxs) == 1, idxs          # 국면 2개
+    assert sorted(set(idxs)) == [0, 1]
+    # 인덱스가 뒤로 가거나 건너뛰지 않는다
+    assert all(b - a in (0, 1) for a, b in zip(idxs, idxs[1:]))

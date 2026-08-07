@@ -228,7 +228,7 @@ def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> lis
             j += 1
         text = None
         for t in range(j, i - 1, -1):        # 국면 안에서 가장 최근 유효 재료
-            cooled, rising = qualifying_sets(frames, t, allowed)
+            _, cooled, rising = raw[t]        # 위 raw 루프에서 이미 구한 값 재사용
             cum = {k: v["cum"] for k, v in frames[t].items()}
             gap = {k: v["gap"] for k, v in frames[t].items()}
             text = headline(states[i], cooled, rising, cum, gap, names, order)
