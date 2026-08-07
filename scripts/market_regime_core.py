@@ -113,7 +113,13 @@ def qualifying_sets(frames: list, i: int, allowed: set | None = None) -> tuple[s
 
     히스테리시스를 상태가 아니라 이 입력 집합에 건다. 상태 판정과 문구 생성이
     둘 다 이 반환값만 쓰므로, 상태가 있으면 문구 재료도 반드시 있다.
+
+    i가 범위를 벗어나면(예: i==len(frames), 흔한 off-by-one) 파이썬 슬라이스는
+    예외 없이 조용히 잘린 결과를 준다 — i=5(범위 밖)와 i=4(정상 마지막)가 구분 불가능한
+    값을 반환해 호출부 버그를 감춘다. daily_frames의 길이·NaN 가드와 같은 이유로 즉시 실패시킨다.
     """
+    if not 0 <= i < len(frames):
+        raise ValueError(f"qualifying_sets: i={i}가 frames 범위(0~{len(frames)-1})를 벗어났다.")
     lo = max(0, i - HYST_WINDOW + 1)
     window = frames[lo:i + 1]
     need = min(HYST_MIN, len(window))

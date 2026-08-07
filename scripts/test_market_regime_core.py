@@ -150,3 +150,21 @@ def test_classify_three_states():
     assert classify(set(), {"b"}) == "lead"
     assert classify({"a"}, set()) == "none"
     assert classify(set(), set()) == "none"
+
+
+def test_qualifying_rejects_out_of_range_i():
+    """i가 범위를 벗어나면 조용히 잘린 결과 대신 명시적으로 실패한다.
+    i=len(frames)(흔한 off-by-one)가 정상 마지막 날과 똑같은 결과를 내던 문제의 회귀 가드."""
+    frames = [{"a": {"is_cooled": True, "is_high": False}}] * 5
+    with pytest.raises(ValueError):
+        qualifying_sets(frames, 5)
+    with pytest.raises(ValueError):
+        qualifying_sets(frames, -1)
+
+
+def test_qualifying_needs_more_than_short_window_all_pass():
+    """짧은 창에서 일부만 충족하면 제외된다 — need가 항상 전부 통과시키는 버그의 회귀 가드."""
+    frames = [{"a": {"is_cooled": True, "is_high": False}},
+              {"a": {"is_cooled": False, "is_high": False}}]
+    cooled, _ = qualifying_sets(frames, 1)
+    assert cooled == set()   # 2일 중 1일만 충족 — need=min(3,2)=2에 미달
