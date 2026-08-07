@@ -168,3 +168,30 @@ def test_qualifying_needs_more_than_short_window_all_pass():
               {"a": {"is_cooled": False, "is_high": False}}]
     cooled, _ = qualifying_sets(frames, 1)
     assert cooled == set()   # 2일 중 1일만 충족 — need=min(3,2)=2에 미달
+
+
+from market_regime_core import absorb_short_runs  # noqa: E402
+
+
+def test_absorb_run_shorter_than_min():
+    """10일 미만 구간은 직전 국면에 흡수된다."""
+    states = ["lead"] * 12 + ["swap"] * 3 + ["lead"] * 12
+    out = absorb_short_runs(states)
+    assert set(out) == {"lead"}
+
+
+def test_absorb_keeps_long_enough_run():
+    states = ["lead"] * 12 + ["swap"] * 10 + ["lead"] * 12
+    out = absorb_short_runs(states)
+    assert out[12:22] == ["swap"] * 10
+
+
+def test_absorb_does_not_touch_first_run():
+    """첫 구간은 흡수할 직전 국면이 없다 — 짧아도 그대로 둔다."""
+    states = ["swap"] * 3 + ["lead"] * 20
+    out = absorb_short_runs(states)
+    assert out[:3] == ["swap"] * 3
+
+
+def test_absorb_empty():
+    assert absorb_short_runs([]) == []

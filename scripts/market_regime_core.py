@@ -143,3 +143,22 @@ def classify(cooled: set, rising: set) -> str:
     if rising:
         return "lead"
     return "none"
+
+
+def absorb_short_runs(states: list) -> list:
+    """MIN_RUN보다 짧은 구간을 직전 국면에 흡수한다 — 카드가 깜빡이는 것을 막는다.
+
+    첫 구간은 흡수 대상이 아니다(직전이 없다).
+    """
+    out = list(states)
+    i = 0
+    while i < len(out):
+        j = i
+        while j + 1 < len(out) and out[j + 1] == out[i]:
+            j += 1
+        if (j - i + 1) < MIN_RUN and i > 0:
+            fill = out[i - 1]
+            for t in range(i, j + 1):
+                out[t] = fill
+        i = j + 1
+    return out
