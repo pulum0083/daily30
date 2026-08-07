@@ -195,3 +195,51 @@ def test_absorb_does_not_touch_first_run():
 
 def test_absorb_empty():
     assert absorb_short_runs([]) == []
+
+
+from market_regime_core import josa, headline  # noqa: E402
+
+NAMES = {"memory": "메모리 반도체", "ai_infra": "AI 인프라",
+         "value_cyclical": "가치 경기민감", "dividend_defensive": "배당 방어"}
+ORDER = ["memory", "ai_infra", "value_cyclical", "dividend_defensive"]
+
+
+def test_josa_by_final_consonant():
+    assert josa("인프라") == "로"        # 받침 없음
+    assert josa("가치 경기민감") == "으로"  # 받침 ㅁ
+    assert josa("서울") == "로"          # ㄹ 종성은 '로'
+    assert josa("방어") == "로"
+
+
+def test_headline_swap_picks_most_cooled_and_top_two_high():
+    """A = gap 최소(가장 많이 식은), B = cum 내림차순 최대 2개."""
+    cum = {"memory": 89.4, "ai_infra": 17.2, "value_cyclical": 9.8, "dividend_defensive": -1.5}
+    gap = {"memory": -53.2, "ai_infra": 0.0, "value_cyclical": 0.0, "dividend_defensive": -20.0}
+    txt = headline("swap", {"memory", "dividend_defensive"},
+                   {"ai_infra", "value_cyclical"}, cum, gap, NAMES, ORDER)
+    assert txt == "주도주가 메모리 반도체에서 AI 인프라, 가치 경기민감으로 넘어가는 중이에요"
+
+
+def test_headline_lead_uses_top_cumulative():
+    cum = {"memory": 89.4, "ai_infra": 17.2}
+    gap = {"memory": 0.0, "ai_infra": 0.0}
+    txt = headline("lead", set(), {"memory"}, cum, gap, NAMES, ORDER)
+    assert txt == "메모리 반도체 주도가 이어지고 있어요"
+
+
+def test_headline_none_is_fixed_sentence():
+    assert headline("none", set(), set(), {}, {}, NAMES, ORDER) == "뚜렷한 주도주가 없어요"
+
+
+def test_headline_returns_none_when_material_missing():
+    """상태는 swap인데 재료가 없으면 None. 억지로 문장을 만들지 않는다(§0)."""
+    assert headline("swap", set(), {"ai_infra"}, {"ai_infra": 1.0}, {"ai_infra": 0.0},
+                    NAMES, ORDER) is None
+
+
+def test_headline_ties_break_by_declaration_order():
+    """동점이면 설정 파일 선언 순서를 따른다 — 결정론 보장."""
+    cum = {"ai_infra": 5.0, "value_cyclical": 5.0}
+    gap = {"ai_infra": 0.0, "value_cyclical": 0.0}
+    txt = headline("lead", set(), {"ai_infra", "value_cyclical"}, cum, gap, NAMES, ORDER)
+    assert txt == "AI 인프라 주도가 이어지고 있어요"

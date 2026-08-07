@@ -162,3 +162,40 @@ def absorb_short_runs(states: list) -> list:
                 out[t] = fill
         i = j + 1
     return out
+
+
+def josa(word: str) -> str:
+    """받침에 따라 '으로/로'. 종성이 없거나 ㄹ이면 '로'."""
+    ch = word.strip()[-1]
+    code = ord(ch)
+    if not (0xAC00 <= code <= 0xD7A3):
+        return "로"
+    jong = (code - 0xAC00) % 28
+    return "로" if jong in (0, 8) else "으로"
+
+
+def headline(state, cooled, rising, cum, gap, names, order):
+    """상태별 문구. 재료가 없으면 None — 억지로 만들지 않는다(§0).
+
+    A = cooled 중 gap 오름차순 1개, B = rising 중 cum 내림차순 최대 2개,
+    C = rising 중 cum 내림차순 1개. 동점은 order(선언 순서)로 깬다.
+    """
+    def rank(keys, metric, reverse):
+        return sorted(keys, key=lambda k: (-metric[k] if reverse else metric[k],
+                                           order.index(k) if k in order else 999))
+
+    if state == "none":
+        return "뚜렷한 주도주가 없어요"
+    if state == "lead":
+        if not rising:
+            return None
+        top = rank(rising, cum, True)[0]
+        return f"{names[top]} 주도가 이어지고 있어요"
+    if state == "swap":
+        if not cooled or not rising:
+            return None
+        frm = names[rank(cooled, gap, False)[0]]
+        tos = [names[k] for k in rank(rising, cum, True)[:2]]
+        joined = ", ".join(tos)
+        return f"주도주가 {frm}에서 {joined}{josa(joined)} 넘어가는 중이에요"
+    return None
