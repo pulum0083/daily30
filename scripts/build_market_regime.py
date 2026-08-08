@@ -72,14 +72,14 @@ def build(closes: dict, cfg: dict) -> dict:
             if cum:
                 cums[b["key"]] = cum
                 if i == len(cal) - 1:
-                    spark_by_key[b["key"]] = [round(v, 1) for v in cum[::5]]
+                    spark_by_key[b["key"]] = [round(v, 1) for v in list(reversed(cum[::-5]))]
                     meta[b["key"]] = n
         frames.append(daily_frames(cums)[-1])
 
     res = resolve_regimes(frames, names, order, allowed)
     last, last_frame = res[-1], frames[-1]
 
-    since = cal[-1]
+    since = cal[len(cal) - hist_n]  # 폴백: 국면이 가용 이력 전체를 덮은 경우
     for i in range(len(res) - 1, 0, -1):
         if res[i]["regime_index"] != res[i - 1]["regime_index"]:
             since = cal[len(cal) - hist_n + i]
