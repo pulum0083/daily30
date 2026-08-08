@@ -93,6 +93,33 @@ test('데이터가 없거나 헤드라인이 비면 표시하지 않는다', () 
   assert.equal(els['regime-block'].classList.contains('is-hidden'), true);
 });
 
+test('baskets가 비어있거나 없으면 표시하지 않는다 — 근거 없는 헤드라인 금지', () => {
+  const { api, els } = load();
+  api.regimeRender({ ...SWAP, baskets: [] });
+  assert.equal(els['regime-block'].classList.contains('is-hidden'), true);
+  const { api: api2, els: els2 } = load();
+  const { baskets, ...noBaskets } = SWAP;
+  api2.regimeRender(noBaskets);
+  assert.equal(els2['regime-block'].classList.contains('is-hidden'), true);
+});
+
+test('숨길 때·보일 때 인라인 display도 함께 바뀐다 — is-hidden 클래스만으로는 Task 12 CSS 전까지 숨겨지지 않는다', () => {
+  const { api, els } = load();
+  api.regimeRender(SWAP);
+  assert.equal(els['regime-block'].style.display, '');
+  api.regimeRender(null);
+  assert.equal(els['regime-block'].style.display, 'none');
+});
+
+test('basket 이름·헤드라인에 HTML 특수문자가 있으면 이스케이프한다', () => {
+  const { api, els } = load();
+  api.regimeRender({ ...SWAP, headline: '<script>alert(1)</script> & 테스트',
+    baskets: [{ ...SWAP.baskets[0], name: 'AT&T <b>류</b>' }] });
+  assert.doesNotMatch(els['regime-body'].innerHTML, /<script>/);
+  assert.match(els['regime-body'].innerHTML, /AT&amp;T/);
+  assert.match(els['regime-body'].innerHTML, /&amp; 테스트/);
+});
+
 test('한국 read-through는 격차를 함께 보여준다', () => {
   const { api, els } = load();
   api.regimeRender(SWAP);

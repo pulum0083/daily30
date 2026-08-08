@@ -3424,6 +3424,9 @@ if(passBtn){
 /* ── 시장의 큰 흐름(국면) — web/data/market-regime.json ── */
 (function(){
   var STALE_DAYS=5;
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  // 제목·이름은 데이터 파일에서 온 값이라 innerHTML에 넣기 전 반드시 이스케이프한다(파일 상단 규칙).
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
   function fmtPct(v){ return (v>=0?'+':'−')+Math.abs(v).toFixed(1)+'%'; }
   function cls(v){ return v>=0?'up':'dn'; }
   function spark(vals,color){
@@ -3442,7 +3445,7 @@ if(passBtn){
     var sub=kind==='cool'
       ? '정점 '+fmtPct(b.peak)+' → 지금 '+fmtPct(b.cum)
       : '누적 '+fmtPct(b.cum);
-    return '<div class="regime-item"><div class="regime-n">'+b.name+high+'</div>'
+    return '<div class="regime-item"><div class="regime-n">'+esc(b.name)+high+'</div>'
       +'<div class="regime-s">'+sub+'</div>'
       +spark(b.spark, kind==='cool'?'#2775ED':'#E03131')+'</div>';
   }
@@ -3451,11 +3454,15 @@ if(passBtn){
     var body=document.getElementById('regime-body');
     var asof=document.getElementById('regime-asof');
     if(!box||!body) return;
+    // .is-hidden은 Task 12의 CSS가 붙기 전까지 아무 효과가 없다 — 그 사이엔 인라인
+    // display로 직접 숨긴다(defense-in-depth, #mom-track과 같은 패턴).
+    function hide(){ box.classList.add('is-hidden'); box.style.display='none'; }
     // 없으면 비운다 — 낡은 국면이 계속 진짜처럼 보이는 게 가장 위험하다(§0·§20)
-    if(!d||!d.headline||!d.generated_at){ box.classList.add('is-hidden'); return; }
+    // baskets가 비어 있으면 헤드라인만 있고 근거(카드·스파크라인)가 없는 상태 — 표시하지 않는다.
+    if(!d||!d.headline||!d.generated_at||!Array.isArray(d.baskets)||d.baskets.length===0){ hide(); return; }
     var age=(Date.now()-new Date(d.generated_at).getTime())/864e5;
     if(!(age>=0)||age>STALE_DAYS){
-      box.classList.add('is-hidden');
+      hide();
       console.warn('[regime] 데이터가 '+Math.round(age)+'일 지났습니다 — 섹션 생략');
       return;
     }
@@ -3463,7 +3470,7 @@ if(passBtn){
     var cooled=g.slice().sort(function(a,b){return a.gap-b.gap;})[0];
     var rising=g.filter(function(b){return b.is_high;})
                 .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
-    var html='<div class="regime-hd">'+d.headline+'</div>'
+    var html='<div class="regime-hd">'+esc(d.headline)+'</div>'
       +'<div class="regime-sub">최근 6개월 누적 기준'
       +(d.regime_since?' · '+d.regime_since.slice(5).replace('-','/')+'부터':'')+'</div>';
     if(d.state==='swap' && cooled && rising.length){
@@ -3485,6 +3492,7 @@ if(passBtn){
     if(asof&&d.session_date) asof.textContent='최근 6개월 · '
       +d.session_date.slice(5).replace('-','/')+' 기준';
     box.classList.remove('is-hidden');
+    box.style.display='';
   }
   function regimeLoad(){
     fetch('/data/market-regime.json',{cache:'no-store'})
