@@ -3420,3 +3420,78 @@ if(passBtn){
     gate();
   });
 })();
+
+/* ── 시장의 큰 흐름(국면) — web/data/market-regime.json ── */
+(function(){
+  var STALE_DAYS=5;
+  function fmtPct(v){ return (v>=0?'+':'−')+Math.abs(v).toFixed(1)+'%'; }
+  function cls(v){ return v>=0?'up':'dn'; }
+  function spark(vals,color){
+    if(!vals||vals.length<2) return '';
+    var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals);
+    if(hi===lo) hi=lo+1;
+    var pts=vals.map(function(v,i){
+      return (3+i*194/(vals.length-1)).toFixed(1)+','+(31-(v-lo)/(hi-lo)*28).toFixed(1);
+    }).join(' ');
+    return '<svg viewBox="0 0 200 34" class="regime-spark" preserveAspectRatio="none">'
+      +'<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" '
+      +'stroke-linejoin="round"/></svg>';
+  }
+  function card(b,kind){
+    var high=b.is_high?'<span class="regime-pill">6개월 최고</span>':'';
+    var sub=kind==='cool'
+      ? '정점 '+fmtPct(b.peak)+' → 지금 '+fmtPct(b.cum)
+      : '누적 '+fmtPct(b.cum);
+    return '<div class="regime-item"><div class="regime-n">'+b.name+high+'</div>'
+      +'<div class="regime-s">'+sub+'</div>'
+      +spark(b.spark, kind==='cool'?'#2775ED':'#E03131')+'</div>';
+  }
+  function regimeRender(d){
+    var box=document.getElementById('regime-block');
+    var body=document.getElementById('regime-body');
+    var asof=document.getElementById('regime-asof');
+    if(!box||!body) return;
+    // 없으면 비운다 — 낡은 국면이 계속 진짜처럼 보이는 게 가장 위험하다(§0·§20)
+    if(!d||!d.headline||!d.generated_at){ box.classList.add('is-hidden'); return; }
+    var age=(Date.now()-new Date(d.generated_at).getTime())/864e5;
+    if(!(age>=0)||age>STALE_DAYS){
+      box.classList.add('is-hidden');
+      console.warn('[regime] 데이터가 '+Math.round(age)+'일 지났습니다 — 섹션 생략');
+      return;
+    }
+    var g=(d.baskets||[]).filter(function(b){return b.scope==='global';});
+    var cooled=g.slice().sort(function(a,b){return a.gap-b.gap;})[0];
+    var rising=g.filter(function(b){return b.is_high;})
+                .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    var html='<div class="regime-hd">'+d.headline+'</div>'
+      +'<div class="regime-sub">최근 6개월 누적 기준'
+      +(d.regime_since?' · '+d.regime_since.slice(5).replace('-','/')+'부터':'')+'</div>';
+    if(d.state==='swap' && cooled && rising.length){
+      html+='<div class="regime-swap">'
+        +'<div class="regime-col is-cool"><div class="regime-lab">식는 중</div>'+card(cooled,'cool')+'</div>'
+        +'<div class="regime-arrow">→</div>'
+        +'<div class="regime-col is-hot"><div class="regime-lab">뜨는 중</div>'
+        +rising.map(function(b){return card(b,'hot');}).join('')+'</div></div>';
+    } else {
+      var top=g.slice().sort(function(a,b){return b.cum-a.cum;})[0];
+      if(top) html+='<div class="regime-single">'+card(top,'hot')+'</div>';
+    }
+    if(d.korea){
+      html+='<div class="regime-kr">🇰🇷 한국은 반도체 <b>'+fmtPct(d.korea.semi)
+        +'</b> vs 그 외 <b>'+fmtPct(d.korea.rest)+'</b> — 격차 <b>'
+        +Math.abs(d.korea.gap).toFixed(0)+'%p</b></div>';
+    }
+    body.innerHTML=html;
+    if(asof&&d.session_date) asof.textContent='최근 6개월 · '
+      +d.session_date.slice(5).replace('-','/')+' 기준';
+    box.classList.remove('is-hidden');
+  }
+  function regimeLoad(){
+    fetch('/data/market-regime.json',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(regimeRender)
+      .catch(function(){ regimeRender(null); });
+  }
+  window.__marketRegime={regimeRender:regimeRender, regimeLoad:regimeLoad};
+  if(typeof window.addEventListener==='function') window.addEventListener('load', regimeLoad);
+})();
