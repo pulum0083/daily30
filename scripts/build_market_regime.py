@@ -47,3 +47,84 @@ def fetch_all(cfg: dict, rng: str = "2y") -> dict:
             if t not in out:
                 out[t] = fetch_daily_closes(t, rng)
     return out
+
+
+def build(closes: dict, cfg: dict) -> dict:
+    """오늘 시점 국면 산출물. 창은 마지막 WINDOW_DAYS 영업일."""
+    from market_regime_core import basket_cum, daily_frames, resolve_regimes
+
+    names = {b["key"]: b["name"] for b in cfg["baskets"]}
+    order = [b["key"] for b in cfg["baskets"]]
+    allowed = {b["key"] for b in cfg["baskets"] if b["scope"] == "global"}
+
+    cal = sorted(closes["MSFT"])
+    if len(cal) < WINDOW_DAYS + 1:
+        raise RuntimeError(f"캘린더 부족: {len(cal)}일 < {WINDOW_DAYS + 1}일")
+
+    # 국면 이력을 위해 최근 120일치도 같이 계산한다(regime_since 산출용)
+    hist_n = min(120, len(cal) - WINDOW_DAYS)
+    frames, spark_by_key, meta = [], {}, {}
+    for i in range(len(cal) - hist_n, len(cal)):
+        win = cal[i - WINDOW_DAYS:i + 1]
+        cums = {}
+        for b in cfg["baskets"]:
+            cum, n = basket_cum(b["members"], closes, win)
+            if cum:
+                cums[b["key"]] = cum
+                if i == len(cal) - 1:
+                    spark_by_key[b["key"]] = [round(v, 1) for v in cum[::5]]
+                    meta[b["key"]] = n
+        frames.append(daily_frames(cums)[-1])
+
+    res = resolve_regimes(frames, names, order, allowed)
+    last, last_frame = res[-1], frames[-1]
+
+    since = cal[-1]
+    for i in range(len(res) - 1, 0, -1):
+        if res[i]["regime_index"] != res[i - 1]["regime_index"]:
+            since = cal[len(cal) - hist_n + i]
+            break
+
+    baskets = []
+    for b in cfg["baskets"]:
+        k = b["key"]
+        if k not in last_frame:
+            continue
+        f = last_frame[k]
+        baskets.append({"key": k, "name": b["name"], "scope": b["scope"],
+                        "cum": f["cum"], "peak": f["peak"], "gap": f["gap"],
+                        "is_high": f["is_high"], "spark": spark_by_key.get(k, []),
+                        "members": b["members"], "n_used": meta.get(k, 0)})
+
+    kr = {b["key"]: last_frame[b["key"]]["cum"]
+          for b in cfg["baskets"] if b["scope"] == "korea" and b["key"] in last_frame}
+    korea = None
+    if "kr_semi" in kr and "kr_rest" in kr:
+        korea = {"semi": kr["kr_semi"], "rest": kr["kr_rest"],
+                 "gap": round(kr["kr_semi"] - kr["kr_rest"], 1)}
+
+    out = {"generated_at": datetime.now(KST).isoformat(),
+           "session_date": cal[-1],
+           "window_days": WINDOW_DAYS,
+           "state": last["state"], "headline": last["headline"],
+           "regime_since": since, "baskets": baskets}
+    if korea:
+        out["korea"] = korea
+    return out
+
+
+def main():
+    cfg = load_config()
+    closes = fetch_all(cfg)
+    usable = {t: v for t, v in closes.items() if v}
+    print(f"[regime] 수집 {len(usable)}/{len(closes)} 티커", file=sys.stderr)
+    result = build(closes, cfg)
+    if not result["headline"]:
+        raise RuntimeError("헤드라인 생성 실패 — 판정과 재료가 어긋났다")
+    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[regime] {result['state']} · \"{result['headline']}\" → {OUT_PATH}")
+
+
+if __name__ == "__main__":
+    main()
