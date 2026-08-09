@@ -324,6 +324,30 @@ def test_resolve_uses_freshest_material_in_regime():
     assert "가치 경기민감" in out[-1]["headline"], out[-1]["headline"]
 
 
+def test_resolve_exposes_cooled_rising_keys_matching_headline():
+    """cooled_keys/rising_keys는 헤드라인이 실제로 지목한 바스켓과 일치해야 한다.
+
+    프런트가 이 키로 카드를 고르므로, 문장의 A(식는 것)·B(뜨는 것)와 다른 바스켓을
+    가리키면 본문과 카드가 서로 모순되는 사고(§28 계열)가 재발한다."""
+    frames = _mk_frames(30, {"memory"}, {"ai_infra"})
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra"})
+    last = out[-1]
+    assert last["state"] == "swap"
+    assert last["cooled_keys"] == ["memory"]
+    assert last["rising_keys"] == ["ai_infra"]
+    assert "메모리 반도체" in last["headline"]
+    assert "AI 인프라" in last["headline"]
+
+
+def test_resolve_cooled_rising_keys_track_freshest_material():
+    """국면 내내 재료가 바뀌면 cooled_keys/rising_keys도 최신 재료를 반영한다
+    (test_resolve_uses_freshest_material_in_regime과 같은 시나리오)."""
+    frames = _mk_frames_shifting(30, switch_at=10)
+    out = resolve_regimes(frames, NAMES, ORDER, {"memory", "ai_infra", "value_cyclical"})
+    last = out[-1]
+    assert "value_cyclical" in last["rising_keys"]
+
+
 def test_resolve_regime_index_increments_across_transition():
     """국면이 실제로 바뀌면 regime_index가 정확히 1 증가한다."""
     lead = [{"ai_infra": {"is_cooled": False, "is_high": True, "cum": 10.0, "gap": 0.0},

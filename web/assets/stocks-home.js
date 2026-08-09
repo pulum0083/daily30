@@ -3467,9 +3467,24 @@ if(passBtn){
       return;
     }
     var g=(d.baskets||[]).filter(function(b){return b.scope==='global';});
-    var cooled=g.slice().sort(function(a,b){return a.gap-b.gap;})[0];
-    var rising=g.filter(function(b){return b.is_high;})
-                .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    var byKey={}; g.forEach(function(b){byKey[b.key]=b;});
+    // 카드는 헤드라인을 만든 바로 그 히스테리시스 재료(cooled_keys/rising_keys)로 고른다 —
+    // raw 단일일자 gap/is_high로 재도출하면 본문 문장과 카드가 다른 바스켓을 가리킬 수 있다(§28 계열).
+    var cooledKeys=Array.isArray(d.cooled_keys)?d.cooled_keys:[];
+    var risingKeys=Array.isArray(d.rising_keys)?d.rising_keys:[];
+    var cooled, rising;
+    if(cooledKeys.length && risingKeys.length){
+      var cooledBaskets=cooledKeys.map(function(k){return byKey[k];}).filter(Boolean);
+      var risingBaskets=risingKeys.map(function(k){return byKey[k];}).filter(Boolean);
+      cooled=cooledBaskets.slice().sort(function(a,b){return a.gap-b.gap;})[0];
+      rising=risingBaskets.slice().sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    } else {
+      // 폴백: 롤아웃 중 캐시된 구 JSON(cooled_keys/rising_keys 없음) 대비. 근사치이므로
+      // 새 데이터가 들어오는 즉시 위 authoritative 경로로 대체된다.
+      cooled=g.slice().sort(function(a,b){return a.gap-b.gap;})[0];
+      rising=g.filter(function(b){return b.is_high;})
+                  .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    }
     var html='<div class="regime-hd">'+esc(d.headline)+'</div>'
       +'<div class="regime-sub">최근 6개월 누적 기준'
       +(d.regime_since?' · '+d.regime_since.slice(5).replace('-','/')+'부터':'')+'</div>';

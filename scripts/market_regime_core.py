@@ -210,11 +210,16 @@ def headline(state, cooled, rising, cum, gap, names, order):
 
 
 def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> list:
-    """일자별 [{state, headline, regime_index}].
+    """일자별 [{state, headline, regime_index, cooled_keys, rising_keys}].
 
     문구는 국면 단위로 한 번 확정한다 — 같은 국면 안에서 문장이 매일 미묘하게
     달라지면 '국면'이라는 개념 자체가 흐려진다. 그 국면에서 재료가 유효한 가장
     최근 값으로 만들어 국면 내내 유지한다.
+
+    cooled_keys/rising_keys는 headline()을 만든 바로 그 qualifying_sets() 호출의
+    결과를 그대로 노출한 것이다 — 화면(카드)이 헤드라인과 다른 재료로 렌더링돼
+    서로 모순되는 사고(§28 계열)를 막으려면, 문구와 카드가 반드시 같은 호출 결과를
+    공유해야 한다. 별도로 다시 계산하지 말 것.
     """
     raw = []
     for i in range(len(frames)):
@@ -230,6 +235,7 @@ def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> lis
         while j + 1 < len(states) and states[j + 1] == states[i]:
             j += 1
         text = None
+        cooled_used, rising_used = set(), set()
         for t in range(j, i - 1, -1):        # 국면 안에서 가장 최근 유효 재료
             _, cooled, rising = raw[t]        # 위 raw 루프에서 이미 구한 값 재사용
             # 한국 바스켓은 헤드라인 주어가 될 수 없다 — allowed(글로벌)로 걸러서 넘긴다.
@@ -237,9 +243,11 @@ def resolve_regimes(frames: list, names: dict, order: list, allowed: set) -> lis
             gap = {k: v["gap"] for k, v in frames[t].items() if k in allowed}
             text = headline(states[i], cooled, rising, cum, gap, names, order)
             if text:
+                cooled_used, rising_used = cooled, rising
                 break
         for t in range(i, j + 1):
-            out[t] = {"state": states[i], "headline": text, "regime_index": regime_index}
+            out[t] = {"state": states[i], "headline": text, "regime_index": regime_index,
+                      "cooled_keys": sorted(cooled_used), "rising_keys": sorted(rising_used)}
         regime_index += 1
         i = j + 1
     return out

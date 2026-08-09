@@ -107,6 +107,10 @@ def build(closes: dict, cfg: dict) -> dict:
            "session_date": cal[-1],
            "window_days": WINDOW_DAYS,
            "state": last["state"], "headline": last["headline"],
+           # 헤드라인을 만든 바로 그 히스테리시스 재료(§28 계열 사고 방지) — 프런트가
+           # 카드를 고를 때 raw 단일일자 수치로 재도출하지 않고 이 키를 그대로 쓴다.
+           "cooled_keys": last.get("cooled_keys", []),
+           "rising_keys": last.get("rising_keys", []),
            "regime_since": since, "baskets": baskets}
     if korea:
         out["korea"] = korea

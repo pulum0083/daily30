@@ -48,6 +48,7 @@ const FRESH = new Date().toISOString();
 const SWAP = { generated_at: FRESH, session_date: '2026-08-07', state: 'swap',
   headline: '주도주가 메모리 반도체에서 AI 인프라로 넘어가는 중이에요',
   regime_since: '2026-06-24',
+  cooled_keys: ['memory'], rising_keys: ['ai_infra'],
   baskets: [
     { key: 'memory', name: '메모리 반도체', scope: 'global', cum: 89.4, peak: 142.6,
       gap: -53.2, is_high: false, spark: [0, 50, 142, 89] },
@@ -124,4 +125,30 @@ test('한국 read-through는 격차를 함께 보여준다', () => {
   const { api, els } = load();
   api.regimeRender(SWAP);
   assert.match(els['regime-body'].innerHTML, /62/);
+});
+
+test('카드는 cooled_keys/rising_keys를 쓴다 — raw 최저 gap·최고 cum이 아니다', () => {
+  const { api, els } = load();
+  const data = { ...SWAP, baskets: [
+    ...SWAP.baskets,
+    // raw gap이 memory(-53.2)보다 낮지만 cooled_keys엔 없다 — 히스테리시스 미달로 봐야 한다.
+    { key: 'dividend_defensive', name: '배당 방어', scope: 'global', cum: 5.0, peak: 100.0,
+      gap: -95.0, is_high: false, spark: [0, 0, 0, 0] },
+    // is_high=true·raw cum이 ai_infra보다 높지만 rising_keys엔 없다.
+    { key: 'value_cyclical', name: '가치 경기민감', scope: 'global', cum: 500.0, peak: 500.0,
+      gap: 0, is_high: true, spark: [0, 0, 0, 0] },
+  ] };
+  api.regimeRender(data);
+  assert.match(els['regime-body'].innerHTML, /메모리 반도체/);
+  assert.doesNotMatch(els['regime-body'].innerHTML, /배당 방어/);
+  assert.match(els['regime-body'].innerHTML, /AI 인프라/);
+  assert.doesNotMatch(els['regime-body'].innerHTML, /가치 경기민감/);
+});
+
+test('cooled_keys/rising_keys가 없는 구 캐시 JSON은 raw 근사치로 폴백한다', () => {
+  const { api, els } = load();
+  const { cooled_keys, rising_keys, ...noKeys } = SWAP;
+  api.regimeRender(noKeys);
+  assert.match(els['regime-body'].innerHTML, /메모리 반도체/);
+  assert.match(els['regime-body'].innerHTML, /AI 인프라/);
 });
