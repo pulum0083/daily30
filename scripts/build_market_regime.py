@@ -57,7 +57,7 @@ def build(closes: dict, cfg: dict) -> dict:
     order = [b["key"] for b in cfg["baskets"]]
     allowed = {b["key"] for b in cfg["baskets"] if b["scope"] == "global"}
 
-    cal = sorted(closes["MSFT"])
+    cal = sorted(closes["MSFT"])            # 기준 캘린더 = 미국 거래일 (모든 바스켓에서 MSFT를 빼면 KeyError)
     if len(cal) < WINDOW_DAYS + 1:
         raise RuntimeError(f"캘린더 부족: {len(cal)}일 < {WINDOW_DAYS + 1}일")
 
