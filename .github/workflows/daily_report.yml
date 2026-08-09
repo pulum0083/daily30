@@ -464,6 +464,12 @@ jobs:
           TOSS_CLIENT_SECRET: ${{ secrets.TOSS_CLIENT_SECRET }}
         run: python3 scripts/build_stocks_snapshot.py
 
+      - name: 🌊 시장 국면 빌드 (최근 6개월)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true   # 종목 서비스용 — 실패해도 마감 브리핑 발행은 계속(직전 JSON 유지)
+        timeout-minutes: 5
+        run: python3 scripts/build_market_regime.py
+
       - name: 🗂️ 섹터 페이지 생성 (섹터 리스트)
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/generate_html.py --sectors
