@@ -705,6 +705,23 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
 
 
 
+def _chg_cell(chg) -> dict:
+    """등락률 셀의 표시 문자열과 색상 클래스.
+
+    세 상태를 구분한다 — 모름(None) / 보합(정확히 0) / 상승·하락.
+    예전엔 `>= 0`으로 뭉뚱그려 0.00%가 ▲·상승색(빨강)으로 나갔다. 방향성이 핵심인
+    화면에서 '안 움직임'과 '올랐음'이 같은 모습이면 안 된다.
+    """
+    if chg is None:
+        return {"chg": "", "chg_cls": "unknown"}
+    if chg == 0:
+        return {"chg": "— 0.00%", "chg_cls": "flat"}
+    return {
+        "chg": f"{'▲' if chg > 0 else '▼'} {chg:+.2f}%",
+        "chg_cls": "up" if chg > 0 else "down",
+    }
+
+
 def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> list:
     """시장 지표 사이드바. market_data_js 키를 표시 항목으로 매핑(있는 것만)."""
     mdj = dict(market_data.get("market_data_js", {}))
@@ -773,12 +790,13 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         for name, key in [("KOSDAQ", "kosdaq"), ("원/달러", "usdkrw")]:
             d = indices.get(key)
             if isinstance(d, dict) and d.get("price") is not None:
-                scp = d.get("change_pct", 0)
+                scp = d.get("change_pct")
                 subs.append({
                     "name": name,
                     "val": f"{d['price']:,.2f}",
-                    "chg": f"{'▲' if scp >= 0 else '▼'} {scp:+.2f}%",
-                    "chg_cls": "up" if scp >= 0 else "down",
+                    # 등락률을 모르면(None) 셀을 비운다 — 0.00%로 채우면 '보합'이라는
+                    # 틀린 주장이 된다. 진짜 보합은 화살표 없이 중립색으로 구분한다.
+                    **_chg_cell(scp),
                 })
         ctx.update({
             "index_name": index_name,
