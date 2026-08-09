@@ -2107,10 +2107,19 @@ if(passBtn){
   }
 
   // 이 화면은 항상 스냅샷(마감) 기준이라 .ds-asof(장중 '오늘 실시간')를 재사용하면 안 된다.
+  // session_date를 먼저 본다 — 종목별 마지막 봉 날짜가 전부 일치할 때만 채워지는 필드라
+  // (build_stocks_snapshot._reconcile_session_date) 이 데이터가 실제로 '어느 장'의 것인지를
+  // 가리킨다. generated_at은 빌드가 돈 시각일 뿐이라, 빌드가 늦게 돌면 봉은 어제 건데
+  // 날짜만 오늘로 찍힌다. 둘 다 없으면 빈 문자열 — 모르는 날짜를 지어내지 않는다(§0).
+  function secAsOfYmd(snap){
+    if(!snap) return '';
+    if(typeof snap.session_date==='string' && snap.session_date) return snap.session_date;
+    if(typeof snap.generated_at==='string' && snap.generated_at) return snap.generated_at.slice(0,10);
+    return '';
+  }
   function secAsOfLabel(snap){
-    if(!snap||!snap.generated_at) return '';
-    var ymd=String(snap.generated_at).slice(0,10);
-    return fmtKoDate(ymd)+' 마감';
+    var ymd=secAsOfYmd(snap);
+    return ymd?fmtKoDate(ymd)+' 마감':'';
   }
 
   function secSectorRow(r,i){
@@ -2151,9 +2160,20 @@ if(passBtn){
     if(!d) return;   // 없는 섹터면 화면을 건드리지 않는다(§0) — 직전 상태 유지
     secActiveKey=key;
 
+    var allAvgs=secAllAverages(snap);   // 아래 phead 표기와 칩 렌더가 같이 쓴다(중복 계산 방지)
+
     var crumbEl=document.getElementById('sec-crumb-label'); if(crumbEl) crumbEl.textContent=d.label;
     var titleEl=document.getElementById('sec-title'); if(titleEl) titleEl.textContent=(SECTOR_ICONS[key]||'')+' '+d.label;
-    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목 · 코스피·코스닥 · '+secAsOfLabel(snap);
+    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목';
+
+    // 화면 타이틀 아래 기준 표기. 기준일을 모르면 그 조각만 빼고 나머지는 그대로 쓴다(§0).
+    var pheadEl=document.getElementById('sec-phead-sub');
+    if(pheadEl){
+      var nSec=Object.keys(allAvgs||{}).length;
+      var asof=secAsOfLabel(snap);
+      pheadEl.textContent=[nSec?nSec+'개 섹터':'', '코스피·코스닥', asof?asof+' 종가':'']
+        .filter(Boolean).join(' · ');
+    }
 
     var avgEl=document.getElementById('sec-avg');
     if(avgEl){avgEl.textContent=(d.avg>=0?'+':'−')+Math.abs(d.avg).toFixed(2)+'%';avgEl.className='v num '+(d.avg>=0?'up':'dn');}
@@ -2174,7 +2194,7 @@ if(passBtn){
     var rowsWrap=document.getElementById('sec-rows');
     if(rowsWrap) rowsWrap.innerHTML=d.rows.map(secSectorRow).join('');
 
-    secRenderChips(document.getElementById('secsel'), key, secAllAverages(snap));
+    secRenderChips(document.getElementById('secsel'), key, allAvgs);
   }
 
   // 칩 클릭 위임 — 칩은 매번 innerHTML로 다시 그려지므로 개별 리스너 대신 문서 레벨 위임 1개만 둔다.
@@ -3399,4 +3419,102 @@ if(passBtn){
     if(inWindow()) refresh();
     gate();
   });
+})();
+
+/* ── 시장의 큰 흐름(국면) — web/data/market-regime.json ── */
+(function(){
+  var STALE_DAYS=5;
+  var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  // 제목·이름은 데이터 파일에서 온 값이라 innerHTML에 넣기 전 반드시 이스케이프한다(파일 상단 규칙).
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
+  function fmtPct(v){ return (v>=0?'+':'−')+Math.abs(v).toFixed(1)+'%'; }
+  function cls(v){ return v>=0?'up':'dn'; }
+  function spark(vals,color){
+    if(!vals||vals.length<2) return '';
+    var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals);
+    if(hi===lo) hi=lo+1;
+    var pts=vals.map(function(v,i){
+      return (3+i*194/(vals.length-1)).toFixed(1)+','+(31-(v-lo)/(hi-lo)*28).toFixed(1);
+    }).join(' ');
+    return '<svg viewBox="0 0 200 34" class="regime-spark" preserveAspectRatio="none">'
+      +'<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" '
+      +'stroke-linejoin="round"/></svg>';
+  }
+  function card(b,kind){
+    var high=b.is_high?'<span class="regime-pill">6개월 최고</span>':'';
+    var sub=kind==='cool'
+      ? '정점 '+fmtPct(b.peak)+' → 지금 '+fmtPct(b.cum)
+      : '누적 '+fmtPct(b.cum);
+    return '<div class="regime-item"><div class="regime-n">'+esc(b.name)+high+'</div>'
+      +'<div class="regime-s">'+sub+'</div>'
+      +spark(b.spark, kind==='cool'?'#2775ED':'#E03131')+'</div>';
+  }
+  function regimeRender(d){
+    var box=document.getElementById('regime-block');
+    var body=document.getElementById('regime-body');
+    var asof=document.getElementById('regime-asof');
+    if(!box||!body) return;
+    // .is-hidden은 Task 12의 CSS가 붙기 전까지 아무 효과가 없다 — 그 사이엔 인라인
+    // display로 직접 숨긴다(defense-in-depth, #mom-track과 같은 패턴).
+    function hide(){ box.classList.add('is-hidden'); box.style.display='none'; }
+    // 없으면 비운다 — 낡은 국면이 계속 진짜처럼 보이는 게 가장 위험하다(§0·§20)
+    // baskets가 비어 있으면 헤드라인만 있고 근거(카드·스파크라인)가 없는 상태 — 표시하지 않는다.
+    if(!d||!d.headline||!d.generated_at||!Array.isArray(d.baskets)||d.baskets.length===0){ hide(); return; }
+    var age=(Date.now()-new Date(d.generated_at).getTime())/864e5;
+    if(!(age>=0)||age>STALE_DAYS){
+      hide();
+      console.warn('[regime] 데이터가 '+Math.round(age)+'일 지났습니다 — 섹션 생략');
+      return;
+    }
+    var g=(d.baskets||[]).filter(function(b){return b.scope==='global';});
+    var byKey={}; g.forEach(function(b){byKey[b.key]=b;});
+    // 카드는 헤드라인을 만든 바로 그 히스테리시스 재료(cooled_keys/rising_keys)로 고른다 —
+    // raw 단일일자 gap/is_high로 재도출하면 본문 문장과 카드가 다른 바스켓을 가리킬 수 있다(§28 계열).
+    var cooledKeys=Array.isArray(d.cooled_keys)?d.cooled_keys:[];
+    var risingKeys=Array.isArray(d.rising_keys)?d.rising_keys:[];
+    var cooled, rising;
+    if(cooledKeys.length && risingKeys.length){
+      var cooledBaskets=cooledKeys.map(function(k){return byKey[k];}).filter(Boolean);
+      var risingBaskets=risingKeys.map(function(k){return byKey[k];}).filter(Boolean);
+      cooled=cooledBaskets.slice().sort(function(a,b){return a.gap-b.gap;})[0];
+      rising=risingBaskets.slice().sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    } else {
+      // 폴백: 롤아웃 중 캐시된 구 JSON(cooled_keys/rising_keys 없음) 대비. 근사치이므로
+      // 새 데이터가 들어오는 즉시 위 authoritative 경로로 대체된다.
+      cooled=g.slice().sort(function(a,b){return a.gap-b.gap;})[0];
+      rising=g.filter(function(b){return b.is_high;})
+                  .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
+    }
+    var html='<div class="regime-hd">'+esc(d.headline)+'</div>'
+      +'<div class="regime-sub">최근 6개월 누적 기준'
+      +(d.regime_since?' · '+d.regime_since.slice(5).replace('-','/')+'부터':'')+'</div>';
+    if(d.state==='swap' && cooled && rising.length){
+      html+='<div class="regime-swap">'
+        +'<div class="regime-col is-cool"><div class="regime-lab">식는 중</div>'+card(cooled,'cool')+'</div>'
+        +'<div class="regime-arrow">→</div>'
+        +'<div class="regime-col is-hot"><div class="regime-lab">뜨는 중</div>'
+        +rising.map(function(b){return card(b,'hot');}).join('')+'</div></div>';
+    } else {
+      var top=g.slice().sort(function(a,b){return b.cum-a.cum;})[0];
+      if(top) html+='<div class="regime-single">'+card(top,'hot')+'</div>';
+    }
+    if(d.korea){
+      html+='<div class="regime-kr">🇰🇷 한국은 반도체 <b>'+fmtPct(d.korea.semi)
+        +'</b> vs 그 외 <b>'+fmtPct(d.korea.rest)+'</b> — 격차 <b>'
+        +Math.abs(d.korea.gap).toFixed(0)+'%p</b></div>';
+    }
+    body.innerHTML=html;
+    if(asof&&d.session_date) asof.textContent='최근 6개월 · '
+      +d.session_date.slice(5).replace('-','/')+' 기준';
+    box.classList.remove('is-hidden');
+    box.style.display='';
+  }
+  function regimeLoad(){
+    fetch('/data/market-regime.json',{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(regimeRender)
+      .catch(function(){ regimeRender(null); });
+  }
+  window.__marketRegime={regimeRender:regimeRender, regimeLoad:regimeLoad};
+  if(typeof window.addEventListener==='function') window.addEventListener('load', regimeLoad);
 })();

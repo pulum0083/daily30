@@ -293,3 +293,57 @@ test('secShowSector — 같은 종목은 랭킹·대장주에서 동일한 자�
   assert.equal(decimals(rowPct), 2, `랭킹 행은 소수점 2자리여야 하는데: ${rowPct}`);
   assert.equal(decimals(els['sec-avg'].textContent.replace('%', '')), 2);
 });
+
+// ── 화면 타이틀(phead) 표기 ────────────────────────────────────────────────
+// 2026-08-07: 이 화면만 phead가 없어서 "이 리스트가 어느 날짜 정보인지" 알 수 없었다.
+// 다른 화면(거래량 순위·ETF 랭킹·특이 신호)과 같은 규격으로 맞춘 뒤의 회귀 가드.
+
+test('기준일은 session_date를 generated_at보다 우선한다', () => {
+  // session_date는 종목별 마지막 봉 날짜가 전부 일치할 때만 채워지는 필드라(§0)
+  // 이 데이터가 실제로 '어느 장'의 것인지를 가리킨다. generated_at은 빌드가 돈 시각일 뿐이라
+  // 빌드가 늦게 돌면 봉은 어제 건데 날짜만 오늘로 찍힌다.
+  const { secAsOfLabel } = load();
+  const snap = fixtureSnap();
+  snap.generated_at = '2026-08-07T02:10:00+09:00'; // 자정 넘겨 돈 빌드
+  snap.session_date = '2026-08-06';                // 실제 봉은 8/6 장
+  assert.equal(secAsOfLabel(snap), '8/6(목) 마감');
+});
+
+test('session_date가 없으면 generated_at으로 폴백한다', () => {
+  const { secAsOfLabel } = load();
+  const snap = fixtureSnap();               // generated_at만 있음(2026-08-01, 토)
+  assert.equal(secAsOfLabel(snap), '8/1(토) 마감');
+});
+
+test('둘 다 없으면 빈 문자열 — 날짜를 지어내지 않는다(§0)', () => {
+  const { secAsOfLabel } = load();
+  assert.equal(secAsOfLabel({stocks:{}}), '');
+});
+
+test('phead 부제에 섹터 수·시장·기준일이 모두 들어간다', () => {
+  const { els, doc } = mkDoc();
+  const { secShowSector } = load(doc);
+  const snap = fixtureSnap();
+  snap.session_date = '2026-08-06';
+  secShowSector(snap, 'semicon');
+  assert.equal(els['sec-phead-sub'].textContent, '2개 섹터 · 코스피·코스닥 · 8/6(목) 마감 종가');
+});
+
+test('기준일을 모르면 그 조각만 빼고 나머지는 남긴다 — 통째로 비우지 않는다', () => {
+  const { els, doc } = mkDoc();
+  const { secShowSector } = load(doc);
+  const snap = fixtureSnap();
+  delete snap.generated_at;                 // session_date도 없음
+  secShowSector(snap, 'semicon');
+  const txt = els['sec-phead-sub'].textContent;
+  assert.equal(txt, '2개 섹터 · 코스피·코스닥');
+  assert.ok(!txt.includes('undefined') && !txt.includes('· ·'), `구분자가 새어나옴: ${txt}`);
+});
+
+test('카드 부제는 종목수만 — phead와 날짜를 중복 표기하지 않는다', () => {
+  const { els, doc } = mkDoc();
+  const { secShowSector } = load(doc);
+  secShowSector(fixtureSnap(), 'semicon');
+  assert.equal(els['sec-sub'].textContent, '추적 3종목');
+  assert.ok(!els['sec-sub'].textContent.includes('마감'), '날짜가 카드 부제에 중복으로 남아있다');
+});
