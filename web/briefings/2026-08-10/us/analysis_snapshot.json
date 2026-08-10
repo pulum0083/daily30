@@ -1,0 +1,172 @@
+{
+  "prediction": {
+    "up_pct": 62,
+    "down_pct": 38
+  },
+  "todays_view": {
+    "view_title": "반도체 장비주가 다시 랠리를 이끌어요 — CPI 발표 전 마지막 안전지대",
+    "dek": "AMAT·LRCX·KLAC 같은 <b>반도체 장비</b> 종목들이 프리마켓에서 강하게 뛰면서 SOX(필라델피아 반도체지수)가 지수 전체를 끌어올리고 있어요. 이틀 뒤 나올 <b>CPI</b> 전까지는 위험선호 분위기가 이어질 가능성이 높아요."
+  },
+  "issues": [
+    {
+      "title": "반도체 장비주(AMAT·LRCX·KLAC) 급등, SOX 강세 주도",
+      "body": "AMAT와 LRCX가 20일선을 뚫고 올라오면서 반도체 장비 섹터 전체에 매수세가 몰리고 있어요. AI 인프라 투자 확대 기대가 장비 발주 증가로 이어질 거라는 시각이 커지고 있어요.",
+      "up": {
+        "label": "반도체 장비",
+        "tickers": [
+          "AMAT",
+          "LRCX",
+          "KLAC",
+          "QCOM"
+        ]
+      }
+    },
+    {
+      "title": "메모리(MU) 및 D램 관련주는 오히려 눌려요",
+      "body": "MU는 20일선 아래로 밀렸고 D램 ETF도 약세를 보이고 있어요. 장비주와 메모리주 사이에 온도차가 나타나면서 반도체 섹터 내부에서도 자금이 갈리는 모습이에요.",
+      "down": {
+        "label": "메모리 반도체",
+        "tickers": [
+          "MU"
+        ]
+      }
+    },
+    {
+      "title": "빅테크 혼조 — AAPL·TSLA·META는 20일선 아래, MSFT·AMZN·GOOGL은 위",
+      "body": "AAPL이 20일선 아래로 내려온 채 약세를 보이고 META도 이틀선 밑에서 부진한 반면, MSFT와 AMZN, GOOGL은 20일선 위에서 견조하게 버티고 있어요. 빅테크 내에서도 실적·가이던스에 따라 종목별 차별화가 뚜렷해지고 있어요.",
+      "down": {
+        "label": "약세 빅테크",
+        "tickers": [
+          "AAPL",
+          "TSLA",
+          "META"
+        ]
+      },
+      "up": {
+        "label": "강세 빅테크",
+        "tickers": [
+          "MSFT",
+          "AMZN",
+          "GOOGL"
+        ]
+      }
+    },
+    {
+      "title": "이틀 앞으로 다가온 CPI 발표 — 금리 인하 기대의 시험대",
+      "body": "8월 12일 발표될 CPI(소비자물가지수)가 예상치(전월 대비 0.1%, 전년 대비 3.4%)에 부합하는지가 관전 포인트예요. 지금 VIX(변동성지수)가 낮게 유지되는 건 시장이 무난한 결과를 기대하고 있다는 신호인데, 예상을 웃돌면 금리 인하 기대가 흔들리면서 위험자산 전반에 부담이 될 수 있어요.",
+      "down": {
+        "label": "지수 전반",
+        "tickers": []
+      }
+    },
+    {
+      "title": "10년물 금리 소폭 하락, VIX는 낮은 수준 유지",
+      "body": "10년물 국채금리가 살짝 내려가고 VIX도 20일선 밑에서 안정적으로 유지되고 있어요. 시장이 아직 CPI 발표 전까지는 긴장하지 않고 있다는 뜻이라, 성장주·반도체 쪽에 우호적인 환경이 이어지고 있어요.",
+      "up": {
+        "label": "성장주·반도체",
+        "tickers": [
+          "NVDA",
+          "AVGO"
+        ]
+      }
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "AMAT",
+      "name": "AMAT (어플라이드 머티리얼즈)",
+      "price": "$555.00",
+      "change": "+2.94%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 3.84,
+      "ma200_dist_pct": 45.79,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "반도체 장비 섹터 전체가 강세를 보이는 가운데 20일선을 막 뚫고 올라온 종목이에요. AI 인프라 투자 확대 기대가 이어지는 한 추세가 더 붙을 가능성이 있어요.",
+      "action_guide": "시가 $560 이내 진입. 목표: $585 / 손절: $535 이탈 시.",
+      "entry": "$560",
+      "target": "$585",
+      "target_pct": "+4.5%",
+      "stop": "$535",
+      "stop_pct": "-3.6%"
+    },
+    {
+      "ticker": "LRCX",
+      "name": "LRCX (램리서치)",
+      "price": "$319.90",
+      "change": "+2.75%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 3.86,
+      "ma200_dist_pct": 30.61,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "AMAT와 함께 반도체 장비 랠리를 이끄는 종목이에요. 200일선 대비로도 여유가 있어서 추가 상승 공간이 있어 보여요.",
+      "action_guide": "시가 $323 이내 진입. 목표: $338 / 손절: $308 이탈 시.",
+      "entry": "$323",
+      "target": "$338",
+      "target_pct": "+4.6%",
+      "stop": "$308",
+      "stop_pct": "-4.6%"
+    },
+    {
+      "ticker": "MS",
+      "name": "MS (모건스탠리)",
+      "price": "$216.80",
+      "change": "+0.22%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 0.92,
+      "ma200_dist_pct": 17.93,
+      "scenario_tag": "금융주 안정적 우상향",
+      "scenario": "200일선 대비 여유가 있는 상태에서 20일선을 갓 넘긴 종목이에요. 금리 환경이 안정되면 대형 금융주에 우호적인 흐름이 이어질 수 있어요.",
+      "action_guide": "시가 $218 이내 진입. 목표: $227 / 손절: $210 이탈 시.",
+      "entry": "$218",
+      "target": "$227",
+      "target_pct": "+4.1%",
+      "stop": "$210",
+      "stop_pct": "-3.7%"
+    },
+    {
+      "ticker": "QCOM",
+      "name": "QCOM (퀄컴)",
+      "price": "$167.50",
+      "change": "-0.21%",
+      "change_cls": "down",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 0.67,
+      "ma200_dist_pct": -0.2,
+      "scenario_tag": "반등 초기 국면",
+      "scenario": "200일선 근처에서 20일선을 막 넘긴 자리라 반등 초기 신호로 볼 수 있어요. 반도체 장비주 강세 분위기에 동반 수혜를 받을 여지가 있어요.",
+      "action_guide": "시가 $169 이내 진입. 목표: $176 / 손절: $162 이탈 시.",
+      "entry": "$169",
+      "target": "$176",
+      "target_pct": "+4.1%",
+      "stop": "$162",
+      "stop_pct": "-4.1%"
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "GOOGL (알파벳)",
+      "price": "$357.85",
+      "change": "+1.00%",
+      "change_cls": "up",
+      "signal": "20일선 위 안착",
+      "golden": false,
+      "ma20_dist_pct": 2.61,
+      "ma200_dist_pct": 8.83,
+      "scenario_tag": "빅테크 중 상대적 강세",
+      "scenario": "빅테크 내에서 상대적으로 견조한 흐름을 보이는 종목이에요. 20일선과 200일선 모두 위에서 지지받고 있어서 안정적인 우상향이 기대돼요.",
+      "action_guide": "시가 $360 이내 진입. 목표: $375 / 손절: $344 이탈 시.",
+      "entry": "$360",
+      "target": "$375",
+      "target_pct": "+4.2%",
+      "stop": "$344",
+      "stop_pct": "-4.4%"
+    }
+  ],
+  "generated_at": "2026-08-10T21:17:14.913786+09:00"
+}
