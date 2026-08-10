@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<!-- Double-Shot 서비스 진단 보고서 — 코드와 라이브 데이터 실측 기반 (2026-08-10) -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Double-Shot 서비스 진단 — 2026-08-10</title>
+
+<style>
+  :root {
+    --paper:      #F5F5F2;
+    --surface:    #FCFCFB;
+    --surface-2:  #EFEFEA;
+    --ink:        #16191E;
+    --ink-2:      #4A5058;
+    --ink-3:      #767D87;
+    --rule:       #DEDED7;
+    --rule-2:     #C8C8C0;
+
+    --brass:      #AD7318;
+    --petrol:     #0F72B0;
+    --brick:      #A63A32;
+    --muted-mark: #9AA0A8;
+
+    --measure:    68ch;
+    --step--1:    0.8125rem;
+    --step-0:     1.0rem;
+    --step-1:     1.1875rem;
+    --step-2:     1.5rem;
+    --step-3:     2.0rem;
+    --step-4:     2.75rem;
+
+    --sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+            'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+    --mono: ui-monospace, 'SF Mono', SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:     #0D1013;
+      --surface:   #14181D;
+      --surface-2: #1D222A;
+      --ink:       #E9EBEE;
+      --ink-2:     #AEB5BE;
+      --ink-3:     #7E868F;
+      --rule:      #262C34;
+      --rule-2:    #363D47;
+
+      --brass:     #C08628;
+      --petrol:    #2E93C8;
+      --brick:     #D4675C;
+      --muted-mark:#6B737C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #0D1013;
+    --surface:   #14181D;
+    --surface-2: #1D222A;
+    --ink:       #E9EBEE;
+    --ink-2:     #AEB5BE;
+    --ink-3:     #7E868F;
+    --rule:      #262C34;
+    --rule-2:    #363D47;
+    --brass:     #C08628;
+    --petrol:    #2E93C8;
+    --brick:     #D4675C;
+    --muted-mark:#6B737C;
+  }
+  :root[data-theme="light"] {
+    --paper:     #F5F5F2;
+    --surface:   #FCFCFB;
+    --surface-2: #EFEFEA;
+    --ink:       #16191E;
+    --ink-2:     #4A5058;
+    --ink-3:     #767D87;
+    --rule:      #DEDED7;
+    --rule-2:    #C8C8C0;
+    --brass:     #AD7318;
+    --petrol:    #0F72B0;
+    --brick:     #A63A32;
+    --muted-mark:#9AA0A8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--step-0);
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 clamp(1.15rem, 4vw, 3rem) 6rem;
+  }
+
+  .layout { display: block; }
+  @media (min-width: 1100px) {
+    .layout { display: grid; grid-template-columns: 172px minmax(0, 1fr); gap: 3.5rem; align-items: start; }
+  }
+
+  /* ---------- 목차 ---------- */
+  .toc { display: none; }
+  @media (min-width: 1100px) {
+    .toc {
+      display: block; position: sticky; top: 2.5rem;
+      font-size: var(--step--1); line-height: 1.5;
+      border-left: 1px solid var(--rule); padding-left: 1rem;
+    }
+    .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .62rem; }
+    .toc a { color: var(--ink-3); text-decoration: none; display: block; }
+    .toc a:hover, .toc a:focus-visible { color: var(--ink); }
+    .toc .toc-num { font-family: var(--mono); font-size: .72rem; color: var(--rule-2); margin-right: .4rem; }
+    .toc-head { font-family: var(--mono); font-size: .68rem; letter-spacing: .13em; text-transform: uppercase;
+                color: var(--ink-3); margin-bottom: .9rem; }
+  }
+
+  /* ---------- 표지 ---------- */
+  header.cover { padding: clamp(3rem, 9vw, 6rem) 0 2.5rem; }
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3); display: flex; flex-wrap: wrap; gap: .5rem 1.1rem; margin-bottom: 1.6rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 5.4vw, var(--step-4));
+    line-height: 1.16; letter-spacing: -0.026em; font-weight: 800;
+    margin: 0 0 1.4rem; text-wrap: balance; max-width: 19ch;
+  }
+  .standfirst {
+    font-size: clamp(1.02rem, 2.1vw, var(--step-1));
+    color: var(--ink-2); max-width: var(--measure); margin: 0; line-height: 1.68;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 700; }
+
+  /* ---------- KPI ---------- */
+  /* 4개 항목이므로 2열 또는 4열만 허용한다. 3열이면 빈 칸이 하나 남는다. */
+  .kpi-row {
+    display: grid; gap: 1px; background: var(--rule);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid var(--rule); margin: 3rem 0 0;
+  }
+  @media (min-width: 880px) {
+    .kpi-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  .kpi { background: var(--surface); padding: 1.15rem 1.15rem 1.25rem; }
+  .kpi-label {
+    font-size: .72rem; font-family: var(--mono); letter-spacing: .06em;
+    color: var(--ink-3); margin-bottom: .55rem; text-transform: uppercase;
+  }
+  .kpi-val {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 1.72rem; font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;
+  }
+  .kpi-val.warn { color: var(--brick); }
+  .kpi-note { font-size: .78rem; color: var(--ink-3); margin-top: .45rem; line-height: 1.45; }
+
+  /* ---------- 섹션 ---------- */
+  section { padding-top: 4.2rem; scroll-margin-top: 1.5rem; }
+  h2 {
+    font-size: clamp(1.35rem, 3.2vw, var(--step-2));
+    line-height: 1.28; letter-spacing: -0.02em; font-weight: 750;
+    margin: 0 0 1rem; text-wrap: balance; max-width: 26ch;
+    display: flex; gap: .85rem; align-items: baseline;
+  }
+  h2 .n {
+    font-family: var(--mono); font-size: .82rem; font-weight: 500;
+    color: var(--ink-3); flex: none; padding-top: .18em;
+  }
+  h3 {
+    font-size: var(--step-0); font-weight: 700; letter-spacing: -0.008em;
+    margin: 2.4rem 0 .7rem; color: var(--ink);
+  }
+  p { max-width: var(--measure); margin: 0 0 1.05rem; }
+  p:last-child { margin-bottom: 0; }
+  .lede { font-size: 1.06rem; color: var(--ink-2); }
+  strong { font-weight: 700; color: var(--ink); }
+  em { font-style: normal; border-bottom: 1.5px solid var(--brass); padding-bottom: 1px; }
+  a { color: inherit; }
+  code {
+    font-family: var(--mono); font-size: .86em; background: var(--surface-2);
+    padding: .1em .38em; border-radius: 3px; color: var(--ink-2);
+  }
+
+  .sev {
+    display: inline-flex; align-items: center; gap: .42rem;
+    font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: .26rem .55rem; border: 1px solid var(--rule-2); color: var(--ink-2);
+    margin-bottom: 1.1rem;
+  }
+  .sev::before { content: ""; width: 7px; height: 7px; background: var(--muted-mark); flex: none; }
+  .sev.critical { color: var(--brick); border-color: var(--brick); }
+  .sev.critical::before { background: var(--brick); }
+  .sev.structural::before { background: var(--brass); }
+
+  /* ---------- 증거 블록 ---------- */
+  figure {
+    margin: 1.9rem 0 1.6rem; background: var(--surface);
+    border: 1px solid var(--rule); padding: 1.35rem 1.35rem 1.1rem;
+  }
+  .fig-title { font-size: .95rem; font-weight: 700; margin-bottom: .25rem; letter-spacing: -0.006em; }
+  .fig-sub { font-size: .8rem; color: var(--ink-3); margin-bottom: 1.15rem; line-height: 1.5; }
+  .fig-scroll { overflow-x: auto; }
+  figcaption {
+    font-size: .78rem; color: var(--ink-3); line-height: 1.58;
+    border-top: 1px solid var(--rule); padding-top: .8rem; margin-top: .9rem;
+  }
+  svg { display: block; max-width: 100%; height: auto; }
+
+  .source {
+    font-family: var(--mono); font-size: .7rem; color: var(--ink-3);
+    letter-spacing: .02em; margin-top: .55rem; display: block;
+  }
+  .source::before { content: "측정 "; color: var(--rule-2); }
+
+  /* ---------- 표 ---------- */
+  .t-scroll { overflow-x: auto; margin: 1.7rem 0; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; min-width: 520px; }
+  th, td { text-align: left; padding: .68rem .9rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--mono); font-size: .69rem; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 500; background: var(--surface-2); white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.bad { color: var(--brick); }
+
+  /* ---------- 목록 ---------- */
+  ul.pts { list-style: none; margin: 1.2rem 0; padding: 0; max-width: var(--measure); display: flex; flex-direction: column; gap: .85rem; }
+  ul.pts li { padding-left: 1.35rem; position: relative; }
+  ul.pts li::before {
+    content: ""; position: absolute; left: 0; top: .68em;
+    width: 6px; height: 1.5px; background: var(--rule-2);
+  }
+
+  /* ---------- 인용/판정 ---------- */
+  .verdict {
+    border-left: 2px solid var(--brick); padding: .2rem 0 .2rem 1.25rem;
+    margin: 1.7rem 0; max-width: var(--measure);
+  }
+  .verdict p { font-size: 1.04rem; font-weight: 600; color: var(--ink); margin: 0; line-height: 1.6; }
+
+  .quote {
+    border-left: 2px solid var(--rule-2); padding-left: 1.25rem; margin: 1.5rem 0;
+    max-width: var(--measure); color: var(--ink-2); font-size: .93rem;
+  }
+  .quote cite { display: block; font-style: normal; font-family: var(--mono); font-size: .72rem;
+                color: var(--ink-3); margin-top: .5rem; }
+
+  /* ---------- 권고 ---------- */
+  .rec { border: 1px solid var(--rule); background: var(--surface); margin: 1.5rem 0; }
+  .rec-head {
+    display: flex; gap: .9rem; align-items: baseline; padding: 1.05rem 1.25rem .3rem;
+  }
+  .rec-rank {
+    font-family: var(--mono); font-size: .72rem; color: var(--surface);
+    background: var(--ink); padding: .18rem .45rem; flex: none; letter-spacing: .04em;
+  }
+  .rec-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.008em; }
+  .rec-body { padding: 0 1.25rem 1.15rem 1.25rem; }
+  .rec-body p { font-size: .91rem; color: var(--ink-2); margin-bottom: .7rem; }
+  .rec-meta {
+    display: flex; flex-wrap: wrap; gap: .4rem .9rem; font-family: var(--mono); font-size: .71rem;
+    color: var(--ink-3); border-top: 1px solid var(--rule); padding-top: .7rem; margin-top: .9rem;
+  }
+  .rec-meta span { white-space: nowrap; }
+
+  hr.div { border: none; border-top: 1px solid var(--rule); margin: 4rem 0 0; }
+
+  footer.end {
+    margin-top: 4.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+    font-size: .78rem; color: var(--ink-3); line-height: 1.65; max-width: var(--measure);
+  }
+
+  a:focus-visible, .toc a:focus-visible { outline: 2px solid var(--petrol); outline-offset: 3px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem 1.15rem; font-size: .76rem; color: var(--ink-2); margin-bottom: .9rem; }
+  .legend i { display: inline-flex; align-items: center; gap: .38rem; font-style: normal; }
+  .swatch { width: 11px; height: 11px; flex: none; border-radius: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<div class="layout">
+
+  <nav class="toc" aria-label="목차">
+    <div class="toc-head">진단 항목</div>
+    <ol>
+      <li><a href="#s1"><span class="toc-num">01</span>예측의 증거</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>휘발되는 브리핑</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>이미 끝난 전환</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>방어에 쓰이는 공학</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>재방문 장치 부재</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>보이지 않는 사용자</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>경쟁력의 실체</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>권고</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <header class="cover">
+    <div class="eyebrow">
+      <span>서비스 진단 보고서</span>
+      <span>doubleshot.space</span>
+      <span>2026-08-10</span>
+    </div>
+    <h1>엎을 필요는 없다. 이미 옮겨간 곳을 인정하면 된다.</h1>
+    <p class="standfirst">
+      코드와 라이브 데이터를 직접 측정한 결과, 이 서비스는 <strong>이미 종목 대시보드로 전환을
+      끝냈다</strong>. 홈은 <code>/stocks</code>로 301 리다이렉트되고, 검색에 남는 자산도 종목 페이지뿐이다.
+      다만 하루 세 편의 브리핑이 여전히 공학 역량과 사고 리스크의 대부분을 가져가고 있고,
+      정작 그 브리핑의 핵심 약속인 <strong>방향 예측은 통계적으로 증명되지 않았다</strong>.
+      진단의 결론은 재구축이 아니라 정리다.
+    </p>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">코스피 예측 적중률</div>
+        <div class="kpi-val">65.9<span style="font-size:.6em">%</span></div>
+        <div class="kpi-note">기준선 61.0% · 우위 +4.9%p · 유의하지 않음</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">브리핑 URL 생존</div>
+        <div class="kpi-val warn">12<span style="font-size:.55em">일</span></div>
+        <div class="kpi-note">그 이전 발행분은 전부 404</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">5주간 기록된 실사고</div>
+        <div class="kpi-val warn">17<span style="font-size:.55em">건</span></div>
+        <div class="kpi-note">7/03 ~ 8/05 · 약 이틀에 1건</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">개인화 장치</div>
+        <div class="kpi-val warn">0<span style="font-size:.55em">개</span></div>
+        <div class="kpi-note">관심종목 · 로그인 · 알림 전부 없음</div>
+      </div>
+    </div>
+    <span class="source">data/briefings.json · 라이브 HTTP 응답 · docs/SERVICE_RULES.md · 소스 전체 grep</span>
+  </header>
+
+  <hr class="div">
+
+  <!-- ============ 01 ============ -->
+  <section id="s1">
+    <div class="sev critical">치명 · 제품의 핵심 약속</div>
+    <h2><span class="n">01</span>예측이라는 약속에 아직 증거가 없다</h2>
+
+    <p class="lede">
+      브리핑이 파는 것은 방향 예측이다. 그런데 144건의 기록을 채점 결과까지 열어보면,
+      이 예측이 <em>"항상 오른다"고 답하는 것보다 낫다는 증거가 없다</em>.
+    </p>
+
+    <p>
+      코스피 예측은 82건 채점에서 54건 적중, 65.9%다. 숫자만 보면 나쁘지 않다.
+      문제는 같은 기간 코스피가 실제로 오른 날이 82일 중 50일이라는 점이다.
+      즉 아무 분석 없이 매일 "상승"이라고만 답해도 61.0%가 나온다.
+      AI 파이프라인 전체가 만들어낸 우위는 <strong>4.9%p</strong>이고,
+      이 정도 차이는 82건 표본에서 우연으로 충분히 설명된다.
+    </p>
+
+    <figure>
+      <div class="fig-title">적중률과 95% 신뢰구간, 그리고 "항상 상승" 기준선</div>
+      <div class="fig-sub">신뢰구간이 기준선을 가로지르면 우위를 입증하지 못한 것이다. 두 브리핑 모두 가로지른다.</div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 740 230" role="img" aria-label="코스피 적중률 65.9%, 신뢰구간 55.1에서 75.2로 기준선 61.0%를 포함. 미국 적중률 70.7%, 신뢰구간 58.0에서 80.8로 기준선 58.6%를 포함.">
+          <!-- grid -->
+          <g stroke="var(--rule)" stroke-width="1">
+            <line x1="80" y1="176" x2="700" y2="176"/>
+          </g>
+          <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="middle">
+            <text x="80"  y="194">40%</text>
+            <text x="196" y="194">50%</text>
+            <text x="312" y="194">60%</text>
+            <text x="428" y="194">70%</text>
+            <text x="544" y="194">80%</text>
+            <text x="660" y="194">90%</text>
+          </g>
+          <g stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 4">
+            <line x1="196" y1="34" x2="196" y2="176"/>
+            <line x1="312" y1="34" x2="312" y2="176"/>
+            <line x1="428" y1="34" x2="428" y2="176"/>
+            <line x1="544" y1="34" x2="544" y2="176"/>
+            <line x1="660" y1="34" x2="660" y2="176"/>
+          </g>
+
+          <!-- row 1 : KOSPI -->
+          <text x="0" y="66" font-size="12" font-weight="700" fill="var(--ink)">코스피</text>
+          <text x="0" y="82" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">n=82 · 진행중</text>
+          <line x1="255" y1="70" x2="488" y2="70" stroke="var(--petrol)" stroke-width="2" opacity="0.28" stroke-linecap="round"/>
+          <line x1="255" y1="63" x2="255" y2="77" stroke="var(--petrol)" stroke-width="1.5" opacity="0.5"/>
+          <line x1="488" y1="63" x2="488" y2="77" stroke="var(--petrol)" stroke-width="1.5" opacity="0.5"/>
+          <line x1="324" y1="52" x2="324" y2="88" stroke="var(--muted-mark)" stroke-width="2"/>
+          <circle cx="380" cy="70" r="6" fill="var(--petrol)" stroke="var(--surface)" stroke-width="2"/>
+          <text x="380" y="46" font-family="var(--mono)" font-size="11" font-weight="600" fill="var(--petrol)" text-anchor="middle">65.9%</text>
+          <text x="324" y="104" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" text-anchor="middle">기준선 61.0</text>
+
+          <!-- row 2 : US -->
+          <text x="0" y="140" font-size="12" font-weight="700" fill="var(--ink)">미국</text>
+          <text x="0" y="156" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">n=58 · 채점 탈퇴</text>
+          <line x1="289" y1="144" x2="553" y2="144" stroke="var(--petrol)" stroke-width="2" opacity="0.28" stroke-linecap="round"/>
+          <line x1="289" y1="137" x2="289" y2="151" stroke="var(--petrol)" stroke-width="1.5" opacity="0.5"/>
+          <line x1="553" y1="137" x2="553" y2="151" stroke="var(--petrol)" stroke-width="1.5" opacity="0.5"/>
+          <line x1="296" y1="126" x2="296" y2="162" stroke="var(--muted-mark)" stroke-width="2"/>
+          <circle cx="436" cy="144" r="6" fill="var(--petrol)" stroke="var(--surface)" stroke-width="2"/>
+          <text x="436" y="120" font-family="var(--mono)" font-size="11" font-weight="600" fill="var(--petrol)" text-anchor="middle">70.7%</text>
+          <text x="296" y="120" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" text-anchor="middle">기준선 58.6</text>
+        </svg>
+      </div>
+      <div class="legend" style="margin-top:.9rem;margin-bottom:0">
+        <i><span class="swatch" style="background:var(--petrol)"></span>측정 적중률과 95% 신뢰구간</i>
+        <i><span class="swatch" style="background:var(--muted-mark)"></span>"항상 상승" 기준선</i>
+      </div>
+      <figcaption>
+        코스피 신뢰구간은 55.1~75.2%로 기준선 61.0%를 품는다. 이항검정 결과 P(적중≥54)=0.215로,
+        우위를 주장하려면 82건 중 58건은 맞혔어야 한다. 미국도 신뢰구간 58.0~80.8%가 기준선 58.6%를 품는다.
+        <span class="source">data/briefings.json 144건 · Wilson 구간 · 이항검정</span>
+      </figcaption>
+    </figure>
+
+    <h3>신뢰도 숫자는 정보를 담고 있지 않다</h3>
+    <p>
+      브리핑은 매번 "신뢰도 62%" 같은 숫자를 함께 내보낸다. 사용자는 이 숫자가 높을수록
+      더 믿을 만하다고 읽는다. 실제로는 그렇지 않다.
+      <strong>신뢰도 70~79%로 낸 예측의 적중률이 60.7%로, 50~59%로 낸 예측의 68.8%보다 낮다.</strong>
+      네 구간의 신뢰구간이 전부 겹쳐서, 신뢰도와 실제 적중 사이에 관계가 있다고 말할 근거가 없다.
+    </p>
+
+    <figure>
+      <div class="fig-title">제시한 신뢰도 대비 실제 적중률</div>
+      <div class="fig-sub">점선은 신뢰도와 적중률이 일치하는 이상적인 보정선이다. 점들은 이 선을 따라가지 않는다.</div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 340" role="img" aria-label="신뢰도 55%는 적중 68.8%, 65%는 66.7%, 75%는 60.7%, 85%는 76.7%로 보정선을 따르지 않는다.">
+          <g stroke="var(--rule)" stroke-width="1">
+            <line x1="80" y1="300" x2="640" y2="300"/>
+            <line x1="80" y1="40"  x2="80"  y2="300"/>
+          </g>
+          <g stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 4">
+            <line x1="80" y1="248" x2="640" y2="248"/>
+            <line x1="80" y1="196" x2="640" y2="196"/>
+            <line x1="80" y1="144" x2="640" y2="144"/>
+            <line x1="80" y1="92"  x2="640" y2="92"/>
+          </g>
+          <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="end">
+            <text x="70" y="304">40</text><text x="70" y="252">50</text>
+            <text x="70" y="200">60</text><text x="70" y="148">70</text>
+            <text x="70" y="96">80</text><text x="70" y="44">90</text>
+          </g>
+          <text x="26" y="170" font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="middle" transform="rotate(-90 26 170)">실제 적중률 %</text>
+
+          <!-- ideal diagonal -->
+          <line x1="80" y1="248" x2="620" y2="40" stroke="var(--muted-mark)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text x="556" y="66" font-family="var(--mono)" font-size="10" fill="var(--ink-3)">이상적 보정선</text>
+
+          <!-- CI + points -->
+          <g stroke="var(--petrol)" stroke-width="2" opacity="0.3" stroke-linecap="round">
+            <line x1="147" y1="279" x2="147" y2="61"/>
+            <line x1="282" y1="222" x2="282" y2="108"/>
+            <line x1="417" y1="290" x2="417" y2="113"/>
+            <line x1="552" y1="201" x2="552" y2="50"/>
+          </g>
+          <g fill="var(--petrol)" stroke="var(--surface)" stroke-width="2">
+            <circle cx="147" cy="150" r="6"/>
+            <circle cx="282" cy="161" r="6"/>
+            <circle cx="417" cy="192" r="6"/>
+            <circle cx="552" cy="109" r="6"/>
+          </g>
+          <g font-family="var(--mono)" font-size="10.5" font-weight="600" fill="var(--ink)" text-anchor="middle">
+            <text x="147" y="140">68.8</text>
+            <text x="282" y="151">66.7</text>
+            <text x="417" y="182">60.7</text>
+            <text x="552" y="99">76.7</text>
+          </g>
+          <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="middle">
+            <text x="147" y="318">신뢰도 55</text><text x="147" y="331">n=16</text>
+            <text x="282" y="318">65</text><text x="282" y="331">n=66</text>
+            <text x="417" y="318">75</text><text x="417" y="331">n=28</text>
+            <text x="552" y="318">85</text><text x="552" y="331">n=30</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        세로 막대는 각 구간의 95% 신뢰구간이다. 네 구간이 전부 겹치고, 점들이 보정선을 따르지 않는다.
+        화면에 표시되는 신뢰도 숫자는 현재로선 장식에 가깝다.
+        <span class="source">data/briefings.json 채점 완료 140건 · 신뢰도 10%p 구간 집계</span>
+      </figcaption>
+    </figure>
+
+    <h3>미국 브리핑은 이미 채점에서 물러났다</h3>
+    <p>
+      미국 브리핑은 2026-07-14에 "이슈 중심 전환"을 이유로 채점을 중단했다.
+      코드에도 <code>US backfill skip — 채점 탈퇴</code>로 명시돼 있고,
+      요약 JSON에도 동결 표기가 남아 있다. 의도된 결정이고 기록도 정직하다.
+      다만 그 직전 궤적을 보면 왜 물러났는지가 드러난다.
+    </p>
+
+    <figure>
+      <div class="fig-title">미국 브리핑 적중률 추이 (채점 탈퇴 이전)</div>
+      <div class="fig-sub">시간순 4구간. 초기의 높은 성적은 유지되지 않았다.</div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 660 260" role="img" aria-label="미국 브리핑 적중률이 93%, 79%, 64%, 50%로 시간이 갈수록 낮아졌다.">
+          <g stroke="var(--rule)" stroke-width="1">
+            <line x1="70" y1="210" x2="630" y2="210"/>
+          </g>
+          <g stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 4">
+            <line x1="70" y1="160" x2="630" y2="160"/>
+            <line x1="70" y1="110" x2="630" y2="110"/>
+            <line x1="70" y1="60"  x2="630" y2="60"/>
+          </g>
+          <g font-family="var(--mono)" font-size="10" fill="var(--ink-3)" text-anchor="end">
+            <text x="60" y="214">40</text><text x="60" y="164">55</text>
+            <text x="60" y="114">70</text><text x="60" y="64">85</text>
+          </g>
+          <!-- baseline for US -->
+          <line x1="70" y1="149" x2="630" y2="149" stroke="var(--muted-mark)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text x="628" y="143" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" text-anchor="end">기준선 58.6</text>
+
+          <!-- columns: 93,79,64,50 -> y = 210 - (v-40)*(150/45) -->
+          <g fill="var(--brass)">
+            <rect x="104" y="33"  width="62" height="177" rx="4"/>
+            <rect x="244" y="80"  width="62" height="130" rx="4"/>
+            <rect x="384" y="130" width="62" height="80"  rx="4"/>
+            <rect x="524" y="177" width="62" height="33"  rx="4"/>
+          </g>
+          <g font-family="var(--mono)" font-size="12" font-weight="600" fill="var(--ink)" text-anchor="middle">
+            <text x="135" y="25">93%</text>
+            <text x="275" y="72">79%</text>
+            <text x="415" y="122">64%</text>
+            <text x="555" y="169">50%</text>
+          </g>
+          <g font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" text-anchor="middle">
+            <text x="135" y="228">4/15–5/05</text><text x="135" y="241">n=14</text>
+            <text x="275" y="228">5/06–5/27</text><text x="275" y="241">n=14</text>
+            <text x="415" y="228">5/28–6/17</text><text x="415" y="241">n=14</text>
+            <text x="555" y="228">6/18–7/13</text><text x="555" y="241">n=16</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        구간별 표본이 14~16건뿐이라 각 값의 오차는 크다. 그래도 마지막 구간이 기준선 아래로 내려간 것은
+        분명하다. 초기 93%는 실력보다 시장 국면의 덕이 컸다고 읽는 편이 안전하다.
+        <span class="source">data/briefings.json 미국 채점분 58건 · 시간순 4분할</span>
+      </figcaption>
+    </figure>
+
+    <div class="verdict">
+      <p>
+        사용자에게 의미가 있으려면, 예측은 기준선과 나란히 표시되어야 한다.
+        "적중률 66%"는 광고이고, "기준선 61%, 우리 66%, 아직 유의하지 않음"은 정보다.
+        후자를 내보내는 순간 이 서비스는 국내에서 거의 유일하게 정직한 예측 서비스가 된다.
+      </p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 02 ============ -->
+  <section id="s2">
+    <div class="sev structural">구조 · 자산 형성 실패</div>
+    <h2><span class="n">02</span>브리핑은 매일 만들어지고 2주 뒤 사라진다</h2>
+
+    <p class="lede">
+      하루 세 편, 평일마다. 그런데 <em>12거래일이 지나면 URL이 404가 된다</em>.
+      만드는 노력은 매일 발생하고, 남는 자산은 0이다.
+    </p>
+
+    <p>
+      실제로 확인했다. 사이트맵에 올라가 있던 주소를 하나씩 호출해봤다.
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <thead>
+          <tr><th>URL</th><th>상태</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="num">/briefings/2026-07-14/kospi/</td><td class="num bad">404</td><td>사이트맵 등재 이력 있음</td></tr>
+          <tr><td class="num">/briefings/2026-07-20/kospi/</td><td class="num bad">404</td><td>사이트맵 등재 이력 있음</td></tr>
+          <tr><td class="num">/briefings/2026-07-26/kospi/</td><td class="num bad">404</td><td>사이트맵 등재 이력 있음</td></tr>
+          <tr><td class="num">/briefings/2026-08-07/kospi/</td><td class="num">200</td><td>보존 구간 내</td></tr>
+          <tr><td class="num">/stocks/005930/</td><td class="num">200</td><td>영구 페이지</td></tr>
+          <tr><td class="num">/stocks/196170/</td><td class="num">200</td><td>영구 페이지</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="source">2026-08-10 라이브 HTTP 응답 코드 직접 확인</span>
+
+    <p style="margin-top:1.6rem">
+      이건 단순한 낭비가 아니라 <strong>마이너스</strong>다. 사이트맵에 올려 크롤링을 유도한 뒤 삭제하면
+      검색엔진에는 404가 누적된다. 크롤링 예산을 깎아먹고 사이트 품질 신호를 떨어뜨린다.
+      현재 사이트맵 100개 URL 중 33개가 브리핑인데, 이 중 대부분은 몇 주 안에 죽는다.
+    </p>
+
+    <figure>
+      <div class="fig-title">두 갈래로 갈린 생산물의 운명</div>
+      <div class="fig-sub">같은 파이프라인이 만든 두 결과물이 정반대 방향으로 간다.</div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 700 300" role="img" aria-label="브리핑은 생산 후 12거래일 만에 404로 소멸하는 순환이고, 종목 페이지는 66개가 영구 보존되며 누적된다.">
+          <!-- 브리핑 트레드밀 -->
+          <text x="0" y="24" font-size="12.5" font-weight="700" fill="var(--brass)">브리핑 · 트레드밀</text>
+          <text x="0" y="42" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">3편/일 · 평일</text>
+
+          <g fill="none" stroke="var(--brass)" stroke-width="1.6">
+            <rect x="0"   y="62" width="118" height="42" rx="4"/>
+            <rect x="158" y="62" width="118" height="42" rx="4"/>
+            <rect x="316" y="62" width="118" height="42" rx="4"/>
+          </g>
+          <rect x="474" y="62" width="118" height="42" rx="4" fill="none" stroke="var(--brick)" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <g font-size="11" fill="var(--ink)" text-anchor="middle">
+            <text x="59"  y="88">AI 생성·검증</text>
+            <text x="217" y="88">발행·배포</text>
+            <text x="375" y="88">사이트맵 등재</text>
+          </g>
+          <text x="533" y="83" font-size="11" fill="var(--brick)" text-anchor="middle" font-weight="600">404 소멸</text>
+          <text x="533" y="97" font-family="var(--mono)" font-size="9" fill="var(--brick)" text-anchor="middle">12거래일 후</text>
+
+          <g stroke="var(--rule-2)" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+            <line x1="122" y1="83" x2="152" y2="83"/>
+            <line x1="280" y1="83" x2="310" y2="83"/>
+            <line x1="438" y1="83" x2="468" y2="83"/>
+          </g>
+          <!-- loop back -->
+          <path d="M533 108 L533 128 L59 128 L59 110" fill="none" stroke="var(--rule-2)" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+          <text x="296" y="144" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)" text-anchor="middle">누적되는 자산 없이 다시 처음부터</text>
+
+          <!-- 종목 자산 -->
+          <text x="0" y="196" font-size="12.5" font-weight="700" fill="var(--petrol)">종목 페이지 · 자산</text>
+          <text x="0" y="214" font-family="var(--mono)" font-size="9.5" fill="var(--ink-3)">66개 · 영구 URL</text>
+
+          <g fill="none" stroke="var(--petrol)" stroke-width="1.6">
+            <rect x="0"   y="234" width="118" height="42" rx="4"/>
+            <rect x="158" y="234" width="118" height="42" rx="4"/>
+          </g>
+          <rect x="316" y="234" width="276" height="42" rx="4" fill="var(--petrol)" fill-opacity="0.1" stroke="var(--petrol)" stroke-width="1.6"/>
+          <g font-size="11" fill="var(--ink)" text-anchor="middle">
+            <text x="59"  y="260">일 1회 실측 갱신</text>
+            <text x="217" y="260">같은 URL 유지</text>
+            <text x="454" y="255" font-weight="600">검색 유입이 복리로 쌓임</text>
+          </g>
+          <text x="454" y="270" font-family="var(--mono)" font-size="9" fill="var(--ink-3)" text-anchor="middle">시간이 갈수록 가치 증가</text>
+          <g stroke="var(--rule-2)" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+            <line x1="122" y1="255" x2="152" y2="255"/>
+            <line x1="280" y1="255" x2="310" y2="255"/>
+          </g>
+
+          <defs>
+            <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="var(--rule-2)"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <figcaption>
+        브리핑에 들어가는 공학·비용·사고 리스크는 종목 페이지보다 훨씬 크지만,
+        남는 것은 종목 페이지 쪽뿐이다.
+        <span class="source">web/briefings 디렉토리 12일치 · web/sitemap.xml 100 URL · find 집계</span>
+      </figcaption>
+    </figure>
+
+    <p>
+      선택지는 두 개뿐이고, 지금은 둘 다 아닌 최악의 조합이다.
+      <strong>보존해서 자산으로 만들거나, 사이트맵에서 빼서 손실을 멈추거나</strong> 해야 한다.
+      브리핑 한 편은 수 KB짜리 HTML이다. 보존 비용은 사실상 0이다.
+    </p>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 03 ============ -->
+  <section id="s3">
+    <div class="sev structural">구조 · 이미 벌어진 일</div>
+    <h2><span class="n">03</span>전환은 이미 끝났다. 선언만 안 했을 뿐이다</h2>
+
+    <p class="lede">
+      "서비스 구조를 엎어야 하나"라고 물었는데, <em>이미 엎어졌다</em>.
+      코드가 그렇게 말하고 있다.
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <thead>
+          <tr><th>신호</th><th>측정값</th><th>의미</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>홈 <code>/</code> 의 목적지</td>
+            <td class="num">301 → /stocks/</td>
+            <td>브리핑은 더 이상 현관이 아니다</td>
+          </tr>
+          <tr>
+            <td>사이트맵 구성</td>
+            <td class="num">종목 57 · 브리핑 33</td>
+            <td>브리핑 33개는 대부분 곧 404</td>
+          </tr>
+          <tr>
+            <td>영구 URL 수</td>
+            <td class="num">종목 66 · 브리핑 0</td>
+            <td>검색 자산은 종목 쪽에만 쌓인다</td>
+          </tr>
+          <tr>
+            <td>종목 홈 안의 브리핑</td>
+            <td class="num">카드 1줄</td>
+            <td>메인 제품에서 링크로 격하됨</td>
+          </tr>
+          <tr>
+            <td>랜딩 페이지</td>
+            <td class="num">삭제됨</td>
+            <td>CLAUDE.md 문서에는 아직 남아 있음</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="source">vercel.json 라우팅 · 라이브 301 응답 · web/sitemap.xml · web/stocks/index.html</span>
+
+    <p style="margin-top:1.6rem">
+      종목 대시보드는 실제로 잘 만들어져 있다. 41종목 특이신호를 규칙으로 선별하고,
+      각 종목에 "거래량이 급증하며 +14.1% 급등했어요" 같은 근거 문장을 붙인다.
+      수급·섹터·자금 지도·ETF까지 탭으로 묶여 있고 전부 실측이다.
+      <strong>이건 브리핑보다 훨씬 방어하기 쉬운 제품이다</strong> —
+      규칙으로 계산되니 환각이 개입할 여지가 구조적으로 없다.
+    </p>
+
+    <p>
+      그런데 조직의 무게중심은 아직 브리핑에 있다. 하루 26회 이상의 자동 실행,
+      10개 워크플로우, 34개 운영 규칙 섹션의 대부분이 브리핑을 지키기 위한 것이다.
+      <strong>제품은 옮겨갔는데 공장은 옮겨가지 않았다.</strong>
+    </p>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 04 ============ -->
+  <section id="s4">
+    <div class="sev critical">치명 · 개발 역량 소모</div>
+    <h2><span class="n">04</span>공학의 절반이 AI를 방어하는 데 쓰인다</h2>
+
+    <p class="lede">
+      7월 3일부터 8월 5일까지 5주 동안 <em>기록된 실사고만 17건</em>이다.
+      이틀에 한 번꼴이고, 대부분이 AI가 만들어낸 거짓을 사후에 잡아내는 싸움이다.
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <thead>
+          <tr><th>지표</th><th>규모</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>운영 규칙 문서</td><td class="num">1,008줄 · 34개 섹션</td></tr>
+          <tr><td>기록된 실사고 (7/03~8/05)</td><td class="num bad">17건</td></tr>
+          <tr><td>검증·수집 파이프라인 코드</td><td class="num">7,573줄</td></tr>
+          <tr><td>테스트 파일</td><td class="num">65개 · 7,862줄</td></tr>
+          <tr><td>최근 90일 사람 커밋 중 수정·가드 성격</td><td class="num">약 절반</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="source">docs/SERVICE_RULES.md · git log 분류 · wc -l 집계</span>
+
+    <p style="margin-top:1.6rem">
+      사고 목록을 읽어보면 패턴이 하나다. 익명 날조("B사가"), 방향 반대 서술,
+      숫자 없는 최상급("사상 최고치 경신"), 끝난 이벤트를 "예정"으로 표기, 41일 전 실적을 오늘 이슈로.
+      그때마다 정규식 게이트를 하나씩 덧댔고, <strong>다음 사고는 매번 그 정규식이 커버하지 못한
+      변형으로 뚫렸다</strong>.
+    </p>
+
+    <div class="quote">
+      <p style="margin:0">
+        "정규식 게이트를 하나 더 추가하려 할 때 먼저 물을 것 — 이건 입력 단계에서 걸러졌어야 하는 것 아닌가?
+        표현 공간은 무한하고 정규식은 유한하므로 이 경주는 계속 진다."
+      </p>
+      <cite>docs/SERVICE_RULES.md §31 · 2026-08-04</cite>
+    </div>
+
+    <p>
+      진단할 것도 없이 <strong>코드베이스가 이미 스스로 결론을 내려놨다</strong>.
+      §31은 근본 처방이 게이트가 아니라 수집 구조라고 적었다.
+      문서를 먼저 가져오고 LLM은 그 안에서 고르고 요약만 하게 하면 날조가 구조적으로 불가능해진다.
+      이미 <code>fetch_news_live.py</code>와 <code>fetch_ib_korea_views.py</code>는 그 방식이고,
+      실제로 이 둘에서는 같은 유형의 사고가 나지 않았다.
+    </p>
+
+    <p>
+      결정적 측정도 남아 있다. <code>google_search</code> 방식으로 뉴스를 받으면
+      <strong>응답에 출처가 0건</strong>이다. 근거 문서가 아예 없으니 반박할 수 있는 것만 걸러지고
+      나머지는 통과한다. 게이트를 아무리 늘려도 이 구조에서는 이긴 적이 없다.
+    </p>
+
+    <div class="verdict">
+      <p>
+        수집 구조를 바꾸면 사고율이 떨어지는 데서 그치지 않는다.
+        지금 방어에 묶인 공학 역량의 절반이 풀린다. 그게 이 진단에서 가장 큰 단일 이득이다.
+      </p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 05 ============ -->
+  <section id="s5">
+    <div class="sev critical">치명 · 재방문</div>
+    <h2><span class="n">05</span>다시 올 이유를 만드는 장치가 하나도 없다</h2>
+
+    <p class="lede">
+      "자주 방문하게 하려면 무엇을 더 해야 할까"에 대한 답은 명확하다.
+      지금은 <em>모든 방문자가 완전히 똑같은 화면을 본다</em>.
+    </p>
+
+    <p>
+      소스 전체를 검색했다. 관심종목, 즐겨찾기, watchlist, 로그인, 웹푸시, 알림 설정 —
+      <strong>전부 0건</strong>이다. PWA 껍데기(<code>sw.js</code>, <code>manifest.webmanifest</code>)는
+      있지만, 설치해서 홈 화면에 두고 매일 열 개인적인 이유가 없다.
+    </p>
+
+    <div class="t-scroll">
+      <table>
+        <thead>
+          <tr><th>재방문 장치</th><th>구현</th><th>현재 대체 수단</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>관심종목 / 즐겨찾기</td><td class="num bad">없음</td><td>매번 41종목 전체를 훑어야 함</td></tr>
+          <tr><td>가격·신호 알림</td><td class="num bad">없음</td><td>없음</td></tr>
+          <tr><td>웹푸시</td><td class="num bad">없음</td><td>없음</td></tr>
+          <tr><td>계정 / 로그인</td><td class="num bad">없음</td><td>없음</td></tr>
+          <tr><td>텔레그램 구독</td><td class="num">있음</td><td>전체 발송 · 개인화 없음</td></tr>
+          <tr><td>이메일 구독</td><td class="num">있음</td><td>전체 발송 · 개인화 없음</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <span class="source">web/assets/*.js · web/stocks/index.html · api/*.mjs 전체 grep</span>
+
+    <p style="margin-top:1.6rem">
+      텔레그램과 이메일이 있긴 하지만 모두에게 같은 내용을 보낸다.
+      개인 투자자가 매일 열어보는 앱의 공통점은 하나다 —
+      <strong>내가 가진 종목이 거기 있다</strong>. 지금 이 서비스에는 "내"가 없다.
+    </p>
+
+    <p>
+      다행히 이건 가장 고치기 쉬운 항목이다. 신호 계산은 이미 매일 돌고 있고,
+      41종목 각각에 "기관 5일 연속 순매수" 같은 이벤트가 이미 붙어 있다.
+      필요한 건 그 이벤트를 <em>사용자가 고른 종목으로 필터링해서 알려주는 것</em>뿐이다.
+      로그인 없이 로컬 저장만으로도 1차 버전은 가능하다.
+    </p>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 06 ============ -->
+  <section id="s6">
+    <div class="sev">주의 · 계측</div>
+    <h2><span class="n">06</span>사용자를 볼 수 없는 상태로 운영 중이다</h2>
+
+    <p>
+      GA4 태그(<code>G-PW9RHHFPM4</code>)는 브리핑과 종목 페이지에 붙어 있다.
+      그런데 서비스 안에서 그 숫자를 꺼내 쓰는 <code>/api/visitors</code>는
+      환경변수 미설정으로 <strong>503</strong>을 반환한다.
+    </p>
+
+    <p>
+      이 보고서가 사용량을 다루지 못한 이유도 그것이다.
+      적중률·URL 생존·사고 건수는 전부 측정했지만,
+      <strong>몇 명이 오는지, 다시 오는지, 어디서 이탈하는지는 이 저장소 안에서 알 수 없다</strong>.
+      GA4 콘솔에는 데이터가 쌓여 있을 테니, 다음 판단 전에 재방문율과 유입 경로부터 확인하는 편이 좋다.
+      위 다섯 개 진단은 그 숫자와 무관하게 성립하지만, 우선순위는 그 숫자가 정한다.
+    </p>
+    <span class="source">web 소스 GA 태그 검색 · https://doubleshot.space/api/visitors 라이브 호출 503</span>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 07 ============ -->
+  <section id="s7">
+    <h2><span class="n">07</span>그래서 경쟁력은 무엇인가</h2>
+
+    <p class="lede">
+      먼저 <em>경쟁력이 아닌 것</em>부터 정리해야 한다. 여기가 가장 냉정해야 할 대목이다.
+    </p>
+
+    <h3>해자가 아닌 것</h3>
+    <ul class="pts">
+      <li><strong>데이터.</strong> 이 서비스의 모든 시세·수급·리포트는 토스증권과 네이버 금융에서 온다.
+          그들이 원본을 갖고 있고, 사용자도 갖고 있고, 계좌도 갖고 있다. 데이터로는 이길 수 없다.</li>
+      <li><strong>속도.</strong> 증권사 앱이 더 빠르다.</li>
+      <li><strong>AI 요약.</strong> 2026년에 뉴스를 요약해주는 곳은 흔하다. 진입장벽이 사라진 기능이다.</li>
+      <li><strong>방향 예측.</strong> 진단 01이 보여준 대로, 아직 기준선을 이겼다는 증거가 없다.</li>
+    </ul>
+
+    <h3>실제로 희소한 것</h3>
+    <p>
+      코드를 읽으면서 가장 인상적이었던 건 제품이 아니라 <strong>규율</strong>이었다.
+      34개 운영 규칙 전부가 한 문장으로 수렴한다 —
+      "늦거나, 짧거나, 섹션이 비는 것은 감수할 수 있지만 틀린 것은 감수할 수 없다."
+      실제로 뉴스 수집이 두 번 실패한 날에는 이슈 섹션을 비운 채로 발행했다.
+    </p>
+
+    <p>
+      국내 개인 투자자용 AI 콘텐츠 중에 이 정도로 <strong>자기 출력을 불신하고 실측으로 덮어쓰는
+      파이프라인을 굴리는 곳은 사실상 없다</strong>. 대부분은 LLM이 뱉은 숫자를 그대로 내보낸다.
+      이건 진짜 차별점인데, <em>사용자에게는 완전히 보이지 않는다</em>.
+      1,000줄짜리 규칙 문서와 65개 테스트가 저장소 안에만 있다.
+    </p>
+
+    <p>
+      두 번째로 희소한 건 <strong>규칙 기반 신호</strong>다. 역행 하락·거래량 급증·수급 교차를
+      41종목에 매일 적용하고, 각각에 사람이 읽을 수 있는 근거 문장을 붙인다.
+      환각이 개입할 수 없는 구조이고, 증권사 앱은 이런 걸 한 화면에 정리해주지 않는다.
+    </p>
+
+    <div class="verdict">
+      <p>
+        경쟁력의 후보는 "AI가 시장을 예측한다"가 아니라
+        "틀린 숫자를 내보내느니 빈칸을 내보내는 유일한 서비스"다.
+        전자는 증명에 실패했고, 후자는 이미 갖고 있는데 아무도 모른다.
+      </p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <!-- ============ 08 ============ -->
+  <section id="s8">
+    <h2><span class="n">08</span>권고 — 엎지 말고 덜어내라</h2>
+
+    <p class="lede">
+      전면 재설계는 필요 없다. 비싼 부분은 이미 다 지어졌고 품질도 좋다.
+      필요한 건 <em>하나를 더하고 셋을 정리하는 것</em>이다. 영향이 큰 순서다.
+    </p>
+
+    <div class="rec">
+      <div class="rec-head">
+        <span class="rec-rank">01</span>
+        <span class="rec-title">뉴스 수집을 "문서 먼저, 요약 나중"으로 바꾼다</span>
+      </div>
+      <div class="rec-body">
+        <p>
+          §31이 이미 내린 결론을 실행하는 것이다. RSS나 검색 API로 실제 기사를 먼저 확보하고,
+          LLM에게는 그 목록 안에서 고르고 요약하는 일만 시킨다. 날짜·수치·사건이 실기사에서만
+          나오면 날조가 구조적으로 불가능해진다.
+        </p>
+        <p>
+          미국 브리핑부터 적용하면 된다. 이미 <code>fetch_ib_korea_views.py</code>에 검증된
+          구현 패턴이 있어서 새로 설계할 것도 없다. 성공하면 게이트 코드 상당수를 삭제할 수 있고,
+          그게 진짜 이득이다.
+        </p>
+        <div class="rec-meta">
+          <span>영향 · 사고율과 공학 부담 동시 감소</span>
+          <span>난이도 · 중</span>
+          <span>선례 있음</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec-head">
+        <span class="rec-rank">02</span>
+        <span class="rec-title">관심종목 하나만 넣는다</span>
+      </div>
+      <div class="rec-body">
+        <p>
+          재방문을 만드는 유일하게 빠진 조각이다. 종목 옆에 별표, 로컬 저장,
+          상단에 "내 종목" 섹션. 로그인도 서버도 필요 없다.
+        </p>
+        <p>
+          그다음 단계가 진짜 가치다. 이미 매일 계산하는 신호를 사용자가 고른 종목으로 필터링해
+          텔레그램으로 보낸다. "전체 브리핑"에서 "내 종목에 신호가 떴다"로 바뀌는 순간
+          알림의 성격이 완전히 달라진다.
+        </p>
+        <div class="rec-meta">
+          <span>영향 · 재방문의 유일한 해법</span>
+          <span>난이도 · 하</span>
+          <span>신호 계산은 이미 존재</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec-head">
+        <span class="rec-rank">03</span>
+        <span class="rec-title">예측을 기준선과 나란히 표시한다</span>
+      </div>
+      <div class="rec-body">
+        <p>
+          "적중률 66%"만 보여주는 건 지금 데이터로는 과장이다.
+          "항상 상승이라 답하면 61%, 우리는 66%, 표본 82건으로는 아직 유의하지 않음"을
+          그대로 내보내는 편이 낫다.
+        </p>
+        <p>
+          손해처럼 보이지만 반대다. 이 정직함 자체가 진단 07에서 말한 유일한 차별점의
+          가장 눈에 띄는 증거가 된다. 신뢰도 숫자는 보정될 때까지 화면에서 내리는 편이 낫다 —
+          지금은 정보가 아니라 노이즈다.
+        </p>
+        <div class="rec-meta">
+          <span>영향 · 차별점을 사용자에게 노출</span>
+          <span>난이도 · 하</span>
+          <span>데이터는 이미 있음</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec-head">
+        <span class="rec-rank">04</span>
+        <span class="rec-title">브리핑을 보존하거나, 사이트맵에서 뺀다</span>
+      </div>
+      <div class="rec-body">
+        <p>
+          지금은 최악의 조합이다. 크롤링을 유도해놓고 삭제해서 404를 쌓고 있다.
+          보존이 정답에 가깝다 — 파일 크기는 무시할 수준이고,
+          "2026년 8월 10일 코스피가 왜 올랐나"는 시간이 지나도 검색되는 질문이다.
+        </p>
+        <p>
+          보존하지 않기로 한다면 사이트맵에서 브리핑을 빼고 <code>noindex</code>를 건다.
+          어느 쪽이든 지금보다는 낫다.
+        </p>
+        <div class="rec-meta">
+          <span>영향 · 검색 자산 또는 손실 중단</span>
+          <span>난이도 · 하</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec-head">
+        <span class="rec-rank">05</span>
+        <span class="rec-title">계측을 복구하고, 그다음은 숫자로 정한다</span>
+      </div>
+      <div class="rec-body">
+        <p>
+          <code>/api/visitors</code>의 환경변수를 채우고 재방문율·유입 경로·이탈 지점을 본다.
+          위 네 가지는 사용량과 무관하게 옳지만, 그 이후의 우선순위는 추측이 아니라
+          데이터가 정해야 한다.
+        </p>
+        <div class="rec-meta">
+          <span>영향 · 이후 모든 판단의 전제</span>
+          <span>난이도 · 하</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>하지 말아야 할 것</h3>
+    <ul class="pts">
+      <li><strong>전면 재설계.</strong> 종목 대시보드·신호 엔진·실측 파이프라인은 잘 지어져 있다.
+          지금 엎으면 좋은 것까지 같이 버린다.</li>
+      <li><strong>브리핑 종류 추가.</strong> 이미 하루 세 편이고 사고의 대부분이 여기서 난다.
+          네 번째를 더할 자리가 아니다.</li>
+      <li><strong>게이트 하나 더 추가.</strong> §31이 직접 경고한 함정이다.
+          다음 정규식은 다음 변형에 또 뚫린다.</li>
+      <li><strong>예측 정확도를 올리려는 모델 튜닝.</strong> 방향 예측으로 시장을 이기는 건
+          이 서비스의 싸움터가 아니다. 82건으로 4.9%p를 방어하려 애쓰는 대신
+          예측의 역할 자체를 바꾸는 편이 낫다.</li>
+    </ul>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <h2><span class="n">—</span>한 문단 요약</h2>
+    <p class="lede" style="max-width:var(--measure)">
+      브리핑은 매일 세 편씩 만들어져 2주 뒤 사라지고, 그 핵심 약속인 방향 예측은
+      "항상 상승"보다 낫다는 증거가 아직 없으며, 유지 비용은 5주에 17건의 사고로 나타난다.
+      반면 종목 대시보드는 규칙 기반이라 환각이 없고, 영구 URL로 검색 자산이 쌓이고,
+      이미 홈이 그쪽을 가리키고 있다. <strong>할 일은 재설계가 아니라
+      무게중심을 실제 제품에 맞추는 것이다</strong> — 수집 구조를 바꿔 공학을 되찾고,
+      관심종목으로 재방문을 만들고, 예측은 정직하게 표시해 유일한 차별점을 드러내면 된다.
+    </p>
+  </section>
+
+  <footer class="end">
+    <p style="margin:0">
+      이 보고서의 모든 수치는 2026-08-10 기준으로 저장소 파일과 라이브 응답에서 직접 측정했다.
+      추정하거나 인용한 값은 없다. 사용량·재방문율 등 트래픽 지표는
+      <code>/api/visitors</code>가 503이라 측정하지 못했고, 그 사실을 진단 06에 기록했다.
+    </p>
+  </footer>
+
+  </main>
+</div>
+</div>
+</body>
+</html>
