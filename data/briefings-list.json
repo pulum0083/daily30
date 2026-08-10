@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-08-11": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-08-11/kospi/",
+        "headline": "오늘, 코스피 반도체 더 흔들릴까요?",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-08-10": {
       "kospi": {
         "state": "ready",
@@ -525,20 +544,6 @@
       }
     },
     "2026-06-30": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-29": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
