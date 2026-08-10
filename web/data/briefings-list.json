@@ -1,5 +1,28 @@
 {
   "slots": {
+    "2026-08-10": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-08-10/kospi/",
+        "headline": "SOX +2.56%인데 선물은 주춤 — 반도체가 다시 키를 쥐다",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "ready",
+        "url": "/briefings/2026-08-10/close/",
+        "headline": "외국인 매도 속에도 코스닥이 6%대 폭등한 이유",
+        "title": "6,299.66",
+        "price": "6,299.66",
+        "time": ""
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-08-07": {
       "kospi": {
         "state": "ready",
@@ -262,54 +285,30 @@
     },
     "2026-07-24": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-24/kospi/",
-        "headline": "왜 내릴까? — 나스닥 약세·VIX 급등 동시 부담",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:30"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-24/close/",
-        "headline": "코스피 -5.72% 급락, 어디까지 왔나요?",
-        "title": "6,690.62",
-        "price": "6,690.62",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-24/us/",
-        "headline": "유가가 100달러를 뚫고, AI 실적 회의론이 그 위에 얹혔다",
-        "title": "—",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-07-23": {
       "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-23/kospi/",
-        "headline": "구글 클라우드 +82% 확인 — HBM엔 순풍, 단기 심리는 혼조예요",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "중립",
-        "time": "07:30"
+        "state": "pending",
+        "scheduled_time": "07:30"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-23/close/",
-        "headline": "전선·2차전지·정유 동반 폭등 — 코스피 4%대 급등",
-        "title": "7,096.89",
-        "price": "7,096.89",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-23/us/",
-        "headline": "CPI는 예상보다 뜨겁고, VIX는 급등하고, 메모리는 주저앉았다",
-        "title": "—",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-07-22": {
@@ -537,20 +536,6 @@
       }
     },
     "2026-06-29": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-06-26": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
