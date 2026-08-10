@@ -205,6 +205,16 @@
         <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
       </div>
     </div>
+    <!-- 시장의 큰 흐름 — 최근 6개월 국면. regimeRender()가 채운다.
+         데이터가 없거나 5일 넘게 낡으면 JS가 is-hidden을 유지한다(§0·§20).
+         home-main(2fr) 안이라 PC에서도 전폭보다 좁게 렌더 — .regime-block에서 폭 대응 스타일 적용. -->
+    <div class="block regime-block is-hidden" id="regime-block" style="display:none">
+      <div class="block__h">
+        <span class="block__t"><span class="ic">🌊</span>시장의 큰 흐름</span>
+        <span class="block__s" id="regime-asof">—</span>
+      </div>
+      <div class="regime-body" id="regime-body"></div>
+    </div>
     <!-- ETF 신호 — /api/signals의 etf(lead·betting·sector)로 채운다. 데이터가 없으면 통째로 숨긴다.
          홈 4개 서브탭 중 ETF만 대응 블록이 없어 신설한 요약 블록이다(서브탭 IA 스펙). -->
     <div class="block etfsig-block" id="etf-signal" style="display:none">
@@ -230,16 +240,6 @@
       </div>
       <div class="etfsig-ext" id="etfsig-ext"></div>
       <a class="etfsig-more" onclick="go('etf-rank')">ETF 전체 보기 →</a>
-    </div>
-    <!-- 시장의 큰 흐름 — 최근 6개월 국면. regimeRender()가 채운다.
-         데이터가 없거나 5일 넘게 낡으면 JS가 is-hidden을 유지한다(§0·§20).
-         home-main(2fr) 안이라 PC에서도 전폭보다 좁게 렌더 — .regime-block에서 폭 대응 스타일 적용. -->
-    <div class="block regime-block is-hidden" id="regime-block" style="display:none">
-      <div class="block__h">
-        <span class="block__t"><span class="ic">🌊</span>시장의 큰 흐름</span>
-        <span class="block__s" id="regime-asof">—</span>
-      </div>
-      <div class="regime-body" id="regime-body"></div>
     </div>
     <!-- 탭에 없는 화면 진입점 — 서브탭에는 넣지 않되(스펙: 탭 넘침 방지) 홈에서는 도달 가능해야 한다.
          지금까지 이 두 화면은 홈에 링크가 없어 사실상 고립돼 있었다. -->
