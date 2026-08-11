@@ -45,6 +45,22 @@
 `fetch_news.py --type us`(기존 gemini 경로)를 호출한다. `--source rss`로 바꾸는 건
 런타임 코드 변경 없는 원라이너지만, 정규 발행에 앞서 수동 실행으로 하루 더 관찰한다.
 
+## 2.5단계 — 세션 라벨 + 배선 (2026-08-11)
+
+배선 전에 세션 라벨을 먼저 넣는다. 근거는 context-notes 2026-08-11 항목 참조 —
+RSS 경로가 `published_at`을 갖고도 세션 정보를 안 넘겨, 모델이 "직전 정규장 기사"를
+스스로 추론해야 하는 상태다(§24·§26이 반복 실패한 추론).
+
+- [ ] 라이브 스모크 재실행 → verify: 4건 수집, URL·발행일 검증 통과, 수치가 Toss 실측과 일치 ✅ (08-11 18:22)
+- [ ] `fetch_and_summarize_rss` 반환에 `news_session` 추가 (`session_label.prev_us_session` 재사용)
+- [ ] `call_claude._session_label_directive`에 us 분기 추가 → "뉴스는 직전 정규장, 프리마켓 아님" 명시
+- [ ] 테스트 — `news_session` 계산(월요일·휴일 다음날 포함), us 지시문 방출, kospi에는 미방출
+- [ ] `daily_report.yml` us-briefing job에 `--source rss`
+- [ ] verify: 전체 테스트 통과 + 정규 발행(21:15) 결과 확인
+
+**게이트 미구현은 의도적 유보** — context-notes에 이유를 적었다. 4단계 관찰에서
+실제 오표기가 나오면 그때 그 실패 모양에 맞춰 만든다.
+
 ## 3단계 — 출처 표시
 - [ ] catalyst에 `url` 보존 (`fetch_news.py` → `call_claude.py` → `generate_html.py`)
 - [ ] 이슈 카드에 출처 링크 렌더 → verify: 브라우저에서 링크 클릭해 실기사 도달
