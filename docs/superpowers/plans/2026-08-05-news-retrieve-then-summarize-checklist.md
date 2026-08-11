@@ -51,12 +51,13 @@
 RSS 경로가 `published_at`을 갖고도 세션 정보를 안 넘겨, 모델이 "직전 정규장 기사"를
 스스로 추론해야 하는 상태다(§24·§26이 반복 실패한 추론).
 
-- [ ] 라이브 스모크 재실행 → verify: 4건 수집, URL·발행일 검증 통과, 수치가 Toss 실측과 일치 ✅ (08-11 18:22)
-- [ ] `fetch_and_summarize_rss` 반환에 `news_session` 추가 (`session_label.prev_us_session` 재사용)
-- [ ] `call_claude._session_label_directive`에 us 분기 추가 → "뉴스는 직전 정규장, 프리마켓 아님" 명시
-- [ ] 테스트 — `news_session` 계산(월요일·휴일 다음날 포함), us 지시문 방출, kospi에는 미방출
-- [ ] `daily_report.yml` us-briefing job에 `--source rss`
-- [ ] verify: 전체 테스트 통과 + 정규 발행(21:15) 결과 확인
+- [x] 라이브 스모크 재실행 → verify: 4건 수집, URL·발행일 검증 통과, 수치가 Toss 실측과 일치 (08-11 18:22)
+- [x] `fetch_and_summarize_rss` 반환에 `news_session` 추가 (`session_label.prev_us_session` 재사용)
+- [x] `call_claude._session_label_directive`에 us 분기 추가 → "뉴스는 직전 정규장, 프리마켓 아님" 명시
+- [x] 테스트 8건 (`test_us_news_session.py`) — 세션 계산(월요일·휴일 다음날), us 지시문 방출, kospi 미오염
+- [x] `daily_report.yml` us-briefing job에 `--source rss`
+- [x] verify: 전체 718건 통과 + 지시문 엔드투엔드 렌더 확인. 커밋 `47abf8ee`
+- [ ] **오늘(08-11) 21:15 정규 발행 결과 확인** — 이슈에 실제 사건 인과가 들어왔는지, 세션 오표기 없는지
 
 **게이트 미구현은 의도적 유보** — context-notes에 이유를 적었다. 4단계 관찰에서
 실제 오표기가 나오면 그때 그 실패 모양에 맞춰 만든다.
