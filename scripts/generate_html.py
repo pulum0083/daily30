@@ -1135,7 +1135,14 @@ def build_scorecard(internal_type: str) -> dict:
         return "good" if p >= 70 else ("mid" if p >= 50 else "bad")
 
     r15 = scored[-15:]
+    r15_pct = pct(r15)
     cum_pct = pct(scored)
+    r15_base = _baseline_pct(r15)
+    cum_base = _baseline_pct(scored)
+    # 우위는 원본 실수 차이가 아니라 화면에 뜬 반올림값끼리의 차이로 구한다 —
+    # 사용자가 73 − 53을 암산했을 때 표시된 +20%p와 어긋나면 안 된다.
+    r15_edge = r15_pct - r15_base
+    cum_edge = cum_pct - cum_base
     hits = [b for b in scored if b["is_correct"]]
     hit_avg = (sum(abs(b.get("actual_change_pct") or 0) for b in hits) / len(hits)) if hits else 0
 
@@ -1146,18 +1153,21 @@ def build_scorecard(internal_type: str) -> dict:
     pending = sum(1 for b in typed if b.get("is_correct") is None)
     total = max(hit30 + miss30 + pending, 1)
 
-    # 월별 적중률 (최근 5개월)
+    # 월별 적중률 (최근 5개월) — 같은 달 기준선을 함께 실어 진 달이 드러나게 한다
     from collections import defaultdict
-    mon = defaultdict(lambda: [0, 0])
+    mon = defaultdict(list)
     for b in scored:
-        mkey = b["date"][:7]
-        mon[mkey][0] += 1
-        mon[mkey][1] += 1 if b["is_correct"] else 0
+        mon[b["date"][:7]].append(b)
     monthly = []
     for mkey in sorted(mon)[-5:]:
-        s, h = mon[mkey]
-        p = round(h / s * 100) if s else 0
-        monthly.append({"label": f"{int(mkey[5:7])}월", "pct": p, "cls": cls(p)})
+        rows_m = mon[mkey]
+        p = pct(rows_m)
+        monthly.append({
+            "label": f"{int(mkey[5:7])}월",
+            "pct": p,
+            "cls": cls(p),
+            "base_pct": _baseline_pct(rows_m),
+        })
 
     # 최근 결과 (맞은 날·틀린 날 그대로, 사실만)
     dows = ["월", "화", "수", "목", "금", "토", "일"]
@@ -1180,11 +1190,18 @@ def build_scorecard(internal_type: str) -> dict:
         })
 
     return {
-        "sc_recent15_pct": pct(r15),
-        "sc_recent15_cls": cls(pct(r15)),
+        "sc_recent15_pct": r15_pct,
+        "sc_recent15_cls": cls(r15_pct),
         "sc_cum_pct": cum_pct,
         "sc_cum_cls": cls(cum_pct),
         "sc_cum_count": len(scored),
+        # 기준선 = 매일 '상승'이라고만 답했을 때의 적중률
+        "sc_recent15_base": r15_base,
+        "sc_recent15_edge": r15_edge,
+        "sc_recent15_gcls": _edge_cls(r15_edge),
+        "sc_cum_base": cum_base,
+        "sc_cum_edge": cum_edge,
+        "sc_cum_gcls": _edge_cls(cum_edge),
         "sc_hit_avg": f"{hit_avg:.1f}%",
         "sc_hit": hit30, "sc_miss": miss30, "sc_pending": pending,
         "sc_hit_pct": round(hit30 / total * 100),
