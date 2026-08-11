@@ -1089,6 +1089,31 @@ def build_accuracy(internal_type: str) -> dict:
     }
 
 
+def _baseline_pct(rows: list) -> int:
+    """구간 내 실제 상승일 비율(%). '매일 상승이라고만 답하는 예측기'의 적중률이다.
+
+    우리 적중률과 반드시 같은 표본이어야 비교가 성립하므로, 미채점 항목은
+    여기서도 직접 걸러낸다(호출자 필터링에 의존하지 않는다).
+    상승 판정은 채점 로직(check_accuracy)이 기록한 actual_direction을 그대로 쓴다."""
+    scored = [b for b in rows if b.get("is_correct") is not None]
+    if not scored:
+        return 0
+    up = sum(1 for b in scored if b.get("actual_direction") == "상승")
+    return round(up / len(scored) * 100)
+
+
+def _edge_cls(edge: int) -> str:
+    """우위 폭(%p) → 게이지 채움 색. ±10%p를 경계로 둔다.
+
+    최근 15건 기준 1건이 6.7%p라 한 자릿수 차이는 표본 노이즈다. 경계를 0에 두면
+    +3%p 같은 사실상 무차이를 초록으로 칠해 없는 우위를 주장하게 된다."""
+    if edge >= 10:
+        return "good"
+    if edge <= -10:
+        return "bad"
+    return "flat"
+
+
 def build_scorecard(internal_type: str) -> dict:
     """예측 성적표(카드+더보기 모달) 컨텍스트. briefings.json의 실측 채점값(is_correct)만 사용.
     월별 적중률·최근 결과는 모두 실데이터 집계 — 사후 '복기 사유' 서술은 저장돼 있지 않으므로
