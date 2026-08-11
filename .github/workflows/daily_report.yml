@@ -255,10 +255,13 @@ jobs:
           mkdir -p data web/briefings
           python3 scripts/fetch_data.py --type us
 
-      - name: 📰 뉴스 요약 (Gemini Flash)
+      # RSS로 실기사를 먼저 모으고 Gemini는 그 목록에서 고르고 요약만 한다(계획 2.5단계).
+      # 날짜·출처가 기사에서 그대로 오므로 §31 같은 무출처 생성물이 구조적으로 불가능하다.
+      # 기존 google_search 경로는 08-05~10 네 거래일 연속 catalyst 0건이었다.
+      - name: 📰 뉴스 요약 (RSS 실기사 → Gemini 선별)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
-        run: python3 scripts/fetch_news.py --type us
+        run: python3 scripts/fetch_news.py --type us --source rss
 
       - name: Fetch analyst quotes
         if: steps.holiday.outputs.open == 'true'

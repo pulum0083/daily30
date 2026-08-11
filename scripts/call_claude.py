@@ -706,12 +706,42 @@ def load_market_data(briefing_type: str) -> dict:
         return json.load(f)
 
 
-def _session_label_directive(date_str: str, briefing_type: str) -> str:
+def _us_news_session_directive(date_str: str, news_summary: dict | None) -> str:
+    """미국 브리핑 — 뉴스가 다루는 세션을 못박는다.
+
+    미국 브리핑은 프리마켓(21:15 KST)에 나가는데 RSS로 모은 기사는 **직전 정규장 마감**을
+    다룬다. 그 등락을 "지금·프리마켓"으로 옮겨 쓰면 §26 재발이다(직전 정규장 종가를
+    프리마켓 실체결가인 양 실은 사고).
+
+    세션 날짜는 fetch_news가 계산해 `news_session`으로 넘긴 값만 쓴다 — 여기서 다시
+    계산하면 판정이 두 곳에 생긴다(§30).
+    """
+    session = (news_summary or {}).get("news_session") or {}
+    prev = session.get("date")
+    if not prev:
+        return ""
+    return (
+        f"## 뉴스 세션 기준 (중요)\n"
+        f"이 브리핑은 {date_str} **미국 프리마켓** 시간에 발행된다. 함께 제공된 뉴스"
+        f"(catalysts·catalyst_sources)는 모두 **직전 정규장({prev}) 마감**을 다룬 기사다.\n"
+        f"- 뉴스에서 온 등락·수치는 **\"직전 정규장에서\"**로 서술한다. "
+        f"**\"지금·현재·프리마켓에서\"라고 쓰지 않는다.**\n"
+        f"- 프리마켓 현재 상태는 뉴스가 아니라 **시장 데이터 실측**에서만 가져온다.\n\n"
+    )
+
+
+def _session_label_directive(date_str: str, briefing_type: str,
+                             news_summary: dict | None = None) -> str:
     """'간밤' 표기 지시문 — 월요일·휴일 다음날은 직전 미국장이 어제가 아니다.
 
     2026-07-27 실사고: 월요일 브리핑이 지난 금요일(7/24) 미국장을 "간밤"으로 서술.
     프롬프트만으로는 새므로 validate_analysis.fix_overnight_labels가 발행 직전 한 번 더 잡는다.
+
+    미국 브리핑은 성격이 다르다 — '간밤'이 아니라 '뉴스가 어느 세션 것인가'가 쟁점이라
+    별도 지시문으로 갈라 처리한다.
     """
+    if briefing_type == "us":
+        return _us_news_session_directive(date_str, news_summary)
     if briefing_type != "kospi":
         return ""
     try:
@@ -1339,7 +1369,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         ]
 
     user_content = f"오늘 날짜: {date_str}\n\n"
-    user_content += _session_label_directive(date_str, briefing_type)
+    user_content += _session_label_directive(date_str, briefing_type, news_summary)
     user_content += _calendar_tense_directive(analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:

@@ -24,6 +24,7 @@ from pathlib import Path
 import pytz
 
 import news_sources as ns
+from session_label import prev_us_session
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -1267,6 +1268,23 @@ _RSS_SELECT_PROMPT = """아래는 오늘({today}) 실제로 수집된 미국 시
 {{"selection": [{{"idx": 1, "text": "사건 → 영향", "ticker": "MU"}}]}}"""
 
 
+def _us_news_session(today: date) -> dict | None:
+    """미국 브리핑이 참조하는 뉴스 세션 — 직전 정규장.
+
+    미국 브리핑은 21:15 KST(= 미국 프리마켓)에 나가고 RSS 수집은 오늘 KST 발행분만 담는다.
+    그 기사들이 다룰 수 있는 최신 세션은 구조적으로 **직전 정규장 하나뿐**이라, 기사별로
+    세션을 나누지 않고 하루치 라벨 하나만 계산한다(서머타임 경계 계산을 들여도 얻는 게
+    없고 틀릴 여지만 는다 — 판단 근거는 계획 context-notes 2026-08-11).
+
+    이 값이 없으면 call_claude는 세션 지시문을 만들지 않는다 — 근거 없는 지시를
+    지어내지 않기 위해서다(§0).
+    """
+    prev = prev_us_session(today)
+    if prev is None:
+        return None
+    return {"date": prev.isoformat(), "label": "직전 정규장"}
+
+
 def fetch_and_summarize_rss(briefing_type: str) -> dict:
     """RSS로 실제 기사를 먼저 모으고, LLM은 그 목록에서 고르고 요약만 한다.
 
@@ -1313,13 +1331,19 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
     resolved = _drop_placeholder_entities(resolved)
     verified = _attach_verified_sources(resolved)
 
-    return {
+    out = {
         "key_indicators": [],
         "catalysts": [c["text"] for c in verified],
         "catalyst_sources": verified,   # 계획 3단계(출처 표시)에서 소비 — url·source·published_at
         "headlines": [],
         "market_sentiment": "neutral",
     }
+    # 이 기사들이 다루는 세션을 계산해 함께 넘긴다. 모델이 published_at에서 스스로
+    # 추론하게 두면 직전 정규장 값을 "지금 프리마켓"으로 쓰는 §26이 재발한다.
+    session = _us_news_session(datetime.now(KST).date())
+    if session:
+        out["news_session"] = session
+    return out
 
 
 def fetch_and_summarize(briefing_type: str) -> dict:
