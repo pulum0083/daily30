@@ -1,0 +1,197 @@
+<!doctype html>
+<!-- 성적표 카드에 "항상 상승" 기준선을 병기하는 3개 레이아웃 시안 (실측 데이터, 2026-08-11) -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>성적표 기준선 병기 — 레이아웃 시안</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--gold:#B7791F;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+  --up:#F74B53;--gold:#E0B252;
+  --s1:0 1px 4px rgba(0,0,0,.35);
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,system-ui,sans-serif;
+     background:var(--surface-soft);color:var(--ink);word-break:keep-all;padding:28px 16px 60px;}
+.wrap{max-width:420px;margin:0 auto;}
+.page-h{font-size:18px;font-weight:800;margin-bottom:6px;}
+.page-s{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:26px;}
+.page-s code{font-size:12px;background:var(--surface-inset);padding:1px 5px;border-radius:4px;}
+.opt-h{font-size:13px;font-weight:800;color:var(--primary);margin:34px 0 4px;}
+.opt-d{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:12px;}
+
+/* ── 실제 style.css의 성적표 카드 규칙 (1180~1193줄) 그대로 ── */
+.sc-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;padding:14px 16px 4px;}
+.sc-card__h{font-size:12px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.sc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+.sc-stats{display:flex;gap:0;margin-bottom:10px;}
+.sc-stat{flex:1;text-align:center;}
+.sc-stat+.sc-stat{border-left:1px solid var(--hairline);}
+.sc-stat__v{font-size:19px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);}
+.sc-stat__v.good{color:#16A34A;}.sc-stat__v.mid{color:#D97706;}.sc-stat__v.bad{color:var(--up);}
+.sc-stat__l{font-size:10px;color:var(--muted);margin-top:4px;}
+.sc-bar{height:5px;border-radius:999px;display:flex;gap:2px;overflow:hidden;margin:12px 0 4px;}
+.sc-bar i{display:block;border-radius:999px;}
+.sc-bar__h{background:#A2BFA5;}.sc-bar__m{background:#C8AAAA;}.sc-bar__p{background:var(--hairline);}
+.sc-card__cta{width:100%;margin-top:10px;padding:11px 0;border-top:1px solid var(--hairline);font-size:12px;font-weight:800;color:var(--primary);display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;font-family:inherit;}
+
+/* ── A안: 각 칸 아래 기준선 한 줄 ── */
+.scb-base{font-size:10px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums;}
+.scb-base b{font-weight:700;color:var(--muted);}
+.scb-edge{font-weight:800;}
+.scb-edge.pos{color:#16A34A;}
+.scb-edge.flat{color:var(--muted);}
+
+/* ── B안: 미니 게이지 (우리 vs 기준선 겹친 막대) ── */
+.scg{margin-top:7px;}
+.scg__track{height:4px;border-radius:999px;background:var(--surface-inset);position:relative;overflow:visible;}
+.scg__fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#16A34A;}
+.scg__fill.flat{background:#9CA3AF;}
+.scg__mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+.scg__cap{font-size:9px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums;}
+
+/* ── C안: 카드 하단 한 문장 요약 ── */
+.scs{margin-top:12px;padding:9px 11px;background:var(--surface-inset);border-radius:var(--r-sm);
+     font-size:11px;line-height:1.65;color:var(--muted);}
+.scs b{color:var(--ink);font-weight:700;}
+.scs .pos{color:#16A34A;font-weight:800;}
+.scs .flat{color:var(--ink);font-weight:800;}
+
+.note{margin-top:14px;font-size:11px;color:var(--muted);line-height:1.7;}
+.legend{display:flex;gap:14px;margin-top:9px;font-size:10px;color:var(--muted);align-items:center;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.legend i{display:block;width:14px;height:4px;border-radius:999px;background:#16A34A;}
+.legend i.mk{width:2px;height:10px;border-radius:0;background:var(--ink);opacity:.55;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-h">성적표 카드 — 기준선 병기 시안</div>
+  <p class="page-s">
+    코스피 브리핑 본문의 <code>_scorecard.html</code> 카드예요. 숫자는 전부
+    <code>data/briefings.json</code> 실측(채점 80건, 2026-04-07~08-05)입니다 —
+    최근 15건 우리 73% / 기준선 53%, 누적 80건 우리 65% / 기준선 62%.
+    <b>기준선 = 매일 "상승"이라고만 답했을 때의 적중률</b>이에요.
+  </p>
+
+  <!-- ══════════ 현재 ══════════ -->
+  <div class="opt-h">현재 (기준선 없음)</div>
+  <p class="opt-d">지금 라이브 화면. 65%가 잘한 건지 아닌지 판단할 근거가 없어요.</p>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat__v good">73%</div><div class="sc-stat__l">최근 15건</div></div>
+      <div class="sc-stat"><div class="sc-stat__v mid">65%</div><div class="sc-stat__l">누적 80건</div></div>
+      <div class="sc-stat"><div class="sc-stat__v">3.5%</div><div class="sc-stat__l">적중일 평균</div></div>
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+
+  <!-- ══════════ A안 ══════════ -->
+  <div class="opt-h">A안 — 칸마다 기준선 한 줄</div>
+  <p class="opt-d">각 적중률 칸 아래에 <b>기준선 값 + 차이</b>를 작게 붙여요. 구조 변경이 가장 적고, 세 번째 칸(적중일 평균)은 그대로 둡니다.</p>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat__v good">73%</div>
+        <div class="sc-stat__l">최근 15건</div>
+        <div class="scb-base">기준선 53% <span class="scb-edge pos">+20%p</span></div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v mid">65%</div>
+        <div class="sc-stat__l">누적 80건</div>
+        <div class="scb-base">기준선 62% <span class="scb-edge flat">+3%p</span></div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v">3.5%</div>
+        <div class="sc-stat__l">적중일 평균</div>
+        <div class="scb-base">&nbsp;</div>
+      </div>
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+  <p class="note">👍 변경 최소, 세로 공간 +16px. 👎 10px 글씨가 세 줄로 촘촘해져 좁은 화면에서 답답할 수 있어요.</p>
+
+  <!-- ══════════ B안 ══════════ -->
+  <div class="opt-h">B안 — 미니 게이지</div>
+  <p class="opt-d">칸마다 작은 막대를 두고 <b>세로선으로 기준선 위치</b>를 찍어요. "얼마나 앞섰나"가 숫자를 읽지 않아도 눈에 들어와요.</p>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat__v good">73%</div>
+        <div class="sc-stat__l">최근 15건</div>
+        <div class="scg">
+          <div class="scg__track">
+            <i class="scg__fill" style="width:73%"></i>
+            <i class="scg__mark" style="left:53%"></i>
+          </div>
+          <div class="scg__cap">기준선 53%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v mid">65%</div>
+        <div class="sc-stat__l">누적 80건</div>
+        <div class="scg">
+          <div class="scg__track">
+            <i class="scg__fill flat" style="width:65%"></i>
+            <i class="scg__mark" style="left:62%"></i>
+          </div>
+          <div class="scg__cap">기준선 62%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v">3.5%</div>
+        <div class="sc-stat__l">적중일 평균</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i></i>우리 적중률</span>
+      <span><i class="mk"></i>항상 "상승" 기준선</span>
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+  <p class="note">👍 우위 폭이 직관적 — 누적 칸의 막대와 세로선이 거의 붙어 있어 "차이 거의 없음"이 말없이 전달돼요. 👎 카드에 막대가 이미 하나(적중/오류/미결) 있어서 시각 요소가 늘어나요. 범례가 필요해요.</p>
+
+  <!-- ══════════ C안 ══════════ -->
+  <div class="opt-h">C안 — 카드 하단 한 문장</div>
+  <p class="opt-d">숫자 칸은 그대로 두고, 카드 아래에 <b>문장으로</b> 대비시켜요. 기준선이라는 개념 자체를 설명해야 하는 초면 사용자에게 가장 친절해요.</p>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat__v good">73%</div><div class="sc-stat__l">최근 15건</div></div>
+      <div class="sc-stat"><div class="sc-stat__v mid">65%</div><div class="sc-stat__l">누적 80건</div></div>
+      <div class="sc-stat"><div class="sc-stat__v">3.5%</div><div class="sc-stat__l">적중일 평균</div></div>
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <div class="scs">
+      같은 기간 매일 <b>"상승"이라고만</b> 답했다면 최근 15건 <b>53%</b>, 누적 <b>62%</b>였어요.
+      우리는 <span class="pos">+20%p</span> · <span class="flat">+3%p</span> 앞섰어요.
+    </div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+  <p class="note">👍 "기준선"이 뭔지 설명이 필요 없어요 — 문장이 곧 정의예요. 👎 세로 공간을 가장 많이 먹고(+52px), 숫자끼리의 1:1 대응이 A·B보다 약해요.</p>
+
+  <p class="note" style="margin-top:34px;border-top:1px solid var(--hairline);padding-top:16px;">
+    세 안 모두 <b>누적 칸에서 +3%p가 그대로 드러나요</b> — 의도한 결과예요.
+    유리한 구간만 보여주면 기준선을 붙이는 이유가 사라지니까요.
+    라이트/다크 모두 대응돼 있어요 (시스템 설정 따라감).
+  </p>
+</div>
+</body>
+</html>

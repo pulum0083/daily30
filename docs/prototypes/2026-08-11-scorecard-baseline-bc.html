@@ -1,0 +1,208 @@
+<!doctype html>
+<!-- 성적표 기준선 병기 B+C 조합안 2종 (게이지 위치·문장 배치 차이) — 실측 데이터, 2026-08-11 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>기준선 병기 — B+C 조합안</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--gold:#B7791F;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s2:0 8px 28px rgba(0,0,0,.14);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+  --up:#F74B53;--gold:#E0B252;
+  --s1:0 1px 4px rgba(0,0,0,.35);--s2:0 8px 28px rgba(0,0,0,.5);
+}}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,system-ui,sans-serif;
+     background:var(--surface-soft);color:var(--ink);word-break:keep-all;padding:28px 16px 60px;}
+.wrap{max-width:420px;margin:0 auto;}
+.page-h{font-size:18px;font-weight:800;margin-bottom:6px;}
+.page-s{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px;}
+.page-s code{font-size:12px;background:var(--surface-inset);padding:1px 5px;border-radius:4px;}
+.opt-h{font-size:13px;font-weight:800;color:var(--primary);margin:34px 0 4px;}
+.opt-d{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:12px;}
+.sub{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;margin:14px 0 7px;}
+
+/* ── style.css 성적표 카드 규칙 (1180~1193줄) 그대로 ── */
+.sc-card{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--s1);overflow:hidden;padding:14px 16px 4px;}
+.sc-card__h{font-size:12px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.sc-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+.sc-stats{display:flex;gap:0;margin-bottom:10px;}
+.sc-stat{flex:1;text-align:center;}
+.sc-stat+.sc-stat{border-left:1px solid var(--hairline);}
+.sc-stat__v{font-size:19px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink);}
+.sc-stat__v.good{color:#16A34A;}.sc-stat__v.mid{color:#D97706;}.sc-stat__v.bad{color:var(--up);}
+.sc-stat__l{font-size:10px;color:var(--muted);margin-top:4px;}
+.sc-bar{height:5px;border-radius:999px;display:flex;gap:2px;overflow:hidden;margin:12px 0 4px;}
+.sc-bar i{display:block;border-radius:999px;}
+.sc-bar__h{background:#A2BFA5;}.sc-bar__m{background:#C8AAAA;}.sc-bar__p{background:var(--hairline);}
+.sc-card__cta{width:100%;margin-top:10px;padding:11px 0;border-top:1px solid var(--hairline);font-size:12px;font-weight:800;color:var(--primary);display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;font-family:inherit;}
+
+/* ── B: 미니 게이지 ── */
+.scg{margin-top:7px;}
+.scg__track{height:4px;border-radius:999px;background:var(--surface-inset);position:relative;}
+.scg__fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:#16A34A;}
+.scg__fill.flat{background:#9CA3AF;}
+.scg__mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+.scg__cap{font-size:9px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums;}
+.legend{display:flex;gap:14px;margin-top:9px;font-size:10px;color:var(--muted);align-items:center;justify-content:center;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.legend i{display:block;width:14px;height:4px;border-radius:999px;background:#16A34A;}
+.legend i.mk{width:2px;height:10px;border-radius:0;background:var(--ink);opacity:.55;}
+
+/* ── C: 문장 ── */
+.scs{margin-top:12px;padding:9px 11px;background:var(--surface-inset);border-radius:var(--r-sm);
+     font-size:11px;line-height:1.65;color:var(--muted);}
+.scs b{color:var(--ink);font-weight:700;}
+.scs .pos{color:#16A34A;font-weight:800;}
+.scs .flat{color:var(--ink);font-weight:800;}
+
+/* ── 모달 목업 ── */
+.modal-mock{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);
+            box-shadow:var(--s2);padding:18px 16px;position:relative;}
+.modal-mock__tag{position:absolute;top:-9px;left:14px;background:var(--primary);color:#fff;
+                 font-size:9px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.04em;}
+.modal-mock__t{font-size:15px;font-weight:800;margin-bottom:12px;}
+.sc-modal-sec{font-size:12px;font-weight:800;color:var(--ink);margin:18px 0 10px;}
+.sc-mrate{display:grid;gap:7px;}
+.sc-mrate__row{display:flex;align-items:center;gap:10px;}
+.sc-mrate__m{font-size:12px;color:var(--muted);width:30px;flex-shrink:0;}
+.sc-mrate__bar{flex:1;height:6px;border-radius:999px;background:var(--surface-inset);overflow:hidden;}
+.sc-mrate__bar i{display:block;height:100%;border-radius:999px;}
+.sc-mrate__bar i.good{background:#16A34A;}.sc-mrate__bar i.mid{background:#D97706;}.sc-mrate__bar i.bad{background:var(--up);}
+.sc-mrate__v{font-size:12px;font-weight:700;width:34px;text-align:right;font-variant-numeric:tabular-nums;}
+.sc-mrate__b{font-size:11px;color:var(--muted);width:52px;text-align:right;font-variant-numeric:tabular-nums;}
+.sc-modal-note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:14px;}
+
+.note{margin-top:14px;font-size:11px;color:var(--muted);line-height:1.7;}
+.hr{border-top:1px solid var(--hairline);margin-top:34px;padding-top:16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-h">B + C 조합 — 2가지 배치</div>
+  <p class="page-s">
+    숫자는 전부 <code>data/briefings.json</code> 실측(채점 80건, 2026-04-07~08-05).
+    <b>기준선 = 매일 "상승"이라고만 답했을 때의 적중률.</b>
+    최근 15건 73% vs 53% / 누적 80건 65% vs 62%.
+  </p>
+
+  <!-- ══════════ 조합 1 ══════════ -->
+  <div class="opt-h">조합 1 — 카드에 게이지 + 문장 둘 다</div>
+  <p class="opt-d">게이지가 "얼마나 앞섰나"를 보여주고, 바로 아래 문장이 <b>"기준선"이라는 단어를 그 자리에서 정의</b>해요. 범례 없이 문장이 범례 역할을 겸해요.</p>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat__v good">73%</div>
+        <div class="sc-stat__l">최근 15건</div>
+        <div class="scg">
+          <div class="scg__track"><i class="scg__fill" style="width:73%"></i><i class="scg__mark" style="left:53%"></i></div>
+          <div class="scg__cap">기준선 53%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v mid">65%</div>
+        <div class="sc-stat__l">누적 80건</div>
+        <div class="scg">
+          <div class="scg__track"><i class="scg__fill flat" style="width:65%"></i><i class="scg__mark" style="left:62%"></i></div>
+          <div class="scg__cap">기준선 62%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v">3.5%</div>
+        <div class="sc-stat__l">적중일 평균</div>
+      </div>
+    </div>
+    <div class="scs">
+      세로선은 같은 기간 매일 <b>"상승"이라고만</b> 답했을 때의 성적이에요.
+      우리는 최근 <span class="pos">+20%p</span>, 누적 <span class="flat">+3%p</span> 앞섰어요.
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+  <p class="note">👍 카드 하나로 완결 — 모달을 안 열어도 맥락이 다 보여요. 👎 카드 높이 +68px. 요소가 게이지·문장·막대로 세 겹이라 밀도가 높아요.</p>
+
+  <!-- ══════════ 조합 2 ══════════ -->
+  <div class="opt-h">조합 2 — 카드엔 게이지만, 문장은 모달로 <span style="color:var(--muted);font-weight:700">(추천)</span></div>
+  <p class="opt-d">카드는 <b>게이지 + 범례</b>로 가볍게 두고, 설명 문장과 월별 기준선 대비는 이미 있는 모달로 내려요. 카드 높이 증가가 조합 1의 절반이에요.</p>
+
+  <div class="sub">카드</div>
+  <div class="sc-card">
+    <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+    <div class="sc-stats">
+      <div class="sc-stat">
+        <div class="sc-stat__v good">73%</div>
+        <div class="sc-stat__l">최근 15건</div>
+        <div class="scg">
+          <div class="scg__track"><i class="scg__fill" style="width:73%"></i><i class="scg__mark" style="left:53%"></i></div>
+          <div class="scg__cap">기준선 53%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v mid">65%</div>
+        <div class="sc-stat__l">누적 80건</div>
+        <div class="scg">
+          <div class="scg__track"><i class="scg__fill flat" style="width:65%"></i><i class="scg__mark" style="left:62%"></i></div>
+          <div class="scg__cap">기준선 62%</div>
+        </div>
+      </div>
+      <div class="sc-stat">
+        <div class="sc-stat__v">3.5%</div>
+        <div class="sc-stat__l">적중일 평균</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i></i>우리 적중률</span>
+      <span><i class="mk"></i>항상 "상승" 기준선</span>
+    </div>
+    <div class="sc-bar"><i class="sc-bar__h" style="width:62%"></i><i class="sc-bar__m" style="width:31%"></i><i class="sc-bar__p" style="width:6%"></i></div>
+    <button class="sc-card__cta">틀린 날까지 전부 공개해요 <span>→</span></button>
+  </div>
+
+  <div class="sub">CTA를 누르면 열리는 모달 (기존 모달 + 기준선)</div>
+  <div class="modal-mock">
+    <span class="modal-mock__tag">모달</span>
+    <div class="modal-mock__t">우리 예측 성적표</div>
+
+    <div class="scs" style="margin-top:0;">
+      같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>53%</b>, 누적 <b>62%</b>를 맞혀요.
+      코스피가 오르는 날이 더 많기 때문이에요. 그래서 <b>적중률만으로는 잘한 건지 알 수 없고</b>,
+      이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는
+      <span class="pos">+20%p</span> · <span class="flat">+3%p</span>였어요.
+    </div>
+
+    <div class="sc-modal-sec">월별 적중률 <span style="font-weight:600;color:var(--muted);font-size:11px;">(회색 = 기준선)</span></div>
+    <div class="sc-mrate">
+      <div class="sc-mrate__row"><span class="sc-mrate__m">4월</span><div class="sc-mrate__bar"><i class="mid" style="width:60%"></i></div><span class="sc-mrate__v">60%</span><span class="sc-mrate__b">기준 65%</span></div>
+      <div class="sc-mrate__row"><span class="sc-mrate__m">5월</span><div class="sc-mrate__bar"><i class="mid" style="width:62%"></i></div><span class="sc-mrate__v">62%</span><span class="sc-mrate__b">기준 67%</span></div>
+      <div class="sc-mrate__row"><span class="sc-mrate__m">6월</span><div class="sc-mrate__bar"><i class="good" style="width:71%"></i></div><span class="sc-mrate__v">71%</span><span class="sc-mrate__b">기준 62%</span></div>
+      <div class="sc-mrate__row"><span class="sc-mrate__m">7월</span><div class="sc-mrate__bar"><i class="good" style="width:70%"></i></div><span class="sc-mrate__v">70%</span><span class="sc-mrate__b">기준 52%</span></div>
+      <div class="sc-mrate__row"><span class="sc-mrate__m">8월</span><div class="sc-mrate__bar"><i class="good" style="width:75%"></i></div><span class="sc-mrate__v">75%</span><span class="sc-mrate__b">기준 50%</span></div>
+    </div>
+    <p class="sc-modal-note">※ 월별 기준선 수치는 배치 예시예요 — 실제 값은 구현 때 <code>briefings.json</code>에서 계산해요.</p>
+
+    <div class="sc-modal-sec">최근 예측 결과</div>
+    <p class="sc-modal-note" style="margin-top:0;">(기존 목록 그대로 — 변경 없음)</p>
+
+    <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
+  </div>
+  <p class="note">👍 카드가 가볍고, 설명이 필요한 사람만 모달에서 읽어요. 월별 기준선까지 얹으면 <b>"4·5월엔 기준선에 졌다"</b>는 사실도 드러나 정직성이 한 단계 올라가요. 👎 카드만 본 사람은 세로선이 뭔지 범례로만 알아요.</p>
+
+  <p class="note hr">
+    두 조합 모두 누적 칸의 막대와 세로선이 거의 붙어 있어요 — <b>+3%p라는 불리한 사실이 시각적으로 그대로 드러나요.</b>
+    라이트/다크 모두 대응 (시스템 설정 따라감).
+  </p>
+</div>
+</body>
+</html>
