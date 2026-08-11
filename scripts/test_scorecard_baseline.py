@@ -130,3 +130,44 @@ def test_card_omitted_below_five_scored(monkeypatch, tmp_path):
     """표본 5건 미만이면 카드 자체를 생략하는 기존 가드가 유지된다."""
     rows = [_row(f"2026-04-{i:02d}", True, True) for i in range(1, 5)]
     assert _ctx(monkeypatch, tmp_path, rows) == {}
+
+
+def _flat_fixture_rows():
+    """15건(≤15라 최근15=누적) — 상승 8/15=53%, 적중 9/15=60% → 우위 +7%p.
+
+    노이즈 범위(±10%p 미만)의 우위다. 이 기능의 핵심 주장이 '+3%p를 초록으로
+    칠하지 않는다'이므로, 작은 양의 우위가 실제로 flat으로 나오는지를
+    build_scorecard 통합 경로에서 잠근다."""
+    rows = []
+    for i in range(1, 16):
+        rows.append(_row(f"2026-06-{i:02d}", is_correct=(i <= 9), up=(i <= 8)))
+    return rows
+
+
+def _bad_fixture_rows():
+    """15건 — 상승 11/15=73%, 적중 5/15=33% → 우위 -40%p.
+
+    기준선(매일 상승 예측)보다 크게 못한 경우 — 게이지가 실제로 bad(빨강)로
+    떨어지는지를 잠근다."""
+    rows = []
+    for i in range(1, 16):
+        rows.append(_row(f"2026-07-{i:02d}", is_correct=(i <= 5), up=(i <= 11)))
+    return rows
+
+
+def test_gauge_color_flat_for_small_edge(monkeypatch, tmp_path):
+    """+7%p처럼 작은 우위는 good이 아니라 flat으로 표시돼야 한다."""
+    ctx = _ctx(monkeypatch, tmp_path, _flat_fixture_rows())
+    assert ctx["sc_cum_edge"] == 7
+    assert ctx["sc_cum_gcls"] == "flat"
+    assert ctx["sc_recent15_edge"] == 7
+    assert ctx["sc_recent15_gcls"] == "flat"
+
+
+def test_gauge_color_bad_for_negative_edge(monkeypatch, tmp_path):
+    """기준선보다 -40%p 뒤처지면 게이지가 bad로 표시돼야 한다."""
+    ctx = _ctx(monkeypatch, tmp_path, _bad_fixture_rows())
+    assert ctx["sc_cum_edge"] == -40
+    assert ctx["sc_cum_gcls"] == "bad"
+    assert ctx["sc_recent15_edge"] == -40
+    assert ctx["sc_recent15_gcls"] == "bad"
