@@ -1,10 +1,50 @@
 {
   "key_indicators": [],
-  "catalysts": [],
+  "catalysts": [
+    "호르무즈 협상 교착에 유가 5% 급등 → 필라델피아반도체 2.94% 하락",
+    "뉴욕증시, 유가 급등에 일제히 하락 마감 → 나스닥 0.32%↓",
+    "실적 모멘텀 소진에 반도체 조정 → 엔비디아·하이닉스 하락",
+    "2분기 기업 실적 호조, AI가 성장 동력 → 미국 증시 상승 견인"
+  ],
+  "catalyst_sources": [
+    {
+      "date": "2026-08-11",
+      "text": "호르무즈 협상 교착에 유가 5% 급등 → 필라델피아반도체 2.94% 하락",
+      "ticker": "",
+      "url": "https://www.jabon.co.kr/news/articleView.html?idxno=5830",
+      "source": "자본시장뉴스",
+      "published_at": "2026-08-11T08:00:00+09:00"
+    },
+    {
+      "date": "2026-08-11",
+      "text": "뉴욕증시, 유가 급등에 일제히 하락 마감 → 나스닥 0.32%↓",
+      "ticker": "",
+      "url": "https://www.newspim.com/news/view/20260811000029",
+      "source": "뉴스핌",
+      "published_at": "2026-08-11T05:19:00+09:00"
+    },
+    {
+      "date": "2026-08-11",
+      "text": "실적 모멘텀 소진에 반도체 조정 → 엔비디아·하이닉스 하락",
+      "ticker": "NVDA",
+      "url": "https://www.mediapen.com/news/view/1115500",
+      "source": "미디어펜",
+      "published_at": "2026-08-11T04:42:17+09:00"
+    },
+    {
+      "date": "2026-08-11",
+      "text": "2분기 기업 실적 호조, AI가 성장 동력 → 미국 증시 상승 견인",
+      "ticker": "",
+      "url": "https://finance.yahoo.com/markets/article/corporate-earnings-soared-in-q2-with-ai-as-the-growth-engine-chart-of-the-day-173507179.html",
+      "source": "Yahoo Finance",
+      "published_at": "2026-08-10T17:35:07+00:00"
+    }
+  ],
   "headlines": [],
   "market_sentiment": "neutral",
-  "grounding_failure": [
-    "no_grounding_sources"
-  ],
-  "generated_at": "2026-08-10T21:16:36.854845+09:00"
+  "news_session": {
+    "date": "2026-08-10",
+    "label": "직전 정규장"
+  },
+  "generated_at": "2026-08-11T21:16:31.758529+09:00"
 }
