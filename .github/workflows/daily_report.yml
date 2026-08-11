@@ -147,10 +147,6 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type kospi
 
-      - name: 🧹 15일 초과 브리핑 정리
-        if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/prune_briefings.py
-
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -288,10 +284,6 @@ jobs:
       - name: 🔄 latest.json 업데이트
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/update_latest.py --type us
-
-      - name: 🧹 15일 초과 브리핑 정리
-        if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/prune_briefings.py
 
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
@@ -450,10 +442,6 @@ jobs:
           DATE=$(TZ=Asia/Seoul date +'%Y-%m-%d')
           python3 scripts/call_claude.py --type kospi-close --date "$DATE" --render \
             ${{ github.event.inputs.force_refresh == 'true' && '--force-refresh' || '' }}
-
-      - name: 🧹 15일 초과 브리핑 정리
-        if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/prune_briefings.py
 
       - name: 📈 종목 스냅샷 빌드 (시세·52주)
         if: steps.holiday.outputs.open == 'true'
