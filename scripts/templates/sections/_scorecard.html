@@ -45,10 +45,13 @@
         <div class="sc-stat"><div class="sc-stat__v">{{ sc_hit_avg }}</div><div class="sc-stat__l">적중일 평균</div></div>
       </div>
 
-      <div class="sc-modal-sec">월별 적중률</div>
+      {# 기준선이라는 낯선 단어를 이 문장이 그 자리에서 정의한다 #}
+      <p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>{{ sc_recent15_base }}%</b>, 누적 <b>{{ sc_cum_base }}%</b>를 맞혀요. 코스피가 오르는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 <span class="{{ sc_recent15_gcls }}">{{ '%+d'|format(sc_recent15_edge) }}%p</span> · <span class="{{ sc_cum_gcls }}">{{ '%+d'|format(sc_cum_edge) }}%p</span>였어요.</p>
+
+      <div class="sc-modal-sec">월별 적중률 <span class="sc-modal-sec__sub">(오른쪽 = 기준선)</span></div>
       <div class="sc-mrate">
         {% for m in sc_monthly %}
-        <div class="sc-mrate__row"><span class="sc-mrate__m">{{ m.label }}</span><div class="sc-mrate__bar"><i class="{{ m.cls }}" style="width:{{ m.pct }}%"></i></div><span class="sc-mrate__v">{{ m.pct }}%</span></div>
+        <div class="sc-mrate__row"><span class="sc-mrate__m">{{ m.label }}</span><div class="sc-mrate__bar"><i class="{{ m.cls }}" style="width:{{ m.pct }}%"></i></div><span class="sc-mrate__v">{{ m.pct }}%</span><span class="sc-mrate__b">기준 {{ m.base_pct }}%</span></div>
         {% endfor %}
       </div>
 
