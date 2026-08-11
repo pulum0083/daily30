@@ -1191,6 +1191,17 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .sc-bar__h{background:#A2BFA5;}.sc-bar__m{background:#C8AAAA;}.sc-bar__p{background:var(--hairline);}
 .sc-card__cta{width:100%;margin-top:10px;padding:11px 0;border-top:1px solid var(--hairline);font-size:12px;font-weight:800;color:var(--primary);display:flex;align-items:center;justify-content:space-between;background:none;cursor:pointer;}
 .sc-card__cta:hover{opacity:.75;}
+/* 성적표 기준선 게이지 — 막대=우리 적중률, 세로선=항상 '상승' 기준선 */
+.scg{margin-top:7px;}
+.scg__track{height:4px;border-radius:999px;background:var(--surface-inset);position:relative;}
+.scg__fill{position:absolute;left:0;top:0;bottom:0;border-radius:999px;}
+.scg__fill.good{background:#16A34A;}.scg__fill.flat{background:#9CA3AF;}.scg__fill.bad{background:var(--up);}
+.scg__mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+.scg__cap{font-size:9px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums;}
+.sc-legend{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:9px;font-size:10px;color:var(--muted);}
+.sc-legend span{display:flex;align-items:center;gap:5px;}
+.sc-legend__bar{display:block;width:14px;height:4px;border-radius:999px;background:var(--muted);}
+.sc-legend__mk{display:block;width:2px;height:10px;background:var(--ink);opacity:.55;}
 /* 모달 본문 (info-modal 재사용) */
 .info-modal__body .sc-stats{margin:4px 0 6px;}
 .sc-modal-sec{font-size:12px;font-weight:800;color:var(--ink);margin:18px 0 10px;}

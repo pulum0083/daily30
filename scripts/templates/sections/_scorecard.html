@@ -3,9 +3,28 @@
 <div class="sc-card">
   <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
   <div class="sc-stats">
-    <div class="sc-stat"><div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div><div class="sc-stat__l">최근 15건</div></div>
-    <div class="sc-stat"><div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div><div class="sc-stat__l">누적 {{ sc_cum_count }}건</div></div>
+    <div class="sc-stat">
+      <div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div>
+      <div class="sc-stat__l">최근 15건</div>
+      {# 막대=우리 적중률, 세로선=매일 '상승'이라고만 답했을 때의 적중률 #}
+      <div class="scg">
+        <div class="scg__track"><i class="scg__fill {{ sc_recent15_gcls }}" style="width:{{ sc_recent15_pct }}%"></i><i class="scg__mark" style="left:{{ sc_recent15_base }}%"></i></div>
+        <div class="scg__cap">기준선 {{ sc_recent15_base }}%</div>
+      </div>
+    </div>
+    <div class="sc-stat">
+      <div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div>
+      <div class="sc-stat__l">누적 {{ sc_cum_count }}건</div>
+      <div class="scg">
+        <div class="scg__track"><i class="scg__fill {{ sc_cum_gcls }}" style="width:{{ sc_cum_pct }}%"></i><i class="scg__mark" style="left:{{ sc_cum_base }}%"></i></div>
+        <div class="scg__cap">기준선 {{ sc_cum_base }}%</div>
+      </div>
+    </div>
     <div class="sc-stat"><div class="sc-stat__v">{{ sc_hit_avg }}</div><div class="sc-stat__l">적중일 평균</div></div>
+  </div>
+  <div class="sc-legend">
+    <span><i class="sc-legend__bar"></i>우리 적중률</span>
+    <span><i class="sc-legend__mk"></i>항상 "상승" 기준선</span>
   </div>
   <div class="sc-bar">
     <i class="sc-bar__h" style="width:{{ sc_hit_pct }}%"></i><i class="sc-bar__m" style="width:{{ sc_miss_pct }}%"></i><i class="sc-bar__p" style="width:{{ sc_pending_pct }}%"></i>
