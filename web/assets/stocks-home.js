@@ -109,32 +109,43 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     if(link) link.setAttribute('href','/stocks/'+encodeURIComponent(code)+'/');
   }
 
+  /* 컨센서스 추이 스파크라인.
+     viewBox를 그리는 시점의 실제 픽셀 폭에 맞춘다 — 240 고정 뷰박스를 컨테이너(≈370px)에 늘리면
+     선·점·글자가 1.5배로 함께 부풀어 저해상도 이미지를 늘린 것처럼 보인다(frSpark가 픽셀 크기를
+     고정해둔 것과 같은 이유). 시작·끝 값은 SVG <text> 대신 HTML(.lw-tr-f)로 빼 카드 본문과
+     같은 폰트·크기로 렌더한다. 폭이 바뀌면 다시 그려야 하므로 hist를 캐시해둔다. */
+  var trendHist=null, trendRT;
   function drawTrend(hist){
-    var wrap=document.getElementById('lw-tr');
-    if(!wrap) return;
-    if(!hist||hist.length<20){ wrap.style.display='none'; return; }  // 데이터 부족 시 숨김
+    var wrap=document.getElementById('lw-tr'), svg=document.getElementById('lw-tr-svg');
+    if(!wrap||!svg) return;
+    if(hist!==undefined) trendHist=hist;
+    if(!trendHist||trendHist.length<20){ wrap.style.display='none'; return; }  // 데이터 부족 시 숨김
     wrap.style.display='';
-    var p=hist.map(function(h){return h.value;});
-    var W=240,H=60,PT=8,PB=14,PL=4,PR=4;
+    var p=trendHist.map(function(h){return h.value;});
+    var W=Math.round(svg.clientWidth)||240,H=54,PT=7,PB=7,PL=4,PR=4;
     var mn=Math.min.apply(null,p),mx=Math.max.apply(null,p),span=(mx-mn)||1;
     var X=function(i){return PL+(W-PL-PR)*(i/(p.length-1));};
     var Y=function(v){return PT+(H-PT-PB)*(1-(v-mn)/span);};
     var line=p.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' ');
     var rising=p[p.length-1]>=p[0];
-    var col=rising?'#E03131':'#2775ED', fill=rising?'rgba(224,49,49,.12)':'rgba(39,117,237,.12)';
-    var base=H-PB;
-    document.getElementById('lw-tr-svg').innerHTML=
-      '<polygon points="'+X(0)+','+base+' '+line+' '+X(p.length-1)+','+base+'" fill="'+fill+'"/>'+
-      '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linejoin="round"/>'+
-      '<circle cx="'+X(p.length-1)+'" cy="'+Y(p[p.length-1])+'" r="2.8" fill="'+col+'"/>'+
-      '<text x="'+PL+'" y="'+(H-3)+'" font-size="9" fill="#94A3B8" font-weight="600">'+num(p[0])+'</text>'+
-      '<text x="'+(W-PR)+'" y="'+(H-3)+'" font-size="9" fill="#94A3B8" font-weight="600" text-anchor="end">'+num(p[p.length-1])+'</text>';
+    var col=rising?'#E03131':'#2775ED', gid='lw-tr-fill-'+(rising?'up':'dn');
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.innerHTML=
+      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="'+col+'" stop-opacity=".15"/>'+
+      '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'+
+      '<polygon points="'+X(0).toFixed(1)+','+H+' '+line+' '+X(p.length-1).toFixed(1)+','+H+'" fill="url(#'+gid+')"/>'+
+      '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'+
+      '<circle cx="'+X(p.length-1).toFixed(1)+'" cy="'+Y(p[p.length-1]).toFixed(1)+'" r="2.6" fill="#fff" stroke="'+col+'" stroke-width="1.6"/>';
+    document.getElementById('lw-tr-s').textContent=num(p[0]);
+    document.getElementById('lw-tr-e').textContent=num(p[p.length-1]);
     var pct=(p[p.length-1]-p[0])/p[0]*100;
     var d=document.getElementById('lw-tr-d');
     d.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%'; d.style.color=col;
     var lb=document.getElementById('lw-tr-label');
     if(lb) lb.textContent='컨센서스 추이 · '+p.length+'거래일';
   }
+  window.addEventListener('resize',function(){ clearTimeout(trendRT); trendRT=setTimeout(function(){ drawTrend(); },140); });
 
   function renderNews(code){
     var el=document.getElementById('lw-news');
