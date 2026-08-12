@@ -152,3 +152,31 @@ test('cooled_keys/rising_keys가 없는 구 캐시 JSON은 raw 근사치로 폴�
   assert.match(els['regime-body'].innerHTML, /메모리 반도체/);
   assert.match(els['regime-body'].innerHTML, /AI 인프라/);
 });
+
+test('기간 라벨은 window_days에서 유도한다 — 문자열 하드코딩 금지', () => {
+  const { api, els } = load();
+  api.regimeRender({ ...SWAP, window_days: 5 });
+  const html = els['regime-body'].innerHTML;
+  assert.match(html, /최근 1주일 누적 기준/);
+  assert.match(html, /1주일 최고/);
+  assert.match(els['regime-asof'].textContent, /^최근 1주일 · /);
+  assert.doesNotMatch(html, /6개월/);
+});
+
+test('window_days가 126이면 기존 6개월 표기를 그대로 낸다', () => {
+  const { api, els } = load();
+  api.regimeRender({ ...SWAP, window_days: 126 });
+  assert.match(els['regime-body'].innerHTML, /최근 6개월 누적 기준/);
+  assert.match(els['regime-body'].innerHTML, /6개월 최고/);
+});
+
+test('window_days가 없는 구 캐시 JSON은 기간을 지어내지 않고 생략한다', () => {
+  const { api, els } = load();
+  const { window_days, ...noWin } = { ...SWAP, window_days: 5 };
+  api.regimeRender(noWin);
+  const html = els['regime-body'].innerHTML;
+  assert.match(html, /누적 기준/);
+  assert.doesNotMatch(html, /최근 .* 누적 기준/);
+  assert.doesNotMatch(html, /최근/);
+  assert.match(els['regime-asof'].textContent, /^08\/07 기준$/);
+});

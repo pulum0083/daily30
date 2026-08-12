@@ -3451,8 +3451,19 @@ if(passBtn){
       +'<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" '
       +'stroke-linejoin="round"/></svg>';
   }
-  function card(b,kind){
-    var high=b.is_high?'<span class="regime-pill">6개월 최고</span>':'';
+  /* 기간 라벨은 데이터의 window_days에서 만든다 — 문자열로 박아두면 창을 바꿨을 때
+     카드가 실제 판정 기준과 다른 기간을 광고한다(SERVICE_RULES §20 "상대 라벨은 저장하지
+     말고 렌더 시점에 계산한다"와 같은 처방). window_days가 없는 구 캐시 JSON에서는
+     기간 문구를 지어내지 않고 생략한다(§0). */
+  function winLabel(n){
+    n=+n||0;
+    if(n<=0) return '';
+    if(n<=5) return '1주일';
+    if(n<21) return Math.round(n/5)+'주';
+    return Math.round(n/21)+'개월';
+  }
+  function card(b,kind,wlab){
+    var high=b.is_high?'<span class="regime-pill">'+(wlab?wlab+' ':'')+'최고</span>':'';
     var sub=kind==='cool'
       ? '정점 '+fmtPct(b.peak)+' → 지금 '+fmtPct(b.cum)
       : '누적 '+fmtPct(b.cum);
@@ -3496,18 +3507,19 @@ if(passBtn){
       rising=g.filter(function(b){return b.is_high;})
                   .sort(function(a,b){return b.cum-a.cum;}).slice(0,2);
     }
+    var wlab=winLabel(d.window_days);
     var html='<div class="regime-hd">'+esc(d.headline)+'</div>'
-      +'<div class="regime-sub">최근 6개월 누적 기준'
+      +'<div class="regime-sub">'+(wlab?'최근 '+wlab+' ':'')+'누적 기준'
       +(d.regime_since?' · '+d.regime_since.slice(5).replace('-','/')+'부터':'')+'</div>';
     if(d.state==='swap' && cooled && rising.length){
       html+='<div class="regime-swap">'
-        +'<div class="regime-col is-cool"><div class="regime-lab">식는 중</div>'+card(cooled,'cool')+'</div>'
+        +'<div class="regime-col is-cool"><div class="regime-lab">식는 중</div>'+card(cooled,'cool',wlab)+'</div>'
         +'<div class="regime-arrow">→</div>'
         +'<div class="regime-col is-hot"><div class="regime-lab">뜨는 중</div>'
-        +rising.map(function(b){return card(b,'hot');}).join('')+'</div></div>';
+        +rising.map(function(b){return card(b,'hot',wlab);}).join('')+'</div></div>';
     } else {
       var top=g.slice().sort(function(a,b){return b.cum-a.cum;})[0];
-      if(top) html+='<div class="regime-single">'+card(top,'hot')+'</div>';
+      if(top) html+='<div class="regime-single">'+card(top,'hot',wlab)+'</div>';
     }
     if(d.korea){
       html+='<div class="regime-kr">🇰🇷 한국은 반도체 <b>'+fmtPct(d.korea.semi)
@@ -3515,7 +3527,7 @@ if(passBtn){
         +Math.abs(d.korea.gap).toFixed(0)+'%p</b></div>';
     }
     body.innerHTML=html;
-    if(asof&&d.session_date) asof.textContent='최근 6개월 · '
+    if(asof&&d.session_date) asof.textContent=(wlab?'최근 '+wlab+' · ':'')
       +d.session_date.slice(5).replace('-','/')+' 기준';
     box.classList.remove('is-hidden');
     box.style.display='';

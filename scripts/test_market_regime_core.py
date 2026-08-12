@@ -79,17 +79,26 @@ def test_daily_frames_flags():
     cums = {"cooled": [0.0, 30.0, 10.0], "high": [0.0, 1.0, 2.0]}
     fr = daily_frames(cums)
     last = fr[2]
-    assert last["cooled"]["is_cooled"] is True    # -20 <= -15
+    assert last["cooled"]["is_cooled"] is True    # gap -20 — 어떤 창 길이에서도 확실히 식음
     assert last["cooled"]["is_high"] is False
-    assert last["high"]["is_high"] is True        # gap 0 >= -3
+    assert last["high"]["is_high"] is True        # gap 0 — 정점 그 자체라 항상 신고점
     assert last["high"]["is_cooled"] is False
 
 
 def test_daily_frames_threshold_boundaries():
-    """경계값은 포함이다 — 정확히 -15.0이면 식음, -3.0이면 신고점."""
-    fr = daily_frames({"x": [0.0, 100.0, 85.0]})   # gap = -15.0
+    """경계값은 포함이다 — 정확히 COOL_THRESHOLD면 식음, HIGH_THRESHOLD면 신고점.
+
+    임계값을 리터럴로 박지 않는다. 창 길이를 바꾸면 두 임계값도 함께 재산출되는데
+    (market_regime_core 상단 주석), 리터럴이면 이 테스트가 '경계값 포함' 대신
+    엉뚱한 지점을 재게 된다 — 실제로 창을 126일→5일로 줄였을 때 그렇게 깨졌다.
+    """
+    from market_regime_core import COOL_THRESHOLD, HIGH_THRESHOLD
+
+    fr = daily_frames({"x": [0.0, 100.0, 100.0 + COOL_THRESHOLD]})
+    assert fr[2]["x"]["gap"] == COOL_THRESHOLD
     assert fr[2]["x"]["is_cooled"] is True
-    fr2 = daily_frames({"y": [0.0, 100.0, 97.0]})  # gap = -3.0
+    fr2 = daily_frames({"y": [0.0, 100.0, 100.0 + HIGH_THRESHOLD]})
+    assert fr2[2]["y"]["gap"] == HIGH_THRESHOLD
     assert fr2[2]["y"]["is_high"] is True
 
 

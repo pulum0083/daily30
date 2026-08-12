@@ -12,6 +12,12 @@ import pytz
 sys.path.insert(0, str(Path(__file__).parent))
 from market_regime_core import WINDOW_DAYS  # noqa: E402
 
+# 스파크라인 샘플 간격. 창 길이에서 유도한다 — 리터럴로 두면 창이 짧아졌을 때 조용히
+# 2~3점짜리 직선이 된다(126일 창 시절의 하드코딩 5가 5일 창에서 2점을 만들었다).
+# 126일에서는 5로 계산돼 기존 출력(26점)이 그대로 유지된다.
+SPARK_TARGET_POINTS = 25
+SPARK_STRIDE = max(1, WINDOW_DAYS // SPARK_TARGET_POINTS)
+
 KST = pytz.timezone("Asia/Seoul")
 CONFIG_PATH = Path(__file__).parent / "config" / "regime_baskets.json"
 OUT_PATH = Path(__file__).parent.parent / "web" / "data" / "market-regime.json"
@@ -72,7 +78,7 @@ def build(closes: dict, cfg: dict) -> dict:
             if cum:
                 cums[b["key"]] = cum
                 if i == len(cal) - 1:
-                    spark_by_key[b["key"]] = [round(v, 1) for v in list(reversed(cum[::-5]))]
+                    spark_by_key[b["key"]] = [round(v, 1) for v in list(reversed(cum[::-SPARK_STRIDE]))]
                     meta[b["key"]] = n
         frames.append(daily_frames(cums)[-1])
 

@@ -3,9 +3,17 @@ from __future__ import annotations
 
 from bisect import bisect_right
 
-WINDOW_DAYS = 126
-COOL_THRESHOLD = -15.0   # 정점 대비 이만큼 이하면 '식음'
-HIGH_THRESHOLD = -3.0    # 정점 대비 이 이내면 '신고점'
+# 창 길이와 두 임계값은 한 세트다 — 따로 바꾸지 말 것.
+# COOL/HIGH는 '창 전체 누적수익률의 정점 대비 %p'라 창 길이에 비례한다. 창만 줄이면 누적
+# 변동폭이 함께 줄어 임계값이 거의 발화하지 않는다(126일→5일로 줄였을 때 픽스처 기준 cooled
+# 발화율 0.156 → 0.004). 그래도 판정은 예외 없이 돌고 페이지도 정상 렌더돼, '교체 카드만 영영
+# 안 나오는' 형태로 조용히 죽는다. 창을 바꾸려면 반드시 임계값을 재산출하고
+# test_market_regime_backtest.py의 관찰 회귀 가드를 그대로 통과시킬 것(가드를 고치지 말 것).
+# 재산출 근거: docs/superpowers/plans/2026-08-12-regime-window-1week-context-notes.md
+WINDOW_DAYS = 5          # 1주일(영업일)
+COOL_THRESHOLD = -2.5    # 정점 대비 이만큼 이하면 '식음'
+HIGH_THRESHOLD = -0.5    # 정점 대비 이 이내면 '신고점'
+# 아래 셋은 영업일 수 단위라 창 길이와 무관하다 — 창을 바꿔도 그대로 둔다.
 HYST_WINDOW = 5          # 히스테리시스 창(영업일)
 HYST_MIN = 3             # 창 안에서 이만큼 이상 충족해야 인정
 MIN_RUN = 10             # 이보다 짧은 국면은 직전 국면에 흡수
@@ -36,7 +44,7 @@ def basket_cum(members: list, closes: dict, dates: list) -> tuple[list | None, i
     """바스켓의 창 내 누적수익률(%)과 실제 사용된 종목 수.
 
     창 시작일에 값이 없는 종목은 통째로 제외한다 — 신규 상장 종목을 섞으면
-    그 종목의 '상장 이후 수익률'이 6개월 수익률인 척 평균에 들어간다.
+    그 종목의 '상장 이후 수익률'이 창 전체 수익률인 척 평균에 들어간다.
     """
     if not dates:
         return None, 0
@@ -195,7 +203,7 @@ def headline(state, cooled, rising, cum, gap, names, order):
         if not rising:
             return None
         # 슬롯 C는 '신고점 집합'이 아니라 글로벌 전체에서 누적 1위를 고른다.
-        # 정점에서 내려왔어도 6개월 누적 1위면 여전히 주도주다 — 신고점만 보면
+        # 정점에서 내려왔어도 창 누적 1위면 여전히 주도주다 — 신고점만 보면
         # 누적 +12%짜리가 누적 +214%짜리를 제치고 '주도'로 불린다(백테스트에서 실제 발생).
         top = rank(list(cum), cum, True)[0]
         return f"{names[top]} 주도가 이어지고 있어요"
