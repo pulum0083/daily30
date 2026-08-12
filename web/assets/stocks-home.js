@@ -3440,16 +3440,45 @@ if(passBtn){
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
   function fmtPct(v){ return (v>=0?'+':'−')+Math.abs(v).toFixed(1)+'%'; }
   function cls(v){ return v>=0?'up':'dn'; }
+  /* 스파크라인은 2패스로 그린다 — 값은 여기서 껍데기에 실어두고, DOM에 넣은 뒤
+     paintSparks()가 실제 픽셀 폭을 재서 채운다.
+     이전 구현은 viewBox 200×34에 preserveAspectRatio="none"이라 렌더 시 가로 1.46배·
+     세로 0.82배로 비균등 확대돼 선 굵기가 방향에 따라 달라졌다(2px → 가로 2.9px·세로 1.6px).
+     문자열 조립 시점엔 아직 DOM에 없어 폭을 잴 수 없으므로 삽입 후 다시 칠한다. */
+  var SPARK_H=28;   // .regime-spark의 CSS 높이와 같아야 1:1로 그려진다
   function spark(vals,color){
     if(!vals||vals.length<2) return '';
+    return '<svg class="regime-spark" aria-hidden="true" data-spark="'
+      +vals.map(Number).join(',')+'" data-color="'+color+'"></svg>';
+  }
+  function paintSpark(svg){
+    var vals=(svg.getAttribute('data-spark')||'').split(',').map(Number).filter(function(v){return v===v;});
+    if(vals.length<2) return;
+    var color=svg.getAttribute('data-color')||'#94A3B8';
+    var W=Math.round(svg.clientWidth)||200, H=SPARK_H, PL=3, PR=3, PT=4, PB=4;
     var lo=Math.min.apply(null,vals), hi=Math.max.apply(null,vals);
     if(hi===lo) hi=lo+1;
-    var pts=vals.map(function(v,i){
-      return (3+i*194/(vals.length-1)).toFixed(1)+','+(31-(v-lo)/(hi-lo)*28).toFixed(1);
-    }).join(' ');
-    return '<svg viewBox="0 0 200 34" class="regime-spark" preserveAspectRatio="none">'
-      +'<polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="2" '
-      +'stroke-linejoin="round"/></svg>';
+    var X=function(i){ return PL+(W-PL-PR)*(i/(vals.length-1)); };
+    var Y=function(v){ return H-PB-(v-lo)/(hi-lo)*(H-PT-PB); };
+    var pts=vals.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ');
+    // 관측점이 적을 땐(1주일 창 = 6일) 점을 찍어 '성긴 선'이 아니라 '일별 관측치'로 읽히게 한다.
+    // 26점(6개월 창)에서는 점이 뭉개져 오히려 지저분하므로 생략한다.
+    var dots='';
+    if(vals.length<=10){
+      dots=vals.map(function(v,i){
+        return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="1.8" fill="'+color+'"/>';
+      }).join('');
+    }
+    var li=vals.length-1;
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.innerHTML='<polyline points="'+pts+'" fill="none" stroke="'+color
+      +'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>'+dots
+      +'<circle cx="'+X(li).toFixed(1)+'" cy="'+Y(vals[li]).toFixed(1)
+      +'" r="2.4" fill="#fff" stroke="'+color+'" stroke-width="1.6"/>';
+  }
+  function paintSparks(){
+    var list=document.querySelectorAll('#regime-body .regime-spark');
+    for(var i=0;i<list.length;i++) paintSpark(list[i]);
   }
   /* 기간 라벨은 데이터의 window_days에서 만든다 — 문자열로 박아두면 창을 바꿨을 때
      카드가 실제 판정 기준과 다른 기간을 광고한다(SERVICE_RULES §20 "상대 라벨은 저장하지
@@ -3464,8 +3493,12 @@ if(passBtn){
   }
   function card(b,kind,wlab){
     var high=b.is_high?'<span class="regime-pill">'+(wlab?wlab+' ':'')+'최고</span>':'';
+    /* '식는 중'은 정점 대비 낙폭(gap) 한 값으로 말한다.
+       예전엔 '정점 X% → 지금 Y%'였는데, 누적이 창 시작 기준이라 창이 짧으면 러닝 정점이
+       그대로 0.0인 경우가 흔하다(1주일 창에서 7개 중 3개). 그때 '정점 +0.0% → 지금 −3.8%'로
+       찍혀 수치는 맞는데 읽히지 않았다. gap은 어떤 창 길이에서도 같은 의미로 읽힌다. */
     var sub=kind==='cool'
-      ? '정점 '+fmtPct(b.peak)+' → 지금 '+fmtPct(b.cum)
+      ? (wlab?wlab+' ':'')+'고점 대비 '+fmtPct(b.gap)
       : '누적 '+fmtPct(b.cum);
     return '<div class="regime-item"><div class="regime-n">'+esc(b.name)+high+'</div>'
       +'<div class="regime-s">'+sub+'</div>'
@@ -3531,6 +3564,16 @@ if(passBtn){
       +d.session_date.slice(5).replace('-','/')+' 기준';
     box.classList.remove('is-hidden');
     box.style.display='';
+    // 반드시 블록을 보이게 만든 뒤에 칠한다 — display:none 상태에선 clientWidth가 0이라
+    // 폴백 폭으로 그려져 실제 렌더 크기와 어긋난다.
+    paintSparks();
+  }
+  // 폭이 바뀌면 viewBox가 실제 픽셀과 어긋나므로 다시 칠한다(값은 data-spark에 남아 있다).
+  var sparkRT;
+  if(typeof window.addEventListener==='function'){
+    window.addEventListener('resize',function(){
+      clearTimeout(sparkRT); sparkRT=setTimeout(paintSparks,140);
+    });
   }
   function regimeLoad(){
     fetch('/data/market-regime.json',{cache:'no-store'})

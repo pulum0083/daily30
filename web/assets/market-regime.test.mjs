@@ -180,3 +180,29 @@ test('window_days가 없는 구 캐시 JSON은 기간을 지어내지 않고 생
   assert.doesNotMatch(html, /최근/);
   assert.match(els['regime-asof'].textContent, /^08\/07 기준$/);
 });
+
+test('스파크라인은 값을 data-spark에 실어 2패스로 그린다 — 비균등 확대 금지', () => {
+  const { api, els } = load();
+  api.regimeRender({ ...SWAP, window_days: 5 });
+  const html = els['regime-body'].innerHTML;
+  // preserveAspectRatio="none"은 가로/세로 배율을 따로 먹여 선 굵기를 방향별로 다르게 만든다.
+  assert.doesNotMatch(html, /preserveAspectRatio/);
+  assert.doesNotMatch(html, /viewBox="0 0 200 34"/);
+  assert.match(html, /data-spark="0,50,142,89"/);
+  assert.match(html, /data-color="#2775ED"/);   // 식는 중 = 파랑
+  assert.match(html, /data-color="#E03131"/);   // 뜨는 중 = 빨강
+});
+
+test("'식는 중' 카드는 고점 대비 낙폭 한 값으로 말한다 — '정점 +0.0%' 방지", () => {
+  const { api, els } = load();
+  // 창이 짧으면 러닝 정점이 그대로 0.0인 경우가 흔하다(누적이 창 시작 기준이라).
+  api.regimeRender({ ...SWAP, window_days: 5, baskets: [
+    { key: 'memory', name: '메모리 반도체', scope: 'global', cum: -3.8, peak: 0.0,
+      gap: -3.8, is_high: false, spark: [0, -1.4, -3.1, -3.8] },
+    { key: 'ai_infra', name: 'AI 인프라', scope: 'global', cum: 1.5, peak: 1.5,
+      gap: 0, is_high: true, spark: [0, 0.2, 0.9, 1.5] }] });
+  const html = els['regime-body'].innerHTML;
+  assert.match(html, /1주일 고점 대비 −3\.8%/);
+  assert.doesNotMatch(html, /정점 \+0\.0%/);
+  assert.match(html, /누적 \+1\.5%/);           // '뜨는 중'은 누적 그대로
+});
