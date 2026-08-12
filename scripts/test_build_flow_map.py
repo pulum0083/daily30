@@ -224,11 +224,45 @@ def test_build_raises_when_rebuild_context_fails_despite_matching_date():
         assert "재구성" in str(e) or "히스토리" in str(e)
 
 
+def theme_bar_tolerance(n_dates, n_etfs):
+    """불변식②(일별 막대 합 vs 헤더)의 반올림 노이즈 상한(억).
+
+    헤더와 막대는 **같은 실수값을 서로 다르게 분할해 각각 반올림**한 결과다.
+
+      헤더 flow_eok = Σ_ETF round(ETF별 흐름)          — ETF 수만큼 반올림
+      막대 합       = Σ_날짜 round(그날 전 ETF 합)      — 날짜 수만큼 반올림
+
+    두 실수 합은 telescoping으로 정확히 같지만(build_etf_flows.daily_by_theme 참고),
+    반올림 지점이 달라 정수끼리는 최대 0.5×(날짜수 + ETF수)까지 벌어진다.
+
+    이 오차는 제거할 수 없다 — 개별 표시값은 전부 자기 실측의 최근접 정수이고,
+    둘을 동시에 정확히 맞추려면 최대잔여법으로 각 값을 실측에서 1억씩 밀어내야 한다.
+    표시값 자체의 정확도를 희생하는 쪽이 운영규칙 0에 어긋나므로 그렇게 하지 않는다.
+    (헤더를 round(Σ실수)로 바꾸는 방향도 검토했으나, 그러면 같은 오차가 그대로
+     불변식①로 옮겨갈 뿐이다 — ETF 행은 여전히 개별 반올림이라 합이 안 맞는다.)
+
+    실측(2026-08-12, 5일·테마당 2~109개 ETF): 최대 4억. 상한 대비 한참 아래다.
+    이 게이트가 노리는 진짜 고장(telescoping 파괴 = NAV 기준 오적용)은 실측 기준
+    17.9% 규모라 이 상한으로도 여전히 잡힌다.
+    """
+    return max(3, (n_dates + n_etfs + 1) // 2)
+
+
+def test_theme_bar_tolerance_scales_with_etf_count():
+    """상한이 ETF 수를 반영하는지 — 날짜 수만 보면 이 사고가 그대로 재발한다."""
+    # 실사고(2026-08-12) 재현: 5일·46개 ETF 테마에서 4억 어긋났다. 고정 ±3은 실패했다.
+    assert theme_bar_tolerance(5, 46) >= 4
+    # ETF가 늘면 상한도 늘어야 한다(반올림 지점이 그만큼 많아진다).
+    assert theme_bar_tolerance(5, 109) > theme_bar_tolerance(5, 46)
+    # 작은 테마에서 상한이 0으로 붕괴하지 않는다.
+    assert theme_bar_tolerance(5, 2) >= 3
+
+
 def test_build_real_data_invariants():
     """저장소 실데이터로 스펙의 불변식 2개를 확인한다.
 
       ① ETF 목록 합 + 그 외 합계 = 헤더 순유입액 (±3억)
-      ② 일별 막대 합 = 헤더 순유입액 (±3억)
+      ② 일별 막대 합 = 헤더 순유입액 (반올림 노이즈 상한 이내)
     """
     real = _load_real()
     if real is None:
@@ -243,11 +277,15 @@ def test_build_real_data_invariants():
         listed = sum(e["flow"] for e in t["etfs"]) + t["rest_flow"]
         assert abs(listed - t["flow_eok"]) <= 3, f"불변식① {t['theme']}: {listed} vs {t['flow_eok']}"
         bars = sum(t["daily"])
-        assert abs(bars - t["flow_eok"]) <= 3, f"불변식② {t['theme']}: {bars} vs {t['flow_eok']}"
+        tol = theme_bar_tolerance(len(out["dates"]), t["etf_count"])
+        assert abs(bars - t["flow_eok"]) <= tol, (
+            f"불변식② {t['theme']}: {bars} vs {t['flow_eok']} (허용 ±{tol})")
         assert len(t["daily"]) == len(out["dates"])
         assert len(t["etfs"]) <= m.TOP_ETFS_DETAIL
         for e in t["etfs"]:
             assert len(e["daily"]) == len(out["dates"])
+            # ETF 하나는 반올림 지점이 날짜수 + 자기 자신 1개뿐이라 상한이 0.5×(5+1)=3이다.
+            # 테마 단위(위 tol)와 달리 ETF 수가 안 곱해지므로 고정 ±3이 맞다.
             assert abs(sum(e["daily"]) - e["flow"]) <= 3, (
                 f"ETF 반올림 노이즈 초과 {e['name']}: {sum(e['daily'])} vs {e['flow']}")
 
