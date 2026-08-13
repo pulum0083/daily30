@@ -1410,6 +1410,65 @@ def _check_supply_scale(analysis, latest, warnings):
             )
 
 
+# ── 형식↔본문 불일치 ──────────────────────────────────────────────────────────
+# 각 형식의 '근거 섹션 본문'이 담기는 필드. 하나라도 차 있으면 섹션이 렌더된다.
+# generate_html.build_*_context()가 실제로 읽는 키와 1:1로 맞춘다 — 한쪽만 바뀌면 이 게이트가
+# 조용히 헛돈다. 형식을 추가할 땐 여기에도 등록할 것(test_registry_covers_every_rotation_format).
+FORMAT_BODY_FIELDS = {
+    "split": (),                                   # 형식별 필드 없음 — todays_view의 recap/outlook이 본문
+    "scenario": ("sc_left_items", "sc_right_items", "sc_summary"),
+    "why_what_so": ("why", "what", "so_what"),
+    "qa": ("qa_items",),
+    "signal": ("sig_items",),
+    "flow": ("flow_steps",),
+    "keynum": ("num_cards",),
+}
+FORMAT_FALLBACK = "split"
+
+
+def fix_format_payload_mismatch(analysis, corrections, warnings, blocks):
+    """찍힌 analysis_format의 본문이 비었으면 내용에 맞는 형식으로 내려앉힌다.
+
+    call_claude가 형식을 랜덤 추첨해 프롬프트로 지시한 뒤, 응답 내용과 무관하게
+    `analysis["analysis_format"] = chosen_format`으로 덮어쓴다. 모델이 지시한 형식의 필드를
+    내놓지 않으면 generate_html이 그 형식 템플릿을 골라 **빈 껍데기**를 렌더한다.
+
+    2026-08-13 실사고: keynum으로 찍혔으나 num_cards가 없어 `<div class="keynum-grid"></div>`가
+    그대로 발행됐다. 게다가 todays_view의 recap/outlook은 split일 때만 렌더되므로, 모델이
+    만들어둔 복기·관전 2단까지 함께 사라져 근거 본문이 통째로 빈 채 나갔다.
+
+    내용이 온전한데 포장만 어긋난 것이므로 발행을 막지 않고 split으로 내려앉힌다 — §0은
+    "짧거나 섹션이 비는 것은 감수하되 틀린 것은 감수하지 않는다"이고, 여기서 틀린 것은 없다.
+    다만 내려앉힐 내용조차 없으면 빈 브리핑이 나가므로 그때는 발행을 막는다.
+    """
+    fmt = analysis.get("analysis_format")
+    if not fmt:
+        return
+    fields = FORMAT_BODY_FIELDS.get(fmt)
+    if fields is None:
+        warnings.append(
+            f"analysis_format '{fmt}'가 FORMAT_BODY_FIELDS에 미등록 — 빈 섹션 검사를 건너뛴다. "
+            "형식을 추가했다면 이 표에도 등록할 것")
+        return
+    if not fields or any(analysis.get(f) for f in fields):
+        return
+
+    # split으로 내려앉혔을 때 실제로 보여줄 본문이 남는가.
+    tv = analysis.get("todays_view") or {}
+    has_core = bool(tv.get("recap") or tv.get("outlook") or analysis.get("key_drivers"))
+    if not has_core:
+        blocks.append(
+            f"analysis_format '{fmt}'의 본문({'/'.join(fields)})이 비었고 "
+            "todays_view·key_drivers도 없어 근거 섹션이 통째로 빈다 — 빈 브리핑 발행 차단")
+        return
+
+    analysis["analysis_format"] = FORMAT_FALLBACK
+    corrections.append(
+        f"analysis_format '{fmt}' → '{FORMAT_FALLBACK}': "
+        f"'{fmt}' 본문({'/'.join(fields)})이 비어 빈 섹션이 렌더될 상황 — "
+        "모델이 실제로 만든 todays_view 본문으로 렌더한다")
+
+
 # ── 검증 본체 ─────────────────────────────────────────────────────────────────
 def validate(analysis, latest, btype):
     """analysis를 검증·교정한다.
@@ -1429,6 +1488,10 @@ def validate(analysis, latest, btype):
             blocks.append(f"prediction.up_pct 비정상: {up!r}")
         if not pred.get("direction"):
             blocks.append("prediction.direction 누락")
+
+    # 1-a) 형식↔본문 불일치 — 빈 껍데기 섹션 발행 차단. 다른 교정보다 먼저 형식을 확정해야
+    #      이후 단계가 실제로 렌더될 필드를 대상으로 검사한다.
+    fix_format_payload_mismatch(a, corrections, warnings, blocks)
 
     # 1-b) 위로 한 줄 — 순수 정서적 문구만 허용. 숫자·%·종목 티커가 섞이면 통째로 제거.
     cl = a.get("comfort_line")
