@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-13T16:32:53.926168+09:00",
-  "session_date": "2026-08-12",
+  "generated_at": "2026-08-14T16:32:57.906182+09:00",
+  "session_date": "2026-08-13",
   "window_days": 5,
   "state": "swap",
   "headline": "주도주가 메모리 반도체에서 가치 경기민감, 배당 방어로 넘어가는 중이에요",
@@ -8,7 +8,6 @@
     "memory"
   ],
   "rising_keys": [
-    "ai_infra",
     "dividend_defensive",
     "value_cyclical"
   ],
@@ -18,17 +17,17 @@
       "key": "memory",
       "name": "메모리 반도체",
       "scope": "global",
-      "cum": 2.3,
-      "peak": 2.3,
+      "cum": 7.3,
+      "peak": 7.3,
       "gap": 0.0,
       "is_high": true,
       "spark": [
         0.0,
-        -1.7,
-        -1.7,
-        -3.9,
-        -2.5,
-        2.3
+        -0.0,
+        -2.2,
+        -0.7,
+        4.2,
+        7.3
       ],
       "members": [
         "MU",
@@ -41,17 +40,17 @@
       "key": "ai_infra",
       "name": "AI 인프라",
       "scope": "global",
-      "cum": 0.2,
-      "peak": 1.9,
-      "gap": -1.7,
+      "cum": -0.2,
+      "peak": 1.2,
+      "gap": -1.5,
       "is_high": false,
       "spark": [
         0.0,
-        0.7,
-        1.9,
-        1.5,
-        0.5,
-        0.2
+        1.2,
+        0.8,
+        -0.2,
+        -0.5,
+        -0.2
       ],
       "members": [
         "NVDA",
@@ -65,17 +64,17 @@
       "key": "consumer_platform",
       "name": "소비 플랫폼",
       "scope": "global",
-      "cum": -3.2,
+      "cum": -1.5,
       "peak": 0.0,
-      "gap": -3.2,
+      "gap": -1.5,
       "is_high": false,
       "spark": [
         0.0,
+        -0.1,
         -0.2,
-        -0.3,
-        -0.4,
-        -1.8,
-        -3.2
+        -1.6,
+        -3.0,
+        -1.5
       ],
       "members": [
         "AAPL",
@@ -88,17 +87,17 @@
       "key": "dividend_defensive",
       "name": "배당 방어",
       "scope": "global",
-      "cum": 0.7,
-      "peak": 0.7,
+      "cum": 1.6,
+      "peak": 1.6,
       "gap": 0.0,
       "is_high": true,
       "spark": [
         0.0,
-        -0.2,
-        0.1,
-        -0.0,
         0.4,
-        0.7
+        0.2,
+        0.6,
+        0.9,
+        1.6
       ],
       "members": [
         "SCHD",
@@ -117,10 +116,10 @@
       "is_high": true,
       "spark": [
         0.0,
-        0.4,
-        0.1,
+        -0.3,
+        1.4,
         1.8,
-        2.2,
+        1.9,
         2.3
       ],
       "members": [
@@ -134,17 +133,17 @@
       "key": "kr_semi",
       "name": "한국 반도체",
       "scope": "korea",
-      "cum": -3.0,
-      "peak": 0.0,
-      "gap": -3.0,
-      "is_high": false,
+      "cum": 11.4,
+      "peak": 11.4,
+      "gap": 0.0,
+      "is_high": true,
       "spark": [
         0.0,
-        -8.3,
-        -10.4,
-        -10.7,
-        -8.6,
-        -3.0
+        -2.3,
+        -2.6,
+        -0.4,
+        5.7,
+        11.4
       ],
       "members": [
         "005930.KS",
@@ -156,17 +155,17 @@
       "key": "kr_rest",
       "name": "한국 그 외",
       "scope": "korea",
-      "cum": 3.2,
-      "peak": 5.2,
-      "gap": -2.0,
-      "is_high": false,
+      "cum": 4.5,
+      "peak": 4.8,
+      "gap": -0.3,
+      "is_high": true,
       "spark": [
         0.0,
-        0.4,
-        3.2,
-        5.2,
-        2.0,
-        3.2
+        2.7,
+        4.8,
+        1.5,
+        2.8,
+        4.5
       ],
       "members": [
         "305720.KS",
@@ -178,8 +177,8 @@
     }
   ],
   "korea": {
-    "semi": -3.0,
-    "rest": 3.2,
-    "gap": -6.2
+    "semi": 11.4,
+    "rest": 4.5,
+    "gap": 6.9
   }
 }
