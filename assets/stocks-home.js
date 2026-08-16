@@ -619,7 +619,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
             // 페이지를 열어둔 채 07:30·09:00·15:30 경계를 넘으면 상태·폴링을 자동 전환
             var momTimer=null;
             function ensurePolling(){
-              if(momPhase()==='open'){ if(!momTimer) momTimer=setInterval(poll,45000); }
+              if(momPhase()==='open'){ if(!momTimer) momTimer=setInterval(poll,90000); }
               else if(momTimer){ clearInterval(momTimer); momTimer=null; }
             }
             ensurePolling();
@@ -740,7 +740,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var label={open:'정규장',pre:'프리장',post:'애프터장'}[sessionState];
     if(isLive && label){
       b.classList.remove('closed');
-      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 10초 갱신';
+      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 30초 갱신';
     }else{
       b.classList.add('closed');
       var dt='';
@@ -816,7 +816,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       setPoll(isLive ? POLL_LIVE : POLL_IDLE);
     });
   }
-  var pollId=null, POLL_LIVE=10000, POLL_IDLE=60000, curPoll=0;
+  var pollId=null, POLL_LIVE=30000, POLL_IDLE=60000, curPoll=0;
   function setPoll(ms){
     if(pollId && curPoll===ms) return;
     if(pollId) clearInterval(pollId);
@@ -1993,7 +1993,7 @@ if(passBtn){
     if(night) pollNight(); else pollDay();
   }
   poll();
-  setInterval(poll, 10000);
+  setInterval(poll, 30000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
@@ -2815,7 +2815,7 @@ if(passBtn){
   }
   function sbxSetLiveBadge(open){
     var el=document.getElementById('sbx-live'); if(!el) return;
-    if(open){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신'; }
+    if(open){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 60초 갱신'; }
     else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_asOfYmd||'')+' 종가 기준'; }
   }
   function sbxUpdateLive(){
@@ -2865,10 +2865,10 @@ if(passBtn){
       renderTodayLine();
       sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
       if(krMarketOpen()){
-        setInterval(pollVolTop,120000);
-        setInterval(loadSignals,120000); // 장중 2분마다 특이신호 자동 갱신
-        setInterval(sbxUpdateLive,30000); // 장중 30초마다 섹터 브라우저 실시간 시세 갱신
-        setInterval(sbxLoadIntraday,30000); // 장중 30초마다 섹터 브라우저 곡선(장중 1분봉) 갱신
+        setInterval(pollVolTop,300000);
+        setInterval(loadSignals,300000); // 장중 2분마다 특이신호 자동 갱신
+        setInterval(sbxUpdateLive,60000); // 장중 30초마다 섹터 브라우저 실시간 시세 갱신
+        setInterval(sbxLoadIntraday,120000); // 장중 30초마다 섹터 브라우저 곡선(장중 1분봉) 갱신
       }
     })
     .catch(function(){ pollVolTop(); });
@@ -2880,7 +2880,7 @@ if(passBtn){
   (function(){
     var b=document.getElementById('kospi-live-badge'); if(!b) return;
     var open=(typeof hubMarketOpen==='function')?hubMarketOpen():false;
-    if(open){ b.classList.remove('closed'); b.innerHTML='<span class="dot"></span>LIVE · 10초 갱신'; }
+    if(open){ b.classList.remove('closed'); b.innerHTML='<span class="dot"></span>LIVE · 60초 갱신'; }
     // 색은 CSS(.upd-badge.closed)에 맡긴다 — 인라인으로 박으면 토큰(--muted) 교정이 반영되지 않는다.
     else{ b.classList.add('closed'); b.innerHTML='<span class="dot"></span>장 마감 · 종가 기준'; }
   })();
