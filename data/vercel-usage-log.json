@@ -1,0 +1,101 @@
+{
+  "updated_at": "2026-08-17T01:34:34+09:00",
+  "rows": [
+    {
+      "date": "2026-08-17",
+      "checked_at": "2026-08-17T01:34:34+09:00",
+      "summary": {
+        "cacheable": 3,
+        "total": 8,
+        "regressed": [
+          "/api/data?f=briefings-list",
+          "/api/hl-night",
+          "/api/signals",
+          "/api/stocks-live?codes=005930",
+          "/api/vol-top"
+        ],
+        "failed": []
+      },
+      "endpoints": [
+        {
+          "path": "/api/kospi-live",
+          "status": 200,
+          "elapsed_ms": 1213,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/market",
+          "status": 200,
+          "elapsed_ms": 66,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "HIT",
+          "age": "11",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/stocks-live?codes=005930",
+          "status": 200,
+          "elapsed_ms": 1350,
+          "cache_control": "no-store",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "no-store"
+        },
+        {
+          "path": "/api/intraday?code=005930",
+          "status": 200,
+          "elapsed_ms": 1639,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/signals",
+          "status": 200,
+          "elapsed_ms": 3072,
+          "cache_control": "no-store",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "no-store"
+        },
+        {
+          "path": "/api/vol-top",
+          "status": 200,
+          "elapsed_ms": 1433,
+          "cache_control": "no-store",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "no-store"
+        },
+        {
+          "path": "/api/hl-night",
+          "status": 200,
+          "elapsed_ms": 1108,
+          "cache_control": "no-store",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "no-store"
+        },
+        {
+          "path": "/api/data?f=briefings-list",
+          "status": 200,
+          "elapsed_ms": 303,
+          "cache_control": "no-store, no-cache, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "no-store"
+        }
+      ],
+      "team": {
+        "plan": "hobby",
+        "soft_block": null,
+        "blocked": null
+      },
+      "note": "수정 배포 전 기준선 (fix/reduce-fluid-cpu 미적용)"
+    }
+  ]
+}
