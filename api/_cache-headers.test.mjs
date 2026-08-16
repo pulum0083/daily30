@@ -14,11 +14,15 @@ import assert from 'node:assert/strict';
 
 // 검증 대상 — 클라이언트가 주기적으로 폴링하는 읽기 전용 엔드포인트.
 // board.mjs는 폴링 대상이 아니고 POST 쓰기를 겸하므로 제외한다.
+// pollSec = 그 엔드포인트를 **가장 짧은 주기로 부르는 소비자**의 주기.
+// s-maxage가 이 값을 넘으면 화면이 약속한 신선도보다 낡은 값이 나가 표기가 거짓이 된다
+// (운영 규칙 0 · SERVICE_RULES §10 "표기와 스케줄의 1:1 대응").
+// 폴링 주기를 바꾸면 여기도 같이 바꿔야 한다 — 그게 이 테스트의 존재 이유다.
 const POLLED = [
-  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 20,  req: { query: { codes: '005930', us: '' } } },
-  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 10,  req: { query: {} } },
-  { name: 'signals',     mod: './signals.mjs',     pollSec: 120, req: { query: {} } },
-  { name: 'vol-top',     mod: './vol-top.mjs',     pollSec: 120, req: { query: {} } },
+  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 30,  req: { query: { codes: '005930', us: '' } } },
+  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 30,  req: { query: {} } },
+  { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
+  { name: 'vol-top',     mod: './vol-top.mjs',     pollSec: 300, req: { query: {} } },
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'news-live' } } },
 ];
 
@@ -67,7 +71,7 @@ for (const { name, mod, pollSec, req } of POLLED) {
     assert.ok(Number(m[1]) >= 1, `${name}의 s-maxage가 0이다: "${cc}"`);
   });
 
-  test(`${name}: s-maxage가 폴링 주기(${pollSec}초)를 넘지 않는다`, async () => {
+  test(`${name}: s-maxage가 최단 소비자 주기(${pollSec}초)를 넘지 않는다`, async () => {
     const res = await callHandler(mod, req);
     const cc = res.get('cache-control');
     const ttl = Number(/s-maxage=(\d+)/i.exec(cc)?.[1] ?? -1);

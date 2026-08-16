@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }).catch(function(){});
   }
   poll();
-  setInterval(poll, 20000);
+  setInterval(poll, 60000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
@@ -716,7 +716,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(hide);
   }
   poll();
-  setInterval(poll,30000);   // 문구의 '30초 갱신'과 반드시 일치시킬 것
+  setInterval(poll,60000);   // 화면 문구가 생기면 '60초'로 반드시 일치시킬 것
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 

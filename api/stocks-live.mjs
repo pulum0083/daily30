@@ -114,8 +114,9 @@ async function fetchOverseas(sym) {
 }
 
 export default async function handler(req, res) {
-  // 20초 주기 폴링 — s-maxage를 주기와 맞춰 동시 접속자를 함수 실행 1회로 합친다(체감 지연 0).
-  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=40');
+  // 최단 소비자는 홈 라이브 타일(30초). s-maxage를 그 주기와 맞춘다 — 더 길게 잡으면
+  // 화면이 약속한 신선도보다 낡은 값이 나가 표기가 거짓이 된다(운영 규칙 0·§10).
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
   try {
     const codes = (req.query?.codes || '').toString()
       .split(',').map(s => s.trim()).filter(c => /^\d{6}$/.test(c)).slice(0, 50);

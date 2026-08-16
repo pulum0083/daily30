@@ -109,10 +109,13 @@ function loadStocks({ now } = {}) {
     apiCalls: () => fetched.filter((u) => u.startsWith('/api/')),
     reset: () => { fetched.length = 0; },
     setHidden: (v) => { doc.hidden = v; },
-    tickEvery: (ms) => {
-      const it = intervals.find((i) => i.ms === ms);
-      assert.ok(it, `${ms}ms 폴링 인터벌이 등록되지 않았다 — 루프가 사라졌거나 주기가 바뀌었다`);
-      it.fn();
+    // 두 루프(peers·night-px)가 같은 주기라 ms로 구분할 수 없다 — 해당 주기의 인터벌을
+    // 전부 돌리고 몇 개를 돌렸는지 돌려준다.
+    tickAll: (ms) => {
+      const its = intervals.filter((i) => i.ms === ms);
+      assert.ok(its.length, `${ms}ms 폴링 인터벌이 하나도 없다 — 루프가 사라졌거나 주기가 바뀌었다`);
+      its.forEach((i) => i.fn());
+      return its.length;
     },
     fireVisibilityChange: () => {
       const ls = docListeners.filter((l) => l.ev === 'visibilitychange');
@@ -131,31 +134,33 @@ test('stocks.js가 스텁 DOM 환경에서 예외 없이 로드된다', () => {
   assert.ok(s.intervals.length > 0, '인터벌이 하나도 등록되지 않았다 — 스텁이 루프 진입을 막고 있다');
 });
 
-for (const [label, ms] of [['peers(20초)', 20000], ['night-px(30초)', 30000]]) {
-  test(`${label}: 탭이 보이지 않으면 API를 호출하지 않는다`, () => {
-    const s = loadStocks({ now: KR_CLOSED_EVENING });
-    s.reset();               // 로드 직후 1회 폴링은 정상 동작이므로 제외
-    s.setHidden(true);
-    s.tickEvery(ms);
-    assert.deepEqual(s.apiCalls(), [], `${label}이 백그라운드 탭에서 서버리스 함수를 깨웠다`);
-  });
+// peers·night-px 둘 다 60초로 통일됐다(레버 1 — 폴링 주기 완화). 주기가 같아 개별 식별이
+// 안 되므로 두 루프를 함께 검증한다. 개수(2)를 단언해 한쪽 루프가 사라지면 바로 드러나게 한다.
+const DETAIL_POLL_MS = 60000;
 
-  test(`${label}: 탭이 보이면 평소대로 API를 호출한다 (과잉 차단 방지)`, () => {
-    const s = loadStocks({ now: KR_CLOSED_EVENING });
-    s.reset();
-    s.setHidden(false);
-    s.tickEvery(ms);
-    assert.equal(s.apiCalls().length, 1, `${label}이 보이는 탭에서도 멈췄다 — 가드가 과하다`);
-  });
-}
+test('상세 폴링: 탭이 보이지 않으면 두 루프 모두 API를 호출하지 않는다', () => {
+  const s = loadStocks({ now: KR_CLOSED_EVENING });
+  s.reset();                 // 로드 직후 1회 폴링은 정상 동작이므로 제외
+  s.setHidden(true);
+  const n = s.tickAll(DETAIL_POLL_MS);
+  assert.equal(n, 2, 'peers·night-px 두 루프가 60초로 등록돼야 한다');
+  assert.deepEqual(s.apiCalls(), [], '백그라운드 탭에서 서버리스 함수를 깨웠다');
+});
+
+test('상세 폴링: 탭이 보이면 두 루프 모두 평소대로 호출한다 (과잉 차단 방지)', () => {
+  const s = loadStocks({ now: KR_CLOSED_EVENING });
+  s.reset();
+  s.setHidden(false);
+  s.tickAll(DETAIL_POLL_MS);
+  assert.equal(s.apiCalls().length, 2, '보이는 탭에서 폴링이 멈췄다 — 가드가 과하다');
+});
 
 test('탭 복귀 시 두 루프 모두 다음 인터벌을 기다리지 않고 즉시 받아온다', () => {
   const s = loadStocks({ now: KR_CLOSED_EVENING });
   s.setHidden(true);
-  s.tickEvery(20000);
-  s.tickEvery(30000);
+  s.tickAll(DETAIL_POLL_MS);
   s.reset();
   s.setHidden(false);
   s.fireVisibilityChange();
-  assert.equal(s.apiCalls().length, 2, '복귀 직후 최대 30초간 낡은 값이 남는다');
+  assert.equal(s.apiCalls().length, 2, '복귀 직후 최대 60초간 낡은 값이 남는다');
 });

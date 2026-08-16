@@ -473,7 +473,7 @@ test('go(): window.dsSubnavSync가 함수가 아니어도(미정의·문자열) 
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 라이브 타일 10초 폴링 — 백그라운드 탭 가드 (2026-08-16 Vercel 차단 사고 방지)
+// 라이브 타일 30초 폴링 — 백그라운드 탭 가드 (2026-08-16 Vercel 차단 사고 방지)
 //
 // 사고: Vercel 팀이 FAIR_USE_LIMITS_EXCEEDED(fluidCpuDuration)로 소프트 차단돼
 // doubleshot.space 전체가 402를 반환했다. 이 10초 폴링은 시장 시간·탭 포커스와 무관하게
@@ -506,8 +506,8 @@ function loadLivePolling({ now } = {}) {
     },
   });
 
-  const tick = intervals.find((i) => i.ms === 10000);
-  assert.ok(tick, '10초 폴링 인터벌이 등록되지 않았다 — 루프가 사라졌거나 주기가 바뀌었다');
+  const tick = intervals.find((i) => i.ms === 30000);
+  assert.ok(tick, '30초 폴링 인터벌이 등록되지 않았다 — 루프가 사라졌거나 주기가 바뀌었다');
 
   return {
     win,
@@ -557,4 +557,36 @@ test('폴링 가드: 숨김→복귀를 반복해도 폴링이 중복 등록되�
   p.reset();
   p.tick();
   assert.equal(p.apiCalls().length, 1, '인터벌이 중복 등록돼 호출이 배로 늘었다');
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 표기 ↔ 실제 주기 1:1 (SERVICE_RULES §10)
+//
+// 2026-08-17 실사고: #kospi-live-badge가 'LIVE · 10초 갱신'이라 적혀 있었는데 그 구역의
+// 실제 폴링은 pollMarket 60초였다. 10초 인터벌은 다른 위젯의 것이었고, 아무도 몇 달간
+// 눈치채지 못했다. 화면이 약속한 신선도보다 실제가 느리면 그건 §0 위반이다.
+//
+// 소스에 박힌 'N초 갱신' 문구의 N이 실제로 등록되는 setInterval 주기 중에 있는지 검사한다.
+// 분 단위 문구(뉴스 수집 주기 등)는 폴링 인터벌이 아니라 대상이 아니다.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('표기된 "N초 갱신"은 실제로 존재하는 폴링 주기여야 한다', () => {
+  const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
+
+  const labelled = [...src.matchAll(/(\d+)\s*초\s*갱신/g)].map((m) => Number(m[1]));
+  assert.ok(labelled.length, '초 단위 갱신 표기를 하나도 못 찾았다 — 정규식이 낡았는지 확인할 것');
+
+  const intervals = new Set(
+    [...src.matchAll(/setInterval\s*\([^,]+,\s*(\d+)\s*\)/g)].map((m) => Number(m[1]) / 1000),
+  );
+  // 변수로 주기를 넘기는 위젯(setPoll(POLL_LIVE))은 상수 선언에서 값을 거둔다.
+  for (const m of src.matchAll(/POLL_[A-Z]+\s*=\s*(\d+)/g)) intervals.add(Number(m[1]) / 1000);
+
+  for (const sec of labelled) {
+    assert.ok(
+      intervals.has(sec),
+      `'${sec}초 갱신'이라 표기했지만 ${sec}초 폴링이 없다 — 화면이 거짓 신선도를 약속한다. ` +
+      `실제 등록된 주기(초): ${[...intervals].sort((a, b) => a - b).join(', ')}`,
+    );
+  }
 });

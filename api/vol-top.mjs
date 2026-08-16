@@ -39,8 +39,9 @@ async function fetchVol(code, name, sector) {
 }
 
 export default async function handler(req, res) {
-  // 장중 120초 주기 폴링 — 주기의 절반으로 잡아 신선도 여유를 남긴다.
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  // 유일한 소비자가 홈 거래량 톱(300초)이지만, 처음 들어온 방문자가 보는 값이
+  // 지나치게 낡지 않도록 120초로 제한한다.
+  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
   try {
     const ETF_UNIVERSE = await loadEtfUniverse();
     const [stockRes, etfRes] = await Promise.all([

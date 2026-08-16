@@ -73,8 +73,8 @@ async function getAnchors(syms, closeTs) {
 }
 
 export default async function handler(req, res) {
-  // 10초 주기 폴링 — kospi-live와 같은 기준(주기 = s-maxage)으로 엣지에서 합친다.
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=20');
+  // 최단 소비자는 홈 야간 타일(30초). 상세 페이지 야간 추정가는 60초다.
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const r = await fetch(HL, {
