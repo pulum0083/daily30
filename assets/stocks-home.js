@@ -1982,12 +1982,19 @@ if(passBtn){
   }
   function poll(){
     if(!liveCodes.length) return;
+    // 보이지 않는 탭에서는 아무도 이 값을 보지 않는다 — 서버리스 함수만 깨운다.
+    // 이 루프는 시장 시간과 무관하게 24시간 돌아 탭 하나당 하루 8,640회를 쌓았고,
+    // 2026-08-16 Vercel 팀 차단(FAIR_USE_LIMITS_EXCEEDED / fluidCpuDuration)의 주된 소비원이었다.
+    // 복귀 시 아래 visibilitychange가 인터벌을 기다리지 않고 즉시 다시 받아오므로
+    // 사용자가 실제로 보는 화면의 신선도는 그대로다.
+    if(document.hidden) return;
     var night=!krOpen();
     setNight(night);
     if(night) pollNight(); else pollDay();
   }
   poll();
   setInterval(poll, 10000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
 /* ── 블록 8 (원본 index.html) ── */

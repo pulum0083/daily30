@@ -7,8 +7,9 @@
 //   실행하고 window.__layoutPhase로 꺼내 테스트한다. main.test.mjs와 같은 패턴.
 //
 // 검증 범위
-//   국면 판정(day / us_open / quiet)만. 실제 DOM 이동 순서는 스텁 환경에서 확인할 수 없어
-//   브라우저에서 별도 확인한다.
+//   ① 국면 판정(day / us_open / quiet). 실제 DOM 이동 순서는 스텁 환경에서 확인할 수 없어
+//      브라우저에서 별도 확인한다.
+//   ② 라이브 타일 10초 폴링의 백그라운드 탭 가드(2026-08-16 Vercel 차단 사고 방지).
 //
 // 실행: node --test web/assets/
 import { test } from 'node:test';
@@ -62,7 +63,7 @@ function loadWindow({ now, hooks } = {}) {
     // id별로 같은 엘리먼트를 돌려준다 — 렌더 결과(display·innerHTML)를 밖에서 확인하려면
     // 매 호출마다 새 스텁을 만들면 안 된다.
     getElementById: (id) => { if (!els.has(id)) els.set(id, mkEl()); return els.get(id); },
-    querySelector: () => mkEl(), querySelectorAll: () => [],
+    querySelector: () => mkEl(), querySelectorAll: h.querySelectorAll || (() => []),
     addEventListener: h.onDocListener || noop,
     createElement: () => mkEl(), createTextNode: () => ({}),
   };
@@ -469,4 +470,91 @@ test('go(): window.dsSubnavSync가 함수가 아니어도(미정의·문자열) 
     win.dsSubnavSync = bad;
     assert.doesNotThrow(() => win.go('sector'), `dsSubnavSync=${String(bad)} 케이스에서 예외 발생`);
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 라이브 타일 10초 폴링 — 백그라운드 탭 가드 (2026-08-16 Vercel 차단 사고 방지)
+//
+// 사고: Vercel 팀이 FAIR_USE_LIMITS_EXCEEDED(fluidCpuDuration)로 소프트 차단돼
+// doubleshot.space 전체가 402를 반환했다. 이 10초 폴링은 시장 시간·탭 포커스와 무관하게
+// 24시간 돌아 탭 하나당 하루 8,640회 서버리스 함수를 깨웠다.
+//
+// 보이지 않는 탭에서 값을 갱신해봐야 아무도 보지 않는다. 복귀 시 즉시 다시 받으므로
+// 사용자가 보는 화면의 신선도는 그대로다.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** 라이브 타일 폴링 루프를 스텁 환경에서 띄우고 조작 핸들을 돌려준다. */
+function loadLivePolling({ now } = {}) {
+  const intervals = [];
+  const docListeners = [];
+  const fetched = [];
+  // liveCodes는 #us-linked-widget의 타일에서 나온다 — 비어 있으면 poll()이 즉시 return해
+  // 테스트가 무의미하게 통과한다(가드가 없어도 fetch가 0건).
+  const tiles = ['005930', '000660'].map((code) => {
+    const t = mkEl();
+    t.getAttribute = (k) => (k === 'data-code' ? code : null);
+    return t;
+  });
+
+  const win = loadWindow({
+    now,
+    hooks: {
+      onInterval: (fn, ms) => { intervals.push({ fn, ms }); },
+      onDocListener: (ev, fn) => { docListeners.push({ ev, fn }); },
+      querySelectorAll: (sel) => (String(sel).includes('.us-tile[data-code]') ? tiles : []),
+      fetch: (url) => { fetched.push(String(url)); return Promise.reject(new Error('테스트 스텁')); },
+    },
+  });
+
+  const tick = intervals.find((i) => i.ms === 10000);
+  assert.ok(tick, '10초 폴링 인터벌이 등록되지 않았다 — 루프가 사라졌거나 주기가 바뀌었다');
+
+  return {
+    win,
+    apiCalls: () => fetched.filter((u) => u.startsWith('/api/')),
+    reset: () => { fetched.length = 0; },
+    setHidden: (v) => { win.document.hidden = v; },
+    tick: () => tick.fn(),
+    fireVisibilityChange: () => {
+      const ls = docListeners.filter((l) => l.ev === 'visibilitychange');
+      assert.ok(ls.length, 'visibilitychange 리스너가 없다 — 탭 복귀 시 즉시 복구되지 않는다');
+      ls.forEach((l) => l.fn());
+    },
+  };
+}
+
+const WEEKDAY_OPEN = kst('2026-07-28T10:00:00'); // 화요일 장중 — pollDay 경로
+
+test('폴링 가드: 탭이 보이지 않으면 API를 호출하지 않는다', () => {
+  const p = loadLivePolling({ now: WEEKDAY_OPEN });
+  p.reset();                 // 로드 직후 1회 폴링은 정상 동작이므로 제외
+  p.setHidden(true);
+  p.tick();
+  assert.deepEqual(p.apiCalls(), [], '백그라운드 탭에서 서버리스 함수를 깨웠다');
+});
+
+test('폴링 가드: 탭이 보이면 평소대로 API를 호출한다 (과잉 차단 방지)', () => {
+  const p = loadLivePolling({ now: WEEKDAY_OPEN });
+  p.reset();
+  p.setHidden(false);
+  p.tick();
+  assert.equal(p.apiCalls().length, 1, '보이는 탭에서 폴링이 멈췄다 — 가드가 과하다');
+});
+
+test('폴링 가드: 탭 복귀 시 다음 인터벌을 기다리지 않고 즉시 받아온다', () => {
+  const p = loadLivePolling({ now: WEEKDAY_OPEN });
+  p.setHidden(true);
+  p.tick();
+  p.reset();
+  p.setHidden(false);
+  p.fireVisibilityChange();
+  assert.equal(p.apiCalls().length, 1, '복귀 직후 최대 10초간 낡은 값이 남는다');
+});
+
+test('폴링 가드: 숨김→복귀를 반복해도 폴링이 중복 등록되지 않는다', () => {
+  const p = loadLivePolling({ now: WEEKDAY_OPEN });
+  for (let i = 0; i < 3; i++) { p.setHidden(true); p.tick(); p.setHidden(false); p.fireVisibilityChange(); }
+  p.reset();
+  p.tick();
+  assert.equal(p.apiCalls().length, 1, '인터벌이 중복 등록돼 호출이 배로 늘었다');
 });
