@@ -114,7 +114,8 @@ async function fetchOverseas(sym) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
+  // 20초 주기 폴링 — s-maxage를 주기와 맞춰 동시 접속자를 함수 실행 1회로 합친다(체감 지연 0).
+  res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=40');
   try {
     const codes = (req.query?.codes || '').toString()
       .split(',').map(s => s.trim()).filter(c => /^\d{6}$/.test(c)).slice(0, 50);

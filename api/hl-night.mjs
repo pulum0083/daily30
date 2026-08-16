@@ -73,7 +73,8 @@ async function getAnchors(syms, closeTs) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
+  // 10초 주기 폴링 — kospi-live와 같은 기준(주기 = s-maxage)으로 엣지에서 합친다.
+  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=20');
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const r = await fetch(HL, {

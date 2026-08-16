@@ -17,13 +17,17 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'bad_request', message: 'unknown f' });
     return;
   }
+  // 정적 파일을 그대로 중계하는 읽기 전용 경로다. 원본은 30분~수 시간에 한 번 갱신되므로
+  // 60초 엣지 캐시로 화면 신선도는 그대로 두고 함수 실행만 줄인다.
+  // 상류 실패(502) 경로에서도 헤더가 남도록 try 밖에서 설정한다 — 상류가 흔들릴 때야말로
+  // 캐시가 함수 폭주를 막아야 하는 구간이다.
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
   try {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const proto = req.headers['x-forwarded-proto'] || 'https';
     const r = await fetch(`${proto}://${host}/data/${file}`, { signal: AbortSignal.timeout(8000) });
     if (!r.ok) throw new Error(`upstream ${r.status}`);
     const data = await r.json();
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.status(200).json(data);
   } catch (e) {
     res.status(502).json({ error: 'upstream', message: String(e) });

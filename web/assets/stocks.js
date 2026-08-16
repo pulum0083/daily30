@@ -553,6 +553,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if(!rows.length) return;
   var syms=rows.map(function(r){return r.getAttribute('data-ticker');});
   function poll(){
+    // 보이지 않는 탭에서는 아무도 이 값을 보지 않는다 — 서버리스 함수만 깨운다.
+    // 시장 시간 게이트가 없어 24시간 도는 루프라, 2026-08-16 Vercel 팀 차단
+    // (FAIR_USE_LIMITS_EXCEEDED / fluidCpuDuration)에 그대로 기여했다.
+    // 복귀 시 아래 visibilitychange가 즉시 다시 받아오므로 체감 신선도는 그대로다.
+    if(document.hidden) return;
     fetch('/api/stocks-live?us='+encodeURIComponent(syms.join(',')),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
@@ -571,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   poll();
   setInterval(poll, 20000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
 // 외국인 보유율 스파크라인 — 직선 폴리라인을 부드러운 곡선 + 그라디언트로 재렌더
@@ -687,6 +693,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function hide(){ box.style.display='none'; }
 
   function poll(){
+    // 보이지 않는 탭에서는 아무도 이 값을 보지 않는다 — 서버리스 함수만 깨운다.
+    // 이 루프는 마감 구간 내내(평일 17.5시간 + 주말 종일) 30초마다 돌아
+    // 2026-08-16 Vercel 팀 차단(fluidCpuDuration)에 기여했다.
+    // 표시 상태(hide) 보정은 복귀 시 visibilitychange가 즉시 poll()을 돌려 맞춘다.
+    if(document.hidden) return;
     if(!krClosed()){ hide(); return; }
     fetch('/api/hl-night',{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
@@ -706,5 +717,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   poll();
   setInterval(poll,30000);   // 문구의 '30초 갱신'과 반드시 일치시킬 것
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
