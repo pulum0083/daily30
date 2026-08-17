@@ -19,8 +19,8 @@ import assert from 'node:assert/strict';
 // (운영 규칙 0 · SERVICE_RULES §10 "표기와 스케줄의 1:1 대응").
 // 폴링 주기를 바꾸면 여기도 같이 바꿔야 한다 — 그게 이 테스트의 존재 이유다.
 const POLLED = [
-  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 30,  req: { query: { codes: '005930', us: '' } } },
-  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 30,  req: { query: {} } },
+  { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 60,  req: { query: { codes: '005930', us: '' } } },
+  { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 60,  req: { query: {} } },
   { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
   { name: 'vol-top',     mod: './vol-top.mjs',     pollSec: 300, req: { query: {} } },
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'news-live' } } },

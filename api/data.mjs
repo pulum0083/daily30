@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   // 60초 엣지 캐시로 화면 신선도는 그대로 두고 함수 실행만 줄인다.
   // 상류 실패(502) 경로에서도 헤더가 남도록 try 밖에서 설정한다 — 상류가 흔들릴 때야말로
   // 캐시가 함수 폭주를 막아야 하는 구간이다.
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
   try {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const proto = req.headers['x-forwarded-proto'] || 'https';

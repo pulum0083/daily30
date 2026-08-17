@@ -33,7 +33,7 @@ async function fetchBasic() {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=10, stale-while-revalidate=20');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
 
   // 장 마감 후 → basic API 직행
   if (isAfterMarketKST()) {
