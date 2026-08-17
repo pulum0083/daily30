@@ -7,7 +7,7 @@
      브라우저 로컬 타임존과 무관하게 KST 기준으로 판단해야 하므로, UTC에 +9h를 더한
      Date를 만들고 getUTC*()로 읽는다. (getHours() 같은 로컬 접근자를 섞으면 사용자
      타임존에 따라 날짜가 하루 밀린다.)
-     원래는 initNowBand·initSidebarSignals 등에 동일 구현이 각각 복제돼 있었다. */
+     원래는 여러 위젯에 동일 구현이 각각 복제돼 있었다. */
   function kstNow() {
     return new Date(Date.now() + 9 * 3600 * 1000);
   }
@@ -668,7 +668,6 @@
   // fetch 없이 KST 시각·URL 날짜만으로 동기 결정되므로, 본문이 먼저 그려진 뒤 밴드가
   // 뒤늦게 끼어들며 267px 밀려나는 레이아웃 튐(CLS)을 방지한다.
   initLiveMarketPanel();
-  initNowBand();
   initSidebarSignals();
 
   window.addEventListener('load', () => {
@@ -795,7 +794,7 @@
       if (night) pollNight(); else pollDay();
     }
     pollTiles();
-    setInterval(pollTiles, 10000);
+    setInterval(pollTiles, 60000);
     // 탭에 다시 돌아왔을 때(오래 켜뒀다 재방문) 날짜가 바뀌었으면 즉시 곡선을 새 거래일로 복구한다.
     document.addEventListener('visibilitychange', function () { if (!document.hidden) leadersDayRoll(); });
 
@@ -1444,161 +1443,6 @@
      상태: 장전(08:50~08:59)·장중(09:00~15:29 폴링)·장후(15:30~ 최종값)·과거(정적)·숨김.
      데이터: /api/kospi-live(지수)·/api/market(코스닥·원달러·수급)·kospi-news(장중 이슈).
      실측만 채우고, 없으면 해당 영역 숨김(데이터 정합성). 날짜는 URL에서 파싱. */
-  function initNowBand() {
-    var band = document.getElementById('now-band');
-    if (!band) return;
-
-    // 날짜·요일·분을 같은 시각으로 판단해야 하므로 한 번만 찍는다
-    var kNow = kstNow();
-    var todayKst = kstDateStr(kNow);
-    var m       = location.pathname.match(/\/briefings\/(\d{4}-\d{2}-\d{2})\//);
-    var urlDate = m ? m[1] : todayKst;
-    if (urlDate > todayKst) return;                 // 미래: 숨김
-    var isPast  = urlDate < todayKst;
-
-    // 상태 판정 (당일)
-    var mins = kstMinsOfDay(kNow), day = kNow.getUTCDay(), weekend = (day === 0 || day === 6);
-    var mode = null;                                // 'past' | 'pre' | 'live' | 'after'
-    if (isPast)              mode = 'past';
-    else if (weekend)        return;                // 주말 당일: 숨김
-    else if (mins < 530)     return;                // 08:50 이전: 숨김
-    else if (mins < 540)     mode = 'pre';          // 08:50~08:59
-    else if (mins < 930)     mode = 'live';         // 09:00~15:29
-    else                     mode = 'after';        // 15:30~
-
-    // 헤더 세팅
-    var dot = document.getElementById('nb-dot');
-    var titleWrap = document.getElementById('nb-title');
-    var titleText = document.getElementById('nb-title-text');
-    var subEl = document.getElementById('nb-sub');
-    var kospiTag = document.getElementById('nb-kospi-tag');
-    if (mode === 'live') {
-      titleWrap.classList.add('live');
-      titleText.textContent = '지금 코스피';
-      subEl.textContent = '09:00부터 실시간 갱신 · LIVE';
-    } else {
-      dot.classList.add('pre');
-      if (mode === 'after') {
-        titleText.textContent = '지금 코스피';
-        subEl.textContent = '장 마감 · 최종 종가';
-      } else if (mode === 'pre') {
-        titleText.textContent = '시장 현황';
-        subEl.textContent = '장 시작 전 · 지난 종가 기준';
-        if (kospiTag) kospiTag.hidden = false;
-      } else { // past
-        titleText.textContent = '시장 현황';
-        subEl.textContent = urlDate + ' 마감 기준';
-        if (kospiTag) kospiTag.hidden = false;
-        var sub = document.getElementById('nb-subline');
-        if (sub) sub.hidden = true;                 // 과거: 코스닥·원달러 데이터 없음
-      }
-    }
-    band.hidden = false;
-
-    // 표시 헬퍼
-    function fmt(n, dp) { return Number(n).toLocaleString('ko-KR', { minimumFractionDigits: dp, maximumFractionDigits: dp }); }
-    function setChg(el, pct) {
-      if (!el) return;
-      var p = Number(pct) || 0;
-      el.className = p > 0 ? 'up' : (p < 0 ? 'dn' : '');
-      el.textContent = (p > 0 ? '▲ ' : (p < 0 ? '▼ ' : '')) + Math.abs(p).toFixed(2) + '%';
-    }
-
-    // 스파크라인 누적 (코스피 지수)
-    var SPARK_KEY = 'nb-spark-v1';
-    var sparkArr = (function () {
-      try { var s = JSON.parse(sessionStorage.getItem(SPARK_KEY) || 'null'); return Array.isArray(s) ? s : []; }
-      catch (e) { return []; }
-    })();
-
-    function applyKospi(price, pct) {
-      if (price == null) return;
-      var v = document.getElementById('nb-kospi-val');
-      if (v) v.textContent = fmt(price, 2);
-      setChg(document.getElementById('nb-kospi-chg'), pct);
-      if (mode === 'live') {                          // 스파크는 장중 누적만
-        sparkArr.push(Number(price));
-        if (sparkArr.length > 400) sparkArr.shift();
-        try { sessionStorage.setItem(SPARK_KEY, JSON.stringify(sparkArr)); } catch (e) {}
-      }
-      if (sparkArr.length >= 2) drawSparkline('nb-spark', sparkArr);
-    }
-    function applyMarket(d) {
-      if (!d) return;
-      if (d.kosdaq) {
-        var kv = document.getElementById('nb-kosdaq-val');
-        if (kv) kv.textContent = fmt(d.kosdaq.price, 2);
-        setChg(document.getElementById('nb-kosdaq-chg'), d.kosdaq.changePct);
-      }
-      if (d.forex) {
-        var fv = document.getElementById('nb-fx-val');
-        if (fv) fv.textContent = fmt(d.forex.price, 2);
-        setChg(document.getElementById('nb-fx-chg'), d.forex.changePct);
-      }
-      if (d.investor) {
-        var sup = document.getElementById('nb-supply'), any = false;
-        var map = { 'nb-indv': d.investor.individual, 'nb-inst': d.investor.institution, 'nb-frgn': d.investor.foreign };
-        Object.keys(map).forEach(function (id) {
-          var val = map[id], el = document.getElementById(id);
-          if (!el || val == null) return;
-          any = true;
-          el.textContent = (val >= 0 ? '+' : '') + Math.round(val).toLocaleString();
-          el.className = val >= 0 ? 'up' : 'dn';
-        });
-        if (any && sup) sup.hidden = false;
-      }
-    }
-    function applyIssues(data) {
-      if (!data) return;
-      if (data.date && data.date !== urlDate) return;   // 당일 첫 수집 전 어제 데이터 노출 방지
-      var box = document.getElementById('nb-issues');
-      if (!box) return;
-      var hist = (data.history || []).filter(function (it) {
-        var p = (it.time || '').split(':'); if (p.length < 2) return false;
-        var mm = parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
-        return mm >= 540 && mm < 930;                     // MARKET 슬롯
-      });
-      var rows = [];
-      hist.slice(0, 3).forEach(function (it) {
-        var title = (it.market && it.market.title) || (it.stock && it.stock.title) || '';
-        title = title.replace(/\[.*?\]/g, '').replace(/\s*[-–—]\s*[가-힣A-Za-z0-9·]{2,15}\s*$/u, '').trim();
-        if (title) rows.push('<div class="nb-issue"><span class="nb-issue__t">' + escHtml(it.time || '') + '</span><span>' + escHtml(title) + '</span></div>');
-      });
-      if (rows.length) { box.innerHTML = rows.join(''); box.hidden = false; }
-    }
-
-    // fetch
-    function pollKospi() {
-      fetch('/api/kospi-live').then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (d) { if (d) applyKospi(d.price, d.changePct || 0); }).catch(function () {});
-    }
-    function pollMarket() {
-      fetch('/api/market', { signal: AbortSignal.timeout(8000) }).then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(applyMarket).catch(function () {});
-    }
-    function loadIssues() {
-      fetch('/data/kospi-news-' + urlDate + '.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(applyIssues)
-        .catch(function () {
-          fetch('/data/kospi-news-live.json').then(function (r) { return r.ok ? r.json() : null; }).then(applyIssues).catch(function () {});
-        });
-    }
-
-    if (mode === 'past') {
-      fetch('/data/market-' + urlDate + '.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); })
-        .then(function (d) { if (d && d.kospi) applyKospi(d.kospi.price, d.kospi.changePct || 0); }).catch(function () {});
-      loadIssues();
-    } else if (mode === 'pre') {
-      pollKospi(); pollMarket();                         // 장전: API가 전일 종가/수급 반환
-    } else if (mode === 'live') {
-      pollKospi(); pollMarket(); loadIssues();
-      setInterval(pollKospi, 10000);
-      setInterval(pollMarket, 60000);
-      setInterval(loadIssues, 300000);
-    } else { // after
-      pollKospi(); pollMarket(); loadIssues();           // 최종값 1회
-    }
-  }
 
   /* ── 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(/api/signals phase==='intraday')에만
      노출하며 시장 지표 패널(#market-data-panel)을 완전히 대체한다. 장외·과거/미래 브리핑·

@@ -473,7 +473,7 @@ test('go(): window.dsSubnavSync가 함수가 아니어도(미정의·문자열) 
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 라이브 타일 30초 폴링 — 백그라운드 탭 가드 (2026-08-16 Vercel 차단 사고 방지)
+// 라이브 타일 60초 폴링 — 백그라운드 탭 가드 (2026-08-16 Vercel 차단 사고 방지)
 //
 // 사고: Vercel 팀이 FAIR_USE_LIMITS_EXCEEDED(fluidCpuDuration)로 소프트 차단돼
 // doubleshot.space 전체가 402를 반환했다. 이 10초 폴링은 시장 시간·탭 포커스와 무관하게
@@ -506,8 +506,18 @@ function loadLivePolling({ now } = {}) {
     },
   });
 
-  const tick = intervals.find((i) => i.ms === 30000);
-  assert.ok(tick, '30초 폴링 인터벌이 등록되지 않았다 — 루프가 사라졌거나 주기가 바뀌었다');
+  // 60초 인터벌은 여러 개다(날짜 롤오버 체커·섹터 시세·시장 지표·라이브 타일…).
+  // ms만으로는 라이브 타일 루프를 못 고르므로, 후보를 하나씩 돌려보고 타일 엔드포인트
+  // (stocks-live·hl-night)를 부르는 놈을 찾는다. 로드가 결정론적이라 인덱스는 재현된다.
+  const candidates = intervals.filter((i) => i.ms === 60000);
+  assert.ok(candidates.length, '60초 폴링 인터벌이 하나도 없다 — 루프가 사라졌거나 주기가 바뀌었다');
+  let tick = null;
+  for (const c of candidates) {
+    fetched.length = 0;
+    c.fn();
+    if (fetched.some((u) => /\/api\/(stocks-live|hl-night)/.test(u))) { tick = c; break; }
+  }
+  assert.ok(tick, '라이브 타일 루프를 찾지 못했다 — 타일이 stocks-live·hl-night를 부르지 않는다');
 
   return {
     win,

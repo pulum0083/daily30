@@ -740,7 +740,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var label={open:'정규장',pre:'프리장',post:'애프터장'}[sessionState];
     if(isLive && label){
       b.classList.remove('closed');
-      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 30초 갱신';
+      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 60초 갱신';
     }else{
       b.classList.add('closed');
       var dt='';
@@ -816,7 +816,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
       setPoll(isLive ? POLL_LIVE : POLL_IDLE);
     });
   }
-  var pollId=null, POLL_LIVE=30000, POLL_IDLE=60000, curPoll=0;
+  var pollId=null, POLL_LIVE=60000, POLL_IDLE=60000, curPoll=0;
   function setPoll(ms){
     if(pollId && curPoll===ms) return;
     if(pollId) clearInterval(pollId);
@@ -1993,7 +1993,7 @@ if(passBtn){
     if(night) pollNight(); else pollDay();
   }
   poll();
-  setInterval(poll, 30000);
+  setInterval(poll, 60000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
