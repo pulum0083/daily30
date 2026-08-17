@@ -38,3 +38,7 @@ data/quote_today.json
 
 # npm (eslint 등은 npx로 즉석 실행 — 커밋하지 않는다)
 node_modules/
+
+# 로컬 도구 캐시/설정 — 계정 식별 정보 포함, 커밋 대상 아님
+.kiro/
+.wrangler/
