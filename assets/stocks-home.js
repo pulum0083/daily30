@@ -1119,71 +1119,6 @@ function rankSetTab(tab,el){rankTab=tab;rankShown=10;if(el){[].forEach.call(el.p
 function rankSetSector(sec,el){rankSector=sec;rankShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}rankRender();}
 rankRender();
 
-/* ETF 전체 랭킹 화면 — vol-top etf 실데이터(등락률순). */
-let ETF_ALL=[];
-function etfRankTag(name){
-  if(/레버리지|2X|2x/.test(name))return '<span style="font-size:11px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--up-bg);color:var(--up)">레버리지</span>';
-  if(/인버스|곱버스/.test(name))return '<span style="font-size:11px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--dn-bg);color:var(--dn)">인버스</span>';
-  return '';
-}
-function fmtVolShort(v){if(v>=100000000)return (v/100000000).toFixed(1)+'억주';return Math.round(v/10000).toLocaleString('en-US')+'만주';}
-let etfTab='vol';
-let etfShown=10;
-function etfSorted(){
-  if(etfTab==='up')return ETF_ALL.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;});
-  if(etfTab==='dn')return ETF_ALL.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;});
-  return ETF_ALL.slice().sort(function(a,b){return (b.vol||0)-(a.vol||0);});
-}
-function etfRankRender(){
-  var box=document.getElementById('etf-rank-rows');if(!box)return;
-  var cnt=document.getElementById('etf-rank-count');if(cnt)cnt.textContent=ETF_ALL.length+'개 ETF';
-  var btn=document.getElementById('etf-rank-more');
-  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:var(--muted);">ETF를 불러오는 중…</div>';if(btn)btn.style.display='none';return;}
-  var arr=etfSorted();
-  var maxVal=arr.length?(etfTab==='vol'?Math.max.apply(null,arr.map(function(x){return x.vol||0;})):Math.max.apply(null,arr.map(function(x){return Math.abs(x.changePct||0);}))):1;
-  if(!maxVal)maxVal=1;
-  btn=document.getElementById('etf-rank-more');
-  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:var(--muted);">'+(etfTab==='up'?'상승 ETF가 없어요.':'하락 ETF가 없어요.')+'</div>';if(btn)btn.style.display='none';return;}
-  box.innerHTML=arr.map(function(x,i){
-    var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
-    var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%';
-    var barW=etfTab==='vol'?Math.round((x.vol||0)/maxVal*100):Math.round(Math.abs(pct)/maxVal*100);
-    var tag=etfRankTag(x.name);
-    var avg20=x.vol_avg20||0;
-    var mult=avg20>0?((x.vol||0)/avg20):0;
-    var multTxt=mult>0?mult.toFixed(1)+'×':'—';
-    var multCls=mult>=1.5?'color:var(--up);font-weight:800':'color:var(--muted)';
-    return '<a class="trow trow--static" style="cursor:default">'
-      +'<span class="rk'+(top3?' t':'')+' num">'+rank+'</span>'
-      +'<div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+(tag?' · ':'')+'</small>'+tag+'</div>'
-      +'<div class="barwrap"><div class="bar vol" style="width:'+barW+'%"></div></div>'
-      +'<span class="barval num">'+fmtVolShort(x.vol||0)+'</span>'
-      +'<span class="num vsavg" style="text-align:right;flex:none;font-size:11px;font-weight:700;'+multCls+'">'+multTxt+'</span>'
-      +'<span class="tchg '+dir+' num" style="width:72px;text-align:right;flex:none;">'+pctTxt+'</span>'
-      +'</a>';
-  }).join('');
-}
-function etfSetTab(tab,el){etfTab=tab;etfShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}etfRankRender();}
-function etfLoadMore(){etfShown=Math.min(etfShown+10,30);etfRankRender();}
-/* 우측 사이드 — 하락률 순(상위 10) */
-function etfDnSorted(){return ETF_ALL.filter(function(x){return (x.changePct||0)<0;}).sort(function(a,b){return a.changePct-b.changePct;});}
-function etfDnRender(){
-  var box=document.getElementById('etf-dn-rows');if(!box)return;
-  if(!ETF_ALL.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:var(--muted);">불러오는 중…</div>';return;}
-  var arr=etfDnSorted().slice(0,10);
-  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:var(--muted);">하락 ETF가 없어요.</div>';return;}
-  box.innerHTML=arr.map(function(x,i){
-    var pct=x.changePct||0,tag=etfRankTag(x.name);
-    return '<div class="etf-row">'
-      +'<span class="num" style="width:15px;text-align:center;font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0;">'+(i+1)+'</span>'
-      +'<span class="etf-nm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+x.name+(tag?' ':'')+tag+'</span>'
-      +'<span class="etf-pct dn num">−'+Math.abs(pct).toFixed(2)+'%</span>'
-      +'</div>';
-  }).join('');
-}
-etfRankRender();
-etfDnRender();
-
 /* 더보기 자동 트리거 — 스크롤 시 버튼이 뷰포트 근처면 자동 확장 (500ms 쓰로틀) */
 (function(){
   function isNearViewport(el){var r=el.getBoundingClientRect();return r.top<window.innerHeight+200&&r.bottom>-200;}
@@ -1191,8 +1126,6 @@ etfDnRender();
   function check(){
     var rm=document.getElementById('rank-more');
     if(rm&&getComputedStyle(rm).display!=='none'&&isNearViewport(rm)) rankLoadMore();
-    var em=document.getElementById('etf-rank-more');
-    if(em&&getComputedStyle(em).display!=='none'&&isNearViewport(em)) etfLoadMore();
   }
   window.addEventListener('scroll',function(){
     if(_t) return;
@@ -2029,30 +1962,6 @@ if(passBtn){
   function chgRow(x,i,cls,barPct){
     return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+secLbl(x.sector)+'</small></div><div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div><span class="barval '+cls+' num">'+(x.changePct>=0?'+':'')+x.changePct.toFixed(1)+'%</span>'+nearHighBadge(x.code,x.price)+surgeBadge(x.code,x.vol)+'</a>';
   }
-  function etfVolRow(x,i){
-    var pc=x.changePct>=0?'var(--up)':'var(--dn)',sg=x.changePct>=0?'+':'';
-    return '<div class="row etf-top5">'
-      +'<span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span>'
-      +'<span class="etf-top5-nm">'+x.name+'</span>'
-      +'<span class="etf-top5-vol num">'+manju(x.vol)+'</span>'
-      +'<span class="etf-top5-pct num" style="color:'+pc+'">'+sg+x.changePct.toFixed(1)+'%</span>'
-      +'</div>';
-  }
-  function etfChgRow(x,i,cls,barPct){
-    return '<a class="row" onclick="go(\'etf-detail\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · ETF</small></div><div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div><span class="barval '+cls+' num">'+(x.changePct>=0?'+':'')+x.changePct.toFixed(1)+'%</span></a>';
-  }
-  function renderEtf(etf){
-    if(!etf||!etf.length) return;
-    var byVol=etf.filter(function(x){return x.vol>0;}).sort(function(a,b){return b.vol-a.vol;}).slice(0,5);
-    var mv=byVol[0]?byVol[0].vol:1;
-    var w1=document.getElementById('etf-top-rows'); if(w1) w1.innerHTML=byVol.map(function(x,i){return etfVolRow(Object.assign({},x,{barPct:Math.round(x.vol/mv*100)}),i);}).join('');
-    var up=etf.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;}).slice(0,5);
-    var um=up[0]?Math.abs(up[0].changePct):1;
-    var w2=document.getElementById('etf-rise-rows'); if(w2) w2.innerHTML=up.length?up.map(function(x,i){return etfChgRow(x,i,'up',Math.round(Math.abs(x.changePct)/um*100));}).join(''):emptyRow('상승 ETF가 없어요');
-    var dn=etf.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;}).slice(0,5);
-    var dm=dn[0]?Math.abs(dn[0].changePct):1;
-    var w3=document.getElementById('etf-fall-rows'); if(w3) w3.innerHTML=dn.length?dn.map(function(x,i){return etfChgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dm*100));}).join(''):emptyRow('하락 ETF가 없어요');
-  }
   function emptyRow(msg){ return '<div style="padding:14px 16px;font-size:12px;color:var(--muted);">'+msg+'</div>'; }
   function renderTops(d){
     var volWrap=document.getElementById('vol-top-rows');
@@ -2067,12 +1976,6 @@ if(passBtn){
     var dnMax=dn[0]?Math.abs(dn[0].changePct):1;
     var dnWrap=document.getElementById('fall-top-rows');
     if(dnWrap) dnWrap.innerHTML=dn.length?dn.map(function(x,i){return chgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dnMax*100));}).join(''):emptyRow('하락 종목이 없어요');
-    if(d.etf){
-      renderEtf(d.etf);
-      ETF_ALL=(d.etf||[]).map(function(e){var se=SNAP&&SNAP.etfs&&SNAP.etfs[e.code];return Object.assign({},e,{vol_avg20:se?se.vol_avg20:0});});
-      etfRankRender();
-      etfDnRender();
-    }
     bindSurgeTips();
   }
   // 8개 섹터 대표 종목(대장주) — stock_universe.json 순서 그대로 상위 2~3종목 선별.
@@ -2274,104 +2177,6 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
-  // ETF 요약 블록 — /api/signals의 etf(lead·betting·sector). 상세는 #etf-rank 탭.
-  // ⚠️ 위쪽 renderEtf()는 /api/vol-top 배열을 받는 다른 함수다. 혼동 금지.
-  function fmtEok(mw){                       // 백만원 → '1조 9,855억'
-    var eok = Math.round(mw/100);
-    if(eok >= 10000){
-      var jo = Math.floor(eok/10000), rest = eok % 10000;
-      return jo + '조' + (rest ? ' ' + rest.toLocaleString() + '억' : '');
-    }
-    return eok.toLocaleString() + '억';
-  }
-  // 극단값(최고·최저)은 서로 다른 두 종목이 있어야 '범위'다. 1개(나머지 폴링 전멸)면 최고=최저로
-  // 같은 종목이 중복 표시되던 문제(코드리뷰 Minor) — 그럴 땐 범위 자체를 숨긴다.
-  function pickExtremes(rows){
-    if(!rows || rows.length < 2) return null;
-    var s = rows.slice().sort(function(a,b){ return b.pct - a.pct; });
-    return { top: s[0], bottom: s[s.length-1] };
-  }
-  function isFiniteNum(v){ return typeof v === 'number' && isFinite(v); }
-  function shouldShowEtfSignal(etf){
-    if(!(etf && etf.lead && etf.lead.title && etf.lead.body && etf.betting)) return false;
-    var b = etf.betting;
-    // 폴링이 전종목 실패해도 api/_signals-core.mjs의 etfBettingFlow()는 모양은 온전한
-    // {downAmt:0,upAmt:0,downRatio:0,upRatio:100,invVolMultiple:0,levPct:null} 객체를 돌려준다
-    // (필드는 다 있지만 값이 전부 미측정) — 타입 체크로 그 함정을 먼저 거른다(코드리뷰 Critical).
-    if(!isFiniteNum(b.downAmt) || !isFiniteNum(b.upAmt) || !isFiniteNum(b.downRatio) ||
-       !isFiniteNum(b.upRatio) || !isFiniteNum(b.invVolMultiple)) return false;
-    // 인버스·레버리지 ETF 거래대금이 하루 종일 양쪽 다 0인 날은 현실에 없다 — 이 조합은 수집
-    // 전체 실패의 신호다. API 응답엔 "몇 종목이 성공했는지"를 구분하는 필드가 없어(byCode가
-    // 성공분만 채워지고 실패 개수는 응답에 안 실린다) 이 값 조합 자체로 "데이터 없음"을 판정한다.
-    // 없으면 지어내지 않고 비운다(운영 규칙 §0) — "조용한 평온한 하루"처럼 보이게 두지 않는다.
-    if(b.downAmt === 0 && b.upAmt === 0) return false;
-    return true;
-  }
-  // levPct처럼 개별 종목 폴링 하나만 실패해도 null이 될 수 있는 값은 여기서 안전하게 처리한다.
-  // null/undefined를 0으로 취급하면 "+0.00%"라는, 실측된 적 없는 숫자가 빨간색(상승)으로
-  // 나타난다(코드리뷰 Critical) — 숫자가 아니면 포맷·색 모두 아무것도 반환하지 않는다.
-  function pctCls(v){ return isFiniteNum(v) ? (v >= 0 ? 'up' : 'dn') : ''; }
-  function pctFmt(v){ return isFiniteNum(v) ? (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%' : null; }
-  // lead.body는 api/_signals-core.mjs의 etfLead()가 만드는 문자열이고, 오늘은 숫자만 보간해
-  // <b>...</b> 굵게 강조 외엔 태그가 없다. 그 전제를 주석으로만 남기면 나중에 다른 필드가
-  // 섞여도 아무도 못 알아챈다(SERVICE_RULES §20·§25와 같은 실패 패턴) — <b>·</b>(속성 없이)만
-  // 통과시키고 그 외 태그는 전부 제거해 innerHTML에 안전하게 넣을 수 있도록 코드로 강제한다.
-  function sanitizeBodyHtml(html){
-    return String(html == null ? '' : html).replace(/<(?!\/?b>)[^>]*>/gi, '');
-  }
-  function renderEtfSignal(etf, asOf){
-    var box = document.getElementById('etf-signal');
-    if(!box) return;
-    if(!shouldShowEtfSignal(etf)){ box.style.display = 'none'; return; }   // 없으면 비운다(§0)
-    var b = etf.betting;
-    var set = function(id, txt){ var e = document.getElementById(id); if(e) e.textContent = txt; };
-    set('etfsig-asof', asOf && asOf.label ? asOf.label + ' 종가' : '');
-    set('etfsig-title', etf.lead.title);
-    var bodyEl = document.getElementById('etfsig-body'); if(bodyEl) bodyEl.innerHTML = sanitizeBodyHtml(etf.lead.body);
-    set('etfsig-dn-amt', fmtEok(b.downAmt));
-    set('etfsig-up-amt', fmtEok(b.upAmt));
-    set('etfsig-dn-pct', b.downRatio + '%');
-    set('etfsig-up-pct', b.upRatio + '%');
-    var bar = document.getElementById('etfsig-bar-dn'); if(bar) bar.style.width = b.downRatio + '%';
-    set('etfsig-inv', 'KODEX 200 대비 ×' + b.invVolMultiple);
-    var lev = document.getElementById('etfsig-lev');
-    var inv = document.getElementById('etfsig-inv');
-    var invRow = inv && inv.parentElement;
-    if(lev){
-      var levTxt = pctFmt(b.levPct), levRow = lev.parentElement;
-      if(levTxt){
-        lev.textContent = levTxt; lev.className = 'v num ' + pctCls(b.levPct);
-        if(levRow) levRow.style.display='';
-        if(invRow) invRow.style.gridColumn='';   // 짝이 돌아오면 원래 폭(1fr)으로 되돌린다
-      } else {
-        lev.textContent = '';
-        if(levRow) levRow.style.display = 'none';   // 이 종목만 미측정 — 행을 비운다(§0)
-        // grid-template-columns:1fr 1fr에서 짝(레버리지)이 사라지면 오른쪽에 빈 칸(격자선 배경)이
-        // 그대로 남는다(코드리뷰 재검토 지적) — 남은 칸이 전체 폭을 차지하도록 넓힌다.
-        if(invRow) invRow.style.gridColumn = '1 / -1';
-      }
-    }
-    var ext = document.getElementById('etfsig-ext'), ex = pickExtremes(etf.sector);
-    if(ext){
-      ext.innerHTML = '';   // 라벨·값은 아래에서 textContent로만 채운다 — 문자열 조립 innerHTML 금지(코드리뷰 Important)
-      if(ex){
-        [['섹터 ETF 최고', ex.top], ['섹터 ETF 최저', ex.bottom]].forEach(function(p){
-          var row = document.createElement('div'); row.className = 'etfsig-ext__r';
-          var k = document.createElement('span'); k.className = 'k'; k.textContent = p[0];
-          var n = document.createElement('span'); n.className = 'n'; n.textContent = p[1].label;
-          var v = document.createElement('span'); v.className = 'v num ' + pctCls(p[1].pct); v.textContent = pctFmt(p[1].pct) || '';
-          row.appendChild(k); row.appendChild(n); row.appendChild(v);
-          ext.appendChild(row);
-        });
-      }
-    }
-    box.style.display = '';
-  }
-  // 테스트 훅 — node:vm에서 순수 포맷터 + renderEtfSignal 자체를 DOM 스텁으로 검증한다(코드리뷰 재검토).
-  window.__etfSignal = {
-    fmtEok: fmtEok, pickExtremes: pickExtremes, shouldShowEtfSignal: shouldShowEtfSignal,
-    pctFmt: pctFmt, pctCls: pctCls, sanitizeBodyHtml: sanitizeBodyHtml, renderEtfSignal: renderEtfSignal
-  };
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
@@ -2384,7 +2189,6 @@ if(passBtn){
     if(d.sectors) SIG_SECTORS=d.sectors;
     if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
     renderTodayLine();
-    renderEtfSignal(d.etf, d.asOf);
     sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
   }
   /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
@@ -2455,8 +2259,7 @@ if(passBtn){
     var list=Object.keys(SNAP.stocks).map(function(c){var s=SNAP.stocks[c];return {code:c,name:s.name,sector:s.sector,vol:s.vol||0,changePct:s.change_pct||0,price:s.close||null};});
     var byVol=list.filter(function(x){return x.vol>0;}).sort(function(a,b){return b.vol-a.vol;}).slice(0,5);
     var maxv=byVol[0]?byVol[0].vol:1;
-    var etf=SNAP.etfs?Object.keys(SNAP.etfs).map(function(c){var e=SNAP.etfs[c];return {code:c,name:e.name,sector:'ETF',vol:e.vol||0,changePct:e.change_pct||0,price:null};}):[];
-    renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list,etf:etf});
+    renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list});
   }
 
   /* ── 섹터별 종목 브라우저 (홈 중앙) — stocks-snapshot.json + /api/stocks-live 배선 ── */

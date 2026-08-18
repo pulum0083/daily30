@@ -46,13 +46,13 @@ function mkHost() {
   };
 }
 
-test('탭 정의는 이번 범위인 5개만 점등한다', () => {
+test('탭 정의는 이번 범위인 4개만 점등한다', () => {
   const { TABS } = load().api;
   // Array.from으로 vm 컨텍스트 배열을 호스트 realm 배열로 재구성한다 — assert.deepEqual(=deepStrictEqual)이
   // 값이 같아도 realm이 다른 배열의 prototype/constructor를 비교해 실패시키는 Node 고질적 이슈 회피
   // (nodejs/node#44462, Node 22·24 모두 재현 확인).
-  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'sector', 'flow', 'etf']);
-  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '섹터', '자금 지도', 'ETF']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'sector', 'flow']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '섹터', '자금 지도']);
 });
 
 test('경로·해시 조합별 활성 탭 판정', () => {
@@ -61,7 +61,7 @@ test('경로·해시 조합별 활성 탭 판정', () => {
   assert.equal(resolveActiveTab('/stocks/', '#home'), 'home');
   assert.equal(resolveActiveTab('/stocks/', '#signals-all'), 'signals');
   assert.equal(resolveActiveTab('/stocks/', '#sector'), 'sector');
-  assert.equal(resolveActiveTab('/stocks/', '#etf-rank'), 'etf');
+  assert.equal(resolveActiveTab('/stocks/', '#flow-map'), 'flow');
 });
 
 test('탭이 없는 화면(#passive 등)은 전체로 떨어진다', () => {
@@ -125,7 +125,7 @@ test('해시 대소문자와 무관하게 같은 탭으로 판정한다', () => 
   const { resolveActiveTab } = load().api;
   assert.equal(resolveActiveTab('/stocks/', '#SIGNALS-ALL'), 'signals');
   assert.equal(resolveActiveTab('/stocks/', '#Sector'), 'sector');
-  assert.equal(resolveActiveTab('/stocks/', '#ETF-RANK'), 'etf');
+  assert.equal(resolveActiveTab('/stocks/', '#FLOW-MAP'), 'flow');
 });
 
 test('탭을 TABS에 하나 추가하면 해시 판정도 별도 편집 없이 즉시 따라온다 (드리프트 회귀)', () => {
@@ -205,10 +205,10 @@ test('dsSubnavSync는 현재 위치로 강조를 다시 계산한다', () => {
   const { win } = load({ host, pathname: '/stocks/', hash: '' });
   assert.ok(host.innerHTML.match(/<a[^>]*data-tab="home"[^>]*>/)[0].includes('is-active'));
 
-  win.location.hash = '#etf-rank';       // go()가 해시를 바꾼 뒤의 상태를 흉내낸다
+  win.location.hash = '#flow-map';       // go()가 해시를 바꾼 뒤의 상태를 흉내낸다
   win.dsSubnavSync();
 
-  assert.ok(host.innerHTML.match(/<a[^>]*data-tab="etf"[^>]*>/)[0].includes('is-active'));
+  assert.ok(host.innerHTML.match(/<a[^>]*data-tab="flow"[^>]*>/)[0].includes('is-active'));
   assert.ok(!host.innerHTML.match(/<a[^>]*data-tab="home"[^>]*>/)[0].includes('is-active'));
 });
 

@@ -21,11 +21,11 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=13" defer></script>
-<script src="/assets/ds-subnav.js?v=1" defer></script>
+<script src="/assets/stocks-home.js?v=14" defer></script>
+<script src="/assets/ds-subnav.js?v=2" defer></script>
 <script src="/assets/flow-map.js?v=1" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=12">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=13">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/flow-map.css?v=1">
 </head>
@@ -204,32 +204,6 @@
         <span>유입 <span class="flow-scale"><i style="background:rgba(224,49,49,0.25)"></i><i style="background:rgba(224,49,49,0.55)"></i><i style="background:rgba(224,49,49,1)"></i></span></span>
         <span>유출 <span class="flow-scale"><i style="background:rgba(39,117,237,0.25)"></i><i style="background:rgba(39,117,237,0.55)"></i><i style="background:rgba(39,117,237,1)"></i></span></span>
       </div>
-    </div>
-    <!-- ETF 신호 — /api/signals의 etf(lead·betting·sector)로 채운다. 데이터가 없으면 통째로 숨긴다.
-         홈 4개 서브탭 중 ETF만 대응 블록이 없어 신설한 요약 블록이다(서브탭 IA 스펙). -->
-    <div class="block etfsig-block" id="etf-signal" style="display:none">
-      <div class="block__h">
-        <span class="block__t"><span class="ic">📊</span> ETF 신호</span>
-        <span class="block__s" id="etfsig-asof"></span>
-      </div>
-      <div class="etfsig-lead">
-        <div class="etfsig-lead__t" id="etfsig-title"></div>
-        <p class="etfsig-lead__b" id="etfsig-body"></p>
-      </div>
-      <div class="etfsig-bet">
-        <div class="etfsig-bet__lbl">
-          <span class="dn">하락 베팅 <b id="etfsig-dn-amt"></b></span>
-          <span class="up"><b id="etfsig-up-amt"></b> 상승 베팅</span>
-        </div>
-        <div class="etfsig-bar"><span class="etfsig-bar__dn" id="etfsig-bar-dn"></span></div>
-        <div class="etfsig-bet__pct"><span id="etfsig-dn-pct"></span><span id="etfsig-up-pct"></span></div>
-      </div>
-      <div class="etfsig-kpi">
-        <div><span class="k">인버스 거래량</span><span class="v" id="etfsig-inv"></span></div>
-        <div><span class="k">KODEX 레버리지</span><span class="v num" id="etfsig-lev"></span></div>
-      </div>
-      <div class="etfsig-ext" id="etfsig-ext"></div>
-      <a class="etfsig-more" onclick="go('etf-rank')">ETF 전체 보기 →</a>
     </div>
     <!-- 탭에 없는 화면 진입점 — 서브탭에는 넣지 않되(스펙: 탭 넘침 방지) 홈에서는 도달 가능해야 한다.
          지금까지 이 두 화면은 홈에 링크가 없어 사실상 고립돼 있었다. -->
@@ -672,31 +646,6 @@
         </div>
         <div class="home-side">
           <div class="block" style="margin-bottom:0;" id="fmap-detail"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== ETF RANKING (ETF 전체 랭킹) ===== -->
-  <div class="screen" id="etf-rank">
-    <div class="phead">
-      <div><h1><span class="ic">📊</span> ETF 전체 랭킹</h1><div class="psub"><span id="etf-rank-count">— ETF</span> · <span class="ds-asof"></span></div></div>
-    </div>
-    <div class="home-cols">
-      <!-- 좌: 거래량·상승률 (탭 전환) -->
-      <div class="home-main">
-        <div class="block">
-          <div class="block__h"><span class="block__s" style="margin-left:auto;"><span class="stabs" id="etf-rank-tabs" style="margin-bottom:0;"><a class="on" onclick="etfSetTab('vol',this)">거래량순</a><a onclick="etfSetTab('up',this)">상승률순</a></span></span></div>
-          <div class="block__h colhead" style="background:var(--soft);"><span class="block__s" style="font-weight:700;">ETF</span><span style="flex:1;font-size:11px;font-weight:700;color:var(--muted);padding-left:8px;">거래량</span><span class="block__s vsavg" style="text-align:right;font-size:11px;font-weight:700;color:var(--muted);">vs평균</span><span class="block__s" style="width:72px;text-align:right;">등락률</span></div>
-          <div id="etf-rank-rows"></div>
-        </div>
-      </div>
-      <!-- 우: 하락률 순 -->
-      <div class="home-side">
-        <div class="block">
-          <div class="block__h"><span class="block__t"><span class="ic">📉</span>하락률 순</span></div>
-          <p class="sig-intro" style="padding:11px 16px 8px;">오늘 가장 많이 빠진 ETF예요.</p>
-          <div id="etf-dn-rows"></div>
         </div>
       </div>
     </div>
