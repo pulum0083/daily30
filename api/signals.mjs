@@ -1,6 +1,5 @@
-// 종목·ETF 신호 통합 API — polling(가격·등락·거래량) + itemSummary(거래대금) + 일봉 스냅샷 조합 → 코어 가공
-import { ALL_ETF_CODES, ETF_NAME } from './_etf-universe.mjs';
-import { buildSignals, classifySupply, etfBettingFlow, etfSectorRotation, etfSafeHaven, etfLead, sectorAverages, SIGNAL_META } from './_signals-core.mjs';
+// 종목 신호 통합 API — polling(가격·등락·거래량) + 일봉 스냅샷 조합 → 코어 가공
+import { buildSignals, classifySupply, sectorAverages, SIGNAL_META } from './_signals-core.mjs';
 import { krMarketOpen, krSessionProgress, kstTodayYmd, labelFromYmd, lastTradingDay } from './_market-calendar.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -18,18 +17,6 @@ async function pollOne(code) {
       price: parseFloat(String(it.closePriceRaw || '0').replace(/,/g, '')) || 0,
     };
   } catch { return null; }
-}
-
-// ETF 전용 거래대금 조회. ETF는 전 종목 유가증권시장 상장이라 amount 단위가 백만원으로 일관됨(16종목 전수 확인).
-// ⚠️ 개별 종목에는 쓰지 말 것 — itemSummary의 amount는 코스닥 종목만 '천원' 단위로 와서 1000배 뻥튀기된다.
-//    종목 거래대금은 아래 pollOne의 price*vol로 직접 계산한다(단위 불문 일관).
-async function amountOne(code) {
-  try {
-    const r = await fetch(`https://api.finance.naver.com/service/itemSummary.naver?itemcode=${code}`, { headers: HDR, signal: AbortSignal.timeout(6000) });
-    if (!r.ok) return 0;
-    const d = await r.json();
-    return Number(d.amount) || 0; // 거래대금(백만)
-  } catch { return 0; }
 }
 
 async function trendOne(code) {
@@ -68,10 +55,8 @@ export default async function handler(req, res) {
     if (!snap || !snap.stocks) return res.status(502).json({ error: 'snapshot unavailable' });
     const stockCodes = Object.keys(snap.stocks);
 
-    const [stockPolls, etfPolls, etfAmts, kPct] = await Promise.all([
+    const [stockPolls, kPct] = await Promise.all([
       Promise.all(stockCodes.map(pollOne)),
-      Promise.all(ALL_ETF_CODES.map(pollOne)),
-      Promise.all(ALL_ETF_CODES.map(amountOne)),
       kospiPct(),
     ]);
 
@@ -101,22 +86,9 @@ export default async function handler(req, res) {
     const progress = phase === 'intraday' ? krSessionProgress() : 1;
     const { signals, signalsAll } = buildSignals(stocks, kPct, { enrich, progress });
 
-    const byCode = {};
-    ALL_ETF_CODES.forEach((code, i) => {
-      const p = etfPolls[i];
-      if (p) byCode[code] = { pct: p.pct, vol: p.vol, amount: etfAmts[i] || 0, name: ETF_NAME[code] };
-    });
-    const betting = etfBettingFlow(byCode);
-    const etf = {
-      lead: etfLead(betting),
-      betting,
-      sector: etfSectorRotation(byCode),
-      safeHaven: etfSafeHaven(byCode, byCode['069500']?.pct ?? kPct),
-    };
-
     return res.status(200).json({
       phase, asOf, kospiPct: kPct, sectors: sectorAverages(stocks),
-      signals, signalsAll, etf, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
+      signals, signalsAll, meta: SIGNAL_META, updatedAt: new Date().toISOString(),
     });
   } catch (e) {
     return res.status(502).json({ error: String(e) });

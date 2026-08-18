@@ -1,6 +1,11 @@
-// 종목·ETF 신호 판정 순수 함수(네트워크 없음). 핸들러가 fetch한 데이터를 받아 가공한다.
+// 종목 신호 판정 순수 함수(네트워크 없음). 핸들러가 fetch한 데이터를 받아 가공한다.
 
-import { SECTOR_LABEL, ETF_BET_DOWN, ETF_BET_UP, ETF_KOSPI200, ETF_SECTOR, ETF_SAFE } from './_etf-universe.mjs';
+// 스냅샷의 영문 섹터 코드 → 한글(섹터칩/표시용). 예전엔 api/_etf-universe.mjs에 얹혀 있었으나
+// ETF와 무관한 종목 섹터 라벨이라 ETF 신호 기능 제거(2026-08-19) 시 유일한 소비자인 이 파일로 옮겼다.
+export const SECTOR_LABEL = {
+  auto: '자동차', battery: '2차전지', bio: '바이오', defense: '방산',
+  finance: '금융', power: '전력기기', semicon: '반도체', ship: '조선',
+};
 
 export const COUNTER_TREND_OUTPERF = 3.0;
 // 급락일 보정: 지수가 크게 빠진 날은 '살짝 초록'인 종목까지 전부 역행 상승으로 잡혀 배지 변별력이 사라진다.
@@ -149,38 +154,6 @@ export function sectorAverages(stocks) {
   return out;
 }
 
-// byCode: { code: {amount, vol, pct} } — amount는 거래대금(백만)
-export function etfBettingFlow(byCode) {
-  const sum = (codes, f) => codes.reduce((a, c) => a + (byCode[c]?.[f] || 0), 0);
-  const downAmt = sum(Object.keys(ETF_BET_DOWN), 'amount');
-  const upAmt = sum(Object.keys(ETF_BET_UP), 'amount');
-  const total = downAmt + upAmt;
-  const downRatio = total > 0 ? Math.round((downAmt / total) * 100) : 0;
-  const invCode = Object.keys(ETF_BET_DOWN)[0]; // 114800 KODEX 인버스
-  const invVol = byCode[invCode]?.vol || 0;
-  const refVol = byCode[ETF_KOSPI200]?.vol || 0;
-  const invVolMultiple = refVol > 0 ? Math.round(invVol / refVol) : 0;
-  const levCode = Object.keys(ETF_BET_UP)[0];
-  return { downAmt, upAmt, downRatio, upRatio: 100 - downRatio, invVolMultiple, levPct: byCode[levCode]?.pct ?? null };
-}
-
-export function etfSectorRotation(byCode) {
-  return Object.keys(ETF_SECTOR)
-    .filter((c) => byCode[c] && typeof byCode[c].pct === 'number')
-    .map((c) => ({ code: c, label: ETF_SECTOR[c], pct: byCode[c].pct, amount: byCode[c].amount || 0 }))
-    .sort((a, b) => b.pct - a.pct);
-}
-
-// ETF_SAFE 선언 순서를 명시적으로 보존 (정수형 키는 V8이 숫자순 정렬)
-const ETF_SAFE_ORDER = ['132030', '148070', '114260'];
-
-export function etfSafeHaven(byCode, marketPct) {
-  const rows = ETF_SAFE_ORDER
-    .filter((c) => byCode[c] && typeof byCode[c].pct === 'number')
-    .map((c) => ({ code: c, label: ETF_SAFE[c], pct: byCode[c].pct }));
-  return { rows, market: marketPct };
-}
-
 export const SUPPLY_STREAK_MIN = 3;
 // trend: 최신순 [{foreign, organ}] (순매수 수량). 연속 순매수 또는 전환 판정.
 // opts.suffix: 배지 뒤에 붙일 문구. 장중엔 네이버 trend API가 당일 행을 주지 않아(최신=전일)
@@ -197,25 +170,4 @@ export function classifySupply(trend, opts = {}) {
     if ((trend[0].organ || 0) > 0 && (trend[1].organ || 0) < 0 && !cats.includes('inst_buy')) { cats.push('inst_buy'); badges.push(`기관 순매수 전환${sfx}`); }
   }
   return { cats, badges };
-}
-
-export function etfLead(betting) {
-  const m = betting?.invVolMultiple || 0;
-  const dr = betting?.downRatio;
-  if (m >= 5) {
-    // 거래량(인버스 회전)은 폭증했지만 방향 베팅(거래대금 비중)이 중립권(40~60%)이면
-    // 헤드라인이 '하락 대비 수요'만 단정하는 건 과장이다. 두 신호가 엇갈릴 땐 중립 톤으로 완화.
-    const conflict = typeof dr === 'number' && dr >= 40 && dr <= 60;
-    if (conflict) {
-      return {
-        title: '엇갈린 ETF 신호 · 거래량↑ 방향은 중립',
-        body: `KODEX 인버스 거래량이 KODEX 200의 <b>${m}배</b>지만, 인버스·레버리지 거래대금은 <b>${dr} : ${100 - dr}</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.`,
-      };
-    }
-    return {
-      title: '인버스 ETF 거래량 폭증 · 하락 대비 수요 확대',
-      body: `KODEX 인버스 거래량이 KODEX 200의 <b>${m}배</b>예요. 급락장에서 하락 대비·저점매수·안전자산 수요가 동시에 움직였어요.`,
-    };
-  }
-  return { title: 'ETF 시황', body: '오늘 ETF 흐름을 아래에서 나눠 봐요.' };
 }

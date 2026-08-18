@@ -312,35 +312,10 @@ def _build_one(symbol, name, sector, market):
     return rec, bar_date
 
 
-def _build_etf(code, name):
-    """ETF 거래량 수집(네이버 일봉). 최근 세션 거래량이 오버플로 센티넬이면 제외(현재 거래량 미상)."""
-    rows = _naver_day_rows(code)
-    if not rows:
-        return None
-    last_vol = rows[-1].get("accumulatedTradingVolume")
-    if last_vol in (None, _VOL_SENTINEL):
-        return None
-    vols = [r["accumulatedTradingVolume"] for r in rows
-            if r.get("accumulatedTradingVolume") not in (None, _VOL_SENTINEL)]
-    closes = [float(r["closePrice"]) for r in rows if r.get("closePrice")]
-    return {
-        "name": name,
-        "vol": int(last_vol),
-        "vol_avg20": int(sum(vols[-20:]) / len(vols[-20:])),
-        "change_pct": change_pct(closes),
-    }
-
-
 def build_snapshot():
     uni = load_universe()
-    stocks, bellwethers, etfs = {}, {}, {}
+    stocks, bellwethers = {}, {}
     kr_bar_dates = []
-    for e in uni.get("etfs", []):
-        rec = _build_etf(e["code"], e["name"])
-        if rec:
-            etfs[e["code"]] = rec
-        else:
-            print(f"[snapshot] ETF {e['code']}({e['name']}) 거래량 무효 → 생략", file=sys.stderr)
     for key, sec in uni["sectors"].items():
         for s in sec["stocks"]:
             rec, bar_date = _build_one(s["code"], s["name"], key, "kr")
@@ -369,7 +344,6 @@ def build_snapshot():
         "generated_at": datetime.now(KST).isoformat(),
         "stocks": stocks,
         "bellwethers": bellwethers,
-        "etfs": etfs,
     }
     if session_date is not None:
         result["session_date"] = session_date
@@ -380,7 +354,7 @@ def main():
     snap = build_snapshot()
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[snapshot] {len(snap['stocks'])}종목 + {len(snap['bellwethers'])}벨웨더 + {len(snap['etfs'])}ETF → {OUT_PATH}")
+    print(f"[snapshot] {len(snap['stocks'])}종목 + {len(snap['bellwethers'])}벨웨더 → {OUT_PATH}")
 
 
 if __name__ == "__main__":

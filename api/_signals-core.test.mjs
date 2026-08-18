@@ -1,7 +1,7 @@
 // api/_signals-core.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyStock, buildSignals, etfBettingFlow, SIGNALS_DISPLAY_MAX } from './_signals-core.mjs';
+import { classifyStock, buildSignals, SIGNALS_DISPLAY_MAX } from './_signals-core.mjs';
 
 test('역행: 시장 -5.8%인데 종목 +1.7% → counter_up', () => {
   const s = { pct: 1.7, vol: 100, vol_avg20: 100, price: 100, wk52_high: 200 };
@@ -96,39 +96,6 @@ test('섹터 평균: 섹터별 평균 등락률·상승/하락 집계', () => {
   assert.ok(Math.abs(r.semicon.avg - (-8 / 3)) < 1e-9);
 });
 
-import { etfSectorRotation, etfSafeHaven, etfLead } from './_signals-core.mjs';
-
-test('섹터 로테이션: 등락률 내림차순', () => {
-  const byCode = { '091170': { pct: -3.15, amount: 16000 }, '139260': { pct: -6.22, amount: 534000 }, '449450': { pct: -6.29, amount: 40000 } };
-  const r = etfSectorRotation(byCode);
-  assert.equal(r[0].label, '은행');       // 가장 덜 빠짐
-  assert.equal(r[r.length - 1].label, '방산'); // 가장 약세
-});
-
-test('안전자산: 금·채권 + 시장 대비 행', () => {
-  const byCode = { '132030': { pct: 0.91 }, '148070': { pct: 0.14 }, '114260': { pct: 0.09 } };
-  const r = etfSafeHaven(byCode, -5.79);
-  assert.equal(r.market, -5.79);
-  assert.equal(r.rows[0].label, '금');
-});
-
-test('리드 헤드라인: 인버스 거래량 배수 크면 인버스 헤드라인', () => {
-  const lead = etfLead({ invVolMultiple: 46 });
-  assert.ok(lead.title.includes('인버스'));
-  assert.ok(lead.body.includes('46'));
-});
-
-test('리드 헤드라인: 거래량↑지만 거래대금 비중 중립(49%)이면 엇갈림 톤으로 완화', () => {
-  const lead = etfLead({ invVolMultiple: 52, downRatio: 49 });
-  assert.ok(lead.title.includes('엇갈린'));
-  assert.ok(lead.body.includes('52'));
-});
-
-test('리드 헤드라인: 거래대금도 하락 우위(72%)면 인버스 헤드라인 유지', () => {
-  const lead = etfLead({ invVolMultiple: 52, downRatio: 72 });
-  assert.ok(lead.title.includes('인버스'));
-});
-
 import { classifySupply } from './_signals-core.mjs';
 
 test('수급: 외국인 3일 연속 순매수 → foreign_buy', () => {
@@ -147,21 +114,6 @@ test('수급: 신호 없으면 빈 cats', () => {
   const trend = [{ foreign: -10, organ: -10 }, { foreign: -5, organ: -5 }];
   const r = classifySupply(trend);
   assert.deepEqual(r.cats, []);
-});
-
-test('베팅 흐름: 인버스류 거래대금 합산 vs 레버리지 + 인버스 거래량 배수', () => {
-  const byCode = {
-    '114800': { amount: 1122000, vol: 1239929374, pct: 6.08 }, // 인버스(백만)
-    '252670': { amount: 1183000, vol: 17149039548, pct: 11.29 }, // 인버스2X
-    '122630': { amount: 3163000, vol: 15796886, pct: -12.04 }, // 레버리지
-    '069500': { amount: 3677000, vol: 26711323, pct: -5.79 }, // KODEX200(분모)
-  };
-  const r = etfBettingFlow(byCode);
-  assert.equal(r.downAmt, 2305000);
-  assert.equal(r.upAmt, 3163000);
-  assert.equal(r.downRatio, 42); // 2305/(2305+3163) = 42.2 → 42
-  assert.equal(r.levPct, -12.04);
-  assert.ok(r.invVolMultiple >= 45 && r.invVolMultiple <= 47); // 12.4억/0.267억 ≈ 46
 });
 
 test('why+enrich: 수급만 있는 종목도 enrich로 설명 문구가 채워진다', () => {
