@@ -1447,6 +1447,28 @@
   /* ── 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(/api/signals phase==='intraday')에만
      노출하며 시장 지표 패널(#market-data-panel)을 완전히 대체한다. 장외·과거/미래 브리핑·
      데이터 없음이면 위젯을 숨기고 시장 지표를 그대로 둔다. 코스피 당일 브리핑 전용. ── */
+  // /api/signals는 stock_universe.json 기준 46종목 전체를 스캔하지만, 상세 페이지가
+  // 실제로 있는 종목은 scripts/config/stocks.json의 목록뿐이다(2026-08-19 상세 페이지
+  // 축소 결정). 여기 목록이 stocks.json과 어긋나면 404로 링크하게 되므로, stocks.json을
+  // 바꿀 때는 반드시 이 목록도 함께 맞출 것(stocks-home.js의 STOCK_PAGES와 같은 패턴).
+  var DETAIL_PAGE_CODES = {'005930':1,'000660':1,'005380':1};
+  function sidebarSignalRowHtml(s) {
+    var pct = Number(s.pct) || 0;
+    var dir = pct >= 0 ? 'up' : 'dn';
+    var pctTxt = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    var badges = (s.badges || []).slice(0, 2).map(function (b) {
+      var flow = /^(외국인|기관)/.test(b);
+      return '<span class="ssig-bdg' + (flow ? ' flow' : '') + '">' + escHtml(b) + '</span>';
+    }).join('');
+    var linked = !!DETAIL_PAGE_CODES[s.code];
+    var tag = linked ? 'a' : 'span';
+    var hrefAttr = linked ? ' href="/stocks/' + encodeURIComponent(s.code) + '/"' : '';
+    return '<' + tag + ' class="ssig-row ssig-row--sig"' + hrefAttr + '>'
+      + '<span class="ssig-sig-main"><span class="ssig-name">' + escHtml(s.name || '') + '</span>'
+      + (badges ? '<span class="ssig-bdgs">' + badges + '</span>' : '') + '</span>'
+      + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></' + tag + '>';
+  }
+
   function initSidebarSignals() {
     var box = document.getElementById('signals-today');
     if (!box) return;
@@ -1459,19 +1481,7 @@
     if (urlDate !== todayKst) return;   // 과거·미래 브리핑: 장중 신호는 '오늘'만 의미 → 시장 지표 유지
 
     var SIDEBAR_MAX = 6;   // 사이드바 컴팩트 노출 개수 (API는 최대 8개 내려줌)
-    function rowHtml(s) {
-      var pct = Number(s.pct) || 0;
-      var dir = pct >= 0 ? 'up' : 'dn';
-      var pctTxt = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
-      var badges = (s.badges || []).slice(0, 2).map(function (b) {
-        var flow = /^(외국인|기관)/.test(b);
-        return '<span class="ssig-bdg' + (flow ? ' flow' : '') + '">' + escHtml(b) + '</span>';
-      }).join('');
-      return '<a class="ssig-row ssig-row--sig" href="/stocks/' + encodeURIComponent(s.code) + '/">'
-        + '<span class="ssig-sig-main"><span class="ssig-name">' + escHtml(s.name || '') + '</span>'
-        + (badges ? '<span class="ssig-bdgs">' + badges + '</span>' : '') + '</span>'
-        + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></a>';
-    }
+    var rowHtml = sidebarSignalRowHtml;
 
     var scheduled = false;
     function poll() {
@@ -1519,5 +1529,7 @@
     kstMinsOfDay: kstMinsOfDay,
     trustRelTime: trustRelTime,
     TRUST_STALE_HOURS: TRUST_STALE_HOURS,
+    sidebarSignalRowHtml: sidebarSignalRowHtml,
+    DETAIL_PAGE_CODES: DETAIL_PAGE_CODES,
   };
 })();
