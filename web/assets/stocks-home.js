@@ -983,9 +983,12 @@ const navHistory=[];
    /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
    /briefings/                     브리핑 허브 (기존 서비스)
 ─────────────────────────────────────────────────────────────── */
-// 종목 상세 — standalone 페이지로 실제 이동 (생성된 종목만, 나머지는 "준비 중" 토스트)
-// 시드 3종목은 스냅샷 로드 전 즉시 클릭 대비. 나머지는 스냅샷 로드 시 유니버스 전체로 자동 채움
-// (build_all_stocks가 유니버스 종목 페이지를 일괄 빌드하므로 스냅샷=빌드된 페이지 목록).
+// 종목 상세 — standalone 페이지로 실제 이동 (생성된 종목만, 나머지는 안내 토스트).
+// 랭킹·섹터·특이신호가 스캔하는 종목 유니버스(stock_universe.json, 46종목)와 상세 페이지가
+// 실제로 존재하는 종목(scripts/config/stocks.json)은 이제 서로 다른 목록이다(2026-08-19
+// 상세 페이지 축소 결정) — 예전엔 두 목록이 같아서 스냅샷에 있으면 곧 페이지가 있다는 뜻이었지만,
+// 지금은 아니다. 여기 하드코딩한 목록이 stocks.json과 어긋나면 존재하지 않는 페이지로
+// 이동시키게 되므로, stocks.json을 바꿀 때는 반드시 이 목록도 함께 맞출 것.
 const STOCK_PAGES={'005930':1,'000660':1,'005380':1};
 let _stockToastT=null;
 function _stockToast(msg){
@@ -996,7 +999,7 @@ function _stockToast(msg){
   t.textContent=msg;t.style.opacity='1';
   clearTimeout(_stockToastT);_stockToastT=setTimeout(()=>{t.style.opacity='0';},1800);
 }
-function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else _stockToast('해당 종목 상세 페이지는 준비 중이에요.');}
+function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else _stockToast('이 종목은 상세 페이지를 제공하지 않아요.');}
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
 function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
 // 탭·화면별 트래픽을 GA4에서 구분해 볼 수 있도록 가상 pageview를 보낸다.
@@ -2653,8 +2656,9 @@ if(passBtn){
     .then(function(snap){
       SNAP=snap;
       if(SNAP&&SNAP.stocks){
+        // STOCK_PAGES는 여기서 채우지 않는다 — 스냅샷 유니버스(46종목)와 실제 상세 페이지
+        // 목록(stocks.json)이 더 이상 같지 않다(위 STOCK_PAGES 선언부 주석 참고).
         var _ks=Object.keys(SNAP.stocks);
-        _ks.forEach(function(c){STOCK_PAGES[c]=1;});
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}

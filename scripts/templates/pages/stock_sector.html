@@ -176,7 +176,7 @@
   </div>
   <div class="sector-stock-list">
     {% for s in stocks %}
-    <a class="sector-card" href="/stocks/{{ s.code }}/" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>
+    {% if s.linked %}<a class="sector-card" href="/stocks/{{ s.code }}/" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>{% else %}<div class="sector-card" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>{% endif %}
       <div class="sector-card__head">
         <span class="sector-card__name">{{ s.name }}</span>
         <span class="sector-card__code">{{ s.code }}</span>
@@ -199,7 +199,7 @@
       {% if s.foreign_rate is not none %}
       <div class="sector-card__fr">외국인 보유 {{ "%.1f"|format(s.foreign_rate) }}%</div>
       {% endif %}
-    </a>
+    {% if s.linked %}</a>{% else %}</div>{% endif %}
     {% endfor %}
   </div>
    </div><!-- /.sector-main -->

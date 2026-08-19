@@ -218,3 +218,28 @@ test('stale 경계: 95h는 표시 대상, 97h는 숨김 대상', () => {
   assert.ok(t.trustRelTime(ago(95 * 3600 * 1000)).hours < t.TRUST_STALE_HOURS);
   assert.ok(t.trustRelTime(ago(97 * 3600 * 1000)).hours > t.TRUST_STALE_HOURS);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 사이드바 특이신호 — 상세 페이지 존재 게이트 (2026-08-19 상세 페이지 축소)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('상세 페이지가 있는 종목은 <a href>로 링크한다', () => {
+  const t = loadMainJs();
+  const html = t.sidebarSignalRowHtml({ code: '005930', name: '삼성전자', pct: 1.2, badges: [] });
+  assert.match(html, /^<a class="ssig-row ssig-row--sig" href="\/stocks\/005930\/">/);
+  assert.match(html, /<\/a>$/);
+});
+
+test('상세 페이지가 없는 종목은 링크 없는 <span>으로 렌더한다 — 존재하지 않는 페이지로 보내지 않는다', () => {
+  const t = loadMainJs();
+  const html = t.sidebarSignalRowHtml({ code: '042700', name: '한미반도체', pct: -0.5, badges: [] });
+  assert.doesNotMatch(html, /href=/);
+  assert.match(html, /^<span class="ssig-row ssig-row--sig">/);
+  assert.match(html, /<\/span>$/);
+  assert.match(html, /한미반도체/);
+});
+
+test('DETAIL_PAGE_CODES는 정확히 keep-list 3종목이다', () => {
+  const t = loadMainJs();
+  assert.deepEqual(Object.keys(t.DETAIL_PAGE_CODES).sort(), ['000660', '005380', '005930']);
+});

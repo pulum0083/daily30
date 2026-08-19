@@ -45,7 +45,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20260703"
+ASSET_VER = "20260819"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -2153,11 +2153,17 @@ def build_all_us_stocks():
 
 
 def build_all_stocks():
-    """stocks.json 전체를 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
+    """stocks.json 중 detail_page:true인 종목만 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
+
+    stocks.json은 상세 페이지 생성 대상뿐 아니라 scripts/fetch_movers_why.py("코스피 주도주"
+    뉴스 근거 수집)의 종목 유니버스로도 쓰인다 — 그래서 항목 자체를 지우지 않고 detail_page
+    필드로만 상세 페이지 생성 여부를 가른다(2026-08-19 상세 페이지 축소 결정). 이 필드를
+    빼먹고 파일에서 항목을 통째로 지우면 fetch_movers_why.py의 스캔 범위까지 조용히 줄어든다.
 
     실측 호출 1회라도 실패하면 build_stock_page가 RuntimeError로 배치를 중단한다(fail-fast).
     """
-    stocks = load_json(CONFIG_DIR / "stocks.json")
+    all_stocks = load_json(CONFIG_DIR / "stocks.json")
+    stocks = [s for s in all_stocks if s.get("detail_page")]
     reg_codes = {s["code"] for s in stocks}
     peer_rd_cache = {}  # peer 실측 중복 호출 방지 (여러 종목이 같은 peer를 공유)
 
@@ -2208,8 +2214,11 @@ def write_sitemap_xml():
                     "priority": "0.7",
                 })
 
-    # 생성된 종목 상세 페이지만 포함
+    # 생성된 종목 상세 페이지만 포함 (detail_page:false는 파일이 남아있어도 제외 — §33 계열,
+    # 상세 페이지 축소 후 디렉터리 삭제를 깜빡했을 때 죽은 URL을 sitemap에 올리지 않는다)
     for s in load_json(CONFIG_DIR / "stocks.json"):
+        if not s.get("detail_page"):
+            continue
         if (WEB_DIR / "stocks" / s["code"] / "index.html").exists():
             urls.append({
                 "loc": f"{BASE}/stocks/{s['code']}/",
@@ -2360,13 +2369,20 @@ _SECTOR_DESC = {
 
 
 def build_sector_pages():
-    """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성."""
+    """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성.
+
+    섹터의 종목 유니버스(46개)는 stocks.json의 상세 페이지 목록(축소될 수 있음)과
+    별개다 — 카드 자체는 46개 전부 계속 보여주되, 상세 페이지가 없는 종목의 카드는
+    linked=False로 표시해 템플릿이 <a> 대신 <div>로 렌더해야 한다(§20 계열: 존재하지
+    않는 페이지로 링크해 404를 노출하지 않는다. detail.html의 peer 섹션과 동일 패턴).
+    """
     universe_path = CONFIG_DIR / "stock_universe.json"
     snapshot_path = WEB_DIR / "data" / "stocks-snapshot.json"
     universe = json.loads(universe_path.read_text(encoding="utf-8"))
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     snap_stocks = snapshot.get("stocks", {})
     snapshot_date = snapshot.get("generated_at", "")[:10]
+    detail_page_codes = {s["code"] for s in load_json(CONFIG_DIR / "stocks.json") if s.get("detail_page")}
 
     env = make_env()
     tpl = env.get_template("pages/stock_sector.html")
@@ -2386,6 +2402,7 @@ def build_sector_pages():
             stocks.append({
                 "code": code,
                 "name": s["name"],
+                "linked": code in detail_page_codes,
                 "close": measured["close"],
                 "close_fmt": _fmt_krw(measured["close"]),
                 "change_pct": measured["change_pct"],

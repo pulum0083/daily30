@@ -4,8 +4,8 @@
     {
       "name": "daily30-web",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8788", "--directory", "web"],
-      "port": 8788
+      "runtimeArgs": ["-m", "http.server", "8792", "--directory", "web"],
+      "port": 8792
     },
     {
       "name": "proto-web",
