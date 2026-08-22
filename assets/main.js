@@ -1533,3 +1533,16 @@
     DETAIL_PAGE_CODES: DETAIL_PAGE_CODES,
   };
 })();
+
+/* 텔레그램 구독 CTA 클릭 계측.
+   CTA는 템플릿 5곳(_chip_cta·_sidebar_kospi·detail·us_detail·about)에 흩어져 있어
+   각각을 고치는 대신 document 위임으로 한 번에 잡는다 — CTA가 늘어도 자동 계측된다.
+   종목 상세·월배당은 main.js를 싣지 않으므로 stocks.js에 같은 리스너가 하나 더 있다.
+   두 파일이 같은 페이지에 동시에 실리면 중복 집계되므로, 그렇게 바꾸게 되면 한쪽으로 합칠 것. */
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href*="t.me/"]');
+    if (!a || typeof gtag !== 'function') return;
+    gtag('event','telegram_click',{ link_url: a.getAttribute('href'), page_path: location.pathname });
+  }, true);
+})();

@@ -720,3 +720,13 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 
+
+/* 텔레그램 구독 CTA 클릭 계측 — 종목 상세는 main.js를 싣지 않아 같은 리스너를 여기 둔다.
+   근거와 중복 집계 주의사항은 main.js의 같은 블록 주석 참조. */
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href*="t.me/"]');
+    if (!a || typeof gtag !== 'function') return;
+    gtag('event','telegram_click',{ link_url: a.getAttribute('href'), page_path: location.pathname });
+  }, true);
+})();
