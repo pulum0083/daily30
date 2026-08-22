@@ -999,7 +999,19 @@ function _stockToast(msg){
   t.textContent=msg;t.style.opacity='1';
   clearTimeout(_stockToastT);_stockToastT=setTimeout(()=>{t.style.opacity='0';},1800);
 }
-function goStock(code){if(STOCK_PAGES[code])location.href='/stocks/'+code+'/';else _stockToast('이 종목은 상세 페이지를 제공하지 않아요.');}
+// 홈의 종목 클릭 진입점 9곳(신호·랭킹·검색·주도주·모멘텀)이 전부 이 함수를 지나므로
+// 여기 한 곳만 계측하면 홈의 모든 종목 클릭이 잡힌다 — 개별 호출부는 건드리지 않는다.
+// blocked는 페이지 이동이 아니라 토스트라서 pageview에 흔적이 안 남는다. 이 이벤트가
+// 없으면 "신호를 눌렀다가 막다른 길에서 튕긴 횟수"를 알 방법이 아예 없다.
+function goStock(code){
+  if(STOCK_PAGES[code]){
+    dsTrackEvent('stock_detail_open',{stock_code:code});
+    location.href='/stocks/'+code+'/';
+  }else{
+    dsTrackEvent('stock_detail_blocked',{stock_code:code});
+    _stockToast('이 종목은 상세 페이지를 제공하지 않아요.');
+  }
+}
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
 function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
 // 탭·화면별 트래픽을 GA4에서 구분해 볼 수 있도록 가상 pageview를 보낸다.
@@ -1009,6 +1021,12 @@ function goHub(screen){if(!screen){go('home');return;}if(document.getElementById
 function dsTrackPageview(){
   if(typeof gtag!=='function')return;
   gtag('event','page_view',{page_title:document.title,page_location:location.href,page_path:location.pathname+location.hash});
+}
+// 행동 이벤트 공용 진입점. gtag가 없으면(차단·로드 실패) 조용히 넘어간다 —
+// 계측 실패가 기능을 막으면 안 된다. 개인 식별 정보는 절대 넣지 않는다(종목코드·검색어만).
+function dsTrackEvent(name,params){
+  if(typeof gtag!=='function')return;
+  gtag('event',name,params||{});
 }
 function go(id,noHistory){
   const el=document.getElementById(id);if(!el||!el.classList.contains('screen'))return;
@@ -1234,6 +1252,18 @@ function openSearch(){document.getElementById('ov').classList.add('on');renderSe
 function closeSearch(){document.getElementById('ov').classList.remove('on');document.getElementById('sq').value='';}
 (function(){const sq=document.getElementById('sq');if(!sq)return;
   sq.addEventListener('input',renderSearch);
+  // 검색은 키 입력마다 renderSearch가 도는데, 그때마다 이벤트를 쏘면 한 번의 검색이
+  // 글자 수만큼 집계된다. 타이핑이 멎은 뒤 한 번만 보낸다.
+  let _sqTrackT;
+  sq.addEventListener('input',()=>{
+    clearTimeout(_sqTrackT);
+    _sqTrackT=setTimeout(()=>{
+      const q=(sq.value||'').trim();
+      if(q.length<2)return;
+      const hits=STOCK_LIST.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.code.includes(q)).length;
+      dsTrackEvent('search',{search_term:q,result_count:hits});
+    },800);
+  });
   sq.addEventListener('keydown',e=>{
     if(e.key==='ArrowDown'){e.preventDefault();_sqMove(1);}
     else if(e.key==='ArrowUp'){e.preventDefault();_sqMove(-1);}
