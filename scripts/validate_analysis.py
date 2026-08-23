@@ -10,6 +10,7 @@ call_claude → [validate_analysis] → generate_html 사이에서 동작.
 """
 import argparse
 import copy
+import html
 import json
 import os
 import re
@@ -1621,6 +1622,14 @@ def validate(analysis, latest, btype):
 
 
 # ── 관리자 알림 ───────────────────────────────────────────────────────────────
+def build_block_alert(btype, blocks):
+    """차단 알림 메시지. 인용하는 블록 텍스트는 브리핑 산문(<b> 태그·부등호 포함)이라
+    반드시 이스케이프한다 — 안 하면 parse_mode=HTML이 400을 뱉고, 하필 가장 알아야 할
+    차단 상황에서만 알림이 사라진다(2026-08-24 실사고)."""
+    body = "\n".join(f"• {html.escape(str(b))}" for b in blocks)
+    return f"🚫 <b>{html.escape(btype)}</b> 브리핑 발행 차단\n{body}"
+
+
 def send_admin_alert(message):
     """차단 시 관리자 텔레그램으로 알림. 키 미설정이면 조용히 건너뜀(차단은 유지)."""
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -1628,14 +1637,24 @@ def send_admin_alert(message):
     if not token or not chat_id:
         print("[validate] 관리자 알림 키 미설정 — 알림 건너뜀 (차단은 유지)", file=sys.stderr)
         return
-    try:
-        data = urllib.parse.urlencode({
-            "chat_id": chat_id, "text": message, "parse_mode": "HTML",
-        }).encode()
+
+    def _post(payload):
         req = urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/sendMessage", data=data)
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            data=urllib.parse.urlencode(payload).encode())
         urllib.request.urlopen(req, timeout=10)
+
+    base = {"chat_id": chat_id, "text": message}
+    try:
+        _post({**base, "parse_mode": "HTML"})
         print("[validate] 관리자 알림 발송 완료", file=sys.stderr)
+        return
+    except Exception as e:
+        print(f"[validate] 관리자 알림 HTML 파싱 실패({e}) — 평문 재시도", file=sys.stderr)
+    # 이스케이프를 빠뜨린 호출부가 생겨도 알림 자체는 도달해야 한다.
+    try:
+        _post(base)
+        print("[validate] 관리자 알림 발송 완료(평문)", file=sys.stderr)
     except Exception as e:
         print(f"[validate] 관리자 알림 실패: {e}", file=sys.stderr)
 
@@ -1719,10 +1738,7 @@ def main():
     if result["blocks"]:
         summary = "\n".join(f"  • {b}" for b in result["blocks"])
         print(f"[validate] 🚫 발행 차단 — 치명적 오류:\n{summary}", file=sys.stderr)
-        send_admin_alert(
-            f"🚫 <b>{btype}</b> 브리핑 발행 차단\n"
-            + "\n".join(f"• {b}" for b in result["blocks"])
-        )
+        send_admin_alert(build_block_alert(btype, result["blocks"]))
         return 1
 
     # 교정본 저장 (교정 사항이 있을 때만 덮어씀)
