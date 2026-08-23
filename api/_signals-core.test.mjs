@@ -94,6 +94,45 @@ test('섹터 평균: 섹터별 평균 등락률·상승/하락 집계', () => {
   assert.equal(r.semicon.total, 3);
   assert.equal(r.semicon.dn, 2);
   assert.ok(Math.abs(r.semicon.avg - (-8 / 3)) < 1e-9);
+  // amount가 없으면 wavg는 단순평균으로 폴백한다 — 섹터를 감추지 않는다.
+  assert.equal(r.bio.wavg, r.bio.avg);
+});
+
+test('섹터 가중: 거래대금이 큰 종목이 부호를 결정한다 (2026-08-21 반도체 리플레이)', () => {
+  // 실사고 데이터. 삼성전자·SK하이닉스가 섹터 거래대금의 97%인데
+  // 단순평균은 -2.78%로 지수(+0.88%)와 정반대였다.
+  const semis = [
+    { sector: 'semicon', pct: 3.87, amount: 7_789_700_000_000 },  // 삼성전자
+    { sector: 'semicon', pct: 2.31, amount: 7_348_000_000_000 },  // SK하이닉스
+    { sector: 'semicon', pct: -4.91, amount: 133_600_000_000 },   // 주성엔지니어링
+    { sector: 'semicon', pct: -5.32, amount: 110_000_000_000 },   // 한미반도체
+    { sector: 'semicon', pct: -7.43, amount: 55_100_000_000 },    // DB하이텍
+    { sector: 'semicon', pct: -2.53, amount: 40_300_000_000 },    // 이오테크닉스
+    { sector: 'semicon', pct: -5.47, amount: 22_400_000_000 },    // 리노공업
+  ];
+  const r = sectorAverages(semis).semicon;
+  assert.ok(r.avg < 0, '단순평균은 여전히 음수여야 한다(계산 자체는 바뀌지 않음)');
+  assert.ok(r.wavg > 0, '거래대금 가중은 양수여야 한다 — 지수·주도주 카드와 일치');
+  assert.ok(Math.abs(r.wavg - 2.92) < 0.05, `wavg 실측 근사치 +2.92% (얻은 값 ${r.wavg})`);
+});
+
+test('섹터 가중: amount가 일부만 있으면 있는 것만으로 가중한다', () => {
+  const r = sectorAverages([
+    { sector: 'auto', pct: 10, amount: 900 },
+    { sector: 'auto', pct: -10 },              // amount 없음 → 가중에서 빠짐
+  ]).auto;
+  assert.equal(r.avg, 0);      // 단순평균은 둘 다 셈
+  assert.equal(r.wavg, 10);    // 가중은 amount 있는 것만
+  assert.equal(r.total, 2);    // 카운트는 그대로
+});
+
+test('섹터 가중: amount가 0이거나 음수면 가중치로 쓰지 않는다', () => {
+  const r = sectorAverages([
+    { sector: 'ship', pct: 4, amount: 100 },
+    { sector: 'ship', pct: -8, amount: 0 },
+    { sector: 'ship', pct: -8, amount: -5 },
+  ]).ship;
+  assert.equal(r.wavg, 4, '0·음수 거래대금은 무시 — 가짜 가중 방지');
 });
 
 import { classifySupply } from './_signals-core.mjs';

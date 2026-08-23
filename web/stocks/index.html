@@ -414,7 +414,7 @@
         <div class="shead"><div class="top">
           <!-- 종목수만 남긴다. 시장·기준일은 화면 타이틀(psub)이 이미 말하고 있어 중복이었다. -->
           <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목</div></div>
-          <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
+          <div class="kpi"><div class="l">거래대금 가중</div><div class="v num" id="sec-avg">—</div></div>
         </div>
         <!-- "섹터 AI 심리" 게이지는 2026-08-04 제거. 값이 upN/total(단순 상승 비율)이라
              AI가 관여하지 않는데 라벨만 그렇게 달려 있었고(§0 과장), 바로 아래 시장폭이
@@ -446,107 +446,7 @@
   </div>
 
   <!-- ===== INCOME (배당 인컴 설계기) ===== -->
-  <div class="screen" id="income">
-    <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
-    <div class="phead">
-      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1,000억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · <span class="ds-date"></span></div></div>
-    </div>
-
-    <div class="grid">
-      <!-- 메인: 인컴 시뮬레이터 -->
-      <div>
-        <div class="sim">
-          <div class="sim__h"><div class="q">🧮 내 보유를 넣어보세요 <small>커버드콜·배당주·해외 직상장까지</small></div></div>
-          <div id="sim-rows"></div>
-          <div class="sim__add">
-            <div class="combo">
-              <input id="sim-search" placeholder="종목 검색 (이름·코드) — 순자산 톱20 기본" autocomplete="off"
-                     onfocus="comboOpen()" oninput="comboFilter()" onkeydown="comboKey(event)" onblur="comboClose()">
-              <div class="combo__list" id="combo-list"></div>
-            </div>
-            <div class="qty"><input id="sim-amt" type="number" value="100"><span>주</span></div>
-            <a onclick="simAdd()">+ 추가</a>
-          </div>
-          <div class="sim__target">
-            <div class="sim__target-row">
-              <span>목표 월 수령액</span>
-              <input id="sim-target" type="number" value="100" oninput="targetInput()">
-              <span>만원</span>
-              <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400;">종목 추가·주 수 변경 시 자동 계산돼요</span>
-            </div>
-            <div class="sim__presets" id="target-presets">
-              <a onclick="targetPreset(50)">50만</a>
-              <a onclick="targetPreset(100)" class="on">100만</a>
-              <a onclick="targetPreset(200)">200만</a>
-              <a onclick="targetPreset(300)">300만</a>
-              <a onclick="targetPreset(500)">500만</a>
-            </div>
-          </div>
-          <div class="sim__out" id="sim-out"></div>
-        </div>
-
-        <!-- 정직 배너 -->
-        <p class="disc">※ 분배율은 수익률이 아니에요. 커버드콜 ETF 일부는 분배금에 원금이 섞여 있어 가격이 녹으면 실제로 번 게 아니에요. 건전성 뱃지는 "총수익 − 분배율"로 추정한 가격 변화예요. 분배율·총수익·순자산은 직전 기준 실측값이며, 세금은 예상치예요. 투자 권유가 아니에요.</p>
-      </div>
-
-      <!-- 사이드바: 인컴 ETF 전체 -->
-      <div>
-        <div class="panel">
-          <div class="panel__h">배당·커버드콜 ETF
-            <div class="stabs" id="isort-tabs" style="margin-left:auto;margin-bottom:0;">
-              <a class="on" onclick="incomeSort('y',this)">분배율순</a>
-              <a onclick="incomeSort('health',this)">건전성순</a>
-            </div>
-          </div>
-          <div class="ipanel-cap">
-            <div class="ipanel-cap-row">
-              <div style="flex:1;">순자산 <b>1,000억원 이상</b> 배당·커버드콜 ETF예요.<br>
-                <span id="icap-y">연 <b>분배율이 높은 순</b>으로 정렬돼요.</span>
-                <span id="icap-h" style="display:none"><b>분배율 대비 실제 1년 총수익</b>이 높은 순으로 정렬돼요.</span>
-              </div>
-              <button class="ipanel-qbtn" onclick="openIncomeModal()">?</button>
-            </div>
-            <div class="ipanel-legend">
-              <span><i class="dot ok"></i>건전 · 가격 유지</span>
-              <span><i class="dot warn"></i>주의 · 소폭 침식</span>
-              <span><i class="dot bad"></i>원금성 · 원금 잠식</span>
-            </div>
-          </div>
-
-          <!-- 인컴 도움말 모달 -->
-          <div class="income-modal-bg" id="income-modal-bg" onclick="if(event.target===this)closeIncomeModal()">
-            <div class="income-modal">
-              <button class="close-btn" onclick="closeIncomeModal()">×</button>
-              <h3>🪙 인컴 ETF, 이것만 알면 돼요</h3>
-
-              <h4>분배율과 수익률은 달라요</h4>
-              <p>분배율이 15%여도, 그 돈이 내 원금에서 나왔다면 실제로 번 게 아니에요. 커버드콜 ETF 일부는 옵션 프리미엄 수익이 부족할 때 원금을 떼어 분배금으로 지급해요.</p>
-
-              <h4>건전성이 뭔가요?</h4>
-              <p><b>건전성 = 총수익 − 분배율</b>이에요. 총수익이 분배율보다 높으면 분배하면서 자산도 불어나는 구조예요 (건전). 총수익이 분배율보다 낮으면 분배금 일부가 원금에서 나온 거예요 (원금성).</p>
-
-              <h4>어떤 ETF를 골라야 할까요?</h4>
-              <p>분배율이 낮아도 건전한 ETF가 장기적으로 더 유리할 수 있어요. 건전성 탭으로 정렬해 비교해보세요.</p>
-
-              <h4>💬 AI에게 더 물어보세요</h4>
-              <div class="prompt-box">
-                <div class="prompt-text" id="income-prompt">커버드콜 ETF를 고려 중인데, 분배율 15%짜리 ETF와 분배율 9%지만 건전성이 좋은 ETF 중 어떤 게 장기적으로 유리할까요? 세금 효과까지 포함해서 비교해줘.</div>
-                <div style="display:flex;align-items:center;">
-                  <button class="copy-btn" onclick="copyPrompt()">📋 프롬프트 복사</button>
-                  <span class="copy-ok" id="copy-ok">✓ 복사됐어요</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <label id="cc-toggle" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;padding:8px 16px;border-top:1px solid var(--hair);">
-            <input type="checkbox" id="cc-exclude" onchange="incomeRender()" style="accent-color:#4F46E5;width:14px;height:14px;cursor:pointer;">
-            커버드콜 제외
-          </label>
-          <div id="income-rows"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- 배당 인컴 설계기 블록 제거(2026-08-23) — /stocks/income-designer/ 로 이관됨, 도달 경로 없었음 -->
 
   <!-- ===== PASSIVE (패시브 민감주 전체) ===== -->
   <div class="screen" id="passive">

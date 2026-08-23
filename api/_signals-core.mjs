@@ -139,18 +139,35 @@ export function buildSignals(stocks, kospiPct, opts = {}) {
   return { signals: display, signalsAll: sorted, rank };
 }
 
-// 섹터별 평균 등락률·상승/하락 카운트 — '오늘의 한 줄' 배너가 장중에도 전 섹터 라이브 값을 쓰도록.
-// stocks의 sector는 영문 키(semicon 등). 반환: { [sector]: {avg, up, dn, total} }
+// 섹터별 등락률·상승/하락 카운트 — '오늘의 한 줄' 배너가 장중에도 전 섹터 라이브 값을 쓰도록.
+// stocks의 sector는 영문 키(semicon 등). 반환: { [sector]: {avg, wavg, up, dn, total} }
+//
+// wavg = 거래대금(amount) 가중 평균. 화면에 쓰는 값은 이쪽이다.
+// 단순평균(avg)은 대표 5~7종목을 동일 비중으로 취급해서, 대장주가 끌어올린 날
+// 소형주가 눌리면 섹터가 지수와 정반대 부호로 뜬다. 2026-08-21 반도체가 그랬다 —
+// 삼성전자(+3.87%)·SK하이닉스(+2.31%)가 섹터 거래대금의 97%인데 단순평균은 -2.78%였고,
+// 같은 화면의 주도주 카드·코스피(+0.88%)와 정면으로 모순됐다.
+//
+// 시가총액 가중이 정석이지만 발행주식수를 어느 소스에서도 못 얻는다(스냅샷 필드 없음,
+// 토스 API 미제공, 네이버 integration은 409 차단). 그래서 없는 실측을 지어내지 않고
+// 이미 있는 실측(거래대금)으로 근사한다(§0). amount가 없으면 단순평균으로 폴백한다 —
+// 가중치를 못 구했다고 섹터를 통째로 감추는 것보다 낫고, 그 경우 avg와 값이 같아진다.
 export function sectorAverages(stocks) {
   const acc = {};
   for (const s of stocks || []) {
     const k = s.sector; if (!k) continue;
-    const a = acc[k] || (acc[k] = { sum: 0, up: 0, dn: 0, total: 0 });
+    const a = acc[k] || (acc[k] = { sum: 0, up: 0, dn: 0, total: 0, wsum: 0, wden: 0 });
     const p = s.pct || 0;
     a.sum += p; a.total += 1; if (p > 0) a.up += 1; else if (p < 0) a.dn += 1;
+    const w = typeof s.amount === 'number' && s.amount > 0 ? s.amount : 0;
+    if (w) { a.wsum += p * w; a.wden += w; }
   }
   const out = {};
-  for (const k of Object.keys(acc)) { const a = acc[k]; out[k] = { avg: a.total ? a.sum / a.total : 0, up: a.up, dn: a.dn, total: a.total }; }
+  for (const k of Object.keys(acc)) {
+    const a = acc[k];
+    const avg = a.total ? a.sum / a.total : 0;
+    out[k] = { avg, wavg: a.wden ? a.wsum / a.wden : avg, up: a.up, dn: a.dn, total: a.total };
+  }
   return out;
 }
 

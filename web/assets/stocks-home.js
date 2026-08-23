@@ -1272,293 +1272,9 @@ function closeSearch(){document.getElementById('ov').classList.remove('on');docu
 })();
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();}if(e.key==='Escape')closeSearch();});
 
-/* ── 배당 인컴 설계기 (보유=주 단위, 주가 기반 인컴 계산) ── */
-// 국내 18종 = data/income_etfs.json 실측(2026-06-11 기준, build_income_etfs.py). US 3종은 해외 직상장 데모용 샘플.
-const INCOME_UNIVERSE=[
-  {code:'494300',name:'KODEX 미국나스닥100데일리커버드콜OTM',aum:0.88,price:10835,y:18.48,r:42.93,mk:'KR'},
-  {code:'498410',name:'KODEX 금융고배당TOP10타겟위클리커버드콜',aum:0.77,price:11925,y:16.4,r:16.35,mk:'KR'},
-  {code:'490590',name:'RISE 미국AI밸류체인데일리고정커버드콜',aum:0.75,price:16510,y:15.87,r:89.59,mk:'KR'},
-  {code:'472150',name:'TIGER 배당커버드콜액티브',aum:1.93,price:25580,y:14.68,r:177.47,mk:'KR'},
-  {code:'475720',name:'RISE 200위클리커버드콜',aum:0.92,price:15065,y:14.61,r:100.36,mk:'KR'},
-  {code:'486290',name:'TIGER 미국나스닥100타겟데일리커버드콜',aum:1.89,price:11970,y:13.48,r:44.7,mk:'KR'},
-  {code:'476550',name:'TIGER 미국30년국채커버드콜액티브(H)',aum:0.9,price:7240,y:13.02,r:1.85,mk:'KR'},
-  {code:'481060',name:'KODEX 미국30년국채타겟커버드콜(합성 H)',aum:0.84,price:7750,y:12.94,r:1.67,mk:'KR'},
-  {code:'498400',name:'KODEX 200타겟위클리커버드콜',aum:6.74,price:25050,y:11.23,r:174.81,mk:'KR'},
-  {code:'329200',name:'TIGER 리츠부동산인프라',aum:1.47,price:4075,y:9.54,r:6.03,mk:'KR'},
-  {code:'458760',name:'TIGER 미국배당다우존스타겟커버드콜2호',aum:0.73,price:11670,y:9.15,r:35.42,mk:'KR'},
-  {code:'441640',name:'KODEX 미국배당커버드콜액티브',aum:1.62,price:13395,y:8.7,r:29.7,mk:'KR'},
-  {code:'441800',name:'TIME Korea플러스배당액티브',aum:0.95,price:34340,y:5.31,r:137.48,mk:'KR'},
-  {code:'161510',name:'PLUS 고배당주',aum:2.49,price:26330,y:3.77,r:47.47,mk:'KR'},
-  {code:'466940',name:'TIGER 은행고배당플러스TOP10',aum:0.8,price:25865,y:3.66,r:50.98,mk:'KR'},
-  {code:'446720',name:'SOL 미국배당다우존스',aum:1.01,price:14360,y:2.76,r:37.41,mk:'KR'},
-  {code:'402970',name:'ACE 미국배당다우존스',aum:0.92,price:15900,y:2.73,r:37.68,mk:'KR'},
-  {code:'458730',name:'TIGER 미국배당다우존스',aum:3.9,price:15670,y:2.69,r:37.49,mk:'KR'},
-  {code:'JEPI',name:'JPMorgan 에쿼티프리미엄 (JEPI)',aum:0,price:78000,y:7.8,r:9.5,mk:'US'},
-  {code:'SCHD',name:'Schwab 미국배당 (SCHD)',aum:0,price:38000,y:3.5,r:12.0,mk:'US'},
-  {code:'QYLD',name:'Global X 나스닥커버드콜 (QYLD)',aum:0,price:24000,y:11.8,r:2.5,mk:'US'},
-];
-const UNIV={};INCOME_UNIVERSE.forEach(d=>UNIV[d.code]=d);
-function incomeHealth(d){const e=d.r-d.y;if(e>=0)return['ok','건전',e];if(e>=-d.y/2)return['warn','주의',e];return['bad','원금성',e];}
-
-/* 사이드바: 인컴 ETF 전체 (국내 1조+) */
-const BADGE_TIPS={ok:'총수익이 분배율을 웃돌아요. 분배하면서도 자산이 불어나는 구조예요.',warn:'총수익이 분배율보다 약간 낮아요. 분배금 일부에 원금이 섞여 있을 수 있어요.',bad:'총수익이 분배율을 크게 밑돌아요. 분배금 상당 부분이 원금 반환 구조예요.'};
-function incomeRow(d,i){
-  const[hc,hl,e]=incomeHealth(d);
-  const rk=i+1,rkCls=rk<=3?'rk top':'rk';
-  const rTxt=`${d.r>=0?'+':''}${d.r}%`;
-  const eTxt=e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`;
-  const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
-  return `<a class="irow" onclick="addFromRanking('${d.code}')">
-    <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
-    <div class="imeta num">${d.code} · 순자산 ${d.aum.toFixed(1)}조</div>
-    <div class="imx"><span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${rTxt}</b> · ${eTxt}</div>
-  </a>`;
-}
-let iSortKey='y';
-function incomeRender(){
-  const excludeCC=document.getElementById('cc-exclude')?.checked;
-  let arr=INCOME_UNIVERSE.filter(d=>d.mk==='KR');
-  if(excludeCC)arr=arr.filter(d=>!d.name.includes('커버드콜'));
-  if(iSortKey==='y')arr.sort((a,b)=>b.y-a.y);
-  else arr.sort((a,b)=>(b.r-b.y)-(a.r-a.y));
-  arr=arr.slice(0,15);
-  document.getElementById('income-rows').innerHTML=arr.map(incomeRow).join('');
-}
-function incomeSort(k,el){
-  iSortKey=k;
-  document.querySelectorAll('#isort-tabs a').forEach(a=>a.classList.remove('on'));el.classList.add('on');
-  document.getElementById('icap-y').style.display=k==='y'?'':'none';
-  document.getElementById('icap-h').style.display=k==='health'?'':'none';
-  incomeRender();
-}
-incomeRender();
-
-/* 메인: 인컴 시뮬레이터 — 보유(주) 입력 → 인컴·원금성 경고·종합과세·갭 */
-const SIM_KEY='ds-income-holdings-v1';
-function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
-function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
-let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
-function simIncome(h){const d=UNIV[h.code];return h.qty*d.price*d.y/100/10000;}  // 만원/년
-function simRowsRender(){
-  document.getElementById('sim-rows').innerHTML=simHoldings.map((h,i)=>{
-    const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
-    return `<div class="simrow">
-      <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
-      <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
-      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
-      <div class="sx" onclick="simDel(${i})">×</div>
-    </div>`;
-  }).join('');
-}
-function simSet(i,v){
-  simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
-  const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
-  const el=document.getElementById('sinc-'+i);
-  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small>평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
-  simOut();
-}
-function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
-/* 사이드바 행 클릭 → 시뮬레이터에 바로 담기 */
-function addFromRanking(code){
-  const ex=simHoldings.findIndex(h=>h.code===code);
-  if(ex>=0)simHoldings[ex].qty+=100; else simHoldings.push({code,qty:100});
-  saveHoldings();simRowsRender();simOut();
-  const rows=document.querySelectorAll('#sim-rows .simrow');
-  const idx=ex>=0?ex:simHoldings.length-1,el=rows[idx];
-  if(el){
-    el.style.transition='background .4s';el.style.background='#EEF2FF';
-    setTimeout(()=>el.style.background='',700);
-    el.scrollIntoView({block:'nearest'});
-    const inp=el.querySelector('.qty input');
-    if(inp){inp.focus();inp.select();}
-  }
-}
-
-/* 콤보박스: 순자산 톱20 기본 + 이름·코드 검색 */
-let comboSel=null,comboCur=[],comboIdx=-1;
-function comboItems(q){
-  q=(q||'').trim().toLowerCase();
-  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,20);
-  return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
-}
-function comboRender(q){
-  const arr=comboItems(q),list=document.getElementById('combo-list');comboCur=arr;
-  if(!arr.length){list.innerHTML='<div class="combo__none">검색 결과 없음</div>';return;}
-  const hd=(q||'').trim()?'':'<div class="combo__hd">순자산 톱20</div>';
-  list.innerHTML=hd+arr.map((d,i)=>`<div class="combo__item${i===comboIdx?' sel':''}" onmousedown="comboPick('${d.code}')"><span class="ci-nm">${d.name}<small class="num">${d.code}</small></span><span class="ci-mk">${d.mk}</span><span class="ci-y num">${d.y}%</span></div>`).join('');
-}
-function comboOpen(){comboRender(document.getElementById('sim-search').value);document.getElementById('combo-list').classList.add('on');}
-function comboFilter(){comboSel=null;comboIdx=-1;comboOpen();}
-function comboClose(){setTimeout(()=>document.getElementById('combo-list').classList.remove('on'),150);}
-function comboPick(code){comboSel=code;document.getElementById('sim-search').value=UNIV[code].name;document.getElementById('combo-list').classList.remove('on');}
-function comboHighlight(){
-  const items=document.querySelectorAll('#combo-list .combo__item');
-  items.forEach((el,i)=>el.classList.toggle('sel',i===comboIdx));
-  if(comboIdx>=0&&items[comboIdx])items[comboIdx].scrollIntoView({block:'nearest'});
-}
-function comboKey(e){
-  const list=document.getElementById('combo-list');
-  if(!list.classList.contains('on')){if(e.key==='ArrowDown')comboOpen();return;}
-  if(e.key==='ArrowDown'){e.preventDefault();comboIdx=Math.min(comboCur.length-1,comboIdx+1);comboHighlight();}
-  else if(e.key==='ArrowUp'){e.preventDefault();comboIdx=Math.max(0,comboIdx-1);comboHighlight();}
-  else if(e.key==='Enter'){if(comboIdx>=0&&comboCur[comboIdx]){e.preventDefault();comboPick(comboCur[comboIdx].code);}}
-  else if(e.key==='Escape'){list.classList.remove('on');}
-}
-function simAdd(){
-  if(!comboSel){const q=document.getElementById('sim-search').value.trim().toLowerCase();const m=INCOME_UNIVERSE.find(d=>d.name.toLowerCase()===q||d.code.toLowerCase()===q);if(m)comboSel=m.code;}
-  const qty=parseInt(document.getElementById('sim-amt').value)||0;
-  if(comboSel&&qty>0){
-    simHoldings.push({code:comboSel,qty});
-    comboSel=null;document.getElementById('sim-search').value='';
-    saveHoldings();simRowsRender();simOut();
-    const rows=document.querySelectorAll('#sim-rows .simrow');
-    const el=rows[simHoldings.length-1];
-    if(el){el.scrollIntoView({block:'nearest'});const inp=el.querySelector('.qty input');if(inp){inp.focus();inp.select();}}
-  }
-}
-const DONUT_COLORS=['#4F46E5','#2775ED','#10B981','#8B5CF6','#D97706','#EF4444','#EC4899','#6366F1','#F59E0B'];
-const GAP_COLOR='#E5E7EB';
-
-function buildDonut(segs, monthly){
-  const CX=70,CY=70,R=50,W=18,circ=2*Math.PI*R;
-  const gap=segs.length>1?1.5:0;
-  let offset=0;
-  const arcs=segs.map((s,i)=>{
-    const len=Math.max(0,s.pct*circ-gap);
-    const el=`<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${s.color}" stroke-width="${W}" stroke-linecap="butt" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" class="donut-arc" data-i="${i}" transform="rotate(-90 ${CX} ${CY})"/>`;
-    offset+=s.pct*circ;
-    return el;
-  }).join('');
-  return `<svg class="donut-svg" viewBox="0 0 140 140" width="140" height="140">
-    <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--hair)" stroke-width="${W}"/>
-    ${arcs}
-    <text x="${CX}" y="${CY-5}" text-anchor="middle" font-size="17" font-weight="700" fill="var(--ink)" font-family="inherit">${monthly.toFixed(0)}</text>
-    <text x="${CX}" y="${CY+12}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">만원/월</text>
-  </svg>`;
-}
-
-function setupDonutTip(segs){
-  const tip=document.getElementById('donut-tip');
-  if(!tip)return;
-  document.querySelectorAll('.donut-arc').forEach(el=>{
-    el.addEventListener('mousemove',e=>{
-      const i=parseInt(el.dataset.i),s=segs[i];
-      if(!s)return;
-      const pct=(s.pct*100).toFixed(1);
-      tip.innerHTML=s.code
-        ?`<b>${s.name}</b><br>월 인컴 <b>${s.inc.toFixed(1)}만원</b> · ${pct}%`
-        :`<b>${s.name}</b><br>${s.inc.toFixed(1)}만원 더 필요해요`;
-      tip.style.display='block';
-      tip.style.left=(e.clientX+14)+'px';
-      tip.style.top=(e.clientY-10)+'px';
-    });
-    el.addEventListener('mouseleave',()=>{tip.style.display='none';});
-  });
-}
-
-const PRESETS=[50,100,200,300,500];
-function targetPreset(v){
-  document.getElementById('sim-target').value=v;
-  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
-  simOut();
-}
-function targetInput(){
-  const v=parseInt(document.getElementById('sim-target').value)||0;
-  document.querySelectorAll('#target-presets a').forEach((el,i)=>el.classList.toggle('on',PRESETS[i]===v));
-  simOut();
-}
-function simOut(){
-  let totalDiv=0;const bad=[],slices=[];
-  simHoldings.forEach(h=>{
-    const d=UNIV[h.code],inc=simIncome(h);
-    totalDiv+=inc;
-    slices.push({name:d.name,code:h.code,inc});
-    const[hc,,e]=incomeHealth(d);
-    if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
-  });
-  const monthly=totalDiv/12,target=parseInt(document.getElementById('sim-target').value)||0,gap=target-monthly;
-
-  // 도넛 세그먼트 구성
-  const total=Math.max(monthly,target,0.01);
-  const segs=slices.map((s,i)=>({name:s.name,code:s.code,inc:s.inc/12,pct:s.inc/12/total,color:DONUT_COLORS[i%DONUT_COLORS.length]}));
-  if(gap>0)segs.push({name:'목표까지 부족',code:'',inc:gap,pct:gap/total,color:GAP_COLOR});
-
-  const donut=simHoldings.length?buildDonut(segs,monthly):'';
-  const legend=segs.filter(s=>s.code).map(s=>`<span class="dl-item"><i style="background:${s.color}"></i>${s.name}<b class="num">${s.inc.toFixed(0)}만</b></span>`).join('');
-
-  let html=`<div class="sim-out-row">
-    ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
-    <div style="flex:1;min-width:0;">
-      <div class="sim-kpi">
-        <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
-        <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
-      </div>
-      <div class="donut-legend">${legend}</div>
-    </div>
-  </div>`;
-
-  // 리포트 카드 조립
-  const cards=[];
-  if(bad.length){
-    cards.push(`<div class="rc open">
-      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body">${bad.map(b=>`<b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요. 분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.`).join('<br><br>')}</div>
-    </div>`);
-    const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
-    const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
-    if(alt){
-      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
-      cards.push(`<div class="rc open">
-        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
-        <div class="rc-body">
-          <div class="rc-flow">
-            <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
-          </div>
-          같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.
-          <div class="rc-actions">
-            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
-            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
-          </div>
-        </div>
-      </div>`);
-    }
-  }
-  const taxWarn=totalDiv>=2000;
-  cards.push(`<div class="rc">
-    <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'red':'green'}">${taxWarn?'과세 대상':'안전'}</span><span class="rc-chev">▾</span></div>
-    <div class="rc-body">${taxWarn
-      ?`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>이 기준(2,000만원)을 초과해요. 초과분 <b class="rc-num" style="color:#f33942">${(totalDiv-2000).toFixed(0)}만원</b>이 다른 소득에 합산돼 세율이 높아질 수 있어요.`
-      :`연 분배금 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요. 현재 보유 조합에서는 금융소득종합과세 대상이 아니에요.`}
-    </div>
-  </div>`);
-  if(gap>0){
-    const f=UNIV['458760'],need=gap*12/(f.y/100),needTxt=need>=10000?(need/10000).toFixed(1)+'억원':need.toFixed(0)+'만원';
-    cards.push(`<div class="rc">
-      <div class="rc-head" onclick="toggleRc(this)"><span class="rci">📈</span><span class="rct">목표 달성 전략</span><span class="rcb amber">월 ${gap.toFixed(0)}만원 부족</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body">건전 등급 <b>${f.name}</b><span class="rc-num">(분배 ${f.y}% · 가격 +${(f.r-f.y).toFixed(0)}%)</span>을 약 <b class="rc-num">${needTxt}</b> 더 담으면 목표 월 <b class="rc-num">${target}만원</b>에 도달할 수 있어요.
-        <div class="rc-actions"><a class="rc-act pri" onclick="addFromRanking('${f.code}')">시뮬레이터에 추가</a></div>
-      </div>
-    </div>`);
-  }
-
-  html+=`<div class="sim-report-title">📋 진단 리포트</div><div class="sim-report">${cards.join('')}</div>`;
-
-  document.getElementById('sim-out').innerHTML=html;
-  if(simHoldings.length)setupDonutTip(segs);
-}
-function openIncomeModal(){document.getElementById('income-modal-bg').classList.add('open');document.body.style.overflow='hidden';}
-function closeIncomeModal(){document.getElementById('income-modal-bg').classList.remove('open');document.body.style.overflow='';}
-function copyPrompt(){
-  const txt=document.getElementById('income-prompt').textContent;
-  navigator.clipboard.writeText(txt).then(()=>{
-    const ok=document.getElementById('copy-ok');ok.style.display='inline';
-    setTimeout(()=>ok.style.display='none',2000);
-  });
-}
-function toggleRc(head){head.closest('.rc').classList.toggle('open');}
-try{ simRowsRender();simOut(); }catch(e){ /* 인컴 설계기 초기화 실패가 이후 코드(브리핑 커넥터 등)를 막지 않도록 격리 */ console.warn('[income] init skipped', e); }
+/* 배당 인컴 설계기는 /stocks/income-designer/ 전용 페이지로 이관됨(d52a4ca8).
+   홈에 남아 있던 원본 마크업·로직은 도달 경로가 없어 2026-08-23에 제거했다.
+   하드코딩된 INCOME_UNIVERSE(2026-06-11 스냅샷)도 함께 사라졌다 — §20 정적 데이터 금지. */
 
 /* 패시브 뱃지 툴팁 */
 const passBtn=document.getElementById('badge-pass-btn');
@@ -2034,20 +1750,29 @@ if(passBtn){
     Object.keys(snap.stocks).forEach(function(code){
       var s=snap.stocks[code];
       if(s&&s.sector===key&&typeof s.change_pct==='number'){
-        rows.push({code:code,name:s.name,pct:s.change_pct});
-        // 시가총액이 스냅샷에 없어(발행주식수 미보유) '섹터 크기' 대용으로 거래대금
-        // (종가×거래량)을 쓴다 — §0: 없는 실측을 지어내지 않고, 있는 실측으로 근사한다.
-        if(typeof s.close==='number'&&typeof s.vol==='number') dvol+=s.close*s.vol;
+        // 시가총액이 스냅샷에 없어(발행주식수 미보유) '섹터 크기'와 가중치 대용으로
+        // 거래대금(종가×거래량)을 쓴다 — §0: 없는 실측을 지어내지 않고, 있는 실측으로 근사한다.
+        var d=(typeof s.close==='number'&&typeof s.vol==='number')?s.close*s.vol:0;
+        rows.push({code:code,name:s.name,pct:s.change_pct,dvol:d});
+        dvol+=d;
       }
     });
     if(!rows.length) return null;
     rows.sort(function(a,b){return b.pct-a.pct;});
-    var upN=0,dnN=0,flatN=0,sum=0;
-    rows.forEach(function(r){sum+=r.pct;if(r.pct>0)upN++;else if(r.pct<0)dnN++;else flatN++;});
+    var upN=0,dnN=0,flatN=0,sum=0,wsum=0,wden=0;
+    rows.forEach(function(r){
+      sum+=r.pct;if(r.pct>0)upN++;else if(r.pct<0)dnN++;else flatN++;
+      if(r.dvol>0){wsum+=r.pct*r.dvol;wden+=r.dvol;}
+    });
     var total=rows.length,avg=sum/total;
+    // 화면에 쓰는 값은 wavg(거래대금 가중)다. 단순평균은 대표 5~7종목을 동일 비중으로
+    // 취급해서 대장주가 끌어올린 날 섹터가 지수와 반대 부호로 뜬다(2026-08-21 반도체).
+    // 시총 가중이 정석이나 발행주식수를 어느 소스에서도 못 얻어, 있는 실측인 거래대금으로
+    // 근사한다(§0). 거래대금을 못 구하면 avg로 폴백 — 섹터를 감추지는 않는다.
+    var wavg=wden?wsum/wden:avg;
     var byCode={}; rows.forEach(function(r){byCode[r.code]=r;});
     var leaders=(SECTOR_LEADERS[key]||[]).map(function(c){return byCode[c];}).filter(Boolean);
-    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,leaders:leaders,dvol:dvol};
+    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,wavg:wavg,leaders:leaders,dvol:dvol};
   }
 
   // 8개 섹터 전부의 평균·거래대금 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
@@ -2055,7 +1780,7 @@ if(passBtn){
     var out={};
     Object.keys(SECTOR_LABELS).forEach(function(key){
       var d=secBuildSectorData(snap,key);
-      if(d) out[key]={avg:d.avg,label:d.label,dvol:d.dvol};
+      if(d) out[key]={avg:d.avg,wavg:d.wavg,label:d.label,dvol:d.dvol};
     });
     return out;
   }
@@ -2104,7 +1829,7 @@ if(passBtn){
       .sort(function(a,b){return (allAvgs[b].dvol||0)-(allAvgs[a].dvol||0);});
     var order=allAvgs['semicon']?['semicon'].concat(rest):rest;
     box.innerHTML=order.map(function(k){
-      var d=allAvgs[k]; return secChipHtml(k,d.label,d.avg,k===activeKey);
+      var d=allAvgs[k]; return secChipHtml(k,d.label,(typeof d.wavg==='number'?d.wavg:d.avg),k===activeKey);
     }).join('');
   }
 
@@ -2130,7 +1855,8 @@ if(passBtn){
     }
 
     var avgEl=document.getElementById('sec-avg');
-    if(avgEl){avgEl.textContent=(d.avg>=0?'+':'−')+Math.abs(d.avg).toFixed(2)+'%';avgEl.className='v num '+(d.avg>=0?'up':'dn');}
+    // 칩과 같은 기준(거래대금 가중)을 써야 한다 — 다르면 같은 화면에서 두 값이 어긋난다.
+    if(avgEl){var wa=(typeof d.wavg==='number'?d.wavg:d.avg);avgEl.textContent=(wa>=0?'+':'−')+Math.abs(wa).toFixed(2)+'%';avgEl.className='v num '+(wa>=0?'up':'dn');}
 
     var lbl=document.getElementById('sec-breadth-label');
     if(lbl) lbl.innerHTML=d.total+'종목 중 <b class="up num">'+d.upN+' 상승</b>';
@@ -2392,10 +2118,18 @@ if(passBtn){
   // 실시간이고 나머지 탭은 정적 스냅샷에 머물러 있다가 클릭 시 갑자기 값이 바뀌는 불일치를 막는다.
   function sbxSectorStat(key){
     if(SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
-    var arr=sbxSectorStocks(key), sum=0,up=0,dn=0;
-    arr.forEach(function(s){var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;});
-    return {avg:arr.length?sum/arr.length:0, up:up, dn:dn, total:arr.length};
+    var arr=sbxSectorStocks(key), sum=0,up=0,dn=0,wsum=0,wden=0;
+    arr.forEach(function(s){
+      var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;
+      var d=(typeof s.close==='number'&&typeof s.vol==='number')?s.close*s.vol:0;
+      if(d>0){wsum+=p*d;wden+=d;}
+    });
+    var avg=arr.length?sum/arr.length:0;
+    return {avg:avg, wavg:wden?wsum/wden:avg, up:up, dn:dn, total:arr.length};
   }
+  // 화면에 쓰는 섹터 등락률. 거래대금 가중(wavg)이 정본이고 없으면 단순평균으로 폴백한다.
+  // 단순평균을 그대로 쓰면 대장주가 끌어올린 날 섹터가 지수와 반대 부호로 뜬다(2026-08-21 반도체).
+  function sbxAvgOf(st){ return st&&typeof st.wavg==='number'?st.wavg:((st&&st.avg)||0); }
   // 상단 스트립의 코스피 등락률을 읽는다(유니코드 마이너스·기호 정규화). 못 읽으면 null.
   function tlKospiPct(){
     var el=document.getElementById('h-kospi-c'); if(!el) return null;
@@ -2560,7 +2294,7 @@ if(passBtn){
     if(SIG_SECTORS){
       return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
     }
-    return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{label:SECTOR_LABELS[k],avg:st.avg,total:st.total}:null;}).filter(Boolean);
+    return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{label:SECTOR_LABELS[k],avg:sbxAvgOf(st),total:st.total}:null;}).filter(Boolean);
   }
   function renderTodayLine(){
     var wrap=document.getElementById('today-line'); if(!wrap) return;
@@ -2615,8 +2349,8 @@ if(passBtn){
   function sbxRenderTabs(){
     var box=document.getElementById('sbx-tabs'); if(!box||!SNAP) return;
     box.innerHTML=SBX_ORDER.map(function(key){
-      var st=sbxSectorStat(key), cls=sbxPctCls(st.avg);
-      return '<span class="sbx-tab'+(key===sbxActiveKey?' on':'')+'" data-key="'+key+'">'+SBX_EMOJI[key]+' '+SECTOR_LABELS[key]+'<span class="rt '+cls+'">'+sbxPctFmt(st.avg)+'</span></span>';
+      var st=sbxSectorStat(key), cls=sbxPctCls(sbxAvgOf(st));
+      return '<span class="sbx-tab'+(key===sbxActiveKey?' on':'')+'" data-key="'+key+'">'+SBX_EMOJI[key]+' '+SECTOR_LABELS[key]+'<span class="rt '+cls+'">'+sbxPctFmt(sbxAvgOf(st))+'</span></span>';
     }).join('');
     [].slice.call(box.querySelectorAll('.sbx-tab')).forEach(function(el){
       el.onclick=function(){ sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday(); };
@@ -2625,19 +2359,19 @@ if(passBtn){
   function sbxRenderBody(){
     var body=document.getElementById('sbx-body'); if(!body||!SNAP) return;
     var arr=sbxSectorStocks(sbxActiveKey), st=sbxSectorStat(sbxActiveKey);
-    var avgCls=sbxPctCls(st.avg), upFlex=st.up||0.001, dnFlex=st.dn||0.001;
+    var avgCls=sbxPctCls(sbxAvgOf(st)), upFlex=st.up||0.001, dnFlex=st.dn||0.001;
     // 집계값(평균·상승·하락·시장폭)도 카드와 같은 라이브 데이터에서 나오므로, 미해결이면 빗금으로 대기해 튐을 막는다.
     var pend=sbxPending();
     var statBlock = pend
       ? '<div class="sbx-stat">'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">섹터 평균</div><div class="sbx-stat__val flat">'+sbxSkel(56,17)+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">거래대금 가중</div><div class="sbx-stat__val flat">'+sbxSkel(56,17)+'</div></div>'
           +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
           +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
         +'</div>'
         +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — 집계 중…</div>'
           +'<div class="sbx-breadth__bar"><span class="scard__skel" style="flex:1;height:8px;border-radius:4px;"></span></div></div>'
       : '<div class="sbx-stat">'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">섹터 평균</div><div class="sbx-stat__val '+avgCls+'">'+sbxPctFmt(st.avg)+'</div></div>'
+          +'<div class="sbx-stat__box"><div class="sbx-stat__label">거래대금 가중</div><div class="sbx-stat__val '+avgCls+'">'+sbxPctFmt(sbxAvgOf(st))+'</div></div>'
           +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val up">'+st.up+'</div></div>'
           +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val down">'+st.dn+'</div></div>'
         +'</div>'
@@ -2697,7 +2431,7 @@ if(passBtn){
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
       var _best=sbxActiveKey, _bestAvg=-Infinity;
-      SBX_ORDER.forEach(function(k){var st=sbxSectorStat(k); if(st.total&&st.avg>_bestAvg){_bestAvg=st.avg;_best=k;}});
+      SBX_ORDER.forEach(function(k){var st=sbxSectorStat(k); var a=sbxAvgOf(st); if(st.total&&a>_bestAvg){_bestAvg=a;_best=k;}});
       sbxActiveKey=_best;
       renderTodayLine();
       sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
