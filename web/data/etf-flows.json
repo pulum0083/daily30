@@ -1,386 +1,382 @@
 {
-  "generated_at": "2026-08-21T18:39:46.611426+09:00",
+  "generated_at": "2026-08-24T18:51:19.396025+09:00",
   "window_days": 5,
   "aum_floor_eok": 300,
   "coverage": {
-    "etf_count": 717,
+    "etf_count": 716,
     "theme_count": 16
   },
   "themes": [
     {
-      "theme": "미국 나스닥·기술",
-      "flow_eok": 6778,
-      "gross_eok": 7226,
-      "etf_count": 46,
-      "top_etfs": [
-        {
-          "code": "379810",
-          "name": "KODEX 미국나스닥100",
-          "flow_eok": 2055
-        },
-        {
-          "code": "133690",
-          "name": "TIGER 미국나스닥100",
-          "flow_eok": 1520
-        },
-        {
-          "code": "486290",
-          "name": "TIGER 미국나스닥100타겟데일리커버드콜",
-          "flow_eok": 550
-        },
-        {
-          "code": "367380",
-          "name": "ACE 미국나스닥100",
-          "flow_eok": 413
-        },
-        {
-          "code": "368590",
-          "name": "RISE 미국나스닥100",
-          "flow_eok": 322
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 1294
-        },
-        {
-          "date": "2026-08-18",
-          "eok": -2800
-        },
-        {
-          "date": "2026-08-19",
-          "eok": 3075
-        },
-        {
-          "date": "2026-08-20",
-          "eok": 5533
-        },
-        {
-          "date": "2026-08-21",
-          "eok": -327
-        }
-      ]
-    },
-    {
       "theme": "미국 S&P·대형",
-      "flow_eok": 6627,
-      "gross_eok": 7931,
+      "flow_eok": 2425,
+      "gross_eok": 4223,
       "etf_count": 48,
       "top_etfs": [
         {
           "code": "360750",
           "name": "TIGER 미국S&P500",
-          "flow_eok": 3023
+          "flow_eok": 1242
         },
         {
           "code": "379800",
           "name": "KODEX 미국S&P500",
-          "flow_eok": 1806
-        },
-        {
-          "code": "458730",
-          "name": "TIGER 미국배당다우존스",
-          "flow_eok": 634
-        },
-        {
-          "code": "360200",
-          "name": "ACE 미국S&P500",
-          "flow_eok": 410
+          "flow_eok": 752
         },
         {
           "code": "379780",
           "name": "RISE 미국S&P500",
-          "flow_eok": -306
+          "flow_eok": -460
+        },
+        {
+          "code": "458730",
+          "name": "TIGER 미국배당다우존스",
+          "flow_eok": 339
+        },
+        {
+          "code": "449770",
+          "name": "KIWOOM 미국S&P500",
+          "flow_eok": -213
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": 2901
-        },
-        {
           "date": "2026-08-18",
-          "eok": -1188
+          "eok": -1191
         },
         {
           "date": "2026-08-19",
-          "eok": 1802
+          "eok": 1807
         },
         {
           "date": "2026-08-20",
-          "eok": 1615
+          "eok": 1619
         },
         {
           "date": "2026-08-21",
-          "eok": 1494
+          "eok": 1499
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -1307
         }
       ]
     },
     {
-      "theme": "반도체",
-      "flow_eok": 2519,
-      "gross_eok": 6723,
-      "etf_count": 48,
+      "theme": "배당·커버드콜",
+      "flow_eok": 1086,
+      "gross_eok": 3808,
+      "etf_count": 46,
       "top_etfs": [
         {
-          "code": "396500",
-          "name": "TIGER 반도체TOP10",
-          "flow_eok": 1866
+          "code": "498400",
+          "name": "KODEX 200타겟위클리커버드콜",
+          "flow_eok": -1185
         },
         {
-          "code": "0228G0",
-          "name": "ACE 반도체Plus전략산업",
-          "flow_eok": 931
+          "code": "0219E0",
+          "name": "KODEX 200커버드콜액티브",
+          "flow_eok": 1003
         },
         {
-          "code": "0177R0",
-          "name": "TIGER 반도체TOP10커버드콜액티브",
-          "flow_eok": -531
+          "code": "472150",
+          "name": "TIGER 배당커버드콜액티브",
+          "flow_eok": 645
         },
         {
-          "code": "488080",
-          "name": "TIGER 반도체TOP10레버리지",
-          "flow_eok": 466
+          "code": "329200",
+          "name": "TIGER 리츠부동산인프라",
+          "flow_eok": 206
         },
         {
-          "code": "442580",
-          "name": "PLUS 글로벌HBM반도체",
-          "flow_eok": -463
+          "code": "475720",
+          "name": "RISE 200위클리커버드콜",
+          "flow_eok": 80
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": 115
-        },
-        {
           "date": "2026-08-18",
-          "eok": -2028
+          "eok": -122
         },
         {
           "date": "2026-08-19",
-          "eok": 383
+          "eok": 45
         },
         {
           "date": "2026-08-20",
-          "eok": 3582
+          "eok": -414
         },
         {
           "date": "2026-08-21",
-          "eok": 467
+          "eok": 328
+        },
+        {
+          "date": "2026-08-24",
+          "eok": 1250
+        }
+      ]
+    },
+    {
+      "theme": "미국 나스닥·기술",
+      "flow_eok": 1025,
+      "gross_eok": 3371,
+      "etf_count": 46,
+      "top_etfs": [
+        {
+          "code": "379810",
+          "name": "KODEX 미국나스닥100",
+          "flow_eok": 1278
+        },
+        {
+          "code": "426030",
+          "name": "TIME 미국나스닥100액티브",
+          "flow_eok": -377
+        },
+        {
+          "code": "486290",
+          "name": "TIGER 미국나스닥100타겟데일리커버드콜",
+          "flow_eok": 264
+        },
+        {
+          "code": "381170",
+          "name": "TIGER 미국테크TOP10 INDXX",
+          "flow_eok": -172
+        },
+        {
+          "code": "494300",
+          "name": "KODEX 미국나스닥100데일리커버드콜OTM",
+          "flow_eok": 127
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-08-18",
+          "eok": -2802
+        },
+        {
+          "date": "2026-08-19",
+          "eok": 3078
+        },
+        {
+          "date": "2026-08-20",
+          "eok": 5537
+        },
+        {
+          "date": "2026-08-21",
+          "eok": -325
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -4463
         }
       ]
     },
     {
       "theme": "채권",
-      "flow_eok": -763,
-      "gross_eok": 6565,
+      "flow_eok": 858,
+      "gross_eok": 5926,
       "etf_count": 108,
       "top_etfs": [
         {
-          "code": "423160",
-          "name": "KODEX KOFR금리액티브(합성)",
-          "flow_eok": -623
-        },
-        {
-          "code": "436140",
-          "name": "SOL 종합채권(AA-이상)액티브",
-          "flow_eok": 538
+          "code": "0119H0",
+          "name": "KODEX 28-12 회사채(AA-이상)액티브",
+          "flow_eok": 601
         },
         {
           "code": "451000",
           "name": "PLUS 종합채권(AA-이상)액티브",
-          "flow_eok": 504
+          "flow_eok": 509
         },
         {
-          "code": "473290",
-          "name": "KODEX 26-12 회사채(AA-이상)액티브",
-          "flow_eok": -457
+          "code": "385560",
+          "name": "RISE KIS국고채30년Enhanced",
+          "flow_eok": -389
         },
         {
           "code": "480260",
           "name": "TIGER 27-04회사채(A+이상)액티브",
-          "flow_eok": -355
+          "flow_eok": -353
+        },
+        {
+          "code": "423160",
+          "name": "KODEX KOFR금리액티브(합성)",
+          "flow_eok": -335
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": -688
-        },
-        {
           "date": "2026-08-18",
-          "eok": -444
+          "eok": -437
         },
         {
           "date": "2026-08-19",
-          "eok": -90
+          "eok": -92
         },
         {
           "date": "2026-08-20",
-          "eok": 762
+          "eok": 760
         },
         {
           "date": "2026-08-21",
-          "eok": -305
+          "eok": -306
+        },
+        {
+          "date": "2026-08-24",
+          "eok": 931
         }
       ]
     },
     {
-      "theme": "원자력·전력",
-      "flow_eok": 578,
-      "gross_eok": 846,
-      "etf_count": 23,
+      "theme": "반도체",
+      "flow_eok": 840,
+      "gross_eok": 8638,
+      "etf_count": 48,
       "top_etfs": [
         {
-          "code": "487240",
-          "name": "KODEX AI전력핵심설비",
-          "flow_eok": 324
+          "code": "396500",
+          "name": "TIGER 반도체TOP10",
+          "flow_eok": 1647
         },
         {
-          "code": "0117V0",
-          "name": "TIGER 코리아AI전력기기TOP3플러스",
-          "flow_eok": 134
+          "code": "381180",
+          "name": "TIGER 미국필라델피아반도체나스닥",
+          "flow_eok": -1125
         },
         {
-          "code": "487230",
-          "name": "KODEX 미국AI전력핵심인프라",
-          "flow_eok": 70
+          "code": "0228G0",
+          "name": "ACE 반도체Plus전략산업",
+          "flow_eok": 896
         },
         {
-          "code": "486450",
-          "name": "SOL 미국AI전력인프라",
-          "flow_eok": -49
+          "code": "488080",
+          "name": "TIGER 반도체TOP10레버리지",
+          "flow_eok": 772
         },
         {
-          "code": "491820",
-          "name": "HANARO 전력설비투자",
-          "flow_eok": 47
+          "code": "0167A0",
+          "name": "SOL AI반도체TOP2플러스",
+          "flow_eok": 653
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": 236
+          "date": "2026-08-18",
+          "eok": -2013
         },
         {
+          "date": "2026-08-19",
+          "eok": 382
+        },
+        {
+          "date": "2026-08-20",
+          "eok": 3536
+        },
+        {
+          "date": "2026-08-21",
+          "eok": 408
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -1468
+        }
+      ]
+    },
+    {
+      "theme": "금융·은행",
+      "flow_eok": -774,
+      "gross_eok": 1450,
+      "etf_count": 21,
+      "top_etfs": [
+        {
+          "code": "0162M0",
+          "name": "KODEX 금융채1~2년(AA-이상)PLUS액티브",
+          "flow_eok": -703
+        },
+        {
+          "code": "0117L0",
+          "name": "KODEX 26-12 금융채(AA-이상)액티브",
+          "flow_eok": -201
+        },
+        {
+          "code": "498410",
+          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
+          "flow_eok": 193
+        },
+        {
+          "code": "0089D0",
+          "name": "KODEX 금융고배당TOP10",
+          "flow_eok": 72
+        },
+        {
+          "code": "0061Z0",
+          "name": "RISE 단기특수은행채액티브",
+          "flow_eok": -68
+        }
+      ],
+      "daily": [
+        {
           "date": "2026-08-18",
+          "eok": -89
+        },
+        {
+          "date": "2026-08-19",
+          "eok": -269
+        },
+        {
+          "date": "2026-08-20",
+          "eok": 470
+        },
+        {
+          "date": "2026-08-21",
           "eok": -156
         },
         {
-          "date": "2026-08-19",
-          "eok": 185
-        },
-        {
-          "date": "2026-08-20",
-          "eok": 575
-        },
-        {
-          "date": "2026-08-21",
-          "eok": -262
-        }
-      ]
-    },
-    {
-      "theme": "2차전지",
-      "flow_eok": 468,
-      "gross_eok": 482,
-      "etf_count": 14,
-      "top_etfs": [
-        {
-          "code": "462330",
-          "name": "KODEX 2차전지산업레버리지",
-          "flow_eok": 143
-        },
-        {
-          "code": "305540",
-          "name": "TIGER 2차전지테마",
-          "flow_eok": 90
-        },
-        {
-          "code": "305720",
-          "name": "KODEX 2차전지산업",
-          "flow_eok": 85
-        },
-        {
-          "code": "364980",
-          "name": "TIGER 2차전지TOP10",
-          "flow_eok": 58
-        },
-        {
-          "code": "461950",
-          "name": "KODEX 2차전지핵심소재10",
-          "flow_eok": 32
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 292
-        },
-        {
-          "date": "2026-08-18",
-          "eok": 6
-        },
-        {
-          "date": "2026-08-19",
-          "eok": 190
-        },
-        {
-          "date": "2026-08-20",
-          "eok": -76
-        },
-        {
-          "date": "2026-08-21",
-          "eok": 55
+          "date": "2026-08-24",
+          "eok": -732
         }
       ]
     },
     {
       "theme": "금·원자재",
-      "flow_eok": 304,
-      "gross_eok": 434,
+      "flow_eok": 503,
+      "gross_eok": 615,
       "etf_count": 11,
       "top_etfs": [
         {
           "code": "411060",
           "name": "ACE KRX금현물",
-          "flow_eok": 144
-        },
-        {
-          "code": "160580",
-          "name": "TIGER 구리실물",
-          "flow_eok": 68
-        },
-        {
-          "code": "271050",
-          "name": "KODEX WTI원유선물인버스(H)",
-          "flow_eok": 60
+          "flow_eok": 364
         },
         {
           "code": "0072R0",
           "name": "TIGER KRX금현물",
-          "flow_eok": 48
+          "flow_eok": 77
+        },
+        {
+          "code": "271050",
+          "name": "KODEX WTI원유선물인버스(H)",
+          "flow_eok": 69
         },
         {
           "code": "144600",
           "name": "KODEX 은선물(H)",
-          "flow_eok": -32
+          "flow_eok": -25
+        },
+        {
+          "code": "132030",
+          "name": "KODEX 골드선물(H)",
+          "flow_eok": 23
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": -108
-        },
-        {
           "date": "2026-08-18",
-          "eok": 264
+          "eok": 268
         },
         {
           "date": "2026-08-19",
-          "eok": -30
+          "eok": -29
         },
         {
           "date": "2026-08-20",
@@ -388,234 +384,238 @@
         },
         {
           "date": "2026-08-21",
-          "eok": 139
+          "eok": 141
+        },
+        {
+          "date": "2026-08-24",
+          "eok": 82
         }
       ]
     },
     {
-      "theme": "중국·신흥국",
-      "flow_eok": -260,
-      "gross_eok": 390,
-      "etf_count": 25,
+      "theme": "원자력·전력",
+      "flow_eok": -367,
+      "gross_eok": 497,
+      "etf_count": 23,
       "top_etfs": [
         {
-          "code": "371460",
-          "name": "TIGER 차이나전기차SOLACTIVE",
-          "flow_eok": -82
+          "code": "487230",
+          "name": "KODEX 미국AI전력핵심인프라",
+          "flow_eok": -168
         },
         {
-          "code": "456680",
-          "name": "TIGER 차이나전기차레버리지(합성)",
-          "flow_eok": -48
+          "code": "491010",
+          "name": "TIGER 글로벌AI전력인프라액티브",
+          "flow_eok": -83
         },
         {
-          "code": "0043Y0",
-          "name": "TIME 차이나AI테크액티브",
-          "flow_eok": -41
+          "code": "0091P0",
+          "name": "TIGER 코리아원자력",
+          "flow_eok": -47
         },
         {
-          "code": "0047A0",
-          "name": "TIGER 차이나테크TOP10",
-          "flow_eok": -35
+          "code": "491820",
+          "name": "HANARO 전력설비투자",
+          "flow_eok": 42
         },
         {
-          "code": "414780",
-          "name": "TIGER 차이나과창판STAR50(합성)",
-          "flow_eok": -25
+          "code": "486450",
+          "name": "SOL 미국AI전력인프라",
+          "flow_eok": -28
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": -137
-        },
-        {
           "date": "2026-08-18",
-          "eok": -136
+          "eok": -153
         },
         {
           "date": "2026-08-19",
-          "eok": 208
+          "eok": 184
         },
         {
           "date": "2026-08-20",
-          "eok": -126
+          "eok": 573
         },
         {
           "date": "2026-08-21",
-          "eok": -69
-        }
-      ]
-    },
-    {
-      "theme": "배당·커버드콜",
-      "flow_eok": -150,
-      "gross_eok": 2700,
-      "etf_count": 46,
-      "top_etfs": [
-        {
-          "code": "498400",
-          "name": "KODEX 200타겟위클리커버드콜",
-          "flow_eok": -1098
+          "eok": -263
         },
         {
-          "code": "0219E0",
-          "name": "KODEX 200커버드콜액티브",
-          "flow_eok": 439
-        },
-        {
-          "code": "329200",
-          "name": "TIGER 리츠부동산인프라",
-          "flow_eok": 208
-        },
-        {
-          "code": "472150",
-          "name": "TIGER 배당커버드콜액티브",
-          "flow_eok": 145
-        },
-        {
-          "code": "0167B0",
-          "name": "SOL 200타겟위클리커버드콜",
-          "flow_eok": -108
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 44
-        },
-        {
-          "date": "2026-08-18",
-          "eok": -132
-        },
-        {
-          "date": "2026-08-19",
-          "eok": 27
-        },
-        {
-          "date": "2026-08-20",
-          "eok": -423
-        },
-        {
-          "date": "2026-08-21",
-          "eok": 335
-        }
-      ]
-    },
-    {
-      "theme": "바이오·헬스",
-      "flow_eok": -149,
-      "gross_eok": 197,
-      "etf_count": 14,
-      "top_etfs": [
-        {
-          "code": "364970",
-          "name": "TIGER 바이오TOP10",
-          "flow_eok": -50
-        },
-        {
-          "code": "462900",
-          "name": "KoAct 바이오헬스케어액티브",
-          "flow_eok": -29
-        },
-        {
-          "code": "463050",
-          "name": "TIME K바이오액티브",
-          "flow_eok": -22
-        },
-        {
-          "code": "0000Z0",
-          "name": "RISE 바이오TOP10액티브",
-          "flow_eok": -19
-        },
-        {
-          "code": "227540",
-          "name": "TIGER 200 헬스케어",
-          "flow_eok": -19
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": -35
-        },
-        {
-          "date": "2026-08-18",
-          "eok": 26
-        },
-        {
-          "date": "2026-08-19",
-          "eok": -50
-        },
-        {
-          "date": "2026-08-20",
-          "eok": -46
-        },
-        {
-          "date": "2026-08-21",
-          "eok": -44
+          "date": "2026-08-24",
+          "eok": -708
         }
       ]
     },
     {
       "theme": "방산",
-      "flow_eok": 133,
-      "gross_eok": 225,
+      "flow_eok": -366,
+      "gross_eok": 380,
       "etf_count": 14,
       "top_etfs": [
         {
-          "code": "463250",
-          "name": "TIGER K방산&우주",
-          "flow_eok": 63
-        },
-        {
           "code": "0167Z0",
           "name": "KODEX 미국우주항공",
-          "flow_eok": 35
-        },
-        {
-          "code": "478150",
-          "name": "TIME 글로벌우주테크&방산액티브",
-          "flow_eok": -28
+          "flow_eok": -93
         },
         {
           "code": "0131V0",
           "name": "1Q 미국우주항공테크",
-          "flow_eok": 26
+          "flow_eok": -75
         },
         {
-          "code": "421320",
-          "name": "PLUS 우주항공",
-          "flow_eok": 22
+          "code": "449450",
+          "name": "PLUS K방산",
+          "flow_eok": -46
+        },
+        {
+          "code": "478150",
+          "name": "TIME 글로벌우주테크&방산액티브",
+          "flow_eok": -37
+        },
+        {
+          "code": "463250",
+          "name": "TIGER K방산&우주",
+          "flow_eok": -29
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": 228
-        },
-        {
           "date": "2026-08-18",
-          "eok": -135
+          "eok": -138
         },
         {
           "date": "2026-08-19",
-          "eok": -102
+          "eok": -104
         },
         {
           "date": "2026-08-20",
-          "eok": 235
+          "eok": 238
         },
         {
           "date": "2026-08-21",
-          "eok": -91
+          "eok": -92
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -274
+        }
+      ]
+    },
+    {
+      "theme": "2차전지",
+      "flow_eok": -249,
+      "gross_eok": 449,
+      "etf_count": 14,
+      "top_etfs": [
+        {
+          "code": "305720",
+          "name": "KODEX 2차전지산업",
+          "flow_eok": -186
+        },
+        {
+          "code": "364980",
+          "name": "TIGER 2차전지TOP10",
+          "flow_eok": -86
+        },
+        {
+          "code": "412570",
+          "name": "TIGER 2차전지TOP10레버리지",
+          "flow_eok": -45
+        },
+        {
+          "code": "305540",
+          "name": "TIGER 2차전지테마",
+          "flow_eok": 34
+        },
+        {
+          "code": "462330",
+          "name": "KODEX 2차전지산업레버리지",
+          "flow_eok": 32
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-08-18",
+          "eok": 8
+        },
+        {
+          "date": "2026-08-19",
+          "eok": 206
+        },
+        {
+          "date": "2026-08-20",
+          "eok": -84
+        },
+        {
+          "date": "2026-08-21",
+          "eok": 63
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -442
+        }
+      ]
+    },
+    {
+      "theme": "중국·신흥국",
+      "flow_eok": -183,
+      "gross_eok": 307,
+      "etf_count": 25,
+      "top_etfs": [
+        {
+          "code": "371460",
+          "name": "TIGER 차이나전기차SOLACTIVE",
+          "flow_eok": -64
+        },
+        {
+          "code": "456680",
+          "name": "TIGER 차이나전기차레버리지(합성)",
+          "flow_eok": -44
+        },
+        {
+          "code": "0043Y0",
+          "name": "TIME 차이나AI테크액티브",
+          "flow_eok": -32
+        },
+        {
+          "code": "0053L0",
+          "name": "TIGER 차이나휴머노이드로봇",
+          "flow_eok": 28
+        },
+        {
+          "code": "371160",
+          "name": "TIGER 차이나항셍테크",
+          "flow_eok": -23
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-08-18",
+          "eok": -133
+        },
+        {
+          "date": "2026-08-19",
+          "eok": 203
+        },
+        {
+          "date": "2026-08-20",
+          "eok": -122
+        },
+        {
+          "date": "2026-08-21",
+          "eok": -69
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -63
         }
       ]
     },
     {
       "theme": "일본·유럽",
-      "flow_eok": 122,
-      "gross_eok": 130,
+      "flow_eok": 132,
+      "gross_eok": 136,
       "etf_count": 6,
       "top_etfs": [
         {
@@ -624,226 +624,122 @@
           "flow_eok": 122
         },
         {
-          "code": "196030",
-          "name": "ACE 일본TOPIX레버리지(H)",
-          "flow_eok": -3
+          "code": "292560",
+          "name": "TIGER 일본엔선물",
+          "flow_eok": 8
         },
         {
           "code": "101280",
           "name": "KODEX 일본TOPIX100",
-          "flow_eok": 2
+          "flow_eok": 3
         },
         {
           "code": "238720",
           "name": "ACE 일본Nikkei225(H)",
-          "flow_eok": 2
+          "flow_eok": -2
         },
         {
-          "code": "352540",
-          "name": "KODEX 일본부동산리츠(H)",
-          "flow_eok": -1
+          "code": "196030",
+          "name": "ACE 일본TOPIX레버리지(H)",
+          "flow_eok": 1
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": 21
-        },
-        {
           "date": "2026-08-18",
-          "eok": -9
+          "eok": -8
         },
         {
           "date": "2026-08-19",
-          "eok": 43
+          "eok": 42
         },
         {
           "date": "2026-08-20",
-          "eok": 61
+          "eok": 60
         },
         {
           "date": "2026-08-21",
           "eok": 6
+        },
+        {
+          "date": "2026-08-24",
+          "eok": 33
         }
       ]
     },
     {
-      "theme": "금융·은행",
-      "flow_eok": 67,
-      "gross_eok": 791,
-      "etf_count": 21,
+      "theme": "바이오·헬스",
+      "flow_eok": -95,
+      "gross_eok": 153,
+      "etf_count": 14,
       "top_etfs": [
         {
-          "code": "0117L0",
-          "name": "KODEX 26-12 금융채(AA-이상)액티브",
-          "flow_eok": -203
+          "code": "364970",
+          "name": "TIGER 바이오TOP10",
+          "flow_eok": -41
         },
         {
-          "code": "498410",
-          "name": "KODEX 금융고배당TOP10타겟위클리커버드콜",
-          "flow_eok": 144
+          "code": "462900",
+          "name": "KoAct 바이오헬스케어액티브",
+          "flow_eok": -24
         },
         {
-          "code": "0061Z0",
-          "name": "RISE 단기특수은행채액티브",
-          "flow_eok": -69
+          "code": "244580",
+          "name": "KODEX 바이오",
+          "flow_eok": -16
         },
         {
-          "code": "0162M0",
-          "name": "KODEX 금융채1~2년(AA-이상)PLUS액티브",
-          "flow_eok": 65
+          "code": "0000Z0",
+          "name": "RISE 바이오TOP10액티브",
+          "flow_eok": -15
         },
         {
-          "code": "102970",
-          "name": "KODEX 증권",
-          "flow_eok": 57
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 108
-        },
-        {
-          "date": "2026-08-18",
-          "eok": -89
-        },
-        {
-          "date": "2026-08-19",
-          "eok": -268
-        },
-        {
-          "date": "2026-08-20",
-          "eok": 471
-        },
-        {
-          "date": "2026-08-21",
-          "eok": -157
-        }
-      ]
-    },
-    {
-      "theme": "조선",
-      "flow_eok": 34,
-      "gross_eok": 78,
-      "etf_count": 7,
-      "top_etfs": [
-        {
-          "code": "0115D0",
-          "name": "KODEX 조선TOP10",
-          "flow_eok": 23
-        },
-        {
-          "code": "466920",
-          "name": "SOL 조선TOP3플러스",
-          "flow_eok": -22
-        },
-        {
-          "code": "0080Y0",
-          "name": "SOL 조선TOP3플러스레버리지",
+          "code": "203780",
+          "name": "TIGER 미국나스닥바이오",
           "flow_eok": 14
-        },
-        {
-          "code": "494670",
-          "name": "TIGER 조선TOP10",
-          "flow_eok": 8
-        },
-        {
-          "code": "0141S0",
-          "name": "SOL 조선기자재",
-          "flow_eok": 8
         }
       ],
       "daily": [
         {
-          "date": "2026-08-14",
-          "eok": -58
-        },
-        {
           "date": "2026-08-18",
-          "eok": 172
+          "eok": 28
         },
         {
           "date": "2026-08-19",
-          "eok": -75
+          "eok": -52
         },
         {
           "date": "2026-08-20",
-          "eok": 53
+          "eok": -48
         },
         {
           "date": "2026-08-21",
-          "eok": -58
-        }
-      ]
-    },
-    {
-      "theme": "인터넷·게임",
-      "flow_eok": 23,
-      "gross_eok": 33,
-      "etf_count": 3,
-      "top_etfs": [
-        {
-          "code": "228810",
-          "name": "TIGER 미디어컨텐츠",
-          "flow_eok": 21
+          "eok": -47
         },
         {
-          "code": "395290",
-          "name": "HANARO Fn K-POP&미디어",
-          "flow_eok": 7
-        },
-        {
-          "code": "365000",
-          "name": "TIGER 인터넷TOP10",
-          "flow_eok": -5
-        }
-      ],
-      "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 2
-        },
-        {
-          "date": "2026-08-18",
-          "eok": 1
-        },
-        {
-          "date": "2026-08-19",
-          "eok": 6
-        },
-        {
-          "date": "2026-08-20",
-          "eok": 8
-        },
-        {
-          "date": "2026-08-21",
-          "eok": 6
+          "date": "2026-08-24",
+          "eok": 22
         }
       ]
     },
     {
       "theme": "자동차",
-      "flow_eok": 19,
-      "gross_eok": 19,
+      "flow_eok": -37,
+      "gross_eok": 37,
       "etf_count": 2,
       "top_etfs": [
         {
-          "code": "091180",
-          "name": "KODEX 자동차",
-          "flow_eok": 16
-        },
-        {
           "code": "466930",
           "name": "SOL 자동차TOP3플러스",
-          "flow_eok": 3
+          "flow_eok": -20
+        },
+        {
+          "code": "091180",
+          "name": "KODEX 자동차",
+          "flow_eok": -17
         }
       ],
       "daily": [
-        {
-          "date": "2026-08-14",
-          "eok": 7
-        },
         {
           "date": "2026-08-18",
           "eok": -29
@@ -859,6 +755,110 @@
         {
           "date": "2026-08-21",
           "eok": 6
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -49
+        }
+      ]
+    },
+    {
+      "theme": "인터넷·게임",
+      "flow_eok": 21,
+      "gross_eok": 27,
+      "etf_count": 3,
+      "top_etfs": [
+        {
+          "code": "228810",
+          "name": "TIGER 미디어컨텐츠",
+          "flow_eok": 20
+        },
+        {
+          "code": "395290",
+          "name": "HANARO Fn K-POP&미디어",
+          "flow_eok": 4
+        },
+        {
+          "code": "365000",
+          "name": "TIGER 인터넷TOP10",
+          "flow_eok": -3
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-08-18",
+          "eok": 1
+        },
+        {
+          "date": "2026-08-19",
+          "eok": 6
+        },
+        {
+          "date": "2026-08-20",
+          "eok": 8
+        },
+        {
+          "date": "2026-08-21",
+          "eok": 7
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -1
+        }
+      ]
+    },
+    {
+      "theme": "조선",
+      "flow_eok": 3,
+      "gross_eok": 83,
+      "etf_count": 7,
+      "top_etfs": [
+        {
+          "code": "0115D0",
+          "name": "KODEX 조선TOP10",
+          "flow_eok": 28
+        },
+        {
+          "code": "494670",
+          "name": "TIGER 조선TOP10",
+          "flow_eok": -25
+        },
+        {
+          "code": "466920",
+          "name": "SOL 조선TOP3플러스",
+          "flow_eok": -15
+        },
+        {
+          "code": "0141S0",
+          "name": "SOL 조선기자재",
+          "flow_eok": 9
+        },
+        {
+          "code": "0080Y0",
+          "name": "SOL 조선TOP3플러스레버리지",
+          "flow_eok": 3
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-08-18",
+          "eok": 173
+        },
+        {
+          "date": "2026-08-19",
+          "eok": -75
+        },
+        {
+          "date": "2026-08-20",
+          "eok": 53
+        },
+        {
+          "date": "2026-08-21",
+          "eok": -58
+        },
+        {
+          "date": "2026-08-24",
+          "eok": -90
         }
       ]
     }
