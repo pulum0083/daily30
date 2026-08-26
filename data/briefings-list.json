@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-08-26": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-08-26/kospi/",
+        "headline": "반도체·수급 동반 강세, 다만 PCE·GDP 대기",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "09:40"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-08-25": {
       "kospi": {
         "state": "ready",
@@ -645,20 +664,6 @@
       }
     },
     "2026-07-14": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
-      }
-    },
-    "2026-07-13": {
       "kospi": {
         "state": "pending",
         "scheduled_time": "07:30"
