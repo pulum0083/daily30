@@ -2177,22 +2177,31 @@ if(passBtn){
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.
+  // 상세 페이지가 실제로 있는 종목만 링크한다(§36 존재-게이트). 신호 스캔 유니버스는
+  // 46종목이고 상세 페이지는 3종목뿐이라, 전부 클릭 가능하게 두면 대부분의 클릭이
+  // 토스트로 튀기는 막다른 길이 된다. 링크되지 않는 행은 화살표·hover도 뺀다 —
+  // 누를 수 있을 것처럼 보이게 해놓고 막는 것보다 애초에 누를 수 없다고 보여주는 게 정직하다.
+  // STOCK_PAGES를 바꿀 땐 stocks.json의 detail_page와 반드시 함께 맞춘다(§36).
   function sigItemHtml(s,i,heroFlag){
     var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
     var badges=(s.badges||[]).map(badgeHtml).join('');
-    var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var linked=!!STOCK_PAGES[s.code];
+    var goArrow=linked?'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
+    var tag=linked?'a':'div';
+    var attrs=linked?(' onclick="goStock(\''+s.code+'\')"'):'';
+    var nolink=linked?'':' is-nolink';
     if(i===0){
-      return '<a class="sig-hero" onclick="goStock(\''+s.code+'\')">'
+      return '<'+tag+' class="sig-hero'+nolink+'"'+attrs+'>'
         +'<span class="sig-flag">'+(heroFlag||'오늘 가장 눈에 띄는 신호')+'</span>'
         +'<div class="sig-htop"><span class="sig-hnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
         +'<span class="sig-hpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
         +'<div class="sig-hbadges">'+badges+'</div>'
-        +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</a>';
+        +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</'+tag+'>';
     }
-    return '<a class="sig-row" onclick="goStock(\''+s.code+'\')">'
+    return '<'+tag+' class="sig-row'+nolink+'"'+attrs+'>'
       +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
       +'<span class="sig-rbadges">'+badges+'</span></span>'
-      +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
+      +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</'+tag+'>';
   }
   function sigHomeRender(){
     var w=document.getElementById('sig-rows'); if(!w) return;
@@ -2210,6 +2219,8 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
+  // 테스트 훅 — 존재-게이트(상세 페이지 있는 종목만 링크) 회귀 검증용.
+  window.__sigHome={sigItemHtml:sigItemHtml, STOCK_PAGES:STOCK_PAGES};
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
