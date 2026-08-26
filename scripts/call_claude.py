@@ -763,6 +763,52 @@ def _session_label_directive(date_str: str, briefing_type: str,
     )
 
 
+def _index_position_directive(analysis_data: dict | None) -> str:
+    """주요 지수가 52주 고·저 대비 어디에 있는지를 프롬프트에 명시한다.
+
+    등락률만 보면 "+0.32% 상승"에서 "사상 최고 수준을 다시 확인했다"로 넘어가는 비약을
+    막을 근거가 모델에게 없다. 2026-08-24·2026-08-26 코스피 아침 브리핑이 둘 다 이
+    비약을 저질렀고(실측 S&P500은 52주 고점 대비 -1.6%), §28 게이트가 스칼라 산문에서
+    잡아 **발행을 통째로 차단**했다 — 그날 브리핑이 아예 안 나갔다.
+
+    게이트는 최종 방어선이라 그대로 두고(자동 교정이 불가능한 산문은 차단이 맞다),
+    애초에 모델이 그 주장을 안 하도록 실측 위치를 미리 준다. 임계 1%는 게이트의
+    `snap["level"] < snap["high_52w"] * 0.99` 와 같은 값이다 — 두 곳이 어긋나면
+    프롬프트가 허용한 표현을 게이트가 막는 모순이 생기므로 함께 바꾼다.
+    """
+    idx = (analysis_data or {}).get("index_52w") or {}
+    rows = []
+    for label, d in idx.items():
+        if not isinstance(d, dict):
+            continue
+        price, hi, lo = d.get("price"), d.get("high_52w"), d.get("low_52w")
+        if not (price and hi and lo):
+            continue
+        from_hi = d.get("pct_from_52w_high")
+        if from_hi is None:
+            from_hi = (price - hi) / hi * 100
+        near_high = price >= hi * 0.99
+        near_low = price <= lo * 1.01
+        verdict = ("52주 고점권 — 최고 표현 가능" if near_high
+                   else "52주 저점권 — 최저 표현 가능" if near_low
+                   else "고점도 저점도 아님 — 최상급 표현 금지")
+        rows.append(f"- {label}: 현재 {price:,.2f} / 52주 고점 {hi:,.2f} "
+                    f"({from_hi:+.2f}%) / 52주 저점 {lo:,.2f} → {verdict}")
+    if not rows:
+        return ""
+
+    return (
+        "## 지수 최상급 표현 규칙 (반드시 지킬 것)\n\n"
+        "'사상 최고'·'최고치 경신'·'신고가'·'역대 최고' 같은 표현은 그 지수가 **52주 고점의 "
+        "99% 이상**일 때만 쓴다. '사상 최저'·'신저가'도 52주 저점의 101% 이하일 때만 쓴다.\n"
+        "그날 올랐다는 사실만으로 최고 표현을 쓰지 않는다 — 상승과 신고가는 다른 주장이다.\n\n"
+        + "\n".join(rows) +
+        "\n\n위 실측이 '최상급 표현 금지'인 지수에 최고·최저 표현을 쓰면 발행 검증에서 "
+        "차단돼 브리핑이 아예 나가지 못한다. 대신 '상승 마감'·'고점권에서 버티는 중'처럼 "
+        "실측이 뒷받침하는 표현을 쓴다.\n\n"
+    )
+
+
 def _calendar_tense_directive(analysis_data: dict | None) -> str:
     """이미 끝난 고영향 경제 이벤트를 예고형으로 쓰지 않도록 발행 시점 시제를 주입한다.
 
@@ -1371,6 +1417,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += _session_label_directive(date_str, briefing_type, news_summary)
     user_content += _calendar_tense_directive(analysis_data)
+    user_content += _index_position_directive(analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

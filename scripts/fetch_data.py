@@ -9,6 +9,7 @@ from __future__ import annotations  # `X | None` 어노테이션을 구버전 �
 import argparse
 import json
 import math
+import os
 import sys
 import time
 import urllib.request
@@ -266,6 +267,45 @@ def fetch_investor_trading_kospi(date_str: str = None) -> dict:
         return {}
 
 
+# 한국·아시아 시장은 코스피 아침 브리핑이 나가는 07:25 KST엔 닫혀 있고 09:00부터 열린다.
+# 그래서 장이 열린 뒤 브리핑을 수동 재생성하면(정정·재발행) 같은 스크립트가 **장중 값**을
+# 수집해, "직전 종가 대비 예측"이어야 할 자리에 오늘 장중 지수·주가가 들어간다.
+# DS_PIN_SESSION_DATE=YYYY-MM-DD(KST)를 주면 그 날짜 이후 데이터를 아직 없는 것으로 취급해
+# 07:25 시점 전제(양 시장 휴장)를 그대로 재현한다. 미국·선물·환율은 그 시각에도 이미
+# 열려 있었으므로 건드리지 않는다 — 전부 일괄로 되돌리면 오히려 07:25과 더 멀어진다.
+_PIN_ASIA_TICKERS = {"^KS11", "^KQ11", "^N225", "^HSI", "^TWII", "000001.SS"}
+
+
+def _pin_date_for(ticker: str):
+    """이 티커에 적용할 pin 날짜(date) 또는 None."""
+    raw = os.environ.get("DS_PIN_SESSION_DATE", "").strip()
+    if not raw:
+        return None
+    t = (ticker or "").upper()
+    if not (t.endswith(".KS") or t.endswith(".KQ") or t in _PIN_ASIA_TICKERS):
+        return None
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"[fetch_data] DS_PIN_SESSION_DATE 형식 오류: {raw!r} — 무시", file=sys.stderr)
+        return None
+
+
+def _truncate_at_pin(ticker: str, hist):
+    """pin 날짜 이후(당일 포함) 행을 잘라낸다. pin이 없으면 그대로 돌려준다."""
+    pin = _pin_date_for(ticker)
+    if pin is None or hist is None or len(hist) == 0:
+        return hist
+    try:
+        kept = hist[[i.date() < pin for i in hist.index]]
+    except Exception:
+        return hist
+    if len(kept) < len(hist):
+        print(f"[fetch_data] {ticker}: pin {pin} — {len(hist) - len(kept)}행(당일분) 제외",
+              file=sys.stderr)
+    return kept
+
+
 def _yf_history(ticker: str, retries: int = 3, **kwargs):
     """yfinance history() 호출을 최대 retries회 exponential backoff으로 재시도한다."""
     import yfinance as yf
@@ -275,7 +315,7 @@ def _yf_history(ticker: str, retries: int = 3, **kwargs):
         try:
             hist = yf.Ticker(ticker).history(**kwargs)
             if not hist.empty:
-                return hist
+                return _truncate_at_pin(ticker, hist)
         except Exception as e:
             last_exc = e
         if attempt < retries - 1:
@@ -373,6 +413,11 @@ def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """
     import yfinance as yf
 
+    # pin이 걸린 티커는 "그 시각엔 아직 장이 안 열렸다"가 전제이므로 실시간가를 쓰지 않는다.
+    # 호출부가 일봉 close[-1] vs close[-2] 폴백으로 내려간다(§0 코스피 아침 기준).
+    if _pin_date_for(ticker) is not None:
+        return None
+
     intraday = None
     try:
         intraday = _yf_history(ticker, period="2d", interval="5m", prepost=True)
@@ -468,6 +513,21 @@ def get_ticker_full(ticker: str) -> dict:
             "volume":     int(hist["Volume"].iloc[-1]),
             "sparkline":  [round(float(p), 4) for p in closes.iloc[-20:].tolist()],
         }
+
+        # 52주 고·저 — hist가 이미 1년치라 추가 조회 비용이 없다.
+        # 모델이 "사상 최고" 같은 최상급을 쓰려면 지금 값이 고점 대비 어디인지를 알아야 한다.
+        # 이 값이 없어서 2026-08-24·08-26 코스피 아침 브리핑이 S&P500을 "사상 최고"로 쓰고
+        # §28 게이트에 걸려 발행이 통째로 막혔다(실측은 52주 고점 대비 -1.6%).
+        # validate_analysis._index_extremes()가 발행 직전에 같은 값을 다시 재는 게 최종 방어선이고,
+        # 여기 있는 값은 모델에게 미리 알려주는 1차 방어다.
+        hi52 = float(closes.max())
+        lo52 = float(closes.min())
+        result["high_52w"] = round(hi52, 4)
+        result["low_52w"] = round(lo52, 4)
+        if hi52 > 0:
+            result["pct_from_52w_high"] = round((price - hi52) / hi52 * 100, 2)
+        if lo52 > 0:
+            result["pct_from_52w_low"] = round((price - lo52) / lo52 * 100, 2)
 
         if len(closes) >= 20:
             ma20_series = closes.rolling(20).mean().dropna()
@@ -1044,6 +1104,10 @@ def fetch_kospi_data() -> dict:
     # 2. Additional macro tickers (not in sidebar)
     print("[fetch_data]   → macro tickers")
     macro_tickers = ["^GSPC", "^VIX", "BZ=F", "GC=F", "^TNX",
+                     # ^IXIC·^DJI는 사이드바에도 있지만 그쪽은 period="1mo"라 52주 고·저가 없다.
+                     # §28 게이트가 검증하는 네 지수(S&P500·나스닥·다우·SOX)의 52주 위치를
+                     # 모델에게 미리 주려면 1년치를 읽는 이 경로가 필요하다.
+                     "^IXIC", "^DJI",
                      "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "^SOX", "EWY",
                      "DRAM",  # Roundhill Memory & HBM ETF (삼성·하이닉스 연동 선행 지표)
                      # 미 지수선물 — 브리핑 생성 시각(07:25 KST)에 **유일하게 실시간인** 신호.
@@ -1134,6 +1198,19 @@ def fetch_kospi_data() -> dict:
         "oil": {
             "wti":   market_data_js.get("oil", {}),
             "brent": macro.get("BZ=F", {}),
+        },
+        # 주요 지수의 52주 위치 — 모델이 "사상 최고" 같은 최상급을 쓸지 판단할 유일한 근거.
+        # 이 값 없이 등락률만 보면 "+0.32% 상승"에서 "사상 최고 수준"으로 넘어가는 비약을
+        # 막을 방법이 없다(2026-08-24·08-26 실사고 → 발행 차단). §28 게이트는 최종 방어선이고
+        # 이건 1차 방어다. call_claude._index_position_directive()가 프롬프트로 옮긴다.
+        "index_52w": {
+            label: {k: macro[sym][k] for k in
+                    ("price", "change_pct", "high_52w", "low_52w",
+                     "pct_from_52w_high", "pct_from_52w_low")
+                    if k in macro[sym]}
+            for label, sym in (("S&P500", "^GSPC"), ("나스닥", "^IXIC"),
+                               ("다우", "^DJI"), ("필라델피아 반도체", "^SOX"))
+            if macro.get(sym, {}).get("high_52w")
         },
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},

@@ -847,6 +847,57 @@ def _fetch_us_realdata(ticker, live=False):
         return {"error": str(e)}
 
 
+def _pin_session_date():
+    """DS_PIN_SESSION_DATE(KST)가 있으면 date, 없으면 None.
+
+    코스피 아침 브리핑을 장 시작 후 수동 재생성할 때, 픽 실측이 **오늘 장중 값**으로
+    주입되는 것을 막는다. 07:25 발행 시점엔 한국장이 닫혀 있어 §0가 "직전 완료 세션
+    종가 대비"를 기준으로 삼는데, 09시 이후 재실행하면 토스·네이버 모두 당일 진행 중인
+    (미완성) 일봉을 최신 캔들로 돌려주기 때문이다 — 실측 확인 결과 오늘 캔들의 거래량이
+    전일의 1/6 수준이었다(장 초반 부분 데이터).
+    """
+    from datetime import datetime as _dt
+    raw = os.environ.get("DS_PIN_SESSION_DATE", "").strip()
+    if not raw:
+        return None
+    try:
+        return _dt.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"[validate] DS_PIN_SESSION_DATE 형식 오류: {raw!r} — 무시", file=sys.stderr)
+        return None
+
+
+def _drop_rows_at_pin(rows, date_of):
+    """pin 날짜 이후(당일 포함) 행 제거. pin이 없으면 그대로."""
+    pin = _pin_session_date()
+    if pin is None or not rows:
+        return rows
+    kept = []
+    for r in rows:
+        d = date_of(r)
+        if d is None or d < pin:
+            kept.append(r)
+    if len(kept) < len(rows):
+        print(f"[validate] pin {pin} — 당일 캔들 {len(rows) - len(kept)}건 제외", file=sys.stderr)
+    return kept
+
+
+def _toss_candle_date(c):
+    from datetime import datetime as _dt
+    try:
+        return _dt.fromisoformat(str(c.get("timestamp"))).date()
+    except Exception:
+        return None
+
+
+def _naver_row_date(r):
+    from datetime import datetime as _dt
+    try:
+        return _dt.strptime(str(r.get("localDate"))[:8], "%Y%m%d").date()
+    except Exception:
+        return None
+
+
 def _fetch_kospi_realdata(code):
     """한국 종목 실측 (6자리 코드). Toss 캔들 우선, 실패 시 네이버 폴백."""
     # 1) 토스 API
@@ -859,7 +910,8 @@ def _fetch_kospi_realdata(code):
             tc = None
     if tc:
         try:
-            candles = tc.get_candles(code, interval="1d", count=300)
+            candles = _drop_rows_at_pin(
+                tc.get_candles(code, interval="1d", count=300), _toss_candle_date)
             if candles:
                 return _closes_from_toss_candles(candles, ndigits=2)
         except Exception:
@@ -875,7 +927,7 @@ def _fetch_kospi_realdata(code):
                f"?startDateTime={start}&endDateTime={end}")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
-            rows = json.loads(resp.read())
+            rows = _drop_rows_at_pin(json.loads(resp.read()), _naver_row_date)
         closes = [float(rw["closePrice"]) for rw in rows if rw.get("closePrice")]
         return _closes_to_realdata(closes, ndigits=2)
     except Exception as e:
