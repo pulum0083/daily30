@@ -10,6 +10,7 @@ call_claude → [validate_analysis] → generate_html 사이에서 동작.
 """
 import argparse
 import copy
+import html
 import json
 import os
 import re
@@ -1674,20 +1675,45 @@ def validate(analysis, latest, btype):
 
 # ── 관리자 알림 ───────────────────────────────────────────────────────────────
 def send_admin_alert(message):
-    """차단 시 관리자 텔레그램으로 알림. 키 미설정이면 조용히 건너뜀(차단은 유지)."""
+    """차단 시 관리자 텔레그램으로 알림. 키 미설정이면 조용히 건너뜀(차단은 유지).
+
+    **HTML 실패 시 평문으로 한 번 더 보낸다.** 이 알림의 본문에는 모델이 쓴 산문이
+    그대로 들어가는데, 그 산문에 <b> 같은 태그가 섞이고 길이 제한으로 잘리면
+    parse_mode=HTML이 400을 뱉는다 — 실제로 2026-08-24·08-26 발행 차단 알림이 둘 다
+    이 이유로 실패했고, 그래서 "브리핑이 안 나갔다"는 사실을 아무도 몰랐다.
+    가장 중요한 알림이 자기 서식 때문에 죽는 구조라 서식을 포기하더라도 반드시 보낸다.
+    """
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
     if not token or not chat_id:
         print("[validate] 관리자 알림 키 미설정 — 알림 건너뜀 (차단은 유지)", file=sys.stderr)
         return
-    try:
-        data = urllib.parse.urlencode({
-            "chat_id": chat_id, "text": message, "parse_mode": "HTML",
-        }).encode()
+
+    def _post(text, parse_mode):
+        payload = {"chat_id": chat_id, "text": text}
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
         req = urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/sendMessage", data=data)
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            data=urllib.parse.urlencode(payload).encode())
         urllib.request.urlopen(req, timeout=10)
+
+    try:
+        _post(message, "HTML")
         print("[validate] 관리자 알림 발송 완료", file=sys.stderr)
+        return
+    except Exception as e:
+        detail = ""
+        try:                          # HTTPError면 텔레그램이 사유를 본문에 준다
+            detail = f" — {e.read().decode('utf-8', 'replace')[:300]}"
+        except Exception:
+            pass
+        print(f"[validate] 관리자 알림 HTML 실패({e}){detail} — 평문으로 재시도",
+              file=sys.stderr)
+
+    try:
+        _post(strip_tags(message), None)
+        print("[validate] 관리자 알림 발송 완료(평문)", file=sys.stderr)
     except Exception as e:
         print(f"[validate] 관리자 알림 실패: {e}", file=sys.stderr)
 
@@ -1771,9 +1797,11 @@ def main():
     if result["blocks"]:
         summary = "\n".join(f"  • {b}" for b in result["blocks"])
         print(f"[validate] 🚫 발행 차단 — 치명적 오류:\n{summary}", file=sys.stderr)
+        # 차단 사유에는 모델 산문이 그대로 들어간다 — 태그를 이스케이프하지 않으면
+        # parse_mode=HTML이 400으로 거절해 알림 자체가 사라진다(위 함수 주석).
         send_admin_alert(
-            f"🚫 <b>{btype}</b> 브리핑 발행 차단\n"
-            + "\n".join(f"• {b}" for b in result["blocks"])
+            f"🚫 <b>{html.escape(btype)}</b> 브리핑 발행 차단\n"
+            + "\n".join(f"• {html.escape(str(b))}" for b in result["blocks"])
         )
         return 1
 
