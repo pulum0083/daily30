@@ -31,6 +31,11 @@ on:
         options:
           - "false"
           - "true"
+      pin_session_date:
+        description: "YYYY-MM-DD(KST). 그 날짜 이후 한국·아시아 데이터를 아직 없는 것으로 취급 — 장 시작 후 아침 브리핑을 재생성할 때 07:25 전제(휴장)를 유지"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
@@ -53,6 +58,9 @@ env:
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
   RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
   RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
+  # 비워두면 평소대로 동작한다(정규 스케줄 실행은 항상 비어 있다).
+  # 값이 있으면 fetch_data·validate_analysis가 그 날짜 이후 한국·아시아 데이터를 무시한다.
+  DS_PIN_SESSION_DATE: ${{ github.event.inputs.pin_session_date }}
 
 defaults:
   run:
