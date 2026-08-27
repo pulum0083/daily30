@@ -5,7 +5,7 @@
       "name": "삼성전자",
       "consensus": 483333,
       "firm_count": 12,
-      "close_price": 261500,
+      "close_price": 266000,
       "reports": [
         {
           "firm": "미래에셋증권",
@@ -199,7 +199,7 @@
       "name": "SK하이닉스",
       "consensus": 3326923,
       "firm_count": 13,
-      "close_price": 1688000,
+      "close_price": 1730000,
       "reports": [
         {
           "firm": "미래에셋증권",
@@ -391,21 +391,45 @@
     },
     "005380": {
       "name": "현대차",
-      "consensus": 752000,
-      "firm_count": 10,
-      "close_price": 408000,
+      "consensus": 742727,
+      "firm_count": 11,
+      "close_price": 398000,
       "reports": [
+        {
+          "firm": "한화투자증권",
+          "opinion": "Buy",
+          "target_price": 760000,
+          "date": "26.08.27"
+        },
+        {
+          "firm": "하나증권",
+          "opinion": "Buy",
+          "target_price": 650000,
+          "date": "26.08.27"
+        },
+        {
+          "firm": "미래에셋증권",
+          "opinion": "매수",
+          "target_price": 840000,
+          "date": "26.08.27"
+        },
+        {
+          "firm": "iM증권",
+          "opinion": "Buy",
+          "target_price": 650000,
+          "date": "26.08.27"
+        },
+        {
+          "firm": "대신증권",
+          "opinion": "Buy",
+          "target_price": 740000,
+          "date": "26.08.27"
+        },
         {
           "firm": "DS투자증권",
           "opinion": "매수",
           "target_price": 840000,
           "date": "26.07.30"
-        },
-        {
-          "firm": "한화투자증권",
-          "opinion": "Buy",
-          "target_price": 760000,
-          "date": "26.07.24"
         },
         {
           "firm": "교보증권",
@@ -420,39 +444,15 @@
           "date": "26.07.24"
         },
         {
-          "firm": "미래에셋증권",
-          "opinion": "매수",
-          "target_price": 840000,
-          "date": "26.07.24"
-        },
-        {
-          "firm": "대신증권",
-          "opinion": "Buy",
-          "target_price": 740000,
-          "date": "26.07.24"
-        },
-        {
           "firm": "신한투자증권",
           "opinion": "매수",
           "target_price": 780000,
           "date": "26.07.24"
         },
         {
-          "firm": "iM증권",
-          "opinion": "Buy",
-          "target_price": 650000,
-          "date": "26.07.24"
-        },
-        {
           "firm": "유진투자증권",
           "opinion": "Buy",
           "target_price": 900000,
-          "date": "26.07.24"
-        },
-        {
-          "firm": "키움증권",
-          "opinion": "Buy",
-          "target_price": 700000,
           "date": "26.07.24"
         }
       ],
@@ -579,7 +579,7 @@
         },
         {
           "date": "2026-08-27",
-          "value": 752000
+          "value": 742727
         }
       ]
     }
