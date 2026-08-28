@@ -5,7 +5,7 @@
       "name": "삼성전자",
       "consensus": 483333,
       "firm_count": 12,
-      "close_price": 266000,
+      "close_price": 257000,
       "reports": [
         {
           "firm": "미래에셋증권",
@@ -203,7 +203,7 @@
       "name": "SK하이닉스",
       "consensus": 3326923,
       "firm_count": 13,
-      "close_price": 1730000,
+      "close_price": 1653000,
       "reports": [
         {
           "firm": "미래에셋증권",
@@ -399,10 +399,16 @@
     },
     "005380": {
       "name": "현대차",
-      "consensus": 742727,
-      "firm_count": 11,
-      "close_price": 398000,
+      "consensus": 733333,
+      "firm_count": 12,
+      "close_price": 399500,
       "reports": [
+        {
+          "firm": "현대차증권",
+          "opinion": "Buy",
+          "target_price": 630000,
+          "date": "26.08.28"
+        },
         {
           "firm": "한화투자증권",
           "opinion": "Buy",
@@ -455,12 +461,6 @@
           "firm": "신한투자증권",
           "opinion": "매수",
           "target_price": 780000,
-          "date": "26.07.24"
-        },
-        {
-          "firm": "유진투자증권",
-          "opinion": "Buy",
-          "target_price": 900000,
           "date": "26.07.24"
         }
       ],
@@ -591,7 +591,7 @@
         },
         {
           "date": "2026-08-28",
-          "value": 742727
+          "value": 733333
         }
       ]
     }
