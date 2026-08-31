@@ -1,4 +1,5 @@
-{# 시장 지표 사이드바 패널 — 지수/환율/금리 스파크라인 + VIX 뱃지 (코스피·미국 공유) #}
+{# 시장 지표 사이드바 패널 — VIX·공포탐욕 지수 뱃지 (코스피·미국 공유).
+   뱃지가 없는 항목은 스파크라인을 그린다. #}
 <div class="right-panel" id="market-data-panel">
   <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">{{ generated_time }} KST</span></div>
   <div class="mkt-list">
@@ -8,8 +9,8 @@
         <span class="mkt-name"{% if item.info_modal %} style="display:flex;align-items:center;gap:4px"{% endif %}>{{ item.name }}{% if item.info_modal %}<button class="info-icon-btn" data-modal-open="{{ item.info_modal }}">?</button>{% endif %}</span>
         <div class="mkt-vals"><div class="mkt-val">{{ item.val }}</div><div class="mkt-chg {{ item.chg_cls }}">{{ item.chg }}</div></div>
       </div>
-      {% if item.vix_level %}
-      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge {{ item.vix_level_cls }}">{{ item.vix_level }}</span></div>
+      {% if item.badge %}
+      <div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge {{ item.badge_cls }}">{{ item.badge }}</span></div>
       {% else %}
       <div class="mkt-spark"><canvas id="{{ item.spark_id }}"></canvas></div>
       {% endif %}

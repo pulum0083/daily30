@@ -19,7 +19,7 @@ import math
 import os
 import re
 import sys
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 
 import pytz
@@ -723,39 +723,22 @@ def _chg_cell(chg) -> dict:
 
 
 def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> list:
-    """시장 지표 사이드바. market_data_js 키를 표시 항목으로 매핑(있는 것만)."""
+    """시장 지표 사이드바 — VIX와 공포·탐욕 지수 두 항목만 표시한다.
+
+    2026-08-31에 나스닥·필라델피아 반도체·나스닥100 선물 행을 화면에서 뺐다(수집은 유지 —
+    분석 프롬프트와 다른 위젯이 계속 소비한다). 이 패널은 '지수 시세'가 아니라 '투자 심리'를
+    보여주는 자리다. 데이터가 없으면 그 행을 그리지 않는다(§0 — 없으면 비운다).
+    """
+    if internal_type not in ("kospi", "us"):
+        return []
     mdj = dict(market_data.get("market_data_js", {}))
     if "vix" not in mdj and market_data.get("vix"):
         mdj["vix"] = market_data["vix"]
-    if internal_type == "kospi":
-        # 원/달러(usdkrw)는 '지금 코스피 밴드'로 이관 — 사이드바에서 제외(중복 방지).
-        spec = [("나스닥", "nasdaq"), ("필라델피아 반도체", "sox"),
-                ("나스닥100 선물", "nq")]
-    else:
-        spec = [("나스닥100 선물", "nq"), ("나스닥", "nasdaq"),
-                ("필라델피아 반도체", "sox")]
     items = []
-    for name, key in spec:
-        d = mdj.get(key)
-        if not isinstance(d, dict):
-            continue
-        val = d.get("base", d.get("price"))
-        chg = d.get("chg", d.get("change_pct"))
-        if val is None:
-            continue
-        chg_cls = "up" if (chg or 0) >= 0 else "down"
-        items.append({
-            "name": name,
-            "val": f"{val:,.2f}" if isinstance(val, (int, float)) else str(val),
-            "chg": f"{'+' if (chg or 0) >= 0 else ''}{chg:.2f}%" if isinstance(chg, (int, float)) else str(chg),
-            "chg_cls": chg_cls,
-            "spark_id": f"c-{key}",
-            "spark_data": d.get("data", []),
-            "spark_color": "#E03131" if chg_cls == "up" else "#2775ED",
-        })
-    # VIX (코스피·미국 공통 — 데이터 있을 때만)
+
+    # VIX — S&P500 30일 내재변동성
     vix = mdj.get("vix")
-    if internal_type in ("kospi", "us") and isinstance(vix, dict) and vix.get("price") is not None:
+    if isinstance(vix, dict) and vix.get("price") is not None:
         p = vix["price"]
         lvls = [(15, "안정", "calm"), (20, "보통", "normal"), (30, "경계", "elevated"),
                 (40, "불안", "high"), (10 ** 9, "극단", "high")]
@@ -766,9 +749,81 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
             "val": f"{p:.2f}",
             "chg": f"{'+' if cp >= 0 else ''}{cp:.2f}%",
             "chg_cls": "up" if cp >= 0 else "down",
-            "vix_level": lbl, "vix_level_cls": cls,
+            "badge": lbl, "badge_cls": cls,
         })
+
+    # 공포·탐욕 지수 (CNN, 0~100)
+    fng = mdj.get("fng")
+    if isinstance(fng, dict) and _fng_is_fresh(fng):
+        score = fng["score"]
+        label, cls = _fng_label(score, fng.get("rating"))
+        item = {
+            "name": "공포·탐욕 지수", "info_modal": "fng-modal",
+            "val": f"{score:.0f}",
+            "badge": label, "badge_cls": cls,
+        }
+        prev = fng.get("prev_close")
+        if isinstance(prev, (int, float)):
+            # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
+            d = score - prev
+            item["chg"] = f"{'+' if d >= 0 else ''}{d:.1f}p"
+            item["chg_cls"] = "up" if d >= 0 else "down"
+        else:
+            item["chg"] = ""
+            item["chg_cls"] = ""
+        items.append(item)
     return items
+
+
+# CNN 등급 → 한국어 라벨. 뱃지 색은 기존 vix-badge 팔레트를 재사용한다 —
+# 공포·탐욕은 양쪽 끝이 모두 위험 구간이라 극단을 red(high), 그 안쪽을 yellow(elevated),
+# 중립을 green(calm)으로 둔다.
+_FNG_RATING_KO = {
+    "extreme fear":  ("극단적 공포", "high"),
+    "fear":          ("공포", "elevated"),
+    "neutral":       ("중립", "calm"),
+    "greed":         ("탐욕", "elevated"),
+    "extreme greed": ("극단적 탐욕", "high"),
+}
+
+
+def _fng_label(score: float, rating) -> tuple:
+    """CNN이 준 등급을 우선 쓰고, 없거나 모르는 값이면 점수 구간으로 되돌린다."""
+    hit = _FNG_RATING_KO.get((rating or "").strip().lower())
+    if hit:
+        return hit
+    for upper, key in ((25, "extreme fear"), (45, "fear"), (55, "neutral"), (75, "greed")):
+        if score < upper:
+            return _FNG_RATING_KO[key]
+    return _FNG_RATING_KO["extreme greed"]
+
+
+def _fng_is_fresh(fng: dict, max_age_days: int = 5, now=None) -> bool:
+    """수집이 조용히 죽었을 때 낡은 값을 계속 보여주지 않기 위한 신선도 게이트(§20).
+
+    CNN은 미국 정규장 기준으로 갱신되므로 주말·연휴엔 며칠 묵는 게 정상이다.
+    3일 연휴 + 주말을 감안해 5일까지 허용하고, 그보다 오래되면 행을 그리지 않는다.
+    """
+    if not isinstance(fng.get("score"), (int, float)):
+        return False
+    asof = fng.get("asof")
+    if not asof:
+        print("[generate_html] ⚠️ 공포·탐욕 지수에 수집 시각이 없어 표시하지 않습니다.", file=sys.stderr)
+        return False
+    try:
+        ts = datetime.fromisoformat(str(asof).replace("Z", "+00:00"))
+    except ValueError:
+        print(f"[generate_html] ⚠️ 공포·탐욕 지수 시각 파싱 실패: {asof}", file=sys.stderr)
+        return False
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    ref = now or datetime.now(timezone.utc)
+    age_days = (ref - ts).total_seconds() / 86400.0
+    if age_days > max_age_days:
+        print(f"[generate_html] ⚠️ 공포·탐욕 지수가 {age_days:.1f}일 지났습니다 — 표시 생략.",
+              file=sys.stderr)
+        return False
+    return True
 
 
 def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:

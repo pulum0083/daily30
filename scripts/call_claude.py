@@ -269,7 +269,7 @@ reasons, watch_items, us_linked_story 등 모든 출력에서, 시장 데이터 
 ✅ 허용 예: "EWY가 <b>+5.20%</b> 폭등해 외국인 자금 유입이 강하게 나타나고 있어요." (EWY change_pct는 데이터에 존재)
 
 **[필수 규칙 5-1] 공포탐욕지수(Fear & Greed Index) 언급 전면 금지**
-CNN Fear & Greed Index(공포탐욕지수)는 수집 데이터에 포함되지 않는다. 어떤 섹션(reasons, watch_items, us_linked_story, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
+CNN Fear & Greed Index(공포탐욕지수)는 사이드바 표시용으로만 수집되며 이 프롬프트에 주어지지 않는다. 즉 네가 쓰는 어떤 수치도 실측이 아니다. 어떤 섹션(reasons, watch_items, us_linked_story, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
 
 **[필수 규칙 6] 원/달러 환율 수치는 반드시 `usdkrw.price`를 사용한다**
 환율을 언급해야 하는 모든 섹션(reasons, us_linked_story, watch_items 등)에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.

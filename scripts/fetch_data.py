@@ -404,6 +404,46 @@ def _extended_hours_price(intraday, fast_last: float | None, now=None,
     return float(closes.iloc[-1])
 
 
+# CNN 공포·탐욕 지수 — 0~100 시장 심리 지표(투자자가 공포에 있는지 탐욕에 있는지).
+# ⚠️ 2026-06-03에 제거된 옛 구현은 alternative.me/fng 를 "CNN Fear & Greed"라고 부르며
+#    썼는데, 그건 **암호화폐** 심리 지수라 라벨과 실제 데이터가 달랐다(§0 위반). 다시
+#    그 엔드포인트로 돌아가지 말 것 — 주식 시장 심리는 CNN dataviz가 정본이다.
+_FNG_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata"
+
+
+def get_fear_greed() -> dict:
+    """CNN Fear & Greed Index 실측 수집. 실패하면 빈 dict(섹션 생략, §0)."""
+    try:
+        req = urllib.request.Request(_FNG_URL, headers={
+            # 브라우저 헤더가 없으면 418을 준다 — GHA 러너(미국 Azure IP)에서 실측 확인.
+            # 헤더를 붙이면 200 + 로컬과 동일한 값. 이 헤더 3줄을 지우지 말 것.
+            "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://edition.cnn.com/",
+        })
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = json.loads(resp.read().decode())
+        fg = raw.get("fear_and_greed") or {}
+        score = fg.get("score")
+        if score is None:
+            print("[fetch_data] Fear & Greed: score 없음 — 생략", file=sys.stderr)
+            return {}
+        out = {
+            "score":      float(score),
+            "rating":     (fg.get("rating") or "").strip().lower(),
+            "prev_close": float(fg["previous_close"]) if fg.get("previous_close") is not None else None,
+            "asof":       fg.get("timestamp"),   # ISO8601 (UTC)
+            "source":     "cnn",
+        }
+        print(f"[fetch_data] Fear & Greed: {out['score']:.1f} ({out['rating']}) asof={out['asof']}")
+        return out
+    except Exception as e:
+        # 실패해도 파이프라인을 막지 않는다 — 해당 행만 사라진다.
+        print(f"[fetch_data] Fear & Greed API error: {e}", file=sys.stderr)
+        return {}
+
+
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
@@ -1130,6 +1170,12 @@ def fetch_kospi_data() -> dict:
     if macro.get("^VIX"):
         market_data_js["vix"] = macro["^VIX"]
 
+    # 공포·탐욕 지수 (CNN) — 사이드바 표시용. 실패 시 키 자체를 넣지 않는다.
+    print("[fetch_data]   → fear & greed index")
+    fng = get_fear_greed()
+    if fng:
+        market_data_js["fng"] = fng
+
     # 4. Korean stock candidates (Kellogg strategy screening)
     print("[fetch_data]   → KOSPI candidates")
     kospi_candidates = build_stock_candidates(KOSPI_CANDIDATES)
@@ -1276,6 +1322,12 @@ def fetch_us_data() -> dict:
     # VIX를 사이드바 market_data_js에 포함 (UI 표시용)
     if macro.get("^VIX"):
         market_data_js["vix"] = macro["^VIX"]
+
+    # 공포·탐욕 지수 (CNN) — 사이드바 표시용. 실패 시 키 자체를 넣지 않는다.
+    print("[fetch_data]   → fear & greed index")
+    fng = get_fear_greed()
+    if fng:
+        market_data_js["fng"] = fng
 
     # 4. US stock candidates
     print("[fetch_data]   → US candidates")
