@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from generate_html import build_market_items, _fng_is_fresh, _fng_label  # noqa: E402
+from generate_html import (build_market_items, build_fng_dial,  # noqa: E402
+                           _fng_is_fresh, _fng_label)
 
 NOW = datetime(2026, 8, 31, 22, 25, tzinfo=timezone.utc)
 
@@ -20,27 +21,30 @@ def _fresh_fng(**over):
     return d
 
 
-def test_only_two_items():
-    """지수·선물 행은 데이터가 있어도 더 이상 그리지 않는다."""
-    items = build_market_items(_md(
+def test_only_vix_row_remains():
+    """지수·선물 행은 데이터가 있어도 더 이상 그리지 않는다(공포·탐욕은 다이얼로 분리)."""
+    md = _md(
         nasdaq={"base": 26541.35, "chg": 1.57, "data": [1, 2]},
         sox={"base": 11882.17, "chg": 2.33, "data": [1, 2]},
         nq={"base": 29622.25, "chg": 1.14, "data": [1, 2]},
         vix={"price": 14.51, "change_pct": -4.6},
         fng=_fresh_fng(),
-    ), "kospi", "07:26")
-    assert [i["name"] for i in items] == ["VIX 공포지수", "공포·탐욕 지수"]
-    assert all("spark_id" not in i for i in items)
+    )
+    assert [i["name"] for i in build_market_items(md, "kospi", "07:26")] == ["VIX 공포지수"]
+    assert build_fng_dial(md, "kospi")["score"] == "54"
 
 
-def test_fng_row_values():
-    items = build_market_items(_md(fng=_fresh_fng()), "us", "21:16")
-    fng = items[0]
-    assert fng["val"] == "54"
-    assert fng["chg"] == "-3.7p"          # 58.17 → 54.43
-    assert fng["chg_cls"] == "down"
-    assert fng["badge"] == "중립"
-    assert fng["info_modal"] == "fng-modal"
+def test_fng_dial_values():
+    d = build_fng_dial(_md(fng=_fresh_fng()), "us")
+    assert d["score"] == "54"
+    assert d["state"] == "중립"
+    assert d["state_cls"] == "calm"
+    assert d["sub"] == "전일 58.2 · -3.7p"   # 58.17 → 54.43
+    # 0점=왼쪽(-90°), 50점=위(0°), 100점=오른쪽(+90°)
+    assert d["needle_deg"] == 7.97
+    assert build_fng_dial(_md(fng=_fresh_fng(score=0.0)), "us")["needle_deg"] == -90.0
+    assert build_fng_dial(_md(fng=_fresh_fng(score=50.0)), "us")["needle_deg"] == 0.0
+    assert build_fng_dial(_md(fng=_fresh_fng(score=100.0)), "us")["needle_deg"] == 90.0
 
 
 def test_vix_row_unchanged():
@@ -52,9 +56,18 @@ def test_vix_row_unchanged():
 
 
 def test_missing_data_omits_row():
-    """수집 실패 → 행을 그리지 않는다(§0 — 없으면 비운다)."""
+    """수집 실패 → 행·다이얼을 그리지 않는다(§0 — 없으면 비운다)."""
     assert build_market_items(_md(), "kospi", "07:26") == []
-    assert build_market_items(_md(fng=_fresh_fng()), "close", "16:25") == []
+    assert build_fng_dial(_md(), "kospi") == {}
+    # 마감 브리핑은 이 패널 자체를 쓰지 않는다.
+    assert build_fng_dial(_md(fng=_fresh_fng()), "close") == {}
+    assert build_market_items(_md(vix={"price": 14.51, "change_pct": -4.6}), "close", "16:25") == []
+
+
+def test_stale_fng_dial_dropped():
+    """낡은 점수로 다이얼을 그리지 않는다 — 게이트가 다이얼 경로에도 걸려 있어야 한다."""
+    old = _fresh_fng(asof=(NOW - timedelta(days=9)).isoformat())
+    assert build_fng_dial(_md(fng=old), "kospi") == {}
 
 
 def test_stale_fng_dropped():
@@ -72,10 +85,9 @@ def test_broken_fng_dropped():
     assert _fng_is_fresh(_fresh_fng(score=None), now=NOW) is False
 
 
-def test_prev_close_missing_leaves_change_blank():
+def test_prev_close_missing_leaves_sub_blank():
     """전일 값이 없으면 0.0p로 채우지 않고 비운다 — 보합이라는 틀린 주장 방지."""
-    items = build_market_items(_md(fng=_fresh_fng(prev_close=None)), "us", "21:16")
-    assert items[0]["chg"] == "" and items[0]["chg_cls"] == ""
+    assert build_fng_dial(_md(fng=_fresh_fng(prev_close=None)), "us")["sub"] == ""
 
 
 def test_label_falls_back_to_score_band():

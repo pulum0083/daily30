@@ -751,28 +751,37 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
             "chg_cls": "up" if cp >= 0 else "down",
             "badge": lbl, "badge_cls": cls,
         })
-
-    # 공포·탐욕 지수 (CNN, 0~100)
-    fng = mdj.get("fng")
-    if isinstance(fng, dict) and _fng_is_fresh(fng):
-        score = fng["score"]
-        label, cls = _fng_label(score, fng.get("rating"))
-        item = {
-            "name": "공포·탐욕 지수", "info_modal": "fng-modal",
-            "val": f"{score:.0f}",
-            "badge": label, "badge_cls": cls,
-        }
-        prev = fng.get("prev_close")
-        if isinstance(prev, (int, float)):
-            # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
-            d = score - prev
-            item["chg"] = f"{'+' if d >= 0 else ''}{d:.1f}p"
-            item["chg_cls"] = "up" if d >= 0 else "down"
-        else:
-            item["chg"] = ""
-            item["chg_cls"] = ""
-        items.append(item)
     return items
+
+
+def build_fng_dial(market_data: dict, internal_type: str) -> dict:
+    """공포·탐욕 지수 반원 다이얼. 데이터가 없거나 낡았으면 빈 dict → 섹션 생략(§0).
+
+    아치 좌표는 반지름 82 · 중심 (100,100)의 고정값이라 템플릿에 상수로 두고,
+    여기서는 바늘 각도만 계산한다. 0점=왼쪽(-90°), 100점=오른쪽(+90°)이므로
+    각도 = (점수 - 50) × 1.8.
+    """
+    if internal_type not in ("kospi", "us"):
+        return {}
+    mdj = market_data.get("market_data_js", {})
+    fng = mdj.get("fng")
+    if not isinstance(fng, dict) or not _fng_is_fresh(fng):
+        return {}
+    score = fng["score"]
+    label, cls = _fng_label(score, fng.get("rating"))
+    prev = fng.get("prev_close")
+    sub = ""
+    if isinstance(prev, (int, float)):
+        # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
+        d = score - prev
+        sub = f"전일 {prev:.1f} · {'+' if d >= 0 else ''}{d:.1f}p"
+    return {
+        "score": f"{score:.0f}",
+        "needle_deg": round((max(0.0, min(100.0, score)) - 50) * 1.8, 2),
+        "state": label,
+        "state_cls": cls,
+        "sub": sub,
+    }
 
 
 # CNN 등급 → 한국어 라벨. 뱃지 색은 기존 vix-badge 팔레트를 재사용한다 —
@@ -1426,6 +1435,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
+        ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
         tv = analysis.get("todays_view") or {}
@@ -1437,6 +1447,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
+        ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더

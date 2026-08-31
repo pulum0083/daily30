@@ -15,3 +15,10 @@
 - [x] 단위 테스트 `scripts/test_market_items.py`
 - [x] 로컬 전체 테스트 통과
 - [x] **GitHub Actions 러너(미국 IP)에서 CNN 수집 가능한지 실측 확인**
+
+## 표현 방식 결정 (2026-08-31)
+- [x] 프로토타입 4안 비교 (`docs/prototypes/2026-08-31-sidebar-sentiment-variants.html`)
+- [x] **D안 채택** — 공포·탐욕 반원 다이얼 + VIX 컴팩트 행
+- [x] `build_fng_dial()` + `market_data.html` 다이얼 블록 + `style.css` `.fng-*`
+- [x] 라이트·다크 양쪽 렌더 확인 (바늘·점수는 `var(--ink)`로 테마 추종)
+- [x] 전체 테스트 재통과 (pytest 746 / node 136 / eslint 0 errors)

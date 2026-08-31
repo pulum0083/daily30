@@ -1,7 +1,31 @@
-{# 시장 지표 사이드바 패널 — VIX·공포탐욕 지수 뱃지 (코스피·미국 공유).
-   뱃지가 없는 항목은 스파크라인을 그린다. #}
+{# 시장 지표 사이드바 패널 (코스피·미국 공유).
+   공포·탐욕 지수는 반원 다이얼, VIX는 아래 한 줄. 뱃지 없는 항목은 스파크라인을 그린다.
+   다이얼 아치 좌표는 반지름 82 · 중심(100,100) 고정값 — 경계는 25/45/55/75점. #}
 <div class="right-panel" id="market-data-panel">
   <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">{{ generated_time }} KST</span></div>
+  {% if fng_dial %}
+  <div class="fng-dial">
+    <span class="fng-dial-name">공포·탐욕 지수<button class="info-icon-btn" data-modal-open="fng-modal">?</button></span>
+    <svg viewBox="0 0 200 116" role="img" aria-label="공포·탐욕 지수 {{ fng_dial.score }}점, {{ fng_dial.state }}">
+      <g fill="none" stroke-width="13" stroke-linecap="butt">
+        <path d="M18.0 100.0 A82 82 0 0 1 42.0 42.0" stroke="#FCA5A5"/>
+        <path d="M42.0 42.0 A82 82 0 0 1 87.2 19.0" stroke="#FDE68A"/>
+        <path d="M87.2 19.0 A82 82 0 0 1 112.8 19.0" stroke="#86EFAC"/>
+        <path d="M112.8 19.0 A82 82 0 0 1 158.0 42.0" stroke="#FDE68A"/>
+        <path d="M158.0 42.0 A82 82 0 0 1 182.0 100.0" stroke="#FCA5A5"/>
+      </g>
+      <path class="fng-needle" d="M100 100 L100 42" stroke-width="3" stroke-linecap="round"
+            transform="rotate({{ fng_dial.needle_deg }} 100 100)"/>
+      <circle class="fng-pivot" cx="100" cy="100" r="5.5"/>
+      <text class="fng-tick" x="14" y="112">0 공포</text>
+      <text class="fng-tick" x="150" y="112">탐욕 100</text>
+    </svg>
+    <div class="fng-score">{{ fng_dial.score }}</div>
+    <div class="fng-state {{ fng_dial.state_cls }}">{{ fng_dial.state }}</div>
+    {% if fng_dial.sub %}<div class="fng-sub">{{ fng_dial.sub }}</div>{% endif %}
+  </div>
+  {% endif %}
+  {% if market_items %}
   <div class="mkt-list">
     {% for item in market_items %}
     <div class="mkt-row">
@@ -17,6 +41,7 @@
     </div>
     {% endfor %}
   </div>
+  {% endif %}
 </div>
 <script>
 window.addEventListener('load', function () {
