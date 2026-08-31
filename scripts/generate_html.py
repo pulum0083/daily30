@@ -774,7 +774,14 @@ def build_fng_dial(market_data: dict, internal_type: str) -> dict:
     if isinstance(prev, (int, float)):
         # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
         d = score - prev
-        sub = f"전일 {prev:.1f} · {'+' if d >= 0 else ''}{d:.1f}p"
+        # 표시상 0.0p가 되는 구간은 아예 비운다 — '보합'이라는 틀린 주장을 막기 위함(§0).
+        # CNN은 미국 정규장이 열리기 전에 이미 직전 종가를 previous_close로 넘기는데,
+        # 새 세션 값은 아직 없어 score와 previous_close가 **완전히 같아진다**. 미국 브리핑은
+        # 21:15 KST(= 프리마켓)에 나가므로 이 구간에 정확히 걸리고, 비우지 않으면 매일
+        # '+0.0p'가 찍힌다(2026-08-31 확인). 소수 13자리가 우연히 일치할 일은 없으므로
+        # 이 조건은 사실상 '아직 갱신 안 됨'만 잡는다.
+        if abs(d) >= 0.05:
+            sub = f"전일 {prev:.1f} · {'+' if d >= 0 else ''}{d:.1f}p"
     return {
         "score": f"{score:.0f}",
         "needle_deg": round((max(0.0, min(100.0, score)) - 50) * 1.8, 2),

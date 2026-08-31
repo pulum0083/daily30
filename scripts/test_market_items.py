@@ -90,6 +90,22 @@ def test_prev_close_missing_leaves_sub_blank():
     assert build_fng_dial(_md(fng=_fresh_fng(prev_close=None)), "us")["sub"] == ""
 
 
+def test_session_rollover_leaves_sub_blank():
+    """CNN 프리마켓 롤오버 실사고(2026-08-31): score == previous_close면 비운다.
+
+    미국 브리핑은 21:15 KST(= 프리마켓)에 나가는데, 그 시각 CNN은 직전 종가를 이미
+    previous_close로 넘겨놓고 새 세션 값은 아직 내지 않아 두 값이 완전히 같아진다.
+    그대로 두면 '+0.0p'(보합)라는 틀린 주장이 매일 발행된다.
+    """
+    same = _fresh_fng(score=54.4285714285714, prev_close=54.4285714285714)
+    assert build_fng_dial(_md(fng=same), "us")["sub"] == ""
+    # 표시상 0.0p로 반올림되는 미세 변화도 같은 이유로 비운다.
+    assert build_fng_dial(_md(fng=_fresh_fng(score=54.43, prev_close=54.40)), "us")["sub"] == ""
+    # 0.1p부터는 정상 표시한다(오제거 방지).
+    assert build_fng_dial(_md(fng=_fresh_fng(score=54.5, prev_close=54.4)), "us")["sub"] \
+        == "전일 54.4 · +0.1p"
+
+
 def test_label_falls_back_to_score_band():
     """CNN 등급이 없거나 모르는 값이면 점수 구간으로 되돌린다."""
     assert _fng_label(12.0, None) == ("극단적 공포", "high")
