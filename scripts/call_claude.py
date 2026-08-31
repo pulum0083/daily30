@@ -1620,6 +1620,42 @@ def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: b
         sys.exit(1)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# API 호출 실패 알림
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-08-31 사고: 크레딧 소진으로 마감 브리핑이 죽었는데 아무에게도 알림이 가지
+# 않았다. 잡은 failure로 끝났지만 GHA는 아무도 안 보고 있어서, 사용자가 몇 시간 뒤
+# 직접 발견했다. 발행이 통째로 멈추는 실패는 반드시 사람에게 도달해야 한다(§32).
+_API_FAIL_HINTS = (
+    ("credit balance", "Anthropic 크레딧 소진 — Console → Plans & Billing에서 충전해야 합니다. "
+                       "충전 전까지 모든 브리핑이 같은 이유로 실패합니다."),
+    ("authentication", "ANTHROPIC_API_KEY 인증 실패 — 키가 만료·회수됐는지 확인하세요."),
+    ("permission", "API 키 권한 부족 — 키 스코프를 확인하세요."),
+    ("rate limit", "레이트 리밋 — 잠시 뒤 재실행하면 풀릴 수 있습니다."),
+)
+
+
+def alert_api_failure(briefing_type: str, date_str: str, err: Exception) -> None:
+    """Claude API 호출 실패를 관리자 텔레그램으로 알린다. 절대 예외를 올리지 않는다."""
+    try:
+        text = str(err)
+        low = text.lower()
+        hint = next((h for k, h in _API_FAIL_HINTS if k in low), "")
+        lines = [
+            "🚨 브리핑 발행 실패 — Claude API 호출 오류",
+            f"종류: {briefing_type} / {date_str}",
+        ]
+        if hint:
+            lines.append(f"원인: {hint}")
+        lines.append(f"오류: {text[:400]}")
+        # 평문으로 보낸다 — 오류 문자열에 <> 가 섞여도 서식 때문에 알림이 죽지 않게(§37).
+        from send_telegram import send_admin_alert
+        send_admin_alert("\n".join(lines))
+    except Exception as e:
+        # 알림 실패가 원래 오류를 가리면 안 된다.
+        print(f"[call_claude] 관리자 알림 실패: {e}", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Call Claude API with Prompt Caching")
     parser.add_argument("--type", choices=["kospi", "us", "kospi-close"], required=True)
@@ -1666,6 +1702,7 @@ def main():
             analysis = call_claude_closing(date_str)
         except Exception as e:
             print(f"[call_claude] ERROR: {e}", file=sys.stderr)
+            alert_api_failure("kospi-close", date_str, e)
             sys.exit(1)
 
         save_analysis("kospi-close", analysis)
@@ -1678,6 +1715,7 @@ def main():
         analysis = call_claude(args.type, date_str, force_direction=args.force_direction)
     except Exception as e:
         print(f"[call_claude] ERROR calling Claude API: {e}", file=sys.stderr)
+        alert_api_failure(args.type, date_str, e)
         sys.exit(1)
 
     save_analysis(args.type, analysis)
