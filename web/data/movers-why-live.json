@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-01T10:31:02.842616+09:00",
+  "generated_at": "2026-09-01T11:00:50.787100+09:00",
   "date": "2026-09-01",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -0.67,
-      "surge": 0.18,
+      "changePct": -0.77,
+      "surge": 0.22,
       "events": [
         {
           "time": "07:12",
           "headline": "삼성전자 '걸림돌' 걷히나…목표주가 '쑥', 배경은 신제품 비중 확대·수율 개선",
           "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE5NYVZEUHJnckJmM3BwTzNRQTFCSk1xQmc3S0lpUFlGLUhsdTdZdVQ3bkxtY1FWSkZzZGxIOGhMTjhxYmVhMzBqWVZZWGJXSGc?oc=5",
           "source": "v.daum.net",
-          "why": "삼성전자의 신제품 비중 확대와 수율 개선으로 목표주가가 상향 조정되며 주가 상승의 걸림돌이 해소될 가능성이 제기되었다. (개별 인과 단정 안 함)",
+          "why": "삼성전자의 목표주가가 신제품 비중 확대와 수율 개선에 힘입어 상승할 것이라는 전망이 나왔습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
@@ -31,17 +31,17 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.84,
-      "surge": 0.22,
+      "changePct": 0.54,
+      "surge": 0.26,
       "events": [
         {
-          "time": "09:56",
-          "headline": "삼성전자 '약세' 약해지고.. SK하이닉스 '상승 전환'",
-          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPckg3U0hSV09acTFMTm9jU0tWMi1oNUF5MXZkemY3LUR0bVRlVWlhazYxRi1sSXQ2NFhvOTc0UmNnSnVYQWNBbnFfUUdMTlhpV0dTZG9MeEhkZFBwdXp6RFJ6YTZfRFlKYlpSV0tHQkdMa09XT2VJQkx5NzJEVHU2UVFPVVpyRGM3?oc=5",
-          "source": "글로벌이코노믹",
-          "why": "삼성전자와 SK하이닉스의 주가 흐름이 엇갈리는 가운데, 9월의 주요 변수는 자사주 매입이 될 것으로 전망된다. (개별 인과 단정 안 함)",
+          "time": "09:12",
+          "headline": "코스피 0.52% 내린 6784.29...삼성전자·SK하이닉스 주가 약세",
+          "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE84QXJqeDJPLUJOWWRBMkVsYjVKS2gyVzdUcGdfdzNISzhxRTVHb2pBRFFaSXVlRTNhYjlTYkpMQ3hqTVRuWERGQXFGUTFFclIzVndwY2xWTHVMSkVyVXhOdWNOZDc3Q0Z6dTQtdktB?oc=5",
+          "source": "gukjenews.com",
+          "why": "코스피 지수가 0.52% 하락한 가운데 삼성전자와 SK하이닉스 주가도 약세를 보였다. (개별 인과 단정 안 함)",
           "tier": "related",
-          "sentiment": "neu"
+          "sentiment": "neg"
         },
         {
           "time": "05:32",
@@ -58,14 +58,23 @@
       "code": "005380",
       "name": "현대차",
       "changePct": -1.36,
-      "surge": 0.25,
+      "surge": 0.29,
       "events": [
         {
           "time": "06:08",
           "headline": "신사업 ‘물음표’ 못 지운 현대차…증권가 목표주가도 제자리",
           "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFBxS1R3TVlubUVOLS1zVUxsM3plQVM1Zm9ROFV6OENmM3pKRnpoeTNTUTFNSjZiV2tMcGVBMUNSWXFuVEN3VzMwRFZhS2N6YVFmNkM3TndXel9HUDlyWDdnUA?oc=5",
-          "source": "metroseoul.co.kr",
-          "why": "현대차가 신사업에 대한 불확실성을 해소하지 못하면서 증권가에서도 목표주가를 유지하고 있다. (개별 인과 단정 안 함)",
+          "source": "메트로신문",
+          "why": "현대차의 신사업 추진에 대한 불확실성이 증권가의 목표주가에도 영향을 미치고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:24",
+          "headline": "현대차 주가, 9월 1일 장중 399,500원 0.99% 하락",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE41TXVBTXpvS0h2Y3BKaUxITUtWWHBxNVBGcVhsc3pvRDVhYUNUSkk1alN6Zkl0X2dDZFdJV0hTSVVpakc1dXIxdGNnOTl6U1hWdEp5a3lnRi1mS1ZFUzVYVlI2MzVPRGJqUkdaSlphUFJ2QQ?oc=5",
+          "source": "톱스타뉴스",
+          "why": "현대차 주가, 9월 1일 장중 399,500원 0.99% 하락 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
         }
