@@ -628,6 +628,13 @@ def _pick_detail_url(ticker: str, internal_type: str) -> str:
     return ""
 
 
+def _fmt_level(v, internal_type: str) -> str:
+    """MA 등 기준선 절대값 표시 문자열. 없으면 빈 문자열(지어내지 않는다)."""
+    if not isinstance(v, (int, float)):
+        return ""
+    return f"${v:,.2f}" if internal_type == "us" else f"{int(round(v)):,}원"
+
+
 def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> list:
     """analysis.stock_picks → 카드 컨텍스트.
     price/change는 candidates 실데이터로 덮어쓴다 (Claude 할루시네이션 방지).
@@ -696,6 +703,9 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
             "target_pct": p.get("target_pct"),
             "stop": p.get("stop"),
             "stop_pct": p.get("stop_pct"),
+            # 손절 기준선(20일선) 실측 절대값 — 카드에 근거로 노출한다(2026-09-02).
+            # ⚠️ 아래 "ma20"은 미니차트용 **시리즈**다. 이름이 비슷하니 섞지 말 것.
+            "ma20_level": _fmt_level(p.get("ma20_level") or cand.get("ma20_level"), internal_type),
             "prices": cand.get("sparkline", []),
             "ma20": cand.get("ma20_sparkline", []),
             "ma200": cand.get("ma200_sparkline", []),

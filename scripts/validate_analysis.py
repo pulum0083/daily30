@@ -733,6 +733,8 @@ def _inject_candidate(cands, clean_ticker, name, data):
         "change_pct": data["change_pct"],
         "ma20_dist_pct": data.get("ma20_dist_pct"),
         "ma200_dist_pct": data.get("ma200_dist_pct"),
+        "ma20_level": data.get("ma20_level"),
+        "ma200_level": data.get("ma200_level"),
         "sparkline": data.get("sparkline", []),
         "ma20_sparkline": data.get("ma20_sparkline", []),
         "ma200_sparkline": data.get("ma200_sparkline", []),
@@ -777,9 +779,13 @@ def _closes_to_realdata(closes, ndigits, live_price=None):
         ma20 = _ma_series(20)
         out["ma20_dist_pct"] = round((price - ma20[-1]) / ma20[-1] * 100, 2)
         out["ma20_sparkline"] = [r(v) for v in ma20]
+        # 이격률뿐 아니라 **절대 수준**도 낸다 — 픽 카드가 손절 기준선을 실측으로 보여주고,
+        # LLM이 "20일선 이탈 시"라고 쓴 손절가를 이 값으로 검증하기 위함(2026-09-02).
+        out["ma20_level"] = r(ma20[-1])
     if len(closes) >= 200:
         ma200 = _ma_series(200)
         out["ma200_dist_pct"] = round((price - ma200[-1]) / ma200[-1] * 100, 2)
+        out["ma200_level"] = r(ma200[-1])
         out["ma200_sparkline"] = [r(v) for v in ma200]
     return out
 
@@ -1290,6 +1296,48 @@ def inject_kospi_index_levels(analysis, corrections, warnings):
     )
 
 
+# 손절가가 "20일선 이탈 시"라고 주장할 때, 그 값이 실측 20일선과 맞는지 확인한다.
+#
+# 2026-09-02 조사에서 확인된 상태: LLM은 action_guide에 "손절: 20일선(약 1,605,000원)
+# 이탈 시"처럼 **근거를 이미 주장**하고 있었고, 그날 실측과 대조하니 오차 -0.17%·-0.26%로
+# 정확했다. 문제는 그게 **우연히 맞은 것인지 아무도 확인하지 않았다**는 점이다 — §22·§24·§28
+# 에서 반복된 "산문 속 주장에 게이트가 없다" 패턴 그대로다. 픽 카드가 실측 20일선을 근거로
+# 내걸게 된 이상(2026-09-02), 그 옆 손절가가 다른 값이면 화면이 스스로 모순된다.
+#
+# 허용 오차 3%: 20일선은 매일 움직이고 LLM은 종가 기준으로 계산하므로 소수점 차이는 정상이다.
+# 이 게이트가 잡으려는 건 "20일선이라 써놓고 전혀 다른 값을 쓴" 경우다.
+_MA20_CLAIM_RE = re.compile(r"20\s*일\s*선|20일\s*이동평균|20MA|MA\s*20", re.I)
+_MA20_STOP_TOLERANCE_PCT = 3.0
+
+
+def _verify_stop_against_ma20(pick, ma20_level, is_us, corrections, warnings):
+    """손절가가 20일선 근거를 주장하면 실측 20일선으로 검증하고, 어긋나면 교정한다."""
+    if not isinstance(ma20_level, (int, float)) or ma20_level <= 0:
+        return
+    guide = str(pick.get("action_guide") or "")
+    if not _MA20_CLAIM_RE.search(guide):
+        return                      # 20일선을 근거로 내세우지 않았으면 판단하지 않는다
+    stop = parse_price(pick.get("stop"))
+    if stop is None:
+        return
+    gap = (stop - ma20_level) / ma20_level * 100
+    if abs(gap) <= _MA20_STOP_TOLERANCE_PCT:
+        return
+    fixed = f"${ma20_level:,.2f}" if is_us else f"{int(round(ma20_level)):,}원"
+    corrections.append(
+        f"종목 '{pick.get('name')}' 손절가 교정: {pick.get('stop')} → {fixed} "
+        f"(20일선 근거 주장, 실측 20일선 대비 {gap:+.1f}% 이탈)"
+    )
+    pick["stop"] = fixed
+    # stop_pct는 현재가 기준 비율이라 함께 다시 만든다. 못 만들면 지운다 — 틀린 값을 남기지 않는다.
+    cur = parse_price(pick.get("price"))
+    if cur:
+        pick["stop_pct"] = f"{(ma20_level - cur) / cur * 100:+.1f}%"
+    else:
+        pick.pop("stop_pct", None)
+        warnings.append(f"종목 '{pick.get('name')}' 손절 교정 후 현재가 파싱 실패 — stop_pct 제거")
+
+
 def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
     """픽된 종목의 실측 데이터를 fetch해 analysis·latest(candidate)에 주입한다.
     Returns: latest가 변경됐는지(bool).
@@ -1326,6 +1374,11 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
             p["ma20_dist_pct"] = data["ma20_dist_pct"]
         if data.get("vol_mult") is not None:
             p["vol_mult"] = data["vol_mult"]
+        if data.get("ma20_level") is not None:
+            p["ma20_level"] = data["ma20_level"]
+        if data.get("ma200_level") is not None:
+            p["ma200_level"] = data["ma200_level"]
+        _verify_stop_against_ma20(p, data.get("ma20_level"), is_us, corrections, warnings)
 
         _inject_candidate(cands, tk, p.get("name", ""), data)
         changed = True
