@@ -1,27 +1,36 @@
 {
-  "generated_at": "2026-09-02T09:00:41.265064+09:00",
+  "generated_at": "2026-09-02T09:30:52.075236+09:00",
   "date": "2026-09-02",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -3.45,
-      "surge": 0.01,
+      "changePct": -3.07,
+      "surge": 0.08,
       "events": []
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.0,
-      "surge": 0.0,
+      "changePct": -2.6,
+      "surge": 0.09,
       "events": [
         {
           "time": "08:17",
           "headline": "중동 전운 다시 고조…삼전·SK하닉 프리마켓서 3% 약세",
           "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1HTzZWX0loNzJzWjFVYXp5RlNjRkh4VDBPRDA3Tm1kNmpCWWJhZ1Z3T1NXT1RzVDRFSm5zeFFNZnh5QnhIUzhGSDE5LVpySTRUZHJv?oc=5",
-          "source": "네이트",
-          "why": "중동 지역의 긴장 고조로 인해 SK하이닉스가 프리마켓에서 3% 하락했다. (개별 인과 단정 안 함)",
-          "tier": "related",
+          "source": "news.nate.com",
+          "why": "중동 지역의 긴장 고조로 인해 SK하이닉스를 포함한 반도체 관련 주식들이 프리마켓에서 약세를 보였다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:12",
+          "headline": "계속되는 전운…삼전·SK하닉 장 초반 3% 약세",
+          "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTFBMN25LTHVtaWdDR0xkb3lLWUV4ZXVWMGVCTWFfX2FPTGVIZlI1T1o3NXU3cUswSnNEbmZ4UkhNNzhLM3ZlcGFtTWVrRlN1ZGEwNzdIbFFpMWtQcjNaZXBHbdIBeEFVX3lxTE96N1pDd25jVHIxc1hfZU9oaWZma0tWREFOQ1BqZ3NyVUNnM1QxVFBISXBlSk5rN0JoOVloeEZsYjREX0JodVRyUy1oWGE3N2tpeWJ3Qi1Na3BoU2Y3c3c5amhhRUc0Ri1sVGJNdm9hVHpGSjFUYUVuRA?oc=5",
+          "source": "뉴시스",
+          "why": "계속되는 전운…삼전·SK하닉 장 초반 3% 약세",
+          "tier": "why",
           "sentiment": "neg"
         }
       ]
@@ -29,8 +38,8 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -3.5,
-      "surge": 0.03,
+      "changePct": -4.0,
+      "surge": 0.26,
       "events": []
     }
   ]
