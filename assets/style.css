@@ -1285,3 +1285,10 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
   .arch-day__date{flex:none;display:flex;align-items:baseline;gap:6px;}
   .arch-day__dow{margin-top:0;}
 }
+
+/* 종목 픽 산출 근거 한 줄 — 2026-09-02.
+   구체적 가격만 근거 없이 놓이면 매매 신호로 읽힌다. 실측과 AI 판단을 구분해 밝힌다. */
+.pick-basis{margin-top:9px;padding-top:9px;border-top:1px solid var(--hairline);
+  font-size:11.5px;line-height:1.65;color:var(--muted);word-break:keep-all;}
+.pick-basis b{color:var(--ink);font-weight:600;}
+.pick-basis a{color:var(--primary);font-weight:600;white-space:nowrap;}
