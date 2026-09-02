@@ -315,7 +315,17 @@ python3 scripts/generate_html.py --write-list-only
 - 현재 보고 있는 브리핑만 `is-current`로 강조.
 - 주말(토·일): 모든 슬롯 `state: 'empty'`(`—`). "생성 예정" 문구 절대 표시 금지.
 
-`/briefings` 진입 시: `briefings-list.json`에서 가장 최근 `ready` 슬롯 URL로 `location.replace()`. 날짜 내 우선순위: `us > close > kospi`. `vercel.json`에 날짜를 하드코딩하지 않는다.
+**`/briefings/` 는 정적 아카이브다 — 리다이렉트하지 않는다 (2026-09-02 변경).**
+
+그 전까지는 `briefings-list.json`을 fetch해 가장 최근 `ready` 슬롯으로 `location.replace()` 하는 1.7KB 스텁이었다(본문 26자). 발행본이 81편 쌓였는데 **과거 브리핑을 훑어볼 경로가 사실상 없었고**(사이드바 목록은 최근 10일뿐), sitemap에는 그 스텁이 등재돼 크롤러에게 빈 페이지를 광고하고 있었다. 외부 진단이 "브리핑이 thin content"라고 본 것도 허브에서 막혀 본문(4,600자)에 도달하지 못했기 때문으로 보인다.
+
+- `generate_html.write_briefings_index()` 가 `web/briefings/index.html` 을 정적 생성한다. 목록 JSON·sitemap과 **같은 자리에서 항상 함께** 갱신되므로 별도 스텝이 필요 없다(호출부 3곳).
+- **목록의 원본은 `data/*.json`이 아니라 디스크에 커밋된 발행본이다.** 로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28). 헤드라인은 각 발행본 옆의 `analysis_snapshot.json`에서 `todays_view.view_title` → `reason_title` → `market_title` → meta description 순으로 찾고, **없으면 비운다**(지어내지 않는다).
+- **`.bottom-list` 클래스를 쓰지 말 것.** `main.js patchBriefingList()` 가 그 클래스를 찾아 **최근 10일치로 다시 그린다** — 아카이브가 그 클래스를 쓰면 81편이 10일로 잘린다. 아카이브는 `.arch-list`로 그 대상에서 벗어나 있다.
+- day 딕셔너리의 브리핑 목록 키는 `briefings`다. **`items`로 되돌리지 말 것** — Jinja가 `dict.items` 메서드를 먼저 잡아 렌더가 `TypeError`로 깨진다(실제로 겪었다).
+- 테스트: `scripts/test_briefings_archive.py`(7) — 월별 그룹·헤드라인 우선순위·미발행 제외·빈 아카이브·`items` 키 회귀 가드·리다이렉트 부재.
+
+**sitemap 정리(같은 날):** `/` 는 `vercel.json`에서 `/stocks/`로 **301 리다이렉트**되므로 sitemap에서 뺐다 — 넣어두면 "리디렉션이 있는 페이지"로 색인에서 제외되고 신호만 흐려진다. 대신 손으로 만든 정적 페이지 `/about/`·`/legal/{disclaimer,privacy,terms}/` 4개를 명시적으로 넣었다(자동 수집 대상이 아니라 그동안 빠져 있었다).
 
 ### 5. 랜딩 페이지 CSS 변수 의존성
 

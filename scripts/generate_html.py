@@ -2257,16 +2257,117 @@ def build_all_stocks():
     return results
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 브리핑 아카이브 (/briefings/)
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-09-02 신설. 그 전까지 /briefings/ 는 briefings-list.json을 fetch해서
+# 최신 브리핑으로 location.replace() 하는 1.7KB 리다이렉트 스텁이었다(본문 26자).
+# 발행본이 80편 넘게 쌓였는데 **과거 브리핑을 훑어볼 경로가 사실상 없었고**,
+# sitemap에는 그 스텁이 등재돼 크롤러에게 빈 페이지를 광고하고 있었다.
+#
+# ⚠️ 목록의 원본은 data/*.json이 아니라 **디스크에 커밋된 발행본**이다.
+#    로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28).
+# ⚠️ main.js patchBriefingList()는 `.bottom-list`를 찾아 최근 10일로 다시 그린다.
+#    아카이브는 `.arch-list`를 쓰므로 그 대상이 아니다 — 클래스를 바꾸지 말 것.
+ARCHIVE_TYPES = ["kospi", "close", "us"]
+
+
+def _archive_headline(date_str: str, btype: str) -> str:
+    """발행본의 헤드라인. 스냅샷 → meta description 순으로 찾고, 없으면 빈 문자열."""
+    snap = BRIEFINGS_DIR / date_str / btype / "analysis_snapshot.json"
+    if snap.exists():
+        try:
+            d = load_json(snap)
+        except Exception:
+            d = {}
+        tv = d.get("todays_view") or {}
+        for cand in (tv.get("view_title"), d.get("reason_title"), d.get("market_title")):
+            if isinstance(cand, str) and cand.strip():
+                return cand.strip()
+    page = BRIEFINGS_DIR / date_str / btype / "index.html"
+    if page.exists():
+        m = re.search(r'<meta name="description" content="([^"]*)"', page.read_text(errors="ignore"))
+        if m and m.group(1).strip():
+            return html.unescape(m.group(1).strip())
+    return ""
+
+
+def build_archive_context() -> dict:
+    """발행된 브리핑을 디스크에서 훑어 월별 아카이브 목록을 만든다."""
+    if not BRIEFINGS_DIR.exists():
+        return {"months": [], "total": 0}
+    dates = sorted(
+        (p.name for p in BRIEFINGS_DIR.iterdir()
+         if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)),
+        reverse=True,
+    )
+    months, total, prev_month = [], 0, None
+    for d in dates:
+        entries = []
+        for t in ARCHIVE_TYPES:
+            if not (BRIEFINGS_DIR / d / t / "index.html").exists():
+                continue
+            entries.append({
+                "label": BRIEFING_LABELS[t],
+                "url": f"/briefings/{d}/{t}/",
+                "headline": _archive_headline(d, t),
+            })
+        if not entries:
+            continue
+        total += len(entries)
+        dt = date.fromisoformat(d)
+        label = f"{dt.year}년 {dt.month}월"
+        if label != prev_month:
+            months.append({"label": label, "days": []})
+            prev_month = label
+        months[-1]["days"].append({
+            "date": d, "date_short": f"{dt.month}월 {dt.day}일",
+            "day_label": day_label(d),
+            # ⚠️ 키 이름을 items로 두면 Jinja가 dict.items 메서드를 먼저 잡아 렌더가 깨진다.
+            "briefings": entries,
+        })
+    return {"months": months, "total": total}
+
+
+def write_briefings_index():
+    """web/briefings/index.html — 정적 아카이브 목록을 생성한다."""
+    ctx = build_archive_context()
+    if not ctx["total"]:
+        print("[generate_html] 아카이브: 발행본 없음 — index.html 생략", file=sys.stderr)
+        return
+    env = make_env()
+    out = BRIEFINGS_DIR / "index.html"
+    out.write_text(
+        env.get_template("pages/briefings_index.html").render(
+            canonical_url=f"{SITE_BASE}/briefings/", **ctx),
+        encoding="utf-8")
+    # 로그용 상대경로 — BASE_DIR 밖이면 relative_to가 예외를 던진다(테스트의 tmp_path 등).
+    # 로그 한 줄 때문에 아카이브 생성이 죽으면 안 되므로 실패 시 절대경로로 떨어진다.
+    try:
+        shown = out.relative_to(BASE_DIR)
+    except ValueError:
+        shown = out
+    print(f"[generate_html] 아카이브 갱신: {shown} "
+          f"({ctx['total']}편 / {len(ctx['months'])}개월)")
+
+
 def write_sitemap_xml():
     """web/sitemap.xml 을 생성한다. generate_html 실행마다 자동 갱신."""
     BASE = "https://doubleshot.space"
     today = datetime.now(KST).strftime("%Y-%m-%d")
 
+    # ⚠️ `/` 는 vercel.json에서 `/stocks/`로 301 리다이렉트된다 — sitemap에 넣으면
+    #    "리디렉션이 있는 페이지"로 색인에서 제외되고 신호만 흐려진다. 도착지를 직접 등재한다.
+    # /about/·/legal/* 는 손으로 만든 정적 페이지라 자동 수집 대상이 아니었다.
+    # 심사·신뢰도 판단 때 가장 먼저 찾는 페이지들이므로 명시적으로 넣는다(2026-09-02 추가).
     urls = [
-        {"loc": f"{BASE}/",                              "changefreq": "daily",   "priority": "1.0"},
+        {"loc": f"{BASE}/stocks/",                       "changefreq": "daily",   "priority": "1.0"},
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
-        {"loc": f"{BASE}/stocks/",                        "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
+        {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
+        {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
+        {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
+        {"loc": f"{BASE}/legal/terms/",                  "changefreq": "yearly",  "priority": "0.3"},
     ]
 
     # ready 상태인 브리핑 페이지만 포함
@@ -2591,6 +2692,7 @@ def main():
 
     if args.write_list_only:
         write_briefings_list_json()
+        write_briefings_index()
         write_sitemap_xml()
         return
 
@@ -2599,6 +2701,7 @@ def main():
         if latest:
             update_vercel_briefings_route(latest[0], latest[1])
         write_briefings_list_json()
+        write_briefings_index()
         write_sitemap_xml()
         return
 
@@ -2629,6 +2732,7 @@ def main():
                       file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
+    write_briefings_index()
     write_sitemap_xml()
 
 

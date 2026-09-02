@@ -1252,3 +1252,36 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
 .imp-side.down .imp-tk{background:var(--dn-bg);color:var(--dn);}
 .imp-side.up .imp-tk{background:var(--up-bg);color:var(--up);}
+
+
+/* ──────────────────────────────────────────────
+   브리핑 아카이브 (/briefings/) — 2026-09-02
+   ⚠️ .bottom-list 와 별개다. main.js patchBriefingList()는 .bottom-list만 다시 그린다.
+────────────────────────────────────────────── */
+.arch-head{padding:28px 0 22px;border-bottom:1px solid var(--hairline);margin-bottom:8px;}
+.arch-title{font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);margin-bottom:12px;}
+.arch-lead{font-size:14px;line-height:1.75;color:var(--ink);max-width:640px;margin-bottom:8px;}
+.arch-lead--muted{color:var(--muted);font-size:13px;}
+.arch-lead a{color:var(--primary);font-weight:600;}
+.arch-month{margin-top:26px;}
+.arch-month__label{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.02em;
+  padding-bottom:8px;border-bottom:1px solid var(--hairline);margin-bottom:4px;}
+.arch-day{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--hairline);}
+.arch-day:last-child{border-bottom:none;}
+.arch-day__date{flex:0 0 78px;padding-top:2px;}
+.arch-day__num{display:block;font-size:13px;font-weight:700;color:var(--ink);}
+.arch-day__dow{display:block;font-size:11px;color:var(--muted);margin-top:1px;}
+.arch-day__items{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;}
+.arch-item{display:block;background:var(--surface-soft);border:1px solid var(--hairline);
+  border-radius:10px;padding:10px 12px;transition:background .12s,border-color .12s;}
+.arch-item:hover{background:var(--canvas);border-color:var(--primary);}
+.arch-item__label{display:inline-block;font-size:11px;font-weight:700;color:var(--primary);
+  background:var(--primary-bg);border-radius:999px;padding:1px 8px;margin-bottom:5px;}
+.arch-item__headline{display:block;font-size:14px;font-weight:600;line-height:1.55;color:var(--ink);
+  word-break:keep-all;}
+@media(max-width:640px){
+  .arch-title{font-size:22px;}
+  .arch-day{flex-direction:column;gap:8px;}
+  .arch-day__date{flex:none;display:flex;align-items:baseline;gap:6px;}
+  .arch-day__dow{margin-top:0;}
+}

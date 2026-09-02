@@ -1,10 +1,49 @@
-{# /briefings 진입 페이지 — TODAY 카드 + 최근 30일 브리핑 목록 #}
+{# /briefings/ 브리핑 아카이브 — 발행본 전체를 월별로 나열하는 정적 목록.
+   2026-09-02 신설(그 전엔 최신 브리핑으로 보내는 JS 리다이렉트 스텁이었다).
+   ⚠️ `.bottom-list` 클래스를 쓰지 말 것 — main.js patchBriefingList()가 그 클래스를
+      찾아 최근 10일치로 다시 그린다. 아카이브는 `.arch-list`로 그 대상에서 벗어난다. #}
 {% extends "base.html" %}
-{% block title %}브리핑 목록 — Double-Shot{% endblock %}
-{% block og_title %}Double-Shot — AI 투자 브리핑 목록{% endblock %}
-{% block og_desc %}매일 아침 코스피·저녁 미국 시장 AI 예측 브리핑{% endblock %}
+{% block title %}브리핑 아카이브 — Double-Shot{% endblock %}
+{% block og_title %}Double-Shot 브리핑 아카이브{% endblock %}
+{% block og_desc %}코스피 예측·마감, 미국 시장 브리핑 {{ total }}편을 날짜별로 모아 봅니다{% endblock %}
 {% block body %}
 <div class="layout-wrapper">
-  {% include "sections/briefing_list.html" %}
+  <div class="arch-head">
+    <h1 class="arch-title">브리핑 아카이브</h1>
+    <p class="arch-lead">
+      Double-Shot이 매일 발행한 브리핑 <b>{{ total }}편</b>을 날짜별로 모았어요.
+      아침에는 코스피가 오늘 어느 방향으로 열릴지, 오후에는 그날 시장이 왜 그렇게 끝났는지,
+      저녁에는 미국 시장에서 무엇을 점검해야 하는지를 다룹니다.
+    </p>
+    <p class="arch-lead arch-lead--muted">
+      모든 수치는 발행 시점에 수집한 실측 시장 데이터예요. 수집되지 않은 항목은 비워 둡니다.
+      산출 기준은 <a href="/about/">서비스 소개</a>에서 확인할 수 있고,
+      투자 권유가 아닌 참고 자료라는 점은 <a href="/legal/disclaimer/">면책 고지</a>에 정리해 두었어요.
+    </p>
+  </div>
+
+  <div class="arch-list">
+    {% for month in months %}
+    <section class="arch-month">
+      <h2 class="arch-month__label">{{ month.label }}</h2>
+      {% for day in month.days %}
+      <div class="arch-day">
+        <div class="arch-day__date">
+          <span class="arch-day__num">{{ day.date_short }}</span>
+          <span class="arch-day__dow">{{ day.day_label }}</span>
+        </div>
+        <div class="arch-day__items">
+          {% for item in day.briefings %}
+          <a class="arch-item" href="{{ item.url }}">
+            <span class="arch-item__label">{{ item.label }}</span>
+            {% if item.headline %}<span class="arch-item__headline">{{ item.headline }}</span>{% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
