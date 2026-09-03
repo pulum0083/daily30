@@ -28,7 +28,6 @@
     { id: 'home',    label: '전체',     href: '/stocks/',             screen: 'home' },
     { id: 'signals', label: '특이신호', href: '/stocks/#signals-all', screen: 'signals-all' },
     // { id: 'themes',   label: '테마', href: '/themes/' },    // 테마 타임라인 완성 시 점등
-    { id: 'sector',  label: '섹터',     href: '/stocks/#sector',      screen: 'sector' },
     { id: 'flow',    label: '자금 지도', href: '/stocks/#flow-map',    screen: 'flow-map' },
     // { id: 'calendar', label: '일정', href: '/calendar/' },  // 실적 캘린더 완성 시 점등
   ];

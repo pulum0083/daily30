@@ -68,7 +68,16 @@
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-  .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
+  .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
+  .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
+  .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
+  .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
+  .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
+  .sector-guide b{color:var(--ink);font-weight:600;}
+  .sector-guide .nowrap{white-space:nowrap;}
+  .sector-guide__note{font-size:12px;color:var(--muted);}
+  .sector-guide__note a{color:var(--primary);font-weight:600;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -159,7 +168,11 @@
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
     if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
   </script>
+  
+  
   <p class="sector-desc">메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.</p>
+  <p class="sector-desc">코스피 시가총액에서 가장 큰 비중을 차지하는 섹터이고, 지수 방향 자체를 좌우하는 날이 많아요. 크게 세 갈래로 나뉘어요. 메모리(삼성전자·SK하이닉스)는 DRAM·낸드 가격 사이클을 따라가고, 그중 HBM은 AI 서버 수요에 직접 연동돼요. 파운드리·시스템반도체는 고객사 주문 잔고가 실적을 결정하고, 장비·소재(한미반도체·주성엔지니어링·이오테크닉스 등)는 대장주의 설비투자 결정이 한 박자 늦게 반영돼요.</p>
+  <p class="sector-desc">그래서 같은 반도체 섹터라도 대장주와 장비주가 서로 다른 날에 움직이는 경우가 흔해요. 메모리 대형주가 먼저 오르고 장비주가 뒤따라 붙는 흐름이 전형적이고, 반대로 장비주만 강한 날은 개별 수주 소식일 가능성이 커요. 미국 필라델피아 반도체지수(SOX)와 엔비디아·마이크론의 밤사이 등락이 다음 날 국내 반도체 시가에 그대로 반영되는 경향도 강해요.</p>
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -391,6 +404,26 @@
      </div>
    </aside>
   </div><!-- /.sector-cols -->
+
+  
+  <section class="sector-guide">
+    <h2 class="sector-guide__title">이 페이지 읽는 법</h2>
+    <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
+      같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
+      앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
+      같은 섹터 안에서 종목을 비교할 때 특히 쓸모가 있어요.</p>
+    <p><b>외국인 보유율</b>은 발행주식 중 외국인이 들고 있는 비중이에요. 이 값 자체가 좋고 나쁨을 뜻하진 않지만,
+      비중이 높은 종목일수록 환율과 미국 시장 흐름에 함께 흔들리는 경향이 있어요. 비중이 높은데 외국인이
+      순매도로 돌아서면 수급 부담이 그만큼 커진다는 뜻이기도 해요.</p>
+    <p><b>섹터 평균과 시장폭</b>은 다른 이야기를 해요. 평균은 섹터가 전체적으로 어느 방향인지를 알려주고,
+      시장폭(상승/하락 종목 수)은 그 움직임이 섹터 전반에 퍼진 것인지 몇 종목이 끌고 간 것인지를 알려줘요.
+      평균은 플러스인데 상승 종목이 둘뿐이라면 대장주 한두 개가 지수를 들어 올린 것이고, 그건 섹터 전체가
+      좋아진 것과 다르게 봐야 해요.
+      오늘 반도체 섹터는 7종목 중
+      2종목이 오르고 5종목이 내렸고, 섹터 평균은 -2.03%예요.</p>
+    <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
+      투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
+  </section>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>
