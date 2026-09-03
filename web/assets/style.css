@@ -1255,35 +1255,48 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 
 
 /* ──────────────────────────────────────────────
-   브리핑 아카이브 (/briefings/) — 2026-09-02
+   브리핑 아카이브 (/briefings/) — 2026-09-02, 타임라인 개편 2026-09-03
    ⚠️ .bottom-list 와 별개다. main.js patchBriefingList()는 .bottom-list만 다시 그린다.
+   위계 규칙: 타이틀이 주인공, 유형 태그(코스피 예측 등)는 보조다. 태그를 강조하면
+   81편이 전부 같은 라벨의 반복으로 보여 정작 읽을 타이틀이 묻힌다.
 ────────────────────────────────────────────── */
 .arch-head{padding:28px 0 22px;border-bottom:1px solid var(--hairline);margin-bottom:8px;}
 .arch-title{font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);margin-bottom:12px;}
 .arch-lead{font-size:14px;line-height:1.75;color:var(--ink);max-width:640px;margin-bottom:8px;}
 .arch-lead--muted{color:var(--muted);font-size:13px;}
 .arch-lead a{color:var(--primary);font-weight:600;}
-.arch-month{margin-top:26px;}
-.arch-month__label{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.02em;
-  padding-bottom:8px;border-bottom:1px solid var(--hairline);margin-bottom:4px;}
-.arch-day{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--hairline);}
-.arch-day:last-child{border-bottom:none;}
-.arch-day__date{flex:0 0 78px;padding-top:2px;}
-.arch-day__num{display:block;font-size:13px;font-weight:700;color:var(--ink);}
-.arch-day__dow{display:block;font-size:11px;color:var(--muted);margin-top:1px;}
-.arch-day__items{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;}
-.arch-item{display:block;background:var(--surface-soft);border:1px solid var(--hairline);
-  border-radius:10px;padding:10px 12px;transition:background .12s,border-color .12s;}
-.arch-item:hover{background:var(--canvas);border-color:var(--primary);}
-.arch-item__label{display:inline-block;font-size:11px;font-weight:700;color:var(--primary);
-  background:var(--primary-bg);border-radius:999px;padding:1px 8px;margin-bottom:5px;}
-.arch-item__headline{display:block;font-size:14px;font-weight:600;line-height:1.55;color:var(--ink);
-  word-break:keep-all;}
+
+/* 타임라인 레일 — 날짜 노드가 세로선에 꿰인 형태 */
+.arch-timeline{position:relative;padding:8px 0 40px 0;}
+.arch-timeline::before{content:'';position:absolute;left:7px;top:18px;bottom:34px;width:2px;
+  background:var(--hairline);}
+.arch-month{position:relative;margin:22px 0 10px;padding-left:34px;font-size:12px;font-weight:700;
+  color:var(--muted);letter-spacing:.03em;}
+.arch-month::before{content:'';position:absolute;left:0;top:3px;width:16px;height:16px;border-radius:50%;
+  background:var(--surface-soft);border:2px solid var(--hairline);}
+.arch-day{position:relative;padding:0 0 20px 34px;}
+.arch-day__mark{position:absolute;left:2px;top:6px;width:12px;height:12px;border-radius:50%;
+  background:var(--canvas);border:2px solid var(--primary);box-shadow:0 0 0 3px var(--surface-soft);}
+.arch-day__date{font-size:13px;font-weight:700;color:var(--ink);margin:0 0 8px;
+  display:flex;align-items:baseline;gap:6px;}
+.arch-day__dow{font-size:11px;font-weight:500;color:var(--muted);}
+.arch-day__items{display:flex;flex-direction:column;gap:6px;}
+
+/* 항목 — 타이틀 먼저, 태그는 그 아래 작게 */
+.arch-item{display:block;padding:11px 13px;border:1px solid var(--hairline);border-radius:10px;
+  background:var(--canvas);transition:border-color .12s,background .12s;}
+.arch-item:hover{border-color:var(--primary);background:var(--surface-soft);}
+.arch-item__headline{display:block;font-size:15px;font-weight:600;line-height:1.5;color:var(--ink);
+  letter-spacing:-.2px;word-break:keep-all;}
+.arch-item__label{display:block;margin-top:5px;font-size:11px;font-weight:500;color:var(--muted);
+  letter-spacing:.02em;}
 @media(max-width:640px){
   .arch-title{font-size:22px;}
-  .arch-day{flex-direction:column;gap:8px;}
-  .arch-day__date{flex:none;display:flex;align-items:baseline;gap:6px;}
-  .arch-day__dow{margin-top:0;}
+  .arch-timeline::before{left:5px;}
+  .arch-month,.arch-day{padding-left:26px;}
+  .arch-day__mark{left:0;width:10px;height:10px;}
+  .arch-month::before{width:12px;height:12px;top:2px;}
+  .arch-item__headline{font-size:14.5px;}
 }
 
 /* 종목 픽 산출 근거 한 줄 — 2026-09-02.

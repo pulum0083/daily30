@@ -82,7 +82,13 @@
   .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
-  .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
+  .sector-guide__title{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+    font-size:15px;font-weight:700;color:var(--ink);margin:0;padding:2px 0;user-select:none;}
+  .sector-guide__title::-webkit-details-marker{display:none;}
+  .sector-guide__title::after{content:'';width:5px;height:5px;border-right:1.5px solid var(--muted);
+    border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-guide[open] .sector-guide__title::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-guide[open] .sector-guide__title{margin-bottom:12px;}
   .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
   .sector-guide b{color:var(--ink);font-weight:600;}
   .sector-guide .nowrap{white-space:nowrap;}
@@ -380,8 +386,8 @@
   </div><!-- /.sector-cols -->
 
   
-  <section class="sector-guide">
-    <h2 class="sector-guide__title">이 페이지 읽는 법</h2>
+  <details class="sector-guide">
+    <summary class="sector-guide__title">이 페이지 읽는 법</summary>
     <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
       같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
       앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
@@ -397,7 +403,7 @@
       0종목이 오르고 5종목이 내렸고, 섹터 평균은 -4.41%예요.</p>
     <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
       투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
-  </section>
+  </details>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>

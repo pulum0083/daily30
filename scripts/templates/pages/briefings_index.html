@@ -22,27 +22,25 @@
     </p>
   </div>
 
-  <div class="arch-list">
+  {# 타임레인 — 좌측 레일 + 날짜 노드. 타이틀이 주인공이고 유형 태그(코스피 예측 등)는 보조다.
+     태그를 강조하면 81편이 전부 같은 라벨의 반복으로 보여 타이틀이 묻힌다(2026-09-03 수정). #}
+  <div class="arch-timeline">
     {% for month in months %}
-    <section class="arch-month">
-      <h2 class="arch-month__label">{{ month.label }}</h2>
-      {% for day in month.days %}
-      <div class="arch-day">
-        <div class="arch-day__date">
-          <span class="arch-day__num">{{ day.date_short }}</span>
-          <span class="arch-day__dow">{{ day.day_label }}</span>
-        </div>
-        <div class="arch-day__items">
-          {% for item in day.briefings %}
-          <a class="arch-item" href="{{ item.url }}">
-            <span class="arch-item__label">{{ item.label }}</span>
-            {% if item.headline %}<span class="arch-item__headline">{{ item.headline }}</span>{% endif %}
-          </a>
-          {% endfor %}
-        </div>
+    <div class="arch-month">{{ month.label }}</div>
+    {% for day in month.days %}
+    <section class="arch-day">
+      <div class="arch-day__mark" aria-hidden="true"></div>
+      <h2 class="arch-day__date">{{ day.date_short }}<span class="arch-day__dow">{{ day.day_label }}</span></h2>
+      <div class="arch-day__items">
+        {% for item in day.briefings %}
+        <a class="arch-item" href="{{ item.url }}">
+          <span class="arch-item__headline">{{ item.headline or item.label }}</span>
+          <span class="arch-item__label">{{ item.label }}</span>
+        </a>
+        {% endfor %}
       </div>
-      {% endfor %}
     </section>
+    {% endfor %}
     {% endfor %}
   </div>
 </div>
