@@ -70,6 +70,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -171,8 +181,16 @@
   
   
   <p class="sector-desc">완성차와 부품을 아우르는 자동차 종목이에요. 글로벌 판매·환율과 전동화 전환 속도가 실적을 좌우해요.</p>
-  <p class="sector-desc">자동차는 판매량·판매단가·환율 세 가지가 실적을 만들어요. 국내 완성차는 해외 매출 비중이 높아서 원화가 약해지면 같은 대수를 팔아도 원화 환산 이익이 늘어나요. 그래서 환율이 실적 방향을 바꿔놓는 경우가 자주 있어요.</p>
-  <p class="sector-desc">부품사는 완성차 생산 계획을 그대로 따라가기 때문에 대장주보다 한 박자 늦게 움직이는 편이에요. 전동화 전환도 종목마다 영향이 갈려요 — 내연기관 부품 비중이 높은 기업과 전장·전기차 부품으로 넘어간 기업이 같은 뉴스에 반대로 반응하기도 해요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">자동차는 판매량·판매단가·환율 세 가지가 실적을 만들어요. 국내 완성차는 해외 매출 비중이 높아서 원화가 약해지면 같은 대수를 팔아도 원화 환산 이익이 늘어나요. 그래서 환율이 실적 방향을 바꿔놓는 경우가 자주 있어요.</p>
+      <p class="sector-desc">부품사는 완성차 생산 계획을 그대로 따라가기 때문에 대장주보다 한 박자 늦게 움직이는 편이에요. 전동화 전환도 종목마다 영향이 갈려요 — 내연기관 부품 비중이 높은 기업과 전장·전기차 부품으로 넘어간 기업이 같은 뉴스에 반대로 반응하기도 해요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>

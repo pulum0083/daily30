@@ -37,6 +37,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -134,8 +144,17 @@
   {# 카피가 안 넘어와도 페이지 생성이 깨지면 안 된다 — 문단만 빠진다(§0). #}
   {% set copy = sector_copy | default({}, true) %}
   {% if copy.lead %}<p class="sector-desc">{{ copy.lead }}</p>{% endif %}
-  {% if copy.intro %}<p class="sector-desc">{{ copy.intro }}</p>{% endif %}
-  {% if copy.composition %}<p class="sector-desc">{{ copy.composition }}</p>{% endif %}
+  {# 긴 설명은 기본 접힘 — 섹터 평균·종목 카드가 첫 화면에서 밀리지 않게 한다.
+     <details>는 접혀 있어도 크롤러가 내용을 읽으므로 본문 분량에는 손해가 없다. #}
+  {% if copy.intro or copy.composition %}
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      {% if copy.intro %}<p class="sector-desc">{{ copy.intro }}</p>{% endif %}
+      {% if copy.composition %}<p class="sector-desc">{{ copy.composition }}</p>{% endif %}
+    </div>
+  </details>
+  {% endif %}
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>

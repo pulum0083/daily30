@@ -70,6 +70,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -171,8 +181,16 @@
   
   
   <p class="sector-desc">메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.</p>
-  <p class="sector-desc">코스피 시가총액에서 가장 큰 비중을 차지하는 섹터이고, 지수 방향 자체를 좌우하는 날이 많아요. 크게 세 갈래로 나뉘어요. 메모리(삼성전자·SK하이닉스)는 DRAM·낸드 가격 사이클을 따라가고, 그중 HBM은 AI 서버 수요에 직접 연동돼요. 파운드리·시스템반도체는 고객사 주문 잔고가 실적을 결정하고, 장비·소재(한미반도체·주성엔지니어링·이오테크닉스 등)는 대장주의 설비투자 결정이 한 박자 늦게 반영돼요.</p>
-  <p class="sector-desc">그래서 같은 반도체 섹터라도 대장주와 장비주가 서로 다른 날에 움직이는 경우가 흔해요. 메모리 대형주가 먼저 오르고 장비주가 뒤따라 붙는 흐름이 전형적이고, 반대로 장비주만 강한 날은 개별 수주 소식일 가능성이 커요. 미국 필라델피아 반도체지수(SOX)와 엔비디아·마이크론의 밤사이 등락이 다음 날 국내 반도체 시가에 그대로 반영되는 경향도 강해요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">코스피 시가총액에서 가장 큰 비중을 차지하는 섹터이고, 지수 방향 자체를 좌우하는 날이 많아요. 크게 세 갈래로 나뉘어요. 메모리(삼성전자·SK하이닉스)는 DRAM·낸드 가격 사이클을 따라가고, 그중 HBM은 AI 서버 수요에 직접 연동돼요. 파운드리·시스템반도체는 고객사 주문 잔고가 실적을 결정하고, 장비·소재(한미반도체·주성엔지니어링·이오테크닉스 등)는 대장주의 설비투자 결정이 한 박자 늦게 반영돼요.</p>
+      <p class="sector-desc">그래서 같은 반도체 섹터라도 대장주와 장비주가 서로 다른 날에 움직이는 경우가 흔해요. 메모리 대형주가 먼저 오르고 장비주가 뒤따라 붙는 흐름이 전형적이고, 반대로 장비주만 강한 날은 개별 수주 소식일 가능성이 커요. 미국 필라델피아 반도체지수(SOX)와 엔비디아·마이크론의 밤사이 등락이 다음 날 국내 반도체 시가에 그대로 반영되는 경향도 강해요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>

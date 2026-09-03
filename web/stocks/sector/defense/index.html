@@ -70,6 +70,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -171,8 +181,16 @@
   
   
   <p class="sector-desc">항공·미사일·지상장비 등 국방 수출 종목이에요. 글로벌 지정학 리스크와 대규모 수주 사이클에 따라 움직여요.</p>
-  <p class="sector-desc">방산은 다른 섹터와 수요 구조가 근본적으로 달라요. 고객이 정부이고 계약 단위가 수천억~수조 원이라, 한 건의 수주 공시가 몇 분기 실적을 한꺼번에 바꿔놓아요. 그래서 평소에는 조용하다가 수출 계약 소식에 섹터 전체가 함께 뛰는 패턴이 반복돼요.</p>
-  <p class="sector-desc">지정학 리스크가 커질 때 방산주가 오르는 건 맞지만, 분쟁 발생 자체보다는 그로 인해 각국 국방예산이 실제로 늘어나는지가 중요해요. 뉴스에 즉각 반응한 뒤 되돌리는 경우도 잦아서, 수주 잔고가 실제로 늘고 있는지를 함께 봐야 흐름이 이어지는지 판단할 수 있어요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">방산은 다른 섹터와 수요 구조가 근본적으로 달라요. 고객이 정부이고 계약 단위가 수천억~수조 원이라, 한 건의 수주 공시가 몇 분기 실적을 한꺼번에 바꿔놓아요. 그래서 평소에는 조용하다가 수출 계약 소식에 섹터 전체가 함께 뛰는 패턴이 반복돼요.</p>
+      <p class="sector-desc">지정학 리스크가 커질 때 방산주가 오르는 건 맞지만, 분쟁 발생 자체보다는 그로 인해 각국 국방예산이 실제로 늘어나는지가 중요해요. 뉴스에 즉각 반응한 뒤 되돌리는 경우도 잦아서, 수주 잔고가 실제로 늘고 있는지를 함께 봐야 흐름이 이어지는지 판단할 수 있어요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>

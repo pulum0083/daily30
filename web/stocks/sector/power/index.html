@@ -70,6 +70,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -171,8 +181,16 @@
   
   
   <p class="sector-desc">변압기·전선·중전기 등 전력 인프라 종목이에요. AI 데이터센터와 노후 전력망 교체 수요로 구조적 성장 기대를 받아요.</p>
-  <p class="sector-desc">전력기기는 경기 사이클보다 설비투자 사이클을 따라가는 섹터예요. 최근 몇 년간 수요를 끌어올린 건 두 가지예요. 하나는 AI 데이터센터가 요구하는 전력량이고, 다른 하나는 미국·유럽의 노후 전력망 교체예요. 둘 다 한 번 시작되면 수년에 걸쳐 집행되는 투자라, 분기 실적보다 수주 잔고와 수주 공시가 주가를 더 크게 움직여요.</p>
-  <p class="sector-desc">국내 종목은 변압기·전선처럼 수출 비중이 높은 쪽과 내수 중전기 쪽으로 나뉘어요. 수출 비중이 높은 종목은 환율과 미국 발주 일정에 민감하고, 그래서 미국 전력 인프라 기업(GE Vernova·Vertiv)의 실적 발표나 가이던스가 국내 종목의 방향을 미리 알려주는 경우가 있어요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">전력기기는 경기 사이클보다 설비투자 사이클을 따라가는 섹터예요. 최근 몇 년간 수요를 끌어올린 건 두 가지예요. 하나는 AI 데이터센터가 요구하는 전력량이고, 다른 하나는 미국·유럽의 노후 전력망 교체예요. 둘 다 한 번 시작되면 수년에 걸쳐 집행되는 투자라, 분기 실적보다 수주 잔고와 수주 공시가 주가를 더 크게 움직여요.</p>
+      <p class="sector-desc">국내 종목은 변압기·전선처럼 수출 비중이 높은 쪽과 내수 중전기 쪽으로 나뉘어요. 수출 비중이 높은 종목은 환율과 미국 발주 일정에 민감하고, 그래서 미국 전력 인프라 기업(GE Vernova·Vertiv)의 실적 발표나 가이던스가 국내 종목의 방향을 미리 알려주는 경우가 있어요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
