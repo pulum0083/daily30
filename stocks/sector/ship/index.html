@@ -70,6 +70,16 @@
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
   .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
   .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
   /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
   .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
   .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
@@ -171,8 +181,16 @@
   
   
   <p class="sector-desc">상선·해양플랜트·특수선을 건조하는 조선 종목이에요. 친환경 선박 교체 수요와 수주 잔고, 선가 흐름이 핵심 변수예요.</p>
-  <p class="sector-desc">조선은 수주에서 인도까지 2~3년이 걸려서, 오늘의 실적은 2~3년 전에 받은 계약의 결과예요. 그래서 주가는 현재 이익보다 신규 수주와 선가(신조선가 지수)를 먼저 반영해요. 수주 잔고가 이미 몇 년치 차 있으면 조선사가 가격 협상에서 우위를 갖고, 그게 시차를 두고 마진으로 나타나요.</p>
-  <p class="sector-desc">친환경 규제로 인한 노후선 교체, LNG 운반선처럼 부가가치가 높은 선종의 비중, 그리고 원자재(후판) 가격이 마진을 좌우해요. 환율도 중요해요 — 계약은 달러로 하고 비용은 원화로 쓰기 때문에 원화 약세가 마진에 유리하게 작용해요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">조선은 수주에서 인도까지 2~3년이 걸려서, 오늘의 실적은 2~3년 전에 받은 계약의 결과예요. 그래서 주가는 현재 이익보다 신규 수주와 선가(신조선가 지수)를 먼저 반영해요. 수주 잔고가 이미 몇 년치 차 있으면 조선사가 가격 협상에서 우위를 갖고, 그게 시차를 두고 마진으로 나타나요.</p>
+      <p class="sector-desc">친환경 규제로 인한 노후선 교체, LNG 운반선처럼 부가가치가 높은 선종의 비중, 그리고 원자재(후판) 가격이 마진을 좌우해요. 환율도 중요해요 — 계약은 달러로 하고 비용은 원화로 쓰기 때문에 원화 약세가 마진에 유리하게 작용해요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
