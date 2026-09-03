@@ -1265,6 +1265,16 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .arch-lead{font-size:14px;line-height:1.75;color:var(--ink);max-width:640px;margin-bottom:8px;}
 .arch-lead--muted{color:var(--muted);font-size:13px;}
 .arch-lead a{color:var(--primary);font-weight:600;}
+/* 상단 설명 접기 — 섹터 페이지의 .sector-more와 같은 규칙 */
+.arch-more{margin-top:2px;}
+.arch-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+  font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+.arch-more__toggle::-webkit-details-marker{display:none;}
+.arch-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+.arch-more[open] .arch-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+.arch-more__body{padding-top:6px;}
+.arch-more__body .arch-lead:last-child{margin-bottom:0;}
 
 /* 타임라인 레일 — 날짜 노드가 세로선에 꿰인 형태 */
 /* 레일·마커 정렬 규칙 (2026-09-03 정정)
