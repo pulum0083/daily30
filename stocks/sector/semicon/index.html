@@ -94,6 +94,14 @@
   .sector-guide .nowrap{white-space:nowrap;}
   .sector-guide__note{font-size:12px;color:var(--muted);}
   .sector-guide__note a{color:var(--primary);font-weight:600;}
+  /* 섹터 밖으로 나가는 문맥 링크 */
+  .sector-links{max-width:760px;margin:20px 0 4px;font-size:13px;}
+  .sector-links__row{margin:0 0 7px;color:#475569;line-height:1.7;}
+  .sector-links__label{display:inline-block;min-width:96px;font-size:11.5px;font-weight:600;color:var(--muted);}
+  .sector-links a{color:var(--primary);font-weight:600;}
+  .sector-links .sep{color:var(--muted);margin:0 3px;}
+  .sector-links__note{color:var(--muted);font-size:12px;}
+  @media(max-width:640px){ .sector-links__label{display:block;min-width:0;margin-bottom:2px;} }
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -448,6 +456,18 @@
     <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
       투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
   </details>
+
+  
+  <div class="sector-links">
+    
+    <p class="sector-links__row"><span class="sector-links__label">밤사이 선행 지표</span>
+      <a href="/stocks/us/nvda/">엔비디아</a><span class="sep">·</span><a href="/stocks/us/mu/">마이크론</a><span class="sep">·</span><a href="/stocks/us/soxx/">반도체 ETF</a>
+      <span class="sector-links__note">— 이 섹터가 참고하는 미국 종목이에요</span></p>
+    
+    <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
+      <a href="/briefings/">브리핑 아카이브</a>
+      <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
+  </div>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>
