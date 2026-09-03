@@ -399,54 +399,7 @@
   </div>
 
   <!-- ===== SECTOR (반도체) ===== -->
-  <div class="screen" id="sector">
-    <!-- 화면 타이틀. 다른 화면(거래량 순위·ETF 랭킹·특이 신호)과 같은 phead 규격이다.
-         날짜는 .ds-asof를 쓰지 않는다 — 이 화면은 스냅샷(마감)만 쓰는데 .ds-asof는
-         장중에 '오늘 실시간'으로 바뀌어 없는 갱신을 광고하게 된다(secAsOfLabel 주석 참조). -->
-    <div class="phead">
-      <div><h1><span class="ic">🧭</span> 섹터 현황</h1><div class="psub" id="sec-phead-sub">—</div></div>
-    </div>
-    <!-- 섹터 선택 칩 — secRenderChips()가 채운다. 8개 섹터 평균은 stocks-snapshot.json 실측. -->
-    <div class="secsel" id="secsel" role="tablist" aria-label="섹터 선택"></div>
-    <div class="grid">
-      <div>
-        <div class="dbox">
-        <div class="shead"><div class="top">
-          <!-- 종목수만 남긴다. 시장·기준일은 화면 타이틀(psub)이 이미 말하고 있어 중복이었다. -->
-          <div><div class="st" id="sec-title">🔧 반도체</div><div class="ss" id="sec-sub">추적 —종목</div></div>
-          <div class="kpi"><div class="l">섹터 평균</div><div class="v num" id="sec-avg">—</div></div>
-        </div>
-        <!-- "섹터 AI 심리" 게이지는 2026-08-04 제거. 값이 upN/total(단순 상승 비율)이라
-             AI가 관여하지 않는데 라벨만 그렇게 달려 있었고(§0 과장), 바로 아래 시장폭이
-             같은 값을 더 많은 정보(하락·보합 수)와 함께 보여줘 중복이었다.
-             스냅샷에 심리·AI 계열 필드가 없어 정직하게 채울 방법도 없다. -->
-        <div class="breadth" id="sec-breadth">
-          <div class="l"><span>시장폭</span><span id="sec-breadth-label">—</span></div>
-          <div class="bbar" id="sec-bbar"><i class="bu" style="width:0"></i><i class="bd" style="width:0"></i><i class="bn" style="width:100%"></i></div>
-          <div class="bk" id="sec-bk"><span><i class="iu"></i>상승 <span class="num">—</span></span><span><i class="id"></i>하락 <span class="num">—</span></span><span><i class="in"></i>보합 <span class="num">—</span></span></div>
-        </div>
-        </div>
-        <div class="block">
-          <div class="block__h"><span class="block__t">종목 랭킹</span><span class="block__s">등락률순</span></div>
-          <div id="sec-rows"></div>
-        </div>
-        <!-- 패시브 쏠림 — ETF 보유비중·소진일수 실측 소스가 없다(§0, 2026-08-04 확정). 준비 중 상태만 표시. -->
-        <div class="block">
-          <div class="block__h"><span class="block__t"><span class="ic">🧲</span> 패시브 쏠림</span></div>
-          <div class="empty-note">🧲 ETF 기계매매 노출 데이터는 아직 실측 소스가 없어요.<br>곧 추가할 예정이에요.</div>
-        </div>
-        </div>
-      </div>
-      <div>
-        <div class="panel"><div class="panel__h">대장주</div>
-          <div id="sec-leaders"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== INCOME (배당 인컴 설계기) ===== -->
-  <div class="screen" id="income">
+    <div class="screen" id="income">
     <div class="crumb"><button class="back-btn" onclick="goBack()"><svg width="7" height="12" viewBox="0 0 7 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><a href="/stocks/" onclick="event.preventDefault();go('home')">홈</a> › <a href="/stocks/" onclick="event.preventDefault();go('home')">종목</a> › <span style="color:#4F46E5;">배당 인컴 설계기</span></div>
     <div class="phead">
       <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 배당 인컴 설계기</h1><div class="psub">순자산 1,000억+ 배당·커버드콜 ETF · 내 보유 → 인컴·분배 품질·세금 · <span class="ds-date"></span></div></div>
