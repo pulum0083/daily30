@@ -2539,17 +2539,19 @@ _SECTOR_EMOJI = {
     "ship": "🚢", "bio": "🧬", "finance": "🏦", "power": "⚡",
 }
 
-# 섹터별 한 줄 설명 — 검색 유입·체류를 위한 본문 텍스트
-_SECTOR_DESC = {
-    "semicon": "메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.",
-    "power": "변압기·전선·중전기 등 전력 인프라 종목이에요. AI 데이터센터와 노후 전력망 교체 수요로 구조적 성장 기대를 받아요.",
-    "defense": "항공·미사일·지상장비 등 국방 수출 종목이에요. 글로벌 지정학 리스크와 대규모 수주 사이클에 따라 움직여요.",
-    "ship": "상선·해양플랜트·특수선을 건조하는 조선 종목이에요. 친환경 선박 교체 수요와 수주 잔고, 선가 흐름이 핵심 변수예요.",
-    "battery": "배터리 셀·소재·장비 종목이에요. 전기차 수요와 미국 IRA·유럽 정책, 원자재 가격 변동에 민감해요.",
-    "auto": "완성차와 부품을 아우르는 자동차 종목이에요. 글로벌 판매·환율과 전동화 전환 속도가 실적을 좌우해요.",
-    "bio": "제약·바이오시밀러·신약개발 종목이에요. 임상 결과와 기술수출, 금리 환경에 따라 변동성이 큰 섹터예요.",
-    "finance": "은행·증권·보험 지주 종목이에요. 금리와 배당 정책, 정부 밸류업 정책의 영향을 크게 받아요.",
-}
+# 섹터 페이지 본문 카피는 scripts/config/sector_copy.json에 있다.
+# 2026-09-02에 파이썬 리터럴 딕셔너리에서 분리했다 — 소스에 긴 한국어 산문을 박아두면
+# 수정할 때마다 코드를 건드려야 하고, 그대로 방치되기 쉽다(§20).
+_SECTOR_COPY_PATH = CONFIG_DIR / "sector_copy.json"
+
+
+def _sector_copy(key: str) -> dict:
+    """섹터별 본문 카피. 파일·키가 없으면 빈 dict → 해당 문단이 렌더되지 않는다(§0)."""
+    if not _SECTOR_COPY_PATH.exists():
+        print(f"[generate_html] ⚠️ {_SECTOR_COPY_PATH.name} 없음 — 섹터 본문 생략", file=sys.stderr)
+        return {}
+    entry = load_json(_SECTOR_COPY_PATH).get(key)
+    return entry if isinstance(entry, dict) else {}
 
 
 def build_sector_pages():
@@ -2623,7 +2625,7 @@ def build_sector_pages():
                 (sector["label"], f"/stocks/sector/{key}/"),
             ]))],
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
-            sector_desc=_SECTOR_DESC.get(key, ""),
+            sector_copy=_sector_copy(key),
             stocks=stocks,
             avg_pct=avg_pct,
             avg_pct_fmt=_fmt_pct(avg_pct),

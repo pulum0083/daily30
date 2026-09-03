@@ -35,7 +35,16 @@
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-  .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
+  .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
+  .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
+  .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
+  .sector-guide__title{font-size:15px;font-weight:700;color:var(--ink);margin:0 0 12px;}
+  .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
+  .sector-guide b{color:var(--ink);font-weight:600;}
+  .sector-guide .nowrap{white-space:nowrap;}
+  .sector-guide__note{font-size:12px;color:var(--muted);}
+  .sector-guide__note a{color:var(--primary);font-weight:600;}
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -122,7 +131,11 @@
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
     if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
   </script>
-  {% if sector_desc %}<p class="sector-desc">{{ sector_desc }}</p>{% endif %}
+  {# 카피가 안 넘어와도 페이지 생성이 깨지면 안 된다 — 문단만 빠진다(§0). #}
+  {% set copy = sector_copy | default({}, true) %}
+  {% if copy.lead %}<p class="sector-desc">{{ copy.lead }}</p>{% endif %}
+  {% if copy.intro %}<p class="sector-desc">{{ copy.intro }}</p>{% endif %}
+  {% if copy.composition %}<p class="sector-desc">{{ copy.composition }}</p>{% endif %}
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -216,6 +229,29 @@
      </div>
    </aside>
   </div><!-- /.sector-cols -->
+
+  {# 지표 해석 — 8개 섹터가 공유하는 설명이라 카피 파일이 아니라 여기 둔다.
+     화면이 "52주 중 N% 지점"·"외국인 보유 N%"를 계산해 보여주면서 그게 왜 중요한지는
+     한 마디도 없었다(2026-09-02 추가). 마지막 문단에 그날 이 섹터의 실측을 섞어
+     8개 페이지가 완전히 같은 문단이 되지 않게 한다. #}
+  <section class="sector-guide">
+    <h2 class="sector-guide__title">이 페이지 읽는 법</h2>
+    <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
+      같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
+      앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
+      같은 섹터 안에서 종목을 비교할 때 특히 쓸모가 있어요.</p>
+    <p><b>외국인 보유율</b>은 발행주식 중 외국인이 들고 있는 비중이에요. 이 값 자체가 좋고 나쁨을 뜻하진 않지만,
+      비중이 높은 종목일수록 환율과 미국 시장 흐름에 함께 흔들리는 경향이 있어요. 비중이 높은데 외국인이
+      순매도로 돌아서면 수급 부담이 그만큼 커진다는 뜻이기도 해요.</p>
+    <p><b>섹터 평균과 시장폭</b>은 다른 이야기를 해요. 평균은 섹터가 전체적으로 어느 방향인지를 알려주고,
+      시장폭(상승/하락 종목 수)은 그 움직임이 섹터 전반에 퍼진 것인지 몇 종목이 끌고 간 것인지를 알려줘요.
+      평균은 플러스인데 상승 종목이 둘뿐이라면 대장주 한두 개가 지수를 들어 올린 것이고, 그건 섹터 전체가
+      좋아진 것과 다르게 봐야 해요.
+      {% if breadth and breadth.total %}오늘 {{ sector_label }} 섹터는 {{ breadth.total }}종목 중
+      {{ breadth.up }}종목이 오르고 {{ breadth.down }}종목이 내렸고, 섹터 평균은 {{ avg_pct_fmt }}예요.{% endif %}</p>
+    <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
+      투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
+  </section>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>

@@ -1,0 +1,141 @@
+<!doctype html>
+<!-- 52주 레인지 위치 카드 프로토타입 — 실측 1분봉 옆 '장중 지표' 영역에 '당일 레인지 위치' 카드와 짝을 이루는 52주 위치 카드 추가안 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>52주 레인지 위치 카드 — 프로토타입</title>
+<style>
+:root{
+  --ink:#0F172A; --ink2:#475569; --muted:#94A3B8; --hair:#E5E7EB; --canvas:#fff; --bg:#F7F9FC;
+  --primary:#2775ED; --primary-bg:#EFF4FE;
+  --up:#E03131; --dn:#2775ED;
+  --s1:0 1px 2px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Segoe UI',sans-serif;color:var(--ink);padding:28px 20px 80px;}
+.wrap{max-width:520px;margin:0 auto;}
+h1{font-size:20px;margin:0 0 4px;}
+.lede{font-size:13px;color:var(--ink2);line-height:1.6;margin:0 0 8px;}
+.warn{display:inline-block;font-size:11.5px;font-weight:700;color:#166534;background:#ECFDF3;border:1px solid #BBF7D0;border-radius:7px;padding:5px 10px;margin-bottom:24px;}
+h2{font-size:13px;margin:26px 0 10px;color:var(--muted);font-weight:800;letter-spacing:.02em;}
+
+/* ── 종목 선택 (프로토타입용) ── */
+.picker{display:flex;gap:8px;margin-bottom:20px;}
+.pick{flex:1;border:1.5px solid var(--hair);background:var(--canvas);border-radius:11px;padding:9px 10px;cursor:pointer;text-align:left;transition:border-color .14s,background .14s;}
+.pick.on{border-color:var(--primary);background:var(--primary-bg);}
+.pick .nm{font-size:12.5px;font-weight:800;color:var(--ink);}
+.pick .px{font-size:12px;font-weight:700;color:var(--ink2);margin-top:2px;font-variant-numeric:tabular-nums;}
+
+/* ── 장중 지표 패널 (실제 lw-r 영역 재현) ── */
+.panel{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:16px 18px;}
+.lw-h{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px;margin-bottom:14px;color:var(--ink);}
+.lw-note{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--muted);}
+
+.wm-card{padding:12px 0;border-top:1px solid #F1F5F9;}
+.wm-card:first-of-type{border-top:none;padding-top:0;}
+.wm-card-h{display:flex;align-items:center;font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:9px;}
+.wm-bell-note{font-size:11.5px;color:var(--ink2);margin-top:8px;line-height:1.5;}
+
+/* 위치 바 (당일·52주 공용) */
+.posbar{position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#DBEAFE,#FECACA);}
+.posbar .dot{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:var(--ink);border:2px solid #fff;transform:translateX(-50%);box-shadow:0 1px 2px rgba(0,0,0,.15);}
+.posends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;}
+.posends b{color:var(--ink2);font-weight:700;}
+
+/* 거래량 바 (mock) */
+.volbar{position:relative;height:8px;border-radius:5px;background:#EEF2F7;overflow:hidden;}
+.volbar .fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;}
+.volbar .mid{position:absolute;left:50%;top:0;width:1.5px;height:100%;background:#CBD5E1;}
+
+.lw-moved{font-size:10.5px;color:var(--muted);margin-top:14px;line-height:1.5;}
+.lw-moved a{color:var(--primary);font-weight:700;text-decoration:none;}
+
+.cap{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:16px;}
+.cap b{color:var(--ink2);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>52주 레인지 위치 카드</h1>
+  <p class="lede">실측 1분봉 옆 <b>장중 지표</b> 영역에서 <b>당일 레인지 위치</b> 아래에 붙는 <b>52주 레인지 위치</b> 카드예요. 같은 위치-바 패턴을 재사용해 "오늘 위치 / 1년 위치"가 위아래로 대비돼요.</p>
+  <span class="warn">✓ wk52_high · wk52_low 는 이미 스냅샷에 로드된 실측값 · 새 데이터 소스 없음</span>
+
+  <div class="picker" id="picker"></div>
+
+  <div class="panel">
+    <div class="lw-h">📊 장중 지표<span class="lw-note">당일</span></div>
+
+    <!-- 📊 당일 레인지 위치 (현행, mock 장중) -->
+    <div class="wm-card">
+      <div class="wm-card-h">📊 당일 레인지 위치<b style="margin-left:auto;font-size:18px;font-weight:900;" id="d-pos">14%</b></div>
+      <div class="posbar"><div class="dot" id="d-dot" style="left:14%"></div></div>
+      <div class="posends"><span>저 <b id="d-lo">—</b></span><span>고 <b id="d-hi">—</b></span></div>
+      <div class="wm-bell-note" id="d-note">—</div>
+    </div>
+
+    <!-- 📅 52주 레인지 위치 (신규) — 당일 카드와 동일한 박스 없는 패턴으로 통일 -->
+    <div class="wm-card">
+      <div class="wm-card-h">📅 52주 레인지 위치<b style="margin-left:auto;font-size:18px;font-weight:900;" id="y-pos">—</b></div>
+      <div class="posbar"><div class="dot" id="y-dot"></div></div>
+      <div class="posends"><span>1년 최저 <b id="y-lo">—</b></span><span>최고 <b id="y-hi">—</b></span></div>
+      <div class="wm-bell-note" id="y-note">—</div>
+    </div>
+
+    <div class="lw-moved">평균체결가(VWAP)·외국인 보유율은 <a href="#">종목 상세</a>에서 볼 수 있어요.</div>
+  </div>
+
+  <p class="cap"><b>수치 근거</b> — 52주 최저·최고는 <code>stocks-snapshot.json</code>의 <code>wk52_low</code>·<code>wk52_high</code> 실측값이에요. 위치 %는 <code>(현재가 − 최저) / (최고 − 최저)</code>로 계산해요. 당일 레인지 위치는 장중 1분봉 버퍼로 계산돼 장 마감 후·주말엔 숨지만, 52주 위치는 종가 기준이라 상시 표시돼요.</p>
+</div>
+
+<script>
+// 실측 스냅샷값 (2026-07-16 기준, 프로토타입 하드코딩)
+var DATA = {
+  '005930': {nm:'삼성전자',   close:255000,  lo:60400,   hi:362500},
+  '000660': {nm:'SK하이닉스', close:1842000, lo:245000,  hi:2919000},
+  '005380': {nm:'현대차',     close:425000,  lo:206500,  hi:750000},
+};
+function won(n){ return n.toLocaleString('ko-KR'); }
+
+function render(code){
+  var s = DATA[code];
+  document.querySelectorAll('.pick').forEach(function(p){ p.classList.toggle('on', p.dataset.code===code); });
+
+  // 52주 위치
+  var span = (s.hi - s.lo) || 1;
+  var pos = Math.max(0, Math.min(100, (s.close - s.lo) / span * 100));
+  var fromHi = (s.close - s.hi) / s.hi * 100;
+  document.getElementById('y-pos').textContent = pos.toFixed(0) + '%';
+  document.getElementById('y-dot').style.left = pos.toFixed(0) + '%';
+  document.getElementById('y-lo').textContent = won(s.lo);
+  document.getElementById('y-hi').textContent = won(s.hi);
+  document.getElementById('y-note').innerHTML =
+    '52주 고점 대비 <b style="color:var(--dn)">' + fromHi.toFixed(0) + '%</b>';
+
+  // 당일 레인지 위치 (mock 장중 — 종목별 그럴싸한 값)
+  var mock = {
+    '005930': {pos:14, lo:250500, hi:259000, note:'저점서 +1.8% 회복 · 고점 대비 -1.5%'},
+    '000660': {pos:38, lo:1740000, hi:1877000, note:'저점서 +5.9% 회복 · 고점 대비 -1.9%'},
+    '005380': {pos:29, lo:395000, hi:409000, note:'저점서 +1.0% 회복 · 고점 대비 -2.4%'},
+  }[code];
+  document.getElementById('d-pos').textContent = mock.pos + '%';
+  document.getElementById('d-dot').style.left = mock.pos + '%';
+  document.getElementById('d-lo').textContent = won(mock.lo);
+  document.getElementById('d-hi').textContent = won(mock.hi);
+  document.getElementById('d-note').textContent = mock.note;
+}
+
+// 종목 선택 버튼
+var picker = document.getElementById('picker');
+Object.keys(DATA).forEach(function(code){
+  var s = DATA[code];
+  var b = document.createElement('button');
+  b.className = 'pick'; b.dataset.code = code;
+  b.innerHTML = '<div class="nm">' + s.nm + '</div><div class="px">' + won(s.close) + '</div>';
+  b.onclick = function(){ render(code); };
+  picker.appendChild(b);
+});
+render('005930');
+</script>
+</body>
+</html>
