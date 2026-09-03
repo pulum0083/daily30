@@ -50,3 +50,18 @@ def test_config_key_matches_universe():
     copy = json.loads((g.CONFIG_DIR / "sector_copy.json").read_text(encoding="utf-8"))
     copy_keys = set(k for k in copy if not k.startswith("_"))
     assert keys == copy_keys, f"universe만: {keys - copy_keys} / copy만: {copy_keys - keys}"
+
+
+def test_bellwether_links_are_existence_gated():
+    """상세 페이지가 실제로 있는 벨웨더만 링크한다 — 없는 페이지로 링크하면 죽은 링크(§36)."""
+    semicon = g._sector_bellwether_links("semicon")
+    assert [b["url"] for b in semicon] == ["/stocks/us/nvda/", "/stocks/us/mu/", "/stocks/us/soxx/"]
+    # 벨웨더는 정의돼 있지만 상세 페이지가 없는 섹터는 빈 리스트 → 그 줄이 통째로 빠진다
+    for key in ("auto", "finance", "power", "defense", "battery", "bio"):
+        assert g._sector_bellwether_links(key) == [], key
+    # 벨웨더 자체가 없는 섹터
+    assert g._sector_bellwether_links("ship") == []
+
+
+def test_bellwether_unknown_sector_is_safe():
+    assert g._sector_bellwether_links("nonexistent") == []

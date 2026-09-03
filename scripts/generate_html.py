@@ -2554,6 +2554,22 @@ def _sector_copy(key: str) -> dict:
     return entry if isinstance(entry, dict) else {}
 
 
+def _sector_bellwether_links(key: str) -> list:
+    """섹터의 미국 벨웨더 중 **상세 페이지가 실제로 있는 것만** 링크로 낸다.
+
+    벨웨더는 stock_universe.json이 섹터별 미국 비교 대상으로 이미 정의해둔 값이고
+    (밤사이 브리지가 쓰는 그 목록), 여기서는 링크 대상으로 재사용한다.
+    ⚠️ 페이지 존재를 확인하고 링크한다 — 없는 페이지로 링크하면 죽은 링크가 된다(§36).
+    """
+    universe = load_json(CONFIG_DIR / "stock_universe.json").get("sectors", {})
+    out = []
+    for b in (universe.get(key, {}).get("bellwethers") or []):
+        t = (b.get("t") or "").lower()
+        if t and (WEB_DIR / "stocks" / "us" / t / "index.html").exists():
+            out.append({"name": b.get("name") or b.get("t"), "url": f"/stocks/us/{t}/"})
+    return out
+
+
 def build_sector_pages():
     """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성.
 
@@ -2626,6 +2642,7 @@ def build_sector_pages():
             ]))],
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
             sector_copy=_sector_copy(key),
+            bellwethers=_sector_bellwether_links(key),
             stocks=stocks,
             avg_pct=avg_pct,
             avg_pct_fmt=_fmt_pct(avg_pct),
