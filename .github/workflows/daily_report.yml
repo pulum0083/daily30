@@ -174,7 +174,23 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
-          $pushed || { echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"; exit 1; }
+          if ! $pushed; then
+            # 2026-09-03: 마감 잡이 push 충돌로 죽었는데 아무도 몰랐다(§32 — 실패 표시와
+            # 실패 전달은 다른 문제다). 여기서 멈추면 그날 브리핑이 통째로 유실된다.
+            # 평문 발송 — 오류 문자열의 <>가 서식을 깨지 않게(§37).
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+              MSG=$(printf '%s\n%s\n%s\n%s' \
+                "🚨 브리핑 발행 실패 — main push 5회 실패 ($GITHUB_JOB)" \
+                "$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')" \
+                "원인: 대개 같은 파일을 재생성하는 커밋과의 rebase 충돌. 브리핑 잡 실행 중에 web/ 생성물을 푸시하면 발생." \
+                "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+              curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+                --data-urlencode "text=$MSG" >/dev/null || true
+            fi
+            echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"
+            exit 1
+          fi
 
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         if: steps.holiday.outputs.open == 'true'
@@ -315,7 +331,23 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
-          $pushed || { echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"; exit 1; }
+          if ! $pushed; then
+            # 2026-09-03: 마감 잡이 push 충돌로 죽었는데 아무도 몰랐다(§32 — 실패 표시와
+            # 실패 전달은 다른 문제다). 여기서 멈추면 그날 브리핑이 통째로 유실된다.
+            # 평문 발송 — 오류 문자열의 <>가 서식을 깨지 않게(§37).
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+              MSG=$(printf '%s\n%s\n%s\n%s' \
+                "🚨 브리핑 발행 실패 — main push 5회 실패 ($GITHUB_JOB)" \
+                "$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')" \
+                "원인: 대개 같은 파일을 재생성하는 커밋과의 rebase 충돌. 브리핑 잡 실행 중에 web/ 생성물을 푸시하면 발생." \
+                "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+              curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+                --data-urlencode "text=$MSG" >/dev/null || true
+            fi
+            echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"
+            exit 1
+          fi
 
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         if: steps.holiday.outputs.open == 'true'
@@ -504,7 +536,23 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
-          $pushed || { echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"; exit 1; }
+          if ! $pushed; then
+            # 2026-09-03: 마감 잡이 push 충돌로 죽었는데 아무도 몰랐다(§32 — 실패 표시와
+            # 실패 전달은 다른 문제다). 여기서 멈추면 그날 브리핑이 통째로 유실된다.
+            # 평문 발송 — 오류 문자열의 <>가 서식을 깨지 않게(§37).
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+              MSG=$(printf '%s\n%s\n%s\n%s' \
+                "🚨 브리핑 발행 실패 — main push 5회 실패 ($GITHUB_JOB)" \
+                "$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')" \
+                "원인: 대개 같은 파일을 재생성하는 커밋과의 rebase 충돌. 브리핑 잡 실행 중에 web/ 생성물을 푸시하면 발생." \
+                "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+              curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+                --data-urlencode "text=$MSG" >/dev/null || true
+            fi
+            echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"
+            exit 1
+          fi
 
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         if: steps.holiday.outputs.open == 'true'
@@ -591,7 +639,23 @@ jobs:
             echo "Push attempt $i failed, retrying in 15s..."
             sleep 15
           done
-          $pushed || { echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"; exit 1; }
+          if ! $pushed; then
+            # 2026-09-03: 마감 잡이 push 충돌로 죽었는데 아무도 몰랐다(§32 — 실패 표시와
+            # 실패 전달은 다른 문제다). 여기서 멈추면 그날 브리핑이 통째로 유실된다.
+            # 평문 발송 — 오류 문자열의 <>가 서식을 깨지 않게(§37).
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+              MSG=$(printf '%s\n%s\n%s\n%s' \
+                "🚨 브리핑 발행 실패 — main push 5회 실패 ($GITHUB_JOB)" \
+                "$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')" \
+                "원인: 대개 같은 파일을 재생성하는 커밋과의 rebase 충돌. 브리핑 잡 실행 중에 web/ 생성물을 푸시하면 발생." \
+                "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+              curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+                --data-urlencode "text=$MSG" >/dev/null || true
+            fi
+            echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"
+            exit 1
+          fi
 
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
         env:
@@ -654,7 +718,23 @@ jobs:
               echo "Push attempt $i failed, retrying in 15s..."
               sleep 15
             done
-            $pushed || { echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"; exit 1; }
+            if ! $pushed; then
+            # 2026-09-03: 마감 잡이 push 충돌로 죽었는데 아무도 몰랐다(§32 — 실패 표시와
+            # 실패 전달은 다른 문제다). 여기서 멈추면 그날 브리핑이 통째로 유실된다.
+            # 평문 발송 — 오류 문자열의 <>가 서식을 깨지 않게(§37).
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+              MSG=$(printf '%s\n%s\n%s\n%s' \
+                "🚨 브리핑 발행 실패 — main push 5회 실패 ($GITHUB_JOB)" \
+                "$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')" \
+                "원인: 대개 같은 파일을 재생성하는 커밋과의 rebase 충돌. 브리핑 잡 실행 중에 web/ 생성물을 푸시하면 발생." \
+                "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID")
+              curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+                --data-urlencode "text=$MSG" >/dev/null || true
+            fi
+            echo "::error::5회 시도 후에도 push 실패 — 이후 배포 스텝이 잘못된(미반영) SHA를 사용하게 되므로 여기서 중단"
+            exit 1
+          fi
           fi
 
       - name: 🚀 Vercel 배포 트리거 (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시켜 명시적 dispatch 필요)
