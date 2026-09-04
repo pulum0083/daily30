@@ -40,8 +40,9 @@
       <h2 class="arch-day__date">{{ day.date_short }}<span class="arch-day__dow">{{ day.day_label }}</span></h2>
       <div class="arch-day__items">
         {% for item in day.briefings %}
-        <a class="arch-item" href="{{ item.url }}">
+        <a class="arch-item{% if item.featured %} is-featured{% endif %}" href="{{ item.url }}">
           <span class="arch-item__headline">{{ item.headline or item.label }}</span>
+          {% if item.dek %}<span class="arch-item__dek">{{ item.dek | safe }}</span>{% endif %}
           <span class="arch-item__label">{{ item.label }}</span>
         </a>
         {% endfor %}

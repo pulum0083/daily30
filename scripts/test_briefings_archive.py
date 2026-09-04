@@ -82,6 +82,39 @@ def test_rendered_page_has_no_redirect_and_no_bottom_list(tmp_path, monkeypatch)
     html = (tmp_path / "index.html").read_text()
     assert "location.replace" not in html
     assert "bottom-list" not in html        # patchBriefingList()가 최근 10일로 덮어쓰는 클래스
-    assert 'class="arch-item"' in html
+    # 최신 1편은 is-featured가 붙으므로 클래스 문자열 완전일치로 보지 않는다.
+    assert 'class="arch-item' in html
     assert "헤드라인 문장" in html
     assert 'rel="canonical" href="https://doubleshot.space/briefings/"' in html
+
+
+def test_only_newest_gets_dek(tmp_path, monkeypatch):
+    """맨 위 최신 1편만 서브타이틀을 갖는다 — 전부 달면 목록이 훑기 어려워진다."""
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    _publish(tmp_path, "2026-09-02", "kospi",
+             {"reason_title": "옛날", "todays_view": {"dek": "옛날 요약"}})
+    _publish(tmp_path, "2026-09-04", "kospi",
+             {"todays_view": {"view_title": "최신", "dek": "최신 요약"}})
+    _publish(tmp_path, "2026-09-04", "close", {"reason_title": "같은 날 두 번째"})
+    ctx = g.build_archive_context()
+    flat = [i for m in ctx["months"] for d in m["days"] for i in d["briefings"]]
+    assert flat[0]["headline"] == "최신" and flat[0]["dek"] == "최신 요약"
+    assert flat[0].get("featured") is True
+    # 같은 날 두 번째 항목부터는 dek·featured가 없다
+    assert all("dek" not in i and "featured" not in i for i in flat[1:])
+
+
+def test_dek_falls_back_to_sc_summary(tmp_path, monkeypatch):
+    """마감 브리핑은 todays_view.dek이 없고 sc_summary가 같은 역할을 한다."""
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    _publish(tmp_path, "2026-09-04", "close",
+             {"reason_title": "마감 제목", "sc_summary": "마감 요약 문장"})
+    flat = g.build_archive_context()["months"][0]["days"][0]["briefings"]
+    assert flat[0]["dek"] == "마감 요약 문장"
+
+
+def test_missing_dek_is_empty(tmp_path, monkeypatch):
+    """요약이 없으면 빈 문자열 → 템플릿에서 그 줄이 빠진다(지어내지 않는다)."""
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    _publish(tmp_path, "2026-09-04", "kospi", {"reason_title": "제목만"})
+    assert g.build_archive_context()["months"][0]["days"][0]["briefings"][0]["dek"] == ""

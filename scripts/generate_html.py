@@ -2302,6 +2302,26 @@ def _archive_headline(date_str: str, btype: str) -> str:
     return ""
 
 
+def _archive_dek(date_str: str, btype: str) -> str:
+    """발행본의 서브타이틀(한 문단 요약). 없으면 빈 문자열 — 지어내지 않는다(§0).
+
+    kospi·us는 `todays_view.dek`, close는 `sc_summary`가 같은 역할을 한다.
+    맨 위 최신 1편에만 쓰이므로(그 아래는 제목만) 여기서만 읽는다.
+    """
+    snap = BRIEFINGS_DIR / date_str / btype / "analysis_snapshot.json"
+    if not snap.exists():
+        return ""
+    try:
+        d = load_json(snap)
+    except Exception:
+        return ""
+    tv = d.get("todays_view") or {}
+    for cand in (tv.get("dek"), d.get("sc_summary")):
+        if isinstance(cand, str) and cand.strip():
+            return cand.strip()
+    return ""
+
+
 def build_archive_context() -> dict:
     """발행된 브리핑을 디스크에서 훑어 월별 아카이브 목록을 만든다."""
     if not BRIEFINGS_DIR.exists():
@@ -2311,17 +2331,24 @@ def build_archive_context() -> dict:
          if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)),
         reverse=True,
     )
-    months, total, prev_month = [], 0, None
+    months, total, prev_month, featured_done = [], 0, None, False
     for d in dates:
         entries = []
         for t in ARCHIVE_TYPES:
             if not (BRIEFINGS_DIR / d / t / "index.html").exists():
                 continue
-            entries.append({
+            entry = {
                 "label": BRIEFING_LABELS[t],
                 "url": f"/briefings/{d}/{t}/",
                 "headline": _archive_headline(d, t),
-            })
+            }
+            # 목록 맨 위 최신 1편만 서브타이틀까지 보여준다(2026-09-04). 나머지는 제목만 —
+            # 전부 요약을 달면 목록이 길어져 훑어보기 어려워진다.
+            if not featured_done:
+                entry["dek"] = _archive_dek(d, t)
+                entry["featured"] = True
+                featured_done = True
+            entries.append(entry)
         if not entries:
             continue
         total += len(entries)

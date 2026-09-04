@@ -321,6 +321,11 @@ python3 scripts/generate_html.py --write-list-only
 
 - `generate_html.write_briefings_index()` 가 `web/briefings/index.html` 을 정적 생성한다. 목록 JSON·sitemap과 **같은 자리에서 항상 함께** 갱신되므로 별도 스텝이 필요 없다(호출부 3곳).
 - **목록의 원본은 `data/*.json`이 아니라 디스크에 커밋된 발행본이다.** 로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28). 헤드라인은 각 발행본 옆의 `analysis_snapshot.json`에서 `todays_view.view_title` → `reason_title` → `market_title` → meta description 순으로 찾고, **없으면 비운다**(지어내지 않는다).
+- **맨 위 최신 1편만 서브타이틀까지 보여준다**(2026-09-04). 제목 아래 한 문단 요약이 붙고
+  카드가 강조된다. 요약 출처는 `todays_view.dek`(코스피·미국) → `sc_summary`(마감) 순이고,
+  **없으면 그 줄이 빠진다**(지어내지 않는다). 나머지는 제목만 — 전부 요약을 달면 86편이
+  길어져 훑어보기 어려워진다. `featured`·`dek` 키는 `build_archive_context()`가 첫 항목에만
+  붙인다.
 - **타임라인 형식이고, 타이틀이 주인공이다**(2026-09-03). 좌측 레일에 날짜 노드를 꿰고 각
   날짜 아래 브리핑 카드를 쌓는다. 카드는 **헤드라인이 먼저(15px/600/ink), 유형 태그(코스피
   예측·마감·미국 시장)는 그 아래 작은 회색 보조 텍스트**다. 처음엔 태그를 파란 pill로 강조했는데
