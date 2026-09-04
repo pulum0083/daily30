@@ -1305,6 +1305,19 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
   letter-spacing:-.2px;word-break:keep-all;}
 .arch-item__label{display:block;margin-top:5px;font-size:11px;font-weight:500;color:var(--muted);
   letter-spacing:.02em;}
+/* 맨 위 최신 1편만 서브타이틀까지 — 나머지는 제목만(2026-09-04).
+   전부 요약을 달면 목록이 길어져 훑어보기 어려워진다. */
+.arch-item.is-featured{padding:14px 15px;border-color:var(--primary-bg);background:var(--primary-bg);}
+.arch-item.is-featured:hover{border-color:var(--primary);background:var(--primary-bg);}
+.arch-item.is-featured .arch-item__headline{font-size:17px;font-weight:700;letter-spacing:-.4px;line-height:1.45;}
+.arch-item__dek{display:block;margin-top:7px;font-size:13px;line-height:1.7;color:#475569;
+  word-break:keep-all;}
+.arch-item__dek b{color:var(--ink);font-weight:600;}
+html.dark .arch-item__dek{color:var(--muted);}
+@media(max-width:640px){
+  .arch-item.is-featured .arch-item__headline{font-size:16px;}
+  .arch-item__dek{font-size:12.5px;}
+}
 @media(max-width:640px){
   .arch-title{font-size:22px;}
   /* 모바일 — 레일 중심 = 5 + 1 = 6. 마커 left = 6 - 지름/2 */
