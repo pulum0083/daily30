@@ -321,6 +321,14 @@ python3 scripts/generate_html.py --write-list-only
 
 - `generate_html.write_briefings_index()` 가 `web/briefings/index.html` 을 정적 생성한다. 목록 JSON·sitemap과 **같은 자리에서 항상 함께** 갱신되므로 별도 스텝이 필요 없다(호출부 3곳).
 - **목록의 원본은 `data/*.json`이 아니라 디스크에 커밋된 발행본이다.** 로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28). 헤드라인은 각 발행본 옆의 `analysis_snapshot.json`에서 `todays_view.view_title` → `reason_title` → `market_title` → meta description 순으로 찾고, **없으면 비운다**(지어내지 않는다).
+- **생성물을 rebase로 합치면 조용히 어긋난다**(2026-09-04 실사고). 순서를 바꾼 내 커밋이
+  같은 파일을 재생성한 마감 잡 커밋(`03def437`) 위로 rebase되면서, **충돌 없이** 날짜별로
+  순서가 뒤섞인 하이브리드가 됐다(9/3은 새 순서, 9/4는 옛 순서). §43은 *충돌*이 나는 경우를
+  다뤘지만 이건 그보다 나쁘다 — 아무 경고가 없어 배포까지 갔다. **아카이브를 손댄 뒤
+  rebase했다면 push 전에 `--write-list-only`로 다시 생성한다.** 내 diff가 생성 시점의 디스크
+  상태를 전제하기 때문이다.
+  · 가드: `test_committed_archive_order_matches_archive_types` — 커밋된 HTML의 날짜별 순서가
+    `ARCHIVE_TYPES`와 다르면 CI가 실패한다. 사고 당시 파일로 실제 검출을 확인했다.
 - **하루 안에서도 최신 발행이 위다**(2026-09-04). `ARCHIVE_TYPES = ["us", "close", "kospi"]` —
   발행 시각이 코스피 예측 07:25 → 마감 16:25 → 미국 21:15이므로 역순으로 나열한다. 날짜가
   최신순인데 하루 안만 발행순이면 어긋난다. **이 순서가 곧 featured 선정 순서**이기도 하다

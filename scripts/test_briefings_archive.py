@@ -139,3 +139,31 @@ def test_missing_dek_is_empty(tmp_path, monkeypatch):
     monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
     _publish(tmp_path, "2026-09-04", "kospi", {"reason_title": "제목만"})
     assert g.build_archive_context()["months"][0]["days"][0]["briefings"][0]["dek"] == ""
+
+
+def test_committed_archive_order_matches_archive_types():
+    """커밋된 아카이브 HTML의 하루 안 순서가 ARCHIVE_TYPES와 일치해야 한다.
+
+    2026-09-04 사고: 브리핑 잡이 재생성한 아카이브 위로 내 커밋이 rebase되면서,
+    **충돌 없이** 날짜별로 순서가 뒤섞인 하이브리드 파일이 만들어졌다(9/3은 새 순서,
+    9/4는 옛 순서). 생성물은 통째로 다시 쓰이는 파일이라 diff 병합이 성립하지 않는데
+    git이 조용히 합쳐버린 것이라, 아무 경고도 없었다.
+
+    이 테스트는 발행본 디스크가 아니라 **커밋된 결과물**을 검사하므로 그 상태를 잡는다.
+    """
+    page = g.BRIEFINGS_DIR / "index.html"
+    if not page.exists():
+        return                                  # 아카이브가 아직 없는 저장소는 검사 대상 아님
+    html = page.read_text(encoding="utf-8")
+    label_to_type = {v: k for k, v in g.BRIEFING_LABELS.items()}
+    rank = {t: i for i, t in enumerate(g.ARCHIVE_TYPES)}
+
+    # 날짜 블록별로 라벨이 나타난 순서를 뽑는다.
+    import re
+    for block in re.split(r'<section class="arch-day">', html)[1:]:
+        labels = re.findall(r'class="arch-item__label">([^<]+)<', block)
+        ranks = [rank[label_to_type[l]] for l in labels if l in label_to_type]
+        date = re.search(r'class="arch-day__date">([^<]*)', block)
+        assert ranks == sorted(ranks), (
+            f"{date.group(1) if date else '?'} 날짜의 순서가 ARCHIVE_TYPES와 다릅니다: {labels}"
+        )
