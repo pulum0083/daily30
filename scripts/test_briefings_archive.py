@@ -88,20 +88,41 @@ def test_rendered_page_has_no_redirect_and_no_bottom_list(tmp_path, monkeypatch)
     assert 'rel="canonical" href="https://doubleshot.space/briefings/"' in html
 
 
+def _flat(ctx):
+    return [i for m in ctx["months"] for d in m["days"] for i in d["briefings"]]
+
+
+def test_newest_published_first_within_a_day():
+    """하루 안에서도 최신 발행이 위 — 미국(21:15) → 마감(16:25) → 예측(07:25)."""
+    assert g.ARCHIVE_TYPES == ["us", "close", "kospi"]
+
+
 def test_only_newest_gets_dek(tmp_path, monkeypatch):
-    """맨 위 최신 1편만 서브타이틀을 갖는다 — 전부 달면 목록이 훑기 어려워진다."""
+    """맨 위 최신 1편만 서브타이틀을 갖는다 — 전부 달면 목록이 훑기 어려워진다.
+
+    같은 날 여러 편이 있으면 **가장 늦게 발행된 것**이 맨 위이자 featured다.
+    """
     monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
-    _publish(tmp_path, "2026-09-02", "kospi",
-             {"reason_title": "옛날", "todays_view": {"dek": "옛날 요약"}})
-    _publish(tmp_path, "2026-09-04", "kospi",
-             {"todays_view": {"view_title": "최신", "dek": "최신 요약"}})
-    _publish(tmp_path, "2026-09-04", "close", {"reason_title": "같은 날 두 번째"})
-    ctx = g.build_archive_context()
-    flat = [i for m in ctx["months"] for d in m["days"] for i in d["briefings"]]
-    assert flat[0]["headline"] == "최신" and flat[0]["dek"] == "최신 요약"
-    assert flat[0].get("featured") is True
-    # 같은 날 두 번째 항목부터는 dek·featured가 없다
+    _publish(tmp_path, "2026-09-02", "us",
+             {"todays_view": {"view_title": "옛날", "dek": "옛날 요약"}})
+    _publish(tmp_path, "2026-09-04", "kospi", {"reason_title": "그날 아침"})
+    _publish(tmp_path, "2026-09-04", "close",
+             {"reason_title": "그날 마감", "sc_summary": "마감 요약"})
+    flat = _flat(g.build_archive_context())
+    # 09-04엔 마감(16:25)이 예측(07:25)보다 나중이므로 마감이 맨 위이자 featured
+    assert [i["headline"] for i in flat] == ["그날 마감", "그날 아침", "옛날"]
+    assert flat[0]["dek"] == "마감 요약" and flat[0].get("featured") is True
     assert all("dek" not in i and "featured" not in i for i in flat[1:])
+
+
+def test_featured_is_us_when_all_three_published(tmp_path, monkeypatch):
+    """3종이 다 있는 날이면 미국(21:15)이 맨 위다."""
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    for t, title in (("kospi", "예측"), ("close", "마감"), ("us", "미국")):
+        _publish(tmp_path, "2026-09-03", t, {"reason_title": title})
+    flat = _flat(g.build_archive_context())
+    assert [i["headline"] for i in flat] == ["미국", "마감", "예측"]
+    assert flat[0].get("featured") is True
 
 
 def test_dek_falls_back_to_sc_summary(tmp_path, monkeypatch):

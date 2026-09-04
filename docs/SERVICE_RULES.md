@@ -321,6 +321,11 @@ python3 scripts/generate_html.py --write-list-only
 
 - `generate_html.write_briefings_index()` 가 `web/briefings/index.html` 을 정적 생성한다. 목록 JSON·sitemap과 **같은 자리에서 항상 함께** 갱신되므로 별도 스텝이 필요 없다(호출부 3곳).
 - **목록의 원본은 `data/*.json`이 아니라 디스크에 커밋된 발행본이다.** 로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28). 헤드라인은 각 발행본 옆의 `analysis_snapshot.json`에서 `todays_view.view_title` → `reason_title` → `market_title` → meta description 순으로 찾고, **없으면 비운다**(지어내지 않는다).
+- **하루 안에서도 최신 발행이 위다**(2026-09-04). `ARCHIVE_TYPES = ["us", "close", "kospi"]` —
+  발행 시각이 코스피 예측 07:25 → 마감 16:25 → 미국 21:15이므로 역순으로 나열한다. 날짜가
+  최신순인데 하루 안만 발행순이면 어긋난다. **이 순서가 곧 featured 선정 순서**이기도 하다
+  (목록의 첫 항목이 featured). ⚠️ `build_list_context`의 `types`(사이드바 3열 목록)는 가로
+  배치라 발행 순서대로 두는 게 자연스럽다 — **함께 뒤집지 말 것.**
 - **맨 위 최신 1편만 서브타이틀까지 보여준다**(2026-09-04). 제목 아래 한 문단 요약이 붙고
   카드가 강조된다. 요약 출처는 `todays_view.dek`(코스피·미국) → `sc_summary`(마감) 순이고,
   **없으면 그 줄이 빠진다**(지어내지 않는다). 나머지는 제목만 — 전부 요약을 달면 86편이

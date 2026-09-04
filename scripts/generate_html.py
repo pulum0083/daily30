@@ -2279,7 +2279,12 @@ def build_all_stocks():
 #    로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28).
 # ⚠️ main.js patchBriefingList()는 `.bottom-list`를 찾아 최근 10일로 다시 그린다.
 #    아카이브는 `.arch-list`를 쓰므로 그 대상이 아니다 — 클래스를 바꾸지 말 것.
-ARCHIVE_TYPES = ["kospi", "close", "us"]
+# 하루 안에서도 **최신 발행이 위**로 온다 — 날짜가 최신순이므로 그래야 일관된다.
+# 발행 시각: 코스피 예측 07:25 → 마감 16:25 → 미국 21:15 이므로 역순으로 나열한다.
+# 이 순서가 곧 featured(맨 위 1편) 선정 순서이기도 하다 — 목록의 첫 항목이 featured다.
+# ⚠️ build_list_context의 types(사이드바 3열 목록)와는 별개다. 그쪽은 가로 배치라 발행
+#    순서대로 두는 게 자연스러우므로 함께 뒤집지 말 것.
+ARCHIVE_TYPES = ["us", "close", "kospi"]
 
 
 def _archive_headline(date_str: str, btype: str) -> str:
