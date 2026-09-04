@@ -1506,3 +1506,45 @@ error: could not apply 850d7fb... 🇰🇷 코스피 마감: 2026-09-03 16:32 KS
   `git log --since` 로 대조 — 사람이면 이 사고, 다른 워크플로우면 §18이다. ③ 충돌 파일이
   생성물이면 코드를 고칠 게 아니라 **재실행**하면 된다(그 시점 main으로 다시 생성하므로
   충돌이 사라진다): `gh workflow run daily_report.yml -f briefing_type=kospi-close`.
+
+
+### 44. 코스피 아침 브리핑 미발행 — 응답이 max_tokens에서 잘려 JSON 파싱 실패 (2026-09-04 실사고)
+
+**증상**: 07:25 `kospi-briefing` 잡이 `✨ Claude 분석 생성` 스텝에서 실패해 그날 아침
+브리핑이 발행되지 않았다(`/briefings/2026-09-04/kospi/` 404).
+
+```
+[call_claude] Input: 22117, Output: 4096 tokens          ← 정확히 상한
+[call_claude] ERROR: Unterminated string starting at: line 127 column 12
+[call_claude] ERROR calling Claude API: Claude API JSON 파싱 3회 모두 실패
+```
+
+**원인**: `max_tokens=4096`에서 응답이 잘려 JSON이 미완성으로 끝났다. 3회 재시도가 모두
+같은 지점에서 실패한 이유도 이것이다 — 재시도해도 상한은 그대로다.
+
+**핵심은 이게 그날 갑자기 생긴 문제가 아니라는 점이다.** 그 전에 **성공한** 실행들도
+`Output: 4096`으로 정확히 상한에 붙어 있었다(run 33690260104 등). 즉 코스피 분석은 한동안
+천장에 닿은 채 돌고 있었고, JSON이 우연히 닫히면 통과하고 아니면 터지는 상태였다. 마감
+브리핑은 출력이 784토큰으로 여유가 커서 영향이 없었다.
+
+**수정** ([call_claude.py](../scripts/call_claude.py)):
+- `max_tokens` 4096 → **16000**. 상한을 올려도 실제 출력이 늘지는 않는다 — 모델은 필요한
+  만큼만 쓰고, 상한은 "잘리지 않을 여유"일 뿐이다.
+- `stop_reason == "max_tokens"`면 **잘림으로 명시 보고**한다. 그 전엔 잘림이 JSON 파싱
+  오류로 위장돼 원인 파악을 늦췄다("Unterminated string"은 증상이지 원인이 아니다).
+- 테스트 `scripts/test_call_claude_truncation.py`(2) — max_tokens 여유·잘림 감지 존재.
+
+- **방지 룰(상한에 붙어 있으면 이미 고장 난 것이다)**: 출력 토큰이 `max_tokens`와 **정확히
+  같으면** 그 응답은 잘린 것이다. 성공했더라도 우연이다. 로그에 `Output: <상한>`이 보이면
+  그 자리에서 상한을 올린다 — 터질 때까지 기다리지 않는다.
+- **방지 룰(같은 오류로 3회 재시도하면 재시도가 답이 아니다)**: 재시도는 일시적 실패에만
+  듣는다. 3회가 **같은 지점에서** 실패하면 결정론적 원인이므로 재시도 횟수를 늘릴 게 아니라
+  원인을 봐야 한다. 파싱 오류 메시지보다 `stop_reason`·`usage`를 먼저 읽는다.
+
+**페이지만 다시 만들 때(텔레그램 없이)**: `daily_report.yml`에 이미 `dry_run` 입력이 있다.
+`dry_run=true`면 데이터 수집·분석·검증·HTML 생성·커밋·배포는 전부 실행하고
+**상세 페이지 라이브 확인·텔레그램·발송 기록·이메일 4개 스텝만 건너뛴다.**
+
+```bash
+gh workflow run daily_report.yml -f briefing_type=kospi -f dry_run=true
+```

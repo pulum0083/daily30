@@ -1500,7 +1500,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
 
         response = client.messages.create(
             model="claude-sonnet-5",
-            max_tokens=4096,
+            # 2026-09-04 사고: 4096에서 응답이 잘려 JSON 파싱이 3회 모두 실패했다.
+            # 그날 전에도 성공한 실행들이 Output=4096으로 **정확히 상한에 붙어** 있었다 —
+            # 우연히 JSON이 닫히면 통과하고 아니면 터지는 상태로 한동안 돌고 있었다.
+            # 상한을 올려도 실제 출력이 늘지는 않는다(모델이 필요한 만큼만 쓴다).
+            max_tokens=16000,
             thinking={"type": "disabled"},
             system=[
                 {
@@ -1513,6 +1517,13 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
                 {"role": "user", "content": user_content}
             ],
         )
+
+        # 잘림은 JSON 파싱 오류로 위장돼 원인 파악을 늦춘다 — 먼저 명시적으로 잡는다.
+        if getattr(response, "stop_reason", None) == "max_tokens":
+            raise RuntimeError(
+                f"Claude 응답이 max_tokens에서 잘렸습니다 (출력 {response.usage.output_tokens} 토큰). "
+                "JSON이 미완성이라 파싱이 실패합니다 — max_tokens를 올려야 합니다."
+            )
 
         # Log cache usage if available
         usage = response.usage
