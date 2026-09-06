@@ -7,7 +7,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from generate_html import (build_market_items, build_fng_dial,  # noqa: E402
                            _fng_is_fresh, _fng_label)
 
-NOW = datetime(2026, 8, 31, 22, 25, tzinfo=timezone.utc)
+# 실행 시점 기준으로 잡는다. 고정 시각을 쓰면 며칠 뒤 스스로 썩는다 —
+# build_fng_dial()이 내부에서 부르는 _fng_is_fresh()는 now 인자 없이 실제 벽시계와
+# 대조하므로, 픽스처만 과거에 고정돼 있으면 5일 신선도 게이트(§39)에 걸려 다이얼이
+# 통째로 생략되고 score·sub 키가 사라진다(2026-09-06 CI 적색 — 8/31에 고정한 값이
+# 6일째 되던 날 터졌다). NOW를 상대 시각으로 두면 픽스처 사이의 관계
+# (fresh=-22h, stale=-9d)는 그대로 유지되면서 시간이 지나도 깨지지 않는다.
+NOW = datetime.now(timezone.utc)
 
 
 def _md(**mdj):
