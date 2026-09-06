@@ -1,3 +1,35 @@
+/* 동시 중복 GET 합치기 (in-flight dedupe).
+   홈은 위젯이 독립적으로 같은 엔드포인트를 부른다 — 1회 로드에서 /api/market 4회,
+   stocks-snapshot.json 3회, stocks-live?us= 3회, briefings-list.json 2회(낭비 8건).
+   호출부를 지우면 어느 위젯이 데이터를 잃는지 추적이 어렵고 회귀 위험이 커서,
+   호출부는 그대로 두고 '같은 URL이 아직 날아가는 중이면 그 응답을 나눠 쓰는' 방식으로 없앤다.
+   - GET·문자열 URL만 대상. POST 등은 손대지 않는다.
+   - 응답은 clone()으로 넘겨 각 소비처가 독립적으로 본문을 읽을 수 있게 한다.
+   - 공유분이 실패하면(한쪽의 AbortSignal 타임아웃 등) 각자 원래대로 재요청한다 —
+     최악의 경우 지금과 같은 횟수가 되고, 남의 abort가 내 요청을 죽이지 않는다.
+   - 창은 1.5초. 폴링 주기(60초 등)를 건드리지 않고 같은 로드 사이클의 중복만 합친다. */
+(function(){
+  if (typeof window === 'undefined' || !window.fetch || window.__dsFetchDeduped) return;
+  window.__dsFetchDeduped = true;
+  var orig = window.fetch.bind(window);
+  var inflight = new Map();
+  var WINDOW_MS = 1500;
+  window.fetch = function(input, init){
+    var url = typeof input === 'string' ? input : null;
+    var method = ((init && init.method) || 'GET').toUpperCase();
+    if (!url || method !== 'GET' || (init && init.body)) return orig(input, init);
+    var hit = inflight.get(url);
+    if (hit) {
+      return hit.then(function(r){ return r.clone(); }, function(){ return orig(input, init); });
+    }
+    var p = orig(input, init);
+    inflight.set(url, p);
+    p.then(function(){ setTimeout(function(){ inflight.delete(url); }, WINDOW_MS); },
+           function(){ inflight.delete(url); });
+    return p.then(function(r){ return r.clone(); });
+  };
+})();
+
 // 브리핑 공용 JS — 다크모드·GNB 시계·접힘 토글·모달·차트 프리미티브
 
 (function () {
