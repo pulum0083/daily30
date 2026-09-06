@@ -46,13 +46,13 @@ function mkHost() {
   };
 }
 
-test('탭 정의는 이번 범위인 4개만 점등한다', () => {
+test('탭 정의는 이번 범위인 3개만 점등한다', () => {
   const { TABS } = load().api;
   // Array.from으로 vm 컨텍스트 배열을 호스트 realm 배열로 재구성한다 — assert.deepEqual(=deepStrictEqual)이
   // 값이 같아도 realm이 다른 배열의 prototype/constructor를 비교해 실패시키는 Node 고질적 이슈 회피
   // (nodejs/node#44462, Node 22·24 모두 재현 확인).
-  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'sector', 'flow']);
-  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '섹터', '자금 지도']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.id)), ['home', 'signals', 'flow']);
+  assert.deepEqual(Array.from(TABS.map((t) => t.label)), ['전체', '특이신호', '자금 지도']);
 });
 
 test('경로·해시 조합별 활성 탭 판정', () => {
@@ -60,7 +60,7 @@ test('경로·해시 조합별 활성 탭 판정', () => {
   assert.equal(resolveActiveTab('/stocks/', ''), 'home');
   assert.equal(resolveActiveTab('/stocks/', '#home'), 'home');
   assert.equal(resolveActiveTab('/stocks/', '#signals-all'), 'signals');
-  assert.equal(resolveActiveTab('/stocks/', '#sector'), 'sector');
+  assert.equal(resolveActiveTab('/stocks/', '#flow-map'), 'flow');
   assert.equal(resolveActiveTab('/stocks/', '#flow-map'), 'flow');
 });
 
@@ -124,7 +124,7 @@ test('해시 대소문자와 무관하게 같은 탭으로 판정한다', () => 
   // 해시가 다른 대소문자로 들어올 수 있다 — 그 경우도 '전체'로 조용히 떨어지면 안 된다.
   const { resolveActiveTab } = load().api;
   assert.equal(resolveActiveTab('/stocks/', '#SIGNALS-ALL'), 'signals');
-  assert.equal(resolveActiveTab('/stocks/', '#Sector'), 'sector');
+  assert.equal(resolveActiveTab('/stocks/', '#Flow-Map'), 'flow');
   assert.equal(resolveActiveTab('/stocks/', '#FLOW-MAP'), 'flow');
 });
 
@@ -140,10 +140,10 @@ test('탭을 TABS에 하나 추가하면 해시 판정도 별도 편집 없이 �
 
 test('렌더 — 활성 탭에만 is-active와 aria-current가 붙는다', () => {
   const host = mkHost();
-  load({ host, pathname: '/stocks/', hash: '#sector' });
+  load({ host, pathname: '/stocks/', hash: '#flow-map' });
 
-  assert.ok(host.innerHTML.includes('data-tab="sector"'));
-  const sectorTag = host.innerHTML.match(/<a[^>]*data-tab="sector"[^>]*>/)[0];
+  assert.ok(host.innerHTML.includes('data-tab="flow"'));
+  const sectorTag = host.innerHTML.match(/<a[^>]*data-tab="flow"[^>]*>/)[0];
   const homeTag = host.innerHTML.match(/<a[^>]*data-tab="home"[^>]*>/)[0];
   assert.ok(sectorTag.includes('is-active'), '활성 탭에 is-active가 없다');
   assert.ok(sectorTag.includes('aria-current="page"'));
@@ -167,23 +167,23 @@ test('클릭 — /stocks/ 내부 화면은 go()로 전환하고 기본 이동을
 
   let prevented = false;
   host._click({
-    target: { closest: () => ({ getAttribute: () => 'sector' }) },
+    target: { closest: () => ({ getAttribute: () => 'flow' }) },
     preventDefault: () => { prevented = true; },
   });
 
-  assert.deepEqual(calls, ['sector']);
+  assert.deepEqual(calls, ['flow-map']);
   assert.equal(prevented, true);
 });
 
 test('클릭 — go()가 없는 페이지에서는 가로채지 않는다', () => {
-  // /themes/에서 "섹터" 탭을 누르면 /stocks/#sector로 정상 이동한 뒤
+  // /themes/에서 "자금 지도" 탭을 누르면 /stocks/#flow-map으로 정상 이동한 뒤
   // 그 페이지의 해시 복원 로직이 화면을 띄운다.
   const host = mkHost();
   load({ host, pathname: '/themes/', hash: '' });   // go 미주입
 
   let prevented = false;
   host._click({
-    target: { closest: () => ({ getAttribute: () => 'sector' }) },
+    target: { closest: () => ({ getAttribute: () => 'flow' }) },
     preventDefault: () => { prevented = true; },
   });
 
@@ -267,8 +267,8 @@ test('같은 window에 스크립트가 두 번 실행돼도 리스너가 중복 
   assert.equal(popHandlers.length, 1, 'popstate 리스너가 두 번 등록됐다');
 
   host._click({
-    target: { closest: () => ({ getAttribute: () => 'sector' }) },
+    target: { closest: () => ({ getAttribute: () => 'flow' }) },
     preventDefault: noop,
   });
-  assert.deepEqual(calls, ['sector'], '클릭 한 번에 go()가 정확히 한 번만 호출돼야 한다');
+  assert.deepEqual(calls, ['flow-map'], '클릭 한 번에 go()가 정확히 한 번만 호출돼야 한다');
 });

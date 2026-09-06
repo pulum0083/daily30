@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>종목 시그널 서브탭 — 추가분 목업 (2026-08-03)</title>
+<style>
+*{box-sizing:border-box}
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#5B6472;--primary:#006EFF;--up:#E03131;--dn:#2775ED}
+html,body{margin:0;max-width:100%;overflow-x:hidden}
+body{background:var(--soft);color:var(--ink);font:400 15px/1.65 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .dn{color:var(--dn)}
+.wrap{max-width:1200px;margin:0 auto;padding:40px 20px 96px}
+h1{font-size:26px;font-weight:600;letter-spacing:-.4px;margin:0 0 10px}
+h2{font-size:19px;font-weight:600;letter-spacing:-.3px;margin:0 0 6px}
+.lede{font-size:15px;color:var(--muted);margin:0 0 6px;max-width:74ch}
+.prov{font-size:13px;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:14px 16px;margin:20px 0 0}
+.prov b{color:var(--ink);font-weight:500}
+.prov code{font-size:13px;background:var(--inset);border-radius:6px;padding:1px 5px}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 34px}
+.lg{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:7px 13px}
+.lgs{width:22px;height:14px;border-radius:5px;background:var(--soft);border:1px dashed var(--hair);flex:none}
+.lgn{width:22px;height:14px;border-radius:5px;background:var(--canvas);border:1px solid var(--hair);flex:none;position:relative}
+.lgn::after{content:"";position:absolute;inset:3px auto auto 3px;width:8px;height:8px;border-radius:50%;background:var(--primary)}
+
+section{margin:0 0 46px}
+.shd{margin:0 0 16px}
+.row{display:grid;grid-template-columns:400px minmax(0,1fr);gap:26px;align-items:start}
+@media (max-width:880px){.row{grid-template-columns:minmax(0,1fr)}}
+
+.phone{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:12px;min-width:0}
+.phone>*{margin-bottom:8px} .phone>*:last-child{margin-bottom:0}
+
+.sk{background:var(--soft);border:1px dashed var(--hair);border-radius:12px;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.sk b{font-size:13px;font-weight:500;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.sk .h{font-size:13px;color:var(--muted);background:var(--inset);border-radius:999px;padding:2px 8px;white-space:nowrap;flex:none}
+.skjoin>.sk{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:none}
+
+.newmark{display:flex;justify-content:flex-end}
+.bdg{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;font-size:13px;font-weight:500;background:var(--inset);color:var(--ink);white-space:nowrap}
+.bdg i{width:8px;height:8px;border-radius:50%;background:var(--primary);flex:none}
+.bdg.mini{height:22px;font-size:13px}
+.bdg.gray{color:var(--muted)} .bdg.gray i{display:none}
+
+.tabs{display:flex;border-bottom:1px solid var(--hair);background:var(--canvas);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{min-height:40px;display:inline-flex;align-items:center;padding:0 16px;font-size:14px;font-weight:500;line-height:1.2;letter-spacing:-.16px;color:var(--muted);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex:none;cursor:default}
+.tabs a.on{color:var(--primary);border-bottom-color:var(--primary)}
+
+.nw{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;min-width:0}
+.nw.flat{border-radius:16px}
+.nwh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 16px;border-bottom:1px solid var(--hair);background:var(--soft);min-width:0}
+.nwt{font-size:14px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.cnt{font-size:13px;color:var(--muted);white-space:nowrap;flex:none}
+.cnt.v{font-size:16px;font-weight:500}
+.nwb{padding:14px 16px}
+.lead{margin:0 0 6px;font-size:15px;font-weight:500;letter-spacing:-.2px}
+.leadb{margin:0 0 14px;font-size:14px;color:var(--muted);line-height:1.6}
+.leadb b{color:var(--ink);font-weight:500}
+
+.betwrap{margin:0 0 14px}
+.betlbl{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin:0 0 6px;flex-wrap:wrap}
+.betlbl b{font-weight:500}
+.betlbl.sm{color:var(--muted);margin:6px 0 0}
+.bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:var(--inset)}
+.bar i{display:block} .bar i.d{background:var(--dn)} .bar i.u{background:var(--up)} .bar i.n{background:var(--inset)}
+.bk{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);margin:6px 0 0}
+.bk b{font-weight:500;color:var(--ink)}
+.brd{padding:0 0 14px;margin:0 0 14px;border-bottom:1px solid var(--hair)}
+.brd:last-child{padding:0;margin:0;border-bottom:none}
+.gg{position:relative;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--dn),var(--inset),var(--up))}
+.gg i{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}
+.kpi{background:var(--soft);border-radius:12px;padding:10px 12px;min-width:0}
+.kpi .l{font-size:13px;color:var(--muted);margin:0 0 2px}
+.kpi .v{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+
+.extreme{border-top:1px solid var(--hair)}
+.ex{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--hair);font-size:14px;min-width:0}
+.ex:last-child{border-bottom:none}
+.exl{font-size:13px;color:var(--muted);flex:none}
+.exn{flex:1;min-width:0;font-weight:500;overflow-wrap:anywhere}
+.exp{flex:none;font-weight:500}
+.fine{margin:10px 0 0;font-size:13px;color:var(--muted);line-height:1.55}
+
+.more{display:flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;font-size:14px;font-weight:500;color:var(--primary);text-decoration:none;border-top:1px solid var(--hair);cursor:default}
+.more.attached{background:var(--canvas);border:1px dashed var(--hair);border-top:1px solid var(--hair);border-radius:0 0 12px 12px}
+.more .bdg{margin-left:auto}
+.more.ex-link{color:var(--muted)}
+
+.lrow{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hair);font-size:14px;text-decoration:none;color:var(--ink);cursor:default;min-width:0}
+.lrow:last-child{border-bottom:none}
+.lm{margin-left:auto;font-size:13px;color:var(--muted);flex:none}
+.ar{margin-left:auto;color:var(--primary);flex:none;font-weight:500}
+.lrow .ar.up,.lrow .ar.dn{margin-left:auto}
+.rk{width:18px;font-size:13px;color:var(--muted);flex:none}
+.rk.t{color:var(--ink);font-weight:500}
+
+.stabs{display:flex;gap:0;border-bottom:1px solid var(--hair);padding:0 8px}
+.stabs a{min-height:38px;display:inline-flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:default}
+.stabs a.on{color:var(--primary);border-bottom-color:var(--primary)}
+
+.sigc{padding:12px 16px;border-bottom:1px solid var(--hair);min-width:0}
+.sigc:last-of-type{border-bottom:1px solid var(--hair)}
+.sigt{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.sigt b{font-size:14px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.sigt span{font-size:14px;font-weight:500;flex:none}
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:var(--inset);color:var(--muted);font-size:13px;font-weight:500}
+.why{margin:0;font-size:13px;color:var(--muted);line-height:1.55}
+.why b{color:var(--ink);font-weight:500}
+.rest{padding:11px 16px;font-size:13px;color:var(--muted);background:var(--soft)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px}
+.chip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:var(--inset);font-size:13px;font-weight:500;color:var(--muted);cursor:default}
+.chip.on{background:var(--ink);color:var(--canvas)}
+.chip.on .up,.chip.on .dn{color:var(--canvas)}
+
+.blank{padding:14px 16px;background:var(--soft)}
+.bt{margin:0 0 6px;font-size:14px;font-weight:500}
+.bb{margin:0;font-size:13px;color:var(--muted);line-height:1.6}
+.bb b{color:var(--ink);font-weight:500}
+code{font-size:13px;background:var(--inset);border-radius:5px;padding:1px 5px;overflow-wrap:anywhere}
+
+.erow{padding:10px 16px;border-bottom:1px solid var(--hair);min-width:0}
+.erow:last-of-type{border-bottom:1px solid var(--hair)}
+.e1{display:flex;align-items:baseline;gap:8px;min-width:0}
+.e1 b{font-size:14px;font-weight:500;flex:1;min-width:0;overflow-wrap:anywhere}
+.ep{flex:none;font-weight:500;font-size:14px}
+.e2{display:flex;align-items:center;gap:8px;margin:6px 0 0}
+.ebar{flex:1;min-width:0;height:6px;border-radius:999px;background:var(--inset);overflow:hidden}
+.ebar i{display:block;height:100%;background:var(--muted);opacity:.45}
+.em{font-size:13px;color:var(--muted);flex:none;white-space:nowrap}
+
+.ann{min-width:0}
+.nt{display:flex;gap:12px;background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:14px 16px;margin:0 0 10px;min-width:0}
+.nn{width:26px;height:26px;border-radius:50%;background:var(--inset);color:var(--ink);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;flex:none}
+.ntt{font-size:14px;font-weight:500;display:block;margin:0 0 3px}
+.nt p{margin:0;font-size:13px;color:var(--muted);line-height:1.65;overflow-wrap:anywhere}
+.nt p b{color:var(--ink);font-weight:500}
+.nt p+p{margin-top:7px}
+.gain{background:var(--soft);border:1px solid var(--hair);border-radius:16px;padding:14px 16px;margin:0 0 10px}
+.gain .gt{font-size:13px;color:var(--muted);margin:0 0 4px}
+.gain .gv{font-size:14px;line-height:1.6;margin:0}
+.gain .gv b{font-weight:500}
+ul{margin:6px 0 0;padding-left:18px} li{font-size:13px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+li b{color:var(--ink);font-weight:500}
+</style></head>
+<body><div class="wrap">
+
+<h1>종목 시그널 서브탭 — 추가되는 것만</h1>
+<p class="lede">홈은 지금 그대로 둔다. 이 목업이 보여주는 건 <b>네 가지 추가분</b>뿐이다 — 서브탭 바, ETF 요약 블록(유일한 신규 블록), 섹터 전체 보기 링크, 패시브·순위 링크 복구.</p>
+<p class="lede">홈 전체 15,095px을 그대로 재현하면 추가분이 묻히므로, <b>기존 블록은 제목과 실측 높이만 남긴 회색 스키마틱</b>으로 두고 <b>신규 부분만 실데이터로 완전 렌더</b>했다. 탭 3종은 "지금 이미 존재하는 화면"을 근사해 보여주고, 각 탭마다 "홈보다 더 주는 것" 한 줄을 붙였다.</p>
+
+<div class="prov">
+  <b>데이터 출처 · 2026-08-03 (월) 장중</b><br>
+  홈 ETF 블록 = <code>/api/signals</code> <b>14:47 KST</b> · ETF 탭 = <code>/api/vol-top</code> <b>14:49 KST</b> ·
+  20일 평균 거래량 = <code>web/data/stocks-snapshot.json</code> <b>07-31 16:33</b> ·
+  특이신호 · 섹터 = <code>/api/signals</code>.<br>
+  두 API의 같은 종목 등락률이 소수점에서 미세하게 다른 건 <b>2분 간격의 스냅샷 차이</b>다(코드 9종 전부 코드값은 일치 확인).
+  기록 시점 코스피 <b class="dn num">−4.93%</b>. 숫자는 전부 실측이고, 없는 값은 지어내지 않고 비운 뒤 이유를 적었다.
+</div>
+
+<div class="legend">
+  <span class="lg"><span class="lgs"></span>기존 — 손대지 않음 (제목 + 실측 높이만)</span>
+  <span class="lg"><span class="lgn"></span>신규 — 이번에 추가되는 것 (실데이터 렌더)</span>
+</div>
+
+<section>
+  <div class="shd">
+    <h2>1 · 전체 (홈)</h2>
+    <p class="lede">DOM 순서 그대로. 회색 점선은 기존 블록이고 흰 카드가 추가분이다.</p>
+  </div>
+  <div class="row">
+    <div class="phone">
+<div class="sk"><b>히어로 + 검색</b><span class="h">99px</span></div>
+<div class="sk"><b>지수 · 수급 카드</b><span class="h">219px</span></div>
+<div class="newmark"><span class="bdg"><i></i>신규 · 서브탭 바</span></div>
+<nav class="tabs" aria-label="종목 시그널 메뉴"><a class="on" aria-current=page>전체</a><a class="">특이신호</a><a class="">섹터</a><a class="">ETF</a></nav>
+<div class="sk"><b>장중 이슈 피드</b><span class="h">159px</span></div>
+<div class="sk"><b>오늘 예측 링크</b><span class="h">37px</span></div>
+<div class="sk"><b>밤사이 미국 반도체</b><span class="h">17:00–07:30만 노출</span></div>
+<div class="sk"><b>코스피 주도주 + 관련 뉴스 + 증권사 목표주가</b><span class="h">3,107px</span></div>
+<div class="sk"><b>상승 모멘텀 종목</b><span class="h">905px</span></div>
+<div class="skjoin">
+  <div class="sk"><b>섹터별 대표 종목</b><span class="h">2,227px</span></div>
+  <a class="more attached">섹터 전체 보기 <span>→</span><span class="bdg mini"><i></i>신규 링크</span></a>
+</div>
+<div class="sk"><b>이번 주 자금 지도</b><span class="h">794px</span></div>
+
+<div class="nw">
+  <div class="nwh">
+    <span class="nwt">ETF 신호</span>
+    <span class="bdg"><i></i>신규 블록</span>
+  </div>
+  <div class="nwb">
+    <p class="lead">엇갈린 ETF 신호 · 거래량↑ 방향은 중립</p>
+    <p class="leadb">KODEX 인버스 거래량이 KODEX 200의 <b>47배</b>지만, 인버스·레버리지 거래대금은 <b>50 : 50</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.</p>
+
+    <div class="betwrap">
+      <div class="betlbl">
+        <span class="dn">하락 베팅 <b class="num">1조 8,518억</b></span>
+        <span class="up"><b class="num">1조 8,236억</b> 상승 베팅</span>
+      </div>
+      <div class="bar"><i class="d" style="width:50%"></i><i class="u" style="width:50%"></i></div>
+      <div class="betlbl sm"><span class="num">50%</span><span class="num">50%</span></div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="l">인버스 거래량</div><div class="v num">KODEX 200 ×47</div></div>
+      <div class="kpi"><div class="l">KODEX 레버리지</div><div class="v num dn">−15.57%</div></div>
+    </div>
+
+    <div class="extreme">
+      <div class="ex"><span class="exl">섹터 ETF 최고</span><span class="exn">바이오</span><span class="exp up num">+4.59%</span></div>
+      <div class="ex"><span class="exl">섹터 ETF 최저</span><span class="exn">반도체</span><span class="exp dn num">−6.85%</span></div>
+    </div>
+    <p class="fine">섹터 ETF 9종 중 양 극단만 표시해요. 나머지 7종과 안전자산·전체 순위는 ETF 탭에 있어요.</p>
+  </div>
+  <a class="more">ETF 전체 보기 · 29종 <span>→</span></a>
+</div>
+<div class="skjoin">
+  <div class="sk"><b>오늘의 특이 신호</b><span class="h">3,904px</span></div>
+  <a class="more attached ex-link">특이 신호 전체 보기 <span>→</span><span class="bdg mini gray">기존 · 홈의 유일한 링크</span></a>
+</div>
+<div class="nw">
+  <div class="nwh"><span class="nwt">탭에 없는 화면</span><span class="bdg"><i></i>링크 복구</span></div>
+  <a class="lrow">패시브 민감주 <span class="lm num">1,942px</span><span class="ar">→</span></a>
+  <a class="lrow">거래량 순위 <span class="lm num">1,303px</span><span class="ar">→</span></a>
+</div></div>
+    <div class="ann"><div class="nt"><div class="nn num">1</div><div><b class="ntt">서브탭 바 — 지수·수급 카드 바로 아래</b><p>IA 스펙의 배치 규칙 그대로다. 코스피·수급은 어느 탭에서든 참인 공통 맥락이라 탭 위에 남기고, 탭 아래부터가 탭에 따라 바뀌는 영역이다. 언더라인 변형, 40px 높이, 좌우 16px, 14px/500. <b>활성 탭은 굵게 하지 않고 primary 색 하나로만</b> 표시한다(굵기 변화는 레이아웃 점프를 만든다).</p></div></div><div class="nt"><div class="nn num">2</div><div><b class="ntt">섹터별 대표 종목 → 전체 보기 링크 신설</b><p>블록 자체는 손대지 않고 <b>맨 아래에 링크 한 줄만</b> 붙였다. 지금 홈에서 다른 화면으로 가는 링크는 특이 신호 하나뿐인데, 섹터는 탭이 생기는 영역이니 "보고 있는 것을 이어보는" 맥락 이동 경로가 있어야 한다.</p></div></div><div class="nt"><div class="nn num">3</div><div><b class="ntt">ETF 요약 블록 — 이번 유일한 신규 블록</b><p>홈 본문에 "ETF"라는 단어가 한 번도 안 나온다. 대응 블록 없이 탭만 생기면 "탭이 있는 영역은 홈에도 요약이 있다"는 약속이 깨지므로, 이 하나만 새로 만든다.</p></div></div><div class="nt"><div class="nn num">4</div><div><b class="ntt">패시브 민감주 · 거래량 순위 — 링크 복구</b><p>둘 다 완성돼 있는데 홈에서 도달할 수 없다. 스펙상 <b>탭이 아니라 인페이지 링크</b>로 유지되는 화면이라, 블록을 새로 만들지 않고 링크 두 줄짜리 카드로만 되살렸다.</p></div></div><div class="gain"><p class="gt">ETF 블록을 자금 지도 <b>뒤</b>, 특이 신호 <b>앞</b>에 둔 이유</p><p class="gv">자금 지도(ETF 주간 순유입·유출)와 같은 계열이라 인접이 자연스럽다. 그리고 뒤에 오는 특이 신호가 3,904px이라 그 아래에 두면 사실상 아무도 못 본다.</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shd">
+    <h2>2 · 특이신호</h2>
+    <p class="lede">이미 존재하는 <code>#signals-all</code> 화면. 오늘 실데이터로 근사했다.</p>
+  </div>
+  <div class="row">
+    <div class="phone">
+<div class="sk"><b>히어로 + 검색</b><span class="h">99px</span></div>
+<div class="sk"><b>지수 · 수급 카드</b><span class="h">219px</span></div>
+<nav class="tabs" aria-label="종목 시그널 메뉴"><a class="">전체</a><a class="on" aria-current=page>특이신호</a><a class="">섹터</a><a class="">ETF</a></nav>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">오늘의 특이 신호</span><span class="cnt num">32종목</span></div>
+  <nav class="stabs"><a class="on">신호 강도순</a><a>상승률순</a></nav>
+  <div class="sigc"><div class="sigt"><b>HL만도</b><span class="up num">+4.47%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">거래량 ×1.7 급증</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+4.5% 상승</b>했어요.</p></div><div class="sigc"><div class="sigt"><b>주성엔지니어링</b><span class="up num">+3.13%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 5일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+3.1% 상승</b>했어요.</p></div><div class="sigc"><div class="sigt"><b>효성중공업</b><span class="up num">+2.90%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+2.9% 상승</b>했어요.</p></div><div class="sigc"><div class="sigt"><b>LS일렉트릭</b><span class="up num">+1.57%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+1.6% 상승</b>했어요.</p></div><div class="sigc"><div class="sigt"><b>한미약품</b><span class="up num">+3.60%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+3.6% 상승</b>했어요.</p></div><div class="sigc"><div class="sigt"><b>현대모비스</b><span class="up num">+2.63%</span></div><div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 4일 연속 순매수 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+2.6% 상승</b>했어요.</p></div>
+  <div class="rest num">… 아래로 26종목 더</div>
+</div>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">하락률 순</span></div>
+  <a class="lrow"><span class="rk num">1</span>삼성생명<span class="ar dn num">−8.83%</span></a><a class="lrow"><span class="rk num">2</span>삼성전자<span class="ar dn num">−8.19%</span></a><a class="lrow"><span class="rk num">3</span>SK하이닉스<span class="ar dn num">−7.57%</span></a><a class="lrow"><span class="rk num">4</span>에코프로비엠<span class="ar dn num">−6.57%</span></a><a class="lrow"><span class="rk num">5</span>한미반도체<span class="ar dn num">−5.83%</span></a>
+</div></div>
+    <div class="ann"><div class="gain"><p class="gt">이 탭이 홈 블록보다 더 주는 것</p><p class="gv"><b>홈은 상위 15종목을 한 가지 순서로만</b> 보여준다. 탭은 <b>32종목 전부</b>를 주고, <b>신호 강도순 ↔ 상승률순</b> 정렬을 바꿀 수 있고, <b>하락률 순 레일</b>이 따로 붙는다. 즉 개수와 정렬축이 늘어난다.</p></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">손대지 않는다</b><p>카드 구조·뱃지·문구 전부 지금 그대로다. 탭 바가 위에 붙는 것 말고 이 화면에 생기는 변화는 없다.</p></div></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">표시한 숫자</b><p>32종목 중 신호 강도순 상위 6개만 실었다. 뱃지·설명 문장은 <code>/api/signals</code>가 내려준 <code>badges</code>·<code>why</code> 원문 그대로다.</p></div></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shd">
+    <h2>3 · 섹터</h2>
+    <p class="lede">이미 존재하는 <code>#sector</code> 화면. 반도체로 진입한 상태.</p>
+  </div>
+  <div class="row">
+    <div class="phone">
+<div class="sk"><b>히어로 + 검색</b><span class="h">99px</span></div>
+<div class="sk"><b>지수 · 수급 카드</b><span class="h">219px</span></div>
+<nav class="tabs" aria-label="종목 시그널 메뉴"><a class="">전체</a><a class="">특이신호</a><a class="on" aria-current=page>섹터</a><a class="">ETF</a></nav>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">🔧 반도체</span><span class="cnt">섹터 선택</span></div>
+  <div class="chips"><a class="chip">자동차<span class="up num">+0.9%</span></a><a class="chip">전력기기<span class="up num">+0.8%</span></a><a class="chip">바이오<span class="dn num">−0.6%</span></a><a class="chip">방산<span class="dn num">−2.0%</span></a><a class="chip">금융<span class="dn num">−2.3%</span></a><a class="chip">조선<span class="dn num">−3.1%</span></a><a class="chip">2차전지<span class="dn num">−3.2%</span></a><a class="chip on">반도체<span class="dn num">−3.8%</span></a></div>
+</div>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">섹터 평균</span><span class="cnt v dn num">−3.84%</span></div>
+  <div class="nwb">
+    <div class="brd">
+      <div class="betlbl sm"><span>시장폭</span><span><b class="num">7</b>종목 중 <b class="up num">1</b> 상승</span></div>
+      <div class="bar"><i class="u" style="width:14.3%"></i><i class="d" style="width:85.7%"></i><i class="n" style="width:0.0%"></i></div>
+      <div class="bk"><span>상승 <b class="num">1</b></span><span>하락 <b class="num">6</b></span><span>보합 <b class="num">0</b></span></div>
+    </div>
+    <div class="brd">
+      <div class="betlbl sm"><span>섹터 AI 심리</span><span>하락 우위 <b class="num">14%</b></span></div>
+      <div class="gg"><i style="left:14%"></i></div>
+      <div class="bk"><span>약세</span><span>중립</span><span>강세</span></div>
+    </div>
+  </div>
+</div>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">반도체 종목 랭킹 · 28종목</span></div>
+  <div class="blank">
+    <p class="bt">실데이터 없음 — 목업에 싣지 않았어요.</p>
+    <p class="bb">이 랭킹은 현재 프로덕션에서 <code>stocks-home.js</code>의 <code>SECTOR_RANK</code> 배열에
+    <b>28행이 하드코딩</b>돼 있어요(종목명·등락률·신호 점수 전부 리터럴). 실측 소스가 없어 §0에 따라 비웠어요.</p>
+  </div>
+</div></div>
+    <div class="ann"><div class="gain"><p class="gt">이 탭이 홈 블록보다 더 주는 것</p><p class="gv"><b>홈은 섹터당 대표 5~6종목의 등락만</b> 보여준다(블록 안에 그렇게 명시돼 있다). 탭은 같은 섹터에 대해 <b>섹터 평균 · 시장폭 · AI 심리 게이지 · 28종목 전체 랭킹 · 패시브 쏠림</b>을 준다. 요약이 "무엇이 올랐나"라면 탭은 "그 섹터가 어떤 상태인가"다.</p></div><div class="nt"><div class="nn num">!</div><div><b class="ntt">단, 28종목 랭킹은 지금 실데이터가 아니다</b><p><code>web/assets/stocks-home.js</code>의 <code>SECTOR_RANK</code>에 28행이 종목명·등락률·신호 점수까지 <b>전부 리터럴로 하드코딩</b>돼 있다. 같은 화면의 패시브 쏠림 수치(약 2.8조 · 15.0일 등)도 <code>web/stocks/index.html</code>에 literal로 박혀 있다. §20에서 목표주가가 3주간 mock으로 나갔던 것과 <b>같은 패턴</b>이다.</p></div></div><div class="nt"><div class="nn num">!</div><div><b class="ntt">그래서 비웠다</b><p>실측 소스가 없으므로 §0에 따라 랭킹 자리를 채우지 않고 사유를 적었다. 이 목업의 범위 밖이지만, <b>탭을 켜면 이 화면의 노출이 늘어난다</b>는 점에서 탭 작업과 무관하지 않다.</p></div></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">실데이터인 부분</b><p>섹터 칩 8개의 평균, 섹터 평균 <b>−3.84%</b>, 시장폭 <b>7종목 중 1 상승</b>, AI 심리 <b>14%</b>는 전부 <code>/api/signals</code> 실값이다. 다만 화면 문구는 "추적 28종목"인데 지표는 <b>7종목</b> 기준이라 <b>기존 화면에 이미 불일치가 있다</b>(이번 범위 밖, 별건).</p></div></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shd">
+    <h2>4 · ETF</h2>
+    <p class="lede">이미 존재하는 <code>#etf-rank</code> 화면. 홈에 대응 블록이 없던 유일한 탭이다.</p>
+  </div>
+  <div class="row">
+    <div class="phone">
+<div class="sk"><b>히어로 + 검색</b><span class="h">99px</span></div>
+<div class="sk"><b>지수 · 수급 카드</b><span class="h">219px</span></div>
+<nav class="tabs" aria-label="종목 시그널 메뉴"><a class="">전체</a><a class="">특이신호</a><a class="">섹터</a><a class="on" aria-current=page>ETF</a></nav>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">ETF 전체 순위</span><span class="cnt num">29개 ETF</span></div>
+  <nav class="stabs"><a class="on">거래량순</a><a>상승률순</a></nav>
+  <div class="erow"><div class="e1"><span class="rk t num">1</span><b>KODEX 인버스</b><span class="up num ep">+9.85%</span></div><div class="e2"><div class="ebar"><i style="width:100.0%"></i></div><span class="num em">9.3억주 · 20일평균 ×0.8</span></div></div><div class="erow"><div class="e1"><span class="rk t num">2</span><b>KODEX 코스닥150레버리지</b><span class="up num ep">+6.32%</span></div><div class="e2"><div class="ebar"><i style="width:12.0%"></i></div><span class="num em">1.1억주 · 20일평균 ×1.1</span></div></div><div class="erow"><div class="e1"><span class="rk t num">3</span><b>KODEX 코스닥150</b><span class="up num ep">+2.73%</span></div><div class="e2"><div class="ebar"><i style="width:3.9%"></i></div><span class="num em">3,586만주 · 20일평균 ×0.9</span></div></div><div class="erow"><div class="e1"><span class="rk num">4</span><b>TIGER 미국S&P500</b><span class="up num ep">+0.51%</span></div><div class="e2"><div class="ebar"><i style="width:2.8%"></i></div><span class="num em">2,612만주 · 20일평균 ×0.6</span></div></div><div class="erow"><div class="e1"><span class="rk num">5</span><b>KODEX 200</b><span class="dn num ep">−9.07%</span></div><div class="e2"><div class="ebar"><i style="width:2.1%"></i></div><span class="num em">1,991만주 · 20일평균 ×0.8</span></div></div><div class="erow"><div class="e1"><span class="rk num">6</span><b>KODEX 레버리지</b><span class="dn num ep">−15.79%</span></div><div class="e2"><div class="ebar"><i style="width:2.1%"></i></div><span class="num em">1,929만주 · 20일평균 ×1.1</span></div></div><div class="erow"><div class="e1"><span class="rk num">7</span><b>KODEX 미국S&P500</b><span class="up num ep">+0.92%</span></div><div class="e2"><div class="ebar"><i style="width:2.0%"></i></div><span class="num em">1,820만주 · 20일평균 ×0.5</span></div></div><div class="erow"><div class="e1"><span class="rk num">8</span><b>KODEX AI반도체TOP2플러스</b><span class="dn num ep">−5.95%</span></div><div class="e2"><div class="ebar"><i style="width:0.6%"></i></div><span class="num em">574만주 · 20일평균 ×0.6</span></div></div><div class="erow"><div class="e1"><span class="rk num">9</span><b>KODEX 은행</b><span class="dn num ep">−0.38%</span></div><div class="e2"><div class="ebar"><i style="width:0.6%"></i></div><span class="num em">518만주 · 20일평균 ×1.9</span></div></div><div class="erow"><div class="e1"><span class="rk num">10</span><b>TIGER 200</b><span class="dn num ep">−9.41%</span></div><div class="e2"><div class="ebar"><i style="width:0.4%"></i></div><span class="num em">373만주 · 20일평균 ×0.9</span></div></div>
+  <div class="rest num">… 아래로 19개 더</div>
+</div>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">하락률 순</span></div>
+  <a class="lrow"><span class="rk num">1</span>KODEX 레버리지<span class="ar dn num">−15.79%</span></a><a class="lrow"><span class="rk num">2</span>TIGER 200<span class="ar dn num">−9.41%</span></a><a class="lrow"><span class="rk num">3</span>KODEX 200<span class="ar dn num">−9.07%</span></a><a class="lrow"><span class="rk num">4</span>KIWOOM 200<span class="ar dn num">−9.05%</span></a><a class="lrow"><span class="rk num">5</span>TIGER 반도체<span class="ar dn num">−6.92%</span></a>
+</div>
+<div class="nw flat">
+  <div class="nwh"><span class="nwt">안전자산</span><span class="cnt">코스피200 ETF <b class="dn num">−8.93%</b> 대비</span></div>
+  <a class="lrow">금<span class="ar dn num">−0.59%</span></a><a class="lrow">국고채10년<span class="ar dn num">−0.02%</span></a><a class="lrow">국고채3년<span class="ar up num">+0.02%</span></a>
+</div></div>
+    <div class="ann"><div class="gain"><p class="gt">이 탭이 홈 블록보다 더 주는 것</p><p class="gv"><b>홈 요약은 방향 판정 한 줄(50 : 50)과 섹터 양 극단 2개</b>로 끝난다. 탭은 <b>29개 ETF 전량</b>을 <b>거래량순 ↔ 상승률순</b>으로 다시 세우고, <b>20일 평균 대비 배수</b>와 <b>안전자산 3종</b>을 붙인다. 요약이 "오늘 ETF가 어느 쪽인가"라면 탭은 "그럼 어떤 ETF가 얼마나"다.</p></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">요약과 상세를 가른 선</b><p>홈 블록에 넣은 것 — <b>해석 한 줄(lead)</b>, 그 근거인 <b>인버스·레버리지 거래대금 50:50 바</b>, <b>인버스 거래량 ×47</b>과 <b>레버리지 등락률</b>, <b>섹터 ETF 9종 중 양 극단 2개</b>. 탭으로 넘긴 것 — 나머지 섹터 7종, 안전자산 3행, 29종 전체 순위, 거래량 배수, 정렬 전환.</p></div></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">왜 이 선인가</b><p>홈 블록은 자금 지도(794px) 옆에서 자기 자리를 벌어야 하는 <b>요약</b>이지 두 번째 3,000px 섹션이 아니다. 기준은 <b>"스크롤 없이 오늘 ETF 상태를 한 문장으로 답할 수 있는가"</b>로 잡았다. lead + 50:50 + 양 극단이면 답이 되고, 순위·배수·안전자산은 그 답을 바꾸지 않고 깊이만 더한다 — 그건 더보기의 몫이다.</p></div></div><div class="nt"><div class="nn num">·</div><div><b class="ntt">lead 문구는 다시 쓰지 않았다</b><p><code>etf.lead</code>는 이미 서비스가 작성해 내려주는 해석문이라 제목·본문 원문 그대로 넣었다. 목업이 문구를 새로 지어내면 그 자체가 실데이터 위반이 된다.</p></div></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="shd"><h2>5 · 못 보여준 것과 확인한 것</h2></div>
+  <div class="row">
+    <div class="ann">
+      <div class="nt"><div class="nn num">A</div><div><b class="ntt">데이터가 없어 못 보여준 것</b><p><b>섹터 탭의 28종목 랭킹</b> — <code>SECTOR_RANK</code> 하드코딩. 실측 소스 없음.<br><b>섹터 탭의 패시브 쏠림 수치</b> — 섹터 합산 노출 "약 2.8조", 종목별 "15.0일" 등이 HTML literal.<br><b>섹터 AI 심리의 AI 근거</b> — 게이지 값은 상승 종목 비율(1/7)의 산술값이라 실데이터지만, "AI 심리"라는 이름이 시사하는 모델 판단은 아니다.<br><b>밤사이 미국 반도체 블록의 높이</b> — 17:00–07:30에만 노출돼 14시 측정 시점에 숨겨져 있었다. 높이 대신 노출 조건만 적었다.</p></div></div>
+      <div class="nt"><div class="nn num">B</div><div><b class="ntt">검증한 숫자 세 개</b><p><b>KODEX 건설 +2.33%</b> — <code>/api/signals</code> <code>etf.sector</code>(code 117700)와 <code>/api/vol-top</code> 양쪽에서 <b>소수점까지 일치</b>.<br><b>인버스·레버리지 거래대금 50 : 50</b> — <code>downAmt</code> 1,851,805 · <code>upAmt</code> 1,823,614 (백만원) → 1조 8,518억 · 1조 8,236억. 비율을 직접 계산하면 50.4%로 내려온 값과 일치.<br><b>반도체 섹터 평균 −3.84%</b> — <code>sectors.semicon.avg</code> 원값 -3.844286, 시장폭 1↑/6↓/7종목과 정합.</p></div></div>
+      <div class="nt"><div class="nn num">C</div><div><b class="ntt">범위를 지킨 방식</b><p>기존 블록은 <b>제목과 높이 외에 아무것도 그리지 않았다</b> — 다시 그리기 시작하면 그 순간 리뉴얼이 된다. 탭 3종도 새 레이아웃을 제안하지 않고 지금 화면 구성을 그대로 근사했다. 실제로 바뀌는 건 위에 탭 바가 한 줄 붙는 것뿐이다.</p></div></div>
+    </div>
+    <div class="ann">
+      <div class="nt"><div class="nn num">D</div><div><b class="ntt">이 목업이 결정을 요구하는 것</b><p><b>ETF 블록의 분량</b> — lead + 50:50 + 양 극단이 적정한가, 안전자산 3행을 홈으로 올릴 것인가. 오늘처럼 코스피가 <b class="dn num">−4.93%</b>인 날엔 "금 −0.59% · 국고채 ±0.02%로 안전자산은 거의 안 움직였다"가 의미 있는 한 줄이라 올릴 근거는 있다. 다만 올리면 블록이 3행 더 길어진다.</p></div></div>
+      <div class="nt"><div class="nn num">E</div><div><b class="ntt">탭 순서와 라벨</b><p>스펙 확정대로 <b>전체 · 특이신호 · 섹터 · ETF</b> 4개만 켰다. 테마·일정은 화면이 없으므로 넣지 않았다 — 빈 탭을 먼저 만들지 않는다.</p></div></div>
+      <div class="nt"><div class="nn num">F</div><div><b class="ntt">스티키 여부는 이 목업에서 판단 못 한다</b><p>섹터별 대표 종목의 <code>.sbx-tabs</code>가 이미 <code>top:52px</code> 스티키라 서브탭을 같은 자리에 고정하면 겹친다. 실제 스크롤에서 확인할 문제라 목업에서는 고정하지 않았다.</p></div></div>
+    </div>
+  </div>
+</section>
+
+</div></body></html>

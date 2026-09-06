@@ -552,6 +552,28 @@ html.dark .spark-tip{background:#1e2130;border-color:rgba(255,255,255,.12);}
 .vix-badge.elevated{background:#FEF9C3;color:#CA8A04;}
 .vix-badge.high{background:var(--dn-bg);color:var(--dn);}
 
+/* ── 공포·탐욕 지수 다이얼 (사이드바 상단, 코스피·미국) ──
+   아치 파스텔은 vix-badge와 같은 계열로 하드코딩한다(라이트·다크 모두 배경 대비 확보).
+   바늘·숫자는 var(--ink)라 테마를 따라 뒤집힌다. 양 끝이 모두 빨강인 것은 의도 —
+   공포뿐 아니라 탐욕(과열)도 위험 구간이기 때문이다. */
+.fng-dial{padding:13px 14px 12px;text-align:center;border-bottom:1px solid var(--hairline);}
+.fng-dial-name{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--muted);}
+.fng-dial svg{display:block;width:100%;max-width:200px;height:auto;margin:2px auto 0;}
+.fng-needle{stroke:var(--ink);}
+.fng-pivot{fill:var(--ink);}
+.fng-tick{fill:var(--muted);font-size:10px;}
+.fng-score{font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.6px;line-height:1.05;margin-top:-4px;font-variant-numeric:tabular-nums;}
+.fng-state{font-size:12px;font-weight:700;margin-top:5px;}
+.fng-sub{font-size:11px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
+.fng-state.calm{color:#16A34A;}
+.fng-state.normal{color:#65A30D;}
+.fng-state.elevated{color:#CA8A04;}
+.fng-state.high{color:#E03131;}
+html.dark .fng-state.calm{color:#4ADE80;}
+html.dark .fng-state.normal{color:#A3E635;}
+html.dark .fng-state.elevated{color:#FACC15;}
+html.dark .fng-state.high{color:#F87171;}
+
 /* ── 실시간 시장 지표 패널 (장 중 전환) ── */
 .mkt-section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:7px 14px 3px;background:var(--surface-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);}
 .mkt-live-time{display:flex;align-items:center;gap:5px;}
@@ -1230,3 +1252,90 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
 .imp-side.down .imp-tk{background:var(--dn-bg);color:var(--dn);}
 .imp-side.up .imp-tk{background:var(--up-bg);color:var(--up);}
+
+
+/* ──────────────────────────────────────────────
+   브리핑 아카이브 (/briefings/) — 2026-09-02, 타임라인 개편 2026-09-03
+   ⚠️ .bottom-list 와 별개다. main.js patchBriefingList()는 .bottom-list만 다시 그린다.
+   위계 규칙: 타이틀이 주인공, 유형 태그(코스피 예측 등)는 보조다. 태그를 강조하면
+   81편이 전부 같은 라벨의 반복으로 보여 정작 읽을 타이틀이 묻힌다.
+────────────────────────────────────────────── */
+.arch-head{padding:28px 0 22px;border-bottom:1px solid var(--hairline);margin-bottom:8px;}
+.arch-title{font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);margin-bottom:12px;}
+.arch-lead{font-size:14px;line-height:1.75;color:var(--ink);max-width:640px;margin-bottom:8px;}
+.arch-lead--muted{color:var(--muted);font-size:13px;}
+.arch-lead a{color:var(--primary);font-weight:600;}
+/* 상단 설명 접기 — 섹터 페이지의 .sector-more와 같은 규칙 */
+.arch-more{margin-top:2px;}
+.arch-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+  font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+.arch-more__toggle::-webkit-details-marker{display:none;}
+.arch-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+.arch-more[open] .arch-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+.arch-more__body{padding-top:6px;}
+.arch-more__body .arch-lead:last-child{margin-bottom:0;}
+
+/* 타임라인 레일 — 날짜 노드가 세로선에 꿰인 형태 */
+/* 레일·마커 정렬 규칙 (2026-09-03 정정)
+   마커 중심을 레일 중심과 첫 줄 텍스트 중심에 동시에 맞춘다. 그러려면 두 값이 고정이어야 해서
+   라벨에 line-height를 명시한다 — 기본 line-height에 기대면 폰트가 바뀔 때 다시 어긋난다.
+     가로: 레일 중심 = left(7) + width(2)/2 = 8  →  마커 left = 8 - 지름/2
+     세로: 마커 top = (line-height - 지름) / 2                                        */
+.arch-timeline{position:relative;padding:8px 0 40px 0;}
+.arch-timeline::before{content:'';position:absolute;left:7px;top:18px;bottom:34px;width:2px;
+  background:var(--hairline);}
+.arch-month{position:relative;margin:22px 0 10px;padding-left:34px;font-size:12px;font-weight:700;
+  line-height:18px;color:var(--muted);letter-spacing:.03em;}
+.arch-month::before{content:'';position:absolute;left:0;top:1px;width:16px;height:16px;border-radius:50%;
+  background:var(--surface-soft);border:2px solid var(--hairline);}
+.arch-day{position:relative;padding:0 0 20px 34px;}
+.arch-day__mark{position:absolute;left:2px;top:4px;width:12px;height:12px;border-radius:50%;
+  background:var(--canvas);border:2px solid var(--primary);box-shadow:0 0 0 3px var(--surface-soft);}
+.arch-day__date{font-size:13px;font-weight:700;line-height:20px;color:var(--ink);margin:0 0 8px;
+  display:flex;align-items:baseline;gap:6px;}
+.arch-day__dow{font-size:11px;font-weight:500;color:var(--muted);}
+.arch-day__items{display:flex;flex-direction:column;gap:6px;}
+
+/* 항목 — 타이틀 먼저, 태그는 그 아래 작게 */
+.arch-item{display:block;padding:11px 13px;border:1px solid var(--hairline);border-radius:10px;
+  background:var(--canvas);transition:border-color .12s,background .12s;}
+.arch-item:hover{border-color:var(--primary);background:var(--surface-soft);}
+.arch-item__headline{display:block;font-size:15px;font-weight:600;line-height:1.5;color:var(--ink);
+  letter-spacing:-.2px;word-break:keep-all;}
+.arch-item__label{display:block;margin-top:5px;font-size:11px;font-weight:500;color:var(--muted);
+  letter-spacing:.02em;}
+/* 맨 위 최신 1편만 서브타이틀까지 — 나머지는 제목만(2026-09-04).
+   전부 요약을 달면 목록이 길어져 훑어보기 어려워진다. */
+.arch-item.is-featured{padding:14px 15px;border-color:var(--primary-bg);background:var(--primary-bg);}
+.arch-item.is-featured:hover{border-color:var(--primary);background:var(--primary-bg);}
+.arch-item.is-featured .arch-item__headline{font-size:17px;font-weight:700;letter-spacing:-.4px;line-height:1.45;}
+.arch-item__dek{display:block;margin-top:7px;font-size:13px;line-height:1.7;color:#475569;
+  word-break:keep-all;}
+.arch-item__dek b{color:var(--ink);font-weight:600;}
+html.dark .arch-item__dek{color:var(--muted);}
+@media(max-width:640px){
+  .arch-item.is-featured .arch-item__headline{font-size:16px;}
+  .arch-item__dek{font-size:12.5px;}
+}
+@media(max-width:640px){
+  .arch-title{font-size:22px;}
+  /* 모바일 — 레일 중심 = 5 + 1 = 6. 마커 left = 6 - 지름/2 */
+  .arch-timeline::before{left:5px;}
+  .arch-month,.arch-day{padding-left:26px;}
+  .arch-day__mark{left:1px;width:10px;height:10px;top:5px;}
+  .arch-month::before{left:0;width:12px;height:12px;top:3px;}
+  .arch-item__headline{font-size:14.5px;}
+}
+
+/* 종목 픽 산출 근거 한 줄 — 2026-09-02.
+   구체적 가격만 근거 없이 놓이면 매매 신호로 읽힌다. 실측과 AI 판단을 구분해 밝힌다. */
+.pick-basis{margin-top:9px;padding-top:9px;border-top:1px solid var(--hairline);
+  font-size:11.5px;line-height:1.65;color:var(--muted);word-break:keep-all;}
+.pick-basis b{color:var(--ink);font-weight:600;}
+.pick-basis a{color:var(--primary);font-weight:600;white-space:nowrap;}
+
+/* 푸터 안내문 안의 섹터 링크 — 섹터 상세로 가는 유일한 상시 진입점(2026-09-03).
+   홈의 섹터 화면을 제거한 뒤 섹터 8페이지의 내부 링크가 sitemap과 종목 상세 3곳뿐이었다. */
+.ds-foot-list .fl a{color:var(--primary);text-decoration:none;}
+.ds-foot-list .fl a:hover{text-decoration:underline;}

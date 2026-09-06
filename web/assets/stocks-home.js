@@ -1013,7 +1013,7 @@ function goStock(code){
   }
 }
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
-function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('sector');}
+function goHub(screen){if(!screen){go('home');return;}if(document.getElementById(screen))go(screen);else go('home');}
 // 탭·화면별 트래픽을 GA4에서 구분해 볼 수 있도록 가상 pageview를 보낸다.
 // index.html의 gtag config에 send_page_view:false를 줘서 자동 최초 pageview를 껐고,
 // 이 함수가 최초 진입(아래 해시 복원 IIFE)과 이후 모든 화면 전환(go()) 양쪽에서 한 번씩만 호출되므로
@@ -1042,8 +1042,8 @@ function go(id,noHistory){
 }
 function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
-// 진입 시 해시(#sector 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
-(function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('sector',true);})();
+// 진입 시 해시(#flow-map 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
+(function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('home',true);})();
 // #mom-track 앵커 — 코스피 브리핑 "종목 시그널에서 트래킹" CTA 진입 시 상승 모멘텀 종목 섹션으로 스크롤.
 // 데이터 fetch·시간대 게이트(ueGate)로 표시가 비동기라 표시될 때까지 잠깐 폴링한다.
 (function(){
@@ -1727,169 +1727,10 @@ if(passBtn){
     if(dnWrap) dnWrap.innerHTML=dn.length?dn.map(function(x,i){return chgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dnMax*100));}).join(''):emptyRow('하락 종목이 없어요');
     bindSurgeTips();
   }
-  // 8개 섹터 대표 종목(대장주) — stock_universe.json 순서 그대로 상위 2~3종목 선별.
-  // 종목 "선택"만 손으로 골랐을 뿐 값은 전부 SNAP(stocks-snapshot.json) 실측이다 —
-  // 밤사이 브리지의 BRIDGE_US_TICKERS와 같은 패턴(§20 위반 아님, 종목 선택 큐레이션).
-  var SECTOR_LEADERS={
-    semicon:['005930','000660','042700'],
-    power:['267260','010120','298040'],
-    defense:['012450','079550','064350'],
-    ship:['329180','042660','010140'],
-    battery:['373220','247540','006400'],
-    auto:['005380','000270','012330'],
-    bio:['207940','068270','000100'],
-    finance:['032830','105560','055550'],
-  };
-  var SECTOR_ICONS={semicon:'🔧',power:'⚡',defense:'🛡️',ship:'🚢',battery:'🔋',auto:'🚗',bio:'🧬',finance:'🏦'};
-
-  // 섹터 화면 데이터 — stocks-snapshot.json(SNAP)만 쓴다. vol-top·API 라이브 소스와
-  // 섞지 않는다(§0 정합성 우선, §24 시점 불일치 방지) — 이 화면은 항상 "직전 마감 기준"이다.
-  function secBuildSectorData(snap, key){
-    if(!snap||!snap.stocks) return null;
-    var rows=[], dvol=0;
-    Object.keys(snap.stocks).forEach(function(code){
-      var s=snap.stocks[code];
-      if(s&&s.sector===key&&typeof s.change_pct==='number'){
-        // 시가총액이 스냅샷에 없어(발행주식수 미보유) '섹터 크기'와 가중치 대용으로
-        // 거래대금(종가×거래량)을 쓴다 — §0: 없는 실측을 지어내지 않고, 있는 실측으로 근사한다.
-        var d=(typeof s.close==='number'&&typeof s.vol==='number')?s.close*s.vol:0;
-        rows.push({code:code,name:s.name,pct:s.change_pct,dvol:d});
-        dvol+=d;
-      }
-    });
-    if(!rows.length) return null;
-    rows.sort(function(a,b){return b.pct-a.pct;});
-    var upN=0,dnN=0,flatN=0,sum=0,wsum=0,wden=0;
-    rows.forEach(function(r){
-      sum+=r.pct;if(r.pct>0)upN++;else if(r.pct<0)dnN++;else flatN++;
-      if(r.dvol>0){wsum+=r.pct*r.dvol;wden+=r.dvol;}
-    });
-    var total=rows.length,avg=sum/total;
-    // 화면에 쓰는 값은 wavg(거래대금 가중)다. 단순평균은 대표 5~7종목을 동일 비중으로
-    // 취급해서 대장주가 끌어올린 날 섹터가 지수와 반대 부호로 뜬다(2026-08-21 반도체).
-    // 시총 가중이 정석이나 발행주식수를 어느 소스에서도 못 얻어, 있는 실측인 거래대금으로
-    // 근사한다(§0). 거래대금을 못 구하면 avg로 폴백 — 섹터를 감추지는 않는다.
-    var wavg=wden?wsum/wden:avg;
-    var byCode={}; rows.forEach(function(r){byCode[r.code]=r;});
-    var leaders=(SECTOR_LEADERS[key]||[]).map(function(c){return byCode[c];}).filter(Boolean);
-    return {key:key,label:SECTOR_LABELS[key]||key,rows:rows,total:total,upN:upN,dnN:dnN,flatN:flatN,avg:avg,wavg:wavg,leaders:leaders,dvol:dvol};
-  }
-
-  // 8개 섹터 전부의 평균·거래대금 — 섹터 선택 칩 렌더에 쓴다. 데이터 없는 섹터는 빠진다(§0).
-  function secAllAverages(snap){
-    var out={};
-    Object.keys(SECTOR_LABELS).forEach(function(key){
-      var d=secBuildSectorData(snap,key);
-      if(d) out[key]={avg:d.avg,wavg:d.wavg,label:d.label,dvol:d.dvol};
-    });
-    return out;
-  }
-
-  // 이 화면은 항상 스냅샷(마감) 기준이라 .ds-asof(장중 '오늘 실시간')를 재사용하면 안 된다.
-  // session_date를 먼저 본다 — 종목별 마지막 봉 날짜가 전부 일치할 때만 채워지는 필드라
-  // (build_stocks_snapshot._reconcile_session_date) 이 데이터가 실제로 '어느 장'의 것인지를
-  // 가리킨다. generated_at은 빌드가 돈 시각일 뿐이라, 빌드가 늦게 돌면 봉은 어제 건데
-  // 날짜만 오늘로 찍힌다. 둘 다 없으면 빈 문자열 — 모르는 날짜를 지어내지 않는다(§0).
-  function secAsOfYmd(snap){
-    if(!snap) return '';
-    if(typeof snap.session_date==='string' && snap.session_date) return snap.session_date;
-    if(typeof snap.generated_at==='string' && snap.generated_at) return snap.generated_at.slice(0,10);
-    return '';
-  }
-  function secAsOfLabel(snap){
-    var ymd=secAsOfYmd(snap);
-    return ymd?fmtKoDate(ymd)+' 마감':'';
-  }
-
-  function secSectorRow(r,i){
-    var top3=i<3;
-    var cls=r.pct>=0?'up':'dn', sign=r.pct>=0?'+':'−';
-    var barPct=Math.max(4,Math.min(100,Math.round(Math.abs(r.pct)/10*100)));
-    return '<a class="row" onclick="goStock(\''+r.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+(i+1)+'</span>'
-      +'<div class="nm"><b>'+r.name+'</b><small class="num">'+r.code+'</small></div>'
-      +'<div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div>'
-      +'<span class="barval '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
-  }
-
-  function secChipHtml(key,label,avg,active){
-    var cls=avg>=0?'up':'dn', sign=avg>=0?'+':'−';
-    return '<a class="secsel__i'+(active?' on':'')+'" role="tab" aria-selected="'+(active?'true':'false')+'" data-sector="'+key+'">'
-      +'<span class="ic">'+(SECTOR_ICONS[key]||'')+'</span>'+label
-      +'<b class="'+cls+' num">'+sign+Math.abs(avg).toFixed(2)+'%</b></a>';
-  }
-
-  // order: 반도체 항상 맨 앞 고정, 나머지는 거래대금(종가×거래량 합산) 내림차순 —
-  // 사용자 지정(2026-08-04). activeKey와 무관하다. SNAP은 세션당 한 번만 로드되고
-  // 재할당되지 않으므로(§24, 라이브 폴링 없음) 이 정렬은 클릭해도 절대 바뀌지 않는다.
-  // 예전엔 활성 섹터를 맨 앞으로 보냈는데, 클릭할 때마다 칩 전체가 재배치돼 메뉴가
-  // 들썩이는 것처럼 보였다(같은 날 사용자 신고) — 위치는 고정하고 강조(.on)만 옮긴다.
-  function secRenderChips(box, activeKey, allAvgs){
-    if(!box) return;
-    var rest=Object.keys(allAvgs).filter(function(k){return k!=='semicon';})
-      .sort(function(a,b){return (allAvgs[b].dvol||0)-(allAvgs[a].dvol||0);});
-    var order=allAvgs['semicon']?['semicon'].concat(rest):rest;
-    box.innerHTML=order.map(function(k){
-      var d=allAvgs[k]; return secChipHtml(k,d.label,(typeof d.wavg==='number'?d.wavg:d.avg),k===activeKey);
-    }).join('');
-  }
-
-  var secActiveKey='semicon';
-  function secShowSector(snap, key){
-    var d=secBuildSectorData(snap,key);
-    if(!d) return;   // 없는 섹터면 화면을 건드리지 않는다(§0) — 직전 상태 유지
-    secActiveKey=key;
-
-    var allAvgs=secAllAverages(snap);   // 아래 phead 표기와 칩 렌더가 같이 쓴다(중복 계산 방지)
-
-    var crumbEl=document.getElementById('sec-crumb-label'); if(crumbEl) crumbEl.textContent=d.label;
-    var titleEl=document.getElementById('sec-title'); if(titleEl) titleEl.textContent=(SECTOR_ICONS[key]||'')+' '+d.label;
-    var subEl=document.getElementById('sec-sub'); if(subEl) subEl.textContent='추적 '+d.total+'종목';
-
-    // 화면 타이틀 아래 기준 표기. 기준일을 모르면 그 조각만 빼고 나머지는 그대로 쓴다(§0).
-    var pheadEl=document.getElementById('sec-phead-sub');
-    if(pheadEl){
-      var nSec=Object.keys(allAvgs||{}).length;
-      var asof=secAsOfLabel(snap);
-      pheadEl.textContent=[nSec?nSec+'개 섹터':'', '코스피·코스닥', asof?asof+' 종가':'']
-        .filter(Boolean).join(' · ');
-    }
-
-    var avgEl=document.getElementById('sec-avg');
-    // 칩과 같은 기준(거래대금 가중)을 써야 한다 — 다르면 같은 화면에서 두 값이 어긋난다.
-    if(avgEl){var wa=(typeof d.wavg==='number'?d.wavg:d.avg);avgEl.textContent=(wa>=0?'+':'−')+Math.abs(wa).toFixed(2)+'%';avgEl.className='v num '+(wa>=0?'up':'dn');}
-
-    var lbl=document.getElementById('sec-breadth-label');
-    if(lbl) lbl.innerHTML=d.total+'종목 중 <b class="up num">'+d.upN+' 상승</b>';
-    var bbar=document.getElementById('sec-bbar');
-    if(bbar){var bu=Math.round(d.upN/d.total*1000)/10,bdw=Math.round(d.dnN/d.total*1000)/10,bn=Math.round(d.flatN/d.total*1000)/10;
-      bbar.innerHTML='<i class="bu" style="width:'+bu+'%"></i><i class="bd" style="width:'+bdw+'%"></i><i class="bn" style="width:'+bn+'%"></i>';}
-    var bk=document.getElementById('sec-bk');
-    if(bk) bk.innerHTML='<span><i class="iu"></i>상승 <span class="num">'+d.upN+'</span></span><span><i class="id"></i>하락 <span class="num">'+d.dnN+'</span></span><span><i class="in"></i>보합 <span class="num">'+d.flatN+'</span></span>';
-
-    var lw=document.getElementById('sec-leaders');
-    if(lw) lw.innerHTML=d.leaders.map(function(r,i){var cls=r.pct>=0?'up':'dn',sign=r.pct>=0?'+':'−';
-      return '<a class="srow" onclick="goStock(\''+r.code+'\')"><span class="n2">'+['①','②','③'][i]+' '+r.name+' <small class="num">'+r.code+'</small></span><span class="c '+cls+' num">'+sign+Math.abs(r.pct).toFixed(2)+'%</span></a>';
-    }).join('');
-
-    var rowsWrap=document.getElementById('sec-rows');
-    if(rowsWrap) rowsWrap.innerHTML=d.rows.map(secSectorRow).join('');
-
-    secRenderChips(document.getElementById('secsel'), key, allAvgs);
-  }
-
-  // 칩 클릭 위임 — 칩은 매번 innerHTML로 다시 그려지므로 개별 리스너 대신 문서 레벨 위임 1개만 둔다.
-  document.addEventListener('click', function(e){
-    var chip=e.target&&e.target.closest?e.target.closest('.secsel__i'):null;
-    if(!chip) return;
-    var key=chip.getAttribute('data-sector');
-    if(key&&SNAP) secShowSector(SNAP, key);
-  });
-
-  // 테스트 훅 — node:vm에서 함수만 꺼내 검증한다(실제 DOM 결과는 브라우저에서 확인).
-  window.__sectorScreen={
-    secBuildSectorData:secBuildSectorData, secAllAverages:secAllAverages, secAsOfLabel:secAsOfLabel,
-    secShowSector:secShowSector, secRenderChips:secRenderChips,
-  };
+  // 섹터 화면(#sector)은 2026-09-02에 제거됐다. 홈에서 섹터 상세 페이지로 가는 링크가
+  // 0개였고(JS도 주입하지 않았다) '패시브 쏠림'은 실측 소스 없는 자리표시자였다.
+  // 섹터 상세는 /stocks/sector/{key}/ 정적 페이지가 계속 담당한다.
+  // SECTOR_LABELS·secLbl은 남긴다 — 섹터 박스(sbx) 위젯이 계속 쓴다.
   function bindSurgeTips(){
     if(typeof showTip!=='function') return;
     document.querySelectorAll('.vol-surge-badge').forEach(function(el){
@@ -1903,22 +1744,31 @@ if(passBtn){
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.
+  // 상세 페이지가 실제로 있는 종목만 링크한다(§36 존재-게이트). 신호 스캔 유니버스는
+  // 46종목이고 상세 페이지는 3종목뿐이라, 전부 클릭 가능하게 두면 대부분의 클릭이
+  // 토스트로 튀기는 막다른 길이 된다. 링크되지 않는 행은 화살표·hover도 뺀다 —
+  // 누를 수 있을 것처럼 보이게 해놓고 막는 것보다 애초에 누를 수 없다고 보여주는 게 정직하다.
+  // STOCK_PAGES를 바꿀 땐 stocks.json의 detail_page와 반드시 함께 맞춘다(§36).
   function sigItemHtml(s,i,heroFlag){
     var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
     var badges=(s.badges||[]).map(badgeHtml).join('');
-    var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var linked=!!STOCK_PAGES[s.code];
+    var goArrow=linked?'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
+    var tag=linked?'a':'div';
+    var attrs=linked?(' onclick="goStock(\''+s.code+'\')"'):'';
+    var nolink=linked?'':' is-nolink';
     if(i===0){
-      return '<a class="sig-hero" onclick="goStock(\''+s.code+'\')">'
+      return '<'+tag+' class="sig-hero'+nolink+'"'+attrs+'>'
         +'<span class="sig-flag">'+(heroFlag||'오늘 가장 눈에 띄는 신호')+'</span>'
         +'<div class="sig-htop"><span class="sig-hnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
         +'<span class="sig-hpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span></div>'
         +'<div class="sig-hbadges">'+badges+'</div>'
-        +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</a>';
+        +'<div class="sig-hwhy">'+(s.why||'')+'</div>'+goArrow+'</'+tag+'>';
     }
-    return '<a class="sig-row" onclick="goStock(\''+s.code+'\')">'
+    return '<'+tag+' class="sig-row'+nolink+'"'+attrs+'>'
       +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
       +'<span class="sig-rbadges">'+badges+'</span></span>'
-      +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
+      +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</'+tag+'>';
   }
   function sigHomeRender(){
     var w=document.getElementById('sig-rows'); if(!w) return;
@@ -1936,6 +1786,8 @@ if(passBtn){
     sigHomeRender();
   }
   window.sigHomeSetSort=sigHomeSetSort;
+  // 테스트 훅 — 존재-게이트(상세 페이지 있는 종목만 링크) 회귀 검증용.
+  window.__sigHome={sigItemHtml:sigItemHtml, STOCK_PAGES:STOCK_PAGES};
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
@@ -2426,7 +2278,6 @@ if(passBtn){
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
-      if(SNAP&&SNAP.stocks) secShowSector(SNAP, secActiveKey);
       pollVolTop();
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.

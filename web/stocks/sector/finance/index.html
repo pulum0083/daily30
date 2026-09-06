@@ -8,19 +8,19 @@
 <title>🏦 금융 주도주 — Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
 
-<meta name="description" content="금융 섹터 7종목 · 섹터 평균 +3.96% · 종가·52주 레인지 실측">
+<meta name="description" content="금융 섹터 7종목 · 섹터 평균 -3.33% · 종가·52주 레인지 실측">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Double-Shot">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://doubleshot.space/stocks/sector/finance/">
 <meta property="og:title" content="🏦 금융 주도주 — Double-Shot">
-<meta property="og:description" content="금융 섹터 7종목 · 섹터 평균 +3.96% · 종가·52주 레인지 실측">
+<meta property="og:description" content="금융 섹터 7종목 · 섹터 평균 -3.33% · 종가·52주 레인지 실측">
 
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🏦 금융 주도주 — Double-Shot">
-<meta name="twitter:description" content="금융 섹터 7종목 · 섹터 평균 +3.96% · 종가·52주 레인지 실측">
+<meta name="twitter:description" content="금융 섹터 7종목 · 섹터 평균 -3.33% · 종가·52주 레인지 실측">
 <meta name="twitter:image" content="https://doubleshot.space/assets/og-image.png">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"종목","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":3,"name":"금융","item":"https://doubleshot.space/stocks/sector/finance/"}]}</script>
@@ -68,7 +68,40 @@
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-  .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
+  .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
+  .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
+  /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
+  .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
+  .sector-guide__title{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+    font-size:15px;font-weight:700;color:var(--ink);margin:0;padding:2px 0;user-select:none;}
+  .sector-guide__title::-webkit-details-marker{display:none;}
+  .sector-guide__title::after{content:'';width:5px;height:5px;border-right:1.5px solid var(--muted);
+    border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-guide[open] .sector-guide__title::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-guide[open] .sector-guide__title{margin-bottom:12px;}
+  .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
+  .sector-guide b{color:var(--ink);font-weight:600;}
+  .sector-guide .nowrap{white-space:nowrap;}
+  .sector-guide__note{font-size:12px;color:var(--muted);}
+  .sector-guide__note a{color:var(--primary);font-weight:600;}
+  /* 섹터 밖으로 나가는 문맥 링크 */
+  .sector-links{max-width:760px;margin:20px 0 4px;font-size:13px;}
+  .sector-links__row{margin:0 0 7px;color:#475569;line-height:1.7;}
+  .sector-links__label{display:inline-block;min-width:96px;font-size:11.5px;font-weight:600;color:var(--muted);}
+  .sector-links a{color:var(--primary);font-weight:600;}
+  .sector-links .sep{color:var(--muted);margin:0 3px;}
+  .sector-links__note{color:var(--muted);font-size:12px;}
+  @media(max-width:640px){ .sector-links__label{display:block;min-width:0;margin-bottom:2px;} }
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -153,13 +186,25 @@
     <span><a href="/stocks/">종목 홈</a> › 🏦 금융</span>
   </div>
   <h1 class="sector-page-title">🏦 금융 주도주</h1>
-  <p class="sector-page-sub">7종목 · 2026-08-21 기준 <span id="live-status" class="sector-live off" data-snap="2026-08-21"><span class="sl-dot"></span>장마감 · 2026-08-21 종가 기준</span></p>
+  <p class="sector-page-sub">7종목 · 2026-09-04 기준 <span id="live-status" class="sector-live off" data-snap="2026-09-04"><span class="sl-dot"></span>장마감 · 2026-09-04 종가 기준</span></p>
   <script>
   /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
     if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
   </script>
+  
+  
   <p class="sector-desc">은행·증권·보험 지주 종목이에요. 금리와 배당 정책, 정부 밸류업 정책의 영향을 크게 받아요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">금융은 금리가 곧 원재료 가격인 섹터예요. 은행은 예금과 대출의 금리 차이(순이자마진)에서 이익을 내기 때문에 금리 방향이 실적에 직결돼요. 다만 금리가 너무 빨리 오르면 대출 부실이 늘어 반대로 작용하는 구간도 있어서, 금리 상승이 항상 호재인 건 아니에요.</p>
+      <p class="sector-desc">국내 금융지주는 배당수익률이 높은 편이라 배당 정책 발표와 자사주 매입이 주가를 크게 움직여요. 증권은 거래대금에, 보험은 금리와 회계 기준 변화에 각각 더 민감해서 같은 금융 섹터 안에서도 서로 다른 날에 움직여요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -189,29 +234,29 @@
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
-      <div class="sector-stat__val up" id="st-avg">+3.96%</div>
+      <div class="sector-stat__val down" id="st-avg">-3.33%</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">상승</div>
-      <div class="sector-stat__val up" id="st-up">7</div>
+      <div class="sector-stat__val up" id="st-up">0</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">하락</div>
-      <div class="sector-stat__val down" id="st-down">0</div>
+      <div class="sector-stat__val down" id="st-down">7</div>
     </div>
     
   </div>
 
   <div class="sector-breadth">
-    <div class="sector-breadth__label" id="bd-label">시장폭 — 7종목 중 상승 7</div>
+    <div class="sector-breadth__label" id="bd-label">시장폭 — 7종목 중 상승 0</div>
     <div class="sector-breadth__bar">
-      <div class="sector-breadth__up" id="bd-up" style="flex:7"></div>
-      <div class="sector-breadth__dn" id="bd-dn" style="flex:0"></div>
+      <div class="sector-breadth__up" id="bd-up" style="flex:0"></div>
+      <div class="sector-breadth__dn" id="bd-dn" style="flex:7"></div>
       
     </div>
     <div class="sector-breadth__legend">
-      <span><i class="iu"></i>상승 <span id="lg-up">7</span></span>
-      <span><i class="id"></i>하락 <span id="lg-dn">0</span></span>
+      <span><i class="iu"></i>상승 <span id="lg-up">0</span></span>
+      <span><i class="id"></i>하락 <span id="lg-dn">7</span></span>
       
     </div>
   </div>
@@ -222,157 +267,157 @@
   </div>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="032830" data-spark20='[318000.0, 311500.0, 285000.0, 265500.0, 264000.0, 311500.0, 287500.0, 278000.0, 294000.0, 287500.0, 275500.0, 280500.0, 289500.0, 302500.0, 291500.0, 301000.0, 310500.0, 276000.0, 297000.0, 328500.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">삼성생명</span>
-        <span class="sector-card__code">032830</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">328,500</span>
-        <span class="sector-card__pct up">+10.61%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 123,400 – 497,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:54.9%"></div>
-        <div class="sector-card__pos" style="left:54.9%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 55% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 23.4%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="000810" data-spark20='[644000.0, 645000.0, 609000.0, 587000.0, 618000.0, 632000.0, 616000.0, 620000.0, 637000.0, 648000.0, 645000.0, 630000.0, 641000.0, 628000.0, 611000.0, 615000.0, 626000.0, 613000.0, 622000.0, 661000.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">삼성화재</span>
-        <span class="sector-card__code">000810</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">661,000</span>
-        <span class="sector-card__pct up">+6.27%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 433,500 – 730,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:76.7%"></div>
-        <div class="sector-card__pos" style="left:76.7%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 77% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 58.1%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="086790" data-spark20='[132400.0, 130600.0, 123000.0, 120400.0, 124600.0, 125400.0, 126900.0, 127600.0, 128600.0, 133300.0, 134700.0, 130400.0, 127700.0, 127900.0, 131000.0, 133000.0, 130700.0, 127500.0, 123400.0, 128800.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">하나금융지주</span>
-        <span class="sector-card__code">086790</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">128,800</span>
-        <span class="sector-card__pct up">+4.38%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 81,200 – 136,800</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:85.6%"></div>
-        <div class="sector-card__pos" style="left:85.6%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 86% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 68.3%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="055550" data-spark20='[104400.0, 105000.0, 100900.0, 98300.0, 100800.0, 100700.0, 102700.0, 102300.0, 103600.0, 107400.0, 110000.0, 106400.0, 104500.0, 103800.0, 106600.0, 107400.0, 106500.0, 105000.0, 101100.0, 104100.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">신한지주</span>
-        <span class="sector-card__code">055550</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">104,100</span>
-        <span class="sector-card__pct up">+2.97%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 64,000 – 110,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:87.2%"></div>
-        <div class="sector-card__pos" style="left:87.2%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 87% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 62.2%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="105560" data-spark20='[171500.0, 172600.0, 165200.0, 160100.0, 167400.0, 168500.0, 169500.0, 168800.0, 170700.0, 171500.0, 175800.0, 171700.0, 166600.0, 166000.0, 168100.0, 168500.0, 168500.0, 166400.0, 160000.0, 164300.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">KB금융</span>
-        <span class="sector-card__code">105560</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">164,300</span>
-        <span class="sector-card__pct up">+2.69%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 106,700 – 186,200</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:72.5%"></div>
-        <div class="sector-card__pos" style="left:72.5%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 72% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 79.3%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="316140" data-spark20='[30850.0, 33100.0, 31750.0, 32050.0, 32700.0, 33600.0, 33350.0, 33200.0, 33350.0, 33500.0, 34800.0, 33350.0, 33800.0, 33000.0, 33300.0, 33700.0, 33750.0, 33500.0, 31550.0, 31750.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">우리금융지주</span>
-        <span class="sector-card__code">316140</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">31,750</span>
-        <span class="sector-card__pct up">+0.63%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 24,250 – 40,800</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:45.3%"></div>
-        <div class="sector-card__pos" style="left:45.3%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 45% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 46.2%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="138040" data-spark20='[123300.0, 125600.0, 118100.0, 117600.0, 124100.0, 124000.0, 120300.0, 119500.0, 120400.0, 125700.0, 126300.0, 123500.0, 123800.0, 119000.0, 118600.0, 116700.0, 117200.0, 115200.0, 115200.0, 115400.0]'>
+    <div class="sector-card" data-code="138040" data-spark20='[126300.0, 123500.0, 123800.0, 119000.0, 118600.0, 116700.0, 117200.0, 115200.0, 115200.0, 115400.0, 115400.0, 120800.0, 118000.0, 119000.0, 122000.0, 122200.0, 125400.0, 129800.0, 136900.0, 135500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">메리츠금융지주</span>
         <span class="sector-card__code">138040</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">115,400</span>
-        <span class="sector-card__pct up">+0.17%</span>
+        <span class="sector-card__close">135,500</span>
+        <span class="sector-card__pct down">-1.02%</span>
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 100,600 – 146,200</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:32.5%"></div>
-        <div class="sector-card__pos" style="left:32.5%"></div>
+        <div class="sector-card__posfill " style="width:76.5%"></div>
+        <div class="sector-card__pos" style="left:76.5%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 32% 지점</div>
+      <div class="sector-card__poslbl">52주 중 77% 지점</div>
       
       
-      <div class="sector-card__fr">외국인 보유 14.3%</div>
+      <div class="sector-card__fr">외국인 보유 14.4%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="032830" data-spark20='[275500.0, 280500.0, 289500.0, 302500.0, 291500.0, 301000.0, 310500.0, 276000.0, 297000.0, 328500.0, 285500.0, 285000.0, 309500.0, 307000.0, 310000.0, 306000.0, 309500.0, 294000.0, 303000.0, 297500.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">삼성생명</span>
+        <span class="sector-card__code">032830</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">297,500</span>
+        <span class="sector-card__pct down">-1.82%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 138,700 – 497,000</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:44.3%"></div>
+        <div class="sector-card__pos" style="left:44.3%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 44% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 23.2%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="105560" data-spark20='[175800.0, 171700.0, 166600.0, 166000.0, 168100.0, 168500.0, 168500.0, 166400.0, 160000.0, 164300.0, 163100.0, 166400.0, 166600.0, 168100.0, 171600.0, 173300.0, 171200.0, 169100.0, 177900.0, 172000.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">KB금융</span>
+        <span class="sector-card__code">105560</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">172,000</span>
+        <span class="sector-card__pct down">-3.32%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 106,700 – 186,200</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:82.1%"></div>
+        <div class="sector-card__pos" style="left:82.1%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 82% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 79.2%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="055550" data-spark20='[110000.0, 106400.0, 104500.0, 103800.0, 106600.0, 107400.0, 106500.0, 105000.0, 101100.0, 104100.0, 103300.0, 106500.0, 107400.0, 108800.0, 109700.0, 108900.0, 111100.0, 110500.0, 114500.0, 110300.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">신한지주</span>
+        <span class="sector-card__code">055550</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">110,300</span>
+        <span class="sector-card__pct down">-3.67%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 64,000 – 114,500</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:91.7%"></div>
+        <div class="sector-card__pos" style="left:91.7%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 92% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 62.0%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="086790" data-spark20='[134700.0, 130400.0, 127700.0, 127900.0, 131000.0, 133000.0, 130700.0, 127500.0, 123400.0, 128800.0, 128700.0, 130800.0, 133200.0, 133600.0, 136000.0, 136300.0, 137400.0, 134900.0, 139500.0, 134300.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">하나금융지주</span>
+        <span class="sector-card__code">086790</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">134,300</span>
+        <span class="sector-card__pct down">-3.73%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 81,200 – 139,500</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:91.1%"></div>
+        <div class="sector-card__pos" style="left:91.1%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 91% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 68.1%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="316140" data-spark20='[34800.0, 33350.0, 33800.0, 33000.0, 33300.0, 33700.0, 33750.0, 33500.0, 31550.0, 31750.0, 31950.0, 32600.0, 33000.0, 32950.0, 33900.0, 33800.0, 34550.0, 34500.0, 34650.0, 33200.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">우리금융지주</span>
+        <span class="sector-card__code">316140</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">33,200</span>
+        <span class="sector-card__pct down">-4.18%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 24,250 – 40,800</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:54.1%"></div>
+        <div class="sector-card__pos" style="left:54.1%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 54% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 50.1%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="000810" data-spark20='[645000.0, 630000.0, 641000.0, 628000.0, 611000.0, 615000.0, 626000.0, 613000.0, 622000.0, 661000.0, 636000.0, 648000.0, 680000.0, 682000.0, 687000.0, 665000.0, 677000.0, 657000.0, 702000.0, 663000.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">삼성화재</span>
+        <span class="sector-card__code">000810</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">663,000</span>
+        <span class="sector-card__pct down">-5.56%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 436,500 – 730,000</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:77.2%"></div>
+        <div class="sector-card__pos" style="left:77.2%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 77% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 57.8%</div>
       
     </div>
     
@@ -391,6 +436,34 @@
      </div>
    </aside>
   </div><!-- /.sector-cols -->
+
+  
+  <details class="sector-guide">
+    <summary class="sector-guide__title">이 페이지 읽는 법</summary>
+    <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
+      같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
+      앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
+      같은 섹터 안에서 종목을 비교할 때 특히 쓸모가 있어요.</p>
+    <p><b>외국인 보유율</b>은 발행주식 중 외국인이 들고 있는 비중이에요. 이 값 자체가 좋고 나쁨을 뜻하진 않지만,
+      비중이 높은 종목일수록 환율과 미국 시장 흐름에 함께 흔들리는 경향이 있어요. 비중이 높은데 외국인이
+      순매도로 돌아서면 수급 부담이 그만큼 커진다는 뜻이기도 해요.</p>
+    <p><b>섹터 평균과 시장폭</b>은 다른 이야기를 해요. 평균은 섹터가 전체적으로 어느 방향인지를 알려주고,
+      시장폭(상승/하락 종목 수)은 그 움직임이 섹터 전반에 퍼진 것인지 몇 종목이 끌고 간 것인지를 알려줘요.
+      평균은 플러스인데 상승 종목이 둘뿐이라면 대장주 한두 개가 지수를 들어 올린 것이고, 그건 섹터 전체가
+      좋아진 것과 다르게 봐야 해요.
+      오늘 금융 섹터는 7종목 중
+      0종목이 오르고 7종목이 내렸고, 섹터 평균은 -3.33%예요.</p>
+    <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
+      투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
+  </details>
+
+  
+  <div class="sector-links">
+    
+    <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
+      <a href="/briefings/">브리핑 아카이브</a>
+      <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
+  </div>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>

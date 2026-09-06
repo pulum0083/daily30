@@ -30,6 +30,14 @@
           <div class="pick-num"><span class="pick-num__label">목표</span><span class="pick-num__val up">{{ pick.target }}</span><span class="pick-num__sub up">{{ pick.target_pct }}</span></div>
           <div class="pick-num"><span class="pick-num__label">손절</span><span class="pick-num__val dn">{{ pick.stop }}</span><span class="pick-num__sub dn">{{ pick.stop_pct }}</span></div>
         </div>
+        {# 산출 근거 — 어느 숫자가 실측이고 어느 것이 AI 판단인지 구분해 밝힌다.
+           구체적 가격만 근거 없이 놓이면 매매 신호로 읽힌다(2026-09-02 추가). #}
+        <p class="pick-basis">
+          {% if pick.ma20_level %}<b>손절선</b>은 실측 20일 이동평균({{ pick.ma20_level }})을 기준으로 잡았어요.
+          {% endif %}<b>진입·목표</b>는 AI가 제시한 참고 범위이고 매매 신호가 아니에요.
+          현재가·이동평균은 발행 시점에 수집한 실측값이에요.
+          <a href="/legal/disclaimer/">면책 고지</a>
+        </p>
       </div>
       {% endif %}
     </div>

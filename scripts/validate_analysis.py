@@ -733,6 +733,8 @@ def _inject_candidate(cands, clean_ticker, name, data):
         "change_pct": data["change_pct"],
         "ma20_dist_pct": data.get("ma20_dist_pct"),
         "ma200_dist_pct": data.get("ma200_dist_pct"),
+        "ma20_level": data.get("ma20_level"),
+        "ma200_level": data.get("ma200_level"),
         "sparkline": data.get("sparkline", []),
         "ma20_sparkline": data.get("ma20_sparkline", []),
         "ma200_sparkline": data.get("ma200_sparkline", []),
@@ -777,9 +779,13 @@ def _closes_to_realdata(closes, ndigits, live_price=None):
         ma20 = _ma_series(20)
         out["ma20_dist_pct"] = round((price - ma20[-1]) / ma20[-1] * 100, 2)
         out["ma20_sparkline"] = [r(v) for v in ma20]
+        # 이격률뿐 아니라 **절대 수준**도 낸다 — 픽 카드가 손절 기준선을 실측으로 보여주고,
+        # LLM이 "20일선 이탈 시"라고 쓴 손절가를 이 값으로 검증하기 위함(2026-09-02).
+        out["ma20_level"] = r(ma20[-1])
     if len(closes) >= 200:
         ma200 = _ma_series(200)
         out["ma200_dist_pct"] = round((price - ma200[-1]) / ma200[-1] * 100, 2)
+        out["ma200_level"] = r(ma200[-1])
         out["ma200_sparkline"] = [r(v) for v in ma200]
     return out
 
@@ -848,6 +854,57 @@ def _fetch_us_realdata(ticker, live=False):
         return {"error": str(e)}
 
 
+def _pin_session_date():
+    """DS_PIN_SESSION_DATE(KST)가 있으면 date, 없으면 None.
+
+    코스피 아침 브리핑을 장 시작 후 수동 재생성할 때, 픽 실측이 **오늘 장중 값**으로
+    주입되는 것을 막는다. 07:25 발행 시점엔 한국장이 닫혀 있어 §0가 "직전 완료 세션
+    종가 대비"를 기준으로 삼는데, 09시 이후 재실행하면 토스·네이버 모두 당일 진행 중인
+    (미완성) 일봉을 최신 캔들로 돌려주기 때문이다 — 실측 확인 결과 오늘 캔들의 거래량이
+    전일의 1/6 수준이었다(장 초반 부분 데이터).
+    """
+    from datetime import datetime as _dt
+    raw = os.environ.get("DS_PIN_SESSION_DATE", "").strip()
+    if not raw:
+        return None
+    try:
+        return _dt.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        print(f"[validate] DS_PIN_SESSION_DATE 형식 오류: {raw!r} — 무시", file=sys.stderr)
+        return None
+
+
+def _drop_rows_at_pin(rows, date_of):
+    """pin 날짜 이후(당일 포함) 행 제거. pin이 없으면 그대로."""
+    pin = _pin_session_date()
+    if pin is None or not rows:
+        return rows
+    kept = []
+    for r in rows:
+        d = date_of(r)
+        if d is None or d < pin:
+            kept.append(r)
+    if len(kept) < len(rows):
+        print(f"[validate] pin {pin} — 당일 캔들 {len(rows) - len(kept)}건 제외", file=sys.stderr)
+    return kept
+
+
+def _toss_candle_date(c):
+    from datetime import datetime as _dt
+    try:
+        return _dt.fromisoformat(str(c.get("timestamp"))).date()
+    except Exception:
+        return None
+
+
+def _naver_row_date(r):
+    from datetime import datetime as _dt
+    try:
+        return _dt.strptime(str(r.get("localDate"))[:8], "%Y%m%d").date()
+    except Exception:
+        return None
+
+
 def _fetch_kospi_realdata(code):
     """한국 종목 실측 (6자리 코드). Toss 캔들 우선, 실패 시 네이버 폴백."""
     # 1) 토스 API
@@ -860,7 +917,8 @@ def _fetch_kospi_realdata(code):
             tc = None
     if tc:
         try:
-            candles = tc.get_candles(code, interval="1d", count=300)
+            candles = _drop_rows_at_pin(
+                tc.get_candles(code, interval="1d", count=300), _toss_candle_date)
             if candles:
                 return _closes_from_toss_candles(candles, ndigits=2)
         except Exception:
@@ -876,7 +934,7 @@ def _fetch_kospi_realdata(code):
                f"?startDateTime={start}&endDateTime={end}")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=15) as resp:
-            rows = json.loads(resp.read())
+            rows = _drop_rows_at_pin(json.loads(resp.read()), _naver_row_date)
         closes = [float(rw["closePrice"]) for rw in rows if rw.get("closePrice")]
         return _closes_to_realdata(closes, ndigits=2)
     except Exception as e:
@@ -1238,6 +1296,48 @@ def inject_kospi_index_levels(analysis, corrections, warnings):
     )
 
 
+# 손절가가 "20일선 이탈 시"라고 주장할 때, 그 값이 실측 20일선과 맞는지 확인한다.
+#
+# 2026-09-02 조사에서 확인된 상태: LLM은 action_guide에 "손절: 20일선(약 1,605,000원)
+# 이탈 시"처럼 **근거를 이미 주장**하고 있었고, 그날 실측과 대조하니 오차 -0.17%·-0.26%로
+# 정확했다. 문제는 그게 **우연히 맞은 것인지 아무도 확인하지 않았다**는 점이다 — §22·§24·§28
+# 에서 반복된 "산문 속 주장에 게이트가 없다" 패턴 그대로다. 픽 카드가 실측 20일선을 근거로
+# 내걸게 된 이상(2026-09-02), 그 옆 손절가가 다른 값이면 화면이 스스로 모순된다.
+#
+# 허용 오차 3%: 20일선은 매일 움직이고 LLM은 종가 기준으로 계산하므로 소수점 차이는 정상이다.
+# 이 게이트가 잡으려는 건 "20일선이라 써놓고 전혀 다른 값을 쓴" 경우다.
+_MA20_CLAIM_RE = re.compile(r"20\s*일\s*선|20일\s*이동평균|20MA|MA\s*20", re.I)
+_MA20_STOP_TOLERANCE_PCT = 3.0
+
+
+def _verify_stop_against_ma20(pick, ma20_level, is_us, corrections, warnings):
+    """손절가가 20일선 근거를 주장하면 실측 20일선으로 검증하고, 어긋나면 교정한다."""
+    if not isinstance(ma20_level, (int, float)) or ma20_level <= 0:
+        return
+    guide = str(pick.get("action_guide") or "")
+    if not _MA20_CLAIM_RE.search(guide):
+        return                      # 20일선을 근거로 내세우지 않았으면 판단하지 않는다
+    stop = parse_price(pick.get("stop"))
+    if stop is None:
+        return
+    gap = (stop - ma20_level) / ma20_level * 100
+    if abs(gap) <= _MA20_STOP_TOLERANCE_PCT:
+        return
+    fixed = f"${ma20_level:,.2f}" if is_us else f"{int(round(ma20_level)):,}원"
+    corrections.append(
+        f"종목 '{pick.get('name')}' 손절가 교정: {pick.get('stop')} → {fixed} "
+        f"(20일선 근거 주장, 실측 20일선 대비 {gap:+.1f}% 이탈)"
+    )
+    pick["stop"] = fixed
+    # stop_pct는 현재가 기준 비율이라 함께 다시 만든다. 못 만들면 지운다 — 틀린 값을 남기지 않는다.
+    cur = parse_price(pick.get("price"))
+    if cur:
+        pick["stop_pct"] = f"{(ma20_level - cur) / cur * 100:+.1f}%"
+    else:
+        pick.pop("stop_pct", None)
+        warnings.append(f"종목 '{pick.get('name')}' 손절 교정 후 현재가 파싱 실패 — stop_pct 제거")
+
+
 def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
     """픽된 종목의 실측 데이터를 fetch해 analysis·latest(candidate)에 주입한다.
     Returns: latest가 변경됐는지(bool).
@@ -1274,6 +1374,11 @@ def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
             p["ma20_dist_pct"] = data["ma20_dist_pct"]
         if data.get("vol_mult") is not None:
             p["vol_mult"] = data["vol_mult"]
+        if data.get("ma20_level") is not None:
+            p["ma20_level"] = data["ma20_level"]
+        if data.get("ma200_level") is not None:
+            p["ma200_level"] = data["ma200_level"]
+        _verify_stop_against_ma20(p, data.get("ma20_level"), is_us, corrections, warnings)
 
         _inject_candidate(cands, tk, p.get("name", ""), data)
         changed = True
@@ -1631,29 +1736,44 @@ def build_block_alert(btype, blocks):
 
 
 def send_admin_alert(message):
-    """차단 시 관리자 텔레그램으로 알림. 키 미설정이면 조용히 건너뜀(차단은 유지)."""
+    """차단 시 관리자 텔레그램으로 알림. 키 미설정이면 조용히 건너뜀(차단은 유지).
+
+    **HTML 실패 시 평문으로 한 번 더 보낸다.** 이 알림의 본문에는 모델이 쓴 산문이
+    그대로 들어가는데, 그 산문에 <b> 같은 태그가 섞이고 길이 제한으로 잘리면
+    parse_mode=HTML이 400을 뱉는다 — 실제로 2026-08-24·08-26 발행 차단 알림이 둘 다
+    이 이유로 실패했고, 그래서 "브리핑이 안 나갔다"는 사실을 아무도 몰랐다.
+    가장 중요한 알림이 자기 서식 때문에 죽는 구조라 서식을 포기하더라도 반드시 보낸다.
+    """
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
     if not token or not chat_id:
         print("[validate] 관리자 알림 키 미설정 — 알림 건너뜀 (차단은 유지)", file=sys.stderr)
         return
 
-    def _post(payload):
+    def _post(text, parse_mode):
+        payload = {"chat_id": chat_id, "text": text}
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
         req = urllib.request.Request(
             f"https://api.telegram.org/bot{token}/sendMessage",
             data=urllib.parse.urlencode(payload).encode())
         urllib.request.urlopen(req, timeout=10)
 
-    base = {"chat_id": chat_id, "text": message}
     try:
-        _post({**base, "parse_mode": "HTML"})
+        _post(message, "HTML")
         print("[validate] 관리자 알림 발송 완료", file=sys.stderr)
         return
     except Exception as e:
-        print(f"[validate] 관리자 알림 HTML 파싱 실패({e}) — 평문 재시도", file=sys.stderr)
-    # 이스케이프를 빠뜨린 호출부가 생겨도 알림 자체는 도달해야 한다.
+        detail = ""
+        try:                          # HTTPError면 텔레그램이 사유를 본문에 준다
+            detail = f" — {e.read().decode('utf-8', 'replace')[:300]}"
+        except Exception:
+            pass
+        print(f"[validate] 관리자 알림 HTML 실패({e}){detail} — 평문으로 재시도",
+              file=sys.stderr)
+
     try:
-        _post(base)
+        _post(strip_tags(message), None)
         print("[validate] 관리자 알림 발송 완료(평문)", file=sys.stderr)
     except Exception as e:
         print(f"[validate] 관리자 알림 실패: {e}", file=sys.stderr)

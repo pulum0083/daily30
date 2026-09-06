@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>종목 시그널 서브탭 — 탭별 콘텐츠 목업 (2026-08-03)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#5B6472;--primary:#006EFF;--up:#E03131;--dn:#2775ED}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;background:var(--soft);color:var(--ink);
+  -webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5;font-size:14px}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 16px 80px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.dn{color:var(--dn)}.fl{color:var(--muted)}.muted{color:var(--muted)}.gap{color:#9AA3AF}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--inset);padding:1px 5px;border-radius:4px}
+a{color:inherit;text-decoration:none}
+
+/* intro */
+.intro{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:24px 22px;margin-bottom:28px}
+.intro h1{font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:6px}
+.intro .sub{font-size:14px;color:var(--muted);margin-bottom:18px}
+.intro p{font-size:14px;margin-bottom:12px}
+.srcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-top:16px}
+.src{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 13px}
+.src b{display:block;font-size:13px;font-weight:600}
+.src span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.warn{margin-top:16px;background:var(--inset);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted)}
+
+/* annotation */
+.anno{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:20px 22px;margin:44px 0 14px}
+.anno__tag{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:var(--inset);
+  font-size:13px;font-weight:500;color:var(--muted);margin-bottom:10px}
+.anno h2{font-size:19px;font-weight:600;letter-spacing:-.3px;margin-bottom:14px}
+.anno dl{display:grid;grid-template-columns:88px 1fr;gap:8px 14px;font-size:14px}
+.anno dt{color:var(--muted);font-weight:500}
+.anno dd.q{font-weight:600}
+.anno .notes{margin:14px 0 0;padding-left:18px;font-size:13px;color:var(--muted)}
+.anno .notes li{margin-top:5px}
+
+/* frame chrome */
+.frame{background:var(--soft);border:1px solid var(--hair);border-radius:16px;overflow:hidden}
+.gnb{display:flex;align-items:center;gap:16px;height:52px;padding:0 16px;background:var(--canvas);border-bottom:1px solid var(--hair)}
+.gnb b{font-size:15px;font-weight:600;letter-spacing:-.2px}
+.gnb__m{font-size:14px;font-weight:500;color:var(--muted)}
+.phead{background:var(--canvas);padding:18px 16px 0}
+.phead h3{font-size:19px;font-weight:600;letter-spacing:-.3px}
+.phead h3 em{font-size:13px;font-weight:500;font-style:normal;color:var(--primary);vertical-align:middle;margin-left:4px}
+.phead p{font-size:13px;color:var(--muted);margin-top:2px}
+.srch{margin-top:12px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--muted)}
+.mkt{margin-top:12px;padding-bottom:14px}
+.mkt__k{display:flex;align-items:baseline;gap:8px}
+.mkt__k .l{font-size:13px;color:var(--muted)}
+.mkt__k .l em{font-style:normal;background:var(--inset);border-radius:999px;padding:1px 7px;font-size:13px}
+.mkt__k .v{font-size:20px;font-weight:600}
+.mkt__g{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.mkt__g span{display:inline-flex;align-items:center;gap:5px;background:var(--soft);border:1px solid var(--hair);
+  border-radius:999px;height:26px;padding:0 9px;font-size:13px}
+.mkt__g i{font-style:normal;color:var(--muted)}
+.mkt__s{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+.mkt__s i,.mkt__s em{font-style:normal;color:var(--muted)}
+.tabs{display:flex;background:var(--canvas);border-bottom:1px solid var(--hair);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{flex:0 0 auto;min-height:40px;display:inline-flex;align-items:center;padding:0 16px;font-size:14px;font-weight:500;
+  line-height:1.2;letter-spacing:-.16px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs a.on{color:var(--primary);border-bottom-color:var(--primary)}
+.canvas{padding:16px}
+
+/* card */
+.card{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.card:last-child{margin-bottom:0}
+.card__h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 16px;border-bottom:1px solid var(--hair)}
+.card__h--sub{background:var(--soft);border-top:1px solid var(--hair)}
+.card__t{font-size:14px;font-weight:600;letter-spacing:-.2px}
+.card__s{font-size:13px;color:var(--muted);flex:0 0 auto}
+.card__f{padding:11px 16px;border-top:1px solid var(--hair);background:var(--soft);font-size:13px;color:var(--muted);line-height:1.6}
+.lede{padding:12px 16px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--hair)}
+.lead{padding:14px 16px;border-bottom:1px solid var(--hair)}
+.lead>b{display:block;font-size:14px;font-weight:600;margin-bottom:5px}
+.lead p b{font-weight:600;color:var(--ink)}
+.lead p{font-size:13px;color:var(--muted);line-height:1.6}
+.more{display:block;padding:12px 16px;border-top:1px solid var(--hair);font-size:13px;font-weight:500;color:var(--primary);background:var(--soft)}
+
+/* rows */
+.row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--hair)}
+.row:last-child{border-bottom:none}
+.row--stack{display:block}
+.row__top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.nm{flex:1;min-width:0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm small{margin-left:6px;font-size:13px;font-weight:400;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:var(--inset);
+  color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap}
+.why{margin-top:7px;font-size:13px;color:var(--muted)}
+.why b{color:var(--ink);font-weight:600}
+.arw{font-size:13px;color:var(--muted)}
+.row--mini{padding:10px 16px}
+.row--more{color:var(--muted);font-size:13px}
+.bar{flex:0 0 56px;display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--inset)}
+.bar i{display:block;height:100%}
+.row--sec .num,.row--board .num{flex:0 0 62px;text-align:right;font-size:13px;font-weight:600}
+.row--board{gap:8px}
+.row--board .etfc{flex:0 0 74px;text-align:right}
+.row--board .etfc .num{flex:none;display:block;font-size:13px}
+.row--board .etfc small{display:block;font-size:13px;color:var(--muted);line-height:1.3}
+.row--board .sigc{flex:0 0 28px;text-align:right;font-size:13px;color:var(--muted)}
+.row--hd{background:var(--soft);font-size:13px;color:var(--muted);padding-top:9px;padding-bottom:9px}
+.row--hd span{font-weight:500}
+.row--hd .nm{font-weight:500}
+.bar--hd{background:none;height:auto;flex:0 0 56px;font-size:13px;color:var(--muted)}
+.row--flow .nm small,.row--val .nm small{display:block;margin:1px 0 0;font-size:13px;color:var(--muted)}
+.fbar{flex:0 0 70px;height:8px;background:var(--inset);border-radius:999px;overflow:hidden}
+.fbar i{display:block;height:100%;background:var(--up)}
+.fbar i.dn{background:var(--dn)}
+.row--flow .num{flex:0 0 66px;text-align:right;font-size:13px;font-weight:600}
+.row--rot .num{flex:0 0 62px;text-align:right;font-size:13px;font-weight:600}
+.row--rot .muted{font-weight:400;flex:0 0 58px}
+.row--val{gap:8px}
+.row--val .num{flex:0 0 68px;text-align:right;font-size:13px}
+.row--val .num:last-child{flex:0 0 58px;font-weight:600}
+
+/* misc blocks */
+.empty{margin:14px 16px;border:1px dashed var(--hair);border-radius:12px;padding:14px;background:var(--soft)}
+.empty b{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.empty span{display:block;font-size:13px;color:var(--muted);line-height:1.6}
+.empty--sm{margin:12px 16px;padding:11px;font-size:13px;color:var(--muted);text-align:center}
+.cols{display:grid;grid-template-columns:2fr 1fr;gap:14px;align-items:start}
+.filters{padding:12px 16px;border-bottom:1px solid var(--hair);background:var(--soft)}
+.frow{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.frow:last-child{margin-bottom:0}
+.fl{flex:0 0 34px;font-size:13px;color:var(--muted);line-height:24px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
+.chips--pad{padding:12px 16px;border-bottom:1px solid var(--hair)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:999px;background:var(--canvas);
+  border:1px solid var(--hair);font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap}
+.chip em{font-style:normal;color:#9AA3AF}
+.chip.on{border-color:var(--primary);color:var(--primary)}
+.chip.on em{color:var(--primary)}
+.chip.off{opacity:.45}
+.kpis{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--hair)}
+.kpi{flex:1 1 100px;padding:12px 16px;border-right:1px solid var(--hair)}
+.kpi:last-child{border-right:none}
+.kpi i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-bottom:3px}
+.kpi b,.kpi .num{font-size:15px;font-weight:600}
+.betbar{display:flex;height:32px;margin:0;border-bottom:1px solid var(--hair)}
+.betbar i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:500;color:#fff}
+.betbar .d{background:var(--dn)}.betbar .u{background:var(--up)}
+.dchart{display:flex;gap:8px;height:120px;padding:14px 16px;border-bottom:1px solid var(--hair)}
+.dbar{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0}
+.dbar .pos,.dbar .neg{flex:1;width:100%;display:flex;justify-content:center}
+.dbar .pos{align-items:flex-end;border-bottom:1px solid var(--hair)}
+.dbar .neg{align-items:flex-start}
+.dbar i{display:block;width:100%;max-width:32px;background:var(--up);border-radius:4px 4px 0 0}
+.dbar .neg i{background:var(--dn);border-radius:0 0 4px 4px}
+.dbar em{font-style:normal;font-size:13px;color:var(--muted);margin-top:4px}
+.grpgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card--grp{margin-bottom:0}
+.card--grp .card__h{padding:11px 13px}
+.card--grp .row{padding:9px 13px}
+.card--dim{opacity:.55}
+.row--mini .num{flex:0 0 54px;text-align:right;font-size:13px;font-weight:600}
+
+/* variants */
+.vsplit{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.vcol{min-width:0}
+.vhead{margin-bottom:10px}
+.vk{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:999px;background:var(--ink);color:#fff;
+  font-size:13px;font-weight:500;margin-right:6px}
+.vhead b{font-size:14px;font-weight:600}
+.vhead p{font-size:13px;color:var(--muted);margin-top:5px}
+.vnote{font-size:13px;color:var(--muted);margin-top:10px;background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 13px}
+.shared{margin-top:18px}
+.shared__l{font-size:13px;color:var(--muted);margin-bottom:8px}
+
+@media(max-width:820px){
+  .cols,.vsplit,.grpgrid{grid-template-columns:1fr}
+  .anno dl{grid-template-columns:1fr;gap:2px 0}
+  .anno dt{margin-top:8px}
+}
+@media(max-width:560px){
+  .wrap{padding:20px 12px 60px}
+  .canvas{padding:12px}
+  .intro,.anno{padding:18px 16px}
+  .row--board .sigc,.row--hd .sigc{display:none}
+  .bar--hd{visibility:hidden}
+  .bar{flex:0 0 44px}
+  .row--sec .num,.row--board .num{flex:0 0 58px}
+  .row--board .etfc{flex:0 0 66px}
+  .row--rot .muted{flex:0 0 52px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="intro">
+  <h1>종목 시그널 서브탭 — 탭별 콘텐츠 목업</h1>
+  <div class="sub">2026-08-03 · 디자인 결정용 프로토타입 · 프로덕션 파일 미변경 · 커밋 안 함</div>
+  <p><b>정해진 것</b> — <code>/stocks/</code>에 <b>전체 · 특이신호 · 섹터 · ETF</b> 4개 언더라인 서브탭을 붙인다.
+  IA는 <code>docs/superpowers/specs/2026-08-02-stocks-subnav-ia-design.md</code>에서 확정됐다.</p>
+  <p><b>정하지 못한 것 — 이 목업이 결정하려는 것</b> — 각 탭 안에 무엇을 담을지다.
+  지금 <code>#signals-all</code>·<code>#sector</code>·<code>#etf-rank</code>는 홈 블록을 길게 늘인 수준이다.
+  <b>홈 블록의 긴 버전이면 탭을 가질 자격이 없다.</b> 아래 네 화면은 각 탭이 독립 목적지가 됐을 때의 모습이다.</p>
+  <p>세 곳에서 <b>A안·B안을 나란히</b> 뒀다. 나머지는 갈림길이 아니라고 봐서 하나만 그렸다.</p>
+  <div class="srcs">
+    <div class="src"><b>/api/signals</b><span>2026-08-03 14:00:38 KST · 실시간 · 섹터 8 · 신호 32 · ETF</span></div>
+    <div class="src"><b>/api/market</b><span>2026-08-03 14:00:31 KST · 지수·환율·VIX·수급</span></div>
+    <div class="src"><b>etf-flows.json</b><span>2026-07-31 20:31 · 5일 순유입 16테마 / 712 ETF</span></div>
+    <div class="src"><b>valuation.json</b><span>2026-07-31 16:40 · 코스피200 199종목 중 133 평가</span></div>
+    <div class="src"><b>stocks-snapshot.json</b><span>2026-07-31 16:33 · 46종목 · 미국 벨웨더</span></div>
+    <div class="src"><b>income_etfs.json</b><span>2026-08-03 06:44 · 월배당 국내 66 / 미국 17</span></div>
+  </div>
+  <div class="warn">화면의 모든 숫자는 위 파일의 실측값이다(§0). 없는 값은 지어내지 않고
+  <b>—</b> 또는 “데이터 없음”으로 비우고 그 사실을 그 자리에 적었다.
+  날짜가 다른 소스(07-31 생성분)는 오늘 실시간 값과 같은 카드에 섞지 않고 생성 시각을 함께 표기했다.</div>
+</div>
+<div class="anno">
+  <div class="anno__tag">탭 1 / 4</div>
+  <h2>전체 — 모듬 요약</h2>
+  <dl>
+    <dt>넣은 것</dt><dd>탭이 있는 세 영역(특이신호·섹터·ETF)의 <b>요약 블록 1개씩</b> + 탭이 없는 화면으로 가는 링크. 각 블록은 3~8행으로 압축하고 “전체 보기 →”로 넘긴다.</dd>
+    <dt>답하는 질문</dt><dd class="q">“지금 시장에서 뭐부터 봐야 하나?”</dd>
+  </dl>
+  <ul class="notes"><li>스펙 50행 규칙 점검 — 특이신호 ✅ / 섹터 ✅ / ETF ✅ 세 탭 모두 홈에 대응 요약 블록이 있다. 테마·일정은 아직 미점등이라 대응 블록도 없어야 맞다.</li><li>홈에서는 어떤 블록도 전체 목록을 펼치지 않는다. 32종목 중 3개, 8섹터는 한 줄씩, ETF는 해석 한 문단만이다.</li><li>브리핑 스트립은 오늘자 수집분이 없어 <b>비웠다.</b> 7/31 데이터로 채우면 §13(stale 폴백 금지) 위반이라 채우지 않았다.</li><li>밤사이 미국 블록은 스냅샷이 7/31 16:33 생성분이라 8/3 기준의 “밤사이”가 아니다. 배치만 보기 위해 그대로 두고 카드 안에 그 사실을 적었다.</li></ul>
+</div><div class="frame">
+  <div class="gnb"><b>Double-Shot</b><span class="gnb__m">브리핑</span><span class="gnb__m">월배당</span></div>
+  <div class="phead">
+    <h3>종목 시그널 <em>BETA</em></h3>
+    <p>코스피 주도주 실시간 대시보드</p>
+    <div class="srch">종목명 또는 코드…</div>
+    <div class="mkt">
+      <div class="mkt__k"><span class="l">코스피 <em>장중</em></span><span class="v"><span class="num dn">-5.33%</span></span></div>
+      <div class="mkt__g">
+        <span><i>코스피200</i><span class="num dn">-6.03%</span></span>
+        <span><i>코스닥</i><span class="num up">+2.32%</span></span>
+        <span><i>원/달러</i><b class="num">1,429.5</b></span>
+        <span><i>VIX</i><b class="num">15.99</b></span>
+      </div>
+      <div class="mkt__s"><i>수급</i>
+        <span>개인 <b class="num up">+38,094</b></span>
+        <span>기관 <b class="num dn">-14,882</b></span>
+        <span>외국인 <b class="num dn">-24,149</b></span>
+        <em>억원</em></div>
+    </div>
+  </div>
+  <nav class="tabs"><a class="on">전체</a><a class="">특이신호</a><a class="">섹터</a><a class="">ETF</a></nav>
+  <div class="canvas"><div class="cols"><div><section class="card"><div class="card__h"><span class="card__t">📰 브리핑 스트립</span><span class="card__s">장중 이슈 슬롯</span></div><div class="empty"><b>오늘(8/3) 수집분 없음 — 이 목업에서는 비워 둔다.</b><span>로컬 <code>kospi-news-live.json</code>이 7/31 23:31자다. §13은 과거 날짜 폴백을 금지하므로 실서비스라면 이 자리는 오늘 코스피 예측으로 대체되거나 통째로 숨겨진다. 지어낸 이슈로 채우지 않았다.</span></div></section><section class="card"><div class="card__h"><span class="card__t">🌙 밤사이 미국 반도체</span><span class="card__s">스냅샷 07-31 16:33</span></div><div class="row"><span class="nm">엔비디아<small class="num">NVDA</small></span><span class="num up">+2.65%</span></div><div class="row"><span class="nm">마이크론<small class="num">MU</small></span><span class="num up">+18.36%</span></div><div class="row"><span class="nm">반도체 ETF<small class="num">SOXX</small></span><span class="num up">+8.50%</span></div><div class="card__f">⚠️ 이 값은 <code>stocks-snapshot.json</code> 생성 시각(7/31 16:33 KST) 기준이라 8/3 아침의 “밤사이”가 아니다. 블록 형태만 보기 위한 배치이며, 실서비스는 발행 시점에 다시 수집한다(§24·§26).</div></section><section class="card"><div class="card__h"><span class="card__t">⚡ 오늘의 특이 신호</span><span class="card__s">32종목 · 상승 11 / 하락 21</span></div><p class="lede">신호 강도 상위 3종목만 보여주고 나머지는 탭으로 넘긴다.</p><div class="row row--stack">
+      <div class="row__top"><span class="nm">HL만도<small class="num">204320</small></span><span class="num up">+4.92%</span></div>
+      </div><div class="row row--stack">
+      <div class="row__top"><span class="nm">효성중공업<small class="num">298040</small></span><span class="num up">+3.52%</span></div>
+      </div><div class="row row--stack">
+      <div class="row__top"><span class="nm">주성엔지니어링<small class="num">036930</small></span><span class="num up">+3.37%</span></div>
+      </div><div class="card__f"><a class="more">특이신호 32종목 전체 →</a></div></section><section class="card"><div class="card__h"><span class="card__t">🧭 섹터 한눈에</span><span class="card__s">8개 섹터 · 코스피 대비</span></div><p class="lede">8개 섹터가 모두 코스피(<b class="num dn">-5.33%</b>)보다 덜 빠졌다. 낙폭이 지수 대형주에 몰려 있다는 뜻이다.</p><div class="row row--sec"><span class="nm">전력기기</span><span class="bar" title="상승 3 · 하락 2 · 보합 0"><i style="width:60.0%;background:var(--up)"></i><i style="width:40.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num up">+1.12%</span></div><div class="row row--sec"><span class="nm">자동차</span><span class="bar" title="상승 4 · 하락 2 · 보합 0"><i style="width:66.7%;background:var(--up)"></i><i style="width:33.3%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num up">+1.05%</span></div><div class="row row--sec"><span class="nm">바이오</span><span class="bar" title="상승 2 · 하락 4 · 보합 0"><i style="width:33.3%;background:var(--up)"></i><i style="width:66.7%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num dn">-0.47%</span></div><div class="row row--sec"><span class="nm">방산</span><span class="bar" title="상승 0 · 하락 4 · 보합 1"><i style="width:0.0%;background:var(--up)"></i><i style="width:80.0%;background:var(--dn)"></i><i style="width:20.0%;background:var(--inset)"></i></span><span class="num dn">-1.94%</span></div><div class="row row--sec"><span class="nm">금융</span><span class="bar" title="상승 2 · 하락 5 · 보합 0"><i style="width:28.6%;background:var(--up)"></i><i style="width:71.4%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num dn">-2.32%</span></div><div class="row row--sec"><span class="nm">2차전지</span><span class="bar" title="상승 0 · 하락 6 · 보합 0"><i style="width:0.0%;background:var(--up)"></i><i style="width:100.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num dn">-2.83%</span></div><div class="row row--sec"><span class="nm">조선</span><span class="bar" title="상승 0 · 하락 4 · 보합 0"><i style="width:0.0%;background:var(--up)"></i><i style="width:100.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num dn">-2.86%</span></div><div class="row row--sec"><span class="nm">반도체</span><span class="bar" title="상승 1 · 하락 6 · 보합 0"><i style="width:14.3%;background:var(--up)"></i><i style="width:85.7%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span><span class="num dn">-3.82%</span></div><div class="card__f"><a class="more">섹터 비교 보드 →</a></div></section></div><div><section class="card"><div class="card__h"><span class="card__t">📊 ETF 한 줄</span><span class="card__s">실시간</span></div><div class="lead"><b>엇갈린 ETF 신호 · 거래량↑ 방향은 중립</b><p>KODEX 인버스 거래량이 KODEX 200의 <b>49배</b>지만, 인버스·레버리지 거래대금은 <b>51 : 49</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.</p></div><div class="row row--bet"><span class="nm">인버스 : 레버리지</span><span class="num">51 : 49</span></div><div class="card__f"><a class="more">ETF 탭 →</a></div></section><section class="card"><div class="card__h"><span class="card__t">💸 이번 주 자금 지도</span><span class="card__s">5일 순유입 · 07-31</span></div><div class="row row--flow"><span class="nm">반도체</span>
+      <span class="fbar"><i style="width:100%"></i></span>
+      <span class="num up">+15,592</span></div><div class="row row--flow"><span class="nm">미국 나스닥·기술</span>
+      <span class="fbar"><i style="width:87%"></i></span>
+      <span class="num up">+13,510</span></div><div class="row row--flow"><span class="nm">미국 S&amp;P·대형</span>
+      <span class="fbar"><i style="width:54%"></i></span>
+      <span class="num up">+8,485</span></div><div class="row row--flow"><span class="nm">배당·커버드콜</span>
+      <span class="fbar"><i style="width:44%"></i></span>
+      <span class="num up">+6,855</span></div><div class="row row--flow"><span class="nm">원자력·전력</span>
+      <span class="fbar"><i style="width:13%"></i></span>
+      <span class="num up">+2,046</span></div><div class="card__f">순유입 단위 억원 · <code>etf-flows.json</code> (07-31 20:31 생성)</div></section><section class="card"><div class="card__h"><span class="card__t">🔗 탭이 없는 화면</span><span class="card__s">인페이지 링크 유지</span></div><div class="row"><span class="nm">패시브 민감주</span><span class="arw">→</span></div><div class="row"><span class="nm">거래량 순위</span><span class="arw">→</span></div><div class="row"><span class="nm">월배당 ETF</span><span class="arw">GNB</span></div><div class="card__f">스펙 46행 — 탭이 넘치는 것을 막고 기존 진입 경로를 깨지 않는다.</div></section></div></div></div>
+</div><div class="anno">
+  <div class="anno__tag">탭 2 / 4</div>
+  <h2>특이신호 — 32종목을 어떻게 훑게 할까</h2>
+  <dl>
+    <dt>넣은 것</dt><dd>필터(신호 9종 · 방향 · 섹터 8종) + 정렬. 각 행은 종목·등락률·배지·왜 한 줄. 오늘 실제로 잡힌 신호는 6종이고 3종은 0건이다.</dd>
+    <dt>답하는 질문</dt><dd class="q">“평소와 다른 종목이 오늘 몇 개고, 그중 내가 볼 건 뭔가?”</dd>
+  </dl>
+  <ul class="notes"><li>오늘 32종목 = 상승 11 / 하락 21. 카테고리 9종 중 <b>counter_down · near_high · foreign_sell 3종이 0건</b>이다. 0건 칩을 숨길지 흐리게 둘지가 실제 설계 결정이다 — 여기선 흐리게 둬서 “오늘은 없다”가 정보가 되게 했다.</li><li>한 종목이 여러 신호에 걸린다. 32종목이 카테고리에 48번 배치된다(16건 중복). 이 사실이 A·B안의 갈림길을 만든다.</li><li>오늘 신호의 21건이 <code>foreign_buy</code>, 14건이 <code>inst_buy</code>다. 수급 배지가 절반 이상이라 “수급만 있는 종목”과 “가격이 실제로 튄 종목”을 구분하는 필터가 없으면 목록이 밋밋해진다.</li><li>배지 문구는 API가 준 원문 그대로다(“(전일 기준)” 포함). 장중 수급이 전일 확정치라는 사실을 지우지 않았다.</li></ul>
+</div><div class="frame">
+  <div class="gnb"><b>Double-Shot</b><span class="gnb__m">브리핑</span><span class="gnb__m">월배당</span></div>
+  <div class="phead">
+    <h3>종목 시그널 <em>BETA</em></h3>
+    <p>코스피 주도주 실시간 대시보드</p>
+    <div class="srch">종목명 또는 코드…</div>
+    <div class="mkt">
+      <div class="mkt__k"><span class="l">코스피 <em>장중</em></span><span class="v"><span class="num dn">-5.33%</span></span></div>
+      <div class="mkt__g">
+        <span><i>코스피200</i><span class="num dn">-6.03%</span></span>
+        <span><i>코스닥</i><span class="num up">+2.32%</span></span>
+        <span><i>원/달러</i><b class="num">1,429.5</b></span>
+        <span><i>VIX</i><b class="num">15.99</b></span>
+      </div>
+      <div class="mkt__s"><i>수급</i>
+        <span>개인 <b class="num up">+38,094</b></span>
+        <span>기관 <b class="num dn">-14,882</b></span>
+        <span>외국인 <b class="num dn">-24,149</b></span>
+        <em>억원</em></div>
+    </div>
+  </div>
+  <nav class="tabs"><a class="">전체</a><a class="on">특이신호</a><a class="">섹터</a><a class="">ETF</a></nav>
+  <div class="canvas"><div class="vsplit">
+  <div class="vcol"><div class="vhead"><span class="vk">A안</span><b>필터 + 단일 리스트</b><p>중복 없이 32종목을 한 번만 보여준다. 대신 사용자가 무엇으로 좁힐지 먼저 정해야 한다.</p></div><section class="card">
+  <div class="card__h"><span class="card__t">⚡ 특이 신호 32종목</span><span class="card__s">신호 강도순</span></div>
+  <div class="filters">
+    <div class="frow"><span class="fl">신호</span><div class="chips"><span class="chip">🔥 거래량 급증 · 급락<em>1</em></span><span class="chip">🚀 거래량 급증 · 급등<em>1</em></span><span class="chip">↗ 역행 상승<em>8</em></span><span class="chip off">↘ 역행 하락<em>0</em></span><span class="chip off">▲ 52주 신고가 근접<em>0</em></span><span class="chip">💰 거래대금 상위<em>3</em></span><span class="chip">🏛️ 기관 순매수<em>14</em></span><span class="chip">🌏 외국인 순매수<em>21</em></span><span class="chip off">🌏 외국인 순매도<em>0</em></span></div></div>
+    <div class="frow"><span class="fl">방향</span><div class="chips"><span class="chip on">전체<em>32</em></span><span class="chip">상승<em>11</em></span><span class="chip">하락<em>21</em></span></div></div>
+    <div class="frow"><span class="fl">섹터</span><div class="chips"><span class="chip">자동차<em>6</em></span><span class="chip">반도체<em>6</em></span><span class="chip">금융<em>6</em></span><span class="chip">2차전지<em>4</em></span><span class="chip">전력기기<em>3</em></span><span class="chip">방산<em>3</em></span><span class="chip">바이오<em>2</em></span><span class="chip">조선<em>2</em></span></div></div>
+  </div>
+  <div class="row row--stack">
+      <div class="row__top"><span class="nm">HL만도<small class="num">204320</small></span><span class="num up">+4.92%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">거래량 ×1.8 급증</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+4.9% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">효성중공업<small class="num">298040</small></span><span class="num up">+3.52%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+3.5% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">주성엔지니어링<small class="num">036930</small></span><span class="num up">+3.37%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 5일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+3.4% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">LS일렉트릭<small class="num">010120</small></span><span class="num up">+2.06%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+2.1% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">에코프로비엠<small class="num">247540</small></span><span class="num dn">-6.18%</span></div>
+      <div class="pills"><span class="pill">거래량 ×1.6 급증</span><span class="pill">기관 3일 연속 순매수 (전일 기준)</span></div><p class="why">거래량이 급증하며 -6.2% 급락했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">한미약품<small class="num">128940</small></span><span class="num up">+4.50%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 3일 연속 순매수 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+4.5% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">현대모비스<small class="num">012330</small></span><span class="num up">+2.63%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 4일 연속 순매수 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+2.6% 상승</b>했어요.</p></div>
+  <a class="more">32종목 중 7개 표시 · 더보기</a>
+</section></div>
+  <div class="vcol"><div class="vhead"><span class="vk">B안</span><b>신호 카테고리 보드</b><p>어떤 종류의 신호가 몰렸는지 구조가 바로 보인다. 대신 같은 종목이 여러 카드에 반복된다.</p></div><div class="grpgrid"><section class="card card--grp"><div class="card__h"><span class="card__t">🔥 거래량 급증 · 급락</span><span class="card__s">1</span></div><div class="row row--mini"><span class="nm">에코프로비엠</span><span class="num dn">-6.2%</span></div></section><section class="card card--grp"><div class="card__h"><span class="card__t">🚀 거래량 급증 · 급등</span><span class="card__s">1</span></div><div class="row row--mini"><span class="nm">HL만도</span><span class="num up">+4.9%</span></div></section><section class="card card--grp"><div class="card__h"><span class="card__t">↗ 역행 상승</span><span class="card__s">8</span></div><div class="row row--mini"><span class="nm">HL만도</span><span class="num up">+4.9%</span></div><div class="row row--mini"><span class="nm">한미약품</span><span class="num up">+4.5%</span></div><div class="row row--mini"><span class="nm">효성중공업</span><span class="num up">+3.5%</span></div><div class="row row--mini"><span class="nm">주성엔지니어링</span><span class="num up">+3.4%</span></div><div class="row row--mini row--more">+4종목</div></section><section class="card card--grp card--dim"><div class="card__h"><span class="card__t">↘ 역행 하락</span><span class="card__s">0</span></div><div class="empty empty--sm">오늘 해당 종목 없음</div></section><section class="card card--grp card--dim"><div class="card__h"><span class="card__t">▲ 52주 신고가 근접</span><span class="card__s">0</span></div><div class="empty empty--sm">오늘 해당 종목 없음</div></section><section class="card card--grp"><div class="card__h"><span class="card__t">💰 거래대금 상위</span><span class="card__s">3</span></div><div class="row row--mini"><span class="nm">현대차</span><span class="num up">+0.9%</span></div><div class="row row--mini"><span class="nm">SK하이닉스</span><span class="num dn">-8.0%</span></div><div class="row row--mini"><span class="nm">삼성전자</span><span class="num dn">-8.5%</span></div></section><section class="card card--grp"><div class="card__h"><span class="card__t">🏛️ 기관 순매수</span><span class="card__s">14</span></div><div class="row row--mini"><span class="nm">HL만도</span><span class="num up">+4.9%</span></div><div class="row row--mini"><span class="nm">효성중공업</span><span class="num up">+3.5%</span></div><div class="row row--mini"><span class="nm">주성엔지니어링</span><span class="num up">+3.4%</span></div><div class="row row--mini"><span class="nm">LS일렉트릭</span><span class="num up">+2.1%</span></div><div class="row row--mini row--more">+10종목</div></section><section class="card card--grp"><div class="card__h"><span class="card__t">🌏 외국인 순매수</span><span class="card__s">21</span></div><div class="row row--mini"><span class="nm">한미약품</span><span class="num up">+4.5%</span></div><div class="row row--mini"><span class="nm">효성중공업</span><span class="num up">+3.5%</span></div><div class="row row--mini"><span class="nm">주성엔지니어링</span><span class="num up">+3.4%</span></div><div class="row row--mini"><span class="nm">현대모비스</span><span class="num up">+2.6%</span></div><div class="row row--mini row--more">+17종목</div></section><section class="card card--grp card--dim"><div class="card__h"><span class="card__t">🌏 외국인 순매도</span><span class="card__s">0</span></div><div class="empty empty--sm">오늘 해당 종목 없음</div></section></div>
+<p class="vnote">한 종목이 여러 신호에 동시에 걸린다. 32종목이 48번 배치돼 중복이 16건이다.</p></div>
+</div></div>
+</div><div class="anno">
+  <div class="anno__tag">탭 3 / 4</div>
+  <h2>섹터 — 비교인가 드릴다운인가</h2>
+  <dl>
+    <dt>넣은 것</dt><dd>8개 섹터의 평균 등락 · 상승/하락 폭 · 대표 ETF 등락 · 신호 종목 수를 한 화면에 놓은 비교 보드(A) 또는 현행 단일 섹터 화면(B). 아래에 밸류에이션 블록을 공통으로 붙였다.</dd>
+    <dt>답하는 질문</dt><dd class="q">“오늘 하락이 전 종목에 퍼진 건가, 특정 섹터·특정 대형주에 몰린 건가?”</dd>
+  </dl>
+  <ul class="notes"><li>오늘 데이터가 이 탭의 존재 이유를 그대로 보여준다 — <b>8개 섹터 평균이 전부 코스피(−5.33%)보다 위</b>다. 즉 지수 낙폭은 섹터가 아니라 지수 대형주(삼성전자 −8.48%, SK하이닉스 −7.97%)에 몰려 있다. 섹터를 하나씩 보는 화면으로는 이 사실이 절대 보이지 않는다.</li><li>대표 ETF 열에서 <b>전력기기는 대응 ETF가 payload에 없어 —로 비웠다.</b> 임의로 다른 ETF를 끼워 넣지 않았다.</li><li>금융 행의 ETF는 <code>091170</code> 은행 ETF다. 섹터 구성(증권·보험 포함)과 정확히 같지 않아 라벨을 그대로 노출했다.</li><li>밸류에이션(valuation.json)은 07-31 생성분이라 오늘 등락과 <b>다른 날짜</b>다. 같은 행에 섞지 않고 별도 카드로 분리하고 생성일을 적었다.</li><li>현행 <code>#sector</code> 화면의 “패시브 쏠림 · 섹터 AI 심리” 수치는 HTML에 하드코딩된 값이라 이 목업에 옮기지 않았다(§20류). 실데이터가 붙기 전까지는 그 블록을 그릴 수 없다.</li></ul>
+</div><div class="frame">
+  <div class="gnb"><b>Double-Shot</b><span class="gnb__m">브리핑</span><span class="gnb__m">월배당</span></div>
+  <div class="phead">
+    <h3>종목 시그널 <em>BETA</em></h3>
+    <p>코스피 주도주 실시간 대시보드</p>
+    <div class="srch">종목명 또는 코드…</div>
+    <div class="mkt">
+      <div class="mkt__k"><span class="l">코스피 <em>장중</em></span><span class="v"><span class="num dn">-5.33%</span></span></div>
+      <div class="mkt__g">
+        <span><i>코스피200</i><span class="num dn">-6.03%</span></span>
+        <span><i>코스닥</i><span class="num up">+2.32%</span></span>
+        <span><i>원/달러</i><b class="num">1,429.5</b></span>
+        <span><i>VIX</i><b class="num">15.99</b></span>
+      </div>
+      <div class="mkt__s"><i>수급</i>
+        <span>개인 <b class="num up">+38,094</b></span>
+        <span>기관 <b class="num dn">-14,882</b></span>
+        <span>외국인 <b class="num dn">-24,149</b></span>
+        <em>억원</em></div>
+    </div>
+  </div>
+  <nav class="tabs"><a class="">전체</a><a class="">특이신호</a><a class="on">섹터</a><a class="">ETF</a></nav>
+  <div class="canvas"><div class="vsplit">
+  <div class="vcol"><div class="vhead"><span class="vk">A안</span><b>8개 섹터 비교 보드</b><p>“오늘 어디서 무슨 일이 벌어졌나”에 답한다. 대신 한 섹터를 깊게 파고들 수 없다.</p></div><section class="card">
+  <div class="card__h"><span class="card__t">🧭 섹터 비교 보드</span><span class="card__s">평균 등락순</span></div>
+  <p class="lede">코스피 <b class="num dn">-5.33%</b> · 8개 섹터 전부 지수보다 덜 빠졌다. 낙폭이 지수 대형주에 집중돼 있다는 신호다
+  (삼성전자 <b class="num dn">-8.48%</b>, SK하이닉스 <b class="num dn">-7.97%</b> — 둘 다 오늘 신호 목록에 있다).</p>
+  <div class="row row--board row--hd"><span class="nm">섹터</span><span class="num">평균</span><span class="bar bar--hd">상승/하락</span><span class="etfc">대표 ETF</span><span class="sigc">신호</span></div>
+  <div class="row row--board">
+      <span class="nm">전력기기<small class="num">5종목</small></span>
+      <span class="num up">+1.12%</span>
+      <span class="bar" title="상승 3 · 하락 2 · 보합 0"><i style="width:60.0%;background:var(--up)"></i><i style="width:40.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num gap">—</span><small class="gap">대응 ETF 없음</small></span>
+      <span class="sigc num">3</span>
+    </div><div class="row row--board">
+      <span class="nm">자동차<small class="num">6종목</small></span>
+      <span class="num up">+1.05%</span>
+      <span class="bar" title="상승 4 · 하락 2 · 보합 0"><i style="width:66.7%;background:var(--up)"></i><i style="width:33.3%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num up">+0.23%</span><small>자동차</small></span>
+      <span class="sigc num">6</span>
+    </div><div class="row row--board">
+      <span class="nm">바이오<small class="num">6종목</small></span>
+      <span class="num dn">-0.47%</span>
+      <span class="bar" title="상승 2 · 하락 4 · 보합 0"><i style="width:33.3%;background:var(--up)"></i><i style="width:66.7%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num up">+4.86%</span><small>바이오</small></span>
+      <span class="sigc num">2</span>
+    </div><div class="row row--board">
+      <span class="nm">방산<small class="num">5종목</small></span>
+      <span class="num dn">-1.94%</span>
+      <span class="bar" title="상승 0 · 하락 4 · 보합 1"><i style="width:0.0%;background:var(--up)"></i><i style="width:80.0%;background:var(--dn)"></i><i style="width:20.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num dn">-1.95%</span><small>방산</small></span>
+      <span class="sigc num">3</span>
+    </div><div class="row row--board">
+      <span class="nm">금융<small class="num">7종목</small></span>
+      <span class="num dn">-2.32%</span>
+      <span class="bar" title="상승 2 · 하락 5 · 보합 0"><i style="width:28.6%;background:var(--up)"></i><i style="width:71.4%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num dn">-0.32%</span><small>은행</small></span>
+      <span class="sigc num">6</span>
+    </div><div class="row row--board">
+      <span class="nm">2차전지<small class="num">6종목</small></span>
+      <span class="num dn">-2.83%</span>
+      <span class="bar" title="상승 0 · 하락 6 · 보합 0"><i style="width:0.0%;background:var(--up)"></i><i style="width:100.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num dn">-3.40%</span><small>2차전지</small></span>
+      <span class="sigc num">4</span>
+    </div><div class="row row--board">
+      <span class="nm">조선<small class="num">4종목</small></span>
+      <span class="num dn">-2.86%</span>
+      <span class="bar" title="상승 0 · 하락 4 · 보합 0"><i style="width:0.0%;background:var(--up)"></i><i style="width:100.0%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num dn">-2.84%</span><small>조선</small></span>
+      <span class="sigc num">2</span>
+    </div><div class="row row--board">
+      <span class="nm">반도체<small class="num">7종목</small></span>
+      <span class="num dn">-3.82%</span>
+      <span class="bar" title="상승 1 · 하락 6 · 보합 0"><i style="width:14.3%;background:var(--up)"></i><i style="width:85.7%;background:var(--dn)"></i><i style="width:0.0%;background:var(--inset)"></i></span>
+      <span class="etfc"><span class="num dn">-6.84%</span><small>반도체</small></span>
+      <span class="sigc num">6</span>
+    </div>
+</section>
+<p class="vnote">전력기기는 <code>/api/signals</code>의 ETF 목록에 대응 항목이 없어 <b>—</b>로 비운다. 금융 행의 ETF는 은행 ETF(091170)라 섹터 범위가 정확히 같지는 않다.</p></div>
+  <div class="vcol"><div class="vhead"><span class="vk">B안</span><b>한 섹터 드릴다운(현행)</b><p>“이 섹터 안에서 뭘 볼까”에 답한다. 대신 섹터를 고르기 전까지 전체 그림이 안 보인다.</p></div><section class="card">
+  <div class="card__h"><span class="card__t">🔧 반도체</span><span class="card__s">추적 7종목</span></div>
+  <div class="chips chips--pad"><span class="chip on">반도체</span><span class="chip">전력기기</span><span class="chip">자동차</span><span class="chip">바이오</span><span class="chip">방산</span><span class="chip">금융</span><span class="chip">2차전지</span><span class="chip">조선</span></div>
+  <div class="kpis">
+    <div class="kpi"><i>섹터 평균</i><span class="num dn">-3.82%</span></div>
+    <div class="kpi"><i>상승 / 하락</i><b class="num"><span class="up">1</span> / <span class="dn">6</span></b></div>
+    <div class="kpi"><i>대표 ETF</i><span class="num dn">-6.84%</span></div>
+  </div>
+  <div class="card__h card__h--sub"><span class="card__t">신호가 잡힌 반도체 종목</span><span class="card__s">6</span></div>
+  <div class="row row--stack">
+      <div class="row__top"><span class="nm">주성엔지니어링<small class="num">036930</small></span><span class="num up">+3.37%</span></div>
+      <div class="pills"><span class="pill">역행 상승</span><span class="pill">외국인 5일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">시장이 하락하는 동안 <b>+3.4% 상승</b>했어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">DB하이텍<small class="num">000990</small></span><span class="num dn">-2.41%</span></div>
+      <div class="pills"><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">기관 수급이 꾸준히 들어오고 있어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">리노공업<small class="num">058470</small></span><span class="num dn">-4.21%</span></div>
+      <div class="pills"><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">기관 수급이 꾸준히 들어오고 있어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">한미반도체<small class="num">042700</small></span><span class="num dn">-5.83%</span></div>
+      <div class="pills"><span class="pill">외국인 4일 연속 순매수 (전일 기준)</span><span class="pill">기관 순매수 전환 (전일 기준)</span></div><p class="why">외국인 수급이 꾸준히 들어오고 있어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">SK하이닉스<small class="num">000660</small></span><span class="num dn">-7.97%</span></div>
+      <div class="pills"><span class="pill">기관 순매수 전환 (전일 기준)</span><span class="pill">거래대금 상위</span></div><p class="why">거래대금 상위. 지수에 큰 영향을 줬어요.</p></div><div class="row row--stack">
+      <div class="row__top"><span class="nm">삼성전자<small class="num">005930</small></span><span class="num dn">-8.48%</span></div>
+      <div class="pills"><span class="pill">기관 순매수 전환 (전일 기준)</span><span class="pill">거래대금 상위</span></div><p class="why">거래대금 상위. 지수에 큰 영향을 줬어요.</p></div>
+</section></div>
+</div><div class="shared"><div class="shared__l">두 안 공통으로 아래에 붙는 블록</div><section class="card"><div class="card__h"><span class="card__t">🧮 밸류에이션 시그널</span><span class="card__s">코스피200 199종목 중 133종목 평가 · 2026-07-31</span></div><div class="card__h card__h--sub"><span class="card__t">섹터 중앙값 대비 저평가</span><span class="card__s">62종목</span></div><div class="row row--val"><span class="nm">KCC<small>건축자재</small></span><span class="num">PER 2.08</span><span class="num muted">중앙 12.78</span><span class="num dn">-83.7%</span></div><div class="row row--val"><span class="nm">LG씨엔에스<small>IT서비스</small></span><span class="num">PER 12.7</span><span class="num muted">중앙 47.58</span><span class="num dn">-73.3%</span></div><div class="row row--val"><span class="nm">대웅<small>제약</small></span><span class="num">PER 5.16</span><span class="num muted">중앙 18.39</span><span class="num dn">-71.9%</span></div><div class="row row--val"><span class="nm">한국전력<small>전기유틸리티</small></span><span class="num">PER 3.86</span><span class="num muted">중앙 12.84</span><span class="num dn">-69.9%</span></div><div class="card__h card__h--sub"><span class="card__t">섹터 중앙값 대비 고평가</span><span class="card__s">57종목</span></div><div class="row row--val"><span class="nm">OCI홀딩스<small>화학</small></span><span class="num">PER 22.05</span><span class="num muted">중앙 9.27</span><span class="num up">+137.9%</span></div><div class="row row--val"><span class="nm">카카오뱅크<small>은행</small></span><span class="num">PER 17.62</span><span class="num muted">중앙 7.64</span><span class="num up">+130.6%</span></div><div class="row row--val"><span class="nm">유한양행<small>제약</small></span><span class="num">PER 38.75</span><span class="num muted">중앙 18.39</span><span class="num up">+110.7%</span></div><div class="row row--val"><span class="nm">삼성바이오로직스<small>제약</small></span><span class="num">PER 36.54</span><span class="num muted">중앙 18.39</span><span class="num up">+98.7%</span></div><div class="card__f">PER 기준 · <code>valuation.json</code>(07-31 16:40 생성) · 오늘 등락과 다른 날짜의 데이터라 같은 카드에 섞지 않고 분리했다.</div></section></div></div>
+</div><div class="anno">
+  <div class="anno__tag">탭 4 / 4</div>
+  <h2>ETF — 오늘의 방향인가 이번 주 자금인가</h2>
+  <dl>
+    <dt>넣은 것</dt><dd>A안은 실시간(해석 한 줄 · 인버스/레버리지 베팅 · 안전자산 · 섹터 로테이션 9종), B안은 5일 자금 흐름(16테마 · 테마 뜯어보기). 월배당은 링크 한 줄만.</dd>
+    <dt>답하는 질문</dt><dd class="q">“ETF 흐름이 오늘 시장 방향에 대해 뭐라고 말하고 있나?”</dd>
+  </dl>
+  <ul class="notes"><li>ETF 탭은 네 탭 중 <b>해석 문장이 원본 데이터에 이미 들어 있는</b> 유일한 탭이다(<code>etf.lead</code>). 그래서 랭킹표보다 판독형이 자연스럽다.</li><li>안전자산 비교 기준(<code>safeHaven.market</code>)은 KODEX 200 ETF -9.04%인데 같은 시각 코스피200 <b>지수</b>는 -6.03%다. 3%p 차이를 라벨 없이 한 화면에 두면 §30형 자기모순이 되므로 기준을 명시했다.</li><li>섹터 ETF 거래대금 원본 단위는 백만원이다. 억원으로 환산해 표기하고 카드 하단에 그 사실을 적었다.</li><li>월배당은 이미 GNB 1depth에 있다. 여기서는 규모 두 줄과 링크만 두고 화면을 복제하지 않았다.</li><li>B안 자금 데이터는 홈의 “이번 주 자금 지도”와 같은 소스다. B안을 택하면 홈 요약과 탭 본문의 차이를 따로 설계해야 한다.</li></ul>
+</div><div class="frame">
+  <div class="gnb"><b>Double-Shot</b><span class="gnb__m">브리핑</span><span class="gnb__m">월배당</span></div>
+  <div class="phead">
+    <h3>종목 시그널 <em>BETA</em></h3>
+    <p>코스피 주도주 실시간 대시보드</p>
+    <div class="srch">종목명 또는 코드…</div>
+    <div class="mkt">
+      <div class="mkt__k"><span class="l">코스피 <em>장중</em></span><span class="v"><span class="num dn">-5.33%</span></span></div>
+      <div class="mkt__g">
+        <span><i>코스피200</i><span class="num dn">-6.03%</span></span>
+        <span><i>코스닥</i><span class="num up">+2.32%</span></span>
+        <span><i>원/달러</i><b class="num">1,429.5</b></span>
+        <span><i>VIX</i><b class="num">15.99</b></span>
+      </div>
+      <div class="mkt__s"><i>수급</i>
+        <span>개인 <b class="num up">+38,094</b></span>
+        <span>기관 <b class="num dn">-14,882</b></span>
+        <span>외국인 <b class="num dn">-24,149</b></span>
+        <em>억원</em></div>
+    </div>
+  </div>
+  <nav class="tabs"><a class="">전체</a><a class="">특이신호</a><a class="">섹터</a><a class="on">ETF</a></nav>
+  <div class="canvas"><div class="vsplit">
+  <div class="vcol"><div class="vhead"><span class="vk">A안</span><b>오늘의 방향 판독</b><p>발행 시점 실측이라 신선하다. 대신 −5%대 급락일엔 노이즈가 크고 “왜”가 없다.</p></div><section class="card">
+  <div class="card__h"><span class="card__t">📊 오늘 ETF가 말하는 방향</span><span class="card__s">실시간</span></div>
+  <div class="lead"><b>엇갈린 ETF 신호 · 거래량↑ 방향은 중립</b><p>KODEX 인버스 거래량이 KODEX 200의 <b>49배</b>지만, 인버스·레버리지 거래대금은 <b>51 : 49</b>으로 팽팽해요. 하락 대비 수요는 늘었어도 방향을 단정하긴 일러요.</p></div>
+  <div class="betbar"><i class="d" style="width:51%">인버스 51</i><i class="u" style="width:49%">레버리지 49</i></div>
+  <div class="kpis">
+    <div class="kpi"><i>인버스 거래대금</i><b class="num">17,410억</b></div>
+    <div class="kpi"><i>레버리지 거래대금</i><b class="num">16,453억</b></div>
+    <div class="kpi"><i>KODEX 레버리지</i><span class="num dn">-15.81%</span></div>
+  </div>
+</section>
+<section class="card">
+  <div class="card__h"><span class="card__t">🛡️ 안전자산</span><span class="card__s">KODEX 200 -9.04% 대비</span></div>
+  <div class="row row--mini"><span class="nm">금<small class="num">132030</small></span><span class="num dn">-0.50%</span></div><div class="row row--mini"><span class="nm">국고채10년<small class="num">148070</small></span><span class="num dn">-0.05%</span></div><div class="row row--mini"><span class="nm">국고채3년<small class="num">114260</small></span><span class="num up">+0.01%</span></div>
+  <div class="card__f">비교 기준은 <b>KODEX 200 ETF(069500) -9.04%</b>다.
+  같은 시각 코스피200 <b>지수</b>는 -6.03%로 3%p 차이가 난다 — 한 화면에 섞으면 §30형 모순이 되므로 라벨을 분리해 뒀다.</div>
+</section>
+<section class="card">
+  <div class="card__h"><span class="card__t">🔁 섹터 ETF 로테이션</span><span class="card__s">9개</span></div>
+  <div class="row row--rot"><span class="nm">바이오<small class="num">244580</small></span>
+    <span class="num up">+4.86%</span><span class="num muted">36억</span></div><div class="row row--rot"><span class="nm">건설<small class="num">117700</small></span>
+    <span class="num up">+2.42%</span><span class="num muted">89억</span></div><div class="row row--rot"><span class="nm">자동차<small class="num">091180</small></span>
+    <span class="num up">+0.23%</span><span class="num muted">105억</span></div><div class="row row--rot"><span class="nm">은행<small class="num">091170</small></span>
+    <span class="num dn">-0.32%</span><span class="num muted">685억</span></div><div class="row row--rot"><span class="nm">방산<small class="num">449450</small></span>
+    <span class="num dn">-1.95%</span><span class="num muted">110억</span></div><div class="row row--rot"><span class="nm">조선<small class="num">466920</small></span>
+    <span class="num dn">-2.84%</span><span class="num muted">147억</span></div><div class="row row--rot"><span class="nm">2차전지<small class="num">305720</small></span>
+    <span class="num dn">-3.40%</span><span class="num muted">316억</span></div><div class="row row--rot"><span class="nm">반도체<small class="num">091230</small></span>
+    <span class="num dn">-6.84%</span><span class="num muted">523억</span></div><div class="row row--rot"><span class="nm">IT<small class="num">139260</small></span>
+    <span class="num dn">-7.20%</span><span class="num muted">413억</span></div>
+  <div class="card__f">거래대금 원본 단위는 백만원이라 100으로 나눠 억원으로 표기했다.</div>
+</section></div>
+  <div class="vcol"><div class="vhead"><span class="vk">B안</span><b>자금 흐름 중심</b><p>돈이 어디로 갔는지 인과가 보인다. 대신 07-31 생성분이라 월요일엔 3일 전 값이고 홈 블록과 겹친다.</p></div><section class="card">
+  <div class="card__h"><span class="card__t">💸 5일 순유입 테마</span><span class="card__s">712개 ETF · 2026-07-31</span></div>
+  <p class="lede">단위 억원 · 5일 누적 순유입. 16개 테마 중 상위 6개와 하위 2개.</p>
+  <div class="row row--flow"><span class="nm">반도체<small>47개</small></span><span class="fbar"><i class="up" style="width:100%"></i></span><span class="num up">+15,592</span></div><div class="row row--flow"><span class="nm">미국 나스닥·기술<small>46개</small></span><span class="fbar"><i class="up" style="width:87%"></i></span><span class="num up">+13,510</span></div><div class="row row--flow"><span class="nm">미국 S&amp;P·대형<small>49개</small></span><span class="fbar"><i class="up" style="width:54%"></i></span><span class="num up">+8,485</span></div><div class="row row--flow"><span class="nm">배당·커버드콜<small>45개</small></span><span class="fbar"><i class="up" style="width:44%"></i></span><span class="num up">+6,855</span></div><div class="row row--flow"><span class="nm">원자력·전력<small>22개</small></span><span class="fbar"><i class="up" style="width:13%"></i></span><span class="num up">+2,046</span></div><div class="row row--flow"><span class="nm">금융·은행<small>21개</small></span><span class="fbar"><i class="up" style="width:11%"></i></span><span class="num up">+1,744</span></div><div class="row row--flow"><span class="nm">인터넷·게임<small>3개</small></span><span class="fbar"><i class="up" style="width:0%"></i></span><span class="num up">+21</span></div><div class="row row--flow"><span class="nm">중국·신흥국<small>26개</small></span><span class="fbar"><i class="dn" style="width:0%"></i></span><span class="num dn">-14</span></div>
+</section>
+<section class="card">
+  <div class="card__h"><span class="card__t">🔥 반도체 테마 뜯어보기</span><span class="card__s">+15,592억</span></div>
+  <div class="dchart"><span class="dbar"><span class="pos"><i style="height:43%"></i></span><span class="neg"></span><em>07-27</em></span><span class="dbar"><span class="pos"></span><span class="neg"><i style="height:64%"></i></span><em>07-28</em></span><span class="dbar"><span class="pos"><i style="height:8%"></i></span><span class="neg"></span><em>07-29</em></span><span class="dbar"><span class="pos"><i style="height:49%"></i></span><span class="neg"></span><em>07-30</em></span><span class="dbar"><span class="pos"><i style="height:100%"></i></span><span class="neg"></span><em>07-31</em></span></div>
+  <div class="row row--mini"><span class="nm">TIGER 미국필라델피아반도체나스닥<small class="num">381180</small></span><span class="num up">+2,798</span></div><div class="row row--mini"><span class="nm">TIGER 반도체TOP10<small class="num">396500</small></span><span class="num up">+2,718</span></div><div class="row row--mini"><span class="nm">PLUS 글로벌HBM반도체<small class="num">442580</small></span><span class="num up">+1,594</span></div><div class="row row--mini"><span class="nm">KODEX AI반도체TOP2플러스<small class="num">395160</small></span><span class="num up">+1,322</span></div><div class="row row--mini"><span class="nm">ACE 글로벌반도체TOP4 Plus<small class="num">446770</small></span><span class="num up">+827</span></div>
+</section>
+<p class="vnote">이 데이터는 07-31 20:31 생성분이라 월요일 화면에서는 <b>3일 전</b> 값이다. 홈의 “이번 주 자금 지도”와도 같은 소스라 중복 위험이 있다.</p></div>
+</div><div class="shared"><div class="shared__l">두 안 공통 — 월배당은 통째로 옮기지 않고 링크 한 줄만</div>
+<section class="card"><div class="card__h"><span class="card__t">🪙 월배당 ETF</span><span class="card__s">GNB 1depth 유지</span></div><div class="row"><span class="nm">국내 월배당 ETF</span><span class="num">66개</span></div><div class="row"><span class="nm">미국 큐레이션</span><span class="num">17개</span></div><div class="card__f">국내 1000억+ 월배당 ETF + 미국 큐레이션 ETF · 2026-08-03 06:44 생성</div></section></div></div>
+</div>
+</div>
+</body>
+</html>

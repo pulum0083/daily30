@@ -65,6 +65,29 @@
   </div>
 </div>
 
+{# 공포·탐욕 지수 #}
+<div class="info-modal-backdrop" id="fng-modal">
+  <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="fng-modal-title">
+    <button class="info-modal__close" data-modal-close="fng-modal" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-modal__title" id="fng-modal-title">공포·탐욕 지수(Fear &amp; Greed Index)</div>
+    <div class="info-modal__body">
+      <p>투자자들의 심리가 '공포(Fear)'에 휩싸여 있는지, 아니면 '탐욕(Greed)'으로 과열되어 있는지를 0부터 100까지의 점수로 계량화한 시장 심리 지표입니다. CNN이 주가 모멘텀·시장 변동성·안전자산 수요 등 7개 지표를 종합해 산출합니다.</p>
+      <br>
+      <ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+        <li><strong style="color:#B91C1C">0~24</strong> : 극단적 공포 — 투자자 심리가 크게 위축</li>
+        <li><strong style="color:#CA8A04">25~44</strong> : 공포 — 위험 회피 성향 우세</li>
+        <li><strong style="color:#16A34A">45~54</strong> : 중립 — 공포와 탐욕이 균형</li>
+        <li><strong style="color:#CA8A04">55~74</strong> : 탐욕 — 위험 선호 성향 우세</li>
+        <li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕 — 과열 신호</li>
+      </ul>
+      <br>
+      <p style="color:var(--muted); font-size:12px;">※ 미국 정규장 기준으로 갱신돼요. 점수 옆 숫자는 전 거래일 대비 점수 변화(p)예요.</p>
+    </div>
+  </div>
+</div>
+
 {# 당일 방향 예측 #}
 <div class="info-modal-backdrop" id="pred-modal">
   <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="pred-modal-title">

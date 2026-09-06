@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>브리핑 사이드바 시장 지표 — VIX·공포탐욕 표현 변형 (2026-08-31)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#5B6472;
+  --up:#E03131;--dn:#2775ED;
+  --calm-bg:#DCFCE7;--calm-fg:#16A34A;
+  --normal-bg:#ECFCCB;--normal-fg:#65A30D;
+  --elev-bg:#FEF9C3;--elev-fg:#CA8A04;
+  --high-bg:#FEE2E2;--high-fg:#E03131;
+}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;
+  line-height:1.5;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 80px}
+.num{font-variant-numeric:tabular-nums}
+
+.intro{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:24px 22px;margin-bottom:14px}
+.intro h1{font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:6px}
+.intro .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.intro p{font-size:14px;margin-bottom:10px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:14px}
+.fact{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 13px;font-size:13px}
+.fact b{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:3px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px;align-items:start}
+.col{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:18px 16px}
+.col h2{font-size:15px;font-weight:600;margin-bottom:2px}
+.col .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;
+  background:var(--inset);color:var(--muted);margin-bottom:10px}
+.col .tag.rec{background:#E0EDFF;color:#006EFF}
+.col .note{font-size:12.5px;color:var(--muted);margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
+.col .note li{margin-left:15px;margin-bottom:4px}
+
+/* ── 실제 사이드바 폭(300px)을 흉내낸 프레임 ── */
+.frame{width:300px;margin:0 auto}
+.panel{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 11px}
+.section-title{font-size:13px;font-weight:600}
+.pub-time{font-size:11px;color:var(--muted)}
+.mkt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:11px 14px;border-top:1px solid var(--hair)}
+.mkt-name{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.mkt-val{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.mkt-chg{font-size:12px;font-weight:600}
+.mkt-chg.up{color:var(--up)}.mkt-chg.down{color:var(--dn)}
+.ico{width:14px;height:14px;border-radius:50%;background:var(--inset);color:var(--muted);
+  font-size:9px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px}
+.badge.calm{background:var(--calm-bg);color:var(--calm-fg)}
+.badge.normal{background:var(--normal-bg);color:var(--normal-fg)}
+.badge.elevated{background:var(--elev-bg);color:var(--elev-fg)}
+.badge.high{background:var(--high-bg);color:var(--high-fg)}
+
+/* B — 게이지 */
+.g-item{padding:12px 14px;border-top:1px solid var(--hair)}
+.g-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+.g-name{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.g-vals{display:flex;align-items:baseline;gap:6px}
+.g-val{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.g-chg{font-size:11.5px;font-weight:600}
+.g-track{position:relative;height:6px;border-radius:999px;display:flex;overflow:hidden}
+.g-track span{display:block;height:100%}
+.g-mark{position:absolute;top:-4px;width:3px;height:14px;border-radius:2px;background:var(--ink);
+  box-shadow:0 0 0 2px #fff;transform:translateX(-50%)}
+.g-scale{display:flex;justify-content:space-between;margin-top:6px;font-size:10.5px;color:#9AA3AF}
+.g-state{font-size:11.5px;font-weight:700;margin-top:7px}
+
+/* C — 2열 카드 */
+.c2{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border-top:1px solid var(--hair)}
+.c2 .cell{background:var(--canvas);padding:14px 12px;text-align:center}
+.c2 .cl{font-size:11.5px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:7px}
+.c2 .cv{font-size:26px;font-weight:700;letter-spacing:-.8px;line-height:1.1}
+.c2 .cc{font-size:11.5px;font-weight:600;margin-top:3px}
+.c2 .badge{margin-top:8px;display:inline-block}
+
+/* D — 다이얼 */
+.d-wrap{padding:14px 14px 12px;border-top:1px solid var(--hair);text-align:center}
+.d-name{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:2px}
+.d-val{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1.05;margin-top:-4px}
+.d-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+.d-state{font-size:12px;font-weight:700;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="intro">
+    <h1>브리핑 사이드바 &lsquo;시장 지표&rsquo; — 두 지표 표현 변형</h1>
+    <div class="sub">2026-08-31 · 코스피/미국 브리핑 우측 사이드바 · 실제 폭 300px 기준</div>
+    <p>나스닥·필라델피아 반도체·나스닥100 선물 행을 빼고 <b>VIX</b>와 <b>공포·탐욕 지수</b> 둘만 남기면,
+      이 패널의 역할이 &lsquo;지수 시세&rsquo;에서 <b>&lsquo;투자 심리&rsquo;</b>로 바뀝니다. 그러면 스파크라인 자리가 비고,
+      두 숫자만으로는 &ldquo;지금 어디쯤인지&rdquo;가 안 보입니다. 아래 네 가지 안을 실제 값으로 그렸고, <b>D안(다이얼)으로 결정해 구현했습니다.</b></p>
+    <div class="facts">
+      <div class="fact"><b>VIX (실측)</b>14.51 · −4.60% · 안정<br>
+        <span style="color:#9AA3AF;font-size:12px">2026-08-28 코스피 브리핑 발행본에서 그대로 가져온 값</span></div>
+      <div class="fact"><b>공포·탐욕 지수 (실측)</b>54.4 · 중립 · 전일 58.2<br>
+        <span style="color:#9AA3AF;font-size:12px">CNN, 2026-08-28 종가 기준 — 방금 실제 수집한 값</span></div>
+      <div class="fact"><b>색 규칙</b>공포·탐욕은 양 끝이 모두 위험 구간<br>
+        <span style="color:#9AA3AF;font-size:12px">극단(&lt;25·≥75)=빨강, 그 안쪽=노랑, 중립=초록</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ─────────── A ─────────── -->
+    <div class="col">
+      <h2>A. 현재 구현 — 행 + 뱃지</h2>
+      <span class="tag">지금 커밋된 상태</span>
+      <div class="frame">
+        <div class="panel">
+          <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:26 KST</span></div>
+          <div class="mkt-row">
+            <div>
+              <div class="mkt-name">VIX 공포지수<span class="ico">?</span></div>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <div class="mkt-val num">14.51</div><div class="mkt-chg down num">−4.60%</div>
+              </div>
+            </div>
+            <span class="badge calm">안정</span>
+          </div>
+          <div class="mkt-row">
+            <div>
+              <div class="mkt-name">공포·탐욕 지수<span class="ico">?</span></div>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <div class="mkt-val num">54</div><div class="mkt-chg down num">−3.7p</div>
+              </div>
+            </div>
+            <span class="badge calm">중립</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        기존 행 구조를 그대로 쓰고 스파크라인 자리에 뱃지만 놓습니다.
+        <ul>
+          <li>추가 CSS 0줄, 위험 없음</li>
+          <li><b>단점</b> — 두 줄뿐이라 패널이 허전하고, 14.51·54가 각각 어느 구간인지는 뱃지 글자로만 전달됨</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─────────── B ─────────── -->
+    <div class="col">
+      <h2>B. 구간 게이지</h2>
+      <span class="tag">검토안</span>
+      <div class="frame">
+        <div class="panel">
+          <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:26 KST</span></div>
+
+          <div class="g-item">
+            <div class="g-top">
+              <div class="g-name">VIX 공포지수<span class="ico">?</span></div>
+              <div class="g-vals"><span class="g-val num">14.51</span><span class="g-chg num" style="color:var(--dn)">−4.60%</span></div>
+            </div>
+            <div class="g-track">
+              <span style="width:37.5%;background:var(--calm-bg)"></span>
+              <span style="width:12.5%;background:var(--normal-bg)"></span>
+              <span style="width:25%;background:var(--elev-bg)"></span>
+              <span style="width:25%;background:var(--high-bg)"></span>
+              <i class="g-mark" style="left:36.3%"></i>
+            </div>
+            <div class="g-scale"><span>0</span><span>15</span><span>20</span><span>30</span><span>40+</span></div>
+            <div class="g-state" style="color:var(--calm-fg)">안정 — 정상 범위보다 낮아요</div>
+          </div>
+
+          <div class="g-item">
+            <div class="g-top">
+              <div class="g-name">공포·탐욕 지수<span class="ico">?</span></div>
+              <div class="g-vals"><span class="g-val num">54</span><span class="g-chg num" style="color:var(--dn)">−3.7p</span></div>
+            </div>
+            <div class="g-track">
+              <span style="width:25%;background:var(--high-bg)"></span>
+              <span style="width:20%;background:var(--elev-bg)"></span>
+              <span style="width:10%;background:var(--calm-bg)"></span>
+              <span style="width:20%;background:var(--elev-bg)"></span>
+              <span style="width:25%;background:var(--high-bg)"></span>
+              <i class="g-mark" style="left:54.4%"></i>
+            </div>
+            <div class="g-scale"><span>공포</span><span>중립</span><span>탐욕</span></div>
+            <div class="g-state" style="color:var(--calm-fg)">중립 — 공포와 탐욕이 균형이에요</div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        숫자 아래 <b>구간 막대 + 현재 위치 마커</b>를 둡니다. 심리 지표는 절대값보다
+        &ldquo;어느 구간에 있나&rdquo;가 핵심이라 이게 가장 직관적입니다.
+        <ul>
+          <li>공포·탐욕은 양쪽 끝이 빨강 &rarr; 과열도 위험이라는 게 한눈에 보임</li>
+          <li>사라진 스파크라인 자리를 자연스럽게 대체 — 패널이 안 허전함</li>
+          <li><b>비용</b> — CSS 약 20줄 추가(캔버스·JS 없음, 순수 div)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─────────── C ─────────── -->
+    <div class="col">
+      <h2>C. 2열 큰 숫자 카드</h2>
+      <span class="tag">가장 작음</span>
+      <div class="frame">
+        <div class="panel">
+          <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:26 KST</span></div>
+          <div class="c2">
+            <div class="cell">
+              <div class="cl">VIX<span class="ico">?</span></div>
+              <div class="cv num">14.51</div>
+              <div class="cc num" style="color:var(--dn)">−4.60%</div>
+              <span class="badge calm">안정</span>
+            </div>
+            <div class="cell">
+              <div class="cl">공포·탐욕<span class="ico">?</span></div>
+              <div class="cv num">54</div>
+              <div class="cc num" style="color:var(--dn)">−3.7p</div>
+              <span class="badge calm">중립</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        둘을 좌우로 나란히 놓아 세로 공간을 절반으로 줄입니다.
+        <ul>
+          <li>사이드바가 짧아져 아래 카드(성적표 등)가 위로 올라옴</li>
+          <li><b>단점</b> — 이름을 &lsquo;VIX&rsquo;·&lsquo;공포·탐욕&rsquo;으로 줄여야 해서(300px에 2열) 처음 보는 사람에겐 불친절.
+            구간 정보는 여전히 뱃지 글자뿐</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─────────── D ─────────── -->
+    <div class="col">
+      <h2>D. 다이얼 + 컴팩트 행</h2>
+      <span class="tag rec">✅ 채택 (2026-08-31 구현 완료)</span>
+      <div class="frame">
+        <div class="panel">
+          <div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">07:26 KST</span></div>
+          <div class="d-wrap">
+            <div class="d-name">공포·탐욕 지수<span class="ico">?</span></div>
+            <svg width="200" height="112" viewBox="0 0 200 112" style="max-width:100%">
+              <g fill="none" stroke-width="13" stroke-linecap="butt">
+                <path d="M18.0 100.0 A82 82 0 0 1 42.0 42.0" stroke="#FCA5A5"/>
+                <path d="M42.0 42.0 A82 82 0 0 1 87.2 19.0" stroke="#FDE68A"/>
+                <path d="M87.2 19.0 A82 82 0 0 1 112.8 19.0" stroke="#86EFAC"/>
+                <path d="M112.8 19.0 A82 82 0 0 1 158.0 42.0" stroke="#FDE68A"/>
+                <path d="M158.0 42.0 A82 82 0 0 1 182.0 100.0" stroke="#FCA5A5"/>
+              </g>
+              <g transform="rotate(7.98 100 100)">
+                <path d="M100 100 L100 42" stroke="#13151A" stroke-width="3" stroke-linecap="round"/>
+              </g>
+              <circle cx="100" cy="100" r="5.5" fill="#13151A"/>
+              <text x="14" y="112" font-size="10" fill="#9AA3AF">0 공포</text>
+              <text x="150" y="112" font-size="10" fill="#9AA3AF">탐욕 100</text>
+            </svg>
+            <div class="d-val num">54</div>
+            <div class="d-state" style="color:var(--calm-fg)">중립</div>
+            <div class="d-sub num">전일 58.2 · −3.7p</div>
+          </div>
+          <div class="mkt-row">
+            <div>
+              <div class="mkt-name">VIX 공포지수<span class="ico">?</span></div>
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <div class="mkt-val num">14.51</div><div class="mkt-chg down num">−4.60%</div>
+              </div>
+            </div>
+            <span class="badge calm">안정</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        공포·탐욕을 CNN 원본처럼 반원 다이얼로 크게 보여주고, VIX는 한 줄로 받칩니다.
+        <ul>
+          <li>가장 인상적이고 지표 성격(양 끝이 위험)이 형태로 드러남</li>
+          <li><b>단점</b> — 두 지표의 위계가 갈림(VIX가 부속처럼 보임). 세로 180px 이상 차지해서
+            사이드바 아래 카드가 밀림. SVG 각도 계산 코드가 추가로 필요</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

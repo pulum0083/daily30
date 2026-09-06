@@ -19,7 +19,7 @@ import math
 import os
 import re
 import sys
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from pathlib import Path
 
 import pytz
@@ -628,6 +628,13 @@ def _pick_detail_url(ticker: str, internal_type: str) -> str:
     return ""
 
 
+def _fmt_level(v, internal_type: str) -> str:
+    """MA 등 기준선 절대값 표시 문자열. 없으면 빈 문자열(지어내지 않는다)."""
+    if not isinstance(v, (int, float)):
+        return ""
+    return f"${v:,.2f}" if internal_type == "us" else f"{int(round(v)):,}원"
+
+
 def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> list:
     """analysis.stock_picks → 카드 컨텍스트.
     price/change는 candidates 실데이터로 덮어쓴다 (Claude 할루시네이션 방지).
@@ -696,6 +703,9 @@ def build_stock_picks(analysis: dict, market_data: dict, internal_type: str) -> 
             "target_pct": p.get("target_pct"),
             "stop": p.get("stop"),
             "stop_pct": p.get("stop_pct"),
+            # 손절 기준선(20일선) 실측 절대값 — 카드에 근거로 노출한다(2026-09-02).
+            # ⚠️ 아래 "ma20"은 미니차트용 **시리즈**다. 이름이 비슷하니 섞지 말 것.
+            "ma20_level": _fmt_level(p.get("ma20_level") or cand.get("ma20_level"), internal_type),
             "prices": cand.get("sparkline", []),
             "ma20": cand.get("ma20_sparkline", []),
             "ma200": cand.get("ma200_sparkline", []),
@@ -723,39 +733,22 @@ def _chg_cell(chg) -> dict:
 
 
 def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> list:
-    """시장 지표 사이드바. market_data_js 키를 표시 항목으로 매핑(있는 것만)."""
+    """시장 지표 사이드바 — VIX와 공포·탐욕 지수 두 항목만 표시한다.
+
+    2026-08-31에 나스닥·필라델피아 반도체·나스닥100 선물 행을 화면에서 뺐다(수집은 유지 —
+    분석 프롬프트와 다른 위젯이 계속 소비한다). 이 패널은 '지수 시세'가 아니라 '투자 심리'를
+    보여주는 자리다. 데이터가 없으면 그 행을 그리지 않는다(§0 — 없으면 비운다).
+    """
+    if internal_type not in ("kospi", "us"):
+        return []
     mdj = dict(market_data.get("market_data_js", {}))
     if "vix" not in mdj and market_data.get("vix"):
         mdj["vix"] = market_data["vix"]
-    if internal_type == "kospi":
-        # 원/달러(usdkrw)는 '지금 코스피 밴드'로 이관 — 사이드바에서 제외(중복 방지).
-        spec = [("나스닥", "nasdaq"), ("필라델피아 반도체", "sox"),
-                ("나스닥100 선물", "nq")]
-    else:
-        spec = [("나스닥100 선물", "nq"), ("나스닥", "nasdaq"),
-                ("필라델피아 반도체", "sox")]
     items = []
-    for name, key in spec:
-        d = mdj.get(key)
-        if not isinstance(d, dict):
-            continue
-        val = d.get("base", d.get("price"))
-        chg = d.get("chg", d.get("change_pct"))
-        if val is None:
-            continue
-        chg_cls = "up" if (chg or 0) >= 0 else "down"
-        items.append({
-            "name": name,
-            "val": f"{val:,.2f}" if isinstance(val, (int, float)) else str(val),
-            "chg": f"{'+' if (chg or 0) >= 0 else ''}{chg:.2f}%" if isinstance(chg, (int, float)) else str(chg),
-            "chg_cls": chg_cls,
-            "spark_id": f"c-{key}",
-            "spark_data": d.get("data", []),
-            "spark_color": "#E03131" if chg_cls == "up" else "#2775ED",
-        })
-    # VIX (코스피·미국 공통 — 데이터 있을 때만)
+
+    # VIX — S&P500 30일 내재변동성
     vix = mdj.get("vix")
-    if internal_type in ("kospi", "us") and isinstance(vix, dict) and vix.get("price") is not None:
+    if isinstance(vix, dict) and vix.get("price") is not None:
         p = vix["price"]
         lvls = [(15, "안정", "calm"), (20, "보통", "normal"), (30, "경계", "elevated"),
                 (40, "불안", "high"), (10 ** 9, "극단", "high")]
@@ -766,9 +759,97 @@ def build_market_items(market_data: dict, internal_type: str, gen_time: str) -> 
             "val": f"{p:.2f}",
             "chg": f"{'+' if cp >= 0 else ''}{cp:.2f}%",
             "chg_cls": "up" if cp >= 0 else "down",
-            "vix_level": lbl, "vix_level_cls": cls,
+            "badge": lbl, "badge_cls": cls,
         })
     return items
+
+
+def build_fng_dial(market_data: dict, internal_type: str) -> dict:
+    """공포·탐욕 지수 반원 다이얼. 데이터가 없거나 낡았으면 빈 dict → 섹션 생략(§0).
+
+    아치 좌표는 반지름 82 · 중심 (100,100)의 고정값이라 템플릿에 상수로 두고,
+    여기서는 바늘 각도만 계산한다. 0점=왼쪽(-90°), 100점=오른쪽(+90°)이므로
+    각도 = (점수 - 50) × 1.8.
+    """
+    if internal_type not in ("kospi", "us"):
+        return {}
+    mdj = market_data.get("market_data_js", {})
+    fng = mdj.get("fng")
+    if not isinstance(fng, dict) or not _fng_is_fresh(fng):
+        return {}
+    score = fng["score"]
+    label, cls = _fng_label(score, fng.get("rating"))
+    prev = fng.get("prev_close")
+    sub = ""
+    if isinstance(prev, (int, float)):
+        # 0~100 점수라 등락'률'이 아니라 포인트 차이로 보여준다.
+        d = score - prev
+        # 표시상 0.0p가 되는 구간은 아예 비운다 — '보합'이라는 틀린 주장을 막기 위함(§0).
+        # CNN은 미국 정규장이 열리기 전에 이미 직전 종가를 previous_close로 넘기는데,
+        # 새 세션 값은 아직 없어 score와 previous_close가 **완전히 같아진다**. 미국 브리핑은
+        # 21:15 KST(= 프리마켓)에 나가므로 이 구간에 정확히 걸리고, 비우지 않으면 매일
+        # '+0.0p'가 찍힌다(2026-08-31 확인). 소수 13자리가 우연히 일치할 일은 없으므로
+        # 이 조건은 사실상 '아직 갱신 안 됨'만 잡는다.
+        if abs(d) >= 0.05:
+            sub = f"전일 {prev:.1f} · {'+' if d >= 0 else ''}{d:.1f}p"
+    return {
+        "score": f"{score:.0f}",
+        "needle_deg": round((max(0.0, min(100.0, score)) - 50) * 1.8, 2),
+        "state": label,
+        "state_cls": cls,
+        "sub": sub,
+    }
+
+
+# CNN 등급 → 한국어 라벨. 뱃지 색은 기존 vix-badge 팔레트를 재사용한다 —
+# 공포·탐욕은 양쪽 끝이 모두 위험 구간이라 극단을 red(high), 그 안쪽을 yellow(elevated),
+# 중립을 green(calm)으로 둔다.
+_FNG_RATING_KO = {
+    "extreme fear":  ("극단적 공포", "high"),
+    "fear":          ("공포", "elevated"),
+    "neutral":       ("중립", "calm"),
+    "greed":         ("탐욕", "elevated"),
+    "extreme greed": ("극단적 탐욕", "high"),
+}
+
+
+def _fng_label(score: float, rating) -> tuple:
+    """CNN이 준 등급을 우선 쓰고, 없거나 모르는 값이면 점수 구간으로 되돌린다."""
+    hit = _FNG_RATING_KO.get((rating or "").strip().lower())
+    if hit:
+        return hit
+    for upper, key in ((25, "extreme fear"), (45, "fear"), (55, "neutral"), (75, "greed")):
+        if score < upper:
+            return _FNG_RATING_KO[key]
+    return _FNG_RATING_KO["extreme greed"]
+
+
+def _fng_is_fresh(fng: dict, max_age_days: int = 5, now=None) -> bool:
+    """수집이 조용히 죽었을 때 낡은 값을 계속 보여주지 않기 위한 신선도 게이트(§20).
+
+    CNN은 미국 정규장 기준으로 갱신되므로 주말·연휴엔 며칠 묵는 게 정상이다.
+    3일 연휴 + 주말을 감안해 5일까지 허용하고, 그보다 오래되면 행을 그리지 않는다.
+    """
+    if not isinstance(fng.get("score"), (int, float)):
+        return False
+    asof = fng.get("asof")
+    if not asof:
+        print("[generate_html] ⚠️ 공포·탐욕 지수에 수집 시각이 없어 표시하지 않습니다.", file=sys.stderr)
+        return False
+    try:
+        ts = datetime.fromisoformat(str(asof).replace("Z", "+00:00"))
+    except ValueError:
+        print(f"[generate_html] ⚠️ 공포·탐욕 지수 시각 파싱 실패: {asof}", file=sys.stderr)
+        return False
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    ref = now or datetime.now(timezone.utc)
+    age_days = (ref - ts).total_seconds() / 86400.0
+    if age_days > max_age_days:
+        print(f"[generate_html] ⚠️ 공포·탐욕 지수가 {age_days:.1f}일 지났습니다 — 표시 생략.",
+              file=sys.stderr)
+        return False
+    return True
 
 
 def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:
@@ -1371,6 +1452,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
+        ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
         tv = analysis.get("todays_view") or {}
@@ -1382,6 +1464,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_analyst_quotes(market_data))
         ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
+        ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더
@@ -2184,16 +2267,149 @@ def build_all_stocks():
     return results
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 브리핑 아카이브 (/briefings/)
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-09-02 신설. 그 전까지 /briefings/ 는 briefings-list.json을 fetch해서
+# 최신 브리핑으로 location.replace() 하는 1.7KB 리다이렉트 스텁이었다(본문 26자).
+# 발행본이 80편 넘게 쌓였는데 **과거 브리핑을 훑어볼 경로가 사실상 없었고**,
+# sitemap에는 그 스텁이 등재돼 크롤러에게 빈 페이지를 광고하고 있었다.
+#
+# ⚠️ 목록의 원본은 data/*.json이 아니라 **디스크에 커밋된 발행본**이다.
+#    로컬 analysis 파일이 stale일 때 아카이브가 오염되는 것을 구조적으로 막는다(§23·§28).
+# ⚠️ main.js patchBriefingList()는 `.bottom-list`를 찾아 최근 10일로 다시 그린다.
+#    아카이브는 `.arch-list`를 쓰므로 그 대상이 아니다 — 클래스를 바꾸지 말 것.
+# 하루 안에서도 **최신 발행이 위**로 온다 — 날짜가 최신순이므로 그래야 일관된다.
+# 발행 시각: 코스피 예측 07:25 → 마감 16:25 → 미국 21:15 이므로 역순으로 나열한다.
+# 이 순서가 곧 featured(맨 위 1편) 선정 순서이기도 하다 — 목록의 첫 항목이 featured다.
+# ⚠️ build_list_context의 types(사이드바 3열 목록)와는 별개다. 그쪽은 가로 배치라 발행
+#    순서대로 두는 게 자연스러우므로 함께 뒤집지 말 것.
+ARCHIVE_TYPES = ["us", "close", "kospi"]
+
+
+def _archive_headline(date_str: str, btype: str) -> str:
+    """발행본의 헤드라인. 스냅샷 → meta description 순으로 찾고, 없으면 빈 문자열."""
+    snap = BRIEFINGS_DIR / date_str / btype / "analysis_snapshot.json"
+    if snap.exists():
+        try:
+            d = load_json(snap)
+        except Exception:
+            d = {}
+        tv = d.get("todays_view") or {}
+        for cand in (tv.get("view_title"), d.get("reason_title"), d.get("market_title")):
+            if isinstance(cand, str) and cand.strip():
+                return cand.strip()
+    page = BRIEFINGS_DIR / date_str / btype / "index.html"
+    if page.exists():
+        m = re.search(r'<meta name="description" content="([^"]*)"', page.read_text(errors="ignore"))
+        if m and m.group(1).strip():
+            return html.unescape(m.group(1).strip())
+    return ""
+
+
+def _archive_dek(date_str: str, btype: str) -> str:
+    """발행본의 서브타이틀(한 문단 요약). 없으면 빈 문자열 — 지어내지 않는다(§0).
+
+    kospi·us는 `todays_view.dek`, close는 `sc_summary`가 같은 역할을 한다.
+    맨 위 최신 1편에만 쓰이므로(그 아래는 제목만) 여기서만 읽는다.
+    """
+    snap = BRIEFINGS_DIR / date_str / btype / "analysis_snapshot.json"
+    if not snap.exists():
+        return ""
+    try:
+        d = load_json(snap)
+    except Exception:
+        return ""
+    tv = d.get("todays_view") or {}
+    for cand in (tv.get("dek"), d.get("sc_summary")):
+        if isinstance(cand, str) and cand.strip():
+            return cand.strip()
+    return ""
+
+
+def build_archive_context() -> dict:
+    """발행된 브리핑을 디스크에서 훑어 월별 아카이브 목록을 만든다."""
+    if not BRIEFINGS_DIR.exists():
+        return {"months": [], "total": 0}
+    dates = sorted(
+        (p.name for p in BRIEFINGS_DIR.iterdir()
+         if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)),
+        reverse=True,
+    )
+    months, total, prev_month, featured_done = [], 0, None, False
+    for d in dates:
+        entries = []
+        for t in ARCHIVE_TYPES:
+            if not (BRIEFINGS_DIR / d / t / "index.html").exists():
+                continue
+            entry = {
+                "label": BRIEFING_LABELS[t],
+                "url": f"/briefings/{d}/{t}/",
+                "headline": _archive_headline(d, t),
+            }
+            # 목록 맨 위 최신 1편만 서브타이틀까지 보여준다(2026-09-04). 나머지는 제목만 —
+            # 전부 요약을 달면 목록이 길어져 훑어보기 어려워진다.
+            if not featured_done:
+                entry["dek"] = _archive_dek(d, t)
+                entry["featured"] = True
+                featured_done = True
+            entries.append(entry)
+        if not entries:
+            continue
+        total += len(entries)
+        dt = date.fromisoformat(d)
+        label = f"{dt.year}년 {dt.month}월"
+        if label != prev_month:
+            months.append({"label": label, "days": []})
+            prev_month = label
+        months[-1]["days"].append({
+            "date": d, "date_short": f"{dt.month}월 {dt.day}일",
+            "day_label": day_label(d),
+            # ⚠️ 키 이름을 items로 두면 Jinja가 dict.items 메서드를 먼저 잡아 렌더가 깨진다.
+            "briefings": entries,
+        })
+    return {"months": months, "total": total}
+
+
+def write_briefings_index():
+    """web/briefings/index.html — 정적 아카이브 목록을 생성한다."""
+    ctx = build_archive_context()
+    if not ctx["total"]:
+        print("[generate_html] 아카이브: 발행본 없음 — index.html 생략", file=sys.stderr)
+        return
+    env = make_env()
+    out = BRIEFINGS_DIR / "index.html"
+    out.write_text(
+        env.get_template("pages/briefings_index.html").render(
+            canonical_url=f"{SITE_BASE}/briefings/", **ctx),
+        encoding="utf-8")
+    # 로그용 상대경로 — BASE_DIR 밖이면 relative_to가 예외를 던진다(테스트의 tmp_path 등).
+    # 로그 한 줄 때문에 아카이브 생성이 죽으면 안 되므로 실패 시 절대경로로 떨어진다.
+    try:
+        shown = out.relative_to(BASE_DIR)
+    except ValueError:
+        shown = out
+    print(f"[generate_html] 아카이브 갱신: {shown} "
+          f"({ctx['total']}편 / {len(ctx['months'])}개월)")
+
+
 def write_sitemap_xml():
     """web/sitemap.xml 을 생성한다. generate_html 실행마다 자동 갱신."""
     BASE = "https://doubleshot.space"
     today = datetime.now(KST).strftime("%Y-%m-%d")
 
+    # ⚠️ `/` 는 vercel.json에서 `/stocks/`로 301 리다이렉트된다 — sitemap에 넣으면
+    #    "리디렉션이 있는 페이지"로 색인에서 제외되고 신호만 흐려진다. 도착지를 직접 등재한다.
+    # /about/·/legal/* 는 손으로 만든 정적 페이지라 자동 수집 대상이 아니었다.
+    # 심사·신뢰도 판단 때 가장 먼저 찾는 페이지들이므로 명시적으로 넣는다(2026-09-02 추가).
     urls = [
-        {"loc": f"{BASE}/",                              "changefreq": "daily",   "priority": "1.0"},
+        {"loc": f"{BASE}/stocks/",                       "changefreq": "daily",   "priority": "1.0"},
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
-        {"loc": f"{BASE}/stocks/",                        "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
+        {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
+        {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
+        {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
+        {"loc": f"{BASE}/legal/terms/",                  "changefreq": "yearly",  "priority": "0.3"},
     ]
 
     # ready 상태인 브리핑 페이지만 포함
@@ -2355,17 +2571,35 @@ _SECTOR_EMOJI = {
     "ship": "🚢", "bio": "🧬", "finance": "🏦", "power": "⚡",
 }
 
-# 섹터별 한 줄 설명 — 검색 유입·체류를 위한 본문 텍스트
-_SECTOR_DESC = {
-    "semicon": "메모리·시스템반도체·장비를 아우르는 한국 증시 대표 섹터예요. HBM·파운드리 업황과 외국인 수급에 민감하게 움직여요.",
-    "power": "변압기·전선·중전기 등 전력 인프라 종목이에요. AI 데이터센터와 노후 전력망 교체 수요로 구조적 성장 기대를 받아요.",
-    "defense": "항공·미사일·지상장비 등 국방 수출 종목이에요. 글로벌 지정학 리스크와 대규모 수주 사이클에 따라 움직여요.",
-    "ship": "상선·해양플랜트·특수선을 건조하는 조선 종목이에요. 친환경 선박 교체 수요와 수주 잔고, 선가 흐름이 핵심 변수예요.",
-    "battery": "배터리 셀·소재·장비 종목이에요. 전기차 수요와 미국 IRA·유럽 정책, 원자재 가격 변동에 민감해요.",
-    "auto": "완성차와 부품을 아우르는 자동차 종목이에요. 글로벌 판매·환율과 전동화 전환 속도가 실적을 좌우해요.",
-    "bio": "제약·바이오시밀러·신약개발 종목이에요. 임상 결과와 기술수출, 금리 환경에 따라 변동성이 큰 섹터예요.",
-    "finance": "은행·증권·보험 지주 종목이에요. 금리와 배당 정책, 정부 밸류업 정책의 영향을 크게 받아요.",
-}
+# 섹터 페이지 본문 카피는 scripts/config/sector_copy.json에 있다.
+# 2026-09-02에 파이썬 리터럴 딕셔너리에서 분리했다 — 소스에 긴 한국어 산문을 박아두면
+# 수정할 때마다 코드를 건드려야 하고, 그대로 방치되기 쉽다(§20).
+_SECTOR_COPY_PATH = CONFIG_DIR / "sector_copy.json"
+
+
+def _sector_copy(key: str) -> dict:
+    """섹터별 본문 카피. 파일·키가 없으면 빈 dict → 해당 문단이 렌더되지 않는다(§0)."""
+    if not _SECTOR_COPY_PATH.exists():
+        print(f"[generate_html] ⚠️ {_SECTOR_COPY_PATH.name} 없음 — 섹터 본문 생략", file=sys.stderr)
+        return {}
+    entry = load_json(_SECTOR_COPY_PATH).get(key)
+    return entry if isinstance(entry, dict) else {}
+
+
+def _sector_bellwether_links(key: str) -> list:
+    """섹터의 미국 벨웨더 중 **상세 페이지가 실제로 있는 것만** 링크로 낸다.
+
+    벨웨더는 stock_universe.json이 섹터별 미국 비교 대상으로 이미 정의해둔 값이고
+    (밤사이 브리지가 쓰는 그 목록), 여기서는 링크 대상으로 재사용한다.
+    ⚠️ 페이지 존재를 확인하고 링크한다 — 없는 페이지로 링크하면 죽은 링크가 된다(§36).
+    """
+    universe = load_json(CONFIG_DIR / "stock_universe.json").get("sectors", {})
+    out = []
+    for b in (universe.get(key, {}).get("bellwethers") or []):
+        t = (b.get("t") or "").lower()
+        if t and (WEB_DIR / "stocks" / "us" / t / "index.html").exists():
+            out.append({"name": b.get("name") or b.get("t"), "url": f"/stocks/us/{t}/"})
+    return out
 
 
 def build_sector_pages():
@@ -2439,7 +2673,8 @@ def build_sector_pages():
                 (sector["label"], f"/stocks/sector/{key}/"),
             ]))],
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
-            sector_desc=_SECTOR_DESC.get(key, ""),
+            sector_copy=_sector_copy(key),
+            bellwethers=_sector_bellwether_links(key),
             stocks=stocks,
             avg_pct=avg_pct,
             avg_pct_fmt=_fmt_pct(avg_pct),
@@ -2518,6 +2753,7 @@ def main():
 
     if args.write_list_only:
         write_briefings_list_json()
+        write_briefings_index()
         write_sitemap_xml()
         return
 
@@ -2526,6 +2762,7 @@ def main():
         if latest:
             update_vercel_briefings_route(latest[0], latest[1])
         write_briefings_list_json()
+        write_briefings_index()
         write_sitemap_xml()
         return
 
@@ -2556,6 +2793,7 @@ def main():
                       file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
+    write_briefings_index()
     write_sitemap_xml()
 
 

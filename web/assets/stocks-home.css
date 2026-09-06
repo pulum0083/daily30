@@ -386,6 +386,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sig-hero:hover .sig-go,.sig-row:hover .sig-go{opacity:1;}
 .sig-row:hover{background:var(--primary-bg);}
 .sig-hero:hover{background:var(--primary-bg);}
+/* 상세 페이지가 없는 신호 행 — 링크가 아니므로 클릭 어피던스를 주지 않는다(§36 존재-게이트) */
+.sig-hero.is-nolink,.sig-row.is-nolink{cursor:default;}
+.sig-hero.is-nolink:hover{background:linear-gradient(180deg,#FFF,#FBFCFE);}
+.sig-row.is-nolink:hover{background:var(--canvas);}
 /* 로딩 스켈레톤 — 특이신호·ETF 시황이 /api/signals 응답 전 빈칸으로 깜빡이는 레이아웃 시프트 방지 */
 @keyframes sklPulse{0%,100%{opacity:.5}50%{opacity:.85}}
 .skl{background:#EEF2F7;border-radius:6px;animation:sklPulse 1.1s ease-in-out infinite;}

@@ -1346,6 +1346,111 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
     return out
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 1단계(검색)와 2단계(정형화)는 요구 능력이 다르다 — 검색은 도구 호출 판단이 필요하고
+# 정형화는 주어진 텍스트를 옮겨 담기만 하면 된다. 실측상 flash-lite가 양쪽 다 해내므로
+# 같은 모델을 쓰되, 한쪽만 올리고 싶을 때 바꿀 자리를 분리해 둔다.
+SEARCH_STAGE_MODEL = "gemini-2.5-flash-lite"
+STRUCTURE_STAGE_MODEL = "gemini-2.5-flash-lite"
+
+# 2단계 수집 — ① 산문으로 검색시켜 출처를 받고 ② 그 산문을 JSON으로 정형화한다
+#
+# **왜 나눴나 (2026-08-26 실측)**: 한 번의 호출로 "검색해서 JSON으로 내라"를 시키면
+# gemini-2.5-flash-lite가 검색을 **아예 하지 않는다**. 프로덕션 프롬프트(4,038자)로
+# 2회 반복 측정한 결과 `web_search_queries`가 매번 **0건**이었고, 그러면서 587~625토큰의
+# 내용을 기억만으로 지어냈다("구체적인 수치는 검색 결과에 따라 추가" 같은 슬롯 문구가
+# 응답에 그대로 남아 있었다). 4,000자짜리 엄격한 스키마를 받으면 작은 모델은 이걸
+# 검색 과제가 아니라 **서식 채우기 과제**로 처리한다.
+#
+# 대조 실험으로 원인을 좁혔다.
+#   짧은 프롬프트 · 산문 출력       → 쿼리 2건, 출처 5건
+#   짧은 프롬프트 · "JSON만 출력"   → 쿼리 2건, 출처 **0건**
+#   프로덕션 프롬프트 · flash-lite  → 쿼리 **0건**
+#   "검색 의무" 프리픽스만 추가     → 쿼리 0건 (2회 모두 실패 — 지시만으론 안 된다)
+#   출력 형식 지시를 **무시하라**고 명시 → 쿼리 4~18건, 출처 4~17건 (3개 타입 × 2회 전부 성공)
+#
+# 즉 작동 요인은 "검색하라"는 지시가 아니라 **형식 압박을 걷어내는 것**이다.
+# 그래서 1단계에서는 스키마를 겨냥하지 않게 만들고, 정형화는 2단계로 분리한다.
+#
+# 이 구조는 §31이 처방한 "문서를 먼저 가져오고 LLM은 고르고 요약만" 으로 가는 징검다리다.
+# 최종 목표는 여전히 RSS 우선 수집(fetch_news_live·fetch_ib_korea_views가 쓰는 방식)이며,
+# 그쪽은 날짜·URL·출처가 실기사에서 그대로 오므로 날조가 구조적으로 불가능하다.
+_SEARCH_STAGE_WRAP = (
+    "너는 지금 **검색 단계**를 수행한다. 아래 지침은 '무엇을 찾아야 하는가'에 대한 것이다.\n"
+    "지침 안의 출력 형식(JSON·필드명·스키마) 지시는 이번 단계에서 **전부 무시**한다.\n\n"
+    "이번 단계의 규칙:\n"
+    "1. 반드시 google_search로 실제 검색을 먼저 수행한다. 기억에 의존해 답하지 않는다.\n"
+    "2. 결과는 JSON이 아니라 **한국어 산문**으로 쓴다. 코드블록·중괄호를 쓰지 않는다.\n"
+    "3. 검색으로 확인한 사실만 쓴다. 확인 안 된 것은 쓰지 않는다.\n"
+    "4. 각 사실마다 수치·날짜·출처 매체명을 함께 적는다.\n\n"
+    "──── 무엇을 찾을지에 대한 지침 (출력 형식 지시는 무시) ────\n"
+)
+
+# 2단계는 검색 도구를 주지 않는다 — 근거는 1단계 결과가 전부여야 한다.
+# 도구를 남겨두면 정형화 중에 새로 검색해 1단계 출처와 무관한 내용이 섞이고,
+# 그러면 출처 개수(1단계 측정치)와 본문이 서로 다른 것을 가리키게 된다.
+_STRUCTURE_STAGE_WRAP = (
+    "아래 '검색 결과'는 방금 google_search로 수집한 내용이다.\n"
+    "**이 검색 결과에 실제로 있는 사실만** 사용해 지침이 요구하는 JSON으로 정리한다.\n"
+    "검색 결과에 없는 내용을 추가·추정·보간하지 않는다. 해당 항목을 채울 근거가 없으면 "
+    "빈 배열로 둔다 — 비는 것이 지어내는 것보다 낫다.\n\n"
+    "──── 검색 결과 ────\n{evidence}\n\n"
+    "──── 출력 지침 ────\n"
+)
+
+
+def _grounding_sources(response) -> list:
+    """출처 매체명(도메인) 목록. 진단·로그용이며 판정에는 쓰지 않는다.
+
+    URI는 일부러 담지 않는다 — grounding_chunks의 uri는 만료되는 임시 리다이렉트라
+    저장해두면 나중에 깨진 링크가 된다(§11). 링크로 쓰려면 수집 시점에 원문 URL로
+    리졸브해야 하는데, 매 실행 20여 건을 리졸브하는 비용이 진단 가치보다 크다.
+    """
+    try:
+        gm = getattr((response.candidates or [None])[0], "grounding_metadata", None)
+        out = []
+        for ch in (getattr(gm, "grounding_chunks", None) or []):
+            title = getattr(getattr(ch, "web", None), "title", None)
+            if title and title not in out:
+                out.append(title)
+        return out
+    except Exception:
+        return []
+
+
+def _search_stage(client, types, prompt: str) -> tuple:
+    """1단계 — 실제 검색을 시켜 근거 텍스트·출처 수·출처 매체를 받는다.
+
+    반환 (근거 텍스트, 출처 수 or None, 출처 매체 목록).
+    출력이 산문이 아니라 JSON으로 나와도 그대로 쓴다 — 2단계 입력으로는 어느 형태든
+    상관없고, 중요한 건 **검색이 실제로 일어났는지**(출처 수)다.
+    """
+    r = client.models.generate_content(
+        model=SEARCH_STAGE_MODEL,
+        contents=_SEARCH_STAGE_WRAP + prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())],
+            temperature=0.3,
+            max_output_tokens=2000,
+        ),
+    )
+    return (r.text or "").strip(), _count_grounding_chunks(r), _grounding_sources(r)
+
+
+def _structure_stage(client, types, prompt: str, evidence: str) -> str:
+    """2단계 — 1단계 근거만으로 JSON을 만든다. 검색 도구 없음."""
+    r = client.models.generate_content(
+        model=STRUCTURE_STAGE_MODEL,
+        contents=_STRUCTURE_STAGE_WRAP.format(evidence=evidence) + prompt,
+        config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=1400),
+    )
+    if not r.text:
+        finish = (getattr(r.candidates[0], "finish_reason", "UNKNOWN")
+                  if r.candidates else "NO_CANDIDATES")
+        raise RuntimeError(f"Gemini 정형화 단계가 빈 응답 (finish_reason={finish})")
+    return r.text.strip()
+
+
 def fetch_and_summarize(briefing_type: str) -> dict:
     """Gemini Google Search grounding으로 최신 뉴스를 검색·요약해 dict로 반환한다."""
     try:
@@ -1383,19 +1488,22 @@ def fetch_and_summarize(briefing_type: str) -> dict:
             " 검색되지 않으면 억지로 만들지 않는다."
         )
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash-lite",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            tools=[types.Tool(google_search=types.GoogleSearch())],
-            temperature=0.3,
-            max_output_tokens=1400,
-        ),
-    )
-    if not response.text:
-        finish = getattr(response.candidates[0], 'finish_reason', 'UNKNOWN') if response.candidates else 'NO_CANDIDATES'
-        raise RuntimeError(f"Gemini returned empty response (finish_reason={finish})")
-    raw = response.text.strip()
+    # ── 1단계: 실제로 검색시킨다 (출처는 여기서만 붙는다 — 위 상수 주석의 실측 참조) ──
+    evidence, _gchunks, _sources = _search_stage(client, types, prompt)
+    print(f"[fetch_news] 1단계 검색 — 출처 "
+          f"{('%d건' % _gchunks) if _gchunks is not None else '조회불가'}"
+          f"{(' (' + ', '.join(_sources[:6]) + ')') if _sources else ''}",
+          file=sys.stderr)
+
+    if not evidence:
+        # 검색 단계가 빈손이면 정형화할 근거가 없다. 지어내게 두지 않고 여기서 끝낸다(§27).
+        print("[fetch_news] ⚠️ 1단계가 빈 응답 — 뉴스 없이 발행한다", file=sys.stderr)
+        return {"key_indicators": [], "catalysts": [], "headlines": [],
+                "market_sentiment": "neutral",
+                "grounding_failure": ["empty_search_stage"]}
+
+    # ── 2단계: 1단계 근거만으로 정형화한다 (검색 도구 없음) ──
+    raw = _structure_stage(client, types, prompt, evidence)
 
     # JSON 블록 추출 (마크다운 펜스·전후 텍스트 제거)
     if raw.startswith("```"):
@@ -1412,7 +1520,8 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     # ── ① 수집 결과 **전체**의 신뢰도를 원본 그대로 먼저 판정한다 ──────────────────
     # 반드시 정규화·게이트 **이전**이어야 한다. 게이트를 통과한 뒤 재면 스키마 위반은
     # 이미 지워져 있고(2026-08-04 실사고), 익명 플레이스홀더도 이미 제거된 뒤다.
-    _gchunks = _count_grounding_chunks(response)
+    # _gchunks는 **1단계**에서 잰 값이다. 2단계 응답에는 도구가 없어 출처가 아예 없으므로
+    # 거기서 재면 항상 0이 나와 매번 폐기된다 — 측정 지점을 옮기면 안 된다(§31 "게이트 앞뒤").
     _signals = _grounding_failure_signals(data, _load_today_calendar(briefing_type), _gchunks)
     print(f"[fetch_news] 그라운딩 출처 {('%d건' % _gchunks) if _gchunks is not None else '조회불가'}"
           f", 신호 {_signals or '없음'}", file=sys.stderr)
@@ -1421,7 +1530,8 @@ def fetch_and_summarize(briefing_type: str) -> dict:
         print("[fetch_news] 뉴스 없이 발행한다 — 방향이 틀린 브리핑보다 빈 섹션이 안전하다(§27).",
               file=sys.stderr)
         return {"key_indicators": [], "catalysts": [], "headlines": [],
-                "market_sentiment": "neutral", "grounding_failure": _signals}
+                "market_sentiment": "neutral", "grounding_failure": _signals,
+                "grounding_sources": _sources}
 
     # ── ② 정규화 경계 — 모든 게이트가 같은 본문을 보게 만든다 ─────────────────────
     # LLM이 키 이름을 바꿔도(text → catalyst) 게이트가 통째로 눈이 머는 일을 막는다.
@@ -1468,6 +1578,10 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     for _fld in ("headlines", "key_indicators"):
         if isinstance(data.get(_fld), list):
             data[_fld] = [_item_text(it) for it in data[_fld] if _item_text(it)]
+    # 진단용 — 이 수집이 실제로 어떤 매체를 근거로 삼았는지 파일에 남긴다. §31이 "출처가
+    # 몇 건 붙었는지를 매 수집마다 남기라"고 한 이유가, 그 한 줄이 없어서 무출처 생성이
+    # 석 달간 검증되지 않은 채 유지됐기 때문이다. 로그는 지나가지만 파일은 남는다.
+    data["grounding_sources"] = _sources
     return data
 
 

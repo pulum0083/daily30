@@ -8,19 +8,19 @@
 <title>🧬 바이오 주도주 — Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
 
-<meta name="description" content="바이오 섹터 6종목 · 섹터 평균 -1.43% · 종가·52주 레인지 실측">
+<meta name="description" content="바이오 섹터 6종목 · 섹터 평균 +0.58% · 종가·52주 레인지 실측">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Double-Shot">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://doubleshot.space/stocks/sector/bio/">
 <meta property="og:title" content="🧬 바이오 주도주 — Double-Shot">
-<meta property="og:description" content="바이오 섹터 6종목 · 섹터 평균 -1.43% · 종가·52주 레인지 실측">
+<meta property="og:description" content="바이오 섹터 6종목 · 섹터 평균 +0.58% · 종가·52주 레인지 실측">
 
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🧬 바이오 주도주 — Double-Shot">
-<meta name="twitter:description" content="바이오 섹터 6종목 · 섹터 평균 -1.43% · 종가·52주 레인지 실측">
+<meta name="twitter:description" content="바이오 섹터 6종목 · 섹터 평균 +0.58% · 종가·52주 레인지 실측">
 <meta name="twitter:image" content="https://doubleshot.space/assets/og-image.png">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"종목","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":3,"name":"바이오","item":"https://doubleshot.space/stocks/sector/bio/"}]}</script>
@@ -68,7 +68,40 @@
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-  .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
+  .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
+  .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
+  /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
+  .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
+  .sector-guide__title{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+    font-size:15px;font-weight:700;color:var(--ink);margin:0;padding:2px 0;user-select:none;}
+  .sector-guide__title::-webkit-details-marker{display:none;}
+  .sector-guide__title::after{content:'';width:5px;height:5px;border-right:1.5px solid var(--muted);
+    border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-guide[open] .sector-guide__title::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-guide[open] .sector-guide__title{margin-bottom:12px;}
+  .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
+  .sector-guide b{color:var(--ink);font-weight:600;}
+  .sector-guide .nowrap{white-space:nowrap;}
+  .sector-guide__note{font-size:12px;color:var(--muted);}
+  .sector-guide__note a{color:var(--primary);font-weight:600;}
+  /* 섹터 밖으로 나가는 문맥 링크 */
+  .sector-links{max-width:760px;margin:20px 0 4px;font-size:13px;}
+  .sector-links__row{margin:0 0 7px;color:#475569;line-height:1.7;}
+  .sector-links__label{display:inline-block;min-width:96px;font-size:11.5px;font-weight:600;color:var(--muted);}
+  .sector-links a{color:var(--primary);font-weight:600;}
+  .sector-links .sep{color:var(--muted);margin:0 3px;}
+  .sector-links__note{color:var(--muted);font-size:12px;}
+  @media(max-width:640px){ .sector-links__label{display:block;min-width:0;margin-bottom:2px;} }
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -153,13 +186,25 @@
     <span><a href="/stocks/">종목 홈</a> › 🧬 바이오</span>
   </div>
   <h1 class="sector-page-title">🧬 바이오 주도주</h1>
-  <p class="sector-page-sub">6종목 · 2026-08-21 기준 <span id="live-status" class="sector-live off" data-snap="2026-08-21"><span class="sl-dot"></span>장마감 · 2026-08-21 종가 기준</span></p>
+  <p class="sector-page-sub">6종목 · 2026-09-04 기준 <span id="live-status" class="sector-live off" data-snap="2026-09-04"><span class="sl-dot"></span>장마감 · 2026-09-04 종가 기준</span></p>
   <script>
   /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
     if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
   </script>
+  
+  
   <p class="sector-desc">제약·바이오시밀러·신약개발 종목이에요. 임상 결과와 기술수출, 금리 환경에 따라 변동성이 큰 섹터예요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">바이오는 이 목록에서 개별 이벤트 의존도가 가장 높은 섹터예요. 임상 결과 발표, 기술수출 계약, 규제기관 승인 여부 하나에 주가가 수십 퍼센트 움직여요. 실적이 아직 없는 기업이 많아서 밸류에이션도 현재 이익이 아니라 미래 현금흐름 기대에 기대고 있어요.</p>
+      <p class="sector-desc">그래서 금리에 민감해요. 먼 미래의 이익을 현재 가치로 환산하는 구조라, 금리가 오르면 같은 기대치라도 평가가 낮아져요. 반면 바이오시밀러·위탁생산(CMO)처럼 이미 매출이 나오는 쪽은 신약개발사보다 이벤트 변동성이 작고 실적 흐름을 따라가는 편이에요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -189,30 +234,35 @@
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
-      <div class="sector-stat__val down" id="st-avg">-1.43%</div>
+      <div class="sector-stat__val up" id="st-avg">+0.58%</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">상승</div>
-      <div class="sector-stat__val up" id="st-up">1</div>
+      <div class="sector-stat__val up" id="st-up">4</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">하락</div>
-      <div class="sector-stat__val down" id="st-down">5</div>
+      <div class="sector-stat__val down" id="st-down">1</div>
+    </div>
+    
+    <div class="sector-stat__box">
+      <div class="sector-stat__label">보합</div>
+      <div class="sector-stat__val flat" id="st-flat">1</div>
     </div>
     
   </div>
 
   <div class="sector-breadth">
-    <div class="sector-breadth__label" id="bd-label">시장폭 — 6종목 중 상승 1</div>
+    <div class="sector-breadth__label" id="bd-label">시장폭 — 6종목 중 상승 4</div>
     <div class="sector-breadth__bar">
-      <div class="sector-breadth__up" id="bd-up" style="flex:1"></div>
-      <div class="sector-breadth__dn" id="bd-dn" style="flex:5"></div>
-      
+      <div class="sector-breadth__up" id="bd-up" style="flex:4"></div>
+      <div class="sector-breadth__dn" id="bd-dn" style="flex:1"></div>
+      <div class="sector-breadth__fl" id="bd-fl" style="flex:1"></div>
     </div>
     <div class="sector-breadth__legend">
-      <span><i class="iu"></i>상승 <span id="lg-up">1</span></span>
-      <span><i class="id"></i>하락 <span id="lg-dn">5</span></span>
-      
+      <span><i class="iu"></i>상승 <span id="lg-up">4</span></span>
+      <span><i class="id"></i>하락 <span id="lg-dn">1</span></span>
+      <span><i class="in"></i>보합 <span id="lg-fl">1</span></span>
     </div>
   </div>
 
@@ -222,135 +272,135 @@
   </div>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="128940" data-spark20='[392000.0, 390500.0, 374500.0, 322000.0, 311500.0, 333500.0, 345500.0, 378000.0, 380000.0, 391000.0, 392500.0, 407500.0, 413000.0, 396000.0, 398500.0, 398500.0, 392000.0, 388500.0, 399000.0, 415500.0]'>
+    <div class="sector-card" data-code="128940" data-spark20='[392500.0, 407500.0, 413000.0, 396000.0, 398500.0, 398500.0, 392000.0, 388500.0, 399000.0, 415500.0, 540000.0, 501000.0, 530000.0, 504000.0, 509000.0, 492500.0, 492000.0, 474000.0, 460500.0, 473500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한미약품</span>
         <span class="sector-card__code">128940</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">415,500</span>
-        <span class="sector-card__pct up">+4.14%</span>
+        <span class="sector-card__close">473,500</span>
+        <span class="sector-card__pct up">+2.82%</span>
       </div>
       <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 279,000 – 626,000</div>
+      <div class="sector-card__range">52주 290,000 – 626,000</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill up" style="width:39.3%"></div>
-        <div class="sector-card__pos" style="left:39.3%"></div>
+        <div class="sector-card__posfill up" style="width:54.6%"></div>
+        <div class="sector-card__pos" style="left:54.6%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 39% 지점</div>
+      <div class="sector-card__poslbl">52주 중 55% 지점</div>
       
       
-      <div class="sector-card__fr">외국인 보유 14.8%</div>
+      <div class="sector-card__fr">외국인 보유 13.7%</div>
       
     </div>
     
-    <div class="sector-card" data-code="068270" data-spark20='[177600.0, 178700.0, 177400.0, 180000.0, 190000.0, 186700.0, 182200.0, 185800.0, 190300.0, 195000.0, 199300.0, 201000.0, 210500.0, 202000.0, 202000.0, 201000.0, 195500.0, 194100.0, 194100.0, 192300.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">셀트리온</span>
-        <span class="sector-card__code">068270</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">192,300</span>
-        <span class="sector-card__pct down">-0.93%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 159,400 – 236,861</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:42.5%"></div>
-        <div class="sector-card__pos" style="left:42.5%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 42% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 25.6%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="000100" data-spark20='[74900.0, 72000.0, 70700.0, 70300.0, 74000.0, 73500.0, 73600.0, 74800.0, 75100.0, 77800.0, 80600.0, 82000.0, 85600.0, 83100.0, 82500.0, 83700.0, 79600.0, 79600.0, 83400.0, 82300.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">유한양행</span>
-        <span class="sector-card__code">000100</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">82,300</span>
-        <span class="sector-card__pct down">-1.32%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 66,400 – 125,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:27.1%"></div>
-        <div class="sector-card__pos" style="left:27.1%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 27% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 20.4%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="207940" data-spark20='[1518000.0, 1545000.0, 1549000.0, 1479000.0, 1527000.0, 1485000.0, 1423000.0, 1476000.0, 1491000.0, 1514000.0, 1556000.0, 1569000.0, 1609000.0, 1549000.0, 1564000.0, 1548000.0, 1531000.0, 1544000.0, 1574000.0, 1551000.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">삼성바이오로직스</span>
-        <span class="sector-card__code">207940</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">1,551,000</span>
-        <span class="sector-card__pct down">-1.46%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 1,243,000 – 1,965,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:42.7%"></div>
-        <div class="sector-card__pos" style="left:42.7%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 43% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 13.2%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="326030" data-spark20='[80600.0, 81900.0, 79500.0, 75600.0, 77600.0, 79000.0, 78400.0, 79800.0, 82000.0, 83500.0, 85400.0, 88700.0, 90500.0, 88200.0, 87600.0, 87300.0, 85200.0, 85300.0, 86500.0, 83700.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">SK바이오팜</span>
-        <span class="sector-card__code">326030</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">83,700</span>
-        <span class="sector-card__pct down">-3.24%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 74,600 – 140,700</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:13.8%"></div>
-        <div class="sector-card__pos" style="left:13.8%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 14% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 12.5%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="196170" data-spark20='[231220.0, 240069.0, 228142.0, 217370.0, 215061.0, 237376.0, 244301.0, 267000.0, 277000.0, 293500.0, 305000.0, 348000.0, 327500.0, 317500.0, 317500.0, 314000.0, 298000.0, 303500.0, 339500.0, 320000.0]'>
+    <div class="sector-card" data-code="196170" data-spark20='[305000.0, 348000.0, 327500.0, 317500.0, 317500.0, 314000.0, 298000.0, 303500.0, 339500.0, 320000.0, 320500.0, 305500.0, 311500.0, 311500.0, 320000.0, 307500.0, 301000.0, 298500.0, 283000.0, 288500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">알테오젠</span>
         <span class="sector-card__code">196170</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">320,000</span>
-        <span class="sector-card__pct down">-5.74%</span>
+        <span class="sector-card__close">288,500</span>
+        <span class="sector-card__pct up">+1.94%</span>
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 206,213 – 430,123</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:50.8%"></div>
-        <div class="sector-card__pos" style="left:50.8%"></div>
+        <div class="sector-card__posfill up" style="width:36.8%"></div>
+        <div class="sector-card__pos" style="left:36.8%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 51% 지점</div>
+      <div class="sector-card__poslbl">52주 중 37% 지점</div>
       
       
-      <div class="sector-card__fr">외국인 보유 15.1%</div>
+      <div class="sector-card__fr">외국인 보유 14.4%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="068270" data-spark20='[199300.0, 201000.0, 210500.0, 202000.0, 202000.0, 201000.0, 195500.0, 194100.0, 194100.0, 192300.0, 194000.0, 189600.0, 193400.0, 191300.0, 190700.0, 188900.0, 188000.0, 186300.0, 187100.0, 188100.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">셀트리온</span>
+        <span class="sector-card__code">068270</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">188,100</span>
+        <span class="sector-card__pct up">+0.53%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 159,400 – 236,861</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill up" style="width:37.1%"></div>
+        <div class="sector-card__pos" style="left:37.1%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 37% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 25.4%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="326030" data-spark20='[85400.0, 88700.0, 90500.0, 88200.0, 87600.0, 87300.0, 85200.0, 85300.0, 86500.0, 83700.0, 86400.0, 84400.0, 91600.0, 88000.0, 88000.0, 87300.0, 89000.0, 86300.0, 86400.0, 86600.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">SK바이오팜</span>
+        <span class="sector-card__code">326030</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">86,600</span>
+        <span class="sector-card__pct up">+0.23%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 74,600 – 140,700</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill up" style="width:18.2%"></div>
+        <div class="sector-card__pos" style="left:18.2%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 18% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 12.3%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="000100" data-spark20='[80600.0, 82000.0, 85600.0, 83100.0, 82500.0, 83700.0, 79600.0, 79600.0, 83400.0, 82300.0, 84300.0, 83300.0, 86700.0, 82700.0, 84900.0, 83700.0, 82700.0, 81300.0, 81400.0, 81400.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">유한양행</span>
+        <span class="sector-card__code">000100</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">81,400</span>
+        <span class="sector-card__pct flat">0.00%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 66,400 – 125,000</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:25.6%"></div>
+        <div class="sector-card__pos" style="left:25.6%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 26% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 21.9%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="207940" data-spark20='[1556000.0, 1569000.0, 1609000.0, 1549000.0, 1564000.0, 1548000.0, 1531000.0, 1544000.0, 1574000.0, 1551000.0, 1573000.0, 1585000.0, 1599000.0, 1594000.0, 1486000.0, 1518000.0, 1520000.0, 1501000.0, 1477000.0, 1447000.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">삼성바이오로직스</span>
+        <span class="sector-card__code">207940</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">1,447,000</span>
+        <span class="sector-card__pct down">-2.03%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 1,243,000 – 1,965,000</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill " style="width:28.3%"></div>
+        <div class="sector-card__pos" style="left:28.3%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 28% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 13.1%</div>
       
     </div>
     
@@ -369,6 +419,34 @@
      </div>
    </aside>
   </div><!-- /.sector-cols -->
+
+  
+  <details class="sector-guide">
+    <summary class="sector-guide__title">이 페이지 읽는 법</summary>
+    <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
+      같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
+      앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
+      같은 섹터 안에서 종목을 비교할 때 특히 쓸모가 있어요.</p>
+    <p><b>외국인 보유율</b>은 발행주식 중 외국인이 들고 있는 비중이에요. 이 값 자체가 좋고 나쁨을 뜻하진 않지만,
+      비중이 높은 종목일수록 환율과 미국 시장 흐름에 함께 흔들리는 경향이 있어요. 비중이 높은데 외국인이
+      순매도로 돌아서면 수급 부담이 그만큼 커진다는 뜻이기도 해요.</p>
+    <p><b>섹터 평균과 시장폭</b>은 다른 이야기를 해요. 평균은 섹터가 전체적으로 어느 방향인지를 알려주고,
+      시장폭(상승/하락 종목 수)은 그 움직임이 섹터 전반에 퍼진 것인지 몇 종목이 끌고 간 것인지를 알려줘요.
+      평균은 플러스인데 상승 종목이 둘뿐이라면 대장주 한두 개가 지수를 들어 올린 것이고, 그건 섹터 전체가
+      좋아진 것과 다르게 봐야 해요.
+      오늘 바이오 섹터는 6종목 중
+      4종목이 오르고 1종목이 내렸고, 섹터 평균은 +0.58%예요.</p>
+    <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
+      투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
+  </details>
+
+  
+  <div class="sector-links">
+    
+    <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
+      <a href="/briefings/">브리핑 아카이브</a>
+      <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
+  </div>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>

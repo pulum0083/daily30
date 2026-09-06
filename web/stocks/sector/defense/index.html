@@ -8,19 +8,19 @@
 <title>🛡️ 방산 주도주 — Double-Shot</title>
 <meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
 
-<meta name="description" content="방산 섹터 5종목 · 섹터 평균 -6.80% · 종가·52주 레인지 실측">
+<meta name="description" content="방산 섹터 5종목 · 섹터 평균 +0.30% · 종가·52주 레인지 실측">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Double-Shot">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://doubleshot.space/stocks/sector/defense/">
 <meta property="og:title" content="🛡️ 방산 주도주 — Double-Shot">
-<meta property="og:description" content="방산 섹터 5종목 · 섹터 평균 -6.80% · 종가·52주 레인지 실측">
+<meta property="og:description" content="방산 섹터 5종목 · 섹터 평균 +0.30% · 종가·52주 레인지 실측">
 
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🛡️ 방산 주도주 — Double-Shot">
-<meta name="twitter:description" content="방산 섹터 5종목 · 섹터 평균 -6.80% · 종가·52주 레인지 실측">
+<meta name="twitter:description" content="방산 섹터 5종목 · 섹터 평균 +0.30% · 종가·52주 레인지 실측">
 <meta name="twitter:image" content="https://doubleshot.space/assets/og-image.png">
 
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"종목","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":3,"name":"방산","item":"https://doubleshot.space/stocks/sector/defense/"}]}</script>
@@ -68,7 +68,40 @@
   .sector-back:hover{border-color:var(--primary);color:var(--primary);}
   .sector-page-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-0.3px;}
   .sector-page-sub{font-size:12.5px;color:var(--muted);margin:0 0 10px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
-  .sector-desc{font-size:13.5px;line-height:1.65;color:#475569;margin:0 0 18px;max-width:680px;}
+  .sector-desc{font-size:13.5px;line-height:1.75;color:#475569;margin:0 0 10px;max-width:680px;word-break:keep-all;}
+  .sector-desc:last-of-type{margin-bottom:18px;}
+  /* 긴 섹터 설명 — 기본 접힘. 접혀 있어도 크롤러는 내용을 읽는다. */
+  .sector-more{margin:0 0 18px;max-width:680px;}
+  .sector-more__toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:var(--primary);padding:4px 0;user-select:none;}
+  .sector-more__toggle::-webkit-details-marker{display:none;}
+  .sector-more__toggle::after{content:'';width:5px;height:5px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-more[open] .sector-more__toggle::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-more__body{padding-top:6px;}
+  .sector-more__body .sector-desc:last-of-type{margin-bottom:0;}
+  /* 지표 해석 — 종목 테이블과 섹터 이동 칩 사이 */
+  .sector-guide{max-width:760px;margin:26px 0 4px;padding-top:20px;border-top:1px solid var(--hairline);}
+  .sector-guide__title{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+    font-size:15px;font-weight:700;color:var(--ink);margin:0;padding:2px 0;user-select:none;}
+  .sector-guide__title::-webkit-details-marker{display:none;}
+  .sector-guide__title::after{content:'';width:5px;height:5px;border-right:1.5px solid var(--muted);
+    border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translateY(-1px);transition:transform .15s;}
+  .sector-guide[open] .sector-guide__title::after{transform:rotate(-135deg) translateY(-1px);}
+  .sector-guide[open] .sector-guide__title{margin-bottom:12px;}
+  .sector-guide p{font-size:13.5px;line-height:1.8;color:#475569;margin:0 0 12px;word-break:keep-all;}
+  .sector-guide b{color:var(--ink);font-weight:600;}
+  .sector-guide .nowrap{white-space:nowrap;}
+  .sector-guide__note{font-size:12px;color:var(--muted);}
+  .sector-guide__note a{color:var(--primary);font-weight:600;}
+  /* 섹터 밖으로 나가는 문맥 링크 */
+  .sector-links{max-width:760px;margin:20px 0 4px;font-size:13px;}
+  .sector-links__row{margin:0 0 7px;color:#475569;line-height:1.7;}
+  .sector-links__label{display:inline-block;min-width:96px;font-size:11.5px;font-weight:600;color:var(--muted);}
+  .sector-links a{color:var(--primary);font-weight:600;}
+  .sector-links .sep{color:var(--muted);margin:0 3px;}
+  .sector-links__note{color:var(--muted);font-size:12px;}
+  @media(max-width:640px){ .sector-links__label{display:block;min-width:0;margin-bottom:2px;} }
 
   .sector-stat{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
   .sector-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 16px;flex:1;min-width:120px;}
@@ -153,13 +186,25 @@
     <span><a href="/stocks/">종목 홈</a> › 🛡️ 방산</span>
   </div>
   <h1 class="sector-page-title">🛡️ 방산 주도주</h1>
-  <p class="sector-page-sub">5종목 · 2026-08-21 기준 <span id="live-status" class="sector-live off" data-snap="2026-08-21"><span class="sl-dot"></span>장마감 · 2026-08-21 종가 기준</span></p>
+  <p class="sector-page-sub">5종목 · 2026-09-04 기준 <span id="live-status" class="sector-live off" data-snap="2026-09-04"><span class="sl-dot"></span>장마감 · 2026-09-04 종가 기준</span></p>
   <script>
   /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
     if(m>=540&&m<=930){var el=document.getElementById('live-status');if(el){el.className='sector-live on';el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 30초 갱신';}}})();
   </script>
+  
+  
   <p class="sector-desc">항공·미사일·지상장비 등 국방 수출 종목이에요. 글로벌 지정학 리스크와 대규모 수주 사이클에 따라 움직여요.</p>
+  
+  
+  <details class="sector-more">
+    <summary class="sector-more__toggle">이 섹터를 어떻게 보나요</summary>
+    <div class="sector-more__body">
+      <p class="sector-desc">방산은 다른 섹터와 수요 구조가 근본적으로 달라요. 고객이 정부이고 계약 단위가 수천억~수조 원이라, 한 건의 수주 공시가 몇 분기 실적을 한꺼번에 바꿔놓아요. 그래서 평소에는 조용하다가 수출 계약 소식에 섹터 전체가 함께 뛰는 패턴이 반복돼요.</p>
+      <p class="sector-desc">지정학 리스크가 커질 때 방산주가 오르는 건 맞지만, 분쟁 발생 자체보다는 그로 인해 각국 국방예산이 실제로 늘어나는지가 중요해요. 뉴스에 즉각 반응한 뒤 되돌리는 경우도 잦아서, 수주 잔고가 실제로 늘고 있는지를 함께 봐야 흐름이 이어지는지 판단할 수 있어요.</p>
+    </div>
+  </details>
+  
 
   <div class="sector-nav sector-nav--top">
     <div class="sector-nav__label">다른 섹터 보기</div>
@@ -189,29 +234,29 @@
   <div class="sector-stat">
     <div class="sector-stat__box">
       <div class="sector-stat__label">섹터 평균</div>
-      <div class="sector-stat__val down" id="st-avg">-6.80%</div>
+      <div class="sector-stat__val up" id="st-avg">+0.30%</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">상승</div>
-      <div class="sector-stat__val up" id="st-up">0</div>
+      <div class="sector-stat__val up" id="st-up">4</div>
     </div>
     <div class="sector-stat__box">
       <div class="sector-stat__label">하락</div>
-      <div class="sector-stat__val down" id="st-down">5</div>
+      <div class="sector-stat__val down" id="st-down">1</div>
     </div>
     
   </div>
 
   <div class="sector-breadth">
-    <div class="sector-breadth__label" id="bd-label">시장폭 — 5종목 중 상승 0</div>
+    <div class="sector-breadth__label" id="bd-label">시장폭 — 5종목 중 상승 4</div>
     <div class="sector-breadth__bar">
-      <div class="sector-breadth__up" id="bd-up" style="flex:0"></div>
-      <div class="sector-breadth__dn" id="bd-dn" style="flex:5"></div>
+      <div class="sector-breadth__up" id="bd-up" style="flex:4"></div>
+      <div class="sector-breadth__dn" id="bd-dn" style="flex:1"></div>
       
     </div>
     <div class="sector-breadth__legend">
-      <span><i class="iu"></i>상승 <span id="lg-up">0</span></span>
-      <span><i class="id"></i>하락 <span id="lg-dn">5</span></span>
+      <span><i class="iu"></i>상승 <span id="lg-up">4</span></span>
+      <span><i class="id"></i>하락 <span id="lg-dn">1</span></span>
       
     </div>
   </div>
@@ -222,110 +267,110 @@
   </div>
   <div class="sector-stock-list">
     
-    <div class="sector-card" data-code="047810" data-spark20='[158100.0, 146200.0, 143000.0, 117500.0, 120700.0, 127300.0, 123700.0, 137500.0, 146500.0, 150100.0, 154200.0, 154100.0, 135500.0, 144100.0, 151200.0, 146400.0, 140000.0, 135700.0, 134700.0, 130000.0]'>
+    <div class="sector-card" data-code="047810" data-spark20='[154200.0, 154100.0, 135500.0, 144100.0, 151200.0, 146400.0, 140000.0, 135700.0, 134700.0, 130000.0, 130700.0, 130900.0, 132100.0, 137600.0, 133100.0, 131000.0, 127200.0, 122600.0, 125000.0, 126500.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한국항공우주</span>
         <span class="sector-card__code">047810</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">130,000</span>
-        <span class="sector-card__pct down">-3.49%</span>
+        <span class="sector-card__close">126,500</span>
+        <span class="sector-card__pct up">+1.20%</span>
       </div>
       <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 86,600 – 202,000</div>
+      <div class="sector-card__range">52주 93,500 – 202,000</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:37.6%"></div>
-        <div class="sector-card__pos" style="left:37.6%"></div>
+        <div class="sector-card__posfill up" style="width:30.4%"></div>
+        <div class="sector-card__pos" style="left:30.4%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 38% 지점</div>
+      <div class="sector-card__poslbl">52주 중 30% 지점</div>
       
       
-      <div class="sector-card__fr">외국인 보유 23.7%</div>
+      <div class="sector-card__fr">외국인 보유 23.6%</div>
       
     </div>
     
-    <div class="sector-card" data-code="064350" data-spark20='[158400.0, 132500.0, 122600.0, 120100.0, 120500.0, 133700.0, 129700.0, 139900.0, 147700.0, 144200.0, 146900.0, 150200.0, 141400.0, 146500.0, 147600.0, 146900.0, 143200.0, 136300.0, 137200.0, 130100.0]'>
-      <div class="sector-card__head">
-        <span class="sector-card__name">현대로템</span>
-        <span class="sector-card__code">064350</span>
-      </div>
-      <div class="sector-card__price">
-        <span class="sector-card__close">130,100</span>
-        <span class="sector-card__pct down">-5.17%</span>
-      </div>
-      <div class="sector-card__spark"></div>
-      <div class="sector-card__range">52주 120,100 – 269,000</div>
-      <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:6.7%"></div>
-        <div class="sector-card__pos" style="left:6.7%"></div>
-      </div>
-      <div class="sector-card__poslbl">52주 중 7% 지점</div>
-      
-      
-      <div class="sector-card__fr">외국인 보유 39.4%</div>
-      
-    </div>
-    
-    <div class="sector-card" data-code="272210" data-spark20='[68200.0, 63000.0, 61200.0, 54200.0, 55100.0, 62500.0, 63100.0, 69100.0, 72400.0, 70100.0, 70700.0, 77200.0, 72900.0, 75600.0, 79600.0, 80300.0, 79900.0, 76000.0, 75300.0, 70300.0]'>
+    <div class="sector-card" data-code="272210" data-spark20='[70700.0, 77200.0, 72900.0, 75600.0, 79600.0, 80300.0, 79900.0, 76000.0, 75300.0, 70300.0, 70100.0, 72700.0, 73400.0, 77900.0, 75800.0, 73200.0, 70600.0, 66900.0, 68000.0, 68800.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한화시스템</span>
         <span class="sector-card__code">272210</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">70,300</span>
-        <span class="sector-card__pct down">-6.64%</span>
+        <span class="sector-card__close">68,800</span>
+        <span class="sector-card__pct up">+1.18%</span>
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 45,350 – 162,700</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:21.3%"></div>
-        <div class="sector-card__pos" style="left:21.3%"></div>
+        <div class="sector-card__posfill up" style="width:20.0%"></div>
+        <div class="sector-card__pos" style="left:20.0%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 21% 지점</div>
+      <div class="sector-card__poslbl">52주 중 20% 지점</div>
       
       
       <div class="sector-card__fr">외국인 보유 10.5%</div>
       
     </div>
     
-    <div class="sector-card" data-code="012450" data-spark20='[979000.0, 899000.0, 875000.0, 810000.0, 865000.0, 917000.0, 919000.0, 1004000.0, 1007000.0, 1054000.0, 1097000.0, 1152000.0, 1098000.0, 1156000.0, 1185000.0, 1160000.0, 1146000.0, 1177000.0, 1167000.0, 1085000.0]'>
+    <div class="sector-card" data-code="012450" data-spark20='[1097000.0, 1152000.0, 1098000.0, 1156000.0, 1185000.0, 1160000.0, 1146000.0, 1177000.0, 1167000.0, 1085000.0, 1105000.0, 1102000.0, 1087000.0, 1150000.0, 1157000.0, 1102000.0, 1058000.0, 1025000.0, 1047000.0, 1055000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">한화에어로스페이스</span>
         <span class="sector-card__code">012450</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">1,085,000</span>
-        <span class="sector-card__pct down">-7.03%</span>
+        <span class="sector-card__close">1,055,000</span>
+        <span class="sector-card__pct up">+0.76%</span>
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 810,000 – 1,537,000</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:37.8%"></div>
-        <div class="sector-card__pos" style="left:37.8%"></div>
+        <div class="sector-card__posfill up" style="width:33.7%"></div>
+        <div class="sector-card__pos" style="left:33.7%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 38% 지점</div>
+      <div class="sector-card__poslbl">52주 중 34% 지점</div>
       
       
-      <div class="sector-card__fr">외국인 보유 45.5%</div>
+      <div class="sector-card__fr">외국인 보유 45.4%</div>
       
     </div>
     
-    <div class="sector-card" data-code="079550" data-spark20='[762000.0, 696000.0, 697000.0, 620000.0, 641000.0, 699000.0, 699000.0, 801000.0, 798000.0, 702000.0, 741000.0, 823000.0, 760000.0, 788000.0, 837000.0, 815000.0, 795000.0, 796000.0, 787000.0, 695000.0]'>
+    <div class="sector-card" data-code="064350" data-spark20='[146900.0, 150200.0, 141400.0, 146500.0, 147600.0, 146900.0, 143200.0, 136300.0, 137200.0, 130100.0, 134200.0, 133600.0, 136400.0, 138600.0, 139100.0, 136200.0, 130300.0, 122900.0, 126400.0, 126800.0]'>
+      <div class="sector-card__head">
+        <span class="sector-card__name">현대로템</span>
+        <span class="sector-card__code">064350</span>
+      </div>
+      <div class="sector-card__price">
+        <span class="sector-card__close">126,800</span>
+        <span class="sector-card__pct up">+0.32%</span>
+      </div>
+      <div class="sector-card__spark"></div>
+      <div class="sector-card__range">52주 120,100 – 269,000</div>
+      <div class="sector-card__posbar">
+        <div class="sector-card__posfill up" style="width:4.5%"></div>
+        <div class="sector-card__pos" style="left:4.5%"></div>
+      </div>
+      <div class="sector-card__poslbl">52주 중 4% 지점</div>
+      
+      
+      <div class="sector-card__fr">외국인 보유 39.5%</div>
+      
+    </div>
+    
+    <div class="sector-card" data-code="079550" data-spark20='[741000.0, 823000.0, 760000.0, 788000.0, 837000.0, 815000.0, 795000.0, 796000.0, 787000.0, 695000.0, 717000.0, 718000.0, 710000.0, 745000.0, 734000.0, 694000.0, 685000.0, 655000.0, 665000.0, 652000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">LIG넥스원</span>
         <span class="sector-card__code">079550</span>
       </div>
       <div class="sector-card__price">
-        <span class="sector-card__close">695,000</span>
-        <span class="sector-card__pct down">-11.69%</span>
+        <span class="sector-card__close">652,000</span>
+        <span class="sector-card__pct down">-1.95%</span>
       </div>
       <div class="sector-card__spark"></div>
       <div class="sector-card__range">52주 364,500 – 1,020,000</div>
       <div class="sector-card__posbar">
-        <div class="sector-card__posfill " style="width:50.4%"></div>
-        <div class="sector-card__pos" style="left:50.4%"></div>
+        <div class="sector-card__posfill " style="width:43.9%"></div>
+        <div class="sector-card__pos" style="left:43.9%"></div>
       </div>
-      <div class="sector-card__poslbl">52주 중 50% 지점</div>
+      <div class="sector-card__poslbl">52주 중 44% 지점</div>
       
       
       <div class="sector-card__fr">외국인 보유 27.1%</div>
@@ -347,6 +392,34 @@
      </div>
    </aside>
   </div><!-- /.sector-cols -->
+
+  
+  <details class="sector-guide">
+    <summary class="sector-guide__title">이 페이지 읽는 법</summary>
+    <p><b>52주 중 N% 지점</b>은 지난 1년 최저가를 0%, 최고가를 100%로 놓았을 때 현재가가 어디쯤인지를 나타내요.
+      같은 <span class="nowrap">-3%</span>라도 90% 지점에서 밀린 것과 20% 지점에서 밀린 것은 의미가 달라요.
+      앞은 고점 부담이 쌓인 상태고, 뒤는 이미 오래 눌려 있던 자리예요. 절대 가격만으로는 안 보이는 위치 정보라
+      같은 섹터 안에서 종목을 비교할 때 특히 쓸모가 있어요.</p>
+    <p><b>외국인 보유율</b>은 발행주식 중 외국인이 들고 있는 비중이에요. 이 값 자체가 좋고 나쁨을 뜻하진 않지만,
+      비중이 높은 종목일수록 환율과 미국 시장 흐름에 함께 흔들리는 경향이 있어요. 비중이 높은데 외국인이
+      순매도로 돌아서면 수급 부담이 그만큼 커진다는 뜻이기도 해요.</p>
+    <p><b>섹터 평균과 시장폭</b>은 다른 이야기를 해요. 평균은 섹터가 전체적으로 어느 방향인지를 알려주고,
+      시장폭(상승/하락 종목 수)은 그 움직임이 섹터 전반에 퍼진 것인지 몇 종목이 끌고 간 것인지를 알려줘요.
+      평균은 플러스인데 상승 종목이 둘뿐이라면 대장주 한두 개가 지수를 들어 올린 것이고, 그건 섹터 전체가
+      좋아진 것과 다르게 봐야 해요.
+      오늘 방산 섹터는 5종목 중
+      4종목이 오르고 1종목이 내렸고, 섹터 평균은 +0.30%예요.</p>
+    <p class="sector-guide__note">모든 수치는 화면 상단에 표시된 기준 시점에 토스증권·네이버 금융에서 수집한 실측값이에요.
+      투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
+  </details>
+
+  
+  <div class="sector-links">
+    
+    <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
+      <a href="/briefings/">브리핑 아카이브</a>
+      <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
+  </div>
 
   <div class="sector-nav">
     <div class="sector-nav__label">다른 섹터 보기</div>

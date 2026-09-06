@@ -269,7 +269,7 @@ reasons, watch_items, us_linked_story 등 모든 출력에서, 시장 데이터 
 ✅ 허용 예: "EWY가 <b>+5.20%</b> 폭등해 외국인 자금 유입이 강하게 나타나고 있어요." (EWY change_pct는 데이터에 존재)
 
 **[필수 규칙 5-1] 공포탐욕지수(Fear & Greed Index) 언급 전면 금지**
-CNN Fear & Greed Index(공포탐욕지수)는 수집 데이터에 포함되지 않는다. 어떤 섹션(reasons, watch_items, us_linked_story, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
+CNN Fear & Greed Index(공포탐욕지수)는 사이드바 표시용으로만 수집되며 이 프롬프트에 주어지지 않는다. 즉 네가 쓰는 어떤 수치도 실측이 아니다. 어떤 섹션(reasons, watch_items, us_linked_story, scenario 등)에서도 공포탐욕지수 수치나 레벨(공포/탐욕/극단적 공포 등)을 언급하지 않는다. 뉴스 요약에 수치가 포함되어 있더라도 그대로 인용하지 않는다.
 
 **[필수 규칙 6] 원/달러 환율 수치는 반드시 `usdkrw.price`를 사용한다**
 환율을 언급해야 하는 모든 섹션(reasons, us_linked_story, watch_items 등)에서 원/달러 환율 숫자는 시장 데이터의 `usdkrw.price` 값만 사용한다.
@@ -760,6 +760,52 @@ def _session_label_directive(date_str: str, briefing_type: str,
         f"오늘({date_str})이 참조하는 직전 미국장은 **{prev} ({label})**이다. "
         f"어젯밤 미국장은 열리지 않았으므로 **'간밤'·'어젯밤'·'밤사이'라고 쓰지 말고 "
         f"'{label}'로 쓴다.** 국내 직전 거래일도 같은 날이다.\n\n"
+    )
+
+
+def _index_position_directive(analysis_data: dict | None) -> str:
+    """주요 지수가 52주 고·저 대비 어디에 있는지를 프롬프트에 명시한다.
+
+    등락률만 보면 "+0.32% 상승"에서 "사상 최고 수준을 다시 확인했다"로 넘어가는 비약을
+    막을 근거가 모델에게 없다. 2026-08-24·2026-08-26 코스피 아침 브리핑이 둘 다 이
+    비약을 저질렀고(실측 S&P500은 52주 고점 대비 -1.6%), §28 게이트가 스칼라 산문에서
+    잡아 **발행을 통째로 차단**했다 — 그날 브리핑이 아예 안 나갔다.
+
+    게이트는 최종 방어선이라 그대로 두고(자동 교정이 불가능한 산문은 차단이 맞다),
+    애초에 모델이 그 주장을 안 하도록 실측 위치를 미리 준다. 임계 1%는 게이트의
+    `snap["level"] < snap["high_52w"] * 0.99` 와 같은 값이다 — 두 곳이 어긋나면
+    프롬프트가 허용한 표현을 게이트가 막는 모순이 생기므로 함께 바꾼다.
+    """
+    idx = (analysis_data or {}).get("index_52w") or {}
+    rows = []
+    for label, d in idx.items():
+        if not isinstance(d, dict):
+            continue
+        price, hi, lo = d.get("price"), d.get("high_52w"), d.get("low_52w")
+        if not (price and hi and lo):
+            continue
+        from_hi = d.get("pct_from_52w_high")
+        if from_hi is None:
+            from_hi = (price - hi) / hi * 100
+        near_high = price >= hi * 0.99
+        near_low = price <= lo * 1.01
+        verdict = ("52주 고점권 — 최고 표현 가능" if near_high
+                   else "52주 저점권 — 최저 표현 가능" if near_low
+                   else "고점도 저점도 아님 — 최상급 표현 금지")
+        rows.append(f"- {label}: 현재 {price:,.2f} / 52주 고점 {hi:,.2f} "
+                    f"({from_hi:+.2f}%) / 52주 저점 {lo:,.2f} → {verdict}")
+    if not rows:
+        return ""
+
+    return (
+        "## 지수 최상급 표현 규칙 (반드시 지킬 것)\n\n"
+        "'사상 최고'·'최고치 경신'·'신고가'·'역대 최고' 같은 표현은 그 지수가 **52주 고점의 "
+        "99% 이상**일 때만 쓴다. '사상 최저'·'신저가'도 52주 저점의 101% 이하일 때만 쓴다.\n"
+        "그날 올랐다는 사실만으로 최고 표현을 쓰지 않는다 — 상승과 신고가는 다른 주장이다.\n\n"
+        + "\n".join(rows) +
+        "\n\n위 실측이 '최상급 표현 금지'인 지수에 최고·최저 표현을 쓰면 발행 검증에서 "
+        "차단돼 브리핑이 아예 나가지 못한다. 대신 '상승 마감'·'고점권에서 버티는 중'처럼 "
+        "실측이 뒷받침하는 표현을 쓴다.\n\n"
     )
 
 
@@ -1371,6 +1417,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += _session_label_directive(date_str, briefing_type, news_summary)
     user_content += _calendar_tense_directive(analysis_data)
+    user_content += _index_position_directive(analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"
@@ -1453,7 +1500,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
 
         response = client.messages.create(
             model="claude-sonnet-5",
-            max_tokens=4096,
+            # 2026-09-04 사고: 4096에서 응답이 잘려 JSON 파싱이 3회 모두 실패했다.
+            # 그날 전에도 성공한 실행들이 Output=4096으로 **정확히 상한에 붙어** 있었다 —
+            # 우연히 JSON이 닫히면 통과하고 아니면 터지는 상태로 한동안 돌고 있었다.
+            # 상한을 올려도 실제 출력이 늘지는 않는다(모델이 필요한 만큼만 쓴다).
+            max_tokens=16000,
             thinking={"type": "disabled"},
             system=[
                 {
@@ -1466,6 +1517,13 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
                 {"role": "user", "content": user_content}
             ],
         )
+
+        # 잘림은 JSON 파싱 오류로 위장돼 원인 파악을 늦춘다 — 먼저 명시적으로 잡는다.
+        if getattr(response, "stop_reason", None) == "max_tokens":
+            raise RuntimeError(
+                f"Claude 응답이 max_tokens에서 잘렸습니다 (출력 {response.usage.output_tokens} 토큰). "
+                "JSON이 미완성이라 파싱이 실패합니다 — max_tokens를 올려야 합니다."
+            )
 
         # Log cache usage if available
         usage = response.usage
@@ -1573,6 +1631,42 @@ def render_outputs(briefing_type: str, date_str: str, analysis: dict, no_html: b
         sys.exit(1)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# API 호출 실패 알림
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-08-31 사고: 크레딧 소진으로 마감 브리핑이 죽었는데 아무에게도 알림이 가지
+# 않았다. 잡은 failure로 끝났지만 GHA는 아무도 안 보고 있어서, 사용자가 몇 시간 뒤
+# 직접 발견했다. 발행이 통째로 멈추는 실패는 반드시 사람에게 도달해야 한다(§32).
+_API_FAIL_HINTS = (
+    ("credit balance", "Anthropic 크레딧 소진 — Console → Plans & Billing에서 충전해야 합니다. "
+                       "충전 전까지 모든 브리핑이 같은 이유로 실패합니다."),
+    ("authentication", "ANTHROPIC_API_KEY 인증 실패 — 키가 만료·회수됐는지 확인하세요."),
+    ("permission", "API 키 권한 부족 — 키 스코프를 확인하세요."),
+    ("rate limit", "레이트 리밋 — 잠시 뒤 재실행하면 풀릴 수 있습니다."),
+)
+
+
+def alert_api_failure(briefing_type: str, date_str: str, err: Exception) -> None:
+    """Claude API 호출 실패를 관리자 텔레그램으로 알린다. 절대 예외를 올리지 않는다."""
+    try:
+        text = str(err)
+        low = text.lower()
+        hint = next((h for k, h in _API_FAIL_HINTS if k in low), "")
+        lines = [
+            "🚨 브리핑 발행 실패 — Claude API 호출 오류",
+            f"종류: {briefing_type} / {date_str}",
+        ]
+        if hint:
+            lines.append(f"원인: {hint}")
+        lines.append(f"오류: {text[:400]}")
+        # 평문으로 보낸다 — 오류 문자열에 <> 가 섞여도 서식 때문에 알림이 죽지 않게(§37).
+        from send_telegram import send_admin_alert
+        send_admin_alert("\n".join(lines))
+    except Exception as e:
+        # 알림 실패가 원래 오류를 가리면 안 된다.
+        print(f"[call_claude] 관리자 알림 실패: {e}", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Call Claude API with Prompt Caching")
     parser.add_argument("--type", choices=["kospi", "us", "kospi-close"], required=True)
@@ -1619,6 +1713,7 @@ def main():
             analysis = call_claude_closing(date_str)
         except Exception as e:
             print(f"[call_claude] ERROR: {e}", file=sys.stderr)
+            alert_api_failure("kospi-close", date_str, e)
             sys.exit(1)
 
         save_analysis("kospi-close", analysis)
@@ -1631,6 +1726,7 @@ def main():
         analysis = call_claude(args.type, date_str, force_direction=args.force_direction)
     except Exception as e:
         print(f"[call_claude] ERROR calling Claude API: {e}", file=sys.stderr)
+        alert_api_failure(args.type, date_str, e)
         sys.exit(1)
 
     save_analysis(args.type, analysis)
