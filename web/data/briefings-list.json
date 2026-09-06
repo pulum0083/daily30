@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-07": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-07/kospi/",
+        "headline": "고용 쇼크에도 반도체는 웃었다 — 오늘의 진짜 신호",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-04": {
       "kospi": {
         "state": "ready",
@@ -748,20 +767,6 @@
         "headline": "선물은 웃는데 VIX는 더 웃는다 — FOMC 앞두고 낙폭 되돌리는 장",
         "title": "—",
         "time": ""
-      }
-    },
-    "2026-07-24": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
       }
     }
   }
