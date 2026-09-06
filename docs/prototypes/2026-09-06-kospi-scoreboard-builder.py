@@ -111,7 +111,12 @@ banner = ('<div class="proto-banner">프로토타입 — 2026-09-04 발행 코�
 src = src.replace("<body", banner + "\n<body", 1) if "<body" in src else src
 anchor = '<div class="open-section">\n  <div class="open-section__title us-linked-title">'
 assert anchor in src, "주입 지점 못 찾음"
-src = src.replace(anchor, section + anchor, 1)
+# 기존 '간밤 미국 시장 이슈'(us_issues) 섹션을 통째로 걷어내고 그 자리에 스코어보드를 놓는다.
+i = src.index(anchor)
+j = src.index("</div>\n</div>", i) + len("</div>\n</div>")
+removed = src[i:j]
+assert "간밤 미국 시장 이슈" in removed, "제거 대상이 아님"
+src = src[:i] + section.rstrip() + src[j:]
 out = pathlib.Path("docs/prototypes/2026-09-06-kospi-briefing-with-scoreboard.html")
 out.write_text(src, encoding="utf-8")
 print("생성:", out, len(src), "bytes")
