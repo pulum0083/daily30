@@ -175,3 +175,28 @@ def test_replay_2026_09_04_session():
 
     assert [c["verdict_text"] for c in cards] == ["3중 1 적중", "4건 전부", "적중"]
     assert cards[2]["result_line"].startswith("전기차가 "), cards[2]["result_line"]
+
+
+# ── 미국 휴장일 다음날 섹션 생략 (2026-09-07 노동절 케이스) ──────────
+import datetime  # noqa: E402
+from session_label import us_session_to_score  # noqa: E402
+
+
+def test_labor_day_monday_still_scores_friday():
+    """월요일이 미국 휴장이어도 그날 코스피 브리핑은 금요일 세션을 처음 채점한다."""
+    assert us_session_to_score(datetime.date(2026, 9, 7)) == datetime.date(2026, 9, 4)
+
+
+def test_day_after_us_holiday_has_nothing_new_to_score():
+    """화요일엔 직전 미국장이 여전히 금요일 — 어제 이미 보여준 결과라 섹션을 생략한다."""
+    assert us_session_to_score(datetime.date(2026, 9, 8)) is None
+
+
+def test_normal_weekday_scores_previous_night():
+    assert us_session_to_score(datetime.date(2026, 9, 9)) == datetime.date(2026, 9, 8)
+    assert us_session_to_score(datetime.date(2026, 9, 4)) == datetime.date(2026, 9, 3)
+
+
+def test_monday_after_normal_friday_scores_friday():
+    """평범한 월요일은 금요일 밤 미국장을 채점한다 — 휴장 규칙이 이걸 막으면 안 된다."""
+    assert us_session_to_score(datetime.date(2026, 8, 31)) == datetime.date(2026, 8, 28)

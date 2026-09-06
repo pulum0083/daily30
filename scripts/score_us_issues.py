@@ -34,7 +34,7 @@ from pathlib import Path
 import pytz
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from session_label import prev_us_session, us_session_label  # noqa: E402
+from session_label import us_session_to_score, us_session_label  # noqa: E402
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -234,9 +234,18 @@ def main():
 
     today = (datetime.strptime(args.date, "%Y-%m-%d").date() if args.date
              else datetime.now(KST).date())
-    session = prev_us_session(today)
+    session = us_session_to_score(today)
     if session is None:
-        print("[score_us_issues] 직전 미국장을 찾지 못함 — 건너뜀", file=sys.stderr)
+        # 미국이 쉬어 새 세션이 없다 — 직전 세션은 어제 브리핑에서 이미 채점했다.
+        # 같은 결과를 이틀 연속 내보내지 않는다.
+        print("[score_us_issues] 새로 채점할 미국 세션이 없음(직전 세션은 이미 채점됨) — 섹션 생략",
+              file=sys.stderr)
+        OUT_PATH.write_text(json.dumps({
+            "generated_at": datetime.now(KST).isoformat(),
+            "briefing_date": str(today),
+            "us_session_date": None,
+            "cards": [],
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
         return 0
 
     issues = load_us_issues(session)

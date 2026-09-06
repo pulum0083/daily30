@@ -273,13 +273,18 @@ def _read_us_issue_results(target_date: str):
         return data
     try:
         from datetime import date as _d
-        from session_label import prev_us_session
+        from session_label import us_session_to_score
         y, m, dd = (int(x) for x in target_date.split("-"))
-        expected = prev_us_session(_d(y, m, dd))
+        expected = us_session_to_score(_d(y, m, dd))
     except Exception:
         return data
     got = data.get("us_session_date")
-    if expected and got != str(expected):
+    if expected is None:
+        # 미국 휴장으로 새 세션이 없는 날 — 직전 세션은 어제 이미 채점했다.
+        # 채점 스텝이 실패해 어제 결과 파일이 남아 있어도 여기서 막는다.
+        print("[generate_html] 새로 채점할 미국 세션이 없어 이슈 결과 섹션을 생략합니다.")
+        return None
+    if got != str(expected):
         print(f"[generate_html] ⚠️ us_issue_results 세션 불일치({got} ≠ {expected}) — 섹션 생략")
         return None
     return data

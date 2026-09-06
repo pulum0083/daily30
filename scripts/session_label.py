@@ -46,6 +46,30 @@ def prev_kospi_session(d: _date) -> _date | None:
     return None
 
 
+def us_session_to_score(d: _date) -> _date | None:
+    """d(코스피 브리핑 날짜)에서 **새로 채점할** 미국 세션. 없으면 None.
+
+    직전 미국장이 직전 코스피 브리핑보다 오래됐다면 그 세션은 **이미 지난 브리핑에서
+    채점됐다** — 다시 보여주면 같은 결과가 이틀 연속 나간다. 미국이 쉬는 날(노동절 등)에
+    정확히 이 상황이 만들어진다.
+
+        금 9/4  코스피 브리핑 → 9/3 세션 채점
+        월 9/7  미국 휴장(노동절). 코스피 브리핑 → 9/4 세션 채점
+        화 9/8  직전 미국장이 여전히 9/4 → **이미 어제 보여준 결과** → None (섹션 생략)
+        수 9/9  직전 미국장 9/8 → 정상 채점
+
+    한국이 쉬고 미국만 열린 날은 반대로 문제가 없다 — 직전 미국장이 직전 코스피
+    브리핑보다 최신이라 그대로 채점된다.
+    """
+    us = prev_us_session(d)
+    if us is None:
+        return None
+    ko = prev_kospi_session(d)
+    if ko is not None and us < ko:
+        return None
+    return us
+
+
 def _label_for(d: _date, prev: _date | None, same_night: str) -> str:
     if prev is None:
         return "직전 미국장"
