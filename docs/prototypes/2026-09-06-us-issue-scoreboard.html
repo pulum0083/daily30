@@ -1,0 +1,330 @@
+<!-- 미국 브리핑 이슈의 결과를 다음날 코스피 브리핑에서 채점해 보여주는 새 섹션 프로토타입(3안 비교) -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>US 이슈 결과 스코어보드 — 3안 비교</title>
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
+}
+html.dark{
+  --canvas:#1C1D1F;--surface-soft:#242628;--surface-inset:#2A2B2D;
+  --hairline:#3C3E40;--ink:#F3F5F7;--muted:#888B90;
+  --primary:#1C82FF;--primary-bg:rgba(28,130,255,.12);
+  --up:#F74B53;--up-bg:rgba(247,75,83,.15);--dn:#1C82FF;--dn-bg:rgba(0,110,255,.15);
+  --gold:#E0B252;--gold-bg:rgba(224,178,82,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-font-smoothing:antialiased;}
+body{font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+     background:var(--surface-soft);color:var(--ink);word-break:keep-all;padding:28px 18px 80px;}
+.wrap{max-width:660px;margin:0 auto;}
+
+/* ── 프로토타입 크롬(실제 브리핑에는 없음) ── */
+.proto-head{margin-bottom:26px;}
+.proto-head h1{font-size:19px;font-weight:800;letter-spacing:-.02em;}
+.proto-head p{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.7;}
+.proto-head code{background:var(--surface-inset);padding:1px 5px;border-radius:4px;font-size:12px;}
+.toggle{position:fixed;top:14px;right:14px;z-index:9;background:var(--canvas);border:1px solid var(--hairline);
+        border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;}
+.variant{margin-top:34px;}
+.variant__tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;
+  background:var(--gold-bg);color:var(--gold);padding:4px 10px;border-radius:999px;margin-bottom:6px;}
+.variant__note{font-size:12.5px;color:var(--muted);line-height:1.7;margin:8px 0 15px;}
+.panel{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px 18px;}
+
+/* ── 실제 브리핑 스타일(style.css에서 그대로 가져옴) ── */
+.open-section__title{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.open-section__title::before{content:'';display:block;width:3px;height:12px;background:var(--primary);border-radius:2px;flex-shrink:0;}
+.us-badge{display:inline-flex;align-items:center;gap:4px;background:var(--primary-bg);color:var(--primary);
+  font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;margin-right:6px;line-height:1;}
+.issue-list{display:flex;flex-direction:column;gap:12px;}
+.issue-card{border:1px solid var(--hairline);border-radius:var(--r-md);padding:15px 16px;background:var(--canvas);}
+.issue-card__title{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.4;}
+.issue-list--numbered{counter-reset:issue;}
+.issue-list--numbered .issue-card__title{display:flex;align-items:center;gap:8px;}
+.issue-list--numbered .issue-card__title::before{counter-increment:issue;content:counter(issue);flex:0 0 20px;width:20px;height:20px;
+  border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;}
+.issue-card__impact{display:flex;flex-direction:column;gap:7px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--hairline);}
+.imp-side{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.imp-arrow{font-size:11px;font-weight:800;flex-shrink:0;line-height:1.3;}
+.imp-label{font-size:12px;font-weight:800;flex-shrink:0;}
+.imp-side.down .imp-arrow,.imp-side.down .imp-label{color:var(--dn);}
+.imp-side.up .imp-arrow,.imp-side.up .imp-label{color:var(--up);}
+.imp-tickers{display:flex;gap:6px;flex-wrap:wrap;}
+.imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
+
+/* ── 새 요소: 채점 표시 ── */
+.res-tk{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+  padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
+.res-tk .pct{font-variant-numeric:tabular-nums;font-weight:800;}
+.res-tk.hit{background:var(--up-bg);color:var(--up);}
+.res-tk.hit.dnmove{background:var(--dn-bg);color:var(--dn);}
+.res-tk.miss{background:var(--surface-inset);color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
+.res-mark{font-size:10px;font-weight:900;}
+
+.verdict{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;flex-shrink:0;letter-spacing:-.2px;}
+.verdict.all{background:var(--up-bg);color:var(--up);}
+.verdict.part{background:var(--gold-bg);color:var(--gold);}
+.verdict.none{background:var(--surface-inset);color:var(--muted);}
+
+.reshead{display:flex;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--hairline);}
+.reshead__txt{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.5;}
+.proxy-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.sec-foot{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.6;}
+.sec-foot a{color:var(--primary);font-weight:700;}
+</style>
+</head>
+<body>
+<button class="toggle" onclick="document.documentElement.classList.toggle('dark')">🌓 다크</button>
+<div class="wrap">
+
+<div class="proto-head">
+  <h1>미국 이슈 결과 스코어보드 — 3안 비교</h1>
+  <p>
+    9월 4일(금) 21:15 미국 브리핑이 내건 이슈 4건을, 그날 밤 미국 정규장(ET 9/4) 마감 실측으로 채점한 것이다.
+    다음 코스피 브리핑이 월요일(9/7)이라 <code>session_label</code>이 자동으로 <b>“지난 금요일”</b>로 라벨을 잡는 실제 케이스다.<br>
+    <b>표시된 등락률은 전부 실측이다</b> — <code>_fetch_us_realdata()</code>로 방금 조회한 값이고 손으로 넣은 숫자가 없다.
+  </p>
+</div>
+
+<!-- ══════════════ A안 ══════════════ -->
+<div class="variant">
+  <span class="variant__tag">A안 · 종목별 채점만</span>
+  <div class="variant__note">
+    어제 카드를 그대로 다시 놓고 티커 배지만 <b>등락률 + 적중 여부</b>로 바꾼다. 판정 문구를 새로 만들지 않으므로
+    추가되는 텍스트가 0이다. 부분 적중은 배지 색으로 저절로 드러난다(1번 카드).
+  </div>
+  <div class="panel">
+    <div class="open-section__title">
+      <span class="us-badge">🇺🇸 US</span> 지난 금요일 이슈, 이렇게 끝났어요
+    </div>
+    <div class="issue-list issue-list--numbered">
+
+      <div class="issue-card">
+        <div class="issue-card__title">국채금리 급락에 나스닥 급등 — 어제 랠리의 배경</div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">성장주·빅테크</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">NVDA <span class="pct">+0.84%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk miss">MSFT <span class="pct">−2.04%</span></span>
+              <span class="res-tk miss">AMZN <span class="pct">−0.15%</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">오늘 밤 고용지표 3종 세트 — 금리 기대의 다음 테스트</div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">지수 전반</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">S&amp;P500 <span class="pct">−0.38%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+          <div class="proxy-note">※ 종목이 지정되지 않은 “지수 전반”은 S&amp;P500 실측으로 채점했어요.</div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">메모리·반도체 장비주, 프리마켓에서도 강세 지속</div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">메모리·반도체 장비</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">MU <span class="pct">+6.10%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">AMAT <span class="pct">+4.31%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">KLAC <span class="pct">+7.32%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">LRCX <span class="pct">+5.12%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">테슬라, 홀로 약세 — 개별 종목 리스크</div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">전기차</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">TSLA <span class="pct">−5.92%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="sec-foot">ET 9/4 정규장 종가 기준 실측이에요. · <a href="#">지난 금요일 미국 브리핑 보기 →</a></div>
+  </div>
+</div>
+
+<!-- ══════════════ B안 ══════════════ -->
+<div class="variant">
+  <span class="variant__tag">B안 · 이슈 단위 판정 배지 추가</span>
+  <div class="variant__note">
+    A안에 카드 우상단 <b>판정 배지</b>를 얹는다. 훑어볼 때 4건 중 몇 건이 맞았는지가 한눈에 잡히고,
+    부분 적중을 <b>“3중 1”</b>처럼 정직하게 쓴다. 배지 문구는 적중 수를 세어 만드는 것이라 여전히 결정론이다.
+  </div>
+  <div class="panel">
+    <div class="open-section__title">
+      <span class="us-badge">🇺🇸 US</span> 지난 금요일 이슈, 이렇게 끝났어요
+    </div>
+    <div class="issue-list issue-list--numbered">
+
+      <div class="issue-card">
+        <div class="issue-card__title">국채금리 급락에 나스닥 급등 — 어제 랠리의 배경
+          <span class="verdict part">3중 1 적중</span></div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">성장주·빅테크</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">NVDA <span class="pct">+0.84%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk miss">MSFT <span class="pct">−2.04%</span></span>
+              <span class="res-tk miss">AMZN <span class="pct">−0.15%</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">오늘 밤 고용지표 3종 세트 — 금리 기대의 다음 테스트
+          <span class="verdict all">적중</span></div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">지수 전반</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">S&amp;P500 <span class="pct">−0.38%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+          <div class="proxy-note">※ 종목이 지정되지 않은 “지수 전반”은 S&amp;P500 실측으로 채점했어요.</div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">메모리·반도체 장비주, 프리마켓에서도 강세 지속
+          <span class="verdict all">4건 전부</span></div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">메모리·반도체 장비</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">MU <span class="pct">+6.10%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">AMAT <span class="pct">+4.31%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">KLAC <span class="pct">+7.32%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">LRCX <span class="pct">+5.12%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">테슬라, 홀로 약세 — 개별 종목 리스크
+          <span class="verdict all">적중</span></div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">전기차</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">TSLA <span class="pct">−5.92%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="sec-foot">ET 9/4 정규장 종가 기준 실측이에요. · <a href="#">지난 금요일 미국 브리핑 보기 →</a></div>
+  </div>
+</div>
+
+<!-- ══════════════ C안 ══════════════ -->
+<div class="variant">
+  <span class="variant__tag">C안 · 결과 한 줄을 앞세움</span>
+  <div class="variant__note">
+    B안에 더해, 채점 수치에서 <b>기계적으로 조립한 한 줄</b>을 카드에 넣는다(“4종목 전부 올랐어요 · 평균 +5.71%”).
+    LLM이 쓰는 문장이 아니라 <b>템플릿 + 실측</b>이라 §0을 지키면서도 읽는 맛이 생긴다. 대신 세로 길이가 가장 길다.
+  </div>
+  <div class="panel">
+    <div class="open-section__title">
+      <span class="us-badge">🇺🇸 US</span> 지난 금요일 이슈, 이렇게 끝났어요
+    </div>
+    <div class="issue-list issue-list--numbered">
+
+      <div class="issue-card">
+        <div class="issue-card__title">국채금리 급락에 나스닥 급등 — 어제 랠리의 배경
+          <span class="verdict part">3중 1 적중</span></div>
+        <div class="reshead"><div class="reshead__txt">성장주·빅테크 3종목 중 <b>1종목만 올랐어요</b> · 평균 −0.45%</div></div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">성장주·빅테크</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">NVDA <span class="pct">+0.84%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk miss">MSFT <span class="pct">−2.04%</span></span>
+              <span class="res-tk miss">AMZN <span class="pct">−0.15%</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">오늘 밤 고용지표 3종 세트 — 금리 기대의 다음 테스트
+          <span class="verdict all">적중</span></div>
+        <div class="reshead"><div class="reshead__txt">지수 전반이 <b>내렸어요</b> · S&amp;P500 −0.38%</div></div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">지수 전반</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">S&amp;P500 <span class="pct">−0.38%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+          <div class="proxy-note">※ 종목이 지정되지 않은 “지수 전반”은 S&amp;P500 실측으로 채점했어요.</div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">메모리·반도체 장비주, 프리마켓에서도 강세 지속
+          <span class="verdict all">4건 전부</span></div>
+        <div class="reshead"><div class="reshead__txt">메모리·반도체 장비 <b>4종목 전부 올랐어요</b> · 평균 +5.71%</div></div>
+        <div class="issue-card__impact">
+          <div class="imp-side up">
+            <span class="imp-arrow">▲</span><span class="imp-label">메모리·반도체 장비</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit">MU <span class="pct">+6.10%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">AMAT <span class="pct">+4.31%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">KLAC <span class="pct">+7.32%</span><span class="res-mark">✓</span></span>
+              <span class="res-tk hit">LRCX <span class="pct">+5.12%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card">
+        <div class="issue-card__title">테슬라, 홀로 약세 — 개별 종목 리스크
+          <span class="verdict all">적중</span></div>
+        <div class="reshead"><div class="reshead__txt">전기차가 <b>내렸어요</b> · TSLA −5.92%</div></div>
+        <div class="issue-card__impact">
+          <div class="imp-side down">
+            <span class="imp-arrow">▼</span><span class="imp-label">전기차</span>
+            <span class="imp-tickers">
+              <span class="res-tk hit dnmove">TSLA <span class="pct">−5.92%</span><span class="res-mark">✓</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="sec-foot">ET 9/4 정규장 종가 기준 실측이에요. · <a href="#">지난 금요일 미국 브리핑 보기 →</a></div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
