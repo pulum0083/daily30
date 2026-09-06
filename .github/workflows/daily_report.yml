@@ -104,6 +104,11 @@ jobs:
           mkdir -p data web/briefings
           python3 scripts/fetch_data.py --type kospi
 
+      - name: 🇺🇸 직전 미국장 이슈 채점 (실측, 실패해도 발행 계속)
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python3 scripts/score_us_issues.py
+
       - name: 📰 뉴스 요약 (Gemini Flash)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
