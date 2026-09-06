@@ -952,7 +952,7 @@ _SUPERLATIVE_LOW_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|
 # 발견되면 발행을 차단한다 — 산문은 자동 수정이 불가능하고, 틀린 전제 위에 쓰인 글이라
 # 문장 하나만 지워도 나머지 서사가 그대로 남기 때문이다.
 _SUPERLATIVE_LIST_FIELDS = (
-    "us_issues", "key_drivers", "watch_items", "telegram_signals", "reasons", "issues",
+    "key_drivers", "watch_items", "telegram_signals", "reasons", "issues",
 )
 
 

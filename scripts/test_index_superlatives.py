@@ -61,7 +61,7 @@ def test_list_item_dropped_scalar_blocks(monkeypatch=None):
     va._index_extremes = lambda sym: REAL.get(sym)
     try:
         a = {
-            "us_issues": [
+            "issues": [
                 {"title": "나스닥 사상 최고치 경신", "body": "간밤 나스닥이 신고가를 썼어요"},
                 {"title": "정상 항목", "body": "SOX가 <b>-4.49%</b> 밀렸어요"},
             ],
@@ -69,7 +69,7 @@ def test_list_item_dropped_scalar_blocks(monkeypatch=None):
         }
         corr, warn, blocks = [], [], []
         validate_index_superlatives(a, corr, warn, blocks)
-        assert len(a["us_issues"]) == 1, a["us_issues"]
+        assert len(a["issues"]) == 1, a["issues"]
         assert corr and not blocks
 
         a2 = {"why": "간밤 나스닥이 사상 최고치를 경신했어요."}

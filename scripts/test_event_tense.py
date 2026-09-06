@@ -56,14 +56,14 @@ def test_preview_wording_far_from_keyword_is_not_flagged():
 
 
 def test_list_items_are_removed():
-    analysis = {"us_issues": [
+    analysis = {"issues": [
         {"title": "FOMC 결과 발표 대기 속 국채금리 상승", "body": "긴장감이 높아지고 있어요."},
         {"title": "메모리 반등", "body": "저가 매수세가 유입돼요."},
     ]}
     corrections, warnings, blocks = [], [], []
     va.validate_event_tense(analysis, CAL, corrections, warnings, blocks)
-    assert len(analysis["us_issues"]) == 1
-    assert analysis["us_issues"][0]["title"] == "메모리 반등"
+    assert len(analysis["issues"]) == 1
+    assert analysis["issues"][0]["title"] == "메모리 반등"
     assert corrections and not blocks
 
 
