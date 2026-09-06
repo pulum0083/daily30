@@ -34,8 +34,8 @@
                 {% include "sections/why_what_so.html" %}
               {% endif %}
             {% endif %}
-            {# 간밤 미국 시장 이슈 — 어제 국내 마감 다음, 오늘 예측 앞. 항목 없으면 자동 생략. #}
-            {% if us_issues %}{% include "sections/_us_issues.html" %}{% endif %}
+            {# 직전 미국장 이슈의 실측 채점 결과 — 어제 국내 마감 다음, 오늘 예측 앞. 카드 없으면 자동 생략. #}
+            {% if us_issue_cards %}{% include "sections/us_issue_results.html" %}{% endif %}
             {% if todays_view %}{% include "sections/prediction_strip.html" %}{% else %}{% include "sections/prediction.html" %}{% endif %}
             {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             <div class="divider"></div>

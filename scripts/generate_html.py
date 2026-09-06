@@ -223,7 +223,7 @@ def _strip_issue_numbers(text: str) -> str:
     return out.strip()
 
 
-def _us_issues_label(target_date: str) -> str:
+def _prev_us_session_label(target_date: str) -> str:
     """섹션 제목의 '간밤' 표기. 월요일·휴일 다음날은 직전 미국장이 어제가 아니므로
     '지난 금요일'처럼 실제 세션을 가리킨다 (2026-07-27 실사고)."""
     try:
@@ -235,24 +235,54 @@ def _us_issues_label(target_date: str) -> str:
         return "간밤"
 
 
-def build_us_issues(analysis: dict, target_date: str = "") -> dict:
-    """analysis.us_issues → 코스피 아침 브리핑 '직전 미국장' 이슈 리스트.
-    title 없는 항목·미검색 placeholder 문장은 제외한다. (US 저녁 브리핑 build_issues의 경량판)"""
-    out = []
-    for it in (analysis.get("us_issues") or []):
-        if not isinstance(it, dict):
-            continue
-        title = (it.get("title") or "").strip()
-        body = (it.get("body") or "").strip()
-        # '확인되지 않았습니다'·'관련 뉴스 없음' 류 미검색 placeholder는 이슈가 아니므로 제외
-        joined = re.sub(r"<[^>]+>", "", f"{title} {body}")
-        if not title or any(p in joined for p in ("확인되지 않", "확인되지않", "관련 뉴스는", "뉴스가 없", "검색 결과에서 확인")):
-            continue
-        out.append({"title": title, "body": body})
+def build_us_issue_results(analysis: dict, target_date: str = "") -> dict:
+    """직전 미국장 이슈 채점 결과 → 코스피 아침 브리핑 '이렇게 끝났어요' 섹션.
+
+    **스냅샷이 1순위다.** 결과를 analysis에 주입해 두면 generate_html이 analysis를 통째로
+    analysis_snapshot.json에 저장하므로, 나중에 재생성할 때 §2 규칙대로 스냅샷이 먼저 쓰이고
+    그 시점 시세를 다시 조회하지 않는다 — 별도 저장 장치가 필요 없다.
+
+    데이터 파일을 쓸 때는 세션 날짜를 대조한다. 다른 실행이 남긴 파일이 엉뚱한 날짜 브리핑을
+    오염시키는 것을 막는다(§14와 같은 처방). 결과가 없으면 빈 리스트 — 섹션이 통째로 생략된다.
+    """
+    label = _prev_us_session_label(target_date) if target_date else "간밤"
+    results = analysis.get("us_issue_results")
+    if not isinstance(results, dict):
+        results = _read_us_issue_results(target_date)
+        if results is not None:
+            analysis["us_issue_results"] = results   # 스냅샷에 함께 저장된다
+    cards = (results or {}).get("cards") or []
     return {
-        "us_issues": out[:2],  # 최대 2개 (프롬프트 지시의 하드 백스톱)
-        "us_issues_label": _us_issues_label(target_date) if target_date else "간밤",
+        "us_issue_cards": [c for c in cards if isinstance(c, dict)],
+        "us_issue_label": (results or {}).get("session_label") or label,
+        "us_issue_session": (results or {}).get("us_session_date", ""),
     }
+
+
+def _read_us_issue_results(target_date: str):
+    """data/us_issue_results.json 을 읽되 대상 세션이 맞을 때만 돌려준다."""
+    path = DATA_DIR / "us_issue_results.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] us_issue_results 파싱 실패: {e}")
+        return None
+    if not target_date:
+        return data
+    try:
+        from datetime import date as _d
+        from session_label import prev_us_session
+        y, m, dd = (int(x) for x in target_date.split("-"))
+        expected = prev_us_session(_d(y, m, dd))
+    except Exception:
+        return data
+    got = data.get("us_session_date")
+    if expected and got != str(expected):
+        print(f"[generate_html] ⚠️ us_issue_results 세션 불일치({got} ≠ {expected}) — 섹션 생략")
+        return None
+    return data
 
 
 def build_issues(analysis: dict) -> dict:
@@ -310,7 +340,7 @@ def build_overnight_bridge(market_data: dict) -> dict:
     이 섹션은 선택 섹션이다 — 행 하나가 깨져 있다고 07:25 브리핑 전체를 죽이면 안 된다
     (§0 부칙). market_data는 latest_kospi.json에서 오는데, §23/§28 정정 절차로 사람이
     직접 손으로 고치는 파일이라 필드가 null이거나 타입이 틀린 실제 실패 모드가 있다.
-    build_us_issues가 컨테이너가 아니라 항목 단위로 isinstance(dict) 가드를 거는 것과
+    build_us_issue_results가 컨테이너가 아니라 항목 단위로 isinstance(dict) 가드를 거는 것과
     같은 방식으로, 행 하나가 dict가 아니거나 숫자 필드가 숫자가 아니거나(None·문자열 등)
     거래일이 없으면 그 행만 건너뛴다 — 자리표시자를 채워 넣지 않는다(§0, 없으면 지어내지
     않고 비운다). 건너뛴 행은 stderr에 로그를 남긴다 — 이 데이터가 수동 편집 파일에서
@@ -592,8 +622,8 @@ def build_reasons(analysis: dict, target_date: str = "") -> dict:
         # 이렇게 보는 이유 — 예측 방향의 핵심 동인 3개(넘버링). 형식과 무관하게 항상 표시.
         "key_drivers": analysis.get("key_drivers") or [],
     }
-    # 직전 미국장 이슈 — us_issues(뉴스 요약 기반). 항목 없으면 템플릿에서 자동 생략.
-    ctx.update(build_us_issues(analysis, target_date))
+    # 직전 미국장 이슈의 실측 채점 결과. 카드가 없으면 템플릿에서 자동 생략.
+    ctx.update(build_us_issue_results(analysis, target_date))
     if fmt == "split":
         pass  # split은 오늘의 관점 본문이 todays_view.recap/outlook — 별도 형식 컨텍스트 불필요
     elif fmt == "scenario":

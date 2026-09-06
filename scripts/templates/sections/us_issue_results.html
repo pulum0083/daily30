@@ -1,0 +1,38 @@
+{# 직전 미국장 이슈의 실측 채점 결과 — 코스피 아침 브리핑 전용 (score_us_issues.py 산출) #}
+{% if us_issue_cards %}
+<div class="open-section">
+  <div class="open-section__title us-linked-title">
+    <span class="us-badge"><span class="us-badge__flag" aria-hidden="true">🇺🇸</span>US</span> {{ us_issue_label | default('간밤') }} 이슈, 이렇게 끝났어요
+  </div>
+  <div class="issue-list issue-list--numbered">
+    {% for c in us_issue_cards %}
+    <div class="issue-card">
+      <div class="issue-card__title">{{ c.title }}
+        {% if c.verdict_text %}<span class="verdict {{ c.verdict_class }}">{{ c.verdict_text }}</span>{% endif %}
+      </div>
+      {% if c.duplicate_of %}
+      <div class="reshead"><div class="dup-note">{{ c.duplicate_of }}번 이슈와 같은 지표로 채점돼요.</div></div>
+      {% else %}
+      {% if c.result_line %}<div class="reshead"><div class="reshead__txt">{{ c.result_line | safe }}</div></div>{% endif %}
+      <div class="issue-card__impact">
+        {% for s in c.sides %}
+        <div class="imp-side {{ s.side }}">
+          <span class="imp-arrow">{% if s.side == 'up' %}▲{% else %}▼{% endif %}</span><span class="imp-label">{{ s.label }}</span>
+          <span class="imp-tickers">
+            {%- for m in s.marks -%}
+            <span class="res-tk {% if m.hit %}hit{% if m.pct < 0 %} dnmove{% endif %}{% else %}miss{% endif %}">{{ m.name }} <span class="pct">{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</span>{% if m.hit %}<span class="res-mark">✓</span>{% endif %}</span>
+            {%- endfor -%}
+          </span>
+        </div>
+        {% if s.proxy %}<div class="proxy-note">※ 종목이 지정되지 않은 “{{ s.label }}”은 {{ s.proxy }} 실측으로 채점했어요.</div>{% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% if us_issue_session %}
+  <div class="sec-foot">ET {{ us_issue_session }} 정규장 종가 기준 실측이에요. · <a href="/briefings/{{ us_issue_session }}/us/">{{ us_issue_label | default('간밤') }} 미국 브리핑 보기 →</a></div>
+  {% endif %}
+</div>
+{% endif %}
