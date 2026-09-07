@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-08": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-08/kospi/",
+        "headline": "오픈AI發 반도체 랠리, 오늘도 이어질까",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-07": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-07-28/us/",
         "headline": "메모리 랠리의 숙취 — 반도체가 통째로 20일선 아래로 꺼졌어요",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-07-27": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-27/kospi/",
-        "headline": "왜 내릴까? — 미 반도체 급락·대장주 갭하락 압력",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-27/close/",
-        "headline": "외국인 2.8조 매도에도 코스피 6755선 지켜낸 이유",
-        "title": "6,755.75",
-        "price": "6,755.75",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-27/us/",
-        "headline": "선물은 웃는데 VIX는 더 웃는다 — FOMC 앞두고 낙폭 되돌리는 장",
         "title": "—",
         "time": ""
       }
