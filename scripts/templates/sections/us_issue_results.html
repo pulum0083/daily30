@@ -1,32 +1,26 @@
-{# 직전 미국장 이슈의 실측 채점 결과 — 코스피 아침 브리핑 전용 (score_us_issues.py 산출) #}
+{# 직전 미국장 브리핑이 짚은 이슈 + 그 종목들의 실제 움직임 (score_us_issues.py 산출).
+   적중·빗나감을 판정하지 않는다 — 이슈는 예측이 아니라 관전 포인트다(2026-09-08). #}
 {% if us_issue_cards %}
 <div class="open-section">
   <div class="open-section__title us-linked-title">
-    <span class="us-badge"><span class="us-badge__flag" aria-hidden="true">🇺🇸</span>US</span> {{ us_issue_label | default('간밤') }} 이슈, 이렇게 끝났어요
+    <span class="us-badge"><span class="us-badge__flag" aria-hidden="true">🇺🇸</span>US</span> {{ us_issue_label | default('간밤') }} 미국 브리핑이 짚은 이슈
   </div>
   <div class="issue-list issue-list--numbered">
     {% for c in us_issue_cards %}
     <div class="issue-card">
-      <div class="issue-card__title">{{ c.title }}
-        {% if c.verdict_text %}<span class="verdict {{ c.verdict_class }}">{{ c.verdict_text }}</span>{% endif %}
-      </div>
+      <div class="issue-card__title">{{ c.title }}</div>
       {% if c.duplicate_of %}
-      <div class="reshead"><div class="dup-note">{{ c.duplicate_of }}번 이슈와 같은 지표로 채점돼요.</div></div>
+      <div class="chk-line chk-dim">{{ c.duplicate_of }}번 이슈와 같은 지표예요.</div>
       {% else %}
-      {% if c.result_line %}<div class="reshead"><div class="reshead__txt">{{ c.result_line | safe }}</div></div>{% endif %}
-      <div class="issue-card__impact">
-        {% for s in c.sides %}
-        <div class="imp-side {{ s.side }}">
-          <span class="imp-arrow">{% if s.side == 'up' %}▲{% else %}▼{% endif %}</span><span class="imp-label">{{ s.label }}</span>
-          <span class="imp-tickers">
-            {%- for m in s.marks -%}
-            <span class="res-tk {% if m.hit %}hit{% if m.pct < 0 %} dnmove{% endif %}{% else %}miss{% endif %}">{{ m.name }} <span class="pct">{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</span>{% if m.hit %}<span class="res-mark">✓</span>{% endif %}</span>
-            {%- endfor -%}
-          </span>
-        </div>
-        {% if s.proxy %}<div class="proxy-note">※ 종목이 지정되지 않은 “{{ s.label }}”은 {{ s.proxy }} 실측으로 채점했어요.</div>{% endif %}
-        {% endfor %}
+      {% if c.check_line %}<div class="chk-line">{{ c.check_line | safe }}</div>{% endif %}
+      {% for s in c.sides %}
+      <div class="chk-row">
+        {%- for m in s.marks -%}
+        <span class="chk-tk {% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ m.name }} <span class="pct">{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</span></span>
+        {%- endfor -%}
       </div>
+      {% if s.proxy %}<div class="proxy-note">※ 종목이 지정되지 않아 {{ s.proxy }} 실측으로 봤어요.</div>{% endif %}
+      {% endfor %}
       {% endif %}
     </div>
     {% endfor %}

@@ -7,10 +7,15 @@ Usage:
 출력: data/us_issue_results.json
 
 미국 브리핑(21:15 KST)의 이슈 카드는 산문이 아니라 up/down × {label, tickers} 구조라
-방향 주장이 검증 가능한 형태로 스냅샷에 남아 있다. 그 세션이 끝난 뒤(미국 마감 05~06시 KST)
-코스피 아침 브리핑(07:25)에서 실측으로 채점한다.
+어떤 종목을 지목했는지가 스냅샷에 남아 있다. 그 세션이 끝난 뒤(미국 마감 05~06시 KST)
+코스피 아침 브리핑(07:25)에서 **그 종목들이 실제로 어떻게 움직였는지만** 보여준다.
 
-**숫자·판정·문구가 전부 결정론이다. LLM이 개입하지 않는다.**
+**적중·빗나감을 판정하지 않는다.** 미국 브리핑의 이슈는 예측이 아니라 관전 포인트라,
+채점 대상이 아닌 것을 채점하면 무슨 말인지 알 수 없는 화면이 된다(2026-09-08 사용자 지적 —
+"어제 랠리의 배경"이라는 서술형 이슈에 "3중 1 적중"이 붙어 있었다). 어제 예상과 맞았는지는
+말하지 않고, 읽는 사람이 수치를 보고 직접 판단한다.
+
+**숫자·문구가 전부 결정론이다. LLM이 개입하지 않는다.**
 
 **날짜 고정 조회가 이 스크립트의 핵심이다.** 대상 ET 세션의 봉을 골라 직전 봉과 비교하고,
 그 날짜 봉이 없으면 해당 티커를 버린다 — "최신 봉"으로 폴백하지 않는다. 07:25는 미국 마감
@@ -84,41 +89,65 @@ def _has_final_consonant(word: str) -> bool:
     return (ord(ch) - 0xAC00) % 28 != 0
 
 
-def _i_ga(word: str) -> str:
-    """주격 조사 — '지수 전반이' / '전기차가'."""
-    return "이" if _has_final_consonant(word) else "가"
+def _eun_neun(word: str) -> str:
+    """보조사 — '지수 전반은' / '전기차는'."""
+    return "은" if _has_final_consonant(word) else "는"
 
 
-def fmt_pct(pct: float) -> str:
-    """등락률 표기. 마이너스는 하이픈이 아니라 −(U+2212)로 — 화면 폭이 흔들리지 않는다."""
-    return ("+" if pct >= 0 else "−") + f"{abs(pct):.2f}%"
+# 제목에 박힌 시점 표현. 미국 브리핑은 21:15 KST(=그날 아침 ET)에 나가므로 제목의 시제가
+# 그 시점 기준이다 — 다음날 코스피 브리핑에서 그대로 읽으면 어긋난다(2026-09-08 사용자 지적:
+# "오늘 밤 고용지표"가 월요일 아침에 오늘 밤 일처럼 읽혔다). 실측 138건 중 오늘 12·이번 주 6·
+# 내일 5로 미래·현재 시점어가 대부분이고 과거형은 2건뿐이다.
+_TIME_RE = re.compile(
+    r"(오늘\s*밤|오늘밤|오늘|내일|모레|어제|전날|금일|이번\s*주|이번주|간밤|어젯밤|지난밤|밤사이)"
+    r"\s*(새벽|아침|밤|낮|오전|오후)?\s*(은|는|이|가|의|도|에|엔|까지|부터)?\s*")
+_LEAD_PUNCT_RE = re.compile(r"^[\s—·,\-–]+")
 
 
-def verdict(total: int, hits: int) -> tuple[str, str]:
-    """판정 배지 (클래스, 문구). 적중 개수를 세어 만든다."""
-    if hits == total:
-        return ("all", "적중" if total == 1 else f"{total}건 전부")
-    if hits == 0:
-        return ("none", "빗나감")
-    return ("part", f"{total}중 {hits} 적중")
+def retitle(title: str, session_label: str) -> str:
+    """제목의 시점 표현을 읽는 사람 기준으로 맞춘다.
+
+    '오늘 밤'은 그 브리핑이 가리킨 세션 **자체**라 라벨로 정확히 치환된다('간밤'·'지난 금요일').
+    나머지(오늘·내일·이번 주·어제…)는 지금 프레임에서 무엇을 가리키는지 단정할 수 없으므로
+    **지어내지 않고 지운다** — 어느 세션인지는 섹션 제목이 이미 말하고 있다(§0).
+
+    지우고 나서 남는 게 없거나 너무 짧으면 원문을 그대로 둔다. 시점을 고치려다 제목을
+    망가뜨리는 것이 더 나쁘다.
+    """
+    if not title:
+        return title
+
+    def _sub(m):
+        head = m.group(1).replace(" ", "")
+        return f"{session_label} " if (head == "오늘밤" and session_label) else ""
+
+    out = _TIME_RE.sub(_sub, title)
+    out = _LEAD_PUNCT_RE.sub("", re.sub(r"\s{2,}", " ", out)).strip()
+    return out if len(out) >= 6 else title
 
 
-def result_line(label: str, want_up: bool, marks: list) -> str:
-    """결과 한 줄. LLM 문장이 아니라 실측에서 조립한 템플릿이다."""
-    hits = [m for m in marks if m["hit"]]
+def mood(marks: list) -> str:
+    """지목된 종목들이 **실제로** 어떻게 움직였는지. 어제 예상과 맞았는지는 보지 않는다."""
+    ups = sum(1 for m in marks if m["pct"] > 0)
+    downs = sum(1 for m in marks if m["pct"] < 0)
     if len(marks) == 1:
-        m = marks[0]
-        pct = m["pct"]
-        actual = "올랐어요" if pct > 0 else ("내렸어요" if pct < 0 else "보합이었어요")
-        line = f'{label}{_i_ga(label)} <b>{actual}</b> · {m["name"]} {fmt_pct(pct)}'
-        return line + (" — 예상과 반대예요" if not hits else "")
-    moved = "올랐어요" if want_up else "내렸어요"
-    avg = sum(m["pct"] for m in marks) / len(marks)
-    return (f'{label} {len(marks)}종목 중 <b>{len(hits)}종목이 {moved}</b> '
-            f'· 평균 {fmt_pct(avg)}')
+        pct = marks[0]["pct"]
+        return "올랐어요" if pct > 0 else ("내렸어요" if pct < 0 else "보합이었어요")
+    if ups and downs:
+        return "엇갈렸어요"
+    if ups:
+        return "나란히 올랐어요"
+    if downs:
+        return "나란히 내렸어요"
+    return "보합이었어요"
 
 
-def build_cards(issues: list, measure) -> list:
+def check_line(label: str, marks: list) -> str:
+    """카드 한 줄. 실측 움직임만 말하고 판정하지 않는다."""
+    return f"{label}{_eun_neun(label)} <b>{mood(marks)}</b>"
+
+
+def build_cards(issues: list, measure, session_label: str = "") -> list:
     """이슈 리스트를 채점 카드로. `measure(ticker) -> pct | None` 를 주입받아 네트워크와 분리한다.
 
     - 측정 가능한 근거가 하나도 없는 카드는 통째로 뺀다(운영 규칙 0).
@@ -132,6 +161,7 @@ def build_cards(issues: list, measure) -> list:
         title = (issue.get("title") or "").strip()
         if not title:
             continue
+        title = retitle(title, session_label)
         sides = []
         for side in ("up", "down"):
             s = issue.get(side)
@@ -155,7 +185,6 @@ def build_cards(issues: list, measure) -> list:
                     "ticker": t,
                     "name": proxy_name or t,
                     "pct": round(pct, 2),
-                    "hit": (pct > 0) if side == "up" else (pct < 0),
                 })
             if not marks:
                 continue
@@ -176,10 +205,7 @@ def build_cards(issues: list, measure) -> list:
         else:
             if key:
                 seen_proxy[key] = len(cards) + 1
-            total = sum(len(s["marks"]) for s in sides)
-            hits = sum(1 for s in sides for m in s["marks"] if m["hit"])
-            card["verdict_class"], card["verdict_text"] = verdict(total, hits)
-            card["result_line"] = result_line(head["label"], head["side"] == "up", head["marks"])
+            card["check_line"] = check_line(head["label"], head["marks"])
         cards.append(card)
     return cards
 
@@ -249,12 +275,13 @@ def main():
         return 0
 
     issues = load_us_issues(session)
-    cards = build_cards(issues, lambda t: bar_change_on(t, session))
+    label = us_session_label(today)
+    cards = build_cards(issues, lambda t: bar_change_on(t, session), label)
     payload = {
         "generated_at": datetime.now(KST).isoformat(),
         "briefing_date": str(today),
         "us_session_date": str(session),
-        "session_label": us_session_label(today),
+        "session_label": label,
         "cards": cards,
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

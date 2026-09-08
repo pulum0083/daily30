@@ -1341,23 +1341,19 @@ html.dark .arch-item__dek{color:var(--muted);}
 .ds-foot-list .fl a:hover{text-decoration:underline;}
 
 /* ──────────────────────────────────────────────
-   직전 미국장 이슈 채점 결과 (us_issue_results)
-   — 숫자·판정은 전부 실측이다(score_us_issues.py). LLM 문장이 아니다.
+   직전 미국장 브리핑이 짚은 이슈 (us_issue_results)
+   — 수치는 전부 실측이다(score_us_issues.py). 판정하지 않으므로 색은
+     '적중 여부'가 아니라 **실제 등락 방향**을 뜻한다.
 ────────────────────────────────────────────── */
-.res-tk{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:2px 8px;
+.chk-line{font-size:12.5px;font-weight:700;color:var(--ink);margin-top:11px;padding-top:11px;
+  border-top:1px dashed var(--hairline);line-height:1.5;}
+.chk-line.chk-dim{font-weight:600;color:var(--muted);}
+.chk-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:9px;}
+.chk-tk{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:2px 8px;
   border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
-.res-tk .pct{font-variant-numeric:tabular-nums;font-weight:800;}
-.res-tk.hit{background:var(--up-bg);color:var(--up);}
-.res-tk.hit.dnmove{background:var(--dn-bg);color:var(--dn);}
-.res-tk.miss{background:var(--surface-inset);color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px;}
-.res-mark{font-size:10px;font-weight:900;}
-.verdict{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;flex-shrink:0;letter-spacing:-.2px;}
-.verdict.all{background:var(--up-bg);color:var(--up);}
-.verdict.part{background:var(--gold-bg);color:var(--gold);}
-.verdict.none{background:var(--surface-inset);color:var(--muted);}
-.reshead{margin-top:11px;padding-top:11px;border-top:1px dashed var(--hairline);}
-.reshead__txt{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.5;}
-.dup-note{font-size:12px;color:var(--muted);line-height:1.5;}
-.proxy-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.chk-tk .pct{font-variant-numeric:tabular-nums;font-weight:800;}
+.chk-tk.up{background:var(--up-bg);color:var(--up);}
+.chk-tk.dn{background:var(--dn-bg);color:var(--dn);}
+.proxy-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;}
 .sec-foot{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.6;}
 .sec-foot a{color:var(--primary);font-weight:700;}

@@ -15,56 +15,89 @@ def _issue(title, side, label, tickers):
     return {"title": title, side: {"label": label, "tickers": tickers}}
 
 
-# ── 판정 배지 ──────────────────────────────────────────────
-def test_verdict_all_single():
-    assert S.verdict(1, 1) == ("all", "적중")
+# ── 실제 움직임 요약 (판정 아님) ─────────────────────────
+def _m(name, pct):
+    return {"ticker": name, "name": name, "pct": pct}
 
 
-def test_verdict_all_multi():
-    assert S.verdict(4, 4) == ("all", "4건 전부")
+def test_mood_all_up():
+    assert S.mood([_m("MU", 6.1), _m("AMAT", 4.31)]) == "나란히 올랐어요"
 
 
-def test_verdict_none():
-    assert S.verdict(2, 0) == ("none", "빗나감")
+def test_mood_all_down():
+    assert S.mood([_m("XOM", -1.18), _m("CVX", -0.22)]) == "나란히 내렸어요"
 
 
-def test_verdict_partial():
-    assert S.verdict(4, 2) == ("part", "4중 2 적중")
+def test_mood_mixed():
+    assert S.mood([_m("NVDA", 0.84), _m("MSFT", -2.04)]) == "엇갈렸어요"
+
+
+def test_mood_single():
+    assert S.mood([_m("TSLA", -5.92)]) == "내렸어요"
+    assert S.mood([_m("NVDA", 0.84)]) == "올랐어요"
+
+
+def test_no_verdict_or_hit_fields_anywhere():
+    """적중·빗나감을 판정하지 않는다 — 판정 잔재가 데이터에 남으면 안 된다."""
+    issues = [_issue("이슈", "up", "빅테크", ["NVDA", "MSFT"])]
+    cards = S.build_cards(issues, _measure({"NVDA": 0.84, "MSFT": -2.04}))
+    assert "verdict_text" not in cards[0] and "verdict_class" not in cards[0]
+    assert all("hit" not in m for s_ in cards[0]["sides"] for m in s_["marks"])
 
 
 # ── 조사 처리 (받침 유무) ──────────────────────────────────
 def test_josa_with_final_consonant():
-    line = S.result_line("지수 전반", False, [{"ticker": "^GSPC", "name": "S&P500", "pct": -0.38, "hit": True}])
-    assert line.startswith("지수 전반이 "), line
+    assert S.check_line("지수 전반", [_m("S&P500", -0.38)]).startswith("지수 전반은 ")
 
 
 def test_josa_without_final_consonant():
-    """'전기차' 처럼 받침이 없으면 '가'다 — '전기차이'로 나가면 안 된다."""
-    line = S.result_line("전기차", False, [{"ticker": "TSLA", "name": "TSLA", "pct": -5.92, "hit": True}])
-    assert line.startswith("전기차가 "), line
+    """'전기차' 처럼 받침이 없으면 '는'이다 — '전기차은'으로 나가면 안 된다."""
+    assert S.check_line("전기차", [_m("TSLA", -5.92)]).startswith("전기차는 ")
 
 
-# ── 결과 한 줄 ────────────────────────────────────────────
-def test_result_line_single_miss_says_opposite():
-    line = S.result_line("지수 전반", False, [{"ticker": "^GSPC", "name": "S&P500", "pct": 1.06, "hit": False}])
-    assert "올랐어요" in line and "예상과 반대예요" in line, line
+def test_check_line_says_only_what_happened():
+    """어제 예상과 맞았는지는 말하지 않는다."""
+    line = S.check_line("성장주·빅테크", [_m("NVDA", 0.84), _m("MSFT", -2.04), _m("AMZN", -0.15)])
+    assert line == "성장주·빅테크는 <b>엇갈렸어요</b>", line
+    for banned in ("적중", "빗나", "예상", "반대"):
+        assert banned not in line
 
 
-def test_result_line_single_hit_has_no_opposite_note():
-    line = S.result_line("전기차", False, [{"ticker": "TSLA", "name": "TSLA", "pct": -5.92, "hit": True}])
-    assert "예상과 반대" not in line, line
+# ── 제목 시점 교정 ────────────────────────────────────────
+def test_retitle_maps_tonight_to_session_label():
+    """'오늘 밤'은 그 브리핑이 가리킨 세션 자체라 라벨로 정확히 치환된다."""
+    assert S.retitle("오늘 밤 ISM 제조업 PMI 발표", "지난 금요일") == "지난 금요일 ISM 제조업 PMI 발표"
+    assert S.retitle("오늘 밤 ISM 제조업 PMI 발표", "간밤") == "간밤 ISM 제조업 PMI 발표"
 
 
-def test_result_line_multi_counts_and_average():
-    marks = [
-        {"ticker": "MU", "name": "MU", "pct": 6.10, "hit": True},
-        {"ticker": "AMAT", "name": "AMAT", "pct": 4.31, "hit": True},
-        {"ticker": "KLAC", "name": "KLAC", "pct": 7.32, "hit": True},
-        {"ticker": "LRCX", "name": "LRCX", "pct": 5.12, "hit": True},
-    ]
-    line = S.result_line("메모리·반도체 장비", True, marks)
-    assert "4종목 중 <b>4종목이 올랐어요</b>" in line, line
-    assert "평균 +5.71%" in line, line
+def test_retitle_drops_unresolvable_time_words():
+    """지금 프레임에서 뭘 가리키는지 단정할 수 없는 표현은 지어내지 않고 지운다."""
+    assert S.retitle("이번 주 FOMC·PCE 대기 모드 진입", "간밤") == "FOMC·PCE 대기 모드 진입"
+    assert S.retitle("오늘 새벽 FOMC 결과 발표 — 매파 신호", "간밤") == "FOMC 결과 발표 — 매파 신호"
+    assert S.retitle("국채금리 급락에 나스닥 급등 — 어제 랠리의 배경", "간밤") \
+        == "국채금리 급락에 나스닥 급등 — 랠리의 배경"
+
+
+def test_retitle_handles_multiple_words_and_particles():
+    assert S.retitle("내일 밤 고용지표(비농업고용) 대기 — 오늘은 관망 심리도", "간밤") \
+        == "고용지표(비농업고용) 대기 — 관망 심리도"
+
+
+def test_retitle_leaves_clean_titles_alone():
+    for t in ("테슬라, 홀로 약세 — 개별 종목 리스크",
+              "메모리·반도체 장비주, 프리마켓에서도 강세 지속"):
+        assert S.retitle(t, "간밤") == t
+
+
+def test_retitle_keeps_original_when_stripping_guts_it():
+    """시점을 고치려다 제목을 망가뜨리지 않는다."""
+    assert S.retitle("오늘의 관망", "간밤") == "오늘의 관망"
+
+
+def test_retitle_applied_in_build_cards():
+    issues = [_issue("오늘 밤 고용지표 3종 세트 — 다음 테스트", "down", "지수 전반", [])]
+    cards = S.build_cards(issues, _measure({"^GSPC": -0.38}), "지난 금요일")
+    assert cards[0]["title"] == "지난 금요일 고용지표 3종 세트 — 다음 테스트"
 
 
 # ── 프록시 ────────────────────────────────────────────────
@@ -109,16 +142,16 @@ def test_empty_issues_give_empty_cards():
 
 # ── 중복 제거 ─────────────────────────────────────────────
 def test_duplicate_proxy_same_direction_keeps_title_only():
-    """같은 프록시·같은 방향이 두 번 나오면 뒤엣것은 결과를 반복하지 않는다."""
+    """같은 프록시·같은 방향이 두 번 나오면 뒤엣것은 수치를 반복하지 않는다."""
     issues = [
         _issue("고용지표 대기", "down", "지수 전반", []),
         _issue("중동 리스크", "down", "지수 전반", []),
     ]
     cards = S.build_cards(issues, _measure({"^GSPC": 1.06}))
     assert len(cards) == 2
-    assert "result_line" in cards[0] and cards[0]["sides"]
+    assert "check_line" in cards[0] and cards[0]["sides"]
     assert cards[1]["duplicate_of"] == 1
-    assert cards[1]["sides"] == [] and "result_line" not in cards[1]
+    assert cards[1]["sides"] == [] and "check_line" not in cards[1]
 
 
 def test_same_proxy_opposite_direction_is_not_duplicate():
@@ -155,10 +188,9 @@ def test_replay_2026_09_03_session():
     cards = S.build_cards(issues, _measure(real))
 
     assert len(cards) == 4, [c["title"] for c in cards]        # 금값 카드는 생략
-    assert cards[0]["verdict_text"] == "빗나감"                  # 에너지 0/2
-    assert cards[1]["verdict_text"] == "4중 2 적중"              # 장비주 2/4
-    assert "평균 −0.36%" in cards[1]["result_line"], cards[1]["result_line"]
-    assert cards[2]["verdict_text"] == "빗나감"                  # 지수 전반
+    assert cards[0]["check_line"] == "에너지는 <b>나란히 내렸어요</b>"
+    assert cards[1]["check_line"] == "반도체 장비는 <b>엇갈렸어요</b>"
+    assert cards[2]["check_line"] == "지수 전반은 <b>올랐어요</b>"
     assert cards[3]["duplicate_of"] == 3                        # 같은 지표 반복 안 함
 
 
@@ -173,8 +205,11 @@ def test_replay_2026_09_04_session():
             "MU": 6.10, "AMAT": 4.31, "KLAC": 7.32, "LRCX": 5.12, "TSLA": -5.92}
     cards = S.build_cards(issues, _measure(real))
 
-    assert [c["verdict_text"] for c in cards] == ["3중 1 적중", "4건 전부", "적중"]
-    assert cards[2]["result_line"].startswith("전기차가 "), cards[2]["result_line"]
+    assert [c["check_line"] for c in cards] == [
+        "성장주·빅테크는 <b>엇갈렸어요</b>",
+        "메모리·반도체 장비는 <b>나란히 올랐어요</b>",
+        "전기차는 <b>내렸어요</b>",
+    ]
 
 
 # ── 미국 휴장일 다음날 섹션 생략 (2026-09-07 노동절 케이스) ──────────
