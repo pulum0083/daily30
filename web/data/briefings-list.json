@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-09": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-09/kospi/",
+        "headline": "선물은 꺾였는데 반도체는 살아있다 — 오늘의 줄다리기",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "혼조 우위",
+        "time": "07:31"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-08": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-07-29/us/",
         "headline": "반도체 장비주가 무너진다 — 실적 시즌이 AI 랠리의 진짜 시험대로",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-07-28": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-07-28/kospi/",
-        "headline": "엔비디아 자체 칩 소식에 반도체 흔들 — 오늘은 방어전",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-07-28/close/",
-        "headline": "코스피 -10.84% 대폭락 — 오늘 버틴 종목 있었나요?",
-        "title": "6,023.66",
-        "price": "6,023.66",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-07-28/us/",
-        "headline": "메모리 랠리의 숙취 — 반도체가 통째로 20일선 아래로 꺼졌어요",
         "title": "—",
         "time": ""
       }
