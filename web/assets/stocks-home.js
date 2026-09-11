@@ -23,7 +23,6 @@
 /* ── 블록 2 (원본 index.html) ── */
 function usSel(code){
   document.querySelectorAll('#us-linked-widget .us-tile').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-code')===code);});
-  if(window.whyMovedRender) window.whyMovedRender(code);
   window.__lwCode = code;
   if(window.lwRenderAll) window.lwRenderAll(code);
 }
@@ -105,8 +104,6 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
         '<span class="d">'+esc(shortDate(r.date))+'</span></div>';
     }).join('');
     drawTrend(hist);
-    var link=document.getElementById('lw-detail-link');
-    if(link) link.setAttribute('href','/stocks/'+encodeURIComponent(code)+'/');
   }
 
   /* 컨센서스 추이 스파크라인.
@@ -214,325 +211,8 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   }
   window.addEventListener('load',load);
 })();
-(function(){
-  var X0=14,X1=626,YT=22,YB=150;
-  var buf={};
-  var buft={};   // buf와 병렬: 각 포인트의 실제 시각 'HH:MM' (장중 부분 데이터를 시간축에 정확히 배치)
-  var bufv={};   // buf와 병렬: 각 포인트의 누적 거래량 (VWAP 계산용, backfill 시점 스냅샷)
-  var bufDay=todayKST();   // buf가 담고 있는 거래일(KST). 페이지를 자정 넘겨 열어두면 전일 곡선에 오늘 실측이 이어붙어(시간축이 HH:MM만 써 날짜를 무시) 곡선이 대각선으로 깨진다 → 날짜가 바뀌면 버퍼를 전량 무효화한다.
-  var curCode=window.__lwCode||'005930';
-  var whyData={};
-  var snapW={};
-  function timeToX(t){var p=(t||'09:00').split(':'),mm=(+p[0])*60+(+p[1]);return X0+(X1-X0)*Math.min(1,Math.max(0,(mm-540)/(930-540)));}
-  function loadWhy(){
-    var d=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
-    // 라이브 데이터는 /api/data(raw main) 우선 — 데이터 전용 커밋은 재배포 안 되므로 정적 /data는 stale일 수 있음
-    fetch('/api/data?f=movers-why',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
-      .then(function(j){ return j||fetch('/data/movers-why-'+d+'.json').then(function(r){return r.ok?r.json():null;}); })
-      .then(function(j){ return j||fetch('/data/movers-why-live.json').then(function(r){return r.ok?r.json():null;}); })
-      .then(function(j){ if(j&&j.stocks){ j.stocks.forEach(function(s){ whyData[s.code]=s.events||[]; }); if(buf[curCode])draw(curCode); } }).catch(function(){});
-  }
-  function loadSnap(){
-    fetch('/data/stocks-snapshot.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
-      .then(function(j){ if(j&&j.stocks){ snapW=j.stocks; renderRight(curCode); } }).catch(function(){});
-  }
-  function frSpark(arr){
-    var lo=Math.min.apply(null,arr),hi=Math.max.apply(null,arr),sp=(hi-lo)||1,n=arr.length,W=120,H=34,P=3;
-    var pts=arr.map(function(v,i){var x=P+(W-2*P)*(i/(n-1));var y=H-P-(H-2*P)*((v-lo)/sp);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
-    var c=arr[n-1]>arr[0]?'#E03131':(arr[n-1]<arr[0]?'#2775ED':'#64748B'),last=pts.split(' ').pop().split(',');
-    return '<svg viewBox="0 0 '+W+' '+H+'" width="108" height="31" style="flex:none;"><polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.6" fill="#fff" stroke="'+c+'" stroke-width="1.6"/></svg>';
-  }
-  function renderRight(code){
-    var fr=document.getElementById('wm-fr'), s=snapW[code];
-    if(fr){
-      if(s&&typeof s.foreign_rate==='number'&&Array.isArray(s.foreign_spark)&&s.foreign_spark.length>1){
-        var arr=s.foreign_spark,chg=arr[arr.length-1]-arr[arr.length-2];
-        var ccol=chg>0?'#E03131':(chg<0?'#2775ED':'var(--muted)'),csign=chg>0?'+':(chg<0?'-':'');
-        fr.style.display='';
-        fr.innerHTML='<div class="wm-card-h">🌐 외국인 보유율</div>'
-          +'<div style="display:flex;align-items:center;gap:10px;">'+frSpark(arr)
-          +'<div style="margin-left:auto;text-align:right;white-space:nowrap;line-height:1.25;">'
-          +'<b style="font-size:18px;font-weight:900;color:#0F172A;">'+s.foreign_rate.toFixed(2)+'<span style="font-size:12px;color:var(--muted);font-weight:700;">%</span></b>'
-          +'<div style="font-size:12px;font-weight:700;color:'+ccol+'">'+csign+Math.abs(chg).toFixed(2)+'%p</div>'
-          +'</div></div>';
-      } else { fr.style.display='none'; }
-    }
-    var rng=document.getElementById('wm-range');
-    if(rng){
-      var rv=buf[code]||[];
-      if(rv.length>4){
-        var rlo=Math.min.apply(null,rv),rhi=Math.max.apply(null,rv),rcur=rv[rv.length-1],rspan=(rhi-rlo)||1;
-        var rpos=Math.max(0,Math.min(100,(rcur-rlo)/rspan*100));
-        var fromLo=(rcur-rlo)/rlo*100, fromHi=(rcur-rhi)/rhi*100;
-        rng.style.display='';
-        rng.innerHTML='<div class="wm-card-h">📊 당일 레인지 위치<b style="margin-left:auto;font-size:18px;font-weight:900;color:#0F172A">'+rpos.toFixed(0)+'%</b></div>'
-          +'<div style="position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#DBEAFE,#FECACA);">'
-          +'<div style="position:absolute;left:'+rpos.toFixed(0)+'%;top:-3px;width:14px;height:14px;border-radius:50%;background:#0F172A;border:2px solid #fff;transform:translateX(-50%);"></div></div>'
-          +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;"><span>저 '+fmt(rlo)+'</span><span>고 '+fmt(rhi)+'</span></div>'
-          +'<div class="wm-bell-note">저점서 +'+fromLo.toFixed(1)+'% 회복 · 고점 대비 '+fromHi.toFixed(1)+'%</div>';
-      } else { rng.style.display='none'; }
-    }
-    var wk52=document.getElementById('wm-wk52');
-    if(wk52){
-      if(s&&s.wk52_high!=null&&s.wk52_low!=null&&s.wk52_high>s.wk52_low&&s.close!=null){
-        var yspan=s.wk52_high-s.wk52_low;
-        var ypos=Math.max(0,Math.min(100,(s.close-s.wk52_low)/yspan*100));
-        var yFromHi=(s.close-s.wk52_high)/s.wk52_high*100;
-        var yDiv=(rng&&rng.style.display!=='none');   // 당일 레인지 카드가 보일 때만 구분선
-        wk52.style.display='';
-        wk52.style.borderTop=yDiv?'1px solid #F1F5F9':'none';
-        wk52.style.marginTop=yDiv?'12px':'0';
-        wk52.style.paddingTop=yDiv?'12px':'0';
-        wk52.innerHTML='<div class="wm-card-h">📅 52주 레인지 위치<b style="margin-left:auto;font-size:18px;font-weight:900;color:#0F172A">'+ypos.toFixed(0)+'%</b></div>'
-          +'<div style="position:relative;height:8px;border-radius:5px;background:linear-gradient(90deg,#DBEAFE,#FECACA);">'
-          +'<div style="position:absolute;left:'+ypos.toFixed(0)+'%;top:-3px;width:14px;height:14px;border-radius:50%;background:#0F172A;border:2px solid #fff;transform:translateX(-50%);"></div></div>'
-          +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:5px;"><span>1년 최저 '+fmt(s.wk52_low)+'</span><span>최고 '+fmt(s.wk52_high)+'</span></div>'
-          +'<div class="wm-bell-note">52주 고점 대비 <b style="color:#2775ED">'+yFromHi.toFixed(0)+'%</b></div>';
-      } else { wk52.style.display='none'; }
-    }
-    var vw=document.getElementById('wm-vwap');
-    if(vw){
-      var pv=buf[code]||[], vv=bufv[code]||[];
-      // VWAP = Σ(종가×구간거래량)/Σ(구간거래량). 누적 거래량을 차분해 구간 거래량 산출.
-      var num=0, den=0, i;
-      if(vv.length>4 && pv.length>=vv.length){
-        for(i=0;i<vv.length;i++){ var dv=(i===0)?vv[0]:Math.max(0,vv[i]-vv[i-1]); num+=pv[i]*dv; den+=dv; }
-      }
-      if(den>0){
-        var vwap=num/den, cur=pv[pv.length-1], diff=(cur-vwap)/vwap*100;
-        var dcol=diff>=0?'#E03131':'#2775ED';
-        vw.style.display='';
-        vw.innerHTML='<div class="wm-card-h">🎯 평균체결가(VWAP)<b style="margin-left:auto;font-size:13px;font-weight:900;color:'+dcol+'">현재 '+(diff>=0?'+':'')+diff.toFixed(1)+'%</b></div>'
-          +'<div style="display:flex;align-items:baseline;gap:6px;"><b style="font-size:18px;font-weight:900;color:#0F172A">'+fmt(Math.round(vwap))+'</b>'
-          +'<span style="font-size:11px;color:var(--muted);">원 · 평균보다 '+(diff>=0?'비싸게':'싸게')+' 매수 중</span></div>';
-      } else { vw.style.display='none'; }
-    }
-  }
-  function pathFrom(vals,times){
-    if(!vals||vals.length<2) return null;
-    var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),span=(hi-lo)||1,n=vals.length;
-    var useT=times&&times.length===n;  // 실제 시각이 있으면 시간축 배치, 없으면 균등 분포(폴백)
-    return vals.map(function(v,i){var x=useT?timeToX(times[i]):X0+(X1-X0)*(i/(n-1));var y=YB-(YB-YT)*((v-lo)/span);return x.toFixed(1)+','+y.toFixed(1);}).join(' ');
-  }
-  function fmt(v){return v>=1000?v.toLocaleString():v;}
-  function idxToTime(i,n){var mm=540+Math.round((390)*i/(n-1));var h=Math.floor(mm/60),m=mm%60;return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
-  function wmSetOpen(open){
-    // 곡선 블록만 숨긴다. 같은 #why-moved 안의 목표주가·관련뉴스·외국계 시각은
-    // 장중 실측과 무관하게 항상 유효하므로 곡선이 없다고 함께 사라지면 안 된다.
-    var blk=document.getElementById('wm-curve-block'); if(!blk) return;
-    blk.style.display = open ? '' : 'none';
-    // 곡선이 숨겨졌음을 CSS에 알린다 — 아래 행의 구분선을 같이 없애 이중선을 막는다.
-    var wm=document.getElementById('why-moved');
-    if(wm) wm.classList.toggle('lw-nocurve', !open);
-  }
-  // 곡선·거래량·레인지 상세 영역(#wm-body) 접힘/펼침 — 밤사이 미국 반도체 시황(#us-evening, 17:00~익일 07:30)과
-  // 같은 시간대엔 자동으로 접히고 07:30(오전 브리핑 발행)에 펼쳐진다. 사용자가 수동으로 펼치거나 접으면 그 선택을
-  // localStorage에 저장해 같은 시간대(밤/낮)가 유지되는 동안은 자동 스케줄보다 우선한다 — 시간대가 바뀌면(예: 다음날
-  // 아침) 저장된 값은 더 이상 유효하지 않은 것으로 간주하고 새 기본값을 따른다.
-  var WM_OVERRIDE_KEY='ds-wm-body-open-v1';
-  function wmNightCollapsed(){
-    var d=new Date(Date.now()+9*3600*1000), wd=d.getUTCDay();
-    if(wd===0||wd===6) return true;
-    var hm=d.getUTCHours()*60+d.getUTCMinutes();
-    return hm>=1020 || hm<450;
-  }
-  function wmReadOverride(){
-    try{
-      var raw=localStorage.getItem(WM_OVERRIDE_KEY); if(!raw) return null;
-      var o=JSON.parse(raw);
-      return (o && typeof o.night==='boolean' && typeof o.open==='boolean') ? o : null;
-    }catch(e){ return null; }
-  }
-  function wmWriteOverride(open){
-    try{ localStorage.setItem(WM_OVERRIDE_KEY, JSON.stringify({night:wmNightCollapsed(),open:open})); }catch(e){}
-  }
-  function wmBodyGate(){
-    var body=document.getElementById('wm-body'), btn=document.getElementById('wm-toggle');
-    if(!body) return;
-    var night=wmNightCollapsed(), ov=wmReadOverride();
-    var open = (ov && ov.night===night) ? ov.open : !night;
-    body.style.display = open ? '' : 'none';
-    if(btn) btn.classList.toggle('is-collapsed', !open);
-    // 접히면 헤더 한 줄만 남아 바로 아래 '📰 관련 뉴스' 제목과 붙어 보인다(2026-07-27 피드백).
-    // CSS가 이 상태를 알아야 헤더를 '눌러서 펼치는 컨트롤'로 보이게 처리할 수 있다.
-    var wm=document.getElementById('why-moved');
-    if(wm) wm.classList.toggle('lw-curve-collapsed', !open);
-  }
-  function wmToggleManual(){
-    var body=document.getElementById('wm-body');
-    var isOpen = !body || body.style.display !== 'none';
-    wmWriteOverride(!isOpen);
-    wmBodyGate();
-  }
-  function draw(code){
-    var vals=buf[code]||[], svg=document.getElementById('wm-svg'), wm=document.getElementById('why-moved');
-    if(!svg||!wm) return;
-    var meta=document.querySelector('#why-moved [data-code="'+code+'"]');
-    var nm=document.getElementById('wm-name'); if(nm&&meta) nm.textContent=meta.getAttribute('data-name')||'';
-        var pts=pathFrom(vals,buft[code]);
-    if(!pts){ wmSetOpen(false); return; }
-    wmSetOpen(true);
-    var up=vals[vals.length-1]>=vals[0], col=up?'#E03131':'#2775ED';
-    var colA=up?'rgba(224,49,49,.18)':'rgba(39,117,237,.18)', colB=up?'rgba(224,49,49,.02)':'rgba(39,117,237,.02)';
-    var coords=pts.split(' ').map(function(p){var a=p.split(',');return {x:+a[0],y:+a[1]};});
-    var last=coords[coords.length-1];
-    var gradId='wm-grad-'+code;
-    // 면적 폴리곤은 마지막 포인트의 x에서 닫는다 — 장중엔 곡선이 현재 시각까지만 그려지고 이후 축은 빈다
-    var areaPath=pts+' '+last.x.toFixed(1)+','+YB+' '+X0.toFixed(1)+','+YB;
-    var hiIdx=0,loIdx=0;
-    for(var i=1;i<vals.length;i++){if(vals[i]>vals[hiIdx])hiIdx=i;if(vals[i]<vals[loIdx])loIdx=i;}
-    var hiC=coords[hiIdx],loC=coords[loIdx];
-    var s='<defs><linearGradient id="'+gradId+'" x1="0" y1="0" x2="0" y2="1">'
-      +'<stop offset="0%" stop-color="'+colA+'"/><stop offset="100%" stop-color="'+colB+'"/></linearGradient></defs>'
-      +'<line x1="'+X0+'" y1="'+YB+'" x2="'+X1+'" y2="'+YB+'" stroke="#E5E7EB" stroke-width="1"/>'
-      +'<polygon points="'+areaPath+'" fill="url(#'+gradId+')"/>'
-      +'<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-linejoin="round"/>'
-      +'<circle cx="'+last.x.toFixed(1)+'" cy="'+last.y.toFixed(1)+'" r="3.5" fill="'+col+'"/>';
-    if(vals.length>4&&hiIdx!==loIdx){
-      var hAnc=hiC.x<320?'start':'end', lAnc=loC.x<320?'start':'end';
-      var hOff=hAnc==='start'?6:-6, lOff=lAnc==='start'?6:-6;
-      var hLabY=(hiC.y-8 < YT+2)?(hiC.y+16):(hiC.y-8);   // 상단 붙으면 점 아래로
-      var lLabY=(loC.y+16 > YB-6)?(loC.y-10):(loC.y+16);  // 하단(축 라벨) 겹치면 점 위로
-      s+='<circle cx="'+hiC.x.toFixed(1)+'" cy="'+hiC.y.toFixed(1)+'" r="4" fill="#E03131"/>'
-        +'<text x="'+(hiC.x+hOff).toFixed(1)+'" y="'+hLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#E03131" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round" text-anchor="'+hAnc+'">고점 '+fmt(vals[hiIdx])+'</text>'
-        +'<circle cx="'+loC.x.toFixed(1)+'" cy="'+loC.y.toFixed(1)+'" r="4" fill="#2775ED"/>'
-        +'<text x="'+(loC.x+lOff).toFixed(1)+'" y="'+lLabY.toFixed(1)+'" font-size="11" font-weight="800" fill="#2775ED" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round" text-anchor="'+lAnc+'">저점 '+fmt(vals[loIdx])+'</text>';
-    }
-    s+='<text x="'+X0+'" y="170" font-size="10" fill="#9CA3AF">09:00</text>'
-      +'<text x="'+(X1-30)+'" y="170" font-size="10" fill="#9CA3AF">15:30</text>';
-    s+='<line id="wm-cross" x1="0" y1="'+YT+'" x2="0" y2="'+YB+'" stroke="#94A3B8" stroke-width="0.8" stroke-dasharray="3,3" opacity="0"/>'
-      +'<circle id="wm-dot" cx="0" cy="0" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5" opacity="0"/>'
-      +'<rect id="wm-hit" x="'+X0+'" y="0" width="'+(X1-X0)+'" height="'+YB+'" fill="transparent" style="cursor:crosshair"/>';
-    svg.innerHTML=s;
-    var evs=whyData[code]||[];
-    // 곡선 위 번호 핀(①②…)은 허브에서 제거했다. 곡선은 가격 흐름만 보여주고,
-    // 뉴스는 아래 '관련 뉴스' 목록이 담당한다 — 같은 정보를 두 군데서 다르게 보여주지 않는다.
-    renderRight(code);
-    // tooltip
-    var tip=document.getElementById('wm-tip');
-    if(!tip){tip=document.createElement('div');tip.id='wm-tip';tip.style.cssText='position:absolute;pointer-events:none;background:#0F172A;color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;opacity:0;transition:opacity .12s;white-space:nowrap;z-index:5;';svg.parentNode.style.position='relative';svg.parentNode.appendChild(tip);}
-    var hit=document.getElementById('wm-hit'),cross=document.getElementById('wm-cross'),dot=document.getElementById('wm-dot');
-    if(hit){
-      var n=vals.length, tms=buft[code];
-      hit.addEventListener('mousemove',function(ev){
-        var rect=svg.getBoundingClientRect(),mx=ev.clientX-rect.left,sx=640/rect.width;
-        var px=mx*sx;
-        // 시간축 비균등 배치이므로 x가 가장 가까운 포인트를 찾는다
-        var idx=0,bd=1e9;for(var k=0;k<coords.length;k++){var dd=Math.abs(coords[k].x-px);if(dd<bd){bd=dd;idx=k;}}
-        var cx=coords[idx].x,cy=coords[idx].y;
-        cross.setAttribute('x1',cx);cross.setAttribute('x2',cx);cross.setAttribute('opacity','1');
-        dot.setAttribute('cx',cx);dot.setAttribute('cy',cy);dot.setAttribute('opacity','1');
-        var pxX=cx/640*rect.width, pxY=cy/180*rect.height;
-        tip.style.opacity='1';tip.style.left=pxX+'px';tip.style.top=(pxY-38)+'px';tip.style.transform='translateX(-50%)';
-        tip.textContent=((tms&&tms[idx])?tms[idx]:idxToTime(idx,n))+' · '+fmt(vals[idx]);
-      });
-      hit.addEventListener('mouseleave',function(){cross.setAttribute('opacity','0');dot.setAttribute('opacity','0');tip.style.opacity='0';});
-    }
-    var tl=document.getElementById('wm-tl');
-    if(tl){ tl.innerHTML = evs.length ? evs.map(function(e,i){var lbl=e.tier==='why'?'why':'관련',nbg=e.tier==='why'?'background:#E03131;color:#fff;':'background:#fff;color:#64748B;border:1.5px solid #CBD5E1;',tcss=e.tier==='why'?'color:#E03131;background:#FEF2F2;':'color:#64748B;background:#F1F5F9;';
-      return '<div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #F1F5F9;"><div style="flex:none;width:20px;height:20px;border-radius:50%;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;'+nbg+'">'+(i+1)+'</div><div style="flex:1;min-width:0;"><div style="font-size:11px;font-weight:700;color:var(--muted);">'+e.time+'</div><div style="font-size:13px;font-weight:700;line-height:1.4;margin:1px 0 2px;"><a href="'+e.url+'" target="_blank" rel="noopener" style="color:#0F172A;text-decoration:none;">'+e.headline+'</a><span style="font-size:11px;font-weight:800;border-radius:5px;padding:1px 6px;margin-left:6px;'+tcss+'">'+lbl+'</span></div><div style="font-size:12px;color:#334155;">'+e.why+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">출처 · '+e.source+'</div></div></div>';}).join('')
-      : '<div style="font-size:12px;color:#64748B;padding:10px 2px;text-align:center;">📭 오늘 관련 뉴스 없음 · 수급/테마 추정</div>'; }
-  }
-  function nowHHMM(){var d=new Date(Date.now()+9*3600*1000);var h=d.getUTCHours(),m=d.getUTCMinutes();return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
-  var backfilled={};   // 코드별 전일 1분봉 백필 완료 여부 — 라이브 폴러가 buf를 미리 채워도 첫 조회 시 풀 곡선 로드
-  // 로딩 자리표시(스켈레톤) — 캐시 없는 첫 진입에서 곡선 영역이 빈 칸으로 깨져 보이지 않도록 펄스 placeholder 표시
-  function ensureSkelCSS(){
-    if(document.getElementById('wm-skel-css')) return;
-    var st=document.createElement('style'); st.id='wm-skel-css';
-    st.textContent='@keyframes wmPulse{0%,100%{opacity:.45}50%{opacity:.9}}.wm-skel{animation:wmPulse 1.1s ease-in-out infinite}';
-    document.head.appendChild(st);
-  }
-  function showSkeleton(){
-    var svg=document.getElementById('wm-svg'), wm=document.getElementById('why-moved');
-    if(!svg||!wm) return;
-    ensureSkelCSS(); wmSetOpen(true);
-    svg.innerHTML='<rect class="wm-skel" x="2" y="14" width="636" height="132" rx="10" fill="#EEF2F7"/>'
-      +'<line x1="14" y1="150" x2="626" y2="150" stroke="#E5E7EB" stroke-width="1"/>'
-      +'<text class="wm-skel" x="320" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#94A3B8">실측 1분봉 불러오는 중…</text>';
-  }
-  // 세션 캐시 — 같은 날 직전 fetch한 실측 1분봉을 보관해 새로고침 시 곡선을 즉시 복원(날짜 다르면 자동 무효화)
-  function todayKST(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
-  // /api/intraday는 네이버 피드의 '최신 세션'을 돌려준다 — 오늘 첫 1분봉이 생기기 전(개장 전·
-  // 공휴일·주말)엔 그게 전 거래일이다. 검증 없이 받으면 어제 곡선(09:00~15:30)에 오늘 라이브
-  // 실측(09:00~)이 같은 버퍼로 이어붙어 시간축이 09:00으로 되감기며 곡선이 대각선으로 깨지고,
-  // 당일 레인지·VWAP까지 전일 저가로 오염된 채 '오늘 장중'으로 표기된다(2026-07-31 실사고).
-  // 상세 페이지(stocks.js)는 같은 API에 이미 d.date===todayKST() 검증이 있었다 — 같은 데이터의
-  // 소비처가 갈릴 때 한쪽만 검증하면 그쪽만 조용히 깨진다(SERVICE_RULES §20·§30).
-  function isTodaySession(d){ return !!(d&&d.date&&String(d.date)===todayKST().replace(/-/g,'')); }
-  window.__wmIsTodaySession=isTodaySession;   // 테스트 훅 (stocks-home.test.mjs)
-  // 캐시 키 v2 — v1엔 위 사고로 전일 세션이 '오늘'로 저장된 탭이 있어 통째로 버린다.
-  function readCache(){
-    try{ var raw=sessionStorage.getItem('wm-intra-v2'); if(!raw) return {}; var o=JSON.parse(raw); return (o&&o.date===todayKST()&&o.data)?o.data:{}; }catch(e){ return {}; }
-  }
-  function writeCache(code,d){
-    if(!isTodaySession(d)) return;   // 전일 세션을 '오늘' 캐시로 굳히지 않는다
-    try{ var raw=sessionStorage.getItem('wm-intra-v2'),o={}; try{ o=raw?JSON.parse(raw):{}; }catch(_){ o={}; }
-      if(!o||o.date!==todayKST()) o={date:todayKST(),data:{}}; if(!o.data) o.data={};
-      o.data[code]={minutes:d.minutes||[],times:d.times||[],volumes:d.volumes||[]};
-      sessionStorage.setItem('wm-intra-v2',JSON.stringify(o)); }catch(e){}
-  }
-  // 오늘 안에 실측 1분봉이 생길 수 있는 상태인지 — 휴장일이거나 아직 개장 전이 아니면 false.
-  // 주말·공휴일·개장 전(09:00 이전)엔 /api/intraday가 항상 전일 세션을 돌려주므로 isTodaySession이
-  // 영원히 실패한다. 이 상태에서 backfilled를 세우지 않으면 탭을 전환할 때마다 스켈레톤이 떴다
-  // 사라지는 게 반복돼 곡선 영역이 튕겨 보인다(2026-08-01 실사고).
-  function todayCandleImpossible(){
-    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return true;
-    var d=new Date(Date.now()+9*3600*1000), hm=d.getUTCHours()*60+d.getUTCMinutes();
-    return hm<540;   // 09:00 KST 이전
-  }
-  function backfill(code){
-    // ① 세션 캐시 즉시 복원 — 같은 날 직전 실측값으로 먼저 그린다(빈 칸 방지). ② 없으면 스켈레톤.
-    var cached=readCache()[code];
-    var impossible=todayCandleImpossible();
-    if(cached&&cached.minutes&&cached.minutes.length>=2){
-      buf[code]=cached.minutes.slice(); buft[code]=(cached.times||[]).slice(); bufv[code]=(cached.volumes||[]).slice(); draw(code);
-    } else if(code===curCode){
-      if(impossible) wmSetOpen(false); else showSkeleton();
-    }
-    // 휴장일·개장 전엔 오늘 1분봉이 나올 수 없으니 매 탭 전환마다 재요청·재플리커할 필요가 없다 —
-    // 한 번만 시도하고 backfilled를 세워 이후 전환에서는 곧장 (숨김 상태로) draw()만 타게 한다.
-    if(impossible&&!(cached&&cached.minutes&&cached.minutes.length>=2)){ backfilled[code]=true; return; }
-    // ③ 라이브 fetch로 최신값 갱신(캐시도 새로 저장)
-    fetch('/api/intraday?code='+code).then(function(r){return r.json();}).then(function(d){
-      // 오늘 세션이 아니면 버린다 — backfilled도 세우지 않아, 오늘 첫 봉이 생긴 뒤 종목을 다시
-      // 고르면 정상 백필된다. 그 전까진 라이브 폴러가 09:00부터 쌓는 실측만으로 곡선을 만든다.
-      if(isTodaySession(d)&&d.minutes&&d.minutes.length){ buf[code]=d.minutes.slice(); buft[code]=(d.times||[]).slice(); bufv[code]=(d.volumes||[]).slice(); backfilled[code]=true; writeCache(code,d); draw(code); }
-      else if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); }
-    }).catch(function(){ if(!(buf[code]&&buf[code].length>=2)){ if(code===curCode) wmSetOpen(false); } });
-  }
-  // 날짜 롤오버 방어 — 자정 넘겨 열어둔 탭에서 전일 buf에 오늘 실측이 이어붙지 않도록 전량 리셋 후 재백필한다.
-  function resetForNewDay(){
-    bufDay=todayKST();
-    buf={}; buft={}; bufv={}; backfilled={};
-    try{ sessionStorage.removeItem('wm-intra-v1'); }catch(e){}
-    backfill(curCode);
-  }
-  window.whyMovedPush=function(code, price){
-    if(typeof price!=='number'||!isFinite(price)) return;
-    if(todayKST()!==bufDay){ resetForNewDay(); return; }   // 자정 넘겨 열어둔 경우 전일 곡선에 오늘 값을 이어붙이지 않는다
-    // 장중(평일 09:00~15:30 KST)만 곡선 버퍼에 반영. 마감 후·주말·공휴일 HL 24h 환산가가 섞여 시간축·스케일을 깨뜨리는 것을 차단.
-    // 주말·공휴일 09:00~15:30엔 krOpen()이 false라 pollNight(HL)이 돌므로, 시각뿐 아니라 비거래일도 막아야 한다.
-    var _kd=new Date(Date.now()+9*3600*1000),_km=_kd.getUTCHours()*60+_kd.getUTCMinutes();
-    if((window.krIsKospiHoliday&&window.krIsKospiHoliday())||_km<540||_km>930) return;
-    if(!buf[code]) buf[code]=[];
-    if(!buft[code]) buft[code]=[];
-    var b=buf[code];
-    if(!b.length||b[b.length-1]!==price){ b.push(price); buft[code].push(nowHHMM()); if(b.length>120){ b.shift(); buft[code].shift(); } }
-    if(code===curCode) draw(code);
-  };
-  window.whyMovedRender=function(code){ curCode=code; if(backfilled[code]) draw(code); else backfill(code); };
-  backfill(curCode);
-  loadWhy();
-  loadSnap();
-  var wmHeaderToggle=document.getElementById('wm-h-toggle');
-  if(wmHeaderToggle) wmHeaderToggle.addEventListener('click', wmToggleManual);
-  wmBodyGate();
-  // 밤사이 미국 반도체 시황(17:00)~오전 브리핑 발행(07:30) 경계를 놓치지 않도록 1분마다 재평가.
-  // + 날짜 롤오버(자정)도 함께 감시 — 오래 켜둔 탭이 전일 곡선을 계속 그리는 것을 자가 치유한다.
-  setInterval(function(){ wmBodyGate(); if(todayKST()!==bufDay) resetForNewDay(); }, 60000);
-  // 탭에 다시 돌아왔을 때(오래 켜뒀다 재방문) 날짜가 바뀌었으면 즉시 곡선을 새 거래일로 복구한다.
-  document.addEventListener('visibilitychange', function(){ if(!document.hidden && todayKST()!==bufDay) resetForNewDay(); });
-})();
+/* (2026-09-11) 선택 종목 1분봉 곡선·장중 지표 모듈 제거 — 장중 지표(당일 레인지·52주 위치)는
+   코스피 주도주 타일 안으로 옮겼다. 레인지는 이제 1분봉 누적이 아니라 원천의 확정 고가·저가다. */
 
 /* ── 블록 3 (원본 index.html) ── */
 /* 더블샷 모멘텀 픽 장중 추적 — 커밋된 kospi 스냅샷 stock_picks(진입·목표·손절) + /api/stocks-live 라이브 가격 */
@@ -922,21 +602,8 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var why=document.getElementById('why-moved');
   var momTrack=document.getElementById('mom-track');
   if(!usEve||!usLinked||!why||!momTrack) return;
-  var curve=document.getElementById('wm-curve-block');
-  // #why-moved 직계 .lw-row = 관련뉴스+목표주가 2단 행(#wm-body 안의 .lw-row와 구분하려면 직계여야 한다).
-  var newsRow=why.querySelector(':scope > .lw-row');
-  if(!curve||!newsRow) return;
-
-  // wm-body(장중 곡선)가 접혀 있으면 curve 블록은 토글 헤더 한 줄뿐이다 — 이땐 숨길 "정지된 차트"가
-  // 없으므로 원래 순서(헤더가 관련 뉴스 바로 위)를 유지한다. krxDay 종료~다음날 개장 전은 기본이
-  // 접힘 상태라(wmBodyGate) 이 분기가 사실상 상시 케이스다. 사용자가 수동으로 펼쳤을 때만
-  // 뉴스를 위로 올려 정지된 차트를 아래로 보낸다(2026-07-27 피드백: 접힌 토글이 뉴스 아래
-  // 동떨어져 보이는 문제).
-  var wmBody=document.getElementById('wm-body');
-  var curveCollapsed = wmBody && wmBody.style.display==='none';
-  if(!curveCollapsed){
-    why.insertBefore(newsRow, curve);              // 갱신되는 뉴스를 정지된 장중 차트 위로
-  }
+  // (2026-09-11) 장중 곡선 블록이 사라져 뉴스·곡선 자리바꿈은 더 이상 없다. 섹션 순서만 바꾼다.
+  // 곡선 조회에 실패하면 여기서 return해 아래 재배치까지 막히던 의존도 함께 걷어냈다.
   // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
   // day가 아닌 국면(= 코스피가 닫혀 있음)은 전부 '밤사이 미국 반도체 시황'을 위로 — 17:00부터 적용.
   [usEve, usLinked]
@@ -1560,25 +1227,112 @@ if(passBtn){
     }
     requestAnimationFrame(step);
   }
-  function paintTile(tile, close, pct, animate){
-    if(close==null) return;
-    var els = tile.children; // [KOSPI 라벨, 종목명, 가격, 등락]
-    if(els.length < 4) return;
-    var prevShown = parseFloat((els[2].textContent||'').replace(/[^0-9.\-]/g,''));
-    var dir = isFinite(prevShown) ? (close>prevShown?1:close<prevShown?-1:0) : 0;
-    if(animate) countUp(els[2], close, dir);
-    else els[2].textContent = fmt(close);
-    if(pct==null) return; // 가격만 갱신, 등락 표시는 유지
-    var prev = close/(1+pct/100);
-    var delta = Math.abs(close-prev);
-    var up = pct>0, dn = pct<0;
-    els[3].textContent = (up?'▲':dn?'▼':'–')+' '+fmt(delta)+' ('+Math.abs(pct).toFixed(2)+'%)';
-    els[3].style.color = up?KR_UP:dn?KR_DN:KR_FLAT;
+  /* 코스피 주도주 확장 타일(2026-09-11). 1분봉 곡선을 빼고 장중 지표를 타일로 올렸다.
+     ⚠️ 원화 등락은 원천의 실제 값(changeAbs)만 쓴다. 예전엔 반올림된 %에서
+     반올림된 %에서 전일 종가를 되짚어 계산해 호가 단위에 없는 값이 나갔다(삼성전자 −9,250 → −9,254).
+     실제 값이 없으면 원화 금액을 만들지 않고 %만 보인다(§0). */
+  function q(tile, cls){ return (tile && tile.querySelector) ? tile.querySelector('.'+cls) : null; }
+  function rangePos(cur, lo, hi){
+    if(cur==null || !(hi>lo)) return null;
+    return Math.max(0, Math.min(100, (cur-lo)/(hi-lo)*100));
+  }
+  function fmtValue(won){                        // 거래대금 → "3조 1,725억" / "1,511억"
+    if(!(won>0)) return null;
+    var eok=Math.round(won/1e8);
+    if(eok>=10000){ var jo=Math.floor(eok/10000), r=eok%10000; return jo+'조'+(r?' '+r.toLocaleString('en-US')+'억':''); }
+    return eok.toLocaleString('en-US')+'억';
+  }
+  function fmtShares(n){                         // 외국인 순매수 수량(주) → "+367만주"
+    var a=Math.abs(n), sg=n>0?'+':n<0?'−':'';
+    return sg+(a>=10000 ? Math.round(a/10000).toLocaleString('en-US')+'만주' : a.toLocaleString('en-US')+'주');
+  }
+  function prevFromSpark(s){                     // 스냅샷의 실제 종가 시계열로 전일 종가를 잡는다
+    var sp=s&&s.spark20;
+    if(!sp||sp.length<2||s.close==null) return null;
+    if(Math.round(sp[sp.length-1])!==Math.round(s.close)) return null; // 마지막 점이 종가가 아니면 판단 불가
+    return sp[sp.length-2];
+  }
+  function chgText(abs, pct){                    // abs가 없으면 %만 — 역산해서 채우지 않는다
+    var arrow=pct>0?'▲':pct<0?'▼':'–', p=Math.abs(pct).toFixed(2)+'%';
+    return abs!=null ? arrow+' '+fmt(Math.abs(abs))+' ('+p+')' : arrow+' '+p;
+  }
+  // 회귀 테스트 훅 — 순수 계산만 노출한다(DOM 페인트는 브라우저에서 확인).
+  window.__leaderTiles={rangePos:rangePos, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
+
+  function paintPrice(tile, price, animate){
+    var el=q(tile,'ut-px'); if(!el||price==null) return;
+    var shown=parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
+    var dir=isFinite(shown)?(price>shown?1:price<shown?-1:0):0;
+    if(animate) countUp(el, price, dir); else el.textContent=fmt(price);
+  }
+  function paintChange(tile, abs, pct, prevClose, note){
+    var el=q(tile,'ut-chg'); if(!el||pct==null) return;
+    el.textContent=chgText(abs, pct);
+    el.style.color=pct>0?KR_UP:pct<0?KR_DN:KR_FLAT;
+    var pv=q(tile,'ut-prev');
+    if(pv) pv.textContent = note || (prevClose!=null ? '전일 '+fmt(prevClose) : '');
+  }
+  function setStat(tile, cls, text, color){
+    var el=q(tile,cls); if(!el) return;
+    var row=el.closest?el.closest('.ut-stat'):null;
+    if(text==null){ if(row) row.hidden=true; return; }
+    if(row) row.hidden=false;
+    el.textContent=text;
+    el.style.color=color||'';
+  }
+  function paintRange(tile, cur, open, lo, hi, label){
+    var box=q(tile,'ut-rng'); if(!box) return;
+    var pos=rangePos(cur, lo, hi);
+    if(pos==null){ box.hidden=true; return; }
+    box.hidden=false;
+    var lb=q(tile,'ut-rng-lbl'); if(lb) lb.textContent=label||'당일 레인지';
+    var ps=q(tile,'ut-rng-pos'); if(ps) ps.textContent=Math.round(pos)+'% 지점';
+    var mk=q(tile,'ut-mk'); if(mk) mk.style.left=pos.toFixed(1)+'%';
+    var op=q(tile,'ut-open'), opPos=rangePos(open, lo, hi);
+    if(op){ op.hidden=(opPos==null); if(opPos!=null) op.style.left=opPos.toFixed(1)+'%'; }
+    var l=q(tile,'ut-lo'); if(l) l.textContent='저 '+fmt(lo);
+    var h=q(tile,'ut-hi'); if(h) h.textContent='고 '+fmt(hi);
+  }
+  var SNAP=null;
+  function snapOf(code){ return SNAP&&SNAP.stocks ? SNAP.stocks[code] : null; }
+  // 스냅샷 기반(52주·외국인) — 52주 고점 대비는 지금 보이는 가격으로 다시 계산한다.
+  function paintStatic(tile, s, cur){
+    if(!s) return;
+    var w=(s.wk52_high>0 && cur!=null) ? (cur/s.wk52_high-1)*100 : null;
+    setStat(tile,'ut-w52', w==null?null:(w>=0?'+':'−')+Math.abs(w).toFixed(1)+'%', w==null?null:(w>=0?KR_UP:KR_DN));
+    var sp=s.supply5||[];
+    if(sp.length){
+      var sum=sp.reduce(function(a,x){ return a+(x.f||0); }, 0);
+      setStat(tile,'ut-frg', fmtShares(sum), sum>0?KR_UP:sum<0?KR_DN:KR_FLAT);
+      var d=q(tile,'ut-frg-d'); if(d) d.textContent=sp[0].date+'~'+sp[sp.length-1].date; // 집계가 하루 늦어 기간을 반드시 적는다
+    } else setStat(tile,'ut-frg', null);
+  }
+  function paintLive(tile, p){
+    tile._regClose=p.price;                      // 장중 실체결가 — 52주 계산의 기준
+    paintPrice(tile, p.price, true);
+    paintChange(tile, p.changeAbs, p.changePct, p.prevClose);
+    if(p.high!=null && p.low!=null) paintRange(tile, p.price, p.open, p.low, p.high);
+    setStat(tile,'ut-val', fmtValue(p.tradingValue));
+    paintStatic(tile, snapOf(p.code), p.price);
+  }
+  // 마감 후 추정가(HL 24h) — 체결가가 아니므로 원화 등락을 만들지 않는다. 만들려면 기준(종가)을
+  // 역산해야 하고, 추정치에 원 단위 정밀도를 입히는 것 자체가 과장이다. %만 보인다.
+  function paintNight(tile, it){
+    paintPrice(tile, it.krw, true);
+    paintChange(tile, null, it.changePct, null, '종가 대비 · 추정');
   }
   function applySnapshot(snap){
+    SNAP=snap;
     document.querySelectorAll('#us-linked-widget .us-tile[data-code]').forEach(function(tile){
-      var s = snap.stocks && snap.stocks[tile.getAttribute('data-code')];
-      if(s) paintTile(tile, s.close, s.change_pct, false); // 최초 baseline은 즉시
+      var s=snapOf(tile.getAttribute('data-code'));
+      if(!s) return;
+      if(!tile._live){                           // 실시간이 먼저 칠했으면 옛 종가로 덮지 않는다
+        paintPrice(tile, s.close, false);
+        var prev=prevFromSpark(s);
+        paintChange(tile, prev!=null ? s.close-prev : null, s.change_pct, prev);
+      }
+      // 화면 가격을 읽지 않는다 — 야간엔 추정가가 떠 있어 52주 대비가 추정치 기준이 된다.
+      paintStatic(tile, s, tile._regClose!=null ? tile._regClose : s.close);
     });
   }
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
@@ -1644,7 +1398,7 @@ if(passBtn){
         if(!d) return;
         if(Array.isArray(d.prices)) d.prices.forEach(function(p){
           var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+p.code+'"]');
-          if(tile && p.price!=null){ paintTile(tile, p.price, p.changePct, true); if(window.whyMovedPush) window.whyMovedPush(p.code, p.price); }
+          if(tile && p.price!=null){ tile._live=true; paintLive(tile, p); }
         });
       })
       .catch(function(){});
@@ -1657,7 +1411,25 @@ if(passBtn){
         if(!d||!Array.isArray(d.items)) return;
         d.items.forEach(function(it){
           var tile = document.querySelector('#us-linked-widget .us-tile[data-code="'+it.code+'"]');
-          if(tile && it.krw!=null){ paintTile(tile, it.krw, it.changePct, true); if(window.whyMovedPush) window.whyMovedPush(it.code, it.krw); }
+          if(tile && it.krw!=null){ tile._live=true; paintNight(tile, it); }
+        });
+      })
+      .catch(function(){});
+  }
+  // 야간 — 정규장에서 확정된 레인지·거래대금을 한 번만 받아 채운다(가격은 추정가가 담당).
+  var regularDone=false;
+  function loadRegularSession(){
+    fetch('/api/stocks-live?codes='+liveCodes.join(','),{cache:'no-store'})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){
+        if(!d||!Array.isArray(d.prices)) return;
+        d.prices.forEach(function(p){
+          var tile=document.querySelector('#us-linked-widget .us-tile[data-code="'+p.code+'"]');
+          if(!tile) return;
+          tile._regClose=p.price;                  // 오늘 정규장 종가(스냅샷은 16:33 전엔 어제 종가다)
+          paintStatic(tile, snapOf(p.code), p.price);
+          if(p.high!=null && p.low!=null) paintRange(tile, p.price, p.open, p.low, p.high, '정규장 레인지');
+          setStat(tile,'ut-val', fmtValue(p.tradingValue));
         });
       })
       .catch(function(){});
@@ -1672,7 +1444,7 @@ if(passBtn){
     if(document.hidden) return;
     var night=!krOpen();
     setNight(night);
-    if(night) pollNight(); else pollDay();
+    if(night){ if(!regularDone){ regularDone=true; loadRegularSession(); } pollNight(); } else pollDay();
   }
   poll();
   setInterval(poll, 60000);
@@ -2771,7 +2543,7 @@ if(passBtn){
    주말·공휴일에도 배포된 채 남아 있으므로, 실제로 그 날들을 막는 것은 요일 검사가 아니라
    이 날짜 게이트다(§0 — 완전성보다 정합성).
 
-   재평가: ueGate(5분)·wmBodyGate(1분) 관례를 따라 1분마다 게이트만 다시 본다 — 탭을 열어둔
+   재평가: ueGate(5분) 관례를 따라 1분마다 게이트만 다시 본다 — 탭을 열어둔
    채 09:00을 넘기면 스스로 내려간다. 섹션 재배치는 하지 않는다(위 phase() 주석의 '재배치는
    로드 1회' 원칙 유지). */
 (function(){

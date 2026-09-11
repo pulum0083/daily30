@@ -201,52 +201,6 @@ test('quiet: 월요일 07:30 이전 (주말이 이어지는 구간)', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 장중 곡선 세션 검증 (__wmIsTodaySession)
-//
-// 2026-07-31 실사고: /api/intraday는 네이버 피드의 '최신 세션'을 돌려준다 — 오늘 첫 1분봉이
-// 생기기 전(개장 전·공휴일)엔 그게 전 거래일이다. 허브 위젯이 이걸 검증 없이 받아
-// buf에 채운 뒤, 09:00부터 라이브 폴러가 오늘 실측을 같은 버퍼에 이어붙였다.
-// buft의 시각이 09:00→15:30(어제) 후 09:00(오늘)으로 되감기며 곡선이 대각선으로 깨지고,
-// 당일 레인지 저점이 전일 저가(202,750)로 오염됐다. 상세 페이지(stocks.js)는 같은 API에
-// d.date===todayKST() 검증이 있어 멀쩡했다 — 같은 데이터의 이중 소비처 중 한쪽만 검증한
-// SERVICE_RULES §20·§30 패턴.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** 해당 KST 시각 기준으로 payload를 오늘 세션으로 인정하는가 */
-function acceptsAt(when, payload) {
-  const fn = loadWindow({ now: kst(when) }).__wmIsTodaySession;
-  assert.ok(fn, 'window.__wmIsTodaySession이 없다 — 장중 곡선 세션 검증 훅이 제거됐는지 확인할 것');
-  return fn(payload);
-}
-
-test('오늘 세션 1분봉은 받는다', () => {
-  assert.equal(acceptsAt('2026-07-31T10:00:00', { date: '20260731', minutes: [1, 2], times: ['09:05', '09:10'] }), true);
-});
-
-test('전 거래일 1분봉은 거부한다 (개장 전 백필 — 실사고 리플레이)', () => {
-  // 07-31 08:00엔 오늘 봉이 아직 없어 피드가 07-30 세션을 돌려준다
-  assert.equal(acceptsAt('2026-07-31T08:00:00', { date: '20260730', minutes: [214000, 207000], times: ['09:00', '15:30'] }), false);
-});
-
-test('공휴일·주말엔 직전 거래일 세션을 거부한다', () => {
-  assert.equal(acceptsAt('2026-08-01T11:00:00', { date: '20260731', minutes: [1, 2], times: ['09:00', '15:30'] }), false);
-});
-
-test('date가 없는 응답(502 등)은 거부한다', () => {
-  assert.equal(acceptsAt('2026-07-31T10:00:00', { minutes: [1, 2], times: ['09:05', '09:10'] }), false);
-  assert.equal(acceptsAt('2026-07-31T10:00:00', {}), false);
-  assert.equal(acceptsAt('2026-07-31T10:00:00', null), false);
-});
-
-test('KST 자정 직후에도 전일 세션을 오늘로 받지 않는다', () => {
-  assert.equal(acceptsAt('2026-07-31T00:10:00', { date: '20260730', minutes: [1, 2], times: ['09:00', '15:30'] }), false);
-});
-
-test('UTC 기준으로 날짜가 갈리지 않는다 (KST 09:00 = UTC 전날 00:00)', () => {
-  assert.equal(acceptsAt('2026-07-31T09:00:00', { date: '20260731', minutes: [1, 2], times: ['09:00', '09:05'] }), true);
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
 // 밤사이 브리지 노출 게이트 (__obShouldShow)
 //
 // 거래일 07:30~09:00(KST)에만 뜬다. 07:30은 '밤사이 미국 반도체 시황'이 꺼지는 경계(핸드오프),
@@ -599,4 +553,54 @@ test('표기된 "N초 갱신"은 실제로 존재하는 폴링 주기여야 한�
       `실제 등록된 주기(초): ${[...intervals].sort((a, b) => a - b).join(', ')}`,
     );
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 코스피 주도주 확장 타일 계산 (2026-09-11)
+//
+// 사고: 원화 등락폭을 반올림된 %에서 역산(prev = close/(1+pct/100))해 호가 단위에 없는 값이
+// 나갔다 — 삼성전자 실제 −9,250원이 −9,254원, SK하이닉스 −40,000원이 −40,025원.
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('타일 — 원화 등락은 받은 값 그대로 표시한다 (역산 회귀 가드)', () => {
+  const { chgText } = loadWindow({}).__leaderTiles;
+  assert.equal(chgText(-9250, -3.44), '▼ 9,250 (3.44%)');
+  assert.equal(chgText(-40000, -2.16), '▼ 40,000 (2.16%)');
+  assert.equal(chgText(8500, 3.42), '▲ 8,500 (3.42%)');
+  // 원화 값이 없으면 만들어내지 않고 %만
+  assert.equal(chgText(null, -3.44), '▼ 3.44%');
+});
+
+test('타일 — 소스에 %→전일가 역산 식이 되돌아오지 않는다', () => {
+  const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
+  assert.ok(!/\/\(1\+pct\/100\)/.test(src), 'close/(1+pct/100) 역산이 다시 들어왔다');
+});
+
+test('타일 — 스냅샷 기준선은 실제 종가 시계열로 전일 종가를 잡는다', () => {
+  const { prevFromSpark } = loadWindow({}).__leaderTiles;
+  assert.equal(prevFromSpark({ close: 269000, spark20: [255500, 270000, 269500, 269500, 269000] }), 269500);
+  // 마지막 점이 종가와 다르면 어느 날인지 판단 불가 → null
+  assert.equal(prevFromSpark({ close: 269000, spark20: [269500, 270000] }), null);
+  assert.equal(prevFromSpark({ close: 269000, spark20: [269000] }), null);
+  assert.equal(prevFromSpark(null), null);
+});
+
+test('타일 — 당일 레인지 위치', () => {
+  const { rangePos } = loadWindow({}).__leaderTiles;
+  assert.equal(rangePos(259750, 256500, 261500), 65);
+  assert.equal(rangePos(256500, 256500, 261500), 0);
+  assert.equal(rangePos(262000, 256500, 261500), 100);   // 범위 밖은 끝에 붙인다
+  assert.equal(rangePos(100, 100, 100), null);           // 고가=저가(상한가 등)는 위치가 없다
+  assert.equal(rangePos(null, 1, 2), null);
+});
+
+test('타일 — 거래대금·외국인 수량 표기', () => {
+  const { fmtValue, fmtShares } = loadWindow({}).__leaderTiles;
+  assert.equal(fmtValue(3167707000000), '3조 1,677억');
+  assert.equal(fmtValue(151100000000), '1,511억');
+  assert.equal(fmtValue(1e12), '1조');
+  assert.equal(fmtValue(0), null);
+  assert.equal(fmtShares(3671062), '+367만주');
+  assert.equal(fmtShares(-51155), '−5만주');
+  assert.equal(fmtShares(9000), '+9,000주');
 });
