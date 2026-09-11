@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-09-11T11:31:24.840962+09:00",
+  "generated_at": "2026-09-11T12:01:29.547529+09:00",
   "date": "2026-09-11",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -4.18,
-      "surge": 0.31,
+      "changePct": -4.28,
+      "surge": 0.35,
       "events": [
-        {
-          "time": "09:39",
-          "headline": "삼성전자 주가 하락 중",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1wMWhpUnc0QXkwM2FDN1ZKYlZMR014Q2lBeGpZR092OXJ1YUI3T2QzYU9uTlAxWkpBWjEyUXNSUS1mOFpLRkctS3dlLUJsWjdvT2w0cS1KRUFWbWdy?oc=5",
-          "source": "anewsa.com",
-          "why": "삼성전자 주가 하락 중",
-          "tier": "why",
-          "sentiment": "neg"
-        },
         {
           "time": "09:18",
           "headline": "미 기술주 삭풍에 삼성전자 3.8% 하락…하이닉스도 4%↓",
           "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFA3Qmh3ZDAwVGNYNEhZSUtocWQ5NUZKLW4xd0VDME12aHlfanR1WjFVOEhmNDhNVVNoSFhWeERmS2pDMEgydTJMazJDT1BualpoWFE?oc=5",
           "source": "매일경제 마켓",
-          "why": "미 기술주 삭풍에 삼성전자 3.8% 하락…하이닉스도 4%↓",
+          "why": "미국 증시의 악재로 인해 삼성전자와 SK하이닉스의 주가가 3% 하락했다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:39",
+          "headline": "삼성전자 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1wMWhpUnc0QXkwM2FDN1ZKYlZMR014Q2lBeGpZR092OXJ1YUI3T2QzYU9uTlAxWkpBWjEyUXNSUS1mOFpLRkctS3dlLUJsWjdvT2w0cS1KRUFWbWdy?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 하락 중",
           "tier": "why",
           "sentiment": "neg"
         }
@@ -31,8 +31,8 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -3.51,
-      "surge": 0.34,
+      "changePct": -3.67,
+      "surge": 0.36,
       "events": [
         {
           "time": "08:29",
@@ -57,15 +57,15 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -2.44,
-      "surge": 0.32,
+      "changePct": -2.63,
+      "surge": 0.37,
       "events": [
         {
           "time": "09:37",
           "headline": "현대차증권 \"한국금융지주 주식 매수의견 신규 제시, 이익 창출력 우수\"",
           "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1HVlZOYnFaSVZCTGtJaWtRem9EU01YVlBiZXB0VmFaNkh4dVc3c1c5NnQybC1zd1pFN3J6QWNDaDlKNURFM1ExUzE1Z1RaMFNDWF9pT2hFQVRXY2hyNG5NdkQ2bERkSjZGd0hGeGZEeDF6MG8?oc=5",
           "source": "비즈니스포스트",
-          "why": "현대차증권은 한국금융지주의 이익 창출력이 우수하다는 평가와 함께 신규 매수 의견을 제시했습니다. (개별 인과 단정 안 함)",
+          "why": "현대차증권은 한국금융지주의 우수한 이익 창출력을 근거로 신규 매수 의견을 제시했습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
