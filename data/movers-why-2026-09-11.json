@@ -1,13 +1,22 @@
 {
-  "generated_at": "2026-09-11T09:31:57.904788+09:00",
+  "generated_at": "2026-09-11T10:01:28.000228+09:00",
   "date": "2026-09-11",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -3.16,
-      "surge": 0.1,
+      "changePct": -3.44,
+      "surge": 0.16,
       "events": [
+        {
+          "time": "09:39",
+          "headline": "삼성전자 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE1wMWhpUnc0QXkwM2FDN1ZKYlZMR014Q2lBeGpZR092OXJ1YUI3T2QzYU9uTlAxWkpBWjEyUXNSUS1mOFpLRkctS3dlLUJsWjdvT2w0cS1KRUFWbWdy?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "삼성전자 주가 하락 중",
+          "tier": "why",
+          "sentiment": "neg"
+        },
         {
           "time": "08:29",
           "headline": "美 증시 악재에 삼성전자·SK하이닉스 3% 하락",
@@ -16,39 +25,30 @@
           "why": "美 증시 악재에 삼성전자·SK하이닉스 3% 하락",
           "tier": "why",
           "sentiment": "neg"
-        },
-        {
-          "time": "09:03",
-          "headline": "“삼성전자 HBM 점유율 40% 갈 것”…목표주가 60만 원",
-          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFBfYkxOcXkyRGhMSy1neTRWWkN6VUo0M1RIMDcwV2NBa0h1VUsyWVFzcUZTSVR4X19MNFY2aHRwXzZwM1I3T2tuS2l6eEgtNVhPaWfSAVNBVV95cUxOVjk3R0Yyd0x6SW5ZdTRYemxfRGtfcU9hNlZyaUY0S0VmRGhaSGxXbm5zNzF1dlItVWFNb19USDQ4VWc2OTREdDNBbnpINmZmajU2WQ?oc=5",
-          "source": "서울경제",
-          "why": "증권사에서 삼성전자의 HBM 시장 점유율을 40%까지 전망하며 목표주가를 60만 원으로 상향 조정했다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -3.24,
-      "surge": 0.15,
+      "changePct": -3.62,
+      "surge": 0.21,
       "events": [
         {
           "time": "09:21",
           "headline": "삼성전자 3%·SK하이닉스 4%↓⋯유가·美 금리 쇼크",
           "url": "https://news.google.com/rss/articles/CBMiSEFVX3lxTE81TGNZTWtONUthLTd4ZzJTODJETEp2NmpMdF9IQkxJOHFHU00tXzVSSDBuanJEU2M5bl9qOFk1UExtdDRQYVFkSw?oc=5",
           "source": "아이뉴스24",
-          "why": "유가 상승과 미국 금리 인상 우려로 삼성전자와 SK하이닉스 주가가 각각 3%, 4% 하락했다.",
+          "why": "유가 및 미국 금리 상승에 대한 우려로 삼성전자와 SK하이닉스 주가가 각각 3%, 4% 하락했습니다.",
           "tier": "why",
           "sentiment": "neg"
         },
         {
-          "time": "04:55",
-          "headline": "곱버스 -59.95% 폭락하던 날…제값보다 더 낮게 거래됐다",
-          "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9OUldReFRxM0pyN1RsZEdPZ3BmY0dyVEFQZFdCVjFNaDJDc2M4LTR4V2Z4am9DcjREZFNIb1lOdzdfN2M4N0JBYnhveDdqRFMtQ1lFWWhLV3p6WDdkMDhha2x5Z21iek1zS1VhdTN3?oc=5",
-          "source": "더스쿠프",
-          "why": "곱버스 -59.95% 폭락하던 날…제값보다 더 낮게 거래됐다",
+          "time": "08:29",
+          "headline": "美 증시 악재에 삼성전자·SK하이닉스 3% 하락",
+          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE5iUXBrZlJHNFpRV1drMWlxd1g0WldLTEFtZTJPVnIybndjNjVOUktJNC1EN1hzUkphcEJVYVBKZ3o2NDBQUEZNR1hYbXJwc2VISUHSAVNBVV95cUxPMDJoMi1PdGZiUlB5U190TVQ5VUZuWWpjdnhvMFFvX0VGWFVUNzY3bzVUTmpqdURUOW41RWZ6RmxXX3gzeUNFQ0NDdnNGRmpaRjhUSQ?oc=5",
+          "source": "서울경제",
+          "why": "美 증시 악재에 삼성전자·SK하이닉스 3% 하락",
           "tier": "why",
           "sentiment": "neg"
         }
@@ -57,8 +57,8 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -2.31,
-      "surge": 0.12,
+      "changePct": -2.44,
+      "surge": 0.17,
       "events": [
         {
           "time": "09:07",
