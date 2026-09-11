@@ -9,7 +9,10 @@ import { krMarketOpen } from './_market-calendar.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
 
-async function fetchOne(code) {
+const toNum = (v) => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? n : null; };
+
+// 테스트가 네트워크 없이 필드 추출을 검증할 수 있게 export한다(기본 export인 handler는 그대로).
+export async function fetchOne(code) {
   try {
     const r = await fetch(`https://polling.finance.naver.com/api/realtime/domestic/stock/${code}`, {
       headers: HDR,
@@ -19,10 +22,22 @@ async function fetchOne(code) {
     const d = await r.json();
     const item = d?.datas?.[0];
     if (!item) return null;
-    const price = parseFloat(String(item.closePriceRaw || '').replace(/,/g, ''));
-    const pct = parseFloat(String(item.fluctuationsRatioRaw || '').replace(/,/g, ''));
-    if (!isFinite(price)) return null;
-    return { code, price, changePct: isFinite(pct) ? pct : null };
+    const price = toNum(item.closePriceRaw);
+    if (price == null) return null;
+    // 원화 등락은 원천의 실제 값을 그대로 넘긴다(2026-09-11). 그 전엔 price·changePct만 넘겨
+    // 클라이언트가 반올림된 %에서 전일 종가를 역산했고, 호가 단위에 없는 값이 나갔다
+    // (삼성전자 실제 −9,250 → 화면 −9,254). 전일 종가도 이 값에서 계산한다 — 역산하지 않는다.
+    const changeAbs = toNum(item.compareToPreviousClosePriceRaw);
+    return {
+      code, price,
+      changePct: toNum(item.fluctuationsRatioRaw),
+      changeAbs,
+      prevClose: changeAbs != null ? price - changeAbs : null,
+      open: toNum(item.openPriceRaw),
+      high: toNum(item.highPriceRaw),
+      low: toNum(item.lowPriceRaw),
+      tradingValue: toNum(item.accumulatedTradingValueRaw),   // 원 단위(누적 거래대금)
+    };
   } catch (e) {
     return null;
   }
