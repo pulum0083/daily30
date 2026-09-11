@@ -34,9 +34,13 @@ KST = pytz.timezone("Asia/Seoul")
 sys.path.insert(0, str(BASE_DIR / "scripts"))
 from fetch_news_live import get_gemini_api_key  # noqa: E402
 
-_HDR = {"User-Agent": "Mozilla/5.0", "Referer": "https://finance.naver.com/"}
-LIST_URL = "https://finance.naver.com/research/market_info_list.naver"
-READ_URL = "https://finance.naver.com/research/market_info_read.naver?nid={nid}&page=1"
+_HDR = {"User-Agent": "Mozilla/5.0"}
+# 2026-09-11 네이버가 리서치 게시판(finance.naver.com/research/market_info_list.naver)을
+# stock.naver.com으로 옮겨 옛 HTML 파서가 0건을 읽었다(SERVICE_RULES §47). 새 페이지가 쓰는
+# JSON API로 바꿨다 — 필터 규칙(당일·국내·재게시 제외·증권사당 1건)은 그대로다.
+LIST_URL = "https://m.stock.naver.com/api/research/market?page=1&pageSize=40"
+DETAIL_URL = "https://m.stock.naver.com/api/research/market/{nid}"
+READ_URL = "https://m.stock.naver.com/research/market/{nid}"
 
 _KW = re.compile(r"코스피|KOSPI|국내|마감|증시|시장|마켓|전략", re.I)
 _EXCL = re.compile(r"미국|글로벌|Global|Carbon|해외", re.I)
@@ -44,32 +48,32 @@ _NUM_LEAK = re.compile(r"\d+\.?\d*\s*%|\d{3,4}\.?\d*\s*p\b|\d,\d{3}")
 MAX_REPORTS = 3
 
 
-def _get(url: str) -> str:
+def _get_json(url: str):
     req = urllib.request.Request(url, headers=_HDR)
     with urllib.request.urlopen(req, timeout=12) as resp:
-        return resp.read().decode("euc-kr", errors="ignore")
+        return json.loads(resp.read().decode("utf-8"))
 
 
 def _list_today(today: str) -> list[dict]:
     """당일 국내 시황 리포트 후보를 증권사당 1건, 최대 MAX_REPORTS건 반환한다."""
     try:
-        html = _get(LIST_URL)
+        items = _get_json(LIST_URL)
     except Exception as e:
         print(f"[research_reports] list fetch failed: {e}", file=sys.stderr)
         return []
-    rows = re.findall(
-        r'market_info_read\.naver\?nid=(\d+)[^"]*"[^>]*>([^<]+)</a>.*?'
-        r'<td[^>]*>\s*([^<]+?)\s*</td>.*?(\d{2}\.\d{2}\.\d{2})',
-        html, re.DOTALL,
-    )
+    rows = [
+        (str(x["researchId"]), str(x.get("title") or ""), str(x.get("brokerName") or ""),
+         str(x.get("writeDate") or ""))
+        for x in (items if isinstance(items, list) else [])
+        if isinstance(x, dict) and x.get("researchId")
+    ]
     import html as _html
-    today_short = today[2:].replace("-", ".")  # "2026-07-02" -> "26.07.02"
     _, today_mm, today_dd = (int(x) for x in today.split("-"))
     _ymd_pat = re.compile(r"(\d{2})\.(\d{2})\.(\d{2})")
     _md_pat = re.compile(r"(?<!\d)(\d{1,2})/(\d{1,2})(?!\d)")
     seen_firm, picks = set(), []
     for nid, title, firm, date in rows:
-        if date != today_short:
+        if date != today:  # writeDate는 "2026-07-02" 형식
             continue
         title = _html.unescape(title.strip())
         firm = firm.strip()
@@ -101,22 +105,14 @@ def _fetch_detail(nid: str, fallback_title: str) -> tuple[str, str]:
     잘리지 않은 전체 제목으로 대체한다. 실패 시 목록의 잘린 제목을 그대로 쓴다.
     """
     try:
-        html = _get(READ_URL.format(nid=nid))
+        data = _get_json(DETAIL_URL.format(nid=nid))
     except Exception as e:
         print(f"[research_reports] {nid} detail fetch failed: {e}", file=sys.stderr)
         return fallback_title, ""
     import html as _html
-    title = fallback_title
-    tm = re.search(r"<title>([^<]+)</title>", html)
-    if tm:
-        full = _html.unescape(tm.group(1)).strip()
-        full = re.sub(r"\s*:\s*Npay\s*증권\s*$", "", full)  # 사이트 접미사 제거
-        if full:
-            title = full
-    i = html.find("view_cnt")
-    if i < 0:
-        return title, ""
-    chunk = re.sub(r"<[^>]+>", " ", html[i:i + 2500])
+    rc = (data or {}).get("researchContent") or {}
+    title = str(rc.get("title") or "").strip() or fallback_title
+    chunk = re.sub(r"<[^>]+>", " ", str(rc.get("content") or ""))[:2500]
     body = re.sub(r"\s+", " ", _html.unescape(chunk)).strip()
     return title, body
 
