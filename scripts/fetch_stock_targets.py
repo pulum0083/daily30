@@ -1,7 +1,6 @@
 # 네이버 증권사 리포트에서 종목별 목표주가·투자의견을 수집해 컨센서스를 계산하는 스크립트
 import json
 import os
-import re
 import sys
 import urllib.request
 from datetime import datetime, timedelta
@@ -12,50 +11,48 @@ import pytz
 KST = pytz.timezone("Asia/Seoul")
 
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
-LIST_URL = ("https://finance.naver.com/research/company_list.naver"
-            "?searchType=itemCode&itemCode={code}&page={page}")
-DETAIL_URL = "https://finance.naver.com/research/company_read.naver?nid={nid}&page=1"
-
-_STRIP = re.compile(r"<[^>]+>")
-
-
-def _text(html):
-    return _STRIP.sub("", html).strip()
+# 2026-09-11 네이버가 리서치 게시판(finance.naver.com/research/company_list.naver)을
+# stock.naver.com(Next.js, 클라이언트 렌더)으로 옮기면서 옛 URL은 302로 새 페이지에 넘어가고
+# itemCode 필터까지 떨어졌다. HTML 표 파서가 0행을 읽어 3종목 모두 리포트 0건이 됐다
+# (SERVICE_RULES §47). 새 페이지가 쓰는 JSON API로 바꿨다 — 목표가·투자의견이 구조화 필드로 온다.
+LIST_URL = "https://m.stock.naver.com/api/research/stock/{code}?page={page}&pageSize=20"
+DETAIL_URL = "https://m.stock.naver.com/api/research/company/{nid}"
 
 
-def fetch_euckr(url):
-    """네이버 금융 리서치 게시판은 EUC-KR로 서빙된다."""
+def fetch_json(url):
     req = urllib.request.Request(url, headers=UA)
-    return urllib.request.urlopen(req, timeout=20).read().decode("euc-kr", "ignore")
+    return json.loads(urllib.request.urlopen(req, timeout=20).read().decode("utf-8"))
 
 
-def parse_report_list(html):
-    """목록 HTML에서 (증권사, 날짜, nid)를 뽑는다. 목표가는 목록에 없다."""
+def parse_report_list(items, code):
+    """목록 JSON에서 (증권사, 날짜, nid)를 뽑는다. 목표가는 목록에 없다.
+
+    다른 종목 리포트는 버린다. 같은 계열의 /api/research/company는 itemCode를 조용히 무시하고
+    전 종목 목록을 돌려줬다 — 필터가 풀리면 남의 목표가가 컨센서스에 섞인다.
+    날짜는 기존 소비처(컨센서스·상세 페이지·허브 위젯)가 쓰는 'YY.MM.DD'로 맞춘다.
+    """
     out = []
-    for row in re.findall(r"<tr[^>]*>(.*?)</tr>", html, re.S):
-        nid = re.search(r"nid=(\d+)", row)
-        cols = [_text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
-        cols = [c for c in cols if c]
-        if not nid or len(cols) < 4:
+    for it in items if isinstance(items, list) else []:
+        if not isinstance(it, dict) or str(it.get("itemCode")) != code or not it.get("researchId") or not it.get("brokerName"):
             continue
-        if not re.fullmatch(r"\d{2}\.\d{2}\.\d{2}", cols[3]):
+        try:
+            d = datetime.strptime(str(it.get("writeDate")), "%Y-%m-%d").strftime("%y.%m.%d")
+        except ValueError:
             continue
-        out.append({"firm": cols[2], "date": cols[3], "nid": nid.group(1)})
+        out.append({"firm": it["brokerName"], "date": d, "nid": str(it["researchId"])})
     return out
 
 
-def parse_report_detail(html):
-    """상세 HTML에서 목표가·투자의견을 뽑는다. 목표가가 없는 리포트는 None."""
-    tp = re.search(r"목표가[\s\S]{0,40}?([\d][\d,]{2,})", html)
-    op = re.search(r"투자의견\s*<em[^>]*>([^<]+)</em>", html)
-    opinion = op.group(1).strip() if op else None
-    # 목표가 없는 리포트는 네이버가 투자의견에도 '없음'을 렌더한다 — 실제 의견이 아니므로 버린다.
+def parse_report_detail(data):
+    """상세 JSON에서 목표가·투자의견을 뽑는다. 목표가가 없는 리포트는 None."""
+    rc = (data or {}).get("researchContent") or {}
+    raw = str(rc.get("goalPrice") or "").replace(",", "").strip()
+    target = int(raw) if raw.isdigit() and int(raw) > 0 else None
+    opinion = str(rc.get("opinion") or "").strip() or None
+    # 목표가 없는 리포트는 투자의견도 '없음'으로 온다 — 실제 의견이 아니므로 버린다.
     if opinion == "없음":
         opinion = None
-    return {
-        "target_price": int(tp.group(1).replace(",", "")) if tp else None,
-        "opinion": opinion,
-    }
+    return {"target_price": target, "opinion": opinion}
 
 
 def _to_date(yymmdd):
@@ -167,29 +164,43 @@ def fetch_close_price(code):
 def collect(code, pages=2):
     """종목 하나의 리포트를 수집해 목표가·투자의견까지 채운다.
 
-    (리포트 목록, 상세 조회 실패 건수)를 돌려준다. 실패 건수를 같이 내보내야
-    호출부가 '살아남은 소수로 낸 평균'인지 판별할 수 있다.
+    (리포트 목록, 상세 조회 실패 건수, 목록 행 수)를 돌려준다. 실패 건수를 같이 내보내야
+    호출부가 '살아남은 소수로 낸 평균'인지 판별할 수 있다. 목록 행 수는 원천 구조가
+    바뀌어 목록 자체를 못 읽는 상황을 가려내는 데 쓴다.
     목표가가 '없음'인 리포트는 정상 데이터지 실패가 아니다 — 여기서 세지 않는다.
     """
     reports = []
     failed = 0
+    listed = 0
     for page in range(1, pages + 1):
         try:
-            html = fetch_euckr(LIST_URL.format(code=code, page=page))
-            rows = parse_report_list(html)
+            rows = parse_report_list(fetch_json(LIST_URL.format(code=code, page=page)), code)
         except Exception as e:
             print(f"⚠️ {code} 목록 페이지 {page} 수집 실패: {e}", file=sys.stderr)
             continue
+        listed += len(rows)
         for row in rows:
             try:
-                detail_html = fetch_euckr(DETAIL_URL.format(nid=row["nid"]))
-                detail = parse_report_detail(detail_html)
+                detail = parse_report_detail(fetch_json(DETAIL_URL.format(nid=row["nid"])))
             except Exception as e:
                 print(f"⚠️ {code} 리포트 nid={row['nid']} 상세 수집 실패: {e}", file=sys.stderr)
                 failed += 1
                 continue
             reports.append({**row, **detail})
-    return reports, failed
+    return reports, failed, listed
+
+
+def _alert_collection_dead(detail):
+    try:
+        from send_telegram import send_admin_alert
+        send_admin_alert(
+            "[Double-Shot] 증권사 목표주가 수집 실패 — 3종목 모두 리포트 목록 0건\n"
+            f"{detail}\n"
+            "원천(네이버 리서치) 구조 변경을 의심하세요. 직전 stock-targets.json을 유지합니다.\n"
+            "확인: python3 scripts/fetch_stock_targets.py"
+        )
+    except Exception as e:
+        print(f"⚠️ 관리자 알림 실패: {e}", file=sys.stderr)
 
 
 def main():
@@ -198,10 +209,23 @@ def main():
     # 존재하지 않는 휴장일 항목이 남았다). 반드시 KST로 명시한다.
     today = datetime.now(KST)
     today_str = today.strftime("%y.%m.%d")
-    stocks_out = {}
+    collected = {}
     for code, name in STOCKS.items():
         print(f"수집 중: {name} ({code})")
-        reports, failed = collect(code)
+        collected[code] = collect(code)
+
+    # 대형주 3종목이 동시에 리포트 0건일 수는 없다 — 원천 구조가 바뀌어 목록을 못 읽은 것이다.
+    # 2026-09-11엔 이 상태로 좋은 파일을 빈 값으로 덮어써, 수집이 죽은 걸 화면이 비고 나서야 알았다.
+    # 덮어쓰지 않으면 updated_at이 멈춰 generate_html의 신선도 게이트(§20)가 5일 뒤 섹션을 내린다.
+    if all(listed == 0 for _, _, listed in collected.values()):
+        msg = "리포트 목록이 3종목 모두 0건 — 기존 파일을 유지하고 종료합니다."
+        print(f"❌ {msg}", file=sys.stderr)
+        _alert_collection_dead(msg)
+        sys.exit(1)
+
+    stocks_out = {}
+    for code, name in STOCKS.items():
+        reports, failed, _ = collected[code]
         consensus = compute_consensus(reports, today=today_str)
         close_price = fetch_close_price(code)
 
