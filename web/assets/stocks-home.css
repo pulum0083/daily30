@@ -1107,8 +1107,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .us-tile .ut-stat .k{color:var(--muted);}
 .us-tile .ut-stat .v{font-weight:700;color:#0F172A;font-variant-numeric:tabular-nums;text-align:right;}
 .us-tile .ut-frg-d{font-weight:500;color:#94A3B8;font-size:10.5px;margin-left:3px;}
-.us-tile .ut-go{display:block;margin-top:11px;text-align:center;font-size:12px;font-weight:700;color:#2563EB;background:#EFF6FF;border-radius:8px;padding:7px 0;text-decoration:none;}
-.us-tile .ut-go:hover{background:#DBEAFE;}
+/* 보조 동선 — 타일의 주인공은 가격·등락이다. 배경 버튼으로 두면 시선이 여기로 먼저 간다(2026-09-11 사용자 지적). */
+.us-tile .ut-go{display:block;margin-top:10px;text-align:right;font-size:11.5px;font-weight:500;color:#94A3B8;text-decoration:none;}
+.us-tile .ut-go:hover{color:#2563EB;text-decoration:underline;}
 @media(max-width:760px){
   #us-linked-widget .usw-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:4px;}
   #us-linked-widget .us-tile{flex:0 0 78%;scroll-snap-align:start;}
