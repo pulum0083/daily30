@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!-- 코스피 주도주 타일 강화 프로토타입 — 1분봉 곡선 제거 후 타일에 담을 정보 비교 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>코스피 주도주 타일 — 1분봉 제거 후 강화안 (2026-09-11)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0F172A;--muted:#64748B;--faint:#94A3B8;--hair:#E5E7EB;--soft:#F7F9FC;--inset:#EEF2F7;
+  --up:#E03131;--dn:#2775ED;--on:#2775ED;--live:#15803D;--live-bg:#ECFDF3}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#F1F4F8;color:var(--ink);
+  -webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5;font-size:14px}
+.wrap{max-width:1120px;margin:0 auto;padding:30px 16px 80px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.intro{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:22px;margin-bottom:18px}
+.intro h1{font-size:21px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.intro .sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+.intro p{font-size:14px;margin-bottom:8px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-top:12px}
+.fact{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:10px 12px;font-size:13px}
+.fact b{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:3px}
+.fact.warn{background:#FFF7ED;border-color:#FED7AA}
+.sec{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:20px 18px;margin-bottom:18px}
+.sec-h{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.sec-h h2{font-size:16px;font-weight:700}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--inset);color:var(--muted)}
+.tag.rec{background:#E0EDFF;color:#1D4ED8}
+.tag.bad{background:#FEE2E2;color:#B91C1C}
+.sec-d{font-size:13px;color:var(--muted);margin-bottom:14px}
+.notes{font-size:12.5px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.notes li{margin-left:16px;margin-bottom:3px}
+
+/* 실제 위젯 프레임 */
+.widget{background:#fff;border:1px solid var(--hair);border-radius:14px;box-shadow:0 1px 3px rgba(15,23,42,.05);padding:15px 16px}
+.w-head{display:flex;align-items:center;margin-bottom:11px}
+.w-title{font-size:15px;font-weight:800}
+.w-sub{margin-left:auto;font-size:11px;color:var(--muted)}
+.pill{font-size:11px;font-weight:700;color:var(--live);background:var(--live-bg);border-radius:999px;padding:1px 6px}
+.mkt{font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:5px}
+
+/* 현재 (기준선) */
+.cur-tiles{display:flex;gap:9px}
+.cur-tile{flex:1;background:var(--soft);border:1.5px solid var(--hair);border-radius:12px;padding:14px 15px}
+.cur-tile.on{background:#fff;border-color:var(--on)}
+.cur-tile .nm{font-size:13px;font-weight:800;margin-top:6px}
+.cur-tile .px{font-size:20px;font-weight:900;margin-top:5px;letter-spacing:-.5px}
+.cur-tile .cg{font-size:12px;font-weight:700;margin-top:3px}
+.bug{outline:2px dashed #F97316;outline-offset:2px;border-radius:4px}
+.removed{margin-top:14px;padding:12px 14px;border:1.5px dashed #FCA5A5;border-radius:10px;background:#FEF2F2;
+  font-size:12.5px;color:#991B1B;display:flex;align-items:center;gap:8px}
+.removed s{color:#B91C1C;font-weight:700}
+
+/* A — 확장 타일 */
+.a-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.a-tile{background:var(--soft);border:1.5px solid var(--hair);border-radius:14px;padding:15px 15px 13px;cursor:pointer}
+.a-tile.on{background:#fff;border-color:var(--on);box-shadow:0 4px 14px rgba(37,117,237,.13)}
+.a-top{display:flex;align-items:center;justify-content:space-between}
+.a-nm{font-size:14px;font-weight:800}
+.a-px{font-size:25px;font-weight:900;letter-spacing:-.8px;margin-top:6px;line-height:1.1}
+.a-cg{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.a-cg .c{font-size:13px;font-weight:800}
+.a-cg .p{font-size:11px;color:var(--faint)}
+.rng{margin-top:13px}
+.rng-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:5px}
+.rng-lbl b{color:var(--ink);font-weight:700}
+.track{position:relative;height:6px;border-radius:999px;background:linear-gradient(90deg,#DBEAFE,#FEE2E2)}
+.track .open{position:absolute;top:-3px;width:2px;height:12px;background:#94A3B8;border-radius:1px;transform:translateX(-50%)}
+.track .mk{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:var(--ink);
+  border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15);transform:translate(-50%,-50%)}
+.rng-ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);margin-top:5px}
+.stats{margin-top:12px;padding-top:11px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:6px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;font-size:12px}
+.stat .k{color:var(--muted)}
+.stat .v{font-weight:700}
+.stat .v small{font-weight:500;color:var(--faint);font-size:10.5px;margin-left:3px}
+.go{margin-top:11px;display:block;text-align:center;font-size:12px;font-weight:700;color:#2563EB;
+  background:#EFF6FF;border-radius:8px;padding:7px 0;text-decoration:none}
+
+/* B — 컴팩트 타일 + 선택 종목 패널 */
+.b-tiles{display:flex;gap:9px}
+.b-tile{flex:1;background:var(--soft);border:1.5px solid var(--hair);border-radius:12px;padding:12px 14px;cursor:pointer}
+.b-tile.on{background:#fff;border-color:var(--on);box-shadow:0 3px 10px rgba(37,117,237,.12)}
+.b-tile .nm{font-size:13px;font-weight:800}
+.b-tile .px{font-size:19px;font-weight:900;letter-spacing:-.5px;margin-top:4px}
+.b-tile .cg{font-size:12px;font-weight:700;margin-top:2px}
+.panel{margin-top:12px;border:1px solid var(--hair);border-radius:12px;padding:14px 15px;background:#fff}
+.panel-h{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.panel-h .t{font-size:14px;font-weight:800}
+.grid6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.cell{background:#fff;padding:10px 11px}
+.cell .k{font-size:11px;color:var(--muted)}
+.cell .v{font-size:14px;font-weight:800;margin-top:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.mini-h{font-size:12px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between}
+.mini-h span{font-weight:500;color:var(--faint);font-size:11px}
+.bars{display:flex;align-items:center;gap:6px;height:64px;position:relative}
+.bars::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hair)}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;position:relative}
+.bar i{position:absolute;left:18%;right:18%;border-radius:3px}
+.bar i.pos{bottom:50%;background:#FCA5A5}
+.bar i.neg{top:50%;background:#93C5FD}
+.bar-d{display:flex;gap:6px;margin-top:4px}
+.bar-d span{flex:1;text-align:center;font-size:10px;color:var(--faint)}
+
+@media(max-width:760px){
+  .a-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:4px}
+  .a-tile{flex:0 0 78%;scroll-snap-align:start}
+  .two{grid-template-columns:1fr}
+  .cur-tiles,.b-tiles{overflow-x:auto}
+  .cur-tile,.b-tile{flex:0 0 46%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="intro">
+  <h1>코스피 주도주 — 1분봉 곡선을 빼고 타일을 키운다</h1>
+  <div class="sub">/stocks/ 종목 홈 · 2026-09-11 15:18 KST 네이버 실시간 실측값으로 그렸어요</div>
+  <p>곡선 자리를 비우면 타일 3장이 이 위젯의 주인공이 됩니다. 곡선 아래 숨어 있던 <b>장중 지표(당일 레인지·52주 위치)</b>를
+    타일 안으로 올리고, 네이버가 이미 주고 있지만 버리던 값(<b>실제 원화 등락·시고저·거래대금</b>)을 담는 안 두 가지를 비교했어요.</p>
+  <div class="facts">
+    <div class="fact warn"><b>함께 고칠 결함</b>원화 등락폭이 반올림된 %에서 역산돼 호가 단위에 없는 값이 나와요.
+      세 종목 모두 틀려요 — 삼성전자 실제 −9,250원이 −9,254원, SK하이닉스 −40,000원이 −40,025원으로 나가요.</div>
+    <div class="fact"><b>원천이 이미 주는 값</b>현재가·원화 등락·등락률·시가·고가·저가·거래량·거래대금·시총.
+      지금 API는 이 중 현재가와 등락률만 쓰고 있어요.</div>
+    <div class="fact"><b>스냅샷에서 가져올 값</b>52주 고·저(9/10 기준), 외국인 순매수 수량(9/3~9/9, 하루 늦게 집계돼요).</div>
+  </div>
+</div>
+
+<!-- ───────── 현재 ───────── -->
+<div class="sec">
+  <div class="sec-h"><h2>현재</h2><span class="tag bad">지금 라이브</span></div>
+  <div class="sec-d">타일은 가격·등락만 담고, 선택한 종목의 1분봉 곡선이 그 아래 크게 자리를 차지해요.</div>
+  <div class="widget">
+    <div class="w-head"><span class="w-title">📈 코스피 주도주</span><span class="w-sub">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div>
+    <div class="cur-tiles">
+      <div class="cur-tile"><div class="mkt">🇰🇷 KOSPI <span class="pill">●실시간</span></div><div class="nm">삼성전자</div>
+        <div class="px num">259,750</div><div class="cg dn num"><span class="bug">▼ 9,254</span> (3.44%)</div></div>
+      <div class="cur-tile on"><div class="mkt">🇰🇷 KOSPI <span class="pill">●실시간</span></div><div class="nm">SK하이닉스</div>
+        <div class="px num">1,813,000</div><div class="cg dn num"><span class="bug">▼ 40,025</span> (2.16%)</div></div>
+      <div class="cur-tile"><div class="mkt">🇰🇷 KOSPI <span class="pill">●실시간</span></div><div class="nm">현대차</div>
+        <div class="px num">382,500</div><div class="cg dn num"><span class="bug">▼ 6,496</span> (1.67%)</div></div>
+    </div>
+    <div class="removed">✂️ <s>📈 SK하이닉스 오늘 장중 · 실측 1분봉</s> 곡선 + 그 아래 ⏱️ 장중 지표 블록 — 이번에 제거</div>
+  </div>
+  <ul class="notes">
+    <li>점선 표시가 역산 결함이에요 — 세 타일 전부 해당해요. 삼성전자 실제 등락은 <b>−9,250원</b>(전일 269,000 → 259,750), 현대차는 <b>−6,500원</b>이에요.
+      SK하이닉스는 −40,000원인데 <b>−40,025원</b>으로 나가요. 가격이 클수록 오차도 커져요.</li>
+  </ul>
+</div>
+
+<!-- ───────── A ───────── -->
+<div class="sec">
+  <div class="sec-h"><h2>A. 확장 타일 — 세 종목을 한눈에 비교</h2><span class="tag rec">추천</span></div>
+  <div class="sec-d">타일 하나가 그 종목의 오늘을 다 말해줘요. 장중 지표를 타일로 올려서 세 종목의 위치를 나란히 비교할 수 있어요.</div>
+  <div class="widget">
+    <div class="w-head"><span class="w-title">📈 코스피 주도주</span><span class="w-sub">시총 상위 3 · 15:18 실시간</span></div>
+    <div class="a-tiles">
+
+      <div class="a-tile">
+        <div class="a-top"><span class="a-nm">삼성전자</span><span class="pill">●실시간</span></div>
+        <div class="a-px num">259,750</div>
+        <div class="a-cg"><span class="c dn num">▼ 9,250 (3.44%)</span><span class="p num">전일 269,000</span></div>
+        <div class="rng">
+          <div class="rng-lbl"><span>당일 레인지</span><b class="num">65% 지점</b></div>
+          <div class="track"><span class="open" style="left:30%"></span><span class="mk" style="left:65%"></span></div>
+          <div class="rng-ends num"><span>저 256,500</span><span>시 258,000</span><span>고 261,500</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">거래대금</span><span class="v num">3조 1,725억</span></div>
+          <div class="stat"><span class="k">52주 고점 대비</span><span class="v dn num">−28.3%</span></div>
+          <div class="stat"><span class="k">외국인 5일 순매수</span><span class="v up num">+367만주<small>9/3~9/9</small></span></div>
+        </div>
+        <a class="go" href="#">종목 상세 →</a>
+      </div>
+
+      <div class="a-tile on">
+        <div class="a-top"><span class="a-nm">SK하이닉스</span><span class="pill">●실시간</span></div>
+        <div class="a-px num">1,813,000</div>
+        <div class="a-cg"><span class="c dn num">▼ 40,000 (2.16%)</span><span class="p num">전일 1,853,000</span></div>
+        <div class="rng">
+          <div class="rng-lbl"><span>당일 레인지</span><b class="num">76% 지점</b></div>
+          <div class="track"><span class="open" style="left:8.5%"></span><span class="mk" style="left:76%"></span></div>
+          <div class="rng-ends num"><span>저 1,768,000</span><span>고 1,827,000</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">거래대금</span><span class="v num">4조 2,139억</span></div>
+          <div class="stat"><span class="k">52주 고점 대비</span><span class="v dn num">−37.9%</span></div>
+          <div class="stat"><span class="k">외국인 5일 순매수</span><span class="v up num">+99만주<small>9/3~9/9</small></span></div>
+        </div>
+        <a class="go" href="#">종목 상세 →</a>
+      </div>
+
+      <div class="a-tile">
+        <div class="a-top"><span class="a-nm">현대차</span><span class="pill">●실시간</span></div>
+        <div class="a-px num">382,500</div>
+        <div class="a-cg"><span class="c dn num">▼ 6,500 (1.67%)</span><span class="p num">전일 389,000</span></div>
+        <div class="rng">
+          <div class="rng-lbl"><span>당일 레인지</span><b class="num">75% 지점</b></div>
+          <div class="track"><span class="open" style="left:50%"></span><span class="mk" style="left:75%"></span></div>
+          <div class="rng-ends num"><span>저 378,000</span><span>시 381,000</span><span>고 384,000</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">거래대금</span><span class="v num">1,511억</span></div>
+          <div class="stat"><span class="k">52주 고점 대비</span><span class="v dn num">−49.0%</span></div>
+          <div class="stat"><span class="k">외국인 5일 순매수</span><span class="v dn num">−5만주<small>9/3~9/9</small></span></div>
+        </div>
+        <a class="go" href="#">종목 상세 →</a>
+      </div>
+
+    </div>
+  </div>
+  <ul class="notes">
+    <li>세 종목 모두 오늘 내렸지만 <b>당일 레인지로 보면 전부 저점에서 회복 중</b>(65~76% 지점)이에요 — 가격·등락만으론 안 보이던 정보예요.</li>
+    <li>회색 눈금이 시가예요. SK하이닉스는 시가(8% 지점) 대비 크게 올라와 있고, 현대차는 시가 근처에서 버티는 중이에요.</li>
+    <li><b>거래량 배수는 일부러 뺐어요.</b> 장중에는 누적 거래량이 하루 치가 아니라 20일 평균과 비교하면 항상 작게 나와요.
+      잘못된 비교를 싣느니 절대값인 거래대금만 둡니다.</li>
+    <li>모바일에선 타일이 가로로 넘겨지고 한 장이 화면의 78%를 차지해요.</li>
+  </ul>
+</div>
+
+<!-- ───────── B ───────── -->
+<div class="sec">
+  <div class="sec-h"><h2>B. 컴팩트 타일 + 선택 종목 패널</h2><span class="tag">대안</span></div>
+  <div class="sec-d">타일은 지금처럼 작게 두고, 곡선이 있던 자리를 선택한 종목의 요약 패널로 바꿔요.</div>
+  <div class="widget">
+    <div class="w-head"><span class="w-title">📈 코스피 주도주</span><span class="w-sub">시총 상위 3 · 15:18 실시간</span></div>
+    <div class="b-tiles">
+      <div class="b-tile"><div class="nm">삼성전자</div><div class="px num">259,750</div><div class="cg dn num">▼ 9,250 (3.44%)</div></div>
+      <div class="b-tile on"><div class="nm">SK하이닉스</div><div class="px num">1,813,000</div><div class="cg dn num">▼ 40,000 (2.16%)</div></div>
+      <div class="b-tile"><div class="nm">현대차</div><div class="px num">382,500</div><div class="cg dn num">▼ 6,500 (1.67%)</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><span class="t">SK하이닉스 오늘</span><span class="pill">●실시간</span></div>
+      <div class="grid6">
+        <div class="cell"><div class="k">전일 종가</div><div class="v num">1,853,000</div></div>
+        <div class="cell"><div class="k">시가</div><div class="v num">1,773,000</div></div>
+        <div class="cell"><div class="k">거래대금</div><div class="v num">4조 2,139억</div></div>
+        <div class="cell"><div class="k">고가</div><div class="v up num">1,827,000</div></div>
+        <div class="cell"><div class="k">저가</div><div class="v dn num">1,768,000</div></div>
+        <div class="cell"><div class="k">시가총액</div><div class="v num">1,324조</div></div>
+      </div>
+      <div class="two">
+        <div>
+          <div class="mini-h">당일·52주 위치<span>52주 9/10 기준</span></div>
+          <div class="rng-lbl"><span>당일</span><b class="num">76% 지점</b></div>
+          <div class="track"><span class="open" style="left:8.5%"></span><span class="mk" style="left:76%"></span></div>
+          <div class="rng-ends num" style="margin-bottom:12px"><span>1,768,000</span><span>1,827,000</span></div>
+          <div class="rng-lbl"><span>52주</span><b class="num">58% 지점 · 고점 대비 −37.9%</b></div>
+          <div class="track"><span class="mk" style="left:58%"></span></div>
+          <div class="rng-ends num"><span>256,000</span><span>2,919,000</span></div>
+        </div>
+        <div>
+          <div class="mini-h">외국인 순매수(주)<span>합계 +99만주</span></div>
+          <div class="bars">
+            <div class="bar"><i class="neg" style="height:15%"></i></div>
+            <div class="bar"><i class="pos" style="height:20%"></i></div>
+            <div class="bar"><i class="pos" style="height:50%"></i></div>
+            <div class="bar"><i class="pos" style="height:6.3%"></i></div>
+            <div class="bar"><i class="pos" style="height:2.7%"></i></div>
+          </div>
+          <div class="bar-d num"><span>9/3</span><span>9/4</span><span>9/7</span><span>9/8</span><span>9/9</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>한 종목을 깊게 보기엔 좋지만, <b>세 종목을 비교하려면 타일을 하나씩 눌러봐야 해요.</b> 이 위젯이 "주도주 3개의 흐름"을
+      보여주는 자리라는 점에서 A가 더 맞다고 봤어요.</li>
+    <li>곡선이 하던 "선택 종목 깊게 보기" 역할을 그대로 이어받는 구조라, 변화를 작게 가져가고 싶으면 이쪽이에요.</li>
+  </ul>
+</div>
+
+<!-- ───────── 마감 후 ───────── -->
+<div class="sec">
+  <div class="sec-h"><h2>마감 후(추정가 모드)에는</h2><span class="tag">두 안 공통</span></div>
+  <div class="sec-d">15:30 이후 제목이 "지금 이시각 추정가", 배지가 "🌙 HL 24h"로 바뀌고 가격은 하이퍼리퀴드 24h 선물로 추정해요.</div>
+  <ul class="notes" style="border-top:0;padding-top:0;margin-top:0">
+    <li><b>추정가와 정규장 확정값을 섞어 보이지 않게 합니다.</b> 가격 줄은 추정가로 바뀌지만, 당일 레인지·거래대금은
+      정규장에서 확정된 값이라 그대로 두고 "정규장 확정" 라벨을 붙여요.</li>
+    <li>추정가 예시 숫자는 이 프로토타입에 넣지 않았어요 — 지금은 장중이라 실측할 수 없고, 지어낸 숫자를 보여드리고 싶지 않았어요.</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>
