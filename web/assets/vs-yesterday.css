@@ -56,7 +56,7 @@
 .vs-fname{text-align:center;font-size:13px;font-weight:700;color:#0F172A;margin:0 0 6px}
 .vs-frow{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;column-gap:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 .vs-frow + .vs-frow{margin-top:5px}
-.vs-fl{text-align:right} .vs-fr{text-align:left}
+.vs-fl{text-align:right} .vs-fr{text-align:left} .vs-fl.muted,.vs-fr.muted{color:var(--muted)}
 .vs-ftrack{position:relative;height:8px;background:#F1F5F9;border-radius:999px}
 .vs-ftrack::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:#CBD5E1}
 .vs-fbar{position:absolute;top:0;bottom:0;border-radius:999px}
