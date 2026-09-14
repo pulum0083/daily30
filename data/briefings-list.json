@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-15": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-15/kospi/",
+        "headline": "반도체 후폭풍은 어제 다 맞았을까? 선물은 반등, 종가는 급락",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "혼조",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-14": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-04/us/",
         "headline": "이란 리스크가 걷혔다 — 나스닥 +2.13%, 반도체가 앞장서는 중",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-03": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-03/kospi/",
-        "headline": "오늘, 코스피 다시 오를까요?",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:41"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-03/close/",
-        "headline": "코스피 하루 만에 -5%, 무슨 일이 있었나요?",
-        "title": "6,257.45",
-        "price": "6,257.45",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-03/us/",
-        "headline": "메가캡은 웃고 반도체는 운다 — 실적 발표 이후 갈라지는 빅테크 내부 순환매",
         "title": "—",
         "time": ""
       }

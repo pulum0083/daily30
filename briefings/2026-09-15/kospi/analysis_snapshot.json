@@ -1,0 +1,314 @@
+{
+  "prediction": {
+    "direction": "혼조",
+    "up_pct": 45,
+    "down_pct": 55,
+    "confidence": 52
+  },
+  "reason_title": "반도체 후폭풍은 어제 다 맞았을까? 선물은 반등, 종가는 급락",
+  "comfort_line": "장이 곧 열려요. 오늘은 숫자보다 마음의 여유를 먼저 챙기기로 해요.",
+  "todays_view": {
+    "view_title": "어제 이미 다 맞았나, 아니면 오늘도 더 맞을 것인가",
+    "dek": "간밤 미국 반도체 지수(SOX)가 <b>-5.86%</b> 급락했지만, 국내 반도체 대장주는 이미 전일 장중 큰 폭으로 하락한 뒤였어요. 문제는 오늘 새로 들어온 정보가 얼마나 더 남아있느냐예요.",
+    "recap": [
+      {
+        "text": "반도체 대형주가 동반 급락하며 지수를 끌어내렸어요. 삼성전자와 SK하이닉스가 각각 큰 폭으로 밀렸어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "방산주는 반대로 강세를 보이며 지수 하단을 방어했어요. 한화에어로스페이스가 눈에 띄게 올랐어요.",
+        "codes": [
+          "012450"
+        ]
+      },
+      {
+        "text": "금융주도 견조했어요. 하나금융지주가 강세를 보이며 낙폭을 일부 상쇄했어요.",
+        "codes": [
+          "086790"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "이틀 뒤 FOMC(9/17)가 예정돼 있어요 — 금리 발표 전까지는 관망 심리가 짙어질 수 있어요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "미 지수선물이 일제히 플러스로 돌아섰는지 장 초반 흐름을 확인하세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "반도체 섹터가 추가 낙폭을 만드는지, 아니면 저가 매수가 들어오는지가 오늘의 관전 포인트예요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>반도체 섹터 급락은 어제 이미 상당 부분 선반영됐어요.</b> 전일 국내 대형 반도체주가 큰 폭으로 이미 하락한 만큼, 간밤 SOX 낙폭이 오늘 그대로 추가 반영되긴 어려운 구조예요.",
+      "codes": []
+    }
+  ],
+  "watch_items": [
+    {
+      "icon": "🇺🇸",
+      "label": "美 FOMC 임박 (9/17)",
+      "text": "금리 발표를 이틀 앞두고 관망세가 짙어질 수 있어요. 예상치는 <b>4.00%</b>로 인하 기대가 이미 반영돼 있어요."
+    },
+    {
+      "icon": "📊",
+      "label": "코스피 방향성 탐색",
+      "levels": [
+        {
+          "label": "지지",
+          "num": "6,650",
+          "cls": "dn"
+        },
+        {
+          "label": "저항",
+          "num": "7,170",
+          "cls": "up"
+        }
+      ]
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "086790",
+      "name": "하나금융지주",
+      "price": "140,800원",
+      "change": "+2.18%",
+      "change_cls": "up",
+      "signal": "20일선 상회 지속",
+      "golden": false,
+      "ma20_dist_pct": 5.13,
+      "ma200_dist_pct": 21.69,
+      "scenario_tag": "금융 강세 지속",
+      "scenario": "전일 <b>+2.18%</b> 오르며 20일선 위에서 견조한 흐름을 이어간 종목이에요. 반도체 변동성이 커진 국면에서 금융주로 수급이 옮겨가는 로테이션 장세가 이어질 가능성이 있어요.",
+      "action_guide": "시가 141,000원 이내 진입. 목표: 148,000원(+5.1%) / 손절: 136,000원 이탈 시.",
+      "entry": "141,000원",
+      "target": "148,000원",
+      "target_pct": "+5.1%",
+      "stop": "136,000원",
+      "stop_pct": "-3.4%",
+      "ma20_level": 133935.0,
+      "ma200_level": 115706.5
+    },
+    {
+      "ticker": "012450",
+      "name": "한화에어로스페이스",
+      "price": "1,137,000원",
+      "change": "+5.18%",
+      "change_cls": "up",
+      "signal": "방산 강세 주도",
+      "golden": false,
+      "ma20_dist_pct": 4.02,
+      "ma200_dist_pct": -1.79,
+      "scenario_tag": "섹터 로테이션 수혜",
+      "scenario": "전일 <b>+5.18%</b> 급등하며 방산 섹터를 이끈 종목이에요. 반도체가 흔들리는 국면에서 대체 주도주로 수급이 몰릴 가능성이 있어요.",
+      "action_guide": "시가 1,140,000원 이내 진입. 목표: 1,200,000원(+5.3%) / 손절: 1,100,000원 이탈 시.",
+      "entry": "1,140,000원",
+      "target": "1,200,000원",
+      "target_pct": "+5.3%",
+      "stop": "1,100,000원",
+      "stop_pct": "-3.5%",
+      "ma20_level": 1093050.0,
+      "ma200_level": 1157685.0
+    },
+    {
+      "ticker": "079550",
+      "name": "LIG넥스원",
+      "price": "705,000원",
+      "change": "+3.98%",
+      "change_cls": "up",
+      "signal": "방산 동반 강세",
+      "golden": false,
+      "ma20_dist_pct": -0.04,
+      "ma200_dist_pct": 4.46,
+      "scenario_tag": "수급 로테이션",
+      "scenario": "전일 <b>+3.98%</b> 오르며 방산 섹터 강세에 동참한 종목이에요. 반도체 변동성 회피 자금이 방산 쪽으로 옮겨가는 흐름이 오늘도 이어질 수 있어요.",
+      "action_guide": "시가 707,000원 이내 진입. 목표: 745,000원(+5.4%) / 손절: 680,000원 이탈 시.",
+      "entry": "707,000원",
+      "target": "745,000원",
+      "target_pct": "+5.4%",
+      "stop": "680,000원",
+      "stop_pct": "-3.8%",
+      "ma20_level": 705300.0,
+      "ma200_level": 674917.5
+    }
+  ],
+  "telegram_signals": [
+    "🇺🇸 미 지수선물 일제히 플러스 전환. 간밤 급락 공포가 새벽 사이 누그러진 모습이에요.",
+    "💡 반도체 급락은 어제 이미 선반영. 오늘 추가 낙폭은 제한적일 수 있어요."
+  ],
+  "us_linked_story": null,
+  "sector_focus": null,
+  "analysis_format": "split",
+  "generated_at": "2026-09-15T07:28:51.274085+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-09-15T07:26:30.880876+09:00",
+    "briefing_date": "2026-09-15",
+    "us_session_date": "2026-09-14",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "10년물 금리 5% 코앞 — 밸류에이션 높은 성장주에 부담",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·고밸류 성장주",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -3.36
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -4.4
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -4.77
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -5.25
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·고밸류 성장주는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "반도체 장비·메모리주 프리마켓 동반 급락",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체 장비·메모리",
+            "marks": [
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -7.07
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -8.29
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": -6.39
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -5.25
+              },
+              {
+                "ticker": "QCOM",
+                "name": "QCOM",
+                "pct": -1.0
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체 장비·메모리는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "VIX 두 자릿수 급등 — 시장이 다음 주 FOMC를 경계하기 시작했어요",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": -0.48
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      },
+      {
+        "title": "빅테크 내에서도 온도차 — MSFT·GOOGL은 견조, NVDA·AMD는 약세",
+        "sides": [
+          {
+            "side": "up",
+            "label": "클라우드·플랫폼",
+            "marks": [
+              {
+                "ticker": "MSFT",
+                "name": "MSFT",
+                "pct": 1.97
+              },
+              {
+                "ticker": "GOOGL",
+                "name": "GOOGL",
+                "pct": 3.22
+              }
+            ],
+            "proxy": null
+          },
+          {
+            "side": "down",
+            "label": "AI 반도체",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -3.36
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -4.4
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "클라우드·플랫폼은 <b>나란히 올랐어요</b>"
+      },
+      {
+        "title": "중동 지정학 리스크에 유가 급등 — 에너지주엔 우호적",
+        "sides": [
+          {
+            "side": "up",
+            "label": "에너지",
+            "marks": [
+              {
+                "ticker": "XOM",
+                "name": "XOM",
+                "pct": -0.55
+              },
+              {
+                "ticker": "CVX",
+                "name": "CVX",
+                "pct": -0.88
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "에너지는 <b>나란히 내렸어요</b>"
+      }
+    ]
+  }
+}
