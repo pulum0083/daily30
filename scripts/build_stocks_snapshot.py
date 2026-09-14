@@ -350,6 +350,13 @@ def build_snapshot():
 
 def main():
     snap = build_snapshot()
+    # 이번 실행에서 15:30 1분봉으로 확인한 공식 종가를 쌓는다 — 1분봉 조회 기한(약 7거래일)이 지나도 쓰기 위해(§48)
+    try:
+        from kr_official_closes import save_cache
+    except ImportError:
+        from scripts.kr_official_closes import save_cache
+    if save_cache():
+        print("[snapshot] 공식 종가 저장소 갱신 → data/kr_official_closes.json")
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(snap, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[snapshot] {len(snap['stocks'])}종목 + {len(snap['bellwethers'])}벨웨더 → {OUT_PATH}")
