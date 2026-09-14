@@ -368,7 +368,7 @@ function viewNight(){
   var tl=D.after[0].lastT.slice(0,2)+':'+D.after[0].lastT.slice(2);
   return '<section class="section">'+hero(ICON.moon,'그 전 밤(9/10 미국장) vs 직전 밤(9/11 미국장)','<span class="'+vcol(j)+'">'+(j==='same'?'그 전 밤과 비슷해요':j==='strong'?'그 전 밤보다 반도체가 셌어요':'그 전 밤보다 반도체가 약했어요')+'</span>',
       '반도체 ETF SOXX <span class="num dn">'+f2(sx.prev)+'%</span> → <span class="num '+cls(sx.p)+'">'+f2(sx.p)+'%</span> · 11종목 중 상승 '+upP+'개 → '+up+'개')+
-    '<div class="card"><div class="card-head"><div><p class="t title-18sb">'+ICON.moon+'밤사이 미국 반도체 시황</p><p class="sub caption-13r muted">평일 17:00~다음 날 07:30 · 주말 종일 · 지금 사이트 섹션을 그대로 살렸어요</p></div>'+
+    '<div class="card"><div class="card-head"><div><p class="t title-18sb">'+ICON.moon+'밤사이 미국 반도체 시황</p><p class="sub caption-13r muted">평일 오후 5시부터 다음 날 07:30까지 · 주말 종일 · 지금 사이트 섹션을 그대로 살렸어요</p></div>'+
       '<div class="badges">'+badge('neutral','직전 종가 · 9/11 미국장')+badge('neutral','<span class="up">'+up+' 상승</span>&nbsp;·&nbsp;<span class="dn">'+dn+' 하락</span>')+'</div></div>'+
       '<div class="stats" style="margin-top:0;border-top:0">'+macro+'</div>'+
       '<div class="separator" style="margin:var(--spacing-24) 0"></div>'+
@@ -442,7 +442,7 @@ var TABS=[
   {label:'장 시작 직후',time:'09:01',icon:ICON.sunrise,slot:'07:30~09:00엔 저녁 신호만 보이고, 09:00 시초가가 나오면 같은 방향이었는지가 붙어요',fn:viewPre},
   {label:'장중',time:'11:00',icon:ICON.clock,slot:'09:00~15:30 · 어제 이 시각 vs 지금',fn:viewIntra},
   {label:'애프터장',time:D.after[0].lastT.slice(0,2)+':'+D.after[0].lastT.slice(2),icon:ICON.sunset,slot:'15:40~17:00 · 오늘 애프터장 vs 어제 애프터장 같은 시각',fn:viewAfter},
-  {label:'밤',time:'21:00',icon:ICON.moon,slot:'17:00~다음 날 07:30 · 밤사이 미국 반도체가 위로, 애프터장(~20:00)은 그 아래로',fn:viewNight},
+  {label:'밤',time:'17:00',icon:ICON.moon,slot:'17:00부터 다음 날 07:30까지 · 밤사이 미국 반도체가 맨 위로, 애프터장(~20:00)은 그 아래로',fn:viewNight},
   {label:'주말',time:'',icon:ICON.cal,slot:'토·일 종일 · 지금 이시각 추정가와 종목 뉴스, 그 아래 이번 주 vs 지난주',fn:viewWeekend}
 ];
 var cur=1;
