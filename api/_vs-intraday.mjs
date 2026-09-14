@@ -2,7 +2,8 @@
 import { TH, prevTradingDay, relLabel, atOrBefore, pct, round2, judge, tickOk, verdict } from './_vs-core.mjs';
 import { flowAt } from './_vs-flow.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
-import { issuesUntil, keywordDiff } from './_vs-issues.mjs';
+// _vs-issues.mjs(issuesUntil·keywordDiff)는 지금 쓰지 않는다 — 아래 issues:null 주석 참고(C2). 계산 코드·사전은
+// 남겨둔다(설계 남기기 — 불변 장중 기록이 생기면 다시 켠다).
 import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 
 export const LEADERS = [['005930', '삼성전자'], ['000660', 'SK하이닉스'], ['005380', '현대차']];
@@ -22,7 +23,7 @@ export async function getEucKr(url) {
 
 const settle = (p, fallback) => Promise.resolve().then(() => p).catch(() => fallback);
 
-export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText, origin }) {
+export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }) {
   const k = new Date(now + 9 * 3600 * 1000);
   const dash = k.toISOString().slice(0, 10);
   const hhmm = k.toISOString().slice(11, 16).replace(':', '');
@@ -72,17 +73,9 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText, 
     return { t, y, diff: round2(t - y), judge: judge(round2(t - y), TH.pctPoint) };
   })() : null;
 
-  const [aT, aY, dict] = await Promise.all([
-    settle(fetchJson(`${origin}/data/kospi-news-${dash}.json`), null),
-    settle(fetchJson(`${origin}/data/kospi-news-${yDash}.json`), null),
-    settle(fetchJson(`${origin}/data/issue-keywords.json`), null),
-  ]);
-  let issues = null;
-  if (aT && aY && dict && Array.isArray(dict.keywords)) {
-    const it = issuesUntil(aT, at), iy = issuesUntil(aY, at);
-    const d = keywordDiff(iy, it, dict.keywords, dict.exclude || {});
-    issues = { y: iy, t: it, new: d.new, keep: d.keep };
-  }
+  // 이슈 비교는 항상 null(C2) — 아카이브가 6개 상한으로 잘리고 최신 항목의 시각이 갱신 때마다
+  // 덮어써져 "어제 이 시각까지"를 보장하지 못한다(SERVICE_RULES §49). 아카이브·사전 fetch도 하지 않는다.
+  const issues = null;
 
   return {
     status: 'ok',

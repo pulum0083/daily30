@@ -111,9 +111,8 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=60');
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
-      const h = req.headers || {};
-      const origin = `${h['x-forwarded-proto'] || 'https'}://${h['x-forwarded-host'] || h.host || 'doubleshot.space'}`;
-      return res.status(200).json(await buildIntradayVs({ fetchJson: getJson, fetchText: getEucKr, origin }));
+      // origin 계산 삭제(C2) — buildIntradayVs가 /data/*.json을 더 이상 부르지 않아 필요 없다
+      return res.status(200).json(await buildIntradayVs({ fetchJson: getJson, fetchText: getEucKr }));
     } catch (e) {
       return res.status(502).json({ status: 'error', error: String(e) });
     }
