@@ -48,27 +48,36 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   kospi.curveT = curve(kT, baseT, at);
   kospi.curveY = curve(kY, baseY, at);
 
-  // 오늘 행을 먼저 찾고, 어제는 오늘 행 자신의 시각으로 찾는다 — 수급 갱신이 코스피 비교 시각(at)보다
-  // 늦으면 두 날의 서로 다른 시각을 맞대게 된다(I1). 그래서 어제 조회는 오늘 조회가 끝난 뒤에만 가능하다.
-  const fT = await settle(flowAt(T, at, fetchText), null);
-  const fY = fT ? await settle(flowAt(Y, fT.t.replace(':', ''), fetchText), null) : null;
-  const flow = fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
-  if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
+  // 수급(오늘→어제, I1 때문에 순서 유지)과 주도주 조회를 함께 돌린다(I2) — 서로 다른 데이터라
+  // 순서를 맞출 필요가 없다. 수급 내부는 오늘 행을 먼저 찾아야 어제 조회 시각을 알 수 있어 순차다.
+  const flowPromise = (async () => {
+    const fT = await settle(flowAt(T, at, fetchText), null);
+    const fY = fT ? await settle(flowAt(Y, fT.t.replace(':', ''), fetchText), null) : null;
+    const f = fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
+    if (f) f.judge = judge(f.foreignDiff, TH.eok);
+    return f;
+  })();
 
-  const leaders = await Promise.all(LEADERS.map(async ([code, name]) => {
+  const leadersPromise = Promise.all(LEADERS.map(async ([code, name]) => {
     const [bT, bY, pT, pY] = await Promise.all([
       settle(minuteBars('item', code, T, fetchJson, '0900', at), []),
       settle(minuteBars('item', code, Y, fetchJson, '0900', at), []),
       settle(prevClose('item', code, T, fetchJson), null),
       settle(prevClose('item', code, Y, fetchJson), null),
     ]);
-    const tb = atOrBefore(bT, at), yb = atOrBefore(bY, at);
+    // 오늘 봉을 먼저 고르고, 어제는 그 봉의 시각으로 고른다(I3) — 오늘 봉이 비교 시각(at)보다
+    // 이르면(데이터 지연 등) 어제를 at으로 고르면 서로 다른 시각을 맞대게 된다.
+    // 오늘 봉이 없으면 어제도 비교하지 않는다 — t·y·diff 모두 null(표에서 행이 빠진다).
+    const tb = atOrBefore(bT, at);
+    const yb = tb ? atOrBefore(bY, tb.t) : null;
     const t = tb ? pct(tb.v, pT) : null, y = yb ? pct(yb.v, pY) : null;
     return {
       code, name, t, y, diff: t != null && y != null ? round2(t - y) : null,
       pxT: tb && tickOk(tb.v) ? tb.v : null, pxY: yb && tickOk(yb.v) ? yb.v : null,
     };
   }));
+
+  const [flow, leaders] = await Promise.all([flowPromise, leadersPromise]);
   const full = leaders.every((l) => l.t != null && l.y != null);
   const avg = full ? (() => {
     const t = round2(leaders.reduce((s, l) => s + l.t, 0) / leaders.length);

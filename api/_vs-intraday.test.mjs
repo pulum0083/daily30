@@ -57,6 +57,33 @@ test('주도주 — 한 종목이라도 비면 평균을 만들지 않는다(§0
   assert.equal(d.avg, null);
 });
 
+test('주도주 — 어제는 오늘 고른 봉의 시각으로 고른다(오늘 봉이 비교 시각보다 이르면, I3)', async () => {
+  const f = fakes();
+  // 005930의 오늘 마지막 봉이 10:55(코스피 비교 시각 at=11:00보다 이름)면, 어제도 11:00이 아니라
+  // 10:55 봉과 맞대야 한다. 어제 데이터에 10:55·11:00 두 봉을 모두 둬서 잘못 고르면 바로 드러나게 한다.
+  const fetchJson = async (url) => {
+    if (/005930\/minute\?startDateTime=202609140900/.test(url)) return minute('20260914', '1055', 251000);
+    if (/005930\/minute\?startDateTime=202609110900/.test(url)) {
+      return [
+        { localDateTime: '20260911105500', currentPrice: 257000 },
+        { localDateTime: '20260911110000', currentPrice: 257500 },
+      ];
+    }
+    return f.fetchJson(url);
+  };
+  const d = await buildIntradayVs({ now: kst('2026-09-14T11:00:30'), ...f, fetchJson });
+  const s = d.leaders.find((l) => l.code === '005930');
+  assert.deepEqual([s.t, s.y, s.diff, s.pxT, s.pxY], [-3.28, -4.46, 1.18, 251000, 257000]);
+});
+
+test('주도주 — 오늘 봉이 없으면 어제도 비교하지 않는다(t·y·diff 모두 null, I3)', async () => {
+  const f = fakes();
+  const fetchJson = async (url) => (/005930\/minute\?startDateTime=202609140900/.test(url) ? [] : f.fetchJson(url));
+  const d = await buildIntradayVs({ now: kst('2026-09-14T11:00:30'), ...f, fetchJson });
+  const s = d.leaders.find((l) => l.code === '005930');
+  assert.deepEqual([s.t, s.y, s.diff, s.pxT, s.pxY], [null, null, null, null, null]);
+});
+
 test('오늘 1분봉이 아직 없으면 waiting', async () => {
   const f = fakes();
   const fetchJson = async (url) => (/minute\?startDateTime=20260914/.test(url) ? [] : f.fetchJson(url));
