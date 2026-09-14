@@ -24,6 +24,7 @@ const POLLED = [
   { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
   { name: 'vol-top',     mod: './vol-top.mjs',     pollSec: 300, req: { query: {} } },
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'news-live' } } },
+  { name: 'intraday?vs', mod: './intraday.mjs', pollSec: 60, req: { query: { vs: 'intraday' }, headers: {} } },   // vs-yesterday.js 60초
 ];
 
 // 상류 fetch를 즉시 실패시켜 네트워크 없이 핸들러를 끝까지 돌린다.

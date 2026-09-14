@@ -1,5 +1,6 @@
 // 코스닥·코스피200·환율 일중 1분봉 데이터 프록시 — 스파크라인 히스토리 초기화용
 import { usSessionState, usBaseClose } from './_us-session.mjs';
+import { buildIntradayVs, getJson, getEucKr } from './_vs-intraday.mjs';
 
 const HDR = {
   'User-Agent': 'Mozilla/5.0 (compatible)',
@@ -105,6 +106,19 @@ async function fetchUSMinutes(ticker) {
 }
 
 export default async function handler(req, res) {
+  // '어제랑 비교해서' 장중 대결판 — 라우트 12개 한도라 새 파일 대신 이 라우트에 분기한다(api/_route-budget.test.mjs)
+  if (req.query && req.query.vs === 'intraday') {
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=60');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    try {
+      const h = req.headers || {};
+      const origin = `${h['x-forwarded-proto'] || 'https'}://${h['x-forwarded-host'] || h.host || 'doubleshot.space'}`;
+      return res.status(200).json(await buildIntradayVs({ fetchJson: getJson, fetchText: getEucKr, origin }));
+    } catch (e) {
+      return res.status(502).json({ status: 'error', error: String(e) });
+    }
+  }
+
   res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
