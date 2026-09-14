@@ -59,6 +59,16 @@ export function lastKrxCloseTs(nowMs = Date.now(), isHoliday = isKospiHoliday) {
   return null;
 }
 
+// 앵커에 곱할 KRX 종가. 장이 닫힌 뒤엔 실시간 closePrice가 애프터장 체결가를 따라 움직이므로
+// (9/14 17:10 SK하이닉스 1,686,000 vs 공식 1,697,000, §48) 1분봉으로 만든 정규장 종가를 쓴다.
+// 그 정규장이 앵커 봉과 같은 날이 아니면(15:30 직후 1분봉 미반영 등) 섞지 않고 null — 추정가를 만들지 않는다.
+export function pickKrxClose({ marketOpen, real, closed, closeTs }) {
+  if (marketOpen) return real?.price ?? null;
+  if (!closed || !isFinite(closed.price) || !closeTs) return null;
+  const closeYmd = new Date(closeTs + 9 * 3600 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
+  return closed.sessionDate === closeYmd ? closed.price : null;
+}
+
 // ── 레거시: 실제 종가 대비 괴리 보정 (앵커 환산 실패 시 폴백으로만 사용) ────────
 // SKHX·SMSN 등 일부 종목의 HL 합성가가 실제 종가 대비 상시 5~11% 웃도는 현상 발견(2026-07-15) —
 // 오라클/유동성 특성으로 추정되며 저희 변환식(usd × fx) 자체는 정상이라 원본 데이터를 못 고치므로,

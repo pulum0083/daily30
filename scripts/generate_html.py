@@ -27,12 +27,10 @@ from jinja2 import Environment, FileSystemLoader
 
 try:
     from scripts.validate_analysis import _fetch_kospi_realdata
-    import scripts.toss_client as tc
     import scripts.us_detail_data as ud
     from scripts.verify_publish_gate import gate_write, check_sitemap
 except ImportError:
     from validate_analysis import _fetch_kospi_realdata
-    import toss_client as tc
     import us_detail_data as ud
     from verify_publish_gate import gate_write, check_sitemap
 
@@ -1721,20 +1719,6 @@ def write_briefings_list_json():
     print(f"[generate_html] wrote web/data/briefings-list.json")
 
 
-def _naver_daily_closes(code):
-    """네이버 일봉 종가 리스트(오래된→최신). 토스 폴백용."""
-    import urllib.request
-    from datetime import timedelta
-    end = datetime.now().strftime("%Y%m%d") + "0000"
-    start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
-    url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
-           f"?startDateTime={start}&endDateTime={end}")
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        rows = json.loads(resp.read())
-    return [float(r["closePrice"]) for r in rows if r.get("closePrice")]
-
-
 def _naver_dated_rows(code, days=130):
     """네이버 일봉 [{localDate, closePrice}] 리스트 (오래된→최신)."""
     import urllib.request
@@ -2038,19 +2022,17 @@ def _briefing_accuracy():
 
 
 def _fetch_stock_closes(code):
-    """일봉 종가 리스트(오래된→최신). 52주 범위 산출용. 토스 우선, 실패 시 네이버 폴백.
+    """정규장 공식 종가 리스트(오래된→최신). 52주 범위 산출용.
 
     _fetch_kospi_realdata가 캔들 원본을 반환하지 않아 부득이 재호출한다.
     sparkline은 20개뿐이라 52주 범위 산출에 부족하다.
+    토스 일봉은 공식 종가와 달라 쓰지 않는다(§48) — 시세와 같은 소스(kr_official_closes)를 쓴다.
     """
     try:
-        candles = tc.get_candles(code, interval="1d", count=300)
-        closes = [float(c["closePrice"]) for c in candles if c.get("closePrice")]
-        if closes:
-            return closes
-    except Exception:
-        pass
-    return _naver_daily_closes(code)
+        from scripts.kr_official_closes import official_closes
+    except ImportError:
+        from kr_official_closes import official_closes
+    return official_closes(code)
 
 
 def stock_realdata(code):

@@ -906,35 +906,18 @@ def _naver_row_date(r):
 
 
 def _fetch_kospi_realdata(code):
-    """한국 종목 실측 (6자리 코드). Toss 캔들 우선, 실패 시 네이버 폴백."""
-    # 1) 토스 API
-    try:
-        import scripts.toss_client as tc
-    except ImportError:
-        try:
-            import toss_client as tc
-        except ImportError:
-            tc = None
-    if tc:
-        try:
-            candles = _drop_rows_at_pin(
-                tc.get_candles(code, interval="1d", count=300), _toss_candle_date)
-            if candles:
-                return _closes_from_toss_candles(candles, ndigits=2)
-        except Exception:
-            pass
+    """한국 종목 실측 (6자리 코드). 정규장 공식 종가 일봉(kr_official_closes) 기준.
 
-    # 2) 네이버 일봉 폴백
-    import urllib.request
-    from datetime import datetime, timedelta
+    토스 일봉은 쓰지 않는다 — 2026-09-14 대조에서 5종목 30거래일 중 26~29일이 KRX 공식 종가와
+    달랐고(최대 8.27%, 넥스트레이드·시간외 체결이 섞인 값으로 보임) 거래소·세션을 고르는 옵션도 없다.
+    §37에 미해결로 남았던 "토스·네이버 최대 4% 차이"의 원인이다(§48).
+    """
     try:
-        end = datetime.now().strftime("%Y%m%d") + "0000"
-        start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
-        url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
-               f"?startDateTime={start}&endDateTime={end}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            rows = _drop_rows_at_pin(json.loads(resp.read()), _naver_row_date)
+        try:
+            from scripts import kr_official_closes as koc
+        except ImportError:
+            import kr_official_closes as koc
+        rows = _drop_rows_at_pin(koc.official_day_rows(code), _naver_row_date)
         closes = [float(rw["closePrice"]) for rw in rows if rw.get("closePrice")]
         return _closes_to_realdata(closes, ndigits=2)
     except Exception as e:

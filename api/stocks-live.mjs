@@ -6,6 +6,8 @@
 import { usSessionState, usBaseClose } from './_us-session.mjs';
 // 개장 판정은 주말·공휴일까지 아는 공용 캘린더를 쓴다(로컬 시간 전용 판정은 평일 공휴일에 장중으로 오판).
 import { krMarketOpen } from './_market-calendar.mjs';
+// 장이 닫힌 뒤 정규장 값은 공용 모듈이 만든다 — 실시간 closePrice·저가는 애프터장이 섞인다(§48).
+import { fetchClosedSession } from './_kr-regular-session.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
 const HDR_M = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://m.stock.naver.com/' };
 
@@ -137,11 +139,12 @@ export default async function handler(req, res) {
       .split(',').map(s => s.trim()).filter(c => /^\d{6}$/.test(c)).slice(0, 50);
     const usSyms = (req.query?.us || '').toString()
       .split(',').map(s => s.trim()).filter(s => /^[A-Za-z]{1,6}(\.[A-Za-z])?$/.test(s)).slice(0, 20);
+    const open = krMarketOpen();
     const [prices, us] = await Promise.all([
-      Promise.all(codes.map(fetchOne)).then(a => a.filter(Boolean)),
+      Promise.all(codes.map(open ? fetchOne : (c) => fetchClosedSession(c))).then(a => a.filter(Boolean)),
       Promise.all(usSyms.map(fetchOverseas)).then(a => a.filter(Boolean)),
     ]);
-    return res.status(200).json({ open: krMarketOpen(), prices, us });
+    return res.status(200).json({ open, prices, us });
   } catch (e) {
     return res.status(502).json({ error: String(e), prices: [], us: [] });
   }

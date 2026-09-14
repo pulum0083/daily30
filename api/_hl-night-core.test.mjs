@@ -123,3 +123,28 @@ test('직전 KRX 종가 시각: 공휴일 다음날 새벽이면 그 전 거래�
   const got = lastKrxCloseTs(Date.parse('2026-07-17T16:00:00Z'));
   assert.equal(new Date(got).toISOString(), '2026-07-16T06:30:00.000Z');
 });
+
+import { pickKrxClose } from './_hl-night-core.mjs';
+
+// 2026-09-14 SK하이닉스 — 15:30 KST = 06:30 UTC
+const CLOSE_0914 = Date.parse('2026-09-14T06:30:00Z');
+
+test('앵커 종가: 장 마감 뒤엔 애프터장 실시간가가 아니라 정규장 공식 종가 (9/14 SK하이닉스)', () => {
+  const v = pickKrxClose({ marketOpen: false, real: { price: 1686000 },
+    closed: { price: 1697000, sessionDate: '20260914' }, closeTs: CLOSE_0914 });
+  assert.equal(v, 1697000);
+});
+
+test('앵커 종가: 정규장 날짜가 앵커 봉과 다르면 섞지 않고 null', () => {
+  const v = pickKrxClose({ marketOpen: false, real: { price: 1686000 },
+    closed: { price: 1812000, sessionDate: '20260911' }, closeTs: CLOSE_0914 });
+  assert.equal(v, null);
+});
+
+test('앵커 종가: 정규장 조회 실패면 null (애프터장 가격으로 폴백하지 않는다)', () => {
+  assert.equal(pickKrxClose({ marketOpen: false, real: { price: 1686000 }, closed: null, closeTs: CLOSE_0914 }), null);
+});
+
+test('앵커 종가: 장중엔 기존대로 실시간가', () => {
+  assert.equal(pickKrxClose({ marketOpen: true, real: { price: 1700000 }, closed: null, closeTs: CLOSE_0914 }), 1700000);
+});

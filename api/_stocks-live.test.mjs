@@ -42,3 +42,49 @@ test('가격이 없으면 항목 자체를 버린다', () => withFetch({ ...REAL
 test('응답이 비면 null', () => withFetch(null, async () => {
   assert.equal(await fetchOne('005930'), null);
 }));
+
+// ── 장이 닫힌 뒤 정규장 값 (§48) ─────────────────────────────────────────────
+// 9/14 저녁 실시간 응답은 삼성전자 lowPrice 248,000·closePrice 248,500을 줬다. 공식 정규장은
+// 저가 248,500(14:57)·종가 249,000(15:30 1분봉, 야후와 일치). 1분봉으로 정규장만 만든다.
+import { regularSessionFromBars, fetchClosedSession } from './_kr-regular-session.mjs';
+
+const BARS_0914 = [
+  { localDateTime: '20260911153000', currentPrice: 259500, openPrice: 259500, highPrice: 259500, lowPrice: 259500 },
+  { localDateTime: '20260914090000', currentPrice: 250000, openPrice: 249500, highPrice: 250500, lowPrice: 249500 },
+  { localDateTime: '20260914101000', currentPrice: 254000, openPrice: 253500, highPrice: 254500, lowPrice: 253500 },
+  { localDateTime: '20260914145700', currentPrice: 248750, openPrice: 249000, highPrice: 249000, lowPrice: 248500 },
+  { localDateTime: '20260914153000', currentPrice: 249000, openPrice: 249000, highPrice: 249000, lowPrice: 249000 },
+  { localDateTime: '20260914171000', currentPrice: 248500, openPrice: 248500, highPrice: 248500, lowPrice: 248000 }, // 애프터장
+];
+
+test('정규장 시·고·저·종은 09:00~15:30 1분봉에서만 — 애프터장 체결을 섞지 않는다 (9/14 삼성전자 실측)', () => {
+  const r = regularSessionFromBars(BARS_0914);
+  assert.equal(r.date, '20260914');
+  assert.equal(r.close, 249000);   // 실시간 248,500 아님
+  assert.equal(r.open, 249500);
+  assert.equal(r.high, 254500);
+  assert.equal(r.low, 248500);     // 애프터장 248,000 아님
+});
+
+test('오늘 15:30 봉이 없으면 직전 거래일 세션을 쓴다(주말·새벽)', () => {
+  const r = regularSessionFromBars(BARS_0914.slice(0, 1));
+  assert.equal(r.date, '20260911');
+  assert.equal(r.close, 259500);
+});
+
+test('15:30 봉이 하나도 없으면 null — 만들어내지 않는다', () => {
+  assert.equal(regularSessionFromBars([BARS_0914[5]]), null);
+  assert.equal(regularSessionFromBars(null), null);
+});
+
+test('장 마감 뒤 응답은 정규장 값만, 거래대금·등락은 비운다', async () => {
+  const orig = globalThis.fetch;
+  globalThis.fetch = async () => ({ ok: true, json: async () => BARS_0914 });
+  try {
+    const r = await fetchClosedSession('005930', new Date('2026-09-14T08:10:00Z'));
+    assert.equal(r.price, 249000);
+    assert.equal(r.low, 248500);
+    assert.equal(r.tradingValue, null);
+    assert.equal(r.changeAbs, null);
+  } finally { globalThis.fetch = orig; }
+});

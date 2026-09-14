@@ -61,17 +61,15 @@ def _toss_closes(symbol):
 
 
 def _naver_day_rows(code):
-    """네이버 일봉 전체 행(오래된→최신). closePrice·accumulatedTradingVolume·foreignRetentionRate 포함. 실패 시 []."""
+    """네이버 일봉 전체 행(오래된→최신). closePrice·accumulatedTradingVolume·foreignRetentionRate 포함. 실패 시 [].
+
+    오늘 봉 종가는 정규장 공식 종가(15:30 1분봉)로 교정된다 — 마감 잡(16:25)은 KRX 애프터마켓
+    (16:00~20:00) 한복판에 돌아, 원본 일봉의 오늘 종가가 애프터장 가격이다(2026-09-14 실사고, §48)."""
     try:
-        end = datetime.now().strftime("%Y%m%d") + "0000"
-        start = (datetime.now() - timedelta(days=420)).strftime("%Y%m%d") + "0000"
-        url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
-               f"?startDateTime={start}&endDateTime={end}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        return json.loads(urllib.request.urlopen(req, timeout=10).read())
-    except Exception as e:
-        print(f"[snapshot] naver day {code} 실패: {e}", file=sys.stderr)
-        return []
+        from kr_official_closes import official_day_rows
+    except ImportError:
+        from scripts.kr_official_closes import official_day_rows
+    return official_day_rows(code)
 
 
 def _naver_closes(code):

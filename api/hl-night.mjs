@@ -2,7 +2,8 @@
 // 데이터: api.hyperliquid.xyz/info (인증·IP화이트리스트 없음 → Vercel 서버리스 호환). 실제 KRX 체결가 아님, 참고용.
 // SKHX·SMSN 등 일부 종목은 HL 합성가가 실제 종가 대비 상시 큰 폭(5~11%)으로 웃도는 현상이 있어(2026-07-15
 // 발견 — 오라클/유동성 특성으로 추정, 저희 환산식 문제 아님), 네이버 실시간가와 비교해 괴리가 크면 보정한다.
-import { reconcileWithReal, anchorEstimate, pickAnchorCandle, lastKrxCloseTs } from './_hl-night-core.mjs';
+import { reconcileWithReal, anchorEstimate, pickAnchorCandle, lastKrxCloseTs, pickKrxClose } from './_hl-night-core.mjs';
+import { fetchClosedSession } from './_kr-regular-session.mjs';
 
 const HL = 'https://api.hyperliquid.xyz/info';
 const NAVER_HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -113,14 +114,17 @@ export default async function handler(req, res) {
     // changePct의 의미가 'HL 24h 변동'에서 '종가 대비 변동'으로 바뀐다 — 화면이 KRX 종가와
     // 나란히 보여주는 값이므로 이쪽이 사용자가 읽는 기준과 일치한다.
     const closeTs = lastKrxCloseTs();
-    const [realPrices, anchors] = await Promise.all([
+    const marketOpen = krMarketOpen();
+    const [realPrices, closedSessions, anchors] = await Promise.all([
       Promise.all(items.map(it => fetchRealKr(it.code))),
+      marketOpen ? Promise.resolve([]) : Promise.all(items.map(it => fetchClosedSession(it.code))),
       closeTs ? getAnchors(items.map(it => it.sym), closeTs) : Promise.resolve({}),
     ]);
     items.forEach((it, i) => {
       const real = realPrices[i];
       const est = anchorEstimate({
-        hlNow: it.usd, hlAtClose: anchors[it.sym], krxClose: real?.price,
+        hlNow: it.usd, hlAtClose: anchors[it.sym],
+        krxClose: pickKrxClose({ marketOpen, real, closed: closedSessions[i], closeTs }),
       });
       if (est) {
         it.krw = est.krw;
