@@ -48,6 +48,15 @@ test('그 시각 이전 행이 없으면 null — 다른 시각으로 폴백하�
   assert.equal(await flowAt('20260914', '0900', fetchText), null);
 });
 
+test('탐색 중 0행 페이지를 만나면 이전에 찾은 값 대신 null — 파싱 실패를 성공으로 착각하지 않는다(I1)', async () => {
+  const pages = {
+    1: page([]),                            // 1페이지가 0행으로 깨짐(파싱 실패 시뮬레이션)
+    2: page([row('10:59', OK)]),
+  };
+  const fetchText = async (url) => { const p = Number(url.match(/page=(\d+)/)[1]); return pages[p]; };
+  assert.equal(await flowAt('20260914', '1100', fetchText), null);
+});
+
 test('URL에 날짜·코스피(sosok=01)를 고정한다', async () => {
   let u = '';
   await flowAt('20260911', '1100', async (url) => { u = url; return page([row('10:00', OK)], 1); });

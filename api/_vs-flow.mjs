@@ -33,7 +33,7 @@ export async function flowAt(ymd, hhmm, fetchText) {
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
     const rows = await rowsOf(mid);
-    if (!rows.length) return found;
+    if (!rows.length) return null;   // 페이지가 0행으로 깨지면 그 전까지 찾은 값도 버린다 — 파싱 실패를 성공으로 착각하지 않는다(§45·I1)
     const hit = rows.find((r) => r.t.replace(':', '') <= hhmm);
     if (hit) { found = hit; hi = mid - 1; } else lo = mid + 1;
   }
