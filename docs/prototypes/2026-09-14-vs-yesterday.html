@@ -435,14 +435,14 @@ function viewIntra(){
 
   var changed='<div class="card"><div class="card-head"><div><p class="t title-22sb">지난 금요일과 달라진 것</p><p class="sub caption-13r muted">'+s.time+'까지 기준</p></div></div>'+
     '<p class="lbl label-14m">'+ICON.news+' 장중 이슈</p>'+
-    '<div class="badges" style="margin-bottom:var(--spacing-8)"><span class="caption-13r muted" style="align-self:center;width:84px">새로 떠오름</span>'+chips(I['new'],'ink')+'</div>'+
+    '<div class="badges" style="margin-bottom:10px"><span class="caption-13r muted" style="align-self:center;width:84px">새로 떠오름</span>'+chips(I['new'],'ink')+'</div>'+
     '<div class="badges"><span class="caption-13r muted" style="align-self:center;width:84px">계속 이어짐</span>'+chips(I.keep,'neutral')+'</div>'+
     '<div class="issues"><div><p class="lbl caption-13r muted">'+YL+' 9/11(금)</p>'+list(I[Y],[])+'</div><div><p class="lbl caption-13r muted">'+TL+' 9/14(월)</p>'+list(I[T],I['new'])+'</div></div>'+
     '<div class="separator"></div>'+
     '<p class="lbl label-14m">주도주 · 전일 종가 대비</p>'+
     '<div class="table-wrap"><table class="data-table"><thead><tr><th>종목</th><th>'+YL+'</th><th>'+TL+'</th><th>차이</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="separator"></div>'+
-    '<p class="lbl label-14m" style="text-align:center;margin-bottom:var(--spacing-20)">투자자별 누적 순매수</p>'+flow+'</div>';
+    '<p class="lbl label-14m" style="text-align:center;margin-bottom:20px">투자자별 누적 순매수</p>'+flow+'</div>';
 
   return '<section class="section">'+hero(ICON.clock,YL+' '+s.time+' vs '+TL+' '+s.time,'<span class="'+vcol(jk)+'">'+verdict+'</span>',sub)+heroCard+changed+'</section>';
 }
@@ -459,7 +459,7 @@ function viewAfter(){
       '금요일 애프터장은 기록이 없어요. KRX 애프터마켓이 오늘 처음 열려서, 내일부터 같은 시각 비교가 붙어요.')+
     '<div class="card"><div class="card-head"><div><p class="t title-18sb">주도주 애프터장 흐름</p><p class="sub caption-13r muted">오늘 공식 종가 대비 · 15:40 ~ 20:00</p></div>'+badge('warning','어제 비교 내일부터',true)+'</div>'+
       legend(series,'')+'<div class="chart" id="c-after"></div>'+
-      '<div class="separator" style="margin:var(--spacing-24) 0"></div>'+
+      '<div class="separator" style="margin:24px 0"></div>'+
       '<div class="table-wrap"><table class="data-table"><thead><tr><th>종목</th><th>오늘 종가</th><th>애프터장 '+tl+'</th><th>종가 대비</th><th>애프터장 범위</th><th>거래량</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
       '<div class="notes caption-13r muted"><p>기준가는 정규장 공식 종가(15:30 1분봉 · 야후 종가와 일치)예요. 장 마감 뒤엔 네이버 일봉·실시간 종가·토스 일봉이 모두 애프터장 가격을 따라가서 쓰지 않았어요.</p>'+
       '<p>실시간 응답에 딸린 애프터장 시가·고가·거래량 칸은 정규장까지 합친 값이라 쓰지 않고, 1분봉으로 직접 계산했어요.</p>'+
@@ -482,7 +482,7 @@ function viewNight(){
     '<div class="card"><div class="card-head"><div><p class="t title-18sb">'+ICON.moon+'밤사이 미국 반도체 시황</p><p class="sub caption-13r muted">평일 오후 5시부터 다음 날 07:30까지 · 주말 종일 · 지금 사이트 섹션을 그대로 살렸어요</p></div>'+
       '<div class="badges">'+badge('neutral','직전 종가 · 9/11 미국장')+badge('neutral','<span class="up">'+up+' 상승</span>&nbsp;·&nbsp;<span class="dn">'+dn+' 하락</span>')+'</div></div>'+
       '<div class="stats" style="margin-top:0;border-top:0">'+macro+'</div>'+
-      '<div class="separator" style="margin:var(--spacing-24) 0"></div>'+
+      '<div class="separator" style="margin:24px 0"></div>'+
       '<div class="table-wrap"><table class="data-table"><thead><tr><th>종목</th><th>9/11 종가</th><th>9/11 미국장</th><th>그 전 밤 '+badge('warning','새 열')+'</th></tr></thead><tbody>'+tr+'</tbody></table></div>'+
       '<div class="notes caption-13r muted"><p>새로 붙인 건 "그 전 밤" 열과 위 비교 한 줄뿐이에요. 환율 자료에 9/11 값이 없어 시안에선 달러로 표시했어요.</p>'+
       '<p>시안: 월요일 밤 미국장은 아직 열리지 않아 목·금 미국장으로 틀만 보여줘요. 실제 화면은 "어제 밤 이 시각 vs 오늘 밤 이 시각"이에요.</p></div></div>'+
