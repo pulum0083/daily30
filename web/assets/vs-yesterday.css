@@ -14,7 +14,8 @@
 .vs-zero{stroke:#CBD5E1;stroke-width:1}
 .vs-line-y{fill:none;stroke:#CBD5E1;stroke-width:2;stroke-dasharray:6 5}
 .vs-line-t{fill:none;stroke:#0F172A;stroke-width:2.5;stroke-linejoin:round}
-.vs-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+.vs-axis{position:relative;height:14px;font-size:11px;color:var(--muted);margin-top:4px}
+.vs-axis span{position:absolute;top:0;white-space:nowrap}
 .vs-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .vs-stat{background:#F7F9FC;border:1px solid var(--inset);border-radius:10px;padding:10px 12px}
 .vs-stat-h{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--muted)}

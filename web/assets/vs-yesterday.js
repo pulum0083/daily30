@@ -60,7 +60,8 @@
     if (d.flow) stats += stat('외국인 누적 순매수', d.flow.judge, d.prev.rel, eok(d.flow.y['외국인']), cls(d.flow.y['외국인']), eok(d.flow.t['외국인']), cls(d.flow.t['외국인']), eok(d.flow.foreignDiff));
     if (d.avg) stats += stat('주도주 3종목 평균', d.avg.judge, d.prev.rel, f2(d.avg.y) + '%', cls(d.avg.y), f2(d.avg.t) + '%', cls(d.avg.t), f2(d.avg.diff) + '%p');
     html += '<div class="vs-card"><div class="vs-legend"><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="t"></i>오늘</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
-      chartSvg(d.kospi.curveY, d.kospi.curveT) + '<div class="vs-axis"><span>09:00</span><span>11:00</span><span>13:00</span><span>15:30</span></div>' +
+      chartSvg(d.kospi.curveY, d.kospi.curveT) +
+      '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
       (stats ? '<div class="vs-stats">' + stats + '</div>' : '') + '</div>';
 
     var changed = '';
@@ -79,8 +80,8 @@
       changed += '<p class="vs-lbl">주도주 · 전일 종가 대비</p><div class="vs-table"><table><thead><tr><th>종목</th><th>' + rel + '</th><th>오늘</th><th>차이</th></tr></thead><tbody>' +
         rows.map(function (l) {
           return '<tr><td><b>' + esc(l.name) + '</b></td>' +
-            '<td><span class="' + cls(l.y) + '">' + f2(l.y) + '%</span>' + (l.pxY != null ? '<small>' + fmt(l.pxY) + '</small>' : '') + '</td>' +
-            '<td><span class="' + cls(l.t) + '">' + f2(l.t) + '%</span>' + (l.pxT != null ? '<small>' + fmt(l.pxT) + '</small>' : '') + '</td>' +
+            '<td><span class="' + cls(l.y) + '">' + (l.y != null ? f2(l.y) + '%' : '—') + '</span>' + (l.pxY != null ? '<small>' + fmt(l.pxY) + '</small>' : '') + '</td>' +
+            '<td><span class="' + cls(l.t) + '">' + (l.t != null ? f2(l.t) + '%' : '—') + '</span>' + (l.pxT != null ? '<small>' + fmt(l.pxT) + '</small>' : '') + '</td>' +
             '<td class="' + cls(l.diff) + '">' + (l.diff != null ? f2(l.diff) + '%p' : '—') + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }

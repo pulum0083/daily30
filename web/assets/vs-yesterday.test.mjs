@@ -55,6 +55,24 @@ test('이슈는 null이면 이슈 섹션을 그리지 않는다(C2)', () => {
   assert.ok(!root.innerHTML.includes('vs-chip'));
 });
 
+test('주도주 표 — 값이 null이면 —만 표시하고 %를 붙이지 않는다(작은 것)', () => {
+  const payload = { ...PAYLOAD, leaders: [...PAYLOAD.leaders, { code: '000660', name: 'SK하이닉스', t: null, y: -1.23, diff: null, pxT: null, pxY: 259000 }] };
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(payload);
+  assert.ok(!root.innerHTML.includes('—%'), 'null 값에 %가 붙음(예: "—%")');
+  assert.ok(root.innerHTML.includes('259,000'));
+});
+
+test('축 라벨 — 09:00·11:00·13:00·15:30을 0·120·240·390분 위치에 절대 배치, 마지막은 오른쪽 정렬(작은 것)', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD);
+  const axis = root.innerHTML.match(/<div class="vs-axis">[\s\S]*?<\/div>/)[0];
+  assert.match(axis, /left:0%[^>]*>09:00</);
+  assert.match(axis, /left:30\.77%[^>]*>11:00</);
+  assert.match(axis, /left:61\.54%[^>]*>13:00</);
+  assert.match(axis, /right:0[^>]*>15:30</);
+});
+
 test('주도주 평균이 없으면 그 칸을 그리지 않는다(§0)', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
