@@ -4,7 +4,7 @@
 .vs-hero + .vs-card,.vs-card + .vs-card{margin-top:12px}
 .vs-eyebrow{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 4px}
 .vs-hero h2{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.35;color:#0F172A;margin:0}
-.vs-hero h2.up,.up{color:var(--up)} .vs-hero h2.dn,.dn{color:var(--dn)}
+.vs-hero h2.up{color:var(--up)} .vs-hero h2.dn{color:var(--dn)}
 .vs-sub{font-size:12px;color:var(--muted);margin:4px 0 0;line-height:1.55}
 .vs-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
 .vs-legend i{display:inline-block;width:18px;border-top:2px solid #0F172A;vertical-align:middle;margin-right:6px}
@@ -56,7 +56,7 @@
 .vs-fname{text-align:center;font-size:13px;font-weight:700;color:#0F172A;margin:0 0 6px}
 .vs-frow{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;column-gap:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 .vs-frow + .vs-frow{margin-top:5px}
-.vs-fl{text-align:right} .vs-fr{text-align:left} .muted{color:var(--muted)}
+.vs-fl{text-align:right} .vs-fr{text-align:left}
 .vs-ftrack{position:relative;height:8px;background:#F1F5F9;border-radius:999px}
 .vs-ftrack::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:#CBD5E1}
 .vs-fbar{position:absolute;top:0;bottom:0;border-radius:999px}
