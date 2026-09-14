@@ -12,8 +12,17 @@ export function issuesUntil(archive, hhmm) {
   return out.sort((a, b) => (a.t < b.t ? -1 : a.t > b.t ? 1 : 0));
 }
 
-export function keywordDiff(yItems, tItems, words) {
-  const has = (items, w) => items.some((i) => i.title.includes(w));
+export function keywordDiff(yItems, tItems, words, exclude = {}) {
+  const has = (items, w) => {
+    const excl = exclude[w] || [];
+    return items.some((i) => {
+      let title = i.title;
+      for (const phrase of excl) {
+        title = title.split(phrase).join(' ');
+      }
+      return title.includes(w);
+    });
+  };
   const res = { new: [], keep: [], gone: [] };
   for (const w of words || []) {
     const y = has(yItems, w), t = has(tItems, w);
