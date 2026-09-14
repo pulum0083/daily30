@@ -48,8 +48,11 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   kospi.curveT = curve(kT, baseT, at);
   kospi.curveY = curve(kY, baseY, at);
 
-  const [fT, fY] = await Promise.all([settle(flowAt(T, at, fetchText), null), settle(flowAt(Y, at, fetchText), null)]);
-  const flow = fT && fY ? { t: fT, y: fY, foreignDiff: fT.외국인 - fY.외국인 } : null;
+  // 오늘 행을 먼저 찾고, 어제는 오늘 행 자신의 시각으로 찾는다 — 수급 갱신이 코스피 비교 시각(at)보다
+  // 늦으면 두 날의 서로 다른 시각을 맞대게 된다(I1). 그래서 어제 조회는 오늘 조회가 끝난 뒤에만 가능하다.
+  const fT = await settle(flowAt(T, at, fetchText), null);
+  const fY = fT ? await settle(flowAt(Y, fT.t.replace(':', ''), fetchText), null) : null;
+  const flow = fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
   if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
 
   const leaders = await Promise.all(LEADERS.map(async ([code, name]) => {

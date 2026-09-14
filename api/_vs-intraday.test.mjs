@@ -6,6 +6,7 @@ import { buildIntradayVs } from './_vs-intraday.mjs';
 const kst = (s) => Date.parse(s + 'Z') - 9 * 3600 * 1000;
 const OK = (f) => ['0', String(f), '0', '0', '0', '0', '0', '0', '0', String(-f)];
 const flowPage = (t, f) => `<table><tr><td>${t}</td>${OK(f).map((x) => `<td>${x}</td>`).join('')}</tr></table>`;
+const flowRow = (t, f) => `<tr><td>${t}</td>${OK(f).map((x) => `<td>${x}</td>`).join('')}</tr>`;
 const minute = (ymd, hhmm, v) => [{ localDateTime: `${ymd}${hhmm}00`, currentPrice: v }];
 
 function fakes() {
@@ -68,6 +69,19 @@ test('수급 원천이 실패해도 나머지는 그린다 — flow만 null', as
   assert.equal(d.status, 'ok');
   assert.equal(d.flow, null);
   assert.equal(d.verdict.sub, '코스피가 같은 시각 기준 거의 같은 자리예요(−0.14%p)');
+});
+
+test('수급 비교는 오늘 수급 행의 시각으로 어제를 맞춘다(오늘 수급이 코스피 비교 시각보다 늦게 갱신되면, I1)', async () => {
+  const f = fakes();
+  // 오늘 수급은 10:55까지만 갱신됐다(코스피 비교 시각 at=11:00보다 이름). 어제는 11:00·10:55 두 행이 있는데,
+  // 같은 시각(10:55)끼리 맞대야 한다 — 11:00 행과 비교하면 안 된다.
+  const fetchText = async (url) => (/bizdate=20260914/.test(url)
+    ? `<table>${flowRow('10:55', -5000)}</table>`
+    : `<table>${flowRow('11:00', -9999)}${flowRow('10:55', -3000)}</table>`);
+  const d = await buildIntradayVs({ now: kst('2026-09-14T11:00:30'), ...f, fetchText });
+  assert.equal(d.time, '11:00');            // 코스피 비교 시각은 그대로
+  assert.equal(d.flow.time, '10:55');       // 수급은 오늘 수급 행 자신의 시각(payload에 노출)
+  assert.equal(d.flow.foreignDiff, -2000);  // -5000 - (-3000). 11:00 행(-9999)과 비교하면 4999가 나와 틀린다
 });
 
 test('이슈는 항상 null — 이슈 아카이브·키워드 사전을 부르지 않는다(C2)', async () => {

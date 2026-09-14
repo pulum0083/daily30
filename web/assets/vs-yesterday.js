@@ -43,7 +43,7 @@
     }
     return '<div class="vs-flow">' + keys.map(function (k) {
       return '<div class="vs-fgroup"><p class="vs-fname">' + k + '</p>' + bar(d.flow.t[k], 'now') + bar(d.flow.y[k], 'prev') + '</div>';
-    }).join('') + '<p class="vs-flegend"><span><i class="now"></i>위 오늘 ' + d.time + '</span><span><i></i>아래 ' + esc(d.prev.rel) + ' ' + d.time + '</span></p></div>';
+    }).join('') + '<p class="vs-flegend"><span><i class="now"></i>위 오늘 ' + d.flow.time + '</span><span><i></i>아래 ' + esc(d.prev.rel) + ' ' + d.flow.time + '</span></p></div>';
   }
 
   function render(d) {
