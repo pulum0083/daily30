@@ -1931,3 +1931,14 @@ ETF·ETN은 이름 키워드 대신 `stockEndType`으로 거른다.
 - **재발 시 진단 순서**: ① 마감 잡 로그에서 `[fetch_closing]` 줄의 빈 항목과 `애프터장 체결가가 반영된 목록`
   문구를 구분한다(전자는 원천 고장, 후자는 가드 작동). ② 원천 URL을 `curl -s -o /dev/null -w '%{http_code}'`로 연다.
   ③ 수급 값이 이상하면 `investorDealTrendTime.naver?bizdate=YYYYMMDD&sosok=01`의 15:30~15:40 행과 대조한다.
+
+### 52. 패시브 민감주·거래량 순위 제거 + 홈 1단 (2026-09-15 결정)
+
+사용자 요청으로 홈 '더 보기'의 **패시브 민감주·거래량 순위 화면을 API까지 뺐다.**
+
+- 지운 것: 화면 `#passive`·`#ranking`, 홈 '더 보기' 블록, 라우트 `api/vol-top.mjs`(라우트 11/12), `scripts/build_etf_exposure.py`와 테스트,
+  `data/etf_exposure.json`, 패시브 배지 툴팁·스타일(`stocks-home.css`·`stocks.css`), 용어 설명의 '패시브 노출' 문단, 사용량 감시 목록의 `/api/vol-top`.
+- 확인한 소비자: `/api/vol-top`은 거래량 순위 화면만 채우고 있었다(홈 거래량·상승·하락 톱 위젯 자리 `#vol-top-rows` 등은 이미 페이지에 없었다).
+  `etf_exposure.json`은 빌드 스크립트 말고 읽는 곳이 없었다(§50에서 남긴 판단은 이번에 뒤집혔다).
+- **남긴 것**: `/stocks/income-designer/` 인라인 CSS의 패시브 스타일(그 페이지 전용, 이번 요청 범위 밖), 거래량 급증 배지(`.vol-surge-badge`, 섹터·종목 페이지가 쓴다).
+- **홈이 PC에서도 1단이다.** '더 보기'를 빼면 왼쪽 칸(`.home-main`)이 비어 특이 신호가 오른쪽 1/3 칸에 갇히므로 홈 화면에만(`#home .home-cols`) 한 칸 그리드를 걸었다. 같은 클래스를 쓰는 특이 신호 전체 화면(`#signals-all`)은 2단 그대로다. 모바일 순서 규칙(`.sig-block{order:-1}`)은 그대로다.

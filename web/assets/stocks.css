@@ -223,32 +223,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .refrow .rk{font-size:12px;color:var(--muted);white-space:nowrap;}
 .refrow b{font-size:15px;font-weight:800;}
 .refnote{font-size:12px;color:var(--muted);line-height:1.65;margin:10px 0 0;}
-/* 패시브 민감주 */
-.block__t.pass::before{background:#0284C7;}
-.block__t.pass{color:#0C4A6E;}
-.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
-.pbdg{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
-.pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
-.pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
-/* 위젯 메트릭 타일 */
-.pmet{display:flex;gap:8px;padding:12px 16px 0;}
-.pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
-.pmet .mc .l{font-size:10px;color:var(--muted);margin-bottom:3px;}
-.pmet .mc .v{font-size:15px;font-weight:800;}
-.pmet .mc .sub{font-size:9px;color:var(--muted);margin-top:2px;}
-/* 패시브 한줄 번역 */
-.p1line{font-size:12px;color:var(--ink);padding:11px 16px 0;line-height:1.6;}
-.p1line b{color:#0284C7;}
-/* ETF 기여 행 */
-.petf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
-.petf-row:last-child{border-bottom:none;}
-.petf-row .en{flex:1;font-weight:600;}.petf-row .en small{display:block;font-size:10px;color:var(--muted);font-weight:400;}
-.petf-row .wt{font-size:12px;font-weight:800;color:var(--primary);}
-.petf-bar{height:3px;border-radius:999px;background:var(--inset);margin-top:3px;overflow:hidden;}
-.petf-bar i{display:block;height:100%;background:#0284C7;border-radius:999px;}
-/* 면책 띠 */
-.pdisc{font-size:10px;color:var(--muted);padding:7px 16px;background:var(--soft);line-height:1.5;border-top:1px solid var(--hair);}
 /* 면책/정직 배너 */
 .honest{background:var(--canvas);border:1px solid var(--hair);border-left:3px solid #eb8e02;border-radius:10px;padding:13px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;}
 .honest .ic3{font-size:18px;flex-shrink:0;line-height:1.5;}

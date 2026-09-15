@@ -272,6 +272,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .grid{display:grid;grid-template-columns:1fr 360px;column-gap:20px;align-items:start;}
 .home-cols{display:grid;grid-template-columns:2fr 1fr;column-gap:20px;align-items:start;}
 .home-main,.home-side{min-width:0;}
+/* 홈은 PC에서도 1단 — '더 보기'를 뺀 뒤 왼쪽 칸이 비어 특이 신호가 1/3 칸에 갇혔다(§52). 특이 신호 전체 화면의 2단은 그대로. */
+#home .home-cols{grid-template-columns:minmax(0,1fr);}
 .home-full{grid-column:1/-1;}
 #today-line{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 15px;margin-bottom:12px;font-size:13px;line-height:1.5;color:var(--ink);}
 .sbx-block .sbx-hdr{background:var(--canvas);border-bottom:1px solid var(--hair);border-radius:10px 10px 0 0;}
@@ -498,20 +500,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .breadth .bk .iu{background:var(--up);}.breadth .bk .id{background:var(--dn);}.breadth .bk .in{background:var(--hair);}
 .disc{font-size:11px;color:var(--muted);line-height:1.6;margin:8px 2px 0;}
 
-/* ranking page */
+/* 화면 머리(phead) */
 .phead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;flex-wrap:wrap;}
 .phead h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin:0;display:flex;align-items:center;gap:9px;}.phead h1 .ic{font-size:18px;}
 .phead .psub{font-size:12px;color:var(--muted);margin-top:5px;}
-.rtabs{display:inline-flex;background:var(--inset);border-radius:10px;padding:3px;gap:2px;}
-.rtabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 14px;border-radius:8px;}.rtabs a.on{background:var(--canvas);color:var(--primary);box-shadow:var(--s1);}
-.fbar{display:flex;align-items:center;gap:9px;margin-bottom:12px;flex-wrap:wrap;}.fbar .lbl{font-size:12px;font-weight:700;color:var(--muted);}
-.fchips{display:flex;flex-wrap:wrap;gap:7px;}.fchips a{font-size:12px;font-weight:600;color:var(--muted);background:var(--canvas);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;text-decoration:none;}.fchips a.on{background:var(--primary-bg);border-color:#BFDBFE;color:var(--primary);}
-.tbl{background:var(--soft);border:1px solid var(--hair);border-radius:10px;overflow:hidden;box-shadow:var(--s1);}
-.trow{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--hair);text-decoration:none;color:var(--ink);background:var(--canvas);}.trow:last-child{border-bottom:none;}.trow:hover{background:var(--primary-bg);}
-.trow--static:hover{background:var(--canvas);cursor:default;}
-.tchg{width:68px;text-align:right;flex-shrink:0;font-size:13px;font-weight:800;}
-.pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
-.pager a{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--hair);background:var(--canvas);font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:0 6px;}.pager a.on{background:var(--primary);border-color:var(--primary);color:#fff;}
 
 /* etf-detail donut + holdings */
 .donutwrap{display:flex;gap:20px;align-items:center;padding:14px 16px;}
@@ -565,46 +557,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .help-q::after{content:'';position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);}
 .help-q:hover{background:#2775ED;color:#fff;}
 
-/* ── 패시브 민감주 ── */
-.block__t.pass::before{background:#0284C7;}
-.block__t.pass{color:#0C4A6E;}
-.bar.pbar{background:linear-gradient(90deg,#BAE6FD,#0284C7);}
-.pbdg{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap;cursor:help;}
-.pbdg.high{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
-.pbdg.mid{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
-.badge-pass-btn{font-size:11px;font-weight:600;color:#0284C7;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:999px;padding:2px 9px;cursor:help;margin-left:6px;white-space:nowrap;}
-/* 위젯 메트릭 타일 */
-.pmet{display:flex;gap:8px;padding:12px 16px 0;}
-.pmet .mc{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:8px;padding:10px 12px;text-align:center;}
-.pmet .mc .l{font-size:11px;color:var(--muted);margin-bottom:3px;}
-.pmet .mc .v{font-size:15px;font-weight:800;}
-.pmet .mc .sub{font-size:11px;color:var(--muted);margin-top:2px;}
-/* 패시브 한줄 번역 */
-.p1line{font-size:12px;color:var(--ink);padding:11px 16px 0;line-height:1.6;}
-.p1line b{color:#0284C7;}
-/* ETF 기여 행 */
-.petf-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--hair);font-size:12px;}
-.petf-row:last-child{border-bottom:none;}
-.petf-row .en{flex:1;font-weight:600;}.petf-row .en small{display:block;font-size:11px;color:var(--muted);font-weight:400;}
-.petf-row .wt{font-size:12px;font-weight:800;color:var(--primary);}
-.petf-bar{height:3px;border-radius:999px;background:var(--inset);margin-top:3px;overflow:hidden;}
-.petf-bar i{display:block;height:100%;background:#0284C7;border-radius:999px;}
-/* 면책 띠 */
-.pdisc{font-size:11px;color:var(--muted);padding:7px 16px;background:var(--soft);line-height:1.5;border-top:1px solid var(--hair);}
-/* 패시브 랭킹 페이지 */
-.prank-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair);background:var(--canvas);text-decoration:none;color:var(--ink);}
-.prank-row:last-child{border-bottom:none;}
-.prank-row:hover{background:#F0F9FF;}
-.prank-row .rk2{width:20px;text-align:center;font-size:13px;font-weight:800;color:var(--muted);flex-shrink:0;}
-.dov-bar{flex:1;height:18px;background:var(--inset);border-radius:5px;overflow:hidden;position:relative;}
-.dov-bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#BAE6FD,#0284C7);}
-.dov-bar .val{position:absolute;right:8px;top:0;height:18px;display:flex;align-items:center;font-size:11px;font-weight:800;color:#0C4A6E;}
-.conc-col{width:56px;text-align:right;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
-.score-col{width:44px;text-align:right;font-size:13px;font-weight:800;color:#0284C7;flex-shrink:0;}
-/* 섹터 쏠림 배너 */
-.sector-bias{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:11px 16px;margin-bottom:14px;font-size:12px;color:#0C4A6E;display:flex;align-items:center;gap:10px;}
-.sector-bias .ic2{font-size:18px;flex-shrink:0;}
-.sector-bias b{font-weight:800;}
 /* 정렬 토글 */
 .stabs{display:inline-flex;background:var(--inset);border-radius:8px;padding:3px;gap:2px;margin-bottom:12px;}
 .stabs a{font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:5px 12px;border-radius:6px;cursor:pointer;}
@@ -858,7 +810,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .block .nm,.cols2 .nm{width:auto;flex:1;min-width:0;}
   .barval{min-width:0;}
   .ai{width:60px;}
-  .prank-row .nm{width:104px!important;}
   .ai{width:auto;}
   /* 브리핑 커넥터 — 좁은 화면에서 줄바꿈 */
   .brief-card{flex-wrap:wrap;}

@@ -22,7 +22,6 @@ const POLLED = [
   { name: 'stocks-live', mod: './stocks-live.mjs', pollSec: 60,  req: { query: { codes: '005930', us: '' } } },
   { name: 'hl-night',    mod: './hl-night.mjs',    pollSec: 60,  req: { query: {} } },
   { name: 'signals',     mod: './signals.mjs',     pollSec: 60,  req: { query: {} } },   // main.js 사이드바가 최단
-  { name: 'vol-top',     mod: './vol-top.mjs',     pollSec: 300, req: { query: {} } },
   { name: 'data',        mod: './data.mjs',        pollSec: 300, req: { query: { f: 'news-live' } } },
   { name: 'intraday?vs', mod: './intraday.mjs', pollSec: 60, req: { query: { vs: 'intraday' }, headers: {} } },   // vs-yesterday.js 60초
 ];

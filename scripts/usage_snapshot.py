@@ -44,7 +44,6 @@ POLLED_ENDPOINTS = [
     "/api/stocks-live?codes=005930",
     "/api/intraday?code=005930",
     "/api/signals",
-    "/api/vol-top",
     "/api/hl-night",
     "/api/data?f=briefings-list",
 ]
