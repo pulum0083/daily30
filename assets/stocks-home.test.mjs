@@ -594,6 +594,15 @@ test('타일 — 당일 레인지 위치', () => {
   assert.equal(rangePos(null, 1, 2), null);
 });
 
+test('타일 — 야간 추정가 위치 문구: 레인지 밖은 %로 적지 않는다', () => {
+  const { rangeText } = loadWindow({}).__leaderTiles;
+  // 9/15 19:39 삼성전자 추정가 250,955 · 정규장 246,000~252,000 (종가 248,500이면 42%)
+  assert.equal(rangeText(250955, 246000, 252000), '83% 지점');
+  assert.equal(rangeText(253000, 246000, 252000), '고가 위');
+  assert.equal(rangeText(245000, 246000, 252000), '저가 아래');
+  assert.equal(rangeText(250000, 250000, 250000), null);
+});
+
 test('타일 — 거래대금·외국인 수량 표기', () => {
   const { fmtValue, fmtShares } = loadWindow({}).__leaderTiles;
   assert.equal(fmtValue(3167707000000), '3조 1,677억');
