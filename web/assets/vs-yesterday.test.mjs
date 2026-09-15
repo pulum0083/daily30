@@ -5,18 +5,19 @@ import { readFileSync } from 'node:fs';
 import { createContext, runInContext } from 'node:vm';
 
 const noop = () => {};
-function load(nowMs, tiles) {
+function load(nowMs, tiles, hooks) {
+  hooks = hooks || {};
   const root = { hidden: true, innerHTML: '' };
   const FixedDate = class extends Date { constructor(...a) { super(...(a.length ? a : [nowMs])); } static now() { return nowMs; } };
   const sb = {
-    document: { getElementById: (id) => (id === 'vs-root' ? root : null), querySelectorAll: () => tiles || [], hidden: false, addEventListener: noop },
-    fetch: () => Promise.reject(new Error('no network')),
+    document: { getElementById: (id) => (id === 'vs-root' ? root : null), querySelectorAll: () => tiles || [], hidden: hooks.hidden || false, addEventListener: hooks.onDocEvent || noop },
+    fetch: hooks.fetch || (() => Promise.reject(new Error('no network'))),
     setInterval: noop, clearInterval: noop, setTimeout: noop, console: { log: noop, warn: noop, error: noop },
     Date: nowMs ? FixedDate : Date, Intl, Math, JSON, String, Number,
   };
   sb.window = sb;
   runInContext(readFileSync(new URL('./vs-yesterday.js', import.meta.url), 'utf8'), createContext(sb));
-  return { api: sb.window.__vsIntraday, root };
+  return { api: sb.window.__vsIntraday, root, sb };
 }
 const kst = (s) => Date.parse(s + 'Z') - 9 * 3600 * 1000;
 
@@ -196,4 +197,23 @@ test('A안 — 렌더에 차이 범례·곡선 상자를 넣는다', () => {
   api.render(PAYLOAD);
   assert.ok(root.innerHTML.includes('class="vs-chartbox"'));
   assert.ok(root.innerHTML.includes('<i class="a"></i>차이'));
+});
+
+test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 바로 불러온다', () => {
+  const calls = [], handlers = {};
+  const hooks = {
+    hidden: true,
+    onDocEvent: (type, fn) => { handlers[type] = fn; },
+    fetch: (url) => { calls.push(url); return Promise.reject(new Error('no network')); },
+  };
+  const { sb } = load(kst('2026-09-15T11:00:00'), [], hooks);
+  assert.equal(calls.length, 0, '숨은 탭에서 요청하면 안 된다');
+  assert.equal(typeof handlers.visibilitychange, 'function', 'visibilitychange 미등록');
+  sb.document.hidden = false;               // 탭이 보이게 됐다
+  handlers.visibilitychange();
+  assert.equal(calls.length, 1, '보이는 순간 한 번 불러와야 한다');
+  assert.match(calls[0], /vs=intraday/);
+  sb.document.hidden = true;                // 다시 가려지면 요청하지 않는다
+  handlers.visibilitychange();
+  assert.equal(calls.length, 1);
 });

@@ -216,4 +216,6 @@
   if (!root) return;
   load();
   setInterval(load, 60000);
+  // 백그라운드에서 열린 탭은 load()가 요청을 건너뛴다 — 보이는 순간 바로 불러와 최대 60초 빈 화면을 없앤다.
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
 })();
