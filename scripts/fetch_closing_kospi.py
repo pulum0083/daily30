@@ -72,20 +72,22 @@ def _source_failed(name: str, detail: str) -> None:
     print(f"[fetch_closing] {name}: {detail}", file=sys.stderr)
 
 
-# KRX 애프터마켓(16:00~20:00, §48) 체결이 들어오면 네이버 현재가·등락률·등락 종목 수가 그 가격을 따른다.
-# 15:40~16:00 장후 시간외는 종가로만 체결되므로 가격이 바뀌지 않는다 — 16:00:00 이후 체결만 오염으로 본다.
-AFTERMARKET_OPEN_HMS = "16:00:00"
-AFTERMARKET_DETAIL = "애프터장 체결가가 반영된 목록 — 정규장 값이 아니라 비운다"
+# KRX 애프터마켓(16:00~20:00, §48)이 열리면 목록 API의 현재가·등락률과 업종 등락률이 애프터장 가격을 따른다.
+# 2026-09-15 실측(15:58 → 16:12): 업종 79개 중 71개의 등락률이 바뀌고 종목 현재가도 움직였다. 시장 폭
+# (upDownStockInfo)은 15:36·15:58·16:12 모두 254/623/40으로 그대로였다. 목록의 localTradedAt은 체결이 없어도
+# 조회 시각으로 갱신돼 판정에 쓸 수 없다. 그래서 시각으로 판정한다 — 09:00~16:00 밖이면 업종·급등주를 비운다.
+_after_market_skips: list[str] = []
 
 
-def priced_after_regular(stocks, now=None) -> bool:
-    """목록 종목 중 오늘 16:00:00 이후 체결 시각(localTradedAt)이 하나라도 있으면 True."""
-    today = (now or datetime.now(KST)).strftime("%Y-%m-%d")
-    for s in stocks or []:
-        ts = str((s or {}).get("localTradedAt") or "")
-        if ts[:10] == today and ts[11:19] >= AFTERMARKET_OPEN_HMS:
-            return True
-    return False
+def list_prices_regular(now=None) -> bool:
+    """목록·업종 API 가격이 정규장 값인 시간대(09:00~16:00 KST)인가."""
+    hhmm = (now or datetime.now(KST)).strftime("%H%M")
+    return "0900" <= hhmm < "1600"
+
+
+def _after_market_skip(name: str) -> None:
+    _after_market_skips.append(name)
+    print(f"[fetch_closing] {name}: 16:00 이후엔 목록 가격이 애프터장 값이라 비운다(§51)", file=sys.stderr)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -272,15 +274,15 @@ def fetch_top_gainers(limit: int = 3, fetch=_get_json, now=None) -> list[dict]:
 
     Returns list of {"name": str, "change_pct": str, "price": str}
     """
+    if not list_prices_regular(now):
+        _after_market_skip("top_gainers")
+        return []
     try:
         payload = fetch(STOCKS_UP_URL)
         result = parse_top_gainers(payload, limit)
     except Exception as e:
         print(f"[fetch_closing] top gainers fetch failed: {e}", file=sys.stderr)
         payload, result = {}, []
-    if result and priced_after_regular(payload.get("stocks"), now):
-        _source_failed("top_gainers", AFTERMARKET_DETAIL)
-        return []
     if not result:
         _source_failed("top_gainers", "상승률 상위 목록 0건")
     print(f"[fetch_closing] top gainers: {[r['name'] for r in result]}")
@@ -330,6 +332,9 @@ def fetch_sector_performance(fetch=_get_json, now=None) -> list[dict]:
 
     Returns list of {"name": str, "change_pct": float, "stocks": [{"name", "change_pct"}, ...]}
     """
+    if not list_prices_regular(now):
+        _after_market_skip("sectors")
+        return []
     try:
         groups = parse_industry_groups(fetch(INDUSTRY_LIST_URL))
     except Exception as e:
@@ -349,10 +354,6 @@ def fetch_sector_performance(fetch=_get_json, now=None) -> list[dict]:
         except Exception as e:
             print(f"[fetch_closing] sector detail fetch failed ({g['no']}): {e}", file=sys.stderr)
             detail, stocks = {}, []
-        # 업종 목록엔 체결 시각이 없어 구성 종목 시각으로 판정한다. 하나라도 오염이면 업종 등락률 전체를 버린다.
-        if priced_after_regular(detail.get("stocks"), now):
-            _source_failed("sectors", AFTERMARKET_DETAIL)
-            return []
         final.append({"name": g["name"], "change_pct": g["change_pct"], "stocks": stocks})
         time.sleep(0.3)  # 네이버 부담 줄이기
 
@@ -523,10 +524,6 @@ def fetch_market_breadth(fetch=_get_json, now=None) -> dict:
     except Exception as e:
         print(f"[fetch_closing] market breadth naver error: {e}", file=sys.stderr)
         payload, result = {}, {}
-    # upDownStockInfo엔 시각이 없어 같은 응답의 시총 상위 종목(enrollStocks) 체결 시각으로 판정한다.
-    if result and priced_after_regular(payload.get("enrollStocks"), now):
-        _source_failed("market_breadth", AFTERMARKET_DETAIL)
-        return {}
     if not result:
         _source_failed("market_breadth", "등락 종목 수를 읽지 못함")
         return {}
@@ -777,7 +774,7 @@ def preserve_same_day(data: dict, old: dict) -> list[str]:
 
 
 def alert_source_failures(data: dict, failures: list[str]) -> None:
-    missing = [k for k in REQUIRED_NAVER_KEYS if not data.get(k)]
+    missing = [k for k in REQUIRED_NAVER_KEYS if not data.get(k) and k not in _after_market_skips]
     if not missing and not failures:
         return
     try:

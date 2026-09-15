@@ -26,6 +26,7 @@ def fx(name):
 def isolated(monkeypatch):
     """실행마다 실패 목록을 비우고, 공식 종가 저장소(data/kr_official_closes.json)를 읽지 않게 한다."""
     monkeypatch.setattr(fc, "_source_failures", [])
+    monkeypatch.setattr(fc, "_after_market_skips", [])
     for name in ("kr_official_closes", "scripts.kr_official_closes"):
         mod = sys.modules.get(name)
         if mod is not None:
@@ -78,7 +79,7 @@ def test_업종은_등락폭이_큰_5개와_각_상위종목을_돌려준다(mon
         return fx("industry_list.json") if url == fc.INDUSTRY_LIST_URL else detail
 
     monkeypatch.setattr(fc.time, "sleep", lambda s: None)
-    out = fc.fetch_sector_performance(fetch=fetch)
+    out = fc.fetch_sector_performance(fetch=fetch, now=KST.localize(datetime(2026, 9, 15, 15, 45)))
     assert [s["name"] for s in out][:2] == ["우주항공과국방", "조선"]
     assert len(out) == 5 and all(len(s["stocks"]) == 3 for s in out)
     assert len(calls) == 6
@@ -297,37 +298,28 @@ def test_다_채워졌으면_알리지_않는다(monkeypatch):
 AT_1625 = KST.localize(datetime(2026, 9, 15, 16, 25))
 
 
-def _traded(ts):
-    return {"stockEndType": "stock", "sosok": "0", "itemCode": "005930", "stockName": "삼성전자",
-            "closePrice": "250,000", "fluctuationsRatio": "0.40", "localTradedAt": ts}
+@pytest.mark.parametrize("hm,ok", [((8, 59), False), ((9, 0), True), ((15, 59), True), ((16, 0), False), ((16, 25), False)])
+def test_목록_가격은_09시부터_16시_전까지만_정규장_값이다(hm, ok):
+    assert fc.list_prices_regular(KST.localize(datetime(2026, 9, 15, *hm))) is ok
 
 
-def test_장후_시간외_종가매매_시각은_오염이_아니다():
-    assert not fc.priced_after_regular([_traded("2026-09-15T15:30:00+09:00"),
-                                        _traded("2026-09-15T15:59:59+09:00")], now=AT_1625)
-    assert not fc.priced_after_regular([_traded("2026-09-14T19:59:00+09:00")], now=AT_1625)   # 어제 체결
-
-
-def test_16시_이후_체결이_있으면_시장폭을_비우고_알린다():
-    payload = {**fx("index_integration.json"), "enrollStocks": [_traded("2026-09-15T16:03:10+09:00")]}
-    assert fc.fetch_market_breadth(fetch=lambda url: payload, now=AT_1625) == {}
-    assert fc._source_failures == [f"market_breadth: {fc.AFTERMARKET_DETAIL}"]
-
-
-def test_정규장_체결만_있으면_시장폭을_그대로_쓴다():
-    payload = {**fx("index_integration.json"), "enrollStocks": [_traded("2026-09-15T15:30:01+09:00")]}
-    assert fc.fetch_market_breadth(fetch=lambda url: payload, now=AT_1625)["up"] == 245
-
-
-def test_16시_이후_체결이_있으면_급등주를_비운다():
-    payload = {"stocks": [_traded("2026-09-15T16:10:00+09:00")]}
-    assert fc.fetch_top_gainers(fetch=lambda url: payload, now=AT_1625) == []
-    assert fc._source_failures == [f"top_gainers: {fc.AFTERMARKET_DETAIL}"]
-
-
-def test_업종_구성종목에_16시_이후_체결이_있으면_업종을_통째로_비운다(monkeypatch):
-    monkeypatch.setattr(fc.time, "sleep", lambda s: None)
-    dirty = {"stocks": [_traded("2026-09-15T16:00:00+09:00")]}
-    fetch = lambda url: fx("industry_list.json") if url == fc.INDUSTRY_LIST_URL else dirty
+def test_16시_이후엔_업종_급등주를_조회하지_않고_비운다():
+    def fetch(url):
+        raise AssertionError("조회하면 안 된다")
     assert fc.fetch_sector_performance(fetch=fetch, now=AT_1625) == []
-    assert fc._source_failures == [f"sectors: {fc.AFTERMARKET_DETAIL}"]
+    assert fc.fetch_top_gainers(fetch=fetch, now=AT_1625) == []
+    assert fc._after_market_skips == ["sectors", "top_gainers"] and fc._source_failures == []
+
+
+def test_시장폭은_16시_이후에도_쓴다():
+    # 9/15 실측: upDownStockInfo가 15:36·15:58·16:12 모두 같았다(애프터장 가격을 따르지 않는다).
+    assert fc.fetch_market_breadth(fetch=lambda url: fx("index_integration.json"), now=AT_1625)["up"] == 245
+
+
+def test_시간대로_비운_항목은_원천_고장_알림에서_뺀다(monkeypatch):
+    sent = _capture_alerts(monkeypatch)
+    monkeypatch.setattr(fc, "_after_market_skips", ["sectors", "top_gainers"])
+    fc.alert_source_failures({**GOOD, "sectors": [], "top_gainers": []}, [])
+    assert sent == []
+    fc.alert_source_failures({**GOOD, "sectors": [], "top_gainers": [], "market_breadth": {}}, [])
+    assert len(sent) == 1 and "빈 항목: market_breadth\n" in sent[0]
