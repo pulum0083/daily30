@@ -1051,6 +1051,14 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     if(cur==null || !(hi>lo)) return null;
     return Math.max(0, Math.min(100, (cur-lo)/(hi-lo)*100));
   }
+  // 레인지 밖이면 끝에 붙인 막대 위치를 '100% 지점'이라 적지 않는다 — 야간 추정가는 정규장 고가·저가를 넘을 수 있다.
+  function rangeText(cur, lo, hi){
+    var pos=rangePos(cur, lo, hi);
+    if(pos==null) return null;
+    if(cur>hi) return '고가 위';
+    if(cur<lo) return '저가 아래';
+    return Math.round(pos)+'% 지점';
+  }
   function fmtValue(won){                        // 거래대금 → "3조 1,725억" / "1,511억"
     if(!(won>0)) return null;
     var eok=Math.round(won/1e8);
@@ -1072,7 +1080,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     return abs!=null ? arrow+' '+fmt(Math.abs(abs))+' ('+p+')' : arrow+' '+p;
   }
   // 회귀 테스트 훅 — 순수 계산만 노출한다(DOM 페인트는 브라우저에서 확인).
-  window.__leaderTiles={rangePos:rangePos, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
+  window.__leaderTiles={rangePos:rangePos, rangeText:rangeText, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
 
   function paintPrice(tile, price, animate){
     var el=q(tile,'ut-px'); if(!el||price==null) return;
@@ -1101,7 +1109,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     if(pos==null){ box.hidden=true; return; }
     box.hidden=false;
     var lb=q(tile,'ut-rng-lbl'); if(lb) lb.textContent=label||'당일 레인지';
-    var ps=q(tile,'ut-rng-pos'); if(ps) ps.textContent=Math.round(pos)+'% 지점';
+    var ps=q(tile,'ut-rng-pos'); if(ps) ps.textContent=rangeText(cur, lo, hi);
     var mk=q(tile,'ut-mk'); if(mk) mk.style.left=pos.toFixed(1)+'%';
     var op=q(tile,'ut-open'), opPos=rangePos(open, lo, hi);
     if(op){ op.hidden=(opPos==null); if(opPos!=null) op.style.left=opPos.toFixed(1)+'%'; }
@@ -1133,8 +1141,11 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 마감 후 추정가(HL 24h) — 체결가가 아니므로 원화 등락을 만들지 않는다. 만들려면 기준(종가)을
   // 역산해야 하고, 추정치에 원 단위 정밀도를 입히는 것 자체가 과장이다. %만 보인다.
   function paintNight(tile, it){
+    tile._est=it.krw;
     paintPrice(tile, it.krw, true);
     paintChange(tile, null, it.changePct, null, '종가 대비 · 추정');
+    var g=tile._regRange;                        // 정규장 레인지 위의 위치도 지금 보이는 추정가로 그린다
+    if(g) paintRange(tile, it.krw, g.open, g.low, g.high, '정규장 레인지');
   }
   function applySnapshot(snap){
     SNAP=snap;
@@ -1243,7 +1254,11 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
           if(!tile) return;
           tile._regClose=p.price;                  // 오늘 정규장 종가(스냅샷은 16:33 전엔 어제 종가다)
           paintStatic(tile, snapOf(p.code), p.price);
-          if(p.high!=null && p.low!=null) paintRange(tile, p.price, p.open, p.low, p.high, '정규장 레인지');
+          if(p.high!=null && p.low!=null){
+            tile._regRange={open:p.open, low:p.low, high:p.high};
+            // 추정가가 먼저 도착했으면 그 위치로, 아니면 종가로 그렸다가 추정가가 오면 옮긴다
+            paintRange(tile, tile._est!=null ? tile._est : p.price, p.open, p.low, p.high, '정규장 레인지');
+          }
           setStat(tile,'ut-val', fmtValue(p.tradingValue));
         });
       })
