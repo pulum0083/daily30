@@ -1059,6 +1059,11 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     if(cur<lo) return '저가 아래';
     return Math.round(pos)+'% 지점';
   }
+  // 야간 레인지 라벨 — 밤새·주말 내내 떠 있어 '어느 날 정규장인지'를 적는다. 날짜를 못 읽으면 날짜 없이.
+  function regLabel(sessionDate){
+    var m=/^\d{4}(\d{2})(\d{2})$/.exec(String(sessionDate||''));
+    return (m ? (+m[1])+'/'+(+m[2])+' ' : '')+'정규장 레인지';
+  }
   function fmtValue(won){                        // 거래대금 → "3조 1,725억" / "1,511억"
     if(!(won>0)) return null;
     var eok=Math.round(won/1e8);
@@ -1080,7 +1085,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     return abs!=null ? arrow+' '+fmt(Math.abs(abs))+' ('+p+')' : arrow+' '+p;
   }
   // 회귀 테스트 훅 — 순수 계산만 노출한다(DOM 페인트는 브라우저에서 확인).
-  window.__leaderTiles={rangePos:rangePos, rangeText:rangeText, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
+  window.__leaderTiles={rangePos:rangePos, rangeText:rangeText, regLabel:regLabel, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
 
   function paintPrice(tile, price, animate){
     var el=q(tile,'ut-px'); if(!el||price==null) return;
@@ -1145,7 +1150,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     paintPrice(tile, it.krw, true);
     paintChange(tile, null, it.changePct, null, '종가 대비 · 추정');
     var g=tile._regRange;                        // 정규장 레인지 위의 위치도 지금 보이는 추정가로 그린다
-    if(g) paintRange(tile, it.krw, g.open, g.low, g.high, '정규장 레인지');
+    if(g) paintRange(tile, it.krw, g.open, g.low, g.high, g.label);
   }
   function applySnapshot(snap){
     SNAP=snap;
@@ -1255,9 +1260,9 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
           tile._regClose=p.price;                  // 오늘 정규장 종가(스냅샷은 16:33 전엔 어제 종가다)
           paintStatic(tile, snapOf(p.code), p.price);
           if(p.high!=null && p.low!=null){
-            tile._regRange={open:p.open, low:p.low, high:p.high};
+            tile._regRange={open:p.open, low:p.low, high:p.high, label:regLabel(p.sessionDate)};
             // 추정가가 먼저 도착했으면 그 위치로, 아니면 종가로 그렸다가 추정가가 오면 옮긴다
-            paintRange(tile, tile._est!=null ? tile._est : p.price, p.open, p.low, p.high, '정규장 레인지');
+            paintRange(tile, tile._est!=null ? tile._est : p.price, p.open, p.low, p.high, tile._regRange.label);
           }
           setStat(tile,'ut-val', fmtValue(p.tradingValue));
         });
