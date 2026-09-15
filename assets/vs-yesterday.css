@@ -1,0 +1,71 @@
+/* '어제랑 비교해서' 장중 대결판 스타일 — 지금 사이트(stocks-home.css) 값 기준, vs- 접두로 기존 클래스와 분리 */
+#vs-root{margin-bottom:12px}
+.vs-hero,.vs-card{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:14px 16px}
+.vs-hero + .vs-card,.vs-card + .vs-card{margin-top:12px}
+.vs-eyebrow{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 4px}
+.vs-hero h2{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.35;color:#0F172A;margin:0}
+.vs-hero h2.up{color:var(--up)} .vs-hero h2.dn{color:var(--dn)}
+.vs-sub{font-size:12px;color:var(--muted);margin:4px 0 0;line-height:1.55}
+.vs-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.vs-legend i{display:inline-block;width:18px;border-top:2px solid #0F172A;vertical-align:middle;margin-right:6px}
+.vs-legend i.y{border-top:2px dashed #CBD5E1}
+.vs-legend .r{margin-left:auto}
+.vs-chart{display:block;width:100%;height:180px}
+.vs-zero{stroke:#CBD5E1;stroke-width:1}
+.vs-line-y{fill:none;stroke:#CBD5E1;stroke-width:2;stroke-dasharray:6 5}
+.vs-line-t{fill:none;stroke:#0F172A;stroke-width:2.5;stroke-linejoin:round}
+.vs-axis{position:relative;height:14px;font-size:11px;color:var(--muted);margin-top:4px}
+.vs-axis span{position:absolute;top:0;white-space:nowrap}
+.vs-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.vs-stat{background:#F7F9FC;border:1px solid var(--inset);border-radius:10px;padding:10px 12px}
+.vs-stat-h{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--muted)}
+.vs-stat-r{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;color:var(--muted)}
+.vs-stat-r b{font-size:13px;font-variant-numeric:tabular-nums}
+.vs-stat-r b.vs-big{font-size:17px;font-weight:800}
+.vs-diff{margin:4px 0 0;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.vs-pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.vs-pill.neutral{color:var(--muted);background:#F1F5F9} .vs-pill.up{color:var(--up);background:var(--up-bg)} .vs-pill.dn{color:var(--dn);background:var(--dn-bg)}
+.vs-card-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:11px}
+.vs-card-h p{margin:0;font-size:15px;font-weight:800;color:#0F172A}
+.vs-card-h span{font-size:11px;color:var(--muted)}
+.vs-lbl{font-size:13px;font-weight:700;color:#0F172A;margin:16px 0 8px}
+.vs-lbl:first-of-type{margin-top:0}
+.vs-center{text-align:center}
+.vs-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.vs-chips + .vs-chips{margin-top:10px}
+.vs-chips-k{width:84px;font-size:11px;color:var(--muted)}
+.vs-chip{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:var(--muted);background:#F1F5F9}
+.vs-chip.new{color:#fff;background:#0F172A}
+.vs-issue-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:14px}
+.vs-col-h{font-size:11px;color:var(--muted);margin:0 0 6px}
+.vs-issues{list-style:none;margin:0;padding:0}
+.vs-issues li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid #F1F5F9;font-size:13px}
+.vs-issues li:first-child{border-top:0;padding-top:2px}
+.vs-issues li span:first-child{font-size:11px;color:var(--muted)}
+.vs-issues li span:last-child{font-weight:600;color:#0F172A;line-height:1.5}
+.vs-issues mark{background:var(--up-bg);color:var(--up);border-radius:3px;padding:0 2px}
+.vs-empty{font-size:13px;color:var(--muted);margin:0}
+.vs-table{border:1px solid #EEF2F6;border-radius:10px;overflow-x:auto}
+.vs-table table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.vs-table th{padding:7px 10px;background:#FAFBFC;font-size:11px;font-weight:800;color:var(--muted);text-align:right;border-bottom:1px solid #EEF2F6;white-space:nowrap}
+.vs-table td{padding:8px 10px;border-bottom:1px solid #EEF2F6;text-align:right;white-space:nowrap}
+.vs-table tr:last-child td{border-bottom:0}
+.vs-table th:first-child,.vs-table td:first-child{text-align:left}
+.vs-table small{display:block;font-size:11px;color:#94A3B8}
+.vs-flow{max-width:760px;margin:0 auto}
+.vs-fgroup + .vs-fgroup{margin-top:14px}
+.vs-fname{text-align:center;font-size:13px;font-weight:700;color:#0F172A;margin:0 0 6px}
+.vs-frow{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;column-gap:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.vs-frow + .vs-frow{margin-top:5px}
+.vs-fl{text-align:right} .vs-fr{text-align:left} .vs-fl.muted,.vs-fr.muted{color:var(--muted)}
+.vs-ftrack{position:relative;height:8px;background:#F1F5F9;border-radius:999px}
+.vs-ftrack::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:#CBD5E1}
+.vs-fbar{position:absolute;top:0;bottom:0;border-radius:999px}
+.vs-fbar.prev{background:#CBD5E1} .vs-fbar.now.up{background:var(--up)} .vs-fbar.now.dn{background:var(--dn)}
+.vs-flegend{display:flex;justify-content:center;gap:14px;margin:14px 0 0;font-size:11px;color:var(--muted)}
+.vs-flegend i{display:inline-block;width:12px;height:7px;border-radius:999px;background:#CBD5E1;margin-right:6px;vertical-align:middle}
+.vs-flegend i.now{background:linear-gradient(90deg,var(--dn) 50%,var(--up) 50%)}
+@media (max-width:760px){
+  .vs-stats,.vs-issue-cols{grid-template-columns:minmax(0,1fr)}
+  .vs-frow{grid-template-columns:60px minmax(0,1fr) 60px;column-gap:8px}
+}
