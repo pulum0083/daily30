@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 import { issuesUntil, keywordDiff } from './_vs-issues.mjs';
 
 const read = (f) => JSON.parse(readFileSync(new URL(`../web/data/${f}`, import.meta.url), 'utf8'));
+// 이슈 아카이브는 저녁 갱신이 덮어써 11:00 항목이 사라진다(C2) — 작성 시점 사본을 고정해 읽는다
+const fixture = (f) => JSON.parse(readFileSync(new URL(`./_fixtures/${f}`, import.meta.url), 'utf8'));
 const WORDS = read('issue-keywords.json').keywords;
 
 test('그 시각 이하 이슈만, market·stock 제목을 모두', () => {
@@ -18,8 +20,8 @@ test('그 시각 이하 이슈만, market·stock 제목을 모두', () => {
 });
 
 test('9/11 vs 9/14 11:00 — 중동·AI 속도 조절론이 새로 떠올랐다(시안 v4와 같은 결과)', () => {
-  const y = issuesUntil(read('kospi-news-2026-09-11.json'), '1100');
-  const t = issuesUntil(read('kospi-news-2026-09-14.json'), '1100');
+  const y = issuesUntil(fixture('kospi-news-2026-09-11.json'), '1100');
+  const t = issuesUntil(fixture('kospi-news-2026-09-14.json'), '1100');
   const d = keywordDiff(y, t, WORDS);
   assert.deepEqual(d.new, ['AI 속도 조절론', '중동']);
   for (const w of ['유가', '금리', '외국인', '기관', '매도', '삼성전자', 'SK하이닉스']) assert.ok(d.keep.includes(w), w);
@@ -69,8 +71,8 @@ test('9/11 vs 9/14 11:00 — exclude 적용 후에도 중동·AI 속도 조절�
   const json = read('issue-keywords.json');
   const WORDS = json.keywords;
   const EXCLUDE = json.exclude;
-  const y = issuesUntil(read('kospi-news-2026-09-11.json'), '1100');
-  const t = issuesUntil(read('kospi-news-2026-09-14.json'), '1100');
+  const y = issuesUntil(fixture('kospi-news-2026-09-11.json'), '1100');
+  const t = issuesUntil(fixture('kospi-news-2026-09-14.json'), '1100');
   const d = keywordDiff(y, t, WORDS, EXCLUDE);
   assert.deepEqual(d.new, ['AI 속도 조절론', '중동']);
   for (const w of ['유가', '금리', '외국인', '기관', '매도', '삼성전자', 'SK하이닉스']) assert.ok(d.keep.includes(w), w);
