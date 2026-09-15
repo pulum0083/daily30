@@ -143,37 +143,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .bc-pill.up{background:#FEE2E2;color:#E03131;}.bc-pill.dn{background:#DBEAFE;color:#2775ED;}
 .bc-arr{font-size:18px;color:#C0C4CA;flex:none;transition:color .14s;}.brief-card:hover .bc-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
-/* 브리핑 커넥터 하위 이슈 피드 — 카드 바로 아래에 붙여 하나의 덩어리로 읽히게 한다. */
-.brief-card:has(+ .bc-feed:not(.is-hidden)){border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;}
-/* 장중 이슈 피드 바로 아래 예측 부줄(bc-sub)이 이어질 땐 틈 없이 붙인다. */
-.bc-feed:has(+ .bc-sub:not(.is-hidden)){margin-bottom:0;}
-.bc-feed{margin:0 0 12px;border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;background:var(--canvas);overflow:hidden;}
-.bc-feed.is-hidden{display:none;}
-.bc-feed-h{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--muted);padding:9px 14px 5px;}
-.bc-feed-h .n{margin-left:auto;font-weight:700;}
-.bc-fi{display:flex;align-items:baseline;gap:9px;padding:8px 14px;text-decoration:none;border-top:1px solid #F4F6F8;transition:background .14s;}
-.bc-fi:hover{background:var(--primary-bg);}
-.bc-fi .t{font-size:11px;font-weight:700;color:var(--muted);flex:none;font-variant-numeric:tabular-nums;}
-.bc-fi .h{font-size:13px;font-weight:600;color:#475569;line-height:1.4;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.bc-fi:hover .h{color:var(--primary);}
 /* 장중 — 이슈 피드가 主가 되는 모드. 카드가 숨고 피드가 상단 카드 자리를 차지한다. */
-.bc-feed--lead{border:1px solid #FECACA;background:#FEF2F2;border-radius:12px 12px 0 0;}
-.bc-feed--lead.bc-feed--solo{border-radius:12px;margin-bottom:12px;}
-.bc-feed--lead .bc-feed-h{color:#EF4444;padding:11px 14px 7px;}
-.bc-feed--lead .bc-feed-h .n{color:var(--muted);}
-.bc-feed--lead .bc-fi{border-top-color:rgba(255,255,255,.8);padding:9px 14px;}
-.bc-feed--lead .bc-fi:hover{background:rgba(255,255,255,.6);}
-.bc-feed--lead .bc-fi .t{color:#EF4444;font-weight:800;}
-.bc-feed--lead .bc-fi .h{font-size:13px;font-weight:700;color:var(--ink);}
-.bc-feed--lead .bc-fi:first-of-type .h{font-size:14px;font-weight:800;}
 /* 副 — 예측 브리핑 한 줄 */
-.bc-sub{display:flex;align-items:center;gap:8px;background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 12px 12px;padding:9px 14px;margin-bottom:12px;text-decoration:none;color:var(--ink);transition:background .14s;}
-.bc-sub.is-hidden{display:none;}
-.bc-sub:hover{background:var(--primary-bg);}
-.bc-sub .ic{font-size:13px;flex:none;}
-.bc-sub .lb{font-size:11px;font-weight:800;color:var(--primary);flex:none;}
-.bc-sub .tx{font-size:12px;color:#475569;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.bc-sub .arr{margin-left:auto;font-size:15px;color:#C0C4CA;flex:none;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
 /* 갱신 배지 */
 .upd-badge{display:inline-flex;align-items:center;gap:3px;background:var(--inset);color:var(--muted);border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700;vertical-align:middle;}

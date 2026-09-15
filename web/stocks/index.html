@@ -21,11 +21,11 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=17" defer></script>
+<script src="/assets/stocks-home.js?v=18" defer></script>
 <script src="/assets/ds-subnav.js?v=3" defer></script>
 <script src="/assets/vs-yesterday.js?v=2" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=15">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=16">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/vs-yesterday.css?v=2">
 </head>
@@ -116,16 +116,6 @@
       </span>
       <span class="bc-pill" id="bc-pill" style="display:none"></span>
       <span class="bc-arr">›</span>
-    </a>
-    <!-- 직전 이슈 헤드라인 — 브리핑 페이지와 같은 30분 갱신 데이터(kospi-news-{date}.json)를 JS가 채운다.
-         브리핑 커넥터가 숨겨진 시간대(심야·주말)엔 이 영역도 함께 숨는다. -->
-    <div class="bc-feed is-hidden" id="bc-feed"></div>
-    <!-- 장중(09:00~16:30) 전용 부(副) 줄 — 이 시간대엔 이슈가 主가 되고 예측 브리핑이 이 한 줄로 내려온다. -->
-    <a class="bc-sub is-hidden" id="bc-sub" href="/briefings/">
-      <span class="ic">📈</span>
-      <span class="lb">오늘 예측</span>
-      <span class="tx" id="bc-sub-tx"></span>
-      <span class="arr">›</span>
     </a>
     <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">

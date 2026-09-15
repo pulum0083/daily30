@@ -682,7 +682,9 @@ jobs:
   kospi-news-live:
     name: "📰 코스피 장중 뉴스 갱신"
     runs-on: ubuntu-latest
+    # 2026-09-15 중지(SERVICE_RULES §53) — 장중 이슈 수집을 멈췄다. 되살리려면 아래 'false &&'를 지운다.
     if: >-
+      false &&
       github.event_name == 'workflow_dispatch' &&
       github.event.inputs.briefing_type == 'kospi-news-live'
 

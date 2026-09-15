@@ -6,6 +6,9 @@
 #   장중:      */30 9-15 * * 1-5   (09:00~15:30, 30분 간격)
 #   장 후:     35 16-20 * * 1-5    (16:35~20:35, 1시간 간격)
 #   미국장:    30 21-23 * * 1-5    (21:30~23:30, 1시간 간격)
+#
+# 2026-09-15: 장중 이슈 수집(fetch_news_live.py)은 중지했다 — 홈 이슈 피드 제거(SERVICE_RULES §53).
+#   트리거는 그대로 두고 '왜 움직였나'·'종목별 관련 뉴스' 수집만 돈다. 되살리려면 아래 이슈 수집 스텝과 git add 경로를 되돌린다.
 
 name: 이슈 브리핑 수집
 
@@ -44,9 +47,6 @@ jobs:
       - name: 📦 의존성 설치
         run: pip install google-genai
 
-      - name: 📰 이슈 수집
-        run: python3 scripts/fetch_news_live.py
-
       - name: 📈 왜 움직였나 수집
         continue-on-error: true
         run: python3 scripts/fetch_movers_why.py
@@ -64,8 +64,7 @@ jobs:
         run: |
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
-          git add web/data/kospi-news-live.json "web/data/kospi-news-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/movers-why-live.json "web/data/movers-why-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/stock-news.json 2>/dev/null || true
-          git add web/data/kospi-news-live.json
+          git add web/data/movers-why-live.json "web/data/movers-why-$(TZ=Asia/Seoul date +'%Y-%m-%d').json" web/data/stock-news.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
             echo "pushed=false" >> "$GITHUB_OUTPUT"

@@ -5,7 +5,6 @@
 
 // 허용 파일 화이트리스트: 키 → 실제 파일명
 const ALLOW = {
-  'news-live': 'kospi-news-live.json',
   'briefings-list': 'briefings-list.json',
   'movers-why': 'movers-why-live.json',
 };

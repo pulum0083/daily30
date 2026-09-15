@@ -891,9 +891,8 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 
 /* ── 블록 6 (원본 index.html) ── */
 /* ── 더블샷 브리핑 커넥터 ── */
-/* 브리핑 타임테이블(KST, 평일): 07:30 코스피 예측 → 09:00~16:30 장중 이슈(실시간)
-   → 16:30 코스피 마감 → 21:20~23:50 미국 예측. 활성 슬롯에 해당할 때만 노출하고,
-   장중에는 실시간 이슈를 우선 노출한다.
+/* 브리핑 타임테이블(KST, 평일): 07:30~16:30 코스피 예측 → 16:30 코스피 마감 → 21:20~23:50 미국 예측.
+   활성 슬롯에 해당할 때만 노출한다. 장중 이슈 피드는 2026-09-15에 제거했다(§53).
    미국 예측 종료(23:50) 이후 심야·주말 등 활성 슬롯 밖에서는 폴백 없이 영역을 숨긴다. */
 (function(){
   var el = document.getElementById('brief-strip');
@@ -965,10 +964,9 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     var nm = nowMin();
     var d = kstNow().getUTCDay();
     var isKstWeekday = (d >= 1 && d <= 5);
-    // 코스피 브리핑(예측·장중이슈·마감)은 한국 거래일(평일·비공휴일)에만 노출
+    // 코스피 브리핑(예측·마감)은 한국 거래일(평일·비공휴일)에만 노출
     if (isWeekday()){
-      if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
-      if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
+      if (nm >= 450 && nm < 990)  return 'kospi'; // 07:30~16:30 코스피 예측(장중 이슈 피드 제거 뒤 장중에도 예측 카드, §53)
       if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
     }
     // 미국 예측은 한국 공휴일(예: 제헌절)이어도 미국장이 열리면 발행되므로, 한국 휴일 여부와
@@ -978,43 +976,18 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     return null;
   }
 
-  /* 슬롯별 이슈 피드 제목·갱신 주기 표기.
-     실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
-     신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
-     history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
-     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다.
-     상한은 15:30이 아니라 995분(16:35, POST_MARKET 시작)이어야 한다 — fetch_news_live.py의
-     _bump_latest_time()이 새 이슈 없을 때 history[0].time을 실행 시각(최대 16:35 직전)까지
-     그대로 찍기 때문에, 여기를 15:30으로 좁혀두면 정작 최신 이슈가 자기 필터에 걸려
-     사라진다(2026-08-05 실사고 — 13:01 이슈가 15:31까지 시각만 갱신되다 화면에서 통째로 빠짐). */
-  function inMarket(mm){ return mm >= 540 && mm < 995; }    // MARKET 실질 상한 09:00~16:35(POST_MARKET 시작)
-  function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
-  var FEED = {
-    kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다
-    issue: { title:'장중 이슈',      cadence:'30분 갱신',    inSlot:inMarket },
-    close: { title:'오늘 장중 이슈', cadence:'장 마감 기준', inSlot:inMarket },
-    us:    { title:'직전 이슈',      cadence:'1시간 갱신',   inSlot:inUsMarket }
-  };
-
-  var feedEl = document.getElementById('bc-feed');
-  var subEl  = document.getElementById('bc-sub');
-
-  function hideFeed(){ if(feedEl){ feedEl.classList.add('is-hidden'); feedEl.classList.remove('bc-feed--lead','bc-feed--solo'); feedEl.textContent=''; } }
-  function hideSub(){ if(subEl) subEl.classList.add('is-hidden'); }
-
   // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
   function paintDefault(slot, today){
     if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
-    if (slot === 'issue'){ el.classList.add('is-hidden'); return; } // 장중엔 카드 대신 이슈 피드가 主
     var m = TYPE[slot];
     paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
             url:'/briefings/' + today + '/' + slot + '/' });
   }
 
-  /* 브리핑 카드(主) — 장중 외 슬롯에서만 그린다. 반환값은 카드가 가리키는 URL. */
+  /* 브리핑 카드 — 반환값은 카드가 가리키는 URL. */
   async function renderCard(slot, today){
     paintDefault(slot, today);
-    if (!slot || slot === 'issue') return null;
+    if (!slot) return null;
 
     var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
     if (!list) return el.dataset.href;   // fetch 실패(PC 차단) → 타임테이블 기본 유지
@@ -1026,107 +999,18 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     return el.dataset.href;
   }
 
-  /* 장중(09:00~16:30) 부(副) 줄 — 오늘 코스피 예측 브리핑. ready가 아니면 줄을 숨긴다(폴백 없음). */
-  async function renderSub(today){
-    if (!subEl) return false;
-    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    var s = list && list.slots && list.slots[today] && list.slots[today].kospi;
-    if (!s || s.state !== 'ready'){ hideSub(); return false; }
-    // pill_text는 화살표만("▼"), 방향 문구는 title("하락 우위")에 있다 — 둘을 합쳐야 뜻이 통한다.
-    var dir = ((s.pill_text || '') + ' ' + (s.title && s.title !== '—' ? s.title : '')).trim();
-    var head = s.headline || '';
-    subEl.href = s.url || ('/briefings/' + today + '/kospi/');
-    document.getElementById('bc-sub-tx').textContent =
-      (dir && head) ? (dir + ' — ' + head) : (dir || head || '오늘 예측 브리핑 보기');
-    subEl.classList.remove('is-hidden');
-    return true;
-  }
-
-  /* 이슈 헤드라인 피드 — 브리핑 페이지와 같은 데이터(kospi-news-{date}.json)를 종목 메인에도 노출한다.
-     각 행은 fetch_news_live.py가 리졸브해 저장한 원문 기사 url로 새 탭 이동한다.
-     url이 없는(과거 데이터·리졸브 실패) 행만 그 시간대 브리핑 URL로 폴백(같은 탭, 아직 발행 안 된 날짜로
-     나가는 것 방지). 오늘 날짜 데이터가 아니면 표시하지 않는다. lead=true면 카드 자리를 대신하는 主 모드. */
-  async function renderFeed(slot, today, href, lead){
-    if (!feedEl) return false;
-    var cfg = FEED[slot];
-    if (!cfg) { hideFeed(); return false; }
-
-    // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않아 정적 /data는 stale일 수 있음
-    var nj = await safeJSON('/api/data?f=news-live')
-          || await safeJSON('/data/kospi-news-' + today + '.json')
-          || await safeJSON('/data/kospi-news-live.json');
-    if (!nj || nj.date !== today){ hideFeed(); return false; }   // 어제 데이터를 오늘인 척 보여주지 않는다
-
-    var rows = [], seen = {};
-    (nj.history || []).forEach(function(h){
-      if (rows.length >= 3) return;
-      var p = (h.time || '').split(':');
-      if (p.length < 2) return;
-      if (!cfg.inSlot(parseInt(p[0],10) * 60 + parseInt(p[1],10))) return;   // 다른 슬롯 이슈 배제
-      var picked = (h.market && h.market.title) ? h.market : ((h.stock && h.stock.title) ? h.stock : null);
-      if (!picked || seen[picked.title]) return;
-      seen[picked.title] = 1;
-      rows.push({ time: h.time || '', title: picked.title, url: picked.url || '' });
-    });
-    if (!rows.length){ hideFeed(); return false; }
-
-    feedEl.textContent = '';
-    var head = document.createElement('div');
-    head.className = 'bc-feed-h';
-    if (lead){ var dot = document.createElement('span'); dot.className = 'live-dot'; head.appendChild(dot); }
-    head.appendChild(document.createTextNode(cfg.title));
-    var n = document.createElement('span');
-    n.className = 'n'; n.textContent = cfg.cadence;
-    head.appendChild(n);
-    feedEl.appendChild(head);
-    rows.forEach(function(r){
-      var a = document.createElement('a');
-      a.className = 'bc-fi';
-      if (r.url){ a.href = r.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-      else { a.href = href || '/briefings/'; }
-      var tm = document.createElement('span'); tm.className = 't'; tm.textContent = r.time;
-      var hd = document.createElement('span'); hd.className = 'h'; hd.textContent = r.title;
-      a.appendChild(tm); a.appendChild(hd);
-      feedEl.appendChild(a);
-    });
-    feedEl.classList.toggle('bc-feed--lead', !!lead);
-    if (!lead) feedEl.classList.remove('bc-feed--solo');
-    feedEl.classList.remove('is-hidden');
-    return true;
-  }
-
-  /* 시간대별 구성 (KST, 평일) — docs/prototypes/2026-07-19-brief-strip-supply.html 참조
-       07:30~09:00  코스피 예측 카드 (이슈 없음)
-       09:00~16:30  장중 이슈 3건이 主 · 예측 브리핑이 副 한 줄     ← 이 슬롯만 위아래가 뒤집힌다
-       16:30~21:20  마감 카드 主 · 장 마감까지의 이슈 3건이 副
-       21:20~23:50  미국 예측 카드 主 · 미국장 이슈 3건이 副
+  /* 시간대별 구성 (KST, 평일)
+       07:30~16:30  코스피 예측 카드
+       16:30~21:20  마감 카드
+       21:20~23:50  미국 예측 카드
        그 외(심야·주말·휴일)  전체 숨김 (과거 날짜 폴백 없음) */
   async function render(){
     var today = kstDate(), slot = slotNow();
-
-    if (!slot){ el.classList.add('is-hidden'); hideFeed(); hideSub(); return; }
-
-    if (slot === 'issue'){
-      el.classList.add('is-hidden');   // 장중엔 카드 대신 이슈 피드가 主
-      var kospiUrl = '/briefings/' + today + '/kospi/';
-      var hasFeed = await renderFeed('issue', today, kospiUrl, true);
-      var hasSub  = await renderSub(today);
-      if (!hasFeed){
-        // 이슈 미수집(09:00~첫 수집 전) → 예측 카드로 폴백해 영역이 비지 않게 한다
-        hideSub(); hideFeed();
-        await renderCard('kospi', today);
-        return;
-      }
-      feedEl.classList.toggle('bc-feed--solo', !hasSub);
-      return;
-    }
-
-    hideSub();
-    var href = await renderCard(slot, today);
-    await renderFeed(slot, today, href, false);
+    if (!slot){ el.classList.add('is-hidden'); return; }
+    await renderCard(slot, today);
   }
   render();
-  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
+  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환 반영
 })();
 
 /* ── 블록 7 (원본 index.html) ── */
