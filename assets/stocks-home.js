@@ -763,63 +763,12 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
   wrap.addEventListener('mouseleave',()=>{tt.style.display='none';cross.style.display='none';});
 });
 
-/* 거래량 순위 화면 — vol-top all 실데이터(탭 거래량/상승률/하락률 + 섹터필터 + 더보기). */
-let RANK_ALL=[];      // vol-top all (실측 ~40종목)
-let SIG_BY_CODE={};   // signals 보유 종목 code→true (AI신호 열)
+/* 특이 신호 화면 상태 */
 let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
 let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
 let sigHomeSort='up'; // score | up
 let sigAllSort='up'; // score | up | dn
-let rankTab='vol';    // vol | up | dn
-let rankSector='전체';
-let rankShown=10;
-let _rankMax=1;
-function rankSecKo(s){return (typeof _SECKO!=='undefined'&&_SECKO[s])?_SECKO[s]:(s||'');}
-function fmtVol(v){return Math.round((v||0)/10000).toLocaleString('en-US')+'만주';}
-function rankSorted(){
-  var arr=RANK_ALL.filter(function(x){return rankSector==='전체'||rankSecKo(x.sector)===rankSector;});
-  if(rankTab==='up')return arr.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;});
-  if(rankTab==='dn')return arr.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;});
-  return arr.slice().sort(function(a,b){return (b.vol||0)-(a.vol||0);});
-}
-function rankRow(x,i){
-  var rank=i+1,top3=rank<=3,pct=x.changePct||0,dir=pct>0?'up':pct<0?'dn':'';
-  var pctTxt=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(1)+'%';
-  var bar=rankTab==='vol'?Math.round((x.vol||0)/(_rankMax||1)*100):Math.round(Math.abs(pct)/(_rankMax||1)*100);
-  var badge=SIG_BY_CODE[x.code]?'<span class="ais">신호</span>':'<span class="ax">—</span>';
-  return '<a class="trow" onclick="goStock(\''+x.code+'\')"><span class="rk'+(top3?' t':'')+' num">'+rank+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+rankSecKo(x.sector)+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+bar+'%"></div></div><span class="barval num">'+fmtVol(x.vol)+'</span><span class="tchg '+dir+' num">'+pctTxt+'</span><div class="ai">'+badge+'</div></a>';
-}
-function rankRender(){
-  var box=document.getElementById('rank-rows');if(!box)return;
-  var cnt=document.getElementById('rank-count');if(cnt)cnt.textContent='추적 '+RANK_ALL.length+'종목';
-  var arr=rankSorted();
-  _rankMax=arr.length?(rankTab==='vol'?Math.max.apply(null,arr.map(function(x){return x.vol||0;})):Math.max.apply(null,arr.map(function(x){return Math.abs(x.changePct||0);}))):1;
-  var btn=document.getElementById('rank-more');
-  if(!arr.length){box.innerHTML='<div style="padding:18px 16px;font-size:12px;color:var(--muted);">'+(RANK_ALL.length?'해당 조건의 종목이 없어요.':'종목을 불러오는 중…')+'</div>';if(btn)btn.style.display='none';return;}
-  box.innerHTML=arr.slice(0,rankShown).map(rankRow).join('');
-  if(!btn)return;
-  if(rankShown>=arr.length){btn.style.display='none';}
-  else{btn.style.display='';btn.textContent='더보기 · '+(Math.min(rankShown+10,arr.length)-rankShown)+'개 더 ('+(arr.length-rankShown)+'개 남음)';}
-}
-function rankLoadMore(){rankShown=Math.min(rankShown+10,rankSorted().length);rankRender();}
-function rankSetTab(tab,el){rankTab=tab;rankShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}rankRender();}
-function rankSetSector(sec,el){rankSector=sec;rankShown=10;if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}rankRender();}
-rankRender();
-
-/* 더보기 자동 트리거 — 스크롤 시 버튼이 뷰포트 근처면 자동 확장 (500ms 쓰로틀) */
-(function(){
-  function isNearViewport(el){var r=el.getBoundingClientRect();return r.top<window.innerHeight+200&&r.bottom>-200;}
-  var _t=0;
-  function check(){
-    var rm=document.getElementById('rank-more');
-    if(rm&&getComputedStyle(rm).display!=='none'&&isNearViewport(rm)) rankLoadMore();
-  }
-  window.addEventListener('scroll',function(){
-    if(_t) return;
-    _t=setTimeout(function(){_t=0;check();},500);
-  },{passive:true});
-})();
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
@@ -838,10 +787,6 @@ function tipHTML(el){
     const m=el.textContent.match(/×([\d.]+)/);const mult=m?m[1]:'N';
     return `<div class="tt" style="color:#E8590C">🔶 거래량 ×${mult} 급증</div><div class="bd">오늘 거래량이 <b>최근 20일 평균 대비 ${mult}배</b>예요. 수치가 높을수록 <b>이례적인 거래 폭증</b>이에요. 외국인·기관 수급이 함께 들어왔다면 의미 있는 수급 유입 신호로 볼 수 있어요.</div>`;
   }
-  if(el.classList.contains('pbdg')&&el.classList.contains('high'))
-    return `<div class="tt" style="color:#92400E">🟡 패시브 노출 高</div><div class="bd">코스피200·반도체 등 주요 ETF가 <b>구조적으로 대량 보유</b>하는 종목이에요. 분기 말·지수 변경일마다 ETF 기계매매가 자동으로 대규모 수급을 만들어요. <b>리밸런싱 시즌에 변동성이 커질 수 있어요.</b></div>`;
-  if(el.classList.contains('pbdg')&&el.classList.contains('mid'))
-    return `<div class="tt" style="color:#065F46">🟢 패시브 노출 中</div><div class="bd">ETF 기계매매 노출이 <b>중간 수준</b>인 종목이에요. 패시브 수급 영향을 받지만 高보다는 낮아요. 리밸런싱 영향이 있을 때 단기 수급 변화를 참고하세요.</div>`;
   if(el.classList.contains('aip'))
     return `<div class="tt" style="color:#006EFF">🔵 AI 상승확률 ${n}%</div><div class="bd">오늘 AI 브리핑이 <b>픽한 종목</b>이에요. Claude가 <b>뉴스·수급·차트를 종합 분석</b>해 상승 방향에 둔 확률이에요. 신뢰도 ${n}%. 더블샷의 프리미엄 신호예요.</div>`;
   if(el.classList.contains('ais'))
@@ -861,7 +806,7 @@ function moveTip(e){
   tip.style.left=Math.max(pad,x)+'px';tip.style.top=Math.max(pad,y)+'px';
 }
 function hideTip(){tip.style.display='none';}
-document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge,.pbdg').forEach(el=>{
+document.querySelectorAll('.aip,.ais,.aid,.ax,.badge-info-btn,.vol-surge-badge').forEach(el=>{
   el.addEventListener('mouseenter',showTip);
   el.addEventListener('mousemove',moveTip);
   el.addEventListener('mouseleave',hideTip);
@@ -943,26 +888,11 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
    홈에 남아 있던 원본 마크업·로직은 도달 경로가 없어 2026-08-23에 제거했다.
    하드코딩된 INCOME_UNIVERSE(2026-06-11 스냅샷)도 함께 사라졌다 — §20 정적 데이터 금지. */
 
-/* 패시브 뱃지 툴팁 */
-const passBtn=document.getElementById('badge-pass-btn');
-if(passBtn){
-  passBtn.addEventListener('mouseenter',e=>{
-    tip.innerHTML=`<div class="tt" style="color:#0284C7;">🧲 패시브 민감주 뱃지</div><div class="bd" style="line-height:1.9;">
-      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg high" style="font-size:11px;">高</span> <b>거래일수 ≥ 8일 AND 집중도 ≥ 10%</b></span><br>
-      <span style="display:inline-flex;align-items:center;gap:6px;margin-bottom:4px"><span class="pbdg mid" style="font-size:11px;">中</span> <b>거래일수 ≥ 4일 AND 집중도 ≥ 5%</b></span><br>
-      거래일수 = 패시브 자금 ÷ 20일 평균 거래대금<br>집중도 = 패시브 자금 ÷ 시가총액<br><b>인과 아님 — 구조적 노출도 지표예요.</b>
-    </div>`;
-    tip.style.display='block';moveTip(e);
-  });
-  passBtn.addEventListener('mousemove',moveTip);
-  passBtn.addEventListener('mouseleave',hideTip);
-}
 
 /* ── 블록 6 (원본 index.html) ── */
 /* ── 더블샷 브리핑 커넥터 ── */
-/* 브리핑 타임테이블(KST, 평일): 07:30 코스피 예측 → 09:00~16:30 장중 이슈(실시간)
-   → 16:30 코스피 마감 → 21:20~23:50 미국 예측. 활성 슬롯에 해당할 때만 노출하고,
-   장중에는 실시간 이슈를 우선 노출한다.
+/* 브리핑 타임테이블(KST, 평일): 07:30~16:30 코스피 예측 → 16:30 코스피 마감 → 21:20~23:50 미국 예측.
+   활성 슬롯에 해당할 때만 노출한다. 장중 이슈 피드는 2026-09-15에 제거했다(§53).
    미국 예측 종료(23:50) 이후 심야·주말 등 활성 슬롯 밖에서는 폴백 없이 영역을 숨긴다. */
 (function(){
   var el = document.getElementById('brief-strip');
@@ -1034,10 +964,9 @@ if(passBtn){
     var nm = nowMin();
     var d = kstNow().getUTCDay();
     var isKstWeekday = (d >= 1 && d <= 5);
-    // 코스피 브리핑(예측·장중이슈·마감)은 한국 거래일(평일·비공휴일)에만 노출
+    // 코스피 브리핑(예측·마감)은 한국 거래일(평일·비공휴일)에만 노출
     if (isWeekday()){
-      if (nm >= 450 && nm < 540)  return 'kospi'; // 07:30~09:00 코스피 예측
-      if (nm >= 540 && nm < 990)  return 'issue'; // 09:00~16:30 장중 이슈
+      if (nm >= 450 && nm < 990)  return 'kospi'; // 07:30~16:30 코스피 예측(장중 이슈 피드 제거 뒤 장중에도 예측 카드, §53)
       if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
     }
     // 미국 예측은 한국 공휴일(예: 제헌절)이어도 미국장이 열리면 발행되므로, 한국 휴일 여부와
@@ -1047,43 +976,18 @@ if(passBtn){
     return null;
   }
 
-  /* 슬롯별 이슈 피드 제목·갱신 주기 표기.
-     실제로 수집이 도는 주기만 적는다 — POST_MARKET(16:35~21:00)은 fetch_news_live.py가 즉시 종료해
-     신규 수집이 아예 없으므로 주기를 광고하지 않는다(운영규칙 0, §10 "화면 표기와 스케줄의 1:1 대응").
-     history에는 하루치 전 슬롯이 섞여 있으므로 반드시 수집 시각(inSlot)으로 걸러낸다 —
-     안 그러면 장중에 어젯밤 미국장 헤드라인이 뜬다.
-     상한은 15:30이 아니라 995분(16:35, POST_MARKET 시작)이어야 한다 — fetch_news_live.py의
-     _bump_latest_time()이 새 이슈 없을 때 history[0].time을 실행 시각(최대 16:35 직전)까지
-     그대로 찍기 때문에, 여기를 15:30으로 좁혀두면 정작 최신 이슈가 자기 필터에 걸려
-     사라진다(2026-08-05 실사고 — 13:01 이슈가 15:31까지 시각만 갱신되다 화면에서 통째로 빠짐). */
-  function inMarket(mm){ return mm >= 540 && mm < 995; }    // MARKET 실질 상한 09:00~16:35(POST_MARKET 시작)
-  function inUsMarket(mm){ return mm >= 1290 || mm < 60; }  // US_MARKET  21:30~01:00
-  var FEED = {
-    kospi: null,                                        // 07:30~09:00 — 당일 이슈가 아직 없다
-    issue: { title:'장중 이슈',      cadence:'30분 갱신',    inSlot:inMarket },
-    close: { title:'오늘 장중 이슈', cadence:'장 마감 기준', inSlot:inMarket },
-    us:    { title:'직전 이슈',      cadence:'1시간 갱신',   inSlot:inUsMarket }
-  };
-
-  var feedEl = document.getElementById('bc-feed');
-  var subEl  = document.getElementById('bc-sub');
-
-  function hideFeed(){ if(feedEl){ feedEl.classList.add('is-hidden'); feedEl.classList.remove('bc-feed--lead','bc-feed--solo'); feedEl.textContent=''; } }
-  function hideSub(){ if(subEl) subEl.classList.add('is-hidden'); }
-
   // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
   function paintDefault(slot, today){
     if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
-    if (slot === 'issue'){ el.classList.add('is-hidden'); return; } // 장중엔 카드 대신 이슈 피드가 主
     var m = TYPE[slot];
     paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
             url:'/briefings/' + today + '/' + slot + '/' });
   }
 
-  /* 브리핑 카드(主) — 장중 외 슬롯에서만 그린다. 반환값은 카드가 가리키는 URL. */
+  /* 브리핑 카드 — 반환값은 카드가 가리키는 URL. */
   async function renderCard(slot, today){
     paintDefault(slot, today);
-    if (!slot || slot === 'issue') return null;
+    if (!slot) return null;
 
     var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
     if (!list) return el.dataset.href;   // fetch 실패(PC 차단) → 타임테이블 기본 유지
@@ -1095,107 +999,18 @@ if(passBtn){
     return el.dataset.href;
   }
 
-  /* 장중(09:00~16:30) 부(副) 줄 — 오늘 코스피 예측 브리핑. ready가 아니면 줄을 숨긴다(폴백 없음). */
-  async function renderSub(today){
-    if (!subEl) return false;
-    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    var s = list && list.slots && list.slots[today] && list.slots[today].kospi;
-    if (!s || s.state !== 'ready'){ hideSub(); return false; }
-    // pill_text는 화살표만("▼"), 방향 문구는 title("하락 우위")에 있다 — 둘을 합쳐야 뜻이 통한다.
-    var dir = ((s.pill_text || '') + ' ' + (s.title && s.title !== '—' ? s.title : '')).trim();
-    var head = s.headline || '';
-    subEl.href = s.url || ('/briefings/' + today + '/kospi/');
-    document.getElementById('bc-sub-tx').textContent =
-      (dir && head) ? (dir + ' — ' + head) : (dir || head || '오늘 예측 브리핑 보기');
-    subEl.classList.remove('is-hidden');
-    return true;
-  }
-
-  /* 이슈 헤드라인 피드 — 브리핑 페이지와 같은 데이터(kospi-news-{date}.json)를 종목 메인에도 노출한다.
-     각 행은 fetch_news_live.py가 리졸브해 저장한 원문 기사 url로 새 탭 이동한다.
-     url이 없는(과거 데이터·리졸브 실패) 행만 그 시간대 브리핑 URL로 폴백(같은 탭, 아직 발행 안 된 날짜로
-     나가는 것 방지). 오늘 날짜 데이터가 아니면 표시하지 않는다. lead=true면 카드 자리를 대신하는 主 모드. */
-  async function renderFeed(slot, today, href, lead){
-    if (!feedEl) return false;
-    var cfg = FEED[slot];
-    if (!cfg) { hideFeed(); return false; }
-
-    // 라이브 데이터는 /api/data(raw main)를 우선 조회 — 데이터 전용 커밋은 재배포되지 않아 정적 /data는 stale일 수 있음
-    var nj = await safeJSON('/api/data?f=news-live')
-          || await safeJSON('/data/kospi-news-' + today + '.json')
-          || await safeJSON('/data/kospi-news-live.json');
-    if (!nj || nj.date !== today){ hideFeed(); return false; }   // 어제 데이터를 오늘인 척 보여주지 않는다
-
-    var rows = [], seen = {};
-    (nj.history || []).forEach(function(h){
-      if (rows.length >= 3) return;
-      var p = (h.time || '').split(':');
-      if (p.length < 2) return;
-      if (!cfg.inSlot(parseInt(p[0],10) * 60 + parseInt(p[1],10))) return;   // 다른 슬롯 이슈 배제
-      var picked = (h.market && h.market.title) ? h.market : ((h.stock && h.stock.title) ? h.stock : null);
-      if (!picked || seen[picked.title]) return;
-      seen[picked.title] = 1;
-      rows.push({ time: h.time || '', title: picked.title, url: picked.url || '' });
-    });
-    if (!rows.length){ hideFeed(); return false; }
-
-    feedEl.textContent = '';
-    var head = document.createElement('div');
-    head.className = 'bc-feed-h';
-    if (lead){ var dot = document.createElement('span'); dot.className = 'live-dot'; head.appendChild(dot); }
-    head.appendChild(document.createTextNode(cfg.title));
-    var n = document.createElement('span');
-    n.className = 'n'; n.textContent = cfg.cadence;
-    head.appendChild(n);
-    feedEl.appendChild(head);
-    rows.forEach(function(r){
-      var a = document.createElement('a');
-      a.className = 'bc-fi';
-      if (r.url){ a.href = r.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-      else { a.href = href || '/briefings/'; }
-      var tm = document.createElement('span'); tm.className = 't'; tm.textContent = r.time;
-      var hd = document.createElement('span'); hd.className = 'h'; hd.textContent = r.title;
-      a.appendChild(tm); a.appendChild(hd);
-      feedEl.appendChild(a);
-    });
-    feedEl.classList.toggle('bc-feed--lead', !!lead);
-    if (!lead) feedEl.classList.remove('bc-feed--solo');
-    feedEl.classList.remove('is-hidden');
-    return true;
-  }
-
-  /* 시간대별 구성 (KST, 평일) — docs/prototypes/2026-07-19-brief-strip-supply.html 참조
-       07:30~09:00  코스피 예측 카드 (이슈 없음)
-       09:00~16:30  장중 이슈 3건이 主 · 예측 브리핑이 副 한 줄     ← 이 슬롯만 위아래가 뒤집힌다
-       16:30~21:20  마감 카드 主 · 장 마감까지의 이슈 3건이 副
-       21:20~23:50  미국 예측 카드 主 · 미국장 이슈 3건이 副
+  /* 시간대별 구성 (KST, 평일)
+       07:30~16:30  코스피 예측 카드
+       16:30~21:20  마감 카드
+       21:20~23:50  미국 예측 카드
        그 외(심야·주말·휴일)  전체 숨김 (과거 날짜 폴백 없음) */
   async function render(){
     var today = kstDate(), slot = slotNow();
-
-    if (!slot){ el.classList.add('is-hidden'); hideFeed(); hideSub(); return; }
-
-    if (slot === 'issue'){
-      el.classList.add('is-hidden');   // 장중엔 카드 대신 이슈 피드가 主
-      var kospiUrl = '/briefings/' + today + '/kospi/';
-      var hasFeed = await renderFeed('issue', today, kospiUrl, true);
-      var hasSub  = await renderSub(today);
-      if (!hasFeed){
-        // 이슈 미수집(09:00~첫 수집 전) → 예측 카드로 폴백해 영역이 비지 않게 한다
-        hideSub(); hideFeed();
-        await renderCard('kospi', today);
-        return;
-      }
-      feedEl.classList.toggle('bc-feed--solo', !hasSub);
-      return;
-    }
-
-    hideSub();
-    var href = await renderCard(slot, today);
-    await renderFeed(slot, today, href, false);
+    if (!slot){ el.classList.add('is-hidden'); return; }
+    await renderCard(slot, today);
   }
   render();
-  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환·이슈 갱신 반영
+  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환 반영
 })();
 
 /* ── 블록 7 (원본 index.html) ── */
@@ -1452,13 +1267,11 @@ if(passBtn){
 })();
 
 /* ── 블록 8 (원본 index.html) ── */
-/* 거래량·상승·하락 톱 — /api/vol-top 라이브(41종목). 급증배수는 스냅샷 vol_avg20 병합.
-   외국인 보유율·ETF 거래량 — stocks-snapshot.json 실측 배선 */
+/* 외국인 보유율·섹터 브라우저·특이 신호 — stocks-snapshot.json·/api/signals 실측 배선 */
 (function(){
   var SNAP=null;
   var SIG_SECTORS=null, SIG_KOSPI=null; // /api/signals가 내려주는 전 섹터 라이브 평균·코스피% (장중 2분 갱신)
   var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
-  function manju(v){ return Math.round(v/10000).toLocaleString('en-US')+'만주'; }
   function sparkSvg(vals,color){
     if(!vals||vals.length<2) return '';
     var n=vals.length,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
@@ -1467,49 +1280,10 @@ if(passBtn){
     return '<svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.2" fill="#fff" stroke="'+color+'" stroke-width="1.5"/></svg>';
   }
   function secLbl(s){ return SECTOR_LABELS[s]||s||''; }
-  function surgeBadge(code,vol){
-    if(!SNAP||!SNAP.stocks||!SNAP.stocks[code]) return '';
-    var avg=SNAP.stocks[code].vol_avg20; if(!avg) return '';
-    var s=vol/avg; return s>=1.5?'<span class="vol-surge-badge">×'+s.toFixed(1)+' 급증</span>':'';
-  }
-  function nearHighBadge(code,price){
-    if(!SNAP||!SNAP.stocks||!SNAP.stocks[code]||price==null) return '';
-    var hi=SNAP.stocks[code].wk52_high; if(!hi) return '';
-    return price>=hi*0.98?'<span class="hi-badge">52주 신고가</span>':'';
-  }
-  function volRow(x,i){
-    return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+secLbl(x.sector)+'</small></div><div class="barwrap"><div class="bar vol" style="width:'+(x.barPct||0)+'%"></div></div><span class="barval num">'+manju(x.vol)+'</span>'+surgeBadge(x.code,x.vol)+nearHighBadge(x.code,x.price)+'</a>';
-  }
-  function chgRow(x,i,cls,barPct){
-    return '<a class="row" onclick="goStock(\''+x.code+'\')"><span class="'+(i<3?'rk t num':'rk num')+'">'+(i+1)+'</span><div class="nm"><b>'+x.name+'</b><small class="num">'+x.code+' · '+secLbl(x.sector)+'</small></div><div class="barwrap"><div class="bar '+cls+'" style="width:'+barPct+'%"></div></div><span class="barval '+cls+' num">'+(x.changePct>=0?'+':'')+x.changePct.toFixed(1)+'%</span>'+nearHighBadge(x.code,x.price)+surgeBadge(x.code,x.vol)+'</a>';
-  }
-  function emptyRow(msg){ return '<div style="padding:14px 16px;font-size:12px;color:var(--muted);">'+msg+'</div>'; }
-  function renderTops(d){
-    var volWrap=document.getElementById('vol-top-rows');
-    if(volWrap&&d.top&&d.top.length) volWrap.innerHTML=d.top.map(volRow).join('');
-    var all=(d.all||[]).slice();
-    RANK_ALL=all; rankRender();
-    var up=all.filter(function(x){return x.changePct>0;}).sort(function(a,b){return b.changePct-a.changePct;}).slice(0,5);
-    var upMax=up[0]?Math.abs(up[0].changePct):1;
-    var upWrap=document.getElementById('rise-top-rows');
-    if(upWrap) upWrap.innerHTML=up.length?up.map(function(x,i){return chgRow(x,i,'up',Math.round(Math.abs(x.changePct)/upMax*100));}).join(''):emptyRow('상승 종목이 없어요');
-    var dn=all.filter(function(x){return x.changePct<0;}).sort(function(a,b){return a.changePct-b.changePct;}).slice(0,5);
-    var dnMax=dn[0]?Math.abs(dn[0].changePct):1;
-    var dnWrap=document.getElementById('fall-top-rows');
-    if(dnWrap) dnWrap.innerHTML=dn.length?dn.map(function(x,i){return chgRow(x,i,'dn',Math.round(Math.abs(x.changePct)/dnMax*100));}).join(''):emptyRow('하락 종목이 없어요');
-    bindSurgeTips();
-  }
   // 섹터 화면(#sector)은 2026-09-02에 제거됐다. 홈에서 섹터 상세 페이지로 가는 링크가
   // 0개였고(JS도 주입하지 않았다) '패시브 쏠림'은 실측 소스 없는 자리표시자였다.
   // 섹터 상세는 /stocks/sector/{key}/ 정적 페이지가 계속 담당한다.
   // SECTOR_LABELS·secLbl은 남긴다 — 섹터 박스(sbx) 위젯이 계속 쓴다.
-  function bindSurgeTips(){
-    if(typeof showTip!=='function') return;
-    document.querySelectorAll('.vol-surge-badge').forEach(function(el){
-      if(el._b) return; el._b=1;
-      el.addEventListener('mouseenter',showTip); el.addEventListener('mousemove',moveTip); el.addEventListener('mouseleave',hideTip);
-    });
-  }
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간 · 2분 간격' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge is-live':'close-pill'; b.innerHTML=phaseLabel(phase); }
@@ -1563,7 +1337,6 @@ if(passBtn){
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
-    SIG_BY_CODE={}; (d.signals||[]).forEach(function(s){SIG_BY_CODE[s.code]=true;}); rankRender();
     SIGNALS_HOME=d.signals||[];
     SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender(); sigAllDnRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
@@ -1622,29 +1395,11 @@ if(passBtn){
       .then(function(d){ if(d&&!d.error){ applySignals(d); } else { clearSkel(); } })
       .catch(function(){ clearSkel(); });
   }
-  function pollVolTop(){
-    fetch('/api/vol-top',{cache:'no-store'})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(d&&(d.top||d.all)) renderTops(d);
-        var badge=document.getElementById('vol-upd-badge');
-        if(badge) badge.title='최근 갱신: '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-      })
-      .catch(function(){});
-  }
   function krMarketOpen(){
     if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false; // 주말·공휴일
     var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);
     return m>=540&&m<=930;
   }
-  function renderTopsFromSnap(){
-    if(!SNAP||!SNAP.stocks) return;
-    var list=Object.keys(SNAP.stocks).map(function(c){var s=SNAP.stocks[c];return {code:c,name:s.name,sector:s.sector,vol:s.vol||0,changePct:s.change_pct||0,price:s.close||null};});
-    var byVol=list.filter(function(x){return x.vol>0;}).sort(function(a,b){return b.vol-a.vol;}).slice(0,5);
-    var maxv=byVol[0]?byVol[0].vol:1;
-    renderTops({top:byVol.map(function(x){return Object.assign({},x,{barPct:Math.round(x.vol/maxv*100)});}),all:list});
-  }
-
   /* ── 섹터별 종목 브라우저 (홈 중앙) — stocks-snapshot.json + /api/stocks-live 배선 ── */
   var SBX_ORDER=['semicon','battery','auto','defense','ship','bio','finance','power'];
   var SBX_EMOJI={semicon:'🔬',battery:'🔋',auto:'🚗',defense:'🛡️',ship:'🚢',bio:'🧬',finance:'🏦',power:'⚡'};
@@ -2050,7 +1805,6 @@ if(passBtn){
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
-      pollVolTop();
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
       var _best=sbxActiveKey, _bestAvg=-Infinity;
@@ -2059,13 +1813,12 @@ if(passBtn){
       renderTodayLine();
       sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
       if(krMarketOpen()){
-        setInterval(pollVolTop,300000);
         setInterval(loadSignals,300000); // 장중 2분마다 특이신호 자동 갱신
         setInterval(sbxUpdateLive,60000); // 장중 30초마다 섹터 브라우저 실시간 시세 갱신
         setInterval(sbxLoadIntraday,120000); // 장중 30초마다 섹터 브라우저 곡선(장중 1분봉) 갱신
       }
     })
-    .catch(function(){ pollVolTop(); });
+    .catch(function(){});
 })();
 
 // 상단 스트립 실시간 갱신 — 코스피(/api/kospi-live) + 코스닥·환율(/api/market)

@@ -62,11 +62,10 @@ test('경로·해시 조합별 활성 탭 판정', () => {
   assert.equal(resolveActiveTab('/stocks/', '#signals-all'), 'signals');
 });
 
-test('탭이 없는 화면(#passive 등)은 전체로 떨어진다', () => {
+test('탭이 없는 화면(#etf-detail 등)은 전체로 떨어진다', () => {
   const { resolveActiveTab } = load().api;
   // 아무 탭도 활성이 아닌 것보다, 시그널 영역 안에 있다는 사실을 유지하는 쪽이 방향 감각에 낫다.
-  assert.equal(resolveActiveTab('/stocks/', '#passive'), 'home');
-  assert.equal(resolveActiveTab('/stocks/', '#ranking'), 'home');
+  assert.equal(resolveActiveTab('/stocks/', '#etf-detail'), 'home');
   assert.equal(resolveActiveTab('/stocks/', '#mom-track'), 'home');
 });
 
