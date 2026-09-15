@@ -66,6 +66,7 @@ Google이 오래된 기사(특히 MSN 등 리스티클성 기사)를 몇 주 뒤
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
 - 거래대금 급증 × 수급 동반 종목 (dpick): 외국인·기관 동시 순매수 + 거래대금 1.5배↑
 - 출력 필드: `market_breadth.up/down/unchanged/upper_limit/lower_limit`
+- 원천은 `m.stock.naver.com/api` JSON이다. 수급만 시간대별 표의 15:31~15:40 행을 쓴다(애프터장 제외, §51).
 
 ## API 키 / 환경변수
 
@@ -1872,3 +1873,61 @@ SK하이닉스 종가가 **1,693,000(−6.57%)**, 현대차 **370,000(−3.27%)*
   용어 설명의 자금 지도 항목·FAQ, 서비스 소개 문구, 공지 1건.
 - **남긴 것**: `data/etf_exposure.json`(`build_etf_exposure`, 패시브 민감주)은 자금 지도와 다른 기능이라 그대로다. 옛 설계 문서·프로토타입은 기록으로 둔다.
 - 되살리려면 이 커밋 이전 git 이력에서 꺼낸다. 롤링 히스토리(최근 7거래일)는 끊겼으므로 다시 켜면 첫 주는 윈도우가 짧다.
+
+
+### 51. 네이버 시세 페이지 이전 — 마감 브리핑 시장 폭·업종·dpick·수급이 조용히 비었다 (2026-09-15 발견, 수정 완료)
+
+**증상**: 9/11·9/14 마감 브리핑에 시장 폭 섹션이 없었다(9/10까지는 있었다). §1이 필수 확인 항목으로 둔
+`market_breadth`·`investor_trading`이 둘 다 비어 나갔고 아무 알림도 없었다. 9/14 16:25 마감 잡 로그에는
+`market breadth: parsing failed`, `sectors: 0개`, `dpick: []`, `investor trading: pattern not found`가 남아 있었다.
+9/15 아침 잡도 `Investor trading: pattern not found`였고, `/api/market`의 `investor`는 `null`이었다.
+
+**원인**: §47과 같은 유형이다. 네이버가 `finance.naver.com/sise/`·`sise_group.naver`·`sise_quant.naver`·
+`sise_rise.naver`·`sise_index.naver`·`item/frgn.naver`를 `stock.naver.com`(클라이언트 렌더)으로 옮겼다.
+옛 URL은 **302 + 빈 본문**을 주고, HTML 정규식은 예외 없이 0행을 읽었다.
+
+**수정 — 새 페이지가 부르는 JSON으로 전환**:
+
+| 항목 | 원천 |
+| --- | --- |
+| 시장 폭 | `/api/index/KOSPI/integration`의 `upDownStockInfo` |
+| 업종 등락률·상위 종목 | `/api/stocks/industry`, `/api/stocks/industry/{no}` (번호는 옛 업종 번호와 같다. 코넥스 제외) |
+| 급등주 | `/api/stocks/up/KOSPI` (보통주만) |
+| dpick 유니버스·종목 수급 | `/api/stocks/quantTop/KOSPI`, `/api/stock/{code}/trend` |
+| 장중 사이드바 수급(`/api/market`) | `/api/index/KOSPI/trend` |
+| 마감·아침 브리핑 수급 | `finance.naver.com/sise/investorDealTrendTime.naver`의 15:31~15:40 행 |
+
+ETF·ETN은 이름 키워드 대신 `stockEndType`으로 거른다.
+
+**애프터장(§48)과 겹친 부분 — 새 JSON도 16:25엔 정규장 값이 아니다**:
+- **수급**: 네이버 하루 합계는 애프터장 체결까지 누적한다. 9/14 시간대별 표 실측 — 15:30 행 개인 +29,190억
+  (동시호가 전), 15:31~15:40 +29,722억, 16:06 +29,681억, 20:00 +30,351억. 그래서 `fetch_data.regular_session_investor()`가
+  **15:31~15:40 사이 마지막 행**을 쓴다. 15:31 이전 행밖에 없으면(장이 안 끝났으면) 비운다. 마감 잡은 이 함수에
+  위임한다(§30 단일 소스). 아침 잡도 같은 함수로 전 거래일 값을 쓰므로 전날 마감 브리핑과 숫자가 같다.
+- **dpick**: `trend`의 종가·거래량도 20:00까지 누적이다(9/14 삼성전자 종가 248,500 / 공식 249,000, 거래량
+  17,776,098 / 09:00~15:30 1분봉 합 16,559,147). 9/14 이후 행의 종가는 `kr_official_closes`, 거래량은 그날
+  1분봉 합으로 바꾸고, 구하지 못하면 그 날을 평균에서 뺀다. 1분봉은 약 7거래일만 조회되므로 평균 일수가 20일보다
+  짧아질 수 있다(5일 미만이면 그 종목을 건너뛴다).
+- **시장 폭·업종·급등주**: 원천에 정규장 전용 값이 없다. 응답 종목의 체결 시각(`localTradedAt`)이 **오늘
+  16:00:00 이후**면 애프터장 가격이 반영된 목록으로 보고 그 섹션을 비운다. 시장 폭은 같은 응답의
+  `enrollStocks`, 업종은 상위 5개 업종의 구성 종목 시각으로 판정한다. 15:40~16:00 장후 시간외는 종가로만
+  체결돼 가격이 바뀌지 않으므로 오염으로 보지 않는다.
+
+**가드(§47 패턴)**:
+- 거래일에 비어 있을 수 없는 네 항목(`market_breadth`·`sectors`·`top_gainers`·`investor_trading`)이 비거나
+  dpick 유니버스가 0건이면 **관리자 텔레그램 알림**. 발행은 멈추지 않는다 — 섹션이 빈 브리핑이 틀린 브리핑보다 낫다(§0).
+- 같은 날 15:40 이후 저장된 `latest_kospi_close.json`의 값은 빈 재수집으로 덮지 않는다(§1의 16:30 재실행 대비).
+- 테스트: `scripts/test_naver_market_collectors.py`(실응답 픽스처 `scripts/fixtures/naver_market/`),
+  `api/_market-investor.test.mjs`.
+
+- **방지 룰(원천의 '하루 합계'가 무엇을 합친 것인지 확인한다)**: 세션이 늘어나면 합계·종가·거래량의 정의가 조용히
+  바뀐다. 새 원천으로 옮길 때는 값이 맞는지뿐 아니라 **어느 세션까지 누적한 값인지**를 시간대별 자료로 확인한다.
+- **방지 룰(같은 원천 계열의 이전은 한꺼번에 온다)**: §47(리서치 게시판) 나흘 뒤 시세 페이지가 옮겨졌다. 한 곳이
+  302로 바뀌면 같은 도메인을 쓰는 스크립트를 전부 `curl -I`로 점검한다. 9/15 기준 `entryJongmok.naver`
+  (`fetch_valuation.py`)·`api/sise/etfItemList.nhn`(`build_etf_exposure.py`·`build_income_etfs.py`)·`investorDealTrendTime.naver`는 아직 200이다.
+- **남은 갭**: (a) dpick의 종목별 외국인·기관 순매매 수량은 애프터장을 뺄 원천이 없다(시장 전체 수급과 달리
+  시간대별 자료가 없다). 16:25엔 16:00~16:25 체결분이 섞일 수 있다. (b) 시장 폭의 `new_high`·`new_low`는 옛 코드부터
+  원천 없이 0으로 채워져 "신고가 0"으로 표시된다. (c) `/api/market` 수급은 16:00 이후 애프터장이 섞인 장중 누적값이다.
+- **재발 시 진단 순서**: ① 마감 잡 로그에서 `[fetch_closing]` 줄의 빈 항목과 `애프터장 체결가가 반영된 목록`
+  문구를 구분한다(전자는 원천 고장, 후자는 가드 작동). ② 원천 URL을 `curl -s -o /dev/null -w '%{http_code}'`로 연다.
+  ③ 수급 값이 이상하면 `investorDealTrendTime.naver?bizdate=YYYYMMDD&sosok=01`의 15:30~15:40 행과 대조한다.
