@@ -94,7 +94,14 @@ def test_fetch_kospi_realdata_no_longer_uses_toss(monkeypatch):
     monkeypatch.setattr(toss_client, "get_candles", toss_must_not_be_called)
     closes = [1800000.0 + i * 1000 for i in range(25)] + [1812000.0, 1697000.0]
     rows = [{"localDate": f"202608{i:02d}", "closePrice": c} for i, c in enumerate(closes, start=1)]
-    monkeypatch.setattr(koc, "official_day_rows", lambda code, *a, **k: rows)
+    # validate_analysis는 scripts.kr_official_closes를 먼저 import한다 — 이 파일의 koc와 다른 모듈 객체라
+    # 둘 다 막아야 한다. 한쪽만 막으면 실제 네이버를 불러 장중엔 오늘 현재가가 나온다(2026-09-15 09:12 실패).
+    import importlib
+    for name in ("kr_official_closes", "scripts.kr_official_closes"):
+        try:
+            monkeypatch.setattr(importlib.import_module(name), "official_day_rows", lambda code, *a, **k: rows)
+        except ImportError:
+            pass
     monkeypatch.delenv("DS_PIN_SESSION_DATE", raising=False)
     r = va._fetch_kospi_realdata("000660")
     assert r["price"] == 1697000.0
