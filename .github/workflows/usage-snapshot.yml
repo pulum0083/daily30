@@ -1,0 +1,103 @@
+# Vercel 사용량 감시 워크플로우 — 폴링 API 캐시 회귀·팀 차단을 매일 기록하고, 이상이 있으면 관리자에게 알린다
+#
+# 배경: 2026-08-16 Vercel 팀이 FAIR_USE_LIMITS_EXCEEDED(fluidCpuDuration)로 소프트 차단돼 사이트 전체가 402였다.
+# 원인은 폴링 API의 Cache-Control: no-store. scripts/usage_snapshot.py가 그 회귀와 softBlock을 확인하는데,
+# 2026-08-17 수동 실행 뒤로 아무도 돌리지 않아 기록이 멈춰 있었다(2026-09-15 확인). 그래서 매일 자동으로 돌린다.
+#
+# ⚠️ CPU 누적치는 여기서 못 잰다 — Vercel API가 제공하지 않는다(스크립트 헤더 참고). 대시보드에서 읽어
+#    `python3 scripts/usage_snapshot.py --cpu-hours N`으로 같은 로그에 적는다.
+#
+# 스케줄(GHA native cron, UTC): '10 3 * * *' → KST 매일 12:10.
+#   장중(대결판 API가 실제로 조립되는 시간)이고, 브리핑 잡 시간대(§43: 07:25·16:25·21:15)와 겹치지 않는다.
+#   GHA cron은 지연 발화가 잦지만 하루 1회 기록이라 몇십 분 늦어도 문제없다.
+#
+# 이 워크플로우가 커밋하는 파일은 data/vercel-usage-log.json 하나뿐이다(§18).
+# data/는 배포 대상이 아니라 Vercel 배포를 트리거하지 않는다.
+
+name: Vercel 사용량 감시
+
+on:
+  schedule:
+    - cron: '10 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: usage-snapshot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: "📊 Vercel 사용량 감시"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Python 세팅
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📊 캐시 회귀·팀 차단 확인
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: python3 scripts/usage_snapshot.py
+
+      # 스크립트는 기록이 목적이라 이상이 있어도 exit 0이다. 사람이 알 수 있게 여기서 알린다(§40 — 실패는 사람에게 도달해야 한다).
+      - name: 🚨 이상 있으면 관리자 알림
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          sys.path.insert(0, "scripts")
+          from send_telegram import send_admin_alert
+          rows = json.load(open("data/vercel-usage-log.json", encoding="utf-8"))["rows"]
+          row = rows[-1]
+          s, team = row["summary"], row.get("team") or {}
+          problems = []
+          if s["regressed"]:
+              problems.append("캐시가 풀린(no-store) 폴링 API: " + ", ".join(s["regressed"]))
+          if s["failed"]:
+              problems.append("200이 아닌 API: " + ", ".join(s["failed"]))
+          if team.get("soft_block") or team.get("blocked"):
+              problems.append(f"Vercel 팀 차단 상태: softBlock={team.get('soft_block')} blocked={team.get('blocked')}")
+          if problems:
+              send_admin_alert("[Vercel 사용량 감시 " + row["date"] + "]\n" + "\n".join(problems)
+                               + "\n\n2026-08-16처럼 사이트 전체가 막힐 수 있어요. api/_cache-headers.test.mjs와 대시보드 Usage를 확인하세요.")
+              print("\n".join(problems))
+          else:
+              print(f"이상 없음 — 캐시 가능 {s['cacheable']}/{s['total']}")
+          PY
+
+      - name: 💾 기록 커밋 & 푸시
+        run: |
+          git config user.name  "DailyB Bot"
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git add data/vercel-usage-log.json
+          if git diff --cached --quiet; then
+            echo "변경 없음, 커밋 스킵"
+            exit 0
+          fi
+          git commit -m "data: Vercel 사용량 감시 $(TZ=Asia/Seoul date +'%Y-%m-%d') KST"
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main; then
+              if git push; then exit 0; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+          # 기록 유실은 서비스 장애가 아니지만, 조용히 멈추면 8/17처럼 감시가 죽은 줄 모른다(§17).
+          echo "::error::push 5회 재시도 모두 실패 — 사용량 기록이 커밋되지 않았습니다."
+          exit 1

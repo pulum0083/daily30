@@ -43,6 +43,7 @@ POLLED_ENDPOINTS = [
     "/api/market",
     "/api/stocks-live?codes=005930",
     "/api/intraday?code=005930",
+    "/api/intraday?vs=intraday",   # 장중 대결판(vs-yesterday.js 60초) — 조립 1회에 네이버 호출이 많아 캐시 회귀가 가장 비싸다
     "/api/signals",
     "/api/hl-night",
     "/api/data?f=briefings-list",
@@ -105,6 +106,15 @@ def probe(base_url: str, path: str, timeout: int = 20) -> dict:
         "cache": classify_cache(cache_control, vercel_cache),
     }
 
+
+def retry_unreachable(probes: list, again) -> list:
+    """응답 자체를 못 받은(status None) 엔드포인트만 한 번 더 부른다.
+
+    매일 도는 감시라 한 번의 네트워크 타임아웃이 곧 거짓 경보가 된다(2026-09-15 로컬 실행에서
+    /api/kospi-live가 20초 타임아웃, 곧바로 curl 3회는 0.9s·HIT·HIT). HTTP 오류 코드는 재시도하지 않는다 —
+    그건 실제 응답이다.
+    """
+    return [again(p["path"]) if p.get("status") is None else p for p in probes]
 
 def fetch_team_state(token: str, team_id: str = TEAM_ID, timeout: int = 20):
     """팀의 차단 상태·플랜을 조회한다. 토큰이 없거나 실패하면 None을 돌려준다(판정하지 않는다)."""
@@ -171,6 +181,7 @@ def main() -> int:
 
     now = datetime.now(KST)
     probes = [probe(args.base_url, p) for p in POLLED_ENDPOINTS]
+    probes = retry_unreachable(probes, lambda path: (time.sleep(5), probe(args.base_url, path))[1])
     summary = summarize(probes)
 
     row = {

@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from usage_snapshot import classify_cache, summarize, upsert_row  # noqa: E402
+from usage_snapshot import classify_cache, retry_unreachable, summarize, upsert_row  # noqa: E402
 
 
 class TestClassifyCache(unittest.TestCase):
@@ -100,5 +100,29 @@ class TestUpsertRow(unittest.TestCase):
         self.assertEqual(upsert_row([], {"date": "2026-08-18"}), [{"date": "2026-08-18"}])
 
 
+
+class TestPolledEndpoints(unittest.TestCase):
+    def test_장중_대결판을_감시한다(self):
+        # 60초 폴링 + 조립 1회에 네이버를 여러 번 부른다 — 감시에서 빠지면 캐시 회귀를 못 본다
+        from usage_snapshot import POLLED_ENDPOINTS
+        self.assertIn("/api/intraday?vs=intraday", POLLED_ENDPOINTS)
+
+
+class TestRetryUnreachable(unittest.TestCase):
+    def test_응답을_못_받은_것만_다시_부른다(self):
+        called = []
+        def again(path):
+            called.append(path)
+            return {"path": path, "status": 200, "cache": "ok"}
+        probes = [
+            {"path": "/api/a", "status": None, "error": "timed out", "cache": "unknown"},
+            {"path": "/api/b", "status": 500, "cache": "unknown"},
+            {"path": "/api/c", "status": 200, "cache": "ok"},
+        ]
+        out = retry_unreachable(probes, again)
+        self.assertEqual(called, ["/api/a"])
+        self.assertEqual([p["status"] for p in out], [200, 500, 200])
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
