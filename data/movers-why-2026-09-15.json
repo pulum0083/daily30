@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-09-15T09:01:33.129006+09:00",
+  "generated_at": "2026-09-15T09:31:23.147687+09:00",
   "date": "2026-09-15",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 0.2,
-      "surge": 0.02,
+      "changePct": 0.5,
+      "surge": 0.09,
       "events": [
         {
           "time": "08:30",
           "headline": "'하이닉스 팔아라' 경고했던 BNK, 삼성전자도 눈높이 낮췄다...왜?",
           "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE96XzFTRUMtdWg5MlVXd3RoV2swbTlxM3JOZmp0Z3p4U2ZnM0h5UmE2bHpKejhxcEN5SVNIQ3hReWhsNU45bnBTazgtRG9ZRXl2cU1GbmxVRlZzUQ?oc=5",
-          "source": "hankyung.com",
-          "why": "하이닉스에 이어 삼성전자도 증권사들의 목표주가가 하향 조정되며 싸늘한 전망이 나오고 있다. (개별 인과 단정 안 함)",
+          "source": "한국경제",
+          "why": "증권가에서 삼성전자와 SK하이닉스의 주가가 이미 충분히 올랐다는 전망이 나오면서 향후 주가 상승에 대한 우려가 제기되고 있습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
         },
@@ -31,15 +31,15 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.47,
-      "surge": 0.04,
+      "changePct": 0.71,
+      "surge": 0.14,
       "events": [
         {
           "time": "08:38",
           "headline": "SK하이닉스 ADR, 월요일 주가 7% 이상 하락한 이유는?",
           "url": "https://news.google.com/rss/articles/CBMisgJBVV95cUxOanFfRjNiZElkRlV6SERQcmpEbVhZOWlMZFZtSVNRUXZPUGxZZm92b2VfQ2Nib2hPQzhmV3JaQzVHdUhzdVk3ZFpNVDctbFBENk95a2thX1NtMHlGUGVPUVFPdmdlZVlxUG82OGkxdDBLa05NWG1pajd5dnFqeUdFMlNUYlBuU2c3RkE3aEd5a2tSZGxxZTZrMjlyRUZkOFc4RWZSVHhjQ05rQnhiY1NKbmZSYURjb2lCeHFoamF2S0ZwR21sa0NXZUJBRzQ2U013UEZKcEpMdjZjZTQ5SzZheGg5Mjd3bDM1cm9mTkMzWTNKbUF3S000YVZoc2s4dTJreW5CcG5qaFgydUROWEVNb0o0RHV0ZTlDTGZCQ0NzeV9nQjB6RmYwU2ZNMlliYkp4OXc?oc=5",
           "source": "Benzinga",
-          "why": "SK하이닉스 ADR이 월요일에 7% 이상 하락한 이유는 불확실하지만, 이는 투자자들에게 중요한 정보입니다. (개별 인과 단정 안 함)",
+          "why": "SK하이닉스 ADR이 월요일에 7% 이상 하락한 이유에 대한 기사입니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neg"
         },
@@ -57,17 +57,26 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.94,
-      "surge": 0.01,
+      "changePct": -0.67,
+      "surge": 0.09,
       "events": [
         {
           "time": "08:06",
           "headline": "현대차, 엔비디아와 자율주행 협력…네이버, 두나무 편입에 지배구조 재편 과제",
           "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBaZVk2OGp3T1Nudk1uSzNjSGZQaFpVdERULTZabnBTRW1lMEFLbHl1U0RkYk9rcWttMEhEYzJNSTFvTjZiV3VhbGRhU3M1bW9DT0t1Rw?oc=5",
           "source": "이투데이",
-          "why": "현대차가 엔비디아와 자율주행 기술 협력을 발표하며, 네이버와 두나무 편입에 따른 지배구조 재편 과제도 함께 언급되었습니다. (개별 인과 단정 안 함)",
+          "why": "현대차가 엔비디아와 자율주행 기술 협력을 발표하며, 네이버의 두나무 편입과 함께 지배구조 재편 과제가 부각되었습니다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
+        },
+        {
+          "time": "09:00",
+          "headline": "‘내우외환’ 현대차 주가…재상승 위한 조건은?",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5VcEFnM0NTY3hEUmtsS2VrSkh5MkZvNF9sRFQwX2lhb2d1NEV1S0RyaHRSbUlwd295ZG1fUC1QQTBvU0xvQ2dhTnZWTVpSSE5aR3Q0bzZoSlh0Zw?oc=5",
+          "source": "한국경제",
+          "why": "‘내우외환’ 현대차 주가…재상승 위한 조건은? (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
         }
       ]
     }
