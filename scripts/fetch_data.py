@@ -203,68 +203,141 @@ def fetch_economic_calendar() -> dict:
         return {"today": [], "upcoming": []}
 
 
-def fetch_investor_trading_kospi(date_str: str = None) -> dict:
-    """NAVER Finance에서 코스피 투자자별 순매수 데이터를 가져온다 (인증 불필요).
+# 코스피 투자자별 순매수 — 2026-09-15 네이버가 sise_index.naver를 stock.naver.com으로 옮겨(302)
+# 옛 HTML 정규식이 매일 "pattern not found"로 빈손이 됐다(§51).
+# 새 페이지의 JSON(m.stock.naver.com/api/index/KOSPI/trend)은 **애프터장(16:00~20:00) 체결까지 누적한
+# 하루 합계**라 마감 잡(16:25)에서 그대로 쓰면 정규장 값이 아니다(9/14 실측: 15:31 개인 +29,722억 →
+# 20:00 +30,351억). 그래서 날짜만 JSON에서 받고, 값은 시간대별 표에서 정규장 마감 직후 행을 쓴다.
+INVESTOR_TREND_URL = "https://m.stock.naver.com/api/index/KOSPI/trend"
+INVESTOR_TIME_URL = ("https://finance.naver.com/sise/investorDealTrendTime.naver"
+                     "?bizdate={d}&sosok=01&page={p}")
+# 15:30 동시호가 체결은 15:31 행에 반영되고, 15:40부터 장후 시간외 종가매매가 값을 다시 움직인다.
+# (9/14 실측: 15:30 행 +29,190 → 15:31~15:36 +29,722 → 15:49 +29,745 → 16:06 +29,681)
+INVESTOR_REGULAR_FROM = "1531"
+INVESTOR_REGULAR_UNTIL = "1540"
 
-    코스피 조회 기준일: 당일 시장 개장 전이므로 전 거래일 데이터 사용.
+
+def _get_text(url: str, encoding: str = "utf-8", timeout: int = 15) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode(encoding, errors="ignore")
+
+
+def parse_investor_time_page(html: str) -> list[dict]:
+    """시간대별 투자자 순매수 표 한 페이지 → [{t: "HHMM", individual, foreign, institution}] (억원, 최신순).
+
+    api/_vs-flow.mjs parseInvestorTimePage와 같은 규칙이다. 개인+외국인+기관계+기타법인은 0이어야 하므로
+    ±5억을 벗어나면 열이 밀린 것으로 보고 그 행을 버린다.
+    """
+    import re
+    rows = []
+    for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", html or "", re.S):
+        cells = [re.sub(r"<[^>]+>|&nbsp;", "", c).strip() for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+        if len(cells) != 11 or not re.fullmatch(r"\d{2}:\d{2}", cells[0]):
+            continue
+        try:
+            v = [int(c.replace(",", "")) for c in cells[1:]]
+        except ValueError:
+            continue
+        if abs(v[0] + v[1] + v[2] + v[9]) > 5:
+            continue
+        rows.append({"t": cells[0].replace(":", ""), "individual": v[0], "foreign": v[1], "institution": v[2]})
+    return rows
+
+
+def _investor_last_page(html: str) -> int:
+    import re
+    nums = [int(n) for n in re.findall(r"page=(\d+)", html or "")]
+    return max(nums) if nums else 1
+
+
+def regular_session_investor(bizdate: str, fetch_text=None) -> dict:
+    """그날 정규장 마감 직후(15:31~15:40) 코스피 투자자별 순매수. 없으면 {}.
+
+    페이지는 최신 시각부터라 이진 탐색으로 15:40 이하 첫 행을 찾는다. 찾은 행이 15:31보다 이르면
+    (정규장이 아직 안 끝났거나 표가 잘린 것) 쓰지 않는다 — 장중 값을 마감 값으로 싣지 않는다.
+    """
+    fetch_text = fetch_text or (lambda url: _get_text(url, "euc-kr"))
+    url = lambda p: INVESTOR_TIME_URL.format(d=bizdate, p=p)
+    first = fetch_text(url(1))
+    pages = {1: parse_investor_time_page(first)}
+    lo, hi, found = 1, _investor_last_page(first), None
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if mid not in pages:
+            pages[mid] = parse_investor_time_page(fetch_text(url(mid)))
+        rows = pages[mid]
+        if not rows:
+            return {}   # 중간 페이지가 0행이면 표가 깨진 것 — 그 전까지 찾은 값도 믿지 않는다
+        hit = next((r for r in rows if r["t"] <= INVESTOR_REGULAR_UNTIL), None)
+        if hit:
+            found, hi = hit, mid - 1
+        else:
+            lo = mid + 1
+    if not found or found["t"] < INVESTOR_REGULAR_FROM:
+        return {}
+    return {
+        "date": bizdate,
+        "asof": found["t"],
+        # 억원 → 백만원 (×100). 다운스트림(supply_history·generate_html)이 기대하는 단위.
+        "foreign":     {"net": found["foreign"] * 100},
+        "institution": {"net": found["institution"] * 100},
+        "individual":  {"net": found["individual"] * 100},
+    }
+
+
+def latest_investor_bizdate(fetch_json=None) -> str | None:
+    """네이버가 수급을 집계 중인 가장 최근 거래일(YYYYMMDD). 실패 시 None."""
+    try:
+        if fetch_json is None:
+            d = json.loads(_get_text(INVESTOR_TREND_URL))
+        else:
+            d = fetch_json(INVESTOR_TREND_URL)
+        bizdate = str((d or {}).get("bizdate") or "")
+        return bizdate if len(bizdate) == 8 and bizdate.isdigit() else None
+    except Exception as e:
+        print(f"[fetch_data] investor bizdate 조회 실패: {e}", file=sys.stderr)
+        return None
+
+
+def fetch_investor_trading_kospi(date_str: str = None, now=None, fetch_text=None, fetch_json=None) -> dict:
+    """코스피 투자자별 순매수(정규장 마감 기준)를 가져온다.
+
+    date_str를 주면 그날을, 없으면 마감이 끝난 직전 거래일을 쓴다(아침 브리핑).
 
     Returns:
         {
           "date": "YYYYMMDD",
-          "foreign":     {"net": int},  # 외국인합계 순매수 (단위: 백만원)
+          "asof": "HHMM",               # 값을 읽은 시간대별 표의 행 시각
+          "foreign":     {"net": int},  # 외국인 순매수 (단위: 백만원)
           "institution": {"net": int},  # 기관합계 순매수
           "individual":  {"net": int},  # 개인 순매수
         }
     """
-    import re
-
-    kst_now = datetime.now(KST)
-
+    now = now or datetime.now(KST)
+    today = now.strftime("%Y%m%d")
     if date_str is None:
-        # 전 거래일 (주말 건너뜀)
-        target = kst_now - timedelta(days=1)
-        while target.weekday() >= 5:  # 5=Sat, 6=Sun
-            target -= timedelta(days=1)
-        date_str = target.strftime("%Y%m%d")
-
-    # 네이버 증권 KOSPI 지수 페이지의 "투자자별 매매동향" 파싱.
-    # 구 investorTrend JSON API(api.stock.naver.com/.../investorTrend)는 폐기되어 404.
-    # 마감 브리핑(fetch_closing_kospi.fetch_investor_trading)과 동일한 HTML 소스를 사용한다.
-    # 07:30 실행 시점엔 시장이 마감 상태이므로 이 페이지는 직전 완료 세션(전 거래일) 수급을 보여준다.
+        # 네이버가 집계 중인 날짜가 오늘이면(장 시작 뒤 재실행 등) 아직 끝난 세션이 아니다 — 전 평일로.
+        bizdate = latest_investor_bizdate(fetch_json)
+        if bizdate and bizdate < today:
+            date_str = bizdate
+        else:
+            target = now - timedelta(days=1)
+            while target.weekday() >= 5:  # 5=Sat, 6=Sun
+                target -= timedelta(days=1)
+            date_str = target.strftime("%Y%m%d")
     try:
-        url = "https://finance.naver.com/sise/sise_index.naver?code=KOSPI"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            text = resp.read().decode("euc-kr", errors="ignore")
-
-        # "개인<br>..+N,NNN억...외국인<br>...-N,NNN억...기관<br>...+N,NNN억" 패턴
-        m = re.search(
-            r"개인<br>.*?([+-][0-9,]+).*?외국인<br>.*?([+-][0-9,]+).*?기관<br>.*?([+-][0-9,]+)",
-            text, re.DOTALL,
-        )
-        if not m:
-            print("[fetch_data] Investor trading: pattern not found", file=sys.stderr)
-            return {}
-
-        def _eok_to_mwon(s: str) -> int:
-            # 억원 → 백만원 (×100). 다운스트림(supply_history·generate_html)이 기대하는 단위.
-            return int(s.replace(",", "").replace("+", "")) * 100
-
-        individual  = _eok_to_mwon(m.group(1))
-        foreign     = _eok_to_mwon(m.group(2))
-        institution = _eok_to_mwon(m.group(3))
-        result = {
-            "date":        date_str,
-            "foreign":     {"net": foreign},
-            "institution": {"net": institution},
-            "individual":  {"net": individual},
-        }
-        print(f"[fetch_data] Investor trading ({date_str}): "
-              f"foreign={foreign:+,}, institution={institution:+,}, individual={individual:+,} (백만원)")
-        return result
+        result = regular_session_investor(date_str, fetch_text)
     except Exception as e:
         print(f"[fetch_data] Investor trading error: {e}", file=sys.stderr)
         return {}
+    if not result:
+        print(f"[fetch_data] Investor trading ({date_str}): 정규장 마감 행(15:31~15:40)을 찾지 못함 — 비운다", file=sys.stderr)
+        return {}
+    print(f"[fetch_data] Investor trading ({date_str} {result['asof']}): "
+          f"foreign={result['foreign']['net']:+,}, institution={result['institution']['net']:+,}, "
+          f"individual={result['individual']['net']:+,} (백만원)")
+    return result
 
 
 # 한국·아시아 시장은 코스피 아침 브리핑이 나가는 07:25 KST엔 닫혀 있고 09:00부터 열린다.

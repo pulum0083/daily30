@@ -37,6 +37,56 @@ NAVER_HEADERS = {
     "Accept-Language": "ko-KR,ko;q=0.9",
 }
 
+# 2026-09-15 네이버가 finance.naver.com/sise·item 페이지를 stock.naver.com(클라이언트 렌더)으로 옮겨
+# 옛 HTML 정규식이 예외 없이 0행을 읽었다(§51). 새 페이지가 부르는 JSON API로 바꿨다.
+M_API = "https://m.stock.naver.com/api"
+KOSPI_INTEGRATION_URL = f"{M_API}/index/KOSPI/integration"
+INDUSTRY_LIST_URL = f"{M_API}/stocks/industry?page=1&pageSize=100"
+INDUSTRY_DETAIL_URL = M_API + "/stocks/industry/{no}?page=1&pageSize=40"
+STOCKS_UP_URL = f"{M_API}/stocks/up/KOSPI?page=1&pageSize=60"
+QUANT_TOP_URL = f"{M_API}/stocks/quantTop/KOSPI?page=1&pageSize=100"
+STOCK_TREND_URL = M_API + "/stock/{code}/trend?pageSize=20"
+MINUTE_RANGE_URL = ("https://api.stock.naver.com/chart/domestic/item/{code}/minute"
+                    "?startDateTime={start}0900&endDateTime={end}1530")
+
+# 원천 구조가 바뀌어 목록 자체를 못 읽은 수집기 — fetch_closing_data가 모아 관리자에게 알린다.
+_source_failures: list[str] = []
+
+
+def _get_json(url: str, timeout: int = 15):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read())
+
+
+def _num(v):
+    """네이버 문자열 숫자("+3,478", "-8.47", "1,209") → float. 비었거나 숫자가 아니면 None."""
+    try:
+        return float(str(v).replace(",", "").replace("+", "").strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _source_failed(name: str, detail: str) -> None:
+    _source_failures.append(f"{name}: {detail}")
+    print(f"[fetch_closing] {name}: {detail}", file=sys.stderr)
+
+
+# KRX 애프터마켓(16:00~20:00, §48) 체결이 들어오면 네이버 현재가·등락률·등락 종목 수가 그 가격을 따른다.
+# 15:40~16:00 장후 시간외는 종가로만 체결되므로 가격이 바뀌지 않는다 — 16:00:00 이후 체결만 오염으로 본다.
+AFTERMARKET_OPEN_HMS = "16:00:00"
+AFTERMARKET_DETAIL = "애프터장 체결가가 반영된 목록 — 정규장 값이 아니라 비운다"
+
+
+def priced_after_regular(stocks, now=None) -> bool:
+    """목록 종목 중 오늘 16:00:00 이후 체결 시각(localTradedAt)이 하나라도 있으면 True."""
+    today = (now or datetime.now(KST)).strftime("%Y-%m-%d")
+    for s in stocks or []:
+        ts = str((s or {}).get("localTradedAt") or "")
+        if ts[:10] == today and ts[11:19] >= AFTERMARKET_OPEN_HMS:
+            return True
+    return False
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # yfinance 래퍼 (재시도 포함)
@@ -200,45 +250,41 @@ class _RiseTableParser(HTMLParser):
                 self._cur = {}
 
 
-def fetch_top_gainers(limit: int = 3) -> list[dict]:
-    """네이버 증권 코스피 등락률 순위 1~3위를 반환한다.
+def parse_top_gainers(payload, limit: int = 3) -> list[dict]:
+    """/api/stocks/up/KOSPI 응답 → 상승률 상위 보통주(ETF·ETN 제외). 목록은 상승률 내림차순이다."""
+    result = []
+    for s in (payload or {}).get("stocks") or []:
+        ratio = _num(s.get("fluctuationsRatio"))
+        if s.get("stockEndType") != "stock" or ratio is None or ratio <= 0 or not s.get("closePrice"):
+            continue
+        result.append({
+            "name":       str(s.get("stockName", "")).strip(),
+            "change_pct": f"+{ratio:.2f}%",
+            "price":      f"{s['closePrice']}원",
+        })
+        if len(result) >= limit:
+            break
+    return result
+
+
+def fetch_top_gainers(limit: int = 3, fetch=_get_json, now=None) -> list[dict]:
+    """코스피 등락률 순위 1~3위를 반환한다.
 
     Returns list of {"name": str, "change_pct": str, "price": str}
     """
-    url = "https://finance.naver.com/sise/sise_rise.naver?sosok=0"
     try:
-        req = urllib.request.Request(url, headers=NAVER_HEADERS)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
+        payload = fetch(STOCKS_UP_URL)
+        result = parse_top_gainers(payload, limit)
     except Exception as e:
         print(f"[fetch_closing] top gainers fetch failed: {e}", file=sys.stderr)
+        payload, result = {}, []
+    if result and priced_after_regular(payload.get("stocks"), now):
+        _source_failed("top_gainers", AFTERMARKET_DETAIL)
         return []
-
-    import re
-    result = []
-
-    tr_pattern = re.compile(r'<tr[^>]*>(.*?)</tr>', re.DOTALL)
-    name_pat   = re.compile(r'<a[^>]+href="/item/main[^"]+"\s*class="tltle">([^<]+)</a>')
-    rate_pat   = re.compile(r'\+(\d+\.\d+)%')
-    price_pat  = re.compile(r'<td\s+class="number">\s*([\d,]+)\s*</td>')
-
-    for m in tr_pattern.finditer(html):
-        row = m.group(1)
-        name_m  = name_pat.search(row)
-        rate_m  = rate_pat.search(row)
-        price_m = price_pat.search(row)
-        if name_m and rate_m and price_m:
-            result.append({
-                "name":       name_m.group(1).strip(),
-                "change_pct": f"+{rate_m.group(1)}%",
-                "price":      price_m.group(1).strip() + "원",
-            })
-        if len(result) >= limit:
-            break
-
+    if not result:
+        _source_failed("top_gainers", "상승률 상위 목록 0건")
     print(f"[fetch_closing] top gainers: {[r['name'] for r in result]}")
     return result
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 네이버 증권 — 섹터 성과
@@ -255,94 +301,59 @@ SECTOR_IDS = {
 }
 
 
-def fetch_sector_top_stocks(detail_path: str, limit: int = 3) -> list[dict]:
-    """네이버 테마 상세 페이지에서 등락률 상위 종목을 반환한다.
-
-    Args:
-        detail_path: "/sise/sise_group_detail.naver?type=theme&no=591" 형태
-    Returns:
-        [{"name": str, "change_pct": float}, ...]
-    """
-    import re
-    url = f"https://finance.naver.com{detail_path}"
-    try:
-        req = urllib.request.Request(url, headers=NAVER_HEADERS)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
-    except Exception as e:
-        print(f"[fetch_closing] sector detail fetch failed ({detail_path}): {e}", file=sys.stderr)
-        return []
-
-    name_pat = re.compile(r'<a href="/item/main\.naver\?code=\d+">([^<]+)</a>')
-    pct_pat  = re.compile(r'<span class="tah p11 (red\d+|blu\d+|nv01)">\s*([+\-]?[\d.]+)%\s*</span>')
-
-    # 종목명 단위로 row를 잘라낸 뒤 그 뒤 1500자 안에서 등락률을 잡아낸다.
-    stocks: list[dict] = []
-    seen: set[str] = set()
-    for m in name_pat.finditer(html):
-        name = m.group(1).strip()
-        if name in seen:
+def parse_industry_groups(payload) -> list[dict]:
+    """/api/stocks/industry 응답 → [{"no", "name", "change_pct"}]. 업종 번호는 옛 sise_group_detail과 같다."""
+    out = []
+    for g in (payload or {}).get("groups") or []:
+        chg = _num(g.get("changeRate"))
+        if g.get("no") is None or not g.get("name") or chg is None:
             continue
-        seen.add(name)
-        chunk = html[m.end():m.end() + 1500]
-        pct_matches = pct_pat.findall(chunk)
-        if pct_matches:
-            color, val = pct_matches[0]
-            try:
-                pct = float(val)
-                if color.startswith("blu"):
-                    pct = -abs(pct)
-                stocks.append({"name": name, "change_pct": round(pct, 2)})
-            except ValueError:
-                continue
+        out.append({"no": g["no"], "name": str(g["name"]).strip(), "change_pct": round(chg, 2)})
+    return out
 
+
+def parse_industry_top_stocks(payload, limit: int = 3) -> list[dict]:
+    """/api/stocks/industry/{no} 응답 → 등락률 상위 코스피·코스닥 보통주. 코넥스(sosok 2)는 뺀다 —
+    옛 업종 상세 페이지엔 없었고, 거래 1주로 +14%가 찍히는 종목이 상위를 차지한다."""
+    stocks = []
+    for s in (payload or {}).get("stocks") or []:
+        chg = _num(s.get("fluctuationsRatio"))
+        if s.get("sosok") not in ("0", "1") or s.get("stockEndType") != "stock" or chg is None:
+            continue
+        stocks.append({"name": str(s.get("stockName", "")).strip(), "change_pct": round(chg, 2)})
     stocks.sort(key=lambda x: x["change_pct"], reverse=True)
     return stocks[:limit]
 
 
-def fetch_sector_performance() -> list[dict]:
-    """네이버 그룹별 시세에서 섹터 등락률과 섹터별 상위 종목을 가져온다.
+def fetch_sector_performance(fetch=_get_json, now=None) -> list[dict]:
+    """네이버 업종별 시세에서 섹터 등락률과 섹터별 상위 종목을 가져온다.
 
     Returns list of {"name": str, "change_pct": float, "stocks": [{"name", "change_pct"}, ...]}
     """
-    url = "https://finance.naver.com/sise/sise_group.naver"
     try:
-        req = urllib.request.Request(url, headers=NAVER_HEADERS)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
+        groups = parse_industry_groups(fetch(INDUSTRY_LIST_URL))
     except Exception as e:
         print(f"[fetch_closing] sector fetch failed: {e}", file=sys.stderr)
+        groups = []
+    if not groups:
+        _source_failed("sectors", "업종 목록 0건")
         return []
 
-    import re
-    result = []
-    tr_pat = re.compile(r'<tr[^>]*>(.*?)</tr>', re.DOTALL)
-    link_pat = re.compile(r'<a[^>]+href="(/sise/sise_group_detail\.naver\?[^"]*)">([^<]+)</a>')
-    rate_pat = re.compile(r'<span[^>]*class="[^"]*\b(red|blu)\d*[^"]*"[^>]*>\s*\+?([\d.]+)%\s*</span>')
-
-    for m in tr_pat.finditer(html):
-        row = m.group(1)
-        link_m = link_pat.search(row)
-        rate_m = rate_pat.search(row)
-        if link_m and rate_m:
-            href = link_m.group(1).replace("&amp;", "&")
-            name = link_m.group(2).strip()
-            color = rate_m.group(1)
-            val = float(rate_m.group(2))
-            chg = val if color == "red" else -val
-            result.append({
-                "name": name,
-                "change_pct": round(chg, 2),
-                "_href": href,
-            })
-
     # 등락률 절대값 기준으로 영향이 큰 섹터 상위 5개 반환
-    result.sort(key=lambda x: abs(x["change_pct"]), reverse=True)
-    final = result[:5]
-
-    # 각 섹터의 상위 종목 2~3개 추가
-    for sec in final:
-        sec["stocks"] = fetch_sector_top_stocks(sec.pop("_href"), limit=3)
+    groups.sort(key=lambda x: abs(x["change_pct"]), reverse=True)
+    final = []
+    for g in groups[:5]:
+        try:
+            detail = fetch(INDUSTRY_DETAIL_URL.format(no=g["no"]))
+            stocks = parse_industry_top_stocks(detail, limit=3)
+        except Exception as e:
+            print(f"[fetch_closing] sector detail fetch failed ({g['no']}): {e}", file=sys.stderr)
+            detail, stocks = {}, []
+        # 업종 목록엔 체결 시각이 없어 구성 종목 시각으로 판정한다. 하나라도 오염이면 업종 등락률 전체를 버린다.
+        if priced_after_regular(detail.get("stocks"), now):
+            _source_failed("sectors", AFTERMARKET_DETAIL)
+            return []
+        final.append({"name": g["name"], "change_pct": g["change_pct"], "stocks": stocks})
         time.sleep(0.3)  # 네이버 부담 줄이기
 
     print(f"[fetch_closing] sectors: {len(final)}개 (종목 포함)")
@@ -350,44 +361,26 @@ def fetch_sector_performance() -> list[dict]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 투자자별 순매수 (네이버, 기존 fetch_data.py 로직 재사용)
+# 투자자별 순매수 — 구현은 fetch_data.fetch_investor_trading_kospi() 한 곳에만 둔다(§30)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def fetch_investor_trading() -> dict:
-    """당일 외국인·기관·개인 순매수를 반환한다. 네이버 증권 PC 페이지 HTML 파싱."""
-    kst_now  = datetime.now(KST)
-    date_str = kst_now.strftime("%Y%m%d")
-    try:
-        url = "https://finance.naver.com/sise/sise_index.naver?code=KOSPI"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            text = resp.read().decode("euc-kr", errors="ignore")
-        # "개인<br>..+N,NNN억...외국인<br>...-N,NNN억...기관<br>...+N,NNN억" 패턴
-        m = re.search(
-            r"개인<br>.*?([+-][0-9,]+).*?외국인<br>.*?([+-][0-9,]+).*?기관<br>.*?([+-][0-9,]+)",
-            text, re.DOTALL
-        )
-        if not m:
-            print("[fetch_closing] investor trading: pattern not found", file=sys.stderr)
-            return {}
-        def _parse_eok(s: str) -> int:
-            # 억원 단위 → 백만원 단위 (×100) 로 변환해 기존 구조와 통일
-            return int(s.replace(",", "").replace("+", "")) * 100
-        individual = _parse_eok(m.group(1))
-        foreign    = _parse_eok(m.group(2))
-        institution= _parse_eok(m.group(3))
-        result = {
-            "date": date_str,
-            "foreign":     {"net": foreign},
-            "institution": {"net": institution},
-            "individual":  {"net": individual},
-        }
-        print(f"[fetch_closing] investor trading ({date_str}): foreign={foreign:+,} individual={individual:+,} institution={institution:+,} (백만원)")
-        return result
-    except Exception as e:
-        print(f"[fetch_closing] investor trading naver error: {e}", file=sys.stderr)
-    return {}
+    """당일 외국인·기관·개인 순매수(정규장 마감 15:31~15:40 기준). 없으면 {}.
 
+    16:25 마감 잡 시점엔 네이버 하루 합계에 애프터장 체결이 섞여 있으므로(§51) 시간대별 표를 쓴다.
+    """
+    try:
+        try:
+            from scripts.fetch_data import fetch_investor_trading_kospi
+        except ImportError:
+            from fetch_data import fetch_investor_trading_kospi
+        result = fetch_investor_trading_kospi(date_str=datetime.now(KST).strftime("%Y%m%d"))
+    except Exception as e:
+        print(f"[fetch_closing] investor trading error: {e}", file=sys.stderr)
+        result = {}
+    if not result:
+        _source_failed("investor_trading", "정규장 마감 수급 행 없음")
+    return result
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 장중 5분봉 (9:00~15:20 KST)
@@ -509,39 +502,36 @@ def fetch_trade_amount() -> dict:
 # 시장 폭 (상한가·하한가·신고가·신저가·상승·하락·보합 종목 수)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_market_breadth() -> dict:
-    """코스피 시장 폭 데이터를 반환한다. 네이버 증권 메인 페이지 HTML 파싱."""
+def parse_market_breadth(payload) -> dict:
+    """/api/index/KOSPI/integration 응답의 upDownStockInfo → 시장 폭. 읽지 못하면 {}."""
+    info = (payload or {}).get("upDownStockInfo") or {}
+    vals = {k: _num(info.get(k)) for k in ("riseCount", "fallCount", "steadyCount", "upperCount", "lowerCount")}
+    if any(v is None for v in vals.values()) or (vals["riseCount"] == 0 and vals["fallCount"] == 0):
+        return {}
+    return {
+        "up": int(vals["riseCount"]), "down": int(vals["fallCount"]), "unchanged": int(vals["steadyCount"]),
+        "upper_limit": int(vals["upperCount"]), "lower_limit": int(vals["lowerCount"]),
+        "new_high": 0, "new_low": 0,
+    }
+
+
+def fetch_market_breadth(fetch=_get_json, now=None) -> dict:
+    """코스피 시장 폭 데이터를 반환한다."""
     try:
-        url = "https://finance.naver.com/sise/"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "ko-KR"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            text = resp.read().decode("euc-kr", errors="ignore")
-        # 등락종목 섹션: uup(상한가) / up(상승) / noc(보합) / dn(하락) / ddn(하한가)
-        def _extract(cls: str) -> int:
-            m = re.search(rf'class="{cls}"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
-            return int(m.group(1).replace(",", "")) if m else 0
-        upper_limit = _extract("uup")
-        up          = _extract("up")
-        unchanged   = _extract("noc")
-        # 하락/하한가는 하락 section에서 파싱
-        dn_m  = re.search(r'class="dn"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
-        ddn_m = re.search(r'class="ddn"[^>]*>\s*<a[^>]*>([0-9,]+)<', text)
-        down        = int(dn_m.group(1).replace(",", "")) if dn_m else 0
-        lower_limit = int(ddn_m.group(1).replace(",", "")) if ddn_m else 0
-        if up == 0 and down == 0:
-            print("[fetch_closing] market breadth: parsing failed", file=sys.stderr)
-            return {}
-        result = {
-            "up": up, "down": down, "unchanged": unchanged,
-            "upper_limit": upper_limit, "lower_limit": lower_limit,
-            "new_high": 0, "new_low": 0,
-        }
-        print(f"[fetch_closing] 시장 폭: 상승 {up} / 하락 {down} / 상한가 {upper_limit}")
-        return result
+        payload = fetch(KOSPI_INTEGRATION_URL)
+        result = parse_market_breadth(payload)
     except Exception as e:
         print(f"[fetch_closing] market breadth naver error: {e}", file=sys.stderr)
-    return {}
-
+        payload, result = {}, {}
+    # upDownStockInfo엔 시각이 없어 같은 응답의 시총 상위 종목(enrollStocks) 체결 시각으로 판정한다.
+    if result and priced_after_regular(payload.get("enrollStocks"), now):
+        _source_failed("market_breadth", AFTERMARKET_DETAIL)
+        return {}
+    if not result:
+        _source_failed("market_breadth", "등락 종목 수를 읽지 못함")
+        return {}
+    print(f"[fetch_closing] 시장 폭: 상승 {result['up']} / 하락 {result['down']} / 상한가 {result['upper_limit']}")
+    return result
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 거래대금 급증 + 수급 동반 종목 (외국인·기관 동시 순매수)
@@ -549,91 +539,116 @@ def fetch_market_breadth() -> dict:
 # 데이터 제약: KRX 종목별 순매수 '금액' 소스가 막혀 있어(LOGOUT), 네이버 종목별
 # 일별 순매매 '수량'에 종가를 곱한 근사 금액(억원)을 사용한다.
 
-DPICK_ETF_KEYWORDS = ("KODEX", "TIGER", "KOSEF", "ARIRANG", "KBSTAR", "HANARO",
-                      "PLUS", "RISE", "ACE ", "SOL ", "TIMEFOLIO", "레버리지", "인버스", "선물")
+def parse_dpick_universe(payload, universe: int = 20) -> list[tuple[str, str]]:
+    """/api/stocks/quantTop/KOSPI 응답 → 거래량 상위 보통주 [(코드, 이름)]. ETF·ETN은 stockEndType으로 뺀다."""
+    out = []
+    for s in (payload or {}).get("stocks") or []:
+        if s.get("stockEndType") == "stock" and s.get("itemCode"):
+            out.append((str(s["itemCode"]), str(s.get("stockName", "")).strip()))
+    return out[:universe]
 
 
-def _dpick_num(cell: str) -> float:
-    s = re.sub(r"<[^>]+>", "", cell).strip().replace(",", "").replace("%", "").replace("+", "")
-    try:
-        return float(s) if "." in s else int(s)
-    except ValueError:
-        return 0
-
-
-def _fetch_frgn_daily(code: str) -> list:
-    """종목별 외국인·기관 일별 순매매(수량) — 네이버 item/frgn. 최신순 행 리스트."""
-    url = f"https://finance.naver.com/item/frgn.naver?code={code}"
-    try:
-        req = urllib.request.Request(url, headers=NAVER_HEADERS)
-        with urllib.request.urlopen(req, timeout=12) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
-    except Exception:
-        return []
+def parse_stock_trend(payload) -> list[dict]:
+    """/api/stock/{code}/trend 응답 → 최신순 [{date, close, vol, frgn, inst}] (수량은 주)."""
     rows = []
-    for r in re.split(r"</tr>", html):
-        if "gray03" not in r:
+    for r in payload if isinstance(payload, list) else []:
+        vals = [_num(r.get(k)) for k in ("closePrice", "accumulatedTradingVolume",
+                                         "foreignerPureBuyQuant", "organPureBuyQuant")]
+        if not r.get("bizdate") or any(v is None for v in vals):
             continue
-        date_m = re.search(r"(\d{4})\.(\d{2})\.(\d{2})", r)
-        if not date_m:
-            continue
-        cells = re.findall(r'<td[^>]*class="num"[^>]*>(.*?)</td>', r, re.DOTALL)
-        if len(cells) >= 6:
-            rows.append({
-                "date": f"{date_m.group(1)}-{date_m.group(2)}-{date_m.group(3)}",
-                "close": _dpick_num(cells[0]),   # 종가
-                "chg":   _dpick_num(cells[2]),   # 등락률(%)
-                "vol":   _dpick_num(cells[3]),   # 거래량(주)
-                "inst":  _dpick_num(cells[4]),   # 기관 순매매량(주)
-                "frgn":  _dpick_num(cells[5]),   # 외국인 순매매량(주)
-            })
+        rows.append({"date": str(r["bizdate"]), "close": vals[0], "vol": vals[1], "frgn": vals[2], "inst": vals[3]})
     return rows
 
 
-def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> list:
+def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[dict]:
+    """2026-09-14(애프터마켓 개장) 이후 행의 종가·거래량을 정규장 값으로 바꾼다.
+
+    trend의 종가·거래량은 20:00 애프터장까지 누적된 값이다(9/14 삼성전자 실측: 종가 248,500 / 공식 249,000,
+    거래량 17,776,098 / 정규장 1분봉 합 16,559,147). 종가는 kr_official_closes(§48), 거래량은 같은 날
+    09:00~15:30 1분봉 거래량 합으로 채운다. 구하지 못한 값은 None으로 비워 둔다 — 틀린 값으로 채우지 않는다.
+    """
+    try:
+        from scripts.kr_official_closes import AFTERMARKET_START, official_close
+    except ImportError:
+        from kr_official_closes import AFTERMARKET_START, official_close
+    recent = sorted(r["date"] for r in rows if r["date"] >= AFTERMARKET_START)
+    if not recent:
+        return rows
+    try:
+        bars = fetch(MINUTE_RANGE_URL.format(code=code, start=recent[0], end=recent[-1]))
+    except Exception as e:
+        print(f"[fetch_closing] dpick {code} 1분봉 조회 실패: {e}", file=sys.stderr)
+        bars = []
+    by_date: dict[str, list] = {}
+    for b in bars if isinstance(bars, list) else []:
+        ts = str(b.get("localDateTime", "")) if isinstance(b, dict) else ""
+        if len(ts) >= 12 and "0900" <= ts[8:12] <= "1530":
+            by_date.setdefault(ts[:8], []).append(b)
+
+    def served(url):  # kr_official_closes가 부르는 15:30 1분봉 조회를 이미 받은 봉으로 대신한다
+        return by_date.get(url.split("startDateTime=")[1][:8], [])
+
+    out = []
+    for r in rows:
+        if r["date"] < AFTERMARKET_START:
+            out.append(r)
+            continue
+        day = by_date.get(r["date"])
+        close = official_close(code, r["date"], fetch=served)
+        vol = sum(float(b.get("accumulatedTradingVolume") or 0) for b in day) if day else None
+        out.append({**r, "close": close, "vol": vol})
+    return out
+
+
+def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5, now=None, fetch=_get_json) -> list:
     """거래대금 급증 × 외국인·기관 동시 순매수 종목을 반환한다.
 
-    universe(코스피 거래량 상위)에서 ETF를 제외하고, 각 종목의 일별 외국인·기관
-    순매매로 (ⓐ거래대금이 20일 평균 대비 min_mult배 이상 급증, ⓑ외국인·기관 동시
-    순매수)를 만족하는 종목을 거래대금 순으로 선별한다.
+    universe(코스피 거래량 상위 보통주)의 일별 외국인·기관 순매매로 (ⓐ거래대금이 최근 평균 대비 min_mult배
+    이상 급증, ⓑ외국인·기관 동시 순매수)를 만족하는 종목을 거래대금 순으로 선별한다.
+    종가·등락률·거래대금은 정규장 값만 쓴다(§48·§51).
     """
-    url = "https://finance.naver.com/sise/sise_quant.naver?sosok=0"  # 코스피 거래량 상위
+    now = now or datetime.now(KST)
+    today = now.strftime("%Y%m%d")
     try:
-        req = urllib.request.Request(url, headers=NAVER_HEADERS)
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            html = resp.read().decode("euc-kr", errors="replace")
+        cand = parse_dpick_universe(fetch(QUANT_TOP_URL), universe)
     except Exception as e:
         print(f"[fetch_closing] dpick universe fetch failed: {e}", file=sys.stderr)
+        cand = []
+    if not cand:
+        _source_failed("dpick", "거래량 상위 목록 0건")
         return []
 
-    pairs = re.findall(r'/item/main\.naver\?code=(\d{6})"[^>]*class="tltle">([^<]+)</a>', html)
-    cand = [(c, n.strip()) for c, n in pairs
-            if not any(k in n for k in DPICK_ETF_KEYWORDS)][:universe]
-
-    today_str = datetime.now(KST).strftime("%Y-%m-%d")
     picks = []
     for code, name in cand:
-        rows = _fetch_frgn_daily(code)
-        if not rows:
+        try:
+            rows = parse_stock_trend(fetch(STOCK_TREND_URL.format(code=code)))
+        except Exception as e:
+            print(f"[fetch_closing] dpick {name}({code}) trend 조회 실패: {e}", file=sys.stderr)
             continue
-        today = rows[0]
         # 당일 데이터가 아직 올라오지 않은 경우(어제 데이터) → 스킵
-        if today.get("date") != today_str:
-            print(f"[fetch_closing] dpick {name}({code}): 최신 행={today.get('date')} ≠ 오늘={today_str} → 스킵")
+        if not rows or rows[0]["date"] != today:
+            print(f"[fetch_closing] dpick {name}({code}): 최신 행={rows[0]['date'] if rows else None} ≠ 오늘={today} → 스킵")
             continue
-        close = today["close"]
-        if close <= 0:
+        rows = regular_session_rows(code, rows, fetch)
+        cur = rows[0]
+        prev = rows[1] if len(rows) > 1 else {}
+        if not cur["close"] or not cur["vol"] or not prev.get("close"):
+            print(f"[fetch_closing] dpick {name}({code}): 정규장 종가·거래량 없음 → 스킵")
             continue
-        tv = today["vol"] * close / 1e8                          # 당일 거래대금(억)
-        recent = rows[:20]
-        avg = sum(x["vol"] * x["close"] for x in recent) / len(recent) / 1e8
+        close = cur["close"]
+        tv = cur["vol"] * close / 1e8                              # 당일 거래대금(억)
+        hist = [x for x in rows[:20] if x["close"] and x["vol"]]
+        if len(hist) < 5:
+            print(f"[fetch_closing] dpick {name}({code}): 정규장 거래량 {len(hist)}일뿐 → 스킵")
+            continue
+        avg = sum(x["vol"] * x["close"] for x in hist) / len(hist) / 1e8
         mult = tv / avg if avg else 0
-        frgn_eok = today["frgn"] * close / 1e8
-        inst_eok = today["inst"] * close / 1e8
+        frgn_eok = cur["frgn"] * close / 1e8
+        inst_eok = cur["inst"] * close / 1e8
         if frgn_eok > 0 and inst_eok > 0 and mult >= min_mult:
             picks.append({
                 "name": name, "code": code,
-                "change_pct": round(today["chg"], 2),
+                "change_pct": round((close - prev["close"]) / prev["close"] * 100, 2),
                 "trade_value_eok": round(tv),
                 "trade_mult": round(mult, 1),
                 "frgn_eok": round(frgn_eok),
@@ -643,7 +658,6 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5) -> li
     picks = picks[:limit]
     print(f"[fetch_closing] dpick: {[p['name'] for p in picks]}")
     return picks
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 코스피 200 시총 상위 10종목
@@ -739,6 +753,49 @@ def fetch_ai_semicon_stocks() -> list:
     return result
 
 
+# 거래일이면 비어 있을 수 없는 네이버 수집 결과. 비었다면 원천 구조가 바뀐 것이다(§47·§51).
+REQUIRED_NAVER_KEYS = ("market_breadth", "sectors", "top_gainers", "investor_trading")
+PRESERVE_KEYS = REQUIRED_NAVER_KEYS + ("dpick",)
+PRESERVE_AFTER_HHMM = "1540"
+
+
+def preserve_same_day(data: dict, old: dict) -> list[str]:
+    """같은 날 15:40 이후에 저장된 파일이 가진 값을, 이번에 빈손이 된 키에만 되살린다.
+
+    §1은 dpick이 비면 16:30 뒤 재실행하라고 한다. 그 재실행에서 원천이 흔들려 시장 폭이 비면
+    이미 받은 정규장 값을 빈 값으로 덮어쓰게 된다. 날짜가 다르거나 장중에 만든 파일이면 되살리지 않는다.
+    """
+    new_at, old_at = str(data.get("generated_at", "")), str((old or {}).get("generated_at", ""))
+    if not old_at or old_at[:10] != new_at[:10] or old_at[11:16].replace(":", "") < PRESERVE_AFTER_HHMM:
+        return []
+    kept = []
+    for k in PRESERVE_KEYS:
+        if not data.get(k) and old.get(k):
+            data[k] = old[k]
+            kept.append(k)
+    return kept
+
+
+def alert_source_failures(data: dict, failures: list[str]) -> None:
+    missing = [k for k in REQUIRED_NAVER_KEYS if not data.get(k)]
+    if not missing and not failures:
+        return
+    try:
+        try:
+            from scripts.send_telegram import send_admin_alert
+        except ImportError:
+            from send_telegram import send_admin_alert
+        send_admin_alert(
+            "[Double-Shot] 코스피 마감 데이터 수집 일부 실패 — 해당 섹션은 비운 채로 발행됩니다\n"
+            f"빈 항목: {', '.join(missing) or '없음'}\n"
+            + "\n".join(failures) + "\n"
+            "네이버 원천(stock.naver.com JSON) 구조 변경을 의심하세요(SERVICE_RULES §51).\n"
+            "확인: python3 scripts/fetch_closing_kospi.py"
+        )
+    except Exception as e:
+        print(f"[fetch_closing] 관리자 알림 실패: {e}", file=sys.stderr)
+
+
 def fetch_closing_data() -> dict:
     print("[fetch_closing] 코스피 마감 데이터 수집 시작...")
 
@@ -804,6 +861,13 @@ def fetch_closing_data() -> dict:
     }
 
     out = DATA_DIR / "latest_kospi_close.json"
+    try:
+        kept = preserve_same_day(data, json.loads(out.read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        kept = []
+    if kept:
+        print(f"[fetch_closing] 이번 수집이 비어 같은 날 저장본 값을 유지: {kept}", file=sys.stderr)
+    alert_source_failures(data, [f for f in _source_failures if f.split(":")[0] not in kept])
     with open(out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     print(f"[fetch_closing] 저장 완료 → {out}")

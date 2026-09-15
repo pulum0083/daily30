@@ -105,27 +105,26 @@ async function fetchKospiHistory() {
   return rows.slice(-8); // 최근 8영업일 {날짜, 종가}
 }
 
+// 2026-09-15 네이버가 sise_index.naver를 stock.naver.com으로 옮겨(302) 옛 HTML 정규식이 매번 실패했다
+// (SERVICE_RULES §51). 새 페이지의 JSON을 쓴다. 억원 단위의 장중 누적값이고, 16:00 이후엔 애프터장
+// 체결이 섞인다 — 장중 사이드바용이다. 마감 브리핑의 정규장 수급은 fetch_data.py가 따로 만든다.
+const INVESTOR_TREND_URL = 'https://m.stock.naver.com/api/index/KOSPI/trend';
+
+export function parseInvestorTrend(d) {
+  const raw = [d?.personalValue, d?.foreignValue, d?.institutionalValue];
+  const [individual, foreign, institution] = raw.map((s) => (s == null || String(s).trim() === ''
+    ? NaN : Number(String(s).replace(/[,+]/g, ''))));
+  if (![individual, foreign, institution].every(Number.isFinite)) throw new Error('investor trend: empty');
+  return { individual, foreign, institution };
+}
+
 async function fetchInvestor() {
-  const r = await fetch('https://finance.naver.com/sise/sise_index.naver?code=KOSPI', {
-    headers: { ...HDR, 'Accept-Language': 'ko-KR' },
+  const r = await fetch(INVESTOR_TREND_URL, {
+    headers: { ...HDR, Referer: 'https://m.stock.naver.com/' },
     signal: AbortSignal.timeout(8000),
   });
   if (!r.ok) throw new Error(`investor ${r.status}`);
-  const buf  = await r.arrayBuffer();
-  const text = new TextDecoder('euc-kr').decode(buf);
-
-  // "개인<br><span class="up">+N,NNN<span>억</span>..."
-  const m = text.match(
-    /개인<br>.*?([+-][\d,]+)<span>억.*?외국인<br>.*?([+-][\d,]+)<span>억.*?기관<br>.*?([+-][\d,]+)<span>억/s
-  );
-  if (!m) throw new Error('investor pattern not found');
-
-  const parse = s => parseInt(s.replace(/,/g, '').replace('+', ''), 10);
-  return {
-    individual: parse(m[1]),
-    foreign:    parse(m[2]),
-    institution: parse(m[3]),
-  };
+  return parseInvestorTrend(await r.json());
 }
 
 export default async function handler(req, res) {
