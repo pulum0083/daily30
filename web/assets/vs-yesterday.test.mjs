@@ -152,3 +152,48 @@ test('곡선은 말풍선 자리와 함께 그린다(처음엔 숨김)', () => {
   assert.ok(root.innerHTML.includes('class="vs-plot"'));
   assert.ok(/class="vs-tip"[^>]*hidden/.test(root.innerHTML));
 });
+
+// ── A안 곡선(2026-09-15) — 차이 색 띠·눈금·선 끝 값·지금 선 ──
+const WIDE = { curveT: [[0, 0], [5, -0.2], [120, -0.5]], curveY: [[0, -3], [5, -3.1], [120, -3]] };
+
+test('A안 — 오늘이 위인 구간은 빨강 띠, 아래 구간은 파랑 띠', () => {
+  const { api } = load(kst('2026-09-14T11:00:00'));
+  const up = api.chartSvg(WIDE.curveY, WIDE.curveT);
+  assert.ok(/class="vs-band up"/.test(up) && !/class="vs-band dn"/.test(up));
+  const dn = api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
+  assert.ok(/class="vs-band dn"/.test(dn));
+  assert.equal((dn.match(/<path /g) || []).length, 2, '선은 여전히 두 줄');
+});
+
+test('A안 — 같은 분에 어제 값이 없는 구간은 띠를 채우지 않는다(§0)', () => {
+  const svg = load(kst('2026-09-14T11:00:00')).api.chartSvg([[0, -1]], [[0, 0], [5, 0.2]]);
+  assert.ok(!svg.includes('vs-band'));
+});
+
+test('A안 — 장이 남았으면 지금 선·남은 장 음영, 15:30이면 없다', () => {
+  const { api } = load(kst('2026-09-14T11:00:00'));
+  assert.ok(api.chartSvg(WIDE.curveY, WIDE.curveT).includes('class="vs-rest"'));
+  assert.ok(!api.chartSvg([[0, -1], [390, -2]], [[0, 0], [390, 1]]).includes('vs-rest'));
+});
+
+test('A안 — 세로 눈금·선 끝 값을 그리고, 차이가 크면 괄호와 %p를 단다', () => {
+  const ov = load(kst('2026-09-14T11:00:00')).api.chartOverlay(WIDE.curveY, WIDE.curveT, '어제');
+  assert.ok(ov.left.includes('>0%<'));
+  for (const s of ['−0.50%', '오늘', '−3.00%', '어제']) assert.ok(ov.right.includes(s), `빠짐: ${s}`);
+  assert.ok(ov.plot.includes('vs-gap up') && ov.plot.includes('+2.50%p'));
+  assert.ok(ov.plot.includes('남은 장'));
+});
+
+test('A안 — 두 끝 값이 가까우면 괄호를 빼고 라벨끼리 밀어낸다', () => {
+  const ov = load(kst('2026-09-14T11:00:00')).api.chartOverlay(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT, '지난 금요일');
+  assert.ok(!ov.plot.includes('vs-gap'));
+  const tops = [...ov.right.matchAll(/top:([\d.]+)%/g)].map((m) => Number(m[1]));
+  assert.ok(Math.abs(tops[0] - tops[1]) >= 19.9, `라벨 간격 ${tops}`);
+});
+
+test('A안 — 렌더에 차이 범례·곡선 상자를 넣는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD);
+  assert.ok(root.innerHTML.includes('class="vs-chartbox"'));
+  assert.ok(root.innerHTML.includes('<i class="a"></i>차이'));
+});

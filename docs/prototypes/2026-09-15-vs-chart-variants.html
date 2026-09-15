@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!-- 장중 대결판 코스피 곡선 영역 재디자인 프로토타입 — 9/15 13:34 실측 5분 곡선으로 세 안 비교 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>대결판 곡선 재디자인 (2026-09-15)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0F172A;--muted:#64748B;--faint:#94A3B8;--hair:#E5E7EB;--soft:#F7F9FC;--up:#E03131;--dn:#2775ED;--up-bg:#FEE2E2;--dn-bg:#DBEAFE}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#F1F4F8;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5;font-size:14px}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 16px 80px}
+.num{font-variant-numeric:tabular-nums}.up{color:var(--up)}.dn{color:var(--dn)}
+.intro,.sec{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:20px 18px;margin-bottom:18px}
+.intro h1{font-size:20px;font-weight:800;margin-bottom:6px}.intro p{font-size:13.5px;color:#334155;margin-bottom:4px}
+.sec-h{display:flex;align-items:center;gap:8px;margin-bottom:4px}.sec-h h2{font-size:16px;font-weight:800}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:#EEF2F7;color:var(--muted)}.tag.rec{background:#E0EDFF;color:#1D4ED8}
+.sec-d{font-size:13px;color:var(--muted);margin-bottom:14px}
+.notes{font-size:12.5px;color:var(--muted);margin-top:12px}.notes li{margin-left:16px;margin-bottom:2px}
+/* 사이트 카드(vs-yesterday.css) 값 */
+.vs-card{background:#fff;border:1px solid var(--hair);border-radius:14px;box-shadow:0 1px 3px rgba(15,23,42,.05);padding:14px 16px}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-block;width:18px;border-top:2px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.y{border-top:2px dashed #94A3B8}.legend i.a{width:12px;height:8px;border:0;background:rgba(224,49,49,.18);border-radius:2px}
+.legend .r{margin-left:auto}
+.plot{position:relative}
+.plot svg{display:block;width:100%;overflow:visible}
+.tip{position:absolute;top:4px;min-width:124px;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:0 4px 14px rgba(15,23,42,.10);padding:7px 10px;font-size:11px;color:var(--muted);pointer-events:none;white-space:nowrap}
+.tip b{display:block;font-size:12px;color:var(--ink);margin-bottom:2px}.tip p{display:flex;justify-content:space-between;gap:12px}.tip p span:last-child{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.stat{background:#F7F9FC;border:1px solid #EEF2F7;border-radius:10px;padding:10px 12px;font-size:11px;color:var(--muted)}
+.stat .h{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}.pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:var(--up);background:var(--up-bg)}
+.stat .r{display:flex;justify-content:space-between;align-items:baseline}.stat .r b{font-size:13px}.stat .r b.big{font-size:17px;font-weight:800}
+.stat .d{text-align:right;margin-top:4px}
+@media(max-width:760px){.stats{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="intro">
+  <h1>대결판 코스피 곡선 — 재디자인 세 안</h1>
+  <p>숫자는 2026-09-15 13:34 실제 응답(5분 곡선)이에요. 세 안 모두 마우스를 올리면 툴팁이 떠요.</p>
+  <p>지금 화면의 아쉬운 점 — 13:34인데 09:00~15:30 전체 폭을 써서 오른쪽 40%가 비어 있고, 세로 눈금·선 끝 값이 없어 "얼마나 차이 나는지"를 아래 칸에서 따로 읽어야 해요.</p>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>A안 — 차이를 색 띠로</h2><span class="tag rec">추천</span></div>
+  <p class="sec-d">두 선 사이를 오늘이 위면 빨강, 아래면 파랑으로 옅게 채워요. 선 끝에 지금 값과 차이를 달고, 세로 눈금(%)과 "지금" 선을 둬요. 가로축은 하루 전체라 남은 장 시간이 보여요.</p>
+  <div class="vs-card"><div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div><div class="plot" id="pA"></div>
+    <div class="stats"><div class="stat"><div class="h"><span>코스피</span><span class="pill">오늘이 셈</span></div><div class="r"><span>어제</span><b class="dn num">−2.75%</b></div><div class="r"><span>오늘</span><b class="big dn num">−0.77%</b></div><p class="d num">차이 +1.98%p</p></div><div class="stat"><div class="h"><span>외국인 누적 순매수</span><span class="pill">오늘이 셈</span></div><div class="r"><span>어제</span><b class="dn num">−2.67조</b></div><div class="r"><span>오늘</span><b class="big dn num">−1.20조</b></div><p class="d num">차이 +1.47조</p></div><div class="stat"><div class="h"><span>주도주 3종목 평균</span><span class="pill">오늘이 셈</span></div><div class="r"><span>어제</span><b class="dn num">−4.08%</b></div><div class="r"><span>오늘</span><b class="big dn num">−0.37%</b></div><p class="d num">차이 +3.71%p</p></div></div>
+  </div>
+  <ul class="notes"><li>색 띠 면적이 곧 "하루 동안 어제보다 얼마나 셌나"라서 결론 문장과 그림이 같은 말을 해요.</li><li>선 끝 값 라벨이 비교 칸과 겹치지만, 그래프만 봐도 읽히게 하는 게 목적이에요.</li></ul>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>B안 — 차이 한 줄</h2><span class="tag">대안</span></div>
+  <p class="sec-d">두 곡선 대신 "오늘 − 어제"만 그려요. 0선 위는 오늘이 센 구간(빨강), 아래는 약한 구간(파랑). 메시지가 가장 선명하지만 코스피 자체가 오르고 내린 모양은 사라져요.</p>
+  <div class="vs-card"><div class="legend"><span><i style="border-top-color:#E03131"></i>오늘 − 어제 (%p)</span><span class="r">코스피 · 같은 시각 차이</span></div><div class="plot" id="pB"></div></div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>C안 — 지나온 시간만 확대</h2><span class="tag">대안</span></div>
+  <p class="sec-d">가로축을 09:00~지금으로 줄여 곡선을 크게 보여줘요. 색 띠 없이 세로 눈금·선 끝 값만 더한 가장 작은 변화예요. 장 초반(09:10 등)엔 점 몇 개로 폭을 다 쓰니 확대가 과해질 수 있어요.</p>
+  <div class="vs-card"><div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제 같은 시각까지</span><span class="r">코스피 · 전일 종가 대비</span></div><div class="plot" id="pC"></div></div>
+</div>
+</div>
+
+<script>
+// 9/15 13:34 실제 응답의 5분 곡선 — [09:00부터 경과 분, 전일 종가 대비 %]
+var T=[[0,-0.15],[5,-0.89],[10,-0.53],[15,-0.55],[20,-0.62],[25,-0.03],[30,-0.37],[35,-0.09],[40,0.12],[45,0.24],[50,-0.17],[55,-0.26],[60,-0.42],[65,-0.07],[70,0.01],[75,-0.06],[80,0.25],[85,0.36],[90,-0.03],[95,-0.02],[100,-0.29],[105,-0.31],[110,-0.22],[115,-0.07],[120,-0.06],[125,0.05],[130,-0.04],[135,0.01],[140,0],[145,0.05],[150,0.2],[155,0.41],[160,0.3],[165,0.33],[170,0.39],[175,0.42],[180,0.23],[185,0.19],[190,0.14],[195,0.13],[200,0.05],[205,0.05],[210,0.05],[215,0.09],[220,0],[225,0.08],[230,0.11],[235,-0.16],[240,-0.32],[245,-0.17],[250,-0.3],[255,-0.44],[260,-0.48],[265,-0.89],[270,-0.77],[274,-0.77]];
+var Y=[[0,-3.27],[5,-3.17],[10,-3.03],[15,-3.04],[20,-3.3],[25,-2.85],[30,-3.09],[35,-3.09],[40,-3.25],[45,-2.85],[50,-2.87],[55,-2.92],[60,-3.12],[65,-3.23],[70,-3.36],[75,-3.49],[80,-3.62],[85,-3.52],[90,-3.33],[95,-3.31],[100,-3.09],[105,-3.08],[110,-3.08],[115,-2.97],[120,-2.56],[125,-2.37],[130,-2.22],[135,-2.22],[140,-2.14],[145,-2.15],[150,-2.1],[155,-2.15],[160,-2.25],[165,-2.13],[170,-2.02],[175,-2.05],[180,-2.27],[185,-2.17],[190,-2.22],[195,-2.21],[200,-2.29],[205,-2.29],[210,-2.22],[215,-2.33],[220,-2.45],[225,-2.38],[230,-2.42],[235,-2.46],[240,-2.52],[245,-2.42],[250,-2.6],[255,-2.63],[260,-2.65],[265,-2.54],[270,-2.64],[274,-2.75]];
+var D=T.map(function(p,i){return [p[0],Math.round((p[1]-Y[i][1])*100)/100];});
+
+function hhmm(m){var t=540+m;return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');}
+function f2(n){return (n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(2);}
+function ticks(lo,hi){var step=(hi-lo)>3?1:0.5,out=[];for(var v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)out.push(Math.round(v*100)/100);return out;}
+
+// opts: series [{pts,cls}], xMax(분), band(true면 T·Y 사이 채움), endLabels, now(true면 지금선)
+function draw(el,o){
+  var W=el.clientWidth,H=o.h||210,L=38,R=o.endLabels?78:12,Tp=10,B=24;
+  var all=[0];o.series.forEach(function(s){s.pts.forEach(function(p){all.push(p[1]);});});
+  var lo=Math.min.apply(null,all),hi=Math.max.apply(null,all),pad=(hi-lo)*0.15||0.4;lo-=pad;hi+=pad;
+  var pw=W-L-R,ph=H-Tp-B;
+  function x(m){return L+m/o.xMax*pw;} function y(v){return Tp+(hi-v)/(hi-lo)*ph;}
+  var s='<svg width="'+W+'" height="'+H+'">';
+  ticks(lo,hi).forEach(function(v){s+='<line x1="'+L+'" x2="'+(L+pw)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="'+(v===0?'#CBD5E1':'#F1F5F9')+'" stroke-width="1"/><text x="'+(L-6)+'" y="'+(y(v)+3.5)+'" text-anchor="end" font-size="10.5" fill="#94A3B8">'+(v>0?'+':'')+v+(v===0?'%':'')+'</text>';});
+  var xt=o.xMax>=390?[0,60,120,180,240,300,390]:[0,60,120,180,240].filter(function(m){return m<=o.xMax;}).concat([o.xMax]);
+  xt.forEach(function(m,i){var anchor=i===0?'start':(i===xt.length-1?'end':'middle');s+='<text x="'+x(m)+'" y="'+(H-6)+'" text-anchor="'+anchor+'" font-size="10.5" fill="#94A3B8">'+hhmm(m)+'</text>';});
+  var last=T[T.length-1][0];
+  if(o.now){s+='<rect x="'+x(last)+'" y="'+Tp+'" width="'+(L+pw-x(last))+'" height="'+ph+'" fill="#F8FAFC"/><line x1="'+x(last)+'" x2="'+x(last)+'" y1="'+Tp+'" y2="'+(Tp+ph)+'" stroke="#CBD5E1" stroke-dasharray="3 3"/><text x="'+(x(last)+6)+'" y="'+(Tp+11)+'" font-size="10.5" fill="#94A3B8">남은 장</text>';}
+  if(o.band){ // 오늘·어제 사이를 구간별로 위(빨강)/아래(파랑) 색 띠
+    for(var i=1;i<T.length;i++){var a=T[i-1],b=T[i],c=Y[i-1],d=Y[i];var up=(a[1]+b[1])/2>=(c[1]+d[1])/2;
+      s+='<polygon points="'+x(a[0])+','+y(a[1])+' '+x(b[0])+','+y(b[1])+' '+x(d[0])+','+y(d[1])+' '+x(c[0])+','+y(c[1])+'" fill="'+(up?'rgba(224,49,49,.13)':'rgba(39,117,237,.13)')+'"/>';}
+  }
+  if(o.area){var ps=o.area;var d0=y(0);
+    for(var j=1;j<ps.length;j++){var p=ps[j-1],q=ps[j];s+='<polygon points="'+x(p[0])+','+d0+' '+x(p[0])+','+y(p[1])+' '+x(q[0])+','+y(q[1])+' '+x(q[0])+','+d0+'" fill="'+((p[1]+q[1])/2>=0?'rgba(224,49,49,.14)':'rgba(39,117,237,.14)')+'"/>';}
+  }
+  o.series.forEach(function(se){s+='<path d="'+se.pts.map(function(p,i){return (i?'L':'M')+x(p[0]).toFixed(1)+' '+y(p[1]).toFixed(1);}).join('')+'" fill="none" '+se.attr+'/>';});
+  if(o.endLabels){
+    o.series.forEach(function(se){var p=se.pts[se.pts.length-1];s+='<circle cx="'+x(p[0])+'" cy="'+y(p[1])+'" r="3.5" fill="'+se.dot+'" stroke="#fff" stroke-width="1.5"/><text x="'+(L+pw+8)+'" y="'+(y(p[1])+4)+'" font-size="12" font-weight="800" fill="'+(p[1]<0?'#2775ED':'#E03131')+'">'+f2(p[1])+(se.unit||'%')+'</text><text x="'+(L+pw+8)+'" y="'+(y(p[1])+17)+'" font-size="10" fill="#94A3B8">'+se.name+'</text>';});
+    if(o.band){var tp=T[T.length-1],yp=Y[Y.length-1],mid=(y(tp[1])+y(yp[1]))/2;s+='<line x1="'+(x(last)+10)+'" x2="'+(x(last)+10)+'" y1="'+(y(tp[1])+5)+'" y2="'+(y(yp[1])-5)+'" stroke="#E03131" stroke-width="1.5"/><text x="'+(x(last)+15)+'" y="'+(mid+4)+'" font-size="11.5" font-weight="800" fill="#E03131">'+f2(Math.round((tp[1]-yp[1])*100)/100)+'%p</text>';}
+  }
+  s+='<g class="hv" style="display:none"><line class="g" y1="'+Tp+'" y2="'+(Tp+ph)+'" stroke="#94A3B8"/></g></svg><div class="tip" style="display:none"></div>';
+  el.innerHTML=s;
+  var svg=el.querySelector('svg'),hv=el.querySelector('.hv'),g=el.querySelector('.g'),tip=el.querySelector('.tip');
+  el.onmousemove=function(e){var r=svg.getBoundingClientRect(),m=Math.max(0,Math.min(last,(e.clientX-r.left-L)/pw*o.xMax));var k=Math.round(m/5),pt=T[Math.min(k,T.length-1)];if(Math.abs(T[T.length-1][0]-m)<Math.abs(pt[0]-m))pt=T[T.length-1];var idx=T.indexOf(pt),yy=Y[idx][1],tt=pt[1];
+    g.setAttribute('x1',x(pt[0]));g.setAttribute('x2',x(pt[0]));hv.style.display='';
+    tip.innerHTML='<b>'+hhmm(pt[0])+'</b><p><span>오늘</span><span class="'+(tt<0?'dn':'up')+'">'+f2(tt)+'%</span></p><p><span>어제</span><span class="'+(yy<0?'dn':'up')+'">'+f2(yy)+'%</span></p><p><span>차이</span><span class="'+(tt-yy<0?'dn':'up')+'">'+f2(Math.round((tt-yy)*100)/100)+'%p</span></p>';
+    tip.style.display='';var px=x(pt[0]);tip.style.left=(px>W*0.55?px-tip.offsetWidth-10:px+10)+'px';};
+  el.onmouseleave=function(){hv.style.display='none';tip.style.display='none';};
+}
+function render(){
+  var today={pts:T,attr:'stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"',dot:'#0F172A',name:'오늘'},prev={pts:Y,attr:'stroke="#94A3B8" stroke-width="2" stroke-dasharray="5 4"',dot:'#94A3B8',name:'어제'};
+  draw(document.getElementById('pA'),{series:[prev,today],xMax:390,band:true,endLabels:true,now:true});
+  draw(document.getElementById('pB'),{series:[{pts:D,attr:'stroke="#E03131" stroke-width="2.5" stroke-linejoin="round"',dot:'#E03131',name:'차이',unit:'%p'}],area:D,xMax:390,endLabels:true,now:true,h:180});
+  draw(document.getElementById('pC'),{series:[prev,today],xMax:T[T.length-1][0],endLabels:true});
+}
+render();window.addEventListener('resize',render);
+</script>
+</body>
+</html>
