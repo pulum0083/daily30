@@ -32,15 +32,64 @@
     return { m: best, time: hhmm(best), t: t, y: y, diff: t != null && y != null ? Math.round((t - y) * 100) / 100 : null };
   }
 
+  // 세로 눈금 — 범위가 3%p를 넘으면 1%p, 아니면 0.5%p 간격
+  function ticks(lo, hi) {
+    var step = hi - lo > 3 ? 1 : 0.5, out = [];
+    for (var v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(Math.round(v * 100) / 100);
+    return out;
+  }
+  function tickText(v) { return v === 0 ? '0%' : (v > 0 ? '+' : '−') + Math.abs(v); }
+  function last(pts) { return pts && pts.length ? pts[pts.length - 1] : null; }
+
+  // 곡선 SVG(가로로 늘려 그린다 — 글자는 넣지 않는다). A안: 두 선 사이 색 띠, 눈금선, 지금 선·남은 장 음영.
   function chartSvg(yPts, tPts) {
     var W = 600, H = 180, s = scale(yPts, tPts), lo = s.lo, hi = s.hi;
     function x(m) { return (m / 390 * W).toFixed(1); }
     function y(v) { return ((hi - v) / (hi - lo) * H).toFixed(1); }
     function path(pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p[0]) + ' ' + y(p[1]); }).join(''); }
-    var zero = '<line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" class="vs-zero"/>';
-    return '<svg class="vs-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="코스피 곡선">' + zero +
+    var out = '', ys = {}, lt = last(tPts);
+    ticks(lo, hi).forEach(function (v) { if (v !== 0) out += '<line x1="0" x2="' + W + '" y1="' + y(v) + '" y2="' + y(v) + '" class="vs-grid" vector-effect="non-scaling-stroke"/>'; });
+    if (lt && lt[0] < 390) {
+      out += '<rect x="' + x(lt[0]) + '" y="0" width="' + (W - x(lt[0])).toFixed(1) + '" height="' + H + '" class="vs-rest"/>' +
+        '<line x1="' + x(lt[0]) + '" x2="' + x(lt[0]) + '" y1="0" y2="' + H + '" class="vs-now" vector-effect="non-scaling-stroke"/>';
+    }
+    out += '<line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
+    // 색 띠 — 같은 분에 두 곡선 값이 모두 있는 구간만 채운다(없는 값을 이어 그리지 않는다, §0)
+    (yPts || []).forEach(function (p) { ys[p[0]] = p[1]; });
+    (tPts || []).forEach(function (b, i) {
+      if (!i) return;
+      var a = tPts[i - 1], c = ys[a[0]], d = ys[b[0]];
+      if (c == null || d == null) return;
+      out += '<polygon points="' + x(a[0]) + ',' + y(a[1]) + ' ' + x(b[0]) + ',' + y(b[1]) + ' ' + x(b[0]) + ',' + y(d) + ' ' + x(a[0]) + ',' + y(c) +
+        '" class="vs-band ' + (a[1] + b[1] >= c + d ? 'up' : 'dn') + '"/>';
+    });
+    return '<svg class="vs-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="코스피 곡선">' + out +
       '<path d="' + path(yPts || []) + '" class="vs-line-y" vector-effect="non-scaling-stroke"/>' +
       '<path d="' + path(tPts || []) + '" class="vs-line-t" vector-effect="non-scaling-stroke"/></svg>';
+  }
+
+  // 곡선 위에 겹치는 글자 — 왼쪽 여백 세로 눈금, 오른쪽 여백 선 끝 값, 곡선 안 차이 괄호·'남은 장'.
+  // 늘려 그린 SVG 안에 글자를 넣으면 찌그러지므로 같은 비율(%)로 HTML을 얹는다.
+  function chartOverlay(yPts, tPts, rel) {
+    var s = scale(yPts, tPts), lo = s.lo, hi = s.hi, lt = last(tPts), ly = last(yPts);
+    function top(v) { return (hi - v) / (hi - lo) * 100; }
+    var left = ticks(lo, hi).map(function (v) { return '<span class="vs-ytick" style="top:' + top(v).toFixed(2) + '%">' + tickText(v) + '</span>'; }).join('');
+    var right = '', plot = '';
+    if (lt && ly && lt[0] === ly[0]) {
+      var tt = top(lt[1]), yt = top(ly[1]), gap = Math.abs(tt - yt), MIN = 20;
+      var ta = tt, ya = yt;                          // 끝 값 두 줄이 겹치면 가운데를 기준으로 서로 밀어낸다
+      if (gap < MIN) { var mid = (tt + yt) / 2, sgn = tt <= yt ? -1 : 1; ta = mid + sgn * MIN / 2; ya = mid - sgn * MIN / 2; }
+      ta = Math.max(8, Math.min(92, ta)); ya = Math.max(8, Math.min(92, ya));
+      right = '<span class="vs-end" style="top:' + ta.toFixed(2) + '%"><b class="' + cls(lt[1]) + '">' + f2(lt[1]) + '%</b>오늘</span>' +
+        '<span class="vs-end" style="top:' + ya.toFixed(2) + '%"><b class="' + cls(ly[1]) + '">' + f2(ly[1]) + '%</b>' + rel + '</span>';
+      var diff = Math.round((lt[1] - ly[1]) * 100) / 100, xp = lt[0] / 390 * 100;
+      if (gap >= 16 && diff !== 0) {                 // 괄호·차이 글자를 넣을 틈이 있을 때만
+        plot += '<i class="vs-gapline ' + cls(diff) + '" style="left:' + xp.toFixed(2) + '%;top:' + Math.min(tt, yt).toFixed(2) + '%;height:' + gap.toFixed(2) + '%"></i>' +
+          '<span class="vs-gap ' + cls(diff) + (xp > 70 ? ' l' : '') + '" style="left:' + xp.toFixed(2) + '%;top:' + ((tt + yt) / 2).toFixed(2) + '%">' + f2(diff) + '%p</span>';
+      }
+      if (lt[0] <= 330) plot += '<span class="vs-rest-l" style="left:' + xp.toFixed(2) + '%">남은 장</span>';
+    }
+    return { left: left, right: right, plot: plot };
   }
 
   function stat(title, j, yl, yv, yc, tv, tc, diff) {
@@ -66,7 +115,7 @@
 
   function render(d) {
     if (!root) return;
-    if (!d || d.status !== 'ok') { root.hidden = true; root.innerHTML = ''; return; }
+    if (!d || d.status !== 'ok') { root.hidden = true; root.innerHTML = ''; paintTiles(null); return; }
     var rel = esc(d.prev.rel), html = '';
     if (d.verdict) {
       html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
@@ -77,9 +126,10 @@
     if (d.kospi.diff != null) stats += stat('코스피', d.kospi.judge, d.prev.rel, f2(d.kospi.y) + '%', cls(d.kospi.y), f2(d.kospi.t) + '%', cls(d.kospi.t), f2(d.kospi.diff) + '%p');
     if (d.flow) stats += stat('외국인 누적 순매수', d.flow.judge, d.prev.rel, eok(d.flow.y['외국인']), cls(d.flow.y['외국인']), eok(d.flow.t['외국인']), cls(d.flow.t['외국인']), eok(d.flow.foreignDiff));
     if (d.avg) stats += stat('주도주 3종목 평균', d.avg.judge, d.prev.rel, f2(d.avg.y) + '%', cls(d.avg.y), f2(d.avg.t) + '%', cls(d.avg.t), f2(d.avg.diff) + '%p');
-    html += '<div class="vs-card"><div class="vs-legend"><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="t"></i>오늘</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
-      '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) +
-      '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' +
+    var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
+    html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
+      '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
+      '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
       '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
       (stats ? '<div class="vs-stats">' + stats + '</div>' : '') + '</div>';
 
@@ -94,21 +144,12 @@
         '<div class="vs-issue-cols"><div><p class="vs-col-h">' + rel + ' ' + esc(d.prev.label) + '</p>' + list(d.issues.y) + '</div>' +
         '<div><p class="vs-col-h">오늘 ' + esc(d.today.label) + '</p>' + list(d.issues.t) + '</div></div>';
     }
-    var rows = d.leaders.filter(function (l) { return l.t != null || l.y != null; });
-    if (rows.length) {
-      changed += '<p class="vs-lbl">주도주 · 전일 종가 대비</p><div class="vs-table"><table><thead><tr><th>종목</th><th>' + rel + '</th><th>오늘</th><th>차이</th></tr></thead><tbody>' +
-        rows.map(function (l) {
-          return '<tr><td><b>' + esc(l.name) + '</b></td>' +
-            '<td><span class="' + cls(l.y) + '">' + (l.y != null ? f2(l.y) + '%' : '—') + '</span>' + (l.pxY != null ? '<small>' + fmt(l.pxY) + '</small>' : '') + '</td>' +
-            '<td><span class="' + cls(l.t) + '">' + (l.t != null ? f2(l.t) + '%' : '—') + '</span>' + (l.pxT != null ? '<small>' + fmt(l.pxT) + '</small>' : '') + '</td>' +
-            '<td class="' + cls(l.diff) + '">' + (l.diff != null ? f2(l.diff) + '%p' : '—') + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    }
-    if (d.flow) changed += '<p class="vs-lbl vs-center">투자자별 누적 순매수</p>' + flowRows(d);
+    if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
     if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
 
     root.innerHTML = html;
     root.hidden = false;
+    paintTiles(d);
     bindHover(root.querySelector ? root.querySelector('.vs-plot') : null, d);
   }
 
@@ -137,6 +178,24 @@
     plot.addEventListener('pointerleave', hide);
   }
 
+  // 주도주 타일(#us-linked-widget) 안 '어제 같은 시각' 블록 — 대결판 카드의 표 대신 각 타일에 그린다(§49).
+  // 타일 위 큰 가격은 실시간이라 블록의 '오늘'과 다를 수 있다 — 그래서 블록 머리에 비교한 확정 분을 적는다.
+  function paintTiles(d) {
+    if (typeof document === 'undefined' || !document.querySelectorAll) return;
+    var byCode = {};
+    (d && d.status === 'ok' ? d.leaders || [] : []).forEach(function (l) { byCode[l.code] = l; });
+    [].forEach.call(document.querySelectorAll('#us-linked-widget .us-tile[data-code] .vs-tb'), function (box) {
+      var tile = box.closest('.us-tile'), l = tile && byCode[tile.getAttribute('data-code')];
+      if (!l || l.t == null || l.y == null || l.diff == null) { box.hidden = true; box.innerHTML = ''; return; }
+      var rel = esc(d.prev.rel);
+      box.innerHTML = '<div class="vs-tb-h"><b>' + rel + ' 같은 시각</b><span>' + d.time + ' 기준</span></div>' +
+        '<div class="vs-tb-g"><span class="k">' + rel + '</span><span class="v ' + cls(l.y) + '">' + f2(l.y) + '%</span>' +
+        '<span class="k">오늘</span><span class="v ' + cls(l.t) + '">' + f2(l.t) + '%</span></div>' +
+        '<div class="vs-tb-d"><span>' + rel + '보다</span><span class="p ' + cls(l.diff) + '">' + f2(l.diff) + '%p</span></div>';
+      box.hidden = false;
+    });
+  }
+
   function withJosa(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c >= 0 && c < 11172 && c % 28 ? '과' : '와'); }
 
   function shouldPoll() {
@@ -153,7 +212,7 @@
       .catch(function () { render(null); });
   }
 
-  window.__vsIntraday = { render: render, shouldPoll: shouldPoll, chartSvg: chartSvg, hoverAt: hoverAt };
+  window.__vsIntraday = { render: render, shouldPoll: shouldPoll, chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt };
   if (!root) return;
   load();
   setInterval(load, 60000);
