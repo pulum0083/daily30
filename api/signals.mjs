@@ -1,8 +1,17 @@
 // 종목 신호 통합 API — polling(가격·등락·거래량) + 일봉 스냅샷 조합 → 코어 가공
 import { buildSignals, classifySupply, sectorAverages, SIGNAL_META } from './_signals-core.mjs';
-import { krMarketOpen, krSessionProgress, kstTodayYmd, labelFromYmd, lastTradingDay } from './_market-calendar.mjs';
+import { krMarketOpen, krSessionProgress, kstTodayYmd, labelFromYmd } from './_market-calendar.mjs';
+import { fetchLastRegularSession, lastClosedSessions } from './_kr-regular-session.mjs';
 
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
+
+// 장이 닫힌 뒤 — 실시간 가격·등락률·거래량은 애프터장(16:00~20:00) 체결을 따른다(§48). 2026-09-15 16:04
+// SK하이닉스 closePriceRaw 1,688,000·-0.53%·거래량 2,549,066 vs 15:30 종가 1,690,000·정규장 1분봉 합 2,547,696.
+// 그래서 마지막 정규장 1분봉으로 만든 값을 쓴다(공용 모듈, §30).
+async function closedOne(code) {
+  const s = await fetchLastRegularSession(code);
+  return s ? { code, pct: s.changePct, vol: s.volume, price: s.close } : null;
+}
 
 async function pollOne(code) {
   try {
@@ -55,8 +64,9 @@ export default async function handler(req, res) {
     if (!snap || !snap.stocks) return res.status(502).json({ error: 'snapshot unavailable' });
     const stockCodes = Object.keys(snap.stocks);
 
+    const phase = krMarketOpen() ? 'intraday' : 'closed';
     const [stockPolls, kPct] = await Promise.all([
-      Promise.all(stockCodes.map(pollOne)),
+      Promise.all(stockCodes.map(phase === 'intraday' ? pollOne : closedOne)),
       kospiPct(),
     ]);
 
@@ -69,11 +79,10 @@ export default async function handler(req, res) {
                vol_avg20: s.vol_avg20 || 0, wk52_high: s.wk52_high || 0, amount: p.price * p.vol };
     }).filter(Boolean);
 
-    const phase = krMarketOpen() ? 'intraday' : 'closed';
-    // 데이터 기준일: 장중이면 오늘(라이브), 마감이면 스냅샷 생성일을 마지막 거래일로 보정
-    // (스냅샷이 주말·공휴일에 생성되면 generated_at이 비거래일이라 라벨이 틀어진다)
-    const snapDate = String(snap.generated_at || '').slice(0, 10);
-    const asOfDate = phase === 'intraday' ? kstTodayYmd() : lastTradingDay(snapDate || kstTodayYmd());
+    // 데이터 기준일: 장중이면 오늘(라이브), 마감이면 값을 만든 마지막 정규장 날짜(스냅샷 생성일이 아니다 —
+    // 15:31~16:35엔 스냅샷이 아직 전날 것이다)
+    const closed = lastClosedSessions().session;
+    const asOfDate = phase === 'intraday' ? kstTodayYmd() : `${closed.slice(0, 4)}-${closed.slice(4, 6)}-${closed.slice(6)}`;
     const asOf = { date: asOfDate, label: labelFromYmd(asOfDate), isToday: phase === 'intraday' };
     // 수급 신호는 장중에도 켠다. 단 네이버 trend API는 장중에 당일 행을 주지 않아(최신 = 전일)
     // 판정 근거가 전일 확정치다 — '잠정'이 아니라 '전일 기준'으로 사실대로 표기한다.
