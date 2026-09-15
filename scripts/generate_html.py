@@ -1720,16 +1720,16 @@ def write_briefings_list_json():
 
 
 def _naver_dated_rows(code, days=130):
-    """네이버 일봉 [{localDate, closePrice}] 리스트 (오래된→최신)."""
-    import urllib.request
-    from datetime import timedelta
-    end = datetime.now().strftime("%Y%m%d") + "0000"
-    start = (datetime.now() - timedelta(days=days)).strftime("%Y%m%d") + "0000"
-    url = (f"https://api.stock.naver.com/chart/domestic/item/{code}/day"
-           f"?startDateTime={start}&endDateTime={end}")
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        rows = json.loads(resp.read())
+    """정규장 공식 종가 일봉 [{localDate, closePrice}] 리스트 (오래된→최신).
+
+    픽 채점과 스파크라인 날짜가 쓴다. 원본 네이버 일봉은 9/14부터 종가가 애프터장 가격이라(§48)
+    시세와 같은 소스(kr_official_closes)를 쓴다 — 스파크라인 종가(스냅샷)와 날짜 목록도 같은 봉 집합이 된다.
+    """
+    try:
+        from scripts.kr_official_closes import official_day_rows
+    except ImportError:
+        from kr_official_closes import official_day_rows
+    rows = official_day_rows(code, days=days)
     return [r for r in rows if r.get("localDate") and r.get("closePrice")]
 
 
