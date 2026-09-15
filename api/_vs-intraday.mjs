@@ -1,6 +1,6 @@
 // '어제랑 비교해서' 장중 대결판 응답 조립 — 코스피·수급·주도주·이슈를 직전 거래일 같은 시각과 맞댄다(설계 §4.2)
 import { TH, prevTradingDay, relLabel, atOrBefore, pct, round2, judge, tickOk, verdict } from './_vs-core.mjs';
-import { flowAt } from './_vs-flow.mjs';
+import { flowAt, parseInvestorTimePage } from './_vs-flow.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
 // _vs-issues.mjs(issuesUntil·keywordDiff)는 지금 쓰지 않는다 — 아래 issues:null 주석 참고(C2). 계산 코드·사전은
 // 남겨둔다(설계 남기기 — 불변 장중 기록이 생기면 다시 켠다).
@@ -25,6 +25,29 @@ export async function getEucKr(url) {
 }
 
 const settle = (p, fallback) => Promise.resolve().then(() => p).catch(() => fallback);
+
+// 어제 데이터(직전 거래일 1분봉·전일 종가·수급 표 페이지)는 다시 바뀌지 않는다. 엣지 캐시가 풀려 새로 조립할 때마다
+// 네이버를 27번씩 부르던 것을 오늘 데이터만 부르게 줄인다(Fluid Compute는 인스턴스를 재사용한다 — 콜드 스타트면 처음부터).
+// 캐시는 fetch 함수별로 따로 둔다(테스트의 가짜 fetch끼리 섞이지 않게). 날짜가 바뀌면 통째로 비운다.
+const MEMO = new WeakMap();
+function memoFor(fn, day) {
+  let m = MEMO.get(fn);
+  if (!m || m.day !== day) { m = { day, map: new Map() }; MEMO.set(fn, m); }
+  return m.map;
+}
+// 진행 중인 요청도 공유한다(같은 조립 안에서 두 번 부르지 않게). 비었거나 실패한 결과는 담지 않는다 —
+// 원천이 잠깐 빈 응답을 줬을 때 그 빈칸이 하루 종일 굳지 않게.
+function remember(map, key, make, keep) {
+  if (map.has(key)) return map.get(key);
+  const p = Promise.resolve().then(make).then(
+    (v) => { if (!keep(v)) map.delete(key); return v; },
+    (e) => { map.delete(key); throw e; },
+  );
+  map.set(key, p);
+  return p;
+}
+const hasRows = (v) => Array.isArray(v) && v.length > 0;
+const isNum = (v) => typeof v === 'number';
 const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2, 4));
 // 지금 분의 봉은 아직 만들어지는 중이다 — 그 값을 확정된 어제 봉과 맞대면 최대 1분 어긋난다(9/15 10:11 실측:
 // 진행 중 −0.02% vs 확정 −0.16%). 막 끝난 분의 봉도 바로 굳지 않는다 — 9/15 13:30 봉을 5초 간격으로 다시 읽으니
@@ -42,21 +65,24 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   const yDash = prevTradingDay(dash);
   const T = dash.replace(/-/g, ''), Y = yDash.replace(/-/g, '');
   const rel = relLabel(yDash, dash);
+  const memoJ = memoFor(fetchJson, T), memoT = memoFor(fetchText, T);
+  const once = (key, make, keep) => remember(memoJ, key, make, keep);
+  const textY = (url) => remember(memoT, url, () => fetchText(url), (h) => parseInvestorTimePage(h).length > 0);
 
   // 코스피와 주도주 1분봉을 먼저 모은다 — 비교 시각은 이 둘과 수급 표를 모두 본 뒤에 정한다.
   const [kospiRaw, leadersRaw] = await Promise.all([
     Promise.all([
       settle(minuteBars('index', 'KOSPI', T, fetchJson, '0900', hhmm), []),
-      settle(minuteBars('index', 'KOSPI', Y, fetchJson), []),
-      settle(prevClose('index', 'KOSPI', T, fetchJson), null),
-      settle(prevClose('index', 'KOSPI', Y, fetchJson), null),
+      settle(once('kY', () => minuteBars('index', 'KOSPI', Y, fetchJson), hasRows), []),
+      settle(once('kBaseT', () => prevClose('index', 'KOSPI', T, fetchJson), isNum), null),
+      settle(once('kBaseY', () => prevClose('index', 'KOSPI', Y, fetchJson), isNum), null),
     ]),
     Promise.all(LEADERS.map(async ([code, name]) => {
       const [bT, bY, pT, pY] = await Promise.all([
         settle(minuteBars('item', code, T, fetchJson, '0900', hhmm), []),
-        settle(minuteBars('item', code, Y, fetchJson), []),
-        settle(prevClose('item', code, T, fetchJson), null),
-        settle(prevClose('item', code, Y, fetchJson), null),
+        settle(once(`bY:${code}`, () => minuteBars('item', code, Y, fetchJson), hasRows), []),
+        settle(once(`pT:${code}`, () => prevClose('item', code, T, fetchJson), isNum), null),
+        settle(once(`pY:${code}`, () => prevClose('item', code, Y, fetchJson), isNum), null),
       ]);
       return { code, name, bT: completed(bT, hhmm), bY, pT, pY };
     })),
@@ -80,7 +106,7 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   const fT = await settle(flowAt(T, at, fetchText), null);
   const flowOk = !!fT && fresh(fT.t.replace(':', ''), at);
   if (flowOk && fT.t.replace(':', '') < at) at = fT.t.replace(':', '');
-  const fY = flowOk ? await settle(flowAt(Y, at, fetchText), null) : null;
+  const fY = flowOk ? await settle(flowAt(Y, at, textY), null) : null;
   const flow = flowOk && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
   if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
 

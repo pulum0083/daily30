@@ -147,3 +147,29 @@ test('이슈는 항상 null — 이슈 아카이브·키워드 사전을 부르�
   assert.equal(d.status, 'ok');
   assert.equal(d.issues, null);
 });
+
+test('어제 데이터는 인스턴스 메모리에서 재사용한다 — 두 번째 조립은 오늘 것만 다시 부른다', async () => {
+  const f = fakes(), seen = [];
+  const fetchJson = async (u) => { seen.push(u); return f.fetchJson(u); };
+  const fetchText = async (u) => { seen.push(u); return f.fetchText(u); };
+  const a = await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText });
+  const first = seen.length;
+  seen.length = 0;
+  const b = await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText });
+  assert.deepEqual(b.kospi, a.kospi, '재사용해도 값은 같다');
+  assert.ok(seen.length < first, `${seen.length} < ${first}`);
+  // 값이 있던 원천(코스피·005930·수급 표)은 오늘 것만 다시 부른다
+  const withData = seen.filter((u) => !/000660|005380/.test(u));
+  assert.ok(withData.every((u) => /startDateTime=202609140900|bizdate=20260914/.test(u)), withData.join('\n'));
+  // 비어 있던 어제 원천(000660·005380 테스트 가짜는 빈 배열)은 담지 않아 다시 부른다
+  assert.ok(seen.some((u) => /000660\/minute\?startDateTime=202609110900/.test(u)));
+});
+
+test('어제 데이터 캐시는 날짜가 바뀌면 비운다', async () => {
+  const f = fakes(), seen = [];
+  const fetchJson = async (u) => { seen.push(u); return f.fetchJson(u); };
+  await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText: f.fetchText });
+  seen.length = 0;
+  await buildIntradayVs({ now: kst('2026-09-15T11:02:30'), fetchJson, fetchText: f.fetchText }).catch(() => null);
+  assert.ok(seen.some((u) => /KOSPI\/minute\?startDateTime=202609140900/.test(u)), '9/15 조립에선 9/14가 어제라 새로 부른다');
+});
