@@ -69,3 +69,13 @@
   .vs-stats,.vs-issue-cols{grid-template-columns:minmax(0,1fr)}
   .vs-frow{grid-template-columns:60px minmax(0,1fr) 60px;column-gap:8px}
 }
+/* 코스피 곡선 마우스 오버 — 세로 안내선·두 점·말풍선(값은 곡선에 실제로 있는 샘플 점만) */
+.vs-plot{position:relative;cursor:crosshair;touch-action:pan-y}
+.vs-guide{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8;pointer-events:none}
+.vs-dot{position:absolute;width:9px;height:9px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15);transform:translate(-50%,-50%);pointer-events:none}
+.vs-dot.t{background:#0F172A} .vs-dot.y{background:#94A3B8}
+.vs-tip{position:absolute;top:6px;min-width:128px;background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);padding:7px 10px;font-size:11px;color:var(--muted);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:2}
+.vs-tip b{display:block;font-size:12px;font-weight:800;color:#0F172A;margin-bottom:3px}
+.vs-tip p{display:flex;justify-content:space-between;gap:12px;margin:1px 0}
+.vs-tip p span:last-child{font-weight:700}
+.vs-tip p.d{border-top:1px solid #F1F5F9;margin-top:4px;padding-top:4px}

@@ -935,65 +935,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
 @keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
 
-/* ── 🧭 이번 주 자금 지도 (ETF 자금흐름 히트맵) ── */
-#flow-block .block__t::before{background:#0F172A;}
-.flow-body{padding:14px 16px 4px;display:flex;flex-direction:column;gap:5px;}
-.flow-row{display:flex;gap:5px;}
-.flow-tile{border-radius:8px;padding:7px 11px;display:flex;flex-direction:column;justify-content:center;gap:3px;overflow:hidden;min-width:0;cursor:pointer;transition:transform .12s ease;}
-.flow-tile:active{transform:scale(.985);}
-.flow-tile .ft-nm{font-size:12px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.flow-tile .ft-amt{font-size:13px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums;}
-/* 클릭 시 부드럽게 펼쳐지는 확장 목록 — JS가 실측 px 높이로 직접 애니메이션(grid-rows 0fr/1fr은 브라우저마다 프레임별 트랙 재계산이 버벅여 교체됨) */
-.ft-expand{overflow:hidden;height:0;opacity:0;margin-top:0;transition:height .28s cubic-bezier(.22,.61,.36,1),opacity .22s ease,margin-top .28s cubic-bezier(.22,.61,.36,1);}
-.ft-expand.open{opacity:1;margin-top:5px;}
-.ft-expand-in{background:var(--soft,#F7F9FC);border-radius:8px;padding:6px 12px;}
-@media(prefers-reduced-motion:reduce){.ft-expand{transition:none;}.flow-tile{transition:none;}}
-.ft-ex-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hair,#EEF2F7);}
-.ft-ex-row:last-child{border-bottom:none;}
-.ft-in{color:#E03131;font-weight:700;font-variant-numeric:tabular-nums;}
-.ft-out{color:#2775ED;font-weight:700;font-variant-numeric:tabular-nums;}
-/* 확장 패널 — 일별 막대 · 집중도 · 유입/유출 그룹 (2026-07-31) */
-.ft-sub{font-size:11px;color:var(--muted);margin:7px 0 4px;line-height:1.45;}
-.ft-sub b{color:#0F172A;}
-/* 0축 기준 발산 — 유입은 위, 유출은 아래. 색만이 아니라 위치로도 방향을 읽게 한다.
-   폭을 470px로 묶고 가운데 정렬한다. 홈 위젯 본문이 638px까지 넓어지는데 .ftd-col이
-   flex:1로 그 폭을 다 나눠 먹으면 막대 하나가 123px 폭 × 13px 높이(가로세로 9.4:1)가 된다 —
-   가로:세로 3:1을 넘으면 막대가 아니라 납작한 판으로 읽힌다. 자금 지도 탭의 일별 차트
-   (flow-map.css .fmap-days)와 같은 규약이다. 막대 폭도 54px로 함께 묶어야 컬럼만 좁아지고
-   막대는 그대로인 상태를 막는다. */
-.ftd{display:flex;gap:6px;margin:2px auto 4px;max-width:470px;}
-.ftd-col{flex:1;display:flex;flex-direction:column;align-items:center;min-width:0;}
-.ftd-up,.ftd-dn{width:100%;display:flex;flex-direction:column;align-items:center;height:38px;}
-.ftd-up{justify-content:flex-end;}
-.ftd-dn{justify-content:flex-start;height:26px;}
-.ftd-zero{height:1px;width:100%;background:#CBD5E1;}
-.ftd-bar{display:block;width:54px;max-width:100%;}
-.ftd-bar.p{background:rgba(224,49,49,.82);border-radius:3px 3px 0 0;}
-.ftd-bar.m{background:rgba(39,117,237,.82);border-radius:0 0 3px 3px;}
-.ftd-v{font-size:9.5px;font-weight:800;margin-bottom:2px;white-space:nowrap;}
-.ftd-v.b{margin:2px 0 0;}
-.ftd-d{font-size:9.5px;color:var(--muted);margin-top:4px;white-space:nowrap;}
-.ftd+.ft-sub{margin-top:12px;padding-top:10px;border-top:1px solid var(--hair,#EEF2F7);}
-.ft-gauge{height:7px;border-radius:4px;background:#E8EDF4;overflow:hidden;margin:0 0 9px;}
-.ft-gauge i{display:block;height:100%;background:rgba(224,49,49,.75);}
-.ft-grp{margin-bottom:7px;}
-/* 헤더는 흰 카드 밖에 있어 padding이 없으면 합계가 아래 행 금액과 어긋난다 — 행과 동일한 좌우 여백을 준다 */
-.ft-grp-h{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;margin-bottom:5px;padding:0 9px;}
-.ft-grp-h .dot{width:7px;height:7px;border-radius:2px;background:currentColor;}
-.ft-grp-h .sum{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;}
-.ft-grp-r{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12.5px;
-  background:#fff;border-radius:7px;padding:5px 9px;margin-bottom:3px;}
-.ft-grp-r .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.ft-grp-r .v{white-space:nowrap;}
-.flow-quiet{font-size:12px;color:var(--muted);margin:9px 16px 0;}
-.flow-leg{font-size:11px;color:var(--muted);padding:11px 16px 14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
-.flow-scale{display:inline-flex;vertical-align:middle;}
-.flow-scale i{width:15px;height:11px;display:inline-block;}
-@media(max-width:640px){
-  .flow-tile .ft-nm{font-size:11px;}
-  .flow-tile .ft-amt{font-size:11px;}
-}
-
 .gnb__tg-btn{width:30px;height:30px;border-radius:8px;background:rgba(90,162,255,.14);color:#5AA2FF;display:flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;}
 .gnb__tg-btn:hover{background:rgba(90,162,255,.24);color:#8CBFFF;}
 .gnb__tg-btn svg{width:15px;height:15px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}

@@ -100,3 +100,33 @@ test('곡선 SVG — 두 선을 그린다', () => {
   const svg = load(kst('2026-09-14T11:00:00')).api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
   assert.equal((svg.match(/<path /g) || []).length, 2);
 });
+
+test('마우스 오버 — 가장 가까운 샘플 점의 오늘·어제·차이를 준다(보간 없음)', () => {
+  const { api } = load(kst('2026-09-15T09:20:00'));
+  const y = [[0, -3.27], [5, -3.17], [10, -3.03], [14, -3.1]];
+  const t = [[0, -0.15], [5, -0.89], [10, -0.53], [14, -0.49]];
+  const h = api.hoverAt(y, t, 6 / 390);
+  assert.equal(h.m, 5);
+  assert.equal(h.time, '09:05');
+  assert.equal(h.t, -0.89);
+  assert.equal(h.y, -3.17);
+  assert.equal(h.diff, 2.28);
+  const far = api.hoverAt(y, t, 0.9);
+  assert.equal(far.m, 14, '곡선이 끝난 오른쪽은 마지막 점에 붙는다');
+  assert.equal(far.time, '09:14');
+  assert.equal(api.hoverAt([], [], 0.5), null);
+});
+
+test('마우스 오버 — 한쪽 곡선에만 있는 점이면 차이를 비운다', () => {
+  const h = load(kst('2026-09-15T09:20:00')).api.hoverAt([[0, -1]], [[0, 0.5], [5, 0.7]], 5 / 390);
+  assert.equal(h.t, 0.7);
+  assert.equal(h.y, null);
+  assert.equal(h.diff, null);
+});
+
+test('곡선은 말풍선 자리와 함께 그린다(처음엔 숨김)', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD);
+  assert.ok(root.innerHTML.includes('class="vs-plot"'));
+  assert.ok(/class="vs-tip"[^>]*hidden/.test(root.innerHTML));
+});
