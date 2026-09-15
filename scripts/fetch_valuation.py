@@ -82,9 +82,34 @@ def fetch_stock(code: str) -> dict | None:
         "industryCode": d.get("industryCode"),
         "per": _num(ti, "per"),
         "cnsPer": _num(ti, "cnsPer"),
+        "eps": _num(ti, "eps"),
+        "cnsEps": _num(ti, "cnsEps"),
         "pbr": _num(ti, "pbr"),
         "mktcap": ti.get("marketValue", {}).get("value", ""),
     }
+
+
+def regular_session_open(now) -> bool:
+    """integration의 PER이 정규장 가격 기반인 시간대(09:00~15:30 KST)인가."""
+    return "0900" <= now.strftime("%H%M") <= "1530"
+
+
+def rebase_per_on_close(row: dict, close) -> dict:
+    """PER·선행 PER을 정규장 공식 종가 ÷ EPS로 다시 계산한다(§48).
+
+    integration의 PER은 실시간 가격(약간 지연) ÷ EPS다 — 2026-09-15 실측으로 EPS가 그대로인데 75초 사이에
+    PER이 바뀌었고, 16:04·16:40에는 애프터장 가격을 따라갔다(SK하이닉스 7.52 → 7.53). 반올림된 EPS로도
+    PER이 재현된다(삼성전자 248,500 / 22,292 = 11.15). 원천에 PER 값이 있을 때만 다시 계산하고
+    (적자·N/A는 그대로 None), 종가를 못 구하면 두 PER 모두 비운다 — 애프터장 가격 기반 값을 남기지 않는다.
+    """
+    out = dict(row)
+    for per_key, eps_key in (("per", "eps"), ("cnsPer", "cnsEps")):
+        eps = row.get(eps_key)
+        if row.get(per_key) is None or not eps or close is None:
+            out[per_key] = None
+        else:
+            out[per_key] = round(close / eps, 2)
+    return out
 
 
 def industry_name(code: str, cache: dict) -> str:
@@ -123,11 +148,32 @@ def main():
     for i, c in enumerate(codes):
         r = fetch_stock(c)
         if r:
-            r["eff_per"], r["basis"] = eff_per(r)
             rows.append(r)
         time.sleep(0.05)
         if (i + 1) % 50 == 0:
             print(f"  {i + 1}/{len(codes)}")
+
+    now = datetime.now(KST)
+    as_of = now.strftime("%Y-%m-%d")
+    if not regular_session_open(now):
+        # 마감 잡(16:25)은 애프터장 한복판이라 integration PER이 애프터장 가격을 따른다(§48).
+        try:
+            from kr_official_closes import last_closed_session, regular_close
+        except ImportError:
+            from scripts.kr_official_closes import last_closed_session, regular_close
+        session = last_closed_session(now)
+        print(f"정규장 밖 실행 — PER을 {session} 정규장 종가 ÷ EPS로 다시 계산")
+        closes = {}
+        for r in rows:
+            closes[r["code"]] = regular_close(r["code"], session)
+            time.sleep(0.05)
+        if not any(v is not None for v in closes.values()):
+            print("정규장 종가를 한 건도 못 구함 — 기존 valuation.json을 덮지 않는다", file=sys.stderr)
+            sys.exit(1)
+        rows = [rebase_per_on_close(r, closes[r["code"]]) for r in rows]
+        as_of = f"{session[:4]}-{session[4:6]}-{session[6:]}"
+    for r in rows:
+        r["eff_per"], r["basis"] = eff_per(r)
 
     # 업종별 중앙값 (유효 종목 MIN_SECTOR_SIZE 이상)
     by_ind = defaultdict(list)
@@ -161,7 +207,7 @@ def main():
     overvalued = sorted([o for o in out if o["disc"] > 0], key=lambda x: -x["disc"])
 
     payload = {
-        "asOf": datetime.now(KST).strftime("%Y-%m-%d"),
+        "asOf": as_of,
         "generatedAt": datetime.now(KST).isoformat(),
         "universe": "코스피200",
         "universeCount": len(rows),
