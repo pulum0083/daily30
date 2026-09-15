@@ -101,3 +101,22 @@ def test_pick_events_gray_fallback_when_no_red(monkeypatch):
 def test_pick_events_empty_when_no_articles(monkeypatch):
     _stub_articles(monkeypatch, [])
     assert m.pick_events("테스트", "2026-06-27", -4.0) == []
+
+
+
+def test_fetch_mover_rows_after_close_uses_official_today_not_realtime(monkeypatch):
+    """2026-09-15 16:35 — 실시간 SK하이닉스는 -0.53%(애프터장 포함), 공식 종가끼리는 -0.41%."""
+    from datetime import datetime
+    import kr_official_closes as koc
+    monkeypatch.setattr(m, "_load_universe", lambda: [{"code": "000660", "name": "SK하이닉스"},
+                                                      {"code": "005930", "name": "삼성전자"}])
+    monkeypatch.setattr(m, "_load_vol_avg20", lambda: {"000660": 2500000})
+    quotes = {"000660": {"close": 1690000.0, "change_pct": -0.41, "volume": 2547696}}
+    monkeypatch.setattr(koc, "official_today", lambda code, now=None: quotes.get(code))
+
+    def no_poll(*a, **k):
+        raise AssertionError("장 마감 뒤 실시간 시세는 애프터장 값이라 부르면 안 된다")
+    monkeypatch.setattr(m.urllib.request, "urlopen", no_poll)
+    rows = m.fetch_mover_rows(now=datetime(2026, 9, 15, 16, 35, tzinfo=m.KST))
+    assert [(r["code"], r["change_pct"], r["volume"]) for r in rows] == [("000660", -0.41, 2547696.0)]
+    assert round(rows[0]["surge"], 3) == round(2547696 / 2500000, 3)   # 오늘 봉이 없는 삼성전자는 건너뛴다
