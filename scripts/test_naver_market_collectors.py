@@ -27,10 +27,14 @@ def isolated(monkeypatch):
     """실행마다 실패 목록을 비우고, 공식 종가 저장소(data/kr_official_closes.json)를 읽지 않게 한다."""
     monkeypatch.setattr(fc, "_source_failures", [])
     monkeypatch.setattr(fc, "_after_market_skips", [])
+    import importlib
     for name in ("kr_official_closes", "scripts.kr_official_closes"):
-        mod = sys.modules.get(name)
-        if mod is not None:
-            monkeypatch.setattr(mod, "_cache", {})
+        try:
+            mod = importlib.import_module(name)   # 아직 import 전이어도 막는다 — 첫 조회가 실제 저장소를 읽지 않게
+        except ImportError:
+            continue
+        monkeypatch.setattr(mod, "_cache", {})
+        monkeypatch.setattr(mod, "_vcache", {})
 
 
 # ── 시장 폭 ──────────────────────────────────────────────────────────────────

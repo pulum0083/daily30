@@ -15,6 +15,14 @@ DAY_ROWS = [
     {"localDate": "20260911", "closePrice": 1812000.0, "accumulatedTradingVolume": 2625165},
     {"localDate": "20260914", "closePrice": 1688000.0, "accumulatedTradingVolume": 3799906},
 ]
+# 정규장 1분봉(요약) — 09:00~15:29 합 3,492,572 + 15:30 봉 250,333 = 정규장 3,742,905(9/14 실측 합).
+# 16:00 봉은 애프터장이라 합에 들어가면 안 된다. 전날 날짜 봉도 섞이면 안 된다.
+BARS_0914 = [
+    {"localDateTime": "20260911153000", "currentPrice": 1812000.0, "accumulatedTradingVolume": 999999},
+    {"localDateTime": "20260914090000", "currentPrice": 1718000.0, "accumulatedTradingVolume": 3492572},
+    {"localDateTime": "20260914153000", "currentPrice": 1697000.0, "accumulatedTradingVolume": 250333},
+    {"localDateTime": "20260914160000", "currentPrice": 1693000.0, "accumulatedTradingVolume": 405},
+]
 BAR_1530 = [{"localDateTime": "20260914153000", "currentPrice": 1697000.0}]
 
 
@@ -22,6 +30,7 @@ BAR_1530 = [{"localDateTime": "20260914153000", "currentPrice": 1697000.0}]
 def _isolated_cache(monkeypatch, tmp_path):
     """테스트끼리 공식 종가 저장소를 공유하지 않게 비운다(실제 data/ 파일도 건드리지 않는다)."""
     monkeypatch.setattr(koc, "_cache", {})
+    monkeypatch.setattr(koc, "_vcache", {})
     monkeypatch.setattr(koc, "_dirty", False)
     monkeypatch.setattr(koc, "CACHE_PATH", tmp_path / "kr_official_closes.json")
 
@@ -47,8 +56,26 @@ def at(hhmm, day="20260914"):
 def test_after_close_today_row_uses_1530_bar():
     rows = koc.official_day_rows("000660", now=at("1710"), fetch=fake())
     assert rows[-1]["closePrice"] == 1697000.0          # 애프터장 1,688,000이 아니라 공식 종가
-    assert rows[-1]["accumulatedTradingVolume"] == 3799906  # 다른 필드는 그대로
     assert rows[0]["closePrice"] == 1812000.0             # 과거 봉은 건드리지 않는다
+    assert rows[0]["accumulatedTradingVolume"] == 2625165
+
+
+def test_aftermarket_volume_replaced_by_regular_session_sum():
+    """9/14 일봉 거래량 4,001,549에는 애프터장 256,370이 들어 있다. 정규장 1분봉 합만 남긴다."""
+    rows = koc.official_day_rows("000660", now=at("2010"), fetch=fake(minute=BARS_0914))
+    assert rows[-1]["closePrice"] == 1697000.0
+    assert rows[-1]["accumulatedTradingVolume"] == 3742905
+
+
+def test_volume_missing_is_emptied_not_left_as_aftermarket_value():
+    rows = koc.official_day_rows("000660", now=at("1710"), fetch=fake(minute=BAR_1530))
+    assert rows[-1]["accumulatedTradingVolume"] is None   # 원본 3,799,906(애프터장 포함)을 남기지 않는다
+
+
+def test_regular_session_ignores_other_days_and_aftermarket_bars():
+    s = koc.regular_session("000660", "20260914", fetch=lambda url: BARS_0914)
+    assert s == {"close": 1697000.0, "volume": 3742905}
+    assert koc.regular_session("000660", "20260914", fetch=lambda url: BARS_0914[:2]) is None  # 15:30 봉 없음
 
 
 def test_missing_1530_bar_drops_today_instead_of_using_drifted_price():
@@ -116,14 +143,19 @@ PAST_ROWS = [
 ]
 
 
-def minute_by_date(prices, calls=None):
+def minute_by_date(prices, calls=None, volumes=None):
     def _f(url):
         if calls is not None:
             calls.append(url)
         if "/day?" in url:
             return [dict(r) for r in PAST_ROWS]
         d = url.split("startDateTime=")[1][:8]
-        return [{"localDateTime": f"{d}153000", "currentPrice": prices[d]}] if d in prices else []
+        if d not in prices:
+            return []
+        bar = {"localDateTime": f"{d}153000", "currentPrice": prices[d]}
+        if volumes and d in volumes:
+            bar["accumulatedTradingVolume"] = volumes[d]
+        return [bar]
     return _f
 
 
@@ -135,14 +167,27 @@ def test_past_aftermarket_day_uses_1530_bar_not_daily_close():
     assert not any("startDateTime=20260911" in u for u in calls)   # 애프터마켓 전 날짜는 일봉 그대로
 
 
-def test_saved_close_is_used_without_minute_lookup():
+def test_saved_close_and_volume_are_used_without_minute_lookup():
     koc._cache = {"000660": {"20260914": 1697000.0}}
+    koc._vcache = {"000660": {"20260914": 3742905}}
     calls = []
     rows = koc.official_day_rows("000660", now=at("1000", day="20260915"),
                                  fetch=minute_by_date({}, calls))
     assert rows[1]["closePrice"] == 1697000.0
+    assert rows[1]["accumulatedTradingVolume"] == 3742905
     assert not any("/minute?" in u for u in calls)                  # 9/15는 장중이라 조회하지 않는다
     assert rows[2]["closePrice"] == 1700000.0
+
+
+def test_saved_close_without_volume_backfills_volume_and_keeps_saved_close():
+    """거래량 저장 이전(9/14 밤)에 쌓인 종가는 거래량만 1분봉으로 채운다."""
+    koc._cache = {"000660": {"20260914": 1697000.0}}
+    rows = koc.official_day_rows("000660", now=at("1700", day="20260915"),
+                                 fetch=minute_by_date({"20260914": 1697000.0, "20260915": 1705000.0},
+                                                      volumes={"20260914": 3742905, "20260915": 2100000}))
+    assert rows[1]["closePrice"] == 1697000.0
+    assert rows[1]["accumulatedTradingVolume"] == 3742905
+    assert koc._vcache["000660"] == {"20260914": 3742905, "20260915": 2100000}
 
 
 def test_past_day_without_official_close_is_dropped():
@@ -151,12 +196,24 @@ def test_past_day_without_official_close_is_dropped():
     assert [r["localDate"] for r in rows] == ["20260911", "20260915"]
 
 
-def test_save_cache_writes_only_new_closes():
+def test_save_cache_writes_only_new_closes_and_volumes():
     assert koc.save_cache() is False
     koc.official_day_rows("000660", now=at("1700", day="20260915"),
-                          fetch=minute_by_date({"20260914": 1697000.0, "20260915": 1705000.0}))
+                          fetch=minute_by_date({"20260914": 1697000.0, "20260915": 1705000.0},
+                                               volumes={"20260914": 3742905}))
     assert koc.save_cache() is True
     import json
     body = json.loads(koc.CACHE_PATH.read_text(encoding="utf-8"))
     assert body["closes"]["000660"] == {"20260914": 1697000.0, "20260915": 1705000.0}
+    assert body["volumes"]["000660"] == {"20260914": 3742905}
     assert koc.save_cache() is False
+
+
+def test_existing_cache_file_without_volumes_still_loads(monkeypatch, tmp_path):
+    """9/14 밤에 저장된 파일에는 volumes 키가 없다."""
+    p = tmp_path / "old.json"
+    p.write_text('{"closes": {"000660": {"20260914": 1697000.0}}}', encoding="utf-8")
+    monkeypatch.setattr(koc, "CACHE_PATH", p)
+    monkeypatch.setattr(koc, "_cache", None)
+    monkeypatch.setattr(koc, "_vcache", None)
+    assert koc.official_session("000660", "20260914", fetch=lambda url: []) == (1697000.0, None)

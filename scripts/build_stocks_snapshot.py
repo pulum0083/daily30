@@ -270,7 +270,10 @@ def _build_one(symbol, name, sector, market):
         bar_date = _last_bar_date(rows)
         vols = [r["accumulatedTradingVolume"] for r in rows if r.get("accumulatedTradingVolume") not in (None, _VOL_SENTINEL)]
         frates = [r["foreignRetentionRate"] for r in rows if r.get("foreignRetentionRate") is not None]
-        if vols:
+        # 마지막 봉의 정규장 거래량을 못 구했으면(§48 — kr_official_closes가 None으로 비움) 전날 거래량을
+        # 오늘 값으로 쓰지 않는다. vols[-1]은 None을 건너뛰어 하루 전 봉을 가리키게 된다.
+        last_vol = rows[-1].get("accumulatedTradingVolume") if rows else None
+        if vols and last_vol not in (None, _VOL_SENTINEL):
             vol = int(vols[-1])
             vol_avg20 = int(sum(vols[-20:]) / len(vols[-20:]))
         if frates:

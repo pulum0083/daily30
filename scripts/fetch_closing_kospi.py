@@ -565,9 +565,9 @@ def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[d
     09:00~15:30 1분봉 거래량 합으로 채운다. 구하지 못한 값은 None으로 비워 둔다 — 틀린 값으로 채우지 않는다.
     """
     try:
-        from scripts.kr_official_closes import AFTERMARKET_START, official_close
+        from scripts.kr_official_closes import AFTERMARKET_START, official_session
     except ImportError:
-        from kr_official_closes import AFTERMARKET_START, official_close
+        from kr_official_closes import AFTERMARKET_START, official_session
     recent = sorted(r["date"] for r in rows if r["date"] >= AFTERMARKET_START)
     if not recent:
         return rows
@@ -590,9 +590,7 @@ def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[d
         if r["date"] < AFTERMARKET_START:
             out.append(r)
             continue
-        day = by_date.get(r["date"])
-        close = official_close(code, r["date"], fetch=served)
-        vol = sum(float(b.get("accumulatedTradingVolume") or 0) for b in day) if day else None
+        close, vol = official_session(code, r["date"], fetch=served)   # 정규장 종가·거래량 단일 소스(§30)
         out.append({**r, "close": close, "vol": vol})
     return out
 
@@ -660,8 +658,27 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5, now=N
 # 코스피 200 시총 상위 10종목
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_kospi200_top10() -> list:
-    """코스피 200 시총 상위 10종목을 반환한다. 네이버 marketValue API 사용."""
+def _official_today_fn():
+    try:
+        from scripts.kr_official_closes import official_today
+    except ImportError:
+        from kr_official_closes import official_today
+    return official_today
+
+
+def _regular_prices_live(now) -> bool:
+    """실시간·목록 API 가격이 정규장 체결인 시간대(09:00~15:30 KST)인가. 밖이면 공식 종가(kr_official_closes)를 쓴다.
+
+    2026-09-15 16:04 marketValue 목록의 SK하이닉스는 1,687,000·-0.59%(애프터장), 공식 종가는 1,690,000·-0.41%.
+    pykrx 9/14 SK하이닉스 종가도 1,683,000(공식 1,697,000)이었다(§48).
+    """
+    return "0900" <= now.strftime("%H%M") <= "1530"
+
+
+def fetch_kospi200_top10(now=None) -> list:
+    """코스피 200 시총 상위 10종목을 반환한다. 네이버 marketValue API 사용. 정규장 밖에선 가격·등락률을 공식 종가로."""
+    now = now or datetime.now(KST)
+    official_today = None if _regular_prices_live(now) else _official_today_fn()
     url = "https://m.stock.naver.com/api/stocks/marketValue?market=KS&size=10"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -672,6 +689,15 @@ def fetch_kospi200_top10() -> list:
         for i, s in enumerate(stocks[:10], 1):
             code = s.get("compareToPreviousPrice", {}).get("code", "3")
             ratio = float(s.get("fluctuationsRatio", "0") or "0")
+            price = s.get("closePrice", "")
+            if official_today:
+                q = official_today(s.get("itemCode", ""), now=now)
+                if not q:
+                    print(f"[fetch_closing] KOSPI200 TOP10 {s.get('stockName')}: 오늘 정규장 종가 없음 — 뺀다", file=sys.stderr)
+                    continue
+                ratio = q["change_pct"]
+                code = "2" if ratio > 0 else ("5" if ratio < 0 else "3")
+                price = f"{int(q['close']):,}"
             if code == "2":
                 chg_disp = f"▲ +{ratio:.2f}%"
                 cls = "up"
@@ -683,7 +709,7 @@ def fetch_kospi200_top10() -> list:
                 cls = "flat"
             result.append({
                 "rank": i, "name": s.get("stockName", ""),
-                "price": s.get("closePrice", ""), "change_pct": chg_disp, "cls": cls,
+                "price": price, "change_pct": chg_disp, "cls": cls,
             })
         print(f"[fetch_closing] KOSPI200 TOP10: {len(result)}종목")
         return result
@@ -698,21 +724,29 @@ def fetch_kospi200_top10() -> list:
 
 def fetch_ai_semicon_stocks() -> list:
     """AI 반도체 대표 종목 (KRX 2개 + US 3개) 현재가·등락률을 반환한다."""
-    from pykrx import stock as krx
     kst_now  = datetime.now(KST)
     date_str = kst_now.strftime("%Y%m%d")
+    official_today = None if _regular_prices_live(kst_now) else _official_today_fn()
 
     result = []
 
-    # 국내 종목: 삼성전자, SK하이닉스
+    # 국내 종목: 삼성전자, SK하이닉스 — 정규장 밖에선 pykrx 일봉이 애프터장 가격이라 공식 종가로(§48)
     krx_stocks = [("005930", "삼성전자", "🇰🇷"), ("000660", "SK하이닉스", "🇰🇷")]
     for code, name, flag in krx_stocks:
         try:
-            df = krx.get_market_ohlcv(date_str, date_str, code)
-            if df.empty:
-                continue
-            price = int(df["종가"].iloc[0])
-            chg   = float(df["등락률"].iloc[0])
+            if official_today:
+                q = official_today(code, now=kst_now)
+                if not q:
+                    print(f"[fetch_closing] ai_semicon {name}: 오늘 정규장 종가 없음 — 뺀다", file=sys.stderr)
+                    continue
+                price, chg = int(q["close"]), q["change_pct"]
+            else:
+                from pykrx import stock as krx
+                df = krx.get_market_ohlcv(date_str, date_str, code)
+                if df.empty:
+                    continue
+                price = int(df["종가"].iloc[0])
+                chg   = float(df["등락률"].iloc[0])
             cls   = "up" if chg > 0 else ("down" if chg < 0 else "neutral")
             arrow = "▲" if chg > 0 else ("▼" if chg < 0 else "")
             result.append({
