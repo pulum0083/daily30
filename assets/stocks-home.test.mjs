@@ -594,6 +594,14 @@ test('타일 — 당일 레인지 위치', () => {
   assert.equal(rangePos(null, 1, 2), null);
 });
 
+test('타일 — 야간 레인지 라벨에 그 정규장 날짜를 적는다', () => {
+  const { regLabel } = loadWindow({}).__leaderTiles;
+  assert.equal(regLabel('20260915'), '9/15 정규장 레인지');
+  assert.equal(regLabel('20261102'), '11/2 정규장 레인지');
+  assert.equal(regLabel(undefined), '정규장 레인지');   // 날짜를 못 읽으면 지어내지 않는다
+  assert.equal(regLabel('2026-09-15'), '정규장 레인지');
+});
+
 test('타일 — 야간 추정가 위치 문구: 레인지 밖은 %로 적지 않는다', () => {
   const { rangeText } = loadWindow({}).__leaderTiles;
   // 9/15 19:39 삼성전자 추정가 250,955 · 정규장 246,000~252,000 (종가 248,500이면 42%)
