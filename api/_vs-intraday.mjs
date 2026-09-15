@@ -8,6 +8,9 @@ import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 
 export const LEADERS = [['005930', '삼성전자'], ['000660', 'SK하이닉스'], ['005380', '현대차']];
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
+// 비교 시각보다 이만큼(분) 넘게 늦은 원천은 비교 시각을 끌어내리지 않고 그 칸만 비운다.
+// 수급 표는 보통 1분 늦게 갱신된다(9/15 09:14·10:11·13:16 실측 모두 1분 차).
+const LAG_MIN = 2;
 
 export async function getJson(url) {
   const r = await fetch(url, { headers: HDR, signal: AbortSignal.timeout(6000) });
@@ -22,6 +25,13 @@ export async function getEucKr(url) {
 }
 
 const settle = (p, fallback) => Promise.resolve().then(() => p).catch(() => fallback);
+const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2, 4));
+// 지금 분의 봉은 아직 만들어지는 중이다 — 그 값을 확정된 어제 봉과 맞대면 최대 1분 어긋난다(9/15 10:11 실측:
+// 진행 중 −0.02% vs 확정 −0.16%). 막 끝난 분의 봉도 바로 굳지 않는다 — 9/15 13:30 봉을 5초 간격으로 다시 읽으니
+// 끝난 뒤 약 1분 동안 응답마다 값이 오갔고(코스피 6,627.19↔6,632.57, SK하이닉스 1,694,000→1,695,000) 그 뒤에 멈췄다.
+// 그래서 끝난 지 1분이 지난 봉(지금 분·직전 분 제외)만 쓴다. 화면은 2분쯤 늦게 따라온다.
+const minusOne = (hhmm) => { const m = toMin(hhmm) - 1; return String(Math.floor(m / 60)).padStart(2, '0') + String(m % 60).padStart(2, '0'); };
+const completed = (bars, hhmm) => (bars || []).filter((b) => b.t < minusOne(hhmm));
 
 export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }) {
   const k = new Date(now + 9 * 3600 * 1000);
@@ -33,51 +43,64 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   const T = dash.replace(/-/g, ''), Y = yDash.replace(/-/g, '');
   const rel = relLabel(yDash, dash);
 
-  const [kT, kY, baseT, baseY] = await Promise.all([
-    settle(minuteBars('index', 'KOSPI', T, fetchJson, '0900', hhmm), []),
-    settle(minuteBars('index', 'KOSPI', Y, fetchJson), []),
-    settle(prevClose('index', 'KOSPI', T, fetchJson), null),
-    settle(prevClose('index', 'KOSPI', Y, fetchJson), null),
+  // 코스피와 주도주 1분봉을 먼저 모은다 — 비교 시각은 이 둘과 수급 표를 모두 본 뒤에 정한다.
+  const [kospiRaw, leadersRaw] = await Promise.all([
+    Promise.all([
+      settle(minuteBars('index', 'KOSPI', T, fetchJson, '0900', hhmm), []),
+      settle(minuteBars('index', 'KOSPI', Y, fetchJson), []),
+      settle(prevClose('index', 'KOSPI', T, fetchJson), null),
+      settle(prevClose('index', 'KOSPI', Y, fetchJson), null),
+    ]),
+    Promise.all(LEADERS.map(async ([code, name]) => {
+      const [bT, bY, pT, pY] = await Promise.all([
+        settle(minuteBars('item', code, T, fetchJson, '0900', hhmm), []),
+        settle(minuteBars('item', code, Y, fetchJson), []),
+        settle(prevClose('item', code, T, fetchJson), null),
+        settle(prevClose('item', code, Y, fetchJson), null),
+      ]);
+      return { code, name, bT: completed(bT, hhmm), bY, pT, pY };
+    })),
   ]);
+  const [kTall, kY, baseT, baseY] = kospiRaw;
+  const kT = completed(kTall, hhmm);
   if (!kT.length) return { status: 'waiting' };
-  const at = kT[kT.length - 1].t;                       // 비교 시각 = 오늘 마지막 1분봉
-  const kyAt = atOrBefore(kY, at);
-  const kospi = { t: pct(kT[kT.length - 1].v, baseT), y: kyAt ? pct(kyAt.v, baseY) : null };
+
+  // 비교 시각 = 코스피·주도주 3종목·수급 표가 모두 가진 가장 이른 확정 분. 하나만 LAG_MIN 넘게 늦으면
+  // 그 원천은 제외하고(칸이 빈다) 나머지로 정한다 — 한 곳의 지연이 화면 전체를 몇 분씩 끌어내리지 않게.
+  const kAt = kT[kT.length - 1].t;
+  const fresh = (t, ref) => !!t && toMin(ref) - toMin(t) <= LAG_MIN;
+  let at = kAt;
+  for (const l of leadersRaw) {
+    const last = l.bT.length ? l.bT[l.bT.length - 1].t : null;
+    l.fresh = fresh(last, kAt);
+    if (l.fresh && last < at) at = last;
+  }
+  // 수급 — 오늘 표에서 비교 시각 이하 마지막 행. 그 행이 조금 늦으면 비교 시각을 그 행 시각으로 내린다.
+  // 어제는 오늘 행과 같은 분으로 고른다(I1).
+  const fT = await settle(flowAt(T, at, fetchText), null);
+  const flowOk = !!fT && fresh(fT.t.replace(':', ''), at);
+  if (flowOk && fT.t.replace(':', '') < at) at = fT.t.replace(':', '');
+  const fY = flowOk ? await settle(flowAt(Y, at, fetchText), null) : null;
+  const flow = flowOk && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
+  if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
+
+  const kb = atOrBefore(kT, at), kyAt = atOrBefore(kY, at);
+  const kospi = { t: kb ? pct(kb.v, baseT) : null, y: kyAt ? pct(kyAt.v, baseY) : null };
   kospi.diff = kospi.t != null && kospi.y != null ? round2(kospi.t - kospi.y) : null;
   kospi.judge = judge(kospi.diff, TH.pctPoint);
   kospi.curveT = curve(kT, baseT, at);
   kospi.curveY = curve(kY, baseY, at);
 
-  // 수급(오늘→어제, I1 때문에 순서 유지)과 주도주 조회를 함께 돌린다(I2) — 서로 다른 데이터라
-  // 순서를 맞출 필요가 없다. 수급 내부는 오늘 행을 먼저 찾아야 어제 조회 시각을 알 수 있어 순차다.
-  const flowPromise = (async () => {
-    const fT = await settle(flowAt(T, at, fetchText), null);
-    const fY = fT ? await settle(flowAt(Y, fT.t.replace(':', ''), fetchText), null) : null;
-    const f = fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
-    if (f) f.judge = judge(f.foreignDiff, TH.eok);
-    return f;
-  })();
-
-  const leadersPromise = Promise.all(LEADERS.map(async ([code, name]) => {
-    const [bT, bY, pT, pY] = await Promise.all([
-      settle(minuteBars('item', code, T, fetchJson, '0900', at), []),
-      settle(minuteBars('item', code, Y, fetchJson, '0900', at), []),
-      settle(prevClose('item', code, T, fetchJson), null),
-      settle(prevClose('item', code, Y, fetchJson), null),
-    ]);
-    // 오늘 봉을 먼저 고르고, 어제는 그 봉의 시각으로 고른다(I3) — 오늘 봉이 비교 시각(at)보다
-    // 이르면(데이터 지연 등) 어제를 at으로 고르면 서로 다른 시각을 맞대게 된다.
-    // 오늘 봉이 없으면 어제도 비교하지 않는다 — t·y·diff 모두 null(표에서 행이 빠진다).
-    const tb = atOrBefore(bT, at);
-    const yb = tb ? atOrBefore(bY, tb.t) : null;
-    const t = tb ? pct(tb.v, pT) : null, y = yb ? pct(yb.v, pY) : null;
+  const leaders = leadersRaw.map((l) => {
+    // 늦은 종목은 비교하지 않는다(t·y·diff 모두 null). 오늘 봉을 고른 뒤 어제는 그 봉의 시각으로 고른다(I3).
+    const tb = l.fresh ? atOrBefore(l.bT, at) : null;
+    const yb = tb ? atOrBefore(l.bY, tb.t) : null;
+    const t = tb ? pct(tb.v, l.pT) : null, y = yb ? pct(yb.v, l.pY) : null;
     return {
-      code, name, t, y, diff: t != null && y != null ? round2(t - y) : null,
+      code: l.code, name: l.name, t, y, diff: t != null && y != null ? round2(t - y) : null,
       pxT: tb && tickOk(tb.v) ? tb.v : null, pxY: yb && tickOk(yb.v) ? yb.v : null,
     };
-  }));
-
-  const [flow, leaders] = await Promise.all([flowPromise, leadersPromise]);
+  });
   const full = leaders.every((l) => l.t != null && l.y != null);
   const avg = full ? (() => {
     const t = round2(leaders.reduce((s, l) => s + l.t, 0) / leaders.length);

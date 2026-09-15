@@ -66,7 +66,7 @@
 
   function render(d) {
     if (!root) return;
-    if (!d || d.status !== 'ok') { root.hidden = true; root.innerHTML = ''; return; }
+    if (!d || d.status !== 'ok') { root.hidden = true; root.innerHTML = ''; paintTiles(null); return; }
     var rel = esc(d.prev.rel), html = '';
     if (d.verdict) {
       html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
@@ -94,21 +94,12 @@
         '<div class="vs-issue-cols"><div><p class="vs-col-h">' + rel + ' ' + esc(d.prev.label) + '</p>' + list(d.issues.y) + '</div>' +
         '<div><p class="vs-col-h">오늘 ' + esc(d.today.label) + '</p>' + list(d.issues.t) + '</div></div>';
     }
-    var rows = d.leaders.filter(function (l) { return l.t != null || l.y != null; });
-    if (rows.length) {
-      changed += '<p class="vs-lbl">주도주 · 전일 종가 대비</p><div class="vs-table"><table><thead><tr><th>종목</th><th>' + rel + '</th><th>오늘</th><th>차이</th></tr></thead><tbody>' +
-        rows.map(function (l) {
-          return '<tr><td><b>' + esc(l.name) + '</b></td>' +
-            '<td><span class="' + cls(l.y) + '">' + (l.y != null ? f2(l.y) + '%' : '—') + '</span>' + (l.pxY != null ? '<small>' + fmt(l.pxY) + '</small>' : '') + '</td>' +
-            '<td><span class="' + cls(l.t) + '">' + (l.t != null ? f2(l.t) + '%' : '—') + '</span>' + (l.pxT != null ? '<small>' + fmt(l.pxT) + '</small>' : '') + '</td>' +
-            '<td class="' + cls(l.diff) + '">' + (l.diff != null ? f2(l.diff) + '%p' : '—') + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    }
-    if (d.flow) changed += '<p class="vs-lbl vs-center">투자자별 누적 순매수</p>' + flowRows(d);
+    if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
     if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
 
     root.innerHTML = html;
     root.hidden = false;
+    paintTiles(d);
     bindHover(root.querySelector ? root.querySelector('.vs-plot') : null, d);
   }
 
@@ -135,6 +126,24 @@
     plot.addEventListener('pointermove', move);
     plot.addEventListener('pointerdown', move);
     plot.addEventListener('pointerleave', hide);
+  }
+
+  // 주도주 타일(#us-linked-widget) 안 '어제 같은 시각' 블록 — 대결판 카드의 표 대신 각 타일에 그린다(§49).
+  // 타일 위 큰 가격은 실시간이라 블록의 '오늘'과 다를 수 있다 — 그래서 블록 머리에 비교한 확정 분을 적는다.
+  function paintTiles(d) {
+    if (typeof document === 'undefined' || !document.querySelectorAll) return;
+    var byCode = {};
+    (d && d.status === 'ok' ? d.leaders || [] : []).forEach(function (l) { byCode[l.code] = l; });
+    [].forEach.call(document.querySelectorAll('#us-linked-widget .us-tile[data-code] .vs-tb'), function (box) {
+      var tile = box.closest('.us-tile'), l = tile && byCode[tile.getAttribute('data-code')];
+      if (!l || l.t == null || l.y == null || l.diff == null) { box.hidden = true; box.innerHTML = ''; return; }
+      var rel = esc(d.prev.rel);
+      box.innerHTML = '<div class="vs-tb-h"><b>' + rel + ' 같은 시각</b><span>' + d.time + ' 기준</span></div>' +
+        '<div class="vs-tb-g"><span class="k">' + rel + '</span><span class="v ' + cls(l.y) + '">' + f2(l.y) + '%</span>' +
+        '<span class="k">오늘</span><span class="v ' + cls(l.t) + '">' + f2(l.t) + '%</span></div>' +
+        '<div class="vs-tb-d"><span>' + rel + '보다</span><span class="p ' + cls(l.diff) + '">' + f2(l.diff) + '%p</span></div>';
+      box.hidden = false;
+    });
   }
 
   function withJosa(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c >= 0 && c < 11172 && c % 28 ? '과' : '와'); }

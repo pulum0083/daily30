@@ -45,13 +45,6 @@
 .vs-issues li span:last-child{font-weight:600;color:#0F172A;line-height:1.5}
 .vs-issues mark{background:var(--up-bg);color:var(--up);border-radius:3px;padding:0 2px}
 .vs-empty{font-size:13px;color:var(--muted);margin:0}
-.vs-table{border:1px solid #EEF2F6;border-radius:10px;overflow-x:auto}
-.vs-table table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-.vs-table th{padding:7px 10px;background:#FAFBFC;font-size:11px;font-weight:800;color:var(--muted);text-align:right;border-bottom:1px solid #EEF2F6;white-space:nowrap}
-.vs-table td{padding:8px 10px;border-bottom:1px solid #EEF2F6;text-align:right;white-space:nowrap}
-.vs-table tr:last-child td{border-bottom:0}
-.vs-table th:first-child,.vs-table td:first-child{text-align:left}
-.vs-table small{display:block;font-size:11px;color:#94A3B8}
 .vs-flow{max-width:760px;margin:0 auto}
 .vs-fgroup + .vs-fgroup{margin-top:14px}
 .vs-fname{text-align:center;font-size:13px;font-weight:700;color:#0F172A;margin:0 0 6px}
@@ -79,3 +72,16 @@
 .vs-tip p{display:flex;justify-content:space-between;gap:12px;margin:1px 0}
 .vs-tip p span:last-child{font-weight:700}
 .vs-tip p.d{border-top:1px solid #F1F5F9;margin-top:4px;padding-top:4px}
+/* 주도주 타일(stocks-home.css .us-tile) 안 '어제 같은 시각' 블록 — 대결판 카드의 주도주 표를 대신한다 */
+.vs-lbl-s{font-size:11px;color:var(--muted);text-align:center;margin:-4px 0 10px}
+.vs-tb{margin-top:11px;padding:9px 10px 10px;background:#fff;border:1px solid #EEF2F6;border-radius:10px;font-variant-numeric:tabular-nums}
+.us-tile.on .vs-tb{background:#F7F9FC}
+.vs-tb-h{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:10.5px;color:var(--muted);margin-bottom:6px}
+.vs-tb-h b{font-weight:700;color:#475569}
+.vs-tb-g{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}
+.vs-tb-g .k{font-size:11px;color:var(--muted)}
+.vs-tb-g .v{font-size:13px;font-weight:800;text-align:right;color:#0F172A}
+.vs-tb .up{color:var(--up)} .vs-tb .dn{color:var(--dn)}
+.vs-tb-d{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:1px dashed #E5E7EB;font-size:11px;color:var(--muted)}
+.vs-tb-d .p{font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px}
+.vs-tb-d .p.up{background:var(--up-bg)} .vs-tb-d .p.dn{background:var(--dn-bg)}

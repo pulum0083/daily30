@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!-- 주도주 타일에 '어제 같은 시각' 비교를 넣는 프로토타입 — 대결판 표 제거·비교 시각 통일·수급 라벨 정리안 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>주도주 타일 × 어제 같은 시각 (2026-09-15)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0F172A;--muted:#64748B;--faint:#94A3B8;--hair:#E5E7EB;--soft:#F7F9FC;--inset:#EEF2F7;--canvas:#fff;
+  --up:#E03131;--dn:#2775ED;--up-bg:#FEE2E2;--dn-bg:#DBEAFE;--s1:0 1px 3px rgba(15,23,42,.05)}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#F1F4F8;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5;font-size:14px}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 16px 80px}
+.num{font-variant-numeric:tabular-nums}.up{color:var(--up)}.dn{color:var(--dn)}
+.intro,.sec{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:20px 18px;margin-bottom:18px}
+.intro h1{font-size:20px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px}
+.intro p{font-size:13.5px;color:#334155;margin-bottom:6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:12px}
+.fact{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.fact b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.fact.warn{background:#FFF7ED;border-color:#FED7AA}
+.sec-h{display:flex;align-items:center;gap:8px;margin-bottom:4px}.sec-h h2{font-size:16px;font-weight:800}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--inset);color:var(--muted)}.tag.rec{background:#E0EDFF;color:#1D4ED8}
+.sec-d{font-size:13px;color:var(--muted);margin-bottom:14px}
+.notes{font-size:12.5px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}.notes li{margin-left:16px;margin-bottom:3px}
+
+/* 사이트 주도주 위젯(stocks-home.css) 값 그대로 */
+.widget{background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px}
+.w-head{display:flex;align-items:center;margin-bottom:11px}.w-title{font-size:15px;font-weight:800}.w-sub{margin-left:auto;font-size:11px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.us-tile{min-width:0;background:var(--soft);border:1.5px solid #E5E7EB;border-radius:14px;padding:15px 15px 13px}
+.us-tile.on{background:#fff;border-color:#2775ED;box-shadow:0 4px 14px rgba(37,117,237,.13)}
+.ut-top{display:flex;align-items:center;justify-content:space-between;gap:6px}.ut-nm{font-size:14px;font-weight:800}
+.pill{font-size:11px;font-weight:700;color:#15803D;background:#ECFDF3;border-radius:999px;padding:1px 6px;white-space:nowrap}
+.ut-px{font-size:25px;font-weight:900;letter-spacing:-.8px;margin-top:6px;line-height:1.1}
+.ut-cg{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;margin-top:4px}.ut-chg{font-size:13px;font-weight:800}.ut-prev{font-size:11px;color:#94A3B8}
+.ut-rng{margin-top:13px}.ut-rng-h{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:5px}.ut-rng-h b{color:var(--ink)}
+.ut-track{position:relative;height:6px;border-radius:999px;background:linear-gradient(90deg,#DBEAFE,#FEE2E2)}
+.ut-mk{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15);transform:translate(-50%,-50%)}
+.ut-rng-ends{display:flex;justify-content:space-between;font-size:10.5px;color:#94A3B8;margin-top:5px}
+.ut-stats{margin-top:12px;padding-top:11px;border-top:1px solid #E5E7EB;display:flex;flex-direction:column;gap:6px}
+.ut-stat{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px}.ut-stat .k{color:var(--muted)}.ut-stat .v{font-weight:700;text-align:right}
+.ut-stat small{font-weight:500;color:#94A3B8;font-size:10.5px;margin-left:3px}
+.ut-go{display:block;margin-top:10px;text-align:right;font-size:11.5px;color:#94A3B8}
+
+/* 신규 — 어제 같은 시각 블록 (A안) */
+.vsb{margin-top:11px;padding:9px 10px 10px;background:#fff;border:1px solid #EEF2F6;border-radius:10px}
+.us-tile.on .vsb{background:var(--soft)}
+.vsb-h{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;color:var(--muted);margin-bottom:6px}
+.vsb-h b{font-weight:700;color:#475569}
+.vsb-g{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}
+.vsb-g .k{font-size:11px;color:var(--muted)}.vsb-g .v{font-size:13px;font-weight:800;text-align:right}
+.vsb-d{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:1px dashed #E5E7EB;font-size:11px;color:var(--muted)}
+.vsb-d .p{font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px}
+.vsb-d .p.up{background:var(--up-bg)}.vsb-d .p.dn{background:var(--dn-bg)}
+/* B안 — 한 줄 */
+.vsl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px}
+.vsl .k{color:var(--muted)}.vsl .v{font-weight:700;text-align:right}
+
+/* 대결판 '달라진 것' 카드(vs-yesterday.css 값) */
+.vs-card{background:#fff;border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:14px 16px}
+.vs-card-h{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px}.vs-card-h p{font-size:15px;font-weight:800}.vs-card-h span{font-size:11px;color:var(--muted)}
+.vs-lbl{font-size:13px;font-weight:700;text-align:center;margin:4px 0 2px}.vs-lbl-s{font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px}
+.fg+.fg{margin-top:14px}.fname{text-align:center;font-size:13px;font-weight:700;margin-bottom:6px}
+.frow{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;column-gap:10px;font-size:11px;font-weight:700;max-width:760px;margin:0 auto}
+.frow+.frow{margin-top:5px}.fl{text-align:right}.fr{text-align:left}.muted{color:var(--muted)}
+.ftrack{position:relative;height:8px;background:#F1F5F9;border-radius:999px}.ftrack::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:#CBD5E1}
+.fbar{position:absolute;top:0;bottom:0;border-radius:999px}.fbar.prev{background:#CBD5E1}.fbar.now.up{background:var(--up)}.fbar.now.dn{background:var(--dn)}
+.old{opacity:.5;text-decoration:line-through;font-size:12px;color:var(--muted);text-align:center;margin-bottom:6px}
+@media(max-width:760px){.tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.us-tile{flex:0 0 78%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="intro">
+  <h1>주도주 타일 × 어제 같은 시각</h1>
+  <p>대결판 카드의 '주도주 · 전일 종가 대비' 표를 없애고, 각 주도주 타일 안에서 <b>어제 같은 시각과 비교</b>하게 바꾸는 안이에요.</p>
+  <p>모든 비교(코스피·주도주·수급)는 <b>세 원천이 모두 확정된 같은 분</b> 하나로 맞추고, 그 시각을 블록에 적어요.</p>
+  <div class="facts">
+    <div class="fact"><b>숫자 출처</b>2026-09-15 13:16~13:18 실제 응답(/api/intraday?vs=intraday · /api/stocks-live). 52주·외국인 5일은 화면 캡처 값.</div>
+    <div class="fact"><b>비교 시각 통일</b>진행 중인 1분봉은 버리고, 코스피·3종목·수급 표가 모두 가진 가장 이른 확정 분(여기선 13:15)으로 맞춰요. 화면이 1~2분 늦게 따라와요.</div>
+    <div class="fact warn"><b>타일 위 가격과 블록의 '오늘'이 다를 수 있어요</b>위 큰 숫자는 실시간, 블록은 13:15 확정값이에요. 그래서 블록 머리에 시각을 반드시 적어요.</div>
+    <div class="fact"><b>수급은 3종목 수급이 아니에요</b>코스피 시장 전체 개인·외국인·기관 누적 순매수라, 라벨을 '코스피 전체'로 바꿔요.</div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>A안 — 타일 안 비교 블록</h2><span class="tag rec">추천</span></div>
+  <p class="sec-d">외국인 5일 순매수 아래에 작은 블록. 어제·오늘(같은 분)과 차이를 한 덩어리로 보여줘요. 장중 09:01~15:30에만 나와요.</p>
+  <div class="widget">
+    <div class="w-head"><span class="w-title">📈 코스피 주도주</span><span class="w-sub">코스피 시총 상위 3 · 마감 후 미국 LIVE</span></div>
+    <div class="tiles">
+      <div class="us-tile on">
+        <div class="ut-top"><span class="ut-nm">삼성전자</span><span class="pill">●실시간</span></div>
+        <div class="ut-px num">248,750</div>
+        <div class="ut-cg"><span class="ut-chg dn num">▼ 250 (0.10%)</span><span class="ut-prev num">전일 249,000</span></div>
+        <div class="ut-rng"><div class="ut-rng-h"><span>당일 레인지</span><b>28% 지점</b></div><div class="ut-track"><span class="ut-mk" style="left:28%"></span></div><div class="ut-rng-ends num"><span>저 247,500</span><span>고 252,000</span></div></div>
+        <div class="ut-stats">
+          <div class="ut-stat"><span class="k">거래대금</span><span class="v num">1조 6,045억</span></div>
+          <div class="ut-stat"><span class="k">52주 고점 대비</span><span class="v dn num">−31.3%</span></div>
+          <div class="ut-stat"><span class="k">외국인 5일 순매수</span><span class="v dn num">−561만주<small>9/7~9/11</small></span></div>
+        </div>
+        <div class="vsb">
+          <div class="vsb-h"><b>어제 같은 시각</b><span class="num">13:15 기준</span></div>
+          <div class="vsb-g"><span class="k">어제</span><span class="v dn num">−2.99%</span><span class="k">오늘</span><span class="v dn num">−0.10%</span></div>
+          <div class="vsb-d"><span>어제보다</span><span class="p up num">+2.89%p</span></div>
+        </div>
+        <span class="ut-go">종목 상세 →</span>
+      </div>
+      <div class="us-tile">
+        <div class="ut-top"><span class="ut-nm">SK하이닉스</span><span class="pill">●실시간</span></div>
+        <div class="ut-px num">1,698,000</div>
+        <div class="ut-cg"><span class="ut-chg up num">▲ 1,000 (0.06%)</span><span class="ut-prev num">전일 1,697,000</span></div>
+        <div class="ut-rng"><div class="ut-rng-h"><span>당일 레인지</span><b>30% 지점</b></div><div class="ut-track"><span class="ut-mk" style="left:30%"></span></div><div class="ut-rng-ends num"><span>저 1,685,000</span><span>고 1,729,000</span></div></div>
+        <div class="ut-stats">
+          <div class="ut-stat"><span class="k">거래대금</span><span class="v num">2조 8,237억</span></div>
+          <div class="ut-stat"><span class="k">52주 고점 대비</span><span class="v dn num">−41.7%</span></div>
+          <div class="ut-stat"><span class="k">외국인 5일 순매수</span><span class="v dn num">−65만주<small>9/7~9/11</small></span></div>
+        </div>
+        <div class="vsb">
+          <div class="vsb-h"><b>어제 같은 시각</b><span class="num">13:15 기준</span></div>
+          <div class="vsb-g"><span class="k">어제</span><span class="v dn num">−5.68%</span><span class="k">오늘</span><span class="v up num">+0.21%</span></div>
+          <div class="vsb-d"><span>어제보다</span><span class="p up num">+5.89%p</span></div>
+        </div>
+        <span class="ut-go">종목 상세 →</span>
+      </div>
+      <div class="us-tile">
+        <div class="ut-top"><span class="ut-nm">현대차</span><span class="pill">●실시간</span></div>
+        <div class="ut-px num">370,000</div>
+        <div class="ut-cg"><span class="ut-chg dn num">▼ 1,500 (0.40%)</span><span class="ut-prev num">전일 371,500</span></div>
+        <div class="ut-rng"><div class="ut-rng-h"><span>당일 레인지</span><b>47% 지점</b></div><div class="ut-track"><span class="ut-mk" style="left:47%"></span></div><div class="ut-rng-ends num"><span>저 366,000</span><span>고 374,500</span></div></div>
+        <div class="ut-stats">
+          <div class="ut-stat"><span class="k">거래대금</span><span class="v num">646억</span></div>
+          <div class="ut-stat"><span class="k">52주 고점 대비</span><span class="v dn num">−50.6%</span></div>
+          <div class="ut-stat"><span class="k">외국인 5일 순매수</span><span class="v up num">+4만주<small>9/7~9/11</small></span></div>
+        </div>
+        <div class="vsb">
+          <div class="vsb-h"><b>어제 같은 시각</b><span class="num">13:15 기준</span></div>
+          <div class="vsb-g"><span class="k">어제</span><span class="v dn num">−3.01%</span><span class="k">오늘</span><span class="v dn num">−0.27%</span></div>
+          <div class="vsb-d"><span>어제보다</span><span class="p up num">+2.74%p</span></div>
+        </div>
+        <span class="ut-go">종목 상세 →</span>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>차이는 오늘 − 어제(%p). 양수면 빨강, 음수면 파랑 — 사이트 등락 색 규칙 그대로예요.</li>
+    <li>장 밖(15:31~익일 09:00)·어제 값이 없는 종목은 블록을 통째로 숨겨요(§0 없으면 비운다).</li>
+    <li>모바일에선 타일이 가로 스크롤이라 블록도 타일 폭(78%)에 맞춰 그대로 들어가요.</li>
+  </ul>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>B안 — 통계 목록에 한 줄</h2><span class="tag">비교용</span></div>
+  <p class="sec-d">블록 없이 기존 통계 줄 아래에 한 줄만. 더 조용하지만 '오늘 값'이 안 보여 위 실시간 등락률과 섞어 읽기 쉬워요.</p>
+  <div class="widget" style="max-width:380px">
+    <div class="us-tile on">
+      <div class="ut-top"><span class="ut-nm">삼성전자</span><span class="pill">●실시간</span></div>
+      <div class="ut-px num">248,750</div>
+      <div class="ut-cg"><span class="ut-chg dn num">▼ 250 (0.10%)</span><span class="ut-prev num">전일 249,000</span></div>
+      <div class="ut-stats">
+        <div class="ut-stat"><span class="k">거래대금</span><span class="v num">1조 6,045억</span></div>
+        <div class="ut-stat"><span class="k">52주 고점 대비</span><span class="v dn num">−31.3%</span></div>
+        <div class="ut-stat"><span class="k">외국인 5일 순매수</span><span class="v dn num">−561만주<small>9/7~9/11</small></span></div>
+        <div class="vsl"><span class="k">어제 13:15 대비</span><span class="v up num">+2.89%p <small style="color:#94A3B8;font-weight:500">어제 −2.99%</small></span></div>
+      </div>
+      <span class="ut-go">종목 상세 →</span>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>대결판 '어제와 달라진 것' 카드</h2><span class="tag">함께 바뀜</span></div>
+  <p class="sec-d">주도주 표가 빠지고 수급만 남아요. 카드 머리 시각도 통일한 확정 분과 같아져요. 요약 칸의 '주도주 3종목 평균'은 그대로 둬요.</p>
+  <div class="vs-card">
+    <div class="vs-card-h"><p>어제와 달라진 것</p><span class="num">13:15까지 기준</span></div>
+    <p class="old">주도주 · 전일 종가 대비 (표) — 타일로 이동</p>
+    <p class="vs-lbl">코스피 전체 · 투자자별 누적 순매수</p>
+    <p class="vs-lbl-s">코스피 시장 전체 합계예요. 위 주도주 3종목만의 수급이 아니에요.</p>
+    <div class="fg"><p class="fname">개인</p>
+      <div class="frow num"><span class="fl"></span><div class="ftrack"><i class="fbar now up" style="left:50%;width:8.04%"></i></div><span class="fr up">+4,125억</span></div>
+      <div class="frow num"><span class="fl"></span><div class="ftrack"><i class="fbar prev" style="left:50%;width:41.1%"></i></div><span class="fr muted">+2.11조</span></div>
+    </div>
+    <div class="fg"><p class="fname">외국인</p>
+      <div class="frow num"><span class="fl dn">−1.12조</span><div class="ftrack"><i class="fbar now dn" style="right:50%;width:21.88%"></i></div><span class="fr"></span></div>
+      <div class="frow num"><span class="fl muted">−2.57조</span><div class="ftrack"><i class="fbar prev" style="right:50%;width:50%"></i></div><span class="fr"></span></div>
+    </div>
+    <div class="fg"><p class="fname">기관</p>
+      <div class="frow num"><span class="fl dn">−4,575억</span><div class="ftrack"><i class="fbar now dn" style="right:50%;width:8.92%"></i></div><span class="fr"></span></div>
+      <div class="frow num"><span class="fl muted">−6,034억</span><div class="ftrack"><i class="fbar prev" style="right:50%;width:11.76%"></i></div><span class="fr"></span></div>
+    </div>
+    <p class="vs-lbl-s" style="margin-top:12px">위 막대 오늘 13:15 · 아래 막대 어제 13:15 (13:16 응답 실측값)</p>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

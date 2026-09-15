@@ -5,11 +5,11 @@ import { readFileSync } from 'node:fs';
 import { createContext, runInContext } from 'node:vm';
 
 const noop = () => {};
-function load(nowMs) {
+function load(nowMs, tiles) {
   const root = { hidden: true, innerHTML: '' };
   const FixedDate = class extends Date { constructor(...a) { super(...(a.length ? a : [nowMs])); } static now() { return nowMs; } };
   const sb = {
-    document: { getElementById: (id) => (id === 'vs-root' ? root : null), hidden: false, addEventListener: noop },
+    document: { getElementById: (id) => (id === 'vs-root' ? root : null), querySelectorAll: () => tiles || [], hidden: false, addEventListener: noop },
     fetch: () => Promise.reject(new Error('no network')),
     setInterval: noop, clearInterval: noop, setTimeout: noop, console: { log: noop, warn: noop, error: noop },
     Date: nowMs ? FixedDate : Date, Intl, Math, JSON, String, Number,
@@ -35,7 +35,7 @@ test('ok 응답이면 결론·비교 칸·달라진 것을 그린다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
   assert.equal(root.hidden, false);
-  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '오늘이 약함', '−2.56%', '252,000', '외국인']) {
+  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '오늘이 약함', '−2.56%', '코스피 전체 · 투자자별 누적 순매수', '외국인']) {
     assert.ok(root.innerHTML.includes(s), `빠짐: ${s}`);
   }
 });
@@ -55,12 +55,34 @@ test('이슈는 null이면 이슈 섹션을 그리지 않는다(C2)', () => {
   assert.ok(!root.innerHTML.includes('vs-chip'));
 });
 
-test('주도주 표 — 값이 null이면 —만 표시하고 %를 붙이지 않는다(작은 것)', () => {
-  const payload = { ...PAYLOAD, leaders: [...PAYLOAD.leaders, { code: '000660', name: 'SK하이닉스', t: null, y: -1.23, diff: null, pxT: null, pxY: 259000 }] };
+test('주도주 표는 대결판 카드에서 빠진다 — 타일 블록으로 옮겼다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD);
+  assert.ok(!root.innerHTML.includes('vs-table'));
+  assert.ok(!root.innerHTML.includes('주도주 · 전일 종가 대비'));
+});
+
+const box = (code) => ({ hidden: true, innerHTML: '', closest: () => ({ getAttribute: () => code }) });
+
+test('타일 블록 — 비교 시각·어제·오늘·차이를 채우고, 값이 빈 종목은 숨긴다', () => {
+  const b1 = box('005930'), b2 = box('000660'), b3 = box('005380');
+  const payload = { ...PAYLOAD, leaders: [...PAYLOAD.leaders, { code: '000660', name: 'SK하이닉스', t: null, y: -1.23, diff: null, pxT: null, pxY: 259000 }] };
+  const { api } = load(kst('2026-09-14T11:00:00'), [b1, b2, b3]);
   api.render(payload);
-  assert.ok(!root.innerHTML.includes('—%'), 'null 값에 %가 붙음(예: "—%")');
-  assert.ok(root.innerHTML.includes('259,000'));
+  assert.equal(b1.hidden, false);
+  for (const s of ['지난 금요일 같은 시각', '11:00 기준', '−4.28%', '−2.89%', '지난 금요일보다', '+1.39%p']) assert.ok(b1.innerHTML.includes(s), `빠짐: ${s}`);
+  assert.equal(b2.hidden, true, '오늘 값이 없는 종목은 숨긴다');
+  assert.equal(b3.hidden, true, '응답에 없는 종목은 숨긴다');
+});
+
+test('타일 블록 — closed·실패면 비운다', () => {
+  const b1 = box('005930');
+  const { api } = load(kst('2026-09-14T11:00:00'), [b1]);
+  api.render(PAYLOAD);
+  assert.equal(b1.hidden, false);
+  api.render({ status: 'closed' });
+  assert.equal(b1.hidden, true);
+  assert.equal(b1.innerHTML, '');
 });
 
 test('축 라벨 — 09:00·11:00·13:00·15:30을 0·120·240·390분 위치에 절대 배치, 마지막은 오른쪽 정렬(작은 것)', () => {
