@@ -1,0 +1,342 @@
+<!-- '어제랑 비교해서' 축 확장 시안 v3 — 브리핑 페이지(/briefings/{date}/close/) 컴포넌트 + NC AI 디자인 시스템 토큰
+     실측: 2026-09-16(수) 13:30 vs 09-15(화) 13:30 -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>어제랑 비교해서 — 축 확장 시안 v3</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  /* 브리핑 style.css 토큰 = NC AI DS 시맨틱 (up=semantic-error, dn=primary/info) */
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;
+  --hairline:#E5E7EB;--ink:#13151A;--muted:#6B7280;
+  --primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;--warn:#D97706;
+  --s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  /* DS Border Radius Scale */
+  --r-badge:6px;--r-input:10px;--r-table:12px;--r-card:16px;--r-pill:9999px;
+  --gnb-bg:#16181A;--gnb-h:52px;
+  --font-text:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --fw-regular:400;--fw-medium:500;--fw-semibold:600;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-text);background:var(--surface-soft);color:var(--ink);
+     -webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+
+/* ── DS Typography (역할당 클래스 1개 · weight 역할 고정) ── */
+.display-28sb{font-size:28px;font-weight:var(--fw-semibold);line-height:1.2;letter-spacing:-.6px}
+.title-22sb{font-size:22px;font-weight:var(--fw-semibold);line-height:1.25;letter-spacing:-.4px}
+.title-18sb{font-size:18px;font-weight:var(--fw-semibold);line-height:1.35;letter-spacing:-.1px}
+.title-16sb{font-size:16px;font-weight:var(--fw-semibold);line-height:1.4;letter-spacing:-.05px}
+.body-15r{font-size:15px;font-weight:var(--fw-regular);line-height:1.5;letter-spacing:-.03px}
+.body-14r{font-size:14px;font-weight:var(--fw-regular);line-height:1.5}
+.caption-13r{font-size:13px;font-weight:var(--fw-regular);line-height:1.4}
+.label-14m{font-size:14px;font-weight:var(--fw-medium);line-height:1.2;letter-spacing:-.16px}
+.eyebrow-13m{font-size:13px;font-weight:var(--fw-medium);line-height:1.3;letter-spacing:.4px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--muted)}
+b{font-weight:var(--fw-semibold);color:var(--ink)}
+
+.gnb{position:sticky;top:0;z-index:10;background:var(--gnb-bg);height:var(--gnb-h);display:flex;
+     align-items:center;padding:0 20px;color:#fff;font-size:15px;font-weight:var(--fw-semibold)}
+.wrap{max-width:780px;margin:0 auto;padding:28px 16px 80px}
+.phead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:8px}
+.phead .eyebrow-13m{color:var(--primary);margin-bottom:6px}
+.phead .body-14r{color:var(--muted);margin-top:8px}
+.proto{flex:0 0 auto;font-size:11px;font-weight:var(--fw-medium);color:var(--gold);
+       background:var(--gold-bg);border-radius:var(--r-pill);padding:4px 10px}
+
+/* ── 비교 대상 바 ── */
+.cmpbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--canvas);
+        border:1px solid var(--hairline);border-radius:var(--r-input);padding:11px 16px;margin:18px 0 14px}
+
+/* ── 브리핑 .section-card ── */
+.section-card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-card);
+              overflow:hidden;margin-bottom:14px}
+.section-card__head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+                    padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hairline)}
+.section-card__title{font-size:13px;font-weight:var(--fw-semibold);color:var(--ink);
+                     display:inline-flex;align-items:center;gap:8px}
+.section-card__title::before{content:'';display:block;width:3px;height:13px;background:var(--primary);border-radius:2px}
+.section-card__sub{font-size:11px;color:var(--muted);font-weight:var(--fw-medium)}
+.section-card__body{padding:16px}
+.section-card__body + .section-card__body{border-top:1px solid var(--hairline)}
+.subhead{font-size:11px;font-weight:var(--fw-semibold);color:var(--muted);margin-bottom:10px}
+
+/* ── 결론 히어로 ── */
+.verdict{color:var(--ink);margin-bottom:4px}
+.verdict-sub{color:var(--muted);margin-top:6px}
+
+/* ── 브리핑 .sig-row (근거 목록) ── */
+.sig-row{display:flex;gap:10px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--hairline);
+         font-size:14px;line-height:1.65;color:var(--muted)}
+.sig-row:first-child{padding-top:0}
+.sig-row:last-child{border-bottom:none;padding-bottom:0}
+.sig-dot{width:9px;height:9px;border-radius:var(--r-pill);flex-shrink:0;position:relative;top:6px}
+.sig-dot.up{background:var(--up)}.sig-dot.down{background:var(--dn)}.sig-dot.neu{background:var(--warn)}
+.sig-k{font-weight:var(--fw-semibold);color:var(--ink)}
+
+/* ── 브리핑 .supply-summary 셀 (라벨 / 큰 숫자 / 보조 + 미니차트) ── */
+.cells{display:flex;flex-direction:column}
+.cell{display:grid;grid-template-columns:1fr 150px;gap:16px;align-items:center;
+      padding:13px 0;border-bottom:1px solid var(--hairline)}
+.cell:first-child{padding-top:0}
+.cell:last-child{border-bottom:none;padding-bottom:0}
+.cell__lbl{font-size:11px;font-weight:var(--fw-medium);color:var(--muted);margin-bottom:5px;
+           display:flex;align-items:center;gap:6px}
+.cell__amt{font-size:20px;font-weight:var(--fw-semibold);line-height:1.1;letter-spacing:-.4px}
+.cell__amt .u{font-size:12px;font-weight:var(--fw-medium);color:var(--muted);margin-left:1px}
+.cell__sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── 브리핑 .flow-chart 문법: 0축 가운데 · 오늘만 진하게 ── */
+.fc{display:flex;flex-direction:column;gap:5px}
+.fc__bars{height:46px;display:grid;gap:6px;position:relative}
+.fc__bars.zero::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hairline)}
+.fc__bars.base::before{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--hairline)}
+.fcbar{position:relative}
+.fcbar__rect{position:absolute;left:0;right:0;border-radius:3px}
+.fcbar__rect.up{background:var(--up)}
+.fcbar__rect.down{background:var(--dn)}
+.fcbar__rect.flat{background:var(--hairline);height:2px!important}
+.fcbar__rect.mag{background:var(--ink);opacity:.6}   /* 방향 없는 양 — 상승/하락 색을 쓰지 않는다 */
+.fcbar.prev .fcbar__rect{opacity:.32}
+.fc__axis{display:grid;gap:6px;font-size:9px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.fc__axis .today{color:var(--ink);font-weight:var(--fw-semibold)}
+
+/* 투자자별 짝 막대 (어제 흐림 + 오늘 진함) */
+.pairs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:4px}
+.pair__bars{height:88px;display:grid;grid-template-columns:1fr 1fr;gap:3px;position:relative}
+.pair__bars::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hairline)}
+.pair__lbl{font-size:10px;color:var(--muted);text-align:center;margin-top:5px;line-height:1.3}
+.pair__prev{font-size:9px;color:var(--muted);text-align:center;margin-top:1px;font-variant-numeric:tabular-nums}
+.pair__val{font-size:10px;font-weight:var(--fw-semibold);text-align:center;margin-top:2px;font-variant-numeric:tabular-nums}
+
+/* ── DS Table (radius 12) ── */
+.tbl-wrap{border:1px solid var(--hairline);border-radius:var(--r-table);overflow:hidden;background:var(--canvas)}
+table{width:100%;border-collapse:collapse}
+th{padding:9px 12px;background:var(--surface-soft);font-size:11px;font-weight:var(--fw-semibold);
+   color:var(--muted);text-align:right;border-bottom:1px solid var(--hairline);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--hairline);text-align:right;white-space:nowrap;
+   font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+th:first-child,td:first-child{text-align:left}
+td.nm{font-weight:var(--fw-semibold);white-space:normal}
+td.nm .reps{display:block;font-size:10px;font-weight:var(--fw-regular);color:var(--muted);margin-top:3px}
+.rk{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+    border-radius:var(--r-badge);background:var(--surface-inset);font-size:10px;
+    font-weight:var(--fw-semibold);color:var(--muted);margin-right:8px;vertical-align:1px}
+.rk.top{background:var(--ink);color:#fff}
+
+/* ── 뱃지 (DS radius.6 / pill) ── */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:var(--fw-medium);
+       border-radius:var(--r-badge);padding:3px 7px;white-space:nowrap}
+.badge.up{color:var(--up);background:var(--up-bg)}
+.badge.dn{color:var(--dn);background:var(--dn-bg)}
+.badge.same{color:var(--muted);background:var(--surface-inset)}
+.tag-new{color:var(--primary);background:var(--primary-bg);font-size:10px;font-weight:var(--fw-medium);
+         border-radius:var(--r-pill);padding:3px 8px}
+
+.mini{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.note{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-card);padding:16px;margin-top:22px}
+.note .subhead{color:var(--gold)}
+.note li{font-size:13px;color:var(--muted);line-height:1.75;margin-left:16px}
+.note li b{color:var(--ink)}
+@media(max-width:640px){
+  .cell{grid-template-columns:1fr 120px;gap:10px}
+  .pairs{grid-template-columns:repeat(3,1fr);row-gap:16px}
+  .display-28sb{font-size:22px;letter-spacing:-.4px}
+  .title-22sb{font-size:18px;letter-spacing:-.2px}
+}
+</style></head><body>
+<div class="gnb">Double-Shot</div>
+<div class="wrap">
+
+<div class="phead">
+  <div>
+    <div class="eyebrow-13m">종목 시그널</div>
+    <h1 class="display-28sb">어제랑 비교해서</h1>
+    <p class="body-14r">지금 대결판이 답하는 건 "얼마나 올랐나" 한 축뿐이에요.
+       여기에 <b>강도</b>·<b>주도권</b>·<b>누가</b> 세 축을 카드로 나눠 붙입니다.
+       결론은 맨 위 카드에서만 말해요.</p>
+  </div>
+  <span class="proto">PROTOTYPE</span>
+</div>
+
+<div class="cmpbar">
+  <span class="label-14m">9/16(수) 13:30 &nbsp;vs&nbsp; 9/15(화) 13:30</span>
+  <span class="mu" style="font-size:11px">확정된 같은 분 · 1분봉 실측</span>
+</div>
+
+<!-- ───────── 결론 ───────── -->
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">오늘이 어제보다 센가</span>
+    <span class="section-card__sub">결론은 여기서만</span>
+  </div>
+  <div class="section-card__body" style="background:var(--canvas)">
+    <p class="title-22sb verdict">코스피가 같은 시각 기준 <span class="up">1.81%p</span> 더 올랐어요</p>
+    <p class="body-15r verdict-sub">다만 거래는 25% 덜 붙었고, 끄는 쪽이 바뀌었어요.</p>
+  </div>
+  <div class="section-card__body">
+    <div class="sig-row"><span class="sig-dot up"></span><span>
+      <span class="sig-k">가격</span> — 코스피 <b class="up">+1.04%</b>(어제 −0.77%), 주도주 3종목 <b class="up">+1.22%</b>(어제 −0.40%)로 나란히 올랐어요.</span></div>
+    <div class="sig-row"><span class="sig-dot down"></span><span>
+      <span class="sig-k">강도</span> — 누적 거래량이 어제 이 시각보다 <b class="dn">25% 적어요</b>. 진폭은 <b>1.75%</b>로 조금 더 넓어졌고요(어제 1.43%).</span></div>
+    <div class="sig-row"><span class="sig-dot neu"></span><span>
+      <span class="sig-k">주도권</span> — <b>전력기기</b>가 어제 6위에서 <b class="up">1위</b>로, <b>2차전지</b>가 어제 1위에서 <b class="dn">4위</b>로 내려갔어요.</span></div>
+    <div class="sig-row"><span class="sig-dot up"></span><span>
+      <span class="sig-k">누가</span> — 어제 <b class="dn">5,890억</b>을 팔던 기관이 오늘은 <b class="up">1조 500억</b>을 샀어요. 외국인은 어제처럼 팔고 있고요.</span></div>
+  </div>
+</div>
+
+<!-- ───────── ① 강도 ───────── -->
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">얼마나 뜨거운가</span>
+    <span class="section-card__sub"><span class="tag-new">새 축 · 강도</span></span>
+  </div>
+  <div class="section-card__body">
+    <div class="cells" id="heat"></div>
+  </div>
+  <div class="section-card__body">
+    <div class="subhead">시장별</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>시장</th><th>누적 거래량</th><th>어제</th><th>차이</th><th>진폭</th><th>어제</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">코스피</td><td>142,592천주</td><td class="mu">190,662</td><td class="dn">−25.2%</td><td>1.75%</td><td class="mu">1.43%</td></tr>
+        <tr><td class="nm">코스닥</td><td>552,991천주</td><td class="mu">497,148</td><td class="up">+11.2%</td><td>1.38%</td><td class="mu">2.78%</td></tr>
+      </tbody></table></div>
+    <p class="mini">⚠ 지수 1분봉에는 거래<b>대금</b>(원)이 없어요 — 현재값만 있고 과거 시각은 못 구합니다. 그래서 거래<b>량</b>(천주)으로 비교해요.</p>
+  </div>
+</div>
+
+<!-- ───────── ② 주도권 ───────── -->
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">어디가 끄는가</span>
+    <span class="section-card__sub"><span class="tag-new">새 축 · 주도권</span></span>
+  </div>
+  <div class="section-card__body">
+    <div class="cells" id="idx"></div>
+  </div>
+  <div class="section-card__body">
+    <div class="subhead">섹터 대표 3종목 평균</div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>섹터</th><th>오늘</th><th>어제</th><th>차이</th><th>순위</th></tr></thead>
+      <tbody id="sect"></tbody></table></div>
+    <p class="mini">각 섹터 <b>대표 3종목의 동일가중 평균</b>이에요(시총가중 아님). 종목별 1분봉으로 직접 계산합니다 — 조회는 8섹터 × 3종목 × 2일 = <b>48건</b>.</p>
+  </div>
+</div>
+
+<!-- ───────── ③ 수급 ───────── -->
+<div class="section-card">
+  <div class="section-card__head">
+    <span class="section-card__title">누가 사는가</span>
+    <span class="section-card__sub"><span class="tag-new">새 축 · 수급 심층</span></span>
+  </div>
+  <div class="section-card__body">
+    <div class="cells" id="flow"></div>
+  </div>
+  <div class="section-card__body">
+    <div class="subhead">기관 안에서 누가 바뀌었나 <span class="mu" style="font-weight:400">— 왼쪽 옅은 막대가 어제, 오른쪽이 오늘</span></div>
+    <div class="pairs" id="pairs"></div>
+  </div>
+</div>
+
+<div class="note">
+  <div class="subhead">이 시안을 만들며 실측으로 확인한 것</div>
+  <ul>
+    <li><b>대표 3종목은 46종목과 순위가 갈려요</b> — 46종목 기준으론 반도체 1위(+2.16%)·2차전지 7위(−1.33%)인데, 3종목 기준으론 전력기기 1위·2차전지 4위예요. 그래서 "섹터 평균"이 아니라 <b>"대표 3종목 평균"</b>이라 적었습니다.</li>
+    <li><b>됨</b> — 코스닥·코스피200 1분봉은 어제 날짜로 조회돼요. 기관 세부 6칸은 합이 기관계와 일치합니다(10,503 ≈ 10,502).</li>
+    <li><b>안 됨 · 원/달러 환율</b> — 분봉이 없어요. 일 단위만 있어 "같은 시각" 축에 못 올립니다.</li>
+    <li><b>안 됨 · 거래대금(원)</b> — 현재값만 있어요. 그래서 "거래량"이라 적었습니다.</li>
+    <li><b>일부러 뺀 것 · 기타법인</b> — 표의 10번째 칸이 이틀 연속 +1.24조로 크게 나오는데, 이 값이 정말 기타법인인지 확인하지 못했어요.</li>
+  </ul>
+</div>
+
+</div>
+<script>
+const nf=n=>Math.abs(n).toLocaleString('en-US');
+const sp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2);
+const cls=v=>v>0?'up':v<0?'dn':'mu';
+const eok=v=>(v>0?'+':'−')+(Math.abs(v)>=10000?(Math.abs(v)/10000).toFixed(2)+'조':nf(Math.abs(v))+'억');
+
+// 브리핑 .flow-chart 문법을 2칸으로 — 어제(옅음) → 오늘(진함), 0축 가운데
+function fc(prev,today,{zero=true,fmt=v=>sp(v)+'%'}={}){
+  const M=Math.max(Math.abs(prev),Math.abs(today))||1;
+  const bar=(v,isToday)=>{
+    const h=Math.max(Math.abs(v)/M*(zero?20:40),2);
+    const st=zero
+      ? (v>=0?`bottom:50%;height:${h}px`:`top:50%;height:${h}px`)
+      : `bottom:0;height:${h}px`;
+    const c=!zero?'mag':(Math.abs(v)<1e-9?'flat':(v>=0?'up':'down'));
+    return `<div class="fcbar ${isToday?'today':'prev'}"><span class="fcbar__rect ${c}" style="${st}"></span></div>`;
+  };
+  return `<div class="fc">
+    <div class="fc__bars ${zero?'zero':'base'}" style="grid-template-columns:repeat(2,1fr)">${bar(prev,0)}${bar(today,1)}</div>
+    <div class="fc__axis" style="grid-template-columns:repeat(2,1fr)"><span>어제</span><span class="today">오늘</span></div>
+  </div>`;
+}
+function cell(lbl,badge,amt,unit,sub,chart){
+  return `<div class="cell"><div>
+    <div class="cell__lbl">${lbl}${badge||''}</div>
+    <div class="cell__amt num ${amt.cls||''}">${amt.v}${unit?`<span class="u">${unit}</span>`:''}</div>
+    <div class="cell__sub">${sub}</div></div>${chart}</div>`;
+}
+const B=(t,c)=>`<span class="badge ${c}">${t}</span>`;
+
+// ① 강도 — 거래량은 0축이 없다(항상 양수) → base 축
+document.getElementById('heat').innerHTML=
+  cell('코스피 누적 거래량',B('덜 붙음','dn'),{v:'142,592',cls:''},'천주',
+       '어제 190,662천주 · <b class="dn">−25.2%</b>', fc(190662,142592,{zero:false}))
++ cell('코스피 일중 진폭',B('더 출렁','up'),{v:'1.75',cls:''},'%',
+       '어제 1.43% · <b class="up">+0.32%p</b>', fc(1.43,1.75,{zero:false}));
+
+// ② 주도권 — 지수 등락률은 0축 기준
+document.getElementById('idx').innerHTML=
+  cell('코스피',B('오늘이 셈','up'),{v:'+1.04',cls:'up'},'%','어제 <b class="dn">−0.77%</b>',fc(-0.77,1.04))
++ cell('코스피200',B('오늘이 셈','up'),{v:'+1.32',cls:'up'},'%','어제 <b class="dn">−0.70%</b>',fc(-0.70,1.32))
++ cell('코스닥',B('오늘이 약함','dn'),{v:'−0.12',cls:'dn'},'%','어제 <b class="up">+1.02%</b>',fc(1.02,-0.12));
+
+// ③ 수급 — 누적 순매수
+document.getElementById('flow').innerHTML=
+  cell('개인',B('돌아섬','dn'),{v:'−9,641',cls:'dn'},'억','어제 <b class="up">+5,538억</b>',fc(5538,-9641))
++ cell('외국인',B('비슷해요','same'),{v:'−1.34',cls:'dn'},'조','어제 <b class="dn">−1.20조</b>',fc(-12029,-13443))
++ cell('기관계',B('돌아섬','up'),{v:'+1.05',cls:'up'},'조','어제 <b class="dn">−5,890억</b>',fc(-5890,10502));
+
+// 섹터 대표 3종목 — 2026-09-16 13:30 실측 (오늘%, 어제%, 어제순위, 대표종목)
+const SECT=[
+ ['전력기기', 2.50,-3.59,6,'HD현대일렉트릭·LS일렉트릭·효성중공업'],
+ ['반도체',   1.52,-0.47,3,'삼성전자·SK하이닉스·한미반도체'],
+ ['금융',     0.04,-2.83,5,'삼성생명·KB금융·신한지주'],
+ ['2차전지', -0.46, 3.29,1,'LG에너지솔루션·에코프로비엠·삼성SDI'],
+ ['바이오',  -0.95, 0.31,2,'삼성바이오로직스·셀트리온·유한양행'],
+ ['방산',    -1.21,-5.32,7,'한화에어로스페이스·LIG넥스원·현대로템'],
+ ['자동차',  -1.49,-0.78,4,'현대차·기아·현대모비스'],
+ ['조선',    -1.97,-5.54,8,'HD현대중공업·한화오션·삼성중공업'],
+];
+document.getElementById('sect').innerHTML=SECT.map(([nm,t,y,pr,reps],i)=>{
+  const rank=i+1,mv=pr-rank,d=Math.round((t-y)*100)/100;
+  const badge=mv>0?B('▲'+mv,'up'):mv<0?B('▼'+(-mv),'dn'):B('─','same');
+  return `<tr><td class="nm"><span class="rk${rank===1?' top':''}">${rank}</span>${nm}<span class="reps">${reps}</span></td>
+    <td class="${cls(t)}">${sp(t)}%</td><td class="mu">${sp(y)}%</td><td class="${cls(d)}">${sp(d)}%p</td><td>${badge}</td></tr>`;
+}).join('');
+
+// 기관 세부 6칸 — 투자자마다 어제(옅음)·오늘(진함) 짝 막대, 0축 가운데
+const INST=[['금융투자',4226,-4336],['연기금등',4224,-47],['투신(사모)',1798,-1848],
+            ['기타금융',130,145],['보험',189,75],['은행',-64,122]];
+const IM=Math.max(...INST.flatMap(r=>[Math.abs(r[1]),Math.abs(r[2])]));
+document.getElementById('pairs').innerHTML=INST.map(([nm,t,y])=>{
+  const bar=(v,isToday)=>{
+    const h=Math.max(Math.abs(v)/IM*40,2);
+    const st=v>=0?`bottom:50%;height:${h}px`:`top:50%;height:${h}px`;
+    return `<div class="fcbar ${isToday?'today':'prev'}"><span class="fcbar__rect ${v>=0?'up':'down'}" style="${st}"></span></div>`;
+  };
+  // 어제 값도 적는다 — 오늘만 적으면 금융투자처럼 부호가 뒤집힌 항목의 변화가 안 읽힌다
+  return `<div class="pair"><div class="pair__bars">${bar(y,0)}${bar(t,1)}</div>
+    <div class="pair__val ${cls(t)}">${eok(t)}</div>
+    <div class="pair__prev">어제 ${eok(y)}</div>
+    <div class="pair__lbl">${nm}</div></div>`;
+}).join('');
+</script>
+</body></html>

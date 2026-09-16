@@ -1,0 +1,570 @@
+<!-- 종목 시그널 홈 — 시간대별 전체 배치 시안 (브리핑 컴포넌트 + NC AI DS 토큰)
+     모든 블록을 실데이터로 채웠다. 실측 2026-09-16(수) 장중 13:30 / 정규장 확정 09:00~15:30 / 17:30 라이브 -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>종목 시그널 홈 — 시간대별 전체 배치 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --canvas:#FFFFFF;--surface-soft:#F9FAFB;--surface-inset:#EEF1F5;--hairline:#E5E7EB;
+  --ink:#13151A;--muted:#6B7280;--faint:#9CA3AF;--primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#F33942;--up-bg:#FFF5F7;--dn:#006EFF;--dn-bg:#EFF6FF;
+  --gold:#B7791F;--gold-bg:#FEF3C7;--warn:#D97706;
+  --r-badge:6px;--r-input:10px;--r-table:12px;--r-card:16px;--r-pill:9999px;
+  --gnb-bg:#16181A;--font-text:'Pretendard Variable',Pretendard,-apple-system,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-text);background:var(--surface-soft);color:var(--ink);
+     -webkit-font-smoothing:antialiased;word-break:keep-all}
+.display-28sb{font-size:28px;font-weight:600;line-height:1.2;letter-spacing:-.6px}
+.title-22sb{font-size:22px;font-weight:600;line-height:1.25;letter-spacing:-.4px}
+.body-15r{font-size:15px;font-weight:400;line-height:1.5}
+.body-14r{font-size:14px;font-weight:400;line-height:1.5}
+.eyebrow-13m{font-size:13px;font-weight:500;line-height:1.3;letter-spacing:.4px}
+.up{color:var(--up)}.dn{color:var(--dn)}.mu{color:var(--muted)}
+b{font-weight:600;color:var(--ink)}
+.num{font-variant-numeric:tabular-nums}
+.gnb{position:sticky;top:0;z-index:30;background:var(--gnb-bg);height:52px;display:flex;
+     align-items:center;padding:0 20px;color:#fff;font-size:15px;font-weight:600}
+.wrap{max-width:860px;margin:0 auto;padding:26px 16px 80px}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.phead .eyebrow-13m{color:var(--primary);margin-bottom:6px}
+.phead .body-14r{color:var(--muted);margin-top:8px}
+.proto{font-size:11px;font-weight:500;color:var(--gold);background:var(--gold-bg);
+       border-radius:var(--r-pill);padding:4px 10px;flex:0 0 auto}
+.tabs{display:flex;border-bottom:1px solid var(--hairline);margin-top:22px;overflow-x:auto;
+      position:sticky;top:52px;background:var(--surface-soft);z-index:20}
+.tab{flex:0 0 auto;padding:10px 14px;font-size:14px;font-weight:500;letter-spacing:-.16px;
+     color:var(--muted);border:0;border-bottom:2px solid transparent;margin-bottom:-1px;
+     cursor:pointer;background:none;white-space:nowrap;font-family:inherit;text-align:left}
+.tab[aria-selected="true"]{color:var(--primary);border-bottom-color:var(--primary)}
+.tab .tm{display:block;font-size:10px;color:var(--faint);margin-top:2px;font-weight:400}
+.tab[aria-selected="true"] .tm{color:var(--primary);opacity:.75}
+.slotnote{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-input);
+          padding:13px 16px;margin:14px 0 4px}
+.slotnote .k{font-size:11px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.slotnote .v{font-size:13px;color:var(--muted);line-height:1.6}
+.slotnote .v b{color:var(--ink)}
+.blk{margin-bottom:11px;position:relative}
+.blk__tag{position:absolute;right:10px;top:-7px;font-size:9px;font-weight:600;
+          border-radius:var(--r-badge);padding:2px 7px;z-index:2}
+.blk__tag.exist{color:var(--muted);background:var(--surface-inset);border:1px solid var(--hairline)}
+.blk__tag.newc{color:#fff;background:var(--primary)}
+.blk__tag.hero{color:#fff;background:var(--ink)}
+.card{background:var(--surface-soft);border:1px solid var(--hairline);border-radius:var(--r-card);overflow:hidden}
+.card.new{border-color:#BFD9FF}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;
+       background:var(--canvas);border-bottom:1px solid var(--hairline)}
+.ctitle{font-size:13px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:8px}
+.ctitle::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.csub{font-size:11px;color:var(--muted);font-weight:500}
+.cbody{padding:15px 16px}
+.cbody+.cbody{border-top:1px solid var(--hairline)}
+.cbody.white{background:var(--canvas)}
+/* LIVE 지수바 */
+.livebar{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-card);padding:13px 16px}
+.lb-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.lb-k{font-size:11px;color:var(--muted);font-weight:500}
+.lb-v{font-size:24px;font-weight:600;letter-spacing:-.5px}
+.lb-p{font-size:14px;font-weight:600}
+.lb-chip{font-size:10px;color:var(--muted);background:var(--surface-inset);border-radius:var(--r-pill);padding:3px 9px}
+.lb-sup{display:flex;gap:18px;margin-top:11px;padding-top:11px;border-top:1px solid var(--hairline);flex-wrap:wrap}
+.lb-sup>div{font-size:11px;color:var(--muted)}
+.lb-sup b{display:block;font-size:15px;margin-top:3px}
+.lb-asof{margin-left:auto;font-size:10px;color:var(--faint);align-self:flex-end}
+.subnav{display:flex;gap:0;background:var(--canvas);border:1px solid var(--hairline);
+        border-radius:var(--r-card);padding:0 10px}
+.subnav span{padding:11px 13px;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent}
+.subnav span.on{color:var(--primary);border-bottom-color:var(--primary)}
+/* 근거 목록 */
+.sig-row{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--hairline);
+         font-size:13.5px;line-height:1.6;color:var(--muted)}
+.sig-row:first-child{padding-top:0}.sig-row:last-child{border-bottom:none;padding-bottom:0}
+.sig-dot{width:9px;height:9px;border-radius:var(--r-pill);flex-shrink:0;position:relative;top:5px}
+.sig-dot.up{background:var(--up)}.sig-dot.down{background:var(--dn)}.sig-dot.neu{background:var(--warn)}
+.sig-dot.off{background:var(--hairline)}
+.sig-k{font-weight:600;color:var(--ink)}
+/* 셀 + 미니차트 */
+.cells{display:flex;flex-direction:column}
+.cell{display:grid;grid-template-columns:1fr 130px;gap:14px;align-items:center;
+      padding:12px 0;border-bottom:1px solid var(--hairline)}
+.cell:first-child{padding-top:0}.cell:last-child{border-bottom:none;padding-bottom:0}
+.cell__lbl{font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.cell__amt{font-size:19px;font-weight:600;line-height:1.1;letter-spacing:-.4px}
+.cell__amt .u{font-size:12px;font-weight:500;color:var(--muted);margin-left:1px}
+.cell__sub{font-size:11px;color:var(--muted);margin-top:4px}
+.fc{display:flex;flex-direction:column;gap:5px}
+.fc__bars{height:44px;display:grid;grid-template-columns:repeat(2,1fr);gap:6px;position:relative}
+.fc__bars.zero::before,.fc__bars.base::before{content:'';position:absolute;left:0;right:0;height:1px;background:var(--hairline)}
+.fc__bars.zero::before{top:50%}.fc__bars.base::before{bottom:0}
+.fcbar{position:relative}
+.fcbar__rect{position:absolute;left:0;right:0;border-radius:3px}
+.fcbar__rect.up{background:var(--up)}.fcbar__rect.down{background:var(--dn)}
+.fcbar__rect.mag{background:var(--ink);opacity:.6}
+.fcbar.prev .fcbar__rect{opacity:.32}
+.fc__axis{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:9px;color:var(--muted);text-align:center}
+.fc__axis .t{color:var(--ink);font-weight:600}
+/* 짝 막대 */
+.pairs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.pair__bars{height:80px;display:grid;grid-template-columns:1fr 1fr;gap:3px;position:relative}
+.pair__bars::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hairline)}
+.pair__val{font-size:10px;font-weight:600;text-align:center;margin-top:5px}
+.pair__prev{font-size:9px;color:var(--muted);text-align:center;margin-top:1px}
+.pair__lbl{font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
+/* 표 */
+.tw{border:1px solid var(--hairline);border-radius:var(--r-table);overflow:hidden;background:var(--canvas)}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 10px;background:var(--surface-soft);font-size:11px;font-weight:600;color:var(--muted);
+   border-bottom:1px solid var(--hairline);text-align:right;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--hairline);text-align:right;white-space:nowrap;
+   font-size:12.5px;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+th:first-child,td:first-child{text-align:left}
+td.nm{font-weight:600;white-space:normal}
+td.nm .reps{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:2px}
+.rk{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+    border-radius:var(--r-badge);background:var(--surface-inset);font-size:10px;font-weight:600;
+    color:var(--muted);margin-right:7px;vertical-align:1px}
+.rk.top{background:var(--ink);color:#fff}
+.badge{display:inline-flex;font-size:9px;font-weight:500;border-radius:var(--r-badge);padding:2px 6px}
+.badge.up{color:var(--up);background:var(--up-bg)}
+.badge.dn{color:var(--dn);background:var(--dn-bg)}
+.badge.same{color:var(--muted);background:var(--surface-inset)}
+.badge.live{color:var(--up);background:var(--up-bg)}
+/* 주도주 타일 */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.tile{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-input);padding:12px}
+.tile.sel{border-color:var(--primary)}
+.tile__n{font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.tile__p{font-size:20px;font-weight:600;letter-spacing:-.4px;margin-top:6px}
+.tile__c{font-size:11px;font-weight:600;margin-top:2px}
+.tile__m{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.55}
+.tile__vs{margin-top:8px;padding-top:7px;border-top:1px dashed var(--hairline);font-size:10px;color:var(--muted)}
+/* 미국 그리드 */
+.usg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.usi{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-input);padding:9px 10px}
+.usi__n{font-size:10px;color:var(--muted)}
+.usi__v{font-size:13px;font-weight:600;margin-top:3px}
+.usi__c{font-size:11px;font-weight:600}
+/* 뉴스·신호 목록 */
+.list{display:flex;flex-direction:column}
+.li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--hairline);align-items:baseline}
+.li:first-child{padding-top:0}.li:last-child{border-bottom:none;padding-bottom:0}
+.li__t{font-size:10px;color:var(--faint);flex:0 0 38px;font-variant-numeric:tabular-nums}
+.li__b{flex:1}
+.li__h{font-size:12.5px;font-weight:600;line-height:1.45}
+.li__d{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.45}
+.sigl{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--hairline);align-items:center}
+.sigl:last-child{border-bottom:none}
+.sigl__n{font-size:12.5px;font-weight:600}
+.sigl__c{font-size:10px;color:var(--muted);margin-top:2px}
+.sigl__p{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:9px;color:var(--muted);background:var(--surface-inset);
+      border-radius:var(--r-badge);padding:2px 6px;margin-right:4px}
+.mini{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.6}
+.warnbox{background:#FFFDF5;border:1px solid #F3E4BC;border-radius:var(--r-input);padding:11px 13px;
+         font-size:12px;color:#7C5E1E;line-height:1.6;margin-top:10px}
+.warnbox b{color:#5C4512}
+.note{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-card);padding:16px;margin-top:20px}
+.note h3{font-size:12px;font-weight:600;color:var(--gold);margin-bottom:8px}
+.note li{font-size:13px;color:var(--muted);line-height:1.75;margin-left:16px}
+.note li b{color:var(--ink)}
+@media(max-width:700px){
+  .tiles{grid-template-columns:1fr}.usg{grid-template-columns:repeat(2,1fr)}
+  .pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}
+  .cell{grid-template-columns:1fr 110px;gap:10px}
+  .display-28sb{font-size:22px}.title-22sb{font-size:18px}
+}
+</style></head><body>
+<div class="gnb">Double-Shot</div>
+<div class="wrap">
+<div class="phead">
+  <div>
+    <div class="eyebrow-13m">종목 시그널 홈</div>
+    <h1 class="display-28sb">시간대별 전체 배치</h1>
+    <p class="body-14r">홈의 <b>모든 블록</b>을 실데이터로 채웠어요. 탭을 눌러 그 시각 홈이 어떤 순서로 보이는지 확인하세요.
+      회색 태그는 <b>지금 있는 블록</b>, 파란 태그는 <b>새로 붙는 카드</b>, 검은 태그는 <b>그 시간대 주인공</b>입니다.</p>
+  </div>
+  <span class="proto">PROTOTYPE</span>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="slotnote" id="slotnote"></div>
+<div id="stack"></div>
+<div class="note" id="note"></div>
+</div>
+<script>
+/* ═══════ 실측 데이터 (2026-09-16) ═══════ */
+const DATA={
+ open:{ // 장중 13:30 확정 1분봉
+   kospi:[6695.89,1.04],kosdaq:[null,-0.12],kospi200:[null,1.32],
+   prev:{kospi:-0.77,kosdaq:1.02,kospi200:-0.70},
+   vol:[142592,190662,-25.2],amp:[1.75,1.43],
+   supply:{개인:-9641,기관:10502,외국인:-13443},
+   supplyPrev:{개인:5538,기관:-5890,외국인:-12029},
+   inst:[['금융투자',4226,-4336],['연기금등',4224,-47],['투신(사모)',1798,-1848],
+         ['기타금융',130,145],['보험',189,75],['은행',-64,122]],
+   sect:[['전력기기',2.50,-3.59,6],['반도체',1.52,-0.47,3],['금융',0.04,-2.83,5],
+         ['2차전지',-0.46,3.29,1],['바이오',-0.95,0.31,2],['방산',-1.21,-5.32,7],
+         ['자동차',-1.49,-0.78,4],['조선',-1.97,-5.54,8]],
+   asof:'13:30 확정 · 실시간은 +2분'},
+ close:{ // 정규장 확정 09:00~15:30
+   kospi:[6717.97,1.37],kosdaq:[815.98,0.44],kospi200:[1060.05,1.69],
+   prev:{kospi:-0.85,kosdaq:0.72,kospi200:-0.80},
+   vol:[197715,274038,-27.9],amp:[1.80,1.99],
+   supply:{개인:-11863,기관:12116,외국인:-16825},
+   supplyPrev:{개인:8320,기관:-9040,외국인:-15711},
+   inst:[['금융투자',7605,-6060],['연기금등',1734,114],['투신(사모)',2472,-3511],
+         ['기타금융',197,204],['보험',171,101],['은행',-63,113]],
+   sect:[['전력기기',2.59,-3.88,6],['반도체',2.56,-0.57,3],['금융',-0.09,-3.16,5],
+         ['2차전지',-0.95,3.26,1],['바이오',-0.97,-0.35,2],['방산',-1.02,-4.58,7],
+         ['자동차',-1.73,-1.51,4],['조선',-2.21,-5.24,8]],
+   asof:'정규장 확정 09:00~15:30'},
+};
+const REPS={'반도체':'삼성전자·SK하이닉스·한미반도체','전력기기':'HD현대일렉트릭·LS일렉트릭·효성중공업',
+ '금융':'삼성생명·KB금융·신한지주','2차전지':'LG에너지솔루션·에코프로비엠·삼성SDI',
+ '바이오':'삼성바이오로직스·셀트리온·유한양행','방산':'한화에어로스페이스·LIG넥스원·현대로템',
+ '자동차':'현대차·기아·현대모비스','조선':'HD현대중공업·한화오션·삼성중공업'};
+const LEADERS=[
+ {n:'삼성전자',p:253500,base:248500,pct:2.01,hi:'−30.1%',frgn:'−1,674만주',rng:'247,500 – 254,000',vsY:'+1.81%(어제 −0.40%)'},
+ {n:'SK하이닉스',p:1759000,base:1690000,pct:4.08,hi:'−39.7%',frgn:'−332만주',rng:'1,686,000 – 1,759,000',vsY:'+3.08%(어제 −0.12%)'},
+ {n:'현대차',p:362000,base:367000,pct:-1.36,hi:'−51.7%',frgn:'+23만주',rng:'359,000 – 367,000',vsY:'−1.23%(어제 −0.67%)'}];
+const US=[['나스닥 QQQ','',0.45],['반도체 ETF SOXX','',1.40],['변동성 VIX','17.05',-0.87],
+ ['메모리·HBM DRAM','76,831원',2.00],['한국ETF EWY','244,639원',1.23],['SK하이닉스 SKHY','246,652원',3.03],
+ ['브로드컴 AVGO','467,506원',0.63],['엔비디아 NVDA','292,384원',0.64],['AMD','699,589원',1.33],
+ ['ASML','2,231,808원',2.41],['TSMC TSM','570,943원',0.78],['마이크론 MU','1,276,831원',0.53]];
+const SECT7=[['DB하이텍','000990',125000,7.11,'52주 중 46% 지점','외국인 24.6%'],
+ ['이오테크닉스','039030',468000,4.82,'52주 중 65% 지점','외국인 25.0%'],
+ ['주성엔지니어링','036930',202000,4.77,'52주 중 78% 지점','외국인 8.7%'],
+ ['SK하이닉스','000660',1759000,4.08,'52주 중 56% 지점','외국인 50.2%'],
+ ['리노공업','058470',65900,2.49,'52주 중 25% 지점','외국인 29.6%'],
+ ['삼성전자','005930',253500,2.01,'52주 중 63% 지점','외국인 46.6%'],
+ ['한미반도체','042700',226000,1.57,'52주 중 44% 지점','외국인 7.1%']];
+const SIGNALS=[['DB하이텍','000990 · 반도체',7.1,['거래량 ×1.5 급증','기관 5일 연속 순매수']],
+ ['이오테크닉스','039030 · 반도체',4.8,['기관 순매수 전환']],
+ ['주성엔지니어링','036930 · 반도체',4.8,['거래대금 상위']],
+ ['SK하이닉스','000660 · 반도체',4.1,['거래대금 상위']],
+ ['리노공업','058470 · 반도체',2.5,['기관 5일 연속 순매수']],
+ ['제룡전기','033100 · 전력기기',0.9,['외국인 3일 연속 순매수','기관 순매수 전환']],
+ ['KB금융','105560 · 금융',0.5,['기관 3일 연속 순매수']],
+ ['LG에너지솔루션','373220 · 2차전지',0.4,['외국인 순매수 전환','기관 순매수 전환']]];
+const NEWS=[['17:28','현대차, 수소 버스 보급 활성화…"충전 인프라 확장"','현대차는 수소 버스 보급 위해 충전 인프라 확대에 나서고 있어요.','팍스경제TV'],
+ ['17:25','현대차, 글로벌 통합 안전 협의체 출범','임직원 안전 최우선으로 안전 협의체를 출범했어요.','글로벌이코노믹'],
+ ['17:22','현대차, 선진그룹과 수소버스 480대 도입','충전 인프라를 함께 넓혀가요.','부산일보'],
+ ['17:20','현대차 노사, 문화나눔 지원금 5000만원 기탁','지역 사회 문화 나눔을 위해 기탁했어요.','뉴시스']];
+const TARGETS=[['현대차증권','매수',630000,'8/28'],['한화투자증권','매수',760000,'8/27'],
+ ['하나증권','매수',650000,'8/27'],['미래에셋증권','매수',840000,'8/27'],
+ ['iM증권','매수',650000,'8/27'],['대신증권','매수',740000,'8/27']];
+
+/* ═══════ 헬퍼 ═══════ */
+const sp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2);
+const cl=v=>v>0?'up':v<0?'dn':'mu';
+const nf=n=>Math.abs(n).toLocaleString('en-US');
+const sgn=n=>(n>0?'+':n<0?'−':'')+nf(n);   // 부호를 잃지 않는 정수 표기
+const eok=v=>(v>0?'+':'−')+(Math.abs(v)>=10000?(Math.abs(v)/10000).toFixed(2)+'조':nf(v)+'억');
+const B=(t,c)=>`<span class="badge ${c}">${t}</span>`;
+const card=(t,sub,body,isNew)=>`<div class="card${isNew?' new':''}">
+  <div class="chead"><span class="ctitle">${t}</span><span class="csub">${sub}</span></div>${body}</div>`;
+const blk=(tag,html)=>`<div class="blk"><span class="blk__tag ${tag[0]}">${tag[1]}</span>${html}</div>`;
+
+function fcChart(prev,today,zero=true){
+  const M=Math.max(Math.abs(prev),Math.abs(today))||1;
+  const bar=(v,isT)=>{
+    const h=Math.max(Math.abs(v)/M*(zero?20:40),2);
+    const st=zero?(v>=0?`bottom:50%;height:${h}px`:`top:50%;height:${h}px`):`bottom:0;height:${h}px`;
+    const c=!zero?'mag':(v>=0?'up':'down');
+    return `<div class="fcbar ${isT?'':'prev'}"><span class="fcbar__rect ${c}" style="${st}"></span></div>`;};
+  return `<div class="fc"><div class="fc__bars ${zero?'zero':'base'}">${bar(prev,0)}${bar(today,1)}</div>
+    <div class="fc__axis"><span>어제</span><span class="t">오늘</span></div></div>`;}
+function cellRow(lbl,badge,amt,unit,cls2,sub,chart){
+  return `<div class="cell"><div><div class="cell__lbl">${lbl}${badge}</div>
+    <div class="cell__amt num ${cls2}">${amt}${unit?`<span class="u">${unit}</span>`:''}</div>
+    <div class="cell__sub">${sub}</div></div>${chart}</div>`;}
+
+/* ═══════ 블록 렌더러 ═══════ */
+function liveBar(d,label,note){
+  const s=d.supply;
+  return `<div class="livebar">
+    <div class="lb-top"><span class="lb-k">코스피</span>
+      <span class="lb-v num">${d.kospi[0]?d.kospi[0].toLocaleString(undefined,{minimumFractionDigits:2}):'—'}</span>
+      <span class="lb-p num ${cl(d.kospi[1])}">${sp(d.kospi[1])}%</span>
+      <span class="lb-chip">코스닥·환율</span>
+      <span class="lb-asof">${label}</span></div>
+    <div class="lb-sup">
+      <div>개인<b class="num ${cl(s.개인)}">${sgn(s.개인)}</b></div>
+      <div>기관<b class="num ${cl(s.기관)}">${sgn(s.기관)}</b></div>
+      <div>외국인<b class="num ${cl(s.외국인)}">${sgn(s.외국인)}</b></div>
+      <div class="lb-asof">10일 추이 ›</div></div>
+    ${note?`<div class="warnbox">${note}</div>`:''}</div>`;}
+
+function verdictCard(d,o){
+  const kd=Math.round((d.kospi[1]-d.prev.kospi)*100)/100;
+  return card(o.title,o.sub,`
+    <div class="cbody white">
+      <p class="title-22sb" style="margin-bottom:5px">${o.verdict}</p>
+      <p class="body-15r mu">${o.lede}</p></div>
+    <div class="cbody">
+      <div class="sig-row"><span class="sig-dot ${kd>=0?'up':'down'}"></span><span>
+        <span class="sig-k">가격</span> — 어제 이 시각엔 <b class="${cl(d.prev.kospi)}">${sp(d.prev.kospi)}%</b>였어요.
+        지금은 <b class="${cl(kd)}">${sp(kd)}%p</b> 더 ${kd>=0?'높아요':'낮아요'}</span></div>
+      <div class="sig-row"><span class="sig-dot ${d.vol[2]>=0?'up':'down'}"></span><span>
+        <span class="sig-k">강도</span> — 거래량 <b class="${cl(d.vol[2])}">${sp(d.vol[2])}%</b>
+        (어제 ${nf(d.vol[1])}천주), 진폭 <b>${d.amp[0].toFixed(2)}%</b>(어제 ${d.amp[1].toFixed(2)}%)</span></div>
+      <div class="sig-row"><span class="sig-dot neu"></span><span>
+        <span class="sig-k">주도권</span> — <b>${d.sect[0][0]}</b>가 어제 ${d.sect[0][3]}위에서 <b class="up">1위</b>로,
+        <b>2차전지</b>가 어제 1위에서 <b class="dn">${d.sect.findIndex(s=>s[0]==='2차전지')+1}위</b>로</span></div>
+      <div class="sig-row"><span class="sig-dot ${d.supply.기관>=0?'up':'down'}"></span><span>
+        <span class="sig-k">누가</span> — 어제 이 시각 기관은 <b class="${cl(d.supplyPrev.기관)}">${eok(d.supplyPrev.기관)}</b>였어요.
+        오늘은 <b class="${cl(d.supply.기관)}">${eok(d.supply.기관)}</b></span></div>
+    </div>`,true);}
+
+function heatCard(d){
+  return card('얼마나 뜨거운가','새 축 · 강도',`
+    <div class="cbody"><div class="cells">
+      ${cellRow('코스피 누적 거래량',B(d.vol[2]<0?'덜 붙음':'더 붙음',d.vol[2]<0?'dn':'up'),
+        nf(d.vol[0]),'천주','',`어제 ${nf(d.vol[1])}천주 · <b class="${cl(d.vol[2])}">${sp(d.vol[2])}%</b>`,
+        fcChart(d.vol[1],d.vol[0],false))}
+      ${cellRow('코스피 일중 진폭',B(Math.abs(d.amp[0]-d.amp[1])<=0.3?'비슷해요':(d.amp[0]>d.amp[1]?'더 출렁':'덜 출렁'),
+        Math.abs(d.amp[0]-d.amp[1])<=0.3?'same':(d.amp[0]>d.amp[1]?'up':'dn')),
+        d.amp[0].toFixed(2),'%','',`어제 ${d.amp[1].toFixed(2)}% · <b class="${cl(d.amp[0]-d.amp[1])}">${sp(d.amp[0]-d.amp[1])}%p</b>`,
+        fcChart(d.amp[1],d.amp[0],false))}
+    </div></div>
+    <div class="cbody"><div class="tw"><table>
+      <thead><tr><th>시장</th><th>누적 거래량</th><th>어제</th><th>차이</th><th>진폭</th><th>어제</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">코스피</td><td>${nf(d.vol[0])}천주</td><td class="mu">${nf(d.vol[1])}</td>
+            <td class="${cl(d.vol[2])}">${sp(d.vol[2])}%</td><td>${d.amp[0].toFixed(2)}%</td><td class="mu">${d.amp[1].toFixed(2)}%</td></tr>
+        <tr><td class="nm">코스닥</td><td>${d===DATA.open?'552,991':'696,186'}천주</td>
+            <td class="mu">${d===DATA.open?'497,148':'630,819'}</td>
+            <td class="up">${d===DATA.open?'+11.20':'+10.40'}%</td>
+            <td>${d===DATA.open?'1.38':'1.83'}%</td><td class="mu">${d===DATA.open?'2.78':'2.78'}%</td></tr>
+      </tbody></table></div>
+      <p class="mini">⚠ 지수 1분봉에는 거래<b>대금</b>(원)이 없어요 — 현재값만 있고 과거 시각은 못 구합니다. 그래서 거래<b>량</b>(천주)으로 비교해요.</p>
+    </div>`,true);}
+
+function leadCard(d){
+  const rows=d.sect.map(([nm,t,y,pr],i)=>{
+    const rk=i+1,mv=pr-rk,diff=Math.round((t-y)*100)/100;
+    const bd=mv>0?B('▲'+mv,'up'):mv<0?B('▼'+(-mv),'dn'):B('─','same');
+    return `<tr><td class="nm"><span class="rk${rk===1?' top':''}">${rk}</span>${nm}<span class="reps">${REPS[nm]}</span></td>
+      <td class="${cl(t)}">${sp(t)}%</td><td class="mu">${sp(y)}%</td><td class="${cl(diff)}">${sp(diff)}%p</td><td>${bd}</td></tr>`;}).join('');
+  return card('어디가 끄는가','새 축 · 주도권',`
+    <div class="cbody"><div class="cells">
+      ${cellRow('코스피',B(d.kospi[1]>d.prev.kospi?'오늘이 셈':'오늘이 약함',d.kospi[1]>d.prev.kospi?'up':'dn'),
+        sp(d.kospi[1]),'%',cl(d.kospi[1]),`어제 <b class="${cl(d.prev.kospi)}">${sp(d.prev.kospi)}%</b>`,fcChart(d.prev.kospi,d.kospi[1]))}
+      ${cellRow('코스피200',B(d.kospi200[1]>d.prev.kospi200?'오늘이 셈':'오늘이 약함',d.kospi200[1]>d.prev.kospi200?'up':'dn'),
+        sp(d.kospi200[1]),'%',cl(d.kospi200[1]),`어제 <b class="${cl(d.prev.kospi200)}">${sp(d.prev.kospi200)}%</b>`,fcChart(d.prev.kospi200,d.kospi200[1]))}
+      ${cellRow('코스닥',B(d.kosdaq[1]>d.prev.kosdaq?'오늘이 셈':'오늘이 약함',d.kosdaq[1]>d.prev.kosdaq?'up':'dn'),
+        sp(d.kosdaq[1]),'%',cl(d.kosdaq[1]),`어제 <b class="${cl(d.prev.kosdaq)}">${sp(d.prev.kosdaq)}%</b>`,fcChart(d.prev.kosdaq,d.kosdaq[1]))}
+    </div></div>
+    <div class="cbody"><div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:9px">섹터 대표 3종목 평균</div>
+      <div class="tw"><table><thead><tr><th>섹터</th><th>오늘</th><th>어제</th><th>차이</th><th>순위</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <p class="mini">각 섹터 <b>대표 3종목의 동일가중 평균</b>이에요(시총가중 아님). 조회는 8섹터 × 3종목 × 2일 = <b>48건</b>.</p>
+    </div>`,true);}
+
+function flowCard(d){
+  const M=Math.max(...d.inst.flatMap(r=>[Math.abs(r[1]),Math.abs(r[2])]));
+  const pairs=d.inst.map(([nm,t,y])=>{
+    const bar=(v,isT)=>{const h=Math.max(Math.abs(v)/M*36,2);
+      return `<div class="fcbar ${isT?'':'prev'}"><span class="fcbar__rect ${v>=0?'up':'down'}"
+        style="${v>=0?`bottom:50%;height:${h}px`:`top:50%;height:${h}px`}"></span></div>`;};
+    return `<div><div class="pair__bars">${bar(y,0)}${bar(t,1)}</div>
+      <div class="pair__val ${cl(t)}">${eok(t)}</div>
+      <div class="pair__prev">어제 ${eok(y)}</div><div class="pair__lbl">${nm}</div></div>`;}).join('');
+  const c=(k)=>cellRow(k,B(Math.sign(d.supply[k])!==Math.sign(d.supplyPrev[k])?'돌아섬':'같은 방향',
+      Math.sign(d.supply[k])!==Math.sign(d.supplyPrev[k])?(d.supply[k]>0?'up':'dn'):'same'),
+      eok(d.supply[k]).replace(/[+−]/,''),'',cl(d.supply[k]),
+      `어제 <b class="${cl(d.supplyPrev[k])}">${eok(d.supplyPrev[k])}</b>`,fcChart(d.supplyPrev[k],d.supply[k]));
+  return card('누가 사는가','새 축 · 수급 심층',`
+    <div class="cbody"><div class="cells">${c('개인')}${c('외국인')}${c('기관')}</div></div>
+    <div class="cbody">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:10px">
+        기관 안에서 누가 바뀌었나 <span style="font-weight:400">— 왼쪽 옅은 막대가 어제, 오른쪽이 오늘</span></div>
+      <div class="pairs">${pairs}</div>
+      <p class="mini">기관 세부 6칸은 <b>지금도 이미 받아오는 값</b>이에요 — 시간대별 표 11칸 중 쓰지 않고 버리던 <code>v[3]~v[8]</code>입니다.</p>
+    </div>`,true);}
+
+const briefCard=(t,h)=>card('더블샷 브리핑',t,`<div class="cbody white" style="display:flex;align-items:center;gap:10px">
+  <span style="font-size:18px">🏁</span><div><div style="font-size:13.5px;font-weight:600">${h}</div>
+  <div style="font-size:11px;color:var(--muted);margin-top:2px">브리핑 보기 →</div></div></div>`);
+
+const usCard=()=>card('밤사이 미국 반도체 시황','LIVE · 프리장 · 60초 갱신',`
+  <div class="cbody white" style="display:flex;gap:10px;align-items:center">
+    ${B('11개 중 11 상승 · 0 하락','live')}<span class="lb-chip">원화 / 달러</span></div>
+  <div class="cbody"><div class="usg">${US.map(([n,v,p])=>`<div class="usi"><div class="usi__n">${n}</div>
+    ${v?`<div class="usi__v num">${v}</div>`:''}<div class="usi__c num ${cl(p)}">${sp(p)}%</div></div>`).join('')}</div>
+    <p class="mini">환율 1,369.3원 적용 · 미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표</p></div>`);
+
+const leadersCard=(showVs)=>card('코스피 주도주','코스피 시총 상위 3',`
+  <div class="cbody"><div class="tiles">${LEADERS.map((L,i)=>`<div class="tile${i===2?' sel':''}">
+    <div class="tile__n">${L.n}${B('실시간','live')}</div>
+    <div class="tile__p num">${nf(L.p)}</div>
+    <div class="tile__c num ${cl(L.pct)}">${L.pct>0?'▲':'▼'} ${nf(L.p-L.base)} (${Math.abs(L.pct).toFixed(2)}%)</div>
+    <div class="tile__m">전일 ${nf(L.base)}<br>정규장 레인지 ${L.rng}<br>52주 고점 대비 ${L.hi} · 외국인 5일 ${L.frgn}</div>
+    ${showVs?`<div class="tile__vs">어제 같은 시각 대비 <b class="${L.pct>0?'up':'dn'}">${L.vsY}</b></div>`:''}
+  </div>`).join('')}</div></div>`);
+
+const newsCard=()=>card('관련 뉴스','현대차 · 최신순',`<div class="cbody"><div class="list">
+  ${NEWS.map(([t,h,d,s])=>`<div class="li"><span class="li__t">${t}</span><div class="li__b">
+    <div class="li__h">${h}</div><div class="li__d">${d} · ${s}</div></div></div>`).join('')}</div></div>`);
+
+const targetCard=()=>card('증권사 목표주가','현대차 · 리포트 8건',`
+  <div class="cbody white"><div style="display:flex;align-items:baseline;gap:10px">
+    <span class="lb-k">컨센서스</span><span class="lb-v num">733,333</span><span class="lb-p up num">+102.6%</span></div>
+    <div class="mini" style="margin-top:4px">종가 362,000 기준 · 3개월 12개사 평균 · 급락 후 미수정 목표가 포함 가능</div></div>
+  <div class="cbody"><div class="tw"><table><thead><tr><th>증권사</th><th>의견</th><th>목표가</th><th>발행</th></tr></thead>
+    <tbody>${TARGETS.map(([b,o,p,dt])=>`<tr><td class="nm">${b}</td><td class="mu">${o}</td>
+      <td>${nf(p)}</td><td class="mu">${dt}</td></tr>`).join('')}</tbody></table></div></div>`);
+
+const sectorCard=()=>card('섹터별 대표 종목','반도체 · 거래대금 가중 +3.38%',`
+  <div class="cbody white" style="display:flex;gap:8px">${B('상승 7','up')}${B('하락 0','same')}
+    <span class="lb-chip">등락률 높은 순 ↓</span></div>
+  <div class="cbody"><div class="tw"><table><thead><tr><th>종목</th><th>현재가</th><th>등락</th><th>52주 위치</th></tr></thead>
+    <tbody>${SECT7.map(([n,c,p,pc,pos,fr])=>`<tr><td class="nm">${n}<span class="reps">${c} · ${fr}</span></td>
+      <td>${nf(p)}</td><td class="${cl(pc)}">${sp(pc)}%</td><td class="mu">${pos}</td></tr>`).join('')}</tbody></table></div></div>`);
+
+const signalCard=()=>card('오늘의 특이 신호','9/16(수) · 신호 강도순',`
+  <div class="cbody white"><div class="mini" style="margin:0">역행·거래량·신고가·수급이 교차한 종목을 규칙으로 선별해요.</div></div>
+  <div class="cbody">${SIGNALS.map(([n,c,p,tags])=>`<div class="sigl"><div>
+    <div class="sigl__n">${n}</div><div class="sigl__c">${c}</div>
+    <div style="margin-top:4px">${tags.map(t=>`<span class="pill">${t}</span>`).join('')}</div></div>
+    <div class="sigl__p ${cl(p)}">${sp(p)}%</div></div>`).join('')}</div>`);
+
+const subnav=()=>`<div class="subnav"><span class="on">전체</span><span>특이신호</span></div>`;
+
+/* ═══════ 슬롯 정의 ═══════ */
+const SLOTS={
+ pre:{label:'장 전',time:'07:30~09:00',
+  cmp:'어제(9/16 수) 정규장 최종 vs 그제(9/15 화) 최종',
+  why:'한국장이 아직 안 열려 <b>"같은 시각"이 없어요.</b> 어제 확정 성적을 보여주고 주인공은 <b>밤사이 미국</b>입니다. 데이터는 전날 마감 후 카드와 같고 라벨만 "어제"로 바뀌어요.',
+  build(){const d=DATA.close;return [
+   blk(['exist','기존'],liveBar(d,'어제(9/16) 마감 기준')),
+   blk(['exist','기존'],subnav()),
+   blk(['hero','이 시간대 주인공'],card('밤사이 브리지','07:30~09:00',
+     `<div class="cbody white"><p class="body-15r">간밤 미국 반도체가 오늘 시초가에 뭘 예고하는지 정리해요.</p></div>`)),
+   blk(['exist','기존'],usCard()),
+   blk(['newc','새 카드'],verdictCard(d,{title:'어제 장, 이렇게 끝났어요',sub:'9/16(수) 정규장 최종',
+     verdict:'어제 코스피는 <span class="up">+1.37%</span>로 마쳤어요',
+     lede:'거래는 그 전날보다 28% 적었고, 전력기기가 끄는 쪽으로 바뀌었어요.'})),
+   blk(['newc','새 카드'],heatCard(d)),
+   blk(['newc','새 카드'],leadCard(d)),
+   blk(['newc','새 카드'],flowCard(d)),
+   blk(['exist','기존'],briefCard('코스피 예측 브리핑 · 07:25 발행','오늘 코스피, 이렇게 봅니다')),
+   blk(['exist','기존'],leadersCard(false)),
+   blk(['exist','기존'],sectorCard()),
+   blk(['exist','기존'],signalCard()),
+  ].join('')}},
+ open:{label:'장중',time:'09:00~15:30',
+  cmp:'오늘 13:30 vs 어제 13:30 — 확정된 같은 분',
+  why:'네 축이 <b>모두 "같은 시각"으로 살아 있는</b> 유일한 시간대예요. 대결판이 홈 맨 위 주인공입니다.',
+  build(){const d=DATA.open;return [
+   blk(['exist','기존'],liveBar(d,'13:30 · 60초 갱신',
+     '<b>LIVE 바는 실시간, 대결판은 확정 1분봉(약 2분 지연)이에요.</b> 13:24~13:30 사이 코스피가 +1.04~+1.24%로 움직였으니 같은 지표가 0.1%p쯤 다르게 보일 수 있어요. 그래서 아래 대결판은 <b>오늘 값을 다시 적지 않고 "어제 이 시각"만</b> 말합니다.')),
+   blk(['exist','기존'],subnav()),
+   blk(['newc','새 카드'],verdictCard(d,{title:'오늘이 어제보다 센가',sub:'13:30 · 결론은 여기서만',
+     verdict:'코스피가 같은 시각 기준 <span class="up">1.81%p</span> 더 올랐어요',
+     lede:'다만 거래는 25% 덜 붙었고, 끄는 쪽이 바뀌었어요.'})),
+   blk(['newc','새 카드'],heatCard(d)),
+   blk(['newc','새 카드'],leadCard(d)),
+   blk(['newc','새 카드'],flowCard(d)),
+   blk(['exist','기존'],briefCard('코스피 예측 브리핑 · 07:25 발행','오늘 코스피, 이렇게 봅니다')),
+   blk(['exist','기존'],leadersCard(true)),
+   blk(['exist','기존'],newsCard()),
+   blk(['exist','기존'],targetCard()),
+   blk(['exist','기존'],sectorCard()),
+   blk(['exist','기존'],signalCard()),
+  ].join('')}},
+ close:{label:'마감 후',time:'15:40~17:00',
+  cmp:'오늘 정규장 최종(09:00~15:30) vs 어제 최종',
+  why:'"같은 시각"이 <b>"하루 전체"로 바뀝니다.</b> 확정값이라 가장 정확해요. 단 16:00부터 애프터장이 열려 실시간·일봉을 쓰면 안 됩니다(§48) — 1분봉과 15:40 수급 행으로만 만들어요.',
+  build(){const d=DATA.close;return [
+   blk(['exist','기존'],liveBar({...d,supply:{개인:-11783,기관:12145,외국인:-16871}},'9/16(수) 마감 기준',
+     '지금 홈의 LIVE 바 수급은 <b>애프터장이 섞인 값</b>이에요(§51 남은 갭). 실측하면 정규장 확정과 개인 80억·기관 29억·외국인 46억 어긋납니다 — 아래 대결판은 <b>15:40 행의 정규장 확정값</b>을 씁니다.')),
+   blk(['exist','기존'],subnav()),
+   blk(['newc','새 카드'],verdictCard(d,{title:'오늘 장, 이렇게 끝났어요',sub:'정규장 확정 09:00~15:30',
+     verdict:'코스피가 어제보다 <span class="up">2.22%p</span> 더 올라 마쳤어요',
+     lede:'거래는 28% 덜 붙었는데도 올랐고, 전력기기가 끄는 쪽으로 바뀌었어요.'})),
+   blk(['newc','새 카드'],heatCard(d)),
+   blk(['newc','새 카드'],leadCard(d)),
+   blk(['newc','새 카드'],flowCard(d)),
+   blk(['exist','기존'],briefCard('코스피 마감 브리핑 · 16:25 발행','반도체 홀로 지수 견인, 외국인 6일째 이탈은 부담')),
+   blk(['exist','기존'],leadersCard(false)),
+   blk(['exist','기존'],newsCard()),
+   blk(['exist','기존'],targetCard()),
+   blk(['exist','기존'],sectorCard()),
+   blk(['exist','기존'],signalCard()),
+  ].join('')}},
+ night:{label:'밤',time:'17:00~다음 날 07:30',
+  cmp:'오늘 정규장 최종 vs 어제 최종 (마감 후와 같은 값)',
+  why:'코스피는 이미 끝나 <b>값이 더 안 바뀝니다.</b> 주인공 자리를 밤사이 미국에 넘기고 네 축 카드는 아래로 내려가요.',
+  build(){const d=DATA.close;return [
+   blk(['exist','기존'],liveBar({...d,supply:{개인:-11783,기관:12145,외국인:-16871}},'9/16(수) 마감 기준')),
+   blk(['exist','기존'],subnav()),
+   blk(['hero','이 시간대 주인공'],usCard()),
+   blk(['exist','기존'],briefCard('미국 시장 브리핑 · 21:15 발행','오늘 밤 미국장, 이렇게 봅니다')),
+   blk(['newc','새 카드'],verdictCard(d,{title:'오늘 장, 이렇게 끝났어요',sub:'정규장 확정 · 값 고정',
+     verdict:'코스피가 어제보다 <span class="up">2.22%p</span> 더 올라 마쳤어요',
+     lede:'마감 후와 같은 값이에요. 지금은 미국장이 주인공이라 아래로 내려왔어요.'})),
+   blk(['newc','새 카드'],heatCard(d)),
+   blk(['newc','새 카드'],leadCard(d)),
+   blk(['newc','새 카드'],flowCard(d)),
+   blk(['exist','기존'],leadersCard(false)),
+   blk(['exist','기존'],sectorCard()),
+   blk(['exist','기존'],signalCard()),
+  ].join('')}},
+ weekend:{label:'주말',time:'토 · 일',
+  cmp:'이번 주(월~금) vs 지난주(월~금)',
+  why:'1분봉이 <b>약 7거래일까지만</b> 와서 지난주를 1분봉으로 못 읽어요. 저장된 공식 종가로 대체하고 <b>진폭 칸은 아예 뺍니다</b> — 고·저가가 없으니까요.',
+  build(){return [
+   blk(['exist','기존'],liveBar({kospi:[6717.97,1.37],supply:{개인:-11863,기관:12116,외국인:-16825}},'금요일 확정값')),
+   blk(['exist','기존'],subnav()),
+   blk(['exist','기존'],leadersCard(false)),
+   blk(['newc','새 카드'],card('이번 주 vs 지난주','월~금 · 구조만',`
+     <div class="cbody white"><p class="title-22sb" style="margin-bottom:5px">주간 비교는 <span class="mu">저장된 공식 종가</span>로 만들어요</p>
+       <p class="body-15r mu">1분봉이 7거래일까지만 와서 지난주를 못 읽어요. 진폭 칸은 빠지고, 나머지는 저장소가 쌓인 만큼만 채워져요.</p></div>
+     <div class="cbody">
+       <div class="sig-row"><span class="sig-dot off"></span><span><span class="sig-k">가격</span> — 주간 등락 <span class="mu">주간 실측을 모으면 채워져요</span></span></div>
+       <div class="sig-row"><span class="sig-dot off"></span><span><span class="sig-k">강도</span> — 주간 거래량 <span class="mu">〃</span> · 진폭은 주말엔 아예 안 나와요</span></div>
+       <div class="sig-row"><span class="sig-dot off"></span><span><span class="sig-k">주도권</span> — 주간 섹터 순위 <span class="mu">〃</span></span></div>
+       <div class="sig-row"><span class="sig-dot off"></span><span><span class="sig-k">누가</span> — 주간 수급 <span class="mu">〃 (수급은 과거 날짜가 조회돼 이 칸은 확실히 채울 수 있어요)</span></span></div>
+     </div>`,true)),
+   blk(['exist','기존'],sectorCard()),
+   blk(['exist','기존'],signalCard()),
+  ].join('')}},
+};
+const NOTE=`<h3>축 × 시간대 가용성 — 전부 실측으로 확인했습니다</h3>
+<div class="tw" style="margin:10px 0 6px"><table>
+<thead><tr><th style="text-align:left">축</th><th style="text-align:center">장 전</th><th style="text-align:center">장중</th>
+<th style="text-align:center">마감 후</th><th style="text-align:center">밤</th><th style="text-align:center">주말</th></tr></thead>
+<tbody>
+<tr><td class="nm">가격</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td style="text-align:center;color:var(--warn)">◐</td></tr>
+<tr><td class="nm">강도 · 거래량</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td style="text-align:center;color:var(--warn)">◐</td></tr>
+<tr><td class="nm">강도 · 진폭</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="mu" style="text-align:center">○</td></tr>
+<tr><td class="nm">주도권 · 섹터</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td style="text-align:center;color:var(--warn)">◐</td></tr>
+<tr><td class="nm">누가 · 수급</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td><td class="up" style="text-align:center">●</td></tr>
+</tbody></table></div>
+<p class="mini">● 됨 · ◐ 저장된 공식 종가에 의존 · ○ 안 됨</p>
+<ul style="margin-top:12px">
+<li><b>LIVE 바와 대결판이 겹칩니다</b> — 코스피 등락률과 수급이 두 곳에 나와요. 장중엔 시차로 0.1%p, 마감 후엔 애프터장 포함 여부로 29~80억 어긋납니다. 그래서 대결판은 <b>오늘 값을 다시 적지 않고 "어제 이 시각"만</b> 말하도록 바꿨어요.</li>
+<li><b>장 전은 전날 마감 후와 같은 데이터예요</b> — 라벨만 "오늘"에서 "어제"로 바뀝니다. 카드를 새로 만들 필요가 없어요.</li>
+<li><b>15:30~15:40은 공백입니다</b> — 정규장은 끝났는데 확정 수급 행(15:31~15:40)이 아직 안 나와요. 그 10분은 "집계 중"으로 둡니다.</li>
+<li><b>규칙을 교차 검증했어요</b> — 15:40 행으로 뽑은 9/15 수급(외국인 −15,711억 · 기관 −9,040억 · 개인 +8,320억)이 그날 마감 브리핑이 발행한 숫자와 정확히 일치했고, 오늘 코스피 마감 +1.37%(6,717.97)도 브리핑과 같았습니다.</li>
+<li><b>주도주 가격은 이미 맞습니다</b> — §48 수정 덕분에 홈 타일 가격이 정규장 확정 종가와 0원 차이로 일치해요(삼성전자 253,500 · SK하이닉스 1,759,000 · 현대차 362,000). 어긋나는 건 수급뿐입니다.</li>
+<li><b>1분봉은 약 7거래일까지만 옵니다</b>(9/16 기준 9/8까지, 9/4는 0건). 주말의 "지난주" 비교는 <code>data/kr_official_closes.json</code>에 의존하고, 진폭은 고·저가가 필요해 주말엔 아예 안 됩니다.</li>
+</ul>`;
+const order=['pre','open','close','night','weekend'];
+const tabs=document.getElementById('tabs');
+tabs.innerHTML=order.map(k=>`<button class="tab" data-k="${k}" aria-selected="false">${SLOTS[k].label}<span class="tm">${SLOTS[k].time}</span></button>`).join('');
+function render(k){
+  const s=SLOTS[k];
+  [...tabs.children].forEach(b=>b.setAttribute('aria-selected',String(b.dataset.k===k)));
+  document.getElementById('slotnote').innerHTML=`<div class="k">비교 대상 — ${s.cmp}</div><div class="v">${s.why}</div>`;
+  document.getElementById('stack').innerHTML=s.build();
+  document.getElementById('note').innerHTML=NOTE;
+}
+tabs.addEventListener('click',e=>{const t=e.target.closest('.tab'); if(t) render(t.dataset.k);});
+(function(){const n=new Date(Date.now()+(new Date().getTimezoneOffset()+540)*60000);
+ const d=n.getDay(),hm=n.getHours()*100+n.getMinutes();
+ render((d===0||d===6)?'weekend':hm>=730&&hm<900?'pre':hm>=900&&hm<1530?'open':hm>=1540&&hm<1700?'close':'night');})();
+</script>
+</body></html>
