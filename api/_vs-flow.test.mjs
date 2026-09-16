@@ -11,8 +11,11 @@ function page(rows, last = 3) {
 // 합계 0: 18675 − 22984 − 12184 + 16493 = 0 (9/11 18:06 실측)
 const OK = ['18,675', '-22,984', '-12,184', '-10,345', '-17', '-4,703', '7', '216', '2,659', '16,493'];
 
-test('열 순서대로 개인·외국인·기관계를 읽는다', () => {
-  assert.deepEqual(parseInvestorTimePage(page([row('18:06', OK)])), [{ t: '18:06', 개인: 18675, 외국인: -22984, 기관: -12184 }]);
+test('열 순서대로 개인·외국인·기관계·기관 세부 6칸을 읽는다', () => {
+  assert.deepEqual(parseInvestorTimePage(page([row('18:06', OK)])), [{
+    t: '18:06', 개인: 18675, 외국인: -22984, 기관: -12184,
+    inst: { 금융투자: -10345, 보험: -17, 투신: -4703, 은행: 7, 기타금융: 216, 연기금: 2659 },
+  }]);
 });
 
 test('합계 0 검사를 통과하지 못한 행은 버린다(열 밀림 방어)', () => {
@@ -55,6 +58,19 @@ test('탐색 중 0행 페이지를 만나면 이전에 찾은 값 대신 null �
   };
   const fetchText = async (url) => { const p = Number(url.match(/page=(\d+)/)[1]); return pages[p]; };
   assert.equal(await flowAt('20260914', '1100', fetchText), null);
+});
+
+test('기관 세부 6칸을 함께 낸다 — 합은 기관계와 같다', () => {
+  // 실사고 없는 합성 행: 개인 -9641 / 외국인 -13443 / 기관계 10502 / 세부 6 / 기타법인 12582
+  const tds = ['13:30', '-9641', '-13443', '10502', '4226', '189', '1798', '-64', '130', '4224', '12582'];
+  const html = '<tr>' + tds.map((v) => `<td>${v}</td>`).join('') + '</tr>';
+  const rows = parseInvestorTimePage(html);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].기관, 10502);
+  assert.equal(rows[0].inst.금융투자, 4226);
+  assert.equal(rows[0].inst.연기금, 4224);
+  const sum = Object.values(rows[0].inst).reduce((s, n) => s + n, 0);
+  assert.ok(Math.abs(sum - rows[0].기관) <= 2, `세부 합 ${sum} vs 기관계 ${rows[0].기관}`);
 });
 
 test('URL에 날짜·코스피(sosok=01)를 고정한다', async () => {

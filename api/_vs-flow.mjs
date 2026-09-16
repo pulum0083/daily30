@@ -10,7 +10,12 @@ export function parseInvestorTimePage(html) {
     if (v.some((n) => !Number.isFinite(n))) continue;
     // 개인+외국인+기관계+기타법인 = 0(반올림 최대 2억). 벗어나면 열이 밀린 것이라 쓰지 않는다
     if (Math.abs(v[0] + v[1] + v[2] + v[9]) > 5) continue;
-    rows.push({ t: cells[0], 개인: v[0], 외국인: v[1], 기관: v[2] });
+    // 열 순서: 개인 · 외국인 · 기관계 · [금융투자 · 보험 · 투신 · 은행 · 기타금융 · 연기금] · 기타법인
+    // 머리글엔 '기관' colspan이 하나 더 있어 머리글 수 ≠ 값 칸 수다. 합계 0 검사로 매번 확인한다(§6 #4).
+    rows.push({
+      t: cells[0], 개인: v[0], 외국인: v[1], 기관: v[2],
+      inst: { 금융투자: v[3], 보험: v[4], 투신: v[5], 은행: v[6], 기타금융: v[7], 연기금: v[8] },
+    });
   }
   return rows;
 }

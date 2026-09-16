@@ -24,6 +24,23 @@ function pair(t, y, diff, th) {
   return { t, y, diff: d, judge: d == null ? null : judge(d, th) };
 }
 
+// 화면 표시 순서 — 금액이 큰 주체부터
+export const INST_KEYS = ['금융투자', '연기금', '투신', '기타금융', '보험', '은행'];
+
+const turned = (t, y) => (typeof t !== 'number' || typeof y !== 'number' ? null : Math.sign(t) !== Math.sign(y));
+
+export function flowAxis(rowT, rowY) {
+  if (!rowT || !rowY) return null;
+  const one = (k) => ({ t: rowT[k], y: rowY[k], turned: turned(rowT[k], rowY[k]) });
+  return {
+    main: { 개인: one('개인'), 외국인: one('외국인'), 기관: one('기관') },
+    inst: INST_KEYS.map((key) => ({
+      key, t: rowT.inst?.[key] ?? null, y: rowY.inst?.[key] ?? null,
+      turned: turned(rowT.inst?.[key], rowY.inst?.[key]),
+    })),
+  };
+}
+
 export function heatAxis(barsT, barsY, baseT, baseY, at) {
   const T = upto(barsT, at), Y = upto(barsY, at);
   const vt = sumVol(T), vy = sumVol(Y);
