@@ -2,7 +2,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildIntradayVs } from './_vs-intraday.mjs';
-import { pct } from './_vs-core.mjs';
+import { pct, prevTradingDay } from './_vs-core.mjs';
+import { SECTOR_REPS } from './_vs-sectors.mjs';
 
 const kst = (s) => Date.parse(s + 'Z') - 9 * 3600 * 1000;
 const OK = (f) => ['0', String(f), '0', '0', '0', '0', '0', '0', '0', String(-f)];
@@ -12,6 +13,44 @@ const minute = (ymd, hhmm, v) => [{ localDateTime: `${ymd}${hhmm}00`, currentPri
 const bars = (ymd, pairs) => pairs.map(([hhmm, v]) => ({ localDateTime: `${ymd}${hhmm}00`, currentPrice: v }));
 // 11:00 봉이 끝나고 1분 더 지난 뒤(11:02대)에 조회한다 — 지금 분·직전 분의 봉은 아직 흔들려서 쓰지 않는다.
 const AFTER_1100 = kst('2026-09-14T11:02:30');
+
+// ── axes(강도·코스닥/코스피200·섹터·수급) 테스트용 제네릭 헬퍼 ──
+// 날짜에 매이지 않는다 — 어느 조립(기존 9/14 테스트든 새 9/16 axes 테스트든)에서 걸려도
+// KOSPI·KOSDAQ·KPI200·섹터 대표 24종목·기존 특례 없는 leaders 코드에 일관된 값을 준다.
+// 코드마다 baseFor()로 서로 다른 기준가를 만들고, 날짜(일)로 값을 살짝 흔들어 t·y가 갈리게 한다.
+const toYmd = (dash) => dash.replace(/-/g, '');
+const toDash = (ymd) => `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`;
+function baseFor(code) {
+  let h = 0;
+  for (const c of code) h = (h * 31 + c.charCodeAt(0)) % 97;
+  return 1000 + h * 10;
+}
+function genericJson(url) {
+  let m;
+  if ((m = url.match(/\/(index|item)\/([A-Za-z0-9]+)\/minute\?startDateTime=(\d{8})(\d{4})&endDateTime=(\d{8})(\d{4})/))) {
+    const [, , code, sYmd, sHM, , eHM] = m;
+    if (sHM === '1530' && eHM === '1530') return minute(sYmd, '1530', baseFor(code)); // prevClose(item)
+    const scale = 1 + (Number(sYmd.slice(6, 8)) % 5) / 100;                           // 일자별로 값이 갈리게
+    return minute(sYmd, '0905', baseFor(code) * scale);
+  }
+  if ((m = url.match(/\/index\/([A-Za-z0-9]+)\/day\?startDateTime=\d{8}0000&endDateTime=(\d{8})0000/))) {
+    const [, code, endYmd] = m;
+    const target = toYmd(prevTradingDay(toDash(endYmd)));
+    return [{ localDate: target, closePrice: baseFor(code) }];
+  }
+  throw new Error('unexpected ' + url);
+}
+const fakeJson = async (url) => genericJson(url);
+const fakeText = async (url) => {
+  const m = url.match(/bizdate=(\d{8})/);
+  return flowPage('13:00', m && m[1] === '20260916' ? -5000 : -3000);
+};
+const SECTOR_CODES = new Set(SECTOR_REPS.flatMap((s) => s.codes));
+const failSectorsJson = async (url) => {
+  const m = url.match(/\/item\/([A-Za-z0-9]+)\//);
+  if (m && SECTOR_CODES.has(m[1])) throw new Error('섹터 조회 실패(테스트)');
+  return fakeJson(url);
+};
 
 function fakes() {
   const fetchJson = async (url) => {
@@ -24,7 +63,8 @@ function fakes() {
     if (/005930\/minute\?startDateTime=202609140900/.test(url)) return minute('20260914', '1100', 252000);
     if (/005930\/minute\?startDateTime=202609110900/.test(url)) return minute('20260911', '1100', 257500);
     if (/\/(000660|005380)\//.test(url)) return [];
-    throw new Error('unexpected ' + url);
+    // KOSDAQ·KPI200·섹터 대표 종목 등 axes 확장이 부르는 나머지 코드는 제네릭 값으로 채운다(§49 once 검증용).
+    return genericJson(url);
   };
   const fetchText = async (url) => (/bizdate=20260914/.test(url) ? flowPage('11:00', -20900) : flowPage('11:00', -12207));
   return { fetchJson, fetchText };
@@ -172,4 +212,27 @@ test('어제 데이터 캐시는 날짜가 바뀌면 비운다', async () => {
   seen.length = 0;
   await buildIntradayVs({ now: kst('2026-09-15T11:02:30'), fetchJson, fetchText: f.fetchText }).catch(() => null);
   assert.ok(seen.some((u) => /KOSPI\/minute\?startDateTime=202609140900/.test(u)), '9/15 조립에선 9/14가 어제라 새로 부른다');
+});
+
+test('axes가 항상 있고 섹터·강도·수급이 채워진다', async () => {
+  const res = await buildIntradayVs({
+    now: Date.parse('2026-09-16T04:30:00Z'),   // 13:30 KST
+    fetchJson: fakeJson, fetchText: fakeText,
+  });
+  assert.equal(res.status, 'ok');
+  assert.ok(res.axes, 'axes 없음');
+  assert.equal(typeof res.axes.heat.vol.t, 'number');
+  assert.ok(Array.isArray(res.axes.sectors));
+  assert.ok(res.axes.sectors.length >= 1);
+  assert.equal(res.axes.sectors[0].rank, 1);
+});
+
+test('섹터 조회가 모두 실패해도 나머지 축은 살아 있다', async () => {
+  const res = await buildIntradayVs({
+    now: Date.parse('2026-09-16T04:30:00Z'),
+    fetchJson: failSectorsJson, fetchText: fakeText,
+  });
+  assert.equal(res.status, 'ok');
+  assert.deepEqual(res.axes.sectors, []);
+  assert.ok(res.axes.heat);
 });

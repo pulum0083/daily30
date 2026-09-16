@@ -2,6 +2,8 @@
 import { TH, prevTradingDay, relLabel, atOrBefore, pct, round2, judge, tickOk, verdict } from './_vs-core.mjs';
 import { flowAt, parseInvestorTimePage } from './_vs-flow.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
+import { heatAxis, flowAxis } from './_vs-axes.mjs';
+import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 // _vs-issues.mjs(issuesUntil·keywordDiff)는 지금 쓰지 않는다 — 아래 issues:null 주석 참고(C2). 계산 코드·사전은
 // 남겨둔다(설계 남기기 — 불변 장중 기록이 생기면 다시 켠다).
 import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
@@ -138,12 +140,48 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   // 덮어써져 "어제 이 시각까지"를 보장하지 못한다(SERVICE_RULES §49). 아카이브·사전 fetch도 하지 않는다.
   const issues = null;
 
+  // ── 축 확장 ── 어제 값은 장중에 안 바뀌므로 전부 once()에 태운다(§49 메모 재사용)
+  const idxAxis = async (code) => {
+    const [bT, bY, pT, pY] = await Promise.all([
+      settle(minuteBars('index', code, T, fetchJson, '0900', hhmm), []),
+      settle(once(`iY:${code}`, () => minuteBars('index', code, Y, fetchJson), hasRows), []),
+      settle(once(`iBT:${code}`, () => prevClose('index', code, T, fetchJson), isNum), null),
+      settle(once(`iBY:${code}`, () => prevClose('index', code, Y, fetchJson), isNum), null),
+    ]);
+    const tb = atOrBefore(completed(bT, hhmm), at), yb = atOrBefore(bY, at);
+    const t = tb ? pct(tb.v, pT) : null, y = yb ? pct(yb.v, pY) : null;
+    return { t, y, diff: t != null && y != null ? round2(t - y) : null,
+             judge: t != null && y != null ? judge(round2(t - y), TH.pctPoint) : null };
+  };
+
+  const sectorCodes = SECTOR_REPS.flatMap((s) => s.codes);
+  const [kosdaq, kospi200, sectorPairs] = await Promise.all([
+    idxAxis('KOSDAQ'), idxAxis('KPI200'),
+    Promise.all(sectorCodes.map(async (code) => {
+      const [bT, bY, pT, pY] = await Promise.all([
+        settle(minuteBars('item', code, T, fetchJson, '0900', hhmm), []),
+        settle(once(`sY:${code}`, () => minuteBars('item', code, Y, fetchJson), hasRows), []),
+        settle(once(`sPT:${code}`, () => prevClose('item', code, T, fetchJson), isNum), null),
+        settle(once(`sPY:${code}`, () => prevClose('item', code, Y, fetchJson), isNum), null),
+      ]);
+      const tb = atOrBefore(completed(bT, hhmm), at), yb = tb ? atOrBefore(bY, tb.t) : null;
+      return [code, { t: tb ? pct(tb.v, pT) : null, y: yb ? pct(yb.v, pY) : null }];
+    })),
+  ]);
+
+  const axes = {
+    heat: heatAxis(kT, kY, baseT, baseY, at),
+    market: { kosdaq, kospi200 },
+    sectors: sectorRows(Object.fromEntries(sectorPairs)),
+    flow: flow ? flowAxis(flow.t, flow.y) : null,
+  };
+
   return {
     status: 'ok',
     time: at.slice(0, 2) + ':' + at.slice(2),
     today: { date: dash, label: labelFromYmd(dash) },
     prev: { date: yDash, label: labelFromYmd(yDash), rel },
     verdict: verdict({ yLabel: rel, kospiDiff: kospi.diff, foreignDiff: flow ? flow.foreignDiff : null }),
-    kospi, flow, leaders, avg, issues,
+    kospi, flow, leaders, avg, issues, axes,
   };
 }
