@@ -15,7 +15,7 @@ function amplitude(bars, base) {
   const hs = bars.map((b) => b.h).filter((n) => typeof n === 'number');
   const ls = bars.map((b) => b.l).filter((n) => typeof n === 'number');
   if (!hs.length || !ls.length) return null;
-  return round2((Math.max(...hs) - Math.min(...ls)) / base * 100);
+  return (Math.max(...hs) - Math.min(...ls)) / base * 100;
 }
 
 // 두 값을 받아 {t,y,diff,judge}. 한쪽이라도 없으면 diff·judge는 null(§45 — 오늘 값으로 메우지 않는다)
@@ -28,8 +28,10 @@ export function heatAxis(barsT, barsY, baseT, baseY, at) {
   const T = upto(barsT, at), Y = upto(barsY, at);
   const vt = sumVol(T), vy = sumVol(Y);
   const at_ = amplitude(T, baseT), ay = amplitude(Y, baseY);
+  // 진폭 차이는 미반올림 값으로 계산한 후 반올림, t·y는 각각 반올림해 표시
+  const ampDiff = at_ != null && ay != null ? round2(at_ - ay) : null;
   return {
     vol: pair(vt, vy, vt != null && vy > 0 ? round2((vt / vy - 1) * 100) : null, TH_VOL),
-    amp: pair(at_, ay, at_ != null && ay != null ? round2(at_ - ay) : null, TH.pctPoint),
+    amp: pair(at_ != null ? round2(at_) : null, ay != null ? round2(ay) : null, ampDiff, TH.pctPoint),
   };
 }
