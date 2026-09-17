@@ -1,0 +1,103 @@
+<!doctype html>
+<!-- 대결판 코스피 곡선 — 어제 대비 차이를 빨강(오늘이 위)·파랑(오늘이 아래)으로 칠하는 2안 비교 프로토타입 -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>대결판 차이 색</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;--up:#F33942;--dn:#006EFF}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:#F9FAFB;color:var(--ink);word-break:keep-all}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}.lede{font-size:13px;color:var(--muted);margin:0 0 20px;line-height:1.6}
+.card{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:18px 18px 14px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-right:6px}
+h2{font-size:15px;margin:0 0 4px;display:flex;align-items:center}
+.desc{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:18px;border-top:2px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.y{border-top:2px dashed #94A3B8}
+.legend i.sw{width:10px;height:10px;border:0;border-radius:2px;margin-right:2px}
+.legend i.sw.u{background:rgba(243,57,66,.22)} .legend i.sw.d{background:rgba(0,110,255,.2);margin-right:6px}
+.legend .r{margin-left:auto}
+svg{display:block;width:100%;overflow:visible} svg text{font-family:inherit;font-variant-numeric:tabular-nums}
+.why{margin:10px 0 0;padding-top:10px;border-top:1px solid #EEF1F5;font-size:13px;color:#475569}
+.why b.dn{color:var(--dn)} .why b.up{color:var(--up)}
+</style></head><body><div class="wrap">
+<h1>차이를 빨강·파랑으로</h1>
+<p class="lede">2026-09-17 14:55 실제 응답 값(오늘 −0.11% · 어제 같은 시각 +0.93%)으로 그렸어요. 두 안 모두 <b>오늘이 어제보다 위면 빨강, 아래면 파랑</b>이고, 남은 장 영역과 아래 차이 막대는 지금 그대로예요.</p>
+<div class="card"><h2><span class="tag">H</span>두 선 사이를 칠하기</h2>
+<p class="desc">매끄러운 두 곡선 사이를 채워요. 오늘이 어제보다 높은 구간은 빨강, 낮은 구간은 파랑이에요. 면의 두께가 곧 차이라 가장 직관적이에요.</p>
+<div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제 같은 시각까지</span><span><i class="sw u"></i><i class="sw d"></i>오늘이 위 · 아래</span><span class="r">코스피 · 전일 종가 대비</span></div>
+<div id="cH"></div></div>
+<div class="card"><h2><span class="tag">I</span>오늘 아래 면을 어제 대비로 칠하기</h2>
+<p class="desc">지금처럼 오늘 곡선 아래를 0%까지 채우되, 색 기준을 0%가 아니라 어제로 바꿨어요. 어제보다 높을 땐 빨간 면, 낮을 땐 파란 면이에요.</p>
+<div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제 같은 시각까지</span><span><i class="sw u"></i><i class="sw d"></i>어제보다 위 · 아래</span><span class="r">코스피 · 전일 종가 대비</span></div>
+<div id="cI"></div></div>
+</div>
+<script>
+var T=[[0, 1.09], [5, 0.6], [10, 0.36], [15, 0.21], [20, 0.25], [25, 0.26], [30, 0.07], [35, 0.22], [40, 0.38], [45, 0.07], [50, 0.28], [55, 0.27], [60, 0.36], [65, 0.55], [70, 0.64], [75, 0.64], [80, 0.8], [85, 0.65], [90, 0.61], [95, 0.64], [100, 0.67], [105, 0.61], [110, 0.29], [115, 0.26], [120, 0.26], [125, 0.16], [130, 0.1], [135, 0.07], [140, 0.13], [145, 0.05], [150, 0.12], [155, 0.08], [160, 0.22], [165, 0.21], [170, 0.28], [175, 0.2], [180, 0.06], [185, 0.19], [190, 0.21], [195, 0.12], [200, 0.13], [205, 0.22], [210, 0.38], [215, 0.34], [220, 0.41], [225, 0.49], [230, 0.5], [235, 0.53], [240, 0.67], [245, 0.76], [250, 0.77], [255, 0.72], [260, 0.8], [265, 0.78], [270, 0.56], [275, 0.54], [280, 0.77], [285, 0.84], [290, 0.85], [295, 0.72], [300, 0.79], [305, 0.6], [310, 0.67], [315, 0.67], [320, 0.42], [325, 0.38], [330, 0.18], [335, 0.18], [340, 0.04], [345, -0.12], [350, -0.01], [355, -0.11]], Y=[[0, -0.06], [5, 0.09], [10, -0.24], [15, 0.14], [20, 0.32], [25, 0.25], [30, 0.28], [35, 0.45], [40, 0.65], [45, 0.81], [50, 0.82], [55, 0.58], [60, 0.48], [65, 0.38], [70, 0.18], [75, 0.29], [80, 0.17], [85, 0.34], [90, 0.3], [95, 0.37], [100, 0.13], [105, 0.23], [110, 0.18], [115, -0.06], [120, -0.07], [125, 0.14], [130, 0.24], [135, -0.01], [140, 0.19], [145, 0.3], [150, 0.37], [155, 0.45], [160, 0.38], [165, 0.34], [170, 0.49], [175, 0.52], [180, 0.62], [185, 0.82], [190, 0.85], [195, 0.9], [200, 0.92], [205, 0.86], [210, 0.78], [215, 0.73], [220, 0.82], [225, 1.02], [230, 0.98], [235, 1.01], [240, 1.18], [245, 1.25], [250, 1.3], [255, 1.19], [260, 1.26], [265, 1.22], [270, 1.04], [275, 0.85], [280, 0.93], [285, 0.87], [290, 0.89], [295, 0.7], [300, 0.67], [305, 0.71], [310, 0.7], [315, 0.75], [320, 0.77], [325, 0.79], [330, 0.75], [335, 0.87], [340, 0.81], [345, 0.95], [350, 0.88], [355, 0.93]], NOW=T[T.length-1][0], END=390, TV=-0.11, YV=0.93, DV=-1.04;
+var UP='#F33942', DN='#006EFF', INK='#13151A', MUTED='#94A3B8';
+function f2(v){return (v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)}
+var ys={};Y.forEach(function(p){ys[p[0]]=p[1]});
+var P=T.filter(function(p){return ys[p[0]]!=null}).map(function(p){return [p[0],p[1],ys[p[0]]]}); // [분, 오늘, 어제]
+function frame(el,H){
+  var W=el.clientWidth,L=34,R=W<500?62:78, all=[0];T.concat(Y).forEach(function(p){all.push(p[1])});
+  var lo=Math.min.apply(null,all),hi=Math.max.apply(null,all),pad=(hi-lo)*.25||.4;lo-=pad;hi+=pad;
+  var x=function(m){return L+m/END*(W-L-R)}, y=function(v){return (hi-v)/(hi-lo)*H};
+  var s='<rect x="'+x(NOW)+'" y="0" width="'+(x(END)-x(NOW))+'" height="'+H+'" fill="#F8FAFC"/><text x="'+(x(NOW)+6)+'" y="13" font-size="10.5" fill="'+MUTED+'">남은 장</text>';
+  var step=hi-lo>3?1:.5;
+  for(var t=Math.ceil(lo/step)*step;t<=hi+1e-9;t+=step){var yy=y(t),z=Math.abs(t)<1e-9;
+    s+='<line x1="'+L+'" x2="'+x(END)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+(z?'#CBD5E1':'#EEF1F5')+'"/><text x="'+(L-6)+'" y="'+(yy+3.5)+'" font-size="10.5" fill="'+MUTED+'" text-anchor="end">'+(z?'0%':(t>0?'+':'−')+Math.abs(+t.toFixed(2)))+'</text>';}
+  s+='<line x1="'+x(NOW)+'" x2="'+x(NOW)+'" y1="0" y2="'+H+'" stroke="#CBD5E1" stroke-dasharray="3 3"/>';
+  return {W:W,L:L,R:R,H:H,x:x,y:y,s:s};
+}
+function sm(pts){ // [[x,y]] → 매끄러운 경로 조각(시작 M 없음)
+  var d='';for(var i=0;i<pts.length-1;i++){var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+  d+='C'+(p1[0]+(p2[0]-p0[0])/6)+' '+(p1[1]+(p2[1]-p0[1])/6)+' '+(p2[0]-(p3[0]-p1[0])/6)+' '+(p2[1]-(p3[1]-p1[1])/6)+' '+p2[0]+' '+p2[1];}return d;}
+// 오늘−어제 부호가 같은 구간으로 나눈다. 부호가 바뀌는 곳은 두 점 사이 교차점을 직선으로 추정해 경계로 쓴다(그림 경계일 뿐, 값으로 쓰지 않는다).
+function runs(){
+  var out=[],cur=null;
+  function push(pt,sg){ if(!cur||cur.sg!==sg){ cur={sg:sg,pts:[]}; out.push(cur);} cur.pts.push(pt); }
+  for(var i=0;i<P.length;i++){var a=P[i],da=a[1]-a[2];
+    if(i){var b=P[i-1],db=b[1]-b[2];
+      if(da*db<0){var f=db/(db-da),m=b[0]+(a[0]-b[0])*f,v=b[1]+(a[1]-b[1])*f,c=[m,v,v]; cur.pts.push(c); push(c,da>0?1:-1);}}
+    push(a,da>=0?1:-1);}
+  return out;
+}
+function lines(g){var tp=T.map(function(p){return[g.x(p[0]),g.y(p[1])]}),yp=Y.map(function(p){return[g.x(p[0]),g.y(p[1])]});
+  return '<path d="M'+yp[0]+sm(yp)+'" fill="none" stroke="'+MUTED+'" stroke-width="1.8" stroke-dasharray="5 4"/><path d="M'+tp[0]+sm(tp)+'" fill="none" stroke="'+INK+'" stroke-width="2.4" stroke-linejoin="round"/>';}
+function ends(g){var xn=g.x(NOW),yt=g.y(TV),yy=g.y(YV),c=DV>0?UP:DN,s='';
+  s+='<line x1="'+(xn+10)+'" x2="'+(xn+10)+'" y1="'+yy+'" y2="'+yt+'" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round"/>';
+  if(g.W>=500) s+='<text x="'+(xn+19)+'" y="'+((yy+yt)/2+4.5)+'" font-size="13" font-weight="800" fill="'+c+'">'+f2(DV)+'%p</text>';
+  s+='<circle cx="'+xn+'" cy="'+yy+'" r="3.5" fill="#fff" stroke="'+MUTED+'" stroke-width="2"/><circle cx="'+xn+'" cy="'+yt+'" r="4" fill="'+INK+'" stroke="#fff" stroke-width="2"/>';
+  var it=[{k:'오늘',v:TV,yy:yt},{k:'어제',v:YV,yy:yy}].sort(function(a,b){return a.yy-b.yy});
+  if(it[1].yy-it[0].yy<30){var m=(it[0].yy+it[1].yy)/2;it[0].yy=m-15;it[1].yy=m+15;}
+  it.forEach(function(o){var X=g.W-g.R+10;s+='<text x="'+X+'" y="'+(o.yy-1)+'" font-size="12.5" font-weight="800" fill="'+(o.v>0?UP:o.v<0?DN:INK)+'">'+f2(o.v)+'%</text><text x="'+X+'" y="'+(o.yy+12)+'" font-size="10" fill="'+MUTED+'">'+o.k+'</text>';});
+  return s;}
+function bars(g,top){var hh=56,mid=top+hh/2,mx=.2,bw=Math.max(2,(g.x(5)-g.x(0))*.62),s='';
+  P.forEach(function(p){mx=Math.max(mx,Math.abs(p[1]-p[2]))});
+  s+='<rect x="'+g.x(NOW)+'" y="'+top+'" width="'+(g.x(END)-g.x(NOW))+'" height="'+hh+'" fill="#F8FAFC"/><line x1="'+g.L+'" x2="'+g.x(END)+'" y1="'+mid+'" y2="'+mid+'" stroke="#CBD5E1"/><text x="'+(g.L-6)+'" y="'+(mid+3.5)+'" font-size="10" fill="'+MUTED+'" text-anchor="end">차이</text>';
+  P.forEach(function(p){var d=+(p[1]-p[2]).toFixed(2);if(!d)return;var h=Math.max(1,Math.abs(d)/mx*(hh/2-2));
+    s+='<rect x="'+(g.x(p[0])-bw/2)+'" y="'+(d>0?mid-h:mid)+'" width="'+bw+'" height="'+h+'" rx="1" fill="'+(d>0?UP:DN)+'" opacity=".85"/>';});
+  s+='<text x="'+(g.W-g.R+10)+'" y="'+(mid+4)+'" font-size="12.5" font-weight="800" fill="'+(DV>0?UP:DN)+'">'+f2(DV)+'%p</text>';
+  (g.W<500?[[0,'09:00'],[180,'12:00'],[390,'15:30']]:[[0,'09:00'],[120,'11:00'],[240,'13:00'],[390,'15:30']]).forEach(function(q){s+='<text x="'+g.x(q[0])+'" y="'+(top+hh+18)+'" font-size="11" fill="'+MUTED+'" text-anchor="'+(q[0]===0?'start':q[0]===END?'end':'middle')+'">'+q[1]+'</text>';});
+  return s;}
+function why(){return '<p class="why">어제 이 시각엔 <b class="'+(YV>0?'up':'dn')+'">'+f2(YV)+'%</b>였어요. 지금은 <b class="'+(DV>0?'up':'dn')+'">'+f2(DV)+'%p</b> 더 '+(DV>0?'높아요':'낮아요')+'</p>';}
+
+function drawH(){var el=document.getElementById('cH'),g=frame(el,180),s=g.s;
+  runs().forEach(function(r){if(r.pts.length<2)return;
+    var a=r.pts.map(function(p){return[g.x(p[0]),g.y(p[1])]}),b=r.pts.map(function(p){return[g.x(p[0]),g.y(p[2])]}).reverse();
+    s+='<path d="M'+a[0]+sm(a)+'L'+b[0]+sm(b)+'Z" fill="'+(r.sg>0?'rgba(243,57,66,.16)':'rgba(0,110,255,.14)')+'"/>';});
+  s+=lines(g)+ends(g)+bars(g,190);
+  el.innerHTML='<svg viewBox="0 0 '+g.W+' 270" height="270">'+s+'</svg>'+why();}
+
+function drawI(){var el=document.getElementById('cI'),g=frame(el,180),s=g.s,z=g.y(0);
+  s+='<defs><linearGradient id="iU" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="'+z+'"><stop offset="0" stop-color="'+UP+'" stop-opacity=".26"/><stop offset="1" stop-color="'+UP+'" stop-opacity=".04"/></linearGradient>'+
+     '<linearGradient id="iD" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="'+z+'"><stop offset="0" stop-color="'+DN+'" stop-opacity=".24"/><stop offset="1" stop-color="'+DN+'" stop-opacity=".04"/></linearGradient></defs>';
+  runs().forEach(function(r){if(r.pts.length<2)return;
+    var a=r.pts.map(function(p){return[g.x(p[0]),g.y(p[1])]});
+    s+='<path d="M'+a[0]+sm(a)+'L'+a[a.length-1][0]+' '+z+'L'+a[0][0]+' '+z+'Z" fill="url(#'+(r.sg>0?'iU':'iD')+')"/>';});
+  s+=lines(g)+ends(g)+bars(g,190);
+  el.innerHTML='<svg viewBox="0 0 '+g.W+' 270" height="270">'+s+'</svg>'+why();}
+function all(){drawH();drawI()} all(); var rt; addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(all,120)});
+</script></body></html>

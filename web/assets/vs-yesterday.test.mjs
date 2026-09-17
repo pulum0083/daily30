@@ -153,13 +153,23 @@ test('곡선은 말풍선 자리와 함께 그린다(처음엔 숨김)', () => {
 // ── A안 곡선(2026-09-15) — 차이 색 띠·눈금·선 끝 값·지금 선 ──
 const WIDE = { curveT: [[0, 0], [5, -0.2], [120, -0.5]], curveY: [[0, -3], [5, -3.1], [120, -3]] };
 
-test('D안 — 오늘 곡선 아래를 0% 기준 면으로 채우고(위 빨강·아래 파랑) 옛 색 띠는 없다', () => {
+test('H안 — 두 곡선 사이를 칠한다: 오늘이 위면 빨강, 아래면 파랑', () => {
   const { api } = load(kst('2026-09-14T11:00:00'));
-  const svg = api.chartSvg(WIDE.curveY, WIDE.curveT);
-  assert.ok(svg.includes('class="vs-area up"') && svg.includes('class="vs-area dn"'));
-  assert.ok(svg.includes('clip-path="url(#vsCU)"') && svg.includes('clip-path="url(#vsCD)"'));
-  assert.ok(!svg.includes('vs-band'));
-  assert.ok(!api.chartSvg([[0, -1]], [[0, 0]]).includes('vs-area'), '점이 하나면 면을 만들지 않는다');
+  const up = api.chartSvg(WIDE.curveY, WIDE.curveT);
+  assert.ok(/class="vs-band up"/.test(up) && !/class="vs-band dn"/.test(up));
+  const dn = api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
+  assert.ok(/class="vs-band dn"/.test(dn));
+  assert.ok(!up.includes('vs-area'), 'D안의 0% 기준 면은 없다');
+});
+
+test('H안 — 부호가 바뀌면 교차점에서 구간을 나누고, 어제 값이 없는 분에서 끊는다(§0)', () => {
+  const { api } = load(kst('2026-09-14T11:00:00'));
+  const r = api.bandRuns([[0, 0], [5, 0]], [[0, 1], [5, -1]]);
+  assert.equal(JSON.stringify(r.map((x) => x.sg)), '[1,-1]');
+  assert.equal(r[0].pts[r[0].pts.length - 1][0], 2.5, '교차점 분');
+  const cut = api.bandRuns([[0, 0], [10, 0]], [[0, 1], [5, 1], [10, 1]]);
+  assert.equal(cut.length, 0, '가운데 분이 비어 두 점짜리 구간이 안 생긴다');
+  assert.ok(!api.chartSvg([[0, -1]], [[0, 0], [5, 0.2]]).includes('vs-band'));
 });
 
 test('D안 — 차이 막대는 같은 분에 두 값이 모두 있는 점만(§0)', () => {

@@ -41,10 +41,9 @@
   function tickText(v) { return v === 0 ? '0%' : (v > 0 ? '+' : '−') + Math.abs(v); }
   function last(pts) { return pts && pts.length ? pts[pts.length - 1] : null; }
 
-  // 샘플 점을 지나는 매끄러운 곡선(Catmull-Rom → 베지어). 값은 실제 샘플 점에서만 찍힌다.
-  function smoothPath(pts, x, y) {
-    if (!pts.length) return '';
-    var p = pts.map(function (q) { return [+x(q[0]), +y(q[1])]; }), d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+  // 픽셀 좌표 점들을 잇는 매끄러운 곡선 조각(Catmull-Rom → 베지어, 'M' 없음). 값은 실제 샘플 점에서만 찍힌다.
+  function smoothTail(p) {
+    var d = '';
     for (var i = 0; i < p.length - 1; i++) {
       var p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
       d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ' ' +
@@ -52,33 +51,55 @@
     }
     return d;
   }
+  function smoothPath(pts, x, y) {
+    if (!pts.length) return '';
+    var p = pts.map(function (q) { return [+x(q[0]), +y(q[1])]; });
+    return 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1) + smoothTail(p);
+  }
 
-  // 곡선 SVG(가로로 늘려 그린다 — 글자는 넣지 않는다). D안(2026-09-17): 오늘 곡선 아래를 0% 기준 옅은 면으로 채우고
-  // (0% 위 빨강·아래 파랑), 어제는 점선 한 줄. 두 선 사이 차이는 아래 막대 칸(diffSvg)이 맡는다.
+  // 오늘−어제 부호가 같은 구간 [[분, 오늘, 어제]…]. 같은 분에 어제 값이 없으면 구간을 끊는다(없는 값을 이어 칠하지 않는다, §0).
+  // 부호가 바뀌는 두 점 사이는 직선 교차점을 경계로 넣는다 — 그림 경계일 뿐 값으로 쓰지 않는다.
+  function bandRuns(yPts, tPts) {
+    var ys = {}, out = [], cur = null, prev = null;
+    (yPts || []).forEach(function (p) { ys[p[0]] = p[1]; });
+    function push(pt, sg) { if (!cur || cur.sg !== sg) { cur = { sg: sg, pts: [] }; out.push(cur); } cur.pts.push(pt); }
+    (tPts || []).forEach(function (p) {
+      if (ys[p[0]] == null) { cur = prev = null; return; }
+      var pt = [p[0], p[1], ys[p[0]]], d = pt[1] - pt[2];
+      if (prev) {
+        var dp = prev[1] - prev[2];
+        if (d * dp < 0) {
+          var f = dp / (dp - d), m = prev[0] + (pt[0] - prev[0]) * f, v = prev[1] + (pt[1] - prev[1]) * f, c = [m, v, v];
+          cur.pts.push(c); push(c, d > 0 ? 1 : -1);
+        }
+      }
+      push(pt, d > 0 ? 1 : d < 0 ? -1 : (cur ? cur.sg : 1));
+      prev = pt;
+    });
+    return out.filter(function (r) { return r.pts.length > 1; });
+  }
+
+  // 곡선 SVG(가로로 늘려 그린다 — 글자는 넣지 않는다). H안(2026-09-17): 매끄러운 두 곡선 사이를 칠한다 —
+  // 오늘이 어제보다 위면 빨강, 아래면 파랑. 면의 두께가 곧 차이이고, 아래 막대 칸(diffSvg)이 같은 차이를 분마다 보여준다.
   function chartSvg(yPts, tPts) {
     var W = 600, H = 180, s = scale(yPts, tPts), lo = s.lo, hi = s.hi;
     function x(m) { return (m / 390 * W).toFixed(1); }
     function y(v) { return ((hi - v) / (hi - lo) * H).toFixed(1); }
-    var out = '', lt = last(tPts), t = tPts || [], z = y(0);
+    var out = '', lt = last(tPts);
     ticks(lo, hi).forEach(function (v) { if (v !== 0) out += '<line x1="0" x2="' + W + '" y1="' + y(v) + '" y2="' + y(v) + '" class="vs-grid" vector-effect="non-scaling-stroke"/>'; });
     if (lt && lt[0] < 390) {
       out += '<rect x="' + x(lt[0]) + '" y="0" width="' + (W - x(lt[0])).toFixed(1) + '" height="' + H + '" class="vs-rest"/>' +
         '<line x1="' + x(lt[0]) + '" x2="' + x(lt[0]) + '" y1="0" y2="' + H + '" class="vs-now" vector-effect="non-scaling-stroke"/>';
     }
-    out += '<line x1="0" x2="' + W + '" y1="' + z + '" y2="' + z + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
-    var line = smoothPath(t, x, y);
-    if (t.length > 1) {
-      var area = line + 'L' + x(lt[0]) + ' ' + z + 'L' + x(t[0][0]) + ' ' + z + 'Z';
-      out += '<defs><linearGradient id="vsAU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="vs-ga up"/><stop offset="1" class="vs-ga up e"/></linearGradient>' +
-        '<linearGradient id="vsAD" x1="0" y1="1" x2="0" y2="0"><stop offset="0" class="vs-ga dn"/><stop offset="1" class="vs-ga dn e"/></linearGradient>' +
-        '<clipPath id="vsCU"><rect x="0" y="0" width="' + W + '" height="' + z + '"/></clipPath>' +
-        '<clipPath id="vsCD"><rect x="0" y="' + z + '" width="' + W + '" height="' + (H - z).toFixed(1) + '"/></clipPath></defs>' +
-        '<path d="' + area + '" class="vs-area up" fill="url(#vsAU)" clip-path="url(#vsCU)"/>' +
-        '<path d="' + area + '" class="vs-area dn" fill="url(#vsAD)" clip-path="url(#vsCD)"/>';
-    }
+    out += '<line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
+    bandRuns(yPts, tPts).forEach(function (r) {
+      var a = r.pts.map(function (q) { return [+x(q[0]), +y(q[1])]; }), b = r.pts.map(function (q) { return [+x(q[0]), +y(q[2])]; }).reverse();
+      out += '<path d="M' + a[0][0].toFixed(1) + ' ' + a[0][1].toFixed(1) + smoothTail(a) + 'L' + b[0][0].toFixed(1) + ' ' + b[0][1].toFixed(1) + smoothTail(b) +
+        'Z" class="vs-band ' + (r.sg > 0 ? 'up' : 'dn') + '"/>';
+    });
     return '<svg class="vs-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="코스피 곡선">' + out +
       '<path d="' + smoothPath(yPts || [], x, y) + '" class="vs-line-y" vector-effect="non-scaling-stroke"/>' +
-      '<path d="' + line + '" class="vs-line-t" vector-effect="non-scaling-stroke"/></svg>';
+      '<path d="' + smoothPath(tPts || [], x, y) + '" class="vs-line-t" vector-effect="non-scaling-stroke"/></svg>';
   }
 
   // 같은 분에 두 곡선 값이 모두 있는 점의 차이(오늘−어제). 한쪽만 있는 분은 뺀다(§0 — 채우지 않는다).
@@ -357,7 +378,7 @@
       // 옛 3칸(오늘 코스피·외국인 누적·주도주 평균)은 LIVE 바·아래 축 카드와 중복이라 뺐다(F2) —
       // 곡선 다음은 heroWhy()의 근거 4줄로 이어진다.
       var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
-      html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="b"></i><i class="b dn"></i>차이(오늘−' + rel + ')</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
+      html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i><i class="a dn"></i>오늘이 위 · 아래</span><span><i class="b"></i><i class="b dn"></i>차이(오늘−' + rel + ')</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
         '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
         '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
         diffBox(d.kospi.curveY, d.kospi.curveT) +
@@ -447,7 +468,7 @@
 
   window.__vsIntraday = {
     render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
-    chartSvg: chartSvg, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
+    chartSvg: chartSvg, bandRuns: bandRuns, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
     heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
     josa: josa,
   };
