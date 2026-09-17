@@ -36,7 +36,8 @@ test('ok 응답이면 결론·비교 칸·달라진 것을 그린다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
   assert.equal(root.hidden, false);
-  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '오늘이 약함', '−2.56%', '코스피 전체 · 투자자별 누적 순매수', '외국인']) {
+  // '오늘이 약함'(옛 외국인 누적 순매수 칸의 판정 배지)은 F2로 뺐다 — 대신 heroWhy 가격 줄의 '더 낮아요'로 확인한다.
+  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '더 낮아요', '−2.56%', '코스피 전체 · 투자자별 누적 순매수', '외국인']) {
     assert.ok(root.innerHTML.includes(s), `빠짐: ${s}`);
   }
 });
@@ -216,4 +217,311 @@ test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 
   sb.document.hidden = true;                // 다시 가려지면 요청하지 않는다
   handlers.visibilitychange();
   assert.equal(calls.length, 1);
+});
+
+test('거래량 막대는 상승/하락 색을 쓰지 않는다 — 방향이 없는 양이다', () => {
+  const { api } = load();
+  const html = api.miniBars(190662, 142592, { zero: false });
+  assert.ok(html.includes('mag'), '중립 클래스 없음');
+  assert.ok(!/class="[^"]*\b(up|dn)\b/.test(html), '방향 색이 섞임: ' + html);
+});
+
+test('수급 짝 막대는 오늘과 어제 값을 함께 적는다', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true },
+    외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+    inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] } });
+  assert.ok(html.includes('4,226'), '오늘 값 없음');
+  assert.ok(html.includes('4,336'), '어제 값 없음 — 부호 반전이 안 읽힌다');
+});
+
+test('섹터 표는 "섹터 평균"이 아니라 "대표 3종목 평균"이라 적는다', () => {
+  const { api } = load();
+  const html = api.leadCard({ market: { kosdaq: {}, kospi200: {} },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }] });
+  assert.ok(html.includes('대표 3종목'), '평균 정의가 안 드러남');
+  assert.ok(html.includes('삼성전자'), '대표 종목 이름이 없음');
+});
+
+test('축 데이터가 없으면 카드를 그리지 않는다', () => {
+  const { api } = load();
+  assert.equal(api.heatCard(null), '');
+  assert.equal(api.flowCard({ flow: null }), '');
+  assert.equal(api.leadCard({ sectors: [] }), '');
+});
+
+test('강도·주도권 카드는 데이터가 있으면 코스피 곡선 카드 뒤, 기존 수급 카드 앞 순서로 붙는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  const axes = {
+    heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } },
+    market: { kosdaq: { t: -0.12, y: 1.02, diff: -1.14, judge: 'weak' }, kospi200: { t: 1.32, y: -0.70, diff: 2.02, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }],
+    flow: { main: { 개인: { t: -9641, y: 5538, turned: true }, 외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+      inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] },
+  };
+  api.render(Object.assign({}, PAYLOAD, { axes }));
+  const html = root.innerHTML;
+  const iChart = html.indexOf('코스피 · 전일 종가 대비');
+  const iHeat = html.indexOf('얼마나 뜨거운가');
+  const iLead = html.indexOf('어디가 끄는가');
+  const iChanged = html.indexOf('달라진 것');
+  const iFlow = html.indexOf('누가 사는가');
+  assert.ok(iChart >= 0 && iHeat > iChart, '강도 카드가 곡선 카드 뒤에 있지 않음');
+  assert.ok(iLead > iHeat, '주도권 카드가 강도 카드 뒤에 있지 않음');
+  assert.ok(iChanged > iLead, '기존 수급 카드가 주도권 카드보다 앞에 있음');
+  assert.ok(iFlow > iChanged, '기관 세부 카드가 마지막이 아님');
+});
+
+test('기관 세부 막대는 값이 없으면 그리지 않는다 — 0이나 다른 값으로 채우지 않는다', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { inst: [{ key: '단독', t: null, y: -1234, turned: null }] } });
+  assert.ok(html.includes('<span class="vsx-bar"></span>'), '값 없는 오늘 칸이 빈 슬롯이 아님: ' + html);
+  assert.ok(!/vsx-bar">\s*<i class="up"/.test(html), '값 없는 오늘 칸에 상승 막대가 생김(0으로 채움): ' + html);
+  assert.ok(/vsx-bar prev"><i class="dn"/.test(html), '값 있는 어제 막대가 그려지지 않음: ' + html);
+});
+
+test('섹터 표는 대표 종목 중 일부가 결측이면 실제 조회된 종목 수를 적는다', () => {
+  const { api } = load();
+  const html = api.leadCard({ sectors: [{ key: 'auto', label: '자동차', names: ['현대차', '기아'],
+    t: -1.2, y: -0.5, diff: -0.7, rank: 2, prevRank: 2, move: 0, n: 2 }] });
+  assert.ok(html.includes('대표 2종목'), 'n=2인데 실제 종목 수가 반영되지 않음: ' + html);
+  assert.ok(!html.includes('대표 3종목 · 현대차'), '결측인데도 3종목이라 지어냄: ' + html);
+  assert.ok(html.includes('대표 3종목 평균'), '표 제목까지 바뀌면 안 됨(고정 문구): ' + html);
+});
+
+test('주도권 카드는 코스피 → 코스피200 → 코스닥 순서로 세 칸을 모두 보여준다', () => {
+  const { api } = load();
+  const kospi = { t: 1.37, y: -0.85, diff: 2.22, judge: 'strong' };
+  const axes = {
+    market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: { t: 1.69, y: -0.80, diff: 2.49, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
+  };
+  const html = api.leadCard(axes, kospi);
+  const iK = html.indexOf('>코스피<'), iK2 = html.indexOf('>코스피200<'), iKq = html.indexOf('>코스닥<');
+  assert.ok(iK >= 0 && iK2 > iK && iKq > iK2, '코스피 → 코스피200 → 코스닥 순서가 아님: ' + html);
+});
+
+// ── 시간대별 표시 규칙(§3.2) ──
+test('시간대 경계', () => {
+  const { api } = load();
+  const d = (s) => new Date(kst(s));
+  assert.equal(api.slotOf(d('2026-09-16T07:29:00')), 'night');
+  assert.equal(api.slotOf(d('2026-09-16T07:30:00')), 'pre');
+  assert.equal(api.slotOf(d('2026-09-16T08:59:00')), 'pre');
+  assert.equal(api.slotOf(d('2026-09-16T09:30:00')), 'open');
+  assert.equal(api.slotOf(d('2026-09-16T15:30:00')), 'open');
+  assert.equal(api.slotOf(d('2026-09-16T15:35:00')), 'close');   // early — 카드는 안 그린다
+  assert.equal(api.slotOf(d('2026-09-16T17:00:00')), 'night');
+  assert.equal(api.slotOf(d('2026-09-19T12:00:00')), 'weekend'); // 토요일
+});
+
+test('장 전엔 카드가 없고 밤엔 강도만', () => {
+  const { api } = load();
+  // cardsFor는 vm 샌드박스의 Array를 반환한다 — 바깥 realm의 assert.deepEqual과 배열 프로토타입이
+  // 달라 참조 비교에서 어긋나므로 Array.from으로 이 realm의 배열로 복사해 비교한다.
+  assert.deepEqual(Array.from(api.cardsFor('pre')), []);
+  assert.deepEqual(Array.from(api.cardsFor('open')), ['hero', 'heat', 'lead', 'flow']);
+  assert.deepEqual(Array.from(api.cardsFor('close')), ['hero', 'heat', 'lead', 'flow']);
+  assert.deepEqual(Array.from(api.cardsFor('night')), ['heat']);
+  assert.deepEqual(Array.from(api.cardsFor('weekend')), []);
+});
+
+test('엔드포인트 선택 — open은 vs=intraday, close·night은 vs=close, pre·weekend는 호출하지 않는다', () => {
+  const { api } = load();
+  assert.equal(api.endpointFor('open'), '/api/intraday?vs=intraday');
+  assert.equal(api.endpointFor('close'), '/api/intraday?vs=close');
+  assert.equal(api.endpointFor('night'), '/api/intraday?vs=close');
+  assert.equal(api.endpointFor('pre'), null);
+  assert.equal(api.endpointFor('weekend'), null);
+});
+
+test('night 슬롯은 강도 카드만 그린다 — 결론·곡선·주도권·수급은 없다', () => {
+  const { api, root } = load(kst('2026-09-14T20:00:00'));
+  const axes = {
+    heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } },
+    market: { kosdaq: { t: -0.12, y: 1.02, diff: -1.14, judge: 'weak' }, kospi200: { t: 1.32, y: -0.70, diff: 2.02, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }],
+    flow: { main: { 개인: { t: -9641, y: 5538, turned: true }, 외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+      inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] },
+  };
+  api.render(Object.assign({}, PAYLOAD, { axes }), 'night');
+  assert.equal(root.hidden, false);
+  assert.ok(root.innerHTML.includes('얼마나 뜨거운가'), '강도 카드가 없음');
+  assert.ok(!root.innerHTML.includes('vs-hero'), '결론(hero)이 그려짐');
+  assert.ok(!root.innerHTML.includes('class="vs-chartbox"'), '곡선이 그려짐');
+  assert.ok(!root.innerHTML.includes('어디가 끄는가'), '주도권 카드가 그려짐');
+  assert.ok(!root.innerHTML.includes('누가 사는가'), '수급 심층 카드가 그려짐');
+  assert.ok(!root.innerHTML.includes('달라진 것'), '수급(달라진 것) 카드가 그려짐');
+});
+
+test('slot이 pre·weekend면(카드 없음) ok 응답이어도 아무것도 그리지 않는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD, 'pre');
+  assert.equal(root.hidden, true);
+  assert.equal(root.innerHTML, '');
+  api.render(PAYLOAD, 'weekend');
+  assert.equal(root.hidden, true);
+  assert.equal(root.innerHTML, '');
+});
+
+test('status가 ok가 아니면 어느 슬롯이든 새 카드를 그리지 않는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  for (const slot of ['open', 'close', 'night']) {
+    root.hidden = false; root.innerHTML = 'x';
+    api.render({ status: 'closed' }, slot);
+    assert.equal(root.hidden, true, slot);
+    assert.equal(root.innerHTML, '', slot);
+  }
+});
+
+test('주도권 카드 — 응답에 코스피가 없으면 그 칸만 뺀다(지어내지 않는다)', () => {
+  const { api } = load();
+  const axes = {
+    market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: {} },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
+  };
+  const html = api.leadCard(axes);
+  assert.ok(!html.includes('>코스피<'), '코스피 데이터가 없는데 칸이 생김: ' + html);
+  assert.ok(html.includes('>코스닥<'), '있는 데이터(코스닥)까지 같이 빠짐: ' + html);
+});
+
+// ── F2: 결론 카드는 승인 시안대로 근거 4줄(.vsx-why)을 그린다 ──
+
+test('결론 근거 4줄 — 가격·강도·주도권·누가를 그리고, 오늘 코스피 절대값은 다시 적지 않는다(F2)', () => {
+  const { api } = load();
+  const axes = {
+    heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } },
+    sectors: [
+      { key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 },
+      { key: 'battery', label: '2차전지', names: ['LG에너지솔루션', '에코프로비엠', '삼성SDI'], t: -0.30, y: 1.80, diff: -2.10, rank: 4, prevRank: 1, move: -3, n: 3 },
+    ],
+    flow: { main: { 개인: { t: -9641, y: 5538, turned: true }, 외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } }, inst: [] },
+  };
+  const d = Object.assign({}, PAYLOAD, { axes });
+  const html = api.heroWhy(d, 'open');
+  const lis = html.match(/<li>/g) || [];
+  assert.equal(lis.length, 4, '근거 줄이 4개가 아님: ' + html);
+  assert.ok(html.includes('−2.42%'), '어제 코스피 값(d.kospi.y)이 없음: ' + html);
+  assert.ok(html.includes('−0.14%p'), '코스피 차이(d.kospi.diff)가 없음: ' + html);
+  assert.ok(!html.includes('−2.56%'), '오늘 코스피 절대값(d.kospi.t)을 다시 적음: ' + html);
+  assert.ok(html.includes('반도체'), '주도권 — 오늘 1위(어제 3위)가 안 보임: ' + html);
+  assert.ok(html.includes('2차전지'), '주도권 — 어제 1위였던 섹터의 하락이 안 보임: ' + html);
+  assert.ok(html.includes('190,662천주'), '강도 — 어제 거래량이 없음: ' + html);
+  assert.ok(html.includes('1.75%') && html.includes('1.43%'), '강도 — 오늘·어제 진폭이 없음: ' + html);
+  // 계사(이었어요)는 </b> 태그 바깥에 붙는다 — 값 자체는 <b>로 감싸므로 태그를 포함해 확인한다.
+  assert.ok(html.includes('5,890억</b>이었어요'), '누가 — 억 단위 계사(이었어요)가 틀림: ' + html);
+  assert.ok(html.includes('1.05조'), '누가 — 오늘 기관 순매수가 없음: ' + html);
+});
+
+test('결론 근거 — 축 데이터가 일부 없으면 그 줄만 빠진다(F2)', () => {
+  const { api } = load();
+  const axes = { heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } } };
+  // sectors·flow 없음 — 주도권·누가 줄은 없어야 한다.
+  const html = api.heroWhy(Object.assign({}, PAYLOAD, { axes }), 'open');
+  assert.ok(html.includes('<span class="k">가격</span>'), '가격 줄이 없음');
+  assert.ok(html.includes('<span class="k">강도</span>'), '강도 줄이 없음');
+  assert.ok(!html.includes('<span class="k">주도권</span>'), '섹터 데이터가 없는데 주도권 줄이 생김');
+  assert.ok(!html.includes('<span class="k">누가</span>'), '수급 데이터가 없는데 누가 줄이 생김');
+});
+
+test('결론 근거 — 입력이 하나도 없으면 빈 문자열을 낸다(§0)', () => {
+  const { api } = load();
+  assert.equal(api.heroWhy({ prev: { rel: '어제' }, kospi: {} }, 'open'), '');
+});
+
+test('결론 근거 — close·night 슬롯은 "이 시각"이 아니라 "지난 금요일은"(하루 전체) 표현을 쓴다(F2)', () => {
+  const { api } = load();
+  const d = Object.assign({}, PAYLOAD);
+  assert.ok(api.heroWhy(d, 'open').includes('지난 금요일 이 시각엔'), 'open 표현이 없음');
+  assert.ok(api.heroWhy(d, 'close').includes('지난 금요일은'), 'close 표현이 없음(받침 있는 rel 뒤엔 은)');
+  assert.ok(!api.heroWhy(d, 'close').includes('금요일는'), 'close인데 받침 뒤 는이 붙음');
+  assert.ok(!api.heroWhy(d, 'close').includes('이 시각엔'), 'close인데 이 시각 표현이 남음');
+});
+
+test('결론 근거 — close 슬롯에서 받침 없는 rel(어제) 뒤엔 는을 쓴다', () => {
+  const { api } = load();
+  const d = Object.assign({}, PAYLOAD, { prev: { date: '2026-09-13', label: '9/13(일)', rel: '어제' } });
+  assert.ok(api.heroWhy(d, 'close').includes('어제는'), 'close인데 받침 없는 rel 뒤 는이 안 붙음: ' + api.heroWhy(d, 'close'));
+});
+
+test('였어요/이었어요 계사 — eok가 내는 조(받침 없음)·억(받침 있음)에 맞춘다', () => {
+  const { api } = load();
+  assert.equal(api.wasKo('−5,890억'), '이었어요', '억(받침 있음)인데 였어요를 씀');
+  assert.equal(api.wasKo('+1.20조'), '였어요', '조(받침 없음)인데 이었어요를 씀');
+});
+
+test('josa — 마지막 글자 받침 유무로 이/가·은/는 짝을 고른다', () => {
+  const { api } = load();
+  assert.equal(api.josa('조선', '이', '가'), '이', '조선(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('반도체', '이', '가'), '가', '반도체(받침 없음)인데 이를 씀');
+  assert.equal(api.josa('방산', '이', '가'), '이', '방산(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('금융', '이', '가'), '이', '금융(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('2차전지', '이', '가'), '가', '2차전지(받침 없음)인데 이를 씀');
+  assert.equal(api.josa('금요일', '은', '는'), '은', '금요일(받침 있음)인데 는을 씀');
+  assert.equal(api.josa('어제', '은', '는'), '는', '어제(받침 없음)인데 은을 씀');
+});
+
+test('결론 근거 — 주도권 줄의 조사가 받침에 맞는다(조선이·반도체가)', () => {
+  const { api } = load();
+  // 라벨은 <b>로 감싸므로 조사는 </b> 태그 바깥에 붙는다(위 계사 테스트와 같은 이유).
+  const base = { axes: { sectors: [
+    { key: 'ship', label: '조선', names: [], t: 1.0, y: -1.0, diff: 2.0, rank: 1, prevRank: 3, move: 2, n: 1 },
+  ] } };
+  const d1 = Object.assign({}, PAYLOAD, base);
+  assert.ok(api.heroWhy(d1, 'open').includes('조선</b>이 어제'), '조선(받침 있음)인데 이가 안 붙음: ' + api.heroWhy(d1, 'open'));
+
+  const base2 = { axes: { sectors: [
+    { key: 'semicon', label: '반도체', names: [], t: 1.0, y: -1.0, diff: 2.0, rank: 1, prevRank: 3, move: 2, n: 1 },
+  ] } };
+  const d2 = Object.assign({}, PAYLOAD, base2);
+  assert.ok(api.heroWhy(d2, 'open').includes('반도체</b>가 어제'), '반도체(받침 없음)인데 가가 안 붙음: ' + api.heroWhy(d2, 'open'));
+});
+
+test('결론 카드에서 예전 3칸(오늘 코스피·외국인 누적·주도주 평균)이 빠진다(F2)', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(PAYLOAD);   // axes 없음 — heat/lead/flow(신규) 카드는 안 그려진다
+  assert.ok(!root.innerHTML.includes('<span>코스피</span>'), '옛 코스피 칸이 남음');
+  assert.ok(!root.innerHTML.includes('<span>외국인 누적 순매수</span>'), '옛 외국인 칸이 남음');
+  assert.ok(!root.innerHTML.includes('<span>주도주 3종목 평균</span>'), '옛 주도주 평균 칸이 남음');
+  assert.ok(root.innerHTML.includes('vsx-why'), '근거 목록(.vsx-why)이 없음');
+});
+
+test('수급 카드 — close·night 슬롯이면 라벨이 "정규장 확정 15:40"으로 바뀐다(F2)', () => {
+  const { api } = load();
+  const flow = { flow: { main: { 개인: { t: -9641, y: 5538, turned: true } }, inst: [] } };
+  assert.ok(api.flowCard(flow).includes('새 축 · 수급 심층'), '기본(open) 라벨이 안 나옴');
+  assert.ok(api.flowCard(flow, 'open').includes('새 축 · 수급 심층'), 'open 라벨이 안 나옴');
+  assert.ok(api.flowCard(flow, 'close').includes('정규장 확정 15:40'), 'close 라벨이 안 바뀜');
+  assert.ok(api.flowCard(flow, 'night').includes('정규장 확정 15:40'), 'night 라벨이 안 바뀜');
+});
+
+// ── F4: 새 카드 함수는 인라인 static 레이아웃 스타일을 쓰지 않는다 ──
+
+test('강도·주도권·수급 카드는 인라인 grid-template-columns를 쓰지 않는다(F4)', () => {
+  const { api } = load();
+  const heat = api.heatCard({ heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } } });
+  const lead = api.leadCard({ sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+    t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }] });
+  const flow = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true } }, inst: [] } });
+  for (const [name, html] of [['heat', heat], ['lead', lead], ['flow', flow]]) {
+    assert.ok(html.length > 0, `${name} 카드가 비어 테스트 자체가 무의미함`);
+    assert.ok(!/style="[^"]*grid-template-columns/.test(html), `${name} 카드에 인라인 grid-template-columns가 남음: ` + html);
+  }
+});
+
+// ── F5: 강도 카드는 오늘 값이 둘 다 없으면 카드째 생략한다 ──
+
+test('강도 카드 — 오늘 거래량·진폭이 둘 다 없으면 카드를 통째로 생략한다(F5, §0)', () => {
+  const { api } = load();
+  const axes = { heat: { vol: { t: null, y: 190662, diff: null, judge: null }, amp: { t: null, y: 1.43, diff: null, judge: null } } };
+  assert.equal(api.heatCard(axes), '');
+});
+
+test('강도 카드 — 오늘 값이 하나라도 있으면 카드를 그린다(F5 경계)', () => {
+  const { api } = load();
+  const axes = { heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: null, y: 1.43, diff: null, judge: null } } };
+  assert.notEqual(api.heatCard(axes), '');
 });

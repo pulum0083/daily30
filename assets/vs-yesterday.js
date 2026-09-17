@@ -92,11 +92,182 @@
     return { left: left, right: right, plot: plot };
   }
 
-  function stat(title, j, yl, yv, yc, tv, tc, diff) {
+  // chart는 강도·주도권 카드가 쓰는 선택 인자(0축 막대) — 기존 호출부는 8개 인자만 넘겨 그대로 동작한다.
+  function stat(title, j, yl, yv, yc, tv, tc, diff, chart) {
     return '<div class="vs-stat"><div class="vs-stat-h"><span>' + title + '</span>' + pill(j) + '</div>' +
       '<div class="vs-stat-r"><span>' + esc(yl) + '</span><b class="' + yc + '">' + yv + '</b></div>' +
       '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + tc + '">' + tv + '</b></div>' +
-      '<p class="vs-diff">차이 ' + diff + '</p></div>';
+      '<p class="vs-diff">차이 ' + diff + '</p>' + (chart || '') + '</div>';
+  }
+
+  // 0축 세로 막대 2칸 — 어제 옅게 · 오늘 진하게. zero:false는 방향 없는 양(거래량·진폭)이라 중립색.
+  function miniBars(prev, now, opts) {
+    var zero = !opts || opts.zero !== false;
+    if (typeof prev !== 'number' || typeof now !== 'number') return '';
+    var M = Math.max(Math.abs(prev), Math.abs(now)) || 1;
+    function bar(v, isNow) {
+      var h = Math.max(Math.abs(v) / M * (zero ? 18 : 36), 2);
+      var st = zero ? (v >= 0 ? 'bottom:50%;height:' : 'top:50%;height:') + h + 'px'
+                    : 'bottom:0;height:' + h + 'px';
+      var c = zero ? (v >= 0 ? 'up' : 'dn') : 'mag';
+      return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"><i class="' + c + '" style="' + st + '"></i></span>';
+    }
+    return '<div class="vsx-mini"><div class="vsx-bars ' + (zero ? 'zero' : 'base') + '">'
+      + bar(prev, false) + bar(now, true) + '</div>'
+      + '<div class="vsx-ax"><span>어제</span><span class="t">오늘</span></div></div>';
+  }
+
+  function pctTxt(n, unit) { return n == null ? '—' : f2(n) + unit; }
+
+  // 강도 카드 — 코스피 누적 거래량·일중 진폭. 지수 1분봉엔 거래대금이 없어 거래량(천주)으로 비교한다.
+  function heatCard(axes) {
+    if (!axes || !axes.heat) return '';
+    var vol = axes.heat.vol, amp = axes.heat.amp;
+    if (!vol || !amp) return '';
+    if (vol.t == null && amp.t == null) return '';   // 오늘 값이 둘 다 없으면 카드째 생략한다(F5, §0)
+    var rows = '<div class="vs-stats vsx-stats2">'
+      + stat('코스피 누적 거래량', vol.judge, '어제', vol.y != null ? fmt(vol.y) + '<small> 천주</small>' : '—', cls(vol.y),
+          vol.t != null ? fmt(vol.t) + '<small> 천주</small>' : '—', cls(vol.t), pctTxt(vol.diff, '%'), miniBars(vol.y, vol.t, { zero: false }))
+      + stat('코스피 일중 진폭', amp.judge, '어제', amp.y != null ? amp.y.toFixed(2) + '%' : '—', '',
+          amp.t != null ? amp.t.toFixed(2) + '%' : '—', '', pctTxt(amp.diff, '%p'), miniBars(amp.y, amp.t, { zero: false }))
+      + '</div>';
+    return '<div class="vs-card"><div class="vs-card-h"><p>얼마나 뜨거운가</p><span>새 축 · 강도</span></div>' + rows +
+      '<p class="vs-sub">지수 1분봉에는 거래<b>대금</b>(원)이 없어요 — 현재값만 있고 과거 시각은 못 구합니다. ' +
+      '그래서 거래<b>량</b>(천주)으로 비교해요.</p></div>';
+  }
+
+  // 코스닥·코스피200 한 줄 — 데이터가 없으면(§45) 그 지수 줄만 빠진다.
+  function marketRow(label, ax) {
+    if (!ax || ax.t == null) return '';
+    return stat(label, ax.judge, '어제', ax.y != null ? f2(ax.y) + '%' : '—', cls(ax.y), f2(ax.t) + '%', cls(ax.t),
+      pctTxt(ax.diff, '%p'), miniBars(ax.y, ax.t, { zero: true }));
+  }
+
+  // 섹터 대표 3종목 평균 한 행 — "섹터 평균"이 아니라 "대표 N종목 평균"임을 이름 나열로 드러낸다.
+  // n이 3 미만이면(일부 종목 결측) 실제 조회된 종목 수를 그대로 적는다 — 3종목이라 지어내지 않는다.
+  function sectorRow(s) {
+    var badge = s.move == null ? '<span class="vs-pill neutral">—</span>'
+      : s.move > 0 ? '<span class="vs-pill up">▲' + s.move + '</span>'
+      : s.move < 0 ? '<span class="vs-pill dn">▼' + (-s.move) + '</span>'
+      : '<span class="vs-pill neutral">─</span>';
+    var n = s.n != null ? s.n : (s.names || []).length;
+    return '<tr><td class="nm"><span class="vsx-rk' + (s.rank === 1 ? ' top' : '') + '">' + s.rank + '</span>' +
+      esc(s.label) + '<small>대표 ' + n + '종목 · ' + esc((s.names || []).join('·')) + '</small></td>' +
+      '<td class="' + cls(s.t) + '">' + f2(s.t) + '%</td><td>' + (s.y != null ? f2(s.y) + '%' : '—') + '</td>' +
+      '<td class="' + cls(s.diff) + '">' + pctTxt(s.diff, '%p') + '</td><td>' + badge + '</td></tr>';
+  }
+
+  // 주도권 카드 — 코스피·코스피200·코스닥이 어제 같은 시각보다 세거나 약한지, 섹터 대표 3종목 평균 순위가
+  // 어떻게 바뀌었는지. 코스피는 axes가 아니라 응답 최상위 kospi에 있다 — 없으면 그 칸만 뺀다(지어내지 않는다).
+  function leadCard(axes, kospi) {
+    if (!axes || !axes.sectors || !axes.sectors.length) return '';
+    var mkt = axes.market || {};
+    var stats = marketRow('코스피', kospi) + marketRow('코스피200', mkt.kospi200) + marketRow('코스닥', mkt.kosdaq);
+    var rows = axes.sectors.map(sectorRow).join('');
+    return '<div class="vs-card"><div class="vs-card-h"><p>어디가 끄는가</p><span>새 축 · 주도권</span></div>' +
+      (stats ? '<div class="vs-stats vsx-mt0">' + stats + '</div>' : '') +
+      '<p class="vs-lbl vsx-sec">대표 3종목 평균</p>' +
+      '<table class="vsx-tbl vsx-mt0"><thead><tr><th>섹터</th><th>오늘</th><th>어제</th><th>차이</th><th>순위</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table>' +
+      '<p class="vs-sub">각 섹터 <b>대표 3종목의 동일가중 평균</b>이에요(시총가중 아니에요).</p></div>';
+  }
+
+  // 개인·외국인·기관 부호가 뒤집혔는지(방향 전환)만 알린다 — judge('same'/'strong'/'weak')가 아니라 turned다.
+  function turnPill(turned, t) {
+    if (turned == null) return '';
+    return turned ? '<span class="vs-pill ' + (t > 0 ? 'up' : 'dn') + '">방향 전환</span>' : '<span class="vs-pill neutral">같은 방향</span>';
+  }
+
+  function flowMainStat(title, m) {
+    if (!m) return '';
+    return '<div class="vs-stat"><div class="vs-stat-h"><span>' + title + '</span>' + turnPill(m.turned, m.t) + '</div>' +
+      '<div class="vs-stat-r"><span>어제</span><b class="' + cls(m.y) + '">' + (m.y != null ? eok(m.y) : '—') + '</b></div>' +
+      '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + cls(m.t) + '">' + (m.t != null ? eok(m.t) : '—') + '</b></div>' +
+      miniBars(m.y, m.t, { zero: true }) + '</div>';
+  }
+
+  // 기관 세부 6칸 짝 막대 — 왼쪽 옅은 막대가 어제, 오른쪽 진한 막대가 오늘. 두 값을 숫자로도 함께 적는다.
+  // 값이 없으면(§0 — 0이나 다른 값으로 채우지 않는다) 그 칸엔 막대를 그리지 않는다 — 칸 자체는 정렬을 위해 남긴다.
+  function flowInstPairs(inst) {
+    var mx = 1;
+    (inst || []).forEach(function (r) {
+      if (typeof r.t === 'number') mx = Math.max(mx, Math.abs(r.t));
+      if (typeof r.y === 'number') mx = Math.max(mx, Math.abs(r.y));
+    });
+    function bar(v, isNow) {
+      if (typeof v !== 'number') return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"></span>';
+      var h = Math.max(Math.abs(v) / mx * 34, 2);
+      var st = v >= 0 ? 'bottom:50%;height:' + h + 'px' : 'top:50%;height:' + h + 'px';
+      return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"><i class="' + (v >= 0 ? 'up' : 'dn') + '" style="' + st + '"></i></span>';
+    }
+    return (inst || []).map(function (r) {
+      return '<div><div class="vsx-pbars">' + bar(r.y, false) + bar(r.t, true) + '</div>' +
+        '<div class="vsx-pv ' + cls(r.t) + '">' + (r.t != null ? eok(r.t) : '—') + '</div>' +
+        '<div class="vsx-pp">어제 ' + (r.y != null ? eok(r.y) : '—') + '</div>' +
+        '<div class="vsx-pl">' + esc(r.key) + '</div></div>';
+    }).join('');
+  }
+
+  // 수급 심층 카드 — 개인·외국인·기관 방향 전환 + 기관 안 6개 주체별 순매수 짝 막대.
+  // slot이 close·night이면 카드 라벨을 "정규장 확정 15:40"으로 바꿔 애프터장이 섞인 홈 LIVE 바와 구분한다(F2).
+  function flowCard(axes, slot) {
+    if (!axes || !axes.flow) return '';
+    var flow = axes.flow, keys = ['개인', '외국인', '기관'];
+    var stats = keys.map(function (k) { return flowMainStat(k, flow.main && flow.main[k]); }).join('');
+    var subLabel = (slot === 'close' || slot === 'night') ? '정규장 확정 15:40' : '새 축 · 수급 심층';
+    return '<div class="vs-card"><div class="vs-card-h"><p>누가 사는가</p><span>' + subLabel + '</span></div>' +
+      (stats ? '<div class="vs-stats vsx-mt0">' + stats + '</div>' : '') +
+      '<p class="vs-lbl vsx-sec">기관 안에서 누가 바뀌었나</p>' +
+      '<p class="vs-lbl-s">왼쪽 옅은 막대가 어제, 오른쪽이 오늘</p>' +
+      '<div class="vsx-pairs">' + flowInstPairs(flow.inst) + '</div></div>';
+  }
+
+  // 결론 근거 4줄(가격·강도·주도권·누가) — 승인 시안(docs/prototypes/2026-09-16-vs-home-design.html heroCard) 그대로다.
+  // 코스피 %만 오늘 절대값을 다시 적지 않는다(§0·F2, LIVE 바와 중복). 강도·주도권·누가는 코스피 %가 아니라 시안대로
+  // 오늘 절대값도 함께 적는다. 입력이 없는 줄은 채우지 않고 통째로 뺀다. open은 "이 시각" 기준, close·night은 하루 전체.
+  function heroWhy(d, slot) {
+    var relRaw = d.prev.rel, rel = esc(relRaw), open = slot === 'open', lines = [];
+
+    if (d.kospi && d.kospi.y != null && d.kospi.diff != null) {
+      var kd = d.kospi.diff;
+      lines.push(['가격', (open ? rel + ' 이 시각엔 ' : rel + josa(relRaw, '은', '는') + ' ') +
+        '<b class="' + cls(d.kospi.y) + '">' + f2(d.kospi.y) + '%</b>였어요. 지금은 ' +
+        '<b class="' + cls(kd) + '">' + f2(kd) + '%p</b> 더 ' + (kd >= 0 ? '높아요' : '낮아요')]);
+    }
+
+    var heat = d.axes && d.axes.heat;
+    if (heat && heat.vol && heat.amp && heat.vol.diff != null && heat.vol.y != null &&
+        heat.amp.t != null && heat.amp.y != null) {
+      lines.push(['강도', '거래량이 <b class="' + cls(heat.vol.diff) + '">' + f2(heat.vol.diff) + '%</b>' +
+        '(어제 ' + fmt(heat.vol.y) + '천주), 진폭은 <b>' + heat.amp.t.toFixed(2) + '%</b>(어제 ' + heat.amp.y.toFixed(2) + '%)']);
+    }
+
+    var sectors = d.axes && d.axes.sectors;
+    if (sectors && sectors.length) {
+      var leader = sectors.filter(function (s) { return s.rank === 1; })[0];
+      var prevLeader = sectors.filter(function (s) { return s.prevRank === 1; })[0];
+      var parts = [];
+      if (leader && leader.prevRank != null) {
+        parts.push('<b>' + esc(leader.label) + '</b>' + josa(leader.label, '이', '가') + ' 어제 ' + leader.prevRank + '위에서 <b class="up">1위</b>로');
+      }
+      if (prevLeader && (!leader || prevLeader.key !== leader.key)) {
+        parts.push('<b>' + esc(prevLeader.label) + '</b>' + josa(prevLeader.label, '이', '가') + ' 어제 1위에서 <b class="dn">' + prevLeader.rank + '위</b>로');
+      }
+      if (parts.length) lines.push(['주도권', parts.join(', ')]);
+    }
+
+    var instM = d.axes && d.axes.flow && d.axes.flow.main && d.axes.flow.main.기관;
+    if (instM && instM.y != null && instM.t != null) {
+      var yTxt = eok(instM.y);
+      lines.push(['누가', (open ? rel + ' 이 시각 기관은 ' : rel + ' 기관은 ') +
+        '<b class="' + cls(instM.y) + '">' + yTxt + '</b>' + wasKo(yTxt) + '. 오늘은 ' +
+        '<b class="' + cls(instM.t) + '">' + eok(instM.t) + '</b>']);
+    }
+
+    if (!lines.length) return '';
+    return '<ul class="vsx-why">' + lines.map(function (l) {
+      return '<li><span class="k">' + esc(l[0]) + '</span><span>' + l[1] + '</span></li>';
+    }).join('') + '</ul>';
   }
 
   function flowRows(d) {
@@ -113,44 +284,76 @@
     }).join('') + '<p class="vs-flegend"><span><i class="now"></i>위 오늘 ' + d.flow.time + '</span><span><i></i>아래 ' + esc(d.prev.rel) + ' ' + d.flow.time + '</span></p></div>';
   }
 
-  function render(d) {
-    if (!root) return;
-    if (!d || d.status !== 'ok') { root.hidden = true; root.innerHTML = ''; paintTiles(null); return; }
-    var rel = esc(d.prev.rel), html = '';
-    if (d.verdict) {
-      html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
-        '<h2 class="' + (d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
-        '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
-    }
-    var stats = '';
-    if (d.kospi.diff != null) stats += stat('코스피', d.kospi.judge, d.prev.rel, f2(d.kospi.y) + '%', cls(d.kospi.y), f2(d.kospi.t) + '%', cls(d.kospi.t), f2(d.kospi.diff) + '%p');
-    if (d.flow) stats += stat('외국인 누적 순매수', d.flow.judge, d.prev.rel, eok(d.flow.y['외국인']), cls(d.flow.y['외국인']), eok(d.flow.t['외국인']), cls(d.flow.t['외국인']), eok(d.flow.foreignDiff));
-    if (d.avg) stats += stat('주도주 3종목 평균', d.avg.judge, d.prev.rel, f2(d.avg.y) + '%', cls(d.avg.y), f2(d.avg.t) + '%', cls(d.avg.t), f2(d.avg.diff) + '%p');
-    var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
-    html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
-      '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
-      '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
-      '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
-      (stats ? '<div class="vs-stats">' + stats + '</div>' : '') + '</div>';
+  // 시간대별 카드 규칙(설계 §3.2) — pre·weekend는 카드 없음, night은 강도(heat) 한 장만.
+  function slotOf(d) {
+    var k = new Date(d.getTime() + 9 * 3600 * 1000);
+    var day = k.getUTCDay(), hm = k.getUTCHours() * 100 + k.getUTCMinutes();
+    if (day === 0 || day === 6) return 'weekend';
+    if (hm >= 730 && hm < 900) return 'pre';
+    if (hm >= 900 && hm <= 1530) return 'open';
+    if (hm > 1530 && hm < 1700) return 'close';   // 15:31~15:39는 close지만 API가 early를 줘 카드가 안 그려진다
+    return 'night';
+  }
 
-    var changed = '';
-    if (d.issues) {
-      var mark = function (t) { var o = esc(t); d.issues.new.forEach(function (w) { o = o.split(esc(w)).join('<mark>' + esc(w) + '</mark>'); }); return o; };
-      var list = function (a) { return a.length ? '<ul class="vs-issues">' + a.map(function (x) { return '<li><span>' + x.t + '</span><span>' + mark(x.title) + '</span></li>'; }).join('') + '</ul>' : '<p class="vs-empty">이 시각까지 수집된 이슈가 없어요.</p>'; };
-      var chips = function (a, k) { return a.length ? a.map(function (w) { return '<span class="vs-chip ' + k + '">' + esc(w) + '</span>'; }).join('') : '<span class="vs-chip">없음</span>'; };
-      changed += '<p class="vs-lbl">📰 장중 이슈</p>' +
-        '<div class="vs-chips"><span class="vs-chips-k">새로 떠오름</span>' + chips(d.issues.new, 'new') + '</div>' +
-        '<div class="vs-chips"><span class="vs-chips-k">계속 이어짐</span>' + chips(d.issues.keep, 'keep') + '</div>' +
-        '<div class="vs-issue-cols"><div><p class="vs-col-h">' + rel + ' ' + esc(d.prev.label) + '</p>' + list(d.issues.y) + '</div>' +
-        '<div><p class="vs-col-h">오늘 ' + esc(d.today.label) + '</p>' + list(d.issues.t) + '</div></div>';
+  var CARDS = { pre: [], open: ['hero', 'heat', 'lead', 'flow'],
+                close: ['hero', 'heat', 'lead', 'flow'], night: ['heat'], weekend: [] };
+  function cardsFor(slot) { return CARDS[slot] || []; }
+
+  // 슬롯별 호출 엔드포인트 — pre·weekend는 아예 부르지 않는다(null).
+  function endpointFor(slot) {
+    if (slot === 'open') return '/api/intraday?vs=intraday';
+    if (slot === 'close' || slot === 'night') return '/api/intraday?vs=close';
+    return null;
+  }
+
+  function render(d, slot) {
+    slot = slot || slotOf(new Date());
+    var cards = cardsFor(slot);
+    function has(c) { return cards.indexOf(c) !== -1; }
+    if (!root) return;
+    if (!d || d.status !== 'ok' || !cards.length) { root.hidden = true; root.innerHTML = ''; paintTiles(null); return; }
+    var rel = esc(d.prev.rel), html = '';
+    if (has('hero')) {
+      if (d.verdict) {
+        html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
+          '<h2 class="' + (d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
+          '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
+      }
+      // 옛 3칸(오늘 코스피·외국인 누적·주도주 평균)은 LIVE 바·아래 축 카드와 중복이라 뺐다(F2) —
+      // 곡선 다음은 heroWhy()의 근거 4줄로 이어진다.
+      var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
+      html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
+        '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
+        '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
+        '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
+        heroWhy(d, slot) + '</div>';
     }
-    if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
-    if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
+
+    // 렌더 순서 — 결론(위 곡선) → 강도 → 주도권 → 수급(아래 이슈·수급 카드 + 기관 세부).
+    if (has('heat')) html += heatCard(d.axes);
+    if (has('lead')) html += leadCard(d.axes, d.kospi);
+
+    if (has('flow')) {
+      var changed = '';
+      if (d.issues) {
+        var mark = function (t) { var o = esc(t); d.issues.new.forEach(function (w) { o = o.split(esc(w)).join('<mark>' + esc(w) + '</mark>'); }); return o; };
+        var list = function (a) { return a.length ? '<ul class="vs-issues">' + a.map(function (x) { return '<li><span>' + x.t + '</span><span>' + mark(x.title) + '</span></li>'; }).join('') + '</ul>' : '<p class="vs-empty">이 시각까지 수집된 이슈가 없어요.</p>'; };
+        var chips = function (a, k) { return a.length ? a.map(function (w) { return '<span class="vs-chip ' + k + '">' + esc(w) + '</span>'; }).join('') : '<span class="vs-chip">없음</span>'; };
+        changed += '<p class="vs-lbl">📰 장중 이슈</p>' +
+          '<div class="vs-chips"><span class="vs-chips-k">새로 떠오름</span>' + chips(d.issues.new, 'new') + '</div>' +
+          '<div class="vs-chips"><span class="vs-chips-k">계속 이어짐</span>' + chips(d.issues.keep, 'keep') + '</div>' +
+          '<div class="vs-issue-cols"><div><p class="vs-col-h">' + rel + ' ' + esc(d.prev.label) + '</p>' + list(d.issues.y) + '</div>' +
+          '<div><p class="vs-col-h">오늘 ' + esc(d.today.label) + '</p>' + list(d.issues.t) + '</div></div>';
+      }
+      if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
+      if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
+      html += flowCard(d.axes, slot);
+    }
 
     root.innerHTML = html;
     root.hidden = false;
     paintTiles(d);
-    bindHover(root.querySelector ? root.querySelector('.vs-plot') : null, d);
+    if (has('hero')) bindHover(root.querySelector ? root.querySelector('.vs-plot') : null, d);
   }
 
   // 곡선 위에서 포인터를 따라 안내선·점·말풍선을 옮긴다. 60초 폴링이 innerHTML을 갈아끼우면 새 요소에 다시 붙는다.
@@ -196,23 +399,39 @@
     });
   }
 
-  function withJosa(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c >= 0 && c < 11172 && c % 28 ? '과' : '와'); }
+  // 마지막 글자 받침 유무로 조사 짝을 고른다 — 한글이 아니면 받침 없는 쪽(without)을 쓴다.
+  function josa(w, withBatchim, without) {
+    var c = String(w).charCodeAt(String(w).length - 1) - 0xac00;
+    return c >= 0 && c < 11172 && c % 28 ? withBatchim : without;
+  }
+
+  function withJosa(w) { return w + josa(w, '과', '와'); }
+
+  // 였어요/이었어요 — eok()가 내는 "조"(받침 없음)·"억"(받침 있음) 뒤에 붙는 계사를 맞춘다(§0 — 표기도 실측만큼 정확해야 한다).
+  function wasKo(w) { return josa(w, '이었어요', '였어요'); }
 
   function shouldPoll() {
     var k = new Date(Date.now() + 9 * 3600 * 1000), dow = k.getUTCDay(), m = k.getUTCHours() * 60 + k.getUTCMinutes();
     return dow >= 1 && dow <= 5 && m >= 540 && m <= 931;
   }
 
+  // 슬롯에 따라 엔드포인트를 고르고(§3.2), pre·weekend는 아예 호출하지 않는다.
   function load() {
-    if (!shouldPoll()) { render(null); return; }
+    var slot = slotOf(new Date()), url = endpointFor(slot);
+    if (!url) { render(null, slot); return; }
     if (document.hidden) return;                       // 백그라운드 탭은 부르지 않는다(2026-08-16 차단 사고)
-    fetch('/api/intraday?vs=intraday', { cache: 'no-store' })
+    fetch(url, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(render)
-      .catch(function () { render(null); });
+      .then(function (d) { render(d, slot); })
+      .catch(function () { render(null, slot); });
   }
 
-  window.__vsIntraday = { render: render, shouldPoll: shouldPoll, chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt };
+  window.__vsIntraday = {
+    render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
+    chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt,
+    heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
+    josa: josa,
+  };
   if (!root) return;
   load();
   setInterval(load, 60000);

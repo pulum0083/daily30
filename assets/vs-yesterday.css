@@ -102,3 +102,48 @@
 .vs-tb-d{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:1px dashed #E5E7EB;font-size:11px;color:var(--muted)}
 .vs-tb-d .p{font-size:12px;font-weight:800;padding:1px 8px;border-radius:999px}
 .vs-tb-d .p.up{background:var(--up-bg)} .vs-tb-d .p.dn{background:var(--dn-bg)}
+
+/* ── 축 확장(2026-09-16) — 기존 vs- 규칙은 건드리지 않고 vsx-만 더한다 ── */
+.vs-card .vsx-sec{margin-top:24px;padding-top:16px;border-top:1px solid #F1F5F9}
+.vsx-why{list-style:none;margin:11px 0 0;padding:0}
+.vsx-why li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;padding:9px 0;
+  border-top:1px solid #F1F5F9;font-size:13px;line-height:1.6;color:var(--muted)}
+.vsx-why li:first-child{border-top:0}
+.vsx-why .k{font-size:11px;font-weight:700;color:#0F172A}
+.vsx-mini{margin-top:9px}
+.vsx-bars{height:40px;display:grid;grid-template-columns:repeat(2,26px);gap:8px;
+  justify-content:center;position:relative}
+.vsx-bars.zero::before,.vsx-bars.base::before{content:'';position:absolute;left:0;right:0;height:1px;background:var(--hair)}
+.vsx-bars.zero::before{top:50%} .vsx-bars.base::before{bottom:0}
+.vsx-bar{position:relative}
+.vsx-bar i{position:absolute;left:0;right:0;border-radius:3px;display:block}
+.vsx-bar i.up{background:var(--up)} .vsx-bar i.dn{background:var(--dn)}
+.vsx-bar i.mag{background:#0F172A;opacity:.6}
+.vsx-bar.prev i{opacity:.32}
+.vsx-ax{display:grid;grid-template-columns:repeat(2,26px);gap:8px;justify-content:center;
+  font-size:9px;color:var(--muted);text-align:center;margin-top:4px}
+.vsx-ax .t{color:#0F172A;font-weight:700}
+.vsx-pairs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:4px}
+.vsx-pbars{height:76px;display:grid;grid-template-columns:repeat(2,20px);gap:5px;
+  justify-content:center;position:relative}
+.vsx-pbars::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hair)}
+.vsx-pv{font-size:10px;font-weight:800;text-align:center;margin-top:5px;font-variant-numeric:tabular-nums}
+.vsx-pp{font-size:9px;color:var(--muted);text-align:center;margin-top:1px;font-variant-numeric:tabular-nums}
+.vsx-pl{font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
+.vsx-tbl{width:100%;border-collapse:collapse;margin-top:8px}
+.vsx-tbl th{padding:7px 8px;background:#FAFBFC;font-size:11px;font-weight:800;color:var(--muted);
+  text-align:right;border-bottom:1px solid #EEF2F6;white-space:nowrap}
+.vsx-tbl td{padding:8px;border-bottom:1px solid #EEF2F6;text-align:right;white-space:nowrap;
+  font-size:12.5px;color:#0F172A;font-variant-numeric:tabular-nums}
+.vsx-tbl tr:last-child td{border-bottom:none}
+.vsx-tbl th:first-child,.vsx-tbl td:first-child{text-align:left}
+.vsx-tbl td.nm{font-weight:700;white-space:normal}
+.vsx-tbl td.nm small{display:block;font-size:10px;font-weight:400;color:#94A3B8;margin-top:2px}
+.vsx-rk{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
+  border-radius:5px;background:#F1F5F9;font-size:10px;font-weight:800;color:var(--muted);
+  margin-right:7px;vertical-align:1px}
+.vsx-rk.top{background:#0F172A;color:#fff}
+/* 카드 안 static 레이아웃 — 인라인 스타일 대신 쓴다(F4). margin-top:0은 라벨(.vs-lbl) 바로 아래 칸에서만 쓴다 */
+.vsx-stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vsx-mt0{margin-top:0}
+@media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}.vsx-stats2{grid-template-columns:minmax(0,1fr)}}
