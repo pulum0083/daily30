@@ -3,15 +3,27 @@
 import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 import { prevTradingDay, relLabel, atOrBefore, pct, round2, judge, TH, verdict } from './_vs-core.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
-import { parseInvestorTimePage } from './_vs-flow.mjs';
+import { flowAt } from './_vs-flow.mjs';
 import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
 export const CLOSE_AT = '1530';
 
-// 마감 후 응답의 CDN 캐시 — ok는 확정값이라 길게, 그 밖(closed·early·waiting·error)은 곧 바뀔 수 있어 짧게
-export function closeCacheControl(status) {
-  return status === 'ok'
+const isNum = (n) => typeof n === 'number';
+const normTime = (t) => String(t).replace(':', '');
+
+// 마감 후 응답의 CDN 캐시 — 필요한 값이 전부 채워진 'ok'만 길게, 그 밖(부분 실패 포함)은 짧게(F1).
+// status만 보던 예전 판정은 flow가 null이거나 15:40 미만 행·섹터 결측 등 불완전한 ok까지 길게 캐시했다.
+export function closeCacheControl(payload) {
+  const p = typeof payload === 'string' ? { status: payload } : (payload || {});
+  const sectors = p.axes && p.axes.sectors;
+  const complete = p.status === 'ok'
+    && p.flow != null && normTime(p.flow.time) === '1540'
+    && isNum(p.kospi && p.kospi.t) && isNum(p.kospi && p.kospi.y)
+    && isNum(p.axes && p.axes.heat && p.axes.heat.vol && p.axes.heat.vol.t)
+    && isNum(p.axes && p.axes.heat && p.axes.heat.amp && p.axes.heat.amp.t)
+    && Array.isArray(sectors) && sectors.length === 8 && sectors.every((s) => s && s.n === 3);
+  return complete
     ? 's-maxage=1800, stale-while-revalidate=600'
     : 's-maxage=60, stale-while-revalidate=60';
 }
@@ -20,29 +32,22 @@ export function closeCacheControl(status) {
 export function regularFlowRow(rows) {
   let hit = null;
   for (const r of rows || []) {
-    const t = String(r.t).replace(':', '');
-    if (t >= '1531' && t <= '1540' && (!hit || t > String(hit.t).replace(':', ''))) hit = r;
+    const t = normTime(r.t);
+    if (t >= '1531' && t <= '1540' && (!hit || t > normTime(hit.t))) hit = r;
   }
   return hit;
 }
 
-const FLOW_URL = (ymd, p) =>
-  `https://finance.naver.com/sise/investorDealTrendTime.naver?bizdate=${ymd}&sosok=01&page=${p}`;
-
-// 15:31~15:40 행은 최신 시각부터 오는 표의 앞쪽이 아니라 중간에 있다 — 페이지를 끝까지 훑는다.
-// 과거 날짜도 같은 방식으로 조회된다(1페이지만 보면 빈손으로 보인다).
+// 15:40 이하 가장 최근 행을 이진 탐색으로 찾은 뒤(_vs-flow.flowAt), 그 행이 실제로 15:31~15:40
+// 구간 안인지 확인한다. 더 이른 행이 나오면(그날 표가 아직 15:31 전까지만 있으면) 확정 전이라 null.
 async function regularFlowOf(ymd, fetchText) {
-  const first = await fetchText(FLOW_URL(ymd, 1));
-  const pages = Math.max(...[...String(first).matchAll(/page=(\d+)/g)].map((m) => +m[1]).concat(1));
-  let rows = parseInvestorTimePage(first);
-  for (let p = 2; p <= pages && !regularFlowRow(rows); p++) {
-    rows = rows.concat(parseInvestorTimePage(await fetchText(FLOW_URL(ymd, p))));
-  }
-  return regularFlowRow(rows);
+  const row = await flowAt(ymd, '1540', fetchText);
+  if (!row) return null;
+  const t = normTime(row.t);
+  return t >= '1531' && t <= '1540' ? row : null;
 }
 
 const settle = (pr, fb) => pr.then((v) => v, () => fb);
-const isNum = (n) => typeof n === 'number';
 
 export async function buildCloseVs({ now = Date.now(), fetchJson, fetchText }) {
   const k = new Date(now + 9 * 3600 * 1000);

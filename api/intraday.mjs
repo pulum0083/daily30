@@ -124,7 +124,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
       const payload = await buildCloseVs({ fetchJson: getJson, fetchText: getEucKr });
-      res.setHeader('Cache-Control', closeCacheControl(payload.status));
+      res.setHeader('Cache-Control', closeCacheControl(payload));
       return res.status(200).json(payload);
     } catch (e) {
       res.setHeader('Cache-Control', closeCacheControl('error'));

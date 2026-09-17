@@ -145,15 +145,86 @@ test('공휴일이면 16:00이라도 closed', async () => {
   assert.equal(d.status, 'closed');
 });
 
+// ── 새 flowAt 기반 regularFlowOf — 15:39/15:40 행 선택(F1) ──
+
+test('15:40 행이 있으면 그 행을 쓴다', async () => {
+  const fetchText = async (url) => {
+    const m = url.match(/bizdate=(\d{8})/);
+    if (m && m[1] === '20260916') return flowPage('15:40', -20900);
+    return flowPage('15:40', -12207);
+  };
+  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  assert.equal(d.flow.t.외국인, -20900);
+});
+
+test('15:39 행도 15:31~15:40 구간 안이라 채택된다', async () => {
+  const fetchText = async (url) => {
+    const m = url.match(/bizdate=(\d{8})/);
+    if (m && m[1] === '20260916') return flowPage('15:39', -20500);
+    return flowPage('15:40', -12207);
+  };
+  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  assert.equal(d.flow.t.외국인, -20500);
+  assert.equal(d.flow.time, '15:39');
+});
+
+test('오늘 표가 15:25까지만 있으면(15:31 전, 확정 전) flow는 null', async () => {
+  const fetchText = async (url) => {
+    const m = url.match(/bizdate=(\d{8})/);
+    if (m && m[1] === '20260916') return flowPage('15:25', -19000);
+    return flowPage('15:40', -12207);
+  };
+  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  assert.equal(d.flow, null);
+});
+
 // ── CDN 캐시 제어 ──
 
-test("closeCacheControl('ok')는 s-maxage=1800을 갖는다", () => {
-  const cc = closeCacheControl('ok');
+// closeCacheControl이 검사하는 모든 조건을 만족하는 최소 payload
+function okPayload(overrides = {}) {
+  return {
+    status: 'ok',
+    flow: { time: '15:40' },
+    kospi: { t: 1, y: 0.5 },
+    axes: {
+      heat: { vol: { t: 100 }, amp: { t: 1.1 } },
+      sectors: Array.from({ length: 8 }, () => ({ n: 3 })),
+    },
+    ...overrides,
+  };
+}
+
+test('완전한 ok payload는 s-maxage=1800을 갖는다', () => {
+  const cc = closeCacheControl(okPayload());
   assert.ok(cc.includes('s-maxage=1800'), `기대: s-maxage=1800, 받음: ${cc}`);
   assert.ok(cc.includes('stale-while-revalidate=600'), `기대: stale-while-revalidate=600, 받음: ${cc}`);
 });
 
-test("closeCacheControl('closed')는 s-maxage=60을 갖는다", () => {
+test('flow가 null이면 s-maxage=60 — 확정 수급 행이 없는 채로 ok가 나올 수 있다', () => {
+  const cc = closeCacheControl(okPayload({ flow: null }));
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test("flow.time이 '15:39'면 s-maxage=60 — 15:40 확정 행이 아니다", () => {
+  const cc = closeCacheControl(okPayload({ flow: { time: '15:39' } }));
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test('섹터 하나라도 n이 3이 아니면 s-maxage=60', () => {
+  const sectors = Array.from({ length: 8 }, () => ({ n: 3 }));
+  sectors[3] = { n: 2 };
+  const cc = closeCacheControl(okPayload({ axes: { heat: okPayload().axes.heat, sectors } }));
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test('axes.heat.vol.t가 null이면 s-maxage=60', () => {
+  const p = okPayload();
+  p.axes.heat.vol.t = null;
+  const cc = closeCacheControl(p);
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test("closeCacheControl('closed')는 s-maxage=60을 갖는다 — 문자열도 받는다(하위호환)", () => {
   const cc = closeCacheControl('closed');
   assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
   assert.ok(cc.includes('stale-while-revalidate=60'), `기대: stale-while-revalidate=60, 받음: ${cc}`);
