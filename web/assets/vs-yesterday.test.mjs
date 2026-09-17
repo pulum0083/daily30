@@ -334,13 +334,13 @@ test('시간대 경계', () => {
   assert.equal(api.slotOf(d('2026-09-19T12:00:00')), 'weekend'); // 토요일
 });
 
-test('장 전엔 카드가 없고 밤엔 강도만', () => {
+test('장 전엔 카드가 없고, 마감 후(~17:00)엔 메인 곡선만, 밤엔 강도만', () => {
   const { api } = load();
   // cardsFor는 vm 샌드박스의 Array를 반환한다 — 바깥 realm의 assert.deepEqual과 배열 프로토타입이
   // 달라 참조 비교에서 어긋나므로 Array.from으로 이 realm의 배열로 복사해 비교한다.
   assert.deepEqual(Array.from(api.cardsFor('pre')), []);
   assert.deepEqual(Array.from(api.cardsFor('open')), ['hero', 'heat', 'lead', 'flow']);
-  assert.deepEqual(Array.from(api.cardsFor('close')), ['hero', 'heat', 'lead', 'flow']);
+  assert.deepEqual(Array.from(api.cardsFor('close')), ['hero']);
   assert.deepEqual(Array.from(api.cardsFor('night')), ['heat']);
   assert.deepEqual(Array.from(api.cardsFor('weekend')), []);
 });
@@ -371,6 +371,21 @@ test('night 슬롯은 강도 카드만 그린다 — 결론·곡선·주도권·
   assert.ok(!root.innerHTML.includes('어디가 끄는가'), '주도권 카드가 그려짐');
   assert.ok(!root.innerHTML.includes('누가 사는가'), '수급 심층 카드가 그려짐');
   assert.ok(!root.innerHTML.includes('달라진 것'), '수급(달라진 것) 카드가 그려짐');
+});
+
+test('close 슬롯은 메인 곡선만 그린다 — 강도·주도권·수급 카드는 없다', () => {
+  const { api, root } = load(kst('2026-09-14T16:10:00'));
+  const axes = {
+    heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } },
+    market: { kosdaq: { t: -0.12, y: 1.02, diff: -1.14, judge: 'weak' }, kospi200: { t: 1.32, y: -0.70, diff: 2.02, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }],
+    flow: { main: { 개인: { t: -9641, y: 5538, turned: true }, 외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+      inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] },
+  };
+  api.render(Object.assign({}, PAYLOAD, { axes }), 'close');
+  const html = root.innerHTML;
+  assert.ok(html.includes('class="vs-chartbox"'), '곡선이 없음');
+  for (const s of ['얼마나 뜨거운가', '어디가 끄는가', '누가 사는가']) assert.ok(!html.includes(s), `그려짐: ${s}`);
 });
 
 test('slot이 pre·weekend면(카드 없음) ok 응답이어도 아무것도 그리지 않는다', () => {
