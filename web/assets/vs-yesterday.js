@@ -270,20 +270,6 @@
     }).join('') + '</ul>';
   }
 
-  function flowRows(d) {
-    var keys = ['개인', '외국인', '기관'], mx = 1;
-    keys.forEach(function (k) { mx = Math.max(mx, Math.abs(d.flow.t[k]), Math.abs(d.flow.y[k])); });
-    function bar(v, kind) {
-      var w = (Math.abs(v) / mx * 50).toFixed(2);
-      return '<div class="vs-frow"><span class="vs-fl ' + (v < 0 ? (kind === 'now' ? 'dn' : 'muted') : '') + '">' + (v < 0 ? eok(v) : '') + '</span>' +
-        '<div class="vs-ftrack"><i class="vs-fbar ' + kind + ' ' + cls(v) + '" style="' + (v >= 0 ? 'left' : 'right') + ':50%;width:' + w + '%"></i></div>' +
-        '<span class="vs-fr ' + (v >= 0 ? (kind === 'now' ? 'up' : 'muted') : '') + '">' + (v >= 0 ? eok(v) : '') + '</span></div>';
-    }
-    return '<div class="vs-flow">' + keys.map(function (k) {
-      return '<div class="vs-fgroup"><p class="vs-fname">' + k + '</p>' + bar(d.flow.t[k], 'now') + bar(d.flow.y[k], 'prev') + '</div>';
-    }).join('') + '<p class="vs-flegend"><span><i class="now"></i>위 오늘 ' + d.flow.time + '</span><span><i></i>아래 ' + esc(d.prev.rel) + ' ' + d.flow.time + '</span></p></div>';
-  }
-
   // 시간대별 카드 규칙(설계 §3.2) — pre·weekend는 카드 없음, night은 강도(heat) 한 장만.
   function slotOf(d) {
     var k = new Date(d.getTime() + 9 * 3600 * 1000);
@@ -329,26 +315,11 @@
         heroWhy(d, slot) + '</div>';
     }
 
-    // 렌더 순서 — 결론(위 곡선) → 강도 → 주도권 → 수급(아래 이슈·수급 카드 + 기관 세부).
+    // 렌더 순서 — 결론(위 곡선) → 강도 → 주도권 → 수급. 옛 '어제와 달라진 것' 가로 막대 카드는 누가 사는가와 겹쳐 뺐다(2026-09-17).
     if (has('heat')) html += heatCard(d.axes);
     if (has('lead')) html += leadCard(d.axes, d.kospi);
 
-    if (has('flow')) {
-      var changed = '';
-      if (d.issues) {
-        var mark = function (t) { var o = esc(t); d.issues.new.forEach(function (w) { o = o.split(esc(w)).join('<mark>' + esc(w) + '</mark>'); }); return o; };
-        var list = function (a) { return a.length ? '<ul class="vs-issues">' + a.map(function (x) { return '<li><span>' + x.t + '</span><span>' + mark(x.title) + '</span></li>'; }).join('') + '</ul>' : '<p class="vs-empty">이 시각까지 수집된 이슈가 없어요.</p>'; };
-        var chips = function (a, k) { return a.length ? a.map(function (w) { return '<span class="vs-chip ' + k + '">' + esc(w) + '</span>'; }).join('') : '<span class="vs-chip">없음</span>'; };
-        changed += '<p class="vs-lbl">📰 장중 이슈</p>' +
-          '<div class="vs-chips"><span class="vs-chips-k">새로 떠오름</span>' + chips(d.issues.new, 'new') + '</div>' +
-          '<div class="vs-chips"><span class="vs-chips-k">계속 이어짐</span>' + chips(d.issues.keep, 'keep') + '</div>' +
-          '<div class="vs-issue-cols"><div><p class="vs-col-h">' + rel + ' ' + esc(d.prev.label) + '</p>' + list(d.issues.y) + '</div>' +
-          '<div><p class="vs-col-h">오늘 ' + esc(d.today.label) + '</p>' + list(d.issues.t) + '</div></div>';
-      }
-      if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
-      if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
-      html += flowCard(d.axes, slot);
-    }
+    if (has('flow')) html += flowCard(d.axes, slot);
 
     root.innerHTML = html;
     root.hidden = false;
@@ -404,8 +375,6 @@
     var c = String(w).charCodeAt(String(w).length - 1) - 0xac00;
     return c >= 0 && c < 11172 && c % 28 ? withBatchim : without;
   }
-
-  function withJosa(w) { return w + josa(w, '과', '와'); }
 
   // 였어요/이었어요 — eok()가 내는 "조"(받침 없음)·"억"(받침 있음) 뒤에 붙는 계사를 맞춘다(§0 — 표기도 실측만큼 정확해야 한다).
   function wasKo(w) { return josa(w, '이었어요', '였어요'); }

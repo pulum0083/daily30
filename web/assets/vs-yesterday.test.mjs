@@ -32,22 +32,17 @@ const PAYLOAD = {
   issues: null, // C2 — 서버 응답은 항상 null(SERVICE_RULES §49)
 };
 
-test('ok 응답이면 결론·비교 칸·달라진 것을 그린다', () => {
+test('ok 응답이면 결론·비교 칸을 그리고 옛 달라진 것 카드는 없다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
   assert.equal(root.hidden, false);
   // '오늘이 약함'(옛 외국인 누적 순매수 칸의 판정 배지)은 F2로 뺐다 — 대신 heroWhy 가격 줄의 '더 낮아요'로 확인한다.
-  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '더 낮아요', '−2.56%', '코스피 전체 · 투자자별 누적 순매수', '외국인']) {
+  for (const s of ['지난 금요일 11:00 vs 오늘 11:00', '지난 금요일과 비슷해요', '더 낮아요', '−2.56%']) {
     assert.ok(root.innerHTML.includes(s), `빠짐: ${s}`);
   }
-});
-
-test('수급 범례는 d.time이 아니라 d.flow.time을 쓴다(I1)', () => {
-  const { api, root } = load(kst('2026-09-14T11:00:00'));
-  api.render(PAYLOAD);
-  assert.ok(root.innerHTML.includes('위 오늘 10:58'), '수급 범례가 flow.time을 안 씀');
-  assert.ok(root.innerHTML.includes('아래 지난 금요일 10:58'));
-  assert.ok(!root.innerHTML.includes('위 오늘 11:00'), '수급 범례가 여전히 d.time을 쓰고 있음');
+  // 옛 가로 막대 수급 카드는 누가 사는가와 겹쳐 뺐다(2026-09-17).
+  assert.ok(!root.innerHTML.includes('달라진 것'));
+  assert.ok(!root.innerHTML.includes('vs-flow'));
 });
 
 test('이슈는 null이면 이슈 섹션을 그리지 않는다(C2)', () => {
@@ -265,12 +260,10 @@ test('강도·주도권 카드는 데이터가 있으면 코스피 곡선 카드
   const iChart = html.indexOf('코스피 · 전일 종가 대비');
   const iHeat = html.indexOf('얼마나 뜨거운가');
   const iLead = html.indexOf('어디가 끄는가');
-  const iChanged = html.indexOf('달라진 것');
   const iFlow = html.indexOf('누가 사는가');
   assert.ok(iChart >= 0 && iHeat > iChart, '강도 카드가 곡선 카드 뒤에 있지 않음');
   assert.ok(iLead > iHeat, '주도권 카드가 강도 카드 뒤에 있지 않음');
-  assert.ok(iChanged > iLead, '기존 수급 카드가 주도권 카드보다 앞에 있음');
-  assert.ok(iFlow > iChanged, '기관 세부 카드가 마지막이 아님');
+  assert.ok(iFlow > iLead, '수급 카드가 주도권 카드 뒤에 있지 않음');
 });
 
 test('기관 세부 막대는 값이 없으면 그리지 않는다 — 0이나 다른 값으로 채우지 않는다', () => {

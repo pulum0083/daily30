@@ -46,38 +46,9 @@
 .vs-card-h span{font-size:11px;color:var(--muted)}
 .vs-lbl{font-size:13px;font-weight:700;color:#0F172A;margin:16px 0 8px}
 .vs-lbl:first-of-type{margin-top:0}
-.vs-center{text-align:center}
-.vs-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.vs-chips + .vs-chips{margin-top:10px}
-.vs-chips-k{width:84px;font-size:11px;color:var(--muted)}
-.vs-chip{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;color:var(--muted);background:#F1F5F9}
-.vs-chip.new{color:#fff;background:#0F172A}
-.vs-issue-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:14px}
-.vs-col-h{font-size:11px;color:var(--muted);margin:0 0 6px}
-.vs-issues{list-style:none;margin:0;padding:0}
-.vs-issues li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid #F1F5F9;font-size:13px}
-.vs-issues li:first-child{border-top:0;padding-top:2px}
-.vs-issues li span:first-child{font-size:11px;color:var(--muted)}
-.vs-issues li span:last-child{font-weight:600;color:#0F172A;line-height:1.5}
-.vs-issues mark{background:var(--up-bg);color:var(--up);border-radius:3px;padding:0 2px}
-.vs-empty{font-size:13px;color:var(--muted);margin:0}
-.vs-flow{max-width:760px;margin:0 auto}
-.vs-fgroup + .vs-fgroup{margin-top:14px}
-.vs-fname{text-align:center;font-size:13px;font-weight:700;color:#0F172A;margin:0 0 6px}
-.vs-frow{display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;column-gap:10px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.vs-frow + .vs-frow{margin-top:5px}
-.vs-fl{text-align:right} .vs-fr{text-align:left} .vs-fl.muted,.vs-fr.muted{color:var(--muted)}
-.vs-ftrack{position:relative;height:8px;background:#F1F5F9;border-radius:999px}
-.vs-ftrack::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:#CBD5E1}
-.vs-fbar{position:absolute;top:0;bottom:0;border-radius:999px}
-.vs-fbar.prev{background:#CBD5E1} .vs-fbar.now.up{background:var(--up)} .vs-fbar.now.dn{background:var(--dn)}
-.vs-flegend{display:flex;justify-content:center;gap:14px;margin:14px 0 0;font-size:11px;color:var(--muted)}
-.vs-flegend i{display:inline-block;width:12px;height:7px;border-radius:999px;background:#CBD5E1;margin-right:6px;vertical-align:middle}
-.vs-flegend i.now{background:linear-gradient(90deg,var(--dn) 50%,var(--up) 50%)}
 @media (max-width:760px){
   .vs-chartbox{padding:0 62px 0 30px} .vs-axis{margin:4px 62px 0 30px} .vs-end{width:56px}
-  .vs-stats,.vs-issue-cols{grid-template-columns:minmax(0,1fr)}
-  .vs-frow{grid-template-columns:60px minmax(0,1fr) 60px;column-gap:8px}
+  .vs-stats{grid-template-columns:minmax(0,1fr)}
 }
 /* 코스피 곡선 마우스 오버 — 세로 안내선·두 점·말풍선(값은 곡선에 실제로 있는 샘플 점만) */
 .vs-plot{position:relative;cursor:crosshair;touch-action:pan-y}
