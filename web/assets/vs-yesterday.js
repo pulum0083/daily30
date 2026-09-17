@@ -124,6 +124,7 @@
     if (!axes || !axes.heat) return '';
     var vol = axes.heat.vol, amp = axes.heat.amp;
     if (!vol || !amp) return '';
+    if (vol.t == null && amp.t == null) return '';   // 오늘 값이 둘 다 없으면 카드째 생략한다(F5, §0)
     var rows = '<div class="vs-stats vsx-stats2">'
       + stat('코스피 누적 거래량', vol.judge, '어제', vol.y != null ? fmt(vol.y) + '<small> 천주</small>' : '—', cls(vol.y),
           vol.t != null ? fmt(vol.t) + '<small> 천주</small>' : '—', cls(vol.t), pctTxt(vol.diff, '%'), miniBars(vol.y, vol.t, { zero: false }))

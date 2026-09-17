@@ -477,3 +477,17 @@ test('강도·주도권·수급 카드는 인라인 grid-template-columns를 쓰
     assert.ok(!/style="[^"]*grid-template-columns/.test(html), `${name} 카드에 인라인 grid-template-columns가 남음: ` + html);
   }
 });
+
+// ── F5: 강도 카드는 오늘 값이 둘 다 없으면 카드째 생략한다 ──
+
+test('강도 카드 — 오늘 거래량·진폭이 둘 다 없으면 카드를 통째로 생략한다(F5, §0)', () => {
+  const { api } = load();
+  const axes = { heat: { vol: { t: null, y: 190662, diff: null, judge: null }, amp: { t: null, y: 1.43, diff: null, judge: null } } };
+  assert.equal(api.heatCard(axes), '');
+});
+
+test('강도 카드 — 오늘 값이 하나라도 있으면 카드를 그린다(F5 경계)', () => {
+  const { api } = load();
+  const axes = { heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: null, y: 1.43, diff: null, judge: null } } };
+  assert.notEqual(api.heatCard(axes), '');
+});
