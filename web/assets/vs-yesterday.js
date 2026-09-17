@@ -208,15 +208,65 @@
   }
 
   // 수급 심층 카드 — 개인·외국인·기관 방향 전환 + 기관 안 6개 주체별 순매수 짝 막대.
-  function flowCard(axes) {
+  // slot이 close·night이면 카드 라벨을 "정규장 확정 15:40"으로 바꿔 애프터장이 섞인 홈 LIVE 바와 구분한다(F2).
+  function flowCard(axes, slot) {
     if (!axes || !axes.flow) return '';
     var flow = axes.flow, keys = ['개인', '외국인', '기관'];
     var stats = keys.map(function (k) { return flowMainStat(k, flow.main && flow.main[k]); }).join('');
-    return '<div class="vs-card"><div class="vs-card-h"><p>누가 사는가</p><span>새 축 · 수급 심층</span></div>' +
+    var subLabel = (slot === 'close' || slot === 'night') ? '정규장 확정 15:40' : '새 축 · 수급 심층';
+    return '<div class="vs-card"><div class="vs-card-h"><p>누가 사는가</p><span>' + subLabel + '</span></div>' +
       (stats ? '<div class="vs-stats" style="margin-top:0">' + stats + '</div>' : '') +
       '<p class="vs-lbl vsx-sec">기관 안에서 누가 바뀌었나</p>' +
       '<p class="vs-lbl-s">왼쪽 옅은 막대가 어제, 오른쪽이 오늘</p>' +
       '<div class="vsx-pairs">' + flowInstPairs(flow.inst) + '</div></div>';
+  }
+
+  // 결론 근거 4줄(가격·강도·주도권·누가) — 승인 시안(docs/prototypes/2026-09-16-vs-home-design.html heroCard) 그대로다.
+  // 코스피 %만 오늘 절대값을 다시 적지 않는다(§0·F2, LIVE 바와 중복). 강도·주도권·누가는 코스피 %가 아니라 시안대로
+  // 오늘 절대값도 함께 적는다. 입력이 없는 줄은 채우지 않고 통째로 뺀다. open은 "이 시각" 기준, close·night은 하루 전체.
+  function heroWhy(d, slot) {
+    var rel = esc(d.prev.rel), open = slot === 'open', lines = [];
+
+    if (d.kospi && d.kospi.y != null && d.kospi.diff != null) {
+      var kd = d.kospi.diff;
+      lines.push(['가격', (open ? rel + ' 이 시각엔 ' : rel + '는 ') +
+        '<b class="' + cls(d.kospi.y) + '">' + f2(d.kospi.y) + '%</b>였어요. 지금은 ' +
+        '<b class="' + cls(kd) + '">' + f2(kd) + '%p</b> 더 ' + (kd >= 0 ? '높아요' : '낮아요')]);
+    }
+
+    var heat = d.axes && d.axes.heat;
+    if (heat && heat.vol && heat.amp && heat.vol.diff != null && heat.vol.y != null &&
+        heat.amp.t != null && heat.amp.y != null) {
+      lines.push(['강도', '거래량이 <b class="' + cls(heat.vol.diff) + '">' + f2(heat.vol.diff) + '%</b>' +
+        '(어제 ' + fmt(heat.vol.y) + '천주), 진폭은 <b>' + heat.amp.t.toFixed(2) + '%</b>(어제 ' + heat.amp.y.toFixed(2) + '%)']);
+    }
+
+    var sectors = d.axes && d.axes.sectors;
+    if (sectors && sectors.length) {
+      var leader = sectors.filter(function (s) { return s.rank === 1; })[0];
+      var prevLeader = sectors.filter(function (s) { return s.prevRank === 1; })[0];
+      var parts = [];
+      if (leader && leader.prevRank != null) {
+        parts.push('<b>' + esc(leader.label) + '</b>가 어제 ' + leader.prevRank + '위에서 <b class="up">1위</b>로');
+      }
+      if (prevLeader && (!leader || prevLeader.key !== leader.key)) {
+        parts.push('<b>' + esc(prevLeader.label) + '</b>가 어제 1위에서 <b class="dn">' + prevLeader.rank + '위</b>로');
+      }
+      if (parts.length) lines.push(['주도권', parts.join(', ')]);
+    }
+
+    var instM = d.axes && d.axes.flow && d.axes.flow.main && d.axes.flow.main.기관;
+    if (instM && instM.y != null && instM.t != null) {
+      var yTxt = eok(instM.y);
+      lines.push(['누가', (open ? rel + ' 이 시각 기관은 ' : rel + ' 기관은 ') +
+        '<b class="' + cls(instM.y) + '">' + yTxt + '</b>' + wasKo(yTxt) + '. 오늘은 ' +
+        '<b class="' + cls(instM.t) + '">' + eok(instM.t) + '</b>']);
+    }
+
+    if (!lines.length) return '';
+    return '<ul class="vsx-why">' + lines.map(function (l) {
+      return '<li><span class="k">' + esc(l[0]) + '</span><span>' + l[1] + '</span></li>';
+    }).join('') + '</ul>';
   }
 
   function flowRows(d) {
@@ -268,16 +318,14 @@
           '<h2 class="' + (d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
           '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
       }
-      var stats = '';
-      if (d.kospi.diff != null) stats += stat('코스피', d.kospi.judge, d.prev.rel, f2(d.kospi.y) + '%', cls(d.kospi.y), f2(d.kospi.t) + '%', cls(d.kospi.t), f2(d.kospi.diff) + '%p');
-      if (d.flow) stats += stat('외국인 누적 순매수', d.flow.judge, d.prev.rel, eok(d.flow.y['외국인']), cls(d.flow.y['외국인']), eok(d.flow.t['외국인']), cls(d.flow.t['외국인']), eok(d.flow.foreignDiff));
-      if (d.avg) stats += stat('주도주 3종목 평균', d.avg.judge, d.prev.rel, f2(d.avg.y) + '%', cls(d.avg.y), f2(d.avg.t) + '%', cls(d.avg.t), f2(d.avg.diff) + '%p');
+      // 옛 3칸(오늘 코스피·외국인 누적·주도주 평균)은 LIVE 바·아래 축 카드와 중복이라 뺐다(F2) —
+      // 곡선 다음은 heroWhy()의 근거 4줄로 이어진다.
       var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
       html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
         '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
         '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
         '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
-        (stats ? '<div class="vs-stats">' + stats + '</div>' : '') + '</div>';
+        heroWhy(d, slot) + '</div>';
     }
 
     // 렌더 순서 — 결론(위 곡선) → 강도 → 주도권 → 수급(아래 이슈·수급 카드 + 기관 세부).
@@ -298,7 +346,7 @@
       }
       if (d.flow) changed += '<p class="vs-lbl vs-center">코스피 전체 · 투자자별 누적 순매수</p><p class="vs-lbl-s">코스피 시장 전체 합계예요. 주도주 3종목만의 수급이 아니에요.</p>' + flowRows(d);
       if (changed) html += '<div class="vs-card"><div class="vs-card-h"><p>' + withJosa(d.prev.rel) + ' 달라진 것</p><span>' + d.time + '까지 기준</span></div>' + changed + '</div>';
-      html += flowCard(d.axes);
+      html += flowCard(d.axes, slot);
     }
 
     root.innerHTML = html;
@@ -352,6 +400,9 @@
 
   function withJosa(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c >= 0 && c < 11172 && c % 28 ? '과' : '와'); }
 
+  // 였어요/이었어요 — eok()가 내는 "조"(받침 없음)·"억"(받침 있음) 뒤에 붙는 계사를 맞춘다(§0 — 표기도 실측만큼 정확해야 한다).
+  function wasKo(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c < 11172 && c % 28 ? '이었어요' : '였어요'; }
+
   function shouldPoll() {
     var k = new Date(Date.now() + 9 * 3600 * 1000), dow = k.getUTCDay(), m = k.getUTCHours() * 60 + k.getUTCMinutes();
     return dow >= 1 && dow <= 5 && m >= 540 && m <= 931;
@@ -371,7 +422,7 @@
   window.__vsIntraday = {
     render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
     chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt,
-    heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars,
+    heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
   };
   if (!root) return;
   load();
