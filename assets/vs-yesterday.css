@@ -10,6 +10,7 @@
 .vs-legend i{display:inline-block;width:18px;border-top:2px solid #0F172A;vertical-align:middle;margin-right:6px}
 .vs-legend i.y{border-top:2px dashed #94A3B8}
 .vs-legend i.b{width:5px;height:10px;border:0;background:var(--up);border-radius:1px;margin-right:2px} .vs-legend i.b.dn{background:var(--dn);margin-right:6px}
+.vs-legend i.a{width:10px;height:10px;border:0;background:rgba(243,57,66,.22);border-radius:2px;margin-right:2px} .vs-legend i.a.dn{background:rgba(0,110,255,.2);margin-right:6px}
 .vs-legend .r{margin-left:auto}
 .vs-chart{display:block;width:100%;height:180px}
 .vs-zero{stroke:#CBD5E1;stroke-width:1}
@@ -19,7 +20,7 @@
 /* A안 — 왼쪽 34px 세로 눈금, 오른쪽 78px 선 끝 값. 가로축(.vs-axis)도 같은 여백으로 곡선과 맞춘다 */
 .vs-chartbox{position:relative;padding:0 78px 0 34px}
 .vs-grid{stroke:#F1F5F9;stroke-width:1}
-.vs-ga.up{stop-color:var(--up);stop-opacity:.22} .vs-ga.dn{stop-color:var(--dn);stop-opacity:.22} .vs-ga.e{stop-opacity:.02}
+.vs-band.up{fill:rgba(243,57,66,.16)} .vs-band.dn{fill:rgba(0,110,255,.14)}
 .vs-enddot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
 .vs-enddot.t{background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)} .vs-enddot.y{background:#fff;border:2px solid #94A3B8}
 /* D안 아래 차이 막대 칸 — 곡선 상자와 같은 좌우 여백으로 시각을 맞춘다 */
