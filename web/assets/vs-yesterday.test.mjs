@@ -217,3 +217,57 @@ test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 
   handlers.visibilitychange();
   assert.equal(calls.length, 1);
 });
+
+test('거래량 막대는 상승/하락 색을 쓰지 않는다 — 방향이 없는 양이다', () => {
+  const { api } = load();
+  const html = api.miniBars(190662, 142592, { zero: false });
+  assert.ok(html.includes('mag'), '중립 클래스 없음');
+  assert.ok(!/class="[^"]*\b(up|dn)\b/.test(html), '방향 색이 섞임: ' + html);
+});
+
+test('수급 짝 막대는 오늘과 어제 값을 함께 적는다', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true },
+    외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+    inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] } });
+  assert.ok(html.includes('4,226'), '오늘 값 없음');
+  assert.ok(html.includes('4,336'), '어제 값 없음 — 부호 반전이 안 읽힌다');
+});
+
+test('섹터 표는 "섹터 평균"이 아니라 "대표 3종목 평균"이라 적는다', () => {
+  const { api } = load();
+  const html = api.leadCard({ market: { kosdaq: {}, kospi200: {} },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }] });
+  assert.ok(html.includes('대표 3종목'), '평균 정의가 안 드러남');
+  assert.ok(html.includes('삼성전자'), '대표 종목 이름이 없음');
+});
+
+test('축 데이터가 없으면 카드를 그리지 않는다', () => {
+  const { api } = load();
+  assert.equal(api.heatCard(null), '');
+  assert.equal(api.flowCard({ flow: null }), '');
+  assert.equal(api.leadCard({ sectors: [] }), '');
+});
+
+test('강도·주도권 카드는 데이터가 있으면 코스피 곡선 카드 뒤, 기존 수급 카드 앞 순서로 붙는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  const axes = {
+    heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } },
+    market: { kosdaq: { t: -0.12, y: 1.02, diff: -1.14, judge: 'weak' }, kospi200: { t: 1.32, y: -0.70, diff: 2.02, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }],
+    flow: { main: { 개인: { t: -9641, y: 5538, turned: true }, 외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
+      inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] },
+  };
+  api.render(Object.assign({}, PAYLOAD, { axes }));
+  const html = root.innerHTML;
+  const iChart = html.indexOf('코스피 · 전일 종가 대비');
+  const iHeat = html.indexOf('얼마나 뜨거운가');
+  const iLead = html.indexOf('어디가 끄는가');
+  const iChanged = html.indexOf('달라진 것');
+  const iFlow = html.indexOf('누가 사는가');
+  assert.ok(iChart >= 0 && iHeat > iChart, '강도 카드가 곡선 카드 뒤에 있지 않음');
+  assert.ok(iLead > iHeat, '주도권 카드가 강도 카드 뒤에 있지 않음');
+  assert.ok(iChanged > iLead, '기존 수급 카드가 주도권 카드보다 앞에 있음');
+  assert.ok(iFlow > iChanged, '기관 세부 카드가 마지막이 아님');
+});
