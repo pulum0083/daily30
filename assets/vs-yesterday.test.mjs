@@ -117,7 +117,7 @@ test('폴링 창 — 평일 09:00~15:31만', () => {
 
 test('곡선 SVG — 두 선을 그린다', () => {
   const svg = load(kst('2026-09-14T11:00:00')).api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
-  assert.equal((svg.match(/<path /g) || []).length, 2);
+  assert.equal((svg.match(/class="vs-line-[ty]"/g) || []).length, 2);
 });
 
 test('마우스 오버 — 가장 가까운 샘플 점의 오늘·어제·차이를 준다(보간 없음)', () => {
@@ -153,18 +153,32 @@ test('곡선은 말풍선 자리와 함께 그린다(처음엔 숨김)', () => {
 // ── A안 곡선(2026-09-15) — 차이 색 띠·눈금·선 끝 값·지금 선 ──
 const WIDE = { curveT: [[0, 0], [5, -0.2], [120, -0.5]], curveY: [[0, -3], [5, -3.1], [120, -3]] };
 
-test('A안 — 오늘이 위인 구간은 빨강 띠, 아래 구간은 파랑 띠', () => {
+test('D안 — 오늘 곡선 아래를 0% 기준 면으로 채우고(위 빨강·아래 파랑) 옛 색 띠는 없다', () => {
   const { api } = load(kst('2026-09-14T11:00:00'));
-  const up = api.chartSvg(WIDE.curveY, WIDE.curveT);
-  assert.ok(/class="vs-band up"/.test(up) && !/class="vs-band dn"/.test(up));
-  const dn = api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
-  assert.ok(/class="vs-band dn"/.test(dn));
-  assert.equal((dn.match(/<path /g) || []).length, 2, '선은 여전히 두 줄');
+  const svg = api.chartSvg(WIDE.curveY, WIDE.curveT);
+  assert.ok(svg.includes('class="vs-area up"') && svg.includes('class="vs-area dn"'));
+  assert.ok(svg.includes('clip-path="url(#vsCU)"') && svg.includes('clip-path="url(#vsCD)"'));
+  assert.ok(!svg.includes('vs-band'));
+  assert.ok(!api.chartSvg([[0, -1]], [[0, 0]]).includes('vs-area'), '점이 하나면 면을 만들지 않는다');
 });
 
-test('A안 — 같은 분에 어제 값이 없는 구간은 띠를 채우지 않는다(§0)', () => {
-  const svg = load(kst('2026-09-14T11:00:00')).api.chartSvg([[0, -1]], [[0, 0], [5, 0.2]]);
-  assert.ok(!svg.includes('vs-band'));
+test('D안 — 차이 막대는 같은 분에 두 값이 모두 있는 점만(§0)', () => {
+  const { api } = load(kst('2026-09-14T11:00:00'));
+  assert.equal(JSON.stringify(api.diffPts([[0, -1], [10, 0.2]], [[0, 0.5], [5, 0.7], [10, 0.1]])), '[[0,1.5],[10,-0.1]]');
+  const svg = api.diffSvg([[0, -1], [10, 0.2]], [[0, 0.5], [5, 0.7], [10, 0.1]]);
+  assert.equal((svg.match(/class="vs-dbar up"/g) || []).length, 1);
+  assert.equal((svg.match(/class="vs-dbar dn"/g) || []).length, 1);
+  assert.equal(api.diffSvg([[0, -1]], [[5, 0.2]]), '', '겹치는 분이 없으면 칸째 생략');
+});
+
+test('D안 — 렌더에 차이 막대 칸과 지금 시각 차이 %p를 넣는다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(Object.assign({}, PAYLOAD, { kospi: Object.assign({}, PAYLOAD.kospi, WIDE) }));
+  const html = root.innerHTML;
+  assert.ok(html.includes('class="vs-diffbox"'));
+  assert.ok(/vs-diffbox[\s\S]*<b class="up">\+2\.50%p<\/b>/.test(html));
+  assert.ok(html.includes('class="vs-enddot t"') && html.includes('class="vs-enddot y"'));
+  assert.ok(html.indexOf('vs-diffbox') < html.indexOf('vs-axis'), '시각축은 차이 칸 아래');
 });
 
 test('A안 — 장이 남았으면 지금 선·남은 장 음영, 15:30이면 없다', () => {
@@ -188,11 +202,11 @@ test('A안 — 두 끝 값이 가까우면 괄호를 빼고 라벨끼리 밀어�
   assert.ok(Math.abs(tops[0] - tops[1]) >= 19.9, `라벨 간격 ${tops}`);
 });
 
-test('A안 — 렌더에 차이 범례·곡선 상자를 넣는다', () => {
+test('렌더에 차이 범례·곡선 상자를 넣는다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
   assert.ok(root.innerHTML.includes('class="vs-chartbox"'));
-  assert.ok(root.innerHTML.includes('<i class="a"></i>차이'));
+  assert.ok(root.innerHTML.includes('차이(오늘−지난 금요일)'));
 });
 
 test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 바로 불러온다', () => {

@@ -9,7 +9,7 @@
 .vs-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
 .vs-legend i{display:inline-block;width:18px;border-top:2px solid #0F172A;vertical-align:middle;margin-right:6px}
 .vs-legend i.y{border-top:2px dashed #94A3B8}
-.vs-legend i.a{width:12px;height:8px;border:0;background:rgba(224,49,49,.18);border-radius:2px}
+.vs-legend i.b{width:5px;height:10px;border:0;background:var(--up);border-radius:1px;margin-right:2px} .vs-legend i.b.dn{background:var(--dn);margin-right:6px}
 .vs-legend .r{margin-left:auto}
 .vs-chart{display:block;width:100%;height:180px}
 .vs-zero{stroke:#CBD5E1;stroke-width:1}
@@ -19,7 +19,13 @@
 /* A안 — 왼쪽 34px 세로 눈금, 오른쪽 78px 선 끝 값. 가로축(.vs-axis)도 같은 여백으로 곡선과 맞춘다 */
 .vs-chartbox{position:relative;padding:0 78px 0 34px}
 .vs-grid{stroke:#F1F5F9;stroke-width:1}
-.vs-band.up{fill:rgba(224,49,49,.13)} .vs-band.dn{fill:rgba(39,117,237,.13)}
+.vs-ga.up{stop-color:var(--up);stop-opacity:.22} .vs-ga.dn{stop-color:var(--dn);stop-opacity:.22} .vs-ga.e{stop-opacity:.02}
+.vs-enddot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+.vs-enddot.t{background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)} .vs-enddot.y{background:#fff;border:2px solid #94A3B8}
+/* D안 아래 차이 막대 칸 — 곡선 상자와 같은 좌우 여백으로 시각을 맞춘다 */
+.vs-diffbox{position:relative;padding:0 78px 0 34px;margin-top:8px}
+.vs-dchart{display:block;width:100%;height:56px}
+.vs-dbar.up{fill:var(--up);opacity:.85} .vs-dbar.dn{fill:var(--dn);opacity:.85}
 .vs-rest{fill:#F8FAFC}
 .vs-now{stroke:#CBD5E1;stroke-width:1;stroke-dasharray:3 3}
 .vs-ytick{position:absolute;left:0;width:28px;text-align:right;font-size:10.5px;color:#94A3B8;transform:translateY(-50%);font-variant-numeric:tabular-nums;pointer-events:none}
@@ -28,7 +34,6 @@
 .vs-end b.up{color:var(--up)} .vs-end b.dn{color:var(--dn)}
 .vs-gapline{position:absolute;width:2px;margin-left:6px;background:var(--up);pointer-events:none} .vs-gapline.dn{background:var(--dn)}
 .vs-gap{position:absolute;transform:translate(13px,-50%);font-size:11.5px;font-weight:800;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
-.vs-gap.l{transform:translate(calc(-100% - 4px),-50%)}
 .vs-gap.up{color:var(--up)} .vs-gap.dn{color:var(--dn)}
 .vs-rest-l{position:absolute;top:2px;margin-left:6px;font-size:10.5px;color:#94A3B8;pointer-events:none}
 .vs-axis span{position:absolute;top:0;white-space:nowrap}
@@ -47,7 +52,7 @@
 .vs-lbl{font-size:13px;font-weight:700;color:#0F172A;margin:16px 0 8px}
 .vs-lbl:first-of-type{margin-top:0}
 @media (max-width:760px){
-  .vs-chartbox{padding:0 62px 0 30px} .vs-axis{margin:4px 62px 0 30px} .vs-end{width:56px}
+  .vs-chartbox,.vs-diffbox{padding:0 62px 0 30px} .vs-gap{display:none} .vs-axis{margin:4px 62px 0 30px} .vs-end{width:56px}
   .vs-stats{grid-template-columns:minmax(0,1fr)}
 }
 /* 코스피 곡선 마우스 오버 — 세로 안내선·두 점·말풍선(값은 곡선에 실제로 있는 샘플 점만) */
