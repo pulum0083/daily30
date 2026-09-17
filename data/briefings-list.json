@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-18": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-18/kospi/",
+        "headline": "오늘, 코스피 반도체 랠리 다시 탈까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-17": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-07/us/",
         "headline": "고용지표 하나에 쏠린 시선 — 금리는 이미 올라있고 반도체는 이미 달리고 있다",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-06": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-06/kospi/",
-        "headline": "전일 급등 뒤 숨고르기 — 반도체 종가는 식었어요",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-06/close/",
-        "headline": "반도체 폭락에도 코스피 6300 지켰다, 그 이유는?",
-        "title": "6,296.38",
-        "price": "6,296.38",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-06/us/",
-        "headline": "메모리 랠리 뒤 숨 고르기 — 반도체 장비·D램이 먼저 흔들려요",
         "title": "—",
         "time": ""
       }
