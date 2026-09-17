@@ -271,3 +271,45 @@ test('강도·주도권 카드는 데이터가 있으면 코스피 곡선 카드
   assert.ok(iChanged > iLead, '기존 수급 카드가 주도권 카드보다 앞에 있음');
   assert.ok(iFlow > iChanged, '기관 세부 카드가 마지막이 아님');
 });
+
+test('기관 세부 막대는 값이 없으면 그리지 않는다 — 0이나 다른 값으로 채우지 않는다', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { inst: [{ key: '단독', t: null, y: -1234, turned: null }] } });
+  assert.ok(html.includes('<span class="vsx-bar"></span>'), '값 없는 오늘 칸이 빈 슬롯이 아님: ' + html);
+  assert.ok(!/vsx-bar">\s*<i class="up"/.test(html), '값 없는 오늘 칸에 상승 막대가 생김(0으로 채움): ' + html);
+  assert.ok(/vsx-bar prev"><i class="dn"/.test(html), '값 있는 어제 막대가 그려지지 않음: ' + html);
+});
+
+test('섹터 표는 대표 종목 중 일부가 결측이면 실제 조회된 종목 수를 적는다', () => {
+  const { api } = load();
+  const html = api.leadCard({ sectors: [{ key: 'auto', label: '자동차', names: ['현대차', '기아'],
+    t: -1.2, y: -0.5, diff: -0.7, rank: 2, prevRank: 2, move: 0, n: 2 }] });
+  assert.ok(html.includes('대표 2종목'), 'n=2인데 실제 종목 수가 반영되지 않음: ' + html);
+  assert.ok(!html.includes('대표 3종목 · 현대차'), '결측인데도 3종목이라 지어냄: ' + html);
+  assert.ok(html.includes('대표 3종목 평균'), '표 제목까지 바뀌면 안 됨(고정 문구): ' + html);
+});
+
+test('주도권 카드는 코스피 → 코스피200 → 코스닥 순서로 세 칸을 모두 보여준다', () => {
+  const { api } = load();
+  const kospi = { t: 1.37, y: -0.85, diff: 2.22, judge: 'strong' };
+  const axes = {
+    market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: { t: 1.69, y: -0.80, diff: 2.49, judge: 'strong' } },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
+  };
+  const html = api.leadCard(axes, kospi);
+  const iK = html.indexOf('>코스피<'), iK2 = html.indexOf('>코스피200<'), iKq = html.indexOf('>코스닥<');
+  assert.ok(iK >= 0 && iK2 > iK && iKq > iK2, '코스피 → 코스피200 → 코스닥 순서가 아님: ' + html);
+});
+
+test('주도권 카드 — 응답에 코스피가 없으면 그 칸만 뺀다(지어내지 않는다)', () => {
+  const { api } = load();
+  const axes = {
+    market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: {} },
+    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
+  };
+  const html = api.leadCard(axes);
+  assert.ok(!html.includes('>코스피<'), '코스피 데이터가 없는데 칸이 생김: ' + html);
+  assert.ok(html.includes('>코스닥<'), '있는 데이터(코스닥)까지 같이 빠짐: ' + html);
+});

@@ -142,23 +142,26 @@
       pctTxt(ax.diff, '%p'), miniBars(ax.y, ax.t, { zero: true }));
   }
 
-  // 섹터 대표 3종목 평균 한 행 — "섹터 평균"이 아니라 "대표 3종목 평균"임을 이름 나열로 드러낸다.
+  // 섹터 대표 3종목 평균 한 행 — "섹터 평균"이 아니라 "대표 N종목 평균"임을 이름 나열로 드러낸다.
+  // n이 3 미만이면(일부 종목 결측) 실제 조회된 종목 수를 그대로 적는다 — 3종목이라 지어내지 않는다.
   function sectorRow(s) {
     var badge = s.move == null ? '<span class="vs-pill neutral">—</span>'
       : s.move > 0 ? '<span class="vs-pill up">▲' + s.move + '</span>'
       : s.move < 0 ? '<span class="vs-pill dn">▼' + (-s.move) + '</span>'
       : '<span class="vs-pill neutral">─</span>';
+    var n = s.n != null ? s.n : (s.names || []).length;
     return '<tr><td class="nm"><span class="vsx-rk' + (s.rank === 1 ? ' top' : '') + '">' + s.rank + '</span>' +
-      esc(s.label) + '<small>대표 3종목 · ' + esc((s.names || []).join('·')) + '</small></td>' +
+      esc(s.label) + '<small>대표 ' + n + '종목 · ' + esc((s.names || []).join('·')) + '</small></td>' +
       '<td class="' + cls(s.t) + '">' + f2(s.t) + '%</td><td>' + (s.y != null ? f2(s.y) + '%' : '—') + '</td>' +
       '<td class="' + cls(s.diff) + '">' + pctTxt(s.diff, '%p') + '</td><td>' + badge + '</td></tr>';
   }
 
-  // 주도권 카드 — 코스닥·코스피200이 오늘 코스피보다 세거나 약한지, 섹터 대표 3종목 평균 순위가 어떻게 바뀌었는지.
-  function leadCard(axes) {
+  // 주도권 카드 — 코스피·코스피200·코스닥이 어제 같은 시각보다 세거나 약한지, 섹터 대표 3종목 평균 순위가
+  // 어떻게 바뀌었는지. 코스피는 axes가 아니라 응답 최상위 kospi에 있다 — 없으면 그 칸만 뺀다(지어내지 않는다).
+  function leadCard(axes, kospi) {
     if (!axes || !axes.sectors || !axes.sectors.length) return '';
     var mkt = axes.market || {};
-    var stats = marketRow('코스피200', mkt.kospi200) + marketRow('코스닥', mkt.kosdaq);
+    var stats = marketRow('코스피', kospi) + marketRow('코스피200', mkt.kospi200) + marketRow('코스닥', mkt.kosdaq);
     var rows = axes.sectors.map(sectorRow).join('');
     return '<div class="vs-card"><div class="vs-card-h"><p>어디가 끄는가</p><span>새 축 · 주도권</span></div>' +
       (stats ? '<div class="vs-stats" style="margin-top:0">' + stats + '</div>' : '') +
@@ -183,13 +186,18 @@
   }
 
   // 기관 세부 6칸 짝 막대 — 왼쪽 옅은 막대가 어제, 오른쪽 진한 막대가 오늘. 두 값을 숫자로도 함께 적는다.
+  // 값이 없으면(§0 — 0이나 다른 값으로 채우지 않는다) 그 칸엔 막대를 그리지 않는다 — 칸 자체는 정렬을 위해 남긴다.
   function flowInstPairs(inst) {
     var mx = 1;
-    (inst || []).forEach(function (r) { mx = Math.max(mx, Math.abs(r.t || 0), Math.abs(r.y || 0)); });
+    (inst || []).forEach(function (r) {
+      if (typeof r.t === 'number') mx = Math.max(mx, Math.abs(r.t));
+      if (typeof r.y === 'number') mx = Math.max(mx, Math.abs(r.y));
+    });
     function bar(v, isNow) {
-      var h = Math.max(Math.abs(v || 0) / mx * 34, 2);
-      var st = (v || 0) >= 0 ? 'bottom:50%;height:' + h + 'px' : 'top:50%;height:' + h + 'px';
-      return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"><i class="' + ((v || 0) >= 0 ? 'up' : 'dn') + '" style="' + st + '"></i></span>';
+      if (typeof v !== 'number') return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"></span>';
+      var h = Math.max(Math.abs(v) / mx * 34, 2);
+      var st = v >= 0 ? 'bottom:50%;height:' + h + 'px' : 'top:50%;height:' + h + 'px';
+      return '<span class="vsx-bar' + (isNow ? '' : ' prev') + '"><i class="' + (v >= 0 ? 'up' : 'dn') + '" style="' + st + '"></i></span>';
     }
     return (inst || []).map(function (r) {
       return '<div><div class="vsx-pbars">' + bar(r.y, false) + bar(r.t, true) + '</div>' +
@@ -246,7 +254,7 @@
       (stats ? '<div class="vs-stats">' + stats + '</div>' : '') + '</div>';
 
     // 렌더 순서 — 결론(위 곡선) → 강도 → 주도권 → 수급(아래 이슈·수급 카드 + 기관 세부).
-    html += heatCard(d.axes) + leadCard(d.axes);
+    html += heatCard(d.axes) + leadCard(d.axes, d.kospi);
 
     var changed = '';
     if (d.issues) {
