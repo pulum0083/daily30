@@ -9,6 +9,13 @@ import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
 export const CLOSE_AT = '1530';
 
+// 마감 후 응답의 CDN 캐시 — ok는 확정값이라 길게, 그 밖(closed·early·waiting·error)은 곧 바뀔 수 있어 짧게
+export function closeCacheControl(status) {
+  return status === 'ok'
+    ? 's-maxage=1800, stale-while-revalidate=600'
+    : 's-maxage=60, stale-while-revalidate=60';
+}
+
 // 15:31~15:40 사이 마지막 행. 16:00 이후 행은 애프터장이 섞였다.
 export function regularFlowRow(rows) {
   let hit = null;

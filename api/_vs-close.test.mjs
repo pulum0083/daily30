@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { regularFlowRow, buildCloseVs } from './_vs-close.mjs';
+import { regularFlowRow, buildCloseVs, closeCacheControl } from './_vs-close.mjs';
 import { round2, prevTradingDay } from './_vs-core.mjs';
 
 const r = (t) => ({ t, 개인: 0, 외국인: 0, 기관: 0, inst: {} });
@@ -143,4 +143,33 @@ test('공휴일이면 16:00이라도 closed', async () => {
   const boom = async () => { throw new Error('호출되면 안 된다'); };
   const d = await buildCloseVs({ now: Date.parse('2026-09-24T07:00:00Z'), fetchJson: boom, fetchText: boom }); // 추석 연휴, 16:00 KST
   assert.equal(d.status, 'closed');
+});
+
+// ── CDN 캐시 제어 ──
+
+test("closeCacheControl('ok')는 s-maxage=1800을 갖는다", () => {
+  const cc = closeCacheControl('ok');
+  assert.ok(cc.includes('s-maxage=1800'), `기대: s-maxage=1800, 받음: ${cc}`);
+  assert.ok(cc.includes('stale-while-revalidate=600'), `기대: stale-while-revalidate=600, 받음: ${cc}`);
+});
+
+test("closeCacheControl('closed')는 s-maxage=60을 갖는다", () => {
+  const cc = closeCacheControl('closed');
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+  assert.ok(cc.includes('stale-while-revalidate=60'), `기대: stale-while-revalidate=60, 받음: ${cc}`);
+});
+
+test("closeCacheControl('early')는 s-maxage=60을 갖는다", () => {
+  const cc = closeCacheControl('early');
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test("closeCacheControl('waiting')는 s-maxage=60을 갖는다", () => {
+  const cc = closeCacheControl('waiting');
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+test("closeCacheControl(undefined)는 s-maxage=60을 갖는다", () => {
+  const cc = closeCacheControl(undefined);
+  assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
 });

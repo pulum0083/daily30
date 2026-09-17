@@ -1,7 +1,7 @@
 // 코스닥·코스피200·환율 일중 1분봉 데이터 프록시 — 스파크라인 히스토리 초기화용
 import { usSessionState, usBaseClose } from './_us-session.mjs';
 import { buildIntradayVs, getJson, getEucKr } from './_vs-intraday.mjs';
-import { buildCloseVs } from './_vs-close.mjs';
+import { buildCloseVs, closeCacheControl } from './_vs-close.mjs';
 
 const HDR = {
   'User-Agent': 'Mozilla/5.0 (compatible)',
@@ -121,11 +121,13 @@ export default async function handler(req, res) {
 
   // '어제랑 비교해서' 마감 후 대결판 — 15:30 정규장 확정 봉 + 15:31~15:40 수급 행(§48·§51)
   if (req.query && req.query.vs === 'close') {
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=60');
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
-      return res.status(200).json(await buildCloseVs({ fetchJson: getJson, fetchText: getEucKr }));
+      const payload = await buildCloseVs({ fetchJson: getJson, fetchText: getEucKr });
+      res.setHeader('Cache-Control', closeCacheControl(payload.status));
+      return res.status(200).json(payload);
     } catch (e) {
+      res.setHeader('Cache-Control', closeCacheControl('error'));
       return res.status(502).json({ status: 'error', error: String(e) });
     }
   }
