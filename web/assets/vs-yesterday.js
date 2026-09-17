@@ -41,31 +41,78 @@
   function tickText(v) { return v === 0 ? '0%' : (v > 0 ? '+' : '−') + Math.abs(v); }
   function last(pts) { return pts && pts.length ? pts[pts.length - 1] : null; }
 
-  // 곡선 SVG(가로로 늘려 그린다 — 글자는 넣지 않는다). A안: 두 선 사이 색 띠, 눈금선, 지금 선·남은 장 음영.
+  // 샘플 점을 지나는 매끄러운 곡선(Catmull-Rom → 베지어). 값은 실제 샘플 점에서만 찍힌다.
+  function smoothPath(pts, x, y) {
+    if (!pts.length) return '';
+    var p = pts.map(function (q) { return [+x(q[0]), +y(q[1])]; }), d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+    for (var i = 0; i < p.length - 1; i++) {
+      var p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + ' ' +
+        (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+
+  // 곡선 SVG(가로로 늘려 그린다 — 글자는 넣지 않는다). D안(2026-09-17): 오늘 곡선 아래를 0% 기준 옅은 면으로 채우고
+  // (0% 위 빨강·아래 파랑), 어제는 점선 한 줄. 두 선 사이 차이는 아래 막대 칸(diffSvg)이 맡는다.
   function chartSvg(yPts, tPts) {
     var W = 600, H = 180, s = scale(yPts, tPts), lo = s.lo, hi = s.hi;
     function x(m) { return (m / 390 * W).toFixed(1); }
     function y(v) { return ((hi - v) / (hi - lo) * H).toFixed(1); }
-    function path(pts) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p[0]) + ' ' + y(p[1]); }).join(''); }
-    var out = '', ys = {}, lt = last(tPts);
+    var out = '', lt = last(tPts), t = tPts || [], z = y(0);
     ticks(lo, hi).forEach(function (v) { if (v !== 0) out += '<line x1="0" x2="' + W + '" y1="' + y(v) + '" y2="' + y(v) + '" class="vs-grid" vector-effect="non-scaling-stroke"/>'; });
     if (lt && lt[0] < 390) {
       out += '<rect x="' + x(lt[0]) + '" y="0" width="' + (W - x(lt[0])).toFixed(1) + '" height="' + H + '" class="vs-rest"/>' +
         '<line x1="' + x(lt[0]) + '" x2="' + x(lt[0]) + '" y1="0" y2="' + H + '" class="vs-now" vector-effect="non-scaling-stroke"/>';
     }
-    out += '<line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
-    // 색 띠 — 같은 분에 두 곡선 값이 모두 있는 구간만 채운다(없는 값을 이어 그리지 않는다, §0)
-    (yPts || []).forEach(function (p) { ys[p[0]] = p[1]; });
-    (tPts || []).forEach(function (b, i) {
-      if (!i) return;
-      var a = tPts[i - 1], c = ys[a[0]], d = ys[b[0]];
-      if (c == null || d == null) return;
-      out += '<polygon points="' + x(a[0]) + ',' + y(a[1]) + ' ' + x(b[0]) + ',' + y(b[1]) + ' ' + x(b[0]) + ',' + y(d) + ' ' + x(a[0]) + ',' + y(c) +
-        '" class="vs-band ' + (a[1] + b[1] >= c + d ? 'up' : 'dn') + '"/>';
-    });
+    out += '<line x1="0" x2="' + W + '" y1="' + z + '" y2="' + z + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
+    var line = smoothPath(t, x, y);
+    if (t.length > 1) {
+      var area = line + 'L' + x(lt[0]) + ' ' + z + 'L' + x(t[0][0]) + ' ' + z + 'Z';
+      out += '<defs><linearGradient id="vsAU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="vs-ga up"/><stop offset="1" class="vs-ga up e"/></linearGradient>' +
+        '<linearGradient id="vsAD" x1="0" y1="1" x2="0" y2="0"><stop offset="0" class="vs-ga dn"/><stop offset="1" class="vs-ga dn e"/></linearGradient>' +
+        '<clipPath id="vsCU"><rect x="0" y="0" width="' + W + '" height="' + z + '"/></clipPath>' +
+        '<clipPath id="vsCD"><rect x="0" y="' + z + '" width="' + W + '" height="' + (H - z).toFixed(1) + '"/></clipPath></defs>' +
+        '<path d="' + area + '" class="vs-area up" fill="url(#vsAU)" clip-path="url(#vsCU)"/>' +
+        '<path d="' + area + '" class="vs-area dn" fill="url(#vsAD)" clip-path="url(#vsCD)"/>';
+    }
     return '<svg class="vs-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="코스피 곡선">' + out +
-      '<path d="' + path(yPts || []) + '" class="vs-line-y" vector-effect="non-scaling-stroke"/>' +
-      '<path d="' + path(tPts || []) + '" class="vs-line-t" vector-effect="non-scaling-stroke"/></svg>';
+      '<path d="' + smoothPath(yPts || [], x, y) + '" class="vs-line-y" vector-effect="non-scaling-stroke"/>' +
+      '<path d="' + line + '" class="vs-line-t" vector-effect="non-scaling-stroke"/></svg>';
+  }
+
+  // 같은 분에 두 곡선 값이 모두 있는 점의 차이(오늘−어제). 한쪽만 있는 분은 뺀다(§0 — 채우지 않는다).
+  function diffPts(yPts, tPts) {
+    var ys = {};
+    (yPts || []).forEach(function (p) { ys[p[0]] = p[1]; });
+    return (tPts || []).filter(function (p) { return ys[p[0]] != null; })
+      .map(function (p) { return [p[0], Math.round((p[1] - ys[p[0]]) * 100) / 100]; });
+  }
+
+  // 곡선 아래 차이 막대 칸 — 샘플 분마다 0축 세로 막대(오늘이 위면 빨강, 아래면 파랑). 없으면 칸째 생략.
+  function diffSvg(yPts, tPts) {
+    var d = diffPts(yPts, tPts);
+    if (!d.length) return '';
+    var W = 600, H = 56, mid = H / 2, mx = 0.2, gap = 5, lt = last(tPts), out = '';
+    d.forEach(function (p, i) { mx = Math.max(mx, Math.abs(p[1])); if (i) gap = Math.min(gap, p[0] - d[i - 1][0]) || gap; });
+    var bw = gap / 390 * W * 0.62;
+    if (lt && lt[0] < 390) out += '<rect x="' + (lt[0] / 390 * W).toFixed(1) + '" y="0" width="' + (W - lt[0] / 390 * W).toFixed(1) + '" height="' + H + '" class="vs-rest"/>';
+    out += '<line x1="0" x2="' + W + '" y1="' + mid + '" y2="' + mid + '" class="vs-zero" vector-effect="non-scaling-stroke"/>';
+    d.forEach(function (p) {
+      if (!p[1]) return;
+      var h = Math.max(Math.abs(p[1]) / mx * (mid - 2), 1);
+      out += '<rect x="' + (p[0] / 390 * W - bw / 2).toFixed(1) + '" y="' + (p[1] > 0 ? mid - h : mid).toFixed(1) + '" width="' + bw.toFixed(1) +
+        '" height="' + h.toFixed(1) + '" class="vs-dbar ' + cls(p[1]) + '"/>';
+    });
+    return '<svg class="vs-dchart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="오늘과 어제의 차이 막대">' + out + '</svg>';
+  }
+
+  // 차이 막대 칸 — 왼쪽 '차이' 라벨, 오른쪽 지금 시각의 차이 %p
+  function diffBox(yPts, tPts) {
+    var ds = diffSvg(yPts, tPts), lp = last(diffPts(yPts, tPts));
+    if (!ds) return '';
+    return '<div class="vs-diffbox"><span class="vs-ytick" style="top:50%">차이</span><div class="vs-dplot">' + ds + '</div>' +
+      '<span class="vs-end" style="top:50%"><b class="' + cls(lp[1]) + '">' + f2(lp[1]) + '%p</b></span></div>';
   }
 
   // 곡선 위에 겹치는 글자 — 왼쪽 여백 세로 눈금, 오른쪽 여백 선 끝 값, 곡선 안 차이 괄호·'남은 장'.
@@ -85,8 +132,10 @@
       var diff = Math.round((lt[1] - ly[1]) * 100) / 100, xp = lt[0] / 390 * 100;
       if (gap >= 16 && diff !== 0) {                 // 괄호·차이 글자를 넣을 틈이 있을 때만
         plot += '<i class="vs-gapline ' + cls(diff) + '" style="left:' + xp.toFixed(2) + '%;top:' + Math.min(tt, yt).toFixed(2) + '%;height:' + gap.toFixed(2) + '%"></i>' +
-          '<span class="vs-gap ' + cls(diff) + (xp > 70 ? ' l' : '') + '" style="left:' + xp.toFixed(2) + '%;top:' + ((tt + yt) / 2).toFixed(2) + '%">' + f2(diff) + '%p</span>';
+          // %p 글자는 남은 장 칸(지금 선 오른쪽)에만 둔다 — 왼쪽으로 넘기면 곡선을 덮는다. 장 끝 무렵엔 아래 차이 칸 끝 값이 대신한다.
+          (xp <= 85 ? '<span class="vs-gap ' + cls(diff) + '" style="left:' + xp.toFixed(2) + '%;top:' + ((tt + yt) / 2).toFixed(2) + '%">' + f2(diff) + '%p</span>' : '');
       }
+      plot += '<i class="vs-enddot y" style="left:' + xp.toFixed(2) + '%;top:' + yt.toFixed(2) + '%"></i><i class="vs-enddot t" style="left:' + xp.toFixed(2) + '%;top:' + tt.toFixed(2) + '%"></i>';
       if (lt[0] <= 330) plot += '<span class="vs-rest-l" style="left:' + xp.toFixed(2) + '%">남은 장</span>';
     }
     return { left: left, right: right, plot: plot };
@@ -308,9 +357,10 @@
       // 옛 3칸(오늘 코스피·외국인 누적·주도주 평균)은 LIVE 바·아래 축 카드와 중복이라 뺐다(F2) —
       // 곡선 다음은 heroWhy()의 근거 4줄로 이어진다.
       var ov = chartOverlay(d.kospi.curveY, d.kospi.curveT, rel);
-      html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="a"></i>차이</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
+      html += '<div class="vs-card"><div class="vs-legend"><span><i class="t"></i>오늘</span><span><i class="y"></i>' + rel + ' 같은 시각까지</span><span><i class="b"></i><i class="b dn"></i>차이(오늘−' + rel + ')</span><span class="r">코스피 · 전일 종가 대비</span></div>' +
         '<div class="vs-chartbox">' + ov.left + '<div class="vs-plot">' + chartSvg(d.kospi.curveY, d.kospi.curveT) + ov.plot +
         '<i class="vs-guide" hidden></i><i class="vs-dot y" hidden></i><i class="vs-dot t" hidden></i><div class="vs-tip" hidden></div></div>' + ov.right + '</div>' +
+        diffBox(d.kospi.curveY, d.kospi.curveT) +
         '<div class="vs-axis"><span style="left:0%">09:00</span><span style="left:30.77%">11:00</span><span style="left:61.54%">13:00</span><span style="right:0">15:30</span></div>' +
         heroWhy(d, slot) + '</div>';
     }
@@ -397,7 +447,7 @@
 
   window.__vsIntraday = {
     render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
-    chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt,
+    chartSvg: chartSvg, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
     heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
     josa: josa,
   };

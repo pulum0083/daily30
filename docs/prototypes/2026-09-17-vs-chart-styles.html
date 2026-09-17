@@ -1,0 +1,182 @@
+<!doctype html>
+<!-- 대결판 코스피 곡선 대체 스타일 4안 비교 프로토타입 (2026-09-17 13:16 실측 데이터) -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>대결판 곡선 스타일</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--canvas:#fff;--soft:#F9FAFB;--hair:#E5E7EB;--ink:#13151A;--muted:#6B7280;--up:#F33942;--dn:#006EFF;--grid:#EEF1F5;--rest:#F8FAFC;--ghost:#94A3B8}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Pretendard Variable','Pretendard',-apple-system,sans-serif;background:var(--soft);color:var(--ink);word-break:keep-all}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 4px} .lede{font-size:13px;color:var(--muted);margin:0 0 20px;line-height:1.6}
+.card{background:var(--canvas);border:1px solid var(--hair);border-radius:16px;padding:18px 18px 14px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--ink);border-radius:999px;padding:2px 8px;margin-right:6px}
+h2{font-size:15px;margin:0 0 4px;display:flex;align-items:center}
+.desc{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.legend i{display:inline-block;width:18px;border-top:2px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.y{border-top:2px dashed var(--ghost)} .legend i.g{border-top:2px solid #CBD5E1}
+.legend i.bu{width:8px;height:10px;border:0;background:var(--up);border-radius:2px}
+.legend i.bd{width:8px;height:10px;border:0;background:var(--dn);border-radius:2px}
+.legend i.by{width:8px;height:10px;border:0;background:#CBD5E1;border-radius:2px}
+.legend .r{margin-left:auto}
+.chart{position:relative}
+svg{display:block;width:100%;overflow:visible}
+svg text{font-family:inherit;font-variant-numeric:tabular-nums}
+.tip{position:absolute;top:4px;background:#fff;border:1px solid var(--hair);border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:6px 9px;font-size:11px;color:var(--muted);pointer-events:none;white-space:nowrap;font-variant-numeric:tabular-nums;display:none;z-index:2}
+.tip b{display:block;font-size:12px;color:var(--ink)} .tip p{margin:1px 0;display:flex;justify-content:space-between;gap:12px} .tip p span:last-child{font-weight:700;color:var(--ink)}
+.why{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--grid);font-size:13px;color:#475569}
+.why b.dn{color:var(--dn)} .why b.up{color:var(--up)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>코스피 곡선 · 다른 스타일 4안</h1>
+  <p class="lede">2026-09-17 13:16 실제 응답 값(오늘 +0.77% · 어제 같은 시각 +1.16%)으로 그렸어요. 네 안 모두 오른쪽 <b>남은 장</b> 영역은 지금 그대로 두고, 앞쪽 곡선만 바꿨어요. 곡선 위에 마우스를 올리면 그 시각 값이 보여요.</p>
+
+  <div class="card"><h2><span class="tag">D</span>부드러운 면적</h2>
+    <p class="desc">오늘을 매끄러운 곡선과 옅은 면으로 채우고, 어제는 가는 점선 하나로만 둬요. 0% 위는 빨강, 아래는 파랑 면이에요. 지금 시각의 차이는 남은 장 칸에 세로 막대와 %p로 적어요.</p>
+    <div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제 같은 시각까지</span><span class="r">코스피 · 전일 종가 대비</span></div>
+    <div class="chart" id="cD"></div></div>
+
+  <div class="card"><h2><span class="tag">E</span>두 선 + 아래 차이 막대</h2>
+    <p class="desc">위는 두 선만 깔끔하게, 아래 얇은 칸에 5분마다 "오늘 − 어제" 차이를 0축 세로 막대로 모았어요. 차이가 어느 시간대에 벌어졌는지 한눈에 보여요.</p>
+    <div class="legend"><span><i></i>오늘</span><span><i class="y"></i>어제</span><span><i class="bu"></i><i class="bd" style="margin-left:-4px"></i>차이(오늘−어제)</span><span class="r">코스피 · 전일 종가 대비</span></div>
+    <div class="chart" id="cE"></div></div>
+
+  <div class="card"><h2><span class="tag">F</span>두 선 · 끝점 강조</h2>
+    <p class="desc">면·띠를 모두 빼고 선 두 개만 남겼어요. 어제 선은 연한 회색 실선, 지금 시각에 두 점을 찍고 그 사이를 괄호로 이어 차이를 적어요.</p>
+    <div class="legend"><span><i></i>오늘</span><span><i class="g"></i>어제 같은 시각까지</span><span class="r">코스피 · 전일 종가 대비</span></div>
+    <div class="chart" id="cF"></div></div>
+
+  <div class="card"><h2><span class="tag">G</span>30분 단위 막대 비교</h2>
+    <p class="desc">30분마다 어제(회색)와 오늘(색) 막대를 나란히 세웠어요. 곡선 대신 막대라 흔들림이 줄고, 남은 장 칸은 빈 자리로 비워둬요.</p>
+    <div class="legend"><span><i class="by"></i>어제</span><span><i class="bu"></i><i class="bd" style="margin-left:-4px"></i>오늘</span><span class="r">코스피 · 전일 종가 대비 · 30분 시점 값</span></div>
+    <div class="chart" id="cG"></div></div>
+</div>
+
+<script>
+var T=[[0,1.09],[5,0.6],[10,0.36],[15,0.21],[20,0.25],[25,0.26],[30,0.07],[35,0.22],[40,0.38],[45,0.07],[50,0.28],[55,0.27],[60,0.36],[65,0.55],[70,0.64],[75,0.64],[80,0.8],[85,0.65],[90,0.61],[95,0.64],[100,0.67],[105,0.61],[110,0.29],[115,0.26],[120,0.26],[125,0.16],[130,0.1],[135,0.07],[140,0.13],[145,0.05],[150,0.12],[155,0.08],[160,0.22],[165,0.21],[170,0.28],[175,0.2],[180,0.06],[185,0.19],[190,0.21],[195,0.12],[200,0.13],[205,0.22],[210,0.38],[215,0.34],[220,0.41],[225,0.49],[230,0.5],[235,0.53],[240,0.67],[245,0.76],[250,0.77],[255,0.72],[256,0.77]];
+var Y=[[0,-0.06],[5,0.09],[10,-0.24],[15,0.14],[20,0.32],[25,0.25],[30,0.28],[35,0.45],[40,0.65],[45,0.81],[50,0.82],[55,0.58],[60,0.48],[65,0.38],[70,0.18],[75,0.29],[80,0.17],[85,0.34],[90,0.3],[95,0.37],[100,0.13],[105,0.23],[110,0.18],[115,-0.06],[120,-0.07],[125,0.14],[130,0.24],[135,-0.01],[140,0.19],[145,0.3],[150,0.37],[155,0.45],[160,0.38],[165,0.34],[170,0.49],[175,0.52],[180,0.62],[185,0.82],[190,0.85],[195,0.9],[200,0.92],[205,0.86],[210,0.78],[215,0.73],[220,0.82],[225,1.02],[230,0.98],[235,1.01],[240,1.18],[245,1.25],[250,1.3],[255,1.19],[256,1.16]];
+var NOW=256, END=390, NS='http://www.w3.org/2000/svg';
+var UP='#F33942', DN='#006EFF', INK='#13151A', MUTED='#94A3B8';
+function f2(v){return (v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)}
+function hm(m){var h=9+Math.floor(m/60),mm=m%60;return h+':'+(mm<10?'0':'')+mm}
+function valAt(a,m){for(var i=a.length-1;i>=0;i--) if(a[i][0]<=m) return a[i][1]; return null}
+
+// 공통 틀 — 왼쪽 눈금, 오른쪽 끝값 칸, 남은 장 음영, 가로 시각축. geo를 받아 각 안이 그린다.
+function frame(el, h, opt){
+  var W=el.clientWidth, L=34, R=opt.right||78, B=20, H=h;
+  var pw=W-L-R, x=function(m){return L+m/END*pw};
+  var lo=opt.lo, hi=opt.hi, y=function(v){return 8+(hi-v)/(hi-lo)*(H-16)};
+  var s='<svg viewBox="0 0 '+W+' '+(H+B+(opt.extra||0))+'" height="'+(H+B+(opt.extra||0))+'">';
+  s+='<rect x="'+x(NOW)+'" y="0" width="'+(x(END)-x(NOW))+'" height="'+H+'" fill="#F8FAFC"/>';
+  s+='<text x="'+(x(NOW)+6)+'" y="13" font-size="10.5" fill="'+MUTED+'">남은 장</text>';
+  for(var t=opt.step*Math.ceil(lo/opt.step); t<=hi+1e-9; t+=opt.step){
+    var yy=y(t).toFixed(1), z=Math.abs(t)<1e-9;
+    s+='<line x1="'+L+'" x2="'+x(END)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+(z?'#CBD5E1':'#EEF1F5')+'"/>';
+    s+='<text x="'+(L-6)+'" y="'+(+yy+3.5)+'" font-size="10.5" fill="'+MUTED+'" text-anchor="end">'+(z?'0%':(t>0?'+':'−')+Math.abs(+t.toFixed(2)))+'</text>';
+  }
+  s+='<line x1="'+x(NOW)+'" x2="'+x(NOW)+'" y1="0" y2="'+H+'" stroke="#CBD5E1" stroke-dasharray="3 3"/>';
+  [[0,'09:00'],[120,'11:00'],[240,'13:00'],[390,'15:30']].forEach(function(p){
+    s+='<text x="'+x(p[0])+'" y="'+(H+B+(opt.extra||0)-4)+'" font-size="11" fill="'+MUTED+'" text-anchor="'+(p[0]===0?'start':p[0]===END?'end':'middle')+'">'+p[1]+'</text>';
+  });
+  return {W:W,L:L,R:R,H:H,x:x,y:y,svg:s};
+}
+function path(a,g){return a.map(function(p,i){return (i?'L':'M')+g.x(p[0]).toFixed(1)+','+g.y(p[1]).toFixed(1)}).join('')}
+// Catmull-Rom → 베지어. 값은 실제 샘플 점만 지나간다.
+function smooth(a,g){
+  var p=a.map(function(q){return [g.x(q[0]),g.y(q[1])]}), d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+  for(var i=0;i<p.length-1;i++){var p0=p[i-1]||p[i],p1=p[i],p2=p[i+1],p3=p[i+2]||p2;
+    d+='C'+(p1[0]+(p2[0]-p0[0])/6).toFixed(1)+','+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)+' '+(p2[0]-(p3[0]-p1[0])/6).toFixed(1)+','+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);}
+  return d;
+}
+function endLabels(g,items){ // 끝값 라벨 — 가까우면 서로 밀어낸다
+  items.sort(function(a,b){return a.yy-b.yy});
+  if(items.length===2 && items[1].yy-items[0].yy<30){var m=(items[0].yy+items[1].yy)/2;items[0].yy=m-15;items[1].yy=m+15;}
+  return items.map(function(it){var c=it.v>0?UP:it.v<0?DN:INK, X=g.x(END)+10;
+    return '<text x="'+X+'" y="'+(it.yy-1)+'" font-size="12.5" font-weight="800" fill="'+c+'">'+f2(it.v)+'%</text><text x="'+X+'" y="'+(it.yy+12)+'" font-size="10" fill="'+MUTED+'">'+it.k+'</text>';}).join('');
+}
+function hover(el,g,rows){
+  var tip=document.createElement('div');tip.className='tip';el.appendChild(tip);
+  var svg=el.querySelector('svg');
+  var guide=document.createElementNS(NS,'line');guide.setAttribute('y1',0);guide.setAttribute('y2',g.H);guide.setAttribute('stroke','#94A3B8');guide.style.display='none';svg.appendChild(guide);
+  el.addEventListener('mousemove',function(e){
+    var r=el.getBoundingClientRect(), px=e.clientX-r.left, m=Math.round((px-g.L)/(g.x(END)-g.L)*END/5)*5;
+    if(m<0||m>NOW){tip.style.display='none';guide.style.display='none';return}
+    var t=valAt(T,m), yv=valAt(Y,m);
+    guide.setAttribute('x1',g.x(m));guide.setAttribute('x2',g.x(m));guide.style.display='';
+    tip.innerHTML='<b>'+hm(m)+'</b><p><span>오늘</span><span>'+f2(t)+'%</span></p><p><span>어제</span><span>'+f2(yv)+'%</span></p><p><span>차이</span><span>'+f2(+(t-yv).toFixed(2))+'%p</span></p>';
+    tip.style.display='block'; tip.style.left=Math.min(px+12, r.width-130)+'px';
+  });
+  el.addEventListener('mouseleave',function(){tip.style.display='none';guide.style.display='none'});
+}
+
+function drawD(){var el=document.getElementById('cD');el.innerHTML='';
+  var g=frame(el,180,{lo:-0.5,hi:1.5,step:0.5}), s=g.svg, z=g.y(0).toFixed(1);
+  var line=smooth(T,g), area=line+'L'+g.x(NOW).toFixed(1)+','+z+'L'+g.x(0).toFixed(1)+','+z+'Z';
+  s+='<defs><linearGradient id="gU" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+UP+'" stop-opacity=".22"/><stop offset="1" stop-color="'+UP+'" stop-opacity=".02"/></linearGradient>'+
+     '<linearGradient id="gD" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="'+DN+'" stop-opacity=".22"/><stop offset="1" stop-color="'+DN+'" stop-opacity=".02"/></linearGradient>'+
+     '<clipPath id="cU"><rect x="0" y="0" width="'+g.W+'" height="'+z+'"/></clipPath><clipPath id="cDn"><rect x="0" y="'+z+'" width="'+g.W+'" height="'+g.H+'"/></clipPath></defs>';
+  s+='<path d="'+area+'" fill="url(#gU)" clip-path="url(#cU)"/><path d="'+area+'" fill="url(#gD)" clip-path="url(#cDn)"/>';
+  s+='<path d="'+smooth(Y,g)+'" fill="none" stroke="'+MUTED+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  s+='<path d="'+line+'" fill="none" stroke="'+INK+'" stroke-width="2.2" stroke-linejoin="round"/>';
+  // 지금 시각의 차이 — 운영 화면처럼 남은 장 칸에 세로 막대와 %p를 둔다
+  var xn=g.x(NOW), yt=g.y(0.77), yy=g.y(1.16), bx=xn+10;
+  s+='<line x1="'+bx+'" x2="'+bx+'" y1="'+yy+'" y2="'+yt+'" stroke="'+DN+'" stroke-width="2.5" stroke-linecap="round"/>';
+  s+='<text x="'+(bx+9)+'" y="'+((yy+yt)/2+4.5)+'" font-size="13" font-weight="800" fill="'+DN+'">−0.39%p</text>';
+  s+='<circle cx="'+xn+'" cy="'+yy+'" r="3.5" fill="#fff" stroke="'+MUTED+'" stroke-width="2"/>';
+  s+='<circle cx="'+xn+'" cy="'+yt+'" r="4" fill="'+INK+'" stroke="#fff" stroke-width="2"/>';
+  s+=endLabels(g,[{k:'오늘',v:0.77,yy:g.y(0.77)},{k:'어제',v:1.16,yy:g.y(1.16)}]);
+  el.innerHTML=s+'</svg>'+'<p class="why">어제 이 시각엔 <b class="up">+1.16%</b>였어요. 지금은 <b class="dn">−0.39%p</b> 더 낮아요</p>';hover(el,g);}
+
+function drawE(){var el=document.getElementById('cE');el.innerHTML='';
+  var g=frame(el,150,{lo:-0.5,hi:1.5,step:0.5,extra:72}), s=g.svg;
+  s+='<path d="'+path(Y,g)+'" fill="none" stroke="'+MUTED+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  s+='<path d="'+path(T,g)+'" fill="none" stroke="'+INK+'" stroke-width="2.2" stroke-linejoin="round"/>';
+  s+=endLabels(g,[{k:'오늘',v:0.77,yy:g.y(0.77)},{k:'어제',v:1.16,yy:g.y(1.16)}]);
+  // 아래 차이 칸
+  var top=g.H+10, hh=56, mid=top+hh/2, mx=0.8, bw=Math.max(2,(g.x(5)-g.x(0))*0.62);
+  s+='<rect x="'+g.x(NOW)+'" y="'+top+'" width="'+(g.x(END)-g.x(NOW))+'" height="'+hh+'" fill="#F8FAFC"/>';
+  s+='<line x1="'+g.L+'" x2="'+g.x(END)+'" y1="'+mid+'" y2="'+mid+'" stroke="#CBD5E1"/>';
+  s+='<text x="'+(g.L-6)+'" y="'+(mid+3.5)+'" font-size="10" fill="'+MUTED+'" text-anchor="end">차이</text>';
+  T.forEach(function(p){var yv=valAt(Y,p[0]); if(yv==null||p[0]%5) return; var d=+(p[1]-yv).toFixed(2), h=Math.min(1,Math.abs(d)/mx)*(hh/2-2);
+    s+='<rect x="'+(g.x(p[0])-bw/2).toFixed(1)+'" y="'+(d>=0?mid-h:mid).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,h).toFixed(1)+'" rx="1" fill="'+(d>=0?UP:DN)+'" opacity=".85"/>';});
+  var d=-0.39;
+  s+='<text x="'+(g.x(END)+10)+'" y="'+(mid+4)+'" font-size="12.5" font-weight="800" fill="'+DN+'">'+f2(d)+'%p</text>';
+  el.innerHTML=s+'</svg><p class="why">어제 이 시각엔 <b class="up">+1.16%</b>였어요. 지금은 <b class="dn">−0.39%p</b> 더 낮아요</p>';hover(el,g);}
+
+function drawF(){var el=document.getElementById('cF');el.innerHTML='';
+  var g=frame(el,180,{lo:-0.5,hi:1.5,step:0.5}), s=g.svg;
+  s+='<path d="'+smooth(Y,g)+'" fill="none" stroke="#CBD5E1" stroke-width="2.2" stroke-linejoin="round"/>';
+  s+='<path d="'+smooth(T,g)+'" fill="none" stroke="'+INK+'" stroke-width="2.4" stroke-linejoin="round"/>';
+  var xn=g.x(NOW), yt=g.y(0.77), yy=g.y(1.16), bx=xn+10;
+  s+='<path d="M'+(bx-4)+','+yy+'H'+bx+'V'+yt+'H'+(bx-4)+'" fill="none" stroke="'+DN+'" stroke-width="1.5"/>';
+  s+='<rect x="'+(bx+5)+'" y="'+((yy+yt)/2-10)+'" width="58" height="20" rx="10" fill="#EFF6FF"/><text x="'+(bx+34)+'" y="'+((yy+yt)/2+4)+'" font-size="11.5" font-weight="800" fill="'+DN+'" text-anchor="middle">−0.39%p</text>';
+  s+='<circle cx="'+xn+'" cy="'+yy+'" r="4.5" fill="#fff" stroke="'+MUTED+'" stroke-width="2"/><circle cx="'+xn+'" cy="'+yt+'" r="4.5" fill="'+INK+'" stroke="#fff" stroke-width="2"/>';
+  s+=endLabels(g,[{k:'오늘',v:0.77,yy:yt},{k:'어제',v:1.16,yy:yy}]);
+  el.innerHTML=s+'</svg><p class="why">어제 이 시각엔 <b class="up">+1.16%</b>였어요. 지금은 <b class="dn">−0.39%p</b> 더 낮아요</p>';hover(el,g);}
+
+function drawG(){var el=document.getElementById('cG');el.innerHTML='';
+  var g=frame(el,180,{lo:-0.5,hi:1.5,step:0.5}), s=g.svg, z=g.y(0), slot=g.x(30)-g.x(0), bw=Math.min(12,slot*0.3);
+  for(var m=30;m<=END;m+=30){ var cx=g.x(m);
+    if(m>NOW){ s+='<rect x="'+(cx-bw-1)+'" y="'+(z-10)+'" width="'+(bw*2+2)+'" height="10" rx="2" fill="none" stroke="#E2E8F0" stroke-dasharray="2 2"/>'; continue; }
+    if(NOW-m<30) continue; // 지금 막대와 겹치는 마지막 30분 칸은 지금 막대가 대신한다
+    var yv=valAt(Y,m), tv=valAt(T,m);
+    [[yv,cx-bw-1,'#CBD5E1'],[tv,cx+1,tv>=0?UP:DN]].forEach(function(b){var yy=g.y(b[0]);
+      s+='<rect x="'+b[1].toFixed(1)+'" y="'+Math.min(yy,z).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,Math.abs(yy-z)).toFixed(1)+'" rx="2" fill="'+b[2]+'"/>';});
+  }
+  // 지금(13:16) 막대 — 30분 칸에 안 맞아 끝에 따로 세운다
+  var cx=g.x(NOW)-bw-6;
+  [[1.16,cx-bw-1,'#CBD5E1'],[0.77,cx+1,UP]].forEach(function(b){var yy=g.y(b[0]);s+='<rect x="'+b[1]+'" y="'+yy+'" width="'+bw+'" height="'+(z-yy)+'" rx="2" fill="'+b[2]+'" stroke="'+INK+'" stroke-width=".8"/>';});
+  s+=endLabels(g,[{k:'오늘',v:0.77,yy:g.y(0.77)},{k:'어제',v:1.16,yy:g.y(1.16)}]);
+  el.innerHTML=s+'</svg><p class="why">어제 이 시각엔 <b class="up">+1.16%</b>였어요. 지금은 <b class="dn">−0.39%p</b> 더 낮아요</p>';hover(el,g);}
+
+function all(){drawD();drawE();drawF();drawG()}
+all(); var rt; addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(all,120)});
+</script>
+</body>
+</html>
