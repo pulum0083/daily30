@@ -124,7 +124,7 @@
     if (!axes || !axes.heat) return '';
     var vol = axes.heat.vol, amp = axes.heat.amp;
     if (!vol || !amp) return '';
-    var rows = '<div class="vs-stats" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">'
+    var rows = '<div class="vs-stats vsx-stats2">'
       + stat('코스피 누적 거래량', vol.judge, '어제', vol.y != null ? fmt(vol.y) + '<small> 천주</small>' : '—', cls(vol.y),
           vol.t != null ? fmt(vol.t) + '<small> 천주</small>' : '—', cls(vol.t), pctTxt(vol.diff, '%'), miniBars(vol.y, vol.t, { zero: false }))
       + stat('코스피 일중 진폭', amp.judge, '어제', amp.y != null ? amp.y.toFixed(2) + '%' : '—', '',
@@ -164,9 +164,9 @@
     var stats = marketRow('코스피', kospi) + marketRow('코스피200', mkt.kospi200) + marketRow('코스닥', mkt.kosdaq);
     var rows = axes.sectors.map(sectorRow).join('');
     return '<div class="vs-card"><div class="vs-card-h"><p>어디가 끄는가</p><span>새 축 · 주도권</span></div>' +
-      (stats ? '<div class="vs-stats" style="margin-top:0">' + stats + '</div>' : '') +
+      (stats ? '<div class="vs-stats vsx-mt0">' + stats + '</div>' : '') +
       '<p class="vs-lbl vsx-sec">대표 3종목 평균</p>' +
-      '<table class="vsx-tbl" style="margin-top:0"><thead><tr><th>섹터</th><th>오늘</th><th>어제</th><th>차이</th><th>순위</th></tr></thead>' +
+      '<table class="vsx-tbl vsx-mt0"><thead><tr><th>섹터</th><th>오늘</th><th>어제</th><th>차이</th><th>순위</th></tr></thead>' +
       '<tbody>' + rows + '</tbody></table>' +
       '<p class="vs-sub">각 섹터 <b>대표 3종목의 동일가중 평균</b>이에요(시총가중 아니에요).</p></div>';
   }
@@ -215,7 +215,7 @@
     var stats = keys.map(function (k) { return flowMainStat(k, flow.main && flow.main[k]); }).join('');
     var subLabel = (slot === 'close' || slot === 'night') ? '정규장 확정 15:40' : '새 축 · 수급 심층';
     return '<div class="vs-card"><div class="vs-card-h"><p>누가 사는가</p><span>' + subLabel + '</span></div>' +
-      (stats ? '<div class="vs-stats" style="margin-top:0">' + stats + '</div>' : '') +
+      (stats ? '<div class="vs-stats vsx-mt0">' + stats + '</div>' : '') +
       '<p class="vs-lbl vsx-sec">기관 안에서 누가 바뀌었나</p>' +
       '<p class="vs-lbl-s">왼쪽 옅은 막대가 어제, 오른쪽이 오늘</p>' +
       '<div class="vsx-pairs">' + flowInstPairs(flow.inst) + '</div></div>';

@@ -143,4 +143,7 @@
   border-radius:5px;background:#F1F5F9;font-size:10px;font-weight:800;color:var(--muted);
   margin-right:7px;vertical-align:1px}
 .vsx-rk.top{background:#0F172A;color:#fff}
-@media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}}
+/* 카드 안 static 레이아웃 — 인라인 스타일 대신 쓴다(F4). margin-top:0은 라벨(.vs-lbl) 바로 아래 칸에서만 쓴다 */
+.vsx-stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vsx-mt0{margin-top:0}
+@media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}.vsx-stats2{grid-template-columns:minmax(0,1fr)}}

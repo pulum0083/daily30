@@ -463,3 +463,17 @@ test('수급 카드 — close·night 슬롯이면 라벨이 "정규장 확정 15
   assert.ok(api.flowCard(flow, 'close').includes('정규장 확정 15:40'), 'close 라벨이 안 바뀜');
   assert.ok(api.flowCard(flow, 'night').includes('정규장 확정 15:40'), 'night 라벨이 안 바뀜');
 });
+
+// ── F4: 새 카드 함수는 인라인 static 레이아웃 스타일을 쓰지 않는다 ──
+
+test('강도·주도권·수급 카드는 인라인 grid-template-columns를 쓰지 않는다(F4)', () => {
+  const { api } = load();
+  const heat = api.heatCard({ heat: { vol: { t: 142592, y: 190662, diff: -25.23, judge: 'weak' }, amp: { t: 1.75, y: 1.43, diff: 0.32, judge: 'strong' } } });
+  const lead = api.leadCard({ sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
+    t: 1.52, y: -0.47, diff: 1.99, rank: 1, prevRank: 3, move: 2, n: 3 }] });
+  const flow = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true } }, inst: [] } });
+  for (const [name, html] of [['heat', heat], ['lead', lead], ['flow', flow]]) {
+    assert.ok(html.length > 0, `${name} 카드가 비어 테스트 자체가 무의미함`);
+    assert.ok(!/style="[^"]*grid-template-columns/.test(html), `${name} 카드에 인라인 grid-template-columns가 남음: ` + html);
+  }
+});
