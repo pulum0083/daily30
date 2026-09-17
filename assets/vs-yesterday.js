@@ -340,7 +340,7 @@
     }).join('') + '</ul>';
   }
 
-  // 시간대별 카드 규칙(설계 §3.2) — pre·weekend는 카드 없음, close는 메인 곡선만, night은 강도(heat) 한 장만.
+  // 시간대별 카드 규칙(설계 §3.2) — pre·weekend는 카드 없음, close는 메인 곡선만, night도 카드 없음(2026-09-17 — 밤사이 미국 반도체 섹션만 남긴다).
   function slotOf(d) {
     var k = new Date(d.getTime() + 9 * 3600 * 1000);
     var day = k.getUTCDay(), hm = k.getUTCHours() * 100 + k.getUTCMinutes();
@@ -353,13 +353,13 @@
 
   // close(15:31~16:59)는 메인 곡선(결론·곡선·근거)만 — 17:00 '밤사이 미국 반도체 시황'이 올라오면 곡선은 빠진다(2026-09-17 사용자 결정).
   var CARDS = { pre: [], open: ['hero', 'heat', 'lead', 'flow'],
-                close: ['hero'], night: ['heat'], weekend: [] };
+                close: ['hero'], night: [], weekend: [] };
   function cardsFor(slot) { return CARDS[slot] || []; }
 
   // 슬롯별 호출 엔드포인트 — pre·weekend는 아예 부르지 않는다(null).
   function endpointFor(slot) {
     if (slot === 'open') return '/api/intraday?vs=intraday';
-    if (slot === 'close' || slot === 'night') return '/api/intraday?vs=close';
+    if (slot === 'close') return '/api/intraday?vs=close';   // night은 그릴 카드가 없어 부르지 않는다
     return null;
   }
 
