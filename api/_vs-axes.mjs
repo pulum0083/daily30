@@ -5,9 +5,12 @@ export const TH_VOL = 10;   // 거래량 "비슷해요" 임계(%)
 
 const upto = (bars, at) => (bars || []).filter((b) => b.t <= at);
 
+// 숫자 거래량을 가진 봉이 하나도 없으면 null(0이 아니다 — §0, 지어낸 "0천주" 방지).
+// 일부만 결측이면 있는 것만 합산한다.
 function sumVol(bars) {
-  if (!bars.length) return null;
-  return bars.reduce((s, b) => s + (Number(b.vol) || 0), 0);
+  const nums = bars.map((b) => b.vol).filter((n) => typeof n === 'number');
+  if (!nums.length) return null;
+  return nums.reduce((s, n) => s + n, 0);
 }
 
 function amplitude(bars, base) {

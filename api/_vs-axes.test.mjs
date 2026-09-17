@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { heatAxis, TH_VOL, flowAxis, INST_KEYS } from './_vs-axes.mjs';
+import { minuteBars } from './_vs-prices.mjs';
 
 const bars = (rows) => rows.map(([t, v, h, l, vol]) => ({ t, v, h, l, vol }));
 
@@ -35,6 +36,24 @@ test('어제 봉이 없으면 비운다 — 오늘 값으로 대신하지 않는
 
 test('거래량 임계는 10%', () => { assert.equal(TH_VOL, 10); });
 
+test('회귀 — 거래량 필드가 없는 봉({t,v}만)이면 vol·amp 모두 null이지 0이 아니다(실서비스 결함 재현, minuteBars가 h/l/vol을 안 실으면 이렇게 된다)', () => {
+  const T = [{ t: '0900', v: 100 }, { t: '0901', v: 101 }];
+  const Y = [{ t: '0900', v: 100 }, { t: '0901', v: 99 }];
+  const r = heatAxis(T, Y, 100, 100, '0901');
+  assert.equal(r.vol.t, null);
+  assert.equal(r.vol.y, null);
+  assert.equal(r.vol.judge, null);
+  assert.equal(r.amp.t, null);
+  assert.equal(r.amp.y, null);
+  assert.equal(r.amp.judge, null);
+});
+
+test('거래량 일부만 결측이면 있는 것만 합산한다', () => {
+  const T = bars([['0900', 100, 101, 99, 10], ['0901', 100, 100, 100, null]]);
+  const r = heatAxis(T, [], 100, null, '0901');
+  assert.equal(r.vol.t, 10);
+});
+
 const row = (개인, 외국인, 기관, inst) => ({ t: '13:30', 개인, 외국인, 기관, inst });
 
 test('부호가 바뀐 주체는 turned', () => {
@@ -51,6 +70,17 @@ test('부호가 바뀐 주체는 turned', () => {
 
 test('어제 행이 없으면 null', () => {
   assert.equal(flowAxis(row(1, 2, 3, {}), null), null);
+});
+
+test('연결 — minuteBars(실API 형태)로 만든 봉을 heatAxis에 그대로 넣으면 강도 값이 숫자로 나온다', async () => {
+  const f = async () => ([
+    { localDateTime: '20260916100000', currentPrice: 6680, highPrice: 6681, lowPrice: 6678, accumulatedTradingVolume: 500 },
+    { localDateTime: '20260916110000', currentPrice: 6690, highPrice: 6692, lowPrice: 6685, accumulatedTradingVolume: 700 },
+  ]);
+  const T = await minuteBars('index', 'KOSPI', '20260916', f, '1000', '1100');
+  const r = heatAxis(T, T, 6680, 6680, '1100');
+  assert.equal(r.vol.t, 1200);
+  assert.notEqual(r.amp.t, null);
 });
 
 test('진폭 차이는 반올림 전 값으로 계산한다 — round2(t)-round2(y)가 아니다', () => {

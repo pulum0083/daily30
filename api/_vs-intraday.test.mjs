@@ -9,8 +9,14 @@ const kst = (s) => Date.parse(s + 'Z') - 9 * 3600 * 1000;
 const OK = (f) => ['0', String(f), '0', '0', '0', '0', '0', '0', '0', String(-f)];
 const flowRow = (t, f) => `<tr><td>${t}</td>${OK(f).map((x) => `<td>${x}</td>`).join('')}</tr>`;
 const flowPage = (t, f) => `<table>${flowRow(t, f)}</table>`;
-const minute = (ymd, hhmm, v) => [{ localDateTime: `${ymd}${hhmm}00`, currentPrice: v }];
-const bars = (ymd, pairs) => pairs.map(([hhmm, v]) => ({ localDateTime: `${ymd}${hhmm}00`, currentPrice: v }));
+// 실API 형태(§48) — highPrice·lowPrice·accumulatedTradingVolume(그 봉 하나)까지 함께 준다.
+// 강도 축(heatAxis)이 이 필드들을 실제로 쓰므로 빠지면 vol.t·amp.t가 null로 비게 된다(회귀 방지).
+const minute = (ymd, hhmm, v) => [{
+  localDateTime: `${ymd}${hhmm}00`, currentPrice: v, highPrice: v + 1, lowPrice: v - 1, accumulatedTradingVolume: 100,
+}];
+const bars = (ymd, pairs) => pairs.map(([hhmm, v]) => ({
+  localDateTime: `${ymd}${hhmm}00`, currentPrice: v, highPrice: v + 1, lowPrice: v - 1, accumulatedTradingVolume: 100,
+}));
 // 11:00 봉이 끝나고 1분 더 지난 뒤(11:02대)에 조회한다 — 지금 분·직전 분의 봉은 아직 흔들려서 쓰지 않는다.
 const AFTER_1100 = kst('2026-09-14T11:02:30');
 

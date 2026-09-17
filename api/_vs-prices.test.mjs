@@ -12,7 +12,22 @@ test('지수 1분봉 — 그 날짜 봉만 오름차순으로', async () => {
     { localDateTime: '20260914110000', currentPrice: 6732.94 },
   ]]]);
   assert.deepEqual(await minuteBars('index', 'KOSPI', '20260914', f, '1000', '1100'),
-    [{ t: '1000', v: 6750.1 }, { t: '1100', v: 6732.94 }]);
+    [{ t: '1000', v: 6750.1, h: null, l: null, vol: null }, { t: '1100', v: 6732.94, h: null, l: null, vol: null }]);
+});
+
+test('1분봉 — 고가·저가·거래량(그 봉 하나, §48)을 함께 싣는다(실API 형태, 회귀 — minuteBars가 h/l/vol을 버리면 강도 축이 빈다)', async () => {
+  const f = fake([[/index\/KOSPI\/minute\?startDateTime=202609161000&endDateTime=202609161100$/, [
+    {
+      localDateTime: '20260916100000', currentPrice: 6680.04, openPrice: 6679.2,
+      highPrice: 6680.04, lowPrice: 6677.88, accumulatedTradingVolume: 568,
+    },
+    // 숫자가 아닌 필드는 null로
+    { localDateTime: '20260916110000', currentPrice: 6690, highPrice: null, lowPrice: '6688', accumulatedTradingVolume: undefined },
+  ]]]);
+  assert.deepEqual(await minuteBars('index', 'KOSPI', '20260916', f, '1000', '1100'), [
+    { t: '1000', v: 6680.04, h: 6680.04, l: 6677.88, vol: 568 },
+    { t: '1100', v: 6690, h: null, l: null, vol: null },
+  ]);
 });
 
 test('종목 경로는 item/{code}', async () => {

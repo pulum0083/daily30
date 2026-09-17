@@ -16,7 +16,14 @@ export async function minuteBars(kind, code, ymd, fetchJson, from = '0900', to =
   const rows = await fetchJson(`${BASE}/${path(kind, code)}/minute?startDateTime=${ymd}${from}&endDateTime=${ymd}${to}`);
   return (Array.isArray(rows) ? rows : [])
     .filter((r) => String(r.localDateTime).slice(0, 8) === ymd && typeof r.currentPrice === 'number')
-    .map((r) => ({ t: String(r.localDateTime).slice(8, 12), v: r.currentPrice }))
+    // 고가·저가·거래량(그 봉 하나, §48) — 숫자가 아니면 null. 강도 축(heatAxis)이 쓴다.
+    .map((r) => ({
+      t: String(r.localDateTime).slice(8, 12),
+      v: r.currentPrice,
+      h: typeof r.highPrice === 'number' ? r.highPrice : null,
+      l: typeof r.lowPrice === 'number' ? r.lowPrice : null,
+      vol: typeof r.accumulatedTradingVolume === 'number' ? r.accumulatedTradingVolume : null,
+    }))
     .sort((a, b) => (a.t < b.t ? -1 : a.t > b.t ? 1 : 0));
 }
 
