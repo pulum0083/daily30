@@ -214,112 +214,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
 /* (2026-09-11) 선택 종목 1분봉 곡선·장중 지표 모듈 제거 — 장중 지표(당일 레인지·52주 위치)는
    코스피 주도주 타일 안으로 옮겼다. 레인지는 이제 1분봉 누적이 아니라 원천의 확정 고가·저가다. */
 
-/* ── 블록 3 (원본 index.html) ── */
-/* 더블샷 모멘텀 픽 장중 추적 — 커밋된 kospi 스냅샷 stock_picks(진입·목표·손절) + /api/stocks-live 라이브 가격 */
-    (function(){
-      var box=document.getElementById('mom-track'), grid=document.getElementById('mt-grid');
-      if(!box||!grid) return;
-      function won(s){ return parseInt(String(s).replace(/[^0-9]/g,''),10)||0; }
-      function fmt(n){ return (n||0).toLocaleString('en-US'); }
-      function parseEntry(s){ var parts=String(s).replace(/원/g,'').split('~'); return parts.length===2?{lo:won(parts[0]),hi:won(parts[1])}:{lo:won(s),hi:0}; }
-      function fmtEntry(p){ return p.entry_hi?fmt(p.entry)+' ~ '+fmt(p.entry_hi):fmt(p.entry); }
-      function kstDate(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
-      function briefDate(){
-        var s=document.getElementById('brief-strip');
-        var m=s&&(s.getAttribute('data-href')||'').match(/(\d{4}-\d{2}-\d{2})/);
-        return m?m[1]:kstDate();
-      }
-      function krOpen(){ if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false; var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+540)%1440; return m>=540&&m<=930; }
-      /* 모멘텀 추적 상태 — prep(07:30~09:00 장 준비) · open(09:00~15:30 장중) · closed(그 외 장 마감) */
-      function momPhase(){ if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return 'closed'; var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+540)%1440;
-        if(m>=450&&m<540) return 'prep'; if(m>=540&&m<=930) return 'open'; return 'closed'; }
-      function setMomStatus(){
-        var lv=document.getElementById('mt-live'); if(!lv) return;
-        var ph=momPhase();
-        if(ph==='open'){ lv.textContent='●장중 추적'; lv.style.color='#16A34A'; lv.style.background='#ECFDF3'; }
-        else if(ph==='prep'){ lv.textContent='●장 준비 중'; lv.style.color='#B45309'; lv.style.background='#FEF3C7'; }
-        else { lv.textContent='●장 마감'; lv.style.color='var(--muted)'; lv.style.background='#F1F5F9'; }
-      }
-      var PICKS=[];
-      function cardHTML(p){
-        return '<a class="mt-card" onclick="goStock(\''+p.code+'\')" id="mt-'+p.code+'">'
-          +'<div class="mt-top"><div><span class="mt-nm">'+p.name+'</span>'+(p.tag?'<span class="mt-tag">'+p.tag+'</span>':'')+'<div style="font-size:11px;color:var(--muted);margin-top:3px" class="num">'+p.code+'</div></div>'
-          +'<div style="text-align:right"><div class="mt-px num" data-px>—</div><div class="mt-cg num" data-cg></div></div></div>'
-          +'<div class="mt-bar"><div class="fill" data-fill></div><div class="entry" data-entry style="left:0"></div><div class="dot" data-dot style="left:0"></div></div>'
-          +'<div class="mt-lvls">손절 <b class="num">'+fmt(p.stop)+'</b> · 진입 <b class="num">'+fmtEntry(p)+'</b> · 목표 <b class="num">'+fmt(p.target)+'</b> <span style="color:#16A34A;font-weight:700">'+(p.target_pct||'')+'</span></div>'
-          +'<div class="mt-foot"><span class="mt-rtn num" data-rtn style="color:var(--muted)">진입가 대비 —</span><span class="mt-st track" data-st>추적 중</span></div></a>';
-      }
-      function applyLive(prices){
-        var byc={}; (prices||[]).forEach(function(x){byc[x.code]=x;});
-        PICKS.forEach(function(p){
-          var card=document.getElementById('mt-'+p.code); if(!card) return;
-          var d=byc[p.code]; if(!d||d.price==null) return;
-          var live=d.price, pct=d.changePct==null?0:d.changePct;
-          var up=pct>0,dn=pct<0,col=up?'#E03131':dn?'#2775ED':'#64748B';
-          card.querySelector('[data-px]').textContent=fmt(live);
-          var cg=card.querySelector('[data-cg]'); cg.style.color=col;
-          cg.textContent=(up?'▲ +':dn?'▼ ':'– ')+Math.abs(pct).toFixed(2)+'%';
-          var rtn=(live-p.entry)/p.entry*100;
-          var rEl=card.querySelector('[data-rtn]'); rEl.style.color=rtn>0?'#E03131':rtn<0?'#2775ED':'#64748B';
-          rEl.textContent='진입가 대비 '+(rtn>=0?'+':'')+rtn.toFixed(2)+'%';
-          var span=(p.target-p.stop)||1;
-          var pos=Math.max(0,Math.min(1,(live-p.stop)/span))*100;
-          var ent=Math.max(0,Math.min(1,(p.entry-p.stop)/span))*100;
-          card.querySelector('[data-fill]').style.width=pos+'%';
-          card.querySelector('[data-dot]').style.left=pos+'%';
-          card.querySelector('[data-entry]').style.left=ent+'%';
-          var st=card.querySelector('[data-st]');
-          if(live>=p.target){st.className='mt-st hit';st.textContent='🎯 목표 도달';}
-          else if(live<=p.stop){st.className='mt-st loss';st.textContent='손절 이탈';}
-          else{st.className='mt-st track';st.textContent='추적 중';}
-        });
-      }
-      function poll(){
-        if(!PICKS.length) return;
-        fetch('/api/stocks-live?codes='+PICKS.map(function(p){return p.code;}).join(','),{cache:'no-store'})
-          .then(function(r){return r.ok?r.json():null;})
-          .then(function(d){ if(d&&d.prices) applyLive(d.prices); }).catch(function(){});
-      }
-      function loadPicks(date){
-        fetch('/briefings/'+date+'/kospi/analysis_snapshot.json',{cache:'no-store'})
-          .then(function(r){return r.ok?r.json():null;})
-          .then(function(snap){
-            var picks=(snap&&snap.stock_picks)||[];
-            PICKS=picks.map(function(p){var e=parseEntry(p.entry);return {code:String(p.ticker||'').replace(/\.(KS|KQ)$/i,''),name:p.name,tag:p.scenario_tag||p.signal||'',entry:e.lo,entry_hi:e.hi,target:won(p.target),stop:won(p.stop),target_pct:p.target_pct||''};})
-              .filter(function(p){return p.code&&p.entry&&p.target&&p.stop;});
-            window.__momHasPicks = PICKS.length>0;
-            if(!PICKS.length){ window.ueGate&&window.ueGate(); return; }
-            grid.innerHTML=PICKS.map(cardHTML).join('');
-            window.ueGate ? window.ueGate() : (box.style.display='');
-            document.getElementById('mt-sub').textContent=date+' 코스피 픽 '+PICKS.length+'종목 · 진입/목표/손절 추적';
-            // 장 준비 중(07:30~09:00)엔 아직 오늘 거래가 없어 전일 종가가 내려온다 — 방금 나온 픽에
-            // 이미 가격이 붙어있는 것처럼 보여 혼동을 준다. 이 구간엔 가격을 아예 띄우지 않고 종목 정보만 둔다.
-            if(momPhase()!=='prep') poll();
-            setMomStatus();
-            // 페이지를 열어둔 채 07:30·09:00·15:30 경계를 넘으면 상태·폴링을 자동 전환
-            var momTimer=null;
-            function ensurePolling(){
-              if(momPhase()==='open'){ if(!momTimer) momTimer=setInterval(poll,90000); }
-              else if(momTimer){ clearInterval(momTimer); momTimer=null; }
-            }
-            ensurePolling();
-            setInterval(function(){ setMomStatus(); ensurePolling(); }, 60000);
-          }).catch(function(){ window.__momHasPicks=false; window.ueGate&&window.ueGate(); });
-      }
-      // 최신 kospi 브리핑 날짜를 briefings-list.json에서 권위있게 해석 — DOM에 박힌 stale data-href(생성 시점 고정) 의존 제거
-      function latestKospiDate(list){
-        var slots=list&&list.slots; if(!slots) return null;
-        var today=kstDate();
-        if(slots[today]&&slots[today].kospi&&slots[today].kospi.state==='ready') return today;
-        var dates=Object.keys(slots).sort().reverse();
-        for(var i=0;i<dates.length;i++){ var k=slots[dates[i]].kospi; if(k&&k.state==='ready') return dates[i]; }
-        return null;
-      }
-      fetch('/data/briefings-list.json',{cache:'no-store'})
-        .then(function(r){return r.ok?r.json():null;})
-        .then(function(list){ loadPicks(latestKospiDate(list)||briefDate()); })
-        .catch(function(){ loadPicks(briefDate()); });
-    })();
+/* (2026-09-17) 블록 3 상승 모멘텀 종목 장중 추적 제거 — 사용자 결정. 픽 가격 폴링(/api/stocks-live 90초)도 함께 사라진다. */
 
 /* ── 블록 4 (원본 index.html) ── */
 (function(){
@@ -529,8 +424,6 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   window.ueGate=function(){
     var ev=isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
-    var mt=document.getElementById('mom-track');
-    if(mt) mt.style.display = ev ? 'none' : (window.__momHasPicks ? '' : 'none');
     if(ev) window.__ueLoad(); else window.__ueStop();
   };
   // 오늘 코스피 브리핑 ready 여부로 비거래일(공휴일) 판별 — 서버 휴일 로직과 정합. 확인 후 게이트 재평가.
@@ -600,14 +493,15 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var usEve=document.getElementById('us-evening');
   var usLinked=document.getElementById('us-linked-widget');
   var why=document.getElementById('why-moved');
-  var momTrack=document.getElementById('mom-track');
-  if(!usEve||!usLinked||!why||!momTrack) return;
+  // (2026-09-17) 기준점이던 모멘텀 블록이 사라져 바로 뒤 섹터·특이 신호 묶음(.home-cols) 앞으로 꽂는다.
+  var anchor=document.querySelector('#home .home-cols');
+  if(!usEve||!usLinked||!why||!anchor) return;
   // (2026-09-11) 장중 곡선 블록이 사라져 뉴스·곡선 자리바꿈은 더 이상 없다. 섹션 순서만 바꾼다.
   // 곡선 조회에 실패하면 여기서 return해 아래 재배치까지 막히던 의존도 함께 걷어냈다.
-  // momTrack 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
+  // anchor 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
   // day가 아닌 국면(= 코스피가 닫혀 있음)은 전부 '밤사이 미국 반도체 시황'을 위로 — 17:00부터 적용.
   [usEve, usLinked]
-    .forEach(function(n){ if(n) momTrack.parentNode.insertBefore(n, momTrack); });
+    .forEach(function(n){ if(n) anchor.parentNode.insertBefore(n, anchor); });
 })();
 
 /* ── 블록 5 (원본 index.html) ── */
@@ -711,18 +605,6 @@ function goBack(){const prev=navHistory.pop();go(prev||'home',true);}
 window.addEventListener('popstate',e=>{const id=(e.state&&e.state.screen)||(location.hash.slice(1)||'home');go(id,true);});
 // 진입 시 해시(#signals-all 등)가 있으면 해당 화면 복원 — standalone에서 돌아올 때 사용
 (function(){const h=location.hash.slice(1);if(!h){dsTrackPageview();return;}document.getElementById(h)?go(h,true):go('home',true);})();
-// #mom-track 앵커 — 코스피 브리핑 "종목 시그널에서 트래킹" CTA 진입 시 상승 모멘텀 종목 섹션으로 스크롤.
-// 데이터 fetch·시간대 게이트(ueGate)로 표시가 비동기라 표시될 때까지 잠깐 폴링한다.
-(function(){
-  if(location.hash!=='#mom-track')return;
-  let tries=0;
-  const iv=setInterval(()=>{
-    tries++;
-    const el=document.getElementById('mom-track');
-    if(el&&el.offsetParent!==null){el.scrollIntoView({behavior:'smooth',block:'start'});clearInterval(iv);}
-    else if(tries>20)clearInterval(iv);
-  },500);
-})();
 function switchTab(hero,tab,el){
   const prefix=hero+'-';
   document.querySelectorAll('#hero-'+hero+' .ctabs a').forEach(a=>a.classList.remove('on'));
