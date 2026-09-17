@@ -226,11 +226,11 @@
   // 코스피 %만 오늘 절대값을 다시 적지 않는다(§0·F2, LIVE 바와 중복). 강도·주도권·누가는 코스피 %가 아니라 시안대로
   // 오늘 절대값도 함께 적는다. 입력이 없는 줄은 채우지 않고 통째로 뺀다. open은 "이 시각" 기준, close·night은 하루 전체.
   function heroWhy(d, slot) {
-    var rel = esc(d.prev.rel), open = slot === 'open', lines = [];
+    var relRaw = d.prev.rel, rel = esc(relRaw), open = slot === 'open', lines = [];
 
     if (d.kospi && d.kospi.y != null && d.kospi.diff != null) {
       var kd = d.kospi.diff;
-      lines.push(['가격', (open ? rel + ' 이 시각엔 ' : rel + '는 ') +
+      lines.push(['가격', (open ? rel + ' 이 시각엔 ' : rel + josa(relRaw, '은', '는') + ' ') +
         '<b class="' + cls(d.kospi.y) + '">' + f2(d.kospi.y) + '%</b>였어요. 지금은 ' +
         '<b class="' + cls(kd) + '">' + f2(kd) + '%p</b> 더 ' + (kd >= 0 ? '높아요' : '낮아요')]);
     }
@@ -248,10 +248,10 @@
       var prevLeader = sectors.filter(function (s) { return s.prevRank === 1; })[0];
       var parts = [];
       if (leader && leader.prevRank != null) {
-        parts.push('<b>' + esc(leader.label) + '</b>가 어제 ' + leader.prevRank + '위에서 <b class="up">1위</b>로');
+        parts.push('<b>' + esc(leader.label) + '</b>' + josa(leader.label, '이', '가') + ' 어제 ' + leader.prevRank + '위에서 <b class="up">1위</b>로');
       }
       if (prevLeader && (!leader || prevLeader.key !== leader.key)) {
-        parts.push('<b>' + esc(prevLeader.label) + '</b>가 어제 1위에서 <b class="dn">' + prevLeader.rank + '위</b>로');
+        parts.push('<b>' + esc(prevLeader.label) + '</b>' + josa(prevLeader.label, '이', '가') + ' 어제 1위에서 <b class="dn">' + prevLeader.rank + '위</b>로');
       }
       if (parts.length) lines.push(['주도권', parts.join(', ')]);
     }
@@ -399,10 +399,16 @@
     });
   }
 
-  function withJosa(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return w + (c >= 0 && c < 11172 && c % 28 ? '과' : '와'); }
+  // 마지막 글자 받침 유무로 조사 짝을 고른다 — 한글이 아니면 받침 없는 쪽(without)을 쓴다.
+  function josa(w, withBatchim, without) {
+    var c = String(w).charCodeAt(String(w).length - 1) - 0xac00;
+    return c >= 0 && c < 11172 && c % 28 ? withBatchim : without;
+  }
+
+  function withJosa(w) { return w + josa(w, '과', '와'); }
 
   // 였어요/이었어요 — eok()가 내는 "조"(받침 없음)·"억"(받침 있음) 뒤에 붙는 계사를 맞춘다(§0 — 표기도 실측만큼 정확해야 한다).
-  function wasKo(w) { var c = w.charCodeAt(w.length - 1) - 0xac00; return c >= 0 && c < 11172 && c % 28 ? '이었어요' : '였어요'; }
+  function wasKo(w) { return josa(w, '이었어요', '였어요'); }
 
   function shouldPoll() {
     var k = new Date(Date.now() + 9 * 3600 * 1000), dow = k.getUTCDay(), m = k.getUTCHours() * 60 + k.getUTCMinutes();
@@ -424,6 +430,7 @@
     render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
     chartSvg: chartSvg, chartOverlay: chartOverlay, hoverAt: hoverAt,
     heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
+    josa: josa,
   };
   if (!root) return;
   load();

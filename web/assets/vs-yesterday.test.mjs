@@ -432,18 +432,52 @@ test('결론 근거 — 입력이 하나도 없으면 빈 문자열을 낸다(§
   assert.equal(api.heroWhy({ prev: { rel: '어제' }, kospi: {} }, 'open'), '');
 });
 
-test('결론 근거 — close·night 슬롯은 "이 시각"이 아니라 "어제는"(하루 전체) 표현을 쓴다(F2)', () => {
+test('결론 근거 — close·night 슬롯은 "이 시각"이 아니라 "지난 금요일은"(하루 전체) 표현을 쓴다(F2)', () => {
   const { api } = load();
   const d = Object.assign({}, PAYLOAD);
   assert.ok(api.heroWhy(d, 'open').includes('지난 금요일 이 시각엔'), 'open 표현이 없음');
-  assert.ok(api.heroWhy(d, 'close').includes('지난 금요일는'), 'close 표현이 없음');
+  assert.ok(api.heroWhy(d, 'close').includes('지난 금요일은'), 'close 표현이 없음(받침 있는 rel 뒤엔 은)');
+  assert.ok(!api.heroWhy(d, 'close').includes('금요일는'), 'close인데 받침 뒤 는이 붙음');
   assert.ok(!api.heroWhy(d, 'close').includes('이 시각엔'), 'close인데 이 시각 표현이 남음');
+});
+
+test('결론 근거 — close 슬롯에서 받침 없는 rel(어제) 뒤엔 는을 쓴다', () => {
+  const { api } = load();
+  const d = Object.assign({}, PAYLOAD, { prev: { date: '2026-09-13', label: '9/13(일)', rel: '어제' } });
+  assert.ok(api.heroWhy(d, 'close').includes('어제는'), 'close인데 받침 없는 rel 뒤 는이 안 붙음: ' + api.heroWhy(d, 'close'));
 });
 
 test('였어요/이었어요 계사 — eok가 내는 조(받침 없음)·억(받침 있음)에 맞춘다', () => {
   const { api } = load();
   assert.equal(api.wasKo('−5,890억'), '이었어요', '억(받침 있음)인데 였어요를 씀');
   assert.equal(api.wasKo('+1.20조'), '였어요', '조(받침 없음)인데 이었어요를 씀');
+});
+
+test('josa — 마지막 글자 받침 유무로 이/가·은/는 짝을 고른다', () => {
+  const { api } = load();
+  assert.equal(api.josa('조선', '이', '가'), '이', '조선(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('반도체', '이', '가'), '가', '반도체(받침 없음)인데 이를 씀');
+  assert.equal(api.josa('방산', '이', '가'), '이', '방산(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('금융', '이', '가'), '이', '금융(받침 있음)인데 가를 씀');
+  assert.equal(api.josa('2차전지', '이', '가'), '가', '2차전지(받침 없음)인데 이를 씀');
+  assert.equal(api.josa('금요일', '은', '는'), '은', '금요일(받침 있음)인데 는을 씀');
+  assert.equal(api.josa('어제', '은', '는'), '는', '어제(받침 없음)인데 은을 씀');
+});
+
+test('결론 근거 — 주도권 줄의 조사가 받침에 맞는다(조선이·반도체가)', () => {
+  const { api } = load();
+  // 라벨은 <b>로 감싸므로 조사는 </b> 태그 바깥에 붙는다(위 계사 테스트와 같은 이유).
+  const base = { axes: { sectors: [
+    { key: 'ship', label: '조선', names: [], t: 1.0, y: -1.0, diff: 2.0, rank: 1, prevRank: 3, move: 2, n: 1 },
+  ] } };
+  const d1 = Object.assign({}, PAYLOAD, base);
+  assert.ok(api.heroWhy(d1, 'open').includes('조선</b>이 어제'), '조선(받침 있음)인데 이가 안 붙음: ' + api.heroWhy(d1, 'open'));
+
+  const base2 = { axes: { sectors: [
+    { key: 'semicon', label: '반도체', names: [], t: 1.0, y: -1.0, diff: 2.0, rank: 1, prevRank: 3, move: 2, n: 1 },
+  ] } };
+  const d2 = Object.assign({}, PAYLOAD, base2);
+  assert.ok(api.heroWhy(d2, 'open').includes('반도체</b>가 어제'), '반도체(받침 없음)인데 가가 안 붙음: ' + api.heroWhy(d2, 'open'));
 });
 
 test('결론 카드에서 예전 3칸(오늘 코스피·외국인 누적·주도주 평균)이 빠진다(F2)', () => {
