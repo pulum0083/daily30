@@ -259,7 +259,8 @@ test('섹터 표는 "섹터 평균"이 아니라 "대표 3종목 평균"이라 �
   const html = api.leadCard({ market: { kosdaq: {}, kospi200: {} },
     sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
       t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }] });
-  assert.ok(html.includes('대표 3종목'), '평균 정의가 안 드러남');
+  assert.ok(html.includes('<small>대표 3종목</small>'), '평균 정의가 안 드러남');
+  assert.ok(html.includes('<small class="nms">삼성전자 · SK하이닉스'), '종목 이름이 다음 줄로 안 내려감');
   assert.ok(html.includes('삼성전자'), '대표 종목 이름이 없음');
 });
 
@@ -303,7 +304,7 @@ test('섹터 표는 대표 종목 중 일부가 결측이면 실제 조회된 �
   const html = api.leadCard({ sectors: [{ key: 'auto', label: '자동차', names: ['현대차', '기아'],
     t: -1.2, y: -0.5, diff: -0.7, rank: 2, prevRank: 2, move: 0, n: 2 }] });
   assert.ok(html.includes('대표 2종목'), 'n=2인데 실제 종목 수가 반영되지 않음: ' + html);
-  assert.ok(!html.includes('대표 3종목 · 현대차'), '결측인데도 3종목이라 지어냄: ' + html);
+  assert.ok(!html.includes('<small>대표 3종목</small>'), '결측인데도 3종목이라 지어냄: ' + html);
   assert.ok(html.includes('대표 3종목 평균'), '표 제목까지 바뀌면 안 됨(고정 문구): ' + html);
 });
 
