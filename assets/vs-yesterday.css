@@ -117,6 +117,8 @@
 .vsx-tbl td.nm{font-weight:700;white-space:normal}
 .vsx-tbl td.nm small{display:block;font-size:10px;font-weight:400;color:#94A3B8;margin-top:2px}
 .vsx-tbl td.nm small.nms{margin-top:1px}
+/* PC는 칸이 넉넉하다 — 종목 이름 줄을 접지 않고 첫 칸을 그만큼 넓힌다. 모바일(≤760px)은 좁아서 접힌다 */
+@media (min-width:761px){.vsx-tbl td.nm small.nms{white-space:nowrap}}
 .vsx-rk{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
   border-radius:5px;background:#F1F5F9;font-size:10px;font-weight:800;color:var(--muted);
   margin-right:7px;vertical-align:1px}
