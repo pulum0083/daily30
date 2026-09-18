@@ -222,7 +222,7 @@
       : '<span class="vs-pill neutral">─</span>';
     var n = s.n != null ? s.n : (s.names || []).length;
     return '<tr><td class="nm"><span class="vsx-rk' + (s.rank === 1 ? ' top' : '') + '">' + s.rank + '</span>' +
-      esc(s.label) + '<small>대표 ' + n + '종목 · ' + esc((s.names || []).join('·')) + '</small></td>' +
+      esc(s.label) + '<small>대표 ' + n + '종목</small><small class="nms">' + esc((s.names || []).join(' · ')) + '</small></td>' +
       '<td class="' + cls(s.t) + '">' + f2(s.t) + '%</td><td>' + (s.y != null ? f2(s.y) + '%' : '—') + '</td>' +
       '<td class="' + cls(s.diff) + '">' + pctTxt(s.diff, '%p') + '</td><td>' + badge + '</td></tr>';
   }
