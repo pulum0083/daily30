@@ -1,0 +1,340 @@
+{
+  "analysis_format": "split",
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 74,
+    "down_pct": 26,
+    "confidence": 72
+  },
+  "reason_title": "반도체 폭주 — SK하이닉스·SOX·DRAM 3박자 동조",
+  "comfort_line": "장이 곧 열려요. 오늘은 흐름에 몸을 맡겨봐요.",
+  "todays_view": {
+    "view_title": "SK하이닉스가 다시 증명했다, 코스피는 결국 메모리다",
+    "dek": "지난 금요일 미국 반도체지수(SOX)가 <b>+2.78%</b> 급등하며 기술주 랠리를 이끌었어요. 여기에 8개월 만에 외국인 순매수 전환 소식까지 겹치면서, 오늘 코스피는 반도체를 축으로 한 상승 출발이 유력해요.",
+    "recap": [
+      {
+        "text": "SK하이닉스가 <b>+6.42%</b> 급등하며 코스피 반도체 랠리를 주도했어요.",
+        "codes": [
+          "000660"
+        ]
+      },
+      {
+        "text": "삼성전자도 <b>+3.37%</b> 오르며 20일선을 막 돌파했어요.",
+        "codes": [
+          "005930"
+        ]
+      },
+      {
+        "text": "하나금융지주는 <b>-3.20%</b> 밀리며 20일선 아래로 내려갔어요. 금융주는 상대적으로 소외됐어요.",
+        "codes": [
+          "086790"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 한국은행 금융통화위원회 본회의가 열려요 — 기준금리 결정과 통화정책 방향이 시장 변수예요.",
+        "source": "news"
+      },
+      {
+        "tag": "watch",
+        "text": "8개월 만에 순매수 전환한 외국인 자금이 오늘도 유입될지 지켜보세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "SK하이닉스·삼성전자 급등 이후 차익실현 매물이 나올지, 아니면 추가 매수세가 붙을지가 관건이에요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>미국 반도체지수(SOX)가 지난 금요일 +2.78% 급등하며 코스피 반도체 대장주 강세를 예고해요.</b> 여기에 지수선물(NQ) 도 +1.26%로 오늘 새벽까지 우호적 흐름이 이어지고 있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>외국인이 8개월 만에 국내 주식 순매수로 돌아섰어요.</b> 8월 유가증권시장에서만 1조 8,880억원을 사들이며 수급 개선 기대가 커지고 있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>DRAM ETF가 +3.17% 오르며 메모리 수요 기대를 뒷받침해요.</b> HBM 수요 훈풍이 SK하이닉스·삼성전자로 그대로 이어질 자리예요.",
+      "codes": [
+        "000660",
+        "005930"
+      ]
+    }
+  ],
+  "watch_items": [
+    {
+      "icon": "🏦",
+      "label": "한국은행 금통위 본회의",
+      "text": "오늘 기준금리 결정이 예정돼 있어요. 동결이냐 인하 시그널이냐에 따라 금융주·환율 흐름이 갈릴 수 있어요."
+    },
+    {
+      "icon": "📊",
+      "label": "코스피 저항·지지 라인",
+      "levels": [
+        {
+          "label": "지지",
+          "num": "6,580",
+          "cls": "dn"
+        },
+        {
+          "label": "저항",
+          "num": "6,910",
+          "cls": "up"
+        }
+      ]
+    }
+  ],
+  "stock_picks": [
+    {
+      "ticker": "000660",
+      "name": "SK하이닉스",
+      "price": "1,857,000원",
+      "change": "+6.42%",
+      "change_cls": "up",
+      "signal": "20일선 위 강한 모멘텀",
+      "golden": true,
+      "ma20_dist_pct": 7.69,
+      "ma200_dist_pct": 35.84,
+      "scenario_tag": "모멘텀 가속",
+      "scenario": "전일 <b>+6.42%</b> 급등하며 20일선을 크게 상회한 종목이에요. SOX 급등과 DRAM ETF 강세가 겹치며 HBM 수요 기대가 계속 살아있어요.",
+      "action_guide": "시가 갭업 폭 확인 후 눌림목에서 분할 진입. 목표: +7~10% 구간 / 손절: 20일선(1,724,327원) 이탈 시.",
+      "entry": "1,850,000원",
+      "target": "1,980,000원",
+      "target_pct": "+7.0%",
+      "stop": "1,720,000원",
+      "stop_pct": "-7.4%",
+      "ma20_level": 1724400.0,
+      "ma200_level": 1367050.0
+    },
+    {
+      "ticker": "005930",
+      "name": "삼성전자",
+      "price": "261,000원",
+      "change": "+3.37%",
+      "change_cls": "up",
+      "signal": "20일선 상향 돌파",
+      "golden": false,
+      "ma20_dist_pct": 0.82,
+      "ma200_dist_pct": 18.74,
+      "scenario_tag": "돌파 초입",
+      "scenario": "전일 <b>+3.37%</b> 급등하며 20일선을 막 돌파한 종목이에요. 반도체 업황 개선 기대와 외국인 순매수 전환이 맞물리며 추가 상승 여력이 있어요.",
+      "action_guide": "시가 261,000원 근접 진입. 목표: 270,000원(+3.4%) / 손절: 258,000원 이탈 시.",
+      "entry": "261,000원",
+      "target": "270,000원",
+      "target_pct": "+3.4%",
+      "stop": "258,000원",
+      "stop_pct": "-1.1%",
+      "ma20_level": 258875.0,
+      "ma200_level": 219813.5
+    },
+    {
+      "ticker": "042700",
+      "name": "한미반도체",
+      "price": "236,000원",
+      "change": "+4.66%",
+      "change_cls": "up",
+      "signal": "20일선 위 상승세",
+      "golden": false,
+      "ma20_dist_pct": 4.16,
+      "ma200_dist_pct": -0.86,
+      "scenario_tag": "모멘텀 지속",
+      "scenario": "전일 <b>+4.66%</b> 오르며 20일선을 지지선 삼아 반등한 종목이에요. HBM 장비 수혜 기대와 반도체 섹터 전반 강세가 추가 상승을 뒷받침해요.",
+      "action_guide": "시가 236,000원 이내 진입. 목표: 248,000원(+5.1%) / 손절: 226,000원 이탈 시.",
+      "entry": "236,000원",
+      "target": "248,000원",
+      "target_pct": "+5.1%",
+      "stop": "226,000원",
+      "stop_pct": "-4.2%",
+      "ma20_level": 226575.0,
+      "ma200_level": 238059.0
+    },
+    {
+      "ticker": "010120",
+      "name": "LS일렉트릭",
+      "price": "211,500원",
+      "change": "+4.70%",
+      "change_cls": "up",
+      "signal": "전력기기 섹터 강세",
+      "golden": false,
+      "ma20_dist_pct": 4.32,
+      "ma200_dist_pct": 19.53,
+      "scenario_tag": "섹터 로테이션",
+      "scenario": "전일 <b>+4.70%</b> 오르며 AI전력기기 섹터 강세를 주도한 종목이에요. AI 데이터센터 투자 확대 흐름 속에서 전력 인프라 수요 기대가 이어지고 있어요.",
+      "action_guide": "시가 211,500원 근접 진입. 목표: 222,000원(+5.0%) / 손절: 203,000원 이탈 시.",
+      "entry": "211,500원",
+      "target": "222,000원",
+      "target_pct": "+5.0%",
+      "stop": "203,000원",
+      "stop_pct": "-4.0%",
+      "ma20_level": 202735.0,
+      "ma200_level": 176937.5
+    }
+  ],
+  "telegram_signals": [
+    "🇰🇷 외국인, 8개월 만에 순매수 전환! 코스피에서만 <b>1.9조</b> 사들였어요.",
+    "💡 SK하이닉스 <b>+6.42%</b> 급등, SOX도 <b>+2.78%</b> — 반도체가 지수를 끌어올려요."
+  ],
+  "us_linked_story": null,
+  "sector_focus": null,
+  "generated_at": "2026-09-21T07:28:45.589357+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-09-21T07:26:10.245451+09:00",
+    "briefing_date": "2026-09-21",
+    "us_session_date": "2026-09-18",
+    "session_label": "지난 금요일",
+    "cards": [
+      {
+        "title": "AMD 급등, 반도체 랠리의 선봉에 서요",
+        "sides": [
+          {
+            "side": "up",
+            "label": "AI 반도체",
+            "marks": [
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 2.7
+              },
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": 1.34
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": 2.97
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 반도체는 <b>나란히 올랐어요</b>"
+      },
+      {
+        "title": "메모리 슈퍼사이클 지속 — 마이크론 신고가 행보",
+        "sides": [
+          {
+            "side": "up",
+            "label": "메모리 반도체",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 3.92
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "메모리 반도체는 <b>올랐어요</b>"
+      },
+      {
+        "title": "필라델피아 반도체지수(SOX) 프리마켓에서 큰 폭 상승",
+        "sides": [
+          {
+            "side": "up",
+            "label": "반도체 전반",
+            "marks": [
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 2.7
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 3.92
+              },
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": 1.34
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체 전반은 <b>나란히 올랐어요</b>"
+      },
+      {
+        "title": "BOJ 정책 발표 — 일본은행 통화정책 결정 마무리",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": 0.17
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      },
+      {
+        "title": "10년물 금리 하락, VIX도 낮은 수준 — 위험선호 우호적 환경",
+        "sides": [
+          {
+            "side": "up",
+            "label": "성장주·기술주",
+            "marks": [
+              {
+                "ticker": "META",
+                "name": "META",
+                "pct": -2.43
+              },
+              {
+                "ticker": "GOOGL",
+                "name": "GOOGL",
+                "pct": 0.64
+              },
+              {
+                "ticker": "AAPL",
+                "name": "AAPL",
+                "pct": -0.26
+              }
+            ],
+            "proxy": null
+          },
+          {
+            "side": "down",
+            "label": "대형 은행",
+            "marks": [
+              {
+                "ticker": "JPM",
+                "name": "JPM",
+                "pct": 0.1
+              },
+              {
+                "ticker": "BAC",
+                "name": "BAC",
+                "pct": -0.77
+              },
+              {
+                "ticker": "GS",
+                "name": "GS",
+                "pct": -1.0
+              },
+              {
+                "ticker": "MS",
+                "name": "MS",
+                "pct": -0.46
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "성장주·기술주는 <b>엇갈렸어요</b>"
+      }
+    ]
+  }
+}
