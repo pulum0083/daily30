@@ -372,7 +372,7 @@
     var rel = esc(d.prev.rel), html = '';
     if (has('hero')) {
       if (d.verdict) {
-        html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
+        html += '<div class="vs-hero"><button type="button" class="help-q vs-help" aria-label="어제랑 비교해서 설명 보기">?</button><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
           '<h2 class="' + (d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
           '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
       }
@@ -467,8 +467,33 @@
       .catch(function () { render(null, slot); });
   }
 
+  // 결론 카드 오른쪽 ? — 누르면 이 영역이 무엇을 비교하는지 모달로 설명한다(기존 #help-modal 재사용).
+  // 60초 폴링이 innerHTML을 갈아끼우므로 버튼마다 붙이지 않고 문서에 한 번만 위임한다.
+  var HELP_HTML = '<div class="tt">어제랑 비교해서란?</div><div class="bd">' +
+    '지금 코스피 흐름을 <b>직전 거래일 같은 시각</b>과 나란히 놓고 비교해요.<br><br>' +
+    '<b>맨 위 결론</b> — 같은 시각 코스피 등락률 차이가 ±0.3%p 안이면 "비슷해요", 그보다 높으면 "세요", 낮으면 "약해요"로 적어요.<br><br>' +
+    '<b>그래프</b> — 검은 선이 오늘, 점선이 직전 거래일이에요. 두 선 사이가 <b>빨간색</b>이면 오늘이 더 높고, <b>파란색</b>이면 더 낮아요. ' +
+    '아래 막대는 5분마다 잰 차이(오늘 − 직전 거래일)이고, 오른쪽 회색 칸은 아직 남은 장이에요.<br><br>' +
+    '<b>근거 네 줄</b><br>· 가격 — 직전 거래일 같은 시각 코스피와의 차이<br>· 강도 — 누적 거래량과 일중 진폭<br>' +
+    '· 주도권 — 섹터 대표 3종목 평균 순위가 어떻게 바뀌었는지<br>· 누가 — 기관 누적 순매수<br><br>' +
+    '<b>기준 시각</b> — 다 끝난 1분봉만 써서 실제보다 2분쯤 늦게 따라와요. 그래서 위 LIVE 지수와 숫자가 조금 다를 수 있어요.<br><br>' +
+    '<b>보이는 시간</b><br>· 장중 09:00~15:30 — 그래프와 강도·주도권·수급 카드<br>' +
+    '· 마감 후 15:31~16:59 — 그래프만(정규장 확정값)<br>· 17:00 이후·장 전·주말 — 보이지 않아요<br><br>' +
+    '수급은 코스피 시장 전체 합계예요. 투자 권유가 아닌 참고용 비교예요.</div>';
+  function openHelp() {
+    var bg = document.getElementById('help-modal-bg'), body = document.getElementById('help-modal-body');
+    if (!bg || !body) return false;
+    body.innerHTML = HELP_HTML;
+    bg.classList.add('open');
+    return true;
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t && t.closest && t.closest('#vs-root .vs-help')) { e.preventDefault(); openHelp(); }
+  });
+
   window.__vsIntraday = {
-    render: render, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
+    render: render, openHelp: openHelp, HELP_HTML: HELP_HTML, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
     chartSvg: chartSvg, bandRuns: bandRuns, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
     heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
     josa: josa,
