@@ -1,6 +1,6 @@
 // 코스닥·코스피200·환율 일중 1분봉 데이터 프록시 — 스파크라인 히스토리 초기화용
 import { usSessionState, usBaseClose } from './_us-session.mjs';
-import { buildIntradayVs, getJson, getEucKr } from './_vs-intraday.mjs';
+import { buildIntradayVs, getJson } from './_vs-intraday.mjs';
 import { buildCloseVs, closeCacheControl } from './_vs-close.mjs';
 
 const HDR = {
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
       // origin 계산 삭제(C2) — buildIntradayVs가 /data/*.json을 더 이상 부르지 않아 필요 없다
-      return res.status(200).json(await buildIntradayVs({ fetchJson: getJson, fetchText: getEucKr }));
+      return res.status(200).json(await buildIntradayVs({ fetchJson: getJson }));
     } catch (e) {
       return res.status(502).json({ status: 'error', error: String(e) });
     }
@@ -123,7 +123,7 @@ export default async function handler(req, res) {
   if (req.query && req.query.vs === 'close') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
-      const payload = await buildCloseVs({ fetchJson: getJson, fetchText: getEucKr });
+      const payload = await buildCloseVs({ fetchJson: getJson });
       res.setHeader('Cache-Control', closeCacheControl(payload));
       return res.status(200).json(payload);
     } catch (e) {

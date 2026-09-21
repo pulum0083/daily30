@@ -1,6 +1,6 @@
 // '어제랑 비교해서' 장중 대결판 응답 조립 — 코스피·수급·주도주·이슈를 직전 거래일 같은 시각과 맞댄다(설계 §4.2)
 import { TH, prevTradingDay, relLabel, atOrBefore, pct, round2, judge, tickOk, verdict } from './_vs-core.mjs';
-import { flowAt, parseInvestorTimePage } from './_vs-flow.mjs';
+import { liveFlowAt, storedFlowAt } from './_vs-flow.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
 import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
@@ -18,12 +18,6 @@ export async function getJson(url) {
   const r = await fetch(url, { headers: HDR, signal: AbortSignal.timeout(6000) });
   if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
   return r.json();
-}
-
-export async function getEucKr(url) {
-  const r = await fetch(url, { headers: HDR, signal: AbortSignal.timeout(6000) });
-  if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
-  return new TextDecoder('euc-kr').decode(await r.arrayBuffer());
 }
 
 const settle = (p, fallback) => Promise.resolve().then(() => p).catch(() => fallback);
@@ -58,7 +52,7 @@ const toMin = (hhmm) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(2, 4))
 const minusOne = (hhmm) => { const m = toMin(hhmm) - 1; return String(Math.floor(m / 60)).padStart(2, '0') + String(m % 60).padStart(2, '0'); };
 const completed = (bars, hhmm) => (bars || []).filter((b) => b.t < minusOne(hhmm));
 
-export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }) {
+export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
   const k = new Date(now + 9 * 3600 * 1000);
   const dash = k.toISOString().slice(0, 10);
   const hhmm = k.toISOString().slice(11, 16).replace(':', '');
@@ -67,9 +61,10 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   const yDash = prevTradingDay(dash);
   const T = dash.replace(/-/g, ''), Y = yDash.replace(/-/g, '');
   const rel = relLabel(yDash, dash);
-  const memoJ = memoFor(fetchJson, T), memoT = memoFor(fetchText, T);
+  const memoJ = memoFor(fetchJson, T);
   const once = (key, make, keep) => remember(memoJ, key, make, keep);
-  const textY = (url) => remember(memoT, url, () => fetchText(url), (h) => parseInvestorTimePage(h).length > 0);
+  // 어제 수급은 마감 잡이 저장한 파일이라 장중에 바뀌지 않는다 — 행이 있는 응답만 기억한다.
+  const jsonY = (url) => remember(memoJ, url, () => fetchJson(url), (b) => Array.isArray(b?.rows) && b.rows.length > 0);
 
   // 코스피와 주도주 1분봉을 먼저 모은다 — 비교 시각은 이 둘과 수급 표를 모두 본 뒤에 정한다.
   const [kospiRaw, leadersRaw] = await Promise.all([
@@ -105,10 +100,10 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson, fetchText }
   }
   // 수급 — 오늘 표에서 비교 시각 이하 마지막 행. 그 행이 조금 늦으면 비교 시각을 그 행 시각으로 내린다.
   // 어제는 오늘 행과 같은 분으로 고른다(I1).
-  const fT = await settle(flowAt(T, at, fetchText), null);
+  const fT = await settle(liveFlowAt(T, at, fetchJson), null);
   const flowOk = !!fT && fresh(fT.t.replace(':', ''), at);
   if (flowOk && fT.t.replace(':', '') < at) at = fT.t.replace(':', '');
-  const fY = flowOk ? await settle(flowAt(Y, at, textY), null) : null;
+  const fY = flowOk ? await settle(storedFlowAt(Y, at, jsonY), null) : null;
   const flow = flowOk && fY ? { t: fT, y: fY, time: fT.t, foreignDiff: fT.외국인 - fY.외국인 } : null;
   if (flow) flow.judge = judge(flow.foreignDiff, TH.eok);
 

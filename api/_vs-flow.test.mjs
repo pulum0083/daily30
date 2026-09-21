@@ -1,80 +1,72 @@
-// 네이버 시간대별 투자자 매매동향 파서·시각 조회 회귀 테스트(설계 §6 #4)
+// 투자자별 순매수 1분 시계열(새 원천·저장본) 파서·시각 조회 회귀 테스트(SERVICE_RULES §56)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseInvestorTimePage, lastPage, flowAt } from './_vs-flow.mjs';
+import { readFileSync } from 'node:fs';
+import { parseInvestorTimeJson, liveFlowAt, storedFlowAt, LIVE_URL, STORE_URL } from './_vs-flow.mjs';
 
-function row(t, v) { return `<tr><td class="date">${t}</td>${v.map((x) => `<td class="rate_up">${x}</td>`).join('')}</tr>`; }
-function page(rows, last = 3) {
-  return '<table><tr><th>시간</th><th>개인</th><th>외국인</th><th>기관계</th><th colspan="6">기관</th><th>기타법인</th></tr>'
-    + rows.join('') + '</table>' + Array.from({ length: last }, (_, i) => `<a href="?page=${i + 1}">${i + 1}</a>`).join('');
+// 9/21 15:40 실측 행(억원) — 개인 + 외국인(9000+9001) + 기관(1000~7000) + 기타법인(7100) = 0
+export const CLOSE_VALS = { 1000: 12474, 2000: -47, 3000: 1280, 3100: 1615, 4000: 27, 5000: 205,
+  6000: -630, 7000: 0, 7100: 16585, 8000: -29790, 9000: -1603, 9001: -116 };
+export function item(date, hhmmss, vals) {
+  return { bizdate: date, time: hhmmss, netAmounts: Object.entries(vals).map(([k, v]) => ({ investorGubun: k, diffValue: String(v * 1e8) })) };
 }
-// 합계 0: 18675 − 22984 − 12184 + 16493 = 0 (9/11 18:06 실측)
-const OK = ['18,675', '-22,984', '-12,184', '-10,345', '-17', '-4,703', '7', '216', '2,659', '16,493'];
+export const livePage = (items, last = true) => ({ content: items, last: last ? 'true' : 'false' });
 
-test('열 순서대로 개인·외국인·기관계·기관 세부 6칸을 읽는다', () => {
-  assert.deepEqual(parseInvestorTimePage(page([row('18:06', OK)])), [{
-    t: '18:06', 개인: 18675, 외국인: -22984, 기관: -12184,
-    inst: { 금융투자: -10345, 보험: -17, 투신: -4703, 은행: 7, 기타금융: 216, 연기금: 2659 },
-  }]);
+test('실응답 한 페이지를 읽는다 — 사모·국가는 투신·연기금, 기타외국인은 외국인에 더한다', () => {
+  const fx = JSON.parse(readFileSync(new URL('../scripts/fixtures/naver_market/investor_time_20260921.json', import.meta.url), 'utf8'));
+  const r = parseInvestorTimeJson(fx).find((x) => x.t === '15:40');
+  assert.equal(r.date, '20260921');
+  assert.deepEqual([r.개인, r.외국인, r.기관], [-29790, -1719, 14924]);
+  assert.equal(r.inst.투신, 2895);
+  assert.equal(r.inst.연기금, -630);
+  assert.equal(r.개인 + r.외국인 + r.기관 + r.기타법인, 0);
 });
 
-test('합계 0 검사를 통과하지 못한 행은 버린다(열 밀림 방어)', () => {
-  const broken = ['18,675', '-22,984', '-12,184', '-10,345', '-17', '-4,703', '7', '216', '2,659', '99,999'];
-  assert.deepEqual(parseInvestorTimePage(page([row('18:05', broken), row('18:04', OK)])).map((r) => r.t), ['18:04']);
+test('합계 0 검사를 통과하지 못한 행은 버린다(코드가 바뀐 경우 방어)', () => {
+  const rows = parseInvestorTimeJson(livePage([item('20260921', '154000', { ...CLOSE_VALS, 8000: 0 }), item('20260921', '153900', CLOSE_VALS)]));
+  assert.deepEqual(rows.map((r) => r.t), ['15:39']);
 });
 
-test('머리글·빈 행은 건너뛴다', () => {
-  assert.deepEqual(parseInvestorTimePage('<tr><td></td></tr>' + page([])), []);
+test('기관 세부 코드가 없으면 그 칸은 0이 아니라 null이다(§0)', () => {
+  const vals = { ...CLOSE_VALS }; delete vals[4000];
+  const r = parseInvestorTimeJson(livePage([item('20260921', '154000', { ...vals, 7100: 16612 })]))[0];
+  assert.equal(r.inst.은행, null);
 });
 
-test('마지막 페이지 번호', () => {
-  assert.equal(lastPage(page([], 37)), 37);
-  assert.equal(lastPage('<table></table>'), 1);
-});
-
-test('시각 이하 마지막 행을 페이지 이진 탐색으로 찾는다', async () => {
-  // 1페이지 11:30~11:02 · 2페이지 11:01~10:59 · 3페이지 10:58~09:01
-  const pages = {
-    1: page([row('11:30', OK), row('11:02', OK)]),
-    2: page([row('11:01', OK), row('10:59', OK)]),
-    3: page([row('10:58', OK), row('09:01', OK)]),
-  };
+test('오늘 시계열에서 시각 이하 첫 행을 페이지를 넘기며 찾는다', async () => {
+  const pages = [
+    livePage([item('20260921', '113000', CLOSE_VALS), item('20260921', '110200', CLOSE_VALS)], false),
+    livePage([item('20260921', '110100', CLOSE_VALS), item('20260921', '105900', CLOSE_VALS)], true),
+  ];
   const seen = [];
-  const fetchText = async (url) => { const p = Number(url.match(/page=(\d+)/)[1]); seen.push(p); return pages[p]; };
-  const hit = await flowAt('20260914', '1100', fetchText);
+  const hit = await liveFlowAt('20260921', '1100', async (url) => { const p = Number(url.match(/startIdx=(\d+)/)[1]); seen.push(p); return pages[p]; });
   assert.equal(hit.t, '10:59');
-  assert.ok(seen.length <= 4, `페이지를 ${seen.length}번 읽었다`);
+  assert.deepEqual(seen, [0, 1]);
+});
+
+test('원천 날짜가 요청 날짜와 다르면 null — 지난 날짜를 오늘 값으로 쓰지 않는다', async () => {
+  assert.equal(await liveFlowAt('20260918', '1540', async () => livePage([item('20260921', '154000', CLOSE_VALS)])), null);
 });
 
 test('그 시각 이전 행이 없으면 null — 다른 시각으로 폴백하지 않는다', async () => {
-  const fetchText = async () => page([row('09:05', OK)], 1);
-  assert.equal(await flowAt('20260914', '0900', fetchText), null);
+  assert.equal(await liveFlowAt('20260921', '0900', async () => livePage([item('20260921', '090500', CLOSE_VALS)])), null);
 });
 
-test('탐색 중 0행 페이지를 만나면 이전에 찾은 값 대신 null — 파싱 실패를 성공으로 착각하지 않는다(I1)', async () => {
-  const pages = {
-    1: page([]),                            // 1페이지가 0행으로 깨짐(파싱 실패 시뮬레이션)
-    2: page([row('10:59', OK)]),
-  };
-  const fetchText = async (url) => { const p = Number(url.match(/page=(\d+)/)[1]); return pages[p]; };
-  assert.equal(await flowAt('20260914', '1100', fetchText), null);
+test('깨진 행이 섞인 페이지를 만나면 null — 파싱 실패를 성공으로 착각하지 않는다(I1)', async () => {
+  const broken = livePage([item('20260921', '154100', { 8000: 1 }), item('20260921', '154000', CLOSE_VALS)]);
+  assert.equal(await liveFlowAt('20260921', '1540', async () => broken), null);
 });
 
-test('기관 세부 6칸을 함께 낸다 — 합은 기관계와 같다', () => {
-  // 실사고 없는 합성 행: 개인 -9641 / 외국인 -13443 / 기관계 10502 / 세부 6 / 기타법인 12582
-  const tds = ['13:30', '-9641', '-13443', '10502', '4226', '189', '1798', '-64', '130', '4224', '12582'];
-  const html = '<tr>' + tds.map((v) => `<td>${v}</td>`).join('') + '</tr>';
-  const rows = parseInvestorTimePage(html);
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].기관, 10502);
-  assert.equal(rows[0].inst.금융투자, 4226);
-  assert.equal(rows[0].inst.연기금, 4224);
-  const sum = Object.values(rows[0].inst).reduce((s, n) => s + n, 0);
-  assert.ok(Math.abs(sum - rows[0].기관) <= 2, `세부 합 ${sum} vs 기관계 ${rows[0].기관}`);
-});
-
-test('URL에 날짜·코스피(sosok=01)를 고정한다', async () => {
+test('저장본에서 시각 이하 마지막 행을 읽고, 없거나 날짜가 다르면 null', async () => {
+  const body = { date: '20260921', rows: [{ t: '15:30', 개인: 1 }, { t: '15:40', 개인: 2 }, { t: '16:25', 개인: 3 }] };
   let u = '';
-  await flowAt('20260911', '1100', async (url) => { u = url; return page([row('10:00', OK)], 1); });
-  assert.match(u, /bizdate=20260911&sosok=01&page=1$/);
+  const hit = await storedFlowAt('20260921', '1540', async (url) => { u = url; return body; });
+  assert.equal(hit.개인, 2);
+  assert.equal(u, STORE_URL('20260921'));
+  assert.equal(await storedFlowAt('20260918', '1540', async () => body), null);
+  assert.equal(await storedFlowAt('20260921', '1540', async () => { throw new Error('404'); }).catch(() => 'threw'), 'threw');
+});
+
+test('오늘 원천은 코스피(대문자 KOSPI)·KRX로 고정한다', () => {
+  assert.match(LIVE_URL(0), /tradeType=KRX&marketType=KOSPI&startIdx=0&pageSize=100$/);
 });

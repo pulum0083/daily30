@@ -186,72 +186,71 @@ def test_dpick_유니버스가_비면_원천_실패로_기록한다():
 
 # ── 정규장 수급 ─────────────────────────────────────────────────────────────
 
-def test_시간대별_표_실응답을_읽는다():
-    rows = fd.parse_investor_time_page(fx("investor_time_20260914_p19.html"))
-    assert rows[0] == {"t": "1534", "individual": 29722, "foreign": -32875, "institution": -11715}
-    assert {"t": "1530", "individual": 29190, "foreign": -33231, "institution": -10843} in rows
-    assert fd._investor_last_page(fx("investor_time_20260914_p19.html")) == 45
+def _page(rows, last=True):
+    """새 원천 한 페이지 — rows는 (HHMMSS, {코드: 억원}) 최신순."""
+    return {"content": [{"bizdate": d, "time": t, "netAmounts": [
+        {"investorGubun": k, "diffValue": str(int(v * 10**8))} for k, v in vals.items()]}
+        for d, t, vals in rows], "last": "true" if last else "false"}
 
 
-def _row(t, vals):
-    return f"<tr><td class=\"date\">{t}</td>" + "".join(f"<td>{v}</td>" for v in vals) + "</tr>"
+# 9/21 15:40 실측 행(억원) — 개인 + 외국인(9000+9001) + 기관(1000~7000) + 기타법인(7100) = 0
+CLOSE_VALS = {"1000": 12474, "2000": -47, "3000": 1280, "3100": 1615, "4000": 27, "5000": 205,
+              "6000": -630, "7000": 0, "7100": 16585, "8000": -29790, "9000": -1603, "9001": -116}
+MID_VALS = {**CLOSE_VALS, "8000": -29000, "7100": 15795}
 
 
-# 9/14 15:34 실측 행 — 개인 + 외국인 + 기관계 + 기타법인 = 0
-CLOSE_ROW = ["29,722", "-32,875", "-11,715", "-5,369", "259", "-6,106", "9", "195", "-703", "14,868"]
-AFTER_ROW = ["30,351", "-33,363", "-11,869", "-5,524", "259", "-6,105", "9", "195", "-703", "14,881"]
-MID_ROW = ["29,190", "-33,231", "-10,843", "-6,857", "271", "-3,595", "10", "194", "-866", "14,884"]
+def test_시간대별_실응답을_읽는다():
+    rows = fd.parse_investor_time_json(fx("investor_time_20260921.json"))
+    close = next(r for r in rows if r["t"] == "15:40")
+    assert close["개인"] == -29790 and close["외국인"] == -1719 and close["기관"] == 14924
+    assert close["inst"]["투신"] == 2895 and close["inst"]["연기금"] == -630   # 사모·국가는 투신·연기금에 더한다
+    assert close["개인"] + close["외국인"] + close["기관"] + close["기타법인"] == 0
 
 
-def _pages(pages):
-    last = len(pages)
-    links = " ".join(f'<a href="?page={i}">' for i in range(1, last + 1))
-    return {i + 1: "<table>" + "".join(_row(t, v) for t, v in rows) + "</table>" + links
-            for i, rows in enumerate(pages)}
+def test_합계가_0이_아니면_그_행을_버린다():
+    broken = {**CLOSE_VALS, "8000": 0}
+    assert fd.parse_investor_time_json(_page([("20260921", "154000", broken)])) == []
 
 
-def _serve(pages):
-    return lambda url: pages[int(url.rsplit("page=", 1)[1])]
+def test_마감_잡은_애프터장_행이_아니라_1540_이하_첫_행을_쓰고_저장한다(tmp_path):
+    page = _page([("20260921", "162500", MID_VALS), ("20260921", "154000", CLOSE_VALS),
+                  ("20260921", "153000", MID_VALS)])
+    got = fd.regular_session_investor("20260921", fetch_json=lambda url: page, out_dir=tmp_path)
+    assert got == {"date": "20260921", "asof": "1540", "foreign": {"net": -171900},
+                   "institution": {"net": 1492400}, "individual": {"net": -2979000}}
+    assert [r["t"] for r in fd.load_investor_time("20260921", tmp_path)] == ["16:25", "15:40", "15:30"]
 
 
-def test_마감_잡은_애프터장_행이_아니라_1540_이하_첫_행을_쓴다():
-    pages = _pages([
-        [("16:25", AFTER_ROW), ("16:20", AFTER_ROW)],
-        [("15:45", AFTER_ROW), ("15:40", CLOSE_ROW), ("15:36", CLOSE_ROW)],
-        [("15:30", MID_ROW), ("15:28", MID_ROW)],
-    ])
-    got = fd.regular_session_investor("20260914", fetch_text=_serve(pages))
-    assert got == {"date": "20260914", "asof": "1540", "foreign": {"net": -3287500},
-                   "institution": {"net": -1171500}, "individual": {"net": 2972200}}
+def test_정규장이_끝나기_전이면_비운다(tmp_path):
+    page = _page([("20260921", "153000", MID_VALS)])
+    assert fd.regular_session_investor("20260921", fetch_json=lambda url: page, out_dir=tmp_path) == {}
 
 
-def test_정규장이_끝나기_전이면_비운다():
-    pages = _pages([[("15:30", MID_ROW), ("15:28", MID_ROW)]])
-    assert fd.regular_session_investor("20260915", fetch_text=_serve(pages)) == {}
+def test_원천이_다른_날짜면_저장본을_쓰고_없으면_비운다(tmp_path):
+    today = _page([("20260922", "091500", MID_VALS)])
+    assert fd.regular_session_investor("20260921", fetch_json=lambda url: today, out_dir=tmp_path) == {}
+    fd.save_investor_time("20260921", fd.parse_investor_time_json(_page([("20260921", "154000", CLOSE_VALS)])), tmp_path)
+    got = fd.regular_session_investor("20260921", fetch_json=lambda url: today, out_dir=tmp_path)
+    assert got["asof"] == "1540" and got["individual"] == {"net": -2979000}
+    assert not (tmp_path / "20260922.json").exists(), "다른 날짜 원천을 요청 날짜로 저장하면 안 된다"
 
 
-def test_중간_페이지가_깨지면_비운다():
-    pages = _pages([[("16:25", AFTER_ROW)], [], [("15:36", CLOSE_ROW)]])
-    assert fd.regular_session_investor("20260914", fetch_text=_serve(pages)) == {}
+def test_페이지가_깨지면_시계열_전체를_버린다():
+    pages = [_page([("20260921", "162500", MID_VALS)], last=False), _page([("20260921", "154000", {"8000": 1})])]
+    assert fd.fetch_investor_time_rows(lambda url: pages[int(url.split("startIdx=")[1].split("&")[0])]) == []
 
 
-def test_아침_브리핑은_네이버_집계일이_오늘이면_전_평일로_간다():
-    seen = []
-    pages = _pages([[("15:40", CLOSE_ROW)]])
+def test_아침_브리핑은_네이버_집계일이_오늘이면_전_평일로_간다(tmp_path):
+    fd.save_investor_time("20260911", fd.parse_investor_time_json(_page([("20260911", "154000", CLOSE_VALS)])), tmp_path)
+    fd.save_investor_time("20260914", fd.parse_investor_time_json(_page([("20260914", "154000", CLOSE_VALS)])), tmp_path)
 
-    def fetch_text(url):
-        seen.append(url.split("bizdate=")[1][:8])
-        return pages[1]
+    def fetch_json(url):
+        return {"bizdate": "20260914"} if "index/KOSPI/trend" in url else {"content": []}
 
     monday = KST.localize(datetime(2026, 9, 14, 7, 25))
-    got = fd.fetch_investor_trading_kospi(now=monday, fetch_text=fetch_text,
-                                          fetch_json=lambda url: {"bizdate": "20260914"})
-    assert got["date"] == "20260911" and set(seen) == {"20260911"}
-
+    assert fd.fetch_investor_trading_kospi(now=monday, fetch_json=fetch_json, out_dir=tmp_path)["date"] == "20260911"
     tuesday = KST.localize(datetime(2026, 9, 15, 7, 25))
-    got = fd.fetch_investor_trading_kospi(now=tuesday, fetch_text=fetch_text,
-                                          fetch_json=lambda url: {"bizdate": "20260914"})
-    assert got["date"] == "20260914"
+    assert fd.fetch_investor_trading_kospi(now=tuesday, fetch_json=fetch_json, out_dir=tmp_path)["date"] == "20260914"
 
 
 # ── 저장·알림 가드 ─────────────────────────────────────────────────────────

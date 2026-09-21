@@ -66,7 +66,7 @@ Google이 오래된 기사(특히 MSN 등 리스티클성 기사)를 몇 주 뒤
 - 장중 흐름 (intraday), 수급 (investor_trading), 시장 폭 (market_breadth), 섹터 (sectors)
 - 거래대금 급증 × 수급 동반 종목 (dpick): 외국인·기관 동시 순매수 + 거래대금 1.5배↑
 - 출력 필드: `market_breadth.up/down/unchanged/upper_limit/lower_limit`
-- 원천은 `m.stock.naver.com/api` JSON이다. 수급만 시간대별 표의 15:31~15:40 행을 쓴다(애프터장 제외, §51).
+- 원천은 `m.stock.naver.com/api` JSON이다. 수급만 1분 시계열의 15:31~15:40 행을 쓴다(애프터장 제외, §51·§56).
 
 ## API 키 / 환경변수
 
@@ -2089,3 +2089,42 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - 밤 시간 섹션 재배치 코드가 `#mom-track`을 삽입 기준점으로 쓰고 있었다 — 기준점을 `#home .home-cols`(섹터·특이 신호 묶음)로 바꿨다. 기준점이 없으면 재배치 전체가 조기 return하므로, 블록만 지우고 이 코드를 두면 **밤사이 미국 반도체가 위로 안 올라온다.**
 - **발행된 과거 코스피 브리핑 39편**에는 `/stocks/#mom-track` 링크가 남아 있다. §33대로 발행본은 고치지 않는다 — 링크는 `/stocks/` 맨 위로 떨어질 뿐 깨지지 않는다. 새 브리핑부터 링크가 빠진다.
 - 되살리려면 이 커밋 이전 git 이력에서 꺼낸다.
+
+### 56. 투자자별 시간대 수급 원천 이전 — 3일 수급 흐름·대결판 수급이 9/18부터 비었다 (2026-09-21 발견, 수정 완료)
+
+**증상**: 마감 브리핑의 "3일 수급 흐름"이 9/15~9/17에서 멈췄다(사용자 발견). 9/18·9/21 마감 잡 로그에
+`Investor trading error: HTTP Error 410` → `정규장 마감 수급 행 없음`이 남았고, 잡은 수급 없이 발행하도록 짜여 있어 성공으로 끝났다.
+같은 원천을 쓰던 아침 브리핑 전일 수급, 대결판 "누가 사는가" 카드·근거 "누가" 줄도 함께 비었다.
+
+**원인**: §47·§51과 같은 유형. `finance.naver.com/sise/investorDealTrendTime.naver`(시간대별 투자자 매매동향)가 2026-09-18부터 **HTTP 410**이다.
+같은 계열의 `investorDealTrendDay.naver`도 410이고, `sise_trans_style.naver`는 `stock.naver.com/market/stock/kr/trend/trader`로 302된다.
+
+**새 원천 — `stock.naver.com/api/domestic/market/trend/time?tradeType=KRX&marketType=KOSPI&startIdx={page}&pageSize=100`**
+
+- 1분 단위, 최신순. `startIdx`는 오프셋이 아니라 **페이지 번호**다. **bizdate 인자를 무시하고 오늘치만 준다** — 과거 날짜를 받을 방법이 없다.
+- 값은 `investorGubun`별 `diffValue`(원). 매핑은 네이버 화면 스크립트와 같다: 1000 금융투자 · 2000 보험 · 3000+3100(사모) 투신 · 4000 은행 · 5000 기타금융 ·
+  6000+7000(국가·지자체) 연기금 · 7100 기타법인 · 8000 개인 · 9000+9001(기타외국인) 외국인. 기관계 = 1000~7000의 합.
+- **`marketType`은 대문자 `KOSPI`여야 한다.** 소문자 `kospi`는 다른 값을 준다(같은 시각 개인 −29,947 vs −31,382).
+- 검산(9/21 17:49 행): 개인 −31,382 · 외국인 −174 · 기관 +14,977이 `m.stock.naver.com/api/index/KOSPI/trend` 하루 합계와 일치했고, 개인+외국인+기관+기타법인 = 0이었다.
+  파서는 이 합계 0 검사(±5억)를 행마다 하고, 벗어나면 그 행을 버린다(코드가 바뀌면 여기서 걸린다).
+
+**과거 날짜 — 마감 잡이 저장한다**: 원천이 오늘치만 주므로 `fetch_data.regular_session_investor()`가 원천 날짜가 요청 날짜와 같을 때
+그날 1분 시계열 전체를 `web/data/investor-time/{YYYYMMDD}.json`(억원, 오래된→최신)에 저장한다. 16:25 마감 잡이 쓰고 `git add web/ data/`로 커밋한다(§18 — 이 파일의 주인은 마감 잡).
+지난 날짜(아침 브리핑의 전 거래일, 대결판의 '어제')는 이 파일을 읽는다. 대결판은 `https://doubleshot.space/data/investor-time/{날짜}.json`을 fetch한다.
+**파일이 없는 날은 비운다** — 원천에서 되살릴 수 없으므로 다른 값으로 채우지 않는다(§0).
+
+- 코드: `scripts/fetch_data.py`(`parse_investor_time_json`·`fetch_investor_time_rows`·`save_investor_time`·`load_investor_time`),
+  `api/_vs-flow.mjs`(`parseInvestorTimeJson`·`liveFlowAt`·`storedFlowAt`). 두 파서의 규칙은 같아야 한다(§30).
+- 복구: 9/21 치(353분)는 원천이 오늘치를 주던 17:50에 받아 저장했고, `supply_history.json`에 9/21(외국인 −1,719 · 기관 +14,924 · 개인 −29,790, 15:40 행)을 넣었다.
+  **9/18은 되살릴 수 없어 비어 있다** — 다음 3일 수급 흐름은 9/17 다음이 9/21이다. 이미 발행된 9/18·9/21 마감 브리핑은 고치지 않는다(§33).
+- 대결판 "누가 사는가"는 어제 저장본이 있는 날부터 돌아온다(9/22 장중부터 9/21 파일을 쓴다).
+- 테스트: `scripts/test_naver_market_collectors.py`(새 원천 실응답 픽스처 `investor_time_20260921.json`·저장·날짜 불일치·깨진 페이지),
+  `api/_vs-flow.test.mjs`. 대결판 조립 테스트는 옛 HTML 픽스처를 새 응답으로 바꿔 주는 `api/_vs-flow-testkit.mjs`로 기존 기대값을 그대로 검증한다.
+
+- **방지 룰(원천 이전은 계열 단위로 온다 — 세 번째다)**: §47(리서치 게시판, 9/11) → §51(시세 페이지, 9/15) → 이번(투자자 동향, 9/18). `finance.naver.com` 경로가 하나 막히면
+  남은 `finance.naver.com` 소비처를 전부 `curl -s -o /dev/null -w '%{http_code}'`로 점검한다. §51이 9/15에 "아직 200"이라 적어둔 `investorDealTrendTime.naver`가 사흘 뒤 410이 됐다.
+- **방지 룰(원천이 '오늘만' 주면 저장이 곧 기능이다)**: 과거를 다시 받을 수 없는 원천은 그날 안에 저장하지 않으면 영영 잃는다. 저장을 부수 작업으로 두지 말고,
+  비교·추세 기능이 그 저장본을 읽는 구조로 만든다. 저장 잡이 하루 실패하면 그날은 복구할 수 없다는 점을 알림 가드(§51)가 잡아야 한다.
+- **재발 시 진단 순서**: ① 마감 잡 로그에서 `Investor trading` 줄의 HTTP 코드를 본다. ② `web/data/investor-time/`에 그날 파일이 생겼는지 본다(없으면 다음 날 아침 브리핑·대결판 '어제'가 빈다).
+  ③ 값이 이상하면 그날 파일의 15:40 행 네 값의 합이 0인지, `m.stock.naver.com/api/index/KOSPI/trend`와 방향이 맞는지 대조한다.
+

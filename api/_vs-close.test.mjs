@@ -2,6 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { regularFlowRow, buildCloseVs, closeCacheControl } from './_vs-close.mjs';
 import { round2, prevTradingDay } from './_vs-core.mjs';
+import { withFlow } from './_vs-flow-testkit.mjs';
+// 옛 표(HTML) 픽스처를 새 원천·저장본 응답으로 바꿔 조립에 먹인다(§56).
+const run = ({ fetchJson, fetchText, ...o }) => buildCloseVs({ ...o, fetchJson: withFlow(fetchJson, fetchText, o.now ?? Date.now()) });
 
 const r = (t) => ({ t, 개인: 0, 외국인: 0, 기관: 0, inst: {} });
 
@@ -15,12 +18,12 @@ test('15:31 이전 행뿐이면 null — 장이 아직 안 끝난 것이다', ()
 });
 
 test('15:30~15:40 사이엔 early — 마감 카드를 만들지 않는다', async () => {
-  const res = await buildCloseVs({ now: Date.parse('2026-09-16T06:35:00Z') }); // 15:35 KST
+  const res = await run({ now: Date.parse('2026-09-16T06:35:00Z') }); // 15:35 KST
   assert.equal(res.status, 'early');
 });
 
 test('09:00~15:30 장중엔 closed — 장중 대결판이 담당한다', async () => {
-  const res = await buildCloseVs({ now: Date.parse('2026-09-16T04:30:00Z') }); // 13:30 KST
+  const res = await run({ now: Date.parse('2026-09-16T04:30:00Z') }); // 13:30 KST
   assert.equal(res.status, 'closed');
 });
 
@@ -80,7 +83,7 @@ const fetchTextOk = async (url) => {
 const AT_1540 = Date.parse('2026-09-16T06:40:00Z');
 
 test('status:ok — 응답 모양(kospi·flow·axes·verdict·time·today/prev 라벨)이 갖춰진다', async () => {
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
   assert.equal(d.status, 'ok');
   assert.equal(d.time, '15:30');
   assert.equal(d.today.date, '2026-09-16');
@@ -94,7 +97,7 @@ test('status:ok — 응답 모양(kospi·flow·axes·verdict·time·today/prev �
 });
 
 test('axes는 heat·market.kosdaq·market.kospi200·sectors 4개를 항상 갖는다', async () => {
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
   assert.ok(d.axes.heat, 'axes.heat 없음');
   assert.ok(d.axes.market.kosdaq, 'axes.market.kosdaq 없음');
   assert.ok(d.axes.market.kospi200, 'axes.market.kospi200 없음');
@@ -103,7 +106,7 @@ test('axes는 heat·market.kosdaq·market.kospi200·sectors 4개를 항상 갖�
 });
 
 test('16:05·17:10 애프터장 행은 쓰지 않는다 — flow·axes.flow 모두 15:40 값이어야 한다', async () => {
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
   assert.equal(d.flow.time, '15:40');
   assert.equal(d.flow.t.외국인, -20900);        // 16:05(-88888)·17:10(-99999)이 아니다
   assert.equal(d.flow.foreignDiff, -20900 - -12207);
@@ -112,7 +115,7 @@ test('16:05·17:10 애프터장 행은 쓰지 않는다 — flow·axes.flow 모�
 });
 
 test('kospi.diff는 round2(t - y) — 반올림 전 값을 뺀다', async () => {
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
   assert.equal(d.kospi.t, 1);
   assert.equal(d.kospi.y, 0.5);
   assert.equal(d.kospi.diff, round2(d.kospi.t - d.kospi.y));
@@ -122,26 +125,26 @@ test('kospi.diff는 round2(t - y) — 반올림 전 값을 뺀다', async () => 
 // ── 시간 경계를 정확히 고정한다 ──
 
 test('15:29 → closed', async () => {
-  assert.equal((await buildCloseVs({ now: Date.parse('2026-09-16T06:29:00Z') })).status, 'closed');
+  assert.equal((await run({ now: Date.parse('2026-09-16T06:29:00Z') })).status, 'closed');
 });
 
 test('15:30 → early', async () => {
-  assert.equal((await buildCloseVs({ now: Date.parse('2026-09-16T06:30:00Z') })).status, 'early');
+  assert.equal((await run({ now: Date.parse('2026-09-16T06:30:00Z') })).status, 'early');
 });
 
 test('15:39 → early', async () => {
-  assert.equal((await buildCloseVs({ now: Date.parse('2026-09-16T06:39:00Z') })).status, 'early');
+  assert.equal((await run({ now: Date.parse('2026-09-16T06:39:00Z') })).status, 'early');
 });
 
 test('15:40 → 조립된다(early가 아니다)', async () => {
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText: fetchTextOk });
   assert.notEqual(d.status, 'early');
   assert.notEqual(d.status, 'closed');
 });
 
 test('공휴일이면 16:00이라도 closed', async () => {
   const boom = async () => { throw new Error('호출되면 안 된다'); };
-  const d = await buildCloseVs({ now: Date.parse('2026-09-24T07:00:00Z'), fetchJson: boom, fetchText: boom }); // 추석 연휴, 16:00 KST
+  const d = await run({ now: Date.parse('2026-09-24T07:00:00Z'), fetchJson: boom, fetchText: boom }); // 추석 연휴, 16:00 KST
   assert.equal(d.status, 'closed');
 });
 
@@ -153,7 +156,7 @@ test('15:40 행이 있으면 그 행을 쓴다', async () => {
     if (m && m[1] === '20260916') return flowPage('15:40', -20900);
     return flowPage('15:40', -12207);
   };
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
   assert.equal(d.flow.t.외국인, -20900);
 });
 
@@ -163,7 +166,7 @@ test('15:39 행도 15:31~15:40 구간 안이라 채택된다', async () => {
     if (m && m[1] === '20260916') return flowPage('15:39', -20500);
     return flowPage('15:40', -12207);
   };
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
   assert.equal(d.flow.t.외국인, -20500);
   assert.equal(d.flow.time, '15:39');
 });
@@ -174,7 +177,7 @@ test('오늘 표가 15:25까지만 있으면(15:31 전, 확정 전) flow는 null
     if (m && m[1] === '20260916') return flowPage('15:25', -19000);
     return flowPage('15:40', -12207);
   };
-  const d = await buildCloseVs({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
+  const d = await run({ now: AT_1540, fetchJson: fetchJsonOk, fetchText });
   assert.equal(d.flow, null);
 });
 

@@ -3,7 +3,7 @@
 import { isKospiHoliday, labelFromYmd } from './_market-calendar.mjs';
 import { prevTradingDay, relLabel, atOrBefore, pct, round2, judge, TH, verdict } from './_vs-core.mjs';
 import { minuteBars, prevClose, curve } from './_vs-prices.mjs';
-import { flowAt } from './_vs-flow.mjs';
+import { liveFlowAt, storedFlowAt } from './_vs-flow.mjs';
 import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
@@ -38,10 +38,10 @@ export function regularFlowRow(rows) {
   return hit;
 }
 
-// 15:40 이하 가장 최근 행을 이진 탐색으로 찾은 뒤(_vs-flow.flowAt), 그 행이 실제로 15:31~15:40
-// 구간 안인지 확인한다. 더 이른 행이 나오면(그날 표가 아직 15:31 전까지만 있으면) 확정 전이라 null.
-async function regularFlowOf(ymd, fetchText) {
-  const row = await flowAt(ymd, '1540', fetchText);
+// 15:40 이하 가장 최근 행이 실제로 15:31~15:40 구간 안인지 확인한다. 더 이른 행이 나오면(아직 15:31 전까지만
+// 있으면) 확정 전이라 null. 오늘은 네이버 원천, 어제는 마감 잡이 저장한 파일에서 읽는다(§56).
+async function regularFlowOf(ymd, fetchJson, stored) {
+  const row = await (stored ? storedFlowAt : liveFlowAt)(ymd, '1540', fetchJson);
   if (!row) return null;
   const t = normTime(row.t);
   return t >= '1531' && t <= '1540' ? row : null;
@@ -49,7 +49,7 @@ async function regularFlowOf(ymd, fetchText) {
 
 const settle = (pr, fb) => pr.then((v) => v, () => fb);
 
-export async function buildCloseVs({ now = Date.now(), fetchJson, fetchText }) {
+export async function buildCloseVs({ now = Date.now(), fetchJson }) {
   const k = new Date(now + 9 * 3600 * 1000);
   const dash = k.toISOString().slice(0, 10);
   const hhmm = k.toISOString().slice(11, 16).replace(':', '');
@@ -82,10 +82,10 @@ export async function buildCloseVs({ now = Date.now(), fetchJson, fetchText }) {
   const [ks, kq, k2, sectorLoaded, fT] = await Promise.all([
     load('index', 'KOSPI'), load('index', 'KOSDAQ'), load('index', 'KPI200'),
     Promise.all(sectorCodes.map(async (c) => [c, rate(await load('item', c))])),
-    settle(regularFlowOf(T, fetchText), null),
+    settle(regularFlowOf(T, fetchJson, false), null),
   ]);
   if (!ks.bT.length) return { status: 'waiting' };
-  const fY = fT ? await settle(regularFlowOf(Y, fetchText), null) : null;
+  const fY = fT ? await settle(regularFlowOf(Y, fetchJson, true), null) : null;
 
   const kospi = rate(ks);
   kospi.curveT = curve(ks.bT, ks.pT, at);

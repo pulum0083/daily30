@@ -4,6 +4,9 @@ import assert from 'node:assert/strict';
 import { buildIntradayVs } from './_vs-intraday.mjs';
 import { pct, prevTradingDay } from './_vs-core.mjs';
 import { SECTOR_REPS } from './_vs-sectors.mjs';
+import { withFlow } from './_vs-flow-testkit.mjs';
+// 옛 표(HTML) 픽스처를 새 원천·저장본 응답으로 바꿔 조립에 먹인다(§56).
+const run = ({ fetchJson, fetchText, ...o }) => buildIntradayVs({ ...o, fetchJson: withFlow(fetchJson, fetchText, o.now ?? Date.now()) });
 
 const kst = (s) => Date.parse(s + 'Z') - 9 * 3600 * 1000;
 const OK = (f) => ['0', String(f), '0', '0', '0', '0', '0', '0', '0', String(-f)];
@@ -79,12 +82,12 @@ function fakes() {
 test('주말·장 전·장 후엔 closed — 네트워크를 부르지 않는다', async () => {
   const boom = async () => { throw new Error('호출되면 안 된다'); };
   for (const s of ['2026-09-13T11:00:00', '2026-09-14T08:59:00', '2026-09-14T15:31:00', '2026-09-24T11:00:00']) {
-    assert.deepEqual(await buildIntradayVs({ now: kst(s), fetchJson: boom, fetchText: boom }), { status: 'closed' }, s);
+    assert.deepEqual(await run({ now: kst(s), fetchJson: boom, fetchText: boom }), { status: 'closed' }, s);
   }
 });
 
 test('9/14 11:00 리플레이 — 코스피·외국인·결론', async () => {
-  const d = await buildIntradayVs({ now: AFTER_1100, ...fakes() });
+  const d = await run({ now: AFTER_1100, ...fakes() });
   assert.equal(d.status, 'ok');
   assert.equal(d.time, '11:00');
   assert.equal(d.prev.rel, '지난 금요일');
@@ -98,7 +101,7 @@ test('9/14 11:00 리플레이 — 코스피·외국인·결론', async () => {
 });
 
 test('주도주 — 한 종목이라도 비면 평균을 만들지 않는다(§0)', async () => {
-  const d = await buildIntradayVs({ now: AFTER_1100, ...fakes() });
+  const d = await run({ now: AFTER_1100, ...fakes() });
   const s = d.leaders.find((l) => l.code === '005930');
   assert.deepEqual([s.t, s.y, s.diff, s.pxT], [-2.89, -4.28, 1.39, 252000]);
   assert.equal(d.leaders.find((l) => l.code === '000660').t, null);
@@ -124,7 +127,7 @@ function withMinute1059(overrides = {}) {
 }
 
 test('지금 분·직전 분의 봉은 버린다 — 11:01:30엔 10:59 봉끼리 맞댄다', async () => {
-  const d = await buildIntradayVs({ now: kst('2026-09-14T11:01:30'), ...withMinute1059() });
+  const d = await run({ now: kst('2026-09-14T11:01:30'), ...withMinute1059() });
   assert.equal(d.time, '10:59');
   assert.equal(d.kospi.t, pct(6740, 6909.91));
   assert.equal(d.kospi.y, pct(6870, 7033.92));
@@ -134,7 +137,7 @@ test('지금 분·직전 분의 봉은 버린다 — 11:01:30엔 10:59 봉끼리
 });
 
 test('종목 하나가 1분 늦으면 코스피·수급·다른 종목까지 그 분으로 맞춘다', async () => {
-  const d = await buildIntradayVs({ now: AFTER_1100, ...withMinute1059({ '005930\\/minute\\?startDateTime=202609140900': bars('20260914', [['1059', 252500]]) }) });
+  const d = await run({ now: AFTER_1100, ...withMinute1059({ '005930\\/minute\\?startDateTime=202609140900': bars('20260914', [['1059', 252500]]) }) });
   assert.equal(d.time, '10:59');
   assert.equal(d.kospi.t, pct(6740, 6909.91));             // 코스피도 11:00이 아니라 10:59
   const s = d.leaders.find((l) => l.code === '005930');
@@ -143,7 +146,7 @@ test('종목 하나가 1분 늦으면 코스피·수급·다른 종목까지 그
 });
 
 test('종목 하나가 2분 넘게 늦으면 그 종목만 비우고 비교 시각은 내리지 않는다', async () => {
-  const d = await buildIntradayVs({ now: AFTER_1100, ...withMinute1059({ '005930\\/minute\\?startDateTime=202609140900': bars('20260914', [['1057', 253000]]) }) });
+  const d = await run({ now: AFTER_1100, ...withMinute1059({ '005930\\/minute\\?startDateTime=202609140900': bars('20260914', [['1057', 253000]]) }) });
   assert.equal(d.time, '11:00');
   const s = d.leaders.find((l) => l.code === '005930');
   assert.deepEqual([s.t, s.y, s.diff, s.pxT, s.pxY], [null, null, null, null, null]);
@@ -154,7 +157,7 @@ test('수급 표가 1분 늦으면 비교 시각을 수급 행 시각으로 내�
   const fetchText = async (url) => (/bizdate=20260914/.test(url)
     ? `<table>${flowRow('10:59', -20000)}</table>`
     : `<table>${flowRow('11:00', -9999)}${flowRow('10:59', -12000)}</table>`);
-  const d = await buildIntradayVs({ now: AFTER_1100, ...f, fetchText });
+  const d = await run({ now: AFTER_1100, ...f, fetchText });
   assert.equal(d.time, '10:59');
   assert.equal(d.flow.time, '10:59');
   assert.equal(d.flow.foreignDiff, -8000);   // −20000 − (−12000). 어제 11:00 행(−9999)과 비교하면 틀린다
@@ -164,7 +167,7 @@ test('수급 표가 1분 늦으면 비교 시각을 수급 행 시각으로 내�
 test('수급 표가 2분 넘게 늦으면 수급만 비우고 비교 시각은 그대로', async () => {
   const f = withMinute1059();
   const fetchText = async (url) => (/bizdate=20260914/.test(url) ? flowPage('10:55', -5000) : flowPage('10:55', -3000));
-  const d = await buildIntradayVs({ now: AFTER_1100, ...f, fetchText });
+  const d = await run({ now: AFTER_1100, ...f, fetchText });
   assert.equal(d.time, '11:00');
   assert.equal(d.flow, null);
 });
@@ -172,14 +175,14 @@ test('수급 표가 2분 넘게 늦으면 수급만 비우고 비교 시각은 �
 test('오늘 1분봉이 아직 없거나 굳지 않은 봉뿐이면 waiting', async () => {
   const f = fakes();
   const none = async (url) => (/minute\?startDateTime=20260914/.test(url) ? [] : f.fetchJson(url));
-  assert.deepEqual(await buildIntradayVs({ now: kst('2026-09-14T09:01:10'), ...f, fetchJson: none }), { status: 'waiting' });
+  assert.deepEqual(await run({ now: kst('2026-09-14T09:01:10'), ...f, fetchJson: none }), { status: 'waiting' });
   const onlyForming = async (url) => (/KOSPI\/minute\?startDateTime=20260914/.test(url) ? bars('20260914', [['0900', 6905], ['0901', 6900]]) : f.fetchJson(url));
-  assert.deepEqual(await buildIntradayVs({ now: kst('2026-09-14T09:01:40'), ...f, fetchJson: onlyForming }), { status: 'waiting' });
+  assert.deepEqual(await run({ now: kst('2026-09-14T09:01:40'), ...f, fetchJson: onlyForming }), { status: 'waiting' });
 });
 
 test('수급 원천이 실패해도 나머지는 그린다 — flow만 null', async () => {
   const f = fakes();
-  const d = await buildIntradayVs({ now: AFTER_1100, ...f, fetchText: async () => { throw new Error('down'); } });
+  const d = await run({ now: AFTER_1100, ...f, fetchText: async () => { throw new Error('down'); } });
   assert.equal(d.status, 'ok');
   assert.equal(d.flow, null);
   assert.equal(d.verdict.sub, '코스피가 같은 시각 기준 거의 같은 자리예요(−0.14%p)');
@@ -189,7 +192,7 @@ test('이슈는 항상 null — 이슈 아카이브·키워드 사전을 부르�
   const f = fakes();
   const boom = async (url) => { throw new Error('호출되면 안 된다: ' + url); };
   const fetchJson = async (url) => (/kospi-news|issue-keywords/.test(url) ? boom(url) : f.fetchJson(url));
-  const d = await buildIntradayVs({ now: AFTER_1100, ...f, fetchJson });
+  const d = await run({ now: AFTER_1100, ...f, fetchJson });
   assert.equal(d.status, 'ok');
   assert.equal(d.issues, null);
 });
@@ -198,10 +201,10 @@ test('어제 데이터는 인스턴스 메모리에서 재사용한다 — 두 �
   const f = fakes(), seen = [];
   const fetchJson = async (u) => { seen.push(u); return f.fetchJson(u); };
   const fetchText = async (u) => { seen.push(u); return f.fetchText(u); };
-  const a = await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText });
+  const a = await run({ now: AFTER_1100, fetchJson, fetchText });
   const first = seen.length;
   seen.length = 0;
-  const b = await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText });
+  const b = await run({ now: AFTER_1100, fetchJson, fetchText });
   assert.deepEqual(b.kospi, a.kospi, '재사용해도 값은 같다');
   assert.ok(seen.length < first, `${seen.length} < ${first}`);
   // 값이 있던 원천(코스피·005930·수급 표)은 오늘 것만 다시 부른다
@@ -214,14 +217,14 @@ test('어제 데이터는 인스턴스 메모리에서 재사용한다 — 두 �
 test('어제 데이터 캐시는 날짜가 바뀌면 비운다', async () => {
   const f = fakes(), seen = [];
   const fetchJson = async (u) => { seen.push(u); return f.fetchJson(u); };
-  await buildIntradayVs({ now: AFTER_1100, fetchJson, fetchText: f.fetchText });
+  await run({ now: AFTER_1100, fetchJson, fetchText: f.fetchText });
   seen.length = 0;
-  await buildIntradayVs({ now: kst('2026-09-15T11:02:30'), fetchJson, fetchText: f.fetchText }).catch(() => null);
+  await run({ now: kst('2026-09-15T11:02:30'), fetchJson, fetchText: f.fetchText }).catch(() => null);
   assert.ok(seen.some((u) => /KOSPI\/minute\?startDateTime=202609140900/.test(u)), '9/15 조립에선 9/14가 어제라 새로 부른다');
 });
 
 test('axes가 항상 있고 섹터·강도·수급이 채워진다', async () => {
-  const res = await buildIntradayVs({
+  const res = await run({
     now: Date.parse('2026-09-16T04:30:00Z'),   // 13:30 KST
     fetchJson: fakeJson, fetchText: fakeText,
   });
@@ -234,7 +237,7 @@ test('axes가 항상 있고 섹터·강도·수급이 채워진다', async () =>
 });
 
 test('섹터 조회가 모두 실패해도 나머지 축은 살아 있다', async () => {
-  const res = await buildIntradayVs({
+  const res = await run({
     now: Date.parse('2026-09-16T04:30:00Z'),
     fetchJson: failSectorsJson, fetchText: fakeText,
   });
