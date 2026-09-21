@@ -2833,6 +2833,34 @@
         "usdkrw": 0.58,
         "vix": -4.0803
       }
+    },
+    {
+      "date": "2026-09-22",
+      "type": "kospi",
+      "predicted_direction": "상승 우위",
+      "up_pct": 78,
+      "down_pct": 22,
+      "confidence": 80,
+      "actual_direction": null,
+      "actual_change_pct": null,
+      "is_correct": null,
+      "generated_at": "2026-09-22T07:29:20.528030+09:00",
+      "checked_at": null,
+      "prior_direction": "상승",
+      "prior_score": 10.261,
+      "prior_strength": "strong",
+      "signals": {
+        "sox": 4.29,
+        "nasdaq": 2.26,
+        "nq": 4.03,
+        "es": 2.2808,
+        "ym": 1.3813,
+        "ewy": 4.3236,
+        "ewy_resid": 2.674,
+        "kospi": 1.65,
+        "usdkrw": -0.94,
+        "vix": 0.3376
+      }
     }
   ]
 }
