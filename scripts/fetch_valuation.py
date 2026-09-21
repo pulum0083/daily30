@@ -42,18 +42,22 @@ def _get(url: str, referer: str, decode: str = "utf-8") -> str:
     return raw.decode(decode, "replace")
 
 
+# 2026-09-18부터 finance.naver.com/sise/entryJongmok.naver가 HTTP 410이다(§56 — 같은 계열 이전).
+# 새 원천은 m.stock.naver.com/api/index/KPI200/enrollStocks(JSON, 페이지당 최대 60). 9/21 기준 201종목.
+ENROLL_URL = "https://m.stock.naver.com/api/index/KPI200/enrollStocks?page={pg}&pageSize=50"
+
+
 def fetch_kospi200_codes() -> list:
-    """네이버 finance entryJongmok(KPI200) 페이지네이션으로 구성종목 코드 실수집."""
+    """코스피200 구성종목 코드 실수집(페이지네이션). 실패하면 그때까지 모은 것만 돌려준다."""
     codes = []
-    for pg in range(1, 26):
-        url = f"https://finance.naver.com/sise/entryJongmok.naver?type=KPI200&page={pg}"
+    for pg in range(1, 11):
         try:
-            html = _get(url, "https://finance.naver.com/", decode="euc-kr")
+            rows = json.loads(_get(ENROLL_URL.format(pg=pg), "https://m.stock.naver.com/"))
         except Exception as e:
-            print(f"  entryJongmok page{pg} 실패: {e}", file=sys.stderr)
+            print(f"  enrollStocks page{pg} 실패: {e}", file=sys.stderr)
             break
-        page_codes = list(dict.fromkeys(re.findall(r"code=(\d{6})", html)))
-        new = [c for c in page_codes if c not in codes]
+        new = [str(r.get("itemCode")) for r in rows or []
+               if re.fullmatch(r"\d{6}", str(r.get("itemCode") or "")) and str(r.get("itemCode")) not in codes]
         if not new:
             break
         codes += new

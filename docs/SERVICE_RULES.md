@@ -2121,6 +2121,9 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - 테스트: `scripts/test_naver_market_collectors.py`(새 원천 실응답 픽스처 `investor_time_20260921.json`·저장·날짜 불일치·깨진 페이지),
   `api/_vs-flow.test.mjs`. 대결판 조립 테스트는 옛 HTML 픽스처를 새 응답으로 바꿔 주는 `api/_vs-flow-testkit.mjs`로 기존 기대값을 그대로 검증한다.
 
+- **같은 날 함께 발견 — 밸류에이션 구성종목도 410이었다.** `fetch_valuation.py`가 쓰던 `finance.naver.com/sise/entryJongmok.naver?type=KPI200`도 9/18부터 410이라
+  `web/data/valuation.json`이 9/17에서 멈춰 있었다(5일 신선도 가드가 곧 섹션을 내릴 참이었다). `m.stock.naver.com/api/index/KPI200/enrollStocks?page=N&pageSize=50`(JSON)으로 바꿨다.
+  9/21 재수집 결과 구성종목 199개로 9/17과 같고, 평가 132종목(9/17 133)이다. 같은 날 점검에서 `finance.naver.com` 중 남은 200은 `api/sise/etfItemList.nhn` 하나다.
 - **방지 룰(원천 이전은 계열 단위로 온다 — 세 번째다)**: §47(리서치 게시판, 9/11) → §51(시세 페이지, 9/15) → 이번(투자자 동향, 9/18). `finance.naver.com` 경로가 하나 막히면
   남은 `finance.naver.com` 소비처를 전부 `curl -s -o /dev/null -w '%{http_code}'`로 점검한다. §51이 9/15에 "아직 200"이라 적어둔 `investorDealTrendTime.naver`가 사흘 뒤 410이 됐다.
 - **방지 룰(원천이 '오늘만' 주면 저장이 곧 기능이다)**: 과거를 다시 받을 수 없는 원천은 그날 안에 저장하지 않으면 영영 잃는다. 저장을 부수 작업으로 두지 말고,
