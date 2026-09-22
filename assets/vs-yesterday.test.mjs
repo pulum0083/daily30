@@ -550,7 +550,7 @@ test('강도 카드 — 오늘 값이 하나라도 있으면 카드를 그린다
 test('결론 카드 오른쪽에 ? 버튼을 두고, 설명은 보이는 시간·색 규칙·기준 시각을 담는다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD, 'open');
-  assert.ok(/<div class="vs-hero"><button type="button" class="help-q vs-help"/.test(root.innerHTML), '? 버튼이 결론 카드 안에 없음');
+  assert.ok(/<p class="vs-eyebrow">[^<]*<button type="button" class="help-q vs-help"/.test(root.innerHTML), '? 버튼이 작은 타이틀 옆에 없음');
   for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '15:31~16:59', '17:00 이후']) {
     assert.ok(api.HELP_HTML.includes(s), `설명에 빠짐: ${s}`);
   }
