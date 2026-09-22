@@ -349,12 +349,13 @@
     if (day === 0 || day === 6) return 'weekend';
     if (hm >= 730 && hm < 900) return 'pre';
     if (hm >= 900 && hm <= 1530) return 'open';
-    // 미국 브리핑 발행(21:15, 브리핑 스트립 us 슬롯 21:20 — §13)까지 마감 곡선을 둔다(2026-09-22 사용자 결정).
-    if (hm > 1530 && hm < 2120) return 'close';   // 15:31~15:39는 close지만 API가 early를 줘 카드가 안 그려진다
+    // 마감 곡선은 오늘 미국 브리핑이 발행될 때까지 둔다(2026-09-22 사용자 결정) — 발행 여부는 load()가 목록으로 판정한다.
+    // 미국 휴장일처럼 발행이 없으면 자정까지 남는다(자정이 지나면 vs=close가 새 날짜로 closed를 준다).
+    if (hm > 1530) return 'close';   // 15:31~15:39는 close지만 API가 early를 줘 카드가 안 그려진다
     return 'night';
   }
 
-  // close(15:31~21:19)는 메인 곡선(결론·곡선·근거)만(2026-09-17). 17:00부터는 '밤사이 미국 반도체 시황'이 위로 올라오고
+  // close(15:31~미국 브리핑 발행 전)는 메인 곡선(결론·곡선·근거)만(2026-09-17). 17:00부터는 '밤사이 미국 반도체 시황'이 위로 올라오고
   // 곡선은 섹터별 대표 종목 바로 위로 내려간다(stocks-home.js 국면 재배치, 2026-09-22).
   var CARDS = { pre: [], open: ['hero', 'heat', 'lead', 'flow'],
                 close: ['hero'], night: [], weekend: [] };
@@ -470,11 +471,29 @@
   }
 
   // 슬롯에 따라 엔드포인트를 고르고(§3.2), pre·weekend는 아예 호출하지 않는다.
+  // 오늘(KST) 미국 브리핑이 목록에서 ready인가. 미국 브리핑은 21:15에 도므로 21:00 전엔 조회하지 않는다.
+  function kstNow() { var k = new Date(Date.now() + 9 * 3600 * 1000); return { ymd: k.toISOString().slice(0, 10), hm: k.getUTCHours() * 100 + k.getUTCMinutes() }; }
+  function usPublished(list, ymd) {
+    var s = list && list.slots && list.slots[ymd];
+    return !!(s && s.us && s.us.state === 'ready');
+  }
+
   function load() {
     var slot = slotOf(new Date()), url = endpointFor(slot);
     if (!url) { render(null, slot); return; }
-    if (root && root.hidden && !root.innerHTML) skeleton();
     if (document.hidden) return;                       // 백그라운드 탭은 부르지 않는다(2026-08-16 차단 사고)
+    var k = kstNow();
+    if (slot === 'close' && k.hm >= 2100) {
+      fetch('/data/briefings-list.json', { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (list) { if (usPublished(list, k.ymd)) render(null, slot); else fetchVs(url, slot); })
+        .catch(function () { fetchVs(url, slot); });
+      return;
+    }
+    fetchVs(url, slot);
+  }
+  function fetchVs(url, slot) {
+    if (root && root.hidden && !root.innerHTML) skeleton();
     fetch(url, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { render(d, slot); })
@@ -492,7 +511,7 @@
     '· 주도권 — 섹터 대표 3종목 평균 순위가 어떻게 바뀌었는지<br>· 누가 — 기관 누적 순매수<br><br>' +
     '<b>기준 시각</b> — 다 끝난 1분봉만 써서 실제보다 2분쯤 늦게 따라와요. 그래서 위 LIVE 지수와 숫자가 조금 다를 수 있어요.<br><br>' +
     '<b>보이는 시간</b><br>· 장중 09:00~15:30 — 그래프와 강도·주도권·수급 카드<br>' +
-    '· 마감 후 15:31~21:19 — 그래프만(정규장 확정값). 17:00부터는 섹터별 대표 종목 바로 위에 있어요<br>· 미국 브리핑 발행(21:20) 이후·장 전·주말 — 보이지 않아요<br><br>' +
+    '· 마감 후 15:31~미국 브리핑 발행 전 — 그래프만(정규장 확정값). 17:00부터는 섹터별 대표 종목 바로 위에 있어요<br>· 미국 브리핑 발행 이후·장 전·주말 — 보이지 않아요<br><br>' +
     '수급은 코스피 시장 전체 합계예요. 투자 권유가 아닌 참고용 비교예요.</div>';
   function openHelp() {
     var bg = document.getElementById('help-modal-bg'), body = document.getElementById('help-modal-body');
@@ -508,7 +527,7 @@
 
   window.__vsIntraday = {
     render: render, openHelp: openHelp, HELP_HTML: HELP_HTML, shouldPoll: shouldPoll, slotOf: slotOf, cardsFor: cardsFor, endpointFor: endpointFor,
-    chartSvg: chartSvg, bandRuns: bandRuns, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
+    usPublished: usPublished, chartSvg: chartSvg, bandRuns: bandRuns, diffSvg: diffSvg, diffPts: diffPts, chartOverlay: chartOverlay, hoverAt: hoverAt,
     heatCard: heatCard, leadCard: leadCard, flowCard: flowCard, miniBars: miniBars, heroWhy: heroWhy, wasKo: wasKo,
     josa: josa,
   };

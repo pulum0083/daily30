@@ -332,12 +332,12 @@ test('시간대 경계', () => {
   assert.equal(api.slotOf(d('2026-09-16T15:30:00')), 'open');
   assert.equal(api.slotOf(d('2026-09-16T15:35:00')), 'close');   // early — 카드는 안 그린다
   assert.equal(api.slotOf(d('2026-09-16T17:00:00')), 'close');
-  assert.equal(api.slotOf(d('2026-09-16T21:19:00')), 'close');
-  assert.equal(api.slotOf(d('2026-09-16T21:20:00')), 'night');
+  assert.equal(api.slotOf(d('2026-09-16T23:59:00')), 'close');   // 미국 브리핑 발행 여부는 load()가 판정한다
+  assert.equal(api.slotOf(d('2026-09-17T00:00:00')), 'night');
   assert.equal(api.slotOf(d('2026-09-19T12:00:00')), 'weekend'); // 토요일
 });
 
-test('장 전·밤엔 카드가 없고, 마감 후(~21:20)엔 메인 곡선만', () => {
+test('장 전·밤엔 카드가 없고, 마감 후(미국 브리핑 발행 전)엔 메인 곡선만', () => {
   const { api } = load();
   // cardsFor는 vm 샌드박스의 Array를 반환한다 — 바깥 realm의 assert.deepEqual과 배열 프로토타입이
   // 달라 참조 비교에서 어긋나므로 Array.from으로 이 realm의 배열로 복사해 비교한다.
@@ -357,7 +357,7 @@ test('엔드포인트 선택 — open은 vs=intraday, close는 vs=close, pre·ni
   assert.equal(api.endpointFor('weekend'), null);
 });
 
-test('night 슬롯(21:20~)은 아무 카드도 그리지 않는다', () => {
+test('night 슬롯(자정~)은 아무 카드도 그리지 않는다', () => {
   const { api, root } = load(kst('2026-09-14T20:00:00'));
   api.render(PAYLOAD, 'night');
   assert.equal(root.hidden, true);
@@ -553,7 +553,7 @@ test('결론 카드 오른쪽에 ? 버튼을 두고, 설명은 보이는 시간�
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD, 'open');
   assert.ok(/<p class="vs-eyebrow">[^<]*<button type="button" class="help-q vs-help"/.test(root.innerHTML), '? 버튼이 작은 타이틀 옆에 없음');
-  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '15:31~21:19', '섹터별 대표 종목 바로 위', '21:20']) {
+  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '미국 브리핑 발행 전', '섹터별 대표 종목 바로 위', '미국 브리핑 발행 이후']) {
     assert.ok(api.HELP_HTML.includes(s), `설명에 빠짐: ${s}`);
   }
   assert.equal(api.openHelp(), false, '모달이 없는 페이지에서는 아무것도 하지 않는다');
@@ -589,4 +589,41 @@ test('응답이 실패하면 자리를 걷고 영역을 숨긴다', async () => 
   await new Promise((r) => setImmediate(r));
   assert.equal(root.hidden, true);
   assert.equal(root.innerHTML, '');
+});
+
+const LIST = (usState) => ({ slots: { '2026-09-22': { kospi: { state: 'ready' }, us: { state: usState } } } });
+function fetchLog(list) {
+  const urls = [];
+  const fetch = (u) => { urls.push(u); return u.includes('briefings-list') ? Promise.resolve({ ok: true, json: () => list }) : new Promise(noop); };
+  return { urls, fetch };
+}
+
+test('오늘 미국 브리핑이 발행됐으면 마감 곡선을 숨기고 대결판을 부르지 않는다(2026-09-22)', async () => {
+  const f = fetchLog(LIST('ready'));
+  const { root } = load(kst('2026-09-22T21:18:00'), null, { fetch: f.fetch });
+  await new Promise((r) => setImmediate(r));
+  assert.equal(root.hidden, true);
+  assert.ok(!f.urls.some((u) => u.includes('vs=close')), f.urls.join());
+});
+
+test('미국 브리핑이 아직이면 마감 곡선을 계속 부른다', async () => {
+  const f = fetchLog(LIST('pending'));
+  const { root } = load(kst('2026-09-22T21:18:00'), null, { fetch: f.fetch });
+  await new Promise((r) => setImmediate(r));
+  assert.ok(f.urls.some((u) => u.includes('vs=close')));
+  assert.ok(root.innerHTML.includes('vs-skel'));
+});
+
+test('21:00 전에는 브리핑 목록을 조회하지 않는다', () => {
+  const f = fetchLog(LIST('ready'));
+  load(kst('2026-09-22T18:00:00'), null, { fetch: f.fetch });
+  assert.ok(!f.urls.some((u) => u.includes('briefings-list')));
+  assert.ok(f.urls.some((u) => u.includes('vs=close')));
+});
+
+test('usPublished — 다른 날짜의 발행은 오늘 발행으로 보지 않는다', () => {
+  const { api } = load(kst('2026-09-22T21:18:00'));
+  assert.equal(api.usPublished(LIST('ready'), '2026-09-22'), true);
+  assert.equal(api.usPublished(LIST('ready'), '2026-09-23'), false);
+  assert.equal(api.usPublished(null, '2026-09-22'), false);
 });
