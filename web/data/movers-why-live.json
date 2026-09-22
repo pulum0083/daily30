@@ -1,22 +1,13 @@
 {
-  "generated_at": "2026-09-22T12:30:57.901280+09:00",
+  "generated_at": "2026-09-22T13:01:05.928591+09:00",
   "date": "2026-09-22",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.74,
-      "surge": 0.51,
+      "changePct": 2.55,
+      "surge": 0.56,
       "events": [
-        {
-          "time": "10:22",
-          "headline": "삼성전자 특별배당 받으려면? “28일까지 주식 사야”…이래서 주가 올랐나?",
-          "url": "https://news.google.com/rss/articles/CBMiT0FVX3lxTFBXWVNJOXZiSzlqZGNxSnRQMXBWV19sZFhZT3MyT0RPa0FFQmJRLTFsSHBhTEVNSFUwMGR1LUxvTGVnQVY0N1pyb3RoOUh2ajA?oc=5",
-          "source": "v.daum.net",
-          "why": "삼성전자가 특별배당을 받기 위해 28일까지 주식을 매수해야 한다는 소식이 주가 상승에 영향을 미친 것으로 보인다.",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "10:21",
           "headline": "삼성전자 주가, 9월 22일 장중 279,500원 2.01% 상승",
@@ -25,22 +16,31 @@
           "why": "삼성전자 주가, 9월 22일 장중 279,500원 2.01% 상승",
           "tier": "why",
           "sentiment": "pos"
+        },
+        {
+          "time": "09:26",
+          "headline": "삼성전자·SK하이닉스, 국제유가 등 부담 완화.. '강세'",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNY3RyT2hFVDU2aElBTldkU1BhMHptNG9acGp4akpMbEo5S2JqMmkwbkJkZDNNU3htWno3dmVyelI4OGJOVDN0TXlqV2dRdm5jYXpzNFlZaHlQUHFXbWliNlI1WU9TaWYxTkFybDdhVEE4UnAxUGJzWlBTa1RWdUhycUYwamc0NndL?oc=5",
+          "source": "글로벌이코노믹",
+          "why": "삼성전자·SK하이닉스, 국제유가 등 부담 완화.. '강세'",
+          "tier": "why",
+          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 2.46,
-      "surge": 0.44,
+      "changePct": 1.77,
+      "surge": 0.48,
       "events": [
         {
           "time": "09:11",
           "headline": "삼전·SK하닉 주가 연일 상승 \"범용 D램 공급 부족 장기화\"",
           "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5DY1FaaVZPZElFcFVFR1pIOVpiM1RZVGx2aGxFeVlDbUFLeXBBOTJQVmJzYUlySzgteVpUaFZmc3ItUklndXhZLVFQQTBsLTdJTnhUNzRRTmg0ZFE0eUN0Z3drWmt3YW9OVFFvaFln?oc=5",
           "source": "gukjenews.com",
-          "why": "범용 D램 공급 부족 장기화 전망에 SK하이닉스 주가가 연일 상승세를 보이고 있다.",
-          "tier": "why",
+          "why": "범용 D램 공급 부족 장기화 전망에 따라 SK하이닉스 주가가 연일 상승세를 보이고 있습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         },
         {
@@ -48,8 +48,8 @@
           "headline": "SK하이닉스 주가, 9월 22일 장중 1,916,500원 2.60% 상승",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFAtNVhtLVdMOUk1SjdMZGtnT2EwdkhlUjkyVkdEOC1qUGZXWGdfSGJVX2JMYXRsV0VjR1VmSUd3SGtIeGhKVUNQNXc4c25rR1M3dWUtU25naG9EaklWbG5raG05M3pRal9VX2VHbExMejJxdw?oc=5",
           "source": "톱스타뉴스",
-          "why": "SK하이닉스 주가, 9월 22일 장중 1,916,500원 2.60% 상승",
-          "tier": "why",
+          "why": "SK하이닉스 주가, 9월 22일 장중 1,916,500원 2.60% 상승 (개별 인과 단정 안 함)",
+          "tier": "related",
           "sentiment": "pos"
         }
       ]
@@ -57,8 +57,8 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 1.67,
-      "surge": 0.49,
+      "changePct": 1.25,
+      "surge": 0.52,
       "events": [
         {
           "time": "08:54",
