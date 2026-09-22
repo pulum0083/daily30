@@ -331,11 +331,13 @@ test('시간대 경계', () => {
   assert.equal(api.slotOf(d('2026-09-16T09:30:00')), 'open');
   assert.equal(api.slotOf(d('2026-09-16T15:30:00')), 'open');
   assert.equal(api.slotOf(d('2026-09-16T15:35:00')), 'close');   // early — 카드는 안 그린다
-  assert.equal(api.slotOf(d('2026-09-16T17:00:00')), 'night');
+  assert.equal(api.slotOf(d('2026-09-16T17:00:00')), 'close');
+  assert.equal(api.slotOf(d('2026-09-16T21:19:00')), 'close');
+  assert.equal(api.slotOf(d('2026-09-16T21:20:00')), 'night');
   assert.equal(api.slotOf(d('2026-09-19T12:00:00')), 'weekend'); // 토요일
 });
 
-test('장 전·밤엔 카드가 없고, 마감 후(~17:00)엔 메인 곡선만', () => {
+test('장 전·밤엔 카드가 없고, 마감 후(~21:20)엔 메인 곡선만', () => {
   const { api } = load();
   // cardsFor는 vm 샌드박스의 Array를 반환한다 — 바깥 realm의 assert.deepEqual과 배열 프로토타입이
   // 달라 참조 비교에서 어긋나므로 Array.from으로 이 realm의 배열로 복사해 비교한다.
@@ -355,7 +357,7 @@ test('엔드포인트 선택 — open은 vs=intraday, close는 vs=close, pre·ni
   assert.equal(api.endpointFor('weekend'), null);
 });
 
-test('night 슬롯은 아무 카드도 그리지 않는다 — 17:00부터는 밤사이 미국 반도체 섹션만', () => {
+test('night 슬롯(21:20~)은 아무 카드도 그리지 않는다', () => {
   const { api, root } = load(kst('2026-09-14T20:00:00'));
   api.render(PAYLOAD, 'night');
   assert.equal(root.hidden, true);
@@ -551,7 +553,7 @@ test('결론 카드 오른쪽에 ? 버튼을 두고, 설명은 보이는 시간�
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD, 'open');
   assert.ok(/<p class="vs-eyebrow">[^<]*<button type="button" class="help-q vs-help"/.test(root.innerHTML), '? 버튼이 작은 타이틀 옆에 없음');
-  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '15:31~16:59', '17:00 이후']) {
+  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '15:31~21:19', '섹터별 대표 종목 바로 위', '21:20']) {
     assert.ok(api.HELP_HTML.includes(s), `설명에 빠짐: ${s}`);
   }
   assert.equal(api.openHelp(), false, '모달이 없는 페이지에서는 아무것도 하지 않는다');
@@ -577,7 +579,7 @@ test('응답 전에는 결론·곡선 자리를 먼저 잡는다 — 숫자는 �
 });
 
 test('카드가 없는 시간대(밤)에는 자리도 잡지 않는다', () => {
-  const { root } = load(kst('2026-09-22T18:00:00'), null, { fetch: () => new Promise(noop) });
+  const { root } = load(kst('2026-09-22T22:00:00'), null, { fetch: () => new Promise(noop) });
   assert.equal(root.hidden, true);
   assert.equal(root.innerHTML, '');
 });
