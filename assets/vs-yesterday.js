@@ -349,11 +349,13 @@
     if (day === 0 || day === 6) return 'weekend';
     if (hm >= 730 && hm < 900) return 'pre';
     if (hm >= 900 && hm <= 1530) return 'open';
-    if (hm > 1530 && hm < 1700) return 'close';   // 15:31~15:39는 close지만 API가 early를 줘 카드가 안 그려진다
+    // 미국 브리핑 발행(21:15, 브리핑 스트립 us 슬롯 21:20 — §13)까지 마감 곡선을 둔다(2026-09-22 사용자 결정).
+    if (hm > 1530 && hm < 2120) return 'close';   // 15:31~15:39는 close지만 API가 early를 줘 카드가 안 그려진다
     return 'night';
   }
 
-  // close(15:31~16:59)는 메인 곡선(결론·곡선·근거)만 — 17:00 '밤사이 미국 반도체 시황'이 올라오면 곡선은 빠진다(2026-09-17 사용자 결정).
+  // close(15:31~21:19)는 메인 곡선(결론·곡선·근거)만(2026-09-17). 17:00부터는 '밤사이 미국 반도체 시황'이 위로 올라오고
+  // 곡선은 섹터별 대표 종목 바로 위로 내려간다(stocks-home.js 국면 재배치, 2026-09-22).
   var CARDS = { pre: [], open: ['hero', 'heat', 'lead', 'flow'],
                 close: ['hero'], night: [], weekend: [] };
   function cardsFor(slot) { return CARDS[slot] || []; }
@@ -490,7 +492,7 @@
     '· 주도권 — 섹터 대표 3종목 평균 순위가 어떻게 바뀌었는지<br>· 누가 — 기관 누적 순매수<br><br>' +
     '<b>기준 시각</b> — 다 끝난 1분봉만 써서 실제보다 2분쯤 늦게 따라와요. 그래서 위 LIVE 지수와 숫자가 조금 다를 수 있어요.<br><br>' +
     '<b>보이는 시간</b><br>· 장중 09:00~15:30 — 그래프와 강도·주도권·수급 카드<br>' +
-    '· 마감 후 15:31~16:59 — 그래프만(정규장 확정값)<br>· 17:00 이후·장 전·주말 — 보이지 않아요<br><br>' +
+    '· 마감 후 15:31~21:19 — 그래프만(정규장 확정값). 17:00부터는 섹터별 대표 종목 바로 위에 있어요<br>· 미국 브리핑 발행(21:20) 이후·장 전·주말 — 보이지 않아요<br><br>' +
     '수급은 코스피 시장 전체 합계예요. 투자 권유가 아닌 참고용 비교예요.</div>';
   function openHelp() {
     var bg = document.getElementById('help-modal-bg'), body = document.getElementById('help-modal-body');
