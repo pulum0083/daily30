@@ -562,3 +562,11 @@ test('결론 제목 색은 verdict.tone(오늘의 방향)이 있으면 그것을
   api.render(Object.assign({}, PAYLOAD, { verdict: { title: '오르고 있지만 지난 금요일보다 오름폭이 작아요', sub: 's', judge: 'weak', tone: 'up' } }), 'open');
   assert.ok(root.innerHTML.includes('<h2 class="up">오르고 있지만'), '덜 오른 날이 파랑으로 칠해짐');
 });
+
+test('모든 비교 박스는 오늘이 위, 어제가 아래다(2026-09-22)', () => {
+  const { api } = load(kst('2026-09-14T11:00:00'));
+  const heat = api.heatCard({ heat: { vol: { t: 165217, y: 154119, diff: 7.2, judge: 'same' }, amp: { t: 1.2, y: 1.0, diff: 0.2, judge: 'same' } } });
+  assert.ok(heat.indexOf('<span>오늘</span>') < heat.indexOf('<span>어제</span>'), '강도 카드에서 어제가 먼저 나옴');
+  const flow = api.flowCard({ flow: { main: { 개인: { t: 1, y: -1, turned: true }, 외국인: { t: 1, y: 1, turned: false }, 기관: { t: -1, y: 1, turned: true } }, inst: [] } });
+  assert.ok(flow.indexOf('<span>오늘</span>') < flow.indexOf('<span>어제</span>'), '수급 카드에서 어제가 먼저 나옴');
+});
