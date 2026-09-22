@@ -556,3 +556,9 @@ test('결론 카드 오른쪽에 ? 버튼을 두고, 설명은 보이는 시간�
   }
   assert.equal(api.openHelp(), false, '모달이 없는 페이지에서는 아무것도 하지 않는다');
 });
+
+test('결론 제목 색은 verdict.tone(오늘의 방향)이 있으면 그것을 따른다', () => {
+  const { api, root } = load(kst('2026-09-14T11:00:00'));
+  api.render(Object.assign({}, PAYLOAD, { verdict: { title: '오르고 있지만 지난 금요일보다 오름폭이 작아요', sub: 's', judge: 'weak', tone: 'up' } }), 'open');
+  assert.ok(root.innerHTML.includes('<h2 class="up">오르고 있지만'), '덜 오른 날이 파랑으로 칠해짐');
+});

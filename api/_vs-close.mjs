@@ -99,7 +99,7 @@ export async function buildCloseVs({ now = Date.now(), fetchJson }) {
     time: '15:30',
     today: { date: dash, label: labelFromYmd(dash) },
     prev: { date: yDash, label: labelFromYmd(yDash), rel: relLabel(yDash, dash) },
-    verdict: verdict({ yLabel: relLabel(yDash, dash), kospiDiff: kospi.diff, foreignDiff }),
+    verdict: verdict({ yLabel: relLabel(yDash, dash), kospiDiff: kospi.diff, foreignDiff, kospiT: kospi.t, kospiY: kospi.y, done: true }),
     kospi,
     flow: fT && fY ? { t: fT, y: fY, time: fT.t, foreignDiff, judge: judge(foreignDiff, TH.eok) } : null,
     axes: {

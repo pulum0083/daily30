@@ -373,7 +373,7 @@
     if (has('hero')) {
       if (d.verdict) {
         html += '<div class="vs-hero"><button type="button" class="help-q vs-help" aria-label="어제랑 비교해서 설명 보기">?</button><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
-          '<h2 class="' + (d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
+          '<h2 class="' + (d.verdict.tone != null ? d.verdict.tone : d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
           '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
       }
       // 옛 3칸(오늘 코스피·외국인 누적·주도주 평균)은 LIVE 바·아래 축 카드와 중복이라 뺐다(F2) —
@@ -471,7 +471,7 @@
   // 60초 폴링이 innerHTML을 갈아끼우므로 버튼마다 붙이지 않고 문서에 한 번만 위임한다.
   var HELP_HTML = '<div class="tt">어제랑 비교해서란?</div><div class="bd">' +
     '지금 코스피 흐름을 <b>직전 거래일 같은 시각</b>과 나란히 놓고 비교해요.<br><br>' +
-    '<b>맨 위 결론</b> — 같은 시각 코스피 등락률 차이가 ±0.3%p 안이면 "비슷해요", 그보다 높으면 "세요", 낮으면 "약해요"로 적어요.<br><br>' +
+    '<b>맨 위 결론</b> — 오늘 코스피가 오르는지 내리는지를 먼저 말하고, 직전 거래일 같은 시각과 비교해요. 예를 들어 둘 다 올랐는데 오늘이 덜 올랐으면 "오르고 있지만 어제보다 오름폭이 작아요"라고 적어요. 차이가 ±0.3%p 안이면 비슷한 것으로 봐요.<br><br>' +
     '<b>그래프</b> — 검은 선이 오늘, 점선이 직전 거래일이에요. 두 선 사이가 <b>빨간색</b>이면 오늘이 더 높고, <b>파란색</b>이면 더 낮아요. ' +
     '아래 막대는 5분마다 잰 차이(오늘 − 직전 거래일)이고, 오른쪽 회색 칸은 아직 남은 장이에요.<br><br>' +
     '<b>근거 네 줄</b><br>· 가격 — 직전 거래일 같은 시각 코스피와의 차이<br>· 강도 — 누적 거래량과 일중 진폭<br>' +

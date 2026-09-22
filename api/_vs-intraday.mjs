@@ -176,7 +176,7 @@ export async function buildIntradayVs({ now = Date.now(), fetchJson }) {
     time: at.slice(0, 2) + ':' + at.slice(2),
     today: { date: dash, label: labelFromYmd(dash) },
     prev: { date: yDash, label: labelFromYmd(yDash), rel },
-    verdict: verdict({ yLabel: rel, kospiDiff: kospi.diff, foreignDiff: flow ? flow.foreignDiff : null }),
+    verdict: verdict({ yLabel: rel, kospiDiff: kospi.diff, foreignDiff: flow ? flow.foreignDiff : null, kospiT: kospi.t, kospiY: kospi.y }),
     kospi, flow, leaders, avg, issues, axes,
   };
 }

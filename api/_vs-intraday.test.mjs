@@ -96,7 +96,8 @@ test('9/14 11:00 리플레이 — 코스피·외국인·결론', async () => {
   assert.equal(d.flow.foreignDiff, -8693);
   assert.equal(d.flow.time, '11:00');
   assert.equal(d.flow.judge, 'weak');
-  assert.equal(d.verdict.title, '지난 금요일과 비슷해요');
+  assert.equal(d.verdict.title, '지난 금요일처럼 내리고 있어요');   // 둘 다 내린 날 — 방향을 먼저 말한다(9/22)
+  assert.equal(d.verdict.tone, 'dn');
   assert.equal(d.issues, null); // C2 — 이슈 아카이브 6개 상한·시각 갱신 때문에 항상 null(SERVICE_RULES §49)
 });
 
@@ -185,7 +186,7 @@ test('수급 원천이 실패해도 나머지는 그린다 — flow만 null', as
   const d = await run({ now: AFTER_1100, ...f, fetchText: async () => { throw new Error('down'); } });
   assert.equal(d.status, 'ok');
   assert.equal(d.flow, null);
-  assert.equal(d.verdict.sub, '코스피가 같은 시각 기준 거의 같은 자리예요(−0.14%p)');
+  assert.equal(d.verdict.sub, '코스피 오늘 −2.56% · 지난 금요일 같은 시각 −2.42% — 거의 같은 자리예요(−0.14%p)');
 });
 
 test('이슈는 항상 null — 이슈 아카이브·키워드 사전을 부르지 않는다(C2)', async () => {

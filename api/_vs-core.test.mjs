@@ -68,3 +68,29 @@ test('결론 문장 — 외국인이 비슷하면 근거 줄에 붙이지 않는
   assert.equal(v.title, '오늘이 어제보다 세요');
   assert.equal(v.sub, '코스피가 같은 시각 기준 0.52%p 높아요');
 });
+
+// 2026-09-22 — "오늘이 어제보다 약해요"가 둘 다 오른 날(오늘이 덜 오른 날)에 하락으로 읽혔다. 제목에 오늘의 방향을 먼저 쓴다.
+test('결론 문장 — 오늘의 방향을 먼저 말한다(장중)', () => {
+  const t = (kospiT, kospiY) => verdict({ yLabel: '어제', kospiT, kospiY, kospiDiff: Math.round((kospiT - kospiY) * 100) / 100 });
+  assert.equal(t(0.5, 1.2).title, '오르고 있지만 어제보다 오름폭이 작아요');
+  assert.equal(t(1.2, 0.27).title, '어제보다 더 오르고 있어요');
+  assert.equal(t(0.5, -0.3).title, '어제와 달리 오르고 있어요');
+  assert.equal(t(-0.5, 0.4).title, '어제와 달리 내리고 있어요');
+  assert.equal(t(-1.2, -0.3).title, '어제보다 더 내리고 있어요');
+  assert.equal(t(-0.3, -1.2).title, '내리고 있지만 어제보다 낙폭이 작아요');
+  assert.equal(t(0.5, 0.4).title, '어제처럼 오르고 있어요');
+});
+
+test('결론 문장 — 근거 줄에 오늘·어제 값을 함께 적고, 제목 색은 오늘의 방향을 따른다', () => {
+  const v = verdict({ yLabel: '어제', kospiT: 0.5, kospiY: 1.2, kospiDiff: -0.7, foreignDiff: null });
+  assert.equal(v.sub, '코스피 오늘 +0.50% · 어제 같은 시각 +1.20% — 0.70%p 낮아요');
+  assert.equal(v.judge, 'weak');
+  assert.equal(v.tone, 'up', '덜 올랐어도 오른 날은 빨강 — 파랑이면 다시 하락으로 읽힌다');
+});
+
+test('결론 문장 — 마감 후엔 과거형이고 "같은 시각"을 빼며, 받침 뒤엔 과를 쓴다', () => {
+  const v = verdict({ yLabel: '지난 금요일', kospiT: -0.5, kospiY: 0.4, kospiDiff: -0.9, foreignDiff: null, done: true });
+  assert.equal(v.title, '지난 금요일과 달리 내렸어요');
+  assert.equal(v.sub, '코스피 오늘 −0.50% · 지난 금요일 +0.40% — 0.90%p 낮아요');
+  assert.equal(verdict({ yLabel: '어제', kospiT: 0.5, kospiY: 1.2, kospiDiff: -0.7, done: true }).title, '올랐지만 어제보다 오름폭이 작았어요');
+});
