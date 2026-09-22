@@ -568,3 +568,23 @@ test('비교 박스는 어제가 위, 오늘이 아래다 — 아래 막대(어�
   const heat = api.heatCard({ heat: { vol: { t: 197183, y: 178404, diff: 10.53, judge: 'strong' }, amp: { t: 1.2, y: 1.0, diff: 0.2, judge: 'same' } } });
   assert.ok(heat.indexOf('<span>어제</span>') < heat.indexOf('<span>오늘</span>'), '강도 카드에서 오늘이 먼저 나옴');
 });
+
+test('응답 전에는 결론·곡선 자리를 먼저 잡는다 — 숫자는 없다(2026-09-22)', () => {
+  const { root } = load(kst('2026-09-22T11:00:00'), null, { fetch: () => new Promise(noop) });
+  assert.equal(root.hidden, false);
+  assert.ok(root.innerHTML.includes('vs-skel'));
+  assert.ok(!/\d/.test(root.innerHTML.replace(/<[^>]+>/g, '')), '자리에는 숫자를 넣지 않는다(§0)');
+});
+
+test('카드가 없는 시간대(밤)에는 자리도 잡지 않는다', () => {
+  const { root } = load(kst('2026-09-22T18:00:00'), null, { fetch: () => new Promise(noop) });
+  assert.equal(root.hidden, true);
+  assert.equal(root.innerHTML, '');
+});
+
+test('응답이 실패하면 자리를 걷고 영역을 숨긴다', async () => {
+  const { root } = load(kst('2026-09-22T11:00:00'), null, { fetch: () => Promise.reject(new Error('down')) });
+  await new Promise((r) => setImmediate(r));
+  assert.equal(root.hidden, true);
+  assert.equal(root.innerHTML, '');
+});
