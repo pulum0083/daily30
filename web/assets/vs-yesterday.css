@@ -130,3 +130,9 @@
 .vsx-stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .vsx-mt0{margin-top:0}
 @media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}.vsx-stats2{grid-template-columns:minmax(0,1fr)}}
+/* 첫 응답 전 자리 — 실제 결론·곡선 카드 높이(2026-09-22 실측: PC 97/482px, 모바일 115/564px) */
+.vs-hero.vs-skel{min-height:97px}
+.vs-card.vs-skel{min-height:482px;animation:vs-skel 1.4s ease-in-out infinite}
+@keyframes vs-skel{50%{opacity:.55}}
+@media (max-width:760px){.vs-hero.vs-skel{min-height:115px}.vs-card.vs-skel{min-height:564px}}
+@media (prefers-reduced-motion:reduce){.vs-card.vs-skel{animation:none}}

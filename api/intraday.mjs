@@ -109,7 +109,9 @@ async function fetchUSMinutes(ticker) {
 export default async function handler(req, res) {
   // '어제랑 비교해서' 장중 대결판 — 라우트 12개 한도라 새 파일 대신 이 라우트에 분기한다(api/_route-budget.test.mjs)
   if (req.query && req.query.vs === 'intraday') {
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=60');
+    // 옛 값 허용 10분 — 방문이 드물어 1분이면 대부분 빈 캐시(조립 2~4초)를 만났다(2026-09-22).
+    // 옛 값은 머리의 비교 시각('어제 13:28 vs 오늘 13:28')이 그대로 밝히고, 60초 폴링이 새 값으로 바꾼다.
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=600');
     res.setHeader('Access-Control-Allow-Origin', '*');
     try {
       // origin 계산 삭제(C2) — buildIntradayVs가 /data/*.json을 더 이상 부르지 않아 필요 없다

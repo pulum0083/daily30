@@ -459,10 +459,19 @@
     return dow >= 1 && dow <= 5 && m >= 540 && m <= 931;
   }
 
+  // 첫 응답 전 자리 — 결론+곡선 카드와 같은 높이를 먼저 잡아, 데이터가 도착할 때 아래 내용이 밀려 내려가지 않게 한다.
+  // 숫자는 넣지 않는다(§0). 응답이 없거나 실패하면 render(null)이 영역째 숨긴다.
+  function skeleton() {
+    root.innerHTML = '<div class="vs-hero vs-skel" aria-busy="true"><p class="vs-eyebrow">어제랑 비교해서 · 불러오는 중</p></div>' +
+      '<div class="vs-card vs-skel" aria-hidden="true"></div>';
+    root.hidden = false;
+  }
+
   // 슬롯에 따라 엔드포인트를 고르고(§3.2), pre·weekend는 아예 호출하지 않는다.
   function load() {
     var slot = slotOf(new Date()), url = endpointFor(slot);
     if (!url) { render(null, slot); return; }
+    if (root && root.hidden && !root.innerHTML) skeleton();
     if (document.hidden) return;                       // 백그라운드 탭은 부르지 않는다(2026-08-16 차단 사고)
     fetch(url, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
