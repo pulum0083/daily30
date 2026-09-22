@@ -500,8 +500,8 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   // 곡선 조회에 실패하면 여기서 return해 아래 재배치까지 막히던 의존도 함께 걷어냈다.
   // anchor 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
   // day가 아닌 국면(= 코스피가 닫혀 있음)은 전부 '밤사이 미국 반도체 시황'을 위로 — 17:00부터 적용.
-  // (2026-09-22) '어제랑 비교해서' 마감 곡선(#vs-root)은 미국 브리핑 발행(21:20)까지 남으므로 섹터별 대표 종목 바로 위에 둔다.
-  // 21:20 이후엔 vs-yesterday.js가 영역을 숨겨 자리만 옮겨진 채 보이지 않는다.
+  // (2026-09-22) '어제랑 비교해서' 마감 곡선(#vs-root)은 오늘 미국 브리핑이 발행될 때까지 남으므로 섹터별 대표 종목 바로 위에 둔다.
+  // 발행 뒤엔 vs-yesterday.js가 영역을 숨겨 자리만 옮겨진 채 보이지 않는다.
   [usEve, usLinked, document.getElementById('vs-root')]
     .forEach(function(n){ if(n) anchor.parentNode.insertBefore(n, anchor); });
 })();
