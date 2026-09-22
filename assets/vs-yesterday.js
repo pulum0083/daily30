@@ -162,12 +162,13 @@
     return { left: left, right: right, plot: plot };
   }
 
-  // 오늘을 위, 어제를 아래에 둔다(2026-09-22 사용자 결정 — 모든 박스 공통).
+  // 어제를 위, 오늘을 아래에 둔다 — 아래 막대가 어제(왼쪽)→오늘(오른쪽) 순이라 글자 순서도 맞춘다
+  // (2026-09-22 한때 오늘을 위로 올렸다가, 막대와 순서가 엇갈려 사용자 결정으로 되돌렸다).
   // chart는 강도·주도권 카드가 쓰는 선택 인자(0축 막대) — 기존 호출부는 8개 인자만 넘겨 그대로 동작한다.
   function stat(title, j, yl, yv, yc, tv, tc, diff, chart) {
     return '<div class="vs-stat"><div class="vs-stat-h"><span>' + title + '</span>' + pill(j) + '</div>' +
-      '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + tc + '">' + tv + '</b></div>' +
       '<div class="vs-stat-r"><span>' + esc(yl) + '</span><b class="' + yc + '">' + yv + '</b></div>' +
+      '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + tc + '">' + tv + '</b></div>' +
       '<p class="vs-diff">차이 ' + diff + '</p>' + (chart || '') + '</div>';
   }
 
@@ -252,8 +253,8 @@
   function flowMainStat(title, m) {
     if (!m) return '';
     return '<div class="vs-stat"><div class="vs-stat-h"><span>' + title + '</span>' + turnPill(m.turned, m.t) + '</div>' +
-      '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + cls(m.t) + '">' + (m.t != null ? eok(m.t) : '—') + '</b></div>' +
       '<div class="vs-stat-r"><span>어제</span><b class="' + cls(m.y) + '">' + (m.y != null ? eok(m.y) : '—') + '</b></div>' +
+      '<div class="vs-stat-r"><span>오늘</span><b class="vs-big ' + cls(m.t) + '">' + (m.t != null ? eok(m.t) : '—') + '</b></div>' +
       miniBars(m.y, m.t, { zero: true }) + '</div>';
   }
 
@@ -437,8 +438,8 @@
       if (!l || l.t == null || l.y == null || l.diff == null) { box.hidden = true; box.innerHTML = ''; return; }
       var rel = esc(d.prev.rel);
       box.innerHTML = '<div class="vs-tb-h"><b>' + rel + ' 같은 시각</b><span>' + d.time + ' 기준</span></div>' +
-        '<div class="vs-tb-g"><span class="k">오늘</span><span class="v ' + cls(l.t) + '">' + f2(l.t) + '%</span>' +
-        '<span class="k">' + rel + '</span><span class="v ' + cls(l.y) + '">' + f2(l.y) + '%</span></div>' +
+        '<div class="vs-tb-g"><span class="k">' + rel + '</span><span class="v ' + cls(l.y) + '">' + f2(l.y) + '%</span>' +
+        '<span class="k">오늘</span><span class="v ' + cls(l.t) + '">' + f2(l.t) + '%</span></div>' +
         '<div class="vs-tb-d"><span>' + rel + '보다</span><span class="p ' + cls(l.diff) + '">' + f2(l.diff) + '%p</span></div>';
       box.hidden = false;
     });
