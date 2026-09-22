@@ -373,7 +373,8 @@
     var rel = esc(d.prev.rel), html = '';
     if (has('hero')) {
       if (d.verdict) {
-        html += '<div class="vs-hero"><button type="button" class="help-q vs-help" aria-label="어제랑 비교해서 설명 보기">?</button><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time + '</p>' +
+        html += '<div class="vs-hero"><p class="vs-eyebrow">🕘 ' + rel + ' ' + d.time + ' vs 오늘 ' + d.time +
+          '<button type="button" class="help-q vs-help" aria-label="어제랑 비교해서 설명 보기">?</button></p>' +
           '<h2 class="' + (d.verdict.tone != null ? d.verdict.tone : d.verdict.judge === 'strong' ? 'up' : d.verdict.judge === 'weak' ? 'dn' : '') + '">' + esc(d.verdict.title) + '</h2>' +
           '<p class="vs-sub">' + esc(d.verdict.sub) + '</p></div>';
       }
