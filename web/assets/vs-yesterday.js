@@ -465,8 +465,20 @@
   // 첫 응답 전 자리 — 결론+곡선 카드와 같은 높이를 먼저 잡아, 데이터가 도착할 때 아래 내용이 밀려 내려가지 않게 한다.
   // 숫자는 넣지 않는다(§0). 응답이 없거나 실패하면 render(null)이 영역째 숨긴다.
   function skeleton() {
-    root.innerHTML = '<div class="vs-hero vs-skel" aria-busy="true"><p class="vs-eyebrow">어제랑 비교해서 · 불러오는 중</p></div>' +
-      '<div class="vs-card vs-skel" aria-hidden="true"></div>';
+    var line = function (w, cls) { return '<span class="skl skl-line' + (cls ? ' ' + cls : '') + '" style="width:' + w + '"></span>'; };
+    root.innerHTML =
+      '<div class="vs-hero vs-skel" aria-busy="true" aria-label="어제랑 비교해서 불러오는 중">' +
+        '<p class="vs-eyebrow">' + line('190px') + '</p>' +
+        line('58%', 'sk-h2') + line('86%', 'sk-sub') +
+      '</div>' +
+      '<div class="vs-card vs-skel" aria-hidden="true">' +
+        '<div class="sk-legend">' + line('240px') + line('150px') + '</div>' +
+        '<div class="skl sk-chart"></div><div class="skl sk-diff"></div>' +
+        '<div class="sk-axis">' + line('34px') + line('34px') + line('34px') + line('34px') + '</div>' +
+        '<div class="sk-why">' +
+          [1, 2, 3, 4].map(function () { return '<span class="skl skl-line sk-why-k"></span>' + line('100%', 'sk-why-v'); }).join('') +
+        '</div>' +
+      '</div>';
     root.hidden = false;
   }
 
