@@ -1248,6 +1248,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     // 전 섹터 라이브 평균·코스피%를 배너에 반영 — 장중에도 버틴/밀린 섹터가 후행하지 않는다
     if(d.sectors) SIG_SECTORS=d.sectors;
     if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
+    if(SNAP&&!sbxUserPicked&&d.sectors){ var k=sbxPickDefault(); if(k!==sbxActiveKey){ sbxActiveKey=k; sbxUpdateLive(); sbxLoadIntraday(); } }
     renderTodayLine();
     sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
   }
@@ -1354,7 +1355,37 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 섹터별 라이브 시세 응답을 한 번이라도 받았는지(성공·실패·휴장 무관). 미해결이면 카드 숫자에 빗금 placeholder를 그린다.
   var sbxLiveTried={};
   // 장중인데 현재 탭 섹터의 라이브 응답이 아직 안 온 상태 — 스냅샷(전일 종가) 숫자를 노출하지 않고 빗금으로 대기.
-  function sbxPending(){ return krMarketOpen() && !sbxLiveTried[sbxActiveKey]; }
+  function sbxPending(){ return (krMarketOpen()||sbxSnapBehind()) && !sbxLiveTried[sbxActiveKey]; }
+  // 장 마감(15:30) 뒤 마감 잡이 스냅샷을 갱신하기(~16:31) 전 — 카드는 어제 스냅샷인데 탭 통계·한 줄은 /api/signals의
+  // 오늘 값이라 한 박스에 두 날짜가 섞였다(2026-09-23 16:17: 머리 "9/22 종가 기준"·카드 3상승 4하락 vs 통계 "상승 6 하락 1").
+  // 이 구간엔 오늘 정규장 공식 종가(/api/stocks-live 마감 세션)로 카드를 맞추고, 맞추지 못하면 오늘 값을 쓰지 않는다.
+  function sbxTodayYmd(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
+  function sbxSnapBehind(){
+    if(!SNAP||!_asOfYmd||krMarketOpen()) return false;
+    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false;
+    var m=(new Date().getUTCHours()*60+new Date().getUTCMinutes()+540)%1440;
+    return m>930 && _asOfYmd<sbxTodayYmd();
+  }
+  var _sbxCloseYmd=null; // 스냅샷보다 새 정규장 종가를 카드에 입힌 날짜(YYYY-MM-DD)
+  // 스냅샷 날짜가 오늘의 직전 거래일이고 오늘 봉이 아직 없을 때 오늘 공식 종가를 입힌다. 등락률 = 오늘 종가 ÷ 스냅샷(어제 공식 종가).
+  // 스냅샷이 더 오래됐으면 여러 날 등락이 하루로 보이므로 입히지 않는다. 입힌 종목 수를 돌려준다.
+  function sbxClosedOverlay(stocks, prices, snapYmd, todayYmd, isHoliday){
+    var d=new Date(todayYmd+'T00:00:00Z'), prev=null;
+    for(var i=0;i<10&&!prev;i++){ d.setUTCDate(d.getUTCDate()-1); var y=d.toISOString().slice(0,10); if(!isHoliday(y)) prev=y; }
+    if(snapYmd!==prev) return 0;
+    var ymd=todayYmd.replace(/-/g,''), n=0;
+    (prices||[]).forEach(function(p){
+      var st=stocks&&stocks[p.code];
+      if(!st||p.sessionDate!==ymd||typeof p.price!=='number'||!isFinite(p.price)) return;
+      if(st._snapClose==null) st._snapClose=st.close;
+      if(!(st._snapClose>0)) return;
+      st.close=p.price; st.change_pct=Math.round((p.price/st._snapClose-1)*10000)/100; n++;
+    });
+    return n;
+  }
+  window.__sbxClosedOverlay=sbxClosedOverlay;
+  // 스냅샷이 뒤처졌는데 오늘 종가를 아직(또는 끝내) 못 입혔다 — 이때 /api/signals의 오늘 섹터 값을 섞지 않는다.
+  function sbxSigStale(){ return sbxSnapBehind() && !_sbxCloseYmd; }
   function sbxSkel(w,h){ return '<span class="scard__skel" style="width:'+w+'px;height:'+h+'px;"></span>'; }
   function sbxCurve(s){var iv=sbxIntraday[s.code]; return (iv&&iv.length>=2)?iv:s.spark20;}
   function sbxCurveIsLive(s){var iv=sbxIntraday[s.code]; return !!(iv&&iv.length>=2);}
@@ -1400,7 +1431,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 라이브(SIG_SECTORS, /api/signals가 전 섹터 동시에 내려줌) 우선 — 스냅샷 폴백은 클릭한 탭만
   // 실시간이고 나머지 탭은 정적 스냅샷에 머물러 있다가 클릭 시 갑자기 값이 바뀌는 불일치를 막는다.
   function sbxSectorStat(key){
-    if(SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
+    if(!sbxSigStale()&&SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
     var arr=sbxSectorStocks(key), sum=0,up=0,dn=0,wsum=0,wden=0;
     arr.forEach(function(s){
       var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;
@@ -1574,13 +1605,15 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   }
   // 섹터 통계 소스 — 라이브(SIG_SECTORS) 우선, 없으면 스냅샷 기반
   function tlSectorStats(){
-    if(SIG_SECTORS){
+    if(SIG_SECTORS&&!sbxSigStale()){
       return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
     }
     return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{label:SECTOR_LABELS[k],avg:sbxAvgOf(st),total:st.total}:null;}).filter(Boolean);
   }
   function renderTodayLine(){
     var wrap=document.getElementById('today-line'); if(!wrap) return;
+    // 스냅샷(어제)과 오늘 코스피를 한 문장에 섞지 않는다 — 오늘 종가를 입히기 전까지는 숨긴다
+    if(sbxSigStale()){ wrap.style.display='none'; return; }
     var stats=tlSectorStats();
     if(!stats.length){ wrap.style.display='none'; return; }
     var leaders=stats.filter(function(s){return s.avg>0;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,2);
@@ -1636,7 +1669,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
       return '<span class="sbx-tab'+(key===sbxActiveKey?' on':'')+'" data-key="'+key+'">'+SBX_EMOJI[key]+' '+SECTOR_LABELS[key]+'<span class="rt '+cls+'">'+sbxPctFmt(sbxAvgOf(st))+'</span></span>';
     }).join('');
     [].slice.call(box.querySelectorAll('.sbx-tab')).forEach(function(el){
-      el.onclick=function(){ sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday(); };
+      el.onclick=function(){ sbxUserPicked=true; sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday(); };
     });
   }
   function sbxRenderBody(){
@@ -1666,13 +1699,22 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
       +'<div class="sbx-list-head"><span class="sbx-list-head__t">종목 '+arr.length+'</span><span class="sbx-list-head__sort">등락률 높은 순 ↓</span></div>'
       +'<div class="sbx-list">'+arr.map(sbxCardHtml).join('')+'</div>';
   }
+  // 기본 탭 = 평균 등락률이 가장 높은 섹터. 스냅샷이 뒤처진 마감 직후에도 오늘 신호(SIG_SECTORS)를 따른다 —
+  // 열린 탭은 곧 오늘 종가로 맞춰진다. 신호가 스냅샷보다 늦게 오면 applySignals가 다시 고른다(사용자가 탭을 누르기 전까지만).
+  var sbxUserPicked=false;
+  function sbxPickDefault(){
+    var best=sbxActiveKey, bestAvg=-Infinity;
+    SBX_ORDER.forEach(function(k){var st=(SIG_SECTORS&&SIG_SECTORS[k]&&SIG_SECTORS[k].total)?SIG_SECTORS[k]:sbxSectorStat(k); var a=sbxAvgOf(st); if(st.total&&a>bestAvg){bestAvg=a;best=k;}});
+    return best;
+  }
   function sbxSetLiveBadge(open){
     var el=document.getElementById('sbx-live'); if(!el) return;
     if(open){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 60초 갱신'; }
-    else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_asOfYmd||'')+' 종가 기준'; }
+    else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_sbxCloseYmd||_asOfYmd||'')+' 종가 기준'; }
   }
   function sbxUpdateLive(){
-    if(!SNAP||!krMarketOpen()) { sbxSetLiveBadge(false); return; }
+    var behind=sbxSnapBehind();
+    if(!SNAP||(!krMarketOpen()&&!behind)) { sbxSetLiveBadge(false); return; }
     var key=sbxActiveKey; // 응답 도착 전 탭이 바뀔 수 있어 요청 시점 섹터를 고정
     var codes=sbxSectorStocks(key).map(function(s){return s.code;});
     if(!codes.length) return;
@@ -1684,7 +1726,10 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     fetch('/api/stocks-live?codes='+encodeURIComponent(codes.join(',')),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
-        if(d){
+        if(d&&behind){
+          if(sbxClosedOverlay(SNAP.stocks, d.prices, _asOfYmd, sbxTodayYmd(), window.krIsKospiHolidayOn||function(){return false;})) _sbxCloseYmd=sbxTodayYmd();
+          sbxSetLiveBadge(false);
+        } else if(d){
           sbxSetLiveBadge(!!d.open);
           if(Array.isArray(d.prices)){
             d.prices.forEach(function(p){
@@ -1711,9 +1756,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
       // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
       // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
-      var _best=sbxActiveKey, _bestAvg=-Infinity;
-      SBX_ORDER.forEach(function(k){var st=sbxSectorStat(k); var a=sbxAvgOf(st); if(st.total&&a>_bestAvg){_bestAvg=a;_best=k;}});
-      sbxActiveKey=_best;
+      sbxActiveKey=sbxPickDefault();
       renderTodayLine();
       sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
       if(krMarketOpen()){

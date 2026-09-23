@@ -621,3 +621,43 @@ test('타일 — 거래대금·외국인 수량 표기', () => {
   assert.equal(fmtShares(-51155), '−5만주');
   assert.equal(fmtShares(9000), '+9,000주');
 });
+
+// ── 섹터 박스: 장 마감 뒤 스냅샷 갱신 전 오늘 종가 입히기(2026-09-23 두 날짜 섞임) ──
+const holi = (ymd) => { const d = new Date(ymd + 'T00:00:00Z').getUTCDay(); return d === 0 || d === 6 || ymd === '2026-09-24'; };
+const snapStock = () => ({ '005930': { close: 276500, change_pct: 0.91 }, '058470': { close: 75000, change_pct: 7.45 } });
+const closedPrices = [
+  { code: '005930', price: 285500, session: 'regular-closed', sessionDate: '20260923' },
+  { code: '058470', price: 74300, session: 'regular-closed', sessionDate: '20260923' },
+];
+
+test('마감 직후 — 오늘 공식 종가 ÷ 스냅샷(어제 공식 종가)로 등락률을 다시 낸다(9/23 실측 리플레이)', () => {
+  const fn = loadWindow().__sbxClosedOverlay;
+  assert.equal(typeof fn, 'function', '__sbxClosedOverlay 훅이 없다');
+  const st = snapStock();
+  assert.equal(fn(st, closedPrices, '2026-09-22', '2026-09-23', holi), 2);
+  assert.equal(st['005930'].close, 285500);
+  assert.equal(st['005930'].change_pct, 3.25);   // /api/signals 삼성전자 pct와 같다
+  assert.equal(st['058470'].change_pct, -0.93);
+});
+
+test('같은 응답을 두 번 입혀도 기준은 스냅샷 종가 그대로다', () => {
+  const fn = loadWindow().__sbxClosedOverlay;
+  const st = snapStock();
+  fn(st, closedPrices, '2026-09-22', '2026-09-23', holi);
+  fn(st, closedPrices, '2026-09-22', '2026-09-23', holi);
+  assert.equal(st['005930'].change_pct, 3.25);
+});
+
+test('스냅샷이 직전 거래일이 아니면 입히지 않는다 — 여러 날 등락을 하루로 보이게 하지 않는다', () => {
+  const fn = loadWindow().__sbxClosedOverlay;
+  const st = snapStock();
+  assert.equal(fn(st, closedPrices, '2026-09-21', '2026-09-23', holi), 0);
+  assert.equal(st['005930'].close, 276500);
+});
+
+test('주말·휴일을 건너뛴 직전 거래일을 쓰고, 세션 날짜가 오늘이 아니면 입히지 않는다', () => {
+  const fn = loadWindow().__sbxClosedOverlay;
+  const mon = [{ code: '005930', price: 280000, sessionDate: '20260921' }];
+  assert.equal(fn(snapStock(), mon, '2026-09-18', '2026-09-21', holi), 1);   // 월요일 ← 금요일
+  assert.equal(fn(snapStock(), closedPrices, '2026-09-22', '2026-09-24', holi), 0); // 세션 날짜 불일치
+});
