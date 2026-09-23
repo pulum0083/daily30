@@ -130,9 +130,27 @@
 .vsx-stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .vsx-mt0{margin-top:0}
 @media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}.vsx-stats2{grid-template-columns:minmax(0,1fr)}}
-/* 첫 응답 전 자리 — 실제 결론·곡선 카드 높이(2026-09-22 실측: PC 97/482px, 모바일 115/564px) */
+/* 첫 응답 전 자리 — 실제 결론·곡선 카드의 부분(제목·범례·곡선·차이 막대·근거 4줄) 모양을 그대로 잡는다.
+   높이는 2026-09-22 실측(PC 97/482px, 모바일 115/564px)에 맞췄다. 숫자·글자는 넣지 않는다(§0). .skl은 stocks-home.css의 공용 스켈레톤. */
+.vs-skel .skl{display:block;background:#E5EBF3;animation-name:vs-skl-pulse}
+@keyframes vs-skl-pulse{0%,100%{opacity:.75}50%{opacity:1}}
+.vs-hero.vs-skel .vs-eyebrow{margin-bottom:10px}
+.vs-hero.vs-skel .sk-h2{height:22px;margin-bottom:10px}
+.vs-hero.vs-skel .sk-sub{height:13px}
+.vs-card.vs-skel .sk-legend{display:flex;gap:12px;margin-bottom:11px}
+.vs-card.vs-skel .sk-chart{height:180px;border-radius:10px}
+.vs-card.vs-skel .sk-diff{height:56px;border-radius:8px;margin-top:6px}
+.vs-card.vs-skel .sk-axis{display:flex;justify-content:space-between;margin-top:8px}
+.vs-card.vs-skel .sk-why{display:grid;grid-template-columns:44px minmax(0,1fr);gap:22px 12px;align-items:center;margin-top:20px}
+.vs-card.vs-skel .sk-why-k{width:100%}
+/* 실제 카드가 내용에 따라 조금씩 다르므로 바닥은 실측 높이로 잡는다(PC 97/482px, 모바일 115/564px) */
 .vs-hero.vs-skel{min-height:97px}
-.vs-card.vs-skel{min-height:482px;animation:vs-skel 1.4s ease-in-out infinite}
-@keyframes vs-skel{50%{opacity:.55}}
-@media (max-width:760px){.vs-hero.vs-skel{min-height:115px}.vs-card.vs-skel{min-height:564px}}
-@media (prefers-reduced-motion:reduce){.vs-card.vs-skel{animation:none}}
+.vs-card.vs-skel{min-height:482px}
+@media (max-width:760px){
+  .vs-hero.vs-skel{min-height:115px}
+  .vs-card.vs-skel{min-height:564px}
+  .vs-hero.vs-skel .sk-h2{height:40px}
+  .vs-card.vs-skel .sk-why{gap:18px 10px}
+  .vs-card.vs-skel .sk-why-v{height:40px}   /* 모바일은 근거 줄이 두 줄로 접힌다 */
+}
+@media (prefers-reduced-motion:reduce){.vs-skel .skl{animation:none}}

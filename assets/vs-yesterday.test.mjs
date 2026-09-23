@@ -575,6 +575,11 @@ test('응답 전에는 결론·곡선 자리를 먼저 잡는다 — 숫자는 �
   const { root } = load(kst('2026-09-22T11:00:00'), null, { fetch: () => new Promise(noop) });
   assert.equal(root.hidden, false);
   assert.ok(root.innerHTML.includes('vs-skel'));
+  // 빈 카드가 아니라 실제 카드의 부분 모양을 그린다 — 안 그리면 화면엔 흰 여백으로만 보인다(2026-09-23)
+  for (const c of ['sk-h2', 'sk-sub', 'sk-legend', 'sk-chart', 'sk-diff', 'sk-axis', 'sk-why']) {
+    assert.ok(root.innerHTML.includes(c), `자리 모양 빠짐: ${c}`);
+  }
+  assert.equal((root.innerHTML.match(/sk-why-k/g) || []).length, 4, '근거 4줄 자리');
   assert.ok(!/\d/.test(root.innerHTML.replace(/<[^>]+>/g, '')), '자리에는 숫자를 넣지 않는다(§0)');
 });
 
