@@ -1,22 +1,13 @@
 {
-  "generated_at": "2026-09-23T10:01:03.458819+09:00",
+  "generated_at": "2026-09-23T10:31:42.229934+09:00",
   "date": "2026-09-23",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.53,
-      "surge": 0.33,
+      "changePct": 2.62,
+      "surge": 0.4,
       "events": [
-        {
-          "time": "08:00",
-          "headline": "\"삼성전자, 목표가 63만원으로 상향…조정은 매수 기회\"-유안타 - 머니투데이",
-          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1fS1NJVUg5bHpoSXZ6RGM5M2owQUpNN09GMkU2a2h1WnFvSUdqRXEyUW90ZXZGbEZOSGYtcmF4NndpeHhBaGE4dVZmeXZmRzhOOF82MUt5djdBV2FhOGd3bFJBVkFTUlZw0gFuQVVfeXFMT3IwNWxtZkhsZW9Cc3Ixb0pjUGpiV3N6T0RNekMyRGtKRTJIM3RQQ0YwZ25rS2paQW9pRkJ5YkZjdnpBQlBzSDJGYjJDSk5yWERYbnZTYWZ3OWdjZW9LdkdtcnFNSERjR3hoQWJPS1E?oc=5",
-          "source": "머니투데이",
-          "why": "유안타증권이 삼성전자 목표가를 63만원으로 상향 조정하며 현재의 조정은 매수 기회라고 분석했다.",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "09:36",
           "headline": "삼성전자·SK하이닉스, 메모리 반도체 수요 증가.. '강세\"",
@@ -25,30 +16,39 @@
           "why": "삼성전자·SK하이닉스, 메모리 반도체 수요 증가.. '강세\"",
           "tier": "why",
           "sentiment": "pos"
+        },
+        {
+          "time": "09:38",
+          "headline": "삼성전자 목표가 63만원 상향 조정 vs 35만원 유지…증권가, 메모리 호황 지속에 주목",
+          "url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5oMUdDUkxSQVB6OWoxcnhhZDdjX283enhUdjhQT045VlJOX1BtZXJjZXNZa19mQTZzb1NsUHhsUHZWM1Y5aGZhOEVrdjJyMUVIdlFTOFJuQVJZY28za2VDTElZbw?oc=5",
+          "source": "시사뉴스",
+          "why": "증권가에서는 메모리 호황 지속에 주목하며 삼성전자의 목표가를 63만원으로 상향 조정하거나 35만원을 유지하는 등 엇갈린 전망을 내놓고 있습니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 0.92,
-      "surge": 0.26,
+      "changePct": 1.36,
+      "surge": 0.32,
       "events": [
         {
           "time": "07:06",
           "headline": "미국증시 혼조마감, 유가·금리 하락에 나스닥 상승…마이크론·SK하이닉스 강세",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9tSy1sZVhzNVpPc2JJMEUwcEJnLVVZNDgwUzYxalhHNGhYZlFsajVucHFRcjVOck55clhzLXFaOTl2TEd6bGwyWk1CTEMzOWI0RzFDNUxUWnJvS092VXRVSnFXQnFhc0lKeUxxaDlzeFdFUQ?oc=5",
-          "source": "톱스타뉴스",
-          "why": "미국 증시에서 유가와 금리 하락에 힘입어 나스닥이 상승했으며, 마이크론과 SK하이닉스도 강세를 보였다. (개별 인과 단정 안 함)",
+          "source": "topstarnews.net",
+          "why": "미국 증시에서 유가와 금리 하락에 힘입어 나스닥이 상승했으며, 특히 마이크론과 SK하이닉스가 강세를 보였다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
         {
-          "time": "09:05",
-          "headline": "SK하이닉스 주가 상승 중",
-          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE92UEFlcE12MGtYT0VUbFNudmVCazZhR1pvYjJPb211MUgyWDM5bHJDMUp1QW41TEp3UHB2WGZBa3ExTlVvbVJYNS1YN244TXJfTVJoV1NUMHFaNlFw?oc=5",
-          "source": "anewsa.com",
-          "why": "SK하이닉스 주가 상승 중 (개별 인과 단정 안 함)",
+          "time": "09:40",
+          "headline": "美 반도체 강세에 코스피 1% 상승… 7100선 재탈환",
+          "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE0zb0dyVzU5a1o4cGtvUVBLOUlyX2hNWEhWcG4wSmVoa0p1UGJnV0h4Sm81WVh3ZnNZRFlhS0tnQnFXU1pIRmg2ZHNzZVh3dEo4cFRSQUNSelBsbGRFRHVqdTNtRmNNTW1LVTV5WF80UTDSAXRBVV95cUxQdkZsTHM0ZEZFNGlNQk0ta1NfRkpRclMxNlZmTWd2MkhCNWhGTWlYU1A2SGZwYTdQenJoVlQwWXVoZWlQN3RBN2JJeVM4NFVZN0R4ci1seW1FaDIxZWp0Y3otY05vRVdHWnU4NHYwQ18wanZjcQ?oc=5",
+          "source": "IT조선",
+          "why": "美 반도체 강세에 코스피 1% 상승… 7100선 재탈환 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         }
@@ -57,15 +57,24 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.42,
-      "surge": 0.18,
+      "changePct": -1.25,
+      "surge": 0.29,
       "events": [
         {
           "time": "08:31",
           "headline": "'현대차=로봇 대장주'라더니…증권사 리포트 믿을 수 있겠나",
           "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFAyd3lLQ3h1cnl4bnN1NUNlMmJmMmZsZTdkSTJ3c2lMMndQdzY4VWJxeGFCZldyUndCZFlzSnNmTFJBRUlJT3c5bHRRSFVybWI3MDNNOVhrangwcERYLWxXUDM2cEc?oc=5",
           "source": "MTN 머니투데이방송",
-          "why": "증권사 리포트에서 현대차를 로봇 대장주로 평가했지만, 이에 대한 의구심이 제기되고 있습니다. (개별 인과 단정 안 함)",
+          "why": "증권사 리포트가 현대차를 로봇 대장주로 평가했지만, 이에 대한 신뢰성에 의문이 제기되고 있다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:11",
+          "headline": "현대차 주가, 9월 23일 장중 359,250원 약보합 흐름",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9tQndlNFY4YVgwN2diN2ZBX3dSUFdReG1jc2c1SlNzVF8zaGlVUjJSaFBVUUVXLWc1anhxdWdIVmExTXlVeWlPb1ZSWEVYVGlWQjg1V05YaS1sX0pxa3R4eWM2UU9xSzVQdlRyUWRfUE45UQ?oc=5",
+          "source": "topstarnews.net",
+          "why": "현대차 주가, 9월 23일 장중 359,250원 약보합 흐름 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "neu"
         }
