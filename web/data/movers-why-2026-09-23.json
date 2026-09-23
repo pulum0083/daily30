@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-23T09:01:42.904177+09:00",
+  "generated_at": "2026-09-23T09:31:06.474329+09:00",
   "date": "2026-09-23",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 2.53,
-      "surge": 0.04,
+      "changePct": 2.8,
+      "surge": 0.2,
       "events": [
         {
           "time": "08:00",
@@ -31,24 +31,24 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 2.88,
-      "surge": 0.03,
+      "changePct": 1.85,
+      "surge": 0.18,
       "events": [
-        {
-          "time": "08:34",
-          "headline": "프리마켓서 삼성전자 28만선 탈환…간밤 美반도체 강세 훈풍",
-          "url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE1nNnZPVmRyUTRpaENhclR4QXBVa1M4MUdJUGVXVW9SakpMMU1BVjlqNnMyd2M0ZXpRcXRIMDd4dHAxRzRXWjllRkdQdlVvT2JselHSAVNBVV95cUxPc0xKTFBzWEtPMGxZWnptUXBpNWxkYjZ1LXVWNElxTUFMNDVBdHJkQWtNLUkycUlJQVFsYmU2Wk5kUTNIMEpXWnRmNVpUUHNUaUEtZw?oc=5",
-          "source": "서울경제",
-          "why": "프리마켓서 삼성전자 28만선 탈환…간밤 美반도체 강세 훈풍",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "07:06",
           "headline": "미국증시 혼조마감, 유가·금리 하락에 나스닥 상승…마이크론·SK하이닉스 강세",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9tSy1sZVhzNVpPc2JJMEUwcEJnLVVZNDgwUzYxalhHNGhYZlFsajVucHFRcjVOck55clhzLXFaOTl2TEd6bGwyWk1CTEMzOWI0RzFDNUxUWnJvS092VXRVSnFXQnFhc0lKeUxxaDlzeFdFUQ?oc=5",
-          "source": "톱스타뉴스",
-          "why": "미국 증시에서 유가와 금리 하락에 힘입어 나스닥이 상승했으며, 마이크론과 SK하이닉스도 강세를 보였다. (개별 인과 단정 안 함)",
+          "source": "topstarnews.net",
+          "why": "미국 증시에서 유가와 금리 하락에 힘입어 나스닥이 상승했으며, 이에 따라 마이크론과 SK하이닉스도 강세를 보였다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:05",
+          "headline": "SK하이닉스 주가 상승 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE92UEFlcE12MGtYT0VUbFNudmVCazZhR1pvYjJPb211MUgyWDM5bHJDMUp1QW41TEp3UHB2WGZBa3ExTlVvbVJYNS1YN244TXJfTVJoV1NUMHFaNlFw?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "SK하이닉스 주가 상승 중 (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         }
@@ -57,9 +57,19 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 0.62,
-      "surge": 0.02,
-      "events": []
+      "changePct": 0.55,
+      "surge": 0.09,
+      "events": [
+        {
+          "time": "08:31",
+          "headline": "'현대차=로봇 대장주'라더니…증권사 리포트 믿을 수 있겠나",
+          "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFAyd3lLQ3h1cnl4bnN1NUNlMmJmMmZsZTdkSTJ3c2lMMndQdzY4VWJxeGFCZldyUndCZFlzSnNmTFJBRUlJT3c5bHRRSFVybWI3MDNNOVhrangwcERYLWxXUDM2cEc?oc=5",
+          "source": "MTN 머니투데이방송",
+          "why": "증권사 리포트에서 현대차를 로봇 대장주로 평가했지만, 이에 대한 신뢰성에 의문을 제기하는 기사입니다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
+        }
+      ]
     }
   ]
 }
