@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-25T17:45:38+09:00",
+  "updated_at": "2026-09-26T17:32:04+09:00",
   "rows": [
     {
       "date": "2026-08-17",
@@ -1064,6 +1064,97 @@
           "path": "/api/data?f=briefings-list",
           "status": 200,
           "elapsed_ms": 798,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        }
+      ],
+      "team": {
+        "plan": "hobby",
+        "soft_block": null,
+        "blocked": null
+      }
+    },
+    {
+      "date": "2026-09-26",
+      "checked_at": "2026-09-26T17:32:04+09:00",
+      "summary": {
+        "cacheable": 8,
+        "total": 8,
+        "regressed": [],
+        "failed": [
+          "/api/hl-night"
+        ]
+      },
+      "endpoints": [
+        {
+          "path": "/api/kospi-live",
+          "status": 200,
+          "elapsed_ms": 2164,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/market",
+          "status": 200,
+          "elapsed_ms": 2978,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/stocks-live?codes=005930",
+          "status": 200,
+          "elapsed_ms": 2176,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/intraday?code=005930",
+          "status": 200,
+          "elapsed_ms": 2755,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/intraday?vs=intraday",
+          "status": 200,
+          "elapsed_ms": 215,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/signals",
+          "status": 200,
+          "elapsed_ms": 3573,
+          "cache_control": "public, max-age=0, must-revalidate",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/hl-night",
+          "status": 502,
+          "elapsed_ms": 4018,
+          "cache_control": "s-maxage=60, stale-while-revalidate=120",
+          "vercel_cache": "MISS",
+          "age": "0",
+          "cache": "ok"
+        },
+        {
+          "path": "/api/data?f=briefings-list",
+          "status": 200,
+          "elapsed_ms": 879,
           "cache_control": "public, max-age=0, must-revalidate",
           "vercel_cache": "MISS",
           "age": "0",
