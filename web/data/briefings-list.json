@@ -1,20 +1,22 @@
 {
   "slots": {
-    "2026-09-25": {
+    "2026-09-28": {
       "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
+        "state": "ready",
+        "url": "/briefings/2026-09-28/kospi/",
+        "headline": "오늘, 코스피 사야 할까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
       },
       "close": {
         "state": "pending",
         "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-09-25/us/",
-        "headline": "30년물 금리 22년래 최고에도 반도체가 지수를 끌어올려요",
-        "title": "—",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-09-23": {
@@ -760,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-13/us/",
         "headline": "CPI 쇼크가 지나간 자리, 이제는 PPI가 반도체 랠리의 연장전을 결정한다",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-12": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-12/kospi/",
-        "headline": "EWY 급등, 오늘 밤 CPI가 관문",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-12/close/",
-        "headline": "코스피 6,600 돌파 시도 — 사이드카까지 부른 급등의 정체는?",
-        "title": "6,579.04",
-        "price": "6,579.04",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-12/us/",
-        "headline": "빅테크는 쉬고, 반도체는 CPI 앞에서 먼저 달린다",
         "title": "—",
         "time": ""
       }
