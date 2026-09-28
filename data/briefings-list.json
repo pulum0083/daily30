@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-09-29": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-09-29/kospi/",
+        "headline": "왜 내릴까? — 금리 5.2% 돌파에 반도체 이중 충격",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-09-28": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-14/us/",
         "headline": "물가는 잠잠해지는데 메모리는 불타오른다 — PPI 안도랠리 위에 올라탄 반도체 슈퍼사이클",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-13": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-13/kospi/",
-        "headline": "반도체 폭주 — SOX·DRAM 동반 급등, 오늘도 이어질까",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-13/close/",
-        "headline": "美 CPI 둔화 + AI 훈풍, 반도체 쌍끌이 급등",
-        "title": "6,813.34",
-        "price": "6,813.34",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-13/us/",
-        "headline": "CPI 쇼크가 지나간 자리, 이제는 PPI가 반도체 랠리의 연장전을 결정한다",
         "title": "—",
         "time": ""
       }
