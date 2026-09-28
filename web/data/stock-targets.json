@@ -5,7 +5,7 @@
       "name": "삼성전자",
       "consensus": 495000,
       "firm_count": 12,
-      "close_price": 285500,
+      "close_price": 270000,
       "reports": [
         {
           "firm": "유안타증권",
@@ -279,8 +279,14 @@
       "name": "SK하이닉스",
       "consensus": 3337500,
       "firm_count": 12,
-      "close_price": 1862000,
+      "close_price": 1768000,
       "reports": [
+        {
+          "firm": "대신증권",
+          "opinion": "Buy",
+          "target_price": 3200000,
+          "date": "26.09.28"
+        },
         {
           "firm": "미래에셋증권",
           "opinion": "매수",
@@ -327,12 +333,6 @@
           "firm": "교보증권",
           "opinion": "Buy",
           "target_price": 4000000,
-          "date": "26.07.30"
-        },
-        {
-          "firm": "대신증권",
-          "opinion": "Buy",
-          "target_price": 3200000,
           "date": "26.07.30"
         },
         {
@@ -553,7 +553,7 @@
       "name": "현대차",
       "consensus": 715385,
       "firm_count": 13,
-      "close_price": 353500,
+      "close_price": 354500,
       "reports": [
         {
           "firm": "삼성증권",
