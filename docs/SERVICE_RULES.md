@@ -2140,3 +2140,15 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - **재발 시 진단 순서**: ① 마감 잡 로그에서 `Investor trading` 줄의 HTTP 코드를 본다. ② `web/data/investor-time/`에 그날 파일이 생겼는지 본다(없으면 다음 날 아침 브리핑·대결판 '어제'가 빈다).
   ③ 값이 이상하면 그날 파일의 15:40 행 네 값의 합이 0인지, `m.stock.naver.com/api/index/KOSPI/trend`와 방향이 맞는지 대조한다.
 
+
+### 46. gh-pages 푸시가 GitHub 500으로 실패해 미국 브리핑 텔레그램이 미발송 (2026-09-30 실사고, 수정 완료)
+
+**증상**: 21:15 미국 잡([run 36713689939](https://github.com/pulum0083/daily30/actions/runs/36713689939))이 분석·검증·HTML·main 커밋·Vercel 배포까지 전부 성공했는데, `🌐 GitHub Pages 배포` 스텝이 `remote: Internal Server Error`로 실패해 잡이 멈췄다. 페이지는 `doubleshot.space`에 정상 발행됐지만 라이브 확인·텔레그램·이메일이 모두 건너뛰어졌다.
+
+**원인**: GitHub 서버 측 일시 오류. 다만 이 스텝이 발송을 막을 이유가 애초에 없었다 — GitHub Pages는 저장소에서 비활성화 상태(`has_pages=false`, §17)라 gh-pages는 서비스 경로가 아니고, 라이브 확인(`check_page_live.py`)도 Vercel을 본다.
+
+**복구**: `gh workflow run telegram-resend.yml -f briefing_type=us -f date=2026-09-30`(§32) — 발행된 스냅샷으로 텔레그램만 재발송. 이메일은 이 워크플로우 범위 밖이다.
+
+**수정**: 3개 브리핑 잡의 gh-pages 스텝에 `continue-on-error: true` + `timeout-minutes: 5`.
+
+- **방지 룰**: 발송(텔레그램·이메일) **앞에** 놓인 스텝은 전부 "이게 실패하면 발송을 막아야 하는가"를 답해야 한다. 서비스 경로가 아닌 부수 배포(gh-pages 등)는 발송을 막지 않게 한다(§21과 같은 계열).

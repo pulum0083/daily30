@@ -216,6 +216,11 @@ jobs:
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
+        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
+        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
+        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
+        continue-on-error: true
+        timeout-minutes: 5
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -373,6 +378,11 @@ jobs:
 
       - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
         if: steps.holiday.outputs.open == 'true'
+        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
+        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
+        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
+        continue-on-error: true
+        timeout-minutes: 5
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -578,6 +588,11 @@ jobs:
 
       - name: 🌐 GitHub Pages 배포
         if: steps.holiday.outputs.open == 'true'
+        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
+        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
+        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
+        continue-on-error: true
+        timeout-minutes: 5
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
