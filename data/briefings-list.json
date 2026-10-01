@@ -1,24 +1,22 @@
 {
   "slots": {
-    "2026-10-01": {
+    "2026-10-02": {
       "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
+        "state": "ready",
+        "url": "/briefings/2026-10-02/kospi/",
+        "headline": "마이크론發 훈풍, 오늘도 반도체가 끌고 간다",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
       },
       "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-01/close/",
-        "headline": "마이크론 훈풍 + 반도체 수출 최대치 — 코스피 1.95% 급등",
-        "title": "6,971.35",
-        "price": "6,971.35",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-01/us/",
-        "headline": "국채금리 24년 만의 고점에도 돈은 반도체로 몰린다",
-        "title": "—",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-09-30": {
@@ -764,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-19/us/",
         "headline": "반도체 쇼크의 후폭풍 — 선물은 웃지만 SOX는 여전히 피 흘려요",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-18": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-18/kospi/",
-        "headline": "휴장 끝난 코스피, 반도체·EWY 폭등 업고 갭업 출발",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:31"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-18/close/",
-        "headline": "삼성전기 급락·기관 매도 겹쳐 코스피 1%대 하락",
-        "title": "6,869.83",
-        "price": "6,869.83",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-18/us/",
-        "headline": "유가에 눌린 지수, 반도체만 홀로 걷는다",
         "title": "—",
         "time": ""
       }
