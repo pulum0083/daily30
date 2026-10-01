@@ -2141,7 +2141,7 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
   ③ 값이 이상하면 그날 파일의 15:40 행 네 값의 합이 0인지, `m.stock.naver.com/api/index/KOSPI/trend`와 방향이 맞는지 대조한다.
 
 
-### 46. gh-pages 푸시가 GitHub 500으로 실패해 미국 브리핑 텔레그램이 미발송 (2026-09-30 실사고, 수정 완료)
+### 57. gh-pages 푸시가 GitHub 500으로 실패해 미국 브리핑 텔레그램이 미발송 (2026-09-30 실사고, 수정 완료)
 
 **증상**: 21:15 미국 잡([run 36713689939](https://github.com/pulum0083/daily30/actions/runs/36713689939))이 분석·검증·HTML·main 커밋·Vercel 배포까지 전부 성공했는데, `🌐 GitHub Pages 배포` 스텝이 `remote: Internal Server Error`로 실패해 잡이 멈췄다. 페이지는 `doubleshot.space`에 정상 발행됐지만 라이브 확인·텔레그램·이메일이 모두 건너뛰어졌다.
 
