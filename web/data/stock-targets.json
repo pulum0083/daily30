@@ -1,12 +1,18 @@
 {
-  "updated_at": "2026-09-30",
+  "updated_at": "2026-10-01",
   "stocks": {
     "005930": {
       "name": "삼성전자",
       "consensus": 495000,
       "firm_count": 12,
-      "close_price": 268500,
+      "close_price": 276000,
       "reports": [
+        {
+          "firm": "하나증권",
+          "opinion": "Buy",
+          "target_price": 480000,
+          "date": "26.10.01"
+        },
         {
           "firm": "신한투자증권",
           "opinion": "매수",
@@ -59,12 +65,6 @@
           "firm": "DS투자증권",
           "opinion": "매수",
           "target_price": 530000,
-          "date": "26.07.31"
-        },
-        {
-          "firm": "한화투자증권",
-          "opinion": "Buy",
-          "target_price": 580000,
           "date": "26.07.31"
         }
       ],
@@ -280,6 +280,10 @@
         {
           "date": "2026-09-30",
           "value": 495000
+        },
+        {
+          "date": "2026-10-01",
+          "value": 495000
         }
       ]
     },
@@ -287,7 +291,7 @@
       "name": "SK하이닉스",
       "consensus": 3337500,
       "firm_count": 12,
-      "close_price": 1776000,
+      "close_price": 1833000,
       "reports": [
         {
           "firm": "신한투자증권",
@@ -562,6 +566,10 @@
         {
           "date": "2026-09-30",
           "value": 3337500
+        },
+        {
+          "date": "2026-10-01",
+          "value": 3337500
         }
       ]
     },
@@ -569,7 +577,7 @@
       "name": "현대차",
       "consensus": 715385,
       "firm_count": 13,
-      "close_price": 345000,
+      "close_price": 349000,
       "reports": [
         {
           "firm": "삼성증권",
@@ -843,6 +851,10 @@
         },
         {
           "date": "2026-09-30",
+          "value": 715385
+        },
+        {
+          "date": "2026-10-01",
           "value": 715385
         }
       ]
