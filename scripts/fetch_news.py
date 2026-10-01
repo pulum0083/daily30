@@ -24,6 +24,7 @@ from pathlib import Path
 import pytz
 
 import news_sources as ns
+import superlative_subject as _ss
 from session_label import prev_us_session
 
 BASE_DIR = Path(__file__).parent.parent
@@ -354,8 +355,8 @@ _INDEX_SYMBOLS = {"nasdaq": "^IXIC", "sp500": "^GSPC", "dow": "^DJI", "sox": "^S
 
 # "사상 최고치 경신"처럼 **수치가 없는 정성 최상급 주장**. 등락률 게이트(§22·§24)는
 # 인접 숫자가 있어야 발화하므로 이런 주장에 구조적으로 눈이 먼다 — 별도로 잡는다.
-_HIGH_SUPERLATIVE_RE = re.compile(r"(?:사상\s*최고|역대\s*최고|최고치|신고가|사상최고)")
-_LOW_SUPERLATIVE_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|신저가|사상최저)")
+_HIGH_SUPERLATIVE_RE = _ss.HIGH_RE
+_LOW_SUPERLATIVE_RE = _ss.LOW_RE
 
 # "5,500선"·"5500 포인트"·"5,500 돌파" 형태의 지수 레벨 표기 (3~5자리)
 _INDEX_LEVEL_RE = re.compile(r"(\d{1,2}[,]?\d{3})\s*(?:선|포인트|p\b|돌파|회복|안착)")
@@ -394,16 +395,18 @@ def _superlative_claim_wrong(text: str, subject: str, snap: dict) -> str | None:
     """
     if subject not in text:
         return None
-    win_all = "".join(text[max(0, m.start() - 25): m.end() + 25]
-                      for m in re.finditer(re.escape(subject), text))
+    # 최상급마다 같은 문장 안의 주어를 하나만 정한다(§59) — 앞뒤 25자 창은 문장 경계를 넘어
+    # "국채금리는 … 최고치를 기록했어요. 이 금리 부담이 다우를…"을 다우의 주장으로 오판했다.
+    kinds = {k for n, k in _ss.attributed_superlatives(text, list(_REALITY_SUBJECTS.items()))
+             if n == subject}
     chg, level = snap.get("change_pct"), snap.get("level")
-    if _HIGH_SUPERLATIVE_RE.search(win_all):
+    if "high" in kinds:
         if chg is not None and chg < 0:
             return f"'최고' 주장이나 실측 {chg:+.2f}% 하락"
         hi = snap.get("high_52w")
         if level is not None and hi and level < hi * 0.99:
             return f"'최고' 주장이나 실측 {level:,.0f} < 52주 고점 {hi:,.0f}"
-    if _LOW_SUPERLATIVE_RE.search(win_all):
+    if "low" in kinds:
         if chg is not None and chg > 0:
             return f"'최저' 주장이나 실측 {chg:+.2f}% 상승"
         lo = snap.get("low_52w")

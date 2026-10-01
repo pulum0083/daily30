@@ -97,6 +97,77 @@ def test_no_superlative_skips_network():
         va._index_extremes = orig
 
 
+# ── 2026-10-01 실사고(§59): 국채금리의 최고치를 다우의 주장으로 오판해 발행 차단 ─────────
+# 로그에 남은 앞 80자는 원문 그대로, 그 뒤("끌어내렸어요.")는 잘린 부분을 복원한 것이다.
+DOW_REAL = {"^DJI": {"level": 45000.0, "change_pct": -0.86,
+                     "high_52w": 47000.0, "low_52w": 38000.0}}
+OCT01 = ("물가 안도에도 미국 10년물 국채금리는 5.29%까지 치솟으며 2002년 5월 이후 최고치를 "
+         "기록했어요. 이 금리 부담이 다우를 -0.86% 끌어내렸어요.")
+
+
+def test_oct01_yield_record_is_not_dow_claim():
+    assert not find_superlative_violations(OCT01, DOW_REAL)
+
+
+def test_oct01_scalar_prose_does_not_block():
+    import validate_analysis as va
+    orig = va._index_extremes
+    va._index_extremes = lambda sym: DOW_REAL.get(sym)
+    try:
+        corr, warn, blocks = [], [], []
+        validate_index_superlatives({"why": OCT01}, corr, warn, blocks)
+        assert not blocks, blocks
+    finally:
+        va._index_extremes = orig
+
+
+def test_yield_record_same_sentence_not_dow_claim():
+    """한 문장 안이라도 최고치의 주어가 국채금리면 다우의 주장이 아니다."""
+    text = "국채금리가 2002년 이후 최고치로 치솟으며 다우를 -0.86% 끌어내렸어요."
+    assert not find_superlative_violations(text, DOW_REAL)
+
+
+def test_index_before_competing_subject_not_attributed():
+    text = "다우는 -0.86% 밀렸고 국채금리는 2002년 이후 최고치를 기록했어요."
+    assert not find_superlative_violations(text, DOW_REAL)
+
+
+def test_contrast_clause_breaks_attribution():
+    text = "다우는 밀렸지만 엔비디아는 사상 최고치를 새로 썼어요."
+    assert not find_superlative_violations(text, DOW_REAL)
+
+
+def test_genuine_dow_claim_still_caught():
+    assert find_superlative_violations("다우가 사상 최고치를 경신했어요.", DOW_REAL)
+
+
+def test_adnominal_form_caught():
+    """'사상 최고치를 경신한 나스닥' — 지수가 최상급 뒤에 와도 꾸밈 관계면 그 지수의 주장이다."""
+    assert find_superlative_violations("간밤엔 사상 최고치를 경신한 나스닥이 시장을 이끌었어요.", REAL)
+
+
+def test_nearest_index_wins():
+    """두 지수가 한 문장에 있으면 최상급에 가까운 쪽의 주장이다."""
+    real = {"^IXIC": {"level": 27500.0, "change_pct": 1.2, "high_52w": 27500.0, "low_52w": 19000.0},
+            **DOW_REAL}
+    hits = find_superlative_violations("다우는 -0.86% 밀렸고 나스닥은 사상 최고치를 경신했어요.", real)
+    assert not hits, hits
+
+
+def test_incident_in_list_item_field_split():
+    """리스트 항목은 필드별로 본다 — 제목의 지수명이 본문의 국채금리 최고치에 붙지 않는다."""
+    import validate_analysis as va
+    orig = va._index_extremes
+    va._index_extremes = lambda sym: DOW_REAL.get(sym)
+    try:
+        a = {"key_drivers": [{"title": "다우 약세", "why": "사상 최고치 국채금리가 부담이에요"}]}
+        corr, warn, blocks = [], [], []
+        validate_index_superlatives(a, corr, warn, blocks)
+        assert len(a["key_drivers"]) == 1 and not corr and not blocks
+    finally:
+        va._index_extremes = orig
+
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):

@@ -20,6 +20,11 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+try:
+    import scripts.superlative_subject as _ss
+except ImportError:
+    import superlative_subject as _ss
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 LATEST_FILE = {
@@ -929,8 +934,8 @@ def _fetch_kospi_realdata(code):
 # (_index_figure_wrong·_us_figure_stale)가 구조적으로 발화할 수 없다 — 인접 수치가 있어야
 # 비교가 성립하기 때문이다. 실제로 그날 나스닥은 -0.22% 하락 마감이었고, 같은 페이지
 # 사이드바(실측)에 -0.22%가 찍혀 있는데도 본문만 "사상 최고"로 나갔다.
-_SUPERLATIVE_HIGH_RE = re.compile(r"(?:사상\s*최고|역대\s*최고|최고치|신고가|사상최고)")
-_SUPERLATIVE_LOW_RE = re.compile(r"(?:사상\s*최저|역대\s*최저|최저치|신저가|사상최저)")
+_SUPERLATIVE_HIGH_RE = _ss.HIGH_RE
+_SUPERLATIVE_LOW_RE = _ss.LOW_RE
 # 최상급 주장은 이 리스트 필드에서 발견되면 항목을 제거하고, 그 밖(스칼라 산문)에서
 # 발견되면 발행을 차단한다 — 산문은 자동 수정이 불가능하고, 틀린 전제 위에 쓰인 글이라
 # 문장 하나만 지워도 나머지 서사가 그대로 남기 때문이다.
@@ -976,26 +981,24 @@ def _index_extremes(symbol):
 def find_superlative_violations(text, idx_real):
     """text의 '지수명 + 사상 최고/최저' 주장 중 실측과 어긋나는 것들의 사유 목록.
 
-    지수명 등장 위치 기준 앞뒤 25자 창에서만 최상급 표현을 찾는다 — 문장 전체를 훑으면
-    "나스닥은 밀렸지만 금값은 사상 최고"처럼 주어가 다른 표현이 교차 매칭된다.
+    최상급 표현마다 같은 문장 안의 주어를 하나만 정한다(superlative_subject, §59).
+    앞뒤 25자 창으로 판정하던 때는 문장 경계를 넘어 "국채금리는 … 최고치를 기록했어요.
+    이 금리 부담이 다우를 끌어내렸어요"를 다우의 주장으로 오판해 발행을 막았다.
     """
     plain = strip_tags(text or "")
     hits = []
-    for name, symbol in _INDEX_NAME_SYMBOL:
-        if symbol is None or name not in plain:
-            continue
-        snap = idx_real.get(symbol)
+    sym_of = dict(_INDEX_NAME_SYMBOL)
+    for name, kind in _ss.attributed_superlatives(plain, _INDEX_NAME_SYMBOL):
+        snap = idx_real.get(sym_of.get(name))
         if not snap:
             continue
-        win = "".join(plain[max(0, m.start() - 25): m.end() + 25]
-                      for m in re.finditer(re.escape(name), plain))
-        if _SUPERLATIVE_HIGH_RE.search(win):
+        if kind == "high":
             if snap["change_pct"] < 0:
                 hits.append(f"{name} '최고' 주장이나 실측 {snap['change_pct']:+.2f}% 하락")
             elif snap["level"] < snap["high_52w"] * 0.99:
                 hits.append(f"{name} '최고' 주장이나 실측 {snap['level']:,.0f} "
                             f"< 52주 고점 {snap['high_52w']:,.0f}")
-        if _SUPERLATIVE_LOW_RE.search(win):
+        else:
             if snap["change_pct"] > 0:
                 hits.append(f"{name} '최저' 주장이나 실측 {snap['change_pct']:+.2f}% 상승")
             elif snap["level"] > snap["low_52w"] * 1.01:
@@ -1049,7 +1052,10 @@ def validate_index_superlatives(analysis, corrections, warnings, blocks):
         kept = []
         for it in items:
             blob = json.dumps(it, ensure_ascii=False) if not isinstance(it, str) else it
-            hits = find_superlative_violations(blob, idx_real)
+            # 필드별로 따로 본다 — JSON으로 이어붙이면 제목의 지수명과 본문의 최상급이
+            # 문장 경계 없이 붙어 주어가 엉킨다(§59)
+            hits = [h for t in _superlative_texts(it)
+                    for h in find_superlative_violations(t, idx_real)]
             if hits:
                 corrections.append(f"{fld} 항목 제거 (실측 모순 {hits}): {strip_tags(blob)[:60]}")
             else:

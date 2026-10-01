@@ -111,6 +111,21 @@ def test_dict_items_supported():
     assert _drop_reality_contradictions(items, REAL) == []
 
 
+
+def test_oct01_yield_record_kept():
+    """2026-10-01 실사고(§59): 국채금리의 최고치를 다우의 주장으로 오판하지 않는다."""
+    real = {"dow": {"change_pct": -0.86, "level": 45000.0,
+                    "high_52w": 47000.0, "low_52w": 38000.0}}
+    items = ["물가 안도에도 미국 10년물 국채금리는 5.29%까지 치솟으며 2002년 5월 이후 최고치를 "
+             "기록했어요. 이 금리 부담이 다우를 -0.86% 끌어내렸어요."]
+    assert _drop_reality_contradictions(items, real) == items
+
+
+def test_genuine_dow_record_claim_dropped():
+    real = {"dow": {"change_pct": -0.86, "level": 45000.0,
+                    "high_52w": 47000.0, "low_52w": 38000.0}}
+    assert _drop_reality_contradictions(["다우가 사상 최고치를 경신했습니다"], real) == []
+
 if __name__ == "__main__":
     fails = 0
     for name, fn in sorted(globals().items()):
