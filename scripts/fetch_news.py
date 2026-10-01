@@ -822,6 +822,77 @@ def _drop_stale_earnings(catalysts: list, today: date, max_age_days: int = 2,
     return kept
 
 
+# 발표 전 시점의 표현 — "곧 나온다"고 말하는 문장. '전망'·'기대'는 결과 기사에도 흔해
+# ("가이던스 전망 상향") 넣지 않는다.
+_PREVIEW_RE = re.compile(
+    r"임박|앞두고|앞둔|앞서|발표\s*예정|예정된|예정이|발표\s*전|발표를\s*기다|대기"
+    r"|ahead of|preview|to report|will report|set to report|expected to report|before .{0,20}earnings",
+    re.IGNORECASE,
+)
+
+_release_cache: dict = {}
+
+
+def _last_earnings_release(ticker: str, now: datetime):
+    """ticker의 가장 최근 실적 발표 **시각**(tz-aware) 중 now 이전인 것. 실패·없음이면 None.
+
+    날짜가 아니라 시각으로 본다 — 미국 실적은 장 마감 뒤(16:00 ET = 다음 날 05:00 KST)에
+    나오므로, 날짜로 비교하면 KST 기준 '오늘 새벽'에 나온 실적을 하루 어긋나게 판정한다(§29).
+    """
+    if ticker in _release_cache:
+        return _release_cache[ticker]
+    out = None
+    try:
+        import yfinance as yf
+        df = yf.Ticker(ticker).get_earnings_dates(limit=8)
+        if df is not None and not df.empty:
+            past = [d.to_pydatetime() for d in df.index
+                    if getattr(d, "tzinfo", None) and d.to_pydatetime() <= now]
+            if past:
+                out = max(past)
+    except Exception as e:
+        print(f"[fetch_news] 실적 발표 시각 조회 실패({ticker}): {e}", file=sys.stderr)
+    _release_cache[ticker] = out
+    return out
+
+
+def _drop_preview_after_release(items: list, now: datetime, window_days: int = 7,
+                                release_fn=None) -> list:
+    """이미 발표된 실적을 '발표 임박·앞두고'로 쓴 항목을 뺀다.
+
+    2026-10-01 실사고: 마이크론 실적은 05:00 KST에 나왔는데 21:17 미국 브리핑이 00:00에
+    발행된 예고 기사("마이크론 실적 발표 임박")를 골라 '오늘의 분수령'으로 서술했다.
+    기사 자체는 쓰인 시점엔 맞았지만 브리핑 시점엔 이미 지난 일이다. stale 게이트
+    (`_drop_stale_earnings`)는 오래된 실적을 오늘 일로 쓰는 것만 막아 이 경우를 못 잡는다.
+
+    판정: 실적형 + 예고형 표현 + 주어 종목의 최근 발표 시각이 now 이전이고 window_days 안.
+    창을 두는 이유 — 직전 발표가 석 달 전이면 그 예고는 다음 분기 실적 이야기라 맞을 수 있다.
+    발표 시각을 못 읽으면 판단하지 않는다(fail-open). 반환 shape는 입력과 같다.
+    """
+    release_fn = release_fn or _last_earnings_release
+    kept = []
+    for it in items:
+        text = _item_text(it)
+        # RSS 경로는 LLM이 다시 쓴 문장에서 '임박'이 빠질 수 있어 원문 기사 제목도 함께 본다.
+        article = it.get("article") if isinstance(it, dict) else None
+        blob = f"{text} {(article or {}).get('title', '')}"
+        if not (_is_earnings_catalyst(blob) and _PREVIEW_RE.search(blob)):
+            kept.append(it)
+            continue
+        ticker_field = it.get("ticker", "") if isinstance(it, dict) else ""
+        released = []
+        for t in _earnings_subject_tickers(text, ticker_field) or _resolve_company_tickers(blob):
+            r = release_fn(t, now)
+            if r is not None and timedelta(0) <= now - r <= timedelta(days=window_days):
+                released.append(f"{t} {r.astimezone(KST):%m-%d %H:%M} KST")
+        if released:
+            print(f"[fetch_news] 이미 발표된 실적의 예고 기사 제외({', '.join(released)}): {text[:80]}",
+                  file=sys.stderr)
+        else:
+            kept.append(it)
+    return kept
+
+
 def _history_path(briefing_type: str) -> Path:
     return DATA_DIR / f"catalyst_history_{briefing_type}.json"
 
@@ -1262,6 +1333,9 @@ _RSS_SELECT_PROMPT = """아래는 오늘({today}) 실제로 수집된 미국 시
 - 반드시 목록의 번호(idx)를 참조한다. 목록에 없는 사건·기업·수치를 새로 만들지 않는다.
 - text는 "사건 → 영향" 한 문장. 숫자를 쓸 때는 **목록에 있는 숫자만** 그대로 옮겨 쓴다.
 - ticker는 그 사건의 주체 기업 미국 티커. 거시·지정학이면 빈 문자열.
+- 목록은 최신 발행순이다. 같은 사건을 다룬 기사가 여럿이면 **가장 최근 기사**를 고른다.
+- 실적·지표처럼 이미 발표된 사건은 결과 기사를 고른다. 발표 전에 쓰인 예고 기사("임박"·"앞두고"·"Ahead of")를
+  골라 아직 안 나온 일처럼 쓰지 않는다 — 그 사이에 결과가 나왔을 수 있다.
 - 중요한 기사가 없으면 selection을 빈 배열로 둔다. 억지로 채우지 않는다.
 
 출력 형식 (JSON만):
@@ -1305,6 +1379,8 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
                 articles.append(a)
     articles.sort(key=lambda a: a.get("pub_time", "99:99"))
     articles = _dedupe_articles(articles)
+    # 최신 기사를 앞에 둔다 — 오래된 순이면 새벽 예고 기사가 1번에 놓여 먼저 뽑힌다(2026-10-01).
+    articles.sort(key=lambda a: a.get("pub_time", ""), reverse=True)
 
     if not articles:
         print("[fetch_news] RSS 수집 0건 — 뉴스 없이 발행(§27)", file=sys.stderr)
@@ -1329,6 +1405,7 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
     prev_items = _load_prev_catalysts(briefing_type)
     resolved = _drop_prev_run_echoes(resolved, prev_items)
     resolved = _drop_placeholder_entities(resolved)
+    resolved = _drop_preview_after_release(resolved, datetime.now(KST))
     verified = _attach_verified_sources(resolved)
 
     out = {
@@ -1545,6 +1622,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     if isinstance(data.get("catalysts"), list):
         # 1차: 실적형 catalyst를 yfinance 실제 발표일로 검증(자기보고 날짜 무시), stale 제외
         cats = _drop_stale_earnings(data["catalysts"], today_kst)
+        cats = _drop_preview_after_release(cats, datetime.now(KST))
         # 2차: 자기보고 날짜 기반 stale 제외 + 순수 문자열로 환원
         # 코스피 아침은 직전 미국장까지 창을 넓힌다(월요일 주말 공백 — _catalyst_cutoff)
         cats = _filter_stale_catalysts(
@@ -1559,6 +1637,7 @@ def fetch_and_summarize(briefing_type: str) -> dict:
     for _fld in ("headlines", "key_indicators"):
         if isinstance(data.get(_fld), list):
             data[_fld] = _drop_stale_earnings(data[_fld], today_kst)
+            data[_fld] = _drop_preview_after_release(data[_fld], datetime.now(KST))
     # "…확인되지 않았습니다" 류 검색 실패 보고를 전 필드에서 제거 (이슈가 아니라 메타 서술)
     # + "B사"·"C은행"·"[기업]" 류 익명 플레이스홀더 주어를 담은 날조 항목도 함께 제거
     # + 실측 시장데이터와 방향이 반대인 주장도 제거 (유가 등)
