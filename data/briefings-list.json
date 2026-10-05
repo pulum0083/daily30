@@ -1,20 +1,22 @@
 {
   "slots": {
-    "2026-10-05": {
+    "2026-10-06": {
       "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
+        "state": "ready",
+        "url": "/briefings/2026-10-06/kospi/",
+        "headline": "나스닥 고점 경신 + 수출 사상최대, 갭상승 조건 갖췄다",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
       },
       "close": {
         "state": "pending",
         "scheduled_time": "16:30"
       },
       "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-05/us/",
-        "headline": "금리 동결 안도감 속 기술주는 숨 고르기 — VIX 반등이 변동성 경고등을 켰다",
-        "title": "—",
-        "time": ""
+        "state": "pending",
+        "scheduled_time": "21:20"
       }
     },
     "2026-10-02": {
@@ -760,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-20/us/",
         "headline": "국채 바이백이 지수를 받쳤지만, 반도체는 혼자 내려가고 있다",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-19": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-19/kospi/",
-        "headline": "반도체 패닉 재현 — SOX -5%, DRAM -8.8% 급락",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-19/close/",
-        "headline": "코스피 5.8% 급락, 사이드카까지 나온 날 — 그래도 버틴 곳은?",
-        "title": "6,471.17",
-        "price": "6,471.17",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-19/us/",
-        "headline": "반도체 쇼크의 후폭풍 — 선물은 웃지만 SOX는 여전히 피 흘려요",
         "title": "—",
         "time": ""
       }
