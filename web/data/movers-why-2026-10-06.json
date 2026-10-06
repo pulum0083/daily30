@@ -1,27 +1,84 @@
 {
-  "generated_at": "2026-10-06T12:31:31.474912+09:00",
+  "generated_at": "2026-10-06T13:01:10.512341+09:00",
   "date": "2026-10-06",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -1.81,
-      "surge": 0.43,
-      "events": []
+      "changePct": -1.9,
+      "surge": 0.46,
+      "events": [
+        {
+          "time": "09:49",
+          "headline": "\"삼성전자, 61만원 간다\"...메모리 공급 부족 심화·내년 영업이익 568조 전망-SK증권",
+          "url": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE4wbC1tX190RzZBM2VIWDhqWGI5b0FhaVpjcFRoNHFwWGZlWi1pdVJmc2tmUDQwby11c194WEhhdzBxNHZBWm9HVFJpY2xTUFppSUFyOWh4OXF5ZjNkWlRDam5LU0Q?oc=5",
+          "source": "PRESS9",
+          "why": "SK증권은 삼성전자의 메모리 공급 부족 심화와 내년 영업이익 568조 전망을 근거로 목표 주가를 61만원으로 제시했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        },
+        {
+          "time": "10:17",
+          "headline": "삼성전자 주가, 10월 6일 장중 276,500원 0.18% 상승",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFBob1NYNkNZd2xkcnVoRjZGeWdGb3lKQjBBV21XeWVyTDVzZGZ0elZCWFBJdFUyV3VBZUtXaW0zVHlmY0Frb3drbFdQYkVDNGc3OG5IeUM3QkEzc3NLNEhBeHptME5hcWQ0RlNHcFh2azFTQQ?oc=5",
+          "source": "TopStarNews",
+          "why": "삼성전자 주가, 10월 6일 장중 276,500원 0.18% 상승 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -2.99,
-      "surge": 0.45,
-      "events": []
+      "changePct": -3.15,
+      "surge": 0.49,
+      "events": [
+        {
+          "time": "10:53",
+          "headline": "엔비디아 사상 최고가에도 SK하이닉스는 하락…왜?",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE4zeUhjektCeW45eFJ1SHFMMElWMXVqYzZCazFDSG0xelZjV0pMVmhibVl4d0xXaFBTNEs4WjlGaGgweW9kaVlFQ29ZWHo3OWk1bWc3ZkhmUmxld9IBWEFVX3lxTE9aOFl5UE1GXzctTndiREJWM3ZLRktyWFhRenNuVGZuUHZNekJod1V1b0R0dXpiM1BpSXNsZjVtOWp4dllWTmgxYjVEWHdxQlJseGVMMUo2S0g?oc=5",
+          "source": "아주경제",
+          "why": "엔비디아 주가가 사상 최고가를 기록했음에도 불구하고 SK하이닉스 주가는 하락세를 보였다.",
+          "tier": "why",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:46",
+          "headline": "SK하이닉스 ADR 주가, 195.02달러 0.06% 하락 마감",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTFAxS2YxcC1RWFdneFg5UGwxb01oZ1hEaF9UZWo5bmxER2N3bHFRN1pIaDBnSzdiUnZoTDBaekkwWWxUYWR1TFB1WDdERFZQREhGUnZlZWhFNHo2SDdQcFhWZzNzS0M3QUpFc3FKUE9yYmFWUQ?oc=5",
+          "source": "TopStarNews",
+          "why": "SK하이닉스 ADR 주가, 195.02달러 0.06% 하락 마감",
+          "tier": "why",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 0.58,
-      "surge": 0.45,
-      "events": []
+      "changePct": 0.14,
+      "surge": 0.5,
+      "events": [
+        {
+          "time": "09:47",
+          "headline": "현대차 목표주가 줄하향…증권가 \"가동률 개선이 실적 회복 관건\"",
+          "url": "https://news.google.com/rss/articles/CBMib0FVX3lxTE41UG9FY0R0T3dkWTdCOGw1enViTG14ZEZBazRsbjNyb3JYT0hxazl0eFY1RHRvSnJuNmFTc1czbk1rRzV1QkZNcDkyWXEyTU41d2FkTmozU3ZxU0RZZTNhNG4yNjA0dEE3TGo5M0RzZw?oc=5",
+          "source": "뉴스웍스",
+          "why": "증권가에서 현대차의 가동률 개선이 실적 회복의 관건이라며 목표주가를 하향 조정했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "10:30",
+          "headline": "현대차 주가, 10월 6일 장중 350,500원 1.15% 상승",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE1KQi04MGN5QXRNQXV0QUR0Snp2N2l6T21IUDJsSXVhMHpTZjBxOTU4RjhILW9LX2xjbHBwdnZZRzNJREZPRXhFa3J1UkFJSXRDRk1ROGhCUmt1SHhqYTF6ZUhLTE0wUVdIa29fZ3NjYWItQQ?oc=5",
+          "source": "TopStarNews",
+          "why": "현대차 주가, 10월 6일 장중 350,500원 1.15% 상승 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "pos"
+        }
+      ]
     }
   ]
 }
