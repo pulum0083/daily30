@@ -3,10 +3,28 @@
   "stocks": {
     "005930": {
       "name": "삼성전자",
-      "consensus": 495000,
-      "firm_count": 12,
-      "close_price": 276000,
+      "consensus": 503846,
+      "firm_count": 13,
+      "close_price": 272000,
       "reports": [
+        {
+          "firm": "교보증권",
+          "opinion": "Buy",
+          "target_price": 500000,
+          "date": "26.10.06"
+        },
+        {
+          "firm": "미래에셋증권",
+          "opinion": "매수",
+          "target_price": 400000,
+          "date": "26.10.06"
+        },
+        {
+          "firm": "SK증권",
+          "opinion": "매수",
+          "target_price": 610000,
+          "date": "26.10.06"
+        },
         {
           "firm": "IBK투자증권",
           "opinion": "매수",
@@ -48,24 +66,6 @@
           "opinion": "Buy",
           "target_price": 560000,
           "date": "26.09.22"
-        },
-        {
-          "firm": "미래에셋증권",
-          "opinion": "매수",
-          "target_price": 400000,
-          "date": "26.09.07"
-        },
-        {
-          "firm": "현대차증권",
-          "opinion": "Buy",
-          "target_price": 440000,
-          "date": "26.08.05"
-        },
-        {
-          "firm": "교보증권",
-          "opinion": "Buy",
-          "target_price": 500000,
-          "date": "26.07.31"
         }
       ],
       "history": [
@@ -291,7 +291,7 @@
         },
         {
           "date": "2026-10-06",
-          "value": 495000
+          "value": 503846
         }
       ]
     },
@@ -299,8 +299,14 @@
       "name": "SK하이닉스",
       "consensus": 3337500,
       "firm_count": 12,
-      "close_price": 1841000,
+      "close_price": 1773000,
       "reports": [
+        {
+          "firm": "미래에셋증권",
+          "opinion": "매수",
+          "target_price": 3100000,
+          "date": "26.10.06"
+        },
         {
           "firm": "신한투자증권",
           "opinion": "매수",
@@ -312,12 +318,6 @@
           "opinion": "Buy",
           "target_price": 3200000,
           "date": "26.09.28"
-        },
-        {
-          "firm": "미래에셋증권",
-          "opinion": "매수",
-          "target_price": 3100000,
-          "date": "26.09.07"
         },
         {
           "firm": "한화투자증권",
@@ -593,7 +593,7 @@
       "name": "현대차",
       "consensus": 715385,
       "firm_count": 13,
-      "close_price": 346500,
+      "close_price": 348000,
       "reports": [
         {
           "firm": "삼성증권",
