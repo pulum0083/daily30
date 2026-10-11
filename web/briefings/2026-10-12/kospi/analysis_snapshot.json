@@ -1,0 +1,189 @@
+{
+  "analysis_format": "split",
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 60,
+    "down_pct": 40,
+    "confidence": 58
+  },
+  "reason_title": "휴장 뒤 첫날, 아시아는 웃었는데 반도체가 발목",
+  "comfort_line": "장이 곧 열려요. 너무 서두르지 않기로 해요.",
+  "todays_view": {
+    "view_title": "수출은 역대 최고, 반도체는 숨고르기 — 엇갈린 신호 속 출발",
+    "dek": "9월 반도체 수출이 <b>262.8%</b> 폭증하며 역대 최고치를 찍었지만, 정작 미국 반도체지수(SOX)는 숨고르기에 들어갔어요. 휴장 이틀 동안 쌓인 해외 흐름을 어떻게 소화하느냐가 오늘 관전 포인트예요.",
+    "recap": [
+      {
+        "text": "지난 금요일 미국 증시는 오픈AI발 매출 우려가 누그러지며 나스닥이 반등했어요. 다만 미시간대 소비자심리지수는 시장 예상치를 밑돌았어요.",
+        "codes": []
+      },
+      {
+        "text": "9월 수출이 전년 대비 <b>83.5%</b> 급증한 <b>1209억 4000만 달러</b>로 역대 최고치를 새로 썼어요. 반도체 수출만 <b>603억 달러</b>로 사상 처음 월 600억 달러를 넘었어요.",
+        "codes": []
+      },
+      {
+        "text": "국고채 금리는 진정되지 않고 올랐어요. 3년물이 <b>3.983%</b>까지 오르며 4% 턱밑까지 다가섰어요.",
+        "codes": []
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "9월 수출 역대 최고 실적이 발표됐어요 — 반도체 업황 체감과 주가 괴리가 오늘 메울지 지켜볼 변수예요.",
+        "source": "news"
+      },
+      {
+        "tag": "watch",
+        "text": "휴장 이틀 치 외국인 수급 공백이 오늘 한꺼번에 반영될 수 있어요. 첫 매매 동향을 확인하세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "국고채 금리 상승이 이어질지, 아니면 숨고르기로 들어갈지 체크하세요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>아시아 증시가 휴장 기간 먼저 웃었어요.</b> 항셍이 <b>+1.79%</b> 오르고 닛케이·대만도 견조한 흐름을 보여, 한국 증시가 쉬는 사이 쌓인 캐치업 기대가 살아있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>미 지수선물이 소폭이지만 상승 쪽을 가리켜요.</b> S&P선물 <b>+0.12%</b>, 나스닥선물 <b>+0.22%</b>로 지난 금요일 반등 분위기가 이어지고 있어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>반도체 수출은 역대급인데 주가는 숨고르기라 괴리가 있어요.</b> 9월 반도체 수출이 <b>262.8%</b> 폭증했지만 SOX는 <b>-0.41%</b>로 쉬어가며 국내 반도체주 방향을 가늠하기 어렵게 만들어요.",
+      "codes": []
+    }
+  ],
+  "telegram_signals": [
+    "🌏 휴장 이틀 새 항셍 <b>+1.79%</b>·아시아 전반 강세. 코스피 캐치업 기대감 있어요.",
+    "📰 9월 반도체 수출 <b>262.8%</b> 폭증, 역대 최고 1209억 달러 달성했어요."
+  ],
+  "us_linked_story": null,
+  "sector_focus": null,
+  "generated_at": "2026-10-12T07:28:12.522575+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-10-12T07:26:22.077243+09:00",
+    "briefing_date": "2026-10-12",
+    "us_session_date": "2026-10-09",
+    "session_label": "지난 금요일",
+    "cards": [
+      {
+        "title": "오픈AI發 AI 쇼크, 하루 지나 진정 국면이지만 경계감은 여전해요",
+        "sides": [
+          {
+            "side": "down",
+            "label": "AI 반도체·AI 밸류에이션 민감주",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.52
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -2.03
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": 0.39
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI 반도체·AI 밸류에이션 민감주는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "유가 후퇴가 프리마켓 선물 반등을 이끌어요",
+        "sides": [
+          {
+            "side": "up",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": 0.59
+              }
+            ],
+            "proxy": "S&P500"
+          },
+          {
+            "side": "down",
+            "label": "에너지",
+            "marks": [
+              {
+                "ticker": "CVX",
+                "name": "CVX",
+                "pct": 0.2
+              },
+              {
+                "ticker": "XOM",
+                "name": "XOM",
+                "pct": 0.26
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      },
+      {
+        "title": "반도체 선물(SOX) 약세와 현물 반도체 강세의 괴리",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -0.66
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -0.5
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -0.55
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": -0.58
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "애플, 20일선 아래로 이탈하며 나홀로 약세",
+        "sides": [
+          {
+            "side": "down",
+            "label": "애플",
+            "marks": [
+              {
+                "ticker": "AAPL",
+                "name": "AAPL",
+                "pct": -1.11
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "애플은 <b>내렸어요</b>"
+      }
+    ]
+  }
+}
