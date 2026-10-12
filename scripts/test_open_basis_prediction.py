@@ -118,3 +118,79 @@ def test_page_label_follows_record_basis():
     html = gh.Environment(loader=gh.FileSystemLoader(str(Path(gh.__file__).parent / "templates"))).from_string(tpl)
     assert "시초가 방향 예측" in html.render(**new)
     assert "당일 방향 예측" in html.render(**old)
+
+
+# ── prior 구속 게이트 — 발행 전 검증 단계에서 up_pct·방향을 prior에 묶는다 ──
+def test_validate_clamps_up_pct_to_prior_range():
+    import validate_analysis as va
+    a = {"prediction": {"direction": "상승 우위", "up_pct": 60, "down_pct": 40}}
+    fixes = []
+    va.clamp_prediction_to_prior(a, {"up_pct": 76}, fixes)
+    assert a["prediction"]["up_pct"] == 66 and a["prediction"]["down_pct"] == 34
+    assert len(fixes) == 1 and "60% → 66%" in fixes[0]
+
+
+def test_validate_leaves_in_range_and_unknown_prior_alone():
+    import validate_analysis as va
+    a = {"prediction": {"direction": "상승 우위", "up_pct": 70, "down_pct": 30}}
+    fixes = []
+    va.clamp_prediction_to_prior(a, {"up_pct": 76}, fixes)
+    va.clamp_prediction_to_prior(a, {"up_pct": None}, fixes)
+    assert a["prediction"]["up_pct"] == 70 and fixes == []
+
+
+def test_validate_does_not_patch_number_when_direction_still_breaks_prior():
+    # 방향 재생성이 실패해 AI 방향이 남은 경우 — '하락 우위'에 상승 확률 66%를 붙이지 않는다.
+    import validate_analysis as va
+    a = {"prediction": {"direction": "하락 우위", "up_pct": 30, "down_pct": 70}}
+    fixes = []
+    va.clamp_prediction_to_prior(a, {"up_pct": 76}, fixes)
+    assert a["prediction"]["up_pct"] == 30 and fixes == []
+
+
+def _run_gate(tmp_path, monkeypatch, direction, up_pct, sox, regen_direction=None):
+    """validate_analysis.main()을 네트워크 없이 돌린다. 재생성 호출 인자와 저장된 분석을 돌려준다."""
+    import validate_analysis as va
+    apath = tmp_path / "analysis_kospi.json"
+    apath.write_text(json.dumps({"prediction": {"direction": direction, "up_pct": up_pct, "down_pct": 100 - up_pct}},
+                                ensure_ascii=False), encoding="utf-8")
+    (tmp_path / va.LATEST_FILE["kospi"]).write_text(
+        json.dumps({"market_data_js": {"sox": {"chg": sox}}}), encoding="utf-8")
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        if regen_direction:
+            apath.write_text(json.dumps({"prediction": {"direction": regen_direction, "up_pct": 50, "down_pct": 50}},
+                                        ensure_ascii=False), encoding="utf-8")
+        return type("R", (), {"returncode": 0 if regen_direction else 1})()
+
+    monkeypatch.setattr(va, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(va.subprocess, "run", fake_run)
+    monkeypatch.setattr(va, "send_admin_alert", lambda *a, **k: None)
+    monkeypatch.setattr(va, "enrich_picks_with_realdata", lambda *a, **k: False)
+    monkeypatch.setattr(va, "validate", lambda a, l, b: {"analysis": a, "corrections": [], "warnings": [], "blocks": []})
+    monkeypatch.setattr(sys, "argv", ["validate_analysis.py", "--type", "kospi"])
+    rc = va.main()
+    return rc, calls, json.loads(apath.read_text(encoding="utf-8"))["prediction"]
+
+
+def test_gate_regenerates_when_ai_flips_a_non_strong_prior(tmp_path, monkeypatch):
+    # SOX +2.0 → score 3.0, 시초가 상승 확률 76%(strong 아님 — EWY 없음). AI가 '하락 우위'를 내면 상승으로 다시 쓰게 한다.
+    rc, calls, pred = _run_gate(tmp_path, monkeypatch, "하락 우위", 35, sox=2.0, regen_direction="상승 우위")
+    assert rc == 0 and len(calls) == 1
+    assert calls[0][-2:] == ["--force-direction", "상승"]
+    assert pred["direction"] == "상승 우위" and pred["up_pct"] == 66      # 재생성본의 50%도 76±10 안으로 당긴다
+
+
+def test_gate_leaves_direction_to_ai_in_the_coin_flip_zone(tmp_path, monkeypatch):
+    # SOX -0.9 → score -1.35, 확률 52% — 45~55 구간은 방향을 강제하지 않는다. 숫자만 범위 안으로.
+    rc, calls, pred = _run_gate(tmp_path, monkeypatch, "하락 우위", 30, sox=-0.9)
+    assert rc == 0 and calls == []
+    assert pred["direction"] == "하락 우위" and pred["up_pct"] == 42
+
+
+def test_gate_keeps_ai_output_untouched_when_regeneration_fails(tmp_path, monkeypatch):
+    rc, calls, pred = _run_gate(tmp_path, monkeypatch, "하락 우위", 35, sox=2.0, regen_direction=None)
+    assert rc == 0 and len(calls) == 1
+    assert pred == {"direction": "하락 우위", "up_pct": 35, "down_pct": 65}   # 방향·숫자를 어긋나게 고치지 않는다

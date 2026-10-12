@@ -1022,6 +1022,26 @@ def _superlative_texts(obj):
     return found
 
 
+def clamp_prediction_to_prior(analysis: dict, prior: dict, corrections: list) -> None:
+    """prediction.up_pct를 prior 확률 ±10%p 안으로 당기고 down_pct를 맞춘다. 고치면 corrections에 적는다.
+
+    AI 방향이 prior가 가리키는 방향과 다르면(재생성 실패로 남은 경우) 손대지 않는다 —
+    '하락 우위'라고 쓰고 상승 확률 60%를 붙이면 한 화면에서 방향과 숫자가 어긋난다.
+    """
+    from leading_signal import clamp_up_pct, direction_breaks_prior
+    pred = analysis.get("prediction")
+    if not isinstance(pred, dict) or (prior or {}).get("up_pct") is None:
+        return
+    if direction_breaks_prior(prior, pred.get("direction", "")):
+        return
+    up = pred.get("up_pct")
+    fixed = clamp_up_pct(up, prior["up_pct"])
+    if fixed is None or fixed == up:
+        return
+    pred["up_pct"], pred["down_pct"] = fixed, 100 - fixed
+    corrections.append(f"up_pct {up}% → {fixed}% (prior 시초가 상승 확률 {prior['up_pct']}% ±10%p 밖)")
+
+
 def validate_index_superlatives(analysis, corrections, warnings, blocks):
     """지수의 '사상 최고/최저' 주장을 실측과 대조해 리스트 항목은 제거, 산문은 발행 차단.
 
@@ -1803,16 +1823,20 @@ def main():
     # 4-b) 선행신호 prior 오버라이드 (kospi 전용) — strong prior가 LLM 방향과 정반대면 재생성
     if btype == "kospi":
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from leading_signal import compute_prior, prior_contradicts_direction
+        from leading_signal import (compute_prior, prior_contradicts_direction,
+                                    direction_breaks_prior, prior_side)
         prior = compute_prior(latest)
         llm_dir = (result["analysis"].get("prediction") or {}).get("direction", "")
-        if prior_contradicts_direction(prior, llm_dir):
-            print(f"[validate] 🧭 선행신호 오버라이드: LLM '{llm_dir}' ↔ strong prior '{prior['direction']}' "
-                  f"(score {prior['score']}) — {prior['direction']}로 재생성", file=sys.stderr)
+        # prior 확률이 한쪽(55%↑/45%↓)을 가리키는데 AI 방향이 다르면 그 방향으로 다시 쓰게 한다(§57).
+        # strong prior와 정반대인 경우(옛 조건)는 이 조건에 포함되지만, 확률을 못 낸 날을 위해 함께 둔다.
+        forced_dir = prior_side(prior) or prior["direction"]
+        if direction_breaks_prior(prior, llm_dir) or prior_contradicts_direction(prior, llm_dir):
+            print(f"[validate] 🧭 선행신호 오버라이드: LLM '{llm_dir}' ↔ prior '{forced_dir}' "
+                  f"(시초가 상승 확률 {prior.get('up_pct')}%, score {prior['score']}) — {forced_dir}로 재생성", file=sys.stderr)
             try:
                 regen = subprocess.run(
                     [sys.executable, str(Path(__file__).resolve().parent / "call_claude.py"),
-                     "--type", "kospi", "--no-html", "--force-direction", prior["direction"]],
+                     "--type", "kospi", "--no-html", "--force-direction", forced_dir],
                     timeout=300,
                 )
             except subprocess.TimeoutExpired:
@@ -1828,13 +1852,21 @@ def main():
                     with open(latest_path, "w", encoding="utf-8") as f:
                         json.dump(latest, f, ensure_ascii=False, indent=2)
                 result = validate(analysis, latest, btype)
+                new_dir = (result["analysis"].get("prediction") or {}).get("direction", "")
+                if forced_dir not in new_dir:
+                    send_admin_alert(f"⚠️ kospi 방향 오버라이드 재생성 뒤에도 방향이 '{new_dir}' — prior {forced_dir}와 다른 채 발행")
                 send_admin_alert(
                     f"🧭 <b>kospi</b> 방향 오버라이드\n"
-                    f"LLM: {llm_dir} → prior: {prior['direction']} (강도 strong, score {prior['score']})\n"
+                    f"LLM: {llm_dir} → prior: {forced_dir} (시초가 상승 확률 {prior.get('up_pct')}%, 강도 {prior['strength']}, score {prior['score']})\n"
                     f"SOX {prior['signals'].get('sox')} / EWY {prior['signals'].get('ewy')} / VIX {prior['signals'].get('vix')}"
                 )
             elif regen is not None:
                 send_admin_alert(f"⚠️ kospi 방향 오버라이드 재생성 실패(rc={regen.returncode}) — LLM 방향 {llm_dir} 유지 발행")
+
+    # 4-c) up_pct를 prior 확률 ±10%p 안으로 당긴다(kospi 전용, §57). 방향 재생성이 실패해 AI 방향이 남았으면
+    #      숫자만 고치지 않는다 — 방향과 확률이 서로 어긋난 채 나가느니 AI 원본을 그대로 두고 관리자에게 알린다(위 알림).
+    if btype == "kospi":
+        clamp_prediction_to_prior(result["analysis"], prior, result["corrections"])
 
     result["corrections"] = pre_corrections + result["corrections"]
     result["warnings"] = pre_warnings + result["warnings"]

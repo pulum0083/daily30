@@ -312,3 +312,31 @@ def test_prompt_shows_live_futures():
 def test_prompt_omits_futures_block_when_absent():
     text = ls.format_prior_for_prompt(ls.compute_prior({"market_data_js": {"sox": {"chg": 1.0}}}))
     assert "살아있는 유일한 신호" not in text
+
+
+# ── prior 구속 게이트(§57) — AI가 계산값을 뒤집지 못하게 한다 ─────────────────────
+def test_prior_side_is_set_only_outside_45_55():
+    assert ls.prior_side({"up_pct": 76}) == "상승"
+    assert ls.prior_side({"up_pct": 55}) == "상승"
+    assert ls.prior_side({"up_pct": 45}) == "하락"
+    assert ls.prior_side({"up_pct": 31}) == "하락"
+    assert ls.prior_side({"up_pct": 50}) is None      # 동전 던지기 구간은 구속하지 않는다
+    assert ls.prior_side({"up_pct": None}) is None     # 확률을 못 낸 날도 구속하지 않는다
+
+
+def test_direction_breaks_prior_includes_neutral_calls():
+    up = {"up_pct": 72}
+    assert ls.direction_breaks_prior(up, "하락 우위") is True
+    assert ls.direction_breaks_prior(up, "중립") is True       # prior가 한쪽인데 보류한 날도 고친다
+    assert ls.direction_breaks_prior(up, "혼조") is True
+    assert ls.direction_breaks_prior(up, "상승 우위") is False
+    assert ls.direction_breaks_prior({"up_pct": 52}, "하락 우위") is False   # 45~55는 AI 판단
+
+
+def test_clamp_up_pct_keeps_within_ten_points_of_prior():
+    assert ls.clamp_up_pct(60, 76) == 66      # 너무 낮게 → 하한
+    assert ls.clamp_up_pct(95, 76) == 86      # 너무 높게 → 상한
+    assert ls.clamp_up_pct(70, 76) == 70      # 범위 안은 그대로
+    assert ls.clamp_up_pct(5, 8) == 5 and ls.clamp_up_pct(1, 20) == 10
+    assert ls.clamp_up_pct(99, 95) == 99      # 99를 넘지 않는다
+    assert ls.clamp_up_pct(60, None) == 60    # 근거가 없으면 손대지 않는다

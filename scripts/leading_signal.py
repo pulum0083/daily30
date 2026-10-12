@@ -153,7 +153,9 @@ def format_prior_for_prompt(prior: dict) -> str:
         f"- 계산 방향: **{prior['direction']}** (강도 {prior['strength']}, score {prior['score']})",
         *([f"- **이 score가 뜻하는 시초가 상승 확률: {prior['up_pct']}%** — 과거 713거래일에서 같은 score였던 날"
            " 실제로 전일 종가보다 높게 열린 비율로 환산한 값이다. **up_pct는 이 값에서 출발한다.**"
-           " 뉴스·이벤트로 조정하되 ±10%p를 넘기려면 그 근거를 key_drivers에 구체적으로 쓴다."
+           " 뉴스·이벤트로 조정하되 **±10%p 안에서만** 한다 — 이 범위를 벗어난 값은 발행 전 검증 단계가"
+           " 범위 끝으로 되돌린다. 이 확률이 55% 이상이면 방향은 상승 우위, 45% 이하면 하락 우위여야 하고,"
+           " 다르게 내면 검증 단계가 그 방향으로 다시 쓰게 한다. 45~55%일 때만 방향을 스스로 정한다."
            " 근거가 빈약하면 이 값을 그대로 쓴다."]
           if prior.get("up_pct") is not None else []),
         f"- SOX {fmt(sig.get('sox'))} · 나스닥 {fmt(sig.get('nasdaq'))} · NQ선물 {fmt(sig.get('nq'))} "
@@ -184,6 +186,34 @@ def format_prior_for_prompt(prior: dict) -> str:
         "모순되면 — 더 신선한 정보이므로 — **선행신호(prior) 방향을 따른다.** 전일 국내 등락에 앵커링하지 않는다.",
     ]
     return "\n".join(lines) + "\n"
+
+
+# ── prior 구속 게이트(2026-10-12) — AI가 계산값을 뒤집으면 더 틀렸다(시초가 기준 prior 73.5% vs AI 68.2%, 라이브 49일) ──
+UP_PCT_TOLERANCE = 10      # AI의 up_pct가 prior 확률에서 벗어날 수 있는 폭(%p)
+SIDE_UP, SIDE_DN = 55, 45  # prior 확률이 이 밖이면 방향이 정해진 것으로 본다. 45~55는 동전 던지기라 AI 판단에 맡긴다
+
+
+def prior_side(prior: dict):
+    """prior 확률이 가리키는 방향. 확률이 없거나 45~55 사이면 None(구속하지 않는다)."""
+    up = (prior or {}).get("up_pct")
+    if up is None:
+        return None
+    return "상승" if up >= SIDE_UP else ("하락" if up <= SIDE_DN else None)
+
+
+def direction_breaks_prior(prior: dict, llm_direction: str) -> bool:
+    """AI 방향이 prior 확률이 가리키는 방향과 다른가. '중립·혼조'도 다른 것으로 본다 —
+    prior가 한쪽을 가리키는데 판단을 보류한 날은 한 번도 맞히지 못했다(6일 중 0일)."""
+    side = prior_side(prior)
+    return side is not None and side not in (llm_direction or "")
+
+
+def clamp_up_pct(llm_up, prior_up, tol: int = UP_PCT_TOLERANCE):
+    """AI의 up_pct를 prior 확률 ±tol 안으로 당긴다. 구속할 근거(prior 확률)가 없으면 그대로 둔다."""
+    if prior_up is None or not isinstance(llm_up, (int, float)):
+        return llm_up
+    lo, hi = max(1, prior_up - tol), min(99, prior_up + tol)
+    return int(min(max(round(llm_up), lo), hi))
 
 
 def prior_contradicts_direction(prior: dict, llm_direction: str) -> bool:
