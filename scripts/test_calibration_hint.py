@@ -26,13 +26,14 @@ def _with_fixture(tmp_path, rows, **kw):
 
 
 def _row(up_pct, actual, type_="kospi"):
-    return {"type": type_, "up_pct": up_pct, "actual_change_pct": actual}
+    # 코스피는 시초가 기준 기록만 집계된다(§57) — 결과값은 actual_open_pct에 든다
+    return {"type": type_, "up_pct": up_pct, "basis": "open", "actual_open_pct": actual, "actual_change_pct": actual}
 
 
 def test_unscored_rows_are_excluded(tmp_path):
     """actual_change_pct가 None인 미채점 항목은 집계에서 빠진다(§16)."""
     rows = [_row(65, 1.0) for _ in range(20)]
-    rows.append({"type": "kospi", "up_pct": 30, "actual_change_pct": None})
+    rows.append({"type": "kospi", "up_pct": 30, "basis": "open", "actual_open_pct": None, "actual_change_pct": None})
     out = _with_fixture(tmp_path, rows)
     assert "채점 완료 20건" in out
 
@@ -75,3 +76,17 @@ def test_real_data_shape():
         return
     assert "| up_pct 구간 | 예측 횟수 | 실제 상승률 |" in out
     assert "기저율" in out
+
+
+def test_close_basis_rows_are_excluded(tmp_path):
+    """전환 이전 종가 기준 기록은 캘리브레이션에 넣지 않는다(§57) — 종가를 맞히려고 낸 up_pct다."""
+    rows = [{"type": "kospi", "up_pct": 65, "actual_change_pct": 1.0} for _ in range(30)]
+    assert _with_fixture(tmp_path, rows) == ""
+
+
+def test_open_basis_uses_open_gap_not_close(tmp_path):
+    """시초가 기준 기록은 종가 등락이 아니라 갭으로 '실제 상승'을 센다. 갭 +, 종가 − 인 날은 상승이다."""
+    rows = [{"type": "kospi", "up_pct": 65, "basis": "open", "actual_open_pct": 0.8, "actual_change_pct": -1.5}
+            for _ in range(20)]
+    out = _with_fixture(tmp_path, rows)
+    assert "| 60~69 | 20회 | 100% |" in out

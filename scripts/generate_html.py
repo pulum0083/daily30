@@ -25,6 +25,9 @@ from pathlib import Path
 import pytz
 from jinja2 import Environment, FileSystemLoader
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from prediction_basis import OPEN as BASIS_OPEN, stats_rows, legacy_kospi_rows, outcome_pct
+
 try:
     from scripts.validate_analysis import _fetch_kospi_realdata
     import scripts.us_detail_data as ud
@@ -481,8 +484,12 @@ def build_prediction(analysis: dict, index_name: str, pred_title: str, gen_time:
     band_color = "#E03131" if is_up else "#2775ED"
     dots = max(1, min(5, round(confidence / 20)))
     conf_label = "강함" if confidence >= 80 else ("보통" if confidence >= 60 else "약함")
+    basis = pred.get("basis")
+    if basis == BASIS_OPEN and index_name.upper().startswith("KOSPI"):
+        pred_title = "KOSPI 시초가 방향 예측"
     return {
         "pred_title": pred_title,
+        "pred_basis": basis,          # "open"이면 시초가 기준(§57). 옛 스냅샷엔 없다 → 템플릿이 옛 문구를 쓴다
         "direction": direction,
         "dir_cls": dir_cls,
         "dir_arrow": "↑" if is_up else ("↓" if "하락" in direction else "→"),
@@ -1181,10 +1188,12 @@ def build_accuracy(internal_type: str) -> dict:
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
         return {}
-    data = load_json(bpath).get("briefings", [])
+    # 코스피는 시초가 기준 기록만 센다(§57). 표본 5건 미만이면 상자를 그리지 않는다 —
+    # 전환 직후 "1건 중 1건 100%"처럼 뜻 없는 숫자를 내보내지 않는다.
+    data = stats_rows(load_json(bpath).get("briefings", []))
     src = SRC_TYPE.get(internal_type, internal_type)
     typed = [b for b in data if b.get("type") in (internal_type, src) and b.get("is_correct") is not None]
-    if not typed:
+    if not typed or (internal_type == "kospi" and len(typed) < 5):
         return {}
     r30, r7 = typed[-30:], typed[-7:]
 
@@ -1228,6 +1237,18 @@ def _edge_cls(edge: int) -> str:
     return "flat"
 
 
+def _legacy_close_summary(all_rows: list, internal_type: str) -> dict:
+    """전환 이전 종가 기준 코스피 기록의 건수·적중률. 코스피가 아니거나 기록이 없으면 빈 dict."""
+    if internal_type != "kospi":
+        return {}
+    legacy = [b for b in legacy_kospi_rows(all_rows) if b.get("is_correct") is not None]
+    if not legacy:
+        return {}
+    hit = sum(1 for b in legacy if b["is_correct"])
+    return {"sc_legacy_count": len(legacy), "sc_legacy_pct": round(hit / len(legacy) * 100),
+            "sc_legacy_until": max(b["date"] for b in legacy)}
+
+
 def build_scorecard(internal_type: str) -> dict:
     """예측 성적표(카드+더보기 모달) 컨텍스트. briefings.json의 실측 채점값(is_correct)만 사용.
     월별 적중률·최근 결과는 모두 실데이터 집계 — 사후 '복기 사유' 서술은 저장돼 있지 않으므로
@@ -1235,7 +1256,8 @@ def build_scorecard(internal_type: str) -> dict:
     bpath = DATA_DIR / "briefings.json"
     if not bpath.exists():
         return {}
-    rows = load_json(bpath).get("briefings", [])
+    all_rows = load_json(bpath).get("briefings", [])
+    rows = stats_rows(all_rows)               # 코스피는 시초가 기준 기록만(§57)
     src = SRC_TYPE.get(internal_type, internal_type)
     typed = [b for b in rows if b.get("type") in (internal_type, src)]
     scored = [b for b in typed if b.get("is_correct") is not None]
@@ -1258,7 +1280,7 @@ def build_scorecard(internal_type: str) -> dict:
     r15_edge = r15_pct - r15_base
     cum_edge = cum_pct - cum_base
     hits = [b for b in scored if b["is_correct"]]
-    hit_avg = (sum(abs(b.get("actual_change_pct") or 0) for b in hits) / len(hits)) if hits else 0
+    hit_avg = (sum(abs(outcome_pct(b) or 0) for b in hits) / len(hits)) if hits else 0
 
     # 최근 30건 기준 적중/오류/미결 막대
     r30 = scored[-30:]
@@ -1294,7 +1316,7 @@ def build_scorecard(internal_type: str) -> dict:
             dlabel = b.get("date", "")
         d = b.get("predicted_direction", "")
         pred_word = "상승 예측" if "상승" in d else ("하락 예측" if "하락" in d else "중립 예측")
-        chg = b.get("actual_change_pct")
+        chg = outcome_pct(b)
         chg_str = f"{chg:+.2f}%" if isinstance(chg, (int, float)) else "—"
         recent.append({
             "date_label": dlabel,
@@ -1309,6 +1331,8 @@ def build_scorecard(internal_type: str) -> dict:
         "sc_cum_pct": cum_pct,
         "sc_cum_cls": cls(cum_pct),
         "sc_cum_count": len(scored),
+        # 전환 이전 종가 기준 기록 — 통계엔 안 넣고 모달에 사실만 적는다(§57)
+        **_legacy_close_summary(all_rows, internal_type),
         # 기준선 = 매일 '상승'이라고만 답했을 때의 적중률
         "sc_recent15_base": r15_base,
         "sc_recent15_edge": r15_edge,
@@ -1518,7 +1542,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
                 ctx["sector_paragraphs"] = sf.get("paragraphs", [])
         d = ctx.get("direction", "")
         rp = ctx.get("readout_pct", "")
-        ctx["og_description"] = f"{config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
+        ctx["og_description"] = f"{ctx.get('pred_title') or config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
 
     template = env.get_template(config["template"])
     return template.render(**ctx), analysis
@@ -2016,7 +2040,7 @@ def _briefing_accuracy():
     records = load_json(bpath).get("briefings", [])
     result = {}
     for btype in ("kospi", "us"):
-        subset = [b for b in records if b.get("type") == btype and b.get("is_correct") is not None]
+        subset = [b for b in stats_rows(records) if b.get("type") == btype and b.get("is_correct") is not None]
         result[btype] = round(sum(1 for b in subset if b["is_correct"]) / len(subset) * 100) if subset else None
     return result
 

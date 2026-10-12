@@ -135,7 +135,7 @@ def build_email(briefing_type: str, date_slug: str) -> tuple[str, str]:
     rows += f"<tr><td style='font-size:13px;color:#888888;padding-bottom:12px;font-family:Arial,sans-serif;'>{meta['label']} | {today_str}</td></tr>"
 
     if direction:
-        rows += f"<tr><td style='padding:4px 0;font-family:Arial,sans-serif;'><span style='font-size:14px;font-weight:700;color:#333333;'>&#128202; 예측: {direction} ({up_pct}%)</span><br/><span style='font-size:13px;color:#888888;'>신뢰도: {confidence}%</span></td></tr>"
+        rows += f"<tr><td style='padding:4px 0;font-family:Arial,sans-serif;'><span style='font-size:14px;font-weight:700;color:#333333;'>&#128202; {'시초가 예측' if pred.get('basis') == 'open' else '예측'}: {direction} ({up_pct}%)</span><br/><span style='font-size:13px;color:#888888;'>신뢰도: {confidence}%</span></td></tr>"
         rows += "<tr><td style='padding:4px 0;'></td></tr>"
 
     if reason_title:

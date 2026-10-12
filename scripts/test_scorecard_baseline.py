@@ -18,6 +18,8 @@ def _row(date, is_correct, up):
     return {
         "date": date,
         "type": "kospi",
+        "basis": "open",          # 성적표는 시초가 기준 기록만 센다(§57)
+        "actual_open_pct": 1.0 if up else -1.0,
         "predicted_direction": "상승 우위" if (up == is_correct) else "하락 우위",
         "actual_direction": "상승" if up else "하락",
         "actual_change_pct": 1.0 if up else -1.0,

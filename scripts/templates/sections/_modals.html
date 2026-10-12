@@ -94,14 +94,20 @@
     <button class="info-modal__close" data-modal-close="pred-modal" aria-label="닫기">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <div class="info-modal__title" id="pred-modal-title">당일 방향 예측이란?</div>
+    <div class="info-modal__title" id="pred-modal-title">{{ '시초가 방향 예측이란?' if pred_basis == 'open' else '당일 방향 예측이란?' }}</div>
     <div class="info-modal__body">
+      {% if pred_basis == 'open' %}
+      <p>간밤 미국 지수·선물, 반도체 지표, 환율 등을 종합해 <strong>오늘 09:00 코스피 지수가 전일 종가보다 위로 열릴지 아래로 열릴지</strong>를 AI가 분석한 결과예요.</p>
+      <br>
+      <p><strong>왜 시초가인가요?</strong> 아침에 볼 수 있는 정보는 밤사이 해외 시장의 움직임이에요. 이 정보는 개장 가격을 설명하지만, 개장 뒤 장중 흐름은 설명하지 못해요. 그래서 맞힐 수 있는 것만 예측하고, 그 기준으로 채점해요. 장중 흐름과 종가는 예측하지 않아요.</p>
+      {% else %}
       <p>미국 선물·지수, 외국인 수급, 반도체 지표 등 다수의 시장 데이터를 종합하여 AI가 당일 코스피 종가 방향을 분석한 결과입니다.</p>
+      {% endif %}
       <br>
       <p><strong>읽는 법</strong></p>
       <ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
-        <li><strong>상승 우위</strong> — 상승 압력이 하락 압력보다 높다는 판단</li>
-        <li><strong>하락 우위</strong> — 하락 압력이 상승 압력보다 높다는 판단</li>
+        <li><strong>상승 우위</strong> — {{ '전일 종가보다 높게 열릴 가능성이 더 크다는 판단' if pred_basis == 'open' else '상승 압력이 하락 압력보다 높다는 판단' }}</li>
+        <li><strong>하락 우위</strong> — {{ '전일 종가보다 낮게 열릴 가능성이 더 크다는 판단' if pred_basis == 'open' else '하락 압력이 상승 압력보다 높다는 판단' }}</li>
         <li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
         <li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
       </ul>

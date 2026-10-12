@@ -26,10 +26,19 @@ def test_returns_none_when_prior_day_unscored(tmp_path, monkeypatch):
 
 def test_returns_correct_value_when_prior_day_scored(tmp_path, monkeypatch):
     _write_briefings(tmp_path, [
-        {"type": "kospi", "date": "2026-07-13", "is_correct": False},
+        {"type": "kospi", "date": "2026-07-13", "basis": "open", "is_correct": False},
     ])
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     assert cc._last_scored_result("kospi", "2026-07-14") is False
+
+
+def test_returns_none_when_prior_day_is_close_basis(tmp_path, monkeypatch):
+    # §57: 직전 예측이 전환 이전 종가 기준이면 "지난 예측" 배지를 달지 않는다 — 기준이 다른 결과다.
+    _write_briefings(tmp_path, [
+        {"type": "kospi", "date": "2026-07-13", "is_correct": True},
+    ])
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    assert cc._last_scored_result("kospi", "2026-07-14") is None
 
 
 def test_returns_none_when_no_prior_entries(tmp_path, monkeypatch):

@@ -46,7 +46,7 @@
       </div>
 
       {# 기준선이라는 낯선 단어를 이 문장이 그 자리에서 정의한다 #}
-      <p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>{{ sc_recent15_base }}%</b>, 누적 <b>{{ sc_cum_base }}%</b>를 맞혀요. 코스피가 오르는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 <span class="{{ sc_recent15_gcls }}">{{ '%+d'|format(sc_recent15_edge) }}%p</span> · <span class="{{ sc_cum_gcls }}">{{ '%+d'|format(sc_cum_edge) }}%p</span>였어요.</p>
+      <p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>{{ sc_recent15_base }}%</b>, 누적 <b>{{ sc_cum_base }}%</b>를 맞혀요. 코스피가 전일 종가보다 높게 열리는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 <span class="{{ sc_recent15_gcls }}">{{ '%+d'|format(sc_recent15_edge) }}%p</span> · <span class="{{ sc_cum_gcls }}">{{ '%+d'|format(sc_cum_edge) }}%p</span>였어요.</p>
 
       <div class="sc-modal-sec">월별 적중률 <span class="sc-modal-sec__sub">(오른쪽 = 기준선)</span></div>
       <div class="sc-mrate">
@@ -58,10 +58,11 @@
       <div class="sc-modal-sec">최근 예측 결과</div>
       <div class="sc-miss">
         {% for r in sc_recent %}
-        <div class="sc-miss__item"><span class="sc-miss__date">{{ r.date_label }}</span><span class="sc-miss__tag {{ 'ok' if r.ok else 'no' }}">{{ '✓' if r.ok else '✗' }} {{ r.pred_word }} → 실제 {{ r.actual }}</span></div>
+        <div class="sc-miss__item"><span class="sc-miss__date">{{ r.date_label }}</span><span class="sc-miss__tag {{ 'ok' if r.ok else 'no' }}">{{ '✓' if r.ok else '✗' }} {{ r.pred_word }} → 시초가 {{ r.actual }}</span></div>
         {% endfor %}
       </div>
 
+      <p class="scs">채점 기준은 <b>시초가</b>예요. 09:00 코스피 지수가 전일 종가보다 높게 열렸으면 상승, 낮게 열렸으면 하락으로 봐요.{% if sc_legacy_count %} 2026-10-13에 종가 기준에서 시초가 기준으로 바꿨고, 그 전 종가 기준 기록({{ sc_legacy_count }}건, 적중 {{ sc_legacy_pct }}%)은 기준이 달라 이 통계에 넣지 않았어요.{% endif %}</p>
       <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
     </div>
   </div>

@@ -35,8 +35,8 @@ def test_badge_shows_hit_when_direction_matches(tmp_path, monkeypatch):
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(-6.37))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
     assert "✓ 적중" in text
-    assert "하락 우위 → 실제 -6.37%" in text
-    assert "누적 50%" in text  # 1승 1패 → 50%
+    assert "하락 우위 → 실제 -6.37%" in text   # 종가 기준(전환 이전) 기록은 종가로 채점한다
+    assert "누적" not in text                  # 누적은 시초가 기준 기록만 세고, 5건 미만이면 붙이지 않는다(§57)
 
 
 def test_badge_shows_miss_when_direction_mismatches(tmp_path, monkeypatch):
@@ -76,10 +76,38 @@ def test_badge_omitted_when_kospi_change_missing(tmp_path, monkeypatch):
 def test_cumulative_accuracy_excludes_today_and_unscored(tmp_path, monkeypatch):
     _write_briefings(tmp_path, [
         {"type": "kospi", "date": "2026-07-16", "predicted_direction": "하락 우위", "is_correct": None},
-        {"type": "kospi", "date": "2026-07-10", "is_correct": True},
-        {"type": "kospi", "date": "2026-07-13", "is_correct": True},
-        {"type": "kospi", "date": "2026-07-14", "is_correct": False},
+        {"type": "kospi", "date": "2026-07-09", "is_correct": True},                    # 종가 기준 옛 기록은 제외(§57)
+        {"type": "kospi", "date": "2026-07-10", "basis": "open", "is_correct": True},
+        {"type": "kospi", "date": "2026-07-13", "basis": "open", "is_correct": True},
+        {"type": "kospi", "date": "2026-07-14", "basis": "open", "is_correct": False},
         {"type": "us", "date": "2026-07-13", "is_correct": True},  # 다른 타입은 제외
     ])
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     assert cc._cumulative_kospi_accuracy("2026-07-16") == (2, 3)
+
+
+# ── 시초가 기준 예측(§57) — 마감 배지는 종가가 아니라 오늘 시가 갭으로 채점한다 ──
+def _open_pred(direction="상승 우위"):
+    return {"type": "kospi", "date": "2026-10-13", "basis": "open", "predicted_direction": direction, "is_correct": None}
+
+
+def test_open_basis_badge_scores_by_open_gap_not_close(tmp_path, monkeypatch):
+    # 위로 열리고(+0.58%) 밀려서 끝난 날(종가 -0.89%) — 2026-10-06 모양. 시초가 예측은 맞은 것이다.
+    import check_accuracy as ca
+    _write_briefings(tmp_path, [_open_pred("상승 우위")])
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: (6600.0, 6562.0, 0.58))
+    cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(-0.89))
+    text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
+    assert "오늘 아침 시초가 예측: 상승 우위 → 시초가 +0.58% ✓ 적중" in text
+
+
+def test_open_basis_badge_omitted_when_gap_unavailable(tmp_path, monkeypatch):
+    # 시가를 못 구하면 종가로 대신 채점하지 않고 배지를 뺀다(§0).
+    import check_accuracy as ca
+    _write_briefings(tmp_path, [_open_pred("상승 우위")])
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: None)
+    cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(1.5))
+    text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
+    assert "🎯" not in text

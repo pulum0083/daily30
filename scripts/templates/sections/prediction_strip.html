@@ -1,8 +1,9 @@
-{# 예측 강등 스트립 — '당일 방향 예측'을 참고 지표로 격하. 오늘의 관점 승격에 따른 재배치. 코스피 전용. #}
+{# 예측 강등 스트립 — 방향 예측을 참고 지표로 격하. 오늘의 관점 승격에 따른 재배치. 코스피 전용.
+   pred_basis == 'open'이면 시초가 기준(§57). 옛 스냅샷엔 값이 없어 '당일 방향 예측' 문구가 그대로 나온다. #}
 <div class="open-section">
   <div class="predc">
     <div class="predc__lbl">
-      당일 방향 예측 <span class="ref">참고 지표</span>
+      {{ '시초가 방향 예측' if pred_basis == 'open' else '당일 방향 예측' }} <span class="ref">참고 지표</span>
       <button class="info-icon-btn" data-modal-open="pred-modal">?</button>
       <span class="section-time">{{ generated_time }} KST 생성</span>
     </div>
@@ -11,6 +12,6 @@
       <span class="predc__pct {{ dir_cls }} num">{{ readout_pct }}<span class="predc__pct-u">%</span></span>
       <span class="predc__conf num">신뢰도 {{ confidence }}%</span>
     </div>
-    <div class="predc__note">모델의 방향 확률일 뿐이에요. 매매 판단은 위 '오늘의 관점'과 아래 분석을 함께 보세요.</div>
+    <div class="predc__note">{% if pred_basis == 'open' %}오늘 09:00 코스피가 전일 종가보다 위로 열릴지 아래로 열릴지에 대한 확률이에요. 장중 흐름과 종가는 예측하지 않아요.{% else %}모델의 방향 확률일 뿐이에요. 매매 판단은 위 '오늘의 관점'과 아래 분석을 함께 보세요.{% endif %}</div>
   </div>
 </div>

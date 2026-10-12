@@ -20,6 +20,7 @@ import pytz
 import yfinance as yf
 
 from holiday_check import check_kospi_open
+from prediction_basis import is_open_basis, stats_rows, legacy_kospi_rows
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -98,6 +99,44 @@ def _kospi_from_naver(date_str: str) -> tuple | None:
                 return close_price, prev_close, (close_price - prev_close) / prev_close * 100
     except Exception:
         pass
+    return None
+
+
+def get_kospi_open_gap(date_str: str) -> tuple | None:
+    """그 날짜 코스피 지수의 (시가, 전일 종가, 갭%) — 시초가 기준 예측의 채점값(§57).
+
+    네이버 지수 일봉의 openPrice와 직전 봉 closePrice를 쓴다. 지수는 애프터장 세션이 없어 일봉 종가가
+    공식 종가다(§54). 그 날짜 봉이나 직전 봉이 없으면 None — 다른 날짜·종가로 대신하지 않는다(§0).
+    """
+    try:
+        target = datetime.strptime(date_str, "%Y-%m-%d")
+        start_dt = (target - timedelta(days=10)).strftime("%Y%m%d") + "000000"
+        end_dt = (target + timedelta(days=2)).strftime("%Y%m%d") + "235959"
+        url = (
+            f"https://api.stock.naver.com/chart/domestic/index/KOSPI/day"
+            f"?startDateTime={start_dt}&endDateTime={end_dt}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
+    except Exception:
+        return None
+    return open_gap_from_rows(rows, date_str)
+
+
+def open_gap_from_rows(rows: list, date_str: str) -> tuple | None:
+    """일봉 목록에서 date_str의 (시가, 전일 종가, 갭%)를 고른다. 네트워크 없는 순수 함수."""
+    try:
+        rows = sorted(rows, key=lambda r: r["localDate"])
+        ymd = date_str.replace("-", "")
+        for i, row in enumerate(rows):
+            if row["localDate"] == ymd and i > 0:
+                open_price = float(row["openPrice"])
+                prev_close = float(rows[i - 1]["closePrice"])
+                if open_price <= 0 or prev_close <= 0:
+                    return None
+                return open_price, prev_close, (open_price - prev_close) / prev_close * 100
+    except Exception:
+        return None
     return None
 
 
@@ -210,9 +249,19 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
     if change_pct != change_pct:  # NaN(미수집 행) → 가짜 '하락' 기록 방지, 채점 보류
         print(f"[check_accuracy] {date_str} ({briefing_type}): change_pct NaN — 채점 보류", file=sys.stderr)
         return
-    actual_direction = "상승" if change_pct >= 0 else "하락"
     predicted = entry.get("predicted_direction", "")
-    is_correct = classify_direction_correct(predicted, change_pct)
+    # 채점값은 그 기록의 기준을 따른다(§57). 시초가 기준이면 갭으로, 아니면 종가 등락률로.
+    # 갭을 못 구하면 종가로 대신 채점하지 않고 보류한다 — 다음 실행에서 다시 시도한다.
+    score_pct = change_pct
+    if briefing_type == "kospi" and is_open_basis(entry):
+        gap = get_kospi_open_gap(date_str)
+        if gap is None:
+            print(f"[check_accuracy] {date_str} (kospi): 시가를 못 구해 채점 보류", file=sys.stderr)
+            return
+        score_pct = gap[2]
+        entry["actual_open_pct"] = round(score_pct, 2)
+    actual_direction = "상승" if score_pct >= 0 else "하락"
+    is_correct = classify_direction_correct(predicted, score_pct)
 
     entry["actual_direction"] = actual_direction
     entry["actual_change_pct"] = round(change_pct, 2)
@@ -241,7 +290,8 @@ def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = Fa
     result_mark = "✓" if is_correct is True else ("?" if is_correct is None else "✗")
     print(
         f"[check_accuracy] {date_str} ({briefing_type}): "
-        f"predicted={predicted}, actual={actual_direction}({change_pct:+.2f}%), {result_mark}"
+        f"predicted={predicted}, actual={actual_direction}({score_pct:+.2f}%"
+        f"{' 시초가' if is_open_basis(entry) else ''}), {result_mark}"
     )
 
 
@@ -306,7 +356,9 @@ def write_accuracy_summary() -> None:
     data = load_briefings()
     # bucket: [scored, hit]
     buckets = {"cumulative": [0, 0], "kospi": [0, 0], "us": [0, 0]}
-    for b in data.get("briefings", []):
+    all_rows = data.get("briefings", [])
+    # 코스피는 시초가 기준 기록만 '지금 성적'이다(§57). 종가 기준 옛 기록은 아래 kospi_close_legacy에 따로 남긴다.
+    for b in stats_rows(all_rows):
         if b.get("is_correct") is None:
             continue
         hit = 1 if b.get("is_correct") else 0
@@ -324,6 +376,14 @@ def write_accuracy_summary() -> None:
     # US는 2026-07-14 이슈 중심 전환으로 채점 탈퇴(call_claude.py / check_accuracy 상단 가드).
     # us 수치는 그 시점에 동결됐고 cumulative는 동결값이 섞인 혼합값이라, 새 소비자가
     # 무심코 "지금 성적"으로 쓰지 않도록 데이터에 명시한다. 살아 있는 지표는 kospi뿐이다.
+    legacy = [b for b in legacy_kospi_rows(all_rows) if b.get("is_correct") is not None]
+    lh = sum(1 for b in legacy if b.get("is_correct"))
+    out["kospi"]["basis"] = "open"
+    out["kospi"]["note"] = "시초가 기준(전일 종가 대비 09:00 개장 지수) — 2026-10-13 전환 이후 기록만"
+    out["kospi_close_legacy"] = {
+        "scored": len(legacy), "hit": lh, "pct": (round(lh / len(legacy) * 100) if legacy else None),
+        "retired": True, "note": "전환 이전 종가 기준 기록 — 수치 동결, 현재 성적에 넣지 않음",
+    }
     out["us"]["retired"] = True
     out["us"]["note"] = "2026-07-14 이슈 중심 전환으로 채점 탈퇴 — 수치 동결"
     out["cumulative"]["note"] = "kospi(진행) + us(동결) 혼합 — 현재 성적은 kospi를 쓸 것"

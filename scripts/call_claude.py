@@ -65,7 +65,16 @@ SECTOR_BY_KEY = {s["key"]: s for s in SECTOR_POOL}
 
 KOSPI_SYSTEM_PROMPT = """\
 너는 20년 경력의 한국·미국 주식시장 투자 전략가다.
-제공된 시장 데이터와 뉴스 요약을 분석하여 오늘 코스피 당일 방향(종가 기준)을 예측한다.
+제공된 시장 데이터와 뉴스 요약을 분석하여 오늘 코스피 **시초가 방향**을 예측한다.
+
+## 예측 대상 — 시초가(09:00 개장 지수)
+
+- 맞히는 것은 **오늘 09:00 코스피 지수 시가가 전일 종가보다 높게 열리는지 낮게 열리는지**다. 종가가 아니다.
+- 이 브리핑이 가진 근거(직전 미국장 종가·지수선물·환율·간밤 뉴스)는 **개장 갭**을 설명하는 정보다.
+  개장 뒤 장중 흐름(시가→종가)은 이 정보로 맞힐 수 없고, 실제로 갭과 반대로 끝나는 날이 많다.
+- 그래서 **"오늘 종가가 오른다/내린다", "상승 마감", "하락 마감"처럼 종가를 단정하는 문장을 쓰지 않는다.**
+  장중에 볼 것은 예측이 아니라 관전 포인트(무엇이 나오면 갭이 유지되고 무엇이 나오면 되돌려지는지)로 쓴다.
+- prediction.direction·up_pct·reason_title·todays_view의 방향 서술은 모두 **시초가 기준**이다.
 
 ## 글쓰기 기본 규칙 (모든 텍스트에 적용)
 
@@ -129,7 +138,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 
 ### 상승·하락 확률(up_pct·down_pct·confidence) — 정의와 규칙
 
-- **`up_pct` = 오늘 코스피가 전일 종가 대비 상승 마감할 확률**(정수 0~100). `down_pct = 100 - up_pct`.
+- **`up_pct` = 오늘 코스피 시초가(09:00 개장 지수)가 전일 종가보다 높게 열릴 확률**(정수 0~100). `down_pct = 100 - up_pct`.
   이건 "얼마나 확신하는지"를 나타내는 값이 **아니라 실제 확률**이다. 같은 상황이 100번 오면 그중 몇 번
   오를지로 생각하고 낸다.
 - **`confidence` = 그 확률 추정의 근거가 얼마나 단단한지**(선행신호 일치도·데이터 완결성). 방향의 세기가
@@ -143,7 +152,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
   나타내고 등락폭 전망을 섞지 않는다.
 
 ### [최우선 원칙] 코스피 지수 집중도 — 반도체 메가캡이 곧 지수다
-삼성전자(005930)·SK하이닉스(000660)·SK스퀘어(402340) 등 반도체 대형주가 코스피 시가총액의 약 1/3을 차지하고, 이들이 크게 움직이는 날엔 지수 등락 기여도의 절반 이상을 좌우한다. 즉 **이 반도체 양대장의 방향이 코스피 당일 방향을 사실상 결정하는 장세**다.
+삼성전자(005930)·SK하이닉스(000660)·SK스퀘어(402340) 등 반도체 대형주가 코스피 시가총액의 약 1/3을 차지하고, 이들이 크게 움직이는 날엔 지수 등락 기여도의 절반 이상을 좌우한다. 즉 **이 반도체 양대장의 방향이 코스피 시초가 방향을 사실상 결정하는 장세**다.
 - 방향 예측의 출발점은 항상 "오늘 삼성전자·SK하이닉스가 오를까 내릴까"이다. 아래 우선순위 중 **SOX(필라델피아 반도체)·DRAM ETF·마이크론/엔비디아 동향**을 이 두 종목의 선행 지표로 **최우선 가중**한다.
 - 반도체가 강세인데 지수가 빠지거나 그 반대는 드물다. 반도체 메가캡 방향과 다른 시그널(예: 금융·내수주 흐름)이 충돌하면, 반도체 쪽에 더 큰 가중을 두되 confidence는 보수적으로 낮춘다.
 - reasons[0](전체 시장 방향 요약)에 이 반도체 메가캡 가중 관점을 반드시 반영한다.
@@ -166,7 +175,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 4-2. asia_regional (닛케이·항셍·상해·대만) — 직전 거래일 아시아 동조 흐름
    - **post_holiday_catchup=true (한국 단독 휴장 다음날)이면 EWY보다 우선순위 높음**
    - 한국이 쉬는 동안 아시아 주요 시장이 강세였다면 코스피 갭 상승(catch-up) 가능성
-   - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 당일 방향에 직접 영향
+   - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 개장 방향에 직접 영향
 5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
    - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
@@ -1059,6 +1068,8 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
         "up_pct": pred.get("up_pct", 0),
         "down_pct": pred.get("down_pct", 0),
         "confidence": pred.get("confidence", 0),
+        # 채점 기준 — "open"이면 시초가(§57). 분석 JSON에 찍힌 값을 그대로 옮긴다(없으면 종가 기준 기록).
+        "basis": pred.get("basis"),
         "actual_direction": None,
         "actual_change_pct": None,
         "is_correct": None,
@@ -1068,12 +1079,20 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
         **_signal_snapshot(briefing_type),
     }
 
+    if entry["basis"] is None:
+        del entry["basis"]
     if existing_idx is not None:
         # Preserve existing actual result (don't overwrite accuracy data on re-run)
         prev = briefings[existing_idx]
         entry["actual_direction"] = prev.get("actual_direction")
         entry["actual_change_pct"] = prev.get("actual_change_pct")
+        entry["actual_open_pct"] = prev.get("actual_open_pct")
         entry["is_correct"] = prev.get("is_correct")
+        # 이미 채점된 기록은 그때의 기준을 지킨다 — 재실행으로 기준이 바뀌면 채점값과 어긋난다.
+        if prev.get("is_correct") is not None:
+            entry.pop("basis", None)
+            if prev.get("basis"):
+                entry["basis"] = prev["basis"]
         entry["checked_at"] = prev.get("checked_at")
         briefings[existing_idx] = entry
     else:
@@ -1111,11 +1130,13 @@ def build_calibration_hint(briefing_type: str = "kospi", min_n: int = 20) -> str
     except Exception:
         return ""
 
+    from prediction_basis import stats_rows, outcome_pct
+    # 코스피는 시초가 기준 기록만 센다(§57) — 종가 기준으로 낸 옛 up_pct와 섞으면 표가 뜻을 잃는다.
     scored = [
-        r for r in rows
+        dict(r, _out=outcome_pct(r)) for r in stats_rows(rows)
         if r.get("type") == briefing_type
         and isinstance(r.get("up_pct"), (int, float))
-        and isinstance(r.get("actual_change_pct"), (int, float))
+        and outcome_pct(r) is not None
     ]
     if len(scored) < min_n:
         return ""
@@ -1123,7 +1144,7 @@ def build_calibration_hint(briefing_type: str = "kospi", min_n: int = 20) -> str
     buckets = {}
     for r in scored:
         lo = int(r["up_pct"]) // 10 * 10
-        buckets.setdefault(lo, []).append(r["actual_change_pct"] > 0)
+        buckets.setdefault(lo, []).append(r["_out"] > 0)
 
     lines = [
         "\n## 📊 지금까지의 up_pct 캘리브레이션 (본인 실적 — 확률 보정에 반영할 것)",
@@ -1136,7 +1157,7 @@ def build_calibration_hint(briefing_type: str = "kospi", min_n: int = 20) -> str
         ups = buckets[lo]
         lines.append(f"| {lo}~{lo + 9} | {len(ups)}회 | {100 * sum(ups) / len(ups):.0f}% |")
 
-    overall_up = 100 * sum(1 for r in scored if r["actual_change_pct"] > 0) / len(scored)
+    overall_up = 100 * sum(1 for r in scored if r["_out"] > 0) / len(scored)
     lines += [
         "",
         f"- 전체 기간 실제 상승 비율(기저율)은 **{overall_up:.0f}%** 다.",
@@ -1170,6 +1191,11 @@ def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
     prior = [b for b in rows
              if b.get("type") == briefing_type
              and str(b.get("date", "")) < before_date]
+    # 직전 예측이 종가 기준(전환 이전)이면 "지난 예측" 배지를 달지 않는다 — 기준이 다른 결과다(§57).
+    if prior and briefing_type == "kospi":
+        from prediction_basis import is_open_basis
+        if not is_open_basis(max(prior, key=lambda b: b["date"])):
+            return None
     if not prior:
         return None
     prior.sort(key=lambda b: b["date"])
@@ -1200,7 +1226,8 @@ def _cumulative_kospi_accuracy(before_date: str) -> "tuple[int, int] | None":
         rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
     except Exception:
         return None
-    scored = [b for b in rows
+    from prediction_basis import stats_rows
+    scored = [b for b in stats_rows(rows)
               if b.get("type") == "kospi"
               and str(b.get("date", "")) < before_date
               and b.get("is_correct") is not None]
@@ -1287,7 +1314,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         lines = [
             header,
             divider,
-            f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>",
+            f"{dir_emoji} {'시초가 예측' if (briefing_type == 'kospi' and (analysis.get('prediction') or {}).get('basis') == 'open') else '예측'}: <b>{direction} ({dir_pct}%)</b>",
             f"신뢰도: <b>{confidence}%</b>",
         ]
         if prev_result:
@@ -1535,6 +1562,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     # 브리핑 형식 강제 주입 — kospi 전용(US는 형식 없음)
     if chosen_format:
         analysis["analysis_format"] = chosen_format
+
+    # 채점 기준 스탬프 — 코스피 예측은 시초가 방향이다(§57). 스냅샷·briefings.json·화면 라벨이 이 값을 따른다.
+    if briefing_type == "kospi" and isinstance(analysis.get("prediction"), dict):
+        from prediction_basis import OPEN as _BASIS_OPEN
+        analysis["prediction"]["basis"] = _BASIS_OPEN
 
     # 응답에서 시그널 추출 후 히스토리에 저장 (kospi 예측 전용 — US는 reasons 없음)
     if briefing_type == "kospi":
@@ -1940,17 +1972,29 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     signals        = analysis.get("telegram_signals", [])
     divider = "─" * 20
 
-    # 결과 배지: 오늘 아침 kospi 예측 → 오늘 종가로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
+    # 결과 배지: 오늘 아침 kospi 예측을 그 예측의 기준으로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
+    #  · 시초가 기준(§57) → 오늘 시가 갭으로 채점한다. 갭을 못 구하면 종가로 대신 채점하지 않고 배지를 뺀다.
+    #  · 종가 기준(전환 이전 기록) → 오늘 종가 등락률.
     result_badge = ""
     today_pred = _today_kospi_prediction(date_str)
     kospi_chg = kospi.get("change_pct") if "error" not in kospi else None
-    if today_pred and isinstance(kospi_chg, (int, float)):
+    if today_pred:
+        from prediction_basis import is_open_basis
         predicted = today_pred.get("predicted_direction", "")
-        is_correct = classify_direction_correct(predicted, kospi_chg)
-        mark = "✓ 적중" if is_correct else "✗ 빗나감"
-        cum = _cumulative_kospi_accuracy(date_str)
-        cum_txt = f" (누적 {round(cum[0] / cum[1] * 100)}%)" if cum else ""
-        result_badge = f"🎯 오늘 아침 예측: {predicted} → 실제 {kospi_chg:+.2f}% {mark}{cum_txt}"
+        if is_open_basis(today_pred):
+            from check_accuracy import get_kospi_open_gap
+            gap = get_kospi_open_gap(date_str)
+            actual, what = (gap[2] if gap else None), "시초가"
+        else:
+            actual, what = (kospi_chg if isinstance(kospi_chg, (int, float)) else None), "실제"
+        if actual is not None:
+            is_correct = classify_direction_correct(predicted, actual)
+            mark = "✓ 적중" if is_correct else "✗ 빗나감"
+            cum = _cumulative_kospi_accuracy(date_str)
+            # 표본 5건 미만이면 누적 %를 붙이지 않는다 — 전환 직후 "1건 100%"는 뜻이 없다(§57)
+            cum_txt = f" (누적 {round(cum[0] / cum[1] * 100)}%)" if (cum and cum[1] >= 5) else ""
+            label = "오늘 아침 시초가 예측" if what == "시초가" else "오늘 아침 예측"
+            result_badge = f"🎯 {label}: {predicted} → {what} {actual:+.2f}% {mark}{cum_txt}"
 
     lines = [
         f"🇰🇷 코스피 마감 시황 | {date_display}",
