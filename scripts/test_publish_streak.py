@@ -71,9 +71,14 @@ def test_real_data_matches_manual_count():
         b["date"] for b in rows
         if (b.get("type") or "kospi") == "kospi" and b.get("date")
     )
-    assert r["from"] == "2026-04-15", r      # 스트릭 시작점은 고정 (끊기면 바뀐다)
+    # 시작일·일수도 고정하지 않는다 — 2026-10-01 아침 브리핑이 검증 게이트에 막혀 미발행되면서 연속 기록이
+    # 실제로 끊겼는데(4/15 → 10/2), 고정 기댓값 때문에 CI가 열흘 넘게 빨갛게 남아 다른 실패를 가렸다.
+    # 계산 규칙(끊긴 날 판정·일수 세기)은 위의 합성 데이터 테스트들이 지킨다.
+    kospi_dates = {b["date"] for b in rows if (b.get("type") or "kospi") == "kospi" and b.get("date")}
     assert r["to"] == latest_kospi, r        # 끝은 항상 최신 kospi 발행일
-    assert r["days"] >= 68, r                # 단조 증가 — 줄었다면 계산 회귀
+    assert r["from"] in kospi_dates, r       # 시작일은 실제 발행일
+    assert r["from"] <= r["to"], r
+    assert 1 <= r["days"] <= len([d for d in kospi_dates if r["from"] <= d <= r["to"]]), r
 
 
 if __name__ == "__main__":
