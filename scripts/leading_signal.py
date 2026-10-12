@@ -5,14 +5,21 @@ SOX·나스닥·NQ선물은 market_data_js.*.chg, EWY·VIX는 최상위 *.change
 가중치·임계값은 scripts/diagnose_direction_signals.py 백테스트로 확정한다(초기값은 74일 진단 기반).
 """
 
-# 진단 기반 재보정값 — 백테스트(diagnose_direction_signals.py)로 확정
-SIGNAL_WEIGHTS = {"sox": 1.5, "nasdaq": 0.5, "nq": 0.3, "ewy": 0.3, "vix": -0.2, "usdkrw": -0.8}
+# 시초가 갭 기준 재점검(2026-10-12, scripts/fit_open_gap_prior.py — 713거래일 2023-11~2026-10).
+#  · 이 가중치는 갭 방향을 전체 72.7%·2026년 76.1% 맞혔고, 다시 맞춘 회귀 가중치가 검증 구간에서 이기지 못해 그대로 둔다.
+#  · 원/달러(-0.8)는 뺐다 — 갭 방향 적중 46.7%로 예측력이 없고, 빼도 성적이 같거나 조금 낫다(전체 72.5→72.7%).
+#    값은 계속 수집해 프롬프트·기록에 남긴다(가중 합산에서만 제외).
+#  · EWY는 잔차(EWY − 직전 코스피)를 쓴다. 긴 표본에선 잔차가 원본보다 갭과 더 맞는다(상관 0.53 vs 0.49).
+SIGNAL_WEIGHTS = {"sox": 1.5, "nasdaq": 0.5, "nq": 0.3, "ewy": 0.3, "vix": -0.2}
+# score → '시초가가 전일 종가보다 높게 열릴' 확률. 로지스틱 P = 1/(1+exp(-(A + B·score))), 713거래일 적합.
+# 2025년까지로 맞춰 2026년(188일)에 검증: 예측 80%↑ 구간 실제 87%, 20%↓ 구간 실제 14%, Brier 0.167(기저율 0.247).
+PROB_A, PROB_B = 0.422, 0.244
+P_STRONG_UP, P_STRONG_DN = 0.80, 0.25   # strong 자격 확률 — 이 구간 갭 방향 적중 88.1%
+P_MID_UP, P_MID_DN = 0.65, 0.40         # mid — 실제 위로 열림 72.8% / 26.9%
 # 비대칭 데드밴드: 상승 드리프트(base 63% up)를 내장 — 하락 판정에 더 강한 음의 증거를 요구.
 # 레짐 전환(하락장) 시 DN_BAND 재점검 필요.
 UP_BAND =  0.3    # score >  UP_BAND → 상승
 DN_BAND = -1.2    # score <  DN_BAND → 하락, 그 사이는 중립
-T_EWY = 3.5          # strong 자격 EWY 임계 (%)
-T_SOX = 3.0          # strong 자격 SOX 임계 (%)
 VIX_CONTRA = 10.0    # 방향과 반대인 VIX 급변동(%) → strong 강등
 
 
@@ -75,20 +82,31 @@ def ewy_residual(sig: dict):
     return round(ewy - kospi, 3)
 
 
-def _strength(sig: dict, direction: str) -> str:
-    sox, ewy, vix = sig.get("sox"), sig.get("ewy"), sig.get("vix")
-    if direction == "중립" or sox is None or ewy is None or sox == 0 or ewy == 0:
+def up_probability(score: float) -> float:
+    """score가 뜻하는 시초가 상승(전일 종가보다 높게 개장) 확률 0~1."""
+    import math
+    return 1.0 / (1.0 + math.exp(-(PROB_A + PROB_B * score)))
+
+
+def _strength(sig: dict, direction: str, p_up: float) -> str:
+    """prior 강도. 확률이 극단이고 SOX·EWY 잔차가 같은 방향일 때만 strong.
+
+    713거래일 실측: 확률 80%↑/25%↓ 구간에서 SOX와 EWY 잔차 부호가 같으면 갭 방향 적중 94.1%(202일),
+    엇갈리면 59.5%(42일)다. 그래서 확률만으로 strong을 주지 않는다. 엇갈리는 날은 mid로 내린다.
+    """
+    if direction == "중립":
         return "weak"
-    agree = (sox > 0) == (ewy > 0)
-    if not agree:
-        return "weak"
+    extreme = (direction == "상승" and p_up >= P_STRONG_UP) or (direction == "하락" and p_up <= P_STRONG_DN)
+    middle = (direction == "상승" and p_up >= P_MID_UP) or (direction == "하락" and p_up <= P_MID_DN)
+    if not extreme:
+        return "mid" if middle else "weak"
+    sox, resid, vix = sig.get("sox"), sig.get("ewy_resid"), sig.get("vix")
+    agree = sox is not None and resid is not None and sox != 0 and resid != 0 and (sox > 0) == (resid > 0)
     vix_contra = vix is not None and (
         (direction == "상승" and vix > VIX_CONTRA) or
         (direction == "하락" and vix < -VIX_CONTRA)
     )
-    if (abs(ewy) >= T_EWY or abs(sox) >= T_SOX) and not vix_contra:
-        return "strong"
-    return "mid"
+    return "strong" if (agree and not vix_contra) else "mid"
 
 
 def compute_prior(latest: dict) -> dict:
@@ -108,17 +126,19 @@ def compute_prior(latest: dict) -> dict:
             score += w * v
             used = True
     if not used:
-        return {"direction": "중립", "score": 0.0, "strength": "weak", "signals": sig}
+        return {"direction": "중립", "score": 0.0, "strength": "weak", "up_pct": None, "signals": sig}
     if score > UP_BAND:
         direction = "상승"
     elif score < DN_BAND:
         direction = "하락"
     else:
         direction = "중립"
+    p_up = up_probability(score)
     return {
         "direction": direction,
         "score": round(score, 3),
-        "strength": _strength(sig, direction),
+        "strength": _strength(sig, direction, p_up),
+        "up_pct": round(p_up * 100),      # 이 score가 뜻하는 시초가 상승 확률(%) — 과거 실측 환산
         "signals": sig,
     }
 
@@ -131,6 +151,11 @@ def format_prior_for_prompt(prior: dict) -> str:
     lines = [
         "\n## 🧭 선행신호 방향 prior (Python 결정론 계산 — 우선 참고)",
         f"- 계산 방향: **{prior['direction']}** (강도 {prior['strength']}, score {prior['score']})",
+        *([f"- **이 score가 뜻하는 시초가 상승 확률: {prior['up_pct']}%** — 과거 713거래일에서 같은 score였던 날"
+           " 실제로 전일 종가보다 높게 열린 비율로 환산한 값이다. **up_pct는 이 값에서 출발한다.**"
+           " 뉴스·이벤트로 조정하되 ±10%p를 넘기려면 그 근거를 key_drivers에 구체적으로 쓴다."
+           " 근거가 빈약하면 이 값을 그대로 쓴다."]
+          if prior.get("up_pct") is not None else []),
         f"- SOX {fmt(sig.get('sox'))} · 나스닥 {fmt(sig.get('nasdaq'))} · NQ선물 {fmt(sig.get('nq'))} "
         f"· EWY {fmt(sig.get('ewy'))} · 원/달러 {fmt(sig.get('usdkrw'))} · VIX {fmt(sig.get('vix'))}",
         "- 이 값들은 직전 미국장 종가로, 전일 한국 마감 **이후** 정보를 반영한다.",

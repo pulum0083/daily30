@@ -163,11 +163,43 @@ def test_strong_negative_is_down():
     assert ls.compute_prior(latest)["direction"] == "하락"
 
 
-def test_usdkrw_weakening_pushes_down():
-    # 원화 약세(usd +2.0)만 있어도 -0.8*2.0=-1.6 < -1.2 → 하락
-    #  (구 로직: usdkrw 가중치 없음 → score 0 → 중립)
-    latest = {"market_data_js": {"usd": {"chg": 2.0}}}
-    assert ls.compute_prior(latest)["direction"] == "하락"
+def test_usdkrw_is_not_in_the_score():
+    # 2026-10-12 재점검: 원/달러는 시초가 갭 방향 적중 46.7%(713거래일)로 예측력이 없어 가중 합산에서 뺐다.
+    # 값은 계속 수집해 프롬프트·기록에 남긴다.
+    assert "usdkrw" not in ls.SIGNAL_WEIGHTS
+    only_fx = ls.compute_prior({"market_data_js": {"usd": {"chg": 2.0}}})
+    assert only_fx["score"] == 0.0 and only_fx["direction"] == "중립"
+    with_fx = ls.compute_prior({"market_data_js": {"sox": {"chg": 1.0}, "usd": {"chg": 2.0}}})
+    without = ls.compute_prior({"market_data_js": {"sox": {"chg": 1.0}}})
+    assert with_fx["score"] == without["score"]
+    assert with_fx["signals"]["usdkrw"] == 2.0
+
+
+def test_score_maps_to_open_up_probability():
+    # 로지스틱 환산 — score 0이면 기저율 근처(60%), 양수로 갈수록 오르고 음수로 갈수록 내린다.
+    assert round(ls.up_probability(0) * 100) == 60
+    assert round(ls.up_probability(8) * 100) == 91
+    assert round(ls.up_probability(-8) * 100) == 18
+    p = ls.compute_prior({"market_data_js": {"sox": {"chg": 2.0}}})       # score 3.0
+    assert p["up_pct"] == 76
+    assert ls.compute_prior({"market_data_js": {}})["up_pct"] is None      # 신호가 없으면 확률도 없다(§0)
+
+
+def test_strong_requires_extreme_probability_and_sox_ewy_resid_agreement():
+    # 확률이 극단이어도 SOX와 EWY 잔차가 엇갈리면 strong이 아니다 — 그런 날 갭 방향 적중은 59.5%였다(일치 94.1%).
+    agree = ls.compute_prior(_latest(sox=4.0, nasdaq=1.0, ewy=2.0, vix=-3.0))
+    assert agree["up_pct"] >= 80 and agree["strength"] == "strong"
+    split = ls.compute_prior(_latest(sox=4.0, nasdaq=1.0, ewy=-2.0, vix=-3.0))
+    assert split["up_pct"] >= 80 and split["strength"] == "mid"
+    mild = ls.compute_prior(_latest(sox=1.0, nasdaq=0.2, ewy=0.5, vix=0.0))   # 확률 65~80% → mid
+    assert 65 <= mild["up_pct"] < 80 and mild["strength"] == "mid"
+    faint = ls.compute_prior(_latest(sox=0.3, ewy=0.1))                        # 방향은 상승이지만 확률 65% 미만 → weak
+    assert faint["direction"] == "상승" and faint["strength"] == "weak"
+
+
+def test_prompt_block_states_the_implied_probability():
+    text = ls.format_prior_for_prompt(ls.compute_prior({"market_data_js": {"sox": {"chg": 2.0}}}))
+    assert "시초가 상승 확률: 76%" in text and "up_pct는 이 값에서 출발" in text
 
 
 def test_format_prior_shows_usdkrw():

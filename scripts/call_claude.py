@@ -1029,6 +1029,7 @@ def _signal_snapshot(briefing_type: str) -> dict:
             "prior_direction": prior["direction"],
             "prior_score": prior["score"],
             "prior_strength": prior["strength"],
+            "prior_up_pct": prior.get("up_pct"),     # score → 시초가 상승 확률 환산값(사후 검증용)
             "signals": {k: sig.get(k) for k in
                         ("sox", "nasdaq", "nq", "es", "ym", "ewy", "ewy_resid",
                          "kospi", "usdkrw", "vix")},
