@@ -1114,7 +1114,10 @@
         var k  = d && d.kospi;
         var st = d && d.streak;
         /* 필수 필드가 하나라도 없으면 그리지 않는다 — 부분 표시로 오해를 만들지 않는다. */
-        if (!k || !k.scored || k.pct == null || !st || !st.days || !d.updated_at) return;
+        if (!k || !st || !st.days || !d.updated_at) return;
+        /* 적중률은 표본이 5건 이상일 때만 붙인다 — 시초가 기준 전환(2026-10-13) 직후엔 표본이 없다(§57).
+           연속 발행 일수는 채점과 무관하므로 그때도 그대로 보여준다. */
+        var hasAcc = k.scored >= 5 && k.pct != null;
 
         var rel = trustRelTime(d.updated_at);
         if (!rel) return;
@@ -1133,9 +1136,9 @@
             /* 좁은 화면에서 라벨과 숫자가 갈라지지 않도록 의미 단위로 묶는다.
                구분자 ·는 앞 그룹 끝에 붙여 줄 시작에 오지 않게 한다. */
             '<span class="trust-strip__g">매 거래일 자동 발행 ·</span>' +
-            '<span class="trust-strip__g"><b>' + st.days + ' 거래일</b> 연속 ·</span>' +
-            '<span class="trust-strip__g">코스피 예측 <b>' +
-              k.scored + '전 ' + k.hit + '적중(' + k.pct + '%)</b></span>' +
+            '<span class="trust-strip__g"><b>' + st.days + ' 거래일</b> 연속' + (hasAcc ? ' ·' : '') + '</span>' +
+            (hasAcc ? '<span class="trust-strip__g">코스피 ' + (k.basis === 'open' ? '시초가 ' : '') + '예측 <b>' +
+              k.scored + '전 ' + k.hit + '적중(' + k.pct + '%)</b></span>' : '') +
             '<a href="/briefings/">채점 기록 전체 보기</a>' +
           '</p>' +
           '<p class="trust-strip__r2">채점 데이터 ' + rel.text +
