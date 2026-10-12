@@ -5,8 +5,32 @@
       "name": "삼성전자",
       "consensus": 503846,
       "firm_count": 13,
-      "close_price": 268500,
+      "close_price": 250500,
       "reports": [
+        {
+          "firm": "DS투자증권",
+          "opinion": "매수",
+          "target_price": 530000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "하나증권",
+          "opinion": "Buy",
+          "target_price": 480000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "유진투자증권",
+          "opinion": "StrongBuy",
+          "target_price": 560000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "IBK투자증권",
+          "opinion": "매수",
+          "target_price": 460000,
+          "date": "26.10.12"
+        },
         {
           "firm": "한화투자증권",
           "opinion": "Buy",
@@ -32,39 +56,15 @@
           "date": "26.10.06"
         },
         {
-          "firm": "IBK투자증권",
-          "opinion": "매수",
-          "target_price": 460000,
-          "date": "26.10.02"
-        },
-        {
-          "firm": "하나증권",
-          "opinion": "Buy",
-          "target_price": 480000,
-          "date": "26.10.01"
-        },
-        {
           "firm": "신한투자증권",
           "opinion": "매수",
           "target_price": 450000,
           "date": "26.09.30"
         },
         {
-          "firm": "유진투자증권",
-          "opinion": "StrongBuy",
-          "target_price": 560000,
-          "date": "26.09.29"
-        },
-        {
           "firm": "유안타증권",
           "opinion": "Buy",
           "target_price": 630000,
-          "date": "26.09.23"
-        },
-        {
-          "firm": "키움증권",
-          "opinion": "Buy",
-          "target_price": 350000,
           "date": "26.09.23"
         }
       ],
@@ -311,8 +311,14 @@
       "name": "SK하이닉스",
       "consensus": 3337500,
       "firm_count": 12,
-      "close_price": 1681000,
+      "close_price": 1605000,
       "reports": [
+        {
+          "firm": "SK증권",
+          "opinion": "매수",
+          "target_price": 4000000,
+          "date": "26.10.12"
+        },
         {
           "firm": "유진투자증권",
           "opinion": "StrongBuy",
@@ -360,12 +366,6 @@
           "opinion": "Buy",
           "target_price": 3300000,
           "date": "26.08.05"
-        },
-        {
-          "firm": "SK증권",
-          "opinion": "매수",
-          "target_price": 4000000,
-          "date": "26.08.03"
         },
         {
           "firm": "DS투자증권",
@@ -615,10 +615,34 @@
     },
     "005380": {
       "name": "현대차",
-      "consensus": 708462,
+      "consensus": 653846,
       "firm_count": 13,
-      "close_price": 324500,
+      "close_price": 320000,
       "reports": [
+        {
+          "firm": "유안타증권",
+          "opinion": "Buy",
+          "target_price": 410000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "유진투자증권",
+          "opinion": "Buy",
+          "target_price": 600000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "신한투자증권",
+          "opinion": "매수",
+          "target_price": 630000,
+          "date": "26.10.12"
+        },
+        {
+          "firm": "키움증권",
+          "opinion": "Buy",
+          "target_price": 600000,
+          "date": "26.10.12"
+        },
         {
           "firm": "한화투자증권",
           "opinion": "Buy",
@@ -654,30 +678,6 @@
           "opinion": "Buy",
           "target_price": 650000,
           "date": "26.08.27"
-        },
-        {
-          "firm": "대신증권",
-          "opinion": "Buy",
-          "target_price": 740000,
-          "date": "26.08.27"
-        },
-        {
-          "firm": "DS투자증권",
-          "opinion": "매수",
-          "target_price": 840000,
-          "date": "26.07.30"
-        },
-        {
-          "firm": "교보증권",
-          "opinion": "Buy",
-          "target_price": 740000,
-          "date": "26.07.24"
-        },
-        {
-          "firm": "유안타증권",
-          "opinion": "Buy",
-          "target_price": 570000,
-          "date": "26.07.24"
         }
       ],
       "history": [
@@ -915,7 +915,7 @@
         },
         {
           "date": "2026-10-12",
-          "value": 708462
+          "value": 653846
         }
       ]
     }
