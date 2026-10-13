@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-10-14": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-10-14/kospi/",
+        "headline": "전일 5.46% 급락 다음날, 반등 시도 나올까요",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-10-13": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-27/us/",
         "headline": "엔비디아 실적이 AI 랠리의 시험대를 통과했다 — 반도체 전체가 함께 웃는 날",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-26": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-26/kospi/",
-        "headline": "반도체·수급 동반 강세, 다만 PCE·GDP 대기",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "09:40"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-26/close/",
-        "headline": "코스피 6800선 회복, 무엇이 움직였을까요?",
-        "title": "6,808.21",
-        "price": "6,808.21",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-26/us/",
-        "headline": "엔비디아 실적 발표 앞두고 숨 고르기 — PCE와 함께 오늘 밤 두 갈래 승부",
         "title": "—",
         "time": ""
       }
