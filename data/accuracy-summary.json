@@ -1,14 +1,16 @@
 {
   "cumulative": {
-    "scored": 179,
-    "hit": 118,
-    "pct": 66,
+    "scored": 58,
+    "hit": 41,
+    "pct": 71,
     "note": "kospi(진행) + us(동결) 혼합 — 현재 성적은 kospi를 쓸 것"
   },
   "kospi": {
-    "scored": 121,
-    "hit": 77,
-    "pct": 64
+    "scored": 0,
+    "hit": 0,
+    "pct": null,
+    "basis": "open",
+    "note": "시초가 기준(전일 종가 대비 09:00 개장 지수) — 2026-10-13 전환 이후 기록만"
   },
   "us": {
     "scored": 58,
@@ -17,11 +19,18 @@
     "retired": true,
     "note": "2026-07-14 이슈 중심 전환으로 채점 탈퇴 — 수치 동결"
   },
+  "kospi_close_legacy": {
+    "scored": 122,
+    "hit": 77,
+    "pct": 63,
+    "retired": true,
+    "note": "전환 이전 종가 기준 기록 — 수치 동결, 현재 성적에 넣지 않음"
+  },
   "live_key": "kospi",
   "streak": {
-    "days": 4,
+    "days": 6,
     "from": "2026-10-02",
-    "to": "2026-10-08"
+    "to": "2026-10-13"
   },
-  "updated_at": "2026-10-10T09:10:57.566635+09:00"
+  "updated_at": "2026-10-13T09:10:54.828560+09:00"
 }
