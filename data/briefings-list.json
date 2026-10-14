@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-10-15": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-10-15/kospi/",
+        "headline": "긴급 점검 — CPI 쇼크에 반도체·나스닥 동반 급락",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-10-14": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-28/us/",
         "headline": "엔비디아가 다시 증시를 끌고 간다 — 이번엔 반도체 전체가 함께 뛰어요",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-27": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-27/kospi/",
-        "headline": "엔비디아 실적 대기 속, 반도체가 다시 지수를 밀어요",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-27/close/",
-        "headline": "금리 인상에도 뚫은 코스피, 진짜 힘은 어디서 나왔을까요?",
-        "title": "6,912.37",
-        "price": "6,912.37",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-27/us/",
-        "headline": "엔비디아 실적이 AI 랠리의 시험대를 통과했다 — 반도체 전체가 함께 웃는 날",
         "title": "—",
         "time": ""
       }
