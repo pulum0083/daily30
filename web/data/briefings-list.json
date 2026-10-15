@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-10-16": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-10-16/kospi/",
+        "headline": "오늘, 어제 폭락 뒤 코스피 반등할까요?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-10-15": {
       "kospi": {
         "state": "ready",
@@ -743,32 +762,6 @@
         "state": "ready",
         "url": "/briefings/2026-08-31/us/",
         "headline": "잭슨홀의 매파 발언과 중동 리스크가 겹치며 반도체가 이중고를 맞았어요",
-        "title": "—",
-        "time": ""
-      }
-    },
-    "2026-08-28": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-08-28/kospi/",
-        "headline": "엔비디아 실적 서프라이즈, 반도체 수출까지 겹경사",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-08-28/close/",
-        "headline": "반도체 관세 리스크에 코스피 흔들 — 오늘 시장 판독",
-        "title": "6,788.88",
-        "price": "6,788.88",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-08-28/us/",
-        "headline": "엔비디아가 다시 증시를 끌고 간다 — 이번엔 반도체 전체가 함께 뛰어요",
         "title": "—",
         "time": ""
       }
