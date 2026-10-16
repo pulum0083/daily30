@@ -3184,11 +3184,11 @@
       "down_pct": 88,
       "confidence": 76,
       "basis": "open",
-      "actual_direction": null,
-      "actual_change_pct": null,
-      "is_correct": null,
+      "actual_direction": "하락",
+      "actual_change_pct": -7.57,
+      "is_correct": true,
       "generated_at": "2026-10-15T07:29:38.453046+09:00",
-      "checked_at": null,
+      "checked_at": "2026-10-16T09:11:30.052116+09:00",
       "prior_direction": "하락",
       "prior_score": -11.562,
       "prior_strength": "strong",
@@ -3204,7 +3204,8 @@
         "kospi": -0.44,
         "usdkrw": -0.04,
         "vix": 10.3471
-      }
+      },
+      "actual_open_pct": -5.59
     },
     {
       "date": "2026-10-16",
