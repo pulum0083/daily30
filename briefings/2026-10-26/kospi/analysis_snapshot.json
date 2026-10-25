@@ -1,0 +1,338 @@
+{
+  "analysis_format": "split",
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 58,
+    "down_pct": 42,
+    "confidence": 55,
+    "basis": "open"
+  },
+  "reason_title": "메타발 기술주 충격 vs 반도체 수급 반전",
+  "comfort_line": "장이 곧 열려요. 엇갈린 신호 속에서도 너무 서두르지 않기로 해요.",
+  "todays_view": {
+    "view_title": "메타는 울었는데 솔리다임은 웃었다, 오늘의 숙제",
+    "dek": "지난 금요일 미 증시는 메타의 AI 투자 부담 우려로 기술주가 흔들렸어요. 그런데 지금 이 순간 미 지수선물은 오히려 플러스권이라, 종가의 공포와 선물의 안도가 동시에 존재하는 드문 아침이에요.",
+    "recap": [
+      {
+        "text": "메타의 잉여현금흐름 적자 전환 우려로 미국 기술주·반도체주가 급락하면서 지난 금요일 코스피도 그 여파를 받았어요.",
+        "codes": []
+      },
+      {
+        "text": "외국인은 코스피에서 순매도(<b>-9,934백만원</b>)했지만 기관이 순매수(<b>+8,726백만원</b>)로 맞서며 낙폭을 방어했어요.",
+        "codes": []
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "이번 주 목요일 새벽 FOMC가 예정돼 있어요 — 금리는 동결 전망이지만 파월 발언 톤이 다음 방향을 좌우해요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "미 지수선물이 종가의 약세를 되돌릴지, 개장 전까지 계속 확인할 필요가 있어요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인과 기관 수급이 오늘도 엇갈릴지, 아니면 한쪽으로 쏠릴지가 변곡점이에요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>반도체 수급 신호가 생각보다 나쁘지 않아요.</b> DRAM ETF가 <b>+3.02%</b> 반등했고 EWY도 <b>+1.48%</b> 올라 외국인 자금이 완전히 등 돌린 건 아니라는 신호를 줘요.",
+      "codes": []
+    },
+    {
+      "text": "<b>VIX가 소폭 올랐지만 여전히 안정권이에요.</b> <b>19.45</b>로 20선 아래를 유지하고 있어 패닉 국면으로 보기는 이르고, 지난 금요일 충격이 일회성에 그칠 여지가 남아 있어요.",
+      "codes": []
+    }
+  ],
+  "watch_items": [
+    {
+      "icon": "🏦",
+      "label": "이번 주 FOMC 경계",
+      "text": "목요일 새벽 금리 발표와 파월 기자회견이 예정돼 있어요. 동결은 기정사실이지만 톤에 따라 변동성이 커질 수 있어요."
+    },
+    {
+      "icon": "😐",
+      "label": "VIX 19.45, 아직은 안정권",
+      "text": "전일 대비 <b>+2.21%</b> 올랐지만 20선 아래라 리스크오프로 보기는 일러요. 추가 상승 여부를 지켜봐야 해요."
+    }
+  ],
+  "us_linked_story": null,
+  "sector_focus": null,
+  "generated_at": "2026-10-26T07:29:10.450243+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-10-26T07:26:17.642375+09:00",
+    "briefing_date": "2026-10-26",
+    "us_session_date": "2026-10-23",
+    "session_label": "지난 금요일",
+    "cards": [
+      {
+        "title": "실적 러시 + 연준 회의, AI 랠리의 '진짜 시험대'",
+        "sides": [
+          {
+            "side": "down",
+            "label": "AI·반도체 전반",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.59
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 1.74
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -0.48
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 2.46
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "AI·반도체 전반은 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "프리마켓에서 반도체(SOX)가 크게 밀려요",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·반도체 장비",
+            "marks": [
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": 0.44
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -0.02
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": -1.5
+              },
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -0.59
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -0.48
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·반도체 장비는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "채권 금리 급락 + VIX 상승 — 안전자산 선호 신호",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": -0.52
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      },
+      {
+        "title": "S&P500, 20일선 하향 이탈 — 기술적 지지선 흔들려요",
+        "sides": [],
+        "duplicate_of": 3
+      },
+      {
+        "title": "에너지주는 상대적으로 견조해요",
+        "sides": [
+          {
+            "side": "up",
+            "label": "에너지",
+            "marks": [
+              {
+                "ticker": "XOM",
+                "name": "XOM",
+                "pct": 2.79
+              },
+              {
+                "ticker": "CVX",
+                "name": "CVX",
+                "pct": 2.88
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "에너지는 <b>나란히 올랐어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-10-26",
+    "generated_at": "2026-10-26T07:26:17.808887+09:00",
+    "universe": 46,
+    "screened": 46,
+    "failed": [],
+    "items": [
+      {
+        "code": "138040",
+        "name": "메리츠금융지주",
+        "passed": true,
+        "streak": 3,
+        "run_label": "7월~9월",
+        "last_complete": "202609",
+        "month_end_close": 126300.0,
+        "month_end_ma5": 116200.0,
+        "month_end_gap_pct": 8.69,
+        "now_date": "20261023",
+        "now_close": 127800.0,
+        "now_gap_pct": 5.46,
+        "mtd_pct": 1.19,
+        "fr_now": 14.21,
+        "fr_chg_3m": 0.17,
+        "strip": [
+          {
+            "m": "202510",
+            "label": "10월",
+            "close": 110500.0,
+            "ma5": 115760.0,
+            "gap_pct": -4.54,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202511",
+            "label": "11월",
+            "close": 108600.0,
+            "ma5": 114980.0,
+            "gap_pct": -5.55,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202512",
+            "label": "12월",
+            "close": 113100.0,
+            "ma5": 114440.0,
+            "gap_pct": -1.17,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202601",
+            "label": "1월",
+            "close": 116600.0,
+            "ma5": 112460.0,
+            "gap_pct": 3.68,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202602",
+            "label": "2월",
+            "close": 127100.0,
+            "ma5": 115180.0,
+            "gap_pct": 10.35,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202603",
+            "label": "3월",
+            "close": 111400.0,
+            "ma5": 115360.0,
+            "gap_pct": -3.43,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202604",
+            "label": "4월",
+            "close": 111700.0,
+            "ma5": 115980.0,
+            "gap_pct": -3.69,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202605",
+            "label": "5월",
+            "close": 102900.0,
+            "ma5": 113940.0,
+            "gap_pct": -9.69,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202606",
+            "label": "6월",
+            "close": 105600.0,
+            "ma5": 111740.0,
+            "gap_pct": -5.49,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202607",
+            "label": "7월",
+            "close": 124000.0,
+            "ma5": 111120.0,
+            "gap_pct": 11.59,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202608",
+            "label": "8월",
+            "close": 122200.0,
+            "ma5": 113280.0,
+            "gap_pct": 7.87,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202609",
+            "label": "9월",
+            "close": 126300.0,
+            "ma5": 116200.0,
+            "gap_pct": 8.69,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202610",
+            "label": "이번 달",
+            "close": 127800.0,
+            "ma5": 121180.0,
+            "gap_pct": 5.46,
+            "run": false,
+            "cur": true
+          }
+        ]
+      }
+    ]
+  }
+}
