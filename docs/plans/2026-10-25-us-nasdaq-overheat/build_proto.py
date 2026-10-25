@@ -18,9 +18,9 @@ cur = d.iloc[-1]
 gap, hi, ma = float(cur["g"]), float(cur["High"]), float(cur["ma60"])
 streak = 0
 for v in d["g"][::-1]:
-    if v >= 50: streak += 1
+    if v >= 60: streak += 1
     else: break
-level = "warn" if gap >= 70 else ("caution" if gap >= 50 else "ok")
+level = "warn" if gap >= 70 else ("caution" if gap >= 60 else "ok")
 
 # 차트: 최근 12년 월별 값
 s = d.loc["2014-01-01":, "g"].dropna()
@@ -34,9 +34,9 @@ years = [(xs[i], s.index[i].year) for i in range(len(s)) if s.index[i].month == 
 peak_i = int(np.argmax(s.values))
 svg = f'''<svg class="nq-chart" viewBox="0 0 {W} {H}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 위치, 2014년 이후">
   <rect x="{PADL}" y="{Y(100):.1f}" width="{W-PADL-PADR}" height="{Y(70)-Y(100):.1f}" class="z-warn"/>
-  <rect x="{PADL}" y="{Y(70):.1f}" width="{W-PADL-PADR}" height="{Y(50)-Y(70):.1f}" class="z-caution"/>
+  <rect x="{PADL}" y="{Y(70):.1f}" width="{W-PADL-PADR}" height="{Y(60)-Y(70):.1f}" class="z-caution"/>
   <line x1="{PADL}" x2="{W-PADR}" y1="{Y(70):.1f}" y2="{Y(70):.1f}" class="th th-warn"/>
-  <line x1="{PADL}" x2="{W-PADR}" y1="{Y(50):.1f}" y2="{Y(50):.1f}" class="th th-caution"/>
+  <line x1="{PADL}" x2="{W-PADR}" y1="{Y(60):.1f}" y2="{Y(60):.1f}" class="th th-caution"/>
   <polygon points="{area}" class="area"/>
   <polyline points="{pts}" class="line"/>
 </svg>'''
@@ -45,33 +45,33 @@ py = lambda v: f"{Y(v) / H * 100:.2f}%"
 svg = (f'<div class="nq-plot">{svg}'
        f'<i class="nq-dot" style="left:{px(xs[-1])};top:{py(s.values[-1])}"></i>'
        f'<i class="nq-dot2" style="left:{px(xs[peak_i])};top:{py(s.values[peak_i])}"></i>'
-       + "".join(f'<span class="nq-ax" style="top:{py(v)}">{v}%</span>' for v in (70, 50, 0))
+       + "".join(f'<span class="nq-ax" style="top:{py(v)}">{v}%</span>' for v in (70, 60, 0))
        + "".join(f'<span class="nq-yr" style="left:{px(x)}">{y}</span>' for x, y in years)
        + '</div>')
 peak_lbl = f"{s.index[peak_i].year}년 {s.index[peak_i].month}월 {s.values[peak_i]:.0f}%"
 
 pos = min(gap, 100)
-badge = {"warn": ("🚨 경고", "70% 돌파"), "caution": ("⚠️ 주의", "50% 넘음"), "ok": ("✓ 정상", "")}[level]
+badge = {"warn": ("🚨 경고", "70% 돌파"), "caution": ("⚠️ 주의", "60% 넘음"), "ok": ("✓ 정상", "")}[level]
 preview = '''<div class="nq-preview">프로토타입 상태 미리보기
-  <button data-s="ok" data-v="38.2">정상</button><button data-s="caution" data-v="59.8" class="on">주의(현재)</button><button data-s="warn" data-v="74.0">경고</button></div>'''
+  <button data-s="ok" data-v="59.8" class="on">정상(현재)</button><button data-s="caution" data-v="64.0">주의</button><button data-s="warn" data-v="74.0">경고</button></div>'''
 section = f'''<div class="open-section nq-section is-{level}">
   <div class="open-section__title">나스닥 체크 <span class="nq-badge">{badge[0]}</span></div>
   {preview}
-  <p class="nq-intro">나스닥 월봉 고점이 60개월(5년) 이동평균선보다 얼마나 위에 있는지 봐요. <b>50%</b>를 넘으면 주의, <b>70%</b>를 넘으면 경고로 표시해요.</p>
+  <p class="nq-intro">나스닥 월봉 고점이 60개월(5년) 이동평균선보다 얼마나 위에 있는지 봐요. <b>60%</b>를 넘으면 주의, <b>70%</b>를 넘으면 경고로 표시해요.</p>
   <div class="nq-card">
     <div class="nq-top">
       <div><div class="nq-k">이번 달 고점 vs 60개월선</div>
         <div class="nq-v"><span class="nq-num">+{gap:.1f}</span><small>%</small></div></div>
-      <div class="nq-side"><span>이번 달 고점 <b>{hi:,.1f}</b></span><span>60개월선 <b>{ma:,.1f}</b></span><span class="nq-streak">50% 위 <b>{streak}개월째</b></span></div>
+      <div class="nq-side"><span>이번 달 고점 <b>{hi:,.1f}</b></span><span>60개월선 <b>{ma:,.1f}</b></span><span class="nq-streak"{' style="visibility:hidden"' if streak == 0 else ''}>60% 위 <b>{streak}개월째</b></span></div>
     </div>
     <div class="nq-gauge"><div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
       <div class="nq-pin" style="left:{pos:.1f}%"><b>{gap:.1f}%</b></div>
-      <div class="nq-ticks"><span style="left:0">0</span><span style="left:50%">50 주의</span><span style="left:70%">70 경고</span><span style="left:100%">100+</span></div>
+      <div class="nq-ticks"><span style="left:0">0</span><span style="left:60%">60</span><span style="left:70%">70</span><span style="left:100%">100+</span></div>
     </div>
     <div class="nq-ch-h">2014년 이후 월별 위치 <span>· 최고 {peak_lbl}</span></div>
     {svg}
   </div>
-  <p class="nq-foot">1985년 이후 50%를 넘은 달은 116개월이었고, 그 뒤 12개월 평균 수익률은 <b>+20.9%</b>로 전체 평균(+14.9%)과 크게 다르지 않았어요 — 50% 자체는 하락 신호가 아니에요.
+  <p class="nq-foot">60개월선을 계산할 수 있는 1990년 이후, 60%를 넘은 달은 64개월이었어요. 60~70% 구간 뒤 12개월 평균 수익률은 <b>+27.9%</b>로 전체 평균(+14.9%)보다 오히려 높았지만 사례가 15개월뿐이에요 — 60% 자체는 하락 신호가 아니에요.
   70%를 넘은 달 뒤에는 12개월 안에 <b>-20% 넘게 빠진 경우가 51%</b>(전체 19%)였지만, 그런 달은 1998~2000년과 2020~2021년 두 시기에 몰려 있어요. 매매 신호가 아니라 지금 위치를 알려주는 표시예요.
   나스닥 종합지수 월봉(이번 달은 진행 중)으로 계산했어요. <a href="/legal/disclaimer/">면책 고지</a></p>
 </div>'''
@@ -93,7 +93,7 @@ css = '''<style id="nq-css">
 .nq-side b{color:var(--ink);font-weight:700;margin-left:4px}
 .nq-gauge{position:relative;margin:22px 0 26px}
 .nq-track{display:flex;height:8px;border-radius:999px;overflow:hidden}
-.nq-track .seg{display:block;height:100%} .seg.ok{width:50%;background:#e5e7eb} .seg.caution{width:20%;background:#fcd34d} .seg.warn{width:30%;background:#f87171}
+.nq-track .seg{display:block;height:100%} .seg.ok{width:60%;background:#e5e7eb} .seg.caution{width:10%;background:#fcd34d} .seg.warn{width:30%;background:#f87171}
 .nq-pin{position:absolute;top:-19px;transform:translateX(-50%);font-size:11px;white-space:nowrap}
 .nq-pin::after{content:'';position:absolute;left:50%;top:15px;width:2px;height:16px;margin-left:-1px;background:var(--ink);border-radius:1px}
 .nq-pin b{font-weight:800;color:var(--ink)}
@@ -135,5 +135,5 @@ js = """<script>document.querySelectorAll('.nq-preview button').forEach(b=>b.onc
 soup.body.append(BeautifulSoup(js, "html.parser"))
 out = str(soup).replace("</head>", css + "\n</head>", 1)
 OUT.write_text(out, encoding="utf-8")
-DOC.write_text(out.replace("<head>", "<head>\n<!-- 미국 브리핑 '나스닥 체크' 섹션 프로토타입(월봉 고점 vs 60개월선, 항상 표시 · 50% 주의·70% 경고) + 새 헤드라인 규칙 예시 — 10/23 발행본 기반, 스타일은 운영 사이트에서 불러온다 -->\n<base href=\"https://doubleshot.space/\">", 1), encoding="utf-8")
+DOC.write_text(out.replace("<head>", "<head>\n<!-- 미국 브리핑 '나스닥 체크' 섹션 프로토타입(월봉 고점 vs 60개월선, 항상 표시 · 60% 주의·70% 경고) + 새 헤드라인 규칙 예시 — 10/23 발행본 기반, 스타일은 운영 사이트에서 불러온다 -->\n<base href=\"https://doubleshot.space/\">", 1), encoding="utf-8")
 print(f"gap {gap:.1f}% hi {hi:.1f} ma60 {ma:.1f} streak {streak} level {level}")
