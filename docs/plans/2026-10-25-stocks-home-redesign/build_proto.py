@@ -291,11 +291,11 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 .ue-p{{font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}}
 .ue-bar{{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}} .ue-bar i{{display:block;height:100%;border-radius:3px}} .ue-bar i.up{{background:#f87171}} .ue-bar i.dn{{background:#60a5fa}}
 .ue-row b{{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}}
-@media (min-width:960px){{
+@media (min-width:720px){{
 .wrap{{max-width:880px;padding:20px 24px 48px}}
-.ttl h1{{font-size:18px}}
+.ttl h1{{font-size:16px}}
 .hero{{padding:22px 26px 20px}}
-.hd,.hp{{font-size:40px}} .hero h2{{font-size:24px}} .dek{{font-size:15px}}
+.hd,.hp{{font-size:32px}} .hero h2{{font-size:20px}} .dek{{font-size:14px}}
 .cta{{display:inline-block;padding:11px 28px}}
 .cv{{height:220px}}
 .blk{{padding:16px 20px}}
