@@ -10,8 +10,8 @@
 - [x] 46종목 중 조회 실패 종목 수를 기록하고 전부 실패면 파일을 쓰지 않음
 
 ## 2. 백테스트 수치
-- [ ] `scripts/backtest_monthly_ma5.py` 작성
-- [ ] `scripts/config/monthly_ma5_backtest.json` 생성·커밋
+- [x] `scripts/backtest_monthly_ma5.py` 작성
+- [x] `scripts/config/monthly_ma5_backtest.json` 생성·커밋
 
 ## 3. 렌더
 - [ ] `generate_html.build_monthly_ma5()` — 스냅샷 1순위, 날짜 대조
