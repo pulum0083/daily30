@@ -1175,6 +1175,29 @@ def _issue_first_sort(signals: list) -> list:
     return sorted(signals, key=is_number_signal)  # False(이슈)=0 먼저, True(수치)=1 뒤로
 
 
+def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
+    """월봉 5개월선 안착 종목 블록 — 페이지에 그 섹션이 보일 때만 같은 데이터로 싣는다(§61·§62).
+
+    텔레그램은 HTML 생성보다 먼저 만들어져 analysis에 아직 monthly_ma5가 없을 수 있다. 그래서 페이지와 같은
+    generate_html.build_monthly_ma5()로 읽는다 — 날짜 대조·백테스트 파일 없음 처리까지 페이지와 똑같다.
+    백테스트 문장 없이 종목만 보이면 '오른다'로 읽히므로 그 문장을 항상 함께 싣는다.
+    """
+    import generate_html
+    ctx = generate_html.build_monthly_ma5(dict(analysis), date_str)
+    items, st = ctx.get("ma5m_items") or [], ctx.get("ma5m_stats")
+    if not items or not st:
+        return []
+    out = ["", "📊 월봉 5개월선 안착 종목"]
+    for x in items[:3]:
+        gap = (f"지금 이격 {x['now_gap_pct']:+.1f}%" if x.get("has_cur")
+               else f"{x['last_label']} 말 이격 {x['month_end_gap_pct']:+.1f}%")
+        out.append(f"• {x['name']} — {x['streak']}개월째 5개월선 위 ({gap})")
+    if len(items) > 3:
+        out.append(f"• 외 {len(items) - 3}종목")
+    out.append(f"※ 같은 조건 뒤 12개월 상승 비율 {st['win_pct']}%(아무 종목 {st['base_win_pct']}%) — 매매 신호가 아니에요.")
+    return out
+
+
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
     import re
@@ -1232,6 +1255,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += ["", f"🎯 <b>{headline}</b>"]
         if outlook:
             lines += ["", "👀 개장 후 볼 것", strip_html(outlook[0]["text"])]
+        lines += _ma5_telegram_lines(analysis, date_str)
         lines += [divider, f"🔗 전체 근거·이슈 점검 → {link}"]
 
     msg = "\n".join(lines)

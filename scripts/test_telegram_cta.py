@@ -69,3 +69,32 @@ def test_us_keeps_two_issues_and_has_cta(tmp_path, monkeypatch):
     assert "엔비디아 중국 재개" not in text  # [:2]로 3번째는 제외
     assert "🔗 전체 이슈·종목 픽 →" in text
     assert "상세 분석" not in text
+
+
+def _ma5_item():
+    from test_monthly_ma5_render import item
+    return item()
+
+
+def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
+    # 월봉 5개월선 종목이 페이지에 보이는 날만 텔레그램에도 싣고, 매매 신호가 아니라는 문장을 함께 붙인다
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    analysis = {"prediction": {"direction": "하락 우위", "up_pct": 7, "down_pct": 93, "confidence": 82},
+                "todays_view": {"view_title": "제목"},
+                "monthly_ma5": {"date": "2026-10-26", "items": [_ma5_item()]}}
+    cc.save_telegram_message("kospi", "2026-10-26", analysis)
+    text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
+    assert "📊 월봉 5개월선 안착 종목\n• 메리츠금융지주 — 3개월째 5개월선 위 (지금 이격 +5.5%)" in text
+    assert "매매 신호가 아니에요" in text
+    assert text.index("📊 월봉") < text.index("🔗 전체 근거")
+
+
+def test_kospi_skips_ma5_block_when_no_items_or_no_backtest(tmp_path, monkeypatch):
+    import generate_html as gh
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    base = {"prediction": {"direction": "상승 우위", "up_pct": 60, "down_pct": 40, "confidence": 70}}
+    cc.save_telegram_message("kospi", "2026-10-26", {**base, "monthly_ma5": {"date": "2026-10-26", "items": []}})
+    assert "월봉" not in (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
+    monkeypatch.setattr(gh, "MA5_BACKTEST_PATH", tmp_path / "none.json")
+    cc.save_telegram_message("kospi", "2026-10-26", {**base, "monthly_ma5": {"date": "2026-10-26", "items": [_ma5_item()]}})
+    assert "월봉" not in (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
