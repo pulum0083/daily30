@@ -31,6 +31,7 @@ Cloudflare (Cron Triggers) → /api/trigger?type=kospi
   → GitHub Actions workflow_dispatch
     → 휴장일 확인 (holiday_check.py)
     → 시장 데이터 수집 (fetch_data.py / fetch_closing_kospi.py)
+    → 월봉 5개월선 안착 종목 스크리닝 (monthly_ma5.py — 코스피 아침만)
     → 뉴스 요약 (fetch_news.py — Gemini 2.5 Flash Lite)
     → AI 분석·예측 (call_claude.py — Claude Sonnet 5, Prompt Caching)
     → latest.json 갱신 (update_latest.py)
@@ -64,6 +65,8 @@ double-shot/
 │   ├── holiday_check.py         # 한국/미국 공휴일 확인
 │   ├── patch_fg.py              # Fear & Greed 지수 HTML 패치 (09:05 KST)
 │   ├── check_accuracy.py        # 전일 예측 정확도 체크
+│   ├── monthly_ma5.py           # 월봉 5개월선 안착 종목 스크리닝 (코스피 아침 코너)
+│   ├── backtest_monthly_ma5.py  # 위 조건 백테스트 → config/monthly_ma5_backtest.json
 │   ├── validate_analysis.py     # 분석 결과 검증 게이트 (픽 실측 주입 + 교정)
 │   ├── toss_client.py           # 토스증권 Open API 클라이언트
 │   ├── config/

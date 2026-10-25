@@ -22,7 +22,7 @@ def test_kospi_compresses_to_one_signal_and_has_cta(tmp_path, monkeypatch):
     assert "📅 오늘 밤 CPI 발표" in text
     assert "💡 DRAM ETF" not in text
     # 사이트 전용 CTA
-    assert "🔗 전체 근거·종목 픽·장중 라이브 →" in text
+    assert "🔗 전체 근거·장중 라이브 →" in text   # 코스피 종목 픽 제거(2026-10-25, §61)
     assert "상세 분석" not in text
 
 

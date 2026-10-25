@@ -1,6 +1,6 @@
 # 체크리스트 — 월봉 5개월선 안착 종목 코너
 
-설계 `plan.md`.
+설계 `plan.md`. **구현 완료(2026-10-25)** — 첫 정규 실행(10/26 07:25) 로그 확인만 남았다.
 
 ## 1. 스크리닝
 - [x] `scripts/monthly_ma5.py` — 순수 함수(월말 시리즈·5개월선·연속 개수·판정) + CLI
@@ -26,11 +26,11 @@
 - [x] 텔레그램 링크 문구
 
 ## 5. 워크플로·문서
-- [ ] `daily_report.yml` kospi 잡에 스크리닝 스텝
-- [ ] `SERVICE_RULES.md` 새 절, `CLAUDE.md` 흐름 갱신
+- [x] `daily_report.yml` kospi 잡에 스크리닝 스텝
+- [x] `SERVICE_RULES.md` 새 절, `CLAUDE.md` 흐름 갱신
 
 ## 6. 검증
-- [ ] 단위 테스트(`test_monthly_ma5.py`) + 제거 회귀 테스트
-- [ ] 전체 `pytest scripts/` + `node --test`(api) 통과
-- [ ] 실데이터로 스크리닝 실행 → 프로토타입 결과와 일치 확인
-- [ ] 10/23 스냅샷으로 렌더해 브라우저 확인(커밋 안 하는 경로)
+- [x] 단위 테스트(`test_monthly_ma5.py`) + 제거 회귀 테스트
+- [x] 전체 `pytest scripts/` + `node --test`(api) 통과
+- [x] 실데이터로 스크리닝 실행 → 프로토타입 결과와 일치 확인
+- [x] 10/23 스냅샷으로 렌더해 브라우저 확인(커밋 안 하는 경로)

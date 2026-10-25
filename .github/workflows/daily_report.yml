@@ -109,6 +109,12 @@ jobs:
         timeout-minutes: 5
         run: python3 scripts/score_us_issues.py
 
+      - name: 📈 월봉 5개월선 안착 종목 스크리닝 (허브 46종목·공식 종가, 실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python3 scripts/monthly_ma5.py
+
       - name: 📰 뉴스 요약 (Gemini Flash)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
