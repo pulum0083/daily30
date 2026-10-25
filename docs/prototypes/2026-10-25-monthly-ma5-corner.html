@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<!-- 코스피 아침 브리핑 신규 코너 프로토타입 — 월봉 5개월선 3개월 안착 종목(실측 스크리닝 + 백테스트) -->
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>월봉 5개월선 안착 코너 — 검토 (2026-10-25)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#0F172A;--muted:#64748B;--faint:#94A3B8;--hair:#E5E7EB;--soft:#F7F9FC;--inset:#EEF2F7;--up:#E03131;--dn:#2775ED}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#F1F4F8;color:var(--ink);
+  -webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.55;font-size:14px}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 16px 80px}
+.num{font-variant-numeric:tabular-nums} .up{color:var(--up)} .dn{color:var(--dn)}
+.intro,.sec{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:22px 20px;margin-bottom:18px}
+h1{font-size:21px;letter-spacing:-.4px;margin-bottom:6px} .sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:6px}
+.fact{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 13px;font-size:13px}
+.fact>b:first-child{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:3px}
+.fact.ok{background:#F0FDF4;border-color:#BBF7D0} .fact.warn{background:#FFF7ED;border-color:#FED7AA} .fact.bad{background:#FEF2F2;border-color:#FECACA}
+.sec-h{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap} .sec-h h2{font-size:16px}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--inset);color:var(--muted)}
+.tag.rec{background:#E0EDFF;color:#1D4ED8} .tag.bad{background:#FEE2E2;color:#B91C1C}
+.sec-d{font-size:13px;color:var(--muted);margin-bottom:14px}
+.notes{font-size:12.5px;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.notes li{margin-left:16px;margin-bottom:3px}
+/* 브리핑 섹션 모형 */
+.bsec{border:1px solid var(--hair);border-radius:14px;padding:16px;background:#fff}
+.bsec-h{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap} .bsec-h h3{font-size:16px;font-weight:800}
+.bsec-sub{margin-left:auto;font-size:11px;color:var(--muted)} .bsec-d{font-size:13px;color:var(--muted);margin-bottom:12px}
+.bsec-foot{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.6} .bsec-foot a{color:var(--muted)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.mcard{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:13px 14px}
+.mcard.is-broken{background:#FFFBEB;border-color:#FDE68A}
+.mc-nm{font-size:15px;font-weight:800} .code{font-size:11px;color:var(--faint);font-weight:500}
+.mc-st{font-size:12px;color:var(--muted);margin-top:2px} .mc-st b{color:var(--up)}
+.chip{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px} .chip.warn{background:#FEF3C7;color:#92400E}
+.spark{width:100%;height:92px;margin:8px 0 4px;display:block} .sx{font-size:9px;fill:#94A3B8}
+.kvs{display:flex;flex-direction:column;gap:3px} .kv{display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.kv b{color:var(--muted);font-weight:500} .brk{margin-top:8px;font-size:12px;color:#92400E;background:#FEF3C7;border-radius:8px;padding:7px 9px}
+.legend{font-size:11.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin:-4px 0 12px}
+.legend i{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.empty{border:1.5px dashed var(--hair);border-radius:12px;padding:18px;text-align:center;color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px 8px;border-bottom:1px solid var(--hair);text-align:right}
+th:first-child{text-align:left} thead th{font-size:12px;color:var(--muted);font-weight:600}
+tbody th{font-weight:600} small{display:block;font-size:11px;color:var(--faint);font-weight:400}
+tr.base{background:var(--soft)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:760px){.cols{grid-template-columns:1fr}}
+.del li{margin-left:18px;margin-bottom:4px;font-size:13px} .del code{font-size:12px;background:var(--inset);padding:1px 5px;border-radius:5px}
+.q li{margin-left:18px;margin-bottom:6px;font-size:13.5px}
+</style></head><body><div class="wrap">
+
+<div class="intro">
+  <h1>코스피 아침 브리핑 — '월봉 5개월선 안착' 코너 검토</h1>
+  <div class="sub">2026-10-25 기준 실측 · 네이버 월봉(2010~) + KRX 공식 종가 저장소로 교정 · 아직 아무것도 바꾸지 않았어요</div>
+  <div class="facts">
+    <div class="fact ok"><b>만들 수 있나</b>가능해요. 월말 종가·외국인 보유율이 2010년부터 있고, 매일 아침 07:25에 결정론으로 계산돼요(LLM이 끼지 않음).</div>
+    <div class="fact bad"><b>"예외 없이 상승 랠리"는 사실인가</b>아니에요. 코스피200 15년 백테스트에서 조건 충족 뒤 12개월 상승 비율이 <b>50.1%</b>로, 아무 종목·아무 달(50.8%)과 차이가 없었어요. 12개월 안에 10% 넘게 빠진 경우도 36.7%예요.</div>
+    <div class="fact bad"><b>수급 기준을 더하면 나아지나</b>아니에요. 외국인 보유율이 3개월간 유지·증가한 경우 12개월 상승 비율 48.8%, 감소한 경우 52.5%로 오히려 반대였어요.</div>
+    <div class="fact warn"><b>그래서 문구는</b>"오른다"가 아니라 "조건을 충족한 종목"으로만 쓰고, 위 상승 비율을 같은 자리에 밝혀야 해요(운영 규칙 §0·§41).</div>
+  </div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>안 A — 엄격 기준 · 허브 46종목</h2><span class="tag rec">권장</span></div>
+  <div class="sec-d">완성 월봉(9월까지) 3개월 이상 안착 <b>그리고</b> 진행 중인 이번 달도 5개월선 위. 공식 종가 저장소가 있는 허브 46종목만 봐서 모든 숫자가 실측이에요. 오늘은 <b>1종목</b>이 걸려요.</div>
+  <div class="legend"><span><i style="background:#E03131"></i>월말 종가(5개월선 위)</span><span><i style="background:#94A3B8"></i>월말 종가(아래)</span><span><i style="background:#F59E0B"></i>5개월 이동평균선</span><span>○ 이번 달 진행 중</span></div>
+  
+<div class="bsec">
+  <div class="bsec-h"><span class="ic">📈</span><h3>월봉 5개월선 안착 종목</h3><span class="bsec-sub">완성 월봉 기준 · 9월 말</span></div>
+  <p class="bsec-d">월말 종가가 5개월 이동평균선 위에 3개월 넘게 머문 종목이에요. 조건만 골라낸 목록이고, 오른다는 보장은 아니에요.</p>
+  <div class="mgrid">
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">메리츠금융지주 <span class="code">138040</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,43.0 31.7,44.9 55.3,46.1 79.0,50.8 102.7,44.4 126.3,44.0 150.0,42.5 173.7,47.3 197.3,52.5 221.0,54.0 244.7,48.9 268.3,42.0 292.0,30.3" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="53.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="57.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="47.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="73.5" y="39.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="14.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="51.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="50.6" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="65.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="21.6" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="25.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="16.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">126,300원 / 116,200원 (<span class="up">+8.7%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">127,800원 · 5개월선 대비 <span class="up">+5.5%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">14.04% → 14.21% (<span class="up">+0.17%p</span>)</span></div>
+  </div>
+  
+</div></div>
+  <p class="bsec-foot">지난 15년(2011~2025) 코스피200에서 같은 조건이 나온 뒤 12개월 동안 오른 경우는 50%였어요(모든 종목·모든 달 평균 51%). 매매 신호가 아니에요. <a href='#'>면책 고지</a></p>
+</div>
+  <ul class="notes"><li>허브 46종목 기준 백테스트: 12개월 상승 비율 59.0%(기준선 56.8%). 코스피200보다 조금 나아 보이지만 지금 살아남은 대형주만 골랐기 때문(생존 편향)일 가능성이 커요.</li>
+  <li>조건이 맞는 종목이 없으면 섹션째 숨겨요 — 빈 카드나 "해당 없음" 문구를 보여주지 않아요.</li></ul>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>안 B — 완성 월봉만 보기</h2><span class="tag bad">비권장</span></div>
+  <div class="sec-d">9월까지의 완성 월봉만 봐요. 그런데 10월에 이미 5개월선을 깨고 내려간 종목도 "안착"으로 나와요. 허브에서 6종목이 걸리고, 그중 5종목은 지금 5개월선 아래예요. 아침 브리핑에서 한 달 가까이 지난 신호를 보여주는 셈이라 권하지 않아요.</div>
+  
+<div class="bsec">
+  <div class="bsec-h"><span class="ic">📈</span><h3>월봉 5개월선 안착 종목</h3><span class="bsec-sub">완성 월봉 기준 · 9월 말</span></div>
+  <p class="bsec-d">월말 종가가 5개월 이동평균선 위에 3개월 넘게 머문 종목이에요. 조건만 골라낸 목록이고, 오른다는 보장은 아니에요.</p>
+  <div class="mgrid">
+<div class="mcard is-broken">
+  <div class="mc-top"><div><div class="mc-nm">삼성화재 <span class="code">000810</span></div>
+    <div class="mc-st"><b>5개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,72.8 31.7,70.4 55.3,67.4 79.0,64.4 102.7,60.3 126.3,60.4 150.0,61.5 173.7,57.7 197.3,51.6 221.0,46.3 244.7,34.5 268.3,25.6 292.0,23.8" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="71.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="60.6" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="56.6" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="55.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="47.9" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="66.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="37.8" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="191.9" y="25.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="215.5" y="21.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="21.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="31.1" r="3.4" fill="#fff" stroke="#94A3B8" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">633,000원 / 623,400원 (<span class="up">+1.5%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">602,000원 · 5개월선 대비 <span class="dn">-4.4%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">58.38% → 57.52% (<span class="dn">-0.86%p</span>)</span></div>
+  </div>
+  <div class="brk">⚠ 이번 달(10/23 기준) 종가 602,000원이 5개월선 630,000원 아래예요. 완성 월봉만 보면 아직 조건 충족으로 나와요.</div>
+</div>
+<div class="mcard is-broken">
+  <div class="mc-top"><div><div class="mc-nm">신한지주 <span class="code">055550</span></div>
+    <div class="mc-st"><b>18개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,73.3 31.7,68.6 55.3,66.0 79.0,60.6 102.7,53.2 126.3,49.1 150.0,42.8 173.7,38.1 197.3,34.8 221.0,33.7 244.7,27.7 268.3,25.9 292.0,27.5" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="63.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="26.2" y="56.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="49.9" y="58.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="73.5" y="47.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="97.2" y="29.8" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="120.9" y="42.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="144.5" y="25.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="168.2" y="34.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="191.9" y="31.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="215.5" y="24.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="16.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="44.3" r="3.4" fill="#fff" stroke="#94A3B8" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">106,100원 / 101,020원 (<span class="up">+5.0%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">88,100원 · 5개월선 대비 <span class="dn">-11.8%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">61.69% → 61.52% (<span class="dn">-0.17%p</span>)</span></div>
+  </div>
+  <div class="brk">⚠ 이번 달(10/23 기준) 종가 88,100원이 5개월선 99,920원 아래예요. 완성 월봉만 보면 아직 조건 충족으로 나와요.</div>
+</div>
+<div class="mcard is-broken">
+  <div class="mc-top"><div><div class="mc-nm">하나금융지주 <span class="code">086790</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,73.3 31.7,71.7 55.3,69.7 79.0,65.6 102.7,57.6 126.3,52.8 150.0,44.8 173.7,40.0 197.3,36.7 221.0,35.8 244.7,29.0 268.3,28.5 292.0,28.2" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="71.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="26.2" y="62.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="61.2" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="54.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="29.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="46.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="144.5" y="22.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="37.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="191.9" y="37.6" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="25.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="19.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="37.7" r="3.4" fill="#fff" stroke="#94A3B8" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">130,000원 / 124,280원 (<span class="up">+4.6%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">116,300원 · 5개월선 대비 <span class="dn">-6.6%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">68.53% → 68.54% (<span class="up">+0.01%p</span>)</span></div>
+  </div>
+  <div class="brk">⚠ 이번 달(10/23 기준) 종가 116,300원이 5개월선 124,520원 아래예요. 완성 월봉만 보면 아직 조건 충족으로 나와요.</div>
+</div>
+<div class="mcard is-broken">
+  <div class="mc-top"><div><div class="mc-nm">KB금융 <span class="code">105560</span></div>
+    <div class="mc-st"><b>18개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,73.3 31.7,70.6 55.3,68.0 79.0,62.8 102.7,54.4 126.3,49.5 150.0,42.7 173.7,37.7 197.3,33.1 221.0,31.3 244.7,25.2 268.3,23.6 292.0,23.1" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="67.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="26.2" y="59.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="49.9" y="59.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="73.5" y="49.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="97.2" y="26.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="120.9" y="42.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="144.5" y="25.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="168.2" y="34.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="191.9" y="26.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="215.5" y="17.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="17.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="34.2" r="3.4" fill="#fff" stroke="#94A3B8" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">168,800원 / 164,040원 (<span class="up">+2.9%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">153,000원 · 5개월선 대비 <span class="dn">-7.0%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">80.06% → 78.67% (<span class="dn">-1.39%p</span>)</span></div>
+  </div>
+  <div class="brk">⚠ 이번 달(10/23 기준) 종가 153,000원이 5개월선 164,520원 아래예요. 완성 월봉만 보면 아직 조건 충족으로 나와요.</div>
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">메리츠금융지주 <span class="code">138040</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,43.0 31.7,44.9 55.3,46.1 79.0,50.8 102.7,44.4 126.3,44.0 150.0,42.5 173.7,47.3 197.3,52.5 221.0,54.0 244.7,48.9 268.3,42.0 292.0,30.3" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="53.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="57.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="47.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="73.5" y="39.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="14.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="51.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="50.6" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="65.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="21.6" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="25.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="16.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">126,300원 / 116,200원 (<span class="up">+8.7%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">127,800원 · 5개월선 대비 <span class="up">+5.5%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">14.04% → 14.21% (<span class="up">+0.17%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard is-broken">
+  <div class="mc-top"><div><div class="mc-nm">우리금융지주 <span class="code">316140</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,73.3 31.7,69.1 55.3,65.7 79.0,60.0 102.7,49.6 126.3,42.8 150.0,35.7 173.7,34.0 197.3,35.3 221.0,37.7 244.7,35.9 268.3,34.3 292.0,33.9" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="67.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="26.2" y="61.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="54.0" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="42.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="33.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="144.5" y="26.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="45.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="48.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="25.1" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="24.1" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="18.4" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="45.2" r="3.4" fill="#fff" stroke="#94A3B8" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">34,900원 / 32,200원 (<span class="up">+8.4%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">30,100원 · 5개월선 대비 <span class="dn">-6.8%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">45.84% → 49.76% (<span class="up">+3.92%p</span>)</span></div>
+  </div>
+  <div class="brk">⚠ 이번 달(10/23 기준) 종가 30,100원이 5개월선 32,280원 아래예요. 완성 월봉만 보면 아직 조건 충족으로 나와요.</div>
+</div></div>
+  <p class="bsec-foot">지난 15년(2011~2025) 코스피200에서 같은 조건이 나온 뒤 12개월 동안 오른 경우는 50%였어요(모든 종목·모든 달 평균 51%). 매매 신호가 아니에요. <a href='#'>면책 고지</a></p>
+</div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>안 C — 엄격 기준 · 코스피200</h2><span class="tag">보류</span></div>
+  <div class="sec-d">범위를 코스피200으로 넓히면 오늘 <b>10종목</b>이에요. 다만 허브 밖 종목은 9월 말 종가가 <b>애프터장이 섞인 값</b>이에요(9/14부터 네이버 일봉 종가에 애프터장이 들어감, §48). 공식 종가 저장소를 코스피200 전체로 넓히면 11월 말부터는 정확해지지만, 9월·10월 말 종가는 되살릴 수 없어요.</div>
+  
+<div class="bsec">
+  <div class="bsec-h"><span class="ic">📈</span><h3>월봉 5개월선 안착 종목</h3><span class="bsec-sub">완성 월봉 기준 · 9월 말</span></div>
+  <p class="bsec-d">월말 종가가 5개월 이동평균선 위에 3개월 넘게 머문 종목이에요. 조건만 골라낸 목록이고, 오른다는 보장은 아니에요.</p>
+  <div class="mgrid">
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">농심 <span class="code">004370</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,33.4 31.7,27.7 55.3,22.9 79.0,23.2 102.7,23.3 126.3,30.6 150.0,37.9 173.7,42.9 197.3,50.4 221.0,55.4 244.7,47.3 268.3,44.6 292.0,42.8" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="18.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="26.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="20.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="33.5" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="97.2" y="21.6" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="120.9" y="54.7" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="49.2" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="45.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="46.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="14.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="35.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="38.6" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">404,000원 / 390,200원 (<span class="up">+3.5%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">401,500원 · 5개월선 대비 <span class="up">+2.0%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">21.96% → 25.36% (<span class="up">+3.40%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">DB손해보험 <span class="code">005830</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,68.3 31.7,68.1 55.3,67.5 79.0,65.4 102.7,56.8 126.3,49.7 150.0,41.4 173.7,39.1 197.3,40.8 221.0,45.8 244.7,42.5 268.3,39.0 292.0,31.2" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="69.1" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="65.0" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="53.9" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="14.9" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="33.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="144.5" y="29.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="53.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="62.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="40.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="16.8" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="16.2" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">185,400원 / 160,100원 (<span class="up">+15.8%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">183,800원 · 5개월선 대비 <span class="up">+9.2%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">46.28% → 43.27% (<span class="dn">-3.01%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">한샘 <span class="code">009240</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,27.9 31.7,28.3 55.3,28.8 79.0,26.0 102.7,23.3 126.3,26.6 150.0,26.8 173.7,36.3 197.3,44.9 221.0,51.6 244.7,52.8 268.3,56.8 292.0,52.4" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="22.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="26.2" y="25.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="23.6" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="22.2" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="38.8" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="26.5" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="65.1" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="46.1" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="45.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="46.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="51.5" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">38,850원 / 36,110원 (<span class="up">+7.6%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">37,800원 · 5개월선 대비 <span class="up">+0.8%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">13.7% → 12.6% (<span class="dn">-1.10%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">HMM <span class="code">011200</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,26.3 31.7,36.4 55.3,45.3 79.0,51.6 102.7,47.7 126.3,50.7 150.0,46.6 173.7,49.4 197.3,53.6 221.0,54.8 244.7,49.1 268.3,47.9 292.0,39.1" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="42.1" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="63.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="42.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="50.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="97.2" y="30.0" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="56.8" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="42.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="57.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="36.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="28.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="36.8" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">20,900원 / 20,294원 (<span class="up">+3.0%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">22,500원 · 5개월선 대비 <span class="up">+7.7%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">7.69% → 8.74% (<span class="up">+1.05%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">코웨이 <span class="code">021240</span></div>
+    <div class="mc-st"><b>6개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,26.1 31.7,29.8 55.3,37.4 79.0,44.6 102.7,50.3 126.3,56.2 150.0,56.2 173.7,55.1 197.3,52.7 221.0,49.4 244.7,40.9 268.3,36.3 292.0,30.7" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="41.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="47.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="45.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="73.5" y="51.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="97.2" y="54.5" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="120.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="47.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="168.2" y="40.5" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="191.9" y="40.0" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="215.5" y="37.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="28.6" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="24.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">99,400원 / 93,620원 (<span class="up">+6.2%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">106,100원 · 5개월선 대비 <span class="up">+9.6%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">54.54% → 54.22% (<span class="dn">-0.32%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">팬오션 <span class="code">028670</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,70.1 31.7,69.8 55.3,71.6 79.0,67.7 102.7,60.8 126.3,55.7 150.0,47.1 173.7,39.1 197.3,39.0 221.0,38.0 244.7,34.3 268.3,33.3 292.0,29.9" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="69.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="69.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="48.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="34.7" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="44.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="144.5" y="28.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="29.6" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="191.9" y="47.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="30.1" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="25.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="23.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">5,750원 / 5,423원 (<span class="up">+6.0%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">6,190원 · 5개월선 대비 <span class="up">+11.3%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">17.0% → 17.32% (<span class="up">+0.32%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">제일기획 <span class="code">030000</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,48.6 31.7,41.7 55.3,38.8 79.0,33.1 102.7,28.8 126.3,32.4 150.0,39.3 173.7,46.0 197.3,55.8 221.0,63.8 244.7,63.2 268.3,66.6 292.0,64.4" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="43.0" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="26.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="49.9" y="34.4" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="21.9" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="21.9" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="61.2" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="46.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="67.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="61.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="58.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="63.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="58.8" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">18,780원 / 18,712원 (<span class="up">+0.4%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">19,300원 · 5개월선 대비 <span class="up">+2.2%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">18.21% → 17.59% (<span class="dn">-0.62%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">메리츠금융지주 <span class="code">138040</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 </div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,43.0 31.7,44.9 55.3,46.1 79.0,50.8 102.7,44.4 126.3,44.0 150.0,42.5 173.7,47.3 197.3,52.5 221.0,54.0 244.7,48.9 268.3,42.0 292.0,30.3" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="53.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="57.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="47.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="73.5" y="39.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="14.3" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="51.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="50.6" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="65.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="21.6" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="25.9" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="16.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="14.7" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">126,300원 / 116,200원 (<span class="up">+8.7%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">127,800원 · 5개월선 대비 <span class="up">+5.5%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">14.04% → 14.21% (<span class="up">+0.17%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">코스맥스 <span class="code">192820</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,41.6 31.7,50.8 55.3,58.0 79.0,59.1 102.7,61.1 126.3,61.7 150.0,58.1 173.7,57.3 197.3,61.1 221.0,61.5 244.7,53.2 268.3,48.4 292.0,40.5" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="51.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="66.8" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="68.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="73.5" y="52.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="97.2" y="57.1" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="120.9" y="54.5" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="144.5" y="48.8" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="168.2" y="63.7" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="59.3" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="12.7" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="25.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="26.2" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">269,000원 / 216,460원 (<span class="up">+24.3%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">271,500원 · 5개월선 대비 <span class="up">+15.0%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">38.39% → 35.41% (<span class="dn">-2.98%p</span>)</span></div>
+  </div>
+  
+</div>
+<div class="mcard">
+  <div class="mc-top"><div><div class="mc-nm">미원에스씨 <span class="code">268280</span></div>
+    <div class="mc-st"><b>3개월 연속</b> 월말 종가가 5개월선 위 <span class="chip warn">9월 말 공식 종가 미확인</span></div></div>
+  </div>
+  <svg viewBox="0 0 300 92" class="spark" preserveAspectRatio="none"><polyline points="8.0,14.7 31.7,18.6 55.3,20.5 79.0,22.9 102.7,24.5 126.3,29.4 150.0,32.2 173.7,43.1 197.3,51.2 221.0,53.4 244.7,50.9 268.3,49.3 292.0,42.4" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-dasharray="4 3"/><rect x="2.5" y="16.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="26.2" y="26.9" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="49.9" y="16.6" width="10.9" height="4" rx="1.5" fill="#E03131"/><rect x="73.5" y="24.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="97.2" y="29.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="120.9" y="40.4" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="144.5" y="41.0" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="168.2" y="71.3" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="191.9" y="64.2" width="10.9" height="4" rx="1.5" fill="#94A3B8"/><rect x="215.5" y="40.2" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="239.2" y="28.1" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><rect x="262.9" y="32.6" width="10.9" height="4" rx="1.5" fill="#E03131" stroke="#E03131" stroke-width="1"/><circle cx="292.0" cy="38.9" r="3.4" fill="#fff" stroke="#E03131" stroke-width="1.8"/><text x="8.0" y="90" text-anchor="middle" class="sx">10월</text><text x="55.3" y="90" text-anchor="middle" class="sx">12월</text><text x="102.7" y="90" text-anchor="middle" class="sx">2월</text><text x="150.0" y="90" text-anchor="middle" class="sx">4월</text><text x="197.3" y="90" text-anchor="middle" class="sx">6월</text><text x="244.7" y="90" text-anchor="middle" class="sx">8월</text><text x="296.0" y="90" text-anchor="end" class="sx">이번 달</text></svg>
+  <div class="kvs">
+    <div class="kv"><b>9월 말 종가 / 5개월선</b><span class="num">128,600원 / 117,920원 (<span class="up">+9.1%</span>)</span></div>
+    <div class="kv"><b>이번 달 진행 중(10/23)</b><span class="num">125,500원 · 5개월선 대비 <span class="up">+2.1%</span></span></div>
+    <div class="kv"><b>외국인 보유율 3개월 변화</b><span class="num">0.55% → 0.54% (<span class="dn">-0.01%p</span>)</span></div>
+  </div>
+  
+</div></div>
+  <p class="bsec-foot">지난 15년(2011~2025) 코스피200에서 같은 조건이 나온 뒤 12개월 동안 오른 경우는 50%였어요(모든 종목·모든 달 평균 51%). 매매 신호가 아니에요. <a href='#'>면책 고지</a></p>
+</div>
+</div>
+
+<div class="sec">
+  <div class="sec-h"><h2>백테스트 — 2011~2025, 월말 종가 기준</h2></div>
+  <div class="sec-d">조건이 처음 완성된 달(3개월째 안착)의 월말 종가에서 산 것으로 보고 이후 수익률을 쟀어요. 칸의 숫자는 그 기간에 오른 경우의 비율이에요.</div>
+  <div class="cols">
+    <div><b style="font-size:13px">코스피200 (현재 구성종목 201개)</b>
+    <table><thead><tr><th></th><th>3개월</th><th>6개월</th><th>12개월</th><th>12개월<br>-10%↓</th><th>코스피<br>초과</th></tr></thead><tbody><tr class="base"><th>모든 종목·모든 달(기준선)<small>30,588건</small></th><td class="num">49.8%<small>중앙값 +0.0%</small></td><td class="num">50.4%<small>중앙값 +0.3%</small></td><td class="num">50.8%<small>중앙값 +0.7%</small></td><td class="num">35.5%</td><td class="num">44.5%</td></tr><tr class=""><th>조건 충족(3개월째 안착)<small>2,201건</small></th><td class="num">48.5%<small>중앙값 -0.6%</small></td><td class="num">50.7%<small>중앙값 +0.5%</small></td><td class="num">50.1%<small>중앙값 +0.2%</small></td><td class="num">36.7%</td><td class="num">43.3%</td></tr><tr class=""><th>조건 + 외국인 보유율 유지·증가<small>1,427건</small></th><td class="num">48.2%<small>중앙값 -0.8%</small></td><td class="num">49.4%<small>중앙값 -0.3%</small></td><td class="num">48.8%<small>중앙값 -0.8%</small></td><td class="num">37.8%</td><td class="num">43.3%</td></tr><tr class=""><th>조건 + 외국인 보유율 감소<small>774건</small></th><td class="num">49.0%<small>중앙값 -0.3%</small></td><td class="num">53.2%<small>중앙값 +1.5%</small></td><td class="num">52.5%<small>중앙값 +2.2%</small></td><td class="num">34.6%</td><td class="num">43.3%</td></tr></tbody></table></div>
+    <div><b style="font-size:13px">허브 46종목</b>
+    <table><thead><tr><th></th><th>3개월</th><th>6개월</th><th>12개월</th><th>12개월<br>-10%↓</th><th>코스피<br>초과</th></tr></thead><tbody><tr class="base"><th>모든 종목·모든 달(기준선)<small>6,904건</small></th><td class="num">53.0%<small>중앙값 +1.4%</small></td><td class="num">54.9%<small>중앙값 +3.1%</small></td><td class="num">56.8%<small>중앙값 +6.5%</small></td><td class="num">30.6%</td><td class="num">51.9%</td></tr><tr class=""><th>조건 충족(3개월째 안착)<small>510건</small></th><td class="num">56.7%<small>중앙값 +2.9%</small></td><td class="num">56.5%<small>중앙값 +3.8%</small></td><td class="num">59.0%<small>중앙값 +8.7%</small></td><td class="num">29.2%</td><td class="num">51.0%</td></tr><tr class=""><th>조건 + 외국인 보유율 유지·증가<small>360건</small></th><td class="num">55.0%<small>중앙값 +2.4%</small></td><td class="num">55.8%<small>중앙값 +3.5%</small></td><td class="num">56.9%<small>중앙값 +6.9%</small></td><td class="num">30.6%</td><td class="num">50.3%</td></tr><tr class=""><th>조건 + 외국인 보유율 감소<small>150건</small></th><td class="num">60.7%<small>중앙값 +4.0%</small></td><td class="num">58.0%<small>중앙값 +5.3%</small></td><td class="num">64.0%<small>중앙값 +13.3%</small></td><td class="num">26.0%</td><td class="num">52.7%</td></tr></tbody></table></div>
+  </div>
+  <ul class="notes">
+    <li>지금의 구성종목으로 과거를 돌렸기 때문에 기준선도 위로 부풀어 있어요(생존 편향). 조건의 효과는 '기준선과의 차이'로 봐야 해요.</li>
+    <li>코스피 초과는 같은 기간 코스피 지수보다 더 오른 비율이에요. 조건 충족이 시장 대비 우위를 주지 못했어요.</li>
+    <li>2026-09 이후 월말 종가는 애프터장이 섞여 있어 백테스트에서 뺐어요(§48).</li>
+  </ul>
+</div>
+
+<div class="cols">
+<div class="sec">
+  <div class="sec-h"><h2>함께 지울 것 — 상승 모멘텀 종목</h2></div>
+  <div class="sec-d">별도 배치잡은 없어요. 코스피 아침 잡 안에서 아래 흐름으로 만들어져요. <b>미국 브리핑의 종목 픽은 남겨요.</b></div>
+  <ul class="del">
+    <li><code>fetch_data.py</code> 켈로그 MA20 후보 스크리닝(<code>KOSPI_CANDIDATES</code>·<code>kospi_candidates</code>)</li>
+    <li><code>call_claude.py</code> 코스피 프롬프트의 <code>stock_picks</code> 지시·필수 필드</li>
+    <li><code>validate_analysis.py</code> 코스피 픽 실측 주입·20일선 손절 검증·"픽 전부 제거 시 차단"</li>
+    <li><code>config/kospi.json</code> 섹션 목록의 <code>stock_picks</code>, 모멘텀 설명 모달</li>
+    <li>텔레그램·이메일의 코스피 픽 문구</li>
+    <li>종목 상세 페이지 '브리핑 픽 이력' — 과거 이력은 남고 새 코스피 픽만 끊겨요</li>
+  </ul>
+</div>
+<div class="sec">
+  <div class="sec-h"><h2>정해주실 것</h2></div>
+  <ol class="q">
+    <li><b>안 A·B·C 중 어느 것</b>으로 갈까요? (권장 A)</li>
+    <li><b>수급 기준</b>은 카드에 정보로만 보여줄까요, 아니면 필터(외국인 보유율 3개월 감소 시 제외)로 쓸까요? 백테스트로는 필터 효과가 없었어요.</li>
+    <li><b>코너 이름</b> — "추천"이란 말은 빼고 "월봉 5개월선 안착 종목"으로 갈까요?</li>
+    <li>상승 비율(약 50%)을 <b>섹션 하단에 그대로 밝히는 것</b>에 동의하시나요? 빼면 "예외 없이 오른다"로 읽힐 수 있어요.</li>
+  </ol>
+</div>
+</div>
+
+</div></body></html>
