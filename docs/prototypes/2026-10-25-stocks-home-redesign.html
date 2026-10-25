@@ -1,0 +1,193 @@
+<!doctype html><html lang="ko"><head>
+<!-- 종목 시그널 첫 페이지 개편 프로토타입(시간대 5종 첫 화면 + 압축 홈) — 10/23 실데이터, 헤드라인은 새 규칙 예시 -->
+<base href="https://doubleshot.space/"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>종목 시그널 개편안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--ink:#13151a;--ink2:#4b5563;--muted:#6b7280;--line:#e5e7eb;--bg:#f6f7f9;--card:#fff;--up:#e03131;--dn:#2775ed;--pri:#2563eb;--ok:#059669}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
+.gnb{position:sticky;top:0;z-index:5;background:#16181a;color:#fff;height:52px;display:flex;align-items:center;gap:14px;padding:0 16px}
+.gnb b{font-size:17px} .gnb b span{color:#60a5fa} .gnb a{font-size:13px;color:#cbd5e1} .gnb .on{color:#4ade80;font-weight:700}
+.wrap{max-width:480px;margin:0 auto;padding:12px 16px 40px}
+.proto{border:1px dashed #c4b5fd;border-radius:12px;padding:8px 10px;margin-bottom:12px;font-size:11px;color:#7c3aed;background:#faf5ff}
+.proto div{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.proto button{border:1px solid #ddd6fe;background:#fff;color:#6d28d9;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.proto button.on{background:#7c3aed;color:#fff;border-color:#7c3aed}
+.ttl{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px} .ttl h1{font-size:15px;margin:0;color:var(--muted);font-weight:700}
+.ttl .q{border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-size:12px;color:var(--muted)}
+.ibar{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:10px} .ibar b{color:var(--ink)}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 16px 14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.hero.is-dn{background:linear-gradient(180deg,#eef4ff,#fff 60%)}
+.hk{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}
+.live{color:var(--pri)} .live.wk{color:var(--muted)}
+.hm{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+.hd,.hp{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.15} .hero.is-dn .hd,.hero.is-dn .hp{color:var(--dn)}
+.hp{text-align:right} .hp small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.hero h2{font-size:19px;line-height:1.4;margin:12px 0 0;letter-spacing:-.3px}
+.dek{font-size:13.5px;line-height:1.7;color:var(--ink2);margin:6px 0 0} .dek b{color:var(--ink)}
+.cta{display:block;margin-top:14px;background:var(--ink);color:#fff;text-align:center;border-radius:12px;padding:11px;font-size:14px;font-weight:700}
+.cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.trust{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:center} .trust b{color:var(--ink)}
+.chip{display:inline-block;margin-top:10px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:#f9fafb} .chip.ok{color:#065f46;background:#ecfdf5;border-color:#a7f3d0}
+.idx2{display:flex;gap:14px;margin-top:10px;font-size:13px;color:var(--muted)} .idx2 b{color:var(--ink);font-size:16px} .idx2 em{font-style:normal;font-weight:700}
+.wk3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px} .wk3 div{background:#f9fafb;border-radius:12px;padding:9px 10px}
+.wk3 span{display:block;font-size:11px;color:var(--muted)} .wk3 b{display:block;font-size:18px;margin-top:2px} .wk3 em{font-style:normal;font-size:11px;color:var(--muted)}
+.cv{position:relative;height:130px;margin-top:12px} .cv svg{position:absolute;inset:0;width:100%;height:100%}
+.cv .rest{fill:#f3f4f6} .cv .zero{stroke:#d1d5db;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.cv .yd{fill:none;stroke:#9ca3af;stroke-width:1.5;vector-effect:non-scaling-stroke} .cv .td{fill:none;stroke:var(--up);stroke-width:2.2;vector-effect:non-scaling-stroke} .cv .td.dn{stroke:var(--dn)}
+.cv-dot.dn{background:var(--dn)} .cv-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--up);border:2px solid #fff;transform:translate(-50%,-50%)}
+.cv-l{position:absolute;right:0;font-size:10px;color:var(--muted);transform:translateY(-120%)}
+.cv-ax{position:absolute;left:0;right:0;bottom:-16px;display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+.cv-lg{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-top:22px} .cv-lg i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.cv-lg i.td{background:var(--ink)} .cv-lg i.yd{background:#9ca3af}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-top:12px}
+.blk.one{font-size:13px;line-height:1.6} .blk.one a{color:var(--pri);font-weight:600;white-space:nowrap} .ok-k{font-weight:700}
+.bh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px} .bh h3{margin:0;font-size:15px} .bh span{font-size:11.5px;color:var(--muted)} .bh a{font-size:12px;color:var(--pri);font-weight:600}
+.sb{display:grid;grid-template-columns:64px 1fr 58px;align-items:center;gap:8px;padding:5px 0;font-size:13px} .sb b{text-align:right;font-size:12.5px}
+.sb-bar{position:relative;height:8px;background:#f3f4f6;border-radius:4px} .sb-bar i{position:absolute;top:0;height:100%;border-radius:4px} .sb-bar i.up{background:#f87171} .sb-bar i.dn{background:#60a5fa}
+.sb-bar::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#d1d5db}
+.note{font-size:11px;color:var(--muted);margin:8px 0 0}
+.sg{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #f3f4f6} .sg:first-of-type{border-top:0}
+.sg span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px} .sg-r{text-align:right} .sg-r b{display:block;font-size:14px}
+.go{font-size:11.5px;color:var(--pri);font-weight:600} .go.soft{color:var(--muted)}
+.lds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} .ld{background:#f9fafb;border-radius:12px;padding:9px 10px}
+.ld span{display:block;font-size:11.5px;color:var(--muted)} .ld b{display:block;font-size:15px;margin-top:2px} .ld em{font-style:normal;font-size:12px;font-weight:700}
+.more summary{font-size:12px;color:var(--muted);margin-top:8px;cursor:pointer}
+.ss{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:9px 0;border-top:1px solid #f3f4f6} .ss:nth-of-type(1){border-top:0}
+.ss-k{font-size:12px;color:var(--muted)} .ss b{font-size:15px;grid-column:1} .ss .pill{grid-column:2;grid-row:1/3;font-size:12px;border-radius:999px;padding:3px 9px;font-weight:700}
+.pill.ok{background:#ecfdf5;color:var(--ok)} .pill.nb{background:#eff6ff;color:var(--pri)} .ss em{grid-column:1/3;font-style:normal;font-size:11px;color:var(--muted)}
+.foot{margin-top:18px;display:flex;gap:10px;justify-content:center;font-size:12px} .foot a{color:var(--pri);font-weight:600}
+</style></head><body>
+<div class="gnb"><b>Double<span>-Shot</span></b><a class="on">종목</a><a>브리핑</a><a>월배당</a></div>
+<div class="wrap">
+<div class="proto">프로토타입 · 시간대를 눌러 첫 화면이 어떻게 바뀌는지 보세요 (숫자는 10/23 금요일 실데이터 — 각 시간대에 알 수 있던 값만, 헤드라인은 새 규칙 예시. 장중 카드의 특이신호·섹터만 10/23 종가로 대신)<div><button data-s="morning">07:30 아침</button><button data-s="intraday">장중</button><button data-s="close">15:30 마감</button><button data-s="evening">21:15 미국</button><button data-s="weekend" class=on>주말</button></div></div>
+<div class="ttl"><h1>종목 시그널</h1><span class="q">🔍 종목 검색</span></div>
+<section class="pane" data-slot="morning" hidden><div class="ibar"><span>10/22 마감</span><span>코스피 <b>5,533.77</b> <span class="dn">-3.52%</span></span><span>코스닥 <b>764.10</b> <span class="dn">-3.62%</span></span></div><div class="hero is-dn"><div class="hk"><span>오늘 07:29 · 코스피 시초가 예측</span><span class="live">새 브리핑</span></div>
+<div class="hm"><b class="hd">↓ 하락 우위</b><b class="hp">93%<small>신뢰도 82%</small></b></div>
+<h2>어제 -3.52% 맞았는데 또? 메타發 반도체 -6.72% 2차 충격</h2>
+<p class="dek">어제 코스피가 기관 매도에 <b>-3.52%</b> 급락한 지 하루 만에, 간밤 미국 반도체지수가 <b>-6.72%</b> 추가로 밀렸어요. 오늘은 반등을 기대하기보다 낙폭을 얼마나 방어하는지가 관전 포인트예요.</p>
+<a class="cta" href="/briefings/2026-10-23/kospi/">오늘 코스피 브리핑 보기 →</a><div class="trust">시초가 예측 적중 <b>7/9</b> (78%) · 매일 07:25·16:25·21:15 발행</div></div><div class="blk one"><span class="ok-k">🌙 밤사이 미국</span> 반도체 ETF <b class="dn">-6.79%</b> → 국내 삼성전자·SK하이닉스 <b class="dn">-4.76%</b> <a href="#">자세히 →</a></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/22 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>214,500</b><em class="dn">-4.03%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,223,000</b><em class="dn">-5.49%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>301,500</b><em class="dn">-2.58%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
+<a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/22 종가</span></div><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<span class="sb-bar"><i class="dn" style="width:5.1%;right:50%"></i></span>
+<b class="dn">-0.79%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
+<span class="sb-bar"><i class="dn" style="width:9.6%;right:50%"></i></span>
+<b class="dn">-1.49%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
+<span class="sb-bar"><i class="dn" style="width:13.7%;right:50%"></i></span>
+<b class="dn">-2.13%</b></a><a class="sb" href="/stocks/sector/power/"><span class="sb-n">전력기기</span>
+<span class="sb-bar"><i class="dn" style="width:14.5%;right:50%"></i></span>
+<b class="dn">-2.25%</b></a><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<span class="sb-bar"><i class="dn" style="width:16.0%;right:50%"></i></span>
+<b class="dn">-2.48%</b></a><a class="sb" href="/stocks/sector/ship/"><span class="sb-n">조선</span>
+<span class="sb-bar"><i class="dn" style="width:19.8%;right:50%"></i></span>
+<b class="dn">-3.06%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
+<span class="sb-bar"><i class="dn" style="width:35.4%;right:50%"></i></span>
+<b class="dn">-5.48%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
+<span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
+<b class="dn">-7.74%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="intraday" hidden><div class="ibar"><span>13:30</span><span>코스피 <b>5,488.70</b> <span class="dn">-0.81%</span></span></div><div class="hero"><div class="hk"><span>장중 · 어제 같은 시각과 비교</span><span class="live">● 13:30</span></div>
+<h2>내리고 있지만 어제보다 낙폭이 작아요</h2>
+<p class="dek">코스피 지금 <b class="dn">-0.81%</b> · 어제 같은 시각 <b class="dn">-3.37%</b> — <b>2.55%p</b> 높아요.</p><div class="cv"><svg viewBox="0 0 300 130" preserveAspectRatio="none">
+<rect x="207.7" y="0" width="92.3" height="130" class="rest"/>
+<line x1="0" x2="300" y1="9.6" y2="9.6" class="zero"/>
+<polyline points="0.0,36.1 0.8,28.2 1.5,26.6 2.3,23.3 3.1,26.6 3.8,14.7 4.6,11.8 5.4,16.9 6.2,21.7 6.9,25.6 7.7,16.5 8.5,18.6 9.2,16.0 10.0,24.0 10.8,22.3 11.5,27.6 12.3,21.2 13.1,29.5 13.8,26.4 14.6,28.1 15.4,32.4 16.2,33.6 16.9,27.0 17.7,26.3 18.5,37.2 19.2,34.4 20.0,32.9 20.8,31.2 21.5,29.3 22.3,32.3 23.1,35.4 23.8,38.7 24.6,40.9 25.4,40.6 26.2,41.5 26.9,37.1 27.7,38.4 28.5,37.2 29.2,33.5 30.0,32.9 30.8,33.7 31.5,31.2 32.3,26.1 33.1,22.4 33.8,20.9 34.6,17.0 35.4,14.8 36.2,10.1 36.9,9.3 37.7,7.8 38.5,16.1 39.2,20.4 40.0,25.7 40.8,29.5 41.5,29.1 42.3,32.9 43.1,32.5 43.8,29.7 44.6,30.7 45.4,30.0 46.2,32.5 46.9,34.3 47.7,34.1 48.5,34.4 49.2,35.8 50.0,37.2 50.8,31.1 51.5,31.3 52.3,30.2 53.1,31.2 53.8,34.5 54.6,34.0 55.4,35.1 56.2,34.2 56.9,36.0 57.7,31.7 58.5,32.2 59.2,33.9 60.0,35.2 60.8,38.7 61.5,42.7 62.3,40.3 63.1,38.8 63.8,37.8 64.6,39.7 65.4,39.5 66.2,38.9 66.9,39.9 67.7,37.7 68.5,39.4 69.2,32.0 70.0,31.7 70.8,35.6 71.5,35.8 72.3,39.8 73.1,38.0 73.8,45.6 74.6,51.9 75.4,56.1 76.2,50.2 76.9,55.1 77.7,60.4 78.5,64.7 79.2,59.1 80.0,58.3 80.8,59.4 81.5,61.4 82.3,55.3 83.1,57.0 83.8,57.6 84.6,53.2 85.4,54.5 86.2,56.3 86.9,59.6 87.7,59.1 88.5,58.8 89.2,54.5 90.0,55.7 90.8,55.3 91.5,52.9 92.3,57.6 93.1,56.3 93.8,56.7 94.6,56.5 95.4,58.7 96.2,59.2 96.9,60.9 97.7,62.2 98.5,64.0 99.2,66.0 100.0,67.4 100.8,63.4 101.5,60.2 102.3,61.0 103.1,62.7 103.8,65.2 104.6,68.6 105.4,70.1 106.2,67.8 106.9,65.2 107.7,68.7 108.5,71.9 109.2,72.0 110.0,73.2 110.8,69.4 111.5,71.0 112.3,71.8 113.1,70.7 113.8,70.6 114.6,67.2 115.4,63.0 116.2,65.6 116.9,65.7 117.7,66.4 118.5,65.6 119.2,65.3 120.0,65.8 120.8,66.6 121.5,66.1 122.3,65.0 123.1,70.6 123.8,69.6 124.6,73.7 125.4,71.7 126.2,71.7 126.9,74.4 127.7,65.0 128.5,65.4 129.2,63.7 130.0,63.6 130.8,66.4 131.5,64.1 132.3,65.8 133.1,68.3 133.8,69.1 134.6,67.4 135.4,66.0 136.2,66.4 136.9,67.5 137.7,65.2 138.5,67.1 139.2,66.2 140.0,70.3 140.8,71.2 141.5,73.7 142.3,73.1 143.1,69.4 143.8,69.6 144.6,68.4 145.4,67.6 146.2,70.3 146.9,72.8 147.7,72.0 148.5,71.4 149.2,72.2 150.0,73.3 150.8,70.0 151.5,72.6 152.3,72.2 153.1,74.3 153.8,72.2 154.6,67.6 155.4,62.2 156.2,64.5 156.9,63.1 157.7,63.3 158.5,62.8 159.2,68.4 160.0,66.9 160.8,67.4 161.5,73.3 162.3,72.3 163.1,74.3 163.8,76.6 164.6,75.8 165.4,79.2 166.2,82.0 166.9,82.9 167.7,82.2 168.5,85.1 169.2,82.6 170.0,81.6 170.8,79.9 171.5,80.3 172.3,79.5 173.1,78.9 173.8,77.5 174.6,77.3 175.4,79.1 176.2,77.7 176.9,75.3 177.7,78.1 178.5,80.9 179.2,84.9 180.0,86.4 180.8,84.7 181.5,86.6 182.3,81.5 183.1,83.3 183.8,81.3 184.6,82.8 185.4,83.7 186.2,84.4 186.9,84.7 187.7,88.3 188.5,89.7 189.2,91.5 190.0,90.3 190.8,86.6 191.5,88.9 192.3,88.7 193.1,87.4 193.8,88.2 194.6,89.7 195.4,90.3 196.2,89.6 196.9,86.9 197.7,88.3 198.5,88.2 199.2,88.7 200.0,92.1 200.8,93.6 201.5,96.9 202.3,97.7 203.1,94.1 203.8,91.5 204.6,94.8 205.4,95.5 206.2,96.3 206.9,95.7 207.7,96.8 208.5,94.6 209.2,93.9 210.0,96.0 210.8,97.9 211.5,102.6 212.3,101.8 213.1,97.4 213.8,99.9 214.6,102.9 215.4,100.1 216.2,101.7 216.9,103.0 217.7,98.4 218.5,99.1 219.2,94.7 220.0,93.1 220.8,95.5 221.5,96.7 222.3,94.6 223.1,95.3 223.8,96.5 224.6,96.2 225.4,98.6 226.2,97.5 226.9,95.4 227.7,95.9 228.5,96.1 229.2,94.3 230.0,94.3 230.8,94.7 231.5,94.2 232.3,95.0 233.1,95.7 233.8,101.3 234.6,103.0 235.4,101.1 236.2,99.5 236.9,101.3 237.7,95.1 238.5,95.3 239.2,98.9 240.0,103.1 240.8,104.2 241.5,106.1 242.3,108.4 243.1,108.9 243.8,109.8 244.6,109.2 245.4,108.1 246.2,104.0 246.9,106.6 247.7,108.3 248.5,109.5 249.2,108.6 250.0,103.2 250.8,102.8 251.5,107.7 252.3,102.6 253.1,103.8 253.8,107.4 254.6,107.8 255.4,109.4 256.2,109.2 256.9,111.7 257.7,106.5 258.5,107.9 259.2,108.6 260.0,109.0 260.8,109.9 261.5,114.0 262.3,114.9 263.1,112.9 263.8,113.8 264.6,113.4 265.4,114.0 266.2,113.8 266.9,119.1 267.7,122.2 268.5,117.7 269.2,119.9 270.0,121.1 270.8,116.6 271.5,116.5 272.3,112.4 273.1,114.2 273.8,111.1 274.6,109.9 275.4,108.9 276.2,101.8 276.9,110.2 277.7,110.4 278.5,105.9 279.2,105.6 280.0,106.8 280.8,107.9 281.5,104.7 282.3,101.0 283.1,98.0 283.8,105.0 284.6,104.7 285.4,104.0 286.2,103.7 286.9,101.6 287.7,101.9 288.5,100.3 289.2,98.9 290.0,97.4 290.8,98.6 291.5,97.1 292.3,97.9 293.1,97.9 293.8,97.9 294.6,97.9 295.4,97.9 296.2,97.9 296.9,97.9 297.7,97.9 298.5,97.9 299.2,97.9 300.0,100.7" class="yd"/><polyline points="0.0,64.2 0.8,74.9 1.5,81.1 2.3,89.7 3.1,93.8 3.8,87.7 4.6,92.3 5.4,97.3 6.2,110.4 6.9,111.2 7.7,111.5 8.5,99.4 9.2,88.9 10.0,89.3 10.8,78.0 11.5,79.7 12.3,78.9 13.1,81.6 13.8,85.8 14.6,89.3 15.4,89.6 16.2,83.4 16.9,97.1 17.7,93.0 18.5,98.6 19.2,94.5 20.0,91.7 20.8,87.2 21.5,80.1 22.3,80.3 23.1,73.4 23.8,67.1 24.6,77.3 25.4,72.6 26.2,81.0 26.9,80.7 27.7,89.5 28.5,87.7 29.2,94.3 30.0,94.3 30.8,88.5 31.5,92.0 32.3,84.4 33.1,86.0 33.8,82.9 34.6,82.7 35.4,73.8 36.2,64.5 36.9,59.3 37.7,63.6 38.5,66.9 39.2,62.8 40.0,65.3 40.8,49.9 41.5,58.6 42.3,56.9 43.1,56.1 43.8,50.6 44.6,55.6 45.4,47.3 46.2,57.0 46.9,46.7 47.7,56.7 48.5,55.4 49.2,49.7 50.0,53.3 50.8,55.9 51.5,48.7 52.3,49.3 53.1,54.2 53.8,55.4 54.6,57.1 55.4,56.0 56.2,58.5 56.9,63.4 57.7,68.4 58.5,69.2 59.2,76.7 60.0,75.6 60.8,72.0 61.5,71.0 62.3,64.4 63.1,57.9 63.8,54.7 64.6,63.0 65.4,61.9 66.2,53.5 66.9,43.5 67.7,47.0 68.5,43.7 69.2,45.1 70.0,49.3 70.8,54.7 71.5,64.0 72.3,61.4 73.1,61.3 73.8,63.5 74.6,65.6 75.4,65.1 76.2,59.6 76.9,53.6 77.7,42.2 78.5,37.0 79.2,39.8 80.0,44.4 80.8,46.1 81.5,45.2 82.3,44.7 83.1,54.5 83.8,58.7 84.6,60.2 85.4,59.4 86.2,62.2 86.9,66.1 87.7,68.2 88.5,73.2 89.2,77.8 90.0,75.4 90.8,72.5 91.5,70.7 92.3,79.5 93.1,74.3 93.8,75.1 94.6,77.2 95.4,77.2 96.2,80.9 96.9,74.4 97.7,72.5 98.5,76.1 99.2,75.5 100.0,75.1 100.8,76.5 101.5,72.2 102.3,72.5 103.1,70.7 103.8,74.9 104.6,74.7 105.4,73.6 106.2,74.9 106.9,73.7 107.7,71.5 108.5,73.6 109.2,74.3 110.0,72.9 110.8,72.5 111.5,77.4 112.3,76.0 113.1,74.8 113.8,73.8 114.6,73.7 115.4,71.1 116.2,68.6 116.9,68.2 117.7,66.9 118.5,64.0 119.2,61.0 120.0,63.1 120.8,66.8 121.5,66.7 122.3,60.8 123.1,61.6 123.8,61.6 124.6,61.8 125.4,61.1 126.2,59.2 126.9,58.8 127.7,62.2 128.5,63.0 129.2,65.3 130.0,63.2 130.8,63.6 131.5,59.7 132.3,57.6 133.1,58.7 133.8,57.8 134.6,60.6 135.4,61.7 136.2,62.6 136.9,61.2 137.7,58.4 138.5,61.4 139.2,63.2 140.0,61.0 140.8,64.6 141.5,63.6 142.3,66.6 143.1,65.9 143.8,65.5 144.6,68.7 145.4,69.5 146.2,68.3 146.9,70.5 147.7,66.7 148.5,67.2 149.2,66.1 150.0,65.3 150.8,64.1 151.5,66.1 152.3,63.5 153.1,64.7 153.8,67.0 154.6,65.8 155.4,61.3 156.2,61.1 156.9,58.3 157.7,61.9 158.5,61.4 159.2,60.9 160.0,55.0 160.8,54.7 161.5,53.1 162.3,52.6 163.1,54.3 163.8,47.9 164.6,42.8 165.4,43.2 166.2,43.4 166.9,49.2 167.7,48.9 168.5,50.2 169.2,50.9 170.0,51.4 170.8,50.9 171.5,43.0 172.3,35.3 173.1,38.4 173.8,35.4 174.6,38.5 175.4,37.3 176.2,38.1 176.9,37.6 177.7,39.0 178.5,34.6 179.2,35.8 180.0,37.6 180.8,33.3 181.5,35.7 182.3,38.7 183.1,37.3 183.8,33.7 184.6,34.0 185.4,34.1 186.2,33.1 186.9,28.9 187.7,30.4 188.5,30.1 189.2,26.9 190.0,26.4 190.8,27.0 191.5,28.5 192.3,27.0 193.1,24.8 193.8,32.4 194.6,29.5 195.4,32.5 196.2,36.8 196.9,35.2 197.7,33.5 198.5,36.6 199.2,33.0 200.0,35.9 200.8,36.2 201.5,36.3 202.3,37.4 203.1,37.3 203.8,35.7 204.6,36.2 205.4,39.1 206.2,39.9 206.9,34.6 207.7,30.7" class="td dn"/></svg>
+<i class="cv-dot dn" style="left:69.2%;top:23.6%"></i>
+<span class="cv-l" style="top:7.4%">0%</span>
+<div class="cv-ax"><span>09:00</span><span>12:00</span><span>15:30</span></div></div>
+<div class="cv-lg"><span><i class="td"></i>오늘</span><span><i class="yd"></i>어제 같은 시각</span></div>
+<a class="cta ghost" href="/briefings/2026-10-23/kospi/">아침 예측 다시 보기 →</a></div><div class="blk"><div class="bh"><h3>지금 뜨는 특이신호</h3><a href="#">전체 46종목 →</a></div><div class="sg"><div><b>SK바이오팜</b><span>거래량 평소의 2.1배</span></div>
+<div class="sg-r"><b class="up">+2.67%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>삼성바이오로직스</b><span>거래량 평소의 1.7배</span></div>
+<div class="sg-r"><b class="up">+7.71%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>LS일렉트릭</b><span>거래량 평소의 1.5배</span></div>
+<div class="sg-r"><b class="dn">-2.79%</b><a class="go soft" href="/stocks/sector/power/">전력기기 보기 →</a></div></div><p class="note">상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보내요.</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>프로토타입: 10/23 종가로 대신</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
+<b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
+<span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
+<b class="dn">-0.78%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
+<span class="sb-bar"><i class="dn" style="width:23.4%;right:50%"></i></span>
+<b class="dn">-1.96%</b></a><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<span class="sb-bar"><i class="dn" style="width:24.0%;right:50%"></i></span>
+<b class="dn">-2.01%</b></a><a class="sb" href="/stocks/sector/ship/"><span class="sb-n">조선</span>
+<span class="sb-bar"><i class="dn" style="width:27.0%;right:50%"></i></span>
+<b class="dn">-2.26%</b></a><a class="sb" href="/stocks/sector/power/"><span class="sb-n">전력기기</span>
+<span class="sb-bar"><i class="dn" style="width:37.7%;right:50%"></i></span>
+<b class="dn">-3.16%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
+<span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
+<b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
+<span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
+<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="close" hidden><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>오늘 16:32 · 코스피 마감</span><span class="live">새 브리핑</span></div>
+<h2>-4%까지 빠졌는데 플러스 마감? 기관이 코스피를 끌어올렸다</h2>
+<p class="dek">기관이 <b>8,726억원</b>을 사들이며 받쳤지만, 외국인은 <b>9,934억원</b>을 던지고 떠났어요.</p>
+<div class="chip ok">📝 아침 시초가 예측 하락 우위 → 시초가 -2.36% ✓ 적중</div>
+<a class="cta" href="/briefings/2026-10-23/close/">마감 브리핑 보기 →</a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
+<b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
+<span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
+<b class="dn">-0.78%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
+<span class="sb-bar"><i class="dn" style="width:23.4%;right:50%"></i></span>
+<b class="dn">-1.96%</b></a><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<span class="sb-bar"><i class="dn" style="width:24.0%;right:50%"></i></span>
+<b class="dn">-2.01%</b></a><a class="sb" href="/stocks/sector/ship/"><span class="sb-n">조선</span>
+<span class="sb-bar"><i class="dn" style="width:27.0%;right:50%"></i></span>
+<b class="dn">-2.26%</b></a><a class="sb" href="/stocks/sector/power/"><span class="sb-n">전력기기</span>
+<span class="sb-bar"><i class="dn" style="width:37.7%;right:50%"></i></span>
+<b class="dn">-3.16%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
+<span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
+<b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
+<span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
+<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>지금 뜨는 특이신호</h3><a href="#">전체 46종목 →</a></div><div class="sg"><div><b>SK바이오팜</b><span>거래량 평소의 2.1배</span></div>
+<div class="sg-r"><b class="up">+2.67%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>삼성바이오로직스</b><span>거래량 평소의 1.7배</span></div>
+<div class="sg-r"><b class="up">+7.71%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>LS일렉트릭</b><span>거래량 평소의 1.5배</span></div>
+<div class="sg-r"><b class="dn">-2.79%</b><a class="go soft" href="/stocks/sector/power/">전력기기 보기 →</a></div></div><p class="note">상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보내요.</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div></section><section class="pane" data-slot="evening" hidden><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero is-dn"><div class="hk"><span>오늘 21:17 · 미국 시장 브리핑</span><span class="live">새 브리핑</span></div>
+<div class="hm"><b class="hd">↓ 하락 우위</b><b class="hp">68%</b></div>
+<h2>반도체가 먼저 맞았다 — 빅테크 실적·FOMC가 몰려오는 한 주</h2>
+<p class="dek">직전 정규장에서 <b>반도체·메모리</b>에 매물이 쏟아졌고, 프리마켓에서도 SOX가 고개를 못 들고 있어요. 이번 주엔 <b>빅테크 실적</b>과 <b>FOMC</b>가 줄줄이 나와요.</p>
+<div class="chip">나스닥 체크 <b>+59.8%</b> · ✓ 정상</div>
+<a class="cta" href="/briefings/2026-10-23/us/">미국 브리핑 보기 →</a></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
+<a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
+<b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
+<span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
+<b class="dn">-0.78%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
+<span class="sb-bar"><i class="dn" style="width:23.4%;right:50%"></i></span>
+<b class="dn">-1.96%</b></a><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<span class="sb-bar"><i class="dn" style="width:24.0%;right:50%"></i></span>
+<b class="dn">-2.01%</b></a><a class="sb" href="/stocks/sector/ship/"><span class="sb-n">조선</span>
+<span class="sb-bar"><i class="dn" style="width:27.0%;right:50%"></i></span>
+<b class="dn">-2.26%</b></a><a class="sb" href="/stocks/sector/power/"><span class="sb-n">전력기기</span>
+<span class="sb-bar"><i class="dn" style="width:37.7%;right:50%"></i></span>
+<b class="dn">-3.16%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
+<span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
+<b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
+<span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
+<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="weekend"><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>이번 주 정리 · 10/19~10/23</span><span class="live wk">주말</span></div>
+<div class="wk3"><div><span>코스피 주간</span><b class="dn">-2.08%</b><em>5,668 → 5,550</em></div>
+<div><span>예측 성적</span><b>3/5</b><em>시초가 기준</em></div>
+<div><span>가장 강했던 섹터</span><b class="up">바이오</b><em>+2.49%</em></div></div>
+<h2>+1.76 → -3.73 → +3.29 → -3.52, 하루씩 뒤집힌 롤러코스터</h2>
+<p class="dek">코스피는 닷새 내내 오름과 내림을 번갈아 하다 주간 <b class="dn">-2.08%</b>로 마쳤어요.</p>
+<a class="cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
+<a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>주간 등락</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<span class="sb-bar"><i class="up" style="width:9.6%;left:50%"></i></span>
+<b class="up">+2.49%</b></a><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<span class="sb-bar"><i class="dn" style="width:8.4%;right:50%"></i></span>
+<b class="dn">-2.17%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
+<span class="sb-bar"><i class="dn" style="width:17.8%;right:50%"></i></span>
+<b class="dn">-4.59%</b></a><a class="sb" href="/stocks/sector/power/"><span class="sb-n">전력기기</span>
+<span class="sb-bar"><i class="dn" style="width:22.0%;right:50%"></i></span>
+<b class="dn">-5.68%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
+<span class="sb-bar"><i class="dn" style="width:30.7%;right:50%"></i></span>
+<b class="dn">-7.92%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
+<span class="sb-bar"><i class="dn" style="width:31.9%;right:50%"></i></span>
+<b class="dn">-8.23%</b></a><a class="sb" href="/stocks/sector/ship/"><span class="sb-n">조선</span>
+<span class="sb-bar"><i class="dn" style="width:41.8%;right:50%"></i></span>
+<b class="dn">-10.77%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
+<span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
+<b class="dn">-12.88%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>주간 등락</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.00%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+0.39%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-5.29%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div></section>
+<div class="foot"><a href="/briefings/">브리핑 아카이브</a><a href="/stocks/income-designer/">월배당 설계</a></div>
+</div>
+<script>document.querySelectorAll('.proto button').forEach(b=>b.onclick=()=>{
+document.querySelectorAll('.proto button').forEach(x=>x.classList.toggle('on',x===b));
+document.querySelectorAll('.pane').forEach(p=>p.hidden=p.dataset.slot!==b.dataset.s);});</script>
+</body></html>
