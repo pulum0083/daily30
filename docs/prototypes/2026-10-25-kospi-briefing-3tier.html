@@ -1,0 +1,594 @@
+
+<!DOCTYPE html>
+
+<html class="light" lang="ko">
+<head>
+<!-- 코스피 아침 브리핑 3단 구조 프로토타입(30초 요약·오늘의 이슈 점검·월봉 5개월선·근거 더 보기) — 10/23 발행본 기반, 스타일은 운영 사이트에서 불러온다 -->
+<base href="https://doubleshot.space/">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2026-10-23 코스피 당일 방향 예측 — Double-Shot</title>
+<meta content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" name="naver-site-verification">
+<meta content="KOSPI 시초가 방향 예측: 하락 우위 93% · 신뢰도 82%" name="description"/>
+<meta content="index, follow, max-image-preview:large, max-snippet:-1" name="robots"/>
+<meta content="website" property="og:type"/>
+<meta content="Double-Shot" property="og:site_name"/>
+<meta content="ko_KR" property="og:locale"/>
+<meta content="https://doubleshot.space/briefings/2026-10-23/kospi/" property="og:url"/>
+<meta content="2026-10-23 코스피 당일 방향 예측 — Double-Shot" property="og:title"/>
+<meta content="KOSPI 시초가 방향 예측: 하락 우위 93% · 신뢰도 82%" property="og:description"/>
+<meta content="summary" name="twitter:card"/>
+<meta content="2026-10-23 코스피 당일 방향 예측 — Double-Shot" name="twitter:title"/>
+<meta content="KOSPI 시초가 방향 예측: 하락 우위 93% · 신뢰도 82%" name="twitter:description"/>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<link href="/assets/style.css?v=20261025" rel="stylesheet"/>
+<link href="/favicon.svg" rel="icon" type="image/svg+xml"/>
+<link href="/manifest.webmanifest" rel="manifest"/>
+<meta content="#0F172A" name="theme-color"/>
+<link href="/icons/apple-touch-icon.png" rel="apple-touch-icon"/>
+<script defer="" src="/assets/pwa-install.js"></script>
+<link href="https://doubleshot.space/briefings/2026-10-23/kospi/" rel="canonical"/>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+</meta><style id="tier3-css">
+.bx-hero{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:16px 18px 14px;background:var(--canvas);box-shadow:var(--s1);margin-top:4px}
+.bx-hero.dn{background:linear-gradient(180deg,var(--dn-bg),var(--canvas) 70%)} .bx-hero.up{background:linear-gradient(180deg,var(--up-bg),var(--canvas) 70%)}
+.bx-k{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}
+.bx-main{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:8px}
+.bx-dir{font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);display:flex;align-items:center;gap:6px}
+.bx-hero.dn .bx-dir,.bx-hero.dn .bx-prob b{color:var(--dn)} .bx-hero.up .bx-dir,.bx-hero.up .bx-prob b{color:var(--up)}
+.bx-arrow{font-size:24px}
+.bx-prob{text-align:right} .bx-prob b{display:block;font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
+.bx-prob span{font-size:11px;color:var(--muted)}
+.bx-head{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5;margin-top:10px}
+.bx-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bx-chip{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--ink);text-decoration:none}
+.bx-chip em{font-style:normal;color:var(--muted)} .bx-chip b{font-weight:700} .bx-chip span{color:var(--muted);font-size:11px}
+.bx-chip.miss b{color:var(--muted)} .bx-chip.ok b{color:var(--primary)}
+.bx-def{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}
+.bx-comfort{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic}
+.ic-section{margin-top:26px}
+.ic-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap} .ic-h h2{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+.ic-h span{font-size:12px;color:var(--muted)}
+.ic-list{display:flex;flex-direction:column;gap:10px}
+.ic-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:13px 15px;background:var(--canvas)}
+.ic-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ic-tag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px}
+.ic-tag.fact{background:var(--surface-inset);color:var(--ink)} .ic-tag.news{background:var(--gold-bg);color:var(--gold)} .ic-tag.ai{background:var(--primary-bg);color:var(--primary)}
+.ic-imp{font-size:12px;font-weight:700} .ic-imp.dn{color:var(--dn)} .ic-imp.up{color:var(--up)} .ic-imp em{font-style:normal;font-weight:500;color:var(--muted);font-size:10px;margin-left:3px}
+.ic-title{font-size:15px;font-weight:700;color:var(--ink);margin-top:8px}
+.ic-body{font-size:13px;color:var(--ink);line-height:1.65;margin-top:4px} .ic-body p{margin:0}
+.ic-tks{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ic-tk{font-size:11.5px;border-radius:6px;padding:2px 7px;background:var(--surface-soft);color:var(--ink);font-variant-numeric:tabular-nums}
+.ic-tk.dn b{color:var(--dn)} .ic-tk.up b{color:var(--up)}
+.ic-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;font-size:12px}
+.ic-links a{color:var(--primary);font-weight:600;text-decoration:none;border:1px solid var(--primary-bg);background:var(--primary-bg);border-radius:999px;padding:2px 9px}
+.ic-lk-l{color:var(--muted)} .ic-lk-n{color:var(--muted);font-size:10px}
+.ic-foot{font-size:11px;color:var(--muted);margin-top:7px}
+.ic-news{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--hairline);color:var(--ink);text-decoration:none;font-size:13px}
+.ic-news:first-child{border-top:0;padding-top:2px} .ic-news span{color:var(--muted);font-size:11px;white-space:nowrap}
+.ic-ul{margin:2px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.ic-src{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px} .ic-src a{color:var(--primary);font-weight:600;white-space:nowrap}
+.bx-more{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas);margin-top:18px}
+.bx-more summary{position:relative;cursor:pointer;padding:13px 76px 13px 15px;font-size:14px;font-weight:700;color:var(--ink);list-style:none}
+.bx-more summary::-webkit-details-marker{display:none} .bx-more summary::after{content:'펼치기 ▾';position:absolute;right:15px;top:15px;font-size:12px;color:var(--muted);font-weight:500}
+.bx-more[open] summary::after{content:'접기 ▴'} .bx-more summary span{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+.bx-more-in{padding:0 15px 14px;font-size:13px;line-height:1.75;color:var(--ink)} .bx-more-in h4{font-size:12px;color:var(--muted);margin:12px 0 4px}
+.bx-more-in ol{padding-left:18px;margin:0}
+</style>
+</head>
+<body>
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg fill="none" viewbox="0 0 32 32"><rect fill="white" height="9" rx="1.6" width="5.5" x="7" y="15"></rect><line stroke="white" stroke-linecap="round" stroke-width="2" x1="9.75" x2="9.75" y1="10" y2="15"></line><line stroke="white" stroke-linecap="round" stroke-width="2" x1="9.75" x2="9.75" y1="24" y2="27"></line><rect fill="white" height="13" rx="1.6" width="5.5" x="19.5" y="9"></rect><line stroke="white" stroke-linecap="round" stroke-width="2" x1="22.25" x2="22.25" y1="5" y2="9"></line><line stroke="white" stroke-linecap="round" stroke-width="2" x1="22.25" x2="22.25" y1="22" y2="26"></line></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub is-active" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><button aria-label="공지 및 게시판" class="gnb__notif-btn" id="gnb-notif-btn" onclick="openNoticePanel()"><svg viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path><rect fill="currentColor" height="7" opacity=".75" rx="2" width="9" x="13" y="1"></rect><path d="M15.5 3.5h4M15.5 5.5h2.5" stroke="var(--gnb-bg,#16181A)" stroke-linecap="round" stroke-width="1.1"></path><path d="M13 8l1.8 2" fill="none" opacity=".75" stroke="currentColor" stroke-width="1.1"></path></svg><span class="gnb__notif-dot" id="gnb-notif-dot"></span></button><span class="sbtn" onclick="location.href='/stocks/'"><svg fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line stroke-linecap="round" x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>검색</span></span></div></div>
+<div class="layout-wrapper">
+<div class="layout-grid">
+<main class="layout-grid__main">
+<div class="accordion-item is-open is-today">
+<div class="accordion-header">
+<div class="accordion-header__date-label">2026-10-23</div>
+<div class="header-nav">
+<a class="hnav-btn" href="/briefings/2026-10-22/kospi/" id="btn-prev" title="이전 브리핑"><svg fill="none" height="14" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24" width="14"><polyline points="15 18 9 12 15 6"></polyline></svg></a>
+<a class="hnav-btn disabled" href="#" id="btn-next" title="다음 브리핑"><svg fill="none" height="14" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24" width="14"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
+</div>
+</div>
+<div class="accordion-body">
+<div class="accordion-body__inner"><div class="bx-hero dn">
+<div class="bx-k"><span>10월 23일(금) 시초가 방향 예측</span><span class="bx-k-t">06:35 생성</span></div>
+<div class="bx-main">
+<div class="bx-dir"><span class="bx-arrow">↓</span>하락 우위</div>
+<div class="bx-prob"><b>93%</b><span>신뢰도 82%</span></div>
+</div>
+<div class="bx-head">메타發 AI 투자 공포, 간밤 미국 반도체를 또 한번 덮쳤어요</div>
+<div class="bx-chips">
+<a class="bx-chip" href="#scorecard"><em>적중률</em><b>78%</b><span>시초가 기준 9건 · 항상 '상승' 33%</span></a>
+<span class="bx-chip miss"><em>어제 예측</em><b>상승 → 빗나감</b><span>시초가 -1.14%</span></span>
+</div>
+<p class="bx-def">09:00 코스피가 전일 종가보다 위로 열릴지 아래로 열릴지에 대한 확률이에요. 장중 흐름과 종가는 예측하지 않아요.</p>
+<p class="bx-comfort">힘든 이틀이었어요. 오늘은 버티는 것만으로도 충분해요.</p>
+</div><div class="open-section ic-section">
+<div class="ic-h"><h2>오늘의 이슈 점검</h2><span>간밤 미국 · 국내 · 오늘 볼 것</span></div>
+<div class="ic-list"><div class="ic-card">
+<div class="ic-top"><span class="ic-tag fact">간밤 미국 · 실측</span><span class="ic-imp dn">코스피 ▼ <em>AI 판단</em></span></div>
+<div class="ic-title">메타·테슬라·IBM 트리플 실적</div>
+<div class="ic-body"><p>소셜/광고 플랫폼은 <b>내렸어요</b></p><div class="ic-tks"><span class="ic-tk dn">META <b>-6.98%</b></span><span class="ic-tk dn">TSLA <b>-3.08%</b></span></div></div>
+</div><div class="ic-card">
+<div class="ic-top"><span class="ic-tag fact">간밤 미국 · 실측</span><span class="ic-imp dn">코스피 ▼ <em>AI 판단</em></span></div>
+<div class="ic-title">메모리·반도체 장비주 동반 급락</div>
+<div class="ic-body"><p>메모리·반도체 장비는 <b>나란히 내렸어요</b></p><div class="ic-tks"><span class="ic-tk dn">LRCX <b>-11.76%</b></span><span class="ic-tk dn">AMAT <b>-8.16%</b></span><span class="ic-tk dn">KLAC <b>-9.55%</b></span><span class="ic-tk dn">MU <b>-6.26%</b></span><span class="ic-tk dn">AVGO <b>-4.31%</b></span><span class="ic-tk dn">AMD <b>-8.10%</b></span><span class="ic-tk dn">NVDA <b>-4.40%</b></span></div></div>
+<div class="ic-links"><span class="ic-lk-l">국내 연결</span><a href="/stocks/005930/">삼성전자</a><a href="/stocks/000660/">SK하이닉스</a><span class="ic-lk-n">AI 해석</span></div>
+</div><div class="ic-card">
+<div class="ic-top"><span class="ic-tag fact">간밤 미국 · 실측</span><span class="ic-imp dn">코스피 ▼ <em>AI 판단</em></span></div>
+<div class="ic-title">S&amp;P·다우 선물 동반 약세, VIX는 급등</div>
+<div class="ic-body"><p>지수 전반은 <b>내렸어요</b></p><div class="ic-tks"><span class="ic-tk dn">S&amp;P500 <b>-1.21%</b></span></div></div>
+<div class="ic-foot">종목이 지정되지 않아 S&amp;P500 실측으로 봤어요.</div>
+</div><div class="ic-card">
+<div class="ic-top"><span class="ic-tag news">국내 · 뉴스</span></div>
+<div class="ic-title">어제 장 이후 국내 소식</div>
+<div class="ic-body"><a class="ic-news" href="http://www.sisacast.kr/news/articleView.html?idxno=101243" rel="noopener noreferrer" target="_blank"><b>한은 기준금리 연 3.0% 동결</b><span>시사캐스트</span></a><a class="ic-news" href="https://www.wikitree.co.kr/articles/1168371" rel="noopener noreferrer" target="_blank"><b>코스피 외국인·기관 동반 투매</b><span>위키트리</span></a></div>
+</div><div class="ic-card">
+<div class="ic-top"><span class="ic-tag ai">오늘 볼 것 · AI 해석</span></div>
+<div class="ic-title">개장 뒤 확인할 세 가지</div>
+<div class="ic-body"><ul class="ic-ul"><li>간밤 메타발 AI 투자 부담 우려가 오늘 반도체 갭다운 폭을 얼마나 키울지 지켜보세요.</li><li>어제에 이어 기관 매도가 오늘도 이어질지가 낙폭 방어의 핵심이에요.</li><li>VIX가 <b>19.03</b>까지 오른 만큼 위험자산 회피 심리가 더 번질지 주시하세요.</li></ul></div>
+</div></div>
+<div class="ic-src">실측 = 거래소 종가로 확인한 숫자 · 뉴스 = 수집한 기사 원문 · AI 해석 = 분석 모델의 판단이에요.
+    <a href="/briefings/2026-10-22/us/">간밤 미국 브리핑 보기 →</a></div>
+</div><div class="divider"></div><div class="open-section ma5m-section">
+<div class="open-section__title">
+    월봉 5개월선 안착 종목
+    <button class="info-icon-btn" data-modal-open="ma5m-modal">?</button>
+</div>
+<p class="m5-intro">월말 종가가 5개월 이동평균선 위에서 3개월 넘게 마감했고, 이번 달에도 그 위에 있는 종목이에요.</p>
+<div class="m5-legend"><span><i class="up"></i>5개월선 위</span><span><i class="dn"></i>아래</span><span><i class="run"></i>안착 구간</span></div>
+<div class="m5a-list">
+<div class="m5a-item">
+<div class="m5a-head">
+<div>
+<div class="m5a-nm">메리츠금융지주</div>
+<div class="m5a-px">127,800원 <em>10/23 종가</em></div>
+</div>
+<div class="m5a-streak"><b>3</b><span>개월째<br/>5개월선 위</span></div>
+</div>
+<div class="m5a-strip" style="--n:13">
+<div class="m5a-axis"></div>
+<div class="m5a-cell" title="10월 월말 종가 110,500원 · 5개월선 115,760원">
+<div class="m5a-bar"><i class="dn" style="height:23%"></i></div>
+<span>10월</span>
+</div>
+<div class="m5a-cell" title="11월 월말 종가 108,600원 · 5개월선 114,980원">
+<div class="m5a-bar"><i class="dn" style="height:28%"></i></div>
+<span>11월</span>
+</div>
+<div class="m5a-cell" title="12월 월말 종가 113,100원 · 5개월선 114,440원">
+<div class="m5a-bar"><i class="dn" style="height:6%"></i></div>
+<span>12월</span>
+</div>
+<div class="m5a-cell" title="1월 월말 종가 116,600원 · 5개월선 112,460원">
+<div class="m5a-bar"><i class="up" style="height:18%"></i></div>
+<span>1월</span>
+</div>
+<div class="m5a-cell" title="2월 월말 종가 127,100원 · 5개월선 115,180원">
+<div class="m5a-bar"><i class="up" style="height:52%"></i></div>
+<span>2월</span>
+</div>
+<div class="m5a-cell" title="3월 월말 종가 111,400원 · 5개월선 115,360원">
+<div class="m5a-bar"><i class="dn" style="height:17%"></i></div>
+<span>3월</span>
+</div>
+<div class="m5a-cell" title="4월 월말 종가 111,700원 · 5개월선 115,980원">
+<div class="m5a-bar"><i class="dn" style="height:18%"></i></div>
+<span>4월</span>
+</div>
+<div class="m5a-cell" title="5월 월말 종가 102,900원 · 5개월선 113,940원">
+<div class="m5a-bar"><i class="dn" style="height:48%"></i></div>
+<span>5월</span>
+</div>
+<div class="m5a-cell" title="6월 월말 종가 105,600원 · 5개월선 111,740원">
+<div class="m5a-bar"><i class="dn" style="height:27%"></i></div>
+<span>6월</span>
+</div>
+<div class="m5a-cell is-run" title="7월 월말 종가 124,000원 · 5개월선 111,120원">
+<div class="m5a-bar"><i class="up" style="height:58%"></i></div>
+<span>7월</span>
+</div>
+<div class="m5a-cell is-run" title="8월 월말 종가 122,200원 · 5개월선 113,280원">
+<div class="m5a-bar"><i class="up" style="height:39%"></i></div>
+<span>8월</span>
+</div>
+<div class="m5a-cell is-run" title="9월 월말 종가 126,300원 · 5개월선 116,200원">
+<div class="m5a-bar"><i class="up" style="height:43%"></i></div>
+<span>9월</span>
+</div>
+<div class="m5a-cell is-cur" title="이번 달 현재 종가 127,800원 · 5개월선 121,180원">
+<div class="m5a-bar"><i class="up" style="height:27%"></i></div>
+<span>이번 달</span>
+</div>
+</div>
+<div class="m5a-facts">
+<span><em>9월 말 이격</em>+8.7%</span>
+<span><em>지금 이격</em>+5.5%</span>
+<span><em>외국인 보유율 3개월</em>+0.17%p</span>
+</div>
+</div>
+</div>
+<p class="m5-foot">지난 15년(2011~2025) 코스피200에서 같은 조건이 나온 뒤 <b>12개월 동안 오른 경우는 49.6%</b>였어요.
+  아무 종목·아무 달(50.4%)과 차이가 없어 매매 신호가 아니에요. 월말 종가·이동평균·외국인 보유율은 KRX 공식 종가로 계산한 실측값이에요.
+  <a href="/legal/disclaimer/">면책 고지</a></p>
+</div><div class="divider"></div><details class="bx-more">
+<summary>근거 전체 보기 <span>이렇게 보는 이유 · WHY · WHAT · SO WHAT</span></summary>
+<div class="bx-more-in">
+<h4>이렇게 보는 이유</h4><ol><li><b>메타발 AI 투자 공포가 반도체 전반을 짓눌렀어요.</b> 메타의 대규모 AI 설비투자와 잉여현금흐름 적자 소식에 필라델피아 반도체지수가 <b>-6.72%</b> 급락하며 간밤 뉴욕 증시를 흔들었어요.</li><li><b>어제 이미 기관 매도로 코스피가 크게 흔들렸던 만큼 오늘도 수급 부담이 이어질 자리예요.</b> 전일 기관이 대규모 순매도를 보이며 지수를 끌어내렸거든요.</li><li><b>미 지수선물도 밤사이 낙폭을 더 키웠어요.</b> NQ선물이 <b>-2.91%</b>까지 밀리며 종가보다 더 신선한 약세 신호를 보내고 있어요.</li></ol>
+<h4>WHY</h4><p>이번 하락의 뿌리는 AI 투자 수익성에 대한 의구심이에요. 메타가 막대한 AI 설비투자 계획을 내놓으면서 잉여현금흐름 적자를 기록했다는 소식이 'AI 거품' 우려를 다시 키웠거든요. 여기에 미국과 이스라엘의 이란 재공격 가능성 보도까지 겹치며 브렌트유가 <b>+3.77%</b> 오르는 등 지정학 리스크까지 가세해 투자 심리를 더 얼어붙게 했어요.</p>
+<h4>WHAT</h4><p>필라델피아 반도체지수가 <b>-6.72%</b>, DRAM ETF가 <b>-7.79%</b> 급락하며 메모리·반도체 섹터 전반에 충격을 줬어요. 빅테크 중에서는 메타가 <b>-7.24%</b>로 가장 크게 밀렸고 아마존(<b>-4.29%</b>)·엔비디아(<b>-3.74%</b>)도 약세를 피하지 못했어요. 반면 애플은 <b>+1.22%</b>로 나홀로 선방하며 개별 종목별 온도차가 뚜렷했어요.</p>
+<h4>SO WHAT</h4><p>오늘 개장은 어제의 급락에 이어 추가 갭다운으로 열릴 가능성이 커요. 반등을 기대하기보다, 기관 매도 강도가 어제보다 완화되는지와 VIX가 추가로 튀는지를 먼저 확인하는 게 중요해요.</p>
+</div>
+</details></div>
+</div>
+</div>
+</main>
+<aside class="layout-grid__right">
+<div class="right-panel" id="market-data-panel">
+<div class="panel-header"><span class="section-title">시장 지표</span><span class="pub-time">06:35 KST</span></div>
+<div class="mkt-list">
+<div class="mkt-row">
+<div class="mkt-row-info">
+<span class="mkt-name" style="display:flex;align-items:center;gap:4px">VIX 공포지수<button class="info-icon-btn" data-modal-open="vix-modal">?</button></span>
+<div class="mkt-vals"><div class="mkt-val">15.03</div><div class="mkt-chg down">-5.11%</div></div>
+</div>
+<div class="mkt-spark" style="display:flex;align-items:center;justify-content:flex-end"><span class="vix-badge normal">보통</span></div>
+</div>
+</div>
+</div>
+<script>
+window.addEventListener('load', function () {
+  
+});
+</script>
+<div class="ssig" hidden="" id="signals-today">
+<div class="ssig__h"><span class="ssig__ic">⚡</span><span>오늘의 특이 신호</span><small class="ssig__note">장중 실시간</small></div>
+<div class="ssig__list" id="signals-today-list"></div>
+<a class="ssig__cta" href="/stocks/#signals-all">종목 시그널 전체 보기 <span>→</span></a>
+</div>
+<div class="sc-card" id="scorecard">
+<div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
+<div class="sc-stats">
+<div class="sc-stat">
+<div class="sc-stat__v good">78%</div>
+<div class="sc-stat__l">최근 15건</div>
+<div class="scg">
+<div class="scg__track"><i class="scg__fill good" style="width:78%"></i><i class="scg__mark" style="left:33%"></i></div>
+<div class="scg__cap">기준선 33%</div>
+</div>
+</div>
+<div class="sc-stat">
+<div class="sc-stat__v good">78%</div>
+<div class="sc-stat__l">누적 9건</div>
+<div class="scg">
+<div class="scg__track"><i class="scg__fill good" style="width:78%"></i><i class="scg__mark" style="left:33%"></i></div>
+<div class="scg__cap">기준선 33%</div>
+</div>
+</div>
+<div class="sc-stat"><div class="sc-stat__v">2.6%</div><div class="sc-stat__l">적중일 평균</div></div>
+</div>
+<div class="sc-legend">
+<span><i class="sc-legend__bar"></i>우리 적중률</span>
+<span><i class="sc-legend__mk"></i>항상 "상승" 기준선</span>
+</div>
+<div class="sc-bar">
+<i class="sc-bar__h" style="width:78%"></i><i class="sc-bar__m" style="width:22%"></i><i class="sc-bar__p" style="width:0%"></i>
+</div>
+<button class="sc-card__cta" data-modal-open="scorecard-modal">틀린 날까지 전부 공개해요 <span>→</span></button>
+</div>
+<div class="info-modal-backdrop" id="scorecard-modal">
+<div aria-labelledby="scorecard-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="scorecard-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="scorecard-modal-title">우리 예측 성적표</div>
+<div class="info-modal__body">
+<div class="sc-stats">
+<div class="sc-stat"><div class="sc-stat__v good">78%</div><div class="sc-stat__l">최근 15건</div></div>
+<div class="sc-stat"><div class="sc-stat__v good">78%</div><div class="sc-stat__l">누적 9건</div></div>
+<div class="sc-stat"><div class="sc-stat__v">2.6%</div><div class="sc-stat__l">적중일 평균</div></div>
+</div>
+<p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>33%</b>, 누적 <b>33%</b>를 맞혀요. 코스피가 전일 종가보다 높게 열리는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 <span class="good">+45%p</span> · <span class="good">+45%p</span>였어요.</p>
+<div class="sc-modal-sec">월별 적중률 <span class="sc-modal-sec__sub">(오른쪽 = 기준선)</span></div>
+<div class="sc-mrate">
+<div class="sc-mrate__row"><span class="sc-mrate__m">10월</span><div class="sc-mrate__bar"><i class="good" style="width:78%"></i></div><span class="sc-mrate__v">78%</span><span class="sc-mrate__b">기준 33%</span></div>
+</div>
+<div class="sc-modal-sec">최근 예측 결과</div>
+<div class="sc-miss">
+<div class="sc-miss__item"><span class="sc-miss__date">10/23 (금)</span><span class="sc-miss__tag ok">✓ 하락 예측 → 시초가 -2.36%</span></div>
+<div class="sc-miss__item"><span class="sc-miss__date">10/22 (목)</span><span class="sc-miss__tag no">✗ 상승 예측 → 시초가 -1.14%</span></div>
+<div class="sc-miss__item"><span class="sc-miss__date">10/21 (수)</span><span class="sc-miss__tag ok">✓ 상승 예측 → 시초가 +2.05%</span></div>
+<div class="sc-miss__item"><span class="sc-miss__date">10/20 (화)</span><span class="sc-miss__tag no">✗ 상승 예측 → 시초가 -0.60%</span></div>
+<div class="sc-miss__item"><span class="sc-miss__date">10/19 (월)</span><span class="sc-miss__tag ok">✓ 하락 예측 → 시초가 -3.17%</span></div>
+<div class="sc-miss__item"><span class="sc-miss__date">10/16 (금)</span><span class="sc-miss__tag ok">✓ 상승 예측 → 시초가 +1.80%</span></div>
+</div>
+<p class="scs">채점 기준은 <b>시초가</b>예요. 09:00 코스피 지수가 전일 종가보다 높게 열렸으면 상승, 낮게 열렸으면 하락으로 봐요. 2026-10-13에 종가 기준에서 시초가 기준으로 바꿨고, 그 전 종가 기준 기록(122건, 적중 63%)은 기준이 달라 이 통계에 넣지 않았어요.</p>
+<p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
+</div>
+</div>
+</div>
+<div class="subcard">
+<div class="subcard__ic">✈</div>
+<div class="subcard__t">브리핑을 텔레그램으로</div>
+<div class="subcard__d">매일 아침·저녁, 예측 결과와 오늘의 관점을 놓치지 않게 자동으로 받아보세요.</div>
+<a class="subcard__btn" href="https://t.me/doubleshot30" rel="noopener" target="_blank">텔레그램으로 구독 <span>→</span></a>
+<div class="subcard__meta">무료 · 광고 없음 · 앱 설치 없이 텔레그램에서</div>
+</div>
+<a class="toolcard" href="/stocks/income-designer/">
+<div class="toolcard__ic">🗓️</div>
+<div>
+<div class="toolcard__t">월배당 계산기</div>
+<div class="toolcard__d">배당 ETF로 매달 현금흐름 설계하기</div>
+</div>
+<span class="toolcard__arr">→</span>
+</a>
+<div class="sidebar-footer">
+<a class="sidebar-intro" href="mailto:pulum0083@gmail.com">메일 문의</a>
+<a class="sidebar-intro" href="/about/">Double-Shot 소개 →</a>
+</div>
+<div class="sidebar-visitors" id="sidebar-visitors" style="display:none">
+<span class="sidebar-visitors__label">누적 방문자</span>
+<span class="sidebar-visitors__count" id="sidebar-visitors-count">—</span>
+</div>
+<div class="t-caption" style="margin-top:10px;text-align:right">생성: 2026-07-12T06:35:34.135866+09:00</div>
+</aside>
+</div>
+<section class="bottom-list">
+<div class="bl-divider">
+<span class="bl-divider__label">브리핑 목록</span>
+<div class="bl-divider__line"></div>
+</div>
+<div class="bl-today">
+<div class="bl-today__head">
+<span class="bl-today__date">2026-10-25</span>
+<span class="bl-today__day">일요일</span>
+</div>
+<div class="bl-today__body">
+<div class="bl-slot is-pending">
+<div class="bl-slot__label">코스피 예측</div>
+<div class="bl-slot__title">생성 예정</div>
+<div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 07:30 예정</span></div>
+</div>
+<div class="bl-slot is-pending">
+<div class="bl-slot__label">코스피 마감</div>
+<div class="bl-slot__title">생성 예정</div>
+<div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 16:30 예정</span></div>
+</div>
+<div class="bl-slot is-pending">
+<div class="bl-slot__label">미국 시장</div>
+<div class="bl-slot__title">생성 예정</div>
+<div class="bl-slot__meta"><span class="bl-slot__time"><span class="bl-dot"></span> 21:20 예정</span></div>
+</div>
+</div>
+</div>
+<div class="bl-month">2026년 10월</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-23</span><span class="bl-row__day">금</span></div>
+<div class="bl-cell is-current"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:29</span></div></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-23/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-23/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-22</span><span class="bl-row__day">목</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-22/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-22/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-22/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-21</span><span class="bl-row__day">수</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-21/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-21/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-21/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-20</span><span class="bl-row__day">화</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-20/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-20/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-20/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-19</span><span class="bl-row__day">월</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-19/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:28</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-19/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-19/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-16</span><span class="bl-row__day">금</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-16/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-16/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-16/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-15</span><span class="bl-row__day">목</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-15/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-15/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-15/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-14</span><span class="bl-row__day">수</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-14/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-14/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-14/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-13</span><span class="bl-row__day">화</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-13/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill dn">▼</span><span class="bl-cell__time">07:29</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-13/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-13/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+<div class="bl-row">
+<div class="bl-row__date"><span class="bl-row__num">10-12</span><span class="bl-row__day">월</span></div>
+<a class="bl-cell is-ready" href="/briefings/2026-10-12/kospi/"><div class="bl-cell__label">코스피 예측</div><div class="bl-cell__bottom"><span class="bl-pill up">▲</span><span class="bl-cell__time">07:28</span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-12/close/"><div class="bl-cell__label">코스피 마감</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+<a class="bl-cell is-ready" href="/briefings/2026-10-12/us/"><div class="bl-cell__label">미국 시장</div><div class="bl-cell__bottom"><span class="bl-cell__time"></span></div></a>
+</div>
+</section>
+</div>
+<div class="info-modal-backdrop" id="ma5m-modal">
+<div aria-labelledby="ma5m-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="ma5m-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="ma5m-modal-title">월봉 5개월선 안착이란?</div>
+<div class="info-modal__body">
+<p>한 달의 마지막 종가(월말 종가)를 최근 5개월 평균과 비교해요. 월말 종가가 그 평균선 위에서 여러 달 이어서 마감하면 '안착'했다고 봐요.</p>
+<br/>
+<p><strong>선별 기준</strong></p>
+<ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+<li>완성된 월봉 기준으로 <strong>3개월 이상 연속</strong> 월말 종가가 5개월선 위</li>
+<li>진행 중인 이번 달 종가도 <strong>5개월선 위</strong> — 이미 깨진 종목은 빼요</li>
+<li>대상은 종목 시그널 허브 46종목이에요</li>
+</ul>
+<br/>
+<p>외국인 보유율 3개월 변화는 참고 정보로만 보여줘요. 지난 데이터로는 이 값이 결과를 가르지 못했어요.</p>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ 조건으로만 골라낸 목록이에요. 오른다는 보장이 아니고 매매 추천이 아니에요.</p>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="picks-modal">
+<div aria-labelledby="picks-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="picks-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="picks-modal-title">잭 켈로그 20일선 전략이란?</div>
+<div class="info-modal__body">
+<p>잭 켈로그(Zack Kellogg)의 20일 이동평균선(20일선) 전략은 단기 모멘텀을 이용한 스윙 트레이딩 기법입니다.</p>
+<br/>
+<p><strong>선별 기준</strong></p>
+<ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+<li>20일선을 <strong>상향 돌파</strong>하거나 정확히 <strong>지지 반등</strong>한 종목</li>
+<li>돌파 시점에 <strong>거래량 급증</strong>을 동반한 종목</li>
+<li>최소 <strong>3거래일 이상</strong> 20일선 위에서 유지 중인 종목</li>
+</ul>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ 매매 추천이 아닌 상승 모멘텀 종목 탐색 목적으로 제공됩니다.</p>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="acc-modal">
+<div aria-labelledby="acc-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="acc-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="acc-modal-title">예측 정확도란?</div>
+<div class="info-modal__body">
+<p>AI가 당일 방향(상승 / 하락)을 예측한 결과를 실제 종가와 비교해 맞힌 비율이에요.</p>
+<br/>
+<p><strong>읽는 법</strong></p>
+<ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+<li><strong>최근 7일 / 30일</strong> — 각 기간 동안 예측이 맞은 횟수를 백분율로 나타내요.</li>
+<li><strong style="color:#16A34A">초록색 점</strong> — 예측이 실제 시장 방향과 일치한 날이에요.</li>
+<li><strong style="color:#E03131">빨간색 점</strong> — 예측이 빗나간 날이에요.</li>
+</ul>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 과거 정확도가 미래 수익을 보장하지 않아요.</p>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="vix-modal">
+<div aria-labelledby="vix-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="vix-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="vix-modal-title">VIX 공포지수(Volatility Index)</div>
+<div class="info-modal__body">
+<p>S&amp;P500 옵션 시장에서 산출되는 30일 내재변동성 지표로, 시장 참여자들이 예상하는 변동성의 크기를 나타냅니다. '월스트리트 공포지수'라고도 불립니다.</p>
+<br/>
+<ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+<li><strong style="color:#16A34A">15 미만</strong> : 안정 — 시장이 매우 안정적</li>
+<li><strong style="color:#65A30D">15~20</strong> : 보통 — 정상 변동성 범위</li>
+<li><strong style="color:#CA8A04">20~30</strong> : 경계 — 불확실성 확대</li>
+<li><strong style="color:#E03131">30~40</strong> : 불안 — 투자자 심리 위축</li>
+<li><strong style="color:#B91C1C">40 이상</strong> : 극단 — 시장 패닉 수준</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="fng-modal">
+<div aria-labelledby="fng-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="fng-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="fng-modal-title">공포·탐욕 지수(Fear &amp; Greed Index)</div>
+<div class="info-modal__body">
+<p>투자자들의 심리가 '공포(Fear)'에 휩싸여 있는지, 아니면 '탐욕(Greed)'으로 과열되어 있는지를 0부터 100까지의 점수로 계량화한 시장 심리 지표입니다. CNN이 주가 모멘텀·시장 변동성·안전자산 수요 등 7개 지표를 종합해 산출합니다.</p>
+<br/>
+<ul style="padding-left:16px; margin-top:0; display:flex; flex-direction:column; gap:8px;">
+<li><strong style="color:#B91C1C">0~24</strong> : 극단적 공포 — 투자자 심리가 크게 위축</li>
+<li><strong style="color:#CA8A04">25~44</strong> : 공포 — 위험 회피 성향 우세</li>
+<li><strong style="color:#16A34A">45~54</strong> : 중립 — 공포와 탐욕이 균형</li>
+<li><strong style="color:#CA8A04">55~74</strong> : 탐욕 — 위험 선호 성향 우세</li>
+<li><strong style="color:#B91C1C">75~100</strong> : 극단적 탐욕 — 과열 신호</li>
+</ul>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ 미국 정규장 기준으로 갱신돼요. 점수 옆 숫자는 전 거래일 대비 점수 변화(p)예요.</p>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="pred-modal">
+<div aria-labelledby="pred-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="pred-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="pred-modal-title">시초가 방향 예측이란?</div>
+<div class="info-modal__body">
+<p>간밤 미국 지수·선물, 반도체 지표, 환율 등을 종합해 <strong>오늘 09:00 코스피 지수가 전일 종가보다 위로 열릴지 아래로 열릴지</strong>를 AI가 분석한 결과예요.</p>
+<br/>
+<p><strong>왜 시초가인가요?</strong> 아침에 볼 수 있는 정보는 밤사이 해외 시장의 움직임이에요. 이 정보는 개장 가격을 설명하지만, 개장 뒤 장중 흐름은 설명하지 못해요. 그래서 맞힐 수 있는 것만 예측하고, 그 기준으로 채점해요. 장중 흐름과 종가는 예측하지 않아요.</p>
+<br/>
+<p><strong>읽는 법</strong></p>
+<ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:6px;">
+<li><strong>상승 우위</strong> — 전일 종가보다 높게 열릴 가능성이 더 크다는 판단</li>
+<li><strong>하락 우위</strong> — 전일 종가보다 낮게 열릴 가능성이 더 크다는 판단</li>
+<li><strong>중립</strong> — 방향성 신호가 혼재되어 판단 보류</li>
+<li><strong>신뢰도</strong> — 수집된 데이터의 일관성 수준 (높을수록 신호가 명확)</li>
+</ul>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ AI 분석 결과이며 투자 권고가 아닙니다. 실제 시장은 예측과 다를 수 있습니다.</p>
+</div>
+</div>
+</div>
+<div class="info-modal-backdrop" id="sector-modal">
+<div aria-labelledby="sector-modal-title" aria-modal="true" class="info-modal" role="dialog">
+<button aria-label="닫기" class="info-modal__close" data-modal-close="sector-modal">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" viewbox="0 0 24 24" width="16"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+<div class="info-modal__title" id="sector-modal-title">섹터 성과란?</div>
+<div class="info-modal__body">
+<p>오늘 코스피·코스닥 시장에서 가장 많이 움직인 <strong>업종·테마 TOP 5</strong>를 보여줘요. 자금이 어디로 쏠렸는지 한눈에 파악할 수 있어요.</p>
+<br/>
+<p><strong>읽는 법</strong></p>
+<ul style="padding-left:16px; margin-top:6px; display:flex; flex-direction:column; gap:8px;">
+<li><strong>섹터명 옆 %</strong> — 해당 섹터의 평균 등락률이에요.</li>
+<li><strong>막대 길이</strong> — 등락률을 <strong>+20% 기준</strong>으로 시각화한 거예요.</li>
+<li><strong>섹터 아래 종목</strong> — 그 섹터에서 가장 강하게 상승한 대표 종목 2~3개와 등락률이에요.</li>
+</ul>
+<br/>
+<p style="color:var(--muted); font-size:12px;">※ 섹터·종목 분류는 네이버 금융 테마 기준이며, 매매 추천이 아닌 시장 흐름 참고용이에요.</p>
+</div>
+</div>
+</div>
+<footer class="site-footer">
+<div class="site-footer__links">
+<a href="/legal/disclaimer/">면책 고지</a>
+<a href="/legal/privacy/">개인정보처리방침</a>
+<a href="/legal/terms/">이용약관</a>
+<a href="mailto:pulum0083@gmail.com">문의</a>
+</div>
+<div class="site-footer__base">© 2026 Double-Shot</div>
+</footer>
+<script src="/assets/main.js?v=20261025"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
+  if (typeof patchBriefingList === 'function') patchBriefingList();
+  if (typeof initNotices === 'function') initNotices();
+  if (typeof loadVisitorCount === 'function') loadVisitorCount();
+  if (typeof renderTrustStrip === 'function') renderTrustStrip();
+});
+</script>
+</body>
+</html>
