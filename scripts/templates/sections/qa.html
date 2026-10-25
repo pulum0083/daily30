@@ -1,6 +1,7 @@
 {# Q&A 문답 형식 — 개인투자자 질문에 AI가 답변 (모든 브리핑 타입 공용) #}
 <div class="open-section">
   {% if not format_in_view %}<div class="open-section__title reason-section-title">{{ reason_title }}</div>{% endif %}
+  {% if not format_in_view %}{% if close_dek %}<p class="close-dek">{{ close_dek | safe }}</p>{% endif %}{% endif %}
   <div class="qa-card">
     {% for item in qa_items %}
     <div class="qa-item">

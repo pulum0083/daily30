@@ -1173,21 +1173,6 @@ def _cumulative_kospi_accuracy(before_date: str) -> "tuple[int, int] | None":
     return hit, len(scored)
 
 
-# 💡(반도체 ETF·SOX)·🇺🇸(EWY 외국인수급)은 단순 등락 수치 계열 — 텔레그램에서 뒤로 민다.
-# 나머지 이모지(📰📅🏦🛢️🌏📉😊😐😰 등)는 뉴스·이벤트 촉매 계열이라 앞에 둔다.
-_ETF_NUMBER_LEAD_EMOJIS = ("💡", "🇺🇸")
-
-
-def _issue_first_sort(signals: list) -> list:
-    """텔레그램 시그널을 이슈 우선으로 안정 정렬한다.
-    맨 앞 이모지가 💡·🇺🇸(단순 등락 수치)인 항목을 뒤로, 뉴스·이벤트 촉매 계열을 앞으로.
-    안정 정렬이라 같은 계열 내부의 상대 순서는 그대로 보존한다."""
-    def is_number_signal(s):
-        t = str(s).lstrip()
-        return t.startswith(_ETF_NUMBER_LEAD_EMOJIS)
-    return sorted(signals, key=is_number_signal)  # False(이슈)=0 먼저, True(수치)=1 뒤로
-
-
 def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     """월봉 5개월선 안착 종목 블록 — 페이지에 그 섹션이 보일 때만 같은 데이터로 싣는다(§61·§62).
 
@@ -1744,9 +1729,22 @@ sentiment shift는 마감 흐름의 근본 원인이 되기도 하고 다음 세
 
 ## 분석 항목
 
+### 0. 타이틀 + 서브 한 문장 (모든 형식 공통 — 웹 페이지 제목·텔레그램 첫 줄에 그대로 나간다)
+타이틀은 형식에 따라 `market_title`(형식 C) 또는 `reason_title`(형식 B·D·E)이다. **재미있어야 한다** — 타이틀이
+재미없으면 아무도 본문을 열지 않는다.
+1. 그날만의 구체적인 사실로 쓴다. 숫자·종목·수급 주체·섹터 이름을 최소 하나 넣는다. 다른 날에 붙여도 말이 되면 실패다.
+2. 긴장·반전·궁금증을 만든다. "~했는데 플러스 마감?", "A는 웃고 B는 울었다", "○○가 코스피를 살렸다", 의인화·비유.
+3. 30자 안팎. 4. 금지어: "혼조", "관망", "변수", "주목", "엇갈린", "~속 마감", "어떻게 봐야 할까요".
+5. 숫자는 [규칙 D]대로 마감 데이터에 있는 값만 쓴다. 재미를 위해 사실을 비틀지 않는다.
+- 좋은 예: "-4%까지 빠졌는데 플러스 마감? 기관이 코스피를 끌어올렸다" · "반도체가 다 했다, 코스피 +3.29%"
+- 나쁜 예: "장 초반 4% 급락한 코스피, 어떻게 버텼나" · "외환 부담 속 혼조 마감"
+
+`dek`(서브 문장, **모든 형식에서 반드시 출력**): 타이틀 바로 아래 붙는 **정확히 1문장**(해요체). 타이틀이 던진 궁금증에
+바로 답하는 대비·반전 한 문장. 수치는 [규칙 D]를 따른다. <b> 강조 허용.
+- 예: "기관이 <b>8,726억원</b>을 사들이며 받쳤지만, 외국인은 <b>9,934억원</b>을 던지고 떠났어요."
+
 ### 1. 시황 타이틀 (market_title)
-오늘 장의 핵심을 압축한 훅 타이틀. 30자 이내.
-예: "반도체 주도 + 외국인 순매수로 강세 마감", "외환 부담 속 코스닥 테마 폭발"
+형식 C의 타이틀. 위 0번 규칙을 따른다.
 
 ### 2. 시황 요약 (market_summary)
 오늘 장 전반을 2문장으로 요약. 지수 등락폭·방향과 핵심 이유 포함.
@@ -1760,42 +1758,35 @@ sentiment shift는 마감 흐름의 근본 원인이 되기도 하고 다음 세
 ### 5. SO WHAT (so_what)
 오늘 장세가 다음 세션(내일·다음 주)에 갖는 시사점. 경고·기회·지속 여부 중 하나. 정확히 1문장.
 
-### 6. 텔레그램 핵심 시그널 (telegram_signals)
-정확히 2개. 텔레그램 발송용 압축 요약.
-각 항목 60자 이내, 이모지 1개, <b> 태그 허용.
-
 ## 출력 형식
 
 순수 JSON만 출력한다. 마크다운 코드블록, 설명 텍스트 없이 오직 JSON.
 
 {
-  "market_title": "외국인 순매도 속 코스닥 테마 폭발 — 코스피 소폭 상승",
+  "market_title": "외국인이 던진 날, 코스닥 테마가 +4.99% 폭발했다",
+  "dek": "코스피는 외국인 <b>2,450억원</b> 순매도에 <b>+0.41%</b>에 묶였지만, 코스닥은 MLCC·양자 테마로 날아올랐어요.",
   "market_summary": "오늘 코스피가 <b>+0.41%</b> 소폭 상승 마감했어요. 코스닥이 <b>+4.99%</b>로 훨씬 강한 흐름을 보이며 테마·중소형주 중심의 차별화 장세가 연출됐어요.",
   "why": "글로벌 리스크온 분위기 속 나스닥 선물이 <b>+0.4%</b> 올랐고, 외국인은 <b>2,450억원 순매도</b>로 대응했어요. 글로벌 매크로 불확실성이 대형주 수급을 막은 핵심 원인이었거든요.",
   "what": "코스닥에서 MLCC <b>+12.6%</b>·나트륨이온배터리 <b>+9.1%</b>·양자컴퓨팅 <b>+7.6%</b> 등 테마 섹터가 폭발했어요. 코스피 대형주는 외국인 이탈 압박에 상승폭이 <b>+0.41%</b> 수준으로 제한됐거든요.",
-  "so_what": "외국인 대형주 수급 회복 여부와 테마 장세의 지속 여부가 다음 세션 코스닥 방향성의 핵심 변수가 될 거예요.",
-  "telegram_signals": [
-    "📊 코스닥 <b>+4.99%</b> 테마 폭발 — MLCC·양자·나트륨이온 동반 급등했어요.",
-    "💰 외국인 <b>2,450억 순매도</b> — 글로벌 매크로 불확실성에 대형주 상단 제한됐어요."
-  ]
+  "so_what": "외국인 대형주 수급 회복 여부와 테마 장세의 지속 여부가 다음 세션 코스닥 방향성의 핵심 변수가 될 거예요."
 }
 
 **[형식 지시] 유저 메시지 하단에 오늘 사용할 형식이 지정된다.**
 
 ### 형식 B: scenario
-`reason_title` + `sc_summary`, `sc_left_label`("버틴 요인"), `sc_right_label`("내린 요인"), `sc_left_items`(3개), `sc_right_items`(3개), `sc_footer` 출력.
+`reason_title` + `dek` + `sc_summary`, `sc_left_label`("버틴 요인"), `sc_right_label`("내린 요인"), `sc_left_items`(3개), `sc_right_items`(3개), `sc_footer` 출력.
 `market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
 
 ### 형식 C: why_what_so (기본값)
-기존 방식 그대로 `market_title`, `market_summary`, `why`, `what`, `so_what` 출력.
+기존 방식 그대로 `market_title`, `dek`, `market_summary`, `why`, `what`, `so_what` 출력.
 
 ### 형식 D: qa
-`reason_title`(질문을 부르는 훅 타이틀, 예: "오늘 코스피, 어떻게 봐야 할까요?") + `qa_items` 출력.
+`reason_title`(질문을 부르는 훅 타이틀 — 0번 규칙) + `dek` + `qa_items` 출력.
 - `qa_items`: 정확히 2~3개. 각 `{"q": ..., "a": ...}`. q는 해요체 의문문 40자 이내, a는 완결된 해요체 2~3문장(<b> 수치 강조).
 `market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
 
 ### 형식 E: signal
-`reason_title`(훅 타이틀) + `sig_verdict`, `sig_tone`, `sig_items` 출력.
+`reason_title`(훅 타이틀 — 0번 규칙) + `dek` + `sig_verdict`, `sig_tone`, `sig_items` 출력.
 - `sig_verdict`: 종합 판정 한 줄 (압축 라벨). `sig_tone`: "up"/"neu"/"down".
 - `sig_items`: 정확히 4~5개. 각 `{"level": "up"|"neu"|"down", "label": 팩터명 12자 이내, "desc": 완결된 해요체 1문장(<b> 수치 강조)}`.
 `market_title`, `why`, `what`, `so_what`은 출력하지 않는다.
@@ -1911,8 +1902,9 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
         arrow = "▲" if chg >= 0 else "▼"
         return f"📊 {name} <b>{price:,.2f}</b>  {arrow} {chg:+.2f}%"
 
-    market_title   = strip_html(analysis.get("market_title", ""))
-    signals        = analysis.get("telegram_signals", [])
+    # 타이틀은 형식에 따라 market_title(why_what_so) 또는 reason_title(scenario·qa·signal) — 페이지와 같은 우선순위.
+    title = strip_html(analysis.get("market_title") or analysis.get("reason_title") or "")
+    dek   = strip_html(analysis.get("dek") or "")
     divider = "─" * 20
 
     # 결과 배지: 오늘 아침 kospi 예측을 그 예측의 기준으로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
@@ -1937,28 +1929,18 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
             # 표본 5건 미만이면 누적 %를 붙이지 않는다 — 전환 직후 "1건 100%"는 뜻이 없다(§57)
             cum_txt = f" (누적 {round(cum[0] / cum[1] * 100)}%)" if (cum and cum[1] >= 5) else ""
             label = "오늘 아침 시초가 예측" if what == "시초가" else "오늘 아침 예측"
-            result_badge = f"🎯 {label}: {predicted} → {what} {actual:+.2f}% {mark}{cum_txt}"
+            result_badge = f"📝 {label}: {predicted} → {what} {actual:+.2f}% {mark}{cum_txt}"
 
-    lines = [
-        f"🇰🇷 코스피 마감 시황 | {date_display}",
-        divider,
-    ]
+    # 지수 → 아침 예측 채점 → 🎯 타이틀 → 서브 한 문장(2026-10-25). 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다.
+    lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", divider,
+             fmt_index(kospi, "KOSPI"), fmt_index(kosdaq, "KOSDAQ")]
     if result_badge:
-        lines += [result_badge, divider]
-    lines += [
-        fmt_index(kospi,  "KOSPI"),
-        fmt_index(kosdaq, "KOSDAQ"),
-        divider,
-        f"💬 {market_title}",
-        "",
-        "핵심 시그널:",
-    ]
-    for sig in _issue_first_sort(signals)[:1]:  # 이슈 우선, 핵심 1개만 — 나머지는 사이트에서(Phase B)
-        lines.append(f"• {strip_html(sig)}")
-    lines += [
-        divider,
-        f"🔗 수급·시장폭 상세 → {web_base}/briefings/{date_str}/close/",
-    ]
+        lines.append(result_badge)
+    if title:
+        lines += ["", f"🎯 <b>{title}</b>"]
+        if dek:
+            lines.append(dek)
+    lines += [divider, f"🔗 수급·시장폭 상세 → {web_base}/briefings/{date_str}/close/"]
 
     msg = "\n".join(lines)
     out = DATA_DIR / "telegram_message_kospi_close.txt"

@@ -1,6 +1,7 @@
 {# 시황 분석 — 리드 문장 + WHY/WHAT/SO 포맷 (마감) #}
 <div class="section-card">
   <div class="reason-title-bar">{{ reason_title }}</div>
+  {% if close_dek %}<p class="close-dek">{{ close_dek | safe }}</p>{% endif %}
   <div class="reason-body">
     {# validate_analysis가 금지 패턴으로 market_summary를 통째로 비울 수 있다 —
        그때 빈 <p>가 렌더되지 않게 가드한다. WHY/WHAT/SO가 본문을 이어받는다. #}

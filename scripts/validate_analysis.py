@@ -39,7 +39,7 @@ LATEST_FILE = {
 # 빈 값 가드가 있어야 한다(close_reason.html·why_what_so.html 참고).
 # 리스트 필드는 위반 원소만 제거된다.
 SCALAR_PROSE = {
-    "kospi-close": ["market_summary", "why", "what", "so_what"],
+    "kospi-close": ["dek", "market_summary", "why", "what", "so_what"],
     "kospi": [],
     "us": [],
 }

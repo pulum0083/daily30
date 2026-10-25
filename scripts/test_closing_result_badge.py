@@ -58,7 +58,7 @@ def test_badge_omitted_when_no_today_prediction(tmp_path, monkeypatch):
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(-6.37))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "🎯" not in text
+    assert "📝" not in text   # 채점 배지(📝) 없음 — 🎯는 타이틀 줄(2026-10-25)
     assert "실제" not in text
 
 
@@ -70,7 +70,7 @@ def test_badge_omitted_when_kospi_change_missing(tmp_path, monkeypatch):
     market_data = {"indices": {"kospi": {"error": "fetch failed"}, "kosdaq": {"price": 800.0, "change_pct": 1.0}}}
     cc.save_closing_telegram_message("2026-07-16", _analysis(), market_data)
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "🎯" not in text
+    assert "📝" not in text   # 채점 배지(📝) 없음 — 🎯는 타이틀 줄(2026-10-25)
 
 
 def test_cumulative_accuracy_excludes_today_and_unscored(tmp_path, monkeypatch):
@@ -110,4 +110,4 @@ def test_open_basis_badge_omitted_when_gap_unavailable(tmp_path, monkeypatch):
     monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: None)
     cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(1.5))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "🎯" not in text
+    assert "📝" not in text   # 채점 배지(📝) 없음 — 🎯는 타이틀 줄(2026-10-25)

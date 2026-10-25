@@ -1387,3 +1387,6 @@ html.dark .arch-item__dek{color:var(--muted);}
 .m5a-facts span{font-size:12px;font-weight:600;color:var(--ink);background:var(--surface-soft);border-radius:999px;padding:4px 10px;font-variant-numeric:tabular-nums}
 .m5a-facts em{font-style:normal;font-weight:500;color:var(--muted);margin-right:5px}
 @media(max-width:640px){.m5a-cell span{font-size:9px}.m5a-streak b{font-size:26px}}
+/* 마감 브리핑 타이틀 아래 서브 한 문장(dek) — 텔레그램과 같은 필드(SERVICE_RULES §62) */
+.close-dek{margin:0;padding:10px 16px 2px;font-size:13.5px;line-height:1.65;color:var(--muted)}
+.close-dek b{color:var(--ink);font-weight:700}

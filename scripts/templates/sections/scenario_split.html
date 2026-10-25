@@ -1,6 +1,7 @@
 {# 시나리오 분기 형식 — 상승/하락 대비 2컬럼 (모든 브리핑 타입 공용) #}
 <div class="sc-card">
   {% if not format_in_view %}<div class="sc-head">{{ reason_title }}</div>{% endif %}
+  {% if not format_in_view %}{% if close_dek %}<p class="close-dek">{{ close_dek | safe }}</p>{% endif %}{% endif %}
   <div class="sc-summary">{{ sc_summary | safe }}</div>
   <div class="sc-cols">
     <div class="sc-col">

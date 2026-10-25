@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261025"
+ASSET_VER = "20261025b"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -1002,6 +1002,7 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         fmt = analysis.get("analysis_format", "why_what_so")
         ctx["analysis_format"] = fmt
         ctx["reason_title"] = analysis.get("market_title") or analysis.get("reason_title", "")
+        ctx["close_dek"] = analysis.get("dek", "")   # 타이틀 아래 서브 한 문장 — 텔레그램과 같은 필드(§62)
         ctx["comfort_line"] = _split_comfort_line(analysis.get("comfort_line", ""))
         if fmt == "scenario":
             ctx.update(build_scenario_context(analysis))

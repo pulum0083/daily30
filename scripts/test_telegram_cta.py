@@ -42,16 +42,27 @@ def test_kospi_falls_back_to_reason_title_and_skips_empty_outlook(tmp_path, monk
     assert "개장 후 볼 것" not in text
 
 
-def test_close_compresses_to_one_signal_and_has_cta(tmp_path, monkeypatch):
+def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
+    # 마감: 지수 → 🎯 타이틀 → 서브 한 문장(2026-10-25). scenario 형식은 reason_title을 쓴다.
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
-    analysis = {"market_title": "코스닥 테마 폭발", "telegram_signals": ["🚀 코스닥 +4.99%", "💱 원달러 부담"]}
-    md = {"indices": {"kospi": {"price": 6820.6, "change_pct": -6.37},
-                      "kosdaq": {"price": 791.8, "change_pct": -4.53}}}
-    cc.save_closing_telegram_message("2026-07-16", analysis, md)
+    analysis = {"analysis_format": "scenario", "reason_title": "-4%까지 빠졌는데 플러스 마감?",
+                "dek": "기관이 <b>8,726억원</b>을 사들였어요.", "telegram_signals": ["🚀 옛 시그널"]}
+    md = {"indices": {"kospi": {"price": 5550.3, "change_pct": 0.30},
+                      "kosdaq": {"price": 751.69, "change_pct": -1.62}}}
+    cc.save_closing_telegram_message("2026-10-23", analysis, md)
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert text.count("\n• ") == 1
+    assert "📊 KOSPI <b>5,550.30</b>  ▲ +0.30%" in text
+    assert "🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n기관이 8,726억원을 사들였어요." in text
+    assert "핵심 시그널" not in text and "옛 시그널" not in text
     assert "🔗 수급·시장폭 상세 →" in text
-    assert "상세 분석" not in text
+
+
+def test_close_prefers_market_title_and_skips_missing_dek(tmp_path, monkeypatch):
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    cc.save_closing_telegram_message("2026-07-16", {"market_title": "코스닥 테마 폭발", "reason_title": "다른 제목"},
+                                     {"indices": {}})
+    text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
+    assert "🎯 <b>코스닥 테마 폭발</b>\n────" in text and "다른 제목" not in text
 
 
 def test_us_first_issue_and_has_cta(tmp_path, monkeypatch):
