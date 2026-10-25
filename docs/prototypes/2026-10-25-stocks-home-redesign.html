@@ -73,15 +73,16 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 .ue-bar{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden} .ue-bar i{display:block;height:100%;border-radius:3px} .ue-bar i.up{background:#f87171} .ue-bar i.dn{background:#60a5fa}
 .ue-row b{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}
 @media (min-width:960px){
-.wrap{max-width:1120px;padding:20px 24px 48px}
+.wrap{max-width:880px;padding:20px 24px 48px}
 .ttl h1{font-size:18px}
-.pane:not([hidden]){display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:20px;align-items:start}
-.pane>.ibar{grid-column:1/-1}
-.pane>.hero{grid-column:1;grid-row:2/span 6;position:sticky;top:68px;padding:22px 24px 20px}
-.pane>.blk{grid-column:2;margin-top:0;margin-bottom:12px}
+.hero{padding:22px 26px 20px}
 .hd,.hp{font-size:40px} .hero h2{font-size:24px} .dek{font-size:15px}
-.cv{height:200px}
-.lds{gap:10px}
+.cta{display:inline-block;padding:11px 28px}
+.cv{height:220px}
+.blk{padding:16px 20px}
+.ue-ais{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.ue-row{grid-template-columns:1fr auto 48px} .ue-row .ue-bar{display:none}
+.sbs{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}
 }
 .foot{margin-top:18px;display:flex;gap:10px;justify-content:center;font-size:12px} .foot a{color:var(--pri);font-weight:600}
 </style></head><body>
@@ -100,7 +101,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="ue-lp"><span class="krw">200,707원</span><span class="usd">$151.26</span></span><span class="ue-ld">코스피 추종</span></div><div class="ue-lead"><span class="ue-tk">DRAM</span><span class="ue-ln">메모리·HBM</span><b class="up">+3.02%</b>
 <span class="ue-lp"><span class="krw">62,444원</span><span class="usd">$47.06</span></span><span class="ue-ld">삼성·하이닉스 선행</span></div><div class="ue-lead"><span class="ue-tk">SOXX</span><span class="ue-ln">반도체 ETF</span><b class="up">+0.53%</b>
 <span class="ue-lp"><span class="krw">634,524원</span><span class="usd">$478.20</span></span><span class="ue-ld">미 반도체 전체</span></div></div></div>
-<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>8개 중 <b class="up">5 상승</b> · <b class="dn">3 하락</b></span></div><div class="ue-g"><div class="ue-gt">메모리</div><a class="ue-row" href="/stocks/000660/"><span class="ue-n">SK하이닉스 <em>SKHY</em></span><span class="ue-p"><span class="krw">181,812원</span><span class="usd">$137.02</span></span>
+<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>8개 중 <b class="up">5 상승</b> · <b class="dn">3 하락</b></span></div><div class="ue-ais"><div class="ue-g"><div class="ue-gt">메모리</div><a class="ue-row" href="/stocks/000660/"><span class="ue-n">SK하이닉스 <em>SKHY</em></span><span class="ue-p"><span class="krw">181,812원</span><span class="usd">$137.02</span></span>
 <span class="ue-bar"><i class="up" style="width:100%"></i></span><b class="up">+4.05%</b></a><a class="ue-row" href="/stocks/us/mu/"><span class="ue-n">마이크론 <em>MU</em></span><span class="ue-p"><span class="krw">1,164,421원</span><span class="usd">$877.55</span></span>
 <span class="ue-bar"><i class="up" style="width:61%"></i></span><b class="up">+2.46%</b></a><a class="ue-row" href="/stocks/us/sndk/"><span class="ue-n">샌디스크 <em>SNDK</em></span><span class="ue-p"><span class="krw">1,642,742원</span><span class="usd">$1,238.03</span></span>
 <span class="ue-bar"><i class="dn" style="width:45%"></i></span><b class="dn">-1.82%</b></a></div><div class="ue-g"><div class="ue-gt">AI 칩</div><a class="ue-row" href="/stocks/us/nvda/"><span class="ue-n">엔비디아 <em>NVDA</em></span><span class="ue-p"><span class="krw">279,923원</span><span class="usd">$210.96</span></span>
@@ -108,10 +109,10 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="ue-bar"><i class="up" style="width:43%"></i></span><b class="up">+1.74%</b></a><a class="ue-row" href="/stocks/us/avgo/"><span class="ue-n">브로드컴 <em>AVGO</em></span><span class="ue-p"><span class="krw">426,837원</span><span class="usd">$321.68</span></span>
 <span class="ue-bar"><i class="dn" style="width:12%"></i></span><b class="dn">-0.48%</b></a></div><div class="ue-g"><div class="ue-gt">파운드리·장비</div><a class="ue-row" href="/stocks/us/tsm/"><span class="ue-n">TSMC <em>TSM</em></span><span class="ue-p"><span class="krw">555,321원</span><span class="usd">$418.51</span></span>
 <span class="ue-bar"><i class="up" style="width:37%"></i></span><b class="up">+1.49%</b></a><a class="ue-row" href="/stocks/us/asml/"><span class="ue-n">ASML <em>ASML</em></span><span class="ue-p"><span class="krw">2,085,621원</span><span class="usd">$1,571.80</span></span>
-<span class="ue-bar"><i class="up" style="width:18%"></i></span><b class="up">+0.72%</b></a></div></div>
+<span class="ue-bar"><i class="up" style="width:18%"></i></span><b class="up">+0.72%</b></a></div></div></div>
 <p class="note">환율 1,326.9원 적용 · 미국 장 시작 전엔 직전 종가, 장중엔 실시간</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/22 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>214,500</b><em class="dn">-4.03%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,223,000</b><em class="dn">-5.49%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>301,500</b><em class="dn">-2.58%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
 <a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
-<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/22 종가</span></div><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/22 종가</span></div><div class="sbs"><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
 <span class="sb-bar"><i class="dn" style="width:5.1%;right:50%"></i></span>
 <b class="dn">-0.79%</b></a><a class="sb" href="/stocks/sector/auto/"><span class="sb-n">자동차</span>
 <span class="sb-bar"><i class="dn" style="width:9.6%;right:50%"></i></span>
@@ -127,7 +128,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="sb-bar"><i class="dn" style="width:35.4%;right:50%"></i></span>
 <b class="dn">-5.48%</b></a><a class="sb" href="/stocks/sector/battery/"><span class="sb-n">2차전지</span>
 <span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
-<b class="dn">-7.74%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="intraday" hidden><div class="ibar"><span>13:30</span><span>코스피 <b>5,488.70</b> <span class="dn">-0.81%</span></span></div><div class="hero"><div class="hk"><span>장중 · 어제 같은 시각과 비교</span><span class="live">● 13:30</span></div>
+<b class="dn">-7.74%</b></a></div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="intraday" hidden><div class="ibar"><span>13:30</span><span>코스피 <b>5,488.70</b> <span class="dn">-0.81%</span></span></div><div class="hero"><div class="hk"><span>장중 · 어제 같은 시각과 비교</span><span class="live">● 13:30</span></div>
 <h2>내리고 있지만 어제보다 낙폭이 작아요</h2>
 <p class="dek">코스피 지금 <b class="dn">-0.81%</b> · 어제 같은 시각 <b class="dn">-3.37%</b> — <b>2.55%p</b> 높아요.</p><div class="cv"><svg viewBox="0 0 300 130" preserveAspectRatio="none">
 <rect x="207.7" y="0" width="92.3" height="130" class="rest"/>
@@ -140,7 +141,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <a class="cta ghost" href="/briefings/2026-10-23/kospi/">아침 예측 다시 보기 →</a></div><div class="blk"><div class="bh"><h3>지금 뜨는 특이신호</h3><a href="#">전체 46종목 →</a></div><div class="sg"><div><b>SK바이오팜</b><span>거래량 평소의 2.1배</span></div>
 <div class="sg-r"><b class="up">+2.67%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>삼성바이오로직스</b><span>거래량 평소의 1.7배</span></div>
 <div class="sg-r"><b class="up">+7.71%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>LS일렉트릭</b><span>거래량 평소의 1.5배</span></div>
-<div class="sg-r"><b class="dn">-2.79%</b><a class="go soft" href="/stocks/sector/power/">전력기기 보기 →</a></div></div><p class="note">상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보내요.</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>프로토타입: 10/23 종가로 대신</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<div class="sg-r"><b class="dn">-2.79%</b><a class="go soft" href="/stocks/sector/power/">전력기기 보기 →</a></div></div><p class="note">상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보내요.</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>프로토타입: 10/23 종가로 대신</span></div><div class="sbs"><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
 <span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
 <b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
 <span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
@@ -156,11 +157,11 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
 <b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
 <span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
-<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="close" hidden><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>오늘 16:32 · 코스피 마감</span><span class="live">새 브리핑</span></div>
+<b class="dn">-4.19%</b></a></div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="close" hidden><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>오늘 16:32 · 코스피 마감</span><span class="live">새 브리핑</span></div>
 <h2>-4%까지 빠졌는데 플러스 마감? 기관이 코스피를 끌어올렸다</h2>
 <p class="dek">기관이 <b>8,726억원</b>을 사들이며 받쳤지만, 외국인은 <b>9,934억원</b>을 던지고 떠났어요.</p>
 <div class="chip ok">📝 아침 시초가 예측 하락 우위 → 시초가 -2.36% ✓ 적중</div>
-<a class="cta" href="/briefings/2026-10-23/close/">마감 브리핑 보기 →</a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<a class="cta" href="/briefings/2026-10-23/close/">마감 브리핑 보기 →</a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><div class="sbs"><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
 <span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
 <b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
 <span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
@@ -176,7 +177,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
 <b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
 <span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
-<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>지금 뜨는 특이신호</h3><a href="#">전체 46종목 →</a></div><div class="sg"><div><b>SK바이오팜</b><span>거래량 평소의 2.1배</span></div>
+<b class="dn">-4.19%</b></a></div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>지금 뜨는 특이신호</h3><a href="#">전체 46종목 →</a></div><div class="sg"><div><b>SK바이오팜</b><span>거래량 평소의 2.1배</span></div>
 <div class="sg-r"><b class="up">+2.67%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>삼성바이오로직스</b><span>거래량 평소의 1.7배</span></div>
 <div class="sg-r"><b class="up">+7.71%</b><a class="go soft" href="/stocks/sector/bio/">바이오 보기 →</a></div></div><div class="sg"><div><b>LS일렉트릭</b><span>거래량 평소의 1.5배</span></div>
 <div class="sg-r"><b class="dn">-2.79%</b><a class="go soft" href="/stocks/sector/power/">전력기기 보기 →</a></div></div><p class="note">상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보내요.</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div></section><section class="pane" data-slot="evening" hidden><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero is-dn"><div class="hk"><span>오늘 21:17 · 미국 시장 브리핑</span><span class="live">새 브리핑</span></div>
@@ -191,7 +192,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="ue-lp"><span class="krw">200,707원</span><span class="usd">$151.26</span></span><span class="ue-ld">코스피 추종</span></div><div class="ue-lead"><span class="ue-tk">DRAM</span><span class="ue-ln">메모리·HBM</span><b class="up">+3.02%</b>
 <span class="ue-lp"><span class="krw">62,444원</span><span class="usd">$47.06</span></span><span class="ue-ld">삼성·하이닉스 선행</span></div><div class="ue-lead"><span class="ue-tk">SOXX</span><span class="ue-ln">반도체 ETF</span><b class="up">+0.53%</b>
 <span class="ue-lp"><span class="krw">634,524원</span><span class="usd">$478.20</span></span><span class="ue-ld">미 반도체 전체</span></div></div></div>
-<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>8개 중 <b class="up">5 상승</b> · <b class="dn">3 하락</b></span></div><div class="ue-g"><div class="ue-gt">메모리</div><a class="ue-row" href="/stocks/000660/"><span class="ue-n">SK하이닉스 <em>SKHY</em></span><span class="ue-p"><span class="krw">181,812원</span><span class="usd">$137.02</span></span>
+<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>8개 중 <b class="up">5 상승</b> · <b class="dn">3 하락</b></span></div><div class="ue-ais"><div class="ue-g"><div class="ue-gt">메모리</div><a class="ue-row" href="/stocks/000660/"><span class="ue-n">SK하이닉스 <em>SKHY</em></span><span class="ue-p"><span class="krw">181,812원</span><span class="usd">$137.02</span></span>
 <span class="ue-bar"><i class="up" style="width:100%"></i></span><b class="up">+4.05%</b></a><a class="ue-row" href="/stocks/us/mu/"><span class="ue-n">마이크론 <em>MU</em></span><span class="ue-p"><span class="krw">1,164,421원</span><span class="usd">$877.55</span></span>
 <span class="ue-bar"><i class="up" style="width:61%"></i></span><b class="up">+2.46%</b></a><a class="ue-row" href="/stocks/us/sndk/"><span class="ue-n">샌디스크 <em>SNDK</em></span><span class="ue-p"><span class="krw">1,642,742원</span><span class="usd">$1,238.03</span></span>
 <span class="ue-bar"><i class="dn" style="width:45%"></i></span><b class="dn">-1.82%</b></a></div><div class="ue-g"><div class="ue-gt">AI 칩</div><a class="ue-row" href="/stocks/us/nvda/"><span class="ue-n">엔비디아 <em>NVDA</em></span><span class="ue-p"><span class="krw">279,923원</span><span class="usd">$210.96</span></span>
@@ -199,10 +200,10 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="ue-bar"><i class="up" style="width:43%"></i></span><b class="up">+1.74%</b></a><a class="ue-row" href="/stocks/us/avgo/"><span class="ue-n">브로드컴 <em>AVGO</em></span><span class="ue-p"><span class="krw">426,837원</span><span class="usd">$321.68</span></span>
 <span class="ue-bar"><i class="dn" style="width:12%"></i></span><b class="dn">-0.48%</b></a></div><div class="ue-g"><div class="ue-gt">파운드리·장비</div><a class="ue-row" href="/stocks/us/tsm/"><span class="ue-n">TSMC <em>TSM</em></span><span class="ue-p"><span class="krw">555,321원</span><span class="usd">$418.51</span></span>
 <span class="ue-bar"><i class="up" style="width:37%"></i></span><b class="up">+1.49%</b></a><a class="ue-row" href="/stocks/us/asml/"><span class="ue-n">ASML <em>ASML</em></span><span class="ue-p"><span class="krw">2,085,621원</span><span class="usd">$1,571.80</span></span>
-<span class="ue-bar"><i class="up" style="width:18%"></i></span><b class="up">+0.72%</b></a></div></div>
+<span class="ue-bar"><i class="up" style="width:18%"></i></span><b class="up">+0.72%</b></a></div></div></div>
 <p class="note">환율 1,326.9원 적용 · 미국 장 시작 전엔 직전 종가, 장중엔 실시간</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>10/23 종가</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.47%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+4.42%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-1.99%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
 <a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
-<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>10/23 마감</span></div><div class="sbs"><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
 <span class="sb-bar"><i class="up" style="width:12.0%;left:50%"></i></span>
 <b class="up">+1.00%</b></a><a class="sb" href="/stocks/sector/semicon/"><span class="sb-n">반도체</span>
 <span class="sb-bar"><i class="dn" style="width:9.3%;right:50%"></i></span>
@@ -218,7 +219,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="sb-bar"><i class="dn" style="width:46.7%;right:50%"></i></span>
 <b class="dn">-3.91%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
 <span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
-<b class="dn">-4.19%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="weekend"><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>이번 주 정리 · 10/19~10/23</span><span class="live wk">주말</span></div>
+<b class="dn">-4.19%</b></a></div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div></section><section class="pane" data-slot="weekend"><div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div><div class="hero"><div class="hk"><span>이번 주 정리 · 10/19~10/23</span><span class="live wk">주말</span></div>
 <div class="wk3"><div><span>코스피 주간</span><b class="dn">-2.08%</b><em>5,668 → 5,550</em></div>
 <div><span>예측 성적</span><b>3/5</b><em>시초가 기준</em></div>
 <div><span>가장 강했던 섹터</span><b class="up">바이오</b><em>+2.49%</em></div></div>
@@ -226,7 +227,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <p class="dek">코스피는 닷새 내내 오름과 내림을 번갈아 하다 주간 <b class="dn">-2.08%</b>로 마쳤어요.</p>
 <a class="cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div><div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단위로 바뀌는 신호</span></div>
 <a class="ss" href="/briefings/2026-10-23/us/"><span class="ss-k">나스닥 체크</span><b>+59.8%</b><span class="pill ok">✓ 정상</span><em>60개월선 대비 월봉 고점 · 60% 주의 · 70% 경고</em></a>
-<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>주간 등락</span></div><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
+<a class="ss" href="/briefings/2026-10-23/kospi/"><span class="ss-k">월봉 5개월선 안착</span><b>메리츠금융지주</b><span class="pill nb">3개월째</span><em>지금 이격 +5.5% · 매매 신호 아님</em></a></div><div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>주간 등락</span></div><div class="sbs"><a class="sb" href="/stocks/sector/bio/"><span class="sb-n">바이오</span>
 <span class="sb-bar"><i class="up" style="width:9.6%;left:50%"></i></span>
 <b class="up">+2.49%</b></a><a class="sb" href="/stocks/sector/finance/"><span class="sb-n">금융</span>
 <span class="sb-bar"><i class="dn" style="width:8.4%;right:50%"></i></span>
@@ -242,7 +243,7 @@ a{color:inherit;text-decoration:none} .up{color:var(--up)} .dn{color:var(--dn)}
 <span class="sb-bar"><i class="dn" style="width:41.8%;right:50%"></i></span>
 <b class="dn">-10.77%</b></a><a class="sb" href="/stocks/sector/defense/"><span class="sb-n">방산</span>
 <span class="sb-bar"><i class="dn" style="width:50.0%;right:50%"></i></span>
-<b class="dn">-12.88%</b></a><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>주간 등락</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.00%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+0.39%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-5.29%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div></section>
+<b class="dn">-12.88%</b></a></div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div><div class="blk"><div class="bh"><h3>주도주</h3><span>주간 등락</span></div><div class="lds"><a class="ld" href="/stocks/005930/"><span>삼성전자</span><b>215,500</b><em class="up">+0.00%</em></a><a class="ld" href="/stocks/000660/"><span>SK하이닉스</span><b>1,277,000</b><em class="up">+0.39%</em></a><a class="ld" href="/stocks/005380/"><span>현대차</span><b>295,500</b><em class="dn">-5.29%</em></a></div><details class="more"><summary>야간 추정가·수급 펼치기</summary><p class="note">지금의 주도주 위젯(곡선·뉴스 핀·수급)을 여기 접어 둬요.</p></details></div></section>
 <div class="foot"><a href="/briefings/">브리핑 아카이브</a><a href="/stocks/income-designer/">월배당 설계</a></div>
 </div>
 <script>document.querySelectorAll('.ue-cur button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ue').forEach(u=>u.classList.toggle('is-usd',b.dataset.c==='usd'));

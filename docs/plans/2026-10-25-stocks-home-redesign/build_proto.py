@@ -91,7 +91,7 @@ def sec_html(rows, cap):
     li = "".join(f'''<a class="sb" href="/stocks/sector/{k}/"><span class="sb-n">{lbl}</span>
 <span class="sb-bar"><i class="{"up" if v >= 0 else "dn"}" style="width:{abs(v)/m*50:.1f}%;{"left:50%" if v >= 0 else f"right:50%"}"></i></span>
 <b class="{"up" if v >= 0 else "dn"}">{v:+.2f}%</b></a>''' for k, lbl, v, n in rows)
-    return f'<div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>{cap}</span></div>{li}<p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div>'
+    return f'<div class="blk"><div class="bh"><h3>섹터 한눈에</h3><span>{cap}</span></div><div class="sbs">{li}</div><p class="note">섹터 대표 종목 평균 · 누르면 섹터 페이지</p></div>'
 
 
 # ── 특이신호 상위 3 (프로토타입: 10/23 거래량 급증 + 등락) ─────────────
@@ -157,7 +157,7 @@ us_block = f'''<div class="blk ue"><div class="bh"><h3>🌙 밤사이 미국</h3
 <div class="ue-meta"><span>10/23 종가</span><span>나스닥 QQQ <b class="{cls(QQQ)}">{QQQ:+.2f}%</b></span><span>VIX <b>{VIX[0]}</b> <b class="{cls(VIX[1])}">{VIX[1]:+.2f}%</b></span></div>
 <div class="ue-sec"><div class="ue-st"><h4>코스피 선행 ETF</h4><span>{len(LEAD)}개 중 <b class="up">{lead_up} 상승</b></span></div>
 <p class="ue-sd">한국 장이 열리기 전에 코스피 방향을 먼저 보여주는 ETF예요.</p><div class="ue-leads">{lead_html}</div></div>
-<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>{ai_n}개 중 <b class="up">{ai_up} 상승</b> · <b class="dn">{ai_n - ai_up} 하락</b></span></div>{ai_html}</div>
+<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>{ai_n}개 중 <b class="up">{ai_up} 상승</b> · <b class="dn">{ai_n - ai_up} 하락</b></span></div><div class="ue-ais">{ai_html}</div></div>
 <p class="note">환율 {FX:,.1f}원 적용 · 미국 장 시작 전엔 직전 종가, 장중엔 실시간</p></div>'''
 
 trust = f'<div class="trust">시초가 예측 적중 <b>{acc["hit"]}/{acc["scored"]}</b> ({acc["pct"]}%) · 매일 07:25·16:25·21:15 발행</div>'
@@ -292,15 +292,16 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 .ue-bar{{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}} .ue-bar i{{display:block;height:100%;border-radius:3px}} .ue-bar i.up{{background:#f87171}} .ue-bar i.dn{{background:#60a5fa}}
 .ue-row b{{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}}
 @media (min-width:960px){{
-.wrap{{max-width:1120px;padding:20px 24px 48px}}
+.wrap{{max-width:880px;padding:20px 24px 48px}}
 .ttl h1{{font-size:18px}}
-.pane:not([hidden]){{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:20px;align-items:start}}
-.pane>.ibar{{grid-column:1/-1}}
-.pane>.hero{{grid-column:1;grid-row:2/span 6;position:sticky;top:68px;padding:22px 24px 20px}}
-.pane>.blk{{grid-column:2;margin-top:0;margin-bottom:12px}}
+.hero{{padding:22px 26px 20px}}
 .hd,.hp{{font-size:40px}} .hero h2{{font-size:24px}} .dek{{font-size:15px}}
-.cv{{height:200px}}
-.lds{{gap:10px}}
+.cta{{display:inline-block;padding:11px 28px}}
+.cv{{height:220px}}
+.blk{{padding:16px 20px}}
+.ue-ais{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}}
+.ue-row{{grid-template-columns:1fr auto 48px}} .ue-row .ue-bar{{display:none}}
+.sbs{{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}}
 }}
 .foot{{margin-top:18px;display:flex;gap:10px;justify-content:center;font-size:12px}} .foot a{{color:var(--pri);font-weight:600}}
 </style></head><body>
