@@ -128,6 +128,38 @@ struct = '''<div class="blk"><div class="bh"><h3>구조 신호</h3><span>월 단
 ovn = next(r for r in bridge["rows"] if r["sector"] == "반도체")
 overnight = f'''<div class="blk one"><span class="ok-k">🌙 밤사이 미국</span> {ovn["us_label"]} <b class="{ovn["us_cls"]}">{ovn["us_change_fmt"]}</b> → 국내 {ovn["kr_label"]} <b class="{ovn["kr_cls"]}">{ovn["kr_change_fmt"]}</b> <a href="#">자세히 →</a></div>'''
 
+# ── 밤사이 미국: 코스피 선행 ETF + AI 인프라 주식 (10/23 종가, /api/stocks-live 실값) ──
+FX = 1326.9
+US = {"DRAM": (47.06, 3.02), "EWY": (151.26, 1.48), "SOXX": (478.2, 0.53), "SKHY": (137.02, 4.05),
+      "MU": (877.55, 2.46), "SNDK": (1238.03, -1.82), "NVDA": (210.96, -0.59), "AMD": (516.79, 1.74),
+      "AVGO": (321.68, -0.48), "TSM": (418.51, 1.49), "ASML": (1571.8, 0.72)}
+QQQ, VIX = -0.01, (19.45, 2.21)
+def px(tk):
+    usd = US[tk][0]
+    return f'<span class="krw">{usd * FX:,.0f}원</span><span class="usd">${usd:,.2f}</span>'
+cls = lambda v: "up" if v > 0 else ("dn" if v < 0 else "")
+LEAD = [("EWY", "한국 ETF", "코스피 추종"), ("DRAM", "메모리·HBM", "삼성·하이닉스 선행"), ("SOXX", "반도체 ETF", "미 반도체 전체")]
+lead_up = sum(1 for t, _, _ in LEAD if US[t][1] > 0)
+lead_html = "".join(f'''<div class="ue-lead"><span class="ue-tk">{tk}</span><span class="ue-ln">{nm}</span><b class="{cls(US[tk][1])}">{US[tk][1]:+.2f}%</b>
+<span class="ue-lp">{px(tk)}</span><span class="ue-ld">{d}</span></div>''' for tk, nm, d in LEAD)
+GROUPS = [("메모리", [("SK하이닉스", "SKHY", "/stocks/000660/"), ("마이크론", "MU", "/stocks/us/mu/"), ("샌디스크", "SNDK", "/stocks/us/sndk/")]),
+          ("AI 칩", [("엔비디아", "NVDA", "/stocks/us/nvda/"), ("AMD", "AMD", "/stocks/us/amd/"), ("브로드컴", "AVGO", "/stocks/us/avgo/")]),
+          ("파운드리·장비", [("TSMC", "TSM", "/stocks/us/tsm/"), ("ASML", "ASML", "/stocks/us/asml/")])]
+mx = max(abs(US[t][1]) for _, g in GROUPS for _, t, _ in g)
+ai_html = ""
+for gname, items in GROUPS:
+    rows = "".join(f'''<a class="ue-row" href="{h}"><span class="ue-n">{n} <em>{t}</em></span><span class="ue-p">{px(t)}</span>
+<span class="ue-bar"><i class="{cls(US[t][1])}" style="width:{abs(US[t][1])/mx*100:.0f}%"></i></span><b class="{cls(US[t][1])}">{US[t][1]:+.2f}%</b></a>''' for n, t, h in items)
+    ai_html += f'<div class="ue-g"><div class="ue-gt">{gname}</div>{rows}</div>'
+ai_up = sum(1 for _, g in GROUPS for _, t, _ in g if US[t][1] > 0)
+ai_n = sum(len(g) for _, g in GROUPS)
+us_block = f'''<div class="blk ue"><div class="bh"><h3>🌙 밤사이 미국</h3><div class="ue-cur"><button class="on" data-c="krw">원화</button><button data-c="usd">달러</button></div></div>
+<div class="ue-meta"><span>10/23 종가</span><span>나스닥 QQQ <b class="{cls(QQQ)}">{QQQ:+.2f}%</b></span><span>VIX <b>{VIX[0]}</b> <b class="{cls(VIX[1])}">{VIX[1]:+.2f}%</b></span></div>
+<div class="ue-sec"><div class="ue-st"><h4>코스피 선행 ETF</h4><span>{len(LEAD)}개 중 <b class="up">{lead_up} 상승</b></span></div>
+<p class="ue-sd">한국 장이 열리기 전에 코스피 방향을 먼저 보여주는 ETF예요.</p><div class="ue-leads">{lead_html}</div></div>
+<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4><span>{ai_n}개 중 <b class="up">{ai_up} 상승</b> · <b class="dn">{ai_n - ai_up} 하락</b></span></div>{ai_html}</div>
+<p class="note">환율 {FX:,.1f}원 적용 · 미국 장 시작 전엔 직전 종가, 장중엔 실시간</p></div>'''
+
 trust = f'<div class="trust">시초가 예측 적중 <b>{acc["hit"]}/{acc["scored"]}</b> ({acc["pct"]}%) · 매일 07:25·16:25·21:15 발행</div>'
 strip_b = lambda t: re.sub(r"<[^>]+>", "", t)
 
@@ -177,10 +209,10 @@ ibar = {
 close_bar = '<div class="ibar"><span>10/23 마감</span><span>코스피 <b>5,550.30</b> <span class="up">+0.30%</span></span><span>코스닥 <b>751.69</b> <span class="dn">-1.62%</span></span><span>기관 <b class="up">+8,682</b> 외국인 <b class="dn">-9,811</b>억</span></div>'
 
 body = {
-"morning": overnight + leaders(off=1) + struct + sec_html(day_prev, "10/22 종가"),
+"morning": us_block + leaders(off=1) + struct + sec_html(day_prev, "10/22 종가"),
 "intraday": sig_html + leaders() + sec_html(day, "프로토타입: 10/23 종가로 대신"),
 "close": sec_html(day, "10/23 마감") + sig_html + leaders(),
-"evening": leaders() + struct + sec_html(day, "10/23 마감"),
+"evening": us_block + leaders() + struct + sec_html(day, "10/23 마감"),
 "weekend": struct + sec_html(wk, "주간 등락") + leaders(weekly=True),
 }
 slots = [("morning", "07:30 아침"), ("intraday", "장중"), ("close", "15:30 마감"), ("evening", "21:15 미국"), ("weekend", "주말")]
@@ -244,6 +276,21 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 .ss{{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:9px 0;border-top:1px solid #f3f4f6}} .ss:nth-of-type(1){{border-top:0}}
 .ss-k{{font-size:12px;color:var(--muted)}} .ss b{{font-size:15px;grid-column:1}} .ss .pill{{grid-column:2;grid-row:1/3;font-size:12px;border-radius:999px;padding:3px 9px;font-weight:700}}
 .pill.ok{{background:#ecfdf5;color:var(--ok)}} .pill.nb{{background:#eff6ff;color:var(--pri)}} .ss em{{grid-column:1/3;font-style:normal;font-size:11px;color:var(--muted)}}
+.ue-cur{{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}} .ue-cur button{{border:0;background:#fff;padding:4px 11px;font-size:12px;font-family:inherit;color:var(--muted);cursor:pointer}} .ue-cur button.on{{background:var(--ink);color:#fff}}
+.ue .usd{{display:none}} .ue.is-usd .usd{{display:inline}} .ue.is-usd .krw{{display:none}}
+.ue-meta{{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:-2px 0 4px}} .ue-meta b{{color:var(--ink)}} .ue-meta b.up{{color:var(--up)}} .ue-meta b.dn{{color:var(--dn)}}
+.ue-sec{{border-top:1px solid #f3f4f6;margin-top:10px;padding-top:10px}}
+.ue-st{{display:flex;justify-content:space-between;align-items:baseline}} .ue-st h4{{margin:0;font-size:14px}} .ue-st span{{font-size:12px;color:var(--muted)}}
+.ue-sd{{font-size:11.5px;color:var(--muted);margin:3px 0 8px}}
+.ue-leads{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}}
+.ue-lead{{background:#f9fafb;border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;gap:1px;min-width:0}}
+.ue-ln{{font-size:11.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}} .ue-ln em,.ue-n em{{font-style:normal;color:var(--muted);font-size:11px}}
+.ue-tk{{font-size:13px;font-weight:800;letter-spacing:.2px}} .ue-lead b{{font-size:19px;letter-spacing:-.4px}} .ue-lp{{font-size:11.5px;color:var(--ink2)}} .ue-ld{{font-size:10.5px;color:var(--muted);margin-top:2px}}
+.ue-g{{margin-top:8px}} .ue-gt{{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px}}
+.ue-row{{display:grid;grid-template-columns:1fr auto 54px 56px;gap:8px;align-items:center;padding:6px 0;font-size:13px}}
+.ue-p{{font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums}}
+.ue-bar{{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden}} .ue-bar i{{display:block;height:100%;border-radius:3px}} .ue-bar i.up{{background:#f87171}} .ue-bar i.dn{{background:#60a5fa}}
+.ue-row b{{text-align:right;font-size:13px;font-variant-numeric:tabular-nums}}
 @media (min-width:960px){{
 .wrap{{max-width:1120px;padding:20px 24px 48px}}
 .ttl h1{{font-size:18px}}
@@ -264,7 +311,9 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 {panes}
 <div class="foot"><a href="/briefings/">브리핑 아카이브</a><a href="/stocks/income-designer/">월배당 설계</a></div>
 </div>
-<script>document.querySelectorAll('.proto button').forEach(b=>b.onclick=()=>{{
+<script>document.querySelectorAll('.ue-cur button').forEach(b=>b.onclick=()=>{{document.querySelectorAll('.ue').forEach(u=>u.classList.toggle('is-usd',b.dataset.c==='usd'));
+document.querySelectorAll('.ue-cur button').forEach(x=>x.classList.toggle('on',x.dataset.c===b.dataset.c));}});
+document.querySelectorAll('.proto button').forEach(b=>b.onclick=()=>{{
 document.querySelectorAll('.proto button').forEach(x=>x.classList.toggle('on',x===b));
 document.querySelectorAll('.pane').forEach(p=>p.hidden=p.dataset.slot!==b.dataset.s);}});</script>
 </body></html>'''
