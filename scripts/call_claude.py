@@ -1236,22 +1236,24 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     divider = "─" * 20
 
     if briefing_type == "us":
-        # US 이슈 중심: 예측 대신 오늘의 관점 + 이슈 제목으로 구성
+        # 미국: 큰 쪽 확률 → 헤드라인(🎯) → 오늘 밤 볼 것(👀, 첫 이슈 제목) — 코스피 형식과 맞춘다(2026-10-25).
+        # 미국 예측엔 신뢰도가 없다. 두 문장 모두 웹 페이지 맨 위 헤드라인·첫 이슈 카드와 같은 필드다.
         header = f"🇺🇸 미국 시장 브리핑 | {date_display}"
         link   = f"{web_base}/briefings/{date_str}/us/"
         tv = analysis.get("todays_view") or {}
         view_title = strip_html(tv.get("view_title", ""))
-        issues = analysis.get("issues") or []
+        issue_titles = [strip_html(it.get("title", "")) for it in (analysis.get("issues") or []) if it.get("title")]
         lines = [header, divider]
         if isinstance(up_pct, int) and isinstance(down_pct, int):
-            lines += [f"📈 상승 확률: <b>{up_pct}%</b>  📉 하락 확률: <b>{down_pct}%</b>"]
+            if up_pct == down_pct:
+                lines += [f"📊 <b>중립 {up_pct}%</b>"]
+            else:
+                us_up = up_pct > down_pct
+                lines += [f"{'📈' if us_up else '📉'} <b>{'상승' if us_up else '하락'} 우위 {max(up_pct, down_pct)}%</b>"]
         if view_title:
-            lines += [f"🧭 {view_title}"]
-        issue_titles = [strip_html(it.get("title", "")) for it in issues if it.get("title")]
+            lines += ["", f"🎯 <b>{view_title}</b>"]
         if issue_titles:
-            lines += ["", "오늘 점검할 이슈:"]
-            for t in issue_titles[:2]:
-                lines.append(f"• {t}")
+            lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
         lines += [divider, f"🔗 전체 이슈·종목 픽 → {link}"]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).

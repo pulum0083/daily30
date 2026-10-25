@@ -54,8 +54,8 @@ def test_close_compresses_to_one_signal_and_has_cta(tmp_path, monkeypatch):
     assert "상세 분석" not in text
 
 
-def test_us_keeps_two_issues_and_has_cta(tmp_path, monkeypatch):
-    # US는 이슈가 브리핑 본체라 2개 유지 — Phase B의 시그널 압축(2→1) 대상이 아니다.
+def test_us_first_issue_and_has_cta(tmp_path, monkeypatch):
+    # 미국도 코스피처럼 첫 이슈 하나만 "오늘 밤 볼 것"으로 싣는다(2026-10-25).
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     analysis = {
         "prediction": {"up_pct": 62, "down_pct": 38},
@@ -65,8 +65,7 @@ def test_us_keeps_two_issues_and_has_cta(tmp_path, monkeypatch):
     cc.save_telegram_message("us", "2026-07-17", analysis)
     text = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
     assert "IBM CEO SW 지출 경고" in text
-    assert "오늘 밤 CPI 발표" in text
-    assert "엔비디아 중국 재개" not in text  # [:2]로 3번째는 제외
+    assert "오늘 밤 CPI 발표" not in text   # 오늘 밤 볼 것은 첫 이슈 하나만(2026-10-25)
     assert "🔗 전체 이슈·종목 픽 →" in text
     assert "상세 분석" not in text
 

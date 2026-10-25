@@ -20,9 +20,21 @@ def test_us_telegram_uses_todays_view_and_issues(tmp_path, monkeypatch):
     msg = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
     assert "미국 시장 브리핑" in msg
     assert "돈이 SW에서 AI 인프라로" in msg
-    assert "IBM CEO SW 지출 경고" in msg
-    assert "예측:" not in msg          # 예측 라인이 없어야 함
-    assert "신뢰도:" not in msg
+    assert "🎯 <b>돈이 SW에서 AI 인프라로</b>" in msg
+    assert "👀 오늘 밤 볼 것\nIBM CEO SW 지출 경고" in msg
+    assert "오늘 밤 CPI 발표" not in msg   # 오늘 밤 볼 것은 첫 이슈 하나만
+    assert "신뢰도" not in msg            # 미국엔 신뢰도가 없다
+    assert "우위" not in msg              # 확률이 없으면 방향 줄도 없다
+
+
+def test_us_telegram_direction_line(tmp_path, monkeypatch):
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    for (up, dn), want in {(32, 68): "📉 <b>하락 우위 68%</b>", (62, 38): "📈 <b>상승 우위 62%</b>",
+                           (50, 50): "📊 <b>중립 50%</b>"}.items():
+        cc.save_telegram_message("us", "2026-10-23", {"prediction": {"up_pct": up, "down_pct": dn},
+                                                       "todays_view": {"view_title": "제목"}, "issues": []})
+        msg = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
+        assert want in msg and "오늘 밤 볼 것" not in msg
 
 
 def test_kospi_telegram_still_has_prediction(tmp_path, monkeypatch):
