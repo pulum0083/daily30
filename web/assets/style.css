@@ -1355,3 +1355,35 @@ html.dark .arch-item__dek{color:var(--muted);}
 .proxy-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;}
 .sec-foot{font-size:11.5px;color:var(--muted);margin-top:12px;line-height:1.6;}
 .sec-foot a{color:var(--primary);font-weight:700;}
+
+/* ── 월봉 5개월선 안착 종목(코스피 아침 브리핑, 2026-10-25) — 달마다 5개월선 대비 이격을 칸으로 그린다 ── */
+.m5-intro{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.m5-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:10px}
+.m5-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.m5-legend i.up{background:var(--up)} .m5-legend i.dn{background:var(--dn)}
+.m5-legend i.run{background:var(--primary-bg);outline:1px solid var(--primary)}
+.m5-foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:12px;padding-top:10px;border-top:1px solid var(--hairline)}
+.m5-foot b{color:var(--ink);font-weight:600} .m5-foot a{color:var(--primary);font-weight:600;white-space:nowrap}
+.m5a-list{display:flex;flex-direction:column;gap:10px}
+.m5a-item{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:14px 16px 12px;background:var(--canvas)}
+.m5a-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.m5a-nm{font-size:16px;font-weight:700;color:var(--ink)} .m5a-nm a{color:inherit;text-decoration:none}
+.m5a-nm a:hover{text-decoration:underline}
+.m5a-px{font-size:13px;color:var(--ink);margin-top:2px;font-variant-numeric:tabular-nums}
+.m5a-px em{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px}
+.m5a-streak{display:flex;align-items:center;gap:6px;color:var(--primary)}
+.m5a-streak b{font-size:30px;font-weight:800;line-height:1;letter-spacing:-1px}
+.m5a-streak span{font-size:11px;line-height:1.3;font-weight:600}
+.m5a-strip{position:relative;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;margin:12px 0 10px}
+.m5a-axis{position:absolute;left:0;right:0;top:30px;border-top:1px solid var(--hairline)}
+.m5a-cell{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:8px;padding:2px 0 3px}
+.m5a-cell.is-run{background:var(--primary-bg)} .m5a-cell.is-cur{outline:1px dashed var(--hairline);outline-offset:-1px}
+.m5a-bar{position:relative;width:100%;height:56px}
+.m5a-bar i{position:absolute;left:28%;right:28%;border-radius:3px}
+.m5a-bar i.up{bottom:50%;background:var(--up)} .m5a-bar i.dn{top:50%;background:var(--dn);opacity:.75}
+.m5a-cell span{font-size:10px;color:var(--muted);white-space:nowrap}
+.m5a-cell.is-run span{color:var(--primary);font-weight:700}
+.m5a-facts{display:flex;gap:6px;flex-wrap:wrap}
+.m5a-facts span{font-size:12px;font-weight:600;color:var(--ink);background:var(--surface-soft);border-radius:999px;padding:4px 10px;font-variant-numeric:tabular-nums}
+.m5a-facts em{font-style:normal;font-weight:500;color:var(--muted);margin-right:5px}
+@media(max-width:640px){.m5a-cell span{font-size:9px}.m5a-streak b{font-size:26px}}

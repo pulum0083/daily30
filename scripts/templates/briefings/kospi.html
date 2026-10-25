@@ -45,7 +45,8 @@
             {# {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>
             {% elif sector_name %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %} #}
             {# 관전 포인트(watchpoints)는 오늘의 관점 outlook(관전 태그)과 내용이 겹쳐 코스피에서 제거(2026-07-12). 미국 브리핑은 유지. #}
-            {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
+            {# 상승 모멘텀 종목은 2026-10-25 제거 — 월봉 5개월선 안착 종목(결정론). 조건 충족 종목이 없으면 섹션째 생략. #}
+            {% if ma5m_items %}{% include "sections/monthly_ma5.html" %}{% endif %}
           </div>
         </div>
       </div>

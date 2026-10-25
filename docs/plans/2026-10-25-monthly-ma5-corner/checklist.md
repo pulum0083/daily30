@@ -14,15 +14,15 @@
 - [x] `scripts/config/monthly_ma5_backtest.json` 생성·커밋
 
 ## 3. 렌더
-- [ ] `generate_html.build_monthly_ma5()` — 스냅샷 1순위, 날짜 대조
-- [ ] `sections/monthly_ma5.html`(A안), `style.css`, `_modals.html`의 `ma5m-modal`
-- [ ] `kospi.html` include 교체, `config/kospi.json`
-- [ ] 종목 0개면 섹션 생략
+- [x] `generate_html.build_monthly_ma5()` — 스냅샷 1순위, 날짜 대조
+- [x] `sections/monthly_ma5.html`(A안), `style.css`, `_modals.html`의 `ma5m-modal`
+- [x] `kospi.html` include 교체, `config/kospi.json`
+- [x] 종목 0개면 섹션 생략
 
 ## 4. 상승 모멘텀 제거(코스피)
 - [ ] `fetch_data.py` 후보 스크리닝 제거
 - [ ] `call_claude.py` 코스피 프롬프트 정리 + 응답의 `stock_picks` 버림
-- [ ] `generate_html.py` 코스피 분기 `stock_picks` 제거
+- [x] `generate_html.py` 코스피 분기 `stock_picks` 제거
 - [ ] 텔레그램 링크 문구
 
 ## 5. 워크플로·문서

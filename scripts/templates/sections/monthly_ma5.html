@@ -1,0 +1,39 @@
+{# 월봉 5개월선 안착 종목 — 완성 월봉 3개월+ 연속 5개월선 위 + 이번 달도 선 위(결정론 스크리닝, SERVICE_RULES §60) #}
+<div class="open-section ma5m-section">
+  <div class="open-section__title">
+    월봉 5개월선 안착 종목
+    <button class="info-icon-btn" data-modal-open="ma5m-modal">?</button>
+  </div>
+  <p class="m5-intro">월말 종가가 5개월 이동평균선 위에서 3개월 넘게 마감했고, 이번 달에도 그 위에 있는 종목이에요.</p>
+  <div class="m5-legend"><span><i class="up"></i>5개월선 위</span><span><i class="dn"></i>아래</span><span><i class="run"></i>안착 구간</span></div>
+  <div class="m5a-list">
+    {% for x in ma5m_items %}
+    <div class="m5a-item">
+      <div class="m5a-head">
+        <div>
+          <div class="m5a-nm">{% if x.detail_url %}<a href="{{ x.detail_url }}">{{ x.name }}</a>{% else %}{{ x.name }}{% endif %}</div>
+          <div class="m5a-px">{{ '{:,.0f}'.format(x.now_close) }}원 <em>{{ x.now_label }} 종가</em></div>
+        </div>
+        <div class="m5a-streak"><b>{{ x.streak }}</b><span>개월째<br>5개월선 위</span></div>
+      </div>
+      <div class="m5a-strip" style="--n:{{ x.n }}">
+        <div class="m5a-axis"></div>
+        {% for c in x.cells %}
+        <div class="m5a-cell{% if c.run %} is-run{% endif %}{% if c.cur %} is-cur{% endif %}" title="{{ c.label }} {% if c.cur %}현재{% else %}월말{% endif %} 종가 {{ '{:,.0f}'.format(c.close) }}원{% if c.ma5 %} · 5개월선 {{ '{:,.0f}'.format(c.ma5) }}원{% endif %}">
+          <div class="m5a-bar"><i class="{{ c.cls }}" style="height:{{ c.h }}%"></i></div>
+          <span>{{ c.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="m5a-facts">
+        <span><em>{{ x.last_label }} 말 이격</em>{{ '%+.1f' % x.month_end_gap_pct }}%</span>
+        {% if x.has_cur %}<span><em>지금 이격</em>{{ '%+.1f' % x.now_gap_pct }}%</span>{% endif %}
+        {% if x.fr_chg_3m is not none %}<span><em>외국인 보유율 3개월</em>{{ '%+.2f' % x.fr_chg_3m }}%p</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="m5-foot">지난 {{ ma5m_stats.years }}년({{ ma5m_stats.years_label }}) 코스피200에서 같은 조건이 나온 뒤 <b>12개월 동안 오른 경우는 {{ ma5m_stats.win_pct }}%</b>였어요.
+  아무 종목·아무 달({{ ma5m_stats.base_win_pct }}%)과 차이가 없어 매매 신호가 아니에요. 월말 종가·이동평균·외국인 보유율은 KRX 공식 종가로 계산한 실측값이에요.
+  <a href="/legal/disclaimer/">면책 고지</a></p>
+</div>

@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20260819"
+ASSET_VER = "20261025"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -289,6 +289,71 @@ def _read_us_issue_results(target_date: str):
         print(f"[generate_html] ⚠️ us_issue_results 세션 불일치({got} ≠ {expected}) — 섹션 생략")
         return None
     return data
+
+
+MA5_BACKTEST_PATH = CONFIG_DIR / "monthly_ma5_backtest.json"
+
+
+def build_monthly_ma5(analysis: dict, target_date: str = "") -> dict:
+    """월봉 5개월선 안착 종목 → 코스피 아침 브리핑 코너(sections/monthly_ma5.html).
+
+    us_issue_results와 같은 구조다 — 스냅샷이 1순위고, 데이터 파일은 브리핑 날짜와 같을 때만 쓴다(§14·§45).
+    조건 충족 종목이 없으면 섹션을 통째로 뺀다. 하단 '12개월 상승 비율' 문장의 출처인 백테스트 파일이
+    없어도 뺀다 — 그 문장 없이 종목만 보이면 '오른다'로 읽힌다(사용자 결정 2026-10-25).
+    """
+    data = analysis.get("monthly_ma5")
+    if not isinstance(data, dict):
+        data = _read_monthly_ma5(target_date)
+        if data is not None:
+            analysis["monthly_ma5"] = data   # 스냅샷에 함께 저장된다
+    items = [x for x in ((data or {}).get("items") or []) if isinstance(x, dict) and x.get("strip")]
+    stats = _ma5_backtest_stats()
+    if not items or not stats:
+        return {"ma5m_items": []}
+    view = []
+    for x in items:
+        cells = []
+        for c in x["strip"]:
+            gap = c.get("gap_pct")
+            cells.append({**c, "cls": "up" if (gap or 0) > 0 else "dn",
+                          "h": round(min(abs(gap or 0), 20) / 20 * 100)})
+        nd = str(x.get("now_date") or "")
+        view.append({**x, "cells": cells, "n": len(cells),
+                     "now_label": f"{int(nd[4:6])}/{int(nd[6:8])}" if len(nd) == 8 else "",
+                     "has_cur": bool(cells and cells[-1].get("cur")),
+                     "last_label": f"{int(str(x['last_complete'])[4:])}월",
+                     "detail_url": _pick_detail_url(x.get("code", ""), "kospi")})
+    return {"ma5m_items": view, "ma5m_stats": stats}
+
+
+def _read_monthly_ma5(target_date: str):
+    """data/monthly_ma5.json 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
+    path = DATA_DIR / "monthly_ma5.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] monthly_ma5 파싱 실패: {e}")
+        return None
+    if target_date and data.get("date") != target_date:
+        print(f"[generate_html] ⚠️ monthly_ma5 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
+        return None
+    return data
+
+
+def _ma5_backtest_stats():
+    """백테스트 설정 파일의 12개월 수치. 없거나 깨졌으면 None."""
+    try:
+        bt = json.loads(MA5_BACKTEST_PATH.read_text(encoding="utf-8"))
+        h = bt["horizons"]["12"]
+        y0, y1 = (int(v) for v in bt["years_label"].split("~"))
+        return {"win_pct": h["signal"]["win_pct"], "base_win_pct": h["base"]["win_pct"],
+                "n": h["signal"]["n"], "years": y1 - y0 + 1, "years_label": bt["years_label"],
+                "universe": bt.get("universe", "")}
+    except Exception as e:
+        print(f"[generate_html] monthly_ma5 백테스트 수치 없음({e}) — 섹션 생략")
+        return None
 
 
 def build_issues(analysis: dict) -> dict:
@@ -1519,7 +1584,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["quote_today"] = _load_quote_today(target_date)
         ctx.update(build_reasons(analysis, target_date))
         ctx.update(build_analyst_quotes(market_data))
-        ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
+        # 상승 모멘텀 종목(LLM 픽)은 2026-10-25 제거 — 그 자리에 월봉 5개월선 안착 종목(결정론)을 둔다
+        ctx.update(build_monthly_ma5(analysis, target_date))
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
