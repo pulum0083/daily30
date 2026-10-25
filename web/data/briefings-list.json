@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-10-26": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-10-26/kospi/",
+        "headline": "메타발 기술주 충격 vs 반도체 수급 반전",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:29"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-10-23": {
       "kospi": {
         "state": "ready",
@@ -752,29 +771,6 @@
         "headline": "유가 급등에 채권 금리가 튀는데도, 반도체는 홀로 웃고 있어요",
         "title": "—",
         "time": ""
-      }
-    },
-    "2026-09-07": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-09-07/kospi/",
-        "headline": "고용 쇼크에도 반도체는 웃었다 — 오늘의 진짜 신호",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-09-07/close/",
-        "headline": "AI 훈풍 반도체 폭등, 코스피 4.61% 급등",
-        "title": "6,995.39",
-        "price": "6,995.39",
-        "time": ""
-      },
-      "us": {
-        "state": "pending",
-        "scheduled_time": "21:20"
       }
     }
   }
