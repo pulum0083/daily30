@@ -194,27 +194,6 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
 7. WTI 유가 — 인플레이션 우려·에너지 섹터 영향
    - 유가 급등 = 인플레 우려로 성장주 부담
 
-### 종목 선택 규칙 (잭 켈로그 MA20 전략)
-잭 켈로그(Zack Kellogg)의 20일 이동평균선 전략은 단기 모멘텀 스윙 기법이다.
-
-선별 기준:
-- kospi_candidates 배열에서 ma20_signal이 "crossing_up"인 종목 최우선
-- ma20_signal이 "above"이고 ma20_dist_pct가 작은 종목 차선
-- price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 JSON 데이터값 그대로 사용 (변경 금지)
-- 3~5개 선택. 모멘텀과 MA200 구조적 강세 종목 우선 배치
-- golden: true 조건 → MA200도 함께 돌파하거나 크게 상회한 종목
-
-실행 가이드 작성 규칙:
-- 구체적 진입 구간 (시가 기준 ±X원 또는 ±X%)
-- 명확한 목표가와 손절가
-- action_guide에 쓴 진입가·목표가·손절가를 구조화 필드(entry, target, target_pct, stop, stop_pct)로도 동일하게 출력한다 (카드 하단 그리드 표시용)
-- 시장 전체 방향과 종목의 연관성 설명
-
-시나리오(scenario) 작성 규칙:
-- 정확히 2문장, 해요체. **진입가·목표가·손절가는 scenario에 절대 쓰지 않는다** (그건 action_guide·구조화 필드로만 출력하며 카드에서 별도 그리드로 표시됨).
-- 1문장: 전일 등락률(change_pct)과 20일선(MA20) 상황을 묶어 쓴다. ma20_signal이 "crossing_up"이면 "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요." 식으로, "above"면 "20일선을 지지선 삼아 반등한 종목이에요." 식으로 쓴다.
-- 2문장: 오늘 섹터·매크로 촉매와 추가 상승 여력 전망을 쓴다.
-
 ### 예측 근거(reasons) 작성 규칙
 - 최대 6개 (최소 4개). 중요도 내림차순 (배열 앞쪽 = 코스피에 영향이 큰 지표)
 - 오늘 실제 데이터에서 임팩트 있는 항목만 채운다. 변동이 없거나 영향이 미미한 항목을 억지로 넣어 6개를 채우지 않는다.
@@ -256,7 +235,7 @@ reasons[1]~[5] — 아래 시그널 풀에서 **오늘 실제 데이터 기준�
 - **미국 빅테크 전략의 반도체 read-through**: 예를 들어 "미국 반도체지수(SOX)가 <b>-5%</b> 빠졌어요. 메타가 자체 AI 칩 설계를 확대한다는 소식에 기존 메모리 수요가 위축될 거란 우려가 커졌거든요." 처럼 숫자 뒤에 뉴스 원인을 붙인다.
 - **AI 모델 개발사(OpenAI·Anthropic) 이슈도 핵심 촉매다** — 비상장이지만 이들의 신모델 출시·대형 칩/HBM 계약·대규모 투자는 SK하이닉스·삼성전자 HBM 수요 기대를 직접 좌우한다. 관련 뉴스가 있으면 반도체 방향 근거로 엮는다.
 - 촉매가 뉴스 요약에 **없으면 억지로 지어내지 않는다**([필수 규칙 5] 준수) — 그 항목은 수치·시그널만으로 서술한다.
-- ⚠️ 뉴스 사건(사업 진출·상장·수주 등)은 서술 가능하지만, [필수 규칙 7]에 따라 픽 외 개별 종목의 등락 방향·%는 여전히 서술하지 않는다. 촉매는 '사건'으로 쓰고 개별 주가 등락으로 환산하지 않는다.
+- ⚠️ 뉴스 사건(사업 진출·상장·수주 등)은 서술 가능하지만, [필수 규칙 7]에 따라 개별 종목의 등락 방향·%는 여전히 서술하지 않는다. 촉매는 '사건'으로 쓰고 개별 주가 등락으로 환산하지 않는다.
 
 **[규칙 A·B 재확인]** 위 "글쓰기 기본 규칙"을 reasons에도 동일하게 적용한다. 의견 먼저, 해요체 필수.
 
@@ -286,9 +265,9 @@ CNN Fear & Greed Index(공포탐욕지수)는 사이드바 표시용으로만 �
 ❌ 금지: 데이터 없이 "환율이 1,370원 아래로" 등 임의 수치 기재
 ✅ 허용: "원달러 환율이 <b>{usdkrw.price}원</b>으로" (데이터에 실제 값 있을 때만)
 
-**[필수 규칙 7] reasons·watch_items에서 픽 외 개별 종목 등락 서술 금지**
-stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥락 종목 포함)의 전일 등락 방향(올랐다/내렸다/급등/급락/상승/하락/강세/약세 등)이나 등락률(%)을 reasons·watch_items에서 서술하지 않는다.
-픽 외 종목을 언급할 때는 섹터·지수 레벨 표현만 허용한다.
+**[필수 규칙 7] reasons·watch_items에서 개별 종목 등락 서술 금지**
+개별 종목(삼성전자, SK하이닉스 등 맥락 종목 포함)의 전일 등락 방향(올랐다/내렸다/급등/급락/상승/하락/강세/약세 등)이나 등락률(%)을 reasons·watch_items에서 서술하지 않는다.
+개별 종목을 언급할 때는 섹터·지수 레벨 표현만 허용한다.
 ❌ 금지: "삼성전자가 <b>+2.3%</b> 올랐어요.", "SK하이닉스가 강세를 보였어요."
 ✅ 허용: "반도체 섹터에 매수세가 집중됐어요.", "SOX 지수가 <b>+2%</b> 올랐어요."
 ⚠️ 예외: todays_view.recap 항목은 codes 배열에 해당 종목의 6자리 코드를 명시하면 개별 종목 등락을 서술할 수 있다(검증 단계에서 실측 확인이 가능하기 때문). reasons·watch_items에는 이 예외가 적용되지 않는다.
@@ -324,7 +303,7 @@ stock_picks에 포함되지 않은 종목(삼성전자, SK하이닉스 등 맥�
 - dek: view_title 아래 붙는 1~2문장 부제(해요체). 오늘 관점의 맥락을 풀어 설명한다. `<b>` 강조 허용. **항상 채운다.**
 - recap(어제 복기, 정확히 3개): 전일 마감 데이터(지수·수급·섹터)에 근거해 "어제 무슨 일"을 서술한다.
   · 개별 종목을 언급하면 반드시 그 종목의 6자리 코드를 codes 배열에 넣는다. (미기재 시 검증 단계에서 제거됨)
-  · codes를 넣으면 픽에 없는 종목이라도 실측 검증을 통과할 수 있다. 코드 없이 개별 종목의 등락 방향·등락률을 서술하지 않는다.
+  · codes를 넣으면 실측 검증을 통과할 수 있다. 코드 없이 개별 종목의 등락 방향·등락률을 서술하지 않는다.
 - outlook(오늘 볼 것, 가급적 3개): 오늘 주목할 것. event가 부족하면 watch(관전 포인트)로 3개를 채운다.
   · tag="event"는 실적·지표 발표 등 **일정 사실**이다. 뉴스 요약(news_summary)·economic_calendar에 실제로 존재하는 것만 쓰고, source에 근거를 표기한다("news"/"calendar"). 근거가 없으면 event로 쓰지 않는다(검증 단계에서 제거됨).
   · tag="watch"는 "외국인 수급 지속 여부" 같은 **정성 관전 포인트**다. 소스 불요, source=null.
@@ -418,7 +397,7 @@ us_linked_story를 지시받았더라도 뉴스 요약에 마땅한 미국 이�
 
 순수 JSON만 출력한다. 마크다운 코드블록(```), 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, key_drivers(정확히 3개), stock_picks, comfort_line, todays_view(view_title·dek·recap·outlook), 그리고 지정된 형식의 필드 세트, 그리고 sector_focus·us_linked_story 두 키 (하단 심층 섹션은 현재 사용하지 않으므로 두 키 모두 반드시 null)**
+**[필수] JSON에 반드시 포함해야 하는 필드: prediction, reason_title, key_drivers(정확히 3개), comfort_line, todays_view(view_title·dek·recap·outlook), 그리고 지정된 형식의 필드 세트, 그리고 sector_focus·us_linked_story 두 키 (하단 심층 섹션은 현재 사용하지 않으므로 두 키 모두 반드시 null)**
 reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타이틀이 공백이 된다.
 
 {
@@ -452,23 +431,6 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
   "watch_items": [
     {"icon": "🇺🇸", "label": "오늘밤 美 PCE 물가", "text": "예상치 <b>+0.2%</b> 부합 여부가 금리 경로의 분수령이에요."},
     {"icon": "📊", "label": "코스피 2,850 저항", "levels": [{"label": "지지", "num": "2,800", "cls": "dn"}, {"label": "저항", "num": "2,850", "cls": "up"}]}
-  ],
-  "stock_picks": [
-    {
-      "ticker": "005930",
-      "name": "종목명",
-      "price": "000,000원",
-      "change": "+X.XX%",
-      "change_cls": "up",
-      "signal": "20일선 상향 돌파",
-      "golden": false,
-      "ma20_dist_pct": 2.1,
-      "ma200_dist_pct": 15.3,
-      "scenario_tag": "모멘텀 가속",
-      "scenario": "전일 <b>+X.XX%</b> 급등하며 20일선을 막 돌파한 종목이에요. 반도체 투자 심리가 개선되고 있고, 코스피 반도체 랠리 속에서 추가 상승 여력이 있어요.",
-      "action_guide": "시가 X원 이내 진입. 목표: Y원(+X.X%) / 손절: Z원 이탈 시.",
-      "entry": "X원", "target": "Y원", "target_pct": "+X.X%", "stop": "Z원", "stop_pct": "-X.X%"
-    }
   ],
   "telegram_signals": [
     "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도할 것 같아요.",
@@ -1334,7 +1296,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
                 lines.append(f"• {strip_html(s)}")
 
         # 유도형 CTA: 텔레그램엔 방향·핵심 시그널만, 실시간·전체 분석은 사이트 몫으로.
-        lines += [divider, f"🔗 전체 근거·종목 픽·장중 라이브 → {link}"]
+        lines += [divider, f"🔗 전체 근거·장중 라이브 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1559,6 +1521,11 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
             last_error = e
     else:
         raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
+
+    # 코스피 아침은 상승 모멘텀 종목(LLM 픽)을 2026-10-25에 뺐다 — 그 자리는 월봉 5개월선 안착 종목(결정론).
+    # 프롬프트에서 지웠어도 모델이 습관처럼 내보내면 검증·렌더 어디에도 실리지 않게 여기서 버린다.
+    if briefing_type == "kospi" and analysis.pop("stock_picks", None) is not None:
+        print("[call_claude] 코스피 응답의 stock_picks 무시(코너 제거됨)")
 
     # 브리핑 형식 강제 주입 — kospi 전용(US는 형식 없음)
     if chosen_format:

@@ -82,25 +82,6 @@ SECTOR_FOCUS_STOCKS = {
     },
 }
 
-# Korean stock candidates for Kellogg strategy screening
-KOSPI_CANDIDATES = [
-    ("005930.KS", "삼성전자"),
-    ("000660.KS", "SK하이닉스"),
-    ("042700.KS", "한미반도체"),
-    ("005490.KS", "POSCO홀딩스"),
-    ("035420.KS", "NAVER"),
-    ("000270.KS", "기아"),
-    ("005380.KS", "현대차"),
-    ("068270.KS", "셀트리온"),
-    ("035720.KS", "카카오"),
-    ("051910.KS", "LG화학"),
-    ("207940.KS", "삼성바이오로직스"),
-    ("373220.KS", "LG에너지솔루션"),
-    ("066570.KS", "LG전자"),
-    ("012330.KS", "현대모비스"),
-    ("086790.KS", "하나금융지주"),
-]
-
 # US stock candidates for Kellogg strategy screening
 US_CANDIDATES = [
     "NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL", "TSLA",
@@ -1309,9 +1290,8 @@ def fetch_kospi_data() -> dict:
     if fng:
         market_data_js["fng"] = fng
 
-    # 4. Korean stock candidates (Kellogg strategy screening)
-    print("[fetch_data]   → KOSPI candidates")
-    kospi_candidates = build_stock_candidates(KOSPI_CANDIDATES)
+    # 4. (2026-10-25 제거) 국내 켈로그 20일선 후보 — 코스피 아침의 상승 모멘텀 종목 코너를 뺐다.
+    #    그 자리의 월봉 5개월선 안착 종목은 scripts/monthly_ma5.py가 따로 판정한다.
 
     # 5. 경제 지표 캘린더 (ForexFactory)
     print("[fetch_data]   → economic calendar")
@@ -1407,9 +1387,6 @@ def fetch_kospi_data() -> dict:
         },
         # True면 어제 한국만 휴장 + 미국 개장 — EWY보다 asia_regional이 더 정확한 선행 지표
         "post_holiday_catchup": post_holiday_catchup,
-        # Kellogg screening — sorted by signal quality
-        # Claude picks 3-5 from this list; use sparkline/ma20_sparkline/ma200_sparkline for stockCharts
-        "kospi_candidates": kospi_candidates,
         # 섹터 로테이션 — 대표 종목·ETF 전일 종가·등락률 (할루시네이션 방지용 실제 데이터)
         "sector_stocks": sector_stocks,
         # 간밤 미국-한국 섹터 갭 브리지 — None이면 섹션 생략 (§0 없으면 비운다)

@@ -20,10 +20,10 @@
 - [x] 종목 0개면 섹션 생략
 
 ## 4. 상승 모멘텀 제거(코스피)
-- [ ] `fetch_data.py` 후보 스크리닝 제거
-- [ ] `call_claude.py` 코스피 프롬프트 정리 + 응답의 `stock_picks` 버림
+- [x] `fetch_data.py` 후보 스크리닝 제거
+- [x] `call_claude.py` 코스피 프롬프트 정리 + 응답의 `stock_picks` 버림
 - [x] `generate_html.py` 코스피 분기 `stock_picks` 제거
-- [ ] 텔레그램 링크 문구
+- [x] 텔레그램 링크 문구
 
 ## 5. 워크플로·문서
 - [ ] `daily_report.yml` kospi 잡에 스크리닝 스텝
