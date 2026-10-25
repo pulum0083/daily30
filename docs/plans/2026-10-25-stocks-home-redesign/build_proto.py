@@ -241,11 +241,11 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 .hk{{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}}
 .live{{color:var(--pri)}} .live.wk{{color:var(--muted)}}
 .hm{{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}}
-.hd,.hp{{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.15}} .hero.is-dn .hd,.hero.is-dn .hp{{color:var(--dn)}}
+.hd,.hp{{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2}} .hero.is-dn .hd,.hero.is-dn .hp{{color:var(--dn)}}
 .hp{{text-align:right}} .hp small{{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}}
-.hero h2{{font-size:19px;line-height:1.4;margin:12px 0 0;letter-spacing:-.3px}}
+.hero h2{{font-size:17px;line-height:1.45;margin:10px 0 0;letter-spacing:-.2px}}
 .dek{{font-size:13.5px;line-height:1.7;color:var(--ink2);margin:6px 0 0}} .dek b{{color:var(--ink)}}
-.cta{{display:block;margin-top:14px;background:var(--ink);color:#fff;text-align:center;border-radius:12px;padding:11px;font-size:14px;font-weight:700}}
+.cta{{display:block;margin-top:12px;background:var(--ink);color:#fff;text-align:center;border-radius:10px;padding:10px;font-size:13px;font-weight:700}}
 .cta.ghost{{background:#fff;color:var(--ink);border:1px solid var(--line)}}
 .trust{{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:center}} .trust b{{color:var(--ink)}}
 .chip{{display:inline-block;margin-top:10px;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:#f9fafb}} .chip.ok{{color:#065f46;background:#ecfdf5;border-color:#a7f3d0}}
@@ -294,9 +294,9 @@ a{{color:inherit;text-decoration:none}} .up{{color:var(--up)}} .dn{{color:var(--
 @media (min-width:720px){{
 .wrap{{max-width:880px;padding:20px 24px 48px}}
 .ttl h1{{font-size:16px}}
-.hero{{padding:22px 26px 20px}}
-.hd,.hp{{font-size:32px}} .hero h2{{font-size:20px}} .dek{{font-size:14px}}
-.cta{{display:inline-block;padding:11px 28px}}
+.hero{{padding:18px 22px 16px}}
+.trust{{text-align:left}}
+.cta{{display:inline-block;padding:9px 22px}}
 .cv{{height:220px}}
 .blk{{padding:16px 20px}}
 .ue-ais{{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}}
