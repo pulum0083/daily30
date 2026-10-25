@@ -7,23 +7,39 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import call_claude as cc
 
 
-def test_kospi_compresses_to_one_signal_and_has_cta(tmp_path, monkeypatch):
+def test_kospi_headline_and_one_watch_line(tmp_path, monkeypatch):
+    # 코스피는 방향·확률(신뢰도) → 헤드라인 → 개장 후 볼 것 한 줄(2026-10-25). 지난 예측 배지·시그널 목록은 없다.
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     analysis = {
-        "prediction": {"direction": "상승 우위", "up_pct": 63, "down_pct": 37, "confidence": 72},
-        "reason_title": "왜 오를까 — 반도체 강세",
-        "telegram_signals": ["📅 오늘 밤 CPI 발표", "💡 DRAM ETF +7% 급등", "📰 반도체 규제 뉴스"],
+        "prediction": {"direction": "하락 우위", "up_pct": 7, "down_pct": 93, "confidence": 82, "basis": "open"},
+        "reason_title": "긴급 점검: 반도체 쇼크",
+        "todays_view": {
+            "view_title": "어제 <b>-3.52%</b> 맞았는데 또? 메타發 반도체 2차 충격",
+            "outlook": [{"tag": "watch", "text": "반도체 갭다운 폭을 <b>얼마나</b> 키울지 지켜보세요."},
+                        {"tag": "watch", "text": "기관 매도가 이어질지 보세요."}],
+        },
+        "telegram_signals": ["📅 오늘 밤 CPI 발표"],
     }
+    cc.save_telegram_message("kospi", "2026-10-23", analysis)
+    text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
+    assert text.startswith("🇰🇷 코스피 시초가 예측 | 2026.10.23")
+    assert "📉 <b>하락 우위 93%</b> (신뢰도 82%)" in text
+    assert "🎯 <b>어제 -3.52% 맞았는데 또? 메타發 반도체 2차 충격</b>" in text
+    assert "👀 개장 후 볼 것\n반도체 갭다운 폭을 얼마나 키울지 지켜보세요." in text
+    assert "기관 매도" not in text          # 개장 후 볼 것은 한 문장만
+    assert "지난 예측" not in text and "핵심 시그널" not in text and "CPI" not in text
+    assert "🔗 전체 근거·이슈 점검 → " in text and text.rstrip().endswith("/briefings/2026-10-23/kospi/")
+
+
+def test_kospi_falls_back_to_reason_title_and_skips_empty_outlook(tmp_path, monkeypatch):
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    analysis = {"prediction": {"direction": "상승 우위", "up_pct": 63, "down_pct": 37, "confidence": 72},
+                "reason_title": "왜 오를까 — 반도체 강세", "todays_view": {}}
     cc.save_telegram_message("kospi", "2026-07-17", analysis)
     text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
-    # 시그널 불릿(•)은 정확히 1개
-    assert text.count("\n• ") == 1
-    # 이슈 우선 정렬로 뉴스·이벤트 계열이 남고 수치 계열(💡)은 밀린다
-    assert "📅 오늘 밤 CPI 발표" in text
-    assert "💡 DRAM ETF" not in text
-    # 사이트 전용 CTA
-    assert "🔗 전체 근거·장중 라이브 →" in text   # 코스피 종목 픽 제거(2026-10-25, §61)
-    assert "상세 분석" not in text
+    assert "🇰🇷 코스피 예측 브리핑" in text          # 종가 기준 기록은 '시초가' 라벨을 달지 않는다
+    assert "🎯 <b>왜 오를까 — 반도체 강세</b>" in text
+    assert "개장 후 볼 것" not in text
 
 
 def test_close_compresses_to_one_signal_and_has_cta(tmp_path, monkeypatch):

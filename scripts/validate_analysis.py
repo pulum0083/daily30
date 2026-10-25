@@ -1541,6 +1541,43 @@ FORMAT_BODY_FIELDS = {
 FORMAT_FALLBACK = "split"
 
 
+_TITLE_PCT_RE = re.compile(r"\d+(?:\.\d+)?(?=\s*%)")
+
+
+def fix_view_title_figures(analysis, btype, corrections):
+    """헤드라인(todays_view.view_title)의 등락률이 검증된 본문에 없으면 헤드라인을 근거 문장으로 바꾼다 (kospi).
+
+    헤드라인은 웹 페이지 맨 위·아카이브·텔레그램 첫 줄에 그대로 나가는데, 숫자 게이트는 key_drivers·recap에만 있다.
+    그래서 헤드라인의 % 숫자는 게이트를 통과한 key_drivers·recap에 같은 숫자로 있어야 한다(부호는 보지 않는다 —
+    "-6.72% 급락"과 "6.72% 밀렸다"는 같은 주장이다). 없으면 key_drivers[0]의 굵은 첫 문장으로 바꾼다(§0).
+    호출 시점은 validate_key_drivers 이후 — 제거된 항목의 숫자를 근거로 삼지 않는다.
+    """
+    if btype != "kospi":
+        return
+    tv = analysis.get("todays_view")
+    if not isinstance(tv, dict) or not isinstance(tv.get("view_title"), str):
+        return
+    title = tv["view_title"]
+    figs = set(_TITLE_PCT_RE.findall(strip_tags(title)))
+    if not figs:
+        return
+    kd = [k for k in (analysis.get("key_drivers") or []) if isinstance(k, dict)]
+    evidence = " ".join(strip_tags(x.get("text", "")) for x in kd + list(tv.get("recap") or []) if isinstance(x, dict))
+    missing = sorted(figs - set(_TITLE_PCT_RE.findall(evidence)))
+    if not missing:
+        return
+    lead = ""
+    if kd:
+        m = re.search(r"<b>(.*?)</b>", kd[0].get("text", ""))
+        lead = strip_tags(m.group(1) if m else kd[0].get("text", "")).strip()
+    if lead and not (set(_TITLE_PCT_RE.findall(lead)) - set(_TITLE_PCT_RE.findall(evidence))):
+        tv["view_title"] = lead
+        corrections.append(f"view_title 교체 (근거에 없는 숫자 {missing}): {strip_tags(title)[:50]} → {lead[:50]}")
+    else:
+        corrections.append(f"view_title의 근거 없는 숫자 {missing} — 대체할 근거 문장이 없어 숫자만 지움: {strip_tags(title)[:50]}")
+        tv["view_title"] = re.sub(r"\s*[+\-−]?\d+(?:\.\d+)?\s*%", "", title).strip()
+
+
 def fix_format_payload_mismatch(analysis, corrections, warnings, blocks):
     """찍힌 analysis_format의 본문이 비었으면 내용에 맞는 형식으로 내려앉힌다.
 
@@ -1648,6 +1685,7 @@ def validate(analysis, latest, btype):
     validate_todays_view_recap(a, btype, corrections, warnings)
     validate_todays_view_outlook(a, btype, corrections, warnings)
     validate_key_drivers(a, btype, corrections, warnings)
+    fix_view_title_figures(a, btype, corrections)
 
     # 2-d-2) 이슈 세션 오표기 — 프리장 미거래 지수를 '프리마켓에서'로 서술 (us 전용)
     if btype == "us":

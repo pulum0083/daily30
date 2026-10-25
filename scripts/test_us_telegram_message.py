@@ -34,5 +34,5 @@ def test_kospi_telegram_still_has_prediction(tmp_path, monkeypatch):
     }
     cc.save_telegram_message("kospi", "2026-07-14", analysis)
     msg = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
-    assert "예측:" in msg
-    assert "신뢰도:" in msg
+    assert "<b>상승 우위 60%</b>" in msg
+    assert "(신뢰도 70%)" in msg

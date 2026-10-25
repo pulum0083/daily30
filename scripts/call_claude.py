@@ -300,6 +300,19 @@ CNN Fear & Greed Index(공포탐욕지수)는 사이드바 표시용으로만 �
   - **⚠️ 이 한 줄이 브리핑 전체에서 가장 중요하다. 그날 브리핑의 퀄리티를 좌우한다.** 오늘 시장을 관통하는
     단 하나의 핵심을 센스 있게 압축한 한 문장이어야 한다 — 여러 이슈를 나열하지 말고, 가장 중요한 것 하나로
     프레이밍한다. 밋밋한 요약("혼조세 속 관망")이 아니라, 읽는 순간 오늘이 무슨 날인지 잡히는 헤드라인으로 쓴다.
+  - **재미있어야 한다 — 이 헤드라인이 웹 페이지 맨 위·아카이브 목록·텔레그램 첫 줄에 그대로 나간다.** 헤드라인이
+    재미없으면 아무도 본문을 열지 않는다. 다음을 지킨다.
+    1. **그날만의 구체적인 사실로 쓴다.** 기업·지표 이름이나 숫자를 최소 하나 넣는다. 다른 날에 붙여도 말이 되면 실패다.
+    2. **긴장·반전·궁금증을 만든다.** "~했는데 또?", "A는 웃고 B는 울었다", "~인데 왜 ○○일까", 의인화·비유를 쓴다.
+    3. **30자 안팎.** 군더더기 없이 한 호흡에 읽힌다.
+    4. **금지어**: "엇갈린 신호", "관전 포인트", "변수", "주목", "혼조", "관망", "~속 출발", "~이냐 ~이냐".
+       어느 날에나 붙는 말은 쓰지 않는다.
+    5. **숫자는 검증된 곳에서만**: view_title에 넣는 등락률(%)은 key_drivers 또는 recap에 **같은 숫자로** 반드시
+       등장해야 한다. 거기 없는 숫자를 넣으면 발행 단계에서 헤드라인이 근거 문장으로 교체된다.
+    6. 재미를 위해 사실을 비틀지 않는다 — 방향 단정 금지·데이터에 없는 사건 금지는 그대로다.
+    - 좋은 예: "어제 -3.52% 맞았는데 또? 메타發 반도체 -6.72% 2차 충격" · "메타가 AI에 돈 쏟자 반도체가 울었다"
+      · "반도체 수출 222% 폭증, 숫자로 증명된 HBM 슈퍼사이클"
+    - 나쁜 예: "엇갈린 신호 속 출발" · "어제 반도체 쇼크, 오늘은 되돌림이냐 연장이냐" · "오늘은 선물이 말해주는 쪽으로"
 - dek: view_title 아래 붙는 1~2문장 부제(해요체). 오늘 관점의 맥락을 풀어 설명한다. `<b>` 강조 허용. **항상 채운다.**
 - recap(어제 복기, 정확히 3개): 전일 마감 데이터(지수·수급·섹터)에 근거해 "어제 무슨 일"을 서술한다.
   · 개별 종목을 언급하면 반드시 그 종목의 6자리 코드를 codes 배열에 넣는다. (미기재 시 검증 단계에서 제거됨)
@@ -309,24 +322,10 @@ CNN Fear & Greed Index(공포탐욕지수)는 사이드바 표시용으로만 �
   · tag="watch"는 "외국인 수급 지속 여부" 같은 **정성 관전 포인트**다. 소스 불요, source=null.
   · 실제 이벤트가 없으면 outlook은 watch 항목만으로 3개를 채운다. event를 억지로 만들지 말고, 없는 일정은 절대 지어내지 않는다(정합성 우선 — 3개 채우기보다 날조 금지가 먼저다).
 
-### 텔레그램 핵심 시그널(telegram_signals) 작성 규칙
-텔레그램 발송용 압축 요약. 정확히 2개.
-- 각 항목 60자 이내, 이모지 1개로 시작, <b> 태그 허용
-- reasons에서 가장 임팩트 큰 2개를 선택해 더 짧게 압축
-- 자세한 내용은 웹에서 확인 유도 목적 — 궁금증을 유발하되 결론만 전달
-
-**[이슈 우선 — 💡 반도체(DRAM ETF·SOX)·🇺🇸 외국인 수급(EWY) 최소 1개는 다른 카테고리로]**
-DRAM ETF·EWY는 변동성이 커서 거의 매일 reasons의 임팩트 상위권에 들지만, 단순 등락 수치일 뿐 이슈가 아니라서
-텔레그램(매일 열어보는 채널)에서 반복되면 "맨날 같은 얘기"로 느껴져 피로도가 가장 크다.
-- reasons[1]~[5] 중 📰 섹터 뉴스처럼 구체적 뉴스 촉매가 있는 항목이 하나라도 있으면 **최우선으로** 선택한다.
-  그 다음 📅 경제 캘린더·VIX·금리·유가·아시아 증시 등이 하나라도 있으면, telegram_signals 2개 중
-  **최소 1개**는 반드시 그 항목에서 고른다. 단순 ETF·지수 등락 수치만 있는 💡 반도체·🇺🇸 외국인 수급은
-  이런 이슈성 항목이 없을 때만 채택한다.
-- 💡 반도체·🇺🇸 외국인 수급 두 카테고리 다 함께 telegram_signals에 넣는 것은, 오늘 다른 카테고리에 쓸 만한
-  항목이 정말 하나도 없을 때만 예외로 허용한다.
-- 두 카테고리 중 하나를 넣더라도, 전날과 똑같은 문형("EWY가 -X% 빠졌어요" 등)을 반복하지 말고 표현을 바꾼다.
-- **순서: 이슈(뉴스·이벤트 촉매)를 먼저, 💡·🇺🇸 단순 수치 항목을 뒤에 둔다.** 독자가 먼저 읽는 첫 줄이
-  단순 등락 수치가 아니라 "오늘 무슨 일이 있었나"가 되도록 한다. (발송 단계에서도 이 순서로 재정렬된다.)
+### 텔레그램 메시지 — view_title + outlook[0]
+코스피 텔레그램은 방향·확률 아래에 **view_title**(🎯)과 **outlook[0]**(👀 개장 후 볼 것) 두 문장만 싣는다.
+- outlook[0]에는 개장 뒤 가장 먼저 확인할 한 가지를 둔다. 혼자 읽어도 뜻이 통하는 한 문장으로 쓴다.
+- 별도의 텔레그램 전용 필드는 만들지 않는다.
 
 ### 하단 심층 섹션 — sector_focus / us_linked_story 중 택1
 코스피 아침 브리핑 하단에는 두 가지 심층 섹션 중 **하나만** 들어간다.
@@ -432,16 +431,10 @@ reason_title을 절대 빠뜨리지 않는다. 없으면 브리핑 페이지 타
     {"icon": "🇺🇸", "label": "오늘밤 美 PCE 물가", "text": "예상치 <b>+0.2%</b> 부합 여부가 금리 경로의 분수령이에요."},
     {"icon": "📊", "label": "코스피 2,850 저항", "levels": [{"label": "지지", "num": "2,800", "cls": "dn"}, {"label": "저항", "num": "2,850", "cls": "up"}]}
   ],
-  "telegram_signals": [
-    "💡 반도체·HBM 수혜주 동반 강세. SK하이닉스 <b>+3.4%</b> 급등하며 장 전반을 주도할 것 같아요.",
-    "📅 오늘 밤 미국 CPI 발표 — 예상치 상회 시 금리 인상 우려로 위험자산 전반 조정 가능성 있어요."
-  ],
   "us_linked_story": null,
   "sector_focus": null
 }
 
-(위 telegram_signals 예시는 형식 참고용이다. 실제로는 그날 데이터에서 임팩트가 큰 걸 고르되,
-반도체·외국인 수급 두 카테고리로만 채우지 않는다 — 위 반복 억제 규칙을 따른다.)
 (us_linked_story·sector_focus 하단 심층 섹션은 현재 사용하지 않는다. 두 키 모두 항상 null로 출력한다.)
 
 **[위로 한 줄(comfort_line) 규칙 — 형식과 무관하게 항상 출력]**
@@ -1132,39 +1125,6 @@ def build_calibration_hint(briefing_type: str = "kospi", min_n: int = 20) -> str
     return "\n".join(lines) + "\n"
 
 
-def _last_scored_result(briefing_type: str, before_date: str) -> "bool | None":
-    """직전(오늘 이전) 예측의 적중 여부(is_correct)를 반환. 없거나 아직 채점 전이면 None.
-
-    ⚠️ 직전 항목이 미채점(is_correct=None)이어도 더 과거의 채점된 항목으로 조용히
-    건너뛰지 않는다 — check_accuracy --backfill은 09:10 KST에 실행되어 이 텔레그램
-    발송 시점(07:25~07:30 KST, 아침 브리핑)보다 항상 늦다. 즉 어제 예측은 이 함수가
-    호출되는 시점에 구조적으로 항상 미채점 상태다. 과거엔 이 경우 더 이전(예: 3일 전)
-    채점 결과를 "지난 예측"이라는 이름으로 그대로 보여줘, 실제로는 갓 나온 예측이
-    크게 틀렸는데도(2026-07-13 "검은 월요일" -8.95% 급락 vs "상승 우위" 예측) 며칠 전의
-    적중 결과가 "지난 예측 ✓ 적중"으로 표시되는 오도 사고가 있었다. 직전 항목이 미채점이면
-    무조건 None을 반환해 배지 자체를 생략한다(호출부에서 표시 안 함).
-    """
-    bpath = DATA_DIR / "briefings.json"
-    if not bpath.exists():
-        return None
-    try:
-        rows = json.load(open(bpath, encoding="utf-8")).get("briefings", [])
-    except Exception:
-        return None
-    prior = [b for b in rows
-             if b.get("type") == briefing_type
-             and str(b.get("date", "")) < before_date]
-    # 직전 예측이 종가 기준(전환 이전)이면 "지난 예측" 배지를 달지 않는다 — 기준이 다른 결과다(§57).
-    if prior and briefing_type == "kospi":
-        from prediction_basis import is_open_basis
-        if not is_open_basis(max(prior, key=lambda b: b["date"])):
-            return None
-    if not prior:
-        return None
-    prior.sort(key=lambda b: b["date"])
-    return prior[-1].get("is_correct")
-
-
 def _today_kospi_prediction(date_str: str) -> dict | None:
     """오늘(date_str) 날짜의 kospi 예측 항목을 briefings.json에서 찾는다. 없으면 None.
 
@@ -1231,9 +1191,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     up_pct = pred.get("up_pct", "?")
     down_pct = pred.get("down_pct", "?")
     confidence = pred.get("confidence", "?")
-    reason_title     = strip_html(analysis.get("reason_title", ""))
-    telegram_signals = analysis.get("telegram_signals", [])
-    reasons          = analysis.get("reasons", [])
+    reason_title = strip_html(analysis.get("reason_title", ""))
 
     # 방향에 맞는 확률 표기: 상승 우위 → up_pct, 하락 우위 → down_pct
     dir_pct   = down_pct if "하락" in str(direction) else up_pct
@@ -1260,43 +1218,21 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
                 lines.append(f"• {t}")
         lines += [divider, f"🔗 전체 이슈·종목 픽 → {link}"]
     else:
-        if briefing_type == "kospi":
-            header = f"🇰🇷 코스피 예측 브리핑 | {date_display}"
-            link   = f"{web_base}/briefings/ko/{date_str}/"
-        else:
-            header = f"📊 브리핑 | {date_display}"
-            link   = f"{web_base}/briefings/{date_str}/"
+        # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).
+        # 두 문장 모두 웹 페이지 맨 위 헤드라인·'오늘 볼 것' 첫 줄과 같은 필드라 텔레그램과 페이지가 어긋나지 않는다.
+        is_open = (analysis.get("prediction") or {}).get("basis") == "open"
+        header = f"🇰🇷 코스피 {'시초가 예측' if is_open else '예측 브리핑'} | {date_display}"
+        link   = f"{web_base}/briefings/{date_str}/kospi/"
+        tv = analysis.get("todays_view") or {}
+        headline = strip_html(tv.get("view_title", "")) or reason_title
+        outlook = [o for o in (tv.get("outlook") or []) if isinstance(o, dict) and o.get("text")]
 
-        # 직전 예측 결과. 아직 채점 전(check_accuracy가 이 발송 이후인 09:10 KST에 실행)이면
-        # None → 배지 자체를 생략한다(_last_scored_result 참고 — 옛 채점 결과로 대체 금지).
-        prev_result = ""
-        if briefing_type == "kospi":
-            prev = _last_scored_result("kospi", date_str)
-            prev_result = "지난 예측 ✓ 적중" if prev is True else ("지난 예측 ✗ 빗나감" if prev is False else "")
-
-        lines = [
-            header,
-            divider,
-            f"{dir_emoji} {'시초가 예측' if (briefing_type == 'kospi' and (analysis.get('prediction') or {}).get('basis') == 'open') else '예측'}: <b>{direction} ({dir_pct}%)</b>",
-            f"신뢰도: <b>{confidence}%</b>",
-        ]
-        if prev_result:
-            lines += [prev_result]
-
-        if reason_title:
-            lines += [divider, f"💬 {reason_title}"]
-
-        # telegram_signals 우선 사용, 없으면 reasons로 폴백. 이슈(뉴스·이벤트)를 ETF·수치 계열보다
-        # 먼저 배치하도록 정렬한 뒤 핵심 1개만 고른다 — 전체 근거는 사이트에서 읽도록 유도(Phase B).
-        sig_src = telegram_signals if telegram_signals else [strip_html(r) for r in reasons]
-        signals = _issue_first_sort(sig_src)[:1]
-        if signals:
-            lines += ["", "핵심 시그널:"]
-            for s in signals:
-                lines.append(f"• {strip_html(s)}")
-
-        # 유도형 CTA: 텔레그램엔 방향·핵심 시그널만, 실시간·전체 분석은 사이트 몫으로.
-        lines += [divider, f"🔗 전체 근거·장중 라이브 → {link}"]
+        lines = [header, divider, f"{dir_emoji} <b>{direction} {dir_pct}%</b> (신뢰도 {confidence}%)"]
+        if headline:
+            lines += ["", f"🎯 <b>{headline}</b>"]
+        if outlook:
+            lines += ["", "👀 개장 후 볼 것", strip_html(outlook[0]["text"])]
+        lines += [divider, f"🔗 전체 근거·이슈 점검 → {link}"]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1424,7 +1360,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         user_content += (
             f"\n## ⛔ 방향 강제 지시 (필수)\n"
             f"이번 브리핑의 `prediction.direction`은 반드시 **{force_direction}**로 한다. "
-            f"reasons·reason_title·telegram_signals 등 모든 본문을 이 방향과 일관되게 작성한다. "
+            f"reasons·reason_title·todays_view 등 모든 본문을 이 방향과 일관되게 작성한다. "
             f"선행신호 prior가 전일 국내 등락보다 우선한다는 판단에 따른 강제다.\n"
         )
         print(f"[call_claude] ⛔ force_direction = {force_direction}")
