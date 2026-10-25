@@ -51,15 +51,18 @@ svg = (f'<div class="nq-plot">{svg}'
 peak_lbl = f"{s.index[peak_i].year}년 {s.index[peak_i].month}월 {s.values[peak_i]:.0f}%"
 
 pos = min(gap, 100)
-badge = {"warn": ("🚨 경고", "70% 돌파"), "caution": ("⚠️ 주의", "50% 넘음"), "ok": ("정상", "")}[level]
+badge = {"warn": ("🚨 경고", "70% 돌파"), "caution": ("⚠️ 주의", "50% 넘음"), "ok": ("✓ 정상", "")}[level]
+preview = '''<div class="nq-preview">프로토타입 상태 미리보기
+  <button data-s="ok" data-v="38.2">정상</button><button data-s="caution" data-v="59.8" class="on">주의(현재)</button><button data-s="warn" data-v="74.0">경고</button></div>'''
 section = f'''<div class="open-section nq-section is-{level}">
-  <div class="open-section__title">나스닥 과열 체크 <span class="nq-badge">{badge[0]}</span></div>
+  <div class="open-section__title">나스닥 체크 <span class="nq-badge">{badge[0]}</span></div>
+  {preview}
   <p class="nq-intro">나스닥 월봉 고점이 60개월(5년) 이동평균선보다 얼마나 위에 있는지 봐요. <b>50%</b>를 넘으면 주의, <b>70%</b>를 넘으면 경고로 표시해요.</p>
   <div class="nq-card">
     <div class="nq-top">
       <div><div class="nq-k">이번 달 고점 vs 60개월선</div>
-        <div class="nq-v">+{gap:.1f}<small>%</small></div></div>
-      <div class="nq-side"><span>이번 달 고점 <b>{hi:,.1f}</b></span><span>60개월선 <b>{ma:,.1f}</b></span><span>50% 위 <b>{streak}개월째</b></span></div>
+        <div class="nq-v"><span class="nq-num">+{gap:.1f}</span><small>%</small></div></div>
+      <div class="nq-side"><span>이번 달 고점 <b>{hi:,.1f}</b></span><span>60개월선 <b>{ma:,.1f}</b></span><span class="nq-streak">50% 위 <b>{streak}개월째</b></span></div>
     </div>
     <div class="nq-gauge"><div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
       <div class="nq-pin" style="left:{pos:.1f}%"><b>{gap:.1f}%</b></div>
@@ -106,13 +109,31 @@ css = '''<style id="nq-css">
 .nq-chart .th{stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke} .th-caution{stroke:#d97706} .th-warn{stroke:#dc2626}
 .nq-chart .area{fill:var(--ink);opacity:.05} .nq-chart .line{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke}
 .nq-foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
-.nq-foot b{color:var(--ink)} .nq-foot a{color:var(--primary);font-weight:600;white-space:nowrap}
+.nq-foot b{color:var(--ink)}
+.is-ok .nq-badge{background:#ecfdf5;color:#059669} .is-ok .nq-v{color:var(--ink)} .is-ok .nq-dot{background:#059669;box-shadow:0 0 0 1px #059669}
+.is-warn .nq-dot{background:#dc2626;box-shadow:0 0 0 1px #dc2626}
+.nq-preview{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 2px;padding:6px 8px;border:1px dashed #c4b5fd;border-radius:10px;font-size:11px;color:#7c3aed}
+.nq-preview button{border:1px solid #ddd6fe;background:#fff;color:#6d28d9;border-radius:999px;padding:2px 9px;font-size:11px;cursor:pointer}
+.nq-preview button.on{background:#7c3aed;color:#fff;border-color:#7c3aed} .nq-foot a{color:var(--primary);font-weight:600;white-space:nowrap}
 </style>'''
 
 soup = BeautifulSoup(SRC.read_text(encoding="utf-8"), "html.parser")
 lead = soup.select_one(".tv-lead")
 lead.insert_after(BeautifulSoup(section, "html.parser"))
+lead.select_one(".tv-title").string = "반도체가 먼저 맞았다 — 빅테크 실적·FOMC가 몰려오는 한 주"
+dek = lead.select_one(".tv-dek"); dek.clear()
+dek.append(BeautifulSoup("직전 정규장에서 <b>반도체·메모리</b>에 매물이 쏟아졌고, 프리마켓에서도 SOX가 고개를 못 들고 있어요. "
+                         "이번 주엔 <b>빅테크 실적</b>과 <b>FOMC</b>가 줄줄이 나와요. AI 랠리가 진짜 체력인지, 이번 주가 답해줄 거예요.", "html.parser"))
+js = """<script>document.querySelectorAll('.nq-preview button').forEach(b=>b.onclick=()=>{
+ const sec=document.querySelector('.nq-section'),v=+b.dataset.v,st=b.dataset.s;
+ sec.classList.remove('is-ok','is-caution','is-warn');sec.classList.add('is-'+st);
+ document.querySelectorAll('.nq-preview button').forEach(x=>x.classList.toggle('on',x===b));
+ sec.querySelector('.nq-badge').textContent={ok:'✓ 정상',caution:'⚠️ 주의',warn:'🚨 경고'}[st];
+ sec.querySelector('.nq-num').textContent='+'+v.toFixed(1);
+ const pin=sec.querySelector('.nq-pin');pin.style.left=Math.min(v,100)+'%';pin.querySelector('b').textContent=v.toFixed(1)+'%';
+ sec.querySelector('.nq-streak').style.visibility=st==='ok'?'hidden':'visible';});</script>"""
+soup.body.append(BeautifulSoup(js, "html.parser"))
 out = str(soup).replace("</head>", css + "\n</head>", 1)
 OUT.write_text(out, encoding="utf-8")
-DOC.write_text(out.replace("<head>", "<head>\n<!-- 미국 브리핑 '나스닥 과열 체크' 섹션 프로토타입(월봉 고점 vs 60개월선, 50% 주의·70% 경고) — 10/23 발행본 기반, 스타일은 운영 사이트에서 불러온다 -->\n<base href=\"https://doubleshot.space/\">", 1), encoding="utf-8")
+DOC.write_text(out.replace("<head>", "<head>\n<!-- 미국 브리핑 '나스닥 체크' 섹션 프로토타입(월봉 고점 vs 60개월선, 항상 표시 · 50% 주의·70% 경고) + 새 헤드라인 규칙 예시 — 10/23 발행본 기반, 스타일은 운영 사이트에서 불러온다 -->\n<base href=\"https://doubleshot.space/\">", 1), encoding="utf-8")
 print(f"gap {gap:.1f}% hi {hi:.1f} ma60 {ma:.1f} streak {streak} level {level}")
