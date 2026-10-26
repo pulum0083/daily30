@@ -2433,3 +2433,5 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **① 시간대 카드**(§13) — `web/assets/home-hero.js`. 카드 글씨는 방향·확률 26px, 헤드라인 17px, 보조 13.5px, 버튼 13px.
   - 마감 카드의 '📝 아침 시초가 예측 → 시초가 x% ✓'와 주말 카드의 주간 등락·이번 주 성적은 공개 JSON에 없어, **마감 잡이 `web/data/home-summary.json`을 만든다**(`scripts/build_home_summary.py`, continue-on-error·timeout 3). **이 파일의 주인은 kospi-close 잡 하나다(§18).** 채점은 check_accuracy와 같은 규칙(지수 일봉 시가 ÷ 직전 종가, `classify_direction_correct`). 일봉을 못 받으면 파일을 쓰지 않는다.
   - 아침 카드의 신뢰 한 줄은 `accuracy-summary.json`의 시초가 기준 기록이 5건 이상일 때만(§57).
+- **② 특이신호 상위 3** — 홈은 `/api/signals` 신호 강도 상위 3개만(`SIG_HOME_N`), 정렬 탭은 뺐다. "특이 신호 전체 보기 →"는 머리줄 오른쪽, 기존 특이신호 화면으로 간다(46종목을 다 나열하는 화면이 아니라 신호가 잡힌 종목 목록이라 "전체 46종목" 문구는 쓰지 않는다).
+  - **상세 페이지가 없는 종목은 막지 않고 그 종목의 섹터 페이지로 보낸다**(`/stocks/sector/{key}/`, "방산 보기 →"). 홈·특이신호 화면 공용(`sigItemHtml`). 섹터를 모르면 예전처럼 막는다. §36 존재 게이트(STOCK_PAGES = stocks.json detail_page)는 그대로다.

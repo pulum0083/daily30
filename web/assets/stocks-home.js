@@ -651,7 +651,6 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
 let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
 let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
-let sigHomeSort='up'; // score | up
 let sigAllSort='up'; // score | up | dn
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
@@ -1063,6 +1062,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     return '<svg viewBox="0 0 78 22" style="width:78px;height:22px;display:block;overflow:visible;"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.2" fill="#fff" stroke="'+color+'" stroke-width="1.5"/></svg>';
   }
   function secLbl(s){ return SECTOR_LABELS[s]||s||''; }
+  var SECTOR_KEY_OF={}; Object.keys(SECTOR_LABELS).forEach(function(k){ SECTOR_KEY_OF[SECTOR_LABELS[k]]=k; });
   // 섹터 화면(#sector)은 2026-09-02에 제거됐다. 홈에서 섹터 상세 페이지로 가는 링크가
   // 0개였고(JS도 주입하지 않았다) '패시브 쏠림'은 실측 소스 없는 자리표시자였다.
   // 섹터 상세는 /stocks/sector/{key}/ 정적 페이지가 계속 담당한다.
@@ -1083,9 +1083,12 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     var badges=(s.badges||[]).map(badgeHtml).join('');
     var linked=!!STOCK_PAGES[s.code];
     var goArrow=linked?'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
-    var tag=linked?'a':'div';
-    var attrs=linked?(' onclick="goStock(\''+s.code+'\')"'):'';
-    var nolink=linked?'':' is-nolink';
+    // 상세 페이지가 없으면 막지 않고 그 종목의 섹터 페이지로 보낸다(2026-10-26, §68). 섹터를 모르면 예전처럼 막는다.
+    var secKey=linked?null:SECTOR_KEY_OF[s.sector];
+    var tag=(linked||secKey)?'a':'div';
+    var attrs=linked?(' onclick="goStock(\''+s.code+'\')"'):(secKey?' href="/stocks/sector/'+secKey+'/"':'');
+    var nolink=linked?'':(secKey?' is-sector':' is-nolink');
+    if(secKey) goArrow='<span class="sig-sec">'+SECTOR_LABELS[secKey]+' 보기 →</span>';   // 라벨은 우리 상수라 이스케이프 불필요
     if(i===0){
       return '<'+tag+' class="sig-hero'+nolink+'"'+attrs+'>'
         +'<span class="sig-flag">'+(heroFlag||'오늘 가장 눈에 띄는 신호')+'</span>'
@@ -1099,24 +1102,17 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
       +'<span class="sig-rbadges">'+badges+'</span></span>'
       +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</'+tag+'>';
   }
+  // 홈은 신호 강도 상위 3개만(2026-10-26, §68) — 정렬·전체 목록은 특이신호 화면이 맡는다.
+  var SIG_HOME_N=3;
   function sigHomeRender(){
     var w=document.getElementById('sig-rows'); if(!w) return;
-    // 강도순은 API가 내려준 상위 N(SIGNALS_HOME) 유지, 상승률순은 전체 신호(SIGNALS_ALL) 기준으로 정렬 후 상위 N — 더보기와 정합성 유지
-    var arr = (sigHomeSort==='up')
-      ? SIGNALS_ALL.slice().sort(function(a,b){return b.pct-a.pct;}).slice(0, SIGNALS_HOME.length||10)
-      : SIGNALS_HOME.slice();
+    var arr = SIGNALS_HOME.slice(0, SIG_HOME_N);
     w.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i);}).join(''):'';
     w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
     setTimeout(function(){w.classList.remove('sig-updated');}, 600);
   }
-  function sigHomeSetSort(sort,el){
-    sigHomeSort=sort;
-    if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
-    sigHomeRender();
-  }
-  window.sigHomeSetSort=sigHomeSetSort;
   // 테스트 훅 — 존재-게이트(상세 페이지 있는 종목만 링크) 회귀 검증용.
-  window.__sigHome={sigItemHtml:sigItemHtml, STOCK_PAGES:STOCK_PAGES};
+  window.__sigHome={sigItemHtml:sigItemHtml, STOCK_PAGES:STOCK_PAGES, SIG_HOME_N:SIG_HOME_N};
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);

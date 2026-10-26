@@ -68,26 +68,31 @@ test('상세 페이지가 있는 종목은 링크로 그린다', () => {
   }
 });
 
-test('상세 페이지가 없는 종목은 링크로 그리지 않는다', () => {
+test('상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보낸다(2026-10-26, §68)', () => {
   const { sigItemHtml } = load();
   // 042700(한미반도체)·000270(기아) 등 43종목은 랭킹·신호에는 나오지만 상세 페이지가 없다.
   for (const code of ['042700', '000270', '035420', '068270']) {
     const hero = sigItemHtml(sig(code), 0);
     const row  = sigItemHtml(sig(code), 1);
-    assert.match(hero, /^<div class="sig-hero is-nolink"/, `${code} 히어로가 <div>여야 한다`);
-    assert.match(row,  /^<div class="sig-row is-nolink"/,  `${code} 행이 <div>여야 한다`);
-    assert.ok(!hero.includes('goStock'), '링크 아닌 행에 onclick이 남으면 안 된다');
-    assert.ok(!row.includes('sig-go'), '링크 아닌 행에는 화살표가 없어야 한다');
-    assert.ok(!hero.includes('<a '), '링크 아닌 행에 <a>가 섞이면 안 된다');
+    assert.match(hero, /^<a class="sig-hero is-sector" href="\/stocks\/sector\/semicon\/"/, `${code} 히어로가 섹터 링크여야 한다`);
+    assert.match(row,  /^<a class="sig-row is-sector" href="\/stocks\/sector\/semicon\/"/,  `${code} 행이 섹터 링크여야 한다`);
+    assert.ok(!hero.includes('goStock'), '상세 페이지가 없는 종목에 goStock이 남으면 안 된다');
+    assert.ok(row.includes('반도체 보기 →'));
   }
+});
+
+test('섹터를 모르면 예전처럼 막는다', () => {
+  const { sigItemHtml } = load();
+  const row = sigItemHtml({ ...sig('042700'), sector: '기타' }, 1);
+  assert.match(row, /^<div class="sig-row is-nolink"/);
 });
 
 test('닫는 태그가 여는 태그와 일치한다', () => {
   const { sigItemHtml } = load();
   assert.ok(sigItemHtml(sig('005930'), 0).endsWith('</a>'));
-  assert.ok(sigItemHtml(sig('042700'), 0).endsWith('</div>'));
+  assert.ok(sigItemHtml(sig('042700'), 0).endsWith('</a>'));
   assert.ok(sigItemHtml(sig('005930'), 2).endsWith('</a>'));
-  assert.ok(sigItemHtml(sig('042700'), 2).endsWith('</div>'));
+  assert.ok(sigItemHtml({ ...sig('042700'), sector: '기타' }, 2).endsWith('</div>'));
 });
 
 test('STOCK_PAGES는 stocks.json의 detail_page 종목과 같아야 한다', () => {
@@ -97,4 +102,9 @@ test('STOCK_PAGES는 stocks.json의 detail_page 종목과 같아야 한다', () 
   const expected = list.filter((s) => s.detail_page).map((s) => s.code).sort();
   assert.deepEqual(Object.keys(STOCK_PAGES).sort(), expected,
     'STOCK_PAGES와 stocks.json의 detail_page가 어긋나면 존재하지 않는 페이지로 링크한다(§36)');
+});
+
+
+test('홈은 신호 강도 상위 3개만', () => {
+  assert.equal(load().SIG_HOME_N, 3);
 });
