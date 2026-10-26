@@ -1015,3 +1015,43 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-block .sb-note{padding:0 16px}
 .sbx-block .sbx-more>summary{padding:6px 16px 12px}
 .sbx-block .sbx-more{margin-top:2px}
+
+/* §68 ⑤ 구조 신호 — 나스닥 체크 게이지(0·60·70 눈금) + 월봉 5개월선 미니 막대. 아침·밤·주말에만 */
+#struct-sig[hidden]{display:none}
+#home:not(.slot-morning):not(.slot-evening):not(.slot-weekend) #struct-sig{display:none}
+#struct-sig .ss{display:block;padding:12px 16px;border-top:1px solid var(--hair);text-decoration:none;color:inherit;background:#fff}
+#struct-sig .ss:hover{background:#F8FAFF}
+#struct-sig .ss-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#struct-sig .ss-k{font-size:12px;font-weight:700;color:var(--muted)}
+#struct-sig .ss-d{font-size:11px;color:var(--muted)}
+#struct-sig .ss-m{display:flex;align-items:center;gap:8px;margin-top:2px}
+#struct-sig .ss-m b{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+#struct-sig .pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+#struct-sig .pill.ok{background:#ECFDF3;color:#15803D}
+#struct-sig .pill.caution{background:#FFF7E6;color:#B45309}
+#struct-sig .pill.warn{background:#FEF2F2;color:#E03131}
+#struct-sig .pill.nb{background:#EFF4FE;color:#2775ED}
+#struct-sig .ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
+#struct-sig .nqg{margin-top:9px}
+#struct-sig .nqg-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
+#struct-sig .nqg-t i{position:absolute;top:0;height:100%;display:block}
+#struct-sig .nqg-t i.z1{background:#FDECC8}
+#struct-sig .nqg-t i.z2{background:#FBD5D5;border-radius:0 4px 4px 0}
+#struct-sig .nqg-t i.f{left:0;border-radius:4px;opacity:.85}
+#struct-sig .nqg-t i.f.ok{background:#4ADE80} #struct-sig .nqg-t i.f.caution{background:#F59E0B} #struct-sig .nqg-t i.f.warn{background:#EF4444}
+#struct-sig .nqg-t i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.12)}
+#struct-sig .nqg-t i.dot.ok{background:#16A34A} #struct-sig .nqg-t i.dot.caution{background:#D97706} #struct-sig .nqg-t i.dot.warn{background:#DC2626}
+#struct-sig .nqg-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
+#struct-sig .nqg-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+#struct-sig .nqg-l span:first-child{transform:none}
+#struct-sig .m5bars{display:flex;gap:6px;margin-top:9px;height:58px}
+#struct-sig .m5b{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+#struct-sig .m5b-u,#struct-sig .m5b-d{flex:1;display:flex;justify-content:center}
+#struct-sig .m5b-u{align-items:flex-end;border-bottom:1px solid #CBD5E1}
+#struct-sig .m5b-d{align-items:flex-start}
+#struct-sig .m5b i{display:block;width:60%;max-width:22px;background:#CBD5E1;border-radius:2px}
+#struct-sig .m5b.run i{background:#2775ED}
+#struct-sig .m5b.cur i{background:#93B8F5}
+#struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
+@media(min-width:720px){#struct-sig .m5bars{max-width:420px}}

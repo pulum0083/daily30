@@ -109,6 +109,79 @@
       '<a class="hh-cta" href="/briefings/' + ymd + '/us/">미국 브리핑 보기 →</a></div>';
   }
 
+  // ── 구조 신호(§68 ⑤) — 월 단위로 바뀌는 신호 두 줄. 가장 최근 발행 스냅샷에서만 읽고(옛 날짜로 거슬러 가지 않는다),
+  //    그 발행이 STRUCT_MAX_AGE일보다 오래됐으면 수집이 멈춘 것으로 보고 뺀다(§20). 기준 브리핑 날짜를 줄마다 밝힌다.
+  var STRUCT_MAX_AGE = 10;
+  function daysBetween(a, b) {
+    var pa = a.split('-'), pb = b.split('-');
+    return Math.round((Date.UTC(+pb[0], +pb[1] - 1, +pb[2]) - Date.UTC(+pa[0], +pa[1] - 1, +pa[2])) / 86400000);
+  }
+  function latestReady(slots, type, today) {
+    var ds = Object.keys(slots || {}).filter(function (d) { return d <= today; }).sort().reverse();
+    for (var i = 0; i < ds.length; i++) {
+      var it = slots[ds[i]] && slots[ds[i]][type];
+      if (it && it.state === 'ready') return daysBetween(ds[i], today) <= STRUCT_MAX_AGE ? ds[i] : null;
+    }
+    return null;
+  }
+
+  // 나스닥 체크 — 60개월선 대비 월봉 고점 이격. 눈금 0·60(주의)·70(경고), 막대는 이격까지, 색은 단계(§65).
+  function nasdaqRow(nq, ymd, today) {
+    if (!nq || typeof nq.gap_pct !== 'number' || !isFinite(nq.gap_pct)) return '';
+    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 60 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
+    var top = Math.max(80, Math.ceil((g + 5) / 10) * 10);
+    var x = function (v) { return (Math.max(0, Math.min(v, top)) / top * 100).toFixed(1) + '%'; };
+    return '<a class="ss" href="/briefings/' + ymd + '/us/">' +
+      '<div class="ss-h"><span class="ss-k">나스닥 체크</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 미국 브리핑</span></div>' +
+      '<div class="ss-m"><b>' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</b><span class="pill ' + lv[0] + '">' + lv[1] + '</span></div>' +
+      '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(60) + ';width:' + (10 / top * 100).toFixed(1) + '%"></i>' +
+      '<i class="z2" style="left:' + x(70) + ';right:0"></i><i class="f ' + lv[0] + '" style="width:' + x(g) + '"></i>' +
+      '<i class="dot ' + lv[0] + '" style="left:' + x(g) + '"></i></div>' +
+      '<div class="nqg-l"><span style="left:0">0</span><span style="left:' + x(60) + '">60 주의</span><span style="left:' + x(70) + '">70 경고</span></div></div>' +
+      '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점</em></a>';
+  }
+
+  // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 그 사실을 적는다.
+  function ma5Row(m5, ymd, today) {
+    if (!m5 || !Array.isArray(m5.items)) return '';
+    var head = '<div class="ss-h"><span class="ss-k">월봉 5개월선 안착</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 코스피 브리핑</span></div>';
+    var it = m5.items[0];
+    if (!it) return '<a class="ss" href="/briefings/' + ymd + '/kospi/">' + head + '<em>조건을 채운 종목이 없어요</em></a>';
+    var strip = (it.strip || []).filter(function (s) { return typeof s.gap_pct === 'number'; }).slice(-6);
+    var mx = Math.max.apply(null, strip.map(function (s) { return Math.abs(s.gap_pct); }).concat([1]));
+    var bars = strip.map(function (s) {
+      var h = (Math.abs(s.gap_pct) / mx * 100).toFixed(0);
+      return '<span class="m5b' + (s.run ? ' run' : '') + (s.cur ? ' cur' : '') + '" title="' + esc(s.label) + ' ' + pct(s.gap_pct) + '">' +
+        '<span class="m5b-u">' + (s.gap_pct > 0 ? '<i style="height:' + h + '%"></i>' : '') + '</span>' +
+        '<span class="m5b-d">' + (s.gap_pct < 0 ? '<i style="height:' + h + '%"></i>' : '') + '</span>' +
+        '<small>' + esc(s.label) + '</small></span>';
+    }).join('');
+    var more = m5.items.length > 1 ? ' 외 ' + (m5.items.length - 1) + '종목' : '';
+    var now = typeof it.now_gap_pct === 'number' ? '지금 이격 ' + (it.now_gap_pct >= 0 ? '+' : '') + it.now_gap_pct.toFixed(1) + '%' : '';
+    return '<a class="ss" href="/briefings/' + ymd + '/kospi/">' + head +
+      '<div class="ss-m"><b>' + esc(it.name) + more + '</b>' + (it.streak ? '<span class="pill nb">' + it.streak + '개월째</span>' : '') + '</div>' +
+      (strip.length ? '<div class="m5bars">' + bars + '</div>' : '') +
+      '<em>월말 종가 ÷ 5개월 평균' + (now ? ' · ' + now : '') + '</em></a>';
+  }
+
+  function structHtml(nq, nqDate, m5, m5Date, today) {
+    var rows = (nqDate ? nasdaqRow(nq, nqDate, today) : '') + (m5Date ? ma5Row(m5, m5Date, today) : '');
+    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">🧱</span>구조 신호</span>' +
+      '<span class="block__s">월 단위로 바뀌는 신호</span></div>' + rows : '';
+  }
+
+  var structEl = document.getElementById('struct-sig');
+  function loadStruct(slots, today) {
+    if (!structEl) return;
+    var usD = latestReady(slots, 'us', today), krD = latestReady(slots, 'kospi', today);
+    var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
+    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi')]).then(function (r) {
+      var html = structHtml(r[0] && r[0].nasdaq_overheat, usD, r[1] && r[1].monthly_ma5, krD, today);
+      structEl.innerHTML = html;
+      structEl.hidden = !html;
+    });
+  }
+
   function json(url) {
     return fetch(url, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
@@ -144,6 +217,7 @@
         usReady: function (ymd) { return ready(ymd, 'us'); },
       });
       window.__homeSlot = info.slot;
+      loadStruct(slots, today);
       var type = { morning: 'kospi', close: 'close', evening: 'us' }[info.slot];
       if (!type || !ready(info.date, type)) { show('', info.slot); return; }   // 장중·주말·미발행 — 카드 없음
       var item = slots[info.date][type];
@@ -161,7 +235,8 @@
   }
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
-                        morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel };
+                        morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, ma5Row: ma5Row, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);

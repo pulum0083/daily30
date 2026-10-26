@@ -99,3 +99,47 @@ test('오늘 브리핑이 ready가 아니면 옛 날짜로 대체하지 않고 �
   assert.equal(t.root.hidden, true);
   assert.ok(!t.cl.has('hero-on'));
 });
+
+// ── 구조 신호(§68 ⑤) ───────────────────────────────────────────────────
+test('구조 신호 — 가장 최근 ready 날짜만, 10일보다 오래되면 뺀다(옛 날짜로 거슬러 가지 않는다)', () => {
+  const slots = { '2026-10-23': { us: { state: 'ready' }, kospi: { state: 'ready' } },
+                  '2026-10-26': { us: { state: 'pending' }, kospi: { state: 'ready' } } };
+  assert.equal(api.latestReady(slots, 'kospi', '2026-10-26'), '2026-10-26');
+  assert.equal(api.latestReady(slots, 'us', '2026-10-26'), '2026-10-23');
+  assert.equal(api.latestReady(slots, 'us', '2026-11-05'), null);          // 13일 전 발행 — 수집이 멈춘 것으로 본다
+  assert.equal(api.latestReady({}, 'us', '2026-10-26'), null);
+});
+
+test('나스닥 체크 — 60·70 눈금과 단계, 값이 없으면 줄을 뺀다', () => {
+  const ok = api.nasdaqRow({ gap_pct: 59.79, month: '2026-10' }, '2026-10-23', '2026-10-26');
+  assert.match(ok, /\+59\.8%/);
+  assert.match(ok, /pill ok">✓ 정상/);
+  assert.match(ok, /60 주의/);
+  assert.match(ok, /70 경고/);
+  assert.match(ok, /href="\/briefings\/2026-10-23\/us\/"/);
+  assert.match(api.nasdaqRow({ gap_pct: 64 }, '2026-10-23', '2026-10-23'), /pill caution">⚠️ 주의/);
+  assert.match(api.nasdaqRow({ gap_pct: 71.2 }, '2026-10-23', '2026-10-23'), /pill warn">🚨 경고/);
+  assert.equal(api.nasdaqRow(null, '2026-10-23', '2026-10-26'), '');
+  assert.equal(api.nasdaqRow({ gap_pct: null }, '2026-10-23', '2026-10-26'), '');
+});
+
+test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표시), 종목이 없으면 그 사실만', () => {
+  const strip = ['5월', '6월', '7월', '8월', '9월', '10월', '이번 달'].map((label, i) =>
+    ({ label, gap_pct: [-9.69, -5.49, 11.59, 7.87, 8.69, 3.1, 5.46][i], run: i >= 2 && i <= 4, cur: i === 6 }));
+  const m5 = { items: [{ name: '메리츠금융지주', streak: 3, now_gap_pct: 5.46, strip }, { name: 'B', streak: 3, strip: [] }] };
+  const h = api.ma5Row(m5, '2026-10-26', '2026-10-26');
+  assert.equal((h.match(/class="m5b[ "]/g) || []).length, 6);                  // 7개 중 최근 6개월
+  assert.equal((h.match(/class="m5b run/g) || []).length, 3);              // 7·8·9월(5월이 잘린다)
+  assert.match(h, /class="m5b cur"/);
+  assert.match(h, /메리츠금융지주 외 1종목/);
+  assert.match(h, /3개월째/);
+  assert.match(h, /지금 이격 \+5\.5%/);
+  assert.ok(!/매매 신호/.test(h));
+  assert.match(api.ma5Row({ items: [] }, '2026-10-26', '2026-10-26'), /조건을 채운 종목이 없어요/);
+  assert.equal(api.ma5Row(null, '2026-10-26', '2026-10-26'), '');
+});
+
+test('구조 신호 블록 — 두 줄 모두 없으면 블록째 뺀다', () => {
+  assert.equal(api.structHtml(null, null, null, null, '2026-10-26'), '');
+  assert.match(api.structHtml(null, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), /구조 신호/);
+});
