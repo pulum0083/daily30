@@ -25,6 +25,8 @@
             </div>
             {% endif %}
             {% include "sections/_issues.html" %}
+            {# 나스닥 체크 — 오늘 점검할 이슈 아래(사용자 결정 2026-10-26, §65). 데이터·백테스트 파일이 없으면 생략. #}
+            {% if nq %}{% include "sections/nasdaq_check.html" %}{% endif %}
             <div class="divider"></div>
             {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}{% endif %}
             {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}

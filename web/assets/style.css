@@ -1460,3 +1460,62 @@ html.dark .arch-item__dek{color:var(--muted);}
 .ic-src{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}
 .ic-src a{color:var(--primary);font-weight:600;white-space:nowrap}
 .accordion-body__inner>.ma5m-section:last-child{margin-bottom:28px}
+
+/* ── 미국 브리핑 '나스닥 체크'(2026-10-26, §65) — 경고=빨강(--up 계열)·주의=황색(--gold)·정상=초록. 다크 모드는 토큰·반투명색으로 따라간다 ── */
+.nq-section{--nq-ok:#059669;--nq-ok-bg:rgba(5,150,105,.12);margin-top:22px}
+.nq-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;vertical-align:1px}
+.is-ok .nq-badge{background:var(--nq-ok-bg);color:var(--nq-ok)}
+.is-caution .nq-badge{background:var(--gold-bg);color:var(--gold)}
+.is-warn .nq-badge{background:var(--up-bg);color:var(--up)}
+.nq-intro{font-size:13px;color:var(--muted);line-height:1.65;margin:6px 0 10px}
+.nq-intro b{color:var(--ink)}
+.nq-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:15px 16px 12px;background:var(--canvas)}
+.is-caution .nq-card{border-color:color-mix(in srgb,var(--gold) 45%,transparent);background:linear-gradient(180deg,var(--gold-bg),var(--canvas) 55%)}
+.is-warn .nq-card{border-color:color-mix(in srgb,var(--up) 40%,transparent);background:linear-gradient(180deg,var(--up-bg),var(--canvas) 55%)}
+.nq-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.nq-k{font-size:12px;color:var(--muted);font-weight:600}
+.nq-v{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.nq-v small{font-size:20px;margin-left:1px}
+.is-caution .nq-v{color:var(--gold)}
+.is-warn .nq-v{color:var(--up)}
+.nq-side{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--muted);text-align:right}
+.nq-side b{color:var(--ink);font-weight:700;margin-left:4px;font-variant-numeric:tabular-nums}
+.nq-gauge{position:relative;margin:22px 0 26px}
+.nq-track{display:flex;height:8px;border-radius:999px;overflow:hidden}
+.nq-track .seg{display:block;height:100%}
+.nq-track .seg.ok{width:60%;background:var(--surface-inset)}
+.nq-track .seg.caution{width:10%;background:#fcd34d}
+.nq-track .seg.warn{width:30%;background:#f87171}
+.nq-pin{position:absolute;top:-19px;transform:translateX(-50%);font-size:11px;white-space:nowrap}
+.nq-pin::after{content:'';position:absolute;left:50%;top:15px;width:2px;height:16px;margin-left:-1px;background:var(--ink);border-radius:1px}
+.nq-pin b{font-weight:800;color:var(--ink)}
+.nq-ticks{position:relative;height:14px;margin-top:6px;font-size:10.5px;color:var(--muted)}
+.nq-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.nq-ticks span:first-child{transform:none}
+.nq-ticks span:last-child{transform:translateX(-100%)}
+.nq-ch-h{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.nq-ch-h span{font-weight:500;color:var(--muted)}
+.nq-plot{position:relative;height:150px}
+.nq-chart{position:absolute;top:0;left:34px;width:calc(100% - 34px);height:100%;display:block}
+.nq-chart .z-caution{fill:#fcd34d;opacity:.22}
+.nq-chart .z-warn{fill:#f87171;opacity:.16}
+.nq-chart .th{stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.nq-chart .th-caution{stroke:var(--gold)}
+.nq-chart .th-warn{stroke:var(--up)}
+.nq-chart .area{fill:var(--ink);opacity:.05}
+.nq-chart .line{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.nq-dot,.nq-dot2{position:absolute;border-radius:50%;transform:translate(-50%,-50%)}
+.nq-dot{width:9px;height:9px;background:var(--nq-ok);border:2px solid var(--canvas);box-shadow:0 0 0 1px var(--nq-ok)}
+.is-caution .nq-dot{background:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.is-warn .nq-dot{background:var(--up);box-shadow:0 0 0 1px var(--up)}
+.nq-dot2{width:6px;height:6px;background:var(--muted)}
+.nq-ax{position:absolute;left:0;width:28px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted)}
+.nq-yr{position:absolute;bottom:0;transform:translateX(-50%);font-size:10px;color:var(--muted)}
+.nq-foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
+.nq-foot summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;font-weight:600}
+.nq-foot summary::-webkit-details-marker{display:none}
+.nq-foot summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.nq-foot[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.nq-foot p{margin:8px 0 0}
+.nq-foot b{color:var(--ink)}
+.nq-foot a{color:var(--primary);font-weight:600;white-space:nowrap}

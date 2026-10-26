@@ -295,6 +295,13 @@ jobs:
           mkdir -p data web/briefings
           python3 scripts/fetch_data.py --type us
 
+      # 나스닥 월봉 고점 vs 60개월선(§65) — data/nasdaq_overheat.json. 실패하면 섹션·텔레그램 블록만 빠진다.
+      - name: 📈 나스닥 체크 (월봉 고점 vs 60개월선, 실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python3 scripts/nasdaq_overheat.py
+
       # RSS로 실기사를 먼저 모으고 Gemini는 그 목록에서 고르고 요약만 한다(계획 2.5단계).
       # 날짜·출처가 기사에서 그대로 오므로 §31 같은 무출처 생성물이 구조적으로 불가능하다.
       # 기존 google_search 경로는 08-05~10 네 거래일 연속 catalyst 0건이었다.

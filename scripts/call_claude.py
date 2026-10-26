@@ -1261,6 +1261,23 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
+def _nasdaq_telegram_lines(analysis: dict, date_str: str) -> list:
+    """나스닥 경고 블록 — 지표가 70% 이상(경고)일 때만 싣는다. 주의·정상은 싣지 않는다(§65).
+
+    페이지 '나스닥 체크' 섹션과 같은 generate_html.build_nasdaq_check()로 읽는다 — 날짜 대조·백테스트 파일 없음
+    처리까지 같아서 둘의 숫자가 어긋나지 않는다(§62 월봉 블록과 같은 방식).
+    """
+    import generate_html
+    nq = generate_html.build_nasdaq_check(dict(analysis), date_str).get("nq")
+    if not nq or nq["level"] != "warn":
+        return []
+    bt = nq["bt"]
+    return ["",
+            f"🚨 나스닥 과열 경고 — {nq['month_label']} 고점이 60개월선보다 {nq['gap']:.1f}% 위예요.",
+            f"※ 과거 {nq['warn']:.0f}% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 "
+            f"{bt['warn']['dd20_pct']:.0f}%였어요(전체 {bt['all_dd20_pct']:.0f}%)."]
+
+
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
     import re
@@ -1304,6 +1321,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += ["", f"🎯 <b>{view_title}</b>"]
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
+        lines += _nasdaq_telegram_lines(analysis, date_str)
         lines += [divider, f"🔗 전체 이슈·종목 픽 → {link}"]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).

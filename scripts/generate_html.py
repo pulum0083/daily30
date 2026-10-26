@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261026b"
+ASSET_VER = "20261026c"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -492,6 +492,94 @@ def _ma5_backtest_stats():
     except Exception as e:
         print(f"[generate_html] monthly_ma5 백테스트 수치 없음({e}) — 섹션 생략")
         return None
+
+
+NASDAQ_BACKTEST_PATH = CONFIG_DIR / "nasdaq_overheat_backtest.json"
+_NQ_BADGE = {"ok": "✓ 정상", "caution": "⚠️ 주의", "warn": "🚨 경고"}
+_NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 SVG 좌표(프로토타입과 같다)
+
+
+def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
+    """미국 브리핑 '나스닥 체크' 섹션 + 텔레그램 경고 블록의 공통 컨텍스트(§65).
+
+    월봉 5개월선 코너와 같은 구조다 — 스냅샷이 1순위고, 데이터 파일은 브리핑 날짜와 같을 때만 쓴다(§14·§45).
+    데이터가 없거나 하단 설명의 출처인 백테스트 파일이 없으면 빈 dict → 섹션·텔레그램 블록 모두 생략.
+    텔레그램(call_claude._nasdaq_telegram_lines)도 이 함수로 읽어 페이지와 숫자가 어긋나지 않는다.
+    """
+    import nasdaq_overheat as nq
+    data = analysis.get("nasdaq_overheat")
+    if not isinstance(data, dict):
+        data = _read_nasdaq_overheat(target_date)
+        if data is not None:
+            analysis["nasdaq_overheat"] = data   # 스냅샷에 함께 저장된다
+    if not data or not isinstance(data.get("gap_pct"), (int, float)):
+        return {}
+    try:
+        bt = json.loads(NASDAQ_BACKTEST_PATH.read_text(encoding="utf-8"))
+        bt["caution_band"]["fwd12_avg_pct"], bt["warn"]["dd20_pct"]          # 필수 키 확인
+    except Exception as e:
+        print(f"[generate_html] 나스닥 체크 백테스트 수치 없음({e}) — 섹션 생략")
+        return {}
+    gap = float(data["gap_pct"])
+    level = nq.level_of(gap)                     # 저장된 level이 아니라 같은 판정 함수로 다시 정한다
+    month = str(data.get("month") or "")
+    month_label = ("이번 달" if target_date and month == target_date[:7]
+                   else (f"{int(month[5:7])}월" if len(month) == 7 else "이번 달"))
+    return {"nq": {
+        "gap": gap, "level": level, "badge": _NQ_BADGE[level],
+        "high": data.get("high"), "ma60": data.get("ma60"),
+        "streak": int(data.get("streak") or 0) if level != "ok" else 0,
+        "pin": max(0.0, min(gap, 100.0)), "month_label": month_label,
+        "chart": _nasdaq_chart(data.get("series") or [], data.get("peak")),
+        "bt": bt, "caution": nq.CAUTION, "warn": nq.WARN,
+    }}
+
+
+def _nasdaq_chart(series: list, peak) -> dict:
+    """2014년 이후 월별 위치 그래프 — SVG는 선·면·기준선만, 글자·점은 HTML로 겹친다(모바일에서 SVG가 가로로 눌려
+    글자가 찌그러졌다). 좌표는 HTML용 퍼센트(top)·calc(left)로 같이 돌려준다."""
+    pts = [s for s in series if isinstance(s, dict) and isinstance(s.get("g"), (int, float))]
+    if len(pts) < 2:
+        return {}
+    W, H = _NQ_W, _NQ_H
+    def Y(v):
+        v = min(max(v, 0), 100)
+        return _NQ_PADT + (H - _NQ_PADT - _NQ_PADB) * (1 - v / 100)
+    xs = [i * (W - _NQ_PADR) / (len(pts) - 1) for i in range(len(pts))]
+    line = " ".join(f"{x:.1f},{Y(p['g']):.1f}" for x, p in zip(xs, pts))
+    left = lambda x: f"calc(34px + (100% - 34px) * {x / W:.4f})"
+    top = lambda v: f"{Y(v) / H * 100:.2f}%"
+    pi = max(range(len(pts)), key=lambda i: pts[i]["g"])
+    pk = peak if isinstance(peak, dict) and peak.get("m") else pts[pi]
+    return {
+        "w": W, "h": H, "x1": W - _NQ_PADR, "line": line,
+        "area": f"{xs[0]:.1f},{Y(0):.1f} {line} {xs[-1]:.1f},{Y(0):.1f}",
+        "y100": f"{Y(100):.1f}", "y70": f"{Y(70):.1f}", "y60": f"{Y(60):.1f}",
+        "h_warn": f"{Y(70) - Y(100):.1f}", "h_caution": f"{Y(60) - Y(70):.1f}",
+        "dot": {"left": left(xs[-1]), "top": top(pts[-1]["g"])},
+        "peak_dot": {"left": left(xs[pi]), "top": top(pts[pi]["g"])},
+        "axes": [{"v": v, "top": top(v)} for v in (70, 60, 0)],
+        "years": [{"y": p["m"][:4], "left": left(x)} for x, p in zip(xs, pts)
+                  if p["m"].endswith("-01") and int(p["m"][:4]) % 2 == 0],
+        "from_year": pts[0]["m"][:4],
+        "peak_label": f"{int(pk['m'][:4])}년 {int(pk['m'][5:7])}월 {pk['g']:.0f}%",
+    }
+
+
+def _read_nasdaq_overheat(target_date: str):
+    """data/nasdaq_overheat.json 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
+    path = DATA_DIR / "nasdaq_overheat.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] nasdaq_overheat 파싱 실패: {e}")
+        return None
+    if target_date and data.get("date") != target_date:
+        print(f"[generate_html] ⚠️ nasdaq_overheat 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
+        return None
+    return data
 
 
 def build_issues(analysis: dict) -> dict:
@@ -1701,6 +1789,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")
+        ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
         tv = analysis.get("todays_view") or {}
         ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"

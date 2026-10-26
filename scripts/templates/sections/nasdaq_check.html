@@ -1,0 +1,49 @@
+{# 나스닥 체크 — 나스닥 종합지수 월봉 고점 vs 60개월선(결정론, §65). 항상 표시(데이터·백테스트 파일이 없으면 생략).
+   그래프 글자·점은 SVG 밖 HTML로 겹친다 — 모바일에서 SVG가 가로로 눌려 글자가 찌그러졌다(프로토타입에서 고친 방식).
+   하단 과거 통계는 scripts/config/nasdaq_overheat_backtest.json에서만 읽는다(§20). 설명·면책은 기본 접힘(사용자 결정 2026-10-26). #}
+{% set c = nq.chart %}
+<div class="open-section nq-section is-{{ nq.level }}">
+  <div class="open-section__title">나스닥 체크 <span class="nq-badge">{{ nq.badge }}</span></div>
+  <p class="nq-intro">나스닥 월봉 고점이 60개월(5년) 이동평균선보다 얼마나 위에 있는지 봐요. <b>{{ nq.caution|int }}%</b>를 넘으면 주의, <b>{{ nq.warn|int }}%</b>를 넘으면 경고로 표시해요.</p>
+  <div class="nq-card">
+    <div class="nq-top">
+      <div><div class="nq-k">{{ nq.month_label }} 고점 vs 60개월선</div>
+        <div class="nq-v"><span class="nq-num">{{ '%+.1f'|format(nq.gap) }}</span><small>%</small></div></div>
+      <div class="nq-side">
+        <span>{{ nq.month_label }} 고점 <b>{{ '{:,.1f}'.format(nq.high) }}</b></span>
+        <span>60개월선 <b>{{ '{:,.1f}'.format(nq.ma60) }}</b></span>
+        {% if nq.streak %}<span class="nq-streak">{{ nq.caution|int }}% 위 <b>{{ nq.streak }}개월째</b></span>{% endif %}
+      </div>
+    </div>
+    <div class="nq-gauge">
+      <div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
+      <div class="nq-pin" style="left:{{ '%.1f'|format(nq.pin) }}%"><b>{{ '%.1f'|format(nq.gap) }}%</b></div>
+      <div class="nq-ticks"><span style="left:0">0</span><span style="left:60%">60</span><span style="left:70%">70</span><span style="left:100%">100+</span></div>
+    </div>
+    {% if c %}
+    <div class="nq-ch-h">{{ c.from_year }}년 이후 월별 위치 <span>· 최고 {{ c.peak_label }}</span></div>
+    <div class="nq-plot">
+      <svg class="nq-chart" viewBox="0 0 {{ c.w }} {{ c.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 위치, {{ c.from_year }}년 이후">
+        <rect x="0" y="{{ c.y100 }}" width="{{ c.x1 }}" height="{{ c.h_warn }}" class="z-warn"/>
+        <rect x="0" y="{{ c.y70 }}" width="{{ c.x1 }}" height="{{ c.h_caution }}" class="z-caution"/>
+        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y70 }}" y2="{{ c.y70 }}" class="th th-warn"/>
+        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y60 }}" y2="{{ c.y60 }}" class="th th-caution"/>
+        <polygon points="{{ c.area }}" class="area"/>
+        <polyline points="{{ c.line }}" class="line"/>
+      </svg>
+      <i class="nq-dot" style="left:{{ c.dot.left }};top:{{ c.dot.top }}"></i>
+      <i class="nq-dot2" style="left:{{ c.peak_dot.left }};top:{{ c.peak_dot.top }}"></i>
+      {% for a in c.axes %}<span class="nq-ax" style="top:{{ a.top }}">{{ a.v }}%</span>{% endfor %}
+      {% for y in c.years %}<span class="nq-yr" style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% set b = nq.bt %}
+  <details class="nq-foot">
+    <summary>근거와 면책 고지</summary>
+    <p>60개월선을 계산할 수 있는 {{ b.since_year }}년 이후, {{ nq.caution|int }}%를 넘은 달은 {{ b.months_over_caution }}개월이었어요.
+    {{ nq.caution|int }}~{{ nq.warn|int }}% 구간 뒤 12개월 평균 수익률은 <b>{{ '%+.1f'|format(b.caution_band.fwd12_avg_pct) }}%</b>로 전체 평균({{ '%+.1f'|format(b.all_fwd12_avg_pct) }}%){{ '보다 오히려 높았지만' if b.caution_band.fwd12_avg_pct > b.all_fwd12_avg_pct else '보다 낮았고' }} 사례가 {{ b.caution_band.fwd12_n }}개월뿐이에요 — {{ nq.caution|int }}% 자체는 하락 신호가 아니에요.
+    {{ nq.warn|int }}%를 넘은 달 뒤에는 12개월 안에 <b>−20% 넘게 빠진 경우가 {{ '%.0f'|format(b.warn.dd20_pct) }}%</b>(전체 {{ '%.0f'|format(b.all_dd20_pct) }}%)였어요{% if b.warn.periods %}. 다만 그런 달은 {{ b.warn.periods | join('년과 ') }}년에 몰려 있어요{% endif %}. 지금 위치를 알려주는 표시예요.
+    나스닥 종합지수 월봉(이번 달은 진행 중)으로 계산했어요. <a href="/legal/disclaimer/">면책 고지</a></p>
+  </details>
+</div>
