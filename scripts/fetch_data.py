@@ -611,6 +611,17 @@ def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     return None
 
 
+def _recent_sessions(closes, n: int = 3) -> list:
+    """일봉 종가에서 최근 n개 세션의 날짜별 등락률. 거래소 현지 날짜를 그대로 쓴다."""
+    out = []
+    vals = closes.dropna()
+    for i in range(max(1, len(vals) - n), len(vals)):
+        prev, cur = float(vals.iloc[i - 1]), float(vals.iloc[i])
+        if prev > 0:
+            out.append({"date": vals.index[i].strftime("%Y-%m-%d"), "pct": round((cur / prev - 1) * 100, 2)})
+    return out
+
+
 def get_ticker_full(ticker: str) -> dict:
     """
     Fetch 1 year daily history for a ticker.
@@ -667,6 +678,9 @@ def get_ticker_full(ticker: str) -> dict:
             "volume":     int(hist["Volume"].iloc[-1]),
             "sparkline":  [round(float(p), 4) for p in closes.iloc[-20:].tolist()],
         }
+
+        # 최근 세션 일지 — 사건을 실제로 일어난 날짜에 붙이게 하는 근거(2026-10-26: 목요일 메타 충격을 '지난 금요일'로 씀).
+        result["recent_sessions"] = _recent_sessions(closes)
 
         # 52주 고·저 — hist가 이미 1년치라 추가 조회 비용이 없다.
         # 모델이 "사상 최고" 같은 최상급을 쓰려면 지금 값이 고점 대비 어디인지를 알아야 한다.
@@ -1370,6 +1384,12 @@ def fetch_kospi_data() -> dict:
             for label, sym in (("S&P500", "^GSPC"), ("나스닥", "^IXIC"),
                                ("다우", "^DJI"), ("필라델피아 반도체", "^SOX"))
             if macro.get(sym, {}).get("high_52w")
+        },
+        # 최근 미국 세션 일지(날짜별 등락) — call_claude._us_session_log_directive()가 프롬프트로 옮긴다.
+        "us_recent_sessions": {
+            label: macro[sym]["recent_sessions"]
+            for label, sym in (("나스닥", "^IXIC"), ("S&P500", "^GSPC"), ("필라델피아 반도체", "^SOX"))
+            if macro.get(sym, {}).get("recent_sessions")
         },
         "gold":   macro.get("GC=F", {}),
         "rates":  {"us10y": macro.get("^TNX", {})},

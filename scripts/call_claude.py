@@ -782,6 +782,64 @@ def _index_position_directive(analysis_data: dict | None) -> str:
     )
 
 
+def _officeholder_directive() -> str:
+    """현직 인물(연준 의장 등)을 프롬프트에 못박는다 — 모델은 학습 시점 인물을 쓴다.
+
+    2026-10-26 코스피 브리핑이 '파월 발언 톤'이라고 썼다(실제 의장은 2026-05-22부터 워시, §29에서도 같은 오류).
+    발행 직전 validate_analysis.fix_officeholder_names()가 한 번 더 교정한다(프롬프트는 새기 때문이다).
+    """
+    try:
+        table = json.loads((BASE_DIR / "scripts" / "config" / "officeholders.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    rows = []
+    for key, o in table.items():
+        if key.startswith("_") or not isinstance(o, dict):
+            continue
+        former = "·".join(o.get("former") or [])
+        rows.append(f"- 현재 {o['role']}: **{o['full_name']}**({o['since']} 취임)"
+                    + (f" — {former}는 현직이 아니다. {o.get('former_note', '')}" if former else ""))
+    if not rows:
+        return ""
+    return ("## 현직 인물 (반드시 지킬 것)\n" + "\n".join(rows) +
+            "\nFOMC 기자회견·의장 발언 등 그 자리의 역할을 쓸 때는 반드시 현직 이름을 쓴다.\n\n")
+
+
+def _us_session_log_directive(date_str: str, analysis_data: dict | None) -> str:
+    """최근 미국 세션 일지(날짜별 등락) — 사건을 실제로 일어난 날짜에 붙이게 한다.
+
+    2026-10-26(월) 브리핑이 목요일(10/22) 메타 충격을 '지난 금요일 미 증시는 메타 우려로 흔들렸다'로 썼다
+    (금요일 SOX +0.44%·DRAM +3.02% 반등). 직전 세션 일봉만 받던 모델에겐 날짜를 가를 근거가 없었다.
+    """
+    log = (analysis_data or {}).get("us_recent_sessions") or {}
+    if not log:
+        return ""
+    try:
+        from datetime import date as _d
+        from session_label import prev_us_session, us_session_label
+        y, m, dd = (int(x) for x in date_str.split("-"))
+        today = _d(y, m, dd)
+        prev, label = str(prev_us_session(today)), us_session_label(today)
+    except Exception:
+        prev, label = "", ""
+    dows = "월화수목금토일"
+    by_date = {}
+    for name, rows in log.items():
+        for r in rows or []:
+            if isinstance(r, dict) and r.get("date") and isinstance(r.get("pct"), (int, float)):
+                by_date.setdefault(r["date"], []).append(f"{name} {r['pct']:+.2f}%")
+    if not by_date:
+        return ""
+    lines = []
+    for ds in sorted(by_date, reverse=True):
+        d = _d(*(int(x) for x in ds.split("-")))
+        tag = f" ← 직전 미국장({label})" if ds == prev and label else ""
+        lines.append(f"- {d.month}/{d.day}({dows[d.weekday()]}){tag}: " + ", ".join(by_date[ds]))
+    return ("## 최근 미국 세션 일지 (사건 날짜 확인용)\n" + "\n".join(lines) +
+            "\n뉴스의 사건(실적 충격·급락·반등)은 위 일지에서 **실제로 그 움직임이 있었던 날짜**로 쓴다. "
+            "직전 미국장보다 앞선 날의 일을 직전 미국장의 일처럼 쓰지 않는다 — 그날을 '목요일'처럼 명시한다.\n\n")
+
+
 def _calendar_tense_directive(analysis_data: dict | None) -> str:
     """이미 끝난 고영향 경제 이벤트를 예고형으로 쓰지 않도록 발행 시점 시제를 주입한다.
 
@@ -1368,6 +1426,9 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     user_content += _session_label_directive(date_str, briefing_type, news_summary)
     user_content += _calendar_tense_directive(analysis_data)
     user_content += _index_position_directive(analysis_data)
+    user_content += _officeholder_directive()
+    if briefing_type == "kospi":
+        user_content += _us_session_log_directive(date_str, analysis_data)
     user_content += f"시장 데이터:\n{json.dumps(analysis_data, ensure_ascii=False, indent=2)}\n\n"
     if news_summary:
         user_content += f"뉴스 요약:\n{json.dumps(news_summary, ensure_ascii=False, indent=2)}\n"

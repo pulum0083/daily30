@@ -677,6 +677,38 @@ def fix_overnight_labels(analysis, btype, corrections):
         corrections.append(f"'간밤' 표기 {n}건 → '{label}' 교정 (직전 미국장이 어제가 아님)")
 
 
+# 역할을 가리키는 표현 뒤에서만 전임자 이름을 현직으로 바꾼다 — '파월 전 의장'처럼 전임자를 일부러 쓴 문장은 두고,
+# 파월은 2028년까지 이사로 남아 이름 자체를 지우면 안 된다(§64).
+_ROLE_SUFFIX = r"(\s*(?:연준\s*)?의장|의?\s*(?:발언|기자회견|회견|입|톤|메시지|연설|코멘트))"
+
+
+def fix_officeholder_names(analysis, corrections, warnings, table=None):
+    """현직 인물 교정 — 모델이 학습 시점 인물(예: 파월)을 현직 역할로 쓴 표현을 현직 이름으로 바꾼다.
+
+    2026-10-26 코스피 '개장 후 볼 것'이 "파월 발언 톤"이라고 썼다. 실제 의장은 2026-05-22부터 워시다(§29에서도 같은 오류).
+    역할 표현이 붙지 않은 전임자 이름은 바꾸지 않고 경고만 남긴다(전임자를 일부러 쓴 문장일 수 있다).
+    """
+    import re as _re
+    if table is None:
+        try:
+            table = json.loads((Path(__file__).parent / "config" / "officeholders.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            print(f"[validate] 현직 인물 표 읽기 실패: {e}", file=sys.stderr)
+            return
+    for key, o in table.items():
+        if key.startswith("_") or not isinstance(o, dict):
+            continue
+        for old in o.get("former") or []:
+            pat = _re.compile(_re.escape(old) + _ROLE_SUFFIX)
+            n = _walk_strings(analysis, lambda t, pat=pat, new=o["name"]: pat.sub(lambda m: new + m.group(1), t))
+            if n:
+                corrections.append(f"{o['role']} 이름 {n}건 '{old}' → '{o['name']}' 교정 (현직: {o['full_name']})")
+            left = []
+            _walk_strings(analysis, lambda t, old=old: (left.append(t) if old in t else None) or t)
+            if left:
+                warnings.append(f"전임 {o['role']} '{old}' 언급이 남아 있어요(역할 표현 없음 — 확인 필요): {left[0][:60]}")
+
+
 def collect_candidates(latest, btype):
     """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
     out = []
@@ -1703,6 +1735,9 @@ def validate(analysis, latest, btype):
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)
+
+    # 2-f) 현직 인물 교정 — 전임 연준 의장 이름을 현직 역할로 쓴 표현 (전 타입, §64)
+    fix_officeholder_names(a, corrections, warnings)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):
