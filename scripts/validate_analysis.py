@@ -1261,6 +1261,24 @@ def find_session_mislabels(issues) -> list:
 
 
 _PREMARKET_PHRASE = re.compile(r"(?:프리마켓|프리장)(?=에서|에도|에|은|는|$|\s)")
+_PREMARKET_DROP = re.compile(r"(?:프리마켓|프리장)(?:에서도|에서는|에서|에도|에는|에)?\s*")
+_ISSUE_BODY_MAX_SENT = 1
+
+
+def trim_issue_bodies(analysis, corrections, max_sent=_ISSUE_BODY_MAX_SENT) -> int:
+    """미국 이슈 본문을 첫 문장만 남긴다 — 설명이 길다는 지적(2026-10-26). 프롬프트(1문장·70자 안팎)만으로는 새서
+    발행 전에 한 번 더 자른다. 문장을 고쳐 쓰지 않고 모델이 쓴 앞 문장을 그대로 남긴다."""
+    n = 0
+    for it in analysis.get("issues") or []:
+        if not isinstance(it, dict) or not isinstance(it.get("body"), str):
+            continue
+        sents = [x for x in re.split(r"(?<=[.!?])\s+", it["body"].strip()) if x]
+        if len(sents) > max_sent:
+            it["body"] = " ".join(sents[:max_sent])
+            n += 1
+    if n:
+        corrections.append(f"이슈 본문 {n}건을 첫 {max_sent}문장으로 줄임")
+    return n
 
 
 def fix_session_mislabels(analysis, corrections) -> int:
@@ -1271,31 +1289,37 @@ def fix_session_mislabels(analysis, corrections) -> int:
     지수와 '프리마켓'이 **같은 절**(쉼표 사이)에 있을 때만 고친다. "SOX는 정규장에서 밀렸고, 프리마켓에서
     AMD는 올랐어요"처럼 세션을 나눈 문장은 둔다. '시간 외'·'장 전'은 뜻이 넓어 고치지 않는다(경고만 남는다).
     """
-    def fix_text(text):
+    def fix_text(text, said=False):
         out_sents = []
         for sent in re.split(r"(?<=[.!?])(\s+)", text):
             clauses = sent.split(",")
             for i, cl in enumerate(clauses):
                 if re.search(_NO_PREMARKET_INDEX, cl) and _PREMARKET_PHRASE.search(cl):
-                    clauses[i] = _PREMARKET_PHRASE.sub("직전 정규장", cl)
+                    if said or "직전 정규장" in ",".join(clauses[:i]):
+                        # 같은 문장 앞에서 이미 '직전 정규장'을 말했다 — 또 쓰면 "직전 정규장에서 …, 직전 정규장에서도 …"처럼
+                        # 어색하게 반복된다(2026-10-26 사용자 지적). 세션 표현을 조사째 지운다.
+                        clauses[i] = _PREMARKET_DROP.sub("", cl)
+                    else:
+                        clauses[i] = _PREMARKET_PHRASE.sub("직전 정규장", cl)
             out_sents.append(",".join(clauses))
         return "".join(out_sents)
 
     n = 0
-    targets = []
-    for it in analysis.get("issues") or []:
-        if isinstance(it, dict):
-            targets += [(it, k) for k in ("title", "body")]
+    pairs = [(it, "title", "body") for it in analysis.get("issues") or [] if isinstance(it, dict)]
     tv = analysis.get("todays_view")
     if isinstance(tv, dict):
-        targets += [(tv, k) for k in ("view_title", "dek")]
-    for obj, k in targets:
-        v = obj.get(k)
-        if isinstance(v, str):
-            new = fix_text(v)
+        pairs.append((tv, "view_title", "dek"))
+    for obj, head, body in pairs:
+        said = False
+        for k in (head, body):
+            v = obj.get(k)
+            if not isinstance(v, str):
+                continue
+            new = fix_text(v, said=said)        # 제목에서 이미 '직전 정규장'이라 했으면 본문에선 되풀이하지 않는다
             if new != v:
                 obj[k] = new
                 n += 1
+            said = said or "직전 정규장" in new
     if n:
         corrections.append(f"세션 오표기 {n}건 교정 — 프리장에 거래되지 않는 지수의 '프리마켓' → '직전 정규장'")
     return n
@@ -1787,6 +1811,7 @@ def validate(analysis, latest, btype):
     if btype == "us":
         fix_session_mislabels(a, corrections)      # 같은 절에 지수+프리마켓이면 교정, 남는 건 아래에서 경고
         limit_data_issues(a, corrections)          # 시장 데이터형 이슈는 하루 1개까지
+        trim_issue_bodies(a, corrections)          # 이슈 본문은 한 문장
         for hit in find_session_mislabels(a.get("issues")):
             warnings.append(
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"

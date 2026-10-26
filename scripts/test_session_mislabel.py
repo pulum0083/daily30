@@ -78,8 +78,10 @@ def test_fix_real_case_20261023():
     corr = []
     assert fix_session_mislabels(a, corr) == 3 and corr
     assert a["issues"][0]["title"] == "직전 정규장에서 반도체(SOX)가 크게 밀려요"
-    assert "반도체 관련 지수가 직전 정규장에서" in a["issues"][0]["body"]
-    assert "직전 정규장에서도 SOX" in a["todays_view"]["dek"]
+    # 제목에서 이미 '직전 정규장'이라 했으니 본문은 되풀이하지 않는다(2026-10-26 사용자 지적)
+    assert a["issues"][0]["body"].startswith("시장 데이터를 보면 반도체 관련 지수가 눈에 띄게 약세")
+    # 같은 문장 앞에서 이미 말했으면 '직전 정규장에서도'를 덧붙이지 않는다
+    assert a["todays_view"]["dek"] == "직전 정규장에서 매물이 쏟아졌고, SOX(필라델피아 반도체 지수)가 큰 폭으로 눌려 있어요."
     assert find_session_mislabels(a["issues"]) == []
 
 
@@ -87,3 +89,13 @@ def test_fix_leaves_correctly_split_sessions():
     text = "SOX는 정규장에서 밀렸고, 프리마켓에서 AMD는 올랐어요. 나스닥 선물은 프리마켓에서 반등했어요."
     a = {"issues": [{"title": "t", "body": text}]}
     assert fix_session_mislabels(a, []) == 0 and a["issues"][0]["body"] == text
+
+
+from validate_analysis import trim_issue_bodies  # noqa: E402
+
+
+def test_trim_issue_body_to_first_sentence():
+    a = {"issues": [{"title": "t", "body": "첫 문장이에요. 둘째 문장이에요."}, {"title": "u", "body": "한 문장뿐이에요."}]}
+    corr = []
+    assert trim_issue_bodies(a, corr) == 1 and corr
+    assert a["issues"][0]["body"] == "첫 문장이에요." and a["issues"][1]["body"] == "한 문장뿐이에요."
