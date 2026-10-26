@@ -33,7 +33,11 @@
     </div>
     {% endfor %}
   </div>
-  <p class="m5-foot">지난 {{ ma5m_stats.years }}년({{ ma5m_stats.years_label }}) 코스피200에서 같은 조건이 나온 뒤 <b>12개월 동안 오른 경우는 {{ ma5m_stats.win_pct }}%</b>였어요.
-  아무 종목·아무 달({{ ma5m_stats.base_win_pct }}%)과 차이가 없어 매매 신호가 아니에요. 월말 종가·이동평균·외국인 보유율은 KRX 공식 종가로 계산한 실측값이에요.
-  <a href="/legal/disclaimer/">면책 고지</a></p>
+  {# 백테스트·면책 문단은 기본 접힘(2026-10-26 사용자 요청). '매매 신호가 아니에요'는 접혀도 보이게 요약줄에 둔다. #}
+  <details class="m5-foot">
+    <summary>매매 신호가 아니에요 · 근거와 면책 고지</summary>
+    <p>지난 {{ ma5m_stats.years }}년({{ ma5m_stats.years_label }}) 코스피200에서 같은 조건이 나온 뒤 <b>12개월 동안 오른 경우는 {{ ma5m_stats.win_pct }}%</b>였어요.
+    아무 종목·아무 달({{ ma5m_stats.base_win_pct }}%)과 차이가 없어 매매 신호가 아니에요. 월말 종가·이동평균·외국인 보유율은 KRX 공식 종가로 계산한 실측값이에요.
+    <a href="/legal/disclaimer/">면책 고지</a></p>
+  </details>
 </div>

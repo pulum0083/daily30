@@ -1,0 +1,68 @@
+{# 오늘의 이슈 점검 — 간밤 미국(실측) · 국내(뉴스) · 외국계(뉴스) · 오늘 볼 것(AI 해석). 코스피 아침 전용(3단 구조, 2026-10-26).
+   카드마다 데이터가 없으면 그 카드만 빠지고, 전부 없으면 섹션째 빠진다(§0). 미국 카드엔 코스피 영향 판정을 붙이지 않는다(§45). #}
+{% set outlook = (todays_view.outlook if todays_view and todays_view.outlook else []) %}
+{% if ic_us_cards or domestic_issues or ib_korea_views or outlook %}
+<div class="open-section ic-section">
+  <div class="ic-h"><h2>오늘의 이슈 점검</h2><span>{{ us_issue_label | default('간밤') }} 미국 · 국내 · 오늘 볼 것</span></div>
+  <div class="ic-list">
+    {% for c in ic_us_cards %}
+    <div class="ic-card">
+      <div class="ic-top"><span class="ic-tag fact">{{ us_issue_label | default('간밤') }} 미국 · 실측</span></div>
+      <div class="ic-title">{{ c.title }}</div>
+      <div class="ic-body">
+        {% if c.duplicate_of %}
+        <p class="ic-dim">{{ c.duplicate_of }}번째 미국 카드와 같은 지표예요.</p>
+        {% else %}
+        {% if c.check_line %}<p>{{ c.check_line | safe }}</p>{% endif %}
+        {% if c.marks %}<div class="ic-tks">
+          {%- for m in c.marks -%}
+          <span class="ic-tk {% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ m.name }} <b>{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</b></span>
+          {%- endfor -%}
+        </div>{% endif %}
+        {% endif %}
+      </div>
+      {% if c.related and not c.duplicate_of %}<div class="ic-links"><span class="ic-lk-l">관련 종목</span>{% for r in c.related %}<a href="{{ r.url }}">{{ r.name }}</a>{% endfor %}</div>{% endif %}
+      {% if c.proxy and not c.duplicate_of %}<div class="ic-foot">종목이 지정되지 않아 {{ c.proxy }} 실측으로 봤어요.</div>{% endif %}
+    </div>
+    {% endfor %}
+
+    {% if domestic_issues %}
+    <div class="ic-card">
+      <div class="ic-top"><span class="ic-tag news">국내 · 뉴스</span></div>
+      <div class="ic-title">{{ domestic_card_title | default('국내 소식', true) }}</div>
+      <div class="ic-body">
+        {% for it in domestic_issues %}
+        <a class="ic-news" href="{{ it.url }}" target="_blank" rel="noopener noreferrer"><b>{{ it.title }}</b><span>{{ it.source }}</span></a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if ib_korea_views %}
+    <div class="ic-card">
+      <div class="ic-top"><span class="ic-tag news">외국계 · 뉴스</span></div>
+      <div class="ic-title">외국계 증권사 시각</div>
+      <div class="ic-body">
+        {% for v in ib_korea_views %}
+        <a class="ic-news ic-news--ib" href="{{ v.url }}" target="_blank" rel="noopener noreferrer">
+          <b>{{ v.house }} <em class="ic-sent {{ v.sentiment }}">{% if v.sentiment == 'bull' %}강세{% elif v.sentiment == 'bear' %}약세{% else %}중립{% endif %}</em></b>
+          <span class="ic-news__txt">{{ v.summary }}</span>
+          <span>{{ v.source }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if outlook %}
+    <div class="ic-card">
+      <div class="ic-top"><span class="ic-tag ai">오늘 볼 것 · AI 해석</span></div>
+      <div class="ic-title">개장 뒤 확인할 {{ ['한', '두', '세', '네', '다섯'][outlook|length - 1] if outlook|length <= 5 else outlook|length }} 가지</div>
+      <div class="ic-body"><ul class="ic-ul">{% for o in outlook %}<li><span>{{ o.text | safe }}</span></li>{% endfor %}</ul></div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="ic-src">실측 = 거래소 종가로 확인한 숫자 · 뉴스 = 수집한 기사 원문 · AI 해석 = 분석 모델의 판단이에요.
+    {% if us_issue_session %}<a href="/briefings/{{ us_issue_session }}/us/">{{ us_issue_label | default('간밤') }} 미국 브리핑 보기 →</a>{% endif %}</div>
+</div>
+{% endif %}

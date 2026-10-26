@@ -1,0 +1,17 @@
+{# 30초 요약 카드 — 시초가 방향·확률, 헤드라인(view_title), 보조 문장(dek), 어제 예측 칩, 정의 한 줄. 코스피 아침 전용(3단 구조, 2026-10-26).
+   적중률 칩·위로 한 줄은 넣지 않는다(사용자 결정). 어제 예측 칩은 채점값이 있을 때만(§16). #}
+<div class="bx-hero {{ dir_cls }}">
+  <div class="bx-k"><span>{{ hero_date_label }} {{ '시초가 방향 예측' if pred_basis == 'open' else '방향 예측' }}</span><span class="bx-k-t">{{ generated_time }} 생성</span></div>
+  <div class="bx-main">
+    <div class="bx-dir"><span class="bx-arrow">{{ dir_arrow }}</span>{{ direction }}</div>
+    <div class="bx-prob"><b class="num">{{ hero_prob if hero_prob is not none else readout_pct }}%</b><span>{% if hero_prob_caption %}{{ hero_prob_caption }} · {% endif %}신뢰도 {{ confidence }}%</span></div>
+  </div>
+  {% if todays_view and todays_view.view_title %}<h2 class="bx-head">{{ todays_view.view_title }}</h2>{% endif %}
+  {% if todays_view and todays_view.dek %}<p class="bx-dek">{{ todays_view.dek | safe }}</p>{% endif %}
+  {% if prev_pred %}
+  <div class="bx-chips">
+    <span class="bx-chip {{ 'ok' if prev_pred.ok else 'miss' }}"><em>{{ prev_pred.label }} 예측</em><b>{{ prev_pred.dir_word }} → {{ '적중' if prev_pred.ok else '빗나감' }}</b><span>시초가 {{ '%+.2f'|format(prev_pred.open_pct) }}%</span></span>
+  </div>
+  {% endif %}
+  {% if pred_basis == 'open' %}<p class="bx-def">09:00 코스피가 전일 종가보다 위로 열릴지 아래로 열릴지에 대한 확률이에요. 장중 흐름과 종가는 예측하지 않아요.</p>{% endif %}
+</div>

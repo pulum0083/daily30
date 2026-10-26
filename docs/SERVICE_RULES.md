@@ -2309,3 +2309,20 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
   - 고친 결함: 옛 마감 텔레그램은 `market_title`·`telegram_signals`를 읽었는데 최근 매일 쓰이는 scenario·qa·signal 형식에는 둘 다 없어 "💬" 줄과 "핵심 시그널:" 아래가 비어 나갔다. 마감 프롬프트의 `telegram_signals` 규칙과 `_issue_first_sort()`는 지웠다(쓰는 곳이 없어졌다).
 - **미국 텔레그램도 같은 형식**(2026-10-25): `📉 하락 우위 68%`(up_pct·down_pct 중 큰 쪽, 같으면 중립 — 미국엔 신뢰도가 없다) → 🎯 view_title → 👀 오늘 밤 볼 것(첫 이슈 제목) → 링크. 나스닥 체크 블록은 그 섹션을 개발할 때 붙인다.
 - **미국 브리핑도 같은 규칙**(2026-10-25): 헤드라인 재미 규칙 + 보조 문장(dek) 1문장·최대 3문장. 단 미국 헤드라인에는 **숫자를 쓰지 않는다** — 미국에는 key_drivers 같은 숫자 게이트가 없어 대조할 근거가 없다. 금지어에 "이중 시험대"·"분수령"·"갈림길"을 더했다(2026-10 미국 헤드라인에서 반복된 말).
+
+### 63. 코스피 아침 브리핑 3단 구조 — 30초 요약 카드 · 오늘의 이슈 점검 · 월봉 5개월선 (2026-10-26 결정, 10-27 발행분부터)
+
+첫 화면에서 예측을 바로 보게 하고 본문 중심을 "오늘의 이슈 점검"으로 옮겼다. 계획·결정 노트는 `docs/plans/2026-10-25-kospi-briefing-3tier/`, 프로토타입은 `docs/prototypes/2026-10-25-kospi-briefing-3tier.html`.
+모바일에서 요약 카드 108px · 이슈 점검 471px(옛 구조 예측 1,763px · 국내 이슈 1,169px)로 프로토타입과 같다.
+
+- **① 30초 요약 카드**(`sections/briefing_hero.html`): 시초가 방향·확률(같은 크기) + 신뢰도, 헤드라인 `todays_view.view_title`, 보조 문장 `todays_view.dek`, 어제 예측 칩, 정의 한 줄. **적중률 칩·위로 한 줄(comfort_line)은 넣지 않는다.** 머리의 생성 시각은 `generated_time`이다(프로토타입의 '06:35'는 하드코딩이었다).
+- **어제 예측 칩**(`build_prev_prediction`): 07:25엔 전날 예측이 아직 채점 전이다(정확도 체크가 다음 거래일 09:10). 그래서 채점 기록이 없으면 전날 시초가 갭을 지수 일봉으로 구해 같은 규칙(`classify_direction_correct`)으로 채점하고, 그것도 못 구하면 칩을 뺀다 — 더 오래된 결과로 대신하지 않는다(§16). 결과는 `analysis["prev_prediction_result"]`로 스냅샷에 저장된다. 종가 기준 옛 예측은 칩을 만들지 않는다. 라벨은 실제 날짜로 정한다 — 어제가 아니면 '지난 금요일'·'9/30(화)'(§24).
+- **② 오늘의 이슈 점검**(`sections/issue_check.html`): 미국 · 실측(`us_issue_results` 카드, 숫자는 여기서 한 번만) → 국내 · 뉴스(`domestic_issues`) → 외국계 · 뉴스(`ib_korea_views`) → 오늘 볼 것 · AI 해석(`todays_view.outlook`). 카드마다 데이터가 없으면 그 카드만, 전부 없으면 섹션째 빠진다(§0).
+  - 미국 카드에 **코스피 영향 칩(▲/▼)을 붙이지 않는다** — 근거 데이터가 없다(프로토타입은 세 장 모두 ▼로 하드코딩). 판정을 붙이지 않는 §45와 같은 원칙이다.
+  - 국내 **관련 종목** 링크는 제목 키워드 규칙(`ISSUE_RELATED_KR` — 반도체·메모리·HBM → 삼성전자·SK하이닉스)이다. AI 판단이 아니므로 'AI 해석'이라고 쓰지 않는다. 상세 페이지가 있을 때만 링크한다(§36).
+  - 미국 태그·국내 카드 제목은 실제 세션·날짜로 쓴다('지난 금요일 미국 · 실측', '10월 22일 장 마감 이후 국내 소식').
+- **③ 월봉 5개월선 안착 종목**(§61) 그대로, 섹션 아래 여백 28px. 백테스트·면책 문단은 `<details>`로 기본 접힘이고 요약줄에 "매매 신호가 아니에요"를 남긴다.
+- **근거 전체 보기(key_drivers·WHY·WHAT·SO WHAT)는 넣지 않는다.** 코스피 화면에서 뺀 템플릿: `todays_view`·`prediction`·`prediction_strip`·`us_issue_results`·`domestic_issues`·`ib_korea_views`·`why_what_so`·`flow_chain`·`key_numbers`(코스피만 쓰던 것이라 파일째 지웠다). **`scenario_split`·`qa`·`signal_board`·`_comfort_line`은 마감 브리핑이 계속 쓴다 — 지우지 말 것.** 마감은 `format_in_view`를 넘기지 않아 이 섹션들이 제목과 `close_dek`를 그린다.
+- **성적표 '최근 15건'**: 시초가 채점이 15건 미만이면 숨긴다(`sc_show_recent15`). 2026-10-26 점검에서 계산은 맞았지만 9건을 '최근 15건'으로 표시해 누적 9건과 같은 숫자가 두 번 나왔다.
+- 테스트: `scripts/test_kospi_3tier.py`(어제 예측 칩 채점·생략·라벨, 카드별 생략, 코스피 칩 부재, 관련 종목 존재 게이트, 성적표 라벨, 마감 공유 섹션 회귀).
+- **남은 갭**: (a) `call_claude`는 여전히 근거 형식(`analysis_format` 로테이션, why/what/so_what·num_cards 등)과 `key_drivers`·`comfort_line`을 만든다 — 화면에 안 나오는 출력이라 프롬프트를 줄일 여지가 있다. §34 형식↔본문 게이트도 코스피 화면엔 더 이상 영향이 없다. (b) `build_ib_korea_views()`엔 날짜 검사가 없다(국내 이슈엔 있다). (c) 렌더 확인은 코스피만 했다 — 로컬 `latest_kospi_close.json`이 낡아 마감 렌더는 수급 기록(`supply_history.json`)을 덮어쓰므로, 마감은 발행본에 새 CSS를 입혀 확인했다. **로컬에서 마감을 `render_briefing`으로 렌더하면 수급 기록이 바뀐다 — 렌더 뒤 `git status`를 확인할 것.**

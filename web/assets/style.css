@@ -1364,6 +1364,11 @@ html.dark .arch-item__dek{color:var(--muted);}
 .m5-legend i.run{background:var(--primary-bg);outline:1px solid var(--primary)}
 .m5-foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:12px;padding-top:10px;border-top:1px solid var(--hairline)}
 .m5-foot b{color:var(--ink);font-weight:600} .m5-foot a{color:var(--primary);font-weight:600;white-space:nowrap}
+.m5-foot summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;font-weight:600}
+.m5-foot summary::-webkit-details-marker{display:none}
+.m5-foot summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+.m5-foot[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.m5-foot p{margin:8px 0 0}
 .m5a-list{display:flex;flex-direction:column;gap:10px}
 .m5a-item{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:14px 16px 12px;background:var(--canvas)}
 .m5a-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -1390,3 +1395,64 @@ html.dark .arch-item__dek{color:var(--muted);}
 /* 마감 브리핑 타이틀 아래 서브 한 문장(dek) — 텔레그램과 같은 필드(SERVICE_RULES §62) */
 .close-dek{margin:0;padding:10px 16px 2px;font-size:13.5px;line-height:1.65;color:var(--muted)}
 .close-dek b{color:var(--ink);font-weight:700}
+
+/* ── 코스피 아침 3단 구조(2026-10-26, §63): 30초 요약 카드 + 오늘의 이슈 점검 ── */
+.bx-hero{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:16px 18px 14px;background:var(--canvas);box-shadow:var(--s1);margin-top:4px}
+.bx-hero.dn{background:linear-gradient(180deg,var(--dn-bg),var(--canvas) 70%)}
+.bx-hero.up{background:linear-gradient(180deg,var(--up-bg),var(--canvas) 70%)}
+.bx-k{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.bx-main{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:8px}
+.bx-dir{font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.15;color:var(--ink);display:flex;align-items:baseline;gap:6px}
+.bx-hero.dn .bx-dir,.bx-hero.dn .bx-prob b{color:var(--dn)}
+.bx-hero.up .bx-dir,.bx-hero.up .bx-prob b{color:var(--up)}
+.bx-arrow{font-size:26px}
+.bx-prob{text-align:right}
+.bx-prob b{display:block;font-size:30px;font-weight:800;line-height:1.15;letter-spacing:-1px;color:var(--ink)}
+.bx-prob span{font-size:11px;color:var(--muted)}
+.bx-head{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5;margin:10px 0 0;letter-spacing:0}
+.bx-dek{font-size:13px;color:color-mix(in srgb,var(--ink) 78%,transparent);line-height:1.65;margin:6px 0 0}
+.bx-dek b{font-weight:700;color:var(--ink)}
+.bx-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.bx-chip{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;background:var(--surface-soft);border:1px solid var(--hairline);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--ink)}
+.bx-chip em{font-style:normal;color:var(--muted)}
+.bx-chip b{font-weight:700}
+.bx-chip span{color:var(--muted);font-size:11px}
+.bx-chip.miss b{color:var(--muted)}
+.bx-chip.ok b{color:var(--primary)}
+.bx-def{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.ic-section{margin-top:26px}
+.ic-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ic-h h2{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin:0}
+.ic-h span{font-size:12px;color:var(--muted)}
+.ic-list{display:flex;flex-direction:column;gap:10px}
+.ic-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:13px 15px;background:var(--canvas)}
+.ic-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ic-tag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px}
+.ic-tag.fact{background:var(--surface-inset);color:var(--ink)}
+.ic-tag.news{background:var(--gold-bg);color:var(--gold)}
+.ic-tag.ai{background:var(--primary-bg);color:var(--primary)}
+.ic-title{font-size:15px;font-weight:700;color:var(--ink);margin-top:8px}
+.ic-body{font-size:13px;color:var(--ink);line-height:1.65;margin-top:4px}
+.ic-body p{margin:0}
+.ic-dim{color:var(--muted)}
+.ic-tks{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ic-tk{font-size:11.5px;border-radius:6px;padding:2px 7px;background:var(--surface-soft);color:var(--ink);font-variant-numeric:tabular-nums}
+.ic-tk.dn b{color:var(--dn)}
+.ic-tk.up b{color:var(--up)}
+.ic-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;font-size:12px}
+.ic-links a{color:var(--primary);font-weight:600;text-decoration:none;border:1px solid var(--primary-bg);background:var(--primary-bg);border-radius:999px;padding:2px 9px}
+.ic-lk-l{color:var(--muted)}
+.ic-foot{font-size:11px;color:var(--muted);margin-top:7px}
+.ic-news{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--hairline);color:var(--ink);text-decoration:none;font-size:13px}
+.ic-news:first-child{border-top:0;padding-top:2px}
+.ic-news>span{color:var(--muted);font-size:11px;white-space:nowrap}
+.ic-news--ib{flex-wrap:wrap}
+.ic-news--ib>b{flex:1 1 auto}
+.ic-news--ib .ic-news__txt{order:3;flex-basis:100%;white-space:normal;color:var(--ink);font-size:12.5px;line-height:1.6}
+.ic-sent{font-style:normal;font-size:10.5px;font-weight:700;margin-left:4px;color:var(--muted)}
+.ic-sent.bull{color:var(--up)}
+.ic-sent.bear{color:var(--dn)}
+.ic-ul{margin:2px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.ic-src{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}
+.ic-src a{color:var(--primary);font-weight:600;white-space:nowrap}
+.accordion-body__inner>.ma5m-section:last-child{margin-bottom:28px}

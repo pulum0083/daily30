@@ -17,36 +17,13 @@
         </div>
         <div class="accordion-body">
           <div class="accordion-body__inner">
-            {# 오늘의 관점: 제목+dek(+split이면 복기/관전). split이 아니면 형식 본문을 바로 이어 렌더(관점의 얼굴). #}
-            {% if todays_view %}{% include "sections/todays_view.html" %}{% endif %}
-            {% if todays_view and analysis_format != 'split' %}
-              {% if analysis_format == 'scenario' %}
-                {% include "sections/scenario_split.html" %}
-              {% elif analysis_format == 'qa' %}
-                {% include "sections/qa.html" %}
-              {% elif analysis_format == 'signal' %}
-                {% include "sections/signal_board.html" %}
-              {% elif analysis_format == 'flow' %}
-                {% include "sections/flow_chain.html" %}
-              {% elif analysis_format == 'keynum' %}
-                {% include "sections/key_numbers.html" %}
-              {% else %}
-                {% include "sections/why_what_so.html" %}
-              {% endif %}
-            {% endif %}
-            {# 직전 미국장 브리핑이 짚은 이슈 + 실제 움직임 — 어제 국내 마감 다음, 오늘 예측 앞. 카드 없으면 자동 생략. #}
-            {% if us_issue_cards %}{% include "sections/us_issue_results.html" %}{% endif %}
-            {% if todays_view %}{% include "sections/prediction_strip.html" %}{% else %}{% include "sections/prediction.html" %}{% endif %}
-            {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
-            <div class="divider"></div>
-            {% if domestic_issues %}{% include "sections/domestic_issues.html" %}<div class="divider"></div>{% endif %}
-            {% if ib_korea_views %}{% include "sections/ib_korea_views.html" %}<div class="divider"></div>{% endif %}
-            {# 하단 심층 섹션(us_linked_story·sector_focus) 2026-07-07 중단 — 되살리려면 아래 두 줄 복원 #}
-            {# {% if us_linked_title %}{% include "sections/us_linked_story.html" %}<div class="divider"></div>
-            {% elif sector_name %}{% include "sections/sector_focus.html" %}<div class="divider"></div>{% endif %} #}
-            {# 관전 포인트(watchpoints)는 오늘의 관점 outlook(관전 태그)과 내용이 겹쳐 코스피에서 제거(2026-07-12). 미국 브리핑은 유지. #}
+            {# 3단 구조(2026-10-26, SERVICE_RULES §63): ① 30초 요약 카드 ② 오늘의 이슈 점검 ③ 월봉 5개월선 안착 종목.
+               근거 형식(why_what_so·qa 등)·오늘의 관점 2단·위로 한 줄·관전 포인트는 코스피 화면에서 뺐다 — 근거 전체 보기는 넣지 않는다(사용자 결정).
+               scenario_split·qa·signal_board·_comfort_line은 마감 브리핑이 계속 쓴다. #}
+            {% include "sections/briefing_hero.html" %}
+            {% include "sections/issue_check.html" %}
             {# 상승 모멘텀 종목은 2026-10-25 제거 — 월봉 5개월선 안착 종목(결정론). 조건 충족 종목이 없으면 섹션째 생략. #}
-            {% if ma5m_items %}{% include "sections/monthly_ma5.html" %}{% endif %}
+            {% if ma5m_items %}<div class="divider"></div>{% include "sections/monthly_ma5.html" %}{% endif %}
           </div>
         </div>
       </div>

@@ -114,10 +114,9 @@ def test_page_label_follows_record_basis():
                               "KOSPI", "KOSPI 당일 방향 예측", "07:28")
     assert new["pred_basis"] == "open" and new["pred_title"] == "KOSPI 시초가 방향 예측"
     assert old["pred_basis"] is None and old["pred_title"] == "KOSPI 당일 방향 예측"   # 옛 스냅샷 재생성은 옛 문구
-    tpl = (Path(gh.__file__).parent / "templates" / "sections" / "prediction_strip.html").read_text(encoding="utf-8")
-    html = gh.Environment(loader=gh.FileSystemLoader(str(Path(gh.__file__).parent / "templates"))).from_string(tpl)
-    assert "시초가 방향 예측" in html.render(**new)
-    assert "당일 방향 예측" in html.render(**old)
+    tpl = gh.make_env().get_template("sections/briefing_hero.html")   # 3단 구조 요약 카드(§63)
+    assert "시초가 방향 예측" in tpl.render(**new) and "장중 흐름과 종가는 예측하지 않아요" in tpl.render(**new)
+    assert "시초가" not in tpl.render(**old)
 
 
 # ── prior 구속 게이트 — 발행 전 검증 단계에서 up_pct·방향을 prior에 묶는다 ──

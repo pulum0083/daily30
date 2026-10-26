@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261025b"
+ASSET_VER = "20261026a"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -289,6 +289,126 @@ def _read_us_issue_results(target_date: str):
         print(f"[generate_html] ⚠️ us_issue_results 세션 불일치({got} ≠ {expected}) — 섹션 생략")
         return None
     return data
+
+
+_DOWS = ["월", "화", "수", "목", "금", "토", "일"]
+# 이슈 점검 카드의 국내 관련 종목 — 제목 키워드 규칙(사용자 결정 2026-10-26). AI 판단이 아니라서 '관련 종목'으로 표기한다.
+ISSUE_RELATED_KR = [
+    (re.compile(r"반도체|메모리|HBM|D램|낸드"), [("005930", "삼성전자"), ("000660", "SK하이닉스")]),
+]
+
+
+def _prev_label(prev_date: str, target_date: str) -> str:
+    """'어제 예측' 칩의 날짜 표현. 어제가 아니면 '어제'라고 쓰지 않는다(§24)."""
+    p = datetime.strptime(prev_date, "%Y-%m-%d").date()
+    t = datetime.strptime(target_date, "%Y-%m-%d").date()
+    gap = (t - p).days
+    if gap == 1:
+        return "어제"
+    if gap <= 3 and p.weekday() == 4 and t.weekday() == 0:
+        return "지난 금요일"
+    return f"{p.month}/{p.day}({_DOWS[p.weekday()]})"
+
+
+def build_prev_prediction(analysis: dict, target_date: str, gap_fn=None) -> dict:
+    """요약 카드의 '어제 예측' 칩 — 직전 코스피 예측이 시초가에서 맞았는지.
+
+    07:25엔 전날 예측이 아직 채점 전이다(정확도 체크는 다음 거래일 09:10). 그래서 채점 기록이 없으면
+    전날 시초가 갭을 지수 일봉으로 직접 구해 같은 규칙으로 채점한다(마감 배지와 같은 방식).
+    그것도 못 구하면 칩을 뺀다 — 더 오래된 결과로 대신하지 않는다(§16).
+    결과는 analysis에 넣어 스냅샷에 함께 저장한다(재생성해도 바뀌지 않게).
+    """
+    saved = analysis.get("prev_prediction_result")
+    if isinstance(saved, dict) and saved.get("date"):
+        res = saved
+    else:
+        bpath = DATA_DIR / "briefings.json"
+        if not bpath.exists():
+            return {}
+        rows = load_json(bpath).get("briefings", [])
+        prev = [b for b in rows if b.get("type") == "kospi" and b.get("date", "") < target_date]
+        if not prev:
+            return {}
+        last = max(prev, key=lambda b: b["date"])   # 가장 최근 항목만 — 채점 여부 무관(§16)
+        if last.get("basis") != BASIS_OPEN:
+            return {}                               # 종가 기준 옛 예측은 시초가 칩으로 말할 수 없다
+        predicted = last.get("predicted_direction", "")
+        gap = last.get("actual_open_pct") if last.get("is_correct") is not None else None
+        if not isinstance(gap, (int, float)):
+            if gap_fn is None:
+                from check_accuracy import get_kospi_open_gap as gap_fn
+            g = gap_fn(last["date"])
+            gap = g[2] if g else None
+        if not isinstance(gap, (int, float)):
+            return {}
+        from check_accuracy import classify_direction_correct
+        res = {
+            "date": last["date"],
+            "direction": predicted,
+            "ok": bool(classify_direction_correct(predicted, gap)),
+            "open_pct": round(gap, 2),
+        }
+        analysis["prev_prediction_result"] = res     # 스냅샷에 함께 저장된다
+    return {"prev_pred": {
+        "label": _prev_label(res["date"], target_date),
+        "dir_word": (res.get("direction") or "").replace(" 우위", ""),
+        "ok": bool(res.get("ok")),
+        "open_pct": res.get("open_pct"),
+    }}
+
+
+def build_hero(analysis: dict, target_date: str) -> dict:
+    """30초 요약 카드 머리·확률 표기. 중립이면 위로 열릴 확률을 그대로 보여준다."""
+    pred = analysis.get("prediction") or {}
+    d = datetime.strptime(target_date, "%Y-%m-%d")
+    direction = pred.get("direction", "")
+    neutral = "상승" not in direction and "하락" not in direction
+    return {
+        "hero_date_label": f"{d.month}월 {d.day}일({_DOWS[d.weekday()]})",
+        "hero_prob_caption": "위로 열릴 확률" if neutral else "",
+        "hero_prob": pred.get("up_pct", 50) if neutral else None,
+    }
+
+
+def _issue_title(title: str) -> str:
+    """'메타 실적 — 반응은 극과 극'에서 대시 뒤 부제를 뗀다. 남는 게 짧으면 원문(§45 retitle과 같은 기준)."""
+    head = re.sub(r"\s*—.*$", "", title or "").strip()
+    return head if len(head) >= 6 else (title or "")
+
+
+def build_issue_check(us_cards: list) -> dict:
+    """오늘의 이슈 점검 — 간밤 미국 카드(us_issue_results 실측)를 화면용으로 펼친다.
+    숫자는 실측 그대로, 판정·코스피 영향은 붙이지 않는다(§45, 사용자 결정 2026-10-26)."""
+    out = []
+    for i, c in enumerate(us_cards or [], 1):
+        title = c.get("title", "")
+        sides = [s for s in (c.get("sides") or []) if isinstance(s, dict)]
+        related = []
+        for pat, stocks in ISSUE_RELATED_KR:
+            if pat.search(title):
+                for code, name in stocks:
+                    url = _pick_detail_url(code, "kospi")
+                    if url:                                   # 상세 페이지가 있을 때만 링크(§36)
+                        related.append({"name": name, "url": url})
+                break
+        out.append({
+            "title": _issue_title(title),
+            "check_line": c.get("check_line", ""),
+            "marks": [m for s in sides for m in (s.get("marks") or []) if isinstance(m.get("pct"), (int, float))],
+            "proxy": next((s.get("proxy") for s in sides if s.get("proxy")), None),
+            "duplicate_of": c.get("duplicate_of"),
+            "related": related,
+        })
+    return {"ic_us_cards": out}
+
+
+def _domestic_card_title(window_from: str) -> str:
+    """국내 뉴스 카드 제목 — '어제'가 아니라 수집 창의 실제 날짜로 쓴다(§24)."""
+    try:
+        d = datetime.strptime(window_from[:10], "%Y-%m-%d")
+        return f"{d.month}월 {d.day}일 장 마감 이후 국내 소식"
+    except (TypeError, ValueError):
+        return "국내 소식"
 
 
 MA5_BACKTEST_PATH = CONFIG_DIR / "monthly_ma5_backtest.json"
@@ -1231,6 +1351,7 @@ def build_domestic_issues(target_date: str = None) -> dict:
     return {
         "domestic_issues": items,
         "domestic_window_label": (payload.get("window") or {}).get("label", ""),
+        "domestic_card_title": _domestic_card_title((payload.get("window") or {}).get("from", "")),
     }
 
 
@@ -1392,6 +1513,8 @@ def build_scorecard(internal_type: str) -> dict:
         })
 
     return {
+        # 채점이 15건이 되기 전엔 '최근 15건'이 누적과 같은 표본이라 숨긴다(2026-10-26 — 9건인데 '최근 15건'으로 표시됐다)
+        "sc_show_recent15": len(scored) >= 15,
         "sc_recent15_pct": r15_pct,
         "sc_recent15_cls": cls(r15_pct),
         "sc_cum_pct": cum_pct,
@@ -1594,6 +1717,10 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더
         ctx.update(build_ib_korea_views())
         ctx.update(build_domestic_issues(target_date))
+        # 3단 구조(2026-10-26) — 30초 요약 카드 + 오늘의 이슈 점검
+        ctx.update(build_hero(analysis, target_date))
+        ctx.update(build_prev_prediction(analysis, target_date))
+        ctx.update(build_issue_check(ctx.get("us_issue_cards")))
         uls = analysis.get("us_linked_story") or {}
         if uls.get("title"):
             ctx["us_linked_title"] = uls["title"]

@@ -3,6 +3,7 @@
 <div class="sc-card">
   <div class="sc-card__h"><span class="sc-dot"></span>우리 성적표</div>
   <div class="sc-stats">
+    {% if sc_show_recent15 %}
     <div class="sc-stat">
       <div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div>
       <div class="sc-stat__l">최근 15건</div>
@@ -12,6 +13,7 @@
         <div class="scg__cap">기준선 {{ sc_recent15_base }}%</div>
       </div>
     </div>
+    {% endif %}
     <div class="sc-stat">
       <div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div>
       <div class="sc-stat__l">누적 {{ sc_cum_count }}건</div>
@@ -40,13 +42,13 @@
     <div class="info-modal__title" id="scorecard-modal-title">우리 예측 성적표</div>
     <div class="info-modal__body">
       <div class="sc-stats">
-        <div class="sc-stat"><div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div><div class="sc-stat__l">최근 15건</div></div>
+        {% if sc_show_recent15 %}<div class="sc-stat"><div class="sc-stat__v {{ sc_recent15_cls }}">{{ sc_recent15_pct }}%</div><div class="sc-stat__l">최근 15건</div></div>{% endif %}
         <div class="sc-stat"><div class="sc-stat__v {{ sc_cum_cls }}">{{ sc_cum_pct }}%</div><div class="sc-stat__l">누적 {{ sc_cum_count }}건</div></div>
         <div class="sc-stat"><div class="sc-stat__v">{{ sc_hit_avg }}</div><div class="sc-stat__l">적중일 평균</div></div>
       </div>
 
       {# 기준선이라는 낯선 단어를 이 문장이 그 자리에서 정의한다 #}
-      <p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 최근 15건 <b>{{ sc_recent15_base }}%</b>, 누적 <b>{{ sc_cum_base }}%</b>를 맞혀요. 코스피가 전일 종가보다 높게 열리는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 <span class="{{ sc_recent15_gcls }}">{{ '%+d'|format(sc_recent15_edge) }}%p</span> · <span class="{{ sc_cum_gcls }}">{{ '%+d'|format(sc_cum_edge) }}%p</span>였어요.</p>
+      <p class="scs">같은 기간 매일 <b>"상승"이라고만</b> 답하면 {% if sc_show_recent15 %}최근 15건 <b>{{ sc_recent15_base }}%</b>, {% endif %}누적 <b>{{ sc_cum_base }}%</b>를 맞혀요. 코스피가 전일 종가보다 높게 열리는 날이 더 많기 때문이에요. 그래서 적중률만으로는 잘한 건지 알 수 없고, 이 기준선을 얼마나 넘었는지가 진짜 성적이에요 — 우리는 {% if sc_show_recent15 %}<span class="{{ sc_recent15_gcls }}">{{ '%+d'|format(sc_recent15_edge) }}%p</span> · {% endif %}<span class="{{ sc_cum_gcls }}">{{ '%+d'|format(sc_cum_edge) }}%p</span>였어요.</p>
 
       <div class="sc-modal-sec">월별 적중률 <span class="sc-modal-sec__sub">(오른쪽 = 기준선)</span></div>
       <div class="sc-mrate">
