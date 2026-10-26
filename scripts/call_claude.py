@@ -1192,7 +1192,11 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
         out.append(f"• {x['name']} — {x['streak']}개월째 5개월선 위 ({gap})")
     if len(items) > 3:
         out.append(f"• 외 {len(items) - 3}종목")
-    out.append(f"※ 같은 조건 뒤 12개월 상승 비율 {st['win_pct']}%(아무 종목 {st['base_win_pct']}%) — 매매 신호가 아니에요.")
+    # 상투적인 '매매 신호가 아니에요' 대신 숫자를 쉬운 말로 풀어 같은 뜻을 전한다(2026-10-26 사용자 지적 — 무슨 말인지 모르겠다)
+    win, base = st["win_pct"], st["base_win_pct"]
+    tail = (f"아무 종목({base}%)과 비슷했어요" if abs(win - base) < 2
+            else f"아무 종목은 {base}%였어요")
+    out.append(f"※ 지난 {st['years']}년 이 조건이 나온 종목이 1년 뒤 오른 비율은 {win}%로, {tail}.")
     return out
 
 

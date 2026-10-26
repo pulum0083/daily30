@@ -87,7 +87,7 @@ def _ma5_item():
 
 
 def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
-    # 월봉 5개월선 종목이 페이지에 보이는 날만 텔레그램에도 싣고, 매매 신호가 아니라는 문장을 함께 붙인다
+    # 월봉 5개월선 종목이 페이지에 보이는 날만 텔레그램에도 싣고, 과거에도 오른 비율이 아무 종목과 비슷했다는 문장을 함께 붙인다
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     analysis = {"prediction": {"direction": "하락 우위", "up_pct": 7, "down_pct": 93, "confidence": 82},
                 "todays_view": {"view_title": "제목"},
@@ -95,7 +95,8 @@ def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
     cc.save_telegram_message("kospi", "2026-10-26", analysis)
     text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
     assert "📊 월봉 5개월선 안착 종목\n• 메리츠금융지주 — 3개월째 5개월선 위 (지금 이격 +5.5%)" in text
-    assert "매매 신호가 아니에요" in text
+    assert "※ 지난 15년 이 조건이 나온 종목이 1년 뒤 오른 비율은 49.6%로, 아무 종목(50.4%)과 비슷했어요." in text
+    assert "매매 신호가 아니에요" not in text and "12개월 상승 비율" not in text
     assert text.index("📊 월봉") < text.index("🔗 전체 근거")
 
 
