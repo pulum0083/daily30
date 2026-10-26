@@ -167,7 +167,6 @@ def _run_gate(tmp_path, monkeypatch, direction, up_pct, sox, regen_direction=Non
     monkeypatch.setattr(va, "DATA_DIR", tmp_path)
     monkeypatch.setattr(va.subprocess, "run", fake_run)
     monkeypatch.setattr(va, "send_admin_alert", lambda *a, **k: None)
-    monkeypatch.setattr(va, "enrich_picks_with_realdata", lambda *a, **k: False)
     monkeypatch.setattr(va, "validate", lambda a, l, b: {"analysis": a, "corrections": [], "warnings": [], "blocks": []})
     monkeypatch.setattr(sys, "argv", ["validate_analysis.py", "--type", "kospi"])
     rc = va.main()

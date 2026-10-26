@@ -82,6 +82,6 @@ def test_kospi_template_uses_new_section_not_stock_picks():
     assert "monthly_ma5" in cfg["sections_main"] and "stock_picks" not in cfg["sections_main"]
 
 
-def test_modal_present_and_us_picks_modal_kept():
+def test_modal_present_and_picks_modal_removed():
     m = (gh.TEMPLATES_DIR / "sections" / "_modals.html").read_text(encoding="utf-8")
-    assert 'id="ma5m-modal"' in m and 'id="picks-modal"' in m
+    assert 'id="ma5m-modal"' in m and 'id="picks-modal"' not in m   # 미국 AI 픽도 2026-10-26 제거

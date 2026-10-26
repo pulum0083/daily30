@@ -54,24 +54,6 @@ def _base_analysis(picks=None):
     }
 
 
-def test_price_correction():
-    a = _base_analysis([{
-        "name": "삼성전자", "price": "70,000원", "change": "+5.00%", "change_cls": "up",
-        "entry": "70,000원", "target": "77,000원", "stop": "66,000원",
-    }])
-    latest = {"kospi_candidates": [{"name": "삼성전자", "ticker": "005930", "price": 53600, "change_pct": -1.47}]}
-    r = v.validate(a, latest, "kospi")
-    assert not r["blocks"]
-    p = r["analysis"]["stock_picks"][0]
-    assert p["price"] == "53,600원"            # 실측으로 교정
-    assert p["change"] == "-1.47%"
-    assert p["change_cls"] == "down"
-    # entry/target/stop도 같은 비율(53600/70000)로 스케일
-    assert p["entry"] == "53,600원"
-    assert v.parse_price(p["target"]) < v.parse_price("77,000원")
-    assert any("가격 교정" in c for c in r["corrections"])
-
-
 def test_price_within_tolerance_no_change():
     a = _base_analysis([{"name": "삼성전자", "price": "53,000원", "change": "-2.0%", "change_cls": "down"}])
     latest = {"kospi_candidates": [{"name": "삼성전자", "ticker": "005930", "price": 53600, "change_pct": -1.47}]}
@@ -80,23 +62,7 @@ def test_price_within_tolerance_no_change():
     assert not any("가격 교정" in c for c in r["corrections"])
 
 
-def test_us_price_correction_dollar():
-    a = _base_analysis([{"name": "NVDA (엔비디아)", "price": "$200.00", "change": "+3.0%", "change_cls": "up"}])
-    latest = {"us_candidates": [{"name": "NVDA", "ticker": "NVDA", "price": 145.30, "change_pct": 1.2}]}
-    r = v.validate(a, latest, "us")
-    assert r["analysis"]["stock_picks"][0]["price"] == "$145.30"
-
-
-# ── 본문 금지패턴: pick 제거 / reasons 원소 제거 ──────────────────────────────
-def test_pick_removed_on_forbidden():
-    a = _base_analysis([
-        {"name": "정상주", "price": "10,000원", "scenario": "정상 시나리오"},
-        {"name": "할루주", "price": "10,000원", "scenario": "시총 6경 돌파 종목"},
-    ])
-    r = v.validate(a, {}, "kospi")
-    names = [p["name"] for p in r["analysis"]["stock_picks"]]
-    assert names == ["정상주"]
-    assert not r["blocks"]
+# ── 본문 금지패턴: reasons 원소 제거 ───────────────────────────────────────────────────────────────────────────
 
 
 def test_reasons_element_removed():
@@ -227,105 +193,9 @@ def test_supply_scale_skipped_for_kospi():
 
 
 # ── 픽 종목 티커 해석 ─────────────────────────────────────────────────────────
-def test_resolve_ticker_us():
-    assert v._resolve_ticker({"name": "NVDA (엔비디아)", "ticker": None}, "us") == "NVDA"
-    assert v._resolve_ticker({"name": "BAC (뱅크오브아메리카)"}, "us") == "BAC"
-    assert v._resolve_ticker({"ticker": "MSFT", "name": "마이크로소프트"}, "us") == "MSFT"
-    # 영문 티커로 해석 불가(한글명만)면 빈 문자열
-    assert v._resolve_ticker({"name": "마이크로소프트"}, "us") == ""
-
-
-def test_resolve_ticker_kospi():
-    # KOSPI·KOSDAQ 모두 6자리 코드만 반환 (.KS/.KQ 접미사 금지 — 네이버 일봉용)
-    assert v._resolve_ticker({"ticker": "005930", "name": "삼성전자"}, "kospi") == "005930"
-    assert v._resolve_ticker({"ticker": "005930.KS", "name": "삼성전자"}, "kospi") == "005930"
-    assert v._resolve_ticker({"ticker": "247540", "name": "에코프로비엠"}, "kospi") == "247540"
-    # 종목코드 없으면 빈 문자열(이름만으로 추측 금지)
-    assert v._resolve_ticker({"name": "삼성전자"}, "kospi") == ""
 
 
 # ── 픽 실측 주입 (fetch 스텁) ─────────────────────────────────────────────────
-def test_enrich_picks_overwrites_and_injects():
-    real = {"price": 224.36, "change_pct": 6.26, "ma20_dist_pct": 3.5,
-            "ma200_dist_pct": 19.4, "sparkline": [1, 2, 3],
-            "ma20_sparkline": [1, 2, 3], "ma200_sparkline": [1, 2, 3]}
-    orig = v._fetch_pick_realdata
-    v._fetch_pick_realdata = lambda tk, is_us: real
-    try:
-        analysis = {"stock_picks": [
-            {"name": "NVDA (엔비디아)", "ticker": None, "change": "+2.14%",
-             "price": "$1.00", "ma200_dist_pct": 99}
-        ]}
-        latest = {"us_candidates": [
-            {"ticker": "NVDA (엔비디아)", "name": "NVDA (엔비디아)", "sparkline": [999]}
-        ]}
-        cor, warn = [], []
-        changed = v.enrich_picks_with_realdata(analysis, latest, "us", cor, warn)
-        p = analysis["stock_picks"][0]
-        assert changed is True
-        assert p["change"] == "+6.26%"
-        assert p["change_cls"] == "up"
-        assert p["price"] == "$224.36"
-        assert p["ma200_dist_pct"] == 19.4
-        # candidate는 중복 추가가 아니라 교체, sparkline은 실측
-        cands = latest["us_candidates"]
-        assert len(cands) == 1
-        assert cands[0]["ticker"] == "NVDA"
-        assert cands[0]["sparkline"] == [1, 2, 3]
-    finally:
-        v._fetch_pick_realdata = orig
-
-
-def test_enrich_picks_down_class():
-    orig = v._fetch_pick_realdata
-    v._fetch_pick_realdata = lambda tk, is_us: {"price": 51.51, "change_pct": -0.17,
-                                                "sparkline": [1], "ma20_sparkline": [1],
-                                                "ma200_sparkline": [1]}
-    try:
-        analysis = {"stock_picks": [{"name": "BAC (뱅크오브아메리카)", "change": "+0.12%"}]}
-        latest = {}
-        cor, warn = [], []
-        v.enrich_picks_with_realdata(analysis, latest, "us", cor, warn)
-        p = analysis["stock_picks"][0]
-        assert p["change"] == "-0.17%"
-        assert p["change_cls"] == "down"
-    finally:
-        v._fetch_pick_realdata = orig
-
-
-def test_enrich_picks_kospi_uses_bare_code_and_won():
-    """코스피 픽: 6자리 코드로 fetch, price는 원화 포맷, candidate ticker는 코드."""
-    captured = {}
-
-    def fake(tk, is_us):
-        captured["tk"], captured["is_us"] = tk, is_us
-        return {"price": 360500.0, "change_pct": 3.30, "ma200_dist_pct": 5.1,
-                "sparkline": [1], "ma20_sparkline": [1], "ma200_sparkline": [1]}
-
-    orig = v._fetch_pick_realdata
-    v._fetch_pick_realdata = fake
-    try:
-        analysis = {"stock_picks": [{"name": "삼성전자", "ticker": "005930", "change": "+9.9%"}]}
-        latest = {}
-        cor, warn = [], []
-        v.enrich_picks_with_realdata(analysis, latest, "kospi", cor, warn)
-        p = analysis["stock_picks"][0]
-        assert captured["tk"] == "005930"   # .KS 없이 6자리 코드
-        assert captured["is_us"] is False
-        assert p["change"] == "+3.30%"
-        assert p["price"] == "360,500원"
-        assert latest["kospi_candidates"][0]["ticker"] == "005930"
-    finally:
-        v._fetch_pick_realdata = orig
-
-
-def test_enrich_picks_unresolvable_ticker_warns():
-    analysis = {"stock_picks": [{"name": "삼성전자"}]}  # kospi 코드 없음
-    latest = {}
-    cor, warn = [], []
-    changed = v.enrich_picks_with_realdata(analysis, latest, "kospi", cor, warn)
-    assert changed is False
-    assert any("티커 해석 실패" in w for w in warn)
 
 
 # ── validate_todays_view_recap ────────────────────────────────────────────────

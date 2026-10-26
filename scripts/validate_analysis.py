@@ -46,8 +46,6 @@ SCALAR_PROSE = {
 # 헤드라인은 검사 제외
 EXCLUDED_FIELDS = {"reason_title", "market_title"}
 
-# 교정 임계치
-PRICE_TOLERANCE = 0.05      # 종목 가격 ±5% 초과 이탈 시 교정
 FX_MIN, FX_MAX = 1000, 2000  # 원/달러 환율 정상 범위
 INDEX_PCT_MAX = 30.0         # 지수 일간 등락률 절대값 상한
 REASONS_MIN = 2             # 교정 후 남아야 할 최소 reasons 수
@@ -167,125 +165,6 @@ def _extract_change_claims(text: str) -> list:
             except ValueError:
                 pass
     return results
-
-
-def validate_prose_against_picks(analysis: dict, btype: str,
-                                  corrections: list, warnings: list, blocks: list) -> None:
-    """픽 실측 데이터와 reasons·scenario·watchpoints 산문을 교차검증한다.
-
-    불일치 문장/항목을 제거하고 corrections에 기록.
-    kospi-close는 stock_picks가 없으므로 skip.
-    """
-    if btype == "kospi-close":
-        return
-
-    picks = analysis.get("stock_picks")
-    if not isinstance(picks, list) or not picks:
-        return
-
-    # 픽 실측 테이블 구성 (enrich 완료 후 change_pct가 float로 채워져 있음)
-    ticker_real: dict = {}
-    name_real: dict = {}
-    for p in picks:
-        chg = p.get("change_pct")
-        if not isinstance(chg, (int, float)):
-            continue
-        tk = (p.get("ticker") or "").strip().upper()
-        nm = (p.get("name") or "").strip()
-        if tk:
-            ticker_real[tk] = float(chg)
-        if nm:
-            name_real[nm] = float(chg)
-        # 이름에서 짧은 식별자 추출: "AVGO (브로드컴)" → "AVGO", "브로드컴"
-        parts = re.split(r'[\s()/·]', nm)
-        for part in parts:
-            part = part.strip()
-            if len(part) >= 2:
-                name_real.setdefault(part, float(chg))
-
-    def real_chg_for_text(text: str):
-        """텍스트에 언급된 픽 티커/이름을 찾아 실측 change_pct 반환. 없으면 None."""
-        t = strip_tags(text)
-        for tk, chg in ticker_real.items():
-            if tk in t:
-                return chg
-        for nm, chg in sorted(name_real.items(), key=lambda x: -len(x[0])):
-            if nm in t:
-                return chg
-        return None
-
-    # ── reasons 검증 ──────────────────────────────────────────────
-    reasons = analysis.get("reasons")
-    if isinstance(reasons, list):
-        kept = []
-        for item in reasons:
-            real = real_chg_for_text(item)
-            if real is None:
-                kept.append(item)
-                continue
-            claims = _extract_change_claims(item)
-            bad = [c for c in claims if is_contradicted(c, real)]
-            if bad:
-                corrections.append(
-                    f"reasons 항목 제거 (실측 {real:+.2f}% vs 텍스트 {bad}): {item[:60]}"
-                )
-            else:
-                kept.append(item)
-        if len(kept) < REASONS_MIN:
-            blocks.append(
-                f"reasons가 {len(kept)}개로 과소 — prose 교정 후 부족 (최소 {REASONS_MIN})"
-            )
-        analysis["reasons"] = kept
-
-    # ── 픽 scenario 검증 ──────────────────────────────────────────
-    for pick in picks:
-        scenario = pick.get("scenario") or ""
-        if not scenario:
-            continue
-        chg = pick.get("change_pct")
-        if not isinstance(chg, (int, float)):
-            continue
-        real = float(chg)
-        sentences = _sentence_split(scenario)
-        kept_sentences = []
-        for sent in sentences:
-            claims = _extract_change_claims(sent)
-            bad = [c for c in claims if is_contradicted(c, real)]
-            if bad:
-                corrections.append(
-                    f"픽 '{pick.get('name')}' scenario 문장 제거 "
-                    f"(실측 {real:+.2f}% vs 텍스트 {bad}): {sent[:60]}"
-                )
-            else:
-                kept_sentences.append(sent)
-        new_scenario = _join_sentences(kept_sentences)
-        if not new_scenario.strip():
-            warnings.append(f"픽 '{pick.get('name')}' scenario 전체 제거됨 — 수동 확인 필요")
-        pick["scenario"] = new_scenario
-
-    # ── watchpoints 검증 ─────────────────────────────────────────
-    if "watch_items" in analysis and "watchpoints" in analysis:
-        warnings.append("watch_items와 watchpoints 키 동시 존재 — watchpoints는 미검증")
-    watch_key = "watch_items" if "watch_items" in analysis else "watchpoints"
-    watch = analysis.get(watch_key)
-    if isinstance(watch, list):
-        kept = []
-        for item in watch:
-            text = item.get("text") or item.get("label") or ""
-            real = real_chg_for_text(text)
-            if real is None:
-                kept.append(item)
-                continue
-            claims = _extract_change_claims(text)
-            bad = [c for c in claims if is_contradicted(c, real)]
-            if bad:
-                corrections.append(
-                    f"watchpoint 항목 제거 (실측 {real:+.2f}% vs 텍스트 {bad}): "
-                    f"{item.get('label', '')}"
-                )
-            else:
-                kept.append(item)
-        analysis[watch_key] = kept
 
 
 # ── 픽 외 종목 산문 검증 ────────────────────────────────────────────────────────
@@ -709,78 +588,10 @@ def fix_officeholder_names(analysis, corrections, warnings, table=None):
                 warnings.append(f"전임 {o['role']} '{old}' 언급이 남아 있어요(역할 표현 없음 — 확인 필요): {left[0][:60]}")
 
 
-def collect_candidates(latest, btype):
-    """latest_*.json에서 {name/ticker → {price, change_pct}} 매칭용 리스트를 모은다."""
-    out = []
-    keys = ["kospi_candidates"] if btype == "kospi" else (["us_candidates"] if btype == "us" else [])
-    for k in keys:
-        out.extend(latest.get(k, []) or [])
-    # 섹터 대표 종목 (kospi 모닝)
-    for sec in (latest.get("sector_stocks") or {}).values():
-        out.extend(sec.get("stocks", []) or [])
-    return out
-
-
-def match_candidate(pick, candidates):
-    """pick.name/ticker가 후보의 name/ticker를 포함하면 매칭(실측 dict 반환)."""
-    name = pick.get("name", "") or ""
-    tk = pick.get("ticker", "") or ""
-    for c in candidates:
-        cn, ct = c.get("name", "") or "", c.get("ticker", "") or ""
-        if (cn and (cn in name or cn == tk)) or (ct and (ct in name or ct == tk)):
-            if c.get("price") is not None:
-                return c
-    return None
-
-
-def _fmt_chg(v):
-    return f"{'+' if v >= 0 else ''}{v:.2f}%"
-
-
 # ── 픽 종목 실측 주입 (yfinance 직접 fetch) ───────────────────────────────────
 # Claude는 후보 풀과 무관하게 종목을 자유 선택하므로, 사전 수집된 candidate가
 # 대부분 비어 있다. 픽된 종목의 ticker를 직접 fetch해 price·change·MA·sparkline을
 # 실측으로 덮어쓰고, generate_html이 읽는 candidate 리스트에도 주입한다.
-
-def _resolve_ticker(pick, btype):
-    """pick → 조회용 식별자. 해석 불가 시 빈 문자열.
-
-    - us: 영문 티커(예: NVDA) — yfinance용.
-    - kospi: 6자리 종목코드(예: 005930) — 네이버 일봉용. .KS/.KQ 접미사는 붙이지
-      않는다. yfinance에 .KS를 붙이면 KOSDAQ 종목이 유령 데이터(하루 stale·오价)를
-      반환해 잘못된 가격이 주입되기 때문. 네이버는 코드만으로 시장을 정확히 식별한다.
-    """
-    tk = (pick.get("ticker") or "").strip()
-    name = pick.get("name") or ""
-    if btype == "us":
-        sym = tk or (name.split("(")[0].strip().split()[0] if name else "")
-        # 미국 티커: 영문 대문자 1~5자
-        return sym if re.fullmatch(r"[A-Z]{1,5}", sym or "") else ""
-    # kospi / kospi-close: 6자리 종목코드 (접미사 없음)
-    code = (tk.split(".")[0] if tk else "").strip()
-    return code if code.isdigit() and len(code) == 6 else ""
-
-
-def _inject_candidate(cands, clean_ticker, name, data):
-    """generate_html sparkline 매칭용 candidate 항목을 주입/갱신한다."""
-    entry = {
-        "ticker": clean_ticker,
-        "name": name,
-        "price": data["price"],
-        "change_pct": data["change_pct"],
-        "ma20_dist_pct": data.get("ma20_dist_pct"),
-        "ma200_dist_pct": data.get("ma200_dist_pct"),
-        "ma20_level": data.get("ma20_level"),
-        "ma200_level": data.get("ma200_level"),
-        "sparkline": data.get("sparkline", []),
-        "ma20_sparkline": data.get("ma20_sparkline", []),
-        "ma200_sparkline": data.get("ma200_sparkline", []),
-    }
-    for i, c in enumerate(cands):
-        if c.get("ticker") == clean_ticker or c.get("name") == name:
-            cands[i] = entry
-            return
-    cands.append(entry)
 
 
 def _closes_to_realdata(closes, ndigits, live_price=None):
@@ -1348,15 +1159,6 @@ def limit_data_issues(analysis, corrections, max_data=1) -> int:
     return len(dropped)
 
 
-def _fetch_pick_realdata(ticker, is_us):
-    """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함.
-
-    미국 픽은 live=True — 미국 브리핑이 프리마켓 시점에 발행되므로 그 시점 실체결가가 기준이다.
-    한국 픽은 코스피 아침 브리핑(장 시작 전 07:25) 기준이라 직전 완료 세션 종가를 유지한다.
-    """
-    return _fetch_us_realdata(ticker, live=is_us) if is_us else _fetch_kospi_realdata(ticker)
-
-
 def _fetch_kospi_index_levels():
     """코스피 지수 실측 + 핵심 레벨(지지/저항) 산출.
 
@@ -1423,141 +1225,6 @@ def inject_kospi_index_levels(analysis, corrections, warnings):
         f"코스피 핵심 레벨 실측 주입 (지지 {old.get('지지')}→{fmt(idx['support'])}, "
         f"저항 {old.get('저항')}→{fmt(idx['resistance'])}; 현재 지수 {fmt(idx['price'])})"
     )
-
-
-# 손절가가 "20일선 이탈 시"라고 주장할 때, 그 값이 실측 20일선과 맞는지 확인한다.
-#
-# 2026-09-02 조사에서 확인된 상태: LLM은 action_guide에 "손절: 20일선(약 1,605,000원)
-# 이탈 시"처럼 **근거를 이미 주장**하고 있었고, 그날 실측과 대조하니 오차 -0.17%·-0.26%로
-# 정확했다. 문제는 그게 **우연히 맞은 것인지 아무도 확인하지 않았다**는 점이다 — §22·§24·§28
-# 에서 반복된 "산문 속 주장에 게이트가 없다" 패턴 그대로다. 픽 카드가 실측 20일선을 근거로
-# 내걸게 된 이상(2026-09-02), 그 옆 손절가가 다른 값이면 화면이 스스로 모순된다.
-#
-# 허용 오차 3%: 20일선은 매일 움직이고 LLM은 종가 기준으로 계산하므로 소수점 차이는 정상이다.
-# 이 게이트가 잡으려는 건 "20일선이라 써놓고 전혀 다른 값을 쓴" 경우다.
-_MA20_CLAIM_RE = re.compile(r"20\s*일\s*선|20일\s*이동평균|20MA|MA\s*20", re.I)
-_MA20_STOP_TOLERANCE_PCT = 3.0
-
-
-def _verify_stop_against_ma20(pick, ma20_level, is_us, corrections, warnings):
-    """손절가가 20일선 근거를 주장하면 실측 20일선으로 검증하고, 어긋나면 교정한다."""
-    if not isinstance(ma20_level, (int, float)) or ma20_level <= 0:
-        return
-    guide = str(pick.get("action_guide") or "")
-    if not _MA20_CLAIM_RE.search(guide):
-        return                      # 20일선을 근거로 내세우지 않았으면 판단하지 않는다
-    stop = parse_price(pick.get("stop"))
-    if stop is None:
-        return
-    gap = (stop - ma20_level) / ma20_level * 100
-    if abs(gap) <= _MA20_STOP_TOLERANCE_PCT:
-        return
-    fixed = f"${ma20_level:,.2f}" if is_us else f"{int(round(ma20_level)):,}원"
-    corrections.append(
-        f"종목 '{pick.get('name')}' 손절가 교정: {pick.get('stop')} → {fixed} "
-        f"(20일선 근거 주장, 실측 20일선 대비 {gap:+.1f}% 이탈)"
-    )
-    pick["stop"] = fixed
-    # stop_pct는 현재가 기준 비율이라 함께 다시 만든다. 못 만들면 지운다 — 틀린 값을 남기지 않는다.
-    cur = parse_price(pick.get("price"))
-    if cur:
-        pick["stop_pct"] = f"{(ma20_level - cur) / cur * 100:+.1f}%"
-    else:
-        pick.pop("stop_pct", None)
-        warnings.append(f"종목 '{pick.get('name')}' 손절 교정 후 현재가 파싱 실패 — stop_pct 제거")
-
-
-def enrich_picks_with_realdata(analysis, latest, btype, corrections, warnings):
-    """픽된 종목의 실측 데이터를 fetch해 analysis·latest(candidate)에 주입한다.
-    Returns: latest가 변경됐는지(bool).
-    """
-    picks = analysis.get("stock_picks")
-    if not isinstance(picks, list) or not picks:
-        return False
-    if btype not in ("kospi", "us"):
-        return False
-
-    is_us = btype == "us"
-    cand_key = "us_candidates" if is_us else "kospi_candidates"
-    cands = latest.setdefault(cand_key, [])
-    changed = False
-
-    for p in picks:
-        tk = _resolve_ticker(p, btype)
-        if not tk:
-            warnings.append(f"종목 '{p.get('name')}' 티커 해석 실패 — 실측 주입 생략")
-            continue
-        data = _fetch_pick_realdata(tk, is_us)
-        if "error" in data or data.get("price") is None:
-            warnings.append(f"종목 '{p.get('name')}'({tk}) 실측 fetch 실패: {data.get('error', 'no price')}")
-            continue
-
-        price, chg = data["price"], data["change_pct"]
-        old_chg = p.get("change")
-        p["price"] = f"${price:,.2f}" if is_us else f"{int(round(price)):,}원"
-        p["change"] = _fmt_chg(chg)
-        p["change_cls"] = "up" if chg >= 0 else "down"
-        if data.get("ma200_dist_pct") is not None:
-            p["ma200_dist_pct"] = data["ma200_dist_pct"]
-        if data.get("ma20_dist_pct") is not None:
-            p["ma20_dist_pct"] = data["ma20_dist_pct"]
-        if data.get("vol_mult") is not None:
-            p["vol_mult"] = data["vol_mult"]
-        if data.get("ma20_level") is not None:
-            p["ma20_level"] = data["ma20_level"]
-        if data.get("ma200_level") is not None:
-            p["ma200_level"] = data["ma200_level"]
-        _verify_stop_against_ma20(p, data.get("ma20_level"), is_us, corrections, warnings)
-
-        _inject_candidate(cands, tk, p.get("name", ""), data)
-        changed = True
-        corrections.append(
-            f"종목 '{p.get('name')}'({tk}) 실측 주입: change {old_chg} → {p['change']}, price {p['price']}"
-        )
-
-    return changed
-
-
-def correct_pick_price(pick, gt, corrections, is_us=False):
-    """pick 가격이 실측과 ±5% 초과 이탈하면 price·change·entry/target/stop를 교정.
-
-    is_us는 btype에서 직접 전달받는다. Claude 원본 가격 문자열('$' 유무)로
-    판정하면 '$' 없는 미국 가격 형식("130달러" 등)에서 오판할 수 있다.
-    """
-    cur = parse_price(pick.get("price"))
-    gt_price = gt.get("price")
-    if cur is None or not gt_price or cur <= 0:
-        return
-    if abs(cur - gt_price) / gt_price <= PRICE_TOLERANCE:
-        return
-
-    new_price = f"${gt_price:,.2f}" if is_us else f"{int(round(gt_price)):,}원"
-    ratio = gt_price / cur
-
-    old = pick.get("price")
-    pick["price"] = new_price
-    chg = gt.get("change_pct")
-    if chg is not None:
-        pick["change"] = _fmt_chg(chg)
-        pick["change_cls"] = "up" if chg >= 0 else "down"
-
-    # 진입/목표/손절: 같은 비율로 스케일 (파싱 가능할 때만)
-    for fld in ("entry", "target", "stop"):
-        raw = pick.get(fld)
-        v = parse_price(raw)
-        if v is not None and isinstance(raw, str):
-            scaled = v * ratio
-            pick[fld] = f"${scaled:,.2f}" if is_us else f"{int(round(scaled)):,}원"
-
-    corrections.append(f"종목 '{pick.get('name')}' 가격 교정: {old} → {new_price} (실측 대비 교차검증)")
-
-
-def forbidden_in_pick(pick):
-    """stock_pick의 서술형 본문(scenario·action_guide)에서 금지 패턴 탐지."""
-    bad = []
-    for fld in ("scenario", "action_guide"):
-        bad.extend(find_forbidden(pick.get(fld)))
-    return bad
 
 
 def _filter_list_prose(items, label, corrections):
@@ -1772,31 +1439,6 @@ def validate(analysis, latest, btype):
             warnings.append(f"comfort_line 제거 (숫자·티커 포함): {cl!r}")
             a["comfort_line"] = ""
 
-    # 2) 계층 1 + stock_picks 본문
-    picks = a.get("stock_picks")
-    is_us = btype == "us"
-    if isinstance(picks, list) and picks:
-        cands = collect_candidates(latest, btype)
-        kept = []
-        for p in picks:
-            bad = forbidden_in_pick(p)
-            if bad:
-                corrections.append(f"종목 '{p.get('name')}' 제거: {bad}")
-                continue
-            gt = match_candidate(p, cands)
-            if gt:
-                correct_pick_price(p, gt, corrections, is_us=is_us)
-            else:
-                warnings.append(f"종목 '{p.get('name')}' 실측 매칭 실패 — 가격 교차검증 생략")
-            kept.append(p)
-        if not kept:
-            blocks.append("stock_picks 전부 제거됨 (브리핑 빈약)")
-        a["stock_picks"] = kept
-
-    # 2-b) 산문 교차검증 — 픽 실측 vs reasons·scenario·watchpoints
-    if btype in ("kospi", "us"):
-        validate_prose_against_picks(a, btype, corrections, warnings, blocks)
-
     # 2-c) 산문 교차검증 — 픽 외 개별 종목 방향 모순 (us 전용)
     if btype == "us":
         validate_prose_nonpick_stocks(a, btype, corrections, warnings)
@@ -1972,16 +1614,6 @@ def main():
     analysis = load_json(analysis_path)
     latest = load_json(latest_path) if latest_path.exists() else {}
 
-    # 0) 픽 종목 실측 주입 (yfinance 직접 fetch — 깨진/빈약한 candidate 풀 우회)
-    pre_corrections, pre_warnings = [], []
-    latest_changed = enrich_picks_with_realdata(
-        analysis, latest, btype, pre_corrections, pre_warnings
-    )
-    if latest_changed and latest_path.exists():
-        with open(latest_path, "w", encoding="utf-8") as f:
-            json.dump(latest, f, ensure_ascii=False, indent=2)
-        print(f"[validate] ✓ candidate 실측 주입 후 저장 → {latest_path}")
-
     result = validate(analysis, latest, btype)
 
     # 4-b) 선행신호 prior 오버라이드 (kospi 전용) — strong prior가 LLM 방향과 정반대면 재생성
@@ -2008,13 +1640,6 @@ def main():
                 regen = None
             if regen and regen.returncode == 0:
                 analysis = load_json(analysis_path)
-                pre_corrections, pre_warnings = [], []
-                latest_changed = enrich_picks_with_realdata(
-                    analysis, latest, btype, pre_corrections, pre_warnings
-                )
-                if latest_changed and latest_path.exists():
-                    with open(latest_path, "w", encoding="utf-8") as f:
-                        json.dump(latest, f, ensure_ascii=False, indent=2)
                 result = validate(analysis, latest, btype)
                 new_dir = (result["analysis"].get("prediction") or {}).get("direction", "")
                 if forced_dir not in new_dir:
@@ -2031,9 +1656,6 @@ def main():
     #      숫자만 고치지 않는다 — 방향과 확률이 서로 어긋난 채 나가느니 AI 원본을 그대로 두고 관리자에게 알린다(위 알림).
     if btype == "kospi":
         clamp_prediction_to_prior(result["analysis"], prior, result["corrections"])
-
-    result["corrections"] = pre_corrections + result["corrections"]
-    result["warnings"] = pre_warnings + result["warnings"]
 
     for w in result["warnings"]:
         print(f"[validate] ⚠️  {w}")
