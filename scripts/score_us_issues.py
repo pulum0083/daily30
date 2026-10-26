@@ -79,6 +79,28 @@ def proxy_for(label: str):
     return _PROXY.get(normalize_label(label))
 
 
+# 제목에 이름이 나온 지수를 함께 잰다 — "S&P·다우 선물 동반 약세, VIX는 급등"을 S&P500 하나로만 재면
+# 제목과 실측이 어긋난다(2026-10-26 점검). 라벨이 지수 계열일 때만 쓴다(_PROXY와 같은 조건).
+_TITLE_INDEX = [
+    (re.compile(r"S\s*&\s*P"), "^GSPC", "S&P500"),
+    (re.compile(r"다우"), "^DJI", "다우"),
+    (re.compile(r"나스닥"), "^IXIC", "나스닥"),
+    (re.compile(r"러셀"), "^RUT", "러셀2000"),
+    (re.compile(r"VIX|변동성\s*지수|공포\s*지수"), "^VIX", "VIX"),
+]
+_FEAR = {"^VIX"}   # 오르면 시장이 약하다는 뜻이라 '올랐어요/내렸어요' 문장 판정에서 뺀다
+
+
+def title_indices(title: str) -> list:
+    """제목에 나온 지수 [(심볼, 이름)] — 제목에 나온 순서대로."""
+    hits = []
+    for pat, sym, name in _TITLE_INDEX:
+        m = pat.search(title or "")
+        if m:
+            hits.append((m.start(), sym, name))
+    return [(sym, name) for _, sym, name in sorted(hits)]
+
+
 def _has_final_consonant(word: str) -> bool:
     """마지막 글자에 받침이 있는지. 한글이 아니면 있는 것으로 본다(‘이’가 무난)."""
     if not word:
@@ -170,12 +192,15 @@ def build_cards(issues: list, measure, session_label: str = "") -> list:
             label = (s.get("label") or "").strip()
             tickers = [t for t in (s.get("tickers") or []) if isinstance(t, str) and t.strip()]
             proxy_sym = proxy_name = None
+            names = {}
             if not tickers:
                 hit = proxy_for(label)
                 if not hit:
                     continue          # 티커도 프록시도 없으면 채점하지 않는다
-                proxy_sym, proxy_name = hit
-                tickers = [proxy_sym]
+                pairs = title_indices(title) or [hit]
+                proxy_sym = pairs[0][0]
+                tickers = [sym for sym, _ in pairs]
+                names = dict(pairs)
             marks = []
             for t in tickers:
                 pct = measure(t)
@@ -183,9 +208,11 @@ def build_cards(issues: list, measure, session_label: str = "") -> list:
                     continue          # 그 세션 봉이 없으면 이 티커는 버린다
                 marks.append({
                     "ticker": t,
-                    "name": proxy_name or t,
+                    "name": names.get(t, t),
                     "pct": round(pct, 2),
                 })
+            if proxy_sym:
+                proxy_name = "·".join(m["name"] for m in marks)
             if not marks:
                 continue
             sides.append({
@@ -205,7 +232,7 @@ def build_cards(issues: list, measure, session_label: str = "") -> list:
         else:
             if key:
                 seen_proxy[key] = len(cards) + 1
-            card["check_line"] = check_line(head["label"], head["marks"])
+            card["check_line"] = check_line(head["label"], [m for m in head["marks"] if m["ticker"] not in _FEAR] or head["marks"])
         cards.append(card)
     return cards
 

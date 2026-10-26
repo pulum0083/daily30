@@ -235,3 +235,20 @@ def test_normal_weekday_scores_previous_night():
 def test_monday_after_normal_friday_scores_friday():
     """평범한 월요일은 금요일 밤 미국장을 채점한다 — 휴장 규칙이 이걸 막으면 안 된다."""
     assert us_session_to_score(datetime.date(2026, 8, 31)) == datetime.date(2026, 8, 28)
+
+
+# ── 제목에 나온 지수를 함께 잰다(2026-10-26 점검 — 제목과 실측이 어긋났다) ──
+def test_title_indices_measured_for_index_label():
+    issue = {"title": "S&P·다우 선물 동반 약세, VIX는 급등", "down": {"label": "지수 전반", "tickers": []}}
+    pct = {"^GSPC": -1.21, "^DJI": -0.60, "^VIX": 14.09}
+    card = S.build_cards([issue], lambda t: pct.get(t))[0]
+    side = card["sides"][0]
+    assert [m["name"] for m in side["marks"]] == ["S&P500", "다우", "VIX"]
+    assert side["proxy"] == "S&P500·다우·VIX"
+    assert "내렸어요" in card["check_line"]          # VIX 상승은 '올랐어요' 판정에 넣지 않는다
+
+
+def test_index_label_without_index_in_title_keeps_sp500():
+    issue = {"title": "고용지표 대기", "down": {"label": "지수 전반", "tickers": []}}
+    card = S.build_cards([issue], lambda t: {"^GSPC": -0.5}.get(t))[0]
+    assert card["sides"][0]["proxy"] == "S&P500" and card["sides"][0]["marks"][0]["ticker"] == "^GSPC"
