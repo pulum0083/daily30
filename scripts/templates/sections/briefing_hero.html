@@ -8,6 +8,10 @@
   </div>
   {% if todays_view and todays_view.view_title %}<h2 class="bx-head">{{ todays_view.view_title }}</h2>{% endif %}
   {% if todays_view and todays_view.dek %}<p class="bx-dek">{{ todays_view.dek | safe }}</p>{% endif %}
+  {% if prior_sig %}
+  {# 예측 근거 신호 — 방향을 정하는 prior 입력 실측(2026-10-26). 확률이 어디서 나왔는지 보여준다. #}
+  <div class="bx-sig"><span class="bx-sig-k">예측 근거 신호</span>{% for g in prior_sig %}<span class="bx-sig-i">{{ g.name }} <b class="{{ 'up' if g.pct > 0 else ('dn' if g.pct < 0 else '') }}">{{ '+' if g.pct > 0 else ('−' if g.pct < 0 else '') }}{{ '%.2f'|format(g.pct|abs) }}%</b></span>{% endfor %}</div>
+  {% endif %}
   {% if prev_pred %}
   <div class="bx-chips">
     <span class="bx-chip {{ 'ok' if prev_pred.ok else 'miss' }}"><em>{{ prev_pred.label }} 예측</em><b>{{ prev_pred.dir_word }} → {{ '적중' if prev_pred.ok else '빗나감' }}</b><span>시초가 {{ '%+.2f'|format(prev_pred.open_pct) }}%</span></span>

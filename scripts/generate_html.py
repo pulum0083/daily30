@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261026d"
+ASSET_VER = "20261026e"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -370,6 +370,65 @@ def build_hero(analysis: dict, target_date: str) -> dict:
     }
 
 
+_PRIOR_SIG_NAMES = [("sox", "SOX"), ("nasdaq", "나스닥"), ("nq", "나스닥 선물"),
+                    ("ewy_resid", "EWY(코스피 반영분 제외)"), ("vix", "VIX")]
+
+
+def _market_data_is_for(market_data: dict, target_date: str) -> bool:
+    """시장 데이터가 이 브리핑 날짜에 수집된 것인지 — 다른 날 파일로 스냅샷을 채우지 않는다(§14)."""
+    return bool(target_date) and str((market_data or {}).get("generated_at") or "")[:10] == target_date
+
+
+def build_prior_signals(analysis: dict, market_data: dict, target_date: str) -> dict:
+    """요약 카드의 '예측 근거 신호' 한 줄 — 방향을 정하는 prior 신호 실측(§57·§63).
+
+    예측에 실제로 쓰는 leading_signal.compute_prior()로 계산하고 analysis에 넣어 스냅샷에 남긴다.
+    시장 데이터가 이 날짜 것이 아니면 만들지 않는다(재생성 때 다른 날 값이 들어가지 않게).
+    """
+    saved = analysis.get("prior_signals")
+    if not isinstance(saved, dict):
+        if not _market_data_is_for(market_data, target_date):
+            return {}
+        try:
+            from leading_signal import compute_prior
+            sig = compute_prior(market_data).get("signals") or {}
+        except Exception as e:
+            print(f"[generate_html] 예측 근거 신호 계산 실패: {e}")
+            return {}
+        saved = {k: sig.get(k) for k, _ in _PRIOR_SIG_NAMES if isinstance(sig.get(k), (int, float))}
+        if not saved:
+            return {}
+        analysis["prior_signals"] = saved      # 스냅샷에 함께 저장된다
+    rows = [{"name": name, "pct": saved[k]} for k, name in _PRIOR_SIG_NAMES if isinstance(saved.get(k), (int, float))]
+    return {"prior_sig": rows} if rows else {}
+
+
+def build_prev_supply(analysis: dict, market_data: dict, target_date: str) -> dict:
+    """이슈 점검의 '국내 · 실측' 카드 — 직전 거래일 정규장 마감(15:31~15:40) 투자자별 순매수(§51·§56).
+
+    표시 순서는 개인 → 기관 → 외국인(§10). 단위는 억원. analysis에 넣어 스냅샷에 남긴다.
+    """
+    saved = analysis.get("prev_supply")
+    if not isinstance(saved, dict):
+        it = (market_data or {}).get("investor_trading") or {}
+        if not _market_data_is_for(market_data, target_date) or not it.get("date"):
+            return {}
+        try:
+            saved = {"date": str(it["date"]),
+                     **{k: round(float(it[k]["net"]) / 100) for k in ("individual", "institution", "foreign")}}
+        except (KeyError, TypeError, ValueError):
+            return {}
+        if str(saved["date"]) >= target_date.replace("-", ""):
+            return {}                            # 아침 브리핑은 전 거래일 값만 — 오늘 장중 값이 아니다
+        analysis["prev_supply"] = saved
+    d = str(saved["date"])
+    rows = [{"name": n, "eok": saved.get(k)} for k, n in (("individual", "개인"), ("institution", "기관"), ("foreign", "외국인"))
+            if isinstance(saved.get(k), (int, float))]
+    if len(rows) < 3:
+        return {}
+    return {"prev_supply": {"label": f"{int(d[4:6])}월 {int(d[6:8])}일", "rows": rows}}
+
+
 def _issue_title(title: str) -> str:
     """'메타 실적 — 반응은 극과 극'에서 대시 뒤 부제를 뗀다. 남는 게 짧으면 원문(§45 retitle과 같은 기준)."""
     head = re.sub(r"\s*—.*$", "", title or "").strip()
@@ -492,6 +551,43 @@ def _ma5_backtest_stats():
     except Exception as e:
         print(f"[generate_html] monthly_ma5 백테스트 수치 없음({e}) — 섹션 생략")
         return None
+
+
+_PM_FUTURES = [("sp500_fut", "S&P500 선물"), ("nasdaq_fut", "나스닥 선물"), ("dow_fut", "다우 선물")]
+_PM_STOCKS = ["NVDA", "AAPL", "MSFT", "AMZN", "META", "GOOGL"]
+
+
+def _pct_of(d):
+    """수집 데이터의 등락률 — get_ticker_full은 change_pct, 사이드바 선물(NQ)은 chg."""
+    if not isinstance(d, dict):
+        return None
+    v = d.get("change_pct", d.get("chg"))
+    return float(v) if isinstance(v, (int, float)) else None
+
+
+def build_premarket_strip(analysis: dict, market_data: dict, target_date: str, gen_time: str = "") -> dict:
+    """미국 브리핑 맨 위 '프리마켓 실측' 띠 — 지수선물 3종 + 빅테크 6종의 발행 시점 실체결가 등락(§0 ①·§26).
+
+    fetch_data가 연장시간 체결로 잡은 값을 그대로 쓴다. analysis에 넣어 스냅샷에 남기고, 시장 데이터가
+    이 날짜 것이 아니면 만들지 않는다. 값이 하나도 없으면 띠를 뺀다.
+    """
+    saved = analysis.get("premarket")
+    if not isinstance(saved, dict):
+        if not _market_data_is_for(market_data, target_date):
+            return {}
+        fut = (market_data or {}).get("futures") or {}
+        big = (market_data or {}).get("bigtech") or {}
+        saved = {
+            "asof": gen_time,
+            "futures": [{"name": n, "pct": _pct_of(fut.get(k))} for k, n in _PM_FUTURES if _pct_of(fut.get(k)) is not None],
+            "stocks": [{"name": t, "pct": _pct_of(big.get(t))} for t in _PM_STOCKS if _pct_of(big.get(t)) is not None],
+        }
+        if not saved["futures"] and not saved["stocks"]:
+            return {}
+        analysis["premarket"] = saved          # 스냅샷에 함께 저장된다
+    if not saved.get("futures") and not saved.get("stocks"):
+        return {}
+    return {"premarket": saved}
 
 
 NASDAQ_BACKTEST_PATH = CONFIG_DIR / "nasdaq_overheat_backtest.json"
@@ -1790,6 +1886,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
+        ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
         tv = analysis.get("todays_view") or {}
         ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"
@@ -1811,6 +1908,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_hero(analysis, target_date))
         ctx.update(build_prev_prediction(analysis, target_date))
         ctx.update(build_issue_check(ctx.get("us_issue_cards")))
+        ctx.update(build_prior_signals(analysis, market_data, target_date))   # 예측 근거 신호 한 줄
+        ctx.update(build_prev_supply(analysis, market_data, target_date))     # 전일 수급 카드
         uls = analysis.get("us_linked_story") or {}
         if uls.get("title"):
             ctx["us_linked_title"] = uls["title"]

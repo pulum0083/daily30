@@ -1421,6 +1421,12 @@ html.dark .arch-item__dek{color:var(--muted);}
 .bx-chip.miss b{color:var(--muted)}
 .bx-chip.ok b{color:var(--primary)}
 .bx-def{font-size:11px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+.bx-sig{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-top:10px;font-size:11.5px;color:var(--muted)}
+.bx-sig-k{font-weight:700;color:var(--ink)}
+.bx-sig-i{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bx-sig-i b{font-weight:700;color:var(--ink)}
+.bx-sig-i b.up{color:var(--up)}
+.bx-sig-i b.dn{color:var(--dn)}
 .ic-section{margin-top:26px}
 .ic-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .ic-h h2{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin:0}
@@ -1520,3 +1526,15 @@ html.dark .arch-item__dek{color:var(--muted);}
 .nq-foot p{margin:8px 0 0}
 .nq-foot b{color:var(--ink)}
 .nq-foot a{color:var(--primary);font-weight:600;white-space:nowrap}
+
+/* ── 미국 브리핑 '지금 프리마켓 · 실측' 띠(2026-10-26) ── */
+.pm-strip{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:11px 14px;background:var(--canvas);margin-top:4px}
+.pm-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pm-asof{font-size:11px;color:var(--muted)}
+.pm-row{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.pm-row+.pm-row{padding-top:7px;border-top:1px dashed var(--hairline)}
+.pm-i{white-space:nowrap}
+.pm-i em{font-style:normal;color:var(--muted);margin-right:4px}
+.pm-i b{font-weight:700;color:var(--ink)}
+.pm-i b.up{color:var(--up)}
+.pm-i b.dn{color:var(--dn)}

@@ -1,7 +1,7 @@
 {# 오늘의 이슈 점검 — 간밤 미국(실측) · 국내(뉴스) · 외국계(뉴스) · 오늘 볼 것(AI 해석). 코스피 아침 전용(3단 구조, 2026-10-26).
    카드마다 데이터가 없으면 그 카드만 빠지고, 전부 없으면 섹션째 빠진다(§0). 미국 카드엔 코스피 영향 판정을 붙이지 않는다(§45). #}
 {% set outlook = (todays_view.outlook if todays_view and todays_view.outlook else []) %}
-{% if ic_us_cards or domestic_issues or ib_korea_views or outlook %}
+{% if ic_us_cards or prev_supply or domestic_issues or ib_korea_views or outlook %}
 <div class="open-section ic-section">
   <div class="ic-h"><h2>오늘의 이슈 점검</h2><span>{{ us_issue_label | default('간밤') }} 미국 · 국내 · 오늘 볼 것</span></div>
   <div class="ic-list">
@@ -29,6 +29,20 @@
       {% if c.proxy and not c.duplicate_of %}<div class="ic-foot">종목이 지정되지 않아 {{ c.proxy }} 실측으로 봤어요.</div>{% endif %}
     </div>
     {% endfor %}
+
+    {% if prev_supply %}
+    {# 전일 수급 — 정규장 마감(15:31~15:40) 확정값, 개인→기관→외국인 순(§10·§51) #}
+    <div class="ic-card">
+      <div class="ic-top"><span class="ic-tag fact">국내 · 실측</span></div>
+      <div class="ic-title">{{ prev_supply.label }} 코스피 투자자별 순매수</div>
+      <div class="ic-body"><div class="ic-tks">
+        {%- for r in prev_supply.rows -%}
+        <span class="ic-tk {{ 'up' if r.eok > 0 else ('dn' if r.eok < 0 else '') }}">{{ r.name }} <b>{{ '+' if r.eok > 0 else ('−' if r.eok < 0 else '') }}{{ '{:,}'.format(r.eok|abs) }}억</b></span>
+        {%- endfor -%}
+      </div></div>
+      <div class="ic-foot">정규장 마감(15:30) 직후 확정값이에요.</div>
+    </div>
+    {% endif %}
 
     {% if domestic_issues %}
     <div class="ic-card">

@@ -1,0 +1,11 @@
+{# 미국 브리핑 맨 위 '프리마켓 실측' 띠 — 지수선물·빅테크의 발행 시점 실체결가 등락(2026-10-26). 지수 자체는 프리마켓 시세가 없다(§66). #}
+<div class="pm-strip">
+  <div class="pm-h"><span class="ic-tag fact">지금 프리마켓 · 실측</span>{% if premarket.asof %}<span class="pm-asof">{{ premarket.asof }} KST 기준 · 전일 종가 대비</span>{% endif %}</div>
+  {% for row in (premarket.futures, premarket.stocks) if row %}
+  <div class="pm-row">
+    {%- for x in row -%}
+    <span class="pm-i"><em>{{ x.name }}</em><b class="{{ 'up' if x.pct > 0 else ('dn' if x.pct < 0 else '') }}">{{ '+' if x.pct > 0 else ('−' if x.pct < 0 else '') }}{{ '%.2f'|format(x.pct|abs) }}%</b></span>
+    {%- endfor -%}
+  </div>
+  {% endfor %}
+</div>
