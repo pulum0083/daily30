@@ -107,7 +107,7 @@ def test_registry_covers_every_rotation_format():
     """형식 풀에 형식을 추가하고 여기 등록을 빠뜨리면 이 게이트가 조용히 헛돈다."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import call_claude
-    missing = [f for f in call_claude.FORMAT_POOL_KOSPI if f not in v.FORMAT_BODY_FIELDS]
-    assert not missing, f"FORMAT_BODY_FIELDS에 미등록: {missing}"
+    assert "split" in v.FORMAT_BODY_FIELDS          # 코스피는 2026-10-26부터 split 고정(로테이션 없음)
+    assert not hasattr(call_claude, "FORMAT_POOL_KOSPI")
     missing_close = [f for f in call_claude.FORMAT_POOL_CLOSE if f not in v.FORMAT_BODY_FIELDS]
     assert not missing_close, f"FORMAT_BODY_FIELDS에 미등록(close): {missing_close}"

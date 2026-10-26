@@ -219,3 +219,15 @@ def test_domestic_news_shows_absolute_time_not_relative(tmp_path, monkeypatch):
     assert ctx["domestic_issues"][0]["time_abs"] == "10/22 21:44"
     html = _issue_html(**ctx)
     assert "연합 · 10/22 21:44" in html and "시간 전" not in html
+
+
+# ── 코스피 프롬프트 정리(2026-10-26) — 화면에 안 나오는 출력은 요구하지 않는다 ──
+def test_kospi_prompt_drops_unused_outputs_and_fixes_split():
+    import call_claude as cc
+    p = cc.KOSPI_SYSTEM_PROMPT
+    for gone in ("watch_items", "comfort_line", "sector_focus", "us_linked_story", "### 형식 B", "\"num_cards\""):
+        assert gone not in p, gone
+    for kept in ("key_drivers", "reason_title", "todays_view", "recap", "outlook"):
+        assert kept in p, kept
+    src = (Path(cc.__file__)).read_text(encoding="utf-8")
+    assert 'chosen_format = "split" if briefing_type == "kospi" else None' in src

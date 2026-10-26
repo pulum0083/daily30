@@ -2420,3 +2420,6 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - 테스트 `scripts/test_content_boost.py`(12), `test_us_issue_scoring.py`(제목 지수 2건), `test_kospi_picks_removed.py`(미국 픽 제거).
 - **같은 날 마무리(2026-10-26)**: 외국계 시각(`build_ib_korea_views`)에 국내 이슈와 같은 날짜 검사를 붙였다(§63 남은 갭 b 해소). 미국 이슈 제목에도 헤드라인 금지어("시험대"·"분수령" 등)를 적용했다 — 첫 이슈 제목이 텔레그램 '👀 오늘 밤 볼 것'에 그대로 실린다(10/23 "AI 랠리의 '진짜 시험대'").
 - **다음에 할 것(미룸)**: ① AI 픽 검증 코드·템플릿 삭제(위 '남은 정리'), ② 코스피 프롬프트에서 화면에 안 나오는 출력(근거 형식 로테이션·key_drivers·comfort_line) 줄이기(§63 남은 갭 a), ③ 코스피200 야간선물(증권사 API 키 필요, §57), ④ 메모리 현물가(TrendForce 서면 동의 필요).
+- **미룬 일 1·2 처리(2026-10-26 같은 날)**:
+  - AI 픽 코드 삭제 — `validate_analysis`의 실측 주입·가격 교정·금지어·산문 교차검증(`enrich_picks_with_realdata` 등 11개 함수·상수 3개), `generate_html.build_stock_picks`·`_fmt_level`, `sections/stock_picks.html`, `picks-modal`, 관련 테스트(`test_pick_basis.py` 등). **픽 CSS는 남긴다** — 영구 보존하는 예전 발행본(§33)이 같은 `style.css`로 픽 카드를 그린다.
+  - 코스피 프롬프트 정리(§63 남은 갭 a 해소) — 근거 형식 로테이션을 없애고 `split`으로 고정(`analysis_format`은 §34 게이트가 계속 읽는다), 형식 B~G 설명·관전 포인트(watch_items)·하단 심층(us_linked_story·sector_focus)·위로 한 줄(comfort_line) 규칙과 예시를 지웠다. 필수 필드는 prediction·reason_title·key_drivers·todays_view. `reason_title`·`key_drivers`는 이메일·latest.json·헤드라인 숫자 검증이 쓰므로 남긴다. 시스템 프롬프트 약 24,000자 → 17,000자. 예전 필드 이름을 예로 들던 공통 규칙 문장은 `todays_view`·`key_drivers` 기준으로 바꿨다(규칙 내용은 같다).
