@@ -1243,7 +1243,8 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
 
     텔레그램은 HTML 생성보다 먼저 만들어져 analysis에 아직 monthly_ma5가 없을 수 있다. 그래서 페이지와 같은
     generate_html.build_monthly_ma5()로 읽는다 — 날짜 대조·백테스트 파일 없음 처리까지 페이지와 똑같다.
-    백테스트 문장 없이 종목만 보이면 '오른다'로 읽히므로 그 문장을 항상 함께 싣는다.
+    백테스트 설명 줄은 싣지 않는다 — 한 줄로는 뜻이 전달되지 않아 페이지의 '근거와 면책 고지'에만 둔다(사용자 결정 2026-10-26).
+    백테스트 파일이 없으면 페이지가 섹션을 빼므로 여기서도 같은 조건으로 뺀다.
     """
     import generate_html
     ctx = generate_html.build_monthly_ma5(dict(analysis), date_str)
@@ -1257,11 +1258,6 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
         out.append(f"• {x['name']} — {x['streak']}개월째 5개월선 위 ({gap})")
     if len(items) > 3:
         out.append(f"• 외 {len(items) - 3}종목")
-    # 상투적인 '매매 신호가 아니에요' 대신 숫자를 쉬운 말로 풀어 같은 뜻을 전한다(2026-10-26 사용자 지적 — 무슨 말인지 모르겠다)
-    win, base = st["win_pct"], st["base_win_pct"]
-    tail = (f"아무 종목({base}%)과 비슷했어요" if abs(win - base) < 2
-            else f"아무 종목은 {base}%였어요")
-    out.append(f"※ 지난 {st['years']}년 이 조건이 나온 종목이 1년 뒤 오른 비율은 {win}%로, {tail}.")
     return out
 
 
