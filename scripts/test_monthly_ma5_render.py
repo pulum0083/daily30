@@ -63,7 +63,8 @@ def test_template_renders_strip_facts_and_footer():
     assert "월봉 5개월선 안착 종목" in html and "메리츠금융지주" in html and "127,800원" in html
     assert html.count('class="m5a-cell') == 10 and html.count("is-run") == 3 and html.count("is-cur") == 1
     assert "9월 말 이격</em>+8.7%" in html and "지금 이격</em>+5.5%" in html and "+0.17%p" in html
-    assert f"오른 경우는 {ctx['ma5m_stats']['win_pct']}%" in html and "매매 신호가 아니에요" in html
+    assert f"1년 뒤 오른 비율은 {ctx['ma5m_stats']['win_pct']}%" in html and "비슷했어요" in html
+    assert "매매 신호가 아니에요" not in html
     assert 'data-modal-open="ma5m-modal"' in html and "추천" not in html
 
 
