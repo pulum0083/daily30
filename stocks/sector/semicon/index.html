@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"종목","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":3,"name":"반도체","item":"https://doubleshot.space/stocks/sector/semicon/"}]}</script>
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261026e">
+<link rel="stylesheet" href="/assets/style.css?v=20261026f">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -128,7 +128,6 @@
   .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:0;}
   .sector-card{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-  .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
   .sector-card__name{font-size:15px;font-weight:800;color:var(--ink);}
   .sector-card__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
@@ -267,7 +266,7 @@
   </div>
   <div class="sector-stock-list">
     
-    <a class="sector-card" href="/stocks/000660/" data-code="000660" data-spark20='[1862000.0, 1768000.0, 1765000.0, 1776000.0, 1833000.0, 1841000.0, 1773000.0, 1723000.0, 1681000.0, 1605000.0, 1443000.0, 1419000.0, 1262000.0, 1272000.0, 1277000.0, 1223000.0, 1294000.0, 1223000.0, 1277000.0, 1275000.0]'>
+    <div class="sector-card" data-code="000660" data-spark20='[1862000.0, 1768000.0, 1765000.0, 1776000.0, 1833000.0, 1841000.0, 1773000.0, 1723000.0, 1681000.0, 1605000.0, 1443000.0, 1419000.0, 1262000.0, 1272000.0, 1277000.0, 1223000.0, 1294000.0, 1223000.0, 1277000.0, 1275000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">SK하이닉스</span>
         <span class="sector-card__code">000660</span>
@@ -287,9 +286,9 @@
       
       <div class="sector-card__fr">외국인 보유 48.7%</div>
       
-    </a>
+    </div>
     
-    <a class="sector-card" href="/stocks/005930/" data-code="005930" data-spark20='[276500.0, 285500.0, 270000.0, 272500.0, 268500.0, 276000.0, 276000.0, 272000.0, 268500.0, 250500.0, 232000.0, 232000.0, 210000.0, 215500.0, 218000.0, 211500.0, 223500.0, 214500.0, 215500.0, 213000.0]'>
+    <div class="sector-card" data-code="005930" data-spark20='[276500.0, 285500.0, 270000.0, 272500.0, 268500.0, 276000.0, 276000.0, 272000.0, 268500.0, 250500.0, 232000.0, 232000.0, 210000.0, 215500.0, 218000.0, 211500.0, 223500.0, 214500.0, 215500.0, 213000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">삼성전자</span>
         <span class="sector-card__code">005930</span>
@@ -309,7 +308,7 @@
       
       <div class="sector-card__fr">외국인 보유 46.1%</div>
       
-    </a>
+    </div>
     
     <div class="sector-card" data-code="042700" data-spark20='[243500.0, 234500.0, 252000.0, 256500.0, 268500.0, 272000.0, 278000.0, 264500.0, 267000.0, 248500.0, 229000.0, 217500.0, 192200.0, 210000.0, 212000.0, 199900.0, 203000.0, 191200.0, 191000.0, 184000.0]'>
       <div class="sector-card__head">
@@ -459,11 +458,6 @@
 
   
   <div class="sector-links">
-    
-    <p class="sector-links__row"><span class="sector-links__label">밤사이 선행 지표</span>
-      <a href="/stocks/us/nvda/">엔비디아</a><span class="sep">·</span><a href="/stocks/us/mu/">마이크론</a><span class="sep">·</span><a href="/stocks/us/soxx/">반도체 ETF</a>
-      <span class="sector-links__note">— 이 섹터가 참고하는 미국 종목이에요</span></p>
-    
     <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
       <a href="/briefings/">브리핑 아카이브</a>
       <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
@@ -504,7 +498,7 @@
   <div class="site-footer__base">© 2026 Double-Shot</div>
 </footer>
 
-<script src="/assets/main.js?v=20261026e"></script>
+<script src="/assets/main.js?v=20261026f"></script>
 <script>
 window.addEventListener('load', function() {
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();

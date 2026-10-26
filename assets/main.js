@@ -1482,11 +1482,7 @@
   /* ── 장중 '오늘의 특이 신호' 사이드바 위젯 — 장중(/api/signals phase==='intraday')에만
      노출하며 시장 지표 패널(#market-data-panel)을 완전히 대체한다. 장외·과거/미래 브리핑·
      데이터 없음이면 위젯을 숨기고 시장 지표를 그대로 둔다. 코스피 당일 브리핑 전용. ── */
-  // /api/signals는 stock_universe.json 기준 46종목 전체를 스캔하지만, 상세 페이지가
-  // 실제로 있는 종목은 scripts/config/stocks.json의 목록뿐이다(2026-08-19 상세 페이지
-  // 축소 결정). 여기 목록이 stocks.json과 어긋나면 404로 링크하게 되므로, stocks.json을
-  // 바꿀 때는 반드시 이 목록도 함께 맞출 것(stocks-home.js의 STOCK_PAGES와 같은 패턴).
-  var DETAIL_PAGE_CODES = {'005930':1,'000660':1,'005380':1};
+  // 종목 상세 페이지는 없다(2026-10-26 제거 — 사용자 결정) — 신호 행은 링크하지 않는다.
   function sidebarSignalRowHtml(s) {
     var pct = Number(s.pct) || 0;
     var dir = pct >= 0 ? 'up' : 'dn';
@@ -1495,13 +1491,10 @@
       var flow = /^(외국인|기관)/.test(b);
       return '<span class="ssig-bdg' + (flow ? ' flow' : '') + '">' + escHtml(b) + '</span>';
     }).join('');
-    var linked = !!DETAIL_PAGE_CODES[s.code];
-    var tag = linked ? 'a' : 'span';
-    var hrefAttr = linked ? ' href="/stocks/' + encodeURIComponent(s.code) + '/"' : '';
-    return '<' + tag + ' class="ssig-row ssig-row--sig"' + hrefAttr + '>'
+    return '<span class="ssig-row ssig-row--sig">'
       + '<span class="ssig-sig-main"><span class="ssig-name">' + escHtml(s.name || '') + '</span>'
       + (badges ? '<span class="ssig-bdgs">' + badges + '</span>' : '') + '</span>'
-      + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></' + tag + '>';
+      + '<span class="ssig-chg ' + dir + '">' + pctTxt + '</span></span>';
   }
 
   function initSidebarSignals() {
@@ -1565,7 +1558,6 @@
     trustRelTime: trustRelTime,
     TRUST_STALE_HOURS: TRUST_STALE_HOURS,
     sidebarSignalRowHtml: sidebarSignalRowHtml,
-    DETAIL_PAGE_CODES: DETAIL_PAGE_CODES,
   };
 })();
 

@@ -948,8 +948,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .us-tile .ut-stat .v{font-weight:700;color:#0F172A;font-variant-numeric:tabular-nums;text-align:right;}
 .us-tile .ut-frg-d{font-weight:500;color:#94A3B8;font-size:10.5px;margin-left:3px;}
 /* 보조 동선 — 타일의 주인공은 가격·등락이다. 배경 버튼으로 두면 시선이 여기로 먼저 간다(2026-09-11 사용자 지적). */
-.us-tile .ut-go{display:block;margin-top:10px;text-align:right;font-size:11.5px;font-weight:500;color:#94A3B8;text-decoration:none;}
-.us-tile .ut-go:hover{color:#2563EB;text-decoration:underline;}
 @media(max-width:760px){
   #us-linked-widget .usw-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:4px;}
   #us-linked-widget .us-tile{flex:0 0 78%;scroll-snap-align:start;}
@@ -982,7 +980,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hh-chip .up{color:#E03131}.hh-chip .dn{color:#2775ED}
 .hh-chip.nq-caution{color:#92400E;background:#FFFBEB;border-color:#FDE68A}
 .hh-chip.nq-warn{color:#991B1B;background:#FEF2F2;border-color:#FECACA}
-@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}}
+@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}.hh-chip+.hh-cta{margin-left:12px}}
 
 /* ── 홈 특이신호 상위 3(§68 ②) — 전체 보기는 머리줄 오른쪽, 상세 없는 종목은 섹터 페이지로 ── */
 .sig-subhead .sig-all{margin-left:auto;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap;text-decoration:none}
