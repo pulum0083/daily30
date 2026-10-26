@@ -125,23 +125,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 }
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
-.brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
-.brief-card:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,117,237,.10);}
-.brief-card.is-hidden{display:none;}
-.brief-card.bc-kospi{background:var(--primary-bg);border-color:#BFDBFE;}
-.brief-card.bc-close{background:#F0FDF4;border-color:#BBF7D0;}
-.brief-card.bc-us{background:#FEFCE8;border-color:#FDE68A;}
-.brief-card.bc-live{background:#FEF2F2;border-color:#FECACA;}
-.bc-ico{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.78);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
-.bc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-.bc-top{display:flex;align-items:center;gap:7px;}
-.bc-type{font-size:12px;font-weight:800;letter-spacing:-.2px;}
-.bc-kospi .bc-type{color:var(--primary);}.bc-close .bc-type{color:#15803D;}.bc-us .bc-type{color:#CA8A04;}.bc-live .bc-type{color:#EF4444;}
-.bc-time{font-size:11px;font-weight:700;color:var(--muted);}
-.bc-head{font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bc-pill{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;flex:none;}
-.bc-pill.up{background:#FEE2E2;color:#E03131;}.bc-pill.dn{background:#DBEAFE;color:#2775ED;}
-.bc-arr{font-size:18px;color:#C0C4CA;flex:none;transition:color .14s;}.brief-card:hover .bc-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
 /* 장중 — 이슈 피드가 主가 되는 모드. 카드가 숨고 피드가 상단 카드 자리를 차지한다. */
 /* 副 — 예측 브리핑 한 줄 */
@@ -781,10 +764,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .barval{min-width:0;}
   .ai{width:60px;}
   .ai{width:auto;}
-  /* 브리핑 커넥터 — 좁은 화면에서 줄바꿈 */
-  .brief-card{flex-wrap:wrap;}
-  .bc-head{white-space:normal;}
-  .bc-arr{order:1;}
   /* 블록 헤더 — 타이틀이 길어 2줄이 되면 배지·탭을 아래 줄로 분리 */
   .block__h{flex-wrap:wrap;row-gap:6px;}
   .block__s{flex-basis:100%;justify-content:flex-end;}
@@ -817,21 +796,41 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #us-evening #ue-live.closed .dot{background:#94A3B8;animation:none;}
 #us-evening #ue-toggle button{border:none;border-radius:0;padding:5px 12px;font-size:12px;font-weight:700;background:transparent;color:#64748B;cursor:pointer;}
 #us-evening #ue-toggle button.on{background:#0F172A;color:#fff;}
-#us-evening .ue-macro{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
-#us-evening .ue-mtile{background:#F7F9FC;border-radius:8px;padding:9px 11px;}
-#us-evening .ue-mtile .l{font-size:12px;color:#64748B;}
-#us-evening .ue-mtile .v{font-size:16px;font-weight:800;color:#0F172A;}
-#us-evening .ue-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0 18px;background:#FBFCFE;border:1px solid #EEF2F7;border-radius:12px;padding:6px 14px;}
-#us-evening .ue-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #F1F5F9;}
-#us-evening a.ue-row--link{text-decoration:none;cursor:pointer;color:inherit;}
-#us-evening a.ue-row--link:hover{background:#F8FAFF;}
-#us-evening .ue-go{color:var(--muted);flex:none;margin-left:6px;opacity:0;transition:opacity .15s;}
-#us-evening a.ue-row--link:hover .ue-go{opacity:1;}
-#us-evening .ue-row .nm{flex:1;color:#0F172A;}
-#us-evening .ue-row .tk{color:var(--muted);font-size:12px;}
-#us-evening .ue-row .lead{font-size:11px;color:#7C3AED;background:#F5F3FF;padding:1px 6px;border-radius:4px;margin-left:4px;}
-#us-evening .ue-row .px{min-width:92px;text-align:right;color:#0F172A;font-weight:700;}
-#us-evening .ue-row .cg{min-width:60px;text-align:right;}
+/* §68 ④ — 맨 위 QQQ·VIX 한 줄, 그 아래 코스피 선행 ETF 3칸 + AI 인프라 3갈래(행마다 등락 막대) */
+#us-evening .ue-macro{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:-2px 0 2px;}
+#us-evening .ue-macro b{color:#0F172A;}
+#us-evening .ue-macro .cg{font-weight:700;}
+#us-evening .ue-sec{border-top:1px solid #F1F5F9;margin-top:10px;padding-top:10px;}
+#us-evening .ue-st{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+#us-evening .ue-st h4{margin:0;font-size:14px;font-weight:800;color:#0F172A;}
+#us-evening .ue-st span{font-size:12px;color:var(--muted);white-space:nowrap;}
+#us-evening .ue-st b.up{color:#E03131;} #us-evening .ue-st b.dn{color:#2775ED;}
+#us-evening .ue-sd{font-size:11.5px;color:var(--muted);margin:3px 0 8px;}
+#us-evening .ue-leads{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+#us-evening .ue-lead{background:#F7F9FC;border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;gap:1px;min-width:0;text-decoration:none;color:inherit;}
+#us-evening a.ue-lead:hover{background:#EEF4FE;}
+#us-evening .ue-tk{font-size:13px;font-weight:800;letter-spacing:.2px;color:#0F172A;}
+#us-evening .ue-ln{font-size:11.5px;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#us-evening .ue-lead .cg{font-size:19px;font-weight:800;letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
+#us-evening .ue-lp{font-size:11.5px;color:#334155;font-variant-numeric:tabular-nums;}
+#us-evening .ue-ld{font-size:10.5px;color:var(--muted);margin-top:2px;}
+#us-evening .ue-g{margin-top:8px;}
+#us-evening .ue-gt{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:2px;}
+#us-evening .ue-row{display:grid;grid-template-columns:1fr auto 54px 58px;gap:8px;align-items:center;padding:6px 0;font-size:13px;text-decoration:none;color:#0F172A;}
+#us-evening a.ue-row:hover .ue-n{color:#2775ED;}
+#us-evening .ue-n{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#us-evening .ue-n em{font-style:normal;color:var(--muted);font-size:11px;}
+#us-evening .ue-p{font-size:12.5px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;}
+#us-evening .ue-bar{height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden;}
+#us-evening .ue-bar i{display:block;height:100%;border-radius:3px;}
+#us-evening .ue-bar i.up{background:#F87171;} #us-evening .ue-bar i.dn{background:#60A5FA;}
+#us-evening .ue-row .cg{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+/* PC: AI 인프라 세 갈래를 가로로, 막대는 숨긴다(§68 ⑦) */
+@media(min-width:720px){
+  #us-evening .ue-ais{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  #us-evening .ue-row{grid-template-columns:1fr auto 52px;}
+  #us-evening .ue-row .ue-bar{display:none;}
+}
 #us-evening .ue-skel{height:13px;border-radius:5px;background:#EEF2F7;animation:uePulse 1.1s ease-in-out infinite;}
 @keyframes uePulse{0%,100%{opacity:.45}50%{opacity:.9}}
 
@@ -955,3 +954,146 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   #us-linked-widget .usw-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:4px;}
   #us-linked-widget .us-tile{flex:0 0 78%;scroll-snap-align:start;}
 }
+
+
+/* ── 시간대 카드(§68) — 아침 예측·마감·미국 카드. 글씨: 방향·확률 26px, 헤드라인 17px, 보조 13.5px, 버튼 13px ── */
+.home-hero{margin:0 0 12px}
+#home.hero-on #vs-root{display:none!important}
+.hh{background:var(--canvas);border:1px solid var(--hair);border-radius:18px;padding:16px 16px 14px;box-shadow:var(--s1)}
+.hh.is-dn{background:linear-gradient(180deg,#EEF4FF,var(--canvas) 60%)}
+.hh.is-up{background:linear-gradient(180deg,#FFF1F1,var(--canvas) 60%)}
+.hh-k{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.hh-new{color:var(--primary)}
+.hh-m{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+.hh-d,.hh-p{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--ink)}
+.hh.is-dn .hh-d,.hh.is-dn .hh-p{color:#2775ED}
+.hh.is-up .hh-d,.hh.is-up .hh-p{color:#E03131}
+.hh-p{text-align:right;font-variant-numeric:tabular-nums}
+.hh-p small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.hh-h{font-size:17px;font-weight:700;line-height:1.45;margin:10px 0 0;letter-spacing:-.2px;color:var(--ink)}
+.hh-dek{font-size:13.5px;line-height:1.7;color:#4B5563;margin:6px 0 0}
+.hh-dek b{color:var(--ink)}
+.hh-cta{display:block;margin-top:12px;background:var(--ink);color:#fff;text-align:center;border-radius:10px;padding:10px;font-size:13px;font-weight:700;text-decoration:none}
+.hh-trust{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:center}
+.hh-trust b{color:var(--ink)}
+.hh-chip{display:inline-block;margin-top:10px;font-size:12px;border:1px solid var(--hair);border-radius:999px;padding:5px 11px;background:#F9FAFB;color:var(--ink)}
+.hh-chip.ok{color:#065F46;background:#ECFDF5;border-color:#A7F3D0}
+.hh-chip.miss{color:#4B5563}
+.hh-chip .up{color:#E03131}.hh-chip .dn{color:#2775ED}
+.hh-chip.nq-caution{color:#92400E;background:#FFFBEB;border-color:#FDE68A}
+.hh-chip.nq-warn{color:#991B1B;background:#FEF2F2;border-color:#FECACA}
+@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}}
+
+/* ── 홈 특이신호 상위 3(§68 ②) — 전체 보기는 머리줄 오른쪽, 상세 없는 종목은 섹터 페이지로 ── */
+.sig-subhead .sig-all{margin-left:auto;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap;text-decoration:none}
+.sig-row.is-sector,.sig-hero.is-sector{text-decoration:none;color:inherit}
+.sig-sec{flex:none;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;margin-left:6px}
+.sig-hero .sig-sec{position:absolute;right:14px;bottom:12px}
+
+/* ── 주도주 한 줄 타일·섹터 막대(§68 ③) ── */
+.ld-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ld{display:block;background:#F7F9FC;border:1px solid #EEF1F5;border-radius:12px;padding:9px 10px;text-decoration:none;color:var(--ink);min-width:0}
+.ld-nm{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ld-px{display:block;font-size:15px;font-weight:800;margin-top:2px}
+.ld-pc{font-style:normal;font-size:12px;font-weight:700}
+.ld-pc.up{color:#E03131}.ld-pc.dn{color:#2775ED}
+.ld-more,.sbx-more{margin-top:8px}
+.ld-more>summary,.sbx-more>summary{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:600}
+.ld-more[open]>summary,.sbx-more[open]>summary{margin-bottom:10px}
+.sb-bars{display:flex;flex-direction:column}
+.sb{display:grid;grid-template-columns:64px 1fr 62px;align-items:center;gap:8px;padding:5px 0;font-size:13px;text-decoration:none;color:var(--ink)}
+.sb b{text-align:right;font-size:12.5px}
+.sb b.up{color:#E03131}.sb b.dn{color:#2775ED}
+.sb-bar{position:relative;height:8px;background:#F3F4F6;border-radius:4px}
+.sb-bar i{position:absolute;top:0;height:100%;border-radius:4px}
+.sb-bar i.up{background:#F87171}.sb-bar i.dn{background:#60A5FA}
+.sb-bar::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#D1D5DB}
+.sb-note{font-size:11px;color:var(--muted);margin:6px 0 0}
+
+/* 섹터 카드는 자식이 각자 여백을 가진다(머리줄 11px 16px) — 막대·안내·펼치기도 같은 좌우 여백 */
+.sbx-block .sb-bars{padding:6px 16px 0}
+.sbx-block .sb-note{padding:0 16px}
+.sbx-block .sbx-more>summary{padding:6px 16px 12px}
+.sbx-block .sbx-more{margin-top:2px}
+
+/* §68 ⑤ 구조 신호 — 나스닥 체크 게이지(0·60·70 눈금) + 월봉 5개월선 미니 막대. 아침·밤·주말에만 */
+#struct-sig[hidden]{display:none}
+#home:not(.slot-morning):not(.slot-evening):not(.slot-weekend) #struct-sig{display:none}
+#struct-sig .ss{display:block;padding:12px 16px;border-top:1px solid var(--hair);text-decoration:none;color:inherit;background:#fff}
+#struct-sig .ss:hover{background:#F8FAFF}
+#struct-sig .ss-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#struct-sig .ss-k{font-size:12px;font-weight:700;color:var(--muted)}
+#struct-sig .ss-d{font-size:11px;color:var(--muted)}
+#struct-sig .ss-m{display:flex;align-items:center;gap:8px;margin-top:2px}
+#struct-sig .ss-m b{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+#struct-sig .pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+#struct-sig .pill.ok{background:#ECFDF3;color:#15803D}
+#struct-sig .pill.caution{background:#FFF7E6;color:#B45309}
+#struct-sig .pill.warn{background:#FEF2F2;color:#E03131}
+#struct-sig .pill.nb{background:#EFF4FE;color:#2775ED}
+#struct-sig .ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
+#struct-sig .nqg{margin-top:9px}
+#struct-sig .nqg-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
+#struct-sig .nqg-t i{position:absolute;top:0;height:100%;display:block}
+#struct-sig .nqg-t i.z1{background:#FDECC8}
+#struct-sig .nqg-t i.z2{background:#FBD5D5;border-radius:0 4px 4px 0}
+#struct-sig .nqg-t i.f{left:0;border-radius:4px;opacity:.85}
+#struct-sig .nqg-t i.f.ok{background:#4ADE80} #struct-sig .nqg-t i.f.caution{background:#F59E0B} #struct-sig .nqg-t i.f.warn{background:#EF4444}
+#struct-sig .nqg-t i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.12)}
+#struct-sig .nqg-t i.dot.ok{background:#16A34A} #struct-sig .nqg-t i.dot.caution{background:#D97706} #struct-sig .nqg-t i.dot.warn{background:#DC2626}
+#struct-sig .nqg-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
+#struct-sig .nqg-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+#struct-sig .nqg-l span:first-child{transform:none}
+#struct-sig .m5bars{display:flex;gap:6px;margin-top:9px;height:58px}
+#struct-sig .m5b{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+#struct-sig .m5b-u,#struct-sig .m5b-d{flex:1;display:flex;justify-content:center}
+#struct-sig .m5b-u{align-items:flex-end;border-bottom:1px solid #CBD5E1}
+#struct-sig .m5b-d{align-items:flex-start}
+#struct-sig .m5b i{display:block;width:60%;max-width:22px;background:#CBD5E1;border-radius:2px}
+#struct-sig .m5b.run i{background:#2775ED}
+#struct-sig .m5b.cur i{background:#93B8F5}
+#struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
+/* PC — 줄마다 왼쪽 정보(이름·알약·설명), 오른쪽 차트(게이지·막대)로 나눠 폭을 다 쓴다 */
+@media(min-width:720px){
+  #struct-sig .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
+  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>em{grid-column:1}
+  #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg{grid-column:2;grid-row:1/4;margin-top:0}
+}
+/* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
+.hh-new.wk{color:var(--muted)}
+.hh-wk3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.hh-wk3>div{background:#F7F9FC;border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;min-width:0}
+.hh-wk3 span{font-size:11.5px;color:var(--muted)}
+.hh-wk3 b{font-size:19px;font-weight:800;letter-spacing:-.4px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hh-wk3 b.up{color:#E03131} .hh-wk3 b.dn{color:#2775ED}
+.hh-wk3 em{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hh-cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair)}
+/* §68 ⑦ 넓은 화면도 한 단 — 880px 가운데. 시간대별 블록 순서는 home-hero.js가 붙이는 #home.slot-* 로 정한다.
+   슬롯 클래스가 붙기 전(또는 목록을 못 받았을 때)은 DOM 순서 그대로 — 국면별 DOM 재배치(stocks-home.js)가 대신한다. */
+.wrap{max-width:880px}
+#home.on{display:flex;flex-direction:column}
+#home .home-cols,#home .home-full,#home .home-side{display:contents}
+/* 기본(슬롯 미정) — 예전 모바일 순서. 모든 블록에 id 선택자로 명시한다(.sig-block{order:-1} 같은 옛 규칙이 이기지 않게). */
+#home #home-hero{order:0} #home #vs-root{order:1} #home #us-evening{order:2} #home #overnight-bridge{order:3}
+#home #us-linked-widget{order:4} #home #struct-sig{order:5} #home #sig-block{order:6} #home .sbx-block{order:7}
+#home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
+#home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
+#home.slot-close #us-evening{order:5} #home.slot-close #overnight-bridge{order:6}
+#home.slot-morning #us-evening,#home.slot-evening #us-evening{order:2}
+#home.slot-morning #overnight-bridge,#home.slot-evening #overnight-bridge{order:3}
+#home.slot-morning #us-linked-widget,#home.slot-evening #us-linked-widget{order:4}
+#home.slot-morning #struct-sig,#home.slot-evening #struct-sig{order:5}
+#home.slot-morning .sbx-block,#home.slot-evening .sbx-block{order:6}
+#home.slot-morning #sig-block,#home.slot-evening #sig-block{order:7}
+#home.slot-weekend #struct-sig{order:2} #home.slot-weekend .sbx-block{order:3} #home.slot-weekend #us-linked-widget{order:4}
+#home.slot-weekend #us-evening{order:5} #home.slot-weekend #overnight-bridge{order:6} #home.slot-weekend #sig-block{order:7}
+/* PC 전용 — 섹터 막대 2열(1~4 왼쪽, 5~8 오른쪽) */
+@media(min-width:720px){
+  #home .sb-bars{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}
+}
+/* 개발용 시간대 전환 막대(?slot= 미리보기 전용, home-hero.js) */
+#dev-slot-bar{position:sticky;top:58px;z-index:9;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border:1px dashed #CBD5E1;border-radius:10px;background:#F8FAFC;font-size:12px}
+#dev-slot-bar span{color:var(--muted);margin-right:4px}
+#dev-slot-bar a{padding:5px 11px;border-radius:999px;border:1px solid #CBD5E1;background:#fff;color:#334155;text-decoration:none;font-weight:600}
+#dev-slot-bar a.on{background:#0F172A;border-color:#0F172A;color:#fff}
