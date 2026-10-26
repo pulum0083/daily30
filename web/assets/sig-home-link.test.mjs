@@ -51,6 +51,7 @@ function load() {
   win.window = win;
   const ctx = createContext(win);
   try { runInContext(readFileSync(join(HERE,'stocks-home.js'),'utf8'), ctx); } catch { /* 로드 시 DOM 접근 실패 무시 — 훅만 필요 */ }
+  win.__sigHome.__win = win;
   return win.__sigHome;
 }
 
@@ -107,4 +108,18 @@ test('STOCK_PAGES는 stocks.json의 detail_page 종목과 같아야 한다', () 
 
 test('홈은 신호 강도 상위 3개만', () => {
   assert.equal(load().SIG_HOME_N, 3);
+});
+
+
+test('섹터 막대 — 등락 큰 순, 섹터 페이지 링크, 0을 가운데 둔 막대(§68 ③)', () => {
+  const { sectorBarsHtml } = load().__win.__sectorBars;
+  const html = sectorBarsHtml([
+    { key: 'semicon', label: '반도체', avg: -1.2 }, { key: 'defense', label: '방산', avg: 2.4 }, { key: 'bio', label: '바이오', avg: NaN },
+  ]);
+  assert.ok(html.indexOf('방산') < html.indexOf('반도체'), '등락 큰 순');
+  assert.ok(html.includes('href="/stocks/sector/defense/"') && html.includes('href="/stocks/sector/semicon/"'));
+  assert.ok(!html.includes('바이오'), '값이 없는 섹터는 그리지 않는다');
+  assert.ok(html.includes('width:50.0%;left:50%') && html.includes('width:25.0%;right:50%'));
+  assert.ok(html.includes('+2.40%') && html.includes('−1.20%'));
+  assert.equal(sectorBarsHtml([]), '');
 });

@@ -849,13 +849,21 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 회귀 테스트 훅 — 순수 계산만 노출한다(DOM 페인트는 브라우저에서 확인).
   window.__leaderTiles={rangePos:rangePos, rangeText:rangeText, regLabel:regLabel, fmtValue:fmtValue, fmtShares:fmtShares, prevFromSpark:prevFromSpark, chgText:chgText};
 
+  // 주도주 한 줄 타일(§68 ③) — 큰 타일과 같은 값을 같은 자리에서 칠한다.
+  function ldOf(tile){
+    var code=tile&&tile.getAttribute?tile.getAttribute('data-code'):null;
+    return code?document.querySelector('#ld-row .ld[data-code="'+code+'"]'):null;
+  }
   function paintPrice(tile, price, animate){
+    var ld=ldOf(tile); if(ld&&price!=null){ var b=ld.querySelector('.ld-px'); if(b) b.textContent=fmt(price); }
     var el=q(tile,'ut-px'); if(!el||price==null) return;
     var shown=parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
     var dir=isFinite(shown)?(price>shown?1:price<shown?-1:0):0;
     if(animate) countUp(el, price, dir); else el.textContent=fmt(price);
   }
   function paintChange(tile, abs, pct, prevClose, note){
+    var ld=ldOf(tile);
+    if(ld&&pct!=null){ var e=ld.querySelector('.ld-pc'); if(e){ e.textContent=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%'+(note&&/추정/.test(note)?' 추정':''); e.className='ld-pc num '+(pct>0?'up':pct<0?'dn':''); } }
     var el=q(tile,'ut-chg'); if(!el||pct==null) return;
     el.textContent=chgText(abs, pct);
     el.style.color=pct>0?KR_UP:pct<0?KR_DN:KR_FLAT;
@@ -1481,11 +1489,30 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 섹터 통계 소스 — 라이브(SIG_SECTORS) 우선, 없으면 스냅샷 기반
   function tlSectorStats(){
     if(SIG_SECTORS&&!sbxSigStale()){
-      return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
+      return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{key:k,label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
     }
-    return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{label:SECTOR_LABELS[k],avg:sbxAvgOf(st),total:st.total}:null;}).filter(Boolean);
+    return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{key:k,label:SECTOR_LABELS[k],avg:sbxAvgOf(st),total:st.total}:null;}).filter(Boolean);
+  }
+  // 섹터 8개 등락 막대(§68 ③) — 한 줄 요약과 같은 섹터 평균(tlSectorStats)을 쓴다. 누르면 섹터 페이지.
+  function sectorBarsHtml(stats){
+    var rows=stats.filter(function(s){ return typeof s.avg==='number'&&isFinite(s.avg); }).sort(function(a,b){ return b.avg-a.avg; });
+    if(!rows.length) return '';
+    var m=Math.max.apply(null, rows.map(function(r){ return Math.abs(r.avg); }))||1;
+    return rows.map(function(r){
+      var c=r.avg>0?'up':r.avg<0?'dn':'', w=(Math.abs(r.avg)/m*50).toFixed(1);
+      return '<a class="sb" href="/stocks/sector/'+r.key+'/"><span class="sb-n">'+r.label+'</span>'
+        +'<span class="sb-bar"><i class="'+c+'" style="width:'+w+'%;'+(r.avg>=0?'left:50%':'right:50%')+'"></i></span>'
+        +'<b class="'+c+' num">'+(r.avg>0?'+':r.avg<0?'−':'')+Math.abs(r.avg).toFixed(2)+'%</b></a>';
+    }).join('');
+  }
+  window.__sectorBars={sectorBarsHtml:sectorBarsHtml};
+  function renderSectorBars(){
+    var w=document.getElementById('sb-bars'); if(!w) return;
+    var html=sectorBarsHtml(tlSectorStats());
+    if(html) w.innerHTML=html;
   }
   function renderTodayLine(){
+    renderSectorBars();
     var wrap=document.getElementById('today-line'); if(!wrap) return;
     // 스냅샷(어제)과 오늘 코스피를 한 문장에 섞지 않는다 — 오늘 종가를 입히기 전까지는 숨긴다
     if(sbxSigStale()){ wrap.style.display='none'; return; }

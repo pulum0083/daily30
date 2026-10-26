@@ -970,3 +970,28 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sig-sec{flex:none;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;margin-left:6px}
 .sig-hero .sig-sec{position:absolute;right:14px;bottom:12px}
 
+/* ── 주도주 한 줄 타일·섹터 막대(§68 ③) ── */
+.ld-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ld{display:block;background:#F7F9FC;border:1px solid #EEF1F5;border-radius:12px;padding:9px 10px;text-decoration:none;color:var(--ink);min-width:0}
+.ld-nm{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ld-px{display:block;font-size:15px;font-weight:800;margin-top:2px}
+.ld-pc{font-style:normal;font-size:12px;font-weight:700}
+.ld-pc.up{color:#E03131}.ld-pc.dn{color:#2775ED}
+.ld-more,.sbx-more{margin-top:8px}
+.ld-more>summary,.sbx-more>summary{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:600}
+.ld-more[open]>summary,.sbx-more[open]>summary{margin-bottom:10px}
+.sb-bars{display:flex;flex-direction:column}
+.sb{display:grid;grid-template-columns:64px 1fr 62px;align-items:center;gap:8px;padding:5px 0;font-size:13px;text-decoration:none;color:var(--ink)}
+.sb b{text-align:right;font-size:12.5px}
+.sb b.up{color:#E03131}.sb b.dn{color:#2775ED}
+.sb-bar{position:relative;height:8px;background:#F3F4F6;border-radius:4px}
+.sb-bar i{position:absolute;top:0;height:100%;border-radius:4px}
+.sb-bar i.up{background:#F87171}.sb-bar i.dn{background:#60A5FA}
+.sb-bar::after{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#D1D5DB}
+.sb-note{font-size:11px;color:var(--muted);margin:6px 0 0}
+
+/* 섹터 카드는 자식이 각자 여백을 가진다(머리줄 11px 16px) — 막대·안내·펼치기도 같은 좌우 여백 */
+.sbx-block .sb-bars{padding:6px 16px 0}
+.sbx-block .sb-note{padding:0 16px}
+.sbx-block .sbx-more>summary{padding:6px 16px 12px}
+.sbx-block .sbx-more{margin-top:2px}
