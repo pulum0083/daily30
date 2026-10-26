@@ -125,23 +125,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 }
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
-.brief-card{display:flex;align-items:center;gap:11px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 14px;margin:10px 0;text-decoration:none;color:var(--ink);transition:border-color .14s,background .14s,transform .14s,box-shadow .14s;}
-.brief-card:hover{border-color:var(--primary);transform:translateY(-1px);box-shadow:0 4px 14px rgba(37,117,237,.10);}
-.brief-card.is-hidden{display:none;}
-.brief-card.bc-kospi{background:var(--primary-bg);border-color:#BFDBFE;}
-.brief-card.bc-close{background:#F0FDF4;border-color:#BBF7D0;}
-.brief-card.bc-us{background:#FEFCE8;border-color:#FDE68A;}
-.brief-card.bc-live{background:#FEF2F2;border-color:#FECACA;}
-.bc-ico{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.78);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;}
-.bc-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
-.bc-top{display:flex;align-items:center;gap:7px;}
-.bc-type{font-size:12px;font-weight:800;letter-spacing:-.2px;}
-.bc-kospi .bc-type{color:var(--primary);}.bc-close .bc-type{color:#15803D;}.bc-us .bc-type{color:#CA8A04;}.bc-live .bc-type{color:#EF4444;}
-.bc-time{font-size:11px;font-weight:700;color:var(--muted);}
-.bc-head{font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bc-pill{font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;flex:none;}
-.bc-pill.up{background:#FEE2E2;color:#E03131;}.bc-pill.dn{background:#DBEAFE;color:#2775ED;}
-.bc-arr{font-size:18px;color:#C0C4CA;flex:none;transition:color .14s;}.brief-card:hover .bc-arr{color:var(--primary);}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#EF4444;margin-right:3px;vertical-align:middle;animation:blink 1.2s ease-in-out infinite;}
 /* 장중 — 이슈 피드가 主가 되는 모드. 카드가 숨고 피드가 상단 카드 자리를 차지한다. */
 /* 副 — 예측 브리핑 한 줄 */
@@ -781,10 +764,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .barval{min-width:0;}
   .ai{width:60px;}
   .ai{width:auto;}
-  /* 브리핑 커넥터 — 좁은 화면에서 줄바꿈 */
-  .brief-card{flex-wrap:wrap;}
-  .bc-head{white-space:normal;}
-  .bc-arr{order:1;}
   /* 블록 헤더 — 타이틀이 길어 2줄이 되면 배지·탭을 아래 줄로 분리 */
   .block__h{flex-wrap:wrap;row-gap:6px;}
   .block__s{flex-basis:100%;justify-content:flex-end;}
@@ -955,3 +934,32 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   #us-linked-widget .usw-tiles{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:9px;padding-bottom:4px;}
   #us-linked-widget .us-tile{flex:0 0 78%;scroll-snap-align:start;}
 }
+
+
+/* ── 시간대 카드(§68) — 아침 예측·마감·미국 카드. 글씨: 방향·확률 26px, 헤드라인 17px, 보조 13.5px, 버튼 13px ── */
+.home-hero{margin:0 0 12px}
+#home.hero-on #vs-root{display:none!important}
+.hh{background:var(--canvas);border:1px solid var(--hair);border-radius:18px;padding:16px 16px 14px;box-shadow:var(--s1)}
+.hh.is-dn{background:linear-gradient(180deg,#EEF4FF,var(--canvas) 60%)}
+.hh.is-up{background:linear-gradient(180deg,#FFF1F1,var(--canvas) 60%)}
+.hh-k{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.hh-new{color:var(--primary)}
+.hh-m{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px}
+.hh-d,.hh-p{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2;color:var(--ink)}
+.hh.is-dn .hh-d,.hh.is-dn .hh-p{color:#2775ED}
+.hh.is-up .hh-d,.hh.is-up .hh-p{color:#E03131}
+.hh-p{text-align:right;font-variant-numeric:tabular-nums}
+.hh-p small{display:block;font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}
+.hh-h{font-size:17px;font-weight:700;line-height:1.45;margin:10px 0 0;letter-spacing:-.2px;color:var(--ink)}
+.hh-dek{font-size:13.5px;line-height:1.7;color:#4B5563;margin:6px 0 0}
+.hh-dek b{color:var(--ink)}
+.hh-cta{display:block;margin-top:12px;background:var(--ink);color:#fff;text-align:center;border-radius:10px;padding:10px;font-size:13px;font-weight:700;text-decoration:none}
+.hh-trust{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:center}
+.hh-trust b{color:var(--ink)}
+.hh-chip{display:inline-block;margin-top:10px;font-size:12px;border:1px solid var(--hair);border-radius:999px;padding:5px 11px;background:#F9FAFB;color:var(--ink)}
+.hh-chip.ok{color:#065F46;background:#ECFDF5;border-color:#A7F3D0}
+.hh-chip.miss{color:#4B5563}
+.hh-chip .up{color:#E03131}.hh-chip .dn{color:#2775ED}
+.hh-chip.nq-caution{color:#92400E;background:#FFFBEB;border-color:#FDE68A}
+.hh-chip.nq-warn{color:#991B1B;background:#FEF2F2;border-color:#FECACA}
+@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}}

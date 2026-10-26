@@ -498,7 +498,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   if(!usEve||!usLinked||!why||!anchor) return;
   // (2026-09-11) 장중 곡선 블록이 사라져 뉴스·곡선 자리바꿈은 더 이상 없다. 섹션 순서만 바꾼다.
   // 곡선 조회에 실패하면 여기서 return해 아래 재배치까지 막히던 의존도 함께 걷어냈다.
-  // anchor 앞에 원하는 순서대로 다시 꽂는다. 위쪽 브리핑 커넥터(#brief-strip 등)·지수 스트립은 건드리지 않는다.
+  // anchor 앞에 원하는 순서대로 다시 꽂는다. 위쪽 시간대 카드(#home-hero)·지수 스트립은 건드리지 않는다.
   // day가 아닌 국면(= 코스피가 닫혀 있음)은 전부 '밤사이 미국 반도체 시황'을 위로 — 17:00부터 적용.
   // (2026-09-22) '어제랑 비교해서' 마감 곡선(#vs-root)은 오늘 미국 브리핑이 발행될 때까지 남으므로 섹터별 대표 종목 바로 위에 둔다.
   // 발행 뒤엔 vs-yesterday.js가 영역을 숨겨 자리만 옮겨진 채 보이지 않는다.
@@ -774,128 +774,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 
 
 /* ── 블록 6 (원본 index.html) ── */
-/* ── 더블샷 브리핑 커넥터 ── */
-/* 브리핑 타임테이블(KST, 평일): 07:30~16:30 코스피 예측 → 16:30 코스피 마감 → 21:20~23:50 미국 예측.
-   활성 슬롯에 해당할 때만 노출한다. 장중 이슈 피드는 2026-09-15에 제거했다(§53).
-   미국 예측 종료(23:50) 이후 심야·주말 등 활성 슬롯 밖에서는 폴백 없이 영역을 숨긴다. */
-(function(){
-  var el = document.getElementById('brief-strip');
-  if (!el) return;
-  var TYPE = {
-    kospi: { cls:'bc-kospi', icon:'📈', label:'코스피 예측 브리핑', pub:450 },   // 07:30
-    close: { cls:'bc-close', icon:'🏁', label:'코스피 마감 브리핑', pub:990 },   // 16:30
-    us:    { cls:'bc-us',    icon:'🌙', label:'미국 시장 예측 브리핑', pub:1280 } // 21:20
-  };
-  function kstNow(){ return new Date(Date.now() + 9 * 3600000); }
-  function kstDate(){ return kstNow().toISOString().slice(0, 10); }
-  function nowMin(){ var k = kstNow(); return k.getUTCHours() * 60 + k.getUTCMinutes(); }
-  // 거래일(평일·비공휴일)만 브리핑 슬롯 활성. 공휴일이면 슬롯 없음 → 스트립 숨김(주말과 동일 처리).
-  function isWeekday(){ if(window.krIsKospiHoliday && window.krIsKospiHoliday()) return false; var d = kstNow().getUTCDay(); return d >= 1 && d <= 5; }
-
-  function paint(o){
-    el.className = 'brief-card ' + o.cls;
-    el.href = o.url; el.dataset.href = o.url;
-    document.getElementById('bc-ico').textContent = o.icon;
-    document.getElementById('bc-type').innerHTML = (o.live ? '<span class="live-dot"></span>' : '') + o.type;
-    document.getElementById('bc-time').textContent = o.time || '';
-    document.getElementById('bc-head').textContent = o.head;
-    var pill = document.getElementById('bc-pill');
-    if (o.pill && o.pillCls) { pill.textContent = o.pill; pill.className = 'bc-pill ' + o.pillCls; pill.style.display = ''; }
-    else { pill.style.display = 'none'; }
-  }
-
-  function safeJSON(url){
-    return Promise.race([
-      fetch(url, {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
-      new Promise(function(res){ setTimeout(function(){ res(null); }, 4000); })
-    ]);
-  }
-
-  function fromSlot(date, type, s){
-    var m = TYPE[type];
-    var arrow = (s.pill_text || '').trim().charAt(0);
-    var pillCls = (arrow === '▲') ? 'up' : (arrow === '▼' ? 'dn' : '');
-    var pill = pillCls ? s.pill_text.trim() : '';
-    return {
-      cls: m.cls, icon: m.icon, type: m.label,
-      time: s.time ? (s.time + ' 발행') : '',
-      head: s.headline || (s.title && s.title !== '—' ? s.title : '') || '오늘 브리핑 보기',
-      url: s.url || ('/briefings/' + date + '/' + type + '/'),
-      pill: pill, pillCls: pillCls
-    };
-  }
-
-  // 가장 최근 '발행된' 브리핑 선택 (오늘은 발행시각 지난 것만, 없으면 이전 날짜의 최신)
-  function pickLatest(list){
-    var slots = list && list.slots; if (!slots) return null;
-    var dates = Object.keys(slots).sort().reverse();
-    var today = kstDate(), nm = nowMin();
-    for (var i = 0; i < dates.length; i++){
-      var date = dates[i], day = slots[date], best = null;
-      ['kospi','close','us'].forEach(function(t){
-        var s = day[t];
-        if (!s || s.state !== 'ready') return;
-        if (date === today && nm < TYPE[t].pub) return; // 오늘 아직 발행 전
-        if (!best || TYPE[t].pub > TYPE[best].pub) best = t;
-      });
-      if (best) return { date:date, type:best, s:day[best] };
-    }
-    return null;
-  }
-
-  // 현재 KST 시각의 브리핑 타임슬롯. 슬롯 밖(심야·주말)은 null.
-  function slotNow(){
-    var nm = nowMin();
-    var d = kstNow().getUTCDay();
-    var isKstWeekday = (d >= 1 && d <= 5);
-    // 코스피 브리핑(예측·마감)은 한국 거래일(평일·비공휴일)에만 노출
-    if (isWeekday()){
-      if (nm >= 450 && nm < 990)  return 'kospi'; // 07:30~16:30 코스피 예측(장중 이슈 피드 제거 뒤 장중에도 예측 카드, §53)
-      if (nm >= 990 && nm < 1280) return 'close'; // 16:30~21:20 마감
-    }
-    // 미국 예측은 한국 공휴일(예: 제헌절)이어도 미국장이 열리면 발행되므로, 한국 휴일 여부와
-    // 무관하게 KST 평일이면 슬롯을 연다. 실제 노출은 render()의 s.state==='ready'가 최종 판정
-    // (미국 휴장일엔 당일 us가 ready가 아니라 자동으로 숨겨진다).
-    if (isKstWeekday && nm >= 1280 && nm < 1430) return 'us'; // 21:20~23:50 미국 예측
-    return null;
-  }
-
-  // 타임테이블 기준 즉시 표시 — fetch 실패(PC 네트워크 차단)에도 슬롯이 맞게 보이도록 동기 렌더
-  function paintDefault(slot, today){
-    if (!slot){ el.classList.add('is-hidden'); return; } // 활성 슬롯 밖(미국 예측 23:50 종료 이후 심야·주말) → 폴백 없이 영역 제거
-    var m = TYPE[slot];
-    paint({ cls:m.cls, icon:m.icon, type:m.label, time:'', head:'오늘 브리핑 보기',
-            url:'/briefings/' + today + '/' + slot + '/' });
-  }
-
-  /* 브리핑 카드 — 반환값은 카드가 가리키는 URL. */
-  async function renderCard(slot, today){
-    paintDefault(slot, today);
-    if (!slot) return null;
-
-    var list = await safeJSON('/data/briefings-list.json') || await safeJSON('/api/data?f=briefings-list');
-    if (!list) return el.dataset.href;   // fetch 실패(PC 차단) → 타임테이블 기본 유지
-
-    var s = list.slots && list.slots[today] && list.slots[today][slot];
-    if (s && s.state === 'ready'){ paint(fromSlot(today, slot, s)); return el.dataset.href; }
-    var pick = pickLatest(list);
-    if (pick) paint(fromSlot(pick.date, pick.type, pick.s));
-    return el.dataset.href;
-  }
-
-  /* 시간대별 구성 (KST, 평일)
-       07:30~16:30  코스피 예측 카드
-       16:30~21:20  마감 카드
-       21:20~23:50  미국 예측 카드
-       그 외(심야·주말·휴일)  전체 숨김 (과거 날짜 폴백 없음) */
-  async function render(){
-    var today = kstDate(), slot = slotNow();
-    if (!slot){ el.classList.add('is-hidden'); return; }
-    await renderCard(slot, today);
-  }
-  render();
-  setInterval(render, 5 * 60 * 1000); // 5분마다 재평가 — 슬롯 전환 반영
-})();
+/* 더블샷 브리핑 커넥터(#brief-strip)는 2026-10-26 시간대 카드(home-hero.js, §68)로 바뀌었다. */
 
 /* ── 블록 7 (원본 index.html) ── */
 /* 미국 연동 대표주 — 실측 스냅샷 baseline + 라이브 폴링(stocks-live).

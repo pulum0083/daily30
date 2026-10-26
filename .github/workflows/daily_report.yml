@@ -551,6 +551,13 @@ jobs:
         timeout-minutes: 5
         run: python3 scripts/fetch_valuation.py
 
+      # 종목 시그널 첫 화면 요약(§68) — 오늘 시초가 채점·최근 코스피 일봉. 이 파일의 주인은 이 잡 하나다(§18).
+      - name: 🏠 첫 화면 요약 (home-summary.json, 실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 3
+        run: python3 scripts/build_home_summary.py
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |

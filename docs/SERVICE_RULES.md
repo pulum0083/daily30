@@ -544,23 +544,24 @@ check_accuracy.py → data/briefings.json (actual_change_pct 기록)
 - HTML 수동 패치(가격 보정, sparkline 추가 등)는 커밋 메시지에 종목명·수정 내용을 명시한다.
 - 브리핑 자동 생성 커밋(`📊 코스피 브리핑: ...`)과 수동 수정 커밋은 구분한다.
 
-### 13. 종목 대시보드 브리핑 스트립 — 타임테이블 (룰 고정)
+### 13. 종목 시그널 첫 화면 — 시간대 카드 타임테이블 (2026-10-26 개편, §68)
 
-`web/stocks/index.html`의 `#brief-strip`(더블샷 브리핑 연결 영역)은 현재 KST 시각에 따라 노출 내용을 바꾼다. `getKSTSlot()` + `renderBriefStrip()`이 담당하며 **5분마다 재평가**한다.
+`web/stocks/index.html` 맨 위 `#home-hero`(시간대 카드)를 `home-hero.js`의 `homeSlot()` 하나가 판정한다. 5분마다 다시 판정한다.
+예전 브리핑 스트립(`#brief-strip`, 한 줄 링크)과 맨 위 제목 "어제랑 비교해서"는 이 카드로 바뀌었다.
 
-| 시간대 (KST, 평일) | 슬롯 | 노출 내용 |
+| 시각 (KST) | 슬롯 | 첫 카드 |
 | --- | --- | --- |
-| 07:30 ~ 09:00 | `kospi` | 코스피 예측 브리핑 타이틀 |
-| 09:00 ~ 16:30 | `issue` | 장중 이슈 브리핑 (`kospi-news-{date}.json`의 `latest`, 30분 갱신마다 타이틀 변경) |
-| 16:30 ~ 21:20 | `close` | 코스피 마감 브리핑 타이틀 |
-| 21:20 ~ 23:00 | `us` | 미국 시장 예측 브리핑 타이틀 |
-| 23:00 ~ 익일 07:30 | `none` | **영역 제거** (`is-hidden`) |
-| 주말·휴일 | `none` | **영역 제거** |
+| 평일 07:30 ~ 09:00 | `morning` | 코스피 시초가 예측(방향·확률·신뢰도·view_title·dek·브리핑 버튼·시초가 적중 한 줄) |
+| 09:00 ~ 15:30 | `intraday` | 어제랑 비교 곡선 — 기존 대결판(`#vs-root`, §49·§54) 그대로 |
+| 15:31 ~ 미국 브리핑 발행 전 | `close` | 코스피 마감(market_title·reason_title·dek·📝 아침 예측 채점·마감 브리핑 버튼). 마감 브리핑이 ready 되기 전엔 기존 마감 곡선(§54)이 첫 카드 |
+| 미국 브리핑 발행 후 ~ 다음 날 07:30 | `evening` | 미국 브리핑(큰 쪽 확률·view_title·dek·나스닥 체크 칩·버튼) |
+| 주말 · 한국 휴장일 | `weekend` | 이번 주 정리 |
 
-- **stale 날짜 폴백 금지.** 각 슬롯은 "오늘(`kstDateStr()`) 해당 타입이 `briefings-list.json`에서 `state==='ready'`"일 때만 표시한다. 과거 날짜 브리핑으로 폴백하지 않는다 (생성 시점에 박힌 정적 HTML 값도 신뢰 금지 — 초기 `is-hidden`으로 두고 JS가 채운다).
-- **휴일 처리**: 한국 공휴일엔 코스피 슬롯(`kospi`·`issue`·`close`)은 `krIsKospiHoliday()`로 자동 숨김. **단 미국 예측(`us`) 슬롯은 한국 공휴일 여부와 무관하게 KST 평일이면 노출한다** — 미국장은 제헌절 등 한국 공휴일에도 열려 미국 브리핑이 발행되기 때문(2026-07-17 제헌절 실사고로 확정). `slotNow()`에서 `us`만 `isWeekday()`(한국 거래일) 게이트에서 분리하고, 실제 노출 여부는 `render()`의 `state==='ready'`가 최종 판정(미국 휴장일엔 당일 us가 ready가 아니라 자동 숨김).
-- **issue 슬롯**: 이슈 미수집(예: 09:00~첫 수집 전)이면 오늘 kospi 예측으로 폴백, 그것도 없으면 숨김. 클릭 시 `/briefings/{date}/kospi/`로 이동.
-- `getKSTSlot` 경계값을 임의로 바꾸지 말 것. 위 표가 정본이다.
+- **stale 날짜 폴백 금지.** 카드는 그 슬롯 날짜의 브리핑이 `briefings-list.json`에서 `state==='ready'`일 때만 그린다. 아니면 카드를 뺀다(§16).
+- **휴일**: 한국 휴장일엔 코스피 카드(`morning`·`intraday`·`close`)를 빼고, 미국 브리핑이 그날 나오면 미국 카드를 그린다(미국장은 한국 공휴일에도 열린다 — 2026-07-17 제헌절). 월요일 07:30 전은 일요일 밤 미국 브리핑이 없어 `weekend`.
+- 헤드라인·보조 문장은 그날 스냅샷(`/briefings/{date}/{type}/analysis_snapshot.json`) 그대로다. 새 문장을 만들지 않는다.
+- 경계 테스트 `web/assets/home-hero.test.mjs`(07:29/07:30 · 08:59/09:00 · 15:30/15:31 · 미국 발행 전후 · 주말 · 공휴일).
+- 개발용 `?slot=morning|intraday|close|evening|weekend&d=YYYY-MM-DD` — 표시만 바뀐다.
 
 ### 14. 코스피 마감 브리핑 — 증권가 시황 섹션
 
@@ -2423,3 +2424,12 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - **미룬 일 1·2 처리(2026-10-26 같은 날)**:
   - AI 픽 코드 삭제 — `validate_analysis`의 실측 주입·가격 교정·금지어·산문 교차검증(`enrich_picks_with_realdata` 등 11개 함수·상수 3개), `generate_html.build_stock_picks`·`_fmt_level`, `sections/stock_picks.html`, `picks-modal`, 관련 테스트(`test_pick_basis.py` 등). **픽 CSS는 남긴다** — 영구 보존하는 예전 발행본(§33)이 같은 `style.css`로 픽 카드를 그린다.
   - 코스피 프롬프트 정리(§63 남은 갭 a 해소) — 근거 형식 로테이션을 없애고 `split`으로 고정(`analysis_format`은 §34 게이트가 계속 읽는다), 형식 B~G 설명·관전 포인트(watch_items)·하단 심층(us_linked_story·sector_focus)·위로 한 줄(comfort_line) 규칙과 예시를 지웠다. 필수 필드는 prediction·reason_title·key_drivers·todays_view. `reason_title`·`key_drivers`는 이메일·latest.json·헤드라인 숫자 검증이 쓰므로 남긴다. 시스템 프롬프트 약 24,000자 → 17,000자. 예전 필드 이름을 예로 들던 공통 규칙 문장은 `todays_view`·`key_drivers` 기준으로 바꿨다(규칙 내용은 같다).
+
+### 68. 종목 시그널 첫 페이지(/stocks/) 개편 — 시간대 카드 + 압축 홈 (2026-10-26 결정, 단계별 적용)
+
+doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고, 맨 위 제목("어제랑 비교해서")이 하루 대부분 맞지 않았고, 현관인데 브리핑으로 가는 길이 약했다.
+계획·체크리스트·결정 노트 `docs/plans/2026-10-25-stocks-home-redesign/`, 프로토타입 `docs/prototypes/2026-10-25-stocks-home-redesign.html`.
+
+- **① 시간대 카드**(§13) — `web/assets/home-hero.js`. 카드 글씨는 방향·확률 26px, 헤드라인 17px, 보조 13.5px, 버튼 13px.
+  - 마감 카드의 '📝 아침 시초가 예측 → 시초가 x% ✓'와 주말 카드의 주간 등락·이번 주 성적은 공개 JSON에 없어, **마감 잡이 `web/data/home-summary.json`을 만든다**(`scripts/build_home_summary.py`, continue-on-error·timeout 3). **이 파일의 주인은 kospi-close 잡 하나다(§18).** 채점은 check_accuracy와 같은 규칙(지수 일봉 시가 ÷ 직전 종가, `classify_direction_correct`). 일봉을 못 받으면 파일을 쓰지 않는다.
+  - 아침 카드의 신뢰 한 줄은 `accuracy-summary.json`의 시초가 기준 기록이 5건 이상일 때만(§57).
