@@ -240,6 +240,24 @@
     } catch (e) { return null; }
   }
 
+  // 개발용 시간대 전환 막대 — ?slot=이 있을 때만 페이지 맨 위에 나온다(운영 화면엔 없다). 누르면 그 시간대로 다시 연다.
+  //   날짜는 각 브리핑의 가장 최근 ready 날짜(장중은 날짜 없음, 주말은 오늘).
+  var DEV_SLOTS = [['morning', '아침 07:30', 'kospi'], ['intraday', '장중', ''], ['close', '마감 15:30', 'close'],
+                   ['evening', '미국 21:15', 'us'], ['weekend', '주말', '']];
+  function devBar(cur, slots, today) {
+    if (document.getElementById('dev-slot-bar')) return;
+    var wrap = document.querySelector('.wrap');
+    if (!wrap) return;
+    var bar = document.createElement('div');
+    bar.id = 'dev-slot-bar';
+    bar.innerHTML = '<span>미리보기 · 시간대</span>' + DEV_SLOTS.map(function (d) {
+      var ymd = d[2] ? latestReady(slots, d[2], today) : (d[0] === 'weekend' ? today : '');
+      var href = '?slot=' + d[0] + (ymd ? '&d=' + ymd : '');
+      return '<a href="' + href + '"' + (d[0] === cur ? ' class="on"' : '') + '>' + d[1] + '</a>';
+    }).join('');
+    wrap.insertBefore(bar, wrap.firstChild);
+  }
+
   var root = document.getElementById('home-hero');
   var home = document.getElementById('home');
   function show(html, slot) {
@@ -263,6 +281,7 @@
         usReady: function (ymd) { return ready(ymd, 'us'); },
       });
       window.__homeSlot = info.slot;
+      if (devOverride()) devBar(info.slot, slots, today);
       loadStruct(slots, today);
       if (info.slot === 'weekend') {
         var p = info.date.split('-'), wd = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();

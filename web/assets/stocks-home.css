@@ -1087,3 +1087,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 @media(min-width:720px){
   #home .sb-bars{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}
 }
+/* 개발용 시간대 전환 막대(?slot= 미리보기 전용, home-hero.js) */
+#dev-slot-bar{position:sticky;top:58px;z-index:9;display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:8px 10px;border:1px dashed #CBD5E1;border-radius:10px;background:#F8FAFC;font-size:12px}
+#dev-slot-bar span{color:var(--muted);margin-right:4px}
+#dev-slot-bar a{padding:5px 11px;border-radius:999px;border:1px solid #CBD5E1;background:#fff;color:#334155;text-decoration:none;font-weight:600}
+#dev-slot-bar a.on{background:#0F172A;border-color:#0F172A;color:#fff}
