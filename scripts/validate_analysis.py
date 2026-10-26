@@ -1301,6 +1301,29 @@ def fix_session_mislabels(analysis, corrections) -> int:
     return n
 
 
+def limit_data_issues(analysis, corrections, max_data=1) -> int:
+    """미국 이슈 중 시장 데이터만으로 만든 이슈(kind == "data")를 하루 max_data개까지만 남긴다(사용자 결정 2026-10-26).
+
+    10/23 미국 브리핑은 이슈 5개 중 2개(금리·VIX, S&P500 20일선 이탈)가 뉴스 사건이 아니라 기술적 위치였다.
+    kind가 없는 이슈는 판단하지 않는다(fail-open — 옛 프롬프트 출력·kind 누락).
+    """
+    issues = analysis.get("issues")
+    if not isinstance(issues, list):
+        return 0
+    kept, seen, dropped = [], 0, []
+    for it in issues:
+        if isinstance(it, dict) and it.get("kind") == "data":
+            seen += 1
+            if seen > max_data:
+                dropped.append(it.get("title", ""))
+                continue
+        kept.append(it)
+    if dropped:
+        analysis["issues"] = kept
+        corrections.append(f"데이터형 이슈 {len(dropped)}건 제외(하루 {max_data}개까지): " + " / ".join(t[:30] for t in dropped))
+    return len(dropped)
+
+
 def _fetch_pick_realdata(ticker, is_us):
     """픽 종목 실측 fetch. 미국·한국 모두 Toss 우선, 폴백 포함.
 
@@ -1763,6 +1786,7 @@ def validate(analysis, latest, btype):
     # 2-d-2) 이슈 세션 오표기 — 프리장 미거래 지수를 '프리마켓에서'로 서술 (us 전용)
     if btype == "us":
         fix_session_mislabels(a, corrections)      # 같은 절에 지수+프리마켓이면 교정, 남는 건 아래에서 경고
+        limit_data_issues(a, corrections)          # 시장 데이터형 이슈는 하루 1개까지
         for hit in find_session_mislabels(a.get("issues")):
             warnings.append(
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"
