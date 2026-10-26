@@ -405,12 +405,12 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   syncToggle();
   function kstNow(){ return new Date(Date.now()+9*3600*1000); }
   var todayKospiReady=null;   // null=미확인. 평일 공휴일이면 오늘 코스피 브리핑이 ready가 아님 → 비거래일로 보고 종일 노출.
-  // 노출 조건: 평일 17:00~익일 07:30. 주말(토·일)·평일 공휴일은 코스피 모멘텀이 갱신되지 않으므로 종일 노출.
+  // 노출 조건: 평일 17:00~익일 09:00(코스피 개장 전까지 — §68 ⑦, 아침 카드 아래 밤사이 미국). 주말(토·일)·평일 공휴일은 종일 노출.
   function isEvening(d){
     var wd=d.getUTCDay();
     if(wd===0||wd===6) return true;                    // 주말 종일
     var hm=d.getUTCHours()*60+d.getUTCMinutes();
-    if(hm>=1020 || hm<450) return true;                // 평일 17:00~익일 07:30
+    if(hm>=1020 || hm<540) return true;                // 평일 17:00~익일 09:00
     return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
   }
   window.ueGate=function(){
@@ -1713,6 +1713,15 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d) return;
+      // 장이 닫혀 있으면 지수 줄 배지에 어느 거래일 종가인지 밝힌다(§68 ⑦ — 그 시간대에 알 수 있는 것만).
+      // 날짜는 같은 응답의 kospiSpark 마지막 영업일(실측). 못 읽으면 기존 문구 그대로.
+      (function(){
+        var b=document.getElementById('kospi-live-badge');
+        var open=(typeof hubMarketOpen==='function')?hubMarketOpen():false;
+        var sk=Array.isArray(d.kospiSpark)?d.kospiSpark[d.kospiSpark.length-1]:null;
+        if(!b||open||!sk||typeof sk.d!=='string'||sk.d.length!==8||typeof fmtKoDate!=='function') return;
+        b.innerHTML='<span class="dot"></span>'+fmtKoDate(sk.d.slice(0,4)+'-'+sk.d.slice(4,6)+'-'+sk.d.slice(6,8))+' 마감 · 종가 기준';
+      })();
       if(Array.isArray(d.kospiSpark)&&d.kospiSpark.length>1){
         var sp=document.getElementById('h-kospi-spark');
         if(sp){

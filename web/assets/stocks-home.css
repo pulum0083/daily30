@@ -1064,3 +1064,26 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hh-wk3 b.up{color:#E03131} .hh-wk3 b.dn{color:#2775ED}
 .hh-wk3 em{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .hh-cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair)}
+/* §68 ⑦ 넓은 화면도 한 단 — 880px 가운데. 시간대별 블록 순서는 home-hero.js가 붙이는 #home.slot-* 로 정한다.
+   슬롯 클래스가 붙기 전(또는 목록을 못 받았을 때)은 DOM 순서 그대로 — 국면별 DOM 재배치(stocks-home.js)가 대신한다. */
+.wrap{max-width:880px}
+#home.on{display:flex;flex-direction:column}
+#home .home-cols,#home .home-full,#home .home-side{display:contents}
+/* 기본(슬롯 미정) — 예전 모바일 순서. 모든 블록에 id 선택자로 명시한다(.sig-block{order:-1} 같은 옛 규칙이 이기지 않게). */
+#home #home-hero{order:0} #home #vs-root{order:1} #home #us-evening{order:2} #home #overnight-bridge{order:3}
+#home #us-linked-widget{order:4} #home #struct-sig{order:5} #home #sig-block{order:6} #home .sbx-block{order:7}
+#home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
+#home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
+#home.slot-close #us-evening{order:5} #home.slot-close #overnight-bridge{order:6}
+#home.slot-morning #us-evening,#home.slot-evening #us-evening{order:2}
+#home.slot-morning #overnight-bridge,#home.slot-evening #overnight-bridge{order:3}
+#home.slot-morning #us-linked-widget,#home.slot-evening #us-linked-widget{order:4}
+#home.slot-morning #struct-sig,#home.slot-evening #struct-sig{order:5}
+#home.slot-morning .sbx-block,#home.slot-evening .sbx-block{order:6}
+#home.slot-morning #sig-block,#home.slot-evening #sig-block{order:7}
+#home.slot-weekend #struct-sig{order:2} #home.slot-weekend .sbx-block{order:3} #home.slot-weekend #us-linked-widget{order:4}
+#home.slot-weekend #us-evening{order:5} #home.slot-weekend #overnight-bridge{order:6} #home.slot-weekend #sig-block{order:7}
+/* PC 전용 — 섹터 막대 2열(1~4 왼쪽, 5~8 오른쪽) */
+@media(min-width:720px){
+  #home .sb-bars{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,auto);grid-auto-flow:column;column-gap:28px}
+}
