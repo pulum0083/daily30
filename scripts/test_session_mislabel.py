@@ -65,3 +65,25 @@ if __name__ == "__main__":
             fn_()
             print(f"✅ {name}")
     print("모든 테스트 통과")
+
+
+# ── 교정(2026-10-26) — 같은 절에 지수+프리마켓이면 '직전 정규장'으로 고친다 ──
+from validate_analysis import fix_session_mislabels  # noqa: E402
+
+
+def test_fix_real_case_20261023():
+    a = {"issues": [{"title": "프리마켓에서 반도체(SOX)가 크게 밀려요",
+                     "body": "시장 데이터를 보면 반도체 관련 지수가 프리마켓에서 눈에 띄게 약세를 보이고 있고, 메모리 관련 ETF도 눌려 있어요."}],
+         "todays_view": {"dek": "직전 정규장에서 매물이 쏟아졌고, 프리마켓에서도 SOX(필라델피아 반도체 지수)가 큰 폭으로 눌려 있어요."}}
+    corr = []
+    assert fix_session_mislabels(a, corr) == 3 and corr
+    assert a["issues"][0]["title"] == "직전 정규장에서 반도체(SOX)가 크게 밀려요"
+    assert "반도체 관련 지수가 직전 정규장에서" in a["issues"][0]["body"]
+    assert "직전 정규장에서도 SOX" in a["todays_view"]["dek"]
+    assert find_session_mislabels(a["issues"]) == []
+
+
+def test_fix_leaves_correctly_split_sessions():
+    text = "SOX는 정규장에서 밀렸고, 프리마켓에서 AMD는 올랐어요. 나스닥 선물은 프리마켓에서 반등했어요."
+    a = {"issues": [{"title": "t", "body": text}]}
+    assert fix_session_mislabels(a, []) == 0 and a["issues"][0]["body"] == text

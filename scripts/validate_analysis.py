@@ -1219,7 +1219,7 @@ def validate_event_tense(analysis, calendar, corrections, warnings, blocks):
 # 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
 # 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
 _NO_PREMARKET_INDEX = (
-    r"(?:SOX|반도체지수|필라델피아\s*반도체|나스닥|S&P\s*500|S&P500|다우|코스피|코스닥)"
+    r"(?:SOX|반도체\s*(?:관련\s*)?지수|필라델피아\s*반도체|나스닥|S&P\s*500|S&P500|다우|코스피|코스닥)"
     r"(?!\s*(?:\d+\s*)?선물)"
 )
 _SESSION_WORDS = r"(?:프리마켓|프리장|시간\s*외|장\s*전)"
@@ -1258,6 +1258,47 @@ def find_session_mislabels(issues) -> list:
         if hit:
             bad.append(hit)
     return bad
+
+
+_PREMARKET_PHRASE = re.compile(r"(?:프리마켓|프리장)(?=에서|에도|에|은|는|$|\s)")
+
+
+def fix_session_mislabels(analysis, corrections) -> int:
+    """프리장에 거래되지 않는 지수를 '프리마켓에서'로 쓴 절을 '직전 정규장에서'로 고친다(미국 브리핑, §65 보강).
+
+    2026-10-23 발행본: "프리마켓에서 반도체(SOX)가 크게 밀려요"(이슈 제목)·"프리마켓에서도 SOX가 큰 폭으로
+    눌려 있어요"(dek). SOX −6.72%는 10/22 정규장 값이다 — 7/27(§27)과 같은 오류가 경고만 남기고 발행됐다.
+    지수와 '프리마켓'이 **같은 절**(쉼표 사이)에 있을 때만 고친다. "SOX는 정규장에서 밀렸고, 프리마켓에서
+    AMD는 올랐어요"처럼 세션을 나눈 문장은 둔다. '시간 외'·'장 전'은 뜻이 넓어 고치지 않는다(경고만 남는다).
+    """
+    def fix_text(text):
+        out_sents = []
+        for sent in re.split(r"(?<=[.!?])(\s+)", text):
+            clauses = sent.split(",")
+            for i, cl in enumerate(clauses):
+                if re.search(_NO_PREMARKET_INDEX, cl) and _PREMARKET_PHRASE.search(cl):
+                    clauses[i] = _PREMARKET_PHRASE.sub("직전 정규장", cl)
+            out_sents.append(",".join(clauses))
+        return "".join(out_sents)
+
+    n = 0
+    targets = []
+    for it in analysis.get("issues") or []:
+        if isinstance(it, dict):
+            targets += [(it, k) for k in ("title", "body")]
+    tv = analysis.get("todays_view")
+    if isinstance(tv, dict):
+        targets += [(tv, k) for k in ("view_title", "dek")]
+    for obj, k in targets:
+        v = obj.get(k)
+        if isinstance(v, str):
+            new = fix_text(v)
+            if new != v:
+                obj[k] = new
+                n += 1
+    if n:
+        corrections.append(f"세션 오표기 {n}건 교정 — 프리장에 거래되지 않는 지수의 '프리마켓' → '직전 정규장'")
+    return n
 
 
 def _fetch_pick_realdata(ticker, is_us):
@@ -1721,6 +1762,7 @@ def validate(analysis, latest, btype):
 
     # 2-d-2) 이슈 세션 오표기 — 프리장 미거래 지수를 '프리마켓에서'로 서술 (us 전용)
     if btype == "us":
+        fix_session_mislabels(a, corrections)      # 같은 절에 지수+프리마켓이면 교정, 남는 건 아래에서 경고
         for hit in find_session_mislabels(a.get("issues")):
             warnings.append(
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"
