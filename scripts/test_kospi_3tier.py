@@ -185,3 +185,37 @@ def test_close_shared_sections_still_render_title_and_dek():
     for name in ("scenario_split", "qa", "signal_board"):
         html = env.get_template(f"sections/{name}.html").render(reason_title="마감 제목", close_dek="마감 서브 문장")
         assert "마감 제목" in html and 'class="close-dek"' in html and "마감 서브 문장" in html, name
+
+
+# ── 개선 3건(2026-10-26 사용자 요청) ──
+TWO_SIDES = {"title": "메타·테슬라·IBM 트리플 실적 — 반응은 극과 극",
+             "sides": [{"side": "up", "label": "소셜/광고 플랫폼", "marks": [{"name": "META", "pct": -6.98}], "proxy": None},
+                       {"side": "down", "label": "전기차·소비재 성장주", "marks": [{"name": "TSLA", "pct": -3.08}], "proxy": None}],
+             "check_line": "소셜/광고 플랫폼은 <b>내렸어요</b>"}
+
+
+def test_marks_grouped_by_side_with_labels_only_when_two_sides():
+    cards = gh.build_issue_check([TWO_SIDES, US_CARDS[0]])["ic_us_cards"]
+    assert [g["label"] for g in cards[0]["groups"]] == ["소셜/광고 플랫폼", "전기차·소비재 성장주"]
+    assert [g["label"] for g in cards[1]["groups"]] == [""]          # 한쪽뿐이면 문장과 겹쳐 라벨을 뺀다
+    html = _issue_html(ic_us_cards=cards)
+    assert '<span class="ic-tks-l">전기차·소비재 성장주</span><span class="ic-tk dn">TSLA' in html
+
+
+def test_us_tag_appears_once_for_all_us_cards():
+    cards = gh.build_issue_check([TWO_SIDES] + US_CARDS)["ic_us_cards"]
+    html = _issue_html(ic_us_cards=cards, us_issue_label="간밤", us_issue_session="2026-10-22")
+    assert html.count("간밤 미국 · 실측") == 1 and "ET 2026-10-22 정규장 종가" in html
+
+
+def test_domestic_news_shows_absolute_time_not_relative(tmp_path, monkeypatch):
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "domestic_issues.json").write_text(json.dumps({
+        "date": "2026-10-23", "window": {"from": "2026-10-22 15:30", "label": "x"},
+        "issues": [{"title": "한은 동결", "source": "연합", "url": "https://a.example/1", "published_at": "2026-10-22 21:44"}]}),
+        encoding="utf-8")
+    monkeypatch.setattr(gh, "BASE_DIR", tmp_path)
+    ctx = gh.build_domestic_issues("2026-10-23")
+    assert ctx["domestic_issues"][0]["time_abs"] == "10/22 21:44"
+    html = _issue_html(**ctx)
+    assert "연합 · 10/22 21:44" in html and "시간 전" not in html

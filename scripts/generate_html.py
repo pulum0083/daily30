@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261026a"
+ASSET_VER = "20261026b"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -391,15 +391,33 @@ def build_issue_check(us_cards: list) -> dict:
                     if url:                                   # 상세 페이지가 있을 때만 링크(§36)
                         related.append({"name": name, "url": url})
                 break
+        # 쪽(side)별로 칩을 묶는다 — 문장(check_line)은 한쪽만 말해서, 다른 쪽 종목 칩이 설명 없이 붙어 있었다(2026-10-26)
+        groups = []
+        for s in sides:
+            marks = [m for m in (s.get("marks") or []) if isinstance(m.get("pct"), (int, float))]
+            if marks:
+                groups.append({"label": s.get("label", ""), "marks": marks})
+        if len(groups) < 2:                       # 한쪽뿐이면 라벨이 문장과 겹친다
+            for g in groups:
+                g["label"] = ""
         out.append({
             "title": _issue_title(title),
             "check_line": c.get("check_line", ""),
-            "marks": [m for s in sides for m in (s.get("marks") or []) if isinstance(m.get("pct"), (int, float))],
+            "groups": groups,
             "proxy": next((s.get("proxy") for s in sides if s.get("proxy")), None),
             "duplicate_of": c.get("duplicate_of"),
             "related": related,
         })
     return {"ic_us_cards": out}
+
+
+def _abs_time_label(published_at: str) -> str:
+    """'2026-10-22 21:44' → '10/22 21:44'. 발행 뒤 굳는 정적 페이지라 상대 시각('3시간 전')을 쓰지 않는다(§20)."""
+    try:
+        d = datetime.strptime((published_at or "")[:16], "%Y-%m-%d %H:%M")
+        return f"{d.month}/{d.day} {d:%H:%M}"
+    except ValueError:
+        return ""
 
 
 def _domestic_card_title(window_from: str) -> str:
@@ -1324,8 +1342,8 @@ def build_domestic_issues(target_date: str = None) -> dict:
     빈 리스트 → 템플릿에서 섹션 자체 생략(운영 규칙 0 — 없으면 지어내지 않는다).
     날짜 검증은 이전 실행의 잔존 파일이 다른 날짜 브리핑을 오염시키는 것을 막는다(§14와 동일 패턴).
 
-    `time_label`은 **렌더 시점에 계산한다** — 저장된 상대 라벨은 페이지가 재생성될 때마다
-    낡아간다(§20·§24에서 세 번 재발한 패턴).
+    `time_abs`는 절대 시각('10/22 21:44')이다 — 발행 뒤 굳는 정적 페이지라 '3시간 전' 같은
+    상대 라벨은 읽는 시각에 따라 틀린다(§20·§24에서 세 번 재발한 패턴).
     """
     path = BASE_DIR / "data" / "domestic_issues.json"
     if not path.exists():
@@ -1342,33 +1360,16 @@ def build_domestic_issues(target_date: str = None) -> dict:
               f"({payload.get('date')} != {target_date}) → 섹션 생략")
         return {"domestic_issues": [], "domestic_window_label": ""}
 
-    now = datetime.now(KST)
     items = []
     for it in payload.get("issues", []):
         if not it.get("url"):
             continue
-        items.append({**it, "time_label": _rel_time_label(it.get("published_at"), now)})
+        items.append({**it, "time_abs": _abs_time_label(it.get("published_at"))})
     return {
         "domestic_issues": items,
         "domestic_window_label": (payload.get("window") or {}).get("label", ""),
         "domestic_card_title": _domestic_card_title((payload.get("window") or {}).get("from", "")),
     }
-
-
-def _rel_time_label(published_at: str, now) -> str:
-    """'N시간 전' 라벨을 렌더 시점 기준으로 계산한다 (저장하지 않는다 — §20)."""
-    if not published_at:
-        return ""
-    try:
-        dt = KST.localize(datetime.strptime(published_at, "%Y-%m-%d %H:%M"))
-    except Exception:
-        return ""
-    mins = int((now - dt).total_seconds() // 60)
-    if mins < 60:
-        return f"{max(mins, 0)}분 전"
-    if mins < 60 * 24:
-        return f"{mins // 60}시간 전"
-    return f"{mins // (60 * 24)}일 전"
 
 
 def build_accuracy(internal_type: str) -> dict:

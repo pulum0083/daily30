@@ -1436,6 +1436,10 @@ html.dark .arch-item__dek{color:var(--muted);}
 .ic-body p{margin:0}
 .ic-dim{color:var(--muted)}
 .ic-tks{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.ic-tks-l{font-size:11.5px;color:var(--muted);align-self:center;margin-right:2px}
+.ic-grp-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:2px 0 -2px}
+.ic-grp-sub{font-size:11px;color:var(--muted)}
+.ic-card--us .ic-title{margin-top:0}
 .ic-tk{font-size:11.5px;border-radius:6px;padding:2px 7px;background:var(--surface-soft);color:var(--ink);font-variant-numeric:tabular-nums}
 .ic-tk.dn b{color:var(--dn)}
 .ic-tk.up b{color:var(--up)}

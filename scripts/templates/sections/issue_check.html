@@ -5,20 +5,24 @@
 <div class="open-section ic-section">
   <div class="ic-h"><h2>오늘의 이슈 점검</h2><span>{{ us_issue_label | default('간밤') }} 미국 · 국내 · 오늘 볼 것</span></div>
   <div class="ic-list">
+    {% if ic_us_cards %}
+    {# 미국 카드는 태그를 묶음 위에 한 번만 단다 — 카드마다 같은 태그가 반복됐다(2026-10-26) #}
+    <div class="ic-grp-h"><span class="ic-tag fact">{{ us_issue_label | default('간밤') }} 미국 · 실측</span>{% if us_issue_session %}<span class="ic-grp-sub">ET {{ us_issue_session }} 정규장 종가</span>{% endif %}</div>
+    {% endif %}
     {% for c in ic_us_cards %}
-    <div class="ic-card">
-      <div class="ic-top"><span class="ic-tag fact">{{ us_issue_label | default('간밤') }} 미국 · 실측</span></div>
+    <div class="ic-card ic-card--us">
       <div class="ic-title">{{ c.title }}</div>
       <div class="ic-body">
         {% if c.duplicate_of %}
         <p class="ic-dim">{{ c.duplicate_of }}번째 미국 카드와 같은 지표예요.</p>
         {% else %}
         {% if c.check_line %}<p>{{ c.check_line | safe }}</p>{% endif %}
-        {% if c.marks %}<div class="ic-tks">
-          {%- for m in c.marks -%}
+        {% for g in c.groups %}<div class="ic-tks">
+          {%- if g.label %}<span class="ic-tks-l">{{ g.label }}</span>{% endif -%}
+          {%- for m in g.marks -%}
           <span class="ic-tk {% if m.pct > 0 %}up{% elif m.pct < 0 %}dn{% endif %}">{{ m.name }} <b>{{ '+' if m.pct >= 0 else '−' }}{{ '%.2f'|format(m.pct|abs) }}%</b></span>
           {%- endfor -%}
-        </div>{% endif %}
+        </div>{% endfor %}
         {% endif %}
       </div>
       {% if c.related and not c.duplicate_of %}<div class="ic-links"><span class="ic-lk-l">관련 종목</span>{% for r in c.related %}<a href="{{ r.url }}">{{ r.name }}</a>{% endfor %}</div>{% endif %}
@@ -32,7 +36,7 @@
       <div class="ic-title">{{ domestic_card_title | default('국내 소식', true) }}</div>
       <div class="ic-body">
         {% for it in domestic_issues %}
-        <a class="ic-news" href="{{ it.url }}" target="_blank" rel="noopener noreferrer"><b>{{ it.title }}</b><span>{{ it.source }}</span></a>
+        <a class="ic-news" href="{{ it.url }}" target="_blank" rel="noopener noreferrer"><b>{{ it.title }}</b><span>{{ it.source }}{% if it.time_abs %} · {{ it.time_abs }}{% endif %}</span></a>
         {% endfor %}
       </div>
     </div>
