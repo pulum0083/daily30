@@ -108,14 +108,15 @@ def _issue_html(**ctx):
     return gh.make_env().get_template("sections/issue_check.html").render(**ctx)
 
 
-def test_issue_cards_trim_title_and_link_related_only_when_page_exists(monkeypatch):
-    monkeypatch.setattr(gh, "_pick_detail_url", lambda code, t: "/stocks/005930/" if code == "005930" else "")
+def test_issue_cards_trim_title_and_related_names_without_links():
     cards = gh.build_issue_check(US_CARDS)["ic_us_cards"]
     assert cards[0]["title"] == "메모리·반도체 장비주 동반 급락"
-    assert cards[0]["related"] == [{"name": "삼성전자", "url": "/stocks/005930/"}]   # 상세 페이지 없는 종목은 뺀다(§36)
+    assert [r["name"] for r in cards[0]["related"]][:1] == ["삼성전자"]          # 종목 상세 페이지가 없어 이름만(2026-10-26)
+    assert all("url" not in r for r in cards[0]["related"])
     assert cards[1]["related"] == [] and cards[1]["proxy"] == "S&P500"
     html = _issue_html(ic_us_cards=cards, us_issue_label="간밤", us_issue_session="2026-10-22")
-    assert "관련 종목" in html and "AI 판단" not in html and "코스피 ▼" not in html
+    assert "관련 종목" in html and '<span class="ic-rel">삼성전자</span>' in html and "/stocks/005930/" not in html
+    assert "AI 판단" not in html and "코스피 ▼" not in html
     assert "S&P500 실측으로 봤어요" in html and "/briefings/2026-10-22/us/" in html
     assert "MU <b>−6.26%</b>" in html
 

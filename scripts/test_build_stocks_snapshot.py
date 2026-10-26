@@ -2,7 +2,6 @@
 #!/usr/bin/env python3
 """실행: python3 scripts/test_build_stocks_snapshot.py"""
 import build_stocks_snapshot as m
-import generate_html as g
 
 
 def test_change_pct():
@@ -41,12 +40,6 @@ def test_to_int():
     assert m._to_int("-") is None
 
 
-def test_q_label():
-    assert m._q_label("202509") == "25Q3"
-    assert m._q_label("202512") == "25Q4"
-    assert m._q_label("202603") == "26Q1"
-
-
 def test_parse_supply5():
     # API는 최신순 → 결과는 오래된→최신
     rows = [
@@ -61,27 +54,6 @@ def test_parse_supply5():
     # 셋 다 빈값이면 제외
     assert m.parse_supply5([{"bizdate": "20260626", "individualPureBuyQuant": "",
                              "organPureBuyQuant": "", "foreignerPureBuyQuant": ""}]) == []
-
-
-def test_parse_financials():
-    info = {
-        "trTitleList": [
-            {"key": "202503", "isConsensus": "N"},
-            {"key": "202506", "isConsensus": "N"},
-            {"key": "202606", "isConsensus": "Y"},
-        ],
-        "rowList": [
-            {"title": "매출액", "columns": {"202503": {"value": "176,391"},
-             "202506": {"value": "222,320"}, "202606": {"value": "828,926"}}},
-            {"title": "영업이익", "columns": {"202503": {"value": "74,405"},
-             "202506": {"value": "92,129"}, "202606": {"value": "634,511"}}},
-        ],
-    }
-    out = m.parse_financials(info)
-    assert [r["q"] for r in out] == ["25Q1", "25Q2", "26Q2"]
-    assert out[0] == {"q": "25Q1", "rev": 176391, "op": 74405, "est": False}
-    assert out[-1]["est"] is True
-    assert m.parse_financials(None) == []
 
 
 def test_last_bar_date():
@@ -112,71 +84,6 @@ def test_reconcile_session_date_disagreement_returns_none():
 def test_reconcile_session_date_all_missing_returns_none():
     assert m._reconcile_session_date([None, None]) is None
     assert m._reconcile_session_date([]) is None
-
-
-def test_sector_bellwether_for_stock():
-    snapshot = {"bellwethers": {"NVDA": {"name": "엔비디아", "change_pct": 1.9}}}
-    sectors = {"semicon": {"bellwethers": [{"t": "NVDA"}]}}
-    bw = g.sector_bellwether(snapshot, sectors, "semicon")
-    assert bw["t"] == "NVDA"
-    assert bw["change_pct"] == 1.9
-    # 없는 섹터 → None
-    assert g.sector_bellwether(snapshot, sectors, "nonexist") is None
-
-
-def test_parse_financials_annual():
-    info = {
-        "trTitleList": [
-            {"key": "202312", "isConsensus": "N"},
-            {"key": "202412", "isConsensus": "N"},
-            {"key": "202512", "isConsensus": "N"},
-            {"key": "202612", "isConsensus": "Y"},
-        ],
-        "rowList": [
-            {"title": "매출액", "columns": {"202312": {"value": "2,589,355"},
-             "202412": {"value": "3,008,709"}, "202512": {"value": "3,336,059"},
-             "202612": {"value": "7,324,732"}}},
-            {"title": "영업이익", "columns": {"202312": {"value": "65,670"},
-             "202412": {"value": "327,260"}, "202512": {"value": "436,011"},
-             "202612": {"value": "3,832,404"}}},
-        ],
-    }
-    out = m.parse_financials_annual(info)
-    assert [r["year"] for r in out] == ["2023", "2024", "2025", "2026"]
-    assert out[0] == {"year": "2023", "rev": 2589355, "op": 65670, "est": False}
-    # 2026 컨센서스 — 영업(383조)<매출(732조)이라 게이트 통과, 크기는 손대지 않음
-    assert out[-1]["est"] is True and out[-1]["rev"] == 7324732
-    assert m.parse_financials_annual(None) == []
-
-
-def test_parse_financials_annual_sanity_gate():
-    # 구조적으로 불가능한 값만 폐기: 영업이익>매출, 매출≤0
-    info = {
-        "trTitleList": [
-            {"key": "202512", "isConsensus": "N"},   # 정상 → 유지
-            {"key": "202612", "isConsensus": "Y"},   # 영업>매출 → 폐기
-            {"key": "202712", "isConsensus": "Y"},   # 매출 0 → 폐기
-        ],
-        "rowList": [
-            {"title": "매출액", "columns": {"202512": {"value": "1,000"},
-             "202612": {"value": "500"}, "202712": {"value": "0"}}},
-            {"title": "영업이익", "columns": {"202512": {"value": "100"},
-             "202612": {"value": "900"}, "202712": {"value": "50"}}},
-        ],
-    }
-    out = m.parse_financials_annual(info)
-    assert [r["year"] for r in out] == ["2025"]
-
-
-def test_parse_financials_annual_op_none_not_gated():
-    # 영업이익 컬럼 자체가 없어도(op=None) 매출만 유효하면 게이트에 안 걸려야 한다
-    # (op>rev 비교는 op가 숫자일 때만 적용 — None과의 비교로 오탈락하면 안 됨)
-    info = {
-        "trTitleList": [{"key": "202512", "isConsensus": "N"}],
-        "rowList": [{"title": "매출액", "columns": {"202512": {"value": "1,000"}}}],
-    }
-    out = m.parse_financials_annual(info)
-    assert out == [{"year": "2025", "rev": 1000, "op": None, "est": False}]
 
 
 def run():

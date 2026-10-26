@@ -534,22 +534,7 @@ jobs:
         if: steps.holiday.outputs.open == 'true'
         run: python3 scripts/generate_html.py --sectors
 
-      - name: 🇰🇷 국내 종목 상세 페이지 재생성 (스냅샷 종가로 갱신)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        timeout-minutes: 5
-        run: python3 scripts/generate_html.py --stocks
-
-      - name: 🇺🇸 미국 반도체 상세 페이지 생성 (yfinance 종가)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        run: python3 scripts/generate_html.py --us-stocks
-
-      - name: 💰 밸류에이션 시그널 갱신 (업종 상대 PER, 종가 기준)
-        if: steps.holiday.outputs.open == 'true'
-        continue-on-error: true
-        timeout-minutes: 5
-        run: python3 scripts/fetch_valuation.py
+      # (2026-10-26) 종목 상세 페이지(국내 --stocks·미국 --us-stocks)와 그 페이지만 쓰던 밸류에이션 수집을 멈췄다 — 사용자 결정.
 
       # 종목 시그널 첫 화면 요약(§68) — 오늘 시초가 채점·최근 코스피 일봉. 이 파일의 주인은 이 잡 하나다(§18).
       - name: 🏠 첫 화면 요약 (home-summary.json, 실패해도 발행 계속)

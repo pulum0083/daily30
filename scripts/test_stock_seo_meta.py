@@ -1,4 +1,4 @@
-# 종목·미국·섹터 상세 페이지의 SEO 메타 주입 회귀 테스트 (네트워크 없이 템플릿만 렌더)
+# 섹터 페이지의 SEO 메타 주입 회귀 테스트 (네트워크 없이 템플릿만 렌더) — 종목 상세 페이지는 2026-10-26 제거
 """2026-07-21: 종목 상세 46개가 <title> 외에 description·canonical·OG·JSON-LD를 하나도
 갖지 않은 채 발행되던 것을 고치면서 추가. STOCKS_SERVICE_RULES §9 발행 게이트 4번이
 문서상 체크리스트로만 있어 아무도 못 잡았으므로, 여기서 자동 검사로 고정한다.
@@ -18,9 +18,7 @@ BASE = "https://doubleshot.space"
 
 
 def _env():
-    env = g.make_env()
-    env.filters["usd"] = g.ud.fmt_usd  # build_us_stock_page가 런타임에 등록하는 필터
-    return env
+    return g.make_env()
 
 
 def _head(html_text):
@@ -78,61 +76,6 @@ def _stock_ctx(**over):
 
 # ── 테스트 ──────────────────────────────────────────────────────────────────
 
-def test_korean_stock_detail_has_full_seo_meta():
-    ctx = _stock_ctx()
-    head = _head(_env().get_template("stocks/detail.html").render(**ctx))
-    _assert_core_meta(head, f"{BASE}/stocks/005930/")
-    assert _jsonld_types(head) == ["BreadcrumbList", "Corporation"]
-
-
-def test_korean_stock_breadcrumb_points_to_real_paths():
-    ctx = _stock_ctx()
-    head = _head(_env().get_template("stocks/detail.html").render(**ctx))
-    crumb = json.loads(re.findall(r'ld\+json">(.*?)</script>', head, re.S)[0])
-    items = [e["name"] for e in crumb["itemListElement"]]
-    assert items == ["홈", "종목", "반도체", "삼성전자"]
-    # 섹터 링크가 실제 생성 경로와 같아야 한다(끊긴 브레드크럼 방지)
-    assert crumb["itemListElement"][2]["item"] == f"{BASE}/stocks/sector/semicon/"
-
-
-def test_description_omits_sections_the_page_does_not_have():
-    """목표주가는 3종목만 수집된다 — 없는 종목의 description이 있다고 말하면 운영 규칙 0 위반."""
-    import html as _h
-    with_t = _h.unescape(g._stock_seo(_stock_ctx()["stock"], _stock_ctx())["seo_desc"])
-    assert "증권사 목표주가" in with_t
-
-    ctx = _stock_ctx(broker_targets=None, financials=None, supply5=None, foreign_rate=None)
-    without = _h.unescape(ctx["seo_desc"])
-    for absent in ("증권사 목표주가", "분기 실적", "수급", "외국인 보유율"):
-        assert absent not in without, f"없는 섹션 '{absent}'이 description에 있음"
-
-
-@pytest.mark.parametrize("ticker,kind,expected", [
-    ("nvda", "stock", ["BreadcrumbList", "Corporation"]),
-    ("soxx", "etf", ["BreadcrumbList"]),  # ETF에 Corporation 타입을 억지로 붙이지 않는다
-])
-def test_us_detail_has_full_seo_meta(ticker, kind, expected):
-    stock = {"ticker": ticker.upper(), "name": ticker.upper(), "kind": kind, "peers": []}
-    financials = [{"q": "25Q4", "rev": 1, "op": 2}] if kind == "stock" else []
-    jsonld = [g._breadcrumb([
-        ("홈", "/stocks/"), ("종목", "/stocks/"),
-        ("미국 반도체", None), (stock["name"], f"/stocks/us/{ticker}/"),
-    ])]
-    if kind == "stock":
-        jsonld.append({"@context": "https://schema.org", "@type": "Corporation",
-                       "name": stock["name"], "tickerSymbol": stock["ticker"],
-                       "url": f"{BASE}/stocks/us/{ticker}/"})
-    seo = g._seo_ctx(title=f"{stock['name']} — 더블샷",
-                     description="테스트 설명입니다. 실측 데이터로 정리했어요. 원화 환산도 봐요.",
-                     path=f"/stocks/us/{ticker}/", jsonld=jsonld)
-    rd = dict(_RD, price=1.0, change_pct=0.0, asof="2026-07-20", sparkline=[], sparkline_dates=[])
-    head = _head(_env().get_template("stocks/us_detail.html").render(
-        stock=stock, rd=rd, financials=financials, peers=[],
-        generated_label="07-20 종가", acc={"pct": 67}, **seo))
-    _assert_core_meta(head, f"{BASE}/stocks/us/{ticker}/")
-    assert _jsonld_types(head) == expected
-
-
 def test_sector_page_has_full_seo_meta():
     html_text = _env().get_template("pages/stock_sector.html").render(
         sector_label="반도체", sector_key="semicon", sector_emoji="🔧", sector_desc="설명",
@@ -146,12 +89,6 @@ def test_sector_page_has_full_seo_meta():
     head = _head(html_text)
     _assert_core_meta(head, f"{BASE}/stocks/sector/semicon/")
     assert _jsonld_types(head) == ["BreadcrumbList"]
-
-
-def test_meta_values_are_html_escaped():
-    """make_env는 autoescape=False다. 따옴표가 섞이면 속성이 깨지므로 Python에서 이스케이프해야 한다."""
-    seo = g._seo_ctx(title='따옴표 "테스트" & 앰퍼샌드', description="설명 " * 10, path="/stocks/000000/")
-    assert "&quot;" in seo["seo_title"] and "&amp;" in seo["seo_title"]
 
 
 def test_jsonld_cannot_break_out_of_script_tag():

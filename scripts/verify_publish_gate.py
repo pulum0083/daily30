@@ -130,20 +130,9 @@ def _load(path: Path):
 def expected_pages() -> list:
     """설정에 선언된 (경로, URL) 목록. 생성기가 만드는 페이지만 본다 — 수기 페이지는 대상 밖.
 
-    stocks.json은 detail_page:false인 항목도 담고 있다(2026-08-19 상세 페이지 축소 —
-    상세 페이지는 아니어도 fetch_movers_why.py의 종목 유니버스로는 계속 쓰인다). 그런
-    항목은 애초에 build_all_stocks()가 페이지를 만들지 않으므로 여기서도 기대 목록에서 뺀다.
+    종목 상세 페이지(국내·미국)는 2026-10-26에 없앴다 — 지금 생성기가 만드는 페이지는 섹터 페이지뿐이다.
     """
     pages = []
-    for s in _load(CONFIG_DIR / "stocks.json"):
-        if not s.get("detail_page"):
-            continue
-        pages.append((WEB_DIR / "stocks" / s["code"] / "index.html",
-                      f"{SITE_BASE}/stocks/{s['code']}/"))
-    for s in _load(CONFIG_DIR / "us_stocks.json"):
-        tk = s["ticker"].lower()
-        pages.append((WEB_DIR / "stocks" / "us" / tk / "index.html",
-                      f"{SITE_BASE}/stocks/us/{tk}/"))
     universe = CONFIG_DIR / "stock_universe.json"
     if universe.exists():
         for key in _load(universe).get("sectors", {}):

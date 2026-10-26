@@ -29,12 +29,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from prediction_basis import OPEN as BASIS_OPEN, stats_rows, legacy_kospi_rows, outcome_pct
 
 try:
-    from scripts.validate_analysis import _fetch_kospi_realdata
-    import scripts.us_detail_data as ud
     from scripts.verify_publish_gate import gate_write, check_sitemap
 except ImportError:
-    from validate_analysis import _fetch_kospi_realdata
-    import us_detail_data as ud
     from verify_publish_gate import gate_write, check_sitemap
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,7 +45,6 @@ CONFIG_DIR = Path(__file__).resolve().parent / "config"
 ASSET_VER = "20261026f"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
-US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
 KST = pytz.timezone("Asia/Seoul")
 
 # CLI type → 내부 type(URL·config·템플릿)
@@ -146,11 +141,6 @@ HL_NIGHT_CODES = {"005930", "000660", "005380"}
 GATE_BLOCKED = []
 
 
-def _attr(value) -> str:
-    """meta content 등 HTML 속성에 넣을 값을 이스케이프한다."""
-    return html.escape(str(value or ""), quote=True)
-
-
 def _jsonld(obj) -> str:
     """JSON-LD 직렬화. 본문에 '</'가 들어가면 <script>가 조기 종료되므로 이스케이프한다."""
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
@@ -165,23 +155,6 @@ def _breadcrumb(items) -> dict:
             el["item"] = f"{SITE_BASE}{path}"
         elements.append(el)
     return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": elements}
-
-
-def _seo_ctx(*, title: str, description: str, path: str, jsonld=None) -> dict:
-    """템플릿 partial(_head_seo.html)이 쓰는 컨텍스트를 만든다.
-
-    jsonld: dict 또는 dict 리스트. 리스트면 @graph 없이 script 태그를 여러 개 낸다.
-    """
-    blocks = []
-    if jsonld:
-        blocks = jsonld if isinstance(jsonld, list) else [jsonld]
-    return {
-        "seo_title": _attr(title),
-        "seo_desc": _attr(description),
-        "seo_url": f"{SITE_BASE}{path}",
-        "seo_image": OG_IMAGE_URL,
-        "seo_jsonld": [_jsonld(b) for b in blocks],
-    }
 
 
 def fmt_time(generated_at: str) -> str:
@@ -446,9 +419,7 @@ def build_issue_check(us_cards: list) -> dict:
         for pat, stocks in ISSUE_RELATED_KR:
             if pat.search(title):
                 for code, name in stocks:
-                    url = _pick_detail_url(code, "kospi")
-                    if url:                                   # 상세 페이지가 있을 때만 링크(§36)
-                        related.append({"name": name, "url": url})
+                    related.append({"name": name})            # 종목 상세 페이지가 없어 이름만(2026-10-26)
                 break
         # 쪽(side)별로 칩을 묶는다 — 문장(check_line)은 한쪽만 말해서, 다른 쪽 종목 칩이 설명 없이 붙어 있었다(2026-10-26)
         groups = []
@@ -536,8 +507,7 @@ def build_monthly_ma5(analysis: dict, target_date: str = "", market: str = "kr")
                      "now_label": f"{int(nd[4:6])}/{int(nd[6:8])}" if len(nd) == 8 else "",
                      "now_price": _ma5_price(x["now_close"], market),
                      "has_cur": bool(cells and cells[-1].get("cur")),
-                     "last_label": f"{int(str(x['last_complete'])[4:])}월",
-                     "detail_url": _pick_detail_url(x.get("code", ""), "us" if market == "us" else "kospi")})
+                     "last_label": f"{int(str(x['last_complete'])[4:])}월"})
     return {"ma5m_items": view, "ma5m_stats": {**stats, "scope": cfg["scope"], "source": cfg["source"]},
             "ma5m_modal": cfg["modal"]}
 
@@ -1059,23 +1029,6 @@ def build_reasons(analysis: dict, target_date: str = "") -> dict:
     elif fmt == "keynum":
         ctx.update(build_keynum_context(analysis))
     return ctx
-
-
-def _pick_detail_url(ticker: str, internal_type: str) -> str:
-    """종목 상세 영구 페이지가 실재할 때만 URL 반환 (없으면 빈 문자열 → 링크 생략).
-    실재하지 않는 페이지로 링크해 '준비 중'/404를 노출하지 않기 위한 존재 게이트."""
-    t = (ticker or "").strip()
-    if not t:
-        return ""
-    if internal_type == "us":
-        slug = t.lower()
-        if (WEB_DIR / "stocks" / "us" / slug / "index.html").exists():
-            return f"/stocks/us/{slug}/"
-        return ""
-    # 한국: 6자리 코드만
-    if re.fullmatch(r"\d{6}", t) and (WEB_DIR / "stocks" / t / "index.html").exists():
-        return f"/stocks/{t}/"
-    return ""
 
 
 def _chg_cell(chg) -> dict:
@@ -2067,571 +2020,6 @@ def write_briefings_list_json():
     print(f"[generate_html] wrote web/data/briefings-list.json")
 
 
-def _naver_dated_rows(code, days=130):
-    """정규장 공식 종가 일봉 [{localDate, closePrice}] 리스트 (오래된→최신).
-
-    픽 채점과 스파크라인 날짜가 쓴다. 원본 네이버 일봉은 9/14부터 종가가 애프터장 가격이라(§48)
-    시세와 같은 소스(kr_official_closes)를 쓴다 — 스파크라인 종가(스냅샷)와 날짜 목록도 같은 봉 집합이 된다.
-    """
-    try:
-        from scripts.kr_official_closes import official_day_rows
-    except ImportError:
-        from kr_official_closes import official_day_rows
-    rows = official_day_rows(code, days=days)
-    return [r for r in rows if r.get("localDate") and r.get("closePrice")]
-
-
-def _naver_sparkline_dates(code, n=20):
-    """최근 N거래일의 'M/D' 날짜 리스트. sparkline hover용."""
-    try:
-        rows = _naver_dated_rows(code, days=60)
-        recent = rows[-n:]
-        return [f"{int(r['localDate'][4:6])}/{int(r['localDate'][6:8])}" for r in recent]
-    except Exception:
-        return []
-
-
-def _parse_price(s):
-    """'337,000원' 또는 '320,000~325,000원' → 숫자 (범위면 평균). 실패 시 None."""
-    nums = re.findall(r'[\d,]+', str(s or ""))
-    if not nums:
-        return None
-    vals = [float(n.replace(",", "")) for n in nums if n.replace(",", "").isdigit()]
-    return sum(vals) / len(vals) if vals else None
-
-
-# 증권사 목표주가 — web/data/stock-targets.json(fetch_stock_targets.py가 네이버에서 실측 수집)을 읽는다.
-# 과거엔 이 자리에 2026-06-25 시점 값을 코드에 박아둔 BROKER_TARGETS 정적 딕셔너리가 있었는데,
-# 매일 재생성되면서도 값이 갱신되지 않아 "1일 전" 라벨이 실제로는 3주 넘게 고정된 채 나갔다(운영규칙 0 위반).
-# 재발 방지(SERVICE_RULES.md §20): 실데이터로 바꿨어도 fetch_stock_targets.py가 조용히 실패하면
-# 똑같이 "낡은 값을 계속 진짜처럼 보여주는" 상태로 되돌아갈 수 있다 — updated_at 신선도를 매번 확인해
-# 임계치를 넘으면 섹션 자체를 생략한다(완전성보다 정합성 우선, 운영규칙 0).
-_STOCK_TARGETS_CACHE = None
-_TARGETS_MAX_STALE_DAYS = 5  # 평일 하루 2회 갱신 — 3일 연휴 + 주말 버퍼
-_TARGETS_STALE_WARNED = False  # 45종목 루프에서 같은 경고가 반복 출력되지 않게
-
-
-def _load_stock_targets():
-    global _STOCK_TARGETS_CACHE
-    if _STOCK_TARGETS_CACHE is None:
-        p = WEB_DIR / "data" / "stock-targets.json"
-        _STOCK_TARGETS_CACHE = load_json(p) if p.exists() else {}
-    return _STOCK_TARGETS_CACHE
-
-
-def _targets_data_is_stale():
-    """stock-targets.json의 updated_at이 임계치보다 오래됐으면 True.
-    날짜 파싱이 안 되는 경우(필드 누락 등)도 신뢰 불가로 보고 True."""
-    updated = str(_load_stock_targets().get("updated_at") or "")[:10]
-    try:
-        d = datetime.strptime(updated, "%Y-%m-%d").date()
-    except ValueError:
-        return True
-    return (datetime.now(KST).date() - d).days > _TARGETS_MAX_STALE_DAYS
-
-
-def _opinion_ko(op):
-    """네이버 리포트 투자의견을 영·국문 혼용에서 한국어 표시용으로 통일. web/stocks/index.html의 opinionKo()와 동일 규칙."""
-    s = str(op or "").strip()
-    if not s:
-        return ""
-    if re.match(r"^strong\s*buy$", s, re.I) or "적극매수" in s:
-        return "적극매수"
-    if re.match(r"^buy$", s, re.I) or s == "매수":
-        return "매수"
-    if re.match(r"^(hold|neutral|marketperform)$", s, re.I) or s == "중립":
-        return "중립"
-    if re.match(r"^(sell|underperform|reduce)$", s, re.I) or s == "매도":
-        return "매도"
-    return s
-
-
-def _rel_when(yymmdd, today=None):
-    """'26.07.08' → '11일 전' 상대 라벨. 페이지 생성 시점(대개 평일 매일) 기준으로 매번 새로 계산한다."""
-    m = re.fullmatch(r"(\d{2})\.(\d{2})\.(\d{2})", str(yymmdd or ""))
-    if not m:
-        return ""
-    try:
-        d = date(2000 + int(m.group(1)), int(m.group(2)), int(m.group(3)))
-    except ValueError:
-        return ""
-    today = today or datetime.now(KST).date()
-    diff = (today - d).days
-    if diff <= 0:
-        return "오늘"
-    if diff == 1:
-        return "1일 전"
-    if diff < 7:
-        return f"{diff}일 전"
-    if diff < 30:
-        return f"{diff // 7}주 전"
-    if diff < 365:
-        return f"{diff // 30}개월 전"
-    return f"{diff // 365}년 전"
-
-
-def _broker_targets_for_code(code, current_price):
-    """실측 목표주가(web/data/stock-targets.json)를 상세 페이지 표 형태로 변환.
-    데이터가 없거나 낡았으면 섹션 자체를 생략한다(억지로 채우지 않음, 운영규칙 0)."""
-    if not current_price:
-        return None
-    global _TARGETS_STALE_WARNED
-    if _targets_data_is_stale():
-        if not _TARGETS_STALE_WARNED:
-            print(f"[generate_html] ⚠️ stock-targets.json이 {_TARGETS_MAX_STALE_DAYS}일 넘게 안 갱신됨 "
-                  f"— 전 종목 목표주가 섹션 생략 (fetch_stock_targets.py 확인 필요)")
-            _TARGETS_STALE_WARNED = True
-        return None
-    s = (_load_stock_targets().get("stocks") or {}).get(code)
-    reports = (s or {}).get("reports") or []
-    priced = [r for r in reports if r.get("target_price")]
-    if not priced:
-        return None
-    prices = [r["target_price"] for r in priced]
-    min_p, max_p = min(prices), max(prices)
-    avg_p = s.get("consensus") or round(sum(prices) / len(prices))
-    span = (max_p - min_p) or 1
-    rows = [{
-        "firm": r.get("firm", ""),
-        "price": r["target_price"],
-        "op": _opinion_ko(r.get("opinion")),
-        "when": _rel_when(r.get("date")),
-        "upside": round((r["target_price"] / current_price - 1) * 100, 1),
-    } for r in priced]
-    avg_upside = round((avg_p / current_price - 1) * 100, 1)
-    return {
-        "count": s.get("firm_count") or len(rows),
-        "min_price": min_p, "avg_price": avg_p, "max_price": max_p,
-        "rows": rows,
-        "cur_pct": round((current_price - min_p) / span * 100, 1),
-        "avg_pct": round((avg_p - min_p) / span * 100, 1),
-        "avg_upside": avg_upside,
-        # 급락 직후 증권사가 목표가를 못 낮춰 상승여력이 비정상적으로 커질 수 있다
-        # (2026-07-31 실사고 — 원문 대조로 스크래핑 오류 아님을 확인). 데이터는 그대로 보여주고
-        # 오독만 막는다(운영규칙 0). 임계치는 stocks-home.js TP_STALE_THRESHOLD와 맞춘다.
-        "maybe_stale": avg_upside >= 50,
-    }
-
-
-# 업종 상대 밸류에이션 — web/data/valuation.json(fetch_valuation.py가 네이버에서 실측 수집).
-# 원래 종목 허브 홈의 랭킹 블록이었는데, 홈이 이미 "종목을 골라주는 랭킹"만 넷이라 성격이 겹쳐
-# 2026-07-21에 홈에서 제거하고 상세 페이지로 옮겼다(docs/plans/2026-07-21-home-earnings-valuation).
-# 코스피200 기반이라 46개 상세 페이지 중 27개만 데이터가 있다 — 없으면 섹션을 생략한다(운영규칙 0).
-_VALUATION_CACHE = None
-_VALUATION_MAX_STALE_DAYS = 5  # 목표주가와 같은 기준 — 연휴 + 주말 버퍼
-_VALUATION_STALE_WARNED = False
-
-
-def _load_valuation():
-    global _VALUATION_CACHE
-    if _VALUATION_CACHE is None:
-        p = WEB_DIR / "data" / "valuation.json"
-        _VALUATION_CACHE = load_json(p) if p.exists() else {}
-    return _VALUATION_CACHE
-
-
-def _valuation_data_is_stale():
-    """asOf가 임계치보다 오래됐으면 True. 날짜 파싱 실패도 신뢰 불가로 본다."""
-    as_of = str(_load_valuation().get("asOf") or "")[:10]
-    try:
-        d = datetime.strptime(as_of, "%Y-%m-%d").date()
-    except ValueError:
-        return True
-    return (datetime.now(KST).date() - d).days > _VALUATION_MAX_STALE_DAYS
-
-
-def _valuation_for_code(code):
-    """종목의 업종 상대 PER 괴리를 상세 페이지용 dict로 돌려준다.
-
-    수집이 조용히 죽었을 때 낡은 값을 계속 보여주지 않도록 신선도를 매번 확인한다(§20).
-    랭킹에 없는 종목(코스피200 밖·적자·이상치)은 None — 억지로 채우지 않는다.
-    """
-    global _VALUATION_STALE_WARNED
-    data = _load_valuation()
-    if not data:
-        return None
-    if _valuation_data_is_stale():
-        if not _VALUATION_STALE_WARNED:
-            print(f"[generate_html] ⚠️ valuation.json이 {_VALUATION_MAX_STALE_DAYS}일 넘게 안 갱신됨 "
-                  f"— 전 종목 밸류에이션 섹션 생략 (fetch_valuation.py 확인 필요)")
-            _VALUATION_STALE_WARNED = True
-        return None
-    for bucket in ("undervalued", "overvalued"):
-        for row in data.get(bucket) or []:
-            if row.get("code") != code:
-                continue
-            disc = row.get("disc")
-            per, med = row.get("per"), row.get("sectorMed")
-            if disc is None or not per or not med:
-                return None
-            cheap = disc < 0
-            # 배지와 문구가 어긋나 보이지 않도록 반올림을 한 번만 하고 둘 다 그 값을 쓴다
-            # (구 홈 위젯 valRowHtml의 의도를 그대로 옮김 — -4.8%인데 "5% 싸요"로 보이면 안 된다).
-            mag = round(abs(disc))
-            return {
-                "sector": row.get("sector") or "",
-                "per": per,
-                "sector_med": med,
-                "basis": row.get("basis") or "선행",
-                "disc": mag,
-                "cheap": cheap,
-                "phrase": f"업종보다 {mag}% " + ("싸요" if cheap else "비싸요"),
-                # 막대는 업종 중앙값을 100%로 두고 종목 PER의 상대 위치를 그린다(0~200%로 클램프).
-                "bar_pct": max(0, min(200, round(per / med * 100))) / 2,
-            }
-    return None
-
-
-def extract_picks_for_code(code):
-    """모든 analysis_snapshot.json에서 해당 종목 코드의 픽 이력 추출."""
-    found = []
-    for snap in sorted(BRIEFINGS_DIR.rglob("analysis_snapshot.json")):
-        date_str = snap.parent.parent.name
-        btype = snap.parent.name
-        try:
-            data = load_json(snap)
-            for p in data.get("stock_picks", []):
-                if p.get("ticker") == code:
-                    found.append({"date": date_str, "briefing_type": btype, **p})
-        except Exception:
-            pass
-    return found
-
-
-def score_picks(code, raw_picks):
-    """픽 이력에 배지(hit/run)와 수익률 추가. 데이터 부족 픽은 제외."""
-    if not raw_picks:
-        return []
-    try:
-        rows = _naver_dated_rows(code, days=130)
-        dated_closes = {r["localDate"]: float(r["closePrice"]) for r in rows}
-    except Exception:
-        dated_closes = {}
-
-    btype_map = {"kospi": "코스피", "us": "미국", "close": "마감"}
-    scored = []
-    for p in raw_picks:
-        entry = _parse_price(p.get("entry"))
-        target = _parse_price(p.get("target"))
-        if not entry or not target:
-            continue
-        pick_date = p["date"].replace("-", "")
-        closes_after = {d: v for d, v in dated_closes.items() if d >= pick_date}
-        if not closes_after:
-            continue
-        max_close = max(closes_after.values())
-        latest_d = max(closes_after.keys())
-        latest_close = closes_after[latest_d]
-        if max_close >= target:
-            max_ret = round((max_close / entry - 1) * 100, 1)
-            badge, badge_label = "hit", "목표 도달"
-            ret_str = f"최대 +{max_ret}%"
-        else:
-            # 목표 미도달 — 마감 기한 개념이 없어 '진행 중'은 지난 픽에 오해를 준다.
-            # 채점(hit/run 버킷)은 유지하되 표기만 중립적인 '미도달 / 최근 ±%'로 바꾼다.
-            cur_ret = round((latest_close / entry - 1) * 100, 1)
-            badge, badge_label = "run", "미도달"
-            sign = "+" if cur_ret >= 0 else ""
-            ret_str = f"최근 {sign}{cur_ret}%"
-
-        d = p["date"]
-        date_label = f"{int(d[5:7])}/{int(d[8:10])}"
-        btype_label = btype_map.get(p.get("briefing_type", ""), "")
-        reason = p.get("scenario_tag") or p.get("signal", "")
-        scored.append({
-            "date_str": f"{date_label} {btype_label}",
-            "reason": reason,
-            "entry_str": p.get("entry", ""),
-            "target_str": p.get("target", ""),
-            "badge": badge,
-            "badge_label": badge_label,
-            "ret_str": ret_str,
-        })
-    return scored
-
-
-def build_trackrecord(code):
-    """종목 코드 → 전체 트랙레코드 리스트 (최신순)."""
-    raw = extract_picks_for_code(code)
-    return list(reversed(score_picks(code, raw)))
-
-
-def _briefing_accuracy():
-    """briefings.json에서 코스피·미국 예측 적중률 계산."""
-    bpath = DATA_DIR / "briefings.json"
-    if not bpath.exists():
-        return {"kospi": None, "us": None}
-    records = load_json(bpath).get("briefings", [])
-    result = {}
-    for btype in ("kospi", "us"):
-        subset = [b for b in stats_rows(records) if b.get("type") == btype and b.get("is_correct") is not None]
-        result[btype] = round(sum(1 for b in subset if b["is_correct"]) / len(subset) * 100) if subset else None
-    return result
-
-
-def _fetch_stock_closes(code):
-    """정규장 공식 종가 리스트(오래된→최신). 52주 범위 산출용.
-
-    _fetch_kospi_realdata가 캔들 원본을 반환하지 않아 부득이 재호출한다.
-    sparkline은 20개뿐이라 52주 범위 산출에 부족하다.
-    토스 일봉은 공식 종가와 달라 쓰지 않는다(§48) — 시세와 같은 소스(kr_official_closes)를 쓴다.
-    """
-    try:
-        from scripts.kr_official_closes import official_closes
-    except ImportError:
-        from kr_official_closes import official_closes
-    return official_closes(code)
-
-
-def stock_realdata(code):
-    """종목 상세용 실측 dict. 시세·sparkline·MA + 52주 범위 + sparkline_dates."""
-    rd = _fetch_kospi_realdata(code)
-    if rd.get("error"):
-        return {"error": rd["error"], "price": None}
-    rd["error"] = None
-    rd.setdefault("ma20_dist_pct", None)
-    rd.setdefault("ma200_dist_pct", None)
-    try:
-        closes = _fetch_stock_closes(code)
-        if closes:
-            lo, hi = min(closes), max(closes)
-            rd["week52_low"] = round(lo, 2)
-            rd["week52_high"] = round(hi, 2)
-            rd["week52_pos_pct"] = round((rd["price"] - lo) / (hi - lo) * 100, 1) if hi > lo else 0
-    except Exception:
-        rd["week52_low"] = rd["week52_high"] = rd["week52_pos_pct"] = None
-    rd["sparkline_dates"] = _naver_sparkline_dates(code)
-    return rd
-
-
-def sector_bellwether(snapshot: dict, sectors: dict, sector_key: str):
-    """종목 섹터의 첫 미국 벨웨더 dict(t·name·change_pct) 반환. 없으면 None."""
-    sec = (sectors or {}).get(sector_key) or {}
-    bells = sec.get("bellwethers") or []
-    if not bells:
-        return None
-    t = bells[0].get("t")
-    info = (snapshot.get("bellwethers") or {}).get(t)
-    if not info:
-        return None
-    return {"t": t, "name": info.get("name"), "change_pct": info.get("change_pct")}
-
-
-_STOCK_SNAPSHOT_CACHE = None
-_SECTORS_CACHE = None
-
-
-def _load_stock_snapshot():
-    global _STOCK_SNAPSHOT_CACHE
-    if _STOCK_SNAPSHOT_CACHE is None:
-        p = WEB_DIR / "data" / "stocks-snapshot.json"
-        _STOCK_SNAPSHOT_CACHE = load_json(p) if p.exists() else {}
-    return _STOCK_SNAPSHOT_CACHE
-
-
-def _load_sectors():
-    global _SECTORS_CACHE
-    if _SECTORS_CACHE is None:
-        p = CONFIG_DIR / "stock_universe.json"
-        _SECTORS_CACHE = (load_json(p).get("sectors") or {}) if p.exists() else {}
-    return _SECTORS_CACHE
-
-
-def _stock_seo(stock, ctx) -> dict:
-    """종목 상세 페이지의 SEO 메타 컨텍스트.
-
-    description은 그 페이지에 **실제로 있는 섹션만** 나열한다. 목표주가·수급·분기 실적은
-    종목마다 수집 여부가 달라서(목표주가는 현재 3종목뿐) 없는 걸 적으면 운영 규칙 0 위반이다.
-    """
-    name, code = stock["name"], stock["code"]
-    sector = stock.get("sector") or ""
-
-    have = ["종가·등락률", "52주 범위", "20일선·200일선"]
-    if ctx.get("foreign_rate") is not None:
-        have.append("외국인 보유율")
-    if ctx.get("supply5"):
-        have.append("수급")
-    if ctx.get("financials"):
-        have.append("분기 실적")
-    if ctx.get("broker_targets"):
-        have.append("증권사 목표주가")
-    desc = (
-        f"{name}({code}) {sector} 종목 분석. "
-        f"{' · '.join(have)}을 실측 데이터로 정리했어요. "
-        "특이 신호와 더블샷 AI 픽 트랙레코드도 함께 봐요."
-    )
-
-    crumbs = [("홈", "/stocks/"), ("종목", "/stocks/")]
-    if stock.get("sector_key"):
-        crumbs.append((sector, f"/stocks/sector/{stock['sector_key']}/"))
-    crumbs.append((name, f"/stocks/{code}/"))
-
-    corp = {
-        "@context": "https://schema.org",
-        "@type": "Corporation",
-        "name": name,
-        "tickerSymbol": code,
-        "url": f"{SITE_BASE}/stocks/{code}/",
-    }
-    return _seo_ctx(
-        title=f"{name}({code}) · 종목 분석 — 더블샷",
-        description=desc,
-        path=f"/stocks/{code}/",
-        jsonld=[_breadcrumb(crumbs), corp],
-    )
-
-
-def build_stock_page(stock, peers):
-    """종목 1개의 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
-    rd = stock_realdata(stock["code"])
-    if rd.get("error") or rd.get("price") is None:
-        raise RuntimeError(f"{stock['code']} 실측 실패: {rd.get('error')}")
-    snap = _load_stock_snapshot()
-    snap_stock = (snap.get("stocks") or {}).get(stock["code"], {})
-    env = make_env()
-    tmpl = env.get_template("stocks/detail.html")
-    picks = build_trackrecord(stock["code"])
-    acc = _briefing_accuracy()
-    # 종가 날짜는 실측 데이터의 실제 마지막 거래일 기준.
-    # (스냅샷 generated_at은 생성일이라 주말·휴일에 생성하면 휴장일을 종가로 잘못 표기 — 예: 일요일 생성 시 "06-28 종가")
-    spark_dates = rd.get("sparkline_dates") or []
-    if spark_dates:
-        mm, dd = spark_dates[-1].split("/")
-        close_label = f"{int(mm):02d}-{int(dd):02d} 종가"
-    else:
-        snap_date = (snap.get("generated_at") or "")[:10]
-        close_label = (
-            f"{snap_date[5:7]}-{snap_date[8:10]} 종가" if len(snap_date) == 10
-            else datetime.now().strftime("%m-%d") + " 종가"
-        )
-    ctx = {
-        "stock": stock,
-        "rd": rd,
-        "peers": peers,
-        "generated_label": close_label,
-        "chips_ticker": stock.get("chips_ticker", ""),
-        "bellwether": sector_bellwether(snap, _load_sectors(), stock.get("sector_key")),
-        "foreign_rate": snap_stock.get("foreign_rate"),
-        "foreign_spark": snap_stock.get("foreign_spark"),
-        "supply5": snap_stock.get("supply5"),
-        "financials": snap_stock.get("financials"),
-        "financials_annual": snap_stock.get("financials_annual"),
-        "picks": picks,
-        "broker_targets": _broker_targets_for_code(stock["code"], rd.get("price")),
-        "valuation": _valuation_for_code(stock["code"]),
-        "acc": acc,
-        "today_str": datetime.now(KST).strftime("%Y-%m-%d"),
-        "hl_night": stock["code"] in HL_NIGHT_CODES,
-    }
-    ctx.update(_stock_seo(stock, ctx))
-    html = tmpl.render(**ctx)
-    url = f"{SITE_BASE}/stocks/{stock['code']}/"
-    if gate_write(WEB_DIR / "stocks" / stock["code"] / "index.html", html, url):
-        GATE_BLOCKED.append(url)
-        return None
-    return f"stocks/{stock['code']}/index.html"
-
-
-def build_us_stock_page(stock, peers, env):
-    """미국 종목 1개의 경량 상세 페이지를 생성·기록하고 출력 경로를 반환한다."""
-    rd = ud.fetch_us_realdata(stock["ticker"])
-    if rd.get("error") or rd.get("price") is None:
-        raise RuntimeError(f"{stock['ticker']} 실측 실패: {rd.get('error')}")
-    financials = ud.fetch_us_financials(stock["ticker"]) if stock.get("kind") == "stock" else []
-    env.filters["usd"] = ud.fmt_usd
-    tmpl = env.get_template("stocks/us_detail.html")
-    asof = rd.get("asof") or datetime.now(KST).strftime("%Y-%m-%d")
-    generated_label = f"{asof[5:7]}-{asof[8:10]} 종가"
-    tk = stock["ticker"].lower()
-    ticker, name = stock["ticker"], stock["name"]
-    is_etf = stock.get("kind") != "stock"
-    have = ["시세·등락률", "52주 범위", "프리·정규·애프터 1분봉"]
-    if financials:
-        have.append("분기 실적")
-    seo = _seo_ctx(
-        title=f"{name}({ticker}) · 미국 반도체 — 더블샷",
-        description=(
-            f"{name}({ticker}) {'ETF' if is_etf else '종목'} 분석. "
-            f"{' · '.join(have)}을 실측 데이터로 정리했어요. 원화 환산으로도 볼 수 있어요."
-        ),
-        path=f"/stocks/us/{tk}/",
-        # ETF는 Corporation이 아니므로 브레드크럼만 낸다(타입을 억지로 붙이지 않는다).
-        jsonld=[_breadcrumb([
-            ("홈", "/stocks/"), ("종목", "/stocks/"),
-            ("미국 반도체", None), (name, f"/stocks/us/{tk}/"),
-        ])] + ([] if is_etf else [{
-            "@context": "https://schema.org", "@type": "Corporation",
-            "name": name, "tickerSymbol": ticker, "url": f"{SITE_BASE}/stocks/us/{tk}/",
-        }]),
-    )
-    html = tmpl.render(
-        stock=stock,
-        rd=rd,
-        financials=financials,
-        peers=peers,
-        generated_label=generated_label,
-        acc=_briefing_accuracy(),
-        **seo,
-    )
-    if gate_write(WEB_DIR / "stocks" / "us" / tk / "index.html", html, seo["seo_url"]):
-        GATE_BLOCKED.append(seo["seo_url"])
-        return None
-    return f"stocks/us/{tk}/index.html"
-
-
-def build_all_us_stocks():
-    """us_stocks.json 전체를 순회 생성. peer 등락률은 실측에서 채운다(캐시 재사용, fail-fast)."""
-    stocks = load_json(US_STOCKS_PATH)
-    name_map = {s["ticker"]: s["name"] for s in stocks}
-    rd_cache = {}
-
-    def _peer_change(tk):
-        if tk not in rd_cache:
-            rd_cache[tk] = ud.fetch_us_realdata(tk)
-        return rd_cache[tk].get("change_pct")
-
-    results = []
-    for s in stocks:
-        peers = [
-            {"ticker": pt, "name": name_map.get(pt, pt), "change_pct": _peer_change(pt)}
-            for pt in s.get("peers", [])
-        ]
-        results.append(build_us_stock_page(s, peers, make_env()))
-    return results
-
-
-def build_all_stocks():
-    """stocks.json 중 detail_page:true인 종목만 순회 생성. peer는 {code,name} 객체, 등락률은 실측에서 채운다.
-
-    stocks.json은 상세 페이지 생성 대상뿐 아니라 scripts/fetch_movers_why.py("코스피 주도주"
-    뉴스 근거 수집)의 종목 유니버스로도 쓰인다 — 그래서 항목 자체를 지우지 않고 detail_page
-    필드로만 상세 페이지 생성 여부를 가른다(2026-08-19 상세 페이지 축소 결정). 이 필드를
-    빼먹고 파일에서 항목을 통째로 지우면 fetch_movers_why.py의 스캔 범위까지 조용히 줄어든다.
-
-    실측 호출 1회라도 실패하면 build_stock_page가 RuntimeError로 배치를 중단한다(fail-fast).
-    """
-    all_stocks = load_json(CONFIG_DIR / "stocks.json")
-    stocks = [s for s in all_stocks if s.get("detail_page")]
-    reg_codes = {s["code"] for s in stocks}
-    peer_rd_cache = {}  # peer 실측 중복 호출 방지 (여러 종목이 같은 peer를 공유)
-
-    def _peer_change(code):
-        if code not in peer_rd_cache:
-            peer_rd_cache[code] = stock_realdata(code)
-        prd = peer_rd_cache[code]
-        return None if prd.get("error") else prd.get("change_pct")
-
-    results = []
-    for s in stocks:
-        peers = [
-            {"code": p["code"], "name": p["name"], "change_pct": _peer_change(p["code"]),
-             "linked": p["code"] in reg_codes}
-            for p in s.get("peers", [])
-        ]
-        results.append(build_stock_page(s, peers))
-    return results
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # 브리핑 아카이브 (/briefings/)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2795,18 +2183,6 @@ def write_sitemap_xml():
                     "priority": "0.7",
                 })
 
-    # 생성된 종목 상세 페이지만 포함 (detail_page:false는 파일이 남아있어도 제외 — §33 계열,
-    # 상세 페이지 축소 후 디렉터리 삭제를 깜빡했을 때 죽은 URL을 sitemap에 올리지 않는다)
-    for s in load_json(CONFIG_DIR / "stocks.json"):
-        if not s.get("detail_page"):
-            continue
-        if (WEB_DIR / "stocks" / s["code"] / "index.html").exists():
-            urls.append({
-                "loc": f"{BASE}/stocks/{s['code']}/",
-                "changefreq": "daily",
-                "priority": "0.8",
-            })
-
     # 생성된 섹터 페이지만 포함 (2026-07-21 추가 — 생성은 되는데 sitemap에 빠져 색인 경로가 없었다)
     universe_path = CONFIG_DIR / "stock_universe.json"
     if universe_path.exists():
@@ -2817,16 +2193,6 @@ def write_sitemap_xml():
                     "changefreq": "daily",
                     "priority": "0.7",
                 })
-
-    # 생성된 미국 반도체 상세 페이지만 포함
-    for s in load_json(US_STOCKS_PATH):
-        tk = s["ticker"].lower()
-        if (WEB_DIR / "stocks" / "us" / tk / "index.html").exists():
-            urls.append({
-                "loc": f"{BASE}/stocks/us/{tk}/",
-                "changefreq": "weekly",
-                "priority": "0.6",
-            })
 
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -2951,29 +2317,10 @@ def _sector_copy(key: str) -> dict:
     return entry if isinstance(entry, dict) else {}
 
 
-def _sector_bellwether_links(key: str) -> list:
-    """섹터의 미국 벨웨더 중 **상세 페이지가 실제로 있는 것만** 링크로 낸다.
-
-    벨웨더는 stock_universe.json이 섹터별 미국 비교 대상으로 이미 정의해둔 값이고
-    (밤사이 브리지가 쓰는 그 목록), 여기서는 링크 대상으로 재사용한다.
-    ⚠️ 페이지 존재를 확인하고 링크한다 — 없는 페이지로 링크하면 죽은 링크가 된다(§36).
-    """
-    universe = load_json(CONFIG_DIR / "stock_universe.json").get("sectors", {})
-    out = []
-    for b in (universe.get(key, {}).get("bellwethers") or []):
-        t = (b.get("t") or "").lower()
-        if t and (WEB_DIR / "stocks" / "us" / t / "index.html").exists():
-            out.append({"name": b.get("name") or b.get("t"), "url": f"/stocks/us/{t}/"})
-    return out
-
-
 def build_sector_pages():
     """stock_universe.json + stocks-snapshot.json → 섹터별 정적 페이지 8개 생성.
 
-    섹터의 종목 유니버스(46개)는 stocks.json의 상세 페이지 목록(축소될 수 있음)과
-    별개다 — 카드 자체는 46개 전부 계속 보여주되, 상세 페이지가 없는 종목의 카드는
-    linked=False로 표시해 템플릿이 <a> 대신 <div>로 렌더해야 한다(§20 계열: 존재하지
-    않는 페이지로 링크해 404를 노출하지 않는다. detail.html의 peer 섹션과 동일 패턴).
+    종목 상세 페이지는 없다(2026-10-26 제거) — 종목 카드는 링크하지 않는다.
     """
     universe_path = CONFIG_DIR / "stock_universe.json"
     snapshot_path = WEB_DIR / "data" / "stocks-snapshot.json"
@@ -2981,7 +2328,6 @@ def build_sector_pages():
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))
     snap_stocks = snapshot.get("stocks", {})
     snapshot_date = snapshot.get("generated_at", "")[:10]
-    detail_page_codes = {s["code"] for s in load_json(CONFIG_DIR / "stocks.json") if s.get("detail_page")}
 
     env = make_env()
     tpl = env.get_template("pages/stock_sector.html")
@@ -3001,7 +2347,6 @@ def build_sector_pages():
             stocks.append({
                 "code": code,
                 "name": s["name"],
-                "linked": code in detail_page_codes,
                 "close": measured["close"],
                 "close_fmt": _fmt_krw(measured["close"]),
                 "change_pct": measured["change_pct"],
@@ -3039,7 +2384,6 @@ def build_sector_pages():
             ]))],
             sector_emoji=_SECTOR_EMOJI.get(key, ""),
             sector_copy=_sector_copy(key),
-            bellwethers=_sector_bellwether_links(key),
             stocks=stocks,
             avg_pct=avg_pct,
             avg_pct_fmt=_fmt_pct(avg_pct),
@@ -3086,10 +2430,6 @@ def main():
                         help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
     parser.add_argument("--sectors", action="store_true",
                         help="섹터별 종목 페이지 8개 생성하고 종료")
-    parser.add_argument("--stocks", action="store_true",
-                        help="stocks.json 종목 상세 페이지 일괄 생성하고 종료")
-    parser.add_argument("--us-stocks", dest="us_stocks", action="store_true",
-                        help="미국 반도체 종목 경량 상세 페이지 생성")
     parser.add_argument("--force", action="store_true",
                         help="기존 analysis_snapshot.json을 무시하고 최신 analysis_{type}.json으로 강제 재생성 (의도적 정정용)")
     args = parser.parse_args()
@@ -3098,22 +2438,6 @@ def main():
         build_sector_pages()
         write_sitemap_xml()   # 섹터 URL이 sitemap에 들어가야 게이트의 색인 경로 검사가 성립한다
         _finish_page_build([])
-        return
-
-    if args.stocks:
-        paths = [p for p in build_all_stocks() if p]
-        for path in paths:
-            print(f"생성: {path}")
-        write_sitemap_xml()
-        _finish_page_build(paths)
-        return
-
-    if args.us_stocks:
-        paths = [p for p in build_all_us_stocks() if p]
-        for path in paths:
-            print(f"생성: {path}")
-        write_sitemap_xml()
-        _finish_page_build(paths)
         return
 
     if args.write_list_only:

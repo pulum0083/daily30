@@ -95,7 +95,6 @@
   .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:0;}
   .sector-card{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-  .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
   .sector-card__name{font-size:15px;font-weight:800;color:var(--ink);}
   .sector-card__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
@@ -222,7 +221,7 @@
   </div>
   <div class="sector-stock-list">
     {% for s in stocks %}
-    {% if s.linked %}<a class="sector-card" href="/stocks/{{ s.code }}/" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>{% else %}<div class="sector-card" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>{% endif %}
+    <div class="sector-card" data-code="{{ s.code }}" data-spark20='{{ s.spark20 | tojson }}'>
       <div class="sector-card__head">
         <span class="sector-card__name">{{ s.name }}</span>
         <span class="sector-card__code">{{ s.code }}</span>
@@ -245,7 +244,7 @@
       {% if s.foreign_rate is not none %}
       <div class="sector-card__fr">외국인 보유 {{ "%.1f"|format(s.foreign_rate) }}%</div>
       {% endif %}
-    {% if s.linked %}</a>{% else %}</div>{% endif %}
+    </div>
     {% endfor %}
   </div>
    </div><!-- /.sector-main -->
@@ -286,13 +285,8 @@
       투자 판단을 돕는 참고 자료이며 매매 권유가 아니에요. 자세한 내용은 <a href="/legal/disclaimer/">면책 고지</a>를 확인해 주세요.</p>
   </details>
 
-  {# 섹터 밖으로 나가는 문맥 링크. 벨웨더는 상세 페이지가 실제로 있는 것만 나온다(§36 존재-게이트). #}
+  {# 섹터 밖으로 나가는 문맥 링크. (2026-10-26 종목 상세 페이지 제거로 '밤사이 선행 지표' 링크 줄은 뺐다) #}
   <div class="sector-links">
-    {% if bellwethers %}
-    <p class="sector-links__row"><span class="sector-links__label">밤사이 선행 지표</span>
-      {% for b in bellwethers %}<a href="{{ b.url }}">{{ b.name }}</a>{% if not loop.last %}<span class="sep">·</span>{% endif %}{% endfor %}
-      <span class="sector-links__note">— 이 섹터가 참고하는 미국 종목이에요</span></p>
-    {% endif %}
     <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
       <a href="/briefings/">브리핑 아카이브</a>
       <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>

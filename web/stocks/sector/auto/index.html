@@ -26,7 +26,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"종목","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":3,"name":"자동차","item":"https://doubleshot.space/stocks/sector/auto/"}]}</script>
 
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=20261026e">
+<link rel="stylesheet" href="/assets/style.css?v=20261026f">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -128,7 +128,6 @@
   .sector-stock-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:0;}
   .sector-card{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;
     padding:15px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-  .sector-card:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
   .sector-card__head{display:flex;align-items:baseline;gap:7px;margin-bottom:9px;}
   .sector-card__name{font-size:15px;font-weight:800;color:var(--ink);}
   .sector-card__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
@@ -355,7 +354,7 @@
       
     </div>
     
-    <a class="sector-card" href="/stocks/005380/" data-code="005380" data-spark20='[353500.0, 354500.0, 350000.0, 345000.0, 349000.0, 346500.0, 348000.0, 336000.0, 324500.0, 320000.0, 315000.0, 313500.0, 295500.0, 312000.0, 326000.0, 310000.0, 309500.0, 301500.0, 295500.0, 288000.0]'>
+    <div class="sector-card" data-code="005380" data-spark20='[353500.0, 354500.0, 350000.0, 345000.0, 349000.0, 346500.0, 348000.0, 336000.0, 324500.0, 320000.0, 315000.0, 313500.0, 295500.0, 312000.0, 326000.0, 310000.0, 309500.0, 301500.0, 295500.0, 288000.0]'>
       <div class="sector-card__head">
         <span class="sector-card__name">현대차</span>
         <span class="sector-card__code">005380</span>
@@ -375,7 +374,7 @@
       
       <div class="sector-card__fr">외국인 보유 24.1%</div>
       
-    </a>
+    </div>
     
     <div class="sector-card" data-code="161390" data-spark20='[57300.0, 59900.0, 59800.0, 59000.0, 58900.0, 59900.0, 60400.0, 60700.0, 62100.0, 62300.0, 61400.0, 62700.0, 62500.0, 63000.0, 64600.0, 62600.0, 61600.0, 61600.0, 60100.0, 58200.0]'>
       <div class="sector-card__head">
@@ -437,7 +436,6 @@
 
   
   <div class="sector-links">
-    
     <p class="sector-links__row"><span class="sector-links__label">오늘의 시장 해설</span>
       <a href="/briefings/">브리핑 아카이브</a>
       <span class="sector-links__note">— 이 종목들의 그날 흐름을 매일 정리해요</span></p>
@@ -478,7 +476,7 @@
   <div class="site-footer__base">© 2026 Double-Shot</div>
 </footer>
 
-<script src="/assets/main.js?v=20261026e"></script>
+<script src="/assets/main.js?v=20261026f"></script>
 <script>
 window.addEventListener('load', function() {
   if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();

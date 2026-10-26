@@ -57,27 +57,15 @@ function load() {
 
 const sig = (code) => ({code, name:'테스트', sector:'반도체', pct:3.2, dir:'up', badges:['거래량 급증'], why:'왜'});
 
-test('상세 페이지가 있는 종목은 링크로 그린다', () => {
+test('모든 종목을 섹터 페이지로 보낸다 — 종목 상세 페이지는 없다(2026-10-26 제거)', () => {
   const { sigItemHtml } = load();
-  for (const code of ['005930', '000660', '005380']) {
-    const hero = sigItemHtml(sig(code), 0);
-    const row  = sigItemHtml(sig(code), 1);
-    assert.match(hero, /^<a class="sig-hero"/, `${code} 히어로가 <a>여야 한다`);
-    assert.match(row,  /^<a class="sig-row"/,  `${code} 행이 <a>여야 한다`);
-    assert.ok(hero.includes(`goStock('${code}')`));
-    assert.ok(row.includes('sig-go'), '링크 행에는 화살표가 있어야 한다');
-  }
-});
-
-test('상세 페이지가 없는 종목은 막지 않고 섹터 페이지로 보낸다(2026-10-26, §68)', () => {
-  const { sigItemHtml } = load();
-  // 042700(한미반도체)·000270(기아) 등 43종목은 랭킹·신호에는 나오지만 상세 페이지가 없다.
-  for (const code of ['042700', '000270', '035420', '068270']) {
+  // 예전에 상세 페이지가 있던 3종목(005930·000660·005380)도 이제 섹터 페이지로 간다.
+  for (const code of ['005930', '000660', '005380', '042700', '000270', '035420', '068270']) {
     const hero = sigItemHtml(sig(code), 0);
     const row  = sigItemHtml(sig(code), 1);
     assert.match(hero, /^<a class="sig-hero is-sector" href="\/stocks\/sector\/semicon\/"/, `${code} 히어로가 섹터 링크여야 한다`);
     assert.match(row,  /^<a class="sig-row is-sector" href="\/stocks\/sector\/semicon\/"/,  `${code} 행이 섹터 링크여야 한다`);
-    assert.ok(!hero.includes('goStock'), '상세 페이지가 없는 종목에 goStock이 남으면 안 된다');
+    assert.ok(!hero.includes('goStock') && !hero.includes(`/stocks/${code}/`), '상세 페이지 링크가 남으면 안 된다');
     assert.ok(row.includes('반도체 보기 →'));
   }
 });
@@ -95,16 +83,6 @@ test('닫는 태그가 여는 태그와 일치한다', () => {
   assert.ok(sigItemHtml(sig('005930'), 2).endsWith('</a>'));
   assert.ok(sigItemHtml({ ...sig('042700'), sector: '기타' }, 2).endsWith('</div>'));
 });
-
-test('STOCK_PAGES는 stocks.json의 detail_page 종목과 같아야 한다', () => {
-  const { STOCK_PAGES } = load();
-  const cfg = JSON.parse(readFileSync(join(HERE, '..', '..', 'scripts', 'config', 'stocks.json'), 'utf8'));
-  const list = Array.isArray(cfg) ? cfg : (cfg.stocks || []);
-  const expected = list.filter((s) => s.detail_page).map((s) => s.code).sort();
-  assert.deepEqual(Object.keys(STOCK_PAGES).sort(), expected,
-    'STOCK_PAGES와 stocks.json의 detail_page가 어긋나면 존재하지 않는 페이지로 링크한다(§36)');
-});
-
 
 test('홈은 신호 강도 상위 3개만', () => {
   assert.equal(load().SIG_HOME_N, 3);

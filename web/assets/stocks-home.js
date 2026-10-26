@@ -222,21 +222,21 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   if(!box) return;
   var gridEl=document.getElementById('ue-grid'), macroEl=document.getElementById('ue-macro');
   // 밤사이 미국 두 묶음(§68 ④) — 코스피 선행 ETF 3칸 + AI 인프라 주식 3갈래. SOXX는 선행 ETF에만 한 번.
-  // href는 상세 페이지가 실제로 있을 때만(§36 — web/stocks/us/{tk}/, SKHY는 한국 상세로).
+  // 종목 상세 페이지가 없어(2026-10-26 제거) 행은 링크하지 않는다.
   var LEAD=[
     {tk:'EWY',  sym:'EWY.O',  nm:'한국 ETF',   desc:'코스피 추종'},
-    {tk:'DRAM', sym:'DRAM.K', nm:'메모리·HBM', desc:'삼성·하이닉스 선행', href:'/stocks/us/dram/'},
-    {tk:'SOXX', sym:'SOXX.O', nm:'반도체 ETF', desc:'미 반도체 전체', href:'/stocks/us/soxx/'}
+    {tk:'DRAM', sym:'DRAM.K', nm:'메모리·HBM', desc:'삼성·하이닉스 선행'},
+    {tk:'SOXX', sym:'SOXX.O', nm:'반도체 ETF', desc:'미 반도체 전체'}
   ];
   var AI_GROUPS=[
-    {g:'메모리', items:[{nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O', href:'/stocks/000660/'},
-                        {nm:'마이크론', tk:'MU', sym:'MU.O', href:'/stocks/us/mu/'},
-                        {nm:'샌디스크', tk:'SNDK', sym:'SNDK.O', href:'/stocks/us/sndk/'}]},
-    {g:'AI 칩', items:[{nm:'엔비디아', tk:'NVDA', sym:'NVDA.O', href:'/stocks/us/nvda/'},
-                       {nm:'AMD', tk:'AMD', sym:'AMD.O', href:'/stocks/us/amd/'},
-                       {nm:'브로드컴', tk:'AVGO', sym:'AVGO.O', href:'/stocks/us/avgo/'}]},
-    {g:'파운드리·장비', items:[{nm:'TSMC', tk:'TSM', sym:'TSM.N', href:'/stocks/us/tsm/'},
-                              {nm:'ASML', tk:'ASML', sym:'ASML.O', href:'/stocks/us/asml/'}]}
+    {g:'메모리', items:[{nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O'},
+                        {nm:'마이크론', tk:'MU', sym:'MU.O'},
+                        {nm:'샌디스크', tk:'SNDK', sym:'SNDK.O'}]},
+    {g:'AI 칩', items:[{nm:'엔비디아', tk:'NVDA', sym:'NVDA.O'},
+                       {nm:'AMD', tk:'AMD', sym:'AMD.O'},
+                       {nm:'브로드컴', tk:'AVGO', sym:'AVGO.O'}]},
+    {g:'파운드리·장비', items:[{nm:'TSMC', tk:'TSM', sym:'TSM.N'},
+                              {nm:'ASML', tk:'ASML', sym:'ASML.O'}]}
   ];
   var TICKERS=LEAD.concat([].concat.apply([], AI_GROUPS.map(function(g){ return g.items; })));
   var NASDAQ='QQQ.O';
@@ -275,13 +275,13 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var d=dataBySym[t.sym]||{};
     var inner='<span class="ue-tk">'+t.tk+'</span><span class="ue-ln">'+t.nm+'</span>'+cgHtml(d.changePct)
       +'<span class="px ue-lp" data-sym="'+t.sym+'" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span><span class="ue-ld">'+t.desc+'</span>';
-    return t.href ? '<a class="ue-lead" href="'+t.href+'">'+inner+'</a>' : '<div class="ue-lead">'+inner+'</div>';
+    return '<div class="ue-lead">'+inner+'</div>';
   }
   function aiRowHtml(t, mx){
     var d=dataBySym[t.sym]||{}, p=d.changePct, w=(typeof p==='number'&&isFinite(p)&&mx)?Math.round(Math.abs(p)/mx*100):0;
-    return '<a class="ue-row" href="'+t.href+'"><span class="ue-n">'+t.nm+' <em>'+t.tk+'</em></span>'
+    return '<div class="ue-row"><span class="ue-n">'+t.nm+' <em>'+t.tk+'</em></span>'
       +'<span class="px ue-p" data-sym="'+t.sym+'" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'
-      +'<span class="ue-bar"><i class="'+cls(p)+'" style="width:'+w+'%"></i></span>'+cgHtml(p)+'</a>';
+      +'<span class="ue-bar"><i class="'+cls(p)+'" style="width:'+w+'%"></i></span>'+cgHtml(p)+'</div>';
   }
   function renderGrid(){
     var lc=upCount(LEAD), ai=[].concat.apply([], AI_GROUPS.map(function(g){ return g.items; })), ac=upCount(ai);
@@ -529,7 +529,6 @@ applyAsOf();
 const navHistory=[];
 /* ── URL 체계 (실서비스 라우팅 기준) ──────────────────────────────
    /stocks/                        홈 허브 (랭킹 + 섹터 + 검색)
-   /stocks/{code}/                 종목 상세   예) /stocks/000660/
    /stocks/etf/{code}/             ETF 상세    예) /stocks/etf/069500/
    /stocks/sectors/{key}/          섹터 페이지 예) /stocks/sectors/semicon/
      keys: semicon | power | defense | ship | battery | auto | bio | finance
@@ -541,13 +540,6 @@ const navHistory=[];
    /chips/                         AI 반도체 칩보드 (외부 chipboard.vercel.app)
    /briefings/                     브리핑 허브 (기존 서비스)
 ─────────────────────────────────────────────────────────────── */
-// 종목 상세 — standalone 페이지로 실제 이동 (생성된 종목만, 나머지는 안내 토스트).
-// 랭킹·섹터·특이신호가 스캔하는 종목 유니버스(stock_universe.json, 46종목)와 상세 페이지가
-// 실제로 존재하는 종목(scripts/config/stocks.json)은 이제 서로 다른 목록이다(2026-08-19
-// 상세 페이지 축소 결정) — 예전엔 두 목록이 같아서 스냅샷에 있으면 곧 페이지가 있다는 뜻이었지만,
-// 지금은 아니다. 여기 하드코딩한 목록이 stocks.json과 어긋나면 존재하지 않는 페이지로
-// 이동시키게 되므로, stocks.json을 바꿀 때는 반드시 이 목록도 함께 맞출 것.
-const STOCK_PAGES={'005930':1,'000660':1,'005380':1};
 let _stockToastT=null;
 function _stockToast(msg){
   let t=document.getElementById('stock-toast');
@@ -557,17 +549,16 @@ function _stockToast(msg){
   t.textContent=msg;t.style.opacity='1';
   clearTimeout(_stockToastT);_stockToastT=setTimeout(()=>{t.style.opacity='0';},1800);
 }
-// 홈의 종목 클릭 진입점 9곳(신호·랭킹·검색·주도주·모멘텀)이 전부 이 함수를 지나므로
-// 여기 한 곳만 계측하면 홈의 모든 종목 클릭이 잡힌다 — 개별 호출부는 건드리지 않는다.
-// blocked는 페이지 이동이 아니라 토스트라서 pageview에 흔적이 안 남는다. 이 이벤트가
-// 없으면 "신호를 눌렀다가 막다른 길에서 튕긴 횟수"를 알 방법이 아예 없다.
+// 종목 클릭 → 그 종목의 섹터 페이지(2026-10-26 종목 상세 페이지 제거 — 사용자 결정, §36).
+// 홈의 종목 클릭 진입점(검색·특이신호·섹터 카드 등)이 전부 이 함수를 지난다. 섹터는 스냅샷(STOCK_LIST)에서 찾고,
+// 아직 못 불러왔거나 유니버스 밖 종목이면 막지 않고 안내만 띄운다.
 function goStock(code){
-  if(STOCK_PAGES[code]){
-    dsTrackEvent('stock_detail_open',{stock_code:code});
-    location.href='/stocks/'+code+'/';
+  var s=STOCK_LIST.find(function(x){return x.code===code;});
+  if(s&&s.sector&&SECTOR_LABELS[s.sector]){
+    dsTrackEvent('stock_sector_open',{stock_code:code,sector:s.sector});
+    location.href='/stocks/sector/'+s.sector+'/';
   }else{
-    dsTrackEvent('stock_detail_blocked',{stock_code:code});
-    _stockToast('이 종목은 상세 페이지를 제공하지 않아요.');
+    _stockToast('섹터 정보를 불러오는 중이에요. 잠시 뒤 다시 눌러 주세요.');
   }
 }
 // 허브 내부 화면 전환 — 유효한 screen이면 그 화면, 섹터 키 등은 반도체 섹터로
@@ -1076,22 +1067,15 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   function badgeHtml(b){ var flow=/^(외국인|기관)/.test(b); return '<span class="bdg'+(flow?' flow':'')+'">'+b+'</span>'; }
   function asOfPrefix(asOf){ return (asOf && !asOf.isToday && asOf.label) ? asOf.label : '오늘의'; }
   // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.
-  // 상세 페이지가 실제로 있는 종목만 링크한다(§36 존재-게이트). 신호 스캔 유니버스는
-  // 46종목이고 상세 페이지는 3종목뿐이라, 전부 클릭 가능하게 두면 대부분의 클릭이
-  // 토스트로 튀기는 막다른 길이 된다. 링크되지 않는 행은 화살표·hover도 뺀다 —
-  // 누를 수 있을 것처럼 보이게 해놓고 막는 것보다 애초에 누를 수 없다고 보여주는 게 정직하다.
-  // STOCK_PAGES를 바꿀 땐 stocks.json의 detail_page와 반드시 함께 맞춘다(§36).
+  // 종목 상세 페이지는 없다(2026-10-26 제거) — 그 종목의 섹터 페이지로 보내고, 섹터를 모르면 링크하지 않는다.
   function sigItemHtml(s,i,heroFlag){
     var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
     var badges=(s.badges||[]).map(badgeHtml).join('');
-    var linked=!!STOCK_PAGES[s.code];
-    var goArrow=linked?'<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
-    // 상세 페이지가 없으면 막지 않고 그 종목의 섹터 페이지로 보낸다(2026-10-26, §68). 섹터를 모르면 예전처럼 막는다.
-    var secKey=linked?null:SECTOR_KEY_OF[s.sector];
-    var tag=(linked||secKey)?'a':'div';
-    var attrs=linked?(' onclick="goStock(\''+s.code+'\')"'):(secKey?' href="/stocks/sector/'+secKey+'/"':'');
-    var nolink=linked?'':(secKey?' is-sector':' is-nolink');
-    if(secKey) goArrow='<span class="sig-sec">'+SECTOR_LABELS[secKey]+' 보기 →</span>';   // 라벨은 우리 상수라 이스케이프 불필요
+    var secKey=SECTOR_KEY_OF[s.sector];
+    var tag=secKey?'a':'div';
+    var attrs=secKey?' href="/stocks/sector/'+secKey+'/"':'';
+    var nolink=secKey?' is-sector':' is-nolink';
+    var goArrow=secKey?'<span class="sig-sec">'+SECTOR_LABELS[secKey]+' 보기 →</span>':'';   // 라벨은 우리 상수라 이스케이프 불필요
     if(i===0){
       return '<'+tag+' class="sig-hero'+nolink+'"'+attrs+'>'
         +'<span class="sig-flag">'+(heroFlag||'오늘 가장 눈에 띄는 신호')+'</span>'
@@ -1115,7 +1099,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     setTimeout(function(){w.classList.remove('sig-updated');}, 600);
   }
   // 테스트 훅 — 존재-게이트(상세 페이지 있는 종목만 링크) 회귀 검증용.
-  window.__sigHome={sigItemHtml:sigItemHtml, STOCK_PAGES:STOCK_PAGES, SIG_HOME_N:SIG_HOME_N};
+  window.__sigHome={sigItemHtml:sigItemHtml, SIG_HOME_N:SIG_HOME_N};
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
@@ -1645,8 +1629,6 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     .then(function(snap){
       SNAP=snap;
       if(SNAP&&SNAP.stocks){
-        // STOCK_PAGES는 여기서 채우지 않는다 — 스냅샷 유니버스(46종목)와 실제 상세 페이지
-        // 목록(stocks.json)이 더 이상 같지 않다(위 STOCK_PAGES 선언부 주석 참고).
         var _ks=Object.keys(SNAP.stocks);
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }

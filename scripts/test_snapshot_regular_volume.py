@@ -17,7 +17,6 @@ def _rows(last_volume):
 def _patch(monkeypatch, rows):
     monkeypatch.setattr(bss, "_naver_day_rows", lambda code: rows)
     monkeypatch.setattr(bss, "_naver_supply5", lambda code: None)
-    monkeypatch.setattr(bss, "_naver_financials", lambda code: None)
 
 
 def test_regular_session_volume_is_today_volume(monkeypatch):

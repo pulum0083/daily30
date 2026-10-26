@@ -114,15 +114,6 @@ def _to_int(s):
         return None
 
 
-def _q_label(key):
-    """'202509' → '25Q3'. 분기 키를 짧은 라벨로."""
-    if not key or len(key) < 6:
-        return key or ""
-    yy, mm = key[2:4], key[4:6]
-    q = {"03": "1", "06": "2", "09": "3", "12": "4"}.get(mm, "")
-    return f"{yy}Q{q}" if q else f"{yy}.{mm}"
-
-
 def parse_supply5(rows, n=5):
     """네이버 trend 응답(최신순)에서 최근 n일 종목별 순매수 수량(주)을 시간순(오래된→최신)으로.
     각 항목: {date:'6/26', i:개인, o:기관, f:외국인}. 셋 다 None이면 제외."""
@@ -140,56 +131,6 @@ def parse_supply5(rows, n=5):
     return out
 
 
-def parse_financials(finance_info, n=5):
-    """네이버 finance/quarter 응답에서 최근 n분기 매출·영업이익(억원)을 시간순으로.
-    각 항목: {q:'25Q3', rev:매출, op:영업이익, est:컨센서스추정여부}. 매출·영업이익 둘 다 없으면 제외."""
-    if not finance_info:
-        return []
-    titles = finance_info.get("trTitleList", [])[-n:]
-    rows = {r.get("title"): r.get("columns", {}) for r in finance_info.get("rowList", [])}
-    rev_col = rows.get("매출액", {})
-    op_col = rows.get("영업이익", {})
-    out = []
-    for t in titles:
-        key = t.get("key")
-        rev = _to_int((rev_col.get(key) or {}).get("value"))
-        op = _to_int((op_col.get(key) or {}).get("value"))
-        if rev is None and op is None:
-            continue
-        out.append({"q": _q_label(key), "rev": rev, "op": op,
-                    "est": t.get("isConsensus") == "Y"})
-    return out
-
-
-# 연간 실적 컨센서스 수집 대상 — 리포트가 지목한 3종목만(스코프 좁혀 QA 단순화, §후속 확대)
-ANNUAL_FIN_CODES = {"005930", "000660", "005380"}
-
-
-def parse_financials_annual(finance_info):
-    """네이버 finance/annual 응답에서 연도별 매출·영업이익(억원)을 순서대로.
-    각 항목: {year:'2026', rev:매출, op:영업이익, est:컨센서스추정여부}.
-    구조적 sanity 게이트(운영규칙 0): 매출 결측/≤0 또는 영업이익>매출(불가능)인 연도는 폐기.
-    컨센서스 값의 크기 자체는 손대지 않는다(벤더 실측)."""
-    if not finance_info:
-        return []
-    titles = finance_info.get("trTitleList", [])
-    rows = {r.get("title"): r.get("columns", {}) for r in finance_info.get("rowList", [])}
-    rev_col = rows.get("매출액", {})
-    op_col = rows.get("영업이익", {})
-    out = []
-    for t in titles:
-        key = t.get("key") or ""
-        rev = _to_int((rev_col.get(key) or {}).get("value"))
-        op = _to_int((op_col.get(key) or {}).get("value"))
-        if rev is None or rev <= 0:
-            continue
-        if op is not None and op > rev:
-            continue
-        out.append({"year": key[:4], "rev": rev, "op": op,
-                    "est": t.get("isConsensus") == "Y"})
-    return out
-
-
 def _naver_supply5(code):
     """종목별 일별 투자자 순매수 수량(외국인·기관·개인). 실패 시 []."""
     try:
@@ -200,32 +141,6 @@ def _naver_supply5(code):
         return parse_supply5(rows) if isinstance(rows, list) else []
     except Exception as e:
         print(f"[snapshot] naver supply {code} 실패: {e}", file=sys.stderr)
-        return []
-
-
-def _naver_financials(code):
-    """종목별 분기 매출·영업이익(억원, 컨센서스 추정 플래그 포함). 실패 시 []."""
-    try:
-        url = f"https://m.stock.naver.com/api/stock/{code}/finance/quarter"
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
-        data = json.loads(urllib.request.urlopen(req, timeout=10).read())
-        return parse_financials(data.get("financeInfo"))
-    except Exception as e:
-        print(f"[snapshot] naver finance {code} 실패: {e}", file=sys.stderr)
-        return []
-
-
-def _naver_financials_annual(code):
-    """종목별 연간 매출·영업이익(억원, 컨센서스 플래그 포함). 실패 시 []."""
-    try:
-        url = f"https://m.stock.naver.com/api/stock/{code}/finance/annual"
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
-        data = json.loads(urllib.request.urlopen(req, timeout=10).read())
-        return parse_financials_annual(data.get("financeInfo"))
-    except Exception as e:
-        print(f"[snapshot] naver finance/annual {code} 실패: {e}", file=sys.stderr)
         return []
 
 
@@ -261,7 +176,7 @@ def _build_one(symbol, name, sector, market):
     bar_date는 market='kr'일 때만 채워지는, change_pct의 closes[-1]에 대응하는 실제 봉 날짜다.
     실패 시 (None, None)."""
     vol = vol_avg20 = foreign = foreign_spark = None
-    supply5 = financials = financials_annual = None
+    supply5 = None
     bar_date = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
@@ -280,9 +195,7 @@ def _build_one(symbol, name, sector, market):
             foreign = round(float(frates[-1]), 2)
             foreign_spark = [round(float(x), 2) for x in frates[-20:]]
         supply5 = _naver_supply5(symbol)        # 종목별 5일 순매수 수량
-        financials = _naver_financials(symbol)  # 분기 매출·영업이익
-        if symbol in ANNUAL_FIN_CODES:
-            financials_annual = _naver_financials_annual(symbol)  # 연간 매출·영업이익(3종목)
+        # (2026-10-26) 분기·연간 실적 수집은 종목 상세 페이지만 쓰던 것이라 페이지와 함께 멈췄다.
     else:
         closes = fetch_closes(symbol, market)
     if len(closes) < 2:
@@ -306,10 +219,6 @@ def _build_one(symbol, name, sector, market):
         rec["foreign_spark"] = foreign_spark
     if supply5:
         rec["supply5"] = supply5
-    if financials:
-        rec["financials"] = financials
-    if financials_annual:
-        rec["financials_annual"] = financials_annual
     return rec, bar_date
 
 

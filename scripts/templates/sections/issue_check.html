@@ -25,7 +25,7 @@
         </div>{% endfor %}
         {% endif %}
       </div>
-      {% if c.related and not c.duplicate_of %}<div class="ic-links"><span class="ic-lk-l">관련 종목</span>{% for r in c.related %}<a href="{{ r.url }}">{{ r.name }}</a>{% endfor %}</div>{% endif %}
+      {% if c.related and not c.duplicate_of %}<div class="ic-links"><span class="ic-lk-l">관련 종목</span>{% for r in c.related %}<span class="ic-rel">{{ r.name }}</span>{% endfor %}</div>{% endif %}
       {% if c.proxy and not c.duplicate_of %}<div class="ic-foot">종목이 지정되지 않아 {{ c.proxy }} 실측으로 봤어요.</div>{% endif %}
     </div>
     {% endfor %}
