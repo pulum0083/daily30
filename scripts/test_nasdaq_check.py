@@ -29,7 +29,7 @@ def test_compute_matches_prototype_numbers():
     assert r["series"][0]["m"] == "2014-01" and r["peak"]["m"] == "2021-02" and round(r["peak"]["g"]) == 84
 
 
-@pytest.mark.parametrize("gap,level", [(59.9, "ok"), (60.0, "caution"), (69.9, "caution"), (70.0, "warn")])
+@pytest.mark.parametrize("gap,level", [(64.9, "ok"), (65.0, "caution"), (69.9, "caution"), (70.0, "warn")])
 def test_level_boundaries(gap, level):
     assert nq.level_of(gap) == level
 
@@ -46,8 +46,8 @@ def test_compute_none_when_under_60_months():
 # ── 백테스트 ──
 def test_backtest_reproduces_prototype_stats():
     r = bt.backtest(MONTHS)
-    assert r["months_over_caution"] == 64
-    assert r["caution_band"] == {"months": 17, "fwd12_n": 15, "fwd12_avg_pct": 27.9}
+    assert r["months_over_caution"] == 55                                 # 주의 기준 65%(2026-10-26 60→65)
+    assert r["caution_band"] == {"months": 8, "fwd12_n": 7, "fwd12_avg_pct": 28.3}
     assert r["warn"]["dd20_pct"] == 51.1 and r["all_dd20_pct"] == 18.8
     assert r["warn"]["periods"] == ["1997~2000", "2020~2021"]
 
@@ -83,30 +83,38 @@ def test_missing_backtest_file_omits_section(tmp_path, monkeypatch):
 def test_snapshot_first_and_stored(tmp_path, monkeypatch):
     a = {}
     ctx = _ctx(tmp_path, monkeypatch, _data(), analysis=a)
-    assert a["nasdaq_overheat"]["date"] == "2026-10-23"                  # 스냅샷에 남는다
+    assert a["nasdaq_overheat"]["date"] == "2026-10-23"                  # 정상이라 섹션은 숨겨도 스냅샷엔 남는다
+    assert ctx == {}
     snap = {"nasdaq_overheat": _data(gap=72.4, date="2026-10-23", streak=3)}
     ctx2 = _ctx(tmp_path, monkeypatch, _data(gap=10.0), analysis=snap)   # 파일보다 스냅샷이 먼저
-    assert ctx["nq"]["level"] == "ok" and ctx2["nq"]["gap"] == 72.4 and ctx2["nq"]["level"] == "warn"
+    assert ctx2["nq"]["gap"] == 72.4 and ctx2["nq"]["level"] == "warn"
 
 
 def _render(ctx):
     return gh.make_env().get_template("sections/nasdaq_check.html").render(**ctx)
 
 
-@pytest.mark.parametrize("gap,badge,cls", [(59.9, "✓ 정상", "is-ok"), (60.0, "⚠️ 주의", "is-caution"),
-                                           (69.9, "⚠️ 주의", "is-caution"), (70.0, "🚨 경고", "is-warn")])
+@pytest.mark.parametrize("gap,badge,cls", [(65.0, "⚠️ 주의", "is-caution"), (69.9, "⚠️ 주의", "is-caution"),
+                                           (70.0, "🚨 경고", "is-warn")])
 def test_render_badge_by_boundary(tmp_path, monkeypatch, gap, badge, cls):
     html = _render(_ctx(tmp_path, monkeypatch, _data(gap=gap, streak=2)))
     assert badge in html and cls in html and f"{gap:.1f}%" in html
-    assert ("60% 위 <b>2개월째</b>" in html) == (gap >= 60)              # 정상일 땐 연속 개월을 숨긴다
+    assert "65% 위 <b>2개월째</b>" in html
 
 
-def test_render_ok_case_matches_prototype(tmp_path, monkeypatch):
-    html = _render(_ctx(tmp_path, monkeypatch, _data()))
-    assert "+59.8" in html and "27,722.8" in html and "17,349.5" in html and "이번 달 고점" in html
+@pytest.mark.parametrize("gap", [59.79, 64.9])
+def test_section_hidden_when_normal(tmp_path, monkeypatch, gap):
+    # 정상 구간엔 섹션째 숨긴다 — 매일 같은 '정상'이 반복돼 뜻이 없었다(2026-10-26)
+    assert _ctx(tmp_path, monkeypatch, _data(gap=gap)) == {}
+
+
+def test_render_caution_case(tmp_path, monkeypatch):
+    html = _render(_ctx(tmp_path, monkeypatch, _data(gap=66.0, streak=1)))
+    assert "+66.0" in html and "27,722.8" in html and "17,349.5" in html and "이번 달 고점" in html
     assert "2014년 이후 월별 위치" in html and "최고 2021년 2월 84%" in html
+    assert '<span style="left:65%">65</span>' in html and '<span class="nq-ax" style="top:' in html
     assert "nq-preview" not in html and "<text" not in html                # 미리보기 버튼 없음, SVG 안 글자 없음
-    assert "<summary>근거와 면책 고지</summary>" in html and "64개월" in html and "+27.9%" in html
+    assert "<summary>근거와 면책 고지</summary>" in html and "55개월" in html and "+28.3%" in html and "65~70%" in html
     assert "51%</b>(전체 19%)" in html and "1997~2000년과 2020~2021년" in html and "매매 신호" not in html
 
 
@@ -125,7 +133,7 @@ def _tg(tmp_path, monkeypatch, gap):
     return (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("gap", [59.9, 60.0, 69.9])
+@pytest.mark.parametrize("gap", [59.9, 65.0, 69.9])
 def test_telegram_no_block_under_70(tmp_path, monkeypatch, gap):
     assert "나스닥" not in _tg(tmp_path, monkeypatch, gap)
 

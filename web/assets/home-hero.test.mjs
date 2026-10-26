@@ -88,7 +88,8 @@ test('미국 카드 — 큰 쪽 확률·나스닥 체크 칩, 다른 날이면 �
   for (const s of ['10/23(금) 21:17 · 미국 시장 브리핑', '↓ 하락 우위', '68%', '반도체가 먼저 맞았다', '나스닥 체크 <b>+72.4%</b> · 🚨 경고', '/briefings/2026-10-23/us/'])
     assert.ok(h.includes(s), s);
   assert.ok(!h.includes('새 브리핑'));
-  assert.ok(api.nasdaqChip({ gap_pct: 59.9 }).includes('✓ 정상') && api.nasdaqChip({ gap_pct: 60 }).includes('⚠️ 주의'));
+  // 정상(65% 미만)은 칩을 달지 않는다 — 미국 브리핑 페이지와 같다(§65)
+  assert.ok(api.nasdaqChip({ gap_pct: 64.9 }) === '' && api.nasdaqChip({ gap_pct: 65 }).includes('⚠️ 주의'));
 });
 
 test('오늘 브리핑이 ready가 아니면 옛 날짜로 대체하지 않고 카드를 뺀다', async () => {
@@ -110,14 +111,15 @@ test('구조 신호 — 가장 최근 ready 날짜만, 10일보다 오래되면 
   assert.equal(api.latestReady({}, 'us', '2026-10-26'), null);
 });
 
-test('나스닥 체크 — 60·70 눈금과 단계, 값이 없으면 줄을 뺀다', () => {
+test('나스닥 체크 — 65·70 눈금과 단계, 값이 없으면 줄을 뺀다', () => {
   const ok = api.nasdaqRow({ gap_pct: 59.79, month: '2026-10' }, '2026-10-23', '2026-10-26');
   assert.match(ok, /\+59\.8%/);
   assert.match(ok, /pill ok">✓ 정상/);
-  assert.match(ok, /60 주의/);
+  assert.match(ok, /65 주의/);
   assert.match(ok, /70 경고/);
   assert.match(ok, /href="\/briefings\/2026-10-23\/us\/"/);
-  assert.match(api.nasdaqRow({ gap_pct: 64 }, '2026-10-23', '2026-10-23'), /pill caution">⚠️ 주의/);
+  assert.match(api.nasdaqRow({ gap_pct: 64 }, '2026-10-23', '2026-10-23'), /pill ok">✓ 정상/);
+  assert.match(api.nasdaqRow({ gap_pct: 65 }, '2026-10-23', '2026-10-23'), /pill caution">⚠️ 주의/);
   assert.match(api.nasdaqRow({ gap_pct: 71.2 }, '2026-10-23', '2026-10-23'), /pill warn">🚨 경고/);
   assert.equal(api.nasdaqRow(null, '2026-10-23', '2026-10-26'), '');
   assert.equal(api.nasdaqRow({ gap_pct: null }, '2026-10-23', '2026-10-26'), '');

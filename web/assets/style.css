@@ -1490,8 +1490,8 @@ html.dark .arch-item__dek{color:var(--muted);}
 .nq-gauge{position:relative;margin:22px 0 26px}
 .nq-track{display:flex;height:8px;border-radius:999px;overflow:hidden}
 .nq-track .seg{display:block;height:100%}
-.nq-track .seg.ok{width:60%;background:var(--surface-inset)}
-.nq-track .seg.caution{width:10%;background:#fcd34d}
+.nq-track .seg.ok{width:65%;background:var(--surface-inset)}
+.nq-track .seg.caution{width:5%;background:#fcd34d}
 .nq-track .seg.warn{width:30%;background:#f87171}
 .nq-pin{position:absolute;top:-19px;transform:translateX(-50%);font-size:11px;white-space:nowrap}
 .nq-pin::after{content:'';position:absolute;left:50%;top:15px;width:2px;height:16px;margin-left:-1px;background:var(--ink);border-radius:1px}

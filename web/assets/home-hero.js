@@ -89,7 +89,10 @@
 
   function nasdaqChip(nq) {
     if (!nq || typeof nq.gap_pct !== 'number') return '';
-    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 60 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
+    // 미국 브리핑 페이지와 같이 주의(65%)·경고(70%)일 때만 칩을 단다 — 정상이 매일 반복되면 뜻이 없다(§65).
+    var g = nq.gap_pct;
+    if (g < 65) return '';
+    var lv = g >= 70 ? ['warn', '🚨 경고'] : ['caution', '⚠️ 주의'];
     return '<div class="hh-chip nq-' + lv[0] + '">나스닥 체크 <b>' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</b> · ' + lv[1] + '</div>';
   }
 
@@ -171,19 +174,19 @@
     return null;
   }
 
-  // 나스닥 체크 — 60개월선 대비 월봉 고점 이격. 눈금 0·60(주의)·70(경고), 막대는 이격까지, 색은 단계(§65).
+  // 나스닥 체크 — 60개월선 대비 월봉 고점 이격. 눈금 0·65(주의)·70(경고), 막대는 이격까지, 색은 단계(§65).
   function nasdaqRow(nq, ymd, today) {
     if (!nq || typeof nq.gap_pct !== 'number' || !isFinite(nq.gap_pct)) return '';
-    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 60 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
+    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 65 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
     var top = Math.max(80, Math.ceil((g + 5) / 10) * 10);
     var x = function (v) { return (Math.max(0, Math.min(v, top)) / top * 100).toFixed(1) + '%'; };
     return '<a class="ss" href="/briefings/' + ymd + '/us/">' +
       '<div class="ss-h"><span class="ss-k">나스닥 체크</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 미국 브리핑</span></div>' +
       '<div class="ss-m"><b>' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</b><span class="pill ' + lv[0] + '">' + lv[1] + '</span></div>' +
-      '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(60) + ';width:' + (10 / top * 100).toFixed(1) + '%"></i>' +
+      '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(65) + ';width:' + (5 / top * 100).toFixed(1) + '%"></i>' +
       '<i class="z2" style="left:' + x(70) + ';right:0"></i><i class="f ' + lv[0] + '" style="width:' + x(g) + '"></i>' +
       '<i class="dot ' + lv[0] + '" style="left:' + x(g) + '"></i></div>' +
-      '<div class="nqg-l"><span style="left:0">0</span><span style="left:' + x(60) + '">60 주의</span><span style="left:' + x(70) + '">70 경고</span></div></div>' +
+      '<div class="nqg-l"><span style="left:0">0</span><span style="left:' + x(65) + '">65 주의</span><span style="left:' + x(70) + '">70 경고</span></div></div>' +
       '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점</em></a>';
   }
 

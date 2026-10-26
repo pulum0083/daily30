@@ -1,4 +1,4 @@
-{# 나스닥 체크 — 나스닥 종합지수 월봉 고점 vs 60개월선(결정론, §65). 항상 표시(데이터·백테스트 파일이 없으면 생략).
+{# 나스닥 체크 — 나스닥 종합지수 월봉 고점 vs 60개월선(결정론, §65). 주의(65%)·경고(70%)일 때만 표시 — 정상 구간엔 섹션째 숨긴다(2026-10-26). 데이터·백테스트 파일이 없어도 생략.
    그래프 글자·점은 SVG 밖 HTML로 겹친다 — 모바일에서 SVG가 가로로 눌려 글자가 찌그러졌다(프로토타입에서 고친 방식).
    하단 과거 통계는 scripts/config/nasdaq_overheat_backtest.json에서만 읽는다(§20). 설명·면책은 기본 접힘(사용자 결정 2026-10-26). #}
 {% set c = nq.chart %}
@@ -18,16 +18,16 @@
     <div class="nq-gauge">
       <div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
       <div class="nq-pin" style="left:{{ '%.1f'|format(nq.pin) }}%"><b>{{ '%.1f'|format(nq.gap) }}%</b></div>
-      <div class="nq-ticks"><span style="left:0">0</span><span style="left:60%">60</span><span style="left:70%">70</span><span style="left:100%">100+</span></div>
+      <div class="nq-ticks"><span style="left:0">0</span><span style="left:{{ nq.caution|int }}%">{{ nq.caution|int }}</span><span style="left:{{ nq.warn|int }}%">{{ nq.warn|int }}</span><span style="left:100%">100+</span></div>
     </div>
     {% if c %}
     <div class="nq-ch-h">{{ c.from_year }}년 이후 월별 위치 <span>· 최고 {{ c.peak_label }}</span></div>
     <div class="nq-plot">
       <svg class="nq-chart" viewBox="0 0 {{ c.w }} {{ c.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 위치, {{ c.from_year }}년 이후">
         <rect x="0" y="{{ c.y100 }}" width="{{ c.x1 }}" height="{{ c.h_warn }}" class="z-warn"/>
-        <rect x="0" y="{{ c.y70 }}" width="{{ c.x1 }}" height="{{ c.h_caution }}" class="z-caution"/>
-        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y70 }}" y2="{{ c.y70 }}" class="th th-warn"/>
-        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y60 }}" y2="{{ c.y60 }}" class="th th-caution"/>
+        <rect x="0" y="{{ c.y_warn }}" width="{{ c.x1 }}" height="{{ c.h_caution }}" class="z-caution"/>
+        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y_warn }}" y2="{{ c.y_warn }}" class="th th-warn"/>
+        <line x1="0" x2="{{ c.x1 }}" y1="{{ c.y_caution }}" y2="{{ c.y_caution }}" class="th th-caution"/>
         <polygon points="{{ c.area }}" class="area"/>
         <polyline points="{{ c.line }}" class="line"/>
       </svg>

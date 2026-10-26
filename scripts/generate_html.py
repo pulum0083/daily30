@@ -46,7 +46,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261026e"
+ASSET_VER = "20261026f"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 US_STOCKS_PATH = CONFIG_DIR / "us_stocks.json"
@@ -637,6 +637,10 @@ def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
         return {}
     gap = float(data["gap_pct"])
     level = nq.level_of(gap)                     # 저장된 level이 아니라 같은 판정 함수로 다시 정한다
+    if level == "ok":
+        # 정상 구간엔 섹션을 숨긴다 — 매일 같은 '정상'이 반복돼 뜻이 없었다(2026-10-26 사용자 결정).
+        # 데이터는 위에서 analysis에 이미 넣었으므로 스냅샷·종목 홈 구조 신호에는 그대로 남는다.
+        return {}
     month = str(data.get("month") or "")
     month_label = ("이번 달" if target_date and month == target_date[:7]
                    else (f"{int(month[5:7])}월" if len(month) == 7 else "이번 달"))
@@ -645,12 +649,12 @@ def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
         "high": data.get("high"), "ma60": data.get("ma60"),
         "streak": int(data.get("streak") or 0) if level != "ok" else 0,
         "pin": max(0.0, min(gap, 100.0)), "month_label": month_label,
-        "chart": _nasdaq_chart(data.get("series") or [], data.get("peak")),
+        "chart": _nasdaq_chart(data.get("series") or [], data.get("peak"), nq.CAUTION, nq.WARN),
         "bt": bt, "caution": nq.CAUTION, "warn": nq.WARN,
     }}
 
 
-def _nasdaq_chart(series: list, peak) -> dict:
+def _nasdaq_chart(series: list, peak, caution: float, warn: float) -> dict:
     """2014년 이후 월별 위치 그래프 — SVG는 선·면·기준선만, 글자·점은 HTML로 겹친다(모바일에서 SVG가 가로로 눌려
     글자가 찌그러졌다). 좌표는 HTML용 퍼센트(top)·calc(left)로 같이 돌려준다."""
     pts = [s for s in series if isinstance(s, dict) and isinstance(s.get("g"), (int, float))]
@@ -669,11 +673,11 @@ def _nasdaq_chart(series: list, peak) -> dict:
     return {
         "w": W, "h": H, "x1": W - _NQ_PADR, "line": line,
         "area": f"{xs[0]:.1f},{Y(0):.1f} {line} {xs[-1]:.1f},{Y(0):.1f}",
-        "y100": f"{Y(100):.1f}", "y70": f"{Y(70):.1f}", "y60": f"{Y(60):.1f}",
-        "h_warn": f"{Y(70) - Y(100):.1f}", "h_caution": f"{Y(60) - Y(70):.1f}",
+        "y100": f"{Y(100):.1f}", "y_warn": f"{Y(warn):.1f}", "y_caution": f"{Y(caution):.1f}",
+        "h_warn": f"{Y(warn) - Y(100):.1f}", "h_caution": f"{Y(caution) - Y(warn):.1f}",
         "dot": {"left": left(xs[-1]), "top": top(pts[-1]["g"])},
         "peak_dot": {"left": left(xs[pi]), "top": top(pts[pi]["g"])},
-        "axes": [{"v": v, "top": top(v)} for v in (70, 60, 0)],
+        "axes": [{"v": int(v), "top": top(v)} for v in (warn, caution, 0)],
         "years": [{"y": p["m"][:4], "left": left(x)} for x, p in zip(xs, pts)
                   if p["m"].endswith("-01") and int(p["m"][:4]) % 2 == 0],
         "from_year": pts[0]["m"][:4],
