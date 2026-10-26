@@ -982,7 +982,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hh-chip .up{color:#E03131}.hh-chip .dn{color:#2775ED}
 .hh-chip.nq-caution{color:#92400E;background:#FFFBEB;border-color:#FDE68A}
 .hh-chip.nq-warn{color:#991B1B;background:#FEF2F2;border-color:#FECACA}
-@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}}
+@media (min-width:720px){.hh{padding:18px 22px 16px}.hh-trust{text-align:left}.hh-cta{display:inline-block;padding:9px 22px}.hh-chip+.hh-cta{margin-left:12px}}
 
 /* ── 홈 특이신호 상위 3(§68 ②) — 전체 보기는 머리줄 오른쪽, 상세 없는 종목은 섹터 페이지로 ── */
 .sig-subhead .sig-all{margin-left:auto;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap;text-decoration:none}
