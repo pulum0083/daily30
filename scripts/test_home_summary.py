@@ -27,3 +27,29 @@ def test_rows_and_open_gap_scoring():
 def test_future_days_ignored_and_too_few_days_none():
     assert hs.build("2026-10-22", DAYS, RECS)["kospi_days"][-1]["date"] == "2026-10-22"
     assert hs.build("2026-10-21", DAYS, RECS) is None
+
+
+def test_week_dates_same_monday_to_sunday():
+    rows = [{"date": d} for d in ["2026-10-15", "2026-10-16", "2026-10-19", "2026-10-20", "2026-10-23"]]
+    assert hs.week_dates(rows) == ["2026-10-19", "2026-10-20", "2026-10-23"]   # 21·22일이 빠진 주도 그 주의 거래일만
+    assert hs.week_dates([]) == []
+
+
+UNI = {"sectors": {"semicon": {"label": "반도체", "stocks": [{"code": "A"}, {"code": "B"}]},
+                   "bio": {"label": "바이오", "stocks": [{"code": "C"}]}}}
+
+
+def test_sectors_week_uses_close_before_week_start():
+    snap = {"session_date": "2026-10-23",
+            "stocks": {"A": {"spark20": [90, 100, 101, 102, 110]},          # 이번 주 3거래일 → 기준은 100
+                       "B": {"spark20": [50, 50, 49, 48, 45]},
+                       "C": {"spark20": [10, 10, 10, 11, 11]}}}
+    out = hs.sectors_week(snap, UNI, ["2026-10-21", "2026-10-22", "2026-10-23"])
+    assert [r["key"] for r in out] == ["bio", "semicon"]
+    assert out[0]["pct"] == 10.0 and out[1]["pct"] == 0.0 and out[1]["n"] == 2   # (10% + -10%) / 2
+
+
+def test_sectors_week_skips_when_snapshot_is_another_session():
+    snap = {"session_date": "2026-10-22", "stocks": {"A": {"spark20": [1, 2, 3, 4]}}}
+    assert hs.sectors_week(snap, UNI, ["2026-10-21", "2026-10-22", "2026-10-23"]) == []
+    assert hs.sectors_week({}, UNI, ["2026-10-23"]) == []

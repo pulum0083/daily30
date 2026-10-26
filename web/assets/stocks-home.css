@@ -1055,3 +1055,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
 @media(min-width:720px){#struct-sig .m5bars{max-width:420px}}
+/* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
+.hh-new.wk{color:var(--muted)}
+.hh-wk3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.hh-wk3>div{background:#F7F9FC;border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;min-width:0}
+.hh-wk3 span{font-size:11.5px;color:var(--muted)}
+.hh-wk3 b{font-size:19px;font-weight:800;letter-spacing:-.4px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hh-wk3 b.up{color:#E03131} .hh-wk3 b.dn{color:#2775ED}
+.hh-wk3 em{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hh-cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair)}

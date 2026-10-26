@@ -143,3 +143,43 @@ test('구조 신호 블록 — 두 줄 모두 없으면 블록째 뺀다', () =>
   assert.equal(api.structHtml(null, null, null, null, '2026-10-26'), '');
   assert.match(api.structHtml(null, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), /구조 신호/);
 });
+
+// ── 주말 카드(§68 ⑥) ───────────────────────────────────────────────────
+const SUM = {
+  kospi_days: [
+    { date: '2026-10-16', close: 5668.0, pct: 0.5, open_pct: 0.1 },
+    { date: '2026-10-19', close: 5767.8, pct: 1.76, open_pct: 0.4 },
+    { date: '2026-10-20', close: 5552.7, pct: -3.73, open_pct: -1.0 },
+    { date: '2026-10-21', close: 5735.66, pct: 3.29, open_pct: 1.2 },
+    { date: '2026-10-22', close: 5533.77, pct: -3.52, open_pct: -1.14 },
+    { date: '2026-10-23', close: 5550.3, pct: 0.3, open_pct: -2.36 }],
+  scores: [{ date: '2026-10-16', ok: true }, { date: '2026-10-22', ok: false }, { date: '2026-10-23', ok: true }],
+  sectors_week: [{ key: 'ship', label: '조선', pct: 4.12, n: 5 }, { key: 'bio', label: '바이오', pct: -1 }],
+};
+
+test('주말 카드 — 일별 등락 나열 헤드라인, 주간 등락·이번 주 예측 성적·가장 강한 섹터', () => {
+  const h = api.cardWeekend(SUM, '2026-10-24', '2026-10-24', false);
+  assert.match(h, /이번 주 정리 · 10\/19~10\/23/);
+  assert.match(h, />주말</);
+  assert.match(h, /\+1\.76% → −3\.73% → \+3\.29% → −3\.52% → \+0\.30%, 하루씩 방향이 바뀐 한 주/);
+  assert.match(h, /<b class="dn">−2\.08%<\/b>/);                         // 5550.3 / 5668 - 1
+  assert.match(h, /5,668 → 5,550/);
+  assert.match(h, /<b>1\/2<\/b>/);                                       // 10/16은 지난 주라 빠진다
+  assert.match(h, /조선/);
+  assert.match(h, /5거래일 중 3일 오르고 2일 내려/);
+  assert.match(h, /href="\/briefings\/"/);
+});
+
+test('주말 카드 — 휴장 표기, 지난 주 요약이면·직전 주 종가가 없으면 카드 없음', () => {
+  assert.match(api.cardWeekend(SUM, '2026-10-26', '2026-10-26', true), />휴장</);
+  assert.equal(api.cardWeekend(SUM, '2026-11-02', '2026-11-02', false), '');   // 10일 지난 요약
+  const noPrev = { kospi_days: SUM.kospi_days.slice(1) };
+  assert.equal(api.cardWeekend(noPrev, '2026-10-24', '2026-10-24', false), '');
+  assert.equal(api.cardWeekend(null, '2026-10-24', '2026-10-24', false), '');
+});
+
+test('주말 헤드라인 꼬리 — 내리 오름·내리 내림·섞임', () => {
+  assert.equal(api.weekTail([1, 2, 0.5], 3.5), '3거래일 내리 오른 한 주');
+  assert.equal(api.weekTail([-1, -2], -3), '2거래일 내리 내린 한 주');
+  assert.equal(api.weekTail([1, 1, -2], -0.1), '주간 −0.10%');
+});

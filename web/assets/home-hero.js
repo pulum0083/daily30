@@ -109,6 +109,52 @@
       '<a class="hh-cta" href="/briefings/' + ymd + '/us/">미국 브리핑 보기 →</a></div>';
   }
 
+  // 주말 카드(§68 ⑥) — home-summary.json(마감 잡이 쓴다)의 가장 최근 거래 주. 헤드라인은 일별 등락을 나열한 결정론 문장이다.
+  function weekRows(rows) {
+    if (!rows || !rows.length) return { week: [], prev: null };
+    var last = rows[rows.length - 1].date, p = last.split('-');
+    var dow = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
+    var monday = shiftYmd(last, -((dow + 6) % 7));
+    var week = rows.filter(function (r) { return r.date >= monday; });
+    var before = rows.filter(function (r) { return r.date < monday; });
+    return { week: week, prev: before.length ? before[before.length - 1] : null };
+  }
+  function weekTail(pcts, total) {
+    var up = pcts.filter(function (v) { return v > 0; }).length, dn = pcts.filter(function (v) { return v < 0; }).length, n = pcts.length;
+    if (n >= 2 && up === n) return n + '거래일 내리 오른 한 주';
+    if (n >= 2 && dn === n) return n + '거래일 내리 내린 한 주';
+    var alt = n >= 3 && pcts.every(function (v, i) { return v !== 0 && (i === 0 || (v > 0) !== (pcts[i - 1] > 0)); });
+    if (alt) return '하루씩 방향이 바뀐 한 주';
+    return '주간 ' + pct(total);
+  }
+  function md(ymd) { var p = ymd.split('-'); return (+p[1]) + '/' + (+p[2]); }
+  function cardWeekend(summary, ymd, today, holiday) {
+    var w = weekRows(summary && summary.kospi_days);
+    if (!w.week.length || !w.prev) return '';
+    var last = w.week[w.week.length - 1];
+    if (last.date > ymd || daysBetween(last.date, ymd) > 7) return '';           // 지난 주 요약을 이번 주로 보이지 않게
+    var total = (last.close / w.prev.close - 1) * 100;
+    var pcts = w.week.map(function (r) { return r.pct; });
+    var up = pcts.filter(function (v) { return v > 0; }).length, dn = pcts.filter(function (v) { return v < 0; }).length;
+    var headline = pcts.map(pct).join(' → ') + ', ' + weekTail(pcts, total);
+    var dates = w.week.map(function (r) { return r.date; });
+    var sc = ((summary && summary.scores) || []).filter(function (x) { return dates.indexOf(x.date) >= 0; });
+    var hit = sc.filter(function (x) { return x.ok; }).length;
+    var top = (summary && summary.sectors_week || [])[0];
+    var tile = function (k, v, e) { return '<div><span>' + k + '</span>' + v + '<em>' + e + '</em></div>'; };
+    var fmt = function (v) { return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); };
+    return '<div class="hh">' +
+      '<div class="hh-k"><span>이번 주 정리 · ' + md(dates[0]) + '~' + md(last.date) + '</span><span class="hh-new wk">' + (holiday ? '휴장' : '주말') + '</span></div>' +
+      '<div class="hh-wk3">' +
+        tile('코스피 주간', '<b class="' + cls(total) + '">' + pct(total) + '</b>', fmt(w.prev.close) + ' → ' + fmt(last.close)) +
+        (sc.length ? tile('시초가 예측', '<b>' + hit + '/' + sc.length + '</b>', '이번 주 적중') : '') +
+        (top ? tile('가장 강했던 섹터', '<b class="' + cls(top.pct) + '">' + esc(top.label) + '</b>', pct(top.pct) + ' · 대표 평균') : '') +
+      '</div>' +
+      '<h2 class="hh-h">' + esc(headline) + '</h2>' +
+      '<p class="hh-dek">코스피는 이번 주 ' + w.week.length + '거래일 중 ' + up + '일 오르고 ' + dn + '일 내려 주간 <b class="' + cls(total) + '">' + pct(total) + '</b>로 마쳤어요.</p>' +
+      '<a class="hh-cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div>';
+  }
+
   // ── 구조 신호(§68 ⑤) — 월 단위로 바뀌는 신호 두 줄. 가장 최근 발행 스냅샷에서만 읽고(옛 날짜로 거슬러 가지 않는다),
   //    그 발행이 STRUCT_MAX_AGE일보다 오래됐으면 수집이 멈춘 것으로 보고 뺀다(§20). 기준 브리핑 날짜를 줄마다 밝힌다.
   var STRUCT_MAX_AGE = 10;
@@ -218,6 +264,11 @@
       });
       window.__homeSlot = info.slot;
       loadStruct(slots, today);
+      if (info.slot === 'weekend') {
+        var p = info.date.split('-'), wd = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
+        var hol = wd >= 1 && wd <= 5 && !!(window.krIsKospiHolidayOn && window.krIsKospiHolidayOn(info.date));
+        return json('/data/home-summary.json').then(function (sm) { show(cardWeekend(sm, info.date, today, hol), info.slot); });
+      }
       var type = { morning: 'kospi', close: 'close', evening: 'us' }[info.slot];
       if (!type || !ready(info.date, type)) { show('', info.slot); return; }   // 장중·주말·미발행 — 카드 없음
       var item = slots[info.date][type];
@@ -236,7 +287,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, ma5Row: ma5Row, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekTail: weekTail, ma5Row: ma5Row, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);
