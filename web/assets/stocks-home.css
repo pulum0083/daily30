@@ -1054,7 +1054,12 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b.cur i{background:#93B8F5}
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
-@media(min-width:720px){#struct-sig .m5bars{max-width:420px}}
+/* PC — 줄마다 왼쪽 정보(이름·알약·설명), 오른쪽 차트(게이지·막대)로 나눠 폭을 다 쓴다 */
+@media(min-width:720px){
+  #struct-sig .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
+  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>em{grid-column:1}
+  #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg{grid-column:2;grid-row:1/4;margin-top:0}
+}
 /* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
 .hh-new.wk{color:var(--muted)}
 .hh-wk3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
