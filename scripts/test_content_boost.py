@@ -85,3 +85,47 @@ def test_premarket_strip_omitted_without_data_or_other_date():
 def test_us_template_puts_strip_on_top():
     t = (gh.TEMPLATES_DIR / "briefings" / "us.html").read_text(encoding="utf-8")
     assert t.index("sections/us_premarket.html") < t.index("tv-lead")
+
+
+# ── 미국 월봉 5개월선 코너(AI 종목 픽 대체) ──
+import json as _json  # noqa: E402
+import monthly_ma5_us as mu  # noqa: E402
+
+
+def _us_item():
+    from test_monthly_ma5_render import item
+    it = item()
+    it.update(code="AAPL", name="AAPL", now_close=347.73, now_date="20261023", fr_now=None, fr_chg_3m=None)
+    return it
+
+
+def test_us_ma5_corner_from_data_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    (tmp_path / "monthly_ma5_us.json").write_text(_json.dumps({"date": "2026-10-23", "items": [_us_item()]}), encoding="utf-8")
+    a = {}
+    ctx = gh.build_monthly_ma5(a, "2026-10-23", "us")
+    assert a["monthly_ma5_us"]["items"][0]["code"] == "AAPL"            # 스냅샷에 남는다
+    html = gh.make_env().get_template("sections/monthly_ma5.html").render(**ctx)
+    assert "$347.73" in html and "원" not in html.split("m5a-px")[1][:40]
+    assert 'data-modal-open="ma5m-us-modal"' in html and "미국 대형주 후보에서 이 조건이 나온 종목이" in html
+    assert "미국 정규장 종가로 계산한 실측값" in html and "외국인 보유율" not in html
+
+
+def test_us_ma5_corner_omitted_without_backtest_or_other_date(tmp_path, monkeypatch):
+    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    (tmp_path / "monthly_ma5_us.json").write_text(_json.dumps({"date": "2026-10-22", "items": [_us_item()]}), encoding="utf-8")
+    assert gh.build_monthly_ma5({}, "2026-10-23", "us")["ma5m_items"] == []
+    monkeypatch.setitem(gh.MA5_MARKETS["us"], "bt", tmp_path / "없음.json")
+    a = {"monthly_ma5_us": {"date": "2026-10-23", "items": [_us_item()]}}
+    assert gh.build_monthly_ma5(a, "2026-10-23", "us")["ma5m_items"] == []
+
+
+def test_us_template_shows_ma5_not_picks_and_modal_exists():
+    t = (gh.TEMPLATES_DIR / "briefings" / "us.html").read_text(encoding="utf-8")
+    assert "sections/monthly_ma5.html" in t and "sections/stock_picks.html" not in t
+    assert 'id="ma5m-us-modal"' in (gh.TEMPLATES_DIR / "sections" / "_modals.html").read_text(encoding="utf-8")
+
+
+def test_last_us_trading_day():
+    assert mu.last_us_trading_day("202610") == "20261030"   # 10/31은 토요일
+    assert mu.last_us_trading_day("202612") == "20261231"

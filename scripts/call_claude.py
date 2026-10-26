@@ -540,7 +540,6 @@ US_SYSTEM_PROMPT = """\
 - `todays_view`도 특정 숫자를 넣지 않고 정성적으로 쓴다. 단어 강조(`<b>단어</b>`)는 되지만 숫자 강조는 금지.
 - 뉴스 이슈(`kind: "news"`)는 반드시 제공된 뉴스 요약(`catalysts`·`headlines`·`key_indicators`)에 실제로 등장한 사건에 근거한다. **없는 사건을 지어내지 않는다.**
 - 시장 데이터(금리·VIX·달러·지수의 이동평균선 위치 등)만으로 만든 이슈(`kind: "data"`)는 **하루 1개까지**다. 여러 지표를 한 카드로 묶는다. 2개 이상 쓰면 발행 전 검증이 첫 번째만 남긴다(2026-10-26).
-- 예외: `stock_picks`의 price·change·ma20 등 구조화 수치는 제공된 `us_candidates` 데이터값을 그대로 쓴다(검증 단계에서 실측 확인됨).
 - **지수(SOX·나스닥·S&P500·다우)는 프리마켓 시세가 없다.** 시장 데이터의 지수 등락은 **직전 정규장** 값이므로 "직전 정규장에서"로 쓴다.
   "프리마켓에서 SOX가 밀려요"처럼 쓰지 않는다 — 발행 전 검증이 "직전 정규장"으로 고친다. 프리마켓 흐름은 지수선물(ES·NQ)이나
   개별 종목·ETF의 실체결가로만 말한다(2026-10-23 실사고, §27).
@@ -593,14 +592,6 @@ US_SYSTEM_PROMPT = """\
 - 뉴스 요약(`catalysts`·`headlines`)에 주요 기업 실적·프리마켓 반응이 등장하면 그날 다른 이슈보다 우선해서 이슈 카드로 만든다.
 - 뉴스 요약에 촉매가 없으면 억지로 이슈를 만들지 않는다. 3개 미만이어도 있는 만큼만 쓴다.
 
-## 종목 선택(stock_picks) 규칙 — 잭 켈로그 MA20 전략 (기존 유지)
-
-- `us_candidates` 배열에서 `ma20_signal`이 "crossing_up"인 종목 최우선, "above"·`ma20_dist_pct` 작은 종목 차선.
-- price, change_pct, ma20, ma20_dist_pct, ma200, ma200_dist_pct는 데이터값 그대로 사용(변경 금지).
-- 3~5개, 섹터 분산 고려. 가능하면 오늘의 이슈와 연관된 종목을 우선.
-- `scenario`: 정확히 2문장 해요체. 진입가·목표가·손절가는 여기 쓰지 않는다(구조화 필드로만).
-- `action_guide`에 쓴 진입/목표/손절을 entry·target·target_pct·stop·stop_pct 필드로도 동일 출력.
-
 ## 상승·하락 확률(prediction) — 텔레그램 전용, 웹페이지에는 표시하지 않음
 
 오늘 미국 지수(S&P500 기준)가 상승 마감할 확률을 추정해 `up_pct`(정수, 0~100)로 낸다. `down_pct`는 `100 - up_pct`다.
@@ -610,7 +601,7 @@ US_SYSTEM_PROMPT = """\
 
 순수 JSON만 출력한다. 마크다운 코드블록, 설명 텍스트, 앞뒤 줄바꿈 없이 오직 JSON.
 
-**[필수] JSON에 반드시 포함할 필드: prediction(up_pct·down_pct), todays_view(view_title·dek), issues, stock_picks**
+**[필수] JSON에 반드시 포함할 필드: prediction(up_pct·down_pct), todays_view(view_title·dek), issues** (종목 픽은 쓰지 않는다 — 2026-10-26 제거)
 
 {
   "prediction": { "up_pct": 60, "down_pct": 40 },
@@ -631,23 +622,6 @@ US_SYSTEM_PROMPT = """\
       "title": "오늘 밤 CPI 발표 — 금리 인하 기대의 분수령",
       "body": "물가가 예상을 웃돌면 위험자산 전반에 부담이에요. 반대로 둔화가 확인되면 성장주에 안도 랠리가 나올 수 있어요.",
       "down": {"label": "지수 전반", "tickers": []}
-    }
-  ],
-  "stock_picks": [
-    {
-      "ticker": "NVDA",
-      "name": "NVDA (엔비디아)",
-      "price": "$XXX.XX",
-      "change": "+X.XX%",
-      "change_cls": "up",
-      "signal": "20일선 상향 돌파",
-      "golden": false,
-      "ma20_dist_pct": 3.2,
-      "ma200_dist_pct": 22.1,
-      "scenario_tag": "모멘텀 가속",
-      "scenario": "전일 20일선을 막 돌파한 종목이에요. AI 인프라로의 자금 회전에서 수혜가 이어질 것 같아요.",
-      "action_guide": "시가 $XXX 이내 진입. 목표: $YYY / 손절: $ZZZ 이탈 시.",
-      "entry": "$XXX", "target": "$YYY", "target_pct": "+X.X%", "stop": "$ZZZ", "stop_pct": "-X.X%"
     }
   ]
 }
@@ -1330,7 +1304,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
         lines += _nasdaq_telegram_lines(analysis, date_str)
-        lines += [divider, f"🔗 전체 이슈·종목 픽 → {link}"]
+        lines += [divider, f"🔗 전체 이슈 점검 → {link}"]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).
         # 두 문장 모두 웹 페이지 맨 위 헤드라인·'오늘 볼 것' 첫 줄과 같은 필드라 텔레그램과 페이지가 어긋나지 않는다.
@@ -1576,10 +1550,10 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     else:
         raise RuntimeError(f"Claude API JSON 파싱 3회 모두 실패: {last_error}")
 
-    # 코스피 아침은 상승 모멘텀 종목(LLM 픽)을 2026-10-25에 뺐다 — 그 자리는 월봉 5개월선 안착 종목(결정론).
+    # 상승 모멘텀 종목(LLM 픽)은 코스피 2026-10-25·미국 2026-10-26에 뺐다 — 그 자리는 월봉 5개월선 안착 종목(결정론).
     # 프롬프트에서 지웠어도 모델이 습관처럼 내보내면 검증·렌더 어디에도 실리지 않게 여기서 버린다.
-    if briefing_type == "kospi" and analysis.pop("stock_picks", None) is not None:
-        print("[call_claude] 코스피 응답의 stock_picks 무시(코너 제거됨)")
+    if briefing_type in ("kospi", "us") and analysis.pop("stock_picks", None) is not None:
+        print(f"[call_claude] {briefing_type} 응답의 stock_picks 무시(코너 제거됨)")
 
     # 브리핑 형식 강제 주입 — kospi 전용(US는 형식 없음)
     if chosen_format:

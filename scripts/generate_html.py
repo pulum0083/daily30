@@ -491,20 +491,35 @@ def _domestic_card_title(window_from: str) -> str:
 MA5_BACKTEST_PATH = CONFIG_DIR / "monthly_ma5_backtest.json"
 
 
-def build_monthly_ma5(analysis: dict, target_date: str = "") -> dict:
-    """월봉 5개월선 안착 종목 → 코스피 아침 브리핑 코너(sections/monthly_ma5.html).
+MA5_MARKETS = {
+    # 코스피 아침(§61) — 허브 46종목·KRX 공식 종가
+    "kr": {"key": "monthly_ma5", "file": "monthly_ma5.json", "bt": None,   # None = MA5_BACKTEST_PATH(호출 시점 값)
+           "scope": "코스피200", "source": "KRX 공식 종가", "modal": "ma5m-modal"},
+    # 미국(§67) — 미국 후보 대형주·정규장 종가. AI 종목 픽(진입·목표·손절)을 대체한다
+    "us": {"key": "monthly_ma5_us", "file": "monthly_ma5_us.json", "bt": CONFIG_DIR / "monthly_ma5_us_backtest.json",
+           "scope": "미국 대형주 후보", "source": "미국 정규장 종가", "modal": "ma5m-us-modal"},
+}
+
+
+def _ma5_price(v, market: str) -> str:
+    return f"${v:,.2f}" if market == "us" else f"{v:,.0f}원"
+
+
+def build_monthly_ma5(analysis: dict, target_date: str = "", market: str = "kr") -> dict:
+    """월봉 5개월선 안착 종목 코너(sections/monthly_ma5.html) — 코스피 아침·미국 브리핑 공용.
 
     us_issue_results와 같은 구조다 — 스냅샷이 1순위고, 데이터 파일은 브리핑 날짜와 같을 때만 쓴다(§14·§45).
-    조건 충족 종목이 없으면 섹션을 통째로 뺀다. 하단 '12개월 상승 비율' 문장의 출처인 백테스트 파일이
+    조건 충족 종목이 없으면 섹션을 통째로 뺀다. 하단 '1년 뒤 오른 비율' 문장의 출처인 백테스트 파일이
     없어도 뺀다 — 그 문장 없이 종목만 보이면 '오른다'로 읽힌다(사용자 결정 2026-10-25).
     """
-    data = analysis.get("monthly_ma5")
+    cfg = MA5_MARKETS[market]
+    data = analysis.get(cfg["key"])
     if not isinstance(data, dict):
-        data = _read_monthly_ma5(target_date)
+        data = _read_monthly_ma5(target_date, cfg["file"])
         if data is not None:
-            analysis["monthly_ma5"] = data   # 스냅샷에 함께 저장된다
+            analysis[cfg["key"]] = data   # 스냅샷에 함께 저장된다
     items = [x for x in ((data or {}).get("items") or []) if isinstance(x, dict) and x.get("strip")]
-    stats = _ma5_backtest_stats()
+    stats = _ma5_backtest_stats(cfg["bt"])
     if not items or not stats:
         return {"ma5m_items": []}
     view = []
@@ -512,44 +527,48 @@ def build_monthly_ma5(analysis: dict, target_date: str = "") -> dict:
         cells = []
         for c in x["strip"]:
             gap = c.get("gap_pct")
-            cells.append({**c, "cls": "up" if (gap or 0) > 0 else "dn",
+            tip = (f"{c.get('label', '')} {'현재' if c.get('cur') else '월말'} 종가 {_ma5_price(c['close'], market)}"
+                   + (f" · 5개월선 {_ma5_price(c['ma5'], market)}" if c.get("ma5") else ""))
+            cells.append({**c, "cls": "up" if (gap or 0) > 0 else "dn", "tip": tip,
                           "h": round(min(abs(gap or 0), 20) / 20 * 100)})
         nd = str(x.get("now_date") or "")
         view.append({**x, "cells": cells, "n": len(cells),
                      "now_label": f"{int(nd[4:6])}/{int(nd[6:8])}" if len(nd) == 8 else "",
+                     "now_price": _ma5_price(x["now_close"], market),
                      "has_cur": bool(cells and cells[-1].get("cur")),
                      "last_label": f"{int(str(x['last_complete'])[4:])}월",
-                     "detail_url": _pick_detail_url(x.get("code", ""), "kospi")})
-    return {"ma5m_items": view, "ma5m_stats": stats}
+                     "detail_url": _pick_detail_url(x.get("code", ""), "us" if market == "us" else "kospi")})
+    return {"ma5m_items": view, "ma5m_stats": {**stats, "scope": cfg["scope"], "source": cfg["source"]},
+            "ma5m_modal": cfg["modal"]}
 
 
-def _read_monthly_ma5(target_date: str):
-    """data/monthly_ma5.json 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
-    path = DATA_DIR / "monthly_ma5.json"
+def _read_monthly_ma5(target_date: str, filename: str = "monthly_ma5.json"):
+    """data/{filename} 을 읽되 브리핑 날짜가 같을 때만 돌려준다."""
+    path = DATA_DIR / filename
     if not path.exists():
         return None
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except Exception as e:
-        print(f"[generate_html] monthly_ma5 파싱 실패: {e}")
+        print(f"[generate_html] {filename} 파싱 실패: {e}")
         return None
     if target_date and data.get("date") != target_date:
-        print(f"[generate_html] ⚠️ monthly_ma5 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
+        print(f"[generate_html] ⚠️ {filename} 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
         return None
     return data
 
 
-def _ma5_backtest_stats():
+def _ma5_backtest_stats(path=None):
     """백테스트 설정 파일의 12개월 수치. 없거나 깨졌으면 None."""
     try:
-        bt = json.loads(MA5_BACKTEST_PATH.read_text(encoding="utf-8"))
+        bt = json.loads((path or MA5_BACKTEST_PATH).read_text(encoding="utf-8"))
         h = bt["horizons"]["12"]
         y0, y1 = (int(v) for v in bt["years_label"].split("~"))
         return {"win_pct": h["signal"]["win_pct"], "base_win_pct": h["base"]["win_pct"],
                 "n": h["signal"]["n"], "years": y1 - y0 + 1, "years_label": bt["years_label"],
                 "universe": bt.get("universe", "")}
     except Exception as e:
-        print(f"[generate_html] monthly_ma5 백테스트 수치 없음({e}) — 섹션 생략")
+        print(f"[generate_html] 월봉 5개월선 백테스트 수치 없음({e}) — 섹션 생략")
         return None
 
 
@@ -1881,7 +1900,8 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_issues(analysis))
         ctx.update(build_us_tone(market_data))
         ctx.update(build_analyst_quotes(market_data))
-        ctx["stock_picks"] = build_stock_picks(analysis, market_data, internal_type)
+        # AI 종목 픽(진입·목표·손절)은 2026-10-26 제거 — 코스피와 같은 월봉 5개월선 안착 코너(결정론, §67)
+        ctx.update(build_monthly_ma5(analysis, target_date, "us"))
         ctx["market_items"] = build_market_items(market_data, internal_type, gen_time)
         ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")

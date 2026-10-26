@@ -5,6 +5,14 @@
   "url_prefix": "us",
   "scheduled_time": "21:20",
   "gnb_time": "21:20",
-  "sections_main": ["todays_view", "issues", "analyst_quotes", "stock_picks"],
-  "sections_sidebar": ["market_data"]
+  "sections_main": [
+    "premarket",
+    "todays_view",
+    "issues",
+    "nasdaq_check",
+    "monthly_ma5"
+  ],
+  "sections_sidebar": [
+    "market_data"
+  ]
 }

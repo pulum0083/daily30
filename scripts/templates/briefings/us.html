@@ -30,7 +30,8 @@
             {% if nq %}{% include "sections/nasdaq_check.html" %}{% endif %}
             <div class="divider"></div>
             {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}{% endif %}
-            {% if stock_picks %}{% include "sections/stock_picks.html" %}{% endif %}
+            {# AI 종목 픽은 2026-10-26 제거 — 월봉 5개월선 안착 종목(결정론, §67). 조건 충족 종목이 없으면 섹션째 생략. #}
+            {% if ma5m_items %}{% include "sections/monthly_ma5.html" %}{% endif %}
           </div>
         </div>
       </div>

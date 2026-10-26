@@ -1,4 +1,4 @@
-# 코스피 아침 상승 모멘텀 종목(LLM 픽) 제거 회귀 테스트 — 미국 브리핑 픽은 그대로 남아야 한다(2026-10-25)
+# 상승 모멘텀 종목(LLM 픽) 제거 회귀 테스트 — 코스피 2026-10-25, 미국 2026-10-26(월봉 5개월선 코너로 대체)
 import sys
 from pathlib import Path
 
@@ -15,8 +15,10 @@ def test_kospi_prompt_has_no_picks():
         assert word not in p, word
 
 
-def test_us_prompt_keeps_picks():
-    assert "stock_picks" in cc.US_SYSTEM_PROMPT and "us_candidates" in cc.US_SYSTEM_PROMPT
+def test_us_prompt_has_no_picks():
+    p = cc.US_SYSTEM_PROMPT
+    for word in ("\"stock_picks\": [", "켈로그", "action_guide", "## 종목 선택"):
+        assert word not in p, word
 
 
 def test_kospi_candidates_no_longer_collected():
@@ -26,8 +28,12 @@ def test_kospi_candidates_no_longer_collected():
 
 def test_kospi_response_picks_are_dropped():
     # 모델이 습관처럼 stock_picks를 내보내도 코스피에서는 버린다
-    assert 'if briefing_type == "kospi" and analysis.pop("stock_picks", None) is not None:' in SRC
+    assert 'if briefing_type in ("kospi", "us") and analysis.pop("stock_picks", None) is not None:' in SRC
 
 
 def test_kospi_telegram_link_no_longer_mentions_picks():
     assert "전체 근거·종목 픽" not in SRC and "🔗 전체 근거·이슈 점검 → " in SRC
+
+
+def test_us_telegram_link_no_longer_mentions_picks():
+    assert "전체 이슈·종목 픽" not in SRC and "🔗 전체 이슈 점검 → " in SRC

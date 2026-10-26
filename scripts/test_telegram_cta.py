@@ -77,7 +77,7 @@ def test_us_first_issue_and_has_cta(tmp_path, monkeypatch):
     text = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
     assert "IBM CEO SW 지출 경고" in text
     assert "오늘 밤 CPI 발표" not in text   # 오늘 밤 볼 것은 첫 이슈 하나만(2026-10-25)
-    assert "🔗 전체 이슈·종목 픽 →" in text
+    assert "🔗 전체 이슈 점검 →" in text
     assert "상세 분석" not in text
 
 

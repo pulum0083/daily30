@@ -2402,3 +2402,19 @@ getter/offset 대신 `shouldPoll`과 같은 UTC+9 방식으로 짰다 — KST �
 - **이슈 본문 줄이기·반복 제거(사용자 지적 2026-10-26)**:
   - 이슈 본문은 **1문장, 70자 안팎**이고 제목을 되풀이하지 않는다(프롬프트). 발행 전 `trim_issue_bodies()`가 첫 문장만 남긴다 — 고쳐 쓰지 않고 모델이 쓴 앞 문장을 그대로 둔다.
   - 세션 교정이 반복을 만들지 않게 했다. 같은 문장 앞에서, 또는 짝이 되는 제목(이슈 title·관점 view_title)에서 이미 '직전 정규장'이라 했으면 뒤의 '프리마켓에서(도)'는 '직전 정규장에서도'로 바꾸지 않고 조사째 지운다. 10/23 dek "직전 정규장에서 …쏟아졌고, 직전 정규장에서도 SOX가…" → "…쏟아졌고, SOX가…".
+
+### 67. 콘텐츠 보강 — 예측 근거 신호·전일 수급·프리마켓 실측 띠·미국 월봉 5개월선 코너 (2026-10-26 결정)
+
+콘텐츠 점검 뒤 사용자가 고른 항목. 계획·결정 노트 `docs/plans/2026-10-26-content-boost/`.
+
+- **코스피 '예측 근거 신호' 한 줄**(요약 카드, `build_prior_signals`) — SOX·나스닥·나스닥 선물·EWY(코스피 반영분 제외)·VIX 실측. 예측에 실제로 쓰는 `leading_signal.compute_prior()`로 계산해 `analysis["prior_signals"]`로 스냅샷에 남긴다. 방향은 사실상 이 신호가 정하므로(§57) 확률이 어디서 나왔는지 보여준다.
+- **코스피 '국내 · 실측' 전일 수급 카드**(이슈 점검, `build_prev_supply`) — 직전 거래일 정규장 마감(15:31~15:40) 확정 순매수(§51·§56), 억원, 개인→기관→외국인(§10). 수급 날짜가 브리핑 날짜 이후면 쓰지 않는다(장중 값 방지). `analysis["prev_supply"]`.
+- **미국 '지금 프리마켓 · 실측' 띠**(맨 위, `build_premarket_strip`) — S&P500·나스닥·다우 선물 + 빅테크 6종(NVDA·AAPL·MSFT·AMZN·META·GOOGL)의 발행 시점 실체결가 등락(§0 ①·§26). 지수 자체는 프리마켓 시세가 없다(§66). `analysis["premarket"]`.
+- 세 블록 모두 **시장 데이터의 `generated_at` 날짜가 브리핑 날짜와 같을 때만** 만든다 — 재생성 때 다른 날 파일로 스냅샷을 채우지 않는다(§14). 값이 없으면 그 블록만 빠진다.
+- **미국 '상승 모멘텀 종목'(AI 픽) → 월봉 5개월선 안착 코너** — 코스피(§61)와 같은 `monthly_ma5.screen_one` 판정·같은 템플릿. 유니버스는 미국 후보 20종목(`fetch_data.US_CANDIDATES`), 일봉은 야후 정규장 종가, 월말 봉 검사는 미국 거래일 달력. 수집 `scripts/monthly_ma5_us.py` → `data/monthly_ma5_us.json`(gitignore, us-briefing 잡 continue-on-error·timeout 5). 백테스트 `scripts/backtest_monthly_ma5_us.py` → `scripts/config/monthly_ma5_us_backtest.json`(신호 2011-01~2025-08, 12개월 상승 75.4% vs 기준선 73.5% — 생존 편향으로 기준선 자체가 높다). 렌더는 `build_monthly_ma5(..., market="us")`, 시장별 설정은 `MA5_MARKETS`(가격 표기·범위 문구·출처·설명 모달 `ma5m-us-modal`).
+  - AI 픽은 미국 프롬프트(규칙·필수 필드·예시)에서 지웠고, 모델이 내보내도 `call_claude`가 버린다(코스피와 같은 줄). 텔레그램 링크는 "🔗 전체 이슈 점검 →".
+  - **남은 정리**: 픽 검증 코드(`validate_analysis` 계층 1·`validate_prose_against_picks`·`enrich_picks_with_realdata`), `build_stock_picks`, `sections/stock_picks.html`·`picks-modal`은 이제 실행되지 않는다. 범위가 커서 이번엔 지우지 않았다 — 지울 때는 관련 테스트(`test_pick_basis.py` 등)와 함께 정리한다.
+- **미국 '간밤 미국 · 실측' 카드 제목 지수**(`score_us_issues.title_indices`) — '지수 전반' 이슈는 제목에 나온 지수(S&P·다우·나스닥·러셀·VIX)를 함께 잰다. VIX는 오르면 약세라 '올랐어요/내렸어요' 판정에서 뺀다. 10/23 "S&P·다우 선물 동반 약세, VIX는 급등"을 S&P500 하나로만 재 제목과 어긋났다.
+- **점검 결과(고치지 않음)**: 10/23 국내 뉴스 "한은 기준금리 연 3.0% 동결"은 한국은행 공식 기준금리 표(2026-07-16 2.75%, 08-27 3.00%)와 일치했다.
+- **메모리 현물가(보류)**: DRAMeXchange 홈페이지에 DRAM 현물가 표가 매일 공개되지만, DRAMeXchange·TrendForce 이용약관이 사전 서면 동의 없는 재게시·배포를 금지한다(DRAMeXchange 6.2항). 동의 없이 붙이지 않는다. 대안은 이미 수집 중인 DRAM ETF·MU 실측이나 관세청 반도체 수출 통계(공공데이터).
+- 테스트 `scripts/test_content_boost.py`(12), `test_us_issue_scoring.py`(제목 지수 2건), `test_kospi_picks_removed.py`(미국 픽 제거).
