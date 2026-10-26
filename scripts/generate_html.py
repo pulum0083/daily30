@@ -1523,17 +1523,21 @@ def build_analyst_quotes(data: dict) -> dict:
     return {"analyst_quotes": analyst_quotes}
 
 
-def build_ib_korea_views() -> dict:
+def build_ib_korea_views(target_date: str = None) -> dict:
     """외국계 IB 코멘트 섹션 컨텍스트 빌더 (코스피 전용).
 
     url이 없는 항목은 표시하지 않는다(원본 링크 이동 보장). 데이터 없으면 빈 리스트 →
-    템플릿에서 섹션 자체 생략.
+    템플릿에서 섹션 자체 생략. 날짜가 브리핑 날짜와 다르면 쓰지 않는다 — 국내 이슈와 같은 검사(§14,
+    2026-10-26 추가: 이전 실행의 잔존 파일이 다른 날짜 브리핑에 실릴 수 있었다).
     """
     views_path = BASE_DIR / "data" / "ib_korea_views.json"
     if not views_path.exists():
         return {"ib_korea_views": []}
     with open(views_path, encoding="utf-8") as f:
         payload = json.load(f)
+    if target_date and payload.get("date") != target_date:
+        print(f"[generate_html] ib_korea_views 날짜 불일치({payload.get('date')} != {target_date}) → 카드 생략")
+        return {"ib_korea_views": []}
     views = [v for v in payload.get("views", []) if v.get("url")]
     return {"ib_korea_views": views}
 
@@ -1922,7 +1926,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["watch_items"] = analysis.get("watch_items") or analysis.get("watchpoints") or []
         ctx["todays_view"] = analysis.get("todays_view")
         ctx["format_in_view"] = True  # 코스피는 근거 형식을 '오늘의 관점' 안에서 렌더
-        ctx.update(build_ib_korea_views())
+        ctx.update(build_ib_korea_views(target_date))
         ctx.update(build_domestic_issues(target_date))
         # 3단 구조(2026-10-26) — 30초 요약 카드 + 오늘의 이슈 점검
         ctx.update(build_hero(analysis, target_date))

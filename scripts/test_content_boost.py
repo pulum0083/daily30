@@ -129,3 +129,19 @@ def test_us_template_shows_ma5_not_picks_and_modal_exists():
 def test_last_us_trading_day():
     assert mu.last_us_trading_day("202610") == "20261030"   # 10/31은 토요일
     assert mu.last_us_trading_day("202612") == "20261231"
+
+
+# ── 외국계 시각 날짜 검사 · 미국 이슈 제목 금지어(2026-10-26) ──
+def test_ib_views_date_mismatch_omitted(tmp_path, monkeypatch):
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "ib_korea_views.json").write_text(_json.dumps(
+        {"date": "2026-10-22", "views": [{"house": "JP모건", "url": "https://x.example/1"}]}), encoding="utf-8")
+    monkeypatch.setattr(gh, "BASE_DIR", tmp_path)
+    assert gh.build_ib_korea_views("2026-10-23") == {"ib_korea_views": []}
+    assert len(gh.build_ib_korea_views("2026-10-22")["ib_korea_views"]) == 1
+
+
+def test_us_prompt_bans_cliches_in_issue_titles():
+    import call_claude as cc
+    i = cc.US_SYSTEM_PROMPT.index("- `title`: 이슈 헤드라인")
+    assert "시험대" in cc.US_SYSTEM_PROMPT[i:i + 300] and "오늘 밤 볼 것" in cc.US_SYSTEM_PROMPT[i:i + 300]
