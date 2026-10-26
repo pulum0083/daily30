@@ -221,24 +221,24 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
   var box=document.getElementById('us-evening');
   if(!box) return;
   var gridEl=document.getElementById('ue-grid'), macroEl=document.getElementById('ue-macro');
-  var TICKERS=[
-    {nm:'메모리·HBM', tk:'DRAM',  sym:'DRAM.K', lead:true},
-    {nm:'한국ETF',    tk:'EWY',   sym:'EWY.O', noLink:true},
-    // SKHY(OTC ADR)는 미국 상세 페이지를 만들지 않는다 — yfinance에 6영업일치밖에 없어
-    // MA20·MA200이 안 나오고, fetch_us_financials가 SK하이닉스 원화 실적을 돌려줘 USD로 찍힌다.
-    // 실측이 온전한 한국 상세 페이지로 보낸다(운영규칙 0).
-    {nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O', href:'/stocks/000660/'},
-    {nm:'브로드컴',   tk:'AVGO',  sym:'AVGO.O'},
-    {nm:'엔비디아',   tk:'NVDA',  sym:'NVDA.O'},
-    {nm:'AMD',       tk:'AMD',   sym:'AMD.O'},
-    {nm:'ASML',      tk:'ASML',  sym:'ASML.O'},
-    // 파운드리·AI 반도체 벨웨더 — 밤사이 반도체 심리 최대 선행 지표. 상세 페이지 없어 noLink(추후 생성 시 해제).
-    {nm:'TSMC',      tk:'TSM',   sym:'TSM.N', noLink:true},
-    {nm:'마이크론',   tk:'MU',    sym:'MU.O'},
-    // 순수 NAND 플래시 — 삼성·SK하이닉스 NAND read-through. 상세 페이지 없어 noLink(추후 생성 시 해제).
-    {nm:'샌디스크',   tk:'SNDK',  sym:'SNDK.O', noLink:true},
-    {nm:'반도체ETF',  tk:'SOXX',  sym:'SOXX.O'}
+  // 밤사이 미국 두 묶음(§68 ④) — 코스피 선행 ETF 3칸 + AI 인프라 주식 3갈래. SOXX는 선행 ETF에만 한 번.
+  // href는 상세 페이지가 실제로 있을 때만(§36 — web/stocks/us/{tk}/, SKHY는 한국 상세로).
+  var LEAD=[
+    {tk:'EWY',  sym:'EWY.O',  nm:'한국 ETF',   desc:'코스피 추종'},
+    {tk:'DRAM', sym:'DRAM.K', nm:'메모리·HBM', desc:'삼성·하이닉스 선행', href:'/stocks/us/dram/'},
+    {tk:'SOXX', sym:'SOXX.O', nm:'반도체 ETF', desc:'미 반도체 전체', href:'/stocks/us/soxx/'}
   ];
+  var AI_GROUPS=[
+    {g:'메모리', items:[{nm:'SK하이닉스', tk:'SKHY', sym:'SKHY.O', href:'/stocks/000660/'},
+                        {nm:'마이크론', tk:'MU', sym:'MU.O', href:'/stocks/us/mu/'},
+                        {nm:'샌디스크', tk:'SNDK', sym:'SNDK.O', href:'/stocks/us/sndk/'}]},
+    {g:'AI 칩', items:[{nm:'엔비디아', tk:'NVDA', sym:'NVDA.O', href:'/stocks/us/nvda/'},
+                       {nm:'AMD', tk:'AMD', sym:'AMD.O', href:'/stocks/us/amd/'},
+                       {nm:'브로드컴', tk:'AVGO', sym:'AVGO.O', href:'/stocks/us/avgo/'}]},
+    {g:'파운드리·장비', items:[{nm:'TSMC', tk:'TSM', sym:'TSM.N', href:'/stocks/us/tsm/'},
+                              {nm:'ASML', tk:'ASML', sym:'ASML.O', href:'/stocks/us/asml/'}]}
+  ];
+  var TICKERS=LEAD.concat([].concat.apply([], AI_GROUPS.map(function(g){ return g.items; })));
   var NASDAQ='QQQ.O';
   var cur='krw', fx=null, vix=null, dataBySym={}, loaded=false, isLive=false, sessionState='', basisAt=null;
   /* 가격 변동 시 상단 대표주 위젯과 동일한 카운트업(odometer) + 방향색 플래시 */
@@ -262,52 +262,46 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     return '<span class="cg" style="color:'+col+'">'+s+pct.toFixed(2)+'%</span>';
   }
   function skeleton(){
-    gridEl.innerHTML=TICKERS.map(function(){return '<div class="ue-row"><span class="nm"><span class="ue-skel" style="display:inline-block;width:90px;"></span></span><span class="ue-skel" style="width:70px;"></span></div>';}).join('');
-    macroEl.innerHTML=['나스닥 QQQ','반도체 ETF SOXX','변동성 VIX'].map(function(l){return '<div class="ue-mtile"><div class="l">'+l+'</div><div class="v"><span class="ue-skel" style="display:inline-block;width:54px;"></span></div></div>';}).join('');
+    gridEl.innerHTML='<div class="ue-leads">'+LEAD.map(function(){ return '<div class="ue-lead"><span class="ue-skel" style="width:60px"></span><span class="ue-skel" style="width:48px;margin-top:6px"></span></div>'; }).join('')+'</div>';
+    macroEl.innerHTML='<span class="ue-skel" style="display:inline-block;width:180px;"></span>';
+  }
+  function cls(p){ return typeof p==='number'&&isFinite(p) ? (p>0?'up':p<0?'dn':'') : ''; }
+  function upCount(list){
+    var up=0,dn=0,n=0;
+    list.forEach(function(t){ var d=dataBySym[t.sym]; if(!d||typeof d.changePct!=='number'||!isFinite(d.changePct)) return; n++; if(d.changePct>0) up++; else if(d.changePct<0) dn++; });
+    return {up:up, dn:dn, n:n};
+  }
+  function leadHtml(t){
+    var d=dataBySym[t.sym]||{};
+    var inner='<span class="ue-tk">'+t.tk+'</span><span class="ue-ln">'+t.nm+'</span>'+cgHtml(d.changePct)
+      +'<span class="px ue-lp" data-sym="'+t.sym+'" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span><span class="ue-ld">'+t.desc+'</span>';
+    return t.href ? '<a class="ue-lead" href="'+t.href+'">'+inner+'</a>' : '<div class="ue-lead">'+inner+'</div>';
+  }
+  function aiRowHtml(t, mx){
+    var d=dataBySym[t.sym]||{}, p=d.changePct, w=(typeof p==='number'&&isFinite(p)&&mx)?Math.round(Math.abs(p)/mx*100):0;
+    return '<a class="ue-row" href="'+t.href+'"><span class="ue-n">'+t.nm+' <em>'+t.tk+'</em></span>'
+      +'<span class="px ue-p" data-sym="'+t.sym+'" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'
+      +'<span class="ue-bar"><i class="'+cls(p)+'" style="width:'+w+'%"></i></span>'+cgHtml(p)+'</a>';
   }
   function renderGrid(){
-    gridEl.innerHTML=TICKERS.map(function(t){
-      var d=dataBySym[t.sym]||{};
-      var inner='<span class="nm">'+t.nm+' <span class="tk">'+t.tk+'</span>'+(t.lead?' <span class="lead">선행</span>':'')+'</span>'
-        +'<span class="px" data-usd="'+(d.price!=null?d.price:'')+'">'+fmtPx(d.price)+'</span>'+cgHtml(d.changePct);
-      if(t.noLink) return '<div class="ue-row">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none" style="visibility:hidden"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
-      // href가 지정된 항목은 그쪽으로(예: SK하이닉스 → 한국 상세), 없으면 미국 상세 규칙 경로
-      return '<a class="ue-row ue-row--link" href="'+(t.href||('/stocks/us/'+t.tk.toLowerCase()+'/'))+'">'+inner+'<svg class="ue-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
-    }).join('');
+    var lc=upCount(LEAD), ai=[].concat.apply([], AI_GROUPS.map(function(g){ return g.items; })), ac=upCount(ai);
+    var mx=Math.max.apply(null, ai.map(function(t){ var d=dataBySym[t.sym]; return d&&typeof d.changePct==='number'&&isFinite(d.changePct)?Math.abs(d.changePct):0; }))||0;
+    gridEl.innerHTML=''
+      +'<div class="ue-sec"><div class="ue-st"><h4>코스피 선행 ETF</h4>'+(lc.n?'<span>'+lc.n+'개 중 <b class="up">'+lc.up+' 상승</b></span>':'')+'</div>'
+      +'<p class="ue-sd">한국 장이 열리기 전에 코스피 방향을 먼저 보여주는 ETF예요.</p>'
+      +'<div class="ue-leads">'+LEAD.map(leadHtml).join('')+'</div></div>'
+      +'<div class="ue-sec"><div class="ue-st"><h4>AI 인프라 주식</h4>'+(ac.n?'<span>'+ac.n+'개 중 <b class="up">'+ac.up+' 상승</b> · <b class="dn">'+ac.dn+' 하락</b></span>':'')+'</div>'
+      +'<div class="ue-ais">'+AI_GROUPS.map(function(g){ return '<div class="ue-g"><div class="ue-gt">'+g.g+'</div>'+g.items.map(function(t){ return aiRowHtml(t, mx); }).join('')+'</div>'; }).join('')+'</div></div>';
   }
+  // 맨 위 한 줄 — 나스닥 QQQ·VIX(§68 ④). SOXX는 선행 ETF 칸에만 한 번 둔다.
   function renderMacro(){
-    var qq=dataBySym[NASDAQ]||{}, soxx=dataBySym['SOXX.O']||{};
-    var vixHtml=(vix&&typeof vix.price==='number')
-      ? vix.price.toFixed(2)+' <span style="font-size:12px">'+cgHtml(vix.changePct)+'</span>'
-      : '<span class="cg" style="color:var(--muted)">—</span>';
-    macroEl.innerHTML=''
-      +'<div class="ue-mtile"><div class="l">나스닥 QQQ</div><div class="v">'+cgHtml(qq.changePct)+'</div></div>'
-      // 라벨은 '필라델피아 반도체'가 아니라 실제 소스인 SOXX ETF로 적는다.
-      // 브리핑 사이드바의 '필라델피아 반도체'는 지수 ^SOX라 서로 다른 상품이고, 실제로 수치도
-      // 갈린다(2026-07-28: ^SOX -4.49% vs SOXX -4.80%). 같은 라벨을 두 소스에 쓰면
-      // 사이트 안에서 같은 이름이 다른 값을 가리킨다(§20 '같은 데이터의 이중 소스').
-      // 프리장엔 지수가 갱신되지 않아 여기서 ETF를 실시간 프록시로 쓰는 것 자체는 맞다(§26).
-      +'<div class="ue-mtile"><div class="l">반도체 ETF SOXX</div><div class="v">'+cgHtml(soxx.changePct)+'</div></div>'
-      +'<div class="ue-mtile"><div class="l">변동성 VIX</div><div class="v">'+vixHtml+'</div></div>';
+    var qq=dataBySym[NASDAQ]||{};
+    macroEl.innerHTML='<span>나스닥 QQQ '+cgHtml(qq.changePct)+'</span>'
+      +'<span>VIX '+((vix&&typeof vix.price==='number')?'<b>'+vix.price.toFixed(2)+'</b> '+cgHtml(vix.changePct):'<span class="cg" style="color:var(--muted)">—</span>')+'</span>';
     var cap=document.getElementById('ue-cap');
-    if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 전일 종가, 장중엔 실시간 · DRAM ETF는 메모리·HBM 선행지표';
+    if(cap) cap.textContent=(fx?'환율 '+fx.toLocaleString('en-US')+'원 적용 · ':'')+'미국 장 시작 전엔 직전 종가, 장중엔 실시간';
   }
-  // 11개 종목 상승/하락 요약(마켓 브레드스) — PC·모바일 모두 노출(원화/달러 토글과 같은 줄).
-  // 여기선 데이터 유무만 has-data 클래스로 표시하고, 실제 표시 여부는 CSS가 결정한다(display를 JS가 직접 건드리지 않음).
-  function renderBreadth(){
-    var el=document.getElementById('ue-breadth'); if(!el) return;
-    var up=0,down=0,flat=0,n=0;
-    TICKERS.forEach(function(t){
-      var d=dataBySym[t.sym];
-      if(!d||typeof d.changePct!=='number'||!isFinite(d.changePct)) return;
-      n++; if(d.changePct>0) up++; else if(d.changePct<0) down++; else flat++;
-    });
-    if(!n){ el.classList.remove('has-data'); el.innerHTML=''; return; }
-    var p=['<b style="color:#E03131">'+up+' 상승</b>','<b style="color:#2775ED">'+down+' 하락</b>'];
-    if(flat) p.push('<b style="color:#64748B">'+flat+' 보합</b>');
-    el.innerHTML=n+'개 중&nbsp;'+p.join(' · ');
-    el.classList.add('has-data');
-  }
+  function renderBreadth(){ var el=document.getElementById('ue-breadth'); if(el){ el.classList.remove('has-data'); el.innerHTML=''; } }
   function render(){ renderGrid(); renderMacro(); renderBreadth(); }
   /* 실시간 기준 배지 — 정규장/프리장/애프터장이면 LIVE, 그 외엔 전일 종가 표시 */
   function updateLiveBadge(){
@@ -349,18 +343,13 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     requestAnimationFrame(step);
   }
   function patch(){
-    var rows=gridEl.querySelectorAll('.ue-row');
-    TICKERS.forEach(function(t,i){
-      var row=rows[i]; if(!row) return;
-      var d=dataBySym[t.sym]||{};
-      var px=row.querySelector('.px');
-      if(px && typeof d.price==='number') animatePx(px, d.price);
-      var cg=row.querySelector('.cg');
-      if(cg && typeof d.changePct==='number'){
-        var up=d.changePct>0;
-        cg.style.color=up?'#E03131':(d.changePct<0?'#2775ED':'#64748B');
-        cg.textContent=(up?'+':'')+d.changePct.toFixed(2)+'%';
-      }
+    // 가격은 data-sym 칸을 그 자리에서 카운트업, 등락·막대·상승 개수는 다시 그린다(행 순서에 기대지 않는다)
+    var pxs={};
+    gridEl.querySelectorAll('.px[data-sym]').forEach(function(el){ pxs[el.getAttribute('data-sym')]=el.getAttribute('data-usd'); });
+    renderGrid();
+    gridEl.querySelectorAll('.px[data-sym]').forEach(function(el){
+      var sym=el.getAttribute('data-sym'), d=dataBySym[sym]||{};
+      if(pxs[sym]!=null && typeof d.price==='number'){ el.setAttribute('data-usd', pxs[sym]); animatePx(el, d.price); }
     });
     renderMacro();
   }
@@ -402,6 +391,9 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     if(!pollId) setPoll(POLL_LIVE);
   };
   window.__ueStop=function(){ if(pollId){ clearInterval(pollId); pollId=null; curPoll=0; } };
+  // 테스트 훅 — 데이터를 주입하고 두 묶음 렌더 결과를 본다(us-evening.test.mjs)
+  window.__usEvening={LEAD:LEAD, AI_GROUPS:AI_GROUPS, TICKERS:TICKERS, gridEl:gridEl, macroEl:macroEl,
+    set:function(d,v,f,c){ dataBySym=d||{}; vix=v||null; fx=f||null; cur=c||'krw'; }, render:render};
   function syncToggle(){
     document.querySelectorAll('#ue-toggle button').forEach(function(b){
       b.classList.toggle('on', b.getAttribute('data-cur')===cur);
