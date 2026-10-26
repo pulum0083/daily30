@@ -413,8 +413,11 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     if(hm>=1020 || hm<540) return true;                // 평일 17:00~익일 09:00
     return todayKospiReady===false;                    // 평일 공휴일(오늘 코스피 미생성) = 비거래일 → 종일 노출
   }
+  // 개발용 ?slot=(home-hero.js와 같은 값) — 시간대별 화면을 지금 시각과 상관없이 보려고 노출만 따라간다(§68).
+  function devSlot(){ try{ return new URLSearchParams(location.search).get('slot'); }catch(e){ return null; } }
   window.ueGate=function(){
-    var ev=isEvening(kstNow());
+    var dev=devSlot();
+    var ev=dev ? /^(morning|evening|weekend)$/.test(dev) : isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
     if(ev) window.__ueLoad(); else window.__ueStop();
   };
