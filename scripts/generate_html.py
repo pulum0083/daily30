@@ -1746,6 +1746,41 @@ def build_list_context(target_date: str, active_type: str) -> dict:
 
 
 # ── 렌더 ──────────────────────────────────────────────────────────────────────
+# 브리핑 <title>·description(2026-10-27). 검색에 나오는 줄이라 사람들이 찾는 말(검색어)을 앞에,
+# 그날 헤드라인을 뒤에 둔다. 새 발행(render_briefing)과 발행본 일괄 교체(backfill_briefing_heads)가
+# 같은 함수를 쓴다 — 두 곳이 어긋나지 않게.
+SEO_TITLE_PREFIX = {"close": "코스피 마감 시황", "us": "미국 증시 전망"}
+
+
+def _plain_text(s) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", "", s)).strip() if isinstance(s, str) else ""
+
+
+def briefing_head(analysis: dict, btype: str, target_date: str) -> dict:
+    """{"title", "description"} — HTML에 그대로 넣을 수 있게 이스케이프한 값."""
+    analysis = analysis or {}
+    dt = date.fromisoformat(target_date)
+    day = f"{dt.month}월 {dt.day}일"
+    if btype == "kospi":
+        # 시초가 기준(§57)이 아닌 옛 예측은 '시초가'라고 쓰지 않는다
+        is_open = (analysis.get("prediction") or {}).get("basis") == BASIS_OPEN
+        prefix = "코스피 시초가 예측" if is_open else "코스피 방향 예측"
+    else:
+        prefix = SEO_TITLE_PREFIX[btype]
+    tv = analysis.get("todays_view") or {}
+    headline = next((t for t in map(_plain_text, (tv.get("view_title"), analysis.get("reason_title"),
+                                                  analysis.get("market_title"))) if t), "")
+    dek = next((t for t in map(_plain_text, (tv.get("dek"), analysis.get("dek"),
+                                             analysis.get("sc_summary"))) if t), "")
+    title = f"{prefix} {day} | {headline}" if headline else f"{prefix} {day} — Double-Shot"
+    parts = []
+    if btype == "kospi" and analysis.get("prediction"):
+        p = build_prediction(analysis, "KOSPI", "KOSPI 당일 방향 예측", "")
+        parts.append(f"{p['pred_title']}: {p['direction']} {p['readout_pct']}% · 신뢰도 {p['confidence']}%")
+    parts.append(dek or headline or f"{target_date} {BRIEFING_LABELS[btype]} 브리핑")
+    return {"title": html.escape(title), "description": html.escape(". ".join(parts))}
+
+
 def render_briefing(internal_type: str, target_date: str, market_data: dict, force: bool = False) -> str:
     env = make_env()
     config = load_json(CONFIG_DIR / f"{internal_type}.json")
@@ -1806,7 +1841,6 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
 
     if internal_type == "close":
         ctx.update(build_close_sections(analysis, market_data, index_name, target_date))
-        ctx["og_description"] = analysis.get("market_title", f"{target_date} 코스피 마감")
     elif internal_type == "us":
         # 미국 이슈 중심 브리핑 — 예측 대신 오늘의 관점 + 이슈 카드. 성적표 사이드바 없음.
         ctx.update(build_issues(analysis))
@@ -1820,8 +1854,6 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
-        tv = analysis.get("todays_view") or {}
-        ctx["og_description"] = tv.get("view_title") or f"{target_date} 미국 시장 이슈 점검"
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx["quote_today"] = _load_quote_today(target_date)
@@ -1855,9 +1887,10 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
                 ctx["sector_name"] = sf.get("sector_name", "반도체")
                 ctx["sector_signal"] = sf["signal"]
                 ctx["sector_paragraphs"] = sf.get("paragraphs", [])
-        d = ctx.get("direction", "")
-        rp = ctx.get("readout_pct", "")
-        ctx["og_description"] = f"{ctx.get('pred_title') or config['pred_title']}: {d} {rp}% · 신뢰도 {ctx.get('confidence','')}%"
+
+    head = briefing_head(analysis, internal_type, target_date)
+    ctx["page_title"] = head["title"]
+    ctx["og_description"] = head["description"]
 
     template = env.get_template(config["template"])
     return template.render(**ctx), analysis
