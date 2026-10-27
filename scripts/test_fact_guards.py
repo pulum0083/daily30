@@ -58,3 +58,17 @@ def test_session_log_marks_previous_session_on_monday():
     assert "10/22(목): 나스닥 -2.60%, 필라델피아 반도체 -6.72%" in d
     assert d.index("10/23") < d.index("10/22")                    # 최신 날짜가 위
     assert cc._us_session_log_directive("2026-10-26", {}) == ""
+
+
+def test_amount_commas_in_titles_only_for_money_units():
+    # 2026-10-26 마감 제목 "6047억" vs 보조 문장 "6,047억원" — 금액 표기를 맞춘다(2026-10-27).
+    import validate_analysis as va
+    a = {"reason_title": "7개월 최저치인데 기관은 6047억 사들였다",
+         "dek": "외국인이 6955억원을 던졌어요.",
+         "todays_view": {"view_title": "코스피 5500 붕괴, 2026년 첫 1조2000억 매도"}}
+    corr = []
+    va.fix_amount_commas(a, corr)
+    assert a["reason_title"] == "7개월 최저치인데 기관은 6,047억 사들였다"
+    assert a["dek"] == "외국인이 6,955억원을 던졌어요."
+    assert a["todays_view"]["view_title"] == "코스피 5500 붕괴, 2026년 첫 1조2,000억 매도"
+    assert len(corr) == 3

@@ -1084,9 +1084,10 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
         return []
     out = ["", "📊 월봉 5개월선 안착 종목"]
     for x in items[:3]:
-        gap = (f"지금 이격 {x['now_gap_pct']:+.1f}%" if x.get("has_cur")
+        # 한 줄이 구분선 폭(20칸)에 들어가게 짧게 쓴다 — 괄호만 다음 줄로 넘어가던 것을 막는다(2026-10-27).
+        gap = (f"이격 {x['now_gap_pct']:+.1f}%" if x.get("has_cur")
                else f"{x['last_label']} 말 이격 {x['month_end_gap_pct']:+.1f}%")
-        out.append(f"• {x['name']} — {x['streak']}개월째 5개월선 위 ({gap})")
+        out.append(f"• {x['name']} {x['streak']}개월째 · {gap}")
     if len(items) > 3:
         out.append(f"• 외 {len(items) - 3}종목")
     return out
@@ -1796,16 +1797,7 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
         date_display = date_str
 
     indices = market_data.get("indices", {})
-    kospi  = indices.get("kospi", {})
-    kosdaq = indices.get("kosdaq", {})
-
-    def fmt_index(d: dict, name: str) -> str:
-        if "error" in d or not d:
-            return f"📊 {name} - 데이터 없음"
-        price = d.get("price", "-")
-        chg   = d.get("change_pct", 0)
-        arrow = "▲" if chg >= 0 else "▼"
-        return f"📊 {name} <b>{price:,.2f}</b>  {arrow} {chg:+.2f}%"
+    kospi  = indices.get("kospi", {})   # 종가 기준(전환 이전) 예측 채점에만 쓴다 — 지수 줄은 싣지 않는다(2026-10-27)
 
     # 타이틀은 형식에 따라 market_title(why_what_so) 또는 reason_title(scenario·qa·signal) — 페이지와 같은 우선순위.
     title = strip_html(analysis.get("market_title") or analysis.get("reason_title") or "")
@@ -1829,22 +1821,23 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
             actual, what = (kospi_chg if isinstance(kospi_chg, (int, float)) else None), "실제"
         if actual is not None:
             is_correct = classify_direction_correct(predicted, actual)
-            mark = "✓ 적중" if is_correct else "✗ 빗나감"
+            mark = "✓" if is_correct else "✗"
             cum = _cumulative_kospi_accuracy(date_str)
             # 표본 5건 미만이면 누적 %를 붙이지 않는다 — 전환 직후 "1건 100%"는 뜻이 없다(§57)
             cum_txt = f" (누적 {round(cum[0] / cum[1] * 100)}%)" if (cum and cum[1] >= 5) else ""
-            label = "오늘 아침 시초가 예측" if what == "시초가" else "오늘 아침 예측"
-            result_badge = f"📝 {label}: {predicted} → {what} {actual:+.2f}% {mark}{cum_txt}"
+            # 짧게 쓴다 — "→"에서 줄이 끊기던 것을 막는다(2026-10-27). "상승 우위" → "상승".
+            short = str(predicted).replace(" 우위", "")
+            result_badge = f"📝 아침 예측 {short} → {what} {actual:+.2f}% {mark}{cum_txt}"
 
-    # 지수 → 아침 예측 채점 → 🎯 타이틀 → 서브 한 문장(2026-10-25). 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다.
-    lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", divider,
-             fmt_index(kospi, "KOSPI"), fmt_index(kosdaq, "KOSDAQ")]
-    if result_badge:
-        lines.append(result_badge)
+    # 🎯 타이틀 → 서브 한 문장 → 아침 예측 채점(2026-10-27). 지수 수치 줄은 싣지 않는다 — 타이틀이 주인공이다.
+    # 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다.
+    lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", divider]
     if title:
-        lines += ["", f"🎯 <b>{title}</b>"]
+        lines += [f"🎯 <b>{title}</b>"]
         if dek:
             lines.append(dek)
+    if result_badge:
+        lines += ["", result_badge]
     lines += [divider, f"🔗 수급·시장폭 상세 → {web_base}/briefings/{date_str}/close/"]
 
     msg = "\n".join(lines)

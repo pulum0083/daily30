@@ -1331,6 +1331,31 @@ FORMAT_FALLBACK = "split"
 _TITLE_PCT_RE = re.compile(r"\d+(?:\.\d+)?(?=\s*%)")
 
 
+_AMOUNT_NO_COMMA_RE = re.compile(r"(?<![\d,.])(\d{4,})(?=\s*(?:억|조|만|원))")
+
+
+def fix_amount_commas(analysis, corrections):
+    """제목·보조 문장의 금액(억·조·만·원 앞 네 자리 이상 숫자)에 쉼표를 넣는다 (전 타입, 2026-10-27).
+
+    제목은 "6047억", 보조 문장은 "6,047억원"처럼 한 메시지 안에서 표기가 갈렸다. 숫자는 바꾸지 않고 표기만 맞춘다.
+    "5500선"·"2026년"처럼 금액 단위가 아닌 숫자는 건드리지 않는다.
+    """
+    def fix(text):
+        return _AMOUNT_NO_COMMA_RE.sub(lambda m: f"{int(m.group(1)):,}", text)
+
+    targets = [(analysis, k) for k in ("reason_title", "market_title", "dek")]
+    tv = analysis.get("todays_view")
+    if isinstance(tv, dict):
+        targets += [(tv, "view_title"), (tv, "dek")]
+    for obj, key in targets:
+        val = obj.get(key)
+        if isinstance(val, str):
+            new = fix(val)
+            if new != val:
+                obj[key] = new
+                corrections.append(f"금액 쉼표 — {key}: {val[:40]} → {new[:40]}")
+
+
 def fix_view_title_figures(analysis, btype, corrections):
     """헤드라인(todays_view.view_title)의 등락률이 검증된 본문에 없으면 헤드라인을 근거 문장으로 바꾼다 (kospi).
 
@@ -1471,6 +1496,9 @@ def validate(analysis, latest, btype):
 
     # 2-f) 현직 인물 교정 — 전임 연준 의장 이름을 현직 역할로 쓴 표현 (전 타입, §64)
     fix_officeholder_names(a, corrections, warnings)
+
+    # 2-g) 제목·보조 문장 금액 쉼표 (전 타입)
+    fix_amount_commas(a, corrections)
 
     # 3) 계층 2 — 리스트형 본문
     if isinstance(a.get("reasons"), list):

@@ -51,8 +51,8 @@ def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
                       "kosdaq": {"price": 751.69, "change_pct": -1.62}}}
     cc.save_closing_telegram_message("2026-10-23", analysis, md)
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "📊 KOSPI <b>5,550.30</b>  ▲ +0.30%" in text
-    assert "🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n기관이 8,726억원을 사들였어요." in text
+    assert "KOSPI" not in text and "5,550.30" not in text   # 지수 수치 줄은 싣지 않는다(2026-10-27)
+    assert "────────────────────\n🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n기관이 8,726억원을 사들였어요." in text
     assert "핵심 시그널" not in text and "옛 시그널" not in text
     assert "🔗 수급·시장폭 상세 →" in text
 
@@ -94,7 +94,7 @@ def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
                 "monthly_ma5": {"date": "2026-10-26", "items": [_ma5_item()]}}
     cc.save_telegram_message("kospi", "2026-10-26", analysis)
     text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
-    assert "📊 월봉 5개월선 안착 종목\n• 메리츠금융지주 — 3개월째 5개월선 위 (지금 이격 +5.5%)" in text
+    assert "📊 월봉 5개월선 안착 종목\n• 메리츠금융지주 3개월째 · 이격 +5.5%" in text
     assert "※" not in text and "오른 비율" not in text and "매매 신호가 아니에요" not in text   # 설명 줄은 페이지에만(2026-10-26)
     assert text.index("📊 월봉") < text.index("🔗 전체 근거")
 
@@ -108,3 +108,18 @@ def test_kospi_skips_ma5_block_when_no_items_or_no_backtest(tmp_path, monkeypatc
     monkeypatch.setattr(gh, "MA5_BACKTEST_PATH", tmp_path / "none.json")
     cc.save_telegram_message("kospi", "2026-10-26", {**base, "monthly_ma5": {"date": "2026-10-26", "items": [_ma5_item()]}})
     assert "월봉" not in (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
+
+
+def test_close_badge_follows_title_and_lines_fit_divider(tmp_path, monkeypatch):
+    # 2026-10-26 실제 메시지 리플레이 — 타이틀이 맨 위, 채점·월봉 줄은 줄 접기 없이 한 줄에 들어간다(2026-10-27).
+    import json, check_accuracy as ca, send_telegram as st
+    (tmp_path / "briefings.json").write_text(json.dumps({"briefings": [
+        {"type": "kospi", "date": "2026-10-26", "basis": "open", "predicted_direction": "상승 우위"}]}), encoding="utf-8")
+    monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: (5400.0, 5450.0, -0.92))
+    cc.save_closing_telegram_message("2026-10-26", {"reason_title": "7개월 최저치인데 기관은 6,047억 사들였다",
+                                                    "dek": "기관이 방어했어요."}, {"indices": {}})
+    text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
+    assert text.index("🎯") < text.index("📝 아침 예측 상승 → 시초가 -0.92% ✗")
+    assert st.narrow_lines("📝 아침 예측 상승 → 시초가 -0.92% ✗") == "📝 아침 예측 상승 → 시초가 -0.92% ✗"
+    assert st.narrow_lines("• 메리츠금융지주 3개월째 · 이격 +3.8%") == "• 메리츠금융지주 3개월째 · 이격 +3.8%"

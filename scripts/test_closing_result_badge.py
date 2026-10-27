@@ -34,8 +34,7 @@ def test_badge_shows_hit_when_direction_matches(tmp_path, monkeypatch):
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(-6.37))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "✓ 적중" in text
-    assert "하락 우위 → 실제 -6.37%" in text   # 종가 기준(전환 이전) 기록은 종가로 채점한다
+    assert "📝 아침 예측 하락 → 실제 -6.37% ✓" in text   # 종가 기준(전환 이전) 기록은 종가로 채점한다
     assert "누적" not in text                  # 누적은 시초가 기준 기록만 세고, 5건 미만이면 붙이지 않는다(§57)
 
 
@@ -46,8 +45,7 @@ def test_badge_shows_miss_when_direction_mismatches(tmp_path, monkeypatch):
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     cc.save_closing_telegram_message("2026-07-16", _analysis(), _market_data(0.73))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "✗ 빗나감" in text
-    assert "하락 우위 → 실제 +0.73%" in text
+    assert "📝 아침 예측 하락 → 실제 +0.73% ✗" in text
 
 
 def test_badge_omitted_when_no_today_prediction(tmp_path, monkeypatch):
@@ -99,7 +97,7 @@ def test_open_basis_badge_scores_by_open_gap_not_close(tmp_path, monkeypatch):
     monkeypatch.setattr(ca, "get_kospi_open_gap", lambda d: (6600.0, 6562.0, 0.58))
     cc.save_closing_telegram_message("2026-10-13", _analysis(), _market_data(-0.89))
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
-    assert "오늘 아침 시초가 예측: 상승 우위 → 시초가 +0.58% ✓ 적중" in text
+    assert "📝 아침 예측 상승 → 시초가 +0.58% ✓" in text
 
 
 def test_open_basis_badge_omitted_when_gap_unavailable(tmp_path, monkeypatch):
