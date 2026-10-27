@@ -2491,3 +2491,12 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - 광고 위치는 본문(예측·이슈 점검) 사이에 끼워 넣지 않는다 — 본문 끝에만 둔다.
 - **/stocks/ 정적 콘텐츠(2026-10-27)**: 첫 화면 대부분을 스크립트가 채워 크롤러에게는 하단 안내문만 보였다. 홈 맨 아래에 **📰 최근 브리핑**(최신 6편, 맨 위 1편만 요약)을 HTML로 박아 둔다 — `generate_html.write_stocks_recent_briefings()`가 `web/stocks/index.html`의 `RECENT_BRIEFINGS:START`·`END` 표시 사이만 다시 쓴다. `write_briefings_index()` 끝에서 함께 돌아서 아카이브와 원본·시점이 같다. 이제 세 브리핑 잡이 모두 `web/stocks/index.html`을 고친다 — **잡 시간대에 이 파일을 손으로 고쳐 푸시하지 않는다(§43).** 하단 안내문과 meta description도 지금 기능 기준으로 정리했다(밸류에이션·실적·장중 이슈·베타 표기 제거). 크롤러가 읽는 글은 약 3,200자 → 3,700자(제목 6편과 링크 6개가 늘고, 낡은 안내 문장은 빠졌다).
 
+
+### 71. 검색·공유 유입 정비 — 제목·RSS·공유 카드 (2026-10-27)
+
+목표는 하루 방문자 1천 명이다(시작 시점 약 20명, 텔레그램 구독 30명). 계획·결정 노트 `docs/plans/2026-10-27-traffic-growth/`.
+
+- **브리핑 제목**: `검색어 날짜 | 헤드라인` — `코스피 시초가 예측 10월 27일 | …`·`코스피 마감 시황 …`·`미국 증시 전망 …`. 시초가 기준(§57)이 아닌 옛 예측은 `코스피 방향 예측`. description은 보조 문장(dek), 코스피는 앞에 예측 한 줄. `generate_html.briefing_head()` 하나가 `<title>`·og·twitter·RSS를 모두 만든다. 발행본 188편은 `<head>`의 이 줄만 같은 함수로 바꿨다(본문은 그대로, §33).
+- **RSS**: `/briefings/rss.xml`(최신 30편) — `write_briefings_index()` 끝에서 함께 갱신된다. 네이버 서치어드바이저에 제출해야 효과가 있다(로그인이 필요해 사람이 한다). `<link rel="alternate">`는 base.html과 `/stocks/`에 있다. `/stocks/`에는 네이버 인증 태그도 넣었다(다른 페이지는 base.html에 이미 있었다).
+- **공유 카드**: 브리핑마다 `og.png`(1200×630, `scripts/og_card.py`, Pillow + `scripts/fonts/` Pretendard). 글자는 analysis에 있는 헤드라인·예측 방향·큰 쪽 확률뿐이고 마감 카드엔 수치가 없다(§0). 못 만들면 `write_output`이 og:image 태그를 지운다. 텔레그램은 `prefer_small_media`라 작은 썸네일로 뜬다. 발행본에는 카드를 만들지 않았다.
+- **구독 입구는 이미 있다** — 세 브리핑 사이드바의 텔레그램 구독 카드(`sections/_sidebar_kospi.html`, 모바일에선 본문 아래)와 GA4 `telegram_click` 이벤트(main.js). 새로 만들지 않았다.

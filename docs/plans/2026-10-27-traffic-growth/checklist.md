@@ -6,4 +6,4 @@
 - [x] 3. RSS 피드 생성 + `<link rel=alternate>` + /stocks/ 네이버 인증 태그
 - [x] 4. 브리핑별 og:image 카드 생성(파이프라인)
 - [x] 테스트 전체 통과(파이썬 976 · Node 382)
-- [ ] SERVICE_RULES 기록
+- [x] SERVICE_RULES 기록(§71)
