@@ -635,3 +635,10 @@ test('특이 신호 전체 화면은 상승률순 하나 — 정렬 탭·하락�
   const html = readFileSync(new URL('../stocks/index.html', import.meta.url), 'utf8');
   assert.ok(!html.includes('sigall-sort-tabs') && !html.includes('sigall-dn-rows') && !html.includes('신호 강도순'));
 });
+
+test('goStock — 종목을 누르면 그 종목의 섹터 페이지로 간다(SECTOR_LABELS가 전역에 있어야 한다, 2026-10-27)', () => {
+  const win = loadWindow();
+  runInContext("STOCK_LIST=[{code:'005930',name:'삼성전자',sector:'semicon'}]", win);
+  assert.doesNotThrow(() => win.goStock('005930'));
+  assert.equal(win.location.href, '/stocks/sector/semicon/');
+});

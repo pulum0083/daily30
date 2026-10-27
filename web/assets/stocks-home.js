@@ -552,6 +552,9 @@ function _stockToast(msg){
 // 종목 클릭 → 그 종목의 섹터 페이지(2026-10-26 종목 상세 페이지 제거 — 사용자 결정, §36).
 // 홈의 종목 클릭 진입점(검색·특이신호·섹터 카드 등)이 전부 이 함수를 지난다. 섹터는 스냅샷(STOCK_LIST)에서 찾고,
 // 아직 못 불러왔거나 유니버스 밖 종목이면 막지 않고 안내만 띄운다.
+// 섹터 키 → 이름. goStock이 전역 함수라 이 표도 전역에 둔다 — 아래 IIFE 안에만 있으면 검색에서 종목을 눌렀을 때
+// ReferenceError로 이동하지 못했다(2026-10-27 발견).
+var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
 function goStock(code){
   var s=STOCK_LIST.find(function(x){return x.code===code;});
   if(s&&s.sector&&SECTOR_LABELS[s.sector]){
@@ -1046,7 +1049,6 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 (function(){
   var SNAP=null;
   var SIG_SECTORS=null; // /api/signals가 내려주는 전 섹터 라이브 평균 (장중 5분 갱신)
-  var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
   function sparkSvg(vals,color){
     if(!vals||vals.length<2) return '';
     var n=vals.length,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
@@ -1059,7 +1061,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 섹터 화면(#sector)은 2026-09-02에 제거됐다. 홈에서 섹터 상세 페이지로 가는 링크가
   // 0개였고(JS도 주입하지 않았다) '패시브 쏠림'은 실측 소스 없는 자리표시자였다.
   // 섹터 상세는 /stocks/sector/{key}/ 정적 페이지가 계속 담당한다.
-  // SECTOR_LABELS·secLbl은 남긴다 — 섹터 박스(sbx) 위젯이 계속 쓴다.
+  // SECTOR_LABELS는 전역(goStock 위)에 있다 — 특이 신호·섹터 막대·goStock이 같이 쓴다.
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간 · 2분 간격' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge is-live':'close-pill'; b.innerHTML=phaseLabel(phase); }
