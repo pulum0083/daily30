@@ -77,6 +77,7 @@ def test_day_key_is_not_items(tmp_path, monkeypatch):
 def test_rendered_page_has_no_redirect_and_no_bottom_list(tmp_path, monkeypatch):
     """구조 불변식 두 가지: JS 리다이렉트 없음, main.js가 다시 그리는 클래스 아님."""
     monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    monkeypatch.setattr(g, "STOCKS_HOME_HTML", tmp_path / "no-stocks.html")   # 실제 /stocks/ 페이지를 건드리지 않게
     _publish(tmp_path, "2026-09-01", "kospi", {"reason_title": "헤드라인 문장"})
     g.write_briefings_index()
     html = (tmp_path / "index.html").read_text()
@@ -167,3 +168,46 @@ def test_committed_archive_order_matches_archive_types():
         assert ranks == sorted(ranks), (
             f"{date.group(1) if date else '?'} 날짜의 순서가 ARCHIVE_TYPES와 다릅니다: {labels}"
         )
+
+
+# ── /stocks/ 최근 브리핑 정적 목록(2026-10-27, §70) ──
+def _stocks_page(tmp_path, monkeypatch):
+    page = tmp_path / "stocks.html"
+    page.write_text(f"<ol>\n      {g.RECENT_START}\n      {g.RECENT_END}\n      </ol>", encoding="utf-8")
+    monkeypatch.setattr(g, "STOCKS_HOME_HTML", page)
+    return page
+
+
+def test_recent_briefings_newest_first_and_only_first_has_dek(tmp_path, monkeypatch):
+    root = tmp_path / "b"
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", root)
+    _publish(root, "2026-10-26", "us", {"todays_view": {"view_title": "미국 제목", "dek": "미국 요약"}})
+    _publish(root, "2026-10-27", "kospi", {"todays_view": {"view_title": "코스피 제목", "dek": "코스피 요약"}})
+    _publish(root, "2026-10-27", "close", {"reason_title": "마감 <b>제목</b>", "dek": "외국인 <b>5,929억원</b><i>x</i>"})
+    page = _stocks_page(tmp_path, monkeypatch)
+    assert g.write_stocks_recent_briefings() is True
+    out = page.read_text(encoding="utf-8")
+    assert out.index("/2026-10-27/close/") < out.index("/2026-10-27/kospi/") < out.index("/2026-10-26/us/")
+    assert "10/27(화) · 코스피 마감" in out and '<div class="rb-h">마감 제목</div>' in out
+    assert "외국인 <b>5,929억원</b>x" in out          # 마감 dek(2026-10-25~)도 읽고, <b>만 남긴다
+    assert "코스피 요약" not in out and "미국 요약" not in out   # 요약은 맨 위 1편만
+
+
+def test_recent_briefings_rerun_is_stable_and_skips_without_markers(tmp_path, monkeypatch):
+    root = tmp_path / "b"
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", root)
+    _publish(root, "2026-10-27", "kospi", {"reason_title": "제목"})
+    page = _stocks_page(tmp_path, monkeypatch)
+    g.write_stocks_recent_briefings()
+    first = page.read_text(encoding="utf-8")
+    g.write_stocks_recent_briefings()
+    assert page.read_text(encoding="utf-8") == first
+    page.write_text("<html>표시 없음</html>", encoding="utf-8")
+    assert g.write_stocks_recent_briefings() is False
+    assert page.read_text(encoding="utf-8") == "<html>표시 없음</html>"
+
+
+def test_committed_stocks_page_has_recent_markers():
+    s = (Path(__file__).parent.parent / "web" / "stocks" / "index.html").read_text(encoding="utf-8")
+    assert g.RECENT_START in s and g.RECENT_END in s
+    assert "비상업적" not in s and "밸류에이션 시그널" not in s and "장중 이슈" not in s

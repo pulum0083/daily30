@@ -2101,7 +2101,7 @@ def _archive_headline(date_str: str, btype: str) -> str:
 def _archive_dek(date_str: str, btype: str) -> str:
     """발행본의 서브타이틀(한 문단 요약). 없으면 빈 문자열 — 지어내지 않는다(§0).
 
-    kospi·us는 `todays_view.dek`, close는 `sc_summary`가 같은 역할을 한다.
+    kospi·us는 `todays_view.dek`, close는 `dek`(2026-10-25~)·`sc_summary`가 같은 역할을 한다.
     맨 위 최신 1편에만 쓰이므로(그 아래는 제목만) 여기서만 읽는다.
     """
     snap = BRIEFINGS_DIR / date_str / btype / "analysis_snapshot.json"
@@ -2112,7 +2112,7 @@ def _archive_dek(date_str: str, btype: str) -> str:
     except Exception:
         return ""
     tv = d.get("todays_view") or {}
-    for cand in (tv.get("dek"), d.get("sc_summary")):
+    for cand in (tv.get("dek"), d.get("dek"), d.get("sc_summary")):
         if isinstance(cand, str) and cand.strip():
             return cand.strip()
     return ""
@@ -2182,6 +2182,69 @@ def write_briefings_index():
         shown = out
     print(f"[generate_html] 아카이브 갱신: {shown} "
           f"({ctx['total']}편 / {len(ctx['months'])}개월)")
+    write_stocks_recent_briefings()
+
+
+# /stocks/ 맨 아래 '최근 브리핑' — 크롤러가 스크립트 없이 읽는 정적 목록(2026-10-27, §70).
+# /stocks/index.html은 손으로 만든 정적 페이지라, 두 표시 사이만 다시 쓴다. 아카이브와 같은 자리에서
+# 함께 갱신되므로 원본도 같다(디스크에 커밋된 발행본). 맨 위 1편만 요약을 붙인다 — 아카이브와 같은 규칙.
+STOCKS_HOME_HTML = WEB_DIR / "stocks" / "index.html"
+RECENT_START = "<!-- RECENT_BRIEFINGS:START -->"
+RECENT_END = "<!-- RECENT_BRIEFINGS:END -->"
+_WEEKDAYS = "월화수목금토일"
+
+
+def build_recent_briefings(n: int = 6) -> list:
+    """최신 발행본 n편 — 날짜 최신순, 하루 안에서는 미국 → 마감 → 코스피(ARCHIVE_TYPES)."""
+    if not BRIEFINGS_DIR.exists():
+        return []
+    dates = sorted((p.name for p in BRIEFINGS_DIR.iterdir()
+                    if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)), reverse=True)
+    out = []
+    for d in dates:
+        for t in ARCHIVE_TYPES:
+            if len(out) >= n:
+                return out
+            if not (BRIEFINGS_DIR / d / t / "index.html").exists():
+                continue
+            headline = re.sub(r"<[^>]+>", "", _archive_headline(d, t)).strip()
+            if not headline:
+                continue   # 제목 없는 편은 싣지 않는다 — 종류 이름만 남은 줄은 정보가 없다
+            dt = date.fromisoformat(d)
+            out.append({"url": f"/briefings/{d}/{t}/", "label": BRIEFING_LABELS[t],
+                        "date": f"{dt.month}/{dt.day}({_WEEKDAYS[dt.weekday()]})",
+                        "headline": headline, "dek": _archive_dek(d, t) if not out else ""})
+    return out
+
+
+def render_recent_briefings(items: list) -> str:
+    rows = []
+    for i, it in enumerate(items):
+        # 요약은 우리 분석 문장이라 <b> 강조만 살리고 나머지 태그는 지운다(아카이브는 그대로 |safe로 쓴다).
+        dek = re.sub(r"<(?!/?b>)[^>]+>", "", it["dek"]) if it["dek"] else ""
+        rows.append(
+            f'      <li class="rb-item{" feat" if i == 0 else ""}"><a href="{it["url"]}">'
+            f'<div class="rb-meta">{it["date"]} · {it["label"]}</div>'
+            f'<div class="rb-h">{html.escape(it["headline"])}</div>'
+            + (f'<div class="rb-d">{dek}</div>' if dek else "") + "</a></li>")
+    return "\n".join(rows)
+
+
+def write_stocks_recent_briefings(n: int = 6) -> bool:
+    """/stocks/index.html의 표시 사이에 최근 브리핑 목록을 다시 쓴다. 표시가 없거나 발행본이 없으면 건드리지 않는다."""
+    if not STOCKS_HOME_HTML.exists():
+        return False
+    page = STOCKS_HOME_HTML.read_text(encoding="utf-8")
+    i, j = page.find(RECENT_START), page.find(RECENT_END)
+    items = build_recent_briefings(n)
+    if i < 0 or j < i or not items:
+        print("[generate_html] /stocks/ 최근 브리핑: 표시 또는 발행본 없음 — 건너뜀", file=sys.stderr)
+        return False
+    new = page[:i + len(RECENT_START)] + "\n" + render_recent_briefings(items) + "\n      " + page[j:]
+    if new != page:
+        STOCKS_HOME_HTML.write_text(new, encoding="utf-8")
+    print(f"[generate_html] /stocks/ 최근 브리핑 갱신: {len(items)}편")
+    return True
 
 
 def write_sitemap_xml():

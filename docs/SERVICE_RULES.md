@@ -2489,3 +2489,5 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **개인정보처리방침**: §6 쿠키에 Google AdSense 광고 쿠키·맞춤 광고 해제(Google 광고 설정·aboutads.info) 안내를 넣었다(2026-10-27). 애드센스 정책상 필요하다 — 광고 공급자를 바꾸면 이 문단도 같이 고친다.
 - **ads.txt**: `web/ads.txt` — `google.com, pub-7262578476089316, DIRECT, f08c47fec0942fa0`.
 - 광고 위치는 본문(예측·이슈 점검) 사이에 끼워 넣지 않는다 — 본문 끝에만 둔다.
+- **/stocks/ 정적 콘텐츠(2026-10-27)**: 첫 화면 대부분을 스크립트가 채워 크롤러에게는 하단 안내문만 보였다. 홈 맨 아래에 **📰 최근 브리핑**(최신 6편, 맨 위 1편만 요약)을 HTML로 박아 둔다 — `generate_html.write_stocks_recent_briefings()`가 `web/stocks/index.html`의 `RECENT_BRIEFINGS:START`·`END` 표시 사이만 다시 쓴다. `write_briefings_index()` 끝에서 함께 돌아서 아카이브와 원본·시점이 같다. 이제 세 브리핑 잡이 모두 `web/stocks/index.html`을 고친다 — **잡 시간대에 이 파일을 손으로 고쳐 푸시하지 않는다(§43).** 하단 안내문과 meta description도 지금 기능 기준으로 정리했다(밸류에이션·실적·장중 이슈·베타 표기 제거). 크롤러가 읽는 글은 약 3,200자 → 3,700자(제목 6편과 링크 6개가 늘고, 낡은 안내 문장은 빠졌다).
+

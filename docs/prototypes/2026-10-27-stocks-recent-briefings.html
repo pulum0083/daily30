@@ -1,0 +1,115 @@
+<!-- /stocks/ 하단 '최근 브리핑' 정적 목록 + 안내문 정리 프로토타입 (2026-10-27, 실제 발행본 6편 데이터) -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>프로토타입 — /stocks/ 최근 브리핑</title>
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#5B6472;--primary:#006EFF;--up:#E03131;--dn:#2775ED;--s1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all}
+.note{max-width:880px;margin:0 auto;padding:14px 16px;font-size:12px;color:#92400E;background:#FFFBEB;border-bottom:1px solid #FDE68A}
+.wrap{max-width:880px;margin:0 auto;padding:16px}
+.block{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);margin-bottom:14px;overflow:hidden}
+.block__h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hair)}
+.block__t{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.block__t:before{content:"";width:3px;height:16px;border-radius:2px;background:var(--primary)}
+.ghost{color:var(--muted);font-size:13px;padding:22px 16px;text-align:center}
+.more{font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;white-space:nowrap}
+
+/* 최근 브리핑 */
+.rb-intro{font-size:12.5px;color:var(--muted);margin:0;padding:10px 16px 4px;line-height:1.6}
+.rb-list{list-style:none;margin:0;padding:4px 0 6px}
+.rb-item a{display:block;padding:11px 16px;text-decoration:none;color:inherit;border-top:1px solid #F1F5F9}
+.rb-item:first-child a{border-top:none}
+.rb-item a:hover .rb-h{color:var(--primary)}
+.rb-meta{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:3px}
+.rb-h{font-size:15px;font-weight:700;line-height:1.45}
+.rb-d{font-size:13px;color:#374151;line-height:1.6;margin-top:5px}
+.rb-d b{font-weight:700}
+.rb-item.feat a{background:#F8FAFF}
+.rb-item.feat .rb-h{font-size:16px}
+
+/* 안내문 */
+.ds-footer{margin:32px 2px 8px;padding-top:20px;border-top:1px solid var(--hair)}
+.ds-foot-list{font-size:12px;color:var(--muted);line-height:1.8}
+.ds-foot-list .fl{margin-bottom:9px}
+.ds-foot-list .fl b{color:var(--ink);font-weight:700}
+.ds-foot-list a{color:inherit}
+.ds-foot-links{display:flex;flex-wrap:wrap;justify-content:center;gap:0 16px;margin-top:16px;padding-top:6px;border-top:1px solid var(--hair)}
+.ds-foot-links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;min-height:40px;display:inline-flex;align-items:center}
+.ds-foot-base{text-align:center;font-size:11px;color:var(--muted);margin-top:4px}
+.del{background:#FEF2F2;text-decoration:line-through;color:#991B1B}
+.cmp{margin-top:28px;border:1px dashed #CBD5E1;border-radius:10px;padding:12px 14px;background:#fff;font-size:12px;line-height:1.8;color:var(--muted)}
+.cmp h4{margin:0 0 6px;font-size:12px;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="note">프로토타입 — /stocks/ 맨 아래(특이 신호 다음)에 들어갈 모습이에요. 목록은 실제 최근 발행본 6편이고, 브리핑이 나갈 때마다 HTML에 직접 다시 써져서 크롤러가 스크립트 없이 읽어요.</div>
+<div class="wrap">
+
+  <div class="block">
+    <div class="block__h"><span class="block__t">⚡ 10/27(화) 특이 신호</span></div>
+    <div class="ghost">(기존 특이 신호 — 변경 없음)</div>
+  </div>
+
+  <!-- 새 블록: 최근 브리핑 -->
+  <section class="block" id="recent-briefings">
+    <div class="block__h"><h2 class="block__t" style="margin:0">📰 최근 브리핑</h2><a class="more" href="/briefings/">브리핑 전체 보기 →</a></div>
+    <p class="rb-intro">매일 아침 코스피 시초가 예측, 오후 코스피 마감, 저녁 미국 시장 브리핑이 나가요.</p>
+    <ol class="rb-list">
+      <li class="rb-item feat"><a href="/briefings/2026-10-27/close/">
+        <div class="rb-meta">10/27(화) · 코스피 마감</div>
+        <div class="rb-h">개미만 팔았다, 5,929억 외국인 매수에 코스피 +3.09%</div>
+        <div class="rb-d">앤트로픽 S-1 공개로 AI 수익성 우려가 걷히자 외국인 <b>5,929억원</b>·기관 <b>2,820억원</b>이 반도체를 쓸어담았어요.</div>
+      </a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-27/kospi/">
+        <div class="rb-meta">10/27(화) · 코스피 예측</div>
+        <div class="rb-h">코스피 5500 붕괴 다음날, 뉴욕은 반도체부터 다시 샀다</div>
+      </a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/us/">
+        <div class="rb-meta">10/26(월) · 미국 시장</div>
+        <div class="rb-h">3거래일 급락 뒤, 선물이 먼저 반등을 선언했다</div>
+      </a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/close/">
+        <div class="rb-meta">10/26(월) · 코스피 마감</div>
+        <div class="rb-h">7개월 최저치인데 기관은 6,047억 사들였다</div>
+      </a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/kospi/">
+        <div class="rb-meta">10/26(월) · 코스피 예측</div>
+        <div class="rb-h">메타는 울었는데 솔리다임은 웃었다, 오늘의 숙제</div>
+      </a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-23/us/">
+        <div class="rb-meta">10/23(금) · 미국 시장</div>
+        <div class="rb-h">AI 랠리가 실적과 연준이라는 이중 시험대 앞에 섰어요</div>
+      </a></li>
+    </ol>
+  </section>
+
+  <!-- 안내문(현재 기능 기준으로 정리) -->
+  <footer class="ds-footer">
+    <div class="ds-foot-list">
+      <div class="fl">Double-Shot 종목 시그널은 시간대에 맞춰 첫 화면을 바꿔요. 아침에는 <b>코스피 시초가 예측</b>, 장중에는 <b>어제 같은 시각과 비교</b>, 장 마감 뒤에는 <b>코스피 마감 정리</b>, 저녁에는 <b>미국 시장 브리핑</b>, 주말에는 한 주 정리를 보여줘요.</div>
+      <div class="fl">섹터 막대와 특이 신호는 <b><a href="/stocks/sector/semicon/">반도체</a>·<a href="/stocks/sector/battery/">2차전지</a>·<a href="/stocks/sector/auto/">자동차</a>·<a href="/stocks/sector/defense/">방산</a>·<a href="/stocks/sector/ship/">조선</a>·<a href="/stocks/sector/bio/">바이오</a>·<a href="/stocks/sector/finance/">금융</a>·<a href="/stocks/sector/power/">전력기기</a></b> 8개 섹터 대표 종목 46개를 다뤄요. 특이 신호는 역행 등락·거래량 급증·52주 신고가 근접·외국인과 기관 순매수를 규칙으로 골라 많이 오른 종목부터 보여줘요. 밤에는 한국 시장을 먼저 움직이는 미국 ETF(EWY·DRAM·SOXX)와 AI 인프라 종목을 함께 봐요.</div>
+      <div class="fl">시세·수급은 장중(평일 09:00~15:30)에는 <b>실시간</b>으로, 그 밖의 시간에는 <b>직전 거래일 정규장 종가</b>로 표시해요. 장 마감 뒤 애프터장 가격은 종가로 쓰지 않아요.</div>
+      <div class="fl">화면에 나오는 모든 수치는 네이버 금융·토스증권 등에서 가져온 <b>실측값</b>이에요. AI가 임의로 만든 숫자는 쓰지 않고, 수집되지 않은 항목은 아예 표시하지 않아요.</div>
+      <div class="fl">AI 예측과 신호는 투자 판단을 돕는 <b>참고용</b>이고 특정 종목을 추천하는 게 아니에요. 투자에 대한 최종 책임은 투자자 본인에게 있어요.</div>
+    </div>
+    <div class="ds-foot-links">
+      <a href="/about/">서비스 소개</a><a href="/glossary/">용어 설명</a><a href="/legal/disclaimer/">면책 고지</a><a href="/legal/privacy/">개인정보처리방침</a><a href="/legal/terms/">이용약관</a><a href="#">문의</a>
+    </div>
+    <div class="ds-foot-base">© 2026 Double-Shot · 장중에는 실시간, 장 마감 후에는 직전 거래일 종가 기준이에요</div>
+  </footer>
+
+  <div class="cmp">
+    <h4>안내문에서 빠지는 옛 내용 (이미 없앤 기능)</h4>
+    <div><span class="del">밸류에이션 시그널은 코스피200 전체를 대상으로 해요</span> — 밸류에이션 수집은 10/26에 멈췄어요(§69).</div>
+    <div><span class="del">목표주가·실적·밸류에이션처럼 증권사·공시 자료를 반영하는 항목은…</span> — 실적·밸류에이션 표가 없어졌어요.</div>
+    <div><span class="del">ETF 30여 개</span> · <span class="del">코스닥150 등으로 단계적으로 넓혀갈 예정</span> — 지금 화면과 맞지 않는 약속이에요.</div>
+    <div><span class="del">종목 서비스 (베타)</span> — 맨 아래 한 줄에서 뺐어요.</div>
+    <div style="margin-top:6px">페이지 설명(meta description)의 "장중 이슈"도 빼요 — 장중 이슈 피드는 9/15에 없앴어요(§53).</div>
+  </div>
+</div>
+</body>
+</html>
