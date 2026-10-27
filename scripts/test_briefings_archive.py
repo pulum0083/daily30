@@ -211,3 +211,25 @@ def test_committed_stocks_page_has_recent_markers():
     s = (Path(__file__).parent.parent / "web" / "stocks" / "index.html").read_text(encoding="utf-8")
     assert g.RECENT_START in s and g.RECENT_END in s
     assert "비상업적" not in s and "밸류에이션 시그널" not in s and "장중 이슈" not in s
+
+
+def test_rss_lists_newest_first_with_head_titles(tmp_path, monkeypatch):
+    """RSS(2026-10-27) — 최신순, 제목은 페이지 <head>와 같은 briefing_head, 유효한 XML."""
+    import xml.dom.minidom
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    _publish(tmp_path, "2026-10-26", "us", {"todays_view": {"view_title": 'S&P "반등"', "dek": "선물이 올라요."},
+                                           "generated_at": "2026-10-26T21:17:00+09:00"})
+    _publish(tmp_path, "2026-10-27", "close", {"market_title": "개미만 팔았다"})
+    assert g.write_briefings_rss() is True
+    doc = xml.dom.minidom.parse(str(tmp_path / "rss.xml"))
+    items = doc.getElementsByTagName("item")
+    titles = [i.getElementsByTagName("title")[0].firstChild.data for i in items]
+    assert titles == ["코스피 마감 시황 10월 27일 | 개미만 팔았다", '미국 증시 전망 10월 26일 | S&P "반등"']
+    dates = [i.getElementsByTagName("pubDate")[0].firstChild.data for i in items]
+    assert dates == ["Tue, 27 Oct 2026 16:30:00 +0900", "Mon, 26 Oct 2026 21:17:00 +0900"]   # 스냅샷 시각 없으면 정해진 발행 시각
+
+
+def test_rss_not_written_without_briefings(tmp_path, monkeypatch):
+    monkeypatch.setattr(g, "BRIEFINGS_DIR", tmp_path)
+    assert g.write_briefings_rss() is False
+    assert not (tmp_path / "rss.xml").exists()

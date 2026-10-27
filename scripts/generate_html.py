@@ -2216,6 +2216,66 @@ def write_briefings_index():
     print(f"[generate_html] 아카이브 갱신: {shown} "
           f"({ctx['total']}편 / {len(ctx['months'])}개월)")
     write_stocks_recent_briefings()
+    write_briefings_rss()
+
+
+# 브리핑 RSS(2026-10-27) — 네이버 서치어드바이저에 제출해 새 브리핑이 빨리 수집되게 한다.
+# 아카이브와 같은 자리·같은 원본(디스크에 커밋된 발행본)으로 만든다. 제목·설명은 페이지 <head>와 같은 briefing_head.
+# 파일은 BRIEFINGS_DIR 안에 둔다 — 테스트가 BRIEFINGS_DIR을 임시 폴더로 바꾸면 피드도 함께 따라간다.
+RSS_ITEMS = 30
+
+
+def _briefing_pub_date(date_str: str, btype: str, analysis: dict) -> str:
+    """RFC 822 발행 시각. 스냅샷 generated_at, 없으면 정해진 발행 시각(SCHEDULED_TIMES)."""
+    from email.utils import format_datetime
+    try:
+        dt = datetime.fromisoformat(analysis.get("generated_at") or "")
+        if dt.tzinfo is None:
+            dt = KST.localize(dt)
+    except (TypeError, ValueError):
+        h, m = SCHEDULED_TIMES[btype].split(":")
+        dt = KST.localize(datetime.fromisoformat(date_str).replace(hour=int(h), minute=int(m)))
+    return format_datetime(dt.astimezone(KST))
+
+
+def write_briefings_rss(n: int = RSS_ITEMS) -> bool:
+    """web/briefings/rss.xml — 최신 발행본 n편. 발행본이 없으면 쓰지 않는다."""
+    if not BRIEFINGS_DIR.exists():
+        return False
+    dates = sorted((p.name for p in BRIEFINGS_DIR.iterdir()
+                    if p.is_dir() and re.fullmatch(r"\d{4}-\d{2}-\d{2}", p.name)), reverse=True)
+    items = []
+    for d in dates:
+        for t in ARCHIVE_TYPES:
+            if len(items) >= n:
+                break
+            if not (BRIEFINGS_DIR / d / t / "index.html").exists():
+                continue
+            snap = BRIEFINGS_DIR / d / t / "analysis_snapshot.json"
+            try:
+                analysis = load_json(snap) if snap.exists() else {}
+            except Exception:
+                analysis = {}
+            head = briefing_head(analysis, t, d)
+            url = f"{SITE_BASE}/briefings/{d}/{t}/"
+            items.append(
+                f"    <item>\n      <title>{head['title']}</title>\n      <link>{url}</link>\n"
+                f"      <guid isPermaLink=\"true\">{url}</guid>\n"
+                f"      <pubDate>{_briefing_pub_date(d, t, analysis)}</pubDate>\n"
+                f"      <description>{head['description']}</description>\n    </item>")
+    if not items:
+        return False
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n  <channel>\n'
+           '    <title>Double-Shot AI 투자 브리핑</title>\n'
+           f'    <link>{SITE_BASE}/briefings/</link>\n'
+           f'    <atom:link href="{SITE_BASE}/briefings/rss.xml" rel="self" type="application/rss+xml"/>\n'
+           '    <description>매일 아침 코스피 시초가 예측, 오후 코스피 마감 시황, 저녁 미국 증시 전망 브리핑</description>\n'
+           '    <language>ko</language>\n'
+           + "\n".join(items) + "\n  </channel>\n</rss>\n")
+    (BRIEFINGS_DIR / "rss.xml").write_text(xml, encoding="utf-8")
+    print(f"[generate_html] RSS 갱신: {len(items)}편")
+    return True
 
 
 # /stocks/ 맨 아래 '최근 브리핑' — 크롤러가 스크립트 없이 읽는 정적 목록(2026-10-27, §70).

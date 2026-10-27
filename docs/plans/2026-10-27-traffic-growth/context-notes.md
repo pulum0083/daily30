@@ -9,3 +9,7 @@
 - 발행본 188편은 재생성하지 않고 `<head>`의 6줄만 같은 함수(`briefing_head`)로 바꿨다(일회성 스크립트, 본문 diff 0).
 - 2번(구독 입구) 취소: 세 브리핑 모두 사이드바에 텔레그램 구독 카드(`sections/_sidebar_kospi.html`)가 이미 있고, 모바일에선 본문 아래로 내려와 페이지 끝에 보인다. 클릭은 GA4 `telegram_click` 이벤트로 이미 집계된다(main.js). 처음 판단은 `briefings/*.html`만 grep하고 `sections/`를 안 봐서 틀렸다 — 만들었던 카드는 전부 되돌렸다.
 - 같이 발견: 10/27 마감 브리핑(16:30 발행)은 광고 일괄 삽입보다 늦게 나왔는데 템플릿 반영 전 코드로 만들어져 광고 칸이 없었다. 그 한 편만 채웠다.
+- 3번 RSS: `/briefings/rss.xml`(최신 30편). 파일을 `BRIEFINGS_DIR` 안에 둔 건 테스트가 그 경로를 임시 폴더로 바꾸면 피드도 따라가게 하려고서다 — `/stocks/` 최근 브리핑 때 테스트가 실제 페이지를 덮어쓴 일이 있었다. `write_briefings_index()` 끝에서 함께 갱신돼 세 브리핑 잡이 `git add web/`로 커밋한다.
+- 제목·설명은 페이지 `<head>`와 같은 `briefing_head`. pubDate는 스냅샷 `generated_at`, 없으면 정해진 발행 시각.
+- 네이버 인증 태그는 `/stocks/`(사이트 첫 화면 — `/`가 301로 오는 곳)에만 없어서 넣었다. RSS 링크는 base.html과 `/stocks/`에.
+- 서치어드바이저 RSS 제출은 사용자가 직접 해야 한다(로그인 필요).
