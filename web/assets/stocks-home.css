@@ -229,21 +229,14 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* 홈은 PC에서도 1단 — '더 보기'를 뺀 뒤 왼쪽 칸이 비어 특이 신호가 1/3 칸에 갇혔다(§52). 특이 신호 전체 화면의 2단은 그대로. */
 #home .home-cols{grid-template-columns:minmax(0,1fr);}
 .home-full{grid-column:1/-1;}
-#today-line{display:flex;align-items:center;gap:9px;background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:11px 15px;margin-bottom:12px;font-size:13px;line-height:1.5;color:var(--ink);}
 .sbx-block .sbx-hdr{background:var(--canvas);border-bottom:1px solid var(--hair);border-radius:10px 10px 0 0;}
 .sbx-block .sbx-hdr .block__h{border-bottom:none;}
-.sbx-block #today-line{background:none;border:none;box-shadow:none;padding:0 16px 11px;margin-bottom:0;color:var(--muted);}
-#today-line .tl-ic{flex:none;font-size:16px;}
-#today-line .tl-tone{font-weight:800;}
-#today-line .tl-tone.up{color:var(--up);}#today-line .tl-tone.dn{color:var(--dn);}
-#today-line b{font-weight:800;}
-#today-line .tl-lead b{color:var(--up);}#today-line .tl-lag b{color:var(--dn);}
 .home-side .barwrap{display:none;}
 .home-side .nm{flex:1;min-width:0;}
 /* 모바일: home-main/home-side를 display:contents로 풀어 3블록을 단일 그리드 아이템으로 만들고,
    order로 특이 신호(맨 위)·밸류에이션(맨 아래) 순서를 PC와 독립적으로 제어한다. */
 @media(max-width:900px){.home-cols{grid-template-columns:minmax(0,1fr);row-gap:0;}.home-main,.home-side{display:contents;}.home-side .barwrap{display:block;}.sig-block{order:-1;}.val-block{order:1;}}
-/* ── 섹터별 종목 브라우저 ── */
+/* ── 섹터 한눈에 머리 배지 ── */
 .sbx-live{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;border-radius:999px;padding:3px 10px;vertical-align:middle;}
 .sbx-live .sl-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
 .sbx-live.on{background:#FEF2F2;color:#E03131;}
@@ -251,66 +244,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-live.off{background:var(--inset);color:var(--muted);}
 .sbx-live.off .sl-dot{background:#94A3B8;}
 @keyframes slblink{0%,100%{opacity:1}50%{opacity:.2}}
-/* 섹터 탭 — PC에서도 섹션(.sbx-block) 내부 스크롤 중엔 GNB 아래 고정, 섹션을 벗어나면(부모 하단) 자동 해제.
-   부모 .block의 overflow:hidden이 sticky 기준을 깨뜨려 이 카드만 overflow를 풀고, 모서리 둥근 처리를 자식에 직접 부여해 유지. */
 .sbx-block{overflow:visible;}
 .sbx-block .block__h{border-radius:10px 10px 0 0;}
-.sbx-block .sbx-body{border-radius:0 0 10px 10px;}
-/* top:108px = GNB 52 + 서브탭 40 + 서브탭 margin-bottom 16.
-   서브탭(#ds-subnav)이 sticky top:52px이라 예전 값 52px을 그대로 두면 정면으로 겹쳐
-   이 칩들의 윗부분이 잘린다. ds-subnav.css의 top/margin을 바꾸면 이 값도 같이 고칠 것. */
-.sbx-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:12px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);position:sticky;top:108px;z-index:5;}
-.sbx-tab{font-size:13px;font-weight:600;color:var(--ink);background:var(--soft);border:1px solid var(--hair);border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;transition:border-color .12s,color .12s,background .12s;}
-.sbx-tab:hover{border-color:var(--primary);color:var(--primary);}
-.sbx-tab.on{border-color:var(--primary);color:var(--primary);background:color-mix(in srgb,var(--primary) 8%,transparent);font-weight:800;}
-.sbx-tab .rt{font-weight:800;font-variant-numeric:tabular-nums;margin-left:5px;font-size:12px;}
-.sbx-tab .rt.up{color:var(--up);}.sbx-tab .rt.down{color:var(--dn);}.sbx-tab .rt.flat{color:var(--muted);}
-.sbx-cov-note{font-size:12px;line-height:1.55;color:#64748B;padding:10px 16px;background:var(--canvas);border-bottom:1px solid var(--hair);}
-.sbx-cov-note b{color:var(--ink);}
-.sbx-body{padding:16px;background:var(--canvas);}
-.sbx-stat{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
-.sbx-stat__box{background:#F8FAFC;border:1px solid #EEF2F7;border-radius:10px;padding:9px 14px;flex:1;min-width:104px;}
-.sbx-stat__label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
-.sbx-stat__val{font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:2px;}
-.sbx-stat__val.up{color:var(--up);}.sbx-stat__val.down{color:var(--dn);}.sbx-stat__val.flat{color:var(--muted);}
-.sbx-breadth{margin-bottom:16px;}
-.sbx-breadth__label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;}
-.sbx-breadth__bar{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;}
-.sbx-breadth__up{background:var(--up);}.sbx-breadth__dn{background:var(--dn);}
-.sbx-breadth__legend{display:flex;gap:14px;margin-top:5px;}
-.sbx-breadth__legend span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;}
-.sbx-breadth__legend i{width:8px;height:8px;border-radius:2px;display:inline-block;}
-.sbx-breadth__legend .iu{background:var(--up);}.sbx-breadth__legend .id{background:var(--dn);}
-.sbx-list-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px;}
-.sbx-list-head__t{font-size:13px;font-weight:800;color:var(--ink);}
-.sbx-list-head__sort{font-size:11px;font-weight:600;color:var(--muted);}
-.sbx-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
-.scard{display:block;text-decoration:none;background:#F8FAFC;border:1px solid #EEF2F7;border-radius:14px;padding:14px 15px;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .14s,box-shadow .14s,transform .14s;}
-.scard:hover{border-color:var(--primary);box-shadow:0 4px 14px rgba(37,117,237,.10);transform:translateY(-1px);}
-.scard__head{display:flex;align-items:baseline;gap:7px;margin-bottom:8px;}
-.scard__name{font-size:15px;font-weight:800;color:var(--ink);}
-.scard__code{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;}
-.scard__price{display:flex;align-items:baseline;gap:8px;}
-.scard__close{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;}
-.scard__pct{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
-.scard__pct.up{color:var(--up);}.scard__pct.down{color:var(--dn);}.scard__pct.flat{color:var(--muted);}
-/* 실시간 시세 로딩 중 빗금 placeholder — 스냅샷(전일 종가) 숫자를 먼저 보였다가 라이브로 튀는 혼란 방지.
-   장중인데 아직 해당 섹터 /api/stocks-live 응답 전이면 숫자 대신 대각선 해치를 그리고, 도착하면 최종값으로 한 번에 채운다. */
-.scard__skel{display:inline-block;vertical-align:middle;border-radius:4px;background-image:repeating-linear-gradient(45deg,#D3DAE3 0,#D3DAE3 3px,#EEF2F7 3px,#EEF2F7 6px);background-size:200% 100%;animation:skelHatch .8s linear infinite;}
-@keyframes skelHatch{to{background-position:8.49px 0;}}
-.scard__spark{margin:9px 0 7px;height:34px;position:relative;}
-.scard__spark svg{width:100%;height:34px;display:block;overflow:visible;}
-/* 곡선 끝의 실시간 점 — SVG는 preserveAspectRatio:none으로 가로만 늘어나 원이 타원으로 찌그러지므로
-   SVG 밖의 일반 HTML 원(고정 px, border-radius:50%)으로 그려 기기 폭과 무관하게 항상 정원을 유지한다. */
-.spark-livedot{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;animation:sparkdotpulse 1.6s ease-in-out infinite;pointer-events:none;}
-@keyframes sparkdotpulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.7);opacity:.35;}}
-.scard__range{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
-.scard__posbar{position:relative;height:4px;border-radius:3px;background:var(--hair);margin:6px 0 2px;overflow:hidden;}
-.scard__posfill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#2775ED33,#2775ED);}
-.scard__posfill.up{background:linear-gradient(90deg,#E0313133,#E03131);}
-.scard__pos{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--ink);transform:translate(-50%,-50%);}
-.scard__poslbl{font-size:11px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;}
-.scard__fr-h{margin-left:auto;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;}
 /* 오늘의 특이 신호 */
 .sig{display:block;padding:13px 32px 13px 16px;border-bottom:1px solid #F1F5F9;cursor:pointer;text-decoration:none;background:var(--canvas);position:relative;}
 .sig-go{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#CBD5E1;opacity:0;transition:opacity .15s;}
@@ -709,11 +644,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .two{grid-template-columns:minmax(0,1fr);}
   .hero{gap:14px;}
   .hero .search{min-width:0;width:100%;}
-  /* 섹터별 종목 탭 — sticky 자체는 base 규칙(.sbx-tabs)으로 이동해 PC에도 적용됨.
-     모바일 전용 추가: 가로 스크롤 탭(줄바꿈 대신 스와이프) + 등락률 숨김(공간 절약). */
-  #sbx-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;}
-  #sbx-tabs::-webkit-scrollbar{display:none;}
-  #sbx-tabs .rt{display:none;}
   /* 지수+수급 한 줄이 안 들어가는 폭 — 수급을 아래 줄로 내리고 구분선을 세로에서 가로로 바꾼다. */
   .strip,.supply{flex-basis:100%;}
   .supply{border-left:none;border-top:1px solid var(--hair);}
@@ -997,9 +927,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ld-px{display:block;font-size:15px;font-weight:800;margin-top:2px}
 .ld-pc{font-style:normal;font-size:12px;font-weight:700}
 .ld-pc.up{color:#E03131}.ld-pc.dn{color:#2775ED}
-.ld-more,.sbx-more{margin-top:8px}
-.ld-more>summary,.sbx-more>summary{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:600}
-.ld-more[open]>summary,.sbx-more[open]>summary{margin-bottom:10px}
+.ld-more{margin-top:8px}
+.ld-more>summary{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:600}
+.ld-more[open]>summary{margin-bottom:10px}
 .sb-bars{display:flex;flex-direction:column}
 .sb{display:grid;grid-template-columns:64px 1fr 62px;align-items:center;gap:8px;padding:5px 0;font-size:13px;text-decoration:none;color:var(--ink)}
 .sb b{text-align:right;font-size:12.5px}
@@ -1012,9 +942,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 /* 섹터 카드는 자식이 각자 여백을 가진다(머리줄 11px 16px) — 막대·안내·펼치기도 같은 좌우 여백 */
 .sbx-block .sb-bars{padding:6px 16px 0}
-.sbx-block .sb-note{padding:0 16px}
-.sbx-block .sbx-more>summary{padding:6px 16px 12px}
-.sbx-block .sbx-more{margin-top:2px}
+.sbx-block .sb-note{padding:0 16px 12px}  /* 펼치기 줄이 빠져 카드 아래 여백을 직접 둔다(2026-10-27) */
 
 /* §68 ⑤ 구조 신호 — 나스닥 체크 게이지(0·60·70 눈금) + 월봉 5개월선 미니 막대. 아침·밤·주말에만 */
 #struct-sig[hidden]{display:none}
