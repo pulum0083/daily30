@@ -240,6 +240,51 @@ QUOTE_TODAY_FILE = DATA_DIR / "quote_today.json"
 SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
 
 
+# 텔레그램 말풍선은 가장 긴 줄만큼 넓어지고 화면 끝에서야 접힌다 — 긴 문장 하나가 있으면 말풍선이 오른쪽 끝까지 찬다.
+# 본문 줄을 구분선(─ 20칸) 너비에서 미리 접어 말풍선이 구분선 폭에 머물게 한다(사용자 요청 2026-10-27).
+NARROW_WIDTH = 20.0
+
+
+def _char_w(ch: str) -> float:
+    """한글·한자·이모지·구분선 기호는 1칸, 영문·숫자·문장부호는 약 0.55칸, 공백은 0.3칸으로 센다."""
+    if ch == " ":
+        return 0.3
+    return 0.55 if ord(ch) < 0x2000 else 1.0
+
+
+def _visible_w(s: str) -> float:
+    import re
+    return sum(_char_w(c) for c in re.sub(r"<[^>]+>", "", s))
+
+
+def narrow_lines(text: str, width: float = NARROW_WIDTH) -> str:
+    """각 줄을 width 칸 안에서 띄어쓰기 단위로 접는다. 링크가 든 줄·구분선·빈 줄은 그대로 둔다.
+    HTML 태그는 너비에 세지 않고 그대로 둔다(<b>…</b> 안의 줄바꿈은 텔레그램이 허용한다).
+    한 단어가 width보다 길면 자르지 않는다(단어를 쪼개면 읽기 어렵다)."""
+    out = []
+    for line in text.split("\n"):
+        if "http" in line:
+            # 주소는 띄어쓰기 없이 길어 접을 수 없다 — 설명과 주소를 나눠 주소만 한 줄을 쓰게 한다
+            i = line.find("http")
+            if line[:i].strip():
+                out.append(line[:i].rstrip())
+            out.append(line[i:])
+            continue
+        if _visible_w(line) <= width or not line.strip(" ─━"):
+            out.append(line)
+            continue
+        cur = ""
+        for word in line.split(" "):
+            cand = word if not cur else cur + " " + word
+            if cur and _visible_w(cand) > width:
+                out.append(cur)
+                cur = word
+            else:
+                cur = cand
+        out.append(cur)
+    return "\n".join(out)
+
+
 def pick_quote() -> str:
     """오늘 코스피 브리핑이 뽑아둔 quote_today.json을 우선 쓰고,
     없거나 날짜가 오늘이 아니면 guru_quotes.json에서 랜덤으로 뽑는다.
@@ -405,6 +450,8 @@ def main():
 
     # 명언 추가
     message_text = message_text.rstrip() + pick_quote()
+    # 말풍선이 화면 끝까지 차지 않게 본문 줄을 구분선 폭에서 접는다(명언 포함)
+    message_text = narrow_lines(message_text)
 
     # ── 날짜 유효성 검사: 오늘 날짜가 아닌 stale 메시지 발송 차단 ──
     if not args.force:
