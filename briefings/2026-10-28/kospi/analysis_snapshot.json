@@ -1,0 +1,179 @@
+{
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 85,
+    "down_pct": 15,
+    "confidence": 82,
+    "basis": "open"
+  },
+  "reason_title": "앤트로픽發 AI 랠리, 반도체 수출 222%가 쐐기 박다",
+  "todays_view": {
+    "view_title": "한국 반도체 수출 숫자가 오늘 가장 강력한 펀더멘털 근거예요.",
+    "dek": "앤트로픽 IPO 추진과 브로드컴 대규모 자금 조달 소식이 간밤 나스닥까지 밀어 올렸어요. <b>SOX +3.60%</b>, 반도체 수출 <b>+222.5%</b> 숫자가 오늘 아침 코스피 갭을 또 열어줄 채비를 하고 있어요.",
+    "recap": [
+      {
+        "text": "코스피가 앤트로픽 IPO 기대감과 반도체 강세에 힘입어 <b>+3.09%</b> 급등했어요. 외국인과 기관이 동반 순매수하며 상승을 뒷받침했어요.",
+        "codes": []
+      },
+      {
+        "text": "반도체 대장주들이 상승을 주도했어요. 미국 반도체 ETF가 <b>+3.91%</b> 오른 영향을 받았어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "삼성바이오로직스가 홀로 약세였어요. 바이오 ETF(XBI)가 <b>+2.90%</b> 오른 것과 반대로 국내 바이오 대형주는 <b>-5.37%</b> 눌렸어요.",
+        "codes": [
+          "207940"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 새벽 FOMC 결과 발표(기준금리 동결 전망, 예상 <b>4.00%</b>)가 예정돼 있어요 — 발표 전까지는 관망 심리가 상단을 누를 수 있어요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "어제 +3% 급등 후 차익실현 매물이 나오는지 지켜보세요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인 순매수가 오늘도 이어지는지가 오늘 상승 폭을 결정해요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>한국 반도체 수출 숫자가 오늘 가장 강력한 펀더멘털 근거예요.</b> 10월 1~20일 반도체 수출이 전년 대비 <b>+222.5%</b> 급증했고 전체 수출의 <b>44.7%</b>를 차지했어요. 어제 외국인·기관 동반 순매수(각각 <b>+5,929억원</b>, <b>+2,820억원</b>)도 이 흐름을 뒷받침해요.",
+      "codes": []
+    },
+    {
+      "text": "<b>미 지수선물이 지금 이 순간 추가 상승 신호를 보내고 있어요.</b> NQ선물 <b>+1.25%</b>, S&P선물 <b>+0.54%</b>로 직전 종가보다 더 오른 채 거래되고 있어 갭이 유지될 가능성이 높아요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-10-28T07:28:46.815055+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-10-28T07:26:02.517260+09:00",
+    "briefing_date": "2026-10-28",
+    "us_session_date": "2026-10-27",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "MSFT 실적 — 애저 성장률 47% 넘기나가 핵심",
+        "sides": [
+          {
+            "side": "up",
+            "label": "클라우드·AI 인프라",
+            "marks": [
+              {
+                "ticker": "MSFT",
+                "name": "MSFT",
+                "pct": -0.24
+              },
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": 0.9
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": 4.0
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "클라우드·AI 인프라는 <b>엇갈렸어요</b>"
+      },
+      {
+        "title": "테슬라 3분기 실적 두고 월가 전망 엇갈려",
+        "sides": [
+          {
+            "side": "down",
+            "label": "테슬라",
+            "marks": [
+              {
+                "ticker": "TSLA",
+                "name": "TSLA",
+                "pct": 4.04
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "테슬라는 <b>올랐어요</b>"
+      },
+      {
+        "title": "메모리 반도체·SOX, 프리마켓서 강한 반등 신호",
+        "sides": [
+          {
+            "side": "up",
+            "label": "메모리·반도체 장비",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 2.77
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": 2.15
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": 1.41
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 2.98
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "메모리·반도체 장비는 <b>나란히 올랐어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-10-28",
+    "generated_at": "2026-10-28T07:26:02.640916+09:00",
+    "universe": 46,
+    "screened": 46,
+    "failed": [],
+    "items": [],
+    "repeat_hidden": [
+      "메리츠금융지주"
+    ]
+  },
+  "prev_prediction_result": {
+    "date": "2026-10-27",
+    "direction": "상승 우위",
+    "ok": true,
+    "open_pct": 3.46
+  },
+  "prior_signals": {
+    "sox": 3.6,
+    "nasdaq": 1.18,
+    "nq": 1.25,
+    "ewy_resid": 0.033,
+    "vix": -4.7308
+  },
+  "prev_supply": {
+    "date": "20261027",
+    "individual": -9494,
+    "institution": 2820,
+    "foreign": 5929
+  }
+}
