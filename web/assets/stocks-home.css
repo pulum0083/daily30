@@ -972,6 +972,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .nqg-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
 #struct-sig .nqg-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
 #struct-sig .nqg-l span:first-child{transform:none}
+/* 65·70 눈금이 가까워 가운데 맞춤이면 두 라벨이 겹친다(2026-10-27) — '65 주의'는 눈금 왼쪽에 끝을 맞추고, '70 경고'는 빨간 구간 오른쪽 끝에 붙인다 */
+#struct-sig .nqg-l span.l65{transform:translateX(calc(-100% - 3px))}
+#struct-sig .nqg-l span.l70{left:auto;right:0;transform:none}
 #struct-sig .m5bars{display:flex;gap:6px;margin-top:9px;height:58px}
 #struct-sig .m5b{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
 #struct-sig .m5b-u,#struct-sig .m5b-d{flex:1;display:flex;justify-content:center}
