@@ -190,12 +190,12 @@
       '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점</em></a>';
   }
 
-  // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 그 사실을 적는다.
+  // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
   function ma5Row(m5, ymd, today) {
     if (!m5 || !Array.isArray(m5.items)) return '';
     var head = '<div class="ss-h"><span class="ss-k">월봉 5개월선 안착</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 코스피 브리핑</span></div>';
     var it = m5.items[0];
-    if (!it) return '<a class="ss" href="/briefings/' + ymd + '/kospi/">' + head + '<em>조건을 채운 종목이 없어요</em></a>';
+    if (!it) return '';   // 실을 종목이 없으면 줄째 뺀다 — '없어요' 같은 빈 문구를 쓰지 않는다(사용자 결정 2026-10-27)
     var strip = (it.strip || []).filter(function (s) { return typeof s.gap_pct === 'number'; }).slice(-6);
     var mx = Math.max.apply(null, strip.map(function (s) { return Math.abs(s.gap_pct); }).concat([1]));
     var bars = strip.map(function (s) {
