@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-10-27T10:01:05.271720+09:00",
+  "generated_at": "2026-10-27T10:30:53.371328+09:00",
   "date": "2026-10-27",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 4.69,
-      "surge": 0.22,
+      "changePct": 5.16,
+      "surge": 0.29,
       "events": [
         {
           "time": "09:27",
           "headline": "앤트로픽 IPO 기대감…삼성전자 5%·하이닉스 7%↑",
           "url": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5YSkVYVDY4WFQxOWZRcjlPRXRZdzMzczNjY0NiblBwYmlOYTUtdU1QT1NfYVprQ0ZEQTJwbkFfcWktaEpsZnI2VXZDWHliYnZuamZFbXFoaGRsUEk?oc=5",
           "source": "에너지경제신문",
-          "why": "앤트로픽의 IPO 기대감이 삼성전자 주가 상승에 긍정적인 영향을 미쳤다.",
+          "why": "앤트로픽의 IPO 기대감이 삼성전자 주가를 5% 상승시켰다.",
           "tier": "why",
           "sentiment": "pos"
         },
@@ -31,9 +31,18 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 6.43,
-      "surge": 0.27,
+      "changePct": 8.0,
+      "surge": 0.35,
       "events": [
+        {
+          "time": "08:59",
+          "headline": "금융위기 급 저평가 ‘삼성전자·SK하이닉스’...‘120조원’ 주주환원, 주가반등 계기될까",
+          "url": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE10NFZMS0psTnkxbXF1bGg1QjFrMS1waF9FNEp0djE0R1d3MFo1Q0dOUTRqMDJqM1Nfd050a25ubklLVm1zV2ktYklEQTJaaFg4ai1YRzY0R0fSAVRBVV95cUxQaW94Q2JKMGgxbElPS1lfV2luTGRrNGNxekQ2d21HWjFmRk5ROU1icTRnVHlyYU5RWGFPM1N4anloSmRVNThqZi1wN1otXzdtOWI4ZDU?oc=5",
+          "source": "세계일보",
+          "why": "금융위기 급 저평가된 삼성전자와 SK하이닉스가 120조원의 주주환원 정책으로 주가 반등을 노리고 있다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
         {
           "time": "09:44",
           "headline": "SK하이닉스 주가, 오늘 급등한 이유는?",
@@ -42,30 +51,21 @@
           "why": "SK하이닉스 주가, 오늘 급등한 이유는?",
           "tier": "why",
           "sentiment": "pos"
-        },
-        {
-          "time": "07:01",
-          "headline": "'영업이익 76조' 전망에도 주가 30% 급락...SK하이닉스, 28일 실적 발표",
-          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1UdFpjRlBXUGhSNkdydlF6R0xjUjFwWkxDTUF6bVozV3pNbVQ2bkJLQlFMRUpqWVhROTdFV2hzMnFPVGhreVo3WDcxZzlrcnUyck1FT0JiN2l6eHFDVXMxVExn?oc=5",
-          "source": "KBC광주방송",
-          "why": "'영업이익 76조' 전망에도 불구하고 SK하이닉스 주가가 30% 급락했으며, 28일 실적 발표를 앞두고 있다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "neg"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 1.56,
-      "surge": 0.15,
+      "changePct": 1.74,
+      "surge": 0.21,
       "events": [
         {
           "time": "09:40",
           "headline": "현대차 주가, 10월 27일 장중 292,500원 1.56% 상승",
           "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5mWVhQMGxzVUhwdWdpcWJLaTV5M3IzX0hFNXlRWGNDZF9EbjJCWkNnZW5nY0FMcDlsVWJVSHhHUk96U0cxVVdSMHZCLVB0XzN6cXdHb0lfUlEyMnhuYWRlYUFSSUI2QklQUUZ1eW52SGhwZw?oc=5",
           "source": "톱스타뉴스",
-          "why": "현대차 주가는 10월 27일 장중 1.56% 상승한 292,500원을 기록했다. (개별 인과 단정 안 함)",
+          "why": "현대차 주가가 10월 27일 장중 1.56% 상승하여 292,500원을 기록했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
