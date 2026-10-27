@@ -106,10 +106,9 @@ def send_message(bot_token: str, chat_id: str, text: str) -> dict:
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "HTML",
-        # 링크 프리뷰를 켜되 썸네일 없는 '텍스트 카드'로 표시한다. 브리핑 페이지는 og:image를
-        # 내보내지 않으므로(generate_html no_og_image) 텔레그램이 도메인·제목·설명만 그린다.
-        # prefer_small_media는 혹시 다른 이미지가 잡혀도 크게 뜨지 않게 하는 안전장치.
-        "link_preview_options": json.dumps({"is_disabled": False, "prefer_small_media": True}),
+        # 링크 미리보기를 끈다(2026-10-27 사용자 결정). 브리핑 페이지는 공유 카드(og.png)를
+        # 내보내는데, 텔레그램에는 미리보기를 남기고 이미지만 빼는 옵션이 없다. 링크는 그대로 눌린다.
+        "link_preview_options": json.dumps({"is_disabled": True}),
     }
     data = urllib.parse.urlencode(payload).encode("utf-8")
 

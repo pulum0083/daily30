@@ -1831,7 +1831,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
         # 공유 카드(2026-10-27) — write_output이 같은 폴더에 og.png를 만든다. 못 만들면 태그를 지운다.
-        # 텔레그램은 link_preview_options.prefer_small_media라 작은 썸네일로 뜬다.
+        # 텔레그램 메시지는 링크 미리보기를 끈다(send_telegram) — 이 카드는 카카오톡·X 공유용이다.
         "og_image": f"{canonical_url}og.png",
     }
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
