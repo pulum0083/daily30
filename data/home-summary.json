@@ -1,12 +1,6 @@
 {
- "date": "2026-10-26",
+ "date": "2026-10-27",
  "kospi_days": [
-  {
-   "date": "2026-10-13",
-   "close": 6035.35,
-   "pct": -5.46,
-   "open_pct": -3.1
-  },
   {
    "date": "2026-10-14",
    "close": 6008.81,
@@ -60,15 +54,15 @@
    "close": 5469.47,
    "pct": -1.46,
    "open_pct": -0.92
+  },
+  {
+   "date": "2026-10-27",
+   "close": 5638.34,
+   "pct": 3.09,
+   "open_pct": 3.46
   }
  ],
  "scores": [
-  {
-   "date": "2026-10-13",
-   "direction": "하락 우위",
-   "open_pct": -3.1,
-   "ok": true
-  },
   {
    "date": "2026-10-14",
    "direction": "상승 우위",
@@ -122,57 +116,63 @@
    "direction": "상승 우위",
    "open_pct": -0.92,
    "ok": false
+  },
+  {
+   "date": "2026-10-27",
+   "direction": "상승 우위",
+   "open_pct": 3.46,
+   "ok": true
   }
  ],
  "sectors_week": [
   {
+   "key": "battery",
+   "label": "2차전지",
+   "pct": 0.58,
+   "n": 6
+  },
+  {
+   "key": "semicon",
+   "label": "반도체",
+   "pct": -0.03,
+   "n": 7
+  },
+  {
+   "key": "power",
+   "label": "전력기기",
+   "pct": -0.68,
+   "n": 5
+  },
+  {
    "key": "auto",
    "label": "자동차",
-   "pct": -1.55,
+   "pct": -0.74,
    "n": 6
   },
   {
    "key": "finance",
    "label": "금융",
-   "pct": -2.21,
+   "pct": -1.91,
    "n": 7
-  },
-  {
-   "key": "bio",
-   "label": "바이오",
-   "pct": -2.23,
-   "n": 6
-  },
-  {
-   "key": "battery",
-   "label": "2차전지",
-   "pct": -2.26,
-   "n": 6
-  },
-  {
-   "key": "power",
-   "label": "전력기기",
-   "pct": -3.05,
-   "n": 5
   },
   {
    "key": "ship",
    "label": "조선",
-   "pct": -3.6,
+   "pct": -2.95,
    "n": 4
   },
   {
-   "key": "semicon",
-   "label": "반도체",
-   "pct": -3.86,
-   "n": 7
+   "key": "bio",
+   "label": "바이오",
+   "pct": -3.85,
+   "n": 6
   },
   {
    "key": "defense",
    "label": "방산",
-   "pct": -5.28,
+   "pct": -4.32,
    "n": 5
   }
  ],
- "generated_at": "2026-10-26T16:34:59+09:00"
+ "generated_at": "2026-10-27T16:30:33+09:00"
 }
