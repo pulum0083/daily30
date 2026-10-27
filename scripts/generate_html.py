@@ -26,6 +26,7 @@ import pytz
 from jinja2 import Environment, FileSystemLoader
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from og_card import make_card
 from prediction_basis import OPEN as BASIS_OPEN, stats_rows, legacy_kospi_rows, outcome_pct
 
 try:
@@ -1829,8 +1830,9 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         "issue_slot": _issue_slot_map.get(internal_type, "MARKET"),
         **build_list_context(target_date, internal_type),
         **build_accuracy(internal_type),
-        # 브리핑 페이지는 og:image를 내보내지 않아 텔레그램 링크 프리뷰가 썸네일 없는 텍스트 카드로 뜬다.
-        "no_og_image": True,
+        # 공유 카드(2026-10-27) — write_output이 같은 폴더에 og.png를 만든다. 못 만들면 태그를 지운다.
+        # 텔레그램은 link_preview_options.prefer_small_media라 작은 썸네일로 뜬다.
+        "og_image": f"{canonical_url}og.png",
     }
     ctx["accuracy"] = bool(ctx.get("acc_30d_pct") is not None and (ctx.get("hit", 0) + ctx.get("miss", 0)) > 0)
 
@@ -1896,9 +1898,21 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
     return template.render(**ctx), analysis
 
 
+def strip_og_image(html: str) -> str:
+    """공유 카드를 못 만든 페이지에서 og:image·twitter:image를 지운다 — 없는 이미지를 가리키지 않게."""
+    html = re.sub(r'<meta (?:property="og:image"|name="twitter:image") content="[^"]*">\n?', "", html)
+    return html.replace('<meta name="twitter:card" content="summary_large_image">',
+                        '<meta name="twitter:card" content="summary">')
+
+
 def write_output(html: str, internal_type: str, target_date: str, analysis=None):
     out_dir = BRIEFINGS_DIR / target_date / internal_type
     out_dir.mkdir(parents=True, exist_ok=True)
+    card = make_card(analysis, internal_type, target_date)
+    if card:
+        (out_dir / "og.png").write_bytes(card)
+    else:
+        html = strip_og_image(html)
     (out_dir / "index.html").write_text(html, encoding="utf-8")
     print(f"[generate_html] wrote {out_dir.relative_to(BASE_DIR)}/index.html")
     # analysis snapshot 저장 — git에 커밋되어 재생성 시 날짜 오염을 방지함

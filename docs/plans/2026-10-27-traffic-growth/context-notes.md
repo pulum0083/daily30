@@ -13,3 +13,8 @@
 - 제목·설명은 페이지 `<head>`와 같은 `briefing_head`. pubDate는 스냅샷 `generated_at`, 없으면 정해진 발행 시각.
 - 네이버 인증 태그는 `/stocks/`(사이트 첫 화면 — `/`가 301로 오는 곳)에만 없어서 넣었다. RSS 링크는 base.html과 `/stocks/`에.
 - 서치어드바이저 RSS 제출은 사용자가 직접 해야 한다(로그인 필요).
+- 4번 카드: `scripts/og_card.py`가 Pillow로 1200×630 PNG를 그린다. 글자는 analysis에 이미 있는 헤드라인·예측 방향·확률뿐이다(§0). 마감 카드엔 수치를 넣지 않는다 — 지수 종가는 시장 데이터 파일에 있어 재생성 때 다른 날 값이 섞일 수 있다.
+- 폰트: Pretendard Bold·Medium 원본(OFL)을 `scripts/fonts/`에 넣었다(각 2.6MB). 서브셋은 크기가 20%만 줄고, OFL 예약 글꼴 이름 조항과 엇갈릴 수 있어 원본을 쓴다.
+- `write_output`이 og.png를 쓰고, 못 만들면 og:image·twitter:image 태그를 지운다 — 없는 이미지를 가리키지 않게. `no_og_image` 스위치는 쓰는 곳이 없어져 base.html에서 지웠다.
+- 발행본 188편에는 카드를 만들지 않았다(약 8.5MB). 공유는 대부분 갓 나온 브리핑이라 새 발행부터 붙는다.
+- 텔레그램은 `prefer_small_media`라 미리보기에 작은 썸네일로 이 카드가 뜬다(예전엔 이미지가 없어 글자 카드였다).
