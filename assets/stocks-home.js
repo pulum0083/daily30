@@ -552,6 +552,9 @@ function _stockToast(msg){
 // 종목 클릭 → 그 종목의 섹터 페이지(2026-10-26 종목 상세 페이지 제거 — 사용자 결정, §36).
 // 홈의 종목 클릭 진입점(검색·특이신호·섹터 카드 등)이 전부 이 함수를 지난다. 섹터는 스냅샷(STOCK_LIST)에서 찾고,
 // 아직 못 불러왔거나 유니버스 밖 종목이면 막지 않고 안내만 띄운다.
+// 섹터 키 → 이름. goStock이 전역 함수라 이 표도 전역에 둔다 — 아래 IIFE 안에만 있으면 검색에서 종목을 눌렀을 때
+// ReferenceError로 이동하지 못했다(2026-10-27 발견).
+var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
 function goStock(code){
   var s=STOCK_LIST.find(function(x){return x.code===code;});
   if(s&&s.sector&&SECTOR_LABELS[s.sector]){
@@ -637,7 +640,6 @@ document.querySelectorAll('.chart-wrap').forEach(wrap=>{
 let SIGNALS_HOME=[];  // 홈 특이신호 (정렬 재적용용)
 let SIGNALS_ALL=[];   // 특이 신호 전체(더보기 화면용) — /api/signals.signalsAll
 let SIG_ASOF=null;    // 신호 기준일 메타(제목 prefix용)
-let sigAllSort='up'; // score | up | dn
 
 /* AI 뱃지 툴팁 — position:fixed (카드 overflow에 안 잘림) */
 const tip=document.getElementById('tip');
@@ -1046,8 +1048,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 /* 외국인 보유율·섹터 브라우저·특이 신호 — stocks-snapshot.json·/api/signals 실측 배선 */
 (function(){
   var SNAP=null;
-  var SIG_SECTORS=null, SIG_KOSPI=null; // /api/signals가 내려주는 전 섹터 라이브 평균·코스피% (장중 2분 갱신)
-  var SECTOR_LABELS={semicon:'반도체',battery:'2차전지',auto:'자동차',defense:'방산',ship:'조선',bio:'바이오',finance:'금융',power:'전력기기'};
+  var SIG_SECTORS=null; // /api/signals가 내려주는 전 섹터 라이브 평균 (장중 5분 갱신)
   function sparkSvg(vals,color){
     if(!vals||vals.length<2) return '';
     var n=vals.length,min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
@@ -1060,7 +1061,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 섹터 화면(#sector)은 2026-09-02에 제거됐다. 홈에서 섹터 상세 페이지로 가는 링크가
   // 0개였고(JS도 주입하지 않았다) '패시브 쏠림'은 실측 소스 없는 자리표시자였다.
   // 섹터 상세는 /stocks/sector/{key}/ 정적 페이지가 계속 담당한다.
-  // SECTOR_LABELS·secLbl은 남긴다 — 섹터 박스(sbx) 위젯이 계속 쓴다.
+  // SECTOR_LABELS는 전역(goStock 위)에 있다 — 특이 신호·섹터 막대·goStock이 같이 쓴다.
   /* ── 오늘의 특이 신호 · 신호별 랭킹 · ETF 4카드 — /api/signals 실측 배선 ── */
   function phaseLabel(phase){ return phase==='intraday' ? '<span class="dot"></span>장중 실시간 · 2분 간격' : '장 마감 기준'; }
   function setBadge(id, phase){ var b=document.getElementById(id); if(!b) return; b.className=phase==='intraday'?'upd-badge is-live':'close-pill'; b.innerHTML=phaseLabel(phase); }
@@ -1089,72 +1090,36 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
       +'<span class="sig-rbadges">'+badges+'</span></span>'
       +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</'+tag+'>';
   }
-  // 홈은 신호 강도 상위 3개만(2026-10-26, §68) — 정렬·전체 목록은 특이신호 화면이 맡는다.
+  // 특이 신호는 상승률순(많이 오른 종목이 위) 하나로만 보여준다(2026-10-27). 홈은 그중 위 3개.
   var SIG_HOME_N=3;
+  function sigByRise(list){ return (list||[]).slice().sort(function(a,b){return (b.pct||0)-(a.pct||0);}); }
   function sigHomeRender(){
     var w=document.getElementById('sig-rows'); if(!w) return;
-    var arr = SIGNALS_HOME.slice(0, SIG_HOME_N);
-    w.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i);}).join(''):'';
+    var arr = sigByRise(SIGNALS_HOME).slice(0, SIG_HOME_N);
+    w.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i,'오늘 가장 많이 오른 신호');}).join(''):'';
     w.classList.remove('sig-updated'); void w.offsetWidth; w.classList.add('sig-updated');
     setTimeout(function(){w.classList.remove('sig-updated');}, 600);
   }
   // 테스트 훅 — 존재-게이트(상세 페이지 있는 종목만 링크) 회귀 검증용.
-  window.__sigHome={sigItemHtml:sigItemHtml, SIG_HOME_N:SIG_HOME_N};
+  window.__sigHome={sigItemHtml:sigItemHtml, SIG_HOME_N:SIG_HOME_N, sigByRise:sigByRise};
 
   function applySignals(d){
     setBadge('sig-upd-badge', d.phase);
     SIGNALS_HOME=d.signals||[];
-    SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender(); sigAllDnRender();
+    SIGNALS_ALL=d.signalsAll||d.signals||[]; SIG_ASOF=d.asOf; sigAllRender();
     var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(d.asOf)+' 특이 신호';
     sigHomeRender();
-    // 전 섹터 라이브 평균·코스피%를 배너에 반영 — 장중에도 버틴/밀린 섹터가 후행하지 않는다
+    // 전 섹터 라이브 평균을 섹터 막대에 반영
     if(d.sectors) SIG_SECTORS=d.sectors;
-    if(typeof d.kospiPct==='number') SIG_KOSPI=d.kospiPct;
-    if(SNAP&&!sbxUserPicked&&d.sectors){ var k=sbxPickDefault(); if(k!==sbxActiveKey){ sbxActiveKey=k; sbxUpdateLive(); sbxLoadIntraday(); } }
-    renderTodayLine();
-    sbxRenderTabs(); sbxRenderBody(); // 전 섹터 라이브 값 도착 시 탭 전체를 즉시 갱신(클릭 전에도 최신값)
+    renderSectorBars();
   }
-  /* 특이 신호 전체(더보기) — D안 UI 유지 + 정렬 3종(강도/상승률/하락률) */
-  function sigAllSorted(){
-    var arr=SIGNALS_ALL.slice();
-    if(sigAllSort==='up') arr.sort(function(a,b){return b.pct-a.pct;});
-    else if(sigAllSort==='dn') arr.sort(function(a,b){return a.pct-b.pct;});
-    // 'score'는 API가 이미 강도순으로 내려준 순서를 유지
-    return arr;
-  }
+  /* 특이 신호 전체(더보기) — 상승률순 하나(2026-10-27). 정렬 탭·하락률 순 목록은 뺐다. */
   function sigAllRender(){
     var box=document.getElementById('sigall-rows'); if(!box) return;
-    var arr=sigAllSorted();
-    var flag={score:'신호 강도 1위',up:'오늘 최고 상승',dn:'오늘 최대 하락'}[sigAllSort];
-    box.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i,flag);}).join(''):'<p class="sig-intro" style="padding:24px 16px;text-align:center;color:var(--muted);">표시할 특이 신호가 없어요.</p>';
+    var arr=sigByRise(SIGNALS_ALL);
+    box.innerHTML=arr.length?arr.map(function(s,i){return sigItemHtml(s,i,'오늘 최고 상승');}).join(''):'<p class="sig-intro" style="padding:24px 16px;text-align:center;color:var(--muted);">표시할 특이 신호가 없어요.</p>';
     var cnt=document.getElementById('sigall-count'); if(cnt) cnt.textContent=arr.length+'종목';
     var t=document.getElementById('sigall-title'); if(t) t.textContent=asOfPrefix(SIG_ASOF)+' 특이 신호';
-  }
-  function sigAllSetSort(sort,el){
-    sigAllSort=sort;
-    if(el){[].forEach.call(el.parentNode.children,function(a){a.classList.remove('on');});el.classList.add('on');}
-    sigAllRender();
-  }
-  // 정렬 탭은 정적 HTML의 인라인 onclick에서 호출 → 클로저 밖(전역)에서 접근 가능해야 함
-  window.sigAllSetSort=sigAllSetSort;
-  /* 우측 사이드 — 하락률 순(신호 종목 중 하락 상위 10) */
-  function sigAllDnSorted(){ return SIGNALS_ALL.filter(function(s){return (s.pct||0)<0;}).sort(function(a,b){return a.pct-b.pct;}); }
-  function sigAllDnRender(){
-    var box=document.getElementById('sigall-dn-rows'); if(!box) return;
-    if(!SIGNALS_ALL.length){ box.innerHTML=''; return; }
-    var arr=sigAllDnSorted().slice(0,10);
-    if(!arr.length){ box.innerHTML='<p class="sig-intro" style="padding:20px 16px;text-align:center;color:var(--muted);">하락 중인 신호 종목이 없어요.</p>'; return; }
-    var goArrow='<svg class="sig-go" width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    // 좌측 색 막대 대신 순위 숫자로 표기
-    box.innerHTML=arr.map(function(s,i){
-      var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
-      var badges=(s.badges||[]).map(badgeHtml).join('');
-      return '<a class="sig-row" onclick="goStock(\''+s.code+'\')">'
-        +'<span class="num" style="min-width:16px;text-align:center;align-self:center;color:var(--muted);font-weight:800;font-size:12px;flex-shrink:0;">'+(i+1)+'</span>'
-        +'<span class="sig-rmain"><span class="sig-rnm">'+s.name+' <small>'+s.code+' · '+s.sector+'</small></span>'
-        +'<span class="sig-rbadges">'+badges+'</span></span>'
-        +'<span class="sig-rpct" style="color:'+lc+';">'+sign+s.pct.toFixed(1)+'%</span>'+goArrow+'</a>';
-    }).join('');
   }
   function clearSkel(){ ['sig-rows'].forEach(function(id){var e=document.getElementById(id); if(e&&e.querySelector('.skl')) e.innerHTML='';}); }
   function loadSignals(){
@@ -1167,121 +1132,18 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);
     return m>=540&&m<=930;
   }
-  /* ── 섹터별 종목 브라우저 (홈 중앙) — stocks-snapshot.json + /api/stocks-live 배선 ── */
+  /* ── 섹터 한눈에 막대 — /api/signals 섹터 평균, 없으면 stocks-snapshot.json ──
+     '섹터별 대표 종목 펼치기'(섹터 탭·종목 카드·한 줄 요약)와 그 영역 전용 조회(/api/stocks-live·/api/intraday)는
+     2026-10-27에 뺐다. 막대는 신호 응답이 오면 그 값을, 아니면 스냅샷으로 섹터 평균을 낸다. */
   var SBX_ORDER=['semicon','battery','auto','defense','ship','bio','finance','power'];
-  var SBX_EMOJI={semicon:'🔬',battery:'🔋',auto:'🚗',defense:'🛡️',ship:'🚢',bio:'🧬',finance:'🏦',power:'⚡'};
-  var sbxActiveKey='semicon';
-  function sbxPctCls(p){return p>0?'up':(p<0?'down':'flat');}
-  function sbxPctFmt(p){return (p>0?'+':'')+p.toFixed(2)+'%';}
-  function sbxWon(n){return Math.round(n).toLocaleString();}
-  // 섹터 상세 페이지(sector/*/index.html)와 동일한 곡선 스파크 양식 — 중간점 앵커 베지어 + 그라디언트 채움
-  function sbxSpark(vals, isLive){
-    if(!vals||vals.length<2) return '';
-    var W=240,H=34,padT=3,padB=3,n=vals.length;
-    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),rng=(max-min)||1;
-    var up=vals[n-1]>=vals[0], col=up?'#E03131':'#2775ED';
-    // 장중 곡선은 정적 20일 곡선과 똑같이 카드 폭을 꽉 채우면 "실시간 갱신 중"인지 구분이 안 간다.
-    // 09:00~15:30 경과 비율만큼만 폭을 채우고 나머지는 점선으로 비워, 하루가 진행 중임을 시각적으로 드러낸다.
-    var drawW=W;
-    if(isLive){
-      var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
-      var elapsed=Math.max(0,Math.min(390,kmin-540)); // 09:00(540분) 기준 경과분, 15:30(930분)에 390
-      drawW=Math.max(W*(elapsed/390), W*(1/n));
-    }
-    function x(i){return (i/(n-1))*drawW;}
-    function y(v){return padT+(1-(v-min)/rng)*(H-padT-padB);}
-    var d='M'+x(0).toFixed(1)+','+y(vals[0]).toFixed(1);
-    for(var i=1;i<n;i++){
-      var cx=((x(i-1)+x(i))/2).toFixed(1);
-      d+=' C'+cx+','+y(vals[i-1]).toFixed(1)+' '+cx+','+y(vals[i]).toFixed(1)+' '+x(i).toFixed(1)+','+y(vals[i]).toFixed(1);
-    }
-    var lastX=x(n-1).toFixed(1), lastY=y(vals[n-1]).toFixed(1);
-    var gid='sbx-grad-'+Math.random().toString(36).slice(2,8);
-    // 실시간 진행 표시: 마지막 값에서 카드 끝까지 점선 가이드(장 마감 전까지 "여기까지 진행 중")
-    var trail=(isLive&&drawW<W-2) ? ('<line x1="'+lastX+'" y1="'+((H-padT-padB)/2+padT).toFixed(1)+'" x2="'+W+'" y2="'+((H-padT-padB)/2+padT).toFixed(1)+'" stroke="#94A3B8" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2,2"/>') : '';
-    // data-curve: live(오늘 장중 1분봉)/static(20거래일 종가) 구분 — DOM에서 확인 가능하게
-    var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" data-curve="'+(isLive?'live':'static')+'" aria-label="'+(isLive?'오늘 장중 추이':'최근 20거래일 종가 추이')+'">'
-      +'<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
-      +'<stop offset="0" stop-color="'+col+'" stop-opacity="0.14"/>'
-      +'<stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs>'
-      +trail
-      +'<path d="'+d+' L'+lastX+','+H+' L0,'+H+' Z" fill="url(#'+gid+')"/>'
-      +'<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
-      +'</svg>';
-    // 맥동하는 점은 SVG 밖의 일반 HTML 원으로 — preserveAspectRatio:none의 가로 스케일에 영향받지 않아 항상 정원이다.
-    var liveDot=isLive ? ('<span class="spark-livedot" style="left:'+(lastX/W*100).toFixed(2)+'%;top:'+(lastY/H*100).toFixed(2)+'%;background:'+col+';"></span>') : '';
-    return svg+liveDot;
-  }
-  // 오늘 장중 1분봉 캐시 (code → minutes[]). 있으면 곡선을 정적 20일 대신 실시간 흐름으로 그린다.
-  var sbxIntraday={};
-  // 섹터별 라이브 시세 응답을 한 번이라도 받았는지(성공·실패·휴장 무관). 미해결이면 카드 숫자에 빗금 placeholder를 그린다.
-  var sbxLiveTried={};
-  // 장중인데 현재 탭 섹터의 라이브 응답이 아직 안 온 상태 — 스냅샷(전일 종가) 숫자를 노출하지 않고 빗금으로 대기.
-  function sbxPending(){ return (krMarketOpen()||sbxSnapBehind()) && !sbxLiveTried[sbxActiveKey]; }
-  // 장 마감(15:30) 뒤 마감 잡이 스냅샷을 갱신하기(~16:31) 전 — 카드는 어제 스냅샷인데 탭 통계·한 줄은 /api/signals의
-  // 오늘 값이라 한 박스에 두 날짜가 섞였다(2026-09-23 16:17: 머리 "9/22 종가 기준"·카드 3상승 4하락 vs 통계 "상승 6 하락 1").
-  // 이 구간엔 오늘 정규장 공식 종가(/api/stocks-live 마감 세션)로 카드를 맞추고, 맞추지 못하면 오늘 값을 쓰지 않는다.
   function sbxTodayYmd(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
+  // 장 마감(15:30) 뒤 마감 잡이 스냅샷을 갱신하기(~16:31) 전 — 이 구간엔 /api/signals의 오늘 값과 어제 스냅샷을
+  // 한 막대에 섞지 않도록 스냅샷(어제 종가) 하나로 그리고, 배지에 그 날짜를 적는다(2026-09-23 날짜 섞임 사고).
   function sbxSnapBehind(){
     if(!SNAP||!_asOfYmd||krMarketOpen()) return false;
     if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false;
     var m=(new Date().getUTCHours()*60+new Date().getUTCMinutes()+540)%1440;
     return m>930 && _asOfYmd<sbxTodayYmd();
-  }
-  var _sbxCloseYmd=null; // 스냅샷보다 새 정규장 종가를 카드에 입힌 날짜(YYYY-MM-DD)
-  // 스냅샷 날짜가 오늘의 직전 거래일이고 오늘 봉이 아직 없을 때 오늘 공식 종가를 입힌다. 등락률 = 오늘 종가 ÷ 스냅샷(어제 공식 종가).
-  // 스냅샷이 더 오래됐으면 여러 날 등락이 하루로 보이므로 입히지 않는다. 입힌 종목 수를 돌려준다.
-  function sbxClosedOverlay(stocks, prices, snapYmd, todayYmd, isHoliday){
-    var d=new Date(todayYmd+'T00:00:00Z'), prev=null;
-    for(var i=0;i<10&&!prev;i++){ d.setUTCDate(d.getUTCDate()-1); var y=d.toISOString().slice(0,10); if(!isHoliday(y)) prev=y; }
-    if(snapYmd!==prev) return 0;
-    var ymd=todayYmd.replace(/-/g,''), n=0;
-    (prices||[]).forEach(function(p){
-      var st=stocks&&stocks[p.code];
-      if(!st||p.sessionDate!==ymd||typeof p.price!=='number'||!isFinite(p.price)) return;
-      if(st._snapClose==null) st._snapClose=st.close;
-      if(!(st._snapClose>0)) return;
-      st.close=p.price; st.change_pct=Math.round((p.price/st._snapClose-1)*10000)/100; n++;
-    });
-    return n;
-  }
-  window.__sbxClosedOverlay=sbxClosedOverlay;
-  // 스냅샷이 뒤처졌는데 오늘 종가를 아직(또는 끝내) 못 입혔다 — 이때 /api/signals의 오늘 섹터 값을 섞지 않는다.
-  function sbxSigStale(){ return sbxSnapBehind() && !_sbxCloseYmd; }
-  function sbxSkel(w,h){ return '<span class="scard__skel" style="width:'+w+'px;height:'+h+'px;"></span>'; }
-  function sbxCurve(s){var iv=sbxIntraday[s.code]; return (iv&&iv.length>=2)?iv:s.spark20;}
-  function sbxCurveIsLive(s){var iv=sbxIntraday[s.code]; return !!(iv&&iv.length>=2);}
-  function sbxTodayYMD(){var k=new Date(Date.now()+9*3600*1000);return ''+k.getUTCFullYear()+String(k.getUTCMonth()+1).padStart(2,'0')+String(k.getUTCDate()).padStart(2,'0');}
-  // 장중인데 아직 이 종목의 실시간 곡선을 못 받아온 상태 — 이럴 때 20일 정적 곡선(꽉 찬 폭)을
-  // 먼저 그렸다가 잠시 후 장중 곡선(짧은 폭)으로 교체하면 폭이 갑자기 줄어드는 "버벅임"으로 보인다.
-  // 그래서 로딩 중엔 폭이 없는 얇은 점선 placeholder만 보여주고, 실제 곡선은 최종 크기로 한 번에 그린다.
-  function sbxSparkSkeleton(){
-    return '<svg viewBox="0 0 240 34" preserveAspectRatio="none" aria-hidden="true">'
-      +'<line x1="0" y1="17" x2="240" y2="17" stroke="#CBD5E1" stroke-width="1.4" stroke-dasharray="3,3">'
-      +'<animate attributeName="stroke-opacity" values="0.25;0.55;0.25" dur="1.1s" repeatCount="indefinite"/>'
-      +'</line></svg>';
-  }
-  // 현재 섹터 종목들의 오늘 장중 곡선을 /api/intraday(CDN 30초 캐시)로 받아 해당 카드 곡선만 교체.
-  function sbxLoadIntraday(){
-    if(!SNAP) return;
-    var today=sbxTodayYMD();
-    sbxSectorStocks(sbxActiveKey).forEach(function(s){
-      var code=s.code;
-      fetch('/api/intraday?code='+code,{cache:'no-store'})
-        .then(function(r){return r.ok?r.json():null;})
-        .then(function(d){
-          var el=document.querySelector('.scard[data-code="'+code+'"] .scard__spark');
-          if(!d||!Array.isArray(d.minutes)||d.minutes.length<2||d.date!==today){
-            if(el&&!sbxIntraday[code]) el.innerHTML=sbxSpark(s.spark20,false); // 오늘 세션 없으면 정적 곡선으로 폴백
-            return;
-          }
-          sbxIntraday[code]=d.minutes;
-          if(el) el.innerHTML=sbxSpark(d.minutes, true);
-        }).catch(function(){
-          var el=document.querySelector('.scard[data-code="'+code+'"] .scard__spark');
-          if(el&&!sbxIntraday[code]) el.innerHTML=sbxSpark(s.spark20,false);
-        });
-    });
   }
   function sbxSectorStocks(key){
     if(!SNAP||!SNAP.stocks) return [];
@@ -1293,7 +1155,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 라이브(SIG_SECTORS, /api/signals가 전 섹터 동시에 내려줌) 우선 — 스냅샷 폴백은 클릭한 탭만
   // 실시간이고 나머지 탭은 정적 스냅샷에 머물러 있다가 클릭 시 갑자기 값이 바뀌는 불일치를 막는다.
   function sbxSectorStat(key){
-    if(!sbxSigStale()&&SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
+    if(!sbxSnapBehind()&&SIG_SECTORS&&SIG_SECTORS[key]&&SIG_SECTORS[key].total) return SIG_SECTORS[key];
     var arr=sbxSectorStocks(key), sum=0,up=0,dn=0,wsum=0,wden=0;
     arr.forEach(function(s){
       var p=s.change_pct||0; sum+=p; if(p>0)up++; else if(p<0)dn++;
@@ -1306,168 +1168,9 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 화면에 쓰는 섹터 등락률. 거래대금 가중(wavg)이 정본이고 없으면 단순평균으로 폴백한다.
   // 단순평균을 그대로 쓰면 대장주가 끌어올린 날 섹터가 지수와 반대 부호로 뜬다(2026-08-21 반도체).
   function sbxAvgOf(st){ return st&&typeof st.wavg==='number'?st.wavg:((st&&st.avg)||0); }
-  // 상단 스트립의 코스피 등락률을 읽는다(유니코드 마이너스·기호 정규화). 못 읽으면 null.
-  function tlKospiPct(){
-    var el=document.getElementById('h-kospi-c'); if(!el) return null;
-    var v=parseFloat((el.textContent||'').replace(/[−–—]/g,'-').replace(/[^0-9.\-]/g,''));
-    return isFinite(v)?v:null;
-  }
-  // ── '오늘의 한 줄' 요약 배너 ──
-  // 섹터 소스 우선순위: /api/signals가 내려준 전 섹터 라이브 평균(장중 2분 갱신) > 스냅샷(전일 종가).
-  // 문구는 맥락(장중/마감·리더/래거드 유무)에 맞는 템플릿 풀에서 하나를 골라 채운다 — 매 방문마다 달라져 지루하지 않게.
-  // 슬롯: {tone}=당일 장세(상승 우위 등) · {lead}=주도 섹터 · {lag}=부진 섹터 · {kp}=코스피% · {when}=장중/오늘
-  // 조사 토큰: {lead:이}=이/가, {lead:은}=은/는, {lead:을}=을/를, {lead:으로}=으로/로, {lead:이에요}=이에요/예요, {tone:이지만}=이지만/지만 (받침 자동)
-  // 케이스는 톤 방향(상승/하락/보합) × 분산 여부로 나눠, 문구 프레이밍이 톤과 절대 어긋나지 않게 한다.
-  // 각 케이스는 phase(live=장중 진행형 / closed=마감 완료형)로 다시 나뉜다 — 장중에 "밀렸어요"(완료)처럼
-  // 아직 끝나지 않은 하루를 과거형으로 단정하면 안 되기 때문. live는 "~하고 있어요" 계열, closed만 "~했어요" 계열을 쓴다.
-  var TL_TPL={
-    // 상승일, 일부 섹터는 뒤처짐 — 주도/소외 프레이밍 (버틴·발목·방어 금지)
-    up_mix:{
-      live:[
-        '{tone:이에요}. {lead:이} 상승을 주도하고 있고, {lag:은} 따라오지 못하고 있어요.',
-        '{lead:으로} 매수세가 몰리고 있어요. {lag:은} 상대적으로 소외되고 있고요. {tone:이에요}.',
-        '{when} {tone} — 지금 주역은 {lead}, {lag:은} 뒤처지고 있어요.',
-        '코스피 {kp}. 강세는 {lead}, 부진은 {lag:으로} 갈리는 중이에요.',
-        '{lead:이} 지수를 끌어올리고 있어요. {lag:은} 힘을 보태지 못하고 있고요.',
-        '{tone:이지만} {lead:은} 특히 뜨겁고, {lag:은} 미지근해요.'
-      ],
-      closed:[
-        '{tone:이에요}. {lead:이} 상승을 주도했고, {lag:은} 따라오지 못했어요.',
-        '{lead:으로} 매수세가 몰렸어요. {lag:은} 상대적으로 소외됐고요. {tone:이에요}.',
-        '{when} {tone} — 오늘의 주역은 {lead}, {lag:은} 뒤처졌어요.',
-        '코스피 {kp}. 강세는 {lead}, 부진은 {lag:으로} 갈렸어요.',
-        '{lead:이} 지수를 끌어올렸어요. {lag:은} 힘을 보태지 못했고요.',
-        '{tone:이지만} {lead:은} 특히 뜨거웠어요. {lag:은} 미지근했고요.'
-      ]
-    },
-    // 전면 상승 (부진 섹터 없음)
-    up:{
-      live:[
-        '{tone:이에요}. {lead:이} 상승을 이끌고 있어요.',
-        '고르게 초록불이 켜지고 있어요. 특히 {lead:이} 앞장서고 있고요. {tone:이에요}.',
-        '{when} {tone} — 지금 대장은 {lead:이에요}.',
-        '위험자산 선호가 살아나고 있어요. {lead:이} 특히 강하고요.',
-        '코스피 {kp}. {lead:이} 랠리를 주도하고 있어요.',
-        '매수 심리가 붙고 있어요. {lead:이} 가장 뜨겁고요. {tone:이에요}.'
-      ],
-      closed:[
-        '{tone:이에요}. {lead:이} 상승을 이끌었어요.',
-        '고르게 초록불이 켜졌어요. 특히 {lead:이} 앞장섰고요. {tone:이에요}.',
-        '{when} {tone} — 오늘의 대장은 {lead:이에요}.',
-        '위험자산 선호가 살아났어요. {lead:이} 특히 강했고요.',
-        '코스피 {kp}. {lead:이} 랠리를 주도했어요.',
-        '매수 심리가 붙었어요. {lead:이} 가장 뜨거웠고요. {tone:이에요}.'
-      ]
-    },
-    // 하락일, 일부 섹터는 방어 — 버틴·발목·방어 프레이밍은 여기만
-    dn_mix:{
-      live:[
-        '{tone:이에요}. {lead:이} 버티고 있고, {lag:은} 크게 밀리고 있어요.',
-        '{when} {tone} 속에서 {lead}만 초록불을 지키고 있어요. {lag:은} 낙폭이 커지고 있고요.',
-        '{lead:이} 방어선, {lag:이} 뇌관이에요. {tone:이에요}.',
-        '{tone} — 그나마 버티는 건 {lead}, 발목 잡는 건 {lag:이에요}.',
-        '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버티고 있어요.',
-        '코스피 {kp}. {lag:이} 지수를 누르고 있고, {lead:은} 방어하고 있어요.',
-        '{tone:이지만} {lead:은} 견조하고, 반대로 {lag:은} 부진해요.'
-      ],
-      closed:[
-        '{tone:이에요}. {lead:이} 버텼고, {lag:은} 크게 밀렸어요.',
-        '{when} {tone} 속에서 {lead}만 초록불을 지켰어요. {lag:은} 낙폭이 컸고요.',
-        '{lead:이} 방어선, {lag:이} 뇌관이었어요. {tone:이에요}.',
-        '{tone} — 그나마 버틴 건 {lead}, 발목 잡은 건 {lag:이에요}.',
-        '{lag:이} 지수를 끌어내리는 사이 {lead:이} 홀로 버텼어요.',
-        '코스피 {kp}. {lag:이} 지수를 눌렀고, {lead:은} 방어했어요.',
-        '{tone:이지만} {lead:은} 견조했어요. 반대로 {lag:은} 부진했고요.'
-      ]
-    },
-    // 전면 하락 (방어 섹터 없음)
-    dn:{
-      live:[
-        '{tone:이에요}. 대부분 약세이고 {lag:이} 특히 부진해요.',
-        '{when} 숨을 곳이 없어요. {lag:이} 낙폭 상위이고요. {tone:이에요}.',
-        '위험회피가 짙어지고 있어요. {lag:이} 가장 크게 밀리고 있고요.',
-        '전반적으로 무거워요. {lag:이} 하락을 주도하고 있어요.',
-        '코스피 {kp}. {lag:이} 지수를 끌어내리고 있어요.',
-        '매도세가 우위예요. {lag}에서 낙폭이 두드러지고 있고요. {tone:이에요}.'
-      ],
-      closed:[
-        '{tone:이에요}. 대부분 약세였고 {lag:이} 특히 부진했어요.',
-        '{when} 숨을 곳이 없었어요. {lag:이} 낙폭 상위였고요. {tone:이에요}.',
-        '위험회피가 짙었어요. {lag:이} 가장 크게 밀렸고요.',
-        '전반적으로 무거웠어요. {lag:이} 하락을 주도했어요. {tone:이에요}.',
-        '코스피 {kp}. {lag:이} 지수를 끌어내렸어요.',
-        '매도세가 우위였어요. {lag}에서 낙폭이 두드러졌고요. {tone:이에요}.'
-      ]
-    },
-    // 보합일, 섹터별 온도차 — 방향 단정 없는 중립 프레이밍
-    flat_mix:{
-      live:[
-        '오늘의 온도차예요. {lead:은} 따뜻하고 {lag:은} 싸늘해요.',
-        '희비가 갈리고 있어요. {lead:은} 웃고 {lag:은} 울고 있어요. {tone:이에요}.',
-        '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone:이에요}.',
-        '쏠림이 뚜렷해요. {lead}엔 온기, {lag}엔 한기가 돌고 있어요.',
-        '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈리는 중이에요.',
-        '돈은 {lead:으로}, 매물은 {lag:으로} 쏠리고 있어요. {tone:이에요}.'
-      ],
-      closed:[
-        '오늘의 온도차예요. {lead:은} 따뜻했고 {lag:은} 싸늘했어요.',
-        '희비가 갈렸어요. {lead:은} 웃고 {lag:은} 울었어요. {tone:이에요}.',
-        '{lead:이} 상대적 강세, {lag:이} 상대적 약세예요. {tone:이에요}.',
-        '쏠림이 뚜렷했어요. {lead}엔 온기, {lag}엔 한기가 돌았어요.',
-        '{when} 기준 {tone}. 강세는 {lead}, 약세는 {lag:으로} 갈렸어요.',
-        '돈은 {lead:으로}, 매물은 {lag:으로} 쏠렸어요. {tone:이에요}.'
-      ]
-    },
-    // 분산조차 없음 (거의 안 뜨는 안전 케이스)
-    flat:{
-      live:[
-        '{tone:이에요}. 뚜렷한 주도 섹터 없이 눈치보기 장세예요.',
-        '{when} 방향을 정하지 못하고 있어요. 관망세가 짙어요.',
-        '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
-        '{tone:이에요}. 매수도 매도도 뚜렷하지 않아요.'
-      ],
-      closed:[
-        '{tone:이에요}. 뚜렷한 주도 섹터 없이 눈치보기 장세였어요.',
-        '{when} 방향을 정하지 못했어요. 관망세가 짙어요.',
-        '코스피 {kp}. 섹터별 등락이 엇갈린 보합 흐름이에요.',
-        '{tone:이에요}. 매수도 매도도 뚜렷하지 않았어요.'
-      ]
-    }
-  };
-  var _tlCase=null, _tlPick=null; // 로드 세션 동안 문구 고정(데이터만 갱신), 구조(case+phase)가 바뀌면 재추첨
-  function tlPick(caseKey, hasKp, phase){
-    var stateKey=caseKey+'|'+phase;
-    if(_tlCase===stateKey && _tlPick) return _tlPick;
-    var pool=TL_TPL[caseKey][phase].filter(function(t){ return hasKp || t.indexOf('{kp}')<0; });
-    if(!pool.length) pool=TL_TPL[caseKey][phase];
-    _tlPick=pool[Math.floor(Math.random()*pool.length)]; _tlCase=stateKey;
-    return _tlPick;
-  }
-  // 받침 유무에 따른 조사 꼬리만 반환 (섹터명 span 바깥에 붙여 조사는 색/굵기 없이 표기)
-  function josaTail(word, type){
-    var last=word.charCodeAt(word.length-1), isHan=last>=0xAC00&&last<=0xD7A3;
-    var bat=isHan?((last-0xAC00)%28):0, hasBat=bat!==0, isRieul=bat===8;
-    if(type==='이') return hasBat?'이':'가';
-    if(type==='은') return hasBat?'은':'는';
-    if(type==='을') return hasBat?'을':'를';
-    if(type==='으로') return (!hasBat||isRieul)?'로':'으로';
-    if(type==='이에요') return hasBat?'이에요':'예요';
-    if(type==='이지만') return hasBat?'이지만':'지만';
-    return '';
-  }
-  function tlFill(tpl, c){
-    var leadSpan='<span class="tl-lead"><b>'+c.lead+'</b></span>', lagSpan='<span class="tl-lag"><b>'+c.lag+'</b></span>';
-    var toneSpan='<span class="tl-tone '+c.cls+'">'+c.tone+'</span>';
-    return tpl
-      .replace(/\{tone(?::([^}]+))?\}/g, function(_m,t){ return toneSpan+(t?josaTail(c.tone,t):''); })
-      .replace(/\{lead(?::([^}]+))?\}/g, function(_m,t){ return leadSpan+(t?josaTail(c.lead,t):''); })
-      .replace(/\{lag(?::([^}]+))?\}/g, function(_m,t){ return lagSpan+(t?josaTail(c.lag,t):''); })
-      .replace(/\{kp\}/g, c.kp!=null ? '<b>'+(c.kp>=0?'+':'')+c.kp.toFixed(2)+'%</b>' : '')
-      .replace(/\{when\}/g, c.when);
-  }
   // 섹터 통계 소스 — 라이브(SIG_SECTORS) 우선, 없으면 스냅샷 기반
   function tlSectorStats(){
-    if(SIG_SECTORS&&!sbxSigStale()){
+    if(SIG_SECTORS&&!sbxSnapBehind()){
       return SBX_ORDER.map(function(k){var s=SIG_SECTORS[k]; return (s&&s.total)?{key:k,label:SECTOR_LABELS[k],avg:s.avg,total:s.total}:null;}).filter(Boolean);
     }
     return SBX_ORDER.map(function(k){var st=sbxSectorStat(k); return st.total?{key:k,label:SECTOR_LABELS[k],avg:sbxAvgOf(st),total:st.total}:null;}).filter(Boolean);
@@ -1490,138 +1193,11 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     var html=sectorBarsHtml(tlSectorStats());
     if(html) w.innerHTML=html;
   }
-  function renderTodayLine(){
-    renderSectorBars();
-    var wrap=document.getElementById('today-line'); if(!wrap) return;
-    // 스냅샷(어제)과 오늘 코스피를 한 문장에 섞지 않는다 — 오늘 종가를 입히기 전까지는 숨긴다
-    if(sbxSigStale()){ wrap.style.display='none'; return; }
-    var stats=tlSectorStats();
-    if(!stats.length){ wrap.style.display='none'; return; }
-    var leaders=stats.filter(function(s){return s.avg>0;}).sort(function(a,b){return b.avg-a.avg;}).slice(0,2);
-    var lags=stats.filter(function(s){return s.avg<0;}).sort(function(a,b){return a.avg-b.avg;}).slice(0,2);
-    var kp = (SIG_KOSPI!=null) ? SIG_KOSPI : tlKospiPct();
-    var basis = kp!=null ? kp : (stats.reduce(function(a,s){return a+s.avg;},0)/stats.length);
-    var tone, cls='', ic='📊';
-    if(basis<=-2){tone='급락장';cls='dn';ic='🔻';}
-    else if(basis<=-0.5){tone='하락 우위';cls='dn';ic='🔻';}
-    else if(basis>=2){tone='급등장';cls='up';ic='🔺';}
-    else if(basis>=0.5){tone='상승 우위';cls='up';ic='🔺';}
-    else {tone='보합권';cls='';ic='➖';}
-    var hasL=leaders.length, hasG=lags.length;
-    var caseKey = (hasL&&hasG)
-      ? (cls==='up'?'up_mix':cls==='dn'?'dn_mix':'flat_mix')
-      : (hasL?'up':hasG?'dn':'flat');
-    var phase=krMarketOpen()?'live':'closed';
-    var ctx={
-      tone:tone, cls:cls, kp:kp, when:phase==='live'?'장중':'오늘',
-      lead:leaders.map(function(s){return s.label;}).join('·'),
-      lag:lags.map(function(s){return s.label;}).join('·')
-    };
-    wrap.innerHTML='<span class="tl-ic">'+ic+'</span><span>'+tlFill(tlPick(caseKey, kp!=null, phase), ctx)+'</span>';
-    wrap.style.display='';
-  }
-  function sbxCardHtml(s){
-    var wk52Pct=(s.wk52_high>s.wk52_low)?Math.max(0,Math.min(100,(s.close-s.wk52_low)/(s.wk52_high-s.wk52_low)*100)):null;
-    var extra='';
-    if(s.wk52_high!=null&&s.wk52_low!=null) extra+='<div class="scard__range">52주 '+sbxWon(s.wk52_low)+' – '+sbxWon(s.wk52_high)+'</div>';
-    if(wk52Pct!=null){
-      extra+='<div class="scard__posbar"><div class="scard__posfill '+(s.change_pct>0?'up':'')+'" style="width:'+wk52Pct.toFixed(1)+'%"></div><div class="scard__pos" style="left:'+wk52Pct.toFixed(1)+'%"></div></div>'
-        +'<div class="scard__poslbl">52주 중 '+Math.round(wk52Pct)+'% 지점</div>';
-    }
-    // 장중인데 아직 이 종목의 실시간 곡선을 못 받아온 상태면, 나중에 폭이 줄어드는 정적 곡선 대신
-    // placeholder를 먼저 보여준다 — sbxLoadIntraday가 도착하면 최종 크기로 한 번에 교체한다.
-    var sparkHtml = (krMarketOpen()&&!sbxIntraday[s.code]) ? sbxSparkSkeleton() : sbxSpark(sbxCurve(s), sbxCurveIsLive(s));
-    // 외국인 보유율은 카드 하단에선 눈에 잘 안 띄어 타이틀 줄 우측으로 이동
-    var frHtml = s.foreign_rate!=null ? '<span class="scard__fr-h">외국인 '+s.foreign_rate.toFixed(1)+'%</span>' : '';
-    // 라이브 미해결이면 가격·등락률을 스냅샷 숫자 대신 빗금으로 — 도착 즉시 최종값으로 교체돼 "튐"이 사라진다.
-    var priceHtml = sbxPending()
-      ? '<span class="scard__close">'+sbxSkel(72,19)+'</span><span class="scard__pct flat">'+sbxSkel(46,13)+'</span>'
-      : '<span class="scard__close">'+sbxWon(s.close)+'</span><span class="scard__pct '+sbxPctCls(s.change_pct)+'">'+sbxPctFmt(s.change_pct)+'</span>';
-    return '<a class="scard" data-code="'+s.code+'" onclick="goStock(\''+s.code+'\')">'
-      +'<div class="scard__head"><span class="scard__name">'+s.name+'</span><span class="scard__code">'+s.code+'</span>'+frHtml+'</div>'
-      +'<div class="scard__price">'+priceHtml+'</div>'
-      +'<div class="scard__spark">'+sparkHtml+'</div>'
-      +extra+'</a>';
-  }
-  function sbxRenderTabs(){
-    var box=document.getElementById('sbx-tabs'); if(!box||!SNAP) return;
-    box.innerHTML=SBX_ORDER.map(function(key){
-      var st=sbxSectorStat(key), cls=sbxPctCls(sbxAvgOf(st));
-      return '<span class="sbx-tab'+(key===sbxActiveKey?' on':'')+'" data-key="'+key+'">'+SBX_EMOJI[key]+' '+SECTOR_LABELS[key]+'<span class="rt '+cls+'">'+sbxPctFmt(sbxAvgOf(st))+'</span></span>';
-    }).join('');
-    [].slice.call(box.querySelectorAll('.sbx-tab')).forEach(function(el){
-      el.onclick=function(){ sbxUserPicked=true; sbxActiveKey=el.getAttribute('data-key'); sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday(); };
-    });
-  }
-  function sbxRenderBody(){
-    var body=document.getElementById('sbx-body'); if(!body||!SNAP) return;
-    var arr=sbxSectorStocks(sbxActiveKey), st=sbxSectorStat(sbxActiveKey);
-    var avgCls=sbxPctCls(sbxAvgOf(st)), upFlex=st.up||0.001, dnFlex=st.dn||0.001;
-    // 집계값(평균·상승·하락·시장폭)도 카드와 같은 라이브 데이터에서 나오므로, 미해결이면 빗금으로 대기해 튐을 막는다.
-    var pend=sbxPending();
-    var statBlock = pend
-      ? '<div class="sbx-stat">'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">거래대금 가중</div><div class="sbx-stat__val flat">'+sbxSkel(56,17)+'</div></div>'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val flat">'+sbxSkel(28,17)+'</div></div>'
-        +'</div>'
-        +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — 집계 중…</div>'
-          +'<div class="sbx-breadth__bar"><span class="scard__skel" style="flex:1;height:8px;border-radius:4px;"></span></div></div>'
-      : '<div class="sbx-stat">'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">거래대금 가중</div><div class="sbx-stat__val '+avgCls+'">'+sbxPctFmt(sbxAvgOf(st))+'</div></div>'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">상승</div><div class="sbx-stat__val up">'+st.up+'</div></div>'
-          +'<div class="sbx-stat__box"><div class="sbx-stat__label">하락</div><div class="sbx-stat__val down">'+st.dn+'</div></div>'
-        +'</div>'
-        +'<div class="sbx-breadth"><div class="sbx-breadth__label">시장폭 — '+st.total+'종목 중 상승 '+st.up+'</div>'
-          +'<div class="sbx-breadth__bar"><div class="sbx-breadth__up" style="flex:'+upFlex+'"></div><div class="sbx-breadth__dn" style="flex:'+dnFlex+'"></div></div>'
-          +'<div class="sbx-breadth__legend"><span><i class="iu"></i>상승 '+st.up+'</span><span><i class="id"></i>하락 '+st.dn+'</span></div></div>';
-    body.innerHTML=
-      statBlock
-      +'<div class="sbx-list-head"><span class="sbx-list-head__t">종목 '+arr.length+'</span><span class="sbx-list-head__sort">등락률 높은 순 ↓</span></div>'
-      +'<div class="sbx-list">'+arr.map(sbxCardHtml).join('')+'</div>';
-  }
-  // 기본 탭 = 평균 등락률이 가장 높은 섹터. 스냅샷이 뒤처진 마감 직후에도 오늘 신호(SIG_SECTORS)를 따른다 —
-  // 열린 탭은 곧 오늘 종가로 맞춰진다. 신호가 스냅샷보다 늦게 오면 applySignals가 다시 고른다(사용자가 탭을 누르기 전까지만).
-  var sbxUserPicked=false;
-  function sbxPickDefault(){
-    var best=sbxActiveKey, bestAvg=-Infinity;
-    SBX_ORDER.forEach(function(k){var st=(SIG_SECTORS&&SIG_SECTORS[k]&&SIG_SECTORS[k].total)?SIG_SECTORS[k]:sbxSectorStat(k); var a=sbxAvgOf(st); if(st.total&&a>bestAvg){bestAvg=a;best=k;}});
-    return best;
-  }
-  function sbxSetLiveBadge(open){
+  // 막대 머리 배지 — 장중이면 신호 갱신 주기, 아니면 막대가 쓴 데이터의 날짜.
+  function renderSectorBadge(){
     var el=document.getElementById('sbx-live'); if(!el) return;
-    if(open){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 60초 갱신'; }
-    else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_sbxCloseYmd||_asOfYmd||'')+' 종가 기준'; }
-  }
-  function sbxUpdateLive(){
-    var behind=sbxSnapBehind();
-    if(!SNAP||(!krMarketOpen()&&!behind)) { sbxSetLiveBadge(false); return; }
-    var key=sbxActiveKey; // 응답 도착 전 탭이 바뀔 수 있어 요청 시점 섹터를 고정
-    var codes=sbxSectorStocks(key).map(function(s){return s.code;});
-    if(!codes.length) return;
-    // 응답이 성공이든 실패든(휴장·API 장애 포함) 일단 시도가 끝나면 빗금을 풀고 가진 값(라이브 또는 스냅샷)을 노출한다.
-    function resolve(){
-      sbxLiveTried[key]=true;
-      if(key===sbxActiveKey){ sbxRenderTabs(); sbxRenderBody(); renderTodayLine(); }
-    }
-    fetch('/api/stocks-live?codes='+encodeURIComponent(codes.join(',')),{cache:'no-store'})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(d&&behind){
-          if(sbxClosedOverlay(SNAP.stocks, d.prices, _asOfYmd, sbxTodayYmd(), window.krIsKospiHolidayOn||function(){return false;})) _sbxCloseYmd=sbxTodayYmd();
-          sbxSetLiveBadge(false);
-        } else if(d){
-          sbxSetLiveBadge(!!d.open);
-          if(Array.isArray(d.prices)){
-            d.prices.forEach(function(p){
-              var s=SNAP.stocks[p.code]; if(!s) return;
-              if(isFinite(p.price)) s.close=p.price;
-              if(p.changePct!=null) s.change_pct=p.changePct;
-            });
-          }
-        }
-        resolve();
-      }).catch(function(){ resolve(); });
+    if(krMarketOpen()){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 5분 갱신'; }
+    else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_asOfYmd||'')+' 종가 기준'; }
   }
   loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
@@ -1633,16 +1209,8 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
-      // 기본 탭 = 오늘 평균 등락률이 가장 높은 섹터. 매일 반도체로 고정돼 급락일엔 첫 화면이
-      // 온통 빨강으로 열리고 옆 특이신호(초록)와 모순돼 보이던 문제 해결 — 세 섹션이 같은 방향을 가리킨다.
-      sbxActiveKey=sbxPickDefault();
-      renderTodayLine();
-      sbxRenderTabs(); sbxRenderBody(); sbxUpdateLive(); sbxLoadIntraday();
-      if(krMarketOpen()){
-        setInterval(loadSignals,300000); // 장중 2분마다 특이신호 자동 갱신
-        setInterval(sbxUpdateLive,60000); // 장중 30초마다 섹터 브라우저 실시간 시세 갱신
-        setInterval(sbxLoadIntraday,120000); // 장중 30초마다 섹터 브라우저 곡선(장중 1분봉) 갱신
-      }
+      renderSectorBars(); renderSectorBadge();
+      if(krMarketOpen()) setInterval(loadSignals,300000); // 장중 5분마다 특이신호·섹터 막대 갱신
     })
     .catch(function(){});
 })();

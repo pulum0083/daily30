@@ -186,7 +186,7 @@
       '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(65) + ';width:' + (5 / top * 100).toFixed(1) + '%"></i>' +
       '<i class="z2" style="left:' + x(70) + ';right:0"></i><i class="f ' + lv[0] + '" style="width:' + x(g) + '"></i>' +
       '<i class="dot ' + lv[0] + '" style="left:' + x(g) + '"></i></div>' +
-      '<div class="nqg-l"><span style="left:0">0</span><span style="left:' + x(65) + '">65 주의</span><span style="left:' + x(70) + '">70 경고</span></div></div>' +
+      '<div class="nqg-l"><span style="left:0">0</span><span class="l65" style="left:' + x(65) + '">65 주의</span><span class="l70">70 경고</span></div></div>' +
       '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점</em></a>';
   }
 

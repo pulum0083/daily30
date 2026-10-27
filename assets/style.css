@@ -1538,3 +1538,7 @@ html.dark .arch-item__dek{color:var(--muted);}
 .pm-i b{font-weight:700;color:var(--ink)}
 .pm-i b.up{color:var(--up)}
 .pm-i b.dn{color:var(--dn)}
+
+/* 구글 애드센스 멀티플렉스 — 브리핑 본문 끝(2026-10-27). 광고가 안 채워지면 높이 0으로 접힌다 */
+.ad-slot{margin:20px 0 0;}
+.ad-slot ins.adsbygoogle[data-ad-status="unfilled"]{display:none!important;}

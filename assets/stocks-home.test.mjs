@@ -622,42 +622,23 @@ test('타일 — 거래대금·외국인 수량 표기', () => {
   assert.equal(fmtShares(9000), '+9,000주');
 });
 
-// ── 섹터 박스: 장 마감 뒤 스냅샷 갱신 전 오늘 종가 입히기(2026-09-23 두 날짜 섞임) ──
-const holi = (ymd) => { const d = new Date(ymd + 'T00:00:00Z').getUTCDay(); return d === 0 || d === 6 || ymd === '2026-09-24'; };
-const snapStock = () => ({ '005930': { close: 276500, change_pct: 0.91 }, '058470': { close: 75000, change_pct: 7.45 } });
-const closedPrices = [
-  { code: '005930', price: 285500, session: 'regular-closed', sessionDate: '20260923' },
-  { code: '058470', price: 74300, session: 'regular-closed', sessionDate: '20260923' },
-];
-
-test('마감 직후 — 오늘 공식 종가 ÷ 스냅샷(어제 공식 종가)로 등락률을 다시 낸다(9/23 실측 리플레이)', () => {
-  const fn = loadWindow().__sbxClosedOverlay;
-  assert.equal(typeof fn, 'function', '__sbxClosedOverlay 훅이 없다');
-  const st = snapStock();
-  assert.equal(fn(st, closedPrices, '2026-09-22', '2026-09-23', holi), 2);
-  assert.equal(st['005930'].close, 285500);
-  assert.equal(st['005930'].change_pct, 3.25);   // /api/signals 삼성전자 pct와 같다
-  assert.equal(st['058470'].change_pct, -0.93);
+// ── 섹터별 대표 종목 펼치기 제거(2026-10-27) — 화면·전용 조회가 다시 붙지 않게 ──
+test('섹터 펼치기·섹터 탭이 없고, 그 영역 전용 조회(/api/intraday?code=)도 없다', () => {
+  const html = readFileSync(new URL('../stocks/index.html', import.meta.url), 'utf8');
+  const js = readFileSync(new URL('./stocks-home.js', import.meta.url), 'utf8');
+  assert.ok(!html.includes('sbx-more') && !html.includes('id="sbx-tabs"') && !html.includes('id="today-line"'));
+  assert.ok(html.includes('id="sb-bars"'), '섹터 한눈에 막대는 남는다');
+  assert.ok(!js.includes("/api/intraday?code="), '섹터 카드 곡선 조회가 남아 있다');
 });
 
-test('같은 응답을 두 번 입혀도 기준은 스냅샷 종가 그대로다', () => {
-  const fn = loadWindow().__sbxClosedOverlay;
-  const st = snapStock();
-  fn(st, closedPrices, '2026-09-22', '2026-09-23', holi);
-  fn(st, closedPrices, '2026-09-22', '2026-09-23', holi);
-  assert.equal(st['005930'].change_pct, 3.25);
+test('특이 신호 전체 화면은 상승률순 하나 — 정렬 탭·하락률 순 목록이 없다', () => {
+  const html = readFileSync(new URL('../stocks/index.html', import.meta.url), 'utf8');
+  assert.ok(!html.includes('sigall-sort-tabs') && !html.includes('sigall-dn-rows') && !html.includes('신호 강도순'));
 });
 
-test('스냅샷이 직전 거래일이 아니면 입히지 않는다 — 여러 날 등락을 하루로 보이게 하지 않는다', () => {
-  const fn = loadWindow().__sbxClosedOverlay;
-  const st = snapStock();
-  assert.equal(fn(st, closedPrices, '2026-09-21', '2026-09-23', holi), 0);
-  assert.equal(st['005930'].close, 276500);
-});
-
-test('주말·휴일을 건너뛴 직전 거래일을 쓰고, 세션 날짜가 오늘이 아니면 입히지 않는다', () => {
-  const fn = loadWindow().__sbxClosedOverlay;
-  const mon = [{ code: '005930', price: 280000, sessionDate: '20260921' }];
-  assert.equal(fn(snapStock(), mon, '2026-09-18', '2026-09-21', holi), 1);   // 월요일 ← 금요일
-  assert.equal(fn(snapStock(), closedPrices, '2026-09-22', '2026-09-24', holi), 0); // 세션 날짜 불일치
+test('goStock — 종목을 누르면 그 종목의 섹터 페이지로 간다(SECTOR_LABELS가 전역에 있어야 한다, 2026-10-27)', () => {
+  const win = loadWindow();
+  runInContext("STOCK_LIST=[{code:'005930',name:'삼성전자',sector:'semicon'}]", win);
+  assert.doesNotThrow(() => win.goStock('005930'));
+  assert.equal(win.location.href, '/stocks/sector/semicon/');
 });

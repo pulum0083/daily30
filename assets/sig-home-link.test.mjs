@@ -84,8 +84,12 @@ test('닫는 태그가 여는 태그와 일치한다', () => {
   assert.ok(sigItemHtml({ ...sig('042700'), sector: '기타' }, 2).endsWith('</div>'));
 });
 
-test('홈은 신호 강도 상위 3개만', () => {
-  assert.equal(load().SIG_HOME_N, 3);
+test('홈은 상승률순 위 3개만(2026-10-27)', () => {
+  const { SIG_HOME_N, sigByRise } = load();
+  assert.equal(SIG_HOME_N, 3);
+  const list = [{ code: 'a', pct: -2 }, { code: 'b', pct: 5.1 }, { code: 'c', pct: 0.4 }, { code: 'd', pct: 9 }];
+  assert.deepEqual(Array.from(sigByRise(list), (s) => s.code), ['d', 'b', 'c', 'a']);
+  assert.equal(list[0].code, 'a', '원본 배열은 건드리지 않는다');
 });
 
 
