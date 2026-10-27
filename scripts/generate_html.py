@@ -538,7 +538,7 @@ def _drop_ma5_repeats(data: dict, target_date: str, market: str) -> dict:
     """한 번 실은 종목은 그 달에 다시 싣지 않는다(사용자 결정 2026-10-27) — 브리핑·텔레그램 공통.
 
     조건은 월봉 기준이라 한 달 내내 같은 종목이 매일 나왔다. 다음 달에도 조건을 채우면 다시 나온다.
-    뺀 종목 이름은 `repeat_hidden`에 남긴다 — 첫 화면 구조 신호가 '조건을 채운 종목이 없다'로 잘못 쓰지 않게 한다.
+    뺀 종목 이름은 기록으로 `repeat_hidden`에 남긴다. 실을 종목이 없으면 브리핑·텔레그램·첫 화면 모두 섹션째 빠진다.
     """
     seen = _ma5_shown_this_month(target_date, market)
     items = data.get("items") or []

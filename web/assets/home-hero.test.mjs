@@ -125,7 +125,7 @@ test('나스닥 체크 — 65·70 눈금과 단계, 값이 없으면 줄을 뺀�
   assert.equal(api.nasdaqRow({ gap_pct: null }, '2026-10-23', '2026-10-26'), '');
 });
 
-test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표시), 종목이 없으면 그 사실만', () => {
+test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표시), 종목이 없으면 줄째 뺀다', () => {
   const strip = ['5월', '6월', '7월', '8월', '9월', '10월', '이번 달'].map((label, i) =>
     ({ label, gap_pct: [-9.69, -5.49, 11.59, 7.87, 8.69, 3.1, 5.46][i], run: i >= 2 && i <= 4, cur: i === 6 }));
   const m5 = { items: [{ name: '메리츠금융지주', streak: 3, now_gap_pct: 5.46, strip }, { name: 'B', streak: 3, strip: [] }] };
@@ -137,14 +137,14 @@ test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표�
   assert.match(h, /3개월째/);
   assert.match(h, /지금 이격 \+5\.5%/);
   assert.ok(!/매매 신호/.test(h));
-  assert.match(api.ma5Row({ items: [] }, '2026-10-26', '2026-10-26'), /조건을 채운 종목이 없어요/);
-  assert.equal(api.ma5Row({ items: [], repeat_hidden: ['메리츠금융지주'] }, '2026-10-27', '2026-10-27'), '');   // 이번 달에 이미 실어서 빈 것
+  assert.equal(api.ma5Row({ items: [] }, '2026-10-26', '2026-10-26'), '');                       // 빈 문구 없이 줄째 뺀다
   assert.equal(api.ma5Row(null, '2026-10-26', '2026-10-26'), '');
 });
 
 test('구조 신호 블록 — 두 줄 모두 없으면 블록째 뺀다', () => {
   assert.equal(api.structHtml(null, null, null, null, '2026-10-26'), '');
-  assert.match(api.structHtml(null, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), /구조 신호/);
+  assert.equal(api.structHtml(null, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), '');   // 나스닥 값 없음 + 종목 없음
+  assert.match(api.structHtml({ gap_pct: 59.8 }, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), /구조 신호/);
 });
 
 // ── 주말 카드(§68 ⑥) ───────────────────────────────────────────────────
