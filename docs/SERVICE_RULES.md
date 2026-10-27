@@ -2485,6 +2485,7 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 ### 70. 구글 애드센스 (2026-10-27 도입)
 
 - **로더**: `adsbygoogle.js?client=ca-pub-7262578476089316`를 모든 페이지 `<head>`에 한 번 둔다. 템플릿은 `base.html`(브리핑·아카이브·섹터 페이지)이고, 손으로 만든 정적 페이지(`/stocks/`·`/glossary/`·`/about/`·`/legal/*`·`/stocks/income-designer/`)와 이미 발행된 브리핑 HTML에도 같은 줄을 넣었다. 개발용 `web/preview-*.html`은 뺐다. **새 정적 페이지를 만들면 `<head>`에 같은 줄을 넣는다.**
-- **광고 단위**: 코스피·마감·미국 브리핑 본문 끝(`</main>` 안, 사이드바 밖)에 멀티플렉스(`data-ad-format="autorelaxed"`, slot `1548082974`) 하나 — `sections/_ad_multiplex.html`. 채워지지 않으면(`data-ad-status="unfilled"`) 숨긴다. 이미 발행된 브리핑에는 로더만 있고 이 단위는 없다(재생성하지 않는다, §33).
+- **광고 단위**: 코스피·마감·미국 브리핑 본문 끝(`</main>` 안, 사이드바 밖)에 멀티플렉스(`data-ad-format="autorelaxed"`, slot `1548082974`) 하나 — `sections/_ad_multiplex.html`. 채워지지 않으면(`data-ad-status="unfilled"`) 숨긴다. 이미 발행된 브리핑 187편에도 같은 단위를 `</main>` 바로 앞에 넣었다(재생성하지 않고 그 자리만 고쳤다).
+- **개인정보처리방침**: §6 쿠키에 Google AdSense 광고 쿠키·맞춤 광고 해제(Google 광고 설정·aboutads.info) 안내를 넣었다(2026-10-27). 애드센스 정책상 필요하다 — 광고 공급자를 바꾸면 이 문단도 같이 고친다.
 - **ads.txt**: `web/ads.txt` — `google.com, pub-7262578476089316, DIRECT, f08c47fec0942fa0`.
 - 광고 위치는 본문(예측·이슈 점검) 사이에 끼워 넣지 않는다 — 본문 끝에만 둔다.
