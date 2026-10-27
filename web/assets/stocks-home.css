@@ -1011,8 +1011,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
 #home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
 #home.slot-close #overnight-bridge{order:6}
-/* 마감 슬롯에서 밤사이 미국(평일 17:00부터 보인다)은 마감 브리핑 카드 위 — 사용자 결정 2026-10-27. 17:00 전엔 숨어 있어 영향이 없다. */
-#home.slot-close #us-evening{order:-1}
+/* 마감 슬롯에서 밤사이 미국이 보이면(평일 17:00~, ueGate가 #home에 ue-on을 붙인다)
+   밤사이 미국 → 지금 이시각 추정가 → 마감 브리핑 카드 순 — 사용자 결정 2026-10-27. */
+#home.slot-close.ue-on #us-evening{order:-2} #home.slot-close.ue-on #us-linked-widget{order:-1}
 #home.slot-morning #us-evening,#home.slot-evening #us-evening{order:2}
 #home.slot-morning #overnight-bridge,#home.slot-evening #overnight-bridge{order:3}
 #home.slot-morning #us-linked-widget,#home.slot-evening #us-linked-widget{order:4}
