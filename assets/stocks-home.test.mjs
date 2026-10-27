@@ -642,3 +642,13 @@ test('goStock — 종목을 누르면 그 종목의 섹터 페이지로 간다(S
   assert.doesNotThrow(() => win.goStock('005930'));
   assert.equal(win.location.href, '/stocks/sector/semicon/');
 });
+
+test('마감 시간대 저녁(밤사이 미국이 보일 때) 순서 — 밤사이 미국 → 이시각 추정가 → 마감 카드(2026-10-27)', () => {
+  const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
+  const css = readFileSync(join(HERE, 'stocks-home.css'), 'utf8');
+  assert.match(src, /classList\.toggle\('ue-on', ev\)/);                 // 노출 판정과 같은 값으로 클래스를 단다
+  assert.match(css, /#home\.slot-close\.ue-on #us-evening\{order:-2\}/);
+  assert.match(css, /#home\.slot-close\.ue-on #us-linked-widget\{order:-1\}/);
+  assert.match(css, /#home #home-hero\{order:0\}/);
+  assert.doesNotMatch(css, /#home\.slot-close #us-evening\{order:-1\}/);  // 17:00 전엔 주도주가 마감 카드 위로 오면 안 된다
+});

@@ -419,6 +419,8 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var dev=devSlot();
     var ev=dev ? /^(morning|evening|weekend)$/.test(dev) : isEvening(kstNow());
     box.style.display = ev ? '' : 'none';
+    var home=document.getElementById('home');
+    if(home) home.classList.toggle('ue-on', ev);   // 마감 시간대 블록 순서(stocks-home.css slot-close.ue-on)
     if(ev) window.__ueLoad(); else window.__ueStop();
   };
   // 오늘 코스피 브리핑 ready 여부로 비거래일(공휴일) 판별 — 서버 휴일 로직과 정합. 확인 후 게이트 재평가.
