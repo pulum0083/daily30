@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>종목 시그널 — Double-Shot</title>
-<meta name="description" content="코스피·코스닥 실시간 대시보드. 지수·수급·주도주·장중 이슈와 AI 예측 브리핑을 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
+<meta name="description" content="코스피 시초가 예측·코스피 마감·미국 시장 AI 브리핑과 주도주·섹터·특이 신호를 시간대에 맞춰 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
 <link rel="canonical" href="https://doubleshot.space/stocks/">
 <meta property="og:url" content="https://doubleshot.space/stocks/">
 <meta property="og:title" content="종목 시그널 — Double-Shot">
-<meta property="og:description" content="코스피·코스닥 실시간 대시보드. 지수·수급·주도주·장중 이슈와 AI 예측 브리핑을 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
+<meta property="og:description" content="코스피 시초가 예측·코스피 마감·미국 시장 AI 브리핑과 주도주·섹터·특이 신호를 시간대에 맞춰 한 화면에서 봐요. 매일 갱신되는 실측 데이터.">
 <meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4',{send_page_view:false});</script>
@@ -26,7 +26,7 @@
 <script src="/assets/vs-yesterday.js?v=21" defer></script>
 <script src="/assets/home-hero.js?v=7" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=33">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=34">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/vs-yesterday.css?v=14">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
@@ -175,6 +175,22 @@
     </div>
     </div><!-- /home-side -->
     </div><!-- /home-cols -->
+
+    <!-- 최근 브리핑 — 크롤러가 스크립트 없이 읽는 정적 목록. 표시 사이는 generate_html.write_stocks_recent_briefings()가 브리핑 발행 때마다 다시 쓴다(§70) -->
+    <section class="block" id="recent-briefings">
+      <div class="block__h"><h2 class="block__t"><span class="ic">📰</span>최근 브리핑</h2><a class="rb-more" href="/briefings/">브리핑 전체 보기 →</a></div>
+      <p class="rb-intro">매일 아침 코스피 시초가 예측, 오후 코스피 마감, 저녁 미국 시장 브리핑이 나가요.</p>
+      <ol class="rb-list">
+      <!-- RECENT_BRIEFINGS:START -->
+      <li class="rb-item feat"><a href="/briefings/2026-10-27/close/"><div class="rb-meta">10/27(화) · 코스피 마감</div><div class="rb-h">개미만 팔았다, 5,929억 외국인 매수에 코스피 +3.09%</div><div class="rb-d">앤트로픽 S-1 공개로 AI 수익성 우려가 걷히자 외국인 <b>5,929억원</b>·기관 <b>2,820억원</b>이 반도체를 쓸어담았어요.</div></a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-27/kospi/"><div class="rb-meta">10/27(화) · 코스피 예측</div><div class="rb-h">코스피 5500 붕괴 다음날, 뉴욕은 반도체부터 다시 샀다</div></a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/us/"><div class="rb-meta">10/26(월) · 미국 시장</div><div class="rb-h">3거래일 급락 뒤, 선물이 먼저 반등을 선언했다</div></a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/close/"><div class="rb-meta">10/26(월) · 코스피 마감</div><div class="rb-h">7개월 최저치인데 기관은 6,047억 사들였다</div></a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-26/kospi/"><div class="rb-meta">10/26(월) · 코스피 예측</div><div class="rb-h">메타는 울었는데 솔리다임은 웃었다, 오늘의 숙제</div></a></li>
+      <li class="rb-item"><a href="/briefings/2026-10-23/us/"><div class="rb-meta">10/23(금) · 미국 시장</div><div class="rb-h">AI 랠리가 실적과 연준이라는 이중 시험대 앞에 섰어요</div></a></li>
+      <!-- RECENT_BRIEFINGS:END -->
+      </ol>
+    </section>
   </div>
 
   <!-- ===== ETF DETAIL (KODEX 200) ===== -->
@@ -367,10 +383,11 @@
   <!-- ===== 안내 푸터 (전 화면 공통) ===== -->
   <footer class="ds-footer">
     <div class="ds-foot-list">
-      <div class="fl">섹터별 대표 종목·특이 신호는 <b><a href="/stocks/sector/semicon/">반도체</a>·<a href="/stocks/sector/battery/">2차전지</a>·<a href="/stocks/sector/auto/">자동차</a>·<a href="/stocks/sector/defense/">방산</a>·<a href="/stocks/sector/ship/">조선</a>·<a href="/stocks/sector/bio/">바이오</a>·<a href="/stocks/sector/finance/">금융</a>·<a href="/stocks/sector/power/">전력기기</a></b> 등 8개 섹터의 주요 종목과 ETF 30여 개를 다루고, 밸류에이션 시그널은 <b>코스피200 전체</b>를 대상으로 해요. 코스닥150 등으로는 앞으로 단계적으로 넓혀갈 예정이에요.</div>
-      <div class="fl">시세·수급은 장중(평일 09:00~15:30)에는 <b>실시간</b>으로, 그 밖의 시간에는 <b>직전 거래일 종가</b>로 표시돼요. 목표주가·실적·밸류에이션처럼 증권사·공시 자료를 반영하는 항목은 장 마감 후 갱신되고, 발표 시점에 따라 며칠 정도 차이가 날 수 있어요.</div>
-      <div class="fl">화면에 나오는 모든 수치는 토스증권·네이버 금융에서 가져온 <b>실측값</b>이에요. AI가 임의로 만든 숫자는 쓰지 않고, 수집되지 않은 항목은 아예 표시하지 않아요.</div>
-      <div class="fl">AI 신호와 기술 신호는 투자 판단을 돕는 <b>참고용</b>일 뿐 예측이 아니고, ETF 지수 흐름도 특정 종목을 추천하는 게 아니에요. 투자에 대한 최종 책임은 투자자 본인에게 있어요.</div>
+      <div class="fl">Double-Shot 종목 시그널은 시간대에 맞춰 첫 화면을 바꿔요. 아침에는 <b>코스피 시초가 예측</b>, 장중에는 <b>어제 같은 시각과 비교</b>, 장 마감 뒤에는 <b>코스피 마감 정리</b>, 저녁에는 <b>미국 시장 브리핑</b>, 주말에는 한 주 정리를 보여줘요.</div>
+      <div class="fl">섹터 막대와 특이 신호는 <b><a href="/stocks/sector/semicon/">반도체</a>·<a href="/stocks/sector/battery/">2차전지</a>·<a href="/stocks/sector/auto/">자동차</a>·<a href="/stocks/sector/defense/">방산</a>·<a href="/stocks/sector/ship/">조선</a>·<a href="/stocks/sector/bio/">바이오</a>·<a href="/stocks/sector/finance/">금융</a>·<a href="/stocks/sector/power/">전력기기</a></b> 8개 섹터 대표 종목 46개를 다뤄요. 특이 신호는 역행 등락·거래량 급증·52주 신고가 근접·외국인과 기관 순매수를 규칙으로 골라 많이 오른 종목부터 보여줘요. 밤에는 한국 시장을 먼저 움직이는 미국 ETF(EWY·DRAM·SOXX)와 AI 인프라 종목을 함께 봐요.</div>
+      <div class="fl">시세·수급은 장중(평일 09:00~15:30)에는 <b>실시간</b>으로, 그 밖의 시간에는 <b>직전 거래일 정규장 종가</b>로 표시해요. 장 마감 뒤 애프터장 가격은 종가로 쓰지 않아요.</div>
+      <div class="fl">화면에 나오는 모든 수치는 네이버 금융·토스증권 등에서 가져온 <b>실측값</b>이에요. AI가 임의로 만든 숫자는 쓰지 않고, 수집되지 않은 항목은 아예 표시하지 않아요.</div>
+      <div class="fl">AI 예측과 신호는 투자 판단을 돕는 <b>참고용</b>이고 특정 종목을 추천하는 게 아니에요. 투자에 대한 최종 책임은 투자자 본인에게 있어요.</div>
     </div>
     <div class="ds-foot-links">
       <a href="/about/">서비스 소개</a>
@@ -380,7 +397,7 @@
       <a href="/legal/terms/">이용약관</a>
       <a href="mailto:pulum0083@gmail.com">문의</a>
     </div>
-    <div class="ds-foot-base">© 2026 Double-Shot · 종목 서비스 (베타) · 장중에는 실시간, 장 마감 후에는 직전 거래일 종가 기준이에요</div>
+    <div class="ds-foot-base">© 2026 Double-Shot · 장중에는 실시간, 장 마감 후에는 직전 거래일 종가 기준이에요</div>
   </footer>
 
 </div>
