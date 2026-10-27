@@ -195,7 +195,8 @@
     if (!m5 || !Array.isArray(m5.items)) return '';
     var head = '<div class="ss-h"><span class="ss-k">월봉 5개월선 안착</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 코스피 브리핑</span></div>';
     var it = m5.items[0];
-    if (!it) return '<a class="ss" href="/briefings/' + ymd + '/kospi/">' + head + '<em>조건을 채운 종목이 없어요</em></a>';
+    // 이번 달에 이미 실은 종목만 남아 비었으면(repeat_hidden) '없다'고 쓰지 않고 줄을 뺀다(2026-10-27 — 같은 종목은 한 달에 한 번)
+    if (!it) return (m5.repeat_hidden && m5.repeat_hidden.length) ? '' : '<a class="ss" href="/briefings/' + ymd + '/kospi/">' + head + '<em>조건을 채운 종목이 없어요</em></a>';
     var strip = (it.strip || []).filter(function (s) { return typeof s.gap_pct === 'number'; }).slice(-6);
     var mx = Math.max.apply(null, strip.map(function (s) { return Math.abs(s.gap_pct); }).concat([1]));
     var bars = strip.map(function (s) {

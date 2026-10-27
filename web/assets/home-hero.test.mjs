@@ -138,6 +138,7 @@ test('월봉 5개월선 — 최근 6개월 막대(안착 구간·이번 달 표�
   assert.match(h, /지금 이격 \+5\.5%/);
   assert.ok(!/매매 신호/.test(h));
   assert.match(api.ma5Row({ items: [] }, '2026-10-26', '2026-10-26'), /조건을 채운 종목이 없어요/);
+  assert.equal(api.ma5Row({ items: [], repeat_hidden: ['메리츠금융지주'] }, '2026-10-27', '2026-10-27'), '');   // 이번 달에 이미 실어서 빈 것
   assert.equal(api.ma5Row(null, '2026-10-26', '2026-10-26'), '');
 });
 

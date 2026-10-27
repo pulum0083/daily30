@@ -85,3 +85,49 @@ def test_kospi_template_uses_new_section_not_stock_picks():
 def test_modal_present_and_picks_modal_removed():
     m = (gh.TEMPLATES_DIR / "sections" / "_modals.html").read_text(encoding="utf-8")
     assert 'id="ma5m-modal"' in m and 'id="picks-modal"' not in m   # 미국 AI 픽도 2026-10-26 제거
+
+
+def _snap(tmp_path, date, btype, key, codes):
+    d = tmp_path / date / btype
+    d.mkdir(parents=True)
+    (d / "analysis_snapshot.json").write_text(json.dumps({key: {"items": [{"code": c} for c in codes]}}), encoding="utf-8")
+
+
+def test_stock_shown_earlier_this_month_is_dropped(tmp_path, monkeypatch):
+    # 10/26에 실은 메리츠금융지주는 10/27에 다시 싣지 않는다(사용자 결정 2026-10-27)
+    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
+    _snap(tmp_path, "2026-10-26", "kospi", "monthly_ma5", ["138040"])
+    _snap(tmp_path, "2026-09-30", "kospi", "monthly_ma5", ["005930"])      # 지난달 — 세지 않는다
+    _snap(tmp_path, "2026-10-28", "kospi", "monthly_ma5", ["000660"])      # 이후 날짜 — 세지 않는다
+    data = {"date": "2026-10-27", "items": [item(), item("삼성전자", "005930"), item("SK하이닉스", "000660")]}
+    out = gh._drop_ma5_repeats(data, "2026-10-27", "kr")
+    assert [x["code"] for x in out["items"]] == ["005930", "000660"]
+    assert out["repeat_hidden"] == ["메리츠금융지주"]
+
+
+def test_repeat_filter_reads_the_market_own_briefings(tmp_path, monkeypatch):
+    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
+    _snap(tmp_path, "2026-10-26", "kospi", "monthly_ma5", ["NVDA"])          # 코스피 발행본은 미국 판단에 쓰지 않는다
+    _snap(tmp_path, "2026-10-23", "us", "monthly_ma5_us", ["AAPL"])
+    data = {"date": "2026-10-27", "items": [item("엔비디아", "NVDA"), item("애플", "AAPL")]}
+    out = gh._drop_ma5_repeats(data, "2026-10-27", "us")
+    assert [x["code"] for x in out["items"]] == ["NVDA"]
+
+
+def test_new_month_shows_again_and_nothing_hidden_keeps_data(tmp_path, monkeypatch):
+    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
+    _snap(tmp_path, "2026-10-26", "kospi", "monthly_ma5", ["138040"])
+    data = {"date": "2026-11-02", "items": [item()]}
+    assert gh._drop_ma5_repeats(data, "2026-11-02", "kr") is data           # 새 달엔 다시 나온다
+
+
+def test_file_path_applies_filter_and_snapshot_path_does_not(tmp_path, monkeypatch):
+    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
+    _snap(tmp_path, "2026-10-26", "kospi", "monthly_ma5", ["138040"])
+    monkeypatch.setattr(gh, "_read_monthly_ma5", lambda td, fn="": {"date": "2026-10-27", "items": [item()]})
+    a = {}
+    assert gh.build_monthly_ma5(a, "2026-10-27") == {"ma5m_items": []}       # 걸러져 섹션째 빠진다
+    assert a["monthly_ma5"]["repeat_hidden"] == ["메리츠금융지주"]          # 스냅샷에 걸러낸 목록이 남는다
+    # 이미 저장된 스냅샷으로 다시 그릴 때는 다시 거르지 않는다(발행본 그대로)
+    snap = {"monthly_ma5": {"date": "2026-10-26", "items": [item()]}}
+    assert gh.build_monthly_ma5(snap, "2026-10-26")["ma5m_items"]

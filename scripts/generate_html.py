@@ -488,7 +488,8 @@ def build_monthly_ma5(analysis: dict, target_date: str = "", market: str = "kr")
     if not isinstance(data, dict):
         data = _read_monthly_ma5(target_date, cfg["file"])
         if data is not None:
-            analysis[cfg["key"]] = data   # 스냅샷에 함께 저장된다
+            data = _drop_ma5_repeats(data, target_date, market)
+            analysis[cfg["key"]] = data   # 스냅샷에 함께 저장된다 — 걸러낸 뒤라 재생성해도 같은 목록이다
     items = [x for x in ((data or {}).get("items") or []) if isinstance(x, dict) and x.get("strip")]
     stats = _ma5_backtest_stats(cfg["bt"])
     if not items or not stats:
@@ -510,6 +511,43 @@ def build_monthly_ma5(analysis: dict, target_date: str = "", market: str = "kr")
                      "last_label": f"{int(str(x['last_complete'])[4:])}월"})
     return {"ma5m_items": view, "ma5m_stats": {**stats, "scope": cfg["scope"], "source": cfg["source"]},
             "ma5m_modal": cfg["modal"]}
+
+
+def _ma5_shown_this_month(target_date: str, market: str) -> set:
+    """같은 달에 이미 발행된 브리핑(그 날짜 전)의 월봉 5개월선 코너에 나온 종목 코드.
+
+    발행본 스냅샷이 원본이다(§4·§45) — 로컬 데이터 파일이 아니라 실제로 구독자에게 나간 목록을 센다.
+    """
+    if not target_date or len(target_date) < 7:
+        return set()
+    cfg = MA5_MARKETS[market]
+    btype = "kospi" if market == "kr" else "us"
+    seen = set()
+    for snap in sorted(BRIEFINGS_DIR.glob(f"{target_date[:7]}-*/{btype}/analysis_snapshot.json")):
+        if snap.parent.parent.name >= target_date:
+            continue
+        try:
+            d = json.loads(snap.read_text(encoding="utf-8")).get(cfg["key"]) or {}
+        except Exception:
+            continue
+        seen |= {x.get("code") for x in (d.get("items") or []) if isinstance(x, dict) and x.get("code")}
+    return seen
+
+
+def _drop_ma5_repeats(data: dict, target_date: str, market: str) -> dict:
+    """한 번 실은 종목은 그 달에 다시 싣지 않는다(사용자 결정 2026-10-27) — 브리핑·텔레그램 공통.
+
+    조건은 월봉 기준이라 한 달 내내 같은 종목이 매일 나왔다. 다음 달에도 조건을 채우면 다시 나온다.
+    뺀 종목 이름은 `repeat_hidden`에 남긴다 — 첫 화면 구조 신호가 '조건을 채운 종목이 없다'로 잘못 쓰지 않게 한다.
+    """
+    seen = _ma5_shown_this_month(target_date, market)
+    items = data.get("items") or []
+    keep = [x for x in items if not (isinstance(x, dict) and x.get("code") in seen)]
+    if len(keep) == len(items):
+        return data
+    hidden = [x.get("name") or x.get("code") for x in items if isinstance(x, dict) and x.get("code") in seen]
+    print(f"[generate_html] 월봉 5개월선 — 이번 달에 이미 실은 종목 제외: {', '.join(hidden)}")
+    return {**data, "items": keep, "repeat_hidden": hidden}
 
 
 def _read_monthly_ma5(target_date: str, filename: str = "monthly_ma5.json"):
