@@ -48,11 +48,13 @@ def test_quote_block_is_narrowed_too():
     assert "\n" in out and all(st._visible_w(l) <= st.NARROW_WIDTH for l in out.split("\n"))
 
 
-def test_link_line_shows_url_on_its_own_line():
-    """바로가기는 주소를 그대로 보인다(2026-10-28 오후 되돌림) — 접을 땐 설명과 주소를 두 줄로 나눈다."""
-    line = st.link_line("전체 근거·이슈 점검", "https://doubleshot.space/briefings/2026-10-28/kospi/")
-    assert line == "🔗 전체 근거·이슈 점검 → https://doubleshot.space/briefings/2026-10-28/kospi/"
-    assert st.narrow_lines(line) == "🔗 전체 근거·이슈 점검 →\nhttps://doubleshot.space/briefings/2026-10-28/kospi/"
+def test_link_line_shows_short_url_as_link():
+    """바로가기는 설명 한 줄 + https 없는 주소 글자 링크 한 줄(2026-10-28 A안). 링크 줄은 접지 않는다."""
+    url = "https://doubleshot.space/briefings/2026-10-28/kospi/"
+    line = st.link_line("전체 근거·이슈 점검", url)
+    assert line == '🔗 전체 근거·이슈 점검 →\n<a href="https://doubleshot.space/briefings/2026-10-28/kospi/">doubleshot.space/briefings/2026-10-28/kospi</a>'
+    assert st.narrow_lines(line) == line
+    assert st._visible_w("doubleshot.space/briefings/2026-10-28/kospi") < st._visible_w(url)
 
 
 def test_no_single_short_word_left_on_last_line():

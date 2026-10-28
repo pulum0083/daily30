@@ -259,9 +259,13 @@ def _visible_w(s: str) -> float:
 
 
 def link_line(label: str, url: str) -> str:
-    """메시지 맨 아래 바로가기 줄 — 주소를 그대로 보인다. narrow_lines()가 설명과 주소를 두 줄로 나눈다.
-    (2026-10-28 오전에 글자 링크로 바꿨다가 같은 날 사용자 요청으로 주소 표기로 되돌렸다.)"""
-    return f"🔗 {label} → {url}"
+    """메시지 맨 아래 바로가기 두 줄 — 설명 한 줄, 그 아래 주소처럼 보이는 링크 한 줄(2026-10-28 A안).
+
+    https://와 끝 '/'를 뺀 주소를 글자로 보이고 실제 링크는 전체 주소로 건다. 전체 주소를 그대로 쓰면
+    그 줄이 본문 폭(21칸)보다 훨씬 길어(약 28.6칸) 말풍선 폭을 정하고 본문 오른쪽이 비었다.
+    <a> 줄은 narrow_lines()가 접지 않는다(태그 안 띄어쓰기에서 접으면 링크가 깨진다)."""
+    shown = url.split("://", 1)[-1].rstrip("/")
+    return f'🔗 {label} →\n<a href="{url}">{shown}</a>'
 
 
 def narrow_lines(text: str, width: float = NARROW_WIDTH) -> str:
