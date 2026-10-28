@@ -936,6 +936,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ld-more[open]>summary{margin-bottom:10px}
 .sb-bars{display:flex;flex-direction:column}
 .sb{display:grid;grid-template-columns:64px 1fr 62px;align-items:center;gap:8px;padding:5px 0;font-size:13px;text-decoration:none;color:var(--ink)}
+.sb-n{transition:color .12s}
+.sb:hover .sb-n{color:#2563EB}   /* 누르면 섹터 페이지 — 링크라는 걸 알 수 있게(2026-10-28) */
 .sb b{text-align:right;font-size:12.5px}
 .sb b.up{color:#E03131}.sb b.dn{color:#2775ED}
 .sb-bar{position:relative;height:8px;background:#F3F4F6;border-radius:4px}
