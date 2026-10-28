@@ -204,8 +204,6 @@ def build_fallback_message(briefing_type: str) -> str:
     # 방향에 맞는 확률 표기: 상승 우위 → up_pct, 하락 우위 → down_pct
     dir_pct = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
-    divider = DIVIDER
-
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 예측 브리핑 | {today}"
         pred_line = f"{dir_emoji} 예측: <b>{direction} ({dir_pct}%)</b>\n신뢰도: <b>{confidence}%</b>"
@@ -223,13 +221,13 @@ def build_fallback_message(briefing_type: str) -> str:
         pred_line = ""
         link = f"{web_url}/briefings/weekly/{date_slug}/"
 
-    parts = [header, divider, pred_line] if pred_line else [header]
+    parts = [header, "", pred_line] if pred_line else [header]
     if reason_title:
-        parts += [divider, f"💬 {strip_html(reason_title)}"]
+        parts += ["", f"💬 {strip_html(reason_title)}"]
     if reasons:
         parts += ["", "핵심 시그널:"]
         parts += [f"• {strip_html(r)}" for r in reasons[:3]]
-    parts += [divider, link_line("상세 분석", link)]
+    parts += ["", link_line("상세 분석", link)]
 
     return "\n".join(parts)
 
@@ -240,9 +238,9 @@ SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
 
 
 # 텔레그램 말풍선은 가장 긴 줄만큼 넓어지고 화면 끝에서야 접힌다 — 긴 문장 하나가 있으면 말풍선이 오른쪽 끝까지 찬다.
-# 본문 줄을 구분선(─ 20칸) 너비에서 미리 접어 말풍선이 구분선 폭에 머물게 한다(사용자 요청 2026-10-27).
-NARROW_WIDTH = 24.0   # 본문을 접는 폭이자 구분선 길이. 20은 문장이 너무 잘게 끊겨 읽기 어려웠다(2026-10-28)
-DIVIDER = "─" * int(NARROW_WIDTH)
+# 본문 줄을 NARROW_WIDTH 칸에서 미리 접어 말풍선 폭을 묶어 둔다(사용자 요청 2026-10-27).
+# 폭은 20 → 24(2026-10-28 오전) → 21(같은 날 오후 — 24는 다시 넓어 보였다). 구분선(─)은 2026-10-28 뺐다 — 빈 줄로 나눈다.
+NARROW_WIDTH = 21.0
 
 
 def _char_w(ch: str) -> float:
@@ -257,10 +255,13 @@ def _visible_w(s: str) -> float:
     return sum(_char_w(c) for c in re.sub(r"<[^>]+>", "", s))
 
 
+
+
+
 def link_line(label: str, url: str) -> str:
-    """메시지 맨 아래 바로가기 줄. 주소를 그대로 보이지 않고 글자에 링크를 건다(2026-10-28) —
-    긴 주소가 한 줄을 통째로 차지해 말풍선 아래쪽이 어색했다."""
-    return f'🔗 <a href="{url}">{label} →</a>'
+    """메시지 맨 아래 바로가기 줄 — 주소를 그대로 보인다. narrow_lines()가 설명과 주소를 두 줄로 나눈다.
+    (2026-10-28 오전에 글자 링크로 바꿨다가 같은 날 사용자 요청으로 주소 표기로 되돌렸다.)"""
+    return f"🔗 {label} → {url}"
 
 
 def narrow_lines(text: str, width: float = NARROW_WIDTH) -> str:
@@ -318,7 +319,7 @@ def pick_quote() -> str:
                 and today_quote.get("quote")
                 and today_quote.get("author")
             ):
-                return "\n\n" + "━" * int(NARROW_WIDTH) + f"\n💡 <i>\"{today_quote['quote']}\"</i>\n— {today_quote['author']}"
+                return f"\n\n💡 <i>\"{today_quote['quote']}\"</i>\n— {today_quote['author']}"
         except (json.JSONDecodeError, OSError):
             pass
 
@@ -334,7 +335,7 @@ def pick_quote() -> str:
     item = random.choice(quotes)
     if not isinstance(item, dict) or not item.get("quote") or not item.get("author"):
         return ""
-    return "\n\n" + "━" * int(NARROW_WIDTH) + f"\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
+    return f"\n\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
 
 
 def _load_sent_log() -> dict:

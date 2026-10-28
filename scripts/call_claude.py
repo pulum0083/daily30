@@ -1112,7 +1112,7 @@ def _nasdaq_telegram_lines(analysis: dict, date_str: str) -> list:
 
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
-    from send_telegram import DIVIDER, link_line
+    from send_telegram import link_line
     import re
 
     def strip_html(text: str) -> str:
@@ -1133,7 +1133,6 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     dir_pct   = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
-    divider = DIVIDER
 
     if briefing_type == "us":
         # 미국: 큰 쪽 확률 → 헤드라인(🎯) → 오늘 밤 볼 것(👀, 첫 이슈 제목) — 코스피 형식과 맞춘다(2026-10-25).
@@ -1143,7 +1142,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         tv = analysis.get("todays_view") or {}
         view_title = strip_html(tv.get("view_title", ""))
         issue_titles = [strip_html(it.get("title", "")) for it in (analysis.get("issues") or []) if it.get("title")]
-        lines = [header, divider]
+        lines = [header, ""]
         if isinstance(up_pct, int) and isinstance(down_pct, int):
             if up_pct == down_pct:
                 lines += [f"📊 <b>중립 {up_pct}%</b>"]
@@ -1155,7 +1154,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
         lines += _nasdaq_telegram_lines(analysis, date_str)
-        lines += [divider, link_line("전체 이슈 점검", link)]
+        lines += ["", link_line("전체 이슈 점검", link)]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).
         # 두 문장 모두 웹 페이지 맨 위 헤드라인·'오늘 볼 것' 첫 줄과 같은 필드라 텔레그램과 페이지가 어긋나지 않는다.
@@ -1166,13 +1165,13 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         headline = strip_html(tv.get("view_title", "")) or reason_title
         outlook = [o for o in (tv.get("outlook") or []) if isinstance(o, dict) and o.get("text")]
 
-        lines = [header, divider, f"{dir_emoji} <b>{direction} {dir_pct}%</b> (신뢰도 {confidence}%)"]
+        lines = [header, "", f"{dir_emoji} <b>{direction} {dir_pct}%</b> (신뢰도 {confidence}%)"]
         if headline:
             lines += ["", f"🎯 <b>{headline}</b>"]
         if outlook:
             lines += ["", "👀 개장 후 볼 것", strip_html(outlook[0]["text"])]
         lines += _ma5_telegram_lines(analysis, date_str)
-        lines += [divider, link_line("전체 근거·이슈 점검", link)]
+        lines += ["", link_line("전체 근거·이슈 점검", link)]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1782,7 +1781,7 @@ def call_claude_closing(date_str: str) -> dict:
 
 def save_closing_telegram_message(date_str: str, analysis: dict, market_data: dict) -> None:
     """KOSPI 마감 시황 텔레그램 메시지를 파일로 저장한다."""
-    from send_telegram import DIVIDER, link_line
+    from send_telegram import link_line
     import re
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1804,7 +1803,6 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     # 타이틀은 형식에 따라 market_title(why_what_so) 또는 reason_title(scenario·qa·signal) — 페이지와 같은 우선순위.
     title = strip_html(analysis.get("market_title") or analysis.get("reason_title") or "")
     dek   = strip_html(analysis.get("dek") or "")
-    divider = DIVIDER
 
     # 결과 배지: 오늘 아침 kospi 예측을 그 예측의 기준으로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
     #  · 시초가 기준(§57) → 오늘 시가 갭으로 채점한다. 갭을 못 구하면 종가로 대신 채점하지 않고 배지를 뺀다.
@@ -1833,14 +1831,14 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
 
     # 🎯 타이틀 → 서브 한 문장 → 아침 예측 채점(2026-10-27). 지수 수치 줄은 싣지 않는다 — 타이틀이 주인공이다.
     # 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다.
-    lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", divider]
+    lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", ""]
     if title:
         lines += [f"🎯 <b>{title}</b>"]
         if dek:
             lines.append(dek)
     if result_badge:
         lines += ["", result_badge]
-    lines += [divider, link_line("수급·시장폭 상세", f"{web_base}/briefings/{date_str}/close/")]
+    lines += ["", link_line("수급·시장폭 상세", f"{web_base}/briefings/{date_str}/close/")]
 
     msg = "\n".join(lines)
     out = DATA_DIR / "telegram_message_kospi_close.txt"
