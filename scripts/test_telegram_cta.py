@@ -28,10 +28,8 @@ def test_kospi_headline_and_one_watch_line(tmp_path, monkeypatch):
     assert "👀 개장 후 볼 것\n반도체 갭다운 폭을 얼마나 키울지 지켜보세요." in text
     assert "기관 매도" not in text          # 개장 후 볼 것은 한 문장만
     assert "지난 예측" not in text and "핵심 시그널" not in text and "CPI" not in text
-    tail = text.rstrip().split("\n")[-2:]   # 바로가기 = 설명 한 줄 + https 없는 주소 글자 링크(2026-10-28 A안)
-    assert tail[0] == "🔗 전체 근거·이슈 점검 →"
-    assert tail[1].startswith('<a href="http') and '/briefings/2026-10-23/kospi/">' in tail[1]
-    assert tail[1].endswith("/briefings/2026-10-23/kospi</a>") and ">https" not in tail[1]
+    last = text.rstrip().split("\n")[-1]   # 바로가기는 주소를 그대로 보인다(2026-10-28 오후, 글자 링크에서 되돌림)
+    assert last.startswith("🔗 전체 근거·이슈 점검 → http") and last.endswith("/briefings/2026-10-23/kospi/")
     assert "─" not in text and "━" not in text   # 구분선은 뺐다(2026-10-28) — 빈 줄로 나눈다
 
 
@@ -59,7 +57,7 @@ def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
     assert "2026.10.23\n\n🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n기관이 8,726억원을 사들였어요." in text
     assert "─" not in text
     assert "핵심 시그널" not in text and "옛 시그널" not in text
-    assert "🔗 수급·시장폭 상세 →\n<a href=" in text
+    assert "🔗 수급·시장폭 상세 → http" in text
 
 
 def test_close_prefers_market_title_and_skips_missing_dek(tmp_path, monkeypatch):
@@ -82,7 +80,7 @@ def test_us_first_issue_and_has_cta(tmp_path, monkeypatch):
     text = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
     assert "IBM CEO SW 지출 경고" in text
     assert "오늘 밤 CPI 발표" not in text   # 오늘 밤 볼 것은 첫 이슈 하나만(2026-10-25)
-    assert "🔗 전체 이슈 점검 →\n<a href=" in text
+    assert "🔗 전체 이슈 점검 → http" in text
     assert "상세 분석" not in text
 
 
@@ -101,7 +99,7 @@ def test_kospi_adds_ma5_block_when_page_shows_it(tmp_path, monkeypatch):
     text = (tmp_path / "telegram_message_kospi.txt").read_text(encoding="utf-8")
     assert "📊 월봉 5개월선 안착 종목\n• 메리츠금융지주 3개월째 · 이격 +5.5%" in text
     assert "※" not in text and "오른 비율" not in text and "매매 신호가 아니에요" not in text   # 설명 줄은 페이지에만(2026-10-26)
-    assert text.index("📊 월봉") < text.index("🔗 전체 근거·이슈 점검 →")
+    assert text.index("📊 월봉") < text.index("🔗 전체 근거·이슈 점검 → http")
 
 
 def test_kospi_skips_ma5_block_when_no_items_or_no_backtest(tmp_path, monkeypatch):
