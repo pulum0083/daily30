@@ -2,7 +2,7 @@
 <div class="right-panel">
   <div class="panel-header">
     <span class="section-title">섹터 로테이션<button class="info-icon-btn" data-modal-open="sector-modal" style="margin-left:6px">?</button></span>
-    <span class="pub-time">자금 흐름</span>
+    <span class="pub-time">{{ sector_basis | default('자금 흐름', true) }}</span>
   </div>
   <div class="rota-list">
     {% for s in sectors %}

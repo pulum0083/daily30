@@ -165,17 +165,31 @@ def test_dpick_등락률_거래대금은_정규장_값으로_계산한다():
     now = KST.localize(datetime(2026, 9, 15, 16, 30))
     picks = fc.fetch_dpick(now=now, fetch=_dpick_fetch())
     # 종가 10,300(15:30 1분봉) vs 전일 10,000 → +3.00%. 애프터장 10,500·9,900이면 +6.06%가 된다.
-    # 거래대금 = 정규장 거래량 2,500,000 × 10,300 = 257.5억. 평균 = (257.5 + 100 × 19) / 20 = 107.875억.
-    assert picks == [{
-        "name": "가나전자", "code": "111111", "change_pct": 3.0, "trade_value_eok": 258,
-        "trade_mult": 2.4, "frgn_eok": 10, "inst_eok": 21,
-    }]
+    # 거래대금 = 정규장 거래량 2,500,000 × 10,300 = 257.5억. 평균은 오늘을 뺀 지난 19거래일 = 100억 → 2.6배.
+    # 2026-10-28부터 외국인·기관 수급 조건·금액은 없다(16:25엔 종목별 당일 수급 원천이 없다).
+    assert picks == [{"name": "가나전자", "code": "111111", "change_pct": 3.0, "trade_value_eok": 258, "trade_mult": 2.6}]
 
 
-def test_dpick_오늘_행이_아직_없으면_건너뛴다():
+def test_dpick_trend에_오늘_행이_없어도_1분봉으로_채운다():
+    # 2026-10-28 발견: 네이버 trend의 오늘 행은 20:00이 지나도 없다 — 예전엔 이 때문에 매일 전부 건너뛰었다.
     now = KST.localize(datetime(2026, 9, 15, 16, 30))
-    assert fc.fetch_dpick(now=now, fetch=_dpick_fetch(today_trend=False)) == []
-    assert fc._source_failures == []   # 원천 고장이 아니다 — §1의 정상 동작
+    picks = fc.fetch_dpick(now=now, fetch=_dpick_fetch(today_trend=False))
+    assert picks == [{"name": "가나전자", "code": "111111", "change_pct": 3.0, "trade_value_eok": 258, "trade_mult": 2.6}]
+    assert fc._source_failures == []
+
+
+def test_섹터_대표3종목_공식종가_평균_큰순_하나라도_없으면_뺀다():
+    uni = {"sectors": {
+        "semicon": {"label": "반도체", "stocks": [{"code": "A", "name": "a"}, {"code": "B", "name": "b"}, {"code": "C", "name": "c"}, {"code": "D", "name": "d"}]},
+        "auto": {"label": "자동차", "stocks": [{"code": "E", "name": "e"}, {"code": "F", "name": "f"}, {"code": "G", "name": "g"}]},
+        "bio": {"label": "바이오", "stocks": [{"code": "H", "name": "h"}, {"code": "I", "name": "i"}, {"code": "J", "name": "j"}]},
+    }}
+    pct = {"A": 9.0, "B": 10.0, "C": 5.0, "D": -50.0, "E": 1.0, "F": 2.0, "G": 3.0, "H": 1.0, "I": None, "J": 2.0}
+    ot = lambda code, now=None: None if pct[code] is None else {"close": 1, "change_pct": pct[code], "volume": 1}
+    out = fc.sector_reps_after_close(official_today=ot, universe=uni)
+    assert [s["name"] for s in out] == ["반도체", "자동차"]       # 바이오는 한 종목이 비어 뺀다
+    assert out[0]["change_pct"] == 8.0 and out[0]["basis"] == "대표 3종목 평균"   # 네 번째 종목(D)은 넣지 않는다
+    assert [x["name"] for x in out[0]["stocks"]] == ["a", "b", "c"]
 
 
 def test_dpick_유니버스가_비면_원천_실패로_기록한다():

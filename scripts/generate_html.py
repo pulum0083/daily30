@@ -1413,6 +1413,8 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             "pct": f"{s.get('change_pct', 0):+.1f}%",
             "cls": "up" if s.get("change_pct", 0) >= 0 else "dn",
         } for s in sectors[:8]]
+        if sectors[0].get("basis"):
+            ctx["sector_basis"] = sectors[0]["basis"]   # 16시 뒤 대표 3종목 공식 종가로 채운 날(2026-10-28)
 
     # close_supply (수급) — fetch_investor_trading 구조: {player: {"net": 백만원}}
     inv = market.get("investor_trading", {})
@@ -1486,23 +1488,24 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
     if dpick_raw:
         dpick_rows = []
         for p in dpick_raw:
-            frgn = p.get("frgn_eok", 0)
-            inst = p.get("inst_eok", 0)
-            total = frgn + inst or 1
-            fw = max(4, round(frgn / total * 80))
-            iw = max(4, round(inst / total * 80))
             chg = p.get("change_pct", 0)
-            dpick_rows.append({
+            row = {
                 "name": p.get("name", ""),
                 "code": p.get("code", ""),
                 "mult": p.get("trade_mult", 0),
                 "vol":  f"{p.get('trade_value_eok', 0):,}억",
                 "chg":  f"{'▲' if chg >= 0 else '▼'} {abs(chg):.2f}%",
-                "segs": [
-                    {"cls": "frgn", "width": fw, "label": f"외국인 {frgn:,}억"},
-                    {"cls": "inst", "width": iw, "label": f"기관 {inst:,}억"},
-                ],
-            })
+                "chg_cls": "up" if chg > 0 else "down" if chg < 0 else "",
+            }
+            # 옛 데이터(수급 조건이 있던 시절)에 외국인·기관 금액이 있으면 그대로 보인다. 지금 수집분엔 없다(2026-10-28).
+            frgn, inst = p.get("frgn_eok"), p.get("inst_eok")
+            if isinstance(frgn, (int, float)) and isinstance(inst, (int, float)):
+                total = frgn + inst or 1
+                row["segs"] = [
+                    {"cls": "frgn", "width": max(4, round(frgn / total * 80)), "label": f"외국인 {frgn:,}억"},
+                    {"cls": "inst", "width": max(4, round(inst / total * 80)), "label": f"기관 {inst:,}억"},
+                ]
+            dpick_rows.append(row)
         ctx["dpick_rows"] = dpick_rows
 
     # close_research — 오늘 증권가 시황 (data/research_reports.json). Gemini 요약이지만

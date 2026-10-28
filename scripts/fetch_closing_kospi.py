@@ -327,12 +327,52 @@ def parse_industry_top_stocks(payload, limit: int = 3) -> list[dict]:
     return stocks[:limit]
 
 
+UNIVERSE_PATH = Path(__file__).resolve().parent / "config" / "stock_universe.json"
+
+
+def sector_reps_after_close(now=None, official_today=None, universe=None) -> list[dict]:
+    """stock_universe.json 각 섹터의 앞 3종목(대표 3종목) 공식 종가 등락 평균 — 큰 순.
+
+    종목 홈 '어디가 이끄나'(api/_vs-sectors.mjs SECTOR_REPS)와 같은 대표 3종목이다. 세 종목 중 하나라도
+    오늘 공식 종가가 없으면 그 섹터는 뺀다(평균을 지어내지 않는다).
+    """
+    official_today = official_today or _official_today_fn()
+    if universe is None:
+        try:
+            universe = json.loads(UNIVERSE_PATH.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            print(f"[fetch_closing] sector reps: 유니버스 읽기 실패 {e}", file=sys.stderr)
+            return []
+    out = []
+    for key, sec in (universe.get("sectors") or {}).items():
+        reps = (sec.get("stocks") or [])[:3]
+        stocks = []
+        for st in reps:
+            q = official_today(st.get("code", ""), now=now)
+            if not q:
+                break
+            stocks.append({"name": st.get("name", ""), "change_pct": q["change_pct"]})
+        if len(reps) < 3 or len(stocks) < len(reps):
+            print(f"[fetch_closing] sector reps {key}: 공식 종가 {len(stocks)}/{len(reps)} — 뺀다", file=sys.stderr)
+            continue
+        out.append({"name": sec.get("label", key), "change_pct": round(sum(s["change_pct"] for s in stocks) / len(stocks), 2),
+                    "stocks": stocks, "basis": "대표 3종목 평균"})
+    out.sort(key=lambda s: -s["change_pct"])
+    return out
+
+
 def fetch_sector_performance(fetch=_get_json, now=None) -> list[dict]:
     """네이버 업종별 시세에서 섹터 등락률과 섹터별 상위 종목을 가져온다.
 
     Returns list of {"name": str, "change_pct": float, "stocks": [{"name", "change_pct"}, ...]}
     """
     if not list_prices_regular(now):
+        # 16:00 뒤엔 업종 목록이 애프터장 값이라 쓰지 않는다(§51). 대신 우리 유니버스의 섹터 대표 3종목을
+        # 정규장 공식 종가로 계산해 채운다(2026-10-28 — 그 전엔 마감 사이드바가 매일 비었다).
+        reps = sector_reps_after_close(now=now)
+        if reps:
+            print(f"[fetch_closing] sectors: 대표 3종목 공식 종가 기준 {len(reps)}개")
+            return reps
         _after_market_skip("sectors")
         return []
     try:
@@ -531,10 +571,11 @@ def fetch_market_breadth(fetch=_get_json, now=None) -> dict:
     return result
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 거래대금 급증 + 수급 동반 종목 (외국인·기관 동시 순매수)
+# 거래대금 급증 종목
 # ─────────────────────────────────────────────────────────────────────────────
-# 데이터 제약: KRX 종목별 순매수 '금액' 소스가 막혀 있어(LOGOUT), 네이버 종목별
-# 일별 순매매 '수량'에 종가를 곱한 근사 금액(억원)을 사용한다.
+# 2026-10-28: 예전엔 '외국인·기관 동시 순매수'도 조건이었는데, 네이버 종목별 일별 순매매(trend)의 오늘 행이
+# 20:00이 지나도 올라오지 않아 16:25 마감 작업에서는 매일 전부 건너뛰어 섹션이 비었다. 종목별 당일 수급을
+# 그 시각에 주는 원천이 없어(KRX LOGOUT) 수급 조건을 빼고, 정규장 거래대금 급증만 본다.
 
 def parse_dpick_universe(payload, universe: int = 20) -> list[tuple[str, str]]:
     """/api/stocks/quantTop/KOSPI 응답 → 거래량 상위 보통주 [(코드, 이름)]. ETF·ETN은 stockEndType으로 뺀다."""
@@ -596,11 +637,8 @@ def regular_session_rows(code: str, rows: list[dict], fetch=_get_json) -> list[d
 
 
 def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5, now=None, fetch=_get_json) -> list:
-    """거래대금 급증 × 외국인·기관 동시 순매수 종목을 반환한다.
-
-    universe(코스피 거래량 상위 보통주)의 일별 외국인·기관 순매매로 (ⓐ거래대금이 최근 평균 대비 min_mult배
-    이상 급증, ⓑ외국인·기관 동시 순매수)를 만족하는 종목을 거래대금 순으로 선별한다.
-    종가·등락률·거래대금은 정규장 값만 쓴다(§48·§51).
+    """거래대금 급증 종목 — 코스피 거래량 상위 보통주 중 오늘 정규장 거래대금이 최근 평균의 min_mult배 이상인 종목을
+    거래대금 순으로. 종가·등락률·거래대금은 정규장 값만 쓴다(§48·§51). 오늘 값은 1분봉(09:00~15:30)에서 만든다.
     """
     now = now or datetime.now(KST)
     today = now.strftime("%Y%m%d")
@@ -620,10 +658,12 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5, now=N
         except Exception as e:
             print(f"[fetch_closing] dpick {name}({code}) trend 조회 실패: {e}", file=sys.stderr)
             continue
-        # 당일 데이터가 아직 올라오지 않은 경우(어제 데이터) → 스킵
-        if not rows or rows[0]["date"] != today:
-            print(f"[fetch_closing] dpick {name}({code}): 최신 행={rows[0]['date'] if rows else None} ≠ 오늘={today} → 스킵")
+        # trend엔 16:25에 오늘 행이 없다 — 오늘 자리를 비워 넣고 정규장 1분봉으로 종가·거래량을 채운다
+        if not rows:
+            print(f"[fetch_closing] dpick {name}({code}): trend 행 없음 → 스킵")
             continue
+        if rows[0]["date"] != today:
+            rows = [{"date": today, "close": None, "vol": None, "frgn": None, "inst": None}] + rows
         rows = regular_session_rows(code, rows, fetch)
         cur = rows[0]
         prev = rows[1] if len(rows) > 1 else {}
@@ -632,22 +672,18 @@ def fetch_dpick(universe: int = 20, limit: int = 3, min_mult: float = 1.5, now=N
             continue
         close = cur["close"]
         tv = cur["vol"] * close / 1e8                              # 당일 거래대금(억)
-        hist = [x for x in rows[:20] if x["close"] and x["vol"]]
+        hist = [x for x in rows[1:21] if x["close"] and x["vol"]]   # 평균은 오늘을 뺀 지난 거래일
         if len(hist) < 5:
             print(f"[fetch_closing] dpick {name}({code}): 정규장 거래량 {len(hist)}일뿐 → 스킵")
             continue
         avg = sum(x["vol"] * x["close"] for x in hist) / len(hist) / 1e8
         mult = tv / avg if avg else 0
-        frgn_eok = cur["frgn"] * close / 1e8
-        inst_eok = cur["inst"] * close / 1e8
-        if frgn_eok > 0 and inst_eok > 0 and mult >= min_mult:
+        if mult >= min_mult:
             picks.append({
                 "name": name, "code": code,
                 "change_pct": round((close - prev["close"]) / prev["close"] * 100, 2),
                 "trade_value_eok": round(tv),
                 "trade_mult": round(mult, 1),
-                "frgn_eok": round(frgn_eok),
-                "inst_eok": round(inst_eok),
             })
     picks.sort(key=lambda p: -p["trade_value_eok"])
     picks = picks[:limit]
