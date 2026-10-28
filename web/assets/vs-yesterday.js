@@ -343,7 +343,10 @@
       var leader = sectors.filter(function (s) { return s.rank === 1; })[0];
       var prevLeader = sectors.filter(function (s) { return s.prevRank === 1; })[0];
       var parts = [];
-      if (leader && leader.prevRank != null) {
+      if (leader && leader.prevRank === 1) {
+        // 1위가 그대로면 '어제 1위에서 1위로'가 되어 어색하다(2026-10-28) — 이어서 1위라고 쓴다.
+        parts.push('<b>' + esc(leader.label) + '</b>' + josa(leader.label, '이', '가') + ' 어제에 이어 <b class="up">1위</b>예요');
+      } else if (leader && leader.prevRank != null) {
         parts.push('<b>' + esc(leader.label) + '</b>' + josa(leader.label, '이', '가') + ' 어제 ' + leader.prevRank + '위에서 <b class="up">1위</b>로');
       }
       if (prevLeader && (!leader || prevLeader.key !== leader.key)) {

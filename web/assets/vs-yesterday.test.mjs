@@ -542,6 +542,16 @@ test('josa — 마지막 글자 받침 유무로 이/가·은/는 짝을 고른�
   assert.equal(api.josa('어제', '은', '는'), '는', '어제(받침 없음)인데 은을 씀');
 });
 
+test('결론 근거 — 1위가 어제와 같으면 "어제에 이어 1위"로 쓴다', () => {
+  const { api } = load();
+  const d = Object.assign({}, PAYLOAD, { axes: { sectors: [
+    { key: 'semicon', label: '반도체', names: [], t: 1.0, y: 1.0, diff: 0, rank: 1, prevRank: 1, move: 0, n: 3 },
+  ] } });
+  const html = api.heroWhy(d, 'close');
+  assert.ok(html.includes('반도체</b>가 어제에 이어 <b class="up">1위</b>예요'), html);
+  assert.ok(!html.includes('1위에서'), html);
+});
+
 test('결론 근거 — 주도권 줄의 조사가 받침에 맞는다(조선이·반도체가)', () => {
   const { api } = load();
   // 라벨은 <b>로 감싸므로 조사는 </b> 태그 바깥에 붙는다(위 계사 테스트와 같은 이유).
