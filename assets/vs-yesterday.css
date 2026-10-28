@@ -130,7 +130,7 @@
 .vsx-two .s{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
 /* 주도권 — 시장 기준선. 이름 칸 112px + 간격 8px, 값 칸 64px + 8px — 세로 점선 겹(.vsx-lines)도 같은 여백으로 맞춘다 */
 .vsx-lead{position:relative}
-.vsx-lead.has-lab{margin-top:40px}
+.vsx-lead.has-lab{margin-top:56px}
 .vsx-lr{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:8px;height:34px}
 .vsx-lr .nm{display:flex;align-items:center;font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;min-width:0}
 .vsx-lr .nm small{font-size:10.5px;font-weight:800;margin-left:7px}
@@ -143,9 +143,12 @@
 .vsx-lr .v.up{color:var(--up)} .vsx-lr .v.dn{color:var(--dn)}
 .vsx-lines{position:absolute;left:120px;right:72px;top:0;bottom:0;pointer-events:none}
 .vsx-vl{position:absolute;top:0;bottom:0;border-left:1.5px dashed #C3CAD3}
-.vsx-vl.q{border-left-color:#8A939F} .vsx-vl.k{border-left-color:#0F172A}
-.vsx-vlab{position:absolute;font-size:10.5px;font-weight:800;transform:translateX(-50%);white-space:nowrap}
-.vsx-vlab.k{top:-18px;color:#0F172A} .vsx-vlab.q{top:-34px;color:#8A939F}
+.vsx-vl.q{border-left:2px dashed #64748B;top:-8px} .vsx-vl.k{border-left:2px dashed #0F172A;top:-8px}
+/* 기준선 라벨 — 흰 알약 + 선 색 테두리. 두 줄(코스피 아래·코스닥 위)로 엇갈려 겹치지 않게 둔다 */
+.vsx-vlab{position:absolute;font-size:11px;font-weight:800;line-height:1;transform:translateX(-50%);white-space:nowrap;
+  background:#fff;border:1.5px solid;border-radius:999px;padding:3px 7px;font-variant-numeric:tabular-nums}
+.vsx-vlab.l{transform:translateX(-12px)} .vsx-vlab.r{transform:translateX(calc(-100% + 12px))}
+.vsx-vlab.k{top:-26px;color:#0F172A;border-color:#0F172A} .vsx-vlab.q{top:-50px;color:#475569;border-color:#64748B}
 /* 수급 — 판 쪽 vs 산 쪽 한 줄 막대(오늘 · 어제 이 시각) */
 .vsx-bal{margin:6px 0 2px}
 .vsx-bal+.vsx-bal{margin-top:18px;padding-top:14px;border-top:1px dashed var(--hair)}
