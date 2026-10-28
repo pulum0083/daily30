@@ -148,3 +148,51 @@ def test_telegram_block_at_70_after_watch_line(tmp_path, monkeypatch):
 def test_telegram_no_block_without_data_or_backtest(tmp_path, monkeypatch):
     monkeypatch.setattr(gh, "NASDAQ_BACKTEST_PATH", tmp_path / "없음.json")
     assert "나스닥" not in _tg(tmp_path, monkeypatch, 80.0)
+
+
+# ── 상세 페이지(/stocks/nasdaq-check/, 2026-10-28) ──
+def test_history_starts_1990_and_matches_series():
+    r = nq.compute(MONTHS)
+    h = r["history"]
+    assert h[0]["m"] == "1990-01" and h[-1]["m"] == "2026-10" and len(h) == 442
+    assert max(h, key=lambda x: x["g"])["m"] == "2000-03"                 # 닷컴 버블 최고점이 들어온다
+    by_m = {x["m"]: x["g"] for x in h}
+    assert all(by_m[s["m"]] == s["g"] for s in r["series"])               # 브리핑 그래프(2014~)와 같은 값
+
+
+def test_snapshot_does_not_store_history(tmp_path, monkeypatch):
+    a = {}
+    _ctx(tmp_path, monkeypatch, _data(), analysis=a)
+    assert "history" not in a["nasdaq_overheat"] and a["nasdaq_overheat"]["series"]
+
+
+def _page(tmp_path, monkeypatch, data, target="2026-10-23"):
+    monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(gh, "WEB_DIR", tmp_path / "web")
+    if data is not None:
+        (tmp_path / "nasdaq_overheat.json").write_text(json.dumps(data), encoding="utf-8")
+    ok = gh.write_nasdaq_page(target)
+    out = tmp_path / "web" / "stocks" / "nasdaq-check" / "index.html"
+    return ok, (out.read_text(encoding="utf-8") if out.exists() else "")
+
+
+def test_page_written_with_two_charts_and_points(tmp_path, monkeypatch):
+    ok, html = _page(tmp_path, monkeypatch, _data())
+    assert ok
+    assert html.count('class="nqp-in"') == 2 and 'data-kind="gap"' in html and 'data-kind="lvl"' in html
+    pts = json.loads(html.split('id="nqp-data">')[1].split("</script>")[0])
+    assert len(pts) == 442 and pts[0][0] == "1990-01"
+    assert "최고 2000년 3월 +182%" in html and "✓ 정상" in html
+    assert '<link rel="canonical" href="https://doubleshot.space/stocks/nasdaq-check/">' in html
+
+
+def test_page_skipped_on_date_mismatch_or_no_history(tmp_path, monkeypatch):
+    assert _page(tmp_path, monkeypatch, _data(date="2026-10-22"))[0] is False
+    d = _data()
+    d.pop("history")
+    assert _page(tmp_path, monkeypatch, d)[0] is False
+
+
+def test_page_in_sitemap_and_gate():
+    import verify_publish_gate as vg
+    assert any(url.endswith("/stocks/nasdaq-check/") for _, url in vg.expected_pages())

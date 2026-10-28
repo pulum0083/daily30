@@ -964,6 +964,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .pill.warn{background:#FEF2F2;color:#E03131}
 #struct-sig .pill.nb{background:#EFF4FE;color:#2775ED}
 #struct-sig .ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
+#struct-sig .ss-go{margin-left:8px;font-weight:700;color:#2563EB;white-space:nowrap}
+#struct-sig .ss:hover .ss-go{text-decoration:underline}
 #struct-sig .nqg{margin-top:9px}
 #struct-sig .nqg-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
 #struct-sig .nqg-t i{position:absolute;top:0;height:100%;display:block}

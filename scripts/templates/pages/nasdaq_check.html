@@ -1,0 +1,219 @@
+{# 나스닥 체크 상세 페이지(/stocks/nasdaq-check/) — 1990년부터의 월별 이격률·지수와 60개월선(2026-10-28 사용자 요청).
+   숫자는 전부 미국 브리핑 때 수집한 data/nasdaq_overheat.json·백테스트 파일 그대로다(§0·§20).
+   그래프 SVG는 가로로 늘려 그리므로 글자·점·짚기 선은 SVG 밖 HTML로 겹친다(브리핑 섹션과 같은 방식). #}
+{% extends "base.html" %}
+{% set g1 = nq.gap_chart %}{% set g2 = nq.level_chart %}{% set b = nq.bt %}
+{% block title %}나스닥 체크 — 60개월선 대비 과열도 {{ '%+.1f'|format(nq.gap) }}% | Double-Shot{% endblock %}
+{% block og_title %}나스닥 체크 — 60개월선 대비 과열도 {{ '%+.1f'|format(nq.gap) }}%{% endblock %}
+{% block og_desc %}나스닥 월봉 고점이 60개월(5년) 이동평균선보다 {{ '%.1f'|format(nq.gap) }}% 위예요({{ nq.badge }}). {{ nq.from_year }}년부터의 월별 이격률과 지수·60개월선 그래프, 과거 통계를 함께 봐요.{% endblock %}
+{% block head_extra %}
+<style>
+  .nqp-wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+  /* 뒤로 가기 — 섹터 페이지(.sector-crumb·.sector-back)와 같은 모양(2026-10-28 사용자 요청) */
+  .nqp-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center}
+  .nqp-crumb a{color:var(--muted);text-decoration:none}
+  .nqp-crumb a:hover{color:var(--ink)}
+  .nqp-back{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;
+    background:var(--canvas);border:1px solid var(--hairline);color:var(--muted);cursor:pointer;margin-right:10px;padding:0;line-height:1;
+    flex:none;transition:background .12s,color .12s,border-color .12s}
+  .nqp-back:hover{border-color:var(--primary);color:var(--primary)}
+  .nqp-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-.3px}
+  .nqp-lead{font-size:13.5px;line-height:1.7;color:var(--muted);margin:0 0 16px;word-break:keep-all}
+  .nqp-lead b{color:var(--ink)}
+  .nqp-wrap .nq-section{margin-top:0}
+  .nqp-asof{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .nqp-card{border:1px solid var(--hairline);border-radius:14px;background:var(--canvas);padding:16px 16px 12px;margin-top:14px}
+  .nqp-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .nqp-h h2{font-size:15px;font-weight:800;color:var(--ink);margin:0}
+  .nqp-h small{font-size:11.5px;color:var(--muted)}
+  .nqp-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:6px 0 22px}
+  .nqp-leg i{display:inline-block;width:16px;height:0;border-top:2px solid var(--ink);vertical-align:3px;margin-right:5px}
+  .nqp-leg i.ma{border-top:2px dashed var(--primary)}
+  .nqp-leg i.zc{border:0;height:9px;width:12px;background:#fcd34d;opacity:.55;vertical-align:0;border-radius:2px}
+  .nqp-leg i.zw{border:0;height:9px;width:12px;background:#f87171;opacity:.4;vertical-align:0;border-radius:2px}
+  /* 짚기 말풍선 — 짚은 달의 선 위에 점을 찍고 그 위에 값을 띄운다(2026-10-28 사용자 요청) */
+  .nqp-pt{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);background:var(--canvas);border:2.5px solid var(--ink);pointer-events:none;z-index:2}
+  .nqp-pt.ma{border-color:var(--primary)}
+  .nqp-tip{position:absolute;z-index:3;pointer-events:none;background:#1B2232;color:#fff;border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.5;white-space:nowrap;box-shadow:0 6px 18px rgba(15,23,42,.22);font-variant-numeric:tabular-nums}
+  .nqp-tip b{display:block;font-size:13px;font-weight:800;margin-bottom:1px}
+  .nqp-tip .up{color:#fca5a5;font-weight:800} .nqp-tip .gold{color:#fcd34d;font-weight:800} .nqp-tip .v{font-weight:700}
+  .nqp-tip .k{color:#94A3B8}
+  html.dark .nqp-tip{background:#2a3142;border:1px solid rgba(255,255,255,.12)}
+  .nqp-plot{position:relative;height:230px;padding-left:46px}
+  .nqp-in{position:relative;height:100%;touch-action:pan-y;cursor:crosshair}
+  .nqp-in svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+  .nqp-in .z-caution{fill:#fcd34d;opacity:.22}
+  .nqp-in .z-warn{fill:#f87171;opacity:.14}
+  .nqp-in .th{stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+  .nqp-in .th-caution{stroke:var(--gold)} .nqp-in .th-warn{stroke:var(--up)}
+  .nqp-in .zero{stroke:var(--hairline);stroke-width:1;vector-effect:non-scaling-stroke}
+  .nqp-in .area{fill:var(--ink);opacity:.05}
+  .nqp-in .line{fill:none;stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+  .nqp-in .ma{fill:none;stroke:var(--primary);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+  .nqp-ax{position:absolute;left:0;width:40px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .nqp-th{position:absolute;left:6px;transform:translateY(-120%);font-size:10px;font-weight:700}
+  .nqp-th.caution{color:var(--gold);transform:translateY(15%)} .nqp-th.warn{color:var(--up)}   /* 65는 선 아래, 70은 선 위 — 두 선이 붙어 있어 글자가 겹쳤다 */
+  .nqp-dot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);background:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+  .is-ok .nqp-dot{background:#059669;box-shadow:0 0 0 1px #059669}
+  .is-caution .nqp-dot{background:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+  .is-warn .nqp-dot{background:var(--up);box-shadow:0 0 0 1px var(--up)}
+  .nqp-peak{position:absolute;transform:translate(-50%,-140%);font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .nqp-cur{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--ink);opacity:.3;pointer-events:none}
+  .nqp-yrs{position:relative;height:16px;margin:4px 0 0 46px;font-size:10px;color:var(--muted)}
+  .nqp-yrs span{position:absolute;transform:translateX(-50%)}
+  .nqp-sec{margin-top:22px}
+  .nqp-sec h2{font-size:15px;font-weight:800;color:var(--ink);margin:0 0 8px}
+  .nqp-sec ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.75;color:#475569}
+  html.dark .nqp-sec ul,html.dark .nqp-sec p{color:var(--muted)}
+  .nqp-sec li{margin-bottom:4px;word-break:keep-all}
+  .nqp-sec li b{color:var(--ink)}
+  .nqp-sec p{font-size:13px;line-height:1.75;color:#475569;margin:0 0 8px;word-break:keep-all}
+  .nqp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+  .nqp-links a{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;border:1px solid var(--hairline);border-radius:10px;padding:9px 14px;background:var(--canvas)}
+  .nqp-links a:hover{border-color:var(--primary);color:var(--primary)}
+  @media(max-width:560px){.nqp-plot{height:190px;padding-left:40px}.nqp-ax{width:34px}.nqp-yrs{margin-left:40px}.nqp-peak{display:none}}
+</style>
+{% endblock %}
+{% block body %}
+<main class="nqp-wrap">
+  <div class="nqp-crumb">
+    <button class="nqp-back" onclick="if(history.length>1)history.back();else location.href='/stocks/'" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › 나스닥 체크</span>
+  </div>
+  <h1 class="nqp-title">나스닥 체크</h1>
+  <p class="nqp-lead">나스닥 종합지수의 월봉 고점이 60개월(5년) 이동평균선보다 얼마나 위에 있는지 봐요. <b>{{ nq.caution|int }}%</b>를 넘으면 주의, <b>{{ nq.warn|int }}%</b>를 넘으면 경고로 표시해요.</p>
+
+  <div class="nq-section is-{{ nq.level }}">
+    <div class="nq-card">
+      <div class="nq-top">
+        <div><div class="nq-k">{{ nq.month_label }} 고점 vs 60개월선 <span class="nq-badge">{{ nq.badge }}</span></div>
+          <div class="nq-v"><span class="nq-num">{{ '%+.1f'|format(nq.gap) }}</span><small>%</small></div>
+          {% if nq.asof %}<div class="nqp-asof">{{ nq.asof }} 미국장까지 반영</div>{% endif %}</div>
+        <div class="nq-side">
+          <span>월봉 고점 <b>{{ '{:,.1f}'.format(nq.high) }}</b></span>
+          <span>60개월선 <b>{{ '{:,.1f}'.format(nq.ma60) }}</b></span>
+          {% if nq.streak %}<span class="nq-streak">{{ nq.caution|int }}% 위 <b>{{ nq.streak }}개월째</b></span>{% endif %}
+        </div>
+      </div>
+      <div class="nq-gauge">
+        <div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
+        <div class="nq-pin" style="left:{{ '%.1f'|format(nq.pin) }}%"><b>{{ '%.1f'|format(nq.gap) }}%</b></div>
+        <div class="nq-ticks"><span style="left:0">0</span><span style="left:{{ nq.caution|int }}%">{{ nq.caution|int }}</span><span style="left:{{ nq.warn|int }}%">{{ nq.warn|int }}</span><span style="left:100%">100+</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="nqp-card is-{{ nq.level }}">
+    <div class="nqp-h"><h2>월별 이격률</h2><small>{{ nq.from_year }}년 1월 ~ {{ nq.month_label }}</small></div>
+    <div class="nqp-leg"><span><i></i>월봉 고점 ÷ 60개월선 − 1</span><span><i class="zc"></i>주의 {{ nq.caution|int }}~{{ nq.warn|int }}%</span><span><i class="zw"></i>경고 {{ nq.warn|int }}% 이상</span></div>
+    <div class="nqp-plot">
+      {% for a in g1.axes %}<span class="nqp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
+      <div class="nqp-in" data-kind="gap" data-lo="{{ g1.lo }}" data-hi="{{ g1.hi }}">
+        <svg viewBox="0 0 {{ g1.w }} {{ g1.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점의 60개월선 대비 이격률, {{ nq.from_year }}년 이후 월별">
+          <rect x="0" y="{{ g1.y_hi }}" width="{{ g1.w }}" height="{{ g1.h_warn }}" class="z-warn"/>
+          <rect x="0" y="{{ g1.y_warn }}" width="{{ g1.w }}" height="{{ g1.h_caution }}" class="z-caution"/>
+          <line x1="0" x2="{{ g1.w }}" y1="{{ g1.y0 }}" y2="{{ g1.y0 }}" class="zero"/>
+          <line x1="0" x2="{{ g1.w }}" y1="{{ g1.y_warn }}" y2="{{ g1.y_warn }}" class="th th-warn"/>
+          <line x1="0" x2="{{ g1.w }}" y1="{{ g1.y_caution }}" y2="{{ g1.y_caution }}" class="th th-caution"/>
+          <polygon points="{{ g1.area }}" class="area"/>
+          <polyline points="{{ g1.line }}" class="line"/>
+        </svg>
+        {% for t in g1.th %}<span class="nqp-th {{ t.cls }}" style="top:{{ t.top }}">{{ t.v }}</span>{% endfor %}
+        <span class="nqp-peak" style="left:{{ g1.peak.left }};top:{{ g1.peak.top }}">최고 {{ g1.peak.label }}</span>
+        <i class="nqp-dot" style="left:{{ g1.dot.left }};top:{{ g1.dot.top }}"></i>
+        <i class="nqp-cur" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="nqp-yrs">{% for y in g1.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+  </section>
+
+  <section class="nqp-card">
+    <div class="nqp-h"><h2>나스닥 월봉 고점과 60개월선</h2><small>로그 눈금</small></div>
+    <div class="nqp-leg"><span><i></i>월봉 고점</span><span><i class="ma"></i>60개월 이동평균(월말 종가)</span></div>
+    <div class="nqp-plot">
+      {% for a in g2.axes %}<span class="nqp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
+      <div class="nqp-in" data-kind="lvl" data-lo="{{ g2.llo }}" data-hi="{{ g2.lhi }}">
+        <svg viewBox="0 0 {{ g2.w }} {{ g2.h }}" preserveAspectRatio="none" role="img" aria-label="나스닥 월봉 고점과 60개월 이동평균, {{ nq.from_year }}년 이후 로그 눈금">
+          <polyline points="{{ g2.ma }}" class="ma"/>
+          <polyline points="{{ g2.high }}" class="line"/>
+        </svg>
+        <i class="nqp-cur" hidden></i><i class="nqp-pt ma" hidden></i><i class="nqp-pt" hidden></i><div class="nqp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="nqp-yrs">{% for y in g2.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+  </section>
+
+  <section class="nqp-sec">
+    <h2>과거엔 어땠나요</h2>
+    <ul>
+      <li>60개월선을 계산할 수 있는 {{ b.since_year }}년 이후 {{ b.months_total }}개월 중 {{ nq.caution|int }}%를 넘은 달은 <b>{{ b.months_over_caution }}개월</b>이었어요.</li>
+      <li>{{ nq.caution|int }}~{{ nq.warn|int }}% 구간 뒤 12개월 평균 수익률은 <b>{{ '%+.1f'|format(b.caution_band.fwd12_avg_pct) }}%</b>로 전체 평균({{ '%+.1f'|format(b.all_fwd12_avg_pct) }}%){{ '보다 오히려 높았어요' if b.caution_band.fwd12_avg_pct > b.all_fwd12_avg_pct else '보다 낮았어요' }}. 사례는 {{ b.caution_band.fwd12_n }}개월뿐이에요.</li>
+      <li>{{ nq.warn|int }}%를 넘은 달({{ b.warn.months }}개월) 뒤에는 12개월 안에 <b>−20% 넘게 빠진 경우가 {{ '%.0f'|format(b.warn.dd20_pct) }}%</b>였어요(전체 {{ '%.0f'|format(b.all_dd20_pct) }}%).{% if b.warn.periods %} 그런 달은 {{ b.warn.periods | join('년과 ') }}년에 몰려 있어요.{% endif %}</li>
+    </ul>
+  </section>
+
+  <section class="nqp-sec">
+    <h2>어떻게 계산하나요</h2>
+    <p>나스닥 종합지수(^IXIC) 일봉을 달마다 묶어, 그 달 일봉 고가 중 가장 높은 값을 월봉 고점으로 써요. 60개월선은 최근 60개월 월말 종가의 평균이고, 진행 중인 이번 달 종가도 넣어요. 이격률은 월봉 고점 ÷ 60개월선 − 1이에요.</p>
+    <p>12개월 뒤 수익률은 월말 종가, −20% 하락은 다음 12개월의 월 저가 가운데 가장 낮은 값으로 셌어요. 지금 위치를 알려주는 지표이고, 이것만으로 사고팔 시점을 정할 수는 없어요. <a href="/legal/disclaimer/">면책 고지</a></p>
+  </section>
+
+  <div class="nqp-links">
+    {% if nq.brief_url %}<a href="{{ nq.brief_url }}">이날 미국 브리핑 →</a>{% endif %}
+    <a href="/briefings/">브리핑 전체 보기 →</a>
+  </div>
+</main>
+<script type="application/json" id="nqp-data">{{ nq.points | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script>
+/* 그래프를 짚으면 두 그래프에 같은 달 세로선·점을 찍고, 그래프 안 말풍선에 그 달 값을 띄운다(2026-10-28).
+   점의 높이는 파이썬이 그린 눈금(data-lo/hi — 이격률은 직선, 지수는 로그)과 같은 식으로 계산한다. */
+(function () {
+  var el = document.getElementById('nqp-data');
+  if (!el) return;
+  var P = JSON.parse(el.textContent), n = P.length;
+  if (n < 2) return;
+  var C = {{ nq.caution }}, W = {{ nq.warn }};
+  var boxes = [].slice.call(document.querySelectorAll('.nqp-in'));
+  function num(v) { return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+  function ym(m) { return m.slice(0, 4) + '년 ' + (+m.slice(5)) + '월'; }
+  function topPct(box, v) {
+    var lo = +box.dataset.lo, hi = +box.dataset.hi;
+    if (box.dataset.kind === 'lvl') v = Math.log10(v);
+    return Math.max(0, Math.min(100, (hi - v) / (hi - lo) * 100));
+  }
+  function place(box, i) {
+    var p = P[i], x = i / (n - 1) * 100, lvl = box.dataset.kind === 'lvl';
+    var pts = box.querySelectorAll('.nqp-pt'), tip = box.querySelector('.nqp-tip'), cur = box.querySelector('.nqp-cur');
+    var ys = lvl ? [topPct(box, p[4]), topPct(box, p[2])] : [topPct(box, p[1])];   // 지수 그래프: 60개월선 점, 고점 점
+    for (var k = 0; k < pts.length; k++) { pts[k].hidden = false; pts[k].style.left = x + '%'; pts[k].style.top = ys[k] + '%'; }
+    cur.hidden = false; cur.style.left = x + '%';
+    var g = p[1], cls = g >= W ? 'up' : g >= C ? 'gold' : 'v';
+    tip.innerHTML = '<b>' + ym(p[0]) + '</b>' + (lvl
+      ? '<span class="k">월봉 고점</span> <span class="v">' + num(p[2]) + '</span><br><span class="k">60개월선</span> <span class="v">' + num(p[4]) + '</span>'
+      : '<span class="k">이격</span> <span class="' + cls + '">' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</span>');
+    tip.hidden = false;
+    var y = Math.min.apply(null, ys), below = y < 32;   // 위쪽이 좁으면 점 아래에 띄운다
+    var tx = x < 15 ? '0%' : x > 85 ? '-100%' : '-50%';
+    tip.style.left = x + '%'; tip.style.top = y + '%';
+    tip.style.transform = 'translate(' + tx + ',' + (below ? '16px' : 'calc(-100% - 14px)') + ')';
+  }
+  function show(i) { boxes.forEach(function (b) { place(b, i); }); }
+  function hide() {
+    boxes.forEach(function (b) {
+      [].forEach.call(b.querySelectorAll('.nqp-pt,.nqp-tip,.nqp-cur'), function (e) { e.hidden = true; });
+    });
+  }
+  boxes.forEach(function (box) {
+    function at(e) {
+      var r = box.getBoundingClientRect();
+      show(Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (n - 1)));
+    }
+    box.addEventListener('pointermove', at);
+    box.addEventListener('pointerdown', at);
+    box.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hide(); });   // 손가락은 다음 터치까지 남긴다
+  });
+})();
+</script>
+{% endblock %}

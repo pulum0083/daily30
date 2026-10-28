@@ -26,6 +26,7 @@ SYMBOL = "^IXIC"
 MA_MONTHS = 60
 CAUTION, WARN = 65.0, 70.0      # 주의·경고 기준(%) — 60→65(2026-10-26): 60%대가 몇 달씩 이어져 매일 같은 '주의'가 나왔다
 CHART_FROM = "2014-01"          # 화면 그래프 시작 월
+HISTORY_FROM = "1990-01"        # 상세 페이지 그래프 시작 월(/stocks/nasdaq-check/, 2026-10-28) — 닷컴 버블이 보이게
 UA = {"User-Agent": "Mozilla/5.0"}
 
 
@@ -79,7 +80,7 @@ def gap_series(months: list) -> list:
             out.append(None)
             continue
         ma = sum(closes[i + 1 - MA_MONTHS:i + 1]) / MA_MONTHS
-        out.append({"m": x["m"], "g": (x["high"] / ma - 1) * 100, "ma60": ma})
+        out.append({"m": x["m"], "g": (x["high"] / ma - 1) * 100, "ma60": ma, "high": x["high"], "close": x["close"]})
     return out
 
 
@@ -96,6 +97,9 @@ def compute(months: list) -> dict | None:
         streak += 1
     series = [{"m": g["m"], "g": round(g["g"], 2)} for g in gs if g and g["m"] >= CHART_FROM]
     peak = max(series, key=lambda s: s["g"]) if series else None
+    # 상세 페이지용 긴 시계열 — 스냅샷에는 넣지 않는다(generate_html.build_nasdaq_check가 뺀다).
+    history = [{"m": g["m"], "g": round(g["g"], 2), "h": round(g["high"], 2), "c": round(g["close"], 2),
+                "ma": round(g["ma60"], 2)} for g in gs if g and g["m"] >= HISTORY_FROM]
     return {
         "month": last["m"],
         "last_date": last["last_date"],
@@ -106,6 +110,7 @@ def compute(months: list) -> dict | None:
         "level": level_of(cur["g"]),
         "series": series,
         "peak": peak,
+        "history": history,
     }
 
 

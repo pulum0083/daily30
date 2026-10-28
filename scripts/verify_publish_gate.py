@@ -130,9 +130,9 @@ def _load(path: Path):
 def expected_pages() -> list:
     """설정에 선언된 (경로, URL) 목록. 생성기가 만드는 페이지만 본다 — 수기 페이지는 대상 밖.
 
-    종목 상세 페이지(국내·미국)는 2026-10-26에 없앴다 — 지금 생성기가 만드는 페이지는 섹터 페이지뿐이다.
+    종목 상세 페이지(국내·미국)는 2026-10-26에 없앴다 — 지금 생성기가 만드는 페이지는 섹터 페이지와 나스닥 체크 상세 페이지(2026-10-28)다.
     """
-    pages = []
+    pages = [(WEB_DIR / "stocks" / "nasdaq-check" / "index.html", f"{SITE_BASE}/stocks/nasdaq-check/")]
     universe = CONFIG_DIR / "stock_universe.json"
     if universe.exists():
         for key in _load(universe).get("sectors", {}):

@@ -117,7 +117,9 @@ test('나스닥 체크 — 65·70 눈금과 단계, 값이 없으면 줄을 뺀�
   assert.match(ok, /pill ok">✓ 정상/);
   assert.match(ok, /65 주의/);
   assert.match(ok, /70 경고/);
-  assert.match(ok, /href="\/briefings\/2026-10-23\/us\/"/);
+  assert.match(ok, /href="\/stocks\/nasdaq-check\/"/);          // 상세 페이지로 간다(2026-10-28)
+  assert.match(ok, /class="ss-go">상세 그래프 ›/);
+  assert.doesNotMatch(ok, /미국 브리핑/);                              // 브리핑 날짜 라벨은 뺐다(2026-10-28)
   assert.match(api.nasdaqRow({ gap_pct: 64 }, '2026-10-23', '2026-10-23'), /pill ok">✓ 정상/);
   assert.match(api.nasdaqRow({ gap_pct: 65 }, '2026-10-23', '2026-10-23'), /pill caution">⚠️ 주의/);
   assert.match(api.nasdaqRow({ gap_pct: 71.2 }, '2026-10-23', '2026-10-23'), /pill warn">🚨 경고/);

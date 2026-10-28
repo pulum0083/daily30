@@ -43,7 +43,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261027a"
+ASSET_VER = "20261028a"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 KST = pytz.timezone("Asia/Seoul")
@@ -635,7 +635,10 @@ def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
     if not isinstance(data, dict):
         data = _read_nasdaq_overheat(target_date)
         if data is not None:
-            analysis["nasdaq_overheat"] = data   # 스냅샷에 함께 저장된다
+            # 스냅샷에 함께 저장된다. 1990년부터의 긴 시계열(history)은 상세 페이지 전용이라 뺀다 —
+            # 브리핑마다 수십 KB가 쌓인다(/stocks/nasdaq-check/, 2026-10-28).
+            data = {k: v for k, v in data.items() if k != "history"}
+            analysis["nasdaq_overheat"] = data
     if not data or not isinstance(data.get("gap_pct"), (int, float)):
         return {}
     try:
@@ -708,6 +711,121 @@ def _read_nasdaq_overheat(target_date: str):
         print(f"[generate_html] ⚠️ nasdaq_overheat 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
         return None
     return data
+
+
+NASDAQ_PAGE_URL = f"{SITE_BASE}/stocks/nasdaq-check/"
+_NQP_W, _NQP_H = 1000, 300        # 상세 페이지 그래프 SVG 좌표 — 늘려 그리고 글자·점은 HTML로 겹친다(_nasdaq_chart와 같은 방식)
+_NQP_LOG_TICKS = (500, 1000, 2000, 5000, 10000, 20000, 50000)
+
+
+def _nqp_years(hist: list) -> list:
+    """5년마다 연도 눈금(1월 위치)."""
+    n = len(hist)
+    return [{"y": h["m"][:4], "left": f"{i / (n - 1) * 100:.2f}%"}
+            for i, h in enumerate(hist) if h["m"].endswith("-01") and int(h["m"][:4]) % 5 == 0]
+
+
+def _nqp_gap_chart(hist: list, caution: float, warn: float) -> dict:
+    """① 월별 이격률(월봉 고점 ÷ 60개월선 − 1). 주의·경고 구간을 칠하고 0·기준선을 긋는다."""
+    W, H = _NQP_W, _NQP_H
+    gs = [h["g"] for h in hist]
+    lo = min(-50.0, math.floor(min(gs) / 50) * 50)
+    hi = max(100.0, math.ceil(max(gs) / 50) * 50)
+    Y = lambda v: (hi - v) / (hi - lo) * H
+    xs = [i * W / (len(hist) - 1) for i in range(len(hist))]
+    line = " ".join(f"{x:.1f},{Y(g):.1f}" for x, g in zip(xs, gs))
+    top = lambda v: f"{Y(v) / H * 100:.2f}%"
+    pi = max(range(len(gs)), key=lambda i: gs[i])
+    return {
+        "w": W, "h": H, "line": line, "lo": lo, "hi": hi,   # 짚기 말풍선이 같은 눈금으로 점을 찍는다
+        "area": f"0,{Y(0):.1f} {line} {W},{Y(0):.1f}",
+        "y_hi": f"{Y(hi):.1f}", "y_warn": f"{Y(warn):.1f}", "y_caution": f"{Y(caution):.1f}", "y0": f"{Y(0):.1f}",
+        "h_warn": f"{Y(warn) - Y(hi):.1f}", "h_caution": f"{Y(caution) - Y(warn):.1f}",
+        "axes": [{"v": f"{int(v)}%", "top": top(v)} for v in range(int(lo), int(hi) + 1, 50)],
+        "th": [{"v": f"{int(caution)} 주의", "top": top(caution), "cls": "caution"},
+               {"v": f"{int(warn)} 경고", "top": top(warn), "cls": "warn"}],
+        "dot": {"left": "100%", "top": top(gs[-1])},
+        "peak": {"left": f"{xs[pi] / W * 100:.2f}%", "top": top(gs[pi]),
+                 "label": f"{int(hist[pi]['m'][:4])}년 {int(hist[pi]['m'][5:7])}월 {gs[pi]:+.0f}%"},
+        "years": _nqp_years(hist),
+    }
+
+
+def _nqp_level_chart(hist: list) -> dict:
+    """② 나스닥 월봉 고점과 60개월선 — 1990년 ~400에서 2만 7천대까지라 로그 눈금으로 그린다."""
+    W, H = _NQP_W, _NQP_H
+    vals = [v for h in hist for v in (h["h"], h["ma"]) if v and v > 0]
+    lo = min(vals) * 0.85
+    hi = max(vals) * 1.12
+    llo, lhi = math.log10(lo), math.log10(hi)
+    Y = lambda v: (lhi - math.log10(v)) / (lhi - llo) * H
+    xs = [i * W / (len(hist) - 1) for i in range(len(hist))]
+    pts = lambda key: " ".join(f"{x:.1f},{Y(h[key]):.1f}" for x, h in zip(xs, hist))
+    return {
+        "w": W, "h": H, "high": pts("h"), "ma": pts("ma"), "llo": round(llo, 6), "lhi": round(lhi, 6),
+        "axes": [{"v": f"{t:,}", "top": f"{Y(t) / H * 100:.2f}%"} for t in _NQP_LOG_TICKS if lo <= t <= hi],
+        "years": _nqp_years(hist),
+    }
+
+
+def build_nasdaq_page(data: dict, bt: dict, target_date: str) -> dict:
+    """/stocks/nasdaq-check/ 상세 페이지 컨텍스트. 숫자는 전부 수집 파일·백테스트 파일 그대로다(§0)."""
+    import nasdaq_overheat as nq
+    hist = [h for h in (data.get("history") or [])
+            if isinstance(h, dict) and all(isinstance(h.get(k), (int, float)) for k in ("g", "h", "c", "ma"))]
+    if len(hist) < 24 or not isinstance(data.get("gap_pct"), (int, float)):
+        return {}
+    gap = float(data["gap_pct"])
+    level = nq.level_of(gap)
+    month = str(data.get("month") or "")
+    month_label = f"{int(month[:4])}년 {int(month[5:7])}월" if len(month) == 7 else "이번 달"
+    last = str(data.get("last_date") or "")
+    asof = f"{int(last[5:7])}월 {int(last[8:10])}일" if len(last) == 10 else ""
+    brief = BRIEFINGS_DIR / target_date / "us" / "index.html"
+    return {
+        "nq": {
+            "gap": gap, "level": level, "badge": _NQ_BADGE[level],
+            "high": data.get("high"), "ma60": data.get("ma60"),
+            "streak": int(data.get("streak") or 0), "pin": max(0.0, min(gap, 100.0)),
+            "month_label": month_label, "asof": asof, "date": target_date,
+            "caution": nq.CAUTION, "warn": nq.WARN, "bt": bt,
+            "from_year": hist[0]["m"][:4],
+            "gap_chart": _nqp_gap_chart(hist, nq.CAUTION, nq.WARN),
+            "level_chart": _nqp_level_chart(hist),
+            # 짚었을 때 띄울 월별 값 — [월, 이격률, 고점, 종가, 60개월선]
+            "points": [[h["m"], h["g"], h["h"], h["c"], h["ma"]] for h in hist],
+            "brief_url": f"/briefings/{target_date}/us/" if brief.exists() else "",
+        },
+        "canonical_url": NASDAQ_PAGE_URL,
+        "seo_jsonld": [_jsonld(_breadcrumb([("홈", "/stocks/"), ("종목", "/stocks/"),
+                                            ("나스닥 체크", "/stocks/nasdaq-check/")]))],
+        "css_path": CSS_PATH, "js_path": JS_PATH,
+    }
+
+
+def write_nasdaq_page(target_date: str) -> bool:
+    """그날 수집한 data/nasdaq_overheat.json으로 상세 페이지를 쓴다. 날짜가 다르거나 데이터·백테스트가
+    없으면 쓰지 않는다 — 직전 페이지가 그대로 남는다(§14·§20)."""
+    data = _read_nasdaq_overheat(target_date)
+    if not data:
+        return False
+    try:
+        bt = json.loads(NASDAQ_BACKTEST_PATH.read_text(encoding="utf-8"))
+        bt["caution_band"]["fwd12_avg_pct"], bt["warn"]["dd20_pct"]
+    except Exception as e:
+        print(f"[generate_html] 나스닥 체크 상세 페이지 생략 — 백테스트 수치 없음({e})")
+        return False
+    ctx = build_nasdaq_page(data, bt, target_date)
+    if not ctx:
+        print("[generate_html] 나스닥 체크 상세 페이지 생략 — 1990년부터의 시계열(history)이 없음")
+        return False
+    html_out = make_env().get_template("pages/nasdaq_check.html").render(**ctx)
+    out = WEB_DIR / "stocks" / "nasdaq-check" / "index.html"
+    if gate_write(out, html_out, NASDAQ_PAGE_URL):
+        GATE_BLOCKED.append(NASDAQ_PAGE_URL)
+        return False
+    print(f"[generate_html] 나스닥 체크 상세 페이지 → {out}")
+    return True
 
 
 def build_issues(analysis: dict) -> dict:
@@ -2366,6 +2484,7 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/stocks/",                       "changefreq": "daily",   "priority": "1.0"},
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
+        {"loc": f"{BASE}/stocks/nasdaq-check/",          "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
         {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
@@ -2637,6 +2756,8 @@ def main():
                         help="index.html + briefings-list.json 재동기화만 하고 종료 (수동 브리핑 수정 후 사용)")
     parser.add_argument("--sectors", action="store_true",
                         help="섹터별 종목 페이지 8개 생성하고 종료")
+    parser.add_argument("--nasdaq-page", dest="nasdaq_page", action="store_true",
+                        help="--date 날짜의 data/nasdaq_overheat.json으로 /stocks/nasdaq-check/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--force", action="store_true",
                         help="기존 analysis_snapshot.json을 무시하고 최신 analysis_{type}.json으로 강제 재생성 (의도적 정정용)")
     args = parser.parse_args()
@@ -2644,6 +2765,14 @@ def main():
     if args.sectors:
         build_sector_pages()
         write_sitemap_xml()   # 섹터 URL이 sitemap에 들어가야 게이트의 색인 경로 검사가 성립한다
+        _finish_page_build([])
+        return
+
+    if args.nasdaq_page:
+        if not args.date:
+            parser.error("--nasdaq-page 는 --date 가 필요합니다")
+        write_nasdaq_page(args.date)
+        write_sitemap_xml()
         _finish_page_build([])
         return
 
@@ -2687,6 +2816,13 @@ def main():
             except Exception as e:
                 print(f"[generate_html] overnight_bridge JSON 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
                       file=sys.stderr)
+    if internal_type == "us":
+        # 나스닥 체크 상세 페이지 — 부가 페이지라 실패해도 브리핑 발행은 계속한다(§0 부칙과 같은 판단).
+        try:
+            write_nasdaq_page(args.date)
+        except Exception as e:
+            print(f"[generate_html] 나스닥 체크 상세 페이지 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
+                  file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()
     write_briefings_index()

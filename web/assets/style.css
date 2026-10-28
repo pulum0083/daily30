@@ -1519,6 +1519,8 @@ html.dark .arch-item__dek{color:var(--muted);}
 .nq-ax{position:absolute;left:0;width:28px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted)}
 .nq-yr{position:absolute;bottom:0;transform:translateX(-50%);font-size:10px;color:var(--muted)}
 .nq-foot{font-size:12px;color:var(--muted);line-height:1.7;margin-top:10px}
+.nq-more{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--primary);text-decoration:none}
+.nq-more:hover{text-decoration:underline}
 .nq-foot summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;font-weight:600}
 .nq-foot summary::-webkit-details-marker{display:none}
 .nq-foot summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
