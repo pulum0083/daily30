@@ -96,3 +96,38 @@ def run():
 
 if __name__ == "__main__":
     run()
+
+
+# ── 2026-10-28 점검 ──
+QYLG_1Y = [0.276, 0.162, 2.778, 0.157, 0.146, 0.184, 0.153, 0.207, 0.208, 0.268, 0.171, 0.14, 0.17]   # 야후 실측, 2.778은 연말 특별분배
+
+
+def test_regular_dividends_drops_special_and_keeps_last_12():
+    from build_income_etfs import regular_dividends
+    reg, spec = regular_dividends(QYLG_1Y)
+    assert spec == [2.778]
+    assert len(reg) == 12 and reg[-1] == 0.17
+    assert round(sum(reg) / 29.86 * 100, 1) < 8   # 정기분 기준 약 7.5% (특별분배를 넣으면 16.8%)
+
+
+def test_regular_dividends_keeps_steady_payers():
+    from build_income_etfs import regular_dividends
+    qyld = [0.173, 0.178, 0.179, 0.177, 0.172, 0.179, 0.179, 0.185, 0.178, 0.183, 0.177, 0.183]
+    assert regular_dividends(qyld) == (qyld, [])
+    assert regular_dividends([]) == ([], [])
+
+
+def test_january_keeps_last_weeks_monthly_etfs():
+    from datetime import date
+    from build_income_etfs import is_monthly
+    jan = date(2027, 1, 4)
+    assert is_monthly([], "20200101", jan, was_monthly=True) is True    # 1월 첫 갱신 — 올해 지급 월이 아직 비어 있다
+    assert is_monthly([], "20200101", jan, was_monthly=False) is False
+    assert is_monthly([], "20200101", date(2027, 3, 2), was_monthly=True) is False   # 1월이 지나면 원래 판정
+
+
+def test_enough_kr_guard():
+    from build_income_etfs import enough_kr
+    assert enough_kr(68, 68) and enough_kr(40, 68)
+    assert not enough_kr(0, 68) and not enough_kr(20, 68)
+    assert enough_kr(5, 0) and not enough_kr(0, 0)

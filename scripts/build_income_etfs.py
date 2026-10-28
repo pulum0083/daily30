@@ -117,12 +117,17 @@ def is_new_fund(listed_date, today):
     return (today - d).days < 365
 
 
-def is_monthly(months, listed_date, today):
+def is_monthly(months, listed_date, today, was_monthly=False):
     """올해 지급 월(months)로 월배당 여부 판정. 분기·반기 배당 ETF를 걸러낸다.
 
     신생 펀드는 올해 분배 횟수가 적으므로 상장 후 경과한 '완료 월' 수를 기준으로 본다.
     이번 달은 아직 지급 전일 수 있어 1개월 여유를 둔다.
+
+    1월엔 '올해 지급 월'이 아직 비어 있어 모든 ETF가 월배당이 아닌 것으로 판정됐다(2026-10-28 점검에서 발견).
+    네이버 응답엔 지난해 지급 월이 없으므로, 1월에는 직전 갱신 파일에서 월배당이었던 종목(was_monthly)을 그대로 인정한다.
     """
+    if today.month == 1 and not months:
+        return bool(was_monthly)
     if not months:
         return False
     start = date(today.year, 1, 1)
@@ -136,6 +141,30 @@ def is_monthly(months, listed_date, today):
     elapsed = (today.year - start.year) * 12 + (today.month - start.month)
     need = max(1, elapsed - 1)  # 직전 달 미지급 1개월 허용
     return len(months) >= need
+
+
+def regular_dividends(amounts, cap=12, spike=2.5):
+    """최근 12개월 분배금에서 1회성 특별분배를 빼고 정기 분배만 남긴다(최근 cap회까지).
+
+    2026-10-28 점검: QYLG·XYLG·BST가 연말 자본이득 특별분배(정기분의 10~17배)까지 연 분배율에 넣어
+    17.2%·12.6%·14.0%로 나왔다(정기분 기준 약 7.5%·5.3%·6.2%). 중앙값의 spike배를 넘는 분배를 특별분배로 본다.
+    1년 구간 양 끝에 같은 달 분배가 두 번 걸리면 13회가 되므로 최근 cap회만 쓴다.
+    """
+    vals = [float(a) for a in amounts if a is not None and math.isfinite(float(a)) and float(a) > 0]
+    if not vals:
+        return [], []
+    srt = sorted(vals)
+    mid = srt[len(srt) // 2] if len(srt) % 2 else (srt[len(srt) // 2 - 1] + srt[len(srt) // 2]) / 2
+    regular = [v for v in vals if v <= mid * spike]
+    special = [v for v in vals if v > mid * spike]
+    return regular[-cap:], special
+
+
+def enough_kr(new_count, prev_count, ratio=0.5):
+    """국내 수집 결과가 직전 파일의 절반도 안 되면 원천 고장으로 보고 덮어쓰지 않는다(§47 — 0건 정상 종료 의심)."""
+    if not prev_count:
+        return new_count > 0
+    return new_count >= prev_count * ratio
 
 
 # ---------- 네트워크 (국내) ----------
@@ -222,15 +251,18 @@ def build_us(usd_krw, sleep=0.5):
                 print(f"  skip {ticker} — 배당 이력 없음")
                 continue
 
-            # 최근 12개월 배당만 집계
-            recent = divs[divs.index >= one_year_ago]
-            if len(recent) < 6:
-                print(f"  skip {ticker} — 연 {len(recent)}회 배당 (월배당 아님)")
+            # 최근 12개월 배당만 집계 — 분배율은 정기 분배만(특별분배 제외), 총수익엔 받은 돈 전부를 넣는다
+            recent = divs[divs.index > one_year_ago]
+            regular, special = regular_dividends(list(recent.values))
+            if len(regular) < 6:
+                print(f"  skip {ticker} — 연 {len(regular)}회 정기 배당 (월배당 아님)")
                 continue
 
-            yield_ttm = round(float(recent.sum()) / float(price_usd) * 100, 2)
+            yield_ttm = round(sum(regular) / float(price_usd) * 100, 2)
             if yield_ttm <= 0:
                 continue
+            if special:
+                print(f"  note {ticker} — 특별분배 {len(special)}회(${sum(special):.3f}) 분배율에서 제외")
 
             # 1년 총수익 = (현재가 - 1년전가 + 배당합) / 1년전가
             hist = t.history(period="400d")
@@ -273,8 +305,9 @@ def build_us(usd_krw, sleep=0.5):
 
 # ---------- 조립 ----------
 
-def build(aum_floor_eok, include_us=True, sleep=0.25):
+def build(aum_floor_eok, include_us=True, sleep=0.25, prev_kr_codes=None):
     today = datetime.now(KST).date()
+    prev_monthly = set(prev_kr_codes or [])
     cands = [c for c in fetch_universe() if (c[3] or 0) >= aum_floor_eok]
     cands.sort(key=lambda c: -(c[3] or 0))
     etfs = []
@@ -287,7 +320,7 @@ def build(aum_floor_eok, include_us=True, sleep=0.25):
         if not y or y <= 0:
             continue
         months = parse_months(div.get("dividendMonthThisYear"))
-        if not is_monthly(months, a.get("listedDate"), today):
+        if not is_monthly(months, a.get("listedDate"), today, was_monthly=code in prev_monthly):
             continue
         r1y = return_y1(a.get("returnPerformanceList"))
         health, erosion = classify_health(y, r1y)
@@ -359,7 +392,17 @@ def main():
     ap.add_argument("--out", default="web/data/income_etfs.json")
     ap.add_argument("--no-us", action="store_true", help="미국 ETF 수집 건너뜀")
     args = ap.parse_args()
-    result = sanitize_nonfinite(build(args.aum_floor, include_us=not args.no_us))
+    prev = {}
+    try:
+        with open(args.out, encoding="utf-8") as f:
+            prev = json.load(f)
+    except (OSError, ValueError):
+        pass
+    prev_kr = [e.get("code") for e in (prev.get("etfs") or []) if isinstance(e, dict)]
+    result = sanitize_nonfinite(build(args.aum_floor, include_us=not args.no_us, prev_kr_codes=prev_kr))
+    if not enough_kr(result["coverage"]["kr_count"], len(prev_kr)):
+        raise SystemExit(f"✗ 국내 {result['coverage']['kr_count']}개 — 직전 {len(prev_kr)}개의 절반 미만이라 원천 고장으로 보고 "
+                         f"{args.out}을 덮어쓰지 않아요")
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
     kr = result["coverage"]["kr_count"]

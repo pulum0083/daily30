@@ -34,3 +34,17 @@ jobs:
           git add web/data/income_etfs.json
           git diff --staged --quiet || git commit -m "data: income_etfs.json 주간 갱신 $(TZ='Asia/Seoul' date +'%Y-%m-%d')"
           git push
+
+      # 수집 실패·0건 가드(build_income_etfs.enough_kr)로 멈추면 관리자에게 알린다 — 조용히 지난주 데이터로 남지 않게
+      - name: Notify admin on failure
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_ADMIN_CHAT_ID}" \
+              -d "text=⚠️ 월배당 ETF 데이터(income_etfs.json) 주간 갱신 실패 — 지난주 데이터가 그대로 남아 있어요. GitHub Actions 로그 확인 필요." \
+              >/dev/null || true
+          fi

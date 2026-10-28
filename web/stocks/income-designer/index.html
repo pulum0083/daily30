@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot</title>
 <link rel="canonical" href="https://doubleshot.space/stocks/income-designer/">
+<meta name="description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산해요. 분배율·1년 총수익으로 원금이 녹는지(건전성)를 보고, 금융소득종합과세 2,000만원 기준도 함께 점검해요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="월배당 ETF 계산기 — 건전성·분배금·세금 | Double-Shot">
+<meta property="og:description" content="국내·미국 월배당 ETF를 담아 매달 받을 분배금(세후)을 계산하고 원금 침식·종합과세를 점검해요.">
+<meta property="og:url" content="https://doubleshot.space/stocks/income-designer/">
 <link rel="icon" type="image/svg+xml" href="/stocks/income-designer/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F172A">
@@ -402,11 +407,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .rc-body .rc-to{color:#4F46E5;font-weight:700;}
 .rc-body .rc-dest{display:inline-flex;align-items:baseline;flex-shrink:0;}
 .rc-body .rc-num{font-variant-numeric:tabular-nums;}
-.rc-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--hair);}
-.rc-act{font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:opacity .12s;}
-.rc-act:hover{opacity:.8;}
-.rc-act.pri{background:#4F46E5;color:#fff;}
-.rc-act.sec{background:var(--soft);border:1px solid var(--hair);color:var(--ink);}
 .sim-out-row{display:flex;gap:20px;align-items:flex-start;margin-bottom:14px;}
 .donut-wrap{position:relative;flex-shrink:0;}
 .donut-arc{cursor:pointer;transition:opacity .15s;}
@@ -489,8 +489,8 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .iall-lft .iall-nums .yv{font-size:13px;font-weight:700;color:#4F46E5;flex-shrink:0;}
 .iall-rgt{width:90px;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;padding-left:10px;border-left:1px solid var(--hair);margin-left:10px;}
 .iall-price{font-size:15px;font-weight:700;line-height:1;}
-.iall-price.up{color:#00ae1a;}
-.iall-price.dn{color:#f33942;}
+.iall-price.up{color:#E03131;}
+.iall-price.dn{color:#2775ED;}
 .iall-price.neu{color:var(--muted);}
 .iall-desc{font-size:10px;line-height:1.45;color:var(--muted);text-align:right;}
 .iall-ret{font-size:10px;color:var(--muted);text-align:right;}
@@ -611,7 +611,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .dl-item{min-width:0;max-width:100%;}
   .dl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 
-  /* 갈아타기 제안: 긴 ETF 이름 줄바꿈 허용 */
+  /* 건전 ETF 비교 카드: 긴 ETF 이름 줄바꿈 허용 */
   .rc-body .rc-dest{flex-shrink:1;min-width:0;flex-wrap:wrap;display:flex;}
   .rc-body .rc-to{word-break:keep-all;overflow-wrap:break-word;min-width:0;}
 
@@ -652,7 +652,7 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
   <!-- ===== INCOME (월배당 ETF 계산기) ===== -->
   <div id="income">
     <div class="phead" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
-      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 우측 리스트에서 담을 수 있어요.</div></div>
+      <div><h1 style="color:#312E81;"><span class="ic">🪙</span> 월배당 ETF 계산기 <span style="display:inline-block;font-size:9px;font-weight:700;color:#7C3AED;background:rgba(124,58,237,.12);padding:2px 6px;border-radius:4px;vertical-align:middle;letter-spacing:.04em;margin-left:2px;">BETA</span></h1><div class="psub">월 배당·분배금을 계산해봐요. ETF를 직접 검색하거나 아래(PC는 오른쪽) 랭킹에서 담을 수 있어요.</div></div>
       <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
         <span id="data-updated-at" style="font-size:11px;color:#9CA3AF;">데이터 매주 월요일 갱신</span>
       </div>
@@ -741,21 +741,21 @@ html.dark .icon-sun{display:block;}html.light .icon-moon{display:block;}
                     </div>
                     <div style="font-size:11px;color:var(--muted);margin-top:2px;"><span class="mk-kr" style="display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;background:#EEF2FF;color:#4F46E5;">KR</span>498400 · 순자산 6.7조</div>
                     <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px;font-size:11px;color:var(--muted);">
-                      <span style="font-size:15px;font-weight:600;color:#4F46E5;">11.23%</span> 분배 · 총수익 <b style="color:var(--ink)">+174.81%</b> · <span style="color:#00ae1a">가격 +164%</span>
+                      <span style="font-size:15px;font-weight:600;color:#4F46E5;">11.23%</span> 분배 · 총수익 <b style="color:var(--ink)">+174.81%</b> · <span style="color:#E03131">가격 +164%</span>
                     </div>
                   </div>
                 </div>
                 <div class="anno-labels">
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#4F46E5;"></span>
-                    <div><b>분배율 11.23%</b><br>올해 분배금 합계 ÷ 현재가. 내가 받는 배당 비율이에요.</div>
+                    <div><b>분배율 11.23%</b><br>최근 12개월 정기 분배금 ÷ 현재가. 내가 받는 배당 비율이에요(미국 ETF의 1회성 특별분배는 빼요).</div>
                   </div>
                   <div class="anno-item">
                     <span class="anno-dot" style="background:#111;"></span>
                     <div><b>총수익 +174.81%</b><br>분배금 재투자 기준 1년 수익률. 자산이 실제로 얼마나 불었는지예요.</div>
                   </div>
                   <div class="anno-item">
-                    <span class="anno-dot" style="background:#00ae1a;"></span>
+                    <span class="anno-dot" style="background:#E03131;"></span>
                     <div><b>가격 +164%</b><br>총수익 − 분배율 ≈ 가격 변화 추정치. 분배받으면서 ETF 가격도 올랐어요.</div>
                   </div>
                   <div class="anno-item">
@@ -866,6 +866,7 @@ function normKrEtf(e) {
     lc: e.low_confidence,
     is_cc: e.is_cc || false,
     divMonths: Array.isArray(e.dividend_months) ? e.dividend_months.length : null,
+    aumKrw: (e.aum_jo || 0) * 1e12,
   };
 }
 function normUsEtf(e, usdKrw) {
@@ -881,6 +882,7 @@ function normUsEtf(e, usdKrw) {
     lc: e.low_confidence || false,
     is_cc: e.is_cc || false,
     aumLabel: '$' + e.aum_b + 'B',
+    aumKrw: (e.aum_b || 0) * 1e9 * (usdKrw || 0),   // 국내(조원)와 같은 단위로 맞춰 순위를 매긴다 — 예전엔 $B 숫자를 조원과 그대로 비교했다
   };
 }
 
@@ -896,7 +898,7 @@ function incomeRow(d,i){
   const bdgTip=BADGE_TIPS[hc]?`<span class="hbdg-tip">${BADGE_TIPS[hc]}</span>`:'';
   const lastCol=hc==='na'
     ?`<span class="yv num">${d.y}%</span> 분배 · <span style="color:#868E96">총수익 미집계 (이력 ${d.divMonths!=null?d.divMonths+'개월':'신생'})</span>`
-    :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#00ae1a">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#f33942">가격 ${e.toFixed(0)}%</span>`}`;
+    :`<span class="yv num">${d.y}%</span> 분배 · 총수익 <b class="num" style="color:var(--ink)">${d.r>=0?'+':''}${d.r}%</b> · ${e>=0?`<span style="color:#E03131">가격 +${e.toFixed(0)}%</span>`:`<span style="color:#2775ED">가격 ${e.toFixed(0)}%</span>`}`;
   return `<a class="irow" onclick="openAddSheet('${d.code}')">
     <div class="it"><span class="${rkCls}"><span class="rk-n">${rk}</span><span class="rk-p">+</span></span><b>${d.name}</b><span class="hbdg-w"><span class="hbdg ${hc}">${hl}</span>${bdgTip}</span></div>
     <div class="imeta num">${d.mk==='US'?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`:`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`}</div>
@@ -933,7 +935,7 @@ function incomeAllPageRow(d,i){
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조${hc==='na'&&d.divMonths!=null?` · 이력 ${d.divMonths}개월`:''}`;
-  const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#00ae1a':'#f33942'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
+  const mobilePriceTxt=ePct!=null?` · <span style="color:${ePct>=0?'#E03131':'#2775ED'}">${ePct>=0?'+':''}${ePct}%</span>`:'';
   const rkEl=rk<=3
     ?`<span style="width:22px;height:22px;border-radius:6px;background:#4F46E5;color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">${rk}</span>`
     :`<span style="width:22px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);display:inline-block;flex-shrink:0;">${rk}</span>`;
@@ -1006,14 +1008,19 @@ const SIM_KEY='ds-income-holdings-v1';
 function saveHoldings(){try{localStorage.setItem(SIM_KEY,JSON.stringify(simHoldings));}catch(e){}}
 function loadHoldings(){try{const s=localStorage.getItem(SIM_KEY);if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length)return p;}}catch(e){}return null;}
 let simHoldings=loadHoldings()||[{code:'476550',qty:2000},{code:'458760',qty:3000},{code:'JEPI',qty:200}];
-function simIncome(h){const d=UNIV[h.code];if(!d)return 0;const g=h.qty*d.price*d.y/100/10000;return d.mk==='US'?g*0.85:g;}  // 만원/년, US는 15% 원천징수 차감
+// 분배금 세율 — 국내 배당소득세 15.4%, 미국은 현지 15% 원천징수(국내 추가 과세 없음 가정).
+// 예전엔 국내는 세전·미국은 세후를 그대로 더했다(2026-10-28 점검). 수령액(행·월 인컴·목표 비교)은 세후,
+// 금융소득종합과세 판정은 세전으로 계산한다.
+const TAX={KR:0.154,US:0.15};
+function simGross(h){const d=UNIV[h.code];if(!d)return 0;return h.qty*d.price*d.y/100/10000;}   // 만원/년, 세전
+function simIncome(h){const d=UNIV[h.code];if(!d)return 0;return simGross(h)*(1-TAX[d.mk]);}      // 만원/년, 세후
 function simRowsRender(){
   document.getElementById('sim-rows').innerHTML=simHoldings.filter(h=>UNIV[h.code]).map((h,i)=>{
     const d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
     return `<div class="simrow">
       <div class="snm">${d.name}<span class="mk">${d.mk}</span></div>
       <div class="qty"><input type="number" value="${h.qty}" oninput="simSet(${i},this.value)"><span>주</span></div>
-      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
+      <div class="sinc" id="sinc-${i}"><b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 세후 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small></div>
       <div class="sx" onclick="simDel(${i})">×</div>
     </div>`;
   }).join('');
@@ -1022,7 +1029,7 @@ function simSet(i,v){
   simHoldings[i].qty=Math.max(0,parseInt(v)||0);saveHoldings();
   const h=simHoldings[i],d=UNIV[h.code],inc=simIncome(h),val=h.qty*d.price/10000;
   const el=document.getElementById('sinc-'+i);
-  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
+  if(el)el.innerHTML=`<b class="num">${inc.toFixed(0)}만원</b><small class="num">연간 세후 · 평가 ${val.toFixed(0)}만 · 분배 ${d.y}%</small>`;
   simOut();
 }
 function simDel(i){simHoldings.splice(i,1);saveHoldings();simRowsRender();simOut();}
@@ -1035,7 +1042,7 @@ function openAddSheet(code){
   const alreadyQty=ex>=0?simHoldings[ex].qty:null;
   const ePct=d.r!=null?Math.round(d.r-d.y):null;
   const priceTxt=ePct==null?'—':`${ePct>=0?'+':''}${ePct}%`;
-  const priceColor=ePct==null?'var(--muted)':ePct>=0?'#00ae1a':'#f33942';
+  const priceColor=ePct==null?'var(--muted)':ePct>=0?'#E03131':'#2775ED';   // 상승 빨강·하락 파랑(사이트 규칙)
   const metaTxt=d.mk==='US'
     ?`<span class="mk mk-us">US</span> ${d.code} · 순자산 ${d.aumLabel}`
     :`<span class="mk mk-kr">KR</span> ${d.code} · 순자산 ${d.aum.toFixed(1)}조`;
@@ -1138,7 +1145,7 @@ function addFromRanking(code,qty=100){
 let comboSel=null,comboCur=[],comboIdx=-1;
 function comboItems(q){
   q=(q||'').trim().toLowerCase();
-  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aum-a.aum).slice(0,20);
+  if(!q)return[...INCOME_UNIVERSE].sort((a,b)=>b.aumKrw-a.aumKrw).slice(0,20);
   return INCOME_UNIVERSE.filter(d=>d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q));
 }
 function comboRender(q){
@@ -1229,11 +1236,11 @@ function targetInput(){
   simOut();
 }
 function simOut(){
-  let totalDiv=0;const bad=[],slices=[];
+  let totalDiv=0,totalGross=0;const bad=[],slices=[];
   simHoldings.forEach(h=>{
     const d=UNIV[h.code];if(!d)return;
     const inc=simIncome(h);
-    totalDiv+=inc;
+    totalDiv+=inc;totalGross+=simGross(h);
     slices.push({name:d.name,code:h.code,inc,val:h.qty*d.price/10000,d});
     const[hc,,e]=incomeHealth(d);
     if(hc==='bad')bad.push({code:h.code,name:d.name,y:d.y,e,val:h.qty*d.price/10000});
@@ -1252,12 +1259,12 @@ function simOut(){
     ${donut?`<div class="donut-wrap">${donut}<div id="donut-tip" class="donut-tip"></div></div>`:''}
     <div style="flex:1;min-width:0;">
       <div class="sim-kpi">
-        <div class="k"><div class="l">현재 월 인컴</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">현재 월 인컴(세후)</div><div class="v num">${monthly.toFixed(0)}만원</div></div>
         <div class="k"><div class="l">목표</div><div class="v num">${target}만원</div></div>
-        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'#f33942':'#00ae1a'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
+        <div class="k"><div class="l">${gap>0?'부족':'초과'}</div><div class="v num" style="color:${gap>0?'var(--ink)':'#4F46E5'}">${gap>0?'−':'+'}${Math.abs(gap).toFixed(0)}만원</div></div>
       </div>
       <div class="donut-legend">${legend}</div>
-      ${slices.some(s=>s.d.mk==='US')&&USDKRW?`<div style="margin-top:8px;font-size:11px;color:var(--muted);">기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b> 적용 · 미국 ETF 15% 원천징수 차감 후 수령액</div>`:''}
+      ${slices.length?`<div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">세후 = 국내 15.4%·미국 15%(현지 원천징수)를 뺀 수령액 · 세전 월 ${(totalGross/12).toFixed(0)}만원${slices.some(s=>s.d.mk==='US')&&USDKRW?` · 기준 환율 <b style="color:var(--ink)">${USDKRW.toLocaleString()}원/$</b>`:''}</div>`:''}
     </div>
   </div>`;
 
@@ -1266,7 +1273,7 @@ function simOut(){
   if(bad.length){
     cards.push(`<div class="rc open">
       <div class="rc-head" onclick="toggleRc(this)"><span class="rci">⚠️</span><span class="rct">원금성 분배 주의</span><span class="rcb red">${bad.length}종목</span><span class="rc-chev">▾</span></div>
-      <div class="rc-body"><ul class="rc-bullets">${bad.map(b=>`<li><b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#f33942">${b.e.toFixed(0)}%</b> 하락했어요.</li><li>분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.</li>`).join('')}</ul></div>
+      <div class="rc-body"><ul class="rc-bullets">${bad.map(b=>`<li><b>${b.name}</b>는 분배율 <b class="rc-num">${b.y}%</b>인데 가격은 <b class="rc-num" style="color:#2775ED">${b.e.toFixed(0)}%</b> 하락했어요.</li><li>분배금에 원금이 섞여 있어 표면 수치만큼 번 게 아니에요.</li>`).join('')}</ul></div>
     </div>`);
   }
   // ── 포트 구성 분석 (집중위험·커버드콜·국내해외·건전성 통합 1카드) ──
@@ -1288,33 +1295,32 @@ function simOut(){
     ].join('');
     cards.push(`<div class="rc"><div class="rc-head" onclick="toggleRc(this)"><span class="rci">${warn?'⚠️':'📊'}</span><span class="rct">포트 구성 분석</span><span class="rcb ${warn?'amber':'blue'}">${slices.length}종목</span><span class="rc-chev">▾</span></div><div class="rc-body"><div class="pa-grid">${rows}</div></div></div>`);
   }
+  // 원금성 종목을 같은 금액의 '건전' ETF와 나란히 놓는 비교 정보만 보인다(2026-10-28) —
+  // 예전엔 '갈아타기 제안' 카드에 특정 상품 추가·기존 종목 제거 버튼이 있어 매매 권유로 읽혔다.
   if(bad.length){
     const worst=[...bad].sort((a,b)=>a.e-b.e)[0];
     const alt=[...INCOME_UNIVERSE].filter(d=>incomeHealth(d)[0]==='ok'&&d.code!==worst.code).sort((a,b)=>b.y-a.y)[0];
     if(alt){
-      const ae=incomeHealth(alt)[2],curM=worst.val*worst.y/100/12,altM=worst.val*alt.y/100/12;
+      const wd=UNIV[worst.code],ae=incomeHealth(alt)[2];
+      const curM=worst.val*worst.y/100/12*(1-TAX[wd.mk]),altM=worst.val*alt.y/100/12*(1-TAX[alt.mk]);
       cards.push(`<div class="rc open">
-        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔄</span><span class="rct">갈아타기 제안</span><span class="rcb green">월 ${altM.toFixed(1)}만원</span><span class="rc-chev">▾</span></div>
+        <div class="rc-head" onclick="toggleRc(this)"><span class="rci">🔍</span><span class="rct">건전 ETF와 나란히 보기</span><span class="rcb blue">비교</span><span class="rc-chev">▾</span></div>
         <div class="rc-body">
           <div class="rc-flow">
             <span class="rc-from">${worst.name} <span class="rc-num">(분배 ${worst.y}% · 가격 ${worst.e.toFixed(0)}%)</span></span>
-            <span class="rc-dest"><span class="rc-arr">→</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
+            <span class="rc-dest"><span class="rc-arr" style="color:var(--muted)">↔</span><span class="rc-to">${alt.name} <span class="rc-num" style="color:#4F46E5">(분배 ${alt.y}% · 가격 +${ae.toFixed(0)}%)</span></span></span>
           </div>
-          <ul class="rc-bullets" style="margin-top:10px"><li>같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b> 기준으로 월 인컴이 <b class="rc-num">${curM.toFixed(1)}만원 → ${altM.toFixed(1)}만원</b>으로 ${altM<curM?'줄지만, 가격이 녹지 않아 실질 수익은 더 안정적이에요':'늘고, 가격도 유지돼 실질 수익이 개선돼요'}.</li></ul>
-          <div class="rc-actions">
-            <a class="rc-act pri" onclick="addFromRanking('${alt.code}')">시뮬레이터에 추가</a>
-            <a class="rc-act sec" onclick="simDel(simHoldings.findIndex(h=>h.code==='${worst.code}'))">기존 종목 제거</a>
-          </div>
+          <ul class="rc-bullets" style="margin-top:10px"><li>같은 평가금액 <b class="rc-num">${worst.val.toFixed(0)}만원</b>이면 월 세후 인컴은 <b class="rc-num">${curM.toFixed(1)}만원</b>과 <b class="rc-num">${altM.toFixed(1)}만원</b>이에요.</li><li>비교 대상은 '건전' 판정 ETF 중 분배율이 가장 높은 것이에요. 비교용 정보이고 매매 권유가 아니에요.</li></ul>
         </div>
       </div>`);
     }
   }
-  const taxWarn=totalDiv>=2000;
+  const taxWarn=totalGross>=2000;   // 종합과세는 세전 금융소득 기준
   cards.push(`<div class="rc">
     <div class="rc-head" onclick="toggleRc(this)"><span class="rci">${taxWarn?'⚠️':'✅'}</span><span class="rct">금융소득종합과세</span><span class="rcb ${taxWarn?'amber':'green'}">${taxWarn?'검토 필요':'여유'}</span><span class="rc-chev">▾</span></div>
     <div class="rc-body"><ul class="rc-bullets">${taxWarn
-      ?`<li>이 조합의 연 분배금만 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 종합과세 기준 <b>2,000만원</b>을 넘어요.</li><li>예금이자·다른 배당까지 합치면 실제 합산액은 더 커질 수 있어요.</li>`
-      :`<li>이 조합의 연 분배금은 <b class="rc-num">${totalDiv.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요.</li><li>다만 예금이자·다른 배당과 합산되면 달라질 수 있어요.</li>`}
+      ?`<li>이 조합의 연 분배금(세전)만 <b class="rc-num">${totalGross.toFixed(0)}만원</b>으로 종합과세 기준 <b>2,000만원</b>을 넘어요.</li><li>예금이자·다른 배당까지 합치면 실제 합산액은 더 커질 수 있어요.</li>`
+      :`<li>이 조합의 연 분배금(세전)은 <b class="rc-num">${totalGross.toFixed(0)}만원</b>으로 기준(2,000만원) 이하예요.</li><li>다만 예금이자·다른 배당과 합산되면 달라질 수 있어요.</li>`}
       </ul><div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.6;">분배금 전액을 과세 대상으로 가정한 추정이에요. 국내주식형 ETF의 매매차익 비과세분은 실제 금융소득에 안 들어가, 실제 과세액은 더 낮을 수 있어요. 정확한 판정은 보유 전체·연소득 기준으로 확인하세요.</div>
     </div>
   </div>`);
@@ -1350,12 +1356,13 @@ function copyPrompt(){
 }
 function toggleRc(head){head.closest('.rc').classList.toggle('open');}
 fetch('/data/income_etfs.json')
-  .then(r => r.json())
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
-    const usdKrw = data.usd_krw || 1360;
+    // 환율이 없으면 미국 ETF를 원화로 바꿀 수 없다 — 예전엔 1,360원을 지어내 계산했다(§0). 그날은 미국 ETF를 빼고 보인다.
+    const usdKrw = data.usd_krw > 0 ? data.usd_krw : 0;
     USDKRW = usdKrw;
     const krEtfs = (data.etfs || []).map(normKrEtf);
-    const usEtfs = (data.us_etfs || []).map(e => normUsEtf(e, usdKrw));
+    const usEtfs = usdKrw ? (data.us_etfs || []).map(e => normUsEtf(e, usdKrw)).filter(d => d.price > 0) : [];
     INCOME_UNIVERSE = [...krEtfs, ...usEtfs];
     INCOME_UNIVERSE.forEach(d => UNIV[d.code] = d);
     if(data.generated_at){
@@ -1368,9 +1375,11 @@ fetch('/data/income_etfs.json')
     simRowsRender();simOut();
   })
   .catch(() => {
-    incomeRender();
-    incomeAllPageRender();
-    simRowsRender();simOut();
+    // 불러오지 못하면 빈 화면 대신 안내를 남긴다(2026-10-28)
+    const msg='<div style="padding:18px 16px;font-size:13px;color:var(--muted);line-height:1.6;">ETF 데이터를 불러오지 못했어요. 잠시 뒤 새로고침해 주세요.</div>';
+    document.getElementById('income-rows').innerHTML=msg;
+    document.getElementById('income-all-page-rows').innerHTML=msg;
+    document.getElementById('sim-out').innerHTML=msg;
   });
 
 
