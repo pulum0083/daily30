@@ -222,7 +222,9 @@
     function p(v) { return ((v - lo) / (hi - lo) * 100).toFixed(2); }
     var rows = secs.map(function (s, i) {
       var rank = s.rank != null ? s.rank : i + 1, a = Math.min(p(0), p(s.t)), w = Math.abs(p(s.t) - p(0));
-      var mv = s.move > 0 ? '<small class="up">▲' + s.move + '</small>' : s.move < 0 ? '<small class="dn">▼' + (-s.move) + '</small>' : '';
+      // 순위가 어제와 같으면 '–'를 단다(2026-10-28 사용자 요청). 어제 순위를 모르면(move null) 아무것도 달지 않는다.
+      var mv = s.move > 0 ? '<small class="up">▲' + s.move + '</small>' : s.move < 0 ? '<small class="dn">▼' + (-s.move) + '</small>'
+        : s.move === 0 ? '<small class="eq" aria-label="어제와 같은 순위">–</small>' : '';
       var n = s.n != null ? s.n : (s.names || []).length;
       var tone = s.t < 0 ? 'dn' : kp != null && s.t >= kp ? 'up' : 'up-l';
       return '<div class="vsx-lr" title="' + esc('대표 ' + n + '종목 · ' + (s.names || []).join(' · ')) + '">' +
