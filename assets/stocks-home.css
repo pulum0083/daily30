@@ -71,6 +71,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sup-g .s+.s{border-left:1px solid var(--hair);padding-left:12px;}
 .sup-g .s i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted);}
 .sup-g .s b{font-size:15px;font-weight:800;white-space:nowrap;}
+/* PC — 왼쪽(지수)이 정보는 많은데 좁고 오른쪽(수급)은 비어 보였다(2026-10-28 사용자 지적).
+   두 칸을 비율로 나눠 왼쪽을 넓히고, 왼쪽 글자·줄 간격을 키운다. 폰(≤900px)은 위 기본값 그대로다. */
+@media(min-width:901px){
+  .idx-card{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);}
+  .ix-top{padding:12px 20px 14px;}
+  .ix-r1{gap:10px;margin-top:8px;}
+  .ix-r1 .l{font-size:13px;}
+  .ix-r1 .v{font-size:24px;}
+  .ix-r1 .vc{font-size:15px;}
+  .ix-r1 .ix-abs{font-size:13px;}
+  .ix-r1 .ksp,.ix-r1 .ksp svg{width:72px;height:22px;}
+  .ix-r2{gap:4px 22px;margin-top:8px;font-size:12.5px;}
+  .supply{padding:12px 20px 14px;}
+  .sup-h{margin-bottom:10px;}
+  .sup-g .s+.s{padding-left:16px;}
+  .sup-g .s b{font-size:17px;}
+}
 .sup-more{flex-shrink:0;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
 .sup-more[hidden]{display:none;}
 .sup-more:hover{background:#E0EBFD;}
