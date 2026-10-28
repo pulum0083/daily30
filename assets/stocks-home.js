@@ -309,7 +309,8 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
     var label={open:'정규장',pre:'프리장',post:'애프터장'}[sessionState];
     if(isLive && label){
       b.classList.remove('closed');
-      b.innerHTML='<span class="dot"></span>LIVE · '+label+' · 60초 갱신';
+      // 꼬리(· 60초 갱신)는 폰에서 숨긴다 — 머리 줄에 원화/달러 토글까지 한 줄로 넣기 위해(2026-10-28)
+      b.innerHTML='<span class="dot"></span>LIVE · '+label+'<span class="ue-live-tail"> · 60초 갱신</span>';
     }else{
       b.classList.add('closed');
       var dt='';
@@ -323,7 +324,7 @@ window.addEventListener('load', function(){ usSel(window.__lwCode); });
           if(mo&&da) dt=mo.value+'.'+da.value+' ';
         }
       }
-      b.innerHTML='<span class="dot"></span>장 마감 · '+dt+'종가 기준';
+      b.innerHTML='<span class="dot"></span>장 마감 · '+dt.trim()+'<span class="ue-live-tail"> 종가 기준</span>';
     }
   }
   /* 폴링 후 행 가격을 in-place 갱신 — 카운트업 + 방향색 플래시(상단 대표주 위젯과 동일 효과) */
