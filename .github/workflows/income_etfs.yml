@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write    # vercel-deploy.yml 명시 dispatch — GITHUB_TOKEN 커밋은 push 트리거를 발동하지 않는다
 
 jobs:
   update-income-etfs:
@@ -34,6 +35,15 @@ jobs:
           git add web/data/income_etfs.json
           git diff --staged --quiet || git commit -m "data: income_etfs.json 주간 갱신 $(TZ='Asia/Seoul' date +'%Y-%m-%d')"
           git push
+
+      # 봇(GITHUB_TOKEN) 커밋은 vercel-deploy.yml의 push 트리거를 발동하지 않는다 — 배포를 직접 부른다(2026-10-28 발견:
+      # 그 전까진 주간 갱신이 다음 다른 배포가 있을 때까지 사이트에 반영되지 않았다).
+      - name: Trigger Vercel deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          gh workflow run vercel-deploy.yml --ref main -f sha="$sha"
 
       # 수집 실패·0건 가드(build_income_etfs.enough_kr)로 멈추면 관리자에게 알린다 — 조용히 지난주 데이터로 남지 않게
       - name: Notify admin on failure
