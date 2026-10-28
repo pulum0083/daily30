@@ -1,0 +1,475 @@
+<!-- 장중 '어제랑 비교' 화면 가독성 개선 시안 (2026-10-28 13:06 실데이터) -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시안 — 장중 어제랑 비교 가독성</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+:root{--canvas:#FFF;--soft:#F9FAFB;--inset:#EEF1F5;--hair:#E5E7EB;--ink:#13151A;--muted:#5B6472;--up:#E03131;--up-bg:#FFE8E8;--dn:#2775ED;--dn-bg:#DBE8FE;--y:#9AA3AF}
+*{box-sizing:border-box}body{margin:0;font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);word-break:keep-all;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}.up{color:var(--up)}.dn{color:var(--dn)}.mut{color:var(--muted)}
+.note{max-width:880px;margin:0 auto;padding:14px 16px;font-size:12.5px;color:#92400E;background:#FFFBEB;border-bottom:1px solid #FDE68A;line-height:1.6}
+.wrap{max-width:880px;margin:0 auto;padding:16px}
+h2.sec{font-size:13px;color:var(--muted);font-weight:700;margin:28px 2px 10px;letter-spacing:.02em}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.pair{grid-template-columns:1fr}}
+.card{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--inset);color:var(--muted);margin-bottom:8px}
+.tag.new{background:#E8F4FF;color:#006EFF}
+.ct{font-size:16px;font-weight:800;margin:0 0 2px}.cs{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-block;vertical-align:middle;margin-right:5px}
+.chart{position:relative;width:100%;height:220px}
+.chart svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ylab{position:absolute;left:0;font-size:10.5px;color:var(--muted);transform:translateY(-50%)}
+.endlab{position:absolute;right:0;font-size:13px;font-weight:800;transform:translateY(-50%);text-align:right;line-height:1.1}
+.endlab small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+.xax{position:relative;height:18px;font-size:10.5px;color:var(--muted)}.xax span{position:absolute;top:4px;transform:translateX(-50%)}
+.diffstrip{position:relative;height:46px;margin-top:6px}
+.diffstrip .ev{position:absolute;right:0;font-size:12px;font-weight:800;transform:translateY(-50%)}
+.dlab{display:flex;align-items:baseline;gap:8px;margin-top:10px;font-size:11.5px;font-weight:700;color:var(--ink)}.dlab small{font-weight:500;color:var(--muted);font-size:11px}
+.diffstrip svg{position:absolute;inset:0;width:100%;height:100%}
+/* 시안 요약 줄 */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 12px}
+.kpi{background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:9px 10px}
+.kpi .l{font-size:11px;color:var(--muted);font-weight:700}.kpi .v{font-size:19px;font-weight:800;margin-top:2px}.kpi .s{font-size:11px;color:var(--muted);margin-top:1px}
+/* 비교 행 */
+.row{display:grid;grid-template-columns:96px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #F1F3F6}
+.row:first-of-type{border-top:none}
+.rl{font-size:13px;font-weight:700}.rl small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.bars{display:flex;flex-direction:column;gap:4px}
+.b{height:8px;border-radius:4px;background:var(--inset);position:relative;overflow:hidden}
+.b span{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.b.y span{background:#CBD2DB}.b.t span{background:#4B5563}
+.rv{min-width:128px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rv b{font-size:15px}.rv small{display:block;font-size:11px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;margin-left:6px}
+.chip.st{background:#13151A;color:#fff}.chip.wk{background:var(--inset);color:var(--muted)}
+.srow .rv,.frow .rv{min-width:0}
+/* 섹터 */
+.srow{display:grid;grid-template-columns:22px 92px 1fr 62px 40px;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #F1F3F6}
+.srow:first-of-type{border-top:none}
+.rk{width:20px;height:20px;border-radius:6px;background:var(--inset);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.rk.top{background:#13151A;color:#fff}
+.sn{font-size:13px;font-weight:700;line-height:1.25}.sn small{display:block;font-size:10.5px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zb{position:relative;height:16px}
+.zb .axis{position:absolute;top:-2px;bottom:-2px;width:1px;background:#9AA3AF}
+.zb .bar{position:absolute;top:4px;height:8px;border-radius:3px}
+.zb .tick{position:absolute;top:0;width:2px;height:16px;background:#6B7280;border-radius:1px}
+.mv{font-size:11px;font-weight:800;text-align:center;border-radius:6px;padding:2px 0}
+.mv.u{background:var(--up-bg);color:var(--up)}.mv.d{background:var(--dn-bg);color:var(--dn)}.mv.z{background:var(--inset);color:var(--muted)}
+/* 수급 */
+.frow{display:grid;grid-template-columns:70px 1fr 92px;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #F1F3F6}
+.frow:first-of-type{border-top:none}
+.legend2{font-size:11px;color:var(--muted);margin:2px 0 8px}
+.legend2 i{display:inline-block;width:12px;height:8px;border-radius:2px;vertical-align:middle;margin-right:4px}
+.sub{font-size:12.5px;font-weight:800;margin:14px 0 4px}
+/* 버전 전환 */
+.vsw{position:sticky;top:0;z-index:5;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-items:center;gap:6px;margin:28px 0 0;padding:10px 0;background:var(--soft)}
+.vsw-l{font-size:12px;font-weight:700;color:var(--muted);margin-right:4px}
+@media(max-width:480px){.vsw-l{display:none}}
+.vsw button{white-space:nowrap;font:inherit;font-size:12.5px;font-weight:700;border:1px solid var(--hair);background:var(--canvas);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.vsw button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+/* 버전 2 */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tiles.t3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:480px){.tiles.t3{grid-template-columns:1fr}}
+.tile{background:var(--soft);border:1px solid var(--hair);border-radius:12px;padding:11px 12px}
+.tile .l{font-size:12px;font-weight:700;color:var(--muted)}.tile .v{font-size:24px;font-weight:800;margin-top:3px;line-height:1.15}
+.tile .y{font-size:12px;color:var(--muted);margin-top:4px}.tile .d{display:inline-block;font-size:11.5px;font-weight:800;margin-top:6px;padding:2px 8px;border-radius:999px;background:var(--inset);color:var(--ink)}
+.slope{display:grid;grid-template-columns:132px 1fr 132px;align-items:stretch}
+.slope .col{position:relative}.slope .lab{position:absolute;left:0;right:0;transform:translateY(-50%);display:flex;align-items:center;gap:6px;font-size:12.5px;white-space:nowrap}
+.slope .col.r .lab{justify-content:flex-start;padding-left:6px}.slope .col.l .lab{justify-content:flex-end;padding-right:6px}
+.slope .lab .rk{width:18px;height:18px;font-size:10.5px}.slope .lab b{font-weight:700}.slope .lab .p{font-size:11.5px;font-variant-numeric:tabular-nums}
+.slope .hd{font-size:11px;font-weight:700;color:var(--muted);padding-bottom:4px}
+.slope svg{width:100%;height:100%;display:block}
+.tb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.tb th{font-size:11px;color:var(--muted);font-weight:700;text-align:right;padding:4px 0 6px;border-bottom:1px solid var(--hair)}.tb th:first-child{text-align:left}
+.tb td{padding:8px 0;border-bottom:1px solid #F1F3F6;text-align:right}.tb td:first-child{text-align:left;font-weight:700}
+.tb .turn{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--inset);border-radius:999px;padding:1px 6px;margin-left:6px}
+/* 버전 3 */
+.drow{display:grid;grid-template-columns:88px 1fr 76px;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #F1F3F6}
+.drow:first-of-type{border-top:none}
+.trk{position:relative;height:20px}
+.trk .z{position:absolute;top:0;bottom:0;width:1px;background:#C3CAD3}
+.trk .ln{position:absolute;top:9px;height:2px;background:#CBD2DB;border-radius:1px}
+.trk .dy,.trk .dt{position:absolute;top:10px;border-radius:50%;transform:translate(-50%,-50%)}
+.trk .dy{width:10px;height:10px;background:#fff;border:2px solid #9AA3AF}
+.trk .dt{width:12px;height:12px;background:#13151A}
+.dax{position:relative;height:16px;margin-left:96px;margin-right:84px;font-size:10px;color:var(--muted)}
+.dax span{position:absolute;transform:translateX(-50%)}
+/* 버전 4 */
+.hl{font-size:18px;font-weight:800;line-height:1.35;margin:2px 0 10px}
+.facts{display:flex;flex-direction:column;gap:8px}
+.fact{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.5}
+.fact .k{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--muted);background:var(--inset);border-radius:6px;padding:2px 7px;margin-top:2px}
+.bigx{display:flex;gap:18px;margin:4px 0 12px}.bigx div{font-size:12px;color:var(--muted);font-weight:700}.bigx b{display:block;font-size:28px;color:var(--ink);font-weight:800;line-height:1.15}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}.pill{font-size:12.5px;font-weight:700;border:1px solid var(--hair);border-radius:999px;padding:4px 10px;background:var(--soft)}
+/* 버전 5 */
+.xs{position:relative;height:34px;margin:6px 0 4px}
+.xs .tr{position:absolute;left:0;right:0;top:14px;height:6px;border-radius:3px;background:var(--inset)}
+.xs .fl{position:absolute;left:0;top:14px;height:6px;border-radius:3px;background:#4B5563}
+.xs .one{position:absolute;top:10px;width:2px;height:18px;background:#9AA3AF}
+.xs .lb{position:absolute;top:-4px;font-size:10px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.xrow{padding:8px 0;border-top:1px solid #F1F3F6}.xrow:first-of-type{border-top:none}
+.xrow .h{display:flex;justify-content:space-between;align-items:baseline}.xrow .h b{font-size:20px}
+.map2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}@media(max-width:560px){.map{grid-template-columns:repeat(2,1fr)}}
+.mt{border-radius:10px;padding:9px 10px;min-height:76px;position:relative}
+.mt .n{font-size:13px;font-weight:800}.mt .v{font-size:19px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.mt .y{font-size:11px;margin-top:2px;opacity:.85}.mt .r{position:absolute;top:8px;right:9px;font-size:11px;font-weight:800}
+.bal{margin:6px 0 2px}.bal .cap{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.bal .bar{position:relative;height:30px;background:var(--soft);border-radius:8px;overflow:hidden}
+.bal .seg{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden}
+.bal .mid{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#13151A}
+.stack{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:4px 0 6px}
+.stack div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden}
+.skey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted)}.skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
+/* 새 안 */
+.decided{background:#ECFDF3;border:1px solid #ABEFC6;color:#05603A;border-radius:12px;padding:10px 14px;font-size:12.5px;line-height:1.7;margin-top:6px}.decided a{color:#05603A}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin:6px 0 4px}
+.steps div{height:26px;border-radius:5px;background:var(--inset);font-size:10.5px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.steps div.on{background:#13151A;color:#fff}
+.hrow{padding:10px 0;border-top:1px solid #F1F3F6}.hrow:first-of-type{border-top:none}
+.hrow .h{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:700}.hrow .h span{font-size:12px;color:var(--muted);font-weight:500}
+.band{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;background:var(--soft);border:1px solid var(--hair);border-radius:10px;padding:10px 12px;font-size:13px}
+.band .j{font-weight:800}.band .m{color:var(--muted)}.band b{font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.two .l{font-size:12px;font-weight:700;color:var(--muted)}.two .v{font-size:30px;font-weight:800;line-height:1.15;margin-top:2px}.two .s{font-size:12px;color:var(--muted);margin-top:2px}
+.badge{display:inline-block;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:#13151A;color:#fff}
+.ref{position:relative}
+.lrow{display:grid;grid-template-columns:86px 1fr 64px;align-items:center;gap:8px;height:34px}
+.lrow .nm{font-size:13px;font-weight:700;white-space:nowrap}.lrow .nm small{font-size:10.5px;font-weight:800;margin-left:3px}
+.lrow .tk{position:relative;height:14px}
+.lrow .br{position:absolute;top:0;height:14px;border-radius:3px}
+.lrow .vv{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.vline{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed}
+.vlab{position:absolute;top:-18px;font-size:10.5px;font-weight:800;transform:translateX(-50%);white-space:nowrap}
+.grp{padding:10px 0;border-top:1px solid #F1F3F6}.grp:first-of-type{border-top:none}
+.grp .gh{font-size:12.5px;font-weight:800;margin-bottom:6px}.grp .gh span{font-weight:500;color:var(--muted);margin-left:6px}
+</style></head><body>
+<div class="note">시안 — 장중(09:00~15:30) '어제랑 비교' 화면. 숫자는 2026-10-28(수) 13:06 실제 데이터예요. 위는 지금 화면을 그대로 다시 그린 것, 아래가 바꾸는 안이에요.</div>
+<div class="wrap">
+<div class="decided"><b>정한 것</b> · ① 곡선은 <b>시안 B(회색 차이 막대)</b> · ④ 수급은 <b>버전 5(판 쪽 vs 산 쪽 + 기관 구성)</b><br><b>다시 만드는 것</b> · ② 얼마나 뜨거운가, ③ 어디가 이끄나 → 맨 아래 <a href="#redo">새 안 A·B·C</a></div>
+
+<h2 class="sec">① 코스피 곡선 — 지금 vs 시안</h2>
+<div class="pair">
+  <div class="card"><span class="tag">지금</span>
+    <div class="legend"><span><i style="width:14px;height:2px;background:#13151A"></i>오늘</span><span><i style="width:14px;border-top:2px dashed #9AA3AF"></i>어제 같은 시각까지</span><span><i style="width:10px;height:10px;background:#FFD5D5"></i><i style="width:10px;height:10px;background:#D6E4FD;margin-left:-3px"></i>오늘이 위·아래</span></div>
+    <div class="chart" id="c-now"></div><div class="diffstrip" id="d-now"></div><div class="xax"></div>
+    <p class="cs" style="margin-top:10px">문제 — 처음 30분 파란 면이 '내렸다'로 읽혀요. 실제로 오늘은 +1.97%에서 시작해 장중 내내 올랐고, 파랑은 '어제보다 덜 올랐다'는 뜻이었어요.</p>
+  </div>
+  <div class="card"><span class="tag new">시안 A · 차이는 숫자만</span>
+    <div class="ct">어제보다 더 오르고 있어요</div>
+    <p class="cs">코스피 오늘 <b class="up num">+6.53%</b> · 어제 이 시각 <span class="num">+3.82%</span></p>
+    <div class="kpis"><div class="kpi"><div class="l">오늘</div><div class="v up num">+6.53%</div><div class="s">13:06 기준</div></div><div class="kpi"><div class="l">어제 같은 시각</div><div class="v num" style="color:#6B7280">+3.82%</div><div class="s">10/27(화)</div></div><div class="kpi"><div class="l">차이</div><div class="v num">+2.71%p</div><div class="s">오늘이 더 높아요</div></div></div>
+    <div class="legend"><span><i style="width:14px;height:3px;background:#E03131"></i>오늘</span><span><i style="width:14px;border-top:2px dashed #9AA3AF"></i>어제</span><span><i style="width:10px;height:10px;background:rgba(224,49,49,.12)"></i>0% 위 = 상승 구간</span></div>
+    <div class="chart" id="c-new"></div><div class="xax"></div>
+    <p class="cs" style="margin-top:10px">바뀐 점 — 면의 색이 '0% 기준 오르내림'만 뜻해요(빨강 = 전일 종가보다 위). 어제와의 차이는 위 세 칸 숫자로 따로 보여주고, 아래 '차이' 막대 줄은 뺐어요.</p>
+  </div>
+  <div class="card"><span class="tag new">시안 B · 회색 차이 막대</span>
+    <div class="ct">어제보다 더 오르고 있어요</div>
+    <p class="cs">코스피 오늘 <b class="up num">+6.53%</b> · 어제 이 시각 <span class="num">+3.82%</span></p>
+    <div class="kpis"><div class="kpi"><div class="l">오늘</div><div class="v up num">+6.53%</div><div class="s">13:06 기준</div></div><div class="kpi"><div class="l">어제 같은 시각</div><div class="v num" style="color:#6B7280">+3.82%</div><div class="s">10/27(화)</div></div><div class="kpi"><div class="l">차이</div><div class="v num">+2.71%p</div><div class="s">오늘이 더 높아요</div></div></div>
+    <div class="legend"><span><i style="width:14px;height:3px;background:#E03131"></i>오늘</span><span><i style="width:14px;border-top:2px dashed #9AA3AF"></i>어제</span><span><i style="width:10px;height:10px;background:rgba(224,49,49,.12)"></i>0% 위 = 상승 구간</span></div>
+    <div class="chart" id="c-new2"></div>
+    <div class="dlab"><span>어제와 차이</span><small>선 위 = 오늘이 높음 · 아래 = 낮음</small></div>
+    <div class="diffstrip g" id="d-new2"></div><div class="xax"></div>
+    <p class="cs" style="margin-top:10px">시안 A에 차이 막대 줄만 회색으로 되살렸어요. 9시 무렵 오늘이 어제보다 낮았다가(선 아래) 9시 50분쯤부터 앞서고 벌어진 흐름이 보여요. 색은 쓰지 않아 '하락'으로 읽히지 않아요.</p>
+  </div>
+</div>
+
+<div class="vsw" role="tablist"><span class="vsw-l">② ~ ④ 카드 버전</span><button data-v="1" class="on">1 막대 짝</button><button data-v="2">2 숫자 타일</button><button data-v="3">3 점 잇기</button><button data-v="4">4 문장 먼저</button><button data-v="5">5 지도</button></div>
+<div class="vpane" data-v="1">
+<h2 class="sec">② 얼마나 뜨거운가 — 427px → 한 카드 두 줄</h2>
+<div class="card"><span class="tag new">버전 1 · 막대 짝</span><div class="ct">얼마나 뜨거운가</div><p class="cs">어제 같은 시각과 비교 · 위 막대 어제, 아래 막대 오늘</p><div id="heat"></div></div>
+
+<h2 class="sec">③ 주도권 — 지수 두 줄 + 섹터 한 줄씩 (1,226px → 약 450px)</h2>
+<div class="card"><span class="tag new">버전 1 · 막대 짝</span><div class="ct">어디가 이끄나</div><p class="cs">지수는 어제 같은 시각과 비교 · 섹터 막대는 오늘 등락, 회색 눈금은 어제 같은 시각</p><div id="mkt"></div>
+  <div class="sub">섹터 대표 3종목 평균</div><div id="sec"></div>
+  <p class="cs" style="margin:8px 0 0">종목 이름은 한 줄로 줄였어요. 순위 칸은 어제 대비 오르내린 계단 수예요.</p>
+</div>
+
+<h2 class="sec">④ 누가 사는가 — 840px → 약 380px</h2>
+<div class="card"><span class="tag new">버전 1 · 막대 짝</span><div class="ct">누가 사는가</div><p class="cs">코스피 전체 누적 순매수 · 가운데 선 오른쪽 = 순매수, 왼쪽 = 순매도</p>
+  <div class="legend2"><i style="background:#E03131"></i>오늘 순매수 <i style="background:#2775ED;margin-left:8px"></i>오늘 순매도 <i style="background:transparent;border:2px solid #6B7280;width:2px;height:12px;margin-left:8px"></i>어제 같은 시각</div>
+  <div id="flow"></div><div class="sub">기관 안에서</div><div id="inst"></div></div>
+
+</div>
+<div class="vpane" data-v="2" hidden>
+<h2 class="sec">② 얼마나 뜨거운가 — 숫자 타일</h2>
+<div class="card"><span class="tag new">버전 2 · 숫자 타일</span><div class="ct">얼마나 뜨거운가</div><p class="cs">큰 숫자가 오늘, 아래 줄이 어제 같은 시각</p><div class="tiles" id="v2-heat"></div></div>
+<h2 class="sec">③ 주도권 — 지수 타일 + 섹터 순위 이동</h2>
+<div class="card"><span class="tag new">버전 2 · 숫자 타일</span><div class="ct">어디가 이끄나</div><p class="cs">지수는 어제 같은 시각과 비교 · 섹터는 어제 순위에서 오늘 순위로 이은 선</p><div class="tiles" id="v2-mkt"></div>
+  <div class="sub">섹터 대표 3종목 평균 · 순위 이동</div><div id="v2-slope"></div>
+  <p class="cs" style="margin:8px 0 0">진한 선은 순위가 3계단 이상 움직인 섹터예요.</p></div>
+<h2 class="sec">④ 누가 사는가 — 숫자 타일 + 표</h2>
+<div class="card"><span class="tag new">버전 2 · 숫자 타일</span><div class="ct">누가 사는가</div><p class="cs">코스피 전체 누적 순매수 · 아래 줄은 어제 같은 시각보다 얼마나 더 샀는지(팔았는지)</p><div class="tiles t3" id="v2-flow"></div>
+  <div class="sub">기관 안에서</div><table class="tb" id="v2-inst"></table></div>
+</div>
+<div class="vpane" data-v="3" hidden>
+<h2 class="sec">② 얼마나 뜨거운가 — 점 잇기</h2>
+<div class="card"><span class="tag new">버전 3 · 점 잇기</span><div class="ct">얼마나 뜨거운가</div><p class="cs">회색 점이 어제 같은 시각, 진한 점이 오늘 · 선 길이가 차이</p><div id="v3-heat"></div></div>
+<h2 class="sec">③ 주도권 — 같은 눈금 위에 지수·섹터</h2>
+<div class="card"><span class="tag new">버전 3 · 점 잇기</span><div class="ct">어디가 이끄나</div><p class="cs">모든 줄이 같은 % 눈금이에요 · 점 색은 오늘 등락 부호</p><div class="dax" id="v3-ax1"></div><div id="v3-mkt"></div>
+  <div class="sub">섹터 대표 3종목 평균 · 오늘 순위순</div><div id="v3-sec"></div></div>
+<h2 class="sec">④ 누가 사는가 — 점 잇기</h2>
+<div class="card"><span class="tag new">버전 3 · 점 잇기</span><div class="ct">누가 사는가</div><p class="cs">코스피 전체 누적 순매수 · 가운데 선 오른쪽이 순매수</p><div id="v3-flow"></div>
+  <div class="sub">기관 안에서</div><div id="v3-inst"></div></div>
+</div>
+<div class="vpane" data-v="4" hidden>
+<h2 class="sec">② 얼마나 뜨거운가 — 결론 한 줄 먼저</h2>
+<div class="card"><span class="tag new">버전 4 · 문장 먼저</span><div id="v4-heat"></div></div>
+<h2 class="sec">③ 주도권 — 결론 한 줄 먼저</h2>
+<div class="card"><span class="tag new">버전 4 · 문장 먼저</span><div id="v4-mkt"></div></div>
+<h2 class="sec">④ 누가 사는가 — 결론 한 줄 먼저</h2>
+<div class="card"><span class="tag new">버전 4 · 문장 먼저</span><div id="v4-flow"></div></div>
+</div>
+<div class="vpane" data-v="5" hidden>
+<h2 class="sec">② 얼마나 뜨거운가 — 배수 눈금</h2>
+<div class="card"><span class="tag new">버전 5 · 지도</span><div class="ct">얼마나 뜨거운가</div><p class="cs">어제 같은 시각을 1배로 놓고 오늘이 몇 배인지</p><div id="v5-heat"></div></div>
+<h2 class="sec">③ 주도권 — 섹터 지도</h2>
+<div class="card"><span class="tag new">버전 5 · 지도</span><div class="ct">어디가 이끄나</div><p class="cs">칸 색이 진할수록 오늘 많이 올랐어요 · 오늘 순위순</p><div class="map2" id="v5-idx"></div><div class="map" id="v5-sec"></div></div>
+<h2 class="sec">④ 누가 사는가 — 판 쪽 vs 산 쪽</h2>
+<div class="card"><span class="tag new">버전 5 · 지도</span><div class="ct">누가 사는가</div><p class="cs">한 줄 막대의 왼쪽은 판 쪽, 오른쪽은 산 쪽이에요 · 판 만큼 누군가 샀어요</p><div id="v5-flow"></div>
+  <div class="sub">기관 순매수 구성</div><div id="v5-inst"></div></div>
+</div>
+<h2 class="sec" id="redo" style="margin-top:44px">새 안 — ② 얼마나 뜨거운가</h2>
+<div class="card"><span class="tag new">강도 A · 열기 계단</span><div class="ct">얼마나 뜨거운가</div><p class="cs">어제 같은 시각과 비교해 다섯 칸 중 어디인지</p><div id="h-a"></div></div>
+<div class="card"><span class="tag new">강도 B · 곡선 아래 한 줄</span><div class="ct">곡선 카드 바로 아래에 붙이는 띠</div><p class="cs">카드를 따로 두지 않고 결론·숫자만 한 줄로 보여줘요</p><div id="h-b"></div></div>
+<div class="card"><span class="tag new">강도 C · 숫자 두 개</span><div id="h-c"></div></div>
+
+<h2 class="sec" style="margin-top:36px">새 안 — ③ 어디가 이끄나</h2>
+<div class="card"><span class="tag new">주도권 A · 시장 기준선</span><div class="ct">어디가 이끄나</div><p class="cs">섹터 막대 위에 코스피·코스닥 오늘 등락을 세로선으로 그었어요 · 선을 넘은 섹터가 시장보다 센 곳</p><div id="l-a"></div></div>
+<div class="card"><span class="tag new">주도권 B · 코스피보다 얼마나</span><div class="ct">코스피보다 센 섹터, 약한 섹터</div><p class="cs">코스피 오늘 +6.53%를 0으로 놓고 각 섹터가 그보다 몇 %p 더(덜) 올랐는지 · 눈금은 어제 같은 시각</p><div id="l-b"></div></div>
+<div class="card"><span class="tag new">주도권 C · 세 묶음</span><div id="l-c"></div></div>
+</div>
+<script>
+const D={"time":"13:06","today":{"date":"2026-10-28","label":"10/28(수)"},"prev":{"date":"2026-10-27","label":"10/27(화)","rel":"어제"},"verdict":{"title":"어제보다 더 오르고 있어요","sub":"코스피 오늘 +6.53% · 어제 같은 시각 +3.82% — 2.71%p 높아요 · 외국인 누적 순매수는 3,491억 원 많아요","judge":"strong","tone":"up"},"kospi":{"t":6.53,"y":3.82,"diff":2.71,"judge":"strong","curveT":[[0,1.97],[5,2.32],[10,2.83],[15,3.28],[20,3.21],[25,3.56],[30,3.34],[35,3.48],[40,3.47],[45,3.72],[50,4.21],[55,4.75],[60,4.94],[65,4.72],[70,4.95],[75,5.19],[80,5.27],[85,5.76],[90,5.6],[95,5.71],[100,5.96],[105,6.16],[110,5.95],[115,6.32],[120,6.13],[125,6.13],[130,5.97],[135,5.69],[140,5.79],[145,5.71],[150,5.75],[155,5.73],[160,5.9],[165,5.87],[170,6.16],[175,6.19],[180,5.81],[185,5.67],[190,6],[195,6.08],[200,6.25],[205,6.25],[210,6.62],[215,6.49],[220,6.76],[225,6.65],[230,6.82],[235,6.5],[240,6.48],[245,6.51],[246,6.53]],"curveY":[[0,3.61],[5,3.93],[10,3.62],[15,4.08],[20,4.24],[25,4.31],[30,4.05],[35,4.15],[40,3.82],[45,4],[50,4.17],[55,4.07],[60,3.74],[65,4.11],[70,4.07],[75,4.16],[80,4.2],[85,4.25],[90,4.52],[95,4.41],[100,4.65],[105,4.83],[110,4.7],[115,4.54],[120,4.42],[125,4.04],[130,3.92],[135,4.14],[140,3.9],[145,3.96],[150,4.04],[155,3.74],[160,3.46],[165,3.45],[170,3.7],[175,3.5],[180,3.58],[185,3.46],[190,3.43],[195,3.37],[200,3.45],[205,3.41],[210,3.36],[215,3.63],[220,3.66],[225,3.55],[230,3.68],[235,3.75],[240,3.75],[245,3.76],[246,3.82]]},"axes":{"heat":{"vol":{"t":152441,"y":116634,"diff":30.7,"judge":"strong"},"amp":{"t":4.93,"y":1.77,"diff":3.16,"judge":"strong"}},"market":{"kosdaq":{"t":3.21,"y":2.8,"diff":0.41,"judge":"strong"},"kospi200":{"t":7.29,"y":4.18,"diff":3.11,"judge":"strong"}},"sectors":[{"key":"semicon","label":"반도체","names":["삼성전자","SK하이닉스","한미반도체"],"n":3,"t":8.14,"y":5.37,"diff":2.77,"rank":1,"prevRank":2,"move":1},{"key":"finance","label":"금융","names":["삼성생명","KB금융","신한지주"],"n":3,"t":5.66,"y":0.52,"diff":5.14,"rank":2,"prevRank":7,"move":5},{"key":"power","label":"전력기기","names":["HD현대일렉트릭","LS일렉트릭","효성중공업"],"n":3,"t":3.87,"y":4.41,"diff":-0.55,"rank":3,"prevRank":3,"move":0},{"key":"auto","label":"자동차","names":["현대차","기아","현대모비스"],"n":3,"t":3.45,"y":1.12,"diff":2.33,"rank":4,"prevRank":6,"move":2},{"key":"defense","label":"방산","names":["한화에어로스페이스","LIG넥스원","현대로템"],"n":3,"t":3.21,"y":2.74,"diff":0.47,"rank":5,"prevRank":4,"move":-1},{"key":"battery","label":"2차전지","names":["LG에너지솔루션","에코프로비엠","삼성SDI"],"n":3,"t":1.68,"y":6.33,"diff":-4.64,"rank":6,"prevRank":1,"move":-5},{"key":"bio","label":"바이오","names":["삼성바이오로직스","셀트리온","유한양행"],"n":3,"t":0.39,"y":-2.67,"diff":3.06,"rank":7,"prevRank":8,"move":1},{"key":"ship","label":"조선","names":["HD현대중공업","한화오션","삼성중공업"],"n":3,"t":-0.42,"y":1.2,"diff":-1.62,"rank":8,"prevRank":5,"move":-3}],"flow":{"main":{"개인":{"t":-17755,"y":-9621,"turned":false},"외국인":{"t":7339,"y":3848,"turned":false},"기관":{"t":10365,"y":5226,"turned":false}},"inst":[{"key":"금융투자","t":6744,"y":3368,"turned":false},{"key":"연기금","t":2356,"y":852,"turned":false},{"key":"투신","t":1184,"y":969,"turned":false},{"key":"기타금융","t":-41,"y":36,"turned":true},{"key":"보험","t":140,"y":12,"turned":false},{"key":"은행","t":-18,"y":-12,"turned":false}]}},"flow":{"t":{"date":"20261028","t":"13:06","개인":-17755,"외국인":7339,"기관":10365,"기타법인":52,"inst":{"금융투자":6744,"보험":140,"투신":1184,"은행":-18,"기타금융":-41,"연기금":2356}},"y":{"t":"13:06","개인":-9621,"외국인":3848,"기관":5226,"기타법인":546,"inst":{"금융투자":3368,"보험":12,"투신":969,"은행":-12,"기타금융":36,"연기금":852},"date":"20261027"},"time":"13:06","foreignDiff":3491,"judge":"strong"},"leaders":[{"code":"005930","name":"삼성전자","t":8.78,"y":4.69,"diff":4.09,"pxT":241500,"pxY":223000},{"code":"000660","name":"SK하이닉스","t":10.37,"y":6.59,"diff":3.78,"pxT":1480000,"pxY":1359000},{"code":"005380","name":"현대차","t":2.58,"y":0.69,"diff":1.89,"pxT":298000,"pxY":290000}],"avg":{"t":7.24,"y":3.99,"diff":3.25,"judge":"strong"}};
+const K=D.kospi, X0=0, X1=390;
+const fmtP=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)+'%';
+const cls=v=>v>0?'up':v<0?'dn':'';
+function eok(v){const a=Math.abs(v);const s=v>0?'+':v<0?'−':'';return a>=10000?s+(a/10000).toFixed(2)+'조':s+a.toLocaleString()+'억';}
+function drawChart(el,mode){
+  const W=1000,H=220,PL=34,PR=64,PT=10,PB=10;
+  const vals=K.curveT.concat(K.curveY).map(p=>p[1]).concat([0]);
+  let lo=Math.floor(Math.min(...vals))-1,hi=Math.ceil(Math.max(...vals))+1;
+  const x=m=>PL+(m-X0)/(X1-X0)*(W-PL-PR), y=v=>PT+(hi-v)/(hi-lo)*(H-PT-PB);
+  const line=c=>c.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+' '+y(p[1]).toFixed(1)).join(' ');
+  let s='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">';
+  for(let v=lo;v<=hi;v++){s+='<line x1="'+PL+'" x2="'+(W-PR)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="'+(v===0?'#9AA3AF':'#F1F3F6')+'" stroke-width="'+(v===0?1.2:1)+'" vector-effect="non-scaling-stroke"/>';}
+  const lastM=K.curveT[K.curveT.length-1][0];
+  s+='<rect x="'+x(lastM)+'" y="'+PT+'" width="'+(W-PR-x(lastM))+'" height="'+(H-PT-PB)+'" fill="#F7F8FA"/>';
+  if(mode==='now'){
+    const yMap=Object.fromEntries(K.curveY.map(p=>[p[0],p[1]]));
+    K.curveT.forEach((p,i)=>{if(!i)return;const a=K.curveT[i-1];const ya=yMap[a[0]],yb=yMap[p[0]];if(ya==null||yb==null)return;
+      const up=(a[1]+p[1])/2>=(ya+yb)/2;s+='<path d="M'+x(a[0])+' '+y(a[1])+' L'+x(p[0])+' '+y(p[1])+' L'+x(p[0])+' '+y(yb)+' L'+x(a[0])+' '+y(ya)+'Z" fill="'+(up?'#FFD5D5':'#D6E4FD')+'" opacity=".85"/>';});
+    s+='<path d="'+line(K.curveY)+'" fill="none" stroke="#9AA3AF" stroke-width="1.6" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>';
+    s+='<path d="'+line(K.curveT)+'" fill="none" stroke="#13151A" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+  }else{
+    const pts=K.curveT;
+    s+='<path d="'+line(pts)+' L'+x(lastM)+' '+y(0)+' L'+x(pts[0][0])+' '+y(0)+'Z" fill="rgba(224,49,49,.10)"/>';
+    s+='<path d="'+line(K.curveY)+'" fill="none" stroke="#9AA3AF" stroke-width="1.6" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>';
+    s+='<path d="'+line(pts)+'" fill="none" stroke="#E03131" stroke-width="2.6" vector-effect="non-scaling-stroke"/>';
+  }
+  s+='<line x1="'+x(lastM)+'" x2="'+x(lastM)+'" y1="'+PT+'" y2="'+(H-PB)+'" stroke="#CBD2DB" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/></svg>';
+  let lab='';for(let v=lo;v<=hi;v++){lab+='<div class="ylab num" style="top:'+(y(v)/H*100)+'%">'+(v>0?'+':'')+v+(v===0?'%':'')+'</div>';}
+  const tv=K.curveT[K.curveT.length-1][1], yv=K.curveY[K.curveY.length-1][1];
+  lab+='<div class="endlab up num" style="top:'+(y(tv)/H*100)+'%">'+fmtP(tv)+'<small>오늘</small></div>';
+  lab+='<div class="endlab num" style="top:'+(y(yv)/H*100)+'%;color:'+(mode==='now'?'#E03131':'#6B7280')+'">'+fmtP(yv)+'<small>어제</small></div>';
+  el.innerHTML=s+lab;
+}
+function drawDiff(el,grey){
+  const W=1000,H=46,PL=34,PR=64;const yMap=Object.fromEntries(K.curveY.map(p=>[p[0],p[1]]));
+  const ds=K.curveT.filter(p=>yMap[p[0]]!=null).map(p=>[p[0],p[1]-yMap[p[0]]]);const mx=Math.max(...ds.map(d=>Math.abs(d[1])));
+  let s='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><line x1="'+PL+'" x2="'+(W-PR)+'" y1="23" y2="23" stroke="#CBD2DB"/>';
+  ds.forEach(d=>{const x=PL+d[0]/390*(W-PL-PR),h=d[1]/mx*20;s+='<rect x="'+(x-3)+'" width="6" y="'+(h>0?23-h:23)+'" height="'+Math.abs(h)+'" fill="'+(grey?(h>0?'#8A939F':'#C3CAD3'):(h>0?'#E03131':'#2775ED'))+'"/>';});
+  let ev='';if(grey){const last=ds[ds.length-1][1];ev='<div class="ev num" style="top:'+((23-last/mx*20)/46*100)+'%">'+(last>0?'+':'−')+Math.abs(last).toFixed(2)+'%p</div>';}
+  el.innerHTML=s+'</svg>'+ev;
+}
+function cmpRow(label,sub,y,t,fmt,diffTxt,strong,max){
+  const pw=v=>Math.max(2,Math.abs(v)/max*100);
+  return '<div class="row"><div class="rl">'+label+(sub?'<small>'+sub+'</small>':'')+'</div><div class="bars"><div class="b y"><span style="width:'+pw(y)+'%"></span></div><div class="b t"><span style="width:'+pw(t)+'%"></span></div></div><div class="rv"><b>'+fmt(t)+'</b><span class="chip '+(strong?'st':'wk')+'">'+diffTxt+'</span><small>어제 '+fmt(y)+'</small></div></div>';
+}
+document.querySelectorAll('.xax').forEach(el=>{el.innerHTML=[[0,'09:00'],[120,'11:00'],[240,'13:00'],[390,'15:30']].map(([m,t])=>'<span style="left:'+((34+m/390*(1000-34-64))/10)+'%">'+t+'</span>').join('');});
+drawChart(document.getElementById('c-now'),'now');drawDiff(document.getElementById('d-now'));drawChart(document.getElementById('c-new'),'new');drawChart(document.getElementById('c-new2'),'new');drawDiff(document.getElementById('d-new2'),true);
+const H=D.axes.heat;
+document.getElementById('heat').innerHTML=
+  cmpRow('누적 거래량','천주',H.vol.y,H.vol.t,v=>v.toLocaleString(),'+'+H.vol.diff.toFixed(1)+'%',true,Math.max(H.vol.y,H.vol.t))+
+  cmpRow('일중 진폭','고가−저가',H.amp.y,H.amp.t,v=>v.toFixed(2)+'%','+'+H.amp.diff.toFixed(2)+'%p',true,Math.max(H.amp.y,H.amp.t));
+const M=D.axes.market,mx=Math.max(M.kospi200.t,M.kospi200.y,M.kosdaq.t,M.kosdaq.y);
+const pf=v=>'<span class="'+cls(v)+'">'+fmtP(v)+'</span>';
+document.getElementById('mkt').innerHTML=
+  cmpRow('코스피200','',M.kospi200.y,M.kospi200.t,pf,'+'+M.kospi200.diff.toFixed(2)+'%p',true,mx)+
+  cmpRow('코스닥','',M.kosdaq.y,M.kosdaq.t,pf,'+'+M.kosdaq.diff.toFixed(2)+'%p',M.kosdaq.diff>=0.3,mx);
+const S=D.axes.sectors,smx=Math.max(...S.map(s=>Math.max(Math.abs(s.t),Math.abs(s.y))));
+const pos=v=>50+v/smx*50;
+document.getElementById('sec').innerHTML=S.map(s=>{
+  const a=Math.min(pos(0),pos(s.t)),w=Math.abs(pos(s.t)-pos(0));
+  const mv=s.move>0?'<div class="mv u">▲'+s.move+'</div>':s.move<0?'<div class="mv d">▼'+(-s.move)+'</div>':'<div class="mv z">—</div>';
+  return '<div class="srow"><div class="rk'+(s.rank===1?' top':'')+'">'+s.rank+'</div><div class="sn">'+s.label+'<small>'+s.names.join('·')+'</small></div><div class="zb"><div class="axis" style="left:50%"></div><div class="bar" style="left:'+a+'%;width:'+w+'%;background:'+(s.t>=0?'#E03131':'#2775ED')+'"></div><div class="tick" style="left:calc('+pos(s.y)+'% - 1px)"></div></div><div class="rv"><b class="'+cls(s.t)+'" style="font-size:13.5px">'+fmtP(s.t)+'</b><small>어제 '+fmtP(s.y)+'</small></div>'+mv+'</div>';
+}).join('');
+function flowRows(list,mxv){const p=v=>50+v/mxv*50;return list.map(f=>{const a=Math.min(p(0),p(f.t)),w=Math.abs(p(f.t)-p(0));
+  return '<div class="frow"><div class="rl">'+f.key+'</div><div class="zb"><div class="axis" style="left:50%"></div><div class="bar" style="left:'+a+'%;width:'+w+'%;background:'+(f.t>=0?'#E03131':'#2775ED')+'"></div><div class="tick" style="left:calc('+p(f.y)+'% - 1px)"></div></div><div class="rv"><b class="'+cls(f.t)+'" style="font-size:14px">'+eok(f.t)+'</b><small>어제 '+eok(f.y)+'</small></div></div>';}).join('');}
+const FM=D.axes.flow.main,main=['개인','외국인','기관'].map(k=>({key:k,t:FM[k].t,y:FM[k].y}));
+document.getElementById('flow').innerHTML=flowRows(main,Math.max(...main.map(f=>Math.max(Math.abs(f.t),Math.abs(f.y)))));
+const I=D.axes.flow.inst;document.getElementById('inst').innerHTML=flowRows(I,Math.max(...I.map(f=>Math.max(Math.abs(f.t),Math.abs(f.y)))));
+
+/* ---------- 버전 2 ---------- */
+const chip=(txt)=>'<span class="d">'+txt+'</span>';
+function tile(l,v,vcls,y,d){return '<div class="tile"><div class="l">'+l+'</div><div class="v num '+(vcls||'')+'">'+v+'</div><div class="y">어제 같은 시각 '+y+'</div>'+(d?chip(d):'')+'</div>';}
+document.getElementById('v2-heat').innerHTML=
+  tile('누적 거래량',H.vol.t.toLocaleString()+'<small style="font-size:13px;font-weight:700;color:var(--muted)"> 천주</small>','',H.vol.y.toLocaleString()+'천주','어제보다 '+H.vol.diff.toFixed(1)+'% 많아요')+
+  tile('일중 진폭',H.amp.t.toFixed(2)+'%','',H.amp.y.toFixed(2)+'%','어제보다 '+H.amp.diff.toFixed(2)+'%p 커요');
+document.getElementById('v2-mkt').innerHTML=
+  tile('코스피200',fmtP(M.kospi200.t),cls(M.kospi200.t),fmtP(M.kospi200.y),M.kospi200.diff.toFixed(2)+'%p 더 올라요')+
+  tile('코스닥',fmtP(M.kosdaq.t),cls(M.kosdaq.t),fmtP(M.kosdaq.y),M.kosdaq.diff.toFixed(2)+'%p 더 올라요');
+(function(){
+  const n=S.length,RH=30,h=n*RH, yy=r=>((r-0.5)/n*100);
+  let L='<div class="hd" style="text-align:right;padding-right:6px">어제 같은 시각</div><div class="col l" style="height:'+h+'px">',R='<div class="hd" style="padding-left:6px">오늘</div><div class="col r" style="height:'+h+'px">',G='';
+  S.forEach(s=>{
+    const big=Math.abs(s.move)>=3;
+    L+='<div class="lab" style="top:'+yy(s.prevRank)+'%;color:'+(big?'var(--ink)':'var(--muted)')+'"><span class="p '+cls(s.y)+'">'+fmtP(s.y)+'</span><b>'+s.label+'</b><span class="rk">'+s.prevRank+'</span></div>';
+    R+='<div class="lab" style="top:'+yy(s.rank)+'%"><span class="rk'+(s.rank===1?' top':'')+'">'+s.rank+'</span><b>'+s.label+'</b><span class="p '+cls(s.t)+'">'+fmtP(s.t)+'</span></div>';
+    G+='<line x1="0" x2="100" y1="'+yy(s.prevRank)+'" y2="'+yy(s.rank)+'" stroke="'+(big?'#13151A':'#CBD2DB')+'" stroke-width="'+(big?2.2:1.4)+'" vector-effect="non-scaling-stroke"/>';
+  });
+  document.getElementById('v2-slope').innerHTML='<div class="slope"><div>'+L+'</div></div><div><div class="hd">&nbsp;</div><div style="height:'+h+'px"><svg viewBox="0 0 100 100" preserveAspectRatio="none">'+G+'</svg></div></div><div>'+R+'</div></div></div>';
+})();
+function flowDiffTxt(t,y){const d=t-y;if(t<0&&y<=0)return(d<0?eok(-d).replace('+','')+' 더 팔아요':eok(d).replace('+','')+' 덜 팔아요');return(d>0?eok(d).replace('+','')+' 더 사요':eok(-d).replace('+','')+' 덜 사요');}
+document.getElementById('v2-flow').innerHTML=main.map(f=>tile(f.key,eok(f.t),cls(f.t),eok(f.y),flowDiffTxt(f.t,f.y))).join('');
+document.getElementById('v2-inst').innerHTML='<tr><th>기관 세부</th><th>어제 같은 시각</th><th>오늘</th></tr>'+I.map(f=>'<tr><td>'+f.key+(f.turned?'<span class="turn">방향 바뀜</span>':'')+'</td><td class="mut">'+eok(f.y)+'</td><td class="'+cls(f.t)+'" style="font-weight:800">'+eok(f.t)+'</td></tr>').join('');
+
+/* ---------- 버전 3 ---------- */
+function dumb(label,sub,y,t,lo,hi,fmt,tcol){
+  const p=v=>(v-lo)/(hi-lo)*100, a=Math.min(p(y),p(t)), b=Math.max(p(y),p(t));
+  const z=(lo<0&&hi>0)?'<div class="z" style="left:'+p(0)+'%"></div>':'';
+  return '<div class="drow"><div class="rl">'+label+(sub?'<small>'+sub+'</small>':'')+'</div><div class="trk">'+z+'<div class="ln" style="left:'+a+'%;width:'+(b-a)+'%"></div><div class="dy" style="left:'+p(y)+'%"></div><div class="dt" style="left:'+p(t)+'%;background:'+(tcol||'#13151A')+'"></div></div><div class="rv" style="min-width:0"><b style="font-size:14px" class="'+(tcol?cls(t):'')+'">'+fmt(t)+'</b><small>어제 '+fmt(y)+'</small></div></div>';
+}
+const sc=v=>v>0?'#E03131':v<0?'#2775ED':'#13151A';
+document.getElementById('v3-heat').innerHTML=
+  dumb('누적 거래량','천주',H.vol.y,H.vol.t,0,Math.max(H.vol.y,H.vol.t)*1.08,v=>v.toLocaleString())+
+  dumb('일중 진폭','고가−저가',H.amp.y,H.amp.t,0,Math.max(H.amp.y,H.amp.t)*1.08,v=>v.toFixed(2)+'%');
+(function(){
+  const all=[M.kospi200.t,M.kospi200.y,M.kosdaq.t,M.kosdaq.y].concat(...S.map(s=>[s.t,s.y]));
+  const lo=Math.floor(Math.min(0,...all))-1, hi=Math.ceil(Math.max(...all))+1;
+  let ax='';for(let v=lo;v<=hi;v+=2){ax+='<span style="left:'+((v-lo)/(hi-lo)*100)+'%">'+(v>0?'+':'')+v+(v===0?'%':'')+'</span>';}
+  document.getElementById('v3-ax1').innerHTML=ax;
+  document.getElementById('v3-mkt').innerHTML=
+    dumb('코스피200','',M.kospi200.y,M.kospi200.t,lo,hi,fmtP,sc(M.kospi200.t))+dumb('코스닥','',M.kosdaq.y,M.kosdaq.t,lo,hi,fmtP,sc(M.kosdaq.t));
+  document.getElementById('v3-sec').innerHTML=S.map(s=>{
+    const mv=s.move>0?' <span class="up" style="font-size:11px">▲'+s.move+'</span>':s.move<0?' <span class="dn" style="font-size:11px">▼'+(-s.move)+'</span>':'';
+    return dumb(s.rank+'. '+s.label+mv,'',s.y,s.t,lo,hi,fmtP,sc(s.t));}).join('');
+})();
+function flowDumb(list){const m=Math.max(...list.map(f=>Math.max(Math.abs(f.t),Math.abs(f.y))))*1.08;return list.map(f=>dumb(f.key+(f.turned?' <span class="turn" style="font-size:10px;color:var(--muted)">방향 바뀜</span>':''),'',f.y,f.t,-m,m,eok,sc(f.t))).join('');}
+document.getElementById('v3-flow').innerHTML=flowDumb(main);
+document.getElementById('v3-inst').innerHTML=flowDumb(I);
+
+
+/* ---------- 버전 4 · 문장 먼저 ---------- */
+(function(){
+  const vr=H.vol.t/H.vol.y, ar=H.amp.t/H.amp.y;
+  const hot=(vr>=1.1&&ar>=1.1)?'어제보다 훨씬 뜨거워요':(vr<=0.9&&ar<=0.9)?'어제보다 조용해요':'어제와 비슷한 열기예요';
+  document.getElementById('v4-heat').innerHTML='<div class="hl">'+hot+'</div><div class="bigx"><div>거래량<b>'+vr.toFixed(2)+'배</b></div><div>하루 진폭<b>'+ar.toFixed(2)+'배</b></div></div>'+
+   '<div class="facts"><div class="fact"><span class="k">거래량</span><span>지금까지 <b class="num">'+H.vol.t.toLocaleString()+'천주</b>예요. 어제 이 시각엔 '+H.vol.y.toLocaleString()+'천주였어요.</span></div>'+
+   '<div class="fact"><span class="k">진폭</span><span>고가와 저가 차이가 <b class="num">'+H.amp.t.toFixed(2)+'%</b>예요. 어제 이 시각엔 '+H.amp.y.toFixed(2)+'%였어요.</span></div></div>';
+  const big=M.kospi200.t>M.kosdaq.t?'대형주(코스피200)가 코스닥보다 세게 올라요':'코스닥이 대형주보다 세게 올라요';
+  const up=[...S].sort((a,b)=>b.move-a.move).filter(s=>s.move>=2), dn=[...S].sort((a,b)=>a.move-b.move).filter(s=>s.move<=-2);
+  const neg=S.filter(s=>s.t<0);
+  document.getElementById('v4-mkt').innerHTML='<div class="hl">'+big+'</div>'+
+   '<div class="facts"><div class="fact"><span class="k">지수</span><span>코스피200 <b class="up num">'+fmtP(M.kospi200.t)+'</b>(어제 '+fmtP(M.kospi200.y)+'), 코스닥 <b class="up num">'+fmtP(M.kosdaq.t)+'</b>(어제 '+fmtP(M.kosdaq.y)+')예요.</span></div></div>'+
+   '<div class="sub">지금 앞선 섹터</div><div class="pills">'+S.slice(0,3).map(s=>'<span class="pill">'+s.rank+' '+s.label+' <span class="'+cls(s.t)+' num">'+fmtP(s.t)+'</span></span>').join('')+'</div>'+
+   '<div class="facts">'+
+   (up.length?'<div class="fact"><span class="k">올라선</span><span>'+up.map(s=>'<b>'+s.label+'</b> '+s.prevRank+'위 → '+s.rank+'위').join(', ')+'</span></div>':'')+
+   (dn.length?'<div class="fact"><span class="k">밀려난</span><span>'+dn.map(s=>'<b>'+s.label+'</b> '+s.prevRank+'위 → '+s.rank+'위').join(', ')+'</span></div>':'')+
+   (neg.length?'<div class="fact"><span class="k">내린</span><span>'+neg.map(s=>'<b>'+s.label+'</b> <span class="dn num">'+fmtP(s.t)+'</span>').join(', ')+' — 8개 섹터 중 '+neg.length+'곳만 내려요.</span></div>':'')+
+   '</div>';
+  const buy=main.filter(f=>f.t>0).map(f=>f.key), sell=main.filter(f=>f.t<0).map(f=>f.key);
+  const same=main.every(f=>Math.sign(f.t)===Math.sign(f.y));
+  const ratio=main.reduce((a,f)=>a+Math.abs(f.t),0)/main.reduce((a,f)=>a+Math.abs(f.y),0);
+  const posI=I.filter(f=>f.t>0), top=posI.reduce((a,b)=>a.t>b.t?a:b), share=Math.round(top.t/posI.reduce((a,f)=>a+f.t,0)*100);
+  const turned=I.filter(f=>f.turned);
+  document.getElementById('v4-flow').innerHTML='<div class="hl">'+buy.join('·')+'이 사고 '+sell.join('·')+'이 팔아요</div>'+
+   '<div class="bigx"><div>'+(same?'어제와 같은 방향':'어제와 다른 방향')+'<b>규모 '+ratio.toFixed(1)+'배</b></div></div>'+
+   '<div class="facts">'+main.map(f=>'<div class="fact"><span class="k">'+f.key+'</span><span><b class="'+cls(f.t)+' num">'+eok(f.t)+'</b> · 어제 이 시각 '+eok(f.y)+'</span></div>').join('')+
+   '<div class="fact"><span class="k">기관 안</span><span>사들인 돈의 '+share+'%가 <b>'+top.key+'</b>('+eok(top.t)+')예요.'+(turned.length?' '+turned.map(f=>f.key).join('·')+'은 어제와 반대로 '+(turned[0].t<0?'팔아요':'사요')+'.':'')+'</span></div></div>';
+})();
+
+/* ---------- 버전 5 · 지도 ---------- */
+(function(){
+  const MX=3;
+  const xs=(lab,unit,t,y)=>{const r=t/y,p=v=>Math.min(v,MX)/MX*100;
+    let lb='';[1,2,3].forEach(v=>lb+='<span class="lb" style="left:'+Math.min(p(v),95)+'%">'+v+'배'+(v===1?' = 어제':'')+'</span>');
+    return '<div class="xrow"><div class="h"><span class="rl">'+lab+'</span><b class="num">'+r.toFixed(2)+'배</b></div><div class="xs">'+lb+'<div class="tr"></div><div class="fl" style="width:'+p(r)+'%"></div><div class="one" style="left:'+p(1)+'%"></div></div><div class="mut" style="font-size:11.5px">오늘 '+unit(t)+' · 어제 이 시각 '+unit(y)+'</div></div>';};
+  document.getElementById('v5-heat').innerHTML=xs('누적 거래량',v=>v.toLocaleString()+'천주',H.vol.t,H.vol.y)+xs('하루 진폭',v=>v.toFixed(2)+'%',H.amp.t,H.amp.y);
+  const mx=Math.max(...S.map(s=>Math.abs(s.t)),M.kospi200.t,M.kosdaq.t);
+  const bg=v=>{const a=Math.min(1,Math.abs(v)/mx);return v>=0?'rgba(224,49,49,'+(0.12+a*0.78)+')':'rgba(39,117,237,'+(0.12+a*0.78)+')';};
+  const fg=v=>Math.abs(v)/mx>0.45?'#fff':'var(--ink)';
+  const mt=(name,t,y,r)=>'<div class="mt" style="background:'+bg(t)+';color:'+fg(t)+'">'+(r||'')+'<div class="n">'+name+'</div><div class="v">'+fmtP(t)+'</div><div class="y">어제 '+fmtP(y)+'</div></div>';
+  document.getElementById('v5-idx').innerHTML=mt('코스피200',M.kospi200.t,M.kospi200.y)+mt('코스닥',M.kosdaq.t,M.kosdaq.y);
+  document.getElementById('v5-sec').innerHTML=S.map(s=>mt(s.rank+'. '+s.label,s.t,s.y,s.move?'<span class="r">'+(s.move>0?'▲':'▼')+Math.abs(s.move)+'</span>':'')).join('');
+  const all=main.concat([{key:'기타법인',t:D.flow.t['기타법인'],y:D.flow.y['기타법인']}]);
+  const rows=[['오늘',f=>f.t],['어제 이 시각',f=>f.y]];
+  const span=Math.max(...rows.map(([_,g])=>Math.max(all.filter(f=>g(f)>0).reduce((a,f)=>a+g(f),0),-all.filter(f=>g(f)<0).reduce((a,f)=>a+g(f),0))))*1.05;
+  document.getElementById('v5-flow').innerHTML=rows.map(([lab,g])=>{
+    let L=50,R=50,seg='';
+    all.forEach(f=>{const v=g(f),w=Math.abs(v)/span*50;if(v<0){L-=w;seg+='<div class="seg" style="left:'+L+'%;width:'+w+'%;background:'+(f.key==='개인'?'#2775ED':'#7BA7F2')+'"></div>';}
+      else if(v>0){seg+='<div class="seg" style="left:'+R+'%;width:'+w+'%;background:'+(f.key==='외국인'?'#E03131':f.key==='기관'?'#EF7A7A':'#F2B8B8')+'"></div>';R+=w;}});
+    const side=sg=>all.filter(f=>Math.sign(g(f))===sg&&Math.abs(g(f))>=500).map(f=>f.key+' <b class="'+(sg<0?'dn':'up')+' num">'+eok(g(f))+'</b>').join(' · ');
+    return '<div class="bal"><div class="cap"><span>← 판 쪽</span><span>'+lab+'</span><span>산 쪽 →</span></div><div class="bar">'+seg+'<div class="mid"></div></div><div class="cap" style="margin-top:4px;font-weight:500;color:var(--ink);font-size:12px"><span>'+side(-1)+'</span><span style="text-align:right">'+side(1)+'</span></div></div>';}).join('')+
+    '<p class="cs" style="margin:8px 0 0">두 막대의 구도가 같고, 오늘 막대가 약 '+(main.reduce((a,f)=>a+Math.abs(f.t),0)/main.reduce((a,f)=>a+Math.abs(f.y),0)).toFixed(1)+'배 길어요.</p>';
+  const pos=I.filter(f=>f.t>0), tot=pos.reduce((a,f)=>a+f.t,0), shades=['#13151A','#4B5563','#8A939F','#C3CAD3','#E5E7EB'];
+  document.getElementById('v5-inst').innerHTML='<div class="stack">'+pos.map((f,i)=>'<div style="width:'+(f.t/tot*100)+'%;background:'+shades[i]+';color:'+(i<3?'#fff':'var(--ink)')+'">'+(f.t/tot>0.12?f.key+' '+Math.round(f.t/tot*100)+'%':'')+'</div>').join('')+'</div>'+
+   '<div class="skey">'+pos.map((f,i)=>'<span><i style="background:'+shades[i]+'"></i>'+f.key+' '+eok(f.t)+'</span>').join('')+'</div>'+
+   '<p class="cs" style="margin:6px 0 0">판 곳 · '+I.filter(f=>f.t<0).map(f=>f.key+' '+eok(f.t)+(f.turned?'(어제는 샀어요)':'')).join(', ')+'</p>';
+})();
+
+
+/* ---------- 새 강도 안 ---------- */
+(function(){
+  const LV=['훨씬 조용','조용','비슷','뜨거움','훨씬 뜨거움'];
+  const lv=r=>r<0.7?0:r<0.9?1:r<1.1?2:r<1.5?3:4;
+  const vr=H.vol.t/H.vol.y, ar=H.amp.t/H.amp.y;
+  const step=(name,r,t,y)=>'<div class="hrow"><div class="h">'+name+'<span>어제의 <b style="color:var(--ink)">'+r.toFixed(2)+'배</b></span></div><div class="steps">'+LV.map((l,i)=>'<div class="'+(i===lv(r)?'on':'')+'">'+l+'</div>').join('')+'</div><div class="mut" style="font-size:11.5px">오늘 '+t+' · 어제 이 시각 '+y+'</div></div>';
+  document.getElementById('h-a').innerHTML=step('누적 거래량',vr,H.vol.t.toLocaleString()+'천주',H.vol.y.toLocaleString()+'천주')+step('하루 진폭(고가−저가)',ar,H.amp.t.toFixed(2)+'%',H.amp.y.toFixed(2)+'%')+
+    '<p class="cs" style="margin:6px 0 0">칸 기준 · 0.7배 · 0.9배 · 1.1배 · 1.5배</p>';
+  const j=Math.min(lv(vr),lv(ar))>=3?'어제보다 뜨거워요':Math.max(lv(vr),lv(ar))<=1?'어제보다 조용해요':'어제와 비슷해요';
+  document.getElementById('h-b').innerHTML='<div class="band"><span class="j">'+j+'</span><span>거래량 <b>'+vr.toFixed(2)+'배</b> <span class="m">('+(H.vol.t/100000).toFixed(2)+'억주)</span></span><span>진폭 <b>'+H.amp.t.toFixed(2)+'%</b> <span class="m">(어제 '+H.amp.y.toFixed(2)+'%)</span></span></div>'+
+    '<p class="cs" style="margin:8px 0 0">시안 B 곡선 카드의 \'어제와 차이\' 줄 바로 밑에 들어가요. 강도 카드 하나가 통째로 빠져요.</p>';
+  document.getElementById('h-c').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><div class="ct" style="margin:0">얼마나 뜨거운가</div><span class="badge">'+j+'</span></div>'+
+    '<div class="two"><div><div class="l">거래량</div><div class="v num">+'+((vr-1)*100).toFixed(0)+'%</div><div class="s">'+H.vol.t.toLocaleString()+'천주 · 어제 '+H.vol.y.toLocaleString()+'</div></div>'+
+    '<div><div class="l">하루 진폭</div><div class="v num">'+ar.toFixed(1)+'배</div><div class="s">'+H.amp.t.toFixed(2)+'% · 어제 '+H.amp.y.toFixed(2)+'%</div></div></div>';
+})();
+
+/* ---------- 새 주도권 안 ---------- */
+(function(){
+  const KP=K.t, KPY=K.y, sorted=[...S].sort((a,b)=>b.t-a.t);
+  const mvT=s=>s.move>0?'<small class="up">▲'+s.move+'</small>':s.move<0?'<small class="dn">▼'+(-s.move)+'</small>':'';
+  // A · 시장 기준선
+  const lo=Math.min(0,...S.map(s=>s.t))-0.5, hi=Math.max(...S.map(s=>s.t),M.kospi200.t)+0.5, p=v=>(v-lo)/(hi-lo)*100;
+  let rows=sorted.map(s=>{const a=Math.min(p(0),p(s.t)),w=Math.abs(p(s.t)-p(0));const beat=s.t>=KP;
+    return '<div class="lrow"><div class="nm">'+s.label+mvT(s)+'</div><div class="tk"><div class="br" style="left:'+a+'%;width:'+w+'%;background:'+(s.t<0?'#2775ED':beat?'#E03131':'#F2A5A5')+'"></div></div><div class="vv '+cls(s.t)+'">'+fmtP(s.t)+'</div></div>';}).join('');
+  const lines=[[KP,'코스피 '+fmtP(KP),'#13151A'],[M.kosdaq.t,'코스닥 '+fmtP(M.kosdaq.t),'#8A939F'],[0,'0','#C3CAD3']];
+  const ov='<div style="position:absolute;left:94px;right:72px;top:0;bottom:0;pointer-events:none">'+lines.map(([v,l,c])=>'<div class="vline" style="left:'+p(v)+'%;border-color:'+c+'"></div>'+(v?'<div class="vlab" style="top:'+(v===KP?-18:-34)+'px;left:'+p(v)+'%;color:'+c+'">'+l+'</div>':'')).join('')+'</div>';
+  const beat=S.filter(s=>s.t>=KP).map(s=>s.label);
+  document.getElementById('l-a').innerHTML='<div class="ref" style="margin-top:40px">'+rows+ov+'</div><p class="cs" style="margin:8px 0 0">코스피보다 센 섹터는 <b style="color:var(--ink)">'+(beat.join('·')||'없어요')+'</b>'+(beat.length?'뿐이에요':'')+'. 진한 빨강이 코스피를 넘은 섹터예요.</p>';
+  // B · 코스피 대비
+  const rel=S.map(s=>({...s,r:s.t-KP,ry:s.y-KPY})).sort((a,b)=>b.r-a.r);
+  const rlo=Math.min(0,...rel.map(s=>Math.min(s.r,s.ry)))*1.05, rhi=Math.max(0.5,...rel.map(s=>Math.max(s.r,s.ry)))*1.05, q=v=>(v-rlo)/(rhi-rlo)*100;
+  const fp=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)+'%p';
+  document.getElementById('l-b').innerHTML='<div style="position:relative;height:16px;margin:0 72px 4px 94px;font-size:11px;font-weight:700;color:var(--muted)"><span style="position:absolute;right:'+(100-q(0))+'%;padding-right:6px">← 약해요</span><span style="position:absolute;left:'+q(0)+'%;padding-left:6px">세요 →</span></div>'+rel.map(s=>{const a=Math.min(q(0),q(s.r)),w=Math.abs(q(s.r)-q(0));
+    return '<div class="lrow"><div class="nm">'+s.label+'</div><div class="tk"><div style="position:absolute;left:'+q(0)+'%;top:-4px;bottom:-4px;width:1.5px;background:#13151A"></div><div class="br" style="left:'+a+'%;width:'+w+'%;background:'+(s.r>=0?'#13151A':'#B8BFC9')+'"></div><div style="position:absolute;top:-3px;width:2px;height:20px;background:#E8590C;left:calc('+q(s.ry)+'% - 1px)"></div></div><div class="vv">'+fp(s.r)+'</div></div>';}).join('')+
+    '<div class="legend2" style="margin-top:8px"><i style="background:#13151A"></i>코스피보다 셈 <i style="background:#B8BFC9;margin-left:8px"></i>코스피보다 약함 <i style="background:#E8590C;width:3px;height:12px;margin-left:8px"></i>어제 같은 시각</div>'+
+    '<p class="cs" style="margin:4px 0 0">어제 코스피보다 가장 셌던 2차전지(+2.51%p)가 오늘은 −4.85%p로 조선 다음으로 약해요. 금융은 어제 −3.30%p에서 −0.87%p로 따라붙었어요.</p>';
+  // C · 세 묶음
+  const g1=sorted.filter(s=>s.t>=KP), g2=sorted.filter(s=>s.t>=0&&s.t<KP), g3=sorted.filter(s=>s.t<0);
+  const chipS=s=>'<span class="pill">'+s.label+' <span class="'+cls(s.t)+' num">'+fmtP(s.t)+'</span>'+(s.move?' '+mvT(s).replace('<small','<small style="font-size:11px"'):'')+'</span>';
+  const grp=(t,sub,list)=>list.length?'<div class="grp"><div class="gh">'+t+'<span>'+sub+'</span></div><div class="pills" style="margin:0">'+list.map(chipS).join('')+'</div></div>':'';
+  const lead=M.kospi200.t>M.kosdaq.t;
+  document.getElementById('l-c').innerHTML='<div class="ct">'+(lead?'대형주가 이끌고, 앞장선 섹터는 '+g1.map(s=>s.label).join('·')+'예요':'코스닥이 더 세요')+'</div>'+
+    '<p class="cs">코스피200 <b class="up num">'+fmtP(M.kospi200.t)+'</b> · 코스닥 <b class="up num">'+fmtP(M.kosdaq.t)+'</b> · 코스피 '+fmtP(KP)+' 기준으로 나눴어요</p>'+
+    grp('🚀 코스피보다 센','오늘 '+fmtP(KP)+' 넘게',g1)+grp('🙂 오르지만 코스피보다 약한','0 ~ '+fmtP(KP),g2)+grp('🧊 내린','0% 아래',g3);
+})();
+
+/* 버전 전환 JS */
+document.querySelectorAll('.vsw button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.vsw button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.vpane').forEach(p=>p.hidden=p.dataset.v!==b.dataset.v);
+}));
+</script></body></html>

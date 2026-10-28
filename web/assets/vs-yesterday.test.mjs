@@ -117,7 +117,7 @@ test('폴링 창 — 평일 09:00~15:31만', () => {
 
 test('곡선 SVG — 두 선을 그린다', () => {
   const svg = load(kst('2026-09-14T11:00:00')).api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
-  assert.equal((svg.match(/class="vs-line-[ty]"/g) || []).length, 2);
+  assert.equal((svg.match(/class="vs-line-[ty]\b/g) || []).length, 2);
 });
 
 test('마우스 오버 — 가장 가까운 샘플 점의 오늘·어제·차이를 준다(보간 없음)', () => {
@@ -153,13 +153,16 @@ test('곡선은 말풍선 자리와 함께 그린다(처음엔 숨김)', () => {
 // ── A안 곡선(2026-09-15) — 차이 색 띠·눈금·선 끝 값·지금 선 ──
 const WIDE = { curveT: [[0, 0], [5, -0.2], [120, -0.5]], curveY: [[0, -3], [5, -3.1], [120, -3]] };
 
-test('H안 — 두 곡선 사이를 칠한다: 오늘이 위면 빨강, 아래면 파랑', () => {
+test('시안 B — 오늘 곡선과 0%선 사이를 칠한다: 0% 위면 빨강, 아래면 파랑(어제 대비가 아니다)', () => {
   const { api } = load(kst('2026-09-14T11:00:00'));
-  const up = api.chartSvg(WIDE.curveY, WIDE.curveT);
-  assert.ok(/class="vs-band up"/.test(up) && !/class="vs-band dn"/.test(up));
-  const dn = api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
-  assert.ok(/class="vs-band dn"/.test(dn));
-  assert.ok(!up.includes('vs-area'), 'D안의 0% 기준 면은 없다');
+  // 2026-10-28 실사고 모양 — 오늘이 내내 올랐지만 처음엔 어제보다 낮았다. 옛 H안은 이 구간을 파랗게 칠했다.
+  const rose = api.chartSvg([[0, 3.6], [5, 3.9], [10, 3.6]], [[0, 1.97], [5, 2.32], [10, 2.83]]);
+  assert.ok(/class="vs-area up"/.test(rose) && !/class="vs-area dn"/.test(rose), '0% 위에서만 움직였는데 파란 면이 생김');
+  assert.ok(!rose.includes('vs-band'), '두 곡선 사이 면(H안)이 남음');
+  const fell = api.chartSvg(PAYLOAD.kospi.curveY, PAYLOAD.kospi.curveT);
+  assert.ok(/class="vs-area dn"/.test(fell) && !/class="vs-area up"/.test(fell));
+  assert.ok(/class="vs-line-t dn"/.test(fell), '내리는 날 오늘 선은 파랑');
+  assert.ok(/class="vs-line-t up"/.test(rose), '오르는 날 오늘 선은 빨강');
 });
 
 test('H안 — 부호가 바뀌면 교차점에서 구간을 나누고, 어제 값이 없는 분에서 끊는다(§0)', () => {
@@ -169,25 +172,27 @@ test('H안 — 부호가 바뀌면 교차점에서 구간을 나누고, 어제 �
   assert.equal(r[0].pts[r[0].pts.length - 1][0], 2.5, '교차점 분');
   const cut = api.bandRuns([[0, 0], [10, 0]], [[0, 1], [5, 1], [10, 1]]);
   assert.equal(cut.length, 0, '가운데 분이 비어 두 점짜리 구간이 안 생긴다');
-  assert.ok(!api.chartSvg([[0, -1]], [[0, 0], [5, 0.2]]).includes('vs-band'));
+  assert.ok(api.chartSvg([[0, -1]], [[0, 0], [5, 0.2]]).includes('vs-area up'), '0% 기준 면은 어제 값과 상관없이 그린다');
 });
 
-test('D안 — 차이 막대는 같은 분에 두 값이 모두 있는 점만(§0)', () => {
+test('차이 막대는 같은 분에 두 값이 모두 있는 점만(§0), 색 없이 회색 진하게·옅게', () => {
   const { api } = load(kst('2026-09-14T11:00:00'));
   assert.equal(JSON.stringify(api.diffPts([[0, -1], [10, 0.2]], [[0, 0.5], [5, 0.7], [10, 0.1]])), '[[0,1.5],[10,-0.1]]');
   const svg = api.diffSvg([[0, -1], [10, 0.2]], [[0, 0.5], [5, 0.7], [10, 0.1]]);
-  assert.equal((svg.match(/class="vs-dbar up"/g) || []).length, 1);
-  assert.equal((svg.match(/class="vs-dbar dn"/g) || []).length, 1);
+  assert.equal((svg.match(/class="vs-dbar hi"/g) || []).length, 1);
+  assert.equal((svg.match(/class="vs-dbar lo"/g) || []).length, 1);
+  assert.ok(!/vs-dbar (up|dn)/.test(svg), '차이 막대에 오르내림 색이 남음');
   assert.equal(api.diffSvg([[0, -1]], [[5, 0.2]]), '', '겹치는 분이 없으면 칸째 생략');
 });
 
-test('D안 — 렌더에 차이 막대 칸과 지금 시각 차이 %p를 넣는다', () => {
+test('렌더에 차이 막대 칸과 지금 시각 차이 %p를 색 없이 넣는다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(Object.assign({}, PAYLOAD, { kospi: Object.assign({}, PAYLOAD.kospi, WIDE) }));
   const html = root.innerHTML;
   assert.ok(html.includes('class="vs-diffbox"'));
-  assert.ok(/vs-diffbox[\s\S]*<b class="up">\+2\.50%p<\/b>/.test(html));
-  assert.ok(html.includes('class="vs-enddot t"') && html.includes('class="vs-enddot y"'));
+  assert.ok(/vs-diffbox[\s\S]*<b>\+2\.50%p<\/b>/.test(html));
+  assert.ok(html.includes('지난 금요일과 차이'), '차이 칸 설명(받침 뒤 과)이 없음');
+  assert.ok(html.includes('class="vs-enddot t dn"') && html.includes('class="vs-enddot y"'));
   assert.ok(html.indexOf('vs-diffbox') < html.indexOf('vs-axis'), '시각축은 차이 칸 아래');
 });
 
@@ -197,11 +202,12 @@ test('A안 — 장이 남았으면 지금 선·남은 장 음영, 15:30이면 �
   assert.ok(!api.chartSvg([[0, -1], [390, -2]], [[0, 0], [390, 1]]).includes('vs-rest'));
 });
 
-test('A안 — 세로 눈금·선 끝 값을 그리고, 차이가 크면 괄호와 %p를 단다', () => {
+test('A안 — 세로 눈금·선 끝 값을 그리고, 어제 끝 값은 회색이며 차이 괄호는 없다', () => {
   const ov = load(kst('2026-09-14T11:00:00')).api.chartOverlay(WIDE.curveY, WIDE.curveT, '어제');
   assert.ok(ov.left.includes('>0%<'));
   for (const s of ['−0.50%', '오늘', '−3.00%', '어제']) assert.ok(ov.right.includes(s), `빠짐: ${s}`);
-  assert.ok(ov.plot.includes('vs-gap up') && ov.plot.includes('+2.50%p'));
+  assert.ok(ov.right.includes('<b class="y">−3.00%</b>'), '어제 끝 값에 오르내림 색이 남음');
+  assert.ok(!ov.plot.includes('vs-gap'), '차이 괄호(옛 A안)가 남음');
   assert.ok(ov.plot.includes('남은 장'));
 });
 
@@ -212,11 +218,22 @@ test('A안 — 두 끝 값이 가까우면 괄호를 빼고 라벨끼리 밀어�
   assert.ok(Math.abs(tops[0] - tops[1]) >= 19.9, `라벨 간격 ${tops}`);
 });
 
-test('렌더에 차이 범례·곡선 상자를 넣는다', () => {
+test('렌더에 세 칸(오늘·어제 같은 시각·차이)·범례·곡선 상자를 넣는다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD);
-  assert.ok(root.innerHTML.includes('class="vs-chartbox"'));
-  assert.ok(root.innerHTML.includes('차이(오늘−지난 금요일)'));
+  const html = root.innerHTML;
+  assert.ok(html.includes('class="vs-chartbox"'));
+  assert.ok(html.includes('0% 위 · 아래'), '0% 기준 면 범례가 없음');
+  assert.ok(!html.includes('차이(오늘−'), '옛 차이 범례가 남음');
+  for (const s of ['<span class="l">오늘</span><b class="dn">−2.56%</b>', '지난 금요일 같은 시각', '<b class="y">−2.42%</b>', '−0.14%p', '오늘이 더 낮아요', '11:00 기준', '9/11(금)']) {
+    assert.ok(html.includes(s), `세 칸에 빠짐: ${s}`);
+  }
+  assert.ok(html.indexOf('vs-kpis') < html.indexOf('vs-chartbox'), '세 칸은 곡선 위');
+});
+
+test('세 칸 — 오늘 코스피 값이 없으면 칸째 뺀다(§0)', () => {
+  const { api } = load();
+  assert.equal(api.kpiRow({ kospi: { t: null, y: 1 }, prev: { rel: '어제' }, time: '10:00' }), '');
 });
 
 test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 바로 불러온다', () => {
@@ -238,30 +255,70 @@ test('뒤에서 열린 탭 — 로드 땐 요청하지 않고, 보이는 순간 
   assert.equal(calls.length, 1);
 });
 
-test('거래량 막대는 상승/하락 색을 쓰지 않는다 — 방향이 없는 양이다', () => {
+test('강도 카드 — 거래량 %·진폭 배수를 크게, 오늘·어제 값을 아래에 적고 판정 뱃지를 단다', () => {
   const { api } = load();
-  const html = api.miniBars(190662, 142592, { zero: false });
-  assert.ok(html.includes('mag'), '중립 클래스 없음');
-  assert.ok(!/class="[^"]*\b(up|dn)\b/.test(html), '방향 색이 섞임: ' + html);
+  const html = api.heatCard({ heat: { vol: { t: 152441, y: 116634, diff: 30.7, judge: 'strong' }, amp: { t: 4.93, y: 1.77, diff: 3.16, judge: 'strong' } } });
+  for (const s of ['<b>+31%</b>', '<b>2.8배</b>', '152,441천주 · 어제 116,634', '4.93% · 어제 1.77%', '어제보다 뜨거워요']) {
+    assert.ok(html.includes(s), `빠짐: ${s} — ` + html);
+  }
+  assert.ok(!/class="[^"]*\b(up|dn)\b/.test(html), '방향 없는 양(거래량·진폭)에 오르내림 색이 섞임: ' + html);
 });
 
-test('수급 짝 막대는 오늘과 어제 값을 함께 적는다', () => {
+test('강도 판정 — 서버 판정 두 개를 묶어 읽고, 없으면 뱃지를 뺀다', () => {
+  const { api } = load();
+  assert.equal(api.heatWord('weak', 'weak'), '어제보다 조용해요');
+  assert.equal(api.heatWord('same', 'same'), '어제와 비슷해요');
+  assert.equal(api.heatWord('strong', 'same'), '거래가 더 붐벼요');
+  assert.equal(api.heatWord('same', 'strong'), '더 크게 출렁여요');
+  assert.equal(api.heatWord(null, 'weak'), '출렁임이 작아요');
+  assert.equal(api.heatWord(null, null), '');
+  const html = api.heatCard({ heat: { vol: { t: 1, y: 1, diff: null, judge: null }, amp: { t: 1, y: null, diff: null, judge: null } } });
+  assert.ok(!html.includes('vsx-badge'), '판정이 없는데 뱃지가 생김');
+});
+
+test('수급 카드 — 판 쪽·산 쪽 막대를 오늘·어제 이 시각 두 줄로, 금액과 기관 구성을 적는다', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { main: { 개인: { t: -17755, y: -9621, turned: false },
+    외국인: { t: 7339, y: 3848, turned: false }, 기관: { t: 10365, y: 5226, turned: false } },
+    inst: [{ key: '금융투자', t: 6744, y: 3368, turned: false }, { key: '연기금', t: 2356, y: 852, turned: false },
+      { key: '기타금융', t: -41, y: 36, turned: true }] } }, 'open', { rel: '어제', etc: { t: 52, y: 546 } });
+  for (const s of ['← 판 쪽', '산 쪽 →', '>오늘<', '>어제 이 시각<', '−1.78조', '+7,339억', '+1.04조', '−9,621억',
+    '두 막대의 구도가 같고, 오늘 막대가 약 1.9배 길어요.', '기관 순매수 구성', '금융투자 74%', '판 곳 · 기타금융 −41억(어제는 샀어요)']) {
+    assert.ok(html.includes(s), `빠짐: ${s} — ` + html);
+  }
+  assert.ok(!html.includes('기타법인'), '판 쪽·산 쪽 합의 10% 미만인 기타법인은 이름을 적지 않는다');
+});
+
+test('수급 카드 — 사고판 쪽이 바뀌면 문장이 바뀐다', () => {
   const { api } = load();
   const html = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true },
-    외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } },
-    inst: [{ key: '금융투자', t: 4226, y: -4336, turned: true }] } });
-  assert.ok(html.includes('4,226'), '오늘 값 없음');
-  assert.ok(html.includes('4,336'), '어제 값 없음 — 부호 반전이 안 읽힌다');
+    외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } }, inst: [] } }, 'open', { rel: '지난 금요일' });
+  assert.ok(html.includes('지난 금요일과 사고판 쪽이 바뀌었고'), html);
+  assert.ok(html.includes('>지난 금요일 이 시각<'), html);
 });
 
-test('섹터 표는 "섹터 평균"이 아니라 "대표 3종목 평균"이라 적는다', () => {
+test('주도권 카드 — 섹터 대표 3종목 평균을 오늘 등락순 막대로, 순위·이동·코스피 기준선을 그린다', () => {
   const { api } = load();
-  const html = api.leadCard({ market: { kosdaq: {}, kospi200: {} },
-    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
-      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }] });
-  assert.ok(html.includes('<small>대표 3종목</small>'), '평균 정의가 안 드러남');
-  assert.ok(html.includes('<small class="nms">삼성전자 · SK하이닉스'), '종목 이름이 다음 줄로 안 내려감');
-  assert.ok(html.includes('삼성전자'), '대표 종목 이름이 없음');
+  const html = api.leadCard({ market: { kosdaq: { t: 3.21 }, kospi200: { t: 7.29 } }, sectors: [
+    { key: 'finance', label: '금융', names: ['삼성생명', 'KB금융', '신한지주'], t: 5.66, y: 0.52, rank: 2, prevRank: 7, move: 5, n: 3 },
+    { key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 8.14, y: 5.37, rank: 1, prevRank: 2, move: 1, n: 3 },
+    { key: 'ship', label: '조선', names: ['HD현대중공업', '한화오션', '삼성중공업'], t: -0.42, y: 1.2, rank: 3, prevRank: 5, move: -2, n: 3 }] }, { t: 6.53 });
+  assert.ok(html.indexOf('반도체') < html.indexOf('금융') && html.indexOf('금융') < html.indexOf('조선'), '오늘 등락순이 아님');
+  assert.ok(html.includes('<span class="vsx-rk top">1</span>반도체<small class="up">▲1</small>'), '순위·이동 표시가 없음');
+  assert.ok(html.includes('<small class="dn">▼2</small>'));
+  assert.ok(html.includes('섹터 대표 3종목 평균'), '평균 정의가 안 드러남');
+  assert.ok(html.includes('title="대표 3종목 · 삼성전자 · SK하이닉스 · 한미반도체"'), '대표 종목 이름이 없음');
+  assert.ok(html.includes('코스피 +6.53%') && html.includes('코스닥 +3.21%'), '기준선 라벨이 없음');
+  assert.ok(/<i class="up" style=[^>]*><\/i><\/div><div class="v up">\+8\.14%/.test(html), '코스피를 넘은 섹터는 진한 빨강');
+  assert.ok(html.includes('class="up-l"'), '코스피보다 약한 상승 섹터는 옅은 빨강');
+  assert.ok(html.includes('코스피보다 센 섹터는 <b>반도체</b>뿐이에요.'), html);
+});
+
+test('주도권 카드 — 센 섹터가 절반을 넘으면 약한 쪽을 적는다', () => {
+  const { api } = load();
+  const sec = (label, t) => ({ key: label, label, names: [], t, y: 0, rank: 1, prevRank: 1, move: 0, n: 3 });
+  const html = api.leadCard({ sectors: [sec('반도체', 1), sec('금융', 0.5), sec('조선', -3)] }, { t: -1.8 });
+  assert.ok(html.includes('코스피보다 약한 섹터는 <b>조선</b>뿐이에요.'), html);
 });
 
 test('축 데이터가 없으면 카드를 그리지 않는다', () => {
@@ -284,41 +341,29 @@ test('강도·주도권 카드는 데이터가 있으면 코스피 곡선 카드
   const html = root.innerHTML;
   const iChart = html.indexOf('코스피 · 전일 종가 대비');
   const iHeat = html.indexOf('얼마나 뜨거운가');
-  const iLead = html.indexOf('어디가 끄는가');
+  const iLead = html.indexOf('어디가 이끄나');
   const iFlow = html.indexOf('누가 사는가');
   assert.ok(iChart >= 0 && iHeat > iChart, '강도 카드가 곡선 카드 뒤에 있지 않음');
   assert.ok(iLead > iHeat, '주도권 카드가 강도 카드 뒤에 있지 않음');
   assert.ok(iFlow > iLead, '수급 카드가 주도권 카드 뒤에 있지 않음');
 });
 
-test('기관 세부 막대는 값이 없으면 그리지 않는다 — 0이나 다른 값으로 채우지 않는다', () => {
+test('수급 카드 — 값이 없는 주체·기관 세부는 그리지 않는다(0으로 채우지 않는다)', () => {
   const { api } = load();
-  const html = api.flowCard({ flow: { inst: [{ key: '단독', t: null, y: -1234, turned: null }] } });
-  assert.ok(html.includes('<span class="vsx-bar"></span>'), '값 없는 오늘 칸이 빈 슬롯이 아님: ' + html);
-  assert.ok(!/vsx-bar">\s*<i class="up"/.test(html), '값 없는 오늘 칸에 상승 막대가 생김(0으로 채움): ' + html);
-  assert.ok(/vsx-bar prev"><i class="dn"/.test(html), '값 있는 어제 막대가 그려지지 않음: ' + html);
+  const html = api.flowCard({ flow: { main: { 개인: { t: -1000, y: null }, 외국인: { t: null, y: null }, 기관: { t: 1000, y: null } },
+    inst: [{ key: '단독', t: null, y: -1234, turned: null }] } }, 'open', { rel: '어제' });
+  assert.ok(!html.includes('어제 이 시각'), '어제 값이 하나도 없는데 어제 막대가 생김');
+  assert.ok(!html.includes('외국인'), '값 없는 외국인이 적힘');
+  assert.ok(!html.includes('단독'), '값 없는 기관 세부가 적힘');
+  assert.ok(!html.includes('구도가'), '어제 막대가 없는데 비교 문장이 생김');
 });
 
-test('섹터 표는 대표 종목 중 일부가 결측이면 실제 조회된 종목 수를 적는다', () => {
+test('주도권 카드 — 대표 종목 중 일부가 결측이면 실제 조회된 종목 수를 적는다', () => {
   const { api } = load();
   const html = api.leadCard({ sectors: [{ key: 'auto', label: '자동차', names: ['현대차', '기아'],
     t: -1.2, y: -0.5, diff: -0.7, rank: 2, prevRank: 2, move: 0, n: 2 }] });
-  assert.ok(html.includes('대표 2종목'), 'n=2인데 실제 종목 수가 반영되지 않음: ' + html);
-  assert.ok(!html.includes('<small>대표 3종목</small>'), '결측인데도 3종목이라 지어냄: ' + html);
-  assert.ok(html.includes('대표 3종목 평균'), '표 제목까지 바뀌면 안 됨(고정 문구): ' + html);
-});
-
-test('주도권 카드는 코스피 → 코스피200 → 코스닥 순서로 세 칸을 모두 보여준다', () => {
-  const { api } = load();
-  const kospi = { t: 1.37, y: -0.85, diff: 2.22, judge: 'strong' };
-  const axes = {
-    market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: { t: 1.69, y: -0.80, diff: 2.49, judge: 'strong' } },
-    sectors: [{ key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'],
-      t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
-  };
-  const html = api.leadCard(axes, kospi);
-  const iK = html.indexOf('>코스피<'), iK2 = html.indexOf('>코스피200<'), iKq = html.indexOf('>코스닥<');
-  assert.ok(iK >= 0 && iK2 > iK && iKq > iK2, '코스피 → 코스피200 → 코스닥 순서가 아님: ' + html);
+  assert.ok(html.includes('<small class="n">2종목</small>') && html.includes('대표 2종목'), 'n=2인데 실제 종목 수가 반영되지 않음: ' + html);
+  assert.ok(html.includes('섹터 대표 3종목 평균'), '카드 설명까지 바뀌면 안 됨(고정 문구): ' + html);
 });
 
 // ── 시간대별 표시 규칙(§3.2) ──
@@ -399,7 +444,7 @@ test('status가 ok가 아니면 어느 슬롯이든 새 카드를 그리지 않�
   }
 });
 
-test('주도권 카드 — 응답에 코스피가 없으면 그 칸만 뺀다(지어내지 않는다)', () => {
+test('주도권 카드 — 응답에 코스피가 없으면 그 기준선과 아래 한 줄만 뺀다(지어내지 않는다)', () => {
   const { api } = load();
   const axes = {
     market: { kosdaq: { t: 0.44, y: 0.72, diff: -0.28, judge: 'same' }, kospi200: {} },
@@ -407,8 +452,9 @@ test('주도권 카드 — 응답에 코스피가 없으면 그 칸만 뺀다(�
       t: 2.56, y: -0.57, diff: 3.13, rank: 1, prevRank: 3, move: 2, n: 3 }],
   };
   const html = api.leadCard(axes);
-  assert.ok(!html.includes('>코스피<'), '코스피 데이터가 없는데 칸이 생김: ' + html);
-  assert.ok(html.includes('>코스닥<'), '있는 데이터(코스닥)까지 같이 빠짐: ' + html);
+  assert.ok(!html.includes('코스피 '), '코스피 데이터가 없는데 기준선이 생김: ' + html);
+  assert.ok(!html.includes('코스피보다 센'), '코스피 없이 비교 문장이 생김: ' + html);
+  assert.ok(html.includes('코스닥 +0.44%'), '있는 데이터(코스닥)까지 같이 빠짐: ' + html);
 });
 
 // ── F2: 결론 카드는 승인 시안대로 근거 4줄(.vsx-why)을 그린다 ──
@@ -503,20 +549,21 @@ test('결론 근거 — 주도권 줄의 조사가 받침에 맞는다(조선이
   assert.ok(api.heroWhy(d2, 'open').includes('반도체</b>가 어제'), '반도체(받침 없음)인데 가가 안 붙음: ' + api.heroWhy(d2, 'open'));
 });
 
-test('결론 카드에서 예전 3칸(오늘 코스피·외국인 누적·주도주 평균)이 빠진다(F2)', () => {
+test('결론 카드 — 옛 3칸(외국인 누적·주도주 평균)은 없고, 근거 4줄은 마감 후에만 붙는다', () => {
   const { api, root } = load(kst('2026-09-14T11:00:00'));
-  api.render(PAYLOAD);   // axes 없음 — heat/lead/flow(신규) 카드는 안 그려진다
-  assert.ok(!root.innerHTML.includes('<span>코스피</span>'), '옛 코스피 칸이 남음');
+  api.render(PAYLOAD, 'open');
   assert.ok(!root.innerHTML.includes('<span>외국인 누적 순매수</span>'), '옛 외국인 칸이 남음');
   assert.ok(!root.innerHTML.includes('<span>주도주 3종목 평균</span>'), '옛 주도주 평균 칸이 남음');
-  assert.ok(root.innerHTML.includes('vsx-why'), '근거 목록(.vsx-why)이 없음');
+  assert.ok(!root.innerHTML.includes('vsx-why'), '장중엔 아래 카드가 같은 내용을 보여주므로 근거 4줄을 빼야 함');
+  api.render(PAYLOAD, 'close');
+  assert.ok(root.innerHTML.includes('vsx-why'), '마감 후 근거 목록(.vsx-why)이 없음');
 });
 
 test('수급 카드 — close·night 슬롯이면 라벨이 "정규장 확정 15:40"으로 바뀐다(F2)', () => {
   const { api } = load();
   const flow = { flow: { main: { 개인: { t: -9641, y: 5538, turned: true } }, inst: [] } };
-  assert.ok(api.flowCard(flow).includes('새 축 · 수급 심층'), '기본(open) 라벨이 안 나옴');
-  assert.ok(api.flowCard(flow, 'open').includes('새 축 · 수급 심층'), 'open 라벨이 안 나옴');
+  assert.ok(!api.flowCard(flow).includes('정규장 확정'), '기본(open)에 마감 라벨이 붙음');
+  assert.ok(!api.flowCard(flow, 'open').includes('정규장 확정'), 'open에 마감 라벨이 붙음');
   assert.ok(api.flowCard(flow, 'close').includes('정규장 확정 15:40'), 'close 라벨이 안 바뀜');
   assert.ok(api.flowCard(flow, 'night').includes('정규장 확정 15:40'), 'night 라벨이 안 바뀜');
 });
@@ -553,7 +600,7 @@ test('결론 카드 오른쪽에 ? 버튼을 두고, 설명은 보이는 시간�
   const { api, root } = load(kst('2026-09-14T11:00:00'));
   api.render(PAYLOAD, 'open');
   assert.ok(/<p class="vs-eyebrow">[^<]*<button type="button" class="help-q vs-help"/.test(root.innerHTML), '? 버튼이 작은 타이틀 옆에 없음');
-  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '2분쯤 늦게', '미국 브리핑 발행 전', '섹터별 대표 종목 바로 위', '미국 브리핑 발행 이후']) {
+  for (const s of ['직전 거래일 같은 시각', '±0.3%p', '빨간색', '파란색', '회색 막대', '오르내림만', '2분쯤 늦게', '미국 브리핑 발행 전', '섹터별 대표 종목 바로 위', '미국 브리핑 발행 이후']) {
     assert.ok(api.HELP_HTML.includes(s), `설명에 빠짐: ${s}`);
   }
   assert.equal(api.openHelp(), false, '모달이 없는 페이지에서는 아무것도 하지 않는다');
@@ -565,21 +612,15 @@ test('결론 제목 색은 verdict.tone(오늘의 방향)이 있으면 그것을
   assert.ok(root.innerHTML.includes('<h2 class="up">오르고 있지만'), '덜 오른 날이 파랑으로 칠해짐');
 });
 
-test('비교 박스는 어제가 위, 오늘이 아래다 — 아래 막대(어제→오늘)와 같은 순서(2026-09-22)', () => {
-  const { api } = load(kst('2026-09-14T11:00:00'));
-  const heat = api.heatCard({ heat: { vol: { t: 197183, y: 178404, diff: 10.53, judge: 'strong' }, amp: { t: 1.2, y: 1.0, diff: 0.2, judge: 'same' } } });
-  assert.ok(heat.indexOf('<span>어제</span>') < heat.indexOf('<span>오늘</span>'), '강도 카드에서 오늘이 먼저 나옴');
-});
-
 test('응답 전에는 결론·곡선 자리를 먼저 잡는다 — 숫자는 없다(2026-09-22)', () => {
   const { root } = load(kst('2026-09-22T11:00:00'), null, { fetch: () => new Promise(noop) });
   assert.equal(root.hidden, false);
   assert.ok(root.innerHTML.includes('vs-skel'));
   // 빈 카드가 아니라 실제 카드의 부분 모양을 그린다 — 안 그리면 화면엔 흰 여백으로만 보인다(2026-09-23)
-  for (const c of ['sk-h2', 'sk-sub', 'sk-legend', 'sk-chart', 'sk-diff', 'sk-axis', 'sk-why']) {
+  for (const c of ['sk-h2', 'sk-sub', 'sk-kpis', 'sk-legend', 'sk-chart', 'sk-diff', 'sk-axis']) {
     assert.ok(root.innerHTML.includes(c), `자리 모양 빠짐: ${c}`);
   }
-  assert.equal((root.innerHTML.match(/sk-why-k/g) || []).length, 4, '근거 4줄 자리');
+  assert.ok(!root.innerHTML.includes('sk-why'), '장중 카드엔 근거 4줄이 없으니 자리도 없다(2026-10-28)');
   assert.ok(!/\d/.test(root.innerHTML.replace(/<[^>]+>/g, '')), '자리에는 숫자를 넣지 않는다(§0)');
 });
 

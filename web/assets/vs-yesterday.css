@@ -12,52 +12,44 @@
 .vs-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:11px;color:var(--muted);margin-bottom:8px}
 .vs-legend i{display:inline-block;width:18px;border-top:2px solid #0F172A;vertical-align:middle;margin-right:6px}
 .vs-legend i.y{border-top:2px dashed #94A3B8}
-.vs-legend i.b{width:5px;height:10px;border:0;background:var(--up);border-radius:1px;margin-right:2px} .vs-legend i.b.dn{background:var(--dn);margin-right:6px}
-.vs-legend i.a{width:10px;height:10px;border:0;background:rgba(243,57,66,.22);border-radius:2px;margin-right:2px} .vs-legend i.a.dn{background:rgba(0,110,255,.2);margin-right:6px}
+.vs-legend i.t.up{border-top-color:var(--up)} .vs-legend i.t.dn{border-top-color:var(--dn)}
+.vs-legend i.a{width:10px;height:10px;border:0;background:rgba(224,49,49,.16);border-radius:2px;margin-right:2px} .vs-legend i.a.dn{background:rgba(39,117,237,.16);margin-right:6px}
 .vs-legend .r{margin-left:auto}
 .vs-chart{display:block;width:100%;height:180px}
 .vs-zero{stroke:#CBD5E1;stroke-width:1}
 .vs-line-y{fill:none;stroke:#94A3B8;stroke-width:2;stroke-dasharray:6 5}
 .vs-line-t{fill:none;stroke:#0F172A;stroke-width:2.5;stroke-linejoin:round}
+.vs-line-t.up{stroke:var(--up)} .vs-line-t.dn{stroke:var(--dn)}
 .vs-axis{position:relative;height:14px;font-size:11px;color:var(--muted);margin:4px 78px 0 34px}
 /* A안 — 왼쪽 34px 세로 눈금, 오른쪽 78px 선 끝 값. 가로축(.vs-axis)도 같은 여백으로 곡선과 맞춘다 */
 .vs-chartbox{position:relative;padding:0 78px 0 34px}
 .vs-grid{stroke:#F1F5F9;stroke-width:1}
-.vs-band.up{fill:rgba(243,57,66,.16)} .vs-band.dn{fill:rgba(0,110,255,.14)}
+/* 시안 B(2026-10-28) — 오늘 곡선과 0%선 사이 면. 색은 오늘의 오르내림만 뜻한다 */
+.vs-area.up{fill:rgba(224,49,49,.10)} .vs-area.dn{fill:rgba(39,117,237,.10)}
 .vs-enddot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
 .vs-enddot.t{background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)} .vs-enddot.y{background:#fff;border:2px solid #94A3B8}
+.vs-enddot.t.up{background:var(--up)} .vs-enddot.t.dn{background:var(--dn)}
 /* D안 아래 차이 막대 칸 — 곡선 상자와 같은 좌우 여백으로 시각을 맞춘다 */
-.vs-diffbox{position:relative;padding:0 78px 0 34px;margin-top:8px}
+.vs-diffbox{position:relative;padding:0 78px 0 34px;margin-top:4px}
+.vs-dcap{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;margin:10px 0 0;font-size:11px;color:var(--muted)}
+.vs-dcap b{font-size:11.5px;font-weight:700;color:#0F172A}
 .vs-dchart{display:block;width:100%;height:56px}
-.vs-dbar.up{fill:var(--up);opacity:.85} .vs-dbar.dn{fill:var(--dn);opacity:.85}
+.vs-dbar.hi{fill:#8A939F} .vs-dbar.lo{fill:#C3CAD3}
 .vs-rest{fill:#F8FAFC}
 .vs-now{stroke:#CBD5E1;stroke-width:1;stroke-dasharray:3 3}
 .vs-ytick{position:absolute;left:0;width:28px;text-align:right;font-size:10.5px;color:#94A3B8;transform:translateY(-50%);font-variant-numeric:tabular-nums;pointer-events:none}
 .vs-end{position:absolute;right:0;width:70px;transform:translateY(-50%);font-size:10px;color:#94A3B8;line-height:1.25;pointer-events:none}
 .vs-end b{display:block;font-size:12px;font-weight:800;color:#0F172A;font-variant-numeric:tabular-nums}
-.vs-end b.up{color:var(--up)} .vs-end b.dn{color:var(--dn)}
-.vs-gapline{position:absolute;width:2px;margin-left:6px;background:var(--up);pointer-events:none} .vs-gapline.dn{background:var(--dn)}
-.vs-gap{position:absolute;transform:translate(13px,-50%);font-size:11.5px;font-weight:800;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
-.vs-gap.up{color:var(--up)} .vs-gap.dn{color:var(--dn)}
+.vs-end b.up{color:var(--up)} .vs-end b.dn{color:var(--dn)} .vs-end b.y{color:#6B7280}
 .vs-rest-l{position:absolute;top:2px;margin-left:6px;font-size:10.5px;color:#94A3B8;pointer-events:none}
 .vs-axis span{position:absolute;top:0;white-space:nowrap}
-.vs-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
-.vs-stat{background:#F7F9FC;border:1px solid var(--inset);border-radius:10px;padding:10px 12px}
-.vs-stat-h{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--muted)}
-.vs-stat-r{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;color:var(--muted)}
-.vs-stat-r b{font-size:13px;font-variant-numeric:tabular-nums}
-.vs-stat-r b.vs-big{font-size:17px;font-weight:800}
-.vs-diff{margin:4px 0 0;text-align:right;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.vs-pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap}
-.vs-pill.neutral{color:var(--muted);background:#F1F5F9} .vs-pill.up{color:var(--up);background:var(--up-bg)} .vs-pill.dn{color:var(--dn);background:var(--dn-bg)}
 .vs-card-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:11px}
 .vs-card-h p{margin:0;font-size:15px;font-weight:800;color:#0F172A}
 .vs-card-h span{font-size:11px;color:var(--muted)}
 .vs-lbl{font-size:13px;font-weight:700;color:#0F172A;margin:16px 0 8px}
 .vs-lbl:first-of-type{margin-top:0}
 @media (max-width:760px){
-  .vs-chartbox,.vs-diffbox{padding:0 62px 0 30px} .vs-gap{display:none} .vs-axis{margin:4px 62px 0 30px} .vs-end{width:56px}
-  .vs-stats{grid-template-columns:minmax(0,1fr)}
+  .vs-chartbox,.vs-diffbox{padding:0 62px 0 30px} .vs-axis{margin:4px 62px 0 30px} .vs-end{width:56px}
 }
 /* 코스피 곡선 마우스 오버 — 세로 안내선·두 점·말풍선(값은 곡선에 실제로 있는 샘플 점만) */
 .vs-plot{position:relative;cursor:crosshair;touch-action:pan-y}
@@ -70,7 +62,6 @@
 .vs-tip p span:last-child{font-weight:700}
 .vs-tip p.d{border-top:1px solid #F1F5F9;margin-top:4px;padding-top:4px}
 /* 주도주 타일(stocks-home.css .us-tile) 안 '어제 같은 시각' 블록 — 대결판 카드의 주도주 표를 대신한다 */
-.vs-lbl-s{font-size:11px;color:var(--muted);text-align:center;margin:-4px 0 10px}
 .vs-tb{margin-top:11px;padding:9px 10px 10px;background:#fff;border:1px solid #EEF2F6;border-radius:10px;font-variant-numeric:tabular-nums}
 .us-tile.on .vs-tb{background:#F7F9FC}
 .vs-tb-h{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:10.5px;color:var(--muted);margin-bottom:6px}
@@ -90,67 +81,89 @@
   border-top:1px solid #F1F5F9;font-size:13px;line-height:1.6;color:var(--muted)}
 .vsx-why li:first-child{border-top:0}
 .vsx-why .k{font-size:11px;font-weight:700;color:#0F172A}
-.vsx-mini{margin-top:9px}
-.vsx-bars{height:40px;display:grid;grid-template-columns:repeat(2,26px);gap:8px;
-  justify-content:center;position:relative}
-.vsx-bars.zero::before,.vsx-bars.base::before{content:'';position:absolute;left:0;right:0;height:1px;background:var(--hair)}
-.vsx-bars.zero::before{top:50%} .vsx-bars.base::before{bottom:0}
-.vsx-bar{position:relative}
-.vsx-bar i{position:absolute;left:0;right:0;border-radius:3px;display:block}
-.vsx-bar i.up{background:var(--up)} .vsx-bar i.dn{background:var(--dn)}
-.vsx-bar i.mag{background:#0F172A;opacity:.6}
-.vsx-bar.prev i{opacity:.32}
-.vsx-ax{display:grid;grid-template-columns:repeat(2,26px);gap:8px;justify-content:center;
-  font-size:9px;color:var(--muted);text-align:center;margin-top:4px}
-.vsx-ax .t{color:#0F172A;font-weight:700}
-.vsx-pairs{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:4px}
-.vsx-pbars{height:76px;display:grid;grid-template-columns:repeat(2,20px);gap:5px;
-  justify-content:center;position:relative}
-.vsx-pbars::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--hair)}
-.vsx-pv{font-size:10px;font-weight:800;text-align:center;margin-top:5px;font-variant-numeric:tabular-nums}
-.vsx-pp{font-size:9px;color:var(--muted);text-align:center;margin-top:1px;font-variant-numeric:tabular-nums}
-.vsx-pl{font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
-.vsx-tbl{width:100%;border-collapse:collapse;margin-top:8px}
-.vsx-tbl th{padding:7px 8px;background:#FAFBFC;font-size:11px;font-weight:800;color:var(--muted);
-  text-align:right;border-bottom:1px solid #EEF2F6;white-space:nowrap}
-.vsx-tbl td{padding:8px;border-bottom:1px solid #EEF2F6;text-align:right;white-space:nowrap;
-  font-size:12.5px;color:#0F172A;font-variant-numeric:tabular-nums}
-.vsx-tbl tr:last-child td{border-bottom:none}
-.vsx-tbl th:first-child,.vsx-tbl td:first-child{text-align:left}
-.vsx-tbl td.nm{font-weight:700;white-space:normal}
-.vsx-tbl td.nm small{display:block;font-size:10px;font-weight:400;color:#94A3B8;margin-top:2px}
-.vsx-tbl td.nm small.nms{margin-top:1px}
-/* PC는 칸이 넉넉하다 — 종목 이름 줄을 접지 않고 첫 칸을 그만큼 넓힌다. 모바일(≤760px)은 좁아서 접힌다 */
-@media (min-width:761px){.vsx-tbl td.nm small.nms{white-space:nowrap}}
 .vsx-rk{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
   border-radius:5px;background:#F1F5F9;font-size:10px;font-weight:800;color:var(--muted);
   margin-right:7px;vertical-align:1px}
 .vsx-rk.top{background:#0F172A;color:#fff}
-/* 카드 안 static 레이아웃 — 인라인 스타일 대신 쓴다(F4). margin-top:0은 라벨(.vs-lbl) 바로 아래 칸에서만 쓴다 */
-.vsx-stats2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.vsx-mt0{margin-top:0}
-@media (max-width:760px){.vsx-pairs{grid-template-columns:repeat(3,1fr);row-gap:14px}.vsx-stats2{grid-template-columns:minmax(0,1fr)}}
-/* 첫 응답 전 자리 — 실제 결론·곡선 카드의 부분(제목·범례·곡선·차이 막대·근거 4줄) 모양을 그대로 잡는다.
-   높이는 2026-09-22 실측(PC 97/482px, 모바일 115/564px)에 맞췄다. 숫자·글자는 넣지 않는다(§0). .skl은 stocks-home.css의 공용 스켈레톤. */
+/* 첫 응답 전 자리 — 실제 결론·곡선 카드의 부분(제목·세 칸·범례·곡선·차이 막대) 모양을 그대로 잡는다.
+   높이는 장중 카드 2026-10-28 실측(PC 97/417px, 모바일 115/433px)에 맞췄다. 마감 후엔 근거 4줄이 붙어 조금 더 길다.
+   숫자·글자는 넣지 않는다(§0). .skl은 stocks-home.css의 공용 스켈레톤. */
 .vs-skel .skl{display:block;background:#E5EBF3;animation-name:vs-skl-pulse}
 @keyframes vs-skl-pulse{0%,100%{opacity:.75}50%{opacity:1}}
 .vs-hero.vs-skel .vs-eyebrow{margin-bottom:10px}
 .vs-hero.vs-skel .sk-h2{height:22px;margin-bottom:10px}
 .vs-hero.vs-skel .sk-sub{height:13px}
 .vs-card.vs-skel .sk-legend{display:flex;gap:12px;margin-bottom:11px}
+.vs-card.vs-skel .sk-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.vs-card.vs-skel .sk-kpis .skl{height:64px;border-radius:10px}
 .vs-card.vs-skel .sk-chart{height:180px;border-radius:10px}
 .vs-card.vs-skel .sk-diff{height:56px;border-radius:8px;margin-top:6px}
 .vs-card.vs-skel .sk-axis{display:flex;justify-content:space-between;margin-top:8px}
-.vs-card.vs-skel .sk-why{display:grid;grid-template-columns:44px minmax(0,1fr);gap:22px 12px;align-items:center;margin-top:20px}
-.vs-card.vs-skel .sk-why-k{width:100%}
-/* 실제 카드가 내용에 따라 조금씩 다르므로 바닥은 실측 높이로 잡는다(PC 97/482px, 모바일 115/564px) */
+/* 실제 카드가 내용에 따라 조금씩 다르므로 바닥은 실측 높이로 잡는다(PC 97/417px, 모바일 115/433px) */
 .vs-hero.vs-skel{min-height:97px}
-.vs-card.vs-skel{min-height:482px}
+.vs-card.vs-skel{min-height:417px}
 @media (max-width:760px){
   .vs-hero.vs-skel{min-height:115px}
-  .vs-card.vs-skel{min-height:564px}
+  .vs-card.vs-skel{min-height:433px}
   .vs-hero.vs-skel .sk-h2{height:40px}
-  .vs-card.vs-skel .sk-why{gap:18px 10px}
-  .vs-card.vs-skel .sk-why-v{height:40px}   /* 모바일은 근거 줄이 두 줄로 접힌다 */
 }
 @media (prefers-reduced-motion:reduce){.vs-skel .skl{animation:none}}
+
+/* ── 가독성 개편(2026-10-28, docs/prototypes/2026-10-28-vs-intraday-final.html) ── */
+/* 결론 카드 맨 위 세 칸 — 오늘 · 어제 같은 시각 · 차이 */
+.vs-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.vs-kpi{background:#F7F9FC;border:1px solid var(--inset);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;min-width:0}
+.vs-kpi .l{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-kpi b{font-size:19px;font-weight:800;color:#0F172A;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs-kpi b.up{color:var(--up)} .vs-kpi b.dn{color:var(--dn)} .vs-kpi b.y{color:#6B7280}
+.vs-kpi .s{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vs-card .vsx-desc{margin:-6px 0 10px}
+/* 강도 C — 판정 뱃지 + 큰 숫자 두 개 */
+.vsx-hc{align-items:center}
+.vsx-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:#0F172A;color:#fff;white-space:nowrap}
+.vs-card-h span.vsx-badge{color:#fff;font-size:12px}
+.vsx-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vsx-two>div{display:flex;flex-direction:column;min-width:0}
+.vsx-two .l{font-size:12px;font-weight:700;color:var(--muted)}
+.vsx-two b{font-size:30px;font-weight:800;line-height:1.15;color:#0F172A;margin-top:2px;font-variant-numeric:tabular-nums}
+.vsx-two b small{font-size:14px;font-weight:700;color:var(--muted);margin-left:2px}
+.vsx-two .s{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+/* 주도권 — 시장 기준선. 이름 칸 112px + 간격 8px, 값 칸 64px + 8px — 세로 점선 겹(.vsx-lines)도 같은 여백으로 맞춘다 */
+.vsx-lead{position:relative}
+.vsx-lead.has-lab{margin-top:40px}
+.vsx-lr{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:8px;height:34px}
+.vsx-lr .nm{display:flex;align-items:center;font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;min-width:0}
+.vsx-lr .nm small{font-size:10.5px;font-weight:800;margin-left:7px}
+.vsx-lr .nm small.up{color:var(--up)} .vsx-lr .nm small.dn{color:var(--dn)} .vsx-lr .nm small.n{color:var(--muted);font-weight:600}
+.vsx-lr .vsx-rk{width:20px;height:20px;border-radius:6px;font-size:11px;margin-right:8px;flex:0 0 auto}
+.vsx-lr .tk{position:relative;height:14px}
+.vsx-lr .tk i{position:absolute;top:0;height:14px;border-radius:3px}
+.vsx-lr .tk i.up{background:var(--up)} .vsx-lr .tk i.up-l{background:#F2A5A5} .vsx-lr .tk i.dn{background:var(--dn)}
+.vsx-lr .v{text-align:right;font-size:13px;font-weight:800;color:#0F172A;font-variant-numeric:tabular-nums}
+.vsx-lr .v.up{color:var(--up)} .vsx-lr .v.dn{color:var(--dn)}
+.vsx-lines{position:absolute;left:120px;right:72px;top:0;bottom:0;pointer-events:none}
+.vsx-vl{position:absolute;top:0;bottom:0;border-left:1.5px dashed #C3CAD3}
+.vsx-vl.q{border-left-color:#8A939F} .vsx-vl.k{border-left-color:#0F172A}
+.vsx-vlab{position:absolute;font-size:10.5px;font-weight:800;transform:translateX(-50%);white-space:nowrap}
+.vsx-vlab.k{top:-18px;color:#0F172A} .vsx-vlab.q{top:-34px;color:#8A939F}
+/* 수급 — 판 쪽 vs 산 쪽 한 줄 막대(오늘 · 어제 이 시각) */
+.vsx-bal{margin:6px 0 2px}
+.vsx-bal+.vsx-bal{margin-top:18px;padding-top:14px;border-top:1px dashed var(--hair)}
+.vsx-bal .cap{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.vsx-bal .cap .m{color:#0F172A}
+.vsx-bal .bar{position:relative;height:30px;background:#F7F9FC;border-radius:8px;overflow:hidden}
+.vsx-bal .bar i{position:absolute;top:0;bottom:0}
+.vsx-bal .bar i.up.s0{background:var(--up)} .vsx-bal .bar i.up.s1{background:#EF7A7A} .vsx-bal .bar i.up.s2{background:#F2B8B8}
+.vsx-bal .bar i.dn.s0{background:var(--dn)} .vsx-bal .bar i.dn.s1{background:#7BA7F2} .vsx-bal .bar i.dn.s2{background:#B7CEF7}
+.vsx-bal .bar i.mid{left:50%;width:2px;background:#0F172A}
+.vsx-bal .who{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:12px;color:#0F172A}
+.vsx-bal .who .r{text-align:right}
+.vsx-bal .who b{font-variant-numeric:tabular-nums} .vsx-bal .who b.up{color:var(--up)} .vsx-bal .who b.dn{color:var(--dn)}
+.vsx-stack{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:4px 0 6px}
+.vsx-stack i{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-style:normal;color:#fff;white-space:nowrap;overflow:hidden}
+.vsx-stack i.g0,.vsx-skey i.g0{background:#0F172A} .vsx-stack i.g1,.vsx-skey i.g1{background:#475569} .vsx-stack i.g2,.vsx-skey i.g2{background:#94A3B8}
+.vsx-stack i.g3,.vsx-skey i.g3{background:#CBD5E1} .vsx-stack i.g4,.vsx-skey i.g4{background:#E2E8F0} .vsx-stack i.g5,.vsx-skey i.g5{background:#F1F5F9}
+.vsx-stack i.g3,.vsx-stack i.g4,.vsx-stack i.g5{color:#0F172A}
+.vsx-skey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted)}
+.vsx-skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
+@media (max-width:760px){.vs-kpi b{font-size:17px}.vsx-two b{font-size:26px}}
