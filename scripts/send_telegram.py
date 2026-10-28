@@ -204,7 +204,7 @@ def build_fallback_message(briefing_type: str) -> str:
     # 방향에 맞는 확률 표기: 상승 우위 → up_pct, 하락 우위 → down_pct
     dir_pct = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
-    divider = "─" * 20
+    divider = DIVIDER
 
     if briefing_type == "kospi":
         header = f"🇰🇷 코스피 예측 브리핑 | {today}"
@@ -241,7 +241,8 @@ SENT_LOG_FILE = DATA_DIR / "telegram_sent_log.json"
 
 # 텔레그램 말풍선은 가장 긴 줄만큼 넓어지고 화면 끝에서야 접힌다 — 긴 문장 하나가 있으면 말풍선이 오른쪽 끝까지 찬다.
 # 본문 줄을 구분선(─ 20칸) 너비에서 미리 접어 말풍선이 구분선 폭에 머물게 한다(사용자 요청 2026-10-27).
-NARROW_WIDTH = 20.0
+NARROW_WIDTH = 24.0   # 본문을 접는 폭이자 구분선 길이. 20은 문장이 너무 잘게 끊겨 읽기 어려웠다(2026-10-28)
+DIVIDER = "─" * int(NARROW_WIDTH)
 
 
 def _char_w(ch: str) -> float:
@@ -281,15 +282,20 @@ def narrow_lines(text: str, width: float = NARROW_WIDTH) -> str:
         if _visible_w(line) <= width or not line.strip(" ─━"):
             out.append(line)
             continue
-        cur = ""
+        rows, cur = [], ""
         for word in line.split(" "):
             cand = word if not cur else cur + " " + word
             if cur and _visible_w(cand) > width:
-                out.append(cur)
+                rows.append(cur)
                 cur = word
             else:
                 cur = cand
-        out.append(cur)
+        rows.append(cur)
+        # 마지막 줄에 짧은 단어 하나만 떨어지면('…다시 / 샀다') 앞줄 끝 단어를 함께 내린다
+        if len(rows) >= 2 and _visible_w(rows[-1]) < width / 4 and " " in rows[-2]:
+            head, moved = rows[-2].rsplit(" ", 1)
+            rows[-2:] = [head, moved + " " + rows[-1]]
+        out.extend(rows)
     return "\n".join(out)
 
 
@@ -312,7 +318,7 @@ def pick_quote() -> str:
                 and today_quote.get("quote")
                 and today_quote.get("author")
             ):
-                return f"\n\n━━━━━━━━━━━━━━━━━━━━\n💡 <i>\"{today_quote['quote']}\"</i>\n— {today_quote['author']}"
+                return "\n\n" + "━" * int(NARROW_WIDTH) + f"\n💡 <i>\"{today_quote['quote']}\"</i>\n— {today_quote['author']}"
         except (json.JSONDecodeError, OSError):
             pass
 
@@ -328,7 +334,7 @@ def pick_quote() -> str:
     item = random.choice(quotes)
     if not isinstance(item, dict) or not item.get("quote") or not item.get("author"):
         return ""
-    return f"\n\n━━━━━━━━━━━━━━━━━━━━\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
+    return "\n\n" + "━" * int(NARROW_WIDTH) + f"\n💡 <i>\"{item['quote']}\"</i>\n— {item['author']}"
 
 
 def _load_sent_log() -> dict:

@@ -1112,7 +1112,7 @@ def _nasdaq_telegram_lines(analysis: dict, date_str: str) -> list:
 
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
-    from send_telegram import link_line
+    from send_telegram import DIVIDER, link_line
     import re
 
     def strip_html(text: str) -> str:
@@ -1133,7 +1133,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
     dir_pct   = down_pct if "하락" in str(direction) else up_pct
     dir_emoji = "📈" if "상승" in str(direction) else ("📉" if "하락" in str(direction) else "📊")
 
-    divider = "─" * 20
+    divider = DIVIDER
 
     if briefing_type == "us":
         # 미국: 큰 쪽 확률 → 헤드라인(🎯) → 오늘 밤 볼 것(👀, 첫 이슈 제목) — 코스피 형식과 맞춘다(2026-10-25).
@@ -1782,7 +1782,7 @@ def call_claude_closing(date_str: str) -> dict:
 
 def save_closing_telegram_message(date_str: str, analysis: dict, market_data: dict) -> None:
     """KOSPI 마감 시황 텔레그램 메시지를 파일로 저장한다."""
-    from send_telegram import link_line
+    from send_telegram import DIVIDER, link_line
     import re
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1804,7 +1804,7 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
     # 타이틀은 형식에 따라 market_title(why_what_so) 또는 reason_title(scenario·qa·signal) — 페이지와 같은 우선순위.
     title = strip_html(analysis.get("market_title") or analysis.get("reason_title") or "")
     dek   = strip_html(analysis.get("dek") or "")
-    divider = "─" * 20
+    divider = DIVIDER
 
     # 결과 배지: 오늘 아침 kospi 예측을 그 예측의 기준으로 즉석 채점. 오늘 예측이 없으면 배지 생략(§16).
     #  · 시초가 기준(§57) → 오늘 시가 갭으로 채점한다. 갭을 못 구하면 종가로 대신 채점하지 않고 배지를 뺀다.

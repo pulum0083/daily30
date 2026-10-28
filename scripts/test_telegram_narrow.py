@@ -50,3 +50,10 @@ def test_text_link_line_is_kept_whole():
     line = st.link_line("전체 근거·이슈 점검", "https://doubleshot.space/briefings/2026-10-28/kospi/")
     assert line == '🔗 <a href="https://doubleshot.space/briefings/2026-10-28/kospi/">전체 근거·이슈 점검 →</a>'
     assert st.narrow_lines(line, width=8) == line
+
+
+def test_no_single_short_word_left_on_last_line():
+    """마지막 줄에 짧은 단어 하나만 남기지 않는다(2026-10-28 '…다시 / 샀다')."""
+    out = st.narrow_lines("🎯 <b>코스피 5500 붕괴 다음날, 뉴욕은 반도체부터 다시 샀다</b>", width=24).split("\n")
+    assert out[-1] != "샀다</b>"
+    assert out[-1].startswith("다시")
