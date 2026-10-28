@@ -1112,6 +1112,7 @@ def _nasdaq_telegram_lines(analysis: dict, date_str: str) -> list:
 
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
     """analysis JSON → telegram_message_{type}.txt 생성 (매 실행마다 최신화)."""
+    from send_telegram import link_line
     import re
 
     def strip_html(text: str) -> str:
@@ -1154,7 +1155,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
         lines += _nasdaq_telegram_lines(analysis, date_str)
-        lines += [divider, f"🔗 전체 이슈 점검 → {link}"]
+        lines += [divider, link_line("전체 이슈 점검", link)]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).
         # 두 문장 모두 웹 페이지 맨 위 헤드라인·'오늘 볼 것' 첫 줄과 같은 필드라 텔레그램과 페이지가 어긋나지 않는다.
@@ -1171,7 +1172,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if outlook:
             lines += ["", "👀 개장 후 볼 것", strip_html(outlook[0]["text"])]
         lines += _ma5_telegram_lines(analysis, date_str)
-        lines += [divider, f"🔗 전체 근거·이슈 점검 → {link}"]
+        lines += [divider, link_line("전체 근거·이슈 점검", link)]
 
     msg = "\n".join(lines)
     path = DATA_DIR / f"telegram_message_{briefing_type}.txt"
@@ -1781,6 +1782,7 @@ def call_claude_closing(date_str: str) -> dict:
 
 def save_closing_telegram_message(date_str: str, analysis: dict, market_data: dict) -> None:
     """KOSPI 마감 시황 텔레그램 메시지를 파일로 저장한다."""
+    from send_telegram import link_line
     import re
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -1838,7 +1840,7 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
             lines.append(dek)
     if result_badge:
         lines += ["", result_badge]
-    lines += [divider, f"🔗 수급·시장폭 상세 → {web_base}/briefings/{date_str}/close/"]
+    lines += [divider, link_line("수급·시장폭 상세", f"{web_base}/briefings/{date_str}/close/")]
 
     msg = "\n".join(lines)
     out = DATA_DIR / "telegram_message_kospi_close.txt"

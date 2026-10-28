@@ -96,8 +96,14 @@ def test_does_not_retry_on_http_4xx():
     assert up.call_count == 1
 
 
-def test_admin_alert_sent_when_send_fails(monkeypatch, capsys):
+def test_admin_alert_sent_when_send_fails(monkeypatch, capsys, tmp_path):
     """최종 실패 시 관리자에게 알린다 — continue-on-error로 묻히지 않게."""
+    # 저장소의 실제 메시지 파일을 읽으면 날짜가 지난 날 '낡은 메시지' 가드에 먼저 걸린다 — 오늘 날짜 메시지를 따로 둔다
+    import pytz
+    from datetime import datetime
+    today = datetime.now(pytz.timezone("Asia/Seoul")).strftime("%Y.%m.%d")
+    (tmp_path / "telegram_message_kospi.txt").write_text(f"🇰🇷 코스피 시초가 예측 | {today}\n본문", encoding="utf-8")
+    monkeypatch.setattr(st, "DATA_DIR", tmp_path)
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "tok")
     monkeypatch.setenv("TELEGRAM_ADMIN_CHAT_ID", "admin")
     monkeypatch.setattr(sys, "argv", ["send_telegram.py", "--type", "kospi"])

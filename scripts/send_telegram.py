@@ -183,7 +183,7 @@ def build_fallback_message(briefing_type: str) -> str:
         return (
             f"{label} 브리핑 | {today}\n\n"
             f"브리핑이 생성되었습니다.\n\n"
-            f"🔗 상세 분석 → {web_url}/briefings/{path}/"
+            + link_line("상세 분석", f"{web_url}/briefings/{path}/")
         )
 
     with open(analysis_file, encoding="utf-8") as f:
@@ -229,7 +229,7 @@ def build_fallback_message(briefing_type: str) -> str:
     if reasons:
         parts += ["", "핵심 시그널:"]
         parts += [f"• {strip_html(r)}" for r in reasons[:3]]
-    parts += [divider, f"🔗 상세 분석 → {link}"]
+    parts += [divider, link_line("상세 분석", link)]
 
     return "\n".join(parts)
 
@@ -256,12 +256,21 @@ def _visible_w(s: str) -> float:
     return sum(_char_w(c) for c in re.sub(r"<[^>]+>", "", s))
 
 
+def link_line(label: str, url: str) -> str:
+    """메시지 맨 아래 바로가기 줄. 주소를 그대로 보이지 않고 글자에 링크를 건다(2026-10-28) —
+    긴 주소가 한 줄을 통째로 차지해 말풍선 아래쪽이 어색했다."""
+    return f'🔗 <a href="{url}">{label} →</a>'
+
+
 def narrow_lines(text: str, width: float = NARROW_WIDTH) -> str:
     """각 줄을 width 칸 안에서 띄어쓰기 단위로 접는다. 링크가 든 줄·구분선·빈 줄은 그대로 둔다.
     HTML 태그는 너비에 세지 않고 그대로 둔다(<b>…</b> 안의 줄바꿈은 텔레그램이 허용한다).
     한 단어가 width보다 길면 자르지 않는다(단어를 쪼개면 읽기 어렵다)."""
     out = []
     for line in text.split("\n"):
+        if "<a " in line:
+            out.append(line)   # 글자 링크 줄 — 태그 안 띄어쓰기에서 접으면 링크가 깨진다
+            continue
         if "http" in line:
             # 주소는 띄어쓰기 없이 길어 접을 수 없다 — 설명과 주소를 나눠 주소만 한 줄을 쓰게 한다
             i = line.find("http")

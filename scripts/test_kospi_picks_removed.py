@@ -32,8 +32,8 @@ def test_kospi_response_picks_are_dropped():
 
 
 def test_kospi_telegram_link_no_longer_mentions_picks():
-    assert "전체 근거·종목 픽" not in SRC and "🔗 전체 근거·이슈 점검 → " in SRC
+    assert "전체 근거·종목 픽" not in SRC and 'link_line("전체 근거·이슈 점검", link)' in SRC
 
 
 def test_us_telegram_link_no_longer_mentions_picks():
-    assert "전체 이슈·종목 픽" not in SRC and "🔗 전체 이슈 점검 → " in SRC
+    assert "전체 이슈·종목 픽" not in SRC and 'link_line("전체 이슈 점검", link)' in SRC

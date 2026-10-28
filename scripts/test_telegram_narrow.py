@@ -43,3 +43,10 @@ def test_quote_block_is_narrowed_too():
     q = '💡 <i>"연준과 싸우지 마라. 금리가 시장 방향을 결정한다. 그리고 추세는 친구다."</i>'
     out = st.narrow_lines(q)
     assert "\n" in out and all(st._visible_w(l) <= st.NARROW_WIDTH for l in out.split("\n"))
+
+
+def test_text_link_line_is_kept_whole():
+    """바로가기는 주소를 보이지 않고 글자에 링크를 건다(2026-10-28). 태그 안 띄어쓰기에서 접으면 링크가 깨진다."""
+    line = st.link_line("전체 근거·이슈 점검", "https://doubleshot.space/briefings/2026-10-28/kospi/")
+    assert line == '🔗 <a href="https://doubleshot.space/briefings/2026-10-28/kospi/">전체 근거·이슈 점검 →</a>'
+    assert st.narrow_lines(line, width=8) == line
