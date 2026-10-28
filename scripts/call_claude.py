@@ -711,6 +711,30 @@ def _calendar_tense_directive(analysis_data: dict | None) -> str:
     return "\n".join(lines) + "\n\n"
 
 
+def _event_when_directive(date_str: str, analysis_data: dict | None) -> str:
+    """미국 경제 이벤트의 한국 시각을 '오늘/내일 새벽' 표기로 못박는다(2026-10-28 실사고).
+
+    07:25 코스피 아침 브리핑이 FOMC 결과(10/29 03:00 KST)를 "오늘 새벽 … 예정"이라 썼다 —
+    미국 날짜(ET) 기준 '오늘'이었다. 캘린더의 KST 시각을 브리핑 날짜와 비교한 표기를 그대로 주고,
+    발행 직전 validate_analysis.fix_event_day_words()가 같은 계산(event_when)으로 한 번 더 고친다.
+    사흘 안 미국 이벤트가 없으면 아무것도 넣지 않는다.
+    """
+    try:
+        from event_when import us_events, when_label
+        today = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except Exception:
+        return ""
+    evs = [e for e in us_events((analysis_data or {}).get("economic_calendar"))
+           if 0 <= (e["dt"].date() - today).days <= 2]
+    if not evs:
+        return ""
+    lines = ["## 미국 이벤트 시각 (한국 시간 — 반드시 지킬 것)", "",
+             "미국 이벤트는 아래 한국 시간 표기를 그대로 쓴다. 미국 날짜(ET)로 '오늘'이라 쓰지 않는다 — "
+             "예를 들어 미국 시간 오늘 오후 2시 FOMC는 한국 시간 '내일 새벽 3시'다."]
+    lines += [f"- {e['title']} ({e['date_kst']}) → '{when_label(e['date_kst'], today)}'" for e in evs]
+    return "\n".join(lines) + "\n\n"
+
+
 def load_news_summary(briefing_type: str) -> dict:
     path = DATA_DIR / f"news_summary_{briefing_type}.json"
     if not path.exists():
@@ -1271,6 +1295,7 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
     user_content = f"오늘 날짜: {date_str}\n\n"
     user_content += _session_label_directive(date_str, briefing_type, news_summary)
     user_content += _calendar_tense_directive(analysis_data)
+    user_content += _event_when_directive(date_str, analysis_data)
     user_content += _index_position_directive(analysis_data)
     user_content += _officeholder_directive()
     if briefing_type == "kospi":

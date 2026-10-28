@@ -1027,6 +1027,30 @@ def validate_event_tense(analysis, calendar, corrections, warnings, blocks):
             blocks.append(f"이미 끝난 경제 이벤트를 예고형으로 서술 ({hits}): {strip_tags(val)[:80]}")
 
 
+def fix_event_day_words(analysis, calendar, corrections) -> int:
+    """미국 이벤트를 가리키는 '오늘/내일 새벽·밤'을 실제 KST 날짜로 고친다(2026-10-28 실사고).
+
+    "오늘 새벽 FOMC 결과 발표가 예정돼 있어요"(07:25 발행, 실제 10/29 03:00 KST) → "내일 새벽 …".
+    프롬프트 지시(call_claude._event_when_directive)가 새더라도 발행 직전에 결정론으로 잡는다.
+    계산은 event_when 한 곳이다(§30).
+    """
+    try:
+        from datetime import datetime as _dt
+        import pytz
+        from event_when import fix_day_words, us_events
+    except Exception as e:
+        print(f"[validate] 이벤트 시각 표기 검사 생략: {e}", file=sys.stderr)
+        return 0
+    evs = us_events(calendar)
+    if not evs:
+        return 0
+    today = _dt.now(pytz.timezone("Asia/Seoul")).date()
+    n = _walk_strings(analysis, lambda t: fix_day_words(t, evs, today))
+    if n:
+        corrections.append(f"미국 이벤트 시각 표기 {n}건을 한국 시간 기준(오늘/내일)으로 교정")
+    return n
+
+
 # 프리장·시간외에 거래되지 않는 '지수' — 이 시간대엔 값이 갱신되지 않는다.
 # 뒤에 '선물'이 붙으면 제외한다(지수 선물은 연장시간대에도 거래된다).
 _NO_PREMARKET_INDEX = (
@@ -1490,6 +1514,7 @@ def validate(analysis, latest, btype):
 
     # 2-d-2) 이미 끝난 경제 이벤트를 예고형으로 쓴 서술 차단 (§29)
     validate_event_tense(a, (latest or {}).get("economic_calendar"), corrections, warnings, blocks)
+    fix_event_day_words(a, (latest or {}).get("economic_calendar"), corrections)   # '오늘 새벽 FOMC' → 실제 KST 날짜
 
     # 2-e) '간밤' 표기 교정 — 월요일·휴일 다음날 (kospi 전용)
     fix_overnight_labels(a, btype, corrections)
