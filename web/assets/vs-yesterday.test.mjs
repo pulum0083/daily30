@@ -314,6 +314,15 @@ test('주도권 카드 — 섹터 대표 3종목 평균을 오늘 등락순 막�
   assert.ok(html.includes('코스피보다 센 섹터는 <b>반도체</b>뿐이에요.'), html);
 });
 
+test('주도권 카드 — 순위가 어제와 같으면 –, 어제 순위를 모르면 아무것도 달지 않는다', () => {
+  const { api } = load();
+  const html = api.leadCard({ sectors: [
+    { key: 'power', label: '전력기기', names: [], t: 3.87, y: 4.41, rank: 3, prevRank: 3, move: 0, n: 3 },
+    { key: 'bio', label: '바이오', names: [], t: 0.39, y: null, rank: 7, prevRank: null, move: null, n: 3 }] }, { t: 6.53 });
+  assert.ok(html.includes('전력기기<small class="eq" aria-label="어제와 같은 순위">–</small>'), html);
+  assert.ok(html.includes('바이오</div>'), '어제 순위가 없는데 표시가 붙음: ' + html);
+});
+
 test('주도권 카드 — 센 섹터가 절반을 넘으면 약한 쪽을 적는다', () => {
   const { api } = load();
   const sec = (label, t) => ({ key: label, label, names: [], t, y: 0, rank: 1, prevRank: 1, move: 0, n: 3 });

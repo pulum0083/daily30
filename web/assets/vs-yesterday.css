@@ -134,7 +134,7 @@
 .vsx-lr{display:grid;grid-template-columns:112px minmax(0,1fr) 64px;align-items:center;gap:8px;height:34px}
 .vsx-lr .nm{display:flex;align-items:center;font-size:13px;font-weight:700;color:#0F172A;white-space:nowrap;min-width:0}
 .vsx-lr .nm small{font-size:10.5px;font-weight:800;margin-left:7px}
-.vsx-lr .nm small.up{color:var(--up)} .vsx-lr .nm small.dn{color:var(--dn)} .vsx-lr .nm small.n{color:var(--muted);font-weight:600}
+.vsx-lr .nm small.up{color:var(--up)} .vsx-lr .nm small.dn{color:var(--dn)} .vsx-lr .nm small.n{color:var(--muted);font-weight:600} .vsx-lr .nm small.eq{color:#94A3B8}
 .vsx-lr .vsx-rk{width:20px;height:20px;border-radius:6px;font-size:11px;margin-right:8px;flex:0 0 auto}
 .vsx-lr .tk{position:relative;height:14px}
 .vsx-lr .tk i{position:absolute;top:0;height:14px;border-radius:3px}
