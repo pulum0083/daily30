@@ -1285,6 +1285,87 @@ def _extract_eok_values(text):
     return values
 
 
+# ── 수급 금액 교정 (kospi-close, 2026-10-28 실사고) ──────────────────────────
+# 10/28 마감 브리핑 요약·WHY가 "외국인 1조 1,485억원, 기관 1조 1,519억원"이라 썼는데, 같은 페이지 수급 표
+# (15:40 정규장 확정 실측)는 외국인 +8,157억·기관 +9,609억이었다. 스케일(100배) 검사만 있어 그대로 통과했다.
+# 본문에서 주체(외국인·기관·개인) 바로 뒤에 붙은 금액을 실측과 맞춰 고친다. 다른 날·기간 얘기
+# ('어제'·'3일간'·'누적' 등)나 다른 금액(거래대금·실적 등)이 끼면 건드리지 않는다.
+_SUPPLY_ACTORS = (("외국인", "foreign"), ("외인", "foreign"), ("기관", "institution"), ("개인", "individual"))
+_SUPPLY_AMOUNT_RE = re.compile(r"(?<![\d.])(?:([\d,]+)\s*조\s*([\d,]+)\s*억|(\d+(?:\.\d+)?)\s*조|([\d,]+)\s*억)")
+_SUPPLY_SKIP = re.compile(r"어제|전일|지난|일간|일째|누적|주간|이번\s*주|연속|거래대금|시가총액|시총|목표|매출|영업이익|순이익|\d+\s*일")
+
+
+def _fmt_eok(v):
+    v = abs(int(round(v)))
+    return f"{v // 10000}조 {v % 10000:,}억" if v >= 10000 else f"{v:,}억"
+
+
+def _amount_value(m):
+    if m.group(1):
+        return int(m.group(1).replace(",", "")) * 10000 + int(m.group(2).replace(",", ""))
+    if m.group(3):
+        return float(m.group(3)) * 10000
+    return int(m.group(4).replace(",", ""))
+
+
+def fix_supply_amounts(analysis, latest, corrections, warnings, window=24):
+    it = (latest or {}).get("investor_trading") or {}
+    actual = {}
+    for _, key in _SUPPLY_ACTORS:
+        net = (it.get(key) or {}).get("net")
+        if isinstance(net, (int, float)):
+            actual[key] = net / 100          # 백만원 → 억원(부호 유지)
+    if not actual:
+        return 0
+    fixed = []
+
+    def fix(text):
+        out, last = [], 0
+        for m in _SUPPLY_AMOUNT_RE.finditer(text):
+            seg = strip_tags(text[max(0, m.start() - window):m.start()])
+            seg = re.split(r"[.!?]\s", seg)[-1]          # 같은 문장 안만 본다
+            hits = [(seg.rfind(w), key) for w, key in _SUPPLY_ACTORS if w in seg]
+            # '어제 외국인은 …'·'3일간 외국인이 …'처럼 다른 날·기간 얘기면 건드리지 않는다(주체 앞뒤 모두 본다)
+            if not hits or _SUPPLY_SKIP.search(seg + strip_tags(text[m.end():m.end() + 8])):
+                continue
+            hits.sort()
+            near = hits[-1][1]
+            # 사이에 다른 금액이 있으면 그 주체의 금액이 아니다
+            if _SUPPLY_AMOUNT_RE.search(seg[hits[-1][0]:]):
+                continue
+            if near not in actual:
+                continue
+            both = "각각" in seg and len({k for _, k in hits}) >= 2
+            keys = [k for _, k in hits if k in actual]
+            keys = list(dict.fromkeys(keys))[-2:] if both else [near]
+            if any(k not in actual for k in keys):
+                continue
+            v = _amount_value(m)
+            ok = all(abs(v - abs(actual[k])) <= max(50, abs(actual[k]) * 0.03) for k in keys)
+            if ok:
+                continue
+            new = "·".join(_fmt_eok(actual[k]) + ("원" if both and text[m.end():m.end() + 1] == "원" and i < len(keys) - 1 else "")
+                           for i, k in enumerate(keys))
+            out.append(text[last:m.start()] + new)
+            last = m.end()
+            if both:   # '각각 X씩' → '각각 A·B' — 금액이 둘이 되면 '씩'을 뺀다(사이에 </b>가 있어도)
+                tail = re.match(r"(원?(?:</b>)?)씩", text[last:])
+                if tail:
+                    out.append(tail.group(1)); last += tail.end()
+            fixed.append(f"{m.group(0)} → {new}")
+            near_txt = strip_tags(text[m.end():m.end() + 12])
+            for k in keys:
+                if (actual[k] > 0 and "순매도" in near_txt) or (actual[k] < 0 and "순매수" in near_txt):
+                    warnings.append(f"수급 방향이 실측과 다를 수 있어요({k}): {strip_tags(text)[:60]}")
+        out.append(text[last:])
+        return "".join(out)
+
+    n = _walk_strings(analysis, fix)
+    if fixed:
+        corrections.append(f"수급 금액을 정규장 확정 실측으로 교정 {len(fixed)}건: " + ", ".join(fixed[:4]))
+    return n
+
+
 def _check_supply_scale(analysis, latest, warnings):
     """마감 브리핑 분석 본문의 수급 수치 스케일을 크로스체크한다.
 
@@ -1589,6 +1670,7 @@ def validate(analysis, latest, btype):
 
     # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
     if btype == "kospi-close":
+        fix_supply_amounts(a, latest, corrections, warnings)   # 본문 수급 금액 ↔ 실측(15:40 확정)
         _check_supply_scale(a, latest, warnings)
 
     return {"analysis": a, "corrections": corrections, "warnings": warnings, "blocks": blocks}

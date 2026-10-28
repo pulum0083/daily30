@@ -43,7 +43,6 @@ def test_시장폭은_integration의_upDownStockInfo를_읽는다():
     # 2026-09-15 09:33 실응답 — upperCount 1 · riseCount 245 · lowerCount 0 · fallCount 609 · steadyCount 49
     assert fc.parse_market_breadth(fx("index_integration.json")) == {
         "up": 245, "down": 609, "unchanged": 49, "upper_limit": 1, "lower_limit": 0,
-        "new_high": 0, "new_low": 0,
     }
 
 

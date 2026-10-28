@@ -500,7 +500,7 @@ def fetch_trade_amount() -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 시장 폭 (상한가·하한가·신고가·신저가·상승·하락·보합 종목 수)
+# 시장 폭 (상한가·하한가·상승·하락·보합 종목 수 — 신고가·신저가는 원천이 없어 수집하지 않는다)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def parse_market_breadth(payload) -> dict:
@@ -512,7 +512,7 @@ def parse_market_breadth(payload) -> dict:
     return {
         "up": int(vals["riseCount"]), "down": int(vals["fallCount"]), "unchanged": int(vals["steadyCount"]),
         "upper_limit": int(vals["upperCount"]), "lower_limit": int(vals["lowerCount"]),
-        "new_high": 0, "new_low": 0,
+        # 신고가·신저가는 원천이 없다 — 예전엔 0으로 채워 '신고가 0'이 실측처럼 나갔다(2026-10-28, §0). 키를 두지 않는다.
     }
 
 

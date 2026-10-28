@@ -161,14 +161,15 @@ _SUPPLY_LATEST = {
 }
 
 
-def test_supply_scale_warns_on_100x_undercount():
-    # 분석 본문에 659억 언급(실제 65,941억) → 경고 발생
+def test_supply_100x_undercount_is_corrected():
+    # 분석 본문에 659억 언급(실제 65,941억) — 예전엔 경고만 남겼지만 이제 실측으로 고친다(2026-10-28 fix_supply_amounts)
     a = {
         "market_summary": "", "why": "외국인이 <b>659억원</b> 순매도했어요.",
         "what": "", "so_what": "",
     }
     r = v.validate(a, _SUPPLY_LATEST, "kospi-close")
-    assert any("외국인" in w and "스케일" in w for w in r["warnings"]), r["warnings"]
+    assert "6조 5,941억원" in r["analysis"]["why"], r["analysis"]["why"]
+    assert any("수급 금액" in c for c in r["corrections"]), r["corrections"]
 
 
 def test_supply_scale_clean_on_correct_value():

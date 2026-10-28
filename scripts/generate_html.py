@@ -1278,12 +1278,11 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
                 {"lbl": "하락", "val": mb.get("down", 0), "cls": "down"},
                 {"lbl": "보합", "val": mb.get("unchanged", 0), "cls": "neutral"},
             ]})
-        if any(k in mb for k in ("upper_limit", "lower_limit", "new_high", "new_low")):
+        # 신고가·신저가는 원천이 없어 0으로 채워진 값이었다 — 그리지 않는다(2026-10-28, §0). 옛 데이터 파일의 0도 무시한다.
+        if any(k in mb for k in ("upper_limit", "lower_limit")):
             rows.append({"label": "특이 종목", "cells": [
                 {"lbl": "상한가", "val": mb.get("upper_limit", 0), "cls": "up"},
                 {"lbl": "하한가", "val": mb.get("lower_limit", 0), "cls": "down"},
-                {"lbl": "신고가", "val": mb.get("new_high", 0), "cls": "up"},
-                {"lbl": "신저가", "val": mb.get("new_low", 0), "cls": "down"},
             ]})
         if rows:
             ctx["breadth_rows"] = rows
