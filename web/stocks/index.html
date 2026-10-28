@@ -23,12 +23,12 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=33" defer></script>
+<script src="/assets/stocks-home.js?v=34" defer></script>
 <script src="/assets/ds-subnav.js?v=3" defer></script>
 <script src="/assets/vs-yesterday.js?v=23" defer></script>
 <script src="/assets/home-hero.js?v=7" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=36">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=37">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
 <link rel="stylesheet" href="/assets/vs-yesterday.css?v=16">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
@@ -49,32 +49,23 @@
     </div>
     <div class="search" onclick="openSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg><span>종목명 또는 코드 검색</span><kbd>⌘K</kbd></div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-    <span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 10초 갱신</span>
-    <span style="font-size:11px;color:var(--muted);">09:00 – 15:30 장중</span>
-  </div>
-  <!-- 지수 + 수급 한 줄 카드(2026-07-26) — 코스피와 수급을 한눈에 두고, 보조 지표(코스닥·환율)는
-       칩을 눌러 펼친다. 예전엔 지수/수급이 각자 카드라 두 줄을 차지하며 사이가 붕 떠 보였다. -->
+  <!-- 지수 + 수급 카드(A안, 2026-10-28) — 머리에 LIVE·장 시간을 한 번만, 1줄 코스피(곡선·마우스 오버 표 유지),
+       2줄 코스닥·환율은 항상 작게, 3줄 수급은 단위(조·억)를 달고 세 칸으로. PC에선 수급이 오른쪽으로 붙는다.
+       자리 값은 '—'로 둔다 — 응답 전에 지어낸 숫자를 보이지 않는다(§0). 시안 docs/prototypes/2026-10-28-live-index-card.html -->
   <div class="idx-card" id="idx-card">
-    <div class="mkt-line">
-      <div class="strip">
-        <div class="m"><span class="l">코스피</span><span class="v num" id="h-kospi">8,411</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc dn num" id="h-kospi-c">−5.81%</span></div>
-        <div class="m idx-x" id="m-kosdaq" hidden><span class="l">코스닥</span><span class="v num" id="h-kosdaq">851.4</span><span class="vc dn num" id="h-kosdaq-c">−4.10%</span></div>
-        <div class="m idx-x" id="m-usd" hidden><span class="l">원/달러</span><span class="v num" id="h-usd">1,538</span><span class="vc num" id="h-usd-c"></span></div>
-        <button class="idx-more" id="idx-more" aria-expanded="false" aria-controls="m-kosdaq m-usd">코스닥·환율 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
-      </div>
-      <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
-           순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
-      <div class="supply" id="h-supply" hidden>
-        <span class="lbl">수급</span>
-        <!-- 모바일 전용 줄바꿈 지점 — 데스크탑에선 폭 0(무영향), 좁은 화면에서만 flex-basis:100%로
-             1행(수급·기준일·10일추이)과 2행(개인·기관·외국인)을 강제로 나눈다. -->
-        <span class="sup-brk" aria-hidden="true"></span>
+    <div class="ix-top">
+      <div class="ix-hd"><span class="upd-badge" id="kospi-live-badge"><span class="dot"></span>LIVE · 60초 갱신</span><span class="ix-hours">09:00 – 15:30 장중</span></div>
+      <div class="ix-r1"><span class="l">코스피</span><span class="v num" id="h-kospi">—</span><span class="ksp" id="h-kospi-spark" aria-hidden="true"></span><span class="vc num" id="h-kospi-c"></span><small class="ix-abs num" id="h-kospi-abs"></small></div>
+      <div class="ix-r2"><span class="ix-sub" id="m-kosdaq">코스닥<b class="num" id="h-kosdaq">—</b><span class="vc num" id="h-kosdaq-c"></span></span><span class="ix-sub" id="m-usd">원/달러<b class="num" id="h-usd">—</b><span class="vc num" id="h-usd-c"></span></span></div>
+    </div>
+    <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
+         순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
+    <div class="supply" id="h-supply" hidden>
+      <div class="sup-h"><span class="lbl">수급 · 누적 순매수</span><span class="unit"></span><button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+      <div class="sup-g">
         <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
         <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
         <span class="s"><i>외국인</i><b class="num" id="h-frgn">—</b></span>
-        <span class="unit"></span>
-        <button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button>
       </div>
     </div>
   </div>

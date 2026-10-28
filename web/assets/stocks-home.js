@@ -1255,14 +1255,24 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     }).join('');
     return '<div style="display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;row-gap:3px;align-items:baseline">'+cells+'</div>';
   }
+  // 수급 금액(억원) → '−1.90조' · '+8,420억'. 단위를 붙여 짧게 쓴다(2026-10-28 — 예전엔 단위 없이 '−19,049'만 적었다).
+  function eokTxt(v){var a=Math.abs(v),s=v>=0?'+':'−';return a>=10000?s+(a/10000).toFixed(2)+'조':s+Math.round(a).toLocaleString('ko-KR')+'억';}
+  // 코스피는 머리의 'LIVE · 60초 갱신'과 같은 주기로 다시 받는다 — 예전엔 처음 한 번만 받아 표기와 실제가 어긋났다.
+  function pollKospi(){
   fetch('/api/kospi-live',{cache:'no-store',signal:AbortSignal.timeout(6000)})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){
       if(!d||!d.price) return;
-      var el=document.getElementById('h-kospi'),ec=document.getElementById('h-kospi-c');
+      var el=document.getElementById('h-kospi'),ec=document.getElementById('h-kospi-c'),ea=document.getElementById('h-kospi-abs');
       if(el) el.textContent=Math.round(d.price).toLocaleString('ko-KR');
       if(ec){ec.textContent=fmtPct(d.changePct||0);ec.className='vc '+dirClass(d.changePct||0)+' num';}
+      if(ea){
+        var ab=typeof d.changeAbs==='number'?d.changeAbs:null;
+        ea.textContent=ab?(ab>0?'▲':'▼')+Math.round(Math.abs(ab)).toLocaleString('ko-KR'):'';
+        ea.className='ix-abs '+(ab?dirClass(ab):'')+' num';
+      }
     }).catch(function(){});
+  }
   function pollMarket(){
   fetch('/api/market',{cache:'no-store',signal:AbortSignal.timeout(6000)})
     .then(function(r){return r.ok?r.json():null;})
@@ -1310,7 +1320,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
           var v=map[id], e=document.getElementById(id);
           if(!e||v==null) return;
           any=true;
-          e.textContent=(v>=0?'+':'−')+Math.abs(Math.round(v)).toLocaleString('ko-KR');
+          e.textContent=eokTxt(v);
           e.className='num '+(v>=0?'up':'dn');
         });
         if(any&&sup){
@@ -1325,34 +1335,16 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
             var ymd=(sk&&typeof sk.d==='string'&&sk.d.length===8)
               ? sk.d.slice(0,4)+'-'+sk.d.slice(4,6)+'-'+sk.d.slice(6,8) : '';
             var label=ymd&&typeof fmtKoDate==='function'?fmtKoDate(ymd):'';
-            u.innerHTML = open
-              ? '<span class="live">● 60초 갱신</span>'
-              : (label ? label+' 마감 기준' : '직전 거래일 마감 기준');
+            // 장중엔 머리 배지가 이미 'LIVE · 60초 갱신'이라 '오늘'만 적는다(두 번 쓰지 않는다).
+            u.textContent = open ? '오늘' : (label ? label+' 마감 기준' : '직전 거래일 마감 기준');
           }
         }
       }
     }).catch(function(){});
   }
-  pollMarket();
-  // 장중에만 폴링 — 코스닥·환율·수급을 60초 주기로 갱신(브리핑 시장 지표 패널과 동일 주기).
-  if(typeof hubMarketOpen==='function'&&hubMarketOpen()) setInterval(pollMarket,60000);
-})();
-
-/* ── 보조 지표(코스닥·환율) 인라인 토글 ─────────────────────────────────────────
-   지수 줄의 주인공은 코스피 하나. 코스닥·환율은 칩을 눌러야 같은 줄에 펼쳐진다.
-   값 자체는 접혀 있어도 pollMarket이 계속 갱신하므로(숨김일 뿐 DOM에 있음) 펼치는 즉시 최신값이다. */
-(function(){
-  var btn=document.getElementById('idx-more');
-  if(!btn) return;
-  var extra=[].slice.call(document.querySelectorAll('.strip .idx-x'));
-  if(!extra.length){ btn.hidden=true; return; }
-  var card=document.getElementById('idx-card');
-  btn.addEventListener('click',function(){
-    var open=btn.getAttribute('aria-expanded')!=='true';
-    extra.forEach(function(el){ el.hidden=!open; });
-    btn.setAttribute('aria-expanded',String(open));
-    if(card) card.classList.toggle('idx-open',open);   // 펼치면 수급이 아랫줄로(위 CSS)
-  });
+  pollKospi(); pollMarket();
+  // 장중에만 폴링 — 코스피·코스닥·환율·수급을 60초 주기로 갱신(브리핑 시장 지표 패널과 동일 주기).
+  if(typeof hubMarketOpen==='function'&&hubMarketOpen()) setInterval(function(){pollKospi();pollMarket();},60000);
 })();
 
 /* ── 수급 10거래일 추이 (수급 행 '10일 추이' 토글) ──────────────────────────────
