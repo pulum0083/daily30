@@ -180,14 +180,16 @@
     var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 65 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
     var top = Math.max(80, Math.ceil((g + 5) / 10) * 10);
     var x = function (v) { return (Math.max(0, Math.min(v, top)) / top * 100).toFixed(1) + '%'; };
-    return '<a class="ss" href="/briefings/' + ymd + '/us/">' +
-      '<div class="ss-h"><span class="ss-k">나스닥 체크</span><span class="ss-d">' + esc(dayLabel(ymd, today)) + ' 미국 브리핑</span></div>' +
+    // 누르면 1990년부터의 그래프가 있는 상세 페이지로 간다(2026-10-28) — 브리핑 섹션은 65% 미만이면 숨겨진다.
+    return '<a class="ss" href="/stocks/nasdaq-check/">' +
+      '<div class="ss-h"><span class="ss-k">나스닥 체크</span></div>' +   // 날짜 라벨은 뺐다 — 상세 페이지로 가는 줄이라 브리핑과 무관해 보였다(2026-10-28)
       '<div class="ss-m"><b>' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</b><span class="pill ' + lv[0] + '">' + lv[1] + '</span></div>' +
       '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(65) + ';width:' + (5 / top * 100).toFixed(1) + '%"></i>' +
       '<i class="z2" style="left:' + x(70) + ';right:0"></i><i class="f ' + lv[0] + '" style="width:' + x(g) + '"></i>' +
       '<i class="dot ' + lv[0] + '" style="left:' + x(g) + '"></i></div>' +
       '<div class="nqg-l"><span style="left:0">0</span><span class="l65" style="left:' + x(65) + '">65 주의</span><span class="l70">70 경고</span></div></div>' +
-      '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점</em></a>';
+      '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점' +
+      '<span class="ss-go">상세 그래프 ›</span></em></a>';   // 상세 페이지가 있다는 표시(2026-10-28)
   }
 
   // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
