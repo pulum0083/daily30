@@ -233,9 +233,14 @@
         '<div class="tk"><i class="' + tone + '" style="left:' + a + '%;width:' + w.toFixed(2) + '%"></i></div>' +
         '<div class="v ' + cls(s.t) + '">' + f2(s.t) + '%</div></div>';
     }).join('');
+    // 기준선 라벨은 선 위 작은 알약으로 — 카드 끝에 가까우면 안쪽으로 붙여 잘리지 않게 한다(2026-10-28 모바일에서 안 보인다는 지적).
+    function lab(c, name, v) {
+      var x = +p(v), al = x > 80 ? ' r' : x < 20 ? ' l' : '';
+      return '<i class="vsx-vl ' + c + '" style="left:' + p(v) + '%"></i><span class="vsx-vlab ' + c + al + '" style="left:' + p(v) + '%">' + name + ' ' + f2(v) + '%</span>';
+    }
     var lines = '<i class="vsx-vl z" style="left:' + p(0) + '%"></i>';
-    if (kq != null) lines += '<i class="vsx-vl q" style="left:' + p(kq) + '%"></i><span class="vsx-vlab q" style="left:' + p(kq) + '%">코스닥 ' + f2(kq) + '%</span>';
-    if (kp != null) lines += '<i class="vsx-vl k" style="left:' + p(kp) + '%"></i><span class="vsx-vlab k" style="left:' + p(kp) + '%">코스피 ' + f2(kp) + '%</span>';
+    if (kq != null) lines += lab('q', '코스닥', kq);
+    if (kp != null) lines += lab('k', '코스피', kp);
     var foot = '';
     if (kp != null) {
       // 센 쪽이 절반을 넘으면 짧은 쪽(약한 섹터)을 적는다 — 섹터 이름을 여덟 개 늘어놓지 않는다.
