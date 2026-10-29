@@ -2590,3 +2590,24 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
   - **주도주 3종목 마감**(요약 아래) — 삼성전자·SK하이닉스·현대차의 정규장 공식 종가·등락(`kr_official_closes.official_today`, §48)과 외국인 5일 순매수(주). 종목별 순매매는 오늘 행이 20:00 뒤에도 없어(§75) **오늘을 뺀 직전 5거래일** 합이고, 카드 아래에 기간을 적는다. 공식 종가가 없는 종목은 뺀다.
   - 어제 §75에서 데이터를 고친 '거래대금 급증 종목'과 옛 사이드바 '섹터 로테이션'은 템플릿이 그리지 않는 섹션이었다(예전에 일부러 뺐다). 화면엔 이번에 넣은 섹터 막대만 나온다.
   - 테스트 `scripts/test_close_vs_leaders.py`(10/28 실측 픽스처 `scripts/fixtures/vs_close_20261028.json`).
+
+### 77. Vercel 하루 배포 한도 초과로 마감 브리핑 미발행 — 취소 배포가 한도를 썼다 (2026-10-29 실사고)
+
+**증상**: 16:25 마감 잡이 분석·HTML·main 커밋까지 정상 완료했는데 `vercel-deploy.yml`이 `Resource is limited - try again in 24 hours (more than 100, code: "api-deployments-free-per-day")`로 실패했다. 페이지가 404라 라이브 확인 스텝이 10분 뒤 실패했고 텔레그램·이메일이 나가지 않았다.
+
+**원인**: Hobby 플랜은 24시간 동안 배포를 100개까지 만든다. 거절 시점 105개 중 실제 반영(CLI, READY)은 41개뿐이고 나머지는 **취소된 배포도 한도에 들어간다**는 것이었다.
+- main 푸시마다 Vercel git 연동이 배포를 하나 만들고 `vercel-ignore-build.sh`(§15)가 취소한다 — 46개.
+- gh-pages 푸시마다 같은 일이 생긴다 — 37개. `vercel.json`의 `deploymentEnabled: {"gh-pages": false}`는 **gh-pages 브랜치에 vercel.json이 없어서** 먹지 않았다(설정은 그 커밋 안의 vercel.json에서 읽는다).
+- 커밋 하나가 배포 2~3개를 만들었고, 그날은 사람 커밋 20개 + 데이터 갱신 23개가 겹쳤다.
+
+**수정**:
+- `vercel.json` `git.deploymentEnabled`에 `"main": false` — main 커밋은 git 배포를 만들지 않는다. 프로덕션 배포는 원래대로 `vercel-deploy.yml`(CLI) 하나다.
+- gh-pages 배포를 전부 없앴다 — `deploy.yml` 삭제, `daily_report.yml` 브리핑 잡 3곳·옛 장중 뉴스 잡, `kospi-news-live.yml`의 `peaceiris/actions-gh-pages` 스텝 삭제, 쓰지 않게 된 `pages`·`id-token` 권한 삭제. GitHub Pages는 꺼져 있어(§17) 서비스 경로가 아니었고, 9/30엔 이 스텝이 발송을 막기도 했다(§60).
+- 이제 커밋 하나 = 배포 하나다.
+- `telegram-resend.yml`에 `kospi-close` 선택지 추가(스냅샷 경로 `close/`, `save_closing_telegram_message`).
+
+**복구**: 한도가 풀린 18:15에 `gh workflow run vercel-deploy.yml --ref main`(새 커밋 없이 재배포) → 페이지 확인 → `gh workflow run telegram-resend.yml -f briefing_type=kospi-close -f date=2026-10-29`. 이메일은 재발송 범위 밖이다.
+
+- **방지 룰(한도는 '만든 개수'로 센다)**: 실패·취소된 배포도 한도를 쓴다. 자동 생성되는 부수 배포가 있으면 한도 계산에 넣고, 쓸모없으면 생성 자체를 끈다.
+- **방지 룰(브랜치별 설정은 그 브랜치의 파일에서 읽힌다)**: Vercel `git.deploymentEnabled`는 푸시된 커밋 안의 vercel.json을 본다. 다른 브랜치를 끄는 설정을 main에만 두면 효과가 없다.
+- **재발 시 진단 순서**: ① `gh run view <vercel-deploy run> --log-failed`에서 `api-deployments-free-per-day`를 찾는다. ② Vercel API `GET /v6/deployments?since=<24시간 전>`으로 개수와 `source`(cli/git)·`meta.githubCommitRef`를 센다. ③ 가장 오래된 배포가 24시간을 넘기는 시각에 한도가 풀린다 — 그때 새 커밋 없이 `vercel-deploy.yml`을 dispatch한다(커밋을 올리면 부수 배포가 먼저 한도를 쓸 수 있다).

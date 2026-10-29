@@ -39,8 +39,6 @@ on:
 
 permissions:
   contents: write   # main 브랜치 커밋·푸시
-  pages: write      # GitHub Pages 배포
-  id-token: write   # OIDC 토큰 (actions/deploy-pages 필수)
   actions: write    # vercel-deploy.yml 명시적 dispatch (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시킴)
 
 concurrency:
@@ -220,24 +218,6 @@ jobs:
           echo "::error::5회 시도 후에도 Vercel 배포 트리거 실패 — 데이터는 커밋됐지만 프로덕션에 반영 안 됨. 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
           exit 1
 
-      - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
-        if: steps.holiday.outputs.open == 'true'
-        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
-        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
-        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
-        continue-on-error: true
-        timeout-minutes: 5
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web
-          publish_branch: gh-pages
-          force_orphan: false       # 히스토리 유지
-          keep_files: false         # 매번 전체 덮어씀 (stale 파일 방지)
-          user_name: "DailyB Bot"
-          user_email: "dailyb-bot@users.noreply.github.com"
-          commit_message: "📊 Pages 배포: 코스피 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
-
       - name: 🔎 상세 페이지 라이브 확인
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         run: python3 scripts/check_page_live.py --type kospi
@@ -395,24 +375,6 @@ jobs:
           done
           echo "::error::5회 시도 후에도 Vercel 배포 트리거 실패 — 데이터는 커밋됐지만 프로덕션에 반영 안 됨. 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
           exit 1
-
-      - name: 🌐 GitHub Pages 배포 (web/ → gh-pages 브랜치, Telegram 전송 전 상세 페이지 라이브 확인용)
-        if: steps.holiday.outputs.open == 'true'
-        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
-        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
-        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
-        continue-on-error: true
-        timeout-minutes: 5
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web
-          publish_branch: gh-pages
-          force_orphan: false
-          keep_files: false
-          user_name: "DailyB Bot"
-          user_email: "dailyb-bot@users.noreply.github.com"
-          commit_message: "🇺🇸 Pages 배포: 미국 브리핑 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
 
       - name: 🔎 상세 페이지 라이브 확인
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
@@ -598,24 +560,6 @@ jobs:
           echo "::error::5회 시도 후에도 Vercel 배포 트리거 실패 — 데이터는 커밋됐지만 프로덕션에 반영 안 됨. 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
           exit 1
 
-      - name: 🌐 GitHub Pages 배포
-        if: steps.holiday.outputs.open == 'true'
-        # GitHub Pages는 저장소에서 비활성화(has_pages=false)라 gh-pages는 서비스 경로가 아니다.
-        # 라이브 확인은 doubleshot.space(Vercel)를 본다. 2026-09-30 이 스텝이 GitHub 500으로
-        # 실패해 텔레그램·이메일이 통째로 건너뛰어졌다 — 실패해도 발송은 계속한다.
-        continue-on-error: true
-        timeout-minutes: 5
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web
-          publish_branch: gh-pages
-          force_orphan: false
-          keep_files: false
-          user_name: "DailyB Bot"
-          user_email: "dailyb-bot@users.noreply.github.com"
-          commit_message: "🇰🇷 Pages 배포: 코스피 마감 $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
-
       - name: 🔎 상세 페이지 라이브 확인
         if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
         run: python3 scripts/check_page_live.py --type kospi-close
@@ -786,12 +730,3 @@ jobs:
           done
           echo "::error::5회 시도 후에도 Vercel 배포 트리거 실패 — 데이터는 커밋됐지만 프로덕션에 반영 안 됨. 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
           exit 1
-
-      - name: 🚀 GitHub Pages 배포
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./web
-          keep_files: true
-          user_name: "DailyB Bot"
-          user_email: "dailyb-bot@users.noreply.github.com"
