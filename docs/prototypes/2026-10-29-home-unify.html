@@ -3,7 +3,7 @@
      바꾸는 것
        1. 오르내림 색 한 벌 — 글자 #E03131/#2775ED, 막대 75% 톤 #E86464/#5D97F1(흐린 섹터 막대·진한 주도권 막대를 같은 무게로)
        2. 장중엔 '섹터 한눈에' 숨김 — '어디가 이끄나'와 값이 달라 한 화면에서 섹터 숫자가 둘이 됐다
-       3. 카드 머리 한 모양 — 15px 굵게 + 파란 세로줄, 이모지 없음 · 모서리 12px
+       3. 카드 머리 한 모양 — 파란 세로줄 + 아이콘 + 15px 굵게(아이콘이 없던 카드엔 붙인다, 2026-10-29 사용자 의견) · 모서리 12px
        4. 갱신 배지는 회색 + 빨간 점, 판정 배지는 테두리만
        5. 0.0%는 회색 · 기관 순매수 구성 막대를 검정 대신 빨강 계열 · 맨 위 요약 줄이 아래 세 칸과 겹치면 숨김 -->
 <!--PROTO-START-->
@@ -31,7 +31,7 @@ body.pv #home.slot-intraday .sbx-block{display:none}
 /* 3. 카드 머리 한 모양 + 모서리 */
 body.pv #home .block__t,body.pv .vs-card-h p,body.pv #usw-title,body.pv #us-evening .ue-h-lead > span:first-child{
   font-size:15px!important;font-weight:800!important;color:#0F172A!important;display:inline-flex;align-items:center;gap:8px}
-body.pv #home .block__t .ic{display:none}
+body.pv #home .block__t .ic,body.pv .pv-ic{font-size:15px;line-height:1}
 body.pv #home .block__t::before,body.pv .vs-card-h p::before,body.pv #usw-title::before,body.pv #us-evening .ue-h-lead > span:first-child::before{
   content:'';flex:none;width:3px;height:13px;border-radius:2px;background:var(--primary)}
 body.pv .vs-hero,body.pv .vs-card,body.pv #home .block,body.pv .idx-card,body.pv #us-linked-widget,body.pv #us-evening,body.pv #home-hero > *{border-radius:12px}
@@ -48,13 +48,14 @@ body.pv #vs-root:has(.vs-kpi) .vs-hero .vs-sub{display:none}
 <div class="pv-bar"><span>홈 디자인</span><button data-v="0">지금</button><button data-v="1" class="on">시안</button></div>
 <script>
 (function(){
-  var EMO=/^[\u{1F300}-\u{1FAFF}☀-➿]️?\s*/u, saved=new Map();
+  // 아이콘이 없던 '어제랑 비교' 아래 카드 머리에 아이콘을 붙인다(시안에서만)
+  var ICONS={'얼마나 뜨거운가':'🔥','어디가 이끄나':'🏁','누가 사는가':'👥'};
   function tidy(){
     var on=document.body.classList.contains('pv');
-    ['#usw-title','#us-evening .ue-h-lead > span:first-child'].forEach(function(sel){
-      var e=document.querySelector(sel); if(!e||!e.firstChild||e.firstChild.nodeType!==3) return;
-      if(on&&EMO.test(e.firstChild.nodeValue)){ saved.set(e,e.firstChild.nodeValue); e.firstChild.nodeValue=e.firstChild.nodeValue.replace(EMO,''); }
-      if(!on&&saved.has(e)){ e.firstChild.nodeValue=saved.get(e); saved.delete(e); }
+    document.querySelectorAll('.vs-card-h p').forEach(function(p){
+      var has=p.querySelector('.pv-ic'), ic=ICONS[p.textContent.replace(/^\S+\s/,'').trim()]||ICONS[p.textContent.trim()];
+      if(on&&!has&&ic){ var sp=document.createElement('span'); sp.className='pv-ic'; sp.textContent=ic; p.insertBefore(sp,p.firstChild); }
+      if(!on&&has) has.remove();
     });
     document.querySelectorAll('#home *').forEach(function(e){
       if(e.children.length===0) e.classList.toggle('pv-zero', /^[+−-]?0(\.0+)?%$/.test(e.textContent.trim()));
