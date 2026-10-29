@@ -1,4 +1,4 @@
-# 미국 이슈 카드 — 'AI 판단' 표기·데이터형 이슈 하루 1개 제한 테스트(2026-10-26 사용자 결정)
+# 미국 이슈 카드 — 'AI 판단' 표기 없음(2026-10-29)·데이터형 이슈 하루 1개 제한 테스트
 import sys
 from pathlib import Path
 
@@ -11,13 +11,13 @@ def _render(issues):
     return gh.make_env().get_template("sections/_issues.html").render(**gh.build_issues({"issues": issues}))
 
 
-def test_ai_label_once_per_card():
+def test_no_ai_label():
     html = _render([
         {"title": "한쪽", "down": {"label": "AI·반도체 전반", "tickers": ["NVDA"]}},
         {"title": "양쪽", "down": {"label": "소프트웨어", "tickers": ["CRM"]}, "up": {"label": "AI 인프라", "tickers": ["NVDA"]}},
         {"title": "영향 없음"},
     ])
-    assert html.count('class="imp-ai">AI 판단') == 2                 # 영향 줄이 있는 카드마다 한 번
+    assert 'AI 판단' not in html and 'imp-tk' in html                # 2026-10-29 사용자 결정으로 표기를 뺐다
 
 
 def test_limit_keeps_news_and_first_data_issue():
