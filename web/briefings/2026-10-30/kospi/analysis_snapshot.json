@@ -1,0 +1,299 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 30,
+    "down_pct": 70,
+    "confidence": 70,
+    "basis": "open"
+  },
+  "reason_title": "구글發 AI 거품론, 반도체도 같이 흔들려요",
+  "todays_view": {
+    "view_title": "삼성전자는 106조 벌었는데, 시장은 구글만 쳐다봐요",
+    "dek": "어젯밤 알파벳이 AI 투자 대비 이익 부진 우려로 시간외에서 크게 밀리면서 <b>나스닥 선물(NQ)</b>이 <b>-2.83%</b>까지 흔들렸어요. 삼성전자의 역대급 반도체 실적도 오늘은 이 AI 거품 우려를 덮기 쉽지 않아 보여요.",
+    "recap": [
+      {
+        "text": "삼성전자가 3분기 반도체 사업에서만 영업이익 <b>106조 5천억 원</b>을 기록했지만, 정작 어제 주가는 하락했어요. AI 투자 부담 우려가 실적 호재를 눌렀어요.",
+        "codes": [
+          "005930"
+        ]
+      },
+      {
+        "text": "코스피가 전날 급등 피로감 속에 숨고르기에 들어갔어요. 2차전지·전력기기·방산 등 주도주가 일제히 조정을 받았어요.",
+        "codes": []
+      },
+      {
+        "text": "외국인은 순매수(<b>+756억 원</b>)로 돌아섰지만, 기관이 <b>-4,473억 원</b> 대규모 매도에 나서며 지수 상승폭을 제한했어요.",
+        "codes": []
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 오전 BOJ(일본은행) 금리 결정과 총재 기자회견이 예정돼 있어요 — 엔화·아시아 증시 변동성 확대 가능성을 확인하세요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "간밤 나스닥 선물 급락이 개장 후에도 그대로 이어지는지, 아니면 삼성전자 실적 호재로 되돌려지는지가 관전 포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인이 순매수를 이틀 연속 이어갈 수 있을지 지켜보세요. 기관 매도 압력을 상쇄할 유일한 변수예요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>알파벳發 AI 거품 우려가 오늘 아침 가장 큰 짐이에요.</b> 어젯밤 알파벳이 AI 투자비 대비 이익 부진과 잉여현금흐름 적자 확대 우려로 시간외에서 밀렸고, 이 여파로 나스닥 선물이 <b>-2.83%</b>까지 빠지고 있어요. 마이크로소프트는 클라우드 호조로 선방했지만 전체 분위기를 돌리진 못했어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>삼성전자의 역대급 실적도 오늘은 방어막이 약해요.</b> 반도체 사업에서만 영업이익 <b>106조 5천억 원</b>을 냈지만, 필라델피아 반도체지수가 간밤 <b>-1.42%</b> 밀렸고 SOX·DRAM ETF 모두 꺾인 흐름이라 실적 모멘텀이 주가로 이어지기 쉽지 않아 보여요.",
+      "codes": [
+        "005930"
+      ]
+    },
+    {
+      "text": "<b>수급은 아직 혼재돼 있어요.</b> 외국인은 전일 순매수로 돌아섰지만 기관이 큰 폭 순매도했고, VIX도 <b>+1.72%</b> 소폭 오르며 경계감이 살아 있어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-10-30T07:29:20.651054+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-10-30T07:26:30.508532+09:00",
+    "briefing_date": "2026-10-30",
+    "us_session_date": "2026-10-29",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "GOOGL 프리마켓 10%대 급락",
+        "sides": [
+          {
+            "side": "down",
+            "label": "알파벳·빅테크 센티먼트",
+            "marks": [
+              {
+                "ticker": "GOOGL",
+                "name": "GOOGL",
+                "pct": -12.64
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "알파벳·빅테크 센티먼트는 <b>내렸어요</b>"
+      },
+      {
+        "title": "반도체는 메모리 랠리로 선방",
+        "sides": [
+          {
+            "side": "up",
+            "label": "메모리·반도체",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -4.98
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -2.08
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "메모리·반도체는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "간밤 GDP·PCE 물가지표 대기",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": -0.3
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-10-30",
+    "generated_at": "2026-10-30T07:26:30.691507+09:00",
+    "universe": 46,
+    "screened": 46,
+    "failed": [],
+    "items": [
+      {
+        "code": "000810",
+        "name": "삼성화재",
+        "passed": true,
+        "streak": 5,
+        "run_label": "5월~9월",
+        "last_complete": "202609",
+        "month_end_close": 633000.0,
+        "month_end_ma5": 623400.0,
+        "month_end_gap_pct": 1.54,
+        "now_date": "20261029",
+        "now_close": 651000.0,
+        "now_gap_pct": 1.75,
+        "mtd_pct": 2.84,
+        "fr_now": 57.52,
+        "fr_chg_3m": -0.86,
+        "strip": [
+          {
+            "m": "202510",
+            "label": "10월",
+            "close": 441500.0,
+            "ma5": 442300.0,
+            "gap_pct": -0.18,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202511",
+            "label": "11월",
+            "close": 481500.0,
+            "ma5": 451800.0,
+            "gap_pct": 6.57,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202512",
+            "label": "12월",
+            "close": 497000.0,
+            "ma5": 463100.0,
+            "gap_pct": 7.32,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202601",
+            "label": "1월",
+            "close": 501000.0,
+            "ma5": 474500.0,
+            "gap_pct": 5.58,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202602",
+            "label": "2월",
+            "close": 530000.0,
+            "ma5": 490200.0,
+            "gap_pct": 8.12,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202603",
+            "label": "3월",
+            "close": 440500.0,
+            "ma5": 490000.0,
+            "gap_pct": -10.1,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202604",
+            "label": "4월",
+            "close": 461000.0,
+            "ma5": 485900.0,
+            "gap_pct": -5.12,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202605",
+            "label": "5월",
+            "close": 569000.0,
+            "ma5": 500300.0,
+            "gap_pct": 13.73,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202606",
+            "label": "6월",
+            "close": 618000.0,
+            "ma5": 523700.0,
+            "gap_pct": 18.01,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202607",
+            "label": "7월",
+            "close": 632000.0,
+            "ma5": 544100.0,
+            "gap_pct": 16.16,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202608",
+            "label": "8월",
+            "close": 665000.0,
+            "ma5": 589000.0,
+            "gap_pct": 12.9,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202609",
+            "label": "9월",
+            "close": 633000.0,
+            "ma5": 623400.0,
+            "gap_pct": 1.54,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202610",
+            "label": "이번 달",
+            "close": 651000.0,
+            "ma5": 639800.0,
+            "gap_pct": 1.75,
+            "run": false,
+            "cur": true
+          }
+        ]
+      }
+    ],
+    "repeat_hidden": [
+      "메리츠금융지주"
+    ]
+  },
+  "prev_prediction_result": {
+    "date": "2026-10-29",
+    "direction": "상승 우위",
+    "ok": true,
+    "open_pct": 0.08
+  },
+  "prior_signals": {
+    "sox": -1.42,
+    "nasdaq": -1.38,
+    "nq": -2.83,
+    "ewy_resid": -4.377,
+    "vix": 1.715
+  },
+  "prev_supply": {
+    "date": "20261029",
+    "individual": 334,
+    "institution": -4473,
+    "foreign": 756
+  }
+}
