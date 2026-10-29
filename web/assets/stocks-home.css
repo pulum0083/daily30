@@ -735,6 +735,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #us-evening .ue-macro b{color:#0F172A;}
 #us-evening .ue-macro .cg{font-weight:700;}
 #us-evening .ue-sec{border-top:1px solid #F1F5F9;margin-top:10px;padding-top:10px;}
+#us-evening .ue-sec+.ue-sec{margin-top:16px;padding-top:14px;}   /* 선행 ETF 칸과 AI 인프라 주식 사이를 조금 더 띄운다(2026-10-29) */
 #us-evening .ue-st{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
 #us-evening .ue-st h4{margin:0;font-size:14px;font-weight:800;color:#0F172A;}
 #us-evening .ue-st span{font-size:12px;color:var(--muted);white-space:nowrap;}
