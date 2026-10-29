@@ -21,6 +21,7 @@ on:
         options:
           - kospi
           - us
+          - kospi-close
       date:
         description: "브리핑 날짜 (YYYY-MM-DD)"
         required: true
@@ -77,14 +78,22 @@ jobs:
 
           btype = os.environ["BRIEFING_TYPE"]
           date_str = os.environ["BRIEFING_DATE"]
-          snap = Path(f"web/briefings/{date_str}/{btype}/analysis_snapshot.json")
+          # 마감 브리핑은 발행 경로가 close/ 이고 메시지 파일 이름도 다르다.
+          is_close = btype == "kospi-close"
+          snap = Path(f"web/briefings/{date_str}/{'close' if is_close else btype}/analysis_snapshot.json")
           if not snap.exists():
               sys.exit(f"❌ 스냅샷 없음: {snap} — 그 날짜 브리핑이 발행되지 않았습니다.")
 
           analysis = json.loads(snap.read_text(encoding="utf-8"))
-          cc.save_telegram_message(btype, date_str, analysis)
+          if is_close:
+              # 시장 데이터는 커밋되지 않으므로 넘기지 않는다 — 시초가 기준 채점은 지수 일봉으로 다시 구한다.
+              cc.save_closing_telegram_message(date_str, analysis, {})
+              out = Path("data/telegram_message_kospi_close.txt")
+          else:
+              cc.save_telegram_message(btype, date_str, analysis)
+              out = Path(f"data/telegram_message_{btype}.txt")
           print("─" * 40)
-          print(Path(f"data/telegram_message_{btype}.txt").read_text(encoding="utf-8"))
+          print(out.read_text(encoding="utf-8"))
           print("─" * 40)
           PY
 
