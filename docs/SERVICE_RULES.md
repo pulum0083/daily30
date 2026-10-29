@@ -2579,3 +2579,8 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
   - 시안 `docs/prototypes/2026-10-29-close-briefing-simpler.html`(A안).
 - **타이틀 카피 원칙(세 브리핑 공통)** — 타이틀이 브리핑에서 가장 중요한 한 줄이다. `call_claude.HEADLINE_CRAFT` 한 곳에 두고 코스피 view_title·미국 view_title·마감 market_title 규칙에 끼운다(§30). 비유·의인화·말장난·대구를 적극적으로 쓰되, 비유 때문에 방향·주체·숫자가 달라지면 안 되고 자극적 과장은 쓰지 않는다. 기존 규칙(그날만의 사실·30자 안팎·금지어·코스피 숫자 게이트·미국 숫자 금지)은 그대로다.
 - 테스트 `scripts/test_close_brief.py`.
+- **어제와 비교·섹터별 오늘 등락·주도주 3종목 추가(같은 날)** — 시안 `docs/prototypes/2026-10-29-close-briefing-simpler.html`의 D·B·E.
+  - **어제와 비교**(마감 스냅샷 카드 안, 코스닥·환율 줄 아래)와 **섹터별 오늘 등락**(사이드바 맨 위, 대표 3종목 평균 막대 + 어제 대비 순위 ▲▼)은 종목 홈 '어제랑 비교' 마감 카드와 **같은 값**이다 — 마감 수집(`fetch_closing_kospi.fetch_vs_close`)이 `https://doubleshot.space/api/intraday?vs=close`를 받아 `vs_close`로 저장한다. 계산은 `api/_vs-close.mjs` 한 곳(§30). 응답이 `status: ok`이고 `today.date`가 오늘일 때만 쓰고, 아니면 비운다. 렌더도 `vs_close.today`가 브리핑 날짜와 같을 때만(§14).
+  - **주도주 3종목 마감**(요약 아래) — 삼성전자·SK하이닉스·현대차의 정규장 공식 종가·등락(`kr_official_closes.official_today`, §48)과 외국인 5일 순매수(주). 종목별 순매매는 오늘 행이 20:00 뒤에도 없어(§75) **오늘을 뺀 직전 5거래일** 합이고, 카드 아래에 기간을 적는다. 공식 종가가 없는 종목은 뺀다.
+  - 어제 §75에서 데이터를 고친 '거래대금 급증 종목'과 옛 사이드바 '섹터 로테이션'은 템플릿이 그리지 않는 섹션이었다(예전에 일부러 뺐다). 화면엔 이번에 넣은 섹터 막대만 나온다.
+  - 테스트 `scripts/test_close_vs_leaders.py`(10/28 실측 픽스처 `scripts/fixtures/vs_close_20261028.json`).

@@ -23,6 +23,17 @@
       <div class="a-sub-cell"><span class="a-sub-cell__name">{{ sub.name }}</span><span class="a-sub-cell__val">{{ sub.val }}</span><span class="a-sub-cell__chg {{ sub.chg_cls }}">{{ sub.chg }}</span></div>
       {% endfor %}
     </div>
+    {% if vs_line %}
+    {# 어제와 비교 — 종목 홈 '어제랑 비교' 마감 카드와 같은 확정값(2026-10-29) #}
+    <div class="vsl">
+      <div class="vsl-h"><span>어제와 비교</span><span>{{ vs_line.basis }}</span></div>
+      {% if vs_line.title %}<div class="vsl-t {{ vs_line.tone }}">{{ vs_line.title }}</div>{% endif %}
+      <div class="vsl-g">
+        {% for c in vs_line.cells %}<div class="vsl-c"><div class="l">{{ c.lbl }}</div><div class="v {{ c.cls }}">{{ c.val }}</div>{% if c.sub %}<div class="y">{{ c.sub }}</div>{% endif %}</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 <script>

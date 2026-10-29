@@ -34,6 +34,7 @@
               {% endif %}
               {% if comfort_line %}{% include "sections/_comfort_line.html" %}{% endif %}
             {% endif %}
+            {% if leaders %}{% include "sections/close_leaders.html" %}{% endif %}
             {% if supply_cells %}{% include "sections/close_supply.html" %}{% endif %}
             {% if supply_flow_rows %}{% include "sections/close_supply_flow.html" %}{% endif %}
             {% if breadth_rows %}{% include "sections/close_breadth.html" %}{% endif %}
@@ -45,6 +46,7 @@
     </main>
 
     <aside class="layout-grid__right">
+      {% if sector_bars %}{% include "sections/close_sector_bars.html" %}{% endif %}
       {% include "sections/_sidebar_kospi.html" %}
     </aside>
   </div>

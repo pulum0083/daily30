@@ -1,0 +1,10 @@
+{# 섹터별 오늘 등락 — 대표 3종목 평균, 정규장 공식 종가(종목 홈 '어제랑 비교'와 같은 값, 2026-10-29) #}
+<div class="right-panel sec8">
+  <div class="panel-header"><span class="section-title">섹터별 오늘 등락</span><span class="pub-time">대표 3종목 평균</span></div>
+  <div class="rota-list">
+    {% for b in sector_bars %}
+    <div class="rota-row"><span class="rota-name">{{ b.name }}{% if b.move %}<span class="mv">{{ b.move }}</span>{% endif %}</span><span class="bar"><span class="z"></span><i class="{{ b.cls }}" style="{% if b.neg %}right{% else %}left{% endif %}:50%;width:{{ b.w }}%"></i></span><span class="rota-pct {{ b.cls }}">{{ b.pct }}</span></div>
+    {% endfor %}
+  </div>
+  <div class="rota-take">정규장 공식 종가 기준이에요. ▲▼는 어제 대비 순위 이동이에요.</div>
+</div>

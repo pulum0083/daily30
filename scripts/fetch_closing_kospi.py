@@ -863,6 +863,90 @@ def alert_source_failures(data: dict, failures: list[str]) -> None:
         print(f"[fetch_closing] 관리자 알림 실패: {e}", file=sys.stderr)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 어제와 비교 · 섹터별 오늘 등락 — 종목 홈 '어제랑 비교' 마감 카드와 같은 값(2026-10-29)
+# ─────────────────────────────────────────────────────────────────────────────
+VS_CLOSE_URL = "https://doubleshot.space/api/intraday?vs=close"
+
+
+def parse_vs_close(payload, today: str) -> dict:
+    """/api/intraday?vs=close 응답 → 마감 브리핑용 요약. 오늘 날짜의 확정값(status ok)이 아니면 {}.
+
+    계산은 api/_vs-close.mjs 한 곳이다(§30) — 여기서는 곡선을 빼고 필요한 칸만 옮긴다.
+    """
+    p = payload if isinstance(payload, dict) else {}
+    if p.get("status") != "ok" or (p.get("today") or {}).get("date") != today:
+        return {}
+    k = p.get("kospi") or {}
+    heat = ((p.get("axes") or {}).get("heat")) or {}
+    secs = [s for s in ((p.get("axes") or {}).get("sectors") or [])
+            if isinstance(s, dict) and isinstance(s.get("t"), (int, float))]
+    if not isinstance(k.get("t"), (int, float)):
+        return {}
+    pick = lambda d: {x: d.get(x) for x in ("t", "y", "diff")} if isinstance(d, dict) else {}
+    return {
+        "today": today,
+        "prev_date": (p.get("prev") or {}).get("date"),
+        "prev_rel": (p.get("prev") or {}).get("rel"),
+        "verdict": ((p.get("verdict") or {}).get("title")) or "",
+        "tone": ((p.get("verdict") or {}).get("tone")) or "",
+        "kospi": pick(k),
+        "vol": pick(heat.get("vol")),
+        "amp": pick(heat.get("amp")),
+        "sectors": [{"key": s.get("key"), "label": s.get("label"), "n": s.get("n"), "t": s["t"],
+                     "rank": s.get("rank"), "move": s.get("move") if s.get("prevRank") is not None else None}
+                    for s in secs],
+    }
+
+
+def fetch_vs_close(now=None, fetch=_get_json) -> dict:
+    today = (now or datetime.now(KST)).strftime("%Y-%m-%d")
+    try:
+        out = parse_vs_close(fetch(VS_CLOSE_URL, timeout=60), today)
+    except Exception as e:
+        print(f"[fetch_closing] 어제와 비교 조회 실패: {e}", file=sys.stderr)
+        return {}
+    if not out:
+        print("[fetch_closing] 어제와 비교: 오늘 확정값이 아니라 비운다", file=sys.stderr)
+    return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 주도주 3종목 마감 — 정규장 공식 종가 + 외국인 5일 순매수(2026-10-29)
+# ─────────────────────────────────────────────────────────────────────────────
+LEADERS = (("005930", "삼성전자"), ("000660", "SK하이닉스"), ("005380", "현대차"))
+
+
+def frgn_5days(rows: list, today: str):
+    """trend 행(최신순)에서 오늘 이전 거래일 5개의 외국인 순매수(주) 합과 기간. 5개가 안 되면 None.
+
+    네이버 종목별 순매매의 오늘 행은 20:00이 지나도 없어서(§75) 오늘을 넣지 않는다 — 기간을 화면에 밝힌다.
+    """
+    past = [r for r in rows if r.get("date", "") < today and isinstance(r.get("frgn"), (int, float))][:5]
+    if len(past) < 5:
+        return None
+    return {"sum": int(sum(r["frgn"] for r in past)), "from": past[-1]["date"], "to": past[0]["date"]}
+
+
+def fetch_leaders_close(now=None, fetch=_get_json, official_today=None) -> list:
+    now = now or datetime.now(KST)
+    official_today = official_today or _official_today_fn()
+    today = now.strftime("%Y%m%d")
+    out = []
+    for code, name in LEADERS:
+        q = official_today(code, now=now)
+        if not q:
+            print(f"[fetch_closing] 주도주 {name}: 오늘 공식 종가 없음 — 뺀다", file=sys.stderr)
+            continue
+        try:
+            f5 = frgn_5days(parse_stock_trend(fetch(STOCK_TREND_URL.format(code=code))), today)
+        except Exception as e:
+            print(f"[fetch_closing] 주도주 {name} 수급 조회 실패: {e}", file=sys.stderr)
+            f5 = None
+        out.append({"code": code, "name": name, "close": q["close"], "change_pct": q["change_pct"], "frgn5": f5})
+    return out
+
+
 def fetch_closing_data() -> dict:
     print("[fetch_closing] 코스피 마감 데이터 수집 시작...")
 
@@ -897,6 +981,12 @@ def fetch_closing_data() -> dict:
     print("[fetch_closing]   → 거래대금 급증 + 수급 동반 종목")
     dpick = fetch_dpick()
 
+    print("[fetch_closing]   → 어제와 비교 · 섹터별 등락 (종목 홈 마감 카드와 같은 값)")
+    vs_close = fetch_vs_close()
+
+    print("[fetch_closing]   → 주도주 3종목 마감")
+    leaders = fetch_leaders_close()
+
     print("[fetch_closing]   → 코스피 200 TOP10")
     kospi200_top10 = fetch_kospi200_top10()
 
@@ -923,6 +1013,8 @@ def fetch_closing_data() -> dict:
         "trade_amount": trade_amount,
         "market_breadth": market_breadth,
         "dpick": dpick,
+        "vs_close": vs_close,
+        "leaders": leaders,
         "kospi200_top10": kospi200_top10,
         "ai_semicon_stocks": ai_semicon_stocks,
     }

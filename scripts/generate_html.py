@@ -1325,6 +1325,72 @@ def _fng_is_fresh(fng: dict, max_age_days: int = 5, now=None) -> bool:
     return True
 
 
+def _shares_label(n) -> str:
+    """주 수 → '66.9만주'·'2억 2,320만주'·'9,800주'(부호 없음)."""
+    n = abs(int(n))
+    if n >= 100_000_000:
+        eok, man = divmod(n, 100_000_000)
+        return f"{eok}억 {man // 10_000:,}만주" if man >= 10_000 else f"{eok}억주"
+    if n >= 10_000:
+        return f"{n / 10_000:,.1f}만주"
+    return f"{n:,}주"
+
+
+def build_close_vs(vs: dict) -> dict:
+    """/api/intraday?vs=close 요약 → '어제와 비교' 한 줄 + 사이드바 섹터 막대(종목 홈 마감 카드와 같은 값)."""
+    out = {}
+    k, vol, amp = vs.get("kospi") or {}, vs.get("vol") or {}, vs.get("amp") or {}
+    num = lambda x: isinstance(x, (int, float))
+    rel = vs.get("prev_rel") or "어제"
+    cells = []
+    if num(k.get("t")):
+        cells.append({"lbl": "코스피", "val": f"{k['t']:+.2f}%", "cls": "up" if k["t"] > 0 else "dn" if k["t"] < 0 else "",
+                      "sub": f"{rel} {k['y']:+.2f}%" if num(k.get("y")) else ""})
+    if num(vol.get("diff")):
+        cells.append({"lbl": "거래량", "val": f"{vol['diff']:+.1f}%", "cls": "",
+                      "sub": _shares_label(vol["t"] * 1000) if num(vol.get("t")) else ""})
+    if num(amp.get("t")):
+        cells.append({"lbl": "진폭", "val": f"{amp['t']:.2f}%", "cls": "",
+                      "sub": f"{rel} {amp['y']:.2f}%" if num(amp.get("y")) else ""})
+    if cells:
+        pd = str(vs.get("prev_date") or "")
+        out["vs_line"] = {"title": vs.get("verdict") or "", "tone": vs.get("tone") or "", "cells": cells,
+                          "basis": (f"{int(pd[5:7])}/{int(pd[8:10])} vs " if len(pd) == 10 else "")
+                                   + f"{int(vs['today'][5:7])}/{int(vs['today'][8:10])} · 15:30 확정"}
+    secs = [x for x in vs.get("sectors") or [] if num(x.get("t"))]
+    if secs:
+        secs.sort(key=lambda x: -x["t"])
+        mx = max(abs(x["t"]) for x in secs) or 1
+        out["sector_bars"] = [{
+            "name": x.get("label", ""), "pct": f"{x['t']:+.2f}%", "cls": "up" if x["t"] >= 0 else "dn",
+            "w": round(abs(x["t"]) / mx * 50, 1), "neg": x["t"] < 0,
+            "move": (f"▲{x['move']}" if x["move"] > 0 else f"▼{-x['move']}") if num(x.get("move")) and x["move"] else "",
+            "partial": x.get("n") if num(x.get("n")) and x["n"] < 3 else None,
+        } for x in secs]
+    return out
+
+
+def build_close_leaders(rows: list) -> list:
+    """주도주 3종목 마감 — 공식 종가·등락·외국인 5일 순매수(주). 종가가 없는 종목은 빠져 있다."""
+    out = []
+    for r in rows:
+        if not isinstance(r.get("close"), (int, float)) or not isinstance(r.get("change_pct"), (int, float)):
+            continue
+        cp = r["change_pct"]
+        f5 = r.get("frgn5") or {}
+        row = {"name": r.get("name", ""), "close": f"{int(r['close']):,}",
+               "chg": f"{'▲' if cp > 0 else '▼' if cp < 0 else ''} {cp:+.2f}%".strip(),
+               "cls": "up" if cp > 0 else "dn" if cp < 0 else ""}
+        if isinstance(f5.get("sum"), (int, float)):
+            row["frgn5"] = ("+" if f5["sum"] > 0 else "−" if f5["sum"] < 0 else "") + _shares_label(f5["sum"])
+            row["frgn5_cls"] = "up" if f5["sum"] > 0 else "dn" if f5["sum"] < 0 else ""
+            fr, to = str(f5.get("from", "")), str(f5.get("to", ""))
+            if len(fr) == 8 and len(to) == 8:
+                row["frgn5_range"] = f"{int(fr[4:6])}/{int(fr[6:])}~{int(to[4:6])}/{int(to[6:])}"
+        out.append(row)
+    return out
+
+
 def build_close_sections(analysis: dict, market: dict, index_name: str, target_date: str) -> dict:
     """마감 전용 섹션 컨텍스트 (있는 데이터만)."""
     ctx = {}
@@ -1408,6 +1474,15 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
             ]})
         if rows:
             ctx["breadth_rows"] = rows
+
+    # 어제와 비교 · 섹터별 오늘 등락 · 주도주 3종목(2026-10-29) — 수집일이 브리핑 날짜와 같을 때만(§14)
+    vs = market.get("vs_close") or {}
+    if vs.get("today") == target_date:
+        ctx.update(build_close_vs(vs))
+    if str(market.get("generated_at", ""))[:10] == target_date:
+        leaders = build_close_leaders(market.get("leaders") or [])
+        if leaders:
+            ctx["leaders"] = leaders
 
     # close_sector
     sectors = market.get("sectors", [])

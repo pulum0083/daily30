@@ -1,0 +1,12 @@
+{# 주도주 3종목 마감 — 정규장 공식 종가·등락 + 외국인 5일 순매수(2026-10-29) #}
+<div class="section-card">
+  <div class="section-card__head"><span class="section-card__title">주도주 3종목 마감</span><span class="section-card__sub">정규장 공식 종가</span></div>
+  <div class="ld3">
+    {% for r in leaders %}
+    <div class="ld"><div class="n">{{ r.name }}</div><div class="p">{{ r.close }}</div><div class="c {{ r.cls }}">{{ r.chg }}</div>
+      {% if r.frgn5 %}<div class="f">외국인 5일<b class="{{ r.frgn5_cls }}">{{ r.frgn5 }}</b></div>{% endif %}</div>
+    {% endfor %}
+  </div>
+  {% set rng = (leaders | selectattr('frgn5_range') | map(attribute='frgn5_range') | first) if (leaders | selectattr('frgn5_range') | list) else '' %}
+  {% if rng %}<p class="ld-note">외국인 5일 순매수는 {{ rng }} 합계(주)예요. 종목별 수급 집계가 하루 늦어 오늘은 아직 들어 있지 않아요.</p>{% endif %}
+</div>
