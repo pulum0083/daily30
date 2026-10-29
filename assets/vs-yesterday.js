@@ -300,22 +300,27 @@
       var len = r == null ? '' : r >= 1.05 ? '오늘 막대가 약 ' + r.toFixed(1) + '배 길어요.' : r <= 0.95 ? '오늘 막대가 ' + esc(rel) + '의 약 ' + r.toFixed(1) + '배로 짧아요.' : '길이는 비슷해요.';
       note = '<p class="vs-sub">' + (same ? '두 막대의 구도가 같고, ' : esc(rel) + josa(rel, '과', '와') + ' 사고판 쪽이 바뀌었고, ') + len + '</p>';
     }
-    var inst = (axes.flow.inst || []).filter(function (f) { return typeof f.t === 'number'; });
-    var pos = inst.filter(function (f) { return f.t > 0; }), neg = inst.filter(function (f) { return f.t < 0; });
-    var tot = pos.reduce(function (a, f) { return a + f.t; }, 0), instHtml = '';
-    if (pos.length) {
-      instHtml += '<div class="vsx-stack">' + pos.map(function (f, i) {
-        var sh = f.t / tot;
-        return '<i class="g' + Math.min(i, 5) + '" style="width:' + (sh * 100).toFixed(2) + '%">' + (sh > 0.12 ? esc(f.key) + ' ' + Math.round(sh * 100) + '%' : '') + '</i>';
-      }).join('') + '</div><div class="vsx-skey">' + pos.map(function (f, i) {
-        return '<span><i class="g' + Math.min(i, 5) + '"></i>' + esc(f.key) + ' ' + eok(f.t) + (f.turned ? '(' + esc(rel) + josa(rel, '은', '는') + ' 팔았어요)' : '') + '</span>';
+    // 기관 안 구성(2026-10-29) — 산 곳만 100% 비율 막대로 그리면, 기관 전체가 크게 팔고 한 곳만 조금 산 날에
+    // "기타금융 100%"처럼 읽혔다. 세부 주체를 모두 같은 눈금의 좌우 막대로 놓아 산 곳·판 곳의 크기를 함께 보인다.
+    var inst = (axes.flow.inst || []).filter(function (f) { return typeof f.t === 'number' && f.t !== 0; })
+      .sort(function (a, b) { return b.t - a.t; }), instHtml = '';
+    if (inst.length) {
+      var imax = Math.max.apply(null, inst.map(function (f) { return Math.abs(f.t); })) || 1;
+      var nb = inst.filter(function (f) { return f.t > 0; }).length, ns = inst.length - nb, it = val('기관', 't');
+      var head = (it != null ? '기관 합계 <b class="' + cls(it) + '">' + eok(it) + '</b> · ' : '') +
+        (nb && ns ? '산 곳 ' + nb + ' · 판 곳 ' + ns : nb ? inst.length + '곳 모두 샀어요' : inst.length + '곳 모두 팔았어요');
+      instHtml += '<p class="vs-sub">' + head + '</p><div class="vsx-inst">' + inst.map(function (f) {
+        var w = (Math.abs(f.t) / imax * 50).toFixed(2);
+        return '<div class="ir"><span class="nm">' + esc(f.key) + '</span><span class="bar"><i class="mid"></i><i class="' + cls(f.t) +
+          '" style="' + (f.t > 0 ? 'left:50%' : 'right:50%') + ';width:' + w + '%"></i></span><b class="' + cls(f.t) + '">' + eok(f.t) + '</b></div>';
       }).join('') + '</div>';
+      var turned = inst.filter(function (f) { return f.turned; }).map(function (f) { return esc(f.key); });
+      if (turned.length) instHtml += '<p class="vs-sub">' + esc(rel) + josa(rel, '과', '와') + ' 반대로 움직인 곳 · ' + turned.join('·') + '</p>';
     }
-    if (neg.length) instHtml += '<p class="vs-sub">판 곳 · ' + neg.map(function (f) { return esc(f.key) + ' ' + eok(f.t) + (f.turned ? '(' + esc(rel) + josa(rel, '은', '는') + ' 샀어요)' : ''); }).join(', ') + '</p>';
     var subLabel = (slot === 'close' || slot === 'night') ? '<span>정규장 확정 15:40</span>' : '';
     return '<div class="vs-card"><div class="vs-card-h"><p><span class="ic">👥</span>누가 사는가</p>' + subLabel + '</div>' +
       '<p class="vs-sub vsx-desc">코스피 전체 누적 순매수 · 왼쪽은 판 쪽, 오른쪽은 산 쪽이에요</p>' + bars + note +
-      (instHtml ? '<p class="vs-lbl vsx-sec">기관 순매수 구성</p>' + instHtml : '') + '</div>';
+      (instHtml ? '<p class="vs-lbl vsx-sec">기관 안에서는</p>' + instHtml : '') + '</div>';
   }
 
   // 결론 근거 4줄(가격·강도·주도권·누가) — 승인 시안(docs/prototypes/2026-09-16-vs-home-design.html heroCard) 그대로다.

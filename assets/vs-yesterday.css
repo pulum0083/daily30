@@ -164,12 +164,15 @@
 .vsx-bal .who{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:12px;color:#0F172A}
 .vsx-bal .who .r{text-align:right}
 .vsx-bal .who b{font-variant-numeric:tabular-nums} .vsx-bal .who b.up{color:var(--up)} .vsx-bal .who b.dn{color:var(--dn)}
-.vsx-stack{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:4px 0 6px}
-.vsx-stack i{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-style:normal;color:#fff;white-space:nowrap;overflow:hidden}
 /* 기관 순매수 구성 — 산 주체라 빨강 계열(2026-10-29, 예전 검정~회색) */
-.vsx-stack i.g0,.vsx-skey i.g0{background:#E86464} .vsx-stack i.g1,.vsx-skey i.g1{background:#EF9494} .vsx-stack i.g2,.vsx-skey i.g2{background:#F4B9B9}
-.vsx-stack i.g3,.vsx-skey i.g3{background:#F8D3D3} .vsx-stack i.g4,.vsx-skey i.g4{background:#FBE3E3} .vsx-stack i.g5,.vsx-skey i.g5{background:#FDF0F0}
-.vsx-stack i.g2,.vsx-stack i.g3,.vsx-stack i.g4,.vsx-stack i.g5{color:#7F1D1D}
-.vsx-skey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted)}
-.vsx-skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
 @media (max-width:760px){.vs-kpi b{font-size:17px}.vsx-two b{font-size:26px}}
+/* 기관 안 구성 — 세부 주체를 같은 눈금의 좌우 막대로(산 쪽 오른쪽 빨강, 판 쪽 왼쪽 파랑) */
+.vsx-inst{display:flex;flex-direction:column;gap:2px;margin:4px 0 6px}
+.vsx-inst .ir{display:grid;grid-template-columns:64px minmax(0,1fr) 72px;align-items:center;gap:8px;height:24px}
+.vsx-inst .nm{font-size:12.5px;font-weight:700;color:#0F172A;white-space:nowrap}
+.vsx-inst .bar{position:relative;height:12px}
+.vsx-inst .bar i{position:absolute;top:0;bottom:0;border-radius:3px}
+.vsx-inst .bar i.up{background:#E86464} .vsx-inst .bar i.dn{background:#5D97F1}
+.vsx-inst .bar i.mid{left:50%;width:1px;top:-3px;bottom:-3px;background:#CBD5E1;border-radius:0}
+.vsx-inst b{font-size:12.5px;text-align:right;white-space:nowrap}
+.vsx-inst b.up{color:var(--up)} .vsx-inst b.dn{color:var(--dn)}
