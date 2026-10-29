@@ -158,7 +158,7 @@
       '<a class="hh-cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div>';
   }
 
-  // ── 구조 신호(§68 ⑤) — 월 단위로 바뀌는 신호 두 줄. 가장 최근 발행 스냅샷에서만 읽고(옛 날짜로 거슬러 가지 않는다),
+  // ── 구조 신호(§68 ⑤) — 월봉 기준 신호 두 줄(값은 브리핑마다 다시 계산한다). 가장 최근 발행 스냅샷에서만 읽고(옛 날짜로 거슬러 가지 않는다),
   //    그 발행이 STRUCT_MAX_AGE일보다 오래됐으면 수집이 멈춘 것으로 보고 뺀다(§20). 기준 브리핑 날짜를 줄마다 밝힌다.
   var STRUCT_MAX_AGE = 10;
   function daysBetween(a, b) {
@@ -218,7 +218,8 @@
   function structHtml(nq, nqDate, m5, m5Date, today) {
     var rows = (nqDate ? nasdaqRow(nq, nqDate, today) : '') + (m5Date ? ma5Row(m5, m5Date, today) : '');
     return rows ? '<div class="block__h"><span class="block__t"><span class="ic">🧱</span>구조 신호</span>' +
-      '<span class="block__s">월 단위로 바뀌는 신호</span></div>' + rows : '';
+      // 계산은 브리핑마다(나스닥 21:15·월봉 07:25) 다시 한다 — '월 단위'로만 쓰면 월 1회 갱신으로 읽혔다(2026-10-29)
+      '<span class="block__s">월봉 기준 · 매일 업데이트</span></div>' + rows : '';
   }
 
   var structEl = document.getElementById('struct-sig');
