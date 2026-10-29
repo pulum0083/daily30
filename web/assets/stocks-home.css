@@ -45,7 +45,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
    예전엔 한 줄에 다 넣고 코스닥·환율을 칩으로 접어 두었는데, 폰에선 수급이 어중간하게 두 줄로 갈라지고
    'LIVE · 60초 갱신'이 카드 밖과 안에 두 번 나왔다. PC(>900px)에선 수급이 오른쪽으로 붙는다. */
 .idx-card{background:var(--canvas);border:1px solid var(--hair);border-radius:10px;box-shadow:var(--s1);margin-bottom:10px;display:flex;align-items:stretch;}
-.idx-card.is-open{border-radius:10px 10px 0 0;border-bottom-color:transparent;margin-bottom:0;}
 .ix-top{flex:0 0 auto;padding:9px 14px 10px;min-width:0;}
 .ix-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .ix-hours{font-size:11px;color:var(--muted);white-space:nowrap;}
@@ -60,7 +59,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ix-sub{white-space:nowrap;}
 .ix-sub b{color:var(--ink);font-weight:700;margin:0 4px;}
 .ix-sub .vc{font-weight:600;}
-/* 수급 — 머리줄(라벨·기준·10일 추이) + 개인·기관·외국인 세 칸. 금액은 조·억 단위로 적는다. */
+/* 수급 — 머리줄(라벨·기준) + 개인·기관·외국인 세 칸. 10일 추이 토글은 2026-10-29 뺐다. 금액은 조·억 단위로 적는다. */
 .supply{flex:1 1 auto;min-width:0;padding:9px 14px 10px;border-left:1px solid var(--hair);display:flex;flex-direction:column;justify-content:center;}
 .supply[hidden]{display:none;}
 .sup-h{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;}
@@ -87,55 +86,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
   .sup-h{margin-bottom:10px;}
   .sup-g .s+.s{padding-left:16px;}
   .sup-g .s b{font-size:17px;}
-}
-.sup-more{flex-shrink:0;margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);background:var(--primary-bg);border:1px solid #DBEAFE;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap;}
-.sup-more[hidden]{display:none;}
-.sup-more:hover{background:#E0EBFD;}
-.sup-more .cv{display:inline-flex;transition:transform .18s;}
-.sup-more .cv svg{width:11px;height:11px;}
-.idx-card.is-open .sup-more .cv{transform:rotate(180deg);}
-/* 10일 추이 패널 */
-.sup-panel{background:var(--canvas);border:1px solid var(--hair);border-top:none;border-radius:0 0 10px 10px;box-shadow:var(--s1);padding:2px 14px 12px;margin-bottom:10px;}
-.sup-panel[hidden]{display:none;}
-.sp-head{display:flex;align-items:center;flex-wrap:wrap;gap:7px 11px;padding:11px 0 9px;border-bottom:1px solid #EEF2F6;}
-.sp-t{font-size:13px;font-weight:800;}
-.sp-sub{font-size:11px;color:var(--muted);}
-.sp-legend{display:inline-flex;align-items:center;gap:10px;margin-left:auto;}
-.sp-legend .lg{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#475569;}
-.sp-legend .sw{width:9px;height:9px;border-radius:2px;flex:none;}
-.sp-tbl{font-size:11px;font-weight:700;color:#475569;background:#F1F5F9;border:1px solid var(--hair);border-radius:6px;padding:4px 9px;cursor:pointer;}
-.sp-tbl:hover{background:#E8EDF3;}
-.sp-tbl[aria-pressed="true"]{background:var(--primary-bg);border-color:#DBEAFE;color:var(--primary);}
-.sp-row{display:flex;align-items:center;gap:12px;padding:8px 0;}
-.sp-row + .sp-row{border-top:1px solid #EEF2F6;}
-.sp-row .who{flex:0 0 46px;font-size:12px;font-weight:800;}
-.sp-row .plot{flex:1 1 auto;min-width:0;}
-.sp-row .plot svg{display:block;width:100%;height:60px;overflow:visible;}
-.sp-row .sum{flex:0 0 86px;text-align:right;}
-.sp-row .sum .k{display:block;font-size:11px;color:var(--muted);font-weight:600;}
-.sp-row .sum .v{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
-.sp-axis{display:flex;gap:12px;padding-top:2px;}
-.sp-axis .who{flex:0 0 46px;}.sp-axis .plot{flex:1 1 auto;min-width:0;}.sp-axis .sum{flex:0 0 86px;}
-.xax{position:relative;height:14px;}
-.xax span{position:absolute;top:0;font-size:11px;color:var(--muted);white-space:nowrap;}
-.sp-foot{font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;padding-top:8px;border-top:1px solid #EEF2F6;}
-.sp-foot b{color:#475569;}
-.sp-tblwrap{overflow-x:auto;margin-top:8px;}
-.sp-tblwrap table{width:100%;border-collapse:collapse;font-size:12px;}
-.sp-tblwrap th,.sp-tblwrap td{padding:6px 9px;border-bottom:1px solid #EEF2F6;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums;}
-.sp-tblwrap th:first-child,.sp-tblwrap td:first-child{text-align:left;font-variant-numeric:normal;}
-.sp-tblwrap th{font-size:11px;font-weight:800;color:var(--muted);background:#FAFBFC;}
-.sp-tblwrap tr:last-child td{border-bottom:none;}
-.sp-tblwrap td.na{color:#CBD5E1;}
-@media(max-width:640px){
-  /* 가로 3분할하면 11개 막대에 200px도 안 남는다 — 이름·합계를 한 줄로 올리고 차트가 폭을 다 쓴다 */
-  .sp-row{flex-wrap:wrap;gap:0 8px;}
-  .sp-row .who{flex:0 0 auto;font-size:12px;}
-  .sp-row .sum{flex:1 1 auto;text-align:right;}
-  .sp-row .sum .k{display:inline;margin-right:5px;}
-  .sp-row .plot{flex:0 0 100%;order:3;margin-top:2px;}
-  .sp-axis .who,.sp-axis .sum{display:none;}
-  .sp-axis .plot{flex:0 0 100%;}
 }
 /* ── AI 브리핑 스트립 ── */
 /* ── 더블샷 브리핑 커넥터 (브리핑 타임에 맞춰 실제 브리핑 연결) ── */
