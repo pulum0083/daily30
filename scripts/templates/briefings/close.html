@@ -21,7 +21,9 @@
           <div class="accordion-body__inner">
             {% if intraday_prices %}{% include "sections/close_hero.html" %}{% endif %}
             {% if reason_title %}
-              {% if analysis_format == 'scenario' %}
+              {% if analysis_format == 'brief' %}
+                {% include "sections/close_brief.html" %}
+              {% elif analysis_format == 'scenario' %}
                 {% include "sections/scenario_split.html" %}
               {% elif analysis_format == 'qa' %}
                 {% include "sections/qa.html" %}

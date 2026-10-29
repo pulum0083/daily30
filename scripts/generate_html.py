@@ -1372,13 +1372,17 @@ def build_close_sections(analysis: dict, market: dict, index_name: str, target_d
         ctx["reason_title"] = analysis.get("market_title") or analysis.get("reason_title", "")
         ctx["close_dek"] = analysis.get("dek", "")   # 타이틀 아래 서브 한 문장 — 텔레그램과 같은 필드(§62)
         ctx["comfort_line"] = _split_comfort_line(analysis.get("comfort_line", ""))
-        if fmt == "scenario":
+        if fmt == "brief":   # 세 줄 요약(원인·주도·다음) — 2026-10-29부터 마감 고정 형식
+            ctx["brief_lines"] = [{"k": str(it.get("k", "")), "text": str(it.get("text", ""))}
+                                  for it in (analysis.get("brief_lines") or [])
+                                  if isinstance(it, dict) and it.get("text")]
+        elif fmt == "scenario":
             ctx.update(build_scenario_context(analysis))
         elif fmt == "qa":
             ctx.update(build_qa_context(analysis))
         elif fmt == "signal":
             ctx.update(build_signal_context(analysis))
-        else:  # why_what_so (default for close)
+        else:  # why_what_so (옛 발행본)
             ctx["reason_lead"] = analysis.get("market_summary", "")
             b_rows = []
             for label, key, sw in [("WHY", "why", False), ("WHAT", "what", False), ("SO?", "so_what", True)]:

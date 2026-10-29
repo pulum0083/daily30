@@ -1,0 +1,11 @@
+{# 마감 요약 — 타이틀 + 서브 한 문장 + 세 줄(원인·주도·다음). 2026-10-29부터 마감 고정 형식 #}
+<div class="section-card">
+  <div class="reason-title-bar">{{ reason_title }}</div>
+  {% if close_dek %}<p class="close-dek">{{ close_dek | safe }}</p>{% endif %}
+  {% if brief_lines %}
+  <ul class="brief3">
+    {% for ln in brief_lines %}<li><span class="k">{{ ln.k }}</span><span>{{ ln.text | safe }}</span></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>

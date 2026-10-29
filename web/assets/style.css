@@ -1396,6 +1396,11 @@ html.dark .arch-item__dek{color:var(--muted);}
 @media(max-width:640px){.m5a-cell span{font-size:9px}.m5a-streak b{font-size:26px}}
 /* 마감 브리핑 타이틀 아래 서브 한 문장(dek) — 텔레그램과 같은 필드(SERVICE_RULES §62) */
 .close-dek{margin:0;padding:10px 16px 2px;font-size:13.5px;line-height:1.65;color:var(--muted)}
+/* 마감 세 줄 요약(원인·주도·다음, 2026-10-29) — 라벨 칩 + 한 문장 */
+.brief3{list-style:none;margin:0;padding:8px 16px 14px;display:flex;flex-direction:column;gap:9px}
+.brief3 li{display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:1.6;color:var(--ink)}
+.brief3 li>span:last-child{min-width:0}
+.brief3 .k{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--muted);background:var(--surface,#F1F5F9);border-radius:5px;padding:2px 7px}
 .close-dek b{color:var(--ink);font-weight:700}
 
 /* ── 코스피 아침 3단 구조(2026-10-26, §63): 30초 요약 카드 + 오늘의 이슈 점검 ── */

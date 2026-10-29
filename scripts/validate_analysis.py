@@ -1425,6 +1425,7 @@ FORMAT_BODY_FIELDS = {
     "split": (),                                   # 형식별 필드 없음 — todays_view의 recap/outlook이 본문
     "scenario": ("sc_left_items", "sc_right_items", "sc_summary"),
     "why_what_so": ("why", "what", "so_what"),
+    "brief": ("brief_lines", "dek"),               # 마감 세 줄 요약 — 세 줄이 다 빠져도 dek가 있으면 타이틀+dek로 렌더된다
     "qa": ("qa_items",),
     "signal": ("sig_items",),
     "flow": ("flow_steps",),
@@ -1612,6 +1613,8 @@ def validate(analysis, latest, btype):
         a["reasons"] = kept
         if len(kept) < REASONS_MIN:
             blocks.append(f"reasons가 {len(kept)}개로 과소 (최소 {REASONS_MIN})")
+    if isinstance(a.get("brief_lines"), list):   # 마감 세 줄 요약 — 위반 줄만 뺀다
+        a["brief_lines"], _ = _filter_list_prose(a["brief_lines"], "brief_lines", corrections)
     if isinstance(a.get("watch_items"), list):
         a["watch_items"], _ = _filter_list_prose(a["watch_items"], "watch_items", corrections)
     if btype == "kospi":
