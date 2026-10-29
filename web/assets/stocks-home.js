@@ -1073,7 +1073,8 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   // 신호 1건 → D안 마크업(i===0이면 히어로, 나머지는 컴팩트 행). 홈·더보기 화면 공용.
   // 종목 상세 페이지는 없다(2026-10-26 제거) — 그 종목의 섹터 페이지로 보내고, 섹터를 모르면 링크하지 않는다.
   function sigItemHtml(s,i,heroFlag){
-    var lc=s.dir==='up'?'var(--up)':'var(--dn)', sign=s.pct>=0?'+':'';
+    var flat=Math.abs(s.pct)<0.05;   // 0.0%로 보이는 값은 회색(2026-10-29)
+    var lc=flat?'var(--muted)':s.dir==='up'?'var(--up)':'var(--dn)', sign=!flat&&s.pct>0?'+':'';
     var badges=(s.badges||[]).map(badgeHtml).join('');
     var secKey=SECTOR_KEY_OF[s.sector];
     var tag=secKey?'a':'div';

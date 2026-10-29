@@ -201,7 +201,7 @@
     var aBig = ratio != null ? ratio.toFixed(1) + '배' : amp.t != null ? amp.t.toFixed(2) + '%' : '—';
     var aSub = amp.t != null ? amp.t.toFixed(2) + '% · 어제 ' + (amp.y != null ? amp.y.toFixed(2) + '%' : '—') : '오늘 값 없음';
     var word = heatWord(vol.judge, amp.judge);
-    return '<div class="vs-card"><div class="vs-card-h vsx-hc"><p>얼마나 뜨거운가</p>' + (word ? '<span class="vsx-badge">' + word + '</span>' : '') + '</div>' +
+    return '<div class="vs-card"><div class="vs-card-h vsx-hc"><p><span class="ic">🔥</span>얼마나 뜨거운가</p>' + (word ? '<span class="vsx-badge">' + word + '</span>' : '') + '</div>' +
       '<div class="vsx-two"><div><span class="l">거래량</span><b>' + vBig + '</b><span class="s">' + vSub + '</span></div>' +
       '<div><span class="l">하루 진폭</span><b>' + aBig + '</b><span class="s">' + aSub + '</span></div></div></div>';
   }
@@ -251,7 +251,7 @@
       foot = '<p class="vs-sub">' + (list.length === 0 ? (list === beat ? '코스피보다 센 섹터는 없어요.' : '모든 섹터가 코스피보다 세요.')
         : '코스피보다 ' + what + ' 섹터는 <b>' + esc(list.join('·')) + '</b>' + (list.length === 1 ? '뿐이에요.' : josa(tail, '이에요.', '예요.'))) + '</p>';
     }
-    return '<div class="vs-card"><div class="vs-card-h"><p>어디가 이끄나</p></div>' +
+    return '<div class="vs-card"><div class="vs-card-h"><p><span class="ic">🏁</span>어디가 이끄나</p></div>' +
       '<p class="vs-sub vsx-desc">섹터 대표 3종목 평균 · 숫자는 오늘 순위, 화살표는 어제 대비' + (kp != null ? ' · 점선을 넘은 섹터가 코스피보다 센 곳' : '') + '</p>' +
       '<div class="vsx-lead' + (kp != null || kq != null ? ' has-lab' : '') + '">' + rows + '<div class="vsx-lines">' + lines + '</div></div>' + foot + '</div>';
   }
@@ -313,7 +313,7 @@
     }
     if (neg.length) instHtml += '<p class="vs-sub">판 곳 · ' + neg.map(function (f) { return esc(f.key) + ' ' + eok(f.t) + (f.turned ? '(' + esc(rel) + josa(rel, '은', '는') + ' 샀어요)' : ''); }).join(', ') + '</p>';
     var subLabel = (slot === 'close' || slot === 'night') ? '<span>정규장 확정 15:40</span>' : '';
-    return '<div class="vs-card"><div class="vs-card-h"><p>누가 사는가</p>' + subLabel + '</div>' +
+    return '<div class="vs-card"><div class="vs-card-h"><p><span class="ic">👥</span>누가 사는가</p>' + subLabel + '</div>' +
       '<p class="vs-sub vsx-desc">코스피 전체 누적 순매수 · 왼쪽은 판 쪽, 오른쪽은 산 쪽이에요</p>' + bars + note +
       (instHtml ? '<p class="vs-lbl vsx-sec">기관 순매수 구성</p>' + instHtml : '') + '</div>';
   }

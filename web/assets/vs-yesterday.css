@@ -1,6 +1,6 @@
 /* '어제랑 비교해서' 장중 대결판 스타일 — 지금 사이트(stocks-home.css) 값 기준, vs- 접두로 기존 클래스와 분리 */
 #vs-root{margin-bottom:12px}
-.vs-hero,.vs-card{background:var(--canvas);border:1px solid var(--hair);border-radius:14px;box-shadow:var(--s1);padding:14px 16px}
+.vs-hero,.vs-card{background:var(--canvas);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--s1);padding:14px 16px}
 .vs-hero + .vs-card,.vs-card + .vs-card{margin-top:12px}
 .vs-eyebrow{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 4px}
 .vs-hero h2{font-size:18px;font-weight:800;letter-spacing:-.3px;line-height:1.35;color:#0F172A;margin:0}
@@ -44,7 +44,9 @@
 .vs-rest-l{position:absolute;top:2px;margin-left:6px;font-size:10.5px;color:#94A3B8;pointer-events:none}
 .vs-axis span{position:absolute;top:0;white-space:nowrap}
 .vs-card-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:11px}
-.vs-card-h p{margin:0;font-size:15px;font-weight:800;color:#0F172A}
+.vs-card-h p{margin:0;font-size:15px;font-weight:800;color:#0F172A;display:inline-flex;align-items:center;gap:8px}
+.vs-card-h p::before{content:'';flex:none;width:3px;height:13px;background:var(--primary);border-radius:2px}   /* 홈 카드 머리와 같은 모양(2026-10-29) */
+.vs-card-h p .ic{font-size:15px;line-height:1}
 .vs-card-h span{font-size:11px;color:var(--muted)}
 .vs-lbl{font-size:13px;font-weight:700;color:#0F172A;margin:16px 0 8px}
 .vs-lbl:first-of-type{margin-top:0}
@@ -84,7 +86,7 @@
 .vsx-rk{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;
   border-radius:5px;background:#F1F5F9;font-size:10px;font-weight:800;color:var(--muted);
   margin-right:7px;vertical-align:1px}
-.vsx-rk.top{background:#0F172A;color:#fff}
+.vsx-rk.top{background:#334155;color:#fff}
 /* 첫 응답 전 자리 — 실제 결론·곡선 카드의 부분(제목·세 칸·범례·곡선·차이 막대) 모양을 그대로 잡는다.
    높이는 장중 카드 2026-10-28 실측(PC 97/417px, 모바일 115/433px)에 맞췄다. 마감 후엔 근거 4줄이 붙어 조금 더 길다.
    숫자·글자는 넣지 않는다(§0). .skl은 stocks-home.css의 공용 스켈레톤. */
@@ -120,8 +122,8 @@
 .vs-card .vsx-desc{margin:-6px 0 10px}
 /* 강도 C — 판정 뱃지 + 큰 숫자 두 개 */
 .vsx-hc{align-items:center}
-.vsx-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:#0F172A;color:#fff;white-space:nowrap}
-.vs-card-h span.vsx-badge{color:#fff;font-size:12px}
+.vsx-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:transparent;border:1px solid #CBD5E1;color:#334155;white-space:nowrap}   /* 판정 배지는 테두리만(2026-10-29) */
+.vs-card-h span.vsx-badge{color:#334155;font-size:12px}
 .vsx-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .vsx-two>div{display:flex;flex-direction:column;min-width:0}
 .vsx-two .l{font-size:12px;font-weight:700;color:var(--muted)}
@@ -138,7 +140,7 @@
 .vsx-lr .vsx-rk{width:20px;height:20px;border-radius:6px;font-size:11px;margin-right:8px;flex:0 0 auto}
 .vsx-lr .tk{position:relative;height:14px}
 .vsx-lr .tk i{position:absolute;top:0;height:14px;border-radius:3px}
-.vsx-lr .tk i.up{background:var(--up)} .vsx-lr .tk i.up-l{background:#F2A5A5} .vsx-lr .tk i.dn{background:var(--dn)}
+.vsx-lr .tk i.up{background:#E86464} .vsx-lr .tk i.up-l{background:#F4B9B9} .vsx-lr .tk i.dn{background:#5D97F1}   /* 막대 공통 톤(2026-10-29) */
 .vsx-lr .v{text-align:right;font-size:13px;font-weight:800;color:#0F172A;font-variant-numeric:tabular-nums}
 .vsx-lr .v.up{color:var(--up)} .vsx-lr .v.dn{color:var(--dn)}
 .vsx-lines{position:absolute;left:120px;right:72px;top:0;bottom:0;pointer-events:none}
@@ -156,17 +158,18 @@
 .vsx-bal .cap .m{color:#0F172A}
 .vsx-bal .bar{position:relative;height:30px;background:#F7F9FC;border-radius:8px;overflow:hidden}
 .vsx-bal .bar i{position:absolute;top:0;bottom:0}
-.vsx-bal .bar i.up.s0{background:var(--up)} .vsx-bal .bar i.up.s1{background:#EF7A7A} .vsx-bal .bar i.up.s2{background:#F2B8B8}
-.vsx-bal .bar i.dn.s0{background:var(--dn)} .vsx-bal .bar i.dn.s1{background:#7BA7F2} .vsx-bal .bar i.dn.s2{background:#B7CEF7}
+.vsx-bal .bar i.up.s0{background:#E86464} .vsx-bal .bar i.up.s1{background:#EF9494} .vsx-bal .bar i.up.s2{background:#F6C4C4}
+.vsx-bal .bar i.dn.s0{background:#5D97F1} .vsx-bal .bar i.dn.s1{background:#8EB6F5} .vsx-bal .bar i.dn.s2{background:#C2D7F9}
 .vsx-bal .bar i.mid{left:50%;width:2px;background:#0F172A}
 .vsx-bal .who{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:12px;color:#0F172A}
 .vsx-bal .who .r{text-align:right}
 .vsx-bal .who b{font-variant-numeric:tabular-nums} .vsx-bal .who b.up{color:var(--up)} .vsx-bal .who b.dn{color:var(--dn)}
 .vsx-stack{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:4px 0 6px}
 .vsx-stack i{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-style:normal;color:#fff;white-space:nowrap;overflow:hidden}
-.vsx-stack i.g0,.vsx-skey i.g0{background:#0F172A} .vsx-stack i.g1,.vsx-skey i.g1{background:#475569} .vsx-stack i.g2,.vsx-skey i.g2{background:#94A3B8}
-.vsx-stack i.g3,.vsx-skey i.g3{background:#CBD5E1} .vsx-stack i.g4,.vsx-skey i.g4{background:#E2E8F0} .vsx-stack i.g5,.vsx-skey i.g5{background:#F1F5F9}
-.vsx-stack i.g3,.vsx-stack i.g4,.vsx-stack i.g5{color:#0F172A}
+/* 기관 순매수 구성 — 산 주체라 빨강 계열(2026-10-29, 예전 검정~회색) */
+.vsx-stack i.g0,.vsx-skey i.g0{background:#E86464} .vsx-stack i.g1,.vsx-skey i.g1{background:#EF9494} .vsx-stack i.g2,.vsx-skey i.g2{background:#F4B9B9}
+.vsx-stack i.g3,.vsx-skey i.g3{background:#F8D3D3} .vsx-stack i.g4,.vsx-skey i.g4{background:#FBE3E3} .vsx-stack i.g5,.vsx-skey i.g5{background:#FDF0F0}
+.vsx-stack i.g2,.vsx-stack i.g3,.vsx-stack i.g4,.vsx-stack i.g5{color:#7F1D1D}
 .vsx-skey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted)}
 .vsx-skey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
 @media (max-width:760px){.vs-kpi b{font-size:17px}.vsx-two b{font-size:26px}}
