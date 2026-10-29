@@ -23,14 +23,14 @@
 <meta name="apple-mobile-web-app-title" content="Double-Shot">
 <script src="/assets/pwa-install.js" defer></script>
 <script src="/assets/main.js" defer></script>
-<script src="/assets/stocks-home.js?v=35" defer></script>
+<script src="/assets/stocks-home.js?v=37" defer></script>
 <script src="/assets/ds-subnav.js?v=3" defer></script>
-<script src="/assets/vs-yesterday.js?v=25" defer></script>
-<script src="/assets/home-hero.js?v=9" defer></script>
+<script src="/assets/vs-yesterday.js?v=26" defer></script>
+<script src="/assets/home-hero.js?v=10" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/stocks-home.css?v=42">
+<link rel="stylesheet" href="/assets/stocks-home.css?v=45">
 <link rel="stylesheet" href="/assets/ds-subnav.css?v=1">
-<link rel="stylesheet" href="/assets/vs-yesterday.css?v=17">
+<link rel="stylesheet" href="/assets/vs-yesterday.css?v=18">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -61,7 +61,7 @@
     <!-- 코스피 투자자별 순매수 — /api/market investor. 값이 없으면 행 자체를 숨긴다(— 로 채우지 않음).
          순서는 개인 → 기관 → 외국인 고정(운영규칙 §10, 한국 투자자 관점). -->
     <div class="supply" id="h-supply" hidden>
-      <div class="sup-h"><span class="lbl">수급 · 누적 순매수</span><span class="unit"></span><button class="sup-more" id="sup-more" aria-expanded="false" aria-controls="sup-panel" hidden>10일 추이 <span class="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>
+      <div class="sup-h"><span class="lbl">수급 · 누적 순매수</span><span class="unit"></span></div>
       <div class="sup-g">
         <span class="s"><i>개인</i><b class="num" id="h-indv">—</b></span>
         <span class="s"><i>기관</i><b class="num" id="h-inst">—</b></span>
@@ -69,27 +69,6 @@
       </div>
     </div>
   </div>
-  <!-- 최근 10거래일 수급 추이 — web/data/supply-history.json(실측, 억원). 데이터가 없으면 버튼째 숨긴다. -->
-  <div class="sup-panel" id="sup-panel" hidden>
-    <div class="sp-head">
-      <span class="sp-t" id="sup-title">최근 순매수</span>
-      <span class="sp-sub">억원 · 세 축 공통 스케일</span>
-      <span class="sp-legend">
-        <span class="lg"><span class="sw" style="background:var(--up)"></span>순매수</span>
-        <span class="lg"><span class="sw" style="background:var(--dn)"></span>순매도</span>
-      </span>
-      <button class="sp-tbl" id="sup-tbl-btn" aria-pressed="false">표로 보기</button>
-    </div>
-    <div id="sup-chart">
-      <div id="sup-rows"></div>
-      <div class="sp-axis"><span class="who"></span><span class="plot"><div class="xax" id="sup-xax"></div></span><span class="sum"></span></div>
-    </div>
-    <div id="sup-table" hidden class="sp-tblwrap">
-      <table><thead><tr><th>거래일</th><th>개인</th><th>기관</th><th>외국인</th></tr></thead><tbody id="sup-tbody"></tbody></table>
-    </div>
-    <div class="sp-foot" id="sup-foot"></div>
-  </div>
-
   <!-- 시그널 서브탭 — 마크업은 비워 두고 ds-subnav.js가 채운다. 탭 정의를 한 곳에만 두기
        위해서다(§30 이중 구현 방지). 이 껍데기가 없으면 스크립트는 조용히 아무것도 안 한다. -->
   <nav id="ds-subnav" aria-label="종목 시그널 메뉴"></nav>
@@ -101,9 +80,9 @@
     <!-- 시간대 카드(§68) — 아침 예측·마감·미국·주말 카드를 home-hero.js가 그린다. 장중(그리고 마감 브리핑 발행 전)은 아래 대결판이 첫 카드다. -->
     <section id="home-hero" class="home-hero" hidden></section>
     <section id="vs-root" hidden></section>
-    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:14px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
+    <div id="us-evening" style="display:none;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:var(--s1);padding:15px 16px;margin-bottom:16px;">
       <div class="ue-h">
-        <div class="ue-h-lead"><span style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국</span><a class="help-q" href="/glossary/#us-semi" data-tip-title="밤사이 미국 반도체 시황이란?" data-tip="한국 시간 <b>17:00~다음날 09:00</b>(국내 장 마감 후 ~ 다음 코스피 개장 전) 동안, 삼성전자·SK하이닉스와 연계된 미국 반도체 관련주 시세를 보여줘요.<br><br>· <b>정규장·프리장·애프터장</b> 중엔 60초마다 실시간 갱신돼요.<br>· 그 외 시간엔 <b>직전 종가</b> 기준이에요.">?</a></div>
+        <div class="ue-h-lead"><span class="ue-title" style="font-size:15px;font-weight:800;color:#0F172A;">🌙 밤사이 미국</span><a class="help-q" href="/glossary/#us-semi" data-tip-title="밤사이 미국 반도체 시황이란?" data-tip="한국 시간 <b>17:00~다음날 09:00</b>(국내 장 마감 후 ~ 다음 코스피 개장 전) 동안, 삼성전자·SK하이닉스와 연계된 미국 반도체 관련주 시세를 보여줘요.<br><br>· <b>정규장·프리장·애프터장</b> 중엔 60초마다 실시간 갱신돼요.<br>· 그 외 시간엔 <b>직전 종가</b> 기준이에요.">?</a></div>
         <span class="upd-badge" id="ue-live"><span class="dot"></span>LIVE · 10초 갱신</span>
         <span id="ue-breadth" class="ue-breadth-m"></span>
         <!-- 머리 줄: 제목·? 바로 옆에 LIVE 배지, 원화/달러 토글은 같은 줄 오른쪽 끝(2026-10-28 사용자 결정) -->

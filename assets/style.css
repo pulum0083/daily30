@@ -627,6 +627,7 @@ html.dark .fng-state.high{color:#F87171;}
 .vol-surge-badge{display:inline-flex;align-items:center;background:#E8590C;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap;}
 .dpick-vol{font-size:11px;color:var(--muted);margin-left:2px;}
 .dpick-chg{margin-left:auto;font-size:13px;font-weight:700;color:var(--up);font-variant-numeric:tabular-nums;}
+.dpick-chg.down{color:var(--dn);}   /* 2026-10-28 수급 조건을 빼면서 내린 종목도 들어온다 */
 .dpick-bar{display:flex;height:22px;border-radius:5px;overflow:hidden;background:var(--surface-inset);}
 .dpick-seg{display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
 .dpick-seg.frgn{background:#7C3AED;}
@@ -1250,7 +1251,7 @@ html.dark .subcard{background:linear-gradient(160deg,rgba(34,158,217,.16),transp
 .imp-tk{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px;background:var(--surface-inset);color:var(--ink);letter-spacing:-.2px;}
 .imp-side.down .imp-tk{background:var(--dn-bg);color:var(--dn);}
 .imp-side.up .imp-tk{background:var(--up-bg);color:var(--up);}
-.imp-ai{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--muted);white-space:nowrap;align-self:center;}
+.imp-ai{display:none;}   /* 'AI 판단' 표기 제거(2026-10-29) — 이미 발행된 10/26~ 미국 브리핑에 남은 표기도 숨긴다 */
 
 
 /* ──────────────────────────────────────────────
@@ -1395,6 +1396,39 @@ html.dark .arch-item__dek{color:var(--muted);}
 @media(max-width:640px){.m5a-cell span{font-size:9px}.m5a-streak b{font-size:26px}}
 /* 마감 브리핑 타이틀 아래 서브 한 문장(dek) — 텔레그램과 같은 필드(SERVICE_RULES §62) */
 .close-dek{margin:0;padding:10px 16px 2px;font-size:13.5px;line-height:1.65;color:var(--muted)}
+/* 마감 — 어제와 비교 한 줄(스냅샷 카드 안)·주도주 3종목·사이드바 섹터 막대(2026-10-29) */
+.vsl{margin:12px 0 0;border-top:1px solid var(--hairline);padding:12px 0 2px}
+.vsl-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--muted);font-weight:700}
+.vsl-t{font-size:14.5px;font-weight:800;color:var(--ink);margin:4px 0 8px}
+.vsl-t.up{color:var(--up)}.vsl-t.dn{color:var(--dn)}
+.vsl-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.vsl-c{background:var(--surface,#F7F9FC);border-radius:10px;padding:8px 10px;min-width:0}
+.vsl-c .l{font-size:11px;color:var(--muted);font-weight:700}
+.vsl-c .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+.vsl-c .y{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.vsl-c .v.up,.ld .up{color:var(--up)}.vsl-c .v.dn,.ld .dn{color:var(--dn)}
+.ld3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 16px 14px}
+.ld{background:var(--surface,#F7F9FC);border-radius:12px;padding:10px 11px;min-width:0}
+.ld .n{font-size:13px;font-weight:800;color:var(--ink)}
+.ld .p{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}
+.ld .c{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.ld .f{margin-top:7px;padding-top:7px;border-top:1px solid var(--hairline);font-size:11.5px;color:var(--muted)}
+.ld .f b{display:block;font-size:13px;font-variant-numeric:tabular-nums}
+.ld-note{margin:0;padding:0 16px 13px;font-size:11.5px;color:var(--muted)}
+.sec8{margin-bottom:12px}
+.sec8 .rota-row{display:grid;grid-template-columns:70px 1fr 58px;gap:10px;padding:8px 16px}
+.sec8 .bar{position:relative;height:7px;background:var(--hairline);border-radius:4px}
+.sec8 .bar i{position:absolute;top:0;height:100%;border-radius:4px}
+.sec8 .bar i.up{background:#F08C8C}.sec8 .bar i.dn{background:#7FB0F5}
+.sec8 .bar .z{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#94A3B8}
+.sec8 .rota-pct{text-align:right}.sec8 .rota-pct.up{color:var(--up)}.sec8 .rota-pct.dn{color:var(--dn)}
+.sec8 .mv{font-size:10.5px;color:var(--muted);margin-left:3px;font-weight:600}
+@media(max-width:520px){.vsl-g,.ld3{gap:6px}.vsl-c,.ld{padding:8px}.vsl-c .v,.ld .p{font-size:14px}}
+/* 마감 세 줄 요약(원인·주도·다음, 2026-10-29) — 라벨 칩 + 한 문장 */
+.brief3{list-style:none;margin:0;padding:8px 16px 14px;display:flex;flex-direction:column;gap:9px}
+.brief3 li{display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:1.6;color:var(--ink)}
+.brief3 li>span:last-child{min-width:0}
+.brief3 .k{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--muted);background:var(--surface,#F1F5F9);border-radius:5px;padding:2px 7px}
 .close-dek b{color:var(--ink);font-weight:700}
 
 /* ── 코스피 아침 3단 구조(2026-10-26, §63): 30초 요약 카드 + 오늘의 이슈 점검 ── */
