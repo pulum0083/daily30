@@ -1010,3 +1010,22 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #recent-briefings .rb-item.feat .rb-h{font-size:16px}
 #recent-briefings .rb-d{font-size:13px;color:#374151;line-height:1.6;margin-top:5px}
 #recent-briefings .rb-d b{font-weight:700}
+
+/* 텔레그램 구독 카드 — 홈 맨 아래(최근 브리핑 다음). 브리핑 사이드바 .subcard와 같은 모양, 넓은 화면에선 한 줄 */
+#home #tg-sub{order:100}
+.tg-sub{border:1px solid #E2E8F0;border-radius:12px;padding:16px;margin-bottom:12px;
+  background:linear-gradient(160deg,rgba(34,158,217,.10),transparent 60%),var(--card,#fff)}
+.tg-sub__ic{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2AABEE,#229ED9);display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:18px;margin-bottom:11px;box-shadow:0 3px 8px rgba(34,158,217,.35)}
+.tg-sub__t{font-size:15px;font-weight:800;letter-spacing:-.01em;color:#0F172A}
+.tg-sub__d{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:5px}
+.tg-sub__btn{margin-top:13px;background:#229ED9;color:#fff;font-size:13px;font-weight:800;padding:10px 16px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.tg-sub__btn:hover{background:#1E8FC4}
+.tg-sub__meta{margin-top:9px;font-size:11px;color:var(--muted);text-align:center}
+@media (min-width:720px){
+  .tg-sub{display:grid;grid-template-columns:34px minmax(0,1fr) auto;column-gap:14px;align-items:center}
+  .tg-sub__ic{margin-bottom:0}
+  .tg-sub__btn{margin-top:0;white-space:nowrap}
+  .tg-sub__meta{grid-column:3;margin-top:6px}
+}
