@@ -37,7 +37,7 @@ DEFAULT_OUT = "data/vercel-usage-log.json"
 TEAM_ID = "team_iPwo9taZIskxdoXOJu9assy2"
 
 # 클라이언트가 주기적으로 폴링하는 엔드포인트 — 여기가 Fluid CPU 소비의 전부다.
-# board·subscribe·trigger·visitors는 호출 빈도가 낮아 제외한다(감시 대상이 아님).
+# board·trigger·visitors는 호출 빈도가 낮아 제외한다(감시 대상이 아님).
 POLLED_ENDPOINTS = [
     "/api/kospi-live",
     "/api/market",

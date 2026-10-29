@@ -1,6 +1,6 @@
 # Double-Shot — AI 투자 브리핑 서비스
 
-매일 아침 코스피·저녁 미국 시장 AI 예측 브리핑을 자동 생성해 텔레그램·이메일로 발송하는 서비스.
+매일 아침 코스피·저녁 미국 시장 AI 예측 브리핑을 자동 생성해 텔레그램으로 발송하는 서비스.
 Gemini(뉴스 요약) + Claude(분석·예측) 하이브리드 파이프라인으로 구동된다.
 
 호스팅: Vercel (정적 서빙 + API) + GitHub Pages (`gh-pages` 브랜치), 스케줄링: Cloudflare (Cron Triggers)
@@ -34,9 +34,7 @@ Cloudflare (Cron Triggers) → /api/trigger?type=kospi
     → 월봉 5개월선 안착 종목 스크리닝 (monthly_ma5.py — 코스피 아침만)
     → 뉴스 요약 (fetch_news.py — Gemini 2.5 Flash Lite)
     → AI 분석·예측 (call_claude.py — Claude Sonnet 5, Prompt Caching)
-    → latest.json 갱신 (update_latest.py)
     → 텔레그램 전송 (send_telegram.py)
-    → 이메일 전송 (send_email.py → Resend API)
     → HTML 생성 & main 커밋·푸시 (generate_html.py)
       → web/data/briefings-list.json 자동 갱신 (write_briefings_list_json)
     → GitHub Pages 배포 (gh-pages 브랜치)
@@ -50,8 +48,7 @@ double-shot/
 ├── SERVICE_RULES.md             # 운영 규칙 (AI 파이프라인, 데이터 검증, UI 규칙 등)
 ├── vercel.json                  # Vercel 라우팅 + Cron 스케줄 설정
 ├── api/
-│   ├── trigger.mjs              # Vercel Cron → GitHub Actions dispatch
-│   └── subscribe.mjs            # 이메일 구독 신청 API (최신 브리핑 즉시 발송)
+│   └── trigger.mjs              # Vercel Cron → GitHub Actions dispatch
 ├── scripts/
 │   ├── call_claude.py           # Claude Sonnet 5 + Prompt Caching 분석 생성
 │   ├── fetch_data.py            # yfinance 기반 코스피·미국 시장 데이터 수집
@@ -60,8 +57,6 @@ double-shot/
 │   ├── fetch_news_live.py       # 이슈 브리핑 수집 (시간대별 슬롯 분기, 22회/일)
 │   ├── generate_html.py         # config-driven HTML 브리핑 조립기
 │   ├── send_telegram.py         # 텔레그램 전송
-│   ├── send_email.py            # Resend API 이메일 전송
-│   ├── update_latest.py         # web/data/latest.json 갱신 (구독 API용)
 │   ├── holiday_check.py         # 한국/미국 공휴일 확인
 │   ├── patch_fg.py              # Fear & Greed 지수 HTML 패치 (09:05 KST)
 │   ├── check_accuracy.py        # 전일 예측 정확도 체크
@@ -89,7 +84,6 @@ double-shot/
 │   │   ├── index.html           # 브리핑 목록 (/briefings)
 │   │   └── YYYY-MM-DD/{kospi,close,us}/index.html
 │   ├── data/
-│   │   ├── latest.json          # 최신 브리핑 요약 (구독 API용)
 │   │   └── briefings-list.json  # 날짜별 슬롯 상태 (브리핑 목록 동적 패치용)
 │   └── assets/
 │       ├── style.css

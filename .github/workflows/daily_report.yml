@@ -16,7 +16,7 @@ on:
           - accuracy
           - kospi-news-live
       dry_run:
-        description: "dry_run=true 시 텔레그램·이메일 전송 건너뜀 (테스트용)"
+        description: "dry_run=true 시 텔레그램 전송 건너뜀 (테스트용)"
         required: false
         default: "false"
         type: choice
@@ -54,8 +54,6 @@ env:
   WEB_BASE_URL: "https://doubleshot.space"
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-  RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-  RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
   # 비워두면 평소대로 동작한다(정규 스케줄 실행은 항상 비어 있다).
   # 값이 있으면 fetch_data·validate_analysis가 그 날짜 이후 한국·아시아 데이터를 무시한다.
   DS_PIN_SESSION_DATE: ${{ github.event.inputs.pin_session_date }}
@@ -160,10 +158,6 @@ jobs:
           python3 scripts/call_claude.py --type kospi --render \
             ${{ github.event.inputs.force_refresh == 'true' && '--force-refresh' || '' }}
 
-      - name: 🔄 latest.json 업데이트
-        if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/update_latest.py --type kospi
-
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -232,11 +226,6 @@ jobs:
         continue-on-error: true
         run: |
           bash .github/scripts/commit_sent_log.sh "kospi"
-
-      - name: 📧 이메일 전송
-        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
-        continue-on-error: true
-        run: python3 scripts/send_email.py --type kospi
 
   # ──────────────────────────────────────────────────────────────────
   us-briefing:
@@ -318,10 +307,6 @@ jobs:
           python3 scripts/call_claude.py --type us --render \
             ${{ github.event.inputs.force_refresh == 'true' && '--force-refresh' || '' }}
 
-      - name: 🔄 latest.json 업데이트
-        if: steps.holiday.outputs.open == 'true'
-        run: python3 scripts/update_latest.py --type us
-
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |
@@ -391,11 +376,6 @@ jobs:
         run: |
           bash .github/scripts/commit_sent_log.sh "us"
 
-      - name: 📧 이메일 전송
-        if: steps.holiday.outputs.open == 'true' && github.event.inputs.dry_run != 'true'
-        continue-on-error: true
-        run: python3 scripts/send_email.py --type us
-
   # ──────────────────────────────────────────────────────────────────
 
   kospi-close-briefing:
@@ -409,7 +389,6 @@ jobs:
       ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
       TELEGRAM_BOT_TOKEN:   ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID:     ${{ secrets.TELEGRAM_CHAT_ID }}
-      RESEND_API_KEY:       ${{ secrets.RESEND_API_KEY }}
       WEB_BASE_URL:         "https://doubleshot.space"
 
     steps:

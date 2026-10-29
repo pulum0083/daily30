@@ -76,7 +76,6 @@ Google이 오래된 기사(특히 MSN 등 리스티클성 기사)를 몇 주 뒤
 | `GEMINI_API_KEY`     | Gemini 2.5 Flash |
 | `TELEGRAM_BOT_TOKEN` | 텔레그램 봇 |
 | `TELEGRAM_CHAT_ID`   | 텔레그램 채널 |
-| `RESEND_API_KEY`     | 이메일 발송 (Resend) |
 | `GH_PAT`             | Vercel → GitHub Actions dispatch |
 | `TOSS_CLIENT_ID`     | 토스증권 Open API |
 | `TOSS_CLIENT_SECRET` | 토스증권 Open API 시크릿 |
@@ -119,9 +118,9 @@ GitHub Actions Secrets에 모두 등록되어 있음.
 
 | job                    | 트리거 type      | 주요 스텝 |
 | ---------------------- | ------------- | --------- |
-| `kospi-briefing`       | `kospi`       | fetch_data → fetch_news → call_claude → update_latest → telegram → email → generate_html → commit → pages |
-| `us-briefing`          | `us`          | fetch_data → fetch_news → **fetch_analyst_quotes** → call_claude → update_latest → telegram → email → generate_html → commit → pages |
-| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → telegram → generate_html → commit → pages |
+| `kospi-briefing`       | `kospi`       | fetch_data → fetch_news → call_claude → generate_html → commit → telegram |
+| `us-briefing`          | `us`          | fetch_data → fetch_news → **fetch_analyst_quotes** → call_claude → generate_html → commit → telegram |
+| `kospi-close-briefing` | `kospi-close` | fetch_closing_kospi → fetch_news → call_claude → generate_html → commit → telegram |
 | `kospi-accuracy`       | `accuracy`    | check_accuracy → commit |
 
 ---
@@ -2611,3 +2610,9 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **방지 룰(한도는 '만든 개수'로 센다)**: 실패·취소된 배포도 한도를 쓴다. 자동 생성되는 부수 배포가 있으면 한도 계산에 넣고, 쓸모없으면 생성 자체를 끈다.
 - **방지 룰(브랜치별 설정은 그 브랜치의 파일에서 읽힌다)**: Vercel `git.deploymentEnabled`는 푸시된 커밋 안의 vercel.json을 본다. 다른 브랜치를 끄는 설정을 main에만 두면 효과가 없다.
 - **재발 시 진단 순서**: ① `gh run view <vercel-deploy run> --log-failed`에서 `api-deployments-free-per-day`를 찾는다. ② Vercel API `GET /v6/deployments?since=<24시간 전>`으로 개수와 `source`(cli/git)·`meta.githubCommitRef`를 센다. ③ 가장 오래된 배포가 24시간을 넘기는 시각에 한도가 풀린다 — 그때 새 커밋 없이 `vercel-deploy.yml`을 dispatch한다(커밋을 올리면 부수 배포가 먼저 한도를 쓸 수 있다).
+
+### 78. 이메일 발송 중단 (2026-10-29 결정)
+
+브리핑은 텔레그램으로만 보낸다. 이메일 관련 코드를 모두 지웠다 — `scripts/send_email.py`, 구독 API `api/subscribe.mjs`, 구독용 `scripts/update_latest.py`·`web/data/latest.json`, Apps Script `scripts/email_subscribe.gs`, `daily_report.yml`의 이메일·latest.json 스텝과 `RESEND_*` 환경변수, 로컬 `run_kospi.sh`·`run_us.sh`의 같은 단계.
+- 화면의 구독 입구는 이미 텔레그램뿐이었다(`/about/` 구독 방법, 브리핑 사이드바·종목 홈 카드).
+- **남은 일(사람이 할 것)**: Resend 오디언스·구독 시트의 기존 구독자 이메일 정리, GitHub Secrets `RESEND_API_KEY`·`RESEND_AUDIENCE_ID`와 Vercel 환경변수 삭제, 개인정보처리방침(§6 이전 '이메일 구독 시 이메일 주소' 수집 항목)·이용약관의 이메일 구독 문장 정리.

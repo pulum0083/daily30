@@ -29,14 +29,8 @@ python3 "$PROJECT_DIR/scripts/fetch_news.py" --type us || echo "[WARN] 뉴스 �
 # 4. Claude 분석 생성 + HTML 저장
 python3 "$PROJECT_DIR/scripts/call_claude.py" --type us
 
-# 5. latest.json 업데이트 (구독자 즉시 발송용)
-python3 "$PROJECT_DIR/scripts/update_latest.py" --type us || echo "[WARN] latest.json 업데이트 실패 (무시)"
-
 # 6. Telegram 전송
 python3 "$PROJECT_DIR/scripts/send_telegram.py" --type us || echo "[WARN] Telegram 전송 실패 (무시)"
-
-# 7. 이메일 발송
-python3 "$PROJECT_DIR/scripts/send_email.py" --type us || echo "[WARN] 이메일 발송 실패 (무시)"
 
 # 8. Git 커밋 & 푸시
 git config user.email "dailyb-bot@users.noreply.github.com"
