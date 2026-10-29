@@ -105,3 +105,54 @@ test('섹터 막대 — 등락 큰 순, 섹터 페이지 링크, 0을 가운데 
   assert.ok(html.includes('+2.40%') && html.includes('−1.20%'));
   assert.equal(sectorBarsHtml([]), '');
 });
+
+// 장 마감 뒤 섹터 막대 — 스냅샷(어제 종가)이 아직 안 바뀐 구간에도 /api/signals가 주는 오늘 공식 종가 값을 쓴다(2026-10-29).
+// 예전엔 15:30~16:31 동안 어제 스냅샷만 그려 장이 끝났는데 어제 막대가 보였다.
+async function loadAt(isoUtc, { snapDate, sigDate }) {
+  const FIXED = Date.parse(isoUtc);
+  class FakeDate extends Date { constructor(...a) { super(...(a.length ? a : [FIXED])); } static now() { return FIXED; } }
+  const els = {};
+  const byId = (id) => (els[id] ||= mkEl());
+  const snap = { generated_at: `${snapDate}T16:32:40+09:00`, stocks: {
+    '005930': { name: '삼성전자', sector: 'semicon', change_pct: 1.0, close: 100, vol: 10 },
+  } };
+  const sigs = { phase: 'closed', asOf: { date: sigDate, label: sigDate.slice(5).replace('-', '/'), isToday: false }, signals: [], sectors: { semicon: { avg: -2.5, wavg: -2.5, up: 0, dn: 3, total: 3 } } };
+  const win = {
+    location:{pathname:'/stocks/', hash:'', href:'https://x/stocks/'},
+    addEventListener:noop, removeEventListener:noop,
+    setInterval:()=>0, clearInterval:noop, setTimeout:()=>0, clearTimeout:noop,
+    fetch:(url)=>{
+      if (String(url).includes('/api/signals')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(sigs) });
+      if (String(url).includes('stocks-snapshot')) return Promise.resolve({ ok:true, json:()=>Promise.resolve(snap) });
+      return Promise.reject(new Error('no network'));
+    },
+    matchMedia:()=>({matches:false, addEventListener:noop}),
+    sessionStorage:{getItem:()=>null, setItem:noop}, localStorage:{getItem:()=>null, setItem:noop},
+    Intl, Date: FakeDate, Math, JSON, console:{log:noop, warn:noop, error:noop},
+    navigator:{userAgent:'node'}, history:{pushState:noop, replaceState:noop},
+    document:{ readyState:'complete', getElementById:byId, querySelector:()=>mkEl(), querySelectorAll:()=>[],
+      createElement:()=>mkEl(), addEventListener:noop, body:mkEl(), documentElement:mkEl(), head:mkEl() },
+  };
+  win.window = win;
+  try { runInContext(readFileSync(join(HERE,'stocks-home.js'),'utf8'), createContext(win)); } catch { /* 훅만 필요 */ }
+  for (let i = 0; i < 10; i++) await new Promise((r) => setImmediate(r));
+  return { bars: byId('sb-bars').innerHTML, badge: byId('sbx-live').innerHTML, sigTitle: byId('sig-title').textContent };
+}
+
+test('장 마감 직후(스냅샷은 어제) — 섹터 막대·배지가 오늘 종가 값이다', async () => {
+  const { bars, badge } = await loadAt('2026-10-29T06:50:00Z', { snapDate: '2026-10-28', sigDate: '2026-10-29' });
+  assert.ok(bars.includes('−2.50%'), '오늘 신호 값');
+  assert.ok(!bars.includes('+1.00%'), '어제 스냅샷 값을 쓰지 않는다');
+  assert.ok(badge.includes('2026-10-29'), badge);
+});
+
+test('장 마감 직후 — 특이 신호 제목도 신호 날짜다(스냅샷 날짜로 덮지 않는다)', async () => {
+  const { sigTitle } = await loadAt('2026-10-29T06:50:00Z', { snapDate: '2026-10-28', sigDate: '2026-10-29' });
+  assert.equal(sigTitle, '10/29 특이 신호');
+});
+
+test('신호가 스냅샷보다 오래되면 스냅샷으로 그린다 — 한 막대에 날짜를 섞지 않는다', async () => {
+  const { bars, badge } = await loadAt('2026-10-29T06:50:00Z', { snapDate: '2026-10-29', sigDate: '2026-10-28' });
+  assert.ok(bars.includes('+1.00%') && !bars.includes('−2.50%'));
+  assert.ok(badge.includes('2026-10-29'), badge);
+});

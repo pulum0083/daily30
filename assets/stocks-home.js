@@ -1115,7 +1115,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
     sigHomeRender();
     // 전 섹터 라이브 평균을 섹터 막대에 반영
     if(d.sectors) SIG_SECTORS=d.sectors;
-    renderSectorBars();
+    renderSectorBars(); renderSectorBadge();
   }
   /* 특이 신호 전체(더보기) — 상승률순 하나(2026-10-27). 정렬 탭·하락률 순 목록은 뺐다. */
   function sigAllRender(){
@@ -1140,14 +1140,15 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
      '섹터별 대표 종목 펼치기'(섹터 탭·종목 카드·한 줄 요약)와 그 영역 전용 조회(/api/stocks-live·/api/intraday)는
      2026-10-27에 뺐다. 막대는 신호 응답이 오면 그 값을, 아니면 스냅샷으로 섹터 평균을 낸다. */
   var SBX_ORDER=['semicon','battery','auto','defense','ship','bio','finance','power'];
-  function sbxTodayYmd(){ return new Date(Date.now()+9*3600*1000).toISOString().slice(0,10); }
-  // 장 마감(15:30) 뒤 마감 잡이 스냅샷을 갱신하기(~16:31) 전 — 이 구간엔 /api/signals의 오늘 값과 어제 스냅샷을
-  // 한 막대에 섞지 않도록 스냅샷(어제 종가) 하나로 그리고, 배지에 그 날짜를 적는다(2026-09-23 날짜 섞임 사고).
+  // 장 마감(15:30) 뒤 마감 잡이 스냅샷을 갱신하기(~16:31) 전 — 스냅샷은 어제 종가지만 /api/signals는 장 마감 뒤에도
+  // 오늘 정규장 공식 종가(§48)로 섹터 평균을 낸다. 그래서 신호 날짜가 스냅샷보다 새로우면 신호 값을 쓰고, 배지에도 그 날짜를 적는다.
+  // 신호 응답이 없거나 스냅샷보다 오래됐을 때만 스냅샷으로 그린다(2026-09-23 날짜 섞임 사고 — 막대 하나는 한 날짜만 쓴다).
+  // 예전엔 이 구간에 무조건 스냅샷을 썼는데, 섹터 카드가 빠진(2026-10-27) 뒤로는 어제 값만 남아 마감 직후 한 시간 동안 어제 막대가 보였다(2026-10-29 사용자 지적).
+  function sbxSigDate(){ return SIG_ASOF&&SIG_ASOF.date?String(SIG_ASOF.date):null; }
   function sbxSnapBehind(){
     if(!SNAP||!_asOfYmd||krMarketOpen()) return false;
-    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false;
-    var m=(new Date().getUTCHours()*60+new Date().getUTCMinutes()+540)%1440;
-    return m>930 && _asOfYmd<sbxTodayYmd();
+    var sd=sbxSigDate();
+    return !(SIG_SECTORS&&sd&&sd>=_asOfYmd);
   }
   function sbxSectorStocks(key){
     if(!SNAP||!SNAP.stocks) return [];
@@ -1201,7 +1202,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   function renderSectorBadge(){
     var el=document.getElementById('sbx-live'); if(!el) return;
     if(krMarketOpen()){ el.className='sbx-live on'; el.innerHTML='<span class="sl-dot"></span>실시간 장중 · 5분 갱신'; }
-    else { el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(_asOfYmd||'')+' 종가 기준'; }
+    else { var d=sbxSnapBehind()?_asOfYmd:(sbxSigDate()||_asOfYmd); el.className='sbx-live off'; el.innerHTML='<span class="sl-dot"></span>장마감 · '+(d||'')+' 종가 기준'; }
   }
   loadSignals();
   fetch('/data/stocks-snapshot.json',{cache:'no-store'})
@@ -1213,6 +1214,9 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
         STOCK_LIST=_ks.map(function(c){return {code:c,name:SNAP.stocks[c].name,sector:SNAP.stocks[c].sector};});
       }
       if(SNAP&&SNAP.generated_at){_asOfYmd=String(SNAP.generated_at).slice(0,10);applyAsOf();}
+      // applyAsOf()는 특이 신호 제목을 스냅샷 날짜로 쓴다. 신호가 먼저 왔으면 그 날짜로 되돌린다 —
+      // 장 마감 직후엔 스냅샷이 어제라 오늘 신호에 어제 날짜가 붙었다(2026-10-29).
+      if(SIG_ASOF){var st=document.getElementById('sig-title'); if(st) st.textContent=asOfPrefix(SIG_ASOF)+' 특이 신호';}
       renderSectorBars(); renderSectorBadge();
       if(krMarketOpen()) setInterval(loadSignals,300000); // 장중 5분마다 특이신호·섹터 막대 갱신
     })
