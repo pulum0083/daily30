@@ -5,7 +5,7 @@
        2. 장중엔 '섹터 한눈에' 숨김 — '어디가 이끄나'와 값이 달라 한 화면에서 섹터 숫자가 둘이 됐다
        3. 카드 머리 한 모양 — 파란 세로줄 + 아이콘 + 15px 굵게(아이콘이 없던 카드엔 붙인다, 2026-10-29 사용자 의견) · 모서리 12px
        4. 갱신 배지는 회색 + 빨간 점, 판정 배지는 테두리만
-       5. 0.0%는 회색 · 기관 순매수 구성 막대를 검정 대신 빨강 계열 · 맨 위 요약 줄이 아래 세 칸과 겹치면 숨김 -->
+       5. 0.0%는 회색 · 기관 순매수 구성 막대를 검정 대신 빨강 계열 (맨 위 요약 줄은 그대로 둔다) -->
 <!--PROTO-START-->
 <style id="proto-css">
 .pv-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;display:flex;gap:6px;align-items:center;
@@ -41,9 +41,8 @@ body.pv #home .block__h{border-radius:12px 12px 0 0}
 body.pv .upd-badge.is-live,body.pv .sbx-live.on{background:var(--inset,#EEF1F5);color:var(--muted)}
 body.pv .vsx-badge,body.pv .vs-card-h span.vsx-badge{background:transparent;color:#334155;border:1px solid #CBD5E1;font-weight:700}
 
-/* 5. 0.0% 회색 · 요약 줄 중복 숨김 */
+/* 5. 0.0% 회색 (맨 위 요약 줄은 유지 — 2026-10-29 사용자 결정) */
 body.pv .pv-zero{color:var(--muted)!important}
-body.pv #vs-root:has(.vs-kpi) .vs-hero .vs-sub{display:none}
 </style>
 <div class="pv-bar"><span>홈 디자인</span><button data-v="0">지금</button><button data-v="1" class="on">시안</button></div>
 <script>
