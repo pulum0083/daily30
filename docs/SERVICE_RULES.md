@@ -2615,4 +2615,5 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 
 브리핑은 텔레그램으로만 보낸다. 이메일 관련 코드를 모두 지웠다 — `scripts/send_email.py`, 구독 API `api/subscribe.mjs`, 구독용 `scripts/update_latest.py`·`web/data/latest.json`, Apps Script `scripts/email_subscribe.gs`, `daily_report.yml`의 이메일·latest.json 스텝과 `RESEND_*` 환경변수, 로컬 `run_kospi.sh`·`run_us.sh`의 같은 단계.
 - 화면의 구독 입구는 이미 텔레그램뿐이었다(`/about/` 구독 방법, 브리핑 사이드바·종목 홈 카드).
-- **남은 일(사람이 할 것)**: Resend 오디언스·구독 시트의 기존 구독자 이메일 정리, GitHub Secrets `RESEND_API_KEY`·`RESEND_AUDIENCE_ID`와 Vercel 환경변수 삭제, 개인정보처리방침(§6 이전 '이메일 구독 시 이메일 주소' 수집 항목)·이용약관의 이메일 구독 문장 정리.
+- **남은 일(사람이 할 것)**: Resend 오디언스·구독 시트의 기존 구독자 이메일 정리, GitHub Secrets `RESEND_API_KEY`·`RESEND_AUDIENCE_ID`와 Vercel 환경변수 삭제.
+- 개인정보처리방침·이용약관(개정일 2026-10-29)에서 이메일 수집·발송·Resend 위탁 문구를 뺐고, 구독 기간에 받은 이메일 주소는 파기한다고 적었다 — **Resend·시트의 실제 삭제가 이 문구를 지키는 일이다.**
