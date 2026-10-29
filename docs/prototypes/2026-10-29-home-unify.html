@@ -1,0 +1,68 @@
+<!-- 종목 홈(/stocks/) 디자인 통일 시안 — 실제 홈 위에 덮어씌우는 CSS·스크립트. 위 막대의 버튼으로 지금/시안을 바꿔 본다.
+     미리보기: scratchpad의 proto_proxy.py가 /stocks/ 응답 끝에 아래 PROTO 구간을 끼운다(/api·/data는 실제 사이트로 넘긴다).
+     바꾸는 것
+       1. 오르내림 색 한 벌 — 글자 #E03131/#2775ED, 막대 75% 톤 #E86464/#5D97F1(흐린 섹터 막대·진한 주도권 막대를 같은 무게로)
+       2. 장중엔 '섹터 한눈에' 숨김 — '어디가 이끄나'와 값이 달라 한 화면에서 섹터 숫자가 둘이 됐다
+       3. 카드 머리 한 모양 — 15px 굵게 + 파란 세로줄, 이모지 없음 · 모서리 12px
+       4. 갱신 배지는 회색 + 빨간 점, 판정 배지는 테두리만
+       5. 0.0%는 회색 · 기관 순매수 구성 막대를 검정 대신 빨강 계열 · 맨 위 요약 줄이 아래 세 칸과 겹치면 숨김 -->
+<!--PROTO-START-->
+<style id="proto-css">
+.pv-bar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;display:flex;gap:6px;align-items:center;
+  background:#0F172A;color:#fff;border-radius:999px;padding:6px 8px 6px 14px;font:700 12px/1 Pretendard,system-ui,sans-serif;box-shadow:0 6px 20px rgba(15,23,42,.25)}
+.pv-bar button{border:0;border-radius:999px;padding:7px 12px;font:inherit;background:transparent;color:#CBD5E1;cursor:pointer}
+.pv-bar button.on{background:#fff;color:#0F172A}
+
+/* 1. 오르내림 색 — 막대는 75% 톤 하나 */
+body.pv .sb-bar i.up,body.pv #us-evening .ue-bar i.up,body.pv .vsx-lr .tk i.up,body.pv .vsx-bal .bar i.up.s0{background:#E86464}
+body.pv .sb-bar i.dn,body.pv #us-evening .ue-bar i.dn,body.pv .vsx-lr .tk i.dn,body.pv .vsx-bal .bar i.dn.s0{background:#5D97F1}
+body.pv .vsx-lr .tk i.up-l{background:#F4B9B9}
+body.pv .vsx-bal .bar i.up.s1{background:#EF9494} body.pv .vsx-bal .bar i.up.s2{background:#F6C4C4}
+body.pv .vsx-bal .bar i.dn.s1{background:#8EB6F5} body.pv .vsx-bal .bar i.dn.s2{background:#C2D7F9}
+body.pv .vsx-stack i.g0,body.pv .vsx-skey i.g0{background:#E86464} body.pv .vsx-stack i.g1,body.pv .vsx-skey i.g1{background:#EF9494}
+body.pv .vsx-stack i.g2,body.pv .vsx-skey i.g2{background:#F4B9B9} body.pv .vsx-stack i.g3,body.pv .vsx-skey i.g3{background:#F8D3D3}
+body.pv .vsx-stack i.g4,body.pv .vsx-skey i.g4{background:#FBE3E3} body.pv .vsx-stack i.g5,body.pv .vsx-skey i.g5{background:#FDF0F0}
+body.pv .vsx-stack i.g2{color:#7F1D1D}
+body.pv .vsx-rk.top{background:#334155}
+
+/* 2. 장중엔 섹터 한눈에 숨김 */
+body.pv #home.slot-intraday .sbx-block{display:none}
+
+/* 3. 카드 머리 한 모양 + 모서리 */
+body.pv #home .block__t,body.pv .vs-card-h p,body.pv #usw-title,body.pv #us-evening .ue-h-lead > span:first-child{
+  font-size:15px!important;font-weight:800!important;color:#0F172A!important;display:inline-flex;align-items:center;gap:8px}
+body.pv #home .block__t .ic{display:none}
+body.pv #home .block__t::before,body.pv .vs-card-h p::before,body.pv #usw-title::before,body.pv #us-evening .ue-h-lead > span:first-child::before{
+  content:'';flex:none;width:3px;height:13px;border-radius:2px;background:var(--primary)}
+body.pv .vs-hero,body.pv .vs-card,body.pv #home .block,body.pv .idx-card,body.pv #us-linked-widget,body.pv #us-evening,body.pv #home-hero > *{border-radius:12px}
+body.pv #home .block__h{border-radius:12px 12px 0 0}
+
+/* 4. 배지 */
+body.pv .upd-badge.is-live,body.pv .sbx-live.on{background:var(--inset,#EEF1F5);color:var(--muted)}
+body.pv .vsx-badge,body.pv .vs-card-h span.vsx-badge{background:transparent;color:#334155;border:1px solid #CBD5E1;font-weight:700}
+
+/* 5. 0.0% 회색 · 요약 줄 중복 숨김 */
+body.pv .pv-zero{color:var(--muted)!important}
+body.pv #vs-root:has(.vs-kpi) .vs-hero .vs-sub{display:none}
+</style>
+<div class="pv-bar"><span>홈 디자인</span><button data-v="0">지금</button><button data-v="1" class="on">시안</button></div>
+<script>
+(function(){
+  var EMO=/^[\u{1F300}-\u{1FAFF}☀-➿]️?\s*/u, saved=new Map();
+  function tidy(){
+    var on=document.body.classList.contains('pv');
+    ['#usw-title','#us-evening .ue-h-lead > span:first-child'].forEach(function(sel){
+      var e=document.querySelector(sel); if(!e||!e.firstChild||e.firstChild.nodeType!==3) return;
+      if(on&&EMO.test(e.firstChild.nodeValue)){ saved.set(e,e.firstChild.nodeValue); e.firstChild.nodeValue=e.firstChild.nodeValue.replace(EMO,''); }
+      if(!on&&saved.has(e)){ e.firstChild.nodeValue=saved.get(e); saved.delete(e); }
+    });
+    document.querySelectorAll('#home *').forEach(function(e){
+      if(e.children.length===0) e.classList.toggle('pv-zero', /^[+−-]?0(\.0+)?%$/.test(e.textContent.trim()));
+    });
+  }
+  function set(v){ document.body.classList.toggle('pv',v); document.querySelectorAll('.pv-bar button').forEach(function(b){ b.classList.toggle('on',(b.dataset.v==='1')===v); }); tidy(); }
+  document.querySelector('.pv-bar').addEventListener('click',function(e){ var b=e.target.closest('button'); if(b) set(b.dataset.v==='1'); });
+  set(true); setInterval(tidy,2000);
+})();
+</script>
+<!--PROTO-END-->
