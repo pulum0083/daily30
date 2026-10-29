@@ -283,10 +283,23 @@ test('수급 카드 — 판 쪽·산 쪽 막대를 오늘·어제 이 시각 두
     inst: [{ key: '금융투자', t: 6744, y: 3368, turned: false }, { key: '연기금', t: 2356, y: 852, turned: false },
       { key: '기타금융', t: -41, y: 36, turned: true }] } }, 'open', { rel: '어제', etc: { t: 52, y: 546 } });
   for (const s of ['← 판 쪽', '산 쪽 →', '>오늘<', '>어제 이 시각<', '−1.78조', '+7,339억', '+1.04조', '−9,621억',
-    '두 막대의 구도가 같고, 오늘 막대가 약 1.9배 길어요.', '기관 순매수 구성', '금융투자 74%', '판 곳 · 기타금융 −41억(어제는 샀어요)']) {
+    '두 막대의 구도가 같고, 오늘 막대가 약 1.9배 길어요.', '기관 안에서는', '기관 합계 <b class="up">+1.04조</b> · 산 곳 2 · 판 곳 1', '어제와 반대로 움직인 곳 · 기타금융']) {
     assert.ok(html.includes(s), `빠짐: ${s} — ` + html);
   }
   assert.ok(!html.includes('기타법인'), '판 쪽·산 쪽 합의 10% 미만인 기타법인은 이름을 적지 않는다');
+});
+
+test('수급 카드 — 기관이 크게 팔고 한 곳만 조금 산 날, 그 한 곳을 100%로 그리지 않는다(2026-10-29)', () => {
+  const { api } = load();
+  const html = api.flowCard({ flow: { main: { 개인: { t: 5000, y: 1000 }, 외국인: { t: 2000, y: 1000 }, 기관: { t: -7019, y: 3000 } },
+    inst: [{ key: '기타금융', t: 96, turned: true }, { key: '금융투자', t: -3914, turned: true }, { key: '연기금', t: -1750, turned: true },
+      { key: '투신', t: -1223 }, { key: '보험', t: -140 }, { key: '은행', t: -28 }] } }, 'open', { rel: '어제' });
+  assert.ok(!html.includes('100%'), html);
+  assert.ok(html.includes('기관 합계 <b class="dn">−7,019억</b> · 산 곳 1 · 판 곳 5'), html);
+  // 같은 눈금 — 금융투자(최대)가 50%, 기타금융 +96억은 약 1.23%
+  assert.ok(html.includes('right:50%;width:50.00%'), html);
+  assert.ok(html.includes('left:50%;width:1.23%'), html);
+  assert.ok(html.includes('어제와 반대로 움직인 곳 · 기타금융·연기금·금융투자'), html);
 });
 
 test('수급 카드 — 사고판 쪽이 바뀌면 문장이 바뀐다', () => {
@@ -294,6 +307,7 @@ test('수급 카드 — 사고판 쪽이 바뀌면 문장이 바뀐다', () => {
   const html = api.flowCard({ flow: { main: { 개인: { t: -9641, y: 5538, turned: true },
     외국인: { t: -13443, y: -12029, turned: false }, 기관: { t: 10502, y: -5890, turned: true } }, inst: [] } }, 'open', { rel: '지난 금요일' });
   assert.ok(html.includes('지난 금요일과 사고판 쪽이 바뀌었고'), html);
+  assert.ok(!html.includes('기관 안에서는'), '기관 세부가 없으면 그 칸을 뺀다');
   assert.ok(html.includes('>지난 금요일 이 시각<'), html);
 });
 
