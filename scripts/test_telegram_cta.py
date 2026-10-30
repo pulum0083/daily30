@@ -54,7 +54,7 @@ def test_close_title_and_one_dek_line(tmp_path, monkeypatch):
     cc.save_closing_telegram_message("2026-10-23", analysis, md)
     text = (tmp_path / "telegram_message_kospi_close.txt").read_text(encoding="utf-8")
     assert "KOSPI" not in text and "5,550.30" not in text   # 지수 수치 줄은 싣지 않는다(2026-10-27)
-    assert "2026.10.23\n\n🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n기관이 8,726억원을 사들였어요." in text
+    assert "2026.10.23\n\n🎯 <b>-4%까지 빠졌는데 플러스 마감?</b>\n\n기관이 8,726억원을 사들였어요." in text
     assert "─" not in text
     assert "핵심 시그널" not in text and "옛 시그널" not in text
     assert "🔗 수급·시장폭 상세 → http" in text

@@ -1845,12 +1845,12 @@ def save_closing_telegram_message(date_str: str, analysis: dict, market_data: di
             result_badge = f"📝 아침 예측 {short} → {what} {actual:+.2f}% {mark}{cum_txt}"
 
     # 🎯 타이틀 → 서브 한 문장 → 아침 예측 채점(2026-10-27). 지수 수치 줄은 싣지 않는다 — 타이틀이 주인공이다.
-    # 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다.
+    # 타이틀·서브는 웹 페이지 제목·서브와 같은 필드다. 타이틀과 서브 사이는 한 줄 띄운다(2026-10-30, 코스피 예측과 같은 간격).
     lines = [f"🇰🇷 코스피 마감 시황 | {date_display}", ""]
     if title:
         lines += [f"🎯 <b>{title}</b>"]
         if dek:
-            lines.append(dek)
+            lines += ["", dek]
     if result_badge:
         lines += ["", result_badge]
     lines += ["", link_line("수급·시장폭 상세", f"{web_base}/briefings/{date_str}/close/")]
