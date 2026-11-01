@@ -960,18 +960,23 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hh-wk3 b{font-size:19px;font-weight:800;letter-spacing:-.4px;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hh-wk3 b.up{color:#E03131} .hh-wk3 b.dn{color:#2775ED}
 .hh-wk3 em{font-style:normal;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-/* 주말 카드 계단 그림 — 지난주 종가 → 하루씩 → 이번 주 종가(§68 ⑥) */
-.hh-steps{margin:12px 0 2px}
-.hh-steps svg{display:block;width:100%;height:auto;overflow:visible}
-.hh-steps text{text-anchor:middle;font-variant-numeric:tabular-nums;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
-.hh-steps .st-v{font-size:11px;font-weight:800;fill:#0F172A}
-.hh-steps .st-p{font-size:10.5px;font-weight:800;fill:var(--muted)}.hh-steps .st-p.up{fill:#E03131}.hh-steps .st-p.dn{fill:#2775ED}
-.hh-steps .st-k{font-size:11px;font-weight:700;fill:var(--muted)}.hh-steps .st-k.on{font-size:12px;fill:#0F172A}
-.hh-steps .st-d{font-size:10px;fill:var(--muted)}
-.hh-steps .st-lv{fill:#0F172A}
-.hh-steps .st-b.up{fill:#E86464}.hh-steps .st-b.dn{fill:#5D97F1}
-.hh-steps .st-base{stroke:var(--muted);stroke-dasharray:3 3;opacity:.5}
-.hh-steps .st-cn{stroke:var(--muted);opacity:.45}
+/* 주말 카드 계단 그림 — 지난주 종가 → 하루씩 → 이번 주 종가(§68 ⑥). HTML 칸이라 PC에서도 높이·글자가 그대로다 */
+.hh-steps{margin:14px 0 2px}
+.st-plot{position:relative;display:grid;height:104px;margin:18px 0 16px}
+.st-c{position:relative}
+.st-base{position:absolute;left:4%;right:4%;border-top:1px dashed #CBD5E1}
+.st-cn{position:absolute;left:-50%;right:50%;border-top:1px solid #CBD5E1}
+.st-b{position:absolute;left:50%;width:clamp(18px,36%,32px);transform:translateX(-50%);min-height:2px;border-radius:2px}
+.st-b.up{background:#E86464}.st-b.dn{background:#5D97F1}
+.st-lv{position:absolute;left:50%;width:clamp(24px,48%,40px);height:4px;border-radius:2px;background:#0F172A;transform:translate(-50%,-2px)}
+.st-v,.st-p{position:absolute;left:-20%;right:-20%;text-align:center;font-size:11px;font-weight:800;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.st-v{color:#0F172A;transform:translateY(-17px)}
+.st-p{color:var(--muted)}.st-p.up{color:#E03131}.st-p.dn{color:#2775ED}
+.st-p.a{transform:translateY(-15px)}.st-p.u{transform:translateY(4px)}
+.st-x{display:grid;text-align:center}
+.st-x span{font-size:10px;color:var(--muted);line-height:1.35;font-variant-numeric:tabular-nums}
+.st-x b{display:block;font-size:11px;font-weight:700}
+.st-x .on b{font-size:12px;color:#0F172A}
 .hh-cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair)}
 /* §68 ⑦ 넓은 화면도 한 단 — 880px 가운데. 시간대별 블록 순서는 home-hero.js가 붙이는 #home.slot-* 로 정한다.
    슬롯 클래스가 붙기 전(또는 목록을 못 받았을 때)은 DOM 순서 그대로 — 국면별 DOM 재배치(stocks-home.js)가 대신한다. */

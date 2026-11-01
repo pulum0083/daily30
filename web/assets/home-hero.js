@@ -124,34 +124,30 @@
   }
   // 계단 그림 — 지난주 종가에서 하루씩 쌓아 이번 주 종가까지(2026-11-01 B안, 시안 docs/prototypes/2026-11-01-weekend-week-infographic.html)
   function dowOf(ymd) { var p = ymd.split('-'); return DOWS[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()]; }
+  // SVG로 그리면 PC 폭(880px)에서 글자·높이까지 같이 커진다 — HTML 칸으로 그려 가로만 늘고 높이·글자는 고정한다.
   function weekSteps(prev, week) {
-    var W = 324, H = 168, top = 26, bot = 124, cols = week.length + 2, cw = W / cols, bw = 24;
     var pts = [prev.close].concat(week.map(function (r) { return r.close; }));
     var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), pad = (hi - lo) * 0.12 || 1;
     lo -= pad; hi += pad;
-    var y = function (v) { return +(top + (hi - v) / (hi - lo) * (bot - top)).toFixed(1); };
+    var y = function (v) { return ((hi - v) / (hi - lo) * 100).toFixed(1) + '%'; };
     var f0 = function (v) { return Math.round(v).toLocaleString('en-US'); };
-    var t = function (x, yy, c, txt) { return '<text x="' + x.toFixed(1) + '" y="' + yy + '" class="' + c + '">' + txt + '</text>'; };
-    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="지난주 종가 ' + f0(prev.close) + '에서 이번 주 종가 ' + f0(week[week.length - 1].close) + '까지 일별 등락">' +
-      '<line class="st-base" x1="' + (cw * 0.2).toFixed(1) + '" x2="' + (W - cw * 0.2).toFixed(1) + '" y1="' + y(prev.close) + '" y2="' + y(prev.close) + '"/>';
-    function level(i, v, a, b) {
-      var cx = cw * i + cw / 2;
-      return '<rect class="st-lv" x="' + (cx - 16).toFixed(1) + '" y="' + (y(v) - 2) + '" width="32" height="4" rx="2"/>' +
-        t(cx, y(v) - 8, 'st-v', f0(v)) + t(cx, H - 18, 'st-k', a) + t(cx, H - 4, 'st-d', b);
-    }
-    s += level(0, prev.close, '지난주', '종가');
-    var pv = prev.close;
-    week.forEach(function (r, i) {
-      var cx = cw * (i + 1) + cw / 2, a = y(pv), b = y(r.close), tp = Math.min(a, b), hh = Math.max(Math.abs(a - b), 2);
-      s += '<line class="st-cn" x1="' + (cx - cw + 12).toFixed(1) + '" x2="' + (cx - bw / 2).toFixed(1) + '" y1="' + a + '" y2="' + a + '"/>' +
-        '<rect class="st-b ' + (r.close >= pv ? 'up' : 'dn') + '" x="' + (cx - bw / 2).toFixed(1) + '" y="' + tp + '" width="' + bw + '" height="' + hh + '" rx="2"/>' +
-        t(cx, r.pct >= 0 ? tp - 6 : tp + hh + 13, 'st-p ' + cls(r.pct), pct(r.pct)) +
-        t(cx, H - 18, 'st-k on', dowOf(r.date)) + t(cx, H - 4, 'st-d', md(r.date));
+    var cn = function (v) { return '<i class="st-cn" style="top:' + y(v) + '"></i>'; };
+    var lv = function (v) { return '<i class="st-lv" style="top:' + y(v) + '"></i><span class="st-v" style="top:' + y(v) + '">' + f0(v) + '</span>'; };
+    var cols = '<div class="st-c">' + lv(prev.close) + '</div>', keys = '<span><b>지난주</b>종가</span>', pv = prev.close;
+    week.forEach(function (r) {
+      var a = (hi - Math.max(pv, r.close)) / (hi - lo) * 100, h = Math.abs(r.close - pv) / (hi - lo) * 100;
+      var up = r.close >= pv;
+      cols += '<div class="st-c">' + cn(pv) +
+        '<i class="st-b ' + (up ? 'up' : 'dn') + '" style="top:' + a.toFixed(1) + '%;height:' + h.toFixed(1) + '%"></i>' +
+        '<span class="st-p ' + cls(r.pct) + (r.pct >= 0 ? ' a' : ' u') + '" style="top:' + (r.pct >= 0 ? a : a + h).toFixed(1) + '%">' + pct(r.pct) + '</span></div>';
+      keys += '<span class="on"><b>' + dowOf(r.date) + '</b>' + md(r.date) + '</span>';
       pv = r.close;
     });
-    var ex = cw * (cols - 1) + cw / 2;
-    s += '<line class="st-cn" x1="' + (ex - cw + 12).toFixed(1) + '" x2="' + (ex - 16).toFixed(1) + '" y1="' + y(pv) + '" y2="' + y(pv) + '"/>';
-    return s + level(cols - 1, pv, '이번 주', '종가') + '</svg>';
+    cols += '<div class="st-c">' + cn(pv) + lv(pv) + '</div>';
+    keys += '<span><b>이번 주</b>종가</span>';
+    return '<div class="st-plot" style="grid-template-columns:repeat(' + (week.length + 2) + ',1fr)" role="img" aria-label="지난주 종가 ' + f0(prev.close) +
+      '에서 이번 주 종가 ' + f0(pv) + '까지 일별 등락"><i class="st-base" style="top:' + y(prev.close) + '"></i>' + cols + '</div>' +
+      '<div class="st-x" style="grid-template-columns:repeat(' + (week.length + 2) + ',1fr)">' + keys + '</div>';
   }
   // 헤드라인 — 시작·끝 종가와 가장 크게 움직인 날의 포인트 변화(결정론)
   function weekStepHead(prev, week) {

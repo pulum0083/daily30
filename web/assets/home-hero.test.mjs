@@ -168,7 +168,7 @@ test('주말 카드 — 계단 그림·헤드라인(시작→끝 종가·가장 
   assert.match(h, />주말</);
   assert.match(h, /5,668 → 5,550, 화요일 하루에 <span class="dn">−215p<\/span>/);   // 5552.7 − 5767.8
   assert.doesNotMatch(h, /\+1\.76% → −3\.73%/);                                   // 옛 화살표 나열 문장은 없다
-  assert.match(h, /<div class="hh-steps"><svg/);
+  assert.match(h, /<div class="hh-steps"[^>]*><div class="st-plot"/);
   assert.match(h, /<b class="dn">−2\.08%<\/b>/);                         // 5550.3 / 5668 - 1
   assert.match(h, /5,668 → 5,550/);
   assert.match(h, /<b>1\/2<\/b>/);                                       // 10/16은 지난 주라 빠진다
@@ -191,12 +191,13 @@ test('주말 계단 그림 — 지난주 종가·요일 막대 5개·이번 주 
   assert.equal((svg.match(/class="st-b /g) || []).length, 5);
   assert.equal((svg.match(/class="st-b up"/g) || []).length, 3);
   assert.equal((svg.match(/class="st-b dn"/g) || []).length, 2);
-  assert.match(svg, /지난주<\/text>/);
-  assert.match(svg, /이번 주<\/text>/);
-  assert.match(svg, />5,668<\/text>/);
-  assert.match(svg, />5,550<\/text>/);
-  assert.match(svg, /class="st-p dn">−3\.73%</);
-  assert.match(svg, />월<\/text>.*>금<\/text>/);
+  assert.match(svg, /<b>지난주<\/b>/);
+  assert.match(svg, /<b>이번 주<\/b>/);
+  assert.match(svg, />5,668<\/span>/);
+  assert.match(svg, />5,550<\/span>/);
+  assert.match(svg, /class="st-p dn u"[^>]*>−3\.73%</);
+  assert.match(svg, /<b>월<\/b>.*<b>금<\/b>/);
+  assert.doesNotMatch(svg, /<svg/);                       // SVG는 PC 폭에서 글자까지 커진다
   // 휴장으로 거래일이 적은 주도 그 수만큼만 그린다
   assert.equal((api.weekSteps(prev, week.slice(0, 3)).match(/class="st-b /g) || []).length, 3);
 });
