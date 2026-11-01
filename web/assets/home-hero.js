@@ -171,14 +171,14 @@
     var sc = ((summary && summary.scores) || []).filter(function (x) { return dates.indexOf(x.date) >= 0; });
     var hit = sc.filter(function (x) { return x.ok; }).length;
     var top = (summary && summary.sectors_week || [])[0];
-    var tile = function (k, v, e) { return '<div><span>' + k + '</span>' + v + '<em>' + e + '</em></div>'; };
-    var fmt = function (v) { return v.toLocaleString('en-US', { maximumFractionDigits: 0 }); };
+    // 숫자 줄은 한 줄로 간단히 — 시작·끝 종가는 바로 아래 헤드라인·계단 그림이 보여준다(2026-11-01)
+    var tile = function (k, v) { return '<span><i>' + k + '</i>' + v + '</span>'; };
     return '<div class="hh">' +
       '<div class="hh-k"><span>이번 주 정리 · ' + md(dates[0]) + '~' + md(last.date) + '</span><span class="hh-new wk">' + (holiday ? '휴장' : '주말') + '</span></div>' +
       '<div class="hh-wk3">' +
-        tile('코스피 주간', '<b class="' + cls(total) + '">' + pct(total) + '</b>', fmt(w.prev.close) + ' → ' + fmt(last.close)) +
-        (sc.length ? tile('시초가 예측', '<b>' + hit + '/' + sc.length + '</b>', '이번 주 적중') : '') +
-        (top ? tile('가장 강했던 섹터', '<b class="' + cls(top.pct) + '">' + esc(top.label) + '</b>', pct(top.pct) + ' · 대표 평균') : '') +
+        tile('코스피 주간', '<b class="' + cls(total) + '">' + pct(total) + '</b>') +
+        (sc.length ? tile('시초가 예측', '<b>' + hit + '/' + sc.length + '</b> 적중') : '') +
+        (top ? tile('강했던 섹터', '<b>' + esc(top.label) + '</b> <b class="' + cls(top.pct) + '">' + pct(top.pct) + '</b>') : '') +
       '</div>' +
       '<h2 class="hh-h">' + weekStepHead(w.prev, w.week) + '</h2>' +
       '<div class="hh-steps">' + weekSteps(w.prev, w.week) + '</div>' +
