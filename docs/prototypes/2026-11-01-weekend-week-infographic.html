@@ -1,0 +1,256 @@
+<!-- 종목 홈 주말 카드 '이번 주 정리'의 일별 등락 문장(−1.46% → +3.09% → …)을 인포그래픽으로 바꾸는 시안 5가지 — 실제 home-summary.json(10/26~10/30) 값 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>주말 카드 인포그래픽 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E8EB;--inset:#F2F4F6;--soft:#F7F8FA;--primary:#006EFF;--primary-bg:#E8F4FF;
+  --up:#E03131;--dn:#2775ED;--up-bar:#E86464;--dn-bar:#5D97F1;--up-bg:#FFE8E8;--dn-bg:#DBE8FE}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:var(--soft);color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:24px 16px 60px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.top{max-width:1180px;margin:0 auto 20px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+.grid{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:22px;justify-content:center}
+.slot{width:360px;max-width:100%}
+.slot>h3{font-size:14px;font-weight:800;margin-bottom:4px}
+.slot>p{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:10px;min-height:37px}
+/* 실제 주말 카드(.hh) 모양 */
+.hh{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:18px}
+.hh-k{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600}
+.hh-k .wk{color:var(--muted)}
+.wk3{display:flex;gap:8px;margin:12px 0 14px}
+.wk3>div{background:var(--soft);border-radius:10px;padding:10px 12px;min-width:118px}
+.wk3 span{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.wk3 b{display:block;font-size:22px;font-weight:800;margin:3px 0 2px}
+.wk3 em{font-style:normal;font-size:11px;color:var(--muted)}
+.hh-h{font-size:17px;font-weight:800;line-height:1.4;letter-spacing:-.2px}
+.hh-h.old{font-size:19px}
+.hh-dek{font-size:13.5px;color:#4B5563;line-height:1.6;margin-top:6px}
+.hh-cta{display:block;text-align:center;margin-top:14px;border:1px solid var(--hair);border-radius:10px;padding:11px;font-size:13px;font-weight:700;color:var(--ink);text-decoration:none}
+.viz{margin:14px 0 4px}
+.viz svg{display:block;width:100%;height:auto;overflow:visible}
+.viz svg text{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.lg{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-top:6px}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.lg i.ln{height:2px;border-radius:1px;background:var(--ink);vertical-align:3px}
+/* D안 타일 */
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tl{border-radius:10px;padding:9px 4px 8px;text-align:center}
+.tl .d{font-size:11px;font-weight:700;opacity:.85}
+.tl .p{font-size:14px;font-weight:800;margin:3px 0 2px;letter-spacing:-.3px}
+.tl .c{font-size:10.5px;opacity:.8}
+.pr{text-align:center;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}
+.pr b{font-weight:800}
+.pr .ok{color:#15803D}.pr .ng{color:#9CA3AF}
+.prk{font-size:11px;color:var(--muted);margin:8px 0 0;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>주말 카드 — 이번 주 변화 인포그래픽 시안</h1>
+  <p>값은 실제 <code>web/data/home-summary.json</code>(2026-10-26~10-30, 지난주 종가 10/23 5,550.30)에서 계산했어요. 헤드라인 문장도 규칙으로만 만들어요(가장 크게 움직인 날·가장 높았던 날 등) — 모델 문장은 쓰지 않아요.<br>
+  폭은 실제 폰 카드 폭(360px)에 맞췄어요.</p>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+// ── 실데이터(home-summary.json 2026-10-30) ──
+var PREV = { date: '2026-10-23', close: 5550.3 };
+var WEEK = [
+  { date: '2026-10-26', close: 5469.47, pct: -1.46 },
+  { date: '2026-10-27', close: 5638.34, pct: 3.09 },
+  { date: '2026-10-28', close: 6012.44, pct: 6.63 },
+  { date: '2026-10-29', close: 5937.66, pct: -1.24 },
+  { date: '2026-10-30', close: 5730.74, pct: -3.48 }
+];
+var SCORES = { '2026-10-26': ['상승 우위', false], '2026-10-27': ['상승 우위', true], '2026-10-28': ['상승 우위', true],
+               '2026-10-29': ['상승 우위', true], '2026-10-30': ['하락 우위', true] };
+
+var C = { up: '#E03131', dn: '#2775ED', upBar: '#E86464', dnBar: '#5D97F1', upBg: '#FFE8E8', dnBg: '#DBE8FE',
+          ink: '#0F172A', muted: '#64748B', hair: '#E5E8EB', inset: '#F2F4F6' };
+var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+function dow(ymd) { var p = ymd.split('-'); return DOW[new Date(Date.UTC(+p[0], p[1] - 1, +p[2])).getUTCDay()]; }
+function md(ymd) { var p = ymd.split('-'); return (+p[1]) + '/' + (+p[2]); }
+function pct(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%'; }
+function cls(v) { return v > 0 ? 'up' : v < 0 ? 'dn' : ''; }
+function fmt(v) { return Math.round(v).toLocaleString('en-US'); }
+function tc(v) { return v > 0 ? C.up : v < 0 ? C.dn : C.muted; }
+function bc(v) { return v > 0 ? C.upBar : C.dnBar; }
+
+var last = WEEK[WEEK.length - 1];
+var total = (last.close / PREV.close - 1) * 100;
+var up = WEEK.filter(function (r) { return r.pct > 0; }).length, dnN = WEEK.filter(function (r) { return r.pct < 0; }).length;
+var big = WEEK.slice().sort(function (a, b) { return Math.abs(b.pct) - Math.abs(a.pct); })[0];
+var peak = WEEK.slice().sort(function (a, b) { return b.close - a.close; })[0];
+var hits = WEEK.filter(function (r) { return SCORES[r.date] && SCORES[r.date][1]; }).length;
+
+// 공통 카드 껍데기 — 가운데(헤드라인·그림)만 시안마다 다르다
+function card(head, viz) {
+  return '<div class="hh">' +
+    '<div class="hh-k"><span>이번 주 정리 · ' + md(WEEK[0].date) + '~' + md(last.date) + '</span><span class="wk">주말</span></div>' +
+    '<div class="wk3"><div><span>코스피 주간</span><b class="num ' + cls(total) + '">' + pct(total) + '</b><em class="num">' + fmt(PREV.close) + ' → ' + fmt(last.close) + '</em></div>' +
+    '<div><span>시초가 예측</span><b class="num">' + hits + '/' + WEEK.length + '</b><em>이번 주 적중</em></div></div>' +
+    head + viz +
+    '<p class="hh-dek">코스피는 이번 주 ' + WEEK.length + '거래일 중 ' + up + '일 오르고 ' + dnN + '일 내려 주간 <b class="' + cls(total) + '">' + pct(total) + '</b>로 마쳤어요.</p>' +
+    '<a class="hh-cta" href="#">이번 주 브리핑 다시 보기 →</a></div>';
+}
+function h(t) { return '<h2 class="hh-h">' + t + '</h2>'; }
+function hl(r) { return dow(r.date) + '요일 <span class="' + cls(r.pct) + '">' + pct(r.pct) + '</span>'; }
+
+// ── 지금 ──
+function vNow() {
+  return card('<h2 class="hh-h old num" style="margin-top:2px">' + WEEK.map(function (r) { return pct(r.pct); }).join(' → ') + ', 주간 ' + pct(total) + '</h2>', '');
+}
+
+// ── A. 요일별 막대 ──
+function vA() {
+  var W = 324, H = 166, top = 24, bot = 112, n = WEEK.length, cw = W / n, bw = 30;
+  var mx = Math.max.apply(null, WEEK.map(function (r) { return r.pct; }).concat([0]));
+  var mn = Math.min.apply(null, WEEK.map(function (r) { return r.pct; }).concat([0]));
+  var y = function (v) { return top + (mx - v) / (mx - mn) * (bot - top); };
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '"><line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="' + C.hair + '"/>';
+  WEEK.forEach(function (r, i) {
+    var cx = cw * i + cw / 2, y0 = y(0), y1 = y(r.pct), t = Math.min(y0, y1), hh = Math.max(Math.abs(y1 - y0), 2);
+    var isBig = r === big;
+    s += '<rect x="' + (cx - bw / 2) + '" y="' + t + '" width="' + bw + '" height="' + hh + '" rx="3" fill="' + bc(r.pct) + '"' + (isBig ? '' : ' opacity=".85"') + '/>';
+    var ly = r.pct >= 0 ? t - 6 : t + hh + 13;
+    s += '<text x="' + cx + '" y="' + ly + '" text-anchor="middle" font-size="12" font-weight="800" fill="' + tc(r.pct) + '">' + pct(r.pct) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + C.ink + '">' + dow(r.date) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10.5" fill="' + C.muted + '">' + md(r.date) + '</text>';
+  });
+  return card(h(hl(big) + '가 가장 컸어요'), '<div class="viz">' + s + '</svg></div>');
+}
+
+// ── B. 계단(지난주 종가 → 이번 주 종가) ──
+function vB() {
+  var W = 324, H = 168, top = 26, bot = 124, cols = WEEK.length + 2, cw = W / cols, bw = 24;
+  var pts = [PREV.close].concat(WEEK.map(function (r) { return r.close; }));
+  var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), pad = (hi - lo) * .12;
+  lo -= pad; hi += pad;
+  var y = function (v) { return top + (hi - v) / (hi - lo) * (bot - top); };
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '">';
+  // 지난주 종가 기준선
+  s += '<line x1="' + (cw * .2) + '" x2="' + (W - cw * .2) + '" y1="' + y(PREV.close) + '" y2="' + y(PREV.close) + '" stroke="' + C.muted + '" stroke-dasharray="3 3" opacity=".5"/>';
+  function level(i, v, lab) {
+    var cx = cw * i + cw / 2;
+    s += '<rect x="' + (cx - 16) + '" y="' + (y(v) - 2) + '" width="32" height="4" rx="2" fill="' + C.ink + '"/>';
+    s += '<text x="' + cx + '" y="' + (y(v) - 8) + '" text-anchor="middle" font-size="11" font-weight="800" fill="' + C.ink + '">' + fmt(v) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + C.muted + '">' + lab[0] + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="' + C.muted + '">' + lab[1] + '</text>';
+  }
+  level(0, PREV.close, ['지난주', '종가']);
+  var prevV = PREV.close;
+  WEEK.forEach(function (r, i) {
+    var cx = cw * (i + 1) + cw / 2, a = y(prevV), b = y(r.close), t = Math.min(a, b), hh = Math.max(Math.abs(a - b), 2);
+    s += '<line x1="' + (cx - cw + 12) + '" x2="' + (cx - bw / 2) + '" y1="' + a + '" y2="' + a + '" stroke="' + C.muted + '" stroke-width="1" opacity=".45"/>';
+    s += '<rect x="' + (cx - bw / 2) + '" y="' + t + '" width="' + bw + '" height="' + hh + '" rx="2" fill="' + bc(r.pct) + '"/>';
+    var ly = r.pct >= 0 ? t - 6 : t + hh + 13;
+    s += '<text x="' + cx + '" y="' + ly + '" text-anchor="middle" font-size="10.5" font-weight="800" fill="' + tc(r.pct) + '">' + pct(r.pct) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + C.ink + '">' + dow(r.date) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="' + C.muted + '">' + md(r.date) + '</text>';
+    prevV = r.close;
+  });
+  s += '<line x1="' + (cw * (cols - 2) + cw / 2 + bw / 2) + '" x2="' + (cw * (cols - 1) + cw / 2 - 16) + '" y1="' + y(last.close) + '" y2="' + y(last.close) + '" stroke="' + C.muted + '" opacity=".45"/>';
+  level(cols - 1, last.close, ['이번 주', '종가']);
+  var pt = (big.close - (WEEK[WEEK.indexOf(big) - 1] || PREV).close);
+  return card(h(fmt(PREV.close) + ' → ' + fmt(last.close) + ', ' + dow(big.date) + '요일 하루에 <span class="' + cls(pt) + '">' + (pt > 0 ? '+' : '−') + fmt(Math.abs(pt)) + 'p</span>'),
+              '<div class="viz">' + s + '</svg></div>');
+}
+
+// ── C. 종가 흐름 선(지난주 종가 위·아래를 색으로) ──
+function vC() {
+  var W = 324, H = 160, top = 28, bot = 116, padX = 24;
+  var pts = [PREV].concat(WEEK);
+  var lo = Math.min.apply(null, pts.map(function (r) { return r.close; })), hi = Math.max.apply(null, pts.map(function (r) { return r.close; }));
+  var pad = (hi - lo) * .15; lo -= pad; hi += pad;
+  var x = function (i) { return padX + i * (W - 2 * padX) / (pts.length - 1); };
+  var y = function (v) { return top + (hi - v) / (hi - lo) * (bot - top); };
+  var yb = y(PREV.close);
+  var line = pts.map(function (r, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(r.close).toFixed(1); }).join(' ');
+  var area = line + ' L' + x(pts.length - 1) + ' ' + yb + ' L' + x(0) + ' ' + yb + ' Z';
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '"><defs>' +
+    '<clipPath id="cA"><rect x="0" y="0" width="' + W + '" height="' + yb + '"/></clipPath>' +
+    '<clipPath id="cB"><rect x="0" y="' + yb + '" width="' + W + '" height="' + (H - yb) + '"/></clipPath></defs>' +
+    '<path d="' + area + '" fill="' + C.upBg + '" clip-path="url(#cA)"/><path d="' + area + '" fill="' + C.dnBg + '" clip-path="url(#cB)"/>' +
+    '<line x1="' + x(0) + '" x2="' + x(pts.length - 1) + '" y1="' + yb + '" y2="' + yb + '" stroke="' + C.muted + '" stroke-dasharray="3 3" opacity=".6"/>' +
+    '<path d="' + line + '" fill="none" stroke="' + C.ink + '" stroke-width="2" stroke-linejoin="round"/>';
+  pts.forEach(function (r, i) {
+    var cx = x(i), cy = y(r.close);
+    if (i === 0) {
+      s += '<circle cx="' + cx + '" cy="' + cy + '" r="3.5" fill="#fff" stroke="' + C.muted + '" stroke-width="1.5"/>';
+      s += '<text x="' + cx + '" y="' + (cy - 9) + '" text-anchor="middle" font-size="10.5" fill="' + C.muted + '">' + fmt(r.close) + '</text>';
+      s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + C.muted + '">지난 금</text>';
+      return;
+    }
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="' + tc(r.pct) + '" stroke="#fff" stroke-width="1.5"/>';
+    var ly = r.pct >= 0 ? cy - 9 : cy + 17;
+    s += '<text x="' + cx + '" y="' + ly + '" text-anchor="middle" font-size="11" font-weight="800" fill="' + tc(r.pct) + '">' + pct(r.pct) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + C.ink + '">' + dow(r.date) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="' + C.muted + '">' + fmt(r.close) + '</text>';
+  });
+  return card(h(dow(peak.date) + '요일 ' + fmt(peak.close) + '까지 올랐다가 ' + fmt(last.close) + '로 마쳤어요'), '<div class="viz">' + s + '</svg>' +
+    '<div class="lg"><span><i style="background:' + C.upBg + '"></i>지난주 종가 위</span><span><i style="background:' + C.dnBg + '"></i>아래</span></div></div>');
+}
+
+// ── D. 요일 타일 + 그날 예측 채점 ──
+function vD() {
+  var mx = Math.max.apply(null, WEEK.map(function (r) { return Math.abs(r.pct); }));
+  var t = '<div class="tiles">';
+  WEEK.forEach(function (r) {
+    var k = .18 + .82 * Math.abs(r.pct) / mx, strong = k > .55;
+    var rgb = r.pct >= 0 ? '224,49,49' : '39,117,237';
+    t += '<div><div class="tl num" style="background:rgba(' + rgb + ',' + k.toFixed(2) + ');color:' + (strong ? '#fff' : tc(r.pct)) + '">' +
+      '<div class="d">' + dow(r.date) + ' ' + md(r.date) + '</div><div class="p">' + pct(r.pct) + '</div><div class="c">' + fmt(r.close) + '</div></div>';
+    var sc = SCORES[r.date];
+    t += '<div class="pr">' + (sc ? '예측 <b>' + (sc[0].indexOf('상승') >= 0 ? '▲' : '▼') + '</b> <b class="' + (sc[1] ? 'ok">✓' : 'ng">✗') + '</b>' : '&nbsp;') + '</div></div>';
+  });
+  t += '</div><div class="prk"><span>칸 색이 진할수록 크게 움직인 날</span><span>예측은 시초가 기준</span></div>';
+  return card(h(hl(big) + '가 가장 컸어요'), '<div class="viz">' + t + '</div>');
+}
+
+// ── E. 하루 등락 막대 + 한 주 누적 선 ──
+function vE() {
+  var W = 324, H = 160, top = 26, bot = 118, n = WEEK.length, cw = W / n, bw = 22;
+  var cum = WEEK.map(function (r) { return (r.close / PREV.close - 1) * 100; });
+  var vals = WEEK.map(function (r) { return r.pct; }).concat(cum, [0]);
+  var mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
+  var y = function (v) { return top + (mx - v) / (mx - mn) * (bot - top); };
+  var s = '<svg viewBox="0 0 ' + W + ' ' + H + '"><line x1="0" x2="' + W + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="' + C.hair + '"/>';
+  WEEK.forEach(function (r, i) {
+    var cx = cw * i + cw / 2, y0 = y(0), y1 = y(r.pct);
+    s += '<rect x="' + (cx - bw / 2) + '" y="' + Math.min(y0, y1) + '" width="' + bw + '" height="' + Math.max(Math.abs(y1 - y0), 2) + '" rx="3" fill="' + bc(r.pct) + '" opacity=".38"/>';
+    s += '<text x="' + cx + '" y="' + (H - 18) + '" text-anchor="middle" font-size="12" font-weight="700" fill="' + C.ink + '">' + dow(r.date) + '</text>';
+    s += '<text x="' + cx + '" y="' + (H - 4) + '" text-anchor="middle" font-size="10" fill="' + tc(r.pct) + '">하루 ' + pct(r.pct) + '</text>';
+  });
+  var path = cum.map(function (v, i) { return (i ? 'L' : 'M') + (cw * i + cw / 2).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' ');
+  s += '<path d="' + path + '" fill="none" stroke="' + C.ink + '" stroke-width="2" stroke-linejoin="round"/>';
+  var pk = cum.indexOf(Math.max.apply(null, cum));
+  cum.forEach(function (v, i) {
+    var cx = cw * i + cw / 2, cy = y(v), lab = (i === pk || i === n - 1);
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (lab ? 4 : 3) + '" fill="' + C.ink + '" stroke="#fff" stroke-width="1.5"/>';
+    if (lab) s += '<text x="' + cx + '" y="' + (cy - 9) + '" text-anchor="middle" font-size="11.5" font-weight="800" fill="' + tc(v) + '">' + pct(v) + '</text>';
+  });
+  return card(h(dow(WEEK[pk].date) + '요일 누적 <span class="' + cls(cum[pk]) + '">' + pct(cum[pk]) + '</span>까지 갔다가 <span class="' + cls(total) + '">' + pct(total) + '</span>로 마쳤어요'),
+    '<div class="viz">' + s + '</svg><div class="lg"><span><i style="background:' + C.upBar + ';opacity:.5"></i>하루 등락</span><span><i class="ln"></i>지난주 종가 대비 누적</span></div></div>');
+}
+
+var VARIANTS = [
+  ['지금', '일별 등락을 화살표로 이은 문장. 폰에서 숫자가 중간에 줄바꿈된다(−3. / 48%).', vNow],
+  ['A안 · 요일별 막대', '하루 등락만 크기로 보여준다. 가장 단순하고, 어느 날이 컸는지 한눈에 보인다.', vA],
+  ['B안 · 계단', '지난주 종가에서 이번 주 종가까지 하루씩 쌓아 올린다. 주간 +3.25%가 어떤 날들로 만들어졌는지 보인다.', vB],
+  ['C안 · 종가 흐름 선', '종가를 선으로 잇고 지난주 종가 위·아래를 색으로 칠한다. 고점에서 얼마나 되돌렸는지 보인다.', vC],
+  ['D안 · 요일 타일 + 예측 채점', '요일 칸을 등락 크기만큼 진하게 칠하고, 그날 시초가 예측이 맞았는지 아래에 단다.', vD],
+  ['E안 · 하루 막대 + 누적 선', '하루 등락(연한 막대)과 한 주 누적(선)을 겹친다. "중간에 +8%까지 갔다"가 드러난다.', vE]
+];
+document.getElementById('grid').innerHTML = VARIANTS.map(function (v) {
+  return '<div class="slot"><h3>' + v[0] + '</h3><p>' + v[1] + '</p>' + v[2]() + '</div>';
+}).join('');
+</script>
+</body>
+</html>
