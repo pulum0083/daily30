@@ -961,6 +961,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .hh-wk3 b.up{color:#E03131} .hh-wk3 b.dn{color:#2775ED}
 /* 주말 카드 계단 그림 — 지난주 종가 → 하루씩 → 이번 주 종가(§68 ⑥). HTML 칸이라 PC에서도 높이·글자가 그대로다 */
 .hh-steps{margin:14px 0 2px}
+/* 그림 제목 — 다른 카드 헤드라인(17px)처럼 키우지 않고 위 숫자 줄·그림 글자와 같은 무게로 */
+.hh-h.st-h{font-size:13.5px;font-weight:600;color:#334155;margin-top:12px;font-variant-numeric:tabular-nums}
+.hh-h.st-h span{font-weight:800}
 .st-plot{position:relative;display:grid;height:104px;margin:18px 0 16px}
 .st-c{position:relative}
 .st-base{position:absolute;left:4%;right:4%;border-top:1px dashed #CBD5E1;z-index:0}

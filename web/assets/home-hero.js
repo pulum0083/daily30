@@ -180,7 +180,7 @@
         (sc.length ? tile('시초가 예측', '<b>' + hit + '/' + sc.length + '</b> 적중') : '') +
         (top ? tile('강했던 섹터', '<b>' + esc(top.label) + '</b> <b class="' + cls(top.pct) + '">' + pct(top.pct) + '</b>') : '') +
       '</div>' +
-      '<h2 class="hh-h">' + weekStepHead(w.prev, w.week) + '</h2>' +
+      '<h2 class="hh-h st-h">' + weekStepHead(w.prev, w.week) + '</h2>' +
       '<div class="hh-steps">' + weekSteps(w.prev, w.week) + '</div>' +
       '<p class="hh-dek">코스피는 이번 주 ' + w.week.length + '거래일 중 ' + up + '일 오르고 ' + dn + '일 내려 주간 <b class="' + cls(total) + '">' + pct(total) + '</b>로 마쳤어요.</p>' +
       '<a class="hh-cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div>';
