@@ -1,0 +1,594 @@
+{
+  "prediction": {
+    "direction": "하락 우위",
+    "up_pct": 8,
+    "down_pct": 92,
+    "confidence": 82,
+    "basis": "open"
+  },
+  "reason_title": "긴급 점검: 반도체·빅테크 동반 급락, 갭다운 불가피",
+  "todays_view": {
+    "view_title": "지금 이 순간도 미 선물이 추가 하락을 가리키고 있어요.",
+    "dek": "지난 금요일 <b>알파벳</b>이 AI 투자 부담 우려에 하루 만에 <b>-12.64%</b> 급락하면서 미 증시 전체가 흔들렸어요. 반도체 수출은 역대 최대치를 찍었는데, 정작 시장은 'AI 과잉투자' 쪽에 더 겁을 먹은 하루였어요.",
+    "recap": [
+      {
+        "text": "코스피가 외국인 <b>1조 6173억 원</b> 순매도에 밀려 <b>-3.48%</b> 급락하며 5730선에 마감했어요.",
+        "codes": []
+      },
+      {
+        "text": "SK하이닉스가 <b>-7.08%</b>, 한미반도체가 <b>-7.21%</b> 빠지며 반도체 대형주 중심의 투매가 나왔어요.",
+        "codes": [
+          "000660",
+          "042700"
+        ]
+      },
+      {
+        "text": "기아가 <b>-11.73%</b> 급락하는 등 자동차 섹터까지 투매가 번졌어요.",
+        "codes": [
+          "000270"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "watch",
+        "text": "지난 금요일 미 증시 급락분이 코스피 개장가에 얼마나 반영될지가 첫 관전 포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인이 오늘도 대규모 순매도를 이어가는지 지켜보세요 — 추세 전환의 핵심 열쇠예요.",
+        "source": null
+      },
+      {
+        "tag": "event",
+        "text": "이번 주 금요일 미국 고용지표(실업률·비농업고용)가 예정돼 있어요, 이번 주 변동성의 또 다른 축이에요.",
+        "source": "calendar"
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>지금 이 순간도 미 선물이 추가 하락을 가리키고 있어요.</b> NQ선물이 <b>-3.48%</b>, S&P선물이 <b>-1.81%</b>로 낙폭을 더 키우고 있어서, 어제보다 더 신선한 정보가 하락 쪽에 쌓이고 있어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-02T07:31:44.147858+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-02T07:26:45.581715+09:00",
+    "briefing_date": "2026-11-02",
+    "us_session_date": "2026-10-30",
+    "session_label": "지난 금요일",
+    "cards": [
+      {
+        "title": "인텔 실적 충격, 프리마켓에서 반도체 전반 동반 급락",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·파운드리",
+            "marks": [
+              {
+                "ticker": "INTC",
+                "name": "INTC",
+                "pct": -28.58
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": -10.88
+              },
+              {
+                "ticker": "QCOM",
+                "name": "QCOM",
+                "pct": -11.12
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": -5.48
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -5.3
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·파운드리는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "아마존 실적도 프리마켓서 급락 반응",
+        "sides": [
+          {
+            "side": "down",
+            "label": "빅테크·클라우드",
+            "marks": [
+              {
+                "ticker": "AMZN",
+                "name": "AMZN",
+                "pct": -1.41
+              },
+              {
+                "ticker": "GOOGL",
+                "name": "GOOGL",
+                "pct": -1.4
+              },
+              {
+                "ticker": "META",
+                "name": "META",
+                "pct": -1.53
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "빅테크·클라우드는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "VIX 급등에 안전자산 쏠림, 위험선호 급격히 식어",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^VIX",
+                "name": "VIX",
+                "pct": 12.91
+              }
+            ],
+            "proxy": "VIX"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      },
+      {
+        "title": "메모리·장비주까지 번진 매도세",
+        "sides": [
+          {
+            "side": "down",
+            "label": "메모리·반도체 장비",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": -5.3
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": -7.49
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": -6.01
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": -5.69
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "메모리·반도체 장비는 <b>나란히 내렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-02",
+    "generated_at": "2026-11-02T07:26:45.779287+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": [
+      {
+        "code": "000810",
+        "name": "삼성화재",
+        "passed": true,
+        "streak": 6,
+        "run_label": "5월~10월",
+        "last_complete": "202610",
+        "month_end_close": 659000.0,
+        "month_end_ma5": 641400.0,
+        "month_end_gap_pct": 2.74,
+        "now_date": "20261030",
+        "now_close": 659000.0,
+        "now_gap_pct": 2.74,
+        "mtd_pct": null,
+        "fr_now": 57.3,
+        "fr_chg_3m": -0.75,
+        "strip": [
+          {
+            "m": "202511",
+            "label": "11월",
+            "close": 481500.0,
+            "ma5": 451800.0,
+            "gap_pct": 6.57,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202512",
+            "label": "12월",
+            "close": 497000.0,
+            "ma5": 463100.0,
+            "gap_pct": 7.32,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202601",
+            "label": "1월",
+            "close": 501000.0,
+            "ma5": 474500.0,
+            "gap_pct": 5.58,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202602",
+            "label": "2월",
+            "close": 530000.0,
+            "ma5": 490200.0,
+            "gap_pct": 8.12,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202603",
+            "label": "3월",
+            "close": 440500.0,
+            "ma5": 490000.0,
+            "gap_pct": -10.1,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202604",
+            "label": "4월",
+            "close": 461000.0,
+            "ma5": 485900.0,
+            "gap_pct": -5.12,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202605",
+            "label": "5월",
+            "close": 569000.0,
+            "ma5": 500300.0,
+            "gap_pct": 13.73,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202606",
+            "label": "6월",
+            "close": 618000.0,
+            "ma5": 523700.0,
+            "gap_pct": 18.01,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202607",
+            "label": "7월",
+            "close": 632000.0,
+            "ma5": 544100.0,
+            "gap_pct": 16.16,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202608",
+            "label": "8월",
+            "close": 665000.0,
+            "ma5": 589000.0,
+            "gap_pct": 12.9,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202609",
+            "label": "9월",
+            "close": 633000.0,
+            "ma5": 623400.0,
+            "gap_pct": 1.54,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202610",
+            "label": "10월",
+            "close": 659000.0,
+            "ma5": 641400.0,
+            "gap_pct": 2.74,
+            "run": true,
+            "cur": false
+          }
+        ]
+      },
+      {
+        "code": "138040",
+        "name": "메리츠금융지주",
+        "passed": true,
+        "streak": 4,
+        "run_label": "7월~10월",
+        "last_complete": "202610",
+        "month_end_close": 133200.0,
+        "month_end_ma5": 122260.0,
+        "month_end_gap_pct": 8.95,
+        "now_date": "20261030",
+        "now_close": 133200.0,
+        "now_gap_pct": 8.95,
+        "mtd_pct": null,
+        "fr_now": 14.19,
+        "fr_chg_3m": -0.09,
+        "strip": [
+          {
+            "m": "202511",
+            "label": "11월",
+            "close": 108600.0,
+            "ma5": 114980.0,
+            "gap_pct": -5.55,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202512",
+            "label": "12월",
+            "close": 113100.0,
+            "ma5": 114440.0,
+            "gap_pct": -1.17,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202601",
+            "label": "1월",
+            "close": 116600.0,
+            "ma5": 112460.0,
+            "gap_pct": 3.68,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202602",
+            "label": "2월",
+            "close": 127100.0,
+            "ma5": 115180.0,
+            "gap_pct": 10.35,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202603",
+            "label": "3월",
+            "close": 111400.0,
+            "ma5": 115360.0,
+            "gap_pct": -3.43,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202604",
+            "label": "4월",
+            "close": 111700.0,
+            "ma5": 115980.0,
+            "gap_pct": -3.69,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202605",
+            "label": "5월",
+            "close": 102900.0,
+            "ma5": 113940.0,
+            "gap_pct": -9.69,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202606",
+            "label": "6월",
+            "close": 105600.0,
+            "ma5": 111740.0,
+            "gap_pct": -5.49,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202607",
+            "label": "7월",
+            "close": 124000.0,
+            "ma5": 111120.0,
+            "gap_pct": 11.59,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202608",
+            "label": "8월",
+            "close": 122200.0,
+            "ma5": 113280.0,
+            "gap_pct": 7.87,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202609",
+            "label": "9월",
+            "close": 126300.0,
+            "ma5": 116200.0,
+            "gap_pct": 8.69,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202610",
+            "label": "10월",
+            "close": 133200.0,
+            "ma5": 122260.0,
+            "gap_pct": 8.95,
+            "run": true,
+            "cur": false
+          }
+        ]
+      },
+      {
+        "code": "096770",
+        "name": "SK이노베이션",
+        "passed": true,
+        "streak": 3,
+        "run_label": "8월~10월",
+        "last_complete": "202610",
+        "month_end_close": 129900.0,
+        "month_end_ma5": 121920.0,
+        "month_end_gap_pct": 6.55,
+        "now_date": "20261030",
+        "now_close": 129900.0,
+        "now_gap_pct": 6.55,
+        "mtd_pct": null,
+        "fr_now": 16.44,
+        "fr_chg_3m": 2.03,
+        "strip": [
+          {
+            "m": "202511",
+            "label": "11월",
+            "close": 115000.0,
+            "ma5": 110640.0,
+            "gap_pct": 3.94,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202512",
+            "label": "12월",
+            "close": 101200.0,
+            "ma5": 109300.0,
+            "gap_pct": -7.41,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202601",
+            "label": "1월",
+            "close": 112000.0,
+            "ma5": 111520.0,
+            "gap_pct": 0.43,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202602",
+            "label": "2월",
+            "close": 127700.0,
+            "ma5": 116960.0,
+            "gap_pct": 9.18,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202603",
+            "label": "3월",
+            "close": 108700.0,
+            "ma5": 112920.0,
+            "gap_pct": -3.74,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202604",
+            "label": "4월",
+            "close": 146200.0,
+            "ma5": 119160.0,
+            "gap_pct": 22.69,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202605",
+            "label": "5월",
+            "close": 119200.0,
+            "ma5": 122760.0,
+            "gap_pct": -2.9,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202606",
+            "label": "6월",
+            "close": 94900.0,
+            "ma5": 119340.0,
+            "gap_pct": -20.48,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202607",
+            "label": "7월",
+            "close": 110500.0,
+            "ma5": 115900.0,
+            "gap_pct": -4.66,
+            "run": false,
+            "cur": false
+          },
+          {
+            "m": "202608",
+            "label": "8월",
+            "close": 125500.0,
+            "ma5": 119260.0,
+            "gap_pct": 5.23,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202609",
+            "label": "9월",
+            "close": 148800.0,
+            "ma5": 119780.0,
+            "gap_pct": 24.23,
+            "run": true,
+            "cur": false
+          },
+          {
+            "m": "202610",
+            "label": "10월",
+            "close": 129900.0,
+            "ma5": 121920.0,
+            "gap_pct": 6.55,
+            "run": true,
+            "cur": false
+          }
+        ]
+      }
+    ]
+  },
+  "prev_prediction_result": {
+    "date": "2026-10-30",
+    "direction": "하락 우위",
+    "ok": true,
+    "open_pct": -2.99
+  },
+  "prior_signals": {
+    "sox": -7.2,
+    "nasdaq": -2.86,
+    "nq": -3.48,
+    "ewy_resid": -2.044,
+    "vix": 12.907
+  },
+  "prev_supply": {
+    "date": "20261030",
+    "individual": 6207,
+    "institution": 7424,
+    "foreign": -16170
+  }
+}
