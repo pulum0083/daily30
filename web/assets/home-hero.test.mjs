@@ -162,11 +162,13 @@ const SUM = {
   sectors_week: [{ key: 'ship', label: '조선', pct: 4.12, n: 5 }, { key: 'bio', label: '바이오', pct: -1 }],
 };
 
-test('주말 카드 — 일별 등락 나열 헤드라인, 주간 등락·이번 주 예측 성적·가장 강한 섹터', () => {
+test('주말 카드 — 계단 그림·헤드라인(시작→끝 종가·가장 큰 하루), 주간 등락·이번 주 예측 성적·가장 강한 섹터', () => {
   const h = api.cardWeekend(SUM, '2026-10-24', '2026-10-24', false);
   assert.match(h, /이번 주 정리 · 10\/19~10\/23/);
   assert.match(h, />주말</);
-  assert.match(h, /\+1\.76% → −3\.73% → \+3\.29% → −3\.52% → \+0\.30%, 하루씩 방향이 바뀐 한 주/);
+  assert.match(h, /5,668 → 5,550, 화요일 하루에 <span class="dn">−215p<\/span>/);   // 5552.7 − 5767.8
+  assert.doesNotMatch(h, /\+1\.76% → −3\.73%/);                                   // 옛 화살표 나열 문장은 없다
+  assert.match(h, /<div class="hh-steps"><svg/);
   assert.match(h, /<b class="dn">−2\.08%<\/b>/);                         // 5550.3 / 5668 - 1
   assert.match(h, /5,668 → 5,550/);
   assert.match(h, /<b>1\/2<\/b>/);                                       // 10/16은 지난 주라 빠진다
@@ -183,8 +185,24 @@ test('주말 카드 — 휴장 표기, 지난 주 요약이면·직전 주 종�
   assert.equal(api.cardWeekend(null, '2026-10-24', '2026-10-24', false), '');
 });
 
-test('주말 헤드라인 꼬리 — 내리 오름·내리 내림·섞임', () => {
-  assert.equal(api.weekTail([1, 2, 0.5], 3.5), '3거래일 내리 오른 한 주');
-  assert.equal(api.weekTail([-1, -2], -3), '2거래일 내리 내린 한 주');
-  assert.equal(api.weekTail([1, 1, -2], -0.1), '주간 −0.10%');
+test('주말 계단 그림 — 지난주 종가·요일 막대 5개·이번 주 종가, 막대 색은 그날 오르내림', () => {
+  const week = SUM.kospi_days.slice(1), prev = SUM.kospi_days[0];
+  const svg = api.weekSteps(prev, week);
+  assert.equal((svg.match(/class="st-b /g) || []).length, 5);
+  assert.equal((svg.match(/class="st-b up"/g) || []).length, 3);
+  assert.equal((svg.match(/class="st-b dn"/g) || []).length, 2);
+  assert.match(svg, /지난주<\/text>/);
+  assert.match(svg, /이번 주<\/text>/);
+  assert.match(svg, />5,668<\/text>/);
+  assert.match(svg, />5,550<\/text>/);
+  assert.match(svg, /class="st-p dn">−3\.73%</);
+  assert.match(svg, />월<\/text>.*>금<\/text>/);
+  // 휴장으로 거래일이 적은 주도 그 수만큼만 그린다
+  assert.equal((api.weekSteps(prev, week.slice(0, 3)).match(/class="st-b /g) || []).length, 3);
+});
+
+test('주말 헤드라인 — 첫날이 가장 크면 지난주 종가 대비 포인트', () => {
+  const prev = { date: '2026-10-23', close: 5550.3 };
+  const week = [{ date: '2026-10-26', close: 5469.47, pct: -1.46 }, { date: '2026-10-27', close: 5490, pct: 0.38 }];
+  assert.equal(api.weekStepHead(prev, week), '5,550 → 5,490, 월요일 하루에 <span class="dn">−81p</span>');
 });

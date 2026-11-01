@@ -112,7 +112,7 @@
       '<a class="hh-cta" href="/briefings/' + ymd + '/us/">미국 브리핑 보기 →</a></div>';
   }
 
-  // 주말 카드(§68 ⑥) — home-summary.json(마감 잡이 쓴다)의 가장 최근 거래 주. 헤드라인은 일별 등락을 나열한 결정론 문장이다.
+  // 주말 카드(§68 ⑥) — home-summary.json(마감 잡이 쓴다)의 가장 최근 거래 주. 헤드라인·계단 그림은 결정론으로 만든다.
   function weekRows(rows) {
     if (!rows || !rows.length) return { week: [], prev: null };
     var last = rows[rows.length - 1].date, p = last.split('-');
@@ -122,13 +122,45 @@
     var before = rows.filter(function (r) { return r.date < monday; });
     return { week: week, prev: before.length ? before[before.length - 1] : null };
   }
-  function weekTail(pcts, total) {
-    var up = pcts.filter(function (v) { return v > 0; }).length, dn = pcts.filter(function (v) { return v < 0; }).length, n = pcts.length;
-    if (n >= 2 && up === n) return n + '거래일 내리 오른 한 주';
-    if (n >= 2 && dn === n) return n + '거래일 내리 내린 한 주';
-    var alt = n >= 3 && pcts.every(function (v, i) { return v !== 0 && (i === 0 || (v > 0) !== (pcts[i - 1] > 0)); });
-    if (alt) return '하루씩 방향이 바뀐 한 주';
-    return '주간 ' + pct(total);
+  // 계단 그림 — 지난주 종가에서 하루씩 쌓아 이번 주 종가까지(2026-11-01 B안, 시안 docs/prototypes/2026-11-01-weekend-week-infographic.html)
+  function dowOf(ymd) { var p = ymd.split('-'); return DOWS[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()]; }
+  function weekSteps(prev, week) {
+    var W = 324, H = 168, top = 26, bot = 124, cols = week.length + 2, cw = W / cols, bw = 24;
+    var pts = [prev.close].concat(week.map(function (r) { return r.close; }));
+    var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts), pad = (hi - lo) * 0.12 || 1;
+    lo -= pad; hi += pad;
+    var y = function (v) { return +(top + (hi - v) / (hi - lo) * (bot - top)).toFixed(1); };
+    var f0 = function (v) { return Math.round(v).toLocaleString('en-US'); };
+    var t = function (x, yy, c, txt) { return '<text x="' + x.toFixed(1) + '" y="' + yy + '" class="' + c + '">' + txt + '</text>'; };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="지난주 종가 ' + f0(prev.close) + '에서 이번 주 종가 ' + f0(week[week.length - 1].close) + '까지 일별 등락">' +
+      '<line class="st-base" x1="' + (cw * 0.2).toFixed(1) + '" x2="' + (W - cw * 0.2).toFixed(1) + '" y1="' + y(prev.close) + '" y2="' + y(prev.close) + '"/>';
+    function level(i, v, a, b) {
+      var cx = cw * i + cw / 2;
+      return '<rect class="st-lv" x="' + (cx - 16).toFixed(1) + '" y="' + (y(v) - 2) + '" width="32" height="4" rx="2"/>' +
+        t(cx, y(v) - 8, 'st-v', f0(v)) + t(cx, H - 18, 'st-k', a) + t(cx, H - 4, 'st-d', b);
+    }
+    s += level(0, prev.close, '지난주', '종가');
+    var pv = prev.close;
+    week.forEach(function (r, i) {
+      var cx = cw * (i + 1) + cw / 2, a = y(pv), b = y(r.close), tp = Math.min(a, b), hh = Math.max(Math.abs(a - b), 2);
+      s += '<line class="st-cn" x1="' + (cx - cw + 12).toFixed(1) + '" x2="' + (cx - bw / 2).toFixed(1) + '" y1="' + a + '" y2="' + a + '"/>' +
+        '<rect class="st-b ' + (r.close >= pv ? 'up' : 'dn') + '" x="' + (cx - bw / 2).toFixed(1) + '" y="' + tp + '" width="' + bw + '" height="' + hh + '" rx="2"/>' +
+        t(cx, r.pct >= 0 ? tp - 6 : tp + hh + 13, 'st-p ' + cls(r.pct), pct(r.pct)) +
+        t(cx, H - 18, 'st-k on', dowOf(r.date)) + t(cx, H - 4, 'st-d', md(r.date));
+      pv = r.close;
+    });
+    var ex = cw * (cols - 1) + cw / 2;
+    s += '<line class="st-cn" x1="' + (ex - cw + 12).toFixed(1) + '" x2="' + (ex - 16).toFixed(1) + '" y1="' + y(pv) + '" y2="' + y(pv) + '"/>';
+    return s + level(cols - 1, pv, '이번 주', '종가') + '</svg>';
+  }
+  // 헤드라인 — 시작·끝 종가와 가장 크게 움직인 날의 포인트 변화(결정론)
+  function weekStepHead(prev, week) {
+    var bi = 0;
+    week.forEach(function (r, i) { if (Math.abs(r.pct) > Math.abs(week[bi].pct)) bi = i; });
+    var pt = week[bi].close - (bi ? week[bi - 1].close : prev.close);
+    var f0 = function (v) { return Math.round(v).toLocaleString('en-US'); };
+    return f0(prev.close) + ' → ' + f0(week[week.length - 1].close) + ', ' + dowOf(week[bi].date) + '요일 하루에 <span class="' + cls(pt) + '">' +
+      (pt > 0 ? '+' : pt < 0 ? '−' : '') + f0(Math.abs(pt)) + 'p</span>';
   }
   function md(ymd) { var p = ymd.split('-'); return (+p[1]) + '/' + (+p[2]); }
   function cardWeekend(summary, ymd, today, holiday) {
@@ -139,7 +171,6 @@
     var total = (last.close / w.prev.close - 1) * 100;
     var pcts = w.week.map(function (r) { return r.pct; });
     var up = pcts.filter(function (v) { return v > 0; }).length, dn = pcts.filter(function (v) { return v < 0; }).length;
-    var headline = pcts.map(pct).join(' → ') + ', ' + weekTail(pcts, total);
     var dates = w.week.map(function (r) { return r.date; });
     var sc = ((summary && summary.scores) || []).filter(function (x) { return dates.indexOf(x.date) >= 0; });
     var hit = sc.filter(function (x) { return x.ok; }).length;
@@ -153,7 +184,8 @@
         (sc.length ? tile('시초가 예측', '<b>' + hit + '/' + sc.length + '</b>', '이번 주 적중') : '') +
         (top ? tile('가장 강했던 섹터', '<b class="' + cls(top.pct) + '">' + esc(top.label) + '</b>', pct(top.pct) + ' · 대표 평균') : '') +
       '</div>' +
-      '<h2 class="hh-h">' + esc(headline) + '</h2>' +
+      '<h2 class="hh-h">' + weekStepHead(w.prev, w.week) + '</h2>' +
+      '<div class="hh-steps">' + weekSteps(w.prev, w.week) + '</div>' +
       '<p class="hh-dek">코스피는 이번 주 ' + w.week.length + '거래일 중 ' + up + '일 오르고 ' + dn + '일 내려 주간 <b class="' + cls(total) + '">' + pct(total) + '</b>로 마쳤어요.</p>' +
       '<a class="hh-cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div>';
   }
@@ -312,7 +344,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekTail: weekTail, ma5Row: ma5Row, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);
