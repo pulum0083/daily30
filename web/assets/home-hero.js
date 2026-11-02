@@ -259,8 +259,34 @@
       '<div class="uip">' + rows + '<div class="uip-s"><span></span><div><span>−' + top + '%</span><span class="m">200일선</span><span>+' + top + '%</span></div></div></div></div>';
   }
 
-  function structHtml(nq, nqDate, m5, m5Date, today, pos) {
-    var second = pos ? usIndexRow(pos) : (m5Date ? ma5Row(m5, m5Date, today) : '');
+  // 코스피 체크 — 종가 ÷ 60개월선. 정상·주의·경고를 판정하지 않고 과거 최고들 사이의 위치만 보여준다(§68 ⑤). 게이지 색도 회색이다.
+  function kospiRow(kc, today) {
+    if (!kc || typeof kc.gap_pct !== 'number' || !isFinite(kc.gap_pct) || !/^\d{4}-\d{2}-\d{2}$/.test(kc.asof || '')) return '';
+    if (daysBetween(kc.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
+    var s1 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%'; };
+    var s0 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(0) + '%'; };
+    var g = kc.gap_pct, marks = [];
+    if (kc.prev_max && typeof kc.prev_max.gap === 'number') marks.push({ v: kc.prev_max.gap, t: kc.prev_max.m.slice(0, 4) + '년 ' + s0(kc.prev_max.gap) });
+    if (kc.year_max && typeof kc.year_max.gap === 'number') marks.push({ v: kc.year_max.gap, t: '올해 ' + s0(kc.year_max.gap) });
+    var top = Math.ceil((Math.max.apply(null, [g].concat(marks.map(function (m) { return m.v; }))) + 10) / 50) * 50;
+    var x = function (v) { return Math.max(0, Math.min(v, top)) / top * 100; };
+    marks.sort(function (a, b) { return a.v - b.v; });
+    // 두 눈금 글자가 겹칠 만큼 가까우면 높은 쪽만 남긴다. 0 눈금과 가까운 글자도 뺀다.
+    if (marks.length === 2 && x(marks[1].v) - x(marks[0].v) < 25) marks.shift();
+    marks = marks.filter(function (m) { return x(m.v) >= 14; });
+    var labels = marks.map(function (m) {
+      return x(m.v) > 80 ? '<span class="l70">' + esc(m.t) + '</span>' : '<span style="left:' + x(m.v).toFixed(1) + '%">' + esc(m.t) + '</span>';
+    }).join('');
+    return '<div class="ss ss-static"><div class="ss-h"><span class="ss-k">코스피 체크</span><span class="ss-d">' + md(kc.asof) + '(' + dowOf(kc.asof) + ') 종가</span></div>' +
+      '<div class="ss-m"><b>' + s1(g) + '</b></div>' +
+      '<div class="nqg"><div class="nqg-t"><i class="f n" style="width:' + x(g).toFixed(1) + '%"></i>' +
+      marks.map(function (m) { return '<i class="mk" style="left:' + x(m.v).toFixed(1) + '%"></i>'; }).join('') +
+      '<i class="dot n" style="left:' + x(g).toFixed(1) + '%"></i></div><div class="nqg-l"><span style="left:0">0</span>' + labels + '</div></div>' +
+      '<em>60개월선 대비' + (typeof kc.above === 'number' && kc.months ? ' · ' + esc(String(kc.since).slice(0, 4)) + '년 이후 ' + kc.months + '개월 중 지금보다 높았던 달 ' + kc.above + '개월' : '') + '</em></div>';
+  }
+
+  function structHtml(nq, nqDate, m5, m5Date, today, pos, kc) {
+    var second = pos ? usIndexRow(pos) : (kc ? kospiRow(kc, today) : '') + (m5Date ? ma5Row(m5, m5Date, today) : '');
     var rows = (nqDate ? nasdaqRow(nq, nqDate, today) : '') + second;
     return rows ? '<div class="block__h"><span class="block__t"><span class="ic">🧱</span>구조 신호</span>' +
       // 계산은 브리핑마다(나스닥 21:15·월봉 07:25) 다시 한다 — '월 단위'로만 쓰면 월 1회 갱신으로 읽혔다(2026-10-29)
@@ -268,14 +294,16 @@
   }
 
   var structEl = document.getElementById('struct-sig');
-  // 밤(미국 브리핑 뒤)엔 국내 종목 줄이 어색해 미국 지수 줄로 바꾼다(2026-11-02) — 값이 없으면 나스닥 체크만 남는다.
+  // 시간대별 줄(§68 ⑤) — 아침: 코스피 체크 + 월봉 / 밤: 나스닥 체크 + 미국 지수 / 주말·휴장: 나스닥 체크 + 코스피 체크 + 월봉.
+  //   밤에 미국 지수 값이 없으면 나스닥 체크만 남는다 — 국내 줄로 대신하지 않는다.
   function loadStruct(slots, today, slot) {
     if (!structEl) return;
-    var evening = slot === 'evening';
-    var usD = latestReady(slots, 'us', today), krD = evening ? null : latestReady(slots, 'kospi', today);
+    var evening = slot === 'evening', morning = slot === 'morning';
+    var usD = morning ? null : latestReady(slots, 'us', today), krD = evening ? null : latestReady(slots, 'kospi', today);
     var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
-    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi')]).then(function (r) {
-      var html = structHtml(r[0] && r[0].nasdaq_overheat, usD, r[1] && r[1].monthly_ma5, krD, today, evening ? (r[0] && r[0].us_index_position) || null : null);
+    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), evening ? Promise.resolve(null) : json('/data/home-summary.json')]).then(function (r) {
+      var html = structHtml(r[0] && r[0].nasdaq_overheat, usD, r[1] && r[1].monthly_ma5, krD, today,
+        evening ? (r[0] && r[0].us_index_position) || null : null, r[2] && r[2].kospi_check);
       structEl.innerHTML = html;
       structEl.hidden = !html;
     });
@@ -359,7 +387,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, usIndexRow: usIndexRow, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, usIndexRow: usIndexRow, kospiRow: kospiRow, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);

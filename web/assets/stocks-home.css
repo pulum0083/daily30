@@ -946,6 +946,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b.cur i{background:#93B8F5}
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
+/* 코스피 체크 — 판정이 아니라 위치라서 회색 게이지 + 과거 최고 눈금 */
+#struct-sig .nqg-t i.f.n{background:#94A3B8} #struct-sig .nqg-t i.dot.n{background:#0F172A}
+#struct-sig .nqg-t i.mk{width:1.5px;top:-3px;height:14px;margin-left:-.75px;background:#64748B}
 /* 미국 지수 · 200일선 대비 — 가운데 눈금이 200일선 */
 #struct-sig .ss-static:hover{background:#fff}
 #struct-sig .uip{margin-top:9px;display:grid;gap:7px}

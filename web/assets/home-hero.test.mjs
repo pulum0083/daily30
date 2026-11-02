@@ -177,6 +177,42 @@ test('구조 신호 — 밤엔 국내 월봉 줄 대신 미국 지수 줄, 머�
   assert.match(api.structHtml({ gap_pct: 59.9 }, '2026-10-30', null, null, '2026-10-30', null), /월봉 기준 · 매일 업데이트/);
 });
 
+// ── 코스피 체크 ─────────────────────────────────────────────────────
+const KC = { asof: '2026-11-02', gap_pct: 72.1, since: '2001-11', months: 301, above: 15, year_max: { m: '2026-05', gap: 178.6 }, prev_max: { m: '2007-10', gap: 87.5 } };
+test('코스피 체크 — 값·과거 최고 눈금·과거 위치, 판정 표시는 없다', () => {
+  const h = api.kospiRow(KC, '2026-11-03');
+  assert.match(h, /코스피 체크/);
+  assert.match(h, /11\/2\(월\) 종가/);
+  assert.match(h, /<b>\+72\.1%<\/b>/);
+  assert.match(h, /2007년 \+88%/);
+  assert.match(h, /올해 \+179%/);
+  assert.equal((h.match(/class="mk"/g) || []).length, 2);
+  assert.match(h, /2001년 이후 301개월 중 지금보다 높았던 달 15개월/);
+  assert.doesNotMatch(h, /정상|주의|경고|class="pill/);
+  assert.match(h, /class="dot n" style="left:36\.[01]%"/);            // 72.1 ÷ 200
+});
+test('코스피 체크 — 옛 값·빈 값은 줄을 빼고, 가까운 눈금 글자는 높은 쪽만 남긴다', () => {
+  assert.equal(api.kospiRow(KC, '2026-11-20'), '');                   // 10일 넘게 멈춘 값
+  assert.equal(api.kospiRow(null, '2026-11-03'), '');
+  assert.equal(api.kospiRow({ ...KC, gap_pct: null }, '2026-11-03'), '');
+  const near = api.kospiRow({ ...KC, year_max: { m: '2027-01', gap: 100 }, prev_max: { m: '2026-05', gap: 110 } }, '2026-11-03');
+  assert.match(near, /2026년 \+110%/);
+  assert.doesNotMatch(near, /올해/);
+  assert.equal((near.match(/class="mk"/g) || []).length, 1);
+  const first = api.kospiRow({ ...KC, prev_max: null, year_max: { m: '2026-05', gap: 178.6 } }, '2026-11-03');
+  assert.match(first, /올해 \+179%/);                                   // 이전 해 기록이 없어도 그린다
+});
+test('구조 신호 — 아침은 코스피 체크 + 월봉, 주말은 나스닥까지 세 줄, 밤엔 코스피 체크를 그리지 않는다', () => {
+  const m5 = { items: [{ name: '삼성화재', streak: 6, strip: [] }] };
+  const am = api.structHtml(null, null, m5, '2026-11-02', '2026-11-02', null, KC);
+  assert.ok(am.indexOf('코스피 체크') < am.indexOf('월봉 5개월선'));
+  assert.doesNotMatch(am, /나스닥 체크/);
+  const wk = api.structHtml({ gap_pct: 59.9 }, '2026-11-02', m5, '2026-11-02', '2026-11-02', null, KC);
+  assert.ok(wk.indexOf('나스닥 체크') < wk.indexOf('코스피 체크') && wk.indexOf('코스피 체크') < wk.indexOf('월봉 5개월선'));
+  const pm = api.structHtml({ gap_pct: 59.9 }, '2026-11-02', null, null, '2026-11-02', POS, null);
+  assert.doesNotMatch(pm, /코스피 체크|월봉 5개월선/);
+});
+
 // ── 주말 카드(§68 ⑥) ───────────────────────────────────────────────────
 const SUM = {
   kospi_days: [
