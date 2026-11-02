@@ -1,22 +1,13 @@
 {
-  "generated_at": "2026-11-02T14:01:28.748201+09:00",
+  "generated_at": "2026-11-02T14:31:33.258653+09:00",
   "date": "2026-11-02",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
       "changePct": 2.44,
-      "surge": 0.61,
+      "surge": 0.67,
       "events": [
-        {
-          "time": "08:57",
-          "headline": "KB증권 \"삼성전자 내년 영업이익 640조 전망, HBM 가격 150% 상승할 것\"",
-          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5WZU5pUVZISE1PRGlQVFJub1Vsb3FtNmd6UmF6SGN6NlA0aEpxYmd6MlJ4UkxmUDNTZXBfT0E4UmhyLWRRUWJtdzNkS29JUTFoMGlydGhiN29lZENsTFZOQzJ4eXhIT1htbmRmd05WR3hxY0k?oc=5",
-          "source": "비즈니스포스트",
-          "why": "KB증권은 삼성전자의 내년 영업이익을 640조원으로 전망하며 HBM 가격이 150% 상승할 것으로 예상했다.",
-          "tier": "why",
-          "sentiment": "pos"
-        },
         {
           "time": "10:16",
           "headline": "KB증권 \"반도체, 'W자 반등' 두번째 바닥…상승여력 주목할 시점\"",
@@ -25,21 +16,30 @@
           "why": "KB증권 \"반도체, 'W자 반등' 두번째 바닥…상승여력 주목할 시점\"",
           "tier": "why",
           "sentiment": "pos"
+        },
+        {
+          "time": "08:57",
+          "headline": "KB증권 \"삼성전자 내년 영업이익 640조 전망, HBM 가격 150% 상승할 것\"",
+          "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5WZU5pUVZISE1PRGlQVFJub1Vsb3FtNmd6UmF6SGN6NlA0aEpxYmd6MlJ4UkxmUDNTZXBfT0E4UmhyLWRRUWJtdzNkS29JUTFoMGlydGhiN29lZENsTFZOQzJ4eXhIT1htbmRmd05WR3hxY0k?oc=5",
+          "source": "비즈니스포스트",
+          "why": "KB증권 \"삼성전자 내년 영업이익 640조 전망, HBM 가격 150% 상승할 것\"",
+          "tier": "why",
+          "sentiment": "pos"
         }
       ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 4.94,
-      "surge": 0.55,
+      "changePct": 4.16,
+      "surge": 0.59,
       "events": [
         {
           "time": "07:54",
           "headline": "\"SK하이닉스, 4분기 영업익 사상 첫 100조 돌파 전망\"-KB",
           "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1wcXo2MHVKOHRYWFdqUVFTLUJ0VndzS1dYV3N3VV9EcTg2QnQ1bGE2NXo5X1ZXQklRLWo3YWRhQ3ZjQ09RZk1VVUM3Sjl2eDllaG1Eb01UUGV4Zw?oc=5",
           "source": "한국경제",
-          "why": "KB증권은 SK하이닉스가 4분기 영업이익에서 사상 처음으로 100조 원을 돌파할 것으로 전망했다.",
+          "why": "\"SK하이닉스, 4분기 영업익 사상 첫 100조 돌파 전망\"-KB",
           "tier": "why",
           "sentiment": "pos"
         },
@@ -58,25 +58,16 @@
       "code": "005380",
       "name": "현대차",
       "changePct": 1.6,
-      "surge": 0.48,
+      "surge": 0.51,
       "events": [
         {
           "time": "06:00",
           "headline": "현대차·기아, 실적 발표 후 주가 빠졌다는데",
           "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxON2dsbDFmQkUyMFIyTkxtV0Q5SExkZ0s2V1BSMTdnMno5ZlRiRnBXNVYzUWctQlIwTWx0MG01cndOLU5yU2daaDVpZnc2enRGX2RMR0FFQnZZMW1xQS03WkV2cFJIanZJR0Q1MmVwdktlc1V0OXd3VjZ3R25icExuag?oc=5",
           "source": "네이버 프리미엄콘텐츠",
-          "why": "현대차와 기아의 실적 발표 이후 주가가 하락했다는 기사입니다. (개별 인과 단정 안 함)",
+          "why": "현대차·기아, 실적 발표 후 주가 빠졌다는데 (개별 인과 단정 안 함)",
           "tier": "related",
-          "sentiment": "neg"
-        },
-        {
-          "time": "09:53",
-          "headline": "현대차 주가, 11월 2일 장중 286,750원 1.68% 상승",
-          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE5wb0pESXFCaHZGQXVGX05uZ09ObHNxaVVodlVRdExweFNJcmcyRkwxeVVBVUxyRFJyaG1zVTJCWi1Ya0hhVWJxNXVwWG5IcEtMSi1CVkpnc3dHZmxnQU9vcG1XdWI0YnNhNWJFOFlPVk9TZw?oc=5",
-          "source": "중앙이코노미뉴스",
-          "why": "현대차 주가, 11월 2일 장중 286,750원 1.68% 상승 (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
+          "sentiment": "neu"
         }
       ]
     }
