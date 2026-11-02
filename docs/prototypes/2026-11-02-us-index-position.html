@@ -1,0 +1,198 @@
+<!-- 종목 홈 구조 신호 — 저녁에 월봉 5개월선 줄 대신 넣을 '미국 지수 위치' 시안 5가지(2026-10-30 종가 실측, PC·폰 폭 나란히) -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>미국 지수 위치 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--primary:#006EFF;--up:#E03131;--dn:#2775ED}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#F7F8FA;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:24px 16px 60px}
+.num{font-variant-numeric:tabular-nums}
+.top{max-width:1200px;margin:0 auto 22px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+.v{max-width:1200px;margin:0 auto 34px}
+.v>h3{font-size:15px;font-weight:800}
+.v>p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:3px 0 10px}
+.pair{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.fw{min-width:0;max-width:100%}
+.fw>small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.frame{background:#fff;border:1px solid var(--hair);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.frame.pc{width:824px;max-width:100%}.frame.ph{width:343px;max-width:100%}
+
+/* 실제 구조 신호 블록과 같은 모양 */
+.bh{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hair)}
+.bt{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.bt::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.bs{font-size:11px;color:var(--muted)}
+.ss{display:block;padding:12px 16px;border-top:1px solid var(--hair)}
+.bh+.ss{border-top:0}
+.ss-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ss-k{font-size:12px;font-weight:700;color:var(--muted)}
+.ss-d{font-size:11px;color:var(--muted)}
+.ss-m{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:2px}
+.ss-m b{font-size:17px;font-weight:800;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.ok{background:#ECFDF3;color:#15803D}.pill.caution{background:#FFF7E6;color:#B45309}.pill.warn{background:#FEF2F2;color:#E03131}
+.pill.sm{font-size:11px;padding:1px 7px}
+.go{margin-left:8px;font-weight:700;color:#2563EB;white-space:nowrap}
+.chart{margin-top:9px}
+.pc .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
+.pc .ss>.ss-h,.pc .ss>.ss-m,.pc .ss>em{grid-column:1}
+.pc .ss>.chart{grid-column:2;grid-row:1/4;margin-top:0}
+.pc .ss.full{display:block}.pc .ss.full>.chart{margin-top:9px}
+
+/* 나스닥 체크(지금 그대로) 게이지 */
+.g-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
+.g-t i{position:absolute;top:0;height:100%;display:block}
+.g-t i.z1{background:#FDECC8}.g-t i.z2{background:#FBD5D5;border-radius:0 4px 4px 0}
+.g-t i.f{left:0;border-radius:4px;opacity:.85}
+.f.ok{background:#4ADE80}.f.caution{background:#F59E0B}.f.warn{background:#EF4444}
+.g-t i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.12)}
+.dot.ok{background:#16A34A}.dot.caution{background:#D97706}.dot.warn{background:#DC2626}
+.g-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
+.g-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.g-l span:first-child{transform:none}.g-l span.end{left:auto;right:0;transform:none}
+
+/* A 고점에서 내려온 폭 / B 52주 범위 — 지수 네 줄 */
+.rows{display:grid;gap:7px}
+.r{display:grid;grid-template-columns:48px 1fr 54px;align-items:center;gap:8px;font-size:12px}
+.r>span:first-child{font-weight:700;color:#334155;white-space:nowrap}
+.r>b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.r .g-t{height:7px}
+.r .g-t i.dot{width:11px;height:11px;top:-2px;margin-left:-5.5px}
+.rng{position:relative;height:7px;border-radius:4px;background:#E8EDF3}
+.rng i{position:absolute;top:-2px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)}
+.scale{display:grid;grid-template-columns:48px 1fr 54px;gap:8px}
+.scale>.g-l{grid-column:2;margin-top:0}
+
+/* C 칩 */
+.chips{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;color:var(--muted)}
+.chips b{font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;margin-left:4px}
+
+/* D 타일 */
+.tiles{display:grid;gap:8px;grid-template-columns:repeat(2,1fr)}
+.pc .tiles{grid-template-columns:repeat(4,1fr)}
+.tl{background:#F7F9FC;border-radius:10px;padding:9px 10px}
+.tl>span{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+.tl>b{display:block;font-size:17px;font-weight:800;letter-spacing:-.3px;margin:2px 0 5px;font-variant-numeric:tabular-nums}
+.tl .g-t{height:5px;margin-top:7px}
+.tl .g-t i.dot{display:none}
+
+/* E 표 */
+.tb{width:100%;border-collapse:collapse;font-size:12.5px}
+.tb th{font-size:10.5px;font-weight:600;color:var(--muted);text-align:right;padding:0 0 4px}
+.tb th:first-child,.tb td:first-child{text-align:left}
+.tb td{padding:4px 0;text-align:right;border-top:1px solid #F1F5F9;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.tb td:first-child{font-weight:700;color:#334155}
+.tb td.st{width:64px}
+.u{color:var(--up)}.d{color:var(--dn)}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>구조 신호 — 저녁에 넣을 '미국 지수 위치' 시안</h1>
+  <p>값은 야후 일봉으로 잰 실측이에요(2026-10-30 금요일 종가, 52주 고·저는 사이트의 <code>high_52w</code>·<code>low_52w</code>와 같은 종가 기준). 나스닥 체크 줄은 지금 그대로 두고, 아래 줄만 바꿔 봤어요.<br>
+  상태 이름은 규칙으로만 정해요 — 고점 대비 3% 이내 <b>고점 근처</b> · 10% 이내 <b>눌림</b> · 20% 이내 <b>조정</b> · 20% 넘게 <b>약세장</b>.</p>
+</div>
+<div id="out"></div>
+<script>
+// ── 실측(^GSPC·^IXIC·^DJI·^SOX, 1년 일봉 종가) ──
+var ASOF = '10/30(금) 종가';
+var D = [
+  { n: 'S&P500', last: 7580.07, hi: 7818.93, lo: 6343.72, ma200: 7309.76 },
+  { n: '나스닥', last: 25437.00, hi: 27599.79, lo: 20794.64, ma200: 25055.75 },
+  { n: '다우', last: 51770.31, hi: 54349.12, lo: 45166.64, ma200: 50605.44 },
+  { n: '반도체', last: 10688.80, hi: 14634.72, lo: 6352.07, ma200: 10781.40 }
+];
+D.forEach(function (x) {
+  x.dd = (x.last / x.hi - 1) * 100;                 // 고점 대비
+  x.pos = (x.last - x.lo) / (x.hi - x.lo) * 100;     // 52주 범위 안 위치
+  x.vs = (x.last / x.ma200 - 1) * 100;               // 200일선 대비
+  var a = -x.dd;
+  x.st = a <= 3 ? ['ok', '고점 근처'] : a <= 10 ? ['ok', '눌림'] : a <= 20 ? ['caution', '조정'] : ['warn', '약세장'];
+});
+var TOP = 30;                                         // 눈금 끝 −30%
+function pc(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%'; }
+function x(a) { return (Math.min(a, TOP) / TOP * 100).toFixed(1) + '%'; }
+function zones() { return '<i class="z1" style="left:' + x(10) + ';width:' + (10 / TOP * 100).toFixed(1) + '%"></i><i class="z2" style="left:' + x(20) + ';right:0"></i>'; }
+function gauge(it) { return '<div class="g-t">' + zones() + '<i class="f ' + it.st[0] + '" style="width:' + x(-it.dd) + '"></i><i class="dot ' + it.st[0] + '" style="left:' + x(-it.dd) + '"></i></div>'; }
+var scaleLab = '<div class="g-l"><span style="left:0">고점</span><span style="left:' + x(10) + '">−10 조정</span><span style="left:' + x(20) + '">−20 약세장</span></div>';
+
+// 지금 그대로인 나스닥 체크 줄(11/2 미국 브리핑 값)
+var nq = function () {
+  var g = 59.87, top = 80, p = function (v) { return (v / top * 100).toFixed(1) + '%'; };
+  return '<div class="ss"><div class="ss-h"><span class="ss-k">나스닥 체크</span></div>' +
+    '<div class="ss-m"><b>+59.9%</b><span class="pill ok">✓ 정상</span></div>' +
+    '<div class="chart"><div class="g-t"><i class="z1" style="left:' + p(65) + ';width:' + p(5) + '"></i><i class="z2" style="left:' + p(70) + ';right:0"></i>' +
+    '<i class="f ok" style="width:' + p(g) + '"></i><i class="dot ok" style="left:' + p(g) + '"></i></div>' +
+    '<div class="g-l"><span style="left:0">0</span><span style="left:' + p(65) + '">65 주의</span><span class="end">70 경고</span></div></div>' +
+    '<em>60개월선 대비 10월 월봉 고점<span class="go">상세 그래프 ›</span></em></div>';
+};
+function block(row) {
+  return '<div class="bh"><span class="bt">🧱 구조 신호</span><span class="bs">월봉 기준 · 매일 업데이트</span></div>' + nq() + row;
+}
+var spx = D[0];
+function left(extraEm) {
+  return '<div class="ss-h"><span class="ss-k">미국 지수 위치</span><span class="ss-d">' + ASOF + '</span></div>' +
+    '<div class="ss-m"><b>S&amp;P500 ' + pc(spx.dd) + '</b><span class="pill ' + spx.st[0] + '">' + spx.st[1] + '</span></div>' +
+    '<em>' + extraEm + '</em>';
+}
+
+// A. 고점에서 내려온 폭 — 나스닥 체크와 같은 게이지를 지수마다
+function vA() {
+  var rows = D.map(function (it) {
+    return '<div class="r"><span>' + it.n + '</span>' + gauge(it) + '<b>' + pc(it.dd) + '</b></div>';
+  }).join('');
+  return '<div class="ss">' + left('52주 종가 고점 대비') +
+    '<div class="chart"><div class="rows">' + rows + '</div><div class="scale"><span></span>' + scaleLab + '</div></div></div>';
+}
+// B. 52주 범위 안 위치 — 왼쪽 저점, 오른쪽 고점
+function vB() {
+  var rows = D.map(function (it) {
+    return '<div class="r"><span>' + it.n + '</span><div class="rng"><i style="left:' + it.pos.toFixed(1) + '%"></i></div><b>' + pc(it.dd) + '</b></div>';
+  }).join('');
+  return '<div class="ss">' + left('52주 저점~고점 사이 지금 자리 · 숫자는 고점 대비') +
+    '<div class="chart"><div class="rows">' + rows + '</div><div class="scale"><span></span><div class="g-l"><span style="left:0">52주 저점</span><span class="end">52주 고점</span></div></div></div></div>';
+}
+// C. 한 지수 게이지 + 나머지는 숫자만 — 가장 짧다
+function vC() {
+  var chips = D.slice(1).map(function (it) { return '<span>' + it.n + '<b>' + pc(it.dd) + '</b></span>'; }).join('');
+  return '<div class="ss">' + left('52주 종가 고점 대비') +
+    '<div class="chart">' + gauge(spx) + scaleLab + '<div class="chips">' + chips + '</div></div></div>';
+}
+// D. 네 칸 타일 — PC 한 줄, 폰 2×2
+function vD() {
+  var t = D.map(function (it) {
+    return '<div class="tl"><span>' + it.n + '</span><b>' + pc(it.dd) + '</b><span class="pill sm ' + it.st[0] + '" style="display:inline-block">' + it.st[1] + '</span>' + gauge(it) + '</div>';
+  }).join('');
+  return '<div class="ss full"><div class="ss-h"><span class="ss-k">미국 지수 위치 · 52주 종가 고점 대비</span><span class="ss-d">' + ASOF + '</span></div><div class="chart"><div class="tiles">' + t + '</div></div></div>';
+}
+// E. 표 — 고점 대비 + 200일선 대비
+function vE() {
+  var rows = D.map(function (it) {
+    return '<tr><td>' + it.n + '</td><td>' + pc(it.dd) + '</td><td class="' + (it.vs >= 0 ? 'u' : 'd') + '">' + (it.vs >= 0 ? '위 ' : '아래 ') + pc(it.vs) + '</td><td class="st"><span class="pill sm ' + it.st[0] + '">' + it.st[1] + '</span></td></tr>';
+  }).join('');
+  return '<div class="ss">' + left('고점은 52주 종가 기준 · 200일선은 종가 평균') +
+    '<div class="chart"><table class="tb"><thead><tr><th>지수</th><th>고점 대비</th><th>200일선</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+var V = [
+  ['A안 · 고점에서 내려온 폭', '나스닥 체크와 같은 게이지를 지수마다 한 줄씩. 오른쪽으로 갈수록 많이 내려온 것이고, 조정·약세장 구간이 색으로 보여요.', vA],
+  ['B안 · 52주 범위 안 위치', '저점~고점 막대에 지금 자리를 점으로 찍어요. 어디쯤인지 직관적이지만, 조정·약세장 경계는 보이지 않아요.', vB],
+  ['C안 · S&P500 게이지 + 나머지 숫자', '대표 지수 하나만 그리고 나머지는 숫자로. 가장 짧아요. 반도체 −26.96% 같은 눈에 띄는 값이 작게 묻혀요.', vC],
+  ['D안 · 네 칸 타일', '지수마다 칸을 나눠 숫자를 크게 보여줘요. 폰에서는 2×2라 세로로 길어져요.', vD],
+  ['E안 · 표 (200일선 포함)', '고점 대비에 200일선 위·아래까지 숫자로 봐요. 정보는 가장 많고, 그림은 없어요.', vE]
+];
+document.getElementById('out').innerHTML = V.map(function (v) {
+  var h = block(v[2]());
+  return '<section class="v"><h3>' + v[0] + '</h3><p>' + v[1] + '</p><div class="pair">' +
+    '<div class="fw"><small>PC</small><div class="frame pc">' + h + '</div></div>' +
+    '<div class="fw"><small>폰</small><div class="frame ph">' + h + '</div></div></div></section>';
+}).join('');
+</script>
+</body>
+</html>
