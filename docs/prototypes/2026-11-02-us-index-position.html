@@ -1,4 +1,4 @@
-<!-- 종목 홈 구조 신호 — 저녁에 월봉 5개월선 줄 대신 넣을 '미국 지수 위치' 시안 6가지(2026-10-30 종가 실측, PC·폰 폭 나란히) -->
+<!-- 종목 홈 구조 신호 — 저녁에 월봉 5개월선 줄 대신 넣을 '미국 지수 위치' 시안 7가지(2026-10-30 종가 실측, PC·폰 폭 나란히) -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -69,6 +69,17 @@ body{font-family:Pretendard,-apple-system,sans-serif;background:#F7F8FA;color:va
 .rng i{position:absolute;top:-2px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)}
 .scale{display:grid;grid-template-columns:48px 1fr 54px;gap:8px}
 .scale>.g-l{grid-column:2;margin-top:0}
+/* G 200일선 기준 — 가운데가 200일선, 오른쪽 위·왼쪽 아래 */
+.dv{position:relative;height:7px;border-radius:4px;background:#F1F5F9}
+.dv::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;margin-left:-.75px;background:#64748B}
+.dv i{position:absolute;top:0;height:100%;display:block}
+.dv i.u{left:50%;background:#E86464;border-radius:0 4px 4px 0}
+.dv i.d{right:50%;background:#5D97F1;border-radius:4px 0 0 4px}
+.r.dvr,.scale.dvr{grid-template-columns:48px 1fr 54px 36px}
+.r.dvr>.pill{justify-self:end}
+.r.dvr b.u{color:var(--up)}.r.dvr b.d{color:var(--dn)}
+.pill.above{background:#FFE8E8;color:var(--up)}.pill.below{background:#DBE8FE;color:var(--dn)}
+.g-l .mid{font-weight:700;color:#334155}
 /* F A안 + 상태 태그 — 줄 끝에 태그 칸을 더한다 */
 .r.tag,.scale.tag{grid-template-columns:48px 1fr 54px 58px}
 .r.tag>.pill{justify-self:end}
@@ -146,6 +157,20 @@ function left(extraEm) {
     '<em>' + extraEm + '</em>';
 }
 
+// G. 200일선 기준 — 가운데 눈금이 200일선. 눈금 끝은 그날 가장 많이 벌어진 지수에 맞춰 5% 단위로 정한다
+function vG() {
+  var mx = Math.max.apply(null, D.map(function (it) { return Math.abs(it.vs); }));
+  var top = Math.max(5, Math.ceil(mx / 5) * 5);
+  var rows = D.map(function (it) {
+    var up = it.vs >= 0, w = (Math.abs(it.vs) / top * 50).toFixed(1) + '%';
+    return '<div class="r dvr"><span>' + it.n + '</span><div class="dv"><i class="' + (up ? 'u' : 'd') + '" style="width:' + w + '"></i></div>' +
+      '<b class="' + (up ? 'u' : 'd') + '">' + pc(it.vs) + '</b><span class="pill sm ' + (up ? 'above' : 'below') + '">' + (up ? '위' : '아래') + '</span></div>';
+  }).join('');
+  return '<div class="ss"><div class="ss-h"><span class="ss-k">미국 지수 · 200일선 대비</span><span class="ss-d">' + ASOF + '</span></div>' +
+    '<div class="ss-m"><b>S&amp;P500 ' + pc(spx.vs) + '</b></div><em>일봉 종가의 200일 평균과 비교</em>' +
+    '<div class="chart"><div class="rows">' + rows + '</div><div class="scale dvr"><span></span><div class="g-l"><span style="left:0">−' + top + '%</span>' +
+    '<span class="mid" style="left:50%">200일선</span><span class="end">+' + top + '%</span></div></div></div></div>';
+}
 // F. A안 + E안의 상태 태그 — 줄 끝에 태그, 왼쪽 큰 숫자 옆 태그는 겹쳐서 뺐다
 function vF() {
   var rows = D.map(function (it) {
@@ -193,6 +218,7 @@ function vE() {
     '<div class="chart"><table class="tb"><thead><tr><th>지수</th><th>고점 대비</th><th>200일선</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
 }
 var V = [
+  ['G안 · 200일선 기준', '가운데 눈금이 200일선이고, 위에 있으면 오른쪽 빨강, 아래면 왼쪽 파랑으로 벌어져요. 줄 끝 태그는 위·아래만 말해요.', vG],
   ['F안 · A안 + 상태 태그', 'A안 게이지에 E안의 상태 태그를 줄 끝에 붙였어요. 왼쪽 큰 숫자 옆 태그는 겹쳐서 뺐어요.', vF],
   ['A안 · 고점에서 내려온 폭', '나스닥 체크와 같은 게이지를 지수마다 한 줄씩. 오른쪽으로 갈수록 많이 내려온 것이고, 조정·약세장 구간이 색으로 보여요.', vA],
   ['B안 · 52주 범위 안 위치', '저점~고점 막대에 지금 자리를 점으로 찍어요. 어디쯤인지 직관적이지만, 조정·약세장 경계는 보이지 않아요.', vB],
