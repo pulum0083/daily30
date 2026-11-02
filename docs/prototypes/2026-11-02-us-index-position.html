@@ -1,4 +1,4 @@
-<!-- 종목 홈 구조 신호 — 저녁에 월봉 5개월선 줄 대신 넣을 '미국 지수 위치' 시안 5가지(2026-10-30 종가 실측, PC·폰 폭 나란히) -->
+<!-- 종목 홈 구조 신호 — 저녁에 월봉 5개월선 줄 대신 넣을 '미국 지수 위치' 시안 6가지(2026-10-30 종가 실측, PC·폰 폭 나란히) -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -69,6 +69,9 @@ body{font-family:Pretendard,-apple-system,sans-serif;background:#F7F8FA;color:va
 .rng i{position:absolute;top:-2px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)}
 .scale{display:grid;grid-template-columns:48px 1fr 54px;gap:8px}
 .scale>.g-l{grid-column:2;margin-top:0}
+/* F A안 + 상태 태그 — 줄 끝에 태그 칸을 더한다 */
+.r.tag,.scale.tag{grid-template-columns:48px 1fr 54px 58px}
+.r.tag>.pill{justify-self:end}
 
 /* C 칩 */
 .chips{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;color:var(--muted)}
@@ -143,6 +146,15 @@ function left(extraEm) {
     '<em>' + extraEm + '</em>';
 }
 
+// F. A안 + E안의 상태 태그 — 줄 끝에 태그, 왼쪽 큰 숫자 옆 태그는 겹쳐서 뺐다
+function vF() {
+  var rows = D.map(function (it) {
+    return '<div class="r tag"><span>' + it.n + '</span>' + gauge(it) + '<b>' + pc(it.dd) + '</b><span class="pill sm ' + it.st[0] + '">' + it.st[1] + '</span></div>';
+  }).join('');
+  return '<div class="ss"><div class="ss-h"><span class="ss-k">미국 지수 위치</span><span class="ss-d">' + ASOF + '</span></div>' +
+    '<div class="ss-m"><b>S&amp;P500 ' + pc(spx.dd) + '</b></div><em>52주 종가 고점 대비</em>' +
+    '<div class="chart"><div class="rows">' + rows + '</div><div class="scale tag"><span></span><div class="g-l"><span style="left:0">고점</span><span style="left:' + x(10) + '">−10%</span><span style="left:' + x(20) + '">−20%</span></div></div></div></div>';
+}
 // A. 고점에서 내려온 폭 — 나스닥 체크와 같은 게이지를 지수마다
 function vA() {
   var rows = D.map(function (it) {
@@ -181,6 +193,7 @@ function vE() {
     '<div class="chart"><table class="tb"><thead><tr><th>지수</th><th>고점 대비</th><th>200일선</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
 }
 var V = [
+  ['F안 · A안 + 상태 태그', 'A안 게이지에 E안의 상태 태그를 줄 끝에 붙였어요. 왼쪽 큰 숫자 옆 태그는 겹쳐서 뺐어요.', vF],
   ['A안 · 고점에서 내려온 폭', '나스닥 체크와 같은 게이지를 지수마다 한 줄씩. 오른쪽으로 갈수록 많이 내려온 것이고, 조정·약세장 구간이 색으로 보여요.', vA],
   ['B안 · 52주 범위 안 위치', '저점~고점 막대에 지금 자리를 점으로 찍어요. 어디쯤인지 직관적이지만, 조정·약세장 경계는 보이지 않아요.', vB],
   ['C안 · S&P500 게이지 + 나머지 숫자', '대표 지수 하나만 그리고 나머지는 숫자로. 가장 짧아요. 반도체 −26.96% 같은 눈에 띄는 값이 작게 묻혀요.', vC],
