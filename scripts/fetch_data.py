@@ -622,6 +622,21 @@ def _recent_sessions(closes, n: int = 3) -> list:
     return out
 
 
+def _ma200_position(closes, now=None) -> dict:
+    """정규장 종가의 200일선 이격 — 종목 홈 구조 신호(§68 ⑤). 진행 중인 오늘 봉은 종가가 아니라서 뺀다."""
+    now = now or datetime.now(pytz.timezone("America/New_York"))
+    vals = closes
+    if len(vals) and vals.index[-1].strftime("%Y-%m-%d") == now.strftime("%Y-%m-%d") and now.hour < 16:
+        vals = vals.iloc[:-1]
+    if len(vals) < 200:
+        return {}
+    ma200 = float(vals.iloc[-200:].mean())
+    if ma200 <= 0:
+        return {}
+    return {"close_date": vals.index[-1].strftime("%Y-%m-%d"),
+            "ma200_close_pct": round((float(vals.iloc[-1]) / ma200 - 1) * 100, 2)}
+
+
 def get_ticker_full(ticker: str) -> dict:
     """
     Fetch 1 year daily history for a ticker.
@@ -723,6 +738,7 @@ def get_ticker_full(ticker: str) -> dict:
             result["ma200"] = round(ma200, 4)
             result["ma200_dist_pct"] = round((price - ma200) / ma200 * 100, 2)
             result["ma200_sparkline"] = [round(float(v), 4) for v in ma200_series.iloc[-20:].tolist()]
+            result.update(_ma200_position(closes))
 
         return result
     except Exception as e:
@@ -1442,6 +1458,7 @@ def fetch_us_data() -> dict:
         "^N225", "^HSI",
         "^GDAXI", "^FTSE", "^FCHI",
         "DRAM",   # Roundhill Memory & HBM ETF
+        "^IXIC", "^DJI", "^SOX",   # 200일선 이격(index_ma200) — 종목 홈 구조 신호
     ]
     macro = {}
     for t in macro_tickers:
@@ -1506,6 +1523,12 @@ def fetch_us_data() -> dict:
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         "us_candidates": us_candidates,
+        # 주요 지수의 200일선 이격(종가 기준) — 종목 홈 구조 신호가 밤에 보여준다(§68 ⑤)
+        "index_ma200": {
+            label: {"date": macro[sym]["close_date"], "pct": macro[sym]["ma200_close_pct"]}
+            for label, sym in (("S&P500", "^GSPC"), ("나스닥", "^IXIC"), ("다우", "^DJI"), ("반도체", "^SOX"))
+            if macro.get(sym, {}).get("close_date")
+        },
     }
 
     # 품질 게이트: S&P500·VIX 누락 시 발행 중단

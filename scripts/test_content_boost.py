@@ -145,3 +145,40 @@ def test_us_prompt_bans_cliches_in_issue_titles():
     import call_claude as cc
     i = cc.US_SYSTEM_PROMPT.index("- `title`: 이슈 헤드라인")
     assert "시험대" in cc.US_SYSTEM_PROMPT[i:i + 300] and "오늘 밤 볼 것" in cc.US_SYSTEM_PROMPT[i:i + 300]
+
+
+# ── 미국 지수 · 200일선 대비(종목 홈 구조 신호) ──
+IDX_MD = {"generated_at": "2026-10-30T21:15:00+09:00", "index_ma200": {
+    "S&P500": {"date": "2026-10-30", "pct": 3.7}, "나스닥": {"date": "2026-10-30", "pct": 1.52},
+    "다우": {"date": "2026-10-29", "pct": 2.3}, "반도체": {"date": "2026-10-30", "pct": -0.86}}}
+
+
+def test_us_index_position_saved_latest_session_only():
+    a = {}
+    gh.save_us_index_position(a, IDX_MD, "2026-10-30")
+    assert a["us_index_position"]["asof"] == "2026-10-30"
+    assert [i["name"] for i in a["us_index_position"]["items"]] == ["S&P500", "나스닥", "반도체"]   # 다른 세션은 섞지 않는다
+
+
+def test_us_index_position_keeps_snapshot_and_skips_other_day():
+    kept = {"us_index_position": {"asof": "2026-10-29", "items": []}}
+    gh.save_us_index_position(kept, IDX_MD, "2026-10-30")
+    assert kept["us_index_position"]["asof"] == "2026-10-29"
+    other = {}
+    gh.save_us_index_position(other, IDX_MD, "2026-10-31")
+    assert "us_index_position" not in other
+
+
+def test_ma200_position_drops_running_bar():
+    import pandas as pd
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    import fetch_data as fd
+    idx = pd.bdate_range(end="2026-11-02", periods=201, tz="America/New_York")
+    closes = pd.Series([100.0] * 200 + [200.0], index=idx)
+    ny = ZoneInfo("America/New_York")
+    running = fd._ma200_position(closes, datetime(2026, 11, 2, 10, 0, tzinfo=ny))
+    assert running == {"close_date": idx[-2].strftime("%Y-%m-%d"), "ma200_close_pct": 0.0}   # 진행 중인 봉 제외
+    done = fd._ma200_position(closes, datetime(2026, 11, 2, 17, 0, tzinfo=ny))
+    assert done["close_date"] == "2026-11-02" and done["ma200_close_pct"] == 99.0
+    assert fd._ma200_position(closes.iloc[:100], datetime(2026, 11, 2, 17, 0, tzinfo=ny)) == {}

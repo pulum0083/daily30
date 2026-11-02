@@ -149,6 +149,34 @@ test('구조 신호 블록 — 두 줄 모두 없으면 블록째 뺀다', () =>
   assert.match(api.structHtml({ gap_pct: 59.8 }, '2026-10-23', { items: [] }, '2026-10-26', '2026-10-26'), /구조 신호/);
 });
 
+// ── 미국 지수 · 200일선 대비(밤 구조 신호) ─────────────────────────────
+const POS = { asof: '2026-10-30', items: [{ name: 'S&P500', pct: 3.7 }, { name: '나스닥', pct: 1.52 }, { name: '다우', pct: 2.3 }, { name: '반도체', pct: -0.86 }] };
+test('미국 지수 줄 — 네 지수·위/아래 태그·200일선 표기·기준일', () => {
+  const h = api.usIndexRow(POS);
+  assert.equal((h.match(/class="uip-r"/g) || []).length, 4);
+  assert.match(h, /미국 지수 · 200일선 대비/);
+  assert.match(h, /10\/30\(금\) 종가/);
+  assert.match(h, /<b>S&amp;P500 \+3\.70%<\/b>/);
+  assert.equal((h.match(/pill above">위</g) || []).length, 3);
+  assert.equal((h.match(/pill below">아래</g) || []).length, 1);
+  assert.match(h, /−5%<\/span><span class="m">200일선<\/span><span>\+5%/);
+  assert.match(h, /class="dn" style="width:8\.6%"/);                  // 0.86 ÷ 5 × 50
+});
+test('미국 지수 줄 — 눈금은 가장 벌어진 지수에 맞춰 넓어지고, 값이 없으면 줄을 뺀다', () => {
+  assert.match(api.usIndexRow({ asof: '2026-10-30', items: [{ name: '반도체', pct: -7.2 }] }), /−10%<\/span>/);
+  assert.equal(api.usIndexRow(null), '');
+  assert.equal(api.usIndexRow({ asof: '2026-10-30', items: [] }), '');
+  assert.equal(api.usIndexRow({ items: [{ name: '다우', pct: 1 }] }), '');   // 기준일 없으면 쓰지 않는다
+});
+test('구조 신호 — 밤엔 국내 월봉 줄 대신 미국 지수 줄, 머리글에서 월봉 기준을 뺀다', () => {
+  const h = api.structHtml({ gap_pct: 59.9 }, '2026-10-30', null, null, '2026-10-30', POS);
+  assert.match(h, /나스닥 체크/);
+  assert.match(h, /200일선 대비/);
+  assert.doesNotMatch(h, /월봉 5개월선/);
+  assert.match(h, />매일 업데이트</);
+  assert.match(api.structHtml({ gap_pct: 59.9 }, '2026-10-30', null, null, '2026-10-30', null), /월봉 기준 · 매일 업데이트/);
+});
+
 // ── 주말 카드(§68 ⑥) ───────────────────────────────────────────────────
 const SUM = {
   kospi_days: [

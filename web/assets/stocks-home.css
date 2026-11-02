@@ -946,11 +946,28 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b.cur i{background:#93B8F5}
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
+/* 미국 지수 · 200일선 대비 — 가운데 눈금이 200일선 */
+#struct-sig .ss-static:hover{background:#fff}
+#struct-sig .uip{margin-top:9px;display:grid;gap:7px}
+#struct-sig .uip-r,#struct-sig .uip-s{display:grid;grid-template-columns:48px 1fr 54px 36px;gap:8px;align-items:center;font-size:12px}
+#struct-sig .uip-r>span:first-child{font-weight:700;color:#334155;white-space:nowrap}
+#struct-sig .uip-r>b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+#struct-sig .uip-r>b.up{color:#E03131} #struct-sig .uip-r>b.dn{color:#2775ED}
+#struct-sig .uip-r>.pill{justify-self:end;font-size:11px;padding:1px 7px}
+#struct-sig .pill.above{background:#FFE8E8;color:#E03131} #struct-sig .pill.below{background:#DBE8FE;color:#2775ED}
+#struct-sig .uip-b{position:relative;height:7px;border-radius:4px;background:#F1F5F9}
+#struct-sig .uip-b::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;margin-left:-.75px;background:#64748B}
+#struct-sig .uip-b i{position:absolute;top:0;height:100%}
+#struct-sig .uip-b i.up{left:50%;background:#E86464;border-radius:0 4px 4px 0}
+#struct-sig .uip-b i.dn{right:50%;background:#5D97F1;border-radius:4px 0 0 4px}
+#struct-sig .uip-s{margin-top:-4px}
+#struct-sig .uip-s>div{grid-column:2;display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+#struct-sig .uip-s .m{font-weight:700;color:#334155}
 /* PC — 줄마다 왼쪽 정보(이름·알약·설명), 오른쪽 차트(게이지·막대)로 나눠 폭을 다 쓴다 */
 @media(min-width:720px){
   #struct-sig .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
   #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>em{grid-column:1}
-  #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg{grid-column:2;grid-row:1/4;margin-top:0}
+  #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg,#struct-sig .ss>.uip{grid-column:2;grid-row:1/4;margin-top:0}
 }
 /* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
 .hh-new.wk{color:var(--muted)}

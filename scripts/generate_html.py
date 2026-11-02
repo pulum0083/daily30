@@ -618,6 +618,20 @@ def build_premarket_strip(analysis: dict, market_data: dict, target_date: str, g
     return {"premarket": saved}
 
 
+def save_us_index_position(analysis: dict, market_data: dict, target_date: str) -> None:
+    """종목 홈 구조 신호의 '미국 지수 · 200일선 대비'(§68 ⑤)를 스냅샷에 남긴다. 브리핑 페이지에는 그리지 않는다.
+
+    다른 날 시장 데이터로 채우지 않고(§14), 한 줄에 다른 세션이 섞이지 않게 가장 최근 종가 날짜만 남긴다.
+    """
+    if isinstance(analysis.get("us_index_position"), dict) or not _market_data_is_for(market_data, target_date):
+        return
+    rows = (market_data or {}).get("index_ma200") or {}
+    asof = max((str(v.get("date") or "") for v in rows.values()), default="")
+    items = [{"name": n, "pct": v["pct"]} for n, v in rows.items() if v.get("date") == asof and v.get("pct") is not None]
+    if asof and items:
+        analysis["us_index_position"] = {"asof": asof, "items": items}
+
+
 NASDAQ_BACKTEST_PATH = CONFIG_DIR / "nasdaq_overheat_backtest.json"
 _NQ_BADGE = {"ok": "✓ 정상", "caution": "⚠️ 주의", "warn": "🚨 경고"}
 _NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 SVG 좌표(프로토타입과 같다)
@@ -2054,6 +2068,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["todays_view"] = analysis.get("todays_view")
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
+        save_us_index_position(analysis, market_data, target_date)
         ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
