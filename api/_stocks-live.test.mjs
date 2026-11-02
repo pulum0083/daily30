@@ -86,5 +86,6 @@ test('장 마감 뒤 응답은 정규장 값만, 거래대금·등락은 비운�
     assert.equal(r.low, 248500);
     assert.equal(r.tradingValue, null);
     assert.equal(r.changeAbs, null);
+    assert.equal(r.prevSessionClose, 259500);   // 직전 세션 15:30 봉 — 실시간 '전일 종가'가 아니다
   } finally { globalThis.fetch = orig; }
 });

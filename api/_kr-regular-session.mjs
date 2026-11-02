@@ -54,6 +54,7 @@ export async function fetchClosedSession(code, now = new Date()) {
     return {
       code, price: reg.close, session: 'regular-closed', sessionDate: reg.date,
       changePct: null, changeAbs: null, prevClose: null,
+      prevSessionClose: reg.prevClose,                    // 이 세션의 전일 공식 종가(1분봉) — 섹터 페이지 마감 등락에 쓴다
       open: reg.open, high: reg.high, low: reg.low, tradingValue: null,
     };
   } catch (e) {

@@ -148,7 +148,7 @@
     <span><a href="/stocks/">종목 홈</a> › {{ sector_emoji }} {{ sector_label }}</span>
   </div>
   <h1 class="sector-page-title">{{ sector_emoji }} {{ sector_label }} 주도주</h1>
-  <p class="sector-page-sub">{{ breadth.total }}종목 · {{ snapshot_date }} 기준 <span id="live-status" class="sector-live off" data-snap="{{ snapshot_date }}"><span class="sl-dot"></span>장마감 · {{ snapshot_date }} 종가 기준</span></p>
+  <p class="sector-page-sub">{{ breadth.total }}종목 · <span id="snap-date">{{ snapshot_date }}</span> 기준 <span id="live-status" class="sector-live off" data-snap="{{ snapshot_date }}"><span class="sl-dot"></span>장마감 · {{ snapshot_date }} 종가 기준</span></p>
   <script>
   /* 장중이면 배지를 즉시 '실시간'으로 설정 — 탭 이동마다 fetch 응답 전 '장마감'이 깜빡이는 것 방지 (동기 실행) */
   (function(){var k=new Date(Date.now()+9*3600*1000),m=k.getUTCHours()*60+k.getUTCMinutes();
@@ -303,6 +303,7 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="/assets/sector-closed.js"></script>
 <script>
 // 뒤로 가기 — 상세 페이지와 동일 규칙 (히스토리 있으면 back, 없으면 종목 허브)
 function goBack(){ if(history.length>1) history.back(); else location.href='/stocks/'; }
@@ -454,12 +455,30 @@ function drawSpark(card, vals, labelSuffix, isLive){
     if(bu)bu.style.flex=up; if(bd)bd.style.flex=dn; if(bf)bf.style.flex=fl;
   }
 
+  // 장이 닫혔으면 오늘 공식 종가로 맞춘다 — 마감 잡이 페이지를 다시 만드는 16:32까지는 정적 값이 직전 거래일이다.
+  function applyClosed(prices){
+    var u=window.sectorClosedUpdate&&window.sectorClosedUpdate(prices,codes,snap);
+    if(!u) return;
+    Object.keys(u.rows).forEach(function(code){
+      var card=byCode[code], row=u.rows[code];
+      var closeEl=card.querySelector('.sector-card__close');
+      var pctEl=card.querySelector('.sector-card__pct');
+      if(closeEl) closeEl.textContent=Math.round(row.price).toLocaleString();
+      if(pctEl){ pctEl.textContent=pctFmt(row.pct); pctEl.className='sector-card__pct '+pctCls(row.pct); }
+    });
+    snap=u.date;
+    setText('snap-date',snap);
+    setStatus(false);
+    recomputeStats();
+  }
+
   function update(){
     fetch('/api/stocks-live?codes='+encodeURIComponent(codes.join(',')),{cache:'no-store'})
       .then(function(r){return r.ok?r.json():null;})
       .then(function(d){
         if(!d) return;
         setStatus(!!d.open);
+        if(!d.open){ applyClosed(d.prices); return; }
         if(Array.isArray(d.prices)){
           d.prices.forEach(function(p){
             var card=byCode[p.code]; if(!card) return;
@@ -495,7 +514,7 @@ function drawSpark(card, vals, labelSuffix, isLive){
   // 장중(09:00~15:30 KST)이면 즉시 갱신 + 30초 폴링, 마감이면 배지만 '장마감' + 오늘자 곡선 1회 반영
   var k=new Date(Date.now()+9*3600*1000), kmin=k.getUTCHours()*60+k.getUTCMinutes();
   if(kmin>=540&&kmin<=930){ setStatus(true); update(); setInterval(update,30000); }
-  else { setStatus(false); refreshLiveSparks(); }
+  else { setStatus(false); update(); }
 })();
 </script>
 {% endblock %}
