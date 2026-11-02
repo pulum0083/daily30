@@ -1,0 +1,161 @@
+<!-- 종목 홈 구조 신호 '코스피 체크' 시안 3가지 — 코스피 월말 종가 ÷ 60개월선(야후 ^KS11, 2026-11-02 종가 실측), 주말 구성(나스닥 체크 + 코스피 체크 + 월봉 5개월선)으로 PC·폰 비교 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>코스피 체크 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--primary:#006EFF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#F7F8FA;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:24px 16px 60px}
+.top{max-width:1200px;margin:0 auto 22px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+.v{max-width:1200px;margin:0 auto 34px}
+.v>h3{font-size:15px;font-weight:800}
+.v>p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:3px 0 10px}
+.pair{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.fw{min-width:0;max-width:100%}
+.fw>small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.frame{background:#fff;border:1px solid var(--hair);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.frame.pc{width:824px;max-width:100%}.frame.ph{width:343px;max-width:100%}
+.bh{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--hair)}
+.bt{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.bt::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.bs{font-size:11px;color:var(--muted)}
+.ss{display:block;padding:12px 16px;border-top:1px solid var(--hair)}
+.bh+.ss{border-top:0}
+.ss-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ss-k{font-size:12px;font-weight:700;color:var(--muted)}
+.ss-d{font-size:11px;color:var(--muted)}
+.ss-m{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:2px}
+.ss-m b{font-size:17px;font-weight:800;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.ok{background:#ECFDF3;color:#15803D}.pill.nb{background:#EFF4FE;color:#2775ED}
+.go{margin-left:8px;font-weight:700;color:#2563EB;white-space:nowrap}
+.chart{margin-top:9px}
+.pc .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
+.pc .ss>.ss-h,.pc .ss>.ss-m,.pc .ss>em{grid-column:1}
+.pc .ss>.chart{grid-column:2;grid-row:1/4;margin-top:0}
+/* 게이지 */
+.g-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
+.g-t i{position:absolute;top:0;height:100%;display:block}
+.g-t i.z1{background:#FDECC8}.g-t i.z2{background:#FBD5D5;border-radius:0 4px 4px 0}
+.g-t i.f{left:0;border-radius:4px;opacity:.85}.f.ok{background:#4ADE80}.f.n{background:#94A3B8}
+.g-t i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.12)}
+.dot.ok{background:#16A34A}.dot.n{background:#0F172A}
+.g-t i.mk{width:1.5px;top:-3px;height:14px;margin-left:-.75px;background:#64748B}
+.g-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
+.g-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.g-l span:first-child{transform:none}.g-l span.end{left:auto;right:0;transform:none}
+/* 역사 선 */
+.ln{position:relative;height:58px}
+.ln svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ln .dotn{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#0F172A;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)}
+.ln .lab{position:absolute;font-size:10px;font-weight:700;color:#334155;white-space:nowrap;transform:translateX(-50%)}
+.ln-x{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
+.ln-x span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ln-x span:first-child{transform:none}.ln-x span:last-child{left:auto;right:0;transform:none}
+/* 최근 달 막대 — 월봉 5개월선과 같은 모양 */
+.bars{display:flex;gap:6px;height:58px}
+.m5b{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
+.m5b-u{flex:1;display:flex;justify-content:center;align-items:flex-end;border-bottom:1px solid #CBD5E1}
+.m5b-d{flex:1;display:flex;justify-content:center;align-items:flex-start}
+.m5b i{display:block;width:60%;max-width:22px;background:#CBD5E1;border-radius:2px}
+.m5b.run i{background:#2775ED}.m5b.cur i{background:#93B8F5}
+.m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap}
+.m5b.cur small{color:#2775ED;font-weight:700}
+.vb{display:flex;gap:6px;height:58px}
+.vb>span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+.vb b{font-size:10px;font-weight:700;color:#334155;font-variant-numeric:tabular-nums;margin-bottom:2px}
+.vb i{display:block;width:60%;max-width:26px;background:#CBD5E1;border-radius:2px 2px 0 0}
+.vb .now i{background:#0F172A}
+.vb-x{display:flex;gap:6px;border-top:1px solid #CBD5E1;margin-top:0;font-size:10px;color:var(--muted);padding-top:3px}
+.vb-x span{flex:1;text-align:center}.vb-x .now{font-weight:700;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>구조 신호 — '코스피 체크' 시안</h1>
+  <p>코스피 종가 ÷ 60개월선 − 1이에요. 값은 야후 ^KS11 일봉으로 잰 실측이고(2026-11-02 종가 5,859 · 60개월선 3,405), 정상·주의·경고 표시는 넣지 않았어요.<br>
+  화면은 <b>주말 구성</b>(나스닥 체크 + 코스피 체크 + 월봉 5개월선)이에요. <b>아침</b>은 여기서 나스닥 체크만 빠져요.</p>
+</div>
+<div id="out"></div>
+<script>
+var D = {"s": [["2001-11", 2.7], ["2001-12", 10.5], ["2002-01", 19.0], ["2002-02", 30.0], ["2002-03", 41.1], ["2002-04", 32.2], ["2002-05", 24.9], ["2002-06", 16.5], ["2002-07", 12.6], ["2002-08", 15.4], ["2002-09", 1.3], ["2002-10", 2.8], ["2002-11", 12.1], ["2002-12", -3.6], ["2003-01", -9.1], ["2003-02", -11.7], ["2003-03", -17.9], ["2003-04", -8.6], ["2003-05", -4.1], ["2003-06", 0.5], ["2003-07", 6.0], ["2003-08", 11.6], ["2003-09", 1.6], ["2003-10", 12.8], ["2003-11", 13.9], ["2003-12", 15.3], ["2004-01", 19.9], ["2004-02", 23.7], ["2004-03", 22.6], ["2004-04", 19.8], ["2004-05", 11.4], ["2004-06", 9.2], ["2004-07", 2.7], ["2004-08", 12.6], ["2004-09", 17.0], ["2004-10", 17.0], ["2004-11", 23.4], ["2004-12", 26.3], ["2005-01", 31.5], ["2005-02", 42.0], ["2005-03", 35.2], ["2005-04", 27.1], ["2005-05", 34.6], ["2005-06", 39.2], ["2005-07", 52.0], ["2005-08", 46.9], ["2005-09", 63.3], ["2005-10", 52.7], ["2005-11", 68.2], ["2005-12", 75.5], ["2006-01", 75.2], ["2006-02", 68.8], ["2006-03", 64.5], ["2006-04", 68.9], ["2006-05", 54.6], ["2006-06", 49.9], ["2006-07", 48.1], ["2006-08", 52.0], ["2006-09", 51.6], ["2006-10", 48.6], ["2006-11", 53.7], ["2006-12", 52.0], ["2007-01", 42.6], ["2007-02", 47.0], ["2007-03", 49.2], ["2007-04", 56.6], ["2007-05", 70.1], ["2007-06", 71.5], ["2007-07", 86.4], ["2007-08", 77.4], ["2007-09", 80.6], ["2007-10", 87.5], ["2007-11", 70.1], ["2007-12", 66.1], ["2008-01", 40.2], ["2008-02", 45.3], ["2008-03", 42.3], ["2008-04", 49.9], ["2008-05", 49.6], ["2008-06", 33.5], ["2008-07", 25.6], ["2008-08", 15.0], ["2008-09", 11.9], ["2008-10", -14.4], ["2008-11", -17.5], ["2008-12", -14.1], ["2009-01", -11.6], ["2009-02", -19.3], ["2009-03", -8.8], ["2009-04", 2.8], ["2009-05", 4.1], ["2009-06", 2.8], ["2009-07", 14.1], ["2009-08", 15.5], ["2009-09", 20.2], ["2009-10", 12.5], ["2009-11", 9.8], ["2009-12", 17.7], ["2010-01", 11.2], ["2010-02", 10.0], ["2010-03", 15.8], ["2010-04", 18.0], ["2010-05", 10.4], ["2010-06", 13.3], ["2010-07", 16.5], ["2010-08", 14.6], ["2010-09", 22.3], ["2010-10", 22.0], ["2010-11", 22.6], ["2010-12", 31.1], ["2011-01", 31.3], ["2011-02", 22.3], ["2011-03", 31.8], ["2011-04", 36.1], ["2011-05", 31.9], ["2011-06", 28.2], ["2011-07", 29.1], ["2011-08", 13.2], ["2011-09", 6.1], ["2011-10", 13.9], ["2011-11", 9.8], ["2011-12", 8.0], ["2012-01", 15.1], ["2012-02", 18.7], ["2012-03", 17.1], ["2012-04", 14.8], ["2012-05", 6.6], ["2012-06", 7.1], ["2012-07", 8.8], ["2012-08", 10.1], ["2012-09", 15.3], ["2012-10", 10.6], ["2012-11", 11.8], ["2012-12", 15.4], ["2013-01", 13.0], ["2013-02", 16.3], ["2013-03", 14.8], ["2013-04", 12.3], ["2013-05", 14.2], ["2013-06", 6.2], ["2013-07", 8.7], ["2013-08", 9.0], ["2013-09", 12.4], ["2013-10", 13.3], ["2013-11", 13.1], ["2013-12", 10.3], ["2014-01", 5.7], ["2014-02", 7.0], ["2014-03", 6.5], ["2014-04", 4.7], ["2014-05", 5.9], ["2014-06", 5.7], ["2014-07", 9.1], ["2014-08", 8.2], ["2014-09", 5.4], ["2014-10", 2.2], ["2014-11", 2.6], ["2014-12", -1.0], ["2015-01", 0.5], ["2015-02", 2.0], ["2015-03", 4.6], ["2015-04", 8.6], ["2015-05", 7.5], ["2015-06", 5.1], ["2015-07", 2.7], ["2015-08", -2.0], ["2015-09", -1.0], ["2015-10", 2.3], ["2015-11", 0.3], ["2015-12", -1.2], ["2016-01", -3.5], ["2016-02", -3.3], ["2016-03", 0.8], ["2016-04", 0.9], ["2016-05", 0.5], ["2016-06", -0.1], ["2016-07", 2.4], ["2016-08", 3.2], ["2016-09", 3.4], ["2016-10", 1.5], ["2016-11", 0.1], ["2016-12", 2.1], ["2017-01", 4.1], ["2017-02", 5.3], ["2017-03", 8.6], ["2017-04", 10.7], ["2017-05", 17.3], ["2017-06", 19.0], ["2017-07", 19.0], ["2017-08", 16.6], ["2017-09", 17.8], ["2017-10", 23.5], ["2017-11", 20.6], ["2017-12", 19.8], ["2018-01", 24.0], ["2018-02", 16.9], ["2018-03", 17.3], ["2018-04", 20.1], ["2018-05", 15.3], ["2018-06", 10.3], ["2018-07", 8.5], ["2018-08", 9.5], ["2018-09", 10.2], ["2018-10", -4.6], ["2018-11", -1.5], ["2018-12", -4.1], ["2019-01", 3.4], ["2019-02", 2.8], ["2019-03", 0.1], ["2019-04", 2.8], ["2019-05", -4.8], ["2019-06", -0.7], ["2019-07", -5.6], ["2019-08", -8.2], ["2019-09", -3.8], ["2019-10", -2.9], ["2019-11", -2.8], ["2019-12", 2.1], ["2020-01", -1.7], ["2020-02", -7.8], ["2020-03", -18.4], ["2020-04", -9.3], ["2020-05", -5.4], ["2020-06", -1.8], ["2020-07", 4.6], ["2020-08", 7.8], ["2020-09", 7.6], ["2020-10", 4.6], ["2020-11", 19.0], ["2020-12", 31.1], ["2021-01", 34.7], ["2021-02", 35.2], ["2021-03", 36.3], ["2021-04", 39.0], ["2021-05", 40.2], ["2021-06", 42.9], ["2021-07", 37.6], ["2021-08", 36.3], ["2021-09", 29.8], ["2021-10", 24.8], ["2021-11", 18.6], ["2021-12", 23.6], ["2022-01", 10.1], ["2022-02", 11.1], ["2022-03", 13.0], ["2022-04", 10.1], ["2022-05", 9.5], ["2022-06", -4.9], ["2022-07", -0.1], ["2022-08", 0.7], ["2022-09", -12.1], ["2022-10", -6.3], ["2022-11", 1.0], ["2022-12", -8.5], ["2023-01", -0.7], ["2023-02", -1.2], ["2023-03", 1.4], ["2023-04", 2.5], ["2023-05", 5.4], ["2023-06", 4.7], ["2023-07", 7.3], ["2023-08", 4.0], ["2023-09", 0.2], ["2023-10", -7.5], ["2023-11", 2.6], ["2023-12", 7.0], ["2024-01", 0.4], ["2024-02", 6.0], ["2024-03", 9.7], ["2024-04", 7.2], ["2024-05", 4.6], ["2024-06", 10.5], ["2024-07", 8.9], ["2024-08", 4.6], ["2024-09", 1.1], ["2024-10", -0.7], ["2024-11", -4.8], ["2024-12", -7.1], ["2025-01", -2.8], ["2025-02", -2.5], ["2025-03", -5.0], ["2025-04", -2.5], ["2025-05", 2.5], ["2025-06", 16.0], ["2025-07", 21.8], ["2025-08", 18.9], ["2025-09", 26.9], ["2025-10", 50.5], ["2025-11", 42.8], ["2025-12", 52.0], ["2026-01", 85.9], ["2026-02", 118.0], ["2026-03", 74.4], ["2026-04", 123.3], ["2026-05", 178.6], ["2026-06", 170.9], ["2026-07", 107.0], ["2026-08", 110.1], ["2026-09", 106.7], ["2026-10", 70.8], ["2026-11", 72.1]], "premax": {"m": "2007-10", "g": 87.5, "ma": 1101.1, "c": 2064.85}, "allmax": {"m": "2026-05", "g": 178.6, "ma": 3042.8, "c": 8476.15}, "above": 15, "ma5": {"name": "삼성화재", "streak": 6, "now": 2.74, "strip": [{"l": "5월", "g": 13.73, "run": true, "cur": false}, {"l": "6월", "g": 18.01, "run": true, "cur": false}, {"l": "7월", "g": 16.16, "run": true, "cur": false}, {"l": "8월", "g": 12.9, "run": true, "cur": false}, {"l": "9월", "g": 1.54, "run": true, "cur": false}, {"l": "10월", "g": 2.74, "run": true, "cur": false}]}};
+var S = D.s, NOW = S[S.length - 1], G = NOW[1];
+function sign(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%'; }
+function sign0(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(0) + '%'; }
+var nq = function () {
+  var g = 59.87, top = 80, p = function (v) { return (v / top * 100).toFixed(1) + '%'; };
+  return '<div class="ss"><div class="ss-h"><span class="ss-k">나스닥 체크</span></div>' +
+    '<div class="ss-m"><b>+59.9%</b><span class="pill ok">✓ 정상</span></div>' +
+    '<div class="chart"><div class="g-t"><i class="z1" style="left:' + p(65) + ';width:' + p(5) + '"></i><i class="z2" style="left:' + p(70) + ';right:0"></i>' +
+    '<i class="f ok" style="width:' + p(g) + '"></i><i class="dot ok" style="left:' + p(g) + '"></i></div>' +
+    '<div class="g-l"><span style="left:0">0</span><span style="left:' + p(65) + ';transform:translateX(calc(-100% - 3px))">65 주의</span><span class="end">70 경고</span></div></div>' +
+    '<em>60개월선 대비 10월 월봉 고점<span class="go">상세 그래프 ›</span></em></div>';
+};
+var ma5 = function () {
+  var m = D.ma5, mx = Math.max.apply(null, m.strip.map(function (s) { return Math.abs(s.g); }).concat([1]));
+  var bars = m.strip.map(function (s) {
+    return '<span class="m5b' + (s.run ? ' run' : '') + (s.cur ? ' cur' : '') + '"><span class="m5b-u">' + (s.g > 0 ? '<i style="height:' + (s.g / mx * 100).toFixed(0) + '%"></i>' : '') + '</span>' +
+      '<span class="m5b-d">' + (s.g < 0 ? '<i style="height:' + (-s.g / mx * 100).toFixed(0) + '%"></i>' : '') + '</span><small>' + s.l + '</small></span>';
+  }).join('');
+  return '<div class="ss"><div class="ss-h"><span class="ss-k">월봉 5개월선 안착</span><span class="ss-d">오늘 코스피 브리핑</span></div>' +
+    '<div class="ss-m"><b>' + m.name + ' 외 2종목</b><span class="pill nb">' + m.streak + '개월째</span></div>' +
+    '<div class="chart"><div class="bars">' + bars + '</div></div><em>월말 종가 ÷ 5개월 평균 · 지금 이격 +' + m.now.toFixed(1) + '%</em></div>';
+};
+function left() {
+  return '<div class="ss-h"><span class="ss-k">코스피 체크</span><span class="ss-d">11/2(월) 종가</span></div><div class="ss-m"><b>' + sign(G) + '</b></div>' +
+    '<em>60개월선 대비 · 2001년 이후 ' + S.length + '개월 중 지금보다 높았던 달 ' + D.above + '개월</em>';
+}
+// A. 게이지 — 2007년 최고와 올해 최고를 눈금으로
+function vA() {
+  var top = Math.ceil((D.allmax.g + 10) / 50) * 50, x = function (v) { return (v / top * 100).toFixed(1) + '%'; };
+  return '<div class="ss">' + left() + '<div class="chart"><div class="g-t"><i class="f n" style="width:' + x(G) + '"></i>' +
+    '<i class="mk" style="left:' + x(D.premax.g) + '"></i><i class="mk" style="left:' + x(D.allmax.g) + '"></i><i class="dot n" style="left:' + x(G) + '"></i></div>' +
+    '<div class="g-l"><span style="left:0">0</span><span style="left:' + x(D.premax.g) + '">2007년 ' + sign0(D.premax.g) + '</span><span class="end">올해 ' + sign0(D.allmax.g) + '</span></div></div></div>';
+}
+// B. 2001년부터 선 — 2007년과 올해가 어떻게 다른지 보인다. 글자는 SVG 밖(가로로 늘어도 눌리지 않게)
+function vB() {
+  var n = S.length, mx = D.allmax.g, mn = Math.min.apply(null, S.map(function (x) { return x[1]; })), W = 1000, H = 100;
+  var X = function (i) { return i / (n - 1) * W; }, Y = function (v) { return 6 + (mx - v) / (mx - mn) * (H - 12); };
+  var path = S.map(function (x, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(x[1]).toFixed(1); }).join(' ');
+  var pct = function (v) { return (v / H * 100).toFixed(1) + '%'; };
+  var pi = S.findIndex(function (x) { return x[0] === D.premax.m; }), ai = S.findIndex(function (x) { return x[0] === D.allmax.m; });
+  var yr = function (y) { var i = S.findIndex(function (x) { return x[0] >= y + '-01'; }); return (i / (n - 1) * 100).toFixed(1) + '%'; };
+  return '<div class="ss">' + left() + '<div class="chart"><div class="ln"><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+    '<line x1="0" x2="' + W + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1) + '" stroke="#CBD5E1" stroke-width="1" vector-effect="non-scaling-stroke"/>' +
+    '<path d="' + path + '" fill="none" stroke="#475569" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>' +
+    '<span class="lab" style="left:' + (pi / (n - 1) * 100).toFixed(1) + '%;top:' + (parseFloat(pct(Y(D.premax.g))) - 19) + '%">' + sign0(D.premax.g) + '</span>' +
+    '<span class="lab" style="left:' + (ai / (n - 1) * 100 - 5).toFixed(1) + '%;top:-2%">' + sign0(D.allmax.g) + '</span>' +
+    '<i class="dotn" style="left:100%;top:' + pct(Y(G)) + '"></i></div>' +
+    '<div class="ln-x"><span style="left:0">2001</span><span style="left:' + yr(2007) + '">2007</span><span style="left:' + yr(2014) + '">2014</span><span style="left:' + yr(2021) + '">2021</span><span>지금</span></div></div></div>';
+}
+// C. 최근 6개월 막대 — 월봉 5개월선과 같은 모양
+function vC() {
+  var r = S.slice(-6), mx = Math.max.apply(null, r.map(function (x) { return x[1]; }));
+  var bars = r.map(function (x, i) { var now = i === r.length - 1; return '<span' + (now ? ' class="now"' : '') + '><b>' + sign0(x[1]) + '</b><i style="height:' + (x[1] / mx * 32 + 2).toFixed(0) + 'px"></i></span>'; }).join('');
+  var xs = r.map(function (x, i) { var now = i === r.length - 1; return '<span' + (now ? ' class="now"' : '') + '>' + (+x[0].slice(5)) + '월</span>'; }).join('');
+  return '<div class="ss">' + left() + '<div class="chart"><div class="vb">' + bars + '</div><div class="vb-x">' + xs + '</div></div></div>';
+}
+function block(row) {
+  return '<div class="bh"><span class="bt">🧱 구조 신호</span><span class="bs">월봉 기준 · 매일 업데이트</span></div>' + nq() + row + ma5();
+}
+var V = [
+  ['A안 · 게이지 + 과거 최고 눈금', '나스닥 체크와 모양을 맞췄어요. 2007년 최고(+88%)와 올해 최고(+179%) 사이에서 지금 어디인지 봐요. 색은 판정을 뜻하지 않게 회색이에요.', vA],
+  ['B안 · 2001년부터 선', '25년 흐름을 한 줄로 봐요. 2007년과 올해가 얼마나 다른지 가장 잘 보여요.', vB],
+  ['C안 · 최근 6개월 막대', '아래 월봉 5개월선과 같은 모양이에요. 최근 넉 달 사이 얼마나 내려왔는지가 잘 보여요. 과거 비교는 문장으로만 봐요.', vC]
+];
+document.getElementById('out').innerHTML = V.map(function (v) {
+  var h = block(v[2]());
+  return '<section class="v"><h3>' + v[0] + '</h3><p>' + v[1] + '</p><div class="pair">' +
+    '<div class="fw"><small>PC · 주말</small><div class="frame pc">' + h + '</div></div>' +
+    '<div class="fw"><small>폰 · 주말</small><div class="frame ph">' + h + '</div></div></div></section>';
+}).join('');
+</script>
+</body>
+</html>
