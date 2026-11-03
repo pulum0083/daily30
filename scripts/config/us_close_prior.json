@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-11-03T22:27:23+09:00",
+  "symbol": "ES=F → ^GSPC",
+  "method": "21:15 KST 직전 ES 1시간봉 ÷ 직전 ES 일봉 종가 − 1을 구간으로 나눠 그날 S&P500 상승 마감 비율을 잰다.",
+  "data_from": "2024-06-12",
+  "data_through": "2026-11-02",
+  "days": 593,
+  "direction_hit_pct": 65.8,
+  "bands": [
+    {
+      "lo": null,
+      "hi": -0.5,
+      "days": 61,
+      "up_pct": 20
+    },
+    {
+      "lo": -0.5,
+      "hi": -0.2,
+      "days": 82,
+      "up_pct": 39
+    },
+    {
+      "lo": -0.2,
+      "hi": 0.0,
+      "days": 99,
+      "up_pct": 45
+    },
+    {
+      "lo": 0.0,
+      "hi": 0.2,
+      "days": 134,
+      "up_pct": 57
+    },
+    {
+      "lo": 0.2,
+      "hi": 0.5,
+      "days": 130,
+      "up_pct": 72
+    },
+    {
+      "lo": 0.5,
+      "hi": null,
+      "days": 87,
+      "up_pct": 76
+    }
+  ],
+  "bands_early": [
+    {
+      "lo": null,
+      "hi": -0.5,
+      "days": 36,
+      "up_pct": 19
+    },
+    {
+      "lo": -0.5,
+      "hi": -0.2,
+      "days": 44,
+      "up_pct": 43
+    },
+    {
+      "lo": -0.2,
+      "hi": 0.0,
+      "days": 66,
+      "up_pct": 52
+    },
+    {
+      "lo": 0.0,
+      "hi": 0.2,
+      "days": 86,
+      "up_pct": 59
+    },
+    {
+      "lo": 0.2,
+      "hi": 0.5,
+      "days": 83,
+      "up_pct": 73
+    },
+    {
+      "lo": 0.5,
+      "hi": null,
+      "days": 48,
+      "up_pct": 77
+    }
+  ],
+  "bands_late": [
+    {
+      "lo": null,
+      "hi": -0.5,
+      "days": 25,
+      "up_pct": 20
+    },
+    {
+      "lo": -0.5,
+      "hi": -0.2,
+      "days": 38,
+      "up_pct": 34
+    },
+    {
+      "lo": -0.2,
+      "hi": 0.0,
+      "days": 33,
+      "up_pct": 33
+    },
+    {
+      "lo": 0.0,
+      "hi": 0.2,
+      "days": 48,
+      "up_pct": 54
+    },
+    {
+      "lo": 0.2,
+      "hi": 0.5,
+      "days": 47,
+      "up_pct": 70
+    },
+    {
+      "lo": 0.5,
+      "hi": null,
+      "days": 39,
+      "up_pct": 74
+    }
+  ]
+}

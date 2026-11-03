@@ -56,7 +56,6 @@ def test_snapshot_records_ewy_residual(tmp_path):
 
 def test_non_kospi_types_skipped():
     """채점 대상이 아닌 타입은 스냅샷을 만들지 않는다."""
-    assert cc._signal_snapshot("us") == {}
     assert cc._signal_snapshot("kospi-close") == {}
 
 

@@ -638,11 +638,11 @@ _NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 S
 
 
 def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
-    """미국 브리핑 '나스닥 체크' 섹션 + 텔레그램 경고 블록의 공통 컨텍스트(§65).
+    """미국 브리핑 '나스닥 체크' 섹션의 컨텍스트(§65).
 
     월봉 5개월선 코너와 같은 구조다 — 스냅샷이 1순위고, 데이터 파일은 브리핑 날짜와 같을 때만 쓴다(§14·§45).
-    데이터가 없거나 하단 설명의 출처인 백테스트 파일이 없으면 빈 dict → 섹션·텔레그램 블록 모두 생략.
-    텔레그램(call_claude._nasdaq_telegram_lines)도 이 함수로 읽어 페이지와 숫자가 어긋나지 않는다.
+    데이터가 없거나 하단 설명의 출처인 백테스트 파일이 없으면 빈 dict → 섹션 생략.
+    텔레그램(call_claude._nasdaq_month_lines)은 그달 첫 브리핑에 지난달 확정값만 싣는다.
     """
     import nasdaq_overheat as nq
     data = analysis.get("nasdaq_overheat")
@@ -2069,7 +2069,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         save_us_index_position(analysis, market_data, target_date)
-        ctx["accuracy"] = False  # US 채점 탈퇴 — 성적표 사이드바 미표시
+        ctx["accuracy"] = False  # 미국 성적표 사이드바는 내지 않는다(채점은 2026-11-03 재개)
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
         ctx["quote_today"] = _load_quote_today(target_date)

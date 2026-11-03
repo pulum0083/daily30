@@ -220,9 +220,6 @@ def classify_direction_correct(predicted_direction: str, change_pct: float) -> b
 
 
 def check_accuracy(date_str: str, briefing_type: str = "kospi", force: bool = False) -> None:
-    if briefing_type == "us":
-        print("[check_accuracy] US는 이슈 중심 전환(2026-07-14)으로 채점 대상이 아니에요 — skip", file=sys.stderr)
-        return
     data = load_briefings()
     briefings = data.get("briefings", [])
 
@@ -301,9 +298,6 @@ def backfill(briefing_type: str = "kospi", force: bool = False) -> None:
     09:10 실행 시점엔 당일 일봉이 아직 없으므로 오늘 이전 날짜만 대상으로 한다.
     force=True 이면 이미 검증된 항목도 종가 기준으로 재정산한다(기준 변경 마이그레이션용).
     """
-    if briefing_type == "us":
-        print("[check_accuracy] US backfill skip — 채점 탈퇴", file=sys.stderr)
-        return
     data = load_briefings()
     today = datetime.now(KST).strftime("%Y-%m-%d")
     pending = sorted({
@@ -373,9 +367,8 @@ def write_accuracy_summary() -> None:
         k: {"scored": s, "hit": h, "pct": (round(h / s * 100) if s else None)}
         for k, (s, h) in buckets.items()
     }
-    # US는 2026-07-14 이슈 중심 전환으로 채점 탈퇴(call_claude.py / check_accuracy 상단 가드).
-    # us 수치는 그 시점에 동결됐고 cumulative는 동결값이 섞인 혼합값이라, 새 소비자가
-    # 무심코 "지금 성적"으로 쓰지 않도록 데이터에 명시한다. 살아 있는 지표는 kospi뿐이다.
+    # cumulative는 기준이 다른 두 성적의 합이라 새 소비자가 무심코 쓰지 않도록 데이터에 명시한다.
+    # 화면에 쓰는 지표는 kospi다(미국은 2026-11-03 채점을 재개했지만 화면에는 아직 내지 않는다).
     legacy = [b for b in legacy_kospi_rows(all_rows) if b.get("is_correct") is not None]
     lh = sum(1 for b in legacy if b.get("is_correct"))
     out["kospi"]["basis"] = "open"
@@ -384,9 +377,9 @@ def write_accuracy_summary() -> None:
         "scored": len(legacy), "hit": lh, "pct": (round(lh / len(legacy) * 100) if legacy else None),
         "retired": True, "note": "전환 이전 종가 기준 기록 — 수치 동결, 현재 성적에 넣지 않음",
     }
-    out["us"]["retired"] = True
-    out["us"]["note"] = "2026-07-14 이슈 중심 전환으로 채점 탈퇴 — 수치 동결"
-    out["cumulative"]["note"] = "kospi(진행) + us(동결) 혼합 — 현재 성적은 kospi를 쓸 것"
+    out["us"]["basis"] = "close"
+    out["us"]["note"] = "S&P500 전일 대비 종가 방향 — 2026-07-15~07-24 발행분은 기록이 없다"
+    out["cumulative"]["note"] = "kospi(시초가) + us(종가) 혼합 — 현재 성적은 kospi를 쓸 것"
     out["live_key"] = "kospi"
     out["streak"] = compute_publish_streak(data.get("briefings", []))
     out["updated_at"] = datetime.now(KST).isoformat()

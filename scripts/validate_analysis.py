@@ -885,6 +885,20 @@ def clamp_prediction_to_prior(analysis: dict, prior: dict, corrections: list) ->
     corrections.append(f"up_pct {up}% → {fixed}% (prior 시초가 상승 확률 {prior['up_pct']}% ±10%p 밖)")
 
 
+def clamp_us_prediction_to_prior(analysis: dict, prior: dict, corrections: list) -> None:
+    """미국 up_pct를 S&P 선물 구간표 ±10%p 안으로 당기고 방향은 뒤집지 못하게 한다. 구간표 값이 없으면 두고 넘어간다."""
+    from leading_signal import clamp_us_up_pct
+    pred = analysis.get("prediction")
+    if not isinstance(pred, dict) or (prior or {}).get("up_pct") is None:
+        return
+    up = pred.get("up_pct")
+    fixed = clamp_us_up_pct(up, prior["up_pct"])
+    if fixed is None or fixed == up:
+        return
+    pred["up_pct"], pred["down_pct"] = fixed, 100 - fixed
+    corrections.append(f"미국 up_pct {up}% → {fixed}% (S&P 선물 구간표 {prior['up_pct']}% ±10%p 밖)")
+
+
 def validate_index_superlatives(analysis, corrections, warnings, blocks):
     """지수의 '사상 최고/최저' 주장을 실측과 대조해 리스트 항목은 제거, 산문은 발행 차단.
 
@@ -1114,6 +1128,64 @@ def trim_issue_bodies(analysis, corrections, max_sent=_ISSUE_BODY_MAX_SENT) -> i
     if n:
         corrections.append(f"이슈 본문 {n}건을 첫 {max_sent}문장으로 줄임")
     return n
+
+
+_ISSUE_FALL_NOW = re.compile(r"(밀리|눌리|내리|빠지|떨어지|하락하|약세를? 보이)고 있|(눌려|밀려|빠져|떨어져) 있|(밀려|눌려|내려|빠져|떨어져)요")
+_ISSUE_RISE_NOW = re.compile(r"(오르|뛰|상승하|반등하|강세를? 보이)고 있|(올라|뛰어) 있|(올라|뛰어)요")
+_ISSUE_MIN_MOVE = 0.5       # 프리마켓 등락 중앙값이 이만큼은 벌어져야 반대라고 본다(%)
+
+
+def _premarket_opposite(side: dict, sign: int, changes: dict):
+    """영향 종목 실측이 sign 쪽으로 움직였으면 [(티커, 등락)]을 큰 순으로, 아니면 None. 2종목 이상 잰 경우만 본다."""
+    moved = [(t, changes[t]) for t in (side.get("tickers") or []) if isinstance(changes.get(t), (int, float))]
+    if len(moved) < 2:
+        return None
+    opp = [(t, v) for t, v in moved if v * sign > 0]
+    vals = sorted(v * sign for _, v in moved)
+    if len(opp) * 3 < len(moved) * 2 or vals[len(vals) // 2] < _ISSUE_MIN_MOVE:
+        return None
+    return sorted(opp, key=lambda x: -abs(x[1]))
+
+
+def fix_issue_premarket_contradictions(analysis, latest, corrections) -> int:
+    """이슈가 지금 일처럼 쓴 방향이 프리마켓 실측과 반대면 고친다(미국 브리핑, 2026-11-03 실사고).
+
+    11/3 "메모리·장비주 전반이 눌리고 있어요" — 21:16 실측은 MU +2.57%·AMD +2.31%·LRCX +3.12%였다. 어제 기사를 지금
+    일처럼 옮긴 것이다. 본문은 실측만 담은 문장으로 바꾸고, 제목까지 그렇게 쓴 이슈는 뺀다. "밀렸어요"처럼 지난 일로
+    쓴 문장은 어제 정규장 얘기일 수 있어 건드리지 않는다.
+    """
+    changes = {c.get("ticker"): c.get("change_pct") for c in (latest.get("us_candidates") or []) if isinstance(c, dict)}
+    fixed = 0
+    kept = []
+    for it in analysis.get("issues") or []:
+        if not isinstance(it, dict):
+            kept.append(it)
+            continue
+        drop = False
+        for key, sign, now_re, word in (("down", 1, _ISSUE_FALL_NOW, "오르고"), ("up", -1, _ISSUE_RISE_NOW, "내리고")):
+            side = it.get(key)
+            if not isinstance(side, dict):
+                continue
+            title, body = str(it.get("title") or ""), str(it.get("body") or "")
+            if not (now_re.search(title) or now_re.search(body)):
+                continue
+            opp = _premarket_opposite(side, sign, changes)
+            if not opp:
+                continue
+            fixed += 1
+            if now_re.search(title):
+                drop = True
+                corrections.append(f"이슈 제거 — 제목이 프리마켓 실측과 반대: {title[:30]}")
+                break
+            shown = "·".join(f"{t} {v:+.1f}%" for t, v in opp[:3])
+            it["body"] = f"발행 시점 프리마켓에선 {shown}로 {word} 있어요."
+            corrections.append(f"이슈 본문 교정 — 프리마켓 실측과 반대: {title[:30]}")
+            break
+        if not drop:
+            kept.append(it)
+    if fixed:
+        analysis["issues"] = kept
+    return fixed
 
 
 def fix_session_mislabels(analysis, corrections) -> int:
@@ -1585,6 +1657,7 @@ def validate(analysis, latest, btype):
         fix_session_mislabels(a, corrections)      # 같은 절에 지수+프리마켓이면 교정, 남는 건 아래에서 경고
         limit_data_issues(a, corrections)          # 시장 데이터형 이슈는 하루 1개까지
         trim_issue_bodies(a, corrections)          # 이슈 본문은 한 문장
+        fix_issue_premarket_contradictions(a, latest, corrections)   # 지금 일처럼 쓴 방향이 프리마켓 실측과 반대면 교정
         for hit in find_session_mislabels(a.get("issues")):
             warnings.append(
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"
@@ -1794,6 +1867,10 @@ def main():
     #      숫자만 고치지 않는다 — 방향과 확률이 서로 어긋난 채 나가느니 AI 원본을 그대로 두고 관리자에게 알린다(위 알림).
     if btype == "kospi":
         clamp_prediction_to_prior(result["analysis"], prior, result["corrections"])
+    elif btype == "us":
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from leading_signal import compute_prior_us
+        clamp_us_prediction_to_prior(result["analysis"], compute_prior_us(latest), result["corrections"])
 
     for w in result["warnings"]:
         print(f"[validate] ⚠️  {w}")

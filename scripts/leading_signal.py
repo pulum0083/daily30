@@ -4,6 +4,8 @@ latest_kospi.json의 선행신호 등락률에서 방향 prior(상승/하락/중
 SOX·나스닥·NQ선물은 market_data_js.*.chg, EWY·VIX는 최상위 *.change_pct 에 있다.
 가중치·임계값은 scripts/diagnose_direction_signals.py 백테스트로 확정한다(초기값은 74일 진단 기반).
 """
+import json
+from pathlib import Path
 
 # 시초가 갭 기준 재점검(2026-10-12, scripts/fit_open_gap_prior.py — 713거래일 2023-11~2026-10).
 #  · 이 가중치는 갭 방향을 전체 72.7%·2026년 76.1% 맞혔고, 다시 맞춘 회귀 가중치가 검증 구간에서 이기지 못해 그대로 둔다.
@@ -228,12 +230,34 @@ def prior_contradicts_direction(prior: dict, llm_direction: str) -> bool:
     return False
 
 
-# ── 미국 브리핑용 prior (advisory 주입 전용 — 하드 오버라이드 없음) ──────────────
-# 미국 브리핑은 개장 전 프리마켓 선물(ES/NQ/YM)이 가장 신선한 선행신호다.
-# EWY는 한국 외국인 프록시라 무관하므로 쓰지 않는다.
-US_SIGNAL_WEIGHTS = {"sp500_fut": 1.0, "nasdaq_fut": 1.0, "dow_fut": 0.3, "sox": 0.5, "vix": -0.2}
-NEUTRAL_BAND_US = 0.3   # 선물은 변동폭이 작아 코스피보다 좁은 데드밴드
+# ── 미국 브리핑용 prior ──────────────
+# 21:15 KST에 살아 있는 값으로 S&P500 상승 마감 확률을 정한다. 593거래일에서 어제 SOX·VIX를 섞으면 방향 적중이
+# 57.7%로 떨어지고 S&P 선물 단독이 65.8%였다(2026-11-03) — SOX·VIX는 표시·기록용으로만 남긴다.
+US_PRIOR_PATH = Path(__file__).resolve().parent / "config" / "us_close_prior.json"
 T_FUT_US = 0.5          # strength 표기용 선물 임계 (%) — advisory라 게이트 아님
+
+
+def us_up_pct(es_change):
+    """S&P 선물 등락이 속한 구간의 과거 상승 마감 비율(%). 구간표나 선물 값이 없으면 None."""
+    if not isinstance(es_change, (int, float)):
+        return None
+    try:
+        rows = json.loads(US_PRIOR_PATH.read_text(encoding="utf-8"))["bands"]
+    except (OSError, ValueError, KeyError):
+        return None
+    for b in rows:
+        if (b["lo"] is None or es_change >= b["lo"]) and (b["hi"] is None or es_change < b["hi"]):
+            return b["up_pct"]
+    return None
+
+
+def clamp_us_up_pct(llm_up, prior_up, tol: int = UP_PCT_TOLERANCE):
+    """AI의 미국 up_pct를 구간표 ±tol 안으로 당긴다. 코스피와 달리 미국엔 방향 재생성이 없어 50%는 넘지 못하게 한다
+    — AI와 선물이 갈린 11일 중 AI가 맞힌 건 4일이었다(2026-11-03)."""
+    fixed = clamp_up_pct(llm_up, prior_up, tol)
+    if prior_up is None or not isinstance(fixed, int):
+        return fixed
+    return min(fixed, 49) if prior_up < 50 else max(fixed, 51) if prior_up > 50 else fixed
 
 
 def extract_signals_us(latest: dict) -> dict:
@@ -275,43 +299,34 @@ def _strength_us(sig: dict, direction: str) -> str:
 
 
 def compute_prior_us(latest: dict) -> dict:
-    """미국 브리핑 선행신호 prior 계산 (반환 형태는 compute_prior와 동일)."""
+    """미국 브리핑 prior — S&P 선물 구간표로 상승 마감 확률을 정한다. 선물이 없으면 판단하지 않는다."""
     sig = extract_signals_us(latest)
-    score = 0.0
-    used = False
-    for key, w in US_SIGNAL_WEIGHTS.items():
-        v = sig.get(key)
-        if v is not None:
-            score += w * v
-            used = True
-    if not used:
-        return {"direction": "중립", "score": 0.0, "strength": "weak", "signals": sig}
-    if score > NEUTRAL_BAND_US:
-        direction = "상승"
-    elif score < -NEUTRAL_BAND_US:
-        direction = "하락"
-    else:
-        direction = "중립"
+    up = us_up_pct(sig.get("sp500_fut"))
+    if up is None:
+        return {"direction": "중립", "score": 0.0, "strength": "weak", "up_pct": None, "signals": sig}
+    direction = "상승" if up > 50 else "하락" if up < 50 else "중립"
     return {
         "direction": direction,
-        "score": round(score, 3),
+        "score": round(sig["sp500_fut"], 3),
         "strength": _strength_us(sig, direction),
+        "up_pct": up,
         "signals": sig,
     }
 
 
 def format_prior_for_prompt_us(prior: dict) -> str:
-    """미국 prior를 LLM 프롬프트에 주입할 한국어 텍스트 블록으로 포맷 (advisory)."""
+    """미국 prior를 LLM 프롬프트에 주입할 한국어 텍스트 블록으로 포맷."""
     sig = prior["signals"]
     def fmt(v):
         return f"{v:+.2f}%" if isinstance(v, (int, float)) else "—"
     lines = [
         "\n## 🧭 선행신호 방향 prior (Python 결정론 계산 — 우선 참고)",
-        f"- 계산 방향: **{prior['direction']}** (강도 {prior['strength']}, score {prior['score']})",
-        f"- S&P선물 {fmt(sig.get('sp500_fut'))} · 나스닥선물 {fmt(sig.get('nasdaq_fut'))} "
-        f"· 다우선물 {fmt(sig.get('dow_fut'))} · SOX {fmt(sig.get('sox'))} · VIX {fmt(sig.get('vix'))}",
-        "- 이 값들은 미국장 개장 전 프리마켓 선물·반도체로, 전일 미국 현물 마감 **이후** 정보를 반영한다.",
-        "- **충돌 해소 규칙**: 전일 미국 현물이 크게 움직였더라도 프리마켓 선물(S&P·나스닥)·SOX가 그와 "
-        "모순되면 — 더 신선한 정보이므로 — 선물 방향을 우선 참고한다. 전일 마감에 앵커링하지 않는다.",
+        f"- 지금 선물: S&P {fmt(sig.get('sp500_fut'))} · 나스닥 {fmt(sig.get('nasdaq_fut'))} · 다우 {fmt(sig.get('dow_fut'))}",
+        *([f"- **S&P 선물이 이 구간일 때 그날 S&P500이 오른 비율은 {prior['up_pct']}%다(과거 약 600거래일 실측).**"
+           " up_pct는 이 값에서 출발한다. 뉴스·실적으로 조정하되 **±10%p 안에서만** 하고 50%를 넘겨 방향을 뒤집지 않는다"
+           " — 벗어나면 발행 전 검증이 되돌린다."]
+          if prior.get("up_pct") is not None else []),
+        f"- 참고: SOX {fmt(sig.get('sox'))}는 **직전 정규장** 등락이고 프리마켓 정보가 아니다. 다음 날 S&P 방향과 상관이"
+        " 거의 없어(5년 -0.01) 확률 근거로 쓰지 않는다.",
     ]
     return "\n".join(lines) + "\n"

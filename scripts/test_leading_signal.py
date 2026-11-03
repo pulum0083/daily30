@@ -104,27 +104,46 @@ def test_extract_signals_us_paths():
 
 
 def test_compute_prior_us_up_from_futures():
-    # 선물 상승 + SOX 상승 → 상승 prior (전일 현물 약세와 무관하게)
-    p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
-    assert p["direction"] == "상승"
+    # 확률은 S&P 선물 구간표에서 온다 — 어제 SOX·VIX는 섞지 않는다
+    p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=-5.0, vix=20.0))
+    assert p["direction"] == "상승" and p["up_pct"] == 72
 
 
 def test_compute_prior_us_handles_missing_futures():
-    # nasdaq_fut 누락(None)이어도 안전하게 계산
-    p = ls.compute_prior_us(_latest_us(sp=-0.5, dow=-0.3, sox=-2.0, vix=5.0))
-    assert p["direction"] == "하락"
+    p = ls.compute_prior_us(_latest_us(sp=-0.6, dow=-0.3, sox=-2.0, vix=5.0))
+    assert p["direction"] == "하락" and p["up_pct"] == 20
     assert p["signals"]["nasdaq_fut"] is None
 
 
 def test_compute_prior_us_neutral_when_empty():
-    p = ls.compute_prior_us({"futures": {}, "market_data_js": {}})
-    assert p["direction"] == "중립" and p["strength"] == "weak"
+    # S&P 선물이 없으면 판단하지 않는다 — 나스닥 선물로 대신하지 않는다
+    p = ls.compute_prior_us(_latest_us(nq=1.0))
+    assert p["direction"] == "중립" and p["strength"] == "weak" and p["up_pct"] is None
 
 
-def test_format_prior_us_contains_futures():
+def test_real_incident_20261103_sox_does_not_drive_probability():
+    # 11/3: S&P 선물 -0.18%, 어제 SOX -3.37%. 예전 계산은 SOX가 점수의 64%였다.
+    p = ls.compute_prior_us(_latest_us(sp=-0.18, nq=0.13, dow=-0.92, sox=-3.37, vix=3.2))
+    assert p["up_pct"] == 45 and p["direction"] == "하락"
+
+
+def test_format_prior_us_marks_sox_as_previous_session():
     p = ls.compute_prior_us(_latest_us(sp=0.39, nq=1.11, dow=0.27, sox=1.05, vix=7.32))
     text = ls.format_prior_for_prompt_us(p)
-    assert "선물" in text and "SOX" in text and "1.11" in text
+    assert "72%" in text and "1.11" in text and "직전 정규장" in text and "프리마켓 선물·반도체" not in text
+
+
+def test_us_up_pct_band_edges():
+    assert [ls.us_up_pct(v) for v in (-0.5, -0.2, 0.0, 0.2, 0.5)] == [39, 45, 57, 72, 76]
+    assert ls.us_up_pct(None) is None
+
+
+def test_clamp_us_keeps_side_and_range():
+    assert ls.clamp_us_up_pct(32, 45) == 35            # 11/3의 AI 32% → 구간표 45% -10
+    assert ls.clamp_us_up_pct(52, 45) == 49            # ±10 안이어도 방향은 뒤집지 못한다
+    assert ls.clamp_us_up_pct(48, 57) == 51
+    assert ls.clamp_us_up_pct(90, 72) == 82
+    assert ls.clamp_us_up_pct(32, None) == 32
 
 
 def test_extract_signals_includes_usdkrw():

@@ -457,8 +457,9 @@ US_SYSTEM_PROMPT = """\
 
 ## 상승·하락 확률(prediction) — 텔레그램 전용, 웹페이지에는 표시하지 않음
 
-오늘 미국 지수(S&P500 기준)가 상승 마감할 확률을 추정해 `up_pct`(정수, 0~100)로 낸다. `down_pct`는 `100 - up_pct`다.
-이 수치는 텔레그램 알림에만 쓰이고 브리핑 웹페이지에는 노출되지 않는다 — 본문 서술과 모순되지 않게 자연스러운 범위로만 추정하면 된다.
+오늘 미국 지수(S&P500 기준)가 전일보다 높게 마감할 확률을 `up_pct`(정수, 0~100)로 낸다. `down_pct`는 `100 - up_pct`다.
+입력의 선행신호 prior에 있는 S&P 선물 구간표 값에서 출발해 ±10%p 안에서만 조정한다. 이 값은 다음 날 실제 S&P500 종가로 채점된다.
+이 수치는 텔레그램과 종목 홈 카드에 쓰이고 브리핑 웹페이지 본문에는 노출되지 않는다.
 
 ## 출력 형식
 
@@ -544,7 +545,9 @@ def _us_news_session_directive(date_str: str, news_summary: dict | None) -> str:
         f"(catalysts·catalyst_sources)는 모두 **직전 정규장({prev}) 마감**을 다룬 기사다.\n"
         f"- 뉴스에서 온 등락·수치는 **\"직전 정규장에서\"**로 서술한다. "
         f"**\"지금·현재·프리마켓에서\"라고 쓰지 않는다.**\n"
-        f"- 프리마켓 현재 상태는 뉴스가 아니라 **시장 데이터 실측**에서만 가져온다.\n\n"
+        f"- 프리마켓 현재 상태는 뉴스가 아니라 **시장 데이터 실측**에서만 가져온다.\n"
+        f"- 개별 종목의 지금 등락은 `us_candidates`의 `change_pct`(발행 시점 프리마켓 체결가)다. 어제 밀린 종목이 지금"
+        f" 오르고 있으면 \"눌리고 있어요\"라고 쓰지 않는다 — 발행 전 검증이 그 문장을 실측으로 바꾼다.\n\n"
     )
 
 
@@ -909,7 +912,16 @@ def build_avoidance_hint(history: list, days: int = 3) -> str:
     return "\n".join(lines)
 
 
-def _signal_snapshot(briefing_type: str) -> dict:
+def _hl_snapshot(date_str: str) -> dict:
+    """하이퍼리퀴드 값을 기록만 한다 — 프롬프트·화면에 넣지 않는다(scripts/hl_signals.py)."""
+    try:
+        d = json.load(open(DATA_DIR / "hl_signals.json", encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {"hl": d["moves"]} if d.get("date") == date_str and d.get("moves") else {}
+
+
+def _signal_snapshot(briefing_type: str, date_str: str = "") -> dict:
     """예측 시점의 선행신호·prior를 그대로 남긴다 (사후 캘리브레이션용).
 
     지금까지 이 값들이 어디에도 아카이브되지 않아 **prior의 실전 성적을 추적할 방법이
@@ -920,6 +932,15 @@ def _signal_snapshot(briefing_type: str) -> dict:
 
     실패해도 조용히 빈 dict — 아카이브 때문에 발행이 막히면 안 된다.
     """
+    if briefing_type == "us":
+        try:
+            from leading_signal import compute_prior_us
+            prior = compute_prior_us(json.load(open(DATA_DIR / "latest_us.json", encoding="utf-8")))
+            return {"prior_direction": prior["direction"], "prior_up_pct": prior.get("up_pct"),
+                    "signals": prior["signals"]}
+        except Exception as e:
+            print(f"[call_claude] 선행신호 스냅샷 생략: {e}", file=sys.stderr)
+            return {}
     if briefing_type != "kospi":
         return {}
     try:
@@ -935,10 +956,19 @@ def _signal_snapshot(briefing_type: str) -> dict:
             "signals": {k: sig.get(k) for k in
                         ("sox", "nasdaq", "nq", "es", "ym", "ewy", "ewy_resid",
                          "kospi", "usdkrw", "vix")},
+            **_hl_snapshot(date_str),
         }
     except Exception as e:
         print(f"[call_claude] 선행신호 스냅샷 생략: {e}", file=sys.stderr)
         return {}
+
+
+def _direction_from_pct(pred: dict) -> str:
+    """미국 예측엔 방향 필드가 없다 — up_pct·down_pct 큰 쪽으로 정한다(채점·화면 표기와 같은 규칙)."""
+    up, down = pred.get("up_pct"), pred.get("down_pct")
+    if not isinstance(up, (int, float)) or not isinstance(down, (int, float)) or up == down:
+        return "중립"
+    return "상승 우위" if up > down else "하락 우위"
 
 
 def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: dict) -> None:
@@ -967,7 +997,7 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
     entry = {
         "date": date_str,
         "type": briefing_type,
-        "predicted_direction": pred.get("direction", ""),
+        "predicted_direction": pred.get("direction") or _direction_from_pct(pred),
         "up_pct": pred.get("up_pct", 0),
         "down_pct": pred.get("down_pct", 0),
         "confidence": pred.get("confidence", 0),
@@ -979,7 +1009,7 @@ def save_prediction_to_briefings(briefing_type: str, date_str: str, analysis: di
         "generated_at": datetime.now(KST).isoformat(),
         "checked_at": None,
         # 예측 시점 선행신호 스냅샷 — 사후 캘리브레이션·가중치 재피팅용
-        **_signal_snapshot(briefing_type),
+        **_signal_snapshot(briefing_type, date_str),
     }
 
     if entry["basis"] is None:
@@ -1131,21 +1161,37 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
-def _nasdaq_telegram_lines(analysis: dict, date_str: str) -> list:
-    """나스닥 경고 블록 — 지표가 70% 이상(경고)일 때만 싣는다. 주의·정상은 싣지 않는다(§65).
+def _nasdaq_month_lines(analysis: dict, date_str: str) -> list:
+    """나스닥 체크는 월 수치가 바뀌는 날, 곧 그달 첫 미국 브리핑에만 싣는다(2026-11-03 사용자 결정 — 매일 나가던 70% 경고도 여기로 합쳤다).
 
-    페이지 '나스닥 체크' 섹션과 같은 generate_html.build_nasdaq_check()로 읽는다 — 날짜 대조·백테스트 파일 없음
-    처리까지 같아서 둘의 숫자가 어긋나지 않는다(§62 월봉 블록과 같은 방식).
+    새 달 값이 아니라 지난달 값이다 — 새 달 첫날은 월봉 고점이 초기화돼 값이 뚝 떨어진다(10월 +59.9% → 11/3 +47.4%).
+    첫 브리핑인지는 디스크의 발행본으로 판정한다 — 같은 날짜를 다시 만들어도 답이 같다.
     """
-    import generate_html
-    nq = generate_html.build_nasdaq_check(dict(analysis), date_str).get("nq")
-    if not nq or nq["level"] != "warn":
+    import generate_html as gh
+    import nasdaq_overheat as nq
+    month = date_str[:7]
+    if any(p.parent.parent.name < date_str for p in gh.BRIEFINGS_DIR.glob(f"{month}-*/us/index.html")):
         return []
-    bt = nq["bt"]
-    return ["",
-            f"🚨 나스닥 과열 경고 — {nq['month_label']} 고점이 60개월선보다 {nq['gap']:.1f}% 위예요.",
-            f"※ 과거 {nq['warn']:.0f}% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 "
-            f"{bt['warn']['dd20_pct']:.0f}%였어요(전체 {bt['all_dd20_pct']:.0f}%)."]
+    data = analysis.get("nasdaq_overheat") or gh._read_nasdaq_overheat(date_str)
+    series = {s.get("m"): s.get("g") for s in (data or {}).get("series") or [] if isinstance(s, dict)}
+    y, m = int(month[:4]), int(month[5:7])
+    prev = f"{y - 1}-12" if m == 1 else f"{y}-{m - 1:02d}"
+    gap = series.get(prev)
+    if not isinstance(gap, (int, float)):
+        return []
+    lines = ["", f"📊 나스닥 체크 {int(prev[5:])}월 {gap:+.1f}% · {gh._NQ_BADGE[nq.level_of(gap)]}"]
+    py, pm = int(prev[:4]), int(prev[5:])
+    before = series.get(f"{py - 1}-12" if pm == 1 else f"{py}-{pm - 1:02d}")
+    if isinstance(before, (int, float)):
+        lines.append(f"{pm - 1 if pm > 1 else 12}월 {before:+.1f}%에서 {gap - before:+.1f}%p, 주의 기준은 {nq.CAUTION:.0f}%예요.")
+    if nq.level_of(gap) == "warn":
+        try:
+            bt = json.loads(gh.NASDAQ_BACKTEST_PATH.read_text(encoding="utf-8"))
+            lines.append(f"※ 과거 {nq.WARN:.0f}% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 "
+                         f"{bt['warn']['dd20_pct']:.0f}%였어요(전체 {bt['all_dd20_pct']:.0f}%).")
+        except (OSError, ValueError, KeyError) as e:
+            print(f"[call_claude] 나스닥 경고 통계 생략: {e}", file=sys.stderr)
+    return lines
 
 
 def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> None:
@@ -1191,7 +1237,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += ["", f"🎯 <b>{view_title}</b>"]
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
-        lines += _nasdaq_telegram_lines(analysis, date_str)
+        lines += _nasdaq_month_lines(analysis, date_str)
         lines += ["", link_line("전체 이슈 점검", link)]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).
@@ -1594,8 +1640,8 @@ def main():
         with open(analysis_path, encoding="utf-8") as f:
             analysis = json.load(f)
         # validate 통과 후 교정된 analysis로 briefings.json 기록.
-        # kospi만 예측 채점 대상 — US는 이슈 중심 전환(2026-07-14)으로 채점 탈퇴, kospi-close는 prediction 없음.
-        if args.type == "kospi":
+        # kospi-close는 prediction이 없다. 미국은 2026-07-14 탈퇴했다가 2026-11-03 다시 채점한다.
+        if args.type in ("kospi", "us"):
             save_prediction_to_briefings(args.type, date_str, analysis)
         render_outputs(args.type, date_str, analysis, no_html=args.no_html, force=args.force_refresh)
         print(f"[call_claude] Render-only done (type={args.type})")

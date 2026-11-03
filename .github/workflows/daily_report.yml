@@ -105,6 +105,12 @@ jobs:
         timeout-minutes: 5
         run: python3 scripts/score_us_issues.py
 
+      - name: 🧪 하이퍼리퀴드 값 기록 (예측에는 쓰지 않음, 실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: python3 scripts/hl_signals.py
+
       - name: 📈 월봉 5개월선 안착 종목 스크리닝 (허브 46종목·공식 종가, 실패해도 발행 계속)
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
@@ -576,6 +582,11 @@ jobs:
 
       - name: 📊 코스피 예측 정확도 백필 (미검증 과거분 일괄 정산)
         run: python3 scripts/check_accuracy.py --type kospi --backfill
+
+      - name: 📊 미국 예측 채점 (S&P500 종가 기준)
+        continue-on-error: true
+        timeout-minutes: 3
+        run: python3 scripts/check_accuracy.py --type us --backfill
 
       - name: 💾 정확도 결과 커밋 & 푸시
         run: |
