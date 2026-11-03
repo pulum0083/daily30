@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-11-03T09:01:28.603385+09:00",
+  "generated_at": "2026-11-03T09:31:33.678387+09:00",
   "date": "2026-11-03",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": -4.15,
-      "surge": 0.04,
+      "changePct": -4.26,
+      "surge": 0.16,
       "events": [
         {
           "time": "08:36",
           "headline": "\"삼성전자, 2년간 1022조 번다…목표주가 60만원 유지\"",
           "url": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1WUl83TzRLekJaaTRhX0JpWlVBTXRGaUllR18wTEpXaEp0dDdwQzJ2d1dlb3R5RGxwUV9sUV83V0Nfbm5nSjh5aUh5cHFKbE03SHh1bzg1OGRfRThtQUhzNA?oc=5",
           "source": "아시아경제",
-          "why": "아시아경제는 삼성전자가 향후 2년간 1022조 원의 수익을 올릴 것으로 전망하며 목표주가 60만 원을 유지한다고 보도했습니다. (개별 인과 단정 안 함)",
+          "why": "아시아경제는 삼성전자가 향후 2년간 1022조원을 벌어들일 것으로 전망하며 목표주가 60만원을 유지한다고 보도했다. (개별 인과 단정 안 함)",
           "tier": "related",
           "sentiment": "pos"
         },
@@ -31,8 +31,8 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -4.21,
-      "surge": 0.03,
+      "changePct": -4.69,
+      "surge": 0.13,
       "events": [
         {
           "time": "03:00",
@@ -44,30 +44,39 @@
           "sentiment": "neg"
         },
         {
-          "time": "00:38",
-          "headline": "SK하이닉스, 올트먼 방한 이후 2.4% 상승…HBM 공급 논의",
-          "url": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFA5elRfN09fSzRRWDdONm9kM2g1RnJhWmI3T08zWUNWcFdVUlBuMHcyZ0hrdWdRNUZ1N3FtVkN2VXU1b2RRbk9HVkpfNEZvVGVI?oc=5",
-          "source": "블루밍비트",
-          "why": "SK하이닉스는 샘 알트먼 오픈AI 최고경영자(CEO)의 방한 이후 고대역폭메모리(HBM) 공급 논의와 관련하여 주가가 2.4% 상승했다. (개별 인과 단정 안 함)",
-          "tier": "related",
-          "sentiment": "pos"
+          "time": "09:03",
+          "headline": "SK하이닉스 주가 하락 중",
+          "url": "https://news.google.com/rss/articles/CBMiXEFVX3lxTFAycV8ybU9nUVV2MVk3Q0RkRkFWUU9QMExvdHpwQ25vTnE5bTJDdUQ1bU01bHg5WXNzald4am5wZWlLODBJMkpmWVhiUkItNUNVWUl4RFRnNmJ6aGQ3?oc=5",
+          "source": "아시아뉴스통신",
+          "why": "SK하이닉스 주가 하락 중",
+          "tier": "why",
+          "sentiment": "neg"
         }
       ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": -0.17,
-      "surge": 0.03,
+      "changePct": -2.09,
+      "surge": 0.1,
       "events": [
         {
           "time": "07:00",
           "headline": "하루에 11곳...현대차 목표주가 줄하향, 왜?",
           "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1LUFE0M0xHei1iV282RzdmbzNuLWh3SUZ1OEtLLWlQYVluTnpac2hLdl8tWDFZdXAzQXFsWnR2Q0lobXRKRWwwRFVXNmRFX09OYjJNWHU3dmZNNmZfbS1xMW1B?oc=5",
           "source": "아시아경제",
-          "why": "현대차의 목표주가가 여러 증권사에서 하향 조정되었다는 기사입니다. (개별 인과 단정 안 함)",
-          "tier": "related",
+          "why": "증권사들이 현대차의 목표주가를 하향 조정하고 있다는 기사입니다.",
+          "tier": "why",
           "sentiment": "neg"
+        },
+        {
+          "time": "09:05",
+          "headline": "현대차證 반도체 장비 업체 디아이, 목표주가 상향…수익성 개선 기대",
+          "url": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFAzZWFhLTN6aDFwd1VWTVM0VndRUFdLSzZGTEhsRWhMcldZeUZlM1pNLVdWZm9pNWRQUmdxMU1PbklORGF4ZV82SEtTSmkzODhpTnZob3BZd25VUdIBWEFVX3lxTE52eFRfNFhrT28yNDJkT0dhM2xDbFFtWThiRFNFQm1Mb1Z6R0hlWnlNckxjeGQ3ZDRkZWZUbDM5dWR4SFhFbFZzX2hVdjZIZkFYOTViMVpvYTI?oc=5",
+          "source": "아주경제",
+          "why": "현대차證 반도체 장비 업체 디아이, 목표주가 상향…수익성 개선 기대 (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neu"
         }
       ]
     }
