@@ -1460,3 +1460,27 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
   });
 })();
 
+
+/* ── 홈의 펼치기(<details>)는 아래로 펼친다 (2026-11-03) ──
+   홈은 블록 순서를 CSS order로 바꿔 둬서, 펼칠 때 브라우저 스크롤 고정이 화면 아래쪽 블록을
+   기준으로 잡는다. 그러면 그 블록은 제자리에 있고 펼친 내용이 위로 밀려 올라가, 누른 줄이
+   화면 밖으로 사라졌다. 펼치거나 접은 뒤 누른 줄(summary)이 원래 자리에 오도록 스크롤을 되돌린다. */
+(function(){
+  document.querySelectorAll('#home details > summary').forEach(function(sum){
+    var top=null;
+    var root=document.documentElement;
+    sum.addEventListener('click', function(){
+      top=sum.getBoundingClientRect().top;
+      root.style.overflowAnchor='none';     // 펼치는 동안만 스크롤 고정을 끈다 — 한 프레임 튀는 것까지 막는다
+    });
+    sum.parentElement.addEventListener('toggle', function(){
+      if(top===null) return;
+      var before=top; top=null;
+      requestAnimationFrame(function(){
+        var dy=sum.getBoundingClientRect().top-before;
+        if(Math.abs(dy)>1) window.scrollBy(0, dy);   // 그래도 밀렸으면 되돌린다
+        root.style.overflowAnchor='';
+      });
+    });
+  });
+})();
