@@ -52,7 +52,7 @@
   .nqp-in .ma{fill:none;stroke:var(--primary);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
   .nqp-ax{position:absolute;left:0;width:40px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
   .nqp-th{position:absolute;left:6px;transform:translateY(-120%);font-size:10px;font-weight:700}
-  .nqp-th.caution{color:var(--gold);transform:translateY(15%)} .nqp-th.warn{color:var(--up)}   /* 65는 선 아래, 70은 선 위 — 두 선이 붙어 있어 글자가 겹쳤다 */
+  .nqp-th.caution{color:var(--gold);transform:translateY(15%)} .nqp-th.warn{color:var(--up)}   /* 주의는 선 아래, 70은 선 위 — 두 선이 붙어 있어 글자가 겹쳤다 */
   .nqp-dot{position:absolute;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--canvas);background:var(--ink);box-shadow:0 0 0 1px var(--ink)}
   .is-ok .nqp-dot{background:#059669;box-shadow:0 0 0 1px #059669}
   .is-caution .nqp-dot{background:var(--gold);box-shadow:0 0 0 1px var(--gold)}
@@ -96,7 +96,7 @@
         </div>
       </div>
       <div class="nq-gauge">
-        <div class="nq-track"><i class="seg ok"></i><i class="seg caution"></i><i class="seg warn"></i></div>
+        <div class="nq-track"><i class="seg ok" style="width:{{ nq.caution|int }}%"></i><i class="seg caution" style="width:{{ (nq.warn - nq.caution)|int }}%"></i><i class="seg warn" style="width:{{ (100 - nq.warn)|int }}%"></i></div>
         <div class="nq-pin" style="left:{{ '%.1f'|format(nq.pin) }}%"><b>{{ '%.1f'|format(nq.gap) }}%</b></div>
         <div class="nq-ticks"><span style="left:0">0</span><span style="left:{{ nq.caution|int }}%">{{ nq.caution|int }}</span><span style="left:{{ nq.warn|int }}%">{{ nq.warn|int }}</span><span style="left:100%">100+</span></div>
       </div>
