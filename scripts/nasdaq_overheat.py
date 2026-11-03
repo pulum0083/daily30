@@ -72,11 +72,16 @@ def monthly(daily: list) -> list:
 
 
 def high_event(daily: list) -> dict:
-    """직전 세션에 이번 달 월봉 고점이 바뀌었는지. 그달 첫 거래일이면 prev_high가 None이다(새 달로 고점이 바뀐 날)."""
+    """직전 세션의 월봉 고점 변화 — 텔레그램 발송 판정 재료(call_claude._nasdaq_change_lines).
+    prev_high는 그 세션 전까지의 이번 달 고점(그달 첫 거래일이면 None), prev_month_high는 전달 고점이다."""
     last_d, last_h = daily[-1][0], daily[-1][1]
-    before = [h for d, h, _, _ in daily if d[:7] == last_d[:7] and d < last_d]
+    month = last_d[:7]
+    before = [h for d, h, _, _ in daily if d[:7] == month and d < last_d]
     prev = max(before) if before else None
-    return {"high_changed": prev is None or last_h > prev, "prev_high": prev}
+    earlier = [d[:7] for d, *_ in daily if d[:7] < month]
+    prev_m = max(earlier) if earlier else None
+    return {"high_changed": prev is None or last_h > prev, "prev_high": prev,
+            "prev_month_high": max((h for d, h, _, _ in daily if d[:7] == prev_m), default=None)}
 
 
 def gap_series(months: list) -> list:

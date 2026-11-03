@@ -117,53 +117,70 @@ def test_committed_band_table_is_monotonic():
     assert ups == sorted(ups) and sum(b["days"] for b in cfg["bands"]) == cfg["days"]
 
 
-# ── 나스닥 텔레그램 — 월봉 고점이 바뀐 날에만 ──
-def _nq(**kw):
-    return {"nasdaq_overheat": {"gap_pct": 48.6, "month": "2026-11", "last_date": "2026-11-03", "ma60": 17501.3,
-                                "high_changed": True, "prev_high": 25799.46,
-                                "series": [{"m": "2026-10", "g": 59.87}, {"m": "2026-11", "g": 48.6}], **kw}}
+# ── 나스닥 텔레그램 — 60·70에 닿은 날, 전달 고점을 넘은 날에만 ──
+def _nq(gap, high, prev_high, pm_high=30000.0, ma60=17500.0, **kw):
+    return {"nasdaq_overheat": {"gap_pct": gap, "high": high, "prev_high": prev_high, "prev_month_high": pm_high, "ma60": ma60,
+                                "month": "2026-11", "last_date": "2026-11-03", "high_changed": True, **kw}}
 
 
-def test_change_lines_on_new_monthly_high():
-    assert cc._nasdaq_change_lines(_nq(), "2026-11-04") == [
-        "", "📊 나스닥 체크 11월 +48.6% · ✓ 정상", "이번 달 고점을 새로 썼어요. +47.4%에서 +1.2%p 올랐어요."]
+def test_no_block_on_ordinary_new_high():
+    # 이번 달 고점만 새로 썼고 전달 고점 아래면 조용하다
+    assert cc._nasdaq_change_lines(_nq(48.6, 26000.0, 25800.0), "2026-11-04") == []
 
 
-def test_change_lines_on_first_session_of_month():
-    a = _nq(gap_pct=47.41, last_date="2026-11-02", prev_high=None)
-    assert cc._nasdaq_change_lines(a, "2026-11-03") == [
-        "", "📊 나스닥 체크 11월 +47.4% · ✓ 정상", "새 달 고점 기준으로 바뀌었어요. 10월은 +59.9%로 마쳤어요."]
+def test_no_block_on_normal_first_session():
+    assert cc._nasdaq_change_lines(_nq(47.41, 25799.5, None), "2026-11-04") == []
 
 
-def test_change_lines_silent_when_high_unchanged():
-    assert cc._nasdaq_change_lines(_nq(high_changed=False), "2026-11-04") == []
+def test_block_when_prev_month_high_first_broken():
+    a = _nq(51.0, 26400.0, 26200.0, pm_high=26286.46)
+    assert cc._nasdaq_change_lines(a, "2026-11-04") == ["", "📊 나스닥 체크 11월 +51.0% · ✓ 정상", "10월 고점(26,286)을 넘었어요."]
 
 
-def test_change_lines_silent_on_stale_data():
-    # 수집이 밀려 어제 경신 데이터가 남아 있으면 또 보내지 않는다
-    assert cc._nasdaq_change_lines(_nq(last_date="2026-11-02"), "2026-11-04") == []
+def test_no_repeat_after_prev_month_high_already_broken():
+    assert cc._nasdaq_change_lines(_nq(52.0, 26600.0, 26400.0, pm_high=26286.46), "2026-11-04") == []
 
 
-def test_change_lines_silent_on_old_snapshot():
-    a = {"nasdaq_overheat": {"gap_pct": 47.41, "month": "2026-11", "last_date": "2026-11-02"}}
-    assert cc._nasdaq_change_lines(a, "2026-11-03") == []
+def test_block_with_caution_icon_at_60():
+    a = _nq(60.4, 28070.0, 27900.0)                                       # 27900/17500 = +59.4% → 60 돌파
+    assert cc._nasdaq_change_lines(a, "2026-11-04") == ["", "⚠️ 나스닥 체크 11월 +60.4% · 주의", "주의 기준 60%를 넘었어요."]
 
 
-def test_change_lines_missing_data(monkeypatch):
+def test_no_repeat_while_staying_in_caution():
+    assert cc._nasdaq_change_lines(_nq(62.0, 28350.0, 28200.0), "2026-11-04") == []
+
+
+def test_block_with_warn_icon_and_history_at_70():
+    lines = cc._nasdaq_change_lines(_nq(70.5, 29840.0, 29700.0), "2026-11-04")
+    assert lines[1] == "🚨 나스닥 체크 11월 +70.5% · 경고" and lines[2] == "경고 기준 70%를 넘었어요."
+    assert lines[3].startswith("※ 과거 70% 넘은 달")
+
+
+def test_crossing_and_prev_month_break_on_same_day():
+    a = _nq(60.4, 28070.0, 27900.0, pm_high=28000.0)
+    assert cc._nasdaq_change_lines(a, "2026-11-04")[2] == "주의 기준 60%를 넘었어요. 10월 고점(28,000)을 넘었어요."
+
+
+def test_first_session_already_in_caution_is_sent():
+    assert "⚠️" in cc._nasdaq_change_lines(_nq(61.0, 28200.0, None), "2026-11-04")[1]
+
+
+def test_silent_when_high_unchanged_or_stale():
+    assert cc._nasdaq_change_lines(_nq(60.4, 28070.0, 27900.0, high_changed=False), "2026-11-04") == []
+    assert cc._nasdaq_change_lines(_nq(60.4, 28070.0, 27900.0, last_date="2026-11-02"), "2026-11-04") == []
+
+
+def test_silent_on_old_snapshot_or_missing_data(monkeypatch):
+    assert cc._nasdaq_change_lines({"nasdaq_overheat": {"gap_pct": 61.0, "month": "2026-11", "last_date": "2026-11-02"}}, "2026-11-03") == []
     monkeypatch.setattr(gh, "_read_nasdaq_overheat", lambda d: None)
     assert cc._nasdaq_change_lines({}, "2026-11-03") == []
 
 
-def test_change_lines_warn_adds_history():
-    lines = cc._nasdaq_change_lines(_nq(gap_pct=72.4), "2026-11-04")
-    assert "🚨 경고" in lines[1] and lines[-1].startswith("※ 과거 70% 넘은 달")
-
-
 def test_high_event_from_daily():
-    d = [("2026-10-30", 100.0, 1, 1), ("2026-11-02", 90.0, 1, 1), ("2026-11-03", 95.0, 1, 1)]
-    assert nq.high_event(d) == {"high_changed": True, "prev_high": 90.0}
-    assert nq.high_event(d[:2]) == {"high_changed": True, "prev_high": None}       # 새 달 첫 거래일
-    assert nq.high_event(d + [("2026-11-04", 94.0, 1, 1)]) == {"high_changed": False, "prev_high": 95.0}
+    d = [("2026-09-30", 80.0, 1, 1), ("2026-10-30", 100.0, 1, 1), ("2026-11-02", 90.0, 1, 1), ("2026-11-03", 95.0, 1, 1)]
+    assert nq.high_event(d) == {"high_changed": True, "prev_high": 90.0, "prev_month_high": 100.0}
+    assert nq.high_event(d[:3])["prev_high"] is None                       # 새 달 첫 거래일
+    assert nq.high_event(d + [("2026-11-04", 94.0, 1, 1)])["high_changed"] is False
 
 
 # ── 하이퍼리퀴드 기록 ──

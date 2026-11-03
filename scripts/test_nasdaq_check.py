@@ -135,22 +135,23 @@ def _tg(tmp_path, monkeypatch, gap):
 
 @pytest.mark.parametrize("gap", [59.9, 72.4, 80.0])
 def test_telegram_no_block_when_high_unchanged(tmp_path, monkeypatch, gap):
-    # 값이 높아도 월봉 고점이 안 바뀐 날엔 싣지 않는다(2026-11-03)
+    # 값이 높아도 기준에 새로 닿거나 전달 고점을 넘지 않은 날엔 싣지 않는다(2026-11-03)
     assert "나스닥" not in _tg(tmp_path, monkeypatch, gap)
 
 
-def test_telegram_block_after_watch_line_on_new_high(tmp_path, monkeypatch):
+def test_telegram_block_after_watch_line_when_crossing_70(tmp_path, monkeypatch):
     monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
     d = _data(gap=72.4, streak=4)
-    d.update(high_changed=True, prev_high=29000.0, ma60=17000.0, month="2026-10", last_date="2026-10-22")
+    d.update(high_changed=True, high=29300.0, prev_high=28800.0, prev_month_high=30000.0, ma60=17000.0,
+             month="2026-10", last_date="2026-10-22")
     analysis = {"prediction": {"up_pct": 40, "down_pct": 60}, "todays_view": {"view_title": "제목"},
                 "issues": [{"title": "첫 이슈"}], "nasdaq_overheat": d}
     cc.save_telegram_message("us", "2026-10-23", analysis)
     text = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
-    assert ("👀 오늘 밤 볼 것\n첫 이슈\n\n📊 나스닥 체크 10월 +72.4% · 🚨 경고\n이번 달 고점을 새로 썼어요. +70.6%에서 +1.8%p 올랐어요.\n"
+    assert ("👀 오늘 밤 볼 것\n첫 이슈\n\n🚨 나스닥 체크 10월 +72.4% · 경고\n경고 기준 70%를 넘었어요.\n"
             "※ 과거 70% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 51%였어요(전체 19%).") in text
-    assert text.index("📊") < text.index("🔗")
+    assert text.index("🚨") < text.index("🔗")
 
 
 # ── 상세 페이지(/stocks/nasdaq-check/, 2026-10-28) ──

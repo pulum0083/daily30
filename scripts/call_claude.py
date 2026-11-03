@@ -1162,10 +1162,10 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
 
 
 def _nasdaq_change_lines(analysis: dict, date_str: str) -> list:
-    """나스닥 체크는 월봉 고점이 바뀐 날의 미국 브리핑에만 싣는다 — 달 중간 경신과 새 달 첫 거래일(2026-11-03 사용자 결정).
+    """나스닥 체크는 주의(60)·경고(70)에 처음 닿은 날과 전달 고점을 처음 넘은 날의 미국 브리핑에만 싣는다(2026-11-03 사용자 결정).
 
-    60개월선은 종가를 따라 매일 조금씩 움직여 값이 소수점에서 늘 바뀌므로, '바뀜'은 고점으로 판정한다.
-    직전 세션 데이터가 아니면 싣지 않는다 — 수집이 밀린 날 어제 경신을 또 보내게 된다.
+    판정은 모두 월봉 고점으로 한다 — 60개월선은 종가를 따라 매일 소수점이 움직여 값으로 보면 거의 매일 바뀐다.
+    직전 세션 데이터가 아니면 싣지 않는다 — 수집이 밀린 날 어제 일을 또 보내게 된다.
     """
     from datetime import date
     import generate_html as gh
@@ -1177,19 +1177,25 @@ def _nasdaq_change_lines(analysis: dict, date_str: str) -> list:
     prev_session = prev_us_session(date.fromisoformat(date_str))
     if not prev_session or data.get("last_date") != prev_session.isoformat():
         return []
-    gap, month = float(data["gap_pct"]), str(data.get("month") or "")
-    lines = ["", f"📊 나스닥 체크 {int(month[5:7])}월 {gap:+.1f}% · {gh._NQ_BADGE[nq.level_of(gap)]}"]
-    prev_high, ma60 = data.get("prev_high"), data.get("ma60")
-    if isinstance(prev_high, (int, float)) and isinstance(ma60, (int, float)) and ma60:
-        before = (prev_high / ma60 - 1) * 100
-        lines.append(f"이번 달 고점을 새로 썼어요. {before:+.1f}%에서 {gap - before:+.1f}%p 올랐어요.")
-    else:
-        y, m = int(month[:4]), int(month[5:7])
-        last_m = f"{y - 1}-12" if m == 1 else f"{y}-{m - 1:02d}"
-        last_gap = next((s.get("g") for s in data.get("series") or [] if isinstance(s, dict) and s.get("m") == last_m), None)
-        lines.append("새 달 고점 기준으로 바뀌었어요."
-                     + (f" {int(last_m[5:7])}월은 {last_gap:+.1f}%로 마쳤어요." if isinstance(last_gap, (int, float)) else ""))
-    if nq.level_of(gap) == "warn":
+    gap, month, level = float(data["gap_pct"]), str(data.get("month") or ""), nq.level_of(float(data["gap_pct"]))
+    high, prev_high, pm_high, ma60 = (data.get(k) for k in ("high", "prev_high", "prev_month_high", "ma60"))
+    before = nq.level_of((prev_high / ma60 - 1) * 100) if isinstance(prev_high, (int, float)) and ma60 else "ok"
+    rank = {"ok": 0, "caution": 1, "warn": 2}
+    crossed = rank[level] > rank[before]
+    broke = (isinstance(pm_high, (int, float)) and isinstance(high, (int, float)) and high > pm_high
+             and (not isinstance(prev_high, (int, float)) or prev_high <= pm_high))
+    if not crossed and not broke:
+        return []
+    icon, word = {"ok": ("📊", "✓ 정상"), "caution": ("⚠️", "주의"), "warn": ("🚨", "경고")}[level]
+    y, m = int(month[:4]), int(month[5:7])
+    last_m = 12 if m == 1 else m - 1
+    reasons = []
+    if crossed:
+        reasons.append(f"{word} 기준 {nq.WARN if level == 'warn' else nq.CAUTION:.0f}%를 넘었어요.")
+    if broke:
+        reasons.append(f"{last_m}월 고점({pm_high:,.0f})을 넘었어요.")
+    lines = ["", f"{icon} 나스닥 체크 {m}월 {gap:+.1f}% · {word}", " ".join(reasons)]
+    if level == "warn":
         try:
             bt = json.loads(gh.NASDAQ_BACKTEST_PATH.read_text(encoding="utf-8"))
             lines.append(f"※ 과거 {nq.WARN:.0f}% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 "
