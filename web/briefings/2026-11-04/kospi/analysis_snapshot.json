@@ -1,0 +1,205 @@
+{
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 85,
+    "down_pct": 15,
+    "confidence": 74,
+    "basis": "open"
+  },
+  "reason_title": "반도체 되돌림 시동, SOX+2.6%·EWY 급반등",
+  "todays_view": {
+    "view_title": "간밤 미국 증시가 전날 급락분을 되돌리며 반등했어요.",
+    "dek": "전날 급락의 진원이던 반도체가 간밤 미국 시장에서 되돌림을 만들었어요. <b>필라델피아 반도체지수(SOX)</b>가 <b>+2.63%</b> 반등했고, 한국 증시를 담은 <b>EWY</b>도 <b>+3.46%</b> 뛰면서 과매도 되돌림 기대가 커졌어요.",
+    "recap": [
+      {
+        "text": "코스피가 급락했어요. 반도체 대형주가 낙폭을 주도하면서 <b>삼성전자</b>가 <b>-4.15%</b>, <b>SK하이닉스</b>가 <b>-5.03%</b> 밀렸어요.",
+        "codes": [
+          "005930",
+          "000660"
+        ]
+      },
+      {
+        "text": "외국인과 기관이 동시에 매도에 나섰어요. 외국인이 <b>-1,515억 원</b>, 기관이 <b>-514억 원</b> 순매도했고 개인이 그 물량을 받아냈어요.",
+        "codes": []
+      },
+      {
+        "text": "2차전지·전력기기 등 수급 쏠림이 컸던 섹터도 함께 흔들렸어요. <b>삼성SDI</b>가 <b>-9.2%</b>까지 밀리며 낙폭이 두드러졌어요.",
+        "codes": [
+          "006400"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "watch",
+        "text": "간밤 SOX·EWY 반등이 오늘 삼성전자·SK하이닉스 갭 상승으로 이어질지가 1순위 체크포인트예요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "외국인이 순매도에서 순매수로 돌아서는지 확인해야 어제 낙폭의 되돌림 신뢰도를 가늠할 수 있어요.",
+        "source": null
+      },
+      {
+        "tag": "event",
+        "text": "모레 밤 10시 30분 미국 비농업고용·실업률 발표가 예정돼 있어요 — 이번 주 금리 경로의 다음 분수령이에요.",
+        "source": "calendar"
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>간밤 미국 증시가 전날 급락분을 되돌리며 반등했어요.</b> 나스닥 <b>+0.83%</b>, S&P500 <b>+0.36%</b>에 더해 SOX가 <b>+2.63%</b> 급등해 전날 코스피 반도체 급락의 되돌림 재료가 마련됐어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>한국 증시를 겨냥한 외국인 자금 심리가 하루 만에 급반전했어요.</b> EWY가 <b>+3.46%</b> 뛰었는데, 전일 코스피 급락분(-3.59%)을 걷어내고 봐도 잔여 반등폭이 상당해 과매도 되돌림 매수가 들어올 여지가 커요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-04T07:29:13.324352+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-04T07:26:58.580270+09:00",
+    "briefing_date": "2026-11-04",
+    "us_session_date": "2026-11-03",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "필라델피아 반도체 지수 급락 — AI 자금 조달 부담 재부각",
+        "sides": [
+          {
+            "side": "down",
+            "label": "반도체·AI 인프라",
+            "marks": [
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 2.58
+              },
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 3.65
+              },
+              {
+                "ticker": "AVGO",
+                "name": "AVGO",
+                "pct": 3.07
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": 1.39
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": 1.97
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 2.02
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체·AI 인프라는 <b>나란히 올랐어요</b>"
+      },
+      {
+        "title": "중간선거 경계감에 투자심리 위축",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": 0.36
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      },
+      {
+        "title": "WTI유 급락 — 에너지주에 부담, 원자재 변동성 확대",
+        "sides": [
+          {
+            "side": "down",
+            "label": "에너지",
+            "marks": [
+              {
+                "ticker": "XOM",
+                "name": "XOM",
+                "pct": -1.23
+              },
+              {
+                "ticker": "CVX",
+                "name": "CVX",
+                "pct": -1.1
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "에너지는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "VIX 상승·국채금리 하락 — 위험회피 심리 뚜렷",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^VIX",
+                "name": "VIX",
+                "pct": -1.51
+              }
+            ],
+            "proxy": "VIX"
+          }
+        ],
+        "check_line": "지수 전반은 <b>내렸어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-04",
+    "generated_at": "2026-11-04T07:26:59.733758+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": [],
+    "repeat_hidden": [
+      "삼성화재",
+      "메리츠금융지주"
+    ]
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-03",
+    "direction": "하락 우위",
+    "ok": true,
+    "open_pct": -2.46
+  },
+  "prior_signals": {
+    "sox": 2.63,
+    "nasdaq": 0.83,
+    "nq": 1.02,
+    "ewy_resid": 7.052,
+    "vix": -1.513
+  },
+  "prev_supply": {
+    "date": "20261103",
+    "individual": 16636,
+    "institution": -5141,
+    "foreign": -15152
+  }
+}
