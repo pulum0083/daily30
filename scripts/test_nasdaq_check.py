@@ -1,4 +1,4 @@
-# 미국 브리핑 '나스닥 체크' 섹션·월간 텔레그램 블록 테스트 — 네트워크 없이 10/23 월봉 픽스처로 돈다(§65)
+# 미국 브리핑 '나스닥 체크' 섹션·텔레그램 블록 테스트 — 네트워크 없이 10/23 월봉 픽스처로 돈다(§65)
 import json
 import sys
 from pathlib import Path
@@ -133,38 +133,24 @@ def _tg(tmp_path, monkeypatch, gap):
     return (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("gap", [59.9, 69.9, 72.4, 80.0])
-def test_telegram_no_block_mid_month(tmp_path, monkeypatch, gap):
-    # 월 수치가 바뀌는 날(그달 첫 미국 브리핑)에만 싣는다 — 70% 이상이어도 매일 나가지 않는다(2026-11-03)
-    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
-    (tmp_path / "2026-10-01" / "us").mkdir(parents=True)
-    (tmp_path / "2026-10-01" / "us" / "index.html").write_text("x")
+@pytest.mark.parametrize("gap", [59.9, 72.4, 80.0])
+def test_telegram_no_block_when_high_unchanged(tmp_path, monkeypatch, gap):
+    # 값이 높아도 월봉 고점이 안 바뀐 날엔 싣지 않는다(2026-11-03)
     assert "나스닥" not in _tg(tmp_path, monkeypatch, gap)
 
 
-def _first_of_month(tmp_path, monkeypatch, sep_gap):
-    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
+def test_telegram_block_after_watch_line_on_new_high(tmp_path, monkeypatch):
     monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
     monkeypatch.setattr(cc, "DATA_DIR", tmp_path)
+    d = _data(gap=72.4, streak=4)
+    d.update(high_changed=True, prev_high=29000.0, ma60=17000.0, month="2026-10", last_date="2026-10-22")
     analysis = {"prediction": {"up_pct": 40, "down_pct": 60}, "todays_view": {"view_title": "제목"},
-                "issues": [{"title": "첫 이슈"}],
-                "nasdaq_overheat": {"gap_pct": 50.0, "series": [{"m": "2026-08", "g": 58.0}, {"m": "2026-09", "g": sep_gap},
-                                                                 {"m": "2026-10", "g": 50.0}]}}
-    cc.save_telegram_message("us", "2026-10-01", analysis)
-    return (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
-
-
-def test_telegram_block_on_first_briefing_after_watch_line(tmp_path, monkeypatch):
-    text = _first_of_month(tmp_path, monkeypatch, 72.4)
-    assert ("👀 오늘 밤 볼 것\n첫 이슈\n\n📊 나스닥 체크 9월 +72.4% · 🚨 경고\n8월 +58.0%에서 +14.4%p, 주의 기준은 60%예요.\n"
+                "issues": [{"title": "첫 이슈"}], "nasdaq_overheat": d}
+    cc.save_telegram_message("us", "2026-10-23", analysis)
+    text = (tmp_path / "telegram_message_us.txt").read_text(encoding="utf-8")
+    assert ("👀 오늘 밤 볼 것\n첫 이슈\n\n📊 나스닥 체크 10월 +72.4% · 🚨 경고\n이번 달 고점을 새로 썼어요. +70.6%에서 +1.8%p 올랐어요.\n"
             "※ 과거 70% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 51%였어요(전체 19%).") in text
     assert text.index("📊") < text.index("🔗")
-
-
-def test_telegram_first_briefing_warn_without_backtest_keeps_value(tmp_path, monkeypatch):
-    monkeypatch.setattr(gh, "NASDAQ_BACKTEST_PATH", tmp_path / "없음.json")
-    text = _first_of_month(tmp_path, monkeypatch, 80.0)
-    assert "9월 +80.0%" in text and "※" not in text
 
 
 # ── 상세 페이지(/stocks/nasdaq-check/, 2026-10-28) ──

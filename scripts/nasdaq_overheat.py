@@ -1,4 +1,4 @@
-# 나스닥 종합지수 월봉 고점 vs 60개월선 — 미국 브리핑 '나스닥 체크' 섹션·월간 텔레그램 블록의 데이터(결정론, LLM 없음)
+# 나스닥 종합지수 월봉 고점 vs 60개월선 — 미국 브리핑 '나스닥 체크' 섹션·텔레그램 블록의 데이터(결정론, LLM 없음)
 """
 지표(사용자 결정 2026-10-25, docs/plans/2026-10-25-us-nasdaq-overheat/plan.md):
   이번 달 월봉 고점 ÷ 월말 종가 60개월 평균(진행 중인 이번 달 종가 포함) − 1
@@ -71,6 +71,14 @@ def monthly(daily: list) -> list:
     return [by_m[k] for k in sorted(by_m)]
 
 
+def high_event(daily: list) -> dict:
+    """직전 세션에 이번 달 월봉 고점이 바뀌었는지. 그달 첫 거래일이면 prev_high가 None이다(새 달로 고점이 바뀐 날)."""
+    last_d, last_h = daily[-1][0], daily[-1][1]
+    before = [h for d, h, _, _ in daily if d[:7] == last_d[:7] and d < last_d]
+    prev = max(before) if before else None
+    return {"high_changed": prev is None or last_h > prev, "prev_high": prev}
+
+
 def gap_series(months: list) -> list:
     """월마다 (월봉 고점 ÷ 60개월 평균 − 1)%. 60개월이 안 되는 달은 None."""
     out = []
@@ -117,13 +125,15 @@ def compute(months: list) -> dict | None:
 def main():
     date_str = datetime.now(KST).strftime("%Y-%m-%d")
     try:
-        result = compute(monthly(fetch_daily()))
+        daily = fetch_daily()
+        result = compute(monthly(daily))
     except Exception as e:
         print(f"[nasdaq_overheat] 조회 실패 — 섹션 생략: {e}", file=sys.stderr)
         sys.exit(1)
     if result is None:
         print("[nasdaq_overheat] 60개월 데이터 부족 — 섹션 생략", file=sys.stderr)
         sys.exit(1)
+    result.update(high_event(daily))
     payload = {"date": date_str, "generated_at": datetime.now(KST).isoformat(timespec="seconds"), **result}
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")

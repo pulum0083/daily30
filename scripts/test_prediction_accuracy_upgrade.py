@@ -1,4 +1,4 @@
-# 미국 채점 재개·이슈 프리마켓 검증·나스닥 월간 텔레그램·하이퍼리퀴드 기록 테스트(2026-11-03)
+# 미국 채점 재개·이슈 프리마켓 검증·나스닥 텔레그램·하이퍼리퀴드 기록 테스트(2026-11-03)
 import json
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -13,6 +13,7 @@ import fit_us_close_prior as fit  # noqa: E402
 import generate_html as gh  # noqa: E402
 import hl_shadow_report as hr  # noqa: E402
 import hl_signals as hs  # noqa: E402
+import nasdaq_overheat as nq  # noqa: E402
 import validate_analysis as va  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
@@ -116,45 +117,53 @@ def test_committed_band_table_is_monotonic():
     assert ups == sorted(ups) and sum(b["days"] for b in cfg["bands"]) == cfg["days"]
 
 
-# ── 나스닥 월간 텔레그램 ──
-NQ = {"nasdaq_overheat": {"gap_pct": 47.41, "series": [{"m": "2026-09", "g": 58.89}, {"m": "2026-10", "g": 59.87}, {"m": "2026-11", "g": 47.41}]}}
+# ── 나스닥 텔레그램 — 월봉 고점이 바뀐 날에만 ──
+def _nq(**kw):
+    return {"nasdaq_overheat": {"gap_pct": 48.6, "month": "2026-11", "last_date": "2026-11-03", "ma60": 17501.3,
+                                "high_changed": True, "prev_high": 25799.46,
+                                "series": [{"m": "2026-10", "g": 59.87}, {"m": "2026-11", "g": 48.6}], **kw}}
 
 
-def _briefings_dir(tmp_path, monkeypatch, dates):
-    monkeypatch.setattr(gh, "BRIEFINGS_DIR", tmp_path)
-    for d in dates:
-        (tmp_path / d / "us").mkdir(parents=True)
-        (tmp_path / d / "us" / "index.html").write_text("x")
+def test_change_lines_on_new_monthly_high():
+    assert cc._nasdaq_change_lines(_nq(), "2026-11-04") == [
+        "", "📊 나스닥 체크 11월 +48.6% · ✓ 정상", "이번 달 고점을 새로 썼어요. +47.4%에서 +1.2%p 올랐어요."]
 
 
-def test_month_lines_on_first_briefing(tmp_path, monkeypatch):
-    _briefings_dir(tmp_path, monkeypatch, ["2026-10-30"])
-    assert cc._nasdaq_month_lines(NQ, "2026-11-02") == [
-        "", "📊 나스닥 체크 10월 +59.9% · ✓ 정상", "9월 +58.9%에서 +1.0%p, 주의 기준은 60%예요."]
+def test_change_lines_on_first_session_of_month():
+    a = _nq(gap_pct=47.41, last_date="2026-11-02", prev_high=None)
+    assert cc._nasdaq_change_lines(a, "2026-11-03") == [
+        "", "📊 나스닥 체크 11월 +47.4% · ✓ 정상", "새 달 고점 기준으로 바뀌었어요. 10월은 +59.9%로 마쳤어요."]
 
 
-def test_month_lines_same_on_rerun_of_first_day(tmp_path, monkeypatch):
-    _briefings_dir(tmp_path, monkeypatch, ["2026-11-02"])              # 첫날 발행본이 생긴 뒤 같은 날짜를 다시 만들어도 같다
-    assert cc._nasdaq_month_lines(NQ, "2026-11-02")
+def test_change_lines_silent_when_high_unchanged():
+    assert cc._nasdaq_change_lines(_nq(high_changed=False), "2026-11-04") == []
 
 
-def test_month_lines_only_once_a_month(tmp_path, monkeypatch):
-    _briefings_dir(tmp_path, monkeypatch, ["2026-11-02"])
-    assert cc._nasdaq_month_lines(NQ, "2026-11-03") == []
+def test_change_lines_silent_on_stale_data():
+    # 수집이 밀려 어제 경신 데이터가 남아 있으면 또 보내지 않는다
+    assert cc._nasdaq_change_lines(_nq(last_date="2026-11-02"), "2026-11-04") == []
 
 
-def test_month_lines_level_and_january(tmp_path, monkeypatch):
-    _briefings_dir(tmp_path, monkeypatch, [])
-    a = {"nasdaq_overheat": {"series": [{"m": "2026-11", "g": 61.0}, {"m": "2026-12", "g": 72.4}]}}
-    assert cc._nasdaq_month_lines(a, "2027-01-04") == [
-        "", "📊 나스닥 체크 12월 +72.4% · 🚨 경고", "11월 +61.0%에서 +11.4%p, 주의 기준은 60%예요.",
-        "※ 과거 70% 넘은 달 뒤 12개월 안에 -20% 넘게 빠진 경우가 51%였어요(전체 19%)."]
+def test_change_lines_silent_on_old_snapshot():
+    a = {"nasdaq_overheat": {"gap_pct": 47.41, "month": "2026-11", "last_date": "2026-11-02"}}
+    assert cc._nasdaq_change_lines(a, "2026-11-03") == []
 
 
-def test_month_lines_missing_data(tmp_path, monkeypatch):
-    _briefings_dir(tmp_path, monkeypatch, [])
+def test_change_lines_missing_data(monkeypatch):
     monkeypatch.setattr(gh, "_read_nasdaq_overheat", lambda d: None)
-    assert cc._nasdaq_month_lines({}, "2026-11-02") == []
+    assert cc._nasdaq_change_lines({}, "2026-11-03") == []
+
+
+def test_change_lines_warn_adds_history():
+    lines = cc._nasdaq_change_lines(_nq(gap_pct=72.4), "2026-11-04")
+    assert "🚨 경고" in lines[1] and lines[-1].startswith("※ 과거 70% 넘은 달")
+
+
+def test_high_event_from_daily():
+    d = [("2026-10-30", 100.0, 1, 1), ("2026-11-02", 90.0, 1, 1), ("2026-11-03", 95.0, 1, 1)]
+    assert nq.high_event(d) == {"high_changed": True, "prev_high": 90.0}
+    assert nq.high_event(d[:2]) == {"high_changed": True, "prev_high": None}       # 새 달 첫 거래일
+    assert nq.high_event(d + [("2026-11-04", 94.0, 1, 1)]) == {"high_changed": False, "prev_high": 95.0}
 
 
 # ── 하이퍼리퀴드 기록 ──

@@ -1161,29 +1161,34 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
-def _nasdaq_month_lines(analysis: dict, date_str: str) -> list:
-    """나스닥 체크는 월 수치가 바뀌는 날, 곧 그달 첫 미국 브리핑에만 싣는다(2026-11-03 사용자 결정 — 매일 나가던 70% 경고도 여기로 합쳤다).
+def _nasdaq_change_lines(analysis: dict, date_str: str) -> list:
+    """나스닥 체크는 월봉 고점이 바뀐 날의 미국 브리핑에만 싣는다 — 달 중간 경신과 새 달 첫 거래일(2026-11-03 사용자 결정).
 
-    새 달 값이 아니라 지난달 값이다 — 새 달 첫날은 월봉 고점이 초기화돼 값이 뚝 떨어진다(10월 +59.9% → 11/3 +47.4%).
-    첫 브리핑인지는 디스크의 발행본으로 판정한다 — 같은 날짜를 다시 만들어도 답이 같다.
+    60개월선은 종가를 따라 매일 조금씩 움직여 값이 소수점에서 늘 바뀌므로, '바뀜'은 고점으로 판정한다.
+    직전 세션 데이터가 아니면 싣지 않는다 — 수집이 밀린 날 어제 경신을 또 보내게 된다.
     """
+    from datetime import date
     import generate_html as gh
     import nasdaq_overheat as nq
-    month = date_str[:7]
-    if any(p.parent.parent.name < date_str for p in gh.BRIEFINGS_DIR.glob(f"{month}-*/us/index.html")):
-        return []
+    from session_label import prev_us_session
     data = analysis.get("nasdaq_overheat") or gh._read_nasdaq_overheat(date_str)
-    series = {s.get("m"): s.get("g") for s in (data or {}).get("series") or [] if isinstance(s, dict)}
-    y, m = int(month[:4]), int(month[5:7])
-    prev = f"{y - 1}-12" if m == 1 else f"{y}-{m - 1:02d}"
-    gap = series.get(prev)
-    if not isinstance(gap, (int, float)):
+    if not data or not data.get("high_changed") or not isinstance(data.get("gap_pct"), (int, float)):
         return []
-    lines = ["", f"📊 나스닥 체크 {int(prev[5:])}월 {gap:+.1f}% · {gh._NQ_BADGE[nq.level_of(gap)]}"]
-    py, pm = int(prev[:4]), int(prev[5:])
-    before = series.get(f"{py - 1}-12" if pm == 1 else f"{py}-{pm - 1:02d}")
-    if isinstance(before, (int, float)):
-        lines.append(f"{pm - 1 if pm > 1 else 12}월 {before:+.1f}%에서 {gap - before:+.1f}%p, 주의 기준은 {nq.CAUTION:.0f}%예요.")
+    prev_session = prev_us_session(date.fromisoformat(date_str))
+    if not prev_session or data.get("last_date") != prev_session.isoformat():
+        return []
+    gap, month = float(data["gap_pct"]), str(data.get("month") or "")
+    lines = ["", f"📊 나스닥 체크 {int(month[5:7])}월 {gap:+.1f}% · {gh._NQ_BADGE[nq.level_of(gap)]}"]
+    prev_high, ma60 = data.get("prev_high"), data.get("ma60")
+    if isinstance(prev_high, (int, float)) and isinstance(ma60, (int, float)) and ma60:
+        before = (prev_high / ma60 - 1) * 100
+        lines.append(f"이번 달 고점을 새로 썼어요. {before:+.1f}%에서 {gap - before:+.1f}%p 올랐어요.")
+    else:
+        y, m = int(month[:4]), int(month[5:7])
+        last_m = f"{y - 1}-12" if m == 1 else f"{y}-{m - 1:02d}"
+        last_gap = next((s.get("g") for s in data.get("series") or [] if isinstance(s, dict) and s.get("m") == last_m), None)
+        lines.append("새 달 고점 기준으로 바뀌었어요."
+                     + (f" {int(last_m[5:7])}월은 {last_gap:+.1f}%로 마쳤어요." if isinstance(last_gap, (int, float)) else ""))
     if nq.level_of(gap) == "warn":
         try:
             bt = json.loads(gh.NASDAQ_BACKTEST_PATH.read_text(encoding="utf-8"))
@@ -1237,7 +1242,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
             lines += ["", f"🎯 <b>{view_title}</b>"]
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
-        lines += _nasdaq_month_lines(analysis, date_str)
+        lines += _nasdaq_change_lines(analysis, date_str)
         lines += ["", link_line("전체 이슈 점검", link)]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).

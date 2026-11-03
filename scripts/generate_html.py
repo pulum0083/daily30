@@ -642,7 +642,7 @@ def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
 
     월봉 5개월선 코너와 같은 구조다 — 스냅샷이 1순위고, 데이터 파일은 브리핑 날짜와 같을 때만 쓴다(§14·§45).
     데이터가 없거나 하단 설명의 출처인 백테스트 파일이 없으면 빈 dict → 섹션 생략.
-    텔레그램(call_claude._nasdaq_month_lines)은 그달 첫 브리핑에 지난달 확정값만 싣는다.
+    텔레그램(call_claude._nasdaq_change_lines)은 월봉 고점이 바뀐 날에만 싣는다.
     """
     import nasdaq_overheat as nq
     data = analysis.get("nasdaq_overheat")
