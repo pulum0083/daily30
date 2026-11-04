@@ -1,12 +1,6 @@
 {
- "date": "2026-11-03",
+ "date": "2026-11-04",
  "kospi_days": [
-  {
-   "date": "2026-10-21",
-   "close": 5735.66,
-   "pct": 3.29,
-   "open_pct": 2.05
-  },
   {
    "date": "2026-10-22",
    "close": 5533.77,
@@ -60,15 +54,15 @@
    "close": 5648.79,
    "pct": -3.59,
    "open_pct": -2.46
+  },
+  {
+   "date": "2026-11-04",
+   "close": 5683.8,
+   "pct": 0.62,
+   "open_pct": 2.43
   }
  ],
  "scores": [
-  {
-   "date": "2026-10-21",
-   "direction": "상승 우위",
-   "open_pct": 2.05,
-   "ok": true
-  },
   {
    "date": "2026-10-22",
    "direction": "상승 우위",
@@ -122,66 +116,72 @@
    "direction": "하락 우위",
    "open_pct": -2.46,
    "ok": true
+  },
+  {
+   "date": "2026-11-04",
+   "direction": "상승 우위",
+   "open_pct": 2.43,
+   "ok": true
   }
  ],
  "sectors_week": [
   {
    "key": "ship",
    "label": "조선",
-   "pct": 8.04,
+   "pct": 7.02,
    "n": 4
   },
   {
    "key": "defense",
    "label": "방산",
-   "pct": 2.25,
+   "pct": 5.13,
    "n": 5
+  },
+  {
+   "key": "battery",
+   "label": "2차전지",
+   "pct": 4.11,
+   "n": 6
   },
   {
    "key": "power",
    "label": "전력기기",
-   "pct": 1.89,
+   "pct": 3.46,
    "n": 5
   },
   {
    "key": "bio",
    "label": "바이오",
-   "pct": 1.74,
+   "pct": 3.39,
    "n": 6
   },
   {
    "key": "auto",
    "label": "자동차",
-   "pct": -0.48,
+   "pct": 0.12,
    "n": 6
   },
   {
    "key": "semicon",
    "label": "반도체",
-   "pct": -2.72,
+   "pct": -0.42,
    "n": 7
   },
   {
    "key": "finance",
    "label": "금융",
-   "pct": -2.79,
+   "pct": -2.3,
    "n": 7
-  },
-  {
-   "key": "battery",
-   "label": "2차전지",
-   "pct": -4.7,
-   "n": 6
   }
  ],
  "kospi_check": {
-  "asof": "2026-11-03",
-  "gap_pct": 66.1,
-  "ma60": 3401.7,
-  "close": 5648.79,
+  "asof": "2026-11-04",
+  "gap_pct": 67.1,
+  "ma60": 3402.3,
+  "close": 5683.8,
   "since": "2001-11",
   "months": 301,
-  "above": 23,
+  "above": 22,
   "year_max": {
    "m": "2026-05",
    "gap": 178.6
@@ -191,5 +191,5 @@
    "gap": 87.5
   }
  },
- "generated_at": "2026-11-03T16:32:14+09:00"
+ "generated_at": "2026-11-04T16:32:26+09:00"
 }
