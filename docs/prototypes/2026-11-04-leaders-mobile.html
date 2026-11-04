@@ -1,0 +1,149 @@
+<!-- 종목 홈 '코스피 주도주' 모바일 한 줄 다시 잡기 시안 — 실제 홈의 #ld-list 자리에 덮어씌운다. 아래 막대로 지금/M1/M2/M3와 장중/애프터장/밤을 바꿔 본다.
+     미리보기: scratchpad의 proto_proxy.py가 /stocks/ 응답 끝에 PROTO 구간을 끼우고 /api는 실제 사이트로 넘긴다. 모바일 폭(390px)으로 볼 것.
+     문제(2026-11-04 사용자 지적): 모바일 한 줄에 숫자가 5개(가격·지금 등락·오늘·어제·차이)이고, 장중엔 '오늘' 등락이 두 번(실시간 −1.37%, 비교 분 10:27 −0.57%) 나와 헷갈린다.
+     목표: 한 줄에 숫자 3개까지, '오늘'은 한 번만.
+       장중        가격 · 지금 등락 · 어제 이 시각과의 차이
+       마감 뒤·밤  가격(애프터장·추정) · 그날 종가 등락 · 전날과의 차이 — 차이가 '그날 등락 − 전날 등락'이라 그날 종가 등락이 있어야 뜻이 통한다.
+     M1 문장형: 1줄 이름·가격·등락, 2줄 회색 문장 + 막대
+     M2 오른쪽 2단: 왼쪽 이름·가격, 오른쪽 큰 등락과 그 아래 회색 차이
+     M3 3칸 표: 머리글을 한 번만 두고 종목 · 등락 · 차이 세 칸
+     차이(%p)는 회색(§49). '마감 뒤·밤' 예시는 11/3 공식 종가(오늘)·11/2(전날), 애프터장 11/3 18:30 체결가, 밤 11/4 06:00 하이퍼리퀴드 앵커 환산값. -->
+<!--PROTO-START-->
+<style id="proto-css">
+.pv-bar{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:9999;display:flex;gap:3px;align-items:center;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100vw - 16px);
+  background:#0F172A;color:#fff;border-radius:16px;padding:5px 7px;font:700 12px/1 Pretendard,system-ui,sans-serif;box-shadow:0 6px 20px rgba(15,23,42,.25)}
+.pv-bar button{border:0;border-radius:999px;padding:7px 10px;font:inherit;background:transparent;color:#CBD5E1;cursor:pointer}
+.pv-bar button.on{background:#fff;color:#0F172A}
+.pv-bar .sep{width:1px;height:16px;background:#334155;margin:0 3px}
+
+#pv-m{border:1px solid #EEF1F5;border-radius:10px;overflow:hidden;background:#fff}
+#pv-m .num{font-variant-numeric:tabular-nums}
+#pv-m .up{color:#E03131}#pv-m .dn{color:#2775ED}#pv-m .zr{color:var(--muted)}
+#pv-m .gd{color:#334155;font-weight:800}
+#pv-m .pill{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+#pv-m .pill.aft{color:#15803D;background:#ECFDF3}#pv-m .pill.est{color:#6D28D9;background:#EDE9FE}
+#pv-m .trk{position:relative;display:inline-block;width:46px;height:6px;background:#F1F5F9;border-radius:3px;vertical-align:1px}
+#pv-m .trk::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#CBD5E1}
+#pv-m .trk i{position:absolute;top:0;bottom:0;border-radius:3px;background:#94A3B8}
+#pv-m .pr{padding:11px 12px;border-top:1px solid #F1F5F9}
+#pv-m .pr:first-child{border-top:none}
+#pv-m .nm{font-size:14px;font-weight:800;color:#0F172A}
+
+/* M1 문장형 */
+#pv-m.m1 .l1{display:flex;align-items:baseline;gap:8px;min-width:0}
+#pv-m.m1 .l1 .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pv-m.m1 .l1 .px{margin-left:auto;white-space:nowrap;font-size:14px;font-weight:800;color:#0F172A}
+#pv-m.m1 .l1 .pc{font-size:13px;font-weight:800;min-width:54px;text-align:right}
+#pv-m.m1 .l2{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;color:var(--muted)}
+#pv-m.m1 .l2 .trk{margin-left:auto}
+#pv-m.m1 .l2 b{font-size:12.5px;min-width:54px;text-align:right}
+
+/* M2 오른쪽 2단 */
+#pv-m.m2 .pr{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px}
+#pv-m.m2 .px{font-size:12.5px;color:#475569;font-weight:600;margin-top:2px}
+#pv-m.m2 .big{font-size:17px;font-weight:800;text-align:right}
+#pv-m.m2 .sm{font-size:11.5px;color:var(--muted);text-align:right;margin-top:2px;white-space:nowrap}
+#pv-m.m2 .sm b{color:#334155}
+
+/* M3 3칸 표 */
+#pv-m.m3 .hd{display:grid;grid-template-columns:1fr 72px 92px;gap:8px;padding:7px 12px;background:#F7F9FC;font-size:11px;font-weight:700;color:var(--muted)}
+#pv-m.m3 .hd span:not(:first-child){text-align:right}
+#pv-m.m3 .pr{display:grid;grid-template-columns:1fr 72px 92px;gap:8px;align-items:center}
+#pv-m.m3 .px{display:block;white-space:nowrap;font-size:12px;color:#475569;font-weight:600;margin-top:2px}
+#pv-m.m3 .c{text-align:right;font-size:14px;font-weight:800}
+#pv-m.m3 .d{display:flex;align-items:center;justify-content:flex-end;gap:6px;font-size:12.5px}
+#pv-m.m3 .d .trk{width:30px}
+#pv-m .foot{font-size:11px;color:var(--muted);padding:7px 12px;background:#F7F9FC;border-top:1px solid #F1F5F9}
+</style>
+<div class="pv-bar" id="pv-bar">
+  <button data-v="0">지금</button><button data-v="1" class="on">M1</button><button data-v="2">M2</button><button data-v="3">M3</button>
+  <span class="sep"></span><button data-s="open" class="on">장중</button><button data-s="after">애프터</button><button data-s="night">밤</button>
+</div>
+<script>
+(function(){
+  var CODES=['005930','000660','005380'], NAMES={'005930':'삼성전자','000660':'SK하이닉스','005380':'현대차'};
+  function f2(n){ return n==null?'—':(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(2); }
+  function cls(n){ return n==null?'':n>0?'up':n<0?'dn':'zr'; }
+  function won(n){ return n==null?'—':Math.round(n).toLocaleString('en-US'); }
+  var ST={v:'1', s:'open', live:null, vs:null};
+  var EX={
+    rows:{'005930':{t:-4.15,y:1.78},'000660':{t:-5.03,y:3.81},'005380':{t:-3.31,y:1.77}}, date:'11/3', prev:'11/2',
+    after:{'005930':[221000,0.68],'000660':[1408000,0.72],'005380':[278000,0.18]},
+    night:{'005930':[223265,1.72],'000660':[1430640,2.33],'005380':[280297,1.01]}
+  };
+  // 한 종목의 표시 모델: 가격·가격 옆 등락(pc)·가격 표시(pill)·주 등락(main)·차이(diff)·문구
+  function model(){
+    var rows={}, M={};
+    if(ST.s==='open'){
+      var vs=ST.vs&&ST.vs.status==='ok'?ST.vs:null, by={}, px={};
+      (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
+      ((ST.live&&ST.live.prices)||[]).forEach(function(p){ px[p.code]=p; });
+      var tm=vs?vs.time:'';
+      M={time:tm, cmpK:'어제 이 시각보다', mainK:'지금', foot:'차이는 '+tm+' 기준 — 오늘과 어제의 같은 시각 등락 차이예요.'};
+      CODES.forEach(function(c){ var p=px[c]||{}, l=by[c]||{};
+        rows[c]={px:p.price, main:p.changePct, diff:l.diff, pill:null}; });
+    } else {
+      var src=EX[ST.s];
+      M={cmpK:'전날보다', mainK:EX.date+' 종가', foot:'차이 = '+EX.date+' 종가 등락 − '+EX.prev+' 종가 등락이에요.'};
+      CODES.forEach(function(c){ var r=EX.rows[c], q=src[c];
+        rows[c]={px:q[0], pxPc:q[1], main:r.t, diff:Math.round((r.t-r.y)*100)/100,
+          pill:ST.s==='after'?['aft','애프터']:['est','추정']}; });
+    }
+    var max=0; CODES.forEach(function(c){ if(rows[c].diff!=null) max=Math.max(max,Math.abs(rows[c].diff)); });
+    M.rows=rows; M.max=max||1; return M;
+  }
+  function bar(d,max){ if(d==null) return ''; var w=Math.abs(d)/max*50; return '<span class="trk"><i style="'+(d>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></span>'; }
+  function pxLine(r, noPill){
+    // 장중엔 가격만(등락은 오른쪽 한 번), 마감 뒤엔 가격 + 그 가격의 등락 + 표시
+    return won(r.px)+(r.pxPc!=null?' <span class="'+cls(r.pxPc)+'">'+f2(r.pxPc)+'%</span>':'')+(r.pill&&!noPill?'<span class="pill '+r.pill[0]+'">'+r.pill[1]+'</span>':'');
+  }
+  function m1(M){
+    return CODES.map(function(c){ var r=M.rows[c], open=ST.s==='open';
+      var l1=open
+        ? '<span class="nm">'+NAMES[c]+'</span><span class="px num">'+won(r.px)+'</span><span class="pc num '+cls(r.main)+'">'+f2(r.main)+'%</span>'
+        : '<span class="nm">'+NAMES[c]+'</span><span class="px num" style="font-size:13px">'+pxLine(r)+'</span>';
+      var l2=open
+        ? '<span>'+M.cmpK+(M.time?' · '+M.time:'')+'</span>'+bar(r.diff,M.max)+'<b class="num gd">'+f2(r.diff)+'%p</b>'
+        : '<span>'+M.mainK+' <b class="num '+cls(r.main)+'" style="min-width:0">'+f2(r.main)+'%</b> · '+M.cmpK+'</span>'+bar(r.diff,M.max)+'<b class="num gd">'+f2(r.diff)+'%p</b>';
+      return '<div class="pr"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>'; }).join('');
+  }
+  function m2(M){
+    return CODES.map(function(c){ var r=M.rows[c], open=ST.s==='open';
+      return '<div class="pr"><div><div class="nm">'+NAMES[c]+'</div><div class="px num">'+(open?won(r.px):pxLine(r))+'</div></div>'+
+        '<div><div class="big num '+cls(r.main)+'">'+f2(r.main)+'%</div><div class="sm">'+(open?'':esc(M.mainK)+' · ')+M.cmpK+' <b class="num">'+f2(r.diff)+'%p</b></div></div></div>'; }).join('')+
+      '<div class="foot">'+M.foot+'</div>';
+  }
+  function m3(M){
+    var open=ST.s==='open';
+    // 좁은 왼쪽 칸에서 표시(애프터·추정)가 줄바꿈되지 않게 머리글로 올린다
+    var k=open?'종목':(ST.s==='after'?'종목 · 애프터장':'종목 · 추정가');
+    return '<div class="hd"><span>'+k+'</span><span>'+(open?'지금':M.mainK)+'</span><span>'+M.cmpK+'</span></div>'+
+      CODES.map(function(c){ var r=M.rows[c];
+        return '<div class="pr"><div><span class="nm">'+NAMES[c]+'</span><span class="px num">'+(open?won(r.px):pxLine(r,true))+'</span></div>'+
+          '<div class="c num '+cls(r.main)+'">'+f2(r.main)+'%</div><div class="d">'+bar(r.diff,M.max)+'<b class="num gd">'+f2(r.diff)+'%p</b></div></div>'; }).join('')+
+      '<div class="foot">'+M.foot+'</div>';
+  }
+  function esc(s){ return String(s); }
+  function render(){
+    var orig=document.getElementById('ld-list'); if(!orig) return;
+    var pv=document.getElementById('pv-m');
+    if(!pv){ pv=document.createElement('div'); pv.id='pv-m'; orig.after(pv); }
+    if(ST.v==='0'){ orig.style.display=''; pv.style.display='none'; return; }
+    orig.style.display='none'; pv.style.display='';
+    var M=model(); pv.className='m'+ST.v;
+    pv.innerHTML=ST.v==='1'?m1(M)+'<div class="foot">'+M.foot+'</div>':ST.v==='2'?m2(M):m3(M);
+    var sub=document.getElementById('ld-sub');
+    if(sub) sub.textContent=ST.s==='open'?'어제 같은 시각과 비교':ST.s==='after'?'애프터장 실시간 · 비교는 종가 기준':'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님';
+  }
+  document.getElementById('pv-bar').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    if(b.dataset.v){ ST.v=b.dataset.v; [].forEach.call(this.querySelectorAll('[data-v]'),function(x){ x.classList.toggle('on',x===b); }); }
+    if(b.dataset.s){ ST.s=b.dataset.s; [].forEach.call(this.querySelectorAll('[data-s]'),function(x){ x.classList.toggle('on',x===b); }); }
+    render();
+  });
+  function j(u){ return fetch(u,{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); }
+  function load(){ Promise.all([j('/api/stocks-live?codes='+CODES.join(',')),j('/api/intraday?vs=intraday')]).then(function(r){ ST.live=r[0]; ST.vs=r[1]; render(); }); }
+  load(); setInterval(load,60000);
+  [300,1500,4000].forEach(function(t){ setTimeout(render,t); });
+})();
+</script>
