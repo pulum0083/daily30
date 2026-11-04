@@ -20,58 +20,176 @@
       };
     })();
 
-/* ── 블록 2 (원본 index.html) ── */
-/* 코스피 주도주 — 한 줄 타일을 누르면 그 종목 관련 뉴스로 바뀐다.
-   (2026-11-04) 펼치기 안의 큰 타일(레인지·거래대금·52주·외국인 5일)·증권사 목표주가·외국계 시각을 걷어냈다. 뉴스만 남는다. */
-var LD_NAMES={'005930':'삼성전자','000660':'SK하이닉스','005380':'현대차'};
-function usSel(code){
-  document.querySelectorAll('#ld-row .ld').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-code')===code);});
-  var nm=document.getElementById('lw-nm'); if(nm&&LD_NAMES[code]) nm.textContent=LD_NAMES[code];
-  window.__lwCode = code;
-  if(window.lwRenderAll) window.lwRenderAll(code);
-}
-/* 진입·새로고침마다 주도주 3종목 중 하나를 랜덤 선택 — 삼성전자에만 노출이 쏠리는 것을 막는다. */
-window.__lwCode = ['005930','000660','005380'][Math.floor(Math.random()*3)];
-usSel(window.__lwCode);   // 선택 표시를 즉시 맞춰 깜빡임을 없앤다(렌더러는 아직 없어 no-op).
-window.addEventListener('load', function(){ usSel(window.__lwCode); });
-/* 관련 뉴스 렌더러. 제목·요약·출처는 외부 RSS에서 온 값이라 innerHTML에 넣기 전 반드시 이스케이프한다. */
+/* ── 블록 2 — 코스피 주도주 (2026-11-04 B안, SERVICE_RULES §79) ──
+   세 종목을 한 줄씩: 지금 가격 · 오늘 · 어제 · 차이. 아래는 세 종목 섞은 관련 뉴스 7개.
+   지금 가격 — 장중 09:00~15:30 실시간(/api/stocks-live) → 15:30~20:00 애프터장 실시간(같은 API의 after)
+             → 20:00~다음 날 09:00·휴장일 하이퍼리퀴드 24h 추정가(/api/hl-night).
+   비교 칸 — 장중엔 같은 확정 분의 오늘·어제 등락(/api/intraday?vs=intraday의 leaders, vs-yesterday.js가 받아 'vs:data'로 넘긴다).
+            장 마감 뒤엔 직전 세션 공식 종가 등락 vs 그 전 세션 공식 종가 등락(1분봉 15:30 봉, 날짜와 함께).
+   어제와의 차이(%p)는 빨강·파랑을 쓰지 않는다 — 오르내림과 헷갈린다(§49). */
 (function(){
-  var LW={news:null};
+  var CODES=['005930','000660','005380'], NAMES={'005930':'삼성전자','000660':'SK하이닉스','005380':'현대차'};
   var ENT={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ENT[c];}); }
   // http(s)만 허용 — javascript: 같은 스킴이 href/src로 들어가는 것을 막는다.
   function safeUrl(u){ return (typeof u==='string'&&/^https?:\/\//i.test(u))?u:''; }
+  function f2(n){ return n==null?'—':(n>0?'+':n<0?'−':'')+Math.abs(n).toFixed(2); }
+  function cls(n){ return n==null?'':n>0?'up':n<0?'dn':'zr'; }
+  function won(n){ return n==null?'—':Math.round(n).toLocaleString('en-US'); }
+  function r2(x){ return Math.round(x*100)/100; }
+  function kst(ms){ return new Date((ms==null?Date.now():ms)+9*3600*1000); }
+  function md8(y8){ var s=String(y8||''); return s.length===8?(+s.slice(4,6))+'/'+(+s.slice(6,8)):''; }
 
-  function renderNews(code){
-    var el=document.getElementById('lw-news');
-    if(!el) return;
-    var list=LW.news&&LW.news.stocks&&LW.news.stocks[code];
-    if(!list||!list.length){
-      el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 2px">수집된 뉴스가 없어요.</div>';
-      return;
+  // 지금 가격을 무엇으로 보일지 — 휴장일은 하루 종일 추정가.
+  function phase(ms){
+    var k=kst(ms), m=k.getUTCHours()*60+k.getUTCMinutes();
+    var off=window.krIsKospiHolidayOn?window.krIsKospiHolidayOn(k.toISOString().slice(0,10)):(k.getUTCDay()===0||k.getUTCDay()===6);
+    if(off) return 'night';
+    if(m>=540&&m<=930) return 'open';
+    if(m<1200&&m>930) return 'after';
+    return 'night';
+  }
+  // 장 마감 뒤 비교 — 1분봉 15:30 봉 세 개(그 세션·직전·그 전). 하나라도 없으면 비운다(§0).
+  function closeCmp(p){
+    if(!p||!(p.price>0)||!(p.prevSessionClose>0)||!(p.prev2SessionClose>0)||!p.sessionDate||!p.prevSessionDate) return null;
+    var t=r2((p.price/p.prevSessionClose-1)*100), y=r2((p.prevSessionClose/p.prev2SessionClose-1)*100);
+    return {date:String(p.sessionDate), prevDate:String(p.prevSessionDate), t:t, y:y, diff:r2(t-y)};
+  }
+  // 세 종목 뉴스 섞기 — 종목마다 가장 최신 1건을 먼저 넣고 나머지는 발행 시각 순(한 종목 뉴스로만 차지 않게).
+  function mixNews(stocks, n){
+    var pub=function(x){ return Date.parse(x.published)||0; };
+    var lists=CODES.map(function(c){ return ((stocks&&stocks[c])||[]).map(function(x){ var o={code:c}; for(var k in x) o[k]=x[k]; return o; }); });
+    var out=[], seen={};
+    lists.forEach(function(l){ if(l[0]){ out.push(l[0]); seen[l[0].url]=1; } });
+    var rest=[].concat.apply([],lists).filter(function(x){ return !seen[x.url]; }).sort(function(a,b){ return pub(b)-pub(a); });
+    var dedup={}, picked=out.concat(rest).filter(function(x){ var k=x.url||x.title; if(dedup[k]) return false; dedup[k]=1; return true; });
+    return picked.slice(0,n).sort(function(a,b){ return pub(b)-pub(a); });
+  }
+  // 발행 시각 라벨은 저장값이 아니라 지금 기준으로 만든다(§20) — 오늘이면 시:분, 아니면 월/일 시:분.
+  function newsTime(iso, nowMs){
+    var t=Date.parse(String(iso||'')); if(isNaN(t)) return '';
+    var k=kst(t), now=kst(nowMs);
+    var hm=String(k.getUTCHours()).padStart(2,'0')+':'+String(k.getUTCMinutes()).padStart(2,'0');
+    return k.toISOString().slice(0,10)===now.toISOString().slice(0,10)?hm:(k.getUTCMonth()+1)+'/'+k.getUTCDate()+' '+hm;
+  }
+  window.__leaders={phase:phase, closeCmp:closeCmp, mixNews:mixNews, newsTime:newsTime, f2:f2};
+
+  var ST={ph:null, now:{}, cmp:{}, labels:null, vs:null, closedAt:0};
+
+  function model(){
+    var ph=ST.ph, L={};
+    if(ph==='open'){
+      var vs=ST.vs&&ST.vs.status==='ok'&&Array.isArray(ST.vs.leaders)?ST.vs:null, by={};
+      (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
+      var rel=vs&&vs.prev?vs.prev.rel:'어제', tm=vs?vs.time:'';
+      L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') '+tm+'와 비교':'어제 같은 시각과 비교',
+         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+tm:'어제'};
+      CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
+    } else {
+      var head=null;
+      CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&!head) head=x; });
+      // 세션 날짜가 다른 종목은 같은 칸에 놓지 않는다.
+      CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate)) ST.cmp[c]=null; });
+      L={sub:ph==='after'?'애프터장 실시간 · 비교는 종가 기준':'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님',
+         now:ph==='after'?'지금 · 애프터장':'지금 · 추정',
+         t:head?md8(head.date)+' 종가':'종가', y:head?md8(head.prevDate)+' 종가':'전날 종가'};
     }
+    return L;
+  }
+
+  function render(){
+    var box=document.getElementById('ld-list'); if(!box) return;
+    var L=model();
+    var sub=document.getElementById('ld-sub'); if(sub) sub.textContent=L.sub;
+    var max=0; CODES.forEach(function(c){ var x=ST.cmp[c]; if(x) max=Math.max(max,Math.abs(x.diff)); });
+    var rows=CODES.map(function(c){
+      var n=ST.now[c]||{}, x=ST.cmp[c];
+      var pill=n.pill?'<span class="ldl-pill '+n.pill[0]+'" title="'+esc(n.pill[2])+'">'+esc(n.pill[1])+'</span>':'';
+      var w=x&&max?Math.abs(x.diff)/max*50:0;
+      var bar=x?'<span class="ldl-trk"><i style="'+(x.diff>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></span>':'';
+      return '<div class="ldl-row"><div class="ldl-nm"><b>'+NAMES[c]+'</b><small class="num">'+won(n.px)+
+          (n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')+pill+'</small></div>'+
+        '<div class="ldl-c t num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'<small class="m-k">'+esc(L.t)+'</small></div>'+
+        '<div class="ldl-c y num '+cls(x&&x.y)+'" data-k="'+esc(L.y)+'">'+(x?f2(x.y)+'%':'—')+'</div>'+
+        '<div class="ldl-d">'+bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div></div>';
+    }).join('');
+    box.innerHTML='<div class="ldl-row ldl-hd"><span>종목 · '+esc(L.now)+'</span><span>'+esc(L.t)+'</span><span>'+esc(L.y)+'</span><span>차이</span></div>'+rows;
+  }
+
+  function json(u){ return fetch(u,{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); }
+  // 장 마감 뒤 가격·비교 — 같은 응답의 1분봉 정규장 값. 밤엔 비교만 필요해 30분에 한 번만 받는다.
+  function applyClosed(d){
+    if(!d||!Array.isArray(d.prices)) return;
+    d.prices.forEach(function(p){
+      var x=closeCmp(p); ST.cmp[p.code]=x;
+      if(ST.ph!=='after') return;
+      var a=p.after&&p.after.price>0?p.after.price:null;
+      ST.now[p.code]=a!=null
+        ? {px:a, pc:r2((a/p.price-1)*100), pill:['aft','애프터','오늘 종가 대비']}
+        : {px:p.price, pc:x?x.t:null, pill:['cls','종가','오늘 정규장 종가']};
+    });
+  }
+  function poll(){
+    // 보이지 않는 탭에서는 서버리스 함수를 깨우지 않는다(2026-08-16 Vercel 차단 사고).
+    // 복귀 시 아래 visibilitychange가 인터벌을 기다리지 않고 즉시 다시 받는다.
+    if(document.hidden) return;
+    var ph=phase(); if(ph!==ST.ph){ ST.ph=ph; ST.cmp={}; ST.now={}; ST.closedAt=0; setNewsCycle(ph!=='open'); }
+    var q='/api/stocks-live?codes='+CODES.join(',');
+    if(ph==='open'){
+      json(q).then(function(d){
+        if(d&&Array.isArray(d.prices)) d.prices.forEach(function(p){ if(p.price!=null) ST.now[p.code]={px:p.price, pc:p.changePct}; });
+        render();
+      });
+    } else if(ph==='after'){
+      json(q).then(function(d){ applyClosed(d); render(); });
+    } else {
+      json('/api/hl-night').then(function(d){
+        if(d&&Array.isArray(d.items)) d.items.forEach(function(it){
+          if(it.krw!=null) ST.now[it.code]={px:it.krw, pc:it.changePct, pill:['est','추정','종가 × 하이퍼리퀴드 야간 변동 · 실제 체결가 아님']};
+        });
+        render();
+      });
+      if(Date.now()-ST.closedAt>30*60000){ ST.closedAt=Date.now(); json(q).then(function(d){ applyClosed(d); render(); }); }
+    }
+  }
+  // 장중 비교 — vs-yesterday.js가 받은 대결판 응답을 같이 쓴다(같은 API를 두 번 부르지 않는다).
+  function onVs(d){ ST.vs=d&&Array.isArray(d.leaders)?d:(ST.ph==='open'?null:ST.vs); if(ST.ph==='open') render(); }
+  if(document.addEventListener) document.addEventListener('vs:data', function(e){ onVs(e&&e.detail); });
+  if(window.__vsLast) onVs(window.__vsLast);
+
+  // 뉴스 갱신 주기 표기 — 실제 수집 스케줄과 1:1로 맞춘다(없는 주기를 적지 않는다):
+  //   평일 장중 09:00~15:30 → 30분  | 평일 그 외 → 1시간   : kospi-news-live.yml(cron-job.org)
+  //   주말 09~21시          → 3시간                        : stock-news-weekend.yml(GHA native cron)
+  //   주말 21시~익일 09시   → 수집 없음 → 주기 표기 생략
+  // 공휴일엔 두 스케줄 모두 발화하지 않으므로 주말과 달리 주기를 적지 않는다.
+  function setNewsCycle(night){
+    var upd=document.getElementById('lw-upd'); if(!upd) return;
+    var k=kst(), kstH=k.getUTCHours(), wd=k.getUTCDay();
+    var isWeekend=(wd===0||wd===6), isHoliday=window.krIsKospiHoliday&&window.krIsKospiHoliday();
+    var label;
+    if(isWeekend) label=(kstH>=9&&kstH<21)?'세 종목 · 최신순 · 3시간 주기':'세 종목 · 최신순';
+    else if(isHoliday) label='세 종목 · 최신순';
+    else label=night?'세 종목 · 최신순 · 1시간 주기':'세 종목 · 최신순 · 30분 주기';
+    upd.textContent=label;
+  }
+
+  function renderNews(d){
+    var el=document.getElementById('lw-news'); if(!el) return;
+    var list=mixNews(d&&d.stocks, 7);
+    if(!list.length){ el.innerHTML='<div class="lw-empty">수집된 뉴스가 없어요.</div>'; return; }
     el.innerHTML=list.map(function(n){
       var href=safeUrl(n.url), th=safeUrl(n.thumb);
-      var img=th?'<img class="nimg" src="'+esc(th)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">':'';
-      var open=href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">':'<a>';
-      return open+'<div style="flex:1 1 auto;min-width:0">'+
-        '<div class="nt">'+esc(n.time)+'</div>'+
-        '<div class="nh">'+esc(n.title)+'</div>'+
-        (n.summary?'<div class="ns">'+esc(n.summary)+'</div>':'')+
-        '<div class="nsrc">'+esc(n.source)+'</div></div>'+img+'</a>';
+      return (href?'<a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">':'<a>')+
+        '<div class="bd"><div class="nh"><span class="chip">'+esc(NAMES[n.code])+'</span>'+esc(n.title)+'</div>'+
+        '<div class="mt">'+esc(newsTime(n.published))+(n.source?' · '+esc(n.source):'')+'</div></div>'+
+        (th?'<img src="'+esc(th)+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</a>';
     }).join('');
   }
+  window.addEventListener('load', function(){ json('/data/stock-news.json').then(renderNews); });
 
-  window.lwRenderAll=function(code){ renderNews(code); };
-
-  function load(){
-    fetch('/data/stock-news.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
-      .then(function(news){
-        LW.news=news;
-        window.lwRenderAll(window.__lwCode||'005930');
-      });
-  }
-  window.addEventListener('load',load);
+  poll();
+  setInterval(poll, 60000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
 })();
 /* (2026-09-11) 선택 종목 1분봉 곡선·장중 지표 모듈 제거 — 장중 지표(당일 레인지·52주 위치)는
    코스피 주도주 타일 안으로 옮겼다. 레인지는 이제 1분봉 누적이 아니라 원천의 확정 고가·저가다. */
@@ -629,122 +747,7 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 /* 더블샷 브리핑 커넥터(#brief-strip)는 2026-10-26 시간대 카드(home-hero.js, §68)로 바뀌었다. */
 
 /* ── 블록 7 (원본 index.html) ── */
-/* 코스피 주도주 한 줄 타일 — 실측 스냅샷 종가로 먼저 채우고, 장중엔 /api/stocks-live, 마감 후엔 /api/hl-night로 덮어쓴다.
-   (2026-11-04) 펼치기 안의 큰 타일(레인지·거래대금·52주·외국인 5일)을 걷어내 한 줄 타일만 칠한다. */
-(function(){
-  function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
-  // ⚠️ 등락은 원천 값만 쓴다. 예전엔 반올림된 %에서 전일 종가를 되짚어 원화 등락을 만들어
-  // 호가 단위에 없는 값이 나갔다(삼성전자 −9,250 → −9,254).
-  function prevFromSpark(s){                     // 스냅샷의 실제 종가 시계열로 전일 종가를 잡는다
-    var sp=s&&s.spark20;
-    if(!sp||sp.length<2||s.close==null) return null;
-    if(Math.round(sp[sp.length-1])!==Math.round(s.close)) return null; // 마지막 점이 종가가 아니면 판단 불가
-    return sp[sp.length-2];
-  }
-  // 회귀 테스트 훅 — 순수 계산만 노출한다(DOM 페인트는 브라우저에서 확인).
-  window.__leaderTiles={prevFromSpark:prevFromSpark};
 
-  function ldOf(code){ return document.querySelector('#ld-row .ld[data-code="'+code+'"]'); }
-  function paint(code, price, pct, est){
-    var ld=ldOf(code); if(!ld) return;
-    if(price!=null){ var b=ld.querySelector('.ld-px'); if(b) b.textContent=fmt(price); }
-    if(pct!=null){
-      var e=ld.querySelector('.ld-pc');
-      // 추정가(HL 24h)는 체결가가 아니라 표시에 '추정'을 붙인다.
-      if(e){ e.textContent=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%'+(est?' 추정':''); e.className='ld-pc num '+(pct>0?'up':pct<0?'dn':''); }
-    }
-    ld._live=true;
-  }
-  fetch('/data/stocks-snapshot.json',{cache:'no-store'})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(snap){
-      if(!snap||!snap.stocks) return;
-      liveCodes.forEach(function(code){
-        var s=snap.stocks[code], ld=ldOf(code);
-        if(!s||!ld||ld._live) return;            // 실시간이 먼저 칠했으면 옛 종가로 덮지 않는다
-        var b=ld.querySelector('.ld-px'); if(b&&s.close!=null) b.textContent=fmt(s.close);
-        var e=ld.querySelector('.ld-pc');
-        if(e&&s.change_pct!=null){ var pct=s.change_pct; e.textContent=(pct>0?'+':pct<0?'−':'')+Math.abs(pct).toFixed(2)+'%'; e.className='ld-pc num '+(pct>0?'up':pct<0?'dn':''); }
-      });
-    })
-    .catch(function(){});
-
-  var liveCodes = [].map.call(
-    document.querySelectorAll('#ld-row .ld[data-code]'),
-    function(t){ return t.getAttribute('data-code'); }
-  );
-  /* KR 정규장 개장 여부(09:00~15:30 평일). 마감 후엔 HL 24h 무기한선물로 전환. */
-  function krOpen(){
-    if(window.krIsKospiHoliday&&window.krIsKospiHoliday()) return false; // 주말·공휴일
-    var m=((new Date().getUTCHours()*60+new Date().getUTCMinutes())+9*60)%(24*60);
-    return m>=540 && m<=930;
-  }
-  var uswWidget=document.getElementById('us-linked-widget');
-  function setNight(on){
-    if(!uswWidget) return;
-    var sub=uswWidget.querySelector('.usw-sub');
-    if(!sub) return;
-    if(on===uswWidget._night) return; uswWidget._night=on;
-    var title=uswWidget.querySelector('#usw-title');
-    if(title) title.textContent=on?'📈 지금 이시각 추정가':'📈 코스피 주도주';
-    // 앵커 환산(2026-07-31~) — 원시 USD 환산이 아니라 '종가 × 하이퍼리퀴드 야간 변동률'이다.
-    // 표기는 실제 계산과 1:1로 맞춘다(운영 규칙 0).
-    sub.textContent=on?'종가 × 하이퍼리퀴드 야간 변동 · 실제 체결가 아님':'코스피 시총 상위 3 · 마감 후 미국 LIVE';
-    // 뉴스 갱신 주기 표기를 시간대에 맞춘다.
-    // 표기는 실제 수집 스케줄과 1:1로 맞춰야 한다(없는 주기를 적지 않는다):
-    //   평일 장중 09:00~15:30 → 30분  | 평일 그 외 → 1시간   : kospi-news-live.yml(cron-job.org)
-    //   주말 09~21시          → 3시간                        : stock-news-weekend.yml(GHA native cron)
-    //   주말 21시~익일 09시   → 수집 없음 → 주기 표기 생략
-    // 공휴일엔 두 스케줄 모두 발화하지 않으므로 주말과 달리 주기를 적지 않는다.
-    var upd=document.getElementById('lw-upd');
-    if(upd){
-      var kstH=(new Date().getUTCHours()+9)%24;
-      var wd=new Date(Date.now()+9*3600*1000).getUTCDay();
-      var isWeekend=(wd===0||wd===6);
-      var isHoliday=window.krIsKospiHoliday&&window.krIsKospiHoliday();
-      var label;
-      if(isWeekend) label=(kstH>=9&&kstH<21)?'최신순 · 3시간 주기':'최신순';
-      else if(isHoliday) label='최신순';           // 평일 공휴일 — 어느 스케줄도 안 돎
-      else label=on?'최신순 · 1시간 주기':'최신순 · 30분 주기';
-      upd.textContent=label;
-    }
-  }
-  /* 장중: 네이버 실측 KRW(stocks-live) */
-  function pollDay(){
-    fetch('/api/stocks-live?codes='+liveCodes.join(','),{cache:'no-store'})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(!d||!Array.isArray(d.prices)) return;
-        d.prices.forEach(function(p){ if(p.price!=null) paint(p.code, p.price, p.changePct, false); });
-      })
-      .catch(function(){});
-  }
-  /* 마감 후: 종가 × HL 24h perp 야간 변동률 추정가 */
-  function pollNight(){
-    fetch('/api/hl-night',{cache:'no-store'})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        if(!d||!Array.isArray(d.items)) return;
-        d.items.forEach(function(it){ if(it.krw!=null) paint(it.code, it.krw, it.changePct, true); });
-      })
-      .catch(function(){});
-  }
-  function poll(){
-    if(!liveCodes.length) return;
-    // 보이지 않는 탭에서는 아무도 이 값을 보지 않는다 — 서버리스 함수만 깨운다.
-    // 이 루프는 시장 시간과 무관하게 24시간 돌아 탭 하나당 하루 8,640회를 쌓았고,
-    // 2026-08-16 Vercel 팀 차단(FAIR_USE_LIMITS_EXCEEDED / fluidCpuDuration)의 주된 소비원이었다.
-    // 복귀 시 아래 visibilitychange가 인터벌을 기다리지 않고 즉시 다시 받아오므로
-    // 사용자가 실제로 보는 화면의 신선도는 그대로다.
-    if(document.hidden) return;
-    var night=!krOpen();
-    setNight(night);
-    if(night) pollNight(); else pollDay();
-  }
-  poll();
-  setInterval(poll, 60000);
-  document.addEventListener('visibilitychange', function(){ if(!document.hidden) poll(); });
-})();
 
 /* ── 블록 8 (원본 index.html) ── */
 /* 외국인 보유율·섹터 브라우저·특이 신호 — stocks-snapshot.json·/api/signals 실측 배선 */

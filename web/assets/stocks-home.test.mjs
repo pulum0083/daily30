@@ -567,15 +567,6 @@ test('타일 — 소스에 %→전일가 역산 식이 되돌아오지 않는다
   assert.ok(!/\/\(1\+pct\/100\)/.test(src), 'close/(1+pct/100) 역산이 다시 들어왔다');
 });
 
-test('타일 — 스냅샷 기준선은 실제 종가 시계열로 전일 종가를 잡는다', () => {
-  const { prevFromSpark } = loadWindow({}).__leaderTiles;
-  assert.equal(prevFromSpark({ close: 269000, spark20: [255500, 270000, 269500, 269500, 269000] }), 269500);
-  // 마지막 점이 종가와 다르면 어느 날인지 판단 불가 → null
-  assert.equal(prevFromSpark({ close: 269000, spark20: [269500, 270000] }), null);
-  assert.equal(prevFromSpark({ close: 269000, spark20: [269000] }), null);
-  assert.equal(prevFromSpark(null), null);
-});
-
 // ── 주도주 펼치기 정리(2026-11-04) — 뉴스만 남기고 큰 타일·목표주가·외국계 시각과 그 수집을 걷어냈다 ──
 test('주도주 펼치기엔 관련 뉴스만 있고, 목표주가·외국계 시각 조회가 다시 붙지 않는다', () => {
   const html = readFileSync(new URL('../stocks/index.html', import.meta.url), 'utf8');
@@ -586,6 +577,50 @@ test('주도주 펼치기엔 관련 뉴스만 있고, 목표주가·외국계 �
   assert.ok(html.includes('id="lw-news"'), '관련 뉴스는 남는다');
   assert.ok(!js.includes('stock-targets.json') && !js.includes('ib_korea_views.json'), '목표주가·외국계 시각을 다시 불러온다');
   assert.ok(!existsSync(new URL('../../scripts/fetch_stock_targets.py', import.meta.url)), '목표주가 수집 스크립트가 되살아났다');
+});
+
+// ── 주도주 한 줄 목록(2026-11-04 B안, §79) ──
+test('주도주 — 지금 가격 시간대: 장중 → 15:30~20:00 애프터장 → 20:00 이후·휴장일 추정가', () => {
+  const { phase } = loadWindow({}).__leaders;
+  const at = (s) => Date.parse(s + '+09:00');
+  assert.equal(phase(at('2026-11-04T09:00:00')), 'open');
+  assert.equal(phase(at('2026-11-04T15:30:00')), 'open');
+  assert.equal(phase(at('2026-11-04T15:31:00')), 'after');
+  assert.equal(phase(at('2026-11-04T19:59:00')), 'after');
+  assert.equal(phase(at('2026-11-04T20:00:00')), 'night');
+  assert.equal(phase(at('2026-11-05T08:59:00')), 'night');
+  assert.equal(phase(at('2026-11-07T12:00:00')), 'night');      // 토요일
+  assert.equal(phase(at('2026-12-25T12:00:00')), 'night');      // 공휴일
+});
+
+test('주도주 — 장 마감 뒤 비교는 날짜 붙은 세 공식 종가로, 하나라도 없으면 비운다 (11/3 실측)', () => {
+  const { closeCmp } = loadWindow({}).__leaders;
+  const p = { price: 219500, sessionDate: '20261103', prevSessionClose: 229000, prevSessionDate: '20261102', prev2SessionClose: 225000 };
+  assert.deepEqual({ ...closeCmp(p) }, { date: '20261103', prevDate: '20261102', t: -4.15, y: 1.78, diff: -5.93 });
+  assert.equal(closeCmp({ ...p, prev2SessionClose: null }), null);
+  assert.equal(closeCmp({ ...p, prevSessionDate: null }), null);
+  assert.equal(closeCmp(null), null);
+});
+
+test('주도주 뉴스 — 세 종목을 섞어 7개, 종목마다 최신 1건은 반드시 들어가고 같은 기사는 한 번만', () => {
+  const { mixNews } = loadWindow({}).__leaders;
+  const mk = (code, n, hh) => Array.from({ length: n }, (_, i) => ({ url: `u-${code}-${i}`, title: `${code}-${i}`, published: `2026-11-04T${String(hh - i).padStart(2, '0')}:00:00+09:00` }));
+  const stocks = { '005930': mk('005930', 5, 20), '000660': mk('000660', 5, 19), '005380': mk('005380', 2, 9) };
+  stocks['000660'].push({ ...stocks['005930'][1] });          // 두 종목에 같은 기사
+  const out = mixNews(stocks, 7);
+  assert.equal(out.length, 7);
+  assert.ok(out.some((x) => x.code === '005380'), '뉴스가 적은 종목도 1건은 들어간다');
+  assert.equal(new Set(out.map((x) => x.url)).size, 7, '같은 기사가 두 번 나왔다');
+  const ts = [...out].map((x) => Date.parse(x.published));   // 샌드박스 배열을 바깥 배열로 옮겨 비교
+  assert.deepEqual(ts, [...ts].sort((a, b) => b - a), '최신순이 아니다: ' + out.map((x) => x.published).join(','));
+});
+
+test('주도주 뉴스 시각 — 오늘이면 시:분, 지난 날이면 월/일 시:분(저장 라벨을 쓰지 않는다)', () => {
+  const { newsTime } = loadWindow({}).__leaders;
+  const now = Date.parse('2026-11-04T10:30:00+09:00');
+  assert.equal(newsTime('2026-11-04T09:52:10+09:00', now), '09:52');
+  assert.equal(newsTime('2026-11-03T21:10:00+09:00', now), '11/3 21:10');
+  assert.equal(newsTime('', now), '');
 });
 
 // ── 섹터별 대표 종목 펼치기 제거(2026-10-27) — 화면·전용 조회가 다시 붙지 않게 ──

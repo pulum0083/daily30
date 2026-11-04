@@ -521,8 +521,15 @@
     if (root && root.hidden && !root.innerHTML) skeleton();
     fetch(url, { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { render(d, slot); })
-      .catch(function () { render(null, slot); });
+      .then(function (d) { share(d); render(d, slot); })
+      .catch(function () { share(null); render(null, slot); });
+  }
+  // 받은 응답을 종목 홈 주도주 목록(stocks-home.js)과 나눈다 — 같은 API를 두 번 부르지 않게(§79).
+  function share(d) {
+    try {
+      window.__vsLast = d;
+      if (document.dispatchEvent && typeof CustomEvent === 'function') document.dispatchEvent(new CustomEvent('vs:data', { detail: d }));
+    } catch (e) { /* 공유 실패는 대결판 렌더를 막지 않는다 */ }
   }
 
   // 결론 카드 오른쪽 ? — 누르면 이 영역이 무엇을 비교하는지 모달로 설명한다(기존 #help-modal 재사용).

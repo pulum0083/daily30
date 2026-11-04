@@ -89,3 +89,58 @@ test('장 마감 뒤 응답은 정규장 값만, 거래대금·등락은 비운�
     assert.equal(r.prevSessionClose, 259500);   // 직전 세션 15:30 봉 — 실시간 '전일 종가'가 아니다
   } finally { globalThis.fetch = orig; }
 });
+
+// ── 주도주 한 줄 목록(§79) — 날짜 붙은 직전 두 세션 종가, 애프터장 실시간 ──
+import { afterHoursOpen, closedWithAfter } from './stocks-live.mjs';
+
+const BARS_1103 = [
+  { localDateTime: '20261030153000', currentPrice: 225000, openPrice: 225000, highPrice: 225000, lowPrice: 225000 },
+  { localDateTime: '20261102153000', currentPrice: 229000, openPrice: 229000, highPrice: 229000, lowPrice: 229000 },
+  { localDateTime: '20261103090000', currentPrice: 228000, openPrice: 228000, highPrice: 228500, lowPrice: 227500 },
+  { localDateTime: '20261103153000', currentPrice: 219500, openPrice: 219500, highPrice: 219500, lowPrice: 219500 },
+  { localDateTime: '20261103183000', currentPrice: 221000, openPrice: 221000, highPrice: 221000, lowPrice: 221000 }, // 애프터장
+];
+
+test('직전 세션·그 전 세션 공식 종가를 날짜와 함께 준다 (11/3 삼성전자 실측)', () => {
+  const r = regularSessionFromBars(BARS_1103);
+  assert.equal(r.close, 219500);
+  assert.equal(r.prevClose, 229000);
+  assert.equal(r.prevDate, '20261102');
+  assert.equal(r.prev2Close, 225000);
+  assert.equal(r.prev2Date, '20261030');   // 주말을 건너뛴 실제 직전 세션
+});
+
+test('그 전 세션 봉이 창에 없으면 비운다 — 만들어내지 않는다', () => {
+  const r = regularSessionFromBars(BARS_1103.slice(1));
+  assert.equal(r.prevClose, 229000);
+  assert.equal(r.prev2Close, null);
+  assert.equal(r.prev2Date, null);
+});
+
+test('애프터장 구간 — 거래일 15:30 초과 ~ 20:00 미만만', () => {
+  const at = (s) => new Date(s + '+09:00');
+  assert.equal(afterHoursOpen(at('2026-11-03T15:30:00')), false);
+  assert.equal(afterHoursOpen(at('2026-11-03T15:31:00')), true);
+  assert.equal(afterHoursOpen(at('2026-11-03T19:59:00')), true);
+  assert.equal(afterHoursOpen(at('2026-11-03T20:00:00')), false);
+  assert.equal(afterHoursOpen(at('2026-11-07T17:00:00')), false);   // 토요일
+});
+
+test('애프터장 시간엔 오늘 세션에만 실시간 체결가를 after로 붙인다', async () => {
+  const orig = globalThis.fetch;
+  globalThis.fetch = async (url) => ({
+    ok: true,
+    json: async () => (String(url).includes('polling')
+      ? { datas: [{ closePriceRaw: '221000', fluctuationsRatioRaw: '0.68', compareToPreviousClosePriceRaw: '1500' }] }
+      : BARS_1103),
+  });
+  try {
+    const r = await closedWithAfter('005930', new Date('2026-11-03T18:30:00+09:00'));
+    assert.equal(r.price, 219500);                 // 정규장 종가는 그대로
+    assert.deepEqual(r.after, { price: 221000 });
+    const night = await closedWithAfter('005930', new Date('2026-11-03T20:30:00+09:00'));
+    assert.equal(night.after, undefined);          // 20:00 뒤엔 붙이지 않는다
+    const nextDay = await closedWithAfter('005930', new Date('2026-11-04T18:30:00+09:00'));
+    assert.equal(nextDay.after, undefined);        // 세션(11/3)이 오늘(11/4)이 아니면 붙이지 않는다
+  } finally { globalThis.fetch = orig; }
+});

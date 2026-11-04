@@ -5,7 +5,7 @@
 // 세션 판정·기준가 선택은 intraday와 공유하는 _us-session.mjs가 정본(§30 — 이중 구현 금지).
 import { usSessionState, usBaseClose } from './_us-session.mjs';
 // 개장 판정은 주말·공휴일까지 아는 공용 캘린더를 쓴다(로컬 시간 전용 판정은 평일 공휴일에 장중으로 오판).
-import { krMarketOpen } from './_market-calendar.mjs';
+import { krMarketOpen, isKospiHoliday } from './_market-calendar.mjs';
 // 장이 닫힌 뒤 정규장 값은 공용 모듈이 만든다 — 실시간 closePrice·저가는 애프터장이 섞인다(§48).
 import { fetchClosedSession } from './_kr-regular-session.mjs';
 const HDR = { 'User-Agent': 'Mozilla/5.0', Referer: 'https://finance.naver.com/' };
@@ -43,6 +43,27 @@ export async function fetchOne(code) {
   } catch (e) {
     return null;
   }
+}
+
+// KRX 애프터마켓이 열려 있는 구간(거래일 15:30 초과 ~ 20:00 미만, §48). 이 동안 주도주 목록은
+// 실시간 체결가를 '지금 가격'으로 보인다(§79). 20:00 뒤엔 하이퍼리퀴드 추정가(/api/hl-night)가 맡는다.
+export function afterHoursOpen(now = new Date()) {
+  const k = new Date(now.getTime() + 9 * 3600000);
+  if (isKospiHoliday(k)) return false;
+  const m = k.getUTCHours() * 60 + k.getUTCMinutes();
+  return m > 15 * 60 + 30 && m < 20 * 60;
+}
+
+// 장이 닫힌 뒤 응답 — 정규장 값(1분봉)에, 애프터장 시간이면 실시간 체결가를 after로 붙인다.
+// after는 그 세션이 오늘일 때만 붙인다(실시간 응답의 가격이 어느 세션 것인지 그때만 확실하다).
+export async function closedWithAfter(code, now = new Date()) {
+  const reg = await fetchClosedSession(code, now);
+  if (!reg || !afterHoursOpen(now)) return reg;
+  const today = new Date(now.getTime() + 9 * 3600000).toISOString().slice(0, 10).replace(/-/g, '');
+  if (reg.sessionDate !== today) return reg;
+  const rt = await fetchOne(code);
+  if (rt && typeof rt.price === 'number') reg.after = { price: rt.price };
+  return reg;
 }
 
 // 네이버 심볼 → 야후 티커 변환 (NVDA.O → NVDA, DRAM.K → DRAM)
@@ -141,7 +162,7 @@ export default async function handler(req, res) {
       .split(',').map(s => s.trim()).filter(s => /^[A-Za-z]{1,6}(\.[A-Za-z])?$/.test(s)).slice(0, 20);
     const open = krMarketOpen();
     const [prices, us] = await Promise.all([
-      Promise.all(codes.map(open ? fetchOne : (c) => fetchClosedSession(c))).then(a => a.filter(Boolean)),
+      Promise.all(codes.map(open ? fetchOne : (c) => closedWithAfter(c))).then(a => a.filter(Boolean)),
       Promise.all(usSyms.map(fetchOverseas)).then(a => a.filter(Boolean)),
     ]);
     return res.status(200).json({ open, prices, us });

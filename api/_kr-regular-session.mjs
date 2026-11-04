@@ -27,12 +27,18 @@ export function regularSessionFromBars(bars) {
   const close = toNum(closeBar.currentPrice);
   if (close == null || !highs.length || !lows.length) return null;
   const vols = sess.map((b) => toNum(b.accumulatedTradingVolume)).filter((v) => v != null);
-  const prevBar = [...rows].reverse()
-    .find((b) => b.localDateTime.slice(8, 12) === '1530' && b.localDateTime.slice(0, 8) < day);
+  const closeBefore = (d) => [...rows].reverse()
+    .find((b) => b.localDateTime.slice(8, 12) === '1530' && b.localDateTime.slice(0, 8) < d);
+  const prevBar = closeBefore(day);
+  // 그 전 세션 15:30 봉 — 주도주 한 줄 목록이 '직전 세션 등락 vs 그 전 세션 등락'을 날짜와 함께 비교한다(§79).
+  const prev2Bar = prevBar ? closeBefore(prevBar.localDateTime.slice(0, 8)) : null;
   return {
     date: day, close, open: toNum(sess[0].openPrice), high: Math.max(...highs), low: Math.min(...lows),
     volume: vols.length ? vols.reduce((a, v) => a + v, 0) : null,
     prevClose: prevBar ? toNum(prevBar.currentPrice) : null,
+    prevDate: prevBar ? prevBar.localDateTime.slice(0, 8) : null,
+    prev2Close: prev2Bar ? toNum(prev2Bar.currentPrice) : null,
+    prev2Date: prev2Bar ? prev2Bar.localDateTime.slice(0, 8) : null,
   };
 }
 
@@ -55,6 +61,9 @@ export async function fetchClosedSession(code, now = new Date()) {
       code, price: reg.close, session: 'regular-closed', sessionDate: reg.date,
       changePct: null, changeAbs: null, prevClose: null,
       prevSessionClose: reg.prevClose,                    // 이 세션의 전일 공식 종가(1분봉) — 섹터 페이지 마감 등락에 쓴다
+      prevSessionDate: reg.prevDate,
+      prev2SessionClose: reg.prev2Close,                  // 그 전 세션 공식 종가 — 주도주 목록의 '전날 등락'(§79)
+      prev2SessionDate: reg.prev2Date,
       open: reg.open, high: reg.high, low: reg.low, tradingValue: null,
     };
   } catch (e) {
