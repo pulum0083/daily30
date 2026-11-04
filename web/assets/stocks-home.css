@@ -1041,7 +1041,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ldl-nm b{display:block;font-size:13.5px;font-weight:800;color:#0F172A}
 .ldl-nm small{font-size:12px;color:#475569;font-weight:600}
 .ldl-c{text-align:right;font-size:13px;font-weight:800}
-.ldl-c .m-k{display:none}
 .ldl-d{display:flex;align-items:center;gap:7px;justify-content:flex-end}
 .ldl-d em{font-style:normal;font-size:12.5px;font-weight:800;color:#334155;min-width:56px;text-align:right}
 .ldl-trk{position:relative;flex:1 1 auto;max-width:90px;height:6px;background:#F1F5F9;border-radius:3px}
@@ -1052,15 +1051,21 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ldl-pill.aft{color:#15803D;background:#ECFDF3}
 .ldl-pill.est{color:#6D28D9;background:#EDE9FE}
 .ldl-pill.cls{color:var(--muted);background:#F1F5F9}
+/* 모바일 한 줄 — M1 문장형(2026-11-04 사용자 결정, 시안 docs/prototypes/2026-11-04-leaders-mobile.html) */
+.ldl-m,.ldl-foot{display:none}
+.ldl-foot{font-size:11px;color:var(--muted);padding:7px 12px;background:#F7F9FC;border-top:1px solid #F1F5F9}
 @media(max-width:560px){
-  .ldl-hd{display:none}
-  .ldl-row{grid-template-columns:1fr auto;row-gap:4px}
-  .ldl-c.t{grid-column:2;grid-row:1;font-size:14px}
-  .ldl-c.t .m-k{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
-  .ldl-c.y{grid-column:1;grid-row:2;text-align:left;font-size:12px;font-weight:600;color:var(--muted)}
-  .ldl-c.y::before{content:attr(data-k) ' '}
-  .ldl-d{grid-column:2;grid-row:2}
-  .ldl-trk{width:54px;flex:0 0 54px}
+  .ldl-row{display:block;padding:11px 12px}
+  .ldl-list .ldl-hd,.ldl-row>.ldl-nm,.ldl-row>.ldl-c,.ldl-row>.ldl-d{display:none}
+  .ldl-m,.ldl-foot{display:block}
+  .ldl-m .m1{display:flex;align-items:baseline;gap:8px;min-width:0}
+  .ldl-m .m1 b{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;color:#0F172A}
+  .ldl-m .m1 .px{white-space:nowrap;font-size:13.5px;font-weight:800;color:#0F172A}
+  .ldl-m .m2{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;color:var(--muted)}
+  .ldl-m .m2>span:first-child{min-width:0}
+  .ldl-m .m2 b{font-size:12px;font-weight:800}
+  .ldl-m .ldl-trk{margin-left:auto;flex:0 0 46px;width:46px}
+  .ldl-m .m2 em{font-style:normal;font-size:12.5px;font-weight:800;color:#334155;min-width:54px;text-align:right}
 }
 #why-moved{margin-top:16px;padding-top:14px;border-top:1px solid #F1F5F9}
 #why-moved .lw-news a{display:flex;gap:11px;text-decoration:none;color:inherit;padding:9px 0;border-top:1px solid #F1F5F9}

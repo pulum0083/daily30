@@ -602,6 +602,25 @@ test('주도주 — 장 마감 뒤 비교는 날짜 붙은 세 공식 종가로,
   assert.equal(closeCmp(null), null);
 });
 
+test('주도주 모바일(M1) — 애프터장엔 1줄 가격·애프터 표시, 2줄 그날 종가 등락 · 전날보다 차이 (11/3 실측)', async () => {
+  const prices = [
+    { code: '005930', price: 219500, sessionDate: '20261103', prevSessionClose: 229000, prevSessionDate: '20261102', prev2SessionClose: 225000, after: { price: 221000 } },
+  ];
+  const win = loadWindow({
+    now: kst('2026-11-03T18:30:00'),
+    hooks: { fetch: (u) => Promise.resolve({ ok: true, json: () => Promise.resolve(String(u).includes('stocks-live') ? { prices } : null) }) },
+  });
+  await new Promise((r) => setImmediate(r));
+  await new Promise((r) => setImmediate(r));
+  const html = win.__els.get('ld-list').innerHTML;
+  const m = html.match(/<div class="ldl-m">.*?<\/div><\/div><\/div>/);
+  assert.ok(m, '모바일 줄(.ldl-m)이 없다');
+  assert.match(m[0], /221,000 <span class="up">\+0\.68%<\/span><span class="ldl-pill aft"/);
+  assert.match(m[0], /11\/3 종가 <b class="num dn">−4\.15%<\/b> · 전날보다/);
+  assert.match(m[0], /−5\.93%p/);
+  assert.match(html, /<div class="ldl-foot">차이 = 11\/3 종가 등락 − 11\/2 종가 등락이에요\.<\/div>/);
+});
+
 test('주도주 뉴스 — 세 종목을 섞어 7개, 종목마다 최신 1건은 반드시 들어가고 같은 기사는 한 번만', () => {
   const { mixNews } = loadWindow({}).__leaders;
   const mk = (code, n, hh) => Array.from({ length: n }, (_, i) => ({ url: `u-${code}-${i}`, title: `${code}-${i}`, published: `2026-11-04T${String(hh - i).padStart(2, '0')}:00:00+09:00` }));

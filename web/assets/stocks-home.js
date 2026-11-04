@@ -83,7 +83,8 @@
       (vs?vs.leaders:[]).forEach(function(l){ by[l.code]=l; });
       var rel=vs&&vs.prev?vs.prev.rel:'어제', tm=vs?vs.time:'';
       L={sub:vs?rel+'('+String(vs.prev.label||'').replace(/\(.\)$/,'')+') '+tm+'와 비교':'어제 같은 시각과 비교',
-         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+tm:'어제'};
+         now:'지금 · 실시간', t:vs?'오늘 '+tm:'오늘', y:vs?rel+' '+tm:'어제',
+         mk:rel+' 이 시각보다'+(tm?' · '+tm:''), foot:vs?'차이는 '+tm+' 기준 — 오늘과 '+rel+'의 같은 시각 등락 차이예요.':''};
       CODES.forEach(function(c){ var l=by[c]; ST.cmp[c]=l&&l.t!=null&&l.y!=null&&l.diff!=null?{t:l.t,y:l.y,diff:l.diff}:null; });
     } else {
       var head=null;
@@ -92,7 +93,8 @@
       CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate)) ST.cmp[c]=null; });
       L={sub:ph==='after'?'애프터장 실시간 · 비교는 종가 기준':'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님',
          now:ph==='after'?'지금 · 애프터장':'지금 · 추정',
-         t:head?md8(head.date)+' 종가':'종가', y:head?md8(head.prevDate)+' 종가':'전날 종가'};
+         t:head?md8(head.date)+' 종가':'종가', y:head?md8(head.prevDate)+' 종가':'전날 종가',
+         mk:'전날보다', foot:head?'차이 = '+md8(head.date)+' 종가 등락 − '+md8(head.prevDate)+' 종가 등락이에요.':''};
     }
     return L;
   }
@@ -102,6 +104,7 @@
     var L=model();
     var sub=document.getElementById('ld-sub'); if(sub) sub.textContent=L.sub;
     var max=0; CODES.forEach(function(c){ var x=ST.cmp[c]; if(x) max=Math.max(max,Math.abs(x.diff)); });
+    var open=ST.ph==='open';
     var rows=CODES.map(function(c){
       var n=ST.now[c]||{}, x=ST.cmp[c];
       var pill=n.pill?'<span class="ldl-pill '+n.pill[0]+'" title="'+esc(n.pill[2])+'">'+esc(n.pill[1])+'</span>':'';
@@ -109,11 +112,18 @@
       var bar=x?'<span class="ldl-trk"><i style="'+(x.diff>=0?'left:50%':'right:50%')+';width:'+w.toFixed(1)+'%"></i></span>':'';
       return '<div class="ldl-row"><div class="ldl-nm"><b>'+NAMES[c]+'</b><small class="num">'+won(n.px)+
           (n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')+pill+'</small></div>'+
-        '<div class="ldl-c t num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'<small class="m-k">'+esc(L.t)+'</small></div>'+
-        '<div class="ldl-c y num '+cls(x&&x.y)+'" data-k="'+esc(L.y)+'">'+(x?f2(x.y)+'%':'—')+'</div>'+
-        '<div class="ldl-d">'+bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div></div>';
+        '<div class="ldl-c t num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'</div>'+
+        '<div class="ldl-c y num '+cls(x&&x.y)+'">'+(x?f2(x.y)+'%':'—')+'</div>'+
+        '<div class="ldl-d">'+bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div>'+
+        // 모바일(M1 문장형) — 한 줄에 숫자 3개, '오늘' 등락은 한 번만.
+        // 장중: 가격 · 지금 등락 / 어제 이 시각보다 차이. 마감 뒤: 가격 · 그 가격 등락 · 표시 / 그날 종가 등락 · 전날보다 차이.
+        '<div class="ldl-m"><div class="m1"><b>'+NAMES[c]+'</b><span class="px num">'+won(n.px)+
+          (n.pc!=null?' <span class="'+cls(n.pc)+'">'+f2(n.pc)+'%</span>':'')+pill+'</span></div>'+
+        '<div class="m2"><span>'+(open?esc(L.mk):esc(L.t)+' <b class="num '+cls(x&&x.t)+'">'+(x?f2(x.t)+'%':'—')+'</b> · '+esc(L.mk))+'</span>'+
+          bar+'<em class="num">'+(x?f2(x.diff)+'%p':'—')+'</em></div></div></div>';
     }).join('');
-    box.innerHTML='<div class="ldl-row ldl-hd"><span>종목 · '+esc(L.now)+'</span><span>'+esc(L.t)+'</span><span>'+esc(L.y)+'</span><span>차이</span></div>'+rows;
+    box.innerHTML='<div class="ldl-row ldl-hd"><span>종목 · '+esc(L.now)+'</span><span>'+esc(L.t)+'</span><span>'+esc(L.y)+'</span><span>차이</span></div>'+rows+
+      (L.foot?'<div class="ldl-foot">'+esc(L.foot)+'</div>':'');
   }
 
   function json(u){ return fetch(u,{cache:'no-store'}).then(function(r){ return r.ok?r.json():null; }).catch(function(){ return null; }); }
