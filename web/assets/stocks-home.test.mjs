@@ -14,7 +14,7 @@
 // 실행: node --test web/assets/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { createContext, runInContext } from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -442,7 +442,7 @@ function loadLivePolling({ now } = {}) {
   const intervals = [];
   const docListeners = [];
   const fetched = [];
-  // liveCodes는 #us-linked-widget의 타일에서 나온다 — 비어 있으면 poll()이 즉시 return해
+  // liveCodes는 #ld-row의 한 줄 타일에서 나온다 — 비어 있으면 poll()이 즉시 return해
   // 테스트가 무의미하게 통과한다(가드가 없어도 fetch가 0건).
   const tiles = ['005930', '000660'].map((code) => {
     const t = mkEl();
@@ -455,7 +455,7 @@ function loadLivePolling({ now } = {}) {
     hooks: {
       onInterval: (fn, ms) => { intervals.push({ fn, ms }); },
       onDocListener: (ev, fn) => { docListeners.push({ ev, fn }); },
-      querySelectorAll: (sel) => (String(sel).includes('.us-tile[data-code]') ? tiles : []),
+      querySelectorAll: (sel) => (String(sel).includes('#ld-row .ld[data-code]') ? tiles : []),
       fetch: (url) => { fetched.push(String(url)); return Promise.reject(new Error('테스트 스텁')); },
     },
   });
@@ -562,15 +562,6 @@ test('표기된 "N초 갱신"은 실제로 존재하는 폴링 주기여야 한�
 // 나갔다 — 삼성전자 실제 −9,250원이 −9,254원, SK하이닉스 −40,000원이 −40,025원.
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('타일 — 원화 등락은 받은 값 그대로 표시한다 (역산 회귀 가드)', () => {
-  const { chgText } = loadWindow({}).__leaderTiles;
-  assert.equal(chgText(-9250, -3.44), '▼ 9,250 (3.44%)');
-  assert.equal(chgText(-40000, -2.16), '▼ 40,000 (2.16%)');
-  assert.equal(chgText(8500, 3.42), '▲ 8,500 (3.42%)');
-  // 원화 값이 없으면 만들어내지 않고 %만
-  assert.equal(chgText(null, -3.44), '▼ 3.44%');
-});
-
 test('타일 — 소스에 %→전일가 역산 식이 되돌아오지 않는다', () => {
   const src = readFileSync(join(HERE, 'stocks-home.js'), 'utf8');
   assert.ok(!/\/\(1\+pct\/100\)/.test(src), 'close/(1+pct/100) 역산이 다시 들어왔다');
@@ -585,41 +576,16 @@ test('타일 — 스냅샷 기준선은 실제 종가 시계열로 전일 종가
   assert.equal(prevFromSpark(null), null);
 });
 
-test('타일 — 당일 레인지 위치', () => {
-  const { rangePos } = loadWindow({}).__leaderTiles;
-  assert.equal(rangePos(259750, 256500, 261500), 65);
-  assert.equal(rangePos(256500, 256500, 261500), 0);
-  assert.equal(rangePos(262000, 256500, 261500), 100);   // 범위 밖은 끝에 붙인다
-  assert.equal(rangePos(100, 100, 100), null);           // 고가=저가(상한가 등)는 위치가 없다
-  assert.equal(rangePos(null, 1, 2), null);
-});
-
-test('타일 — 야간 레인지 라벨에 그 정규장 날짜를 적는다', () => {
-  const { regLabel } = loadWindow({}).__leaderTiles;
-  assert.equal(regLabel('20260915'), '9/15 정규장 레인지');
-  assert.equal(regLabel('20261102'), '11/2 정규장 레인지');
-  assert.equal(regLabel(undefined), '정규장 레인지');   // 날짜를 못 읽으면 지어내지 않는다
-  assert.equal(regLabel('2026-09-15'), '정규장 레인지');
-});
-
-test('타일 — 야간 추정가 위치 문구: 레인지 밖은 %로 적지 않는다', () => {
-  const { rangeText } = loadWindow({}).__leaderTiles;
-  // 9/15 19:39 삼성전자 추정가 250,955 · 정규장 246,000~252,000 (종가 248,500이면 42%)
-  assert.equal(rangeText(250955, 246000, 252000), '83% 지점');
-  assert.equal(rangeText(253000, 246000, 252000), '고가 위');
-  assert.equal(rangeText(245000, 246000, 252000), '저가 아래');
-  assert.equal(rangeText(250000, 250000, 250000), null);
-});
-
-test('타일 — 거래대금·외국인 수량 표기', () => {
-  const { fmtValue, fmtShares } = loadWindow({}).__leaderTiles;
-  assert.equal(fmtValue(3167707000000), '3조 1,677억');
-  assert.equal(fmtValue(151100000000), '1,511억');
-  assert.equal(fmtValue(1e12), '1조');
-  assert.equal(fmtValue(0), null);
-  assert.equal(fmtShares(3671062), '+367만주');
-  assert.equal(fmtShares(-51155), '−5만주');
-  assert.equal(fmtShares(9000), '+9,000주');
+// ── 주도주 펼치기 정리(2026-11-04) — 뉴스만 남기고 큰 타일·목표주가·외국계 시각과 그 수집을 걷어냈다 ──
+test('주도주 펼치기엔 관련 뉴스만 있고, 목표주가·외국계 시각 조회가 다시 붙지 않는다', () => {
+  const html = readFileSync(new URL('../stocks/index.html', import.meta.url), 'utf8');
+  const js = readFileSync(new URL('./stocks-home.js', import.meta.url), 'utf8');
+  for (const id of ['us-tile', 'ut-rng', 'lw-tp-val', 'lw-ib', 'vs-tb']) {
+    assert.ok(!html.includes(id), `${id}가 홈 HTML에 남아 있다`);
+  }
+  assert.ok(html.includes('id="lw-news"'), '관련 뉴스는 남는다');
+  assert.ok(!js.includes('stock-targets.json') && !js.includes('ib_korea_views.json'), '목표주가·외국계 시각을 다시 불러온다');
+  assert.ok(!existsSync(new URL('../../scripts/fetch_stock_targets.py', import.meta.url)), '목표주가 수집 스크립트가 되살아났다');
 });
 
 // ── 섹터별 대표 종목 펼치기 제거(2026-10-27) — 화면·전용 조회가 다시 붙지 않게 ──

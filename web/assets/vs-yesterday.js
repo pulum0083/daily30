@@ -405,7 +405,7 @@
     var cards = cardsFor(slot);
     function has(c) { return cards.indexOf(c) !== -1; }
     if (!root) return;
-    if (!d || d.status !== 'ok' || !cards.length) { root.hidden = true; root.innerHTML = ''; paintTiles(null); return; }
+    if (!d || d.status !== 'ok' || !cards.length) { root.hidden = true; root.innerHTML = ''; return; }
     var rel = esc(d.prev.rel), html = '';
     if (has('hero')) {
       if (d.verdict) {
@@ -434,7 +434,6 @@
 
     root.innerHTML = html;
     root.hidden = false;
-    paintTiles(d);
     if (has('hero')) bindHover(root.querySelector ? root.querySelector('.vs-plot') : null, d);
   }
 
@@ -462,24 +461,6 @@
     plot.addEventListener('pointermove', move);
     plot.addEventListener('pointerdown', move);
     plot.addEventListener('pointerleave', hide);
-  }
-
-  // 주도주 타일(#us-linked-widget) 안 '어제 같은 시각' 블록 — 대결판 카드의 표 대신 각 타일에 그린다(§49).
-  // 타일 위 큰 가격은 실시간이라 블록의 '오늘'과 다를 수 있다 — 그래서 블록 머리에 비교한 확정 분을 적는다.
-  function paintTiles(d) {
-    if (typeof document === 'undefined' || !document.querySelectorAll) return;
-    var byCode = {};
-    (d && d.status === 'ok' ? d.leaders || [] : []).forEach(function (l) { byCode[l.code] = l; });
-    [].forEach.call(document.querySelectorAll('#us-linked-widget .us-tile[data-code] .vs-tb'), function (box) {
-      var tile = box.closest('.us-tile'), l = tile && byCode[tile.getAttribute('data-code')];
-      if (!l || l.t == null || l.y == null || l.diff == null) { box.hidden = true; box.innerHTML = ''; return; }
-      var rel = esc(d.prev.rel);
-      box.innerHTML = '<div class="vs-tb-h"><b>' + rel + ' 같은 시각</b><span>' + d.time + ' 기준</span></div>' +
-        '<div class="vs-tb-g"><span class="k">' + rel + '</span><span class="v ' + cls(l.y) + '">' + f2(l.y) + '%</span>' +
-        '<span class="k">오늘</span><span class="v ' + cls(l.t) + '">' + f2(l.t) + '%</span></div>' +
-        '<div class="vs-tb-d"><span>' + rel + '보다</span><span class="p ' + cls(l.diff) + '">' + f2(l.diff) + '%p</span></div>';
-      box.hidden = false;
-    });
   }
 
   // 마지막 글자 받침 유무로 조사 짝을 고른다 — 한글이 아니면 받침 없는 쪽(without)을 쓴다.

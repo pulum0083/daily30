@@ -2512,8 +2512,8 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 
 - **멈춘 수집**: 마감 잡의 `generate_html.py --stocks`·`--us-stocks`, `fetch_valuation.py`(상세 페이지만 쓰던 업종 상대 PER),
   `build_stocks_snapshot.py`의 분기·연간 실적 조회(종목마다 네이버 2건 — 상세 페이지의 실적 표만 썼다).
-- **남긴 수집**(다른 화면이 쓴다 — §36 소비자 전수 확인): `fetch_stock_targets.py`(종목 홈 주도주 위젯 목표주가),
-  `build_stocks_snapshot.py`(종목 홈·섹터 페이지, 외국인 5일 순매수 `supply5` 포함), `scripts/config/stocks.json`(`fetch_movers_why.py` 유니버스).
+- **남긴 수집**(다른 화면이 쓴다 — §36 소비자 전수 확인): `fetch_stock_targets.py`(종목 홈 주도주 위젯 목표주가 — 2026-11-04 §79에서 함께 멈췄다),
+  `build_stocks_snapshot.py`(종목 홈·섹터 페이지. 외국인 5일 순매수 `supply5`는 §79에서 뺐다), `scripts/config/stocks.json`(`fetch_movers_why.py` 유니버스).
 - **지운 것**: 발행 페이지 13개, 템플릿 `stocks/detail.html`·`us_detail.html`·`_head_seo.html`, `web/assets/stocks.js`·`stocks.css`,
   `scripts/us_detail_data.py`·`fetch_valuation.py`·`config/us_stocks.json`·`web/data/valuation.json`, `generate_html.py`의 상세 전용 함수 22개와 테스트.
 - **링크**: 종목 홈의 종목 클릭(`goStock`)은 그 종목의 **섹터 페이지**로 보낸다(검색·특이신호·섹터 카드). 밤사이 미국 행·주도주 바로가기·
@@ -2643,3 +2643,15 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - **이슈 실측 검증** `validate_analysis.fix_issue_premarket_contradictions()`. 이슈가 지금 일처럼 쓴 방향("눌리고 있어요")이 영향 종목 2개 이상의 프리마켓 실측(`us_candidates.change_pct`, 3분의 2 이상 반대 + 중앙값 0.5% 이상)과 반대면 본문을 실측 문장으로 바꾸고, 제목까지 그렇게 썼으면 이슈를 뺀다. "밀렸어요"처럼 지난 일로 쓴 문장은 건드리지 않는다. **남은 갭**: dek의 "프리마켓 분위기가 가라앉아 있어요"처럼 종목을 지목하지 않은 문장은 프롬프트로만 막는다.
 - **하이퍼리퀴드는 기록만 한다.** `scripts/hl_signals.py`가 코스피 아침에 KR200·SMSN·SKHX·EWY의 전날 15:30 대비 등락을 `data/hl_signals.json`에 쓰고 예측 행의 `hl`로 옮긴다. 프롬프트·화면에 넣지 않는다. 137일 대조에서 삼성전자 선물 83.3%·83.1%로 안정적이었지만 KR200은 69.4%·86.2%로 갈렸고 네 신호 중 고른 결과다. 20~30거래일 뒤 `python3 scripts/hl_shadow_report.py`로 지금 계산값과 비교해 꾸준히 나을 때만 공식에 넣는다.
 - 미채점으로 남은 2026-05-16(토요일) 행은 S&P 세션이 없어 매일 건너뛴다. 해롭지 않아 뒀다.
+
+### 79. 종목 홈 '코스피 주도주' 펼치기 정리 — 관련 뉴스만 남긴다 (2026-11-04 결정)
+
+사용자 요청으로 `/stocks/` 코스피 주도주의 펼치기 안에서 **관련 뉴스 말고는 전부 뺐고, 그것만 쓰던 수집도 멈췄다.**
+
+- **지운 화면**: 큰 타일 3장(당일 레인지·거래대금·52주 고점 대비·외국인 5일 순매수, §46), 타일 안 '어제 같은 시각' 블록(`.vs-tb`, §49 — `vs-yesterday.js paintTiles`), 증권사 목표주가(컨센서스·증권사별·추이), 외국계 시각.
+- **지운 수집**: `scripts/fetch_stock_targets.py`와 테스트, `web/data/stock-targets.json`, `daily_report.yml`의 목표주가 스텝 2개(아침·마감), `build_stocks_snapshot.py`의 종목별 5일 순매수(`supply5`, 종목당 네이버 1건).
+- **남긴 것**: 한 줄 타일 3개(가격·등락 — 장중 `/api/stocks-live`, 마감 후 `/api/hl-night` 추정가), 관련 뉴스(`stock-news.json`, 수집 스케줄 §10 그대로). 한 줄 타일을 누르면 그 종목 뉴스로 바뀐다(`.ld.on`).
+- **`ib_korea_views.json`(외국계 시각) 수집은 그대로다** — 코스피 아침 브리핑 '이슈 점검'(§63)이 쓴다. 종목 홈에서 읽지 않게 됐을 뿐이다.
+- 되살리려면 이 커밋 이전 git 이력에서 꺼낸다. §20의 목표주가 신선도 가드(`_targets_data_is_stale`)는 상세 페이지(§69)와 함께 이미 없어졌다.
+- 다음 단계(같은 날 시안): 주도주를 어제와 비교한 한 줄 목록 + 세 종목 뉴스 7개(썸네일)로 바꾸는 B안 — `docs/prototypes/2026-11-04-leaders-redesign.html`.
+

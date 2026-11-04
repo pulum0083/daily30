@@ -32,30 +32,6 @@ def test_ma200():
     assert m.ma200([1.0, 2.0]) is None           # 200개 미만
 
 
-def test_to_int():
-    assert m._to_int("-847,969") == -847969
-    assert m._to_int("+1,864,496") == 1864496
-    assert m._to_int("") is None
-    assert m._to_int(None) is None
-    assert m._to_int("-") is None
-
-
-def test_parse_supply5():
-    # API는 최신순 → 결과는 오래된→최신
-    rows = [
-        {"bizdate": "20260626", "individualPureBuyQuant": "+1,864,496",
-         "organPureBuyQuant": "-1,065,176", "foreignerPureBuyQuant": "-847,969"},
-        {"bizdate": "20260625", "individualPureBuyQuant": "-716,876",
-         "organPureBuyQuant": "+865,177", "foreignerPureBuyQuant": "-113,276"},
-    ]
-    out = m.parse_supply5(rows)
-    assert [r["date"] for r in out] == ["6/25", "6/26"]
-    assert out[-1] == {"date": "6/26", "i": 1864496, "o": -1065176, "f": -847969}
-    # 셋 다 빈값이면 제외
-    assert m.parse_supply5([{"bizdate": "20260626", "individualPureBuyQuant": "",
-                             "organPureBuyQuant": "", "foreignerPureBuyQuant": ""}]) == []
-
-
 def test_last_bar_date():
     rows = [
         {"localDate": "20260728", "closePrice": 100.0},

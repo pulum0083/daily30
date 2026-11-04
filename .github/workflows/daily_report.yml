@@ -122,11 +122,6 @@ jobs:
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type kospi
 
-      - name: 🎯 증권사 목표주가 수집 (개장 전)
-        continue-on-error: true
-        timeout-minutes: 5
-        run: python3 scripts/fetch_stock_targets.py
-
       - name: 🇰🇷 국내 이슈 수집 (RSS 실수집 + 발행일 검증, 실패해도 발행 계속)
         continue-on-error: true
         timeout-minutes: 5
@@ -445,11 +440,6 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_research_reports.py
-
-      - name: 🎯 증권사 목표주가 수집 (마감 후)
-        continue-on-error: true
-        timeout-minutes: 5
-        run: python3 scripts/fetch_stock_targets.py
 
       - name: ✨ Claude 마감 시황 분석
         if: steps.holiday.outputs.open == 'true'

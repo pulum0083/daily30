@@ -101,49 +101,6 @@ def _reconcile_session_date(bar_dates):
     return None
 
 
-def _to_int(s):
-    """'-847,969'·'+1,864' 같은 네이버 문자열을 정수로. 빈값/None → None."""
-    if s is None:
-        return None
-    s = str(s).replace(",", "").replace("+", "").strip()
-    if s in ("", "-", "N/A"):
-        return None
-    try:
-        return int(float(s))
-    except ValueError:
-        return None
-
-
-def parse_supply5(rows, n=5):
-    """네이버 trend 응답(최신순)에서 최근 n일 종목별 순매수 수량(주)을 시간순(오래된→최신)으로.
-    각 항목: {date:'6/26', i:개인, o:기관, f:외국인}. 셋 다 None이면 제외."""
-    out = []
-    for r in rows[:n]:
-        bd = str(r.get("bizdate", ""))
-        date = f"{int(bd[4:6])}/{int(bd[6:8])}" if len(bd) == 8 else bd
-        i = _to_int(r.get("individualPureBuyQuant"))
-        o = _to_int(r.get("organPureBuyQuant"))
-        f = _to_int(r.get("foreignerPureBuyQuant"))
-        if i is None and o is None and f is None:
-            continue
-        out.append({"date": date, "i": i or 0, "o": o or 0, "f": f or 0})
-    out.reverse()  # 오래된→최신
-    return out
-
-
-def _naver_supply5(code):
-    """종목별 일별 투자자 순매수 수량(외국인·기관·개인). 실패 시 []."""
-    try:
-        url = f"https://m.stock.naver.com/api/stock/{code}/trend"
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
-        rows = json.loads(urllib.request.urlopen(req, timeout=10).read())
-        return parse_supply5(rows) if isinstance(rows, list) else []
-    except Exception as e:
-        print(f"[snapshot] naver supply {code} 실패: {e}", file=sys.stderr)
-        return []
-
-
 def _yf_closes(ticker):
     """yfinance 폴백(미국). 실패 시 []."""
     try:
@@ -176,7 +133,6 @@ def _build_one(symbol, name, sector, market):
     bar_date는 market='kr'일 때만 채워지는, change_pct의 closes[-1]에 대응하는 실제 봉 날짜다.
     실패 시 (None, None)."""
     vol = vol_avg20 = foreign = foreign_spark = None
-    supply5 = None
     bar_date = None
     if market == "kr":
         # 한국은 네이버 일봉 한 번으로 종가+거래량+외국인보유율 동시 수집(토스 IP 차단 우회)
@@ -194,7 +150,7 @@ def _build_one(symbol, name, sector, market):
         if frates:
             foreign = round(float(frates[-1]), 2)
             foreign_spark = [round(float(x), 2) for x in frates[-20:]]
-        supply5 = _naver_supply5(symbol)        # 종목별 5일 순매수 수량
+        # (2026-11-04) 종목별 5일 순매수(supply5)는 종목 홈 주도주 큰 타일만 쓰던 것이라 타일과 함께 멈췄다.
         # (2026-10-26) 분기·연간 실적 수집은 종목 상세 페이지만 쓰던 것이라 페이지와 함께 멈췄다.
     else:
         closes = fetch_closes(symbol, market)
@@ -217,8 +173,6 @@ def _build_one(symbol, name, sector, market):
     if foreign is not None:
         rec["foreign_rate"] = foreign
         rec["foreign_spark"] = foreign_spark
-    if supply5:
-        rec["supply5"] = supply5
     return rec, bar_date
 
 
