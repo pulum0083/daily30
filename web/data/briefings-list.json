@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-05": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-05/kospi/",
+        "headline": "선물은 웃고 반도체는 울고 — 오늘 코스피는 어느 장단?",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-04": {
       "kospi": {
         "state": "ready",
@@ -778,25 +797,6 @@
         "pill_text": "▲",
         "title": "상승 우위",
         "time": "21:16"
-      }
-    },
-    "2026-09-24": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "pending",
-        "scheduled_time": "16:30"
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-09-24/us/",
-        "headline": "10년물이 5%를 뚫으면서, AI 랠리의 '금리 무시' 국면이 끝났어요",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "21:17"
       }
     }
   }
