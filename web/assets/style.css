@@ -1578,3 +1578,56 @@ html.dark .arch-item__dek{color:var(--muted);}
 /* 구글 애드센스 멀티플렉스 — 브리핑 본문 끝(2026-10-27). 광고가 안 채워지면 높이 0으로 접힌다 */
 .ad-slot{margin:20px 0 0;}
 .ad-slot ins.adsbygoogle[data-ad-status="unfilled"]{display:none!important;}
+
+/* 구조 신호(미국 브리핑) — 종목 홈 #struct-sig와 같은 구성. PC는 본문 끝, 900px 이하는 시장 지표 위에 보인다. */
+.ssig{background:var(--canvas);border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden;}
+.ssig--main{margin-top:24px;}
+.ssig--aside{display:none;}
+@media(max-width:900px){.ssig--main{display:none;}.ssig--aside{display:block;margin-top:12px;}}
+.ssig-h{padding:12px 16px 11px;}
+.ssig-t{font-size:13px;font-weight:700;color:var(--ink);}
+.ssig-r{display:block;padding:12px 16px;border-top:1px solid var(--hairline);text-decoration:none;color:inherit;}
+a.ssig-r:hover{background:var(--surface-soft);}
+.ssig-k{font-size:12px;font-weight:700;color:var(--muted);}
+.ssig-kd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+.ssig-d{font-size:11px;color:var(--muted);white-space:nowrap;}
+.ssig-m{display:flex;align-items:center;gap:8px;margin-top:2px;}
+.ssig-m b{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.3px;font-variant-numeric:tabular-nums;}
+.ssig-l em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px;}
+.ssig-go{margin-left:8px;font-weight:700;color:var(--primary);white-space:nowrap;}
+a.ssig-r:hover .ssig-go{text-decoration:underline;}
+.ssig-pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;}
+.ssig-pill.ok{background:rgba(22,163,74,.12);color:#15803D;}
+.ssig-pill.caution{background:rgba(245,158,11,.15);color:#B45309;}
+.ssig-pill.warn,.ssig-pill.above{background:var(--up-bg);color:var(--up);}
+.ssig-pill.below{background:var(--dn-bg);color:var(--dn);}
+.ssig-g{margin-top:9px;}
+.ssig-track{position:relative;height:8px;border-radius:4px;background:var(--surface-inset);}
+.ssig-track i{position:absolute;top:0;height:100%;display:block;}
+.ssig-track i.z1{background:#FDECC8;}
+.ssig-track i.z2{background:#FBD5D5;border-radius:0 4px 4px 0;}
+.ssig-track i.f{left:0;border-radius:4px;opacity:.85;}
+.ssig-track i.f.ok{background:#4ADE80;}.ssig-track i.f.caution{background:#F59E0B;}.ssig-track i.f.warn{background:#EF4444;}
+.ssig-track i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid var(--canvas);box-shadow:0 0 0 1px rgba(15,23,42,.12);}
+.ssig-track i.dot.ok{background:#16A34A;}.ssig-track i.dot.caution{background:#D97706;}.ssig-track i.dot.warn{background:#DC2626;}
+.ssig-ticks{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted);}
+.ssig-ticks span{position:absolute;top:0;white-space:nowrap;}
+.ssig-ticks span.c{transform:translateX(calc(-100% - 3px));}
+.ssig-ticks span.w{right:0;}
+.ssig-i{display:grid;grid-template-columns:48px 1fr 54px 36px;gap:8px;align-items:center;font-size:12px;margin-bottom:7px;}
+.ssig-i>span:first-child{font-weight:700;color:var(--ink);white-space:nowrap;}
+.ssig-i>b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;}
+.ssig-i>b.up{color:var(--up);}.ssig-i>b.dn{color:var(--dn);}
+.ssig-i>.ssig-pill{justify-self:end;font-size:11px;padding:1px 7px;}
+.ssig-b{position:relative;height:7px;border-radius:4px;background:var(--surface-inset);}
+.ssig-b::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;margin-left:-.75px;background:var(--muted);}
+.ssig-b i{position:absolute;top:0;height:100%;}
+.ssig-b i.up{left:50%;background:#E86464;border-radius:0 4px 4px 0;}
+.ssig-b i.dn{right:50%;background:#5D97F1;border-radius:4px 0 0 4px;}
+.ssig-s{margin:-3px 0 0;}
+.ssig-s>div{grid-column:2;display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+.ssig-s .m{font-weight:700;color:var(--ink);}
+@media(min-width:901px){
+  .ssig-r{display:grid;grid-template-columns:minmax(190px,1fr) 1.6fr;column-gap:24px;align-items:center;}
+  .ssig-g{margin-top:0;}
+}

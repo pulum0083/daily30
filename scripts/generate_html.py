@@ -43,7 +43,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261029a"
+ASSET_VER = "20261105a"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 KST = pytz.timezone("Asia/Seoul")
@@ -635,6 +635,47 @@ def save_us_index_position(analysis: dict, market_data: dict, target_date: str) 
 NASDAQ_BACKTEST_PATH = CONFIG_DIR / "nasdaq_overheat_backtest.json"
 _NQ_BADGE = {"ok": "✓ 정상", "caution": "⚠️ 주의", "warn": "🚨 경고"}
 _NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 SVG 좌표(프로토타입과 같다)
+
+
+def _signed_pct(v: float) -> str:
+    return f"{'+' if v > 0 else '−' if v < 0 else ''}{abs(v):.2f}%"
+
+
+def build_struct_signal(analysis: dict) -> dict:
+    """미국 브리핑 '구조 신호' — 종목 홈 밤 구조 신호(home-hero.js nasdaqRow·usIndexRow)와 같은 값·눈금(§68 ⑤).
+
+    재료는 이미 스냅샷에 있는 nasdaq_overheat·us_index_position이다. 한쪽만 있으면 그 줄만, 둘 다 없으면 블록째 뺀다.
+    나스닥 줄은 '브리핑 섹션은 60% 미만이면 숨김'과 달리 항상 보인다 — 값과 기준까지 거리를 매일 보여주는 자리다.
+    """
+    import nasdaq_overheat as nq
+    out = {}
+    data = analysis.get("nasdaq_overheat") or {}
+    if isinstance(data.get("gap_pct"), (int, float)):
+        gap = float(data["gap_pct"])
+        top = max(80, math.ceil((gap + 5) / 10) * 10)
+        x = lambda v: round(max(0.0, min(v, top)) / top * 100, 1)
+        level = nq.level_of(gap)
+        month = str(data.get("month") or "")
+        out["nasdaq"] = {
+            "gap": gap, "level": level, "badge": _NQ_BADGE[level],
+            "x_gap": x(gap), "x_caution": x(nq.CAUTION), "x_warn": x(nq.WARN),
+            "w_caution": round((nq.WARN - nq.CAUTION) / top * 100, 1),
+            "caution": int(nq.CAUTION), "warn": int(nq.WARN),
+            "month_label": f"{int(month[5:7])}월" if len(month) == 7 else "이번 달",
+        }
+    pos = analysis.get("us_index_position") or {}
+    items = [i for i in (pos.get("items") or []) if isinstance(i.get("pct"), (int, float))]
+    asof = str(pos.get("asof") or "")
+    if items and re.fullmatch(r"\d{4}-\d{2}-\d{2}", asof):
+        top = max(5, math.ceil(max(abs(i["pct"]) for i in items) / 5) * 5)
+        d = datetime.strptime(asof, "%Y-%m-%d")
+        out["index"] = {
+            "asof": f"{d.month}/{d.day}({'월화수목금토일'[d.weekday()]})", "top": top,
+            "head": f"{items[0]['name']} {_signed_pct(items[0]['pct'])}",
+            "rows": [{"name": i["name"], "text": _signed_pct(i["pct"]), "up": i["pct"] >= 0,
+                      "w": round(abs(i["pct"]) / top * 50, 1)} for i in items],
+        }
+    return {"struct_sig": out} if out else {}
 
 
 def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
@@ -2101,6 +2142,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         save_us_index_position(analysis, market_data, target_date)
+        ctx.update(build_struct_signal(analysis))               # 구조 신호 — 본문 맨 아래, 모바일은 시장 지표 위(§68 ⑤)
         ctx["accuracy"] = False  # 미국 성적표 사이드바는 내지 않는다(채점은 2026-11-03 재개)
     else:
         ctx.update(build_prediction(analysis, index_name, config["pred_title"], gen_time))
