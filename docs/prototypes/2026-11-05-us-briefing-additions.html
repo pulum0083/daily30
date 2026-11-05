@@ -1,0 +1,237 @@
+<!-- 미국 브리핑 추가 내용 시안 — 11/5 21:16 KST 실측·11/4 종가(야후), 경제 일정(Forex Factory), 실적일(yfinance) 값으로 그렸다 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>미국 브리핑 추가 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--hair:#E5E7EB;--soft:#F9FAFB;--inset:#EEF1F5;--primary:#006EFF;--pbg:#EFF6FF;
+  --up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1;--upbg:#FFF5F7;--dnbg:#EFF6FF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#F4F5F7;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:24px 16px 80px}
+.top{max-width:1120px;margin:0 auto 20px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.legend span{font-size:12px;font-weight:700;background:#fff;border:1px solid var(--hair);border-radius:999px;padding:4px 10px}
+.legend b{color:var(--primary);margin-right:4px}
+.board{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+.col-h{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
+.page{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:18px;display:grid;gap:16px}
+.side{display:grid;gap:14px}
+.phone{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:14px}
+.phone h3,.alt h3{font-size:14px;font-weight:800}
+.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}
+.new{position:relative;outline:2px dashed #93B8F5;outline-offset:4px;border-radius:10px}
+.tag{position:absolute;top:-11px;left:8px;background:var(--primary);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;z-index:2}
+.same{opacity:.92}
+.fact{font-size:11px;font-weight:800;color:#15803D;background:#ECFDF3;border-radius:999px;padding:2px 8px}
+.ai{font-size:11px;font-weight:800;color:#6D28D9;background:#F3EEFF;border-radius:999px;padding:2px 8px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.h{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.asof{font-size:11px;color:var(--muted)}
+.card{border:1px solid var(--hair);border-radius:12px;padding:12px 14px;background:#fff}
+.sec-t{font-size:13px;font-weight:800;margin-bottom:9px}
+
+/* 요약 카드 */
+.hero{background:linear-gradient(180deg,#FFF5F7,#fff 70%);border:1px solid #FFE3E8;border-radius:14px;padding:16px 18px}
+.hero-k{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hero-k b{font-size:24px;font-weight:800;color:var(--up);letter-spacing:-.5px}
+.hero-k span{font-size:12px;color:var(--muted)}
+.hero h2{font-size:18px;font-weight:800;letter-spacing:-.03em;line-height:1.35;margin-top:8px}
+.hero p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+.hero p b{color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;font-weight:700;background:#fff;border:1px solid var(--hair);border-radius:999px;padding:3px 10px;color:#374151}
+.chip b{font-weight:800}
+
+/* 프리마켓 띠 */
+.pm-row{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+.pm-g{display:grid;gap:6px;margin-top:9px}
+.pm-l{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:-2px}
+.pm-i{font-size:12.5px;white-space:nowrap}
+.pm-i em{font-style:normal;color:var(--muted);margin-right:4px}
+.pm-i b{font-weight:800;font-variant-numeric:tabular-nums}
+.kr-line{font-size:12px;color:#374151;background:var(--soft);border-radius:8px;padding:7px 10px;margin-top:9px;line-height:1.5}
+
+/* 직전 정규장 */
+.rs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rs div{background:var(--soft);border-radius:9px;padding:8px 10px}
+.rs em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+.rs b{display:block;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:1px}
+.bars{display:grid;gap:6px;margin-top:11px}
+.bar{display:grid;grid-template-columns:64px 1fr 52px;gap:8px;align-items:center;font-size:12px}
+.bar>span{font-weight:700;white-space:nowrap}
+.bar>b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.track{position:relative;height:7px;background:var(--inset);border-radius:4px}
+.track::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;margin-left:-.75px;background:#94A3B8}
+.track i{position:absolute;top:0;height:100%}
+.track i.u{left:50%;background:var(--upb);border-radius:0 4px 4px 0}
+.track i.d{right:50%;background:var(--dnb);border-radius:4px 0 0 4px}
+.fine{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+/* 이슈 칩 */
+.issue-t{font-size:14.5px;font-weight:800;line-height:1.4}
+.issue-b{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+.imp{display:grid;gap:6px;border-top:1px solid var(--hair);margin-top:10px;padding-top:9px}
+.imp-s{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12px;font-weight:800}
+.tk{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--inset);color:#374151}
+.tk b{font-weight:800;margin-left:3px}
+.tk.u{background:var(--upbg)}.tk.u b{color:var(--up)}
+.tk.d{background:var(--dnbg)}.tk.d b{color:var(--dn)}
+
+/* 일정 */
+.ev{display:grid;grid-template-columns:96px 1fr auto;gap:8px;align-items:baseline;font-size:12.5px;padding:7px 0;border-top:1px solid var(--hair)}
+.ev:first-of-type{border-top:0}
+.ev time{font-weight:800;color:#374151;white-space:nowrap}
+.ev em{font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap}
+.ev .hi{color:var(--up);font-weight:800;margin-right:4px}
+
+/* 구조 신호 */
+.nq-g{margin-top:8px}.nq-t{position:relative;height:8px;border-radius:4px;background:var(--inset)}
+.nq-t i{position:absolute;top:0;height:100%}
+.nq-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}.nq-l span{position:absolute}
+
+.alts{max-width:1120px;margin:26px auto 0}
+.alts>h2{font-size:16px;font-weight:800;margin-bottom:12px}
+.alt-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.alt{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:14px}
+.alt>.demo{margin-top:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-size:11px;font-weight:700;color:var(--muted);text-align:right;padding:4px 0;border-bottom:1px solid var(--hair)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:6px 0;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;border-bottom:1px solid #F3F4F6}
+.tbl td:first-child{font-weight:700}
+.hero2{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;border:1px solid var(--hair);border-radius:12px;padding:12px 14px}
+.dial{width:62px;height:62px;border-radius:50%;background:conic-gradient(var(--upb) 0 68%,var(--dnb) 68% 100%);display:grid;place-items:center}
+.dial b{width:46px;height:46px;background:#fff;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:800;color:var(--up)}
+.hero2 h4{font-size:14px;font-weight:800;line-height:1.35}
+.hero2 p{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+@media(max-width:900px){.board,.alt-g{grid-template-columns:1fr}.side{order:2}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>미국 브리핑 추가 시안 — 11/5 실측 값</h1>
+  <p>점선이 새로 넣는 부분이고 나머지는 지금 페이지 그대로예요. 숫자는 전부 11/5 21:16 KST 체결가와 11/4 종가예요.</p>
+  <div class="legend"><span><b>A</b>요약 카드</span><span><b>B</b>프리마켓 띠 확장</span><span><b>C</b>직전 정규장 실측</span><span><b>D</b>종목 칩에 전일 등락</span><span><b>E</b>오늘 밤·내일 일정</span></div>
+</div>
+
+<div class="board">
+  <div>
+    <div class="col-h">PC 본문 — 위에서 아래 순서</div>
+    <div class="page">
+
+      <div class="new"><span class="tag">B 프리마켓 띠 확장</span>
+        <div class="card">
+          <div class="h"><span class="fact">지금 프리마켓 · 실측</span><span class="asof">21:16 KST 기준 · 전일 종가 대비</span></div>
+          <div class="pm-g">
+            <div class="pm-l">지수 선물</div>
+            <div class="pm-row"><span class="pm-i"><em>S&amp;P500</em><b class="up">+0.21%</b></span><span class="pm-i"><em>나스닥</em><b class="dn">−0.45%</b></span><span class="pm-i"><em>다우</em><b class="up">+0.63%</b></span></div>
+            <div class="pm-l">코스피 선행</div>
+            <div class="pm-row"><span class="pm-i"><em>EWY</em><b class="dn">−4.11%</b></span><span class="pm-i"><em>DRAM</em><b class="dn">−5.25%</b></span><span class="pm-i"><em>SKHY</em><b class="dn">−5.58%</b></span></div>
+            <div class="pm-l">AI 인프라</div>
+            <div class="pm-row"><span class="pm-i"><em>MU</em><b class="dn">−3.96%</b></span><span class="pm-i"><em>SNDK</em><b class="dn">−5.43%</b></span><span class="pm-i"><em>NVDA</em><b class="dn">−1.05%</b></span><span class="pm-i"><em>AMD</em><b class="dn">−3.84%</b></span><span class="pm-i"><em>TSM</em><b class="dn">−2.39%</b></span></div>
+            <div class="pm-l">빅테크</div>
+            <div class="pm-row"><span class="pm-i"><em>AAPL</em><b class="up">+0.97%</b></span><span class="pm-i"><em>MSFT</em><b class="up">+0.40%</b></span><span class="pm-i"><em>AMZN</em><b class="up">+1.56%</b></span><span class="pm-i"><em>META</em><b class="up">+1.28%</b></span><span class="pm-i"><em>GOOGL</em><b class="up">+1.62%</b></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="new"><span class="tag">A 요약 카드</span>
+        <div class="hero">
+          <div class="hero-k"><b>상승 우위 68%</b><span>오늘 S&amp;P500 상승 마감 확률</span></div>
+          <h2>다우는 축포, 반도체는 침묵 — 민주당 압승이 가른 두 세계</h2>
+          <p>직전 정규장에서 <b>다우가 1,569포인트</b> 뛰는 동안 <b>반도체는 정반대로 주저앉았어요</b>. 정치 지형이 바뀌면서 돈이 관세·규제 수혜주로 몰리고, AI 반도체 랠리에는 찬물이 끼얹어진 모양새예요.</p>
+          <div class="chips"><span class="chip">출발점 S&amp;P 선물 <b class="up">+0.21%</b> → 과거 72%</span><span class="chip">어제 예측 상승 → <b class="up">+1.58%</b> ✓</span></div>
+        </div>
+      </div>
+
+      <div class="new"><span class="tag">C 직전 정규장 실측</span>
+        <div class="card">
+          <div class="h" style="margin-bottom:9px"><span class="sec-t" style="margin:0">📊 11/4(수) 미국장 마감</span><span class="fact">실측</span></div>
+          <div class="rs">
+            <div><em>S&amp;P500</em><b class="up">+1.58%</b></div>
+            <div><em>나스닥</em><b class="up">+1.44%</b></div>
+            <div><em>다우</em><b class="up">+3.03%</b></div>
+          </div>
+          <div class="bars">
+            <div class="bar"><span>금융</span><div class="track"><i class="u" style="width:17.6%"></i></div><b class="up">+3.51%</b></div>
+            <div class="bar"><span>기술</span><div class="track"></div><b style="color:var(--muted)">−0.01%</b></div>
+            <div class="bar"><span>산업재</span><div class="track"><i class="d" style="width:5.5%"></i></div><b class="dn">−1.09%</b></div>
+            <div class="bar"><span>반도체</span><div class="track"><i class="d" style="width:15.7%"></i></div><b class="dn">−3.14%</b></div>
+            <div class="bar"><span>에너지</span><div class="track"><i class="d" style="width:23.7%"></i></div><b class="dn">−4.74%</b></div>
+          </div>
+          <p class="fine">XLF·XLK·XLI·SOXX·XLE 종가 기준이에요. VIX −20.3%, WTI −8.3%, 금 +3.4%.</p>
+        </div>
+      </div>
+
+      <div class="same">
+        <div class="sec-t">📌 오늘 점검할 이슈</div>
+        <div class="new"><span class="tag">D 종목 칩에 전일 등락</span>
+          <div class="card">
+            <div class="issue-t">민주당 압승에 다우 급등, 반도체는 급락 — 엇갈린 반응</div>
+            <div class="issue-b">금융주는 웃었지만, AI 반도체 수혜 기대가 꺾이며 메모리·장비주가 크게 눌렸어요. <span style="color:#B45309;font-weight:700">(정정 예시: 지금은 "에너지·산업재도 웃었다"고 쓰여 있어요)</span></div>
+            <div class="imp">
+              <div class="imp-s"><span class="dn">▼ 반도체</span><span class="tk d">MU<b>−7.00%</b></span><span class="tk d">KLAC<b>−4.10%</b></span><span class="tk d">LRCX<b>−4.03%</b></span><span class="tk d">AMAT<b>−3.28%</b></span><span class="tk d">NVDA<b>−3.17%</b></span><span class="tk d">AVGO<b>−2.00%</b></span></div>
+              <div class="imp-s"><span class="up">▲ 금융</span><span class="tk u">MS<b>+4.23%</b></span><span class="tk u">JPM<b>+4.18%</b></span><span class="tk u">BAC<b>+3.97%</b></span><span class="tk u">GS<b>+3.56%</b></span></div>
+            </div>
+          </div>
+        </div>
+        <p class="note">나머지 이슈 카드는 지금과 같아요.</p>
+      </div>
+
+      <div class="new"><span class="tag">E 오늘 밤·내일 일정</span>
+        <div class="card">
+          <div class="h" style="margin-bottom:4px"><span class="sec-t" style="margin:0">🗓️ 오늘 밤·내일 볼 일정</span><span class="asof">한국 시간</span></div>
+          <div class="ev"><time>오늘 22:30</time><span>주간 실업수당 청구</span><em>예상 19.7만 · 이전 19.4만</em></div>
+          <div class="ev"><time>오늘 23:30</time><span>미국 정규장 개장</span><em></em></div>
+          <div class="ev"><time>내일 22:30</time><span><span class="hi">중요</span>10월 고용보고서</span><em>예상 6.5만 · 이전 2.9만</em></div>
+          <div class="ev"><time>내일 22:30</time><span><span class="hi">중요</span>실업률</span><em>예상 4.2% · 이전 4.2%</em></div>
+          <div class="ev"><time>11/13 06:00</time><span>AMAT 실적</span><em>후보 20종목 기준</em></div>
+        </div>
+      </div>
+
+      <div class="same card">
+        <div class="sec-t">🧱 구조 신호</div>
+        <div style="font-size:12px;font-weight:700;color:var(--muted)">나스닥 체크</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:2px"><b style="font-size:17px;font-weight:800">+48.8%</b><span style="font-size:12px;font-weight:700;background:#ECFDF3;color:#15803D;border-radius:999px;padding:2px 9px">✓ 정상</span></div>
+        <div class="nq-g"><div class="nq-t"><i style="left:75%;width:12.5%;background:#FDECC8"></i><i style="left:87.5%;right:0;background:#FBD5D5;border-radius:0 4px 4px 0"></i><i style="left:0;width:60.9%;background:#4ADE80;border-radius:4px"></i></div><div class="nq-l"><span style="left:0">0</span><span style="left:75%;transform:translateX(calc(-100% - 3px))">60 주의</span><span style="right:0">70 경고</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="col-h">왜 넣나요</div>
+    <div class="phone"><h3>B. 11/5의 빅테크 줄만 보면 놓치는 것</h3><p class="note">지금 띠엔 NVDA −1%와 빅테크 상승만 보여요. 같은 시각 EWY −4.11%, SKHY −5.58%, MU −3.96%였어요. 한국 독자에게 가장 중요한 값이 빠져 있어요.</p></div>
+    <div class="phone"><h3>A. 확률이 본문에 없어요</h3><p class="note">텔레그램과 종목 홈엔 있는데 페이지엔 없어요. 채점을 재개해서 어제 결과도 붙일 수 있어요. 11/4 예측은 상승, 실제 +1.58%로 맞았어요.</p></div>
+    <div class="phone"><h3>C. 지난 장 숫자를 확인할 곳이 없어요</h3><p class="note">지금은 "다우 1,569포인트" 한 문장뿐이에요. 표가 있으면 에너지 −4.74%가 바로 보여서 "에너지가 웃었다"가 틀린 걸 독자도 알 수 있어요. 같은 값을 AI에게도 줘요.</p></div>
+    <div class="phone"><h3>D. ▲▼ 종목이 실제로 그랬는지</h3><p class="note">AI가 고른 ▲▼에 실측을 붙여요. 반대로 움직인 종목은 칩에서 빼는 검증을 함께 둬요. 11/5에선 AMD(+1.01%)·QCOM(+5.33%)이 ▼에서, CVX·XOM이 ▲에서 빠져요.</p></div>
+    <div class="phone"><h3>E. 21:15에 가장 궁금한 건 오늘 밤 일정</h3><p class="note">경제 일정은 이미 수집 중이에요. 실적일은 후보 20종목만 볼 수 있어요.</p></div>
+    <div class="phone"><h3>주의: SOXX 프리마켓 값</h3><p class="note">야후가 21:16 SOXX를 145.68로 줘요(11/4 종가 450.41). 그대로 계산하면 −67%라 시안에선 뺐어요. 액면분할로 보이지만 확인 전이에요.</p></div>
+  </div>
+</div>
+
+<div class="alts">
+  <h2>형태를 고를 수 있는 것</h2>
+  <div class="alt-g">
+    <div class="alt"><h3>A-1. 글자 카드 (위 시안)</h3><p class="note">지금 관점 카드에 확률 줄만 더해요. 세로가 가장 적게 늘어요.</p>
+      <div class="demo hero"><div class="hero-k"><b>상승 우위 68%</b><span>오늘 S&amp;P500 상승 마감 확률</span></div><h2 style="font-size:15px">다우는 축포, 반도체는 침묵 — 민주당 압승이 가른 두 세계</h2></div></div>
+    <div class="alt"><h3>A-2. 원형 확률</h3><p class="note">확률이 눈에 먼저 들어와요. 다만 그림이 정확도를 과장해 보일 수 있어요.</p>
+      <div class="demo hero2"><div class="dial"><b>68%</b></div><div><h4>다우는 축포, 반도체는 침묵 — 민주당 압승이 가른 두 세계</h4><p>S&amp;P500 상승 마감 확률 · 선물 +0.21%</p></div></div></div>
+  </div>
+  <div class="alt-g">
+    <div class="alt"><h3>C-1. 지수 + 섹터 막대 (위 시안)</h3><p class="note">어디로 돈이 갔는지 한눈에 보여요. 세로가 조금 길어요.</p></div>
+    <div class="alt"><h3>C-2. 표 한 장</h3><p class="note">가장 짧아요. 어제와 프리마켓을 나란히 볼 수 있어요.</p>
+      <div class="demo"><table class="tbl"><tr><th></th><th>11/4 종가</th><th>21:16 프리마켓</th></tr>
+        <tr><td>금융 XLF</td><td class="up">+3.51%</td><td class="up">+1.30%</td></tr>
+        <tr><td>에너지 XLE</td><td class="dn">−4.74%</td><td class="up">+0.88%</td></tr>
+        <tr><td>산업재 XLI</td><td class="dn">−1.09%</td><td style="color:var(--muted)">−0.01%</td></tr>
+        <tr><td>기술 XLK</td><td style="color:var(--muted)">−0.01%</td><td class="dn">−1.13%</td></tr>
+        <tr><td>메모리 DRAM</td><td class="dn">−5.31%</td><td class="dn">−5.25%</td></tr></table></div></div>
+  </div>
+</div>
+</body>
+</html>
