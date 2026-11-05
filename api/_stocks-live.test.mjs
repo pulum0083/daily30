@@ -1,7 +1,7 @@
 // /api/stocks-live 필드 추출 회귀 테스트 — 원화 등락을 원천 값 그대로 넘기는지(역산 금지) 검증
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchOne } from './stocks-live.mjs';
+import { fetchOne, implausibleExtended } from './stocks-live.mjs';
 
 // 2026-09-11 15:17 네이버 실시간 실응답에서 필요한 필드만 옮겼다(삼성전자).
 const REAL = {
@@ -145,4 +145,11 @@ test('애프터장 시간엔 오늘 세션에만 실시간 체결가를 after로
     const nextDay = await closedWithAfter('005930', new Date('2026-11-04T18:30:00+09:00'));
     assert.equal(nextDay.after, undefined);        // 세션(11/3)이 오늘(11/4)이 아니면 붙이지 않는다
   } finally { globalThis.fetch = orig; }
+});
+
+test('프리·애프터 ±25% 초과는 데이터 문제로 본다 (11/5 SOXX −67.97%), 정규장 값은 건드리지 않는다', () => {
+  assert.equal(implausibleExtended('pre', -67.97), true);
+  assert.equal(implausibleExtended('post', 30), true);
+  assert.equal(implausibleExtended('pre', -5.58), false);
+  assert.equal(implausibleExtended('open', -40), false);
 });

@@ -75,6 +75,12 @@ function naverToYahoo(sym) { return sym.replace(/\.[A-Z]$/, ''); }
 // 야후 파이낸스 — 프리장·애프터장 실시간 데이터 포함
 // 야후 파이낸스 — 프리장·정규장·애프터장 실시간. 시세는 1분봉 시계열의 마지막 유효 체결가에서 뽑는다.
 // (chart meta에는 pre/postMarketPrice 필드가 없어 시계열을 직접 읽어야 한다.)
+// 프리·애프터 값이 기준가에서 이만큼 벌어지면 시세가 아니라 데이터 문제로 본다 — 2026-11-05 SOXX가 프리마켓 144달러,
+// 종가 450달러로 와 −67.97%가 나갔다(액면분할로 보이는데 기준가는 분할 전 값이었다).
+export function implausibleExtended(state, pct) {
+  return (state === 'pre' || state === 'post') && Math.abs(pct) > 25;
+}
+
 async function fetchYahoo(sym) {
   const ticker = naverToYahoo(sym);
   try {
@@ -117,6 +123,7 @@ async function fetchYahoo(sym) {
     // price가 null이면 isFinite(null)===true라 통과해 -100%가 만들어진다 — 타입까지 확인한다.
     if (base == null || typeof price !== 'number' || !isFinite(price)) return null;
     const pct = ((price - base) / base) * 100;
+    if (implausibleExtended(state, pct)) return null;     // 틀린 등락을 보이느니 네이버 종가로 넘긴다
     return {
       sym, price,
       changePct: Math.round(pct * 100) / 100,
