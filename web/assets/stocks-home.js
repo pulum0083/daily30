@@ -22,7 +22,8 @@
 
 /* ── 블록 2 — 코스피 주도주 (2026-11-04 B안, SERVICE_RULES §79) ──
    세 종목을 한 줄씩: 지금 가격 · 오늘 · 어제 · 차이. 아래는 세 종목 섞은 관련 뉴스 7개.
-   지금 가격 — 장중 09:00~15:30 실시간(/api/stocks-live) → 15:30~20:00 애프터장 실시간(같은 API의 after)
+   지금 가격 — 장중 09:00~15:30 실시간(/api/stocks-live) → 15:31~15:59 종가(시간외 종가 매매라 움직이지 않는다)
+             → 16:00~20:00 KRX 애프터장 실시간(같은 API의 after)
              → 20:00~다음 날 09:00·휴장일 하이퍼리퀴드 24h 추정가(/api/hl-night).
    비교 칸 — 장중엔 같은 확정 분의 오늘·어제 등락(/api/intraday?vs=intraday의 leaders, vs-yesterday.js가 받아 'vs:data'로 넘긴다).
             장 마감 뒤엔 직전 세션 공식 종가 등락 vs 그 전 세션 공식 종가 등락(1분봉 15:30 봉, 날짜와 함께).
@@ -49,6 +50,8 @@
     if(m<1200&&m>930) return 'after';
     return 'night';
   }
+  // 15:31~15:59 — KRX 시간외 종가 매매 구간. 애프터장(16:00~) 전이다.
+  function afterPre(ms){ var k=kst(ms), m=k.getUTCHours()*60+k.getUTCMinutes(); return m>930&&m<960; }
   // 장 마감 뒤 비교 — 1분봉 15:30 봉 세 개(그 세션·직전·그 전). 하나라도 없으면 비운다(§0).
   function closeCmp(p){
     if(!p||!(p.price>0)||!(p.prevSessionClose>0)||!(p.prev2SessionClose>0)||!p.sessionDate||!p.prevSessionDate) return null;
@@ -72,7 +75,7 @@
     var hm=String(k.getUTCHours()).padStart(2,'0')+':'+String(k.getUTCMinutes()).padStart(2,'0');
     return k.toISOString().slice(0,10)===now.toISOString().slice(0,10)?hm:(k.getUTCMonth()+1)+'/'+k.getUTCDate()+' '+hm;
   }
-  window.__leaders={phase:phase, closeCmp:closeCmp, mixNews:mixNews, newsTime:newsTime, f2:f2};
+  window.__leaders={phase:phase, afterPre:afterPre, closeCmp:closeCmp, mixNews:mixNews, newsTime:newsTime, f2:f2};
 
   var ST={ph:null, now:{}, cmp:{}, labels:null, vs:null, closedAt:0};
 
@@ -91,8 +94,10 @@
       CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&!head) head=x; });
       // 세션 날짜가 다른 종목은 같은 칸에 놓지 않는다.
       CODES.forEach(function(c){ var x=ST.cmp[c]; if(x&&head&&(x.date!==head.date||x.prevDate!==head.prevDate)) ST.cmp[c]=null; });
-      L={sub:ph==='after'?'애프터장 실시간 · 비교는 종가 기준':'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님',
-         now:ph==='after'?'지금 · 애프터장':'지금 · 추정',
+      // 15:31~15:59는 애프터장 전이라 지금 가격이 곧 종가다(서버도 16:00부터 after를 붙인다).
+      var pre=ph==='after'&&afterPre(Date.now());
+      L={sub:ph==='after'?(pre?'정규장 마감 · 애프터장 실시간은 16:00부터':'애프터장 실시간 · 비교는 종가 기준'):'하이퍼리퀴드 24h 추정가 · 실제 체결가 아님',
+         now:ph==='after'?(pre?'지금 · 종가':'지금 · 애프터장'):'지금 · 추정',
          t:head?md8(head.date)+' 종가':'종가', y:head?md8(head.prevDate)+' 종가':'전날 종가',
          mk:'전날보다', foot:head?'차이 = '+md8(head.date)+' 종가 등락 − '+md8(head.prevDate)+' 종가 등락이에요.':''};
     }

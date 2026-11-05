@@ -593,6 +593,15 @@ test('주도주 — 지금 가격 시간대: 장중 → 15:30~20:00 애프터장
   assert.equal(phase(at('2026-12-25T12:00:00')), 'night');      // 공휴일
 });
 
+test('주도주 — 15:31~15:59는 애프터장 전(시간외 종가)이라 종가로 보인다', () => {
+  const { afterPre } = loadWindow({}).__leaders;
+  const at = (s) => Date.parse(s + '+09:00');
+  assert.equal(afterPre(at('2026-11-04T15:30:00')), false);
+  assert.equal(afterPre(at('2026-11-04T15:31:00')), true);
+  assert.equal(afterPre(at('2026-11-04T15:59:00')), true);
+  assert.equal(afterPre(at('2026-11-04T16:00:00')), false);
+});
+
 test('주도주 — 장 마감 뒤 비교는 날짜 붙은 세 공식 종가로, 하나라도 없으면 비운다 (11/3 실측)', () => {
   const { closeCmp } = loadWindow({}).__leaders;
   const p = { price: 219500, sessionDate: '20261103', prevSessionClose: 229000, prevSessionDate: '20261102', prev2SessionClose: 225000 };

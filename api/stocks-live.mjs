@@ -45,13 +45,16 @@ export async function fetchOne(code) {
   }
 }
 
-// KRX 애프터마켓이 열려 있는 구간(거래일 15:30 초과 ~ 20:00 미만, §48). 이 동안 주도주 목록은
+// KRX 애프터마켓이 열려 있는 구간(거래일 16:00 ~ 20:00 미만, §48). 이 동안 주도주 목록은
 // 실시간 체결가를 '지금 가격'으로 보인다(§79). 20:00 뒤엔 하이퍼리퀴드 추정가(/api/hl-night)가 맡는다.
+// 15:31~15:59는 KRX 시간외 종가 매매라 체결가가 늘 종가와 같다(2026-11-04 실측) — after를 붙이지 않는다.
+// closePriceRaw는 KRX 가격이다. 같은 응답의 overMarketPriceInfo는 넥스트레이드라 섞지 않는다
+// (11/4 17:12:04 삼성전자 KRX 219,000 vs 넥스트레이드 218,500 — 같은 시각에 갈린다).
 export function afterHoursOpen(now = new Date()) {
   const k = new Date(now.getTime() + 9 * 3600000);
   if (isKospiHoliday(k)) return false;
   const m = k.getUTCHours() * 60 + k.getUTCMinutes();
-  return m > 15 * 60 + 30 && m < 20 * 60;
+  return m >= 16 * 60 && m < 20 * 60;
 }
 
 // 장이 닫힌 뒤 응답 — 정규장 값(1분봉)에, 애프터장 시간이면 실시간 체결가를 after로 붙인다.

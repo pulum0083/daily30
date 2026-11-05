@@ -117,10 +117,12 @@ test('그 전 세션 봉이 창에 없으면 비운다 — 만들어내지 않�
   assert.equal(r.prev2Date, null);
 });
 
-test('애프터장 구간 — 거래일 15:30 초과 ~ 20:00 미만만', () => {
+test('애프터장 구간 — 거래일 16:00 ~ 20:00 미만만 (15:31~15:59는 시간외 종가라 종가와 같다)', () => {
   const at = (s) => new Date(s + '+09:00');
   assert.equal(afterHoursOpen(at('2026-11-03T15:30:00')), false);
-  assert.equal(afterHoursOpen(at('2026-11-03T15:31:00')), true);
+  assert.equal(afterHoursOpen(at('2026-11-03T15:31:00')), false);
+  assert.equal(afterHoursOpen(at('2026-11-03T15:59:00')), false);
+  assert.equal(afterHoursOpen(at('2026-11-03T16:00:00')), true);
   assert.equal(afterHoursOpen(at('2026-11-03T19:59:00')), true);
   assert.equal(afterHoursOpen(at('2026-11-03T20:00:00')), false);
   assert.equal(afterHoursOpen(at('2026-11-07T17:00:00')), false);   // 토요일
