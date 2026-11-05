@@ -32,8 +32,9 @@
             {% if analyst_quotes %}{% include "sections/analyst_quotes.html" %}{% endif %}
             {# AI 종목 픽은 2026-10-26 제거 — 월봉 5개월선 안착 종목(결정론, §67). 조건 충족 종목이 없으면 섹션째 생략. #}
             {% if ma5m_items %}{% include "sections/monthly_ma5.html" %}{% endif %}
-            {# 구조 신호 — 본문 맨 아래. 모바일(900px 이하)에선 이 자리를 숨기고 시장 지표 바로 위에 보인다(2026-11-05 사용자 결정). #}
-            {% if struct_sig %}{% with ssig_place = "main" %}{% include "sections/struct_signal.html" %}{% endwith %}{% endif %}
+            {# 구조 신호(나스닥 체크) — 본문 맨 아래. 모바일(900px 이하)에선 이 자리를 숨기고 시장 지표 바로 위에 보인다(2026-11-05 사용자 결정).
+               60% 이상이면 위 나스닥 체크 섹션이 같은 값을 보여주므로 뺀다. #}
+            {% if struct_sig and not nq %}{% with ssig_place = "main" %}{% include "sections/struct_signal.html" %}{% endwith %}{% endif %}
           </div>
         </div>
       </div>
@@ -41,7 +42,7 @@
     </main>
 
     <aside class="layout-grid__right">
-      {% if struct_sig %}{% with ssig_place = "aside" %}{% include "sections/struct_signal.html" %}{% endwith %}{% endif %}
+      {% if struct_sig and not nq %}{% with ssig_place = "aside" %}{% include "sections/struct_signal.html" %}{% endwith %}{% endif %}
       {% if market_items or fng_dial %}{% include "sections/market_data.html" %}{% endif %}
       {% include "sections/_sidebar_kospi.html" %}
     </aside>

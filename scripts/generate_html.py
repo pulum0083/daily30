@@ -637,45 +637,28 @@ _NQ_BADGE = {"ok": "✓ 정상", "caution": "⚠️ 주의", "warn": "🚨 경�
 _NQ_W, _NQ_H, _NQ_PADR, _NQ_PADT, _NQ_PADB = 640, 190, 8, 10, 22   # 그래프 SVG 좌표(프로토타입과 같다)
 
 
-def _signed_pct(v: float) -> str:
-    return f"{'+' if v > 0 else '−' if v < 0 else ''}{abs(v):.2f}%"
-
-
 def build_struct_signal(analysis: dict) -> dict:
-    """미국 브리핑 '구조 신호' — 종목 홈 밤 구조 신호(home-hero.js nasdaqRow·usIndexRow)와 같은 값·눈금(§68 ⑤).
+    """미국 브리핑 '구조 신호' — 나스닥 체크 한 줄. 종목 홈 nasdaqRow(home-hero.js)와 같은 값·눈금이다(§68 ⑤).
 
-    재료는 이미 스냅샷에 있는 nasdaq_overheat·us_index_position이다. 한쪽만 있으면 그 줄만, 둘 다 없으면 블록째 뺀다.
-    나스닥 줄은 '브리핑 섹션은 60% 미만이면 숨김'과 달리 항상 보인다 — 값과 기준까지 거리를 매일 보여주는 자리다.
+    재료는 스냅샷의 nasdaq_overheat다. 값이 없으면 블록째 뺀다.
+    60% 이상이면 페이지의 '나스닥 체크' 섹션(§65)이 같은 값을 그래프와 함께 보여주므로 템플릿이 이 블록을 뺀다.
     """
     import nasdaq_overheat as nq
-    out = {}
     data = analysis.get("nasdaq_overheat") or {}
-    if isinstance(data.get("gap_pct"), (int, float)):
-        gap = float(data["gap_pct"])
-        top = max(80, math.ceil((gap + 5) / 10) * 10)
-        x = lambda v: round(max(0.0, min(v, top)) / top * 100, 1)
-        level = nq.level_of(gap)
-        month = str(data.get("month") or "")
-        out["nasdaq"] = {
-            "gap": gap, "level": level, "badge": _NQ_BADGE[level],
-            "x_gap": x(gap), "x_caution": x(nq.CAUTION), "x_warn": x(nq.WARN),
-            "w_caution": round((nq.WARN - nq.CAUTION) / top * 100, 1),
-            "caution": int(nq.CAUTION), "warn": int(nq.WARN),
-            "month_label": f"{int(month[5:7])}월" if len(month) == 7 else "이번 달",
-        }
-    pos = analysis.get("us_index_position") or {}
-    items = [i for i in (pos.get("items") or []) if isinstance(i.get("pct"), (int, float))]
-    asof = str(pos.get("asof") or "")
-    if items and re.fullmatch(r"\d{4}-\d{2}-\d{2}", asof):
-        top = max(5, math.ceil(max(abs(i["pct"]) for i in items) / 5) * 5)
-        d = datetime.strptime(asof, "%Y-%m-%d")
-        out["index"] = {
-            "asof": f"{d.month}/{d.day}({'월화수목금토일'[d.weekday()]})", "top": top,
-            "head": f"{items[0]['name']} {_signed_pct(items[0]['pct'])}",
-            "rows": [{"name": i["name"], "text": _signed_pct(i["pct"]), "up": i["pct"] >= 0,
-                      "w": round(abs(i["pct"]) / top * 50, 1)} for i in items],
-        }
-    return {"struct_sig": out} if out else {}
+    if not isinstance(data.get("gap_pct"), (int, float)):
+        return {}
+    gap = float(data["gap_pct"])
+    top = max(80, math.ceil((gap + 5) / 10) * 10)
+    x = lambda v: round(max(0.0, min(v, top)) / top * 100, 1)
+    level = nq.level_of(gap)
+    month = str(data.get("month") or "")
+    return {"struct_sig": {
+        "gap": gap, "level": level, "badge": _NQ_BADGE[level],
+        "x_gap": x(gap), "x_caution": x(nq.CAUTION), "x_warn": x(nq.WARN),
+        "w_caution": round((nq.WARN - nq.CAUTION) / top * 100, 1),
+        "caution": int(nq.CAUTION), "warn": int(nq.WARN),
+        "month_label": f"{int(month[5:7])}월" if len(month) == 7 else "이번 달",
+    }}
 
 
 def build_nasdaq_check(analysis: dict, target_date: str = "") -> dict:
