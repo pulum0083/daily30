@@ -1188,6 +1188,50 @@ def fix_issue_premarket_contradictions(analysis, latest, corrections) -> int:
     return fixed
 
 
+_ISSUE_ROSE_PAST = re.compile(r"올랐|웃었|뛰었|상승했|반등했|강세를? 보였")
+_ISSUE_FELL_PAST = re.compile(r"내렸|눌렸|눌린|밀렸|밀린|빠졌|떨어졌|하락했|급락했|약세를? 보였")
+
+
+def _prev_us_session_str(analysis) -> str:
+    """이 브리핑이 말하는 직전 미국장 날짜(YYYY-MM-DD). 발행 시각을 못 읽으면 빈 값."""
+    from datetime import date as _date
+    from session_label import prev_us_session
+    try:
+        s = prev_us_session(_date.fromisoformat(str(analysis.get("generated_at") or "")[:10]))
+    except ValueError:
+        return ""
+    return s.isoformat() if s else ""
+
+
+def fix_issue_side_tickers(analysis, latest, corrections, session_date) -> int:
+    """지난 장 일로 쓴 이슈의 ▲▼ 칩에서 직전 정규장에 반대로 0.5% 넘게 움직인 종목을 뺀다(2026-11-05 실사고).
+
+    11/5 1번 이슈가 CVX(−3.69%)·XOM(−4.62%)을 ▲에, AMD(+1.01%)·QCOM(+5.33%)을 ▼에 넣었다. 칩은 고칠 수 있지만
+    문장은 고칠 수 없다 — "에너지가 웃었다" 같은 문장은 프롬프트의 us_sector_session 규칙이 막는다.
+    """
+    moved = {}
+    for c in latest.get("us_candidates") or []:
+        for s in (c.get("recent_sessions") or []) if isinstance(c, dict) else []:
+            if s.get("date") == session_date and isinstance(s.get("pct"), (int, float)):
+                moved[c.get("ticker")] = s["pct"]
+    dropped = 0
+    for it in analysis.get("issues") or []:
+        if not isinstance(it, dict):
+            continue
+        text = f"{it.get('title') or ''} {it.get('body') or ''}"
+        for key, sign, past in (("down", 1, _ISSUE_FELL_PAST), ("up", -1, _ISSUE_ROSE_PAST)):
+            side = it.get(key)
+            if not isinstance(side, dict) or not past.search(text):
+                continue
+            tickers = side.get("tickers") or []
+            kept = [t for t in tickers if not (isinstance(moved.get(t), (int, float)) and moved[t] * sign >= _ISSUE_MIN_MOVE)]
+            if len(kept) != len(tickers):
+                dropped += len(tickers) - len(kept)
+                corrections.append(f"이슈 칩 제외 — 직전 정규장 반대로 움직임: {sorted(set(tickers) - set(kept))}")
+                side["tickers"] = kept
+    return dropped
+
+
 def fix_session_mislabels(analysis, corrections) -> int:
     """프리장에 거래되지 않는 지수를 '프리마켓에서'로 쓴 절을 '직전 정규장에서'로 고친다(미국 브리핑, §65 보강).
 
@@ -1658,6 +1702,9 @@ def validate(analysis, latest, btype):
         limit_data_issues(a, corrections)          # 시장 데이터형 이슈는 하루 1개까지
         trim_issue_bodies(a, corrections)          # 이슈 본문은 한 문장
         fix_issue_premarket_contradictions(a, latest, corrections)   # 지금 일처럼 쓴 방향이 프리마켓 실측과 반대면 교정
+        _sess = _prev_us_session_str(a)
+        if _sess:
+            fix_issue_side_tickers(a, latest, corrections, _sess)    # 지난 장 일로 쓴 칩을 직전 정규장 실측과 대조
         for hit in find_session_mislabels(a.get("issues")):
             warnings.append(
                 f"세션 오표기 의심 — {hit['subject']}는 프리장에 거래되지 않는다"

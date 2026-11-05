@@ -515,7 +515,12 @@ def _extended_hours_price(intraday, fast_last: float | None, now=None,
     if age_h > max_age_hours:
         # 마지막 체결이 너무 오래됨 — 주말·휴장 구간이라 연장시간대가 아니다.
         return float(fast_last) if fast_last else float(closes.iloc[-1])
-    return float(closes.iloc[-1])
+    last = float(closes.iloc[-1])
+    # 정규장 종가에서 25% 넘게 벌어진 연장시간대 값은 쓰지 않는다 — 2026-11-05 SOXX 144달러 vs 종가 450달러(§79)
+    if fast_last and abs(last / float(fast_last) - 1) > 0.25:
+        print(f"[fetch_data] 연장시간대 값 무시: {last} vs 종가 {fast_last}", file=sys.stderr)
+        return float(fast_last)
+    return last
 
 
 # CNN 공포·탐욕 지수 — 0~100 시장 심리 지표(투자자가 공포에 있는지 탐욕에 있는지).
@@ -878,6 +883,7 @@ def build_stock_candidates(candidates: list[tuple]) -> list[dict]:
             "sparkline":       data.get("sparkline", []),
             "ma20_sparkline":  data.get("ma20_sparkline", []),
             "ma200_sparkline": data.get("ma200_sparkline", []),
+            "recent_sessions": data.get("recent_sessions", []),
         }
         result.append(entry)
 
@@ -1523,6 +1529,12 @@ def fetch_us_data() -> dict:
         # 경제 지표 캘린더 (오늘 + 이번주 고영향 이벤트)
         "economic_calendar": economic_calendar,
         "us_candidates": us_candidates,
+        # 직전 정규장 섹터 ETF 실측 — 이슈가 어느 섹터가 오르내렸는지 쓸 때의 근거(2026-11-05, §79)
+        "us_sector_session": {
+            name: fetch_bridge_us_changes([t]).get(t)
+            for name, t in (("금융", "XLF"), ("에너지", "XLE"), ("산업재", "XLI"), ("기술", "XLK"),
+                            ("헬스케어", "XLV"), ("소비재", "XLY"), ("반도체", "SOXX"))
+        },
         # 주요 지수의 200일선 이격(종가 기준) — 종목 홈 구조 신호가 밤에 보여준다(§68 ⑤)
         "index_ma200": {
             label: {"date": macro[sym]["close_date"], "pct": macro[sym]["ma200_close_pct"]}

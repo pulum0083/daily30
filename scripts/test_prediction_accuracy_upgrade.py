@@ -228,3 +228,42 @@ def test_shadow_report_counts():
             {"type": "kospi", "prior_score": 1.0, "actual_open_pct": 1.0}]
     r = hr.report(rows)
     assert r["KR200"] == {"hit": 2, "n": 2} and r["prior"] == {"hit": 1, "n": 2} and r["AI"] == {"hit": 2, "n": 2}
+
+
+# ── 지난 장 일로 쓴 이슈 칩 — 직전 정규장 실측 대조(2026-11-05) ──
+def _sess(t, p):
+    return {"ticker": t, "recent_sessions": [{"date": "2026-11-03", "pct": 0.5}, {"date": "2026-11-04", "pct": p}]}
+
+
+LATEST_1104 = {"us_candidates": [_sess(t, p) for t, p in (("NVDA", -3.17), ("AMD", 1.01), ("MU", -7.00), ("QCOM", 5.33),
+                                                          ("BAC", 3.97), ("JPM", 4.18), ("CVX", -3.69), ("XOM", -4.62))]}
+
+
+def test_real_incident_20261105_side_tickers():
+    a = {"issues": [{"title": "민주당 압승", "body": "에너지는 웃었지만 반도체주만 눌렸어요.",
+                     "down": {"label": "반도체", "tickers": ["NVDA", "AMD", "MU", "QCOM"]},
+                     "up": {"label": "금융", "tickers": ["BAC", "JPM", "CVX", "XOM"]}}]}
+    corr = []
+    assert va.fix_issue_side_tickers(a, LATEST_1104, corr, "2026-11-04") == 4
+    assert a["issues"][0]["down"]["tickers"] == ["NVDA", "MU"] and a["issues"][0]["up"]["tickers"] == ["BAC", "JPM"] and corr
+
+
+def test_side_tickers_left_alone_when_not_about_past():
+    a = {"issues": [{"title": "오늘 볼 것", "body": "AI 투자 신호를 지켜봐요.", "down": {"label": "반도체", "tickers": ["AMD"]}}]}
+    assert va.fix_issue_side_tickers(a, LATEST_1104, [], "2026-11-04") == 0
+
+
+def test_side_tickers_ignore_other_session_and_unmeasured():
+    a = {"issues": [{"title": "t", "body": "눌렸어요.", "down": {"label": "x", "tickers": ["AMD", "ZZZ"]}}]}
+    assert va.fix_issue_side_tickers(a, LATEST_1104, [], "2026-10-30") == 0
+    assert a["issues"][0]["down"]["tickers"] == ["AMD", "ZZZ"]
+
+
+def test_extended_price_ignored_when_far_from_close():
+    import pandas as pd
+    import fetch_data as fd
+    now = pd.Timestamp("2026-11-05 07:16", tz="America/New_York")
+    df = pd.DataFrame({"Close": [144.2]}, index=[now])
+    assert fd._extended_hours_price(df, 450.41, now=now) == 450.41        # 11/5 SOXX
+    df = pd.DataFrame({"Close": [855.0]}, index=[now])
+    assert fd._extended_hours_price(df, 833.59, now=now) == 855.0
