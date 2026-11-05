@@ -32,6 +32,7 @@
     <i class="sc-bar__h" style="width:{{ sc_hit_pct }}%"></i><i class="sc-bar__m" style="width:{{ sc_miss_pct }}%"></i><i class="sc-bar__p" style="width:{{ sc_pending_pct }}%"></i>
   </div>
   <button class="sc-card__cta" data-modal-open="scorecard-modal">틀린 날까지 전부 공개해요 <span>→</span></button>
+  <a class="sc-card__all" href="/accuracy/" style="display:block;margin-top:8px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none">전체 성적표·방법 보기 →</a>
 </div>
 
 <div class="info-modal-backdrop" id="scorecard-modal">
@@ -65,7 +66,7 @@
       </div>
 
       <p class="scs">채점 기준은 <b>시초가</b>예요. 09:00 코스피 지수가 전일 종가보다 높게 열렸으면 상승, 낮게 열렸으면 하락으로 봐요.{% if sc_legacy_count %} 2026-10-13에 종가 기준에서 시초가 기준으로 바꿨고, 그 전 종가 기준 기록({{ sc_legacy_count }}건, 적중 {{ sc_legacy_pct }}%)은 기준이 달라 이 통계에 넣지 않았어요.{% endif %}</p>
-      <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요.</p>
+      <p class="sc-modal-note">맞은 날도 틀린 날도 그대로 공개해요. 예측이 완벽해서가 아니라, 결과를 숨기지 않는 게 우리 방식이니까요. <a href="/accuracy/">날마다 전체 기록 보기 →</a></p>
     </div>
   </div>
 </div>

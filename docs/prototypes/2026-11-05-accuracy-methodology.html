@@ -1,0 +1,257 @@
+<!-- 성적표(/accuracy/)·방법론(/methodology/) 페이지 시안 — 애드센스 "가치가 별로 없는 콘텐츠" 대응(2026-11-05).
+     숫자는 전부 data/briefings.json·scripts/config/*_backtest.json·us_close_prior.json에서 생성기(gen_proto.py)가 넣었다. 손으로 옮긴 숫자 없음.
+     §57의 713거래일 시초가 갭 백테스트·121일 분해 수치는 SERVICE_RULES §57 기록 값이다(재현: scripts/fit_open_gap_prior.py).
+     위 탭으로 두 페이지를 오간다. 실제 사이트에선 base.html 레이아웃(GNB·푸터)에 들어간다. -->
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시안 — 예측 성적표 · 방법론</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--ink:#13151A;--sub:#334155;--muted:#6B7280;--line:#E5E7EB;--soft:#F7F9FC;--up:#E03131;--dn:#2775ED;--ok:#0F9D58;--card:#fff}
+*{box-sizing:border-box} body{margin:0;background:#F2F4F7;color:var(--ink);font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;word-break:keep-all;line-height:1.6}
+.gnb{background:#13151A;color:#fff;height:52px;display:flex;align-items:center;padding:0 20px;gap:18px;font-size:14px} .gnb b{font-size:16px} .gnb span{color:#9CA3AF}
+.tabs{max-width:880px;margin:16px auto 0;padding:0 16px;display:flex;gap:6px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--sub);cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs small{margin-left:auto;align-self:center;color:var(--muted);font-size:12px}
+.wrap{max-width:880px;margin:0 auto;padding:16px 16px 60px}
+.page[hidden]{display:none}
+h1{font-size:26px;margin:8px 0 6px;letter-spacing:-.02em} .lead{color:var(--sub);font-size:15px;margin:0 0 4px} .asof{color:var(--muted);font-size:12.5px;margin:0 0 18px}
+h2{font-size:18px;margin:0 0 4px;display:flex;align-items:center;gap:8px} h2::before{content:"";width:3px;height:16px;background:var(--dn);border-radius:2px}
+h3{font-size:15px;margin:22px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:14px 0}
+.card>p{margin:6px 0} .desc{color:var(--muted);font-size:13px;margin:0 0 14px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.kpi .t{font-size:13px;font-weight:700;color:var(--sub)} .kpi .big{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:4px 0 0} .kpi .big small{font-size:14px;color:var(--muted);font-weight:600;margin-left:6px}
+.kpi .vs{font-size:13px;color:var(--sub);margin-top:6px} .kpi .vs b{color:var(--ink)} .kpi .def{font-size:12px;color:var(--muted);margin-top:8px;border-top:1px solid #F1F5F9;padding-top:8px}
+.vsbar{position:relative;height:8px;background:#EEF1F5;border-radius:4px;margin-top:10px} .vsbar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:4px} .vsbar em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#94A3B8}
+.warn{background:#FFF8E6;border:1px solid #F6E3B4;color:#7A5B00;border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0 0}
+.tw{overflow-x:auto} table{width:100%;border-collapse:collapse;font-size:13.5px} th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)} td{padding:8px;border-bottom:1px solid #F1F5F9;white-space:nowrap}
+td.dt small{color:var(--muted);margin-left:4px;font-size:11.5px} .pd{font-weight:700} .pd.up{color:var(--up)} .pd.dn{color:var(--dn)} .pp{color:var(--muted);font-size:12.5px}
+.num{font-variant-numeric:tabular-nums;font-weight:700} .num.up,.up{color:var(--up)} .num.dn{color:var(--dn)}
+.rs{font-weight:800;font-size:12.5px} .rs.ok{color:var(--ok)} .rs.no{color:#94A3B8}
+.cbs,.mos{display:flex;flex-direction:column;gap:8px}
+.cb,.mo{display:grid;grid-template-columns:76px minmax(0,1fr) 120px;align-items:center;gap:10px;font-size:13px} .mo{grid-template-columns:40px minmax(0,1fr) 90px}
+.cb-k,.mo-k{font-weight:700;color:var(--sub)} .cb-bar,.mo-bar,.bb{position:relative;height:12px;background:#EEF1F5;border-radius:6px;overflow:visible}
+.cb-bar i,.mo-bar i,.bb i{position:absolute;left:0;top:0;bottom:0;background:#475569;border-radius:6px} .mo-bar em{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E86464}
+.cb-v,.mo-v{text-align:right;font-variant-numeric:tabular-nums} .cb-v small,.mo-v small{color:var(--muted)}
+.bb{display:inline-block;width:120px;vertical-align:middle}
+.legend{font-size:12px;color:var(--muted);margin:10px 0 0} .legend i{display:inline-block;width:10px;height:10px;background:#475569;border-radius:2px;vertical-align:-1px;margin-right:4px} .legend em{display:inline-block;width:2px;height:12px;background:#E86464;vertical-align:-2px;margin:0 4px 0 12px}
+.fine{font-size:12px;color:var(--muted);margin:10px 0 0}
+.split{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0} .split div{background:var(--soft);border-radius:10px;padding:12px} .split b{display:block;font-size:22px} .split span{font-size:12.5px;color:var(--sub)}
+.split div.hl{background:#13151A;color:#fff} .split div.hl span{color:#CBD5E1}
+ul.rules{margin:8px 0 0;padding-left:18px} ul.rules li{margin:4px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px} .toc a{font-size:12.5px;color:var(--sub);background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 10px;text-decoration:none}
+.formula{font-family:ui-monospace,Menlo,monospace;background:var(--soft);border-radius:8px;padding:10px 12px;font-size:12.5px;overflow-x:auto;white-space:nowrap}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px} .mini div{border:1px solid var(--line);border-radius:10px;padding:12px} .mini b{font-size:20px} .mini span{display:block;font-size:12.5px;color:var(--sub)}
+a.inl{color:var(--dn);text-decoration:none;font-weight:700}
+@media(max-width:600px){ .kpis,.mini{grid-template-columns:1fr} .split{grid-template-columns:1fr} h1{font-size:22px} .cb{grid-template-columns:64px minmax(0,1fr) 100px} }
+</style></head><body>
+<div class="gnb"><b>Double-Shot</b><span>브리핑</span><span>월배당</span></div>
+<div class="tabs"><button class="on" data-p="acc">성적표 · /accuracy/</button><button data-p="met">방법론 · /methodology/</button><small>시안 — 실제 페이지에선 이 탭이 없어요</small></div>
+<div class="wrap">
+
+<!-- ═════════════ 성적표 ═════════════ -->
+<section class="page" id="acc">
+<h1>예측 성적표</h1>
+<p class="lead">Double-Shot이 매일 낸 방향 예측을 실제 지수로 채점한 기록이에요. 맞힌 날만 고르지 않고, 낸 예측은 전부 남겨요.</p>
+<p class="asof">11월 4일까지 채점한 기록 · 매일 09:10에 갱신</p>
+
+<div class="kpis">
+ <div class="kpi"><div class="t">🇰🇷 코스피 시초가 예측</div>
+  <div class="big">82.4%<small>14/17일 맞음</small></div>
+  <div class="vsbar"><i style="width:82.4%"></i><em style="left:41.2%"></em></div>
+  <div class="vs">매일 '상승'이라고 찍었다면 <b>41.2%</b> (7/17일)</div>
+  <div class="def">전날 종가 대비 09:00 시초가가 올랐는지 · 10/13~11/4</div></div>
+ <div class="kpi"><div class="t">🇺🇸 미국 종가 예측</div>
+  <div class="big">67.9%<small>89/131일 맞음</small></div>
+  <div class="vsbar"><i style="width:67.9%"></i><em style="left:52.7%"></em></div>
+  <div class="vs">매일 '상승'이라고 찍었다면 <b>52.7%</b> (69/131일)</div>
+  <div class="def">S&amp;P500이 전날보다 올라 마감했는지 · 4/15~11/4</div></div>
+</div>
+<div class="warn">코스피 시초가 예측은 10월 13일에 시작해 아직 17일뿐이에요. 표본이 작아 몇 날만 빗나가도 비율이 크게 바뀌어요. 막대 위 회색 선이 '매일 상승' 기준선이에요 — 예측이 의미가 있으려면 이 선보다 높아야 해요.</div>
+
+<div class="card" id="kospi">
+ <h2>코스피 시초가 예측 — 날마다</h2>
+ <p class="desc">아침 07:25 브리핑에서 낸 방향과 확률, 그날 실제 시초가 등락이에요. 확률은 큰 쪽 숫자예요.</p>
+ <div class="tw"><table><thead><tr><th>날짜</th><th>예측</th><th>실제 시초가</th><th>결과</th></tr></thead><tbody>
+<tr><td class="dt">11/4<small>수</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">85%</span></td>
+<td class="num up">+2.43%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">11/3<small>화</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">78%</span></td>
+<td class="num dn">−2.46%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">11/2<small>월</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">92%</span></td>
+<td class="num dn">−1.62%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/30<small>금</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">70%</span></td>
+<td class="num dn">−2.99%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/29<small>목</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">78%</span></td>
+<td class="num up">+0.08%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/28<small>수</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">85%</span></td>
+<td class="num up">+2.23%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/27<small>화</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">83%</span></td>
+<td class="num up">+3.46%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/26<small>월</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">58%</span></td>
+<td class="num dn">−0.92%</td>
+<td class="rs no">빗나감</td></tr>
+<tr><td class="dt">10/23<small>금</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">93%</span></td>
+<td class="num dn">−2.36%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/22<small>목</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">78%</span></td>
+<td class="num dn">−1.14%</td>
+<td class="rs no">빗나감</td></tr>
+<tr><td class="dt">10/21<small>수</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">73%</span></td>
+<td class="num up">+2.05%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/20<small>화</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">83%</span></td>
+<td class="num dn">−0.60%</td>
+<td class="rs no">빗나감</td></tr>
+<tr><td class="dt">10/19<small>월</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">92%</span></td>
+<td class="num dn">−3.17%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/16<small>금</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">64%</span></td>
+<td class="num up">+1.80%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/15<small>목</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">88%</span></td>
+<td class="num dn">−5.59%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/14<small>수</small></td>
+<td><span class="pd up">▲ 상승 우위</span> <span class="pp">63%</span></td>
+<td class="num up">+0.44%</td>
+<td class="rs ok">맞음</td></tr>
+<tr><td class="dt">10/13<small>화</small></td>
+<td><span class="pd dn">▼ 하락 우위</span> <span class="pp">72%</span></td>
+<td class="num dn">−3.10%</td>
+<td class="rs ok">맞음</td></tr>
+ </tbody></table></div>
+ <h3>확률을 높게 말한 날일수록 더 맞았나</h3>
+ <div class="cbs"><div class="cb"><span class="cb-k">50~59%</span><span class="cb-bar"><i style="width:0%"></i></span><span class="cb-v"><b>0%</b> 맞음 <small>0/1일</small></span></div><div class="cb"><span class="cb-k">60~69%</span><span class="cb-bar"><i style="width:100%"></i></span><span class="cb-v"><b>100%</b> 맞음 <small>2/2일</small></span></div><div class="cb"><span class="cb-k">70~79%</span><span class="cb-bar"><i style="width:83%"></i></span><span class="cb-v"><b>83%</b> 맞음 <small>5/6일</small></span></div><div class="cb"><span class="cb-k">80% 이상</span><span class="cb-bar"><i style="width:88%"></i></span><span class="cb-v"><b>88%</b> 맞음 <small>7/8일</small></span></div></div><p class="fine">예측 확률 구간별로 실제 맞힌 비율이에요. 아직 날 수가 적어 참고만 하세요.</p>
+</div>
+
+<div class="card" id="us">
+ <h2>미국 종가 예측 — 달마다</h2>
+ <p class="desc">밤 21:15 브리핑의 방향을 그날 S&amp;P500 종가로 채점했어요.</p>
+ <div class="mos"><div class="mo"><span class="mo-k">4월</span><span class="mo-bar"><i style="width:91%"></i><em style="left:55%" title="매일 상승이라고 찍었다면 55%"></em></span><span class="mo-v"><b>91%</b> <small>10/11</small></span></div><div class="mo"><span class="mo-k">5월</span><span class="mo-bar"><i style="width:79%"></i><em style="left:74%" title="매일 상승이라고 찍었다면 74%"></em></span><span class="mo-v"><b>79%</b> <small>15/19</small></span></div><div class="mo"><span class="mo-k">6월</span><span class="mo-bar"><i style="width:55%"></i><em style="left:50%" title="매일 상승이라고 찍었다면 50%"></em></span><span class="mo-v"><b>55%</b> <small>11/20</small></span></div><div class="mo"><span class="mo-k">7월</span><span class="mo-bar"><i style="width:64%"></i><em style="left:64%" title="매일 상승이라고 찍었다면 64%"></em></span><span class="mo-v"><b>64%</b> <small>9/14</small></span></div><div class="mo"><span class="mo-k">8월</span><span class="mo-bar"><i style="width:62%"></i><em style="left:43%" title="매일 상승이라고 찍었다면 43%"></em></span><span class="mo-v"><b>62%</b> <small>13/21</small></span></div><div class="mo"><span class="mo-k">9월</span><span class="mo-bar"><i style="width:62%"></i><em style="left:33%" title="매일 상승이라고 찍었다면 33%"></em></span><span class="mo-v"><b>62%</b> <small>13/21</small></span></div><div class="mo"><span class="mo-k">10월</span><span class="mo-bar"><i style="width:77%"></i><em style="left:55%" title="매일 상승이라고 찍었다면 55%"></em></span><span class="mo-v"><b>77%</b> <small>17/22</small></span></div><div class="mo"><span class="mo-k">11월</span><span class="mo-bar"><i style="width:33%"></i><em style="left:67%" title="매일 상승이라고 찍었다면 67%"></em></span><span class="mo-v"><b>33%</b> <small>1/3</small></span></div></div>
+ <p class="legend"><i></i>맞힌 비율 <em></em>그 달 매일 '상승'이라고 찍었다면</p>
+ <h3>확률을 높게 말한 날일수록 더 맞았나</h3>
+ <div class="cbs"><div class="cb"><span class="cb-k">50~59%</span><span class="cb-bar"><i style="width:61%"></i></span><span class="cb-v"><b>61%</b> 맞음 <small>30/49일</small></span></div><div class="cb"><span class="cb-k">60~69%</span><span class="cb-bar"><i style="width:71%"></i></span><span class="cb-v"><b>71%</b> 맞음 <small>53/75일</small></span></div><div class="cb"><span class="cb-k">70~79%</span><span class="cb-bar"><i style="width:86%"></i></span><span class="cb-v"><b>86%</b> 맞음 <small>6/7일</small></span></div></div><p class="fine">131일 중 71일(7/27~11/3)은 채점이 잠시 멈춰 있던 기간이라, 그날 발행한 브리핑 원본에 적힌 예측을 나중에 실제 종가로 채점했어요.</p>
+</div>
+
+<div class="card" id="retired">
+ <h2>바꾼 기준 — 코스피 종가 예측 (4/7~10/12)</h2>
+ <p>10월 12일까지 코스피 예측은 '그날 종가'를 맞히는 것이었어요. 122일 동안 <b>63.1%</b>를 맞혔는데, 매일 '상승'이라고만 찍어도 <b>59.0%</b>였어요. 차이가 4.1%p뿐이라 예측이 거의 쓸모없었다는 뜻이에요.</p>
+ <p>같은 기간을 나눠 보니 이유가 보였어요. 예측에 쓰는 정보(밤사이 미국장·선물·환율)는 아침 개장가를 설명하지만, 장중 움직임은 설명하지 못했어요.</p>
+ <div class="split"><div class="hl"><b>74.8%</b><span>시초가 방향을 맞힌 비율</span></div><div><b>66.1%</b><span>종가 방향</span></div><div><b>46.1%</b><span>장중(시가→종가) 방향 — 동전 던지기보다 낮음</span></div></div>
+ <p>그래서 10월 13일부터 맞힐 수 있는 것, 시초가만 예측해요. 예전 기록은 다시 채점하지 않고 이렇게 따로 남겨 둬요.</p>
+ <p class="fine">세 비율은 4/7~10/8 중 상승·하락 방향을 말한 115일 기준이라, 중립 예측까지 넣은 위 63.1%와 조금 달라요. 계산 방법은 <a class="inl" href="#" data-go="met">방법론</a>에 있어요.</p>
+</div>
+
+<div class="card">
+ <h2>채점 규칙</h2>
+ <ul class="rules">
+  <li>코스피: 전 거래일 종가 대비 당일 09:00 시가. 시가를 못 구한 날은 종가로 대신 채점하지 않고 비워 둬요.</li>
+  <li>미국: S&amp;P500 전 거래일 대비 종가.</li>
+  <li>'상승 우위'·'하락 우위'는 실제 방향이 같으면 맞음, '중립'은 실제 변동이 ±0.5% 안이면 맞음이에요.</li>
+  <li>채점은 다음 거래일 09:10에 자동으로 해요.</li>
+ </ul>
+</div>
+</section>
+
+<!-- ═════════════ 방법론 ═════════════ -->
+<section class="page" id="met" hidden>
+<h1>어떻게 예측하나요</h1>
+<p class="lead">Double-Shot의 숫자가 어디서 오고, 예측 확률을 어떻게 내는지 적었어요. 직접 돌린 백테스트 결과도 좋든 나쁘든 그대로 공개해요.</p>
+<div class="toc"><a href="#m-rule">데이터 원칙</a><a href="#m-kospi">코스피 시초가</a><a href="#m-us">미국 종가</a><a href="#m-ma5">월봉 5개월선</a><a href="#m-nq">나스닥 체크</a></div>
+
+<div class="card" id="m-rule">
+ <h2>데이터 원칙</h2>
+ <ul class="rules">
+  <li><b>화면의 숫자는 전부 실제 시세예요.</b> AI가 쓴 문장에 숫자가 있으면 발행 전에 실제 데이터와 대조하고, 다르면 고치거나 지워요.</li>
+  <li><b>데이터가 없으면 비워요.</b> 수집에 실패한 칸을 추정값이나 지난 값으로 채우지 않아요.</li>
+  <li><b>한국 종목 종가는 KRX 정규장 15:30 공식 종가예요.</b> 2026년 9월부터 애프터마켓이 생겨 일봉 종가에 장 마감 뒤 가격이 섞이기 때문에, 15:30 1분봉으로 다시 맞춰요.</li>
+  <li><b>브리핑은 발행 시각의 시장 상태로 만들어요.</b> 밤 21:15 미국 브리핑은 미국 프리마켓 한복판이라, 그 시각의 실제 체결가를 써요.</li>
+ </ul>
+</div>
+
+<div class="card" id="m-kospi">
+ <h2>코스피 시초가 예측</h2>
+ <p class="desc">아침 07:25, 한국·미국 시장이 모두 닫혀 있을 때 오늘 09:00 시초가 방향을 예측해요.</p>
+ <h3>① 밤사이 신호 다섯 개를 점수로 합쳐요</h3>
+ <div class="tw"><table><thead><tr><th>신호</th><th>무엇을 보나</th><th>가중치</th></tr></thead><tbody>
+  <tr><td>필라델피아 반도체(SOX)</td><td>직전 미국장 등락 — 삼성전자·SK하이닉스와 가장 가깝게 움직여요</td><td class="num">1.5</td></tr>
+  <tr><td>나스닥</td><td>직전 미국장 등락</td><td class="num">0.5</td></tr>
+  <tr><td>나스닥100 선물</td><td>07:25 현재 등락</td><td class="num">0.3</td></tr>
+  <tr><td>한국 ETF(EWY)</td><td>미국에 상장된 한국 ETF 등락에서 전날 코스피 움직임을 뺀 나머지</td><td class="num">0.3</td></tr>
+  <tr><td>VIX</td><td>미국 변동성 지수 — 오르면 감점</td><td class="num">−0.2</td></tr>
+ </tbody></table></div>
+ <p class="fine">원/달러 환율도 넣었었지만, 시초가 방향과 반대로 움직이는 경우가 더 많아(적중 46.7%) 빼고 기록만 해요.</p>
+ <h3>② 점수를 확률로 바꿔요</h3>
+ <div class="formula">상승 확률 = 1 ÷ (1 + e<sup>−(0.422 + 0.244 × 점수)</sup>)</div>
+ <p>2023년 11월부터 713거래일로 맞춘 식이에요. 2025년까지 데이터로 맞추고 2026년에 시험해 본 결과예요.</p>
+ <div class="mini"><div><b>90%</b><span>'80% 이상 상승'이라고 한 날 실제로 오른 비율</span></div><div><b>14%</b><span>'20% 이하'라고 한 날 실제로 오른 비율</span></div></div>
+ <div class="mini"><div><b>72.5%</b><span>713일 전체 시초가 방향 적중 (매일 상승 60.2%)</span></div><div><b>76.1%</b><span>2026년만 (매일 상승 56.9%)</span></div></div>
+ <h3>③ AI는 근거를 쓰고, 방향은 계산이 정해요</h3>
+ <p>계산한 확률이 55% 이상이면 상승, 45% 이하면 하락으로 정해요. AI(Claude)는 그 확률에서 ±10%p 안에서만 조정하고, 오늘의 근거와 개장 후 볼 것을 써요. 45~55%처럼 동전 던지기에 가까운 날만 AI 판단에 맡겨요. AI가 계산과 다른 방향을 낸 날이 실제로 더 많이 틀렸기 때문이에요.</p>
+</div>
+
+<div class="card" id="m-us">
+ <h2>미국 종가 예측</h2>
+ <p class="desc">밤 21:15에 S&amp;P500 선물이 전날 종가보다 얼마나 움직였는지로 그날 종가 방향의 출발 확률을 정해요.</p>
+ <div class="tw"><table><thead><tr><th>21:15 S&amp;P500 선물 등락</th><th>날 수</th><th>그날 S&amp;P500이 오른 비율</th></tr></thead><tbody><tr><td>−0.5% 미만 -0.5%</td><td class="num">61일</td><td><span class="bb"><i style="width:20%"></i></span> <b>20%</b></td></tr><tr><td>-0.5% ~ -0.2%</td><td class="num">82일</td><td><span class="bb"><i style="width:39%"></i></span> <b>39%</b></td></tr><tr><td>-0.2% ~ 0.0%</td><td class="num">99일</td><td><span class="bb"><i style="width:45%"></i></span> <b>45%</b></td></tr><tr><td>0.0% ~ +0.2%</td><td class="num">134일</td><td><span class="bb"><i style="width:57%"></i></span> <b>57%</b></td></tr><tr><td>+0.2% ~ +0.5%</td><td class="num">130일</td><td><span class="bb"><i style="width:72%"></i></span> <b>72%</b></td></tr><tr><td>+0.5% 이상</td><td class="num">87일</td><td><span class="bb"><i style="width:76%"></i></span> <b>76%</b></td></tr></tbody></table></div>
+ <p class="fine">2024년 6월~2026년 11월 593거래일. 이 표만으로 방향을 정하면 65.8%를 맞혀요. AI는 여기서 ±10%p 안에서만 조정하고 50%를 넘어 방향을 뒤집지 못해요. 전날 반도체 지수·VIX도 넣어 봤지만 오히려 떨어져(57.7%) 뺐어요.</p>
+</div>
+
+<div class="card" id="m-ma5">
+ <h2>월봉 5개월선 안착 종목 — 오른다는 증거는 없었어요</h2>
+ <p>월말 종가가 5개월 이동평균선 위에서 3개월 넘게 마감한 종목을 매일 아침 보여줘요. 흔히 '안착하면 오른다'고 하지만, 직접 돌려 보니 그렇지 않았어요.</p>
+ <div class="mini"><div><b>49.6%</b><span>코스피200 종목이 조건을 채운 뒤 1년 안에 오른 비율 (2,128건)</span></div><div><b>50.4%</b><span>아무 종목·아무 달이나 골랐을 때 (29,685건)</span></div></div>
+ <div class="mini"><div><b>75.4%</b><span>미국 대형주 20종목 · 조건 충족 뒤 1년 (276건)</span></div><div><b>73.5%</b><span>같은 종목 아무 달 (3,500건)</span></div></div>
+ <p class="fine">2011-01~2025-08 신호, 지금 구성종목 기준이라 상장폐지·편출 종목이 빠진 생존 편향이 있어요. 그래서 이 코너는 '추천'이 아니라 '조건을 채운 종목'이라고만 불러요.</p>
+</div>
+
+<div class="card" id="m-nq">
+ <h2>나스닥 체크 — 60개월선에서 얼마나 멀어졌나</h2>
+ <p>나스닥 월봉 고점이 60개월(5년) 평균보다 몇 % 위에 있는지 봐요. 60%를 넘으면 주의, 70%를 넘으면 경고예요.</p>
+ <div class="mini"><div><b>51.1%</b><span>70%를 넘은 달 뒤 12개월 안에 고점에서 20% 넘게 빠진 비율 (47개월)</span></div><div><b>18.8%</b><span>아무 달이나 골랐을 때</span></div></div>
+ <p>70%를 넘은 시기는 1997~2000 · 2020~2021뿐이었어요. 반대로 60~70% 구간에선 12개월 뒤 평균 수익률이 27.9%로 전체 평균(15.0%)보다 높았어요 — 주의 구간이 곧 하락은 아니에요.</p>
+ <p class="fine">1990년부터 442개월, 나스닥 종합지수 월봉 기준.</p>
+</div>
+
+<div class="card">
+ <h2>데이터 출처</h2>
+ <ul class="rules">
+  <li>한국 시세·수급: 네이버 증권(정규장 공식 종가는 15:30 1분봉으로 확인)</li>
+  <li>미국 시세·선물·지수: Yahoo Finance, 토스증권 Open API</li>
+  <li>뉴스 요약: 실제 기사를 먼저 모으고 AI는 고르고 요약만 해요. 출처가 없는 뉴스는 싣지 않아요.</li>
+  <li>예측 문장: Anthropic Claude. 발행 전 자동 검증을 거쳐요.</li>
+ </ul>
+ <p class="fine">이 사이트의 모든 내용은 정보 제공용이며 투자 권유가 아니에요.</p>
+</div>
+</section>
+</div>
+<script>
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.p));
+document.querySelectorAll('[data-go]').forEach(a=>a.onclick=e=>{e.preventDefault();show(a.dataset.go);});
+function show(p){document.querySelectorAll('.page').forEach(s=>s.hidden=s.id!==p);document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));scrollTo(0,0);}
+</script>
+</body></html>

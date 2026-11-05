@@ -1,0 +1,109 @@
+{# 방법론(/methodology/) — 숫자의 출처, 예측 확률을 내는 방법, 직접 돌린 백테스트 결과(2026-11-05, §80).
+   숫자는 전부 record_pages.build_methodology()가 config의 백테스트 파일·leading_signal.py에서 가져온다. 파일이 없으면 그 칸을 뺀다. #}
+{% extends "base.html" %}
+{% block title %}어떻게 예측하나요 — 데이터 원칙·예측 방법·백테스트 | Double-Shot{% endblock %}
+{% block og_title %}어떻게 예측하나요 — Double-Shot 방법론{% endblock %}
+{% block og_desc %}Double-Shot의 숫자가 어디서 오고 예측 확률을 어떻게 내는지 적었어요. 코스피 시초가·미국 종가 예측 방법과 직접 돌린 백테스트 결과를 좋든 나쁘든 그대로 공개해요.{% endblock %}
+{% block head_extra %}{% include "pages/_record_css.html" %}{% endblock %}
+{% block body %}
+<main class="rec-wrap">
+  <div class="rec-crumb"><a href="/stocks/">홈</a> › 어떻게 예측하나요</div>
+  <div class="rec-switch"><a href="/accuracy/">예측 성적표</a><a class="on" href="/methodology/">어떻게 예측하나요</a></div>
+  <h1 class="rec-title">어떻게 예측하나요</h1>
+  <p class="rec-lead">Double-Shot의 숫자가 어디서 오고, 예측 확률을 어떻게 내는지 적었어요. 직접 돌린 백테스트 결과도 좋든 나쁘든 그대로 공개해요.</p>
+  <div class="rec-toc"><a href="#m-rule">데이터 원칙</a><a href="#m-kospi">코스피 시초가</a>{% if us %}<a href="#m-us">미국 종가</a>{% endif %}{% if ma5 %}<a href="#m-ma5">월봉 5개월선</a>{% endif %}{% if nq %}<a href="#m-nq">나스닥 체크</a>{% endif %}<a href="#m-src">데이터 출처</a></div>
+
+  <section class="rec-card" id="m-rule">
+    <h2>데이터 원칙</h2>
+    <ul>
+      <li><b>화면의 숫자는 전부 실제 시세예요.</b> AI가 쓴 문장에 숫자가 있으면 발행 전에 실제 데이터와 대조하고, 다르면 고치거나 지워요.</li>
+      <li><b>데이터가 없으면 비워요.</b> 수집에 실패한 칸을 추정값이나 지난 값으로 채우지 않아요.</li>
+      <li><b>한국 종목 종가는 KRX 정규장 15:30 공식 종가예요.</b> 2026년 9월부터 애프터마켓이 생겨 일봉 종가에 장 마감 뒤 가격이 섞이기 때문에, 15:30 1분봉으로 다시 맞춰요.</li>
+      <li><b>브리핑은 발행 시각의 시장 상태로 만들어요.</b> 밤 21:15 미국 브리핑은 미국 프리마켓 한복판이라, 그 시각의 실제 체결가를 써요.</li>
+    </ul>
+  </section>
+
+  <section class="rec-card" id="m-kospi">
+    <h2>코스피 시초가 예측</h2>
+    <p class="rec-desc">아침 07:25, 한국·미국 시장이 모두 닫혀 있을 때 오늘 09:00 시초가 방향을 예측해요.</p>
+    <h3>① 밤사이 신호를 점수로 합쳐요</h3>
+    <div class="rec-tw"><table>
+      <thead><tr><th>신호</th><th>무엇을 보나</th><th>가중치</th></tr></thead>
+      <tbody>{% for w in weights %}<tr><td>{{ w.name }}</td><td class="wrap">{{ w.what }}</td><td class="rec-num">{{ '%g'|format(w.w)|replace('-', '−') }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% if kospi %}<p class="rec-fine">원/달러 환율도 넣었었지만, 환율 방향으로 시초가를 맞힌 날이 {{ kospi.usdkrw_sign_hit_pct }}%로 절반도 안 돼 뺐어요. 값은 기록만 해요.</p>{% endif %}
+    <h3>② 점수를 확률로 바꿔요</h3>
+    <div class="rec-formula">상승 확률 = 1 ÷ (1 + e<sup>−({{ prob_a }} + {{ prob_b }} × 점수)</sup>)</div>
+    {% if kospi %}
+    <p>{{ kospi.data_from[:4] }}년 {{ kospi.data_from[5:7]|int }}월부터 {{ kospi.days }}거래일로 시험한 결과예요. 나스닥100 선물의 07:25 값은 과거를 되살릴 수 없어 이 시험에선 뺐어요.</p>
+    <div class="rec-pair">
+      <div><b>{{ kospi.hit_pct }}%</b><span>전체 기간 시초가 방향 적중 (매일 '상승'이라고 찍었다면 {{ kospi.base_up_pct }}%)</span></div>
+      <div><b>{{ kospi.y2026.hit_pct }}%</b><span>2026년 {{ kospi.y2026.days }}일만 (매일 '상승'이라고 찍었다면 {{ kospi.y2026.base_up_pct }}%)</span></div>
+    </div>
+    {% if kospi.calib_2026 %}
+    <div class="rec-pair">{% for c in kospi.calib_2026 %}<div><b>{{ c.actual_up_pct }}%</b><span>2026년 확률이 {{ (c.lo * 100)|int }}~{{ (c.hi * 100)|int }}%로 계산된 {{ c.days }}일 중 실제로 위로 열린 비율 (계산 평균 {{ c.pred_pct }}%)</span></div>{% endfor %}</div>
+    {% endif %}
+    {% endif %}
+    <h3>③ 방향은 계산이 정하고, AI는 근거를 써요</h3>
+    <p>계산한 확률이 {{ side_up }}% 이상이면 상승, {{ side_dn }}% 이하면 하락으로 정해요. AI(Claude)는 그 확률에서 ±{{ tol }}%p 안에서만 조정하고, 오늘의 근거와 개장 후 볼 것을 써요. {{ side_dn }}~{{ side_up }}%처럼 동전 던지기에 가까운 날만 방향을 AI 판단에 맡겨요. AI가 계산과 다른 방향을 낸 날이 실제로 더 많이 틀렸기 때문이에요.</p>
+    {% if kospi and kospi.legacy_split %}{% set S = kospi.legacy_split %}
+    <h3>왜 종가가 아니라 시초가인가요</h3>
+    <p>10월 12일까지는 종가 방향을 예측했어요. 그 {{ S.days }}일의 예측을 시초가·종가·장중으로 나눠 채점하니 시초가 {{ S.open_hit_pct }}% · 종가 {{ S.close_hit_pct }}% · 장중 {{ S.intraday_hit_pct }}%였어요. 밤사이 정보는 개장가를 설명할 뿐 장중 움직임은 설명하지 못해서, 맞힐 수 있는 시초가로 바꿨어요. <a class="rec-link" href="/accuracy/#retired">예전 기록 보기</a></p>
+    {% endif %}
+  </section>
+
+  {% if us %}
+  <section class="rec-card" id="m-us">
+    <h2>미국 종가 예측</h2>
+    <p class="rec-desc">밤 21:15에 S&amp;P500 선물이 전날 종가보다 얼마나 움직였는지로 그날 종가 방향의 출발 확률을 정해요.</p>
+    <div class="rec-tw"><table>
+      <thead><tr><th>21:15 S&amp;P500 선물 등락</th><th>날 수</th><th>그날 S&amp;P500이 오른 비율</th></tr></thead>
+      <tbody>{% for b in us.bands %}<tr><td>{{ b.label|replace('-', '−') }}</td><td class="rec-num">{{ b.days }}일</td><td><span class="rec-bb"><i style="width:{{ b.up }}%"></i></span><b>{{ b.up }}%</b></td></tr>{% endfor %}</tbody>
+    </table></div>
+    <p class="rec-fine">{{ us.from_label }}~{{ us.to_label }} {{ us.days }}거래일. 이 표만으로 방향을 정하면 {{ us.direction_hit_pct }}%를 맞혀요. AI는 여기서 ±{{ tol }}%p 안에서만 조정하고 50%를 넘어 방향을 뒤집지 못해요. 전날 반도체 지수·VIX를 함께 넣으면 오히려 덜 맞아서 뺐어요.</p>
+  </section>
+  {% endif %}
+
+  {% if ma5 %}
+  <section class="rec-card" id="m-ma5">
+    <h2>월봉 5개월선 안착 종목 — 오른다는 증거는 없었어요</h2>
+    <p>월말 종가가 5개월 이동평균선 위에서 3개월 넘게 마감한 종목을 매일 아침 보여줘요. 흔히 '안착하면 오른다'고 하지만, 직접 돌려 보니 그렇지 않았어요.</p>
+    <div class="rec-pair">
+      <div><b>{{ ma5.sig.win_pct }}%</b><span>{{ ma5.universe }}에서 조건을 채운 종목이 1년 안에 오른 비율 ({{ '{:,}'.format(ma5.sig.n) }}건)</span></div>
+      <div><b>{{ ma5.base.win_pct }}%</b><span>아무 종목·아무 달이나 골랐을 때 ({{ '{:,}'.format(ma5.base.n) }}건)</span></div>
+    </div>
+    {% if ma5us %}
+    <div class="rec-pair">
+      <div><b>{{ ma5us.sig.win_pct }}%</b><span>{{ ma5us.universe }} · 조건 충족 뒤 1년 ({{ '{:,}'.format(ma5us.sig.n) }}건)</span></div>
+      <div><b>{{ ma5us.base.win_pct }}%</b><span>같은 종목 아무 달 ({{ '{:,}'.format(ma5us.base.n) }}건)</span></div>
+    </div>
+    {% endif %}
+    <p class="rec-fine">{{ ma5.period }} 신호, 지금 구성종목 기준이라 상장폐지·편출 종목이 빠진 생존 편향이 있어요. 그래서 이 코너는 '추천'이 아니라 '조건을 채운 종목'이라고만 불러요.</p>
+  </section>
+  {% endif %}
+
+  {% if nq %}
+  <section class="rec-card" id="m-nq">
+    <h2>나스닥 체크 — 60개월선에서 얼마나 멀어졌나</h2>
+    <p>나스닥 월봉 고점이 60개월(5년) 평균보다 몇 % 위에 있는지 봐요. 60%를 넘으면 주의, 70%를 넘으면 경고예요.</p>
+    <div class="rec-pair">
+      <div><b>{{ nq.warn.dd20_pct }}%</b><span>70%를 넘은 달 뒤 12개월 안에 고점에서 20% 넘게 빠진 비율 ({{ nq.warn.months }}개월)</span></div>
+      <div><b>{{ nq.all_dd20_pct }}%</b><span>아무 달이나 골랐을 때</span></div>
+    </div>
+    <p>70%를 넘은 시기는 {{ nq.warn.periods|join(' · ') }}뿐이었어요. 반대로 60~70% 구간에선 12개월 뒤 평균 수익률이 {{ nq.caution_band.fwd12_avg_pct }}%로 전체 평균({{ nq.all_fwd12_avg_pct }}%)보다 높았어요. 주의 구간이 곧 하락은 아니에요.</p>
+    <p class="rec-fine">{{ nq.since_year }}년부터 {{ nq.months_total }}개월, 나스닥 종합지수 월봉 기준. <a class="rec-link" href="/stocks/nasdaq-check/">그래프 자세히 보기</a></p>
+  </section>
+  {% endif %}
+
+  <section class="rec-card" id="m-src">
+    <h2>데이터 출처</h2>
+    <ul>
+      <li>한국 시세·수급은 네이버 증권에서 가져와요. 정규장 공식 종가는 15:30 1분봉으로 확인해요.</li>
+      <li>미국 시세·선물·지수는 Yahoo Finance와 토스증권 Open API에서 가져와요.</li>
+      <li>뉴스 요약은 실제 기사를 먼저 모으고 AI는 고르고 요약만 해요. 출처가 확인되지 않는 뉴스는 싣지 않아요.</li>
+      <li>예측 문장은 Anthropic Claude가 쓰고, 발행 전 자동 검증을 거쳐요.</li>
+    </ul>
+    <p class="rec-fine">이 사이트의 모든 내용은 정보 제공용이며 투자 권유가 아니에요. <a class="rec-link" href="/legal/disclaimer/">면책 고지</a> · <a class="rec-link" href="/about/">서비스 소개</a></p>
+  </section>
+</main>
+{% endblock %}

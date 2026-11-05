@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어떻게 예측하나요 — 데이터 원칙·예측 방법·백테스트 | Double-Shot</title>
+<meta name="naver-site-verification" content="d2ac1feb412642dd359d2c5db626a1dffeaf8110" />
+<link rel="alternate" type="application/rss+xml" title="Double-Shot 브리핑" href="https://doubleshot.space/briefings/rss.xml">
+
+<meta name="description" content="Double-Shot의 숫자가 어디서 오고 예측 확률을 어떻게 내는지 적었어요. 코스피 시초가·미국 종가 예측 방법과 직접 돌린 백테스트 결과를 좋든 나쁘든 그대로 공개해요.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Double-Shot">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://doubleshot.space/methodology/">
+<meta property="og:title" content="어떻게 예측하나요 — Double-Shot 방법론">
+<meta property="og:description" content="Double-Shot의 숫자가 어디서 오고 예측 확률을 어떻게 내는지 적었어요. 코스피 시초가·미국 종가 예측 방법과 직접 돌린 백테스트 결과를 좋든 나쁘든 그대로 공개해요.">
+
+<meta property="og:image" content="https://doubleshot.space/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="어떻게 예측하나요 — Double-Shot 방법론">
+<meta name="twitter:description" content="Double-Shot의 숫자가 어디서 오고 예측 확률을 어떻게 내는지 적었어요. 코스피 시초가·미국 종가 예측 방법과 직접 돌린 백테스트 결과를 좋든 나쁘든 그대로 공개해요.">
+<meta name="twitter:image" content="https://doubleshot.space/assets/og-image.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://doubleshot.space/stocks/"},{"@type":"ListItem","position":2,"name":"어떻게 예측하나요","item":"https://doubleshot.space/methodology/"}]}</script>
+
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=20261029a">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0F172A">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="/assets/pwa-install.js" defer></script>
+<link rel="canonical" href="https://doubleshot.space/methodology/">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PW9RHHFPM4"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-PW9RHHFPM4');</script>
+<!-- 구글 애드센스 로더(2026-10-27) — 광고 단위(<ins class="adsbygoogle">)는 각 템플릿 본문에 둔다 -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7262578476089316" crossorigin="anonymous"></script>
+
+<style>
+  .rec-wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px;word-break:keep-all}
+  .rec-crumb{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .rec-crumb a{color:var(--muted);text-decoration:none} .rec-crumb a:hover{color:var(--ink)}
+  .rec-title{font-size:24px;font-weight:900;color:var(--ink);margin:0 0 6px;letter-spacing:-.3px}
+  .rec-lead{font-size:14.5px;line-height:1.7;color:var(--ink);margin:0 0 4px}
+  .rec-asof{font-size:12px;color:var(--muted);margin:0 0 16px}
+  .rec-switch{display:flex;gap:6px;margin:0 0 16px}
+  .rec-switch a{font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none;border:1px solid var(--hairline);border-radius:999px;padding:5px 12px;background:var(--canvas)}
+  .rec-switch a.on{color:var(--canvas);background:var(--ink);border-color:var(--ink)}
+  .rec-card{border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:18px;margin-top:14px}
+  .rec-card h2{font-size:16px;font-weight:800;color:var(--ink);margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .rec-card h2::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--primary);flex:none}
+  .rec-card h3{font-size:14px;font-weight:800;color:var(--ink);margin:20px 0 8px}
+  .rec-card p{font-size:14px;line-height:1.75;color:var(--ink);margin:8px 0}
+  .rec-desc{font-size:13px!important;color:var(--muted)!important;margin:0 0 12px!important}
+  .rec-fine{font-size:12px!important;line-height:1.6!important;color:var(--muted)!important;margin:10px 0 0!important}
+  .rec-card ul{margin:6px 0 0;padding-left:18px} .rec-card li{font-size:14px;line-height:1.75;color:var(--ink);margin:3px 0}
+  .rec-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .rec-kpi{border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:16px}
+  .rec-kpi .t{font-size:13px;font-weight:700;color:var(--muted)}
+  .rec-kpi .big{font-size:32px;font-weight:900;color:var(--ink);letter-spacing:-.5px;margin-top:2px;font-variant-numeric:tabular-nums}
+  .rec-kpi .big small{font-size:13px;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:0}
+  .rec-kpi .vs{font-size:13px;color:var(--ink);margin-top:6px}
+  .rec-kpi .def{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)}
+  .rec-track{position:relative;height:8px;border-radius:4px;background:var(--surface-inset);margin-top:10px}
+  .rec-track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--ink)}
+  .rec-track em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#94A3B8}
+  .rec-note{background:#FFF8E6;border:1px solid #F6E3B4;color:#7A5B00;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;margin-top:12px}
+  .rec-tw{overflow-x:auto}
+  .rec-tw table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .rec-tw th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+  .rec-tw td{padding:8px;border-bottom:1px solid var(--surface-inset);white-space:nowrap;color:var(--ink)}
+  .rec-tw td.wrap{white-space:normal;min-width:180px}
+  .rec-tw small{font-size:11.5px;color:var(--muted);margin-left:4px}
+  .rec-num{font-weight:700;font-variant-numeric:tabular-nums}
+  .rec-up,.rec-tw td.rec-up{color:var(--up)} .rec-dn,.rec-tw td.rec-dn{color:var(--dn)}
+  .rec-tw td.rec-ok{font-size:12.5px;font-weight:800;color:#0F9D58} .rec-tw td.rec-no{font-size:12.5px;font-weight:800;color:#94A3B8}
+  .rec-rows{display:flex;flex-direction:column;gap:8px}
+  .rec-row{display:grid;grid-template-columns:72px minmax(0,1fr) 112px;align-items:center;gap:10px;font-size:13px;color:var(--ink)}
+  .rec-row .k{font-weight:700;color:var(--muted)}
+  .rec-row .bar{position:relative;height:12px;border-radius:6px;background:var(--surface-inset)}
+  .rec-row .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:#475569}
+  .rec-row .bar em{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E86464}
+  .rec-row .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .rec-row .v small{color:var(--muted)}
+  .rec-legend{font-size:12px;color:var(--muted);margin-top:10px}
+  .rec-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;background:#475569;vertical-align:-1px;margin-right:4px}
+  .rec-legend em{display:inline-block;width:2px;height:12px;background:#E86464;vertical-align:-2px;margin:0 4px 0 12px}
+  .rec-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  .rec-trio div{background:var(--surface-soft);border-radius:10px;padding:12px}
+  .rec-trio b{display:block;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec-trio span{font-size:12.5px;color:var(--muted)}
+  .rec-trio div.hl{background:var(--ink)} .rec-trio div.hl b{color:var(--canvas)} .rec-trio div.hl span{color:#CBD5E1}
+  .rec-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .rec-pair div{border:1px solid var(--hairline);border-radius:10px;padding:12px}
+  .rec-pair b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec-pair span{display:block;font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:2px}
+  .rec-formula{font-family:ui-monospace,Menlo,monospace;background:var(--surface-soft);border-radius:8px;padding:10px 12px;font-size:12.5px;overflow-x:auto;white-space:nowrap;color:var(--ink)}
+  .rec-toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+  .rec-toc a{font-size:12.5px;color:var(--muted);background:var(--canvas);border:1px solid var(--hairline);border-radius:999px;padding:4px 10px;text-decoration:none}
+  .rec-toc a:hover,.rec-link{color:var(--primary)}
+  .rec-link{font-weight:700;text-decoration:none}
+  .rec-bb{display:inline-block;position:relative;width:110px;height:10px;border-radius:5px;background:var(--surface-inset);vertical-align:middle;margin-right:6px}
+  .rec-bb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#475569}
+  @media(max-width:600px){
+    .rec-kpis,.rec-pair,.rec-trio{grid-template-columns:1fr}
+    .rec-title{font-size:21px}
+    .rec-row{grid-template-columns:56px minmax(0,1fr) auto}
+    .rec-bb{width:70px}
+  }
+</style>
+</head>
+<body>
+
+
+<div class="gnb"><div class="gnb__in"><a class="gnb__logo" href="/stocks/"><span class="gnb__logo-mark"><svg viewBox="0 0 32 32" fill="none"><rect x="7" y="15" width="5.5" height="9" rx="1.6" fill="white"/><line x1="9.75" y1="10" x2="9.75" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="9.75" y1="24" x2="9.75" y2="27" stroke="white" stroke-width="2" stroke-linecap="round"/><rect x="19.5" y="9" width="5.5" height="13" rx="1.6" fill="white"/><line x1="22.25" y1="5" x2="22.25" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/><line x1="22.25" y1="22" x2="22.25" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></span><span class="gnb__title">Double<span>-Shot</span></span></a><span class="gnb__subs"><a class="gnb__sub is-active" href="/briefings/">브리핑</a><span class="gnb__divider"></span><a class="gnb__sub" href="/stocks/income-designer/">월배당</a></span><span class="right"><button class="gnb__notif-btn" id="gnb-notif-btn" onclick="openNoticePanel()" aria-label="공지 및 게시판"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><rect x="13" y="1" width="9" height="7" rx="2" fill="currentColor" opacity=".75"/><path d="M15.5 3.5h4M15.5 5.5h2.5" stroke="var(--gnb-bg,#16181A)" stroke-width="1.1" stroke-linecap="round"/><path d="M13 8l1.8 2" stroke="currentColor" stroke-width="1.1" opacity=".75" fill="none"/></svg><span class="gnb__notif-dot" id="gnb-notif-dot"></span></button><span class="sbtn" onclick="location.href='/stocks/'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"/></svg>검색</span></span></div></div>
+
+
+
+<main class="rec-wrap">
+  <div class="rec-crumb"><a href="/stocks/">홈</a> › 어떻게 예측하나요</div>
+  <div class="rec-switch"><a href="/accuracy/">예측 성적표</a><a class="on" href="/methodology/">어떻게 예측하나요</a></div>
+  <h1 class="rec-title">어떻게 예측하나요</h1>
+  <p class="rec-lead">Double-Shot의 숫자가 어디서 오고, 예측 확률을 어떻게 내는지 적었어요. 직접 돌린 백테스트 결과도 좋든 나쁘든 그대로 공개해요.</p>
+  <div class="rec-toc"><a href="#m-rule">데이터 원칙</a><a href="#m-kospi">코스피 시초가</a><a href="#m-us">미국 종가</a><a href="#m-ma5">월봉 5개월선</a><a href="#m-nq">나스닥 체크</a><a href="#m-src">데이터 출처</a></div>
+
+  <section class="rec-card" id="m-rule">
+    <h2>데이터 원칙</h2>
+    <ul>
+      <li><b>화면의 숫자는 전부 실제 시세예요.</b> AI가 쓴 문장에 숫자가 있으면 발행 전에 실제 데이터와 대조하고, 다르면 고치거나 지워요.</li>
+      <li><b>데이터가 없으면 비워요.</b> 수집에 실패한 칸을 추정값이나 지난 값으로 채우지 않아요.</li>
+      <li><b>한국 종목 종가는 KRX 정규장 15:30 공식 종가예요.</b> 2026년 9월부터 애프터마켓이 생겨 일봉 종가에 장 마감 뒤 가격이 섞이기 때문에, 15:30 1분봉으로 다시 맞춰요.</li>
+      <li><b>브리핑은 발행 시각의 시장 상태로 만들어요.</b> 밤 21:15 미국 브리핑은 미국 프리마켓 한복판이라, 그 시각의 실제 체결가를 써요.</li>
+    </ul>
+  </section>
+
+  <section class="rec-card" id="m-kospi">
+    <h2>코스피 시초가 예측</h2>
+    <p class="rec-desc">아침 07:25, 한국·미국 시장이 모두 닫혀 있을 때 오늘 09:00 시초가 방향을 예측해요.</p>
+    <h3>① 밤사이 신호를 점수로 합쳐요</h3>
+    <div class="rec-tw"><table>
+      <thead><tr><th>신호</th><th>무엇을 보나</th><th>가중치</th></tr></thead>
+      <tbody><tr><td>필라델피아 반도체(SOX)</td><td class="wrap">직전 미국장 등락 — 삼성전자·SK하이닉스와 가장 가깝게 움직여요</td><td class="rec-num">1.5</td></tr><tr><td>나스닥</td><td class="wrap">직전 미국장 등락</td><td class="rec-num">0.5</td></tr><tr><td>나스닥100 선물</td><td class="wrap">07:25 현재 등락</td><td class="rec-num">0.3</td></tr><tr><td>한국 ETF(EWY)</td><td class="wrap">미국에 상장된 한국 ETF 등락에서 전날 코스피 움직임을 뺀 나머지</td><td class="rec-num">0.3</td></tr><tr><td>VIX</td><td class="wrap">미국 변동성 지수 — 오르면 감점</td><td class="rec-num">−0.2</td></tr></tbody>
+    </table></div>
+    <p class="rec-fine">원/달러 환율도 넣었었지만, 환율 방향으로 시초가를 맞힌 날이 44.2%로 절반도 안 돼 뺐어요. 값은 기록만 해요.</p>
+    <h3>② 점수를 확률로 바꿔요</h3>
+    <div class="rec-formula">상승 확률 = 1 ÷ (1 + e<sup>−(0.422 + 0.244 × 점수)</sup>)</div>
+    
+    <p>2023년 11월부터 728거래일로 시험한 결과예요. 나스닥100 선물의 07:25 값은 과거를 되살릴 수 없어 이 시험에선 뺐어요.</p>
+    <div class="rec-pair">
+      <div><b>72.8%</b><span>전체 기간 시초가 방향 적중 (매일 '상승'이라고 찍었다면 59.6%)</span></div>
+      <div><b>76.7%</b><span>2026년 206일만 (매일 '상승'이라고 찍었다면 55.3%)</span></div>
+    </div>
+    
+    <div class="rec-pair"><div><b>11%</b><span>2026년 확률이 0~20%로 계산된 27일 중 실제로 위로 열린 비율 (계산 평균 11%)</span></div><div><b>89%</b><span>2026년 확률이 80~100%로 계산된 62일 중 실제로 위로 열린 비율 (계산 평균 89%)</span></div></div>
+    
+    
+    <h3>③ 방향은 계산이 정하고, AI는 근거를 써요</h3>
+    <p>계산한 확률이 55% 이상이면 상승, 45% 이하면 하락으로 정해요. AI(Claude)는 그 확률에서 ±10%p 안에서만 조정하고, 오늘의 근거와 개장 후 볼 것을 써요. 45~55%처럼 동전 던지기에 가까운 날만 방향을 AI 판단에 맡겨요. AI가 계산과 다른 방향을 낸 날이 실제로 더 많이 틀렸기 때문이에요.</p>
+    
+    <h3>왜 종가가 아니라 시초가인가요</h3>
+    <p>10월 12일까지는 종가 방향을 예측했어요. 그 116일의 예측을 시초가·종가·장중으로 나눠 채점하니 시초가 74.1% · 종가 65.5% · 장중 45.7%였어요. 밤사이 정보는 개장가를 설명할 뿐 장중 움직임은 설명하지 못해서, 맞힐 수 있는 시초가로 바꿨어요. <a class="rec-link" href="/accuracy/#retired">예전 기록 보기</a></p>
+    
+  </section>
+
+  
+  <section class="rec-card" id="m-us">
+    <h2>미국 종가 예측</h2>
+    <p class="rec-desc">밤 21:15에 S&amp;P500 선물이 전날 종가보다 얼마나 움직였는지로 그날 종가 방향의 출발 확률을 정해요.</p>
+    <div class="rec-tw"><table>
+      <thead><tr><th>21:15 S&amp;P500 선물 등락</th><th>날 수</th><th>그날 S&amp;P500이 오른 비율</th></tr></thead>
+      <tbody><tr><td>−0.5% 미만</td><td class="rec-num">61일</td><td><span class="rec-bb"><i style="width:20%"></i></span><b>20%</b></td></tr><tr><td>−0.5% ~ −0.2%</td><td class="rec-num">82일</td><td><span class="rec-bb"><i style="width:39%"></i></span><b>39%</b></td></tr><tr><td>−0.2% ~ 0.0%</td><td class="rec-num">99일</td><td><span class="rec-bb"><i style="width:45%"></i></span><b>45%</b></td></tr><tr><td>0.0% ~ +0.2%</td><td class="rec-num">134일</td><td><span class="rec-bb"><i style="width:57%"></i></span><b>57%</b></td></tr><tr><td>+0.2% ~ +0.5%</td><td class="rec-num">130일</td><td><span class="rec-bb"><i style="width:72%"></i></span><b>72%</b></td></tr><tr><td>+0.5% 이상</td><td class="rec-num">87일</td><td><span class="rec-bb"><i style="width:76%"></i></span><b>76%</b></td></tr></tbody>
+    </table></div>
+    <p class="rec-fine">2024년 6월~2026년 11월 593거래일. 이 표만으로 방향을 정하면 65.8%를 맞혀요. AI는 여기서 ±10%p 안에서만 조정하고 50%를 넘어 방향을 뒤집지 못해요. 전날 반도체 지수·VIX를 함께 넣으면 오히려 덜 맞아서 뺐어요.</p>
+  </section>
+  
+
+  
+  <section class="rec-card" id="m-ma5">
+    <h2>월봉 5개월선 안착 종목 — 오른다는 증거는 없었어요</h2>
+    <p>월말 종가가 5개월 이동평균선 위에서 3개월 넘게 마감한 종목을 매일 아침 보여줘요. 흔히 '안착하면 오른다'고 하지만, 직접 돌려 보니 그렇지 않았어요.</p>
+    <div class="rec-pair">
+      <div><b>49.6%</b><span>코스피200 현재 구성종목에서 조건을 채운 종목이 1년 안에 오른 비율 (2,128건)</span></div>
+      <div><b>50.4%</b><span>아무 종목·아무 달이나 골랐을 때 (29,685건)</span></div>
+    </div>
+    
+    <div class="rec-pair">
+      <div><b>75.4%</b><span>미국 대형주 20종목(현재 후보 목록) · 조건 충족 뒤 1년 (276건)</span></div>
+      <div><b>73.5%</b><span>같은 종목 아무 달 (3,500건)</span></div>
+    </div>
+    
+    <p class="rec-fine">2011-01~2025-08 신호, 지금 구성종목 기준이라 상장폐지·편출 종목이 빠진 생존 편향이 있어요. 그래서 이 코너는 '추천'이 아니라 '조건을 채운 종목'이라고만 불러요.</p>
+  </section>
+  
+
+  
+  <section class="rec-card" id="m-nq">
+    <h2>나스닥 체크 — 60개월선에서 얼마나 멀어졌나</h2>
+    <p>나스닥 월봉 고점이 60개월(5년) 평균보다 몇 % 위에 있는지 봐요. 60%를 넘으면 주의, 70%를 넘으면 경고예요.</p>
+    <div class="rec-pair">
+      <div><b>51.1%</b><span>70%를 넘은 달 뒤 12개월 안에 고점에서 20% 넘게 빠진 비율 (47개월)</span></div>
+      <div><b>18.8%</b><span>아무 달이나 골랐을 때</span></div>
+    </div>
+    <p>70%를 넘은 시기는 1997~2000 · 2020~2021뿐이었어요. 반대로 60~70% 구간에선 12개월 뒤 평균 수익률이 27.9%로 전체 평균(15.0%)보다 높았어요. 주의 구간이 곧 하락은 아니에요.</p>
+    <p class="rec-fine">1990년부터 442개월, 나스닥 종합지수 월봉 기준. <a class="rec-link" href="/stocks/nasdaq-check/">그래프 자세히 보기</a></p>
+  </section>
+  
+
+  <section class="rec-card" id="m-src">
+    <h2>데이터 출처</h2>
+    <ul>
+      <li>한국 시세·수급은 네이버 증권에서 가져와요. 정규장 공식 종가는 15:30 1분봉으로 확인해요.</li>
+      <li>미국 시세·선물·지수는 Yahoo Finance와 토스증권 Open API에서 가져와요.</li>
+      <li>뉴스 요약은 실제 기사를 먼저 모으고 AI는 고르고 요약만 해요. 출처가 확인되지 않는 뉴스는 싣지 않아요.</li>
+      <li>예측 문장은 Anthropic Claude가 쓰고, 발행 전 자동 검증을 거쳐요.</li>
+    </ul>
+    <p class="rec-fine">이 사이트의 모든 내용은 정보 제공용이며 투자 권유가 아니에요. <a class="rec-link" href="/legal/disclaimer/">면책 고지</a> · <a class="rec-link" href="/about/">서비스 소개</a></p>
+  </section>
+</main>
+
+
+<footer class="site-footer">
+  <div class="site-footer__links">
+    <a href="/accuracy/">예측 성적표</a>
+    <a href="/methodology/">방법론</a>
+    <a href="/legal/disclaimer/">면책 고지</a>
+    <a href="/legal/privacy/">개인정보처리방침</a>
+    <a href="/legal/terms/">이용약관</a>
+    <a href="mailto:pulum0083@gmail.com">문의</a>
+  </div>
+  <div class="site-footer__base">© 2026 Double-Shot</div>
+</footer>
+
+<script src="/assets/main.js?v=20261029a"></script>
+<script>
+window.addEventListener('load', function() {
+  if (typeof initLiveMarketPanel === 'function') initLiveMarketPanel();
+  if (typeof patchBriefingList === 'function') patchBriefingList();
+  if (typeof initNotices === 'function') initNotices();
+  if (typeof loadVisitorCount === 'function') loadVisitorCount();
+  if (typeof renderTrustStrip === 'function') renderTrustStrip();
+});
+</script>
+
+</body>
+</html>

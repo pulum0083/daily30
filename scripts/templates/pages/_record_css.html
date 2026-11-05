@@ -1,0 +1,72 @@
+{# 성적표·방법론 페이지 공용 스타일(2026-11-05, §80) — 두 페이지가 같은 카드·표·막대를 쓴다 #}
+<style>
+  .rec-wrap{max-width:880px;margin:0 auto;padding:20px 16px 48px;word-break:keep-all}
+  .rec-crumb{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .rec-crumb a{color:var(--muted);text-decoration:none} .rec-crumb a:hover{color:var(--ink)}
+  .rec-title{font-size:24px;font-weight:900;color:var(--ink);margin:0 0 6px;letter-spacing:-.3px}
+  .rec-lead{font-size:14.5px;line-height:1.7;color:var(--ink);margin:0 0 4px}
+  .rec-asof{font-size:12px;color:var(--muted);margin:0 0 16px}
+  .rec-switch{display:flex;gap:6px;margin:0 0 16px}
+  .rec-switch a{font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none;border:1px solid var(--hairline);border-radius:999px;padding:5px 12px;background:var(--canvas)}
+  .rec-switch a.on{color:var(--canvas);background:var(--ink);border-color:var(--ink)}
+  .rec-card{border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:18px;margin-top:14px}
+  .rec-card h2{font-size:16px;font-weight:800;color:var(--ink);margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .rec-card h2::before{content:"";width:3px;height:15px;border-radius:2px;background:var(--primary);flex:none}
+  .rec-card h3{font-size:14px;font-weight:800;color:var(--ink);margin:20px 0 8px}
+  .rec-card p{font-size:14px;line-height:1.75;color:var(--ink);margin:8px 0}
+  .rec-desc{font-size:13px!important;color:var(--muted)!important;margin:0 0 12px!important}
+  .rec-fine{font-size:12px!important;line-height:1.6!important;color:var(--muted)!important;margin:10px 0 0!important}
+  .rec-card ul{margin:6px 0 0;padding-left:18px} .rec-card li{font-size:14px;line-height:1.75;color:var(--ink);margin:3px 0}
+  .rec-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .rec-kpi{border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:16px}
+  .rec-kpi .t{font-size:13px;font-weight:700;color:var(--muted)}
+  .rec-kpi .big{font-size:32px;font-weight:900;color:var(--ink);letter-spacing:-.5px;margin-top:2px;font-variant-numeric:tabular-nums}
+  .rec-kpi .big small{font-size:13px;font-weight:600;color:var(--muted);margin-left:6px;letter-spacing:0}
+  .rec-kpi .vs{font-size:13px;color:var(--ink);margin-top:6px}
+  .rec-kpi .def{font-size:12px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)}
+  .rec-track{position:relative;height:8px;border-radius:4px;background:var(--surface-inset);margin-top:10px}
+  .rec-track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--ink)}
+  .rec-track em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#94A3B8}
+  .rec-note{background:#FFF8E6;border:1px solid #F6E3B4;color:#7A5B00;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;margin-top:12px}
+  .rec-tw{overflow-x:auto}
+  .rec-tw table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .rec-tw th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--hairline);white-space:nowrap}
+  .rec-tw td{padding:8px;border-bottom:1px solid var(--surface-inset);white-space:nowrap;color:var(--ink)}
+  .rec-tw td.wrap{white-space:normal;min-width:180px}
+  .rec-tw small{font-size:11.5px;color:var(--muted);margin-left:4px}
+  .rec-num{font-weight:700;font-variant-numeric:tabular-nums}
+  .rec-up,.rec-tw td.rec-up{color:var(--up)} .rec-dn,.rec-tw td.rec-dn{color:var(--dn)}
+  .rec-tw td.rec-ok{font-size:12.5px;font-weight:800;color:#0F9D58} .rec-tw td.rec-no{font-size:12.5px;font-weight:800;color:#94A3B8}
+  .rec-rows{display:flex;flex-direction:column;gap:8px}
+  .rec-row{display:grid;grid-template-columns:72px minmax(0,1fr) 112px;align-items:center;gap:10px;font-size:13px;color:var(--ink)}
+  .rec-row .k{font-weight:700;color:var(--muted)}
+  .rec-row .bar{position:relative;height:12px;border-radius:6px;background:var(--surface-inset)}
+  .rec-row .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:#475569}
+  .rec-row .bar em{position:absolute;top:-3px;bottom:-3px;width:2px;background:#E86464}
+  .rec-row .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} .rec-row .v small{color:var(--muted)}
+  .rec-legend{font-size:12px;color:var(--muted);margin-top:10px}
+  .rec-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;background:#475569;vertical-align:-1px;margin-right:4px}
+  .rec-legend em{display:inline-block;width:2px;height:12px;background:#E86464;vertical-align:-2px;margin:0 4px 0 12px}
+  .rec-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  .rec-trio div{background:var(--surface-soft);border-radius:10px;padding:12px}
+  .rec-trio b{display:block;font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec-trio span{font-size:12.5px;color:var(--muted)}
+  .rec-trio div.hl{background:var(--ink)} .rec-trio div.hl b{color:var(--canvas)} .rec-trio div.hl span{color:#CBD5E1}
+  .rec-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .rec-pair div{border:1px solid var(--hairline);border-radius:10px;padding:12px}
+  .rec-pair b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .rec-pair span{display:block;font-size:12.5px;line-height:1.5;color:var(--muted);margin-top:2px}
+  .rec-formula{font-family:ui-monospace,Menlo,monospace;background:var(--surface-soft);border-radius:8px;padding:10px 12px;font-size:12.5px;overflow-x:auto;white-space:nowrap;color:var(--ink)}
+  .rec-toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}
+  .rec-toc a{font-size:12.5px;color:var(--muted);background:var(--canvas);border:1px solid var(--hairline);border-radius:999px;padding:4px 10px;text-decoration:none}
+  .rec-toc a:hover,.rec-link{color:var(--primary)}
+  .rec-link{font-weight:700;text-decoration:none}
+  .rec-bb{display:inline-block;position:relative;width:110px;height:10px;border-radius:5px;background:var(--surface-inset);vertical-align:middle;margin-right:6px}
+  .rec-bb i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#475569}
+  @media(max-width:600px){
+    .rec-kpis,.rec-pair,.rec-trio{grid-template-columns:1fr}
+    .rec-title{font-size:21px}
+    .rec-row{grid-template-columns:56px minmax(0,1fr) auto}
+    .rec-bb{width:70px}
+  }
+</style>

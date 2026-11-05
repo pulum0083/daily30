@@ -2665,3 +2665,18 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
     - **넥스트레이드 가격을 섞지 않는다** — 한 화면에 시장이 둘이 된다. KRX 애프터장은 거래가 얇아(현대차 16:00~16:55 3,287주) 가격이 몇 분씩 멈출 수 있지만 그대로 둔다.
     - 1분봉 API의 `marketType`·`exchange`·`tradeType=NXT` 인자는 무시된다(같은 KRX 봉을 준다).
 
+
+### 80. 예측 성적표(/accuracy/)·방법론(/methodology/) 페이지 (2026-11-05 신설)
+
+계기: 2026-11-04 구글 애드센스가 "가치가 별로 없는 콘텐츠"로 승인하지 않았다. 다른 사이트에 없는 자료 — 매일 채점한 예측 기록과 직접 돌린 백테스트 — 를 사람이 읽는 글로 공개한다. 계획·결정 노트 `docs/plans/2026-11-05-record-pages/`, 시안 `docs/prototypes/2026-11-05-accuracy-methodology.html`.
+
+- **숫자는 전부 파일에서 온다(§0·§20).** 템플릿·코드에 숫자를 박지 않는다.
+  · 성적표 — `data/briefings.json`. `scripts/record_pages.build_accuracy()`. 코스피는 시초가 기준 기록만(§57 `is_open_basis`), 종가 기준 옛 기록은 '바꾼 기준' 칸에 따로. 적중률 옆엔 늘 '매일 상승이라고 찍었다면' 기준선을 둔다. 미국 소급 채점분(`backfilled`)은 그렇다고 밝힌다.
+  · 방법론 — `scripts/config/kospi_open_prior_backtest.json`(새로, `fit_open_gap_prior.py --write`가 쓴다), `us_close_prior.json`, `monthly_ma5*_backtest.json`, `nasdaq_overheat_backtest.json`, `leading_signal.py`의 가중치·확률식·55/45·±10%p. 파일이 없으면 그 칸만 빠진다.
+  · 종가 기준 시절의 시초가·종가·장중 분해(2026-11-05 다시 잰 값 116일: 74.1% · 65.5% · 45.7%)는 `legacy_split()`이 briefings.json과 네이버 지수 일봉으로 계산해 같은 파일에 넣는다. §57의 115일 수치(74.8 · 66.1 · 46.1)와 표본이 하루 다르다.
+  · 백테스트 수치를 바꾸려면 스크립트를 다시 돌려 파일을 갱신한다. 숫자를 페이지에서 손으로 고치지 않는다.
+- **갱신**: `kospi-accuracy` 잡(평일 09:10)이 채점 직후 `generate_html.py --record-pages`로 두 페이지를 다시 쓰고 `web/accuracy`·`web/methodology`를 함께 커밋한다(`continue-on-error` + `timeout-minutes: 3` — 실패해도 채점 커밋은 계속, 직전 페이지가 남는다. 페이지에 기준 날짜가 보이므로 멈추면 화면에서 드러난다). 채점 기록이 하나도 없으면 성적표를 쓰지 않는다.
+- **발행 게이트·sitemap**: `verify_publish_gate.expected_pages()`와 sitemap에 두 주소가 들어 있다. sitemap은 `write_sitemap_xml()`의 고정 목록.
+- **들어오는 길**: 생성 페이지 공통 푸터(`base.html`), 종목 홈 푸터, 손으로 만든 정적 페이지 5개(`/about/`·`/glossary/`·`/legal/*`)의 푸터, 서비스 소개의 '성적과 방법을 공개해요' 문단, 브리핑 성적표 카드·모달. 머리 메뉴엔 넣지 않았다(휴대폰 폭).
+- 문구 원칙: 기대만큼 안 나온 결과(월봉 5개월선 49.6% vs 50.4%)도 그대로 적는다. '추천'·'수익'처럼 성과를 약속하는 말은 쓰지 않는다.
+- 테스트 `scripts/test_record_pages.py` — 집계·기준선·확률 구간·빈 기록이면 페이지 없음·파일 없으면 칸 생략·실데이터로 발행 게이트 통과·sitemap·링크·`legacy_split`.

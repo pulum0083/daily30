@@ -842,6 +842,38 @@ def write_nasdaq_page(target_date: str) -> bool:
     return True
 
 
+RECORD_PAGES = (("accuracy", "pages/accuracy.html", "예측 성적표"),
+                ("methodology", "pages/methodology.html", "어떻게 예측하나요"))
+
+
+def write_record_pages() -> list:
+    """예측 성적표(/accuracy/)·방법론(/methodology/)을 쓴다(2026-11-05, §80). 쓴 파일의 web/ 기준 경로 목록을 돌려준다.
+    성적표는 채점 기록이 없으면 쓰지 않는다 — 직전 페이지가 남는다."""
+    try:
+        import scripts.record_pages as rp
+    except ImportError:
+        import record_pages as rp
+    bpath = DATA_DIR / "briefings.json"
+    briefings = load_json(bpath).get("briefings", []) if bpath.exists() else []
+    ctxs = {"accuracy": rp.build_accuracy(briefings), "methodology": rp.build_methodology()}
+    env, written = make_env(), []
+    for slug, tpl, name in RECORD_PAGES:
+        ctx = ctxs[slug]
+        if not ctx:
+            print(f"[generate_html] /{slug}/ 생략 — 데이터 없음")
+            continue
+        url = f"{SITE_BASE}/{slug}/"
+        ctx.update({"canonical_url": url, "css_path": CSS_PATH, "js_path": JS_PATH,
+                    "seo_jsonld": [_jsonld(_breadcrumb([("홈", "/stocks/"), (name, f"/{slug}/")]))]})
+        out = WEB_DIR / slug / "index.html"
+        if gate_write(out, env.get_template(tpl).render(**ctx), url):
+            GATE_BLOCKED.append(url)
+            continue
+        written.append(f"{slug}/index.html")
+        print(f"[generate_html] {name} → {out}")
+    return written
+
+
 def build_issues(analysis: dict) -> dict:
     """analysis.issues → 렌더용 이슈 리스트. title 없는 항목 제외, title·body 숫자 가드 적용."""
     issues = []
@@ -2582,6 +2614,8 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
         {"loc": f"{BASE}/stocks/nasdaq-check/",          "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/accuracy/",                     "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/methodology/",                  "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/legal/disclaimer/",             "changefreq": "yearly",  "priority": "0.3"},
         {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
@@ -2855,6 +2889,8 @@ def main():
                         help="섹터별 종목 페이지 8개 생성하고 종료")
     parser.add_argument("--nasdaq-page", dest="nasdaq_page", action="store_true",
                         help="--date 날짜의 data/nasdaq_overheat.json으로 /stocks/nasdaq-check/ 상세 페이지만 다시 쓴다")
+    parser.add_argument("--record-pages", dest="record_pages", action="store_true",
+                        help="예측 성적표(/accuracy/)·방법론(/methodology/)만 다시 쓴다 — 평일 09:10 채점 잡이 부른다")
     parser.add_argument("--force", action="store_true",
                         help="기존 analysis_snapshot.json을 무시하고 최신 analysis_{type}.json으로 강제 재생성 (의도적 정정용)")
     args = parser.parse_args()
@@ -2863,6 +2899,12 @@ def main():
         build_sector_pages()
         write_sitemap_xml()   # 섹터 URL이 sitemap에 들어가야 게이트의 색인 경로 검사가 성립한다
         _finish_page_build([])
+        return
+
+    if args.record_pages:
+        written = write_record_pages()
+        write_sitemap_xml()
+        _finish_page_build(written)
         return
 
     if args.nasdaq_page:

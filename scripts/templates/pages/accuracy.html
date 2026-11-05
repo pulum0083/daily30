@@ -1,0 +1,99 @@
+{# 예측 성적표(/accuracy/) — 매일 낸 방향 예측을 실제 지수로 채점한 기록 전부(2026-11-05, §80).
+   숫자는 전부 record_pages.build_accuracy()가 data/briefings.json에서 만든다. 매일 09:10 채점 뒤 다시 쓴다. #}
+{% extends "base.html" %}
+{% set K = kospi.stat %}{% set U = us.stat %}
+{% block title %}예측 성적표 — 코스피 시초가·미국 종가 방향 적중률 | Double-Shot{% endblock %}
+{% block og_title %}예측 성적표 — 맞힌 날도 틀린 날도 전부{% endblock %}
+{% block og_desc %}Double-Shot이 매일 낸 방향 예측을 실제 지수로 채점한 기록이에요.{% if K %} 코스피 시초가 {{ K.pct }}%({{ K.hit }}/{{ K.n }}일),{% endif %}{% if U %} 미국 종가 {{ U.pct }}%({{ U.hit }}/{{ U.n }}일).{% endif %} 매일 '상승'이라고 찍었을 때와 나란히 보여줘요.{% endblock %}
+{% block head_extra %}{% include "pages/_record_css.html" %}{% endblock %}
+{% block body %}
+<main class="rec-wrap">
+  <div class="rec-crumb"><a href="/stocks/">홈</a> › 예측 성적표</div>
+  <div class="rec-switch"><a class="on" href="/accuracy/">예측 성적표</a><a href="/methodology/">어떻게 예측하나요</a></div>
+  <h1 class="rec-title">예측 성적표</h1>
+  <p class="rec-lead">Double-Shot이 매일 낸 방향 예측을 실제 지수로 채점한 기록이에요. 맞힌 날만 고르지 않고, 낸 예측은 전부 남겨요.</p>
+  <p class="rec-asof">{{ asof }}까지 채점한 기록 · 평일 09:10에 갱신</p>
+
+  <div class="rec-kpis">
+    {% if K %}
+    <div class="rec-kpi"><div class="t">🇰🇷 코스피 시초가 예측</div>
+      <div class="big">{{ K.pct }}%<small>{{ K.hit }}/{{ K.n }}일 맞음</small></div>
+      <div class="rec-track"><i style="width:{{ K.pct }}%"></i><em style="left:{{ K.base }}%"></em></div>
+      <div class="vs">매일 '상승'이라고 찍었다면 <b>{{ K.base }}%</b> ({{ K.base_n }}/{{ K.n }}일)</div>
+      <div class="def">전날 종가 대비 09:00 시초가가 올랐는지 · {{ K['from'] }}~{{ K.to }}</div></div>
+    {% endif %}
+    {% if U %}
+    <div class="rec-kpi"><div class="t">🇺🇸 미국 종가 예측</div>
+      <div class="big">{{ U.pct }}%<small>{{ U.hit }}/{{ U.n }}일 맞음</small></div>
+      <div class="rec-track"><i style="width:{{ U.pct }}%"></i><em style="left:{{ U.base }}%"></em></div>
+      <div class="vs">매일 '상승'이라고 찍었다면 <b>{{ U.base }}%</b> ({{ U.base_n }}/{{ U.n }}일)</div>
+      <div class="def">S&amp;P500이 전날보다 올라 마감했는지 · {{ U['from'] }}~{{ U.to }}</div></div>
+    {% endif %}
+  </div>
+  <div class="rec-note">{% if K and K.n < 60 %}코스피 시초가 예측은 {{ kospi.start }}에 시작해 아직 {{ K.n }}일뿐이에요. 표본이 작아 며칠만 빗나가도 비율이 크게 바뀌어요. {% endif %}막대 위 회색 선이 '매일 상승' 기준선이에요. 예측이 의미가 있으려면 이 선보다 높아야 해요.</div>
+
+  {% if kospi.days %}
+  <section class="rec-card" id="kospi">
+    <h2>코스피 시초가 예측 — 날마다</h2>
+    <p class="rec-desc">아침 07:25 브리핑에서 낸 방향과 확률, 그날 실제 시초가 등락이에요. 확률은 큰 쪽 숫자예요.</p>
+    <div class="rec-tw"><table>
+      <thead><tr><th>날짜</th><th>예측</th><th>실제 시초가</th><th>결과</th></tr></thead>
+      <tbody>
+      {% for d in kospi.days %}
+        <tr><td>{{ d.date }}<small>{{ d.wd }}</small></td>
+          <td><b class="{{ 'rec-up' if d.side == 'up' else 'rec-dn' if d.side == 'dn' else '' }}">{{ '▲ 상승 우위' if d.side == 'up' else '▼ 하락 우위' if d.side == 'dn' else '중립' }}</b> <small>{{ d.pct }}%</small></td>
+          <td class="rec-num {{ 'rec-up' if d.gap is not none and d.gap >= 0 else 'rec-dn' }}">{% if d.gap is not none %}{{ '%+.2f'|format(d.gap)|replace('-', '−') }}%{% else %}—{% endif %}</td>
+          <td class="{{ 'rec-ok' if d.ok else 'rec-no' }}">{{ '맞음' if d.ok else '빗나감' }}</td></tr>
+      {% endfor %}
+      </tbody></table></div>
+    {% if kospi.calib %}
+    <h3>확률을 높게 말한 날일수록 더 맞았나</h3>
+    <div class="rec-rows">{% for c in kospi.calib %}<div class="rec-row"><span class="k">{{ c.label }}</span><span class="bar"><i style="width:{{ c.pct }}%"></i></span><span class="v"><b>{{ c.pct }}%</b> 맞음 <small>{{ c.hit }}/{{ c.n }}일</small></span></div>{% endfor %}</div>
+    <p class="rec-fine">예측 확률 구간별로 실제 맞힌 비율이에요. 날 수가 적은 구간은 참고만 하세요.</p>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  {% if us.monthly %}
+  <section class="rec-card" id="us">
+    <h2>미국 종가 예측 — 달마다</h2>
+    <p class="rec-desc">밤 21:15 브리핑의 방향을 그날 S&amp;P500 종가로 채점했어요.</p>
+    <div class="rec-rows">{% for m in us.monthly %}<div class="rec-row"><span class="k">{{ m.label }}</span><span class="bar"><i style="width:{{ m.pct }}%"></i><em style="left:{{ m.base }}%"></em></span><span class="v"><b>{{ m.pct }}%</b> <small>{{ m.hit }}/{{ m.n }}일</small></span></div>{% endfor %}</div>
+    <p class="rec-legend"><i></i>맞힌 비율 <em></em>그 달 매일 '상승'이라고 찍었다면</p>
+    {% if us.calib %}
+    <h3>확률을 높게 말한 날일수록 더 맞았나</h3>
+    <div class="rec-rows">{% for c in us.calib %}<div class="rec-row"><span class="k">{{ c.label }}</span><span class="bar"><i style="width:{{ c.pct }}%"></i></span><span class="v"><b>{{ c.pct }}%</b> 맞음 <small>{{ c.hit }}/{{ c.n }}일</small></span></div>{% endfor %}</div>
+    {% endif %}
+    {% if us.backfilled %}<p class="rec-fine">{{ U.n }}일 중 {{ us.backfilled.n }}일({{ us.backfilled['from'] }}~{{ us.backfilled.to }})은 채점이 멈춰 있던 기간이라, 그날 발행한 브리핑 원본에 적힌 예측을 나중에 실제 종가로 채점했어요.</p>{% endif %}
+  </section>
+  {% endif %}
+
+  {% set L = legacy.stat %}
+  {% if L %}
+  <section class="rec-card" id="retired">
+    <h2>바꾼 기준 — 코스피 종가 예측 ({{ L['from'] }}~{{ L.to }})</h2>
+    <p>10월 12일까지 코스피 예측은 '그날 종가'를 맞히는 것이었어요. {{ L.n }}일 동안 <b>{{ L.pct }}%</b>를 맞혔는데, 매일 '상승'이라고만 찍어도 <b>{{ L.base }}%</b>였어요. 차이가 {{ L.edge }}%p뿐이라 예측이 쓸모가 거의 없었어요.</p>
+    {% set S = legacy.split %}
+    {% if S %}
+    <p>같은 예측을 나눠 채점해 보니 이유가 보였어요. 예측에 쓰는 정보(밤사이 미국장·선물)는 아침 개장가를 설명하지만, 장중 움직임은 설명하지 못했어요.</p>
+    <div class="rec-trio"><div class="hl"><b>{{ S.open_hit_pct }}%</b><span>시초가 방향을 맞힌 비율</span></div><div><b>{{ S.close_hit_pct }}%</b><span>종가 방향</span></div><div><b>{{ S.intraday_hit_pct }}%</b><span>장중(시가→종가) 방향 — 동전 던지기보다 낮아요</span></div></div>
+    <p>그래서 10월 13일부터 맞힐 수 있는 것, 시초가만 예측해요. 예전 기록은 다시 채점하지 않고 이렇게 따로 남겨 둬요.</p>
+    <p class="rec-fine">세 비율은 상승·하락 방향을 말한 {{ S.days }}일 기준이라, 중립 예측까지 넣은 위 {{ L.pct }}%와 조금 달라요. 계산은 <a class="rec-link" href="/methodology/#m-kospi">방법론</a>에 있어요.</p>
+    {% else %}
+    <p>그래서 10월 13일부터 맞힐 수 있는 것, 시초가만 예측해요. 예전 기록은 다시 채점하지 않고 이렇게 따로 남겨 둬요.</p>
+    {% endif %}
+  </section>
+  {% endif %}
+
+  <section class="rec-card">
+    <h2>채점 규칙</h2>
+    <ul>
+      <li>코스피는 전 거래일 종가 대비 당일 09:00 시가로 채점해요. 시가를 못 구한 날은 종가로 대신 채점하지 않고 비워 둬요.</li>
+      <li>미국은 S&amp;P500 전 거래일 대비 종가로 채점해요.</li>
+      <li>'상승 우위'·'하락 우위'는 실제 방향이 같으면 맞음, '중립'은 실제 변동이 ±0.5% 안이면 맞음이에요.</li>
+      <li>채점은 평일 09:10에 자동으로 해요.</li>
+    </ul>
+    <p class="rec-fine">예측은 정보 제공용이며 투자 권유가 아니에요. <a class="rec-link" href="/legal/disclaimer/">면책 고지</a></p>
+  </section>
+</main>
+{% endblock %}

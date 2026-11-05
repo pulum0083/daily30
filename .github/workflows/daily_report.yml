@@ -578,11 +578,18 @@ jobs:
         timeout-minutes: 3
         run: python3 scripts/check_accuracy.py --type us --backfill
 
+      # 예측 성적표(/accuracy/)·방법론(/methodology/) — 채점이 끝난 기록으로 다시 쓴다(§80).
+      # 부가 페이지라 실패해도 채점 커밋은 계속한다(§21). 실패하면 직전 페이지가 남는다.
+      - name: 📈 성적표·방법론 페이지 갱신
+        continue-on-error: true
+        timeout-minutes: 3
+        run: python3 scripts/generate_html.py --record-pages
+
       - name: 💾 정확도 결과 커밋 & 푸시
         run: |
           git config user.email "dailyb-bot@users.noreply.github.com"
           git config user.name "DailyB Bot"
-          git add data/briefings.json web/briefings web/data
+          git add data/briefings.json web/briefings web/data web/accuracy web/methodology web/sitemap.xml
           git diff --staged --quiet || git commit -m "📊 정확도 업데이트: $(TZ=Asia/Seoul date +'%Y-%m-%d')"
           pushed=false
           for i in 1 2 3 4 5; do
