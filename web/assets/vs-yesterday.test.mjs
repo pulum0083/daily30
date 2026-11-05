@@ -1,7 +1,7 @@
 // vs-yesterday.js 렌더·폴링 창 회귀 테스트 — node:vm 샌드박스에서 실제 파일을 로드한다(stocks-home.test.mjs와 같은 방식)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { createContext, runInContext } from 'node:vm';
 
 const noop = () => {};
@@ -295,7 +295,7 @@ test('주도권 카드 — 섹터 대표 3종목 평균을 오늘 등락순 막�
     { key: 'semicon', label: '반도체', names: ['삼성전자', 'SK하이닉스', '한미반도체'], t: 8.14, y: 5.37, rank: 1, prevRank: 2, move: 1, n: 3 },
     { key: 'ship', label: '조선', names: ['HD현대중공업', '한화오션', '삼성중공업'], t: -0.42, y: 1.2, rank: 3, prevRank: 5, move: -2, n: 3 }] }, { t: 6.53 });
   assert.ok(html.indexOf('반도체') < html.indexOf('금융') && html.indexOf('금융') < html.indexOf('조선'), '오늘 등락순이 아님');
-  assert.ok(html.includes('<span class="vsx-rk top">1</span>반도체<small class="up">▲1</small>'), '순위·이동 표시가 없음');
+  assert.ok(html.includes('<span class="vsx-rk top">1</span><a class="vsx-sl" href="/stocks/sector/semicon/">반도체</a><small class="up">▲1</small>'), '순위·이동 표시가 없음');
   assert.ok(html.includes('<small class="dn">▼2</small>'));
   assert.ok(html.includes('섹터 대표 3종목 평균'), '평균 정의가 안 드러남');
   assert.ok(html.includes('title="대표 3종목 · 삼성전자 · SK하이닉스 · 한미반도체"'), '대표 종목 이름이 없음');
@@ -310,8 +310,19 @@ test('주도권 카드 — 순위가 어제와 같으면 –, 어제 순위를 �
   const html = api.leadCard({ sectors: [
     { key: 'power', label: '전력기기', names: [], t: 3.87, y: 4.41, rank: 3, prevRank: 3, move: 0, n: 3 },
     { key: 'bio', label: '바이오', names: [], t: 0.39, y: null, rank: 7, prevRank: null, move: null, n: 3 }] }, { t: 6.53 });
-  assert.ok(html.includes('전력기기<small class="eq" aria-label="어제와 같은 순위">–</small>'), html);
-  assert.ok(html.includes('바이오</div>'), '어제 순위가 없는데 표시가 붙음: ' + html);
+  assert.ok(html.includes('전력기기</a><small class="eq" aria-label="어제와 같은 순위">–</small>'), html);
+  assert.ok(html.includes('바이오</a></div>'), '어제 순위가 없는데 표시가 붙음: ' + html);
+});
+
+test('주도권 카드 — 섹터 이름은 섹터 페이지로 잇고, 페이지가 없는 키는 글자로 둔다', () => {
+  const { api } = load();
+  const html = api.leadCard({ sectors: [
+    { key: 'bio', label: '바이오', names: [], t: 4.66, rank: 1, n: 3 },
+    { key: 'unknown', label: '기타', names: [], t: 1, rank: 2, n: 3 }] }, { t: -4.25 });
+  assert.ok(html.includes('<a class="vsx-sl" href="/stocks/sector/bio/">바이오</a>'), html);
+  assert.ok(!html.includes('/stocks/sector/unknown/') && html.includes('기타</div>'), html);
+  for (const k of ['semicon', 'power', 'defense', 'ship', 'battery', 'auto', 'bio', 'finance'])
+    assert.ok(existsSync(new URL(`../stocks/sector/${k}/index.html`, import.meta.url)), `${k} 섹터 페이지가 없다`);
 });
 
 test('주도권 카드 — 센 섹터가 절반을 넘으면 약한 쪽을 적는다', () => {

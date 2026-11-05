@@ -209,6 +209,11 @@
   // 주도권 카드(시장 기준선, 2026-10-28) — 섹터 대표 3종목 평균을 오늘 등락 순 막대로 그리고, 코스피·코스닥 오늘 등락을
   // 세로 점선으로 긋는다. 코스피 선을 넘은 섹터만 진한 빨강이다. 코스피는 axes가 아니라 응답 최상위 kospi에 있다 —
   // 없으면 그 선과 아래 한 줄만 뺀다(지어내지 않는다). 대표 종목 이름은 행에 마우스를 올리면 보인다.
+  // 섹터 이름은 그 섹터 페이지로 잇는다(2026-11-05). 페이지가 있는 키만 — 모르는 키는 글자로 둔다(§36).
+  var SECTOR_PAGES = { semicon: 1, power: 1, defense: 1, ship: 1, battery: 1, auto: 1, bio: 1, finance: 1 };
+  function secName(s) {
+    return SECTOR_PAGES[s.key] ? '<a class="vsx-sl" href="/stocks/sector/' + s.key + '/">' + esc(s.label) + '</a>' : esc(s.label);
+  }
   function leadCard(axes, kospi) {
     if (!axes || !axes.sectors || !axes.sectors.length) return '';
     var secs = axes.sectors.filter(function (s) { return typeof s.t === 'number'; }).slice().sort(function (a, b) { return b.t - a.t; });
@@ -228,7 +233,7 @@
       var n = s.n != null ? s.n : (s.names || []).length;
       var tone = s.t < 0 ? 'dn' : kp != null && s.t >= kp ? 'up' : 'up-l';
       return '<div class="vsx-lr" title="' + esc('대표 ' + n + '종목 · ' + (s.names || []).join(' · ')) + '">' +
-        '<div class="nm"><span class="vsx-rk' + (rank === 1 ? ' top' : '') + '">' + rank + '</span>' + esc(s.label) + mv +
+        '<div class="nm"><span class="vsx-rk' + (rank === 1 ? ' top' : '') + '">' + rank + '</span>' + secName(s) + mv +
         (n && n < 3 ? '<small class="n">' + n + '종목</small>' : '') + '</div>' +
         '<div class="tk"><i class="' + tone + '" style="left:' + a + '%;width:' + w.toFixed(2) + '%"></i></div>' +
         '<div class="v ' + cls(s.t) + '">' + f2(s.t) + '%</div></div>';
