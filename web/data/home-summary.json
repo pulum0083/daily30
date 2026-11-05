@@ -1,12 +1,6 @@
 {
- "date": "2026-11-04",
+ "date": "2026-11-05",
  "kospi_days": [
-  {
-   "date": "2026-10-22",
-   "close": 5533.77,
-   "pct": -3.52,
-   "open_pct": -1.14
-  },
   {
    "date": "2026-10-23",
    "close": 5550.3,
@@ -60,15 +54,15 @@
    "close": 5683.8,
    "pct": 0.62,
    "open_pct": 2.43
+  },
+  {
+   "date": "2026-11-05",
+   "close": 5383.8,
+   "pct": -5.28,
+   "open_pct": -1.82
   }
  ],
  "scores": [
-  {
-   "date": "2026-10-22",
-   "direction": "상승 우위",
-   "open_pct": -1.14,
-   "ok": false
-  },
   {
    "date": "2026-10-23",
    "direction": "하락 우위",
@@ -122,66 +116,72 @@
    "direction": "상승 우위",
    "open_pct": 2.43,
    "ok": true
+  },
+  {
+   "date": "2026-11-05",
+   "direction": "상승 우위",
+   "open_pct": -1.82,
+   "ok": false
   }
  ],
  "sectors_week": [
   {
-   "key": "ship",
-   "label": "조선",
-   "pct": 7.02,
-   "n": 4
-  },
-  {
-   "key": "defense",
-   "label": "방산",
-   "pct": 5.13,
-   "n": 5
-  },
-  {
-   "key": "battery",
-   "label": "2차전지",
-   "pct": 4.11,
-   "n": 6
-  },
-  {
-   "key": "power",
-   "label": "전력기기",
-   "pct": 3.46,
-   "n": 5
-  },
-  {
    "key": "bio",
    "label": "바이오",
-   "pct": 3.39,
+   "pct": 10.35,
    "n": 6
   },
   {
    "key": "auto",
    "label": "자동차",
-   "pct": 0.12,
+   "pct": 4.19,
    "n": 6
   },
   {
-   "key": "semicon",
-   "label": "반도체",
-   "pct": -0.42,
-   "n": 7
+   "key": "ship",
+   "label": "조선",
+   "pct": 2.62,
+   "n": 4
   },
   {
    "key": "finance",
    "label": "금융",
-   "pct": -2.3,
+   "pct": -0.77,
+   "n": 7
+  },
+  {
+   "key": "battery",
+   "label": "2차전지",
+   "pct": -1.86,
+   "n": 6
+  },
+  {
+   "key": "defense",
+   "label": "방산",
+   "pct": -4.18,
+   "n": 5
+  },
+  {
+   "key": "power",
+   "label": "전력기기",
+   "pct": -6.52,
+   "n": 5
+  },
+  {
+   "key": "semicon",
+   "label": "반도체",
+   "pct": -11.28,
    "n": 7
   }
  ],
  "kospi_check": {
-  "asof": "2026-11-04",
-  "gap_pct": 67.1,
-  "ma60": 3402.3,
-  "close": 5683.8,
+  "asof": "2026-11-05",
+  "gap_pct": 58.5,
+  "ma60": 3397.3,
+  "close": 5383.8,
   "since": "2001-11",
   "months": 301,
-  "above": 22,
+  "above": 25,
   "year_max": {
    "m": "2026-05",
    "gap": 178.6
@@ -191,5 +191,5 @@
    "gap": 87.5
   }
  },
- "generated_at": "2026-11-04T16:32:26+09:00"
+ "generated_at": "2026-11-05T16:32:23+09:00"
 }
