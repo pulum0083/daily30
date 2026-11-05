@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-11-05T10:01:24.084336+09:00",
+  "generated_at": "2026-11-05T10:30:46.817268+09:00",
   "date": "2026-11-05",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
       "changePct": -5.73,
-      "surge": 0.32,
+      "surge": 0.46,
       "events": [
         {
           "time": "08:43",
@@ -31,8 +31,8 @@
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": -7.74,
-      "surge": 0.22,
+      "changePct": -8.24,
+      "surge": 0.34,
       "events": [
         {
           "time": "09:36",
@@ -57,9 +57,28 @@
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 4.06,
-      "surge": 0.87,
-      "events": []
+      "changePct": 3.88,
+      "surge": 0.99,
+      "events": [
+        {
+          "time": "10:00",
+          "headline": "美관세 완화 기대?…현대차·기아, 장 초반 4~5% 강세",
+          "url": "https://news.google.com/rss/articles/CBMiSkFVX3lxTE5fcm5FY1JGNVFUSFd3WS1kZkdoOWE0LVFtNm9UX05jRko4aHBNUmtsOWRYZE8tcnhoS2NtUkFzcWR1STIycDlWcU13?oc=5",
+          "source": "코인리더스",
+          "why": "미국 관세 완화 기대감에 현대차와 기아 주가가 장 초반 4~5% 강세를 보였다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "09:52",
+          "headline": "현대차 주가, 11월 5일 장중 297,500원 4.94% 상승",
+          "url": "https://news.google.com/rss/articles/CBMickFVX3lxTE9xWDFvRG51LTU1TWxXZ3pBT1hTR3BEd1VBUk5UWWh5TnVDZU9pWlo5cERGT2xPUFRaejYxcGJ0eVRyYk94eExQYXZzTmNYYjJtTVpZYmxOLXZFU2I1UVdxQjc5RUZaQ3hYb2VBM1lxV0stQQ?oc=5",
+          "source": "중앙이코노미뉴스",
+          "why": "현대차 주가, 11월 5일 장중 297,500원 4.94% 상승",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
     }
   ]
 }
