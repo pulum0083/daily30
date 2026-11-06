@@ -1033,7 +1033,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 
 /* ── 코스피 주도주 한 줄 목록 (2026-11-04 B안, SERVICE_RULES §79) — 특이 신호와 같은 목록 모양 ── */
 .ldl-list{border:1px solid #EEF1F5;border-radius:10px;overflow:hidden}
-.ldl-row{display:grid;grid-template-columns:minmax(0,1.3fr) .8fr .9fr 1.3fr;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid #F1F5F9;background:#fff}
+.ldl-row{display:grid;grid-template-columns:minmax(0,1.3fr) .8fr .9fr 1.3fr;align-items:center;gap:8px;padding:14px 12px;border-top:1px solid #F1F5F9;background:#fff}
 .ldl-row:first-child{border-top:none}
 .ldl-hd{background:#F7F9FC;font-size:11px;font-weight:700;color:var(--muted);padding:7px 12px}
 .ldl-hd span:not(:first-child){text-align:right}
@@ -1055,13 +1055,13 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .ldl-m,.ldl-foot{display:none}
 .ldl-foot{font-size:11px;color:var(--muted);padding:7px 12px;background:#F7F9FC;border-top:1px solid #F1F5F9}
 @media(max-width:560px){
-  .ldl-row{display:block;padding:11px 12px}
+  .ldl-row{display:block;padding:16px 12px}
   .ldl-list .ldl-hd,.ldl-row>.ldl-nm,.ldl-row>.ldl-c,.ldl-row>.ldl-d{display:none}
   .ldl-m,.ldl-foot{display:block}
   .ldl-m .m1{display:flex;align-items:baseline;gap:8px;min-width:0}
   .ldl-m .m1 b{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:800;color:#0F172A}
   .ldl-m .m1 .px{white-space:nowrap;font-size:13.5px;font-weight:800;color:#0F172A}
-  .ldl-m .m2{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;color:var(--muted)}
+  .ldl-m .m2{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--muted)}
   .ldl-m .m2>span:first-child{min-width:0}
   .ldl-m .m2 b{font-size:12px;font-weight:800}
   .ldl-m .ldl-trk{margin-left:auto;flex:0 0 46px;width:46px}
