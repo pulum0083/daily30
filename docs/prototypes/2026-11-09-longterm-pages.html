@@ -109,6 +109,29 @@ body.m .rax{margin-left:108px;margin-right:0}
 details.tb{margin-top:10px}
 details.tb summary{font-size:12.5px;font-weight:700;color:#2563EB;cursor:pointer}
 details.tb table{margin-top:8px;font-size:12px}
+/* A 계단 */
+.wf{display:grid;grid-template-columns:92px 1fr 74px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #F1F5F9}
+body.m .wf{grid-template-columns:70px 1fr 62px;gap:8px}
+.wf:last-of-type{border-bottom:0}
+.wf .nm{font-size:13px;font-weight:800;line-height:1.35}
+.wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+body.m .wf .nm small{display:none}
+.wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+.stp{position:relative;height:64px;display:flex;gap:4px}
+.stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed #94A3B8}
+.stp div{flex:1;position:relative}
+.stp i{position:absolute;left:3px;right:3px;border-radius:3px;min-height:2px}
+.stp i.u{background:var(--upb)}.stp i.d{background:var(--dnb)}
+.stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
+.stp u{position:absolute;left:0;right:-4px;border-top:1px solid #CBD5E1}
+body.m .stp em{font-size:9px}
+.dayax{display:grid;grid-template-columns:92px 1fr 74px;gap:10px;margin-top:2px}
+body.m .dayax{grid-template-columns:70px 1fr 62px;gap:8px}
+.dayax .ds{display:flex;gap:4px}
+.dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.lg i{display:inline-block;width:14px;height:0;border-top:1px dashed #94A3B8;vertical-align:3px;margin-right:4px}
 /* 섹터 막대·분포 */
 .hb{display:grid;grid-template-columns:78px 1fr 64px;gap:8px;align-items:center;font-size:12px;margin-top:6px}
 .hb .tr{height:8px;background:var(--soft);border-radius:4px;position:relative}
@@ -331,8 +354,10 @@ body.m .lt{grid-template-columns:1fr}
 </div>
 
 <div class="card">
-<div class="ch"><h2>이번 주 시장</h2><small>지난주 금요일 종가 → 이번 주 금요일 종가 · 막대는 하루 등락</small></div>
-<div id="w-ix"></div>
+<div class="ch"><h2>이번 주 시장</h2><small>11/2(월) ~ 11/6(금)</small></div>
+<div id="a-rows"></div>
+<div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
+<div class="lg"><span><i></i>지난주 금요일 종가(0%)</span><span>막대 위·아래 숫자 = 그날 등락</span></div>
 </div>
 
 <div class="card">
@@ -487,10 +512,25 @@ function chart(box,yrsBox,{n,lines,lo,hi,log,ticks,marks,years,zero,tip,area}){
 
 // ── 2 주간
 (()=>{
-  const rows=[['코스피','KS'],['S&P 500','^GSPC'],['나스닥','^IXIC'],['다우','^DJI'],['반도체(SOX)','^SOX']];
-  $('#w-ix').innerHTML=rows.map(([nm,k])=>{const s=D.idx[k];const p=s.map((x,i)=>i?(x[1]/s[i-1][1]-1)*100:null).slice(1);const w=(s[s.length-1][1]/s[0][1]-1)*100;
-    const days=p.map(v=>{const h=Math.min(50,Math.abs(v)/7*50);return `<div><i style="${v>=0?`bottom:50%;height:${h}%;background:var(--upb)`:`top:50%;height:${h}%;background:var(--dnb)`}" title="${fmt(v,2)}%"></i></div>`}).join('');
-    return `<div class="ix"><span class="nm">${nm}</span><span class="days">${days}</span><span class="pr">${s[0][1].toLocaleString()} → ${s[s.length-1][1].toLocaleString()}</span><span class="wc ${cls(w)}">${fmt(w,2)}%</span></div>`}).join('');
+  const DOW=['일','월','화','수','목','금','토'];
+  const dow=d=>DOW[new Date(d+'T00:00:00Z').getUTCDay()];
+  const IX=[['코스피','KS','#0F172A'],['반도체(SOX)','^SOX','#7C3AED'],['나스닥','^IXIC','#0D9488'],['S&P 500','^GSPC','#64748B'],['다우','^DJI','#CBD5E1']].map(([nm,k,c])=>{
+    const s=D.idx[k],b=s[0][1];
+    return {nm,c,s,cum:s.map(x=>(x[1]/b-1)*100),day:s.slice(1).map((x,i)=>(x[1]/s[i][1]-1)*100),wk:(s[s.length-1][1]/b-1)*100};});
+  const nf=v=>v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  
+  // A 계단
+  (()=>{
+    const lo=Math.floor(Math.min(...IX.flatMap(i=>i.cum))-2),hi=Math.ceil(Math.max(...IX.flatMap(i=>i.cum))+2);
+    const Y=v=>(hi-v)/(hi-lo)*100;
+    $('#a-rows').innerHTML=IX.map(ix=>{
+      const cells=ix.day.map((v,i)=>{const a=ix.cum[i],b=ix.cum[i+1],top=Y(Math.max(a,b)),h=Y(Math.min(a,b))-top;
+        const lab=v>=0?`top:calc(${top}% - 13px)`:`top:calc(${top+h}% + 1px)`;
+        return `<div><i class="${v>=0?'u':'d'}" style="top:${top}%;height:${h}%"></i><em class="${v>=0?'up':'dn'}" style="${lab}">${fmt(v,1)}</em>${i<4?`<u style="top:${Y(b)}%"></u>`:''}</div>`}).join('');
+      return `<div class="wf"><div class="nm">${ix.nm}<small>${nf(ix.s[0][1])} → ${nf(ix.s[ix.s.length-1][1])}</small></div><div class="stp" style="--z:${Y(0)}%">${cells}</div><div class="tot ${ix.wk>=0?'up':'dn'}">${fmt(ix.wk,2)}%<small>한 주</small></div></div>`}).join('');
+  })();
+  
+  
   const ma=D.ma200;
   $('#w-ma').innerHTML=Object.entries(ma).map(([k,[now,prev]])=>{const w=Math.min(50,Math.abs(now)/16*50);return `<div class="sw"><span>${k}</span><span class="tr"><i style="${now>=0?`left:50%;width:${w}%;background:var(--upb)`:`right:50%;width:${w}%;background:var(--dnb)`}"></i></span><b>${fmt(now)}%</b></div>`}).join('')+
     `<p>10/30엔 ${Object.entries(ma).map(([k,[n,p]])=>`${k} ${fmt(p)}%`).join(' · ')}</p>`;
