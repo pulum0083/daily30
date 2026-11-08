@@ -52,6 +52,8 @@ def compute(daily: list, last_date: str, last_close: float) -> dict | None:
         "above": sum(1 for x in series[:-1] if x["g"] > cur["g"]),   # 지금보다 높았던 달 수
         "year_max": {"m": this_year["m"], "gap": round(this_year["g"], 1)},
         "prev_max": {"m": prev["m"], "gap": round(prev["g"], 1)} if prev else None,
+        # 월별 흐름 — 종목 홈이 25년 그래프로 그린다(2026-11-08 B안). [월, 5년 평균 대비 %] 오래된→최신
+        "series": [[x["m"], round(x["g"], 1)] for x in series],
     }
 
 

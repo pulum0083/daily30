@@ -259,30 +259,56 @@
       '<div class="uip">' + rows + '<div class="uip-s"><span></span><div><span>−' + top + '%</span><span class="m">200일선</span><span>+' + top + '%</span></div></div></div></div>';
   }
 
-  // 코스피 체크 — 종가 ÷ 60개월선. 정상·주의·경고를 판정하지 않고 과거 최고들 사이의 위치만 보여준다(§68 ⑤). 게이지 색도 회색이다.
+  // 코스피 체크 — 종가 ÷ 5년(60개월) 평균. 정상·주의·경고를 판정하지 않는다(§68 ⑤).
+  //   2001년부터의 월별 선 그래프에 이전 해 꼭대기·올해 꼭대기·지금을 찍고, 한 문장으로 흐름을 말한다(2026-11-08 B안).
+  //   SVG는 가로로 늘려 그리므로 점·글자는 HTML로 겹친다(§49).
   function kospiRow(kc, today) {
     if (!kc || typeof kc.gap_pct !== 'number' || !isFinite(kc.gap_pct) || !/^\d{4}-\d{2}-\d{2}$/.test(kc.asof || '')) return '';
     if (daysBetween(kc.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
     var s1 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%'; };
     var s0 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(0) + '%'; };
-    var g = kc.gap_pct, marks = [];
-    if (kc.prev_max && typeof kc.prev_max.gap === 'number') marks.push({ v: kc.prev_max.gap, t: kc.prev_max.m.slice(0, 4) + '년 ' + s0(kc.prev_max.gap) });
-    if (kc.year_max && typeof kc.year_max.gap === 'number') marks.push({ v: kc.year_max.gap, t: '올해 ' + s0(kc.year_max.gap) });
-    var top = Math.ceil((Math.max.apply(null, [g].concat(marks.map(function (m) { return m.v; }))) + 10) / 50) * 50;
-    var x = function (v) { return Math.max(0, Math.min(v, top)) / top * 100; };
-    marks.sort(function (a, b) { return a.v - b.v; });
-    // 두 눈금 글자가 겹칠 만큼 가까우면 높은 쪽만 남긴다. 0 눈금과 가까운 글자도 뺀다.
-    if (marks.length === 2 && x(marks[1].v) - x(marks[0].v) < 25) marks.shift();
-    marks = marks.filter(function (m) { return x(m.v) >= 14; });
-    var labels = marks.map(function (m) {
-      return x(m.v) > 80 ? '<span class="l70">' + esc(m.t) + '</span>' : '<span style="left:' + x(m.v).toFixed(1) + '%">' + esc(m.t) + '</span>';
-    }).join('');
+    var mon = function (m) { return +String(m).slice(5, 7) + '월'; };
+    var g = kc.gap_pct, ym = kc.year_max && typeof kc.year_max.gap === 'number' ? kc.year_max : null;
+    var pm = kc.prev_max && typeof kc.prev_max.gap === 'number' ? kc.prev_max : null;
+    var say = '';
+    if (ym && ym.gap > g + 0.05) say = '올해 ' + mon(ym.m) + ' <b>' + s1(ym.gap) + '</b>(평균의 ' + (1 + ym.gap / 100).toFixed(1) + '배)까지 벌어졌다가 지금은 <b>' + s1(g) + '</b>로 좁혀졌어요.';
+    else if (ym) say = '올해 들어 가장 많이 벌어졌어요.';
+    if (pm) say += (say ? ' ' : '') + pm.m.slice(0, 4) + '년 꼭대기는 <b>' + s1(pm.gap) + '</b>였어요.';
     return '<div class="ss ss-static"><div class="ss-h"><span class="ss-k">코스피 체크</span><span class="ss-d">' + md(kc.asof) + '(' + dowOf(kc.asof) + ') 종가</span></div>' +
-      '<div class="ss-m"><b>' + s1(g) + '</b></div>' +
-      '<div class="nqg"><div class="nqg-t"><i class="f n" style="width:' + x(g).toFixed(1) + '%"></i>' +
-      marks.map(function (m) { return '<i class="mk" style="left:' + x(m.v).toFixed(1) + '%"></i>'; }).join('') +
-      '<i class="dot n" style="left:' + x(g).toFixed(1) + '%"></i></div><div class="nqg-l"><span style="left:0">0</span>' + labels + '</div></div>' +
-      '<em>60개월선 대비' + (typeof kc.above === 'number' && kc.months ? ' · ' + esc(String(kc.since).slice(0, 4)) + '년 이후 ' + kc.months + '개월 중 지금보다 높았던 달 ' + kc.above + '개월' : '') + '</em></div>';
+      '<div class="ss-m"><b>5년 평균보다 ' + s1(g) + '</b></div>' + (say ? '<p class="kc-say">' + say + '</p>' : '') +
+      kospiChart(kc.series, g, pm, ym, s0) + '<em>월말 종가와 지난 5년(60개월) 월말 종가 평균을 비교해요</em></div>';
+  }
+
+  function kospiChart(series, g, pm, ym, s0) {
+    var pts = (Array.isArray(series) ? series : []).filter(function (p) { return p && typeof p[1] === 'number' && isFinite(p[1]); });
+    if (pts.length < 24) return '';                                   // 흐름이라 부를 만큼 쌓이지 않았으면 그래프를 빼고 문장만 둔다
+    var n = pts.length, vals = pts.map(function (p) { return p[1]; });
+    var lo = Math.min.apply(null, vals.concat([0])) - 5, hi = Math.max.apply(null, vals) + 14;
+    var X = function (i) { return i / (n - 1) * 100; }, Y = function (v) { return (hi - v) / (hi - lo) * 100; };
+    var idx = function (m) { for (var i = 0; i < n; i++) if (pts[i][0] === m) return i; return -1; };
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + X(i).toFixed(2) + ' ' + Y(p[1]).toFixed(2); }).join(' ');
+    var z = Y(0).toFixed(2), html = '<div class="kcc"><div class="kcc-p"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path class="a" d="' + d + ' L100 ' + z + ' L0 ' + z + ' Z"/><line x1="0" x2="100" y1="' + z + '" y2="' + z + '"/><path class="l" d="' + d + '"/></svg>' +
+      // '5년 평균'은 오른쪽 여백의 0선 높이에 둔다 — 선 위에 두면 어느 해와 겹친다. 지금 글자와 붙으면 지금 쪽만 남긴다
+      (Math.abs(Y(g) - Y(0)) >= 16 ? '<span class="kcc-t z" style="top:' + z + '%">5년 평균</span>' : '');
+    var iy = ym ? idx(ym.m) : -1, ip = pm ? idx(pm.m) : -1;
+    if (ip >= 0 && !(iy >= 0 && X(iy) - X(ip) < 30)) {                // 두 꼭대기 글자가 겹칠 만큼 가까우면 올해 것만 둔다
+      html += '<i class="kcc-o" style="left:' + X(ip).toFixed(2) + '%;top:' + Y(pm.gap).toFixed(2) + '%"></i>' +
+        '<span class="kcc-t up" style="left:' + X(ip).toFixed(2) + '%;top:' + Y(pm.gap).toFixed(2) + '%">' + pm.m.slice(0, 4) + '년 ' + s0(pm.gap) + '</span>';
+    }
+    if (iy >= 0 && iy < n - 1) {
+      html += '<i class="kcc-o" style="left:' + X(iy).toFixed(2) + '%;top:' + Y(ym.gap).toFixed(2) + '%"></i>' +
+        '<span class="kcc-t lf" style="left:' + X(iy).toFixed(2) + '%;top:' + Y(ym.gap).toFixed(2) + '%">올해 ' + (+ym.m.slice(5, 7)) + '월 ' + s0(ym.gap) + '</span>';
+    }
+    html += '<i class="kcc-o now" style="left:100%;top:' + Y(g).toFixed(2) + '%"></i>' +
+      '<span class="kcc-t now" style="top:' + Y(g).toFixed(2) + '%">지금 ' + s0(g) + '</span></div><div class="kcc-x">';
+    var y0 = +pts[0][0].slice(0, 4);
+    for (var y = Math.ceil((y0 + 1) / 5) * 5; ; y += 5) {
+      var i = idx(y + '-01');
+      if (i < 0) break;
+      html += '<span style="left:' + X(i).toFixed(2) + '%">' + y + '</span>';
+    }
+    return html + '</div></div>';
   }
 
   function structHtml(nq, nqDate, m5, m5Date, today, pos, kc) {

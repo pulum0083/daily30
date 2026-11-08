@@ -47,6 +47,8 @@ def test_position_above_and_maxes():
     assert r["year_max"]["m"] == "2026-01" and r["prev_max"]["m"] == "2025-01"
     assert r["year_max"]["gap"] > r["prev_max"]["gap"] > r["gap_pct"] > 0
     assert r["above"] == 2                                        # 2025-01·2026-01만 지금보다 높다
+    assert r["series"][0][0] == "2024-12" and r["series"][-1] == ["2026-02", r["gap_pct"]]
+    assert len(r["series"]) == r["months"]
 
 
 def test_first_year_has_no_prev_max():

@@ -908,9 +908,24 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b.cur i{background:#93B8F5}
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
-/* 코스피 체크 — 판정이 아니라 위치라서 회색 게이지 + 과거 최고 눈금 */
-#struct-sig .nqg-t i.f.n{background:#94A3B8} #struct-sig .nqg-t i.dot.n{background:#0F172A}
-#struct-sig .nqg-t i.mk{width:1.5px;top:-3px;height:14px;margin-left:-.75px;background:#64748B}
+/* 코스피 체크 — 2001년부터 월별 선 그래프(판정이 아니라 위치라서 회색). 오른쪽 여백에 '지금' 글자를 둔다(2026-11-08 B안) */
+#struct-sig .kc-say{font-size:12.5px;color:#334155;line-height:1.55;margin-top:4px}
+#struct-sig .kc-say b{font-weight:700;color:#0F172A}
+#struct-sig .kcc{margin-top:12px;padding-right:58px}
+#struct-sig .kcc-p{position:relative;height:96px}
+#struct-sig .kcc-p svg{display:block;width:100%;height:100%;overflow:visible}
+#struct-sig .kcc-p .a{fill:#E2E8F0;opacity:.7}
+#struct-sig .kcc-p .l{fill:none;stroke:#475569;stroke-width:1.5;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#struct-sig .kcc-p line{stroke:#94A3B8;stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+#struct-sig .kcc-o{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#fff;border:1.5px solid #0F172A;box-sizing:border-box}
+#struct-sig .kcc-o.now{width:10px;height:10px;margin:-5px 0 0 -5px;background:#0F172A;border-color:#fff;box-shadow:0 0 0 1px #0F172A}
+#struct-sig .kcc-t{position:absolute;font-size:10px;line-height:1;color:var(--muted);white-space:nowrap}
+#struct-sig .kcc-t.z{left:100%;transform:translate(9px,-50%)}
+#struct-sig .kcc-t.up{transform:translate(-50%,-15px)}
+#struct-sig .kcc-t.lf{transform:translate(calc(-100% - 7px),-4px)}
+#struct-sig .kcc-t.now{left:100%;transform:translate(9px,-50%);font-weight:700;color:#0F172A}
+#struct-sig .kcc-x{position:relative;height:13px;margin-top:5px;font-size:10px;color:var(--muted)}
+#struct-sig .kcc-x span{position:absolute;top:0;transform:translateX(-50%)}
 /* 미국 지수 · 200일선 대비 — 가운데 눈금이 200일선 */
 #struct-sig .ss-static:hover{background:#fff}
 #struct-sig .uip{margin-top:9px;display:grid;gap:7px}
@@ -931,8 +946,9 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 /* PC — 줄마다 왼쪽 정보(이름·알약·설명), 오른쪽 차트(게이지·막대)로 나눠 폭을 다 쓴다 */
 @media(min-width:720px){
   #struct-sig .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
-  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>em{grid-column:1}
+  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>.kc-say,#struct-sig .ss>em{grid-column:1}
   #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg,#struct-sig .ss>.uip{grid-column:2;grid-row:1/4;margin-top:0}
+  #struct-sig .ss>.kcc{grid-column:2;grid-row:1/5;margin-top:0}
 }
 /* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
 .hh-new.wk{color:var(--muted)}
