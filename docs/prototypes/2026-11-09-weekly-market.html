@@ -1,0 +1,152 @@
+<!-- 주간 장기 리포트 '이번 주 시장' 다시 그린 두 시안 — 10/30 종가 → 11/6 종가 실측(코스피 네이버, 미국 야후 정규장) -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이번 주 시장 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--soft:#F1F5F9;--primary:#006EFF;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#EEF1F5;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:20px 12px 80px}
+.top,.v{max-width:780px;margin:0 auto 24px}
+body.m .v{max-width:375px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:6px}
+.bar{position:sticky;top:0;z-index:9;background:#EEF1F5;padding:8px 0;max-width:780px;margin:0 auto 8px;display:flex;gap:6px}
+.bar button{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #CBD5E1;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;color:#334155}
+.bar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.v>h3{font-size:15px;font-weight:800}
+.v>p.d{font-size:12.5px;color:var(--muted);line-height:1.55;margin:3px 0 10px}
+.rec{display:inline-block;font-size:11px;font-weight:700;color:#2563EB;background:#EFF4FE;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.card{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:16px}
+.ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ch h2{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.ch h2::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.ch small{font-size:11.5px;color:var(--muted)}
+.say{font-size:14px;line-height:1.65;color:#1E293B;margin-bottom:12px}
+.say b{font-weight:800}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.fine{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:10px}
+/* A 계단 */
+.wf{display:grid;grid-template-columns:92px 1fr 74px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #F1F5F9}
+body.m .wf{grid-template-columns:70px 1fr 62px;gap:8px}
+.wf:last-of-type{border-bottom:0}
+.wf .nm{font-size:13px;font-weight:800;line-height:1.35}
+.wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+body.m .wf .nm small{display:none}
+.wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+.stp{position:relative;height:64px;display:flex;gap:4px}
+.stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed #94A3B8}
+.stp div{flex:1;position:relative}
+.stp i{position:absolute;left:3px;right:3px;border-radius:3px;min-height:2px}
+.stp i.u{background:var(--upb)}.stp i.d{background:var(--dnb)}
+.stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
+.stp u{position:absolute;left:0;right:-4px;border-top:1px solid #CBD5E1}
+body.m .stp em{font-size:9px}
+.dayax{display:grid;grid-template-columns:92px 1fr 74px;gap:10px;margin-top:2px}
+body.m .dayax{grid-template-columns:70px 1fr 62px;gap:8px}
+.dayax .ds{display:flex;gap:4px}
+.dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.lg i{display:inline-block;width:14px;height:0;border-top:1px dashed #94A3B8;vertical-align:3px;margin-right:4px}
+/* B 누적 선 */
+.plot{position:relative;height:220px;margin:6px 74px 0 38px}
+body.m .plot{height:200px;margin-right:64px}
+.plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.plot .gl{stroke:#E2E8F0;vector-effect:non-scaling-stroke}
+.plot .gl.z{stroke:#94A3B8;stroke-dasharray:4 3}
+.plot .ln{fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.plot .ln.k{stroke-width:3.2}
+.ax{position:absolute;left:-38px;width:32px;text-align:right;font-size:10px;color:var(--muted);transform:translateY(-50%)}
+.pt{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%}
+.el{position:absolute;left:100%;margin-left:8px;transform:translateY(-50%);font-size:11px;font-weight:800;white-space:nowrap;line-height:1.2}
+.el small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.xax{position:relative;height:18px;margin:4px 74px 0 38px}
+body.m .xax{margin-right:64px}
+.xax span{position:absolute;font-size:11px;font-weight:700;color:var(--muted);transform:translateX(-50%);top:3px;white-space:nowrap}
+.cur{position:absolute;top:0;bottom:0;width:1px;background:#94A3B8;pointer-events:none}
+.tip{position:absolute;top:4px;font-size:11px;background:var(--ink);color:#fff;border-radius:8px;padding:6px 8px;line-height:1.5;pointer-events:none;transform:translateX(-50%);white-space:nowrap;z-index:2}
+.tbl{margin-top:12px;border-top:1px solid var(--hair)}
+.tr2{display:grid;grid-template-columns:14px 1fr 70px 110px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9;font-size:12.5px}
+.tr2:last-child{border-bottom:0}
+.tr2 i{width:12px;height:3px;border-radius:2px}
+.tr2 .w{text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
+.tr2 .bd{text-align:right;font-size:11.5px;color:var(--muted)}
+.tr2 .bd b{font-weight:800}
+</style></head><body>
+<div class="top"><h1>주간 장기 리포트 · 이번 주 시장 — 다시 그리기</h1>
+<p>첫 시안은 요일 표시가 없고 막대가 아주 얇아 무엇을 뜻하는지 보이지 않았어요. 두 안 모두 같은 실측(10/30 종가 → 11/6 종가)을 써요. 코스피는 네이버 공식 종가, 미국은 정규장 종가예요.</p></div>
+<div class="bar"><button data-w="pc" class="on">PC</button><button data-w="m">모바일 폭</button></div>
+
+<div class="v"><h3>A. 지수마다 요일 계단 <span class="rec">추천</span></h3>
+<p class="d">점선이 지난주 금요일 종가예요. 요일마다 그날 오르내린 만큼 계단을 이어 쌓아, 금요일에 어디서 끝났는지 보여줘요. 다섯 지수가 같은 눈금이라 크기를 바로 비교할 수 있어요. 주말 카드(코스피 계단)와 같은 그림이에요.</p>
+<div class="card">
+<div class="ch"><h2>이번 주 시장</h2><small>11/2(월) ~ 11/6(금)</small></div>
+<p class="say" id="a-say"></p>
+<div id="a-rows"></div>
+<div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
+<div class="lg"><span><i></i>지난주 금요일 종가(0%)</span><span>막대 위·아래 숫자 = 그날 등락</span></div>
+</div></div>
+
+<div class="v"><h3>B. 다섯 지수를 한 그래프에</h3>
+<p class="d">지난주 금요일 종가를 0%로 놓고 요일마다 누적 등락을 선으로 이어요. 코스피와 반도체가 함께 무너지고 미국 대표 지수는 덜 빠진 게 한 그림에 보여요. 대신 선이 겹치는 날은 읽기 어려워요.</p>
+<div class="card">
+<div class="ch"><h2>이번 주 시장</h2><small>지난주 금요일 종가 = 0%</small></div>
+<p class="say" id="b-say"></p>
+<div class="plot" id="b-p"></div>
+<div class="xax" id="b-x"></div>
+<div class="tbl" id="b-t"></div>
+</div></div>
+
+<script>
+const D={"idx":{"^DJI":[["2026-10-30",51770.31],["2026-11-02",51983.98],["2026-11-03",51786.72],["2026-11-04",53356.12],["2026-11-05",51523.06],["2026-11-06",51285.73]],"^GSPC":[["2026-10-30",7580.07],["2026-11-02",7541.4],["2026-11-03",7568.92],["2026-11-04",7688.62],["2026-11-05",7353.73],["2026-11-06",7376.86]],"^IXIC":[["2026-10-30",25437.0],["2026-11-02",25164.31],["2026-11-03",25372.01],["2026-11-04",25736.51],["2026-11-05",24315.0],["2026-11-06",24579.43]],"^SOX":[["2026-10-30",10688.8],["2026-11-02",10328.33],["2026-11-03",10600.4],["2026-11-04",10268.65],["2026-11-05",9011.14],["2026-11-06",9390.25]],"KS":[["2026-10-30",5730.74],["2026-11-02",5859.08],["2026-11-03",5648.79],["2026-11-04",5683.8],["2026-11-05",5383.8],["2026-11-06",5059.69]]}};
+const $=s=>document.querySelector(s);
+const fmt=(v,d=2)=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d);
+document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.bar button').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.toggle('m',b.dataset.w==='m')});
+const DOW=['일','월','화','수','목','금','토'];
+const dow=d=>DOW[new Date(d+'T00:00:00Z').getUTCDay()];
+const IX=[['코스피','KS','#0F172A'],['반도체(SOX)','^SOX','#7C3AED'],['나스닥','^IXIC','#0D9488'],['S&P 500','^GSPC','#64748B'],['다우','^DJI','#CBD5E1']].map(([nm,k,c])=>{
+  const s=D.idx[k],b=s[0][1];
+  return {nm,c,s,cum:s.map(x=>(x[1]/b-1)*100),day:s.slice(1).map((x,i)=>(x[1]/s[i][1]-1)*100),wk:(s[s.length-1][1]/b-1)*100};});
+const big=ix=>{let j=0;ix.day.forEach((v,i)=>{if(Math.abs(v)>Math.abs(ix.day[j]))j=i});return [dow(ix.s[j+1][0]),ix.day[j]]};
+const say=()=>{const k=IX[0],x=IX[1],us=IX.slice(2);const [kd,kv]=big(k);
+  return `코스피 <b class="dn">${fmt(k.wk)}%</b>, 반도체 <b class="dn">${fmt(x.wk)}%</b>로 크게 빠졌고 미국 대표 지수는 ${us.map(u=>`${u.nm} ${fmt(u.wk)}%`).join(', ')}였어요. 코스피는 <b>${kd}요일 하루에 ${fmt(kv)}%</b>로 가장 크게 움직였어요.`};
+const nf=v=>v.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+
+// A 계단
+(()=>{
+  const lo=Math.floor(Math.min(...IX.flatMap(i=>i.cum))-2),hi=Math.ceil(Math.max(...IX.flatMap(i=>i.cum))+2);
+  const Y=v=>(hi-v)/(hi-lo)*100;
+  $('#a-say').innerHTML=say();
+  $('#a-rows').innerHTML=IX.map(ix=>{
+    const cells=ix.day.map((v,i)=>{const a=ix.cum[i],b=ix.cum[i+1],top=Y(Math.max(a,b)),h=Y(Math.min(a,b))-top;
+      const lab=v>=0?`top:calc(${top}% - 13px)`:`top:calc(${top+h}% + 1px)`;
+      return `<div><i class="${v>=0?'u':'d'}" style="top:${top}%;height:${h}%"></i><em class="${v>=0?'up':'dn'}" style="${lab}">${fmt(v,1)}</em>${i<4?`<u style="top:${Y(b)}%"></u>`:''}</div>`}).join('');
+    return `<div class="wf"><div class="nm">${ix.nm}<small>${nf(ix.s[0][1])} → ${nf(ix.s[ix.s.length-1][1])}</small></div><div class="stp" style="--z:${Y(0)}%">${cells}</div><div class="tot ${ix.wk>=0?'up':'dn'}">${fmt(ix.wk)}%<small>한 주</small></div></div>`}).join('');
+})();
+
+// B 누적 선
+(()=>{
+  $('#b-say').innerHTML=say();
+  const n=6,lo=Math.floor((Math.min(...IX.flatMap(i=>i.cum))-2)/4)*4,hi=4,X=i=>i/(n-1)*1000,Y=v=>(hi-v)/(hi-lo)*100;
+  let s=`<svg viewBox="0 0 1000 100" preserveAspectRatio="none">`;
+  [-16,-12,-8,-4,0,4].filter(t=>t>=lo).forEach(t=>s+=`<line class="gl ${t===0?'z':''}" x1="0" x2="1000" y1="${Y(t)}" y2="${Y(t)}"/>`);
+  [...IX].reverse().forEach((ix,r)=>s+=`<path class="ln ${ix.nm==='코스피'?'k':''}" stroke="${ix.c}" d="${ix.cum.map((v,i)=>(i?'L':'M')+X(i)+','+Y(v)).join(' ')}"/>`);
+  s+='</svg>';
+  [-16,-12,-8,-4,0,4].filter(t=>t>=lo).forEach(t=>s+=`<span class="ax" style="top:${Y(t)}%">${t>0?'+':''}${t}%</span>`);
+  IX.forEach(ix=>ix.cum.forEach((v,i)=>{if(i)s+=`<i class="pt" style="left:${i/(n-1)*100}%;top:${Y(v)}%;background:${ix.c}"></i>`}));
+  // 끝 라벨 — 겹치면 위아래로 민다
+  const ends=IX.map(ix=>({ix,y:Y(ix.wk)})).sort((a,b)=>a.y-b.y);
+  for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<13)ends[i].y=ends[i-1].y+13;
+  ends.forEach(e=>s+=`<span class="el" style="top:${e.y}%;color:${e.ix.c==='#CBD5E1'?'#94A3B8':e.ix.c}">${fmt(e.ix.wk,1)}%<small>${e.ix.nm}</small></span>`);
+  s+=`<i class="cur" hidden></i><div class="tip" hidden></div>`;
+  const P=$('#b-p');P.innerHTML=s;
+  $('#b-x').innerHTML=IX[0].s.map((x,i)=>`<span style="left:${i/(n-1)*100}%">${i?dow(x[0]):'지난 금'}</span>`).join('');
+  const cur=P.querySelector('.cur'),tp=P.querySelector('.tip');
+  P.onmousemove=e=>{const r=P.getBoundingClientRect();const i=Math.max(0,Math.min(n-1,Math.round((e.clientX-r.left)/r.width*(n-1))));cur.hidden=tp.hidden=false;cur.style.left=tp.style.left=i/(n-1)*100+'%';
+    tp.innerHTML=`<b>${i?IX[0].s[i][0].slice(5).replace('-','/')+'('+dow(IX[0].s[i][0])+')':'지난주 금요일'}</b><br>`+IX.map(ix=>`${ix.nm} ${fmt(ix.cum[i],1)}%`).join('<br>')};
+  P.onmouseleave=()=>{cur.hidden=tp.hidden=true};
+  $('#b-t').innerHTML=IX.map(ix=>{const [d,v]=big(ix);return `<div class="tr2"><i style="background:${ix.c}"></i><span><b>${ix.nm}</b></span><span class="w ${ix.wk>=0?'up':'dn'}">${fmt(ix.wk)}%</span><span class="bd">가장 큰 날 <b class="${v>=0?'up':'dn'}">${d} ${fmt(v,1)}%</b></span></div>`}).join('');
+})();
+</script>
+</body></html>
