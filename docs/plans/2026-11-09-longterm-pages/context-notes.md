@@ -5,3 +5,7 @@
 - 1년 뒤 결과는 12개월 뒤 월이 '진행 중인 이번 달'이면 세지 않는다(시안 첫 판의 2025-11 포함 오류).
 - S&P 200일선 과거 흐름은 지금 구성 종목으로 계산한다(생존 편향) — 페이지에 밝힌다. 이후 날짜는 매일 그날 구성 종목으로 upsert한다.
 - 주간 리포트 cron은 GHA native — §10의 지연·누락 위험이 있어 3번(08·11·14시) 걸고, 이미 있으면 건너뛴다. 실패해도 브리핑과 무관하다.
+- 2026-11-09 사용자: 주말 첫 카드는 기존 코스피 계단 그림을 유지하고 그 아래 미국 지수를 A안으로(주간 리포트 페이지도 같은 구성). 장기 신호 줄 순서는 나스닥 → S&P 500 → 코스피.
+- 2026-11-09 인계: 작업은 브랜치 `feat/longterm-pages`로 올렸다(main 푸시 = 프로덕션 배포라서). 다른 컴퓨터에서 `git fetch && git checkout feat/longterm-pages`. origin/main에는 아직 없다 — 이 브랜치가 origin/main 위 10커밋이다(시안 커밋 포함).
+- 로컬 전용 파일(gitignore)은 옮겨지지 않는다: data/kospi_check.json(마감 잡·`python3 -c` 로 kospi_check.fetch 결과를 쓰면 됨), data/sp500_ma200.json(`python3 scripts/sp500_ma200.py`). 페이지를 로컬에서 다시 그릴 때만 필요하다.
+- 로컬 확인: `.claude/launch.json`의 daily30-web(포트 8792, web/ 서빙). 홈 주말 카드는 `/stocks/?slot=weekend&d=2026-11-07`.
