@@ -120,7 +120,7 @@
     var monday = shiftYmd(last, -((dow + 6) % 7));
     var week = rows.filter(function (r) { return r.date >= monday; });
     var before = rows.filter(function (r) { return r.date < monday; });
-    return { week: week, prev: before.length ? before[before.length - 1] : null };
+    return { week: week, prev: before.length ? before[before.length - 1] : null, monday: monday };
   }
   // 계단 그림 — 지난주 종가에서 하루씩 쌓아 이번 주 종가까지(2026-11-01 B안, 시안 docs/prototypes/2026-11-01-weekend-week-infographic.html)
   function dowOf(ymd) { var p = ymd.split('-'); return DOWS[new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()]; }
@@ -159,7 +159,50 @@
       (pt > 0 ? '+' : pt < 0 ? '−' : '') + f0(Math.abs(pt)) + 'p</span>';
   }
   function md(ymd) { var p = ymd.split('-'); return (+p[1]) + '/' + (+p[2]); }
-  function cardWeekend(summary, ymd, today, holiday) {
+
+  // 미국 지수 요일 계단(2026-11-09 사용자 결정, 시안 docs/prototypes/2026-11-09-weekly-market.html A안).
+  //   주간 장기 리포트가 토요일 아침 저장한 /weekly/{금요일}/data.json을 읽는다 — 리포트가 아직 없으면(금요일 밤~토요일 아침) 빠진다.
+  //   지수마다 한 줄, 월~금 다섯 칸에 그날 오르내린 만큼 계단을 이어 쌓는다. 네 지수가 같은 눈금이고, 거래가 없던 요일은 '휴장'.
+  var US_WEEK = [['^SOX', '반도체(SOX)'], ['^IXIC', '나스닥'], ['^GSPC', 'S&P 500'], ['^DJI', '다우']];
+  function usWeekSteps(wk, monday) {
+    if (!wk || wk.monday !== monday || !wk.idx) return '';
+    var rows = [], cums = [0];
+    US_WEEK.forEach(function (x) {
+      var s = wk.idx[x[0]];
+      if (!Array.isArray(s) || s.length < 2) return;
+      var base = s[0][1], prev = base, cells = [null, null, null, null, null];
+      for (var i = 1; i < s.length; i++) {
+        var k = daysBetween(monday, s[i][0]);
+        if (k >= 0 && k < 5) {
+          cells[k] = { pct: (s[i][1] / prev - 1) * 100, a: (prev / base - 1) * 100, b: (s[i][1] / base - 1) * 100 };
+          cums.push(cells[k].b);
+        }
+        prev = s[i][1];
+      }
+      rows.push({ name: x[1], from: base, to: s[s.length - 1][1], wk: (s[s.length - 1][1] / base - 1) * 100, cells: cells });
+    });
+    if (!rows.length) return '';
+    var lo = Math.floor(Math.min.apply(null, cums) - 2), hi = Math.ceil(Math.max.apply(null, cums) + 2);
+    var Y = function (v) { return (hi - v) / (hi - lo) * 100; };
+    var sg = function (v, d) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d); };
+    var f2 = function (v) { return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var html = rows.map(function (r) {
+      var cells = r.cells.map(function (c, i) {
+        if (!c) return '<div><span class="uwk-off">휴장</span></div>';
+        var top = Y(Math.max(c.a, c.b)), h = Math.max(Y(Math.min(c.a, c.b)) - top, 0.6), up = c.pct >= 0;
+        return '<div><i class="' + (up ? 'u' : 'd') + '" style="top:' + top.toFixed(2) + '%;height:' + h.toFixed(2) + '%"></i>' +
+          '<em class="' + (up ? 'up' : 'dn') + '" style="top:calc(' + (up ? top.toFixed(2) + '% - 13px' : (top + h).toFixed(2) + '% + 1px') + ')">' + sg(c.pct, 1) + '</em>' +
+          (i < 4 ? '<u style="top:' + Y(c.b).toFixed(2) + '%"></u>' : '') + '</div>';
+      }).join('');
+      return '<div class="uwk-r"><div class="uwk-n">' + esc(r.name) + '<small>' + f2(r.from) + ' → ' + f2(r.to) + '</small></div>' +
+        '<div class="uwk-s" style="--z:' + Y(0).toFixed(2) + '%">' + cells + '</div>' +
+        '<div class="uwk-t ' + cls(r.wk) + '">' + sg(r.wk, 2) + '%</div></div>';
+    }).join('');
+    return '<div class="uwk"><div class="uwk-h">미국 지수 · 이번 주<span>점선 = 지난주 금요일 종가</span></div>' + html +
+      '<div class="uwk-x"><span></span><div><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div></div>';
+  }
+
+  function cardWeekend(summary, ymd, today, holiday, wk) {
     var w = weekRows(summary && summary.kospi_days);
     if (!w.week.length || !w.prev) return '';
     var last = w.week[w.week.length - 1];
@@ -173,6 +216,7 @@
     var top = (summary && summary.sectors_week || [])[0];
     // 숫자 줄은 한 줄로 간단히 — 시작·끝 종가는 바로 아래 헤드라인·계단 그림이 보여준다(2026-11-01)
     var tile = function (k, v) { return '<span><i>' + k + '</i>' + v + '</span>'; };
+    var us = usWeekSteps(wk, w.monday);
     return '<div class="hh">' +
       '<div class="hh-k"><span>이번 주 정리 · ' + md(dates[0]) + '~' + md(last.date) + '</span><span class="hh-new wk">' + (holiday ? '휴장' : '주말') + '</span></div>' +
       '<div class="hh-wk3">' +
@@ -183,6 +227,7 @@
       '<h2 class="hh-h st-h">' + weekStepHead(w.prev, w.week) + '</h2>' +
       '<div class="hh-steps">' + weekSteps(w.prev, w.week) + '</div>' +
       '<p class="hh-dek">코스피는 이번 주 ' + w.week.length + '거래일 중 ' + up + '일 오르고 ' + dn + '일 내려 주간 <b class="' + cls(total) + '">' + pct(total) + '</b>로 마쳤어요.</p>' +
+      (us ? us + '<a class="hh-cta ghost" href="/weekly/' + wk.end + '/">주간 장기 리포트 →</a>' : '') +
       '<a class="hh-cta ghost" href="/briefings/">이번 주 브리핑 다시 보기 →</a></div>';
   }
 
@@ -393,7 +438,14 @@
       if (info.slot === 'weekend') {
         var p = info.date.split('-'), wd = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
         var hol = wd >= 1 && wd <= 5 && !!(window.krIsKospiHolidayOn && window.krIsKospiHolidayOn(info.date));
-        return json('/data/home-summary.json').then(function (sm) { show(cardWeekend(sm, info.date, today, hol), info.slot); });
+        // 미국 지수 계단은 그 주 금요일의 주간 장기 리포트 데이터에서 읽는다 — 없으면 코스피만 그린다
+        return json('/data/home-summary.json').then(function (sm) {
+          var w = weekRows(sm && sm.kospi_days);
+          var fri = w.monday ? shiftYmd(w.monday, 4) : '';
+          return (fri ? json('/weekly/' + fri + '/data.json') : Promise.resolve(null)).then(function (wk) {
+            show(cardWeekend(sm, info.date, today, hol, wk), info.slot);
+          });
+        });
       }
       var type = { morning: 'kospi', close: 'close', evening: 'us' }[info.slot];
       if (!type || !ready(info.date, type)) { show('', info.slot); return; }   // 장중·주말·미발행 — 카드 없음
@@ -413,7 +465,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, usIndexRow: usIndexRow, kospiRow: kospiRow, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, usIndexRow: usIndexRow, kospiRow: kospiRow, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);

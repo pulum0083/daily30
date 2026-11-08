@@ -252,6 +252,23 @@ test('주말 카드 — 계단 그림·헤드라인(시작→끝 종가·가장 
   assert.match(h, /href="\/briefings\/"/);
 });
 
+// 미국 지수 요일 계단(2026-11-09) — 주간 장기 리포트 data.json의 idx를 읽는다
+const WK = { end: '2026-10-23', monday: '2026-10-19', idx: {
+  '^GSPC': [['2026-10-16', 100], ['2026-10-19', 101], ['2026-10-20', 99.99], ['2026-10-22', 98], ['2026-10-23', 99]],   // 10/21 휴장
+  '^SOX': [['2026-10-16', 100], ['2026-10-23', 90]] } };
+
+test('주말 카드 — 주간 리포트가 있으면 미국 지수 요일 계단과 리포트 링크가 붙는다', () => {
+  const h = api.cardWeekend(SUM, '2026-10-24', '2026-10-24', false, WK);
+  assert.match(h, /미국 지수 · 이번 주/);
+  assert.ok(h.indexOf('st-plot') < h.indexOf('uwk-r'));                  // 코스피 그림이 먼저
+  assert.match(h, /S&amp;P 500|S&P 500/);
+  assert.match(h, /휴장/);                                               // 수요일 칸
+  assert.match(h, /href="\/weekly\/2026-10-23\/"/);
+  assert.match(h, /반도체\(SOX\)[\s\S]*−10\.00%/);                     // SOX는 금요일 하루만 있어도 주간 등락
+  assert.doesNotMatch(api.cardWeekend(SUM, '2026-10-24', '2026-10-24', false, null), /uwk/);   // 리포트 전엔 코스피만
+  assert.doesNotMatch(api.cardWeekend(SUM, '2026-10-24', '2026-10-24', false, { ...WK, monday: '2026-10-12' }), /uwk/);   // 다른 주면 붙이지 않는다
+});
+
 test('주말 카드 — 휴장 표기, 지난 주 요약이면·직전 주 종가가 없으면 카드 없음', () => {
   assert.match(api.cardWeekend(SUM, '2026-10-26', '2026-10-26', true), />휴장</);
   assert.equal(api.cardWeekend(SUM, '2026-11-02', '2026-11-02', false), '');   // 10일 지난 요약

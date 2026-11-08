@@ -978,6 +978,30 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .st-x b{display:block;font-size:11px;font-weight:700}
 .st-x .on b{font-size:12px;color:#0F172A}
 .hh-cta.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair)}
+.hh-cta+.hh-cta{margin-top:8px}
+@media (min-width:720px){.hh-cta.ghost+.hh-cta.ghost{margin:12px 0 0 8px}}
+/* 주말 카드 미국 지수 요일 계단(2026-11-09, 시안 A안) — 점선이 지난주 금요일 종가, 칸마다 그날 오르내린 만큼 이어 쌓는다. 네 지수가 같은 눈금 */
+.uwk{margin-top:14px;padding-top:12px;border-top:1px solid var(--hair)}
+.uwk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:800;color:#0F172A;margin-bottom:2px}
+.uwk-h span{font-size:11px;font-weight:500;color:var(--muted)}
+.uwk-r{display:grid;grid-template-columns:96px 1fr 72px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #F1F5F9}
+.uwk-n{font-size:13px;font-weight:800;color:#0F172A;line-height:1.35}
+.uwk-n small{display:block;font-size:10.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.uwk-t{text-align:right;font-size:15px;font-weight:900;font-variant-numeric:tabular-nums}
+.uwk-t.up{color:#E03131}.uwk-t.dn{color:#2775ED}
+.uwk-s{position:relative;height:58px;display:flex;gap:4px}
+.uwk-s::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed #94A3B8}
+.uwk-s>div{flex:1;position:relative}
+.uwk-s i{position:absolute;left:3px;right:3px;border-radius:3px}
+.uwk-s i.u{background:#E86464}.uwk-s i.d{background:#5D97F1}
+.uwk-s em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
+.uwk-s em.up{color:#E03131}.uwk-s em.dn{color:#2775ED}
+.uwk-s u{position:absolute;left:0;right:-4px;border-top:1px solid #CBD5E1}
+.uwk-off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
+.uwk-x{display:grid;grid-template-columns:96px 1fr 72px;gap:10px;margin-top:3px}
+.uwk-x div{display:flex;gap:4px}
+.uwk-x div span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+@media (max-width:560px){.uwk-r,.uwk-x{grid-template-columns:66px 1fr 62px;gap:8px}.uwk-n small{display:none}.uwk-s em{font-size:9px}.uwk-t{font-size:13.5px}.uwk-h{flex-wrap:wrap}}
 /* §68 ⑦ 넓은 화면도 한 단 — 880px 가운데. 시간대별 블록 순서는 home-hero.js가 붙이는 #home.slot-* 로 정한다.
    슬롯 클래스가 붙기 전(또는 목록을 못 받았을 때)은 DOM 순서 그대로 — 국면별 DOM 재배치(stocks-home.js)가 대신한다. */
 .wrap{max-width:880px}

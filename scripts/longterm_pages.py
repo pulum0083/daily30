@@ -292,7 +292,8 @@ def sp500_context(data: dict, history: list) -> dict:
 
 # ─────────────────────────── 주간 장기 리포트 ───────────────────────────
 
-IDX_ORDER = (("KS", "코스피"), ("^SOX", "반도체(SOX)"), ("^IXIC", "나스닥"), ("^GSPC", "S&P 500"), ("^DJI", "다우"))
+# 미국 지수 요일 계단(A안) 순서. 코스피는 따로 큰 계단 그림으로 그린다(종목 홈 주말 카드와 같은 그림, 2026-11-09 사용자 결정)
+IDX_ORDER = (("^SOX", "반도체(SOX)"), ("^IXIC", "나스닥"), ("^GSPC", "S&P 500"), ("^DJI", "다우"))
 MA200_ORDER = ("S&P500", "나스닥", "다우", "반도체")
 NQ_LEVEL = {"ok": "정상", "caution": "주의", "warn": "경고"}
 WEEK_NO = ("첫째", "둘째", "셋째", "넷째", "다섯째")
@@ -341,13 +342,38 @@ def _weekly_rows(idx: dict, monday: str) -> tuple:
     return rows, lo, hi
 
 
+def _kospi_steps(s: list) -> dict:
+    """코스피 큰 계단 — 지난주 종가에서 하루씩 쌓아 이번 주 종가까지(종목 홈 주말 카드 home-hero.js weekSteps와 같은 그림).
+    s: [[날짜, 종가], ...] 첫 행이 지난주 마지막 종가. 거래한 날만 칸이 된다."""
+    prev, week = s[0][1], s[1:]
+    pts = [prev] + [c for _, c in week]
+    lo, hi = min(pts), max(pts)
+    pad = (hi - lo) * 0.12 or 1
+    lo, hi = lo - pad, hi + pad
+    y = lambda v: (hi - v) / (hi - lo) * 100
+    cols, pv = [], prev
+    for d, c in week:
+        top, h = y(max(pv, c)), abs(c - pv) / (hi - lo) * 100
+        p = (c / pv - 1) * 100
+        cols.append({"cn": f"{y(pv):.1f}%", "top": f"{top:.1f}%", "h": f"{h:.1f}%", "up": c >= pv,
+                     "lab": f"{_signed(p, 2)}%", "lab_top": f"{top if p >= 0 else top + h:.1f}%",
+                     "dow": DOW[date.fromisoformat(d).weekday()], "md": _md(d)})
+        pv = c
+    bi = max(range(len(week)), key=lambda i: abs(week[i][1] / (week[i - 1][1] if i else prev) - 1))   # 가장 크게 움직인 날
+    pt = week[bi][1] - (week[bi - 1][1] if bi else prev)
+    return {"cols": cols, "n": len(week) + 2, "base": f"{y(prev):.1f}%", "last": f"{y(pv):.1f}%",
+            "from": f"{prev:,.0f}", "to": f"{pv:,.0f}",
+            "head_day": f"{cols[bi]['dow']}요일", "head_pt": f"{'+' if pt > 0 else '−' if pt < 0 else ''}{abs(pt):,.0f}p", "head_up": pt >= 0}
+
+
 def weekly_context(d: dict, prev_url: str = "") -> dict:
     """weekly_report.py가 모은 값(web/weekly/{금요일}/data.json) → 주간 리포트 컨텍스트. 코스피 등락이 없으면 {}."""
     monday, end = d["monday"], d["end"]
     rows, _lo, _hi = _weekly_rows(d.get("idx") or {}, monday)
-    ks = next((r for r in rows if r["key"] == "KS"), None)
-    if not ks:
+    s = (d.get("idx") or {}).get("KS") or []
+    if len(s) < 2:
         return {}
+    ks = {"from": s[0][1], "to": s[-1][1], "wk": (s[-1][1] / s[0][1] - 1) * 100}
     e = date.fromisoformat(end)
     first = date.fromisoformat(monday)
     tag = (f"{e.month}월 {WEEK_NO[min((e.day - 1) // 7, 4)]} 주 · {_md_dow(monday)} ~ "
@@ -423,6 +449,7 @@ def weekly_context(d: dict, prev_url: str = "") -> dict:
     mx = max((abs(x["pct"]) for x in sw), default=1) or 1
     return {"wk": {
         "end": end, "monday": monday, "tag": tag, "head": head, "sub": sub, "rows": rows,
+        "ks": dict(_kospi_steps(s), wk_s=_signed(ks["wk"], 2), wk=ks["wk"]),
         "cards": cards, "ma_rows": ma_rows, "ma_event": events[0] if events and "200일선" in events[0] else "",
         "ma_prev_label": _md(d.get("prev_end", "")) if d.get("prev_end") else "",
         "ma5": {k: v for k, v in ma5.items() if v and (v.get("items") or v.get("dropped"))},

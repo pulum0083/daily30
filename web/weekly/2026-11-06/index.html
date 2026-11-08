@@ -116,6 +116,24 @@
   .wkp-d{font-size:13.5px;line-height:1.65;color:var(--ink);margin:6px 0 0;word-break:keep-all}
   .wkp-nav{display:flex;justify-content:space-between;font-size:12.5px;margin-top:10px}
   .wkp-nav a{color:var(--primary);font-weight:700;text-decoration:none}.wkp-nav span{color:var(--muted)}
+  .kst-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13.5px;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+  .kst-h>b{font-size:16px;font-weight:900}
+  .st-plot{position:relative;display:grid;height:104px;margin:22px 0 16px}
+  .st-c{position:relative}
+  .st-base{position:absolute;left:4%;right:4%;border-top:1px dashed var(--muted);opacity:.6}
+  .st-cn{position:absolute;left:-50%;right:50%;border-top:1px solid var(--hairline)}
+  .st-b{position:absolute;left:50%;width:clamp(18px,36%,32px);transform:translateX(-50%);min-height:2px;border-radius:2px;z-index:1}
+  .st-b.up{background:#E86464}.st-b.dn{background:#5D97F1}
+  .st-lv{position:absolute;left:50%;width:clamp(24px,48%,40px);height:4px;border-radius:2px;background:var(--ink);transform:translate(-50%,-2px);z-index:2}
+  .st-v,.st-p{position:absolute;left:-20%;right:-20%;text-align:center;font-size:11px;font-weight:800;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums;z-index:3}
+  .st-v{color:var(--ink);transform:translateY(-17px)}
+  .st-p.a{transform:translateY(-15px)}.st-p.u{transform:translateY(4px)}
+  .st-x{display:grid;text-align:center}
+  .st-x span{font-size:10px;color:var(--muted);line-height:1.35;font-variant-numeric:tabular-nums}
+  .st-x b{display:block;font-size:11px;font-weight:700}
+  .st-x .on b{font-size:12px;color:var(--ink)}
+  .uwk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:800;color:var(--ink);margin-top:16px;padding-top:12px;border-top:1px solid var(--hairline)}
+  .uwk-h span{font-size:11px;font-weight:500;color:var(--muted)}
   .wf{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
   .wf .nm{font-size:13px;font-weight:800;line-height:1.35;color:var(--ink)}
   .wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -132,8 +150,6 @@
   .dayax{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;margin-top:2px}
   .dayax .ds{display:flex;gap:4px}
   .dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
-  .wkp-lg{font-size:11.5px;color:var(--muted);margin-top:8px}
-  .wkp-lg i{display:inline-block;width:14px;height:0;border-top:1px dashed var(--muted);vertical-align:3px;margin-right:4px}
   .lt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .ltc{border:1px solid var(--hairline);border-radius:12px;padding:12px;background:var(--canvas)}
   .ltc .n{font-size:12.5px;font-weight:800;display:flex;justify-content:space-between;gap:6px;color:var(--ink)}
@@ -154,7 +170,7 @@
   .ma4 .h{font-size:11px;font-weight:700;color:var(--muted)}
   .ma4 b{font-weight:800}
   .ma4 .x{font-size:11.5px;color:var(--muted);margin-top:2px}
-  @media(max-width:560px){.wf,.dayax{grid-template-columns:70px 1fr 62px;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
+  @media(max-width:560px){.wf .tot{font-size:13.5px}.wf,.dayax{grid-template-columns:66px 1fr 64px;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -177,11 +193,18 @@
     <div class="wkp-nav"><span></span><a href="/weekly/">전체 주간 리포트 →</a></div>
   </section>
 
+  
   <section class="ltp-card">
     <div class="ltp-h"><h2>이번 주 시장</h2><small>11/2(월) ~ 11/6(금)</small></div>
-    <div class="wf"><div class="nm">코스피<small>5,730.74 → 5,059.69</small></div>
-      <div class="stp" style="--z:25.00%"><div><i class="u" style="top:15.67%;height:9.33%"></i><em class="up" style="top:calc(15.67% - 13px)">+2.2</em><u style="top:15.67%"></u></div><div><i class="d" style="top:15.67%;height:15.29%"></i><em class="dn" style="top:calc(30.96% + 1px)">−3.6</em><u style="top:30.96%"></u></div><div><i class="u" style="top:28.41%;height:2.55%"></i><em class="up" style="top:calc(28.41% - 13px)">+0.6</em><u style="top:28.41%"></u></div><div><i class="d" style="top:28.41%;height:21.81%"></i><em class="dn" style="top:calc(50.23% + 1px)">−5.3</em><u style="top:50.23%"></u></div><div><i class="d" style="top:50.23%;height:23.57%"></i><em class="dn" style="top:calc(73.79% + 1px)">−6.0</em></div></div>
-      <div class="tot dn">−11.71%<small>한 주</small></div></div>
+    <div class="kst-h"><span><b>코스피</b> 5,731 → 5,060, 금요일 하루에 <b class="dn">−324p</b></span><b class="dn">−11.71%</b></div>
+    <div class="st-plot" style="grid-template-columns:repeat(7,1fr)" role="img" aria-label="코스피 지난주 종가 5,731에서 이번 주 종가 5,060까지 일별 등락"><i class="st-base" style="top:22.6%"></i>
+      <div class="st-c"><i class="st-lv" style="top:22.6%"></i><span class="st-v" style="top:22.6%">5,731</span></div>
+      <div class="st-c"><i class="st-cn" style="top:22.6%"></i><i class="st-b up" style="top:9.7%;height:12.9%"></i><span class="st-p up a" style="top:9.7%">+2.24%</span></div><div class="st-c"><i class="st-cn" style="top:9.7%"></i><i class="st-b dn" style="top:9.7%;height:21.2%"></i><span class="st-p dn u" style="top:30.9%">−3.59%</span></div><div class="st-c"><i class="st-cn" style="top:30.9%"></i><i class="st-b up" style="top:27.4%;height:3.5%"></i><span class="st-p up a" style="top:27.4%">+0.62%</span></div><div class="st-c"><i class="st-cn" style="top:27.4%"></i><i class="st-b dn" style="top:27.4%;height:30.3%"></i><span class="st-p dn u" style="top:57.6%">−5.28%</span></div><div class="st-c"><i class="st-cn" style="top:57.6%"></i><i class="st-b dn" style="top:57.6%;height:32.7%"></i><span class="st-p dn u" style="top:90.3%">−6.02%</span></div>
+      <div class="st-c"><i class="st-cn" style="top:90.3%"></i><i class="st-lv" style="top:90.3%"></i><span class="st-v" style="top:90.3%">5,060</span></div>
+    </div>
+    <div class="st-x" style="grid-template-columns:repeat(7,1fr)"><span><b>지난주</b>종가</span><span class="on"><b>월</b>11/2</span><span class="on"><b>화</b>11/3</span><span class="on"><b>수</b>11/4</span><span class="on"><b>목</b>11/5</span><span class="on"><b>금</b>11/6</span><span><b>이번 주</b>종가</span></div>
+
+    <div class="uwk-h">미국 지수<span>점선 = 지난주 금요일 종가 · 막대 위·아래 숫자 = 그날 등락</span></div>
     <div class="wf"><div class="nm">반도체(SOX)<small>10,688.80 → 9,390.25</small></div>
       <div class="stp" style="--z:25.00%"><div><i class="d" style="top:25.00%;height:14.05%"></i><em class="dn" style="top:calc(39.05% + 1px)">−3.4</em><u style="top:39.05%"></u></div><div><i class="u" style="top:28.45%;height:10.61%"></i><em class="up" style="top:calc(28.45% - 13px)">+2.6</em><u style="top:28.45%"></u></div><div><i class="d" style="top:28.45%;height:12.93%"></i><em class="dn" style="top:calc(41.38% + 1px)">−3.1</em><u style="top:41.38%"></u></div><div><i class="d" style="top:41.38%;height:49.02%"></i><em class="dn" style="top:calc(90.40% + 1px)">−12.2</em><u style="top:90.40%"></u></div><div><i class="u" style="top:75.62%;height:14.78%"></i><em class="up" style="top:calc(75.62% - 13px)">+4.2</em></div></div>
       <div class="tot dn">−12.15%<small>한 주</small></div></div>
@@ -196,7 +219,6 @@
       <div class="tot dn">−0.94%<small>한 주</small></div></div>
     
     <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
-    <div class="wkp-lg"><i></i>지난주 금요일 종가(0%) · 막대 위·아래 숫자 = 그날 등락</div>
   </section>
 
   

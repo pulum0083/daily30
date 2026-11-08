@@ -120,11 +120,11 @@ def test_week_of_and_series():
 
 
 def _wk(ma=None):
-    s = lambda vals: [["2026-10-30", 100.0]] + [[f"2026-11-0{i + 2}", v] for i, v in enumerate(vals)]
+    s = lambda vals: [["2026-10-30", 100.0]] + [[f"2026-11-0{i + 2}", v] for i, v in enumerate(vals) if v is not None]
     return {"monday": "2026-11-02", "end": "2026-11-06", "prev_end": "2026-10-30",
             "idx": {"KS": [["2026-10-30", 5730.74], ["2026-11-02", 5859.08], ["2026-11-03", 5648.79],
                            ["2026-11-05", 5383.8], ["2026-11-06", 5059.69]],             # 11/4 휴장
-                    "^GSPC": s([99, 100, 101, 98, 97])},
+                    "^GSPC": s([99, 100, None, 98, 97])},
             "kc": {"now": 49.2, "prev": 70.8, "year_max": {"m": "2026-05", "gap": 178.6}, "prev_max": {"m": "2007-10", "gap": 87.5}},
             "nq": {"now": {"gap": 48.9, "month": "2026-11", "high": 26048.8, "level": "ok"},
                    "prev": {"gap": 59.9, "month": "2026-10", "high": 27722.8, "level": "ok"}},
@@ -139,8 +139,10 @@ def test_weekly_headline_uses_first_crossing_event():
     assert w["head"] == "코스피 한 주 −11.7%, 나스닥은 200일선 아래로"
     assert "나스닥이 200일선 아래로 내려왔어요" in w["sub"] and "반도체 지수는 200일선보다 13.3% 아래예요" in w["sub"]
     assert w["tag"] == "11월 첫째 주 · 11/2(월) ~ 11/6(금)"
-    ks = w["rows"][0]
-    assert ks["cells"][2] is None and ks["cells"][3]["lab"] == "−4.7"     # 수요일 휴장, 목요일 등락은 화요일 종가 대비
+    k = w["ks"]                                                         # 코스피는 큰 계단(거래한 날만 칸)
+    assert [c["dow"] for c in k["cols"]] == ["월", "화", "목", "금"] and k["cols"][2]["lab"] == "−4.69%"   # 목요일 등락은 화요일 종가 대비
+    assert k["head_day"] == "금요일" and k["head_pt"] == "−324p" and k["n"] == 6
+    assert [r["name"] for r in w["rows"]] == ["S&P 500"]                # 미국 지수만 요일 계단(A안)
     assert "헬스케어는 90%, 커뮤니케이션은 23%만 선 위예요" in w["cards"][2]["txt"]
 
 
@@ -175,6 +177,7 @@ def test_templates_render(tmp_path):
     assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로") and "None" not in html
     html = env.get_template("pages/weekly_report.html").render(**lp.weekly_context(_wk()), **base)
     assert "휴장" in html and "코스피 한 주 −11.7%" in html and "None" not in html
+    assert html.index("st-plot") < html.index("미국 지수")             # 코스피 큰 계단이 먼저, 미국 지수가 아래
 
 
 def test_pages_are_in_publish_gate_and_sitemap():
