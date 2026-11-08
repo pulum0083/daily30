@@ -2,7 +2,7 @@
 #
 # GHA native cron은 늦게 뜨거나 빠질 수 있어(§10) 08·11·14시 KST 세 번 건다. 이미 그 주 리포트가 있으면
 # 스크립트가 바로 끝나므로 두 번째부터는 아무것도 하지 않는다. 브리핑 잡과 시간이 겹치지 않는다(토요일).
-# 이 워크플로우가 커밋하는 건 web/weekly/·web/sitemap.xml·data/sp500_breadth_history.json뿐이다(§18).
+# 이 워크플로우가 커밋하는 건 web/weekly/·web/sitemap.xml·web/stocks/index.html(최근 브리핑 목록)·data/sp500_breadth_history.json뿐이다(§18).
 name: 📅 주간 장기 리포트
 
 on:
@@ -58,7 +58,7 @@ jobs:
         run: |
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
-          git add web/weekly web/sitemap.xml data/sp500_breadth_history.json
+          git add web/weekly web/sitemap.xml web/stocks/index.html data/sp500_breadth_history.json
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
             echo "pushed=false" >> "$GITHUB_OUTPUT"

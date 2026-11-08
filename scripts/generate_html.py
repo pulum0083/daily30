@@ -2728,8 +2728,36 @@ def build_recent_briefings(n: int = 6) -> list:
     return out
 
 
-def render_recent_briefings(items: list) -> str:
+WEEKLY_RECENT_MAX_AGE = 14   # 가장 최근 주간 리포트가 이보다 오래됐으면(작업이 멈춤) 최근 목록에 싣지 않는다(§20)
+
+
+def build_recent_weekly(today: str = "") -> dict:
+    """가장 최근 주간 장기 리포트 한 줄(2026-11-09) — 디스크에 커밋된 web/weekly/{금요일}/ 에서. 없거나 오래됐으면 {}."""
+    import longterm_pages as lp
+    today = today or datetime.now(KST).strftime("%Y-%m-%d")
+    for p in sorted((WEB_DIR / "weekly").glob("????-??-??/data.json"), reverse=True):
+        if not (p.parent / "index.html").exists():
+            continue
+        end = p.parent.name
+        if end > today or (date.fromisoformat(today) - date.fromisoformat(end)).days > WEEKLY_RECENT_MAX_AGE:
+            return {}
+        try:
+            c = lp.weekly_context(json.loads(p.read_text(encoding="utf-8")))
+        except (ValueError, KeyError):
+            return {}
+        if not c:
+            return {}
+        w = c["wk"]
+        return {"url": f"/weekly/{end}/", "label": "주간 장기 리포트",
+                "date": f"{_md(w['monday'])}~{_md(end)}", "headline": w["head"]}
+    return {}
+
+
+def render_recent_briefings(items: list, weekly: dict = None) -> str:
     rows = []
+    if weekly:
+        rows.append(f'      <li class="rb-item wk"><a href="{weekly["url"]}"><div class="rb-meta">📅 {weekly["date"]} · {weekly["label"]}</div>'
+                    f'<div class="rb-h">{html.escape(weekly["headline"])}</div></a></li>')
     for i, it in enumerate(items):
         # 요약은 우리 분석 문장이라 <b> 강조만 살리고 나머지 태그는 지운다(아카이브는 그대로 |safe로 쓴다).
         dek = re.sub(r"<(?!/?b>)[^>]+>", "", it["dek"]) if it["dek"] else ""
@@ -2751,7 +2779,7 @@ def write_stocks_recent_briefings(n: int = 6) -> bool:
     if i < 0 or j < i or not items:
         print("[generate_html] /stocks/ 최근 브리핑: 표시 또는 발행본 없음 — 건너뜀", file=sys.stderr)
         return False
-    new = page[:i + len(RECENT_START)] + "\n" + render_recent_briefings(items) + "\n      " + page[j:]
+    new = page[:i + len(RECENT_START)] + "\n" + render_recent_briefings(items, build_recent_weekly()) + "\n      " + page[j:]
     if new != page:
         STOCKS_HOME_HTML.write_text(new, encoding="utf-8")
     print(f"[generate_html] /stocks/ 최근 브리핑 갱신: {len(items)}편")

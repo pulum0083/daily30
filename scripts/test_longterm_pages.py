@@ -201,3 +201,19 @@ def test_write_sp500_page_also_writes_home_file(tmp_path, monkeypatch):
     home = json.loads((tmp_path / "web" / "data" / "sp500-home.json").read_text(encoding="utf-8"))
     assert home["asof"] == "2026-11-06" and home["hot"] == 3 and home["deep"] == 40 and len(home["spark"]) == 120
     assert (tmp_path / "web" / "stocks" / "sp500-200" / "index.html").exists()
+
+
+def test_recent_weekly_line(tmp_path, monkeypatch):
+    import generate_html as gh
+    monkeypatch.setattr(gh, "WEB_DIR", tmp_path)
+    assert gh.build_recent_weekly("2026-11-09") == {}                     # 리포트가 없으면 줄이 없다
+    d = tmp_path / "weekly" / "2026-11-06"
+    d.mkdir(parents=True)
+    (d / "data.json").write_text(json.dumps(_wk()), encoding="utf-8")
+    (d / "index.html").write_text("<html></html>", encoding="utf-8")
+    it = gh.build_recent_weekly("2026-11-09")
+    assert it == {"url": "/weekly/2026-11-06/", "label": "주간 장기 리포트", "date": "11/2~11/6",
+                  "headline": "코스피 한 주 −11.7%, 나스닥은 200일선 아래로"}
+    assert gh.build_recent_weekly("2026-11-25") == {}                     # 14일 넘게 새 리포트가 없으면 싣지 않는다
+    html = gh.render_recent_briefings([{"url": "/b/", "label": "미국 시장", "date": "11/6(금)", "headline": "h", "dek": ""}], it)
+    assert html.index('rb-item wk') < html.index('rb-item feat') and "📅 11/2~11/6 · 주간 장기 리포트" in html

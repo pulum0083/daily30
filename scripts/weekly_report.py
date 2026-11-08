@@ -193,6 +193,7 @@ def render(end: str) -> bool:
     if gh.gate_write(WEEKLY / end / "index.html", env.get_template("pages/weekly_report.html").render(**ctx), url):
         return False
     write_index()
+    gh.write_stocks_recent_briefings()   # 종목 홈 '최근 브리핑' 맨 위 한 줄
     gh.write_sitemap_xml()
     print(f"[weekly] {end} 주간 장기 리포트 → web/weekly/{end}/index.html")
     return True

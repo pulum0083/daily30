@@ -36,6 +36,6 @@
       · 데이터: 나스닥=최근 미국 브리핑 스냅샷 nasdaq_overheat, 코스피=home-summary kospi_check, S&P=홈용 작은 파일 필요(누적 기록 최근 60~120일 + 한 주 전·중앙값·과열/20%↓ — 미국 잡이 web/data/에 쓰게)
       · 월봉 5개월선 줄은 종목 있는 날만 맨 아래 / 미국 지수 200일선 줄(usIndexRow)은 빠짐(주간 리포트로)
       · 기존 home-hero.js nasdaqRow·kospiRow·usIndexRow·structHtml 테스트 갱신, SERVICE_RULES §68 ⑤ 갱신
-- [ ] 홈 맨 아래 '최근 브리핑'에 최신 주간 리포트 한 줄 — 사용자 미확인(확인 후)
+- [x] 홈 맨 아래 '최근 브리핑'에 최신 주간 리포트 한 줄
 - [ ] 텔레그램 토요일 주간 리포트 발송 여부 — 사용자 미확인(지금은 안 보냄)
 - [x] main 머지·푸시 = 배포(vercel-deploy.yml). 브리핑 잡 시간대(07:25~07:45·16:25~16:50·21:15~21:40 KST) 피해서
