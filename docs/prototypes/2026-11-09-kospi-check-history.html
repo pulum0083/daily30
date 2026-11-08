@@ -1,0 +1,205 @@
+<!-- 코스피 체크 '과거엔 어땠나요'를 쉽게 푸는 세 가지 시안 — 야후 ^KS11 월봉, 11/6 종가 기준 실측 -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>코스피 체크 과거 결과 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--soft:#F1F5F9;--primary:#006EFF;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#EEF1F5;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:20px 12px 80px}
+.top,.v{max-width:780px;margin:0 auto 22px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:6px}
+.bar{position:sticky;top:0;z-index:9;background:#EEF1F5;padding:8px 0;max-width:780px;margin:0 auto 8px;display:flex;gap:6px}
+.bar button{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #CBD5E1;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;color:#334155}
+.bar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+body.m .v{max-width:375px}
+.v>h3{font-size:15px;font-weight:800}
+.v>p.d{font-size:12.5px;color:var(--muted);line-height:1.55;margin:3px 0 10px}
+.rec{display:inline-block;font-size:11px;font-weight:700;color:#2563EB;background:#EFF4FE;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.card{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:16px}
+.ch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ch h2{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.ch h2::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.ch small{font-size:11.5px;color:var(--muted)}
+.big{font-size:17px;font-weight:800;line-height:1.5;letter-spacing:-.2px}
+.big b{color:var(--primary)}
+.say{font-size:13.5px;line-height:1.7;color:#334155;margin-top:6px}
+.say b{font-weight:800;color:var(--ink)}
+.fine{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:10px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+/* A 점 분포 */
+.sp{margin-top:12px}
+.sr{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9}
+.sr:last-of-type{border-bottom:0}
+.sr.now{background:#F5F9FF;border-radius:8px;box-shadow:inset 3px 0 0 var(--primary);padding-left:8px;margin-left:-8px}
+.sr .lb{font-size:12.5px;font-weight:800;line-height:1.3}
+.sr .lb small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.sr .tk{position:relative;height:30px}
+.sr .tk::before{content:'';position:absolute;top:0;bottom:0;left:var(--z);border-left:1px dashed #CBD5E1}
+.sr .tk i{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;opacity:.75}
+.sr .tk i.u{background:var(--upb)}.sr .tk i.d{background:var(--dnb)}
+.sr .tk u{position:absolute;top:2px;bottom:2px;width:0;border-left:2px solid var(--ink)}
+.sr .tk em{position:absolute;top:-4px;font-style:normal;font-size:10.5px;font-weight:800;transform:translate(-50%,-100%);white-space:nowrap}
+.sax{position:relative;height:16px;margin-left:96px}
+.sax span{position:absolute;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.lg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.lg u{display:inline-block;width:0;height:11px;border-left:2px solid var(--ink);margin-right:4px;vertical-align:-2px}
+/* B 사례 */
+.blocks{display:flex;gap:4px;margin-top:12px}
+.blocks i{flex:1;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff}
+.blocks i.u{background:var(--upb)}.blocks i.d{background:var(--dnb)}
+.bl{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-top:5px}
+.eps{margin-top:14px;border-top:1px solid var(--hair)}
+.ep{display:grid;grid-template-columns:118px 1fr 92px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #F1F5F9}
+body.m .ep{grid-template-columns:96px 1fr;row-gap:4px}
+body.m .ep .rg{grid-column:2}
+.ep .wh{font-size:13px;font-weight:800;line-height:1.35}
+.ep .wh small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.ep .rail{position:relative;height:22px}
+.ep .rail::before{content:'';position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--soft);border-radius:2px}
+.ep .rail::after{content:'';position:absolute;top:2px;bottom:2px;left:var(--z);border-left:1px dashed #94A3B8}
+.ep .rail b{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:5px;min-width:10px}
+.ep .rail b.u{background:var(--upb)}.ep .rail b.d{background:var(--dnb)}
+.ep .rg{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35}
+.ep .rg small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.ep.now{background:#F5F9FF;border-radius:8px;padding-left:8px;padding-right:8px;margin:0 -8px}
+.rax{position:relative;height:14px;margin-left:130px;margin-right:104px}
+body.m .rax{margin-left:108px;margin-right:0}
+.rax span{position:absolute;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.concl{margin-top:12px;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.65;color:#1E293B}
+.concl b{font-weight:800}
+details.tb{margin-top:10px}
+details.tb summary{font-size:12.5px;font-weight:700;color:#2563EB;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+th{font-size:11px;font-weight:700;color:var(--muted);text-align:right;padding:5px 3px;border-bottom:1px solid var(--hair)}
+th:first-child,td:first-child{text-align:left}
+td{padding:6px 3px;border-bottom:1px solid #F1F5F9;text-align:right;font-variant-numeric:tabular-nums}
+tr.hl td{background:#F5F9FF;font-weight:700}
+/* C 바코드 */
+.plot{position:relative;height:170px;margin-left:40px;margin-right:6px}
+.plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.plot .ln{fill:none;stroke:var(--ink);stroke-width:1.6;vector-effect:non-scaling-stroke}
+.plot .gl{stroke:#E2E8F0;vector-effect:non-scaling-stroke}
+.plot .bd{fill:#DBEAFE;opacity:.7}
+.ax{position:absolute;left:-40px;width:34px;text-align:right;font-size:10px;color:var(--muted);transform:translateY(-50%)}
+.bandl{position:absolute;right:4px;font-size:10.5px;font-weight:800;color:#2563EB;transform:translateY(-50%)}
+.mk{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--primary);border:2px solid #fff;box-shadow:0 0 0 1px var(--primary)}
+.code{position:relative;height:22px;margin:6px 6px 0 40px;display:flex}
+.code i{flex:1;height:100%}
+.code i.u{background:var(--upb)}.code i.d{background:var(--dnb)}.code i.n{background:#E2E8F0}
+.code i.in{box-shadow:inset 0 -5px 0 #0F172A}
+.codel{font-size:11px;color:var(--muted);margin:4px 6px 0 40px}
+.yrs{position:relative;height:16px;margin:4px 6px 0 40px}
+.yrs span{position:absolute;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.tip{position:absolute;top:-6px;font-size:11px;background:var(--ink);color:#fff;border-radius:6px;padding:3px 7px;white-space:nowrap;pointer-events:none;transform:translate(-50%,-100%);z-index:2}
+.cur{position:absolute;top:0;bottom:-34px;width:1px;background:#64748B;pointer-events:none}
+</style></head><body>
+
+<div class="top"><h1>코스피 체크 · 과거엔 어땠나요 — 세 가지 풀이</h1>
+<p>숫자는 전부 실측이에요(야후 ^KS11 월봉, 마지막 달은 11/6 종가). 표의 결론은 '거리가 클수록 위험하다는 규칙이 없다'인데, 숫자 표로는 그게 잘 안 보였어요. 세 시안 모두 같은 데이터를 다른 방식으로 보여줘요.</p>
+<p><b>바로잡은 것</b> · 첫 시안은 2025년 11월을 '12개월 뒤 결과가 나온 달'로 셌는데, 12개월 뒤가 아직 진행 중인 이번 달이라 뺐어요. 그래서 288개월이고 40~60% 구간은 25개월, 1년 뒤 중앙값은 +19.4%예요(첫 시안 26개월·+20.1%).</p></div>
+<div class="bar"><button data-w="pc" class="on">PC</button><button data-w="m">모바일 폭</button></div>
+
+<!-- B -->
+<div class="v"><h3>B. 지금과 비슷했던 때를 '사례'로 <span class="rec">추천</span></h3>
+<p class="d">같은 시기의 달을 하나로 묶으면 40~60% 구간 25개월은 실제로 7번의 사례예요. 7번 중 몇 번 올랐는지, 각각 언제였는지 보여줘요. 구간 표는 접어 둬요.</p>
+<div class="card">
+<div class="ch"><h2>지금과 비슷했던 때</h2><small>5년 평균보다 40~60% 위 · 2001-11 ~ 2025-10</small></div>
+<p class="big">지금(<b>+49.2%</b>)처럼 40~60% 위에 있던 때는 <b>7번</b> 있었어요.</p>
+<div class="blocks" id="b-blocks"></div>
+<div class="bl"><span class="up" id="b-ul"></span><span class="dn" id="b-dl"></span></div>
+<div class="eps" id="b-eps"></div>
+<div class="rax" id="b-rax"></div>
+<div class="concl" id="b-concl"></div>
+<details class="tb"><summary>구간별로 모두 보기</summary><table id="b-tb"></table></details>
+<p class="fine">'1년 뒤'는 그달 종가에서 12개월 뒤 월말 종가까지예요. 3개월 이내로 이어진 달은 한 번의 사례로 묶었어요. 막대는 사례 안 달들의 1년 뒤 등락 범위예요.</p>
+</div></div>
+
+<!-- A -->
+<div class="v"><h3>A. 달마다 점 하나 — 구간별로 1년 뒤가 얼마나 흩어졌나</h3>
+<p class="d">표의 숫자 대신 288개월을 점으로 찍어요. 오른 달은 빨강, 내린 달은 파랑, 검은 세로선은 중앙값이에요. 높은 구간일수록 파랑이 많아지는 모양이 아니라는 게 보여요.</p>
+<div class="card">
+<div class="ch"><h2>과거엔 어땠나요</h2><small>288개월 · 1년 뒤 등락</small></div>
+<p class="big" id="a-big"></p>
+<div class="sp" id="a-sp"></div>
+<div class="sax" id="a-ax"></div>
+<div class="lg"><span><i style="background:var(--upb)"></i>1년 뒤 올랐던 달</span><span><i style="background:var(--dnb)"></i>내렸던 달</span><span><u></u>중앙값</span></div>
+</div></div>
+
+<!-- C -->
+<div class="v"><h3>C. 그래프 아래 띠 — 그때 샀다면 1년 뒤</h3>
+<p class="d">25년 그래프에 지금 구간(40~60%)을 파란 띠로 칠하고, 바로 아래 달마다 1년 뒤 결과를 색 칸으로 붙여요. 띠 안에 들어간 달(검은 밑줄)의 색이 섞여 있는 게 한눈에 보여요.</p>
+<div class="card">
+<div class="ch"><h2>5년 평균과의 거리, 그리고 1년 뒤</h2><small>마우스를 올리면 그달 값</small></div>
+<div class="plot" id="c-p"></div>
+<div class="code" id="c-code"></div>
+<div class="codel">↑ 그달에서 1년 뒤 <span class="up">■ 올랐어요</span> · <span class="dn">■ 내렸어요</span> · <span style="color:#94A3B8">■ 아직 1년이 안 됐어요</span> · 검은 밑줄 = 40~60% 구간이던 달</div>
+<div class="yrs" id="c-y"></div>
+<p class="say" id="c-say"></p>
+</div></div>
+
+<script>
+const D={"months":[["2001-11",2.7,12.6,-10.5],["2001-12",10.5,-9.5,-16.9],["2002-01",19.0,-20.9,-22.9],["2002-02",30.0,-29.8,-31.5],["2002-03",41.1,-40.2,-42.8],["2002-04",32.2,-28.8,-39.2],["2002-05",24.9,-20.5,-35.7],["2002-06",16.5,-9.8,-31.0],["2002-07",12.6,-0.6,-28.6],["2002-08",15.4,3.1,-30.4],["2002-09",1.3,7.9,-20.7],["2002-10",2.8,18.7,-22.3],["2002-11",12.1,9.8,-29.3],["2002-12",-3.6,29.2,-18.4],["2003-01",-9.1,43.4,-13.4],["2003-02",-11.7,53.5,-11.0],["2003-03",-17.9,64.4,-1.9],["2003-04",-8.6,44.0,-2.7],["2003-05",-4.1,26.9,-0.1],["2003-06",0.5,17.3,-1.0],["2003-07",6.0,3.1,-3.6],["2003-08",11.6,5.8,-9.4],["2003-09",1.6,19.7,-1.3],["2003-10",12.8,6.7,-8.7],["2003-11",13.9,10.3,-10.3],["2003-12",15.3,10.5,-11.9],["2004-01",19.9,9.9,-15.9],["2004-02",23.7,14.5,-19.2],["2004-03",22.6,9.7,-18.9],["2004-04",19.8,5.6,-17.3],["2004-05",11.4,20.7,-11.2],["2004-06",9.2,28.3,-9.1],["2004-07",2.7,51.1,-2.9],["2004-08",12.6,34.8,-0.3],["2004-09",17.0,46.2,-4.1],["2004-10",17.0,38.7,-0.4],["2004-11",23.4,47.8,-4.6],["2004-12",26.3,54.0,-3.3],["2005-01",31.5,50.1,-3.2],["2005-02",42.0,35.6,-10.7],["2005-03",35.2,40.8,-6.5],["2005-04",27.1,55.8,-0.1],["2005-05",34.6,35.8,-0.7],["2005-06",39.2,28.5,-0.6],["2005-07",52.0,16.8,-5.0],["2005-08",46.9,24.9,0.8],["2005-09",63.3,12.3,-6.9],["2005-10",52.7,17.8,0.6],["2005-11",68.2,10.4,-8.1],["2005-12",75.5,4.0,-13.6],["2006-01",75.2,-2.8,-14.8],["2006-02",68.8,3.3,-13.1],["2006-03",64.5,6.8,-12.3],["2006-04",68.9,8.6,-16.0],["2006-05",54.6,29.1,-9.5],["2006-06",49.9,34.6,-4.9],["2006-07",48.1,49.0,-1.6],["2006-08",52.0,38.5,-3.6],["2006-09",51.6,41.9,-4.9],["2006-10",48.6,51.3,-1.4],["2006-11",53.7,33.1,-6.1],["2006-12",52.0,32.3,-6.2],["2007-01",42.6,19.4,0.1],["2007-02",47.0,20.8,-2.9],["2007-03",49.2,17.3,0.0],["2007-04",56.6,18.4,-0.3],["2007-05",70.1,8.9,-9.6],["2007-06",71.5,-3.9,-11.8],["2007-07",86.4,-17.5,-23.0],["2007-08",77.4,-21.3,-21.7],["2007-09",80.6,-25.6,-29.8],["2007-10",87.5,-46.1,-56.8],["2007-11",70.1,-43.5,-53.2],["2007-12",66.1,-40.7,-53.0],["2008-01",40.2,-28.5,-45.1],["2008-02",45.3,-37.9,-47.9],["2008-03",42.3,-29.2,-47.6],["2008-04",49.9,-25.0,-51.1],["2008-05",49.6,-24.6,-51.8],["2008-06",33.5,-17.0,-46.7],["2008-07",25.6,-2.3,-44.1],["2008-08",15.0,8.0,-39.5],["2008-09",11.9,15.5,-38.4],["2008-10",-14.4,42.0,-17.9],["2008-11",-17.5,44.6,-7.7],["2008-12",-14.1,49.7,-11.7],["2009-01",-11.6,37.9,-14.6],["2009-02",-19.3,50.0,-6.6],["2009-03",-8.8,40.3,-0.4],["2009-04",2.8,27.2,-4.0],["2009-05",4.1,17.6,-3.3],["2009-06",2.8,22.2,-0.9],["2009-07",14.1,13.0,-2.4],["2009-08",15.5,9.5,-4.6],["2009-09",20.2,11.9,-9.2],["2009-10",12.5,19.1,-3.9],["2009-11",9.8,22.4,-1.5],["2009-12",17.7,21.9,-8.9],["2010-01",11.2,29.2,-4.4],["2010-02",10.0,21.6,-3.9],["2010-03",15.8,24.4,-9.5],["2010-04",18.0,25.9,-12.0],["2010-05",10.4,30.5,-1.4],["2010-06",13.3,23.7,-2.8],["2010-07",16.5,21.3,-2.4],["2010-08",14.6,7.9,-3.3],["2010-09",22.3,-5.5,-12.2],["2010-10",22.0,1.4,-12.7],["2010-11",22.6,-3.0,-13.7],["2010-12",31.1,-11.0,-19.8],["2011-01",31.3,-5.5,-20.6],["2011-02",22.3,4.7,-15.2],["2011-03",31.8,-4.4,-22.0],["2011-04",36.1,-9.6,-25.0],["2011-05",31.9,-14.0,-23.3],["2011-06",28.2,-11.7,-21.7],["2011-07",29.1,-11.8,-22.9],["2011-08",13.2,1.3,-12.6],["2011-09",6.1,12.8,-6.2],["2011-10",13.9,0.2,-8.3],["2011-11",9.8,4.6,-5.2],["2011-12",8.0,9.4,-3.7],["2012-01",15.1,0.3,-10.1],["2012-02",18.7,-0.2,-13.4],["2012-03",17.1,-0.5,-12.7],["2012-04",14.8,-0.9,-11.3],["2012-05",6.6,8.5,-4.6],["2012-06",7.1,0.5,-5.1],["2012-07",8.8,1.7,-5.9],["2012-08",10.1,1.1,-7.1],["2012-09",15.3,0.0,-11.3],["2012-10",10.6,6.2,-7.4],["2012-11",11.8,5.8,-8.4],["2012-12",15.4,0.7,-11.3],["2013-01",13.0,-1.1,-9.8],["2013-02",16.3,-2.3,-12.6],["2013-03",14.8,-1.0,-11.7],["2013-04",12.3,-0.1,-9.8],["2013-05",14.2,-0.3,-11.5],["2013-06",6.2,7.5,-2.9],["2013-07",8.7,8.5,-3.9],["2013-08",9.0,7.4,-2.1],["2013-09",12.4,1.2,-5.6],["2013-10",13.3,-3.2,-7.1],["2013-11",13.1,-3.1,-7.8],["2013-12",10.3,-4.8,-6.4],["2014-01",5.7,0.4,-3.3],["2014-02",7.0,0.3,-5.2],["2014-03",6.5,2.8,-5.5],["2014-04",4.7,8.4,-4.4],["2014-05",5.9,6.0,-5.9],["2014-06",5.7,3.6,-6.3],["2014-07",9.1,-2.2,-9.6],["2014-08",8.2,-6.1,-12.9],["2014-09",5.4,-2.8,-10.9],["2014-10",2.2,3.3,-8.3],["2014-11",2.6,0.6,-9.1],["2014-12",-1.0,2.4,-6.0],["2015-01",0.5,-1.9,-7.6],["2015-02",2.0,-3.5,-9.3],["2015-03",4.6,-2.2,-11.8],["2015-04",8.6,-6.3,-15.3],["2015-05",7.5,-6.2,-14.9],["2015-06",5.1,-5.0,-13.2],["2015-07",2.7,-0.7,-11.3],["2015-08",-2.0,4.8,-6.4],["2015-09",-1.0,4.1,-7.4],["2015-10",2.3,-1.0,-10.4],["2015-11",0.3,-0.4,-8.7],["2015-12",-1.2,3.3,-7.3],["2016-01",-3.5,8.1,-4.9],["2016-02",-3.3,9.1,-1.2],["2016-03",0.8,8.2,-5.2],["2016-04",0.9,10.6,-5.1],["2016-05",0.5,18.4,-4.6],["2016-06",-0.1,21.4,-2.0],["2016-07",2.4,19.2,-4.2],["2016-08",3.2,16.1,-5.1],["2016-09",3.4,17.2,-5.5],["2016-10",1.5,25.7,-3.8],["2016-11",0.1,24.8,-1.2],["2016-12",2.1,21.8,-0.5],["2017-01",4.1,24.1,-0.7],["2017-02",5.3,16.1,-1.1],["2017-03",8.6,13.2,-2.0],["2017-04",10.7,14.1,0.3],["2017-05",17.3,3.2,-1.6],["2017-06",19.0,-2.7,-4.0],["2017-07",19.0,-4.5,-6.6],["2017-08",16.6,-1.7,-6.1],["2017-09",17.8,-2.1,-7.4],["2017-10",23.5,-19.6,-21.3],["2017-11",20.6,-15.3,-19.8],["2017-12",19.8,-17.3,-19.5],["2018-01",24.0,-14.1,-22.7],["2018-02",16.9,-9.6,-18.2],["2018-03",17.3,-12.5,-18.9],["2018-04",20.1,-12.4,-21.1],["2018-05",15.3,-15.7,-18.1],["2018-06",10.3,-8.4,-14.7],["2018-07",8.5,-11.8,-13.5],["2018-08",9.5,-15.3,-18.6],["2018-09",10.2,-12.0,-19.3],["2018-10",-4.6,2.7,-6.8],["2018-11",-1.5,-0.4,-9.8],["2018-12",-4.1,7.7,-7.3],["2019-01",3.4,-3.9,-14.2],["2019-02",2.8,-9.5,-13.8],["2019-03",0.1,-18.0,-32.8],["2019-04",2.8,-11.6,-34.7],["2019-05",-4.8,-0.6,-29.5],["2019-06",-0.7,-1.0,-32.4],["2019-07",-5.6,11.1,-28.9],["2019-08",-8.2,18.2,-26.9],["2019-09",-3.8,12.8,-30.2],["2019-10",-2.9,8.8,-30.9],["2019-11",-2.8,24.1,-31.1],["2019-12",2.1,30.8,-34.5],["2020-01",-1.7,40.5,-32.1],["2020-02",-7.8,51.6,-27.6],["2020-03",-18.4,74.5,-5.2],["2020-04",-9.3,61.6,-2.7],["2020-05",-5.4,57.9,0.1],["2020-06",-1.8,56.4,-0.3],["2020-07",4.6,42.4,-0.5],["2020-08",7.8,37.5,-2.5],["2020-09",7.6,31.8,-2.6],["2020-10",4.6,31.0,0.0],["2020-11",19.0,9.6,0.8],["2020-12",31.1,3.6,-1.8],["2021-01",34.7,-10.5,-12.9],["2021-02",35.2,-10.4,-14.0],["2021-03",36.3,-9.9,-15.3],["2021-04",39.0,-14.4,-17.7],["2021-05",40.2,-16.2,-20.5],["2021-06",42.9,-29.2,-30.0],["2021-07",37.6,-23.4,-28.9],["2021-08",36.3,-22.7,-28.8],["2021-09",29.8,-29.8,-30.4],["2021-10",24.8,-22.8,-28.1],["2021-11",18.6,-12.9,-24.8],["2021-12",23.6,-24.9,-28.3],["2022-01",10.1,-8.9,-19.8],["2022-02",11.1,-10.6,-20.9],["2022-03",13.0,-10.2,-22.6],["2022-04",10.1,-7.2,-20.8],["2022-05",9.5,-4.1,-20.5],["2022-06",-4.9,9.9,-8.5],["2022-07",-0.1,7.4,-12.9],["2022-08",0.7,3.4,-13.6],["2022-09",-12.1,14.4,0.3],["2022-10",-6.3,-0.7,-4.9],["2022-11",1.0,2.5,-11.8],["2022-12",-8.5,18.7,-2.5],["2023-01",-0.7,3.0,-6.2],["2023-02",-1.2,9.5,-5.8],["2023-03",1.4,10.9,-8.2],["2023-04",2.5,7.6,-9.1],["2023-05",5.4,2.3,-11.8],["2023-06",4.7,9.1,-11.3],["2023-07",7.3,5.2,-13.6],["2023-08",4.0,4.6,-11.0],["2023-09",0.2,5.2,-7.8],["2023-10",-7.5,12.2,0.5],["2023-11",2.6,-3.1,-5.9],["2023-12",7.0,-9.6,-11.1],["2024-01",0.4,0.8,-5.5],["2024-02",6.0,-4.1,-10.7],["2024-03",9.7,-9.7,-14.1],["2024-04",7.2,-5.0,-15.1],["2024-05",4.6,2.3,-13.3],["2024-06",10.5,9.8,-18.3],["2024-07",8.9,17.1,-17.5],["2024-08",4.6,19.1,-14.6],["2024-09",1.1,32.1,-11.9],["2024-10",-0.7,60.7,-10.6],["2024-11",-4.8,59.9,-7.0],["2024-12",-7.1,75.6,-4.8],["2025-01",-2.8,107.5,-9.2],["2025-02",-2.5,146.5,-9.8],["2025-03",-5.0,103.6,-7.9],["2025-04",-2.5,158.1,-0.6],["2025-05",2.5,214.2,-0.5],["2025-06",16.0,176.0,-1.3],["2025-07",21.8,103.2,-5.1],["2025-08",18.9,114.1,-1.6],["2025-09",26.9,99.7,0.5],["2025-10",50.5,39.5,-6.7]],"series":[["2001-11",2.7],["2001-12",10.5],["2002-01",19.0],["2002-02",30.0],["2002-03",41.1],["2002-04",32.2],["2002-05",24.9],["2002-06",16.5],["2002-07",12.6],["2002-08",15.4],["2002-09",1.3],["2002-10",2.8],["2002-11",12.1],["2002-12",-3.6],["2003-01",-9.1],["2003-02",-11.7],["2003-03",-17.9],["2003-04",-8.6],["2003-05",-4.1],["2003-06",0.5],["2003-07",6.0],["2003-08",11.6],["2003-09",1.6],["2003-10",12.8],["2003-11",13.9],["2003-12",15.3],["2004-01",19.9],["2004-02",23.7],["2004-03",22.6],["2004-04",19.8],["2004-05",11.4],["2004-06",9.2],["2004-07",2.7],["2004-08",12.6],["2004-09",17.0],["2004-10",17.0],["2004-11",23.4],["2004-12",26.3],["2005-01",31.5],["2005-02",42.0],["2005-03",35.2],["2005-04",27.1],["2005-05",34.6],["2005-06",39.2],["2005-07",52.0],["2005-08",46.9],["2005-09",63.3],["2005-10",52.7],["2005-11",68.2],["2005-12",75.5],["2006-01",75.2],["2006-02",68.8],["2006-03",64.5],["2006-04",68.9],["2006-05",54.6],["2006-06",49.9],["2006-07",48.1],["2006-08",52.0],["2006-09",51.6],["2006-10",48.6],["2006-11",53.7],["2006-12",52.0],["2007-01",42.6],["2007-02",47.0],["2007-03",49.2],["2007-04",56.6],["2007-05",70.1],["2007-06",71.5],["2007-07",86.4],["2007-08",77.4],["2007-09",80.6],["2007-10",87.5],["2007-11",70.1],["2007-12",66.1],["2008-01",40.2],["2008-02",45.3],["2008-03",42.3],["2008-04",49.9],["2008-05",49.6],["2008-06",33.5],["2008-07",25.6],["2008-08",15.0],["2008-09",11.9],["2008-10",-14.4],["2008-11",-17.5],["2008-12",-14.1],["2009-01",-11.6],["2009-02",-19.3],["2009-03",-8.8],["2009-04",2.8],["2009-05",4.1],["2009-06",2.8],["2009-07",14.1],["2009-08",15.5],["2009-09",20.2],["2009-10",12.5],["2009-11",9.8],["2009-12",17.7],["2010-01",11.2],["2010-02",10.0],["2010-03",15.8],["2010-04",18.0],["2010-05",10.4],["2010-06",13.3],["2010-07",16.5],["2010-08",14.6],["2010-09",22.3],["2010-10",22.0],["2010-11",22.6],["2010-12",31.1],["2011-01",31.3],["2011-02",22.3],["2011-03",31.8],["2011-04",36.1],["2011-05",31.9],["2011-06",28.2],["2011-07",29.1],["2011-08",13.2],["2011-09",6.1],["2011-10",13.9],["2011-11",9.8],["2011-12",8.0],["2012-01",15.1],["2012-02",18.7],["2012-03",17.1],["2012-04",14.8],["2012-05",6.6],["2012-06",7.1],["2012-07",8.8],["2012-08",10.1],["2012-09",15.3],["2012-10",10.6],["2012-11",11.8],["2012-12",15.4],["2013-01",13.0],["2013-02",16.3],["2013-03",14.8],["2013-04",12.3],["2013-05",14.2],["2013-06",6.2],["2013-07",8.7],["2013-08",9.0],["2013-09",12.4],["2013-10",13.3],["2013-11",13.1],["2013-12",10.3],["2014-01",5.7],["2014-02",7.0],["2014-03",6.5],["2014-04",4.7],["2014-05",5.9],["2014-06",5.7],["2014-07",9.1],["2014-08",8.2],["2014-09",5.4],["2014-10",2.2],["2014-11",2.6],["2014-12",-1.0],["2015-01",0.5],["2015-02",2.0],["2015-03",4.6],["2015-04",8.6],["2015-05",7.5],["2015-06",5.1],["2015-07",2.7],["2015-08",-2.0],["2015-09",-1.0],["2015-10",2.3],["2015-11",0.3],["2015-12",-1.2],["2016-01",-3.5],["2016-02",-3.3],["2016-03",0.8],["2016-04",0.9],["2016-05",0.5],["2016-06",-0.1],["2016-07",2.4],["2016-08",3.2],["2016-09",3.4],["2016-10",1.5],["2016-11",0.1],["2016-12",2.1],["2017-01",4.1],["2017-02",5.3],["2017-03",8.6],["2017-04",10.7],["2017-05",17.3],["2017-06",19.0],["2017-07",19.0],["2017-08",16.6],["2017-09",17.8],["2017-10",23.5],["2017-11",20.6],["2017-12",19.8],["2018-01",24.0],["2018-02",16.9],["2018-03",17.3],["2018-04",20.1],["2018-05",15.3],["2018-06",10.3],["2018-07",8.5],["2018-08",9.5],["2018-09",10.2],["2018-10",-4.6],["2018-11",-1.5],["2018-12",-4.1],["2019-01",3.4],["2019-02",2.8],["2019-03",0.1],["2019-04",2.8],["2019-05",-4.8],["2019-06",-0.7],["2019-07",-5.6],["2019-08",-8.2],["2019-09",-3.8],["2019-10",-2.9],["2019-11",-2.8],["2019-12",2.1],["2020-01",-1.7],["2020-02",-7.8],["2020-03",-18.4],["2020-04",-9.3],["2020-05",-5.4],["2020-06",-1.8],["2020-07",4.6],["2020-08",7.8],["2020-09",7.6],["2020-10",4.6],["2020-11",19.0],["2020-12",31.1],["2021-01",34.7],["2021-02",35.2],["2021-03",36.3],["2021-04",39.0],["2021-05",40.2],["2021-06",42.9],["2021-07",37.6],["2021-08",36.3],["2021-09",29.8],["2021-10",24.8],["2021-11",18.6],["2021-12",23.6],["2022-01",10.1],["2022-02",11.1],["2022-03",13.0],["2022-04",10.1],["2022-05",9.5],["2022-06",-4.9],["2022-07",-0.1],["2022-08",0.7],["2022-09",-12.1],["2022-10",-6.3],["2022-11",1.0],["2022-12",-8.5],["2023-01",-0.7],["2023-02",-1.2],["2023-03",1.4],["2023-04",2.5],["2023-05",5.4],["2023-06",4.7],["2023-07",7.3],["2023-08",4.0],["2023-09",0.2],["2023-10",-7.5],["2023-11",2.6],["2023-12",7.0],["2024-01",0.4],["2024-02",6.0],["2024-03",9.7],["2024-04",7.2],["2024-05",4.6],["2024-06",10.5],["2024-07",8.9],["2024-08",4.6],["2024-09",1.1],["2024-10",-0.7],["2024-11",-4.8],["2024-12",-7.1],["2025-01",-2.8],["2025-02",-2.5],["2025-03",-5.0],["2025-04",-2.5],["2025-05",2.5],["2025-06",16.0],["2025-07",21.8],["2025-08",18.9],["2025-09",26.9],["2025-10",50.5],["2025-11",42.8],["2025-12",52.0],["2026-01",85.9],["2026-02",118.0],["2026-03",74.4],["2026-04",123.3],["2026-05",178.6],["2026-06",170.9],["2026-07",107.0],["2026-08",110.1],["2026-09",106.7],["2026-10",70.8],["2026-11",49.2]],"now":49.2};
+const $=s=>document.querySelector(s);
+const fmt=(v,d=1)=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d);
+document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.bar button').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.toggle('m',b.dataset.w==='m')});
+const M=D.months; // [월, 거리, 1년 뒤 등락, 1년 안 최대 하락]
+const NOW=D.now, BK=[[-999,0,'0% 미만'],[0,20,'0~20%'],[20,40,'20~40%'],[40,60,'40~60%'],[60,9999,'60% 이상']];
+const inB=(x,b)=>x[1]>=b[0]&&x[1]<b[1];
+const med=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+const ym=m=>`${m.slice(0,4)}년 ${+m.slice(5)}월`;
+
+// ── B 사례
+(()=>{
+  const sel=M.filter(x=>inB(x,BK[3]));
+  const key=m=>+m.slice(0,4)*12+ +m.slice(5);
+  const eps=[];sel.forEach(x=>{const L=eps[eps.length-1];if(L&&key(x[0])-key(L[L.length-1][0])<=3)L.push(x);else eps.push([x])});
+  const R=eps.map(e=>{const r=e.map(x=>x[2]);return {e,lo:Math.min(...r),hi:Math.max(...r),md:med(r),dd:Math.min(...e.map(x=>x[3])),up:med(r)>0}});
+  const nu=R.filter(r=>r.up).length,nd=R.length-nu;
+  $('#b-blocks').innerHTML=R.map(r=>`<i class="${r.up?'u':'d'}">${r.e[0][0].slice(0,4)}</i>`).join('');
+  $('#b-ul').textContent=`${nu}번은 1년 뒤 올랐어요`;$('#b-dl').textContent=`${nd}번은 1년 뒤 내렸어요`;
+  const lo=-60,hi=60,X=v=>(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*100;
+  $('#b-eps').innerHTML=R.map(r=>{const a=r.e[0][0],b=r.e[r.e.length-1][0];const when=a===b?ym(a):`${ym(a)} ~ ${a.slice(0,4)===b.slice(0,4)?+b.slice(5)+'월':ym(b)}`;
+    const rg=r.lo===r.hi?`${fmt(r.lo)}%`:`${fmt(r.lo,0)} ~ ${fmt(r.hi,0)}%`;
+    return `<div class="ep"><div class="wh">${when}<small>${r.e.length}개월</small></div><div class="rail" style="--z:${X(0)}%"><b class="${r.up?'u':'d'}" style="left:${X(r.lo)}%;width:calc(${X(r.hi)-X(r.lo)}% + 0px)"></b></div><div class="rg ${r.up?'up':'dn'}">${rg}<small>1년 안 최대 ${r.dd>=0?'하락 없음':fmt(r.dd,0)+'%'}</small></div></div>`}).join('');
+  $('#b-rax').innerHTML=[-60,-30,0,30,60].map(v=>`<span style="left:${X(v)}%">${v>0?'+':''}${v}%${v===60?'+':''}</span>`).join('');
+  const ups=R.filter(r=>r.up).map(r=>r.e[0][0].slice(0,4)),dns=R.filter(r=>!r.up).map(r=>r.e[0][0].slice(0,4));
+  const uy=[...new Set(ups)],dy=[...new Set(dns)];
+  $('#b-concl').innerHTML=`<b>오른 때(${uy.join('·')})와 내린 때(${dy.join('·')})가 거리만으로는 갈리지 않았어요.</b> 내린 ${nd}번은 1년 안에 모두 20% 넘게 빠졌고, 오른 ${nu}번은 1년 안 최대 하락이 ${Math.min(...R.filter(r=>r.up).map(r=>r.dd)).toFixed(0)}% 안이었어요. 그래서 코스피 체크는 주의·경고 기준을 두지 않고, 지금 위치만 보여줘요.`;
+  // 접힌 표
+  $('#b-tb').innerHTML='<tr><th>거리</th><th>달 수</th><th>사례</th><th>1년 뒤 중앙값</th><th>오른 비율</th></tr>'+BK.map(b=>{const s=M.filter(x=>inB(x,b));const e=[];s.forEach(x=>{const L=e[e.length-1];if(L&&key(x[0])-key(L[L.length-1])<=3)L.push(x[0]);else e.push([x[0]])});const m=med(s.map(x=>x[2]));
+    return `<tr class="${b===BK[3]?'hl':''}"><td>${b[2]}${b===BK[3]?' · 지금':''}</td><td>${s.length}</td><td>${e.length}번</td><td class="${m>0?'up':'dn'}">${fmt(m)}%</td><td>${Math.round(s.filter(x=>x[2]>0).length/s.length*100)}%</td></tr>`}).join('');
+})();
+
+// ── A 점 분포
+(()=>{
+  const lo=-60,hi=110,X=v=>(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*100;
+  $('#a-big').innerHTML=`거리가 높은 구간일수록 1년 뒤가 나빠졌을까요? <b>아니요</b> — 구간마다 점이 넓게 흩어져 있어요.`;
+  $('#a-sp').innerHTML=BK.map(b=>{const s=M.filter(x=>inB(x,b));const m=med(s.map(x=>x[2]));const now=b===BK[3];
+    return `<div class="sr ${now?'now':''}"><div class="lb">${b[2]}${now?' · 지금':''}<small>${s.length}개월 · 중앙값 <span class="${m>0?'up':'dn'}">${fmt(m)}%</span></small></div><div class="tk" style="--z:${X(0)}%">${s.map(x=>`<i class="${x[2]>0?'u':'d'}" style="left:${X(x[2])}%" title="${x[0]} · 1년 뒤 ${fmt(x[2])}%"></i>`).join('')}<u style="left:${X(m)}%"></u></div></div>`}).join('');
+  $('#a-ax').innerHTML=[-50,0,50,100].map(v=>`<span style="left:${X(v)}%">${v>0?'+':''}${v}%</span>`).join('');
+})();
+
+// ── C 바코드
+(()=>{
+  const S=D.series,n=S.length,res=Object.fromEntries(M.map(x=>[x[0],x[2]]));
+  const lo=-50,hi=200,Y=v=>(1-(v-lo)/(hi-lo))*100,X=i=>i/(n-1)*1000;
+  let s=`<svg viewBox="0 0 1000 100" preserveAspectRatio="none"><rect class="bd" x="0" width="1000" y="${Y(60)}" height="${Y(40)-Y(60)}"/>`;
+  [-50,0,50,100,150,200].forEach(t=>s+=`<line class="gl" x1="0" x2="1000" y1="${Y(t)}" y2="${Y(t)}"/>`);
+  s+=`<path class="ln" d="${S.map((x,i)=>(i?'L':'M')+X(i)+','+Y(x[1])).join(' ')}"/></svg>`;
+  [-50,0,50,100,150,200].forEach(t=>s+=`<span class="ax" style="top:${Y(t)}%">${t}%</span>`);
+  s+=`<span class="bandl" style="top:${Y(50)}%">40~60% · 지금 구간</span><i class="mk" style="left:100%;top:${Y(S[n-1][1])}%"></i><i class="cur" hidden></i><span class="tip" hidden></span>`;
+  const P=$('#c-p');P.innerHTML=s;
+  $('#c-code').innerHTML=S.map(x=>{const r=res[x[0]];const c=r==null?'n':r>0?'u':'d';return `<i class="${c} ${x[1]>=40&&x[1]<60&&r!=null?'in':''}"></i>`}).join('');
+  const yi=[];S.forEach((x,i)=>{if(x[0].endsWith('-01')&&+x[0].slice(0,4)%5===0)yi.push([i,x[0].slice(0,4)])});
+  $('#c-y').innerHTML=yi.map(([i,t])=>`<span style="left:${i/(n-1)*100}%">${t}</span>`).join('');
+  const cur=P.querySelector('.cur'),tp=P.querySelector('.tip');
+  const mv=e=>{const r=P.getBoundingClientRect();const i=Math.max(0,Math.min(n-1,Math.round((e.clientX-r.left)/r.width*(n-1))));const x=S[i],v=res[x[0]];cur.hidden=tp.hidden=false;cur.style.left=tp.style.left=i/(n-1)*100+'%';tp.textContent=`${x[0]} · 거리 ${fmt(x[1])}% · 1년 뒤 ${v==null?'아직':fmt(v)+'%'}`};
+  P.onmousemove=mv;$('#c-code').onmousemove=mv;P.onmouseleave=()=>{cur.hidden=tp.hidden=true};
+  const sel=M.filter(x=>inB(x,BK[3]));
+  $('#c-say').innerHTML=`파란 띠 안에 있던 <b>${sel.length}개월</b> 중 1년 뒤 오른 달은 <b>${sel.filter(x=>x[2]>0).length}개월</b>, 내린 달은 <b>${sel.filter(x=>x[2]<=0).length}개월</b>이에요. 2006~2007년엔 띠 안에서 오래 머물며 계속 올랐고, 2008년엔 같은 띠에서 크게 빠졌어요.`;
+})();
+</script>
+</body></html>
