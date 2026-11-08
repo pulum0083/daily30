@@ -247,22 +247,63 @@
     return null;
   }
 
-  // 나스닥 체크 — 60개월선 대비 월봉 고점 이격. 눈금 0·60(주의)·70(경고), 막대는 이격까지, 색은 단계(§65).
-  function nasdaqRow(nq, ymd, today) {
+  // ── 장기 신호(2026-11-09 §68 ⑤ 개정, 시안 docs/prototypes/2026-11-09-home-longterm-entry.html) ──
+  //   줄마다 이름·큰 숫자·한 줄 설명·작은 그래프 — 깊은 그래프는 상세 페이지에 있다. 순서: 나스닥 체크 → S&P 500 200일선 → 코스피 체크(사용자 결정).
+  //   하루 종일 보인다(장중·마감엔 맨 아래). 값이 없거나 오래된 줄만 빠진다.
+  function sg1(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1); }
+  // 작은 선 그래프 — zero가 있으면 그 높이에 점선(코스피 0% · S&P 50%). 마지막 점을 찍는다.
+  function ltSpark(vals, zero) {
+    vals = (vals || []).filter(function (v) { return typeof v === 'number' && isFinite(v); });
+    if (vals.length < 2) return '<span class="lt-g"></span>';
+    var all = zero == null ? vals : vals.concat([zero]);
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all), n = vals.length;
+    if (hi === lo) hi = lo + 1;
+    var Y = function (v) { return ((hi - v) / (hi - lo) * 100).toFixed(2); };
+    var d = vals.map(function (v, i) { return (i ? 'L' : 'M') + (i / (n - 1) * 100).toFixed(2) + ' ' + Y(v); }).join(' ');
+    return '<span class="lt-g"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+      (zero == null ? '' : '<line x1="0" x2="100" y1="' + Y(zero) + '" y2="' + Y(zero) + '"/>') +
+      '<path class="a" d="' + d + ' L100 100 L0 100 Z"/><path class="l" d="' + d + '"/></svg><i style="top:' + Y(vals[n - 1]) + '%"></i></span>';
+  }
+  function ltRow(href, k, d, v, desc, graph) {
+    return '<a class="lt-r" href="' + href + '"><span class="lt-t"><span class="lt-k">' + k + (d ? '<em>' + d + '</em>' : '') + '</span>' +
+      '<span class="lt-v">' + v + '</span><span class="lt-d">' + desc + '</span></span>' + graph + '<span class="lt-go" aria-hidden="true">›</span></a>';
+  }
+
+  // 나스닥 체크 — 60개월선 대비 월봉 고점 이격. 0·60(주의)·70(경고) 미니 게이지(§65).
+  function nasdaqRow(nq) {
     if (!nq || typeof nq.gap_pct !== 'number' || !isFinite(nq.gap_pct)) return '';
-    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고'] : g >= 60 ? ['caution', '⚠️ 주의'] : ['ok', '✓ 정상'];
+    var g = nq.gap_pct, lv = g >= 70 ? ['warn', '🚨 경고', '경고 구간(70% 이상)이에요'] : g >= 60 ? ['caution', '⚠️ 주의', '주의 구간(60~70%)이에요'] : ['ok', '✓ 정상', '주의 기준 60%보다 아래예요'];
     var top = Math.max(80, Math.ceil((g + 5) / 10) * 10);
     var x = function (v) { return (Math.max(0, Math.min(v, top)) / top * 100).toFixed(1) + '%'; };
-    // 누르면 1990년부터의 그래프가 있는 상세 페이지로 간다(2026-10-28) — 브리핑 섹션은 60% 미만이면 숨겨진다.
-    return '<a class="ss" href="/stocks/nasdaq-check/">' +
-      '<div class="ss-h"><span class="ss-k">나스닥 체크</span></div>' +   // 날짜 라벨은 뺐다 — 상세 페이지로 가는 줄이라 브리핑과 무관해 보였다(2026-10-28)
-      '<div class="ss-m"><b>' + (g >= 0 ? '+' : '') + g.toFixed(1) + '%</b><span class="pill ' + lv[0] + '">' + lv[1] + '</span></div>' +
-      '<div class="nqg"><div class="nqg-t"><i class="z1" style="left:' + x(60) + ';width:' + (10 / top * 100).toFixed(1) + '%"></i>' +
-      '<i class="z2" style="left:' + x(70) + ';right:0"></i><i class="f ' + lv[0] + '" style="width:' + x(g) + '"></i>' +
-      '<i class="dot ' + lv[0] + '" style="left:' + x(g) + '"></i></div>' +
-      '<div class="nqg-l"><span style="left:0">0</span><span class="l60" style="left:' + x(60) + '">60 주의</span><span class="l70">70 경고</span></div></div>' +
-      '<em>60개월선 대비 ' + esc(/^\d{4}-\d{2}$/.test(nq.month || '') ? (+nq.month.slice(5)) + '월' : '이번 달') + ' 월봉 고점' +
-      '<span class="ss-go">상세 그래프 ›</span></em></a>';   // 상세 페이지가 있다는 표시(2026-10-28)
+    var gauge = '<span class="lt-g lt-gg"><span class="t"><i class="z1" style="left:' + x(60) + ';width:' + (10 / top * 100).toFixed(1) + '%"></i>' +
+      '<i class="z2" style="left:' + x(70) + ';right:0"></i><u class="' + lv[0] + '" style="left:' + x(g) + '"></u></span>' +
+      '<span class="s"><b style="left:0">0</b><b style="left:' + x(60) + '">60</b></span></span>';
+    return ltRow('/stocks/nasdaq-check/', '나스닥 체크 · 60개월선 대비 월봉 고점', '',
+      sg1(g) + '%<span class="pill ' + lv[0] + '">' + lv[1] + '</span>', lv[2], gauge);
+  }
+
+  // S&P 500 200일선 위 종목 비율 — 미국 잡이 쓰는 /data/sp500-home.json(최근 120거래일 흐름). 10일 넘게 멈췄으면 뺀다(§20).
+  function sp500Row(sp, today) {
+    if (!sp || typeof sp.pct !== 'number' || !/^\d{4}-\d{2}-\d{2}$/.test(sp.asof || '')) return '';
+    if (daysBetween(sp.asof, today) > STRUCT_MAX_AGE) return '';
+    var med = typeof sp.median_all === 'number' ? sp.median_all : null;
+    var cmp = med == null ? '' : '보통(' + med.toFixed(1) + '%)보다 ' + (Math.abs(sp.pct - med) < 1 ? '비슷해요' : sp.pct > med ? '높아요' : '낮아요');
+    var cnt = typeof sp.hot === 'number' && typeof sp.deep === 'number' ? '과열 ' + sp.hot + '개, 20%↓ ' + sp.deep + '개' : '';
+    return ltRow('/stocks/sp500-200/', 'S&amp;P 500 · 200일선 위 종목 비율', md(sp.asof) + '(' + dowOf(sp.asof) + ') 종가',
+      sp.pct.toFixed(1) + '%' + (sp.week && typeof sp.week.pct === 'number' ? '<small>한 주 전 ' + sp.week.pct.toFixed(1) + '%</small>' : ''),
+      [cmp, cnt].filter(Boolean).join(' · '), ltSpark(sp.spark, 50));
+  }
+
+  // 코스피 체크 — 종가 ÷ 5년(60개월) 평균. 정상·주의·경고를 판정하지 않는다(§68 ⑤). 25년 흐름을 작게.
+  function kospiRow(kc, today) {
+    if (!kc || typeof kc.gap_pct !== 'number' || !isFinite(kc.gap_pct) || !/^\d{4}-\d{2}-\d{2}$/.test(kc.asof || '')) return '';
+    if (daysBetween(kc.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
+    var g = kc.gap_pct, ym = kc.year_max && typeof kc.year_max.gap === 'number' ? kc.year_max : null;
+    var desc = ym && ym.gap > g + 0.05 ? '올해 ' + (+String(ym.m).slice(5, 7)) + '월 ' + sg1(ym.gap) + '%에서 좁혀졌어요'
+             : ym ? '올해 들어 가장 멀어요' : '';
+    var series = (Array.isArray(kc.series) ? kc.series : []).map(function (p) { return p && p[1]; });
+    return ltRow('/stocks/kospi-check/', '코스피 체크 · 5년 평균과의 거리', md(kc.asof) + '(' + dowOf(kc.asof) + ') 종가',
+      sg1(g) + '%', desc, ltSpark(series, 0));
   }
 
   // 월봉 5개월선 안착 — 첫 종목의 최근 6개월 이격 막대(안착 구간은 파랑, 이번 달은 옅게). 종목이 없으면 줄을 뺀다.
@@ -288,93 +329,20 @@
       '<em>월말 종가 ÷ 5개월 평균' + (now ? ' · ' + now : '') + '</em></a>';
   }
 
-  // 미국 지수 · 200일선 대비 — 밤에 월봉 5개월선 자리에 온다(2026-11-02, 시안 G안). 가운데가 200일선, 위는 오른쪽 빨강·아래는 왼쪽 파랑.
-  //   눈금 끝은 그날 가장 많이 벌어진 지수에 맞춰 5% 단위로 정한다.
-  function usIndexRow(pos) {
-    var items = (pos && Array.isArray(pos.items) ? pos.items : []).filter(function (x) { return typeof x.pct === 'number' && isFinite(x.pct); });
-    if (!items.length || !/^\d{4}-\d{2}-\d{2}$/.test(pos.asof || '')) return '';
-    var top = Math.max(5, Math.ceil(Math.max.apply(null, items.map(function (x) { return Math.abs(x.pct); })) / 5) * 5);
-    var rows = items.map(function (x) {
-      var up = x.pct >= 0, w = (Math.abs(x.pct) / top * 50).toFixed(1);
-      return '<div class="uip-r"><span>' + esc(x.name) + '</span><div class="uip-b"><i class="' + (up ? 'up' : 'dn') + '" style="width:' + w + '%"></i></div>' +
-        '<b class="' + (up ? 'up' : 'dn') + '">' + pct(x.pct) + '</b><span class="pill ' + (up ? 'above' : 'below') + '">' + (up ? '위' : '아래') + '</span></div>';
-    }).join('');
-    return '<div class="ss ss-static"><div class="ss-h"><span class="ss-k">미국 지수 · 200일선 대비</span><span class="ss-d">' + md(pos.asof) + '(' + dowOf(pos.asof) + ') 종가</span></div>' +
-      '<div class="ss-m"><b>' + esc(items[0].name) + ' ' + pct(items[0].pct) + '</b></div><em>일봉 종가의 200일 평균과 비교</em>' +
-      '<div class="uip">' + rows + '<div class="uip-s"><span></span><div><span>−' + top + '%</span><span class="m">200일선</span><span>+' + top + '%</span></div></div></div></div>';
-  }
-
-  // 코스피 체크 — 종가 ÷ 5년(60개월) 평균. 정상·주의·경고를 판정하지 않는다(§68 ⑤).
-  //   2001년부터의 월별 선 그래프에 이전 해 꼭대기·올해 꼭대기·지금을 찍고, 한 문장으로 흐름을 말한다(2026-11-08 B안).
-  //   SVG는 가로로 늘려 그리므로 점·글자는 HTML로 겹친다(§49).
-  function kospiRow(kc, today) {
-    if (!kc || typeof kc.gap_pct !== 'number' || !isFinite(kc.gap_pct) || !/^\d{4}-\d{2}-\d{2}$/.test(kc.asof || '')) return '';
-    if (daysBetween(kc.asof, today) > STRUCT_MAX_AGE) return '';   // 수집이 멈췄으면 옛 값을 보여주지 않는다(§20)
-    var s1 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%'; };
-    var s0 = function (v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(0) + '%'; };
-    var mon = function (m) { return +String(m).slice(5, 7) + '월'; };
-    var g = kc.gap_pct, ym = kc.year_max && typeof kc.year_max.gap === 'number' ? kc.year_max : null;
-    var pm = kc.prev_max && typeof kc.prev_max.gap === 'number' ? kc.prev_max : null;
-    var say = '';
-    if (ym && ym.gap > g + 0.05) say = '올해 ' + mon(ym.m) + ' <b>' + s1(ym.gap) + '</b>(평균의 ' + (1 + ym.gap / 100).toFixed(1) + '배)까지 벌어졌다가 지금은 <b>' + s1(g) + '</b>로 좁혀졌어요.';
-    else if (ym) say = '올해 들어 가장 많이 벌어졌어요.';
-    if (pm) say += (say ? ' ' : '') + pm.m.slice(0, 4) + '년 꼭대기는 <b>' + s1(pm.gap) + '</b>였어요.';
-    return '<div class="ss ss-static"><div class="ss-h"><span class="ss-k">코스피 체크</span><span class="ss-d">' + md(kc.asof) + '(' + dowOf(kc.asof) + ') 종가</span></div>' +
-      '<div class="ss-m"><b>5년 평균보다 ' + s1(g) + '</b></div>' + (say ? '<p class="kc-say">' + say + '</p>' : '') +
-      kospiChart(kc.series, g, pm, ym, s0) + '<em>월말 종가와 지난 5년(60개월) 월말 종가 평균을 비교해요</em></div>';
-  }
-
-  function kospiChart(series, g, pm, ym, s0) {
-    var pts = (Array.isArray(series) ? series : []).filter(function (p) { return p && typeof p[1] === 'number' && isFinite(p[1]); });
-    if (pts.length < 24) return '';                                   // 흐름이라 부를 만큼 쌓이지 않았으면 그래프를 빼고 문장만 둔다
-    var n = pts.length, vals = pts.map(function (p) { return p[1]; });
-    var lo = Math.min.apply(null, vals.concat([0])) - 5, hi = Math.max.apply(null, vals) + 14;
-    var X = function (i) { return i / (n - 1) * 100; }, Y = function (v) { return (hi - v) / (hi - lo) * 100; };
-    var idx = function (m) { for (var i = 0; i < n; i++) if (pts[i][0] === m) return i; return -1; };
-    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + X(i).toFixed(2) + ' ' + Y(p[1]).toFixed(2); }).join(' ');
-    var z = Y(0).toFixed(2), html = '<div class="kcc"><div class="kcc-p"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
-      '<path class="a" d="' + d + ' L100 ' + z + ' L0 ' + z + ' Z"/><line x1="0" x2="100" y1="' + z + '" y2="' + z + '"/><path class="l" d="' + d + '"/></svg>' +
-      // '5년 평균'은 오른쪽 여백의 0선 높이에 둔다 — 선 위에 두면 어느 해와 겹친다. 지금 글자와 붙으면 지금 쪽만 남긴다
-      (Math.abs(Y(g) - Y(0)) >= 16 ? '<span class="kcc-t z" style="top:' + z + '%">5년 평균</span>' : '');
-    var iy = ym ? idx(ym.m) : -1, ip = pm ? idx(pm.m) : -1;
-    if (ip >= 0 && !(iy >= 0 && X(iy) - X(ip) < 30)) {                // 두 꼭대기 글자가 겹칠 만큼 가까우면 올해 것만 둔다
-      html += '<i class="kcc-o" style="left:' + X(ip).toFixed(2) + '%;top:' + Y(pm.gap).toFixed(2) + '%"></i>' +
-        '<span class="kcc-t up" style="left:' + X(ip).toFixed(2) + '%;top:' + Y(pm.gap).toFixed(2) + '%">' + pm.m.slice(0, 4) + '년 ' + s0(pm.gap) + '</span>';
-    }
-    if (iy >= 0 && iy < n - 1) {
-      html += '<i class="kcc-o" style="left:' + X(iy).toFixed(2) + '%;top:' + Y(ym.gap).toFixed(2) + '%"></i>' +
-        '<span class="kcc-t lf" style="left:' + X(iy).toFixed(2) + '%;top:' + Y(ym.gap).toFixed(2) + '%">올해 ' + (+ym.m.slice(5, 7)) + '월 ' + s0(ym.gap) + '</span>';
-    }
-    html += '<i class="kcc-o now" style="left:100%;top:' + Y(g).toFixed(2) + '%"></i>' +
-      '<span class="kcc-t now" style="top:' + Y(g).toFixed(2) + '%">지금 ' + s0(g) + '</span></div><div class="kcc-x">';
-    var y0 = +pts[0][0].slice(0, 4);
-    for (var y = Math.ceil((y0 + 1) / 5) * 5; ; y += 5) {
-      var i = idx(y + '-01');
-      if (i < 0) break;
-      html += '<span style="left:' + X(i).toFixed(2) + '%">' + y + '</span>';
-    }
-    return html + '</div></div>';
-  }
-
-  function structHtml(nq, nqDate, m5, m5Date, today, pos, kc) {
-    var second = pos ? usIndexRow(pos) : (kc ? kospiRow(kc, today) : '') + (m5Date ? ma5Row(m5, m5Date, today) : '');
-    var rows = (nqDate ? nasdaqRow(nq, nqDate, today) : '') + second;
-    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">🧱</span>구조 신호</span>' +
-      // 계산은 브리핑마다(나스닥 21:15·월봉 07:25) 다시 한다 — '월 단위'로만 쓰면 월 1회 갱신으로 읽혔다(2026-10-29)
-      '<span class="block__s">' + (pos ? '' : '월봉 기준 · ') + '매일 업데이트</span></div>' + rows : '';
+  function structHtml(nq, sp, kc, m5, m5Date, today) {
+    var rows = nasdaqRow(nq) + sp500Row(sp, today) + kospiRow(kc, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
+    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">종가 기준 · 매일 갱신</span></div>' +
+      rows + '<div class="lt-f"><span>매주 토요일 한 주 정리</span><a href="/weekly/">주간 장기 리포트 ›</a></div>' : '';
   }
 
   var structEl = document.getElementById('struct-sig');
-  // 시간대별 줄(§68 ⑤) — 아침: 코스피 체크 + 월봉 / 밤: 나스닥 체크 + 미국 지수 / 주말·휴장: 나스닥 체크 + 코스피 체크 + 월봉.
-  //   밤에 미국 지수 값이 없으면 나스닥 체크만 남는다 — 국내 줄로 대신하지 않는다.
-  function loadStruct(slots, today, slot) {
+  // 시간대와 상관없이 같은 줄을 그린다 — 위치만 시간대별로 다르다(stocks-home.css #home.slot-*).
+  function loadStruct(slots, today) {
     if (!structEl) return;
-    var evening = slot === 'evening', morning = slot === 'morning';
-    var usD = morning ? null : latestReady(slots, 'us', today), krD = evening ? null : latestReady(slots, 'kospi', today);
+    var usD = latestReady(slots, 'us', today), krD = latestReady(slots, 'kospi', today);
     var snap = function (d, t) { return d ? json('/briefings/' + d + '/' + t + '/analysis_snapshot.json') : Promise.resolve(null); };
-    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), evening ? Promise.resolve(null) : json('/data/home-summary.json')]).then(function (r) {
-      var html = structHtml(r[0] && r[0].nasdaq_overheat, usD, r[1] && r[1].monthly_ma5, krD, today,
-        evening ? (r[0] && r[0].us_index_position) || null : null, r[2] && r[2].kospi_check);
+    return Promise.all([snap(usD, 'us'), snap(krD, 'kospi'), json('/data/home-summary.json'), json('/data/sp500-home.json')]).then(function (r) {
+      var html = structHtml(r[0] && r[0].nasdaq_overheat, r[3], r[2] && r[2].kospi_check, r[1] && r[1].monthly_ma5, krD, today);
       structEl.innerHTML = html;
       structEl.hidden = !html;
     });
@@ -434,7 +402,7 @@
       });
       window.__homeSlot = info.slot;
       if (devOverride()) devBar(info.slot, slots, today);
-      loadStruct(slots, today, info.slot);
+      loadStruct(slots, today);
       if (info.slot === 'weekend') {
         var p = info.date.split('-'), wd = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay();
         var hol = wd >= 1 && wd <= 5 && !!(window.krIsKospiHolidayOn && window.krIsKospiHolidayOn(info.date));
@@ -465,7 +433,7 @@
 
   window.__homeHero = { homeSlot: homeSlot, cardMorning: cardMorning, cardClose: cardClose, cardEvening: cardEvening,
                         morningChip: morningChip, nasdaqChip: nasdaqChip, dekHtml: dekHtml, dayLabel: dayLabel,
-                        latestReady: latestReady, nasdaqRow: nasdaqRow, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, usIndexRow: usIndexRow, kospiRow: kospiRow, structHtml: structHtml };
+                        latestReady: latestReady, nasdaqRow: nasdaqRow, sp500Row: sp500Row, cardWeekend: cardWeekend, weekSteps: weekSteps, usWeekSteps: usWeekSteps, weekStepHead: weekStepHead, ma5Row: ma5Row, kospiRow: kospiRow, structHtml: structHtml };
   if (!root) return;
   load();
   setInterval(load, 5 * 60 * 1000);

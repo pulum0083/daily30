@@ -865,9 +865,37 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 .sbx-block .sb-bars{padding:6px 16px 0}
 .sbx-block .sb-note{padding:0 16px 12px}  /* 펼치기 줄이 빠져 카드 아래 여백을 직접 둔다(2026-10-27) */
 
-/* §68 ⑤ 구조 신호 — 나스닥 체크 게이지(0·60·70 눈금) + 월봉 5개월선 미니 막대. 아침·밤·주말에만 */
+/* §68 ⑤ 장기 신호(2026-11-09 개정) — 줄마다 이름·큰 숫자·한 줄 설명·작은 그래프, 누르면 상세 페이지. 하루 종일 보인다 */
 #struct-sig[hidden]{display:none}
-#home:not(.slot-morning):not(.slot-evening):not(.slot-weekend) #struct-sig{display:none}
+#struct-sig .lt-r{display:grid;grid-template-columns:1fr 104px 14px;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--hair);text-decoration:none;color:inherit;background:#fff}
+#struct-sig .lt-r:hover{background:#F8FAFF}
+#struct-sig .lt-t{display:block;min-width:0}
+#struct-sig .lt-k{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;font-weight:700;color:var(--muted)}
+#struct-sig .lt-k em{font-style:normal;font-weight:500;font-size:11px;white-space:nowrap}
+#struct-sig .lt-v{display:flex;align-items:center;gap:7px;margin-top:1px;font-size:17px;font-weight:900;color:#0F172A;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+#struct-sig .lt-v small{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:0}
+#struct-sig .lt-d{display:block;font-size:12px;color:#334155;margin-top:2px;line-height:1.45}
+#struct-sig .lt-go{color:#94A3B8;font-size:16px;font-weight:700}
+#struct-sig .lt-g{position:relative;display:block;height:34px}
+#struct-sig .lt-g svg{display:block;width:100%;height:100%;overflow:visible}
+#struct-sig .lt-g .l{fill:none;stroke:#334155;stroke-width:1.4;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#struct-sig .lt-g .a{fill:#0F172A;opacity:.06}
+#struct-sig .lt-g line{stroke:#94A3B8;stroke-width:1;stroke-dasharray:2 2;vector-effect:non-scaling-stroke}
+#struct-sig .lt-g>i{position:absolute;right:-3px;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:#2775ED}
+#struct-sig .lt-gg{display:flex;flex-direction:column;justify-content:center}
+#struct-sig .lt-gg .t{position:relative;display:block;height:6px;background:#F1F5F9;border-radius:3px}
+#struct-sig .lt-gg .t i{position:absolute;top:0;bottom:0}
+#struct-sig .lt-gg .t i.z1{background:#FDECC8}
+#struct-sig .lt-gg .t i.z2{background:#FBD5D5;border-radius:0 3px 3px 0}
+#struct-sig .lt-gg .t u{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.15)}
+#struct-sig .lt-gg u.ok{background:#16A34A} #struct-sig .lt-gg u.caution{background:#D97706} #struct-sig .lt-gg u.warn{background:#DC2626}
+#struct-sig .lt-gg .s{position:relative;display:block;height:12px;margin-top:3px;font-size:9.5px;color:var(--muted)}
+#struct-sig .lt-gg .s b{position:absolute;font-weight:500;transform:translateX(-50%)}
+#struct-sig .lt-gg .s b:first-child{transform:none}
+#struct-sig .lt-f{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--hair);background:#F8FAFC;font-size:12.5px;color:var(--muted)}
+#struct-sig .lt-f a{color:#2563EB;font-weight:800;text-decoration:none}
+@media(min-width:720px){#struct-sig .lt-r{grid-template-columns:1fr 220px 14px;column-gap:28px}#struct-sig .lt-g{height:40px}}
+/* 월봉 5개월선 줄(종목이 있는 날만) */
 #struct-sig .ss{display:block;padding:12px 16px;border-top:1px solid var(--hair);text-decoration:none;color:inherit;background:#fff}
 #struct-sig .ss:hover{background:#F8FAFF}
 #struct-sig .ss-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
@@ -881,23 +909,6 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .pill.warn{background:#FEF2F2;color:#E03131}
 #struct-sig .pill.nb{background:#EFF4FE;color:#2775ED}
 #struct-sig .ss em{display:block;font-style:normal;font-size:11px;color:var(--muted);margin-top:6px}
-#struct-sig .ss-go{margin-left:8px;font-weight:700;color:#2563EB;white-space:nowrap}
-#struct-sig .ss:hover .ss-go{text-decoration:underline}
-#struct-sig .nqg{margin-top:9px}
-#struct-sig .nqg-t{position:relative;height:8px;border-radius:4px;background:#F1F5F9}
-#struct-sig .nqg-t i{position:absolute;top:0;height:100%;display:block}
-#struct-sig .nqg-t i.z1{background:#FDECC8}
-#struct-sig .nqg-t i.z2{background:#FBD5D5;border-radius:0 4px 4px 0}
-#struct-sig .nqg-t i.f{left:0;border-radius:4px;opacity:.85}
-#struct-sig .nqg-t i.f.ok{background:#4ADE80} #struct-sig .nqg-t i.f.caution{background:#F59E0B} #struct-sig .nqg-t i.f.warn{background:#EF4444}
-#struct-sig .nqg-t i.dot{width:12px;height:12px;top:-2px;margin-left:-6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.12)}
-#struct-sig .nqg-t i.dot.ok{background:#16A34A} #struct-sig .nqg-t i.dot.caution{background:#D97706} #struct-sig .nqg-t i.dot.warn{background:#DC2626}
-#struct-sig .nqg-l{position:relative;height:14px;margin-top:3px;font-size:10px;color:var(--muted)}
-#struct-sig .nqg-l span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
-#struct-sig .nqg-l span:first-child{transform:none}
-/* 65·70 눈금이 가까워 가운데 맞춤이면 두 라벨이 겹친다(2026-10-27) — '65 주의'는 눈금 왼쪽에 끝을 맞추고, '70 경고'는 빨간 구간 오른쪽 끝에 붙인다 */
-#struct-sig .nqg-l span.l60{transform:translateX(calc(-100% - 3px))}
-#struct-sig .nqg-l span.l70{left:auto;right:0;transform:none}
 #struct-sig .m5bars{display:flex;gap:6px;margin-top:9px;height:58px}
 #struct-sig .m5b{flex:1;display:flex;flex-direction:column;align-items:stretch;min-width:0}
 #struct-sig .m5b-u,#struct-sig .m5b-d{flex:1;display:flex;justify-content:center}
@@ -908,47 +919,10 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #struct-sig .m5b.cur i{background:#93B8F5}
 #struct-sig .m5b small{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #struct-sig .m5b.cur small{color:#2775ED;font-weight:700}
-/* 코스피 체크 — 2001년부터 월별 선 그래프(판정이 아니라 위치라서 회색). 오른쪽 여백에 '지금' 글자를 둔다(2026-11-08 B안) */
-#struct-sig .kc-say{font-size:12.5px;color:#334155;line-height:1.55;margin-top:4px}
-#struct-sig .kc-say b{font-weight:700;color:#0F172A}
-#struct-sig .kcc{margin-top:12px;padding-right:58px}
-#struct-sig .kcc-p{position:relative;height:96px}
-#struct-sig .kcc-p svg{display:block;width:100%;height:100%;overflow:visible}
-#struct-sig .kcc-p .a{fill:#E2E8F0;opacity:.7}
-#struct-sig .kcc-p .l{fill:none;stroke:#475569;stroke-width:1.5;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-#struct-sig .kcc-p line{stroke:#94A3B8;stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
-#struct-sig .kcc-o{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#fff;border:1.5px solid #0F172A;box-sizing:border-box}
-#struct-sig .kcc-o.now{width:10px;height:10px;margin:-5px 0 0 -5px;background:#0F172A;border-color:#fff;box-shadow:0 0 0 1px #0F172A}
-#struct-sig .kcc-t{position:absolute;font-size:10px;line-height:1;color:var(--muted);white-space:nowrap}
-#struct-sig .kcc-t.z{left:100%;transform:translate(9px,-50%)}
-#struct-sig .kcc-t.up{transform:translate(-50%,-15px)}
-#struct-sig .kcc-t.lf{transform:translate(calc(-100% - 7px),-4px)}
-#struct-sig .kcc-t.now{left:100%;transform:translate(9px,-50%);font-weight:700;color:#0F172A}
-#struct-sig .kcc-x{position:relative;height:13px;margin-top:5px;font-size:10px;color:var(--muted)}
-#struct-sig .kcc-x span{position:absolute;top:0;transform:translateX(-50%)}
-/* 미국 지수 · 200일선 대비 — 가운데 눈금이 200일선 */
-#struct-sig .ss-static:hover{background:#fff}
-#struct-sig .uip{margin-top:9px;display:grid;gap:7px}
-#struct-sig .uip-r,#struct-sig .uip-s{display:grid;grid-template-columns:48px 1fr 54px 36px;gap:8px;align-items:center;font-size:12px}
-#struct-sig .uip-r>span:first-child{font-weight:700;color:#334155;white-space:nowrap}
-#struct-sig .uip-r>b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
-#struct-sig .uip-r>b.up{color:#E03131} #struct-sig .uip-r>b.dn{color:#2775ED}
-#struct-sig .uip-r>.pill{justify-self:end;font-size:11px;padding:1px 7px}
-#struct-sig .pill.above{background:#FFE8E8;color:#E03131} #struct-sig .pill.below{background:#DBE8FE;color:#2775ED}
-#struct-sig .uip-b{position:relative;height:7px;border-radius:4px;background:#F1F5F9}
-#struct-sig .uip-b::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:1.5px;margin-left:-.75px;background:#64748B}
-#struct-sig .uip-b i{position:absolute;top:0;height:100%}
-#struct-sig .uip-b i.up{left:50%;background:#E86464;border-radius:0 4px 4px 0}
-#struct-sig .uip-b i.dn{right:50%;background:#5D97F1;border-radius:4px 0 0 4px}
-#struct-sig .uip-s{margin-top:-4px}
-#struct-sig .uip-s>div{grid-column:2;display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
-#struct-sig .uip-s .m{font-weight:700;color:#334155}
-/* PC — 줄마다 왼쪽 정보(이름·알약·설명), 오른쪽 차트(게이지·막대)로 나눠 폭을 다 쓴다 */
 @media(min-width:720px){
   #struct-sig .ss{display:grid;grid-template-columns:minmax(220px,1fr) 1.6fr;column-gap:32px;align-items:center}
-  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>.kc-say,#struct-sig .ss>em{grid-column:1}
-  #struct-sig .ss>.m5bars,#struct-sig .ss>.nqg,#struct-sig .ss>.uip{grid-column:2;grid-row:1/4;margin-top:0}
-  #struct-sig .ss>.kcc{grid-column:2;grid-row:1/5;margin-top:0}
+  #struct-sig .ss>.ss-h,#struct-sig .ss>.ss-m,#struct-sig .ss>em{grid-column:1}
+  #struct-sig .ss>.m5bars{grid-column:2;grid-row:1/4;margin-top:0}
 }
 /* §68 ⑥ 주말 카드 — 이번 주 정리 세 칸 */
 .hh-new.wk{color:var(--muted)}
@@ -1013,6 +987,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #home.slot-intraday #sig-block{order:2} #home.slot-intraday #us-linked-widget{order:3} #home.slot-intraday .sbx-block{order:4}
 #home.slot-close .sbx-block{order:2} #home.slot-close #sig-block{order:3} #home.slot-close #us-linked-widget{order:4}
 #home.slot-close #overnight-bridge{order:6}
+#home.slot-intraday #struct-sig,#home.slot-close #struct-sig{order:9}   /* 장기 신호 — 장중·마감엔 맨 아래(2026-11-09) */
 /* 마감 슬롯에서 밤사이 미국이 보이면(평일 17:00~, ueGate가 #home에 ue-on을 붙인다)
    밤사이 미국 → 지금 이시각 추정가 → 마감 브리핑 카드 순 — 사용자 결정 2026-10-27. */
 #home.slot-close.ue-on #us-evening{order:-2} #home.slot-close.ue-on #us-linked-widget{order:-1}

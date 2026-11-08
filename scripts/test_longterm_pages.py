@@ -186,3 +186,18 @@ def test_pages_are_in_publish_gate_and_sitemap():
     assert {"https://doubleshot.space/stocks/kospi-check/", "https://doubleshot.space/stocks/sp500-200/"} <= urls
     sm = (Path(__file__).resolve().parents[1] / "web" / "sitemap.xml").read_text(encoding="utf-8")
     assert "/stocks/kospi-check/" in sm and "/stocks/sp500-200/" in sm and "/weekly/" in sm
+
+
+def test_write_sp500_page_also_writes_home_file(tmp_path, monkeypatch):
+    import generate_html as gh
+    (tmp_path / "data").mkdir()
+    (tmp_path / "web" / "data").mkdir(parents=True)
+    d = dict(_sp_data(), date="2026-11-09")
+    (tmp_path / "data" / "sp500_ma200.json").write_text(json.dumps(d), encoding="utf-8")
+    (tmp_path / "data" / "sp500_breadth_history.json").write_text(json.dumps({"rows": _sp_hist()}), encoding="utf-8")
+    monkeypatch.setattr(gh, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(gh, "WEB_DIR", tmp_path / "web")
+    assert gh.write_sp500_page("2026-11-09")
+    home = json.loads((tmp_path / "web" / "data" / "sp500-home.json").read_text(encoding="utf-8"))
+    assert home["asof"] == "2026-11-06" and home["hot"] == 3 and home["deep"] == 40 and len(home["spark"]) == 120
+    assert (tmp_path / "web" / "stocks" / "sp500-200" / "index.html").exists()

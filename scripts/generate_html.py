@@ -989,6 +989,12 @@ def write_sp500_page(target_date: str) -> bool:
     if not ctx:
         print("[generate_html] S&P 500 200일선 상세 페이지 생략 — 누적 기록이 1년치 미만이거나 그날 값이 없음")
         return False
+    # 종목 홈 '장기 신호' 줄용 작은 파일(2026-11-09) — 페이지와 같은 값. 이 파일의 주인은 미국 잡이다(§18).
+    s = ctx["spx"]
+    home = {"asof": s["asof"], "pct": s["pct"], "week": s["week"], "median_all": s["median_all"],
+            "hot": data["dist"]["hot"], "deep": data["dist"]["deep"],
+            "spark": [p[1] for p in s["points"][-120:]]}
+    (WEB_DIR / "data" / "sp500-home.json").write_text(json.dumps(home, ensure_ascii=False) + "\n", encoding="utf-8")
     return _write_lt_page("pages/sp500_200.html", ctx, "/stocks/sp500-200/", SP500_PAGE_URL, "S&P 500 200일선")
 
 
