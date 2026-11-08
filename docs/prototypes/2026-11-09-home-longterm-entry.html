@@ -1,0 +1,184 @@
+<!-- 종목 시그널 홈(/stocks/)에서 장기 지표 페이지 2개·주간 장기 리포트로 들어오는 길 시안 — 숫자는 11/6(금) 종가 실측 -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>홈 장기 지표 연결 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--soft:#F8FAFC;--canvas:#fff;--primary:#006EFF;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1;--gold:#B7791F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#EEF1F5;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:20px 12px 80px}
+.top{max-width:980px;margin:0 auto 14px}
+.top h1{font-size:20px;font-weight:800}
+.top p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:6px}
+.rec{max-width:980px;margin:0 auto 14px;background:#fff;border:1px solid var(--hair);border-radius:14px;padding:14px 16px}
+.rec h2{font-size:14.5px;font-weight:800;margin-bottom:8px}
+.rec ol{margin-left:18px;font-size:13px;line-height:1.75;color:#334155}
+.rec ol b{color:var(--ink)}
+.bar{position:sticky;top:0;z-index:9;background:#EEF1F5;padding:8px 0;max-width:980px;margin:0 auto 8px;display:flex;gap:6px;flex-wrap:wrap}
+.bar button{font:inherit;font-size:12.5px;font-weight:700;border:1px solid #CBD5E1;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;color:#334155}
+.bar button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bar .sep{width:1px;background:#CBD5E1;margin:0 4px}
+.stage{max-width:980px;margin:0 auto;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.phone{width:375px;max-width:100%;background:#F7F8FA;border-radius:22px;box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden;flex:none}
+body.pc .phone{width:640px}
+.gnb{height:44px;background:#111827;color:#fff;display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:800;gap:8px}
+.gnb span{color:#60A5FA}
+.sub{display:flex;gap:4px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--hair);font-size:12.5px;font-weight:700}
+.sub i{font-style:normal;padding:4px 10px;border-radius:999px;color:var(--muted)}.sub i.on{background:var(--ink);color:#fff}
+.scr{padding:12px}
+.notes{flex:1;min-width:260px;font-size:12.5px;line-height:1.7;color:#334155}
+.notes h3{font-size:13.5px;font-weight:800;color:var(--ink);margin:0 0 6px}
+.notes .n{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.notes .n b{color:var(--ink)}
+.notes .new{display:inline-block;font-size:10.5px;font-weight:800;color:#fff;background:var(--primary);border-radius:5px;padding:0 6px;margin-right:4px}
+/* 기존 블록 자리표시 */
+.ph{background:#fff;border:1px dashed #CBD5E1;border-radius:12px;padding:12px 14px;margin-bottom:12px;color:#94A3B8;font-size:12.5px;font-weight:700;display:flex;justify-content:space-between}
+.ph small{font-weight:500}
+.ph.tall{height:120px}.ph.mid{height:84px}
+/* 새·바뀐 블록 */
+.block{background:#fff;border:1px solid var(--hair);border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,.05);position:relative}
+.block.hl{outline:2px solid var(--primary);outline-offset:2px}
+.tagnew{position:absolute;top:-1px;right:12px;font-size:10px;font-weight:800;color:#fff;background:var(--primary);border-radius:0 0 6px 6px;padding:1px 7px}
+.bh{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--hair)}
+.bt{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.bt::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.bs{font-size:11.5px;color:var(--muted)}
+.lr{display:grid;grid-template-columns:1fr 92px 14px;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid #F1F5F9;text-decoration:none;color:inherit}
+.lr:hover{background:#F8FAFC}
+.lr .k{font-size:11.5px;font-weight:700;color:var(--muted)}
+.lr .v{font-size:17px;font-weight:900;letter-spacing:-.3px;margin-top:1px;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
+.lr .v small{font-size:12px;font-weight:700;color:var(--muted)}
+.lr .d{font-size:12px;color:#334155;margin-top:2px;line-height:1.45}
+.lr .go{color:#94A3B8;font-size:16px;font-weight:700}
+.pill{font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px}
+.pill.ok{color:#059669;background:rgba(5,150,105,.12)}
+.spk{height:34px;position:relative}
+.spk svg{width:100%;height:100%;display:block;overflow:visible}
+.spk .l{fill:none;stroke:var(--ink);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.spk .z{stroke:#94A3B8;stroke-dasharray:2 2;vector-effect:non-scaling-stroke}
+.spk .a{fill:var(--ink);opacity:.06}
+.spk i{position:absolute;right:-3px;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--primary)}
+.gg{height:34px;display:flex;flex-direction:column;justify-content:center}
+.gg .t{position:relative;height:6px;background:#F1F5F9;border-radius:3px}
+.gg .t i{position:absolute;top:0;bottom:0;border-radius:3px}
+.gg .t u{position:absolute;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:#059669;border:2px solid #fff;box-shadow:0 0 0 1px #059669}
+.gg .s{position:relative;height:12px;font-size:9.5px;color:var(--muted)}
+.gg .s span{position:absolute;transform:translateX(-50%)}
+.bf{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#F8FAFC;font-size:12.5px}
+.bf a{color:var(--primary);font-weight:800;text-decoration:none}
+.bf span{color:var(--muted)}
+/* 주말 첫 카드 */
+.hero{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:14px;margin-bottom:12px;position:relative}
+.hero .tg{font-size:11.5px;font-weight:700;color:var(--primary);display:flex;justify-content:space-between}
+.hero .tg em{font-style:normal;font-size:10.5px;color:#fff;background:#7C3AED;border-radius:999px;padding:1px 7px}
+.hero h3{font-size:18px;font-weight:900;letter-spacing:-.3px;margin-top:5px;line-height:1.35}
+.hero p{font-size:13px;color:#334155;line-height:1.6;margin-top:5px}
+.steps{display:flex;gap:3px;height:56px;margin:14px 0 14px;position:relative}
+.steps::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed #94A3B8}
+.steps div{flex:1;position:relative}
+.steps i{position:absolute;left:2px;right:2px;border-radius:3px}
+.steps em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:9.5px;font-weight:700}
+.days{display:flex;gap:3px;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px}
+.days span{flex:1;text-align:center}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.chips div{background:#F8FAFC;border-radius:9px;padding:7px 9px;font-size:11px;color:var(--muted);font-weight:700}
+.chips b{display:block;font-size:13.5px;color:var(--ink);font-weight:900;font-variant-numeric:tabular-nums;margin-top:1px}
+.chips b s{text-decoration:none;color:var(--muted);font-weight:700;font-size:12px}
+.btn{display:block;text-align:center;margin-top:10px;background:var(--ink);color:#fff;border-radius:10px;padding:10px;font-size:13px;font-weight:800;text-decoration:none}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.foot{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12.5px}
+.foot b{font-size:13.5px}
+.foot a{display:block;color:var(--ink);text-decoration:none;padding:6px 0;border-bottom:1px solid #F1F5F9}
+.foot a span{display:block;font-size:11px;color:var(--muted)}
+</style></head><body>
+
+<div class="top"><h1>종목 시그널 홈 · 장기 지표 3페이지 연결 시안</h1>
+<p>숫자는 11/6(금) 종가 실측이에요. 점선 박스는 지금 있는 블록(그대로 둬요), 파란 테두리가 새로 넣거나 바꾸는 블록이에요. 위 버튼으로 시간대를 바꾸면 블록 순서가 바뀌어요.</p></div>
+
+<div class="rec"><h2>추천 — 세 가지만 바꿔요</h2><ol>
+<li><b>'구조 신호' → '장기 신호'로 바꾸고 하루 종일 보이게 해요.</b> 지금은 아침·밤·주말에만 보이고 줄마다 큰 그래프가 있어 홈이 길어져요. 깊은 그래프는 이제 상세 페이지에 있으니, 홈은 <b>한 줄 요약 3개(코스피 체크·나스닥 체크·S&amp;P 500 200일선)</b>로 줄이고 줄을 누르면 상세 페이지로 가요. 장중·마감엔 맨 아래에 둬서 단기 블록을 밀어내지 않아요.</li>
+<li><b>주말 첫 카드를 '주간 장기 리포트'로 바꿔요.</b> 토요일 아침 리포트가 나오면 헤드라인·코스피 요일 계단·장기 지표 4칸·'리포트 전체 보기' 버튼을 보여줘요. 리포트가 아직 없는 금요일 밤~토요일 아침엔 지금의 '이번 주 정리' 카드를 그대로 써요.</li>
+<li><b>홈 맨 아래 '최근 브리핑'에 가장 최근 주간 리포트를 한 줄 더해요.</b> 크롤러가 읽는 정적 링크라 검색 유입에도 도움이 돼요(애드센스 재신청용 콘텐츠).</li>
+</ol></div>
+
+<div class="bar">
+<button data-s="morning">평일 아침</button><button data-s="intraday">장중</button><button data-s="close">마감 후</button><button data-s="evening">밤(미국 브리핑 뒤)</button><button data-s="weekend" class="on">주말</button>
+<span class="sep"></span><button data-w="m" class="on">모바일</button><button data-w="pc">PC 폭</button>
+</div>
+
+<div class="stage">
+<div class="phone"><div class="gnb">Double-<span>Shot</span></div><div class="sub"><i class="on">전체</i><i>특이신호</i></div><div class="scr" id="scr"></div></div>
+<div class="notes" id="notes"></div>
+</div>
+
+<template id="t-lt">
+<div class="block hl" id="lt"><span class="tagnew">바뀜</span>
+<div class="bh"><span class="bt">📐 장기 신호</span><span class="bs">11/6(금) 종가 · 매일 갱신</span></div>
+<a class="lr" href="#"><div><div class="k">코스피 체크 · 5년 평균과의 거리</div><div class="v">+49.2%</div><div class="d">올해 5월 +178.6% → 지금 +49.2%, 좁혀지는 중</div></div><div class="spk" id="sk-kc"></div><span class="go">›</span></a>
+<a class="lr" href="#"><div><div class="k">나스닥 체크 · 60개월선 대비 월봉 고점</div><div class="v">+48.9% <span class="pill ok">✓ 정상</span></div><div class="d">주의 기준 60%보다 아래</div></div><div class="gg"><div class="t"><i style="left:75%;width:12.5%;background:#FDE68A"></i><i style="left:87.5%;right:0;background:#FECACA"></i><u style="left:61.1%"></u></div><div class="s"><span style="left:0">0</span><span style="left:75%">60</span></div></div><span class="go">›</span></a>
+<a class="lr" href="#"><div><div class="k">S&amp;P 500 · 200일선 위 종목 비율</div><div class="v">58.8% <small>한 주 전 61.6%</small></div><div class="d">보통(66.3%)보다 낮아요 · 과열 3개, 20%↓ 40개</div></div><div class="spk" id="sk-sp"></div><span class="go">›</span></a>
+<div class="bf"><span>매주 토요일 한 주 정리</span><a href="#">주간 장기 리포트 ›</a></div>
+</div>
+</template>
+
+<template id="t-wk">
+<div class="hero block hl" style="padding:14px"><span class="tagnew">새로</span>
+<div class="tg"><span>주간 장기 리포트 · 11월 첫째 주</span><em>주말</em></div>
+<h3>코스피 한 주 −11.7%, 나스닥은 200일선 아래로</h3>
+<p>코스피는 5,731에서 5,060으로 내려왔고, 5년 평균과의 거리는 70.8%에서 49.2%로 좁혀졌어요.</p>
+<div class="steps" id="wk-steps"></div><div class="days"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div>
+<div class="chips">
+<div>코스피 체크<b><s>70.8%</s> → 49.2%</b></div>
+<div>나스닥 체크<b><s>59.9%</s> → 48.9%</b></div>
+<div>S&amp;P 200일선 위 비율<b><s>61.6%</s> → 58.8%</b></div>
+<div>나스닥 · 200일선<b><s>+1.5%</s> → <span class="dn">−2.1%</span></b></div>
+</div>
+<a class="btn" href="#">주간 리포트 전체 보기 ›</a>
+</div>
+</template>
+
+<template id="t-foot">
+<div class="foot block hl" style="padding:12px 14px"><span class="tagnew">한 줄 추가</span><b>📰 최근 브리핑</b>
+<a href="#">📅 주간 장기 리포트 · 11월 첫째 주<span>코스피 한 주 −11.7%, 나스닥은 200일선 아래로</span></a>
+<a href="#" style="color:#94A3B8">(기존) 미국 브리핑 · 11/6 …<span>지금 있는 최근 브리핑 6편</span></a>
+</div>
+</template>
+
+<script>
+const D={"kc":[2.7,10.5,19.0,30.0,41.1,32.2,24.9,16.5,12.6,15.4,1.3,2.8,12.1,-3.6,-9.1,-11.7,-17.9,-8.6,-4.1,0.5,6.0,11.6,1.6,12.8,13.9,15.3,19.9,23.7,22.6,19.8,11.4,9.2,2.7,12.6,17.0,17.0,23.4,26.3,31.5,42.0,35.2,27.1,34.6,39.2,52.0,46.9,63.3,52.7,68.2,75.5,75.2,68.8,64.5,68.9,54.6,49.9,48.1,52.0,51.6,48.6,53.7,52.0,42.6,47.0,49.2,56.6,70.1,71.5,86.4,77.4,80.6,87.5,70.1,66.1,40.2,45.3,42.3,49.9,49.6,33.5,25.6,15.0,11.9,-14.4,-17.5,-14.1,-11.6,-19.3,-8.8,2.8,4.1,2.8,14.1,15.5,20.2,12.5,9.8,17.7,11.2,10.0,15.8,18.0,10.4,13.3,16.5,14.6,22.3,22.0,22.6,31.1,31.3,22.3,31.8,36.1,31.9,28.2,29.1,13.2,6.1,13.9,9.8,8.0,15.1,18.7,17.1,14.8,6.6,7.1,8.8,10.1,15.3,10.6,11.8,15.4,13.0,16.3,14.8,12.3,14.2,6.2,8.7,9.0,12.4,13.3,13.1,10.3,5.7,7.0,6.5,4.7,5.9,5.7,9.1,8.2,5.4,2.2,2.6,-1.0,0.5,2.0,4.6,8.6,7.5,5.1,2.7,-2.0,-1.0,2.3,0.3,-1.2,-3.5,-3.3,0.8,0.9,0.5,-0.1,2.4,3.2,3.4,1.5,0.1,2.1,4.1,5.3,8.6,10.7,17.3,19.0,19.0,16.6,17.8,23.5,20.6,19.8,24.0,16.9,17.3,20.1,15.3,10.3,8.5,9.5,10.2,-4.6,-1.5,-4.1,3.4,2.8,0.1,2.8,-4.8,-0.7,-5.6,-8.2,-3.8,-2.9,-2.8,2.1,-1.7,-7.8,-18.4,-9.3,-5.4,-1.8,4.6,7.8,7.6,4.6,19.0,31.1,34.7,35.2,36.3,39.0,40.2,42.9,37.6,36.3,29.8,24.8,18.6,23.6,10.1,11.1,13.0,10.1,9.5,-4.9,-0.1,0.7,-12.1,-6.3,1.0,-8.5,-0.7,-1.2,1.4,2.5,5.4,4.7,7.3,4.0,0.2,-7.5,2.6,7.0,0.4,6.0,9.7,7.2,4.6,10.5,8.9,4.6,1.1,-0.7,-4.8,-7.1,-2.8,-2.5,-5.0,-2.5,2.5,16.0,21.8,18.9,26.9,50.5,42.8,52.0,85.9,118.0,74.4,123.3,178.6,170.9,107.0,110.1,106.7,70.8,49.2],"sp":[55.3,57.5,58.3,60.1,60.3,59.5,60.5,59.9,56.1,56.7,56.9,59.7,59.9,58.5,61.5,59.9,61.5,62.3,63.1,64.5,61.9,61.7,60.9,62.1,63.9,63.1,65.3,63.5,62.3,64.3,67.9,68.1,68.3,65.1,65.5,67.9,68.3,67.1,67.3,71.1,68.9,66.9,66.1,66.7,66.1,66.9,70.5,72.3,70.3,69.9,68.7,70.9,72.9,72.5,72.1,74.1,73.5,72.9,72.5,75.4,75.2,72.2,72.2,75.6,74.0,73.2,75.0,73.0,73.4,71.4,72.2,69.0,66.2,67.0,69.2,67.6,63.4,60.4,58.2,60.0,59.8,57.2,54.0,54.0,53.0,52.8,51.0,49.8,47.6,49.0,48.0,45.6,42.4,44.2,46.0,47.8,50.2,47.2,50.4,50.0,52.4,51.8,51.2,54.4,55.0,51.8,55.8,56.4,60.0,58.6,60.6,61.8,61.4,65.4,61.6,66.0,64.4,69.4,61.4,58.8],"ks":[["2026-10-30",5730.74],["2026-11-02",5859.08],["2026-11-03",5648.79],["2026-11-04",5683.8],["2026-11-05",5383.8],["2026-11-06",5059.69]]};
+const $=s=>document.querySelector(s);
+const PH={hero_m:['🌅 코스피 시초가 예측 카드','기존 · 시간대 첫 카드'],hero_i:['⚔️ 어제랑 비교 (장중 대결판)','기존'],hero_c:['🏁 코스피 마감 카드','기존'],hero_e:['🇺🇸 미국 브리핑 카드','기존'],
+ night:['🌙 밤사이 미국','기존'],lead:['🚀 코스피 주도주','기존'],sector:['🧭 섹터 한눈에','기존'],sig:['⚡ 오늘의 특이 신호','기존'],axes:['🔥🏁👥 강도·주도권·수급','기존 · 장중만'],weekhero:['🗓️ 이번 주 정리 (리포트 나오기 전)','기존 · 금 밤~토 아침']};
+const ORDER={
+ morning:['hero_m','night','lead','LT','sector','sig','FOOT'],
+ intraday:['hero_i','axes','sig','lead','sector','LT','FOOT'],
+ close:['hero_c','sector','sig','lead','LT','FOOT'],
+ evening:['hero_e','night','lead','LT','sector','sig','FOOT'],
+ weekend:['WK','LT','sector','lead','night','sig','FOOT']};
+const NOTES={
+ morning:'<b>아침</b> — 장기 신호는 지금 \'구조 신호\' 자리 그대로(주도주 아래). 큰 그래프 대신 한 줄 요약이라 홈이 짧아져요.',
+ intraday:'<b>장중</b> — 지금은 구조 신호가 아예 안 보여요. 맨 아래에 장기 신호를 둬서, 단기 화면을 다 본 사람이 장기 흐름으로 넘어가게 해요.',
+ close:'<b>마감 후</b> — 장중과 같이 맨 아래. 코스피 체크 줄은 이날 종가로 막 갱신된 값이에요(마감 잡이 다시 계산).',
+ evening:'<b>밤</b> — 지금의 \'미국 지수 · 200일선\' 줄은 S&P 500 200일선 줄로 바뀌어요(지수 4개 막대는 주간 리포트로).',
+ weekend:'<b>주말</b> — 토요일 아침 주간 리포트가 나오면 첫 카드가 리포트 요약으로 바뀌어요. 바로 아래 장기 신호에서 세 페이지로 들어가요.'};
+function ph(k){const p=PH[k];return `<div class="ph ${k.startsWith('hero')||k==='weekhero'?'tall':'mid'}"><span>${p[0]}</span><small>${p[1]}</small></div>`}
+function spark(el,vals,zero){const n=vals.length,lo=Math.min(...vals,zero??Infinity),hi=Math.max(...vals,zero??-Infinity),Y=v=>(hi-v)/(hi-lo)*100,X=i=>i/(n-1)*100;
+ const d=vals.map((v,i)=>(i?'L':'M')+X(i).toFixed(2)+' '+Y(v).toFixed(2)).join(' ');
+ el.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none">${zero!=null?`<line class="z" x1="0" x2="100" y1="${Y(zero)}" y2="${Y(zero)}"/>`:''}<path class="a" d="${d} L100 100 L0 100Z"/><path class="l" d="${d}"/></svg><i style="top:${Y(vals[n-1])}%"></i>`}
+function stairs(){const ks=D.ks,base=ks[0][1],cum=ks.map(x=>(x[1]/base-1)*100),lo=Math.min(...cum)-2,hi=Math.max(...cum)+3,Y=v=>(hi-v)/(hi-lo)*100;
+ let h='';for(let i=1;i<ks.length;i++){const a=cum[i-1],b=cum[i],p=(ks[i][1]/ks[i-1][1]-1)*100,top=Y(Math.max(a,b)),ht=Y(Math.min(a,b))-top;
+  h+=`<div><i style="top:${top}%;height:${Math.max(ht,1)}%;background:${p>=0?'var(--upb)':'var(--dnb)'}"></i><em class="${p>=0?'up':'dn'}" style="top:${p>=0?`calc(${top}% - 12px)`:`calc(${top+ht}% + 1px)`}">${p>=0?'+':'−'}${Math.abs(p).toFixed(1)}</em></div>`}
+ const el=$('#wk-steps');el.style.setProperty('--z',Y(0)+'%');el.innerHTML=h}
+function render(s){
+ $('#scr').innerHTML=ORDER[s].map(k=>k==='LT'?$('#t-lt').innerHTML:k==='WK'?$('#t-wk').innerHTML:k==='FOOT'?$('#t-foot').innerHTML:ph(k)).join('');
+ if(s==='weekend')stairs();
+ spark($('#sk-kc'),D.kc,0);spark($('#sk-sp'),D.sp,50);
+ $('#notes').innerHTML=`<div class="n"><h3>이 시간대</h3>${NOTES[s]}</div>
+ <div class="n"><h3>줄을 누르면</h3><span class="new">→</span><b>코스피 체크</b> /stocks/kospi-check/<br><span class="new">→</span><b>나스닥 체크</b> /stocks/nasdaq-check/<br><span class="new">→</span><b>S&amp;P 500 200일선</b> /stocks/sp500-200/<br><span class="new">→</span><b>주간 장기 리포트</b> /weekly/ (블록 아래 링크·주말 카드 버튼)</div>
+ <div class="n"><h3>빠지는 것</h3>홈에서 코스피 25년 그래프·나스닥 게이지 큰 판·미국 지수 4개 막대가 빠져요. 같은 내용이 상세 페이지·주간 리포트에 더 자세히 있어요. 월봉 5개월선 줄은 종목이 있는 날만 장기 신호 맨 아래에 그대로 붙어요.</div>
+ <div class="n"><h3>데이터</h3>새 수집은 없어요. 코스피 체크는 home-summary.json, 나스닥 체크는 미국 브리핑 스냅샷, S&amp;P는 새로 커밋되는 누적 기록(최근 60거래일만 홈용으로), 주말 카드는 /weekly/{금요일}/data.json을 읽어요.</div>`}
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-s]').forEach(x=>x.classList.toggle('on',x===b));render(b.dataset.s)});
+document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-w]').forEach(x=>x.classList.toggle('on',x===b));document.body.classList.toggle('pc',b.dataset.w==='pc')});
+render('weekend');
+</script>
+</body></html>
