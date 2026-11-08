@@ -4,7 +4,8 @@
 - 월봉 고점이 아니라 월말 종가를 쓴다. 고점으로 재면 새 달 첫 거래일에 값이 튄다(2026-11-02 +110% → +74%).
 - 정상·주의·경고를 판정하지 않는다. 기준을 받칠 사례가 2005~2007년 하나뿐이고 70%를 넘은 채 11개월째다.
   지금 값과 과거 위치만 준다.
-결과는 build_home_summary가 home-summary.json의 kospi_check로 쓴다.
+결과는 build_home_summary가 home-summary.json의 kospi_check로 쓴다. 월별 기록(history)은 home-summary에 넣지 않고
+data/kospi_check.json에만 남긴다 — 상세 페이지(/stocks/kospi-check/, 2026-11-09)가 읽는다.
 """
 from __future__ import annotations
 
@@ -30,11 +31,50 @@ def gap_series(months: list) -> list:
     return out
 
 
+BUCKETS = ((None, 0.0), (0.0, 20.0), (20.0, 40.0), (40.0, 60.0), (60.0, None))   # 과거 비교 구간(%) — 상세 페이지
+EPISODE_GAP = 3        # 같은 구간의 달이 이 개월 수 안에 이어지면 한 번의 사례로 묶는다
+
+
+def forward(months: list, i: int):
+    """i번째 달 종가에서 12개월 뒤 월말 종가까지의 등락과, 그 12개월 월 저가 중 가장 낮은 값까지의 하락(%).
+    12개월 뒤가 마지막 달(진행 중인 이번 달)이거나 그보다 뒤면 (None, None) — 끝나지 않은 결과를 세지 않는다."""
+    if i + 12 > len(months) - 2:
+        return None, None
+    c0 = months[i]["close"]
+    low = min(months[j]["low"] for j in range(i + 1, i + 13))
+    return (months[i + 12]["close"] / c0 - 1) * 100, (low / c0 - 1) * 100
+
+
+def bucket_of(g: float) -> tuple:
+    for lo, hi in BUCKETS:
+        if (lo is None or g >= lo) and (hi is None or g < hi):
+            return lo, hi
+    return BUCKETS[-1]
+
+
+def episodes(history: list, lo, hi) -> list:
+    """history([월, 거리, 종가, 5년 평균, 1년 뒤 등락, 1년 안 최대 하락])에서 거리가 [lo, hi) 안이고 1년 뒤 결과가 있는 달을
+    EPISODE_GAP 개월 안으로 이어진 것끼리 묶는다. [{months:[...], r12:[...], dd:[...]}] 오래된→최신."""
+    key = lambda m: int(m[:4]) * 12 + int(m[5:7])
+    out = []
+    for m, g, _c, _ma, r, dd in history:
+        if r is None or (lo is not None and g < lo) or (hi is not None and g >= hi):
+            continue
+        if out and key(m) - key(out[-1]["months"][-1]) <= EPISODE_GAP:
+            out[-1]["months"].append(m)
+            out[-1]["r12"].append(r)
+            out[-1]["dd"].append(dd)
+        else:
+            out.append({"months": [m], "r12": [r], "dd": [dd]})
+    return out
+
+
 def compute(daily: list, last_date: str, last_close: float) -> dict | None:
     """야후 일봉에 네이버 마지막 종가를 맞춰 계산한다 — 화면의 다른 코스피 숫자와 갈리지 않게 한다.
     daily: [(YYYY-MM-DD, high, low, close)] 오래된→최신. 계산할 달이 없으면 None."""
     rows = [r for r in daily if r[0] < last_date] + [(last_date, last_close, last_close, last_close)]
-    series = gap_series(nq.monthly(rows))
+    months = nq.monthly(rows)
+    series = gap_series(months)
     if not series:
         return None
     cur = series[-1]
@@ -54,7 +94,17 @@ def compute(daily: list, last_date: str, last_close: float) -> dict | None:
         "prev_max": {"m": prev["m"], "gap": round(prev["g"], 1)} if prev else None,
         # 월별 흐름 — 종목 홈이 25년 그래프로 그린다(2026-11-08 B안). [월, 5년 평균 대비 %] 오래된→최신
         "series": [[x["m"], round(x["g"], 1)] for x in series],
+        # 상세 페이지용 월별 기록 — home-summary에는 넣지 않는다(build_home_summary가 뺀다).
+        # [월, 거리 %, 월말 종가, 5년 평균, 1년 뒤 등락 %, 1년 안 최대 하락 %] — 1년 뒤가 아직이면 마지막 둘은 None
+        "history": [_hist_row(months, x) for x in series],
     }
+
+
+def _hist_row(months: list, x: dict) -> list:
+    i = next(k for k, m in enumerate(months) if m["m"] == x["m"])
+    r, dd = forward(months, i)
+    rd = lambda v: None if v is None else round(v, 1)
+    return [x["m"], round(x["g"], 1), round(months[i]["close"], 2), round(x["ma60"], 1), rd(r), rd(dd)]
 
 
 def fetch(last_date: str, last_close: float) -> dict | None:

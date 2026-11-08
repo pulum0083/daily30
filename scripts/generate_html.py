@@ -939,6 +939,59 @@ def write_nasdaq_page(target_date: str) -> bool:
     return True
 
 
+KOSPI_PAGE_URL = f"{SITE_BASE}/stocks/kospi-check/"
+SP500_PAGE_URL = f"{SITE_BASE}/stocks/sp500-200/"
+
+
+def _write_lt_page(tpl: str, ctx: dict, rel: str, url: str, name: str) -> bool:
+    ctx.update({"canonical_url": url, "css_path": CSS_PATH, "js_path": JS_PATH,
+                "seo_jsonld": [_jsonld(_breadcrumb([("홈", "/stocks/"), ("종목", "/stocks/"), (name, rel)]))]})
+    out = WEB_DIR / rel.strip("/") / "index.html"
+    if gate_write(out, make_env().get_template(tpl).render(**ctx), url):
+        GATE_BLOCKED.append(url)
+        return False
+    print(f"[generate_html] {name} 상세 페이지 → {out}")
+    return True
+
+
+def write_kospi_page(target_date: str) -> bool:
+    """마감 잡이 쓴 data/kospi_check.json으로 /stocks/kospi-check/를 쓴다(2026-11-09). 기준일이 target_date와
+    다르거나 월별 기록이 없으면 쓰지 않는다 — 직전 페이지가 남는다(§14·§20)."""
+    import longterm_pages as lp
+    path = DATA_DIR / "kospi_check.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] 코스피 체크 상세 페이지 생략 — 데이터 없음({e})")
+        return False
+    if data.get("asof") != target_date:
+        print(f"[generate_html] 코스피 체크 상세 페이지 생략 — 기준일 불일치({data.get('asof')} ≠ {target_date})")
+        return False
+    ctx = lp.kospi_context(data)
+    if not ctx:
+        print("[generate_html] 코스피 체크 상세 페이지 생략 — 월별 기록(history)이 2년치 미만")
+        return False
+    return _write_lt_page("pages/kospi_check.html", ctx, "/stocks/kospi-check/", KOSPI_PAGE_URL, "코스피 체크")
+
+
+def write_sp500_page(target_date: str) -> bool:
+    """미국 잡이 쓴 data/sp500_ma200.json(그날)·data/sp500_breadth_history.json으로 /stocks/sp500-200/을 쓴다(2026-11-09)."""
+    import longterm_pages as lp
+    data = read_sp500_ma200({}, target_date)
+    if not data:
+        return False
+    try:
+        rows = json.loads((DATA_DIR / "sp500_breadth_history.json").read_text(encoding="utf-8"))["rows"]
+    except Exception as e:
+        print(f"[generate_html] S&P 500 200일선 상세 페이지 생략 — 누적 기록 없음({e})")
+        return False
+    ctx = lp.sp500_context(data, rows)
+    if not ctx:
+        print("[generate_html] S&P 500 200일선 상세 페이지 생략 — 누적 기록이 1년치 미만이거나 그날 값이 없음")
+        return False
+    return _write_lt_page("pages/sp500_200.html", ctx, "/stocks/sp500-200/", SP500_PAGE_URL, "S&P 500 200일선")
+
+
 RECORD_PAGES = (("accuracy", "pages/accuracy.html", "예측 성적표"),
                 ("methodology", "pages/methodology.html", "어떻게 예측하나요"))
 
@@ -2713,6 +2766,9 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/briefings/",                    "changefreq": "daily",   "priority": "0.9"},
         {"loc": f"{BASE}/stocks/income-designer/",       "changefreq": "monthly", "priority": "0.8"},
         {"loc": f"{BASE}/stocks/nasdaq-check/",          "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/stocks/kospi-check/",           "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/stocks/sp500-200/",             "changefreq": "daily",   "priority": "0.7"},
+        {"loc": f"{BASE}/weekly/",                       "changefreq": "weekly",  "priority": "0.7"},
         {"loc": f"{BASE}/accuracy/",                     "changefreq": "daily",   "priority": "0.7"},
         {"loc": f"{BASE}/methodology/",                  "changefreq": "monthly", "priority": "0.6"},
         {"loc": f"{BASE}/about/",                        "changefreq": "monthly", "priority": "0.6"},
@@ -2720,6 +2776,10 @@ def write_sitemap_xml():
         {"loc": f"{BASE}/legal/privacy/",                "changefreq": "yearly",  "priority": "0.3"},
         {"loc": f"{BASE}/legal/terms/",                  "changefreq": "yearly",  "priority": "0.3"},
     ]
+
+    # 주간 장기 리포트(2026-11-09) — 토요일에 한 번 쓰고 고치지 않는다. 디스크에 있는 주만 등재한다
+    for wp in sorted((WEB_DIR / "weekly").glob("????-??-??/index.html"), reverse=True):
+        urls.append({"loc": f"{BASE}/weekly/{wp.parent.name}/", "lastmod": wp.parent.name, "changefreq": "yearly", "priority": "0.6"})
 
     # ready 상태인 브리핑 페이지만 포함
     bpath = DATA_DIR / "briefings.json"
@@ -2988,6 +3048,10 @@ def main():
                         help="섹터별 종목 페이지 8개 생성하고 종료")
     parser.add_argument("--nasdaq-page", dest="nasdaq_page", action="store_true",
                         help="--date 날짜의 data/nasdaq_overheat.json으로 /stocks/nasdaq-check/ 상세 페이지만 다시 쓴다")
+    parser.add_argument("--kospi-page", dest="kospi_page", action="store_true",
+                        help="--date 날짜의 data/kospi_check.json으로 /stocks/kospi-check/ 상세 페이지만 다시 쓴다 — 마감 잡이 부른다")
+    parser.add_argument("--sp500-page", dest="sp500_page", action="store_true",
+                        help="--date 날짜의 data/sp500_ma200.json으로 /stocks/sp500-200/ 상세 페이지만 다시 쓴다")
     parser.add_argument("--record-pages", dest="record_pages", action="store_true",
                         help="예측 성적표(/accuracy/)·방법론(/methodology/)만 다시 쓴다 — 평일 09:10 채점 잡이 부른다")
     parser.add_argument("--force", action="store_true",
@@ -3004,6 +3068,14 @@ def main():
         written = write_record_pages()
         write_sitemap_xml()
         _finish_page_build(written)
+        return
+
+    if args.kospi_page or args.sp500_page:
+        if not args.date:
+            parser.error("--kospi-page·--sp500-page 는 --date 가 필요합니다")
+        (write_kospi_page if args.kospi_page else write_sp500_page)(args.date)
+        write_sitemap_xml()
+        _finish_page_build([])
         return
 
     if args.nasdaq_page:
@@ -3060,6 +3132,11 @@ def main():
             write_nasdaq_page(args.date)
         except Exception as e:
             print(f"[generate_html] 나스닥 체크 상세 페이지 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
+                  file=sys.stderr)
+        try:
+            write_sp500_page(args.date)
+        except Exception as e:
+            print(f"[generate_html] S&P 500 200일선 상세 페이지 생성 실패({type(e).__name__}: {e}) — 건너뜀.",
                   file=sys.stderr)
     update_vercel_briefings_route(internal_type, args.date)
     write_briefings_list_json()

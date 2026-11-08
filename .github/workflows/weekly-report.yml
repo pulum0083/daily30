@@ -1,0 +1,107 @@
+# 주간 장기 리포트 — 토요일 아침(미국 금요일 장 마감 뒤) web/weekly/{금요일}/을 한 번 만든다(2026-11-09, SERVICE_RULES §82)
+#
+# GHA native cron은 늦게 뜨거나 빠질 수 있어(§10) 08·11·14시 KST 세 번 건다. 이미 그 주 리포트가 있으면
+# 스크립트가 바로 끝나므로 두 번째부터는 아무것도 하지 않는다. 브리핑 잡과 시간이 겹치지 않는다(토요일).
+# 이 워크플로우가 커밋하는 건 web/weekly/·web/sitemap.xml·data/sp500_breadth_history.json뿐이다(§18).
+name: 📅 주간 장기 리포트
+
+on:
+  schedule:
+    - cron: "0 23 * * 5"   # 토 08:00 KST
+    - cron: "0 2 * * 6"    # 토 11:00 KST (앞 실행이 빠졌을 때)
+    - cron: "0 5 * * 6"    # 토 14:00 KST
+  workflow_dispatch:
+    inputs:
+      week_end:
+        description: "그 주 금요일(YYYY-MM-DD). 비우면 오늘 이전 가장 최근 금요일"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  actions: write   # vercel-deploy.yml 명시적 dispatch (GITHUB_TOKEN 커밋은 push 트리거를 발동 안 시킴)
+
+concurrency:
+  group: weekly-report
+  cancel-in-progress: false
+
+jobs:
+  run:
+    name: "📅 주간 장기 리포트"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 📥 체크아웃
+        uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐍 Python 세팅
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📦 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 📅 주간 리포트 생성
+        timeout-minutes: 10
+        run: |
+          if [ -n "${{ github.event.inputs.week_end }}" ]; then
+            python3 scripts/weekly_report.py --week-end "${{ github.event.inputs.week_end }}"
+          else
+            python3 scripts/weekly_report.py
+          fi
+
+      - name: 💾 커밋 & 푸시
+        id: commit
+        run: |
+          git config user.name  "DailyB Bot"
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git add web/weekly web/sitemap.xml data/sp500_breadth_history.json
+          if git diff --cached --quiet; then
+            echo "변경 없음, 커밋 스킵"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "📅 주간 장기 리포트: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M') KST"
+          pushed=false
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase --autostash origin/main; then
+              if git push; then pushed=true; break; fi
+            else
+              git rebase --abort 2>/dev/null || true
+            fi
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+          echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
+          if [ "$pushed" != "true" ]; then
+            echo "::error::push 5회 재시도 모두 실패 — 잡을 중단합니다."
+            exit 1
+          fi
+
+      - name: 🚀 Vercel 배포 트리거
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          for i in 1 2 3 4 5; do
+            if gh workflow run vercel-deploy.yml --ref main -f sha="$sha"; then
+              echo "✅ 배포 트리거 성공 (시도 $i/5)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Vercel 배포 트리거 실패 — 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
+          exit 1
+
+      - name: 🔔 실패 알림
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          python3 -c "import sys; sys.path.insert(0,'scripts'); from send_telegram import send_admin_alert; send_admin_alert('📅 주간 장기 리포트 생성 실패 — gh workflow run weekly-report.yml 로 다시 돌려 주세요.')" || true

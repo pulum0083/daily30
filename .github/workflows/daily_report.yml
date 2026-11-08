@@ -487,6 +487,14 @@ jobs:
         timeout-minutes: 3
         run: python3 scripts/build_home_summary.py
 
+      # 코스피 체크 상세 페이지(/stocks/kospi-check/, 2026-11-09) — 바로 위 스텝이 쓴 data/kospi_check.json으로 그린다.
+      # 기준일이 오늘이 아니면(위 스텝 실패) 쓰지 않고 직전 페이지가 남는다.
+      - name: 📐 코스피 체크 상세 페이지 (실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: python3 scripts/generate_html.py --kospi-page --date "$(TZ=Asia/Seoul date +%F)"
+
       - name: 💾 HTML & 데이터 커밋 → main 푸시
         if: steps.holiday.outputs.open == 'true'
         run: |

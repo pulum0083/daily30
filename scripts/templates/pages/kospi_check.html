@@ -1,0 +1,129 @@
+{# 코스피 체크 상세 페이지(/stocks/kospi-check/) — 5년 평균과의 거리 25년 기록과 '지금과 비슷했던 때'(2026-11-09 B안).
+   숫자는 전부 마감 잡이 쓴 data/kospi_check.json 그대로다(§0). 문장도 정해진 틀이다(longterm_pages.kospi_context). #}
+{% extends "base.html" %}
+{% set g1 = kc.gap_chart %}{% set g2 = kc.level_chart %}
+{% block title %}코스피 체크 — 5년 평균보다 {{ kc.gap_s }}% | Double-Shot{% endblock %}
+{% block og_title %}코스피 체크 — 5년 평균보다 {{ kc.gap_s }}%{% endblock %}
+{% block og_desc %}코스피가 지난 5년(60개월) 평균보다 {{ kc.gap_s }}% 높은 곳에 있어요({{ kc.asof_label }} 종가). {{ kc.since[:4] }}년부터의 기록과, 지금과 비슷했던 때 1년 뒤 코스피가 어떻게 움직였는지 함께 봐요.{% endblock %}
+{% block head_extra %}
+{% include "pages/_lt_css.html" %}
+<style>
+  .kcp-big{font-size:17px;font-weight:800;line-height:1.5;letter-spacing:-.2px;color:var(--ink);margin:0}
+  .kcp-big b{color:var(--primary)}
+  .kcp-blocks{display:flex;gap:4px;margin-top:12px}
+  .kcp-blocks i{flex:1;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:800;color:#fff}
+  .kcp-blocks i.u{background:#E86464}.kcp-blocks i.d{background:#5D97F1}
+  .kcp-bl{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-top:5px}
+  .kcp-eps{margin-top:14px;border-top:1px solid var(--hairline)}
+  .kcp-ep{display:grid;grid-template-columns:122px 1fr 96px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .kcp-ep .wh{font-size:13px;font-weight:800;line-height:1.35;color:var(--ink)}
+  .kcp-ep .wh small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+  .kcp-rail{position:relative;height:22px}
+  .kcp-rail::before{content:'';position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:var(--surface-soft);border-radius:2px}
+  .kcp-rail::after{content:'';position:absolute;top:2px;bottom:2px;left:50%;border-left:1px dashed var(--muted)}
+  .kcp-rail b{position:absolute;top:50%;height:10px;margin-top:-5px;border-radius:5px;min-width:10px;transform:translateX(0)}
+  .kcp-rail b.u{background:#E86464}.kcp-rail b.d{background:#5D97F1}
+  .kcp-ep .rg{text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.35}
+  .kcp-ep .rg small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+  .kcp-rax{position:relative;height:14px;margin:2px 108px 0 134px;font-size:10px;color:var(--muted)}
+  .kcp-rax span{position:absolute;transform:translateX(-50%)}
+  .kcp-concl{margin-top:12px;background:var(--surface-soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.65;color:var(--ink);word-break:keep-all}
+  .kcp-concl b{font-weight:800}
+  details.kcp-tb{margin-top:10px}
+  details.kcp-tb summary{font-size:12.5px;font-weight:700;color:var(--primary);cursor:pointer}
+  @media(max-width:560px){.kcp-ep{grid-template-columns:96px 1fr;row-gap:4px}.kcp-ep .rg{grid-column:2}.kcp-rax{margin:2px 0 0 108px}}
+</style>
+{% endblock %}
+{% block body %}
+<main class="ltp">
+  <div class="ltp-crumb">
+    <button class="ltp-back" onclick="if(history.length>1)history.back();else location.href='/stocks/'" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › 코스피 체크</span>
+  </div>
+  <h1 class="ltp-title">코스피 체크</h1>
+  <p class="ltp-lead">코스피가 지난 5년(60개월) 평균보다 얼마나 높은 곳에 있는지 봐요. <b>숫자가 클수록 5년 평균에서 멀리 올라와 있다</b>는 뜻이에요. 주의·경고 기준은 두지 않아요 — 아래 '지금과 비슷했던 때'에 이유가 있어요.</p>
+
+  <section class="ltp-card">
+    <div class="ltp-k">{{ kc.asof_label }} 종가 vs 5년 평균</div>
+    <div class="ltp-v">{{ kc.gap_s }}<small>%</small></div>
+    <p class="ltp-say">{{ kc.say | safe }}</p>
+    <div class="ltp-kpis">
+      <div class="ltp-kpi"><span>한 달 전({{ kc.prev.label }})</span><b>{{ kc.prev.gap_s }}%</b><em>종가 {{ '{:,.2f}'.format(kc.prev.close) }}</em></div>
+      <div class="ltp-kpi"><span>올해 꼭대기</span><b>{{ kc.year_max_s }}%</b><em>{{ kc.year_max.m[:4] }}년 {{ kc.year_max.m[5:7]|int }}월</em></div>
+      <div class="ltp-kpi"><span>지금보다 높았던 달</span><b>{{ kc.above }}개월</b><em>{{ kc.months }}개월 중</em></div>
+    </div>
+    <div class="ltp-asof">{{ kc.asof_label }}({{ kc.asof_dow }}) 종가 {{ '{:,.2f}'.format(kc.close) }} · 5년 평균 {{ '{:,.1f}'.format(kc.ma60) }} · 매일 장 마감 뒤 갱신</div>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>5년 평균과의 거리</h2><small>{{ kc.since[:4] }}년 {{ kc.since[5:7]|int }}월 ~ 지금 · 월말 종가</small></div>
+    <div class="ltp-leg"><span><i></i>월말 종가 ÷ 5년 평균 − 1</span><span><i class="z"></i>0% = 5년 평균</span></div>
+    <div class="ltp-plot">
+      {% for a in g1.axes %}<span class="ltp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
+      <div class="ltp-in" data-kind="gap" data-lo="{{ g1.lo }}" data-hi="{{ g1.hi }}">
+        <svg viewBox="0 0 {{ g1.w }} {{ g1.h }}" preserveAspectRatio="none" role="img" aria-label="코스피 월말 종가의 5년 평균 대비 거리, {{ kc.since[:4] }}년 이후 월별">
+          <line x1="0" x2="{{ g1.w }}" y1="{{ g1.y0 }}" y2="{{ g1.y0 }}" class="zero"/>
+          <polygon points="{{ g1.area }}" class="area"/>
+          <polyline points="{{ g1.line }}" class="line"/>
+        </svg>
+        {% for m in g1.marks %}<i class="ltp-mk {{ 'now' if 'now' in m.cls }}" style="left:{{ m.left }};top:{{ m.top }}"></i><span class="ltp-ml {{ m.cls }}" style="left:{{ m.left }};top:{{ m.top }}">{{ m.label }}</span>{% endfor %}
+        <i class="ltp-cur" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="ltp-yrs">{% for y in g1.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>코스피와 5년 평균</h2><small>로그 눈금</small></div>
+    <div class="ltp-leg"><span><i></i>코스피 월말 종가</span><span><i class="ma"></i>5년(60개월) 평균</span></div>
+    <div class="ltp-plot">
+      {% for a in g2.axes %}<span class="ltp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
+      <div class="ltp-in" data-kind="lvl" data-lo="{{ g2.llo }}" data-hi="{{ g2.lhi }}">
+        <svg viewBox="0 0 {{ g2.w }} {{ g2.h }}" preserveAspectRatio="none" role="img" aria-label="코스피 월말 종가와 5년 평균, 로그 눈금">
+          <polyline points="{{ g2.b }}" class="ma"/>
+          <polyline points="{{ g2.a }}" class="line"/>
+        </svg>
+        <i class="ltp-mk now" style="left:{{ g2.now.left }};top:{{ g2.now.top }}"></i>
+        <i class="ltp-cur" hidden></i><i class="ltp-pt ma" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="ltp-yrs">{% for y in g2.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+  </section>
+
+  {% if kc.eps %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>지금과 비슷했던 때</h2><small>5년 평균보다 {{ kc.bucket }} · {{ kc.done_from }} ~ {{ kc.done_to }}</small></div>
+    <p class="kcp-big">지금(<b>{{ kc.gap_s }}%</b>)처럼 {{ kc.bucket }} 구간에 있던 때는 <b>{{ kc.eps|length }}번</b> 있었어요.</p>
+    <div class="kcp-blocks">{% for e in kc.eps %}<i class="{{ 'u' if e.up else 'd' }}">{{ e.year }}</i>{% endfor %}</div>
+    <div class="kcp-bl"><span class="up">{{ kc.nu }}번은 1년 뒤 올랐어요</span><span class="dn">{{ kc.nd }}번은 1년 뒤 내렸어요</span></div>
+    <div class="kcp-eps">
+      {% for e in kc.eps %}<div class="kcp-ep"><div class="wh">{{ e.when }}<small>{{ e.n }}개월</small></div><div class="kcp-rail"><b class="{{ 'u' if e.up else 'd' }}" style="left:{{ e.left }};width:{{ e.width }}"></b></div><div class="rg {{ 'up' if e.up else 'dn' }}">{{ e.range }}<small>1년 안 최대 {{ e.dd }}</small></div></div>
+      {% endfor %}
+    </div>
+    <div class="kcp-rax"><span style="left:0">−60%</span><span style="left:25%">−30%</span><span style="left:50%">0%</span><span style="left:75%">+30%</span><span style="left:100%">+60%+</span></div>
+    {% if kc.concl %}<div class="kcp-concl">{{ kc.concl | safe }}</div>{% endif %}
+    <details class="kcp-tb"><summary>구간별로 모두 보기</summary>
+      <table><thead><tr><th>그달의 거리</th><th>달 수</th><th>사례</th><th>1년 뒤 중앙값</th><th>1년 뒤 오른 비율</th></tr></thead><tbody>
+      {% for r in kc.table %}<tr class="{{ 'hl' if r.now }}"><td>{{ r.label }}{{ ' · 지금' if r.now }}</td><td>{{ r.months }}</td><td>{{ r.eps }}번</td><td class="{{ 'up' if r.median > 0 else 'dn' }}">{{ r.median_s }}%</td><td>{{ r.up }}%</td></tr>{% endfor %}
+      </tbody></table>
+    </details>
+    <p class="ltp-fine">'1년 뒤'는 그달 종가에서 12개월 뒤 월말 종가까지예요. 3개월 이내로 이어진 달은 한 번의 사례로 묶었어요. 막대는 사례 안 달들의 1년 뒤 등락 범위, '1년 안 최대'는 다음 12개월 월봉 저가까지의 가장 큰 하락이에요. 12개월 뒤가 아직 끝나지 않은 달은 세지 않아요.</p>
+  </section>
+  {% endif %}
+
+  <section class="ltp-sec">
+    <h2>어떻게 계산하나요</h2>
+    <p>매달 마지막 거래일의 코스피 종가를 그 달까지 60개월 월말 종가 평균으로 나눠요. 이번 달은 가장 최근 종가({{ kc.asof_label }})를 월말 종가처럼 써요. 나스닥 체크는 월봉 <b>고점</b>을 쓰지만 코스피 체크는 <b>종가</b>를 써요 — 고점으로 재면 새 달 첫날 값이 크게 튀기 때문이에요.</p>
+    <p>지금 위치를 알려주는 지표이고, 이것만으로 사고팔 시점을 정할 수는 없어요. <a href="/legal/disclaimer/">면책 고지</a></p>
+  </section>
+  <div class="ltp-links">
+    <a href="/stocks/nasdaq-check/">나스닥 체크 →</a>
+    <a href="/stocks/sp500-200/">S&amp;P 500 200일선 →</a>
+    <a href="/weekly/">주간 장기 리포트 →</a>
+  </div>
+</main>
+<script type="application/json" id="ltp-data">{{ kc.points | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+{% include "pages/_lt_chart_js.html" %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{# 장기 지표 페이지(코스피 체크·S&P 500 200일선)·주간 장기 리포트 공용 스타일 — 다크 모드는 style.css 변수로 따라간다 #}
+<style>
+  .ltp{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+  .ltp-crumb{font-size:12px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center}
+  .ltp-crumb a{color:var(--muted);text-decoration:none}
+  .ltp-crumb a:hover{color:var(--ink)}
+  .ltp-back{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:var(--canvas);border:1px solid var(--hairline);color:var(--muted);cursor:pointer;margin-right:10px;padding:0;flex:none}
+  .ltp-back:hover{border-color:var(--primary);color:var(--primary)}
+  .ltp-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-.3px}
+  .ltp-lead{font-size:13.5px;line-height:1.7;color:var(--muted);margin:0 0 14px;word-break:keep-all}
+  .ltp-lead b{color:var(--ink)}
+  .ltp-card{border:1px solid var(--hairline);border-radius:14px;background:var(--canvas);padding:16px;margin-top:12px}
+  .ltp-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .ltp-h h2{font-size:15px;font-weight:800;color:var(--ink);margin:0;display:inline-flex;align-items:center;gap:8px}
+  .ltp-h h2::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+  .ltp-h small{font-size:11.5px;color:var(--muted)}
+  .ltp-k{font-size:12.5px;font-weight:700;color:var(--muted)}
+  .ltp-v{font-size:34px;font-weight:900;letter-spacing:-.8px;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px;color:var(--ink)}
+  .ltp-v small{font-size:15px;font-weight:700;color:var(--muted);margin-left:2px}
+  .ltp-say{font-size:14px;line-height:1.65;color:var(--ink);margin:8px 0 0;word-break:keep-all}
+  .ltp-say b{font-weight:800}
+  .ltp-asof{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .ltp-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .ltp-kpi{background:var(--surface-soft);border-radius:10px;padding:9px 10px}
+  .ltp-kpi span{display:block;font-size:11px;color:var(--muted);font-weight:700}
+  .ltp-kpi b{display:block;font-size:16px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .ltp-kpi em{font-style:normal;font-size:11px;color:var(--muted)}
+  .ltp-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:2px 0 14px}
+  .ltp-leg i{display:inline-block;width:16px;height:0;border-top:2px solid var(--ink);vertical-align:3px;margin-right:5px}
+  .ltp-leg i.ma{border-top:2px dashed var(--primary)}
+  .ltp-leg i.z{border-top:1px dashed var(--muted)}
+  .ltp-plot{position:relative;height:220px;padding-left:44px}
+  .ltp-in{position:relative;height:100%;touch-action:pan-y;cursor:crosshair}
+  .ltp-in svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+  .ltp-in .area{fill:var(--ink);opacity:.05}
+  .ltp-in .line{fill:none;stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+  .ltp-in .ma{fill:none;stroke:var(--primary);stroke-width:1.5;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
+  .ltp-in .zero{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.6;vector-effect:non-scaling-stroke}
+  .ltp-ax{position:absolute;left:0;width:38px;text-align:right;transform:translateY(-50%);font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .ltp-mk{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--ink);border:2px solid var(--canvas);box-shadow:0 0 0 1px var(--ink);pointer-events:none}
+  .ltp-mk.now{background:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+  .ltp-ml{position:absolute;font-size:10.5px;font-weight:700;color:var(--ink);white-space:nowrap;transform:translate(-50%,-150%);pointer-events:none}
+  .ltp-ml.lo{transform:translate(-50%,60%)}
+  .ltp-ml.l{transform:translate(-100%,-150%)}.ltp-ml.l.lo{transform:translate(-100%,60%)}
+  .ltp-ml.now{color:var(--primary)}
+  .ltp-yrs{position:relative;height:16px;margin:4px 0 0 44px;font-size:10px;color:var(--muted)}
+  .ltp-yrs span{position:absolute;transform:translateX(-50%)}
+  .ltp-cur{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed var(--ink);opacity:.3;pointer-events:none}
+  .ltp-pt{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);background:var(--canvas);border:2.5px solid var(--ink);pointer-events:none;z-index:2}
+  .ltp-pt.ma{border-color:var(--primary)}
+  .ltp-tip{position:absolute;z-index:3;pointer-events:none;background:#1B2232;color:#fff;border-radius:10px;padding:7px 10px;font-size:12px;line-height:1.5;white-space:nowrap;box-shadow:0 6px 18px rgba(15,23,42,.22);font-variant-numeric:tabular-nums}
+  .ltp-tip b{display:block;font-size:12.5px;font-weight:800}
+  .ltp-tip .k{color:#94A3B8}
+  html.dark .ltp-tip{background:#2a3142;border:1px solid rgba(255,255,255,.12)}
+  .ltp-fine{font-size:11.5px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+  .ltp-sec{margin-top:22px}
+  .ltp-sec h2{font-size:15px;font-weight:800;color:var(--ink);margin:0 0 8px}
+  .ltp-sec p{font-size:13px;line-height:1.75;color:#475569;margin:0 0 8px;word-break:keep-all}
+  html.dark .ltp-sec p{color:var(--muted)}
+  .ltp-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+  .ltp-links a{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;border:1px solid var(--hairline);border-radius:10px;padding:9px 14px;background:var(--canvas)}
+  .ltp-links a:hover{border-color:var(--primary);color:var(--primary)}
+  .ltp .up{color:var(--up)} .ltp .dn{color:var(--dn)}
+  .ltp table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  .ltp th{font-size:11px;font-weight:700;color:var(--muted);text-align:right;padding:6px 4px;border-bottom:1px solid var(--hairline)}
+  .ltp th:first-child,.ltp td:first-child{text-align:left}
+  .ltp td{padding:7px 4px;border-bottom:1px solid var(--hairline);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .ltp tr.hl td{background:var(--primary-bg);font-weight:700}
+  @media(max-width:560px){.ltp-plot{height:180px;padding-left:38px}.ltp-ax{width:32px}.ltp-yrs{margin-left:38px}.ltp-kpis{grid-template-columns:1fr 1fr}.ltp-ml:not(.now){display:none}}
+</style>

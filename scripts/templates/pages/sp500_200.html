@@ -1,0 +1,136 @@
+{# S&P 500 200일선 상세 페이지(/stocks/sp500-200/) — 200일선 위 종목 비율의 흐름·섹터·분포(지금 vs 보통)·눈여겨볼 종목(2026-11-09).
+   숫자는 전부 미국 잡이 쓴 data/sp500_ma200.json·data/sp500_breadth_history.json 그대로다(§0). #}
+{% extends "base.html" %}
+{% set c = spx.chart %}
+{% block title %}S&P 500 200일선 위 종목 비율 {{ spx.pct }}% | Double-Shot{% endblock %}
+{% block og_title %}S&P 500 200일선 위 종목 비율 {{ spx.pct }}%{% endblock %}
+{% block og_desc %}S&P 500 {{ spx.n }}종목 중 {{ spx.above }}개({{ spx.pct }}%)가 200일 이동평균선 위에 있어요({{ spx.asof_label }} 종가). {{ spx.from_label }}부터의 흐름, 섹터별 비율, 과열·이탈 종목을 함께 봐요.{% endblock %}
+{% block head_extra %}
+{% include "pages/_lt_css.html" %}
+<style>
+  .spp-hb{display:grid;grid-template-columns:82px 1fr 70px;gap:8px;align-items:center;font-size:12px;margin-top:6px;color:var(--ink)}
+  .spp-hb .tr{height:8px;background:var(--surface-soft);border-radius:4px;position:relative}
+  .spp-hb .tr i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--muted)}
+  .spp-hb .tr u{position:absolute;top:-3px;bottom:-3px;width:0;border-left:1px dashed var(--muted)}
+  .spp-hb b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+  .spp-hb b em{font-style:normal;font-weight:500;color:var(--muted);font-size:11px;margin-left:3px}
+  .spp-dsay{font-size:14px;line-height:1.65;color:var(--ink);margin:0 0 10px;word-break:keep-all}
+  .spp-dsay b{font-weight:800}
+  .spp-side{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:16px}
+  .spp-side b{font-weight:900}
+  .spp-hist{position:relative;display:flex;align-items:flex-end;gap:2px;height:120px;border-bottom:1px solid var(--hairline)}
+  .spp-hist div{flex:1;position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+  .spp-hist i{display:block;border-radius:3px 3px 0 0}
+  .spp-hist em{font-style:normal;font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:2px}
+  .spp-hist i.d2{background:#5D97F1}.spp-hist i.d1{background:#A9C6F7}.spp-hist i.u1{background:#F4AFAF}.spp-hist i.u2{background:#E86464}.spp-hist i.h{background:#F59E0B}
+  .spp-zero{position:absolute;top:-6px;bottom:-4px;width:0;border-left:2px solid var(--ink);pointer-events:none}
+  .spp-zero span{position:absolute;top:-15px;left:0;transform:translateX(-50%);font-size:10.5px;font-weight:800;white-space:nowrap;background:var(--canvas);padding:0 3px;color:var(--ink)}
+  .spp-hax{position:relative;height:16px}
+  .spp-hax span{position:absolute;font-size:10px;color:var(--muted);transform:translateX(-50%);top:3px}
+  .spp-band{display:flex;gap:2px;margin-top:4px}
+  .spp-band div{border-top:3px solid;padding-top:4px;font-size:11px;line-height:1.35;text-align:center;color:var(--muted)}
+  .spp-band div b{display:block;font-size:13px;font-weight:900;color:var(--ink)}
+  .spp-cmp{margin-top:14px;border-top:1px solid var(--hairline);padding-top:10px}
+  .spp-cmph{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:4px}
+  .spp-cr{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--hairline);font-size:12.5px;color:var(--ink)}
+  .spp-cr:last-child{border-bottom:0}
+  .spp-cr small{color:var(--muted)}
+  .spp-cr .v2{font-weight:900;font-size:15px;font-variant-numeric:tabular-nums;text-align:right}
+  .spp-cr .v2 small{display:block;font-size:11px;font-weight:500}
+  .spp-cr .tg{font-size:11px;font-weight:800;border-radius:999px;padding:2px 8px;background:var(--surface-soft);color:var(--muted);white-space:nowrap}
+  .spp-cr .tg.hi,.spp-cr .tg.lo{background:var(--ink);color:var(--canvas)}
+  .spp-bk{font-size:13px;font-weight:800;margin-top:14px;display:flex;align-items:center;gap:6px;color:var(--ink)}
+  .spp-bk:first-of-type{margin-top:4px}
+  .spp-bk em{font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
+  .spp-bk em.d{color:var(--dn);background:var(--dn-bg)}.spp-bk em.u{color:var(--up);background:var(--up-bg)}.spp-bk em.h{color:var(--gold);background:var(--gold-bg)}
+  .spp-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .spp-chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hairline);border-radius:8px;padding:4px 8px;font-size:12px;color:var(--ink)}
+  .spp-chip b{font-weight:800}.spp-chip span{font-variant-numeric:tabular-nums}
+  .spp-chip .g{color:var(--gold);font-weight:800}.spp-chip .x{color:var(--muted)}
+  @media(max-width:560px){.spp-hist em{display:none}.spp-hb{grid-template-columns:70px 1fr 62px}}
+</style>
+{% endblock %}
+{% block body %}
+<main class="ltp">
+  <div class="ltp-crumb">
+    <button class="ltp-back" onclick="if(history.length>1)history.back();else location.href='/stocks/'" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › S&amp;P 500 200일선</span>
+  </div>
+  <h1 class="ltp-title">S&amp;P 500 · 200일선 위 종목 비율</h1>
+  <p class="ltp-lead">S&amp;P 500 종목 중 몇 %가 200일 이동평균선 위에 있는지 봐요. 지수가 오르는데 이 비율이 내려가면 <b>소수 종목만 끌어올리는 장</b>, 함께 오르면 <b>넓게 오르는 장</b>이에요.</p>
+
+  <section class="ltp-card">
+    <div class="ltp-k">{{ spx.asof_label }} 종가 기준</div>
+    <div class="ltp-v">{{ spx.pct }}<small>%</small></div>
+    <p class="ltp-say">{{ spx.n }}개 중 <b>{{ spx.above }}개</b>가 200일선 위에 있어요.{% if spx.week %} 한 주 전({{ spx.week.d }}) <b>{{ spx.week.pct }}%</b>에서 {{ '올라왔어요' if spx.pct > spx.week.pct else '내려왔어요' if spx.pct < spx.week.pct else '그대로예요' }}.{% endif %} {{ spx.from_label }} 이후 하루하루 중 지금보다 낮았던 날은 <b>{{ spx.lower }}%</b>예요.</p>
+    <div class="ltp-kpis">
+      {% if spx.week %}<div class="ltp-kpi"><span>한 주 전</span><b>{{ spx.week.pct }}%</b><em>{{ spx.week.d }}</em></div>{% endif %}
+      <div class="ltp-kpi"><span>{{ spx.from[:7] }} 이후 중앙값</span><b>{{ spx.median_all }}%</b><em>{{ '{:,}'.format(spx.days) }}거래일</em></div>
+      <div class="ltp-kpi"><span>올해 가장 낮았던 날</span><b>{{ spx.ymin.pct }}%</b><em>{{ spx.ymin.d }}</em></div>
+    </div>
+    <div class="ltp-asof">미국 정규장 종가 · 매일 미국 브리핑 때 갱신</div>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>비율의 흐름</h2><small>{{ spx.from_label }} ~ 지금 · 일별</small></div>
+    <div class="ltp-leg"><span><i></i>200일선 위 종목 비율</span><span><i class="z"></i>50%</span></div>
+    <div class="ltp-plot">
+      {% for a in c.axes %}<span class="ltp-ax" style="top:{{ a.top }}">{{ a.v }}</span>{% endfor %}
+      <div class="ltp-in" data-kind="pct" data-lo="0" data-hi="100">
+        <svg viewBox="0 0 {{ c.w }} {{ c.h }}" preserveAspectRatio="none" role="img" aria-label="S&amp;P 500 200일선 위 종목 비율, {{ spx.from_label }} 이후 일별">
+          <line x1="0" x2="{{ c.w }}" y1="{{ c.y50 }}" y2="{{ c.y50 }}" class="zero"/>
+          <polyline points="{{ c.line }}" class="line"/>
+        </svg>
+        {% for m in c.marks %}<i class="ltp-mk {{ 'now' if 'now' in m.cls }}" style="left:{{ m.left }};top:{{ m.top }}"></i><span class="ltp-ml {{ m.cls }}" style="left:{{ m.left }};top:{{ m.top }}">{{ m.label }}</span>{% endfor %}
+        <i class="ltp-cur" hidden></i><i class="ltp-pt" hidden></i><div class="ltp-tip" role="status" hidden></div>
+      </div>
+    </div>
+    <div class="ltp-yrs">{% for y in c.years %}<span style="left:{{ y.left }}">{{ y.y }}</span>{% endfor %}</div>
+    <p class="ltp-fine">처음 기록을 채울 때 지금 구성 종목으로 과거를 계산했어요. 그사이 빠진 종목은 없고 새로 들어온 종목은 들어오기 전 기간도 세어져서, 당시 실제 S&amp;P 500 기준 값과 조금 달라요.</p>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>섹터별 200일선 위 비율</h2><small>{{ spx.asof_label }} · 점선 = 전체 {{ spx.pct }}%</small></div>
+    {% for s in spx.sectors %}<div class="spp-hb"><span>{{ s.k }}</span><span class="tr"><i style="width:{{ '%.1f'|format(s.p) }}%"></i><u style="left:{{ spx.pct }}%"></u></span><b>{{ '%.0f'|format(s.p) }}%<em>{{ s.a }}/{{ s.t }}</em></b></div>{% endfor %}
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>{{ spx.n }}종목은 200일선에서 어디쯤 있나</h2><small>{{ spx.asof_label }} · 막대 하나 = 5%p 구간</small></div>
+    <p class="spp-dsay">{{ spx.dsay | safe }}</p>
+    <div class="spp-side"><span class="dn">← 200일선 아래 <b>{{ spx.below_n }}개</b></span><span class="up">200일선 위 <b>{{ spx.above }}개</b> →</span></div>
+    <div class="spp-hist">{% for b in spx.bars %}<div title="{{ b.title }}"><em>{{ b.c if b.c }}</em><i class="{{ b.cls }}" style="height:{{ b.h }}"></i></div>{% endfor %}<i class="spp-zero" style="left:{{ spx.pos0 }}"><span>200일선</span></i></div>
+    <div class="spp-hax">{% for a in spx.axes_x %}<span style="left:{{ a.left }}">{{ a.v }}</span>{% endfor %}</div>
+    <div class="spp-band">{% for b in spx.bands %}<div style="flex:{{ b.flex }};border-color:{{ b.c }}"><b>{{ b.n }}개</b>{{ b.l }}</div>{% endfor %}</div>
+    <div class="spp-cmp"><div class="spp-cmph">지금 vs 보통({{ spx.from_label }} 이후)</div>
+      {% for r in spx.cmp %}<div class="spp-cr"><span>{{ r.label }}<br><small>{{ r.more }}</small></span><span class="v2">{{ r.v }}<small>보통 {{ r.m }}</small></span><span class="tg {{ r.tcls }}">{{ r.tag }}</span></div>{% endfor %}
+    </div>
+    <p class="ltp-fine">'보통'은 {{ spx.from_label }} 이후 {{ '{:,}'.format(spx.days) }}거래일의 중앙값이에요. '많은 편·적은 편'은 지금보다 많았던 날이 4분의 1 미만이거나 4분의 3을 넘을 때예요.</p>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>{{ spx.asof_label }} 눈여겨볼 종목</h2><small>과열은 거리 순 · 위로·아래로는 시가총액 순</small></div>
+    {% if spx.hot %}<div class="spp-bk"><em class="h">🔥 과열</em> 200일선보다 40% 넘게 높아요 {{ spx.hot|length }}개</div>
+    <div class="spp-chips">{% for r in spx.hot %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="g">{{ r.gap }}</span><span class="x">평균의 {{ r.x }}배</span></span>{% endfor %}</div>{% endif %}
+    {% if spx.up %}<div class="spp-bk"><em class="u">위로</em> 200일선 위로 {{ spx.up|length }}개</div>
+    <div class="spp-chips">{% for r in spx.up %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="{{ r.cls }}">{{ r.chg }}%</span></span>{% endfor %}</div>{% endif %}
+    {% if spx.below %}<div class="spp-bk"><em class="d">아래로</em> 200일선 아래로 {{ spx.below|length }}개</div>
+    <div class="spp-chips">{% for r in spx.below %}<span class="spp-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="{{ r.cls }}">{{ r.chg }}%</span></span>{% endfor %}</div>{% endif %}
+    <p class="ltp-fine">'위로·아래로'는 전 거래일엔 반대편에 있다가 이날 종가로 200일선을 넘은 종목이에요. 숫자는 이날 등락이에요.</p>
+  </section>
+
+  <section class="ltp-sec">
+    <h2>어떻게 계산하나요</h2>
+    <p>종목마다 최근 200거래일 종가(분할·배당 반영) 평균을 내고, 그날 종가가 그보다 위면 '위'로 세요. 배당락 날의 가격 하락이 추세로 잡히지 않게 배당을 반영해요. 구성 종목은 위키피디아 S&amp;P 500 목록을 매일 읽어요.</p>
+    <p>시장의 폭을 보여주는 지표이고, 이것만으로 사고팔 시점을 정할 수는 없어요. <a href="/legal/disclaimer/">면책 고지</a></p>
+  </section>
+  <div class="ltp-links">
+    <a href="/stocks/nasdaq-check/">나스닥 체크 →</a>
+    <a href="/stocks/kospi-check/">코스피 체크 →</a>
+    <a href="/weekly/">주간 장기 리포트 →</a>
+  </div>
+</main>
+<script type="application/json" id="ltp-data">{{ spx.points | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+{% include "pages/_lt_chart_js.html" %}
+{% endblock %}

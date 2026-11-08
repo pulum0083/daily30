@@ -1,0 +1,46 @@
+{# 장기 지표 페이지 그래프 짚기 — 짚은 점의 세로선·점·말풍선을 띄운다. 데이터는 #ltp-data(JSON).
+   data-kind: gap(거리 %) · lvl(로그 눈금, 종가·평균) · pct(0~100% 비율). 눈금은 파이썬이 그린 것과 같은 식이다. #}
+<script>
+(function () {
+  var el = document.getElementById('ltp-data');
+  if (!el) return;
+  var P = JSON.parse(el.textContent), n = P.length;
+  if (n < 2) return;
+  var boxes = [].slice.call(document.querySelectorAll('.ltp-in'));
+  function num(v, d) { return v.toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
+  function sg(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(1); }
+  function lab(s) { return s.length === 7 ? s.slice(0, 4) + '년 ' + (+s.slice(5)) + '월' : s.slice(0, 4) + '-' + s.slice(5, 7) + '-' + s.slice(8); }
+  function topPct(box, v) {
+    var lo = +box.dataset.lo, hi = +box.dataset.hi;
+    if (box.dataset.kind === 'lvl') v = Math.log10(v);
+    return Math.max(0, Math.min(100, (hi - v) / (hi - lo) * 100));
+  }
+  function place(box, i) {
+    var p = P[i], x = i / (n - 1) * 100, k = box.dataset.kind;
+    var pts = box.querySelectorAll('.ltp-pt'), tip = box.querySelector('.ltp-tip'), cur = box.querySelector('.ltp-cur');
+    var ys = k === 'lvl' ? [topPct(box, p[3]), topPct(box, p[2])] : [topPct(box, p[1])];
+    for (var j = 0; j < pts.length; j++) { pts[j].hidden = false; pts[j].style.left = x + '%'; pts[j].style.top = ys[j] + '%'; }
+    cur.hidden = false; cur.style.left = x + '%';
+    tip.innerHTML = '<b>' + lab(p[0]) + '</b>' + (k === 'lvl'
+      ? '<span class="k">종가</span> ' + num(p[2], 2) + '<br><span class="k">5년 평균</span> ' + num(p[3], 1)
+      : k === 'pct' ? '<span class="k">200일선 위</span> ' + p[1].toFixed(1) + '%'
+      : '<span class="k">5년 평균보다</span> ' + sg(p[1]) + '%');
+    tip.hidden = false;
+    var y = Math.min.apply(null, ys), below = y < 32;
+    tip.style.left = x + '%'; tip.style.top = y + '%';
+    tip.style.transform = 'translate(' + (x < 15 ? '0%' : x > 85 ? '-100%' : '-50%') + ',' + (below ? '16px' : 'calc(-100% - 14px)') + ')';
+  }
+  function hide() {
+    boxes.forEach(function (b) { [].forEach.call(b.querySelectorAll('.ltp-pt,.ltp-tip,.ltp-cur'), function (e) { e.hidden = true; }); });
+  }
+  boxes.forEach(function (box) {
+    function at(e) {
+      var r = box.getBoundingClientRect(), i = Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * (n - 1));
+      boxes.forEach(function (b) { place(b, i); });
+    }
+    box.addEventListener('pointermove', at);
+    box.addEventListener('pointerdown', at);
+    box.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hide(); });
+  });
+})();
+</script>

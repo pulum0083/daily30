@@ -27,6 +27,7 @@ KST = ZoneInfo("Asia/Seoul")
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "web" / "data" / "home-summary.json"
 BRIEFINGS = ROOT / "data" / "briefings.json"
+KOSPI_CHECK_OUT = ROOT / "data" / "kospi_check.json"           # 코스피 체크 상세 페이지 원천(gitignore)
 SNAPSHOT = ROOT / "web" / "data" / "stocks-snapshot.json"      # 같은 잡이 앞 스텝에서 쓴다(build_stocks_snapshot)
 UNIVERSE = ROOT / "scripts" / "config" / "stock_universe.json"
 DAYS = 10            # 최근 거래일 수(주간 등락 계산에 직전 주 마지막 종가까지 필요)
@@ -126,7 +127,9 @@ def main():
     last_day = out["kospi_days"][-1]
     check = kospi_check.fetch(last_day["date"], last_day["close"])
     if check:
-        out["kospi_check"] = check
+        # 월별 기록은 상세 페이지(/stocks/kospi-check/)만 쓴다 — 홈이 매번 받는 JSON에 싣지 않는다.
+        KOSPI_CHECK_OUT.write_text(json.dumps(check, ensure_ascii=False) + "\n", encoding="utf-8")
+        out["kospi_check"] = {k: v for k, v in check.items() if k != "history"}
     out["generated_at"] = datetime.now(KST).isoformat(timespec="seconds")
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     last = out["scores"][-1] if out["scores"] else None

@@ -133,6 +133,8 @@ def expected_pages() -> list:
     종목 상세 페이지(국내·미국)는 2026-10-26에 없앴다 — 지금 생성기가 만드는 페이지는 섹터 페이지·나스닥 체크 상세 페이지(2026-10-28)·성적표·방법론(2026-11-05)이다.
     """
     pages = [(WEB_DIR / "stocks" / "nasdaq-check" / "index.html", f"{SITE_BASE}/stocks/nasdaq-check/"),
+             (WEB_DIR / "stocks" / "kospi-check" / "index.html", f"{SITE_BASE}/stocks/kospi-check/"),   # 장기 지표 페이지(2026-11-09)
+             (WEB_DIR / "stocks" / "sp500-200" / "index.html", f"{SITE_BASE}/stocks/sp500-200/"),
              (WEB_DIR / "accuracy" / "index.html", f"{SITE_BASE}/accuracy/"),        # 예측 성적표(2026-11-05, §80)
              (WEB_DIR / "methodology" / "index.html", f"{SITE_BASE}/methodology/")]
     universe = CONFIG_DIR / "stock_universe.json"

@@ -1,0 +1,30 @@
+{# 주간 장기 리포트 목록(/weekly/) — 디스크에 커밋된 주간 리포트에서 만든다. 최신이 위, 맨 위 한 편만 요약까지. #}
+{% extends "base.html" %}
+{% block title %}주간 장기 리포트 | Double-Shot{% endblock %}
+{% block og_title %}주간 장기 리포트 — Double-Shot{% endblock %}
+{% block og_desc %}매주 토요일, 코스피·미국 지수의 한 주와 코스피 체크·나스닥 체크·S&P 500 200일선 같은 장기 지표가 어떻게 움직였는지 정리해요.{% endblock %}
+{% block head_extra %}
+{% include "pages/_lt_css.html" %}
+<style>
+  .wki{display:block;border:1px solid var(--hairline);border-radius:12px;background:var(--canvas);padding:13px 14px;margin-top:10px;text-decoration:none}
+  .wki:hover{border-color:var(--primary)}
+  .wki span{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .wki b{display:block;font-size:15px;font-weight:800;color:var(--ink);margin-top:3px;line-height:1.4}
+  .wki p{font-size:13px;line-height:1.6;color:var(--muted);margin:4px 0 0;word-break:keep-all}
+  .wki.first{border-color:var(--primary)}
+</style>
+{% endblock %}
+{% block body %}
+<main class="ltp">
+  <div class="ltp-crumb"><span><a href="/stocks/">종목 홈</a> › 주간 장기 리포트</span></div>
+  <h1 class="ltp-title">주간 장기 리포트</h1>
+  <p class="ltp-lead">매주 토요일 아침, 미국 금요일 장이 끝난 뒤 한 주를 정리해요. 코스피·미국 지수가 요일마다 어떻게 움직였는지, 그리고 <b>코스피 체크·나스닥 체크·S&amp;P 500 200일선</b> 같은 장기 지표가 한 주 사이 어디로 갔는지 봐요.</p>
+  {% for it in items %}<a class="wki {{ 'first' if loop.first }}" href="{{ it.url }}"><span>{{ it.tag }}</span><b>{{ it.head }}</b>{% if loop.first %}<p>{{ it.sub }}</p>{% endif %}</a>
+  {% else %}<p class="ltp-lead">첫 리포트는 토요일 아침에 나와요.</p>{% endfor %}
+  <div class="ltp-links">
+    <a href="/stocks/kospi-check/">코스피 체크 →</a>
+    <a href="/stocks/nasdaq-check/">나스닥 체크 →</a>
+    <a href="/stocks/sp500-200/">S&amp;P 500 200일선 →</a>
+  </div>
+</main>
+{% endblock %}

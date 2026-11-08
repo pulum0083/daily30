@@ -1,0 +1,125 @@
+{# 주간 장기 리포트(/weekly/{금요일}/) — 토요일 아침 한 번 만들고 고치지 않는다(2026-11-09 시안 A안).
+   숫자·문장은 전부 web/weekly/{금요일}/data.json과 longterm_pages.weekly_context의 정해진 틀이다(§0, LLM 없음). #}
+{% extends "base.html" %}
+{% block title %}주간 장기 리포트 {{ wk.tag.split(' · ')[0] }} — {{ wk.head }} | Double-Shot{% endblock %}
+{% block og_title %}{{ wk.head }} — 주간 장기 리포트{% endblock %}
+{% block og_desc %}{{ wk.sub }}{% endblock %}
+{% block head_extra %}
+{% include "pages/_lt_css.html" %}
+<style>
+  .wkp-head{border:1px solid var(--hairline);border-radius:14px;background:var(--canvas);padding:16px}
+  .wkp-tag{font-size:12px;font-weight:700;color:var(--primary)}
+  .wkp-h{font-size:21px;font-weight:900;letter-spacing:-.4px;margin:4px 0 0;line-height:1.35;color:var(--ink)}
+  .wkp-d{font-size:13.5px;line-height:1.65;color:var(--ink);margin:6px 0 0;word-break:keep-all}
+  .wkp-nav{display:flex;justify-content:space-between;font-size:12.5px;margin-top:10px}
+  .wkp-nav a{color:var(--primary);font-weight:700;text-decoration:none}.wkp-nav span{color:var(--muted)}
+  .wf{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .wf .nm{font-size:13px;font-weight:800;line-height:1.35;color:var(--ink)}
+  .wf .nm small{display:block;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+  .wf .tot{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+  .wf .tot small{display:block;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .stp{position:relative;height:64px;display:flex;gap:4px}
+  .stp::before{content:'';position:absolute;left:0;right:0;top:var(--z);border-top:1px dashed var(--muted);opacity:.7}
+  .stp div{flex:1;position:relative}
+  .stp i{position:absolute;left:3px;right:3px;border-radius:3px}
+  .stp i.u{background:#E86464}.stp i.d{background:#5D97F1}
+  .stp em{position:absolute;left:0;right:0;text-align:center;font-style:normal;font-size:10px;font-weight:700;white-space:nowrap}
+  .stp u{position:absolute;left:0;right:-4px;border-top:1px solid var(--hairline)}
+  .stp .off{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
+  .dayax{display:grid;grid-template-columns:96px 1fr 76px;gap:10px;margin-top:2px}
+  .dayax .ds{display:flex;gap:4px}
+  .dayax .ds span{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--muted)}
+  .wkp-lg{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .wkp-lg i{display:inline-block;width:14px;height:0;border-top:1px dashed var(--muted);vertical-align:3px;margin-right:4px}
+  .lt{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ltc{border:1px solid var(--hairline);border-radius:12px;padding:12px;background:var(--canvas)}
+  .ltc .n{font-size:12.5px;font-weight:800;display:flex;justify-content:space-between;gap:6px;color:var(--ink)}
+  .ltc .n a{font-size:11.5px;font-weight:700;color:var(--primary);text-decoration:none;white-space:nowrap}
+  .ltc .ft{display:flex;align-items:baseline;gap:8px;margin-top:6px;font-variant-numeric:tabular-nums}
+  .ltc .ft s{text-decoration:none;font-size:14px;color:var(--muted);font-weight:700}
+  .ltc .ft b{font-size:22px;font-weight:900;letter-spacing:-.4px;color:var(--ink)}
+  .ltc .ft em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+  .ltc p{font-size:12px;color:var(--ink);line-height:1.55;margin:5px 0 0;word-break:keep-all}
+  .ltc .ev{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;margin-top:6px;background:var(--ink);color:var(--canvas)}
+  .sw{display:grid;grid-template-columns:70px 1fr 62px;gap:8px;align-items:center;font-size:12px;margin-top:5px;color:var(--ink)}
+  .sw .tr{height:8px;position:relative}
+  .sw .tr::before{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px solid var(--hairline)}
+  .sw .tr i{position:absolute;top:0;bottom:0;border-radius:3px}
+  .sw b{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+  .ma4 .mr{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--hairline);line-height:1.6;font-size:13px;color:var(--ink)}
+  .ma4 .mr:last-child{border-bottom:0}
+  .ma4 .h{font-size:11px;font-weight:700;color:var(--muted)}
+  .ma4 b{font-weight:800}
+  .ma4 .x{font-size:11.5px;color:var(--muted);margin-top:2px}
+  @media(max-width:560px){.wf,.dayax{grid-template-columns:70px 1fr 62px;gap:8px}.wf .nm small{display:none}.stp em{font-size:9px}.lt{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block body %}
+<main class="ltp">
+  <div class="ltp-crumb">
+    <button class="ltp-back" onclick="if(history.length>1)history.back();else location.href='/weekly/'" aria-label="뒤로 가기"><svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M6 1L1 6L6 11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <span><a href="/stocks/">종목 홈</a> › <a href="/weekly/">주간 장기 리포트</a></span>
+  </div>
+  <section class="wkp-head">
+    <div class="wkp-tag">주간 장기 리포트 · {{ wk.tag }}</div>
+    <h1 class="wkp-h">{{ wk.head }}</h1>
+    <p class="wkp-d">{{ wk.sub }}</p>
+    <div class="wkp-nav">{% if wk.prev_url %}<a href="{{ wk.prev_url }}">← 지난 주</a>{% else %}<span></span>{% endif %}<a href="/weekly/">전체 주간 리포트 →</a></div>
+  </section>
+
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>이번 주 시장</h2><small>{{ wk.tag.split(' · ')[1] }}</small></div>
+    {% for r in wk.rows %}<div class="wf"><div class="nm">{{ r.name }}<small>{{ '{:,.2f}'.format(r.from) }} → {{ '{:,.2f}'.format(r.to) }}</small></div>
+      <div class="stp" style="--z:{{ r.z }}">{% for c in r.cells %}<div>{% if c %}<i class="{{ 'u' if c.up else 'd' }}" style="top:{{ c.top }};height:{{ c.h }}"></i><em class="{{ 'up' if c.up else 'dn' }}" style="top:{{ c.lab_top }}">{{ c.lab }}</em>{% if not loop.last %}<u style="top:{{ c.end }}"></u>{% endif %}{% else %}<span class="off">휴장</span>{% endif %}</div>{% endfor %}</div>
+      <div class="tot {{ 'up' if r.wk >= 0 else 'dn' }}">{{ r.wk_s }}%<small>한 주</small></div></div>
+    {% endfor %}
+    <div class="dayax"><span></span><div class="ds"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span></div><span></span></div>
+    <div class="wkp-lg"><i></i>지난주 금요일 종가(0%) · 막대 위·아래 숫자 = 그날 등락</div>
+  </section>
+
+  {% if wk.cards or wk.ma_rows %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>장기 지표 — 한 주 사이</h2><small>지난주 금요일 → 이번 주 금요일</small></div>
+    <div class="lt">
+      {% for c in wk.cards %}<div class="ltc"><div class="n">{{ c.name }}<a href="{{ c.url }}">자세히 →</a></div>
+        <div class="ft"><s>{{ c.a }}</s><em>→</em><b>{{ c.b }}</b></div><p>{{ c.txt }}</p></div>{% endfor %}
+      {% if wk.ma_rows %}<div class="ltc"><div class="n">미국 지수 · 200일선과의 거리</div>
+        {% for m in wk.ma_rows %}<div class="sw"><span>{{ m.k }}</span><span class="tr"><i style="{{ 'left:50%' if m.pos else 'right:50%' }};width:{{ m.w }};background:{{ '#E86464' if m.pos else '#5D97F1' }}"></i></span><b>{{ m.s }}%</b></div>{% endfor %}
+        <p>지난주 금요일엔 {% for m in wk.ma_rows %}{{ m.k }} {{ m.ps }}%{{ ' · ' if not loop.last }}{% endfor %}</p>
+        {% if wk.ma_event %}<span class="ev">이번 주 {{ wk.ma_event }}</span>{% endif %}</div>{% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if wk.ma5 %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>월봉 5개월선 안착 종목</h2><small>3개월 이상 연속 5개월선 위 마감 + 이번 달도 위</small></div>
+    <div class="ma4">
+      {% for k, lab in [('kr', '국내'), ('us', '미국')] %}{% set m = wk.ma5.get(k) %}{% if m %}
+      <div class="mr"><span class="h">{{ lab }}</span><div>{% for i in m['items'] %}<b>{{ i.name }}</b>{% if i.streak %} {{ i.streak }}개월째{% endif %}{{ ' · ' if not loop.last }}{% endfor %}{% if not m['items'] %}조건을 채운 종목이 없어요{% endif %}
+        {% if m.dropped %}<div class="x">이번 주 빠짐 · {% for x in m.dropped %}{{ x.name }}{% if x.when %}({{ x.when[5:7]|int }}/{{ x.when[8:10]|int }} 종가){% endif %}{{ ', ' if not loop.last }}{% endfor %}</div>{% endif %}</div></div>
+      {% endif %}{% endfor %}
+    </div>
+    <p class="ltp-fine">국내는 종목 시그널 46종목, 미국은 대형주 20종목 중에서 골라요. 지난 15년 이 조건이 나온 종목이 1년 뒤 오른 비율은 아무 종목과 비슷했어요.</p>
+  </section>
+  {% endif %}
+
+  {% if wk.sectors_week %}
+  <section class="ltp-card">
+    <div class="ltp-h"><h2>코스피 섹터 · 이번 주</h2><small>섹터 대표 종목 주간 등락 평균</small></div>
+    {% for x in wk.sectors_week %}<div class="sw"><span>{{ x.label }}</span><span class="tr"><i style="{{ 'left:50%' if x.pct >= 0 else 'right:50%' }};width:{{ x.w }};background:{{ '#E86464' if x.pct >= 0 else '#5D97F1' }}"></i></span><b class="{{ 'up' if x.pct >= 0 else 'dn' }}">{{ x.s }}%</b></div>{% endfor %}
+  </section>
+  {% endif %}
+
+  <section class="ltp-sec">
+    <h2>이 리포트는</h2>
+    <p>매주 토요일 아침, 미국 금요일 장이 끝난 뒤 한 번 만들고 고치지 않아요. 코스피는 네이버 공식 종가, 미국은 정규장 종가예요. 헤드라인은 정해진 틀로 만들어요 — 코스피 주간 등락에, 이번 주 장기 지표가 기준선을 넘은 일이 있으면 하나를 붙여요.</p>
+    <p>이 리포트는 시장의 흐름을 정리한 것이고, 이것만으로 사고팔 시점을 정할 수는 없어요. <a href="/legal/disclaimer/">면책 고지</a></p>
+  </section>
+  <div class="ltp-links">
+    <a href="/stocks/kospi-check/">코스피 체크 →</a>
+    <a href="/stocks/nasdaq-check/">나스닥 체크 →</a>
+    <a href="/stocks/sp500-200/">S&amp;P 500 200일선 →</a>
+  </div>
+</main>
+{% endblock %}
