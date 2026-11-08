@@ -1,0 +1,180 @@
+<!-- 미국 브리핑 'S&P 500 · 200일선 체크' 섹션·텔레그램 시안 — 야후 일봉(정규장 종가) 11/6(금) 기준, 구성 종목은 위키피디아 S&P 500 목록 -->
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S&P 500 200일선 체크 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--ink:#0F172A;--muted:#64748B;--hair:#E5E7EB;--primary:#006EFF;--up:#E03131;--dn:#2775ED;--upb:#E86464;--dnb:#5D97F1}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,sans-serif;background:#F7F8FA;color:var(--ink);-webkit-font-smoothing:antialiased;word-break:keep-all;padding:24px 16px 60px}
+.top,.v{max-width:1200px;margin:0 auto 34px}
+.top h1{font-size:20px;font-weight:800}.top p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:6px}
+.v>h3{font-size:15px;font-weight:800}.v>p{font-size:12.5px;color:var(--muted);line-height:1.55;margin:3px 0 10px}
+.rec{display:inline-block;font-size:11px;font-weight:700;color:#2563EB;background:#EFF4FE;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.pair{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.fw>small{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:5px}
+.pc{width:720px;max-width:100%}.ph{width:343px;max-width:100%}
+.ctx{font-size:11.5px;color:#94A3B8;border:1px dashed #CBD5E1;border-radius:10px;padding:10px 14px;margin:8px 0;background:#fff}
+/* 섹션 카드 */
+.sec{background:#fff;border:1px solid var(--hair);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hair)}
+.st{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+.st::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
+.sd{font-size:11px;color:var(--muted);white-space:nowrap}
+.br{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;border-bottom:1px solid var(--hair)}
+.ph .br{grid-template-columns:1fr}
+.brk{font-size:12px;font-weight:700;color:var(--muted)}
+.brv{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-top:2px;font-variant-numeric:tabular-nums}
+.brs{font-size:12.5px;color:#334155;margin-top:3px;line-height:1.5}
+.brs b{font-weight:700}
+.spk{position:relative;height:64px}
+.spk svg{width:100%;height:100%;display:block;overflow:visible}
+.spk .l{fill:none;stroke:#475569;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.spk .g{stroke:#94A3B8;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spk span{position:absolute;font-size:10px;color:var(--muted);white-space:nowrap}
+.spk i{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--ink)}
+.blk{padding:12px 16px;border-bottom:1px solid var(--hair)}
+.blk:last-of-type{border-bottom:0}
+.bh{display:flex;align-items:baseline;gap:6px;font-size:13px;font-weight:800}
+.bh em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.bh{flex-wrap:wrap}.bh small{margin-left:auto;font-size:11px;font-weight:500;color:var(--muted)}
+.ph .bh small{flex-basis:100%;margin-left:0;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hair);border-radius:8px;padding:4px 8px;font-size:12px}
+.chip b{font-weight:800}.chip span{font-variant-numeric:tabular-nums}
+.dn{color:var(--dn)}.up{color:var(--up)}
+details.more summary{list-style:none;cursor:pointer;display:inline-flex;font-size:12px;font-weight:700;color:#2563EB;border:1px solid #DBE7FE;background:#F5F9FF;border-radius:8px;padding:4px 8px}
+details.more summary::-webkit-details-marker{display:none}
+details.more[open] summary{display:none}
+details.more{display:contents}
+.secs{font-size:11.5px;color:var(--muted);margin-top:7px}
+.hrow{display:grid;grid-template-columns:56px 1fr 90px 62px;gap:10px;align-items:center;font-size:12px;margin-top:8px}
+.ph .hrow{grid-template-columns:48px 1fr 62px}
+.ph .hrow .bar{display:none}
+.hrow b{font-weight:800}.hrow .nm{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .bar{height:7px;border-radius:4px;background:#F1F5F9;position:relative}
+.hrow .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--upb)}
+.hrow .g{text-align:right;font-weight:800;color:var(--up);font-variant-numeric:tabular-nums}
+.foot{padding:10px 16px 12px;font-size:11px;color:var(--muted);line-height:1.5;background:#FAFBFC;border-top:1px solid var(--hair)}
+/* B안 표 */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:11px;font-weight:700;color:var(--muted);text-align:left;padding:6px 0;border-bottom:1px solid var(--hair)}
+td{padding:6px 0;border-bottom:1px solid #F1F5F9;font-variant-numeric:tabular-nums}
+td.r,th.r{text-align:right}
+td.sec2{color:var(--muted)}
+.ph .hide-ph{display:none}
+/* 텔레그램 */
+.tgs{display:flex;flex-wrap:wrap;gap:18px}
+.tg{width:340px;max-width:100%}
+.tg small{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+.tg small em{font-style:normal;font-weight:500;color:var(--muted);margin-left:4px}
+.bub{background:#fff;border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:13.5px;line-height:1.45;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12);border:1px solid #E2E8F0}
+.tgbg{background:#C8D9B4;padding:14px;border-radius:12px}
+.bub mark{background:#FFF7D6;border-radius:4px;padding:0 1px}
+</style></head><body>
+<div class="top"><h1>미국 브리핑 · S&amp;P 500 200일선 체크</h1>
+<p>숫자는 전부 실측이다 — S&amp;P 500 구성 종목 503개(위키피디아 목록) 중 1년치 일봉이 있는 500개의 <b>11/6(금) 정규장 종가</b>와 200일 평균. 다음 미국 브리핑인 <b>11/9(월) 21:15</b>에 실릴 값과 같다.<br>
+'새로 아래로·위로'는 전 거래일(11/5)엔 반대편에 있다가 11/6 종가로 200일선을 넘은 종목. '과열'은 200일선보다 40% 이상 높은 종목. 칩 순서는 시가총액 순.</p></div>
+
+<div class="v"><h3>A. 세 묶음 — 비율 + 새로 이탈·회복 칩 + 과열 막대 <span class="rec">추천</span></h3>
+<p>맨 위에 시장 전체 숫자(200일선 위 비율)와 최근 60거래일 흐름. 아래 세 묶음은 오늘 바뀐 종목만 보여준다. 이탈 칩은 8개까지, 나머지는 '더 보기'.</p>
+<div class="ctx">… 오늘 점검할 이슈 · 나스닥 체크 …</div>
+<div class="pair"><div class="fw"><small>PC (본문 폭)</small><div class="pc" data-v="A"></div></div>
+<div class="fw"><small>모바일</small><div class="ph" data-v="A"></div></div></div>
+<div class="ctx">… 월봉 5개월선 안착 종목 …</div></div>
+
+<div class="v"><h3>B. 표 한 장 — 회사명·섹터까지</h3>
+<p>세 묶음을 표로. 회사명과 섹터가 보여 '어떤 업종이 무너지는지' 읽히지만 길다(이탈 19개를 다 펼치면 표가 길어 8개로 자른다).</p>
+<div class="pair"><div class="fw"><small>PC</small><div class="pc" data-v="B"></div></div>
+<div class="fw"><small>모바일</small><div class="ph" data-v="B"></div></div></div></div>
+
+<div class="v"><h3>텔레그램 — 아주 간단한 버전 3가지</h3>
+<p>11/5 미국 텔레그램 실제 문장에 덧붙인 모습(노란 부분이 추가분). 말풍선 폭은 실제와 같은 21칸 줄바꿈을 적용했다. 숫자는 11/6 종가 값.</p>
+<div class="tgs">
+<div class="tg"><small>T1 · 한 줄 <em>시장 전체 숫자만</em></small><div class="tgbg"><div class="bub">🇺🇸 미국 시장 브리핑 | 2026.11.05
+
+📈 <b>상승 우위 68%</b>
+
+🎯 <b>다우는 축포, 반도체는 침묵 — 민주당
+압승이 가른 두 세계</b>
+
+👀 오늘 밤 볼 것
+민주당 압승에 다우 급등, 반도체는 급락 —
+엇갈린 반응
+
+<mark>📏 S&amp;P 500 200일선 위 58.8% (전날 61.4%)</mark>
+
+🔗 전체 이슈 점검 →
+https://doubleshot.space/briefings/2026-11-05/us/</div></div></div>
+<div class="tg"><small>T2 · 두 줄 <em>바뀐 개수까지</em></small><div class="tgbg"><div class="bub">🇺🇸 미국 시장 브리핑 | 2026.11.05
+
+📈 <b>상승 우위 68%</b>
+
+🎯 <b>다우는 축포, 반도체는 침묵 — 민주당
+압승이 가른 두 세계</b>
+
+👀 오늘 밤 볼 것
+민주당 압승에 다우 급등, 반도체는 급락 —
+엇갈린 반응
+
+<mark>📏 S&amp;P 500 200일선 위 58.8% (전날 61.4%)
+새로 이탈 19 · 새로 회복 6 · 40%↑ 3</mark>
+
+🔗 전체 이슈 점검 →
+https://doubleshot.space/briefings/2026-11-05/us/</div></div></div>
+<div class="tg"><small>T3 · 세 줄 <em>종목 이름까지</em></small><div class="tgbg"><div class="bub">🇺🇸 미국 시장 브리핑 | 2026.11.05
+
+📈 <b>상승 우위 68%</b>
+
+🎯 <b>다우는 축포, 반도체는 침묵 — 민주당
+압승이 가른 두 세계</b>
+
+👀 오늘 밤 볼 것
+민주당 압승에 다우 급등, 반도체는 급락 —
+엇갈린 반응
+
+<mark>📏 S&amp;P 500 200일선 위 58.8% (전날 61.4%)
+이탈 IBM·AXP·VZ 외 16개
+과열 MRNA·CRL·VEEV</mark>
+
+🔗 전체 이슈 점검 →
+https://doubleshot.space/briefings/2026-11-05/us/</div></div></div>
+</div></div>
+
+<script>
+const D={"asof": "2026-11-06", "prev": "2026-11-05", "n": 500, "above": 294, "above_pct": 58.8, "above_pct_prev": 61.4, "breadth": [["2026-08-14", 75.2], ["2026-08-17", 72.2], ["2026-08-18", 72.2], ["2026-08-19", 75.6], ["2026-08-20", 74.0], ["2026-08-21", 73.2], ["2026-08-24", 75.0], ["2026-08-25", 73.0], ["2026-08-26", 73.4], ["2026-08-27", 71.4], ["2026-08-28", 72.2], ["2026-08-31", 69.0], ["2026-09-01", 66.2], ["2026-09-02", 67.0], ["2026-09-03", 69.2], ["2026-09-04", 67.6], ["2026-09-08", 63.4], ["2026-09-09", 60.4], ["2026-09-10", 58.2], ["2026-09-11", 60.0], ["2026-09-14", 59.8], ["2026-09-15", 57.2], ["2026-09-16", 54.0], ["2026-09-17", 54.0], ["2026-09-18", 53.0], ["2026-09-21", 52.8], ["2026-09-22", 51.0], ["2026-09-23", 49.8], ["2026-09-24", 47.6], ["2026-09-25", 49.0], ["2026-09-28", 48.0], ["2026-09-29", 45.6], ["2026-09-30", 42.4], ["2026-10-01", 44.2], ["2026-10-02", 46.0], ["2026-10-05", 47.8], ["2026-10-06", 50.2], ["2026-10-07", 47.2], ["2026-10-08", 50.4], ["2026-10-09", 50.0], ["2026-10-12", 52.4], ["2026-10-13", 51.8], ["2026-10-14", 51.2], ["2026-10-15", 54.4], ["2026-10-16", 55.0], ["2026-10-19", 51.8], ["2026-10-20", 55.8], ["2026-10-21", 56.4], ["2026-10-22", 60.0], ["2026-10-23", 58.6], ["2026-10-26", 60.6], ["2026-10-27", 61.8], ["2026-10-28", 61.4], ["2026-10-29", 65.4], ["2026-10-30", 61.6], ["2026-11-02", 66.0], ["2026-11-03", 64.4], ["2026-11-04", 69.4], ["2026-11-05", 61.4], ["2026-11-06", 58.8]], "new_below": [{"t": "IBM", "n": "IBM", "sec": "Information Technology", "gap": -0.4, "prev": 0.4, "chg": -0.85, "close": 245.0, "cap": 231554597225.0}, {"t": "AXP", "n": "American Express", "sec": "Financials", "gap": -0.8, "prev": 0.4, "chg": -1.22, "close": 320.99, "cap": 215240485709.46045}, {"t": "VZ", "n": "Verizon", "sec": "Communication Services", "gap": -0.0, "prev": 1.0, "chg": -0.93, "close": 45.69, "cap": 189366692280.10034}, {"t": "INTU", "n": "Intuit", "sec": "Information Technology", "gap": -3.3, "prev": 0.2, "chg": -3.76, "close": 341.5, "cap": 91261094000.0}, {"t": "PNC", "n": "PNC Financial Services", "sec": "Financials", "gap": -0.2, "prev": 0.5, "chg": -0.6, "close": 225.38, "cap": 89425829605.81262}, {"t": "KKR", "n": "KKR & Co.", "sec": "Financials", "gap": -1.5, "prev": 0.3, "chg": -1.85, "close": 96.48, "cap": 86603885797.78311}, {"t": "ORLY", "n": "O'Reilly Automotive", "sec": "Consumer Discretionary", "gap": -0.6, "prev": 1.2, "chg": -1.75, "close": 89.89, "cap": 72326168762.58655}, {"t": "AZO", "n": "AutoZone", "sec": "Consumer Discretionary", "gap": -1.1, "prev": 1.6, "chg": -2.8, "close": 3216.35, "cap": 51765035247.06299}, {"t": "HIG", "n": "Hartford (The)", "sec": "Financials", "gap": -0.6, "prev": 1.8, "chg": -2.26, "close": 133.99, "cap": 35830722532.97566}, {"t": "CPRT", "n": "Copart", "sec": "Industrials", "gap": -0.6, "prev": 0.9, "chg": -1.63, "close": 31.95, "cap": 29596258648.13405}, {"t": "FE", "n": "FirstEnergy", "sec": "Utilities", "gap": -0.2, "prev": 0.2, "chg": -0.44, "close": 46.43, "cap": 26878017488.564224}, {"t": "RF", "n": "Regions Financial Corporation", "sec": "Financials", "gap": -0.0, "prev": 0.3, "chg": -0.35, "close": 28.31, "cap": 24063499546.051025}, {"t": "NI", "n": "NiSource", "sec": "Utilities", "gap": -0.4, "prev": 0.3, "chg": -0.65, "close": 44.15, "cap": 21177371276.216263}, {"t": "LEN", "n": "Lennar", "sec": "Consumer Discretionary", "gap": -0.9, "prev": 2.2, "chg": -3.11, "close": 88.74, "cap": 21111266700.65026}, {"t": "GIS", "n": "General Mills", "sec": "Consumer Staples", "gap": -1.6, "prev": 0.9, "chg": -2.61, "close": 35.51, "cap": 18986739585.985382}, {"t": "INVH", "n": "Invitation Homes", "sec": "Real Estate", "gap": -0.9, "prev": 0.8, "chg": -1.67, "close": 27.1, "cap": 15613788687.38552}, {"t": "REG", "n": "Regency Centers", "sec": "Real Estate", "gap": -1.2, "prev": 0.8, "chg": -1.89, "close": 74.84, "cap": 13704741066.872528}, {"t": "HRL", "n": "Hormel Foods", "sec": "Consumer Staples", "gap": -1.2, "prev": 1.7, "chg": -2.88, "close": 21.95, "cap": 12080200479.884338}, {"t": "DPZ", "n": "Domino's", "sec": "Consumer Discretionary", "gap": -1.0, "prev": 1.0, "chg": -2.15, "close": 334.28, "cap": 10996493559.523682}], "new_above": [{"t": "AMD", "n": "Advanced Micro Devices", "sec": "Information Technology", "gap": 7.9, "prev": -2.6, "chg": 11.04, "close": 449.04, "cap": 736464793203.4574}, {"t": "GE", "n": "GE Aerospace", "sec": "Industrials", "gap": 0.3, "prev": -2.3, "chg": 2.7, "close": 323.24, "cap": 335381696569.6736}, {"t": "ANET", "n": "Arista Networks", "sec": "Information Technology", "gap": 2.8, "prev": -4.1, "chg": 7.31, "close": 170.8, "cap": 215789122673.59796}, {"t": "EQIX", "n": "Equinix", "sec": "Real Estate", "gap": 0.2, "prev": -1.2, "chg": 1.54, "close": 1012.71, "cap": 100246461696.81628}, {"t": "SNPS", "n": "Synopsys", "sec": "Information Technology", "gap": 1.9, "prev": -0.5, "chg": 2.31, "close": 450.46, "cap": 86324641919.63983}, {"t": "NXPI", "n": "NXP Semiconductors", "sec": "Information Technology", "gap": 1.1, "prev": -0.4, "chg": 1.58, "close": 248.29, "cap": 62582234698.269714}], "hot": [{"t": "MRNA", "n": "Moderna", "sec": "Health Care", "gap": 177.9, "prev": 166.9, "chg": 5.27, "close": 254.19, "cap": 101481771599.607}, {"t": "CRL", "n": "Charles River Laboratories", "sec": "Health Care", "gap": 50.3, "prev": 39.7, "chg": 7.83, "close": 337.52, "cap": 16173102935.402985}, {"t": "VEEV", "n": "Veeva Systems", "sec": "Health Care", "gap": 43.7, "prev": 47.0, "chg": -2.05, "close": 303.73, "cap": 49176576789.28375}]};
+const p1=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(Math.abs(v)<0.1?2:1)+'%', p2=v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)+'%';
+const SEC={'Information Technology':'기술','Financials':'금융','Consumer Discretionary':'경기소비재','Consumer Staples':'필수소비재','Utilities':'유틸리티','Real Estate':'부동산','Industrials':'산업재','Health Care':'헬스케어','Communication Services':'커뮤니케이션','Energy':'에너지','Materials':'소재'};
+const md=s=>(+s.slice(5,7))+'/'+(+s.slice(8,10));
+const dp=(D.above_pct-D.above_pct_prev);
+function head(){return `<div class="sh"><span class="st">S&amp;P 500 · 200일선 체크</span><span class="sd">${md(D.asof)}(금) 종가 기준</span></div>`}
+function breadth(){
+  const b=D.breadth, n=b.length, lo=Math.min(40,...b.map(x=>x[1]))-3, hi=Math.max(70,...b.map(x=>x[1]))+3, Y=v=>(hi-v)/(hi-lo)*100, X=i=>i/(n-1)*100;
+  const d=b.map((x,i)=>(i?'L':'M')+X(i).toFixed(2)+' '+Y(x[1]).toFixed(2)).join(' ');
+  return `<div class="br"><div><div class="brk">200일선 위에 있는 종목</div><div class="brv">${D.above_pct.toFixed(1)}%</div>
+   <div class="brs">${D.n}개 중 <b>${D.above}개</b> · 전날 ${D.above_pct_prev.toFixed(1)}%에서 <b class="${dp<0?'dn':'up'}">${dp<0?'−':'+'}${Math.abs(dp).toFixed(1)}%p</b></div></div>
+   <div class="spk"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line class="g" x1="0" x2="100" y1="${Y(50)}" y2="${Y(50)}"/><path class="l" d="${d}"/></svg>
+   <i style="left:100%;top:${Y(b[n-1][1])}%"></i><span style="right:0;top:${Y(50)}%;margin-top:2px">50%</span>
+   <span style="left:0;bottom:-14px">${md(b[0][0])}</span><span style="right:0;bottom:-14px">${md(b[n-1][0])}</span></div></div>`;
+}
+function secCount(rows){const c={};rows.forEach(r=>{const k=SEC[r.sec]||r.sec;c[k]=(c[k]||0)+1});return Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,v])=>k+' '+v).join(' · ')}
+const chip=(r,cls)=>`<span class="chip" title="${r.n}"><b>${r.t}</b><span class="${cls}">${p2(r.chg)}</span></span>`;
+const R={
+A(el){
+  const nb=D.new_below, nu=D.new_above, mx=Math.max(...D.hot.map(r=>r.gap));
+  el.innerHTML=`<div class="sec">${head()}${breadth()}
+  <div class="blk"><div class="bh">새로 200일선 아래로 <em>${nb.length}개</em><small>${secCount(nb)}</small></div>
+   <div class="chips">${nb.slice(0,8).map(r=>chip(r,'dn')).join('')}${nb.length>8?`<details class="more"><summary>+${nb.length-8}개 더 보기</summary>${nb.slice(8).map(r=>chip(r,'dn')).join('')}</details>`:''}</div></div>
+  <div class="blk"><div class="bh">새로 200일선 위로 <em>${nu.length}개</em></div><div class="chips">${nu.map(r=>chip(r,'up')).join('')}</div></div>
+  <div class="blk"><div class="bh">200일선보다 40% 이상 높은 종목 <em>${D.hot.length}개</em></div>
+   ${D.hot.map(r=>`<div class="hrow"><b>${r.t}</b><span class="nm">${r.n}</span><span class="bar"><i style="width:${(r.gap/mx*100).toFixed(1)}%"></i></span><span class="g">${p1(r.gap)}</span></div>`).join('')}</div>
+  <div class="foot">칩 숫자는 ${md(D.asof)} 하루 등락이에요. 200일선은 최근 200거래일 정규장 종가의 평균이에요.</div></div>`;
+},
+B(el){
+  const tr=(r,cls)=>`<tr><td><b>${r.t}</b></td><td class="hide-ph">${r.n}</td><td class="sec2">${SEC[r.sec]||r.sec}</td><td class="r ${cls}">${p2(r.chg)}</td><td class="r">${p1(r.gap)}</td></tr>`;
+  const tb=(title,rows,cls,lim)=>`<div class="blk"><div class="bh">${title} <em>${rows.length}개</em></div><table><tr><th>종목</th><th class="hide-ph">회사</th><th>섹터</th><th class="r">하루</th><th class="r">200일선 대비</th></tr>${rows.slice(0,lim).map(r=>tr(r,cls)).join('')}</table>${rows.length>lim?`<div class="secs">외 ${rows.length-lim}개 · ${rows.slice(lim).map(r=>r.t).join(', ')}</div>`:''}</div>`;
+  el.innerHTML=`<div class="sec">${head()}${breadth()}${tb('새로 200일선 아래로',D.new_below,'dn',8)}${tb('새로 200일선 위로',D.new_above,'up',8)}${tb('200일선보다 40% 이상 높은 종목',D.hot,'',8)}
+  <div class="foot">하루 = ${md(D.asof)} 등락. 200일선은 최근 200거래일 정규장 종가의 평균이에요.</div></div>`;
+}};
+document.querySelectorAll('[data-v]').forEach(el=>R[el.dataset.v](el));
+</script></body></html>
