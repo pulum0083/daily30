@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-09": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-09/kospi/",
+        "headline": "반도체 되돌림 자리 — SOX·DRAM 동반 반등",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:30"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-06": {
       "kospi": {
         "state": "ready",
@@ -786,34 +805,6 @@
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-09-28": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-09-28/kospi/",
-        "headline": "오늘, 코스피 사야 할까요?",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-09-28/close/",
-        "headline": "美 금리 급등發 반도체 쇼크 — 코스피 7000선 붕괴",
-        "title": "6,889.74",
-        "price": "6,889.74",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-09-28/us/",
-        "headline": "VIX가 하루 만에 튀어 오르는 사이, 마이크론 실적이 AI 메모리 랠리의 시험대에 오른다",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
         "time": "21:17"
       }
     }

@@ -4780,6 +4780,42 @@
         "sox": -12.25,
         "vix": -4.7197
       }
+    },
+    {
+      "date": "2026-11-09",
+      "type": "kospi",
+      "predicted_direction": "상승 우위",
+      "up_pct": 87,
+      "down_pct": 13,
+      "confidence": 72,
+      "basis": "open",
+      "actual_direction": null,
+      "actual_change_pct": null,
+      "is_correct": null,
+      "generated_at": "2026-11-09T07:30:46.781946+09:00",
+      "checked_at": null,
+      "prior_direction": "상승",
+      "prior_score": 12.065,
+      "prior_strength": "strong",
+      "prior_up_pct": 97,
+      "signals": {
+        "sox": 4.21,
+        "nasdaq": 1.09,
+        "nq": 1.25,
+        "es": 0.2573,
+        "ym": -0.4456,
+        "ewy": 4.0714,
+        "ewy_resid": 10.091,
+        "kospi": -6.02,
+        "usdkrw": 0.48,
+        "vix": -9.0135
+      },
+      "hl": {
+        "KR200": 1.206,
+        "SMSN": 1.092,
+        "SKHX": 1.281,
+        "EWY": 0.073
+      }
     }
   ]
 }
