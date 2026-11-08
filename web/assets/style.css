@@ -1615,3 +1615,52 @@ a.ssig-r:hover .ssig-go{text-decoration:underline;}
   .ssig-r{display:grid;grid-template-columns:minmax(190px,1fr) 1.6fr;column-gap:24px;align-items:center;}
   .ssig-g{margin-top:0;}
 }
+
+/* §81 S&P 500 · 200일선 체크(미국 브리핑) — 맨 위 비율 + 60거래일 흐름, 200일선을 넘은 종목 칩, 과열 종목(2026-11-08 A안) */
+.spx-section{margin-top:22px}
+.spx-asof{font-size:12px;font-weight:500;color:var(--muted);margin-left:6px}
+.spx-card{border:1px solid var(--hairline);border-radius:var(--r-lg);background:var(--canvas);overflow:hidden}
+.spx-br{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center;padding:14px 16px 20px;border-bottom:1px solid var(--hairline)}
+.spx-k{font-size:12px;font-weight:700;color:var(--muted)}
+.spx-v{font-size:24px;font-weight:800;letter-spacing:-.4px;margin-top:2px;color:var(--ink);font-variant-numeric:tabular-nums}
+.spx-s{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.spx-s b{font-weight:700;color:var(--ink)}
+.spx-s b.dn{color:var(--dn)} .spx-s b.up{color:var(--up)}
+.spx-spark{position:relative;height:64px}
+.spx-spark svg{display:block;width:100%;height:100%;overflow:visible}
+.spx-spark .l{fill:none;stroke:var(--muted);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.spx-spark .g{stroke:var(--hairline);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spx-spark i{position:absolute;left:100%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--ink)}
+.spx-spark span{position:absolute;font-size:10px;color:var(--muted);white-space:nowrap;line-height:1}
+.spx-spark .y50{right:0;margin-top:3px}
+.spx-spark .fr{left:0;bottom:-15px} .spx-spark .to{right:0;bottom:-15px}
+.spx-blk{padding:12px 16px;border-bottom:1px solid var(--hairline)}
+.spx-bh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:13.5px;font-weight:800;color:var(--ink)}
+.spx-bh em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.spx-bh small{margin-left:auto;font-size:11px;font-weight:500;color:var(--muted)}
+.spx-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.spx-chip{display:inline-flex;align-items:baseline;gap:5px;border:1px solid var(--hairline);border-radius:8px;padding:4px 8px;font-size:12px}
+.spx-chip b{font-weight:800;color:var(--ink)}
+.spx-chip span{font-variant-numeric:tabular-nums}
+.spx-chip .dn{color:var(--dn)} .spx-chip .up{color:var(--up)}
+.spx-more{display:contents}
+.spx-more summary{list-style:none;cursor:pointer;display:inline-flex;font-size:12px;font-weight:700;color:var(--dn);border:1px solid var(--dn-bg);background:var(--dn-bg);border-radius:8px;padding:4px 8px}
+.spx-more summary::-webkit-details-marker{display:none}
+.spx-more[open] summary{display:none}
+/* 과열 — 오르내림(빨강·파랑)과 헷갈리지 않게 주황 계열(나스닥 체크 '주의'와 같은 색) */
+.spx-hot{background:linear-gradient(180deg,var(--gold-bg),var(--canvas) 70%)}
+.spx-tag{display:inline-block;font-size:11.5px;font-weight:800;color:var(--gold);background:var(--gold-bg);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);border-radius:999px;padding:1px 8px;margin-right:2px}
+.spx-hrow{display:grid;grid-template-columns:52px 1fr 110px 92px;gap:10px;align-items:center;font-size:12.5px;margin-top:9px}
+.spx-hrow b{font-weight:800;color:var(--ink)}
+.spx-hrow .nm{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spx-hrow .bar{height:7px;border-radius:4px;background:var(--surface-inset);position:relative}
+.spx-hrow .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#F59E0B}
+.spx-hrow .g{text-align:right;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.2}
+.spx-hrow .g small{display:block;font-size:10.5px;font-weight:500;color:var(--muted)}
+.spx-foot{padding:10px 16px 12px;font-size:11.5px;color:var(--muted);line-height:1.55}
+@media(max-width:600px){
+  .spx-br{grid-template-columns:1fr}
+  .spx-bh small{flex-basis:100%;margin-left:0;margin-top:1px}
+  .spx-hrow{grid-template-columns:48px 1fr 80px}
+  .spx-hrow .bar{display:none}
+}

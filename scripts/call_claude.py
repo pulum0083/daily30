@@ -1162,6 +1162,31 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
+def _sp500_lines(analysis: dict, date_str: str) -> list:
+    """S&P 500 200일선 체크 — 비율 한 줄 + 아래로 넘은 종목 + 과열 종목(2026-11-08 사용자 결정 T3, §81).
+
+    페이지와 같은 generate_html.read_sp500_ma200()으로 읽는다(날짜 대조까지 같다). 값이 없으면 블록째 뺀다.
+    종목은 시가총액 순 앞 3개만 쓰고 나머지는 '외 N개'로 묶는다 — 말풍선 폭(21칸)에 한 줄로 들어간다.
+    """
+    import generate_html
+    d = generate_html.read_sp500_ma200(dict(analysis), date_str)
+    if not d or not isinstance(d.get("above_pct"), (int, float)):
+        return []
+    head = f"📏 S&P 500 200일선 위 {d['above_pct']:.1f}%"
+    if isinstance(d.get("above_pct_prev"), (int, float)):
+        head += f" (전날 {d['above_pct_prev']:.1f}%)"
+    out = ["", head]
+
+    def names(rows):
+        s = "·".join(r["t"] for r in rows[:3])
+        return s + (f" 외 {len(rows) - 3}개" if len(rows) > 3 else "")
+    if d.get("below"):
+        out.append(f"이탈 {names(d['below'])}")
+    if d.get("hot"):
+        out.append(f"과열 {names(d['hot'])}")
+    return out
+
+
 def _nasdaq_change_lines(analysis: dict, date_str: str) -> list:
     """나스닥 체크는 주의(60)·경고(70)에 처음 닿은 날과 전달 고점을 처음 넘은 날의 미국 브리핑에만 싣는다(2026-11-03 사용자 결정).
 
@@ -1250,6 +1275,7 @@ def save_telegram_message(briefing_type: str, date_str: str, analysis: dict) -> 
         if issue_titles:
             lines += ["", "👀 오늘 밤 볼 것", issue_titles[0]]
         lines += _nasdaq_change_lines(analysis, date_str)
+        lines += _sp500_lines(analysis, date_str)
         lines += ["", link_line("전체 이슈 점검", link)]
     else:
         # 코스피: 방향·확률 → 헤드라인(🎯) → 개장 후 볼 것(👀) 한 문장씩만(2026-10-25).

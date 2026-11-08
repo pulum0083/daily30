@@ -43,7 +43,7 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 CONFIG_DIR = Path(__file__).resolve().parent / "config"
 
 # 정적 에셋 캐시 무효화용 버전 — style.css/main.js 변경 시 이 값을 올리면 브라우저가 새 파일을 받는다.
-ASSET_VER = "20261105a"
+ASSET_VER = "20261108a"
 CSS_PATH = f"/assets/style.css?v={ASSET_VER}"
 JS_PATH = f"/assets/main.js?v={ASSET_VER}"
 KST = pytz.timezone("Asia/Seoul")
@@ -749,6 +749,79 @@ def _read_nasdaq_overheat(target_date: str):
         print(f"[generate_html] ⚠️ nasdaq_overheat 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
         return None
     return data
+
+
+SP500_CHIPS = 8        # 아래로·위로 칩은 시가총액 순 8개까지, 나머지는 '더 보기'(2026-11-08 시안 A안)
+
+
+def read_sp500_ma200(analysis: dict, target_date: str = ""):
+    """S&P 500 200일선 체크 데이터 — 스냅샷이 1순위, 데이터 파일은 브리핑 날짜와 같을 때만(§14·§45).
+    파일에서 읽으면 analysis에 넣어 스냅샷에 함께 남긴다. 텔레그램(call_claude)도 이 함수로 읽는다."""
+    data = analysis.get("sp500_ma200")
+    if isinstance(data, dict):
+        return data
+    path = DATA_DIR / "sp500_ma200.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[generate_html] sp500_ma200 파싱 실패: {e}")
+        return None
+    if target_date and data.get("date") != target_date:
+        print(f"[generate_html] ⚠️ sp500_ma200 날짜 불일치({data.get('date')} ≠ {target_date}) — 섹션 생략")
+        return None
+    analysis["sp500_ma200"] = data
+    return data
+
+
+def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
+    """미국 브리핑 'S&P 500 · 200일선 체크' 섹션(2026-11-08 사용자 결정, 시안 A안).
+
+    맨 위 200일선 위 비율과 최근 60거래일 흐름, 아래로·위로 넘은 종목 칩, 200일선보다 40% 넘게 높은 과열 종목.
+    값이 없으면 빈 dict → 섹션 생략. 묶음마다 종목이 없으면 그 묶음만 빠진다.
+    """
+    d = read_sp500_ma200(analysis, target_date)
+    if not d or not isinstance(d.get("above_pct"), (int, float)) or not d.get("asof"):
+        return {}
+    br = [b for b in d.get("breadth") or [] if isinstance(b, list) and len(b) == 2 and isinstance(b[1], (int, float))]
+    spark = {}
+    if len(br) >= 2:
+        vals = [b[1] for b in br]
+        lo, hi = min(vals + [40.0]) - 3, max(vals + [70.0]) + 3
+        Y = lambda v: (hi - v) / (hi - lo) * 100
+        X = lambda i: i / (len(br) - 1) * 100
+        spark = {"path": " ".join(f"{'L' if i else 'M'}{X(i):.2f} {Y(b[1]):.2f}" for i, b in enumerate(br)),
+                 "y50": f"{Y(50):.2f}", "dot": f"{Y(br[-1][1]):.2f}",
+                 "from": _md(br[0][0]), "to": _md(br[-1][0])}
+
+    def sectors(rows):
+        c = {}
+        for r in rows:
+            c[r.get("sec") or ""] = c.get(r.get("sec") or "", 0) + 1
+        return " · ".join(f"{k} {v}" for k, v in sorted(c.items(), key=lambda x: -x[1])[:4] if k)
+
+    hot = [r for r in d.get("hot") or [] if isinstance(r.get("gap"), (int, float))]
+    mx = max([r["gap"] for r in hot] + [1.0])
+    asof = d["asof"]
+    dp = round(d["above_pct"] - d["above_pct_prev"], 1) if isinstance(d.get("above_pct_prev"), (int, float)) else None
+    return {"spx": {
+        "asof_label": f"{_md(asof)}({_dow(asof)}) 종가 기준",
+        "above_pct": d["above_pct"], "above": d.get("above"), "n": d.get("n"),
+        "prev_pct": d.get("above_pct_prev"), "dp": dp, "spark": spark,
+        "below": d.get("below") or [], "up": d.get("up") or [], "chips": SP500_CHIPS,
+        "below_secs": sectors(d.get("below") or []),
+        "hot": [dict(r, w=f"{r['gap'] / mx * 100:.1f}", x=f"{1 + r['gap'] / 100:.1f}") for r in hot],
+        "hot_pct": 40,
+    }}
+
+
+def _md(ymd: str) -> str:
+    return f"{int(ymd[5:7])}/{int(ymd[8:10])}"
+
+
+def _dow(ymd: str) -> str:
+    return "월화수목금토일"[datetime.strptime(ymd, "%Y-%m-%d").weekday()]
 
 
 NASDAQ_PAGE_URL = f"{SITE_BASE}/stocks/nasdaq-check/"
@@ -2123,6 +2196,7 @@ def render_briefing(internal_type: str, target_date: str, market_data: dict, for
         ctx["fng_dial"] = build_fng_dial(market_data, internal_type)
         ctx["todays_view"] = analysis.get("todays_view")
         ctx.update(build_nasdaq_check(analysis, target_date))   # 나스닥 체크(§65) — 이슈 아래
+        ctx.update(build_sp500_ma200(analysis, target_date))    # S&P 500 200일선 체크(§81) — 나스닥 체크 아래
         ctx.update(build_premarket_strip(analysis, market_data, target_date, gen_time))   # 프리마켓 실측 띠 — 맨 위
         save_us_index_position(analysis, market_data, target_date)
         ctx.update(build_struct_signal(analysis))               # 구조 신호 — 본문 맨 아래, 모바일은 시장 지표 위(§68 ⑤)

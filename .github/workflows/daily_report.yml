@@ -272,6 +272,13 @@ jobs:
         timeout-minutes: 5
         run: python3 scripts/nasdaq_overheat.py
 
+      # S&P 500 200일선 체크(§81) — data/sp500_ma200.json. 실패하면 섹션·텔레그램 줄만 빠진다.
+      - name: 📏 S&P 500 200일선 체크 (실패해도 발행 계속)
+        if: steps.holiday.outputs.open == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        run: python3 scripts/sp500_ma200.py
+
       # 미국 대형주 월봉 5개월선 안착 종목(§67) — AI 종목 픽을 대체. 실패하면 코너만 빠진다.
       - name: 📈 월봉 5개월선 안착 종목 스크리닝 (미국 대형주, 실패해도 발행 계속)
         if: steps.holiday.outputs.open == 'true'
