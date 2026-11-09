@@ -164,3 +164,14 @@
 .vsx-inst .bar i.mid{left:50%;width:1px;top:-3px;bottom:-3px;background:#CBD5E1;border-radius:0}
 .vsx-inst b{font-size:12.5px;text-align:right;white-space:nowrap}
 .vsx-inst b.up{color:var(--up)} .vsx-inst b.dn{color:var(--dn)}
+
+/* '어제랑 비교' ? 설명 — 모바일은 한 단, PC는 두 단으로 펼쳐 스크롤이 생기지 않게 한다 */
+.help-modal .vsh p{margin:0 0 14px}
+.help-modal .vsh p:last-child{margin-bottom:0}
+.help-modal .vsh-col p:last-child{margin-bottom:14px}
+@media(min-width:760px){
+  .help-modal:has(.vsh){max-width:760px;max-height:none;padding:24px 26px 22px}
+  .help-modal .vsh-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+  .help-modal .vsh-col p:last-child{margin-bottom:0}
+  .help-modal .vsh-cols{margin-bottom:14px}
+}
