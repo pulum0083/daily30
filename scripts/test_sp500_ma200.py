@@ -74,6 +74,9 @@ def test_section_context_and_render(tmp_path, monkeypatch):
     assert "🔥 과열" in html and "200일선보다 40% 넘게 높아요" in html
     assert "+2개 더 보기" in html and html.count('class="spx-chip"') == 11
     assert "평균의 2.8배" in html
+    import re
+    assert not re.search(r">-\d", html)                                    # 하락은 '−'(U+2212) — 상세 페이지와 같은 기호
+    assert "−2.6%p" in html
 
 
 def test_section_skipped_on_date_mismatch_and_empty_groups(tmp_path, monkeypatch):

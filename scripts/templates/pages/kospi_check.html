@@ -48,7 +48,7 @@
     <div class="ltp-v">{{ kc.gap_s }}<small>%</small></div>
     <p class="ltp-say">{{ kc.say | safe }}</p>
     <div class="ltp-kpis">
-      <div class="ltp-kpi"><span>한 달 전({{ kc.prev.label }})</span><b>{{ kc.prev.gap_s }}%</b><em>종가 {{ '{:,.2f}'.format(kc.prev.close) }}</em></div>
+      <div class="ltp-kpi"><span>{{ kc.prev.label }}</span><b>{{ kc.prev.gap_s }}%</b><em>종가 {{ '{:,.2f}'.format(kc.prev.close) }}</em></div>
       <div class="ltp-kpi"><span>올해 꼭대기</span><b>{{ kc.year_max_s }}%</b><em>{{ kc.year_max.m[:4] }}년 {{ kc.year_max.m[5:7]|int }}월</em></div>
       <div class="ltp-kpi"><span>지금보다 높았던 달</span><b>{{ kc.above }}개월</b><em>{{ kc.months }}개월 중</em></div>
     </div>

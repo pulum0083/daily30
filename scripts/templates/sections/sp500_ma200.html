@@ -8,7 +8,7 @@
       <div>
         <div class="spx-k">200일선 위에 있는 종목</div>
         <div class="spx-v">{{ '%.1f'|format(s.above_pct) }}%</div>
-        <div class="spx-s">{{ s.n }}개 중 <b>{{ s.above }}개</b>{% if s.dp is not none %} · 전날 {{ '%.1f'|format(s.prev_pct) }}%에서 <b class="{{ 'dn' if s.dp < 0 else 'up' }}">{{ '%+.1f'|format(s.dp) }}%p</b>{% endif %}</div>
+        <div class="spx-s">{{ s.n }}개 중 <b>{{ s.above }}개</b>{% if s.dp is not none %} · 전날 {{ '%.1f'|format(s.prev_pct) }}%에서 <b class="{{ 'dn' if s.dp < 0 else 'up' }}">{{ '%+.1f'|format(s.dp)|replace('-', '−') }}%p</b>{% endif %}</div>
       </div>
       {% if s.spark %}
       <div class="spx-spark" aria-hidden="true">
@@ -22,13 +22,13 @@
     {% if s.below %}
     <div class="spx-blk">
       <div class="spx-bh">200일선 아래로 <em>{{ s.below|length }}개</em>{% if s.below_secs %}<small>{{ s.below_secs }}</small>{% endif %}</div>
-      <div class="spx-chips">{% for r in s.below %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.below|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="dn">{{ '%+.2f'|format(r.chg) }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
+      <div class="spx-chips">{% for r in s.below %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.below|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="dn">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
     </div>
     {% endif %}
     {% if s.up %}
     <div class="spx-blk">
       <div class="spx-bh">200일선 위로 <em>{{ s.up|length }}개</em></div>
-      <div class="spx-chips">{% for r in s.up %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.up|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="up">{{ '%+.2f'|format(r.chg) }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
+      <div class="spx-chips">{% for r in s.up %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.up|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="up">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
     </div>
     {% endif %}
     {% if s.hot %}
