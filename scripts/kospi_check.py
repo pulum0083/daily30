@@ -9,7 +9,9 @@ data/kospi_check.json에만 남긴다 — 상세 페이지(/stocks/kospi-check/,
 """
 from __future__ import annotations
 
+import json
 import sys
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -17,6 +19,11 @@ import nasdaq_overheat as nq  # noqa: E402
 
 SYMBOL = "^KS11"
 MA_MONTHS = 60
+# 야후 ^KS11은 1996-11부터라 5년 평균이 2001-11에야 시작한다. 그 앞은 네이버 지수 일봉(1990-01~)으로 채운다
+# (2026-11-09 — 1999-12 같은 사례가 '지금과 비슷했던 때'에서 빠지지 않게). 네이버 일봉은 2006~2007년 저가가
+# 0으로 비어 있는 날이 있어, 야후가 있는 기간은 야후를 그대로 쓰고 그 앞만 네이버로 잇는다.
+NAVER_DAY_URL = ("https://api.stock.naver.com/chart/domestic/index/KOSPI/day"
+                 "?startDateTime=199001010000&endDateTime={end}2359")
 
 
 def gap_series(months: list) -> list:
@@ -92,7 +99,7 @@ def compute(daily: list, last_date: str, last_close: float) -> dict | None:
         "above": sum(1 for x in series[:-1] if x["g"] > cur["g"]),   # 지금보다 높았던 달 수
         "year_max": {"m": this_year["m"], "gap": round(this_year["g"], 1)},
         "prev_max": {"m": prev["m"], "gap": round(prev["g"], 1)} if prev else None,
-        # 월별 흐름 — 종목 홈이 25년 그래프로 그린다(2026-11-08 B안). [월, 5년 평균 대비 %] 오래된→최신
+        # 월별 흐름 — 종목 홈·상세 페이지가 그래프로 그린다(2026-11-08 B안). [월, 5년 평균 대비 %] 오래된→최신
         "series": [[x["m"], round(x["g"], 1)] for x in series],
         # 상세 페이지용 월별 기록 — home-summary에는 넣지 않는다(build_home_summary가 뺀다).
         # [월, 거리 %, 월말 종가, 5년 평균, 1년 뒤 등락 %, 1년 안 최대 하락 %] — 1년 뒤가 아직이면 마지막 둘은 None
@@ -107,10 +114,45 @@ def _hist_row(months: list, x: dict) -> list:
     return [x["m"], round(x["g"], 1), round(months[i]["close"], 2), round(x["ma60"], 1), rd(r), rd(dd)]
 
 
+def naver_daily(end: str) -> list:
+    """네이버 코스피 지수 일봉 → [(YYYY-MM-DD, high, low, close)] 오래된→최신. 값이 빈 날은 뺀다."""
+    url = NAVER_DAY_URL.format(end=end.replace("-", ""))
+    rows = json.loads(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}),
+                                             timeout=30).read())
+    out = []
+    for r in rows:
+        try:
+            d, h, lo, c = r["localDate"], float(r["highPrice"]), float(r["lowPrice"]), float(r["closePrice"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if h > 0 and lo > 0 and c > 0:
+            out.append((f"{d[:4]}-{d[4:6]}-{d[6:8]}", h, lo, c))
+    return sorted(out)
+
+
+def join_daily(yahoo: list, naver: list) -> list:
+    """야후 일봉 앞에 야후 첫 날보다 이른 네이버 일봉을 붙인다. 겹치는 기간은 야후를 쓴다."""
+    if not yahoo:
+        return naver
+    first = yahoo[0][0]
+    return [r for r in naver if r[0] < first] + list(yahoo)
+
+
+def fetch_daily(end: str) -> list:
+    """코스피 체크용 일봉 — 야후 ^KS11 + 그 앞은 네이버. 네이버가 실패하면 야후만 쓴다(기록이 짧아질 뿐이다)."""
+    yahoo = nq.fetch_daily(SYMBOL)
+    try:
+        naver = naver_daily(end)
+    except Exception as e:
+        print(f"[kospi_check] 네이버 지수 일봉 조회 실패 — 야후만 쓴다: {e}", file=sys.stderr)
+        naver = []
+    return join_daily(yahoo, naver)
+
+
 def fetch(last_date: str, last_close: float) -> dict | None:
     """네트워크 실패면 None — 줄이 빠질 뿐 마감 잡을 막지 않는다."""
     try:
-        return compute(nq.fetch_daily(SYMBOL), last_date, last_close)
+        return compute(fetch_daily(last_date), last_date, last_close)
     except Exception as e:
         print(f"[kospi_check] 조회 실패: {e}", file=sys.stderr)
         return None
