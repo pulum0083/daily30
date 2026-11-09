@@ -935,8 +935,20 @@ def write_nasdaq_page(target_date: str) -> bool:
     if gate_write(out, html_out, NASDAQ_PAGE_URL):
         GATE_BLOCKED.append(NASDAQ_PAGE_URL)
         return False
+    write_nasdaq_home(data)
     print(f"[generate_html] 나스닥 체크 상세 페이지 → {out}")
     return True
+
+
+def write_nasdaq_home(data: dict) -> None:
+    """종목 홈 '장기 신호' 나스닥 줄용 작은 파일(2026-11-09) — 상세 페이지와 같은 값·같은 기준일.
+    홈은 이 파일과 최근 미국 브리핑 스냅샷 중 기준일이 더 최근인 것을 쓴다. 주인은 미국 잡과 주간 리포트 작업이다."""
+    if not isinstance(data.get("gap_pct"), (int, float)) or not data.get("last_date"):
+        return
+    home = {"asof": data["last_date"], "gap_pct": data["gap_pct"], "level": data.get("level"),
+            "month": data.get("month"), "high": data.get("high")}
+    (WEB_DIR / "data").mkdir(parents=True, exist_ok=True)
+    (WEB_DIR / "data" / "nasdaq-home.json").write_text(json.dumps(home, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 KOSPI_PAGE_URL = f"{SITE_BASE}/stocks/kospi-check/"

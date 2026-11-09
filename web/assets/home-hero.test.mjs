@@ -122,6 +122,17 @@ test('장기 신호 · 나스닥 체크 — 단계 알약·설명·미니 게이
   assert.equal(api.nasdaqRow({ gap_pct: null }), '');
 });
 
+test('장기 신호 · 나스닥 체크 — 기준일을 적고, 홈 파일과 스냅샷 중 더 최근 것을 쓴다(2026-11-09)', () => {
+  assert.match(api.nasdaqRow({ gap_pct: 48.92, asof: '2026-11-06' }, '2026-11-09'), /<em>11\/6\(금\) 종가<\/em>/);
+  assert.match(api.nasdaqRow({ gap_pct: 48.96, last_date: '2026-11-05' }, '2026-11-09'), /11\/5\(목\) 종가/);
+  assert.equal(api.nasdaqRow({ gap_pct: 48.9, asof: '2026-10-20' }, '2026-11-09'), '');   // 10일 넘게 멈췄으면 뺀다
+  const home = { gap_pct: 48.92, asof: '2026-11-06' }, snap = { gap_pct: 48.96, last_date: '2026-11-05' };
+  assert.equal(api.pickNasdaq(home, snap), home);
+  assert.equal(api.pickNasdaq({ gap_pct: 50, asof: '2026-11-04' }, snap), snap);
+  assert.equal(api.pickNasdaq(null, snap), snap);
+  assert.equal(api.pickNasdaq(home, null), home);
+});
+
 const SPH = { asof: '2026-11-06', pct: 58.8, week: { d: '10/30', pct: 61.6 }, median_all: 66.3, hot: 3, deep: 40, spark: [60, 62, 61, 58.8] };
 test('장기 신호 · S&P 500 — 비율·한 주 전·보통 대비·과열/20%↓, 기준일, 상세 페이지', () => {
   const h = api.sp500Row(SPH, '2026-11-08');
