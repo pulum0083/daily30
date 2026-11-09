@@ -214,11 +214,24 @@ def test_recent_weekly_line(tmp_path, monkeypatch):
     (d / "data.json").write_text(json.dumps(_wk()), encoding="utf-8")
     (d / "index.html").write_text("<html></html>", encoding="utf-8")
     it = gh.build_recent_weekly("2026-11-09")
-    assert it == {"url": "/weekly/2026-11-06/", "label": "주간 장기 리포트", "date": "11/2~11/6",
+    assert it == {"url": "/weekly/2026-11-06/", "label": "주간 장기 리포트", "end": "2026-11-06", "date": "11/2~11/6",
                   "headline": "코스피 한 주 −11.7%, 나스닥은 200일선 아래로"}
     assert gh.build_recent_weekly("2026-11-25") == {}                     # 14일 넘게 새 리포트가 없으면 싣지 않는다
-    html = gh.render_recent_briefings([{"url": "/b/", "label": "미국 시장", "date": "11/6(금)", "headline": "h", "dek": ""}], it)
-    assert html.index('rb-item wk') < html.index('rb-item feat') and "📅 11/2~11/6 · 주간 장기 리포트" in html
+    html = gh.render_recent_briefings([{"url": "/b/", "label": "미국 시장", "iso": "2026-11-06", "date": "11/6(금)", "headline": "h", "dek": ""}], it)
+    assert html.index('rb-item feat wk') < html.index('href="/b/"') and "📅 11/2~11/6 · 주간 장기 리포트" in html   # 토요일 발행이라 금요일보다 위
+
+
+def test_recent_weekly_sits_between_monday_and_friday():
+    """주간 리포트는 발행 순서대로 — 월요일 브리핑 아래, 금요일 브리핑 위. 파란 바(feat)는 가장 최근 1편(2026-11-09)."""
+    import generate_html as gh
+    items = [{"url": f"/b{k}/", "label": "x", "iso": d, "date": d, "headline": f"h{k}", "dek": "요약" if k == 0 else ""}
+             for k, d in enumerate(["2026-11-09", "2026-11-09", "2026-11-06", "2026-11-06"])]
+    wk = {"url": "/weekly/2026-11-06/", "label": "주간 장기 리포트", "end": "2026-11-06", "date": "11/2~11/6", "headline": "w"}
+    html = gh.render_recent_briefings(items, wk)
+    order = [html.index(u) for u in ('href="/b0/"', 'href="/b1/"', 'href="/weekly/', 'href="/b2/"', 'href="/b3/"')]
+    assert order == sorted(order)
+    assert html.count(" feat") == 1 and 'class="rb-item feat"><a href="/b0/"' in html and "요약" in html
+    assert 'class="rb-item wk"' in html
 
 
 def test_kospi_daily_joins_naver_before_yahoo():

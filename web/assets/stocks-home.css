@@ -1024,8 +1024,7 @@ body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;backg
 #recent-briefings .rb-h{font-size:15px;font-weight:700;line-height:1.45}
 #recent-briefings .rb-item.feat a{background:#F8FAFF}
 #recent-briefings .rb-item.feat .rb-h{font-size:16px}
-#recent-briefings .rb-item.wk a{border-left:3px solid var(--primary);padding-left:13px}   /* 주간 장기 리포트 한 줄(2026-11-09) */
-#recent-briefings .rb-item.wk+.rb-item a{border-top:1px solid #F1F5F9}
+#recent-briefings .rb-item.feat a{border-left:3px solid var(--primary);padding-left:13px}   /* 가장 최근 발행 1편(2026-11-09) */
 #recent-briefings .rb-d{font-size:13px;color:#374151;line-height:1.6;margin-top:5px}
 #recent-briefings .rb-d b{font-weight:700}
 

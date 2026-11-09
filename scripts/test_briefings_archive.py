@@ -175,6 +175,7 @@ def _stocks_page(tmp_path, monkeypatch):
     page = tmp_path / "stocks.html"
     page.write_text(f"<ol>\n      {g.RECENT_START}\n      {g.RECENT_END}\n      </ol>", encoding="utf-8")
     monkeypatch.setattr(g, "STOCKS_HOME_HTML", page)
+    monkeypatch.setattr(g, "build_recent_weekly", lambda today="": {})   # 실제 web/weekly/ 를 읽지 않는다
     return page
 
 

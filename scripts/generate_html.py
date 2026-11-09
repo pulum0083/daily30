@@ -2734,7 +2734,7 @@ def build_recent_briefings(n: int = 6) -> list:
             if not headline:
                 continue   # 제목 없는 편은 싣지 않는다 — 종류 이름만 남은 줄은 정보가 없다
             dt = date.fromisoformat(d)
-            out.append({"url": f"/briefings/{d}/{t}/", "label": BRIEFING_LABELS[t],
+            out.append({"url": f"/briefings/{d}/{t}/", "label": BRIEFING_LABELS[t], "iso": d,
                         "date": f"{dt.month}/{dt.day}({_WEEKDAYS[dt.weekday()]})",
                         "headline": headline, "dek": _archive_dek(d, t) if not out else ""})
     return out
@@ -2760,21 +2760,30 @@ def build_recent_weekly(today: str = "") -> dict:
         if not c:
             return {}
         w = c["wk"]
-        return {"url": f"/weekly/{end}/", "label": "주간 장기 리포트",
+        return {"url": f"/weekly/{end}/", "label": "주간 장기 리포트", "end": end,
                 "date": f"{_md(w['monday'])}~{_md(end)}", "headline": w["head"]}
     return {}
 
 
 def render_recent_briefings(items: list, weekly: dict = None) -> str:
-    rows = []
+    """발행 순서(최신 위)대로 쓴다. 주간 리포트는 토요일 아침에 나가므로 그 주 금요일 브리핑들 바로 위에 끼운다.
+    맨 위 1편(가장 최근 발행)만 파란 바·요약으로 강조한다(2026-11-09 사용자 지적 — 주간 리포트가 늘 맨 위에 붙어 있었다)."""
+    order = list(items)
     if weekly:
-        rows.append(f'      <li class="rb-item wk"><a href="{weekly["url"]}"><div class="rb-meta">📅 {weekly["date"]} · {weekly["label"]}</div>'
-                    f'<div class="rb-h">{html.escape(weekly["headline"])}</div></a></li>')
-    for i, it in enumerate(items):
+        end = weekly.get("end", "")
+        at = next((k for k, it in enumerate(order) if it.get("iso", "") <= end), len(order))
+        order.insert(at, dict(weekly, wk=True))
+    rows = []
+    for i, it in enumerate(order):
+        cls = "rb-item" + (" feat" if i == 0 else "") + (" wk" if it.get("wk") else "")
+        if it.get("wk"):
+            rows.append(f'      <li class="{cls}"><a href="{it["url"]}"><div class="rb-meta">📅 {it["date"]} · {it["label"]}</div>'
+                        f'<div class="rb-h">{html.escape(it["headline"])}</div></a></li>')
+            continue
         # 요약은 우리 분석 문장이라 <b> 강조만 살리고 나머지 태그는 지운다(아카이브는 그대로 |safe로 쓴다).
-        dek = re.sub(r"<(?!/?b>)[^>]+>", "", it["dek"]) if it["dek"] else ""
+        dek = re.sub(r"<(?!/?b>)[^>]+>", "", it["dek"]) if (it["dek"] and i == 0) else ""
         rows.append(
-            f'      <li class="rb-item{" feat" if i == 0 else ""}"><a href="{it["url"]}">'
+            f'      <li class="{cls}"><a href="{it["url"]}">'
             f'<div class="rb-meta">{it["date"]} · {it["label"]}</div>'
             f'<div class="rb-h">{html.escape(it["headline"])}</div>'
             + (f'<div class="rb-d">{dek}</div>' if dek else "") + "</a></li>")
