@@ -1162,20 +1162,40 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
-def _sp500_lines(analysis: dict, date_str: str) -> list:
-    """S&P 500 200일선 체크 — 비율 한 줄 + 아래로 넘은 종목 + 과열 종목(2026-11-08 사용자 결정 T3, §81).
+SP500_TG_LINE = 50.0   # 200일선 위 비율이 이 선을 넘나든 날
+SP500_TG_JUMP = 5.0    # 하루에 이만큼(%p) 넘게 움직인 날 — 2025-01~2026-11 463거래일 중 두 조건을 합쳐 34일(한 달 1~2번)
 
+
+def _sp500_event(now: float, prev: float) -> str:
+    """텔레그램에 실을 만한 날인지 — 비율이 50%를 넘나들었거나 하루에 5%p 넘게 움직인 날만(2026-11-09 사용자 결정).
+    해당하면 한 줄 설명, 아니면 ''."""
+    crossed = (now < SP500_TG_LINE) != (prev < SP500_TG_LINE)
+    diff = now - prev
+    jump = abs(diff) >= SP500_TG_JUMP
+    if crossed:
+        where = "절반 아래로 내려왔어요" if now < SP500_TG_LINE else "다시 절반을 넘었어요"
+        return (f"하루에 {abs(diff):.1f}%p {'빠지며' if diff < 0 else '오르며'} " + where + ".") if jump else where + "."
+    if jump:
+        return f"하루에 {abs(diff):.1f}%p {'빠졌어요' if diff < 0 else '올랐어요'}."
+    return ""
+
+
+def _sp500_lines(analysis: dict, date_str: str) -> list:
+    """S&P 500 200일선 체크 — 비율 한 줄 + 무슨 일인지 한 줄 + 아래로 넘은 종목 + 과열 종목(§81).
+
+    특별한 날에만 싣는다 — 200일선 위 비율이 50%를 넘나들었거나 하루에 5%p 넘게 움직인 날(2026-11-09 사용자 결정,
+    그 전엔 매일 나갔다). 전날 비율이 없으면 판단할 수 없어 싣지 않는다.
     페이지와 같은 generate_html.read_sp500_ma200()으로 읽는다(날짜 대조까지 같다). 값이 없으면 블록째 뺀다.
     종목은 시가총액 순 앞 3개만 쓰고 나머지는 '외 N개'로 묶는다 — 말풍선 폭(21칸)에 한 줄로 들어간다.
     """
     import generate_html
     d = generate_html.read_sp500_ma200(dict(analysis), date_str)
-    if not d or not isinstance(d.get("above_pct"), (int, float)):
+    if not d or not isinstance(d.get("above_pct"), (int, float)) or not isinstance(d.get("above_pct_prev"), (int, float)):
         return []
-    head = f"📏 S&P 500 200일선 위 {d['above_pct']:.1f}%"
-    if isinstance(d.get("above_pct_prev"), (int, float)):
-        head += f" (전날 {d['above_pct_prev']:.1f}%)"
-    out = ["", head]
+    event = _sp500_event(d["above_pct"], d["above_pct_prev"])
+    if not event:
+        return []
+    out = ["", f"📏 S&P 500 200일선 위 {d['above_pct']:.1f}% (전날 {d['above_pct_prev']:.1f}%)", event]
 
     def names(rows):
         s = "·".join(r["t"] for r in rows[:3])

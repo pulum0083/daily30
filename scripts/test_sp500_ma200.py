@@ -89,9 +89,17 @@ def test_section_skipped_on_date_mismatch_and_empty_groups(tmp_path, monkeypatch
 
 def test_telegram_lines(tmp_path, monkeypatch):
     _with_file(tmp_path, monkeypatch, DATA)
-    assert cc._sp500_lines({}, "2026-11-09") == [
-        "", "📏 S&P 500 200일선 위 58.8% (전날 61.4%)", "이탈 IBM·AXP·VZ 외 7개", "과열 MRNA·CRL"]
+    assert cc._sp500_lines({}, "2026-11-09") == []                 # 58.8% ← 61.4%: 50% 안 넘었고 −2.6%p — 평범한 날엔 안 보낸다
     assert cc._sp500_lines({}, "2026-11-10") == []
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct=48.8, above_pct_prev=51.2))
+    assert cc._sp500_lines({}, "2026-11-09") == [
+        "", "📏 S&P 500 200일선 위 48.8% (전날 51.2%)", "절반 아래로 내려왔어요.", "이탈 IBM·AXP·VZ 외 7개", "과열 MRNA·CRL"]
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct=58.8, above_pct_prev=66.0))
+    assert cc._sp500_lines({}, "2026-11-09")[2] == "하루에 7.2%p 빠졌어요."
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct=53.0, above_pct_prev=46.0))
+    assert cc._sp500_lines({}, "2026-11-09")[2] == "하루에 7.0%p 오르며 다시 절반을 넘었어요."
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct_prev=None))
+    assert cc._sp500_lines({}, "2026-11-09") == []                 # 전날 비율이 없으면 판단하지 않는다
 
 
 def test_download_retries_empty_tickers():
