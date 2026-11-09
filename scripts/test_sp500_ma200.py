@@ -92,3 +92,21 @@ def test_telegram_lines(tmp_path, monkeypatch):
     assert cc._sp500_lines({}, "2026-11-09") == [
         "", "📏 S&P 500 200일선 위 58.8% (전날 61.4%)", "이탈 IBM·AXP·VZ 외 7개", "과열 MRNA·CRL"]
     assert cc._sp500_lines({}, "2026-11-10") == []
+
+
+def test_download_retries_empty_tickers():
+    """여러 스레드로 받다 놓친 종목만 한 번 더 받는다(2026-11-09 'database is locked')."""
+    import numpy as np
+    idx = pd.date_range("2026-01-01", periods=3)
+    calls = []
+
+    class YF:
+        def download(self, tickers, threads, **kw):
+            calls.append((list(tickers), threads))
+            cols = {t: [1.0, 2.0, 3.0] for t in tickers}
+            if threads:
+                cols["HAS"] = [np.nan] * 3
+            return {"Close": pd.DataFrame(cols, index=idx)}
+    raw = sp.download(YF(), ["AAPL", "HAS"], "15mo")
+    assert calls == [(["AAPL", "HAS"], True), (["HAS"], False)]
+    assert raw["HAS"].tolist() == [1.0, 2.0, 3.0]

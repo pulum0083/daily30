@@ -186,6 +186,26 @@ def add_caps(result: dict) -> None:
         result[k].sort(key=lambda r: -(r["cap"] or 0))
 
 
+def download(yf, tickers: list, period: str):
+    """정규장 종가(분할·배당 반영)를 한 번에 받고, 통째로 빈 종목만 한 번 더 받는다.
+    여러 스레드로 받으면 yfinance 캐시가 'database is locked'로 몇 종목을 놓친다(2026-11-09 주간 작업 HAS 1종목) —
+    그대로 두면 그날 비율이 499종목 기준이 되고 누적 기록 최근 60일이 그 값으로 덮인다."""
+    raw = yf.download(tickers, period=period, interval="1d", auto_adjust=True, progress=False, threads=True)["Close"]
+    miss = [t for t in tickers if t not in raw.columns or raw[t].isna().all()]
+    if miss:
+        print(f"[sp500_ma200] 빈 종목 {len(miss)}개 다시 받기: {', '.join(miss[:10])}", file=sys.stderr)
+        try:
+            again = yf.download(miss, period=period, interval="1d", auto_adjust=True, progress=False, threads=False)["Close"]
+            if not hasattr(again, "columns"):
+                again = again.to_frame(miss[0])
+            for t in miss:
+                if t in again.columns and not again[t].isna().all():
+                    raw[t] = again[t]
+        except Exception as e:
+            print(f"[sp500_ma200] 다시 받기 실패({e})", file=sys.stderr)
+    return raw
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="브리핑 날짜(KST, 기본 오늘)")
@@ -201,8 +221,7 @@ def main() -> int:
         print(f"[sp500_ma200] 구성 종목 {len(items)}개 — 중단", file=sys.stderr)
         return 1
     names = {t: (n, s) for t, n, s in items}
-    raw = yf.download(list(names), period="7y" if args.backfill else "15mo", interval="1d", auto_adjust=True,
-                      progress=False, threads=True)["Close"]
+    raw = download(yf, list(names), "7y" if args.backfill else "15mo")
     if args.backfill:
         df = raw[[d.date() <= session for d in raw.index]]
         gap = (df / df.rolling(MA_DAYS, min_periods=MA_DAYS).mean() - 1) * 100
