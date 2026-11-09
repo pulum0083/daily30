@@ -2766,10 +2766,12 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
   - RSS `pubDate`는 여전히 판정에 쓰지 않는다(Google News 재크롤링 원칙).
 - **선별 상한을 4개에서 7개로 늘렸다** (`RSS_SELECT_MAX`). 선별 프롬프트에는 "지수 마감 요약보다 기업 실적·가이던스·종목 급등락 사유를 우선하고, 지수 요약은 최대 1개만"을 넣었다.
 - **미국 검색어 4개를 추가했다**: `premarket movers stocks`, `stocks making biggest moves premarket`, `shares earnings beat guidance`, `미국 실적 발표 주가 급등락`.
-- **결제·권한 오류는 재시도하지 않고 관리자에게 알린다** (`_is_billing_error`, `alert_gemini_failure`).
-  - 해당하는 오류는 PERMISSION_DENIED, BILLING, outstanding balance, API_KEY_INVALID, 403이다.
-  - 기다려도 풀리지 않는 오류라 재시도는 시간만 쓴다. 알림은 평문으로 보낸다(§37).
-  - 뉴스는 빈 채로 저장하고 발행은 계속한다(§0·§27).
+- **Gemini가 결제·권한 오류로 막히면 브리핑을 만들지 않는다** (`_is_billing_error`, `alert_gemini_failure`, 2026-11-09 사용자 결정).
+  - 해당하는 오류는 PERMISSION_DENIED, BILLING, outstanding balance, API_KEY_INVALID, 403이다. 기다려도 풀리지 않으니 재시도하지 않는다.
+  - `fetch_news.py`는 관리자 텔레그램에 오류 내용과 다시 만드는 명령을 보내고(평문, §37), `GITHUB_OUTPUT`에 `blocked=true`를 쓰고 종료 코드 3으로 끝난다.
+  - 세 브리핑 잡 모두 뉴스 스텝(`id: news`) 바로 다음에 `⛔ Gemini 막힘` 스텝이 있다. 이 스텝이 잡을 실패시켜 분석·발행·구독자 텔레그램이 모두 멈춘다.
+  - **§27의 "뉴스 없이 발행해도 된다"는 일시 오류(429·500·파싱 실패)에만 남는다.** 11/8~9처럼 키가 통째로 막히면 뉴스뿐 아니라 종목 뉴스·주도주 근거·증권가 시황까지 함께 멈추므로, 반쪽 브리핑을 내보내지 않는다.
+  - 풀린 뒤 다시 만들기: `gh workflow run daily_report.yml -f briefing_type={kospi|kospi-close|us}`. 정해진 시각이 지났으면 `-f dry_run=true`로 텔레그램 없이 페이지만 만든다.
 - 기존 게이트(익명 주어·실측 반대·실적 예고·기사 밖 주장 등)는 하나도 완화하지 않았다.
 - 테스트는 `scripts/test_us_news_rss.py`(15)다.
 

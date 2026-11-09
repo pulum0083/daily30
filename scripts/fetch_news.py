@@ -1739,10 +1739,12 @@ def _is_retryable_error(e: Exception) -> bool:
 def alert_gemini_failure(briefing_type: str, err: Exception) -> None:
     """Gemini가 결제·권한 오류로 막혔을 때 관리자 텔레그램 알림(평문, §37). 알림 실패는 삼킨다."""
     label = {"kospi": "코스피 아침", "kospi-close": "코스피 마감", "us": "미국"}.get(briefing_type, briefing_type)
-    msg = (f"⚠️ Gemini API 오류 — {label} 브리핑을 뉴스 없이 발행해요.\n"
-           f"{str(err)[:300]}\n"
+    cmd = {"kospi": "kospi", "kospi-close": "kospi-close", "us": "us"}.get(briefing_type, briefing_type)
+    msg = (f"⛔ Gemini API가 막혀 {label} 브리핑을 만들지 않았어요.\n"
+           f"오류: {str(err)[:300]}\n"
            "결제·키 문제면 https://aistudio.google.com/billing 에서 확인하세요. "
-           "같은 키를 쓰는 종목 뉴스·주도주 근거·증권가 시황 요약도 함께 멈춰 있어요.")
+           "같은 키를 쓰는 종목 뉴스·주도주 근거·증권가 시황 요약도 함께 멈춰 있어요.\n"
+           f"풀린 뒤 다시 만들기: gh workflow run daily_report.yml -f briefing_type={cmd}")
     try:
         from send_telegram import send_admin_alert
         send_admin_alert(msg)
@@ -1796,10 +1798,16 @@ def main():
         if stale.exists():
             stale.unlink()
             print(f"[fetch_news] stale 뉴스 파일 삭제: {stale}", file=sys.stderr)
-        # Gemini 장애 시 빈 뉴스로 파이프라인 계속 진행 — 결제·권한 오류는 기다려도 안 풀리므로 관리자에게 알린다
+        # 결제·권한 오류는 기다려도 안 풀린다 — 브리핑을 만들지 않고 관리자에게 알린다(§83, 2026-11-09 사용자 결정).
+        # 워크플로가 blocked 출력을 보고 이후 스텝(분석·발행·텔레그램)을 멈춘다.
         if last_err is not None and _is_billing_error(last_err):
-            print("[fetch_news] WARN: Gemini 결제·권한 오류 — 빈 뉴스로 계속 진행하고 관리자에게 알린다", file=sys.stderr)
+            print("[fetch_news] ERROR: Gemini 결제·권한 오류 — 브리핑을 만들지 않는다", file=sys.stderr)
             alert_gemini_failure(args.type, last_err)
+            gh_out = os.environ.get("GITHUB_OUTPUT")
+            if gh_out:
+                with open(gh_out, "a", encoding="utf-8") as f:
+                    f.write("blocked=true\n")
+            sys.exit(3)
         else:
             print("[fetch_news] WARN: 빈 뉴스로 계속 진행 (Gemini 일시 장애)", file=sys.stderr)
         summary = EMPTY_NEWS

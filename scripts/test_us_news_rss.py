@@ -98,11 +98,14 @@ def test_billing_error_is_not_retried():
     assert fn._is_retryable_error(Exception("429 RESOURCE_EXHAUSTED")) and not fn._is_billing_error(Exception("429 RESOURCE_EXHAUSTED"))
 
 
-def test_main_alerts_on_billing_error_and_writes_empty(monkeypatch, tmp_path):
+def test_main_stops_briefing_on_billing_error(monkeypatch, tmp_path):
+    """결제·권한 오류면 브리핑을 만들지 않는다 — 관리자 알림 + blocked 출력 + 종료 코드 3(2026-11-09 사용자 결정)."""
     sent = []
     import send_telegram
     monkeypatch.setattr(send_telegram, "send_admin_alert", lambda m: sent.append(m))
     monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    gh_out = tmp_path / "gh_output"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(gh_out))
 
     def boom(t):
         raise Exception(BILLING)
@@ -110,6 +113,31 @@ def test_main_alerts_on_billing_error_and_writes_empty(monkeypatch, tmp_path):
     import time
     monkeypatch.setattr(time, "sleep", lambda s: pytest.fail("결제 오류는 기다리지 않는다"))
     monkeypatch.setattr(sys, "argv", ["fetch_news.py", "--type", "us", "--source", "rss"])
+    with pytest.raises(SystemExit) as ex:
+        fn.main()
+    assert ex.value.code == 3
+    assert "blocked=true" in gh_out.read_text()
+    assert len(sent) == 1 and "미국 브리핑을 만들지 않았어요" in sent[0]
+    assert "aistudio.google.com/billing" in sent[0] and "briefing_type=us" in sent[0]
+    assert not (tmp_path / "news_summary_us.json").exists()
+
+
+def test_main_transient_error_still_publishes_without_news(monkeypatch, tmp_path):
+    """일시 오류(429 등)는 예전처럼 뉴스 없이 계속 간다 — 막힘으로 보지 않는다."""
+    import send_telegram
+    monkeypatch.setattr(send_telegram, "send_admin_alert", lambda m: pytest.fail("일시 오류는 알리지 않는다"))
+    monkeypatch.setattr(fn, "DATA_DIR", tmp_path)
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+
+    def boom(t):
+        raise ValueError("JSON 파싱 실패")
+    monkeypatch.setattr(fn, "fetch_and_summarize_rss", boom)
+    monkeypatch.setattr(sys, "argv", ["fetch_news.py", "--type", "us", "--source", "rss"])
     fn.main()
-    assert len(sent) == 1 and "미국 브리핑을 뉴스 없이" in sent[0] and "aistudio.google.com/billing" in sent[0]
     assert (tmp_path / "news_summary_us.json").exists()
+
+
+def test_workflow_stops_on_blocked():
+    wf = (Path(__file__).resolve().parent.parent / ".github/workflows/daily_report.yml").read_text()
+    assert wf.count("id: news") == 3
+    assert wf.count("if: steps.news.outputs.blocked == 'true'") == 3

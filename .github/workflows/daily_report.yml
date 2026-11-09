@@ -118,9 +118,16 @@ jobs:
         run: python3 scripts/monthly_ma5.py
 
       - name: 📰 뉴스 요약 (Gemini Flash)
+        id: news
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type kospi
+
+      - name: ⛔ Gemini 막힘 — 브리핑 중단 (관리자 알림은 위 스텝이 보냈다)
+        if: steps.news.outputs.blocked == 'true'
+        run: |
+          echo "Gemini API 결제·권한 오류로 브리핑을 만들지 않는다 (SERVICE_RULES §83)"
+          exit 1
 
       - name: 🇰🇷 국내 이슈 수집 (RSS 실수집 + 발행일 검증, 실패해도 발행 계속)
         continue-on-error: true
@@ -290,9 +297,16 @@ jobs:
       # 날짜·출처가 기사에서 그대로 오므로 §31 같은 무출처 생성물이 구조적으로 불가능하다.
       # 기존 google_search 경로는 08-05~10 네 거래일 연속 catalyst 0건이었다.
       - name: 📰 뉴스 요약 (RSS 실기사 → Gemini 선별)
+        id: news
         if: steps.holiday.outputs.open == 'true'
         continue-on-error: true
         run: python3 scripts/fetch_news.py --type us --source rss
+
+      - name: ⛔ Gemini 막힘 — 브리핑 중단 (관리자 알림은 위 스텝이 보냈다)
+        if: steps.news.outputs.blocked == 'true'
+        run: |
+          echo "Gemini API 결제·권한 오류로 브리핑을 만들지 않는다 (SERVICE_RULES §83)"
+          exit 1
 
       - name: Fetch analyst quotes
         if: steps.holiday.outputs.open == 'true'
@@ -429,10 +443,17 @@ jobs:
           python3 scripts/fetch_closing_kospi.py
 
       - name: 📰 뉴스 요약 (Gemini Flash)
+        id: news
         if: steps.holiday.outputs.open == 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python3 scripts/fetch_news.py --type kospi-close
+
+      - name: ⛔ Gemini 막힘 — 브리핑 중단 (관리자 알림은 위 스텝이 보냈다)
+        if: steps.news.outputs.blocked == 'true'
+        run: |
+          echo "Gemini API 결제·권한 오류로 브리핑을 만들지 않는다 (SERVICE_RULES §83)"
+          exit 1
 
       - name: 🗞️ 코스피 주도주 뉴스 근거 (사이드바 위젯용 — 종가 기준)
         if: steps.holiday.outputs.open == 'true'
