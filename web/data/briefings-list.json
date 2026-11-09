@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-10": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-10/kospi/",
+        "headline": "왜 오를까? — 나스닥·반도체 동반 폭등에 베어마켓 랠리 시동",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-09": {
       "kospi": {
         "state": "ready",
@@ -783,34 +802,6 @@
         "state": "ready",
         "url": "/briefings/2026-09-30/us/",
         "headline": "지수는 쉬어가도 반도체는 쉬지 않는다 — 코어 PCE가 그 온도차를 시험한다",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-09-29": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-09-29/kospi/",
-        "headline": "왜 내릴까? — 금리 5.2% 돌파에 반도체 이중 충격",
-        "pill_cls": "dn",
-        "pill_text": "▼",
-        "title": "하락 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-09-29/close/",
-        "headline": "외국인 2.9조 매도, 코스피 왜 버텼을까요?",
-        "title": "6,870.81",
-        "price": "6,870.81",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-09-29/us/",
-        "headline": "금리 5.24%가 던진 돌직구 — 그래도 엔비디아는 혼자 버텼다",
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",

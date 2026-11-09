@@ -1,0 +1,239 @@
+{
+  "prediction": {
+    "direction": "상승 우위",
+    "up_pct": 90,
+    "down_pct": 10,
+    "confidence": 82,
+    "basis": "open"
+  },
+  "reason_title": "왜 오를까? — 나스닥·반도체 동반 폭등에 베어마켓 랠리 시동",
+  "todays_view": {
+    "view_title": "목요일 패닉은 끝났다, 간밤 나스닥 +2.74%·SOX +6.85%로 되갚음",
+    "dek": "지난주 목요일(11/5) 나스닥 <b>-5.52%</b>·필라델피아 반도체 <b>-12.25%</b>로 급락했던 공포가 사흘 만에 되돌려졌어요. 간밤 나스닥은 <b>+2.74%</b>, 반도체 지수는 <b>+6.85%</b> 급등하며 낙폭을 상당 부분 만회했어요.",
+    "recap": [
+      {
+        "text": "전일 코스피는 美 증시 급락 여파로 약세 마감했어요. 외국인은 <b>6,895백만원</b> 순매도했고 기관이 <b>7,172백만원</b> 순매수하며 방어했어요.",
+        "codes": []
+      },
+      {
+        "text": "2차전지·완성차 등 내수·소재 섹터가 약세였어요. <b>삼성SDI</b>는 전일 시세 기준 하락폭이 컸고 <b>LG에너지솔루션</b>도 눌렸어요.",
+        "codes": [
+          "006400",
+          "373220"
+        ]
+      },
+      {
+        "text": "방산주도 조정 받았어요. <b>LIG넥스원</b>이 전일 큰 폭으로 밀렸어요.",
+        "codes": [
+          "079550"
+        ]
+      }
+    ],
+    "outlook": [
+      {
+        "tag": "event",
+        "text": "오늘 밤 10시 30분 미국 CPI·근원CPI 발표가 예정돼 있어요 — 예상치는 각각 <b>0.3%</b>, <b>0.2%</b>로 전월보다 둔화될 걸로 보여요.",
+        "source": "calendar"
+      },
+      {
+        "tag": "watch",
+        "text": "간밤 급등이 반도체 갭상승으로 얼마나 이어지는지가 오늘 개장의 핵심이에요.",
+        "source": null
+      },
+      {
+        "tag": "watch",
+        "text": "원/달러 환율이 <b>1,342원</b>까지 내려온 만큼 외국인 수급이 순매수로 돌아서는지 지켜보세요.",
+        "source": null
+      }
+    ]
+  },
+  "key_drivers": [
+    {
+      "text": "<b>지난주 목요일 패닉이 간밤 급반등으로 되갚아졌어요.</b> 나스닥 <b>+2.74%</b>, S&P500 <b>+2.35%</b>, 필라델피아 반도체는 <b>+6.85%</b>까지 치솟으며 11/5 급락분을 상당폭 만회했어요.",
+      "codes": []
+    },
+    {
+      "text": "<b>반도체 메가캡 갭상승 가능성이 높아요.</b> SOX 급등에 이어 DRAM ETF도 <b>+6.82%</b> 오르며 HBM·메모리 수요 기대가 되살아났어요. 다만 삼성전자·SK하이닉스 전일 국내 시세는 소폭 상승에 그쳐 괴리가 커요.",
+      "codes": [
+        "005930",
+        "000660"
+      ]
+    },
+    {
+      "text": "<b>VIX 급락과 미 지수선물 동반 강세가 리스크온을 뒷받침해요.</b> VIX가 <b>-22.31%</b> 급락했고 S&P·나스닥·다우선물 모두 여전히 플러스권을 유지하고 있어요.",
+      "codes": []
+    }
+  ],
+  "analysis_format": "split",
+  "generated_at": "2026-11-10T07:28:00.966377+09:00",
+  "us_issue_results": {
+    "generated_at": "2026-11-10T07:26:45.115606+09:00",
+    "briefing_date": "2026-11-10",
+    "us_session_date": "2026-11-09",
+    "session_label": "간밤",
+    "cards": [
+      {
+        "title": "젠슨 황 불륜 의혹에 NVDA 프리마켓 약세",
+        "sides": [
+          {
+            "side": "down",
+            "label": "엔비디아",
+            "marks": [
+              {
+                "ticker": "NVDA",
+                "name": "NVDA",
+                "pct": -4.27
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "엔비디아는 <b>내렸어요</b>"
+      },
+      {
+        "title": "유가 급락이 엔비디아 충격 상쇄",
+        "sides": [
+          {
+            "side": "down",
+            "label": "에너지",
+            "marks": [
+              {
+                "ticker": "CVX",
+                "name": "CVX",
+                "pct": -0.86
+              },
+              {
+                "ticker": "XOM",
+                "name": "XOM",
+                "pct": -0.69
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "에너지는 <b>나란히 내렸어요</b>"
+      },
+      {
+        "title": "직전 정규장 반도체 섹터는 강하게 반등",
+        "sides": [
+          {
+            "side": "up",
+            "label": "반도체 장비·메모리",
+            "marks": [
+              {
+                "ticker": "AMD",
+                "name": "AMD",
+                "pct": 13.26
+              },
+              {
+                "ticker": "MU",
+                "name": "MU",
+                "pct": 6.25
+              },
+              {
+                "ticker": "AMAT",
+                "name": "AMAT",
+                "pct": 11.37
+              },
+              {
+                "ticker": "LRCX",
+                "name": "LRCX",
+                "pct": 10.41
+              },
+              {
+                "ticker": "KLAC",
+                "name": "KLAC",
+                "pct": 9.31
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "반도체 장비·메모리는 <b>나란히 올랐어요</b>"
+      },
+      {
+        "title": "CPI 발표 대기",
+        "sides": [
+          {
+            "side": "down",
+            "label": "지수 전반",
+            "marks": [
+              {
+                "ticker": "^GSPC",
+                "name": "S&P500",
+                "pct": 2.35
+              }
+            ],
+            "proxy": "S&P500"
+          }
+        ],
+        "check_line": "지수 전반은 <b>올랐어요</b>"
+      },
+      {
+        "title": "VIX 급락에 금융·대형주 프리마켓 강세",
+        "sides": [
+          {
+            "side": "up",
+            "label": "금융",
+            "marks": [
+              {
+                "ticker": "JPM",
+                "name": "JPM",
+                "pct": 2.27
+              },
+              {
+                "ticker": "GS",
+                "name": "GS",
+                "pct": 4.67
+              },
+              {
+                "ticker": "MS",
+                "name": "MS",
+                "pct": 3.12
+              },
+              {
+                "ticker": "BAC",
+                "name": "BAC",
+                "pct": 2.29
+              }
+            ],
+            "proxy": null
+          }
+        ],
+        "check_line": "금융은 <b>나란히 올랐어요</b>"
+      }
+    ]
+  },
+  "monthly_ma5": {
+    "date": "2026-11-10",
+    "generated_at": "2026-11-10T07:26:46.006338+09:00",
+    "universe": 46,
+    "screened": 45,
+    "failed": [
+      "207940"
+    ],
+    "items": [],
+    "repeat_hidden": [
+      "메리츠금융지주"
+    ]
+  },
+  "prev_prediction_result": {
+    "date": "2026-11-09",
+    "direction": "상승 우위",
+    "ok": false,
+    "open_pct": -0.5
+  },
+  "prior_signals": {
+    "sox": 6.85,
+    "nasdaq": 2.74,
+    "nq": 3.65,
+    "ewy_resid": 5.321,
+    "vix": -22.3089
+  },
+  "prev_supply": {
+    "date": "20261109",
+    "individual": -4891,
+    "institution": 7172,
+    "foreign": -6895
+  }
+}
