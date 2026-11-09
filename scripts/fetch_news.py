@@ -1304,9 +1304,14 @@ def _attach_verified_sources(catalysts: list, log_prefix: str = "fetch_news") ->
     out = []
     for c in catalysts:
         article = c.get("article") or {}
-        link = article.get("link", "")
-        url = ns.resolve_gnews_url(link) if link else ""
-        published = ns.verify_real_published_at(url, log_prefix=log_prefix) if url else None
+        if article.get("verified_url"):            # 선별 전에 이미 확인한 기사(_verify_articles)
+            url, published = article["verified_url"], article["verified_published"]
+        else:
+            link = article.get("link", "")
+            url = ns.resolve_gnews_url(link) if link else ""
+            published = ns.verify_real_published_at(url, log_prefix=log_prefix) if url else None
+            if published and not _is_recent(published):
+                published = None
         if not url or not published:
             print(f"[fetch_news] RSS 발행일 검증 실패 — 항목 제외: {c.get('text', '')[:60]}",
                   file=sys.stderr)
@@ -1324,10 +1329,17 @@ _US_RSS_QUERIES = [
     ("뉴욕증시 나스닥", "kr"), ("미국 증시 반도체", "kr"), ("월가 실적 발표", "kr"),
     ("나스닥 프리마켓", "kr"),
     ("Wall Street stocks premarket", "en"), ("US stock market earnings", "en"),
+    # 기업 뉴스(실적·가이던스·급등락 종목) — 시황 요약만 잡히던 것을 보완한다(§19, 2026-11-09)
+    ("premarket movers stocks", "en"), ("stocks making biggest moves premarket", "en"),
+    ("shares earnings beat guidance", "en"), ("미국 실적 발표 주가 급등락", "kr"),
 ]
+RSS_SELECT_MAX = 7          # 선별 상한 — 2026-11-09 전엔 4였고 검증에서 빠져 하루 0~3건만 남았다
+RECENT_HOURS = 30           # 실제 발행일이 이보다 오래된 기사는 쓰지 않는다(구글 재크롤링 옛 기사 차단)
 
 _RSS_SELECT_PROMPT = """아래는 오늘({today}) 실제로 수집된 미국 시장 관련 기사 목록이다(번호·발행시각·매체·요약 포함).
-이 목록에 있는 사건 중, 오늘 미국 증시 브리핑에 담을 만큼 중요한 것을 최대 4개 골라라.
+이 목록에 있는 사건 중, 오늘 미국 증시 브리핑에 담을 만큼 중요한 것을 최대 {max_n}개 골라라.
+지수 등락을 요약한 시황 기사보다 **기업의 실적·가이던스·경영진 발언·급등락 이유** 같은 구체적인 사건을 먼저 고른다.
+같은 시황을 다룬 기사는 하나만 고른다.
 
 [기사 목록]
 {articles}
@@ -1362,6 +1374,40 @@ def _us_news_session(today: date) -> dict | None:
     return {"date": prev.isoformat(), "label": "직전 정규장"}
 
 
+def _is_recent(published: datetime, now: datetime | None = None) -> bool:
+    """실제 발행일이 최근 RECENT_HOURS 안인지. 시각 없는 값(주소 날짜)은 그날 정오 UTC로 들어온다.
+    앞으로 12시간까지는 허용한다 — 시간대 표기가 없는 메타데이터·정오로 둔 주소 날짜의 오차."""
+    now = now or datetime.now(KST)
+    if published.tzinfo is None:
+        published = KST.localize(published)
+    age = now - published
+    return timedelta(hours=-12) <= age <= timedelta(hours=RECENT_HOURS)
+
+
+def _verify_articles(articles: list, workers: int = 8) -> list:
+    """모은 기사 전부의 원문 주소·실제 발행일을 먼저 확인하고, 확인된 최근 기사만 남긴다.
+    RSS pubDate는 믿지 않는다(§Google News 재크롤링 원칙). 확인 결과는 기사에 붙여 둔다 —
+    _attach_verified_sources가 다시 조회하지 않는다."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def check(a):
+        url = ns.resolve_gnews_url(a.get("link", "")) if a.get("link") else ""
+        pub = ns.verify_real_published_at(url, log_prefix="fetch_news") if url else None
+        return a, url, pub
+    out, old, fail = [], 0, 0
+    with ThreadPoolExecutor(workers) as ex:
+        for a, url, pub in ex.map(check, articles):
+            if not url or not pub:
+                fail += 1
+            elif not _is_recent(pub):
+                old += 1
+                print(f"[fetch_news] 실제 발행일이 오래된 기사 제외({pub.date()}): {a.get('title', '')[:50]}", file=sys.stderr)
+            else:
+                out.append({**a, "verified_url": url, "verified_published": pub})
+    print(f"[fetch_news] 발행일 확인 — 모은 기사 {len(articles)}건 중 {len(out)}건 통과(확인 실패 {fail} · 오래됨 {old})")
+    return out
+
+
 def fetch_and_summarize_rss(briefing_type: str) -> dict:
     """RSS로 실제 기사를 먼저 모으고, LLM은 그 목록에서 고르고 요약만 한다.
 
@@ -1382,20 +1428,22 @@ def fetch_and_summarize_rss(briefing_type: str) -> dict:
                 articles.append(a)
     articles.sort(key=lambda a: a.get("pub_time", "99:99"))
     articles = _dedupe_articles(articles)
+    # 발행일을 먼저 확인한다 — 고른 뒤에 확인하면 고른 기사의 절반 가까이가 버려졌다(2026-11-09 점검).
+    articles = _verify_articles(articles)
     # 최신 기사를 앞에 둔다 — 오래된 순이면 새벽 예고 기사가 1번에 놓여 먼저 뽑힌다(2026-10-01).
     articles.sort(key=lambda a: a.get("pub_time", ""), reverse=True)
 
     if not articles:
-        print("[fetch_news] RSS 수집 0건 — 뉴스 없이 발행(§27)", file=sys.stderr)
+        print("[fetch_news] RSS 수집·발행일 확인 후 0건 — 뉴스 없이 발행(§27)", file=sys.stderr)
         return dict(EMPTY_NEWS)
 
     from google import genai
     from google.genai import types
     client = genai.Client(api_key=get_gemini_api_key())
-    prompt = _RSS_SELECT_PROMPT.format(today=today, articles=_articles_prompt_block(articles))
+    prompt = _RSS_SELECT_PROMPT.format(today=today, max_n=RSS_SELECT_MAX, articles=_articles_prompt_block(articles))
     response = client.models.generate_content(
         model="gemini-2.5-flash-lite", contents=prompt,
-        config=types.GenerateContentConfig(temperature=0.2, max_output_tokens=800),
+        config=types.GenerateContentConfig(temperature=0.2, max_output_tokens=1600),
     )
     raw = (response.text or "").strip()
     if raw.startswith("```"):
@@ -1671,12 +1719,35 @@ def fetch_and_summarize(briefing_type: str) -> dict:
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _is_billing_error(e: Exception) -> bool:
+    """결제·권한·키 오류 — 기다려도 풀리지 않는다(2026-11-08~09 결제 미납으로 이틀간 뉴스 없이 발행)."""
+    msg = str(e).upper()
+    return ("PERMISSION_DENIED" in msg or "BILLING" in msg or "OUTSTANDING BALANCE" in msg
+            or "API_KEY_INVALID" in msg or "API KEY NOT VALID" in msg or "403" in msg)
+
+
 def _is_retryable_error(e: Exception) -> bool:
+    if _is_billing_error(e):
+        return False
     msg = str(e).upper()
     return (
         "429" in msg or "RESOURCE_EXHAUSTED" in msg or "QUOTA" in msg
         or "503" in msg or "UNAVAILABLE" in msg or "SERVICE_UNAVAILABLE" in msg
     )
+
+
+def alert_gemini_failure(briefing_type: str, err: Exception) -> None:
+    """Gemini가 결제·권한 오류로 막혔을 때 관리자 텔레그램 알림(평문, §37). 알림 실패는 삼킨다."""
+    label = {"kospi": "코스피 아침", "kospi-close": "코스피 마감", "us": "미국"}.get(briefing_type, briefing_type)
+    msg = (f"⚠️ Gemini API 오류 — {label} 브리핑을 뉴스 없이 발행해요.\n"
+           f"{str(err)[:300]}\n"
+           "결제·키 문제면 https://aistudio.google.com/billing 에서 확인하세요. "
+           "같은 키를 쓰는 종목 뉴스·주도주 근거·증권가 시황 요약도 함께 멈춰 있어요.")
+    try:
+        from send_telegram import send_admin_alert
+        send_admin_alert(msg)
+    except Exception as e:
+        print(f"[fetch_news] 관리자 알림 실패: {e}", file=sys.stderr)
 
 
 EMPTY_NEWS = {
@@ -1725,8 +1796,12 @@ def main():
         if stale.exists():
             stale.unlink()
             print(f"[fetch_news] stale 뉴스 파일 삭제: {stale}", file=sys.stderr)
-        # Gemini 일시 장애 시 빈 뉴스로 파이프라인 계속 진행
-        print("[fetch_news] WARN: 빈 뉴스로 계속 진행 (Gemini 일시 장애)", file=sys.stderr)
+        # Gemini 장애 시 빈 뉴스로 파이프라인 계속 진행 — 결제·권한 오류는 기다려도 안 풀리므로 관리자에게 알린다
+        if last_err is not None and _is_billing_error(last_err):
+            print("[fetch_news] WARN: Gemini 결제·권한 오류 — 빈 뉴스로 계속 진행하고 관리자에게 알린다", file=sys.stderr)
+            alert_gemini_failure(args.type, last_err)
+        else:
+            print("[fetch_news] WARN: 빈 뉴스로 계속 진행 (Gemini 일시 장애)", file=sys.stderr)
         summary = EMPTY_NEWS
 
     summary["generated_at"] = datetime.now(KST).isoformat()

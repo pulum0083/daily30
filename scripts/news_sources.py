@@ -207,9 +207,32 @@ def fetch_msn_published_at(url: str, log_prefix: str = "news_sources") -> dateti
         return None
 
 
+# 매체가 기사 주소에 직접 박는 날짜(블룸버그 /news/articles/2026-11-08/…, 로이터 …-2026-11-09/, CNBC /2026/11/09/).
+# 유료 구독 사이트는 원문 페이지가 401·403으로 막혀 메타데이터를 못 읽는다 — 그때만 쓰는 보조 근거다(2026-11-09).
+# RSS pubDate(믿지 않기로 한 값)와 달리 매체가 발행 시점에 정한 값이라 옛 기사를 오늘 것으로 바꾸지 못한다.
+# 숫자 8자리 연속(…/20261106000826)은 기사 번호와 구분할 수 없어 쓰지 않는다.
+_URL_DATE_PATS = (
+    re.compile(r"/(20\d{2})-(\d{2})-(\d{2})(?=[/_-]|$)"),
+    re.compile(r"-(20\d{2})-(\d{2})-(\d{2})(?=/|$)"),
+    re.compile(r"/(20\d{2})/(\d{1,2})/(\d{1,2})(?=/)"),
+)
+
+
+def published_from_url(url: str) -> datetime | None:
+    """주소에 박힌 발행 날짜(그날 정오 UTC — 시각을 모르니 하루의 가운데로 둔다). 없거나 날짜가 아니면 None."""
+    for pat in _URL_DATE_PATS:
+        m = pat.search(url or "")
+        if m:
+            try:
+                return datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), 12, tzinfo=timezone.utc)
+            except ValueError:
+                return None
+    return None
+
+
 def verify_real_published_at(url: str, log_prefix: str = "news_sources") -> datetime | None:
     """기사 원문 URL의 실제 발행일시를 조회한다. MSN은 전용 API, 그 외는 페이지 메타데이터.
-    조회 실패(추출 불가·네트워크 오류) 시 None."""
+    페이지가 막혔거나 메타데이터가 없으면 주소에 박힌 날짜로 대신한다. 둘 다 없으면 None."""
     if "msn.com" in url:
         return fetch_msn_published_at(url, log_prefix)
     try:
@@ -217,9 +240,11 @@ def verify_real_published_at(url: str, log_prefix: str = "news_sources") -> date
         with urllib.request.urlopen(req, timeout=10) as r:
             html = r.read().decode("utf-8", "ignore")
     except Exception as e:
-        print(f"[{log_prefix}] 원문 페이지 조회 실패: {e}", file=sys.stderr)
-        return None
-    return parse_real_published_at(html)
+        dt = published_from_url(url)
+        print(f"[{log_prefix}] 원문 페이지 조회 실패: {e}" + (f" — 주소 날짜 {dt.date()}로 확인" if dt else ""),
+              file=sys.stderr)
+        return dt
+    return parse_real_published_at(html) or published_from_url(url)
 
 
 # ── 한국어 제목 중복 판정 ─────────────────────────────────────────────────────
