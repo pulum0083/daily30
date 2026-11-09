@@ -173,7 +173,9 @@ def test_templates_render(tmp_path):
     base = {"css_path": "/a.css", "js_path": "/a.js", "canonical_url": "https://x/", "seo_jsonld": []}
     html = env.get_template("pages/kospi_check.html").render(**lp.kospi_context(_kc_data()), **base)
     assert "지금과 비슷했던 때" in html and "None" not in html
+    assert "한 달 전" not in html and "월 말</span>" in html                 # 지난달 말 값 — '한 달 전'이 아니다(2026-11-09)
     html = env.get_template("pages/sp500_200.html").render(**lp.sp500_context(_sp_data(), _sp_hist()), **base)
+    assert "빠진 종목은 없고" not in html and "빠진 종목은 계산에 들어 있지 않고" in html
     assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로") and "None" not in html
     html = env.get_template("pages/weekly_report.html").render(**lp.weekly_context(_wk()), **base)
     assert "휴장" in html and "코스피 한 주 −11.7%" in html and "None" not in html
@@ -217,3 +219,57 @@ def test_recent_weekly_line(tmp_path, monkeypatch):
     assert gh.build_recent_weekly("2026-11-25") == {}                     # 14일 넘게 새 리포트가 없으면 싣지 않는다
     html = gh.render_recent_briefings([{"url": "/b/", "label": "미국 시장", "date": "11/6(금)", "headline": "h", "dek": ""}], it)
     assert html.index('rb-item wk') < html.index('rb-item feat') and "📅 11/2~11/6 · 주간 장기 리포트" in html
+
+
+def test_kospi_daily_joins_naver_before_yahoo():
+    """야후(1996-12~) 앞을 네이버 일봉으로 잇는다 — 겹치는 기간은 야후(2026-11-09)."""
+    yahoo = [("1996-12-11", 709.5, 704.4, 704.7), ("1996-12-12", 706.0, 688.7, 689.4)]
+    naver = [("1990-01-04", 933.2, 911.2, 928.8), ("1996-12-10", 1, 1, 1), ("1996-12-11", 9, 9, 9)]
+    assert kc.join_daily(yahoo, naver) == [naver[0], naver[1]] + yahoo
+    assert kc.join_daily([], naver) == naver
+
+
+def test_kospi_fetch_daily_falls_back_to_yahoo(monkeypatch):
+    monkeypatch.setattr(kc.nq, "fetch_daily", lambda s: [("1996-12-11", 1.0, 1.0, 1.0)])
+    def boom(end):
+        raise OSError("down")
+    monkeypatch.setattr(kc, "naver_daily", boom)
+    assert kc.fetch_daily("2026-11-06") == [("1996-12-11", 1.0, 1.0, 1.0)]
+
+
+def test_weekly_telegram_text():
+    d = _wk()
+    t = wr.telegram_text(d, lp.weekly_context(d), date(2026, 11, 7), "https://doubleshot.space")
+    lines = t.splitlines()
+    assert lines[0] == "📅 주간 장기 리포트 | 2026.11.07"                   # 보내는 날 — send_telegram 날짜 검사를 통과한다
+    assert "🎯 <b>코스피 한 주 −11.7%" in t
+    assert "코스피 5,731 → 5,060 (−11.71%)" in t
+    assert "S&P 500 −3.00%" in t                                             # 99 → 97
+    assert "코스피 체크 70.8% → 49.2%" in t and "나스닥 체크 59.9% → 48.9%" in t
+    assert "S&P 500 200일선 위 61.6% → 58.8%" in t
+    assert lines[-1] == "🔗 주간 장기 리포트 → https://doubleshot.space/weekly/2026-11-06/"
+
+
+def test_weekly_telegram_needs_published_page(tmp_path, monkeypatch):
+    monkeypatch.setattr(wr, "WEEKLY", tmp_path)
+    monkeypatch.setattr(wr, "TELEGRAM_PATH", tmp_path / "msg.txt")
+    (tmp_path / "2026-11-06").mkdir()
+    (tmp_path / "2026-11-06" / "data.json").write_text(json.dumps(_wk()), encoding="utf-8")
+    assert wr.write_telegram("2026-11-06", date(2026, 11, 7)) is False       # 페이지가 없으면 보내지 않는다
+    (tmp_path / "2026-11-06" / "index.html").write_text("x", encoding="utf-8")
+    assert wr.write_telegram("2026-11-06", date(2026, 11, 7)) is True
+    assert (tmp_path / "msg.txt").read_text(encoding="utf-8").startswith("📅 주간 장기 리포트 | 2026.11.07")
+
+
+def test_weekly_refreshes_live_pages_only_for_this_week(tmp_path, monkeypatch):
+    """지난 주를 채울 때(--week-end) 옛 종가로 상세 페이지를 덮지 않는다."""
+    calls = []
+    monkeypatch.setattr(wr, "WEEKLY", tmp_path)
+    monkeypatch.setattr(wr, "collect", lambda end: _wk())
+    monkeypatch.setattr(wr, "render", lambda end: True)
+    monkeypatch.setattr(wr, "refresh_live_pages", lambda end: calls.append(end))
+    monkeypatch.setattr(sys, "argv", ["weekly_report.py", "--week-end", "2026-10-30"])
+    assert wr.main() == 0 and calls == []
+    monkeypatch.setattr(wr, "week_of", lambda today: date(2026, 11, 6))
+    monkeypatch.setattr(sys, "argv", ["weekly_report.py"])
+    assert wr.main() == 0 and calls == [date(2026, 11, 6)]

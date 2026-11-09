@@ -83,7 +83,24 @@ export default {
     const isWeekend = dow === 0 || dow === 6;
     if (isWeekend && m === 0 && [9, 12, 15, 18, 21].includes(h)) {
       console.log('[cron] → weekend stock news');
-      return dispatch(env, 'stock-news-weekend.yml');
+      const jobs = [dispatch(env, 'stock-news-weekend.yml')];
+      // 주간 장기 리포트 텔레그램: 토요일 09:00 KST(2026-11-09 사용자 결정). 리포트는 07:25에 미리 만들어 둔다(아래).
+      // 같은 09:00 슬롯이라 크론을 새로 늘리지 않는다 — 한 번 호출에 두 워크플로우를 함께 dispatch한다.
+      if (dow === 6 && h === 9) {
+        console.log('[cron] → weekly report telegram');
+        jobs.push(dispatch(env, 'weekly-report.yml', { telegram: 'on' }));
+      }
+      const res = await Promise.allSettled(jobs);
+      const bad = res.filter(r => r.status === 'rejected');
+      if (bad.length) throw bad[0].reason;
+      return;
+    }
+
+    // 주간 장기 리포트 만들기: 토요일 07:25 KST — 코스피 시초가 크론(22:25 UTC)이 매일 발화하므로 그 슬롯을 함께 쓴다.
+    // 미국 금요일 장은 06:00 KST에 끝났다. 09:00 발송 전에 페이지를 만들고 배포까지 끝내 두려는 것이다.
+    if (dow === 6 && h === 7 && m === 25) {
+      console.log('[cron] → weekly report build');
+      return dispatch(env, 'weekly-report.yml', { telegram: 'on' });
     }
 
     // ── 이슈 브리핑 (시간대 범위 매칭) ──────────────────────────────────

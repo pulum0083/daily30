@@ -9,6 +9,13 @@
   · S&P 500 200일선 비율: sp500_ma200.py를 이 자리에서 돌려 금요일 세션까지 누적 기록에 넣는다
   · 월봉 5개월선: 그 주 브리핑 스냅샷(커밋됨) · 섹터 주간 등락: home-summary.json(커밋됨, 날짜가 맞을 때만)
 문장·헤드라인은 longterm_pages.weekly_context가 정해진 틀로 만든다(LLM 없음, §0).
+
+이번 주(가장 최근 금요일) 리포트를 처음 만들 때는 금요일 종가로 나스닥 체크·S&P 500 200일선 상세 페이지와
+종목 홈 장기 신호 줄(web/data/nasdaq-home.json·sp500-home.json)도 다시 쓴다(2026-11-09) — 미국 잡은 금요일 밤에
+목요일 세션까지만 반영하므로, 이걸 하지 않으면 주말 내내 홈은 목요일, 리포트는 금요일 값이 된다.
+
+텔레그램(2026-11-09 사용자 결정 — 토요일 09:00): --telegram-message가 가장 최근 리포트로
+data/telegram_message_weekly.txt를 쓰고, 워크플로우가 send_telegram.py --type weekly로 보낸다.
 """
 from __future__ import annotations
 
@@ -125,7 +132,7 @@ def collect(end: date) -> dict:
     us_last = (idx.get("^GSPC") or [[e]])[-1][0]
     us_prev = (idx.get("^GSPC") or [[prev_end]])[0][0]
 
-    ks_daily = nq.fetch_daily(kc.SYMBOL)
+    ks_daily = kc.fetch_daily(e)
     now_c = kc.compute(ks_daily, kr_last, ks[-1][1])
     prev_c = kc.compute(ks_daily, kr_prev, ks[0][1])
     kcd = {"now": now_c and now_c["gap_pct"], "prev": prev_c and prev_c["gap_pct"],
@@ -175,6 +182,75 @@ def collect(end: date) -> dict:
     }
 
 
+def refresh_live_pages(end: date) -> None:
+    """금요일 종가로 나스닥 체크·S&P 500 200일선 상세 페이지와 홈 줄 파일을 다시 쓴다. 이번 주 리포트를 만들 때만 부른다.
+    S&P는 collect()가 방금 돌린 sp500_ma200.py 결과(date = 토요일)를, 나스닥은 지금 받은 일봉을 쓴다.
+    실패해도 리포트는 계속한다 — 직전 페이지가 남을 뿐이다."""
+    import generate_html as gh
+    today = datetime.now(KST).date().isoformat()
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "nasdaq_overheat.py")], check=False)
+    for name, fn, d in (("나스닥 체크", gh.write_nasdaq_page, today),
+                        ("S&P 500 200일선", gh.write_sp500_page, (end + timedelta(days=1)).isoformat())):
+        try:
+            if not fn(d):
+                print(f"[weekly] {name} 상세 페이지를 다시 쓰지 못함 — 직전 페이지가 남는다", file=sys.stderr)
+        except Exception as ex:
+            print(f"[weekly] {name} 상세 페이지 갱신 실패({type(ex).__name__}: {ex})", file=sys.stderr)
+
+
+TELEGRAM_PATH = ROOT / "data" / "telegram_message_weekly.txt"
+US_TG = (("^SOX", "반도체"), ("^IXIC", "나스닥"), ("^GSPC", "S&P 500"), ("^DJI", "다우"))
+
+
+def _wk_pct(series) -> float | None:
+    if not series or len(series) < 2:
+        return None
+    return (series[-1][1] / series[0][1] - 1) * 100
+
+
+def telegram_text(d: dict, ctx: dict, today: date, base_url: str) -> str:
+    """주간 장기 리포트 텔레그램 — 헤드라인·이번 주 시장·장기 지표 한 주 사이·링크(2026-11-09).
+    숫자는 전부 페이지와 같은 data.json에서 온다. 맨 위 날짜는 보내는 날(토요일)이다 — send_telegram이 오늘 날짜가 아닌
+    메시지를 막는다."""
+    wk = ctx["wk"]
+    sg = lambda v, n=2: ("+" if v >= 0 else "−") + f"{abs(v):.{n}f}"
+    ks = wk["ks"]
+    lines = [f"📅 주간 장기 리포트 | {today.strftime('%Y.%m.%d')}", wk["tag"].split(" · ", 1)[-1], "",
+             f"🎯 <b>{wk['head']}</b>", "", "📊 이번 주 시장",
+             f"코스피 {ks['from']} → {ks['to']} ({sg(wk['ks']['wk'])}%)"]
+    us = [(name, _wk_pct((d.get("idx") or {}).get(sym))) for sym, name in US_TG]
+    us = [f"{name} {sg(v)}%" for name, v in us if v is not None]
+    for i in range(0, len(us), 2):
+        lines.append(" · ".join(us[i:i + 2]))
+    if wk["cards"]:
+        lines += ["", "📐 장기 지표 (지난주 → 이번 주)"]
+        short = {"코스피 체크": "코스피 체크", "나스닥 체크": "나스닥 체크", "S&P 500": "S&P 500 200일선 위"}
+        for c in wk["cards"]:
+            k = next((v for key, v in short.items() if c["name"].startswith(key)), c["name"].split(" · ")[0])
+            lines.append(f"{k} {c['a']} → {c['b']}")
+    from send_telegram import link_line
+    lines += ["", link_line("주간 장기 리포트", f"{base_url}/weekly/{wk['end']}/")]
+    return "\n".join(lines)
+
+
+def write_telegram(end: str, today: date = None) -> bool:
+    """가장 최근 리포트의 data.json으로 data/telegram_message_weekly.txt를 쓴다. 리포트 페이지가 없으면 False."""
+    import longterm_pages as lp
+    from send_telegram import get_web_base_url
+    today = today or datetime.now(KST).date()
+    p = WEEKLY / end / "data.json"
+    if not p.exists() or not (WEEKLY / end / "index.html").exists():
+        print(f"[weekly] {end} 리포트가 없어 텔레그램 메시지를 만들지 않는다", file=sys.stderr)
+        return False
+    d = json.loads(p.read_text(encoding="utf-8"))
+    ctx = lp.weekly_context(d)
+    if not ctx:
+        return False
+    TELEGRAM_PATH.write_text(telegram_text(d, ctx, today, get_web_base_url().rstrip("/")) + "\n", encoding="utf-8")
+    print(f"[weekly] 텔레그램 메시지 → {TELEGRAM_PATH}")
+    return True
+
+
 def render(end: str) -> bool:
     """web/weekly/{end}/data.json으로 그 주 페이지와 목록 페이지를 쓴다."""
     import generate_html as gh
@@ -222,9 +298,13 @@ def main() -> int:
     ap.add_argument("--week-end", help="그 주 금요일(YYYY-MM-DD). 없으면 오늘(KST) 이전 가장 최근 금요일")
     ap.add_argument("--force", action="store_true", help="이미 있는 주도 다시 모은다(기본은 건너뜀 — 발행본을 고치지 않는다)")
     ap.add_argument("--render-only", action="store_true", help="모으지 않고 저장된 data.json으로 다시 그린다")
+    ap.add_argument("--telegram-message", action="store_true",
+                    help="그 주 리포트로 data/telegram_message_weekly.txt만 쓴다(보내지는 않는다)")
     args = ap.parse_args()
     end = date.fromisoformat(args.week_end) if args.week_end else week_of(datetime.now(KST).date())
     out = WEEKLY / end.isoformat()
+    if args.telegram_message:
+        return 0 if write_telegram(end.isoformat()) else 1
     if args.render_only:
         return 0 if render(end.isoformat()) else 1
     if (out / "index.html").exists() and not args.force:
@@ -233,6 +313,8 @@ def main() -> int:
     d = collect(end)
     if not d:
         return 1
+    if not args.week_end:   # 이번 주를 만들 때만 — 지난 주를 채울 때 옛 종가로 상세 페이지를 덮지 않는다
+        refresh_live_pages(end)
     out.mkdir(parents=True, exist_ok=True)
     (out / "data.json").write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     return 0 if render(end.isoformat()) else 1

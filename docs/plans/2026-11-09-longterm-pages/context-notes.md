@@ -9,3 +9,5 @@
 - 2026-11-09 인계: 작업은 브랜치 `feat/longterm-pages`로 올렸다(main 푸시 = 프로덕션 배포라서). 다른 컴퓨터에서 `git fetch && git checkout feat/longterm-pages`. origin/main에는 아직 없다 — 이 브랜치가 origin/main 위 10커밋이다(시안 커밋 포함).
 - 로컬 전용 파일(gitignore)은 옮겨지지 않는다: data/kospi_check.json(마감 잡·`python3 -c` 로 kospi_check.fetch 결과를 쓰면 됨), data/sp500_ma200.json(`python3 scripts/sp500_ma200.py`). 페이지를 로컬에서 다시 그릴 때만 필요하다.
 - 로컬 확인: `.claude/launch.json`의 daily30-web(포트 8792, web/ 서빙). 홈 주말 카드는 `/stocks/?slot=weekend&d=2026-11-07`.
+- 2026-11-09 검증 뒤 사용자: 지적한 4건(코스피 '한 달 전' 표기, S&P 생존 편향 문장, 홈 나스닥 줄 기준일, 브리핑 S&P 섹션 마이너스 기호)과 보강(주간 작업의 금요일 종가 페이지 갱신, 코스피 체크 1994-12부터, 10/30 주 수동 실행)을 모두 진행. 주간 리포트 텔레그램은 토요일 09:00에 보낸다.
+- 09:00을 GHA cron에 맡기지 않은 이유: 사용량 감시 cron(12:10 KST)이 매일 19시대에 떴다(11/1~11/8 실측). 정확한 시각은 Cloudflare 워커만 지킨다 — 워커 배포는 사용자 Cloudflare 로그인이 필요하다(이 컴퓨터는 wrangler 로그인 안 됨).

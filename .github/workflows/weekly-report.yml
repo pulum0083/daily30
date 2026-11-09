@@ -1,8 +1,14 @@
-# 주간 장기 리포트 — 토요일 아침(미국 금요일 장 마감 뒤) web/weekly/{금요일}/을 한 번 만든다(2026-11-09, SERVICE_RULES §82)
+# 주간 장기 리포트 — 토요일 아침(미국 금요일 장 마감 뒤) web/weekly/{금요일}/을 한 번 만들고, 토요일 09:00에 텔레그램으로 보낸다
+# (2026-11-09, SERVICE_RULES §82). 이번 주를 만들 때는 금요일 종가로 나스닥 체크·S&P 500 200일선 상세 페이지와 홈 줄도 다시 쓴다.
 #
-# GHA native cron은 늦게 뜨거나 빠질 수 있어(§10) 08·11·14시 KST 세 번 건다. 이미 그 주 리포트가 있으면
-# 스크립트가 바로 끝나므로 두 번째부터는 아무것도 하지 않는다. 브리핑 잡과 시간이 겹치지 않는다(토요일).
-# 이 워크플로우가 커밋하는 건 web/weekly/·web/sitemap.xml·web/stocks/index.html(최근 브리핑 목록)·data/sp500_breadth_history.json뿐이다(§18).
+# 언제 도나:
+#   · Cloudflare 워커(workers/cron) — 토 07:25 KST(만들기)·토 09:00 KST(보내기)에 telegram=on으로 dispatch한다. 시각이 정확하다.
+#   · GHA native cron 08·11·14시 KST — 워커가 빠졌을 때의 대비. 이 저장소에서 GHA cron은 몇 시간씩 늦게 뜰 수 있다(§10).
+#   만드는 부분은 그 주 리포트가 이미 있으면 바로 끝난다. 보내는 부분은 토요일 09:00 이후에만, 하루 한 번만
+#   (send_telegram의 발송 기록) 돈다 — 07:25 실행은 만들기만 하고, 09:00 실행이 보낸다. 08:00 실행이 늦게 떠 09:00을 넘기면 그 실행이 보낸다.
+#   수동 실행(workflow_dispatch)은 telegram 기본값 off — 지난 주를 채우거나 시험할 때 구독자에게 나가지 않는다.
+# 이 워크플로우가 커밋하는 건 web/weekly/·web/sitemap.xml·web/stocks/index.html(최근 브리핑 목록)·상세 페이지 2개와 홈 줄 파일·
+# data/sp500_breadth_history.json·data/telegram_sent_log.json뿐이다(§18).
 name: 📅 주간 장기 리포트
 
 on:
@@ -16,6 +22,12 @@ on:
         description: "그 주 금요일(YYYY-MM-DD). 비우면 오늘 이전 가장 최근 금요일"
         required: false
         default: ""
+      telegram:
+        description: "텔레그램 발송(on이면 토요일 09:00 이후·이번 주·오늘 처음일 때만 보낸다). 수동 시험은 off"
+        required: false
+        default: "off"
+        type: choice
+        options: ["off", "on"]
 
 permissions:
   contents: write
@@ -29,7 +41,12 @@ jobs:
   run:
     name: "📅 주간 장기 리포트"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+      WEB_BASE_URL: "https://doubleshot.space"
     steps:
       - name: 📥 체크아웃
         uses: actions/checkout@v6
@@ -58,7 +75,8 @@ jobs:
         run: |
           git config user.name  "DailyB Bot"
           git config user.email "dailyb-bot@users.noreply.github.com"
-          git add web/weekly web/sitemap.xml web/stocks/index.html data/sp500_breadth_history.json
+          git add web/weekly web/sitemap.xml web/stocks/index.html data/sp500_breadth_history.json \
+                  web/stocks/nasdaq-check web/stocks/sp500-200 web/data/nasdaq-home.json web/data/sp500-home.json
           if git diff --cached --quiet; then
             echo "변경 없음, 커밋 스킵"
             echo "pushed=false" >> "$GITHUB_OUTPUT"
@@ -97,6 +115,53 @@ jobs:
           done
           echo "::error::Vercel 배포 트리거 실패 — 수동 조치: gh workflow run vercel-deploy.yml --ref main -f sha=$sha"
           exit 1
+
+      # 토요일 09:00 텔레그램 — 이번 주·토요일 09:00 이후·발송 허용(cron 또는 telegram=on)일 때만. 하루 한 번은 send_telegram이 지킨다.
+      - name: 🕘 텔레그램 보낼지 판단
+        id: tg
+        env:
+          EVENT: ${{ github.event_name }}
+          TG_INPUT: ${{ github.event.inputs.telegram }}
+          WEEK_END: ${{ github.event.inputs.week_end }}
+        run: |
+          dow=$(TZ=Asia/Seoul date +%u); hm=$(TZ=Asia/Seoul date +%H%M)
+          if { [ "$EVENT" = "schedule" ] || [ "$TG_INPUT" = "on" ]; } && [ -z "$WEEK_END" ] && [ "$dow" = "6" ] && [ "$hm" -ge 900 ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=false" >> "$GITHUB_OUTPUT"
+            echo "텔레그램 보내지 않음 (event=$EVENT telegram=$TG_INPUT week_end=$WEEK_END 요일=$dow 시각=$hm)"
+          fi
+
+      - name: 📝 텔레그램 메시지 만들기
+        id: msg
+        if: steps.tg.outputs.send == 'true'
+        run: |
+          python3 scripts/weekly_report.py --telegram-message
+          end=$(python3 -c "import sys; sys.path.insert(0,'scripts'); import weekly_report as w; from datetime import datetime; print(w.week_of(datetime.now(w.KST).date()))")
+          echo "end=$end" >> "$GITHUB_OUTPUT"
+          cat data/telegram_message_weekly.txt
+
+      # 페이지가 실제로 열리는지 본 뒤 보낸다(§17) — 배포는 보통 1~2분.
+      - name: 🔎 리포트 페이지 라이브 확인
+        if: steps.tg.outputs.send == 'true'
+        timeout-minutes: 11
+        run: |
+          url="https://doubleshot.space/weekly/${{ steps.msg.outputs.end }}/"
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+            if [ "$code" = "200" ]; then echo "✅ $url"; exit 0; fi
+            echo "아직 $code ($i/60) — 10초 뒤 다시"; sleep 10
+          done
+          echo "::error::$url 이 10분 동안 열리지 않음 — 텔레그램을 보내지 않는다"; exit 1
+
+      - name: 📤 텔레그램 발송
+        if: steps.tg.outputs.send == 'true'
+        run: python3 scripts/send_telegram.py --type weekly
+
+      - name: 🧾 발송 기록 커밋
+        if: steps.tg.outputs.send == 'true'
+        continue-on-error: true
+        run: bash .github/scripts/commit_sent_log.sh weekly
 
       - name: 🔔 실패 알림
         if: failure()
