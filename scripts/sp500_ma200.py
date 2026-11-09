@@ -43,6 +43,22 @@ MIN_LIST = 480          # 위키 목록이 이보다 짧으면 표가 바뀐 것
 MIN_VALID = 450         # 200일선을 계산한 종목이 이보다 적으면 수집 실패로 본다
 BREADTH_DAYS = 60
 DEEP_PCT = -20.0        # '20% 넘게 아래' — 상세 페이지 분포·지금 vs 보통
+EVENT_LINE = 50.0       # 200일선 위 비율이 이 선을 넘나든 날
+EVENT_JUMP = 5.0        # 하루에 이만큼(%p) 넘게 움직인 날 — 2025-01~2026-11 463거래일 중 두 조건을 합쳐 34일(한 달 1~2번)
+
+
+def event_of(now: float, prev: float) -> str:
+    """특별한 날인지 — 비율이 50%를 넘나들었거나 하루에 5%p 넘게 움직인 날만(2026-11-09 사용자 결정).
+    브리핑 섹션과 텔레그램이 같은 판정을 쓴다. 해당하면 한 줄 설명, 아니면 ''."""
+    crossed = (now < EVENT_LINE) != (prev < EVENT_LINE)
+    diff = now - prev
+    jump = abs(diff) >= EVENT_JUMP
+    if crossed:
+        where = "절반 아래로 내려왔어요" if now < EVENT_LINE else "다시 절반을 넘었어요"
+        return (f"하루에 {abs(diff):.1f}%p {'빠지며' if diff < 0 else '오르며'} " + where + ".") if jump else where + "."
+    if jump:
+        return f"하루에 {abs(diff):.1f}%p {'빠졌어요' if diff < 0 else '올랐어요'}."
+    return ""
 BIN = 5                 # 분포 막대 하나의 폭(%p). -50 아래·+50 이상은 양 끝 칸에 모은다
 BIN_LO, BIN_HI = -50, 50
 

@@ -778,11 +778,16 @@ def read_sp500_ma200(analysis: dict, target_date: str = ""):
 def build_sp500_ma200(analysis: dict, target_date: str = "") -> dict:
     """미국 브리핑 'S&P 500 · 200일선 체크' 섹션(2026-11-08 사용자 결정, 시안 A안).
 
-    맨 위 200일선 위 비율과 최근 60거래일 흐름, 아래로·위로 넘은 종목 칩, 200일선보다 40% 넘게 높은 과열 종목.
-    값이 없으면 빈 dict → 섹션 생략. 묶음마다 종목이 없으면 그 묶음만 빠진다.
+    맨 위 200일선 위 비율과 최근 60거래일 흐름, 과열 종목(200일선보다 40% 넘게 높음), 위로·아래로 넘은 종목 칩 순.
+    특별한 날(50% 넘나듦·하루 5%p 넘게)에만 싣는다. 아니면 빈 dict → 섹션 생략. 묶음마다 종목이 없으면 그 묶음만 빠진다.
     """
     d = read_sp500_ma200(analysis, target_date)
     if not d or not isinstance(d.get("above_pct"), (int, float)) or not d.get("asof"):
+        return {}
+    # 특별한 날에만 브리핑에 싣는다 — 텔레그램과 같은 판정(2026-11-09 사용자 결정). 데이터는 위에서 analysis에 남아
+    # 스냅샷·상세 페이지(/stocks/sp500-200/)는 매일 그대로다. 전날 비율이 없으면 판단할 수 없어 뺀다.
+    from sp500_ma200 import event_of
+    if not isinstance(d.get("above_pct_prev"), (int, float)) or not event_of(d["above_pct"], d["above_pct_prev"]):
         return {}
     br = [b for b in d.get("breadth") or [] if isinstance(b, list) and len(b) == 2 and isinstance(b[1], (int, float))]
     spark = {}

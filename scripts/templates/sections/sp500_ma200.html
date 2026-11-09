@@ -1,4 +1,4 @@
-{# S&P 500 · 200일선 체크 — 직전 정규장 종가 기준 200일선 위 비율, 200일선을 넘은 종목, 과열 종목(결정론, SERVICE_RULES §81).
+{# S&P 500 · 200일선 체크 — 직전 정규장 종가 기준 200일선 위 비율, 과열 종목, 200일선을 넘은 종목(결정론, SERVICE_RULES §81).
    선 그래프는 SVG로 늘려 그리고 글자·점은 HTML로 겹친다(§65와 같은 방식). 묶음마다 종목이 없으면 그 묶음만 빠진다. #}
 {% set s = spx %}
 <div class="open-section spx-section">
@@ -19,18 +19,6 @@
       </div>
       {% endif %}
     </div>
-    {% if s.below %}
-    <div class="spx-blk">
-      <div class="spx-bh">200일선 아래로 <em>{{ s.below|length }}개</em>{% if s.below_secs %}<small>{{ s.below_secs }}</small>{% endif %}</div>
-      <div class="spx-chips">{% for r in s.below %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.below|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="dn">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
-    </div>
-    {% endif %}
-    {% if s.up %}
-    <div class="spx-blk">
-      <div class="spx-bh">200일선 위로 <em>{{ s.up|length }}개</em></div>
-      <div class="spx-chips">{% for r in s.up %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.up|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="up">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
-    </div>
-    {% endif %}
     {% if s.hot %}
     <div class="spx-blk spx-hot">
       <div class="spx-bh"><span class="spx-tag">🔥 과열</span>200일선보다 {{ s.hot_pct }}% 넘게 높아요 <em>{{ s.hot|length }}개</em></div>
@@ -39,6 +27,18 @@
       {% endfor %}
     </div>
     {% endif %}
-    <div class="spx-foot">칩 숫자는 그날 하루 등락이에요. 200일선은 최근 200거래일 정규장 종가(배당 반영) 평균이고, 아래로·위로는 전날엔 반대편에 있다가 이날 선을 넘은 종목이에요.</div>
+    {% if s.up %}
+    <div class="spx-blk">
+      <div class="spx-bh">200일선 위로 <em>{{ s.up|length }}개</em></div>
+      <div class="spx-chips">{% for r in s.up %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.up|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="up">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
+    </div>
+    {% endif %}
+    {% if s.below %}
+    <div class="spx-blk">
+      <div class="spx-bh">200일선 아래로 <em>{{ s.below|length }}개</em>{% if s.below_secs %}<small>{{ s.below_secs }}</small>{% endif %}</div>
+      <div class="spx-chips">{% for r in s.below %}{% if loop.index == s.chips + 1 %}<details class="spx-more"><summary>+{{ s.below|length - s.chips }}개 더 보기</summary>{% endif %}<span class="spx-chip" title="{{ r.n }}"><b>{{ r.t }}</b><span class="dn">{{ '%+.2f'|format(r.chg)|replace('-', '−') }}%</span></span>{% if loop.last and loop.length > s.chips %}</details>{% endif %}{% endfor %}</div>
+    </div>
+    {% endif %}
+    <div class="spx-foot">칩 숫자는 그날 하루 등락이에요. 200일선은 최근 200거래일 정규장 종가(배당 반영) 평균이고, 위로·아래로는 전날엔 반대편에 있다가 이날 선을 넘은 종목이에요.</div>
   </div>
 </div>

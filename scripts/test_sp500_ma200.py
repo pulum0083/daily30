@@ -62,8 +62,23 @@ def _with_file(tmp_path, monkeypatch, data):
     monkeypatch.setattr(gh, "DATA_DIR", tmp_path)
 
 
-def test_section_context_and_render(tmp_path, monkeypatch):
+EVENT = dict(DATA, above_pct=48.8, above_pct_prev=51.4)    # 50%를 넘나든 날 — 섹션이 나온다
+
+
+def test_section_only_on_event_days(tmp_path, monkeypatch):
+    """평범한 날(58.8 ← 61.4)엔 섹션을 빼되 데이터는 스냅샷에 남긴다(2026-11-09 사용자 결정)."""
     _with_file(tmp_path, monkeypatch, DATA)
+    a = {}
+    assert gh.build_sp500_ma200(a, "2026-11-09") == {}
+    assert a["sp500_ma200"]["asof"] == "2026-11-06"
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct_prev=None))
+    assert gh.build_sp500_ma200({}, "2026-11-09") == {}
+    _with_file(tmp_path, monkeypatch, dict(DATA, above_pct=58.8, above_pct_prev=64.0))   # 하루 5.2%p
+    assert gh.build_sp500_ma200({}, "2026-11-09")
+
+
+def test_section_context_and_render(tmp_path, monkeypatch):
+    _with_file(tmp_path, monkeypatch, EVENT)
     a = {}
     ctx = gh.build_sp500_ma200(a, "2026-11-09")["spx"]
     assert a["sp500_ma200"]["asof"] == "2026-11-06"                           # 스냅샷에 남는다
@@ -71,6 +86,7 @@ def test_section_context_and_render(tmp_path, monkeypatch):
     assert ctx["hot"][0]["x"] == "2.8" and ctx["below_secs"] == "금융 10"
     html = gh.make_env().get_template("sections/sp500_ma200.html").render(spx=ctx)
     assert "200일선 아래로" in html and "200일선 위로" in html and "새로" not in html
+    assert html.index("🔥 과열") < html.index("200일선 위로") < html.index("200일선 아래로")   # 과열 → 위로 → 아래로
     assert "🔥 과열" in html and "200일선보다 40% 넘게 높아요" in html
     assert "+2개 더 보기" in html and html.count('class="spx-chip"') == 11
     assert "평균의 2.8배" in html
@@ -80,9 +96,9 @@ def test_section_context_and_render(tmp_path, monkeypatch):
 
 
 def test_section_skipped_on_date_mismatch_and_empty_groups(tmp_path, monkeypatch):
-    _with_file(tmp_path, monkeypatch, DATA)
+    _with_file(tmp_path, monkeypatch, EVENT)
     assert gh.build_sp500_ma200({}, "2026-11-10") == {}
-    ctx = gh.build_sp500_ma200({"sp500_ma200": dict(DATA, hot=[], up=[])}, "2026-11-10")["spx"]   # 스냅샷 우선
+    ctx = gh.build_sp500_ma200({"sp500_ma200": dict(EVENT, hot=[], up=[])}, "2026-11-10")["spx"]   # 스냅샷 우선
     html = gh.make_env().get_template("sections/sp500_ma200.html").render(spx=ctx)
     assert "과열" not in html and "200일선 위로" not in html and "200일선 아래로" in html
 

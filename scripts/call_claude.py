@@ -1162,22 +1162,7 @@ def _ma5_telegram_lines(analysis: dict, date_str: str) -> list:
     return out
 
 
-SP500_TG_LINE = 50.0   # 200일선 위 비율이 이 선을 넘나든 날
-SP500_TG_JUMP = 5.0    # 하루에 이만큼(%p) 넘게 움직인 날 — 2025-01~2026-11 463거래일 중 두 조건을 합쳐 34일(한 달 1~2번)
-
-
-def _sp500_event(now: float, prev: float) -> str:
-    """텔레그램에 실을 만한 날인지 — 비율이 50%를 넘나들었거나 하루에 5%p 넘게 움직인 날만(2026-11-09 사용자 결정).
-    해당하면 한 줄 설명, 아니면 ''."""
-    crossed = (now < SP500_TG_LINE) != (prev < SP500_TG_LINE)
-    diff = now - prev
-    jump = abs(diff) >= SP500_TG_JUMP
-    if crossed:
-        where = "절반 아래로 내려왔어요" if now < SP500_TG_LINE else "다시 절반을 넘었어요"
-        return (f"하루에 {abs(diff):.1f}%p {'빠지며' if diff < 0 else '오르며'} " + where + ".") if jump else where + "."
-    if jump:
-        return f"하루에 {abs(diff):.1f}%p {'빠졌어요' if diff < 0 else '올랐어요'}."
-    return ""
+from sp500_ma200 import EVENT_LINE as SP500_TG_LINE, EVENT_JUMP as SP500_TG_JUMP, event_of as _sp500_event  # noqa: E402,F401 — 판정은 한 곳(§30)
 
 
 def _sp500_lines(analysis: dict, date_str: str) -> list:
