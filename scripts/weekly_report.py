@@ -225,7 +225,8 @@ def telegram_text(d: dict, ctx: dict, today: date, base_url: str) -> str:
     if wk["cards"]:
         lines += ["", "📐 장기 지표 (지난주 → 이번 주)"]
         short = {"코스피 체크": "코스피 체크", "나스닥 체크": "나스닥 체크", "S&P 500": "S&P 500 200일선 위"}
-        for c in wk["cards"]:
+        # 종목 홈 장기 신호와 같은 순서 — 나스닥 → S&P 500 → 코스피(2026-11-09 사용자 결정)
+        for c in sorted(wk["cards"], key=lambda c: c["name"].startswith("코스피")):
             k = next((v for key, v in short.items() if c["name"].startswith(key)), c["name"].split(" · ")[0])
             lines.append(f"{k} {c['a']} → {c['b']}")
     from send_telegram import link_line

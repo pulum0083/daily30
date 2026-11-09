@@ -247,6 +247,8 @@ def test_weekly_telegram_text():
     assert "S&P 500 −3.00%" in t                                             # 99 → 97
     assert "코스피 체크 70.8% → 49.2%" in t and "나스닥 체크 59.9% → 48.9%" in t
     assert "S&P 500 200일선 위 61.6% → 58.8%" in t
+    i = lines.index("📐 장기 지표 (지난주 → 이번 주)")                       # 나스닥 → S&P 500 → 코스피(홈과 같은 순서)
+    assert [l.split(" ")[0] for l in lines[i + 1:i + 4]] == ["나스닥", "S&P", "코스피"]
     assert lines[-1] == "🔗 주간 장기 리포트 → https://doubleshot.space/weekly/2026-11-06/"
 
 
