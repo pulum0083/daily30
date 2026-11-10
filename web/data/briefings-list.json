@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-11": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-11/kospi/",
+        "headline": "급등 다음날, 선물도 식었다",
+        "pill_cls": "dn",
+        "pill_text": "▼",
+        "title": "하락 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-10": {
       "kospi": {
         "state": "ready",
@@ -783,34 +802,6 @@
         "state": "ready",
         "url": "/briefings/2026-10-01/us/",
         "headline": "국채금리 24년 만의 고점에도 돈은 반도체로 몰린다",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
-      }
-    },
-    "2026-09-30": {
-      "kospi": {
-        "state": "ready",
-        "url": "/briefings/2026-09-30/kospi/",
-        "headline": "반도체 수출 역대 최대, 자사주 매수까지 겹쳤어요",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "07:29"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-09-30/close/",
-        "headline": "외국인 4일째 매도, 코스피 왜 흔들렸나",
-        "title": "6,838.04",
-        "price": "6,838.04",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-09-30/us/",
-        "headline": "지수는 쉬어가도 반도체는 쉬지 않는다 — 코어 PCE가 그 온도차를 시험한다",
         "pill_cls": "up",
         "pill_text": "▲",
         "title": "상승 우위",
