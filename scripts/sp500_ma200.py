@@ -32,6 +32,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 KST = ZoneInfo("Asia/Seoul")
+ET = ZoneInfo("America/New_York")
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PATH = ROOT / "data" / "sp500_ma200.json"
 LIST_PATH = ROOT / "data" / "sp500_constituents.json"
@@ -222,6 +223,45 @@ def download(yf, tickers: list, period: str):
     return raw
 
 
+def fill_session_close(yf, raw, session: date):
+    """그날 일봉 종가가 비어 있으면 그날 5분봉의 마지막 종가로 채운다(2026-11-10).
+    야후는 미국 장이 끝나고 몇 시간 동안 개별 종목의 그날 일봉 종가를 비워 둔다 — 11/10 07:25 KST(뉴욕 11/9 17:25)에
+    11/9 일봉 종가가 503종목 모두 비어 있었고, 같은 때 5분봉 마지막 값은 장 마감 가격과 같았다(AAPL 350.69).
+    정규장 마지막 봉(15:55)까지 와 있을 때만 채운다 — 장이 끝나기 전이면 그대로 둔다."""
+    import pandas as pd
+    ts = pd.Timestamp(session)
+    have = int(raw.loc[ts].notna().sum()) if ts in raw.index else 0
+    miss = [t for t in raw.columns if ts not in raw.index or pd.isna(raw.at[ts, t])]
+    if not miss or have >= MIN_VALID:
+        return raw
+    try:
+        intr = yf.download(miss, period="5d", interval="5m", auto_adjust=True, prepost=False, progress=False,
+                           threads=True)["Close"]
+    except Exception as e:
+        print(f"[sp500_ma200] 5분봉 조회 실패({e}) — 그날 종가를 채우지 못함", file=sys.stderr)
+        return raw
+    if not hasattr(intr, "columns"):
+        intr = intr.to_frame(miss[0])
+    idx = intr.index.tz_convert(ET) if intr.index.tz is not None else intr.index
+    day = intr[[d.date() == session for d in idx]]
+    day_idx = [d for d in idx if d.date() == session]
+    if not len(day) or max(d.hour * 60 + d.minute for d in day_idx) < 15 * 60 + 55:
+        print(f"[sp500_ma200] {session} 5분봉이 장 마감까지 오지 않음 — 그날 종가를 채우지 않는다", file=sys.stderr)
+        return raw
+    last = day.ffill().iloc[-1]
+    if ts not in raw.index:
+        raw.loc[ts] = float("nan")
+        raw = raw.sort_index()
+    n = 0
+    for t in miss:
+        v = last.get(t)
+        if v is not None and pd.notna(v):
+            raw.at[ts, t] = float(v)
+            n += 1
+    print(f"[sp500_ma200] {session} 일봉 종가가 비어 있던 {len(miss)}종목 중 {n}종목을 5분봉 마지막 값으로 채움")
+    return raw
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="브리핑 날짜(KST, 기본 오늘)")
@@ -238,6 +278,8 @@ def main() -> int:
         return 1
     names = {t: (n, s) for t, n, s in items}
     raw = download(yf, list(names), "7y" if args.backfill else "15mo")
+    if not args.backfill:
+        raw = fill_session_close(yf, raw, session)
     if args.backfill:
         df = raw[[d.date() <= session for d in raw.index]]
         gap = (df / df.rolling(MA_DAYS, min_periods=MA_DAYS).mean() - 1) * 100

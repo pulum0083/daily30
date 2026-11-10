@@ -134,3 +134,49 @@ def test_download_retries_empty_tickers():
     raw = sp.download(YF(), ["AAPL", "HAS"], "15mo")
     assert calls == [(["AAPL", "HAS"], True), (["HAS"], False)]
     assert raw["HAS"].tolist() == [1.0, 2.0, 3.0]
+
+
+def _intraday(tickers, last_bar="15:55"):
+    idx = pd.date_range(f"2026-11-09 09:30", f"2026-11-09 {last_bar}", freq="5min", tz="America/New_York")
+    return pd.DataFrame({t: [100.0 + i for i in range(len(idx))] for t in tickers}, index=idx)
+
+
+def test_fill_session_close_from_intraday():
+    """11/10 07:25 KST 실사고 — 11/9 일봉 종가가 전부 비어 있으면 5분봉 마지막 값으로 채운다."""
+    import numpy as np
+    tickers = [f"T{i}" for i in range(500)]
+    idx = pd.to_datetime(["2026-11-05", "2026-11-06", "2026-11-09"])
+    raw = pd.DataFrame({t: [1.0, 2.0, np.nan] for t in tickers}, index=idx)
+
+    class YF:
+        def download(self, tickers, interval, **kw):
+            assert interval == "5m"
+            return {"Close": _intraday(tickers)}
+    out = sp.fill_session_close(YF(), raw, date(2026, 11, 9))
+    assert out.loc[pd.Timestamp("2026-11-09")].notna().sum() == 500
+    assert out.at[pd.Timestamp("2026-11-09"), "T0"] == _intraday(["T0"])["T0"].iloc[-1]
+    assert out.at[pd.Timestamp("2026-11-06"), "T0"] == 2.0          # 지난 날은 건드리지 않는다
+
+
+def test_fill_session_close_waits_for_market_close():
+    """5분봉이 장 마감(15:55 봉)까지 오지 않았으면 채우지 않는다 — 장중 가격을 종가로 쓰지 않는다."""
+    import numpy as np
+    idx = pd.to_datetime(["2026-11-06", "2026-11-09"])
+    raw = pd.DataFrame({t: [2.0, np.nan] for t in ["A", "B"]}, index=idx)
+
+    class YF:
+        def download(self, tickers, **kw):
+            return {"Close": _intraday(tickers, last_bar="13:00")}
+    out = sp.fill_session_close(YF(), raw, date(2026, 11, 9))
+    assert out.loc[pd.Timestamp("2026-11-09")].isna().all()
+
+
+def test_fill_session_close_skips_when_daily_complete():
+    """일봉 종가가 충분하면 5분봉을 받지 않는다."""
+    tickers = [f"T{i}" for i in range(460)]
+    raw = pd.DataFrame({t: [1.0, 2.0] for t in tickers}, index=pd.to_datetime(["2026-11-06", "2026-11-09"]))
+
+    class YF:
+        def download(self, *a, **kw):
+            raise AssertionError("받지 않아야 한다")
+    assert sp.fill_session_close(YF(), raw, date(2026, 11, 9)) is raw
