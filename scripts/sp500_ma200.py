@@ -248,6 +248,8 @@ def main() -> int:
     if result is None:
         last = raw.index[-1].date() if len(raw) else None
         print(f"[sp500_ma200] 계산 불가(직전 정규장 {session}, 마지막 봉 {last}) — 파일을 쓰지 않는다", file=sys.stderr)
+        for ts in raw.index[-4:]:   # 어느 날짜에 종가가 몇 종목 있는지 — 원인을 짐작하지 않고 로그로 본다
+            print(f"[sp500_ma200]   {ts} 종가 있는 종목 {int(raw.loc[ts].notna().sum())}/{raw.shape[1]}", file=sys.stderr)
         return 1
     add_caps(result)
     upsert_history(result.pop("history_rows"))
