@@ -1,26 +1,64 @@
 {
-  "generated_at": "2026-11-10T09:01:43.259204+09:00",
+  "generated_at": "2026-11-10T09:31:24.170610+09:00",
   "date": "2026-11-10",
   "stocks": [
     {
       "code": "005930",
       "name": "삼성전자",
-      "changePct": 5.0,
-      "surge": 0.06,
-      "events": []
+      "changePct": 5.16,
+      "surge": 0.18,
+      "events": [
+        {
+          "time": "07:10",
+          "headline": "\"겨우 반등했는데\" 삼성전자·SK하이닉스, 젠슨 황 사태에 또 '날벼락'",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5iMHlTRWNLS1FTSE1GLUtiT1NOQnQydHVhMS11ZjN4d0U4VW9BSTBmbXM2bDJWZ3JuZ2ZrdE1zUFBydU4tSVprTVpLWFhsU3dEaGNpQ2VzTDUxTjlqTWdkNTVxZU01SFdXSzFVNA?oc=5",
+          "source": "스마트비즈",
+          "why": "젠슨 황 사태로 삼성전자와 SK하이닉스 주가가 다시 하락할 위기에 처했다. (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        },
+        {
+          "time": "09:24",
+          "headline": "19만 원 무너진 삼성전자…증권가 저가 매수론 `솔솔`",
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTFBzTTkzZFpuTDlrNmUyaG11Yl9wekJkVERoazZjaWJqS3NTNFFfcWtEVThNQXNJNWE0U0ZwaUVmckR4QjJteWNkaGRCZXIyZ1Z1MHp3dUVhRUlZQmI3QWJtVEl3?oc=5",
+          "source": "매일신문",
+          "why": "19만 원 무너진 삼성전자…증권가 저가 매수론 `솔솔` (개별 인과 단정 안 함)",
+          "tier": "related",
+          "sentiment": "neg"
+        }
+      ]
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
-      "changePct": 6.95,
-      "surge": 0.03,
-      "events": []
+      "changePct": 7.92,
+      "surge": 0.19,
+      "events": [
+        {
+          "time": "09:15",
+          "headline": "삼성전자·SK하이닉스 장 초반 5~7% 강세",
+          "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE0xbThvNFZXZFJmcjY4N2pERFJnTmZvZ0tVTkVvMlI1Nmt5eTlvV01HczNvdkg3VE42OVdZM0hqRC15cEZDaUo3dnpsZU9weExPb0VudjBlWnBBUGR6QWtqWlFTUGZ3Wmw5?oc=5",
+          "source": "https://www.2news.co.kr/",
+          "why": "삼성전자와 SK하이닉스가 장 초반 5~7% 강세를 보였다.",
+          "tier": "why",
+          "sentiment": "pos"
+        },
+        {
+          "time": "07:10",
+          "headline": "\"겨우 반등했는데\" 삼성전자·SK하이닉스, 젠슨 황 사태에 또 '날벼락'",
+          "url": "https://news.google.com/rss/articles/CBMibEFVX3lxTE5iMHlTRWNLS1FTSE1GLUtiT1NOQnQydHVhMS11ZjN4d0U4VW9BSTBmbXM2bDJWZ3JuZ2ZrdE1zUFBydU4tSVprTVpLWFhsU3dEaGNpQ2VzTDUxTjlqTWdkNTVxZU01SFdXSzFVNA?oc=5",
+          "source": "스마트비즈",
+          "why": "\"겨우 반등했는데\" 삼성전자·SK하이닉스, 젠슨 황 사태에 또 '날벼락'",
+          "tier": "why",
+          "sentiment": "pos"
+        }
+      ]
     },
     {
       "code": "005380",
       "name": "현대차",
-      "changePct": 4.42,
-      "surge": 0.04,
+      "changePct": 3.13,
+      "surge": 0.15,
       "events": []
     }
   ]
