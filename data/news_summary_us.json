@@ -1,50 +1,68 @@
 {
   "key_indicators": [],
   "catalysts": [
-    "NVIDIA 주가 프리마켓에서 5% 하락 → 투자자들의 우려",
-    "젠슨 황 불륜 의혹으로 엔비디아 주가 휘청 → 시장의 불안감 증폭",
-    "Octodec의 가이던스 상회 예상 → 주가 상승",
-    "유가 하락이 엔비디아 악재를 상쇄하며 미국 증시 상승 → 시장의 복합적인 반응"
+    "The Trade Desk, 2026년 3분기 실적 예상치 상회 → 주가 21.8% 급등",
+    "McDonald’s, 지난주 실적 예상치 상회 → 주가 7% 상승",
+    "뉴욕증시 일제히 반등, 엔비디아만 4%대 급락 → 엔비디아 주가 하락",
+    "나스닥 2.7% 급등, 엔비디아만 4% 넘게 밀림 → 나스닥 지수 상승 및 엔비디아 주가 하락",
+    "엔비디아 빠져도 반도체 7%↑, 유가 급락에 美증시 반등 → 반도체 섹터 강세 및 미국 증시 반등",
+    "3대 지수 일제히 상승, 반도체주 급반등에 나스닥 2.74%↑ → 미국 증시 전반적인 상승세"
   ],
   "catalyst_sources": [
     {
-      "date": "2026-11-09",
-      "text": "NVIDIA 주가 프리마켓에서 5% 하락 → 투자자들의 우려",
+      "date": "2026-11-10",
+      "text": "The Trade Desk, 2026년 3분기 실적 예상치 상회 → 주가 21.8% 급등",
+      "ticker": "TTD",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/trade-desk-nasdaq-ttd-beats-211313465.html",
+      "source": "Yahoo Finance",
+      "published_at": "2026-11-09T21:13:13+00:00"
+    },
+    {
+      "date": "2026-11-10",
+      "text": "McDonald’s, 지난주 실적 예상치 상회 → 주가 7% 상승",
+      "ticker": "MCD",
+      "url": "https://www.tikr.com/ko/blog/mcdonalds-stock-jumped-7-last-week-is-its-earnings-beat-really-that-good?",
+      "source": "TIKR.com",
+      "published_at": "2026-11-09T18:37:19+00:00"
+    },
+    {
+      "date": "2026-11-10",
+      "text": "뉴욕증시 일제히 반등, 엔비디아만 4%대 급락 → 엔비디아 주가 하락",
       "ticker": "NVDA",
-      "url": "https://www.tradingview.com/news/moneycontrol:261a3859d094b:0-wall-street-futures-rise-up-to-0-8-as-crude-oil-prices-decline-nvidia-shares-fall-5-in-pre-market-trade/",
-      "source": "TradingView",
-      "published_at": "2026-11-09T11:20:11+00:00"
+      "url": "https://news.kbs.co.kr/news/view.do?ncd=8708223",
+      "source": "KBS 뉴스",
+      "published_at": "2026-11-10T06:23:48"
     },
     {
-      "date": "2026-11-09",
-      "text": "젠슨 황 불륜 의혹으로 엔비디아 주가 휘청 → 시장의 불안감 증폭",
+      "date": "2026-11-10",
+      "text": "나스닥 2.7% 급등, 엔비디아만 4% 넘게 밀림 → 나스닥 지수 상승 및 엔비디아 주가 하락",
       "ticker": "NVDA",
-      "url": "https://www.topstarnews.net/news/articleView.html?idxno=16272340",
-      "source": "톱스타뉴스",
-      "published_at": "2026-11-09T20:12:54+09:00"
+      "url": "https://www.munhwa.com/article/11630041",
+      "source": "문화일보",
+      "published_at": "2026-11-10T06:15:08+09:00"
     },
     {
-      "date": "2026-11-09",
-      "text": "Octodec의 가이던스 상회 예상 → 주가 상승",
-      "ticker": "OCTO",
-      "url": "https://www.businessday.co.za/companies/earnings/2026-11-09-octodec-shares-rise-as-it-expects-to-beat-guidance/",
-      "source": "Business Day",
-      "published_at": "2026-11-09T08:45:07+00:00"
-    },
-    {
-      "date": "2026-11-09",
-      "text": "유가 하락이 엔비디아 악재를 상쇄하며 미국 증시 상승 → 시장의 복합적인 반응",
+      "date": "2026-11-10",
+      "text": "엔비디아 빠져도 반도체 7%↑, 유가 급락에 美증시 반등 → 반도체 섹터 강세 및 미국 증시 반등",
       "ticker": "",
-      "url": "https://www.bloomberg.com/news/articles/2026-11-08/stock-market-today-dow-s-p-live-updates",
-      "source": "Bloomberg.com",
-      "published_at": "2026-11-08T12:00:00+00:00"
+      "url": "https://www.edaily.co.kr/News/Read?newsId=02338646645644408&mediaCodeNo=257",
+      "source": "이데일리",
+      "published_at": "2026-11-10T06:34:06+08:00"
+    },
+    {
+      "date": "2026-11-10",
+      "text": "3대 지수 일제히 상승, 반도체주 급반등에 나스닥 2.74%↑ → 미국 증시 전반적인 상승세",
+      "ticker": "",
+      "url": "https://www.goodkyung.com/news/articleView.html?idxno=293286",
+      "source": "굿모닝경제",
+      "published_at": "2026-11-10T10:18:19+09:00"
     }
   ],
   "headlines": [],
   "market_sentiment": "neutral",
   "news_session": {
-    "date": "2026-11-06",
+    "date": "2026-11-09",
     "label": "직전 정규장"
   },
-  "generated_at": "2026-11-09T22:54:40.177967+09:00"
+  "generated_at": "2026-11-10T21:16:56.522157+09:00"
 }
