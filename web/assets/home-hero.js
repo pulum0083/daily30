@@ -343,7 +343,7 @@
 
   function structHtml(nq, sp, kc, m5, m5Date, today) {
     var rows = nasdaqRow(nq, today) + sp500Row(sp, today) + kospiRow(kc, today) + (m5Date ? ma5Row(m5, m5Date, today) : '');
-    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">종가 기준 · 매일 갱신</span></div>' +
+    return rows ? '<div class="block__h"><span class="block__t"><span class="ic">📐</span>장기 신호</span><span class="block__s">미국 07:30 · 코스피 16:30 갱신</span></div>' +
       rows + '<div class="lt-f"><span>매주 토요일 한 주 정리</span><a href="/weekly/">주간 장기 리포트 ›</a></div>' : '';
   }
 

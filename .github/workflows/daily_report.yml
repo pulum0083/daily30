@@ -15,6 +15,7 @@ on:
           - kospi-close
           - accuracy
           - kospi-news-live
+          - us-longterm      # 미국 장기 지표 아침 갱신만 따로 (평소엔 kospi 실행 때 함께 돈다)
       dry_run:
         description: "dry_run=true 시 텔레그램 전송 건너뜀 (테스트용)"
         required: false
@@ -234,6 +235,80 @@ jobs:
         continue-on-error: true
         run: |
           bash .github/scripts/commit_sent_log.sh "kospi"
+
+  # ──────────────────────────────────────────────────────────────────
+  # 아침 07:25에 직전 미국장 종가로 장기 지표(나스닥 체크·S&P 500 200일선)를 갱신한다(2026-11-10, §82).
+  # 미국 잡(21:15)은 그날 미국장이 열리기 전이라 전 거래일 종가까지만 반영한다 — 이 잡이 없으면
+  # 미국장이 끝난(06:00 KST) 뒤 21:15까지 하루 전 값이 남는다. 코스피 브리핑과 따로 돌아 발송을 늦추지 않고,
+  # 한국 휴장일에도 돈다. 건드리는 파일은 상세 페이지 2개·홈 줄 파일 2개·S&P 누적 기록뿐이다(§18).
+  us-longterm-morning:
+    name: "📐 미국 장기 지표 아침 갱신 (KST 07:25)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (github.event.inputs.briefing_type == 'kospi' || github.event.inputs.briefing_type == 'us-longterm')
+    steps:
+      - name: 📥 저장소 체크아웃
+        uses: actions/checkout@v6
+
+      - name: 🐍 Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: 📦 Python 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 📈 나스닥 체크·📏 S&P 500 200일선 — 직전 미국장 종가
+        id: refresh
+        timeout-minutes: 8
+        run: |
+          mkdir -p data
+          today=$(TZ=Asia/Seoul date +%F)
+          ok=false
+          if python3 scripts/nasdaq_overheat.py && python3 scripts/generate_html.py --nasdaq-page --date "$today"; then ok=true; fi
+          if python3 scripts/sp500_ma200.py --date "$today" && python3 scripts/generate_html.py --sp500-page --date "$today"; then ok=true; fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: 💾 커밋 → main 푸시
+        if: steps.refresh.outputs.ok == 'true'
+        run: |
+          git config user.email "dailyb-bot@users.noreply.github.com"
+          git config user.name "DailyB Bot"
+          git add web/stocks/nasdaq-check web/stocks/sp500-200 web/data/nasdaq-home.json web/data/sp500-home.json data/sp500_breadth_history.json
+          if git diff --staged --quiet; then echo "바뀐 것 없음"; exit 0; fi
+          git commit -m "📐 미국 장기 지표 아침 갱신: $(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST')"
+          git stash --include-untracked -q || true
+          for i in 1 2 3 4 5; do
+            git fetch origin main
+            if git rebase origin/main && git push; then
+              echo "pushed=true" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_ADMIN_CHAT_ID" ]; then
+            curl -sS -m 20 -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+              --data-urlencode "chat_id=$TELEGRAM_ADMIN_CHAT_ID" \
+              --data-urlencode "text=⚠️ 미국 장기 지표 아침 갱신 push 5회 실패 — 21:15 미국 잡이 다시 갱신한다. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >/dev/null || true
+          fi
+          exit 1
+
+      - name: 🚀 Vercel 배포 트리거
+        if: env.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          for i in 1 2 3; do
+            gh workflow run vercel-deploy.yml --ref main -f sha="$sha" && exit 0
+            sleep 10
+          done
+          exit 1
 
   # ──────────────────────────────────────────────────────────────────
   us-briefing:
