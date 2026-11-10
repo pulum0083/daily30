@@ -62,8 +62,8 @@ function genericJson(url) {
 
 // 코스피만 값을 손으로 고정해 diff를 검증한다: 기준가 T=6700·Y=6600, 15:30 봉 T=6767(+1.00%)·Y=6633(+0.50%).
 function fetchJsonOk(url) {
-  if (/\/index\/KOSPI\/minute\?startDateTime=202609160900&endDateTime=202609161530/.test(url)) return minute('20260916', '1500', 6767);
-  if (/\/index\/KOSPI\/minute\?startDateTime=202609150900&endDateTime=202609151530/.test(url)) return minute('20260915', '1500', 6633);
+  if (/\/index\/KOSPI\/minute\?startDateTime=202609160900&endDateTime=20260916(?:1530|1535)/.test(url)) return minute('20260916', '1500', 6767);
+  if (/\/index\/KOSPI\/minute\?startDateTime=202609150900&endDateTime=20260915(?:1530|1535)/.test(url)) return minute('20260915', '1500', 6633);
   if (/\/index\/KOSPI\/day\?startDateTime=\d{8}0000&endDateTime=202609160000/.test(url)) return [{ localDate: '20260915', closePrice: 6700 }];
   if (/\/index\/KOSPI\/day\?startDateTime=\d{8}0000&endDateTime=202609150000/.test(url)) return [{ localDate: '20260914', closePrice: 6600 }];
   return genericJson(url);
@@ -246,4 +246,17 @@ test("closeCacheControl('waiting')는 s-maxage=60을 갖는다", () => {
 test("closeCacheControl(undefined)는 s-maxage=60을 갖는다", () => {
   const cc = closeCacheControl(undefined);
   assert.ok(cc.includes('s-maxage=60'), `기대: s-maxage=60, 받음: ${cc}`);
+});
+
+// 2026-11-09 실사고 — 코스피 15:30 봉 5,019.78, 공식 종가는 15:32 봉 5,018.85. 15:30 봉 값으로 쓰면 −0.79%(공식 −0.81%).
+test('indexFinal: 15:30 뒤 확정된 지수 종가를 15:30 봉에 얹는다', async () => {
+  const { indexFinal } = await import('./_vs-close.mjs');
+  const bars = [{ t: '1529', v: 5012.84 }, { t: '1530', v: 5019.78, vol: 1 }, { t: '1531', v: 5019.78 }, { t: '1532', v: 5018.85 }];
+  const out = indexFinal(bars);
+  assert.deepEqual(out.map((b) => b.t), ['1529', '1530']);
+  assert.equal(out[1].v, 5018.85);
+  assert.equal(out[1].vol, 1);
+  assert.equal(bars[1].v, 5019.78);                       // 원본은 그대로
+  assert.deepEqual(indexFinal([{ t: '1530', v: 1 }]).map((b) => b.v), [1]);   // 15:30 뒤 봉이 없으면 그대로
+  assert.deepEqual(indexFinal([{ t: '1500', v: 1 }, { t: '1532', v: 2 }]).map((b) => b.v), [1]);   // 15:30 봉이 없으면 덧붙이지 않는다
 });

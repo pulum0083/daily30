@@ -8,6 +8,16 @@ import { heatAxis, flowAxis } from './_vs-axes.mjs';
 import { SECTOR_REPS, sectorRows } from './_vs-sectors.mjs';
 
 export const CLOSE_AT = '1530';
+export const INDEX_FINAL_UNTIL = '1535';
+
+// 지수 봉에서 15:30 뒤에 확정된 최종 값을 15:30 봉의 값으로 쓴다. 15:30 이후 봉은 버린다(곡선의 끝은 15:30).
+export function indexFinal(bars, at = CLOSE_AT) {
+  const all = bars || [];
+  const last = all.length ? all[all.length - 1] : null;
+  const out = all.filter((b) => b.t <= at).map((b) => ({ ...b }));
+  if (last && last.t > at && out.length && out[out.length - 1].t === at) out[out.length - 1].v = last.v;
+  return out;
+}
 
 const isNum = (n) => typeof n === 'number';
 const normTime = (t) => String(t).replace(':', '');
@@ -62,10 +72,14 @@ export async function buildCloseVs({ now = Date.now(), fetchJson }) {
   const at = CLOSE_AT;
 
   // 한 종목/지수의 오늘·어제 정규장 봉과 기준가. 기준가는 직전 거래일 15:30 1분봉이다(§48).
+  // 지수는 15:30 봉 뒤에 최종 종가가 찍히는 날이 있다(2026-11-09 코스피 15:30 봉 5,019.78 → 15:32 봉 5,018.85 = 공식 종가).
+  // 지수엔 애프터장이 없으니 15:35까지 받아 마지막 봉 값을 15:30 봉에 얹는다(indexFinal).
   const load = async (kind, code) => {
+    const to = kind === 'index' ? INDEX_FINAL_UNTIL : at;
+    const fix = kind === 'index' ? (b) => indexFinal(b, at) : (b) => b;
     const [bT, bY, pT, pY] = await Promise.all([
-      settle(minuteBars(kind, code, T, fetchJson, '0900', at), []),
-      settle(minuteBars(kind, code, Y, fetchJson, '0900', at), []),
+      settle(minuteBars(kind, code, T, fetchJson, '0900', to).then(fix), []),
+      settle(minuteBars(kind, code, Y, fetchJson, '0900', to).then(fix), []),
       settle(prevClose(kind, code, T, fetchJson), null),
       settle(prevClose(kind, code, Y, fetchJson), null),
     ]);

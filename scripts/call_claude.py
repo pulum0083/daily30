@@ -186,7 +186,7 @@ sentiment shift가 수치 데이터와 충돌하면 양쪽을 reasons에 모두 
    - **post_holiday_catchup=true (한국 단독 휴장 다음날)이면 EWY보다 우선순위 높음**
    - 한국이 쉬는 동안 아시아 주요 시장이 강세였다면 코스피 갭 상승(catch-up) 가능성
    - 닛케이·항셍·상해 중 2곳 이상 ±1.5% 동조 시 코스피 개장 방향에 직접 영향
-5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 백만원)
+5. investor_trading — 전 거래일 실제 외국인·기관 순매수 (단위: 억원. 본문에도 'N억원'·'N조 M억원'으로 쓰고 '백만원'은 쓰지 않는다)
    - foreign.net 양수 = 외국인 순매수, 음수 = 순매도
    - institution.net 양수 = 기관 순매수 (보험·연기금·투신 합계)
    - EWY + investor_trading 둘 다 긍정이면 수급 신뢰도 최고
@@ -516,6 +516,22 @@ def get_anthropic_api_key() -> str:
             "Set the environment variable or add anthropic.api_key to config.json"
         )
     return key
+
+
+def _investor_to_eok(it: dict) -> dict:
+    """investor_trading.net(백만원)을 프롬프트용 억원으로 바꾼 사본. 원본은 그대로 둔다(supply_history·화면이 백만원을 쓴다).
+
+    2026-11-10 실사고 — 코스피 아침 프롬프트가 백만원 그대로 받아, 모델이 100으로 나눈 숫자에 '백만원'을 붙여
+    "외국인 6,895백만원 순매도"(실제 6,895억원)가 나갔다. 마감 브리핑과 같은 단위(억원)로 맞춘다.
+    """
+    import copy
+    out = copy.deepcopy(it or {})
+    for actor in ("foreign", "institution", "individual"):
+        if isinstance(out.get(actor), dict) and isinstance(out[actor].get("net"), (int, float)):
+            out[actor]["net"] = round(out[actor]["net"] / 100)
+    if out:
+        out["_unit"] = "억원"
+    return out
 
 
 def load_market_data(briefing_type: str) -> dict:
@@ -1388,6 +1404,8 @@ def call_claude(briefing_type: str, date_str: str, force_direction: str | None =
         _fx_chg = usdkrw.get("change_pct")
         print(f"[call_claude] usdkrw = {usdkrw['price']}원 "
               f"({f'{_fx_chg:+.2f}%' if _fx_chg is not None else '등락률 없음'})")
+    if briefing_type == "kospi" and analysis_data.get("investor_trading"):
+        analysis_data["investor_trading"] = _investor_to_eok(analysis_data["investor_trading"])
     # Strip sparkline arrays from candidates — chart-only data, not needed for analysis
     if candidates_key in analysis_data:
         analysis_data[candidates_key] = [
@@ -1822,11 +1840,8 @@ def call_claude_closing(date_str: str) -> dict:
     import copy
     claude_data = copy.deepcopy(market_data)
     it = claude_data.get("investor_trading", {})
-    for actor in ["foreign", "institution", "individual"]:
-        if actor in it and "net" in it[actor]:
-            it[actor]["net"] = round(it[actor]["net"] / 100)
     if it:
-        it["_unit"] = "억원"
+        claude_data["investor_trading"] = _investor_to_eok(it)
     else:
         # 수급 데이터 미수집 시 Claude가 추정 수치를 생성하지 않도록 명시
         claude_data["_investor_trading_note"] = (

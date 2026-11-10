@@ -44,6 +44,10 @@ READ_URL = "https://m.stock.naver.com/research/market/{nid}"
 
 _KW = re.compile(r"코스피|KOSPI|국내|마감|증시|시장|마켓|전략", re.I)
 _EXCL = re.compile(r"미국|글로벌|Global|Carbon|해외", re.I)
+# 장 시작 전에 나오는 아침 리포트는 전 거래일 장을 정리한다 — 마감 브리핑에 실으면 오늘과 반대 이야기가 된다
+# (2026-11-10 실사고: +4.39% 오른 날 "Eugene Daily Snapshot - 코스피 5천 가까스로 사수 … 하락"이 실렸다).
+# 원천엔 발행 '시각'이 없어 제목으로 거른다.
+_MORNING = re.compile(r"daily|morning|모닝|데일리|snapshot|스냅샷|아침|장\s*전|개장\s*전|프리마켓", re.I)
 _NUM_LEAK = re.compile(r"\d+\.?\d*\s*%|\d{3,4}\.?\d*\s*p\b|\d,\d{3}")
 MAX_REPORTS = 3
 
@@ -77,7 +81,7 @@ def _list_today(today: str) -> list[dict]:
             continue
         title = _html.unescape(title.strip())
         firm = firm.strip()
-        if not _KW.search(title) or _EXCL.search(title):
+        if not _KW.search(title) or _EXCL.search(title) or _MORNING.search(title):
             continue
         # 제목에 박힌 날짜(YY.MM.DD 또는 M/D 표기)가 당일과 다르면(전일자 내용 재게시) 제외
         stale = False

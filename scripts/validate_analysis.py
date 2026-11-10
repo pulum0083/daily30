@@ -1203,6 +1203,52 @@ def _prev_us_session_str(analysis) -> str:
     return s.isoformat() if s else ""
 
 
+def drop_stale_earnings_issues(analysis, corrections, age_fn=None, max_age_days=4) -> int:
+    """미국 이슈 중 실적을 '지금 일'로 쓴 카드인데, 붙은 티커의 최근 실적 발표가 max_age_days보다 오래됐으면 뺀다.
+
+    2026-11-10 실사고 — "맥도날드 실적 호조로 소비재 안도감 확산"이 실렸는데 맥도날드 실적은 11/4(6일 전)였다.
+    수집 단계 게이트(fetch_news._drop_stale_earnings)는 회사 이름을 티커로 바꾸는 이름표(_NAME_TO_TICKER)에
+    기대는데 맥도날드가 없어 검사 없이 통과했다. 이슈 카드는 언제나 ▲▼ 티커를 갖고 있으니 여기서 한 번 더 본다.
+    - 실적·어닝·가이던스를 말하지 않는 카드, 발표 전 예고(앞두고·예정·임박 등)는 건드리지 않는다.
+    - 티커 중 하나라도 최근 발표면 둔다(관대한 쪽 — 발행 직전 게이트의 오탐은 이슈 하나를 잃는다).
+    - 발표일을 하나도 못 읽으면 판단하지 않는다(fail-open).
+    max_age_days=4: 목요일 장 마감 뒤 발표 → 다음 월요일 브리핑까지가 4일이다.
+    """
+    from datetime import date as _date
+    issues = analysis.get("issues")
+    if not isinstance(issues, list) or not issues:
+        return 0
+    try:
+        today = _date.fromisoformat(str(analysis.get("generated_at") or "")[:10])
+    except ValueError:
+        return 0
+    import fetch_news as _fn
+    age_fn = age_fn or _fn._days_since_last_earnings
+    kept, dropped = [], []
+    for it in issues:
+        if not isinstance(it, dict):
+            kept.append(it)
+            continue
+        blob = f"{it.get('title') or ''} {it.get('body') or it.get('text') or ''}"
+        if not _fn._is_earnings_catalyst(blob) or _fn._PREVIEW_RE.search(blob):
+            kept.append(it)
+            continue
+        tickers = []
+        for side in ("up", "down"):
+            sd = it.get(side)
+            if isinstance(sd, dict):
+                tickers += [t for t in (sd.get("tickers") or []) if isinstance(t, str) and re.fullmatch(r"[A-Z]{1,5}", t)]
+        ages = [a for a in (age_fn(t, today) for t in dict.fromkeys(tickers)) if a is not None]
+        if ages and min(ages) > max_age_days:
+            dropped.append(f"{it.get('title')}({','.join(tickers)} 최근 발표 {min(ages)}일 전)")
+            continue
+        kept.append(it)
+    if dropped:
+        analysis["issues"] = kept
+        corrections.append("오래된 실적을 지금 일로 쓴 이슈 제거: " + "; ".join(dropped))
+    return len(dropped)
+
+
 def fix_issue_side_tickers(analysis, latest, corrections, session_date) -> int:
     """지난 장 일로 쓴 이슈의 ▲▼ 칩에서 직전 정규장에 반대로 0.5% 넘게 움직인 종목을 뺀다(2026-11-05 실사고).
 
@@ -1407,8 +1453,13 @@ def _extract_eok_values(text):
 # 본문에서 주체(외국인·기관·개인) 바로 뒤에 붙은 금액을 실측과 맞춰 고친다. 다른 날·기간 얘기
 # ('어제'·'3일간'·'누적' 등)나 다른 금액(거래대금·실적 등)이 끼면 건드리지 않는다.
 _SUPPLY_ACTORS = (("외국인", "foreign"), ("외인", "foreign"), ("기관", "institution"), ("개인", "individual"))
-_SUPPLY_AMOUNT_RE = re.compile(r"(?<![\d.])(?:([\d,]+)\s*조\s*([\d,]+)\s*억|(\d+(?:\.\d+)?)\s*조|([\d,]+)\s*억)")
+# '백만원'도 금액으로 본다(2026-11-10 — 코스피 아침 "외국인 6,895백만원"이 실제 6,895억원이었다).
+_SUPPLY_AMOUNT_RE = re.compile(r"(?<![\d.])(?:([\d,]+)\s*조\s*([\d,]+)\s*억|(\d+(?:\.\d+)?)\s*조|([\d,]+)\s*억|([\d,]+)\s*백만)")
 _SUPPLY_SKIP = re.compile(r"어제|전일|지난|일간|일째|누적|주간|이번\s*주|연속|거래대금|시가총액|시총|목표|매출|영업이익|순이익|\d+\s*일")
+# 코스피 아침 브리핑은 실측 자체가 전 거래일 수급이라 '전일·어제·지난'을 건너뛰면 아무것도 못 고친다.
+# 대신 다른 날을 가리키는 말(요일·지난주·날짜)이 끼면 건드리지 않는다 — 그 금액은 실측(전 거래일)과 다른 날 얘기다.
+_SUPPLY_SKIP_MORNING = re.compile(r"[월화수목금토일]요일|지난\s*주|지난\s*달|\d+\s*/\s*\d+|일간|일째|누적|주간|이번\s*주|연속|"
+                                  r"거래대금|시가총액|시총|목표|매출|영업이익|순이익|\d+\s*일")
 
 
 def _fmt_eok(v):
@@ -1421,10 +1472,13 @@ def _amount_value(m):
         return int(m.group(1).replace(",", "")) * 10000 + int(m.group(2).replace(",", ""))
     if m.group(3):
         return float(m.group(3)) * 10000
+    if m.group(5):
+        return int(m.group(5).replace(",", "")) / 100     # 백만원 → 억원
     return int(m.group(4).replace(",", ""))
 
 
-def fix_supply_amounts(analysis, latest, corrections, warnings, window=24):
+def fix_supply_amounts(analysis, latest, corrections, warnings, window=24, skip=None):
+    skip = skip or _SUPPLY_SKIP
     it = (latest or {}).get("investor_trading") or {}
     actual = {}
     for _, key in _SUPPLY_ACTORS:
@@ -1442,7 +1496,7 @@ def fix_supply_amounts(analysis, latest, corrections, warnings, window=24):
             seg = re.split(r"[.!?]\s", seg)[-1]          # 같은 문장 안만 본다
             hits = [(seg.rfind(w), key) for w, key in _SUPPLY_ACTORS if w in seg]
             # '어제 외국인은 …'·'3일간 외국인이 …'처럼 다른 날·기간 얘기면 건드리지 않는다(주체 앞뒤 모두 본다)
-            if not hits or _SUPPLY_SKIP.search(seg + strip_tags(text[m.end():m.end() + 8])):
+            if not hits or skip.search(seg + strip_tags(text[m.end():m.end() + 8])):
                 continue
             hits.sort()
             near = hits[-1][1]
@@ -1458,7 +1512,7 @@ def fix_supply_amounts(analysis, latest, corrections, warnings, window=24):
                 continue
             v = _amount_value(m)
             ok = all(abs(v - abs(actual[k])) <= max(50, abs(actual[k]) * 0.03) for k in keys)
-            if ok:
+            if ok and not m.group(5):     # '백만원' 표기는 값이 맞아도 억원으로 바꿔 쓴다
                 continue
             new = "·".join(_fmt_eok(actual[k]) + ("원" if both and text[m.end():m.end() + 1] == "원" and i < len(keys) - 1 else "")
                            for i, k in enumerate(keys))
@@ -1479,6 +1533,38 @@ def fix_supply_amounts(analysis, latest, corrections, warnings, window=24):
     n = _walk_strings(analysis, fix)
     if fixed:
         corrections.append(f"수급 금액을 정규장 확정 실측으로 교정 {len(fixed)}건: " + ", ".join(fixed[:4]))
+    return n
+
+
+# '전부'라는 말 — 실측이 전부일 때만(2026-11-10 실사고: 마감 타이틀 "코스피 전종목이 들고 일어나"·dek "전 섹터가
+# 동시에 뛰며"가 나갔는데 실제로는 하락 175종목, 바이오 −1.69%였다). 문장을 다시 쓰지 않고 '대부분'으로만 바꾼다.
+_ALL_STOCKS_RE = re.compile(r"전\s*종목|모든\s*종목")
+_ALL_SECTORS_RE = re.compile(r"전\s*섹터|모든\s*섹터|전\s*업종|모든\s*업종")
+
+
+def fix_all_claims(analysis, latest, corrections) -> int:
+    mb = (latest or {}).get("market_breadth") or {}
+    secs = [x.get("change_pct") for x in ((latest or {}).get("sectors") or []) if isinstance(x, dict)]
+    up, down = mb.get("up"), mb.get("down")
+    stocks_not_all = isinstance(up, int) and isinstance(down, int) and up > 0 and down > 0
+    sectors_not_all = (any(isinstance(v, (int, float)) and v > 0 for v in secs)
+                       and any(isinstance(v, (int, float)) and v < 0 for v in secs))
+    if not (stocks_not_all or sectors_not_all):
+        return 0
+    fixed = []
+
+    def fix(text):
+        out = text
+        if stocks_not_all:
+            out = _ALL_STOCKS_RE.sub("대부분 종목", out)
+        if sectors_not_all:
+            out = _ALL_SECTORS_RE.sub("대부분 섹터", out)
+        if out != text:
+            fixed.append(strip_tags(text)[:40])
+        return out
+    n = _walk_strings(analysis, fix)
+    if fixed:
+        corrections.append(f"'전종목·전 섹터' 표현을 실측(상승 {up}·하락 {down}) 기준 '대부분'으로 교정 {len(fixed)}건: " + "; ".join(fixed[:3]))
     return n
 
 
@@ -1700,6 +1786,7 @@ def validate(analysis, latest, btype):
     if btype == "us":
         fix_session_mislabels(a, corrections)      # 같은 절에 지수+프리마켓이면 교정, 남는 건 아래에서 경고
         limit_data_issues(a, corrections)          # 시장 데이터형 이슈는 하루 1개까지
+        drop_stale_earnings_issues(a, corrections) # 실적 이슈의 티커가 최근 발표가 아니면 뺀다(2026-11-10)
         trim_issue_bodies(a, corrections)          # 이슈 본문은 한 문장
         fix_issue_premarket_contradictions(a, latest, corrections)   # 지금 일처럼 쓴 방향이 프리마켓 실측과 반대면 교정
         _sess = _prev_us_session_str(a)
@@ -1791,9 +1878,14 @@ def validate(analysis, latest, btype):
             a[fld] = ""
             warnings.append(f"본문 '{fld}' 전체 제거 (금지 패턴 {bad})")
 
-    # 5) 수급 수치 스케일 크로스체크 (kospi-close only)
+    # 5) 수급 금액 ↔ 실측. 코스피 아침은 전 거래일 정규장 확정 수급이 실측이다(2026-11-10 '백만원' 실사고).
+    if btype == "kospi":
+        fix_supply_amounts(a, latest, corrections, warnings, skip=_SUPPLY_SKIP_MORNING)
+
+    # 수급 수치 스케일 크로스체크 (kospi-close only)
     if btype == "kospi-close":
         fix_supply_amounts(a, latest, corrections, warnings)   # 본문 수급 금액 ↔ 실측(15:40 확정)
+        fix_all_claims(a, latest, corrections)                 # '전종목·전 섹터' ↔ 시장 폭·섹터 실측
         _check_supply_scale(a, latest, warnings)
 
     return {"analysis": a, "corrections": corrections, "warnings": warnings, "blocks": blocks}
