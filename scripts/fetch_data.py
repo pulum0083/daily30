@@ -639,6 +639,39 @@ def _is_us_equity(ticker: str) -> bool:
     return not any(c in ticker for c in "=^.")
 
 
+# 야후가 연장시간대 체결을 못 준 종목 — 실행이 끝나면 관리자에게 한 번에 알린다(2026-11-11 사용자 요청).
+# {"ticker": ..., "how": "naver"(네이버로 대신) | "missing"(둘 다 없어 비움)}
+FEED_ISSUES: list = []
+
+
+def feed_alert_text(issues: list, btype: str) -> str:
+    """수집 불가 알림 문구(평문, §37). 알릴 것이 없으면 빈 문자열."""
+    if not issues:
+        return ""
+    sub = sorted({i["ticker"] for i in issues if i["how"] == "naver"})
+    gone = sorted({i["ticker"] for i in issues if i["how"] == "missing"})
+    label = {"kospi": "코스피 아침", "us": "미국"}.get(btype, btype)
+    lines = [f"⚠️ 야후 미국 시세 수집 불가 — {label} 브리핑 수집 중", "야후가 오늘 프리·애프터장 체결을 주지 않았어요."]
+    if sub:
+        lines.append(f"네이버 체결가로 대신 {len(sub)}종목: {', '.join(sub)}")
+    if gone:
+        lines.append(f"네이버에도 없어 어제 종가 기준으로 남은 {len(gone)}종목: {', '.join(gone)} — 브리핑의 '지금' 값이 아닐 수 있어요.")
+    lines.append("홈 '밤사이 미국'도 같은 원천이라 함께 영향을 받아요(§85).")
+    return "\n".join(lines)
+
+
+def alert_feed_issues(btype: str) -> None:
+    msg = feed_alert_text(FEED_ISSUES, btype)
+    if not msg:
+        return
+    print(f"[fetch_data] {msg}", file=sys.stderr)
+    try:
+        from send_telegram import send_admin_alert
+        send_admin_alert(msg)
+    except Exception as e:      # 알림 실패가 수집을 막지 않는다
+        print(f"[fetch_data] 관리자 알림 실패: {e}", file=sys.stderr)
+
+
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
@@ -661,11 +694,17 @@ def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
 
     # 0순위: 미국 개별주·ETF가 프리·애프터장인데 야후에 오늘 체결이 없으면 네이버 체결가(2026-11-11).
     if _is_us_equity(ticker) and not _yahoo_extended_fresh(intraday):
-        nq = naver_extended_quote(_naver_us_basic(ticker))
+        nb = _naver_us_basic(ticker)
+        nq = naver_extended_quote(nb)
         if nq:
             print(f"[fetch_data] {ticker} 야후에 오늘 연장시간대 체결 없음 → 네이버 {nq[0]:.2f} (기준 {nq[1]:.2f})",
                   file=sys.stderr)
+            FEED_ISSUES.append({"ticker": ticker, "how": "naver"})
             return nq
+        o = (nb or {}).get("overMarketPriceInfo") or {}
+        if o.get("tradingSessionType") in ("PRE_MARKET", "AFTER_MARKET") and o.get("overMarketStatus") == "OPEN":
+            # 연장시간대가 열려 있는데 야후·네이버 모두 체결이 없다 — 아래 fast_info(어제 종가)로 내려간다
+            FEED_ISSUES.append({"ticker": ticker, "how": "missing"})
 
     # 1순위: fast_info (기준가) + intraday 교차 검증 (현재가)
     try:
@@ -1656,6 +1695,7 @@ def main():
             fetch_kospi_data()
         elif args.type == "us":
             fetch_us_data()
+        alert_feed_issues(args.type)
         print(f"[fetch_data] Done — type={args.type}")
     except Exception as e:
         print(f"[fetch_data] ERROR: {e}", file=sys.stderr)

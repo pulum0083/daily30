@@ -54,3 +54,25 @@ def test_realtime_price_uses_naver_when_yahoo_empty(monkeypatch):
 def test_futures_and_indices_skip_naver():
     assert not fd._is_us_equity("ES=F") and not fd._is_us_equity("^IXIC") and not fd._is_us_equity("005930.KS")
     assert fd._is_us_equity("NVDA")
+
+
+def test_feed_alert_text_and_recording(monkeypatch):
+    fd.FEED_ISSUES.clear()
+    monkeypatch.setattr(fd, "_pin_date_for", lambda t: None)
+    monkeypatch.setattr(fd, "_yf_history", lambda *a, **k: pd.DataFrame({"Close": []}))
+    monkeypatch.setattr(fd, "_naver_us_basic", lambda t: NVDA)
+    monkeypatch.setattr(fd, "naver_extended_quote", lambda d, now=None: (176.25, 168.89))
+    fd._get_realtime_price("NVDA")
+    assert fd.FEED_ISSUES == [{"ticker": "NVDA", "how": "naver"}]
+    fd.FEED_ISSUES.append({"ticker": "MU", "how": "missing"})
+    msg = fd.feed_alert_text(fd.FEED_ISSUES, "us")
+    assert "미국 브리핑" in msg and "네이버 체결가로 대신 1종목: NVDA" in msg and "MU" in msg
+    assert fd.feed_alert_text([], "us") == ""
+    sent = []
+    import send_telegram
+    monkeypatch.setattr(send_telegram, "send_admin_alert", lambda m: sent.append(m))
+    fd.alert_feed_issues("us")
+    assert len(sent) == 1
+    fd.FEED_ISSUES.clear()
+    fd.alert_feed_issues("us")
+    assert len(sent) == 1                                       # 문제가 없으면 보내지 않는다
