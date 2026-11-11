@@ -109,8 +109,6 @@
     });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        var np = document.getElementById('notice-panel');
-        if (np && np.classList.contains('is-open')) { closeNoticePanel(); return; }
         document.querySelectorAll('.info-modal-backdrop.is-open')
           .forEach(bd => bd.classList.remove('is-open'));
       }
@@ -533,109 +531,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  var NOTICES_URL = '/data/notices.json';
-  var NOTICES_LS_KEY = 'ds_read_notices';
-
-  function getReadIds() {
-    try { return JSON.parse(localStorage.getItem(NOTICES_LS_KEY) || '[]'); } catch(_) { return []; }
-  }
-  function saveReadIds(ids) {
-    try { localStorage.setItem(NOTICES_LS_KEY, JSON.stringify(ids)); } catch(_) {}
-  }
-
-  function noticeBadgeHtml(type) {
-    var map = { update: ['업데이트', 'update'], ops: ['운영공지', 'ops'], urgent: ['긴급', 'urgent'] };
-    var pair = map[type] || map['update'];
-    return '<span class="notice-badge notice-badge--' + pair[1] + '">' + pair[0] + '</span>';
-  }
-
-  function renderNotices(notices) {
-    var readIds = getReadIds();
-    if (!notices.length) {
-      return '<p class="notice-panel__empty">공지사항이 없습니다.</p>';
-    }
-    return notices.slice(0, 10).map(function(n) {
-      var unread = readIds.indexOf(n.id) === -1;
-      return '<div class="notice-card' + (unread ? ' is-unread' : '') + '">' +
-        (unread ? '<div class="notice-card__dot"></div>' : '') +
-        '<div class="notice-card__meta">' + noticeBadgeHtml(n.type) +
-        '<span class="notice-card__date">' + escHtml(n.date) + '</span></div>' +
-        '<div class="notice-card__title">' + escHtml(n.title) + '</div>' +
-        '<div class="notice-card__body">' + escHtml(n.body) + '</div>' +
-        '</div>';
-    }).join('');
-  }
-
-  function injectNoticePanel() {
-    if (document.getElementById('notice-panel')) return;
-    var overlay = document.createElement('div');
-    overlay.className = 'notice-overlay';
-    overlay.id = 'notice-overlay';
-    overlay.addEventListener('click', closeNoticePanel);
-
-    var panel = document.createElement('div');
-    panel.className = 'notice-panel';
-    panel.id = 'notice-panel';
-    panel.innerHTML =
-      '<div class="notice-panel__header">' +
-        '<span class="notice-panel__title">공지사항</span>' +
-        '<button class="notice-panel__close" onclick="closeNoticePanel()">✕</button>' +
-      '</div>' +
-      '<div class="notice-panel__body" id="notice-panel-body"><p class="notice-panel__empty">불러오는 중...</p></div>';
-
-    document.body.appendChild(overlay);
-    document.body.appendChild(panel);
-  }
-
-  function openNoticePanel() {
-    injectNoticePanel();
-    var overlay = document.getElementById('notice-overlay');
-    var panel = document.getElementById('notice-panel');
-    if (overlay) overlay.classList.add('is-open');
-    if (panel) panel.classList.add('is-open');
-    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var notices = (data && data.notices) || [];
-        var body = document.getElementById('notice-panel-body');
-        if (body) body.innerHTML = renderNotices(notices);
-        var ids = notices.map(function(n) { return n.id; });
-        saveReadIds(ids);
-        var dot = document.getElementById('gnb-notif-dot');
-        if (dot) dot.classList.remove('is-visible');
-      })
-      .catch(function() {
-        var body = document.getElementById('notice-panel-body');
-        if (body) body.innerHTML = '<p class="notice-panel__empty">공지를 불러오지 못했습니다.</p>';
-      });
-  }
-
-  function closeNoticePanel() {
-    var overlay = document.getElementById('notice-overlay');
-    var panel = document.getElementById('notice-panel');
-    if (overlay) overlay.classList.remove('is-open');
-    if (panel) panel.classList.remove('is-open');
-  }
-
-  function checkAndShowDot() {
-    var dot = document.getElementById('gnb-notif-dot');
-    if (!dot) return;
-
-    fetch(NOTICES_URL, { signal: AbortSignal.timeout(5000) })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var notices   = (data && data.notices) || [];
-        var readIds   = getReadIds();
-        var hasUnread = notices.some(function(n) { return readIds.indexOf(n.id) === -1; });
-        if (hasUnread) dot.classList.add('is-visible');
-      })
-      .catch(function() {});
-  }
-
-  function initNotices() {
-    checkAndShowDot();
-  }
-
   /* ── 예측 로직 개선 안내 토스트 (브리핑 상세 진입 시 1회, 닫으면 영구 비표시) ── */
   function initPredictionToast() {
     // 브리핑 상세 페이지(/briefings/YYYY-MM-DD/type/)에서만 노출
@@ -713,7 +608,6 @@
     updateGnbDate();
     setInterval(updateGnbDate, 30000);
     initModals();
-    initNotices();
     initPredictionToast();
     renderSupplyFlows();
     loadLeadersWidget();
@@ -1541,8 +1435,6 @@
   window.drawMiniChart = drawMiniChart;
   window.drawCloseChart = drawCloseChart;
   window.renderInstList = renderInstList;
-  window.openNoticePanel = openNoticePanel;
-  window.closeNoticePanel = closeNoticePanel;
   window.renderTrustStrip = renderTrustStrip;
 
   /* ── 테스트 훅 ──
