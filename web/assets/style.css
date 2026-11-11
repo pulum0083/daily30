@@ -1397,14 +1397,15 @@ html.dark .arch-item__dek{color:var(--muted);}
 /* 마감 브리핑 타이틀 아래 서브 한 문장(dek) — 텔레그램과 같은 필드(SERVICE_RULES §62) */
 .close-dek{margin:0;padding:10px 16px 2px;font-size:13.5px;line-height:1.65;color:var(--muted)}
 /* 마감 — 어제와 비교 한 줄(스냅샷 카드 안)·주도주 3종목·사이드바 섹터 막대(2026-10-29) */
-.vsl{margin:12px 0 0;border-top:1px solid var(--hairline);padding:12px 0 2px}
+/* 어제와 비교 A안(2026-11-11) — 머리줄→문장 8px, 문장→칸 12px, 칸 안 줄 간격. 예전엔 4·8px로 붙어 보였다 */
+.vsl{margin:12px 0 0;border-top:1px solid var(--hairline);padding:14px 0 2px}
 .vsl-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--muted);font-weight:700}
-.vsl-t{font-size:14.5px;font-weight:800;color:var(--ink);margin:4px 0 8px}
+.vsl-t{font-size:15px;font-weight:800;line-height:1.4;color:var(--ink);margin:8px 0 12px}
 .vsl-t.up{color:var(--up)}.vsl-t.dn{color:var(--dn)}
 .vsl-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.vsl-c{background:var(--surface,#F7F9FC);border-radius:10px;padding:8px 10px;min-width:0}
+.vsl-c{background:var(--surface-inset);border-radius:10px;padding:10px;min-width:0}
 .vsl-c .l{font-size:11px;color:var(--muted);font-weight:700}
-.vsl-c .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink)}
+.vsl-c .v{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);margin:3px 0 2px}
 .vsl-c .y{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .vsl-c .v.up,.ld .up{color:var(--up)}.vsl-c .v.dn,.ld .dn{color:var(--dn)}
 .ld3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 16px 14px}
@@ -1423,7 +1424,7 @@ html.dark .arch-item__dek{color:var(--muted);}
 .sec8 .bar .z{position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:#94A3B8}
 .sec8 .rota-pct{text-align:right}.sec8 .rota-pct.up{color:var(--up)}.sec8 .rota-pct.dn{color:var(--dn)}
 .sec8 .mv{font-size:10.5px;color:var(--muted);margin-left:3px;font-weight:600}
-@media(max-width:520px){.vsl-g,.ld3{gap:6px}.vsl-c,.ld{padding:8px}.vsl-c .v,.ld .p{font-size:14px}}
+@media(max-width:520px){.ld3{gap:6px}.ld{padding:8px}.ld .p{font-size:14px}.vsl-c .v{font-size:15px}}
 /* 마감 세 줄 요약(원인·주도·다음, 2026-10-29) — 라벨 칩 + 한 문장 */
 .brief3{list-style:none;margin:0;padding:8px 16px 14px;display:flex;flex-direction:column;gap:9px}
 .brief3 li{display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:1.6;color:var(--ink)}
@@ -1466,14 +1467,15 @@ html.dark .arch-item__dek{color:var(--muted);}
 .ic-h h2{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin:0}
 .ic-h span{font-size:12px;color:var(--muted)}
 .ic-list{display:flex;flex-direction:column;gap:10px}
-.ic-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:13px 15px;background:var(--canvas)}
+.ic-card{border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px 16px 16px;background:var(--canvas)}
 .ic-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .ic-tag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px}
 .ic-tag.fact{background:var(--surface-inset);color:var(--ink)}
 .ic-tag.news{background:var(--gold-bg);color:var(--gold)}
 .ic-tag.ai{background:var(--primary-bg);color:var(--primary)}
-.ic-title{font-size:15px;font-weight:700;color:var(--ink);margin-top:8px}
-.ic-body{font-size:13px;color:var(--ink);line-height:1.65;margin-top:4px}
+/* 이슈 점검 B안(2026-11-11) — 카드 타이틀만 크고 굵게, 항목은 보통 굵기로 위계를 나눈다. 타이틀→본문 12px(예전 4px) */
+.ic-title{font-size:16.5px;font-weight:800;letter-spacing:-.3px;line-height:1.35;color:var(--ink);margin-top:8px}
+.ic-body{font-size:14px;color:var(--ink);line-height:1.6;margin-top:12px}
 .ic-body p{margin:0}
 .ic-dim{color:var(--muted)}
 .ic-tks{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
@@ -1488,16 +1490,20 @@ html.dark .arch-item__dek{color:var(--muted);}
 .ic-links .ic-rel{color:var(--ink);font-weight:600;border:1px solid var(--hairline);background:var(--surface-soft);border-radius:999px;padding:2px 9px}
 .ic-lk-l{color:var(--muted)}
 .ic-foot{font-size:11px;color:var(--muted);margin-top:7px}
-.ic-news{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--hairline);color:var(--ink);text-decoration:none;font-size:13px}
-.ic-news:first-child{border-top:0;padding-top:2px}
-.ic-news>span{color:var(--muted);font-size:11px;white-space:nowrap}
-.ic-news--ib{flex-wrap:wrap}
-.ic-news--ib>b{flex:1 1 auto}
-.ic-news--ib .ic-news__txt{order:3;flex-basis:100%;white-space:normal;color:var(--ink);font-size:12.5px;line-height:1.6}
-.ic-sent{font-style:normal;font-size:10.5px;font-weight:700;margin-left:4px;color:var(--muted)}
-.ic-sent.bull{color:var(--up)}
-.ic-sent.bear{color:var(--dn)}
-.ic-ul{margin:2px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.ic-news{display:flex;flex-direction:column;padding:12px 0;border-top:1px solid var(--hairline);color:var(--ink);text-decoration:none}
+.ic-news:first-child{border-top:0;padding-top:0}
+.ic-news>b{font-size:14.5px;font-weight:500;line-height:1.5}
+.ic-news>span{color:var(--muted);font-size:12px;margin-top:5px;order:3}   /* 출처·시각은 제목 아래(예전엔 오른쪽에 붙어 제목이 좁게 꺾였다) */
+.ic-news--ib>b{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700}
+.ic-news--ib .ic-news__txt{order:2;color:var(--ink);font-size:14px;line-height:1.6;margin-top:6px}
+.ic-sent{font-style:normal;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;color:var(--muted);background:var(--surface-inset)}
+.ic-sent.bull{color:var(--up);background:var(--up-bg)}
+.ic-sent.bear{color:var(--dn);background:var(--dn-bg)}
+/* 오늘 볼 것 — 1·2·3 번호(B안) */
+.ic-ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:icn}
+.ic-ul li{display:flex;gap:10px;counter-increment:icn}
+.ic-ul li::before{content:counter(icn);flex:0 0 20px;height:20px;margin-top:2px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ic-ul li>span{flex:1;min-width:0}
 .ic-src{font-size:11px;color:var(--muted);line-height:1.6;margin-top:10px}
 .ic-src a{color:var(--primary);font-weight:600;white-space:nowrap}
 .accordion-body__inner>.ma5m-section:last-child{margin-bottom:28px}

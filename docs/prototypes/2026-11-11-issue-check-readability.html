@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 코스피 아침 브리핑 '오늘의 이슈 점검' 카드 모바일 가독성 시안 — 지금 / A안(간격) / B안(간격+위계) -->
+<title>이슈 점검 카드 가독성 시안</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+:root{--ink:#13151A;--muted:#6B7280;--hairline:#E5E7EB;--canvas:#fff;--page:#F6F7F9;--gold:#B7791F;--gold-bg:#FEF3C7;--primary:#2775ED;--primary-bg:#E8F0FE;--up:#E03131;--dn:#2775ED}
+*{box-sizing:border-box}
+body{margin:0;background:#EEF0F3;font-family:Pretendard,-apple-system,sans-serif;color:var(--ink)}
+.intro{max-width:1240px;margin:24px auto 8px;padding:0 16px}
+.intro h1{font-size:20px;margin:0 0 6px}
+.intro p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+.cols{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;padding:16px}
+.phone{width:375px;background:var(--page);border-radius:24px;padding:14px 16px 20px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.phone>h3{font-size:14px;margin:2px 0 4px}
+.phone>.note{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 12px}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{border:1px solid var(--hairline);border-radius:16px;background:var(--canvas)}
+.tag{display:inline-block!important;width:auto!important;font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px}
+.tag.news{background:var(--gold-bg);color:var(--gold)} .tag.ai{background:var(--primary-bg);color:var(--primary)}
+a{color:inherit;text-decoration:none}
+
+/* ── 지금 ── */
+.now .card{padding:13px 15px}
+.now .title{font-size:15px;font-weight:700;margin-top:8px}
+.now .body{font-size:13px;line-height:1.65;margin-top:4px}
+.now .news{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--hairline);font-size:13px}
+.now .news:first-child{border-top:0;padding-top:2px}
+.now .news>span{color:var(--muted);font-size:11px;white-space:nowrap}
+.now .ib{flex-wrap:wrap}.now .ib>b{flex:1 1 auto}
+.now .ib .txt{order:3;flex-basis:100%;white-space:normal;color:var(--ink);font-size:12.5px;line-height:1.6}
+.now ul{margin:2px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+
+/* ── A안: 간격만 ── */
+.a .card{padding:16px 16px}
+.a .title{font-size:15px;font-weight:700;margin-top:10px}
+.a .body{font-size:13.5px;line-height:1.6;margin-top:10px}
+.a .news{display:block;padding:11px 0;border-top:1px solid var(--hairline)}
+.a .news:first-child{border-top:0;padding-top:0}
+.a .news b{display:block;font-weight:600;font-size:14px;line-height:1.5}
+.a .news .meta{display:block;color:var(--muted);font-size:11.5px;margin-top:4px}
+.a .ib .txt{display:block;font-size:13px;line-height:1.6;margin-top:4px;color:#374151}
+.a ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:10px}
+.a li{line-height:1.6}
+
+/* ── B안: 간격 + 위계 ── */
+.b .card{padding:18px 16px 16px}
+.b .head{display:flex;align-items:center;gap:8px}
+.b .title{font-size:16.5px;font-weight:800;letter-spacing:-.3px;margin-top:8px;line-height:1.35}
+.b .body{margin-top:12px}
+.b .news{display:block;padding:12px 0;border-top:1px solid #F0F1F3}
+.b .news:first-child{border-top:0;padding-top:0}
+.b .news b{display:block;font-weight:500;font-size:14.5px;line-height:1.5}
+.b .news .meta{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+.b .ib .who{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px}
+.b .sent{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px}
+.b .sent.bear{background:#E8F0FE;color:var(--dn)} .b .sent.neu{background:#F3F4F6;color:var(--muted)}
+.b .ib .txt{display:block;font-size:14px;line-height:1.6;margin-top:6px;color:#374151}
+.b ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:n}
+.b ol li{display:flex;gap:10px;font-size:14px;line-height:1.6;counter-increment:n}
+.b ol li::before{content:counter(n);flex:0 0 20px;height:20px;margin-top:2px;border-radius:50%;background:var(--primary-bg);color:var(--primary);font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.b ol li>span{flex:1}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>오늘의 이슈 점검 — 모바일 가독성 시안</h1>
+  <p>11/11 코스피 아침 브리핑의 세 카드를 375px 폭으로 그렸어요. 내용은 실제 발행본 그대로예요.<br>
+  지금: 타이틀→본문 4px, 기사 제목과 출처가 한 줄에 나란히(제목 칸이 좁아 두 줄로 꺾임), 항목 사이 7px, 목록 간격 4px.</p>
+</div>
+<div class="cols">
+
+<!-- ───────────── 지금 ───────────── -->
+<section class="phone now">
+  <h3>지금</h3>
+  <p class="note">모든 글자가 굵고 간격이 좁아 한 덩어리로 보여요.</p>
+  <div class="list">
+    <div class="card">
+      <span class="tag news">국내 · 뉴스</span>
+      <div class="title">11월 10일 장 마감 이후 국내 소식</div>
+      <div class="body">
+        <a class="news"><b>10월 금통위원, 추가 긴축 시기·속도 조절 언급</b><span>금융신문 · 11/10 20:27</span></a>
+        <a class="news"><b>금통위원 전원, 두 차례 금리 인상 효과 점검 필요성 강조</b><span>조세일보 · 11/10 17:01</span></a>
+        <a class="news"><b>내년 한국 경제성장률 3.1% 전망…반도체 호황 수혜 확산은 더딜 듯</b><span>뉴시안 · 11/10 16:06</span></a>
+        <a class="news"><b>외국인·기관 매수에 코스피·코스닥 동반 상승, 5200선 회복</b><span>뉴스핌 · 11/10 16:03</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag news">외국계 · 뉴스</span>
+      <div class="title">외국계 증권사 시각</div>
+      <div class="body">
+        <a class="news ib"><b>모건스탠리 <span style="color:var(--dn);font-size:10.5px">약세</span></b><span>아주경제</span><span class="txt">모건스탠리가 반도체 겨울을 예고하며 삼성전자와 SK하이닉스의 목표가를 크게 낮췄어요.</span></a>
+        <a class="news ib"><b>골드만삭스 <span style="color:var(--muted);font-size:10.5px">중립</span></b><span>SBS Biz</span><span class="txt">모건스탠리는 반도체 업황 부진을 이유로 삼성전자와 SK하이닉스의 목표가를 하향 조정했지만, 골드만삭스는 현재가 바닥이라고 봤어요.</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag ai">오늘 볼 것 · AI 해석</span>
+      <div class="title">개장 뒤 확인할 세 가지</div>
+      <div class="body"><ul>
+        <li>어제 급등한 전력·방산주 차익실현 매물이 얼마나 나올지 지켜보세요.</li>
+        <li>외국인 순매수가 오늘도 이어질지가 지수 방향의 핵심이에요.</li>
+        <li>원/달러 환율이 <b>1,344원</b>대에서 안정적인 흐름을 유지할지 확인하세요.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── A안 ───────────── -->
+<section class="phone a">
+  <h3>A안 · 간격과 배치만</h3>
+  <p class="note">타이틀→본문 10px, 항목 사이 11px, 목록 간격 10px. 출처·시각을 제목 아래로 내려 제목이 한 줄 폭을 다 써요. 기사 제목은 굵기를 한 단계 낮춰요.</p>
+  <div class="list">
+    <div class="card">
+      <span class="tag news">국내 · 뉴스</span>
+      <div class="title">11월 10일 장 마감 이후 국내 소식</div>
+      <div class="body">
+        <a class="news"><b>10월 금통위원, 추가 긴축 시기·속도 조절 언급</b><span class="meta">금융신문 · 11/10 20:27</span></a>
+        <a class="news"><b>금통위원 전원, 두 차례 금리 인상 효과 점검 필요성 강조</b><span class="meta">조세일보 · 11/10 17:01</span></a>
+        <a class="news"><b>내년 한국 경제성장률 3.1% 전망…반도체 호황 수혜 확산은 더딜 듯</b><span class="meta">뉴시안 · 11/10 16:06</span></a>
+        <a class="news"><b>외국인·기관 매수에 코스피·코스닥 동반 상승, 5200선 회복</b><span class="meta">뉴스핌 · 11/10 16:03</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag news">외국계 · 뉴스</span>
+      <div class="title">외국계 증권사 시각</div>
+      <div class="body">
+        <a class="news ib"><b>모건스탠리 <span style="color:var(--dn);font-size:11px">약세</span></b><span class="txt">모건스탠리가 반도체 겨울을 예고하며 삼성전자와 SK하이닉스의 목표가를 크게 낮췄어요.</span><span class="meta">아주경제</span></a>
+        <a class="news ib"><b>골드만삭스 <span style="color:var(--muted);font-size:11px">중립</span></b><span class="txt">모건스탠리는 반도체 업황 부진을 이유로 삼성전자와 SK하이닉스의 목표가를 하향 조정했지만, 골드만삭스는 현재가 바닥이라고 봤어요.</span><span class="meta">SBS Biz</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag ai">오늘 볼 것 · AI 해석</span>
+      <div class="title">개장 뒤 확인할 세 가지</div>
+      <div class="body"><ul>
+        <li>어제 급등한 전력·방산주 차익실현 매물이 얼마나 나올지 지켜보세요.</li>
+        <li>외국인 순매수가 오늘도 이어질지가 지수 방향의 핵심이에요.</li>
+        <li>원/달러 환율이 <b>1,344원</b>대에서 안정적인 흐름을 유지할지 확인하세요.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── B안 ───────────── -->
+<section class="phone b">
+  <h3>B안 · 간격 + 위계</h3>
+  <p class="note">A안에 더해 카드 타이틀만 크고 굵게(16.5px), 기사 제목은 보통 굵기 14.5px로 나눠요. 외국계는 투자 의견을 작은 배지로, '오늘 볼 것'은 1·2·3 번호로 바꿔요.</p>
+  <div class="list">
+    <div class="card">
+      <span class="tag news">국내 · 뉴스</span>
+      <div class="title">11월 10일 장 마감 이후 국내 소식</div>
+      <div class="body">
+        <a class="news"><b>10월 금통위원, 추가 긴축 시기·속도 조절 언급</b><span class="meta">금융신문 · 11/10 20:27</span></a>
+        <a class="news"><b>금통위원 전원, 두 차례 금리 인상 효과 점검 필요성 강조</b><span class="meta">조세일보 · 11/10 17:01</span></a>
+        <a class="news"><b>내년 한국 경제성장률 3.1% 전망…반도체 호황 수혜 확산은 더딜 듯</b><span class="meta">뉴시안 · 11/10 16:06</span></a>
+        <a class="news"><b>외국인·기관 매수에 코스피·코스닥 동반 상승, 5200선 회복</b><span class="meta">뉴스핌 · 11/10 16:03</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag news">외국계 · 뉴스</span>
+      <div class="title">외국계 증권사 시각</div>
+      <div class="body">
+        <a class="news ib"><span class="who">모건스탠리 <span class="sent bear">약세</span></span><span class="txt">모건스탠리가 반도체 겨울을 예고하며 삼성전자와 SK하이닉스의 목표가를 크게 낮췄어요.</span><span class="meta">아주경제</span></a>
+        <a class="news ib"><span class="who">골드만삭스 <span class="sent neu">중립</span></span><span class="txt">모건스탠리는 반도체 업황 부진을 이유로 삼성전자와 SK하이닉스의 목표가를 하향 조정했지만, 골드만삭스는 현재가 바닥이라고 봤어요.</span><span class="meta">SBS Biz</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag ai">오늘 볼 것 · AI 해석</span>
+      <div class="title">개장 뒤 확인할 세 가지</div>
+      <div class="body"><ol>
+        <li><span>어제 급등한 전력·방산주 차익실현 매물이 얼마나 나올지 지켜보세요.</span></li>
+        <li><span>외국인 순매수가 오늘도 이어질지가 지수 방향의 핵심이에요.</span></li>
+        <li><span>원/달러 환율이 <b>1,344원</b>대에서 안정적인 흐름을 유지할지 확인하세요.</span></li>
+      </ol></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="intro">
+  <h1>마감 브리핑 '어제와 비교'</h1>
+  <p>11/11 마감 브리핑 그대로예요. 지금: 머리줄→문장 4px, 문장→칸 8px, 칸 안 숫자·설명 줄 간격 없음, 칸 배경이 거의 안 보임.</p>
+</div>
+<div class="cols">
+<style>
+.vs{background:#fff;border:1px solid var(--hairline);border-radius:16px;padding:0 16px 14px}
+.vs .top{display:flex;justify-content:space-between;padding:14px 0 12px;font-size:15px}
+.vs .top b{font-variant-numeric:tabular-nums}
+.vs .vsl{border-top:1px solid var(--hairline)}
+.vs .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--muted);font-weight:700}
+.vs .t{font-weight:800;color:var(--up)}
+.vs .g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.vs .c .l{font-size:11px;color:var(--muted);font-weight:700}
+.vs .c .v{font-weight:800;font-variant-numeric:tabular-nums}
+.vs .c .v.up{color:var(--up)}
+.vs .c .y{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* 지금 */
+.vnow .vsl{margin-top:4px;padding:12px 0 2px}.vnow .t{font-size:14.5px;margin:4px 0 8px}
+.vnow .g{gap:6px}.vnow .c{background:#FBFCFD;border-radius:10px;padding:8px}.vnow .c .v{font-size:14px}
+/* A */
+.va .vsl{margin-top:4px;padding:14px 0 2px}.va .t{font-size:15px;margin:8px 0 12px;line-height:1.4}
+.va .g{gap:8px}.va .c{background:#F3F5F8;border-radius:10px;padding:10px}.va .c .v{font-size:15px;margin:3px 0 2px}
+/* B */
+.vb .vsl{margin-top:4px;padding:16px 0 2px}.vb .h .d{font-weight:500}
+.vb .t{font-size:16px;margin:8px 0 14px;line-height:1.4;letter-spacing:-.2px}
+.vb .g{gap:0;border:1px solid var(--hairline);border-radius:12px}
+.vb .c{padding:11px 12px}.vb .c+.c{border-left:1px solid var(--hairline)}
+.vb .c .v{font-size:17px;margin:4px 0 3px}
+</style>
+<section class="phone"><h3>지금</h3><p class="note">문장이 머리줄에 붙고 칸 안 세 줄이 붙어 있어요.</p>
+  <div class="vs vnow"><div class="top"><span>원/달러 <b>1,335.70</b></span><span style="color:var(--dn)">▼ -0.65%</span></div>
+    <div class="vsl"><div class="h"><span>어제와 비교</span><span>11/10 vs 11/11 · 15:30 확정</span></div>
+      <div class="t">올랐지만 어제보다 오름폭이 작았어요</div>
+      <div class="g"><div class="c"><div class="l">코스피</div><div class="v up">+2.60%</div><div class="y">어제 +4.39%</div></div>
+        <div class="c"><div class="l">거래량</div><div class="v">-9.2%</div><div class="y">2억 1,882만주</div></div>
+        <div class="c"><div class="l">진폭</div><div class="v">3.26%</div><div class="y">어제 2.52%</div></div></div></div></div>
+</section>
+<section class="phone"><h3>A안 · 간격만</h3><p class="note">머리줄→문장 8px, 문장→칸 12px, 칸 안 줄 간격 3px. 칸 배경을 한 단계 진하게.</p>
+  <div class="vs va"><div class="top"><span>원/달러 <b>1,335.70</b></span><span style="color:var(--dn)">▼ -0.65%</span></div>
+    <div class="vsl"><div class="h"><span>어제와 비교</span><span>11/10 vs 11/11 · 15:30 확정</span></div>
+      <div class="t">올랐지만 어제보다 오름폭이 작았어요</div>
+      <div class="g"><div class="c"><div class="l">코스피</div><div class="v up">+2.60%</div><div class="y">어제 +4.39%</div></div>
+        <div class="c"><div class="l">거래량</div><div class="v">-9.2%</div><div class="y">2억 1,882만주</div></div>
+        <div class="c"><div class="l">진폭</div><div class="v">3.26%</div><div class="y">어제 2.52%</div></div></div></div></div>
+</section>
+<section class="phone"><h3>B안 · 간격 + 위계</h3><p class="note">A안에 더해 문장을 16px로 키우고, 세 칸을 테두리 하나로 묶어 숫자를 17px로 키워요. 날짜는 가늘게.</p>
+  <div class="vs vb"><div class="top"><span>원/달러 <b>1,335.70</b></span><span style="color:var(--dn)">▼ -0.65%</span></div>
+    <div class="vsl"><div class="h"><span>어제와 비교</span><span class="d">11/10 vs 11/11 · 15:30 확정</span></div>
+      <div class="t">올랐지만 어제보다 오름폭이 작았어요</div>
+      <div class="g"><div class="c"><div class="l">코스피</div><div class="v up">+2.60%</div><div class="y">어제 +4.39%</div></div>
+        <div class="c"><div class="l">거래량</div><div class="v">-9.2%</div><div class="y">2억 1,882만주</div></div>
+        <div class="c"><div class="l">진폭</div><div class="v">3.26%</div><div class="y">어제 2.52%</div></div></div></div></div>
+</section>
+</div>
+</body>
+</html>
