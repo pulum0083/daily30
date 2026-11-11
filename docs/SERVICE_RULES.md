@@ -2816,3 +2816,25 @@ doubleshot.space/ 가 넘어오는 사이트 현관. 모바일 5,091px로 길고
 - 사이드바 '예측 정확도란?' 설명(`acc-modal`)이 "실제 종가와 비교"라고 적혀 있다 — 지금은 성적표 카드가 대신해서 쓰이지 않는다.
 
 테스트 `scripts/test_data_audit_20261110.py`(8), `scripts/test_research_reports_filter.py`(1), `api/_vs-close.test.mjs`(indexFinal).
+
+
+### 85. 야후가 나스닥 종목 프리마켓 봉을 비워 줘 엔비디아가 어제 등락(−5.47%)으로 보였다 (2026-11-11 실사고, 수정 완료)
+
+**증상**: 19:10 KST(뉴욕 05:10 프리마켓) 종목 홈 '밤사이 미국'에서 엔비디아가 −5.47%였다. 실제로는 프리마켓 +4.36%(176.25달러)였다(사용자 발견). 같은 화면 12칸 중 9칸(SOXX·SKHY·MU·SNDK·NVDA·AMD·AVGO·ASML·QQQ)이 같은 상태였고, EWY·DRAM·TSM만 프리마켓 값이었다.
+
+**원인**: 그날 야후는 **나스닥 상장 종목 전부**의 1분·2분·5분봉을 비워 줬다(meta는 정상, 봉 0개). NYSE·Arca 종목은 정상이었다.
+- 홈 API(`api/stocks-live.mjs`)는 프리장인데 체결이 없으면 null을 돌려주고 네이버로 넘어갔다. 그런데 네이버 폴백이 `closePrice`·`fluctuationsRatio`, 곧 **어제 정규장 종가 등락**을 썼다. 같은 응답의 `overMarketPriceInfo`(프리·애프터장 체결가)는 보지 않았다.
+- 미국 브리핑 수집(`fetch_data._get_realtime_price`)은 더 위험했다. 5분봉 이틀치의 '마지막 봉'이 **어제 애프터장 체결**이었고, 12시간 신선도 검사를 통과해 그 값이 '지금 프리마켓'으로 쓰일 상황이었다. 21:15 브리핑의 프리마켓 띠(NVDA·AAPL·MSFT·AMZN·META·GOOGL)와 이슈 실측 검증이 모두 영향을 받는다.
+
+**수정 — 두 경로에 같은 규칙**(§30):
+- **야후에 오늘(뉴욕 날짜) 연장시간대 체결이 3시간 안에 없으면 네이버 프리·애프터장 체결가를 쓴다.** 네이버 값은 `tradingSessionType`이 PRE_MARKET·AFTER_MARKET이고 `overMarketStatus`가 OPEN이며 3시간 안에 체결된 것만 쓴다.
+  - 기준가는 `closePrice`다. 프리장엔 직전 정규장 종가, 애프터장엔 그날 정규장 종가다.
+  - ±25% 가드(§79)는 그대로 적용한다.
+- 홈 API: `naverExtendedQuote()`. 야후가 연장시간대라고 판정했는데 네이버에도 체결이 없으면 **그 종목을 뺀다** — 어제 종가 등락을 '지금'으로 보이지 않는다(§0).
+- 미국 브리핑 수집: `naver_extended_quote()`·`_yahoo_extended_fresh()`. 미국 개별주·ETF만 해당하고 선물·지수(`=`·`^`)는 그대로다. 네이버 거래소 접미사(.O·없음·.N·.K)는 차례로 시도해 기억한다.
+- 실측 확인(19:30 KST) — 홈 12칸 모두 프리마켓 값(엔비디아 +4.64%). 브리핑 수집은 나스닥 6종을 네이버로, NYSE 3종(TSM·JPM·XOM)은 야후로 계산했다.
+- 테스트: `scripts/test_us_extended_fallback.py`(5), `api/_stocks-live.test.mjs`(naverExtendedQuote).
+
+- **방지 룰(폴백은 같은 세션의 값이어야 한다)**: 1순위가 '지금 값'을 못 줄 때 2순위가 **다른 세션의 값**(어제 종가 등락)을 주면 폴백이 아니라 오류다. 폴백 원천에서도 같은 세션의 필드를 찾고, 없으면 비운다.
+- **방지 룰(신선도는 나이만이 아니라 날짜로도 본다)**: '12시간 안 체결'은 어제 애프터장 봉도 통과시킨다. 연장시간대 값은 **그 세션의 날짜**인지까지 확인한다.
+- **재발 시 진단 순서**: ① `/api/stocks-live?us=NVDA.O`의 `source`·`state`를 본다. naver·closed인데 프리장 시간이면 이 사고다. ② 야후 `chart/NVDA?range=1d&interval=1m&includePrePost=true`의 `timestamp` 개수를 본다. ③ 네이버 `api.stock.naver.com/stock/NVDA.O/basic`의 `overMarketPriceInfo`를 본다.

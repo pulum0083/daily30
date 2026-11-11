@@ -153,3 +153,17 @@ test('프리·애프터 ±25% 초과는 데이터 문제로 본다 (11/5 SOXX �
   assert.equal(implausibleExtended('pre', -5.58), false);
   assert.equal(implausibleExtended('open', -40), false);
 });
+
+// 2026-11-11 실사고 — 야후가 나스닥 종목 프리마켓 봉을 비워 줘 엔비디아가 어제 종가 등락(−5.47%)으로 보였다. 실제는 +4.36%.
+test('naverExtendedQuote: 프리마켓 체결가와 직전 종가로 등락을 만든다', async () => {
+  const { naverExtendedQuote } = await import('./stocks-live.mjs');
+  const d = { closePrice: '168.89', fluctuationsRatio: '-5.47', marketStatus: 'CLOSE',
+    overMarketPriceInfo: { tradingSessionType: 'PRE_MARKET', overMarketStatus: 'OPEN', overPrice: '176.25',
+      localTradedAt: '2026-11-11T05:17:36-05:00' } };
+  const now = Date.parse('2026-11-11T05:20:00-05:00');
+  const q = naverExtendedQuote('NVDA.O', d, now);
+  assert.equal(q.state, 'pre'); assert.equal(q.price, 176.25); assert.equal(q.changePct, 4.36); assert.equal(q.source, 'naver');
+  assert.deepEqual(naverExtendedQuote('NVDA.O', d, now + 4 * 3600000), { missing: true });       // 3시간 넘은 체결
+  const shut = { ...d, overMarketPriceInfo: { ...d.overMarketPriceInfo, overMarketStatus: 'CLOSE' } };
+  assert.equal(naverExtendedQuote('NVDA.O', shut, now), null);                                     // 연장시간대가 아니면 판단하지 않는다
+});

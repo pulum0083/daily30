@@ -563,6 +563,82 @@ def get_fear_greed() -> dict:
         return {}
 
 
+# ── 네이버 프리·애프터장 체결가 — 야후가 오늘 연장시간대 봉을 비워 줄 때의 대신(2026-11-11 실사고) ──
+# 그날 야후는 나스닥 상장 종목 전부(NVDA·AAPL·MSFT…)의 1분·5분봉을 비워 줬다(NYSE·Arca는 정상).
+# 5분봉 이틀치에서 '마지막 봉'은 어제 애프터장 체결이었고, 12시간 신선도 검사를 통과해 그 값이
+# '지금 프리마켓'으로 쓰일 뻔했다. 홈 API(api/stocks-live.mjs naverExtendedQuote)와 같은 규칙이다(§30).
+_NAVER_US_SUFFIX: dict = {}
+_ET = pytz.timezone("America/New_York")
+
+
+def _naver_us_basic(ticker: str):
+    """네이버 해외 시세 basic. 거래소 접미사(.O 나스닥 · 없음 NYSE · .N · .K Arca)를 차례로 시도하고 맞은 것을 기억한다."""
+    sufs = [_NAVER_US_SUFFIX[ticker]] if ticker in _NAVER_US_SUFFIX else [".O", "", ".N", ".K"]
+    for suf in sufs:
+        try:
+            req = urllib.request.Request(f"https://api.stock.naver.com/stock/{ticker}{suf}/basic",
+                                         headers={"User-Agent": "Mozilla/5.0", "Referer": "https://m.stock.naver.com/"})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                d = json.loads(r.read().decode())
+            if d.get("closePrice") is None:
+                continue
+            _NAVER_US_SUFFIX[ticker] = suf
+            return d
+        except Exception:
+            continue
+    return None
+
+
+def _num(v):
+    try:
+        return float(str(v).replace(",", ""))
+    except (TypeError, ValueError):
+        return None
+
+
+def naver_extended_quote(d: dict, now=None, max_age_hours: float = 3.0):
+    """네이버 basic 응답에서 (현재가, 기준가)를 꺼낸다. 프리·애프터장이 열려 있고 3시간 안 체결일 때만.
+
+    기준가는 closePrice — 프리장엔 직전 정규장 종가, 애프터장엔 그날 정규장 종가다(§30).
+    정규장 종가에서 25% 넘게 벌어지면 시세가 아니라 데이터 문제로 본다(§79). 아니면 None.
+    """
+    o = (d or {}).get("overMarketPriceInfo") or {}
+    if o.get("tradingSessionType") not in ("PRE_MARKET", "AFTER_MARKET") or o.get("overMarketStatus") != "OPEN":
+        return None
+    price, base = _num(o.get("overPrice")), _num((d or {}).get("closePrice"))
+    if not price or not base or price <= 0 or base <= 0:
+        return None
+    try:
+        at = datetime.fromisoformat(str(o.get("localTradedAt")))
+    except ValueError:
+        return None
+    now = now or datetime.now(at.tzinfo)
+    if (now - at).total_seconds() > max_age_hours * 3600:
+        return None
+    if abs(price / base - 1) > 0.25:
+        return None
+    return price, base
+
+
+def _yahoo_extended_fresh(intraday, now=None, max_age_hours: float = 3.0) -> bool:
+    """야후 연장시간대 시계열에 '오늘(뉴욕 날짜)' 체결이 3시간 안에 있는가. 어제 애프터장 봉은 오늘 프리마켓이 아니다."""
+    if intraday is None or len(intraday) == 0:
+        return False
+    closes = intraday["Close"].dropna()
+    if not len(closes):
+        return False
+    last = closes.index[-1]
+    if last.tzinfo is None:
+        return False
+    now_et = (now or datetime.now(pytz.utc)).astimezone(_ET)
+    last_et = last.tz_convert(_ET) if hasattr(last, "tz_convert") else last.astimezone(_ET)
+    return last_et.date() == now_et.date() and (now_et - last_et).total_seconds() <= max_age_hours * 3600
+
+
+def _is_us_equity(ticker: str) -> bool:
+    return not any(c in ticker for c in "=^.")
+
+
 def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
     """장 중/프리마켓 현재가와 전일 종가를 반환한다.
 
@@ -582,6 +658,14 @@ def _get_realtime_price(ticker: str) -> tuple[float, float] | None:
         intraday = _yf_history(ticker, period="2d", interval="5m", prepost=True)
     except Exception:
         intraday = None
+
+    # 0순위: 미국 개별주·ETF가 프리·애프터장인데 야후에 오늘 체결이 없으면 네이버 체결가(2026-11-11).
+    if _is_us_equity(ticker) and not _yahoo_extended_fresh(intraday):
+        nq = naver_extended_quote(_naver_us_basic(ticker))
+        if nq:
+            print(f"[fetch_data] {ticker} 야후에 오늘 연장시간대 체결 없음 → 네이버 {nq[0]:.2f} (기준 {nq[1]:.2f})",
+                  file=sys.stderr)
+            return nq
 
     # 1순위: fast_info (기준가) + intraday 교차 검증 (현재가)
     try:

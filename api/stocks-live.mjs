@@ -115,7 +115,10 @@ async function fetchYahoo(sym) {
       // 항상 등락률이 정확히 0.00%로 계산되는 가짜 "플랫" 데이터가 만들어진다(SK하이닉스 ADR처럼
       // 사실상 미거래인 심볼에서 확인됨 — 최근 1개월 일봉 0개, 마지막 체결 6일 전).
       // 진짜 프리·애프터 체결이 없으면 수집 실패로 보고 표시하지 않는다(운영규칙 0).
-      if (lastPx == null) return null;
+      // 야후가 오늘 프리·애프터 봉을 비워 주는 날이 있다(2026-11-11 나스닥 상장 종목 전부 — 0봉).
+      // 그때 null을 돌려주면 네이버 '어제 종가 등락'으로 넘어가 엔비디아가 프리마켓 +4.36%인데 −5.47%로 보였다.
+      // 연장시간대라는 사실을 넘겨 네이버 프리·애프터 체결가로만 대신하게 한다(fetchOverseas).
+      if (lastPx == null) return { needExtended: true, state };
       price = lastPx;
     } else {                                            // open·closed — 정규장 체결가/마지막 종가
       price = (typeof regClose === 'number') ? regClose : lastPx;
@@ -135,10 +138,26 @@ async function fetchYahoo(sym) {
   }
 }
 
+// 네이버 해외 시세의 프리·애프터장 체결가(overMarketPriceInfo) — 열려 있고 3시간 안에 체결된 값만.
+// 기준가는 closePrice다: 프리장엔 직전 정규장 종가, 애프터장엔 그날 정규장 종가(§30 세션별 기준가와 같다).
+// 열린 연장시간대인데 값이 없으면 { missing: true } — 어제 종가 등락으로 대신하지 않는다(§0).
+export function naverExtendedQuote(sym, d, nowMs = Date.now()) {
+  const o = d?.overMarketPriceInfo;
+  const type = o?.tradingSessionType;
+  if (!o || (type !== 'PRE_MARKET' && type !== 'AFTER_MARKET') || o.overMarketStatus !== 'OPEN') return null;
+  const price = toNum(o.overPrice), base = toNum(d.closePrice);
+  const at = Date.parse(o.localTradedAt || '');
+  if (price == null || base == null || base <= 0 || !isFinite(at) || nowMs - at > 3 * 3600000) return { missing: true };
+  const state = type === 'PRE_MARKET' ? 'pre' : 'post';
+  const pct = ((price - base) / base) * 100;
+  if (implausibleExtended(state, pct)) return { missing: true };
+  return { sym, price, changePct: Math.round(pct * 100) / 100, source: 'naver', state, tradedAt: o.localTradedAt };
+}
+
 // 해외 종목 — 야후 우선(프리·정규·애프터 실시간), 실패 시 네이버 폴백
-async function fetchOverseas(sym) {
+export async function fetchOverseas(sym) {
   const y = await fetchYahoo(sym);
-  if (y) return y;
+  if (y && !y.needExtended) return y;
   try {
     const r = await fetch(`https://api.stock.naver.com/stock/${encodeURIComponent(sym)}/basic`, {
       headers: HDR_M,
@@ -146,6 +165,10 @@ async function fetchOverseas(sym) {
     });
     if (!r.ok) return null;
     const d = await r.json();
+    const ext = naverExtendedQuote(sym, d);
+    if (ext) return ext.missing ? null : ext;
+    // 야후가 연장시간대라고 했는데 네이버에도 그 체결이 없으면 빼둔다 — 어제 종가 등락을 '지금'으로 보이지 않는다.
+    if (y && y.needExtended) return null;
     const open = d.marketStatus === 'OPEN';
     const price = parseFloat(String(d.closePrice).replace(/,/g, ''));
     const pct = parseFloat(String(d.fluctuationsRatio).replace(/,/g, ''));
