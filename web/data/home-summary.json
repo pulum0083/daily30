@@ -1,12 +1,6 @@
 {
- "date": "2026-11-10",
+ "date": "2026-11-11",
  "kospi_days": [
-  {
-   "date": "2026-10-28",
-   "close": 6012.44,
-   "pct": 6.63,
-   "open_pct": 2.23
-  },
   {
    "date": "2026-10-29",
    "close": 5937.66,
@@ -60,15 +54,15 @@
    "close": 5239.13,
    "pct": 4.39,
    "open_pct": 4.55
+  },
+  {
+   "date": "2026-11-11",
+   "close": 5375.36,
+   "pct": 2.6,
+   "open_pct": -0.56
   }
  ],
  "scores": [
-  {
-   "date": "2026-10-28",
-   "direction": "상승 우위",
-   "open_pct": 2.23,
-   "ok": true
-  },
   {
    "date": "2026-10-29",
    "direction": "상승 우위",
@@ -122,43 +116,49 @@
    "direction": "상승 우위",
    "open_pct": 4.55,
    "ok": true
+  },
+  {
+   "date": "2026-11-11",
+   "direction": "하락 우위",
+   "open_pct": -0.56,
+   "ok": true
   }
  ],
  "sectors_week": [
   {
    "key": "semicon",
    "label": "반도체",
-   "pct": 9.39,
+   "pct": 18.84,
    "n": 7
   },
   {
    "key": "power",
    "label": "전력기기",
-   "pct": 5.54,
+   "pct": 7.9,
    "n": 5
   },
   {
    "key": "defense",
    "label": "방산",
-   "pct": 2.61,
+   "pct": 7.34,
    "n": 5
-  },
-  {
-   "key": "ship",
-   "label": "조선",
-   "pct": 1.78,
-   "n": 4
   },
   {
    "key": "battery",
    "label": "2차전지",
-   "pct": 0.54,
+   "pct": 5.47,
    "n": 6
+  },
+  {
+   "key": "ship",
+   "label": "조선",
+   "pct": 0.98,
+   "n": 4
   },
   {
    "key": "auto",
    "label": "자동차",
-   "pct": -0.11,
+   "pct": -0.55,
    "n": 6
   },
   {
@@ -170,18 +170,18 @@
   {
    "key": "bio",
    "label": "바이오",
-   "pct": -3.22,
+   "pct": -1.86,
    "n": 6
   }
  ],
  "kospi_check": {
-  "asof": "2026-11-10",
-  "gap_pct": 54.3,
-  "ma60": 3394.9,
-  "close": 5239.13,
+  "asof": "2026-11-11",
+  "gap_pct": 58.2,
+  "ma60": 3397.2,
+  "close": 5375.36,
   "since": "1994-12",
   "months": 384,
-  "above": 27,
+  "above": 25,
   "year_max": {
    "m": "2026-05",
    "gap": 178.6
@@ -1725,9 +1725,9 @@
    ],
    [
     "2026-11",
-    54.3
+    58.2
    ]
   ]
  },
- "generated_at": "2026-11-10T16:31:33+09:00"
+ "generated_at": "2026-11-11T16:29:48+09:00"
 }
