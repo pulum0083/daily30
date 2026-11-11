@@ -1,5 +1,24 @@
 {
   "slots": {
+    "2026-11-12": {
+      "kospi": {
+        "state": "ready",
+        "url": "/briefings/2026-11-12/kospi/",
+        "headline": "반도체 쓰나미 2라운드 — SOX +5.7%, 지수선물도 질주",
+        "pill_cls": "up",
+        "pill_text": "▲",
+        "title": "상승 우위",
+        "time": "07:28"
+      },
+      "close": {
+        "state": "pending",
+        "scheduled_time": "16:30"
+      },
+      "us": {
+        "state": "pending",
+        "scheduled_time": "21:20"
+      }
+    },
     "2026-11-11": {
       "kospi": {
         "state": "ready",
@@ -792,29 +811,6 @@
         "pill_text": "▲",
         "title": "상승 우위",
         "time": "21:16"
-      }
-    },
-    "2026-10-01": {
-      "kospi": {
-        "state": "pending",
-        "scheduled_time": "07:30"
-      },
-      "close": {
-        "state": "ready",
-        "url": "/briefings/2026-10-01/close/",
-        "headline": "마이크론 훈풍 + 반도체 수출 최대치 — 코스피 1.95% 급등",
-        "title": "6,971.35",
-        "price": "6,971.35",
-        "time": ""
-      },
-      "us": {
-        "state": "ready",
-        "url": "/briefings/2026-10-01/us/",
-        "headline": "국채금리 24년 만의 고점에도 돈은 반도체로 몰린다",
-        "pill_cls": "up",
-        "pill_text": "▲",
-        "title": "상승 우위",
-        "time": "21:17"
       }
     }
   }
